@@ -20,12 +20,8 @@ $white = imagecolorallocate($image, 0xFF, 0xFF, 0xFF);
 //create an arc and fill it with white color    
 imagefilledarc($image, 50, 50, 30, 30, 0, 90, $white, IMG_ARC_PIE);
 
-ob_start();
-imagegd($image);
-$img = ob_get_contents();
-ob_end_clean();
-
-echo md5(base64_encode($img));
+include_once __DIR__ . '/func.inc';
+test_image_equals_file(__DIR__ . '/imagefilledarc_basic.png', $image);
 ?>
 --EXPECT--
-87637c60ac0ceea48dbcaa4d98319f90
+The images are equal.

@@ -361,45 +361,45 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagegif, 0, 0, 1)
 	ZEND_ARG_INFO(0, im)
-	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, to)
 ZEND_END_ARG_INFO()
 
 #ifdef HAVE_GD_PNG
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagepng, 0, 0, 1)
 	ZEND_ARG_INFO(0, im)
-	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, to)
 ZEND_END_ARG_INFO()
 #endif
 
 #ifdef HAVE_GD_WEBP
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagewebp, 0, 0, 1)
 	ZEND_ARG_INFO(0, im)
-	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, to)
 ZEND_END_ARG_INFO()
 #endif
 
 #ifdef HAVE_GD_JPG
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagejpeg, 0, 0, 1)
 	ZEND_ARG_INFO(0, im)
-	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, to)
 	ZEND_ARG_INFO(0, quality)
 ZEND_END_ARG_INFO()
 #endif
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagewbmp, 0, 0, 1)
 	ZEND_ARG_INFO(0, im)
-	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, to)
 	ZEND_ARG_INFO(0, foreground)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagegd, 0, 0, 1)
 	ZEND_ARG_INFO(0, im)
-	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, to)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagegd2, 0, 0, 1)
 	ZEND_ARG_INFO(0, im)
-	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, to)
 	ZEND_ARG_INFO(0, chunk_size)
 	ZEND_ARG_INFO(0, type)
 ZEND_END_ARG_INFO()
@@ -1521,7 +1521,7 @@ PHP_FUNCTION(imageistruecolor)
 /* }}} */
 
 /* {{{ proto void imagetruecolortopalette(resource im, bool ditherFlag, int colorsWanted)
-   Convert a true colour image to a palette based image with a number of colours, optionally using dithering. */
+   Convert a true color image to a palette based image with a number of colors, optionally using dithering. */
 PHP_FUNCTION(imagetruecolortopalette)
 {
 	zval *IM;
@@ -1547,8 +1547,8 @@ PHP_FUNCTION(imagetruecolortopalette)
 }
 /* }}} */
 
-/* {{{ proto void imagetruecolortopalette(resource im, bool ditherFlag, int colorsWanted)
-   Convert a true colour image to a palette based image with a number of colours, optionally using dithering. */
+/* {{{ proto void imagepalettetotruecolor(resource im)
+   Convert a palette based image to a true color image. */
 PHP_FUNCTION(imagepalettetotruecolor)
 {
 	zval *IM;
@@ -2663,7 +2663,7 @@ PHP_FUNCTION(imagexbm)
 }
 /* }}} */
 
-/* {{{ proto bool imagegif(resource im [, string filename])
+/* {{{ proto bool imagegif(resource im [, mixed to])
    Output GIF image to browser or file */
 PHP_FUNCTION(imagegif)
 {
@@ -2672,7 +2672,7 @@ PHP_FUNCTION(imagegif)
 /* }}} */
 
 #ifdef HAVE_GD_PNG
-/* {{{ proto bool imagepng(resource im [, string filename])
+/* {{{ proto bool imagepng(resource im [, mixed to])
    Output PNG image to browser or file */
 PHP_FUNCTION(imagepng)
 {
@@ -2683,7 +2683,7 @@ PHP_FUNCTION(imagepng)
 
 
 #ifdef HAVE_GD_WEBP
-/* {{{ proto bool imagewebp(resource im [, string filename[, int quality]] )
+/* {{{ proto bool imagewebp(resource im [, mixed to[, int quality]] )
    Output WEBP image to browser or file */
 PHP_FUNCTION(imagewebp)
 {
@@ -2694,7 +2694,7 @@ PHP_FUNCTION(imagewebp)
 
 
 #ifdef HAVE_GD_JPG
-/* {{{ proto bool imagejpeg(resource im [, string filename [, int quality]])
+/* {{{ proto bool imagejpeg(resource im [, mixed to [, int quality]])
    Output JPEG image to browser or file */
 PHP_FUNCTION(imagejpeg)
 {
@@ -2703,7 +2703,7 @@ PHP_FUNCTION(imagejpeg)
 /* }}} */
 #endif /* HAVE_GD_JPG */
 
-/* {{{ proto bool imagewbmp(resource im [, string filename [, int foreground]])
+/* {{{ proto bool imagewbmp(resource im [, mixed to [, int foreground]])
    Output WBMP image to browser or file */
 PHP_FUNCTION(imagewbmp)
 {
@@ -2711,7 +2711,7 @@ PHP_FUNCTION(imagewbmp)
 }
 /* }}} */
 
-/* {{{ proto bool imagegd(resource im [, string filename])
+/* {{{ proto bool imagegd(resource im [, mixed to])
    Output GD image to browser or file */
 PHP_FUNCTION(imagegd)
 {
@@ -2719,7 +2719,7 @@ PHP_FUNCTION(imagegd)
 }
 /* }}} */
 
-/* {{{ proto bool imagegd2(resource im [, string filename [, int chunk_size [, int type]]])
+/* {{{ proto bool imagegd2(resource im [, mixed to [, int chunk_size [, int type]]])
    Output GD2 image to browser or file */
 PHP_FUNCTION(imagegd2)
 {
@@ -2805,9 +2805,11 @@ PHP_FUNCTION(imagecolorat)
 	zend_long x, y;
 	gdImagePtr im;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rll", &IM, &x, &y) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_RESOURCE(IM)
+		Z_PARAM_LONG(x)
+		Z_PARAM_LONG(y)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
 		RETURN_FALSE;
@@ -3067,9 +3069,12 @@ PHP_FUNCTION(imagesetpixel)
 	zend_long x, y, col;
 	gdImagePtr im;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rlll", &IM, &x, &y, &col) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(4, 4)
+		Z_PARAM_RESOURCE(IM)
+		Z_PARAM_LONG(x)
+		Z_PARAM_LONG(y)
+		Z_PARAM_LONG(col)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
 		RETURN_FALSE;
@@ -3838,7 +3843,7 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 {
 	zval *IM, *EXT = NULL;
 	gdImagePtr im=NULL;
-	zend_long col = -1, x = -1, y = -1;
+	zend_long col = -1, x = 0, y = 0;
 	size_t str_len, fontname_len;
 	int i, brect[8];
 	double ptsize, angle;

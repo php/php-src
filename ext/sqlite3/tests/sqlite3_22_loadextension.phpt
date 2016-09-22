@@ -2,7 +2,7 @@
 SQLite3 load extension
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__) . '/skipif.inc');
+require_once(__DIR__ . '/skipif.inc');
 $r = new ReflectionClass("sqlite3");
 if (!$r->hasMethod("loadExtension")) {
 	die("skip - sqlite3 doesn't have loadExtension enabled");
@@ -14,9 +14,9 @@ sqlite3.extension_dir=.
 --FILE--
 <?php
 
-require_once(dirname(__FILE__) . '/new_db.inc');
+require_once(__DIR__ . '/new_db.inc');
 
-$directory = dirname(__FILE__);
+$directory = __DIR__;
 
 touch($directory . '/myext.txt');
 

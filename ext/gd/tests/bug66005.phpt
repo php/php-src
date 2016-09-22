@@ -25,11 +25,10 @@ imagecopy($dest, $png_palette, 0, 0, 0, 0, 50, 50);
 imagecopy($dest, $png_24, 50, 0, 0, 0, 50, 50);
 imagecopy($dest, $png_full, 100, 0, 0, 0, 50, 50);
 
-ob_start();
-imagegd($dest);
-echo md5(ob_get_clean()), PHP_EOL;
+include_once __DIR__ . '/func.inc';
+test_image_equals_file(__DIR__ . '/bug66005.png', $dest);
 ?>
 ==DONE==
 --EXPECT--
-9b36049de01006b367efd433f1689043
+The images are equal.
 ==DONE==

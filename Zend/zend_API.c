@@ -202,7 +202,6 @@ ZEND_API char *zend_zval_type_name(const zval *arg) /* {{{ */
 }
 /* }}} */
 
-#ifdef FAST_ZPP
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_count_error(int num_args, int min_num_args, int max_num_args) /* {{{ */
 {
 	zend_function *active_function = EG(current_execute_data)->func;
@@ -298,7 +297,6 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **pc
 	return 1;
 }
 /* }}} */
-#endif
 
 ZEND_API int ZEND_FASTCALL zend_parse_arg_bool_weak(zval *arg, zend_bool *dest) /* {{{ */
 {
@@ -1857,7 +1855,7 @@ static int zend_startup_module_zval(zval *zv) /* {{{ */
 {
 	zend_module_entry *module = Z_PTR_P(zv);
 
-	return zend_startup_module_ex(module);
+	return (zend_startup_module_ex(module) == SUCCESS) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_REMOVE;
 }
 /* }}} */
 
@@ -2911,7 +2909,7 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 	zend_string *mname, *cname;
 	zend_string *lmname;
 	const char *colon;
-	size_t clen, mlen;
+	size_t clen;
 	HashTable *ftable;
 	int call_via_handler = 0;
 	zend_class_entry *scope;
@@ -2964,6 +2962,8 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 		colon > Z_STRVAL_P(callable) &&
 		*(colon-1) == ':'
 	) {
+		size_t mlen;
+
 		colon--;
 		clen = colon - Z_STRVAL_P(callable);
 		mlen = Z_STRLEN_P(callable) - clen - 2;
@@ -2996,7 +2996,6 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 		mname = zend_string_init(Z_STRVAL_P(callable) + clen + 2, mlen, 0);
 	} else if (ce_org) {
 		/* Try to fetch find static method of given class. */
-		mlen = Z_STRLEN_P(callable);
 		mname = Z_STR_P(callable);
 		zend_string_addref(mname);
 		ftable = &ce_org->function_table;

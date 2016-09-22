@@ -191,16 +191,6 @@ ZEND_API zval *zend_user_it_get_current_data(zend_object_iterator *_iter)
 }
 /* }}} */
 
-/* {{{ zend_user_it_get_current_key_default */
-#if 0
-static int zend_user_it_get_current_key_default(zend_object_iterator *_iter, char **str_key, uint *str_key_len, ulong *int_key)
-{
-	*int_key = _iter->index;
-	return HASH_KEY_IS_LONG;
-}
-#endif
-/* }}} */
-
 /* {{{ zend_user_it_get_current_key */
 ZEND_API void zend_user_it_get_current_key(zend_object_iterator *_iter, zval *key)
 {
@@ -394,15 +384,6 @@ static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry
 /* {{{ zend_implement_arrayaccess */
 static int zend_implement_arrayaccess(zend_class_entry *interface, zend_class_entry *class_type)
 {
-#if 0
-	/* get ht from ce */
-	if (ht->read_dimension != zend_std_read_dimension
-	||  ht->write_dimension != zend_std_write_dimension
-	||  ht->has_dimension != zend_std_has_dimension
-	||  ht->unset_dimension != zend_std_unset_dimension) {
-		return FAILURE;
-	}
-#endif
 	return SUCCESS;
 }
 /* }}}*/

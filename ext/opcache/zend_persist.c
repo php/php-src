@@ -133,7 +133,7 @@ static void zend_hash_persist(HashTable *ht, zend_persist_func_t pPersistElement
 		void *old_data = HT_GET_DATA_ADDR(ht);
 
 		ZEND_ASSERT(((zend_uintptr_t)ZCG(mem) & 0x7) == 0); /* should be 8 byte aligned */
-		ZCG(mem) = (void*)((char*)data + HT_USED_SIZE(ht));
+		ZCG(mem) = (void*)((char*)data + ZEND_ALIGNED_SIZE(HT_USED_SIZE(ht)));
 		memcpy(data, old_data, HT_USED_SIZE(ht));
 		efree(old_data);
 		HT_SET_DATA_ADDR(ht, data);
@@ -214,7 +214,7 @@ static void zend_hash_persist_immutable(HashTable *ht)
 		void *data = ZCG(mem);
 
 		ZEND_ASSERT(((zend_uintptr_t)ZCG(mem) & 0x7) == 0); /* should be 8 byte aligned */
-		ZCG(mem) = (void*)((char*)data + HT_USED_SIZE(ht));
+		ZCG(mem) = (void*)((char*)data + ZEND_ALIGNED_SIZE(HT_USED_SIZE(ht)));
 		memcpy(data, HT_GET_DATA_ADDR(ht), HT_USED_SIZE(ht));
 		HT_SET_DATA_ADDR(ht, data);
 	}

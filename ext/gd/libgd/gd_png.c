@@ -120,8 +120,8 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 #endif
 	png_structp png_ptr;
 	png_infop info_ptr;
-	png_uint_32 width, height, rowbytes, w, h;
-	int bit_depth, color_type, interlace_type;
+	png_uint_32 width, height, rowbytes, w, h, res_x, res_y;
+	int bit_depth, color_type, interlace_type, unit_type;
 	int num_palette, num_trans;
 	png_colorp palette;
 	png_color_16p trans_gray_rgb;
@@ -223,6 +223,20 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 			gdImageDestroy(im);
 		}
 		return NULL;
+	}
+#endif
+
+#ifdef PNG_pHYs_SUPPORTED
+	/* check if the resolution is specified */
+	if (png_get_valid(png_ptr, info_ptr, PNG_INFO_pHYs)) {
+		if (png_get_pHYs(png_ptr, info_ptr, &res_x, &res_y, &unit_type)) {
+			switch (unit_type) {
+			case PNG_RESOLUTION_METER:
+				im->res_x = DPM2DPI(res_x);
+				im->res_y = DPM2DPI(res_y);
+				break;
+			}
+		}
 	}
 #endif
 
@@ -525,6 +539,12 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level, int basefilte
 	if (basefilter >= 0) {
 		png_set_filter(png_ptr, PNG_FILTER_TYPE_BASE, basefilter);
 	}
+
+#ifdef PNG_pHYs_SUPPORTED
+	/* 2.1.0: specify the resolution */
+	png_set_pHYs(png_ptr, info_ptr, DPI2DPM(im->res_x), DPI2DPM(im->res_y),
+	             PNG_RESOLUTION_METER);
+#endif
 
 	/* can set this to a smaller value without compromising compression if all
 	 * image data is 16K or less; will save some decoder memory [min == 8]

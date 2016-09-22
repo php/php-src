@@ -551,6 +551,38 @@ dnl
 AC_CHECK_DECLS([getrandom])
 
 dnl
+dnl Check for argon2
+dnl
+PHP_ARG_WITH(password-argon2, for Argon2 support,
+[  --with-password-argon2[=DIR]           Include Argon2 support in password_*. DIR is the Argon2 shared library path]])
+
+if test "$PHP_PASSWORD_ARGON2" != "no"; then
+  AC_MSG_CHECKING([for Argon2 library])
+  for i in $PHP_PASSWORD_ARGON2 /usr /usr/local ; do
+    if test -r $i/include/argon2.h; then
+      ARGON2_DIR=$i;
+      AC_MSG_RESULT(found in $i)
+      break
+    fi
+  done
+
+  if test -z "$ARGON2_DIR"; then
+    AC_MSG_RESULT([not found])
+    AC_MSG_ERROR([Please ensure the argon2 header and library are installed])
+  fi
+
+  PHP_ADD_LIBRARY_WITH_PATH(argon2, $ARGON2_DIR/$PHP_LIBDIR)
+  PHP_ADD_INCLUDE($ARGON2_DIR/include)
+
+  AC_CHECK_LIB(argon2, argon2_hash, [
+    LIBS="$LIBS -largon2"
+    AC_DEFINE(HAVE_ARGON2LIB, 1, [ Define to 1 if you have the <argon2.h> header file ])
+  ], [
+    AC_MSG_ERROR([Problem with libargon2.(a|so). Please verify that Argon2 header and libaries are installed])
+  ])
+fi
+
+dnl
 dnl Setup extension sources
 dnl
 PHP_NEW_EXTENSION(standard, array.c base64.c basic_functions.c browscap.c crc32.c crypt.c \

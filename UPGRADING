@@ -1,4 +1,4 @@
-PHP 7.1 UPGRADE NOTES
+PHP 7.2 UPGRADE NOTES
 
 1. Backward Incompatible Changes
 2. New Features
@@ -29,6 +29,13 @@ PHP 7.1 UPGRADE NOTES
 2. New Features
 ========================================
 
+- PCRE:
+  . Added `J` modifier for setting PCRE_DUPNAMES.
+
+- Standard:
+  . Simplified password hashing API updated to support Argon2i hashes when PHP is compiled with libargon2
+    (https://wiki.php.net/rfc/argon2_password_hash).
+
 ========================================
 3. Changes in SAPI modules
 ========================================
@@ -41,6 +48,22 @@ PHP 7.1 UPGRADE NOTES
 5. Changed Functions
 ========================================
 
+- Standard:
+  . password_hash() can generate Argon2i hashes when the algorithm is set to PASSWORD_ARGON2I. 
+    When using PASSWORD_ARGON2I, the following cost factors may be set: 'memory_cost', 'time_cost', 
+    and 'threads'. These cost factors will default to 'PASSWORD_ARGON2_DEFAULT_MEMORY_COST', 
+    'PASSWORD_ARGON2_DEFAULT_TIME_COST', and 'PASSWORD_ARGON2_DEFAULT_THREADS' respectively if not set.
+  . password_verify() can verify Argon2i hashes.
+  . password_get_info() and password_needs_rehash() can accept Argon2i hashes.
+  . mail()/mb_send_mail() accept array $extra_header. Array paramter is checked against RFC 2822.
+    Array format is 
+    $extra_headers = [
+      'Header-Name' => 'Header value',
+      'Multiple' => ['One header', 'Another header'],
+      'Multiline' = "FirstLine\r\n SecondLine",
+    ];
+
+
 ========================================
 6. New Functions
 ========================================
@@ -48,6 +71,10 @@ PHP 7.1 UPGRADE NOTES
 - Mbstring:
   . Added mb_chr() and mb_ord().
   . Added mb_scurb() that scrub broken multibyte strings.
+
+- Sockets:
+  . Added socket_addrinfo_lookup(), socket_addrinfo_connect(),
+    socket_addrinfo_bind() and socket_addrinfo_explain().
 
 ========================================
 7. New Classes and Interfaces
@@ -65,9 +92,25 @@ PHP 7.1 UPGRADE NOTES
    . Added extended exif tag support for the following formats: 
      Samsung, DJI, Panasonic, Sony, Pentax, Minolta & Sigma/Foveon.
 
+- GD:
+    . Removed --enable-gd-native-ttf configuration option which was unused as
+      of PHP 5.5.0 anyway.
+
+- Mbstring
+  . mb_check_encoding() accepts array parameter. Both key and value
+    ecodings are checked recursively.
+  . mb_convert_encoding() accepts array parameter. Only value encodings
+    are converted recursively.
+
 ========================================
 10. New Global Constants
 ========================================
+
+- Standard:
+  . PASSWORD_ARGON2_DEFAULT_MEMORY_COST
+  . PASSWORD_ARGON2_DEFAULT_TIME_COST
+  . PASSWORD_ARGON2_DEFAULT_THREADS
+  . PASSWORD_ARGON2I
 
 ========================================
 11. Changes to INI File Handling

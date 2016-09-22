@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Removed the sql.safe_mode directive. (Kalle)
   . Fixed bug #54535 (WSA cleanup executes before MSHUTDOWN). (Kalle)
+  . Implemented bug #69791 (Disallow mail header injections by extra headers)
+    (Yasuo)
 
 - EXIF:
   . Added support for vendor specific tags for the following formats:
@@ -24,10 +26,12 @@ PHP                                                                        NEWS
   . Fixed bug #70896 (gmp_fact() silently ignores non-integer input). (Sara)
 
 - Mbstring:
-  . Implemented request #66024 (mb_chr() and mb_ord()) (Masakielastic, Yasuo)
-  . Implemented request #65081 (mb_scrub()) (Masakielastic, Yasuo)
+  . Implemented request #66024 (mb_chr() and mb_ord()). (Masakielastic, Yasuo)
+  . Implemented request #65081 (mb_scrub()). (Masakielastic, Yasuo)
   . Implemented request #69086 (enhancement for mb_convert_encoding() that
-    handles multibyte replacement char nicely) (Masakielastic, Yasuo)
+    handles multibyte replacement char nicely). (Masakielastic, Yasuo)
+  . Added array input support to mb_convert_encoding(). (Yasuo)
+  . Added array input support to mb_check_encoding(). (Yasuo)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
 

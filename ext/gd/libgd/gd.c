@@ -170,6 +170,8 @@ gdImagePtr gdImageCreate (int sx, int sy)
 	im->cy1 = 0;
 	im->cx2 = im->sx - 1;
 	im->cy2 = im->sy - 1;
+	im->res_x = GD_RESOLUTION;
+	im->res_y = GD_RESOLUTION;
 	im->interpolation = NULL;
 	im->interpolation_id = GD_BILINEAR_FIXED;
 	return im;
@@ -225,6 +227,8 @@ gdImagePtr gdImageCreateTrueColor (int sx, int sy)
 	im->cy1 = 0;
 	im->cx2 = im->sx - 1;
 	im->cy2 = im->sy - 1;
+	im->res_x = GD_RESOLUTION;
+	im->res_y = GD_RESOLUTION;
 	im->interpolation = NULL;
 	im->interpolation_id = GD_BILINEAR_FIXED;
 	return im;
@@ -1771,6 +1775,100 @@ void gdImageFilledArc (gdImagePtr im, int cx, int cy, int w, int h, int s, int e
 	}
 }
 
+/**
+ * Integer Ellipse functions (gdImageEllipse and gdImageFilledEllipse)
+ * Function added by Pierre-Alain Joye 02/08/2003 (paj@pearfr.org)
+ * See the ellipse function simplification for the equation
+ * as well as the midpoint algorithm.
+ */
+
+void gdImageEllipse(gdImagePtr im, int mx, int my, int w, int h, int c)
+{
+	int x=0,mx1=0,mx2=0,my1=0,my2=0;
+	long aq,bq,dx,dy,r,rx,ry,a,b;
+
+	a=w>>1;
+	b=h>>1;
+	gdImageSetPixel(im,mx+a, my, c);
+	gdImageSetPixel(im,mx-a, my, c);
+	mx1 = mx-a;my1 = my;
+	mx2 = mx+a;my2 = my;
+
+	aq = a * a;
+	bq = b * b;
+	dx = aq << 1;
+	dy = bq << 1;
+	r  = a * bq;
+	rx = r << 1;
+	ry = 0;
+	x = a;
+	while (x > 0){
+		if (r > 0) {
+			my1++;my2--;
+			ry +=dx;
+			r  -=ry;
+		}
+		if (r <= 0){
+			x--;
+			mx1++;mx2--;
+			rx -=dy;
+			r  +=rx;
+		}
+		gdImageSetPixel(im,mx1, my1, c);
+		gdImageSetPixel(im,mx1, my2, c);
+		gdImageSetPixel(im,mx2, my1, c);
+		gdImageSetPixel(im,mx2, my2, c);
+	}
+}
+
+void gdImageFilledEllipse (gdImagePtr im, int mx, int my, int w, int h, int c)
+{
+	int x=0,mx1=0,mx2=0,my1=0,my2=0;
+	long aq,bq,dx,dy,r,rx,ry,a,b;
+	int i;
+	int old_y2;
+
+	a=w>>1;
+	b=h>>1;
+
+	for (x = mx-a; x <= mx+a; x++) {
+		gdImageSetPixel(im, x, my, c);
+	}
+
+	mx1 = mx-a;my1 = my;
+	mx2 = mx+a;my2 = my;
+
+	aq = a * a;
+	bq = b * b;
+	dx = aq << 1;
+	dy = bq << 1;
+	r  = a * bq;
+	rx = r << 1;
+	ry = 0;
+	x = a;
+	old_y2=-2;
+	while (x > 0){
+		if (r > 0) {
+			my1++;my2--;
+			ry +=dx;
+			r  -=ry;
+		}
+		if (r <= 0){
+			x--;
+			mx1++;mx2--;
+			rx -=dy;
+			r  +=rx;
+		}
+		if(old_y2!=my2){
+			for(i=mx1;i<=mx2;i++){
+				gdImageSetPixel(im,i,my1,c);
+				gdImageSetPixel(im,i,my2,c);
+			}
+		}
+		old_y2 = my2;
+	}
+}
+
 void gdImageFillToBorder (gdImagePtr im, int x, int y, int border, int color)
 {
 	int lastBorder;
@@ -2055,7 +2153,6 @@ skip:		for(x++; x<=x2 && (pts[y][x] || gdImageGetPixel(im,x, y)!=oc); x++);
 
 void gdImageRectangle (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
 {
-	int x1h = x1, x1v = x1, y1h = y1, y1v = y1, x2h = x2, x2v = x2, y2h = y2, y2v = y2;
 	int thick = im->thick;
 	int t;
 
@@ -2076,7 +2173,6 @@ void gdImageRectangle (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
 		x2 = t;
 	}
 
-	x1h = x1; x1v = x1; y1h = y1; y1v = y1; x2h = x2; x2v = x2; y2h = y2; y2v = y2;
 	if (thick > 1) {
 		int cx, cy, x1ul, y1ul, x2lr, y2lr;
 		int half = thick >> 1;
@@ -2124,12 +2220,10 @@ void gdImageRectangle (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
 		if (x1 == x2 || y1 == y2) {
 			gdImageLine(im, x1, y1, x2, y2, color);
 		} else {
-			y1v = y1h + 1;
-			y2v = y2h - 1;
-			gdImageLine(im, x1h, y1h, x2h, y1h, color);
-			gdImageLine(im, x1h, y2h, x2h, y2h, color);
-			gdImageLine(im, x1v, y1v, x1v, y2v, color);
-			gdImageLine(im, x2v, y1v, x2v, y2v, color);
+			gdImageLine(im, x1, y1, x2, y1, color);
+			gdImageLine(im, x1, y2, x2, y2, color);
+			gdImageLine(im, x1, y1 + 1, x1, y2 - 1, color);
+			gdImageLine(im, x2, y1 + 1, x2, y2 - 1, color);
 		}
 	}
 }
@@ -2793,6 +2887,9 @@ void gdImageSetStyle (gdImagePtr im, int *style, int noOfPixels)
 	if (im->style) {
 		gdFree(im->style);
 	}
+	if (overflow2(sizeof (int), noOfPixels)) {
+		return;
+	}
 	im->style = (int *) gdMalloc(sizeof(int) * noOfPixels);
 	memcpy(im->style, style, sizeof(int) * noOfPixels);
 	im->styleLength = noOfPixels;
@@ -2920,29 +3017,6 @@ int gdImageCompare (gdImagePtr im1, gdImagePtr im2)
 	}
 
 	return cmpStatus;
-}
-
-int
-gdAlphaBlendOld (int dst, int src)
-{
-	/* 2.0.12: TBB: alpha in the destination should be a
-	 * component of the result. Thanks to Frank Warmerdam for
-	 * pointing out the issue.
-	 */
-	return ((((gdTrueColorGetAlpha (src) *
-	     gdTrueColorGetAlpha (dst)) / gdAlphaMax) << 24) +
-	  ((((gdAlphaTransparent - gdTrueColorGetAlpha (src)) *
-	     gdTrueColorGetRed (src) / gdAlphaMax) +
-	    (gdTrueColorGetAlpha (src) *
-	     gdTrueColorGetRed (dst)) / gdAlphaMax) << 16) +
-	  ((((gdAlphaTransparent - gdTrueColorGetAlpha (src)) *
-	     gdTrueColorGetGreen (src) / gdAlphaMax) +
-	    (gdTrueColorGetAlpha (src) *
-	     gdTrueColorGetGreen (dst)) / gdAlphaMax) << 8) +
-	  (((gdAlphaTransparent - gdTrueColorGetAlpha (src)) *
-	    gdTrueColorGetBlue (src) / gdAlphaMax) +
-	   (gdTrueColorGetAlpha (src) *
-	    gdTrueColorGetBlue (dst)) / gdAlphaMax));
 }
 
 int gdAlphaBlend (int dst, int src) {
@@ -3078,6 +3152,12 @@ void gdImageGetClip (gdImagePtr im, int *x1P, int *y1P, int *x2P, int *y2P)
 	*y1P = im->cy1;
 	*x2P = im->cx2;
 	*y2P = im->cy2;
+}
+
+void gdImageSetResolution(gdImagePtr im, const unsigned int res_x, const unsigned int res_y)
+{
+	if (res_x > 0) im->res_x = res_x;
+	if (res_y > 0) im->res_y = res_y;
 }
 
 /* convert a palette image to true color */

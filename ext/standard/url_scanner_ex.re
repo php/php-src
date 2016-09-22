@@ -71,6 +71,7 @@ static int php_ini_on_update_tags(zend_ini_entry *entry, zend_string *new_value,
 	else {
 		ctx->tags = malloc(sizeof(HashTable));
 		if (!ctx->tags) {
+			efree(tmp);
 			return FAILURE;
 		}
 	}
