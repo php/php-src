@@ -1474,6 +1474,7 @@ static PHP_INI_MH(OnUpdate_mbstring_http_output_conv_mimetypes)
 }
 /* }}} */
 
+#if HAVE_MBREGEX
 /* {{{ static PHP_INI_MH(OnUpdate_regex_stack_limit */
 static PHP_INI_MH(OnUpdate_regex_stack_limit)
 {
@@ -1491,6 +1492,7 @@ static PHP_INI_MH(OnUpdate_regex_stack_limit)
 
 	return SUCCESS;
 }
+#endif
 /* }}} */
 /* }}} */
 
