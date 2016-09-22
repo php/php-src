@@ -3439,7 +3439,7 @@ static int zend_jit_fetch_dim_read(dasm_State **Dst, zend_op *opline, zend_op_ar
 			|	SET_Z_TYPE_INFO FP + opline->result.var, IS_NULL
 			|	jmp >9 // END
 			|.code
-			if (op2_info & (MAY_BE_ANY - MAY_BE_STRING)) {
+			if (op2_info & (MAY_BE_ANY - MAY_BE_LONG)) {
 				|	jmp >8 // FOUND
 			}
 			if (op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - MAY_BE_LONG)) {
