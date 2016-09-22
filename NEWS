@@ -10,6 +10,7 @@ PHP                                                                        NEWS
   . Fixed bug #72703 (Out of bounds global memory read in BF_crypt triggered by
     password_verify). (Anatol)
   . Fixed bug #73058 (crypt broken when salt is 'too' long). (Anatol)
+  . Fixed bug #69579 (Invalid free in extension trait). (John Boehr)
 
 - COM:
   . Fixed bug #73126 (Cannot pass parameter 1 by reference). (Anatol)
