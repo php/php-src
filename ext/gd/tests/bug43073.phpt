@@ -7,6 +7,8 @@ Bug #43073 (TrueType bounding box is wrong for angle<>0) freetype < 2.4.10
 
 	include dirname(__FILE__) . '/func.inc';
 	if(version_compare(get_freetype_version(), '2.4.10') >= 0) die('skip for freetype < 2.4.10');
+	
+	die('skip freetype issues');
 ?>
 --FILE--
 <?php
