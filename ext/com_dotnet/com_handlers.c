@@ -309,7 +309,6 @@ static union _zend_function *com_method_get(zend_object **object_ptr, zend_strin
 							}
 
 							f.num_args = bindptr.lpfuncdesc->cParams;
-							zend_set_function_arg_flags((zend_function*)&f);
 
 							ITypeInfo_ReleaseFuncDesc(TI, bindptr.lpfuncdesc);
 							break;
@@ -335,15 +334,14 @@ static union _zend_function *com_method_get(zend_object **object_ptr, zend_strin
 			}
 		}
 
-		if (fptr) {
-			/* save this method in the cache */
-			if (!obj->method_cache) {
-				ALLOC_HASHTABLE(obj->method_cache);
-				zend_hash_init(obj->method_cache, 2, NULL, function_dtor, 0);
-			}
-
-			zend_hash_update_mem(obj->method_cache, name, &f, sizeof(f));
+		zend_set_function_arg_flags((zend_function*)&f);
+		/* save this method in the cache */
+		if (!obj->method_cache) {
+			ALLOC_HASHTABLE(obj->method_cache);
+			zend_hash_init(obj->method_cache, 2, NULL, function_dtor, 0);
 		}
+
+		zend_hash_update_mem(obj->method_cache, name, &f, sizeof(f));
 	}
 
 	if (fptr) {
