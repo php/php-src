@@ -730,9 +730,6 @@ static zend_always_inline zval *_zend_hash_index_add_or_update_i(HashTable *ht, 
 					ht->pDestructor(&p->val);
 				}
 				ZVAL_COPY_VALUE(&p->val, pData);
-				if ((zend_long)h >= (zend_long)ht->nNextFreeElement) {
-					ht->nNextFreeElement = h < ZEND_LONG_MAX ? h + 1 : ZEND_LONG_MAX;
-				}
 				return &p->val;
 			} else { /* we have to keep the order :( */
 				goto convert_to_hash;
