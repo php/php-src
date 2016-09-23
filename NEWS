@@ -13,6 +13,7 @@ PHP                                                                        NEWS
     cmb)
   . Fixed bug #53504 (imagettfbbox gives incorrect values for bounding box).
     (Mark Plomer, cmb)
+  . Fixed bug #73157 (imagegd2() ignores 3rd param if 4 are given). (cmb)
 
 - JSON:
   . Fixed bug #73113 (Segfault with throwing JsonSerializable). (julien)
