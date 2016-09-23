@@ -28,6 +28,8 @@ PHP                                                                        NEWS
     alphablending). (cmb)
   . Fixed bug #73003 (Integer Overflow in gdImageWebpCtx of gd_webp.c). (trylab,
     cmb)
+  . Fixed bug #53504 (imagettfbbox gives incorrect values for bounding box).
+    (Mark Plomer, cmb)
 
 - Mbstring:
   . Fixed bug #66797 (mb_substr only takes 32-bit signed integer). (cmb)
