@@ -47,6 +47,10 @@ PHP                                                                        NEWS
   . Fixed bug #73072 (Invalid path SNI_server_certs causes segfault).
     (Jakub Zelenka)
 
+- PCRE:
+  . Fixed bug #73121 (Bundled PCRE doesn't compile because JIT isn't supported
+    on s390). (Anatol)
+
 - PDO_DBlib:
   . Fixed bug #72414 (Never quote values as raw binary data). (Adam Baratz)
   . Allow \PDO::setAttribute() to set query timeouts. (Adam Baratz)
