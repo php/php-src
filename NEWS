@@ -33,5 +33,16 @@ PHP                                                                        NEWS
   . Added array input support to mb_convert_encoding(). (Yasuo)
   . Added array input support to mb_check_encoding(). (Yasuo)
 
+- PDO_DBlib:
+  . Fixed bug #72414 (Never quote values as raw binary data). (Adam Baratz)
+  . Allow \PDO::setAttribute() to set query timeouts. (Adam Baratz)
+  . Handle SQLDECIMAL/SQLNUMERIC types, which are used by later TDS versions.
+    (Adam Baratz)
+  . Add common PDO test suite. (Adam Baratz)
+  . Free error and message strings when cleaning up PDO instances.
+    (Adam Baratz)
+  . Fixed bug #67130 (\PDOStatement::nextRowset() should succeed when all rows
+    in current rowset haven't been fetched). (Peter LeBrun)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
 
