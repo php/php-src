@@ -2533,7 +2533,8 @@ ZEND_API HashTable* ZEND_FASTCALL zend_proptable_to_symtable(HashTable *ht, zend
 	zval *zv;
 
 	ZEND_HASH_FOREACH_KEY_VAL(ht, num_key, str_key, zv) {
-		if (ZEND_HANDLE_NUMERIC(str_key, num_key)) {
+		/* The `str_key &&` here seems redundant. ArrayObject disagrees. */
+		if (str_key && ZEND_HANDLE_NUMERIC(str_key, num_key)) {
 			goto convert;
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -2556,10 +2557,7 @@ convert:
 
 		ZEND_HASH_FOREACH_KEY_VAL(ht, num_key, str_key, zv) {
 			Z_TRY_ADDREF_P(zv);
-			/* TODO: Though it ought to be a safe assumption there are never
-			 * integer keys in property tables, it isn't. This could be changed
-			 * to a ZEND_ASSERT() in future.
-			 */
+			/* Again, thank ArrayObject for `!str_key ||`. */
 			if (!str_key || ZEND_HANDLE_NUMERIC(str_key, num_key)) {
 				zend_hash_index_add_new(new_ht, num_key, zv);
 			} else {
