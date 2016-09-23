@@ -1219,7 +1219,8 @@ static int zend_jit_inc_dec(dasm_State **Dst, zend_op *opline, zend_op_array *op
 		|	dec aword [FP + opline->op1.var]
 	}
 	op1_def_info = OP1_DEF_INFO();
-	if (op1_def_info & MAY_BE_DOUBLE) {
+
+	if ((op1_def_info & MAY_BE_DOUBLE) && zend_may_overflow(opline, op_array, ssa)) {
 		|	jo >1
 		||	if ((opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_PRE_DEC) &&
 		||	    opline->result_type != IS_UNUSED) {
@@ -1361,15 +1362,7 @@ static int zend_jit_math_long_long(dasm_State **Dst, zend_op *opline, zend_op_ar
 		|		LONG_MATH opline->opcode, r0, opline->op2_type, opline->op2
 		}
 	}
-	if ((res_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_LONG) {
-		if (res_forward) {
-			|	SET_Z_LVAL r1 + res_forward, r0
-			|	SET_Z_TYPE_INFO r1 + res_forward, IS_LONG
-		} else {
-			|	SET_Z_LVAL FP + opline->result.var, r0
-			|	SET_Z_TYPE_INFO FP + opline->result.var, IS_LONG
-		}
-	} else {
+	if ((res_info & MAY_BE_DOUBLE) && zend_may_overflow(opline, op_array, ssa)) {
 		|	jo >1
 		|.cold_code
 		|1:
@@ -1399,6 +1392,14 @@ static int zend_jit_math_long_long(dasm_State **Dst, zend_op *opline, zend_op_ar
 			|	SET_Z_TYPE_INFO FP + opline->result.var, IS_LONG
 		}
 		|2:
+	} else {
+		if (res_forward) {
+			|	SET_Z_LVAL r1 + res_forward, r0
+			|	SET_Z_TYPE_INFO r1 + res_forward, IS_LONG
+		} else {
+			|	SET_Z_LVAL FP + opline->result.var, r0
+			|	SET_Z_TYPE_INFO FP + opline->result.var, IS_LONG
+		}
 	}
 
 	return 1;
