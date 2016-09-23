@@ -641,7 +641,7 @@ try_again:
 			{
 				HashTable *ht = Z_ARR_P(op);
 				ht = zend_symtable_to_proptable(ht);
-				if (GC_FLAGS(Z_ARR_P(op)) & IS_ARRAY_IMMUTABLE) {
+				if (GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) {
 					/* TODO: try not to duplicate immutable arrays as well ??? */
 					ht = zend_array_dup(ht);
 				}
