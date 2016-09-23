@@ -3220,16 +3220,22 @@ static int zend_jit_leave_func(dasm_State **Dst, zend_op *opline, zend_op_array 
 			|2:
 		}
 	}
-	|	test FCARG1d, ZEND_CALL_CLOSURE
-	|	jnz >3
-	|.cold_code
-	|3:
-	|	// OBJ_RELEASE((zend_object*)execute_data->func->op_array.prototype);
-	|	mov r0, EX->func
-	|	mov r0, aword [r0 + offsetof(zend_op_array, prototype)]
-	|	OBJ_RELEASE r0, >4
-	|	jmp >4
-	|.code
+	// TODO: We have to check for ZEND_CALL_CLOSURE flag for every regular
+	// function, just to support rarely used fake closures created by
+	// ReflectionFunction::getClosure() ???
+	// see ext/reflection/tests/ReflectionFunction_getClosure_basic.php
+	if (1 || (op_array->fn_flags & ZEND_ACC_CLOSURE)) {
+		|	test FCARG1d, ZEND_CALL_CLOSURE
+		|	jnz >3
+		|.cold_code
+		|3:
+		|	// OBJ_RELEASE((zend_object*)execute_data->func->op_array.prototype);
+		|	mov r0, EX->func
+		|	mov r0, aword [r0 + offsetof(zend_op_array, prototype)]
+		|	OBJ_RELEASE r0, >4
+		|	jmp >4
+		|.code
+	}
 	|4:
 	|	// EG(vm_stack_top) = (zval*)execute_data;
 	|	mov aword [&EG(vm_stack_top)], FP
