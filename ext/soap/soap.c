@@ -1620,6 +1620,8 @@ PHP_METHOD(SoapServer, handle)
 
 					if (zf) {
 						php_stream_filter_append(&SG(request_info).request_body->readfilters, zf);
+						SG(request_info).request_body->flags &= ~PHP_STREAM_FLAG_NO_BUFFER;
+
 					} else {
 						php_error_docref(NULL, E_WARNING,"Can't uncompress compressed request");
 						zend_string_release(server);
