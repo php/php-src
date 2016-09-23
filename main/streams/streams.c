@@ -1289,7 +1289,7 @@ PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_
 				}
 				break;
 			case SEEK_SET:
-				if (offset >= stream->position &&
+				if (offset > stream->position &&
 						offset <= stream->position + stream->writepos - stream->readpos) {
 					stream->readpos += offset - stream->position;
 					stream->position = offset;
