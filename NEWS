@@ -60,6 +60,7 @@ PHP                                                                        NEWS
 
 - phpdbg:
   . Fixed bug #72996 (phpdbg_prompt.c undefined reference to DL_LOAD). (Nikita)
+  . Fixed next command not stopping when leaving function. (Bob)
 
 - Session:
   . Fixed bug #68015 (Session does not report invalid uid for files save handler).
