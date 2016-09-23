@@ -2479,7 +2479,7 @@ ZEND_API int ZEND_FASTCALL _zend_handle_numeric_str_ex(const char *key, size_t l
 
 /* Takes a "symtable" hashtable (contains integer and non-numeric string keys)
  * and converts it to a "proptable" (contains only string keys).
- * This is destructive: if the symtable was converted, it will be released.
+ * If the symtable didn't need duplicating, its refcount is incremented.
  */
 ZEND_API HashTable* ZEND_FASTCALL zend_symtable_to_proptable(HashTable *ht)
 {
@@ -2496,6 +2496,10 @@ ZEND_API HashTable* ZEND_FASTCALL zend_symtable_to_proptable(HashTable *ht)
 			goto convert;
 		}
 	} ZEND_HASH_FOREACH_END();
+
+	if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+		GC_REFCOUNT(ht)++;
+	}
 
 	return ht;
 
@@ -2514,18 +2518,13 @@ convert:
 			zend_hash_add_new(new_ht, str_key, zv);
 		} ZEND_HASH_FOREACH_END();
 
-		if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !--GC_REFCOUNT(ht)) {
-			zend_array_destroy(ht);
-		}
-
 		return new_ht;
 	}
 }
 
 /* Takes a "proptable" hashtable (contains only string keys) and converts it to
  * a "symtable" (contains integer and non-numeric string keys).
- * This is destructive: if the proptable was converted, it will be released,
- * unless always_duplicate is set.
+ * If the proptable didn't need duplicating, its refcount is incremented.
  */
 ZEND_API HashTable* ZEND_FASTCALL zend_proptable_to_symtable(HashTable *ht, zend_bool always_duplicate)
 {
@@ -2541,6 +2540,10 @@ ZEND_API HashTable* ZEND_FASTCALL zend_proptable_to_symtable(HashTable *ht, zend
 
 	if (always_duplicate) {
 		return zend_array_dup(ht);
+	}
+
+	if (EXPECTED(!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE))) {
+		GC_REFCOUNT(ht)++;
 	}
 
 	return ht;
@@ -2563,10 +2566,6 @@ convert:
 				zend_hash_add_new(new_ht, str_key, zv);
 			}
 		} ZEND_HASH_FOREACH_END();
-
-		if (!always_duplicate && !(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !--GC_REFCOUNT(ht)) {
-			zend_array_destroy(ht);
-		}
 
 		return new_ht;
 	}

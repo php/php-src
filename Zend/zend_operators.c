@@ -593,11 +593,7 @@ try_again:
 							!ZEND_HASH_GET_APPLY_COUNT(Z_OBJ_P(op)->properties)) {
 							/* fast copy */
 							if (EXPECTED(Z_OBJ_P(op)->handlers == &std_object_handlers)) {
-								arr = obj_ht;
-								if (EXPECTED(!(GC_FLAGS(Z_OBJ_P(op)->properties) & IS_ARRAY_IMMUTABLE))) {
-									GC_REFCOUNT(Z_OBJ_P(op)->properties)++;
-								}
-								arr = zend_proptable_to_symtable(arr, 0);
+								arr = zend_proptable_to_symtable(obj_ht, 0);
 							} else {
 								arr = zend_proptable_to_symtable(obj_ht, 1);
 							}
@@ -649,6 +645,7 @@ try_again:
 					/* TODO: try not to duplicate immutable arrays as well ??? */
 					ht = zend_array_dup(ht);
 				}
+				zval_dtor(op);
 				object_and_properties_init(op, zend_standard_class_def, ht);
 				break;
 			}
