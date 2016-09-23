@@ -52,16 +52,18 @@ int fpm_scoreboard_init_main() /* {{{ */
 			return -1;
 		}
 
-		wp->scoreboard = fpm_shm_alloc(sizeof(struct fpm_scoreboard_s) + (wp->config->pm_max_children - 1) * sizeof(struct fpm_scoreboard_proc_s *));
-		if (!wp->scoreboard) {
+		int scoreboard_size = sizeof(struct fpm_scoreboard_s) + (wp->config->pm_max_children) * sizeof(struct fpm_scoreboard_proc_s *);
+		int scoreboard_nprocs_size = sizeof(struct fpm_scoreboard_proc_s) * wp->config->pm_max_children;
+        void *shm_mem = fpm_shm_alloc(scoreboard_size + scoreboard_nprocs_size);
+		if (!shm_mem) {
 			return -1;
 		}
+		wp->scoreboard = shm_mem;
 		wp->scoreboard->nprocs = wp->config->pm_max_children;
+		shm_mem += scoreboard_size;
 		for (i = 0; i < wp->scoreboard->nprocs; i++) {
-			wp->scoreboard->procs[i] = fpm_shm_alloc(sizeof(struct fpm_scoreboard_proc_s));
-			if (!wp->scoreboard->procs[i]) {
-				return -1;
-			}
+			wp->scoreboard->procs[i] = shm_mem;
+			shm_mem += sizeof(struct fpm_scoreboard_proc_s);
 		}
 
 		wp->scoreboard->pm = wp->config->pm;
@@ -239,13 +241,10 @@ void fpm_scoreboard_free(struct fpm_scoreboard_s *scoreboard) /* {{{ */
 		return;
 	}
 
-	for (i = 0; i < scoreboard->nprocs; i++) {
-		if (!scoreboard->procs[i]) {
-			continue;
-		}
-		fpm_shm_free(scoreboard->procs[i], sizeof(struct fpm_scoreboard_proc_s));
-	}
-	fpm_shm_free(scoreboard, sizeof(struct fpm_scoreboard_s));
+	int scoreboard_size = sizeof(struct fpm_scoreboard_s) + (scoreboard->nprocs) * sizeof(struct fpm_scoreboard_proc_s *);
+	int scoreboard_nprocs_size = sizeof(struct fpm_scoreboard_proc_s) * scoreboard->nprocs;
+	
+	fpm_shm_free(scoreboard, scoreboard_size + scoreboard_nprocs_size);
 }
 /* }}} */
 
