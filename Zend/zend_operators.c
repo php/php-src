@@ -597,16 +597,15 @@ try_again:
 								if (EXPECTED(!(GC_FLAGS(Z_OBJ_P(op)->properties) & IS_ARRAY_IMMUTABLE))) {
 									GC_REFCOUNT(Z_OBJ_P(op)->properties)++;
 								}
+								arr = zend_proptable_to_symtable(arr, 0);
 							} else {
-								arr = zend_array_dup(obj_ht);
+								arr = zend_proptable_to_symtable(obj_ht, 1);
 							}
-							zval_dtor(op);
-							ZVAL_ARR(op, arr);
 						} else {
-							arr = zend_array_dup(obj_ht);
-							zval_dtor(op);
-							ZVAL_ARR(op, arr);
+							arr = zend_proptable_to_symtable(obj_ht, 1);
 						}
+						zval_dtor(op);
+						ZVAL_ARR(op, arr);
 						return;
 					}
 				} else {
@@ -645,7 +644,8 @@ try_again:
 		case IS_ARRAY:
 			{
 				HashTable *ht = Z_ARR_P(op);
-				if (Z_IMMUTABLE_P(op)) {
+				ht = zend_symtable_to_proptable(ht);
+				if (ht == Z_ARR_P(op) && Z_IMMUTABLE_P(op)) {
 					/* TODO: try not to duplicate immutable arrays as well ??? */
 					ht = zend_array_dup(ht);
 				}

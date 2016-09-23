@@ -2477,6 +2477,101 @@ ZEND_API int ZEND_FASTCALL _zend_handle_numeric_str_ex(const char *key, size_t l
 	}
 }
 
+/* Takes a "symtable" hashtable (contains integer and non-numeric string keys)
+ * and converts it to a "proptable" (contains only string keys).
+ * This is destructive: if the symtable was converted, it will be released.
+ */
+ZEND_API HashTable* ZEND_FASTCALL zend_symtable_to_proptable(HashTable *ht)
+{
+	zend_ulong num_key;
+	zend_string *str_key;
+	zval *zv;
+
+	if (UNEXPECTED(ht->u.flags & HASH_FLAG_PACKED)) {
+		goto convert;
+	}
+
+	ZEND_HASH_FOREACH_KEY_VAL(ht, num_key, str_key, zv) {
+		if (!str_key) {
+			goto convert;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return ht;
+
+convert:
+	{
+		HashTable *new_ht = emalloc(sizeof(HashTable));
+
+		zend_hash_init(new_ht, zend_hash_num_elements(ht), NULL, ZVAL_PTR_DTOR, 0);
+
+		ZEND_HASH_FOREACH_KEY_VAL(ht, num_key, str_key, zv) {
+			if (!str_key) {
+				str_key = zend_long_to_str(num_key);
+				zend_string_delref(str_key);
+			}
+			Z_TRY_ADDREF_P(zv);
+			zend_hash_add_new(new_ht, str_key, zv);
+		} ZEND_HASH_FOREACH_END();
+
+		if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !--GC_REFCOUNT(ht)) {
+			zend_array_destroy(ht);
+		}
+
+		return new_ht;
+	}
+}
+
+/* Takes a "proptable" hashtable (contains only string keys) and converts it to
+ * a "symtable" (contains integer and non-numeric string keys).
+ * This is destructive: if the proptable was converted, it will be released,
+ * unless always_duplicate is set.
+ */
+ZEND_API HashTable* ZEND_FASTCALL zend_proptable_to_symtable(HashTable *ht, zend_bool always_duplicate)
+{
+	zend_ulong num_key;
+	zend_string *str_key;
+	zval *zv;
+
+	ZEND_HASH_FOREACH_KEY_VAL(ht, num_key, str_key, zv) {
+		if (ZEND_HANDLE_NUMERIC(str_key, num_key)) {
+			goto convert;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	if (always_duplicate) {
+		return zend_array_dup(ht);
+	}
+
+	return ht;
+
+convert:
+	{
+		HashTable *new_ht = emalloc(sizeof(HashTable));
+
+		zend_hash_init(new_ht, zend_hash_num_elements(ht), NULL, ZVAL_PTR_DTOR, 0);
+
+		ZEND_HASH_FOREACH_KEY_VAL(ht, num_key, str_key, zv) {
+			Z_TRY_ADDREF_P(zv);
+			/* TODO: Though it ought to be a safe assumption there are never
+			 * integer keys in property tables, it isn't. This could be changed
+			 * to a ZEND_ASSERT() in future.
+			 */
+			if (!str_key || ZEND_HANDLE_NUMERIC(str_key, num_key)) {
+				zend_hash_index_add_new(new_ht, num_key, zv);
+			} else {
+				zend_hash_add_new(new_ht, str_key, zv);
+			}
+		} ZEND_HASH_FOREACH_END();
+
+		if (!always_duplicate && !(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !--GC_REFCOUNT(ht)) {
+			zend_array_destroy(ht);
+		}
+
+		return new_ht;
+	}
+}
+
 /*
  * Local variables:
  * tab-width: 4
