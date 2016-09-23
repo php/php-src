@@ -15,6 +15,10 @@ PHP                                                                        NEWS
 - JSON:
   . Fixed bug #73113 (Segfault with throwing JsonSerializable). (julien)
 
+- PCRE:
+  . Fixed bug #73121 (Bundled PCRE doesn't compile because JIT isn't supported
+    on s390). (Anatol)
+
 - Session:
   . Fixed bug #73100 (session_destroy null dereference in ps_files_path_create).
     (cmb)
