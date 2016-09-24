@@ -670,7 +670,7 @@ static void _gdImageGd2 (gdImagePtr im, gdIOCtx * out, int cs, int fmt)
 
 	/* Force fmt to a valid value since we don't return anything. */
 	if ((fmt != GD2_FMT_RAW) && (fmt != GD2_FMT_COMPRESSED)) {
-		fmt = im->trueColor ? GD2_FMT_TRUECOLOR_COMPRESSED : GD2_FMT_COMPRESSED;
+		fmt = GD2_FMT_COMPRESSED;
 	}
 	if (im->trueColor) {
 		fmt += 2;
