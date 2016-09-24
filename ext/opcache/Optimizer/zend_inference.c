@@ -1595,6 +1595,20 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 				}
 			}
 			break;
+		case ZEND_STRLEN:
+			if (ssa->ops[line].result_def == var) {
+#if SIZEOF_ZEND_LONG == 4
+				/* The length of a string is a non-negative integer. However, on 32-bit
+				 * platforms overflows into negative lengths may occur, so it's better
+				 * to not assume any particular range. */
+				tmp->min = ZEND_LONG_MIN;
+#else
+				tmp->min = 0;
+#endif
+				tmp->max = ZEND_LONG_MAX;
+				return 1;
+			}
+			break;
 		case ZEND_DO_FCALL:
 		case ZEND_DO_ICALL:
 		case ZEND_DO_UCALL:
@@ -2570,6 +2584,28 @@ static void zend_update_type_info(const zend_op_array *op_array,
 				UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
 			}
 			if (ssa_ops[i].result_def >= 0) {
+				if (opline->extended_value == ZEND_ASSIGN_DIM) {
+					if (opline->op2_type == IS_UNUSED) {
+						/* When appending to an array and the LONG_MAX key is already used
+						 * null will be returned. */
+						tmp |= MAY_BE_NULL;
+					}
+					if (t2 & (MAY_BE_ARRAY | MAY_BE_OBJECT)) {
+						/* Arrays and objects cannot be used as keys. */
+						tmp |= MAY_BE_NULL;
+					}
+					if (t1 & (MAY_BE_ANY - (MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING | MAY_BE_ARRAY))) {
+						/* null and false are implicitly converted to array, anything else
+						 * results in a null return value. */
+						tmp |= MAY_BE_NULL;
+					}
+				} else if (opline->extended_value == ZEND_ASSIGN_OBJ) {
+					if (orig & (MAY_BE_ANY - (MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_OBJECT))) {
+						/* null and false (and empty string) are implicitly converted to object,
+						 * anything else results in a null return value. */
+						tmp |= MAY_BE_NULL;
+					}
+				}
 				UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
 			}
 			break;
@@ -2695,6 +2731,21 @@ static void zend_update_type_info(const zend_op_array *op_array,
 				}
 				if (t1 & (MAY_BE_ANY - MAY_BE_STRING)) {
 					tmp |= (OP1_DATA_INFO() & (MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF));
+
+					if (opline->op2_type == IS_UNUSED) {
+						/* When appending to an array and the LONG_MAX key is already used
+						 * null will be returned. */
+						tmp |= MAY_BE_NULL;
+					}
+					if (t2 & (MAY_BE_ARRAY | MAY_BE_OBJECT)) {
+						/* Arrays and objects cannot be used as keys. */
+						tmp |= MAY_BE_NULL;
+					}
+					if (t1 & (MAY_BE_ANY - (MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING | MAY_BE_ARRAY))) {
+						/* null and false are implicitly converted to array, anything else
+						 * results in a null return value. */
+						tmp |= MAY_BE_NULL;
+					}
 				}
 				tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 				if (t1 & MAY_BE_OBJECT) {
