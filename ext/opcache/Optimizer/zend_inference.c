@@ -1595,6 +1595,20 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 				}
 			}
 			break;
+		case ZEND_STRLEN:
+			if (ssa->ops[line].result_def == var) {
+#if SIZEOF_ZEND_LONG == 4
+				/* The length of a string is a non-negative integer. However, on 32-bit
+				 * platforms overflows into negative lengths may occur, so it's better
+				 * to not assume any particular range. */
+				tmp->min = ZEND_LONG_MIN;
+#else
+				tmp->min = 0;
+#endif
+				tmp->max = ZEND_LONG_MAX;
+				return 1;
+			}
+			break;
 		case ZEND_DO_FCALL:
 		case ZEND_DO_ICALL:
 		case ZEND_DO_UCALL:
