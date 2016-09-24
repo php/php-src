@@ -95,6 +95,8 @@ PHP 7.2 UPGRADE NOTES
 - GD:
     . Removed --enable-gd-native-ttf configuration option which was unused as
       of PHP 5.5.0 anyway.
+    . imagegd() stores truecolor images as real truecolor images. Formerly, they
+      have been converted to palette.
 
 - Mbstring
   . mb_check_encoding() accepts array parameter. Both key and value
