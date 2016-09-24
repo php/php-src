@@ -2,7 +2,7 @@
 ReflectionParameter::get/hasType and ReflectionType tests
 --FILE--
 <?php
-function foo(stdClass $a, array $b, callable $c, stdClass $d = null, $e = null, string $f, bool $g, int $h, float $i, NotExisting $j) { }
+function foo(stdClass $a, array $b, ?callable $c, stdClass $d = null, $e = null, string $f, bool $g, int $h, float $i, NotExisting $j) { }
 
 function bar(): stdClass { return new stdClass; }
 
@@ -89,14 +89,14 @@ bool(true)
 string(5) "array"
 ** Function 0 - Parameter 2
 bool(true)
-bool(false)
 bool(true)
-string(8) "callable"
+bool(true)
+string(9) "?callable"
 ** Function 0 - Parameter 3
 bool(true)
 bool(true)
 bool(false)
-string(9) "?stdClass"
+string(8) "stdClass"
 ** Function 0 - Parameter 4
 bool(false)
 ** Function 0 - Parameter 5
