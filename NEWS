@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016, PHP 7.1.0RC3
 
+- Core:
+  . Fixed bug #73163 (PHP hangs if error handler throws while accessing undef
+    const in default value). (Nikita)
+
 - COM:
   . Fixed bug #73126 (Cannot pass parameter 1 by reference). (Anatol)
   . Fixed bug #69579 (Invalid free in extension trait). (John Boehr)
