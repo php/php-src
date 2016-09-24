@@ -17,6 +17,7 @@ PHP                                                                        NEWS
   . Fixed bug #73155 (imagegd2() writes wrong chunk sizes on boundaries). (cmb)
   . Fixed bug #73159 (imagegd2(): unrecognized formats may result in corrupted
     files). (cmb)
+  . Fixed bug #73161 (imagecreatefromgd2() may leak memory). (cmb)
 
 - JSON:
   . Fixed bug #73113 (Segfault with throwing JsonSerializable). (julien)
