@@ -573,8 +573,6 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 				ZVAL_EMPTY_STRING(p);
 			}
 		} else if (UNEXPECTED((const_value = zend_get_constant_ex(Z_STR_P(p), scope, Z_CONST_FLAGS_P(p))) == NULL)) {
-			char *actual = Z_STRVAL_P(p);
-
 			if (UNEXPECTED(EG(exception))) {
 				RESET_CONSTANT_VISITED(p);
 				return FAILURE;
@@ -584,46 +582,38 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 				return FAILURE;
 			} else {
 				zend_string *save = Z_STR_P(p);
-				char *slash;
-				size_t actual_len = Z_STRLEN_P(p);
-				if ((Z_CONST_FLAGS_P(p) & IS_CONSTANT_UNQUALIFIED) && (slash = (char *)zend_memrchr(actual, '\\', actual_len))) {
-					actual = slash + 1;
-					actual_len -= (actual - Z_STRVAL_P(p));
-					if (inline_change) {
-						zend_string *s = zend_string_init(actual, actual_len, 0);
-						Z_STR_P(p) = s;
-						Z_TYPE_FLAGS_P(p) = IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE;
-					}
-				}
-				if (actual[0] == '\\') {
-					if (inline_change) {
-						memmove(Z_STRVAL_P(p), Z_STRVAL_P(p)+1, Z_STRLEN_P(p));
-						--Z_STRLEN_P(p);
-					} else {
-						++actual;
-					}
-					--actual_len;
-				}
 				if ((Z_CONST_FLAGS_P(p) & IS_CONSTANT_UNQUALIFIED) == 0) {
 					if (ZSTR_VAL(save)[0] == '\\') {
 						zend_throw_error(NULL, "Undefined constant '%s'", ZSTR_VAL(save) + 1);
 					} else {
 						zend_throw_error(NULL, "Undefined constant '%s'", ZSTR_VAL(save));
 					}
-					if (inline_change) {
-						zend_string_release(save);
-					}
 					RESET_CONSTANT_VISITED(p);
 					return FAILURE;
 				} else {
-					zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",  actual,  actual);
+					char *actual = Z_STRVAL_P(p);
+					size_t actual_len = Z_STRLEN_P(p);
+					char *slash = (char *) zend_memrchr(actual, '\\', actual_len);
+					if (slash) {
+						actual = slash + 1;
+						actual_len -= (actual - Z_STRVAL_P(p));
+					}
+
+					zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'", actual, actual);
+					if (EG(exception)) {
+						RESET_CONSTANT_VISITED(p);
+						return FAILURE;
+					}
+
 					if (!inline_change) {
 						ZVAL_STRINGL(p, actual, actual_len);
 					} else {
-						Z_TYPE_INFO_P(p) = Z_REFCOUNTED_P(p) ?
-							IS_STRING_EX : IS_INTERNED_STRING_EX;
-						if (save && ZSTR_VAL(save) != actual) {
+						if (slash) {
+							ZVAL_STRINGL(p, actual, actual_len);
 							zend_string_release(save);
+						} else {
+							Z_TYPE_INFO_P(p) = Z_REFCOUNTED_P(p) ?
+								IS_STRING_EX : IS_INTERNED_STRING_EX;
 						}
 					}
 				}
