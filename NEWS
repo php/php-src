@@ -14,6 +14,7 @@ PHP                                                                        NEWS
   . Fixed bug #53504 (imagettfbbox gives incorrect values for bounding box).
     (Mark Plomer, cmb)
   . Fixed bug #73157 (imagegd2() ignores 3rd param if 4 are given). (cmb)
+  . Fixed bug #73155 (imagegd2() writes wrong chunk sizes on boundaries). (cmb)
 
 - JSON:
   . Fixed bug #73113 (Segfault with throwing JsonSerializable). (julien)

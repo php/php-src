@@ -689,8 +689,8 @@ static void _gdImageGd2 (gdImagePtr im, gdIOCtx * out, int cs, int fmt)
 	}
 
 	/* Work out number of chunks. */
-	ncx = im->sx / cs + 1;
-	ncy = im->sy / cs + 1;
+	ncx = (im->sx + cs - 1) / cs;
+	ncy = (im->sy + cs - 1) / cs;
 
 	/* Write the standard header. */
 	_gd2PutHeader (im, out, cs, fmt, ncx, ncy);
