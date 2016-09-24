@@ -68,6 +68,9 @@ PHP 7.2 UPGRADE NOTES
 6. New Functions
 ========================================
 
+- GD:
+  . Added imagesetclip() and imagegetclip().
+
 - Mbstring:
   . Added mb_chr() and mb_ord().
   . Added mb_scurb() that scrub broken multibyte strings.
