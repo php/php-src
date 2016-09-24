@@ -191,21 +191,21 @@ static gdImagePtr _gd2CreateFromFile (gdIOCtxPtr in, int *sx, int *sy, int *cs, 
 	}
 	if (im == NULL) {
 		GD2_DBG(php_gd_error("Could not create gdImage"));
-		goto fail1;
+		goto fail2;
 	}
 
 	if (!_gdGetColors(in, im, (*vers) == 2)) {
 		GD2_DBG(php_gd_error("Could not read color palette"));
-		goto fail2;
+		goto fail3;
 	}
 	GD2_DBG(php_gd_error("Image palette completed: %d colours", im->colorsTotal));
 
 	return im;
 
-fail2:
+fail3:
 	gdImageDestroy(im);
-	return 0;
-
+fail2:
+	gdFree(*cidx);
 fail1:
 	return 0;
 }
