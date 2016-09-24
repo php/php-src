@@ -2602,9 +2602,9 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 		alloc_globals->mm_heap = malloc(sizeof(zend_mm_heap));
 		memset(alloc_globals->mm_heap, 0, sizeof(zend_mm_heap));
 		alloc_globals->mm_heap->use_custom_heap = ZEND_MM_CUSTOM_HEAP_STD;
-		alloc_globals->mm_heap->custom_heap.std._malloc = malloc;
+		alloc_globals->mm_heap->custom_heap.std._malloc = __zend_malloc;
 		alloc_globals->mm_heap->custom_heap.std._free = free;
-		alloc_globals->mm_heap->custom_heap.std._realloc = realloc;
+		alloc_globals->mm_heap->custom_heap.std._realloc = __zend_realloc;
 		return;
 	}
 #endif
