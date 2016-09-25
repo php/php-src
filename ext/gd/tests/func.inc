@@ -82,7 +82,9 @@ function test_image_equals_file($filename, $actual)
 		save_actual_image($actual);
 		return;
 	}
+	$actual = test_to_truecolor($actual);
 	$expected = imagecreatefrompng($filename);
+	$expected = test_to_truecolor($expected);
 	$exp_x = imagesx($expected);
 	$exp_y = imagesy($expected);
 	$act_x = imagesx($actual);
@@ -90,7 +92,6 @@ function test_image_equals_file($filename, $actual)
 	if ($exp_x != $act_x || $exp_y != $act_y) {
 		echo "The image size differs: expected {$exp_x}x{$exp_y}, got {$act_x}x{$act_y}.\n";
 		save_actual_image($actual);
-		imagedestroy($expected);
 		return;
 	}
 	$pixels_changed = 0;
@@ -109,7 +110,25 @@ function test_image_equals_file($filename, $actual)
 		echo "The images differ in {$pixels_changed} pixels.\n";
 		save_actual_image($actual);
 	}
-	imagedestroy($expected);
+}
+
+/**
+ * Returns the truecolor version of an image.
+ *
+ * @param resource $image
+ * @return resource
+ */
+function test_to_truecolor($image)
+{
+	if (imageistruecolor($image)) {
+		return $image;
+	} else {
+		$width = imagesx($image);
+		$height = imagesy($image);
+		$result = imagecreatetruecolor($width, $height);
+		imagecopy($result, $image, 0,0, 0,0, $width, $height);
+		return $result;
+	}
 }
 
 /**
