@@ -49,9 +49,9 @@ PHP 7.1 UPGRADE NOTES
     the notice level only.
   . Don't call destructors of incompletely constructed objects, even if they
     are kept referenced. See bug #29368 and Zend/tests/bug29368_1.phpt.
-  . call_user_func() will now consistently fail to perform calls to functions
-    that accept reference arguments. Previously this sometimes worked if
-    call_user_func() was used outside a namespace.
+  . call_user_func() will now consistently throw a warning if a function with
+    reference arguments is called. However, call_user_func() will no longer
+    abort the call in this case.
   . rand() and srand() are now aliases of mt_rand() and mt_srand().
     Consequently the output of the following functions has changed:
      . rand()

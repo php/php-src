@@ -3108,6 +3108,29 @@ send_val_by_ref:
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_USER_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *arg, *param;
+
+
+	SAVE_OPLINE();
+	arg = EX_CONSTANT(opline->op1);
+	param = ZEND_CALL_VAR(EX(call), opline->result.var);
+
+	if (UNEXPECTED(ARG_MUST_BE_SENT_BY_REF(EX(call)->func, opline->op2.num))) {
+		zend_error(E_WARNING, "Parameter %d to %s%s%s() expected to be a reference, value given",
+			opline->op2.num,
+			EX(call)->func->common.scope ? ZSTR_VAL(EX(call)->func->common.scope->name) : "",
+			EX(call)->func->common.scope ? "::" : "",
+			ZSTR_VAL(EX(call)->func->common.function_name));
+	}
+
+	ZVAL_COPY(param, arg);
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BOOL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -12597,6 +12620,30 @@ send_val_by_ref:
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_USER_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *arg, *param;
+	zend_free_op free_op1;
+
+	SAVE_OPLINE();
+	arg = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1);
+	param = ZEND_CALL_VAR(EX(call), opline->result.var);
+
+	if (UNEXPECTED(ARG_MUST_BE_SENT_BY_REF(EX(call)->func, opline->op2.num))) {
+		zend_error(E_WARNING, "Parameter %d to %s%s%s() expected to be a reference, value given",
+			opline->op2.num,
+			EX(call)->func->common.scope ? ZSTR_VAL(EX(call)->func->common.scope->name) : "",
+			EX(call)->func->common.scope ? "::" : "",
+			ZSTR_VAL(EX(call)->func->common.function_name));
+	}
+
+	ZVAL_COPY(param, arg);
+
+	zval_ptr_dtor_nogc(free_op1);
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -16078,23 +16125,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_USER_SPEC_VAR_HANDLER(ZEN
 	zend_free_op free_op1;
 
 	SAVE_OPLINE();
-	arg = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	arg = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1);
 	param = ZEND_CALL_VAR(EX(call), opline->result.var);
 
 	if (UNEXPECTED(ARG_MUST_BE_SENT_BY_REF(EX(call)->func, opline->op2.num))) {
-		ZVAL_DEREF(arg);
 		zend_error(E_WARNING, "Parameter %d to %s%s%s() expected to be a reference, value given",
 			opline->op2.num,
 			EX(call)->func->common.scope ? ZSTR_VAL(EX(call)->func->common.scope->name) : "",
 			EX(call)->func->common.scope ? "::" : "",
 			ZSTR_VAL(EX(call)->func->common.function_name));
-	} else {
-		if (Z_ISREF_P(arg) &&
-		    !(EX(call)->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
-			/* don't separate references for __call */
-			arg = Z_REFVAL_P(arg);
-		}
 	}
+
 	ZVAL_COPY(param, arg);
 
 	zval_ptr_dtor_nogc(free_op1);
@@ -35086,23 +35127,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_USER_SPEC_CV_HANDLER(ZEND
 
 
 	SAVE_OPLINE();
-	arg = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
+	arg = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op1.var);
 	param = ZEND_CALL_VAR(EX(call), opline->result.var);
 
 	if (UNEXPECTED(ARG_MUST_BE_SENT_BY_REF(EX(call)->func, opline->op2.num))) {
-		ZVAL_DEREF(arg);
 		zend_error(E_WARNING, "Parameter %d to %s%s%s() expected to be a reference, value given",
 			opline->op2.num,
 			EX(call)->func->common.scope ? ZSTR_VAL(EX(call)->func->common.scope->name) : "",
 			EX(call)->func->common.scope ? "::" : "",
 			ZSTR_VAL(EX(call)->func->common.function_name));
-	} else {
-		if (Z_ISREF_P(arg) &&
-		    !(EX(call)->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
-			/* don't separate references for __call */
-			arg = Z_REFVAL_P(arg);
-		}
 	}
+
 	ZVAL_COPY(param, arg);
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -60131,8 +60166,8 @@ void zend_init_opcodes_handlers(void)
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_SEND_ARRAY_SPEC_HANDLER,
-		ZEND_NULL_HANDLER,
-		ZEND_NULL_HANDLER,
+		ZEND_SEND_USER_SPEC_CONST_HANDLER,
+		ZEND_SEND_USER_SPEC_TMP_HANDLER,
 		ZEND_SEND_USER_SPEC_VAR_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_SEND_USER_SPEC_CV_HANDLER,

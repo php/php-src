@@ -4716,30 +4716,24 @@ ZEND_VM_C_LABEL(send_array):
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HANDLER(120, ZEND_SEND_USER, VAR|CV, NUM)
+ZEND_VM_HANDLER(120, ZEND_SEND_USER, CONST|TMP|VAR|CV, NUM)
 {
 	USE_OPLINE
 	zval *arg, *param;
 	zend_free_op free_op1;
 
 	SAVE_OPLINE();
-	arg = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	arg = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
 	param = ZEND_CALL_VAR(EX(call), opline->result.var);
 
 	if (UNEXPECTED(ARG_MUST_BE_SENT_BY_REF(EX(call)->func, opline->op2.num))) {
-		ZVAL_DEREF(arg);
 		zend_error(E_WARNING, "Parameter %d to %s%s%s() expected to be a reference, value given",
 			opline->op2.num,
 			EX(call)->func->common.scope ? ZSTR_VAL(EX(call)->func->common.scope->name) : "",
 			EX(call)->func->common.scope ? "::" : "",
 			ZSTR_VAL(EX(call)->func->common.function_name));
-	} else {
-		if (Z_ISREF_P(arg) &&
-		    !(EX(call)->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
-			/* don't separate references for __call */
-			arg = Z_REFVAL_P(arg);
-		}
 	}
+
 	ZVAL_COPY(param, arg);
 
 	FREE_OP1();
