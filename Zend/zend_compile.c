@@ -3592,12 +3592,8 @@ int zend_compile_func_cuf(znode *result, zend_ast_list *args, zend_string *lcnam
 		zend_op *opline;
 
 		zend_compile_expr(&arg_node, arg_ast);
-		if (arg_node.op_type & (IS_VAR|IS_CV)) {
-			opline = zend_emit_op(NULL, ZEND_SEND_USER, &arg_node, NULL);
-		} else {
-			opline = zend_emit_op(NULL, ZEND_SEND_VAL, &arg_node, NULL);
-		}
 
+		opline = zend_emit_op(NULL, ZEND_SEND_USER, &arg_node, NULL);
 		opline->op2.num = i;
 		opline->result.var = (uint32_t)(zend_intptr_t)ZEND_CALL_ARG(NULL, i);
 	}
