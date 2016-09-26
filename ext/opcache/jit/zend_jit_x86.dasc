@@ -2884,10 +2884,18 @@ static int zend_jit_do_fcall(dasm_State **Dst, zend_op *opline, zend_op_array *o
 	|	// fbc = call->func;
 	|	// mov r2, EX:r1->func ???
 	|	// SAVE_OPLINE();
-	if (!zend_jit_set_valid_ip(Dst)) {
-		return 0;
-	}
-	|	mov EX->opline, IP
+	|.if X64
+	||	if (IS_32BIT(opline)) {
+	|		mov aword EX->opline, opline
+	||	} else {
+	||		if (!zend_jit_set_valid_ip(Dst)) {
+	||			return 0;
+	||		}
+	|		mov EX->opline, IP
+	||	}
+	|.else
+	|	mov aword EX->opline, opline
+	|.endif
 	||	if (call_level == 1) {
 	|		mov aword EX->call, 0
 	||	} else {
@@ -2956,6 +2964,9 @@ static int zend_jit_do_fcall(dasm_State **Dst, zend_op *opline, zend_op_array *o
 	|		jmp aword [IP]
 #endif
 	||	}
+
+	valid_opline = NULL;
+	valid_opline_offset = 0;
 
 	return 1;
 
