@@ -2543,7 +2543,11 @@ ZEND_API HashTable* ZEND_FASTCALL zend_proptable_to_symtable(HashTable *ht, zend
 	zval *zv;
 
 	ZEND_HASH_FOREACH_KEY_VAL(ht, num_key, str_key, zv) {
-		/* The `str_key &&` here seems redundant. ArrayObject disagrees. */
+		/* The `str_key &&` here might seem redundant: property tables should
+		 * only have string keys. Unfortunately, this isn't true, at the very
+		 * least because of ArrayObject, which stores a symtable where the
+		 * property table should be.
+		 */
 		if (str_key && ZEND_HANDLE_NUMERIC(str_key, num_key)) {
 			goto convert;
 		}
