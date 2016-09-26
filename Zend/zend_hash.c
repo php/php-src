@@ -2514,7 +2514,17 @@ convert:
 				str_key = zend_long_to_str(num_key);
 				zend_string_delref(str_key);
 			}
-			Z_TRY_ADDREF_P(zv);
+			do {
+				if (Z_OPT_REFCOUNTED_P(zv)) {
+					if (Z_ISREF_P(zv) && Z_REFCOUNT_P(zv) == 1) {
+						zv = Z_REFVAL_P(zv);
+						if (!Z_OPT_REFCOUNTED_P(zv)) {
+							break;
+						}
+					}
+					Z_ADDREF_P(zv);
+				}
+			} while (0);
 			zend_hash_add_new(new_ht, str_key, zv);
 		} ZEND_HASH_FOREACH_END();
 
@@ -2556,7 +2566,17 @@ convert:
 		zend_hash_init(new_ht, zend_hash_num_elements(ht), NULL, ZVAL_PTR_DTOR, 0);
 
 		ZEND_HASH_FOREACH_KEY_VAL(ht, num_key, str_key, zv) {
-			Z_TRY_ADDREF_P(zv);
+			do {
+				if (Z_OPT_REFCOUNTED_P(zv)) {
+					if (Z_ISREF_P(zv) && Z_REFCOUNT_P(zv) == 1) {
+						zv = Z_REFVAL_P(zv);
+						if (!Z_OPT_REFCOUNTED_P(zv)) {
+							break;
+						}
+					}
+					Z_ADDREF_P(zv);
+				}
+			} while (0);
 			/* Again, thank ArrayObject for `!str_key ||`. */
 			if (!str_key || ZEND_HANDLE_NUMERIC(str_key, num_key)) {
 				zend_hash_index_add_new(new_ht, num_key, zv);
