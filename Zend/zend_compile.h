@@ -253,6 +253,7 @@ typedef struct _zend_oparray_context {
 
 
 #define ZEND_ACC_CLOSURE              0x100000
+#define ZEND_ACC_FAKE_CLOSURE         0x40
 #define ZEND_ACC_GENERATOR            0x800000
 
 #define ZEND_ACC_NO_RT_ARENA          0x80000
@@ -473,6 +474,7 @@ struct _zend_execute_data {
 #define ZEND_CALL_ALLOCATED          (1 << 7)
 #define ZEND_CALL_GENERATOR          (1 << 8)
 #define ZEND_CALL_DYNAMIC            (1 << 9)
+#define ZEND_CALL_FAKE_CLOSURE       (1 << 10)
 
 #define ZEND_CALL_INFO_SHIFT         16
 
