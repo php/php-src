@@ -3166,81 +3166,90 @@ static int zend_jit_leave_func(dasm_State **Dst, zend_op *opline, zend_op_array 
 		return 0;
 	}
 
-	|	movzx FCARG1d, byte [FP + offsetof(zend_execute_data, This.u1.type_info) + 2]
-	|	test FCARG1d, (ZEND_CALL_TOP|ZEND_CALL_HAS_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS|ZEND_CALL_ALLOCATED)
+	|	movzx FCARG1d, word [FP + offsetof(zend_execute_data, This.u1.type_info) + 2]
+	|	test FCARG1d, (ZEND_CALL_TOP|ZEND_CALL_HAS_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS|ZEND_CALL_ALLOCATED|ZEND_CALL_FAKE_CLOSURE)
 	|	jnz ->leave_function_handler
-	|	// EG(current_execute_data) = EX(prev_execute_data);
-	|	mov r0, EX->prev_execute_data
-	|	mov aword [&EG(current_execute_data)], r0
-	|	// if (call_info & ZEND_CALL_RELEASE_THIS)
-	if (op_array->scope) {
-		|	test FCARG1d, ZEND_CALL_RELEASE_THIS
-		if (op_array->fn_flags & ZEND_ACC_STATIC) {
-			|	jnz >1
-			|.cold_code
-			|1:
-		} else {
-			|	je >2
-		}
-		|	// zend_object *object = Z_OBJ(execute_data->This);
-		|	mov r0, EX->This.value.obj
-		if (op_array->scope && op_array->scope->constructor == (zend_function*)op_array) {
-			|	// if (UNEXPECTED(EG(exception) != NULL)
-			|	cmp aword [&EG(exception)], 0
-			|	jne >6
-			|.cold_code
-			|6:
-			|	// if (call_info & ZEND_CALL_CTOR)
-			|	test FCARG1d, ZEND_CALL_CTOR
-			|	jz >5
-			|	// GC_REFCOUNT(object)--;
-			|	GC_DELREF r0
-			|	// zend_object_store_ctor_failed(object);
-			|.if X64
-			|	mov CARG1, r0
-			|	EXT_CALL zend_object_store_ctor_failed, r0
-			|.else
-			|	sub r4, 12
-			|	push r0
-			|	EXT_CALL zend_object_store_ctor_failed, r0
-			|	add r4, 16
-			|.endif
-			|	// reload registers
+
+	if (op_array->scope || (op_array->fn_flags & ZEND_ACC_CLOSURE)) {
+		|	// EG(current_execute_data) = EX(prev_execute_data);
+		|	mov r0, EX->prev_execute_data
+		|	mov aword [&EG(current_execute_data)], r0
+		if (op_array->scope) {
+			|	// EG(current_execute_data) = EX(prev_execute_data);
+			|	mov r0, EX->prev_execute_data
+			|	mov aword [&EG(current_execute_data)], r0
+			|	// if (call_info & ZEND_CALL_RELEASE_THIS)
+			|	test FCARG1d, ZEND_CALL_RELEASE_THIS
+			if (op_array->fn_flags & ZEND_ACC_STATIC) {
+				|	jnz >1
+				|.cold_code
+				|1:
+			} else {
+				|	je >2
+			}
+			|	// zend_object *object = Z_OBJ(execute_data->This);
 			|	mov r0, EX->This.value.obj
-			|	jmp >5
-			|.code
-			|5:
+			if (op_array->scope && op_array->scope->constructor == (zend_function*)op_array) {
+				|	// if (UNEXPECTED(EG(exception) != NULL)
+				|	cmp aword [&EG(exception)], 0
+				|	jne >6
+				|.cold_code
+				|6:
+				|	// if (call_info & ZEND_CALL_CTOR)
+				|	test FCARG1d, ZEND_CALL_CTOR
+				|	jz >5
+				|	// GC_REFCOUNT(object)--;
+				|	GC_DELREF r0
+				|	// zend_object_store_ctor_failed(object);
+				|.if X64
+				|	mov CARG1, r0
+				|	EXT_CALL zend_object_store_ctor_failed, r0
+				|.else
+				|	sub r4, 12
+				|	push r0
+				|	EXT_CALL zend_object_store_ctor_failed, r0
+				|	add r4, 16
+				|.endif
+				|	// reload registers
+				|	mov r0, EX->This.value.obj
+				|	jmp >5
+				|.code
+				|5:
+			}
+			|	// OBJ_RELEASE(object);
+			|	OBJ_RELEASE r0, >4
+			|	jmp >4
+			if (op_array->fn_flags & ZEND_ACC_STATIC) {
+				|.code
+			} else {
+				|2:
+			}
 		}
-		|	// OBJ_RELEASE(object);
-		|	OBJ_RELEASE r0, >4
-		|	jmp >4
-		if (op_array->fn_flags & ZEND_ACC_STATIC) {
+		if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
+			|	test FCARG1d, ZEND_CALL_CLOSURE
+			|	jnz >3
+			|.cold_code
+			|3:
+			|	// OBJ_RELEASE((zend_object*)execute_data->func->op_array.prototype);
+			|	mov r0, EX->func
+			|	mov r0, aword [r0 + offsetof(zend_op_array, prototype)]
+			|	OBJ_RELEASE r0, >4
+			|	jmp >4
 			|.code
-		} else {
-			|2:
 		}
+		|4:
+		|	// EG(vm_stack_top) = (zval*)execute_data;
+		|	mov aword [&EG(vm_stack_top)], FP
+		|	// execute_data = EX(prev_execute_data);
+		|	mov FP, EX->prev_execute_data
+	} else {
+		|	// EG(vm_stack_top) = (zval*)execute_data;
+		|	mov aword [&EG(vm_stack_top)], FP
+		|	// execute_data = EX(prev_execute_data);
+		|	mov FP, EX->prev_execute_data
+		|	// EG(current_execute_data) = execute_data
+		|	mov aword [&EG(current_execute_data)], FP
 	}
-	// TODO: We have to check for ZEND_CALL_CLOSURE flag for every regular
-	// function, just to support rarely used fake closures created by
-	// ReflectionFunction::getClosure() ???
-	// see ext/reflection/tests/ReflectionFunction_getClosure_basic.php
-	if (1 || (op_array->fn_flags & ZEND_ACC_CLOSURE)) {
-		|	test FCARG1d, ZEND_CALL_CLOSURE
-		|	jnz >3
-		|.cold_code
-		|3:
-		|	// OBJ_RELEASE((zend_object*)execute_data->func->op_array.prototype);
-		|	mov r0, EX->func
-		|	mov r0, aword [r0 + offsetof(zend_op_array, prototype)]
-		|	OBJ_RELEASE r0, >4
-		|	jmp >4
-		|.code
-	}
-	|4:
-	|	// EG(vm_stack_top) = (zval*)execute_data;
-	|	mov aword [&EG(vm_stack_top)], FP
-	|	// execute_data = EX(prev_execute_data);
-	|	mov FP, EX->prev_execute_data
 	|	// if (EG(exception))
 	|	cmp aword [&EG(exception)], 0
 	|	mov IP, EX->opline
