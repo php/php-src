@@ -11,6 +11,7 @@ PHP                                                                        NEWS
     password_verify). (Anatol)
   . Fixed bug #73058 (crypt broken when salt is 'too' long). (Anatol)
   . Fixed bug #69579 (Invalid free in extension trait). (John Boehr)
+  . Fixed bug #73156 (segfault on undefined function). (Dmitry)
   . Fixed bug #73163 (PHP hangs if error handler throws while accessing undef
     const in default value). (Nikita)
 
