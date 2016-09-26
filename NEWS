@@ -42,6 +42,7 @@ PHP                                                                        NEWS
     (Adam Baratz)
   . Fixed bug #67130 (\PDOStatement::nextRowset() should succeed when all rows
     in current rowset haven't been fetched). (Peter LeBrun)
+  . Ignore potentially misleading dberr values. (Chris Kings-Lynne)
 
 - Session:
   . Fixed bug #73100 (session_destroy null dereference in ps_files_path_create).
