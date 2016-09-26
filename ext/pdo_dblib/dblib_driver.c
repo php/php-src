@@ -48,9 +48,9 @@ static int dblib_fetch_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info)
 		einfo = &S->err;
 	}
 
-	if (einfo->dberr == SYBESMSG && einfo->lastmsg) {
+	if (einfo->lastmsg) {
 		msg = einfo->lastmsg;
-	} else if (einfo->dberr == SYBESMSG && DBLIB_G(err).lastmsg) {
+	} else if (DBLIB_G(err).lastmsg) {
 		msg = DBLIB_G(err).lastmsg;
 		DBLIB_G(err).lastmsg = NULL;
 	} else {
