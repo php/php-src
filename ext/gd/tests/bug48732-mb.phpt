@@ -4,12 +4,8 @@ Bug #48732 (TTF Bounding box wrong for letters below baseline)
 <?php
 	if(!extension_loaded('gd')){ die('skip gd extension not available'); }
 	if(!function_exists('imagefttext')) die('skip imagefttext() not available');
-	if (substr(PHP_OS, 0, 3) != 'WIN') {
-	    die('skip.. only for Windows');
-	}
+	if (substr(PHP_OS, 0, 3) == 'WIN') die('skip UTF-8 font file names not yet supported on Windows');
 ?>
---XFAIL--
-seems freetype issue, to investigate
 --FILE--
 <?php
 $cwd = dirname(__FILE__);
@@ -24,4 +20,4 @@ echo 'Left Bottom: (' . $bbox[0]  . ', ' . $bbox[1] . ')';
 --CLEAN--
 <?php @unlink(dirname(__FILE__) . '/bug48732私はガラスを食べられます.png'); ?>
 --EXPECTF--
-Left Bottom: (0, 47)
+Left Bottom: (0, 46)
