@@ -14,6 +14,7 @@ PHP                                                                        NEWS
   . Fixed bug #73156 (segfault on undefined function). (Dmitry)
   . Fixed bug #73163 (PHP hangs if error handler throws while accessing undef
     const in default value). (Nikita)
+  . Fixed bug #73172 (parse error: Invalid numeric literal). (Nikita, Anatol)
 
 - COM:
   . Fixed bug #73126 (Cannot pass parameter 1 by reference). (Anatol)
