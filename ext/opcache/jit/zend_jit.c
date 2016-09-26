@@ -55,8 +55,8 @@ static void *dasm_buf = NULL;
 static void *dasm_ptr = NULL;
 static void *dasm_end = NULL;
 
-static int zend_may_throw(zend_op *opline, zend_op_array *op_array, zend_ssa *ssa);
-static int zend_may_overflow(zend_op *opline, zend_op_array *op_array, zend_ssa *ssa);
+static int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa);
+static int zend_may_overflow(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa);
 
 #include "dynasm/dasm_x86.h"
 #include "jit/zend_jit_helpers.c"
@@ -313,7 +313,7 @@ static void jit_free(void *p, size_t size)
 #endif
 }
 
-static int zend_may_throw(zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
+static int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
 {
 	uint32_t t1 = OP1_INFO();
 	uint32_t t2 = OP2_INFO();
@@ -616,7 +616,7 @@ static int zend_may_throw(zend_op *opline, zend_op_array *op_array, zend_ssa *ss
 	}
 }
 
-static int zend_may_overflow(zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
+static int zend_may_overflow(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
 {
 	uint32_t num;
 	int res;
@@ -854,12 +854,16 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 
 		zend_jit_label(&dasm_state, b);
 		if (ssa->cfg.blocks[b].flags & ZEND_BB_TARGET) {
+			if (!zend_jit_reset_opline(&dasm_state, op_array->opcodes + ssa->cfg.blocks[b].start)) {
+				goto jit_failure;
+			}
+		} else if (ssa->cfg.blocks[b].flags & (ZEND_BB_START|ZEND_BB_RECV_ENTRY|ZEND_BB_ENTRY)) {
 			if (!zend_jit_set_opline(&dasm_state, op_array->opcodes + ssa->cfg.blocks[b].start)) {
 				goto jit_failure;
 			}
 		}
 		if (ssa->cfg.blocks[b].flags & ZEND_BB_LOOP_HEADER) {
-			if (!zend_jit_check_timeout(&dasm_state)) {
+			if (!zend_jit_check_timeout(&dasm_state, op_array->opcodes + ssa->cfg.blocks[b].start)) {
 				goto jit_failure;
 			}
 		}
@@ -1016,10 +1020,6 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 					break;
 #endif
 				case ZEND_NOP:
-					if (!zend_jit_skip_handler(&dasm_state)) {
-						goto jit_failure;
-					}
-					break;
 				case ZEND_OP_DATA:
 					break;
 				case ZEND_JMP:
