@@ -13,4 +13,4 @@ libssh2-1.7.0
 libtidy-20090406
 libxslt-1.1.29
 libxml-2.9.4
-openssl-1.0.2i
+openssl-1.0.2j
