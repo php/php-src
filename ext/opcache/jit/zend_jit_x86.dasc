@@ -3251,9 +3251,8 @@ static int zend_jit_leave_func(dasm_State **Dst, zend_op *opline, zend_op_array 
 	|	cmp aword [&EG(exception)], 0
 	|	mov IP, EX->opline
 	|	jne ->leave_throw_handler
-	|	// EX(opline)++
+	|	// opline = EX(opline) + 1
 	|	add IP, sizeof(zend_op)
-	|	mov EX->opline, IP
 	|	add r4, SPAD // stack alignment
 #ifdef CONTEXT_THREADED_JIT
 	|	ret
