@@ -72,6 +72,7 @@ PHP                                                                        NEWS
     (Adam Baratz)
   . Fixed bug #67130 (\PDOStatement::nextRowset() should succeed when all rows
     in current rowset haven't been fetched). (Peter LeBrun)
+  . Ignore potentially misleading dberr values. (Chris Kings-Lynne)
 
 - phpdbg:
   . Fixed bug #72996 (phpdbg_prompt.c undefined reference to DL_LOAD). (Nikita)
