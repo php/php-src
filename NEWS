@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2016, PHP 7.1.0RC3
 
 - Core:
+  . Fixed bug #73156 (segfault on undefined function). (Dmitry)
   . Fixed bug #73163 (PHP hangs if error handler throws while accessing undef
     const in default value). (Nikita)
 
