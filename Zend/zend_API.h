@@ -343,6 +343,7 @@ ZEND_API void zend_update_property_double(zend_class_entry *scope, zval *object,
 ZEND_API void zend_update_property_str(zend_class_entry *scope, zval *object, const char *name, size_t name_length, zend_string *value);
 ZEND_API void zend_update_property_string(zend_class_entry *scope, zval *object, const char *name, size_t name_length, const char *value);
 ZEND_API void zend_update_property_stringl(zend_class_entry *scope, zval *object, const char *name, size_t name_length, const char *value, size_t value_length);
+ZEND_API void zend_unset_property(zend_class_entry *scope, zval *object, const char *name, size_t name_length);
 
 ZEND_API int zend_update_static_property(zend_class_entry *scope, const char *name, size_t name_length, zval *value);
 ZEND_API int zend_update_static_property_null(zend_class_entry *scope, const char *name, size_t name_length);
