@@ -40,32 +40,32 @@ unset($errstr);
 ?>
 
 --EXPECTF--
-Notice: fwrite(): send of %i bytes failed with errno=%i Broken pipe in - on line %i
+Notice: fwrite(): send of %i bytes failed with errno=%i Broken pipe in %s on line %i
 
-Warning: stream_socket_sendto() expects at least %i parameters, %i given in - on line %i
-bool(false)
+Warning: stream_socket_sendto() expects at least %i parameters, %i given in %s on line %i
+bool(%s)
 
-Warning: stream_socket_sendto() expects at least %i parameters, %i given in - on line %i
-bool(false)
+Warning: stream_socket_sendto() expects at least %i parameters, %i given in %s on line %i
+bool(%s)
 
 Warning: stream_socket_sendto(): Broken pipe
- in - on line %i
+ in %s on line %i
 int(%i)
 
 Warning: stream_socket_sendto(): Broken pipe
- in - on line %i
+ in %s on line %i
 int(%i)
 
-Warning: stream_socket_sendto(): php_network_getaddresses: getaddrinfo failed: Name or service not known in - on line %i
+Warning: stream_socket_sendto(): php_network_getaddresses: getaddrinfo failed: Name or service not known in %s on line %i
 
-Warning: stream_socket_sendto(): Failed to resolve `tcp': php_network_getaddresses: getaddrinfo failed: Name or service not known in - on line %i
+Warning: stream_socket_sendto(): Failed to resolve %s: php_network_getaddresses: getaddrinfo failed: Name or service not known in %s on line %i
 
-Warning: stream_socket_sendto(): Failed to parse %s into a valid network address in - on line %i
-bool(false)
+Warning: stream_socket_sendto(): Failed to parse %s into a valid network address in %s on line %i
+bool(%s)
 
-Warning: stream_socket_sendto(): php_network_getaddresses: getaddrinfo failed: Name or service not known in - on line %i
+Warning: stream_socket_sendto(): php_network_getaddresses: getaddrinfo failed: Name or service not known in %s on line %i
 
-Warning: stream_socket_sendto(): Failed to resolve %s: php_network_getaddresses: getaddrinfo failed: Name or service not known in - on line %i
+Warning: stream_socket_sendto(): Failed to resolve %s: php_network_getaddresses: getaddrinfo failed: Name or service not known in %s on line %i
 
-Warning: stream_socket_sendto(): Failed to parse %s into a valid network address in - on line %i
-bool(false)
+Warning: stream_socket_sendto(): Failed to parse %s into a valid network address in %s on line %i
+bool(%s)
