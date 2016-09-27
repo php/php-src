@@ -3,26 +3,11 @@ string zlib_get_coding_type ( void );
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br> - @phpsp - sao paulo - br
 --SKIPIF--
-<?php
-if (phpversion() < "5.6.0") {
-    die('SKIP php version so lower.');
-}
+if(!extension_loaded('zlib')) die('skip, zlib not loader');
 ?>
 --FILE--
 <?php
-$compressionCoding = zlib_get_coding_type();
-$codingType = "get zlib type error";
-    
-if((!$compressionCoding) || ("gzip" == $compressionCoding) || ("deflate" == $compressionCoding)){
-  $codingType = "okey";
-}
-
-print($codingType);
+var_dump(zlib_get_coding_type());
 ?>
---CLEAN--
-<?php
-unset($compressionCoding);
-unset($codingType);
-?>
---EXPECT--
-okey
+--EXPECTF--
+bool(%s)
