@@ -177,6 +177,8 @@ PHP 7.1 UPGRADE NOTES
     type declarations, and some internal functions. Both nullable type
     declarations (?int) and parameters with default values of null
     (int $foo = NULL) are considered to "accept null" for this purpose.
+  . The simple syntax for variable parsing inside of string literals now
+    supports negative offsets.
 
 ========================================
 3. Changes in SAPI modules
