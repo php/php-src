@@ -1417,13 +1417,17 @@ ZEND_API void ZEND_FASTCALL zend_symtable_clean(HashTable *ht)
 		} else if (ht->nNumUsed == ht->nNumOfElements) {
 			do {
 				i_zval_ptr_dtor(&p->val ZEND_FILE_LINE_CC);
-				zend_string_release(p->key);
+				if (EXPECTED(p->key)) {
+					zend_string_release(p->key);
+				}
 			} while (++p != end);
 		} else {
 			do {
 				if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
 					i_zval_ptr_dtor(&p->val ZEND_FILE_LINE_CC);
-					zend_string_release(p->key);
+					if (EXPECTED(p->key)) {
+						zend_string_release(p->key);
+					}
 				}
 			} while (++p != end);
 		}
