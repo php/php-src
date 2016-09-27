@@ -647,26 +647,30 @@ static int zend_may_overflow(const zend_op *opline, zend_op_array *op_array, zen
 				return 1;
 			}
 			if (ssa->var_info[res].range.underflow) {
-				if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
-					zend_long op1_min, op2_min, res_min;
+				zend_long op1_min, op2_min, res_min;
 
-					op1_min = OP1_MIN_RANGE();
-					op2_min = OP2_MIN_RANGE();
-					res_min = op1_min + op2_min;
-					return (op1_min < 0 && op2_min < 0 && res_min >= 0);
+				if (!OP1_HAS_RANGE() || !OP2_HAS_RANGE()) {
+					return 1;
 				}
-				return 1;
+				op1_min = OP1_MIN_RANGE();
+				op2_min = OP2_MIN_RANGE();
+				res_min = op1_min + op2_min;
+				if (op1_min < 0 && op2_min < 0 && res_min >= 0) {
+					return 1;
+				}
 			}
 			if (ssa->var_info[res].range.overflow) {
-				if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
-					zend_long op1_max, op2_max, res_max;
+				zend_long op1_max, op2_max, res_max;
 
-					op1_max = OP1_MAX_RANGE();
-					op2_max = OP2_MAX_RANGE();
-					res_max = op1_max + op2_max;
-					return (op1_max > 0 && op2_max > 0 && res_max <= 0);
+				if (!OP1_HAS_RANGE() || !OP2_HAS_RANGE()) {
+					return 1;
 				}
-				return 1;
+				op1_max = OP1_MAX_RANGE();
+				op2_max = OP2_MAX_RANGE();
+				res_max = op1_max + op2_max;
+				if (op1_max > 0 && op2_max > 0 && res_max <= 0) {
+					return 1;
+				}
 			}
 			return 0;
 		case ZEND_SUB:
@@ -677,26 +681,30 @@ static int zend_may_overflow(const zend_op *opline, zend_op_array *op_array, zen
 				return 1;
 			}
 			if (ssa->var_info[res].range.underflow) {
-				if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
-					zend_long op1_min, op2_max, res_min;
+				zend_long op1_min, op2_max, res_min;
 
-					op1_min = OP1_MIN_RANGE();
-					op2_max = OP2_MAX_RANGE();
-					res_min = op1_min - op2_max;
-					return (op1_min < 0 && op2_max > 0 && res_min >= 0);
+				if (!OP1_HAS_RANGE() || !OP2_HAS_RANGE()) {
+					return 1;
 				}
-				return 1;
+				op1_min = OP1_MIN_RANGE();
+				op2_max = OP2_MAX_RANGE();
+				res_min = op1_min - op2_max;
+				if (op1_min < 0 && op2_max > 0 && res_min >= 0) {
+					return 1;
+				}
 			}
 			if (ssa->var_info[res].range.overflow) {
-				if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
-					zend_long op1_max, op2_min, res_max;
+				zend_long op1_max, op2_min, res_max;
 
-					op1_max = OP1_MAX_RANGE();
-					op2_min = OP2_MIN_RANGE();
-					res_max = op1_max - op2_min;
-					return (op1_max > 0 && op2_min < 0 && res_max <= 0);
+				if (!OP1_HAS_RANGE() || !OP2_HAS_RANGE()) {
+					return 1;
 				}
-				return 1;
+				op1_max = OP1_MAX_RANGE();
+				op2_min = OP2_MIN_RANGE();
+				res_max = op1_max - op2_min;
+				if (op1_max > 0 && op2_min < 0 && res_max <= 0) {
+					return 1;
+				}
 			}
 			return 0;
 		case ZEND_MUL:
@@ -717,26 +725,30 @@ static int zend_may_overflow(const zend_op *opline, zend_op_array *op_array, zen
 				return 1;
 			}
 			if (ssa->var_info[res].range.underflow) {
-				if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
-					zend_long op1_min, op2_min, res_min;
+				zend_long op1_min, op2_min, res_min;
 
-					op1_min = OP1_MIN_RANGE();
-					op2_min = OP2_MIN_RANGE();
-					res_min = op1_min + op2_min;
-					return (op1_min < 0 && op2_min < 0 && res_min >= 0);
+				if (!OP1_HAS_RANGE() || !OP2_HAS_RANGE()) {
+					return 1;
 				}
-				return 1;
+				op1_min = OP1_MIN_RANGE();
+				op2_min = OP2_MIN_RANGE();
+				res_min = op1_min + op2_min;
+				if (op1_min < 0 && op2_min < 0 && res_min >= 0) {
+					return 1;
+				}
 			}
 			if (ssa->var_info[res].range.overflow) {
-				if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
-					zend_long op1_max, op2_max, res_max;
+				zend_long op1_max, op2_max, res_max;
 
-					op1_max = OP1_MAX_RANGE();
-					op2_max = OP2_MAX_RANGE();
-					res_max = op1_max + op2_max;
-					return (op1_max > 0 && op2_max > 0 && res_max <= 0);
+				if (!OP1_HAS_RANGE() || !OP2_HAS_RANGE()) {
+					return 1;
 				}
-				return 1;
+				op1_max = OP1_MAX_RANGE();
+				op2_max = OP2_MAX_RANGE();
+				res_max = op1_max + op2_max;
+				if (op1_max > 0 && op2_max > 0 && res_max <= 0) {
+					return 1;
+				}
 			}
 			return 0;
 		case ZEND_ASSIGN_SUB:
@@ -750,26 +762,30 @@ static int zend_may_overflow(const zend_op *opline, zend_op_array *op_array, zen
 				return 1;
 			}
 			if (ssa->var_info[res].range.underflow) {
-				if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
-					zend_long op1_min, op2_max, res_min;
+				zend_long op1_min, op2_max, res_min;
 
-					op1_min = OP1_MIN_RANGE();
-					op2_max = OP2_MAX_RANGE();
-					res_min = op1_min - op2_max;
-					return (op1_min < 0 && op2_max > 0 && res_min >= 0);
+				if (!OP1_HAS_RANGE() || !OP2_HAS_RANGE()) {
+					return 1;
 				}
-				return 1;
+				op1_min = OP1_MIN_RANGE();
+				op2_max = OP2_MAX_RANGE();
+				res_min = op1_min - op2_max;
+				if (op1_min < 0 && op2_max > 0 && res_min >= 0) {
+					return 1;
+				}
 			}
 			if (ssa->var_info[res].range.overflow) {
-				if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
-					zend_long op1_max, op2_min, res_max;
+				zend_long op1_max, op2_min, res_max;
 
-					op1_max = OP1_MAX_RANGE();
-					op2_min = OP2_MIN_RANGE();
-					res_max = op1_max - op2_min;
-					return (op1_max > 0 && op2_min < 0 && res_max <= 0);
+				if (!OP1_HAS_RANGE() || !OP2_HAS_RANGE()) {
+					return 1;
 				}
-				return 1;
+				op1_max = OP1_MAX_RANGE();
+				op2_min = OP2_MIN_RANGE();
+				res_max = op1_max - op2_min;
+				if (op1_max > 0 && op2_min < 0 && res_max <= 0) {
+					return 1;
+				}
 			}
 			return 0;
 		case ZEND_ASSIGN_MUL:
