@@ -1,10 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2016, PHP 7.1.0RC4
-
-
-
-29 Sep 2016, PHP 7.1.0RC3
+?? ??? 2016, PHP 7.1.0RC3
 
 - Core:
   . Fixed bug #73156 (segfault on undefined function). (Dmitry)
