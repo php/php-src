@@ -2087,15 +2087,13 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 				ZEND_ASSERT(0);
 		}
 		|.code
-		if (op2_info & (MAY_BE_ANY - MAY_BE_LONG)) {
+		if (op2_info & MAY_BE_STRING) {
 			|	jmp >8
-		}
-		if (op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - MAY_BE_LONG)) {
-			|3:
 		}
 	}
 
 	if (op2_info & MAY_BE_STRING) {
+		|3:
 		if (op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - (MAY_BE_LONG|MAY_BE_STRING))) {
 			|	// if (EXPECTED(Z_TYPE_P(dim) == IS_STRING))
 			|	IF_NOT_Z_TYPE FP + opline->op2.var, IS_STRING, >3
@@ -2275,20 +2273,20 @@ static int zend_jit_assign_dim_math(dasm_State **Dst, const zend_op *opline, zen
 				|	IF_NOT_Z_TYPE FP + opline->op1.var, IS_ARRAY, >7
 			}
 			|	// SEPARATE_ARRAY(var_ptr);
-			|	LONG_LOAD r0, opline->op1_type, opline->op1
-			|	cmp dword [r0], 1 // if (GC_REFCOUNTED() > 1)
+			|	LONG_LOAD FCARG1a, opline->op1_type, opline->op1
+			|	cmp dword [FCARG1a], 1 // if (GC_REFCOUNTED() > 1)
 			|	ja >1
 			|.cold_code
 			|1:
 			|	IF_Z_FLAGS FP + opline->op1.var, IS_TYPE_IMMUTABLE, >2
-			|	GC_DELREF r0
+			|	GC_DELREF FCARG1a
 			|2:
 			|	LOAD_ZVAL_ADDR FCARG1a, opline->op1_type, opline->op1
 			|	ZVAL_COPY_CTOR_FUNC (op_array->filename ? ZSTR_VAL(op_array->filename) : NULL), opline->lineno
+			|	LONG_LOAD FCARG1a, opline->op1_type, opline->op1
 			|	jmp >3
 			|.code
 			|3:
-			|	LONG_LOAD FCARG1a, opline->op1_type, opline->op1
 		}
 	} else if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) {
 		if (op1_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY))) {
