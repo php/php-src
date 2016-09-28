@@ -1617,6 +1617,7 @@ PHP_FUNCTION(dom_document_savexml)
 	dom_doc_propsptr doc_props;
 	int size, format, saveempty = 0;
 	zend_long options = 0;
+	xmlSaveCtxtPtr xscp;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|O!l", &id, dom_document_class_entry, &nodep, dom_node_class_entry, &options) == FAILURE) {
 		return;
@@ -1633,7 +1634,7 @@ PHP_FUNCTION(dom_document_savexml)
 		php_error_docref(NULL, E_WARNING, "Could not fetch buffer");
 		RETURN_FALSE;
 	}
-	xmlSaveCtxtPtr xscp = xmlSaveToBuffer(buf, docp->encoding, options);
+	xscp = xmlSaveToBuffer(buf, docp->encoding, options);
 	if (nodep != NULL) {
 		/* Dump contents of Node */
 		DOM_GET_OBJ(node, nodep, xmlNodePtr, nodeobj);
