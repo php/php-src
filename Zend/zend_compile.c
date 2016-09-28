@@ -5950,7 +5950,11 @@ static zend_bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 					break;
 			}
 		} else {
-			zend_hash_next_index_insert(Z_ARRVAL_P(result), value);
+			if (!zend_hash_next_index_insert(Z_ARRVAL_P(result), value)) {
+				zval_ptr_dtor_nogc(value);
+				zval_ptr_dtor(result);
+				return 0;
+			}
 		}
 	}
 
