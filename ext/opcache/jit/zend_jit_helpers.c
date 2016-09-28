@@ -68,6 +68,103 @@ static zval* ZEND_FASTCALL zend_jit_symtable_find(HashTable *ht, zend_string *st
 	return zend_hash_find(ht, str);
 }
 
+static zval* ZEND_FASTCALL zend_jit_hash_lookup_rw(HashTable *ht, zend_string *str)
+{
+	zval *retval = zend_hash_find(ht, str);
+
+	if (retval) {
+		if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
+			retval = Z_INDIRECT_P(retval);
+			if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
+				zend_error(E_NOTICE,"Undefined index: %s", ZSTR_VAL(str));
+				ZVAL_NULL(retval);
+			}
+		}
+	} else {
+		zend_error(E_NOTICE,"Undefined index: %s", ZSTR_VAL(str));
+		retval = zend_hash_update(ht, str, &EG(uninitialized_zval));
+	}
+	return retval;
+}
+
+static zval* ZEND_FASTCALL zend_jit_hash_lookup_w(HashTable *ht, zend_string *str)
+{
+	zval *retval = zend_hash_find(ht, str);
+
+	if (retval) {
+		if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
+			retval = Z_INDIRECT_P(retval);
+			if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
+				ZVAL_NULL(retval);
+			}
+		}
+	} else {
+		retval = zend_hash_add_new(ht, str, &EG(uninitialized_zval));
+	}
+	return retval;
+}
+
+static zval* ZEND_FASTCALL zend_jit_symtable_lookup_rw(HashTable *ht, zend_string *str)
+{
+	zend_ulong idx;
+	register const char *tmp = str->val;
+
+	do {
+		if (*tmp > '9') {
+			break;
+		} else if (*tmp < '0') {
+			if (*tmp != '-') {
+				break;
+			}
+			tmp++;
+			if (*tmp > '9' || *tmp < '0') {
+				break;
+			}
+		}
+		if (_zend_handle_numeric_str_ex(str->val, str->len, &idx)) {
+			zval *retval = zend_hash_index_find(ht, idx);
+
+			if (!retval) {
+				zend_error(E_NOTICE,"Undefined index: %s", ZSTR_VAL(str));
+				retval = zend_hash_index_update(ht, idx, &EG(uninitialized_zval));
+			}
+			return retval;
+		}
+	} while (0);
+
+	return zend_jit_hash_lookup_rw(ht, str);
+}
+
+static zval* ZEND_FASTCALL zend_jit_symtable_lookup_w(HashTable *ht, zend_string *str)
+{
+	zend_ulong idx;
+	register const char *tmp = str->val;
+
+	do {
+		if (*tmp > '9') {
+			break;
+		} else if (*tmp < '0') {
+			if (*tmp != '-') {
+				break;
+			}
+			tmp++;
+			if (*tmp > '9' || *tmp < '0') {
+				break;
+			}
+		}
+		if (_zend_handle_numeric_str_ex(str->val, str->len, &idx)) {
+			zval *retval = zend_hash_index_find(ht, idx);
+
+			if (!retval) {
+				retval = zend_hash_index_add_new(ht, idx, &EG(uninitialized_zval));
+			}
+			return retval;
+		}
+	} while (0);
+
+	return zend_jit_hash_lookup_w(ht, str);
+}
+
 static void ZEND_FASTCALL zend_jit_undefined_op_helper(uint32_t var)
 {
 	const zend_execute_data *execute_data = EG(current_execute_data);
@@ -203,6 +300,127 @@ num_index:
 
 num_undef:
 	ZVAL_NULL(result);
+}
+
+static zval* ZEND_FASTCALL zend_jit_fetch_dim_rw_helper(zend_array *ht, zval *dim)
+{
+	zend_long hval;
+	zend_string *offset_key;
+	zval *retval;
+
+	if (Z_TYPE_P(dim) == IS_REFERENCE) {
+		dim = Z_REFVAL_P(dim);
+	}
+
+	switch (Z_TYPE_P(dim)) {
+		case IS_UNDEF:
+			zend_jit_undefined_op_helper(EG(current_execute_data)->opline->op2.var);
+			/* break missing intentionally */
+		case IS_NULL:
+			offset_key = ZSTR_EMPTY_ALLOC();
+			goto str_index;
+		case IS_DOUBLE:
+			hval = zend_dval_to_lval(Z_DVAL_P(dim));
+			goto num_index;
+		case IS_RESOURCE:
+			zend_error(E_NOTICE, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(dim), Z_RES_HANDLE_P(dim));
+			hval = Z_RES_HANDLE_P(dim);
+			goto num_index;
+		case IS_FALSE:
+			hval = 0;
+			goto num_index;
+		case IS_TRUE:
+			hval = 1;
+			goto num_index;
+		default:
+			zend_error(E_WARNING, "Illegal offset type");
+			return NULL;
+	}
+
+str_index:
+	retval = zend_hash_find(ht, offset_key);
+	if (retval) {
+		/* support for $GLOBALS[...] */
+		if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
+			retval = Z_INDIRECT_P(retval);
+			if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
+				zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(offset_key));
+				ZVAL_NULL(retval);
+			}
+		}
+	} else {
+		zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(offset_key));
+		retval = zend_hash_update(ht, offset_key, &EG(uninitialized_zval));
+	}
+	return retval;
+
+num_index:
+	ZEND_HASH_INDEX_FIND(ht, hval, retval, num_undef);
+	return retval;
+
+num_undef:
+	zend_error(E_NOTICE,"Undefined offset: " ZEND_LONG_FMT, hval);
+	retval = zend_hash_index_update(ht, hval, &EG(uninitialized_zval));
+	return retval;
+}
+
+static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim)
+{
+	zend_long hval;
+	zend_string *offset_key;
+	zval *retval;
+
+	if (Z_TYPE_P(dim) == IS_REFERENCE) {
+		dim = Z_REFVAL_P(dim);
+	}
+
+	switch (Z_TYPE_P(dim)) {
+		case IS_UNDEF:
+			zend_jit_undefined_op_helper(EG(current_execute_data)->opline->op2.var);
+			/* break missing intentionally */
+		case IS_NULL:
+			offset_key = ZSTR_EMPTY_ALLOC();
+			goto str_index;
+		case IS_DOUBLE:
+			hval = zend_dval_to_lval(Z_DVAL_P(dim));
+			goto num_index;
+		case IS_RESOURCE:
+			zend_error(E_NOTICE, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(dim), Z_RES_HANDLE_P(dim));
+			hval = Z_RES_HANDLE_P(dim);
+			goto num_index;
+		case IS_FALSE:
+			hval = 0;
+			goto num_index;
+		case IS_TRUE:
+			hval = 1;
+			goto num_index;
+		default:
+			zend_error(E_WARNING, "Illegal offset type");
+			return NULL;
+	}
+
+str_index:
+	retval = zend_hash_find(ht, offset_key);
+	if (retval) {
+		/* support for $GLOBALS[...] */
+		if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
+			retval = Z_INDIRECT_P(retval);
+			if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
+				ZVAL_NULL(retval);
+			}
+		}
+	} else {
+		retval = zend_hash_add_new(ht, offset_key, &EG(uninitialized_zval));
+	}
+	return retval;
+
+num_index:
+	ZEND_HASH_INDEX_FIND(ht, hval, retval, num_undef);
+	return retval;
+
+num_undef:
+	retval = zend_hash_index_add_new(ht, hval, &EG(uninitialized_zval));
+	return retval;
 }
 
 static void ZEND_FASTCALL zend_jit_fetch_dim_str_r_helper(zval *container, zval *dim, zval *result)
@@ -349,6 +567,391 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_obj_is_helper(zval *container, zval
 			}
 		} else {
 			ZVAL_NULL(result);
+		}
+	}
+}
+
+static zval* ZEND_FASTCALL zend_jit_fetch_dimension_rw_long_helper(HashTable *ht, zend_long hval)
+{
+	zend_error(E_NOTICE,"Undefined offset: " ZEND_LONG_FMT, hval);
+	return zend_hash_index_update(ht, hval, &EG(uninitialized_zval));
+}
+
+static zend_never_inline zend_long zend_check_string_offset(zval *dim, int type)
+{
+	zend_long offset;
+
+try_again:
+	if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
+		switch(Z_TYPE_P(dim)) {
+			case IS_STRING:
+				if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, -1)) {
+					break;
+				}
+				if (type != BP_VAR_UNSET) {
+					zend_error(E_WARNING, "Illegal string offset '%s'", Z_STRVAL_P(dim));
+				}
+				break;
+			case IS_UNDEF:
+				zend_jit_undefined_op_helper(EG(current_execute_data)->opline->op2.var);
+			case IS_DOUBLE:
+			case IS_NULL:
+			case IS_FALSE:
+			case IS_TRUE:
+				zend_error(E_NOTICE, "String offset cast occurred");
+				break;
+			case IS_REFERENCE:
+				dim = Z_REFVAL_P(dim);
+				goto try_again;
+			default:
+				zend_error(E_WARNING, "Illegal offset type");
+				break;
+		}
+
+		offset = _zval_get_long_func(dim);
+	} else {
+		offset = Z_LVAL_P(dim);
+	}
+
+	return offset;
+}
+
+static zend_never_inline ZEND_COLD void zend_wrong_string_offset(void)
+{
+	const char *msg = NULL;
+	const zend_op *opline = EG(current_execute_data)->opline;
+	const zend_op *end;
+	uint32_t var;
+
+	switch (opline->opcode) {
+		case ZEND_ASSIGN_ADD:
+		case ZEND_ASSIGN_SUB:
+		case ZEND_ASSIGN_MUL:
+		case ZEND_ASSIGN_DIV:
+		case ZEND_ASSIGN_MOD:
+		case ZEND_ASSIGN_SL:
+		case ZEND_ASSIGN_SR:
+		case ZEND_ASSIGN_CONCAT:
+		case ZEND_ASSIGN_BW_OR:
+		case ZEND_ASSIGN_BW_AND:
+		case ZEND_ASSIGN_BW_XOR:
+		case ZEND_ASSIGN_POW:
+			msg = "Cannot use assign-op operators with string offsets";
+			break;
+		case ZEND_FETCH_DIM_W:
+		case ZEND_FETCH_DIM_RW:
+		case ZEND_FETCH_DIM_FUNC_ARG:
+		case ZEND_FETCH_DIM_UNSET:
+			/* TODO: Encode the "reason" into opline->extended_value??? */
+			var = opline->result.var;
+			opline++;
+			end = EG(current_execute_data)->func->op_array.opcodes +
+				EG(current_execute_data)->func->op_array.last;
+			while (opline < end) {
+				if (opline->op1_type == IS_VAR && opline->op1.var == var) {
+					switch (opline->opcode) {
+						case ZEND_ASSIGN_ADD:
+						case ZEND_ASSIGN_SUB:
+						case ZEND_ASSIGN_MUL:
+						case ZEND_ASSIGN_DIV:
+						case ZEND_ASSIGN_MOD:
+						case ZEND_ASSIGN_SL:
+						case ZEND_ASSIGN_SR:
+						case ZEND_ASSIGN_CONCAT:
+						case ZEND_ASSIGN_BW_OR:
+						case ZEND_ASSIGN_BW_AND:
+						case ZEND_ASSIGN_BW_XOR:
+						case ZEND_ASSIGN_POW:
+							if (opline->extended_value == ZEND_ASSIGN_OBJ) {
+								msg = "Cannot use string offset as an object";
+							} else if (opline->extended_value == ZEND_ASSIGN_DIM) {
+								msg = "Cannot use string offset as an array";
+							} else {
+								msg = "Cannot use assign-op operators with string offsets";
+							}
+							break;
+						case ZEND_PRE_INC_OBJ:
+						case ZEND_PRE_DEC_OBJ:
+						case ZEND_POST_INC_OBJ:
+						case ZEND_POST_DEC_OBJ:
+						case ZEND_PRE_INC:
+						case ZEND_PRE_DEC:
+						case ZEND_POST_INC:
+						case ZEND_POST_DEC:
+							msg = "Cannot increment/decrement string offsets";
+							break;
+						case ZEND_FETCH_DIM_W:
+						case ZEND_FETCH_DIM_RW:
+						case ZEND_FETCH_DIM_FUNC_ARG:
+						case ZEND_FETCH_DIM_UNSET:
+						case ZEND_ASSIGN_DIM:
+							msg = "Cannot use string offset as an array";
+							break;
+						case ZEND_FETCH_OBJ_W:
+						case ZEND_FETCH_OBJ_RW:
+						case ZEND_FETCH_OBJ_FUNC_ARG:
+						case ZEND_FETCH_OBJ_UNSET:
+						case ZEND_ASSIGN_OBJ:
+							msg = "Cannot use string offset as an object";
+							break;
+						case ZEND_ASSIGN_REF:
+						case ZEND_ADD_ARRAY_ELEMENT:
+						case ZEND_INIT_ARRAY:
+						case ZEND_MAKE_REF:
+							msg = "Cannot create references to/from string offsets";
+							break;
+						case ZEND_RETURN_BY_REF:
+						case ZEND_VERIFY_RETURN_TYPE:
+							msg = "Cannot return string offsets by reference";
+							break;
+						case ZEND_UNSET_DIM:
+						case ZEND_UNSET_OBJ:
+							msg = "Cannot unset string offsets";
+							break;
+						case ZEND_YIELD:
+							msg = "Cannot yield string offsets by reference";
+							break;
+						case ZEND_SEND_REF:
+						case ZEND_SEND_VAR_EX:
+							msg = "Only variables can be passed by reference";
+							break;
+						EMPTY_SWITCH_DEFAULT_CASE();
+					}
+					break;
+				}
+				if (opline->op2_type == IS_VAR && opline->op2.var == var) {
+					ZEND_ASSERT(opline->opcode == ZEND_ASSIGN_REF);
+					msg = "Cannot create references to/from string offsets";
+					break;
+				}
+			}
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+	ZEND_ASSERT(msg != NULL);
+	zend_throw_error(NULL, msg);
+}
+
+static void ZEND_FASTCALL zend_jit_assign_dim_add_helper(zval *container, zval *dim, zval *value)
+{
+	if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		zval *object = container;
+		zval *property = dim;
+		zval *z;
+		zval rv, res;
+
+		if (Z_OBJ_HT_P(object)->read_dimension &&
+			(z = Z_OBJ_HT_P(object)->read_dimension(object, property, BP_VAR_R, &rv)) != NULL) {
+
+			if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
+				zval rv2;
+				zval *value = Z_OBJ_HT_P(z)->get(z, &rv2);
+
+				if (z == &rv) {
+					zval_ptr_dtor(&rv);
+				}
+				ZVAL_COPY_VALUE(z, value);
+			}
+			add_function(&res, Z_ISREF_P(z) ? Z_REFVAL_P(z) : z, value);
+			Z_OBJ_HT_P(object)->write_dimension(object, property, &res);
+			if (z == &rv) {
+				zval_ptr_dtor(&rv);
+			}
+//???			if (retval) {
+//???				ZVAL_COPY(retval, &res);
+//???			}
+			zval_ptr_dtor(&res);
+		} else {
+			zend_error(E_WARNING, "Attempt to assign property of non-object");
+//???			if (retval) {
+//???				ZVAL_NULL(retval);
+//???			}
+		}
+	} else {
+		if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
+			if (!dim) {
+				zend_throw_error(NULL, "[] operator not supported for strings");
+			} else {
+				zend_check_string_offset(dim, BP_VAR_RW);
+				zend_wrong_string_offset();
+			}
+//???		} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
+//???			ZEND_VM_C_GOTO(assign_dim_op_convert_to_array);
+		} else {
+//???			if (UNEXPECTED(OP1_TYPE != IS_VAR || EXPECTED(!Z_ISERROR_P(container)))) {
+				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+//???			}
+//???			if (retval) {
+//???				ZVAL_NULL(retval);
+//???			}
+		}
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_assign_dim_sub_helper(zval *container, zval *dim, zval *value)
+{
+	if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		zval *object = container;
+		zval *property = dim;
+		zval *z;
+		zval rv, res;
+
+		if (Z_OBJ_HT_P(object)->read_dimension &&
+			(z = Z_OBJ_HT_P(object)->read_dimension(object, property, BP_VAR_R, &rv)) != NULL) {
+
+			if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
+				zval rv2;
+				zval *value = Z_OBJ_HT_P(z)->get(z, &rv2);
+
+				if (z == &rv) {
+					zval_ptr_dtor(&rv);
+				}
+				ZVAL_COPY_VALUE(z, value);
+			}
+			sub_function(&res, Z_ISREF_P(z) ? Z_REFVAL_P(z) : z, value);
+			Z_OBJ_HT_P(object)->write_dimension(object, property, &res);
+			if (z == &rv) {
+				zval_ptr_dtor(&rv);
+			}
+//???			if (retval) {
+//???				ZVAL_COPY(retval, &res);
+//???			}
+			zval_ptr_dtor(&res);
+		} else {
+			zend_error(E_WARNING, "Attempt to assign property of non-object");
+//???			if (retval) {
+//???				ZVAL_NULL(retval);
+//???			}
+		}
+	} else {
+		if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
+			if (!dim) {
+				zend_throw_error(NULL, "[] operator not supported for strings");
+			} else {
+				zend_check_string_offset(dim, BP_VAR_RW);
+				zend_wrong_string_offset();
+			}
+//???		} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
+//???			ZEND_VM_C_GOTO(assign_dim_op_convert_to_array);
+		} else {
+//???			if (UNEXPECTED(OP1_TYPE != IS_VAR || EXPECTED(!Z_ISERROR_P(container)))) {
+				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+//???			}
+//???			if (retval) {
+//???				ZVAL_NULL(retval);
+//???			}
+		}
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_assign_dim_mul_helper(zval *container, zval *dim, zval *value)
+{
+	if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		zval *object = container;
+		zval *property = dim;
+		zval *z;
+		zval rv, res;
+
+		if (Z_OBJ_HT_P(object)->read_dimension &&
+			(z = Z_OBJ_HT_P(object)->read_dimension(object, property, BP_VAR_R, &rv)) != NULL) {
+
+			if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
+				zval rv2;
+				zval *value = Z_OBJ_HT_P(z)->get(z, &rv2);
+
+				if (z == &rv) {
+					zval_ptr_dtor(&rv);
+				}
+				ZVAL_COPY_VALUE(z, value);
+			}
+			mul_function(&res, Z_ISREF_P(z) ? Z_REFVAL_P(z) : z, value);
+			Z_OBJ_HT_P(object)->write_dimension(object, property, &res);
+			if (z == &rv) {
+				zval_ptr_dtor(&rv);
+			}
+//???			if (retval) {
+//???				ZVAL_COPY(retval, &res);
+//???			}
+			zval_ptr_dtor(&res);
+		} else {
+			zend_error(E_WARNING, "Attempt to assign property of non-object");
+//???			if (retval) {
+//???				ZVAL_NULL(retval);
+//???			}
+		}
+	} else {
+		if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
+			if (!dim) {
+				zend_throw_error(NULL, "[] operator not supported for strings");
+			} else {
+				zend_check_string_offset(dim, BP_VAR_RW);
+				zend_wrong_string_offset();
+			}
+//???		} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
+//???			ZEND_VM_C_GOTO(assign_dim_op_convert_to_array);
+		} else {
+//???			if (UNEXPECTED(OP1_TYPE != IS_VAR || EXPECTED(!Z_ISERROR_P(container)))) {
+				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+//???			}
+//???			if (retval) {
+//???				ZVAL_NULL(retval);
+//???			}
+		}
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_assign_dim_div_helper(zval *container, zval *dim, zval *value)
+{
+	if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		zval *object = container;
+		zval *property = dim;
+		zval *z;
+		zval rv, res;
+
+		if (Z_OBJ_HT_P(object)->read_dimension &&
+			(z = Z_OBJ_HT_P(object)->read_dimension(object, property, BP_VAR_R, &rv)) != NULL) {
+
+			if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
+				zval rv2;
+				zval *value = Z_OBJ_HT_P(z)->get(z, &rv2);
+
+				if (z == &rv) {
+					zval_ptr_dtor(&rv);
+				}
+				ZVAL_COPY_VALUE(z, value);
+			}
+			div_function(&res, Z_ISREF_P(z) ? Z_REFVAL_P(z) : z, value);
+			Z_OBJ_HT_P(object)->write_dimension(object, property, &res);
+			if (z == &rv) {
+				zval_ptr_dtor(&rv);
+			}
+//???			if (retval) {
+//???				ZVAL_COPY(retval, &res);
+//???			}
+			zval_ptr_dtor(&res);
+		} else {
+			zend_error(E_WARNING, "Attempt to assign property of non-object");
+//???			if (retval) {
+//???				ZVAL_NULL(retval);
+//???			}
+		}
+	} else {
+		if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
+			if (!dim) {
+				zend_throw_error(NULL, "[] operator not supported for strings");
+			} else {
+				zend_check_string_offset(dim, BP_VAR_RW);
+				zend_wrong_string_offset();
+			}
+//???		} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
+//???			ZEND_VM_C_GOTO(assign_dim_op_convert_to_array);
+		} else {
+//???			if (UNEXPECTED(OP1_TYPE != IS_VAR || EXPECTED(!Z_ISERROR_P(container)))) {
+				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+//???			}
+//???			if (retval) {
+//???				ZVAL_NULL(retval);
+//???			}
 		}
 	}
 }
