@@ -388,6 +388,11 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_leave_nested_func_helper);
 	REGISTER_HELPER(zend_jit_leave_top_func_helper);
 	REGISTER_HELPER(zend_jit_symtable_find);
+	REGISTER_HELPER(zend_jit_hash_lookup_rw);
+	REGISTER_HELPER(zend_jit_hash_lookup_w);
+	REGISTER_HELPER(zend_jit_symtable_lookup_rw);
+	REGISTER_HELPER(zend_jit_symtable_lookup_w);
+	REGISTER_HELPER(zend_jit_fetch_dimension_rw_long_helper);
 	REGISTER_HELPER(zend_jit_undefined_op_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_r_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_is_helper);
@@ -395,6 +400,12 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_fetch_dim_str_is_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_obj_r_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_obj_is_helper);
+	REGISTER_HELPER(zend_jit_fetch_dim_rw_helper);
+	REGISTER_HELPER(zend_jit_fetch_dim_w_helper);
+	REGISTER_HELPER(zend_jit_assign_dim_add_helper);
+	REGISTER_HELPER(zend_jit_assign_dim_sub_helper);
+	REGISTER_HELPER(zend_jit_assign_dim_mul_helper);
+	REGISTER_HELPER(zend_jit_assign_dim_div_helper);
 	REGISTER_HELPER(zend_jit_zval_copy_unref_helper);
 	REGISTER_HELPER(zend_jit_new_ref_helper);
 	REGISTER_HELPER(zend_jit_fetch_global_helper);
