@@ -2853,14 +2853,19 @@ static void zend_compile_keyed_list_assign(zend_ast_list *list, znode *expr_node
 	uint32_t i;
 
 	for (i = 0; i < list->children; ++i) {
-		zend_ast *pair_ast = list->child[i];
-		zend_ast *var_ast = pair_ast->child[0];
-		zend_ast *key_ast = pair_ast->child[1];
+		zend_ast *elem_ast = list->child[i];
+		zend_ast *var_ast, *key_ast;
 		znode fetch_result, dim_node;
 
-		if (pair_ast->attr) {
+		if (elem_ast == NULL) {
+			zend_error(E_COMPILE_ERROR, "Cannot use empty array entries in keyed array assignment");
+		}
+		if (elem_ast->attr) {
 			zend_error(E_COMPILE_ERROR, "[] and list() assignments cannot be by reference");
 		}
+
+		var_ast = elem_ast->child[0];
+		key_ast = elem_ast->child[1];
 
 		if (key_ast == NULL) {
 			zend_error(E_COMPILE_ERROR, "Cannot mix keyed and unkeyed array entries in assignments");
@@ -2870,10 +2875,6 @@ static void zend_compile_keyed_list_assign(zend_ast_list *list, znode *expr_node
 
 		if (expr_node->op_type == IS_CONST) {
 			Z_TRY_ADDREF(expr_node->u.constant);
-		}
-
-		if (var_ast == NULL) {
-			zend_error(E_COMPILE_ERROR, "Cannot use empty array entries in keyed array");
 		}
 
 		zend_verify_list_assign_target(var_ast, old_style);
