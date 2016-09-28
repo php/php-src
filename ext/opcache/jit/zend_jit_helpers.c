@@ -68,6 +68,27 @@ static zval* ZEND_FASTCALL zend_jit_symtable_find(HashTable *ht, zend_string *st
 	return zend_hash_find(ht, str);
 }
 
+static zval* ZEND_FASTCALL zend_jit_hash_index_lookup_rw(HashTable *ht, zend_long idx)
+{
+	zval *retval = zend_hash_index_find(ht, idx);
+
+	if (!retval) {
+		zend_error(E_NOTICE,"Undefined index: %s", idx);
+		retval = zend_hash_index_update(ht, idx, &EG(uninitialized_zval));
+	}
+	return retval;
+}
+
+static zval* ZEND_FASTCALL zend_jit_hash_index_lookup_w(HashTable *ht, zend_long idx)
+{
+	zval *retval = zend_hash_index_find(ht, idx);
+
+	if (!retval) {
+		retval = zend_hash_index_add_new(ht, idx, &EG(uninitialized_zval));
+	}
+	return retval;
+}
+
 static zval* ZEND_FASTCALL zend_jit_hash_lookup_rw(HashTable *ht, zend_string *str)
 {
 	zval *retval = zend_hash_find(ht, str);
@@ -730,6 +751,105 @@ static zend_never_inline ZEND_COLD void zend_wrong_string_offset(void)
 	}
 	ZEND_ASSERT(msg != NULL);
 	zend_throw_error(NULL, msg);
+}
+
+static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim, zval *value, zval *result)
+{
+	zend_string *old_str;
+	zend_uchar c;
+	size_t string_len;
+	zend_long offset;
+
+	offset = zend_check_string_offset(dim, BP_VAR_W);
+	if (offset < -(zend_long)Z_STRLEN_P(str)) {
+		/* Error on negative offset */
+		zend_error(E_WARNING, "Illegal string offset:  " ZEND_LONG_FMT, offset);
+		if (result) {
+			ZVAL_NULL(result);
+		}
+		return;
+	}
+
+	if (Z_TYPE_P(value) != IS_STRING) {
+		/* Convert to string, just the time to pick the 1st byte */
+		zend_string *tmp = zval_get_string(value);
+
+		string_len = ZSTR_LEN(tmp);
+		c = (zend_uchar)ZSTR_VAL(tmp)[0];
+		zend_string_release(tmp);
+	} else {
+		string_len = Z_STRLEN_P(value);
+		c = (zend_uchar)Z_STRVAL_P(value)[0];
+	}
+
+	if (string_len == 0) {
+		/* Error on empty input string */
+		zend_error(E_WARNING, "Cannot assign an empty string to a string offset");
+		if (result) {
+			ZVAL_NULL(result);
+		}
+		return;
+	}
+
+	if (offset < 0) { /* Handle negative offset */
+		offset += (zend_long)Z_STRLEN_P(str);
+	}
+
+	if ((size_t)offset >= Z_STRLEN_P(str)) {
+		/* Extend string if needed */
+		zend_long old_len = Z_STRLEN_P(str);
+		Z_STR_P(str) = zend_string_extend(Z_STR_P(str), offset + 1, 0);
+		Z_TYPE_INFO_P(str) = IS_STRING_EX;
+		memset(Z_STRVAL_P(str) + old_len, ' ', offset - old_len);
+		Z_STRVAL_P(str)[offset+1] = 0;
+	} else if (!Z_REFCOUNTED_P(str)) {
+		old_str = Z_STR_P(str);
+		Z_STR_P(str) = zend_string_init(Z_STRVAL_P(str), Z_STRLEN_P(str), 0);
+		Z_TYPE_INFO_P(str) = IS_STRING_EX;
+		zend_string_release(old_str);
+	} else {
+		SEPARATE_STRING(str);
+		zend_string_forget_hash_val(Z_STR_P(str));
+	}
+
+	Z_STRVAL_P(str)[offset] = c;
+
+	if (result) {
+		/* Return the new character */
+		if (CG(one_char_string)[c]) {
+			ZVAL_INTERNED_STR(result, CG(one_char_string)[c]);
+		} else {
+			ZVAL_NEW_STR(result, zend_string_init(Z_STRVAL_P(str) + offset, 1, 0));
+		}
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_assign_dim_helper(zval *object_ptr, zval *dim, zval *value)
+{
+	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_OBJECT)) {
+
+		if (UNEXPECTED(!Z_OBJ_HT_P(object_ptr)->write_dimension)) {
+			zend_throw_error(NULL, "Cannot use object as array");
+		} else {
+			Z_OBJ_HT_P(object_ptr)->write_dimension(object_ptr, dim, value);
+//???		if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
+//???			ZVAL_COPY(EX_VAR(opline->result.var), value);
+//???		}
+		}
+	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
+		if (dim) {
+			zend_throw_error(NULL, "[] operator not supported for strings");
+		} else {
+			zend_assign_to_string_offset(object_ptr, dim, value, /*???UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) :*/ NULL);
+		}
+	} else {
+//???		if (OP1_TYPE != IS_VAR || EXPECTED(!Z_ISERROR_P(object_ptr))) {
+			zend_error(E_WARNING, "Cannot use a scalar value as an array");
+//???		}
+//???		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+//???				ZVAL_NULL(EX_VAR(opline->result.var));
+//???		}
+	}
 }
 
 static void ZEND_FASTCALL zend_jit_assign_dim_add_helper(zval *container, zval *dim, zval *value)

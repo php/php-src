@@ -1000,6 +1000,13 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 						goto jit_failure;
 					}
 					break;
+#if 0
+				case ZEND_ASSIGN_DIM:
+					if (!zend_jit_assign_dim(&dasm_state, opline, op_array, ssa)) {
+						goto jit_failure;
+					}
+					break;
+#endif
 				case ZEND_ASSIGN:
 					if (!zend_jit_assign(&dasm_state, opline, op_array, ssa)) {
 						goto jit_failure;

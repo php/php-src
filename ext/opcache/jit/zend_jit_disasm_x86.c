@@ -388,6 +388,8 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_leave_nested_func_helper);
 	REGISTER_HELPER(zend_jit_leave_top_func_helper);
 	REGISTER_HELPER(zend_jit_symtable_find);
+	REGISTER_HELPER(zend_jit_hash_index_lookup_rw);
+	REGISTER_HELPER(zend_jit_hash_index_lookup_w);
 	REGISTER_HELPER(zend_jit_hash_lookup_rw);
 	REGISTER_HELPER(zend_jit_hash_lookup_w);
 	REGISTER_HELPER(zend_jit_symtable_lookup_rw);
@@ -402,6 +404,7 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_fetch_dim_obj_is_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_rw_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_w_helper);
+	REGISTER_HELPER(zend_jit_assign_dim_helper);
 	REGISTER_HELPER(zend_jit_assign_dim_add_helper);
 	REGISTER_HELPER(zend_jit_assign_dim_sub_helper);
 	REGISTER_HELPER(zend_jit_assign_dim_mul_helper);
