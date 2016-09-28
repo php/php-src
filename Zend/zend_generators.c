@@ -31,7 +31,7 @@ static zend_object_handlers zend_generator_handlers;
 
 static zend_object *zend_generator_create(zend_class_entry *class_type);
 
-void zend_generator_restore_call_stack(zend_generator *generator) /* {{{ */
+ZEND_API void zend_generator_restore_call_stack(zend_generator *generator) /* {{{ */
 {
 	zend_execute_data *call, *new_call, *prev_call = NULL;
 
@@ -57,7 +57,7 @@ void zend_generator_restore_call_stack(zend_generator *generator) /* {{{ */
 }
 /* }}} */
 
-zend_execute_data* zend_generator_freeze_call_stack(zend_execute_data *execute_data) /* {{{ */
+ZEND_API zend_execute_data* zend_generator_freeze_call_stack(zend_execute_data *execute_data) /* {{{ */
 {
 	size_t used_stack;
 	zend_execute_data *call, *new_call, *prev_call = NULL;
