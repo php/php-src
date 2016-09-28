@@ -49,6 +49,10 @@ PHP                                                                        NEWS
 - phpdbg:
   . Added generator command for inspection of currently alive generators. (Bob)
 
+- Reflection
+  . Undo backwards compatiblity break in ReflectionType->__toString() and
+    deprecate via documentation instead. (Nikita)
+
 - Session:
   . Fixed bug #73100 (session_destroy null dereference in ps_files_path_create).
     (cmb)
