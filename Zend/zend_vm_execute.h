@@ -4119,7 +4119,10 @@ num_index:
 		}
 
 	} else {
-		zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL);
+		if (zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL) == FAILURE) {
+			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			zval_ptr_dtor(&expr_ptr);
+		}
 	}
 	if ((IS_CONST == IS_VAR || IS_CONST == IS_CV) && opline->extended_value) {
 
@@ -5030,7 +5033,10 @@ num_index:
 		}
 		zval_dtor(free_op2.var);
 	} else {
-		zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL);
+		if (zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL) == FAILURE) {
+			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			zval_ptr_dtor(&expr_ptr);
+		}
 	}
 	if ((IS_CONST == IS_VAR || IS_CONST == IS_CV) && opline->extended_value) {
 
@@ -5894,7 +5900,10 @@ num_index:
 		}
 		zval_ptr_dtor_nogc(&free_op2.var);
 	} else {
-		zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL);
+		if (zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL) == FAILURE) {
+			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			zval_ptr_dtor(&expr_ptr);
+		}
 	}
 	if ((IS_CONST == IS_VAR || IS_CONST == IS_CV) && opline->extended_value) {
 
@@ -6614,7 +6623,10 @@ num_index:
 		}
 
 	} else {
-		zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL);
+		if (zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL) == FAILURE) {
+			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			zval_ptr_dtor(&expr_ptr);
+		}
 	}
 	if ((IS_CONST == IS_VAR || IS_CONST == IS_CV) && opline->extended_value) {
 
@@ -7547,7 +7559,10 @@ num_index:
 		}
 
 	} else {
-		zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL);
+		if (zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL) == FAILURE) {
+			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			zval_ptr_dtor(&expr_ptr);
+		}
 	}
 	if ((IS_CONST == IS_VAR || IS_CONST == IS_CV) && opline->extended_value) {
 
@@ -9447,7 +9462,10 @@ num_index:
 		}
 
 	} else {
-		zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL);
+		if (zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL) == FAILURE) {
+			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			zval_ptr_dtor(&expr_ptr);
+		}
 	}
 	if ((IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) && opline->extended_value) {
 
@@ -10314,7 +10332,10 @@ num_index:
 		}
 		zval_dtor(free_op2.var);
 	} else {
-		zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL);
+		if (zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL) == FAILURE) {
+			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			zval_ptr_dtor(&expr_ptr);
+		}
 	}
 	if ((IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) && opline->extended_value) {
 
@@ -11180,7 +11201,10 @@ num_index:
 		}
 		zval_ptr_dtor_nogc(&free_op2.var);
 	} else {
-		zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL);
+		if (zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL) == FAILURE) {
+			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			zval_ptr_dtor(&expr_ptr);
+		}
 	}
 	if ((IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) && opline->extended_value) {
 
@@ -11775,7 +11799,10 @@ num_index:
 		}
 
 	} else {
-		zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL);
+		if (zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL) == FAILURE) {
+			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			zval_ptr_dtor(&expr_ptr);
+		}
 	}
 	if ((IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) && opline->extended_value) {
 
@@ -12624,7 +12651,10 @@ num_index:
 		}
 
 	} else {
-		zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL);
+		if (zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL) == FAILURE) {
+			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			zval_ptr_dtor(&expr_ptr);
+		}
 	}
 	if ((IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) && opline->extended_value) {
 
@@ -16107,7 +16137,10 @@ num_index:
 		}
 
 	} else {
-		zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL);
+		if (zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL) == FAILURE) {
+			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			zval_ptr_dtor(&expr_ptr);
+		}
 	}
 	if ((IS_VAR == IS_VAR || IS_VAR == IS_CV) && opline->extended_value) {
 		if (free_op1.var) {zval_ptr_dtor_nogc(&free_op1.var);};
@@ -18387,7 +18420,10 @@ num_index:
 		}
 		zval_dtor(free_op2.var);
 	} else {
-		zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL);
+		if (zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL) == FAILURE) {
+			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			zval_ptr_dtor(&expr_ptr);
+		}
 	}
 	if ((IS_VAR == IS_VAR || IS_VAR == IS_CV) && opline->extended_value) {
 		if (free_op1.var) {zval_ptr_dtor_nogc(&free_op1.var);};
@@ -20725,7 +20761,10 @@ num_index:
 		}
 		zval_ptr_dtor_nogc(&free_op2.var);
 	} else {
-		zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL);
+		if (zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL) == FAILURE) {
+			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			zval_ptr_dtor(&expr_ptr);
+		}
 	}
 	if ((IS_VAR == IS_VAR || IS_VAR == IS_CV) && opline->extended_value) {
 		if (free_op1.var) {zval_ptr_dtor_nogc(&free_op1.var);};
@@ -22165,7 +22204,10 @@ num_index:
 		}
 
 	} else {
-		zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL);
+		if (zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL) == FAILURE) {
+			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			zval_ptr_dtor(&expr_ptr);
+		}
 	}
 	if ((IS_VAR == IS_VAR || IS_VAR == IS_CV) && opline->extended_value) {
 		if (free_op1.var) {zval_ptr_dtor_nogc(&free_op1.var);};
@@ -24220,7 +24262,10 @@ num_index:
 		}
 
 	} else {
-		zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL);
+		if (zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL) == FAILURE) {
+			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			zval_ptr_dtor(&expr_ptr);
+		}
 	}
 	if ((IS_VAR == IS_VAR || IS_VAR == IS_CV) && opline->extended_value) {
 		if (free_op1.var) {zval_ptr_dtor_nogc(&free_op1.var);};
@@ -33574,7 +33619,10 @@ num_index:
 		}
 
 	} else {
-		zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL);
+		if (zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL) == FAILURE) {
+			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			zval_ptr_dtor(&expr_ptr);
+		}
 	}
 	if ((IS_CV == IS_VAR || IS_CV == IS_CV) && opline->extended_value) {
 
@@ -35717,7 +35765,10 @@ num_index:
 		}
 		zval_dtor(free_op2.var);
 	} else {
-		zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL);
+		if (zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL) == FAILURE) {
+			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			zval_ptr_dtor(&expr_ptr);
+		}
 	}
 	if ((IS_CV == IS_VAR || IS_CV == IS_CV) && opline->extended_value) {
 
@@ -37917,7 +37968,10 @@ num_index:
 		}
 		zval_ptr_dtor_nogc(&free_op2.var);
 	} else {
-		zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL);
+		if (zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL) == FAILURE) {
+			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			zval_ptr_dtor(&expr_ptr);
+		}
 	}
 	if ((IS_CV == IS_VAR || IS_CV == IS_CV) && opline->extended_value) {
 
@@ -39225,7 +39279,10 @@ num_index:
 		}
 
 	} else {
-		zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL);
+		if (zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL) == FAILURE) {
+			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			zval_ptr_dtor(&expr_ptr);
+		}
 	}
 	if ((IS_CV == IS_VAR || IS_CV == IS_CV) && opline->extended_value) {
 
@@ -41125,7 +41182,10 @@ num_index:
 		}
 
 	} else {
-		zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL);
+		if (zend_hash_next_index_insert(Z_ARRVAL(EX_T(opline->result.var).tmp_var), &expr_ptr, sizeof(zval *), NULL) == FAILURE) {
+			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			zval_ptr_dtor(&expr_ptr);
+		}
 	}
 	if ((IS_CV == IS_VAR || IS_CV == IS_CV) && opline->extended_value) {
 
