@@ -5929,7 +5929,7 @@ void zend_do_add_array_element(znode *result, const znode *expr, const znode *of
 }
 /* }}} */
 
-void zend_do_add_static_array_element(zval *result, zval *offset, const zval *expr) /* {{{ */
+void zend_do_add_static_array_element(zval *result, zval *offset, zval *expr) /* {{{ */
 {
 	if (offset) {
 		switch (Z_TYPE_P(offset)) {
@@ -5952,7 +5952,10 @@ void zend_do_add_static_array_element(zval *result, zval *offset, const zval *ex
 				break;
 		}
 	} else {
-		zend_hash_next_index_insert(Z_ARRVAL_P(result), &expr, sizeof(zval *), NULL);
+		if (zend_hash_next_index_insert(Z_ARRVAL_P(result), &expr, sizeof(zval *), NULL) == FAILURE) {
+			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			zval_ptr_dtor(&expr);
+		}
 	}
 }
 /* }}} */

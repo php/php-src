@@ -598,7 +598,7 @@ void zend_do_shell_exec(znode *result, const znode *cmd TSRMLS_DC);
 
 void zend_do_init_array(znode *result, const znode *expr, const znode *offset, zend_bool is_ref TSRMLS_DC);
 void zend_do_add_array_element(znode *result, const znode *expr, const znode *offset, zend_bool is_ref TSRMLS_DC);
-void zend_do_add_static_array_element(zval *result, zval *offset, const zval *expr);
+void zend_do_add_static_array_element(zval *result, zval *offset, zval *expr);
 void zend_do_list_init(TSRMLS_D);
 void zend_do_list_end(znode *result, znode *expr TSRMLS_DC);
 void zend_do_add_list_element(const znode *element TSRMLS_DC);
