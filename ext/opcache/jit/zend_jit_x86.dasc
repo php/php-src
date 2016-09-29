@@ -2013,13 +2013,13 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 			|.endif
 			|	jle >2 // NOT_FOUND
 			|	// _ret = &_ht->arData[_h].val;
+			|	mov r0, FCARG2a
 			|.if X64
-			|	shl FCARG2a, 5
+			|	shl r0, 5
 			|.else
-			|	imul FCARG2a, sizeof(Bucket)
+			|	imul r0, sizeof(Bucket)
 			|.endif
-			|	mov r0, aword [FCARG1a + offsetof(zend_array, arData)]
-			|	add r0, FCARG2a
+			|	add r0, aword [FCARG1a + offsetof(zend_array, arData)]
 			|	IF_NOT_Z_TYPE r0, IS_UNDEF, >8
 			|	jmp >2 // NOT_FOUND
 		}
@@ -2499,23 +2499,13 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, zend_op_
 		}
 	} else if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) {
 		if (op1_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY))) {
-			if (op1_info & (MAY_BE_NULL|MAY_BE_FALSE)) {
-			    if (op1_info & MAY_BE_REF) {
-					|	cmp byte [FCARG1a + 8], IS_FALSE
-				} else {
-					|	cmp byte [FP + opline->op1.var + 8], IS_FALSE
-				}
-				|	jg >2
+		    if (op1_info & MAY_BE_REF) {
+				|	cmp byte [FCARG1a + 8], IS_FALSE
+			} else {
+				|	cmp byte [FP + opline->op1.var + 8], IS_FALSE
 			}
+			|	jg >7
 		}
-		if (op1_info & MAY_BE_UNDEF) {
-			|	IF_NOT_Z_TYPE FP + opline->op1.var, IS_UNDEF, >1
-			|	SAVE_VALID_OPLINE opline
-			|	mov FCARG1a, opline->op1.var
-			|	EXT_CALL zend_jit_undefined_op_helper, r0
-			|1:
-		}
-		|2:
 		|	// ZVAL_NEW_ARR(container);
 		|	// zend_hash_init(Z_ARRVAL_P(container), 8, NULL, ZVAL_PTR_DTOR, 0);
 		if (op1_info & MAY_BE_REF) {
@@ -2606,7 +2596,14 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, zend_op_
 			|	mov FCARG1a, r0
 		}
 
-		do {
+		if (opline->op2_type == IS_UNUSED) {
+			uint32_t var_info = zend_array_element_type(op1_info, 0, 0);
+
+			if (!zend_jit_simple_assign(Dst, opline, op_array, ssa, FCARG1a, 0, var_info, (opline+1)->op1_type, (opline+1)->op1, val_info,
+				opline->result_type == IS_UNUSED ? -1 : opline->result.var, 0)) {
+				return 0;
+			}
+		} else {
 			uint32_t var_info = zend_array_element_type(op1_info, 0, 0);
 
 			|	// value = zend_assign_to_variable(variable_ptr, value, OP_DATA_TYPE);
@@ -2615,11 +2612,13 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, zend_op_
 					opline->result_type == IS_UNUSED ? -1 : opline->result.var)) {
 				return 0;
 			}
-		} while (0);
+		}
 	}
 
-	if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_ARRAY)) {
-		if (op1_info & MAY_BE_ARRAY) {
+	if (((op1_info & MAY_BE_ARRAY) &&
+	     (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE))) ||
+	    (op1_info & (MAY_BE_ANY-(MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY)))) {
+		if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY)) {
 			|.cold_code
 			|7:
 		}
@@ -2696,6 +2695,7 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, zend_op_
 			|	PUSH_ZVAL_ADDR (opline+1)->op1_type, (opline+1)->op1, r0
 			|.endif
 			|	EXT_CALL zend_jit_assign_dim_helper, r0
+			|	FREE_OP (opline+1)->op1_type, (opline+1)->op1, val_info, op_array, opline->lineno
 		}
 
 		if (op1_info & MAY_BE_ARRAY) {
@@ -2706,7 +2706,6 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, zend_op_
 
 	|9:
 	|	FREE_OP opline->op2_type, opline->op2, op2_info, op_array, opline->lineno
-	|	FREE_OP (opline+1)->op1_type, (opline+1)->op1, val_info, op_array, opline->lineno
 
 	return 1;
 
@@ -2776,23 +2775,22 @@ static int zend_jit_assign_dim_math(dasm_State **Dst, const zend_op *opline, zen
 		}
 	} else if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) {
 		if (op1_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY))) {
-			if (op1_info & (MAY_BE_NULL|MAY_BE_FALSE)) {
-			    if (op1_info & MAY_BE_REF) {
-					|	cmp byte [FCARG1a + 8], IS_FALSE
-				} else {
-					|	cmp byte [FP + opline->op1.var + 8], IS_FALSE
-				}
-				|	jg >2
+		    if (op1_info & MAY_BE_REF) {
+				|	cmp byte [FCARG1a + 8], IS_FALSE
+			} else {
+				|	cmp byte [FP + opline->op1.var + 8], IS_FALSE
 			}
+			|	jg >7
 		}
 		if (op1_info & MAY_BE_UNDEF) {
-			|	IF_NOT_Z_TYPE FP + opline->op1.var, IS_UNDEF, >1
+			if (op1_info & (MAY_BE_NULL|MAY_BE_FALSE)) {
+				|	IF_NOT_Z_TYPE FP + opline->op1.var, IS_UNDEF, >1
+			}
 			|	SAVE_VALID_OPLINE opline
 			|	mov FCARG1a, opline->op1.var
 			|	EXT_CALL zend_jit_undefined_op_helper, r0
 			|1:
 		}
-		|2:
 		|	// ZVAL_NEW_ARR(container);
 		|	// zend_hash_init(Z_ARRVAL_P(container), 8, NULL, ZVAL_PTR_DTOR, 0);
 		if (op1_info & MAY_BE_REF) {
@@ -2909,8 +2907,10 @@ static int zend_jit_assign_dim_math(dasm_State **Dst, const zend_op *opline, zen
 		}
 	}
 
-	if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_ARRAY)) {
-		if (op1_info & MAY_BE_ARRAY) {
+	if (((op1_info & MAY_BE_ARRAY) &&
+	     (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE))) ||
+	    (op1_info & (MAY_BE_ANY-(MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY)))) {
+		if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY)) {
 			|.cold_code
 			|7:
 		}
