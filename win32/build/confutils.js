@@ -2498,6 +2498,9 @@ function toolset_setup_project_tools()
 		ERROR('bison is required')
 	}
 
+	/* TODO throw error, ignore for now for BC. */
+	PATH_PROG('sed');
+
 	RE2C = PATH_PROG('re2c');
 	if (RE2C) {
 		var intvers, intmin;
