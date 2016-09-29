@@ -581,7 +581,7 @@ static inline void zend_assign_to_variable_reference(zval *variable_ptr, zval *v
 
 		if (--GC_REFCOUNT(garbage) == 0) {
 			ZVAL_REF(variable_ptr, ref);
-			zval_dtor_func_for_ptr(garbage);
+			zval_dtor_func(garbage);
 			return;
 		} else {
 			GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr);
