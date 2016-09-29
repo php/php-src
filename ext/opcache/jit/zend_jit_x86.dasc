@@ -598,6 +598,42 @@ static void* dasm_labels[zend_lb_MAX];
 ||}
 |.endmacro
 
+/* the same as above, but "src" may overlap with "tmp_reg1d" */
+|.macro ZVAL_COPY_VALUE_clobber_src, dst, src, src_info, tmp_reg1, tmp_reg1d, tmp_reg2
+||if (src_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE))) {
+||	if (!(src_info & MAY_BE_DOUBLE)) {
+| 		GET_Z_PTR tmp_reg2, src
+| 		SET_Z_PTR dst, tmp_reg2
+||	} else if ((src_info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
+|.if X64 or SSE
+|		movsd xmm0, qword [src]
+|		movsd qword [dst], xmm0
+|.else
+|		fld qword [src]
+|		fstp qword [dst]
+|.endif
+||	} else {
+|.if X64
+|		GET_Z_PTR tmp_reg2, src
+|		SET_Z_PTR dst, tmp_reg2
+|.else
+|		GET_Z_W2 tmp_reg2, src
+|		SET_Z_W2 dst, tmp_reg2
+|		GET_Z_PTR tmp_reg2, src
+|		SET_Z_PTR dst, tmp_reg2
+|.endif
+||	}
+||}
+||if ((src_info & (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE)) &&
+||    has_concrete_type(src_info & MAY_BE_ANY)) {
+||	zend_uchar type = concrete_type(src_info);
+|	SET_Z_TYPE_INFO dst, type
+||} else {
+|	GET_Z_TYPE_INFO tmp_reg1d, src
+|	SET_Z_TYPE_INFO dst, tmp_reg1d
+||}
+|.endmacro
+
 |.macro ZVAL_COPY_VALUE_2, dst, dst2, src, src_info, tmp_reg1, tmp_reg1d, tmp_reg2
 ||if (src_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE))) {
 ||	if (!(src_info & MAY_BE_DOUBLE)) {
@@ -627,6 +663,51 @@ static void* dasm_labels[zend_lb_MAX];
 |		SET_Z_PTR dst2, tmp_reg2
 |		SET_Z_W2 dst, tmp_reg1
 |		SET_Z_W2 dst2, tmp_reg1
+|.endif
+||	}
+||}
+||if ((src_info & (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE)) &&
+||    has_concrete_type(src_info & MAY_BE_ANY)) {
+||	zend_uchar type = concrete_type(src_info);
+|	SET_Z_TYPE_INFO dst, type
+|	SET_Z_TYPE_INFO dst2, type
+||} else {
+|	GET_Z_TYPE_INFO tmp_reg1d, src
+|	SET_Z_TYPE_INFO dst, tmp_reg1d
+|	SET_Z_TYPE_INFO dst2, tmp_reg1d
+||}
+|.endmacro
+
+/* the same as above, but "src" may overlap with "tmp_reg1d" */
+|.macro ZVAL_COPY_VALUE_clobber_src_2, dst, dst2, src, src_info, tmp_reg1, tmp_reg1d, tmp_reg2
+||if (src_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE))) {
+||	if (!(src_info & MAY_BE_DOUBLE)) {
+| 		GET_Z_PTR tmp_reg2, src
+| 		SET_Z_PTR dst, tmp_reg2
+| 		SET_Z_PTR dst2, tmp_reg2
+||	} else if ((src_info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
+|.if X64 or SSE
+|		movsd xmm0, qword [src]
+|		movsd qword [dst], xmm0
+|		movsd qword [dst2], xmm0
+|.else
+|		fld qword [src]
+|		fstp qword [dst]
+|		fld qword [src]
+|		fstp qword [dst2]
+|.endif
+||	} else {
+|.if X64
+|		GET_Z_PTR tmp_reg2, src
+|		SET_Z_PTR dst, tmp_reg2
+|		SET_Z_PTR dst2, tmp_reg2
+|.else
+|		GET_Z_W2 tmp_reg2, src
+|		SET_Z_W2 dst, tmp_reg2
+|		SET_Z_W2 dst2, tmp_reg2
+|		GET_Z_PTR tmp_reg2, src
+|		SET_Z_PTR dst, tmp_reg2
+|		SET_Z_PTR dst2, tmp_reg2
 |.endif
 ||	}
 ||}
@@ -719,6 +800,19 @@ static void* dasm_labels[zend_lb_MAX];
 |			inc dword [tmp_reg]
 ||		} else {
 |			inc dword [Z_LVAL_P(zv)]
+||		}
+|.else
+|		inc dword [Z_LVAL_P(zv)]
+|.endif
+|.endmacro
+
+|.macro ADDREF_CONST_2, zv, tmp_reg
+|.if X64
+||		if (!IS_SIGNED_32BIT(Z_LVAL_P(zv))) {
+|			mov64 tmp_reg, ((uintptr_t)Z_LVAL_P(zv))
+|			add dword [tmp_reg], 2
+||		} else {
+|			add dword [Z_LVAL_P(zv)], 2
 ||		}
 |.else
 |		inc dword [Z_LVAL_P(zv)]
@@ -2259,6 +2353,7 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
                                   int             in_cold)
 /* Labels: 1,2,3 */
 {
+	ZEND_ASSERT(var_reg != r0);
 	if (val_type == IS_CONST) {
 		zval *zv = RT_CONSTANT(op_array, val);
 		if (var2 == (uint32_t)-1) {
@@ -2266,10 +2361,13 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
 		} else {
 			|	ZVAL_COPY_CONST_2 Ra(var_reg)+var_offset, FP + var2, var_info, zv, r0
 		}
-		||	if (Z_REFCOUNTED_P(zv)) {
-// TODO: += 2
-		|		ADDREF_CONST zv, r0
-		||	}
+		if (Z_REFCOUNTED_P(zv)) {
+			if (var2 == (uint32_t)-1) {
+				|	ADDREF_CONST zv, r0
+			} else {
+				|	ADDREF_CONST_2 zv, r0
+			}
+		}
 	} else {
 		if (val_info & MAY_BE_UNDEF) {
 			if (in_cold) {
@@ -2280,11 +2378,19 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
 				|1:
 			}
 			|	// zend_error(E_NOTICE, "Undefined variable: %s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
+			if (var_reg != FP) {
+				|	mov aword [r4], Ra(var_reg) // save
+			}
 			|	SAVE_VALID_OPLINE opline
 			|	mov FCARG1d, val.var
 			|	EXT_CALL zend_jit_undefined_op_helper, r0
-			|	SET_Z_TYPE_INFO FP + val.var, IS_NULL
-			|	// ???? val or var ^
+			if (var_reg != FP) {
+				|	mov Ra(var_reg), aword [r4] // restore
+			}
+			|	SET_Z_TYPE_INFO Ra(var_reg)+var_offset, IS_NULL
+			if (var2 != (uint32_t)-1) {
+				|	SET_Z_TYPE_INFO FP + var2, IS_NULL
+			}
 			|	jmp	>3
 			if (in_cold) {
 				|2:
@@ -2294,12 +2400,13 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
 		}
 		if (val_info & MAY_BE_REF) {
 			if (val_type == IS_CV) {
+				ZEND_ASSERT(var_reg != r2);
 				|	lea r2, [FP + val.var]
 				|	ZVAL_DEREF r2, val_info
 				if (var2 == (uint32_t)-1) {
-					|	ZVAL_COPY_VALUE Ra(var_reg)+var_offset, r2, val_info, r0, eax, r1
+					|	ZVAL_COPY_VALUE_clobber_src Ra(var_reg)+var_offset, r2, val_info, r2, edx, r0
 				} else {
-					|	ZVAL_COPY_VALUE_2 Ra(var_reg)+var_offset, FP + var2, r2, val_info, r0, eax, r1
+					|	ZVAL_COPY_VALUE_clobber_src_2 Ra(var_reg)+var_offset, FP + var2, r2, val_info, r2, edx, r0
 				}
 			} else {
 				if (in_cold) {
@@ -2310,29 +2417,29 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
 					|1:
 				}
 				|	// zend_refcounted *ref = Z_COUNTED_P(retval_ptr);
-				|	GET_Z_PTR r0, FP + val.var
+				|	GET_Z_PTR r2, FP + val.var
+				|	GC_DELREF r2
 				|	// ZVAL_COPY_VALUE(return_value, &ref->value);
 				if (var2 == (uint32_t)-1) {
-					|	ZVAL_COPY_VALUE Ra(var_reg)+var_offset, r0 + 8, val_info, r2, edx, r1
+					|	ZVAL_COPY_VALUE_clobber_src Ra(var_reg)+var_offset, r2 + 8, val_info, r2, edx, r0
 				} else {
-					|	ZVAL_COPY_VALUE_2 Ra(var_reg)+var_offset, FP + var2, r0 + 8, val_info, r2, edx, r1
+					|	ZVAL_COPY_VALUE_clobber_src_2 Ra(var_reg)+var_offset, FP + var2, r2 + 8, val_info, r2, edx, r0
 				}
-				|	GC_DELREF r0
 				|	je >2
 				|	IF_NOT_REFCOUNTED dh, >3
 				if (var2 == (uint32_t)-1) {
-					|	GC_ADDREF r1
+					|	GC_ADDREF r0
 				} else {
-					|	add dword [r1], 2
+					|	add dword [r0], 2
 				}
 				|	jmp >3
 				|2:
 				if (var2 != (uint32_t)-1) {
 					|	IF_NOT_REFCOUNTED dh, >2
-					|	GC_ADDREF r1
+					|	GC_ADDREF r0
 					|2:
 				}
-				|	EFREE_SIZE r0, sizeof(zend_reference), op_array, opline
+				|	EFREE_SIZE aword [FP + val.var], sizeof(zend_reference), op_array, opline
 				|	jmp >3
 				if (in_cold) {
 					|1:
@@ -2340,27 +2447,27 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
 					|.code
 				}
 				if (var2 == (uint32_t)-1) {
-					|	ZVAL_COPY_VALUE Ra(var_reg)+var_offset, FP + val.var, val_info, r0, eax, r1
+					|	ZVAL_COPY_VALUE Ra(var_reg)+var_offset, FP + val.var, val_info, r2, edx, r0
 				} else {
-					|	ZVAL_COPY_VALUE_2 Ra(var_reg)+var_offset, FP + var2, FP + val.var, val_info, r0, eax, r1
+					|	ZVAL_COPY_VALUE_2 Ra(var_reg)+var_offset, FP + var2, FP + val.var, val_info, r2, edx, r0
 				}
 			}
 		} else {
 			if (var2 == (uint32_t)-1) {
-				|	ZVAL_COPY_VALUE Ra(var_reg)+var_offset, FP + val.var, val_info, r0, eax, r1
+				|	ZVAL_COPY_VALUE Ra(var_reg)+var_offset, FP + val.var, val_info, r2, edx, r0
 			} else {
-				|	ZVAL_COPY_VALUE_2 Ra(var_reg)+var_offset, FP + var2, FP + val.var, val_info, r0, eax, r1
+				|	ZVAL_COPY_VALUE_2 Ra(var_reg)+var_offset, FP + var2, FP + val.var, val_info, r2, edx, r0
 			}
 		}
 		if (val_type == IS_CV) {
 			if (var2 == (uint32_t)-1) {
-				|	TRY_ADDREF val_info, ah, r1
+				|	TRY_ADDREF val_info, dh, r0
 			} else {
-				|	TRY_ADDREF_2 val_info, ah, r1
+				|	TRY_ADDREF_2 val_info, dh, r0
 			}
 		} else {
 			if (var2 != (uint32_t)-1) {
-				|	TRY_ADDREF val_info, ah, r1
+				|	TRY_ADDREF val_info, dh, r0
 			}
 		}
 		|3:
@@ -2384,6 +2491,7 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 	if (var_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
 		int in_cold = 0;
 
+		ZEND_ASSERT(var_reg != r0);
 		if (var_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
 			|	IF_Z_REFCOUNTED Ra(var_reg)+var_offset, >1
 			|.cold_code
