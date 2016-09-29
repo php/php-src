@@ -2548,7 +2548,7 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, zend_op_
 {
 	uint32_t op1_info, op2_info, val_info;
 
-	if (opline->op1_type != IS_CV || opline->result_type != IS_UNUSED) {
+	if (opline->op1_type != IS_CV) {
 		goto fallback;
 	}
 
@@ -2691,6 +2691,9 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, zend_op_
 			|	EXT_CALL zend_error, r0
 			|	add r4, 16
 			|.endif
+			if (opline->result_type != IS_UNUSED) {
+				|	SET_Z_TYPE_INFO FP + opline->result.var, IS_NULL
+			}
 			|	//ZEND_VM_C_GOTO(assign_dim_op_ret_null);
 			|	jmp >9
 			|.code
@@ -2725,7 +2728,7 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, zend_op_
 
 	if (((op1_info & MAY_BE_ARRAY) &&
 	     (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE))) ||
-	    (op1_info & (MAY_BE_ANY-(MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY)))) {
+	    (op1_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY)))) {
 		if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY)) {
 			|.cold_code
 			|7:
@@ -2797,6 +2800,19 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, zend_op_
 			} else {
 				|	LOAD_ZVAL_ADDR FCARG2a, opline->op2_type, opline->op2
 			}
+			if (opline->result_type == IS_UNUSED) {
+				|.if X64
+				|	xor CARG4, CARG4
+				|.else
+				|	push 0
+				|.endif
+			} else {
+				|.if X64
+				|	LOAD_ZVAL_ADDR CARG4, opline->result_type, opline->result
+				|.else
+				|	PUSH_ZVAL_ADDR opline->result_type, opline->result, r0
+				|.endif
+			}
 			|.if X64
 			|	LOAD_ZVAL_ADDR CARG3, (opline+1)->op1_type, (opline+1)->op1
 			|.else
@@ -2814,6 +2830,10 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, zend_op_
 
 	|9:
 	|	FREE_OP opline->op2_type, opline->op2, op2_info, op_array, opline->lineno
+
+	if (zend_may_throw(opline, op_array, ssa)) {
+		zend_jit_check_exception(Dst);
+	}
 
 	return 1;
 
@@ -3017,7 +3037,7 @@ static int zend_jit_assign_dim_math(dasm_State **Dst, const zend_op *opline, zen
 
 	if (((op1_info & MAY_BE_ARRAY) &&
 	     (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE))) ||
-	    (op1_info & (MAY_BE_ANY-(MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY)))) {
+	    (op1_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY)))) {
 		if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY)) {
 			|.cold_code
 			|7:
@@ -4027,13 +4047,21 @@ static int zend_jit_assign(dasm_State **Dst, const zend_op *opline, zend_op_arra
 	op2_info = OP2_INFO();
 
 	if (op1_info & MAY_BE_REF) {
-		// TODO: support for references ???
-		goto fallback;
+		|	lea	FCARG1a, [FP + opline->op1.var]
+		|	ZVAL_DEREF FCARG1a, op1_info
+		if (!zend_jit_assign_to_variable(Dst, opline, op_array, ssa, FCARG1a, 0, op1_info, opline->op2_type, opline->op2, op2_info,
+				opline->result_type == IS_UNUSED ? -1 : opline->result.var)) {
+			return 0;
+		}
+	} else {
+		if (!zend_jit_assign_to_variable(Dst, opline, op_array, ssa, FP, opline->op1.var, op1_info, opline->op2_type, opline->op2, op2_info,
+				opline->result_type == IS_UNUSED ? -1 : opline->result.var)) {
+			return 0;
+		}
 	}
 
-	if (!zend_jit_assign_to_variable(Dst, opline, op_array, ssa, FP, opline->op1.var, op1_info, opline->op2_type, opline->op2, op2_info,
-			opline->result_type == IS_UNUSED ? -1 : opline->result.var)) {
-		return 0;
+	if (zend_may_throw(opline, op_array, ssa)) {
+		zend_jit_check_exception(Dst);
 	}
 
 	return 1;
