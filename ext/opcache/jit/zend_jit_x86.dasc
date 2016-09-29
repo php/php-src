@@ -2419,7 +2419,7 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 		}
 		|	EXT_CALL gc_possible_root, r0
 		if (var_reg != FP) {
-			|	mov [r4], Ra(var_reg) // restore
+			|	mov Ra(var_reg), [r4] // restore
 		}
 		if (in_cold) {
 			|	jmp >5
