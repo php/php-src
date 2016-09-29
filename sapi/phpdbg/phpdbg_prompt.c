@@ -67,33 +67,34 @@ extern int phpdbg_startup_run;
 
 /* {{{ command declarations */
 const phpdbg_command_t phpdbg_prompt_commands[] = {
-	PHPDBG_COMMAND_D(exec,    "set execution context",                    'e', NULL, "s", 0),
-	PHPDBG_COMMAND_D(step,    "step through execution",                   's', NULL, 0, PHPDBG_ASYNC_SAFE),
-	PHPDBG_COMMAND_D(continue,"continue execution",                       'c', NULL, 0, PHPDBG_ASYNC_SAFE),
-	PHPDBG_COMMAND_D(run,     "attempt execution",                        'r', NULL, "|s", 0),
-	PHPDBG_COMMAND_D(ev,      "evaluate some code",                        0 , NULL, "i", PHPDBG_ASYNC_SAFE), /* restricted ASYNC_SAFE */
-	PHPDBG_COMMAND_D(until,   "continue past the current line",           'u', NULL, 0, 0),
-	PHPDBG_COMMAND_D(finish,  "continue past the end of the stack",       'F', NULL, 0, 0),
-	PHPDBG_COMMAND_D(leave,   "continue until the end of the stack",      'L', NULL, 0, 0),
-	PHPDBG_COMMAND_D(print,   "print something",                          'p', phpdbg_print_commands, "|*c", 0),
-	PHPDBG_COMMAND_D(break,   "set breakpoint",                           'b', phpdbg_break_commands, "|*c", 0),
-	PHPDBG_COMMAND_D(back,    "show trace",                               't', NULL, "|n", PHPDBG_ASYNC_SAFE),
-	PHPDBG_COMMAND_D(frame,   "switch to a frame",                        'f', NULL, "|n", PHPDBG_ASYNC_SAFE),
-	PHPDBG_COMMAND_D(list,    "lists some code",                          'l', phpdbg_list_commands,  "*", PHPDBG_ASYNC_SAFE),
-	PHPDBG_COMMAND_D(info,    "displays some informations",               'i', phpdbg_info_commands, "|s", PHPDBG_ASYNC_SAFE),
-	PHPDBG_COMMAND_D(clean,   "clean the execution environment",          'X', NULL, 0, 0),
-	PHPDBG_COMMAND_D(clear,   "clear breakpoints",                        'C', NULL, 0, 0),
-	PHPDBG_COMMAND_D(help,    "show help menu",                           'h', phpdbg_help_commands, "|s", PHPDBG_ASYNC_SAFE),
-	PHPDBG_COMMAND_D(set,     "set phpdbg configuration",                 'S', phpdbg_set_commands,   "s", PHPDBG_ASYNC_SAFE),
-	PHPDBG_COMMAND_D(register,"register a function",                      'R', NULL, "s", 0),
-	PHPDBG_COMMAND_D(source,  "execute a phpdbginit",                     '<', NULL, "s", 0),
-	PHPDBG_COMMAND_D(export,  "export breaks to a .phpdbginit script",    '>', NULL, "s", PHPDBG_ASYNC_SAFE),
-	PHPDBG_COMMAND_D(sh,   	  "shell a command",                           0 , NULL, "i", 0),
-	PHPDBG_COMMAND_D(quit,    "exit phpdbg",                              'q', NULL, 0, PHPDBG_ASYNC_SAFE),
-	PHPDBG_COMMAND_D(wait,    "wait for other process",                   'W', NULL, 0, 0),
-	PHPDBG_COMMAND_D(watch,   "set watchpoint",                           'w', phpdbg_watch_commands, "|ss", 0),
-	PHPDBG_COMMAND_D(next,    "step over next line",                      'n', NULL, 0, PHPDBG_ASYNC_SAFE),
-	PHPDBG_COMMAND_D(eol,     "set EOL",                                  'E', NULL, "|s", 0),
+	PHPDBG_COMMAND_D(exec,      "set execution context",                    'e', NULL, "s", 0),
+	PHPDBG_COMMAND_D(step,      "step through execution",                   's', NULL, 0, PHPDBG_ASYNC_SAFE),
+	PHPDBG_COMMAND_D(continue,  "continue execution",                       'c', NULL, 0, PHPDBG_ASYNC_SAFE),
+	PHPDBG_COMMAND_D(run,       "attempt execution",                        'r', NULL, "|s", 0),
+	PHPDBG_COMMAND_D(ev,        "evaluate some code",                        0 , NULL, "i", PHPDBG_ASYNC_SAFE), /* restricted ASYNC_SAFE */
+	PHPDBG_COMMAND_D(until,     "continue past the current line",           'u', NULL, 0, 0),
+	PHPDBG_COMMAND_D(finish,    "continue past the end of the stack",       'F', NULL, 0, 0),
+	PHPDBG_COMMAND_D(leave,     "continue until the end of the stack",      'L', NULL, 0, 0),
+	PHPDBG_COMMAND_D(generator, "inspect or switch to a generator",         'g', NULL, "|n", 0),
+	PHPDBG_COMMAND_D(print,     "print something",                          'p', phpdbg_print_commands, "|*c", 0),
+	PHPDBG_COMMAND_D(break,     "set breakpoint",                           'b', phpdbg_break_commands, "|*c", 0),
+	PHPDBG_COMMAND_D(back,      "show trace",                               't', NULL, "|n", PHPDBG_ASYNC_SAFE),
+	PHPDBG_COMMAND_D(frame,     "switch to a frame",                        'f', NULL, "|n", PHPDBG_ASYNC_SAFE),
+	PHPDBG_COMMAND_D(list,      "lists some code",                          'l', phpdbg_list_commands,  "*", PHPDBG_ASYNC_SAFE),
+	PHPDBG_COMMAND_D(info,      "displays some informations",               'i', phpdbg_info_commands, "|s", PHPDBG_ASYNC_SAFE),
+	PHPDBG_COMMAND_D(clean,     "clean the execution environment",          'X', NULL, 0, 0),
+	PHPDBG_COMMAND_D(clear,     "clear breakpoints",                        'C', NULL, 0, 0),
+	PHPDBG_COMMAND_D(help,      "show help menu",                           'h', phpdbg_help_commands, "|s", PHPDBG_ASYNC_SAFE),
+	PHPDBG_COMMAND_D(set,       "set phpdbg configuration",                 'S', phpdbg_set_commands,   "s", PHPDBG_ASYNC_SAFE),
+	PHPDBG_COMMAND_D(register,  "register a function",                      'R', NULL, "s", 0),
+	PHPDBG_COMMAND_D(source,    "execute a phpdbginit",                     '<', NULL, "s", 0),
+	PHPDBG_COMMAND_D(export,    "export breaks to a .phpdbginit script",    '>', NULL, "s", PHPDBG_ASYNC_SAFE),
+	PHPDBG_COMMAND_D(sh,   	    "shell a command",                           0 , NULL, "i", 0),
+	PHPDBG_COMMAND_D(quit,      "exit phpdbg",                              'q', NULL, 0, PHPDBG_ASYNC_SAFE),
+	PHPDBG_COMMAND_D(wait,      "wait for other process",                   'W', NULL, 0, 0),
+	PHPDBG_COMMAND_D(watch,     "set watchpoint",                           'w', phpdbg_watch_commands, "|ss", 0),
+	PHPDBG_COMMAND_D(next,      "step over next line",                      'n', NULL, 0, PHPDBG_ASYNC_SAFE),
+	PHPDBG_COMMAND_D(eol,       "set EOL",                                  'E', NULL, "|s", 0),
 	PHPDBG_END_COMMAND
 }; /* }}} */
 
@@ -875,6 +876,56 @@ PHPDBG_COMMAND(back) /* {{{ */
 		phpdbg_dump_backtrace(0);
 	} else {
 		phpdbg_dump_backtrace(param->num);
+	}
+
+	return SUCCESS;
+} /* }}} */
+
+PHPDBG_COMMAND(generator) /* {{{ */
+{
+	int i;
+
+	if (!PHPDBG_G(in_execution)) {
+		phpdbg_error("inactive", "type=\"noexec\"", "Not executing!");
+		return SUCCESS;
+	}
+
+	if (param) {
+		i = param->num;
+		zend_object **obj = EG(objects_store).object_buckets + i;
+		if (i < EG(objects_store).top && *obj && IS_OBJ_VALID(*obj) && (*obj)->ce == zend_ce_generator) {
+			zend_generator *gen = (zend_generator *) *obj;
+			if (gen->execute_data) {
+				if (zend_generator_get_current(gen)->flags & ZEND_GENERATOR_CURRENTLY_RUNNING) {
+					phpdbg_error("generator", "type=\"running\"", "Generator currently running");
+				} else {
+					phpdbg_open_generator_frame(gen);
+				}
+			} else {
+				phpdbg_error("generator", "type=\"closed\"", "Generator already closed");
+			}
+		} else {
+			phpdbg_error("invalidarg", "", "Invalid object handle");
+		}
+	} else {
+		for (i = 0; i < EG(objects_store).top; i++) {
+			zend_object *obj = EG(objects_store).object_buckets[i];
+			if (obj && IS_OBJ_VALID(obj) && obj->ce == zend_ce_generator) {
+				zend_generator *gen = (zend_generator *) obj, *current = zend_generator_get_current(gen);
+				if (gen->execute_data) {
+					zend_string *s = phpdbg_compile_stackframe(gen->execute_data);
+					phpdbg_out("#%d: %.*s", i, (int) ZSTR_LEN(s), ZSTR_VAL(s));
+					zend_string_release(s);
+					if (gen != current) {
+						if (gen->node.parent != current) {
+							phpdbg_out(" with direct parent #%d and", gen->node.parent->std.handle);
+						}
+						phpdbg_out(" executing #%d currently", current->std.handle);
+					}
+					phpdbg_out("\n");
+				}
+			}
+		}
 	}
 
 	return SUCCESS;

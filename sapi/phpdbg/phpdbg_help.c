@@ -329,34 +329,35 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "It supports the following commands:" CR CR
 
 "**Information**" CR
-"  **list**     list PHP source" CR
-"  **info**     displays information on the debug session" CR
-"  **print**    show opcodes" CR
-"  **frame**    select a stack frame and print a stack frame summary" CR
-"  **back**     shows the current backtrace" CR
-"  **help**     provide help on a topic" CR CR
+"  **list**      list PHP source" CR
+"  **info**      displays information on the debug session" CR
+"  **print**     show opcodes" CR
+"  **frame**     select a stack frame and print a stack frame summary" CR
+"  **generator** show active generators or select a generator frame" CR
+"  **back**      shows the current backtrace" CR
+"  **help**      provide help on a topic" CR CR
 
 "**Starting and Stopping Execution**" CR
-"  **exec**     set execution context" CR
-"  **run**      attempt execution" CR
-"  **step**     continue execution until other line is reached" CR
-"  **continue** continue execution" CR
-"  **until**    continue execution up to the given location" CR
-"  **next**     continue execution up to the given location and halt on the first line after it" CR
-"  **finish**   continue up to end of the current execution frame" CR
-"  **leave**    continue up to end of the current execution frame and halt after the calling instruction" CR
-"  **break**    set a breakpoint at the specified target" CR
-"  **watch**    set a watchpoint on $variable" CR
-"  **clear**    clear one or all breakpoints" CR
-"  **clean**    clean the execution environment" CR CR
+"  **exec**      set execution context" CR
+"  **run**       attempt execution" CR
+"  **step**      continue execution until other line is reached" CR
+"  **continue**  continue execution" CR
+"  **until**     continue execution up to the given location" CR
+"  **next**      continue execution up to the given location and halt on the first line after it" CR
+"  **finish**    continue up to end of the current execution frame" CR
+"  **leave**     continue up to end of the current execution frame and halt after the calling instruction" CR
+"  **break**     set a breakpoint at the specified target" CR
+"  **watch**     set a watchpoint on $variable" CR
+"  **clear**     clear one or all breakpoints" CR
+"  **clean**     clean the execution environment" CR CR
 
 "**Miscellaneous**" CR
-"  **set**      set the phpdbg configuration" CR
-"  **source**   execute a phpdbginit script" CR
-"  **register** register a phpdbginit function as a command alias" CR
-"  **sh**       shell a command" CR
-"  **ev**       evaluate some code" CR
-"  **quit**     exit phpdbg" CR CR
+"  **set**       set the phpdbg configuration" CR
+"  **source**    execute a phpdbginit script" CR
+"  **register**  register a phpdbginit function as a command alias" CR
+"  **sh**        shell a command" CR
+"  **ev**        evaluate some code" CR
+"  **quit**      exit phpdbg" CR CR
 
 "Type **help <command>** or (**help alias**) to get detailed help on any of the above commands, "
 "for example **help list** or **h l**.  Note that help will also match partial commands if unique "
@@ -648,8 +649,8 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 },
 
 {"frame",
-"The **frame** takes an optional integer argument. If omitted, then the current frame is displayed "
-"If specified then the current scope is set to the corresponding frame listed in a **back** trace. "
+"The **frame** takes an optional integer argument. If omitted, then the current frame is displayed. "
+"If specified, then the current scope is set to the corresponding frame listed in a **back** trace. "
 "This can be used to allowing access to the variables in a higher stack frame than that currently being executed." CR CR
 
 "**Examples**" CR CR
@@ -658,7 +659,25 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "    Go to frame 2 and print out variable **$count** in that frame" CR CR
 
 "Note that this frame scope is discarded when execution continues, with the execution frame "
-"then reset to the lowest executiong frame."
+"then reset to the lowest executing frame."
+},
+
+{"generator",
+"The **generator** command takes an optional integer argument. If omitted, then a list of the "
+"currently active generators is displayed. If specified then the current scope is set to the frame "
+"of the generator with the corresponding object handle. This can be used to inspect any generators "
+"not in the current **back** trace." CR CR
+
+"**Examples**" CR CR
+"    $P generator" CR
+"    List of generators, with the #id being the object handle, e.g.:" CR
+"    #3: my_generator(argument=\"value\") at test.php:5" CR
+"    $P g 3" CR
+"    $P ev $i" CR
+"    Go to frame of generator with object handle 3 and print out variable **$i** in that frame" CR CR
+
+"Note that this frame scope is discarded when execution continues, with the execution frame "
+"then reset to the lowest executing frame."
 },
 
 {"info",

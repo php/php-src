@@ -3022,23 +3022,13 @@ ZEND_METHOD(reflection_type, __toString)
 {
 	reflection_object *intern;
 	type_reference *param;
-	zend_string *str;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 	
-	str = reflection_type_name(param);
-	
-	if (param->arg_info->allow_null) {
-		size_t orig_len = ZSTR_LEN(str);
-		str = zend_string_extend(str, orig_len + 1, 0);
-		memmove(ZSTR_VAL(str) + 1, ZSTR_VAL(str), orig_len + 1);
-		ZSTR_VAL(str)[0] = '?';
-	}
-	
-	RETURN_STR(str);
+	RETURN_STR(reflection_type_name(param));
 }
 /* }}} */
 
@@ -6711,6 +6701,9 @@ static const zend_function_entry reflection_type_functions[] = {
 	ZEND_ME(reflection, __clone, arginfo_reflection__void, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
 	ZEND_ME(reflection_type, allowsNull, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_type, isBuiltin, arginfo_reflection__void, 0)
+	/* ReflectionType::__toString() is deprecated, but we currently do not mark it as such
+	 * due to bad interaction with the PHPUnit error handler and exceptions in __toString().
+	 * See PR2137. */
 	ZEND_ME(reflection_type, __toString, arginfo_reflection__void, 0)
 	PHP_FE_END
 };
