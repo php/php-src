@@ -837,7 +837,7 @@ static void ZEND_FASTCALL zend_jit_assign_dim_helper(zval *object_ptr, zval *dim
 //???		}
 		}
 	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
-		if (dim) {
+		if (!dim) {
 			zend_throw_error(NULL, "[] operator not supported for strings");
 		} else {
 			zend_assign_to_string_offset(object_ptr, dim, value, /*???UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) :*/ NULL);
