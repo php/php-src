@@ -32,6 +32,10 @@
 #include "ext/standard/info.h"
 #include "ext/standard/php_filestat.h"
 
+#if HAVE_JIT
+#include "jit/zend_jit.h"
+#endif
+
 #define STRING_NOT_NULL(s) (NULL == (s)?"":s)
 #define MIN_ACCEL_FILES 200
 #define MAX_ACCEL_FILES 1000000
@@ -665,6 +669,9 @@ static ZEND_FUNCTION(opcache_get_status)
 			add_assoc_zval(return_value, "scripts", &scripts);
 		}
 	}
+#if HAVE_JIT
+	zend_jit_status(return_value);
+#endif
 }
 
 static int add_blacklist_path(zend_blacklist_entry *p, zval *return_value)

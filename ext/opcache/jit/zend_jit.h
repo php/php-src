@@ -43,6 +43,7 @@ ZEND_API void zend_jit_unprotect(void);
 ZEND_API void zend_jit_protect(void);
 ZEND_API int  zend_jit_startup(size_t size);
 ZEND_API void zend_jit_shutdown(void);
+ZEND_API void zend_jit_status(zval *ret);
 
 #endif /* HAVE_JIT_H */
 

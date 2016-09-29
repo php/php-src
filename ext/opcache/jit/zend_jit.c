@@ -52,8 +52,8 @@ typedef struct _zend_jit_stub {
 	{JIT_STUB_PREFIX #name, zend_jit_ ## name ## _stub}
 
 static void *dasm_buf = NULL;
-static void *dasm_ptr = NULL;
 static void *dasm_end = NULL;
+static void **dasm_ptr = NULL;
 
 static int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa);
 static int zend_may_overflow(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa);
@@ -78,6 +78,20 @@ static int zend_may_overflow(const zend_op *opline, zend_op_array *op_array, zen
 #endif
 
 #define DASM_ALIGNMENT 16
+
+ZEND_API void zend_jit_status(zval *ret)
+{
+	zval stats;
+	array_init(&stats);
+	if (dasm_buf) {
+		add_assoc_long(&stats, "buffer_size", (char*)dasm_end - (char*)dasm_buf);
+		add_assoc_long(&stats, "buffer_free", (char*)dasm_end - (char*)*dasm_ptr);
+	} else {
+		add_assoc_long(&stats, "buffer_size", 0);
+		add_assoc_long(&stats, "buffer_free", 0);
+	}
+	add_assoc_zval(ret, "jit", &stats);
+}
 
 static zend_string *zend_jit_func_name(zend_op_array *op_array)
 {
@@ -124,21 +138,21 @@ static void *dasm_link_and_encode(dasm_State    **dasm_state,
 		return NULL;
 	}
 
-	if ((void*)((char*)dasm_ptr + size) > dasm_end) {
-		dasm_ptr = dasm_end; //prevent further try
+	if ((void*)((char*)*dasm_ptr + size) > dasm_end) {
+		*dasm_ptr = dasm_end; //prevent further try
 		// TODO: jit_buffer_size overflow ???
 		return NULL;
 	}
 
-	ret = dasm_encode(dasm_state, dasm_ptr);
+	ret = dasm_encode(dasm_state, *dasm_ptr);
 
 	if (ret != DASM_S_OK) {
 		// TODO: dasm_encode() failed ???
 		return NULL;
 	}
 
-	entry = dasm_ptr;
-	dasm_ptr = (void*)((char*)dasm_ptr + ZEND_MM_ALIGNED_SIZE_EX(size, DASM_ALIGNMENT));
+	entry = *dasm_ptr;
+	*dasm_ptr = (void*)((char*)*dasm_ptr + ZEND_MM_ALIGNED_SIZE_EX(size, DASM_ALIGNMENT));
 
 	if (op_array && cfg) {
 		int b;
@@ -1268,7 +1282,7 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script)
 	zend_ssa ssa;
 	void *checkpoint;
 
-	if (dasm_ptr == dasm_end) {
+	if (*dasm_ptr == dasm_end) {
 		return FAILURE;
 	}
 
@@ -1375,7 +1389,7 @@ ZEND_API int zend_jit_script(zend_script *script)
 	zend_func_info *info;
 	int i;
 
-	if (dasm_ptr == dasm_end) {
+	if (dasm_ptr == NULL || *dasm_ptr == dasm_end) {
 		return FAILURE;
 	}
 
@@ -1517,6 +1531,9 @@ ZEND_API int zend_jit_startup(size_t size)
 
 	dasm_buf = dasm_ptr = buf;
 	dasm_end = (void*)(((char*)dasm_buf) + size);
+	zend_jit_unprotect();
+	*dasm_ptr = dasm_buf + sizeof(*dasm_ptr);
+	zend_jit_protect();
 
 #ifdef HAVE_DISASM
 	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_ASM) {
