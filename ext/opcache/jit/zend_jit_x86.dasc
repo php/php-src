@@ -2698,7 +2698,7 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, zend_op_
 			|	FREE_OP (opline+1)->op1_type, (opline+1)->op1, val_info, op_array, opline->lineno
 		}
 
-		if (op1_info & MAY_BE_ARRAY) {
+		if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY)) {
 			|	jmp >9 // END
 			|.code
 		}
@@ -3013,7 +3013,7 @@ static int zend_jit_assign_dim_math(dasm_State **Dst, const zend_op *opline, zen
 			}
 		}
 
-		if (op1_info & MAY_BE_ARRAY) {
+		if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY)) {
 			|	jmp >9 // END
 			|.code
 		}
