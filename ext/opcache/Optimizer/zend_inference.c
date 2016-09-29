@@ -2181,7 +2181,7 @@ uint32_t zend_array_element_type(uint32_t t1, int write, int insert)
 	}
 	if (t1 & MAY_BE_ARRAY) {
 		if (insert) {
-			tmp |= MAY_BE_NULL | MAY_BE_RCN;
+			tmp |= MAY_BE_NULL;
 		} else {
 			tmp |= MAY_BE_NULL | ((t1 & MAY_BE_ARRAY_OF_ANY) >> MAY_BE_ARRAY_SHIFT);
 			if (tmp & MAY_BE_ARRAY) {
@@ -2201,7 +2201,7 @@ uint32_t zend_array_element_type(uint32_t t1, int write, int insert)
 		}
 	}
 	if (t1 & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) {
-		tmp |= MAY_BE_NULL | MAY_BE_RCN;
+		tmp |= MAY_BE_NULL;
 		if (t1 & MAY_BE_ERROR) {
 			if (write) {
 				tmp |= MAY_BE_ERROR;
@@ -2209,7 +2209,7 @@ uint32_t zend_array_element_type(uint32_t t1, int write, int insert)
 		}
 	}
 	if (t1 & (MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_RESOURCE)) {
-		tmp |= MAY_BE_NULL | MAY_BE_RCN;
+		tmp |= MAY_BE_NULL;
 		if (write) {
 			tmp |= MAY_BE_ERROR;
 		}
@@ -2222,8 +2222,8 @@ static uint32_t assign_dim_result_type(
 	uint32_t tmp = arr_type
 		& (MAY_BE_ANY|MAY_BE_REF|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF)
 		& ~(MAY_BE_NULL|MAY_BE_FALSE);
-	if (arr_type & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_STRING)) {
-		tmp |= MAY_BE_ARRAY;
+	if (arr_type & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) {
+		tmp |= MAY_BE_ARRAY|MAY_BE_RC1;
 	}
 	if (arr_type & (MAY_BE_RC1|MAY_BE_RCN)) {
 		tmp |= MAY_BE_RC1;
@@ -4106,7 +4106,7 @@ int zend_ssa_inference(zend_arena **arena, const zend_op_array *op_array, const 
 		}
 	} else {
 		for (i = 0; i < op_array->last_var; i++) {
-			ssa_var_info[i].type = MAY_BE_UNDEF | MAY_BE_RCN;
+			ssa_var_info[i].type = MAY_BE_UNDEF;
 			ssa_var_info[i].has_range = 0;
 		}
 	}

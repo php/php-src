@@ -2064,7 +2064,7 @@ fallback:
 	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
 }
 
-static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_op *opline, zend_op_array *op_array, uint32_t type, uint32_t op2_info, uint32_t found, uint32_t not_found)
+static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_op *opline, zend_op_array *op_array, uint32_t type, uint32_t op1_info, uint32_t op2_info, uint32_t found, uint32_t not_found)
 /* Labels: 1,2,3 */
 {
 	if (op2_info & MAY_BE_LONG) {
@@ -2074,54 +2074,64 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 		}
 		|	// hval = Z_LVAL_P(dim);
 		|	LONG_LOAD FCARG2a, opline->op2_type, opline->op2
-		if (opline->op2_type == IS_CONST) {
-			zend_long val = Z_LVAL_P(RT_CONSTANT(op_array, opline->op2));
-			if (val >= 0 && val < HT_MAX_SIZE) {
+		if (op1_info & MAY_BE_ARRAY_KEY_LONG) {
+			if (opline->op2_type == IS_CONST) {
+				zend_long val = Z_LVAL_P(RT_CONSTANT(op_array, opline->op2));
+				if (val >= 0 && val < HT_MAX_SIZE) {
+					|	// ZEND_HASH_INDEX_FIND(ht, hval, retval, num_undef);
+					|	test dword [FCARG1a + offsetof(zend_array, u.flags)], HASH_FLAG_PACKED
+					|	jz >1 // HASH_FIND
+					|	// if (EXPECTED((zend_ulong)(_h) < (zend_ulong)(_ht)->nNumUsed))
+					|.if X64
+					|	movsxd r0, dword [FCARG1a + offsetof(zend_array, nNumUsed)]
+					|	cmp r0, val
+					|.else
+					|	cmp dword [FCARG1a + offsetof(zend_array, nNumUsed)], val
+						|.endif
+					|	jle >2 // NOT_FOUND
+					|	// _ret = &_ht->arData[_h].val;
+					|	mov r0, aword [FCARG1a + offsetof(zend_array, arData)]
+					|	add r0, val * sizeof(Bucket)
+					|	IF_NOT_Z_TYPE r0, IS_UNDEF, >8
+				}
+			} else {
 				|	// ZEND_HASH_INDEX_FIND(ht, hval, retval, num_undef);
 				|	test dword [FCARG1a + offsetof(zend_array, u.flags)], HASH_FLAG_PACKED
 				|	jz >1 // HASH_FIND
 				|	// if (EXPECTED((zend_ulong)(_h) < (zend_ulong)(_ht)->nNumUsed))
 				|.if X64
 				|	movsxd r0, dword [FCARG1a + offsetof(zend_array, nNumUsed)]
-				|	cmp r0, val
+				|	cmp r0, FCARG2a
 				|.else
-				|	cmp dword [FCARG1a + offsetof(zend_array, nNumUsed)], val
+				|	cmp dword [FCARG1a + offsetof(zend_array, nNumUsed)], FCARG2a
 				|.endif
 				|	jle >2 // NOT_FOUND
 				|	// _ret = &_ht->arData[_h].val;
-				|	mov r0, aword [FCARG1a + offsetof(zend_array, arData)]
-				|	add r0, val * sizeof(Bucket)
+				|	mov r0, FCARG2a
+				|.if X64
+				|	shl r0, 5
+				|.else
+				|	imul r0, sizeof(Bucket)
+				|.endif
+				|	add r0, aword [FCARG1a + offsetof(zend_array, arData)]
 				|	IF_NOT_Z_TYPE r0, IS_UNDEF, >8
-				|	jmp >2 // NOT_FOUND
 			}
-		} else {
-			|	// ZEND_HASH_INDEX_FIND(ht, hval, retval, num_undef);
-			|	test dword [FCARG1a + offsetof(zend_array, u.flags)], HASH_FLAG_PACKED
-			|	jz >1 // HASH_FIND
-			|	// if (EXPECTED((zend_ulong)(_h) < (zend_ulong)(_ht)->nNumUsed))
-			|.if X64
-			|	movsxd r0, dword [FCARG1a + offsetof(zend_array, nNumUsed)]
-			|	cmp r0, FCARG2a
-			|.else
-			|	cmp dword [FCARG1a + offsetof(zend_array, nNumUsed)], FCARG2a
-			|.endif
-			|	jle >2 // NOT_FOUND
-			|	// _ret = &_ht->arData[_h].val;
-			|	mov r0, FCARG2a
-			|.if X64
-			|	shl r0, 5
-			|.else
-			|	imul r0, sizeof(Bucket)
-			|.endif
-			|	add r0, aword [FCARG1a + offsetof(zend_array, arData)]
-			|	IF_NOT_Z_TYPE r0, IS_UNDEF, >8
-			|	jmp >2 // NOT_FOUND
 		}
-		|1:
 		switch (type) {
 			case BP_VAR_R:
 			case BP_VAR_IS:
 			case BP_VAR_UNSET:
+				if (op1_info & MAY_BE_ARRAY_KEY_LONG) {
+					if (opline->op2_type == IS_CONST) {
+						zend_long val = Z_LVAL_P(RT_CONSTANT(op_array, opline->op2));
+						if (val >= 0 && val < HT_MAX_SIZE) {
+							|	jmp >2 // NOT_FOUND
+						}
+					} else {
+						|	jmp >2 // NOT_FOUND
+					}
+					|1:
+				}
 				|	EXT_CALL zend_hash_index_find, r0
 				|	test r0, r0
 				|	jz >2 // NOT_FOUND
@@ -2158,21 +2168,19 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 				|.code
 				break;
 			case BP_VAR_RW:
-				|	SAVE_VALID_OPLINE opline
-				|	EXT_CALL zend_jit_hash_index_lookup_rw, r0
-				|.cold_code
 				|2:
 				|	SAVE_VALID_OPLINE opline
 				|	// zend_error(E_NOTICE,"Undefined offset: " ZEND_LONG_FMT, hval);
 				|	//retval = zend_hash_index_update(ht, hval, &EG(uninitialized_zval));
 				|	EXT_CALL zend_jit_fetch_dimension_rw_long_helper, r0
-				|	jmp >8
-				|.code
+				if (op1_info & MAY_BE_ARRAY_KEY_LONG) {
+					|	jmp >8
+					|1:
+					|	SAVE_VALID_OPLINE opline
+					|	EXT_CALL zend_jit_hash_index_lookup_rw, r0
+				}
 				break;
 			case BP_VAR_W:
-				|	SAVE_VALID_OPLINE opline
-				|	EXT_CALL zend_jit_hash_index_lookup_w, r0
-				|.cold_code
 				|2:
 				|	//retval = zend_hash_index_add_new(ht, hval, &EG(uninitialized_zval));
 				||	if (ZEND_DEBUG) {
@@ -2191,8 +2199,12 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 				|		PUSH_ADDR &EG(uninitialized_zval), r0
 				|.endif
 				|	EXT_CALL _zend_hash_index_add_new, r0
-				|	jmp >8
-				|.code
+				if (op1_info & MAY_BE_ARRAY_KEY_LONG) {
+					|	jmp >8
+					|1:
+					|	SAVE_VALID_OPLINE opline
+					|	EXT_CALL zend_jit_hash_index_lookup_w, r0
+				}
 				break;
 			default:
 				ZEND_ASSERT(0);
@@ -2699,7 +2711,7 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, zend_op_
 			|.code
 			|	mov FCARG1a, r0
 		} else {
-			if (!zend_jit_fetch_dimension_address_inner(Dst, opline, op_array, BP_VAR_W, op2_info, 8, 8)) {
+			if (!zend_jit_fetch_dimension_address_inner(Dst, opline, op_array, BP_VAR_W, op1_info, op2_info, 8, 8)) {
 				return 0;
 			}
 
@@ -2823,7 +2835,9 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, zend_op_
 		}
 
 		if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY)) {
-			|	jmp >9 // END
+			if (op1_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY))) {
+				|	jmp >9 // END
+			}
 			|.code
 		}
 	}
@@ -3001,7 +3015,7 @@ static int zend_jit_assign_dim_math(dasm_State **Dst, const zend_op *opline, zen
 			|.code
 			|	mov FCARG1a, r0
 		} else {
-			if (!zend_jit_fetch_dimension_address_inner(Dst, opline, op_array, BP_VAR_RW, op2_info, 8, 8)) {
+			if (!zend_jit_fetch_dimension_address_inner(Dst, opline, op_array, BP_VAR_RW, op1_info, op2_info, 8, 8)) {
 				return 0;
 			}
 
@@ -3142,7 +3156,9 @@ static int zend_jit_assign_dim_math(dasm_State **Dst, const zend_op *opline, zen
 		}
 
 		if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY)) {
-			|	jmp >9 // END
+			if (op1_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY))) {
+				|	jmp >9 // END
+			}
 			|.code
 		}
 	}
@@ -4740,7 +4756,7 @@ static int zend_jit_fetch_dim_read(dasm_State **Dst, const zend_op *opline, zend
 			}
 			|	LONG_LOAD FCARG1a, opline->op1_type, opline->op1
 		}
-		if (!zend_jit_fetch_dimension_address_inner(Dst, opline, op_array, (opline->opcode == ZEND_FETCH_DIM_R) ? BP_VAR_R : BP_VAR_IS, op2_info, 8, 9)) {
+		if (!zend_jit_fetch_dimension_address_inner(Dst, opline, op_array, (opline->opcode == ZEND_FETCH_DIM_R) ? BP_VAR_R : BP_VAR_IS, op1_info, op2_info, 8, 9)) {
 			return 0;
 		}
 	}
