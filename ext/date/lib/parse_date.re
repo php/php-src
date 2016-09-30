@@ -394,8 +394,12 @@ static timelib_sll timelib_meridian(char **ptr, timelib_sll h)
 	}
 	++*ptr;
 	if (**ptr == '.') {
-		*ptr += 3;
-	} else {
+		++*ptr;
+	}
+	if (**ptr == 'M' || **ptr == 'm') {
+		++*ptr;
+	}
+	if (**ptr == '.') {
 		++*ptr;
 	}
 	return retval;
