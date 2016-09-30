@@ -35,4 +35,4 @@ var_dump(
 --EXPECT--
 bool(true)
 NULL
-bool(false)
+bool(true)
