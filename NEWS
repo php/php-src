@@ -26,6 +26,7 @@ PHP                                                                        NEWS
   . Fixed bug #73159 (imagegd2(): unrecognized formats may result in corrupted
     files). (cmb)
   . Fixed bug #73161 (imagecreatefromgd2() may leak memory). (cmb)
+  . Fixed bug #73213 (Integer overflow in imageline() with antialiasing). (cmb)
 
 - JSON:
   . Fixed bug #73113 (Segfault with throwing JsonSerializable). (julien)
