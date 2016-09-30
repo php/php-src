@@ -2525,7 +2525,7 @@ convert:
 					Z_ADDREF_P(zv);
 				}
 			} while (0);
-			zend_hash_add_new(new_ht, str_key, zv);
+			zend_hash_add(new_ht, str_key, zv);
 		} ZEND_HASH_FOREACH_END();
 
 		return new_ht;
@@ -2583,9 +2583,9 @@ convert:
 			} while (0);
 			/* Again, thank ArrayObject for `!str_key ||`. */
 			if (!str_key || ZEND_HANDLE_NUMERIC(str_key, num_key)) {
-				zend_hash_index_add_new(new_ht, num_key, zv);
+				zend_hash_index_add(new_ht, num_key, zv);
 			} else {
-				zend_hash_add_new(new_ht, str_key, zv);
+				zend_hash_add(new_ht, str_key, zv);
 			}
 		} ZEND_HASH_FOREACH_END();
 
