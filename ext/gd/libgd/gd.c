@@ -125,12 +125,10 @@ gdImagePtr gdImageCreate (int sx, int sy)
 	if (overflow2(sx, sy)) {
 		return NULL;
 	}
-
 	if (overflow2(sizeof(unsigned char *), sy)) {
 		return NULL;
 	}
-
-	if (overflow2(sizeof(unsigned char *), sx)) {
+	if (overflow2(sizeof(unsigned char), sx)) {
 		return NULL;
 	}
 
@@ -181,12 +179,10 @@ gdImagePtr gdImageCreateTrueColor (int sx, int sy)
 	if (overflow2(sx, sy)) {
 		return NULL;
 	}
-
-	if (overflow2(sizeof(unsigned char *), sy)) {
+	if (overflow2(sizeof(int *), sy)) {
 		return NULL;
 	}
-
-	if (overflow2(sizeof(int *), sx)) {
+	if (overflow2(sizeof(int), sx)) {
 		return NULL;
 	}
 
