@@ -217,7 +217,7 @@ php_stream_filter_status_t userfilter_filter(
 	}
 
 	if (bytes_consumed) {
-		*bytes_consumed = Z_LVAL_P(&args[2]);
+		*bytes_consumed = zval_get_long(&args[2]);
 	}
 
 	if (buckets_in->head) {
