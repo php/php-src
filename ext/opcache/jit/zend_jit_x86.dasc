@@ -5163,6 +5163,106 @@ static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, zend_op_a
 
 	return 1;
 }
+
+static int zend_jit_fetch_obj_r(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
+{
+	uint32_t op1_info, res_info;
+	zend_ssa_var_info *op1_ssa;
+	zval *member, *zv;
+	zend_property_info *info;
+
+	if ((opline->op1_type != IS_CV && opline->op1_type != IS_UNUSED) ||
+		opline->op2_type != IS_CONST || !ssa->ops || !ssa->var_info) {
+		goto fallback;
+	}
+
+	op1_info = OP1_INFO();
+	if ((op1_info & MAY_BE_ANY) != MAY_BE_OBJECT) {
+		goto fallback;
+	}
+
+	op1_ssa = &ssa->var_info[ssa->ops[opline - op_array->opcodes].op1_use];
+	if (!op1_ssa->ce || op1_ssa->is_instanceof || op1_ssa->ce->create_object) {
+		goto fallback;
+	}
+
+	member = RT_CONSTANT(op_array, opline->op2);
+	if (Z_TYPE_P(member) != IS_STRING || Z_STRVAL_P(member)[0] == '\0') {
+		goto fallback;
+	}
+
+	zv = zend_hash_find(&op1_ssa->ce->properties_info, Z_STR_P(member));
+	if (zv == NULL) {
+		goto fallback;
+	}
+
+	info = (zend_property_info*)Z_PTR_P(zv);
+	if (!(info->flags & ZEND_ACC_PUBLIC) || info->offset == ZEND_WRONG_PROPERTY_OFFSET) {
+		goto fallback;
+	}
+
+	if (opline->op1_type == IS_CV) {
+	|	mov r0, [FP + opline->op1.var]
+	|	ZVAL_DEREF r0, op1_info
+		if (op1_info & MAY_BE_REF) {
+		|	IF_NOT_Z_TYPE, r0, IS_REFERENCE, >1
+		|	GET_Z_PTR r0, r0
+		|	add r0, offsetof(zend_reference, val)
+		|1:
+		}
+	} else {
+	|	mov r0, EX->This
+	}
+	if (op1_info & MAY_BE_UNDEF) {
+	|	IF_Z_TYPE r0, IS_UNDEF, >8
+	}
+	|   mov r0, [r0 + info->offset]
+	|	// ZVAL_COPY_UNREF
+	if (res_info & MAY_BE_REF) {
+	|	// ZVAL_COPY_UNREF
+	|	IF_NOT_Z_REFCOUNTED r0, >2
+	|	GET_Z_PTR r1, r0
+	|	IF_NOT_Z_TYPE r0, IS_REFERENCE, >1
+	|	cmp dword [r1], 1
+	|	jne >1
+	|	lea FCARG1a, [FP + opline->result.var]
+	|	mov FCARG2a, r0
+	|	EXT_CALL zend_jit_zval_copy_unref_helper, r0
+	|	jmp >9
+	|1:
+	|	GC_ADDREF r1
+	|2:
+	|	ZVAL_COPY_VALUE FP + opline->result.var, r0, MAY_BE_ANY, r1, ecx, r2
+	} else  {
+	|	// ZVAL_COPY
+	|	ZVAL_COPY_VALUE FP + opline->result.var, r0, MAY_BE_ANY, r1, ecx, r2
+	|	TRY_ADDREF res_info, ch, r2
+	}
+	|9: // END
+
+	|.cold_code
+	|8:
+	|.if X64
+	|	mov CARG1, 0
+	|	LOAD_ADDR CARG2, "Using $this when not in object context"
+	|	EXT_CALL zend_throw_error, r0
+	|.else
+	|	sub r4, 8
+	|	push "Using $this when not in object context"
+	|	push 0
+	|	EXT_CALL zend_throw_error, r0
+	|	add r4, 16
+	|.endif
+	|	jmp <9
+	|.code
+
+	return 1;
+
+fallback:
+	/* fallback to subroutine threading */
+	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
+}
+
 #endif
 
 /*
