@@ -1495,7 +1495,6 @@ ZEND_API int zend_jit_startup(size_t size)
 {
 	size_t page_size = jit_page_size();
 	int shared = 1;
-	void *buf;
 	int ret;
 
 #ifdef HAVE_GDB
@@ -1521,16 +1520,15 @@ ZEND_API int zend_jit_startup(size_t size)
 
 	size = ZEND_MM_ALIGNED_SIZE_EX(size, page_size);
 
-	buf = jit_alloc(size, shared);
+	dasm_buf = jit_alloc(size, shared);
 
-	if (!buf) {
+	if (!dasm_buf) {
 		return FAILURE;
 	}
 
-	dasm_buf = dasm_ptr = buf;
-	dasm_end = (void*)(((char*)dasm_buf) + size);
+	dasm_ptr = dasm_end = (void*)(((char*)dasm_buf) + size - sizeof(*dasm_ptr));
 	zend_jit_unprotect();
-	*dasm_ptr = dasm_buf + sizeof(*dasm_ptr);
+	*dasm_ptr = dasm_buf;
 	zend_jit_protect();
 
 #ifdef HAVE_DISASM
