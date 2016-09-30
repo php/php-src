@@ -372,7 +372,7 @@ PHPAPI char *php_escape_shell_cmd(char *str)
 	}
 	cmd[y] = '\0';
 
-	if (y - 1 > cmd_max_len) {
+	if (y > cmd_max_len + 1) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Escaped command exceeds the allowed length of %d bytes", cmd_max_len);
 		efree(cmd);
 		return NULL;
@@ -459,7 +459,7 @@ PHPAPI char *php_escape_shell_arg(char *str)
 #endif
 	cmd[y] = '\0';
 
-	if (y - 1 > cmd_max_len) {
+	if (y > cmd_max_len + 1) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Escaped argument exceeds the allowed length of %d bytes", cmd_max_len);
 		efree(cmd);
 		return NULL;

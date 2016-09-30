@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016, PHP 5.6.28
 
+- Standard:
+  . Fixed bug #73203 (passing additional_parameters causes mail to fail). (cmb)
+
 13 Oct 2016, PHP 5.6.27
 
 - Core:
