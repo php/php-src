@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #73181 (parse_str() without a second argument leads to crash).
     (Nikita)
 
+- GD:
+  . Fixed bug #73213 (Integer overflow in imageline() with antialiasing). (cmb)
+
 - Standard:
   . Fixed bug #73203 (passing additional_parameters causes mail to fail). (cmb)
 
