@@ -1046,6 +1046,7 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 					}
 					break;
 				case ZEND_DO_UCALL:
+				case ZEND_DO_ICALL:
 					if (!zend_jit_do_fcall(&dasm_state, opline, op_array, ssa, call_level)) {
 						goto jit_failure;
 					}

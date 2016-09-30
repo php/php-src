@@ -1076,6 +1076,11 @@ static void ZEND_FASTCALL zend_jit_assign_dim_div_helper(zval *container, zval *
 	}
 }
 
+static void ZEND_FASTCALL zend_jit_free_call_frame(zend_execute_data *call)
+{
+	zend_vm_stack_free_call_frame(call);
+}
+
 static void ZEND_FASTCALL zend_jit_zval_copy_unref_helper(zval *dst, zval *src)
 {
 	ZVAL_UNREF(src);

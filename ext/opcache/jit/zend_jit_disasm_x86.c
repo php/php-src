@@ -409,6 +409,7 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_assign_dim_sub_helper);
 	REGISTER_HELPER(zend_jit_assign_dim_mul_helper);
 	REGISTER_HELPER(zend_jit_assign_dim_div_helper);
+	REGISTER_HELPER(zend_jit_free_call_frame);
 	REGISTER_HELPER(zend_jit_zval_copy_unref_helper);
 	REGISTER_HELPER(zend_jit_new_ref_helper);
 	REGISTER_HELPER(zend_jit_fetch_global_helper);
