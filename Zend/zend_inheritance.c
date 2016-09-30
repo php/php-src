@@ -1227,6 +1227,7 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 	function_add_ref(fn);
 	new_fn = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 	memcpy(new_fn, fn, sizeof(zend_op_array));
+	new_fn->common.fn_flags |= ZEND_ACC_ARENA_ALLOCATED;
 	fn = zend_hash_update_ptr(&ce->function_table, key, new_fn);
 	zend_add_magic_methods(ce, key, fn);
 }

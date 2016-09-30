@@ -9,7 +9,7 @@ require dirname(__FILE__) . '/config.inc';
 <?php
 require dirname(__FILE__) . '/config.inc';
 
-$stmt = $db->prepare("select ic1.* from information_schema.columns ic1");
+$stmt = $db->prepare("select top 1 ic1.* from information_schema.columns ic1");
 $stmt->execute();
 var_dump($stmt->getColumnMeta(0));
 $stmt = null;

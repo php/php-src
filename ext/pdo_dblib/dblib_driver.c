@@ -48,9 +48,9 @@ static int dblib_fetch_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info)
 		einfo = &S->err;
 	}
 
-	if (einfo->dberr == SYBESMSG && einfo->lastmsg) {
+	if (einfo->lastmsg) {
 		msg = einfo->lastmsg;
-	} else if (einfo->dberr == SYBESMSG && DBLIB_G(err).lastmsg) {
+	} else if (DBLIB_G(err).lastmsg) {
 		msg = DBLIB_G(err).lastmsg;
 		DBLIB_G(err).lastmsg = NULL;
 	} else {
@@ -83,6 +83,7 @@ static int dblib_handle_closer(pdo_dbh_t *dbh)
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 
 	if (H) {
+		pdo_dblib_err_dtor(&H->err);
 		if (H->link) {
 			dbclose(H->link);
 			H->link = NULL;
@@ -93,7 +94,6 @@ static int dblib_handle_closer(pdo_dbh_t *dbh)
 		}
 		pefree(H, dbh->is_persistent);
 		dbh->driver_data = NULL;
-		pdo_dblib_err_dtor(&H->err);
 	}
 	return 0;
 }

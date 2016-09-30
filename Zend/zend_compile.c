@@ -2804,35 +2804,56 @@ static void zend_verify_list_assign_target(zend_ast *var_ast, zend_bool old_styl
 }
 /* }}} */
 
-static void zend_compile_unkeyed_list_assign(zend_ast_list *list, znode *expr_node, zend_bool old_style) /* {{{ */
+static void zend_compile_list_assign(
+		znode *result, zend_ast *ast, znode *expr_node, zend_bool old_style) /* {{{ */
 {
+	zend_ast_list *list = zend_ast_get_list(ast);
 	uint32_t i;
 	zend_bool has_elems = 0;
+	zend_bool is_keyed =
+		list->children > 0 && list->child[0] != NULL && list->child[0]->child[1] != NULL;
 
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *elem_ast = list->child[i];
-		zend_ast *var_ast;
+		zend_ast *var_ast, *key_ast;
 		znode fetch_result, dim_node;
 
 		if (elem_ast == NULL) {
-			continue;
+			if (is_keyed) {
+				zend_error(E_COMPILE_ERROR,
+					"Cannot use empty array entries in keyed array assignment");
+			} else {
+				continue;
+			}
 		}
+
 		if (elem_ast->attr) {
 			zend_error(E_COMPILE_ERROR, "[] and list() assignments cannot be by reference");
 		}
 
 		var_ast = elem_ast->child[0];
+		key_ast = elem_ast->child[1];
 		has_elems = 1;
 
-		dim_node.op_type = IS_CONST;
-		ZVAL_LONG(&dim_node.u.constant, i);
+		if (is_keyed) {
+			if (key_ast == NULL) {
+				zend_error(E_COMPILE_ERROR,
+					"Cannot mix keyed and unkeyed array entries in assignments");
+			}
+
+			zend_compile_expr(&dim_node, key_ast);
+		} else {
+			if (key_ast != NULL) {
+				zend_error(E_COMPILE_ERROR,
+					"Cannot mix keyed and unkeyed array entries in assignments");
+			}
+
+			dim_node.op_type = IS_CONST;
+			ZVAL_LONG(&dim_node.u.constant, i);
+		}
 
 		if (expr_node->op_type == IS_CONST) {
 			Z_TRY_ADDREF(expr_node->u.constant);
-		}
-
-		if (elem_ast->child[1] != NULL) {
-			zend_error(E_COMPILE_ERROR, "Cannot mix keyed and unkeyed array entries in assignments");
 		}
 
 		zend_verify_list_assign_target(var_ast, old_style);
@@ -2843,55 +2864,6 @@ static void zend_compile_unkeyed_list_assign(zend_ast_list *list, znode *expr_no
 
 	if (has_elems == 0) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use empty list");
-	}
-
-}
-/* }}} */
-
-static void zend_compile_keyed_list_assign(zend_ast_list *list, znode *expr_node, zend_bool old_style) /* {{{ */
-{
-	uint32_t i;
-
-	for (i = 0; i < list->children; ++i) {
-		zend_ast *pair_ast = list->child[i];
-		zend_ast *var_ast = pair_ast->child[0];
-		zend_ast *key_ast = pair_ast->child[1];
-		znode fetch_result, dim_node;
-
-		if (pair_ast->attr) {
-			zend_error(E_COMPILE_ERROR, "[] and list() assignments cannot be by reference");
-		}
-
-		if (key_ast == NULL) {
-			zend_error(E_COMPILE_ERROR, "Cannot mix keyed and unkeyed array entries in assignments");
-		}
-
-		zend_compile_expr(&dim_node, key_ast);
-
-		if (expr_node->op_type == IS_CONST) {
-			Z_TRY_ADDREF(expr_node->u.constant);
-		}
-
-		if (var_ast == NULL) {
-			zend_error(E_COMPILE_ERROR, "Cannot use empty array entries in keyed array");
-		}
-
-		zend_verify_list_assign_target(var_ast, old_style);
-
-		zend_emit_op(&fetch_result, ZEND_FETCH_LIST, expr_node, &dim_node);
-		zend_emit_assign_znode(var_ast, &fetch_result);
-	}
-}
-/* }}} */
-
-static void zend_compile_list_assign(znode *result, zend_ast *ast, znode *expr_node, zend_bool old_style) /* {{{ */
-{
-	zend_ast_list *list = zend_ast_get_list(ast);
-
-	if (list->children > 0 && list->child[0] != NULL && list->child[0]->child[1] != NULL /* has key */) {
-		zend_compile_keyed_list_assign(list, expr_node, old_style);
-	} else {
-		zend_compile_unkeyed_list_assign(list, expr_node, old_style);
 	}
 
 	*result = *expr_node;
@@ -3592,12 +3564,8 @@ int zend_compile_func_cuf(znode *result, zend_ast_list *args, zend_string *lcnam
 		zend_op *opline;
 
 		zend_compile_expr(&arg_node, arg_ast);
-		if (arg_node.op_type & (IS_VAR|IS_CV)) {
-			opline = zend_emit_op(NULL, ZEND_SEND_USER, &arg_node, NULL);
-		} else {
-			opline = zend_emit_op(NULL, ZEND_SEND_VAL, &arg_node, NULL);
-		}
 
+		opline = zend_emit_op(NULL, ZEND_SEND_USER, &arg_node, NULL);
 		opline->op2.num = i;
 		opline->result.var = (uint32_t)(zend_intptr_t)ZEND_CALL_ARG(NULL, i);
 	}
@@ -6660,7 +6628,11 @@ static zend_bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 					break;
 			}
 		} else {
-			zend_hash_next_index_insert(Z_ARRVAL_P(result), value);
+			if (!zend_hash_next_index_insert(Z_ARRVAL_P(result), value)) {
+				zval_ptr_dtor_nogc(value);
+				zval_ptr_dtor(result);
+				return 0;
+			}
 		}
 	}
 

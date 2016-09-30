@@ -34,6 +34,7 @@
 #if ZEND_DEBUG
 static zend_class_entry *zend_test_interface;
 static zend_class_entry *zend_test_class;
+static zend_class_entry *zend_test_trait;
 static zend_object_handlers zend_test_class_handlers;
 #endif
 
@@ -306,6 +307,16 @@ static int zend_test_class_call_method(zend_string *method, zend_object *object,
 	return 0;
 }
 /* }}} */
+
+static ZEND_METHOD(_ZendTestTrait, testMethod) /* {{{ */ {
+	RETURN_TRUE;
+}
+/* }}} */
+
+static zend_function_entry zend_test_trait_methods[] = {
+    ZEND_ME(_ZendTestTrait, testMethod, arginfo_zend__void, ZEND_ACC_PUBLIC)
+    ZEND_FE_END
+};
 #endif
 
 static const zend_function_entry builtin_functions[] = { /* {{{ */
@@ -403,6 +414,11 @@ ZEND_MINIT_FUNCTION(core) { /* {{{ */
 	memcpy(&zend_test_class_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	zend_test_class_handlers.get_method = zend_test_class_method_get;
 	zend_test_class_handlers.call_method = zend_test_class_call_method;
+
+	INIT_CLASS_ENTRY(class_entry, "_ZendTestTrait", zend_test_trait_methods);
+	zend_test_trait = zend_register_internal_class(&class_entry);
+	zend_test_trait->ce_flags |= ZEND_ACC_TRAIT;
+	zend_declare_property_null(zend_test_trait, "testProp", sizeof("testProp")-1, ZEND_ACC_PUBLIC);
 #endif
 
 	return SUCCESS;
@@ -2277,9 +2293,33 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 		zend_hash_real_init(Z_ARRVAL_P(arg_array), 1);
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(arg_array)) {
 			if (call->func->type == ZEND_USER_FUNCTION) {
-				uint32_t first_extra_arg = call->func->op_array.num_args;
+				uint32_t first_extra_arg = MIN(num_args, call->func->op_array.num_args);
 
-				if (ZEND_CALL_NUM_ARGS(call) > first_extra_arg) {
+				if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_SYMBOL_TABLE)) {
+					/* In case of attached symbol_table, values on stack may be invalid
+					 * and we have to access them through symbol_table
+					 * See: https://bugs.php.net/bug.php?id=73156
+					 */
+					zend_string *arg_name;
+					zval *arg;
+
+					while (i < first_extra_arg) {
+						arg_name = call->func->op_array.vars[i];
+						arg = zend_hash_find_ind(call->symbol_table, arg_name);
+						if (arg) {
+							if (Z_OPT_REFCOUNTED_P(arg)) {
+								Z_ADDREF_P(arg);
+							}
+							n++;
+							ZEND_HASH_FILL_ADD(arg);
+						} else {
+							zval tmp;
+							ZVAL_UNDEF(&tmp);
+							ZEND_HASH_FILL_ADD(&tmp);
+						}
+						i++;
+					}
+				} else {
 					while (i < first_extra_arg) {
 						if (EXPECTED(Z_TYPE_INFO_P(p) != IS_UNDEF)) {
 							if (Z_OPT_REFCOUNTED_P(p)) {
@@ -2291,8 +2331,8 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 						p++;
 						i++;
 					}
-					p = ZEND_CALL_VAR_NUM(call, call->func->op_array.last_var + call->func->op_array.T);
 				}
+				p = ZEND_CALL_VAR_NUM(call, call->func->op_array.last_var + call->func->op_array.T);
 			}
 
 			while (i < num_args) {

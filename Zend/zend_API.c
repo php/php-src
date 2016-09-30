@@ -1855,7 +1855,7 @@ static int zend_startup_module_zval(zval *zv) /* {{{ */
 {
 	zend_module_entry *module = Z_PTR_P(zv);
 
-	return zend_startup_module_ex(module);
+	return (zend_startup_module_ex(module) == SUCCESS) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_REMOVE;
 }
 /* }}} */
 
@@ -2158,7 +2158,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 		internal_function->prototype = NULL;
 		if (ptr->flags) {
 			if (!(ptr->flags & ZEND_ACC_PPP_MASK)) {
-				if (ptr->flags != ZEND_ACC_DEPRECATED || scope) {
+				if (ptr->flags != ZEND_ACC_DEPRECATED && scope) {
 					zend_error(error_type, "Invalid access level for %s%s%s() - access must be exactly one of public, protected or private", scope ? ZSTR_VAL(scope->name) : "", scope ? "::" : "", ptr->fname);
 				}
 				internal_function->fn_flags = ZEND_ACC_PUBLIC | ptr->flags;
