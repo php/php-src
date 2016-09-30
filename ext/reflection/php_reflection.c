@@ -1985,6 +1985,9 @@ ZEND_METHOD(reflection_function, invoke)
 	}
 
 	if (Z_TYPE(retval) != IS_UNDEF) {
+		if (Z_ISREF(retval)) {
+			zend_unwrap_reference(&retval);
+		}
 		ZVAL_COPY_VALUE(return_value, &retval);
 	}
 }
@@ -2048,6 +2051,9 @@ ZEND_METHOD(reflection_function, invokeArgs)
 	}
 
 	if (Z_TYPE(retval) != IS_UNDEF) {
+		if (Z_ISREF(retval)) {
+			zend_unwrap_reference(&retval);
+		}
 		ZVAL_COPY_VALUE(return_value, &retval);
 	}
 }
@@ -3323,6 +3329,9 @@ static void reflection_method_invoke(INTERNAL_FUNCTION_PARAMETERS, int variadic)
 	}
 
 	if (Z_TYPE(retval) != IS_UNDEF) {
+		if (Z_ISREF(retval)) {
+			zend_unwrap_reference(&retval);
+		}
 		ZVAL_COPY_VALUE(return_value, &retval);
 	}
 }
