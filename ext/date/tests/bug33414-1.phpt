@@ -226,8 +226,8 @@ result=Thursday 1980-04-10 00:00:00 CEST 1
 wanted=Thursday             00:00:00
 
 TZ=Asia/Baku - wrong day.
-tStamp=Sunday 1992-09-20 17:17:17 AZST 1
-result=Monday 1992-09-28 00:00:00 AZT 0
+tStamp=Sunday 1992-09-20 17:17:17 +04 1
+result=Monday 1992-09-28 00:00:00 +04 0
 wanted=Monday              00:00:00
 
 TZ=America/Noronha - wrong day.
