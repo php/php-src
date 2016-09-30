@@ -2005,8 +2005,9 @@ MYSQLND_METHOD(mysqlnd_stmt, free_result)(MYSQLND_STMT * const s)
 		stmt->state = MYSQLND_STMT_PREPARED;
 	}
 
-	/* Line is free! */
-	CONN_SET_STATE(stmt->conn, CONN_READY);
+	if (CONN_GET_STATE(stmt->conn) != CONN_QUIT_SENT) {
+		CONN_SET_STATE(stmt->conn, CONN_READY);
+	}
 
 	DBG_RETURN(PASS);
 }
