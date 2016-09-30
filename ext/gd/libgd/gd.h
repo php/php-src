@@ -229,24 +229,11 @@ typedef struct gdImageStruct {
 		have that capability. JPEG doesn't. */
 	int saveAlphaFlag;
 
-
-	/* 2.0.12: anti-aliased globals */
+	/* 2.0.12: anti-aliased globals. 2.0.26: just a few vestiges after
+	  switching to the fast, memory-cheap implementation from PHP-gd. */
 	int AA;
 	int AA_color;
 	int AA_dont_blend;
-	unsigned char **AA_opacity;
-	int AA_polygon;
-	/* Stored and pre-computed variables for determining the perpendicular
-	 * distance from a point to the anti-aliased line being drawn:
-	 */
-	int AAL_x1;
-	int AAL_y1;
-	int AAL_x2;
-	int AAL_y2;
-	int AAL_Bx_Ax;
-	int AAL_By_Ay;
-	int AAL_LAB_2;
-	float AAL_LAB;
 
 	/* 2.0.12: simple clipping rectangle. These values must be checked for safety when set; please use gdImageSetClip */
 	int cx1;
