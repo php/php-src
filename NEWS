@@ -57,6 +57,9 @@ PHP                                                                        NEWS
   . Fixed bug #73100 (session_destroy null dereference in ps_files_path_create).
     (cmb)
 
+- Standard:
+  . Fixed bug #73203 (passing additional_parameters causes mail to fail). (cmb)
+
 15 Sep 2016, PHP 7.1.0RC2
 
 - Core:
