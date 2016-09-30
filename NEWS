@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #73181 (parse_str() without a second argument leads to crash).
     (Nikita)
 
+- Standard:
+  . Fixed bug #73203 (passing additional_parameters causes mail to fail). (cmb)
+
 13 Oct 2016 PHP 7.0.12
 
 - Core:
