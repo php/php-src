@@ -55,15 +55,13 @@
 	d = ROTATE(d, t) ^ c;			\
 	a = ROTATE(a, 32);
 
-#define DOUBLE_ROUND(v0,v1,v2,v3)		\
-	HALF_ROUND(v0,v1,v2,v3,13,16);		\
-	HALF_ROUND(v2,v1,v0,v3,17,21);		\
+#define SINGLE_ROUND(v0,v1,v2,v3)		\
 	HALF_ROUND(v0,v1,v2,v3,13,16);		\
 	HALF_ROUND(v2,v1,v0,v3,17,21);
 
 extern unsigned char zend_siphash_key[16];
 
-static zend_always_inline uint64_t siphash24_bytes(
+static zend_always_inline uint64_t siphash13_bytes(
 		const unsigned char *src, size_t src_sz, const unsigned char *key) {
 	const uint64_t *_key = (uint64_t *) key;
 	uint64_t k0 = _le64toh(_key[0]);
@@ -83,7 +81,7 @@ static zend_always_inline uint64_t siphash24_bytes(
 		uint64_t mi = _le64toh(*in);
 		in += 1; src_sz -= 8;
 		v3 ^= mi;
-		DOUBLE_ROUND(v0,v1,v2,v3);
+		SINGLE_ROUND(v0,v1,v2,v3);
 		v0 ^= mi;
 	}
 
@@ -102,14 +100,15 @@ static zend_always_inline uint64_t siphash24_bytes(
 	b |= _le64toh(t);
 
 	v3 ^= b;
-	DOUBLE_ROUND(v0,v1,v2,v3);
+	SINGLE_ROUND(v0,v1,v2,v3);
 	v0 ^= b; v2 ^= 0xff;
-	DOUBLE_ROUND(v0,v1,v2,v3);
-	DOUBLE_ROUND(v0,v1,v2,v3);
+	SINGLE_ROUND(v0,v1,v2,v3);
+	SINGLE_ROUND(v0,v1,v2,v3);
+	SINGLE_ROUND(v0,v1,v2,v3);
 	return (v0 ^ v1) ^ (v2 ^ v3);
 }
 
-static zend_always_inline uint64_t siphash24_u64(uint64_t in, const unsigned char *key) {
+static zend_always_inline uint64_t siphash13_u64(uint64_t in, const unsigned char *key) {
 	const uint64_t *_key = (uint64_t *) key;
 	uint64_t k0 = _le64toh(_key[0]);
 	uint64_t k1 = _le64toh(_key[1]);
@@ -123,25 +122,26 @@ static zend_always_inline uint64_t siphash24_u64(uint64_t in, const unsigned cha
 	/* TODO: Need _le64toh here? */
 	uint64_t mi = _le64toh(in);
 	v3 ^= mi;
-	DOUBLE_ROUND(v0,v1,v2,v3);
+	SINGLE_ROUND(v0,v1,v2,v3);
 	v0 ^= mi;
 	v3 ^= b;
-	DOUBLE_ROUND(v0,v1,v2,v3);
+	SINGLE_ROUND(v0,v1,v2,v3);
 	v0 ^= b;
 	v2 ^= 0xff;
-	DOUBLE_ROUND(v0,v1,v2,v3);
-	DOUBLE_ROUND(v0,v1,v2,v3);
+	SINGLE_ROUND(v0,v1,v2,v3);
+	SINGLE_ROUND(v0,v1,v2,v3);
+	SINGLE_ROUND(v0,v1,v2,v3);
 	return (v0 ^ v1) ^ (v2 ^ v3);
 }
 
 static zend_always_inline zend_ulong zend_inline_hash_func(const char *str, size_t len)
 {
-	uint64_t hash = siphash24_bytes((unsigned char *) str, len, zend_siphash_key);
+	uint64_t hash = siphash13_bytes((unsigned char *) str, len, zend_siphash_key);
 	return hash | HT_IS_STR_BIT;
 }
 
 static zend_always_inline zend_ulong zend_hash_integer(zend_ulong h) {
-	uint64_t hash = siphash24_u64(h, zend_siphash_key);
+	uint64_t hash = siphash13_u64(h, zend_siphash_key);
 	return hash & ~HT_IS_STR_BIT;
 }
 
