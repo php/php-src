@@ -893,10 +893,9 @@ static void zend_error_va(int type, const char *file, uint lineno, const char *f
 ZEND_API void zend_exception_error(zval *exception, int severity TSRMLS_DC) /* {{{ */
 {
 	zend_class_entry *ce_exception = Z_OBJCE_P(exception);
+	EG(exception) = NULL;
 	if (instanceof_function(ce_exception, default_exception_ce TSRMLS_CC)) {
 		zval *str, *file, *line;
-
-		EG(exception) = NULL;
 
 		zend_call_method_with_0_params(&exception, ce_exception, NULL, "__tostring", &str);
 		if (!EG(exception)) {
@@ -936,6 +935,7 @@ ZEND_API void zend_exception_error(zval *exception, int severity TSRMLS_DC) /* {
 	} else {
 		zend_error(severity, "Uncaught exception '%s'", ce_exception->name);
 	}
+	zval_ptr_dtor(&exception);
 }
 /* }}} */
 
