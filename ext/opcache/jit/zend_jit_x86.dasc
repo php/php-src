@@ -842,7 +842,11 @@ static void* dasm_labels[zend_lb_MAX];
 // zval should be in FCARG1a
 |.macro ZVAL_COPY_CTOR_FUNC, filename, lineno // arg1 must be in FCARG1a
 ||	if (ZEND_DEBUG) {
-|		LOAD_ADDR FCARG2a, filename
+||		if (filename) {
+|			LOAD_ADDR FCARG2a, ZSTR_VAL((zend_string*)filename)
+||		} else {
+|			mov FCARG2a, 0
+||		}
 |.if X64
 |		mov CARG3d, lineno
 |.else
@@ -881,7 +885,11 @@ static void* dasm_labels[zend_lb_MAX];
 // zval should be in FCARG1a
 |.macro ZVAL_DTOR_FUNC, filename, lineno // arg1 must be in FCARG1a
 ||	if (ZEND_DEBUG) {
-|		LOAD_ADDR FCARG2a, filename
+||		if (filename) {
+|			LOAD_ADDR FCARG2a, ZSTR_VAL((zend_string*)filename)
+||		} else {
+|			mov FCARG2a, 0
+||		}
 |.if X64
 |		mov CARG3d, lineno
 |.else
@@ -960,7 +968,7 @@ static void* dasm_labels[zend_lb_MAX];
 |.macro FREE_OP, op_type, op, op_info, op_array, lineno
 ||if ((op_type & (IS_VAR|IS_TMP_VAR)) &&
 ||   (op_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
-|	ZVAL_PTR_DTOR_NOGC FP + op.var, (op_array->filename ? ZSTR_VAL(op_array->filename) : NULL), lineno
+|	ZVAL_PTR_DTOR_NOGC FP + op.var, op_array->filename, lineno
 ||}
 |.endmacro
 
@@ -1435,7 +1443,7 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, zend_op_arr
 		||	if ((opline->opcode == ZEND_POST_INC || opline->opcode == ZEND_POST_DEC)) {
 		||		if (opline->result_type != IS_UNUSED) {
 		|			ZVAL_COPY_VALUE FP + opline->result.var, FCARG1a, op1_info, r0, eax, r2
-		|			//ZVAL_COPY_CTOR op1_info, ah, r2, (op_array->filename ? ZSTR_VAL(op_array->filename) : NULL), opline->lineno
+		|			//ZVAL_COPY_CTOR op1_info, ah, r2, op_array->filename, opline->lineno
 		||			if (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
 		||				if (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY)) {
 		|					IF_NOT_FLAGS ah, IS_TYPE_REFCOUNTED + IS_TYPE_IMMUTABLE, >2
@@ -1444,7 +1452,7 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, zend_op_arr
 		|					jmp >2
 		|1:
 		|					mov aword [r4], FCARG1a // save
-		|					ZVAL_COPY_CTOR_FUNC (op_array->filename ? ZSTR_VAL(op_array->filename) : NULL), opline->lineno
+		|					ZVAL_COPY_CTOR_FUNC op_array->filename, opline->lineno
 		|					mov FCARG1a, aword [r4] // restore
 		|2:
 		||				} else {
@@ -1463,7 +1471,7 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, zend_op_arr
 		|			GC_DELREF r0
 		|1:
 		|			mov aword [r4], FCARG1a // save
-		|			ZVAL_COPY_CTOR_FUNC (op_array->filename ? ZSTR_VAL(op_array->filename) : NULL), opline->lineno
+		|			ZVAL_COPY_CTOR_FUNC op_array->filename, opline->lineno
 		|			mov FCARG1a, aword [r4] // restore
 		|2:
 		||		}
@@ -2522,7 +2530,7 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 			return 0;
 		}
 		|	mov FCARG1a, aword [r4] // restore
-		|	ZVAL_DTOR_FUNC (op_array->filename ? ZSTR_VAL(op_array->filename) : NULL), opline->lineno
+		|	ZVAL_DTOR_FUNC op_array->filename, opline->lineno
 		|	jmp >3
 		|4:
 		|	IF_NOT_Z_FLAGS Ra(var_reg)+var_offset, IS_TYPE_COLLECTABLE, >5
@@ -2592,7 +2600,7 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, zend_op_
 			|	GC_DELREF r0
 			|2:
 			|	mov aword [r4], FCARG1a // save
-			|	ZVAL_COPY_CTOR_FUNC (op_array->filename ? ZSTR_VAL(op_array->filename) : NULL), opline->lineno
+			|	ZVAL_COPY_CTOR_FUNC op_array->filename, opline->lineno
 			|	mov FCARG1a, aword [r4] // restore
 			|	GET_Z_PTR FCARG1a, FCARG1a
 			|	jmp >3
@@ -2613,7 +2621,7 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, zend_op_
 			|	GC_DELREF FCARG1a
 			|2:
 			|	LOAD_ZVAL_ADDR FCARG1a, opline->op1_type, opline->op1
-			|	ZVAL_COPY_CTOR_FUNC (op_array->filename ? ZSTR_VAL(op_array->filename) : NULL), opline->lineno
+			|	ZVAL_COPY_CTOR_FUNC op_array->filename, opline->lineno
 			|	LONG_LOAD FCARG1a, opline->op1_type, opline->op1
 			|	jmp >3
 			|.code
@@ -2890,7 +2898,7 @@ static int zend_jit_assign_dim_math(dasm_State **Dst, const zend_op *opline, zen
 			|	GC_DELREF r0
 			|2:
 			|	mov aword [r4], FCARG1a // save
-			|	ZVAL_COPY_CTOR_FUNC (op_array->filename ? ZSTR_VAL(op_array->filename) : NULL), opline->lineno
+			|	ZVAL_COPY_CTOR_FUNC op_array->filename, opline->lineno
 			|	mov FCARG1a, aword [r4] // restore
 			|	GET_Z_PTR FCARG1a, FCARG1a
 			|	jmp >3
@@ -2911,7 +2919,7 @@ static int zend_jit_assign_dim_math(dasm_State **Dst, const zend_op *opline, zen
 			|	GC_DELREF FCARG1a
 			|2:
 			|	LOAD_ZVAL_ADDR FCARG1a, opline->op1_type, opline->op1
-			|	ZVAL_COPY_CTOR_FUNC (op_array->filename ? ZSTR_VAL(op_array->filename) : NULL), opline->lineno
+			|	ZVAL_COPY_CTOR_FUNC op_array->filename, opline->lineno
 			|	LONG_LOAD FCARG1a, opline->op1_type, opline->op1
 			|	jmp >3
 			|.code
@@ -3038,7 +3046,7 @@ static int zend_jit_assign_dim_math(dasm_State **Dst, const zend_op *opline, zen
 				|	GC_DELREF r0
 				|2:
 				|	mov aword [r4], FCARG1a // save
-				|	ZVAL_COPY_CTOR_FUNC (op_array->filename ? ZSTR_VAL(op_array->filename) : NULL), opline->lineno
+				|	ZVAL_COPY_CTOR_FUNC op_array->filename, opline->lineno
 				|	mov FCARG1a, aword [r4] // restore
 				|	jmp >3
 				|.code
@@ -3218,7 +3226,7 @@ static int zend_jit_assign_math(dasm_State **Dst, const zend_op *opline, zend_op
 			|	GC_DELREF r0
 			|2:
 			|	mov aword [r4], FCARG1a // save
-			|	ZVAL_COPY_CTOR_FUNC (op_array->filename ? ZSTR_VAL(op_array->filename) : NULL), opline->lineno
+			|	ZVAL_COPY_CTOR_FUNC op_array->filename, opline->lineno
 			|	mov FCARG1a, aword [r4] // restore
 			|	jmp >3
 			|.code
@@ -3238,7 +3246,7 @@ static int zend_jit_assign_math(dasm_State **Dst, const zend_op *opline, zend_op
 			|	GC_DELREF r0
 			|2:
 			|	lea FCARG1a, [FP + opline->op1.var]
-			|	ZVAL_COPY_CTOR_FUNC (op_array->filename ? ZSTR_VAL(op_array->filename) : NULL), opline->lineno
+			|	ZVAL_COPY_CTOR_FUNC op_array->filename, opline->lineno
 			|	jmp >3
 			|.code
 			|3:
@@ -4010,7 +4018,7 @@ static int zend_jit_jmpznz(dasm_State **Dst, const zend_op *opline, int b, zend_
 				|	dec dword [FCARG1a]
 				|	jnz >1
 				|	mov aword [r4], r0 // save
-				|	ZVAL_DTOR_FUNC (op_array->filename ? ZSTR_VAL(op_array->filename) : NULL), opline->lineno
+				|	ZVAL_DTOR_FUNC op_array->filename, opline->lineno
 				|	mov r0, aword [r4] // restore
 				|1:
 			}
@@ -4341,7 +4349,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		for (i = 0; i < call_info->num_args; i++ ) {
 			uint32_t offset = (uint32_t)(uintptr_t)ZEND_CALL_VAR_NUM(NULL, i);
 			|	mov r0, aword [r4] // restore
-			|	ZVAL_PTR_DTOR r0 + offset, -1, 0, 1, 1, (op_array->filename ? ZSTR_VAL(op_array->filename) : NULL), opline->lineno
+			|	ZVAL_PTR_DTOR r0 + offset, -1, 0, 1, 1, op_array->filename, opline->lineno
 		}
 
 		|	// zend_vm_stack_free_call_frame(call);
@@ -4364,7 +4372,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 			}
 			|	add r4, 16 /* revert alloca() */
 			if (func_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
-				|	ZVAL_PTR_DTOR r0, func_info, 1, 1, 0, (op_array->filename ? ZSTR_VAL(op_array->filename) : NULL), opline->lineno
+				|	ZVAL_PTR_DTOR r0, func_info, 1, 1, 0, op_array->filename, opline->lineno
 			}
 		}
 
@@ -4385,7 +4393,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		|.endif
 		if (opline->result_type != IS_UNUSED) {
 			|	// zval_ptr_dtor(EX_VAR(opline->result.var));
-			|	ZVAL_PTR_DTOR FP + opline->result.var, RES_INFO(), 1, 0, 0, (op_array->filename ? ZSTR_VAL(op_array->filename) : NULL), opline->lineno
+			|	ZVAL_PTR_DTOR FP + opline->result.var, RES_INFO(), 1, 0, 0, op_array->filename, opline->lineno
 		}
 		|	//	HANDLE_EXCEPTION();
 		|	jmp ->exception_handler
@@ -4575,7 +4583,7 @@ static int zend_jit_free_compiled_variables(dasm_State **Dst, const zend_op *opl
 
 		if (info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
 			uint32_t offset = (uint32_t)(uintptr_t)ZEND_CALL_VAR_NUM(NULL, i);
-			| ZVAL_PTR_DTOR FP + offset, info, 1, 1, 1, (op_array->filename ? ZSTR_VAL(op_array->filename) : NULL), opline->lineno
+			| ZVAL_PTR_DTOR FP + offset, info, 1, 1, 1, op_array->filename, opline->lineno
 		}
 	}
 	return 1;
@@ -4732,7 +4740,7 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, zend_op_arra
 		||	}
 		|	//SAVE_OPLINE()
 		|	SAVE_VALID_OPLINE opline
-		|	ZVAL_DTOR_FUNC (op_array->filename ? ZSTR_VAL(op_array->filename) : NULL), opline->lineno
+		|	ZVAL_DTOR_FUNC op_array->filename, opline->lineno
 		|	mov r1, EX->return_value // reload ???
 		||	if (jit_return_label >= 0) {
 		|		jmp =>jit_return_label
@@ -5121,7 +5129,7 @@ static int zend_jit_bind_global(dasm_State **Dst, const zend_op *opline, zend_op
 		|	jnz >3
 		}
 		|	mov aword [r4], r0 // save
-		|	ZVAL_DTOR_FUNC (op_array->filename ? ZSTR_VAL(op_array->filename) : NULL), opline->lineno
+		|	ZVAL_DTOR_FUNC op_array->filename, opline->lineno
 		|	mov r0, aword [r4] // restore
 		|	jmp >5
 		if (op1_info & (MAY_BE_ARRAY|MAY_BE_OBJECT)) {
@@ -5245,7 +5253,7 @@ static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, zend_op_a
 	|.cold_code
 	if (has_slow & 1) {
 	|7:
-	|	ZVAL_PTR_DTOR  FP + opline->result.var, -1, 1, 0, 0, (op_array->filename ? ZSTR_VAL(op_array->filename) : NULL), opline->lineno
+	|	ZVAL_PTR_DTOR  FP + opline->result.var, -1, 1, 0, 0, op_array->filename, opline->lineno
 	|	SET_Z_TYPE_INFO FP + opline->result.var, IS_UNDEF
 	|	jmp <4
 	}
