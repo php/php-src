@@ -94,7 +94,7 @@ static void* dasm_labels[zend_lb_MAX];
 
 #define IS_32BIT(addr) (((uintptr_t)(addr)) <= 0xffffffff)
 
-#define IS_SIGNED_32BIT(val) ((((intptr_t)(val)) <= 0x7fffffff) && (((intptr_t)(val)) >= -2147483648))
+#define IS_SIGNED_32BIT(val) ((((intptr_t)(val)) <= 0x7fffffff) && (((intptr_t)(val)) >= (-2147483647 - 1)))
 
 |.macro LOAD_ADDR, reg, addr
 |.if X64
