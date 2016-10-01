@@ -262,6 +262,11 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 		PHPDBG_G(oplog_list) = NULL;
 	}
 
+	if (PHPDBG_G(stdin_file)) {
+		fclose(PHPDBG_G(stdin_file));
+		PHPDBG_G(stdin_file) = NULL;
+	}
+
 	return SUCCESS;
 } /* }}} */
 
@@ -1281,6 +1286,27 @@ void *phpdbg_realloc_wrapper(void *ptr, size_t size ZEND_FILE_LINE_DC ZEND_FILE_
 	return _zend_mm_realloc(zend_mm_get_heap(), ptr, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 } /* }}} */
 
+php_stream *phpdbg_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC) /* {{{ */
+{
+	if (!strncasecmp(path, "php://", 6)) {
+		path += 6;
+	}
+
+	if (!strncasecmp(path, "stdin", 6) && PHPDBG_G(stdin_file)) {
+		php_stream *stream =stream = php_stream_fopen_from_file(PHPDBG_G(stdin_file), "r");
+#ifdef PHP_WIN32
+		zval *blocking_pipes = php_stream_context_get_option(context, "pipe", "blocking");
+		if (blocking_pipes) {
+			convert_to_long(blocking_pipes);
+			php_stream_set_option(stream, PHP_STREAM_OPTION_PIPE_BLOCKING, Z_LVAL_P(blocking_pipes), NULL);
+		}
+#endif
+		return stream;
+	}
+
+	return PHPDBG_G(orig_url_wrap_php)(wrapper, path, mode, options, opened_path, context STREAMS_CC);
+} /* }}} */
+
 int main(int argc, char **argv) /* {{{ */
 {
 	sapi_module_struct *phpdbg = &phpdbg_sapi_module;
@@ -1774,6 +1800,13 @@ phpdbg_main:
 		/* set default prompt */
 		phpdbg_set_prompt(PHPDBG_DEFAULT_PROMPT);
 
+/* refactor to preserve run commands on force run command */
+		{
+			php_stream_wrapper *wrapper = zend_hash_str_find_ptr(php_stream_get_url_stream_wrappers_hash(), ZEND_STRL("php"));
+			PHPDBG_G(orig_url_wrap_php) = wrapper->wops->stream_opener;
+			wrapper->wops->stream_opener = phpdbg_stream_url_wrap_php;
+		}
+
 		/* Make stdin, stdout and stderr accessible from PHP scripts */
 		phpdbg_register_file_handles();
 
@@ -2004,6 +2037,11 @@ phpdbg_out:
 			}
 		}
 		php_output_deactivate();
+
+		{
+			php_stream_wrapper *wrapper = zend_hash_str_find_ptr(php_stream_get_url_stream_wrappers_hash(), ZEND_STRL("php"));
+			wrapper->wops->stream_opener = PHPDBG_G(orig_url_wrap_php);
+		}
 
 		zend_try {
 			php_module_shutdown();
