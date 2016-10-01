@@ -5290,8 +5290,8 @@ static int zend_jit_fetch_obj_r(dasm_State **Dst, zend_op *opline, zend_op_array
 	zval *member, *zv;
 	zend_property_info *info;
 
-	if ((opline->op1_type != IS_CV && opline->op1_type != IS_UNUSED) ||
-		opline->op2_type != IS_CONST || !ssa->ops || !ssa->var_info) {
+	/* TODO: supports IS_UNUSED? */
+	if (opline->op1_type != IS_CV || opline->op2_type != IS_CONST || !ssa->ops || !ssa->var_info) {
 		goto fallback;
 	}
 
@@ -5321,21 +5321,16 @@ static int zend_jit_fetch_obj_r(dasm_State **Dst, zend_op *opline, zend_op_array
 	}
 
 	if (opline->op1_type == IS_CV) {
-	|	mov r0, [FP + opline->op1.var]
+	|	lea r0, [FP + opline->op1.var]
 	|	ZVAL_DEREF r0, op1_info
-		if (op1_info & MAY_BE_REF) {
-		|	IF_NOT_Z_TYPE, r0, IS_REFERENCE, >1
-		|	GET_Z_PTR r0, r0
-		|	add r0, offsetof(zend_reference, val)
-		|1:
-		}
 	} else {
-	|	mov r0, EX->This
+	|	lea r0, EX->This
 	}
 	if (op1_info & MAY_BE_UNDEF) {
 	|	IF_Z_TYPE r0, IS_UNDEF, >8
 	}
-	|   mov r0, [r0 + info->offset]
+	|	mov r0, [r0]
+	|   lea r0, [r0 + info->offset]
 	|	// ZVAL_COPY_UNREF
 	if (res_info & MAY_BE_REF) {
 	|	// ZVAL_COPY_UNREF
@@ -5359,6 +5354,7 @@ static int zend_jit_fetch_obj_r(dasm_State **Dst, zend_op *opline, zend_op_array
 	}
 	|9: // END
 
+	if (op1_info & MAY_BE_UNDEF) {
 	|.cold_code
 	|8:
 	|.if X64
@@ -5374,6 +5370,7 @@ static int zend_jit_fetch_obj_r(dasm_State **Dst, zend_op *opline, zend_op_array
 	|.endif
 	|	jmp <9
 	|.code
+	}
 
 	return 1;
 
