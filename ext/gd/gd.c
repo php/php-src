@@ -578,6 +578,13 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagepolygon, 0)
 	ZEND_ARG_INFO(0, col)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_imageopenpolygon, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, points) /* ARRAY_INFO(0, points, 0) */
+	ZEND_ARG_INFO(0, num_pos)
+	ZEND_ARG_INFO(0, col)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO(arginfo_imagefilledpolygon, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, points) /* ARRAY_INFO(0, points, 0) */
@@ -938,6 +945,7 @@ const zend_function_entry gd_functions[] = {
 	PHP_FE(imageline,								arginfo_imageline)
 	PHP_FE(imageloadfont,							arginfo_imageloadfont)
 	PHP_FE(imagepolygon,							arginfo_imagepolygon)
+	PHP_FE(imageopenpolygon,						arginfo_imageopenpolygon)
 	PHP_FE(imagerectangle,							arginfo_imagerectangle)
 	PHP_FE(imagesetpixel,							arginfo_imagesetpixel)
 	PHP_FE(imagestring,								arginfo_imagestring)
@@ -3346,6 +3354,7 @@ PHP_FUNCTION(imageinterlace)
 /* }}} */
 
 /* {{{ php_imagepolygon
+   arg = -1 open polygon
    arg = 0  normal polygon
    arg = 1  filled polygon */
 /* im, points, num_points, col */
@@ -3398,10 +3407,16 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled)
 		gdImageSetAntiAliased(im, col);
 		col = gdAntiAliased;
 	}
-	if (filled) {
-		gdImageFilledPolygon(im, points, npoints, col);
-	} else {
-		gdImagePolygon(im, points, npoints, col);
+	switch (filled) {
+		case -1:
+			gdImageOpenPolygon(im, points, npoints, col);
+			break;
+		case 0:
+			gdImagePolygon(im, points, npoints, col);
+			break;
+		case 1:
+			gdImageFilledPolygon(im, points, npoints, col);
+			break;
 	}
 
 	efree(points);
@@ -3414,6 +3429,14 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled)
 PHP_FUNCTION(imagepolygon)
 {
 	php_imagepolygon(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
+/* }}} */
+
+/* {{{ proto bool imageopenpolygon(resource im, array point, int num_points, int col)
+   Draw a polygon */
+PHP_FUNCTION(imageopenpolygon)
+{
+	php_imagepolygon(INTERNAL_FUNCTION_PARAM_PASSTHRU, -1);
 }
 /* }}} */
 

@@ -2606,6 +2606,17 @@ void gdImageCopyResampled (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, i
 
 void gdImagePolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 {
+	if (n <= 0) {
+		return;
+	}
+
+
+	gdImageLine (im, p->x, p->y, p[n - 1].x, p[n - 1].y, c);
+	gdImageOpenPolygon (im, p, n, c);
+}
+
+void gdImageOpenPolygon (gdImagePtr im, gdPointPtr p, int n, int c)
+{
 	int i;
 	int lx, ly;
 
@@ -2615,7 +2626,6 @@ void gdImagePolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 
 	lx = p->x;
 	ly = p->y;
-	gdImageLine(im, lx, ly, p[n - 1].x, p[n - 1].y, c);
 	for (i = 1; i < n; i++) {
 		p++;
 		gdImageLine(im, lx, ly, p->x, p->y, c);
