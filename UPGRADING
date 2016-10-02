@@ -112,6 +112,9 @@ PHP 7.2 UPGRADE NOTES
 10. New Global Constants
 ========================================
 
+- GD:
+  . IMG_EFFECT_MULTIPLY
+
 - Standard:
   . PASSWORD_ARGON2_DEFAULT_MEMORY_COST
   . PASSWORD_ARGON2_DEFAULT_TIME_COST
