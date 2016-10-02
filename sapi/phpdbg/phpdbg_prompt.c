@@ -385,13 +385,18 @@ void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default) /
 }
 /* }}} */
 
-void phpdbg_clean(zend_bool full) /* {{{ */
+void phpdbg_clean(zend_bool full, zend_bool resubmit) /* {{{ */
 {
 	/* this is implicitly required */
 	if (PHPDBG_G(ops)) {
 		destroy_op_array(PHPDBG_G(ops));
 		efree(PHPDBG_G(ops));
 		PHPDBG_G(ops) = NULL;
+	}
+
+	if (!resubmit && PHPDBG_G(cur_command)) {
+		free(PHPDBG_G(cur_command));
+		PHPDBG_G(cur_command) = NULL;
 	}
 
 	if (full) {
@@ -424,7 +429,7 @@ PHPDBG_COMMAND(exec) /* {{{ */
 
 				if (PHPDBG_G(ops)) {
 					phpdbg_notice("exec", "type=\"unsetops\"", "Destroying compiled opcodes");
-					phpdbg_clean(0);
+					phpdbg_clean(0, 0);
 				}
 
 				PHPDBG_G(exec) = res;
@@ -438,7 +443,7 @@ PHPDBG_COMMAND(exec) /* {{{ */
 				phpdbg_notice("exec", "type=\"set\" context=\"%s\"", "Set execution context: %s", PHPDBG_G(exec));
 
 				if (PHPDBG_G(in_execution)) {
-					phpdbg_clean(1);
+					phpdbg_clean(1, 0);
 					return SUCCESS;
 				}
 
@@ -676,7 +681,7 @@ PHPDBG_COMMAND(run) /* {{{ */
 		if (PHPDBG_G(in_execution)) {
 			if (phpdbg_ask_user_permission("Do you really want to restart execution?") == SUCCESS) {
 				phpdbg_startup_run++;
-				phpdbg_clean(1);
+				phpdbg_clean(1, 1);
 			}
 			return SUCCESS;
 		}
@@ -730,6 +735,7 @@ PHPDBG_COMMAND(run) /* {{{ */
 						goto free_cmd;
 					}
 					efree(buf);
+					phpdbg_register_file_handles();
 					break;
 				}
 
@@ -744,7 +750,7 @@ PHPDBG_COMMAND(run) /* {{{ */
 					p++;
 				}
 				while (*p && *p != sep) {
-					if (*p == '\\' && (p[1] == sep || p[1] == '\\')) {
+					if (*p == '\\' && (p[1] == sep || p[1] == '\\' || (p[1] == '#' && sep == ' '))) {
 						p++;
 					}
 					*(q++) = *(p++);
@@ -833,7 +839,7 @@ free_cmd:
 
 		PHPDBG_G(flags) &= ~PHPDBG_IS_RUNNING;
 
-		phpdbg_clean(1);
+		phpdbg_clean(1, 0);
 	} else {
 		phpdbg_error("inactive", "type=\"nocontext\"", "Nothing to execute!");
 	}
@@ -1337,7 +1343,7 @@ PHPDBG_COMMAND(clean) /* {{{ */
 	phpdbg_writeln("clean", "constants=\"%d\"", "Constants  %d", zend_hash_num_elements(EG(zend_constants)));
 	phpdbg_writeln("clean", "includes=\"%d\"", "Includes   %d", zend_hash_num_elements(&EG(included_files)));
 
-	phpdbg_clean(1);
+	phpdbg_clean(1, 0);
 
 	phpdbg_xml("</cleaninfo>");
 
@@ -1406,10 +1412,9 @@ PHPDBG_COMMAND(watch) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-int phpdbg_interactive(zend_bool allow_async_unsafe) /* {{{ */
+int phpdbg_interactive(zend_bool allow_async_unsafe, char *input) /* {{{ */
 {
 	int ret = SUCCESS;
-	char *input = NULL;
 	phpdbg_param_t stack;
 
 	PHPDBG_G(flags) |= PHPDBG_IS_INTERACTIVE;
@@ -1419,7 +1424,7 @@ int phpdbg_interactive(zend_bool allow_async_unsafe) /* {{{ */
 			zend_bailout();
 		}
 
-		if (!(input = phpdbg_read_input(NULL))) {
+		if (!input && !(input = phpdbg_read_input(NULL))) {
 			break;
 		}
 
@@ -1509,7 +1514,7 @@ int phpdbg_interactive(zend_bool allow_async_unsafe) /* {{{ */
 		efree(file); \
 	} \
 	\
-	switch (phpdbg_interactive(allow_async_unsafe)) { \
+	switch (phpdbg_interactive(allow_async_unsafe, NULL)) { \
 		zval zv; \
 		case PHPDBG_LEAVE: \
 		case PHPDBG_FINISH: \

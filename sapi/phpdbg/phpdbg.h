@@ -232,6 +232,8 @@ int phpdbg_do_parse(phpdbg_param_t *stack, char *input);
 	}
 
 
+void phpdbg_register_file_handles(void);
+
 /* {{{ structs */
 ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	HashTable bp[PHPDBG_BREAK_TABLES];           /* break points */
@@ -242,6 +244,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	phpdbg_frame_t frame;                        /* frame */
 	uint32_t last_line;                          /* last executed line */
 
+	char *cur_command;                           /* current command */
 	phpdbg_lexer_data lexer;                     /* lexer data */
 	phpdbg_param_t *parser_stack;                /* param stack during lexer / parser phase */
 

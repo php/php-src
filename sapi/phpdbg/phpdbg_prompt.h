@@ -25,7 +25,7 @@
 void phpdbg_string_init(char *buffer);
 void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default);
 void phpdbg_try_file_init(char *init_file, size_t init_file_len, zend_bool free_init);
-int phpdbg_interactive(zend_bool allow_async_unsafe);
+int phpdbg_interactive(zend_bool allow_async_unsafe, char *input);
 int phpdbg_compile(void);
 void phpdbg_force_interruption(void);
 /* }}} */
