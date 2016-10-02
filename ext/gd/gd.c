@@ -786,12 +786,10 @@ ZEND_BEGIN_ARG_INFO(arginfo_imageflip, 0)
 	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
-#ifdef HAVE_GD_BUNDLED
 ZEND_BEGIN_ARG_INFO(arginfo_imageantialias, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, on)
 ZEND_END_ARG_INFO()
-#endif
 
 ZEND_BEGIN_ARG_INFO(arginfo_imagecrop, 0)
 	ZEND_ARG_INFO(0, im)
@@ -884,9 +882,7 @@ const zend_function_entry gd_functions[] = {
 	PHP_FE(imagerotate,     						arginfo_imagerotate)
 	PHP_FE(imageflip,								arginfo_imageflip)
 
-#ifdef HAVE_GD_BUNDLED
 	PHP_FE(imageantialias,							arginfo_imageantialias)
-#endif
 	PHP_FE(imagecrop,								arginfo_imagecrop)
 	PHP_FE(imagecropauto,							arginfo_imagecropauto)
 	PHP_FE(imagescale,								arginfo_imagescale)
@@ -3111,14 +3107,11 @@ PHP_FUNCTION(imageline)
 		RETURN_FALSE;
 	}
 
-#ifdef HAVE_GD_BUNDLED
-	if (im->antialias) {
-		gdImageAALine(im, x1, y1, x2, y2, col);
-	} else
-#endif
-	{
-		gdImageLine(im, x1, y1, x2, y2, col);
+	if (im->AA) {
+		gdImageSetAntiAliased(im, col);
+		col = gdAntiAliased;
 	}
+	gdImageLine(im, x1, y1, x2, y2, col);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -3398,6 +3391,10 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled)
 		}
 	}
 
+	if (im->AA) {
+		gdImageSetAntiAliased(im, col);
+		col = gdAntiAliased;
+	}
 	if (filled) {
 		gdImageFilledPolygon(im, points, npoints, col);
 	} else {
@@ -4601,7 +4598,6 @@ PHP_FUNCTION(imageflip)
 }
 /* }}} */
 
-#ifdef HAVE_GD_BUNDLED
 /* {{{ proto bool imageantialias(resource im, bool on)
    Should antialiased functions used or not*/
 PHP_FUNCTION(imageantialias)
@@ -4617,11 +4613,10 @@ PHP_FUNCTION(imageantialias)
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
 		RETURN_FALSE;
 	}
-	gdImageAntialias(im, alias);
+	gdImageSetAntiAliased(im, 0);
 	RETURN_TRUE;
 }
 /* }}} */
-#endif
 
 /* {{{ proto void imagecrop(resource im, array rect)
    Crop an image using the given coordinates and size, x, y, width and height. */

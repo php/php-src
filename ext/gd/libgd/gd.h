@@ -222,8 +222,6 @@ typedef struct gdImageStruct {
 		To do that, build your image as a truecolor image,
 		then quantize down to 8 bits. */
 	int alphaBlendingFlag;
-	/* Should antialias functions be used */
-	int antialias;
 	/* Should the alpha channel of the image be saved? This affects
 		PNG at the moment; other future formats may also
 		have that capability. JPEG doesn't. */

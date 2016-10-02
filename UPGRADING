@@ -96,10 +96,11 @@ PHP 7.2 UPGRADE NOTES
      Samsung, DJI, Panasonic, Sony, Pentax, Minolta & Sigma/Foveon.
 
 - GD:
-    . Removed --enable-gd-native-ttf configuration option which was unused as
-      of PHP 5.5.0 anyway.
-    . imagegd() stores truecolor images as real truecolor images. Formerly, they
-      have been converted to palette.
+  . Removed --enable-gd-native-ttf configuration option which was unused as
+    of PHP 5.5.0 anyway.
+  . imagegd() stores truecolor images as real truecolor images. Formerly, they
+    have been converted to palette.
+  . imageantialias() is now also available if compiled with a system libgd.
 
 - Mbstring
   . mb_check_encoding() accepts array parameter. Both key and value
