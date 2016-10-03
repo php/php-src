@@ -293,10 +293,7 @@ ZEND_METHOD(exception, __construct)
 #define CHECK_EXC_TYPE(name, type) \
 	pvalue = zend_read_property(i_get_exception_base(object), (object), name, sizeof(name) - 1, 1, &value); \
 	if (Z_TYPE_P(pvalue) != IS_NULL && Z_TYPE_P(pvalue) != type) { \
-		zval tmp; \
-		ZVAL_STRINGL(&tmp, name, sizeof(name) - 1); \
-		Z_OBJ_HANDLER_P(object, unset_property)(object, &tmp, NULL); \
-		zval_ptr_dtor(&tmp); \
+		zend_unset_property(i_get_exception_base(object), object, name, sizeof(name)-1); \
 	}
 
 ZEND_METHOD(exception, __wakeup)
@@ -309,7 +306,12 @@ ZEND_METHOD(exception, __wakeup)
 	CHECK_EXC_TYPE("file", IS_STRING);
 	CHECK_EXC_TYPE("line", IS_LONG);
 	CHECK_EXC_TYPE("trace", IS_ARRAY);
-	CHECK_EXC_TYPE("previous", IS_OBJECT);
+	pvalue = zend_read_property(i_get_exception_base(object), object, "previous", sizeof("previous")-1, 1, &value);
+	if (pvalue && Z_TYPE_P(pvalue) != IS_NULL && (Z_TYPE_P(pvalue) != IS_OBJECT ||
+			!instanceof_function(Z_OBJCE_P(pvalue), i_get_exception_base(object)) ||
+			pvalue == object)) {
+		zend_unset_property(i_get_exception_base(object), object, "previous", sizeof("previous")-1);
+	}
 }
 /* }}} */
 
@@ -771,9 +773,23 @@ ZEND_METHOD(exception, __toString)
 		zend_string_release(file);
 		zval_ptr_dtor(&trace);
 
+		Z_OBJPROP_P(exception)->u.v.nApplyCount++;
 		exception = GET_PROPERTY(exception, "previous");
+		if (exception && Z_TYPE_P(exception) == IS_OBJECT && Z_OBJPROP_P(exception)->u.v.nApplyCount > 0) {
+			exception = NULL;
+		}
 	}
 	zval_dtor(&fname);
+
+	/* Reset apply counts */
+	while (exception && Z_TYPE_P(exception) == IS_OBJECT && (base_ce = i_get_exception_base(exception)) && instanceof_function(Z_OBJCE_P(exception), base_ce)) {
+		if(Z_OBJPROP_P(exception)->u.v.nApplyCount) {
+			Z_OBJPROP_P(exception)->u.v.nApplyCount--;
+		} else {
+			break;
+		}
+		exception = GET_PROPERTY(exception, "previous");
+	}
 
 	exception = getThis();
 	base_ce = i_get_exception_base(exception);
