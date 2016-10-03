@@ -1442,6 +1442,19 @@ int gdImageTrueColorToPalette (gdImagePtr im, int dither, int colorsWanted)
 	return gdImageTrueColorToPaletteBody(im, dither, colorsWanted, 0);
 }
 
+static void free_truecolor_image_data(gdImagePtr oim)
+{
+  int i;
+  oim->trueColor = 0;
+  /* Junk the truecolor pixels */
+  for (i = 0; i < oim->sy; i++)
+    {
+      gdFree (oim->tpixels[i]);
+    }
+  gdFree (oim->tpixels);
+  oim->tpixels = 0;
+}
+
 /*
  * Module initialization routine for 2-pass color quantization.
  */
@@ -1605,16 +1618,11 @@ static int gdImageTrueColorToPaletteBody (gdImagePtr oim, int dither, int colors
 
   /* Success! Get rid of the truecolor image data. */
   conversionSucceeded = TRUE;
-  if (!cimP) {
-    oim->trueColor = 0;
-    /* Junk the truecolor pixels */
-    for (i = 0; i < oim->sy; i++)
-      {
-        gdFree (oim->tpixels[i]);
-      }
-    gdFree (oim->tpixels);
-    oim->tpixels = 0;
-  }
+  if (!cimP)
+    {
+      free_truecolor_image_data(oim);
+    }
+
   goto freeQuantizeData;
   /* Tediously free stuff. */
 outOfMemory:
