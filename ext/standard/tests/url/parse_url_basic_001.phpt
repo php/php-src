@@ -790,7 +790,7 @@ foreach ($urls as $url) {
   ["path"]=>
   string(11) "/rest/Users"
   ["query"]=>
-  string(19) "filter={"id":"123"}"
+  string(7) "filter="
 }
 
 --> http:///blah.com: array(2) {

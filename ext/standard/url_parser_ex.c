@@ -3842,16 +3842,8 @@ int url_parse_query_frag (php_url *url)
 query_frag:;
     marker = URLG(url_str);
 
-    /*
-       BREAK IN RFC
-       RFC does not define the characters "{", "}", or "\""
-       as such parsing a path that contains these characters
-       will halt the parser: /index.php?foo={hello}
-       We will accept these characters here
-    */
 
-
-#line 3855 "ext/standard/url_parser_ex.c"
+#line 3847 "ext/standard/url_parser_ex.c"
 {
 	unsigned char yych;
 	unsigned int yyaccept = 0;
@@ -3860,7 +3852,7 @@ query_frag:;
 		  0,   0,   0,   0,   0,   0,   0,   0, 
 		  0,   0,   0,   0,   0,   0,   0,   0, 
 		  0,   0,   0,   0,   0,   0,   0,   0, 
-		  0, 128, 128,   0, 128,   0, 128, 128, 
+		  0, 128,   0,   0, 128,   0, 128, 128, 
 		128, 128, 128, 128, 128, 128, 128, 128, 
 		128, 128, 128, 128, 128, 128, 128, 128, 
 		128, 128, 128, 128,   0, 128,   0, 128, 
@@ -3871,7 +3863,7 @@ query_frag:;
 		  0, 128, 128, 128, 128, 128, 128, 128, 
 		128, 128, 128, 128, 128, 128, 128, 128, 
 		128, 128, 128, 128, 128, 128, 128, 128, 
-		128, 128, 128, 128,   0, 128, 128,   0, 
+		128, 128, 128,   0,   0,   0, 128,   0, 
 		  0,   0,   0,   0,   0,   0,   0,   0, 
 		  0,   0,   0,   0,   0,   0,   0,   0, 
 		  0,   0,   0,   0,   0,   0,   0,   0, 
@@ -3896,14 +3888,14 @@ query_frag:;
 	} else {
 		if (yych == '?') goto yy268;
 	}
-#line 234 "ext/standard/url_parser_ex.re"
+#line 226 "ext/standard/url_parser_ex.re"
 	{ return valid; }
-#line 3902 "ext/standard/url_parser_ex.c"
+#line 3894 "ext/standard/url_parser_ex.c"
 yy263:
 	++URLG(url_str);
-#line 233 "ext/standard/url_parser_ex.re"
+#line 225 "ext/standard/url_parser_ex.re"
 	{ URLG(url_str)--; return valid; }
-#line 3907 "ext/standard/url_parser_ex.c"
+#line 3899 "ext/standard/url_parser_ex.c"
 yy265:
 	yyaccept = 0;
 	YYMARKER = ++URLG(url_str);
@@ -3914,7 +3906,7 @@ yy265:
 	if (yych <= '#') goto yy267;
 	if (yych <= '%') goto yy271;
 yy267:
-#line 244 "ext/standard/url_parser_ex.re"
+#line 236 "ext/standard/url_parser_ex.re"
 	{
         marker++;
         int len = URLG(url_str) - marker;
@@ -3923,15 +3915,15 @@ yy267:
         }
         return 1;
     }
-#line 3927 "ext/standard/url_parser_ex.c"
+#line 3919 "ext/standard/url_parser_ex.c"
 yy268:
 	yyaccept = 1;
 	YYMARKER = ++URLG(url_str);
 	yych = *URLG(url_str);
 	if (yych <= '=') {
 		if (yych <= '$') {
-			if (yych <= ' ') goto yy270;
-			if (yych != '#') goto yy268;
+			if (yych == '!') goto yy268;
+			if (yych >= '$') goto yy268;
 		} else {
 			if (yych <= '%') goto yy273;
 			if (yych != '<') goto yy268;
@@ -3942,16 +3934,15 @@ yy268:
 			if (yych <= 'Z') goto yy268;
 			if (yych >= '_') goto yy268;
 		} else {
-			if (yych <= '{') {
+			if (yych <= 'z') {
 				if (yych >= 'a') goto yy268;
 			} else {
-				if (yych <= '|') goto yy270;
-				if (yych <= '~') goto yy268;
+				if (yych == '~') goto yy268;
 			}
 		}
 	}
 yy270:
-#line 235 "ext/standard/url_parser_ex.re"
+#line 227 "ext/standard/url_parser_ex.re"
 	{
         marker++;
         int len = URLG(url_str) - marker;
@@ -3961,7 +3952,7 @@ yy270:
         valid = 1;
         goto query_frag;
     }
-#line 3965 "ext/standard/url_parser_ex.c"
+#line 3956 "ext/standard/url_parser_ex.c"
 yy271:
 	++URLG(url_str);
 	yych = *URLG(url_str);
@@ -4020,6 +4011,6 @@ yy275:
 		goto yy272;
 	}
 }
-#line 252 "ext/standard/url_parser_ex.re"
+#line 244 "ext/standard/url_parser_ex.re"
 
 }

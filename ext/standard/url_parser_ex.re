@@ -218,17 +218,9 @@ int url_parse_query_frag (php_url *url)
 query_frag:;
     marker = URLG(url_str);
 
-    /*
-       BREAK IN RFC
-       RFC does not define the characters "{", "}", or "\""
-       as such parsing a path that contains these characters
-       will halt the parser: /index.php?foo={hello}
-       We will accept these characters here
-    */
-
 /*!re2c
-    QUERY = "?" (PCHAR | "/" | "?" | ["{}])*;
-    FRAGMENT = "#" (PCHAR | "/" | "?" | ["{}])*;
+    QUERY = "?" (PCHAR | "/" | "?")*;
+    FRAGMENT = "#" (PCHAR | "/" | "?")*;
 
     EOF { URLG(url_str)--; return valid; }
     "" { return valid; }

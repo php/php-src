@@ -106,7 +106,7 @@ echo "Done";
 --> http://[x:80]/   : NULL
 -->    : NULL
 --> /   : NULL
---> /rest/Users?filter={"id":"123"}   : string(19) "filter={"id":"123"}"
+--> /rest/Users?filter={"id":"123"}   : string(7) "filter="
 --> http:///blah.com   : NULL
 --> http://:80   : NULL
 --> http://user@:80   : NULL
