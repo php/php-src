@@ -1426,28 +1426,30 @@ zeroHistogram (hist3d histogram)
     }
 }
 
-static void gdImageTrueColorToPaletteBody (gdImagePtr oim, int dither, int colorsWanted, gdImagePtr *cimP);
+static int gdImageTrueColorToPaletteBody (gdImagePtr oim, int dither, int colorsWanted, gdImagePtr *cimP);
 
 gdImagePtr gdImageCreatePaletteFromTrueColor (gdImagePtr im, int dither, int colorsWanted)
 {
 	gdImagePtr nim;
-	gdImageTrueColorToPaletteBody(im, dither, colorsWanted, &nim);
-	return nim;
+	if (TRUE == gdImageTrueColorToPaletteBody(im, dither, colorsWanted, &nim)) {
+		return nim;
+	}
+	return NULL;
 }
 
-void gdImageTrueColorToPalette (gdImagePtr im, int dither, int colorsWanted)
+int gdImageTrueColorToPalette (gdImagePtr im, int dither, int colorsWanted)
 {
-	gdImageTrueColorToPaletteBody(im, dither, colorsWanted, 0);
+	return gdImageTrueColorToPaletteBody(im, dither, colorsWanted, 0);
 }
 
 /*
  * Module initialization routine for 2-pass color quantization.
  */
 
-static void gdImageTrueColorToPaletteBody (gdImagePtr oim, int dither, int colorsWanted, gdImagePtr *cimP)
+static int gdImageTrueColorToPaletteBody (gdImagePtr oim, int dither, int colorsWanted, gdImagePtr *cimP)
 {
   my_cquantize_ptr cquantize = NULL;
-  int i;
+  int i, conversionSucceeded=0;
 
   /* Allocate the JPEG palette-storage */
   size_t arraysize;
@@ -1457,7 +1459,7 @@ static void gdImageTrueColorToPaletteBody (gdImagePtr oim, int dither, int color
     nim = gdImageCreate(oim->sx, oim->sy);
     *cimP = nim;
     if (!nim) {
-      return;
+      return FALSE;
     }
   } else {
     nim = oim;
@@ -1469,7 +1471,7 @@ static void gdImageTrueColorToPaletteBody (gdImagePtr oim, int dither, int color
         gdImageCopy(nim, oim, 0, 0, 0, 0, oim->sx, oim->sy);
         *cimP = nim;
       }
-      return;
+      return TRUE;
     }
 
   /* If we have a transparent color (the alphaless mode of transparency), we
@@ -1602,6 +1604,7 @@ static void gdImageTrueColorToPaletteBody (gdImagePtr oim, int dither, int color
     }
 
   /* Success! Get rid of the truecolor image data. */
+  conversionSucceeded = TRUE;
   if (!cimP) {
     oim->trueColor = 0;
     /* Junk the truecolor pixels */
@@ -1612,9 +1615,10 @@ static void gdImageTrueColorToPaletteBody (gdImagePtr oim, int dither, int color
     gdFree (oim->tpixels);
     oim->tpixels = 0;
   }
-  goto success;
+  goto freeQuantizeData;
   /* Tediously free stuff. */
 outOfMemory:
+  conversionSucceeded = FALSE;
   if (oim->trueColor)
     {
       if (!cimP) {
@@ -1636,7 +1640,7 @@ outOfMemory:
         *cimP = 0;
       }
     }
-success:
+freeQuantizeData:
   for (i = 0; i < HIST_C0_ELEMS; i++)
     {
       if (cquantize->histogram[i])
@@ -1660,6 +1664,7 @@ success:
     {
       gdFree (cquantize);
     }
+  return conversionSucceeded;
 }
 
 
