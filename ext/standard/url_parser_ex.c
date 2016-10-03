@@ -35,7 +35,7 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(url)
 
-// Since YYMARKER increments on wildcards, we'll track ourselves.
+/* Since YYMARKER increments on wildcards, we'll track ourselves. */
 const char *marker;
 const char *YYMARKER;
 
@@ -229,14 +229,14 @@ yy19:
         char* split = memchr(marker, ':', len);
         if (split && split < URLG(url_str)) {
             len = split - marker;
-            url->user = get_token(len);
+            if (len > 0) url->user = get_token(len);
             marker += len + 1;
             len = URLG(url_str) - split - 2;
-            url->pass = get_token(len);
+            if (len > 0) url->pass = get_token(len);
             return 1;
         } else {
             int len = URLG(url_str) - marker - 1;
-            url->user = get_token(len);
+            if (len > 0) url->user = get_token(len);
             return 1;
         }
     }
@@ -261,10 +261,9 @@ yy21:
 
 int url_parse_authority_host (php_url *url)
 {
-    int incr = 0;
     marker = URLG(url_str);
 
-#line 268 "ext/standard/url_parser_ex.c"
+#line 267 "ext/standard/url_parser_ex.c"
 {
 	unsigned char yych;
 	unsigned int yyaccept = 0;
@@ -314,14 +313,14 @@ int url_parse_authority_host (php_url *url)
 		if (yych <= '[') goto yy32;
 	}
 yy24:
-#line 141 "ext/standard/url_parser_ex.re"
+#line 137 "ext/standard/url_parser_ex.re"
 	{ return 0; }
-#line 320 "ext/standard/url_parser_ex.c"
+#line 319 "ext/standard/url_parser_ex.c"
 yy25:
 	++URLG(url_str);
-#line 140 "ext/standard/url_parser_ex.re"
+#line 136 "ext/standard/url_parser_ex.re"
 	{ URLG(url_str) = marker; return 0; }
-#line 325 "ext/standard/url_parser_ex.c"
+#line 324 "ext/standard/url_parser_ex.c"
 yy27:
 	yyaccept = 1;
 	YYMARKER = ++URLG(url_str);
@@ -332,11 +331,11 @@ yy27:
 	if (yych <= '#') goto yy29;
 	if (yych <= '%') goto yy30;
 yy29:
-#line 142 "ext/standard/url_parser_ex.re"
+#line 138 "ext/standard/url_parser_ex.re"
 	{
         goto host;
     }
-#line 340 "ext/standard/url_parser_ex.c"
+#line 339 "ext/standard/url_parser_ex.c"
 yy30:
 	++URLG(url_str);
 	yych = *URLG(url_str);
@@ -671,12 +670,11 @@ yy51:
 	}
 yy52:
 	++URLG(url_str);
-#line 145 "ext/standard/url_parser_ex.re"
+#line 141 "ext/standard/url_parser_ex.re"
 	{
-        incr = 1;
         goto host;
     }
-#line 680 "ext/standard/url_parser_ex.c"
+#line 678 "ext/standard/url_parser_ex.c"
 yy54:
 	yych = *++URLG(url_str);
 	if (yych <= 'F') {
@@ -3610,16 +3608,10 @@ yy232:
 		}
 	}
 }
-#line 149 "ext/standard/url_parser_ex.re"
+#line 144 "ext/standard/url_parser_ex.re"
 
 host:;
     int len = URLG(url_str) - marker;
-
-    if (incr) {
-        len -= 2;
-        marker++;
-    }
-
     url->host = get_token(len);
     return 1;
 }
@@ -3628,7 +3620,7 @@ int url_parse_authority_port (php_url *url)
 {
     marker = URLG(url_str);
 
-#line 3632 "ext/standard/url_parser_ex.c"
+#line 3624 "ext/standard/url_parser_ex.c"
 {
 	unsigned char yych;
 	static const unsigned char yybm[] = {
@@ -3668,21 +3660,21 @@ int url_parse_authority_port (php_url *url)
 	yych = *URLG(url_str);
 	if (yych <= 0x00) goto yy236;
 	if (yych == ':') goto yy238;
-#line 168 "ext/standard/url_parser_ex.re"
+#line 157 "ext/standard/url_parser_ex.re"
 	{ return 0; }
-#line 3674 "ext/standard/url_parser_ex.c"
+#line 3666 "ext/standard/url_parser_ex.c"
 yy236:
 	++URLG(url_str);
-#line 167 "ext/standard/url_parser_ex.re"
+#line 156 "ext/standard/url_parser_ex.re"
 	{ URLG(url_str)--; return 0; }
-#line 3679 "ext/standard/url_parser_ex.c"
+#line 3671 "ext/standard/url_parser_ex.c"
 yy238:
 	++URLG(url_str);
 	yych = *URLG(url_str);
 	if (yybm[0+yych] & 128) {
 		goto yy238;
 	}
-#line 169 "ext/standard/url_parser_ex.re"
+#line 158 "ext/standard/url_parser_ex.re"
 	{
         marker++;
         int len = URLG(url_str) - marker;
@@ -3691,30 +3683,30 @@ yy238:
         efree(port);
         return 1;
     }
-#line 3695 "ext/standard/url_parser_ex.c"
+#line 3687 "ext/standard/url_parser_ex.c"
 }
-#line 177 "ext/standard/url_parser_ex.re"
+#line 166 "ext/standard/url_parser_ex.re"
 
 }
 
 int url_parse_authority (php_url *url)
 {
 
-#line 3704 "ext/standard/url_parser_ex.c"
+#line 3696 "ext/standard/url_parser_ex.c"
 {
 	unsigned char yych;
 	yych = *(YYMARKER = URLG(url_str));
 	if (yych <= 0x00) goto yy244;
 	if (yych == '/') goto yy246;
 yy243:
-#line 184 "ext/standard/url_parser_ex.re"
+#line 173 "ext/standard/url_parser_ex.re"
 	{ return 0; }
-#line 3713 "ext/standard/url_parser_ex.c"
+#line 3705 "ext/standard/url_parser_ex.c"
 yy244:
 	++URLG(url_str);
-#line 183 "ext/standard/url_parser_ex.re"
+#line 172 "ext/standard/url_parser_ex.re"
 	{ URLG(url_str)--; return 0; }
-#line 3718 "ext/standard/url_parser_ex.c"
+#line 3710 "ext/standard/url_parser_ex.c"
 yy246:
 	yych = *++URLG(url_str);
 	if (yych == '/') goto yy248;
@@ -3722,13 +3714,13 @@ yy246:
 	goto yy243;
 yy248:
 	++URLG(url_str);
-#line 185 "ext/standard/url_parser_ex.re"
+#line 174 "ext/standard/url_parser_ex.re"
 	{
         goto authority;
     }
-#line 3730 "ext/standard/url_parser_ex.c"
+#line 3722 "ext/standard/url_parser_ex.c"
 }
-#line 188 "ext/standard/url_parser_ex.re"
+#line 177 "ext/standard/url_parser_ex.re"
 
 authority:;
     int valid = 0;
@@ -3744,7 +3736,7 @@ int url_parse_path (php_url *url)
 {
     marker = URLG(url_str);
 
-#line 3748 "ext/standard/url_parser_ex.c"
+#line 3740 "ext/standard/url_parser_ex.c"
 {
 	unsigned char yych;
 	static const unsigned char yybm[] = {
@@ -3789,7 +3781,7 @@ int url_parse_path (php_url *url)
 	if (yych <= '#') goto yy252;
 	if (yych <= '%') goto yy257;
 yy252:
-#line 215 "ext/standard/url_parser_ex.re"
+#line 204 "ext/standard/url_parser_ex.re"
 	{
         int len = URLG(url_str) - marker;
 
@@ -3798,12 +3790,12 @@ yy252:
         }
         return 1;
     }
-#line 3802 "ext/standard/url_parser_ex.c"
+#line 3794 "ext/standard/url_parser_ex.c"
 yy253:
 	++URLG(url_str);
-#line 214 "ext/standard/url_parser_ex.re"
+#line 203 "ext/standard/url_parser_ex.re"
 	{ URLG(url_str)--; return 0; }
-#line 3807 "ext/standard/url_parser_ex.c"
+#line 3799 "ext/standard/url_parser_ex.c"
 yy255:
 	YYMARKER = ++URLG(url_str);
 	yych = *URLG(url_str);
@@ -3840,7 +3832,7 @@ yy259:
 		goto yy258;
 	}
 }
-#line 223 "ext/standard/url_parser_ex.re"
+#line 212 "ext/standard/url_parser_ex.re"
 
 }
 
@@ -3849,6 +3841,14 @@ int url_parse_query_frag (php_url *url)
     int valid = 0;
 query_frag:;
     marker = URLG(url_str);
+
+    /*
+       BREAK IN RFC
+       RFC does not define the characters "{", "}", or "\""
+       as such parsing a path that contains these characters
+       will halt the parser: /index.php?foo={hello}
+       We will accept these characters here
+    */
 
 
 #line 3855 "ext/standard/url_parser_ex.c"
@@ -3896,12 +3896,12 @@ query_frag:;
 	} else {
 		if (yych == '?') goto yy268;
 	}
-#line 243 "ext/standard/url_parser_ex.re"
+#line 234 "ext/standard/url_parser_ex.re"
 	{ return valid; }
 #line 3902 "ext/standard/url_parser_ex.c"
 yy263:
 	++URLG(url_str);
-#line 242 "ext/standard/url_parser_ex.re"
+#line 233 "ext/standard/url_parser_ex.re"
 	{ URLG(url_str)--; return valid; }
 #line 3907 "ext/standard/url_parser_ex.c"
 yy265:
@@ -3914,7 +3914,7 @@ yy265:
 	if (yych <= '#') goto yy267;
 	if (yych <= '%') goto yy271;
 yy267:
-#line 253 "ext/standard/url_parser_ex.re"
+#line 244 "ext/standard/url_parser_ex.re"
 	{
         marker++;
         int len = URLG(url_str) - marker;
@@ -3951,7 +3951,7 @@ yy268:
 		}
 	}
 yy270:
-#line 244 "ext/standard/url_parser_ex.re"
+#line 235 "ext/standard/url_parser_ex.re"
 	{
         marker++;
         int len = URLG(url_str) - marker;
@@ -4020,6 +4020,6 @@ yy275:
 		goto yy272;
 	}
 }
-#line 261 "ext/standard/url_parser_ex.re"
+#line 252 "ext/standard/url_parser_ex.re"
 
 }

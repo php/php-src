@@ -1,11 +1,11 @@
 --TEST--
-Test parse_url() function: Parse a load of URLs without specifying the component 
+Test parse_url() function: Parse a load of URLs without specifying the component
 --FILE--
 <?php
 /* Prototype  : proto mixed parse_url(string url, [int url_component])
- * Description: Parse a and return its components 
+ * Description: Parse a and return its components
  * Source code: ext/standard/url.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 /*
@@ -18,7 +18,6 @@ foreach ($urls as $url) {
 	var_dump(parse_url($url));
 }
 
-echo "Done";
 ?>
 --EXPECTF--
 
@@ -48,13 +47,9 @@ echo "Done";
   string(13) "64.246.30.37/"
 }
 
---> 64.246.30.37:80/: array(3) {
-  ["host"]=>
-  string(12) "64.246.30.37"
-  ["port"]=>
-  int(80)
+--> 64.246.30.37:80/: array(1) {
   ["path"]=>
-  string(1) "/"
+  string(16) "64.246.30.37:80/"
 }
 
 --> php.net: array(1) {
@@ -109,11 +104,11 @@ echo "Done";
   string(1) "/"
 }
 
---> www.php.net:80: array(2) {
-  ["host"]=>
+--> www.php.net:80/: array(2) {
+  ["scheme"]=>
   string(11) "www.php.net"
-  ["port"]=>
-  int(80)
+  ["path"]=>
+  string(3) "80/"
 }
 
 --> http://www.php.net:80: array(3) {
@@ -150,13 +145,11 @@ echo "Done";
   string(12) "www.php.net/"
 }
 
---> www.php.net:80/?: array(3) {
-  ["host"]=>
+--> www.php.net:80/?: array(2) {
+  ["scheme"]=>
   string(11) "www.php.net"
-  ["port"]=>
-  int(80)
   ["path"]=>
-  string(1) "/"
+  string(3) "80/"
 }
 
 --> http://www.php.net/?: array(3) {
@@ -234,17 +227,6 @@ echo "Done";
   int(80)
   ["path"]=>
   string(45) "/this/is/a/very/deep/directory/structure/and/"
-}
-
---> http://www.php.net:80/this/is/a/very/deep/directory/structure/and/file.php: array(4) {
-  ["scheme"]=>
-  string(4) "http"
-  ["host"]=>
-  string(11) "www.php.net"
-  ["port"]=>
-  int(80)
-  ["path"]=>
-  string(53) "/this/is/a/very/deep/directory/structure/and/file.php"
 }
 
 --> http://www.php.net:80/this/../a/../deep/directory: array(4) {
@@ -424,13 +406,11 @@ echo "Done";
   string(31) "test=1&test2=char&test3=mixesCI"
 }
 
---> www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123: array(5) {
-  ["host"]=>
+--> www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123: array(4) {
+  ["scheme"]=>
   string(11) "www.php.net"
-  ["port"]=>
-  int(80)
   ["path"]=>
-  string(10) "/index.php"
+  string(12) "80/index.php"
   ["query"]=>
   string(31) "test=1&test2=char&test3=mixesCI"
   ["fragment"]=>
@@ -454,15 +434,13 @@ echo "Done";
   string(16) "some_page_ref123"
 }
 
---> http://secret:@www.php.net/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123: array(7) {
+--> http://secret:@www.php.net/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123: array(6) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
   string(11) "www.php.net"
   ["user"]=>
   string(6) "secret"
-  ["pass"]=>
-  string(0) ""
   ["path"]=>
   string(10) "/index.php"
   ["query"]=>
@@ -471,15 +449,13 @@ echo "Done";
   string(16) "some_page_ref123"
 }
 
---> http://:hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123: array(8) {
+--> http://:hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123: array(7) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
   string(11) "www.php.net"
   ["port"]=>
   int(80)
-  ["user"]=>
-  string(0) ""
   ["pass"]=>
   string(7) "hideout"
   ["path"]=>
@@ -719,49 +695,46 @@ echo "Done";
   string(9) "/blah.com"
 }
 
---> x://::abc/?: bool(false)
+--> x://::abc/?: array(2) {
+  ["scheme"]=>
+  string(1) "x"
+  ["path"]=>
+  string(5) ":abc/"
+}
 
 --> http://::?: array(2) {
   ["scheme"]=>
   string(4) "http"
-  ["host"]=>
+  ["path"]=>
   string(1) ":"
 }
 
 --> http://::#: array(2) {
   ["scheme"]=>
   string(4) "http"
-  ["host"]=>
+  ["path"]=>
   string(1) ":"
 }
 
---> x://::6.5: array(3) {
+--> x://::6.5: array(2) {
   ["scheme"]=>
   string(1) "x"
-  ["host"]=>
-  string(1) ":"
-  ["port"]=>
-  int(6)
+  ["path"]=>
+  string(4) ":6.5"
 }
 
---> http://?:/: array(3) {
+--> http://?:/: array(2) {
   ["scheme"]=>
   string(4) "http"
-  ["host"]=>
-  string(1) "?"
-  ["path"]=>
-  string(1) "/"
+  ["query"]=>
+  string(2) ":/"
 }
 
---> http://@?:/: array(4) {
+--> http://@?:/: array(2) {
   ["scheme"]=>
   string(4) "http"
-  ["host"]=>
-  string(1) "?"
-  ["user"]=>
-  string(0) ""
-  ["path"]=>
-  string(1) "/"
+  ["query"]=>
+  string(2) ":/"
 }
 
 --> file:///:: array(2) {
@@ -775,7 +748,7 @@ echo "Done";
   ["scheme"]=>
   string(4) "file"
   ["path"]=>
-  string(3) "a:/"
+  string(4) "/a:/"
 }
 
 --> file:///ab:/: array(2) {
@@ -785,18 +758,11 @@ echo "Done";
   string(5) "/ab:/"
 }
 
---> file:///a:/: array(2) {
-  ["scheme"]=>
-  string(4) "file"
-  ["path"]=>
-  string(3) "a:/"
-}
-
 --> file:///@:/: array(2) {
   ["scheme"]=>
   string(4) "file"
   ["path"]=>
-  string(3) "@:/"
+  string(4) "/@:/"
 }
 
 --> file:///:80/: array(2) {
@@ -806,24 +772,14 @@ echo "Done";
   string(5) "/:80/"
 }
 
---> []: array(1) {
-  ["path"]=>
-  string(2) "[]"
-}
+--> []: NULL
 
---> http://[x:80]/: array(3) {
+--> http://[x:80]/: array(1) {
   ["scheme"]=>
   string(4) "http"
-  ["host"]=>
-  string(6) "[x:80]"
-  ["path"]=>
-  string(1) "/"
 }
 
---> : array(1) {
-  ["path"]=>
-  string(0) ""
-}
+--> : NULL
 
 --> /: array(1) {
   ["path"]=>
@@ -837,37 +793,139 @@ echo "Done";
   string(19) "filter={"id":"123"}"
 }
 
---> http:///blah.com: bool(false)
+--> http:///blah.com: array(2) {
+  ["scheme"]=>
+  string(4) "http"
+  ["path"]=>
+  string(9) "/blah.com"
+}
 
---> http://:80: bool(false)
+--> http://:80: array(2) {
+  ["scheme"]=>
+  string(4) "http"
+  ["port"]=>
+  int(80)
+}
 
---> http://user@:80: bool(false)
+--> http://user@:80: array(3) {
+  ["scheme"]=>
+  string(4) "http"
+  ["port"]=>
+  int(80)
+  ["user"]=>
+  string(4) "user"
+}
 
---> http://user:pass@:80: bool(false)
+--> http://user:pass@:80: array(4) {
+  ["scheme"]=>
+  string(4) "http"
+  ["port"]=>
+  int(80)
+  ["user"]=>
+  string(4) "user"
+  ["pass"]=>
+  string(4) "pass"
+}
 
---> http://:: bool(false)
+--> http://:: array(1) {
+  ["scheme"]=>
+  string(4) "http"
+}
 
---> http://@/: bool(false)
+--> http://@/: array(2) {
+  ["scheme"]=>
+  string(4) "http"
+  ["path"]=>
+  string(1) "/"
+}
 
---> http://@:/: bool(false)
+--> http://@:/: array(2) {
+  ["scheme"]=>
+  string(4) "http"
+  ["path"]=>
+  string(1) "/"
+}
 
---> http://:/: bool(false)
+--> http://:/: array(2) {
+  ["scheme"]=>
+  string(4) "http"
+  ["path"]=>
+  string(1) "/"
+}
 
---> http://?: bool(false)
+--> http://?: array(1) {
+  ["scheme"]=>
+  string(4) "http"
+}
 
---> http://#: bool(false)
+--> http://#: array(1) {
+  ["scheme"]=>
+  string(4) "http"
+}
 
---> http://?:: bool(false)
+--> http://?:: array(2) {
+  ["scheme"]=>
+  string(4) "http"
+  ["query"]=>
+  string(1) ":"
+}
 
---> http://:?: bool(false)
+--> http://:?: array(1) {
+  ["scheme"]=>
+  string(4) "http"
+}
 
---> http://blah.com:123456: bool(false)
+--> http://blah.com:123456: array(3) {
+  ["scheme"]=>
+  string(4) "http"
+  ["host"]=>
+  string(8) "blah.com"
+  ["port"]=>
+  int(123456)
+}
 
---> http://blah.com:abcdef: bool(false)
+--> http://blah.com:abcdef: array(3) {
+  ["scheme"]=>
+  string(4) "http"
+  ["host"]=>
+  string(8) "blah.com"
+  ["path"]=>
+  string(6) "abcdef"
+}
 
---> http://secret@hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123: bool(false)
+--> http://secret@hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123: array(6) {
+  ["scheme"]=>
+  string(4) "http"
+  ["host"]=>
+  string(7) "hideout"
+  ["user"]=>
+  string(6) "secret"
+  ["path"]=>
+  string(25) "@www.php.net:80/index.php"
+  ["query"]=>
+  string(31) "test=1&test2=char&test3=mixesCI"
+  ["fragment"]=>
+  string(16) "some_page_ref123"
+}
 
---> http://user:@pass@host/path?argument?value#etc: bool(false)
+--> http://user:@pass@host/path?argument?value#etc: array(6) {
+  ["scheme"]=>
+  string(4) "http"
+  ["host"]=>
+  string(4) "pass"
+  ["user"]=>
+  string(4) "user"
+  ["path"]=>
+  string(10) "@host/path"
+  ["query"]=>
+  string(14) "argument?value"
+  ["fragment"]=>
+  string(3) "etc"
+}
 
---> http://foo.com\@bar.com: bool(false)
-Done
+--> http://foo.com\@bar.com: array(2) {
+  ["scheme"]=>
+  string(4) "http"
+  ["host"]=>
+  string(7) "foo.com"
+}

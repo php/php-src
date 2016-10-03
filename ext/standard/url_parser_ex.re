@@ -33,7 +33,7 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(url)
 
-// Since YYMARKER increments on wildcards, we'll track ourselves.
+/* Since YYMARKER increments on wildcards, we'll track ourselves. */
 const char *marker;
 const char *YYMARKER;
 
@@ -94,14 +94,14 @@ int url_parse_authority_userinfo (php_url *url)
         char* split = memchr(marker, ':', len);
         if (split && split < URLG(url_str)) {
             len = split - marker;
-            url->user = get_token(len);
+            if (len > 0) url->user = get_token(len);
             marker += len + 1;
             len = URLG(url_str) - split - 2;
-            url->pass = get_token(len);
+            if (len > 0) url->pass = get_token(len);
             return 1;
         } else {
             int len = URLG(url_str) - marker - 1;
-            url->user = get_token(len);
+            if (len > 0) url->user = get_token(len);
             return 1;
         }
     }
@@ -110,12 +110,8 @@ int url_parse_authority_userinfo (php_url *url)
 
 int url_parse_authority_host (php_url *url)
 {
-    int incr = 0;
     marker = URLG(url_str);
 /*!re2c
-    //
-    // IP Address Formats
-    //
     DEC_OCTET = DIGIT | [1-9] DIGIT | "1" DIGIT{2} | "2" [0-4] DIGIT | "25" [0-5];
     IPV4ADDR = (DEC_OCTET "."){3} DEC_OCTET;
     H16 = HEXDIG{1,4};
@@ -143,18 +139,11 @@ int url_parse_authority_host (php_url *url)
         goto host;
     }
     IPV6ADDR | IPVFUTURE {
-        incr = 1;
         goto host;
     }
 */
 host:;
     int len = URLG(url_str) - marker;
-
-    if (incr) {
-        len -= 2;
-        marker++;
-    }
-
     url->host = get_token(len);
     return 1;
 }
@@ -229,13 +218,15 @@ int url_parse_query_frag (php_url *url)
 query_frag:;
     marker = URLG(url_str);
 
-/*!re2c
+    /*
+       BREAK IN RFC
+       RFC does not define the characters "{", "}", or "\""
+       as such parsing a path that contains these characters
+       will halt the parser: /index.php?foo={hello}
+       We will accept these characters here
+    */
 
-// BREAK IN RFC
-// RFC does not define the characters "{", "}", or "\""
-// as such parsing a path that contains these characters
-// will halt the parser: /index.php?foo={hello}
-// We will accept these characters here
+/*!re2c
     QUERY = "?" (PCHAR | "/" | "?" | ["{}])*;
     FRAGMENT = "#" (PCHAR | "/" | "?" | ["{}])*;
 

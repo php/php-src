@@ -113,7 +113,7 @@ PHP_FUNCTION(parse_url)
 				break;
 			default:
 				php_error_docref(NULL, E_WARNING, "Invalid URL component identifier " ZEND_LONG_FMT, key);
-				RETVAL_FALSE;
+				RETVAL_NULL();
 		}
 		goto done;
 	}
@@ -141,8 +141,9 @@ PHP_FUNCTION(parse_url)
 
 	if (UNEXPECTED(!zend_array_count(HASH_OF(return_value)))) {
 		efree(Z_ARRVAL_P(return_value));
-		RETVAL_FALSE;
+		RETVAL_NULL();
 	}
+
 done:
 	php_url_free(resource);
 }

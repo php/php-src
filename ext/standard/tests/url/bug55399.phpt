@@ -7,4 +7,7 @@ var_dump(parse_url(":"));
 
 ?>
 --EXPECT--
-bool(false)
+array(1) {
+  ["path"]=>
+  string(1) ":"
+}

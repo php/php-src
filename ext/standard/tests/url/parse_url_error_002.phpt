@@ -43,5 +43,5 @@ echo "Done"
 
 --> Above range:
 Warning: parse_url(): Invalid URL component identifier 99 in %s on line 15
-bool(false)
+NULL
 Done

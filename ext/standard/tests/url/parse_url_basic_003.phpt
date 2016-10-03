@@ -25,7 +25,7 @@ echo "Done";
 --> http://64.246.30.37   : string(12) "64.246.30.37"
 --> http://64.246.30.37/   : string(12) "64.246.30.37"
 --> 64.246.30.37/   : NULL
---> 64.246.30.37:80/   : string(12) "64.246.30.37"
+--> 64.246.30.37:80/   : NULL
 --> php.net   : NULL
 --> php.net/   : NULL
 --> http://php.net   : string(7) "php.net"
@@ -34,12 +34,12 @@ echo "Done";
 --> www.php.net/   : NULL
 --> http://www.php.net   : string(11) "www.php.net"
 --> http://www.php.net/   : string(11) "www.php.net"
---> www.php.net:80   : string(11) "www.php.net"
+--> www.php.net:80/   : NULL
 --> http://www.php.net:80   : string(11) "www.php.net"
 --> http://www.php.net:80/   : string(11) "www.php.net"
 --> http://www.php.net/index.php   : string(11) "www.php.net"
 --> www.php.net/?   : NULL
---> www.php.net:80/?   : string(11) "www.php.net"
+--> www.php.net:80/?   : NULL
 --> http://www.php.net/?   : string(11) "www.php.net"
 --> http://www.php.net:80/?   : string(11) "www.php.net"
 --> http://www.php.net:80/index.php   : string(11) "www.php.net"
@@ -47,7 +47,6 @@ echo "Done";
 --> http://www.php.net:80/this/is/a/very/deep/directory/structure/and/file.php   : string(11) "www.php.net"
 --> http://www.php.net:80/this/is/a/very/deep/directory/structure/and/file.php?lots=1&of=2&parameters=3&too=4&here=5   : string(11) "www.php.net"
 --> http://www.php.net:80/this/is/a/very/deep/directory/structure/and/   : string(11) "www.php.net"
---> http://www.php.net:80/this/is/a/very/deep/directory/structure/and/file.php   : string(11) "www.php.net"
 --> http://www.php.net:80/this/../a/../deep/directory   : string(11) "www.php.net"
 --> http://www.php.net:80/this/../a/../deep/directory/   : string(11) "www.php.net"
 --> http://www.php.net:80/this/is/a/very/deep/directory/../file.php   : string(11) "www.php.net"
@@ -63,7 +62,7 @@ echo "Done";
 --> http://www.php.net:80/index.php?foo&   : string(11) "www.php.net"
 --> http://www.php.net/index.php?&foo   : string(11) "www.php.net"
 --> http://www.php.net:80/index.php?test=1&test2=char&test3=mixesCI   : string(11) "www.php.net"
---> www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(11) "www.php.net"
+--> www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : NULL
 --> http://secret@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(11) "www.php.net"
 --> http://secret:@www.php.net/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(11) "www.php.net"
 --> http://:hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(11) "www.php.net"
@@ -92,38 +91,37 @@ echo "Done";
 --> http://x:?   : string(1) "x"
 --> x:blah.com   : NULL
 --> x:/blah.com   : NULL
---> x://::abc/?   : bool(false)
---> http://::?   : string(1) ":"
---> http://::#   : string(1) ":"
---> x://::6.5   : string(1) ":"
---> http://?:/   : string(1) "?"
---> http://@?:/   : string(1) "?"
+--> x://::abc/?   : NULL
+--> http://::?   : NULL
+--> http://::#   : NULL
+--> x://::6.5   : NULL
+--> http://?:/   : NULL
+--> http://@?:/   : NULL
 --> file:///:   : NULL
 --> file:///a:/   : NULL
 --> file:///ab:/   : NULL
---> file:///a:/   : NULL
 --> file:///@:/   : NULL
 --> file:///:80/   : NULL
 --> []   : NULL
---> http://[x:80]/   : string(6) "[x:80]"
+--> http://[x:80]/   : NULL
 -->    : NULL
 --> /   : NULL
 --> /rest/Users?filter={"id":"123"}   : NULL
---> http:///blah.com   : bool(false)
---> http://:80   : bool(false)
---> http://user@:80   : bool(false)
---> http://user:pass@:80   : bool(false)
---> http://:   : bool(false)
---> http://@/   : bool(false)
---> http://@:/   : bool(false)
---> http://:/   : bool(false)
---> http://?   : bool(false)
---> http://#   : bool(false)
---> http://?:   : bool(false)
---> http://:?   : bool(false)
---> http://blah.com:123456   : bool(false)
---> http://blah.com:abcdef   : bool(false)
---> http://secret@hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : bool(false)
---> http://user:@pass@host/path?argument?value#etc   : bool(false)
---> http://foo.com\@bar.com   : bool(false)
+--> http:///blah.com   : NULL
+--> http://:80   : NULL
+--> http://user@:80   : NULL
+--> http://user:pass@:80   : NULL
+--> http://:   : NULL
+--> http://@/   : NULL
+--> http://@:/   : NULL
+--> http://:/   : NULL
+--> http://?   : NULL
+--> http://#   : NULL
+--> http://?:   : NULL
+--> http://:?   : NULL
+--> http://blah.com:123456   : string(8) "blah.com"
+--> http://blah.com:abcdef   : string(8) "blah.com"
+--> http://secret@hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(7) "hideout"
+--> http://user:@pass@host/path?argument?value#etc   : string(4) "pass"
+--> http://foo.com\@bar.com   : string(7) "foo.com"
 Done
