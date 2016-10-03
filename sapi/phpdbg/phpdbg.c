@@ -1296,7 +1296,7 @@ php_stream *phpdbg_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *
 	}
 
 	if (!strncasecmp(path, "stdin", 6) && PHPDBG_G(stdin_file)) {
-		php_stream *stream =stream = php_stream_fopen_from_file(PHPDBG_G(stdin_file), "r");
+		php_stream *stream = php_stream_fopen_from_fd(dup(fileno(PHPDBG_G(stdin_file))), "r", NULL);
 #ifdef PHP_WIN32
 		zval *blocking_pipes = php_stream_context_get_option(context, "pipe", "blocking");
 		if (blocking_pipes) {
