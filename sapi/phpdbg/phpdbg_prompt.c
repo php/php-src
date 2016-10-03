@@ -384,13 +384,18 @@ void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default) /
 }
 /* }}} */
 
-void phpdbg_clean(zend_bool full) /* {{{ */
+void phpdbg_clean(zend_bool full, zend_bool resubmit) /* {{{ */
 {
 	/* this is implicitly required */
 	if (PHPDBG_G(ops)) {
 		destroy_op_array(PHPDBG_G(ops));
 		efree(PHPDBG_G(ops));
 		PHPDBG_G(ops) = NULL;
+	}
+
+	if (!resubmit && PHPDBG_G(cur_command)) {
+		free(PHPDBG_G(cur_command));
+		PHPDBG_G(cur_command) = NULL;
 	}
 
 	if (full) {
@@ -423,7 +428,7 @@ PHPDBG_COMMAND(exec) /* {{{ */
 
 				if (PHPDBG_G(ops)) {
 					phpdbg_notice("exec", "type=\"unsetops\"", "Destroying compiled opcodes");
-					phpdbg_clean(0);
+					phpdbg_clean(0, 0);
 				}
 
 				PHPDBG_G(exec) = res;
@@ -437,7 +442,7 @@ PHPDBG_COMMAND(exec) /* {{{ */
 				phpdbg_notice("exec", "type=\"set\" context=\"%s\"", "Set execution context: %s", PHPDBG_G(exec));
 
 				if (PHPDBG_G(in_execution)) {
-					phpdbg_clean(1);
+					phpdbg_clean(1, 0);
 					return SUCCESS;
 				}
 
@@ -675,7 +680,7 @@ PHPDBG_COMMAND(run) /* {{{ */
 		if (PHPDBG_G(in_execution)) {
 			if (phpdbg_ask_user_permission("Do you really want to restart execution?") == SUCCESS) {
 				phpdbg_startup_run++;
-				phpdbg_clean(1);
+				phpdbg_clean(1, 1);
 			}
 			return SUCCESS;
 		}
@@ -685,6 +690,97 @@ PHPDBG_COMMAND(run) /* {{{ */
 				phpdbg_error("compile", "type=\"compilefailure\" context=\"%s\"", "Failed to compile %s, cannot run", PHPDBG_G(exec));
 				goto out;
 			}
+		}
+
+		if (param && param->type != EMPTY_PARAM && param->len != 0) {
+			char **argv = emalloc(5 * sizeof(char *));
+			char *end = param->str + param->len, *p = param->str;
+			int argc = 0;
+			int i;
+
+			while (*end == '\r' || *end == '\n') *(end--) = 0;
+
+			while (*p == ' ') p++;
+			while (*p) {
+				char sep = ' ';
+				char *buf = emalloc(end - p + 1), *q = buf;
+
+				if (*p == '<') {
+					/* use as STDIN */
+					do p++; while (*p == ' ');
+
+					if (*p == '\'' || *p == '"') {
+						sep = *(p++);
+					}
+					while (*p && *p != sep) {
+						if (*p == '\\' && (p[1] == sep || p[1] == '\\')) {
+							p++;
+						}
+						*(q++) = *(p++);
+					}
+					*(q++) = 0;
+					if (*p) {
+						do p++; while (*p == ' ');
+					}
+
+					if (*p) {
+						phpdbg_error("cmd", "", "Invalid run command, cannot put further arguments after stdin");
+						goto free_cmd;
+					}
+
+					PHPDBG_G(stdin_file) = fopen(buf, "r");
+					if (PHPDBG_G(stdin_file) == NULL) {
+						phpdbg_error("stdin", "path=\"%s\"", "Could not open '%s' for reading from stdin", buf);
+						goto free_cmd;
+					}
+					efree(buf);
+					phpdbg_register_file_handles();
+					break;
+				}
+
+				if (argc >= 4 && argc == (argc & -argc)) {
+					argv = erealloc(argv, (argc * 2 + 1) * sizeof(char *));
+				}
+
+				if (*p == '\'' || *p == '"') {
+					sep = *(p++);
+				}
+				if (*p == '\\' && (p[1] == '<' || p[1] == '\'' || p[1] == '"')) {
+					p++;
+				}
+				while (*p && *p != sep) {
+					if (*p == '\\' && (p[1] == sep || p[1] == '\\' || (p[1] == '#' && sep == ' '))) {
+						p++;
+					}
+					*(q++) = *(p++);
+				}
+				if (!*p && sep != ' ') {
+					phpdbg_error("cmd", "", "Invalid run command, unterminated escape sequence");
+free_cmd:
+					efree(buf);
+					for (i = 0; i < argc; i++) {
+						efree(argv[i]);
+					}
+					efree(argv);
+					return SUCCESS;
+				}
+
+				*(q++) = 0;
+				argv[++argc] = erealloc(buf, q - buf);
+
+				if (*p) {
+					do p++; while (*p == ' ');
+				}
+			}
+			argv[0] = SG(request_info).argv[0];
+			for (i = SG(request_info).argc; --i;) {
+				efree(SG(request_info).argv[i]);
+			}
+			efree(SG(request_info).argv);
+			SG(request_info).argv = erealloc(argv, ++argc * sizeof(char *));
+			SG(request_info).argc = argc;
+
+			php_build_argv(NULL, &PG(http_globals)[TRACK_VARS_SERVER]);
 		}
 
 		/* clean up from last execution */
@@ -701,32 +797,6 @@ PHPDBG_COMMAND(run) /* {{{ */
 
 		/* reset hit counters */
 		phpdbg_reset_breakpoints();
-
-		if (param && param->type != EMPTY_PARAM && param->len != 0) {
-			char **argv = emalloc(5 * sizeof(char *));
-			int argc = 0;
-			int i;
-			/* TODO allow proper escaping with \,  "" and '' here */
-			char *argv_str = strtok(param->str, " ");
-
-			while (argv_str) {
-				if (argc >= 4 && argc == (argc & -argc)) {
-					argv = erealloc(argv, (argc * 2 + 1) * sizeof(char *));
-				}
-				argv[++argc] = argv_str;
-				argv_str = strtok(0, " ");
-				argv[argc] = estrdup(argv[argc]);
-			}
-			argv[0] = SG(request_info).argv[0];
-			for (i = SG(request_info).argc; --i;) {
-				efree(SG(request_info).argv[i]);
-			}
-			efree(SG(request_info).argv);
-			SG(request_info).argv = erealloc(argv, ++argc * sizeof(char *));
-			SG(request_info).argc = argc;
-
-			php_build_argv(NULL, &PG(http_globals)[TRACK_VARS_SERVER]);
-		}
 
 		zend_try {
 			PHPDBG_G(flags) ^= PHPDBG_IS_INTERACTIVE;
@@ -768,7 +838,7 @@ PHPDBG_COMMAND(run) /* {{{ */
 
 		PHPDBG_G(flags) &= ~PHPDBG_IS_RUNNING;
 
-		phpdbg_clean(1);
+		phpdbg_clean(1, 0);
 	} else {
 		phpdbg_error("inactive", "type=\"nocontext\"", "Nothing to execute!");
 	}
@@ -1320,7 +1390,7 @@ PHPDBG_COMMAND(clean) /* {{{ */
 	phpdbg_writeln("clean", "constants=\"%d\"", "Constants  %d", zend_hash_num_elements(EG(zend_constants)));
 	phpdbg_writeln("clean", "includes=\"%d\"", "Includes   %d", zend_hash_num_elements(&EG(included_files)));
 
-	phpdbg_clean(1);
+	phpdbg_clean(1, 0);
 
 	phpdbg_xml("</cleaninfo>");
 
@@ -1387,10 +1457,9 @@ PHPDBG_COMMAND(watch) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-int phpdbg_interactive(zend_bool allow_async_unsafe) /* {{{ */
+int phpdbg_interactive(zend_bool allow_async_unsafe, char *input) /* {{{ */
 {
 	int ret = SUCCESS;
-	char *input = NULL;
 	phpdbg_param_t stack;
 
 	PHPDBG_G(flags) |= PHPDBG_IS_INTERACTIVE;
@@ -1400,7 +1469,7 @@ int phpdbg_interactive(zend_bool allow_async_unsafe) /* {{{ */
 			zend_bailout();
 		}
 
-		if (!(input = phpdbg_read_input(NULL))) {
+		if (!input && !(input = phpdbg_read_input(NULL))) {
 			break;
 		}
 
@@ -1490,7 +1559,7 @@ int phpdbg_interactive(zend_bool allow_async_unsafe) /* {{{ */
 		efree(file); \
 	} \
 	\
-	switch (phpdbg_interactive(allow_async_unsafe)) { \
+	switch (phpdbg_interactive(allow_async_unsafe, NULL)) { \
 		zval zv; \
 		case PHPDBG_LEAVE: \
 		case PHPDBG_FINISH: \

@@ -294,6 +294,11 @@ static PHP_RINIT_FUNCTION(phpdbg) /* {{{ */
 
 static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 {
+	if (PHPDBG_G(stdin_file)) {
+		fclose(PHPDBG_G(stdin_file));
+		PHPDBG_G(stdin_file) = NULL;
+	}
+
 	return SUCCESS;
 } /* }}} */
 
@@ -861,7 +866,7 @@ static void php_sapi_phpdbg_log_message(char *message, int syslog_type_int) /* {
 				}
 
 				do {
-					switch (phpdbg_interactive(1)) {
+					switch (phpdbg_interactive(1, NULL)) {
 						case PHPDBG_LEAVE:
 						case PHPDBG_FINISH:
 						case PHPDBG_UNTIL:
@@ -967,7 +972,7 @@ static inline void php_sapi_phpdbg_flush(void *context)  /* {{{ */
 } /* }}} */
 
 /* copied from sapi/cli/php_cli.c cli_register_file_handles */
-static void phpdbg_register_file_handles(void) /* {{{ */
+void phpdbg_register_file_handles(void) /* {{{ */
 {
 	zval zin, zout, zerr;
 	php_stream *s_in, *s_out, *s_err;
@@ -999,18 +1004,21 @@ static void phpdbg_register_file_handles(void) /* {{{ */
 	ic.flags = CONST_CS;
 	ic.name = zend_string_init(ZEND_STRL("STDIN"), 0);
 	ic.module_number = 0;
+	zend_hash_del(EG(zend_constants), ic.name);
 	zend_register_constant(&ic);
 
 	oc.value = zout;
 	oc.flags = CONST_CS;
 	oc.name = zend_string_init(ZEND_STRL("STDOUT"), 0);
 	oc.module_number = 0;
+	zend_hash_del(EG(zend_constants), oc.name);
 	zend_register_constant(&oc);
 
 	ec.value = zerr;
 	ec.flags = CONST_CS;
 	ec.name = zend_string_init(ZEND_STRL("STDERR"), 0);
 	ec.module_number = 0;
+	zend_hash_del(EG(zend_constants), ec.name);
 	zend_register_constant(&ec);
 }
 /* }}} */
@@ -1307,6 +1315,27 @@ void *phpdbg_realloc_wrapper(void *ptr, size_t size ZEND_FILE_LINE_DC ZEND_FILE_
 	return _zend_mm_realloc(zend_mm_get_heap(), ptr, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 } /* }}} */
 
+php_stream *phpdbg_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC) /* {{{ */
+{
+	if (!strncasecmp(path, "php://", 6)) {
+		path += 6;
+	}
+
+	if (!strncasecmp(path, "stdin", 6) && PHPDBG_G(stdin_file)) {
+		php_stream *stream =stream = php_stream_fopen_from_file(PHPDBG_G(stdin_file), "r");
+#ifdef PHP_WIN32
+		zval *blocking_pipes = php_stream_context_get_option(context, "pipe", "blocking");
+		if (blocking_pipes) {
+			convert_to_long(blocking_pipes);
+			php_stream_set_option(stream, PHP_STREAM_OPTION_PIPE_BLOCKING, Z_LVAL_P(blocking_pipes), NULL);
+		}
+#endif
+		return stream;
+	}
+
+	return PHPDBG_G(orig_url_wrap_php)(wrapper, path, mode, options, opened_path, context STREAMS_CC);
+} /* }}} */
+
 int main(int argc, char **argv) /* {{{ */
 {
 	sapi_module_struct *phpdbg = &phpdbg_sapi_module;
@@ -1318,6 +1347,7 @@ int main(int argc, char **argv) /* {{{ */
 	zend_bool ini_ignore;
 	char *ini_override;
 	char *exec = NULL;
+	char *first_command = NULL;
 	char *init_file;
 	size_t init_file_len;
 	zend_bool init_file_default;
@@ -1787,6 +1817,12 @@ phpdbg_main:
 		/* set default prompt */
 		phpdbg_set_prompt(PHPDBG_DEFAULT_PROMPT);
 
+		{
+			php_stream_wrapper *wrapper = zend_hash_str_find_ptr(php_stream_get_url_stream_wrappers_hash(), ZEND_STRL("php"));
+			PHPDBG_G(orig_url_wrap_php) = wrapper->wops->stream_opener;
+			wrapper->wops->stream_opener = phpdbg_stream_url_wrap_php;
+		}
+
 		/* Make stdin, stdout and stderr accessible from PHP scripts */
 		phpdbg_register_file_handles();
 
@@ -1866,7 +1902,11 @@ phpdbg_interact:
 						PHPDBG_G(flags) |= PHPDBG_IS_INTERACTIVE;
 					}
 					zend_try {
-						PHPDBG_COMMAND_HANDLER(run)(NULL);
+						if (first_command) {
+							phpdbg_interactive(1, estrdup(first_command));
+						} else {
+							PHPDBG_COMMAND_HANDLER(run)(NULL);
+						}
 					} zend_end_try();
 					if (quit_immediately) {
 						/* if -r is on the command line more than once just quit */
@@ -1877,7 +1917,7 @@ phpdbg_interact:
 				}
 
 				CG(unclean_shutdown) = 0;
-				phpdbg_interactive(1);
+				phpdbg_interactive(1, NULL);
 			} zend_catch {
 				if ((PHPDBG_G(flags) & PHPDBG_IS_CLEANING)) {
 					char *bp_tmp_str;
@@ -1935,6 +1975,11 @@ phpdbg_out:
 phpdbg_out:
 #endif
 
+		if (first_command) {
+			free(first_command);
+			first_command = NULL;
+		}
+
 		if (cleaning <= 0) {
 			PHPDBG_G(flags) &= ~PHPDBG_IS_CLEANING;
 			cleaning = -1;
@@ -1990,12 +2035,16 @@ phpdbg_out:
 			settings->input_buflen = PHPDBG_G(input_buflen);
 			memcpy(settings->input_buffer, PHPDBG_G(input_buffer), settings->input_buflen);
 			settings->flags = PHPDBG_G(flags) & PHPDBG_PRESERVE_FLAGS_MASK;
+			first_command = PHPDBG_G(cur_command);
 		} else {
 			if (PHPDBG_G(prompt)[0]) {
 				free(PHPDBG_G(prompt)[0]);
 			}
 			if (PHPDBG_G(prompt)[1]) {
 				free(PHPDBG_G(prompt)[1]);
+			}
+			if (PHPDBG_G(cur_command)) {
+				free(PHPDBG_G(cur_command));
 			}
 		}
 
@@ -2013,6 +2062,11 @@ phpdbg_out:
 					cleaning++;
 				}
 			}
+		}
+
+		{
+			php_stream_wrapper *wrapper = zend_hash_str_find_ptr(php_stream_get_url_stream_wrappers_hash(), ZEND_STRL("php"));
+			wrapper->wops->stream_opener = PHPDBG_G(orig_url_wrap_php);
 		}
 
 		zend_try {

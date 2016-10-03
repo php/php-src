@@ -123,9 +123,7 @@ PHP_FUNCTION(imagerotate);
 
 PHP_FUNCTION(imageflip);
 
-#ifdef HAVE_GD_BUNDLED
 PHP_FUNCTION(imageantialias);
-#endif
 
 PHP_FUNCTION(imagecrop);
 PHP_FUNCTION(imagecropauto);

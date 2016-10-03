@@ -93,8 +93,6 @@ extern int gdSinT[];
 
 static void gdImageBrushApply(gdImagePtr im, int x, int y);
 static void gdImageTileApply(gdImagePtr im, int x, int y);
-static void gdImageAntiAliasedApply(gdImagePtr im, int x, int y);
-static int gdLayerOverlay(int dst, int src);
 static int gdAlphaOverlayColor(int src, int dst, int max);
 int gdImageGetTrueColorPixel(gdImagePtr im, int x, int y);
 
@@ -126,12 +124,10 @@ gdImagePtr gdImageCreate (int sx, int sy)
 	if (overflow2(sx, sy)) {
 		return NULL;
 	}
-
 	if (overflow2(sizeof(unsigned char *), sy)) {
 		return NULL;
 	}
-
-	if (overflow2(sizeof(unsigned char *), sx)) {
+	if (overflow2(sizeof(unsigned char), sx)) {
 		return NULL;
 	}
 
@@ -139,7 +135,6 @@ gdImagePtr gdImageCreate (int sx, int sy)
 
 	/* Row-major ever since gd 1.3 */
 	im->pixels = (unsigned char **) gdMalloc(sizeof(unsigned char *) * sy);
-	im->AA_opacity = (unsigned char **) gdMalloc(sizeof(unsigned char *) * sy);
 	im->polyInts = 0;
 	im->polyAllocated = 0;
 	im->brush = 0;
@@ -148,7 +143,6 @@ gdImagePtr gdImageCreate (int sx, int sy)
 	for (i = 0; i < sy; i++) {
 		/* Row-major ever since gd 1.3 */
 		im->pixels[i] = (unsigned char *) gdCalloc(sx, sizeof(unsigned char));
-		im->AA_opacity[i] = (unsigned char *) gdCalloc(sx, sizeof(unsigned char));
 	}
 	im->sx = sx;
 	im->sy = sy;
@@ -157,7 +151,6 @@ gdImagePtr gdImageCreate (int sx, int sy)
 	im->interlace = 0;
 	im->thick = 1;
 	im->AA = 0;
-	im->AA_polygon = 0;
 	for (i = 0; i < gdMaxColors; i++) {
 		im->open[i] = 1;
 		im->red[i] = 0;
@@ -185,19 +178,16 @@ gdImagePtr gdImageCreateTrueColor (int sx, int sy)
 	if (overflow2(sx, sy)) {
 		return NULL;
 	}
-
-	if (overflow2(sizeof(unsigned char *), sy)) {
+	if (overflow2(sizeof(int *), sy)) {
 		return NULL;
 	}
-
-	if (overflow2(sizeof(int *), sx)) {
+	if (overflow2(sizeof(int), sx)) {
 		return NULL;
 	}
 
 	im = (gdImage *) gdMalloc(sizeof(gdImage));
 	memset(im, 0, sizeof(gdImage));
 	im->tpixels = (int **) gdMalloc(sizeof(int *) * sy);
-	im->AA_opacity = (unsigned char **) gdMalloc(sizeof(unsigned char *) * sy);
 	im->polyInts = 0;
 	im->polyAllocated = 0;
 	im->brush = 0;
@@ -205,7 +195,6 @@ gdImagePtr gdImageCreateTrueColor (int sx, int sy)
 	im->style = 0;
 	for (i = 0; i < sy; i++) {
 		im->tpixels[i] = (int *) gdCalloc(sx, sizeof(int));
-		im->AA_opacity[i] = (unsigned char *) gdCalloc(sx, sizeof(unsigned char));
 	}
 	im->sx = sx;
 	im->sy = sy;
@@ -222,7 +211,6 @@ gdImagePtr gdImageCreateTrueColor (int sx, int sy)
 	im->alphaBlendingFlag = 1;
 	im->thick = 1;
 	im->AA = 0;
-	im->AA_polygon = 0;
 	im->cx1 = 0;
 	im->cy1 = 0;
 	im->cx2 = im->sx - 1;
@@ -248,12 +236,6 @@ void gdImageDestroy (gdImagePtr im)
 			gdFree(im->tpixels[i]);
 		}
 		gdFree(im->tpixels);
-	}
-	if (im->AA_opacity) {
-		for (i = 0; i < im->sy; i++) {
-			gdFree(im->AA_opacity[i]);
-		}
-		gdFree(im->AA_opacity);
 	}
 	if (im->polyInts) {
 		gdFree(im->polyInts);
@@ -760,7 +742,9 @@ void gdImageSetPixel (gdImagePtr im, int x, int y, int color)
 			gdImageTileApply(im, x, y);
 			break;
 		case gdAntiAliased:
-			gdImageAntiAliasedApply(im, x, y);
+			/* This shouldn't happen (2.0.26) because we just call
+			  gdImageAALine now, but do something sane. */
+			gdImageSetPixel(im, x, y, im->AA_color);
 			break;
 		default:
 			if (gdImageBoundsSafe(im, x, y)) {
@@ -771,13 +755,14 @@ void gdImageSetPixel (gdImagePtr im, int x, int y, int color)
 							im->tpixels[y][x] = color;
 							break;
 						case gdEffectAlphaBlend:
-							im->tpixels[y][x] = gdAlphaBlend(im->tpixels[y][x], color);
-							break;
 						case gdEffectNormal:
 							im->tpixels[y][x] = gdAlphaBlend(im->tpixels[y][x], color);
 							break;
 						case gdEffectOverlay :
 							im->tpixels[y][x] = gdLayerOverlay(im->tpixels[y][x], color);
+							break;
+						case gdEffectMultiply :
+							im->tpixels[y][x] = gdLayerMultiply(im->tpixels[y][x], color);
 							break;
 					}
 				} else {
@@ -941,68 +926,6 @@ static int gdImageTileGet (gdImagePtr im, int x, int y)
 }
 
 
-static void gdImageAntiAliasedApply (gdImagePtr im, int px, int py)
-{
-	float p_dist, p_alpha;
-	unsigned char opacity;
-
-	/*
-	 * Find the perpendicular distance from point C (px, py) to the line
-	 * segment AB that is being drawn.  (Adapted from an algorithm from the
-	 * comp.graphics.algorithms FAQ.)
-	 */
-
-	int LAC_2, LBC_2;
-
-	int Ax_Cx = im->AAL_x1 - px;
-	int Ay_Cy = im->AAL_y1 - py;
-
-	int Bx_Cx = im->AAL_x2 - px;
-	int By_Cy = im->AAL_y2 - py;
-
-	/* 2.0.13: bounds check! AA_opacity is just as capable of
-	 * overflowing as the main pixel array. Arne Jorgensen.
-	 * 2.0.14: typo fixed. 2.0.15: moved down below declarations
-	 * to satisfy non-C++ compilers.
-	 */
-	if (!gdImageBoundsSafe(im, px, py)) {
-		return;
-	}
-
-	/* Get the squares of the lengths of the segemnts AC and BC. */
-	LAC_2 = (Ax_Cx * Ax_Cx) + (Ay_Cy * Ay_Cy);
-	LBC_2 = (Bx_Cx * Bx_Cx) + (By_Cy * By_Cy);
-
-	if (((im->AAL_LAB_2 + LAC_2) >= LBC_2) && ((im->AAL_LAB_2 + LBC_2) >= LAC_2)) {
-		/* The two angles are acute.  The point lies inside the portion of the
-		 * plane spanned by the line segment.
-		 */
-		p_dist = fabs ((float) ((Ay_Cy * im->AAL_Bx_Ax) - (Ax_Cx * im->AAL_By_Ay)) / im->AAL_LAB);
-	} else {
-		/* The point is past an end of the line segment.  It's length from the
-		 * segment is the shorter of the lengths from the endpoints, but call
-		 * the distance -1, so as not to compute the alpha nor draw the pixel.
-		 */
-		p_dist = -1;
-	}
-
-	if ((p_dist >= 0) && (p_dist <= (float) (im->thick))) {
-		p_alpha = pow (1.0 - (p_dist / 1.5), 2);
-
-		if (p_alpha > 0) {
-			if (p_alpha >= 1) {
-				opacity = 255;
-			} else {
-				opacity = (unsigned char) (p_alpha * 255.0);
-			}
-			if (!im->AA_polygon || (im->AA_opacity[py][px] < opacity)) {
-				im->AA_opacity[py][px] = opacity;
-			}
-		}
-	}
-}
-
-
 int gdImageGetPixel (gdImagePtr im, int x, int y)
 {
 	if (gdImageBoundsSafe(im, x, y)) {
@@ -1018,46 +941,7 @@ int gdImageGetPixel (gdImagePtr im, int x, int y)
 
 void gdImageAABlend (gdImagePtr im)
 {
-	float p_alpha, old_alpha;
-	int color = im->AA_color, color_red, color_green, color_blue;
-	int old_color, old_red, old_green, old_blue;
-	int p_color, p_red, p_green, p_blue;
-	int px, py;
-
-	color_red = gdImageRed(im, color);
-	color_green = gdImageGreen(im, color);
-	color_blue = gdImageBlue(im, color);
-
-	/* Impose the anti-aliased drawing on the image. */
-	for (py = 0; py < im->sy; py++) {
-		for (px = 0; px < im->sx; px++) {
-			if (im->AA_opacity[py][px] != 0) {
-				old_color = gdImageGetPixel(im, px, py);
-
-				if ((old_color != color) && ((old_color != im->AA_dont_blend) || (im->AA_opacity[py][px] == 255))) {
-					/* Only blend with different colors that aren't the dont_blend color. */
-					p_alpha = (float) (im->AA_opacity[py][px]) / 255.0;
-					old_alpha = 1.0 - p_alpha;
-
-					if (p_alpha >= 1.0) {
-						p_color = color;
-					} else {
-						old_red = gdImageRed(im, old_color);
-						old_green = gdImageGreen(im, old_color);
-						old_blue = gdImageBlue(im, old_color);
-
-						p_red = (int) (((float) color_red * p_alpha) + ((float) old_red * old_alpha));
-						p_green = (int) (((float) color_green * p_alpha) + ((float) old_green * old_alpha));
-						p_blue = (int) (((float) color_blue * p_alpha) + ((float) old_blue * old_alpha));
-						p_color = gdImageColorResolve(im, p_red, p_green, p_blue);
-					}
-					gdImageSetPixel(im, px, py, p_color);
-				}
-			}
-		}
-		/* Clear the AA_opacity array behind us. */
-		memset(im->AA_opacity[py], 0, im->sx);
-	}
+	(void)im;
 }
 
 static void _gdImageFilledHRectangle (gdImagePtr im, int x1, int y1, int x2, int y2, int color);
@@ -1300,7 +1184,7 @@ inline static void gdImageSetAAPixelColor(gdImagePtr im, int x, int y, int color
 void gdImageAALine (gdImagePtr im, int x1, int y1, int x2, int y2, int col)
 {
 	/* keep them as 32bits */
-	long x, y, inc;
+	long x, y, inc, frac;
 	long dx, dy,tmp;
 
 	if (y1 < 0 && y2 < 0) {
@@ -1370,16 +1254,22 @@ void gdImageAALine (gdImagePtr im, int x1, int y1, int x2, int y2, int col)
 			dx = x2 - x1;
 			dy = y2 - y1;
 		}
-		x = x1 << 16;
-		y = y1 << 16;
+		y = y1;
 		inc = (dy * 65536) / dx;
-		while ((x >> 16) <= x2) {
-			gdImageSetAAPixelColor(im, x >> 16, y >> 16, col, (y >> 8) & 0xFF);
-			if ((y >> 16) + 1 < im->sy) {
-				gdImageSetAAPixelColor(im, x >> 16, (y >> 16) + 1,col, (~y >> 8) & 0xFF);
+		frac = 0;
+		for (x = x1; x <= x2; x++) {
+			gdImageSetAAPixelColor(im, x, y, col, (frac >> 8) & 0xFF);
+			if (y + 1 < im->sy) {
+				gdImageSetAAPixelColor(im, x, y + 1, col, (~frac >> 8) & 0xFF);
 			}
-			x += (1 << 16);
-			y += inc;
+			frac += inc;
+			if (frac >= 65536) {
+				frac -= 65536;
+				y++;
+			} else if (frac < 0) {
+				frac += 65536;
+				y--;
+			}
 		}
 	} else {
 		if (dy < 0) {
@@ -1392,16 +1282,22 @@ void gdImageAALine (gdImagePtr im, int x1, int y1, int x2, int y2, int col)
 			dx = x2 - x1;
 			dy = y2 - y1;
 		}
-		x = x1 << 16;
-		y = y1 << 16;
+		x = x1;
 		inc = (dx * 65536) / dy;
-		while ((y>>16) <= y2) {
-			gdImageSetAAPixelColor(im, x >> 16, y >> 16, col, (x >> 8) & 0xFF);
-			if ((x >> 16) + 1 < im->sx) {
-				gdImageSetAAPixelColor(im, (x >> 16) + 1, (y >> 16),col, (~x >> 8) & 0xFF);
+		frac = 0;
+		for (y = y1; y <= y2; y++) {
+			gdImageSetAAPixelColor(im, x, y, col, (frac >> 8) & 0xFF);
+			if (x + 1 < im->sx) {
+				gdImageSetAAPixelColor(im, x + 1, y, col, (~frac >> 8) & 0xFF);
 			}
-			x += inc;
-			y += (1<<16);
+			frac += inc;
+			if (frac >= 65536) {
+				frac -= 65536;
+				x++;
+			} else if (frac < 0) {
+				frac += 65536;
+				x--;
+			}
 		}
 	}
 }
@@ -2712,38 +2608,19 @@ void gdImagePolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 {
 	int i;
 	int lx, ly;
-	typedef void (*image_line)(gdImagePtr im, int x1, int y1, int x2, int y2, int color);
-	image_line draw_line;
 
 	if (n <= 0) {
 		return;
 	}
 
-	/* Let it be known that we are drawing a polygon so that the opacity
-	 * mask doesn't get cleared after each line.
-	 */
-	if (c == gdAntiAliased) {
-		im->AA_polygon = 1;
-	}
-
-	if ( im->antialias) {
-		draw_line = gdImageAALine;
-	} else {
-		draw_line = gdImageLine;
-	}
 	lx = p->x;
 	ly = p->y;
-	draw_line(im, lx, ly, p[n - 1].x, p[n - 1].y, c);
+	gdImageLine(im, lx, ly, p[n - 1].x, p[n - 1].y, c);
 	for (i = 1; i < n; i++) {
 		p++;
-		draw_line(im, lx, ly, p->x, p->y, c);
+		gdImageLine(im, lx, ly, p->x, p->y, c);
 		lx = p->x;
 		ly = p->y;
-	}
-
-	if (c == gdAntiAliased) {
-		im->AA_polygon = 0;
-		gdImageAABlend(im);
 	}
 }
 
@@ -3069,19 +2946,12 @@ void gdImageAlphaBlending (gdImagePtr im, int alphaBlendingArg)
 	im->alphaBlendingFlag = alphaBlendingArg;
 }
 
-void gdImageAntialias (gdImagePtr im, int antialias)
-{
-	if (im->trueColor){
-		im->antialias = antialias;
-	}
-}
-
 void gdImageSaveAlpha (gdImagePtr im, int saveAlphaArg)
 {
 	im->saveAlphaFlag = saveAlphaArg;
 }
 
-static int gdLayerOverlay (int dst, int src)
+int gdLayerOverlay (int dst, int src)
 {
 	int a1, a2;
 	a1 = gdAlphaMax - gdTrueColorGetAlpha(dst);
@@ -3112,6 +2982,28 @@ static int gdAlphaOverlayColor (int src, int dst, int max )
 		/* in the "dark" zone */
 		return dst * src / max;
 	}
+}
+
+int gdLayerMultiply (int dst, int src)
+{
+	int a1, a2, r1, r2, g1, g2, b1, b2;
+	a1 = gdAlphaMax - gdTrueColorGetAlpha(src);
+	a2 = gdAlphaMax - gdTrueColorGetAlpha(dst);
+
+	r1 = gdRedMax - (a1 * (gdRedMax - gdTrueColorGetRed(src))) / gdAlphaMax;
+	r2 = gdRedMax - (a2 * (gdRedMax - gdTrueColorGetRed(dst))) / gdAlphaMax;
+	g1 = gdGreenMax - (a1 * (gdGreenMax - gdTrueColorGetGreen(src))) / gdAlphaMax;
+	g2 = gdGreenMax - (a2 * (gdGreenMax - gdTrueColorGetGreen(dst))) / gdAlphaMax;
+	b1 = gdBlueMax - (a1 * (gdBlueMax - gdTrueColorGetBlue(src))) / gdAlphaMax;
+	b2 = gdBlueMax - (a2 * (gdBlueMax - gdTrueColorGetBlue(dst))) / gdAlphaMax ;
+
+	a1 = gdAlphaMax - a1;
+	a2 = gdAlphaMax - a2;
+	return ( ((a1*a2/gdAlphaMax) << 24) +
+			 ((r1*r2/gdRedMax) << 16) +
+			 ((g1*g2/gdGreenMax) << 8) +
+			 ((b1*b2/gdBlueMax))
+		);
 }
 
 void gdImageSetClip (gdImagePtr im, int x1, int y1, int x2, int y2)

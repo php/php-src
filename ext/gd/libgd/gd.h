@@ -92,6 +92,7 @@ void php_gd_error(const char *format, ...);
 #define gdEffectAlphaBlend 1
 #define gdEffectNormal 2
 #define gdEffectOverlay 3
+#define gdEffectMultiply 4
 
 #define GD_TRUE 1
 #define GD_FALSE 0
@@ -104,6 +105,8 @@ void php_gd_error(const char *format, ...);
 	The resulting color is opaque. */
 
 int gdAlphaBlend(int dest, int src);
+int gdLayerOverlay(int dst, int src);
+int gdLayerMultiply(int dest, int src);
 
 /**
  * Group: Transform
@@ -222,31 +225,16 @@ typedef struct gdImageStruct {
 		To do that, build your image as a truecolor image,
 		then quantize down to 8 bits. */
 	int alphaBlendingFlag;
-	/* Should antialias functions be used */
-	int antialias;
 	/* Should the alpha channel of the image be saved? This affects
 		PNG at the moment; other future formats may also
 		have that capability. JPEG doesn't. */
 	int saveAlphaFlag;
 
-
-	/* 2.0.12: anti-aliased globals */
+	/* 2.0.12: anti-aliased globals. 2.0.26: just a few vestiges after
+	  switching to the fast, memory-cheap implementation from PHP-gd. */
 	int AA;
 	int AA_color;
 	int AA_dont_blend;
-	unsigned char **AA_opacity;
-	int AA_polygon;
-	/* Stored and pre-computed variables for determining the perpendicular
-	 * distance from a point to the anti-aliased line being drawn:
-	 */
-	int AAL_x1;
-	int AAL_y1;
-	int AAL_x2;
-	int AAL_y2;
-	int AAL_Bx_Ax;
-	int AAL_By_Ay;
-	int AAL_LAB_2;
-	float AAL_LAB;
 
 	/* 2.0.12: simple clipping rectangle. These values must be checked for safety when set; please use gdImageSetClip */
 	int cx1;
