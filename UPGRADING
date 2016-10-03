@@ -80,6 +80,16 @@ PHP 7.1 UPGRADE NOTES
     fatal error" to "Recoverable fatal error".
   . The empty index operator (e.g. $str[] = $x) is not supported for strings
     anymore, and throws a fatal error instead of silently converting to array.
+  . Array elements or object properties that are automatically created during
+    by-reference assignments will now result in a different order. For example
+  
+        $array = [];
+        $array["a"] =& $array["b"];
+        $array["b"] = 1;
+        var_dump($array);
+  
+    now results in the array ["b" => 1, "a" => 1], while for PHP 7.0 the result
+    was ["a" => 1, "b" => 1].
 
 - JSON:
   . The serialize_precision is used instead of precision when encoding double
