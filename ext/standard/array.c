@@ -790,6 +790,7 @@ PHP_FUNCTION(count)
 
 	switch (Z_TYPE_P(array)) {
 		case IS_NULL:
+			php_error_docref(NULL, E_WARNING, "Parameter must be an array or an object that implements Countable");
 			RETURN_LONG(0);
 			break;
 		case IS_ARRAY:
@@ -820,8 +821,14 @@ PHP_FUNCTION(count)
 				}
 				return;
 			}
+
+			/* If There's no handler and it doesn't implement Countable then add a warning */
+			php_error_docref(NULL, E_WARNING, "Parameter must be an array or an object that implements Countable");
+			RETURN_LONG(1);
+			break;
 		}
 		default:
+			php_error_docref(NULL, E_WARNING, "Parameter must be an array or an object that implements Countable");
 			RETURN_LONG(1);
 			break;
 	}
