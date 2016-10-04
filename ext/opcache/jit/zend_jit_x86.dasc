@@ -1193,10 +1193,13 @@ static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 		|	//zend_interrupt_function(execute_data);
 		|.if X64
 		|	mov CARG1, FP
-		|.else
-		|	push FP
-		|.endif
 		|	EXT_CALL zend_interrupt_function, r0
+		|.else
+		|	sub r4, 12
+		|	push FP
+		|	EXT_CALL zend_interrupt_function, r0
+		|	add r4, 16
+		|.endif
 		|	//ZEND_VM_ENTER();
 		|	//execute_data = EG(current_execute_data);
 		|	mov FP, aword [&EG(current_execute_data)]
@@ -4365,8 +4368,8 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		|	//	HANDLE_EXCEPTION();
 		|	jmp ->exception_handler
 		|.code
-		// TODO: Interrupt handling ???
-		//return zend_jit_check_timeout(Dst, opline + 1);
+		// TODO: Can we avoid checking for interrupts after each call ???
+		return zend_jit_check_timeout(Dst, opline + 1);
 	}
 
 	return 1;
