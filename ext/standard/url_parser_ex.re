@@ -12,6 +12,8 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
+   | Author: David Walker (dave@mudsite.com)                              |
+   +----------------------------------------------------------------------+
  */
 
 /**
@@ -63,30 +65,30 @@ char* get_token(int len)
     PCHAR = UNRESERVED | PCT_ENCODED | SUB_DELIMS | ":" | "@";
 */
 
-int url_parse_scheme(php_url *url)
+void url_parse_scheme(php_url *url)
 {
     marker = URLG(url_str);
 /*!re2c
     SCHEME = ALPHA (ALPHA | DIGIT | [+-.])*;
 
-    EOF { URLG(url_str)--; return 0; }
-    "" { return 0; }
+    EOF { URLG(url_str)--; return; }
+    "" { return; }
     SCHEME ":" {
         int len = URLG(url_str) - marker - 1;
         url->scheme = get_token(len);
-        return 1;
+        return;
     }
 */
 }
 
-int url_parse_authority_userinfo (php_url *url)
+void url_parse_authority_userinfo (php_url *url)
 {
     marker = URLG(url_str);
 /*!re2c
     USERINFO = (UNRESERVED | PCT_ENCODED | SUB_DELIMS | ":")*;
 
-    EOF { URLG(url_str)--; return 0; }
-    "" { return 0; }
+    EOF { URLG(url_str)--; return; }
+    "" { return; }
     USERINFO "@" {
         int len = 0;
         len = URLG(url_str) - marker;
@@ -98,17 +100,17 @@ int url_parse_authority_userinfo (php_url *url)
             marker += len + 1;
             len = URLG(url_str) - split - 2;
             if (len > 0) url->pass = get_token(len);
-            return 1;
+            return;
         } else {
             int len = URLG(url_str) - marker - 1;
             if (len > 0) url->user = get_token(len);
-            return 1;
+            return;
         }
     }
 */
 }
 
-int url_parse_authority_host (php_url *url)
+void url_parse_authority_host (php_url *url)
 {
     marker = URLG(url_str);
 /*!re2c
@@ -133,8 +135,8 @@ int url_parse_authority_host (php_url *url)
     IPVFUTURE = "[v" HEXDIG+ "." (UNRESERVED | SUB_DELIMS | ":")+ "]";
     REG_NAME = (UNRESERVED | PCT_ENCODED | SUB_DELIMS)+;
 
-    EOF { URLG(url_str) = marker; return 0; }
-    "" { return 0; }
+    EOF { URLG(url_str) = marker; return; }
+    "" { return; }
     IPV4ADDR | REG_NAME {
         goto host;
     }
@@ -145,47 +147,44 @@ int url_parse_authority_host (php_url *url)
 host:;
     int len = URLG(url_str) - marker;
     url->host = get_token(len);
-    return 1;
+    return;
 }
 
-int url_parse_authority_port (php_url *url)
+void url_parse_authority_port (php_url *url)
 {
     marker = URLG(url_str);
 /*!re2c
 
-    EOF { URLG(url_str)--; return 0; }
-    "" { return 0; }
+    EOF { URLG(url_str)--; return; }
+    "" { return; }
     ":" DIGIT* {
         marker++;
         int len = URLG(url_str) - marker;
         char* port = get_token(len);
         url->port = atoi(port);
         efree(port);
-        return 1;
+        return;
     }
 */
 }
 
-int url_parse_authority (php_url *url)
+void url_parse_authority (php_url *url)
 {
 /*!re2c
-    EOF { URLG(url_str)--; return 0; }
-    "" { return 0; }
+    EOF { URLG(url_str)--; return; }
+    "" { return; }
     "//" {
         goto authority;
     }
 */
 authority:;
-    int valid = 0;
-
-    if (url_parse_authority_userinfo(url)) valid = 1;
-    if (url_parse_authority_host(url)) valid = 1;
-    if (url_parse_authority_port(url)) valid = 1;
-
-    return valid;
+    url_parse_authority_userinfo(url);
+    url_parse_authority_host(url);
+    url_parse_authority_port(url);
+    return;
 }
 
-int url_parse_path (php_url *url)
+void url_parse_path (php_url *url)
 {
     marker = URLG(url_str);
 /*!re2c
@@ -200,21 +199,21 @@ int url_parse_path (php_url *url)
     PATH_EMPTY = "";
     PATH = PATH_ABEMPTY | PATH_ABSOLUTE | PATH_NOSCHEME | PATH_ROOTLESS | PATH_EMPTY;
 
-    EOF { URLG(url_str)--; return 0; }
+    EOF { URLG(url_str)--; return; }
     PATH {
         int len = URLG(url_str) - marker;
 
         if (len) {
             url->path = get_token(len);
         }
-        return 1;
+
+        return;
     }
 */
 }
 
-int url_parse_query_frag (php_url *url)
+void url_parse_query_frag (php_url *url)
 {
-    int valid = 0;
 query_frag:;
     marker = URLG(url_str);
 
@@ -222,15 +221,14 @@ query_frag:;
     QUERY = "?" (PCHAR | "/" | "?")*;
     FRAGMENT = "#" (PCHAR | "/" | "?")*;
 
-    EOF { URLG(url_str)--; return valid; }
-    "" { return valid; }
+    EOF { URLG(url_str)--; return; }
+    "" { return; }
     QUERY {
         marker++;
         int len = URLG(url_str) - marker;
         if (len) {
             url->query = get_token(len);
         }
-        valid = 1;
         goto query_frag;
     }
     FRAGMENT {
@@ -239,7 +237,7 @@ query_frag:;
         if (len) {
             url->fragment = get_token(len);
         }
-        return 1;
+        return;
     }
 */
 }

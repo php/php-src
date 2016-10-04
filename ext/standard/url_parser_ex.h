@@ -23,10 +23,10 @@
 #ifndef URL_PARSER_EX_H
 #define URL_PARSER_EX_H
 
-int url_parse_scheme(php_url *url);
-int url_parse_authority(php_url *url);
-int url_parse_path(php_url *url);
-int url_parse_query_frag(php_url *url);
+void url_parse_scheme(php_url *url);
+void url_parse_authority(php_url *url);
+void url_parse_path(php_url *url);
+void url_parse_query_frag(php_url *url);
 
 #endif /* URL_PARSER_EX_H */
 

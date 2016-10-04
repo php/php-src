@@ -51,7 +51,7 @@ char* get_token(int len)
 #line 64 "ext/standard/url_parser_ex.re"
 
 
-int url_parse_scheme(php_url *url)
+void url_parse_scheme(php_url *url)
 {
     marker = URLG(url_str);
 
@@ -102,12 +102,12 @@ int url_parse_scheme(php_url *url)
 	}
 yy2:
 #line 73 "ext/standard/url_parser_ex.re"
-	{ return 0; }
+	{ return; }
 #line 107 "ext/standard/url_parser_ex.c"
 yy3:
 	++URLG(url_str);
 #line 72 "ext/standard/url_parser_ex.re"
-	{ URLG(url_str)--; return 0; }
+	{ URLG(url_str)--; return; }
 #line 112 "ext/standard/url_parser_ex.c"
 yy5:
 	++URLG(url_str);
@@ -126,7 +126,7 @@ yy8:
 	{
         int len = URLG(url_str) - marker - 1;
         url->scheme = get_token(len);
-        return 1;
+        return;
     }
 #line 132 "ext/standard/url_parser_ex.c"
 }
@@ -134,7 +134,7 @@ yy8:
 
 }
 
-int url_parse_authority_userinfo (php_url *url)
+void url_parse_authority_userinfo (php_url *url)
 {
     marker = URLG(url_str);
 
@@ -187,12 +187,12 @@ int url_parse_authority_userinfo (php_url *url)
 	}
 yy12:
 #line 89 "ext/standard/url_parser_ex.re"
-	{ return 0; }
+	{ return; }
 #line 192 "ext/standard/url_parser_ex.c"
 yy13:
 	++URLG(url_str);
 #line 88 "ext/standard/url_parser_ex.re"
-	{ URLG(url_str)--; return 0; }
+	{ URLG(url_str)--; return; }
 #line 197 "ext/standard/url_parser_ex.c"
 yy15:
 	++URLG(url_str);
@@ -233,11 +233,11 @@ yy19:
             marker += len + 1;
             len = URLG(url_str) - split - 2;
             if (len > 0) url->pass = get_token(len);
-            return 1;
+            return;
         } else {
             int len = URLG(url_str) - marker - 1;
             if (len > 0) url->user = get_token(len);
-            return 1;
+            return;
         }
     }
 #line 244 "ext/standard/url_parser_ex.c"
@@ -259,7 +259,7 @@ yy21:
 
 }
 
-int url_parse_authority_host (php_url *url)
+void url_parse_authority_host (php_url *url)
 {
     marker = URLG(url_str);
 
@@ -314,12 +314,12 @@ int url_parse_authority_host (php_url *url)
 	}
 yy24:
 #line 137 "ext/standard/url_parser_ex.re"
-	{ return 0; }
+	{ return; }
 #line 319 "ext/standard/url_parser_ex.c"
 yy25:
 	++URLG(url_str);
 #line 136 "ext/standard/url_parser_ex.re"
-	{ URLG(url_str) = marker; return 0; }
+	{ URLG(url_str) = marker; return; }
 #line 324 "ext/standard/url_parser_ex.c"
 yy27:
 	yyaccept = 1;
@@ -3613,10 +3613,10 @@ yy232:
 host:;
     int len = URLG(url_str) - marker;
     url->host = get_token(len);
-    return 1;
+    return;
 }
 
-int url_parse_authority_port (php_url *url)
+void url_parse_authority_port (php_url *url)
 {
     marker = URLG(url_str);
 
@@ -3661,12 +3661,12 @@ int url_parse_authority_port (php_url *url)
 	if (yych <= 0x00) goto yy236;
 	if (yych == ':') goto yy238;
 #line 157 "ext/standard/url_parser_ex.re"
-	{ return 0; }
+	{ return; }
 #line 3666 "ext/standard/url_parser_ex.c"
 yy236:
 	++URLG(url_str);
 #line 156 "ext/standard/url_parser_ex.re"
-	{ URLG(url_str)--; return 0; }
+	{ URLG(url_str)--; return; }
 #line 3671 "ext/standard/url_parser_ex.c"
 yy238:
 	++URLG(url_str);
@@ -3681,7 +3681,7 @@ yy238:
         char* port = get_token(len);
         url->port = atoi(port);
         efree(port);
-        return 1;
+        return;
     }
 #line 3687 "ext/standard/url_parser_ex.c"
 }
@@ -3689,7 +3689,7 @@ yy238:
 
 }
 
-int url_parse_authority (php_url *url)
+void url_parse_authority (php_url *url)
 {
 
 #line 3696 "ext/standard/url_parser_ex.c"
@@ -3700,12 +3700,12 @@ int url_parse_authority (php_url *url)
 	if (yych == '/') goto yy246;
 yy243:
 #line 173 "ext/standard/url_parser_ex.re"
-	{ return 0; }
+	{ return; }
 #line 3705 "ext/standard/url_parser_ex.c"
 yy244:
 	++URLG(url_str);
 #line 172 "ext/standard/url_parser_ex.re"
-	{ URLG(url_str)--; return 0; }
+	{ URLG(url_str)--; return; }
 #line 3710 "ext/standard/url_parser_ex.c"
 yy246:
 	yych = *++URLG(url_str);
@@ -3723,20 +3723,17 @@ yy248:
 #line 177 "ext/standard/url_parser_ex.re"
 
 authority:;
-    int valid = 0;
-
-    if (url_parse_authority_userinfo(url)) valid = 1;
-    if (url_parse_authority_host(url)) valid = 1;
-    if (url_parse_authority_port(url)) valid = 1;
-
-    return valid;
+    url_parse_authority_userinfo(url);
+    url_parse_authority_host(url);
+    url_parse_authority_port(url);
+    return;
 }
 
-int url_parse_path (php_url *url)
+void url_parse_path (php_url *url)
 {
     marker = URLG(url_str);
 
-#line 3740 "ext/standard/url_parser_ex.c"
+#line 3737 "ext/standard/url_parser_ex.c"
 {
 	unsigned char yych;
 	static const unsigned char yybm[] = {
@@ -3781,21 +3778,22 @@ int url_parse_path (php_url *url)
 	if (yych <= '#') goto yy252;
 	if (yych <= '%') goto yy257;
 yy252:
-#line 204 "ext/standard/url_parser_ex.re"
+#line 201 "ext/standard/url_parser_ex.re"
 	{
         int len = URLG(url_str) - marker;
 
         if (len) {
             url->path = get_token(len);
         }
-        return 1;
+
+        return;
     }
-#line 3794 "ext/standard/url_parser_ex.c"
+#line 3792 "ext/standard/url_parser_ex.c"
 yy253:
 	++URLG(url_str);
-#line 203 "ext/standard/url_parser_ex.re"
-	{ URLG(url_str)--; return 0; }
-#line 3799 "ext/standard/url_parser_ex.c"
+#line 200 "ext/standard/url_parser_ex.re"
+	{ URLG(url_str)--; return; }
+#line 3797 "ext/standard/url_parser_ex.c"
 yy255:
 	YYMARKER = ++URLG(url_str);
 	yych = *URLG(url_str);
@@ -3832,18 +3830,17 @@ yy259:
 		goto yy258;
 	}
 }
-#line 212 "ext/standard/url_parser_ex.re"
+#line 210 "ext/standard/url_parser_ex.re"
 
 }
 
-int url_parse_query_frag (php_url *url)
+void url_parse_query_frag (php_url *url)
 {
-    int valid = 0;
 query_frag:;
     marker = URLG(url_str);
 
 
-#line 3847 "ext/standard/url_parser_ex.c"
+#line 3844 "ext/standard/url_parser_ex.c"
 {
 	unsigned char yych;
 	unsigned int yyaccept = 0;
@@ -3888,14 +3885,14 @@ query_frag:;
 	} else {
 		if (yych == '?') goto yy268;
 	}
-#line 226 "ext/standard/url_parser_ex.re"
-	{ return valid; }
-#line 3894 "ext/standard/url_parser_ex.c"
+#line 223 "ext/standard/url_parser_ex.re"
+	{ return; }
+#line 3891 "ext/standard/url_parser_ex.c"
 yy263:
 	++URLG(url_str);
-#line 225 "ext/standard/url_parser_ex.re"
-	{ URLG(url_str)--; return valid; }
-#line 3899 "ext/standard/url_parser_ex.c"
+#line 222 "ext/standard/url_parser_ex.re"
+	{ URLG(url_str)--; return; }
+#line 3896 "ext/standard/url_parser_ex.c"
 yy265:
 	yyaccept = 0;
 	YYMARKER = ++URLG(url_str);
@@ -3906,16 +3903,16 @@ yy265:
 	if (yych <= '#') goto yy267;
 	if (yych <= '%') goto yy271;
 yy267:
-#line 236 "ext/standard/url_parser_ex.re"
+#line 232 "ext/standard/url_parser_ex.re"
 	{
         marker++;
         int len = URLG(url_str) - marker;
         if (len) {
             url->fragment = get_token(len);
         }
-        return 1;
+        return;
     }
-#line 3919 "ext/standard/url_parser_ex.c"
+#line 3916 "ext/standard/url_parser_ex.c"
 yy268:
 	yyaccept = 1;
 	YYMARKER = ++URLG(url_str);
@@ -3942,17 +3939,16 @@ yy268:
 		}
 	}
 yy270:
-#line 227 "ext/standard/url_parser_ex.re"
+#line 224 "ext/standard/url_parser_ex.re"
 	{
         marker++;
         int len = URLG(url_str) - marker;
         if (len) {
             url->query = get_token(len);
         }
-        valid = 1;
         goto query_frag;
     }
-#line 3956 "ext/standard/url_parser_ex.c"
+#line 3952 "ext/standard/url_parser_ex.c"
 yy271:
 	++URLG(url_str);
 	yych = *URLG(url_str);
@@ -4011,6 +4007,6 @@ yy275:
 		goto yy272;
 	}
 }
-#line 244 "ext/standard/url_parser_ex.re"
+#line 240 "ext/standard/url_parser_ex.re"
 
 }
