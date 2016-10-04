@@ -1103,6 +1103,11 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 						goto jit_failure;
 					}
 					break;
+				case ZEND_ISSET_ISEMPTY_DIM_OBJ:
+					if (!zend_jit_isset_isempty_dim(&dasm_state, opline, b, &i, op_array, ssa)) {
+						goto jit_failure;
+					}
+					break;
 					/*
 				case ZEND_FETCH_OBJ_R:
 					if (!zend_jit_fetch_obj_r(&dasm_state, opline, op_array, ssa)) {

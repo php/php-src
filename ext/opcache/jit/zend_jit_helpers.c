@@ -323,6 +323,67 @@ num_undef:
 	ZVAL_NULL(result);
 }
 
+static int ZEND_FASTCALL zend_jit_fetch_dim_isset_helper(zend_array *ht, zval *dim)
+{
+	zend_long hval;
+	zend_string *offset_key;
+	zval *retval;
+
+	if (Z_TYPE_P(dim) == IS_REFERENCE) {
+		dim = Z_REFVAL_P(dim);
+	}
+
+	switch (Z_TYPE_P(dim)) {
+		case IS_UNDEF:
+			zend_jit_undefined_op_helper(EG(current_execute_data)->opline->op2.var);
+			/* break missing intentionally */
+		case IS_NULL:
+			offset_key = ZSTR_EMPTY_ALLOC();
+			goto str_index;
+		case IS_DOUBLE:
+			hval = zend_dval_to_lval(Z_DVAL_P(dim));
+			goto num_index;
+		case IS_RESOURCE:
+			//zend_error(E_NOTICE, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(dim), Z_RES_HANDLE_P(dim));
+			hval = Z_RES_HANDLE_P(dim);
+			goto num_index;
+		case IS_FALSE:
+			hval = 0;
+			goto num_index;
+		case IS_TRUE:
+			hval = 1;
+			goto num_index;
+		default:
+			zend_error(E_WARNING, "Illegal offset type in isset or empty");
+			return 0;
+	}
+
+str_index:
+	retval = zend_hash_find(ht, offset_key);
+	if (retval) {
+		/* support for $GLOBALS[...] */
+		if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
+			retval = Z_INDIRECT_P(retval);
+		}
+		if (UNEXPECTED(Z_TYPE_P(retval) == IS_REFERENCE)) {
+			retval = Z_REFVAL_P(retval);
+		}
+		return (Z_TYPE_P(retval) > IS_NULL);
+	} else {
+		return 0;
+	}
+
+num_index:
+	ZEND_HASH_INDEX_FIND(ht, hval, retval, num_undef);
+	if (UNEXPECTED(Z_TYPE_P(retval) == IS_REFERENCE)) {
+		retval = Z_REFVAL_P(retval);
+	}
+	return (Z_TYPE_P(retval) > IS_NULL);
+
+num_undef:
+	return 0;
+}
+
 static zval* ZEND_FASTCALL zend_jit_fetch_dim_rw_helper(zend_array *ht, zval *dim)
 {
 	zend_long hval;
@@ -1074,6 +1135,44 @@ static void ZEND_FASTCALL zend_jit_assign_dim_div_helper(zval *container, zval *
 //???			}
 		}
 	}
+}
+
+static int ZEND_FASTCALL zend_jit_isset_dim_helper(zval *container, zval *offset)
+{
+	if (UNEXPECTED(Z_TYPE_P(offset) == IS_UNDEF)) {
+		zend_jit_undefined_op_helper(EG(current_execute_data)->opline->op2.var);
+		offset = &EG(uninitialized_zval);
+	}
+
+	if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		if (EXPECTED(Z_OBJ_HT_P(container)->has_dimension)) {
+			return Z_OBJ_HT_P(container)->has_dimension(container, offset, 0);
+		} else {
+			zend_error(E_NOTICE, "Trying to check element of non-array");
+		}
+	} else if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) { /* string offsets */
+		zend_long lval;
+
+		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			lval = Z_LVAL_P(offset);
+isset_str_offset:
+			if (UNEXPECTED(lval < 0)) { /* Handle negative offset */
+				lval += (zend_long)Z_STRLEN_P(container);
+			}
+			if (EXPECTED(lval >= 0) && (size_t)lval < Z_STRLEN_P(container)) {
+				return 1;
+			}
+		} else {
+			ZVAL_DEREF(offset);
+			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
+					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
+						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
+				lval = zval_get_long(offset);
+				goto isset_str_offset;
+			}
+		}
+	}
+	return 0;
 }
 
 static void ZEND_FASTCALL zend_jit_free_call_frame(zend_execute_data *call)

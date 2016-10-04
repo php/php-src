@@ -398,6 +398,7 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_undefined_op_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_r_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_is_helper);
+	REGISTER_HELPER(zend_jit_fetch_dim_isset_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_str_r_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_str_is_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_obj_r_helper);
@@ -409,6 +410,7 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_assign_dim_sub_helper);
 	REGISTER_HELPER(zend_jit_assign_dim_mul_helper);
 	REGISTER_HELPER(zend_jit_assign_dim_div_helper);
+	REGISTER_HELPER(zend_jit_isset_dim_helper);
 	REGISTER_HELPER(zend_jit_free_call_frame);
 	REGISTER_HELPER(zend_jit_zval_copy_unref_helper);
 	REGISTER_HELPER(zend_jit_new_ref_helper);
