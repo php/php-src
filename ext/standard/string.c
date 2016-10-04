@@ -883,11 +883,12 @@ PHP_FUNCTION(wordwrap)
 {
 	const char *text, *breakchar = "\n";
 	char *newtext;
-	int textlen, breakcharlen = 1, newtextlen, chk;
+	int textlen, breakcharlen = 1, chk;
 	size_t alloced;
-	long current = 0, laststart = 0, lastspace = 0;
+	size_t current = 0, laststart = 0, lastspace = 0;
 	long linelength = 75;
 	zend_bool docut = 0;
+	size_t newtextlen;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lsb", &text, &textlen, &linelength, &breakchar, &breakcharlen, &docut) == FAILURE) {
 		return;
@@ -904,6 +905,11 @@ PHP_FUNCTION(wordwrap)
 
 	if (linelength == 0 && docut) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't force cut when width is zero");
+		RETURN_FALSE;
+	}
+
+	if (linelength < 0 || linelength > INT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length should be between 0 and %d", INT_MAX);
 		RETURN_FALSE;
 	}
 
@@ -934,10 +940,10 @@ PHP_FUNCTION(wordwrap)
 		if (linelength > 0) {
 			chk = (int)(textlen/linelength + 1);
 			newtext = safe_emalloc(chk, breakcharlen, textlen + 1);
-			alloced = textlen + chk * breakcharlen + 1;
+			alloced = (size_t)textlen + chk * (size_t)breakcharlen + 1;
 		} else {
 			chk = textlen;
-			alloced = textlen * (breakcharlen + 1) + 1;
+			alloced = (size_t)textlen * ((size_t)breakcharlen + 1) + 1;
 			newtext = safe_emalloc(textlen, (breakcharlen + 1), 1);
 		}
 
