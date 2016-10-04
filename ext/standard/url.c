@@ -42,11 +42,6 @@ ZEND_DECLARE_MODULE_GLOBALS(url)
 
 PHPAPI php_url *php_url_parse_ex (const char *str, int length)
 {
-	return php_url_parse(str);
-}
-
-PHPAPI php_url *php_url_parse (const char *str)
-{
 	php_url *url = (php_url*) ecalloc (1, sizeof(php_url));
 	URLG(url_str) = str;
 
@@ -56,6 +51,11 @@ PHPAPI php_url *php_url_parse (const char *str)
 	url_parse_query_frag(url);
 
 	return url;
+}
+
+PHPAPI php_url *php_url_parse (const char *str)
+{
+	return php_url_parse_ex(str, strlen(str));
 }
 
 PHPAPI void php_url_free (php_url *url)
