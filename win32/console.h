@@ -41,8 +41,8 @@
 PHP_WINUTIL_API BOOL php_win32_console_os_supports_vt100();
 
 /* Check if the standard handle (STD_OUTPUT_HANDLE, STD_ERROR_HANDLE)
-   is redirected to a file */
-PHP_WINUTIL_API BOOL php_win32_console_handle_is_redirected(DWORD handle_id);
+   is a console (valid handle_id, neither redirected nor piped) */
+PHP_WINUTIL_API BOOL php_win32_console_handle_is_console(DWORD handle_id);
 
 /* Check if the console attached to the specified standard handle
    (STD_OUTPUT_HANDLE, STD_ERROR_HANDLE) has the

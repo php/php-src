@@ -1644,7 +1644,7 @@ PHP_FUNCTION(stream_vt100_support)
 	zval *z_stream;
 	php_stream *stream;
 #ifdef _WIN64
-	long long fileno;
+	zend_long fileno;
 #else
 	int fileno;
 #endif
@@ -1697,7 +1697,7 @@ PHP_FUNCTION(stream_vt100_support)
 			RETURN_FALSE;
 		}
 		/* Check if the Windows standard handle is redirected to file */
-		if (php_win32_console_handle_is_redirected(handle_id)) {
+		if (!php_win32_console_handle_is_console(handle_id)) {
 			RETURN_FALSE;
 		}
 		/* Check if the Windows standard handle has VT100 control codes enabled */
@@ -1727,7 +1727,7 @@ PHP_FUNCTION(stream_vt100_support)
 			RETURN_FALSE;
 		}
 		/* Check if the Windows standard handle is redirected to file */
-		if (php_win32_console_handle_is_redirected(handle_id)) {
+		if (!php_win32_console_handle_is_console(handle_id)) {
 			RETURN_FALSE;
 		}
 		/* Enable/disable VT100 control codes support for the specified Windows standard handle */

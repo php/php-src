@@ -53,14 +53,15 @@ PHP_WINUTIL_API BOOL php_win32_console_os_supports_vt100()
 
 }
 
-PHP_WINUTIL_API BOOL php_win32_console_handle_is_redirected(DWORD handle_id)
+PHP_WINUTIL_API BOOL php_win32_console_handle_is_console(DWORD handle_id)
 {
 	BOOL result = FALSE;
 	HANDLE handle = handle_id ? GetStdHandle(handle_id) : INVALID_HANDLE_VALUE;
 
 	if (handle != INVALID_HANDLE_VALUE) {
-		if (GetFinalPathNameByHandleW(handle, NULL, 0, 0) != 0 || GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
-			result = TRUE;
+        DWORD mode;
+        if (GetConsoleMode(handle, &mode)) {
+            result = TRUE;
 		}
 	}
 	return result;
