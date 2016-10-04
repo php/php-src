@@ -20,7 +20,7 @@
 
 #include "win32/console.h"
 
-BOOL php_win32_console_os_supports_vt100()
+PHP_WINUTIL_API BOOL php_win32_console_os_supports_vt100()
 {
 	const DWORD MINV_MAJOR = 10, MINV_MINOR = 0, MINV_BUILD = 10586;
 	OSVERSIONINFOEX osvi = EG(windows_version_info);
@@ -53,7 +53,7 @@ BOOL php_win32_console_os_supports_vt100()
 
 }
 
-BOOL php_win32_console_handle_is_redirected(DWORD handle_id)
+PHP_WINUTIL_API BOOL php_win32_console_handle_is_redirected(DWORD handle_id)
 {
 	BOOL result = FALSE;
 	HANDLE handle = handle_id ? GetStdHandle(handle_id) : INVALID_HANDLE_VALUE;
@@ -66,7 +66,7 @@ BOOL php_win32_console_handle_is_redirected(DWORD handle_id)
 	return result;
 }
 
-BOOL php_win32_console_handle_has_vt100(DWORD handle_id)
+PHP_WINUTIL_API BOOL php_win32_console_handle_has_vt100(DWORD handle_id)
 {
 	BOOL result = FALSE;
 	HANDLE handle = handle_id ? GetStdHandle(handle_id) : INVALID_HANDLE_VALUE;
@@ -83,7 +83,7 @@ BOOL php_win32_console_handle_has_vt100(DWORD handle_id)
 	return result;
 }
 
-BOOL php_win32_console_handle_set_vt100(DWORD handle_id, BOOL enable)
+PHP_WINUTIL_API BOOL php_win32_console_handle_set_vt100(DWORD handle_id, BOOL enable)
 {
 	BOOL result = FALSE;
 	HANDLE handle = handle_id ? GetStdHandle(handle_id) : INVALID_HANDLE_VALUE;

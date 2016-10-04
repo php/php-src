@@ -21,6 +21,14 @@
 #ifndef PHP_WIN32_CONSOLE_H
 #define PHP_WIN32_CONSOLE_H
 
+#ifndef PHP_WINUTIL_API
+#ifdef PHP_EXPORTS
+# define PHP_WINUTIL_API __declspec(dllexport)
+#else
+# define PHP_WINUTIL_API __declspec(dllimport)
+#endif
+#endif
+
 #include "php.h"
 #include "php_streams.h"
 #include <windows.h>
@@ -30,20 +38,20 @@
 #endif
 
 /* Check if the current Windows version supports VT100 control codes */
-BOOL php_win32_console_os_supports_vt100();
+PHP_WINUTIL_API BOOL php_win32_console_os_supports_vt100();
 
 /* Check if the standard handle (STD_OUTPUT_HANDLE, STD_ERROR_HANDLE)
    is redirected to a file */
-BOOL php_win32_console_handle_is_redirected(DWORD handle_id);
+PHP_WINUTIL_API BOOL php_win32_console_handle_is_redirected(DWORD handle_id);
 
 /* Check if the console attached to the specified standard handle
    (STD_OUTPUT_HANDLE, STD_ERROR_HANDLE) has the
    ENABLE_VIRTUAL_TERMINAL_PROCESSING flag set */
-BOOL php_win32_console_handle_has_vt100(DWORD handle_id);
+PHP_WINUTIL_API BOOL php_win32_console_handle_has_vt100(DWORD handle_id);
 
 /* Set/unset the ENABLE_VIRTUAL_TERMINAL_PROCESSING flag for the console
    attached to the specified standard handle (STD_OUTPUT_HANDLE,
    STD_ERROR_HANDLE) */
-BOOL php_win32_console_handle_set_vt100(DWORD handle_id, BOOL enable);
+PHP_WINUTIL_API BOOL php_win32_console_handle_set_vt100(DWORD handle_id, BOOL enable);
 
 #endif
