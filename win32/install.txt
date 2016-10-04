@@ -1011,7 +1011,6 @@ extension=php_bz2.dll
    php_interbase.dll InterBase functions Requires: gds32.dll (bundled)
    php_ldap.dll LDAP functions requires libeay32.dll, ssleay32.dll (bundled)
    php_mbstring.dll Multi-Byte String functions None
-   php_mcrypt.dll Mcrypt Encryption functions Requires: libmcrypt.dll
    php_mime_magic.dll Mimetype functions Requires: magic.mime (bundled)
    php_ming.dll Ming functions for Flash None
    php_msql.dll mSQL functions Requires: msql.dll (bundled)

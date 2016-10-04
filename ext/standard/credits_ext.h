@@ -36,7 +36,6 @@ CREDIT_LINE("Internationalization", "Ed Batutis, Vladimir Iordanov, Dmitry Lakht
 CREDIT_LINE("JSON", "Jakub Zelenka, Omar Kilani, Scott MacVicar");
 CREDIT_LINE("LDAP", "Amitay Isaacs, Eric Warnke, Rasmus Lerdorf, Gerrit Thomson, Stig Venaas");
 CREDIT_LINE("LIBXML", "Christian Stocker, Rob Richards, Marcus Boerger, Wez Furlong, Shane Caraveo");
-CREDIT_LINE("mcrypt", "Sascha Schumann, Derick Rethans");
 CREDIT_LINE("Multibyte String Functions", "Tsukada Takuya, Rui Hirokawa");
 CREDIT_LINE("MySQL driver for PDO", "George Schlossnagle, Wez Furlong, Ilia Alshanetsky, Johannes Schlueter");
 CREDIT_LINE("MySQLi", "Zak Greant, Georg Richter, Andrey Hristov, Ulf Wendel");

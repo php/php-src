@@ -1737,17 +1737,6 @@ soap.wsdl_cache_limit = 5
 ; Sets the maximum number of open links or -1 for unlimited.
 ldap.max_links = -1
 
-[mcrypt]
-; For more information about mcrypt settings see http://php.net/mcrypt-module-open
-
-; Directory where to load mcrypt algorithms
-; Default: Compiled in into libmcrypt (usually /usr/local/lib/libmcrypt)
-;mcrypt.algorithms_dir=
-
-; Directory where to load mcrypt modes
-; Default: Compiled in into libmcrypt (usually /usr/local/lib/libmcrypt)
-;mcrypt.modes_dir=
-
 [dba]
 ;dba.default_handler=
 

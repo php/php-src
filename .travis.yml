@@ -8,7 +8,6 @@ addons:
       - re2c
       - libgmp-dev
       - libicu-dev
-      - libmcrypt-dev
       - libtidy-dev
       - libenchant-dev
       - libaspell-dev
