@@ -1643,7 +1643,11 @@ PHP_FUNCTION(stream_vt100_support)
 {
 	zval *z_stream;
 	php_stream *stream;
+#ifdef _WIN64
+	long long fileno;
+#else
 	int fileno;
+#endif
 	zend_bool enable;
 #ifdef PHP_WIN32
 	DWORD handle_id;
