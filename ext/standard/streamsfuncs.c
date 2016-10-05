@@ -1645,9 +1645,6 @@ PHP_FUNCTION(stream_vt100_support)
 	php_stream *stream;
 	zend_long fileno;
 	zend_bool enable;
-#ifdef PHP_WIN32
-	DWORD handle_id;
-#endif
 	int argc = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(argc, "z|b", &z_stream, &enable) == FAILURE) {
@@ -1669,20 +1666,6 @@ PHP_FUNCTION(stream_vt100_support)
 	} else {
 		RETURN_FALSE;
 	}
-	switch (fileno) {
-		case STDOUT_FILENO:
-#ifdef PHP_WIN32
-			handle_id = STD_OUTPUT_HANDLE;
-#endif
-			break;
-		case STDERR_FILENO:
-#ifdef PHP_WIN32
-			handle_id = STD_ERROR_HANDLE;
-#endif
-			break;
-		default:
-			RETURN_FALSE;
-	}
 
 
 	if (argc == 1) {
@@ -1693,11 +1676,11 @@ PHP_FUNCTION(stream_vt100_support)
 			RETURN_FALSE;
 		}
 		/* Check if the Windows standard handle is redirected to file */
-		if (!php_win32_console_handle_is_console(handle_id)) {
+		if (!php_win32_console_fileno_is_console(fileno)) {
 			RETURN_FALSE;
 		}
 		/* Check if the Windows standard handle has VT100 control codes enabled */
-		if (php_win32_console_handle_has_vt100(handle_id)) {
+		if (php_win32_console_fileno_has_vt100(fileno)) {
 			RETURN_TRUE;
 		}
 		else {
@@ -1723,11 +1706,11 @@ PHP_FUNCTION(stream_vt100_support)
 			RETURN_FALSE;
 		}
 		/* Check if the Windows standard handle is redirected to file */
-		if (!php_win32_console_handle_is_console(handle_id)) {
+		if (!php_win32_console_fileno_is_console(fileno)) {
 			RETURN_FALSE;
 		}
 		/* Enable/disable VT100 control codes support for the specified Windows standard handle */
-		if (php_win32_console_handle_set_vt100(handle_id, enable ? TRUE : FALSE)) {
+		if (php_win32_console_fileno_set_vt100(fileno, enable ? TRUE : FALSE)) {
 			RETURN_TRUE;
 		}
 		else {

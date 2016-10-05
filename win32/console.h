@@ -37,21 +37,27 @@
 #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
 #endif
 
-/* Check if the current Windows version supports VT100 control codes */
+/*
+Check if the current Windows version supports VT100 control codes
+*/
 PHP_WINUTIL_API BOOL php_win32_console_os_supports_vt100();
 
-/* Check if the standard handle (STD_OUTPUT_HANDLE, STD_ERROR_HANDLE)
-   is a console (valid handle_id, neither redirected nor piped) */
-PHP_WINUTIL_API BOOL php_win32_console_handle_is_console(DWORD handle_id);
+/*
+Check if a file descriptor associated to a stream is a console
+(valid fileno, neither redirected nor piped)
+*/
+PHP_WINUTIL_API BOOL php_win32_console_fileno_is_console(zend_long fileno);
 
-/* Check if the console attached to the specified standard handle
-   (STD_OUTPUT_HANDLE, STD_ERROR_HANDLE) has the
-   ENABLE_VIRTUAL_TERMINAL_PROCESSING flag set */
-PHP_WINUTIL_API BOOL php_win32_console_handle_has_vt100(DWORD handle_id);
+/*
+Check if the console attached to a file descriptor associated to a
+stream is a console has the ENABLE_VIRTUAL_TERMINAL_PROCESSING flag set
+*/
+PHP_WINUTIL_API BOOL php_win32_console_fileno_has_vt100(zend_long fileno);
 
-/* Set/unset the ENABLE_VIRTUAL_TERMINAL_PROCESSING flag for the console
-   attached to the specified standard handle (STD_OUTPUT_HANDLE,
-   STD_ERROR_HANDLE) */
-PHP_WINUTIL_API BOOL php_win32_console_handle_set_vt100(DWORD handle_id, BOOL enable);
+/*
+Set/unset the ENABLE_VIRTUAL_TERMINAL_PROCESSING flag for the console
+attached to a file descriptor associated to a stream
+*/
+PHP_WINUTIL_API BOOL php_win32_console_fileno_set_vt100(zend_long fileno, BOOL enable);
 
 #endif

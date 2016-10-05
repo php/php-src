@@ -53,10 +53,10 @@ PHP_WINUTIL_API BOOL php_win32_console_os_supports_vt100()
 
 }
 
-PHP_WINUTIL_API BOOL php_win32_console_handle_is_console(DWORD handle_id)
+PHP_WINUTIL_API BOOL php_win32_console_fileno_is_console(zend_long fileno)
 {
 	BOOL result = FALSE;
-	HANDLE handle = handle_id ? GetStdHandle(handle_id) : INVALID_HANDLE_VALUE;
+	HANDLE handle = (HANDLE) _get_osfhandle(fileno);
 
 	if (handle != INVALID_HANDLE_VALUE) {
         DWORD mode;
@@ -67,10 +67,10 @@ PHP_WINUTIL_API BOOL php_win32_console_handle_is_console(DWORD handle_id)
 	return result;
 }
 
-PHP_WINUTIL_API BOOL php_win32_console_handle_has_vt100(DWORD handle_id)
+PHP_WINUTIL_API BOOL php_win32_console_fileno_has_vt100(zend_long fileno)
 {
 	BOOL result = FALSE;
-	HANDLE handle = handle_id ? GetStdHandle(handle_id) : INVALID_HANDLE_VALUE;
+	HANDLE handle = (HANDLE) _get_osfhandle(fileno);
 
 	if (handle != INVALID_HANDLE_VALUE) {
 		DWORD mode;
@@ -84,10 +84,10 @@ PHP_WINUTIL_API BOOL php_win32_console_handle_has_vt100(DWORD handle_id)
 	return result;
 }
 
-PHP_WINUTIL_API BOOL php_win32_console_handle_set_vt100(DWORD handle_id, BOOL enable)
+PHP_WINUTIL_API BOOL php_win32_console_fileno_set_vt100(zend_long fileno, BOOL enable)
 {
 	BOOL result = FALSE;
-	HANDLE handle = handle_id ? GetStdHandle(handle_id) : INVALID_HANDLE_VALUE;
+	HANDLE handle = (HANDLE) _get_osfhandle(fileno);
 
 	if (handle != INVALID_HANDLE_VALUE) {
 		DWORD mode;
