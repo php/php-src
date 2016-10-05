@@ -1,18 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2016, PHP 7.1.0RC3
-
-- Core:
-  . Fixed bug #73156 (segfault on undefined function). (Dmitry)
-  . Fixed bug #73163 (PHP hangs if error handler throws while accessing undef
-    const in default value). (Nikita)
-  . Fixed bug #73172 (parse error: Invalid numeric literal). (Nikita, Anatol)
-  . Fixed bug #73181 (parse_str() without a second argument leads to crash).
-    (Nikita)
-
-- COM:
-  . Fixed bug #73126 (Cannot pass parameter 1 by reference). (Anatol)
-  . Fixed bug #69579 (Invalid free in extension trait). (John Boehr)
+?? ??? 2016, PHP 7.1.0RC4
 
 - Date:
   . Fixed bug #45554 (Inconsistent behavior of the u format char). (Derick)
@@ -27,7 +15,26 @@ PHP                                                                        NEWS
   . Fixed bug #73109 (timelib_meridian doesn't parse dots correctly). (Derick)
   . Fixed bug #73247 (DateTime constructor does not initialise microseconds
     property). (Derick)
-    
+
+- GD:
+  . Fixed bug #73213 (Integer overflow in imageline() with antialiasing). (cmb)
+  
+- Standard:
+  . Fixed bug #73203 (passing additional_parameters causes mail to fail). (cmb)
+
+29 Sep 2016, PHP 7.1.0RC3
+
+- Core:
+  . Fixed bug #73156 (segfault on undefined function). (Dmitry)
+  . Fixed bug #73163 (PHP hangs if error handler throws while accessing undef
+    const in default value). (Nikita)
+  . Fixed bug #73172 (parse error: Invalid numeric literal). (Nikita, Anatol)
+  . Fixed bug #73181 (parse_str() without a second argument leads to crash).
+    (Nikita)
+
+- COM:
+  . Fixed bug #73126 (Cannot pass parameter 1 by reference). (Anatol)
+  . Fixed bug #69579 (Invalid free in extension trait). (John Boehr)
 
 - GD:
   . Fixed bug #50194 (imagettftext broken on transparent background w/o
@@ -41,7 +48,6 @@ PHP                                                                        NEWS
   . Fixed bug #73159 (imagegd2(): unrecognized formats may result in corrupted
     files). (cmb)
   . Fixed bug #73161 (imagecreatefromgd2() may leak memory). (cmb)
-  . Fixed bug #73213 (Integer overflow in imageline() with antialiasing). (cmb)
 
 - JSON:
   . Fixed bug #73113 (Segfault with throwing JsonSerializable). (julien)
