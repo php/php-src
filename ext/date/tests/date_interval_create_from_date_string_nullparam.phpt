@@ -8,7 +8,7 @@ $i = date_interval_create_from_date_string(null); //returns a empty object
 var_dump($i);
 ?>
 --EXPECTF--
-object(DateInterval)#1 (15) {
+object(DateInterval)#%d (16) {
   ["y"]=>
   int(0)
   ["m"]=>
@@ -21,6 +21,8 @@ object(DateInterval)#1 (15) {
   int(0)
   ["s"]=>
   int(0)
+  ["f"]=>
+  float(0)
   ["weekday"]=>
   int(0)
   ["weekday_behavior"]=>

@@ -14,6 +14,21 @@ PHP                                                                        NEWS
   . Fixed bug #73126 (Cannot pass parameter 1 by reference). (Anatol)
   . Fixed bug #69579 (Invalid free in extension trait). (John Boehr)
 
+- Date:
+  . Fixed bug #45554 (Inconsistent behavior of the u format char). (Derick)
+  . Fixed bug #48225 (DateTime parser doesn't set microseconds for "now").
+    (Derick)
+  . Fixed bug #52514 (microseconds are missing in DateTime class). (Derick)
+  . Fixed bug #52519 (microseconds in DateInterval are missing). (Derick)
+  . Fixed bug #60089 (DateTime::createFromFormat() U after u nukes microtime).
+    (Derick)
+  . Fixed bug #68506 (General DateTime improvments needed for microseconds to
+    become useful). (Derick)
+  . Fixed bug #73109 (timelib_meridian doesn't parse dots correctly). (Derick)
+  . Fixed bug #73247 (DateTime constructor does not initialise microseconds
+    property). (Derick)
+    
+
 - GD:
   . Fixed bug #50194 (imagettftext broken on transparent background w/o
     alphablending). (cmb)
