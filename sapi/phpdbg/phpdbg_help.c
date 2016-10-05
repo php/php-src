@@ -829,21 +829,19 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 
 {"run",
 "Enter the vm, starting execution. Execution will then continue until the next breakpoint "
-"or completion of the script. Add parameters you want to use as $argv" CR CR
+"or completion of the script. Add parameters you want to use as $argv. Add a trailing "
+"**< filename** for reading STDIN from a file." CR CR
 
 "**Examples**" CR CR
 
 "    $P run" CR
 "    $P r" CR
 "    Will cause execution of the context, if it is set" CR CR
-"    $P r test" CR
-"    Will execute with $argv[1] == \"test\"" CR CR
+"    $P r test < foo.txt" CR
+"    Will execute with $argv[1] == \"test\" and read from the foo.txt file for STDIN" CR CR
 
 "Note that the execution context must be set. If not previously compiled, then the script will "
-"be compiled before execution." CR CR
-
-"Note that attempting to run a script that is already executing will result in an \"execution "
-"in progress\" error."
+"be compiled before execution."
 },
 
 {"set",
