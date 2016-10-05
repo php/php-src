@@ -90,7 +90,11 @@ static size_t php_stream_input_read(php_stream *stream, char *buf, size_t count 
 		}
 	}
 
-	php_stream_seek(input->body, input->position, SEEK_SET);
+	if (!input->body->readfilters.head) {
+		/* If the input stream contains filters, it's not really seekable. The
+			input->position is likely to be wrong for unfiltered data. */
+		php_stream_seek(input->body, input->position, SEEK_SET);
+	}
 	read = php_stream_read(input->body, buf, count);
 
 	if (!read || read == (size_t) -1) {
