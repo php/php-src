@@ -1682,11 +1682,24 @@ PHP_FUNCTION(stream_vt100_support)
 					fileno = STDERR_FILENO;
 				}
 				else {
+					zend_internal_type_error(
+						ZEND_ARG_USES_STRICT_TYPES(),
+						"%s() was not able to recognize the stream named %s",
+						get_active_function_name(),
+						ZSTR_VAL(stream_name)
+					);
 					RETURN_FALSE;
 				}
 			}
 			break;
 		default:
+			zend_internal_type_error(
+				ZEND_ARG_USES_STRICT_TYPES(),
+				"%s() expects parameter %d to be a resource or a stream name, %s given",
+				get_active_function_name(),
+				1,
+				zend_zval_type_name(z_stream)
+			);
 			RETURN_FALSE;
 	}
 
