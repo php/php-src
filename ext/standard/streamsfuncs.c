@@ -1642,7 +1642,6 @@ PHP_FUNCTION(stream_supports_lock)
 PHP_FUNCTION(stream_vt100_support)
 {
 	zval *z_stream;
-	php_stream *stream;
 	zend_long fileno;
 	zend_bool enable;
 	int argc = ZEND_NUM_ARGS();
@@ -1650,21 +1649,45 @@ PHP_FUNCTION(stream_vt100_support)
 	if (zend_parse_parameters(argc, "z|b", &z_stream, &enable) == FAILURE) {
 		return;
 	}
-	stream = NULL;
+
 	switch (Z_TYPE_P(z_stream)) {
 		case IS_RESOURCE:
-			php_stream_from_zval_no_verify(stream, z_stream);
+			{
+				php_stream *stream = NULL;
+				php_stream_from_zval_no_verify(stream, z_stream);
+				if (stream == NULL) {
+					RETURN_FALSE;
+				}
+				if (php_stream_can_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT) == SUCCESS) {
+					php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT, (void*)&fileno, 0);
+				}
+				else if (php_stream_can_cast(stream, PHP_STREAM_AS_FD) == SUCCESS) {
+					php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)&fileno, 0);
+				}
+				else {
+					RETURN_FALSE;
+				}
+			}
 			break;
-	}
-	if (stream == NULL) {
-		RETURN_FALSE;
-	}
-	if (php_stream_can_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT) == SUCCESS) {
-		php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT, (void*)&fileno, 0);
-	} else if (php_stream_can_cast(stream, PHP_STREAM_AS_FD) == SUCCESS) {
-		php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)&fileno, 0);
-	} else {
-		RETURN_FALSE;
+		case IS_STRING:
+			{
+				zend_string *stream_name = Z_STR_P(z_stream);
+				if (strcmp(ZSTR_VAL(stream_name), "php://stdin") == 0) {
+					fileno = STDIN_FILENO;
+				}
+				else if (strcmp(ZSTR_VAL(stream_name), "php://stdout") == 0) {
+					fileno = STDOUT_FILENO;
+				}
+				else if (strcmp(ZSTR_VAL(stream_name), "php://stderr") == 0) {
+					fileno = STDERR_FILENO;
+				}
+				else {
+					RETURN_FALSE;
+				}
+			}
+			break;
+		default:
+			RETURN_FALSE;
 	}
 
 
