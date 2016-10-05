@@ -319,7 +319,7 @@ zend_op_array *phpdbg_init_compile_file(zend_file_handle *file, int type) {
 
 	if (op_array->vars) {
 		int i;
-		/* un-intern these strings to prevent zend_restore_strings from invalidating our string pointers too early */
+		/* un-intern these strings to prevent zend_interned_strings_restore from invalidating our string pointers too early (in phpdbg allocated memory only gets freed after module shutdown) */
 		for (i = 0; i < op_array->last_var; i++) {
 			zend_string **s = op_array->vars + i;
 			if (ZSTR_IS_INTERNED(*s)) {
