@@ -406,6 +406,8 @@ static void get_icu_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAMETERS)
 	if(loc_name_len == 0) {
 		loc_name = intl_locale_get_default();
 	}
+	
+	INTL_CHECK_LOCALE_LEN(strlen(loc_name));
 
 	/* Call ICU get */
 	tag_value = get_icu_value_internal( loc_name , tag_name , &result ,0);
@@ -1165,6 +1167,7 @@ PHP_FUNCTION(locale_get_all_variants)
 		loc_name = intl_locale_get_default();
 	}
 
+	INTL_CHECK_LOCALE_LEN(strlen(loc_name));
 
 	array_init( return_value );
 
@@ -1272,6 +1275,9 @@ PHP_FUNCTION(locale_filter_matches)
 	if( strcmp(loc_range,"*")==0){
 		RETURN_TRUE;
 	}
+
+	INTL_CHECK_LOCALE_LEN(strlen(loc_range));
+	INTL_CHECK_LOCALE_LEN(strlen(lang_tag));
 
 	if( boolCanonical ){
 		/* canonicalize loc_range */
@@ -1553,6 +1559,8 @@ PHP_FUNCTION(locale_lookup)
 	}
 
 	hash_arr = Z_ARRVAL_P(arr);
+
+	INTL_CHECK_LOCALE_LEN(strlen(loc_range));
 
 	if( !hash_arr || zend_hash_num_elements( hash_arr ) == 0 ) {
 		RETURN_EMPTY_STRING();
