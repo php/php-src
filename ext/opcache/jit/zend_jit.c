@@ -62,6 +62,7 @@ typedef struct _zend_jit_stub {
 #define JIT_STUB(name) \
 	{JIT_STUB_PREFIX #name, zend_jit_ ## name ## _stub}
 
+static zend_long zend_jit_level = 0;
 static void *dasm_buf = NULL;
 static void *dasm_end = NULL;
 static void **dasm_ptr = NULL;
@@ -94,6 +95,7 @@ ZEND_API void zend_jit_status(zval *ret)
 {
 	zval stats;
 	array_init(&stats);
+	add_assoc_long(&stats, "level", zend_jit_level);
 	if (dasm_buf) {
 		add_assoc_long(&stats, "buffer_size", (char*)dasm_end - (char*)dasm_buf);
 		add_assoc_long(&stats, "buffer_free", (char*)dasm_end - (char*)*dasm_ptr);
@@ -848,7 +850,7 @@ static int zend_jit_op_array_analyze1(zend_op_array *op_array, zend_script *scri
 		return FAILURE;
 	}
 
-	if ((ZEND_JIT_LEVEL >= ZEND_JIT_LEVEL_OPT_FUNC)
+	if ((zend_jit_level >= ZEND_JIT_LEVEL_OPT_FUNC)
 	 && ssa->cfg.blocks
 	 && op_array->last_try_catch == 0
 	 && !(op_array->fn_flags & ZEND_ACC_GENERATOR)
@@ -877,7 +879,7 @@ static int zend_jit_op_array_analyze1(zend_op_array *op_array, zend_script *scri
 
 static int zend_jit_op_array_analyze2(zend_op_array *op_array, zend_script *script, zend_ssa *ssa, uint32_t *flags)
 {
-	if ((ZEND_JIT_LEVEL >= ZEND_JIT_LEVEL_OPT_FUNC)
+	if ((zend_jit_level >= ZEND_JIT_LEVEL_OPT_FUNC)
 	 && ssa->cfg.blocks
 	 && op_array->last_try_catch == 0
 	 && !(op_array->fn_flags & ZEND_ACC_GENERATOR)
@@ -937,11 +939,11 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 			if (ssa->cfg.split_at_recv && opline->opcode == ZEND_RECV_INIT) {
 				if (opline > op_array->opcodes &&
 				    (opline-1)->opcode == ZEND_RECV_INIT) {
-#if ZEND_JIT_LEVEL < ZEND_JIT_LEVEL_OPT_FUNC
-					/* repeatable opcode */
-					zend_jit_label(&dasm_state, b);
-					continue;
-#endif
+					if (zend_jit_level < ZEND_JIT_LEVEL_INLINE) {
+						/* repeatable opcode */
+						zend_jit_label(&dasm_state, b);
+						continue;
+					}
 				} else {
 					if (opline != op_array->opcodes) {
 						zend_jit_jmp(&dasm_state, 1);
@@ -993,150 +995,156 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 				case ZEND_NEW:
 					call_level++;
 			}
-			switch (opline->opcode) {
-#if ZEND_JIT_LEVEL >= ZEND_JIT_LEVEL_OPT_FUNC
-				case ZEND_PRE_INC:
-				case ZEND_PRE_DEC:
-				case ZEND_POST_INC:
-				case ZEND_POST_DEC:
-					if (!zend_jit_inc_dec(&dasm_state, opline, op_array, ssa)) {
-						goto jit_failure;
-					}
-					break;
-				case ZEND_SR:
-				case ZEND_SL:
-					if (!zend_jit_shift(&dasm_state, opline, op_array, ssa)) {
-						goto jit_failure;
-					}
-					break;
-				case ZEND_ADD:
-				case ZEND_SUB:
-				case ZEND_MUL:
-//				case ZEND_DIV: // TODO: check for division by zero ???
-					if (!zend_jit_math(&dasm_state, opline, &i, op_array, ssa)) {
-						goto jit_failure;
-					}
-					break;
-				case ZEND_ASSIGN_ADD:
-				case ZEND_ASSIGN_SUB:
-				case ZEND_ASSIGN_MUL:
-//				case ZEND_ASSIGN_DIV: // TODO: check for division by zero ???
-					if (!zend_jit_assign_math(&dasm_state, opline, op_array, ssa)) {
-						goto jit_failure;
-					}
-					break;
-				case ZEND_ASSIGN_DIM:
-					if (!zend_jit_assign_dim(&dasm_state, opline, op_array, ssa)) {
-						goto jit_failure;
-					}
-					break;
-				case ZEND_ASSIGN:
-					if (!zend_jit_assign(&dasm_state, opline, op_array, ssa)) {
-						goto jit_failure;
-					}
-					break;
-				case ZEND_QM_ASSIGN:
-					if (!zend_jit_qm_assign(&dasm_state, opline, op_array, ssa)) {
-						goto jit_failure;
-					}
-					break;
-				case ZEND_INIT_FCALL:
-					if (!zend_jit_init_fcall(&dasm_state, opline, op_array, call_level)) {
-						goto jit_failure;
-					}
-					break;
-				case ZEND_SEND_VAL:
-				case ZEND_SEND_VAL_EX:
-					if (!zend_jit_send_val(&dasm_state, opline, op_array, ssa)) {
-						goto jit_failure;
-					}
-					break;
-				case ZEND_SEND_VAR:
-					if (!zend_jit_send_var(&dasm_state, opline, op_array, ssa)) {
-						goto jit_failure;
-					}
-					break;
-				case ZEND_DO_UCALL:
-				case ZEND_DO_ICALL:
-					if (!zend_jit_do_fcall(&dasm_state, opline, op_array, ssa, call_level)) {
-						goto jit_failure;
-					}
-					break;
-				case ZEND_IS_EQUAL:
-				case ZEND_IS_NOT_EQUAL:
-				case ZEND_IS_SMALLER:
-				case ZEND_IS_SMALLER_OR_EQUAL:
-				case ZEND_CASE:
-					if (!zend_jit_cmp(&dasm_state, opline, b, &i, op_array, ssa)) {
-						goto jit_failure;
-					}
-					break;
-				case ZEND_TYPE_CHECK:
-					if (!zend_jit_type_check(&dasm_state, opline, b, &i, op_array, ssa)) {
-						goto jit_failure;
-					}
-					break;
-				case ZEND_RETURN:
-					if (!zend_jit_return(&dasm_state, opline, op_array, ssa)) {
-						goto jit_failure;
-					}
-					break;
-				case ZEND_JMPZ:
-				case ZEND_JMPNZ:
-				case ZEND_JMPZNZ:
-					if ((opline-1)->opcode == ZEND_IS_EQUAL ||
-					    (opline-1)->opcode == ZEND_IS_NOT_EQUAL ||
-					    (opline-1)->opcode == ZEND_IS_SMALLER ||
-					    (opline-1)->opcode == ZEND_IS_SMALLER_OR_EQUAL ||
-					    (opline-1)->opcode == ZEND_CASE) {
-						/* skip */
-					} else if ((opline->opcode != ZEND_JMPZNZ) &&
-					    ((opline-1)->opcode == ZEND_IS_IDENTICAL ||
-					     (opline-1)->opcode == ZEND_IS_NOT_IDENTICAL ||
-					     (opline-1)->opcode == ZEND_ISSET_ISEMPTY_VAR ||
-					     (opline-1)->opcode == ZEND_ISSET_ISEMPTY_STATIC_PROP ||
-					     (opline-1)->opcode == ZEND_ISSET_ISEMPTY_DIM_OBJ ||
-					     (opline-1)->opcode == ZEND_ISSET_ISEMPTY_PROP_OBJ ||
-					     (opline-1)->opcode == ZEND_INSTANCEOF ||
-					     (opline-1)->opcode == ZEND_TYPE_CHECK ||
-					     (opline-1)->opcode == ZEND_DEFINED)) {
-					    /* smart branch */
-						if (!zend_jit_cond_jmp(&dasm_state, opline + 1, ssa->cfg.blocks[b].successors[0])) {
+
+			if (zend_jit_level >= ZEND_JIT_LEVEL_INLINE) {
+				switch (opline->opcode) {
+					case ZEND_PRE_INC:
+					case ZEND_PRE_DEC:
+					case ZEND_POST_INC:
+					case ZEND_POST_DEC:
+						if (!zend_jit_inc_dec(&dasm_state, opline, op_array, ssa)) {
 							goto jit_failure;
 						}
-					} else if (!zend_jit_jmpznz(&dasm_state, opline, b, op_array, ssa)) {
-						goto jit_failure;
-					}
-					break;
-				case ZEND_FETCH_DIM_R:
-				case ZEND_FETCH_DIM_IS:
-					if (!zend_jit_fetch_dim_read(&dasm_state, opline, op_array, ssa)) {
-						goto jit_failure;
-					}
-					break;
-				case ZEND_ISSET_ISEMPTY_DIM_OBJ:
-					if (!zend_jit_isset_isempty_dim(&dasm_state, opline, b, &i, op_array, ssa)) {
-						goto jit_failure;
-					}
-					break;
-					/*
-				case ZEND_FETCH_OBJ_R:
-					if (!zend_jit_fetch_obj_r(&dasm_state, opline, op_array, ssa)) {
-						goto jit_failure;
-					}
-					break;
-					*/
-				case ZEND_BIND_GLOBAL:
-					if (!zend_jit_bind_global(&dasm_state, opline, op_array, ssa)) {
-						goto jit_failure;
-					}
-					break;
-				case ZEND_RECV_INIT:
-					if (!zend_jit_recv_init(&dasm_state, opline, op_array, (opline + 1)->opcode != ZEND_RECV_INIT, ssa)) {
-						goto jit_failure;
-					}
-					break;
-#else
+						goto done;
+					case ZEND_SR:
+					case ZEND_SL:
+						if (!zend_jit_shift(&dasm_state, opline, op_array, ssa)) {
+							goto jit_failure;
+						}
+						goto done;
+					case ZEND_ADD:
+					case ZEND_SUB:
+					case ZEND_MUL:
+//					case ZEND_DIV: // TODO: check for division by zero ???
+						if (!zend_jit_math(&dasm_state, opline, &i, op_array, ssa)) {
+							goto jit_failure;
+						}
+						goto done;
+					case ZEND_ASSIGN_ADD:
+					case ZEND_ASSIGN_SUB:
+					case ZEND_ASSIGN_MUL:
+//					case ZEND_ASSIGN_DIV: // TODO: check for division by zero ???
+						if (!zend_jit_assign_math(&dasm_state, opline, op_array, ssa)) {
+							goto jit_failure;
+						}
+						goto done;
+					case ZEND_ASSIGN_DIM:
+						if (!zend_jit_assign_dim(&dasm_state, opline, op_array, ssa)) {
+							goto jit_failure;
+						}
+						goto done;
+					case ZEND_ASSIGN:
+						if (!zend_jit_assign(&dasm_state, opline, op_array, ssa)) {
+							goto jit_failure;
+						}
+						goto done;
+					case ZEND_QM_ASSIGN:
+						if (!zend_jit_qm_assign(&dasm_state, opline, op_array, ssa)) {
+							goto jit_failure;
+						}
+						goto done;
+					case ZEND_INIT_FCALL:
+						if (!zend_jit_init_fcall(&dasm_state, opline, op_array, call_level)) {
+							goto jit_failure;
+						}
+						goto done;
+					case ZEND_SEND_VAL:
+					case ZEND_SEND_VAL_EX:
+						if (!zend_jit_send_val(&dasm_state, opline, op_array, ssa)) {
+							goto jit_failure;
+						}
+						goto done;
+					case ZEND_SEND_VAR:
+						if (!zend_jit_send_var(&dasm_state, opline, op_array, ssa)) {
+							goto jit_failure;
+						}
+						goto done;
+					case ZEND_DO_UCALL:
+					case ZEND_DO_ICALL:
+						if (!zend_jit_do_fcall(&dasm_state, opline, op_array, ssa, call_level)) {
+							goto jit_failure;
+						}
+						goto done;
+					case ZEND_IS_EQUAL:
+					case ZEND_IS_NOT_EQUAL:
+					case ZEND_IS_SMALLER:
+					case ZEND_IS_SMALLER_OR_EQUAL:
+					case ZEND_CASE:
+						if (!zend_jit_cmp(&dasm_state, opline, b, &i, op_array, ssa)) {
+							goto jit_failure;
+						}
+						goto done;
+					case ZEND_TYPE_CHECK:
+						if (!zend_jit_type_check(&dasm_state, opline, b, &i, op_array, ssa)) {
+							goto jit_failure;
+						}
+						goto done;
+					case ZEND_RETURN:
+						if (!zend_jit_return(&dasm_state, opline, op_array, ssa)) {
+							goto jit_failure;
+						}
+						goto done;
+					case ZEND_JMPZ:
+					case ZEND_JMPNZ:
+					case ZEND_JMPZNZ:
+						if ((opline-1)->opcode == ZEND_IS_EQUAL ||
+						    (opline-1)->opcode == ZEND_IS_NOT_EQUAL ||
+						    (opline-1)->opcode == ZEND_IS_SMALLER ||
+						    (opline-1)->opcode == ZEND_IS_SMALLER_OR_EQUAL ||
+						    (opline-1)->opcode == ZEND_CASE) {
+							/* skip */
+						} else if ((opline->opcode != ZEND_JMPZNZ) &&
+						    ((opline-1)->opcode == ZEND_IS_IDENTICAL ||
+						     (opline-1)->opcode == ZEND_IS_NOT_IDENTICAL ||
+						     (opline-1)->opcode == ZEND_ISSET_ISEMPTY_VAR ||
+						     (opline-1)->opcode == ZEND_ISSET_ISEMPTY_STATIC_PROP ||
+						     (opline-1)->opcode == ZEND_ISSET_ISEMPTY_DIM_OBJ ||
+						     (opline-1)->opcode == ZEND_ISSET_ISEMPTY_PROP_OBJ ||
+						     (opline-1)->opcode == ZEND_INSTANCEOF ||
+						     (opline-1)->opcode == ZEND_TYPE_CHECK ||
+						     (opline-1)->opcode == ZEND_DEFINED)) {
+						    /* smart branch */
+							if (!zend_jit_cond_jmp(&dasm_state, opline + 1, ssa->cfg.blocks[b].successors[0])) {
+								goto jit_failure;
+							}
+						} else if (!zend_jit_jmpznz(&dasm_state, opline, b, op_array, ssa)) {
+							goto jit_failure;
+						}
+						goto done;
+					case ZEND_FETCH_DIM_R:
+						case ZEND_FETCH_DIM_IS:
+						if (!zend_jit_fetch_dim_read(&dasm_state, opline, op_array, ssa)) {
+							goto jit_failure;
+						}
+						goto done;
+					case ZEND_ISSET_ISEMPTY_DIM_OBJ:
+						if (!zend_jit_isset_isempty_dim(&dasm_state, opline, b, &i, op_array, ssa)) {
+							goto jit_failure;
+						}
+						goto done;
+						/*
+					case ZEND_FETCH_OBJ_R:
+						if (!zend_jit_fetch_obj_r(&dasm_state, opline, op_array, ssa)) {
+							goto jit_failure;
+						}
+						goto done;
+						*/
+					case ZEND_BIND_GLOBAL:
+						if (!zend_jit_bind_global(&dasm_state, opline, op_array, ssa)) {
+							goto jit_failure;
+						}
+						goto done;
+					case ZEND_RECV_INIT:
+						if (!zend_jit_recv_init(&dasm_state, opline, op_array, (opline + 1)->opcode != ZEND_RECV_INIT, ssa)) {
+							goto jit_failure;
+						}
+						goto done;
+					default:
+						break;
+				}
+			}
+
+			switch (opline->opcode) {
 				case ZEND_RECV_INIT:
 					if (ssa->cfg.split_at_recv) {
 						if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, ssa))) {
@@ -1146,14 +1154,15 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 					}
 					/* break missing intentionally */
 				case ZEND_BIND_GLOBAL:
-					if (opline->opcode != op_array->opcodes[i+1].opcode) {
+					if (opline == op_array->opcodes ||
+					    opline->opcode != op_array->opcodes[i-1].opcode) {
 						/* repeatable opcodes */
 						if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, ssa))) {
 							goto jit_failure;
 						}
 					}
+					zend_jit_set_opline(&dasm_state, opline+1);
 					break;
-#endif
 				case ZEND_NOP:
 				case ZEND_OP_DATA:
 					break;
@@ -1168,9 +1177,7 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 				case ZEND_GENERATOR_CREATE:
 				case ZEND_GENERATOR_RETURN:
 				case ZEND_RETURN_BY_REF:
-#if ZEND_JIT_LEVEL < ZEND_JIT_LEVEL_OPT_FUNC
 				case ZEND_RETURN:
-#endif
 				case ZEND_EXIT:
 				/* switch through trampoline */
 				case ZEND_YIELD:
@@ -1182,15 +1189,12 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 				/* stackless execution */
 				case ZEND_INCLUDE_OR_EVAL:
 				case ZEND_DO_FCALL:
-#if ZEND_JIT_LEVEL < ZEND_JIT_LEVEL_OPT_FUNC
 				case ZEND_DO_UCALL:
-#endif
 				case ZEND_DO_FCALL_BY_NAME:
 					if (!zend_jit_call(&dasm_state, opline)) {
 						goto jit_failure;
 					}
 					break;
-#if ZEND_JIT_LEVEL < ZEND_JIT_LEVEL_OPT_FUNC
 				case ZEND_JMPZNZ:
 					if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, ssa)) ||
 					    !zend_jit_cond_jmp(&dasm_state, OP_JMP_ADDR(opline, opline->op2), ssa->cfg.blocks[b].successors[1]) ||
@@ -1241,7 +1245,6 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 						}
 					}
 					/* break missing intentionally */
-#endif
 				case ZEND_JMPZ_EX:
 				case ZEND_JMPNZ_EX:
 				case ZEND_JMP_SET:
@@ -1273,6 +1276,7 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 						goto jit_failure;
 					}
 			}
+done:
 			switch (opline->opcode) {
 				case ZEND_DO_FCALL:
 				case ZEND_DO_ICALL:
@@ -1525,11 +1529,13 @@ static int zend_jit_make_stubs(void)
 	return 1;
 }
 
-ZEND_API int zend_jit_startup(size_t size)
+ZEND_API int zend_jit_startup(zend_long jit_level, size_t size)
 {
 	size_t page_size = jit_page_size();
 	int shared = 1;
 	int ret;
+
+	zend_jit_level = jit_level;
 
 #ifdef HAVE_GDB
 	zend_jit_gdb_init();
@@ -1631,7 +1637,7 @@ ZEND_API void zend_jit_protect(void)
 {
 }
 
-ZEND_API int zend_jit_startup(size_t size)
+ZEND_API int zend_jit_startup(zend_long jit_level, size_t size)
 {
 	return FAILURE;
 }

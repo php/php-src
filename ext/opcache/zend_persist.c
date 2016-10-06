@@ -570,8 +570,8 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 	ZCG(mem) = (void*)((char*)ZCG(mem) + ZEND_ALIGNED_SIZE(zend_extensions_op_array_persist(op_array, ZCG(mem))));
 
 #ifdef HAVE_JIT
-	if (ZEND_JIT_LEVEL <= ZEND_JIT_LEVEL_OPT_FUNC &&
-	    do_jit && ZCG(accel_directives).jit_buffer_size) {
+	if (ZCG(accel_directives).jit_level &&
+	    ZCG(accel_directives).jit_level <= ZEND_JIT_LEVEL_OPT_FUNC) {
 		zend_jit_op_array(op_array, ZCG(current_persistent_script) ? &ZCG(current_persistent_script)->script : NULL);
 	}
 #endif
@@ -858,7 +858,9 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	ZCG(mem) = (void*)((char*)ZCG(mem) + script->arena_size);
 
 #ifdef HAVE_JIT
-	zend_jit_unprotect();
+	if (ZCG(accel_directives).jit_level) {
+		zend_jit_unprotect();
+	}
 #endif
 
 	ZCG(current_persistent_script) = script;
@@ -868,11 +870,12 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	ZCG(current_persistent_script) = NULL;
 
 #ifdef HAVE_JIT
-	if (ZEND_JIT_LEVEL >= ZEND_JIT_LEVEL_OPT_SCRIPT &&
-	    ZCG(accel_directives).jit_buffer_size) {
-		zend_jit_script(&script->script);
+	if (ZCG(accel_directives).jit_level) {
+		if (ZCG(accel_directives).jit_level >= ZEND_JIT_LEVEL_OPT_SCRIPT) {
+			zend_jit_script(&script->script);
+		}
+		zend_jit_protect();
 	}
-	zend_jit_protect();
 #endif
 
 	return script;
