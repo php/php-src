@@ -554,7 +554,7 @@ void gdImageColorDeallocate(gdImagePtr im, int color);
 
 gdImagePtr gdImageCreatePaletteFromTrueColor (gdImagePtr im, int ditherFlag, int colorsWanted);
 
-void gdImageTrueColorToPalette(gdImagePtr im, int ditherFlag, int colorsWanted);
+int gdImageTrueColorToPalette(gdImagePtr im, int ditherFlag, int colorsWanted);
 int gdImagePaletteToTrueColor(gdImagePtr src);
 
 /* An attempt at getting the results of gdImageTrueColorToPalette

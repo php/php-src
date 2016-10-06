@@ -1554,9 +1554,12 @@ PHP_FUNCTION(imagetruecolortopalette)
 		php_error_docref(NULL, E_WARNING, "Number of colors has to be greater than zero and no more than %d", INT_MAX);
 		RETURN_FALSE;
 	}
-	gdImageTrueColorToPalette(im, dither, (int)ncolors);
-
-	RETURN_TRUE;
+	if (gdImageTrueColorToPalette(im, dither, (int)ncolors)) {
+		RETURN_TRUE;
+	} else {
+		php_error_docref(NULL, E_WARNING, "Couldn't convert to palette");
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
@@ -4039,7 +4042,10 @@ static void _php_image_bw_convert(gdImagePtr im_org, gdIOCtx *out, int threshold
 	}
 
 	if (im_org->trueColor) {
-		gdImageTrueColorToPalette(im_org, 1, 256);
+		if (!gdImageTrueColorToPalette(im_org, 1, 256)) {
+			php_error_docref(NULL, E_WARNING, "Unable to convert to palette");
+			return;
+		}
 	}
 
 	for (y = 0; y < dest_height; y++) {

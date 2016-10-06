@@ -925,6 +925,7 @@ clf              = day "/" monthabbr "/" year4 ":" hour24lz ":" minutelz ":" sec
 
 /* Timestamp format: @1126396800 */
 timestamp        = "@" "-"? [0-9]+;
+timestampms      = "@" "-"? [0-9]+ "." [0-9]{6};
 
 /* To fix some ambiguities */
 dateshortwithtimeshort12  = datenoyear timeshort12;
@@ -1023,6 +1024,34 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		s->time->h = s->time->i = s->time->s = 0;
 		s->time->f = 0.0;
 		s->time->relative.s += i;
+		s->time->is_localtime = 1;
+		s->time->zone_type = TIMELIB_ZONETYPE_OFFSET;
+		s->time->z = 0;
+		s->time->dst = 0;
+
+		TIMELIB_DEINIT;
+		return TIMELIB_RELATIVE;
+	}
+
+	timestampms
+	{
+		timelib_ull i, ms;
+
+		TIMELIB_INIT;
+		TIMELIB_HAVE_RELATIVE();
+		TIMELIB_UNHAVE_DATE();
+		TIMELIB_UNHAVE_TIME();
+		TIMELIB_HAVE_TZ();
+
+		i = timelib_get_unsigned_nr((char **) &ptr, 24);
+		ms = timelib_get_unsigned_nr((char **) &ptr, 24);
+		s->time->y = 1970;
+		s->time->m = 1;
+		s->time->d = 1;
+		s->time->h = s->time->i = s->time->s = 0;
+		s->time->f = 0.0;
+		s->time->relative.s += i;
+		s->time->relative.f = ((double) ms) / 1000000.0;
 		s->time->is_localtime = 1;
 		s->time->zone_type = TIMELIB_ZONETYPE_OFFSET;
 		s->time->z = 0;
@@ -2032,7 +2061,6 @@ timelib_time *timelib_parse_from_format(char *format, char *string, size_t len, 
 				s->time->m = 1;
 				s->time->d = 1;
 				s->time->h = s->time->i = s->time->s = 0;
-				s->time->f = 0.0;
 				s->time->relative.s += tmp;
 				s->time->is_localtime = 1;
 				s->time->zone_type = TIMELIB_ZONETYPE_OFFSET;
@@ -2190,13 +2218,20 @@ void timelib_fill_holes(timelib_time *parsed, timelib_time *now, int options)
 		parsed->s = 0;
 		parsed->f = 0;
 	}
+	if (
+		parsed->y != TIMELIB_UNSET || parsed->m != TIMELIB_UNSET || parsed->d != TIMELIB_UNSET ||
+		parsed->h != TIMELIB_UNSET || parsed->i != TIMELIB_UNSET || parsed->s != TIMELIB_UNSET
+	) {
+		if (parsed->f == TIMELIB_UNSET) parsed->f = 0;
+	} else {
+		if (parsed->f == TIMELIB_UNSET) parsed->f = now->f != TIMELIB_UNSET ? now->f : 0;
+	}
 	if (parsed->y == TIMELIB_UNSET) parsed->y = now->y != TIMELIB_UNSET ? now->y : 0;
-	if (parsed->d == TIMELIB_UNSET) parsed->d = now->d != TIMELIB_UNSET ? now->d : 0;
 	if (parsed->m == TIMELIB_UNSET) parsed->m = now->m != TIMELIB_UNSET ? now->m : 0;
+	if (parsed->d == TIMELIB_UNSET) parsed->d = now->d != TIMELIB_UNSET ? now->d : 0;
 	if (parsed->h == TIMELIB_UNSET) parsed->h = now->h != TIMELIB_UNSET ? now->h : 0;
 	if (parsed->i == TIMELIB_UNSET) parsed->i = now->i != TIMELIB_UNSET ? now->i : 0;
 	if (parsed->s == TIMELIB_UNSET) parsed->s = now->s != TIMELIB_UNSET ? now->s : 0;
-	if (parsed->f == TIMELIB_UNSET) parsed->f = now->f != TIMELIB_UNSET ? now->f : 0;
 	if (parsed->z == TIMELIB_UNSET) parsed->z = now->z != TIMELIB_UNSET ? now->z : 0;
 	if (parsed->dst == TIMELIB_UNSET) parsed->dst = now->dst != TIMELIB_UNSET ? now->dst : 0;
 
