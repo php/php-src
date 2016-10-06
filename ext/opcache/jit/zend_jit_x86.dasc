@@ -4269,6 +4269,12 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, zend_op_
 			func = call_info->callee_func;
 		}
 	}
+
+	if (!func) {
+		// TODO: implement JIT for INIT_FCALL for unknown functions ???
+		goto fallback;
+	}
+
 	if (func && func->type == ZEND_INTERNAL_FUNCTION) {
 		|	LOAD_ADDR r0, func
 	} else if (func && op_array == &func->op_array) {
@@ -4312,6 +4318,10 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, zend_op_
 	|	mov EX->call, FCARG1a
 
 	return 1;
+
+fallback:
+	/* fallback to subroutine threading */
+	return zend_jit_handler(Dst, opline, 0);
 }
 
 static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa, int call_level)

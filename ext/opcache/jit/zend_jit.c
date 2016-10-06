@@ -1422,6 +1422,14 @@ ZEND_API int zend_jit_script(zend_script *script)
 		goto jit_failure;
 	}
 
+#ifdef ZEND_RUNTIME_JIT
+	for (i = 0; i < call_graph.op_arrays_count; i++) {
+		ZEND_SET_FUNC_INFO(call_graph.op_arrays[i], NULL);
+		if (zend_jit_op_array(call_graph.op_arrays[i], script) != SUCCESS) {
+			goto jit_failure;
+		}
+	}
+#else
 	for (i = 0; i < call_graph.op_arrays_count; i++) {
 		info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
 		if (info) {
@@ -1461,6 +1469,8 @@ ZEND_API int zend_jit_script(zend_script *script)
 	for (i = 0; i < call_graph.op_arrays_count; i++) {
 		ZEND_SET_FUNC_INFO(call_graph.op_arrays[i], NULL);
 	}
+#endif
+
 	zend_arena_release(&CG(arena), checkpoint);
 	return SUCCESS;
 
