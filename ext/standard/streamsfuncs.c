@@ -1739,11 +1739,21 @@ PHP_FUNCTION(stream_vt100_support)
 #ifdef PHP_WIN32
 		/* Check if the current Windows version supports VT100 control codes */
 		if (!php_win32_console_os_supports_vt100()) {
-			RETURN_FALSE;
+			if (enable) {
+				RETURN_FALSE;
+			}
+			else {
+				RETURN_TRUE;
+			}
 		}
 		/* Check if the Windows standard handle is redirected to file */
 		if (!php_win32_console_fileno_is_console(fileno)) {
-			RETURN_FALSE;
+			if (enable) {
+				RETURN_FALSE;
+			}
+			else {
+				RETURN_TRUE;
+			}
 		}
 		/* Enable/disable VT100 control codes support for the specified Windows standard handle */
 		if (php_win32_console_fileno_set_vt100(fileno, enable ? TRUE : FALSE)) {
