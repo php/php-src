@@ -253,11 +253,11 @@ END_EXTERN_C()
 
 #define php_stream_get_resource_id(stream)		((php_stream *)(stream))->res->handle
 /* use this to tell the stream that it is OK if we don't explicitly close it */
-#define php_stream_auto_cleanup(stream)	{ (stream)->__exposed++; }
+#define php_stream_auto_cleanup(stream)	{ (stream)->__exposed = 1; }
 /* use this to assign the stream to a zval and tell the stream that is
  * has been exported to the engine; it will expect to be closed automatically
  * when the resources are auto-destructed */
-#define php_stream_to_zval(stream, zval)	{ ZVAL_RES(zval, (stream)->res); (stream)->__exposed++; }
+#define php_stream_to_zval(stream, zval)	{ ZVAL_RES(zval, (stream)->res); (stream)->__exposed = 1; }
 
 #define php_stream_from_zval(xstr, pzval)	do { \
 	if (((xstr) = (php_stream*)zend_fetch_resource2_ex((pzval), \
