@@ -1062,7 +1062,7 @@ function error_report($testname, $logname, $tested)
 	}
 }
 
-function system_with_timeout($commandline, $env = null, $stdin = null, $captureStdOut = true, $captureStdErr = true)
+function system_with_timeout($commandline, $env = null, $stdin = null, $captureStdIn = true, $captureStdOut = true, $captureStdErr = true)
 {
 	global $leak_check, $cwd;
 
@@ -1073,8 +1073,9 @@ function system_with_timeout($commandline, $env = null, $stdin = null, $captureS
 		$bin_env[$key] = $value;
 	}
 
-	$descriptorspec = array(
-		0 => array('pipe', 'r'),
+	$descriptorspec = array();
+	if ($captureStdIn) {
+		$descriptorspec[0] = array('pipe', 'r');
 	);
 	if ($captureStdOut) {
 		$descriptorspec[1] = array('pipe', 'w');
@@ -1088,11 +1089,13 @@ function system_with_timeout($commandline, $env = null, $stdin = null, $captureS
 		return false;
 	}
 
-	if (!is_null($stdin)) {
-		fwrite($pipes[0], $stdin);
+	if ($captureStdIn) {
+		if (!is_null($stdin)) {
+			fwrite($pipes[0], $stdin);
+		}
+		fclose($pipes[0]);
+		unset($pipes[0]);
 	}
-	fclose($pipes[0]);
-	unset($pipes[0]);
 
 	$timeout = $leak_check ? 300 : (isset($env['TEST_TIMEOUT']) ? $env['TEST_TIMEOUT'] : 60);
 
@@ -1350,9 +1353,11 @@ TEST $file
 	}
 
 	if (isset($section_text['CAPTURE_STDIO'])) {
+		$captureStdIn = stripos($section_text['CAPTURE_STDIO'], 'STDIN') !== false;
 		$captureStdOut = stripos($section_text['CAPTURE_STDIO'], 'STDOUT') !== false;
 		$captureStdErr = stripos($section_text['CAPTURE_STDIO'], 'STDERR') !== false;
 	} else {
+		$captureStdIn = true;
 		$captureStdOut = true;
 		$captureStdErr = true;
 	}
@@ -1360,7 +1365,7 @@ TEST $file
 		$cmdRedirect = ' 2>&1';
 	} else {
 		$cmdRedirect = '';
-    }
+	}
 
 	$tested = trim($section_text['TEST']);
 
@@ -1897,7 +1902,7 @@ COMMAND $cmd
 
 	junit_start_timer($shortname);
 
-	$out = system_with_timeout($cmd, $env, isset($section_text['STDIN']) ? $section_text['STDIN'] : null, $captureStdOut, $captureStdErr);
+	$out = system_with_timeout($cmd, $env, isset($section_text['STDIN']) ? $section_text['STDIN'] : null, $captureStdIn, $captureStdOut, $captureStdErr);
 
 	junit_finish_timer($shortname);
 
