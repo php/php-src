@@ -568,7 +568,7 @@ PHPAPI void _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 		/* allocate a buffer for reading chunks */
 		chunk_buf = emalloc(stream->chunk_size);
 
-		while (!stream->eof && !err_flag && (stream->writepos - stream->readpos < (off_t)size)) {
+		while (!stream->eof && !err_flag && (stream->writepos - stream->readpos < (zend_off_t)size)) {
 			size_t justread = 0;
 			int flags;
 			php_stream_bucket *bucket;
