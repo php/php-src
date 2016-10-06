@@ -35,6 +35,17 @@
 //#define CONTEXT_THREADED_JIT
 #define PREFER_MAP_32BIT
 //#define ZEND_RUNTIME_JIT
+#define ZEND_JIT_USE_RC_INFERENCE
+
+#ifdef ZEND_JIT_USE_RC_INFERENCE
+# define ZEND_SSA_RC_INFERENCE_FLAG ZEND_SSA_RC_INFERENCE
+# define RC_MAY_BE_1(info)          (((info) & (MAY_BE_RC1|MAY_BE_REF)) != 0)
+# define RC_MAY_BE_N(info)          (((info) & (MAY_BE_RCN|MAY_BE_REF)) != 0)
+#else
+# define ZEND_SSA_RC_INFERENCE_FLAG 0
+# define RC_MAY_BE_1(info)          1
+# define RC_MAY_BE_N(info)          1
+#endif
 
 #define JIT_PREFIX      "JIT$"
 #define JIT_STUB_PREFIX "JIT$$"
@@ -819,7 +830,7 @@ static int zend_may_overflow(const zend_op *opline, zend_op_array *op_array, zen
 
 static int zend_jit_op_array_analyze1(zend_op_array *op_array, zend_script *script, zend_ssa *ssa, uint32_t *flags)
 {
-	if (zend_build_cfg(&CG(arena), op_array, ZEND_CFG_STACKLESS | ZEND_CFG_RECV_ENTRY | ZEND_RT_CONSTANTS | ZEND_CFG_NO_ENTRY_PREDECESSORS | ZEND_SSA_RC_INFERENCE, &ssa->cfg, flags) != SUCCESS) {
+	if (zend_build_cfg(&CG(arena), op_array, ZEND_CFG_STACKLESS | ZEND_CFG_RECV_ENTRY | ZEND_RT_CONSTANTS | ZEND_CFG_NO_ENTRY_PREDECESSORS | ZEND_SSA_RC_INFERENCE_FLAG, &ssa->cfg, flags) != SUCCESS) {
 		return FAILURE;
 	}
 
