@@ -162,8 +162,13 @@ static zend_always_inline uint32_t _const_op_type(const zval *zv) {
 		return MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY;
 	} else if (Z_TYPE_P(zv) == IS_ARRAY) {
 		HashTable *ht = Z_ARRVAL_P(zv);
-		uint32_t tmp = MAY_BE_ARRAY | MAY_BE_RC1 | MAY_BE_RCN;
+		uint32_t tmp = MAY_BE_ARRAY;
 
+		if (Z_REFCOUNTED_P(zv)) {
+			tmp |= MAY_BE_RC1 | MAY_BE_RCN;
+		} else {
+			tmp |= MAY_BE_RCN;
+		}
 		zend_string *str;
 		zval *val;
 		ZEND_HASH_FOREACH_STR_KEY_VAL(ht, str, val) {
@@ -176,7 +181,14 @@ static zend_always_inline uint32_t _const_op_type(const zval *zv) {
 		} ZEND_HASH_FOREACH_END();
 		return tmp;
 	} else {
-		return (1 << Z_TYPE_P(zv)) | MAY_BE_RC1 | MAY_BE_RCN;
+		uint32_t tmp = (1 << Z_TYPE_P(zv));
+
+		if (Z_REFCOUNTED_P(zv)) {
+			tmp |= MAY_BE_RC1 | MAY_BE_RCN;
+		} else if (Z_TYPE_P(zv) == IS_STRING) {
+			tmp |= MAY_BE_RCN;
+		}
+		return tmp;
 	}
 }
 
