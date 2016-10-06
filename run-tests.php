@@ -1076,7 +1076,7 @@ function system_with_timeout($commandline, $env = null, $stdin = null, $captureS
 	$descriptorspec = array();
 	if ($captureStdIn) {
 		$descriptorspec[0] = array('pipe', 'r');
-	);
+	}
 	if ($captureStdOut) {
 		$descriptorspec[1] = array('pipe', 'w');
 	}
