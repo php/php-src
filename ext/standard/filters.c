@@ -380,7 +380,7 @@ static void php_conv_base64_encode_dtor(php_conv_base64_encode *inst)
 	}
 }
 
-static php_conv_err_t php_conv_base64_encode_flush(php_conv_base64_encode *inst, const char **in_pp, size_t *in_left_p, char **out_pp, size_t *out_left_p)
+static php_conv_err_t php_conv_base64_encode_flush(php_conv_base64_encode *inst, char **out_pp, size_t *out_left_p)
 {
 	volatile php_conv_err_t err = PHP_CONV_ERR_SUCCESS;
 	register unsigned char *pd;
@@ -462,7 +462,7 @@ static php_conv_err_t php_conv_base64_encode_convert(php_conv_base64_encode *ins
 	register unsigned int line_ccnt;
 
 	if (in_pp == NULL || in_left_p == NULL) {
-		return php_conv_base64_encode_flush(inst, in_pp, in_left_p, out_pp, out_left_p);
+		return php_conv_base64_encode_flush(inst, out_pp, out_left_p);
 	}
 
 	pd = (unsigned char *)(*out_pp);
