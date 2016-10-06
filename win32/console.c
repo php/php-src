@@ -77,17 +77,18 @@ PHP_WINUTIL_API BOOL php_win32_console_fileno_set_vt100(zend_long fileno, BOOL e
 			flag = ENABLE_VIRTUAL_TERMINAL_PROCESSING;
 		}
 		if (GetConsoleMode(handle, &mode)) {
-			if (((mode & ENABLE_VIRTUAL_TERMINAL_PROCESSING) ? 1 : 0) == (enable ? 1 : 0)) {
+			DWORD newMode;
+			if (enable) {
+				newMode = mode | flag;
+			}
+			else {
+				newMode = mode & ~flag;
+			}
+			if (newMode == mode) {
 				result = TRUE;
 			}
 			else {
-				if (enable) {
-					mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-				}
-				else {
-					mode &= ~ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-				}
-				if (SetConsoleMode(handle, mode)) {
+				if (SetConsoleMode(handle, newMode)) {
 					result = TRUE;
 				}
 			}
