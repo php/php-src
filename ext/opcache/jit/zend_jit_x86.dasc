@@ -928,7 +928,7 @@ static void* dasm_labels[zend_lb_MAX];
 ||			}
 |			// zval_dtor_func(r);
 |			ZVAL_DTOR_FUNC filename, lineno
-||			if (gc && ((op_info) & (MAY_BE_REF|MAY_BE_ARRAY|MAY_BE_OBJECT))) {
+||			if (gc && RC_MAY_BE_N(op_info) && ((op_info) & (MAY_BE_REF|MAY_BE_ARRAY|MAY_BE_OBJECT))) {
 |				jmp >2
 ||			}
 |1:
@@ -956,7 +956,7 @@ static void* dasm_labels[zend_lb_MAX];
 |				jmp >2
 |.code
 ||			}
-||		} else if (cold && (!gc || ((op_info) & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))))) {
+||		} else if (cold && ((op_info) & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE)))) {
 |			jmp >2
 |.code
 ||		}
