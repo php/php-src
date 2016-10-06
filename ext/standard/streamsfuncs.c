@@ -1641,68 +1641,33 @@ PHP_FUNCTION(stream_supports_lock)
 */
 PHP_FUNCTION(stream_vt100_support)
 {
-	zval *z_stream;
-	zend_long fileno;
+	zval *zsrc;
+	php_stream *stream;
 	zend_bool enable;
+	zend_long fileno;
+
 	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc, "z|b", &z_stream, &enable) == FAILURE) {
-		return;
+	if (zend_parse_parameters(argc, "r|b", &zsrc, &enable) == FAILURE) {
+		RETURN_FALSE;
 	}
 
-	switch (Z_TYPE_P(z_stream)) {
-		case IS_RESOURCE:
-			{
-				php_stream *stream = NULL;
-				php_stream_from_zval_no_verify(stream, z_stream);
-				if (stream == NULL) {
-					RETURN_FALSE;
-				}
-				if (php_stream_can_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT) == SUCCESS) {
-					php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT, (void*)&fileno, 0);
-				}
-				else if (php_stream_can_cast(stream, PHP_STREAM_AS_FD) == SUCCESS) {
-					php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)&fileno, 0);
-				}
-				else {
-					RETURN_FALSE;
-				}
-			}
-			break;
-		case IS_STRING:
-			{
-				zend_string *stream_name = Z_STR_P(z_stream);
-				if (strcmp(ZSTR_VAL(stream_name), "php://stdin") == 0) {
-					fileno = STDIN_FILENO;
-				}
-				else if (strcmp(ZSTR_VAL(stream_name), "php://stdout") == 0) {
-					fileno = STDOUT_FILENO;
-				}
-				else if (strcmp(ZSTR_VAL(stream_name), "php://stderr") == 0) {
-					fileno = STDERR_FILENO;
-				}
-				else {
-					zend_internal_type_error(
-						ZEND_ARG_USES_STRICT_TYPES(),
-						"%s() was not able to recognize the stream named %s",
-						get_active_function_name(),
-						ZSTR_VAL(stream_name)
-					);
-					RETURN_FALSE;
-				}
-			}
-			break;
-		default:
-			zend_internal_type_error(
-				ZEND_ARG_USES_STRICT_TYPES(),
-				"%s() expects parameter %d to be a resource or a stream name, %s given",
-				get_active_function_name(),
-				1,
-				zend_zval_type_name(z_stream)
-			);
-			RETURN_FALSE;
-	}
+	php_stream_from_zval(stream, zsrc);
 
+	if (php_stream_can_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT) == SUCCESS) {
+		php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT, (void*)&fileno, 0);
+	}
+	else if (php_stream_can_cast(stream, PHP_STREAM_AS_FD) == SUCCESS) {
+		php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)&fileno, 0);
+	}
+	else {
+		zend_internal_type_error(
+			ZEND_ARG_USES_STRICT_TYPES(),
+			"%s() was not able to analyze the specified stream",
+			get_active_function_name()
+		);
+		RETURN_FALSE;
+	}
 
 	if (argc == 1) {
 		/* Check if the specified stream supports VT100 control codes */
