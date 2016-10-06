@@ -37,10 +37,6 @@
 #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
 #endif
 
-/*
-Check if the current Windows version supports VT100 control codes
-*/
-PHP_WINUTIL_API BOOL php_win32_console_os_supports_vt100();
 
 /*
 Check if a file descriptor associated to a stream is a console

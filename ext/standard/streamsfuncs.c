@@ -1707,10 +1707,6 @@ PHP_FUNCTION(stream_vt100_support)
 	if (argc == 1) {
 		/* Check if the specified stream supports VT100 control codes */
 #ifdef PHP_WIN32
-		/* Check if the current Windows version supports VT100 control codes */
-		if (!php_win32_console_os_supports_vt100()) {
-			RETURN_FALSE;
-		}
 		/* Check if the Windows standard handle is redirected to file */
 		if (!php_win32_console_fileno_is_console(fileno)) {
 			RETURN_FALSE;
@@ -1737,15 +1733,6 @@ PHP_FUNCTION(stream_vt100_support)
 	else {
 		/* Enable/disable VT100 control codes support for the specified stream */
 #ifdef PHP_WIN32
-		/* Check if the current Windows version supports VT100 control codes */
-		if (!php_win32_console_os_supports_vt100()) {
-			if (enable) {
-				RETURN_FALSE;
-			}
-			else {
-				RETURN_TRUE;
-			}
-		}
 		/* Check if the Windows standard handle is redirected to file */
 		if (!php_win32_console_fileno_is_console(fileno)) {
 			if (enable) {
@@ -1760,7 +1747,22 @@ PHP_FUNCTION(stream_vt100_support)
 			RETURN_TRUE;
 		}
 		else {
-			RETURN_FALSE;
+			if (php_win32_console_fileno_has_vt100(fileno)) {
+				if (enable) {
+					RETURN_TRUE;
+				}
+				else {
+					RETURN_FALSE;
+				}
+			}
+			else {
+				if (enable) {
+					RETURN_FALSE;
+				}
+				else {
+					RETURN_TRUE;
+				}
+			}
 		}
 #elif HAVE_POSIX
 		/* Check if the file descriptor identifier is a terminal */

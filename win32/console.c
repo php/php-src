@@ -20,38 +20,6 @@
 
 #include "win32/console.h"
 
-PHP_WINUTIL_API BOOL php_win32_console_os_supports_vt100()
-{
-	const DWORD MINV_MAJOR = 10, MINV_MINOR = 0, MINV_BUILD = 10586;
-	OSVERSIONINFOEX osvi = EG(windows_version_info);
-	// Check operating system platform
-	if (osvi.dwPlatformId != VER_PLATFORM_WIN32_NT) {
-		return FALSE;
-	}
-	// Check major version number
-	if (osvi.dwMajorVersion > MINV_MAJOR) {
-		return TRUE;
-	}
-	if (osvi.dwMajorVersion < MINV_MAJOR) {
-		return FALSE;
-	}
-	// Check minor version number
-	if (osvi.dwMinorVersion > MINV_MINOR) {
-		return TRUE;
-	}
-	if (osvi.dwMinorVersion < MINV_MINOR) {
-		return FALSE;
-	}
-	// Check build number
-	if (osvi.dwBuildNumber > MINV_BUILD) {
-		return TRUE;
-	}
-	if (osvi.dwBuildNumber < MINV_BUILD) {
-		return FALSE;
-	}
-	return TRUE;
-
-}
 
 PHP_WINUTIL_API BOOL php_win32_console_fileno_is_console(zend_long fileno)
 {
