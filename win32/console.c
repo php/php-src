@@ -41,10 +41,18 @@ PHP_WINUTIL_API BOOL php_win32_console_fileno_has_vt100(zend_long fileno)
 	HANDLE handle = (HANDLE) _get_osfhandle(fileno);
 
 	if (handle != INVALID_HANDLE_VALUE) {
+		DWORD cNumberOfEvents;
+		DWORD flag;
 		DWORD mode;
 
+		if (GetNumberOfConsoleInputEvents(handle, &cNumberOfEvents)) {
+			flag = ENABLE_VIRTUAL_TERMINAL_INPUT;
+		}
+		else {
+			flag = ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+		}
 		if (GetConsoleMode(handle, &mode)) {
-			if (mode & ENABLE_VIRTUAL_TERMINAL_PROCESSING) {
+			if (mode & flag) {
 				result = TRUE;
 			}
 		}
@@ -58,8 +66,16 @@ PHP_WINUTIL_API BOOL php_win32_console_fileno_set_vt100(zend_long fileno, BOOL e
 	HANDLE handle = (HANDLE) _get_osfhandle(fileno);
 
 	if (handle != INVALID_HANDLE_VALUE) {
+		DWORD cNumberOfEvents;
+		DWORD flag;
 		DWORD mode;
 
+		if (GetNumberOfConsoleInputEvents(handle, &cNumberOfEvents)) {
+			flag = ENABLE_VIRTUAL_TERMINAL_INPUT;
+		}
+		else {
+			flag = ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+		}
 		if (GetConsoleMode(handle, &mode)) {
 			if (((mode & ENABLE_VIRTUAL_TERMINAL_PROCESSING) ? 1 : 0) == (enable ? 1 : 0)) {
 				result = TRUE;
