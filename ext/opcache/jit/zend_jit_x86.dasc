@@ -1288,11 +1288,44 @@ static int zend_jit_leave_throw_stub(dasm_State **Dst)
 	return 1;
 }
 
+static int zend_jit_icall_throw_stub(dasm_State **Dst)
+{
+	|->icall_throw_handler:
+	|	mov IP, EX->opline
+	|	//	zend_throw_exception_internal(NULL);
+	|.if X64
+	|	xor CARG1, CARG1
+	|	EXT_CALL zend_throw_exception_internal, r0
+	|.else
+	|	sub r4, 12
+	|	push 0
+	|	EXT_CALL zend_throw_exception_internal, r0
+	|	add r4, 16
+	|.endif
+	|	// if (opline->result_type != IS_UNUSED) {
+	|	cmp byte OP:IP->result_type, IS_UNUSED
+	|	je >5
+	|	// zval_ptr_dtor(EX_VAR(opline->result.var));
+	|.if X64
+	|	movsxd r0, dword OP:IP->result.var
+	|.else
+	|	mov r0, OP:IP->result.var
+	|.endif
+	|	add r0, FP
+	|	ZVAL_PTR_DTOR r0, MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF, 1, 0, 0, NULL, 0
+	|5:
+	|	//	HANDLE_EXCEPTION()
+	|	jmp ->exception_handler
+
+	return 1;
+}
+
 static const zend_jit_stub zend_jit_stubs[] = {
 	JIT_STUB(interrupt_handler),
 	JIT_STUB(exception_handler),
 	JIT_STUB(leave_function),
 	JIT_STUB(leave_throw),
+	JIT_STUB(icall_throw),
 };
 
 static int zend_jit_align_func(dasm_State **Dst)
@@ -4504,26 +4537,8 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 
 		|	// if (UNEXPECTED(EG(exception) != NULL)) {
 		|	cmp aword [&EG(exception)], 0
-		|	jne >1
-		|.cold_code
-		|1:
-		|	//	zend_throw_exception_internal(NULL);
-		|.if X64
-		|	xor CARG1, CARG1
-		|	EXT_CALL zend_throw_exception_internal, r0
-		|.else
-		|	sub r4, 12
-		|	push 0
-		|	EXT_CALL zend_throw_exception_internal, r0
-		|	add r4, 16
-		|.endif
-		if (opline->result_type != IS_UNUSED) {
-			|	// zval_ptr_dtor(EX_VAR(opline->result.var));
-			|	ZVAL_PTR_DTOR FP + opline->result.var, RES_INFO(), 1, 0, 0, op_array->filename, opline->lineno
-		}
-		|	//	HANDLE_EXCEPTION();
-		|	jmp ->exception_handler
-		|.code
+		|	jne ->icall_throw_handler
+
 		// TODO: Can we avoid checking for interrupts after each call ???
 		return zend_jit_check_timeout(Dst, opline + 1);
 	}
