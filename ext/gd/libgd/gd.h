@@ -46,10 +46,6 @@ extern "C" {
 #include <stdio.h>
 #include "gd_io.h"
 
-void php_gd_error_ex(int type, const char *format, ...);
-
-void php_gd_error(const char *format, ...);
-
 
 /* The maximum number of palette entries in palette-based images.
 	In the wonderful new world of gd 2.0, you can of course have
@@ -289,6 +285,10 @@ typedef struct {
 /* Text functions take these. */
 typedef gdFont *gdFontPtr;
 
+typedef void(*gdErrorMethod)(int, const char *, va_list);
+
+void gdSetErrorMethod(gdErrorMethod);
+void gdClearErrorMethod(void);
 
 /**
  * Group: Types
