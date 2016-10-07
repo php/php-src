@@ -25,7 +25,7 @@ image_type_to_mime_type()
 	var_dump($result);
 ?>
 --EXPECT--
-array(13) {
+array(14) {
   ["test-1pix.bmp"]=>
   string(14) "image/x-ms-bmp"
   ["test1bpix.bmp"]=>
@@ -40,6 +40,8 @@ array(13) {
   string(10) "image/jpeg"
   ["test2pix.gif"]=>
   string(9) "image/gif"
+  ["test3pix.webp"]=>
+  string(10) "image/webp"
   ["test4pix.gif"]=>
   string(9) "image/gif"
   ["test4pix.iff"]=>
