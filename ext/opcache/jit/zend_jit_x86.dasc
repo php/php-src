@@ -2420,7 +2420,6 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 				if (op1_info & MAY_BE_ARRAY_KEY_LONG) {
 					|	jmp >8
 					|1:
-					|	SAVE_VALID_OPLINE opline
 					|	EXT_CALL zend_jit_hash_index_lookup_w, r0
 				}
 				break;
@@ -2522,7 +2521,6 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 				}
 				break;
 			case BP_VAR_W:
-				|	SAVE_VALID_OPLINE opline
 				if (opline->op2_type != IS_CONST) {
 					|	EXT_CALL zend_jit_symtable_lookup_w, r0
 				} else {
