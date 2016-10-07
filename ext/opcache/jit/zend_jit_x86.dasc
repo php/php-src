@@ -2293,11 +2293,11 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 					|	jbe >2 // NOT_FOUND
 				}
 				|	// _ret = &_ht->arData[_h].val;
-				|	mov r0, FCARG2a
 				|.if X64
+				|	mov r0, FCARG2a
 				|	shl r0, 5
 				|.else
-				|	imul r0, sizeof(Bucket)
+				|	imul r0, FCARG2a, sizeof(Bucket)
 				|.endif
 				|	add r0, aword [FCARG1a + offsetof(zend_array, arData)]
 				if (type == BP_JIT_IS) {
