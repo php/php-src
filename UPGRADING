@@ -383,6 +383,9 @@ PHP 7.1 UPGRADE NOTES
   PGSQL_NOTICE_ALL
   PGSQL_NOTICE_CLEAR
 
+- Standard:
+  . IMAGETYPE_WEBP
+
 ========================================
 11. Changes to INI File Handling
 ========================================
