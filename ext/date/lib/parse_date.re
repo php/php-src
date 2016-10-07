@@ -52,14 +52,15 @@
 
 #define TIMELIB_UNSET   -99999
 
-#define TIMELIB_SECOND  1
-#define TIMELIB_MINUTE  2
-#define TIMELIB_HOUR    3
-#define TIMELIB_DAY     4
-#define TIMELIB_MONTH   5
-#define TIMELIB_YEAR    6
-#define TIMELIB_WEEKDAY 7
-#define TIMELIB_SPECIAL 8
+#define TIMELIB_SECOND   1
+#define TIMELIB_MINUTE   2
+#define TIMELIB_HOUR     3
+#define TIMELIB_DAY      4
+#define TIMELIB_MONTH    5
+#define TIMELIB_YEAR     6
+#define TIMELIB_WEEKDAY  7
+#define TIMELIB_SPECIAL  8
+#define TIMELIB_MICROSEC 9
 
 #define EOI      257
 #define TIME     258
@@ -190,6 +191,18 @@ const static timelib_tz_lookup_table timelib_timezone_utc[] = {
 };
 
 static timelib_relunit const timelib_relunit_lookup[] = {
+	{ "ms",           TIMELIB_MICROSEC, 1000 },
+	{ "msec",         TIMELIB_MICROSEC, 1000 },
+	{ "msecs",        TIMELIB_MICROSEC, 1000 },
+	{ "millisecond",  TIMELIB_MICROSEC, 1000 },
+	{ "milliseconds", TIMELIB_MICROSEC, 1000 },
+	{ "µs",           TIMELIB_MICROSEC,    1 },
+	{ "usec",         TIMELIB_MICROSEC,    1 },
+	{ "usecs",        TIMELIB_MICROSEC,    1 },
+	{ "µsec",         TIMELIB_MICROSEC,    1 },
+	{ "µsecs",        TIMELIB_MICROSEC,    1 },
+	{ "microsecond",  TIMELIB_MICROSEC,    1 },
+	{ "microseconds", TIMELIB_MICROSEC,    1 },
 	{ "sec",         TIMELIB_SECOND,  1 },
 	{ "secs",        TIMELIB_SECOND,  1 },
 	{ "second",      TIMELIB_SECOND,  1 },
@@ -655,12 +668,13 @@ static void timelib_set_relative(char **ptr, timelib_sll amount, int behavior, S
 	}
 
 	switch (relunit->unit) {
-		case TIMELIB_SECOND: s->time->relative.s += amount * relunit->multiplier; break;
-		case TIMELIB_MINUTE: s->time->relative.i += amount * relunit->multiplier; break;
-		case TIMELIB_HOUR:   s->time->relative.h += amount * relunit->multiplier; break;
-		case TIMELIB_DAY:    s->time->relative.d += amount * relunit->multiplier; break;
-		case TIMELIB_MONTH:  s->time->relative.m += amount * relunit->multiplier; break;
-		case TIMELIB_YEAR:   s->time->relative.y += amount * relunit->multiplier; break;
+		case TIMELIB_MICROSEC: s->time->relative.f += (((double) amount * (double) relunit->multiplier) / 1000000); break;
+		case TIMELIB_SECOND:   s->time->relative.s += amount * relunit->multiplier; break;
+		case TIMELIB_MINUTE:   s->time->relative.i += amount * relunit->multiplier; break;
+		case TIMELIB_HOUR:     s->time->relative.h += amount * relunit->multiplier; break;
+		case TIMELIB_DAY:      s->time->relative.d += amount * relunit->multiplier; break;
+		case TIMELIB_MONTH:    s->time->relative.m += amount * relunit->multiplier; break;
+		case TIMELIB_YEAR:     s->time->relative.y += amount * relunit->multiplier; break;
 
 		case TIMELIB_WEEKDAY:
 			TIMELIB_HAVE_WEEKDAY_RELATIVE();
@@ -939,7 +953,7 @@ dateshortwithtimelongtz = datenoyear iso8601normtz;
  */
 reltextnumber = 'first'|'second'|'third'|'fourth'|'fifth'|'sixth'|'seventh'|'eight'|'eighth'|'ninth'|'tenth'|'eleventh'|'twelfth';
 reltexttext = 'next'|'last'|'previous'|'this';
-reltextunit = (('sec'|'second'|'min'|'minute'|'hour'|'day'|'fortnight'|'forthnight'|'month'|'year') 's'?) | 'weeks' | daytext;
+reltextunit = 'ms' | 'µs' | (('msec'|'millisecond'|'µsec'|'microsecond'|'usec'|'sec'|'second'|'min'|'minute'|'hour'|'day'|'fortnight'|'forthnight'|'month'|'year') 's'?) | 'weeks' | daytext;
 
 relnumber = ([+-]*[ \t]*[0-9]+);
 relative = relnumber space? (reltextunit | 'week' );
