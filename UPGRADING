@@ -727,6 +727,9 @@ out, that the corresponding SDK isn't available anymore.
 - Openssl
   minimum supported OpenSSL version series was raised to 0.9.8
 
+- Shmop
+  The shmop identifiers have been changed from ints to resources of type shmop.
+
 ========================================
 10. New Global Constants
 ========================================
