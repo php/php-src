@@ -4487,8 +4487,12 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		|	// EG(current_execute_data) = execute_data;
 		|	mov aword [&EG(current_execute_data)], FCARG1a
 
+		// Reuse register reserved for VM IP as a general purpose register,
+		// saved across C calls (to avoid multiple spills)
+		|	mov IP, FCARG1a
+		zend_jit_reset_opline(Dst, NULL);
+
 		|	// fbc->internal_function.handler(call, ret);
-		|	mov aword [r4], FCARG1a // save
 		|.if X64
 		|	EXT_CALL func->internal_function.handler, r0
 		|.else
@@ -4505,20 +4509,19 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		|	// zend_vm_stack_free_args(call);
 		for (i = 0; i < call_info->num_args; i++ ) {
 			uint32_t offset = (uint32_t)(uintptr_t)ZEND_CALL_VAR_NUM(NULL, i);
-			|	mov r0, aword [r4] // restore
-			|	ZVAL_PTR_DTOR r0 + offset, MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN, 0, 1, 1, op_array->filename, opline->lineno
+			|	ZVAL_PTR_DTOR IP + offset, MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN, 0, 1, 1, op_array->filename, opline->lineno
 		}
 
 		|	// zend_vm_stack_free_call_frame(call);
-		|	mov FCARG1a, aword [r4] // restore
-		|	test byte [FCARG1a + offsetof(zend_execute_data, This.u1.type_info) + 2], ZEND_CALL_ALLOCATED
+		|	test byte [IP + offsetof(zend_execute_data, This.u1.type_info) + 2], ZEND_CALL_ALLOCATED
 		|	jnz >1
 		|.cold_code
 		|1:
+		|	mov FCARG1a, IP
 		|	EXT_CALL zend_jit_free_call_frame, r0
 		|	jmp >1
 		|.code
-		|	mov aword [&EG(vm_stack_top)], FCARG1a
+		|	mov aword [&EG(vm_stack_top)], IP
 		|1:
 
 		if (opline->result_type == IS_UNUSED) {
