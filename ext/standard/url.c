@@ -217,46 +217,10 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 		goto nohost;
 	}
 
-	e = ue;
-
-	if (!(p = memchr(s, '/', (ue - s)))) {
-		char *query, *fragment;
-
-		query = memchr(s, '?', (ue - s));
-		fragment = memchr(s, '#', (ue - s));
-
-		if (query && fragment) {
-			if (query > fragment) {
-				e = fragment;
-			} else {
-				e = query;
-			}
-		} else if (query) {
-			e = query;
-		} else if (fragment) {
-			e = fragment;
-		}
-	} else {
-		e = p;
-	}
+	e = s + strcspn(s, "/?#");
 
 	/* check for login and password */
 	if ((p = zend_memrchr(s, '@', (e-s)))) {
-		/* check for invalid chars inside login/pass */
-		pp = s;
-		while (pp < p) {
-			/* http://www.rfc-editor.org/rfc/rfc3986.txt §3.2.1 */
-			const char search_rfc3986[] = ":;=!$%_-.~&'()*+,";
-			if (!isalnum(*pp) && !strchr(search_rfc3986, *pp)) {
-				if (ret->scheme) {
-					efree(ret->scheme);
-				}
-				efree(ret);
-				return NULL;
-			}
-			pp++;
-		}
-
 		if ((pp = memchr(s, ':', (p-s)))) {
 			ret->user = estrndup(s, (pp-s));
 			php_replace_controlchars_ex(ret->user, (pp - s));
