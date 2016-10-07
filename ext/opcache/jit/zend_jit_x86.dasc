@@ -2258,9 +2258,9 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 					|	cmp dword [FCARG1a + offsetof(zend_array, nNumUsed)], val
 					|.endif
 					if (type == BP_JIT_IS) {
-						|	jle >9 // NOT_FOUND
+						|	jbe >9 // NOT_FOUND
 					} else {
-						|	jle >2 // NOT_FOUND
+						|	jbe >2 // NOT_FOUND
 					}
 					|	// _ret = &_ht->arData[_h].val;
 					|	mov r0, aword [FCARG1a + offsetof(zend_array, arData)]
@@ -2288,9 +2288,9 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 				|	cmp dword [FCARG1a + offsetof(zend_array, nNumUsed)], FCARG2a
 				|.endif
 				if (type == BP_JIT_IS) {
-					|	jle >9 // NOT_FOUND
+					|	jbe >9 // NOT_FOUND
 				} else {
-					|	jle >2 // NOT_FOUND
+					|	jbe >2 // NOT_FOUND
 				}
 				|	// _ret = &_ht->arData[_h].val;
 				|	mov r0, FCARG2a
