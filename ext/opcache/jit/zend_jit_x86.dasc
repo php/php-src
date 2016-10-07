@@ -27,6 +27,8 @@
  |.define FP,      r14
  |.define IP,      r15
  |.define IPl,     r15d
+ |.define RX,      IP        // the same as VM IP reused as a general purpos reg
+ |.define RXl,     IPl
  |.define CARG1,   rdi       // x64/POSIX C call arguments.
  |.define CARG2,   rsi
  |.define CARG3,   rdx
@@ -49,6 +51,8 @@
  |.define FP,      esi
  |.define IP,      edi
  |.define IPl,     edi
+ |.define RX,      IP        // the same as VM IP reused as a general purpos reg
+ |.define RXl,     IPl
  |.define FCARG1a, ecx       // x86 fastcall arguments.
  |.define FCARG2a, edx
  |.define FCARG1d, ecx
@@ -1144,6 +1148,7 @@ static void* dasm_labels[zend_lb_MAX];
 ||	}
 |.endmacro
 
+static zend_bool reuse_ip;
 static const zend_op *last_valid_opline;
 static int jit_return_label;
 
@@ -1330,6 +1335,7 @@ static const zend_jit_stub zend_jit_stubs[] = {
 
 static int zend_jit_align_func(dasm_State **Dst)
 {
+	reuse_ip = 0;
 	last_valid_opline = NULL;
 	jit_return_label = -1;
 	|.align 16
@@ -1356,6 +1362,7 @@ static int zend_jit_set_valid_ip(dasm_State **Dst, const zend_op *opline)
 		|	add IP, (opline - last_valid_opline) * sizeof(zend_op);
 	}
 	last_valid_opline = opline;
+	reuse_ip = 0;
 	return 1;
 }
 
@@ -1431,7 +1438,9 @@ static int zend_jit_tail_handler(dasm_State **Dst, const zend_op *opline)
 
 static int zend_jit_set_opline(dasm_State **Dst, const zend_op *target_opline)
 {
-	last_valid_opline = target_opline;
+	if (!reuse_ip) {
+		last_valid_opline = target_opline;
+	}
 	return 1;
 }
 
@@ -1439,6 +1448,15 @@ static int zend_jit_reset_opline(dasm_State **Dst, const zend_op *target_opline)
 {
 	last_valid_opline = NULL;
 	return 1;
+}
+
+static int zend_jit_start_reuse_ip(void) {
+	last_valid_opline = NULL;
+	reuse_ip = 1;
+}
+
+static int zend_jit_stop_reuse_ip(void) {
+	reuse_ip = 0;
 }
 
 static int zend_jit_jmp(dasm_State **Dst, unsigned int target_label)
@@ -4252,30 +4270,32 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, zen
 
 	uint32_t used_stack = zend_vm_calc_used_stack(opline->extended_value, func);
 
+	zend_jit_start_reuse_ip();
+
 	|	// if (UNEXPECTED(used_stack > (size_t)(((char*)EG(vm_stack_end)) - (char*)call))) {
-	|	mov FCARG1a, aword [&EG(vm_stack_top)]
+	|	mov RX, aword [&EG(vm_stack_top)]
 	|	mov r2, aword [&EG(vm_stack_end)]
-	|	sub r2, FCARG1a
+	|	sub r2, RX
 	|	cmp r2, used_stack
 	|	jb >2
 	|	// EG(vm_stack_top) = (zval*)((char*)call + used_stack);
 	|	add aword [&EG(vm_stack_top)], used_stack
 	|	// zend_vm_init_call_frame(call, call_info, func, num_args, called_scope, object);
 	|	// call->func = func;
-	|	mov aword EX:FCARG1a->func, r0
+	|	mov aword EX:RX->func, r0
 	|	// ZEND_SET_CALL_INFO(call, 0, call_info);
-	|	mov dword EX:FCARG1a->This.u1.type_info, (IS_UNDEF | (ZEND_CALL_NESTED_FUNCTION << ZEND_CALL_INFO_SHIFT))
+	|	mov dword EX:RX->This.u1.type_info, (IS_UNDEF | (ZEND_CALL_NESTED_FUNCTION << ZEND_CALL_INFO_SHIFT))
 	|1:
 	|	// Z_CE(call->This) = called_scope;
-	|	mov aword EX:FCARG1a->This.value.ptr, 0
+	|	mov aword EX:RX->This.value.ptr, 0
 	|	// ZEND_CALL_NUM_ARGS(call) = num_args;
-	|	mov dword EX:FCARG1a->This.u2.num_args, opline->extended_value
+	|	mov dword EX:RX->This.u2.num_args, opline->extended_value
 	|.cold_code
 	|2:
 	|	mov FCARG1d, used_stack
 	|	mov FCARG2a, r0
 	|	EXT_CALL zend_jit_extend_stack_helper, r0
-	|	mov FCARG1a, r0
+	|	mov RX, r0
 	|	jmp <1
 	|.code
 
@@ -4337,13 +4357,13 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, zend_op_
 	}
 	|	// call->prev_execute_data = EX(call);
 	if (call_level == 1) {
-		|	mov aword EX:FCARG1a->prev_execute_data, 0
+		|	mov aword EX:RX->prev_execute_data, 0
 	} else {
 		|	mov r0, EX->call
-		|	mov EX:FCARG1a->prev_execute_data, r0
+		|	mov EX:RX->prev_execute_data, r0
 	}
 	|	// EX(call) = call;
-	|	mov EX->call, FCARG1a
+	|	mov EX->call, RX
 
 	return 1;
 
@@ -4390,26 +4410,31 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		ZEND_ASSERT(0);
 	}
 
-	|	// call = EX(call);
-	|	mov FCARG1a, EX->call
+	if (!reuse_ip) {
+		zend_jit_start_reuse_ip();
+		|	// call = EX(call);
+		|	mov RX, EX->call
+	}
+	zend_jit_stop_reuse_ip();
+
 	|	// fbc = call->func;
-	|	// mov r2, EX:FCARG1a->func ???
+	|	// mov r2, EX:RX->func ???
 	|	// SAVE_OPLINE();
 	|	SAVE_VALID_OPLINE opline
 	if (call_level == 1) {
 		|	mov aword EX->call, 0
 	} else {
 		|	//EX(call) = call->prev_execute_data;
-		|	mov r0, EX:FCARG1a->prev_execute_data
+		|	mov r0, EX:RX->prev_execute_data
 		|	mov EX->call, r0
 	}
 	|	//call->prev_execute_data = execute_data;
-	|	mov EX:FCARG1a->prev_execute_data, EX
+	|	mov EX:RX->prev_execute_data, EX
 	|
 
 	if (func && func->type == ZEND_USER_FUNCTION) {
 		|	// EX(call) = NULL;
-		|	mov aword EX:FCARG1a->call, 0
+		|	mov aword EX:RX->call, 0
 	}
 
 	if (func && func->type == ZEND_USER_FUNCTION) {
@@ -4419,15 +4444,15 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 			|	SET_Z_TYPE_INFO FP + opline->result.var, IS_NULL
 			|	// EX(return_value) = EX_VAR(opline->result.var);
 			|	lea r0, aword [FP + opline->result.var]
-			|	mov aword EX:FCARG1a->return_value, r0
+			|	mov aword EX:RX->return_value, r0
 		} else {
 			|	// EX(return_value) = 0;
-			|	mov aword EX:FCARG1a->return_value, 0
+			|	mov aword EX:RX->return_value, 0
 		}
 
 		for (i = call_info->num_args; i < func->op_array.last_var; i++) {
 			uint32_t n = (uint32_t)(uintptr_t)ZEND_CALL_VAR_NUM(NULL, i);
-			|	SET_Z_TYPE_INFO FCARG1a + n, IS_UNDEF
+			|	SET_Z_TYPE_INFO RX + n, IS_UNDEF
 		}
 
 		//EX_LOAD_RUN_TIME_CACHE(op_array);
@@ -4436,24 +4461,24 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 				/* recursive call */
 				if (func->op_array.cache_size > sizeof(void*)) {
 					|	mov r0, EX->run_time_cache
-					|	mov EX:FCARG1a->run_time_cache, r0
+					|	mov EX:RX->run_time_cache, r0
 				}
 			} else {
-				|	mov r2, EX:FCARG1a->func
+				|	mov r2, EX:RX->func
 				|	mov r0, aword [r2 + offsetof(zend_op_array, run_time_cache)]
-				|	mov EX:FCARG1a->run_time_cache, r0
+				|	mov EX:RX->run_time_cache, r0
 			}
 		}
 
 		|	//EX_LOAD_LITERALS(op_array);
 		|.if X64
 		|	LOAD_ADDR r0, func->op_array.literals
-		|	mov EX:FCARG1a->literals, r0
+		|	mov EX:RX->literals, r0
 		|.endif
 
 		|	// EG(current_execute_data) = execute_data;
-		|	mov aword [&EG(current_execute_data)], FCARG1a
-		|	mov FP, FCARG1a
+		|	mov aword [&EG(current_execute_data)], RX
+		|	mov FP, RX
 
 		|	// opline = op_array->opcodes;
 		|	LOAD_ADDR IP, (func->op_array.opcodes + call_info->num_args)
@@ -4485,20 +4510,18 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		}
 
 		|	// EG(current_execute_data) = execute_data;
-		|	mov aword [&EG(current_execute_data)], FCARG1a
+		|	mov aword [&EG(current_execute_data)], RX
 
-		// Reuse register reserved for VM IP as a general purpose register,
-		// saved across C calls (to avoid multiple spills)
-		|	mov IP, FCARG1a
 		zend_jit_reset_opline(Dst, NULL);
 
 		|	// fbc->internal_function.handler(call, ret);
 		|.if X64
+		|	mov FCARG1a, RX
 		|	EXT_CALL func->internal_function.handler, r0
 		|.else
 		|	sub r4, 8
 		|	push FCARG2a
-		|	push FCARG1a
+		|	push RX
 		|	EXT_CALL func->internal_function.handler, r0
 		|	add r4, 16
 		|.endif
@@ -4509,19 +4532,19 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		|	// zend_vm_stack_free_args(call);
 		for (i = 0; i < call_info->num_args; i++ ) {
 			uint32_t offset = (uint32_t)(uintptr_t)ZEND_CALL_VAR_NUM(NULL, i);
-			|	ZVAL_PTR_DTOR IP + offset, MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN, 0, 1, 1, op_array->filename, opline->lineno
+			|	ZVAL_PTR_DTOR RX + offset, MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN, 0, 1, 1, op_array->filename, opline->lineno
 		}
 
 		|	// zend_vm_stack_free_call_frame(call);
-		|	test byte [IP + offsetof(zend_execute_data, This.u1.type_info) + 2], ZEND_CALL_ALLOCATED
+		|	test byte [RX + offsetof(zend_execute_data, This.u1.type_info) + 2], ZEND_CALL_ALLOCATED
 		|	jnz >1
 		|.cold_code
 		|1:
-		|	mov FCARG1a, IP
+		|	mov FCARG1a, RX
 		|	EXT_CALL zend_jit_free_call_frame, r0
 		|	jmp >1
 		|.code
-		|	mov aword [&EG(vm_stack_top)], IP
+		|	mov aword [&EG(vm_stack_top)], RX
 		|1:
 
 		if (opline->result_type == IS_UNUSED) {
@@ -4568,12 +4591,16 @@ static int zend_jit_send_val(dasm_State **Dst, const zend_op *opline, zend_op_ar
 
 	op1_info = OP1_INFO();
 
-	|	mov FCARG1a, EX->call
+	if (!reuse_ip) {
+		zend_jit_start_reuse_ip();
+		|	// call = EX(call);
+		|	mov RX, EX->call
+	}
 
 	if (opline->opcode == ZEND_SEND_VAL_EX) {
 		uint32_t mask = ZEND_SEND_BY_REF << ((arg_num + 3) * 2);
 
-		|	mov r0, EX:FCARG1a->func
+		|	mov r0, EX:RX->func
 		if (arg_num <= MAX_ARG_FLAG_NUM) {
 			|	mov eax, dword [r0 + offsetof(zend_function, quick_arg_flags)]
 			|	test eax, mask
@@ -4583,7 +4610,7 @@ static int zend_jit_send_val(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		}
 		|.cold_code
 		|1:
-		|	SET_Z_TYPE_INFO FCARG1a + opline->result.var, IS_UNDEF
+		|	SET_Z_TYPE_INFO RX + opline->result.var, IS_UNDEF
 		|	SAVE_VALID_OPLINE opline
 		|.if X64
 		|	mov CARG1, 0
@@ -4606,12 +4633,12 @@ static int zend_jit_send_val(dasm_State **Dst, const zend_op *opline, zend_op_ar
 	if (opline->op1_type == IS_CONST) {
 		zval *zv = RT_CONSTANT(op_array, opline->op1);
 
-		|	ZVAL_COPY_CONST FCARG1a + opline->result.var, -1, zv, r0
+		|	ZVAL_COPY_CONST RX + opline->result.var, -1, zv, r0
 		||	if (Z_REFCOUNTED_P(zv)) {
 		|		ADDREF_CONST zv, r0
 		||	}
 	} else {
-		|	ZVAL_COPY_VALUE FCARG1a + opline->result.var, FP + opline->op1.var, op1_info, r0, eax, r2
+		|	ZVAL_COPY_VALUE RX + opline->result.var, FP + opline->op1.var, op1_info, r0, eax, r2
 	}
 
 	return 1;
@@ -4635,8 +4662,14 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, zend_op_ar
 	}
 
 	op1_info = OP1_INFO();
-	|	mov FCARG1a, EX->call
-	|	ZVAL_COPY_VALUE FCARG1a + opline->result.var, FP + opline->op1.var, op1_info, r0, eax, r2
+
+	if (!reuse_ip) {
+		zend_jit_start_reuse_ip();
+		|	// call = EX(call);
+		|	mov RX, EX->call
+	}
+
+	|	ZVAL_COPY_VALUE RX + opline->result.var, FP + opline->op1.var, op1_info, r0, eax, r2
 	||	if (opline->op1_type == IS_CV) {
 	|		TRY_ADDREF op1_info, ah, r2
 	||	}
