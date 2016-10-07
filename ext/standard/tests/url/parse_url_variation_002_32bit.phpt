@@ -85,7 +85,7 @@ Error: 8 - Undefined variable: unset_var, %s(%d)
 
 Arg value 10.5 
 Error: 2 - parse_url(): Invalid URL component identifier 10, %s(%d)
-bool(false)
+NULL
 
 Arg value -10.5 
 array(8) {

@@ -85,7 +85,7 @@ Error: 8 - Undefined variable: unset_var, %s(64)
 
 Arg value 10.5 
 Error: 2 - parse_url(): Invalid URL component identifier 10, %s(71)
-bool(false)
+NULL
 
 Arg value -10.5 
 array(8) {
@@ -109,7 +109,7 @@ array(8) {
 
 Arg value 101234567000 
 Error: 2 - parse_url(): Invalid URL component identifier %d, %s(71)
-bool(false)
+NULL
 
 Arg value 1.07654321E-9 
 string(4) "http"

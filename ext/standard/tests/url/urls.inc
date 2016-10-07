@@ -14,7 +14,7 @@ $urls = array(
 'www.php.net/',
 'http://www.php.net',
 'http://www.php.net/',
-'www.php.net:80',
+'www.php.net:80/',
 'http://www.php.net:80',
 'http://www.php.net:80/',
 'http://www.php.net/index.php',
@@ -27,7 +27,6 @@ $urls = array(
 'http://www.php.net:80/this/is/a/very/deep/directory/structure/and/file.php',
 'http://www.php.net:80/this/is/a/very/deep/directory/structure/and/file.php?lots=1&of=2&parameters=3&too=4&here=5',
 'http://www.php.net:80/this/is/a/very/deep/directory/structure/and/',
-'http://www.php.net:80/this/is/a/very/deep/directory/structure/and/file.php',
 'http://www.php.net:80/this/../a/../deep/directory',
 'http://www.php.net:80/this/../a/../deep/directory/',
 'http://www.php.net:80/this/is/a/very/deep/directory/../file.php',
@@ -81,7 +80,6 @@ $urls = array(
 'file:///:',
 'file:///a:/',
 'file:///ab:/',
-'file:///a:/',
 'file:///@:/',
 'file:///:80/',
 '[]',
@@ -89,8 +87,6 @@ $urls = array(
 '',
 '/',
 '/rest/Users?filter={"id":"123"}',
-
-// Severely malformed URLs that do not parse:
 'http:///blah.com',
 'http://:80',
 'http://user@:80',

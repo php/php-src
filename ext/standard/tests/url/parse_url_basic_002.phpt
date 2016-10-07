@@ -35,12 +35,12 @@ echo "Done";
 --> www.php.net/   : NULL
 --> http://www.php.net   : string(4) "http"
 --> http://www.php.net/   : string(4) "http"
---> www.php.net:80   : NULL
+--> www.php.net:80/   : string(11) "www.php.net"
 --> http://www.php.net:80   : string(4) "http"
 --> http://www.php.net:80/   : string(4) "http"
 --> http://www.php.net/index.php   : string(4) "http"
 --> www.php.net/?   : NULL
---> www.php.net:80/?   : NULL
+--> www.php.net:80/?   : string(11) "www.php.net"
 --> http://www.php.net/?   : string(4) "http"
 --> http://www.php.net:80/?   : string(4) "http"
 --> http://www.php.net:80/index.php   : string(4) "http"
@@ -48,7 +48,6 @@ echo "Done";
 --> http://www.php.net:80/this/is/a/very/deep/directory/structure/and/file.php   : string(4) "http"
 --> http://www.php.net:80/this/is/a/very/deep/directory/structure/and/file.php?lots=1&of=2&parameters=3&too=4&here=5   : string(4) "http"
 --> http://www.php.net:80/this/is/a/very/deep/directory/structure/and/   : string(4) "http"
---> http://www.php.net:80/this/is/a/very/deep/directory/structure/and/file.php   : string(4) "http"
 --> http://www.php.net:80/this/../a/../deep/directory   : string(4) "http"
 --> http://www.php.net:80/this/../a/../deep/directory/   : string(4) "http"
 --> http://www.php.net:80/this/is/a/very/deep/directory/../file.php   : string(4) "http"
@@ -64,7 +63,7 @@ echo "Done";
 --> http://www.php.net:80/index.php?foo&   : string(4) "http"
 --> http://www.php.net/index.php?&foo   : string(4) "http"
 --> http://www.php.net:80/index.php?test=1&test2=char&test3=mixesCI   : string(4) "http"
---> www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : NULL
+--> www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(11) "www.php.net"
 --> http://secret@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(4) "http"
 --> http://secret:@www.php.net/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(4) "http"
 --> http://:hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(4) "http"
@@ -93,7 +92,7 @@ echo "Done";
 --> http://x:?   : string(4) "http"
 --> x:blah.com   : string(1) "x"
 --> x:/blah.com   : string(1) "x"
---> x://::abc/?   : bool(false)
+--> x://::abc/?   : string(1) "x"
 --> http://::?   : string(4) "http"
 --> http://::#   : string(4) "http"
 --> x://::6.5   : string(1) "x"
@@ -102,7 +101,6 @@ echo "Done";
 --> file:///:   : string(4) "file"
 --> file:///a:/   : string(4) "file"
 --> file:///ab:/   : string(4) "file"
---> file:///a:/   : string(4) "file"
 --> file:///@:/   : string(4) "file"
 --> file:///:80/   : string(4) "file"
 --> []   : NULL
@@ -110,21 +108,21 @@ echo "Done";
 -->    : NULL
 --> /   : NULL
 --> /rest/Users?filter={"id":"123"}   : NULL
---> http:///blah.com   : bool(false)
---> http://:80   : bool(false)
---> http://user@:80   : bool(false)
---> http://user:pass@:80   : bool(false)
---> http://:   : bool(false)
---> http://@/   : bool(false)
---> http://@:/   : bool(false)
---> http://:/   : bool(false)
---> http://?   : bool(false)
---> http://#   : bool(false)
---> http://?:   : bool(false)
---> http://:?   : bool(false)
---> http://blah.com:123456   : bool(false)
---> http://blah.com:abcdef   : bool(false)
---> http://secret@hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : bool(false)
---> http://user:@pass@host/path?argument?value#etc   : bool(false)
---> http://foo.com\@bar.com   : bool(false)
+--> http:///blah.com   : string(4) "http"
+--> http://:80   : string(4) "http"
+--> http://user@:80   : string(4) "http"
+--> http://user:pass@:80   : string(4) "http"
+--> http://:   : string(4) "http"
+--> http://@/   : string(4) "http"
+--> http://@:/   : string(4) "http"
+--> http://:/   : string(4) "http"
+--> http://?   : string(4) "http"
+--> http://#   : string(4) "http"
+--> http://?:   : string(4) "http"
+--> http://:?   : string(4) "http"
+--> http://blah.com:123456   : string(4) "http"
+--> http://blah.com:abcdef   : string(4) "http"
+--> http://secret@hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(4) "http"
+--> http://user:@pass@host/path?argument?value#etc   : string(4) "http"
+--> http://foo.com\@bar.com   : string(4) "http"
 Done

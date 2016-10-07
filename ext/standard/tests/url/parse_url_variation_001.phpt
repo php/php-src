@@ -160,16 +160,10 @@ Error: 2 - parse_url() expects parameter 1 to be string, array given, %s(70)
 NULL
 
 Arg value  
-array(1) {
-  ["path"]=>
-  string(0) ""
-}
+NULL
 
 Arg value  
-array(1) {
-  ["path"]=>
-  string(0) ""
-}
+NULL
 
 Arg value 1 
 array(1) {
@@ -178,10 +172,7 @@ array(1) {
 }
 
 Arg value  
-array(1) {
-  ["path"]=>
-  string(0) ""
-}
+NULL
 
 Arg value 1 
 array(1) {
@@ -190,22 +181,13 @@ array(1) {
 }
 
 Arg value  
-array(1) {
-  ["path"]=>
-  string(0) ""
-}
+NULL
 
 Arg value  
-array(1) {
-  ["path"]=>
-  string(0) ""
-}
+NULL
 
 Arg value  
-array(1) {
-  ["path"]=>
-  string(0) ""
-}
+NULL
 Error: 4096 - Object of class stdClass could not be converted to string, %s(69)
 
 Arg value  
@@ -213,14 +195,8 @@ Error: 2 - parse_url() expects parameter 1 to be string, object given, %s(70)
 NULL
 
 Arg value  
-array(1) {
-  ["path"]=>
-  string(0) ""
-}
+NULL
 
 Arg value  
-array(1) {
-  ["path"]=>
-  string(0) ""
-}
+NULL
 Done
