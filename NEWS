@@ -10,6 +10,8 @@ PHP                                                                        NEWS
   . Fixed bug #52519 (microseconds in DateInterval are missing). (Derick)
   . Fixed bug #60089 (DateTime::createFromFormat() U after u nukes microtime).
     (Derick)
+  . Fixed bug #64887 (Allow DateTime modification with subsecond items).
+    (Derick)
   . Fixed bug #68506 (General DateTime improvments needed for microseconds to
     become useful). (Derick)
   . Fixed bug #73109 (timelib_meridian doesn't parse dots correctly). (Derick)
