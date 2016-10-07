@@ -97,8 +97,8 @@ echo "Done";
 --> http://::?   : NULL
 --> http://::#   : NULL
 --> x://::6.5   : NULL
---> http://?:/   : string(1) "/"
---> http://@?:/   : string(1) "/"
+--> http://?:/   : bool(false)
+--> http://@?:/   : bool(false)
 --> file:///:   : string(2) "/:"
 --> file:///a:/   : string(3) "a:/"
 --> file:///ab:/   : string(5) "/ab:/"

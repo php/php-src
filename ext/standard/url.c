@@ -217,28 +217,7 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 		goto nohost;
 	}
 
-	e = ue;
-
-	if (!(p = memchr(s, '/', (ue - s)))) {
-		char *query, *fragment;
-
-		query = memchr(s, '?', (ue - s));
-		fragment = memchr(s, '#', (ue - s));
-
-		if (query && fragment) {
-			if (query > fragment) {
-				e = fragment;
-			} else {
-				e = query;
-			}
-		} else if (query) {
-			e = query;
-		} else if (fragment) {
-			e = fragment;
-		}
-	} else {
-		e = p;
-	}
+	e = s + strcspn(s, "/?#");
 
 	/* check for login and password */
 	if ((p = zend_memrchr(s, '@', (e-s)))) {

@@ -763,25 +763,9 @@ echo "Done";
   int(6)
 }
 
---> http://?:/: array(3) {
-  ["scheme"]=>
-  string(4) "http"
-  ["host"]=>
-  string(1) "?"
-  ["path"]=>
-  string(1) "/"
-}
+--> http://?:/: bool(false)
 
---> http://@?:/: array(4) {
-  ["scheme"]=>
-  string(4) "http"
-  ["host"]=>
-  string(1) "?"
-  ["user"]=>
-  string(0) ""
-  ["path"]=>
-  string(1) "/"
-}
+--> http://@?:/: bool(false)
 
 --> file:///:: array(2) {
   ["scheme"]=>
