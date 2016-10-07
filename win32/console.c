@@ -42,18 +42,15 @@ PHP_WINUTIL_API BOOL php_win32_console_fileno_has_vt100(zend_long fileno)
 
 	if (handle != INVALID_HANDLE_VALUE) {
 		DWORD cNumberOfEvents;
-		DWORD flag;
-		DWORD mode;
 
-		if (GetNumberOfConsoleInputEvents(handle, &cNumberOfEvents)) {
-			flag = ENABLE_VIRTUAL_TERMINAL_INPUT;
-		}
-		else {
-			flag = ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-		}
-		if (GetConsoleMode(handle, &mode)) {
-			if (mode & flag) {
-				result = TRUE;
+		if (fileno != 0 && !GetNumberOfConsoleInputEvents(handle, &cNumberOfEvents)) {
+			// Not STDIN
+			DWORD mode;
+
+			if (GetConsoleMode(handle, &mode)) {
+				if (mode & ENABLE_VIRTUAL_TERMINAL_PROCESSING) {
+					result = TRUE;
+				}
 			}
 		}
 	}
@@ -67,34 +64,32 @@ PHP_WINUTIL_API BOOL php_win32_console_fileno_set_vt100(zend_long fileno, BOOL e
 
 	if (handle != INVALID_HANDLE_VALUE) {
 		DWORD cNumberOfEvents;
-		DWORD flag;
-		DWORD mode;
 
-		if (GetNumberOfConsoleInputEvents(handle, &cNumberOfEvents)) {
-			flag = ENABLE_VIRTUAL_TERMINAL_INPUT;
-		}
-		else {
-			flag = ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-		}
-		if (GetConsoleMode(handle, &mode)) {
-			DWORD newMode;
-			if (enable) {
-				newMode = mode | flag;
-			}
-			else {
-				newMode = mode & ~flag;
-			}
-			if (newMode == mode) {
-				result = TRUE;
-			}
-			else {
-				if (SetConsoleMode(handle, newMode)) {
+		if (fileno != 0 && !GetNumberOfConsoleInputEvents(handle, &cNumberOfEvents)) {
+			// Not STDIN
+			DWORD mode;
+
+			if (GetConsoleMode(handle, &mode)) {
+				DWORD newMode;
+
+				if (enable) {
+					newMode = mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+				}
+				else {
+					newMode = mode & ~ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+				}
+				if (newMode == mode) {
 					result = TRUE;
 				}
 				else {
-					// SetConsoleMode sets the flags even if it fails, so let's revert them back
-					// (otherwise subsequent calls to GetConsoleMode will receive the new (invalid) flags
-					SetConsoleMode(handle, mode);
+					if (SetConsoleMode(handle, newMode)) {
+						result = TRUE;
+					}
+					else {
+						// SetConsoleMode sets the flags even if it fails, so let's revert them back
+						// (otherwise subsequent calls to GetConsoleMode will receive the new (invalid) flags
+						SetConsoleMode(handle, mode);
+					}
 				}
 			}
 		}

@@ -33,10 +33,6 @@
 #include "php_streams.h"
 #include <windows.h>
 
-#ifndef ENABLE_VIRTUAL_TERMINAL_INPUT
-#define ENABLE_VIRTUAL_TERMINAL_INPUT 0x0200
-#endif
-
 #ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
 #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
 #endif
@@ -49,14 +45,14 @@ Check if a file descriptor associated to a stream is a console
 PHP_WINUTIL_API BOOL php_win32_console_fileno_is_console(zend_long fileno);
 
 /*
-Check if the console attached to a file descriptor associated to a
-stream is a console has the ENABLE_VIRTUAL_TERMINAL_PROCESSING flag set
+Check if the console attached to a file descriptor (screen buffer, not STDIN)
+has the ENABLE_VIRTUAL_TERMINAL_PROCESSING flag set
 */
 PHP_WINUTIL_API BOOL php_win32_console_fileno_has_vt100(zend_long fileno);
 
 /*
-Set/unset the ENABLE_VIRTUAL_TERMINAL_PROCESSING flag for the console
-attached to a file descriptor associated to a stream
+Set/unset the ENABLE_VIRTUAL_TERMINAL_PROCESSING flag for the screen buffer (STDOUT/STDERR)
+associated to a file descriptor
 */
 PHP_WINUTIL_API BOOL php_win32_console_fileno_set_vt100(zend_long fileno, BOOL enable);
 
