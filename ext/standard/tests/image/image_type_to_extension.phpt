@@ -23,7 +23,8 @@ image_type_to_extension()
         "IMAGETYPE_IFF"      => IMAGETYPE_IFF,
         "IMAGETYPE_WBMP"     => IMAGETYPE_WBMP,
         "IMAGETYPE_JPEG2000" => IMAGETYPE_JPEG2000,
-        "IMAGETYPE_XBM"      => IMAGETYPE_XBM
+        "IMAGETYPE_XBM"      => IMAGETYPE_XBM,
+		"IMAGETYPE_WEBP"     => IMAGETYPE_WEBP
     );
     foreach($constants as $name => $constant) {
         printf("Constant: %s\n\tWith dot: %s\n\tWithout dot: %s\n", $name, image_type_to_extension($constant), image_type_to_extension($constant, false));
@@ -86,6 +87,9 @@ Constant: IMAGETYPE_JPEG2000
 Constant: IMAGETYPE_XBM
 	With dot: .xbm
 	Without dot: xbm
+Constant: IMAGETYPE_WEBP
+	With dot: .webp
+	Without dot: webp
 
 Warning: image_type_to_extension() expects parameter 2 to be boolean, array given in %s on line %d
 bool(false)

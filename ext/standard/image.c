@@ -55,6 +55,8 @@ PHPAPI const char php_sig_jp2[12] = {(char)0x00, (char)0x00, (char)0x00, (char)0
                                      (char)0x0d, (char)0x0a, (char)0x87, (char)0x0a};
 PHPAPI const char php_sig_iff[4] = {'F','O','R','M'};
 PHPAPI const char php_sig_ico[4] = {(char)0x00, (char)0x00, (char)0x01, (char)0x00};
+PHPAPI const char php_sig_riff[4] = {'R', 'I', 'F', 'F'};
+PHPAPI const char php_sig_webp[4] = {'W', 'E', 'B', 'P'};
 
 /* REMEMBER TO ADD MIME-TYPE TO FUNCTION php_image_type_to_mime_type */
 /* PCX must check first 64bytes and byte 0=0x0a and byte2 < 0x06 */
@@ -92,6 +94,7 @@ PHP_MINIT_FUNCTION(imagetypes)
 	REGISTER_LONG_CONSTANT("IMAGETYPE_JPEG2000",IMAGE_FILETYPE_JPC,     CONST_CS | CONST_PERSISTENT); /* keep alias */
 	REGISTER_LONG_CONSTANT("IMAGETYPE_XBM",     IMAGE_FILETYPE_XBM,     CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_ICO",     IMAGE_FILETYPE_ICO,     CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMAGETYPE_WEBP",	IMAGE_FILETYPE_WEBP,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_UNKNOWN", IMAGE_FILETYPE_UNKNOWN, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_COUNT",   IMAGE_FILETYPE_COUNT,   CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
@@ -1119,6 +1122,32 @@ static struct gfxinfo *php_handle_ico(php_stream * stream)
 }
 /* }}} */
 
+/* {{{ php_handle_webp
+ */
+static struct gfxinfo *php_handle_webp(php_stream * stream)
+{
+	struct gfxinfo *result = NULL;
+	const char sig[4] = {'V', 'P', '8', ' '};
+	unsigned char buf[18];
+
+	if (php_stream_read(stream, (char *) buf, 18) != 18)
+		return NULL;
+
+	if (memcmp(buf, sig, 4)) { /* simple lossy WebP only */
+		return NULL;
+	}
+
+	result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
+	
+	result->width = (buf[14]) + ((buf[15] & 0x3F) << 8);
+	result->height = (buf[16]) + ((buf[17] & 0x3F) << 8);
+	result->bits = 8; /* always 1 byte */
+	result->channels = 3; /* always YUV */
+
+	return result;
+}
+/* }}} */
+
 /* {{{ php_image_type_to_mime_type
  * Convert internal image_type to mime type */
 PHPAPI char * php_image_type_to_mime_type(int image_type)
@@ -1152,6 +1181,8 @@ PHPAPI char * php_image_type_to_mime_type(int image_type)
 			return "image/xbm";
 		case IMAGE_FILETYPE_ICO:
 			return "image/vnd.microsoft.icon";
+		case IMAGE_FILETYPE_WEBP:
+			return "image/webp";
 		default:
 		case IMAGE_FILETYPE_UNKNOWN:
 			return "application/octet-stream"; /* suppose binary format */
@@ -1216,6 +1247,8 @@ PHP_FUNCTION(image_type_to_extension)
 			RETURN_STRING(".xbm" + !inc_dot);
 		case IMAGE_FILETYPE_ICO:
 			RETURN_STRING(".ico" + !inc_dot);
+		case IMAGE_FILETYPE_WEBP:
+			RETURN_STRING(".webp" + !inc_dot);
 	}
 
 	RETURN_FALSE;
@@ -1261,6 +1294,16 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype)
 		return IMAGE_FILETYPE_BMP;
 	} else if (!memcmp(filetype, php_sig_jpc, 3)) {
 		return IMAGE_FILETYPE_JPC;
+	} else if (!memcmp(filetype, php_sig_riff, 3)) {
+		if (php_stream_read(stream, filetype+3, 9) != 9) {
+			php_error_docref(NULL, E_NOTICE, "Read error!");
+			return IMAGE_FILETYPE_UNKNOWN;
+		}
+		if (!memcmp(filetype+8, php_sig_webp, 4)) {
+			return IMAGE_FILETYPE_WEBP;
+		} else {
+			return IMAGE_FILETYPE_UNKNOWN;
+		}
 	}
 
 	if (php_stream_read(stream, filetype+3, 1) != 1) {
@@ -1364,6 +1407,9 @@ static void php_getimagesize_from_stream(php_stream *stream, zval *info, INTERNA
 			break;
 		case IMAGE_FILETYPE_ICO:
 			result = php_handle_ico(stream);
+			break;
+		case IMAGE_FILETYPE_WEBP:
+			result = php_handle_webp(stream);
 			break;
 		default:
 		case IMAGE_FILETYPE_UNKNOWN:

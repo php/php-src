@@ -23,7 +23,7 @@ GetImageSize()
 	var_dump($result);
 ?>
 --EXPECT--
-array(13) {
+array(14) {
   ["test-1pix.bmp"]=>
   array(6) {
     [0]=>
@@ -136,6 +136,23 @@ array(13) {
     int(3)
     ["mime"]=>
     string(9) "image/gif"
+  }
+  ["test3pix.webp"]=>
+  array(7) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(3)
+    [2]=>
+    int(18)
+    [3]=>
+    string(20) "width="1" height="3""
+    ["bits"]=>
+    int(8)
+    ["channels"]=>
+    int(3)
+    ["mime"]=>
+    string(10) "image/webp"
   }
   ["test4pix.gif"]=>
   array(7) {
