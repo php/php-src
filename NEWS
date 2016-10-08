@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #73181 (parse_str() without a second argument leads to crash).
     (Nikita)
+  . Fixed bug #66773 (Autoload with Opcache allows importing conflicting class
+    name to namespace). (Nikita)
+  . Fixed bug #66862 ((Sub-)Namespaces unexpected behaviour). (Nikita)
 
 - GD:
   . Fixed bug #73213 (Integer overflow in imageline() with antialiasing). (cmb)
