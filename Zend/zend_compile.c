@@ -6135,6 +6135,41 @@ static void zend_check_already_in_use(uint32_t type, zend_string *old_name, zend
 }
 /* }}} */
 
+static void zend_check_use_conflict(
+		uint32_t type, zend_string *old_name, zend_string *new_name, zend_string *lookup_name) {
+	switch (type) {
+		case T_CLASS:
+		{
+			zend_class_entry *ce = zend_hash_find_ptr(CG(class_table), lookup_name);
+			if (ce && ce->type == ZEND_USER_CLASS
+				&& ce->info.user.filename == CG(compiled_filename)
+			) {
+				zend_check_already_in_use(type, old_name, new_name, lookup_name);
+			}
+			break;
+		}
+		case T_FUNCTION:
+		{
+			zend_function *fn = zend_hash_find_ptr(CG(function_table), lookup_name);
+			if (fn && fn->type == ZEND_USER_FUNCTION
+				&& fn->op_array.filename == CG(compiled_filename)
+			) {
+				zend_check_already_in_use(type, old_name, new_name, lookup_name);
+			}
+			break;
+		}
+		case T_CONST:
+		{
+			zend_string *filename = zend_hash_find_ptr(&CG(const_filenames), lookup_name);
+			if (filename && filename == CG(compiled_filename)) {
+				zend_check_already_in_use(type, old_name, new_name, lookup_name);
+			}
+			break;
+		}
+		EMPTY_SWITCH_DEFAULT_CASE()
+	}
+}
+
 void zend_compile_use(zend_ast *ast) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
@@ -6191,43 +6226,11 @@ void zend_compile_use(zend_ast *ast) /* {{{ */
 			ZSTR_VAL(ns_name)[ZSTR_LEN(current_ns)] = '\\';
 			memcpy(ZSTR_VAL(ns_name) + ZSTR_LEN(current_ns) + 1, ZSTR_VAL(lookup_name), ZSTR_LEN(lookup_name));
 
-			if (zend_hash_exists(CG(class_table), ns_name)) {
-				zend_check_already_in_use(type, old_name, new_name, ns_name);
-			}
+			zend_check_use_conflict(type, old_name, new_name, ns_name);
 
 			zend_string_free(ns_name);
 		} else {
-			switch (type) {
-				case T_CLASS:
-				{
-					zend_class_entry *ce = zend_hash_find_ptr(CG(class_table), lookup_name);
-					if (ce && ce->type == ZEND_USER_CLASS
-						&& ce->info.user.filename == CG(compiled_filename)
-					) {
-						zend_check_already_in_use(type, old_name, new_name, lookup_name);
-					}
-					break;
-				}
-				case T_FUNCTION:
-				{
-					zend_function *fn = zend_hash_find_ptr(CG(function_table), lookup_name);
-					if (fn && fn->type == ZEND_USER_FUNCTION
-						&& fn->op_array.filename == CG(compiled_filename)
-					) {
-						zend_check_already_in_use(type, old_name, new_name, lookup_name);
-					}
-					break;
-				}
-				case T_CONST:
-				{
-					zend_string *filename = zend_hash_find_ptr(&CG(const_filenames), lookup_name);
-					if (filename && filename == CG(compiled_filename)) {
-						zend_check_already_in_use(type, old_name, new_name, lookup_name);
-					}
-					break;
-				}
-				EMPTY_SWITCH_DEFAULT_CASE()
-			}
+			zend_check_use_conflict(type, old_name, new_name, lookup_name);
 		}
 
 		zend_string_addref(old_name);
