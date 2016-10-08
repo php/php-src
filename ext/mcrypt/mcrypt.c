@@ -1299,6 +1299,7 @@ static void php_mcrypt_do_crypt(char* cipher, const char *key, size_t key_len, c
 	}
 
 	if (mcrypt_generic_init(td, (void *) key, (int)key_len, (void *) iv) < 0) {
+		efree(data_s);
 		php_error_docref(NULL, E_RECOVERABLE_ERROR, "Mcrypt initialisation failed");
 		mcrypt_module_close(td);
 		RETURN_FALSE;
