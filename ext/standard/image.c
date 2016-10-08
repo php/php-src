@@ -1129,21 +1129,19 @@ static struct gfxinfo *php_handle_webp(php_stream * stream)
 	struct gfxinfo *result = NULL;
 	const char sig[3] = {'V', 'P', '8'};
 	unsigned char buf[18];
-	int lossless;
+	char format;
 
 	if (php_stream_read(stream, (char *) buf, 18) != 18)
 		return NULL;
 
-	/* simple WebP only */
 	if (memcmp(buf, sig, 3)) {
 		return NULL;
 	}
 	switch (buf[3]) {
 		case ' ':
-			lossless = 0;
-			break;
 		case 'L':
-			lossless = 1;
+		case 'X':
+			format = buf[3];
 			break;
 		default:
 			return NULL;
@@ -1151,18 +1149,28 @@ static struct gfxinfo *php_handle_webp(php_stream * stream)
 
 	result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
 
-	if (lossless) {
-		result->width = buf[9] + ((buf[10] & 0x3F) << 8) + 1;
-		result->height = (buf[10] >> 6) + (buf[11] << 2) + ((buf[12] & 0xF) << 10) + 1;
-	} else {
-		result->width = (buf[14]) + ((buf[15] & 0x3F) << 8);
-		result->height = (buf[16]) + ((buf[17] & 0x3F) << 8);
+	switch (format) {
+		case ' ':
+			result->width = (buf[14]) + ((buf[15] & 0x3F) << 8);
+			result->height = (buf[16]) + ((buf[17] & 0x3F) << 8);
+			break;
+		case 'L':
+			result->width = buf[9] + ((buf[10] & 0x3F) << 8) + 1;
+			result->height = (buf[10] >> 6) + (buf[11] << 2) + ((buf[12] & 0xF) << 10) + 1;
+			break;
+		case 'X':
+			result->width = buf[12] + (buf[13] << 8) + (buf[14] << 16) + 1;
+			result->height = buf[15] + (buf[16] << 8) + (buf[17] << 16) + 1;
+			break;
 	}
 	result->bits = 8; /* always 1 byte */
-	if (lossless) {
-		result->channels = 4; /* always ARGB */
-	} else {
-		result->channels = 3; /* always YUV */
+	switch (format) {
+		case ' ':
+			result->channels = 3; /* always YUV */
+			break;
+		case 'L':
+			result->channels = 4; /* always ARGB */
+			break;
 	}
 
 	return result;
