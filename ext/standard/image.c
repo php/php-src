@@ -1127,22 +1127,43 @@ static struct gfxinfo *php_handle_ico(php_stream * stream)
 static struct gfxinfo *php_handle_webp(php_stream * stream)
 {
 	struct gfxinfo *result = NULL;
-	const char sig[4] = {'V', 'P', '8', ' '};
+	const char sig[3] = {'V', 'P', '8'};
 	unsigned char buf[18];
+	int lossless;
 
 	if (php_stream_read(stream, (char *) buf, 18) != 18)
 		return NULL;
 
-	if (memcmp(buf, sig, 4)) { /* simple lossy WebP only */
+	/* simple WebP only */
+	if (memcmp(buf, sig, 3)) {
 		return NULL;
+	}
+	switch (buf[3]) {
+		case ' ':
+			lossless = 0;
+			break;
+		case 'L':
+			lossless = 1;
+			break;
+		default:
+			return NULL;
 	}
 
 	result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
-	
-	result->width = (buf[14]) + ((buf[15] & 0x3F) << 8);
-	result->height = (buf[16]) + ((buf[17] & 0x3F) << 8);
+
+	if (lossless) {
+		result->width = buf[9] + ((buf[10] & 0x3F) << 8) + 1;
+		result->height = (buf[10] >> 6) + (buf[11] << 2) + ((buf[12] & 0xF) << 10) + 1;
+	} else {
+		result->width = (buf[14]) + ((buf[15] & 0x3F) << 8);
+		result->height = (buf[16]) + ((buf[17] & 0x3F) << 8);
+	}
 	result->bits = 8; /* always 1 byte */
-	result->channels = 3; /* always YUV */
+	if (lossless) {
+		result->channels = 4; /* always ARGB */
+	} else {
+		result->channels = 3; /* always YUV */
+	}
 
 	return result;
 }
