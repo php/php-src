@@ -15,7 +15,7 @@ if (stripos(PHP_OS, 'WIN') !== 0) {
 STDOUT STDERR
 --FILE--
 <?php
-require 'vt100_support.php';
+require dirname(__FILE__).'/vt100_support.inc';
 testVT100ToStdOut();
 ?>
 --EXPECTF--

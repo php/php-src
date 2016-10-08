@@ -10,7 +10,7 @@ if (!function_exists('posix_isatty')) {
 STDERR
 --FILE--
 <?php
-require 'vt100_support.php';
+require dirname(__FILE__).'/vt100_support.inc';
 testVT100ToStdErr();
 ?>
 --EXPECTF--
