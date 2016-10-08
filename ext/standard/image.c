@@ -1151,8 +1151,8 @@ static struct gfxinfo *php_handle_webp(php_stream * stream)
 
 	switch (format) {
 		case ' ':
-			result->width = (buf[14]) + ((buf[15] & 0x3F) << 8);
-			result->height = (buf[16]) + ((buf[17] & 0x3F) << 8);
+			result->width = buf[14] + ((buf[15] & 0x3F) << 8);
+			result->height = buf[16] + ((buf[17] & 0x3F) << 8);
 			break;
 		case 'L':
 			result->width = buf[9] + ((buf[10] & 0x3F) << 8) + 1;
@@ -1164,14 +1164,6 @@ static struct gfxinfo *php_handle_webp(php_stream * stream)
 			break;
 	}
 	result->bits = 8; /* always 1 byte */
-	switch (format) {
-		case ' ':
-			result->channels = 3; /* always YUV */
-			break;
-		case 'L':
-			result->channels = 4; /* always ARGB */
-			break;
-	}
 
 	return result;
 }

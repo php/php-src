@@ -153,7 +153,7 @@ array(16) {
     string(9) "image/gif"
   }
   ["test3llpix.webp"]=>
-  array(7) {
+  array(6) {
     [0]=>
     int(1)
     [1]=>
@@ -164,13 +164,11 @@ array(16) {
     string(20) "width="1" height="3""
     ["bits"]=>
     int(8)
-    ["channels"]=>
-    int(4)
     ["mime"]=>
     string(10) "image/webp"
   }
   ["test3pix.webp"]=>
-  array(7) {
+  array(6) {
     [0]=>
     int(1)
     [1]=>
@@ -181,8 +179,6 @@ array(16) {
     string(20) "width="1" height="3""
     ["bits"]=>
     int(8)
-    ["channels"]=>
-    int(3)
     ["mime"]=>
     string(10) "image/webp"
   }
