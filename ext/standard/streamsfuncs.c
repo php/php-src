@@ -1636,10 +1636,60 @@ PHP_FUNCTION(stream_supports_lock)
 	RETURN_TRUE;
 }
 
-/* {{{ proto proto stream_vt100_support(resource stream[, bool enable])
-   Get or set VT100 support for the specified stream.
+/* {{{ proto proto stream_isatty(resource stream)
+Check if a stream is a TTY.
 */
-PHP_FUNCTION(stream_vt100_support)
+PHP_FUNCTION(stream_isatty)
+{
+	zval *zsrc;
+	php_stream *stream;
+	zend_long fileno;
+
+	int argc = ZEND_NUM_ARGS();
+
+	if (zend_parse_parameters(argc, "r", &zsrc) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	php_stream_from_zval(stream, zsrc);
+
+	if (php_stream_can_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT) == SUCCESS) {
+		php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT, (void*)&fileno, 0);
+	}
+	else if (php_stream_can_cast(stream, PHP_STREAM_AS_FD) == SUCCESS) {
+		php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)&fileno, 0);
+	}
+	else {
+		RETURN_FALSE;
+	}
+
+#ifdef PHP_WIN32
+	/* Check if the Windows standard handle is redirected to file */
+	if (php_win32_console_fileno_is_console(fileno)) {
+		RETURN_TRUE;
+	}
+	else {
+		RETURN_FALSE;
+	}
+#elif HAVE_POSIX
+	/* Check if the file descriptor identifier is a terminal */
+	if (isatty(fileno)) {
+		RETURN_TRUE;
+	}
+	else {
+		RETURN_FALSE;
+	}
+#else
+	RETURN_FALSE;
+#endif
+}
+
+#ifdef PHP_WIN32
+/* {{{ proto proto sapi_windows_vt100_support(resource stream[, bool enable])
+   Get or set VT100 support for the specified stream associated to an
+   output buffer of a Windows console.
+*/
+PHP_FUNCTION(sapi_windows_vt100_support)
 {
 	zval *zsrc;
 	php_stream *stream;
@@ -1669,13 +1719,12 @@ PHP_FUNCTION(stream_vt100_support)
 		RETURN_FALSE;
 	}
 
+	/* Check if the Windows standard handle is redirected to file */
+	if (!php_win32_console_fileno_is_console(fileno)) {
+		RETURN_FALSE;
+	}
+
 	if (argc == 1) {
-		/* Check if the specified stream supports VT100 control codes */
-#ifdef PHP_WIN32
-		/* Check if the Windows standard handle is redirected to file */
-		if (!php_win32_console_fileno_is_console(fileno)) {
-			RETURN_FALSE;
-		}
 		/* Check if the Windows standard handle has VT100 control codes enabled */
 		if (php_win32_console_fileno_has_vt100(fileno)) {
 			RETURN_TRUE;
@@ -1683,25 +1732,8 @@ PHP_FUNCTION(stream_vt100_support)
 		else {
 			RETURN_FALSE;
 		}
-#elif HAVE_POSIX
-		/* Check if the file descriptor identifier is a terminal */
-		if (isatty(fileno)) {
-			RETURN_TRUE;
-		}
-		else {
-			RETURN_FALSE;
-		}
-#else
-		RETURN_FALSE;
-#endif
 	}
 	else {
-		/* Enable/disable VT100 control codes support for the specified stream */
-#ifdef PHP_WIN32
-		/* Check if the Windows standard handle is redirected to file */
-		if (!php_win32_console_fileno_is_console(fileno)) {
-			RETURN_FALSE;
-		}
 		/* Enable/disable VT100 control codes support for the specified Windows standard handle */
 		if (php_win32_console_fileno_set_vt100(fileno, enable ? TRUE : FALSE)) {
 			RETURN_TRUE;
@@ -1709,11 +1741,9 @@ PHP_FUNCTION(stream_vt100_support)
 		else {
 			RETURN_FALSE;
 		}
-#else
-		RETURN_FALSE;
-#endif
 	}
 }
+#endif
 
 #ifdef HAVE_SHUTDOWN
 /* {{{ proto int stream_socket_shutdown(resource stream, int how)
