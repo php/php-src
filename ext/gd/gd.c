@@ -4695,7 +4695,7 @@ PHP_FUNCTION(imagescale)
 	gdImagePtr im_scaled = NULL;
 	int new_width, new_height;
 	zend_long tmp_w, tmp_h=-1, tmp_m = GD_BILINEAR_FIXED;
-	gdInterpolationMethod method;
+	gdInterpolationMethod method, old_method;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl|ll", &IM, &tmp_w, &tmp_h, &tmp_m) == FAILURE)  {
 		return;
@@ -4724,9 +4724,12 @@ PHP_FUNCTION(imagescale)
 	new_width = tmp_w;
 	new_height = tmp_h;
 
+	/* gdImageGetInterpolationMethod() is only available as of GD 2.1.1 */
+	old_method = im->interpolation_id;
 	if (gdImageSetInterpolationMethod(im, method)) {
 		im_scaled = gdImageScale(im, new_width, new_height);
 	}
+	gdImageSetInterpolationMethod(im, old_method);
 
 	if (im_scaled == NULL) {
 		RETURN_FALSE;
