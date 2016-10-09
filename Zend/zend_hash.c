@@ -21,6 +21,7 @@
 /* $Id$ */
 
 #include "zend.h"
+#include "zend_exceptions.h"
 #include "zend_globals.h"
 #include "zend_variables.h"
 
@@ -470,12 +471,45 @@ ZEND_API void ZEND_FASTCALL _zend_hash_iterators_update(HashTable *ht, HashPosit
 	}
 }
 
-static zend_always_inline Bucket *zend_hash_find_bucket(const HashTable *ht, zend_string *key)
+/* To protect against HashDos attacks, we count collisions during the "find
+ * existing bucket with this key" phase of insertion operations. The check
+ * against MAX_COLLISIONS is only performed if *no* matching bucket is found,
+ * as that corresponds to insert operations (as opposed to updates).
+ *
+ * We use different limits for error and exception collision maximums,
+ * so that on a prepared array with exactly 1000 collisions,
+ * inserting a next index won't blow up immediately with a fatal.
+ *
+ * An important caveat of the implementation is that collisions will *not*
+ * be counted for add_new operations. find+add_new operations should be replaced
+ * with add_or_return operations.
+ */
+#define HT_MAX_ERROR_COLLISIONS 1100
+#define HT_MAX_EXCEPTION_COLLISIONS 1000
+
+static zend_always_inline zend_bool zend_hash_check_collisions(int num_collisions, int flags)
+{
+	if ((flags & HASH_CHECK_COLLISION_ERROR) && UNEXPECTED(num_collisions > HT_MAX_ERROR_COLLISIONS)) {
+		zend_error_noreturn(E_ERROR, "Too many collisions in array");
+		return 1;
+	} else if ((flags & HASH_CHECK_COLLISION_EXCEPTION) && UNEXPECTED(num_collisions > HT_MAX_EXCEPTION_COLLISIONS)) {
+		if (!EG(exception)) {
+			zend_throw_error(zend_ce_hash_collision_error, "Too many collisions in array");
+		}
+		return 1;
+	}
+
+	return 0;
+}
+
+static zend_always_inline Bucket *zend_hash_find_bucket(
+		const HashTable *ht, zend_string *key, int flags)
 {
 	zend_ulong h;
 	uint32_t nIndex;
 	uint32_t idx;
 	Bucket *p, *arData;
+	uint32_t num_collisions = 0;
 
 	h = zend_string_hash_val(key);
 	arData = ht->arData;
@@ -492,15 +526,18 @@ static zend_always_inline Bucket *zend_hash_find_bucket(const HashTable *ht, zen
 			return p;
 		}
 		idx = Z_NEXT(p->val);
+		num_collisions++;
 	}
-	return NULL;
+	return (void *)(intptr_t) zend_hash_check_collisions(num_collisions, flags);
 }
 
-static zend_always_inline Bucket *zend_hash_str_find_bucket(const HashTable *ht, const char *str, size_t len, zend_ulong h)
+static zend_always_inline Bucket *zend_hash_str_find_bucket(
+		const HashTable *ht, const char *str, size_t len, zend_ulong h, int flags)
 {
 	uint32_t nIndex;
 	uint32_t idx;
 	Bucket *p, *arData;
+	uint32_t num_collisions = 0;
 
 	arData = ht->arData;
 	nIndex = h | ht->nTableMask;
@@ -515,15 +552,18 @@ static zend_always_inline Bucket *zend_hash_str_find_bucket(const HashTable *ht,
 			return p;
 		}
 		idx = Z_NEXT(p->val);
+		num_collisions++;
 	}
-	return NULL;
+	return (void *)(intptr_t) zend_hash_check_collisions(num_collisions, flags);
 }
 
-static zend_always_inline Bucket *zend_hash_index_find_bucket(const HashTable *ht, zend_ulong h)
+static zend_always_inline Bucket *zend_hash_index_find_bucket(
+		const HashTable *ht, zend_ulong h, int flags)
 {
 	uint32_t nIndex;
 	uint32_t idx;
 	Bucket *p, *arData;
+	uint32_t num_collisions = 0;
 
 	arData = ht->arData;
 	nIndex = h | ht->nTableMask;
@@ -535,8 +575,9 @@ static zend_always_inline Bucket *zend_hash_index_find_bucket(const HashTable *h
 			return p;
 		}
 		idx = Z_NEXT(p->val);
+		num_collisions++;
 	}
-	return NULL;
+	return (void *)(intptr_t) zend_hash_check_collisions(num_collisions, flags);
 }
 
 static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_string *key, zval *pData, uint32_t flag ZEND_FILE_LINE_DC)
@@ -555,10 +596,17 @@ static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_s
 	} else if (ht->u.flags & HASH_FLAG_PACKED) {
 		zend_hash_packed_to_hash(ht);
 	} else if ((flag & HASH_ADD_NEW) == 0) {
-		p = zend_hash_find_bucket(ht, key);
+		p = zend_hash_find_bucket(ht, key, flag);
 
 		if (p) {
 			zval *data;
+
+			if ((flag & HASH_CHECK_COLLISION_EXCEPTION) && UNEXPECTED(p == (void *) 0x1)) {
+				if (ht->pDestructor) {
+					ht->pDestructor(pData);
+				}
+				return &EG(error_zval);
+			}
 
 			if (flag & HASH_ADD) {
 				if (!(flag & HASH_UPDATE_INDIRECT)) {
@@ -574,6 +622,8 @@ static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_s
 				} else {
 					return NULL;
 				}
+			} else if (flag & HASH_ADD_OR_RETURN) {
+				return &p->val;
 			} else {
 				ZEND_ASSERT(&p->val != pData);
 				data = &p->val;
@@ -621,12 +671,12 @@ ZEND_API zval* ZEND_FASTCALL _zend_hash_add_or_update(HashTable *ht, zend_string
 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_add(HashTable *ht, zend_string *key, zval *pData ZEND_FILE_LINE_DC)
 {
-	return _zend_hash_add_or_update_i(ht, key, pData, HASH_ADD ZEND_FILE_LINE_RELAY_CC);
+	return _zend_hash_add_or_update_i(ht, key, pData, HASH_ADD | HASH_CHECK_COLLISION_ERROR ZEND_FILE_LINE_RELAY_CC);
 }
 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_update(HashTable *ht, zend_string *key, zval *pData ZEND_FILE_LINE_DC)
 {
-	return _zend_hash_add_or_update_i(ht, key, pData, HASH_UPDATE ZEND_FILE_LINE_RELAY_CC);
+	return _zend_hash_add_or_update_i(ht, key, pData, HASH_UPDATE | HASH_CHECK_COLLISION_ERROR ZEND_FILE_LINE_RELAY_CC);
 }
 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_update_ind(HashTable *ht, zend_string *key, zval *pData ZEND_FILE_LINE_DC)
@@ -636,7 +686,22 @@ ZEND_API zval* ZEND_FASTCALL _zend_hash_update_ind(HashTable *ht, zend_string *k
 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_add_new(HashTable *ht, zend_string *key, zval *pData ZEND_FILE_LINE_DC)
 {
-	return _zend_hash_add_or_update_i(ht, key, pData, HASH_ADD_NEW ZEND_FILE_LINE_RELAY_CC);
+	return _zend_hash_add_or_update_i(ht, key, pData, HASH_ADD_NEW | HASH_CHECK_COLLISION_ERROR ZEND_FILE_LINE_RELAY_CC);
+}
+
+ZEND_API zval* ZEND_FASTCALL _zend_hash_add_or_return(HashTable *ht, zend_string *key, zval *pData ZEND_FILE_LINE_DC)
+{
+	return _zend_hash_add_or_update_i(ht, key, pData, HASH_ADD_OR_RETURN | HASH_CHECK_COLLISION_EXCEPTION ZEND_FILE_LINE_RELAY_CC);
+}
+
+ZEND_API zval* ZEND_FASTCALL _zend_hash_update_exception(HashTable *ht, zend_string *key, zval *pData ZEND_FILE_LINE_DC)
+{
+	return _zend_hash_add_or_update_i(ht, key, pData, HASH_UPDATE | HASH_CHECK_COLLISION_EXCEPTION ZEND_FILE_LINE_RELAY_CC);
+}
+
+ZEND_API zval* ZEND_FASTCALL _zend_hash_update_ind_exception(HashTable *ht, zend_string *key, zval *pData ZEND_FILE_LINE_DC)
+{
+	return _zend_hash_add_or_update_i(ht, key, pData, HASH_UPDATE | HASH_UPDATE_INDIRECT | HASH_CHECK_COLLISION_EXCEPTION ZEND_FILE_LINE_RELAY_CC);
 }
 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_str_add_or_update(HashTable *ht, const char *str, size_t len, zval *pData, uint32_t flag ZEND_FILE_LINE_DC)
@@ -650,7 +715,7 @@ ZEND_API zval* ZEND_FASTCALL _zend_hash_str_add_or_update(HashTable *ht, const c
 ZEND_API zval* ZEND_FASTCALL _zend_hash_str_update(HashTable *ht, const char *str, size_t len, zval *pData ZEND_FILE_LINE_DC)
 {
 	zend_string *key = zend_string_init(str, len, ht->u.flags & HASH_FLAG_PERSISTENT);
-	zval *ret = _zend_hash_add_or_update_i(ht, key, pData, HASH_UPDATE ZEND_FILE_LINE_RELAY_CC);
+	zval *ret = _zend_hash_add_or_update_i(ht, key, pData, HASH_UPDATE | HASH_CHECK_COLLISION_ERROR ZEND_FILE_LINE_RELAY_CC);
 	zend_string_release(key);
 	return ret;
 }
@@ -658,7 +723,7 @@ ZEND_API zval* ZEND_FASTCALL _zend_hash_str_update(HashTable *ht, const char *st
 ZEND_API zval* ZEND_FASTCALL _zend_hash_str_update_ind(HashTable *ht, const char *str, size_t len, zval *pData ZEND_FILE_LINE_DC)
 {
 	zend_string *key = zend_string_init(str, len, ht->u.flags & HASH_FLAG_PERSISTENT);
-	zval *ret = _zend_hash_add_or_update_i(ht, key, pData, HASH_UPDATE | HASH_UPDATE_INDIRECT ZEND_FILE_LINE_RELAY_CC);
+	zval *ret = _zend_hash_add_or_update_i(ht, key, pData, HASH_UPDATE | HASH_UPDATE_INDIRECT | HASH_CHECK_COLLISION_ERROR ZEND_FILE_LINE_RELAY_CC);
 	zend_string_release(key);
 	return ret;
 }
@@ -666,7 +731,7 @@ ZEND_API zval* ZEND_FASTCALL _zend_hash_str_update_ind(HashTable *ht, const char
 ZEND_API zval* ZEND_FASTCALL _zend_hash_str_add(HashTable *ht, const char *str, size_t len, zval *pData ZEND_FILE_LINE_DC)
 {
 	zend_string *key = zend_string_init(str, len, ht->u.flags & HASH_FLAG_PERSISTENT);
-	zval *ret = _zend_hash_add_or_update_i(ht, key, pData, HASH_ADD ZEND_FILE_LINE_RELAY_CC);
+	zval *ret = _zend_hash_add_or_update_i(ht, key, pData, HASH_ADD | HASH_CHECK_COLLISION_ERROR ZEND_FILE_LINE_RELAY_CC);
 	zend_string_release(key);
 	return ret;
 }
@@ -674,8 +739,24 @@ ZEND_API zval* ZEND_FASTCALL _zend_hash_str_add(HashTable *ht, const char *str, 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_str_add_new(HashTable *ht, const char *str, size_t len, zval *pData ZEND_FILE_LINE_DC)
 {
 	zend_string *key = zend_string_init(str, len, ht->u.flags & HASH_FLAG_PERSISTENT);
-	zval *ret = _zend_hash_add_or_update_i(ht, key, pData, HASH_ADD_NEW ZEND_FILE_LINE_RELAY_CC);
+	zval *ret = _zend_hash_add_or_update_i(ht, key, pData, HASH_ADD_NEW | HASH_CHECK_COLLISION_ERROR ZEND_FILE_LINE_RELAY_CC);
 	zend_string_delref(key);
+	return ret;
+}
+
+ZEND_API zval* ZEND_FASTCALL _zend_hash_str_update_exception(HashTable *ht, const char *str, size_t len, zval *pData ZEND_FILE_LINE_DC)
+{
+	zend_string *key = zend_string_init(str, len, ht->u.flags & HASH_FLAG_PERSISTENT);
+	zval *ret = _zend_hash_add_or_update_i(ht, key, pData, HASH_UPDATE | HASH_CHECK_COLLISION_EXCEPTION ZEND_FILE_LINE_RELAY_CC);
+	zend_string_release(key);
+	return ret;
+}
+
+ZEND_API zval* ZEND_FASTCALL _zend_hash_str_update_ind_exception(HashTable *ht, const char *str, size_t len, zval *pData ZEND_FILE_LINE_DC)
+{
+	zend_string *key = zend_string_init(str, len, ht->u.flags & HASH_FLAG_PERSISTENT);
+	zval *ret = _zend_hash_add_or_update_i(ht, key, pData, HASH_UPDATE | HASH_UPDATE_INDIRECT | HASH_CHECK_COLLISION_EXCEPTION ZEND_FILE_LINE_RELAY_CC);
+	zend_string_release(key);
 	return ret;
 }
 
@@ -726,6 +807,9 @@ static zend_always_inline zval *_zend_hash_index_add_or_update_i(HashTable *ht, 
 				if (flag & HASH_ADD) {
 					return NULL;
 				}
+				if (flag & HASH_ADD_OR_RETURN) {
+					return &p->val;
+				}
 				if (ht->pDestructor) {
 					ht->pDestructor(&p->val);
 				}
@@ -775,10 +859,19 @@ add_to_packed:
 convert_to_hash:
 		zend_hash_packed_to_hash(ht);
 	} else if ((flag & HASH_ADD_NEW) == 0) {
-		p = zend_hash_index_find_bucket(ht, h);
+		p = zend_hash_index_find_bucket(ht, h, flag);
 		if (p) {
 			if (flag & HASH_ADD) {
 				return NULL;
+			}
+			if ((flag & HASH_CHECK_COLLISION_EXCEPTION) && UNEXPECTED(p == (void *) 0x1)) {
+				if (ht->pDestructor) {
+					ht->pDestructor(pData);
+				}
+				return &EG(error_zval);
+			}
+			if (flag & HASH_ADD_OR_RETURN) {
+				return &p->val;
 			}
 			ZEND_ASSERT(&p->val != pData);
 			if (ht->pDestructor) {
@@ -822,17 +915,22 @@ ZEND_API zval* ZEND_FASTCALL _zend_hash_index_add_or_update(HashTable *ht, zend_
 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_index_add(HashTable *ht, zend_ulong h, zval *pData ZEND_FILE_LINE_DC)
 {
-	return _zend_hash_index_add_or_update_i(ht, h, pData, HASH_ADD ZEND_FILE_LINE_RELAY_CC);
+	return _zend_hash_index_add_or_update_i(ht, h, pData, HASH_ADD | HASH_CHECK_COLLISION_ERROR ZEND_FILE_LINE_RELAY_CC);
 }
 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_index_add_new(HashTable *ht, zend_ulong h, zval *pData ZEND_FILE_LINE_DC)
 {
-	return _zend_hash_index_add_or_update_i(ht, h, pData, HASH_ADD | HASH_ADD_NEW ZEND_FILE_LINE_RELAY_CC);
+	return _zend_hash_index_add_or_update_i(ht, h, pData, HASH_ADD | HASH_ADD_NEW | HASH_CHECK_COLLISION_ERROR ZEND_FILE_LINE_RELAY_CC);
+}
+
+ZEND_API zval* ZEND_FASTCALL _zend_hash_index_add_or_return(HashTable *ht, zend_ulong h, zval *pData ZEND_FILE_LINE_DC)
+{
+	return _zend_hash_index_add_or_update_i(ht, h, pData, HASH_ADD_OR_RETURN | HASH_CHECK_COLLISION_EXCEPTION ZEND_FILE_LINE_RELAY_CC);
 }
 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_index_update(HashTable *ht, zend_ulong h, zval *pData ZEND_FILE_LINE_DC)
 {
-	return _zend_hash_index_add_or_update_i(ht, h, pData, HASH_UPDATE ZEND_FILE_LINE_RELAY_CC);
+	return _zend_hash_index_add_or_update_i(ht, h, pData, HASH_UPDATE | HASH_CHECK_COLLISION_ERROR ZEND_FILE_LINE_RELAY_CC);
 }
 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_next_index_insert(HashTable *ht, zval *pData ZEND_FILE_LINE_DC)
@@ -843,6 +941,11 @@ ZEND_API zval* ZEND_FASTCALL _zend_hash_next_index_insert(HashTable *ht, zval *p
 ZEND_API zval* ZEND_FASTCALL _zend_hash_next_index_insert_new(HashTable *ht, zval *pData ZEND_FILE_LINE_DC)
 {
 	return _zend_hash_index_add_or_update_i(ht, ht->nNextFreeElement, pData, HASH_ADD | HASH_ADD_NEW | HASH_ADD_NEXT ZEND_FILE_LINE_RELAY_CC);
+}
+
+ZEND_API zval* ZEND_FASTCALL _zend_hash_index_update_exception(HashTable *ht, zend_ulong h, zval *pData ZEND_FILE_LINE_DC)
+{
+	return _zend_hash_index_add_or_update_i(ht, h, pData, HASH_UPDATE | HASH_CHECK_COLLISION_EXCEPTION ZEND_FILE_LINE_RELAY_CC);
 }
 
 static void ZEND_FASTCALL zend_hash_do_resize(HashTable *ht)
@@ -1954,7 +2057,7 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_find(const HashTable *ht, zend_string *ke
 
 	IS_CONSISTENT(ht);
 
-	p = zend_hash_find_bucket(ht, key);
+	p = zend_hash_find_bucket(ht, key, 0);
 	return p ? &p->val : NULL;
 }
 
@@ -1966,7 +2069,7 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_str_find(const HashTable *ht, const char 
 	IS_CONSISTENT(ht);
 
 	h = zend_inline_hash_func(str, len);
-	p = zend_hash_str_find_bucket(ht, str, len, h);
+	p = zend_hash_str_find_bucket(ht, str, len, h, 0);
 	return p ? &p->val : NULL;
 }
 
@@ -1976,7 +2079,7 @@ ZEND_API zend_bool ZEND_FASTCALL zend_hash_exists(const HashTable *ht, zend_stri
 
 	IS_CONSISTENT(ht);
 
-	p = zend_hash_find_bucket(ht, key);
+	p = zend_hash_find_bucket(ht, key, 0);
 	return p ? 1 : 0;
 }
 
@@ -1988,7 +2091,7 @@ ZEND_API zend_bool ZEND_FASTCALL zend_hash_str_exists(const HashTable *ht, const
 	IS_CONSISTENT(ht);
 
 	h = zend_inline_hash_func(str, len);
-	p = zend_hash_str_find_bucket(ht, str, len, h);
+	p = zend_hash_str_find_bucket(ht, str, len, h, 0);
 	return p ? 1 : 0;
 }
 
@@ -2008,7 +2111,7 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_index_find(const HashTable *ht, zend_ulon
 		return NULL;
 	}
 
-	p = zend_hash_index_find_bucket(ht, h);
+	p = zend_hash_index_find_bucket(ht, h, 0);
 	return p ? &p->val : NULL;
 }
 
@@ -2018,7 +2121,7 @@ ZEND_API zval* ZEND_FASTCALL _zend_hash_index_find(const HashTable *ht, zend_ulo
 
 	IS_CONSISTENT(ht);
 
-	p = zend_hash_index_find_bucket(ht, h);
+	p = zend_hash_index_find_bucket(ht, h, 0);
 	return p ? &p->val : NULL;
 }
 
@@ -2037,7 +2140,7 @@ ZEND_API zend_bool ZEND_FASTCALL zend_hash_index_exists(const HashTable *ht, zen
 		return 0;
 	}
 
-	p = zend_hash_index_find_bucket(ht, h);
+	p = zend_hash_index_find_bucket(ht, h, 0);
 	return p ? 1 : 0;
 }
 

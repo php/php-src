@@ -1017,7 +1017,7 @@ static void sxe_properties_add(HashTable *rv, char *name, int namelen, zval *val
 			ZVAL_ARR(data_ptr, Z_ARR(newptr));
 		}
 	} else {
-		zend_hash_add_new(rv, key, value);
+		zend_hash_update_exception(rv, key, value);
 	}
 	zend_string_release(key);
 }
@@ -1164,7 +1164,7 @@ static HashTable *sxe_get_prop_hash(zval *object, int is_debug) /* {{{ */
 						array_init(&zattr);
 						sxe_properties_add(rv, "@attributes", sizeof("@attributes") - 1, &zattr);
 					}
-					add_assoc_zval_ex(&zattr, (char*)attr->name, namelen, &value);
+					zend_hash_str_update_exception(Z_ARRVAL(zattr), (char*)attr->name, namelen, &value);
 				}
 				attr = attr->next;
 			}
@@ -1497,7 +1497,7 @@ static inline void sxe_add_namespace_name(zval *return_value, xmlNsPtr ns) /* {{
 
 	if (!zend_hash_exists(Z_ARRVAL_P(return_value), key)) {
 		ZVAL_STRING(&zv, (char*)ns->href);
-		zend_hash_add_new(Z_ARRVAL_P(return_value), key, &zv);
+		zend_hash_update_exception(Z_ARRVAL_P(return_value), key, &zv);
 	}
 	zend_string_release(key);
 }

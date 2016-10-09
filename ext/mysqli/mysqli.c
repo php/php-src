@@ -1165,8 +1165,8 @@ void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend
 	field_len = mysql_fetch_lengths(result);
 
 	for (i = 0; i < mysql_num_fields(result); i++) {
+		zval res;
 		if (row[i]) {
-			zval res;
 
 #if MYSQL_VERSION_ID > 50002
 			if (mysql_fetch_field_direct(result, i)->type == MYSQL_TYPE_BIT) {
@@ -1202,14 +1202,15 @@ void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend
 				if (fetchtype & MYSQLI_NUM && Z_REFCOUNTED(res)) {
 					Z_ADDREF(res);
 				}
-				add_assoc_zval(return_value, fields[i].name, &res);
+				zend_hash_update_exception(Z_ARRVAL_P(return_value), fields[i].name, &res);
 			}
 		} else {
 			if (fetchtype & MYSQLI_NUM) {
 				add_index_null(return_value, i);
 			}
 			if (fetchtype & MYSQLI_ASSOC) {
-				add_assoc_null(return_value, fields[i].name);
+				ZVAL_NULL(res);
+				zend_hash_update_exception(Z_ARRVAL_P(return_value), fields[i].name, &res);
 			}
 		}
 	}

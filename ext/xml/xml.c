@@ -692,7 +692,10 @@ static void _xml_add_to_info(xml_parser *parser,char *name)
 	if ((element = zend_hash_str_find(Z_ARRVAL(parser->info), name, strlen(name))) == NULL) {
 		zval values;
 		array_init(&values);
-		element = zend_hash_str_update(Z_ARRVAL(parser->info), name, strlen(name), &values);
+		element = zend_hash_str_update_exception(Z_ARRVAL(parser->info), name, strlen(name), &values);
+		if (element == &EG(error_zval)) {
+			return;
+		}
 	} 
 			
 	add_next_index_long(element, parser->curtag);
@@ -741,7 +744,7 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 				val = xml_utf8_decode(attributes[1], strlen((char *)attributes[1]), parser->target_encoding);
 
 				ZVAL_STR(&tmp, val);
-				zend_symtable_update(Z_ARRVAL(args[2]), att, &tmp);
+				zend_symtable_update_exception(Z_ARRVAL(args[2]), att, &tmp);
 
 				attributes += 2;
 
@@ -778,7 +781,7 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 					val = xml_utf8_decode(attributes[1], strlen((char *)attributes[1]), parser->target_encoding);
 
 					ZVAL_STR(&tmp, val);
-					zend_symtable_update(Z_ARRVAL(atr), att, &tmp);
+					zend_symtable_update_exception(Z_ARRVAL(atr), att, &tmp);
 
 					atcnt++;
 					attributes += 2;

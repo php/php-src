@@ -368,14 +368,19 @@ PHP_FUNCTION(iptcparse)
 			array_init(return_value);
 		}
 
+		inx += len;
+
 		if ((element = zend_hash_str_find(Z_ARRVAL_P(return_value), key, strlen(key))) == NULL) {
 			array_init(&values);
 
-			element = zend_hash_str_update(Z_ARRVAL_P(return_value), key, strlen(key), &values);
+			element = zend_hash_str_update_exception(Z_ARRVAL_P(return_value), key, strlen(key), &values);
+
+			if (element == &EG(error_zval)) {
+				continue;
+			}
 		}
 
 		add_next_index_stringl(element, (char *) buffer+inx, len);
-		inx += len;
 		tagsfound++;
 	}
 

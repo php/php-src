@@ -4520,6 +4520,7 @@ PHP_FUNCTION(parse_str)
 		sapi_module.treat_data(PARSE_STRING, res, &tmp);
 		if (UNEXPECTED(zend_hash_del(symbol_table, CG(known_strings)[ZEND_STR_THIS]) == SUCCESS)) {
 			zend_throw_error(NULL, "Cannot re-assign $this");
+			return;
 		}
 	} else 	{
 		zval ret;
@@ -4529,6 +4530,11 @@ PHP_FUNCTION(parse_str)
 		array_init(&ret);
 		sapi_module.treat_data(PARSE_STRING, res, &ret);
 		ZVAL_COPY_VALUE(arrayArg, &ret);
+	}
+
+	/* parse_str() tries to parse as much as possible (per treat_data behavior), hence we just ignore possible HashCollisionErrors */
+	if (EG(exception) && EG(exception)->ce == zend_ce_hash_collision_error) {
+		zend_clear_exception();
 	}
 }
 /* }}} */

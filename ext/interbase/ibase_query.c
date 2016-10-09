@@ -1504,6 +1504,7 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type) 
 	for (i = 0; i < ib_result->out_sqlda->sqld; ++i) {
 		XSQLVAR *var = &ib_result->out_sqlda->sqlvar[i];
 		char buf[METADATALENGTH+4], *alias = var->aliasname;
+		zval result;
 
 		if (! (fetch_type & FETCH_ROW)) {
 			int i = 0;
@@ -1530,8 +1531,6 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type) 
 		}
 
 		if (((var->sqltype & 1) == 0) || *var->sqlind != -1) {
-			zval result;
-
 			switch (var->sqltype & ~1) {
 
 				default:
@@ -1633,15 +1632,16 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type) 
 			} /* switch */
 
 			if (fetch_type & FETCH_ROW) {
-				add_index_zval(return_value, i, &result);
+				zend_hash_index_add(Z_ARRVAL_P(return_value), i, &result);
 			} else {
-				add_assoc_zval(return_value, alias, &result);
+				zend_hash_str_update_exception(Z_ARRVAL_P(return_value), alias, strlen(alias), &result);
 			}
 		} else {
+			ZVAL_NULL(&result);
 			if (fetch_type & FETCH_ROW) {
-				add_index_null(return_value, i);
+				zend_hash_index_add(Z_ARRVAL_P(return_value), i, &result);
 			} else {
-				add_assoc_null(return_value, alias);
+				zend_hash_str_update_exception(Z_ARRVAL_P(return_value), alias, strlen(alias), &result);
 			}
 		}
 	} /* for field */

@@ -787,10 +787,12 @@ void mail_getquota(MAILSTREAM *stream, char *qroot, QUOTALIST *qlist)
  */
 void mail_getacl(MAILSTREAM *stream, char *mailbox, ACLLIST *alist)
 {
+	zval zv;
 
 	/* walk through the ACLLIST */
 	for(; alist; alist = alist->next) {
-		add_assoc_stringl(IMAPG(imap_acl_list), alist->identifier, alist->rights, strlen(alist->rights));
+		ZVAL_STRING(&zv, alist->rights);
+		zend_hash_update_exception(Z_ARRVAL_P(IMAPG(imap_acl_list)), alist->identifier, &zv);
 	}
 }
 /* }}} */
@@ -4683,29 +4685,33 @@ void _php_imap_add_body(zval *arg, BODY *body)
  */
 static void build_thread_tree_helper(THREADNODE *cur, zval *tree, long *numNodes, char *buf)
 {
+	zval zv;
 	unsigned long thisNode = *numNodes;
 
 	/* define "#.num" */
 	snprintf(buf, 25, "%ld.num", thisNode);
 
-	add_assoc_long(tree, buf, cur->num);
+	ZVAL_LONG(&zv, cur->num);
+	zend_hash_update_exception(Z_ARRVAL_P(tree), buf, &zv);
 
 	snprintf(buf, 25, "%ld.next", thisNode);
 	if(cur->next) {
-		(*numNodes)++;
-		add_assoc_long(tree, buf, *numNodes);
+		Z_LVAL(zv) = ++*numNodes;
+		zend_hash_update_exception(Z_ARRVAL_P(tree), buf, &zv);
 		build_thread_tree_helper(cur->next, tree, numNodes, buf);
 	} else { /* "null pointer" */
-		add_assoc_long(tree, buf, 0);
+		Z_LVAL(zv) = 0;
+		zend_hash_update_exception(Z_ARRVAL_P(tree), buf, &zv);
 	}
 
 	snprintf(buf, 25, "%ld.branch", thisNode);
 	if(cur->branch) {
-		(*numNodes)++;
-		add_assoc_long(tree, buf, *numNodes);
+		Z_LVAL(zv) = ++*numNodes;
+		zend_hash_update_exception(Z_ARRVAL_P(tree), buf, &zv);
 		build_thread_tree_helper(cur->branch, tree, numNodes, buf);
 	} else { /* "null pointer" */
-		add_assoc_long(tree, buf, 0);
+		Z_LVAL(zv) = 0;
+		zend_hash_update_exception(Z_ARRVAL_P(tree), buf, &zv);
 	}
 }
 /* }}} */

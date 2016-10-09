@@ -1408,7 +1408,7 @@ PHP_FUNCTION(oci_fetch_all)
 				} else { /* default to ASSOC */
 					zend_string *zvtmp;
 					zvtmp = zend_string_init(columns[ i ]->name, columns[ i ]->name_len, 0);
-					zend_symtable_update(Z_ARRVAL(row), zvtmp, &element);
+					zend_symtable_update_exception(Z_ARRVAL(row), zvtmp, &element);
 					zend_string_release(zvtmp);
 				}
 			}
@@ -1443,7 +1443,7 @@ PHP_FUNCTION(oci_fetch_all)
 				
 				array_init(&tmp);
 				zvtmp = zend_string_init(columns[ i ]->name, columns[ i ]->name_len, 0);
-				outarrs[ i ] = zend_symtable_update(Z_ARRVAL_P(array), zvtmp, &tmp);
+				outarrs[ i ] = zend_symtable_update_exception(Z_ARRVAL_P(array), zvtmp, &tmp);
 				zend_string_release(zvtmp);
 			}
 		}

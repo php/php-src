@@ -1829,9 +1829,11 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 			zend_hash_index_update(Z_ARRVAL_P(return_value), i, &tmp);
 		} else {
 			if (!*(result->values[i].name) && Z_TYPE(tmp) == IS_STRING) {
-				zend_hash_update(Z_ARRVAL_P(return_value), Z_STR(tmp), &tmp);
+				zend_hash_update_exception(Z_ARRVAL_P(return_value), Z_STR(tmp), &tmp);
 			} else {
-				zend_hash_str_update(Z_ARRVAL_P(return_value), result->values[i].name, strlen(result->values[i].name), &tmp);
+				zend_string *key = zend_string_init(result->values[i].name, strlen(result->values[i].name), 0);
+				zend_hash_update_exception(Z_ARRVAL_P(return_value), key, &tmp);
+				zend_string_release(key);
 			}
 		}
 	}

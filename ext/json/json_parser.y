@@ -20,6 +20,7 @@
 #include "php.h"
 #include "php_json.h"
 #include "php_json_parser.h"
+#include "zend_exceptions.h"
 
 #define YYDEBUG 0
 
@@ -270,7 +271,7 @@ static int php_json_parser_object_update(php_json_parser *parser, zval *object, 
 {
 	/* if JSON_OBJECT_AS_ARRAY is set */
 	if (Z_TYPE_P(object) == IS_ARRAY) {
-		zend_symtable_update(Z_ARRVAL_P(object), key, zvalue);
+		zend_symtable_update_exception(Z_ARRVAL_P(object), key, zvalue);
 	} else {
 		zval zkey;
 		if (ZSTR_LEN(key) > 0 && ZSTR_VAL(key)[0] == '\0') {
@@ -288,6 +289,13 @@ static int php_json_parser_object_update(php_json_parser *parser, zval *object, 
 		}
 	}
 	zend_string_release(key);
+
+	if (EG(exception)) {
+		parser->scanner.errcode = PHP_JSON_ERROR_COLLISIONS;
+		zval_dtor(object);
+		zend_clear_exception();
+		return FAILURE;
+	}
 
 	return SUCCESS;
 }

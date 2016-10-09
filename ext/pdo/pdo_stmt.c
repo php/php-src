@@ -1015,7 +1015,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_
 
 			switch (how) {
 				case PDO_FETCH_ASSOC:
-					zend_symtable_update(Z_ARRVAL_P(return_value), stmt->columns[i].name, &val);
+					zend_symtable_update_exception(Z_ARRVAL_P(return_value), stmt->columns[i].name, &val);
 					break;
 
 				case PDO_FETCH_KEY_PAIR:
@@ -1027,7 +1027,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_
 							zend_hash_index_update((return_all ? Z_ARRVAL_P(return_all) : Z_ARRVAL_P(return_value)), Z_LVAL(val), &tmp);
 						} else {
 							convert_to_string(&val);
-							zend_symtable_update((return_all ? Z_ARRVAL_P(return_all) : Z_ARRVAL_P(return_value)), Z_STR(val), &tmp);
+							zend_symtable_update_exception((return_all ? Z_ARRVAL_P(return_all) : Z_ARRVAL_P(return_value)), Z_STR(val), &tmp);
 						}
 						zval_ptr_dtor(&val);
 						return 1;
@@ -1036,7 +1036,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_
 
 				case PDO_FETCH_USE_DEFAULT:
 				case PDO_FETCH_BOTH:
-					zend_symtable_update(Z_ARRVAL_P(return_value), stmt->columns[i].name, &val);
+					zend_symtable_update_exception(Z_ARRVAL_P(return_value), stmt->columns[i].name, &val);
 					if (Z_REFCOUNTED(val)) {
 						Z_ADDREF(val);
 					}
@@ -1072,7 +1072,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_
 							}
 							zend_hash_next_index_insert_new(Z_ARRVAL(arr), &val);
 						} else {
-							zend_hash_update(Z_ARRVAL_P(return_value), stmt->columns[i].name, &val);
+							zend_hash_update_exception(Z_ARRVAL_P(return_value), stmt->columns[i].name, &val);
 						}
 					}
 					break;
@@ -1183,12 +1183,12 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_
 
 		if (return_all) {
 			if ((flags & PDO_FETCH_UNIQUE) == PDO_FETCH_UNIQUE) {
-				zend_symtable_update(Z_ARRVAL_P(return_all), Z_STR(grp_val), return_value);
+				zend_symtable_update_exception(Z_ARRVAL_P(return_all), Z_STR(grp_val), return_value);
 			} else {
 				zval grp;
 				if ((pgrp = zend_symtable_find(Z_ARRVAL_P(return_all), Z_STR(grp_val))) == NULL) {
 					array_init(&grp);
-					zend_symtable_update(Z_ARRVAL_P(return_all), Z_STR(grp_val), &grp);
+					zend_symtable_update_exception(Z_ARRVAL_P(return_all), Z_STR(grp_val), &grp);
 				} else {
 					ZVAL_COPY_VALUE(&grp, pgrp);
 				}
@@ -2606,7 +2606,7 @@ static HashTable *row_get_properties(zval *object)
 		zval val;
 		fetch_value(stmt, &val, i, NULL);
 
-		zend_hash_update(stmt->std.properties, stmt->columns[i].name, &val);
+		zend_hash_update_exception(stmt->std.properties, stmt->columns[i].name, &val);
 	}
 
 	return stmt->std.properties;

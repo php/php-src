@@ -2780,8 +2780,10 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 				add_index_null(return_value, i);
 			}
 			if (result_type & PGSQL_ASSOC) {
+				zval zv;
+				ZVAL_NULL(&zv);
 				field_name = PQfname(pgsql_result, i);
-				add_assoc_null(return_value, field_name);
+				zend_hash_str_update_exception(Z_ARRVAL_P(return_value), field_name, strlen(field_name), &zv);
 			}
 		} else {
 			char *element = PQgetvalue(pgsql_result, pgsql_row, i);
@@ -2793,8 +2795,10 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 				}
 
 				if (result_type & PGSQL_ASSOC) {
+					zval zv;
+					ZVAL_STRINGL(&zv, element, element_len);
 					field_name = PQfname(pgsql_result, i);
-					add_assoc_stringl(return_value, field_name, element, element_len);
+					zend_hash_str_update_exception(Z_ARRVAL_P(return_value), field_name, strlen(field_name), &zv);
 				}
 			}
 		}
@@ -5622,7 +5626,7 @@ PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, z
 		}
 		/* pg_attribute.attname */
 		name = PQgetvalue(pg_result,i,0);
-		add_assoc_zval(meta, name, &elem);
+		zend_hash_str_update_exception(Z_ARRVAL_P(meta), name, strlen(name), &elem);
 	}
 	PQclear(pg_result);
 
@@ -6458,10 +6462,10 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 			char *escaped;
 
 			if (_php_pgsql_detect_identifier_escape(ZSTR_VAL(field), ZSTR_LEN(field)) == SUCCESS) {
-				zend_hash_update(Z_ARRVAL_P(result), field, &new_val);
+				zend_hash_update_exception(Z_ARRVAL_P(result), field, &new_val);
 			} else {
 				escaped = PGSQLescapeIdentifier(pg_link, ZSTR_VAL(field), ZSTR_LEN(field));
-				add_assoc_zval(result, escaped, &new_val);
+				zend_hash_str_update_exception(Z_ARRVAL_P(result), escaped, strlen(escaped), &new_val);
 				PGSQLfree(escaped);
 			}
 		}
@@ -7058,7 +7062,9 @@ PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result, zval *ret_array, l
 			field_name = PQfname(pg_result, i);
 			if (PQgetisnull(pg_result, pg_row, i)) {
 				if (result_type & PGSQL_ASSOC) {
-					add_assoc_null(&row, field_name);
+					zval zv;
+					ZVAL_NULL(&zv);
+					zend_hash_str_update_exception(Z_ARRVAL(row), field_name, strlen(field_name), &zv);
 				}
 				if (result_type & PGSQL_NUM) {
 					add_next_index_null(&row);
@@ -7068,7 +7074,9 @@ PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result, zval *ret_array, l
 				if (element) {
 					const size_t element_len = strlen(element);
 					if (result_type & PGSQL_ASSOC) {
-						add_assoc_stringl(&row, field_name, element, element_len);
+						zval zv;
+						ZVAL_STRINGL(&zv, element, element_len);
+						zend_hash_str_update_exception(Z_ARRVAL(row), field_name, strlen(field_name), &zv);
 					}
 					if (result_type & PGSQL_NUM) {
 						add_next_index_stringl(&row, element, element_len);

@@ -1119,7 +1119,7 @@ static HashTable* soap_create_typemap(sdlPtr sdl, HashTable *ht)
 			}
 			smart_str_appends(&nscat, type_name);
 			smart_str_0(&nscat);
-			zend_hash_update_ptr(typemap, nscat.s, new_enc);
+			zend_hash_update_ptr_exception(typemap, nscat.s, new_enc);
 			smart_str_free(&nscat);
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -3159,7 +3159,7 @@ PHP_METHOD(SoapClient, __setCookie)
 
 		array_init(&zcookie);
 		add_index_stringl(&zcookie, 0, val, val_len);
-		add_assoc_zval_ex(cookies, name, name_len, &zcookie);
+		zend_hash_str_update_exception(Z_ARRVAL_P(cookies), name, name_len, &zcookie);
 	}
 }
 /* }}} */

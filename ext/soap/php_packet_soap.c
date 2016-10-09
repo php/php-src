@@ -329,7 +329,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 							master_to_zval(&tmp, NULL, val);
 						}
 					}
-					add_assoc_zval(return_value, param->paramName, &tmp);
+					zend_hash_str_update_exception(Z_ARRVAL_P(return_value), param->paramName, strlen(param->paramName), &tmp);
 
 					param_count++;
 				} ZEND_HASH_FOREACH_END();
@@ -356,9 +356,9 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 
 								array_init(&arr);
 								add_next_index_zval(&arr, &tmp);
-								add_assoc_zval(return_value, (char*)val->name, &arr);
+								zend_hash_str_update_exception(Z_ARRVAL_P(return_value), (char *) val->name, strlen((char *) val->name), &arr);
 							} else {
-								add_assoc_zval(return_value, (char*)val->name, &tmp);
+								zend_hash_str_update_exception(Z_ARRVAL_P(return_value), (char *) val->name, strlen((char *) val->name), &tmp);
 							}
 						} else {
 							add_next_index_zval(return_value, &tmp);
@@ -413,7 +413,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 					smart_str_free(&key);
 				}
 				master_to_zval(&val, enc, trav);
-				add_assoc_zval(soap_headers, (char*)trav->name, &val);
+				zend_hash_str_update_exception(Z_ARRVAL_P(soap_headers), (char *) trav->name, strlen((char *) trav->name), &val);
 			}
 			trav = trav->next;
 		}

@@ -311,8 +311,9 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 			} else {
 				zend_string_addref(key);
 			}
-			if (php_set_session_var(key, ent, NULL)) {
-				if (Z_REFCOUNTED_P(ent)) Z_ADDREF_P(ent);
+			Z_TRY_ADDREF_P(ent);
+			if (!php_set_session_var(key, ent, NULL)) {
+				zval_ptr_dtor(ent);
 			}
 			PS_ADD_VAR(key);
 			zend_string_release(key);
@@ -816,14 +817,14 @@ static void php_wddx_push_element(void *user_data, const XML_Char *name, const X
 				while ((p2 = php_memnstr(p1, ",", sizeof(",")-1, endp)) != NULL) {
 					key = estrndup(p1, p2 - p1);
 					array_init(&tmp);
-					add_assoc_zval_ex(&ent.data, key, p2 - p1, &tmp);
+					zend_hash_str_update_exception(Z_ARRVAL(ent.data), key, p2 - p1, &tmp);
 					p1 = p2 + sizeof(",")-1;
 					efree(key);
 				}
 
 				if (p1 <= endp) {
 					array_init(&tmp);
-					add_assoc_zval_ex(&ent.data, p1, endp - p1, &tmp);
+					zend_hash_str_update_exception(Z_ARRVAL(ent.data), p1, endp - p1, &tmp);
 				}
 
 				break;
@@ -971,7 +972,7 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 						zend_update_property(Z_OBJCE(ent2->data), &ent2->data, ent1->varname, strlen(ent1->varname), &ent1->data);
 						if Z_REFCOUNTED(ent1->data) Z_DELREF(ent1->data);
 					} else {
-						zend_symtable_str_update(target_hash, ent1->varname, strlen(ent1->varname), &ent1->data);
+						zend_symtable_str_update_exception(target_hash, ent1->varname, strlen(ent1->varname), &ent1->data);
 					}
 					efree(ent1->varname);
 				} else	{

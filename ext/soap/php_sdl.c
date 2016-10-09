@@ -157,7 +157,7 @@ encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type)
 				sdl->encoders = pemalloc(sizeof(HashTable), sdl->is_persistent);
 				zend_hash_init(sdl->encoders, 0, NULL, delete_encoder, sdl->is_persistent);
 			}
-			zend_hash_str_update_ptr(sdl->encoders, nscat, len, new_enc);
+			zend_hash_str_update_ptr_exception(sdl->encoders, nscat, len, new_enc);
 			enc = new_enc;
 		}
 	}
@@ -339,7 +339,7 @@ static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, int include)
 		}
 	}
 
-	zend_hash_str_add_ptr(&ctx->docs, struri, strlen(struri), wsdl);
+	zend_hash_str_update_ptr_exception(&ctx->docs, struri, strlen(struri), wsdl);
 
 	root = wsdl->children;
 	definitions = get_node_ex(root, "definitions", WSDL_NAMESPACE);
@@ -399,8 +399,10 @@ static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, int include)
 		} else if (node_is_equal(trav,"message")) {
 			xmlAttrPtr name = get_attribute(trav->properties, "name");
 			if (name && name->children && name->children->content) {
-				if (zend_hash_str_add_ptr(&ctx->messages, (char*)name->children->content, xmlStrlen(name->children->content), trav) == NULL) {
+				if (zend_hash_str_find(&ctx->messages, (char*)name->children->content, xmlStrlen(name->children->content))) {
 					soap_error1(E_ERROR, "Parsing WSDL: <message> '%s' already defined", name->children->content);
+				} else {
+					zend_hash_str_update_ptr_exception(&ctx->messages, (char*)name->children->content, xmlStrlen(name->children->content), trav);
 				}
 			} else {
 				soap_error0(E_ERROR, "Parsing WSDL: <message> has no name attribute");
@@ -409,8 +411,10 @@ static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, int include)
 		} else if (node_is_equal(trav,"portType")) {
 			xmlAttrPtr name = get_attribute(trav->properties, "name");
 			if (name && name->children && name->children->content) {
-				if (zend_hash_str_add_ptr(&ctx->portTypes, (char*)name->children->content, xmlStrlen(name->children->content), trav) == NULL) {
+				if (zend_hash_str_find(&ctx->portTypes, (char*)name->children->content, xmlStrlen(name->children->content))) {
 					soap_error1(E_ERROR, "Parsing WSDL: <portType> '%s' already defined", name->children->content);
+				} else {
+					zend_hash_str_update_ptr_exception(&ctx->portTypes, (char*)name->children->content, xmlStrlen(name->children->content), trav);
 				}
 			} else {
 				soap_error0(E_ERROR, "Parsing WSDL: <portType> has no name attribute");
@@ -419,8 +423,10 @@ static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, int include)
 		} else if (node_is_equal(trav,"binding")) {
 			xmlAttrPtr name = get_attribute(trav->properties, "name");
 			if (name && name->children && name->children->content) {
-				if (zend_hash_str_add_ptr(&ctx->bindings, (char*)name->children->content, xmlStrlen(name->children->content), trav) == NULL) {
+				if (zend_hash_str_find(&ctx->bindings, (char*)name->children->content, xmlStrlen(name->children->content))) {
 					soap_error1(E_ERROR, "Parsing WSDL: <binding> '%s' already defined", name->children->content);
+				} else {
+					zend_hash_str_update_ptr_exception(&ctx->bindings, (char*)name->children->content, xmlStrlen(name->children->content), trav);
 				}
 			} else {
 				soap_error0(E_ERROR, "Parsing WSDL: <binding> has no name attribute");
@@ -429,8 +435,10 @@ static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, int include)
 		} else if (node_is_equal(trav,"service")) {
 			xmlAttrPtr name = get_attribute(trav->properties, "name");
 			if (name && name->children && name->children->content) {
-				if (zend_hash_str_add_ptr(&ctx->services, (char*)name->children->content, xmlStrlen(name->children->content), trav) == NULL) {
+				if (zend_hash_str_find(&ctx->services, (char*)name->children->content, xmlStrlen(name->children->content))) {
 					soap_error1(E_ERROR, "Parsing WSDL: <service> '%s' already defined", name->children->content);
+				} else {
+					zend_hash_str_update_ptr_exception(&ctx->services, (char*)name->children->content, xmlStrlen(name->children->content), trav);
 				}
 			} else {
 				soap_error0(E_ERROR, "Parsing WSDL: <service> has no name attribute");
@@ -541,8 +549,10 @@ static sdlSoapBindingFunctionHeaderPtr wsdl_soap_binding_header(sdlCtx* ctx, xml
 				}
 				smart_str_appends(&key,hf->name);
 				smart_str_0(&key);
-				if (zend_hash_add_ptr(h->headerfaults, key.s, hf) == NULL) {
+				if (zend_hash_find(h->headerfaults, key.s)) {
 					delete_header_int(hf);
+				} else {
+					zend_hash_update_ptr_exception(h->headerfaults, key.s, hf);
 				}
 				smart_str_free(&key);
 			} else if (is_wsdl_element(trav) && !node_is_equal(trav,"documentation")) {
@@ -1113,8 +1123,10 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 								function->faults = emalloc(sizeof(HashTable));
 								zend_hash_init(function->faults, 0, NULL, delete_fault, 0);
 							}
-							if (zend_hash_str_add_ptr(function->faults, f->name, strlen(f->name), f) == NULL) {
+							if (zend_hash_str_find(function->faults, f->name, strlen(f->name))) {
 								soap_error2(E_ERROR, "Parsing WSDL: <fault> with name '%s' already defined in '%s'", f->name, op_name->children->content);
+							} else {
+								zend_hash_str_update_ptr_exception(function->faults, f->name, strlen(f->name), f);
 							}
 						}
 						fault = fault->next;
@@ -1126,8 +1138,10 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 						char *tmp = estrdup(function->functionName);
 						int  len = strlen(tmp);
 
-						if (zend_hash_str_add_ptr(&ctx.sdl->functions, php_strtolower(tmp, len), len, function) == NULL) {
+						if (zend_hash_str_find(&ctx.sdl->functions, php_strtolower(tmp, len), len)) {
 							zend_hash_next_index_insert_ptr(&ctx.sdl->functions, function);
+						} else {
+							zend_hash_str_update_ptr_exception(&ctx.sdl->functions, php_strtolower(tmp, len), len, function);
 						}
 						efree(tmp);
 						if (function->requestName != NULL && strcmp(function->requestName,function->functionName) != 0) {
@@ -1137,7 +1151,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 							}
 							tmp = estrdup(function->requestName);
 							len = strlen(tmp);
-							zend_hash_str_add_ptr(ctx.sdl->requests, php_strtolower(tmp, len), len, function);
+							zend_hash_str_update_ptr_exception(ctx.sdl->requests, php_strtolower(tmp, len), len, function);
 							efree(tmp);
 						}
 					}
@@ -1149,10 +1163,12 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 					zend_hash_init(ctx.sdl->bindings, 0, NULL, delete_binding, 0);
 				}
 
-				if (!zend_hash_str_add_ptr(ctx.sdl->bindings, tmpbinding->name, strlen(tmpbinding->name), tmpbinding)) {
+				if (zend_hash_str_find(ctx.sdl->bindings, tmpbinding->name, strlen(tmpbinding->name))) {
 					zend_hash_next_index_insert_ptr(ctx.sdl->bindings, tmpbinding);
+				} else {
+					zend_hash_str_update_ptr_exception(ctx.sdl->bindings, tmpbinding->name, strlen(tmpbinding->name), tmpbinding);
 				}
-				trav= trav->next;
+				trav = trav->next;
 			}
 
 			zend_hash_move_forward(&ctx.services);
@@ -1213,7 +1229,7 @@ static void sdl_deserialize_key(HashTable* ht, void* data, char **in)
 	if (len == 0) {
 		zend_hash_next_index_insert_ptr(ht, data);
 	} else {
-		zend_hash_str_add_ptr(ht, *in, len, data);
+		zend_hash_str_update_ptr_exception(ht, *in, len, data);
 		WSDL_CACHE_SKIP(len, in);
 	}
 }
@@ -2784,7 +2800,7 @@ static sdlTypePtr make_persistent_sdl_type(sdlTypePtr type, HashTable *ptr_map, 
 			} else {
 				zend_hash_next_index_insert_ptr(ptype->elements, pelem);
 			}
-			zend_hash_str_add_ptr(ptr_map, (char*)&tmp, sizeof(tmp), pelem);
+			zend_hash_str_update_ptr_exception(ptr_map, (char*)&tmp, sizeof(tmp), pelem);
 		} ZEND_HASH_FOREACH_END();
 	}
 
@@ -2954,7 +2970,7 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl)
 			} else {
 				zend_hash_next_index_insert_ptr(psdl->groups, ptype);
 			}
-			zend_hash_str_add_ptr(&ptr_map, (char*)&tmp, sizeof(tmp), ptype);
+			zend_hash_str_update_ptr_exception(&ptr_map, (char*)&tmp, sizeof(tmp), ptype);
 		} ZEND_HASH_FOREACH_END();
 	}
 
@@ -2973,7 +2989,7 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl)
 			} else {
 				zend_hash_next_index_insert_ptr(psdl->types, ptype);
 			}
-			zend_hash_str_add_ptr(&ptr_map, (char*)&tmp, sizeof(tmp), ptype);
+			zend_hash_str_update_ptr_exception(&ptr_map, (char*)&tmp, sizeof(tmp), ptype);
 		} ZEND_HASH_FOREACH_END();
 	}
 
@@ -2992,7 +3008,7 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl)
 			} else {
 				zend_hash_next_index_insert_ptr(psdl->elements, ptype);
 			}
-			zend_hash_str_add_ptr(&ptr_map, (char*)&tmp, sizeof(tmp), ptype);
+			zend_hash_str_update_ptr_exception(&ptr_map, (char*)&tmp, sizeof(tmp), ptype);
 		} ZEND_HASH_FOREACH_END();
 	}
 
@@ -3011,7 +3027,7 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl)
 			} else {
 				zend_hash_next_index_insert_ptr(psdl->encoders, penc);
 			}
-			zend_hash_str_add_ptr(&ptr_map, (char*)&tmp, sizeof(tmp), penc);
+			zend_hash_str_update_ptr_exception(&ptr_map, (char*)&tmp, sizeof(tmp), penc);
 		} ZEND_HASH_FOREACH_END();
 	}
 
@@ -3053,7 +3069,7 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl)
 			} else {
 				zend_hash_next_index_insert_ptr(psdl->bindings, pbind);
 			}
-			zend_hash_str_add_ptr(&ptr_map, (char*)&tmp, sizeof(tmp), pbind);
+			zend_hash_str_update_ptr_exception(&ptr_map, (char*)&tmp, sizeof(tmp), pbind);
 		} ZEND_HASH_FOREACH_END();
 	}
 
@@ -3070,7 +3086,7 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl)
 			} else {
 				zend_hash_next_index_insert_ptr(&psdl->functions, pfunc);
 			}
-			zend_hash_str_add_ptr(&ptr_map, (char*)&tmp, sizeof(tmp), pfunc);
+			zend_hash_str_update_ptr_exception(&ptr_map, (char*)&tmp, sizeof(tmp), pfunc);
 		} ZEND_HASH_FOREACH_END();
 	}
 

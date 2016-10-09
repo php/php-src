@@ -645,8 +645,9 @@ PHP_METHOD(sqlite3, querySingle)
 				array_init(return_value);
 				for (i = 0; i < sqlite3_data_count(stmt); i++) {
 					zval data;
+					char *column_name = (char *) sqlite3_column_name(stmt, i);
 					sqlite_value_to_zval(stmt, i, &data);
-					add_assoc_zval(return_value, (char*)sqlite3_column_name(stmt, i), &data);
+					zend_hash_str_update_exception(Z_ARRVAL_P(return_value), column_name, strlen(column_name), &data);
 				}
 			}
 			break;
@@ -1393,9 +1394,9 @@ static int register_bound_parameter_to_sqlite(struct php_sqlite3_bound_param *pa
 	}
 
 	if (param->name) {
-		zend_hash_update_mem(hash, param->name, param, sizeof(struct php_sqlite3_bound_param));
+		zend_hash_update_mem_exception(hash, param->name, param, sizeof(struct php_sqlite3_bound_param));
 	} else {
-		zend_hash_index_update_mem(hash, param->param_number, param, sizeof(struct php_sqlite3_bound_param));
+		zend_hash_index_update_mem_exception(hash, param->param_number, param, sizeof(struct php_sqlite3_bound_param));
 	}
 
 	return 1;
@@ -1774,12 +1775,13 @@ PHP_METHOD(sqlite3result, fetchArray)
 				}
 
 				if (mode & PHP_SQLITE3_ASSOC) {
+					char *column_name = (char *) sqlite3_column_name(result_obj->stmt_obj->stmt, i);
 					if (mode & PHP_SQLITE3_NUM) {
 						if (Z_REFCOUNTED(data)) {
 							Z_ADDREF(data);
 						}
 					}
-					add_assoc_zval(return_value, (char*)sqlite3_column_name(result_obj->stmt_obj->stmt, i), &data);
+					zend_hash_str_update_exception(Z_ARRVAL_P(return_value), column_name, strlen(column_name), &data);
 				}
 			}
 			break;
