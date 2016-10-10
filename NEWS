@@ -29,5 +29,10 @@ PHP                                                                        NEWS
   . Implemented request #69086 (enhancement for mb_convert_encoding() that
     handles multibyte replacement char nicely) (Masakielastic, Yasuo)
 
+- Standard:
+  . Implemented RFC: get_class() disallow null parameter. Passing null to
+    get_class() now generates a warning, rather than returning the calling
+    class scope.
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
 
