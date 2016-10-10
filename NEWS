@@ -13,6 +13,7 @@ PHP                                                                        NEWS
   . Fixed bug #73213 (Integer overflow in imageline() with antialiasing). (cmb)
   . Fixed bug #73272 (imagescale() is not affected by, but affects
     imagesetinterpolation()). (cmb)
+  . Fixed bug #73279 (Integer overflow in gdImageScaleBilinearPalette()). (cmb)
 
 - phpdbg:
   . Properly allow for stdin input from a file. (Bob)
