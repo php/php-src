@@ -1450,12 +1450,12 @@ static int zend_jit_reset_opline(dasm_State **Dst, const zend_op *target_opline)
 	return 1;
 }
 
-static int zend_jit_start_reuse_ip(void) {
+static void zend_jit_start_reuse_ip(void) {
 	last_valid_opline = NULL;
 	reuse_ip = 1;
 }
 
-static int zend_jit_stop_reuse_ip(void) {
+static void zend_jit_stop_reuse_ip(void) {
 	reuse_ip = 0;
 }
 
