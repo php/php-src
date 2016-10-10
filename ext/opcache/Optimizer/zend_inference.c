@@ -3423,7 +3423,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 				if (!call_info) {
 					goto unknown_opcode;
 				}
-				tmp = zend_get_func_info(call_info, ssa) & ~(FUNC_MAY_WARN|FUNC_MAY_INLINE);
+				tmp = zend_get_func_info(call_info, ssa) & ~FUNC_MAY_WARN;
 				UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
 				if (call_info->callee_func->type == ZEND_USER_FUNCTION) {
 					func_info = ZEND_FUNC_INFO(&call_info->callee_func->op_array);
