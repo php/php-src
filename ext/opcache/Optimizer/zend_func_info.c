@@ -653,7 +653,7 @@ static const func_info_t func_infos[] = {
 	F1("stream_socket_get_name",       MAY_BE_FALSE | MAY_BE_STRING),
 	F1("stream_socket_recvfrom",       MAY_BE_FALSE | MAY_BE_STRING),
 	F0("stream_socket_sendto",         MAY_BE_FALSE | MAY_BE_LONG),
-	F0("stream_socket_enable_crypto",  MAY_BE_FALSE | MAY_BE_LONG),
+	F0("stream_socket_enable_crypto",  MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_LONG),
 #ifdef HAVE_SHUTDOWN
 	F0("stream_socket_shutdown",       MAY_BE_FALSE | MAY_BE_TRUE),
 #endif
