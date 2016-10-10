@@ -79,9 +79,13 @@
 # define r14     14
 # define r15     15
 # define FP      r14
+# define IP      r15
+# define RX      IP
 # define FCARG1a r7
 #else
 # define FP      r6
+# define IP      r7
+# define RX      IP
 # define FCARG1a r1
 #endif
 
@@ -1149,6 +1153,8 @@ static void* dasm_labels[zend_lb_MAX];
 |.endmacro
 
 static zend_bool reuse_ip;
+static zend_bool delayed_call_chain;
+static uint32_t  delayed_call_level;
 static const zend_op *last_valid_opline;
 static int jit_return_label;
 
@@ -1336,6 +1342,7 @@ static const zend_jit_stub zend_jit_stubs[] = {
 static int zend_jit_align_func(dasm_State **Dst)
 {
 	reuse_ip = 0;
+	delayed_call_chain = 0;
 	last_valid_opline = NULL;
 	jit_return_label = -1;
 	|.align 16
@@ -1354,8 +1361,30 @@ static int zend_jit_label(dasm_State **Dst, unsigned int label)
 	return 1;
 }
 
+static int zend_jit_save_call_chain(dasm_State **Dst, uint32_t call_level)
+{
+	|	// call->prev_execute_data = EX(call);
+	if (call_level == 1) {
+		|	mov aword EX:RX->prev_execute_data, 0
+	} else {
+		|	mov r0, EX->call
+		|	mov EX:RX->prev_execute_data, r0
+	}
+	|	// EX(call) = call;
+	|	mov EX->call, RX
+
+	delayed_call_chain = 0;
+
+	return 1;
+}
+
 static int zend_jit_set_valid_ip(dasm_State **Dst, const zend_op *opline)
 {
+	if (delayed_call_chain) {
+		if (!zend_jit_save_call_chain(Dst, delayed_call_level)) {
+			return 0;
+		}
+	}
 	if (!last_valid_opline) {
 		|	LOAD_ADDR  IP, opline
 	} else if (last_valid_opline != opline) {
@@ -2240,8 +2269,12 @@ static int zend_jit_math(dasm_State **Dst, const zend_op *opline, int *opnum, ze
 	    (opline+1)->op1.var == opline->result.var) {
 		/* Eliminate the following SEND_VAL */
 		(*opnum)++;
-		|	mov FCARG1a, EX->call
-		return zend_jit_math_helper(Dst, opline, op_array, ssa, opline->op1_type, opline->op1, FP, opline->op1.var, op1_info, opline->op2_type, opline->op2, FP, opline->op2.var, op2_info, FCARG1a, (opline+1)->result.var, RES_INFO());
+		if (!reuse_ip) {
+			zend_jit_start_reuse_ip();
+			|	// call = EX(call);
+			|	mov RX, EX->call
+		}
+		return zend_jit_math_helper(Dst, opline, op_array, ssa, opline->op1_type, opline->op1, FP, opline->op1.var, op1_info, opline->op2_type, opline->op2, FP, opline->op2.var, op2_info, RX, (opline+1)->result.var, RES_INFO());
 	} else {
 		return zend_jit_math_helper(Dst, opline, op_array, ssa, opline->op1_type, opline->op1, FP, opline->op1.var, op1_info, opline->op2_type, opline->op2, FP, opline->op2.var, op2_info, FP, opline->result.var, RES_INFO());
 	}
@@ -4319,14 +4352,61 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, zen
 	return 1;
 }
 
-static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, zend_op_array *op_array, int call_level)
+static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, zend_op_array *op_array, zend_ssa *ssa)
+{
+	const zend_op *opline = call_info->caller_init_opline;
+	const zend_op *end = call_info->caller_call_opline;
+	int skip;
+
+	if (end - op_array->opcodes >= ssa->cfg.blocks[b].start + ssa->cfg.blocks[b].len) {
+		/* INIT_FCALL and DO_FCALL in different BasicBlocks */
+		return 1;
+	}
+
+	opline++;
+	skip = 1;
+	while (opline != end) {
+		if (skip) {
+			switch (opline->opcode) {
+				case ZEND_SEND_VAL:
+				case ZEND_SEND_VAR:
+				case ZEND_SEND_VAL_EX:
+				case ZEND_SEND_VAR_EX:
+				case ZEND_SEND_REF:
+				case ZEND_SEND_VAR_NO_REF:
+				case ZEND_SEND_VAR_NO_REF_EX:
+					skip = 0;
+					break;
+				case ZEND_SEND_ARRAY:
+				case ZEND_SEND_USER:
+				case ZEND_SEND_UNPACK:
+					return 1;
+			}
+		} else {
+			if (zend_may_throw(opline, op_array, ssa)) {
+				return 1;
+			}
+		}
+		opline++;
+	}
+
+	return 0;
+}
+
+static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t b, zend_op_array *op_array, zend_ssa *ssa, int call_level)
 {
 	zend_func_info *info = ZEND_FUNC_INFO(op_array);
+		zend_call_info *call_info = NULL;
 	zend_function *func = NULL;
 
-	if (info) {
-		zend_call_info *call_info = info->callee_info;
+	if (delayed_call_chain) {
+		if (!zend_jit_save_call_chain(Dst, delayed_call_level)) {
+			return 0;
+		}
+	}
 
+	if (info) {
+		call_info = info->callee_info;
 		while (call_info && call_info->caller_init_opline != opline) {
 			call_info = call_info->next_callee;
 		}
@@ -4372,15 +4452,15 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, zend_op_
 	if (!zend_jit_push_call_frame(Dst, opline, op_array, func)) {
 		return 0;
 	}
-	|	// call->prev_execute_data = EX(call);
-	if (call_level == 1) {
-		|	mov aword EX:RX->prev_execute_data, 0
+
+	if (!func || zend_jit_needs_call_chain(call_info, b, op_array, ssa)) {
+		if (!zend_jit_save_call_chain(Dst, call_level)) {
+			return 0;
+		}
 	} else {
-		|	mov r0, EX->call
-		|	mov EX:RX->prev_execute_data, r0
+		delayed_call_chain = 1;
+		delayed_call_level = call_level;
 	}
-	|	// EX(call) = call;
-	|	mov EX->call, RX
 
 	return 1;
 
@@ -4438,13 +4518,18 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 	|	// mov r2, EX:RX->func ???
 	|	// SAVE_OPLINE();
 	|	SAVE_VALID_OPLINE opline
-	if (call_level == 1) {
-		|	mov aword EX->call, 0
-	} else {
-		|	//EX(call) = call->prev_execute_data;
-		|	mov r0, EX:RX->prev_execute_data
-		|	mov EX->call, r0
+
+	if (!delayed_call_chain) {
+		if (call_level == 1) {
+			|	mov aword EX->call, 0
+		} else {
+			|	//EX(call) = call->prev_execute_data;
+			|	mov r0, EX:RX->prev_execute_data
+			|	mov EX->call, r0
+		}
 	}
+	delayed_call_chain = 0;
+
 	|	//call->prev_execute_data = execute_data;
 	|	mov EX:RX->prev_execute_data, EX
 	|
