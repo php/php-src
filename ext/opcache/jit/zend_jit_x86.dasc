@@ -985,12 +985,12 @@ static void* dasm_labels[zend_lb_MAX];
 |.cold_code
 |1:
 ||		} else {
-|			IF_Z_FLAGS zv, IS_TYPE_COPYABLE + IS_TYPE_IMMUTABLE, >2
+|			IF_NOT_Z_FLAGS zv, IS_TYPE_COPYABLE + IS_TYPE_IMMUTABLE, >2
 ||		}
 |		GET_Z_PTR r0, zv
 ||		if (RC_MAY_BE_1(op_info)) {
 |			cmp dword [r0], 1 // if (GC_REFCOUNTED() > 1)
-|			jbe >3
+|			jbe >2
 ||		}
 |		IF_Z_FLAGS zv, IS_TYPE_IMMUTABLE, >1
 |		GC_DELREF r0
@@ -2053,7 +2053,8 @@ static int zend_jit_math_helper(dasm_State    **Dst,
                                 uint32_t        op2_info,
                                 uint32_t        res_reg,
                                 uint32_t        res_offset,
-                                uint32_t        res_info)
+                                uint32_t        res_info,
+                                zend_bool       separate_op1)
 /* Labels: 1,2,3,4,5 */
 {
 	zend_bool same_ops = (op1_type == op2_type) && (op1.var == op2.var);
@@ -2198,6 +2199,13 @@ static int zend_jit_math_helper(dasm_State    **Dst,
 		|.cold_code
 		|5:
 		|	SAVE_VALID_OPLINE opline
+		if (separate_op1) {
+			if (op1_reg != FCARG1a || op1_offset != 0) {
+				|	SEPARATE_ZVAL_NOREF Ra(op1_reg)+op1_offset, op1_info, 0, op_array->filename, opline->lineno
+			} else {
+				|	SEPARATE_ZVAL_NOREF_REG op1_info, 0, op_array->filename, opline->lineno
+			}
+		}
 		if (res_reg != FCARG1a || res_offset != 0) {
 			|	lea	FCARG1a, [Ra(res_reg)+res_offset]
 		}
@@ -2274,9 +2282,162 @@ static int zend_jit_math(dasm_State **Dst, const zend_op *opline, int *opnum, ze
 			|	// call = EX(call);
 			|	mov RX, EX->call
 		}
-		return zend_jit_math_helper(Dst, opline, op_array, ssa, opline->op1_type, opline->op1, FP, opline->op1.var, op1_info, opline->op2_type, opline->op2, FP, opline->op2.var, op2_info, RX, (opline+1)->result.var, RES_INFO());
+		return zend_jit_math_helper(Dst, opline, op_array, ssa, opline->op1_type, opline->op1, FP, opline->op1.var, op1_info, opline->op2_type, opline->op2, FP, opline->op2.var, op2_info, RX, (opline+1)->result.var, RES_INFO(), 0);
 	} else {
-		return zend_jit_math_helper(Dst, opline, op_array, ssa, opline->op1_type, opline->op1, FP, opline->op1.var, op1_info, opline->op2_type, opline->op2, FP, opline->op2.var, op2_info, FP, opline->result.var, RES_INFO());
+		return zend_jit_math_helper(Dst, opline, op_array, ssa, opline->op1_type, opline->op1, FP, opline->op1.var, op1_info, opline->op2_type, opline->op2, FP, opline->op2.var, op2_info, FP, opline->result.var, RES_INFO(), 0);
+	}
+
+fallback:
+	/* fallback to subroutine threading */
+	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
+}
+
+static int zend_jit_concat_helper(dasm_State    **Dst,
+                                  const zend_op  *opline,
+                                  zend_op_array  *op_array,
+                                  zend_ssa       *ssa,
+                                  zend_uchar      op1_type,
+                                  znode_op        op1,
+                                  uint32_t        op1_reg,
+                                  uint32_t        op1_offset,
+                                  uint32_t        op1_info,
+                                  zend_uchar      op2_type,
+                                  znode_op        op2,
+                                  uint32_t        op2_reg,
+                                  uint32_t        op2_offset,
+                                  uint32_t        op2_info,
+                                  uint32_t        res_reg,
+                                  uint32_t        res_offset,
+                                  uint32_t        res_info)
+{
+#if 1
+	if ((op1_info & MAY_BE_STRING) && (op2_info & MAY_BE_STRING)) {
+		if (op1_info & ((MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF) - MAY_BE_STRING)) {
+			|	IF_NOT_Z_TYPE Ra(op1_reg)+op1_offset, IS_STRING, >5
+		}
+		if (op2_info & ((MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF) - MAY_BE_STRING)) {
+			|	IF_NOT_Z_TYPE Ra(op2_reg)+op2_offset, IS_STRING, >5
+		}
+		if (op1_reg == res_reg && op1_offset == res_offset) {
+			if (res_reg != FCARG1a || res_offset != 0) {
+				|	lea	FCARG1a, [Ra(res_reg)+res_offset]
+			}
+			if (op2_type == IS_CONST) {
+				|	LOAD_ZVAL_ADDR FCARG2a, op2_type, op2
+			} else {
+				|	lea FCARG2a, [Ra(op2_reg)+op2_offset]
+			}
+			|	EXT_CALL zend_jit_fast_assign_concat_helper, r0
+		} else {
+			if (res_reg != FCARG1a || res_offset != 0) {
+				|	lea	FCARG1a, [Ra(res_reg)+res_offset]
+			}
+			if (op1_type == IS_CONST) {
+				|	LOAD_ZVAL_ADDR FCARG2a, op1_type, op1
+			} else {
+				|	lea FCARG2a, [Ra(op1_reg)+op1_offset]
+			}
+			if (op2_type == IS_CONST) {
+				|.if X64
+				|	LOAD_ZVAL_ADDR CARG3, op2_type, op2
+				|.else
+				|	PUSH_ZVAL_ADDR op2_type, op2, r0
+				|.endif
+			} else {
+				|.if X64
+				|	lea CARG3, [Ra(op2_reg)+op2_offset]
+				|.else
+				|	lea r0, [Ra(op2_reg)+op2_offset]
+				|	push r0
+				|.endif
+			}
+			|	EXT_CALL zend_jit_fast_concat_helper, r0
+		}
+		|	FREE_OP op1_type, op1, op1_info, 0, op_array, opline->lineno
+		|	FREE_OP op2_type, op2, op2_info, 0, op_array, opline->lineno
+		|4:
+	}
+	if ((op1_info & ((MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF) - MAY_BE_STRING)) ||
+	    (op2_info & ((MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF) - MAY_BE_STRING))) {
+		if ((op1_info & MAY_BE_STRING) && (op2_info & MAY_BE_STRING)) {
+			|.cold_code
+			|5:
+		}
+#endif
+		|	SAVE_VALID_OPLINE opline
+		if (res_reg != FCARG1a || res_offset != 0) {
+			|	lea	FCARG1a, [Ra(res_reg)+res_offset]
+		}
+		if (op1_type == IS_CONST) {
+			|	LOAD_ZVAL_ADDR FCARG2a, op1_type, op1
+		} else {
+			|	lea FCARG2a, [Ra(op1_reg)+op1_offset]
+		}
+		if (op2_type == IS_CONST) {
+			|.if X64
+			|	LOAD_ZVAL_ADDR CARG3, op2_type, op2
+			|.else
+			|	PUSH_ZVAL_ADDR op2_type, op2, r0
+			|.endif
+		} else {
+			|.if X64
+			|	lea CARG3, [Ra(op2_reg)+op2_offset]
+			|.else
+			|	lea r0, [Ra(op2_reg)+op2_offset]
+			|	push r0
+			|.endif
+		}
+		|	EXT_CALL concat_function, r0
+		|	FREE_OP op1_type, op1, op1_info, 0, op_array, opline->lineno
+		|	FREE_OP op2_type, op2, op2_info, 0, op_array, opline->lineno
+		||	if (zend_may_throw(opline, op_array, ssa)) {
+		||		zend_jit_check_exception(Dst);
+		||	}
+#if 1
+		if ((op1_info & MAY_BE_STRING) && (op2_info & MAY_BE_STRING)) {
+			|	jmp <4
+			|.code
+		}
+	}
+#endif
+
+	return 1;
+}
+
+static int zend_jit_concat(dasm_State **Dst, const zend_op *opline, int *opnum, zend_op_array *op_array, zend_ssa *ssa)
+{
+	uint32_t op1_info, op2_info;
+
+	if (!ssa->ops || !ssa->var_info) {
+		goto fallback;
+	}
+
+	op1_info = OP1_INFO();
+	op2_info = OP2_INFO();
+
+	if ((op1_info & MAY_BE_UNDEF) || (op2_info & MAY_BE_UNDEF)) {
+		goto fallback;
+	}
+
+	if (!(op1_info & MAY_BE_STRING) ||
+	    !(op2_info & MAY_BE_STRING)) {
+		goto fallback;
+	}
+
+	if (opline->result_type == IS_TMP_VAR &&
+	    (opline+1)->opcode == ZEND_SEND_VAL &&
+	    (opline+1)->op1_type == IS_TMP_VAR &&
+	    (opline+1)->op1.var == opline->result.var) {
+		/* Eliminate the following SEND_VAL */
+		(*opnum)++;
+		if (!reuse_ip) {
+			zend_jit_start_reuse_ip();
+			|	// call = EX(call);
+			|	mov RX, EX->call
+		}
+		return zend_jit_concat_helper(Dst, opline, op_array, ssa, opline->op1_type, opline->op1, FP, opline->op1.var, op1_info, opline->op2_type, opline->op2, FP, opline->op2.var, op2_info, RX, (opline+1)->result.var, RES_INFO());
+	} else {
+		return zend_jit_concat_helper(Dst, opline, op_array, ssa, opline->op1_type, opline->op1, FP, opline->op1.var, op1_info, opline->op2_type, opline->op2, FP, opline->op2.var, op2_info, FP, opline->result.var, RES_INFO());
 	}
 
 fallback:
@@ -3141,7 +3302,7 @@ fallback:
 	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
 }
 
-static int zend_jit_assign_dim_math(dasm_State **Dst, const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
+static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
 {
 	uint32_t op1_info, op2_info;
 
@@ -3282,11 +3443,24 @@ static int zend_jit_assign_dim_math(dasm_State **Dst, const zend_op *opline, zen
 			if (op1_info & (MAY_BE_ARRAY_OF_REF)) {
 				|	ZVAL_DEREF FCARG1a, MAY_BE_REF
 			}
-			|	SEPARATE_ZVAL_NOREF_REG var_info, 1, op_array->filename, opline->lineno
 		}
 
-		if (!zend_jit_math_helper(Dst, opline, op_array, ssa, IS_CV, opline->op1, FCARG1a, 0, var_info, (opline+1)->op1_type, (opline+1)->op1, FP, (opline+1)->op1.var, OP1_DATA_INFO(), FCARG1a, 0, OP1_DEF_INFO())) {
-			return 0;
+		switch (opline->opcode) {
+			case ZEND_ASSIGN_ADD:
+			case ZEND_ASSIGN_SUB:
+			case ZEND_ASSIGN_MUL:
+			case ZEND_ASSIGN_DIV:
+				if (!zend_jit_math_helper(Dst, opline, op_array, ssa, IS_CV, opline->op1, FCARG1a, 0, var_info, (opline+1)->op1_type, (opline+1)->op1, FP, (opline+1)->op1.var, OP1_DATA_INFO(), FCARG1a, 0, OP1_DEF_INFO(), 1)) {
+					return 0;
+				}
+				break;
+			case ZEND_ASSIGN_CONCAT:
+				if (!zend_jit_concat_helper(Dst, opline, op_array, ssa, IS_CV, opline->op1, FCARG1a, 0, var_info, (opline+1)->op1_type, (opline+1)->op1, FP, (opline+1)->op1.var, OP1_DATA_INFO(), FCARG1a, 0, OP1_DEF_INFO())) {
+					return 0;
+				}
+				break;
+			default:
+				ZEND_ASSERT(0);
 		}
 	}
 
@@ -3391,6 +3565,9 @@ static int zend_jit_assign_dim_math(dasm_State **Dst, const zend_op *opline, zen
 				case ZEND_ASSIGN_DIV:
 					|	EXT_CALL zend_jit_assign_dim_div_helper, r0
 					break;
+				case ZEND_ASSIGN_CONCAT:
+					|	EXT_CALL zend_jit_assign_dim_concat_helper, r0
+					break;
 				default:
 					ZEND_ASSERT(0);
 			}
@@ -3412,12 +3589,12 @@ fallback:
 	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
 }
 
-static int zend_jit_assign_math(dasm_State **Dst, const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
+static int zend_jit_assign_op(dasm_State **Dst, const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
 {
 	uint32_t op1_info, op2_info;
 
 	if (opline->extended_value == ZEND_ASSIGN_DIM) {
-		return zend_jit_assign_dim_math(Dst, opline, op_array, ssa);
+		return zend_jit_assign_dim_op(Dst, opline, op_array, ssa);
 	} else if (opline->extended_value == ZEND_ASSIGN_OBJ) {
 		goto fallback;
 	}
@@ -3437,19 +3614,52 @@ static int zend_jit_assign_math(dasm_State **Dst, const zend_op *opline, zend_op
 		goto fallback;
 	}
 
-	if (!(op1_info & (MAY_BE_LONG|MAY_BE_DOUBLE)) ||
-	    !(op2_info & (MAY_BE_LONG|MAY_BE_DOUBLE))) {
-		goto fallback;
+	switch (opline->opcode) {
+		case ZEND_ASSIGN_ADD:
+		case ZEND_ASSIGN_SUB:
+		case ZEND_ASSIGN_MUL:
+		case ZEND_ASSIGN_DIV:
+			if (!(op1_info & (MAY_BE_LONG|MAY_BE_DOUBLE)) ||
+			    !(op2_info & (MAY_BE_LONG|MAY_BE_DOUBLE))) {
+				goto fallback;
+			}
+			break;
+		case ZEND_ASSIGN_CONCAT:
+			if (!(op1_info & MAY_BE_STRING) ||
+			    !(op2_info & MAY_BE_STRING)) {
+				goto fallback;
+			}
+			break;
+		default:
+			ZEND_ASSERT(0);
 	}
 
 	if (op1_info & MAY_BE_REF) {
 		|	LOAD_ZVAL_ADDR FCARG1a, opline->op1_type, opline->op1
 		|	ZVAL_DEREF FCARG1a, op1_info
-		|	SEPARATE_ZVAL_NOREF_REG op1_info, 1, op_array->filename, opline->lineno
-		return zend_jit_math_helper(Dst, opline, op_array, ssa, opline->op1_type, opline->op1, FCARG1a, 0, op1_info, opline->op2_type, opline->op2, FP, opline->op2.var, op2_info, FCARG1a, 0, OP1_DEF_INFO());
+		switch (opline->opcode) {
+			case ZEND_ASSIGN_ADD:
+			case ZEND_ASSIGN_SUB:
+			case ZEND_ASSIGN_MUL:
+			case ZEND_ASSIGN_DIV:
+				return zend_jit_math_helper(Dst, opline, op_array, ssa, opline->op1_type, opline->op1, FCARG1a, 0, op1_info, opline->op2_type, opline->op2, FP, opline->op2.var, op2_info, FCARG1a, 0, OP1_DEF_INFO(), 1);
+			case ZEND_ASSIGN_CONCAT:
+				return zend_jit_concat_helper(Dst, opline, op_array, ssa, opline->op1_type, opline->op1, FCARG1a, 0, op1_info, opline->op2_type, opline->op2, FP, opline->op2.var, op2_info, FCARG1a, 0, OP1_DEF_INFO());
+			default:
+				ZEND_ASSERT(0);
+		}
 	} else {
-		|	SEPARATE_ZVAL_NOREF FP + opline->op1.var, op1_info, 1, op_array->filename, opline->lineno
-		return zend_jit_math_helper(Dst, opline, op_array, ssa, opline->op1_type, opline->op1, FP, opline->op1.var, op1_info, opline->op2_type, opline->op2, FP, opline->op2.var, op2_info, FP, opline->op1.var, OP1_DEF_INFO());
+		switch (opline->opcode) {
+			case ZEND_ASSIGN_ADD:
+			case ZEND_ASSIGN_SUB:
+			case ZEND_ASSIGN_MUL:
+			case ZEND_ASSIGN_DIV:
+				return zend_jit_math_helper(Dst, opline, op_array, ssa, opline->op1_type, opline->op1, FP, opline->op1.var, op1_info, opline->op2_type, opline->op2, FP, opline->op2.var, op2_info, FP, opline->op1.var, OP1_DEF_INFO(), 1);
+			case ZEND_ASSIGN_CONCAT:
+				return zend_jit_concat_helper(Dst, opline, op_array, ssa, opline->op1_type, opline->op1, FP, opline->op1.var, op1_info, opline->op2_type, opline->op2, FP, opline->op2.var, op2_info, FP, opline->op1.var, OP1_DEF_INFO());
+			default:
+				ZEND_ASSERT(0);
+		}
 	}
 
 fallback:

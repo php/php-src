@@ -1137,6 +1137,108 @@ static void ZEND_FASTCALL zend_jit_assign_dim_div_helper(zval *container, zval *
 	}
 }
 
+static void ZEND_FASTCALL zend_jit_assign_dim_concat_helper(zval *container, zval *dim, zval *value)
+{
+	if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		zval *object = container;
+		zval *property = dim;
+		zval *z;
+		zval rv, res;
+
+		if (Z_OBJ_HT_P(object)->read_dimension &&
+			(z = Z_OBJ_HT_P(object)->read_dimension(object, property, BP_VAR_R, &rv)) != NULL) {
+
+			if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
+				zval rv2;
+				zval *value = Z_OBJ_HT_P(z)->get(z, &rv2);
+
+				if (z == &rv) {
+					zval_ptr_dtor(&rv);
+				}
+				ZVAL_COPY_VALUE(z, value);
+			}
+			concat_function(&res, Z_ISREF_P(z) ? Z_REFVAL_P(z) : z, value);
+			Z_OBJ_HT_P(object)->write_dimension(object, property, &res);
+			if (z == &rv) {
+				zval_ptr_dtor(&rv);
+			}
+//???			if (retval) {
+//???				ZVAL_COPY(retval, &res);
+//???			}
+			zval_ptr_dtor(&res);
+		} else {
+			zend_error(E_WARNING, "Attempt to assign property of non-object");
+//???			if (retval) {
+//???				ZVAL_NULL(retval);
+//???			}
+		}
+	} else {
+		if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
+			if (!dim) {
+				zend_throw_error(NULL, "[] operator not supported for strings");
+			} else {
+				zend_check_string_offset(dim, BP_VAR_RW);
+				zend_wrong_string_offset();
+			}
+//???		} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
+//???			ZEND_VM_C_GOTO(assign_dim_op_convert_to_array);
+		} else {
+//???			if (UNEXPECTED(OP1_TYPE != IS_VAR || EXPECTED(!Z_ISERROR_P(container)))) {
+				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+//???			}
+//???			if (retval) {
+//???				ZVAL_NULL(retval);
+//???			}
+		}
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_fast_assign_concat_helper(zval *op1, zval *op2)
+{
+	size_t op1_len = Z_STRLEN_P(op1);
+	size_t op2_len = Z_STRLEN_P(op2);
+	size_t result_len = op1_len + op2_len;
+	zend_string *result_str;
+
+	if (UNEXPECTED(op1_len > SIZE_MAX - op2_len)) {
+		zend_throw_error(NULL, "String size overflow");
+		return;
+	}
+
+	if (Z_REFCOUNTED_P(op1)) {
+		result_str = zend_string_extend(Z_STR_P(op1), result_len, 0);
+	} else {
+		result_str = zend_string_alloc(result_len, 0);
+		memcpy(ZSTR_VAL(result_str), Z_STRVAL_P(op1), op1_len);
+	}
+
+	ZVAL_NEW_STR(op1, result_str);
+
+	memcpy(ZSTR_VAL(result_str) + op1_len, Z_STRVAL_P(op2), op2_len);
+	ZSTR_VAL(result_str)[result_len] = '\0';
+}
+
+static void ZEND_FASTCALL zend_jit_fast_concat_helper(zval *result, zval *op1, zval *op2)
+{
+	size_t op1_len = Z_STRLEN_P(op1);
+	size_t op2_len = Z_STRLEN_P(op2);
+	size_t result_len = op1_len + op2_len;
+	zend_string *result_str;
+
+	if (UNEXPECTED(op1_len > SIZE_MAX - op2_len)) {
+		zend_throw_error(NULL, "String size overflow");
+		return;
+	}
+
+	result_str = zend_string_alloc(result_len, 0);
+	memcpy(ZSTR_VAL(result_str), Z_STRVAL_P(op1), op1_len);
+
+	ZVAL_NEW_STR(result, result_str);
+
+	memcpy(ZSTR_VAL(result_str) + op1_len, Z_STRVAL_P(op2), op2_len);
+	ZSTR_VAL(result_str)[result_len] = '\0';
+}
+
 static int ZEND_FASTCALL zend_jit_isset_dim_helper(zval *container, zval *offset)
 {
 	if (UNEXPECTED(Z_TYPE_P(offset) == IS_UNDEF)) {

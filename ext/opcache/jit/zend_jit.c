@@ -1020,11 +1020,18 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 							goto jit_failure;
 						}
 						goto done;
+					case ZEND_CONCAT:
+					case ZEND_FAST_CONCAT:
+						if (!zend_jit_concat(&dasm_state, opline, &i, op_array, ssa)) {
+							goto jit_failure;
+						}
+						goto done;
 					case ZEND_ASSIGN_ADD:
 					case ZEND_ASSIGN_SUB:
 					case ZEND_ASSIGN_MUL:
 //					case ZEND_ASSIGN_DIV: // TODO: check for division by zero ???
-						if (!zend_jit_assign_math(&dasm_state, opline, op_array, ssa)) {
+					case ZEND_ASSIGN_CONCAT:
+						if (!zend_jit_assign_op(&dasm_state, opline, op_array, ssa)) {
 							goto jit_failure;
 						}
 						goto done;
