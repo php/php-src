@@ -554,40 +554,48 @@ safe:
 					}
 					plc->freeq = 1;
 				} else {
-					zval tmp_param;
-				   	ZVAL_DUP(&tmp_param, parameter);
-					switch (Z_TYPE(tmp_param)) {
-						case IS_NULL:
+					zend_string *buf = NULL;
+
+					switch (param->param_type) {
+						case PDO_PARAM_BOOL:
+							plc->quoted = zend_is_true(parameter) ? "1" : "0";
+							plc->qlen = sizeof("1")-1;
+							plc->freeq = 0;
+							break;
+
+						case PDO_PARAM_INT:
+							buf = zend_long_to_str(zval_get_long(parameter));
+
+							plc->qlen = ZSTR_LEN(buf);
+							plc->quoted = estrdup(ZSTR_VAL(buf));
+							plc->freeq = 1;
+							break;
+
+						case PDO_PARAM_NULL:
 							plc->quoted = "NULL";
 							plc->qlen = sizeof("NULL")-1;
 							plc->freeq = 0;
 							break;
 
-						case IS_FALSE:
-						case IS_TRUE:
-							convert_to_long(&tmp_param);
-							/* fall through */
-						case IS_LONG:
-						case IS_DOUBLE:
-							convert_to_string(&tmp_param);
-							plc->qlen = Z_STRLEN(tmp_param);
-							plc->quoted = estrdup(Z_STRVAL(tmp_param));
-							plc->freeq = 1;
-							break;
-
 						default:
-							convert_to_string(&tmp_param);
-							if (!stmt->dbh->methods->quoter(stmt->dbh, Z_STRVAL(tmp_param),
-									Z_STRLEN(tmp_param), &plc->quoted, &plc->qlen,
+							buf = zval_get_string(parameter);
+							if (!stmt->dbh->methods->quoter(stmt->dbh, ZSTR_VAL(buf),
+									ZSTR_LEN(buf), &plc->quoted, &plc->qlen,
 									param->param_type)) {
 								/* bork */
 								ret = -1;
 								strncpy(stmt->error_code, stmt->dbh->error_code, 6);
+								if (buf) {
+									zend_string_release(buf);
+								}
 								goto clean_up;
 							}
 							plc->freeq = 1;
 					}
-					zval_dtor(&tmp_param);
+
+					if (buf) {
+						zend_string_release(buf);
+					}
 				}
 			} else {
 				zval *parameter;
