@@ -18,9 +18,7 @@ $db->exec('CREATE TABLE test(id int)');
 $db->exec('INSERT INTO test VALUES(1)');
 switch ($db->getAttribute(PDO::ATTR_DRIVER_NAME)) {
 	case 'dblib':
-		// if :limit is used, the value will be quoted as '1', which is invalid syntax
-		// this is a bug, to be addressed separately from adding these tests to pdo_dblib
-		$sql = 'SELECT TOP 1 * FROM test';
+		$sql = 'SELECT TOP :limit * FROM test';
 		break;
 	case 'firebird':
 		$sql = 'SELECT FIRST :limit * FROM test';

@@ -2506,6 +2506,10 @@ static void zend_update_type_info(const zend_op_array *op_array,
 				    (opline->extended_value == IS_ARRAY ||
 				     opline->extended_value == IS_OBJECT)) {
 					tmp |= MAY_BE_RCN;
+				} else if ((t1 & MAY_BE_STRING) &&
+				    (opline->op1_type == IS_CV) &&
+				    opline->extended_value == IS_STRING) {
+					tmp |= MAY_BE_RCN;
 				}
 				UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
 				COPY_SSA_OBJ_TYPE(ssa_ops[i].op1_use, ssa_ops[i].op1_def);
@@ -2521,6 +2525,10 @@ static void zend_update_type_info(const zend_op_array *op_array,
 					} else if ((opline->extended_value == IS_ARRAY ||
 					            opline->extended_value == IS_OBJECT) &&
 					           (tmp & (MAY_BE_ARRAY|MAY_BE_OBJECT))) {
+							tmp |= MAY_BE_RC1 | MAY_BE_RCN;
+					} else if (opline->extended_value == IS_STRING &&
+					           (t1 & MAY_BE_STRING) &&
+					           (opline->op1_type == IS_CV)) {
 						tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 					} else {
 						tmp |= MAY_BE_RC1;

@@ -106,22 +106,16 @@ unset($stmt);
 
 echo "===INSERT===\n";
 $stmt = $db->prepare('INSERT INTO test VALUES(:id, :classtype, :val)');
-$stmt->bindParam(':id', $idx);
-$stmt->bindParam(':classtype', $ctype);
-$stmt->bindParam(':val', $val);
 
 foreach($objs as $idx => $obj)
 {
 	$ctype = $ctypes[get_class($obj)];
-	if (method_exists($obj, 'serialize'))
-	{
-		$val = $obj->serialize();
-	}
-	else
-	{
-		$val = '';
-	}
-	$stmt->execute();	
+
+	$stmt->bindValue(':id', $idx);
+	$stmt->bindValue(':classtype', $ctype, $ctype === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
+	$stmt->bindValue(':val', method_exists($obj, 'serialize') ? $obj->serialize() : '');
+
+	$stmt->execute();
 }
 
 unset($stmt);
