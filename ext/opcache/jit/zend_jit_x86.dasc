@@ -4286,7 +4286,20 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, zen
 	|	add aword [&EG(vm_stack_top)], used_stack
 	|	// zend_vm_init_call_frame(call, call_info, func, num_args, called_scope, object);
 	|	// call->func = func;
-	|	mov aword EX:RX->func, r0
+	if (!func || func->type != ZEND_INTERNAL_FUNCTION) {
+		|	mov aword EX:RX->func, r0
+	} else {
+		|.if X64
+		||	if (!IS_32BIT(func)) {
+		|		mov aword EX:RX->func, func
+		||	} else {
+		|		LOAD_ADDR r0, func
+		|		mov aword EX:RX->func, r0
+		||	}
+		|.else
+		|	mov aword EX:RX->func, func
+		|.endif
+	}
 	|	// ZEND_SET_CALL_INFO(call, 0, call_info);
 	|	mov dword EX:RX->This.u1.type_info, (IS_UNDEF | (ZEND_CALL_NESTED_FUNCTION << ZEND_CALL_INFO_SHIFT))
 	|1:
@@ -4328,7 +4341,7 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, zend_op_
 	}
 
 	if (func && func->type == ZEND_INTERNAL_FUNCTION) {
-		|	LOAD_ADDR r0, func
+		/* load constant address later */
 	} else if (func && op_array == &func->op_array) {
 		/* recursive call */
 		|	mov r0,	EX->func
