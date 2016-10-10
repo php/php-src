@@ -98,7 +98,7 @@ void gdImageWBMPCtx (gdImagePtr image, int fg, gdIOCtx * out)
 
 	/* create the WBMP */
 	if ((wbmp = createwbmp (gdImageSX (image), gdImageSY (image), WBMP_WHITE)) == NULL) {
-		php_gd_error("Could not create WBMP");
+		gd_error("Could not create WBMP");
 	}
 
 	/* fill up the WBMP structure */
@@ -114,7 +114,7 @@ void gdImageWBMPCtx (gdImagePtr image, int fg, gdIOCtx * out)
 
 	/* write the WBMP to a gd file descriptor */
 	if (writewbmp (wbmp, &gd_putout, out)) {
-		php_gd_error("Could not save WBMP");
+		gd_error("Could not save WBMP");
 	}
 	/* des submitted this bugfix: gdFree the memory. */
 	freewbmp(wbmp);

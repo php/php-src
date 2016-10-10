@@ -198,7 +198,7 @@ struct _php_stream  {
 	zval wrapperdata;		/* fgetwrapperdata retrieves this */
 
 	uint8_t is_persistent:1;
-	uint8_t in_free:1;			/* to prevent recursion during free */
+	uint8_t in_free:2;			/* to prevent recursion during free */
 	uint8_t eof:1;
 	uint8_t __exposed:1;	/* non-zero if exposed as a zval somewhere */
 

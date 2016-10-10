@@ -63,9 +63,7 @@
 static int le_gd, le_gd_font;
 
 #include <gd.h>
-#ifndef HAVE_GD_BUNDLED
-# include <gd_errors.h>
-#endif
+#include <gd_errors.h>
 #include <gdfontt.h>  /* 1 Tiny font */
 #include <gdfonts.h>  /* 2 Small font */
 #include <gdfontmb.h> /* 3 Medium bold font */
@@ -1028,7 +1026,6 @@ static void php_free_gd_font(zend_resource *rsrc)
 }
 /* }}} */
 
-#ifndef HAVE_GD_BUNDLED
 /* {{{ php_gd_error_method
  */
 void php_gd_error_method(int type, const char *format, va_list args)
@@ -1049,7 +1046,6 @@ void php_gd_error_method(int type, const char *format, va_list args)
 	php_verror(NULL, "", type, format, args TSRMLS_CC);
 }
 /* }}} */
-#endif
 
 /* {{{ PHP_MINIT_FUNCTION
  */
@@ -1061,9 +1057,8 @@ PHP_MINIT_FUNCTION(gd)
 #if HAVE_GD_BUNDLED && HAVE_LIBFREETYPE
 	gdFontCacheMutexSetup();
 #endif
-#ifndef HAVE_GD_BUNDLED
 	gdSetErrorMethod(php_gd_error_method);
-#endif
+
 	REGISTER_INI_ENTRIES();
 
 	REGISTER_LONG_CONSTANT("IMG_GIF", 1, CONST_CS | CONST_PERSISTENT);
@@ -4743,7 +4738,7 @@ PHP_FUNCTION(imagescale)
 	gdImagePtr im_scaled = NULL;
 	int new_width, new_height;
 	zend_long tmp_w, tmp_h=-1, tmp_m = GD_BILINEAR_FIXED;
-	gdInterpolationMethod method;
+	gdInterpolationMethod method, old_method;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl|ll", &IM, &tmp_w, &tmp_h, &tmp_m) == FAILURE)  {
 		return;
@@ -4772,9 +4767,12 @@ PHP_FUNCTION(imagescale)
 	new_width = tmp_w;
 	new_height = tmp_h;
 
+	/* gdImageGetInterpolationMethod() is only available as of GD 2.1.1 */
+	old_method = im->interpolation_id;
 	if (gdImageSetInterpolationMethod(im, method)) {
 		im_scaled = gdImageScale(im, new_width, new_height);
 	}
+	gdImageSetInterpolationMethod(im, old_method);
 
 	if (im_scaled == NULL) {
 		RETURN_FALSE;

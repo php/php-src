@@ -317,17 +317,6 @@ zend_op_array *phpdbg_init_compile_file(zend_file_handle *file, int type) {
 	dataptr = zend_hash_str_find_ptr(&PHPDBG_G(file_sources), filename, strlen(filename));
 	ZEND_ASSERT(dataptr != NULL);
 
-	if (op_array->vars) {
-		int i;
-		/* un-intern these strings to prevent zend_interned_strings_restore from invalidating our string pointers too early (in phpdbg allocated memory only gets freed after module shutdown) */
-		for (i = 0; i < op_array->last_var; i++) {
-			zend_string **s = op_array->vars + i;
-			if (ZSTR_IS_INTERNED(*s)) {
-				*s = zend_string_init(ZSTR_VAL(*s), ZSTR_LEN(*s), 0);
-			}
-		}
-	}
-
 	dataptr->op_array = *op_array;
 	if (dataptr->op_array.refcount) {
 		++*dataptr->op_array.refcount;

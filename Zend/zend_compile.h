@@ -121,6 +121,8 @@ typedef struct _zend_file_context {
 	HashTable *imports;
 	HashTable *imports_function;
 	HashTable *imports_const;
+
+	HashTable seen_symbols;
 } zend_file_context;
 
 typedef union _zend_parser_stack_elem {
@@ -963,6 +965,11 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 #define ZEND_ARRAY_ELEMENT_REF		(1<<0)
 #define ZEND_ARRAY_NOT_PACKED		(1<<1)
 #define ZEND_ARRAY_SIZE_SHIFT		2
+
+/* For "use" AST nodes and the seen symbol table */
+#define ZEND_SYMBOL_CLASS    (1<<0)
+#define ZEND_SYMBOL_FUNCTION (1<<1)
+#define ZEND_SYMBOL_CONST    (1<<2)
 
 /* Pseudo-opcodes that are used only temporarily during compilation */
 #define ZEND_GOTO  253

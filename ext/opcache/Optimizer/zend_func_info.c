@@ -72,10 +72,6 @@ static uint32_t zend_strlen_info(const zend_call_info *call_info, const zend_ssa
 				/* warning, and returns NULL */
 				tmp |= FUNC_MAY_WARN | MAY_BE_NULL;
 			}
-			if ((arg_info & MAY_BE_ANY) == MAY_BE_STRING) {
-				/* TODO: strlen() may be overriden by mbstring */
-				tmp |= FUNC_MAY_INLINE;
-			}
 		} else {
 			tmp |= MAY_BE_LONG | FUNC_MAY_WARN | MAY_BE_NULL;
 		}
@@ -134,7 +130,7 @@ static uint32_t zend_is_type_info(const zend_call_info *call_info, const zend_ss
 {
 	if (call_info->caller_init_opline->extended_value == (uint32_t)call_info->num_args &&
 	    call_info->num_args == 1) {
-		return MAY_BE_FALSE | MAY_BE_TRUE | FUNC_MAY_INLINE;
+		return MAY_BE_FALSE | MAY_BE_TRUE;
 	} else {
 		return MAY_BE_FALSE | MAY_BE_TRUE | FUNC_MAY_WARN;
 	}
@@ -653,7 +649,7 @@ static const func_info_t func_infos[] = {
 	F1("stream_socket_get_name",       MAY_BE_FALSE | MAY_BE_STRING),
 	F1("stream_socket_recvfrom",       MAY_BE_FALSE | MAY_BE_STRING),
 	F0("stream_socket_sendto",         MAY_BE_FALSE | MAY_BE_LONG),
-	F0("stream_socket_enable_crypto",  MAY_BE_FALSE | MAY_BE_LONG),
+	F0("stream_socket_enable_crypto",  MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_LONG),
 #ifdef HAVE_SHUTDOWN
 	F0("stream_socket_shutdown",       MAY_BE_FALSE | MAY_BE_TRUE),
 #endif
