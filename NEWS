@@ -18,6 +18,10 @@ PHP                                                                        NEWS
 - phpdbg:
   . Properly allow for stdin input from a file. (Bob)
 
+- Session:
+  . Fixed bug #73273 (session_unset() empties values from all variables in which
+    is $_session stored). (Nikita)
+
 - Standard:
   . Fixed bug #73203 (passing additional_parameters causes mail to fail). (cmb)
 

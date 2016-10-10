@@ -159,19 +159,14 @@ static int php_session_destroy(void) /* {{{ */
 
 PHPAPI void php_add_session_var(zend_string *name) /* {{{ */
 {
-	zval *sym_track = NULL;
-
 	IF_SESSION_VARS() {
-		sym_track = zend_hash_find(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))), name);
-	} else {
-		return;
-	}
-
-	if (sym_track == NULL) {
-		zval empty_var;
-
-		ZVAL_NULL(&empty_var);
-		zend_hash_update(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))), name, &empty_var);
+		zval *sess_var = Z_REFVAL(PS(http_session_vars));
+		SEPARATE_ARRAY(sess_var);
+		if (!zend_hash_exists(Z_ARRVAL_P(sess_var), name)) {
+			zval empty_var;
+			ZVAL_NULL(&empty_var);
+			zend_hash_update(Z_ARRVAL_P(sess_var), name, &empty_var);
+		}
 	}
 }
 /* }}} */
@@ -179,7 +174,9 @@ PHPAPI void php_add_session_var(zend_string *name) /* {{{ */
 PHPAPI zval* php_set_session_var(zend_string *name, zval *state_val, php_unserialize_data_t *var_hash) /* {{{ */
 {
 	IF_SESSION_VARS() {
-		return zend_hash_update(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))), name, state_val);
+		zval *sess_var = Z_REFVAL(PS(http_session_vars));
+		SEPARATE_ARRAY(sess_var);
+		return zend_hash_update(Z_ARRVAL_P(sess_var), name, state_val);
 	}
 	return NULL;
 }
@@ -2386,10 +2383,11 @@ static PHP_FUNCTION(session_unset)
 	}
 
 	IF_SESSION_VARS() {
-		HashTable *ht_sess_var = Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars)));
+		zval *sess_var = Z_REFVAL(PS(http_session_vars));
+		SEPARATE_ARRAY(sess_var);
 
 		/* Clean $_SESSION. */
-		zend_hash_clean(ht_sess_var);
+		zend_hash_clean(Z_ARRVAL_P(sess_var));
 	}
 }
 /* }}} */
@@ -2923,9 +2921,12 @@ static void php_session_rfc1867_update(php_session_rfc1867_progress *progress, i
 	php_session_initialize();
 	PS(session_status) = php_session_active;
 	IF_SESSION_VARS() {
+		zval *sess_var = Z_REFVAL(PS(http_session_vars));
+		SEPARATE_ARRAY(sess_var);
+
 		progress->cancel_upload |= php_check_cancel_upload(progress);
-		if (Z_REFCOUNTED(progress->data)) Z_ADDREF(progress->data);
-		zend_hash_update(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))), progress->key.s, &progress->data);
+		Z_TRY_ADDREF(progress->data);
+		zend_hash_update(Z_ARRVAL_P(sess_var), progress->key.s, &progress->data);
 	}
 	php_session_flush(1);
 } /* }}} */
@@ -2935,7 +2936,9 @@ static void php_session_rfc1867_cleanup(php_session_rfc1867_progress *progress) 
 	php_session_initialize();
 	PS(session_status) = php_session_active;
 	IF_SESSION_VARS() {
-		zend_hash_del(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))), progress->key.s);
+		zval *sess_var = Z_REFVAL(PS(http_session_vars));
+		SEPARATE_ARRAY(sess_var);
+		zend_hash_del(Z_ARRVAL_P(sess_var), progress->key.s);
 	}
 	php_session_flush(1);
 } /* }}} */
