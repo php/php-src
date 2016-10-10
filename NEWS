@@ -8,6 +8,9 @@ PHP                                                                        NEWS
     imagesetinterpolation()). (cmb)
   . Fixed bug #73279 (Integer overflow in gdImageScaleBilinearPalette()). (cmb)
 
+- SOAP:
+  . Fixed bug #73037 (SoapServer reports Bad Request when gzipped). (Anatol)
+
 - Standard:
   . Fixed bug #73203 (passing additional_parameters causes mail to fail). (cmb)
 
