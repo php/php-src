@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-29 Sep 2016 PHP 7.0.12RC1
+13 Oct 2016 PHP 7.0.12
 
 - Core:
   . Fixed bug #73025 (Heap Buffer Overflow in virtual_popen of
