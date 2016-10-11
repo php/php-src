@@ -665,7 +665,7 @@ END_EXTERN_C()
 		}									\
 		RETURN_FALSE;						\
 	}										\
-	RETVAL_STRINGL((s), __len, (dup)); \
+	RETVAL_STRINGL((s), (int)__len, (dup)); \
 } while (0)
 
 
