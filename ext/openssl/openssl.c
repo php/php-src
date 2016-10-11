@@ -5260,7 +5260,7 @@ PHP_FUNCTION(openssl_encrypt)
 	free_iv = php_openssl_validate_iv(&iv, &iv_len, max_iv_len TSRMLS_CC);
 
 	outlen = data_len + EVP_CIPHER_block_size(cipher_type);
-	outbuf = emalloc(outlen + 1);
+	outbuf = safe_emalloc(outlen, 1, 1);
 
 	EVP_EncryptInit(&cipher_ctx, cipher_type, NULL, NULL);
 	if (password_len > keylen) {
@@ -5278,14 +5278,18 @@ PHP_FUNCTION(openssl_encrypt)
 		outlen += i;
 		if (options & OPENSSL_RAW_DATA) {
 			outbuf[outlen] = '\0';
-			RETVAL_STRINGL((char *)outbuf, outlen, 0);
+			RETVAL_STRINGL_CHECK((char *)outbuf, outlen, 0);
 		} else {
 			int base64_str_len;
 			char *base64_str;
 
 			base64_str = (char*)php_base64_encode(outbuf, outlen, &base64_str_len);
 			efree(outbuf);
-			RETVAL_STRINGL(base64_str, base64_str_len, 0);
+			if (!base64_str) {
+				RETVAL_FALSE;
+			} else {
+				RETVAL_STRINGL(base64_str, base64_str_len, 0);
+			}
 		}
 	} else {
 		efree(outbuf);
@@ -5462,16 +5466,16 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 		return;
 	}
 
-	if (buffer_length <= 0) {
-		RETURN_FALSE;
-	}
-
 	if (zstrong_result_returned) {
 		zval_dtor(zstrong_result_returned);
 		ZVAL_BOOL(zstrong_result_returned, 0);
 	}
 
-	buffer = emalloc(buffer_length + 1);
+	if (buffer_length <= 0 || buffer_length > INT_MAX) {
+		RETURN_FALSE;
+	}
+
+	buffer = safe_emalloc(buffer_length, 1, 1);
 
 #ifdef PHP_WIN32
 	/* random/urandom equivalent on Windows */
