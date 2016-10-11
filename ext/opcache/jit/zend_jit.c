@@ -1061,7 +1061,13 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa)
 							goto jit_failure;
 						}
 						goto done;
+					case ZEND_SEND_REF:
+						if (!zend_jit_send_ref(&dasm_state, opline, op_array, ssa, 0)) {
+							goto jit_failure;
+						}
+						goto done;
 					case ZEND_SEND_VAR:
+					case ZEND_SEND_VAR_EX:
 						if (!zend_jit_send_var(&dasm_state, opline, op_array, ssa)) {
 							goto jit_failure;
 						}
