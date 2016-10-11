@@ -989,7 +989,7 @@ static inline char * sxe_xmlNodeListGetString(xmlDocPtr doc, xmlNodePtr list, in
 {
 	xmlChar *tmp = xmlNodeListGetString(doc, list, inLine);
 	char    *res;
-	
+
 	if (tmp) {
 		res = estrdup((char*)tmp);
 		xmlFree(tmp);
@@ -1147,7 +1147,7 @@ static HashTable * sxe_get_prop_hash(zval *object, int is_debug TSRMLS_DC) /* {{
 			} else {
 				if (node->type == XML_TEXT_NODE) {
 					const xmlChar *cur = node->content;
-					
+
 					if (*cur != 0) {
 						MAKE_STD_ZVAL(value);
 						ZVAL_STRING(value, sxe_xmlNodeListGetString(node->doc, node, 1), 0);
@@ -1198,7 +1198,7 @@ next_iter:
 static HashTable * sxe_get_gc(zval *object, zval ***table, int *n TSRMLS_DC) /* {{{ */ {
 	php_sxe_object  *sxe;
 	sxe = php_sxe_fetch_object(object TSRMLS_CC);
-	
+
 	*table = NULL;
 	*n = 0;
 	return sxe->properties;
@@ -1302,7 +1302,7 @@ SXE_METHOD(xpath)
 	result = retval->nodesetval;
 
 	array_init(return_value);
-		
+
 	if (result != NULL) {
 		for (i = 0; i < result->nodeNr; ++i) {
 			nodeptr = result->nodeTab[i];
@@ -1412,9 +1412,15 @@ SXE_METHOD(asXML)
 	if (node) {
 		if (node->parent && (XML_DOCUMENT_NODE == node->parent->type)) {
 			xmlDocDumpMemoryEnc((xmlDocPtr) sxe->document->ptr, &strval, &strval_len, ((xmlDocPtr) sxe->document->ptr)->encoding);
-			RETVAL_STRINGL((char *)strval, strval_len, 1);
+			if (!strval) {
+				RETVAL_FALSE;
+			} else {
+				RETVAL_STRINGL((char *)strval, strval_len, 1);
+			}
 			xmlFree(strval);
 		} else {
+			char *return_content;
+			size_t return_len;
 			/* Should we be passing encoding information instead of NULL? */
 			outbuf = xmlAllocOutputBuffer(NULL);
 
@@ -1425,10 +1431,17 @@ SXE_METHOD(asXML)
 			xmlNodeDumpOutput(outbuf, (xmlDocPtr) sxe->document->ptr, node, 0, 0, ((xmlDocPtr) sxe->document->ptr)->encoding);
 			xmlOutputBufferFlush(outbuf);
 #ifdef LIBXML2_NEW_BUFFER
-			RETVAL_STRINGL((char *)xmlOutputBufferGetContent(outbuf), xmlOutputBufferGetSize(outbuf), 1);
+			return_content = (char *)xmlOutputBufferGetContent(outbuf);
+			return_len = xmlOutputBufferGetSize(outbuf);
 #else
-			RETVAL_STRINGL((char *)outbuf->buffer->content, outbuf->buffer->use, 1);
+			return_content = (char *)outbuf->buffer->content;
+			return_len = outbuf->buffer->use;
 #endif
+			if (!return_content) {
+				RETVAL_FALSE;
+			} else {
+				RETVAL_STRINGL_CHECK(return_content, return_len, 1);
+			}
 			xmlOutputBufferClose(outbuf);
 		}
 	} else {
@@ -1542,11 +1555,11 @@ SXE_METHOD(getDocNamespaces)
 	}else{
 		GET_NODE(sxe, node);
 	}
-	
+
 	if (node == NULL) {
 		RETURN_FALSE;
 	}
-	
+
 	array_init(return_value);
 	sxe_add_registered_namespaces(sxe, node, recursive, return_value TSRMLS_CC);
 }
@@ -1933,7 +1946,7 @@ SXE_METHOD(count)
 	}
 
 	php_sxe_count_elements_helper(sxe, &count TSRMLS_CC);
-	
+
 	RETURN_LONG(count);
 }
 /* }}} */

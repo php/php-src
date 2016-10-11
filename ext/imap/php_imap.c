@@ -2523,7 +2523,7 @@ PHP_FUNCTION(imap_8bit)
 		RETURN_FALSE;
 	}
 
-	RETVAL_STRINGL(decode, newlength, 1);
+	RETVAL_STRINGL_CHECK(decode, newlength, 1);
 	fs_give((void**) &decode);
 }
 /* }}} */
