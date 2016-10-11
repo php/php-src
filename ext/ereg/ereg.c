@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
    |          Jim Winstead <jimw@php.net>                                 |
-   |          Jaakko Hyvätti <jaakko@hyvatti.iki.fi>                      | 
+   |          Jaakko Hyvätti <jaakko@hyvatti.iki.fi>                      |
    +----------------------------------------------------------------------+
  */
 /* $Id$ */
@@ -29,7 +29,7 @@
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ereg, 0, 0, 2)
 	ZEND_ARG_INFO(0, pattern)
-	ZEND_ARG_INFO(0, string) 
+	ZEND_ARG_INFO(0, string)
 	ZEND_ARG_INFO(1, registers) /* ARRAY_INFO(1, registers, 1) */
 ZEND_END_ARG_INFO()
 
@@ -41,8 +41,8 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_split, 0, 0, 2)
 	ZEND_ARG_INFO(0, pattern)
-	ZEND_ARG_INFO(0, string) 
-	ZEND_ARG_INFO(0, limit)  
+	ZEND_ARG_INFO(0, string)
+	ZEND_ARG_INFO(0, limit)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_sql_regcase, 0)
@@ -204,7 +204,7 @@ static int _php_regcomp(regex_t *preg, const char *pattern, int cflags TSRMLS_DC
 }
 /* }}} */
 
-static void _free_ereg_cache(reg_cache *rc) 
+static void _free_ereg_cache(reg_cache *rc)
 {
 	regfree(&rc->preg);
 }
@@ -309,7 +309,7 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	if (icase) {
 		copts |= REG_ICASE;
 	}
-	
+
 	if (argc == 2) {
 		copts |= REG_NOSUB;
 	}
@@ -337,7 +337,7 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 
 	/* allocate storage for (sub-)expression-matches */
 	subs = (regmatch_t *)ecalloc(sizeof(regmatch_t),re.re_nsub+1);
-	
+
 	/* actually execute the regular expression */
 	err = regexec(&re, string, re.re_nsub+1, subs, 0);
 	if (err && err != REG_NOMATCH) {
@@ -409,8 +409,8 @@ PHP_EREG_API char *php_ereg_replace(const char *pattern, const char *replace, co
 		 *nbuf,	/* nbuf is used when we grow the buffer */
 		 *walkbuf; /* used to walk buf when replacing backrefs */
 	const char *walk; /* used to walk replacement string for backrefs */
-	int buf_len;
-	int pos, tmp, string_len, new_l;
+	size_t buf_len, new_l;
+	int pos, tmp, string_len;
 	int err, copts = 0;
 
 	string_len = strlen(string);
@@ -434,8 +434,8 @@ PHP_EREG_API char *php_ereg_replace(const char *pattern, const char *replace, co
 
 	/* start with a buffer that is twice the size of the stringo
 	   we're doing replacements in */
+	buf = safe_emalloc(string_len, 2, 1);
 	buf_len = 2 * string_len + 1;
-	buf = safe_emalloc(buf_len, sizeof(char), 0);
 
 	err = pos = 0;
 	buf[0] = '\0';
@@ -472,8 +472,8 @@ PHP_EREG_API char *php_ereg_replace(const char *pattern, const char *replace, co
 				}
 			}
 			if (new_l + 1 > buf_len) {
+				nbuf = safe_emalloc(new_l + 1, 2, buf_len);
 				buf_len = 1 + buf_len + 2 * new_l;
-				nbuf = emalloc(buf_len);
 				strncpy(nbuf, buf, buf_len - 1);
 				nbuf[buf_len - 1] = '\0';
 				efree(buf);
@@ -491,7 +491,7 @@ PHP_EREG_API char *php_ereg_replace(const char *pattern, const char *replace, co
 					if (subs[walk[1] - '0'].rm_so > -1 && subs[walk[1] - '0'].rm_eo > -1
 						/* this next case shouldn't happen. it does. */
 						&& subs[walk[1] - '0'].rm_so <= subs[walk[1] - '0'].rm_eo) {
-						
+
 						tmp = subs[walk[1] - '0'].rm_eo - subs[walk[1] - '0'].rm_so;
 						memcpy (walkbuf, &string[pos + subs[walk[1] - '0'].rm_so], tmp);
 						walkbuf += tmp;
@@ -510,8 +510,8 @@ PHP_EREG_API char *php_ereg_replace(const char *pattern, const char *replace, co
 				}
 				new_l = strlen (buf) + 1;
 				if (new_l + 1 > buf_len) {
+					nbuf = safe_emalloc(new_l + 1, 2, buf_len);
 					buf_len = 1 + buf_len + 2 * new_l;
-					nbuf = safe_emalloc(buf_len, sizeof(char), 0);
 					strncpy(nbuf, buf, buf_len-1);
 					efree(buf);
 					buf = nbuf;
@@ -526,7 +526,7 @@ PHP_EREG_API char *php_ereg_replace(const char *pattern, const char *replace, co
 			new_l = strlen(buf) + strlen(&string[pos]);
 			if (new_l + 1 > buf_len) {
 				buf_len = new_l + 1; /* now we know exactly how long it is */
-				nbuf = safe_emalloc(buf_len, sizeof(char), 0);
+				nbuf = safe_emalloc(new_l, 1, 1);
 				strncpy(nbuf, buf, buf_len-1);
 				efree(buf);
 				buf = nbuf;
@@ -556,7 +556,7 @@ static void php_do_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	char *replace;
 	char *ret;
 	int arg_string_len;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZs", &arg_pattern, &arg_replace, &arg_string, &arg_string_len) == FAILURE) {
 		return;
 	}
@@ -598,7 +598,7 @@ static void php_do_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	if (ret == (char *) -1) {
 		RETVAL_FALSE;
 	} else {
-		RETVAL_STRING(ret, 1);
+		RETVAL_STRINGL_CHECK(ret, strlen(ret), 1);
 		STR_FREE(ret);
 	}
 
@@ -664,9 +664,9 @@ static void php_split(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		} else if (subs[0].rm_so == 0 && subs[0].rm_eo == 0) {
 			/* No more matches */
 			regfree(&re);
-			
+
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Regular Expression");
-			
+
 			zend_hash_destroy(Z_ARRVAL_P(return_value));
 			efree(Z_ARRVAL_P(return_value));
 			RETURN_FALSE;
@@ -675,7 +675,7 @@ static void php_split(INTERNAL_FUNCTION_PARAMETERS, int icase)
 
 			/* make a copy of the substring */
 			size = subs[0].rm_so;
-		
+
 			/* add it to the array */
 			add_next_index_stringl(return_value, strp, size, 1);
 
@@ -701,7 +701,7 @@ static void php_split(INTERNAL_FUNCTION_PARAMETERS, int icase)
 
 	/* otherwise we just have one last element to add to the array */
 	size = endp - strp;
-	
+
 	add_next_index_stringl(return_value, strp, size, 1);
 
 	regfree(&re);
@@ -738,9 +738,9 @@ PHP_EREG_API PHP_FUNCTION(sql_regcase)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &string, &string_len) == FAILURE) {
 		return;
 	}
-	
+
 	tmp = safe_emalloc(string_len, 4, 1);
-	
+
 	for (i = j = 0; i < string_len; i++) {
 		c = (unsigned char) string[i];
 		if ( j >= INT_MAX - 1 || (isalpha(c) && j >= INT_MAX - 4)) {
