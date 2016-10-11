@@ -1124,7 +1124,7 @@ static char *_php_math_number_format_ex_len(double d, int dec, char *dec_point,
 	if (thousand_sep) {
 		if (integral + thousand_sep_len * ((integral-1) / 3) < integral) {
 			/* overflow */
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "String overflow");
+			zend_error(E_ERROR, "String overflow");
 		}
 		integral += thousand_sep_len * ((integral-1) / 3);
 	}
@@ -1137,7 +1137,7 @@ static char *_php_math_number_format_ex_len(double d, int dec, char *dec_point,
 		if (dec_point) {
 			if (reslen + dec_point < dec_point) {
 				/* overflow */
-				php_error_docref(NULL TSRMLS_CC, E_ERROR, "String overflow");
+				zend_error(E_ERROR, "String overflow");
 			}
 			reslen += dec_point_len;
 		}
