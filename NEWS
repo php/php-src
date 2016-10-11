@@ -8,6 +8,8 @@ PHP                                                                        NEWS
   . Fixed bug #66773 (Autoload with Opcache allows importing conflicting class
     name to namespace). (Nikita)
   . Fixed bug #66862 ((Sub-)Namespaces unexpected behaviour). (Nikita)
+  . Fixed bug #73067 (__debugInfo crashes when throwing an exception).
+    (Laruence)
 
 - GD:
   . Fixed bug #73213 (Integer overflow in imageline() with antialiasing). (cmb)
@@ -31,8 +33,6 @@ PHP                                                                        NEWS
 13 Oct 2016 PHP 7.0.12
 
 - Core:
-  . Fixed bug #73067 (__debugInfo crashes when throwing an exception).
-    (Laruence)
   . Fixed bug #73025 (Heap Buffer Overflow in virtual_popen of
     zend_virtual_cwd.c). (cmb)
   . Fixed bug #72703 (Out of bounds global memory read in BF_crypt triggered by
