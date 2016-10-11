@@ -4963,15 +4963,6 @@ fallback:
 static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
 {
 	uint32_t op1_info;
-	if (!ssa->ops || !ssa->var_info) {
-		goto fallback;
-	}
-
-	op1_info = OP1_INFO();
-	if (op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) {
-		// TODO: support for references ???
-		goto fallback;
-	}
 
 	op1_info = OP1_INFO();
 
@@ -4981,10 +4972,55 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		|	mov RX, EX->call
 	}
 
-	|	ZVAL_COPY_VALUE RX + opline->result.var, FP + opline->op1.var, op1_info, r0, eax, r2
-	||	if (opline->op1_type == IS_CV) {
-	|		TRY_ADDREF op1_info, ah, r2
-	||	}
+	if (op1_info & MAY_BE_UNDEF) {
+		if (op1_info & (MAY_BE_ANY|MAY_BE_REF)) {
+			|	IF_Z_TYPE FP + opline->op1.var, IS_UNDEF, >1
+			|.cold_code
+			|1:
+			|	SAVE_VALID_OPLINE opline
+			|	mov FCARG1d, opline->op1.var
+			|	EXT_CALL zend_jit_undefined_op_helper, r0
+			|	SET_Z_TYPE_INFO RX + opline->result.var, IS_NULL
+			|	jmp >7
+			|.code
+		}
+	}
+
+	if (op1_info & (MAY_BE_ANY|MAY_BE_REF)) {
+		if (op1_info & MAY_BE_REF) {
+			if (opline->op1_type == IS_CV) {
+				|	lea FCARG1a, [FP + opline->op1.var]
+				|	ZVAL_DEREF FCARG1a, op1_info
+				|	ZVAL_COPY_VALUE RX + opline->result.var, FCARG1a, op1_info, r0, eax, r2
+				|	TRY_ADDREF op1_info, ah, r2
+			} else {
+				|	IF_Z_TYPE FP + opline->op1.var, IS_REFERENCE, >1
+				|.cold_code
+				|1:
+				|	// zend_refcounted *ref = Z_COUNTED_P(retval_ptr);
+				|	GET_Z_PTR FCARG1a, FP + opline->op1.var
+				|	// ZVAL_COPY_VALUE(return_value, &ref->value);
+				|	ZVAL_COPY_VALUE RX + opline->result.var, FCARG1a + 8, op1_info, r0, eax, r2
+				|	GC_DELREF FCARG1a
+				|	je >1
+				|	IF_NOT_REFCOUNTED ah, >2
+				|	GC_ADDREF r2
+				|	jmp >2
+				|1:
+				|	EFREE_SIZE FCARG1a, sizeof(zend_reference), op_array, opline
+				|	jmp >2
+				|.code
+				|	ZVAL_COPY_VALUE RX + opline->result.var, FP + opline->op1.var, op1_info, r0, eax, r2
+				|2:
+			}
+		} else {
+			|	ZVAL_COPY_VALUE RX + opline->result.var, FP + opline->op1.var, op1_info, r0, eax, r2
+			||	if (opline->op1_type == IS_CV) {
+			|		TRY_ADDREF op1_info, ah, r2
+			||	}
+		}
+	}
+	|7:
 
 	return 1;
 
