@@ -8,8 +8,6 @@ var_dump($e."");
 ?>
 --EXPECTF--
 Notice: Undefined property: Exception::$file in %s%ebug69793.php on line %d
-
-Notice: Undefined property: Exception::$previous in %s%ebug69793.php on line %d
 string(53) "exception 'Exception' in :1337
 Stack trace:
 #0 {main}"
