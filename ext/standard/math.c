@@ -1139,18 +1139,14 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 
 	/* calculate the length of the return buffer */
 	if (dp) {
-		integral = (int)(dp - ZSTR_VAL(tmpbuf));
+		integral = (dp - ZSTR_VAL(tmpbuf));
 	} else {
 		/* no decimal point was found */
-		integral = (int)ZSTR_LEN(tmpbuf);
+		integral = ZSTR_LEN(tmpbuf);
 	}
 
 	/* allow for thousand separators */
 	if (thousand_sep) {
-		if (integral + thousand_sep_len * ((integral-1) / 3) < integral) {
-			/* overflow */
-			php_error_docref(NULL, E_ERROR, "String overflow");
-		}
 		integral += thousand_sep_len * ((integral-1) / 3);
 	}
 
@@ -1160,10 +1156,6 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 		reslen += dec;
 
 		if (dec_point) {
-			if (reslen + dec_point_len < dec_point_len) {
-				/* overflow */
-				php_error_docref(NULL, E_ERROR, "String overflow");
-			}
 			reslen += dec_point_len;
 		}
 	}
@@ -1266,6 +1258,7 @@ PHP_FUNCTION(number_format)
 		break;
 	default:
 		WRONG_PARAM_COUNT;
+		break;
 	}
 }
 /* }}} */
