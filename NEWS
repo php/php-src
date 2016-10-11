@@ -2,6 +2,11 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016, PHP 7.1.0RC4
 
+- Core:
+  . Implemented RFC: get_class() disallow null parameter. Passing null to
+    get_class() now generates a warning, rather than returning the calling
+    class scope.
+
 - Date:
   . Fixed bug #45554 (Inconsistent behavior of the u format char). (Derick)
   . Fixed bug #48225 (DateTime parser doesn't set microseconds for "now").
@@ -27,6 +32,9 @@ PHP                                                                        NEWS
 - Session:
   . Fixed bug #73273 (session_unset() empties values from all variables in which
     is $_session stored). (Nikita)
+
+- SOAP:
+  . Fixed bug #73037 (SoapServer reports Bad Request when gzipped). (Anatol)
 
 - Standard:
   . Fixed bug #73203 (passing additional_parameters causes mail to fail). (cmb)
