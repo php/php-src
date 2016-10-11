@@ -1820,13 +1820,13 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 		|	jmp >2
 		|.code
 		|	SET_Z_LVAL Ra(res_reg)+res_offset, r0
-		if (op1_reg != res_reg || op1_offset != res_offset) {
+		if (op1_type == IS_CONST || op1_reg != res_reg || op1_offset != res_offset) {
 			|	SET_Z_TYPE_INFO Ra(res_reg)+res_offset, IS_LONG
 		}
 		|2:
 	} else {
 		|	SET_Z_LVAL Ra(res_reg)+res_offset, r0
-		if (op1_reg != res_reg || op1_offset != res_offset) {
+		if (op1_type == IS_CONST || op1_reg != res_reg || op1_offset != res_offset) {
 			|	SET_Z_TYPE_INFO Ra(res_reg)+res_offset, IS_LONG
 		}
 	}
@@ -1936,7 +1936,7 @@ static int zend_jit_math_double_long(dasm_State    **Dst,
 	||	}
 	|.endif
 	|	DOUBLE_STORE Ra(res_reg)+res_offset, xmm0
-	if (op1_reg != res_reg || op1_offset != res_offset) {
+	if (op1_type == IS_CONST || op1_reg != res_reg || op1_offset != res_offset) {
 		|	SET_Z_TYPE_INFO Ra(res_reg)+res_offset, IS_DOUBLE
 	}
 	return 1;
@@ -1983,7 +1983,7 @@ static int zend_jit_math_double_double(dasm_State    **Dst,
 	}
 	|.endif
 	|	DOUBLE_STORE Ra(res_reg)+res_offset, xmm0
-	if (op1_reg != res_reg || op1_offset != res_offset) {
+	if (op1_type == IS_CONST || op1_reg != res_reg || op1_offset != res_offset) {
 		|	SET_Z_TYPE_INFO Ra(res_reg)+res_offset, IS_DOUBLE
 	}
 
@@ -2336,7 +2336,7 @@ static int zend_jit_concat_helper(dasm_State    **Dst,
 		if (op2_info & ((MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF) - MAY_BE_STRING)) {
 			|	IF_NOT_Z_TYPE Ra(op2_reg)+op2_offset, IS_STRING, >5
 		}
-		if (op1_reg == res_reg && op1_offset == res_offset) {
+		if (op1_type != IS_CONST && op1_reg == res_reg && op1_offset == res_offset) {
 			if (res_reg != FCARG1a || res_offset != 0) {
 				|	lea	FCARG1a, [Ra(res_reg)+res_offset]
 			}
