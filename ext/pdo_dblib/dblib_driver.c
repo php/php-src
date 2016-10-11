@@ -48,13 +48,18 @@ static int dblib_fetch_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info)
 		einfo = &S->err;
 	}
 
-	if (einfo->dberr == SYBESMSG && einfo->lastmsg) {
+	if (einfo->lastmsg) {
 		msg = einfo->lastmsg;
-	} else if (einfo->dberr == SYBESMSG && DBLIB_G(err).lastmsg) {
+	} else if (DBLIB_G(err).lastmsg) {
 		msg = DBLIB_G(err).lastmsg;
 		DBLIB_G(err).lastmsg = NULL;
 	} else {
 		msg = einfo->dberrstr;
+	}
+
+	/* don't return anything if there's nothing to return */
+	if (msg == NULL && einfo->dberr == 0 && einfo->oserr == 0 && einfo->severity == 0) {
+		return 0;
 	}
 
 	spprintf(&message, 0, "%s [%d] (severity %d) [%s]",
@@ -78,6 +83,7 @@ static int dblib_handle_closer(pdo_dbh_t *dbh)
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 
 	if (H) {
+		pdo_dblib_err_dtor(&H->err);
 		if (H->link) {
 			dbclose(H->link);
 			H->link = NULL;
@@ -253,14 +259,13 @@ static int dblib_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 {
 	switch(attr) {
 		case PDO_ATTR_TIMEOUT:
-			return 0;
-
+		case PDO_DBLIB_ATTR_QUERY_TIMEOUT:
+			return SUCCEED == dbsettime(zval_get_long(val)) ? 1 : 0;
 		case PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER:
 			((pdo_dblib_db_handle *)dbh->driver_data)->stringify_uniqueidentifier = zval_get_long(val);
 			return 1;
-
 		default:
-			return 1;
+			return 0;
 	}
 }
 

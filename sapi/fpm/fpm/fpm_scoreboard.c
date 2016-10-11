@@ -25,7 +25,7 @@ static float fpm_scoreboard_tick;
 int fpm_scoreboard_init_main() /* {{{ */
 {
 	struct fpm_worker_pool_s *wp;
-	int i;
+	unsigned int i;
 
 #ifdef HAVE_TIMES
 #if (defined(HAVE_SYSCONF) && defined(_SC_CLK_TCK))
@@ -42,6 +42,9 @@ int fpm_scoreboard_init_main() /* {{{ */
 
 
 	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
+		size_t scoreboard_size, scoreboard_nprocs_size;
+		void *shm_mem;
+
 		if (wp->config->pm_max_children < 1) {
 			zlog(ZLOG_ERROR, "[pool %s] Unable to create scoreboard SHM because max_client is not set", wp->config->name);
 			return -1;
@@ -52,19 +55,22 @@ int fpm_scoreboard_init_main() /* {{{ */
 			return -1;
 		}
 
-		wp->scoreboard = fpm_shm_alloc(sizeof(struct fpm_scoreboard_s) + (wp->config->pm_max_children - 1) * sizeof(struct fpm_scoreboard_proc_s *));
-		if (!wp->scoreboard) {
+		scoreboard_size        = sizeof(struct fpm_scoreboard_s) + (wp->config->pm_max_children) * sizeof(struct fpm_scoreboard_proc_s *);
+		scoreboard_nprocs_size = sizeof(struct fpm_scoreboard_proc_s) * wp->config->pm_max_children;
+		shm_mem                = fpm_shm_alloc(scoreboard_size + scoreboard_nprocs_size);
+
+		if (!shm_mem) {
 			return -1;
 		}
+		wp->scoreboard         = shm_mem;
 		wp->scoreboard->nprocs = wp->config->pm_max_children;
-		for (i = 0; i < wp->scoreboard->nprocs; i++) {
-			wp->scoreboard->procs[i] = fpm_shm_alloc(sizeof(struct fpm_scoreboard_proc_s));
-			if (!wp->scoreboard->procs[i]) {
-				return -1;
-			}
+		shm_mem               += scoreboard_size;
+
+		for (i = 0; i < wp->scoreboard->nprocs; i++, shm_mem += sizeof(struct fpm_scoreboard_proc_s)) {
+			wp->scoreboard->procs[i] = shm_mem;
 		}
 
-		wp->scoreboard->pm = wp->config->pm;
+		wp->scoreboard->pm          = wp->config->pm;
 		wp->scoreboard->start_epoch = time(NULL);
 		strlcpy(wp->scoreboard->pool, wp->config->name, sizeof(wp->scoreboard->pool));
 	}
@@ -232,20 +238,17 @@ void fpm_scoreboard_proc_release(struct fpm_scoreboard_proc_s *proc) /* {{{ */
 
 void fpm_scoreboard_free(struct fpm_scoreboard_s *scoreboard) /* {{{ */
 {
-	int i;
+	size_t scoreboard_size, scoreboard_nprocs_size;
 
 	if (!scoreboard) {
 		zlog(ZLOG_ERROR, "**scoreboard is NULL");
 		return;
 	}
 
-	for (i = 0; i < scoreboard->nprocs; i++) {
-		if (!scoreboard->procs[i]) {
-			continue;
-		}
-		fpm_shm_free(scoreboard->procs[i], sizeof(struct fpm_scoreboard_proc_s));
-	}
-	fpm_shm_free(scoreboard, sizeof(struct fpm_scoreboard_s));
+	scoreboard_size        = sizeof(struct fpm_scoreboard_s) + (scoreboard->nprocs) * sizeof(struct fpm_scoreboard_proc_s *);
+	scoreboard_nprocs_size = sizeof(struct fpm_scoreboard_proc_s) * scoreboard->nprocs;
+	
+	fpm_shm_free(scoreboard, scoreboard_size + scoreboard_nprocs_size);
 }
 /* }}} */
 

@@ -62,7 +62,7 @@ enum {
 
 PHPAPI ZEND_DECLARE_MODULE_GLOBALS(pcre)
 
-#ifdef PCRE_STUDY_JIT_COMPILE
+#ifdef HAVE_PCRE_JIT_SUPPORT
 #define PCRE_JIT_STACK_MIN_SIZE (32 * 1024)
 #define PCRE_JIT_STACK_MAX_SIZE (64 * 1024)
 ZEND_TLS pcre_jit_stack *jit_stack = NULL;
@@ -89,7 +89,7 @@ static void pcre_handle_exec_error(int pcre_code) /* {{{ */
 			preg_code = PHP_PCRE_BAD_UTF8_OFFSET_ERROR;
 			break;
 		
-#ifdef PCRE_STUDY_JIT_COMPILE
+#ifdef HAVE_PCRE_JIT_SUPPORT
 		case PCRE_ERROR_JIT_STACKLIMIT:
 			preg_code = PHP_PCRE_JIT_STACKLIMIT_ERROR;
 			break;
@@ -135,7 +135,7 @@ static PHP_GSHUTDOWN_FUNCTION(pcre) /* {{{ */
 {
 	zend_hash_destroy(&pcre_globals->pcre_cache);
 
-#ifdef PCRE_STUDY_JIT_COMPILE
+#ifdef HAVE_PCRE_JIT_SUPPORT
 	/* Stack may only be destroyed when no cached patterns
 	 	possibly associated with it do exist. */
 	if (jit_stack) {
@@ -150,7 +150,7 @@ static PHP_GSHUTDOWN_FUNCTION(pcre) /* {{{ */
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("pcre.backtrack_limit", "1000000", PHP_INI_ALL, OnUpdateLong, backtrack_limit, zend_pcre_globals, pcre_globals)
 	STD_PHP_INI_ENTRY("pcre.recursion_limit", "100000",  PHP_INI_ALL, OnUpdateLong, recursion_limit, zend_pcre_globals, pcre_globals)
-#ifdef PCRE_STUDY_JIT_COMPILE
+#ifdef HAVE_PCRE_JIT_SUPPORT
 	STD_PHP_INI_ENTRY("pcre.jit",             "1",       PHP_INI_ALL, OnUpdateBool, jit,             zend_pcre_globals, pcre_globals)
 #endif
 PHP_INI_END()
@@ -159,17 +159,23 @@ PHP_INI_END()
 /* {{{ PHP_MINFO_FUNCTION(pcre) */
 static PHP_MINFO_FUNCTION(pcre)
 {
+#ifdef HAVE_PCRE_JIT_SUPPORT
 	int jit_yes = 0;
+#endif
 
 	php_info_print_table_start();
 	php_info_print_table_row(2, "PCRE (Perl Compatible Regular Expressions) Support", "enabled" );
 	php_info_print_table_row(2, "PCRE Library Version", pcre_version() );
 
+#ifdef HAVE_PCRE_JIT_SUPPORT
 	if (!pcre_config(PCRE_CONFIG_JIT, &jit_yes)) {
 		php_info_print_table_row(2, "PCRE JIT Support", jit_yes ? "enabled" : "disabled");
 	} else {
 		php_info_print_table_row(2, "PCRE JIT Support", "unknown" );
 	}
+#else
+	php_info_print_table_row(2, "PCRE JIT Support", "not compiled in" );
+#endif
 
 	php_info_print_table_end();
 
@@ -212,7 +218,7 @@ static PHP_MSHUTDOWN_FUNCTION(pcre)
 }
 /* }}} */
 
-#ifdef PCRE_STUDY_JIT_COMPILE
+#ifdef HAVE_PCRE_JIT_SUPPORT
 /* {{{ PHP_RINIT_FUNCTION(pcre) */
 static PHP_RINIT_FUNCTION(pcre)
 {
@@ -474,7 +480,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 		return NULL;
 	}
 
-#ifdef PCRE_STUDY_JIT_COMPILE
+#ifdef HAVE_PCRE_JIT_SUPPORT
 	if (PCRE_G(jit)) {
 		/* Enable PCRE JIT compiler */
 		do_study = 1;
@@ -490,7 +496,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 			extra->flags |= PCRE_EXTRA_MATCH_LIMIT | PCRE_EXTRA_MATCH_LIMIT_RECURSION;
 			extra->match_limit = (unsigned long)PCRE_G(backtrack_limit);
 			extra->match_limit_recursion = (unsigned long)PCRE_G(recursion_limit);
-#ifdef PCRE_STUDY_JIT_COMPILE
+#ifdef HAVE_PCRE_JIT_SUPPORT
 			if (PCRE_G(jit) && jit_stack) {
 				pcre_assign_jit_stack(extra, NULL, jit_stack);
 			}
@@ -2180,10 +2186,10 @@ zend_module_entry pcre_module_entry = {
 	pcre_functions,
 	PHP_MINIT(pcre),
 	PHP_MSHUTDOWN(pcre),
-#ifdef PCRE_STUDY_JIT_COMPILE
+#ifdef HAVE_PCRE_JIT_SUPPORT
 	PHP_RINIT(pcre),
 #else
-	NULL
+	NULL,
 #endif
 	NULL,
 	PHP_MINFO(pcre),

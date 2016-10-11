@@ -95,22 +95,6 @@ static char *pdo_dblib_get_field_name(int type)
 }
 /* }}} */
 
-static void pdo_dblib_err_dtor(pdo_dblib_err *err)
-{
-	if (err->dberrstr) {
-		efree(err->dberrstr);
-		err->dberrstr = NULL;
-	}
-	if (err->lastmsg) {
-		efree(err->lastmsg);
-		err->lastmsg = NULL;
-	}
-	if (err->oserrstr) {
-		efree(err->oserrstr);
-		err->oserrstr = NULL;
-	}
-}
-
 static int pdo_dblib_stmt_cursor_closer(pdo_stmt_t *stmt)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
@@ -135,7 +119,7 @@ static int pdo_dblib_stmt_dtor(pdo_stmt_t *stmt)
 	return 1;
 }
 
-static int pdo_dblib_stmt_next_rowset(pdo_stmt_t *stmt)
+static int pdo_dblib_stmt_next_rowset_no_cancel(pdo_stmt_t *stmt)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 	pdo_dblib_db_handle *H = S->H;
@@ -158,6 +142,27 @@ static int pdo_dblib_stmt_next_rowset(pdo_stmt_t *stmt)
 	return 1;
 }
 
+static int pdo_dblib_stmt_next_rowset(pdo_stmt_t *stmt)
+{
+	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
+	pdo_dblib_db_handle *H = S->H;
+	RETCODE ret = SUCCESS;
+
+	/* Ideally use dbcanquery here, but there is a bug in FreeTDS's implementation of dbcanquery
+	 * It has been resolved but is currently only available in nightly builds
+	 */
+	while (NO_MORE_ROWS != ret) {
+		ret = dbnextrow(H->link);
+
+		if (FAIL == ret) {
+			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO_DBLIB: dbnextrow() returned FAIL");
+			return 0;
+		}
+	}
+
+	return pdo_dblib_stmt_next_rowset_no_cancel(stmt);
+}
+
 static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
@@ -176,7 +181,7 @@ static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt)
 		return 0;
 	}
 
-	ret = pdo_dblib_stmt_next_rowset(stmt);
+	ret = pdo_dblib_stmt_next_rowset_no_cancel(stmt);
 
 	stmt->row_count = DBCOUNT(H->link);
 	stmt->column_count = dbnumcols(H->link);
@@ -266,6 +271,11 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 	if (data_len != 0 || data != NULL) {
 		if (stmt->dbh->stringify) {
 			switch (coltype) {
+				case SQLDECIMAL:
+				case SQLNUMERIC:
+				case SQLMONEY:
+				case SQLMONEY4:
+				case SQLMONEYN:
 				case SQLFLT4:
 				case SQLFLT8:
 				case SQLINT4:
@@ -361,18 +371,16 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 
 					break;
 				}
+				case SQLDECIMAL:
+				case SQLNUMERIC:
 				case SQLMONEY:
 				case SQLMONEY4:
 				case SQLMONEYN: {
-					DBFLT8 money_value;
-					dbconvert(NULL, coltype, data, 8, SQLFLT8, (LPBYTE)&money_value, -1);
+					DBFLT8 float_value;
+					dbconvert(NULL, coltype, data, 8, SQLFLT8, (LPBYTE)&float_value, -1);
 
 					zv = emalloc(sizeof(zval));
-					ZVAL_DOUBLE(zv, money_value);
-
-					if (stmt->dbh->stringify) {
-						convert_to_string(zv);
-					}
+					ZVAL_DOUBLE(zv, float_value);
 
 					break;
 				}

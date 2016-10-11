@@ -1,15 +1,21 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2016 PHP 7.0.12
+13 Oct 2016 PHP 7.0.12
 
 - Core:
-  . Fixed bug #73067 (__debugInfo crashes when throwing an exception).
-    (Laruence)
   . Fixed bug #73025 (Heap Buffer Overflow in virtual_popen of
     zend_virtual_cwd.c). (cmb)
   . Fixed bug #72703 (Out of bounds global memory read in BF_crypt triggered by
     password_verify). (Anatol)
   . Fixed bug #73058 (crypt broken when salt is 'too' long). (Anatol)
+  . Fixed bug #69579 (Invalid free in extension trait). (John Boehr)
+  . Fixed bug #73156 (segfault on undefined function). (Dmitry)
+  . Fixed bug #73163 (PHP hangs if error handler throws while accessing undef
+    const in default value). (Nikita)
+  . Fixed bug #73172 (parse error: Invalid numeric literal). (Nikita, Anatol)
+
+- COM:
+  . Fixed bug #73126 (Cannot pass parameter 1 by reference). (Anatol)
 
 - Filter:
   . Fixed bug #72972 (Bad filter for the flags FILTER_FLAG_NO_RES_RANGE and
@@ -20,6 +26,17 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #67325 (imagetruecolortopalette: white is duplicated in palette).
     (cmb)
+  . Fixed bug #50194 (imagettftext broken on transparent background w/o
+    alphablending). (cmb)
+  . Fixed bug #73003 (Integer Overflow in gdImageWebpCtx of gd_webp.c). (trylab,
+    cmb)
+  . Fixed bug #53504 (imagettfbbox gives incorrect values for bounding box).
+    (Mark Plomer, cmb)
+  . Fixed bug #73157 (imagegd2() ignores 3rd param if 4 are given). (cmb)
+  . Fixed bug #73155 (imagegd2() writes wrong chunk sizes on boundaries). (cmb)
+  . Fixed bug #73159 (imagegd2(): unrecognized formats may result in corrupted
+    files). (cmb)
+  . Fixed bug #73161 (imagecreatefromgd2() may leak memory). (cmb)
 
 - Mbstring:
   . Fixed bug #66797 (mb_substr only takes 32-bit signed integer). (cmb)
@@ -27,21 +44,51 @@ PHP                                                                        NEWS
   . Fixed bug #72992 (mbstring.internal_encoding doesn't inherit default_charset).
     (Yasuo)
 
+- Mysqlnd:
+  . Fixed bug #72489 (PHP Crashes When Modifying Array Containing MySQLi Result
+    Data). (Nikita)
+
 - Opcache:
   . Fixed bug #72982 (Memory leak in zend_accel_blacklist_update_regexp()
     function). (Laruence)
 
+- OpenSSL:
+  . Fixed bug #73072 (Invalid path SNI_server_certs causes segfault).
+    (Jakub Zelenka)
+
+- PCRE:
+  . Fixed bug #73121 (Bundled PCRE doesn't compile because JIT isn't supported
+    on s390). (Anatol)
+
+- PDO_DBlib:
+  . Fixed bug #72414 (Never quote values as raw binary data). (Adam Baratz)
+  . Allow \PDO::setAttribute() to set query timeouts. (Adam Baratz)
+  . Handle SQLDECIMAL/SQLNUMERIC types, which are used by later TDS versions.
+    (Adam Baratz)
+  . Add common PDO test suite. (Adam Baratz)
+  . Free error and message strings when cleaning up PDO instances.
+    (Adam Baratz)
+  . Fixed bug #67130 (\PDOStatement::nextRowset() should succeed when all rows
+    in current rowset haven't been fetched). (Peter LeBrun)
+  . Ignore potentially misleading dberr values. (Chris Kings-Lynne)
+
 - phpdbg:
   . Fixed bug #72996 (phpdbg_prompt.c undefined reference to DL_LOAD). (Nikita)
+  . Fixed next command not stopping when leaving function. (Bob)
 
 - Session:
   . Fixed bug #68015 (Session does not report invalid uid for files save handler).
     (Yasuo)
+  . Fixed bug #73100 (session_destroy null dereference in ps_files_path_create).
+    (cmb)
 
 - SOAP:
   . Fixed bug #71711 (Soap Server Member variables reference bug). (Nikita)
   . Fixed bug #71996 (Using references in arrays doesn't work like expected).
     (Nikita)
+
+- SQLite3:
+  . Updated bundled SQLite3 to 3.14.2. (cmb)
 
 - Zip:
   . Fixed bug #70752 (Depacking with wrong password leaves 0 length files).
@@ -88,6 +135,10 @@ PHP                                                                        NEWS
 - Intl:
   . Fixed bug #65732 (grapheme_*() is not Unicode compliant on CR LF
     sequence). (cmb)
+  . Fixed bug #73007 (add locale length check). (Stas)
+
+- Mysqlnd:
+  . Fixed bug #72293 (Heap overflow in mysqlnd related to BIT fields). (Stas)
 
 - OCI8
   . Fixed invalid handle error with Implicit Result Sets. (Chris Jones)
@@ -112,6 +163,12 @@ PHP                                                                        NEWS
     specifying a sequence). (Pablo Santiago Sánchez, Matteo)
   . Fixed bug #72759 (Regression in pgo_pgsql). (Anatol)
 
+- Phar:
+  . Fixed bug #72928 (Out of bound when verify signature of zip phar in
+    phar_parse_zipfile). (Stas)
+  . Fixed bug #73035 (Out of bound when verify signature of tar phar in
+    phar_parse_tarfile). (Stas)
+
 - Reflection:
   . Fixed bug #72846 (getConstant for a array constant with constant values
     returns NULL/NFC/UKNOWN). (Laruence)
@@ -125,6 +182,9 @@ PHP                                                                        NEWS
   . Fixed bug #72971 (SimpleXML isset/unset do not respect namespace). (Nikita)
   . Fixed bug #72957 (Null coalescing operator doesn't behave as expected with
     SimpleXMLElement). (Nikita)
+
+- SPL:
+  . Fixed bug #73029 (Missing type check when unserializing SplArray). (Stas)
 
 - Standard:
   . Fixed bug #55451 (substr_compare NULL length interpreted as 0). (Lauri
@@ -140,12 +200,19 @@ PHP                                                                        NEWS
   . Fixed bug #71882 (Negative ftruncate() on php://memory exhausts memory).
     (cmb)
 
+- SQLite3:
+  . Downgraded bundled SQLite to 3.8.10.2. (Anatol);
+
 - Sysvshm:
   . Fixed bug #72858 (shm_attach null dereference). (Anatol)
 
 - XML:
   . Fixed bug #72085 (SEGV on unknown address zif_xml_parse). (cmb)
   . Fixed bug #72714 (_xml_startElementHandler() segmentation fault). (cmb)
+
+- Wddx:
+  . Fixed bug #72860 (wddx_deserialize use-after-free). (Stas)
+  . Fixed bug #73065 (Out-Of-Bounds Read in php_wddx_push_element). (Stas)
 
 - ZIP:
   . Fixed bug #68302 (impossible to compile php with zip support). (cmb)

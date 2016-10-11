@@ -50,7 +50,7 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-bool(false)
+bool(true)
 bool(true)
 bool(true)
 bool(true)
@@ -124,7 +124,20 @@ array(2) {
     string(1) "4"
   }
 }
-bool(false)
+bool(true)
+int(5)
+array(2) {
+  [0]=>
+  array(1) {
+    [0]=>
+    string(1) "5"
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    string(1) "5"
+  }
+}
 bool(true)
 int(6)
 array(2) {

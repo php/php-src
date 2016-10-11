@@ -2546,11 +2546,11 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 
 	if (argc > 1) {
 		fn = file;
-		if (argc == 3) {
+		if (argc >= 3) {
 			q = quality;
-		}
-		if (argc == 4) {
-			t = type;
+			if (argc == 4) {
+				t = type;
+			}
 		}
 	}
 
@@ -3856,7 +3856,7 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 {
 	zval *IM, *EXT = NULL;
 	gdImagePtr im=NULL;
-	zend_long col = -1, x = -1, y = -1;
+	zend_long col = -1, x = 0, y = 0;
 	size_t str_len, fontname_len;
 	int i, brect[8];
 	double ptsize, angle;

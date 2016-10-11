@@ -2047,13 +2047,14 @@ SPL_METHOD(RegexIterator, accept)
 
 	if (Z_TYPE(intern->current.data) == IS_UNDEF) {
 		RETURN_FALSE;
-	} else if (Z_TYPE(intern->current.data) == IS_ARRAY) {
-		RETURN_FALSE;
 	}
 
 	if (intern->u.regex.flags & REGIT_USE_KEY) {
 		subject = zval_get_string(&intern->current.key);
 	} else {
+		if (Z_TYPE(intern->current.data) == IS_ARRAY) {
+			RETURN_FALSE;
+		}
 		subject = zval_get_string(&intern->current.data);
 	}
 
