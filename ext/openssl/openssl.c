@@ -5466,16 +5466,16 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 		return;
 	}
 
-	if (buffer_length <= 0) {
-		RETURN_FALSE;
-	}
-
 	if (zstrong_result_returned) {
 		zval_dtor(zstrong_result_returned);
 		ZVAL_BOOL(zstrong_result_returned, 0);
 	}
 
-	buffer = emalloc(buffer_length + 1);
+	if (buffer_length <= 0 || buffer_length > INT_MAX) {
+		RETURN_FALSE;
+	}
+
+	buffer = safe_emalloc(buffer_length, 1, 1);
 
 #ifdef PHP_WIN32
 	/* random/urandom equivalent on Windows */
