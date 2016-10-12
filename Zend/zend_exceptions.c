@@ -306,7 +306,7 @@ ZEND_METHOD(exception, __construct)
 #define CHECK_EXC_TYPE(id, type) \
 	pvalue = zend_read_property_ex(i_get_exception_base(object), (object), CG(known_strings)[id], 1, &value); \
 	if (Z_TYPE_P(pvalue) != IS_NULL && Z_TYPE_P(pvalue) != type) { \
-		zend_unset_property(i_get_exception_base(object), object, ZEND_STR_PREVIOUS, sizeof(ZEND_STR_PREVIOUS)-1); \
+		zend_unset_property(i_get_exception_base(object), object, "previous", sizeof("previous")-1); \
 	}
 
 ZEND_METHOD(exception, __wakeup)
@@ -319,12 +319,11 @@ ZEND_METHOD(exception, __wakeup)
 	CHECK_EXC_TYPE(ZEND_STR_FILE,     IS_STRING);
 	CHECK_EXC_TYPE(ZEND_STR_LINE,     IS_LONG);
 	CHECK_EXC_TYPE(ZEND_STR_TRACE,    IS_ARRAY);
-	CHECK_EXC_TYPE(ZEND_STR_PREVIOUS, IS_OBJECT);
-	pvalue = zend_read_property(i_get_exception_base(object), object, ZEND_STR_PREVIOUS, sizeof(ZEND_STR_PREVIOUS)-1, 1, &value);
+	pvalue = zend_read_property(i_get_exception_base(object), object, "previous", sizeof("previous")-1, 1, &value);
 	if (pvalue && Z_TYPE_P(pvalue) != IS_NULL && (Z_TYPE_P(pvalue) != IS_OBJECT ||
 			!instanceof_function(Z_OBJCE_P(pvalue), i_get_exception_base(object)) ||
 			pvalue == object)) {
-		zend_unset_property(i_get_exception_base(object), object, ZEND_STR_PREVIOUS, sizeof(ZEND_STR_PREVIOUS)-1);
+		zend_unset_property(i_get_exception_base(object), object, "previous", sizeof("previous")-1);
 	}
 }
 /* }}} */
