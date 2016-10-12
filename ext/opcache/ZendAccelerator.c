@@ -619,27 +619,42 @@ static void accel_use_shm_interned_strings(void)
 #ifndef ZEND_WIN32
 static inline void kill_all_lockers(struct flock *mem_usage_check)
 {
-	int tries = 10;
-
+	int success, tries;
 	/* so that other process won't try to force while we are busy cleaning up */
 	ZCSG(force_restart_time) = 0;
 	while (mem_usage_check->l_pid > 0) {
+		/* Clear previous errno, reset success and tries */
+		errno = 0;
+		success = 0;
+		tries = 10;
+
 		while (tries--) {
-			zend_accel_error(ACCEL_LOG_WARNING, "Killed locker %d", mem_usage_check->l_pid);
+			zend_accel_error(ACCEL_LOG_WARNING, "Attempting to kill locker %d", mem_usage_check->l_pid);
 			if (kill(mem_usage_check->l_pid, SIGKILL)) {
+				if (errno == ESRCH) {
+					/* Process died before the signal was sent */
+					success = 1;
+					zend_accel_error(ACCEL_LOG_WARNING, "Process %d died before SIGKILL was sent", mem_usage_check->l_pid);
+				}
 				break;
 			}
 			/* give it a chance to die */
 			usleep(20000);
 			if (kill(mem_usage_check->l_pid, 0)) {
-				/* can't kill it */
+				if (errno == ESRCH) {
+					/* successfully killed locker, process no longer exists  */
+					success = 1;
+					zend_accel_error(ACCEL_LOG_WARNING, "Killed locker %d", mem_usage_check->l_pid);
+				}
 				break;
 			}
 			usleep(10000);
 		}
-		if (!tries) {
-			zend_accel_error(ACCEL_LOG_WARNING, "Can't kill %d after 10 tries!", mem_usage_check->l_pid);
+		if (!success) {
+			/* errno is not ESRCH or we ran out of tries to kill the locker */
 			ZCSG(force_restart_time) = time(NULL); /* restore forced restart request */
+			/* cannot kill the locker, bail out with error */
+			zend_accel_error(ACCEL_LOG_ERROR, "Cannot kill process %d: %s!", mem_usage_check->l_pid, strerror(errno));
 		}
 
 		mem_usage_check->l_type = F_WRLCK;
