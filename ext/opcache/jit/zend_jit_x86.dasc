@@ -4526,10 +4526,11 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, zen
 	|	// EG(vm_stack_top) = (zval*)((char*)call + used_stack);
 	|	add aword [&EG(vm_stack_top)], used_stack
 	|	// zend_vm_init_call_frame(call, call_info, func, num_args, called_scope, object);
+	|	// ZEND_SET_CALL_INFO(call, 0, call_info);
+	|	mov dword EX:RX->This.u1.type_info, (IS_UNDEF | (ZEND_CALL_NESTED_FUNCTION << ZEND_CALL_INFO_SHIFT))
 	|	// call->func = func;
-	if (!func || func->type != ZEND_INTERNAL_FUNCTION) {
-		|	mov aword EX:RX->func, r0
-	} else {
+	if (func && func->type == ZEND_INTERNAL_FUNCTION) {
+		|1:
 		|.if X64
 		||	if (!IS_32BIT(func)) {
 		|		mov aword EX:RX->func, func
@@ -4540,10 +4541,10 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, zen
 		|.else
 		|	mov aword EX:RX->func, func
 		|.endif
+	} else {
+		|	mov aword EX:RX->func, r0
+		|1:
 	}
-	|	// ZEND_SET_CALL_INFO(call, 0, call_info);
-	|	mov dword EX:RX->This.u1.type_info, (IS_UNDEF | (ZEND_CALL_NESTED_FUNCTION << ZEND_CALL_INFO_SHIFT))
-	|1:
 	|	// Z_CE(call->This) = called_scope;
 	|	mov aword EX:RX->This.value.ptr, 0
 	|	// ZEND_CALL_NUM_ARGS(call) = num_args;
@@ -4552,11 +4553,11 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, zen
 	|2:
 	|	mov FCARG1d, used_stack
 	if (func && func->type == ZEND_INTERNAL_FUNCTION) {
-		|	LOAD_ADDR FCARG2a, func
+		|	EXT_CALL zend_jit_int_extend_stack_helper, r0
 	} else {
 		|	mov FCARG2a, r0
+		|	EXT_CALL zend_jit_extend_stack_helper, r0
 	}
-	|	EXT_CALL zend_jit_extend_stack_helper, r0
 	|	mov RX, r0
 	|	jmp <1
 	|.code
@@ -6115,8 +6116,12 @@ static int zend_jit_bind_global(dasm_State **Dst, const zend_op *opline, zend_op
 	|.endif
 	|	IF_Z_TYPE r0, IS_UNDEF, >9
 	//	(EXPECTED(p->key == Z_STR_P(varname))
+	|.if X64
 	|	LOAD_ADDR r1, Z_PTR_P(varname)
 	|	cmp [r0 + offsetof(Bucket, key)], r1
+	|.else
+	|	cmp aword [r0 + offsetof(Bucket, key)], Z_PTR_P(varname)
+	|.endif
 	|	jne >1
 	|.cold_code
 	|1:

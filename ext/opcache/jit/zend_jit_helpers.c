@@ -43,6 +43,13 @@ static zend_execute_data* ZEND_FASTCALL zend_jit_extend_stack_helper(uint32_t us
 	return call;
 }
 
+static zend_execute_data* ZEND_FASTCALL zend_jit_int_extend_stack_helper(uint32_t used_stack)
+{
+	zend_execute_data *call = (zend_execute_data*)zend_vm_stack_extend(used_stack);
+	ZEND_SET_CALL_INFO(call, 0, ZEND_CALL_NESTED_FUNCTION|ZEND_CALL_ALLOCATED);
+	return call;
+}
+
 static zval* ZEND_FASTCALL zend_jit_symtable_find(HashTable *ht, zend_string *str)
 {
 	zend_ulong idx;
