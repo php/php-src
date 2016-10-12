@@ -1095,9 +1095,8 @@ static void* dasm_labels[zend_lb_MAX];
 ||	}
 |.endmacro
 
-|.macro EFREE_SIZE, ptr, size, op_array, opline
-|	mov FCARG1a, ptr
-||	if (ZEND_DEBUG) {
+|.macro EFREE_REG_24, op_array, opline
+||#if ZEND_DEBUG
 ||		const char *filename = op_array->filename ? op_array->filename->val : NULL;
 |		LOAD_ADDR FCARG2a, filename
 |.if X64
@@ -1109,8 +1108,15 @@ static void* dasm_labels[zend_lb_MAX];
 |		push 0
 |		push opline->lineno
 |.endif
-||	}
-|	EXT_CALL _efree, r0
+|		EXT_CALL _efree, r0
+||#else
+|		EXT_CALL _efree_24, r0
+||#endif
+|.endmacro
+
+|.macro EFREE_24, ptr, op_array, opline
+|	mov FCARG1a, ptr
+|	EFREE_REG_24 op_array, opline
 |.endmacro
 
 |.macro EMALLOC, size, op_array, opline
@@ -2941,7 +2947,7 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
 					|	GC_ADDREF r0
 					|2:
 				}
-				|	EFREE_SIZE aword [FP + val.var], sizeof(zend_reference), op_array, opline
+				|	EFREE_24 aword [FP + val.var], op_array, opline
 				|	jmp >3
 				if (in_cold) {
 					|1:
@@ -5173,7 +5179,7 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, zend_op_ar
 				|	GC_ADDREF r2
 				|	jmp >2
 				|1:
-				|	EFREE_SIZE FCARG1a, sizeof(zend_reference), op_array, opline
+				|	EFREE_REG_24 op_array, opline
 				|	jmp >2
 				|.code
 				|	ZVAL_COPY_VALUE RX + opline->result.var, FP + opline->op1.var, op1_info, r0, eax, r2
@@ -5794,7 +5800,7 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, zend_op_arra
 			|		jmp >9
 			||	}
 			|2:
-			|	EFREE_SIZE r0, sizeof(zend_reference), op_array, opline
+			|	EFREE_24 r0, op_array, opline
 			||	if (jit_return_label >= 0) {
 			|		jmp =>jit_return_label
 			||	} else {
