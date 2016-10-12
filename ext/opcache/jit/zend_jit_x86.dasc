@@ -1402,6 +1402,146 @@ static int zend_jit_throw_cannot_pass_by_ref_stub(dasm_State **Dst)
 	return 1;
 }
 
+static int zend_jit_undefined_offset_stub(dasm_State **Dst)
+{
+	|->undefined_offset:
+	|.if X64
+	|	sub r4, 8
+	|.else
+	|	sub r4, 12
+	|.endif
+	|	mov r0, EX->opline
+	|.if X64
+	|	movsxd r1, dword OP:r0->result.var
+	|.else
+	|	mov r1, OP:r0->result.var
+	|.endif
+	|	cmp byte OP:r0->op2_type, IS_CONST
+	|	SET_Z_TYPE_INFO FP + r1, IS_NULL
+	|	jne >2
+	|.if X64
+	|	movsxd r0, dword OP:r0->op2.constant
+	|   add r0, aword EX->literals
+	|.else
+	|	mov r0, aword OP:r0->op2.zv
+	|.endif
+	|	jmp >3
+	|2:
+	|.if X64
+	|	movsxd r0, dword OP:r0->op2.var
+	|.else
+	|	mov r0, OP:r0->op2.var
+	|.endif
+	|	add r0, FP
+	|3:
+	|.if X64
+	|	mov CARG1, E_NOTICE
+	|	LOAD_ADDR CARG2, "Undefined offset: " ZEND_LONG_FMT
+	|	mov CARG3, aword [r0]
+	|	EXT_CALL zend_error, r0
+	|	add r4, 8 // stack alignment
+	|.else
+	|	sub r4, 4
+	|	push aword [r0]
+	|	push "Undefined offset: " ZEND_LONG_FMT
+	|	push E_NOTICE
+	|	EXT_CALL zend_error, r0
+	|	add r4, 28
+	|.endif
+	|	ret
+
+	return 1;
+}
+
+static int zend_jit_undefined_index_stub(dasm_State **Dst)
+{
+	|->undefined_index:
+	|.if X64
+	|	sub r4, 8
+	|.else
+	|	sub r4, 12
+	|.endif
+	|	mov r0, EX->opline
+	|.if X64
+	|	movsxd r1, dword OP:r0->result.var
+	|.else
+	|	mov r1, OP:r0->result.var
+	|.endif
+	|	cmp byte OP:r0->op2_type, IS_CONST
+	|	SET_Z_TYPE_INFO FP + r1, IS_NULL
+	|	jne >2
+	|.if X64
+	|	movsxd r0, dword OP:r0->op2.constant
+	|   add r0, aword EX->literals
+	|.else
+	|	mov r0, aword OP:r0->op2.zv
+	|.endif
+	|	jmp >3
+	|2:
+	|.if X64
+	|	movsxd r0, dword OP:r0->op2.var
+	|.else
+	|	mov r0, OP:r0->op2.var
+	|.endif
+	|	add r0, FP
+	|3:
+	|.if X64
+	|	mov CARG1, E_NOTICE
+	|	LOAD_ADDR CARG2, "Undefined index: %s"
+	|	mov CARG3, aword [r0]
+	|	add CARG3, offsetof(zend_string, val)
+	|	EXT_CALL zend_error, r0
+	|	add r4, 8
+	|.else
+	|	sub r4, 4
+	|	mov r0, aword [r0]
+	|	add r0, offsetof(zend_string, val)
+	|	push r0
+	|	push "Undefined index: %s"
+	|	push E_NOTICE
+	|	EXT_CALL zend_error, r0
+	|	add r4, 28
+	|.endif
+	|	ret
+
+	return 1;
+}
+
+static int zend_jit_cannot_add_element_stub(dasm_State **Dst)
+{
+	|->cannot_add_element:
+	|.if X64
+	|	sub r4, 8
+	|.else
+	|	sub r4, 12
+	|.endif
+	|	mov r0, EX->opline
+	|	cmp byte OP:r0->result_type, IS_UNUSED
+	|	jz >1
+	|.if X64
+	|	movsxd r0, dword OP:r0->result.var
+	|.else
+	|	mov r0, OP:r0->result.var
+	|.endif
+	|	SET_Z_TYPE_INFO FP + r0, IS_NULL
+	|1:
+	|.if X64
+	|	mov CARG1, E_WARNING
+	|	LOAD_ADDR CARG2, "Cannot add element to the array as the next element is already occupied"
+	|	EXT_CALL zend_error, r0
+	|	add r4, 8
+	|.else
+	|	sub r4, 8
+	|	push "Cannot add element to the array as the next element is already occupied"
+	|	push E_WARNING
+	|	EXT_CALL zend_error, r0
+	|	add r4, 28
+	|.endif
+	|	ret
+
+	return 1;
+}
+
 static const zend_jit_stub zend_jit_stubs[] = {
 	JIT_STUB(interrupt_handler),
 	JIT_STUB(exception_handler),
@@ -1409,6 +1549,9 @@ static const zend_jit_stub zend_jit_stubs[] = {
 	JIT_STUB(leave_throw),
 	JIT_STUB(icall_throw),
 	JIT_STUB(throw_cannot_pass_by_ref),
+	JIT_STUB(undefined_offset),
+	JIT_STUB(undefined_index),
+	JIT_STUB(cannot_add_element),
 };
 
 static int zend_jit_align_func(dasm_State **Dst)
@@ -2621,21 +2764,10 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 					case BP_VAR_R:
 						|	SAVE_VALID_OPLINE opline
 						|	// zend_error(E_NOTICE,"Undefined offset: " ZEND_LONG_FMT, hval);
-						|.if X64
-						|	mov CARG1, E_NOTICE
-						|	LOAD_ADDR CARG2, "Undefined offset: " ZEND_LONG_FMT
-						|	LONG_LOAD CARG3, opline->op2_type, opline->op2
-						|	EXT_CALL zend_error, r0
-						|.else
-						|	sub r4, 4
-						|	LONG_LOAD r0, opline->op2_type, opline->op2
-						|	push r0
-						|	push "Undefined offset: " ZEND_LONG_FMT
-						|	push E_NOTICE
-						|	EXT_CALL zend_error, r0
-						|	add r4, 16
-						|.endif
-						/* break missing intentionally */
+						|	// retval = &EG(uninitialized_zval);
+						|	call ->undefined_offset
+						|	jmp >9
+						break;
 					case BP_VAR_IS:
 					case BP_VAR_UNSET:
 						|	// retval = &EG(uninitialized_zval);
@@ -2739,23 +2871,9 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 					case BP_VAR_R:
 						//	zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(offset_key));
 						|	SAVE_VALID_OPLINE opline
-						|.if X64
-						|	mov CARG1, E_NOTICE
-						|	LOAD_ADDR CARG2, "Undefined index: %s"
-						|	LONG_LOAD CARG3, opline->op2_type, opline->op2
-						|	add CARG3, offsetof(zend_string, val)
-						|	EXT_CALL zend_error, r0
-						|.else
-						|	sub r4, 4
-						|	LONG_LOAD r0, opline->op2_type, opline->op2
-						|	add r0, offsetof(zend_string, val)
-						|	push r0
-						|	push "Undefined index: %s"
-						|	push E_NOTICE
-						|	EXT_CALL zend_error, r0
-						|	add r4, 16
-						|.endif
-						/* break missing intentionally */
+						|	call ->undefined_index
+						|	jmp >9
+						break;
 					case BP_VAR_IS:
 					case BP_VAR_UNSET:
 						|	// retval = &EG(uninitialized_zval);
@@ -3173,20 +3291,7 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, zend_op_
 			|1:
 			|	// zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
 			|	SAVE_VALID_OPLINE opline
-			|.if X64
-			|	mov CARG1, E_WARNING
-			|	LOAD_ADDR CARG2, "Cannot add element to the array as the next element is already occupied"
-			|	EXT_CALL zend_error, r0
-			|.else
-			|	sub r4, 8
-			|	push "Cannot add element to the array as the next element is already occupied"
-			|	push E_WARNING
-			|	EXT_CALL zend_error, r0
-			|	add r4, 16
-			|.endif
-			if (opline->result_type != IS_UNUSED) {
-				|	SET_Z_TYPE_INFO FP + opline->result.var, IS_NULL
-			}
+			|	call ->cannot_add_element
 			|	//ZEND_VM_C_GOTO(assign_dim_op_ret_null);
 			|	jmp >9
 			|.code
@@ -3467,17 +3572,7 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, zend_
 			|1:
 			|	// zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
 			|	SAVE_VALID_OPLINE opline
-			|.if X64
-			|	mov CARG1, E_WARNING
-			|	LOAD_ADDR CARG2, "Cannot add element to the array as the next element is already occupied"
-			|	EXT_CALL zend_error, r0
-			|.else
-			|	sub r4, 8
-			|	push "Cannot add element to the array as the next element is already occupied"
-			|	push E_WARNING
-			|	EXT_CALL zend_error, r0
-			|	add r4, 16
-			|.endif
+			|	call ->cannot_add_element
 			|	//ZEND_VM_C_GOTO(assign_dim_op_ret_null);
 			|	jmp >9
 			|.code
