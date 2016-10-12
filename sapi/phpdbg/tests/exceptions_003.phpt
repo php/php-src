@@ -35,8 +35,8 @@ prompt> [L10 %s ECHO                    "caught "                               
  00011: }
  00012: 
 prompt> caught
-[L10 %s RETURN                  1                                                              %s]
-[Script ended normally]
+[L14 %s RETURN                  1                                                              %s]
+>00014: 
 prompt> 
 --FILE--
 <?php
