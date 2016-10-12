@@ -394,12 +394,17 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 	MAKE_STD_ZVAL(zfuncname);
 	ZVAL_STRING(zfuncname, USERSTREAM_OPEN, 1);
 
-	call_result = call_user_function_ex(NULL,
-			&us->object,
-			zfuncname,
-			&zretval,
-			4, args,
-			0, NULL	TSRMLS_CC);
+	zend_try {
+		call_result = call_user_function_ex(NULL,
+				&us->object,
+				zfuncname,
+				&zretval,
+				4, args,
+				0, NULL	TSRMLS_CC);
+	} zend_catch {
+		FG(user_stream_current_filename) = NULL;
+		zend_bailout();
+	} zend_end_try();
 
 	if (call_result == SUCCESS && zretval != NULL && zval_is_true(zretval)) {
 		/* the stream is now open! */
