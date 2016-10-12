@@ -306,10 +306,7 @@ ZEND_METHOD(exception, __construct)
 #define CHECK_EXC_TYPE(id, type) \
 	pvalue = zend_read_property_ex(i_get_exception_base(object), (object), CG(known_strings)[id], 1, &value); \
 	if (Z_TYPE_P(pvalue) != IS_NULL && Z_TYPE_P(pvalue) != type) { \
-		zval tmp; \
-		ZVAL_STR_COPY(&tmp, CG(known_strings)[id]); \
-		Z_OBJ_HANDLER_P(object, unset_property)(object, &tmp, NULL); \
-		zval_ptr_dtor(&tmp); \
+		zend_unset_property(i_get_exception_base(object), object, ZEND_STR_PREVIOUS, sizeof(ZEND_STR_PREVIOUS)-1); \
 	}
 
 ZEND_METHOD(exception, __wakeup)
@@ -323,6 +320,12 @@ ZEND_METHOD(exception, __wakeup)
 	CHECK_EXC_TYPE(ZEND_STR_LINE,     IS_LONG);
 	CHECK_EXC_TYPE(ZEND_STR_TRACE,    IS_ARRAY);
 	CHECK_EXC_TYPE(ZEND_STR_PREVIOUS, IS_OBJECT);
+	pvalue = zend_read_property(i_get_exception_base(object), object, ZEND_STR_PREVIOUS, sizeof(ZEND_STR_PREVIOUS)-1, 1, &value);
+	if (pvalue && Z_TYPE_P(pvalue) != IS_NULL && (Z_TYPE_P(pvalue) != IS_OBJECT ||
+			!instanceof_function(Z_OBJCE_P(pvalue), i_get_exception_base(object)) ||
+			pvalue == object)) {
+		zend_unset_property(i_get_exception_base(object), object, ZEND_STR_PREVIOUS, sizeof(ZEND_STR_PREVIOUS)-1);
+	}
 }
 /* }}} */
 
@@ -735,9 +738,23 @@ ZEND_METHOD(exception, __toString)
 		zend_string_release(file);
 		zval_ptr_dtor(&trace);
 
+		Z_OBJPROP_P(exception)->u.v.nApplyCount++;
 		exception = GET_PROPERTY(exception, ZEND_STR_PREVIOUS);
+		if (exception && Z_TYPE_P(exception) == IS_OBJECT && Z_OBJPROP_P(exception)->u.v.nApplyCount > 0) {
+			exception = NULL;
+		}
 	}
 	zend_string_release(fname);
+
+	/* Reset apply counts */
+	while (exception && Z_TYPE_P(exception) == IS_OBJECT && (base_ce = i_get_exception_base(exception)) && instanceof_function(Z_OBJCE_P(exception), base_ce)) {
+		if(Z_OBJPROP_P(exception)->u.v.nApplyCount) {
+			Z_OBJPROP_P(exception)->u.v.nApplyCount--;
+		} else {
+			break;
+		}
+		exception = GET_PROPERTY(exception, ZEND_STR_PREVIOUS);
+	}
 
 	exception = getThis();
 	base_ce = i_get_exception_base(exception);
