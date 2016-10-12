@@ -6457,15 +6457,18 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 		return;
 	}
 
-	if (buffer_length <= 0) {
-		RETURN_FALSE;
-	}
-
 	if (zstrong_result_returned) {
 		zval_dtor(zstrong_result_returned);
 		ZVAL_FALSE(zstrong_result_returned);
 	}
 
+	if (buffer_length <= 0
+#ifndef PHP_WIN32
+		|| ZEND_LONG_INT_OVFL(buffer_length)
+#endif
+			) {
+		RETURN_FALSE;
+	}
 	buffer = zend_string_alloc(buffer_length, 0);
 
 #ifdef PHP_WIN32
@@ -6481,6 +6484,7 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 
 	PHP_OPENSSL_CHECK_LONG_TO_INT(buffer_length, length);
 	PHP_OPENSSL_RAND_ADD_TIME();
+	/* FIXME loop if requested size > INT_MAX */
 	if (RAND_bytes((unsigned char*)ZSTR_VAL(buffer), (int)buffer_length) <= 0) {
 		zend_string_release(buffer);
 		if (zstrong_result_returned) {
