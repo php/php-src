@@ -31,8 +31,7 @@ New value:
 prompt> [Breaking on watchpoint $b]
 Old value: 
 New value: 2
->00007: $b = 2;
- 00008: 
+>00008: 
 prompt> [$b was removed, removing watchpoint recursively]
 [Script ended normally]
 prompt> 
