@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2016, PHP 7.1.0RC4
 
 - Core:
+  . Fixed bug #73288 (Segfault in __clone > Exception.toString > __get).
+    (Laruence)
   . Implemented RFC: get_class() disallow null parameter. Passing null to
     get_class() now generates a warning, rather than returning the calling
     class scope.
