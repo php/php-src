@@ -554,9 +554,15 @@ safe:
 					}
 					plc->freeq = 1;
 				} else {
+					enum pdo_param_type param_type = param->param_type;
 					zend_string *buf = NULL;
 
-					switch (param->param_type) {
+					/* assume all types are nullable */
+					if (Z_TYPE_P(parameter) == IS_NULL) {
+						param_type = PDO_PARAM_NULL;
+					}
+
+					switch (param_type) {
 						case PDO_PARAM_BOOL:
 							plc->quoted = zend_is_true(parameter) ? "1" : "0";
 							plc->qlen = sizeof("1")-1;
@@ -581,7 +587,7 @@ safe:
 							buf = zval_get_string(parameter);
 							if (!stmt->dbh->methods->quoter(stmt->dbh, ZSTR_VAL(buf),
 									ZSTR_LEN(buf), &plc->quoted, &plc->qlen,
-									param->param_type)) {
+									param_type)) {
 								/* bork */
 								ret = -1;
 								strncpy(stmt->error_code, stmt->dbh->error_code, 6);

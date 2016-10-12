@@ -51,7 +51,7 @@ MySQLPDOTest::skip();
 		printf("NULL...\n");
 		$stmt = $db->prepare('INSERT INTO test(id, label) VALUES (100, ?)');
 		$label = null;
-		if (!$stmt->bindParam(1, $label, PDO::PARAM_NULL))
+		if (!$stmt->bindParam(1, $label))
 			printf("[%03d + 4] Cannot bind parameter, %s %s\n", $offset,
 				$stmt->errorCode(), var_export($stmt->errorInfo(), true));
 
