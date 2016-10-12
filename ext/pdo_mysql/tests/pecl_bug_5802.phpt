@@ -20,7 +20,7 @@ $stmt->bindParam(':bar', $bar);
 $stmt->execute() or var_dump($stmt->errorInfo());
 
 $bar = null;
-$stmt->bindParam(':bar', $bar, PDO::PARAM_NULL);
+$stmt->bindParam(':bar', $bar);
 $stmt->execute() or var_dump($stmt->errorInfo());
 
 $bar = 'qaz';
