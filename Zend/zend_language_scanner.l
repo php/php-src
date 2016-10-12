@@ -589,6 +589,7 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type)
 		CG(ast) = NULL;
 		CG(ast_arena) = zend_arena_create(1024 * 32);
 		if (!zendparse()) {
+			int last_lineno = CG(zend_lineno);
 			zval retval_zv;
 			zend_file_context original_file_context;
 			zend_oparray_context original_oparray_context;
@@ -605,9 +606,10 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type)
 			zend_file_context_begin(&original_file_context);
 			zend_oparray_context_begin(&original_oparray_context);
 			zend_compile_top_stmt(CG(ast));
+			CG(zend_lineno) = last_lineno;
 			zend_emit_final_return(&retval_zv);
 			op_array->line_start = 1;
-			op_array->line_end = CG(zend_lineno);
+			op_array->line_end = last_lineno;
 			pass_two(op_array);
 			zend_oparray_context_end(&original_oparray_context);
 			zend_file_context_end(&original_file_context);
@@ -756,6 +758,7 @@ zend_op_array *compile_string(zval *source_string, char *filename)
 		BEGIN(ST_IN_SCRIPTING);
 
 		if (!zendparse()) {
+			int last_lineno = CG(zend_lineno);
 			zend_file_context original_file_context;
 			zend_oparray_context original_oparray_context;
 			zend_op_array *original_active_op_array = CG(active_op_array);
@@ -770,9 +773,10 @@ zend_op_array *compile_string(zval *source_string, char *filename)
 			zend_file_context_begin(&original_file_context);
 			zend_oparray_context_begin(&original_oparray_context);
 			zend_compile_top_stmt(CG(ast));
+			CG(zend_lineno) = last_lineno;
 			zend_emit_final_return(NULL);
 			op_array->line_start = 1;
-			op_array->line_end = CG(zend_lineno);
+			op_array->line_end = last_lineno;
 			pass_two(op_array);
 			zend_oparray_context_end(&original_oparray_context);
 			zend_file_context_end(&original_file_context);
