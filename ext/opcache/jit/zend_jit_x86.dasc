@@ -1349,12 +1349,53 @@ static int zend_jit_icall_throw_stub(dasm_State **Dst)
 	return 1;
 }
 
+static int zend_jit_throw_cannot_pass_by_ref_stub(dasm_State **Dst)
+{
+	|->throw_cannot_pass_by_ref:
+	|	mov r0, EX->opline
+	|.if X64
+	|	movsxd r1, dword OP:r0->result.var
+	|.else
+	|	mov r1, OP:r0->result.var
+	|.endif
+	|	SET_Z_TYPE_INFO RX+r1, IS_UNDEF
+	|	mov RX, r0
+	|.if X64
+	|	mov CARG1, 0
+	|	LOAD_ADDR CARG2, "Cannot pass parameter %d by reference"
+	|	mov CARG3d, dword OP:r0->op2.num
+	|	EXT_CALL zend_throw_error, r0
+	|.else
+	|	mov r1, dword OP:r0->op2.num
+	|	sub r4, 4
+	|	push r1
+	|	push "Cannot pass parameter %d by reference"
+	|	push 0
+	|	EXT_CALL zend_throw_error, r0
+	|	add r4, 16
+	|.endif
+	|	cmp byte OP:RX->op1_type, IS_TMP_VAR
+	|	jne >9
+	|.if X64
+	|	movsxd r0, dword OP:RX->op1.var
+	|.else
+	|	mov r0, OP:RX->op1.var
+	|.endif
+	|	add r0, FP
+	|	ZVAL_PTR_DTOR r0, MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF, 0, 0, 0, NULL, 0
+	|9:
+	|	jmp ->exception_handler
+
+	return 1;
+}
+
 static const zend_jit_stub zend_jit_stubs[] = {
 	JIT_STUB(interrupt_handler),
 	JIT_STUB(exception_handler),
 	JIT_STUB(leave_function),
 	JIT_STUB(leave_throw),
 	JIT_STUB(icall_throw),
+	JIT_STUB(throw_cannot_pass_by_ref),
 };
 
 static int zend_jit_align_func(dasm_State **Dst)
@@ -4924,23 +4965,8 @@ static int zend_jit_send_val(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		}
 		|.cold_code
 		|1:
-		|	SET_Z_TYPE_INFO RX + opline->result.var, IS_UNDEF
 		|	SAVE_VALID_OPLINE opline
-		|.if X64
-		|	mov CARG1, 0
-		|	LOAD_ADDR CARG2, "Cannot pass parameter %d by reference"
-		|	mov CARG3d, arg_num
-		|	EXT_CALL zend_throw_error, r0
-		|.else
-		|	sub r4, 4
-		|	push arg_num
-		|	push "Cannot pass parameter %d by reference"
-		|	push 0
-		|	EXT_CALL zend_throw_error, r0
-		|	add r4, 16
-		|.endif
-		|	FREE_OP opline->op1_type, opline->op1, op1_info, 0, op_array, opline->lineno
-		|	jmp ->exception_handler
+		|	jmp ->throw_cannot_pass_by_ref
 		|.code
 	}
 
