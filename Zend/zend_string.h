@@ -33,6 +33,8 @@ ZEND_API zend_ulong zend_hash_func(const char *str, size_t len);
 void zend_interned_strings_init(void);
 void zend_interned_strings_dtor(void);
 
+ZEND_API zend_string *zend_strpprintf(size_t max_len, const char *format, ...);
+
 END_EXTERN_C()
 
 /* Shortcuts */

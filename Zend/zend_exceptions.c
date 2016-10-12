@@ -696,18 +696,6 @@ size_t zend_spprintf(char **message, size_t max_len, const char *format, ...) /*
 }
 /* }}} */
 
-zend_string *zend_strpprintf(size_t max_len, const char *format, ...) /* {{{ */
-{
-	va_list arg;
-	zend_string *str;
-
-	va_start(arg, format);
-	str = zend_vstrpprintf(max_len, format, arg);
-	va_end(arg);
-	return str;
-}
-/* }}} */
-
 /* {{{ proto string Exception|Error::__toString()
    Obtain the string representation of the Exception object */
 ZEND_METHOD(exception, __toString)
