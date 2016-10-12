@@ -1128,7 +1128,7 @@ PHPDBG_COMMAND(break) /* {{{ */
 {
 	if (!param) {
 		if (PHPDBG_G(exec)) {
-			phpdbg_set_breakpoint_file(
+			phpdbg_set_breakpoint_file_ex(
 				zend_get_executed_filename(),
 				strlen(zend_get_executed_filename()),
 				zend_get_executed_lineno());
@@ -1141,7 +1141,7 @@ PHPDBG_COMMAND(break) /* {{{ */
 			break;
 		case NUMERIC_PARAM:
 			if (PHPDBG_G(exec)) {
-				phpdbg_set_breakpoint_file(phpdbg_current_file(), strlen(phpdbg_current_file()), param->num);
+				phpdbg_set_breakpoint_file_ex(phpdbg_current_file(), strlen(phpdbg_current_file()), param->num);
 			} else {
 				phpdbg_error("inactive", "type=\"noexec\"", "Execution context not set!");
 			}
@@ -1156,7 +1156,7 @@ PHPDBG_COMMAND(break) /* {{{ */
 			phpdbg_set_breakpoint_function_opline(param->str, param->num);
 			break;
 		case FILE_PARAM:
-			phpdbg_set_breakpoint_file(param->file.name, 0, param->file.line);
+			phpdbg_set_breakpoint_file(param->file.name, param->file.line);
 			break;
 		case NUMERIC_FILE_PARAM:
 			phpdbg_set_breakpoint_file_opline(param->file.name, param->file.line);

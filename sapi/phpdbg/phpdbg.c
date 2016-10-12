@@ -341,7 +341,7 @@ static PHP_FUNCTION(phpdbg_break_file)
 		return;
 	}
 
-	phpdbg_set_breakpoint_file(file, 0, line);
+	phpdbg_set_breakpoint_file(file, line);
 } /* }}} */
 
 /* {{{ proto void phpdbg_break_method(string class, string method) */
