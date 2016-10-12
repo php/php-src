@@ -4551,7 +4551,11 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, zen
 	|.cold_code
 	|2:
 	|	mov FCARG1d, used_stack
-	|	mov FCARG2a, r0
+	if (func && func->type == ZEND_INTERNAL_FUNCTION) {
+		|	LOAD_ADDR FCARG2a, func
+	} else {
+		|	mov FCARG2a, r0
+	}
 	|	EXT_CALL zend_jit_extend_stack_helper, r0
 	|	mov RX, r0
 	|	jmp <1
