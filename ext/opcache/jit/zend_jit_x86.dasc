@@ -1183,6 +1183,33 @@ static void* dasm_labels[zend_lb_MAX];
 ||	}
 |.endmacro
 
+|.macro UNDEFINED_OFFSET, opline
+|| if (opline == last_valid_opline) {
+|	call ->undefined_offset_ex
+|| } else {
+|	SAVE_VALID_OPLINE, opline
+|	call ->undefined_offset
+|| }
+|.endmacro
+
+|.macro UNDEFINED_INDEX, opline
+|| if (opline == last_valid_opline) {
+|	call ->undefined_index_ex
+|| } else {
+|	SAVE_VALID_OPLINE, opline
+|	call ->undefined_index
+|| }
+|.endmacro
+
+|.macro CANNOT_ADD_ELEMENT, opline
+|| if (opline == last_valid_opline) {
+|	call ->cannot_add_element_ex
+|| } else {
+|	SAVE_VALID_OPLINE, opline
+|	call ->cannot_add_element
+|| }
+|.endmacro
+
 static zend_bool reuse_ip;
 static zend_bool delayed_call_chain;
 static uint32_t  delayed_call_level;
@@ -1402,6 +1429,15 @@ static int zend_jit_throw_cannot_pass_by_ref_stub(dasm_State **Dst)
 	return 1;
 }
 
+static int zend_jit_undefined_offset_ex_stub(dasm_State **Dst)
+{
+	|->undefined_offset_ex:
+	|	mov aword EX->opline, IP
+	|	jmp ->undefined_offset
+
+	return 1;
+}
+
 static int zend_jit_undefined_offset_stub(dasm_State **Dst)
 {
 	|->undefined_offset:
@@ -1449,6 +1485,15 @@ static int zend_jit_undefined_offset_stub(dasm_State **Dst)
 	|	add r4, 28
 	|.endif
 	|	ret
+
+	return 1;
+}
+
+static int zend_jit_undefined_index_ex_stub(dasm_State **Dst)
+{
+	|->undefined_index_ex:
+	|	mov aword EX->opline, IP
+	|	jmp ->undefined_index
 
 	return 1;
 }
@@ -1507,6 +1552,15 @@ static int zend_jit_undefined_index_stub(dasm_State **Dst)
 	return 1;
 }
 
+static int zend_jit_cannot_add_element_ex_stub(dasm_State **Dst)
+{
+	|->cannot_add_element_ex:
+	|	mov aword EX->opline, IP
+	|	jmp ->cannot_add_element
+
+	return 1;
+}
+
 static int zend_jit_cannot_add_element_stub(dasm_State **Dst)
 {
 	|->cannot_add_element:
@@ -1552,6 +1606,9 @@ static const zend_jit_stub zend_jit_stubs[] = {
 	JIT_STUB(undefined_offset),
 	JIT_STUB(undefined_index),
 	JIT_STUB(cannot_add_element),
+	JIT_STUB(undefined_offset_ex),
+	JIT_STUB(undefined_index_ex),
+	JIT_STUB(cannot_add_element_ex),
 };
 
 static int zend_jit_align_func(dasm_State **Dst)
@@ -2762,10 +2819,9 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 				|2:
 				switch (type) {
 					case BP_VAR_R:
-						|	SAVE_VALID_OPLINE opline
 						|	// zend_error(E_NOTICE,"Undefined offset: " ZEND_LONG_FMT, hval);
 						|	// retval = &EG(uninitialized_zval);
-						|	call ->undefined_offset
+						|	UNDEFINED_OFFSET opline
 						|	jmp >9
 						break;
 					case BP_VAR_IS:
@@ -2870,8 +2926,7 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 				switch (type) {
 					case BP_VAR_R:
 						//	zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(offset_key));
-						|	SAVE_VALID_OPLINE opline
-						|	call ->undefined_index
+						|	UNDEFINED_INDEX opline
 						|	jmp >9
 						break;
 					case BP_VAR_IS:
@@ -3290,8 +3345,7 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, zend_op_
 			|.cold_code
 			|1:
 			|	// zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
-			|	SAVE_VALID_OPLINE opline
-			|	call ->cannot_add_element
+			|	CANNOT_ADD_ELEMENT opline
 			|	//ZEND_VM_C_GOTO(assign_dim_op_ret_null);
 			|	jmp >9
 			|.code
@@ -3571,8 +3625,7 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, zend_
 			|.cold_code
 			|1:
 			|	// zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
-			|	SAVE_VALID_OPLINE opline
-			|	call ->cannot_add_element
+			|	CANNOT_ADD_ELEMENT opline
 			|	//ZEND_VM_C_GOTO(assign_dim_op_ret_null);
 			|	jmp >9
 			|.code
