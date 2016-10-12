@@ -1499,7 +1499,7 @@ SXE_METHOD(asXML)
 			return_content = (char *)outbuf->buffer->content;
 			return_len = outbuf->buffer->use;
 #endif
-			if (return_content) {
+			if (!return_content) {
 				RETVAL_FALSE;
 			} else {
 				RETVAL_STRINGL(return_content, return_len);
