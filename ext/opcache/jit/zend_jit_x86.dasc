@@ -5186,56 +5186,305 @@ fallback:
 	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
 }
 
+static int zend_jit_smart_true(dasm_State **Dst, const zend_op *opline, int b, zend_op_array *op_array, zend_ssa *ssa, int jmp)
+{
+	uint32_t target_label;
+
+	if ((opline+1)->opcode == ZEND_JMPZ &&
+	    (opline+1)->op1_type == IS_TMP_VAR &&
+	    (opline+1)->op1.var == opline->result.var) {
+		if (jmp) {
+			|	jmp >7
+		}
+	} else if ((opline+1)->opcode == ZEND_JMPNZ &&
+	           (opline+1)->op1_type == IS_TMP_VAR &&
+	           (opline+1)->op1.var == opline->result.var) {
+		target_label = ssa->cfg.blocks[b].successors[0];
+		| 	jmp =>target_label
+	} else if ((opline+1)->opcode == ZEND_JMPZNZ &&
+	           (opline+1)->op1_type == IS_TMP_VAR &&
+	           (opline+1)->op1.var == opline->result.var) {
+		target_label = ssa->cfg.blocks[b].successors[1];
+		| 	jmp =>target_label
+	} else {
+		|	SET_Z_TYPE_INFO FP + opline->result.var, IS_TRUE
+		if (jmp) {
+			|	jmp >7
+		}
+	}
+
+	return 1;
+}
+
+static int zend_jit_smart_false(dasm_State **Dst, const zend_op *opline, int b, zend_op_array *op_array, zend_ssa *ssa, int jmp)
+{
+	uint32_t target_label;
+
+	if ((opline+1)->opcode == ZEND_JMPZ &&
+	    (opline+1)->op1_type == IS_TMP_VAR &&
+	    (opline+1)->op1.var == opline->result.var) {
+		target_label = ssa->cfg.blocks[b].successors[0];
+		| 	jmp =>target_label
+	} else if ((opline+1)->opcode == ZEND_JMPNZ &&
+	           (opline+1)->op1_type == IS_TMP_VAR &&
+	           (opline+1)->op1.var == opline->result.var) {
+		if (jmp) {
+			|	jmp >7
+		}
+	} else if ((opline+1)->opcode == ZEND_JMPZNZ &&
+	           (opline+1)->op1_type == IS_TMP_VAR &&
+	           (opline+1)->op1.var == opline->result.var) {
+		target_label = ssa->cfg.blocks[b].successors[0];
+		| 	jmp =>target_label
+	} else {
+		|	SET_Z_TYPE_INFO FP + opline->result.var, IS_FALSE
+		if (jmp) {
+			|	jmp >7
+		}
+	}
+
+	return 1;
+}
+
 static int zend_jit_type_check(dasm_State **Dst, const zend_op *opline, int b, int *opnum, zend_op_array *op_array, zend_ssa *ssa)
 {
 	uint32_t op1_info, mask;
-	unsigned int target_label;
+	uint32_t target_label;
 	zend_uchar type;
+	zend_bool smart_branch = 0;
 
-	if (!ssa->ops || !ssa->var_info || opline->extended_value == IS_RESOURCE) {
+	if (opline->extended_value == IS_RESOURCE) {
+		// TODO: support for is_resource() ???
 		goto fallback;
+	}
+
+	if (((opline+1)->opcode == ZEND_JMPZ ||
+	     (opline+1)->opcode == ZEND_JMPNZ ||
+	     (opline+1)->opcode == ZEND_JMPZNZ) &&
+	    (opline+1)->op1_type == IS_TMP_VAR &&
+	    (opline+1)->op1.var == opline->result.var) {
+		(*opnum)++;
+		smart_branch = 1;
 	}
 
 	op1_info = OP1_INFO();
-	type = opline->extended_value;
-	if (type == IS_RESOURCE) {
-		goto fallback;
-	} else if (type == _IS_BOOL) {
-		mask = MAY_BE_FALSE | MAY_BE_TRUE;
-	} else {
-		mask = (1 << type);
+	if (op1_info & MAY_BE_UNDEF) {
+		if (op1_info & (MAY_BE_ANY|MAY_BE_REF)) {
+			|	IF_Z_TYPE FP + opline->op1.var, IS_UNDEF, >1
+			|.cold_code
+			|1:
+		}
+		|	SAVE_VALID_OPLINE opline
+		|	mov FCARG1d, opline->op1.var
+		|	EXT_CALL zend_jit_undefined_op_helper, r0
+		if (opline->extended_value == IS_NULL) {
+			if (!zend_jit_smart_true(Dst, opline, b, op_array, ssa, (op1_info & (MAY_BE_ANY|MAY_BE_REF)) != 0)) {
+				return 0;
+			}
+		} else {
+			if (!zend_jit_smart_false(Dst, opline, b, op_array, ssa, (op1_info & (MAY_BE_ANY|MAY_BE_REF)) != 0)) {
+				return 0;
+			}
+		}
+		if (op1_info & (MAY_BE_ANY|MAY_BE_REF)) {
+			|.code
+		}
 	}
-	if (!(op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF) - mask))) {
-		if ((opline+1)->opcode == ZEND_JMPZ &&
-		    (opline+1)->op1_type == IS_TMP_VAR &&
-		    (opline+1)->op1.var == opline->result.var) {
-			(*opnum)++;
-		} else if ((opline+1)->opcode == ZEND_JMPNZ &&
-                   (opline+1)->op1_type == IS_TMP_VAR &&
-                   (opline+1)->op1.var == opline->result.var) {
-			(*opnum)++;
-			target_label = ssa->cfg.blocks[b].successors[0];
-			| 	jmp =>target_label
+
+	if (op1_info & (MAY_BE_ANY|MAY_BE_REF)) {
+		type = opline->extended_value;
+		if (type == _IS_BOOL) {
+			mask = MAY_BE_FALSE | MAY_BE_TRUE;
 		} else {
-			|	SET_Z_TYPE_INFO FP + opline->result.var, IS_TRUE
+			mask = (1 << type);
 		}
-    } else if (!(op1_info & mask)) {
-		if ((opline+1)->opcode == ZEND_JMPZ &&
-		    (opline+1)->op1_type == IS_TMP_VAR &&
-		    (opline+1)->op1.var == opline->result.var) {
-			(*opnum)++;
-			target_label = ssa->cfg.blocks[b].successors[0];
-			| 	jmp =>target_label
-		} else if ((opline+1)->opcode == ZEND_JMPNZ &&
-                   (opline+1)->op1_type == IS_TMP_VAR &&
-                   (opline+1)->op1.var == opline->result.var) {
-			(*opnum)++;
+
+		if (!(op1_info & (MAY_BE_ANY - mask))) {
+			|	FREE_OP opline->op1_type, opline->op1, op1_info, 1, op_array, opline->lineno
+			if (!zend_jit_smart_true(Dst, opline, b, op_array, ssa, 0)) {
+				return 0;
+			}
+	    } else if (!(op1_info & mask)) {
+			|	FREE_OP opline->op1_type, opline->op1, op1_info, 1, op_array, opline->lineno
+			if (!zend_jit_smart_false(Dst, opline, b, op_array, ssa, 0)) {
+				return 0;
+			}
 		} else {
-			|	SET_Z_TYPE_INFO FP + opline->result.var, IS_FALSE
-		}
-	} else {
-		goto fallback;
-    }
+			if (op1_info & MAY_BE_REF) {
+				|	LOAD_ZVAL_ADDR r0, opline->op1_type, opline->op1
+				|	ZVAL_DEREF r0, op1_info
+			}
+			if (opline->extended_value == _IS_BOOL) {
+				if (smart_branch &&
+				    (opline->op1_type & (IS_VAR|IS_TMP_VAR)) &&
+				    (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+					if ((op1_info) & (MAY_BE_ANY-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+						|	// if (Z_REFCOUNTED_P(cv)) {
+						if (op1_info & MAY_BE_REF) {
+							|	IF_Z_REFCOUNTED r0, >1
+						} else {
+							|	IF_Z_REFCOUNTED FP + opline->op1.var, >1
+						}
+						|.cold_code
+						|1:
+					}
+					|	// if (!Z_DELREF_P(cv)) {
+					if (op1_info & MAY_BE_REF) {
+						|	GET_Z_PTR FCARG1a, r0
+					} else {
+						|	GET_Z_PTR FCARG1a, FP + opline->op1.var
+					}
+					|	GC_DELREF FCARG1a
+					if (RC_MAY_BE_1(op1_info)) {
+						if (RC_MAY_BE_N(op1_info)) {
+							|	jnz >1
+						}
+						if (op1_info & MAY_BE_REF) {
+							|	mov al, byte [r0 + 8]
+						} else {
+							|	mov al, byte [FP + opline->op1.var + 8]
+						}
+						|	mov byte [r4], al // save
+						|	// zval_dtor_func(r);
+						|	ZVAL_DTOR_FUNC op_array->filename, opline->lineno
+						|	mov cl, byte [r4] // restore
+						|jmp >2
+					}
+					if ((op1_info) & (MAY_BE_ANY-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+						if (!RC_MAY_BE_1(op1_info)) {
+							|	jmp >1
+						}
+						|.code
+					}
+					|1:
+					if (op1_info & MAY_BE_REF) {
+						|	mov cl, byte [r0 + 8]
+					} else {
+						|	mov cl, byte [FP + opline->op1.var + 8]
+					}
+					|2:
+                } else {
+					if (op1_info & MAY_BE_REF) {
+						|	mov cl, byte [r0 + 8]
+					} else {
+						|	mov cl, byte [FP + opline->op1.var + 8]
+					}
+				}
+				|	mov al, 1
+				|	shl al, cl
+				|	test al, 0xc
+				if ((opline+1)->opcode == ZEND_JMPZ &&
+				    (opline+1)->op1_type == IS_TMP_VAR &&
+				    (opline+1)->op1.var == opline->result.var) {
+					target_label = ssa->cfg.blocks[b].successors[0];
+					| 	je =>target_label
+				} else if ((opline+1)->opcode == ZEND_JMPNZ &&
+				           (opline+1)->op1_type == IS_TMP_VAR &&
+				           (opline+1)->op1.var == opline->result.var) {
+					target_label = ssa->cfg.blocks[b].successors[0];
+					| 	jne =>target_label
+				} else if ((opline+1)->opcode == ZEND_JMPZNZ &&
+				           (opline+1)->op1_type == IS_TMP_VAR &&
+				           (opline+1)->op1.var == opline->result.var) {
+					target_label = ssa->cfg.blocks[b].successors[0];
+					| 	je =>target_label
+					target_label = ssa->cfg.blocks[b].successors[1];
+					| 	jmp =>target_label
+				} else {
+					|	setne al
+					|	movzx eax, al
+					|	add eax, 2
+					|	SET_Z_TYPE_INFO FP + opline->result.var, eax
+					|	FREE_OP opline->op1_type, opline->op1, op1_info, 1, op_array, opline->lineno
+				}
+			} else if (opline->extended_value == IS_RESOURCE) {
+				ZEND_ASSERT(0);
+			} else {
+				if (smart_branch &&
+				    (opline->op1_type & (IS_VAR|IS_TMP_VAR)) &&
+				    (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+					if ((op1_info) & (MAY_BE_ANY-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+						|	// if (Z_REFCOUNTED_P(cv)) {
+						if (op1_info & MAY_BE_REF) {
+							|	IF_Z_REFCOUNTED r0, >1
+						} else {
+							|	IF_Z_REFCOUNTED FP + opline->op1.var, >1
+						}
+						|.cold_code
+						|1:
+					}
+					|	// if (!Z_DELREF_P(cv)) {
+					if (op1_info & MAY_BE_REF) {
+						|	GET_Z_PTR FCARG1a, r0
+					} else {
+						|	GET_Z_PTR FCARG1a, FP + opline->op1.var
+					}
+					|	GC_DELREF FCARG1a
+					if (RC_MAY_BE_1(op1_info)) {
+						if (RC_MAY_BE_N(op1_info)) {
+							|	jnz >1
+						}
+						if (op1_info & MAY_BE_REF) {
+							|	mov al, byte [r0 + 8]
+						} else {
+							|	mov al, byte [FP + opline->op1.var + 8]
+						}
+						|	mov byte [r4], al // save
+						|	// zval_dtor_func(r);
+						|	ZVAL_DTOR_FUNC op_array->filename, opline->lineno
+						|	mov cl, byte [r4] // restore
+						|jmp >2
+					}
+					if ((op1_info) & (MAY_BE_ANY-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+						if (!RC_MAY_BE_1(op1_info)) {
+							|	jmp >1
+						}
+						|.code
+					}
+					|1:
+					if (op1_info & MAY_BE_REF) {
+						|	mov cl, byte [r0 + 8]
+					} else {
+						|	mov cl, byte [FP + opline->op1.var + 8]
+					}
+					|2:
+					|	cmp cl, opline->extended_value
+				} else {
+					if (op1_info & MAY_BE_REF) {
+						|	cmp byte [r0 + 8], opline->extended_value
+					} else {
+						|	cmp byte [FP + opline->op1.var + 8], opline->extended_value
+					}
+				}
+				if ((opline+1)->opcode == ZEND_JMPZ &&
+				    (opline+1)->op1_type == IS_TMP_VAR &&
+				    (opline+1)->op1.var == opline->result.var) {
+					target_label = ssa->cfg.blocks[b].successors[0];
+					| 	jne =>target_label
+				} else if ((opline+1)->opcode == ZEND_JMPNZ &&
+				           (opline+1)->op1_type == IS_TMP_VAR &&
+				           (opline+1)->op1.var == opline->result.var) {
+					target_label = ssa->cfg.blocks[b].successors[0];
+					| 	je =>target_label
+				} else if ((opline+1)->opcode == ZEND_JMPZNZ &&
+				           (opline+1)->op1_type == IS_TMP_VAR &&
+				           (opline+1)->op1.var == opline->result.var) {
+					target_label = ssa->cfg.blocks[b].successors[0];
+					| 	jne =>target_label
+					target_label = ssa->cfg.blocks[b].successors[1];
+					| 	jmp =>target_label
+				} else {
+					|	sete al
+					|	movzx eax, al
+					|	add eax, 2
+					|	SET_Z_TYPE_INFO FP + opline->result.var, eax
+					|	FREE_OP opline->op1_type, opline->op1, op1_info, 1, op_array, opline->lineno
+				}
+			}
+	    }
+	}
+
+	|7:
 
 	return 1;
 
