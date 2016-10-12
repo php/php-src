@@ -1278,8 +1278,7 @@ static void model_to_zval_any(zval *ret, xmlNodePtr node)
 					any = &arr;
 					name = NULL;
 				} else {
-					ZVAL_DUP(&keepVal, &val);
-					zval_dtor(&val);
+					ZVAL_COPY_VALUE(&keepVal, &val);
 					any = &keepVal;
 				}
 			} else {
