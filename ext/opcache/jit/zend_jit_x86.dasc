@@ -1120,9 +1120,9 @@ static void* dasm_labels[zend_lb_MAX];
 |.endmacro
 
 |.macro EMALLOC, size, op_array, opline
-|	mov FCARG1a, size
-||	if (ZEND_DEBUG) {
+||#if ZEND_DEBUG
 ||		const char *filename = op_array->filename ? op_array->filename->val : NULL;
+|		mov FCARG1a, size
 |		LOAD_ADDR FCARG2a, filename
 |.if X64
 |		mov CARG3d, opline->lineno
@@ -1133,8 +1133,15 @@ static void* dasm_labels[zend_lb_MAX];
 |		push 0
 |		push opline->lineno
 |.endif
+|		EXT_CALL _emalloc, r0
+||#else
+||	if (size == 24) {
+|		EXT_CALL _emalloc_24, r0
+||	} else {
+|		mov FCARG1a, size
+|		EXT_CALL _emalloc, r0
 ||	}
-|	EXT_CALL _emalloc, r0
+||#endif
 |.endmacro
 
 |.macro OBJ_RELEASE, reg, exit_label
