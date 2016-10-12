@@ -127,6 +127,7 @@ static void php_phpdbg_destroy_file_source(zval *data) /* {{{ */
 	if (source->buf) {
 		efree(source->buf);
 	}
+	efree(source->filename);
 	efree(source);
 } /* }}} */
 
@@ -373,7 +374,7 @@ static PHP_FUNCTION(phpdbg_break_file)
 		return;
 	}
 
-	phpdbg_set_breakpoint_file(file, line);
+	phpdbg_set_breakpoint_file(file, 0, line);
 } /* }}} */
 
 /* {{{ proto void phpdbg_break_method(string class, string method) */
@@ -1076,6 +1077,7 @@ const opt_struct OPTIONS[] = { /* {{{ */
 	{'r', 0, "run"},
 	{'e', 0, "generate ext_stmt opcodes"},
 	{'E', 0, "step-through-eval"},
+	{'s', 1, "script from stdin"},
 	{'S', 1, "sapi-name"},
 #ifndef _WIN32
 	{'l', 1, "listen"},
@@ -1374,6 +1376,8 @@ int main(int argc, char **argv) /* {{{ */
 	zend_bool ext_stmt = 0;
 	zend_bool is_exit;
 	int exit_status;
+	char *read_from_stdin = NULL;
+	zend_string *backup_phpdbg_compile = NULL;
 
 #ifndef _WIN32
 	struct sigaction sigio_struct;
@@ -1481,6 +1485,12 @@ phpdbg_main:
 			break;
 
 			/* begin phpdbg options */
+
+			case 's': { /* read script from stdin */
+				if (settings == NULL) {
+					read_from_stdin = strdup(php_optarg);
+				}
+			} break;
 
 			case 'S': { /* set SAPI name */
 				sapi_name = strdup(php_optarg);
@@ -1593,8 +1603,10 @@ phpdbg_main:
 		php_optarg = NULL;
 	}
 
+	quit_immediately = phpdbg_startup_run > 1;
+
 	/* set exec if present on command line */
-	if (argc > php_optind && (strcmp(argv[php_optind-1], "--") != SUCCESS)) {
+	if (!read_from_stdin && argc > php_optind && (strcmp(argv[php_optind-1], "--") != SUCCESS)) {
 		if (!exec && strlen(argv[php_optind])) {
 			exec = strdup(argv[php_optind]);
 		}
@@ -1849,13 +1861,6 @@ phpdbg_main:
 			if (init_file) {
 				phpdbg_init(init_file, init_file_len, init_file_default);
 			}
-			if (bp_tmp) {
-				PHPDBG_G(flags) |= PHPDBG_DISCARD_OUTPUT;
-				phpdbg_string_init(bp_tmp);
-				free(bp_tmp);
-				bp_tmp = NULL;
-				PHPDBG_G(flags) &= ~PHPDBG_DISCARD_OUTPUT;
-			}
 		} zend_end_try();
 		PHPDBG_G(flags) &= ~PHPDBG_IS_INITIALIZING;
 
@@ -1865,16 +1870,53 @@ phpdbg_main:
 		}
 
 		/* auto compile */
-		if (PHPDBG_G(exec)) {
+		if (read_from_stdin) {
+			if (!read_from_stdin[0]) {
+				if (!quit_immediately) {
+					phpdbg_error("error", "", "Impossible to not specify a stdin delimiter without -rr");
+					PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
+					goto phpdbg_out;
+				}
+			}
+			if (show_banner || read_from_stdin[0]) {
+				phpdbg_notice("stdin", "delimiter=\"%s\"", "Reading input from stdin; put '%s' followed by a newline on an own line after code to end input", read_from_stdin);
+			}
+
+			if (phpdbg_startup_run > 0) {
+				PHPDBG_G(flags) |= PHPDBG_DISCARD_OUTPUT;
+			}
+
+			zend_try {
+				phpdbg_param_t cmd;
+				cmd.str = read_from_stdin;
+				cmd.len = strlen(read_from_stdin);
+				PHPDBG_COMMAND_HANDLER(stdin)(&cmd);
+			} zend_end_try();
+
+			PHPDBG_G(flags) &= ~PHPDBG_DISCARD_OUTPUT;
+		} else if (PHPDBG_G(exec)) {
 			if (settings || phpdbg_startup_run > 0) {
 				PHPDBG_G(flags) |= PHPDBG_DISCARD_OUTPUT;
 			}
 
 			zend_try {
-				phpdbg_compile();
+				if (backup_phpdbg_compile) {
+					phpdbg_compile_stdin(backup_phpdbg_compile);
+				} else {
+					phpdbg_compile();
+				}
 			} zend_end_try();
+			backup_phpdbg_compile = NULL;
 
 			PHPDBG_G(flags) &= ~PHPDBG_DISCARD_OUTPUT;
+		}
+
+		if (bp_tmp) {
+			PHPDBG_G(flags) |= PHPDBG_DISCARD_OUTPUT | PHPDBG_IS_INITIALIZING;
+			phpdbg_string_init(bp_tmp);
+			free(bp_tmp);
+			bp_tmp = NULL;
+			PHPDBG_G(flags) &= ~PHPDBG_DISCARD_OUTPUT & ~PHPDBG_IS_INITIALIZING;
 		}
 
 		if (settings == (void *) 0x1) {
@@ -1898,7 +1940,6 @@ phpdbg_interact:
 		do {
 			zend_try {
 				if (phpdbg_startup_run) {
-					quit_immediately = phpdbg_startup_run > 1;
 					phpdbg_startup_run = 0;
 					if (quit_immediately) {
 						PHPDBG_G(flags) = (PHPDBG_G(flags) & ~PHPDBG_HAS_PAGINATION) | PHPDBG_IS_INTERACTIVE | PHPDBG_PREVENT_INTERACTIVE;
@@ -2073,6 +2114,12 @@ phpdbg_out:
 			wrapper->wops->stream_opener = PHPDBG_G(orig_url_wrap_php);
 		}
 
+		if (PHPDBG_G(exec) && !memcmp("-", PHPDBG_G(exec), 2)) { /* i.e. execution context has been read from stdin - back it up */
+			phpdbg_file_source *data = zend_hash_str_find_ptr(&PHPDBG_G(file_sources), PHPDBG_G(exec), PHPDBG_G(exec_len));
+			backup_phpdbg_compile = zend_string_alloc(data->len + 2, 1);
+			sprintf(ZSTR_VAL(backup_phpdbg_compile), "?>%.*s", (int) data->len, data->buf);
+		}
+
 		zend_try {
 			php_module_shutdown();
 		} zend_end_try();
@@ -2097,6 +2144,11 @@ phpdbg_out:
 		free(sapi_name);
 	}
 
+	if (read_from_stdin) {
+		free(read_from_stdin);
+		read_from_stdin = NULL;
+	}
+
 #ifdef ZTS
 	tsrm_shutdown();
 #endif
@@ -2106,6 +2158,10 @@ phpdbg_out:
 		php_getopt(-1, argv, OPTIONS, NULL, &php_optind, 0, 0);
 
 		goto phpdbg_main;
+	}
+
+	if (backup_phpdbg_compile) {
+		zend_string_free(backup_phpdbg_compile);
 	}
 
 #ifndef _WIN32
