@@ -164,7 +164,7 @@ if (getenv('TEST_PHP_EXECUTABLE')) {
 			$phpdbg = $cwd . '/sapi/phpdbg/phpdbg';
 
 			if (file_exists($phpdbg)) {
-				putenv("TEST_PHP_CGI_EXECUTABLE=$phpdbg");
+				putenv("TEST_PHPDBG_EXECUTABLE=$phpdbg");
 			} else {
 				$phpdbg = null;
 			}

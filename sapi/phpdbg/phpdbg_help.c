@@ -338,6 +338,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 
 "**Starting and Stopping Execution**" CR
 "  **exec**     set execution context" CR
+"  **stdin**    set executing script from stdin" CR
 "  **run**      attempt execution" CR
 "  **step**     continue execution until other line is reached" CR
 "  **continue** continue execution" CR
@@ -386,6 +387,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **-rr**                         Run execution context and quit after execution (not respecting breakpoints)" CR
 "  **-e**                          Generate extended information for debugger/profiler" CR
 "  **-E**                          Enable step through eval, careful!" CR
+"  **-s**      **-s=**, **-s**=foo         Read code to execute from stdin with an optional delimiter" CR
 "  **-S**      **-S**cli               Override SAPI name, careful!" CR
 "  **-l**      **-l**4000              Setup remote console ports" CR
 "  **-a**      **-a**192.168.0.3       Setup remote console bind address" CR
@@ -395,6 +397,13 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **-V**                          Print version number" CR
 "  **--**      **--** arg1 arg2        Use to delimit phpdbg arguments and php $argv; append any $argv "
 "argument after it" CR CR
+
+"**Reading from stdin**" CR CR
+
+"The **-s** option allows inputting a script to execute directly from stdin. The given delimiter "
+"(\"foo\" in the example) needs to be specified at the end of the input on its own line, followed by "
+"a line break. If **-rr** has been specified, it is allowed to omit the delimiter (**-s=**) and "
+"it will read until EOF. See also the help entry for the **stdin** command." CR CR
 
 "**Remote Console Mode**" CR CR
 
@@ -632,6 +641,21 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "    $P exec /tmp/script.php" CR
 "    $P e /tmp/script.php" CR
 "    Set the execution context to **/tmp/script.php**"
+},
+
+{"stdin",
+"The **stdin** command takes a string serving as delimiter. It will then read all the input from "
+"stdin until encountering the given delimiter on a standalone line. It can also be passed at "
+"startup using the **-s=** command line option (the delimiter then is optional if **-rr** is "
+"also passed - in that case it will just read until EOF)." CR
+"This input will be then compiled as PHP code and set as execution context." CR CR
+
+"**Example**" CR CR
+
+"    $P stdin foo" CR
+"    <?php" CR
+"    echo \"Hello, world!\\n\";" CR
+"    foo"
 },
 
 //*********** Does F skip any breakpoints lower stack frames or only the current??

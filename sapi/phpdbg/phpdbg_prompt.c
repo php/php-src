@@ -26,7 +26,9 @@
 #include "zend_vm.h"
 #include "zend_generators.h"
 #include "zend_interfaces.h"
+#include "zend_smart_str.h"
 #include "phpdbg.h"
+#include "phpdbg_io.h"
 
 #include "phpdbg_help.h"
 #include "phpdbg_print.h"
@@ -68,6 +70,7 @@ extern int phpdbg_startup_run;
 /* {{{ command declarations */
 const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(exec,    "set execution context",                    'e', NULL, "s", 0),
+	PHPDBG_COMMAND_D(stdin,   "read script from stdin",                    0 , NULL, "s", 0),
 	PHPDBG_COMMAND_D(step,    "step through execution",                   's', NULL, 0, PHPDBG_ASYNC_SAFE),
 	PHPDBG_COMMAND_D(continue,"continue execution",                       'c', NULL, 0, PHPDBG_ASYNC_SAFE),
 	PHPDBG_COMMAND_D(run,     "attempt execution",                        'r', NULL, "|s", 0),
@@ -459,6 +462,111 @@ PHPDBG_COMMAND(exec) /* {{{ */
 	}
 	return SUCCESS;
 } /* }}} */
+
+PHPDBG_COMMAND(stdin)
+{
+	smart_str code = {0};
+	char *buf;
+	char *sep = param->str;
+	int seplen = param->len;
+	int bytes = 0;
+
+	smart_str_appends(&code, "?>");
+
+	do {
+		PHPDBG_G(input_buflen) += bytes;
+		if (PHPDBG_G(input_buflen) <= 0) {
+			continue;
+		}
+
+		if (sep && seplen) {
+			char *nl = buf = PHPDBG_G(input_buffer);
+			do {
+				if (buf == nl + seplen) {
+					if (!memcmp(sep, nl, seplen) && (*buf == '\n' || (*buf == '\r' && buf[1] == '\n'))) {
+						smart_str_appendl(&code, PHPDBG_G(input_buffer), nl - PHPDBG_G(input_buffer));
+						memmove(PHPDBG_G(input_buffer), ++buf, --PHPDBG_G(input_buflen));
+						goto exec_code;
+					}
+				}
+				if (*buf == '\n') {
+					nl = buf + 1;
+				}
+				buf++;
+			} while (--PHPDBG_G(input_buflen));
+			if (buf != nl && buf <= nl + seplen) {
+				smart_str_appendl(&code, PHPDBG_G(input_buffer), nl - PHPDBG_G(input_buffer));
+				PHPDBG_G(input_buflen) = buf - nl;
+				memmove(PHPDBG_G(input_buffer), nl, PHPDBG_G(input_buflen));
+			} else {
+				PHPDBG_G(input_buflen) = 0;
+				smart_str_appendl(&code, PHPDBG_G(input_buffer), buf - PHPDBG_G(input_buffer));
+			}
+		} else {
+			smart_str_appendl(&code, PHPDBG_G(input_buffer), PHPDBG_G(input_buflen));
+			PHPDBG_G(input_buflen) = 0;
+		}
+	} while ((bytes = phpdbg_mixed_read(PHPDBG_G(io)[PHPDBG_STDIN].fd, PHPDBG_G(input_buffer) + PHPDBG_G(input_buflen), PHPDBG_MAX_CMD - PHPDBG_G(input_buflen), -1)) > 0);
+
+	if (bytes < 0) {
+		PHPDBG_G(flags) |= PHPDBG_IS_QUITTING | PHPDBG_IS_DISCONNECTED;
+		zend_bailout();
+	}
+
+exec_code:
+	smart_str_0(&code);
+
+	if (phpdbg_compile_stdin(code.s) == FAILURE) {
+		zend_exception_error(EG(exception), E_ERROR);
+		zend_bailout();
+	}
+
+	return SUCCESS;
+} /* }}} */
+
+int phpdbg_compile_stdin(zend_string *code) {
+	zval zv;
+
+	ZVAL_STR(&zv, code);
+
+	PHPDBG_G(ops) = zend_compile_string(&zv, "-");
+
+	zend_string_release(code);
+
+	if (EG(exception)) {
+		return FAILURE;
+	}
+
+	if (PHPDBG_G(exec)) {
+		efree(PHPDBG_G(exec));
+	}
+	PHPDBG_G(exec) = estrdup("-");
+	PHPDBG_G(exec_len) = 1;
+	{ /* remove leading ?> from source */
+		int i;
+		zend_string *source_path = zend_strpprintf(0, "-%c%p", 0, PHPDBG_G(ops)->opcodes);
+		phpdbg_file_source *data = zend_hash_find_ptr(&PHPDBG_G(file_sources), source_path);
+		dtor_func_t dtor = PHPDBG_G(file_sources).pDestructor;
+		PHPDBG_G(file_sources).pDestructor = NULL;
+		zend_hash_del(&PHPDBG_G(file_sources), source_path);
+		PHPDBG_G(file_sources).pDestructor = dtor;
+		zend_hash_str_update_ptr(&PHPDBG_G(file_sources), "-", 1, data);
+		zend_string_release(source_path);
+
+		efree(data->filename);
+		data->filename = estrdup("-");
+
+		for (i = 1; i <= data->lines; i++) {
+			data->line[i] -= 2;
+		}
+		data->len -= 2;
+		memmove(data->buf, data->buf + 2, data->len);
+	}
+
+	phpdbg_notice("compile", "context=\"-\"", "Successful compilation of stdin input");
+
+	return SUCCESS;
+}
 
 int phpdbg_compile(void) /* {{{ */
 {
@@ -1019,16 +1127,21 @@ PHPDBG_COMMAND(set) /* {{{ */
 PHPDBG_COMMAND(break) /* {{{ */
 {
 	if (!param) {
-		phpdbg_set_breakpoint_file(
-			zend_get_executed_filename(),
-			zend_get_executed_lineno());
+		if (PHPDBG_G(exec)) {
+			phpdbg_set_breakpoint_file(
+				zend_get_executed_filename(),
+				strlen(zend_get_executed_filename()),
+				zend_get_executed_lineno());
+		} else {
+			phpdbg_error("inactive", "type=\"noexec\"", "Execution context not set!");
+		}
 	} else switch (param->type) {
 		case ADDR_PARAM:
 			phpdbg_set_breakpoint_opline(param->addr);
 			break;
 		case NUMERIC_PARAM:
 			if (PHPDBG_G(exec)) {
-				phpdbg_set_breakpoint_file(phpdbg_current_file(), param->num);
+				phpdbg_set_breakpoint_file(phpdbg_current_file(), strlen(phpdbg_current_file()), param->num);
 			} else {
 				phpdbg_error("inactive", "type=\"noexec\"", "Execution context not set!");
 			}
@@ -1043,7 +1156,7 @@ PHPDBG_COMMAND(break) /* {{{ */
 			phpdbg_set_breakpoint_function_opline(param->str, param->num);
 			break;
 		case FILE_PARAM:
-			phpdbg_set_breakpoint_file(param->file.name, param->file.line);
+			phpdbg_set_breakpoint_file(param->file.name, 0, param->file.line);
 			break;
 		case NUMERIC_FILE_PARAM:
 			phpdbg_set_breakpoint_file_opline(param->file.name, param->file.line);
