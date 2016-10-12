@@ -306,7 +306,7 @@ ZEND_METHOD(exception, __construct)
 #define CHECK_EXC_TYPE(id, type) \
 	pvalue = zend_read_property_ex(i_get_exception_base(object), (object), CG(known_strings)[id], 1, &value); \
 	if (Z_TYPE_P(pvalue) != IS_NULL && Z_TYPE_P(pvalue) != type) { \
-		zend_unset_property(i_get_exception_base(object), object, "previous", sizeof("previous")-1); \
+		zend_unset_property(i_get_exception_base(object), object, ZSTR_VAL(CG(known_strings)[id]), ZSTR_LEN(CG(known_strings)[id])); \
 	}
 
 ZEND_METHOD(exception, __wakeup)
