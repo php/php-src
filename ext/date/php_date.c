@@ -4159,7 +4159,7 @@ static int php_date_interval_initialize_from_hash(zval **return_value, php_inter
 #define PHP_DATE_INTERVAL_READ_PROPERTY(element, member, itype, def) \
 	do { \
 		zval *z_arg = zend_hash_str_find(myht, element, sizeof(element) - 1); \
-		if (z_arg) { \
+		if (z_arg && Z_TYPE_P(z_arg) <= IS_STRING) { \
 			(*intobj)->diff->member = (itype)zval_get_long(z_arg); \
 		} else { \
 			(*intobj)->diff->member = (itype)def; \
@@ -4169,7 +4169,7 @@ static int php_date_interval_initialize_from_hash(zval **return_value, php_inter
 #define PHP_DATE_INTERVAL_READ_PROPERTY_I64(element, member) \
 	do { \
 		zval *z_arg = zend_hash_str_find(myht, element, sizeof(element) - 1); \
-		if (z_arg) { \
+		if (z_arg && Z_TYPE_P(z_arg) <= IS_STRING) { \
 			zend_string *str = zval_get_string(z_arg); \
 			DATE_A64I((*intobj)->diff->member, ZSTR_VAL(str)); \
 			zend_string_release(str); \
