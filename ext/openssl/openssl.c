@@ -6458,6 +6458,11 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 		return;
 	}
 
+	if (zstrong_result_returned) {
+		zval_dtor(zstrong_result_returned);
+		ZVAL_FALSE(zstrong_result_returned);
+	}
+
 	if (buffer_length <= 0
 #ifndef PHP_WIN32
 		|| ZEND_LONG_INT_OVFL(buffer_length)
@@ -6465,12 +6470,6 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 			) {
 		RETURN_FALSE;
 	}
-
-	if (zstrong_result_returned) {
-		zval_dtor(zstrong_result_returned);
-		ZVAL_FALSE(zstrong_result_returned);
-	}
-
 	buffer = zend_string_alloc(buffer_length, 0);
 
 #ifdef PHP_WIN32
