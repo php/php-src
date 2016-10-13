@@ -443,6 +443,16 @@ static PHP_FUNCTION(phpdbg_start_oplog)
 	PHPDBG_G(oplog_list)->start = PHPDBG_G(oplog_cur);
 }
 
+static zend_always_inline zend_bool phpdbg_is_ignored_opcode(zend_uchar opcode) {
+	return
+	    opcode == ZEND_NOP || opcode == ZEND_OP_DATA || opcode == ZEND_FE_FREE || opcode == ZEND_FREE || opcode == ZEND_ASSERT_CHECK || opcode == ZEND_VERIFY_RETURN_TYPE
+	 || opcode == ZEND_DECLARE_CONST || opcode == ZEND_DECLARE_CLASS || opcode == ZEND_DECLARE_INHERITED_CLASS || opcode == ZEND_DECLARE_FUNCTION
+	 || opcode == ZEND_DECLARE_INHERITED_CLASS_DELAYED || opcode == ZEND_VERIFY_ABSTRACT_CLASS || opcode == ZEND_ADD_TRAIT || opcode == ZEND_BIND_TRAITS
+	 || opcode == ZEND_DECLARE_ANON_CLASS || opcode == ZEND_DECLARE_ANON_INHERITED_CLASS || opcode == ZEND_FAST_RET || opcode == ZEND_TICKS
+	 || opcode == ZEND_EXT_STMT || opcode == ZEND_EXT_FCALL_BEGIN || opcode == ZEND_EXT_FCALL_END || opcode == ZEND_EXT_NOP || opcode == ZEND_BIND_GLOBAL
+	;
+}
+
 static void phpdbg_oplog_fill_executable(zend_op_array *op_array, HashTable *insert_ht, zend_bool by_opcode) {
 	/* ignore RECV_* opcodes */
 	zend_op *cur = op_array->opcodes + op_array->num_args + !!(op_array->fn_flags & ZEND_ACC_VARIADIC);
@@ -460,11 +470,8 @@ static void phpdbg_oplog_fill_executable(zend_op_array *op_array, HashTable *ins
 	}
 
 	for (; cur < end; cur++) {
-		if (cur->opcode == ZEND_NOP || cur->opcode == ZEND_OP_DATA || cur->opcode == ZEND_FE_FREE || cur->opcode == ZEND_FREE || cur->opcode == ZEND_ASSERT_CHECK || cur->opcode == ZEND_VERIFY_RETURN_TYPE
-		 || cur->opcode == ZEND_DECLARE_CONST || cur->opcode == ZEND_DECLARE_CLASS || cur->opcode == ZEND_DECLARE_INHERITED_CLASS || cur->opcode == ZEND_DECLARE_FUNCTION
-		 || cur->opcode == ZEND_DECLARE_INHERITED_CLASS_DELAYED || cur->opcode == ZEND_VERIFY_ABSTRACT_CLASS || cur->opcode == ZEND_ADD_TRAIT || cur->opcode == ZEND_BIND_TRAITS
-		 || cur->opcode == ZEND_DECLARE_ANON_CLASS || cur->opcode == ZEND_DECLARE_ANON_INHERITED_CLASS || cur->opcode == ZEND_FAST_RET || cur->opcode == ZEND_TICKS
-		 || cur->opcode == ZEND_EXT_STMT || cur->opcode == ZEND_EXT_FCALL_BEGIN || cur->opcode == ZEND_EXT_FCALL_END || cur->opcode == ZEND_EXT_NOP || cur->opcode == ZEND_BIND_GLOBAL) {
+		zend_uchar opcode = cur->opcode;
+		if (phpdbg_is_ignored_opcode(opcode)) {
 			continue;
 		}
 
@@ -474,7 +481,7 @@ static void phpdbg_oplog_fill_executable(zend_op_array *op_array, HashTable *ins
 			insert_idx = cur->lineno;
 		}
 
-		if (cur->opcode == ZEND_NEW && (cur + 1)->opcode == ZEND_DO_FCALL) {
+		if (opcode == ZEND_NEW && cur[1].opcode == ZEND_DO_FCALL) {
 			cur++;
 		}
 
@@ -492,7 +499,7 @@ static inline HashTable* phpdbg_add_empty_array(HashTable *ht, zend_string *name
 	return Z_ARR_P(ht_zv);
 }
 
-/* {{{ proto void phpdbg_end_oplog() */
+/* {{{ proto void phpdbg_get_executable() */
 static PHP_FUNCTION(phpdbg_get_executable)
 {
 	HashTable *options = NULL;
@@ -669,6 +676,10 @@ static PHP_FUNCTION(phpdbg_end_oplog)
 			if (by_opcode) {
 				insert_idx = cur->op - cur->opcodes;
 			} else {
+				if (phpdbg_is_ignored_opcode(cur->op->opcode)) {
+					continue;
+				}
+
 				insert_idx = cur->op->lineno;
 			}
 
@@ -680,8 +691,7 @@ static PHP_FUNCTION(phpdbg_end_oplog)
 				Z_LVAL_P(num)++;
 			}
 
-			cur = cur->next;
-		} while (cur != NULL);
+		} while ((cur = cur->next));
 	}
 
 	if (!prev) {

@@ -22,6 +22,7 @@ PHP                                                                        NEWS
   . Properly allow for stdin input from a file. (Bob)
   . Add -s command line option / stdin command for reading script from stdin.
     (Bob)
+  . Ignore non-executable opcodes in line mode of phpdbg_end_oplog(). (Bob)
 
 - Session:
   . Fixed bug #73273 (session_unset() empties values from all variables in which
