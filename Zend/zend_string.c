@@ -198,18 +198,6 @@ static void zend_interned_strings_restore_int(void)
 #endif
 }
 
-ZEND_API zend_string *zend_strpprintf(size_t max_len, const char *format, ...) /* {{{ */
-{
-	va_list arg;
-	zend_string *str;
-
-	va_start(arg, format);
-	str = zend_vstrpprintf(max_len, format, arg);
-	va_end(arg);
-	return str;
-}
-/* }}} */
-
 /*
  * Local variables:
  * tab-width: 4
