@@ -6341,7 +6341,7 @@ PHP_FUNCTION(openssl_decrypt)
 	const EVP_CIPHER *cipher_type;
 	EVP_CIPHER_CTX *cipher_ctx;
 	struct php_openssl_cipher_mode mode;
-	int outlen, i = 0;
+	int i = 0, outlen;
 	zend_string *outbuf;
 	zend_string *base64_str = NULL;
 	zend_bool free_iv = 0, free_password = 0;
@@ -6376,7 +6376,7 @@ PHP_FUNCTION(openssl_decrypt)
 	php_openssl_load_cipher_mode(&mode, cipher_type);
 
 	if (!(options & OPENSSL_RAW_DATA)) {
-		base64_str = php_base64_decode_ex((unsigned char*)data, (int)data_len, 1);
+		base64_str = php_base64_decode((unsigned char*)data, data_len);
 		if (!base64_str) {
 			php_error_docref(NULL, E_WARNING, "Failed to base64 decode the input");
 			EVP_CIPHER_CTX_free(cipher_ctx);
