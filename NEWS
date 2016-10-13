@@ -7,6 +7,7 @@ PHP                                                                        NEWS
   . Fixed bug #73272 (imagescale() is not affected by, but affects
     imagesetinterpolation()). (cmb)
   . Fixed bug #73279 (Integer overflow in gdImageScaleBilinearPalette()). (cmb)
+  . Fixed bug #73280 (Stack Buffer Overflow in GD dynamicGetbuf). (cmb)
 
 - SOAP:
   . Fixed bug #73037 (SoapServer reports Bad Request when gzipped). (Anatol)
