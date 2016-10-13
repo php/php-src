@@ -4711,11 +4711,30 @@ fallback:
 
 static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, zend_op_array *op_array, zend_function *func)
 {
-	if (!func) {
-		assert(0);
-	}
+	uint32_t used_stack;
 
-	uint32_t used_stack = zend_vm_calc_used_stack(opline->extended_value, func);
+	if (func) {
+		used_stack = zend_vm_calc_used_stack(opline->extended_value, func);
+	} else {
+		used_stack = (ZEND_CALL_FRAME_SLOT + opline->extended_value) * sizeof(zval);
+
+		|	// if (EXPECTED(ZEND_USER_CODE(func->type))) {
+		|	test byte [r0 + offsetof(zend_function, type)], 1
+		|	mov FCARG1a, used_stack
+		|	jnz >1
+		|	// used_stack += (func->op_array.last_var + func->op_array.T - MIN(func->op_array.num_args, num_args)) * sizeof(zval);
+		|	mov	edx, opline->extended_value
+		|	cmp edx, dword [r0 + offsetof(zend_function, op_array.num_args)]
+		|	cmova edx, dword [r0 + offsetof(zend_function, op_array.num_args)]
+		|	sub edx, dword [r0 + offsetof(zend_function, op_array.last_var)]
+		|	sub edx, dword [r0 + offsetof(zend_function, op_array.T)]
+		|	shl edx, 5
+		|.if X64
+		|	movsxd r2, edx
+		|.endif
+		|	sub FCARG1a, r2
+		|1:
+	}
 
 	zend_jit_start_reuse_ip();
 
@@ -4723,10 +4742,18 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, zen
 	|	mov RX, aword [&EG(vm_stack_top)]
 	|	mov r2, aword [&EG(vm_stack_end)]
 	|	sub r2, RX
-	|	cmp r2, used_stack
+	if (func) {
+		|	cmp r2, used_stack
+	} else {
+		|	cmp r2, FCARG1a
+	}
 	|	jb >2
 	|	// EG(vm_stack_top) = (zval*)((char*)call + used_stack);
-	|	add aword [&EG(vm_stack_top)], used_stack
+	if (func) {
+		|	add aword [&EG(vm_stack_top)], used_stack
+	} else {
+		|	add aword [&EG(vm_stack_top)], FCARG1a
+	}
 	|	// zend_vm_init_call_frame(call, call_info, func, num_args, called_scope, object);
 	|	// ZEND_SET_CALL_INFO(call, 0, call_info);
 	|	mov dword EX:RX->This.u1.type_info, (IS_UNDEF | (ZEND_CALL_NESTED_FUNCTION << ZEND_CALL_INFO_SHIFT))
@@ -4753,7 +4780,9 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, zen
 	|	mov dword EX:RX->This.u2.num_args, opline->extended_value
 	|.cold_code
 	|2:
-	|	mov FCARG1d, used_stack
+	if (func) {
+		|	mov FCARG1d, used_stack
+	}
 	if (func && func->type == ZEND_INTERNAL_FUNCTION) {
 		|	EXT_CALL zend_jit_int_extend_stack_helper, r0
 	} else {
@@ -4769,9 +4798,15 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, zen
 
 static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, zend_op_array *op_array, zend_ssa *ssa)
 {
-	const zend_op *opline = call_info->caller_init_opline;
-	const zend_op *end = call_info->caller_call_opline;
+	const zend_op *opline, *end;
 	int skip;
+
+	if (!call_info) {
+		return 1;
+	}
+
+	opline = call_info->caller_init_opline;
+	end = call_info->caller_call_opline;
 
 	if (end - op_array->opcodes >= ssa->cfg.blocks[b].start + ssa->cfg.blocks[b].len) {
 		/* INIT_FCALL and DO_FCALL in different BasicBlocks */
@@ -4811,7 +4846,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, zend
 static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t b, zend_op_array *op_array, zend_ssa *ssa, int call_level)
 {
 	zend_func_info *info = ZEND_FUNC_INFO(op_array);
-		zend_call_info *call_info = NULL;
+	zend_call_info *call_info = NULL;
 	zend_function *func = NULL;
 
 	if (delayed_call_chain) {
@@ -4828,11 +4863,6 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 		if (call_info && call_info->callee_func) {
 			func = call_info->callee_func;
 		}
-	}
-
-	if (!func) {
-		// TODO: implement JIT for INIT_FCALL for unknown functions ???
-		goto fallback;
 	}
 
 	if (func && func->type == ZEND_INTERNAL_FUNCTION) {
@@ -4852,11 +4882,20 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 		|1:
 		|	// SAVE_OPLINE();
 		|	SAVE_VALID_OPLINE opline
-		|	LOAD_ADDR FCARG1a, Z_STR_P(zv);
-		|	EXT_CALL zend_jit_find_func_helper, r0
-		|	// This opcode must not throw exception ???
-		|		// test r0, r0
-		|		// jz ->exception_handler */
+		if (opline->opcode == ZEND_INIT_FCALL) {
+			|	LOAD_ADDR FCARG1a, Z_STR_P(zv);
+			|	EXT_CALL zend_jit_find_func_helper, r0
+		} else if (opline->opcode == ZEND_INIT_FCALL_BY_NAME) {
+			|	LOAD_ADDR FCARG1a, Z_STR_P(zv);
+			|	LOAD_ADDR FCARG2a, Z_STR_P(zv + 1);
+			|	EXT_CALL zend_jit_find_func_by_name_helper, r0
+		} else {
+			ZEND_ASSERT(0);
+		}
+		if (opline->opcode != ZEND_INIT_FCALL) {
+			|	test r0, r0
+			|	jz ->exception_handler
+		}
 		|	// CACHE_PTR(Z_CACHE_SLOT_P(fname), fbc);
 		|	mov r1,	EX->run_time_cache
 		|	mov aword [r1 + Z_CACHE_SLOT_P(zv)], r0
@@ -4864,11 +4903,12 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 		|.code
 		|3:
 	}
+
 	if (!zend_jit_push_call_frame(Dst, opline, op_array, func)) {
 		return 0;
 	}
 
-	if (!func || zend_jit_needs_call_chain(call_info, b, op_array, ssa)) {
+	if (zend_jit_needs_call_chain(call_info, b, op_array, ssa)) {
 		if (!zend_jit_save_call_chain(Dst, call_level)) {
 			return 0;
 		}
@@ -4878,10 +4918,6 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 	}
 
 	return 1;
-
-fallback:
-	/* fallback to subroutine threading */
-	return zend_jit_handler(Dst, opline, 0);
 }
 
 static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa, int call_level)
@@ -6641,6 +6677,7 @@ fallback:
 	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
 }
 
+#ifdef ZEND_JIT_RECORD
 static int zend_jit_func_header(dasm_State **Dst, zend_op_array *op_array)
 {
 	|	EXT_CALL zend_jit_func_header_helper, r0
@@ -6655,6 +6692,7 @@ static int zend_jit_loop_header(dasm_State **Dst, zend_op_array *op_array, zend_
 	|	EXT_CALL zend_jit_loop_header_helper, r0
 	return 1;
 }
+#endif
 
 /*
  * Local variables:

@@ -35,6 +35,23 @@ static zend_function* ZEND_FASTCALL zend_jit_find_func_helper(zend_string *name)
 	return fbc;
 }
 
+static zend_function* ZEND_FASTCALL zend_jit_find_func_by_name_helper(zend_string *name, zend_string *key)
+{
+	zval *func = zend_hash_find(EG(function_table), key);
+	zend_function *fbc;
+
+	if (UNEXPECTED(func == NULL)) {
+		zend_throw_error(NULL, "Call to undefined function %s()", ZSTR_VAL(name));
+		return NULL;
+	}
+	fbc = Z_FUNC_P(func);
+	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!fbc->op_array.run_time_cache)) {
+		fbc->op_array.run_time_cache = zend_arena_alloc(&CG(arena), fbc->op_array.cache_size);
+		memset(fbc->op_array.run_time_cache, 0, fbc->op_array.cache_size);
+	}
+	return fbc;
+}
+
 static zend_execute_data* ZEND_FASTCALL zend_jit_extend_stack_helper(uint32_t used_stack, zend_function *fbc)
 {
 	zend_execute_data *call = (zend_execute_data*)zend_vm_stack_extend(used_stack);

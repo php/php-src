@@ -384,6 +384,7 @@ static int zend_jit_disasm_init(void)
 		(uint64_t)(uintptr_t)n, sizeof(void*));
 	REGISTER_HELPER(memcmp);
 	REGISTER_HELPER(zend_jit_find_func_helper);
+	REGISTER_HELPER(zend_jit_find_func_by_name_helper);
 	REGISTER_HELPER(zend_jit_extend_stack_helper);
 	REGISTER_HELPER(zend_jit_int_extend_stack_helper);
 	REGISTER_HELPER(zend_jit_leave_nested_func_helper);

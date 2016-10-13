@@ -1090,6 +1090,7 @@ pass:
 						}
 						goto done;
 					case ZEND_INIT_FCALL:
+					case ZEND_INIT_FCALL_BY_NAME:
 						if (!zend_jit_init_fcall(&dasm_state, opline, b, op_array, ssa, call_level)) {
 							goto jit_failure;
 						}
