@@ -1248,7 +1248,7 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 				}
 
 				if (new_len >= alloc_len) {
-					alloc_len = safe_address(2, new_len, alloc_len);
+					alloc_len = zend_safe_address_guarded(2, new_len, alloc_len);
 					if (result == NULL) {
 						result = zend_string_alloc(alloc_len, 0);
 					} else {
@@ -1291,9 +1291,9 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 				/* Use custom function to get replacement string and its length. */
 				eval_result = preg_do_repl_func(replace_val, subject, offsets, subpat_names, count, mark);
 				ZEND_ASSERT(eval_result);
-				new_len = safe_address(1, ZSTR_LEN(eval_result), new_len);
+				new_len = zend_safe_address_guarded(1, ZSTR_LEN(eval_result), new_len);
 				if (new_len >= alloc_len) {
-					alloc_len = safe_address(2, new_len, alloc_len);
+					alloc_len = zend_safe_address_guarded(2, new_len, alloc_len);
 					if (result == NULL) {
 						result = zend_string_alloc(alloc_len, 0);
 					} else {
