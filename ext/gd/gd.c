@@ -1032,8 +1032,10 @@ void php_gd_error_method(int type, const char *format, va_list args)
 {
 
 	switch (type) {
+#ifndef PHP_WIN32
 		case GD_DEBUG:
 		case GD_INFO:
+#endif
 		case GD_NOTICE:
 			type = E_NOTICE;
 			break;

@@ -108,12 +108,14 @@ void gd_stderr_error(int priority, const char *format, va_list args)
 	case GD_NOTICE:
 		fputs("GD Notice: ", stderr);
 		break;
+#ifndef PHP_WIN32
 	case GD_INFO:
 		fputs("GD Info: ", stderr);
 		break;
 	case GD_DEBUG:
 		fputs("GD Debug: ", stderr);
 		break;
+#endif
 	}
 	vfprintf(stderr, format, args);
 	fflush(stderr);
