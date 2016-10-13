@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include "gd.h"
+#include "gd_errors.h"
 
 int overflow2(int a, int b)
 {
