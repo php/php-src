@@ -72,10 +72,12 @@ PHP                                                                        NEWS
   . Fixed bug #73072 (Invalid path SNI_server_certs causes segfault).
     (Jakub Zelenka)
   . Fixed bug #73276 (crash in openssl_random_pseudo_bytes function). (Stas)
+  . Fixed bug #73275 (crash in openssl_encrypt function). (Stas)
 
 - PCRE:
   . Fixed bug #73121 (Bundled PCRE doesn't compile because JIT isn't supported
     on s390). (Anatol)
+  . Fixed bug #73174 (heap overflow in php_pcre_replace_impl). (Stas)
 
 - PDO_DBlib:
   . Fixed bug #72414 (Never quote values as raw binary data). (Adam Baratz)
