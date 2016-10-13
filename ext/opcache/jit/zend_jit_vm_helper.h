@@ -22,6 +22,8 @@
 
 void ZEND_FASTCALL zend_jit_leave_nested_func_helper(uint32_t call_info);
 void ZEND_FASTCALL zend_jit_leave_top_func_helper(uint32_t call_info);
+void ZEND_FASTCALL zend_jit_func_header_helper(void);
+void ZEND_FASTCALL zend_jit_loop_header_helper(void);
 
 #endif
 

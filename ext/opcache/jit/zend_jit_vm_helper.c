@@ -83,6 +83,35 @@ void ZEND_FASTCALL zend_jit_leave_top_func_helper(uint32_t call_info)
 	opline = NULL;
 }
 
+/* The recorded log may be postprocessed to identify the hot functions and
+ * loops.
+ *
+ * To get the top functions:
+ *     sed 's/^\(.*\), (.:\(.*\):.*$/\1,\2/' | sort | uniq -c | sort -nr | \
+ *     head -n25 | sed 's/^\s*[0-9]*\s*\(.*\),.*$/"\1",/' > zend_jit_filter.c
+ *
+ */
+
+void ZEND_FASTCALL zend_jit_func_header_helper(void)
+{
+	fprintf(stderr, "%s%s%s, (F:%s:%d)\n",
+		EX(func)->op_array.scope ? ZSTR_VAL(EX(func)->op_array.scope->name) : "",
+		EX(func)->op_array.scope ? "::" : "",
+		EX(func)->op_array.function_name ? ZSTR_VAL(EX(func)->op_array.function_name) : "",
+		ZSTR_VAL(EX(func)->op_array.filename),
+		EX(func)->op_array.line_start);
+}
+
+void ZEND_FASTCALL zend_jit_loop_header_helper(void)
+{
+	fprintf(stderr, "%s%s%s, (L:%s:%d)\n",
+		EX(func)->op_array.scope ? ZSTR_VAL(EX(func)->op_array.scope->name) : "",
+		EX(func)->op_array.scope ? "::" : "",
+		EX(func)->op_array.function_name ? ZSTR_VAL(EX(func)->op_array.function_name) : "",
+		ZSTR_VAL(EX(func)->op_array.filename),
+		opline->lineno);
+}
+
 /*
  * Local variables:
  * tab-width: 4
