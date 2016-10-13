@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include "gd.h"
 #include "gdhelpers.h"
+#include "gd_errors.h"
 
 #include "php.h"
 
