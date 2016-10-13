@@ -4123,15 +4123,6 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 	}
 
 	switch (image_type) {
-		case PHP_GDIMG_TYPE_GIF:
-			im_org = gdImageCreateFromGif(org);
-			if (im_org == NULL) {
-				php_error_docref(NULL, E_WARNING, "Unable to open '%s' Not a valid GIF file", fn_dest);
-                fclose(org);
-                fclose(dest);
-				RETURN_FALSE;
-			}
-			break;
 
 #ifdef HAVE_GD_JPG
 		case PHP_GDIMG_TYPE_JPG:
