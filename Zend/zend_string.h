@@ -34,8 +34,6 @@ void zend_interned_strings_init(void);
 void zend_interned_strings_dtor(void);
 void zend_known_interned_strings_init(zend_string ***, uint32_t *);
 
-ZEND_API zend_string *zend_strpprintf(size_t max_len, const char *format, ...);
-
 END_EXTERN_C()
 
 /* Shortcuts */

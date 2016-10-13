@@ -543,7 +543,7 @@ int phpdbg_compile_stdin(zend_string *code) {
 	PHPDBG_G(exec_len) = 1;
 	{ /* remove leading ?> from source */
 		int i;
-		zend_string *source_path = zend_strpprintf(0, "-%c%p", 0, PHPDBG_G(ops)->opcodes);
+		zend_string *source_path = strpprintf(0, "-%c%p", 0, PHPDBG_G(ops)->opcodes);
 		phpdbg_file_source *data = zend_hash_find_ptr(&PHPDBG_G(file_sources), source_path);
 		dtor_func_t dtor = PHPDBG_G(file_sources).pDestructor;
 		PHPDBG_G(file_sources).pDestructor = NULL;
