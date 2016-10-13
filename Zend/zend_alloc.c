@@ -1472,7 +1472,7 @@ static void *zend_mm_realloc_heap(zend_mm_heap *heap, void *ptr, size_t size, si
 #endif
 #ifdef ZEND_WIN32
 			/* On Windows we don't have ability to extend huge blocks in-place.
-			 * We allocate them with 2MB size granularity, to avoid many 
+			 * We allocate them with 2MB size granularity, to avoid many
 			 * reallocations when they are extended by small pieces
 			 */
 			new_size = ZEND_MM_ALIGNED_SIZE_EX(size, MAX(REAL_PAGE_SIZE, ZEND_MM_CHUNK_SIZE));
@@ -1740,7 +1740,7 @@ static void *zend_mm_alloc_huge(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_D
 {
 #ifdef ZEND_WIN32
 	/* On Windows we don't have ability to extend huge blocks in-place.
-	 * We allocate them with 2MB size granularity, to avoid many 
+	 * We allocate them with 2MB size granularity, to avoid many
 	 * reallocations when they are extended by small pieces
 	 */
 	size_t new_size = ZEND_MM_ALIGNED_SIZE_EX(size, MAX(REAL_PAGE_SIZE, ZEND_MM_CHUNK_SIZE));
@@ -2499,19 +2499,6 @@ ZEND_API size_t ZEND_FASTCALL _zend_mem_block_size(void *ptr ZEND_FILE_LINE_DC Z
 	}
 	return zend_mm_size(AG(mm_heap), ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 }
-
-static zend_always_inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
-{
-	int overflow;
-	size_t ret = zend_safe_address(nmemb, size, offset, &overflow);
-
-	if (UNEXPECTED(overflow)) {
-		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu * %zu + %zu)", nmemb, size, offset);
-		return 0;
-	}
-	return ret;
-}
-
 
 ZEND_API void* ZEND_FASTCALL _safe_emalloc(size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
