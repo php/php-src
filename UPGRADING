@@ -133,6 +133,8 @@ PHP 7.1 UPGRADE NOTES
          SHA2 and 5 bits = 39 chars, ceil(192/5)=39
          SHA1 and 6 bits = 32 chars, ceil(192/6)=32
          and so on.
+  . session_start() returns FALSE and no longer initializes $_SESSION when
+    it failed to start session.
 
 - Reflection:
   . The behavior of ReflectionMethod::invoke() and ::invokeArgs() has been
