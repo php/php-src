@@ -2801,7 +2801,7 @@ SPL_METHOD(CachingIterator, __toString)
 	if (Z_TYPE(intern->u.caching.zstr) == IS_STRING) {
 		RETURN_STR_COPY(Z_STR_P(&intern->u.caching.zstr));
 	} else {
-		RETURN_NULL();
+		RETURN_EMPTY_STRING();
 	}
 } /* }}} */
 
