@@ -29,7 +29,11 @@
 #include "php_date.h"
 #include "zend_interfaces.h"
 #include "lib/timelib.h"
+#ifndef PHP_WIN32
 #include <time.h>
+#else
+#include "win32/time.h"
+#endif
 
 #ifdef PHP_WIN32
 static __inline __int64 php_date_llabs( __int64 i ) { return i >= 0? i: -i; }
