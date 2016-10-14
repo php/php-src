@@ -1877,7 +1877,7 @@ inline_char_handler:
 }
 
 <ST_VAR_OFFSET>{TOKENS}|[{}"`] {
-	/* Only '[' can be valid, but returning other tokens will allow a more explicit parse error */
+	/* Only '[' or '-' can be valid, but returning other tokens will allow a more explicit parse error */
 	RETURN_TOKEN(yytext[0]);
 }
 
