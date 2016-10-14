@@ -24,6 +24,17 @@ PHP                                                                        NEWS
   . Fixed bug #73058 (crypt broken when salt is 'too' long). (Anatol)
   . Fixed bug #72703 (Out of bounds global memory read in BF_crypt triggered by
     password_verify). (Anatol)
+  . Fixed bug #73189 (Memcpy negative size parameter php_resolve_path). (Stas)
+  . Fixed bug #73147 (Use After Free in unserialize()). (Stas)
+
+- BCmath:
+  . Fixed bug #73190 (memcpy negative parameter _bc_new_num_ex). (Stas)
+
+- DOM:
+  . Fixed bug #73150 (missing NULL check in dom_document_save_html). (Stas)
+
+- Ereg:
+  . Fixed bug #73284 (heap overflow in php_ereg_replace function). (Stas)
 
 - Filter:
   . Fixed bug #72972 (Bad filter for the flags FILTER_FLAG_NO_RES_RANGE and
@@ -48,11 +59,22 @@ PHP                                                                        NEWS
     files). (cmb)
   . Fixed bug #73161 (imagecreatefromgd2() may leak memory). (cmb)
 
+- Intl:
+  . Fixed bug #73218 (add mitigation for ICU int overflow). (Stas)
+
+- Imap:
+  . Fixed bug #73208 (integer overflow in imap_8bit caused heap corruption).
+    (Stas)
+
 - Mbstring:
   . Fixed bug #72994 (mbc_to_code() out of bounds read). (Laruence, cmb)
   . Fixed bug #66964 (mb_convert_variables() cannot detect recursion). (Yasuo)
   . Fixed bug #72992 (mbstring.internal_encoding doesn't inherit default_charset).
     (Yasuo)
+  . Fixed bug #73082 (string length overflow in mb_encode_* function). (Stas)
+
+- PCRE:
+  . Fixed bug #73174 (heap overflow in php_pcre_replace_impl). (Stas)
 
 - Opcache:
   . Fixed bug #72590 (Opcache restart with kill_all_lockers does not work).
@@ -61,12 +83,26 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fixed bug #73072 (Invalid path SNI_server_certs causes segfault).
     (Jakub Zelenka)
+  . Fixed bug #73275 (crash in openssl_encrypt function). (Stas)
+  . Fixed bug #73276 (crash in openssl_random_pseudo_bytes function). (Stas)
 
 - Session:
   . Fixed bug #68015 (Session does not report invalid uid for files save handler).
     (Yasuo)
   . Fixed bug #73100 (session_destroy null dereference in ps_files_path_create).
     (cmb)
+
+- SimpleXML:
+  . Fixed bug #73293 (NULL pointer dereference in SimpleXMLElement::asXML()).
+    (Stas)
+
+- SPL:
+  . Fixed bug #73073 (CachingIterator null dereference when convert to string).
+    (Stas)
+
+- Standard:
+  . Fixed bug #73240 (Write out of bounds at number_format). (Stas)
+  . Fixed bug #73017 (memory corruption in wordwrap function). (Stas)
 
 - Stream:
   . Fixed bug #73069 (readfile() mangles files larger than 2G). (Laruence)
