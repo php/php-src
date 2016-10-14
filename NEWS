@@ -23,6 +23,7 @@ PHP                                                                        NEWS
   . Fixed bug #73272 (imagescale() is not affected by, but affects
     imagesetinterpolation()). (cmb)
   . Fixed bug #73279 (Integer overflow in gdImageScaleBilinearPalette()). (cmb)
+  . Fixed bug #73280 (Stack Buffer Overflow in GD dynamicGetbuf). (cmb)
 
 - Session:
   . Fixed bug #73273 (session_unset() empties values from all variables in which
