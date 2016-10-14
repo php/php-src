@@ -2022,7 +2022,7 @@ static int zend_infer_ranges(const zend_op_array *op_array, zend_ssa *ssa) /* {{
 		uint32_t __type = (_type);										\
 		int __var = (_var);												\
 		if (__type & MAY_BE_REF) {										\
-			__type |= MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF; \
+			__type |= MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF; \
 		}																\
 		if (__var >= 0) {												\
 			if (ssa_vars[__var].var < op_array->last_var) {				\
@@ -2527,8 +2527,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 					           (tmp & (MAY_BE_ARRAY|MAY_BE_OBJECT))) {
 							tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 					} else if (opline->extended_value == IS_STRING &&
-					           (t1 & MAY_BE_STRING) &&
-					           (opline->op1_type == IS_CV)) {
+					           (t1 & MAY_BE_STRING)) {
 						tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 					} else {
 						tmp |= MAY_BE_RC1;
@@ -2783,7 +2782,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 				if (t1 & MAY_BE_STRING) {
 					tmp |= MAY_BE_STRING;
 				}
-				if (t1 & (MAY_BE_ANY - MAY_BE_STRING)) {
+				if (t1 & ((MAY_BE_ANY|MAY_BE_UNDEF) - MAY_BE_STRING)) {
 					tmp |= (OP1_DATA_INFO() & (MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF));
 
 					if (opline->op2_type == IS_UNUSED) {
@@ -2796,7 +2795,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 						tmp |= MAY_BE_NULL;
 					}
 					if (t1 & (MAY_BE_ANY - (MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING | MAY_BE_ARRAY))) {
-						/* null and false are implicitly converted to array, anything else
+						/* undef, null and false are implicitly converted to array, anything else
 						 * results in a null return value. */
 						tmp |= MAY_BE_NULL;
 					}
@@ -2948,7 +2947,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 		case ZEND_YIELD:
 			if (ssa_ops[i].op1_def >= 0) {
 				if (op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
-					tmp = t1 & MAY_BE_REF;
+					tmp = t1 | MAY_BE_REF;
 				} else {
 					tmp = t1 & ~(MAY_BE_RC1|MAY_BE_RCN);
 					if (t1 & (MAY_BE_RC1|MAY_BE_RCN)) {
