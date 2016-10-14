@@ -41,5 +41,5 @@
 
 void bc_out_of_memory (void)
 {
-  zend_error_noreturn(E_ERROR, "bcmath: out of memory!");
+  zend_error(E_ERROR, "bcmath: out of memory!");
 }
