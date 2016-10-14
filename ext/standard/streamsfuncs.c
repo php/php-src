@@ -1680,7 +1680,7 @@ PHP_FUNCTION(stream_isatty)
 		RETURN_FALSE;
 	}
 #else
-	RETURN_FALSE;
+	RETURN_NULL();
 #endif
 }
 
