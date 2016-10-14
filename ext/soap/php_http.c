@@ -242,7 +242,7 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 		smart_str soap_headers = {0};
 
 		/* Set peer_name or name verification will try to use the proxy server name */
-		if (context && (tmp = php_stream_context_get_option(context, "ssl", "peer_name")) != NULL) {
+		if (!context || (tmp = php_stream_context_get_option(context, "ssl", "peer_name")) == NULL) {
 			ZVAL_STRING(&ssl_proxy_peer_name, phpurl->host);
 			php_stream_context_set_option(PHP_STREAM_CONTEXT(stream), "ssl", "peer_name", &ssl_proxy_peer_name);
 			zval_ptr_dtor(&ssl_proxy_peer_name);
