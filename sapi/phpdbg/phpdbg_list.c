@@ -312,8 +312,8 @@ zend_op_array *phpdbg_init_compile_file(zend_file_handle *file, int type) {
 			if (file->free_filename) {
 				efree((char *) file->filename);
 			}
-			file->free_filename = 1;
-			file->filename = estrdup(filename);
+			file->free_filename = 0;
+			file->filename = filename;
 		}
 	}
 
