@@ -49,9 +49,22 @@ PHP                                                                        NEWS
   . Fixed bug #73163 (PHP hangs if error handler throws while accessing undef
     const in default value). (Nikita)
   . Fixed bug #73172 (parse error: Invalid numeric literal). (Nikita, Anatol)
+  . Fixed for #73240 (Write out of bounds at number_format). (Stas)
+  . Fixed bug #73147 (Use After Free in PHP7 unserialize()). (Stas)
+  . Fixed bug #73189 (Memcpy negative size parameter php_resolve_path). (Stas)
+
+- BCmath:
+  . Fix bug #73190 (memcpy negative parameter _bc_new_num_ex). (Stas)
 
 - COM:
   . Fixed bug #73126 (Cannot pass parameter 1 by reference). (Anatol)
+
+- Date:
+  . Fixed bug #73091 (Unserializing DateInterval object may lead to __toString
+    invocation). (Stas)
+
+- DOM:
+  . Fixed bug #73150 (missing NULL check in dom_document_save_html). (Stas)
 
 - Filter:
   . Fixed bug #72972 (Bad filter for the flags FILTER_FLAG_NO_RES_RANGE and
@@ -74,6 +87,9 @@ PHP                                                                        NEWS
     files). (cmb)
   . Fixed bug #73161 (imagecreatefromgd2() may leak memory). (cmb)
 
+- Intl:
+  . Fixed bug #73218 (add mitigation for ICU int overflow). (Stas)
+
 - Mbstring:
   . Fixed bug #66797 (mb_substr only takes 32-bit signed integer). (cmb)
   . Fixed bug #66964 (mb_convert_variables() cannot detect recursion) (Yasuo)
@@ -91,10 +107,13 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fixed bug #73072 (Invalid path SNI_server_certs causes segfault).
     (Jakub Zelenka)
+  . Fixed bug #73276 (crash in openssl_random_pseudo_bytes function). (Stas)
+  . Fixed bug #73275 (crash in openssl_encrypt function). (Stas)
 
 - PCRE:
   . Fixed bug #73121 (Bundled PCRE doesn't compile because JIT isn't supported
     on s390). (Anatol)
+  . Fixed bug #73174 (heap overflow in php_pcre_replace_impl). (Stas)
 
 - PDO_DBlib:
   . Fixed bug #72414 (Never quote values as raw binary data). (Adam Baratz)
@@ -118,10 +137,18 @@ PHP                                                                        NEWS
   . Fixed bug #73100 (session_destroy null dereference in ps_files_path_create).
     (cmb)
 
+- SimpleXML:
+  . Fixed bug #73293 (NULL pointer dereference in SimpleXMLElement::asXML()).
+    (Stas)
+
 - SOAP:
   . Fixed bug #71711 (Soap Server Member variables reference bug). (Nikita)
   . Fixed bug #71996 (Using references in arrays doesn't work like expected).
     (Nikita)
+
+- SPL:
+  . Fixed bug #73257, #73258 (SplObjectStorage unserialize allows use of
+    non-object as key). (Stas)
 
 - SQLite3:
   . Updated bundled SQLite3 to 3.14.2. (cmb)
