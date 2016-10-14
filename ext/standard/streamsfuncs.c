@@ -1680,6 +1680,12 @@ PHP_FUNCTION(stream_isatty)
 		RETURN_FALSE;
 	}
 #else
+	zend_stat_t stat;
+	if (zend_fstat(fileno, &stat) == 0) {
+		if ((stat.st_mode & /*S_IFMT*/0170000) == /*S_IFCHR*/0020000) {
+			RETURN_TRUE;
+		}
+	}
 	RETURN_NULL();
 #endif
 }
