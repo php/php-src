@@ -69,29 +69,34 @@ PHPAPI size_t php_strlcat(dst, src, siz)
 	const char *src;
 	size_t siz;
 {
-	register char *d = dst;
-	register const char *s = src;
-	register size_t n = siz;
+	const char *d = dst;
+	const char *s = src;
+	size_t n = siz;
 	size_t dlen;
 
 	/* Find the end of dst and adjust bytes left but don't go past end */
-	while (*d != '\0' && n-- != 0)
-		d++;
-	dlen = d - dst;
+	while (n-- != 0 && *dst != '\0')
+		dst++;
+	dlen = (uintptr_t)dst - (uintptr_t)d;
 	n = siz - dlen;
 
-	if (n == 0)
-		return(dlen + strlen(s));
-	while (*s != '\0') {
-		if (n != 1) {
-			*d++ = *s;
+	if (n-- == 0)
+		return(dlen + strlen(src));
+	while (*src != '\0') {
+		if (n != 0) {
+			*dst++ = *src;
 			n--;
 		}
-		s++;
+		src++;
 	}
-	*d = '\0';
+	*dst = '\0';
 
-	return(dlen + (s - src));	/* count does not include NUL */
+	/*
+	 * Cast pointers to unsigned type before calculation, to avoid signed
+	 * overflow when the string ends where the MSB has changed.
+	 * Return value does not include NUL.
+	 */
+	return(dlen + ((uintptr_t)src - (uintptr_t)s));
 }
 
 #endif /* !HAVE_STRLCAT */
