@@ -2822,10 +2822,12 @@ ZEND_API void * __zend_calloc(size_t nmemb, size_t len)
 
 ZEND_API void * __zend_realloc(void *p, size_t len)
 {
-	p = realloc(p, len);
-	if (EXPECTED(p)) {
+	void *pp = realloc(p, len);
+	if (EXPECTED(pp)) {
+		p = pp;
 		return p;
 	}
+	free(p);
 	zend_out_of_memory();
 }
 

@@ -1198,7 +1198,7 @@ int main(int argc, char *argv[])
 	int php_optind = 1, use_extended_info = 0;
 	char *ini_path_override = NULL;
 	char *ini_entries = NULL;
-	int ini_entries_len = 0;
+	size_t ini_entries_len = 0;
 	int ini_ignore = 0;
 	sapi_module_struct *sapi_module = &cli_sapi_module;
 
@@ -1267,29 +1267,50 @@ int main(int argc, char *argv[])
 				break;
 			case 'd': {
 				/* define ini entries on command line */
-				int len = (int)strlen(php_optarg);
-				char *val;
+				size_t len = strlen(php_optarg);
+				char *val, *pini_entries;
 
 				if ((val = strchr(php_optarg, '='))) {
 					val++;
 					if (!isalnum(*val) && *val != '"' && *val != '\'' && *val != '\0') {
-						ini_entries = realloc(ini_entries, ini_entries_len + len + sizeof("\"\"\n\0"));
+						if ((ini_entries_len + len + sizeof("\"\"\n\0")) >= SIZE_MAX) {
+							goto out;
+						}
+						pini_entries = realloc(ini_entries, ini_entries_len + len + sizeof("\"\"\n\0"));
+						if (!pini_entries) {
+							goto out;
+						}
+						ini_entries = pini_entries;
 						memcpy(ini_entries + ini_entries_len, php_optarg, (val - php_optarg));
-						ini_entries_len += (int)(val - php_optarg);
+						ini_entries_len += (val - php_optarg);
 						memcpy(ini_entries + ini_entries_len, "\"", 1);
 						ini_entries_len++;
 						memcpy(ini_entries + ini_entries_len, val, len - (val - php_optarg));
-						ini_entries_len += len - (int)(val - php_optarg);
+						ini_entries_len += len - (val - php_optarg);
 						memcpy(ini_entries + ini_entries_len, "\"\n\0", sizeof("\"\n\0"));
 						ini_entries_len += sizeof("\n\0\"") - 2;
 					} else {
-						ini_entries = realloc(ini_entries, ini_entries_len + len + sizeof("\n\0"));
+						if ((ini_entries_len + len + sizeof("\n\0")) >= SIZE_MAX) {
+							goto out;
+						}
+						pini_entries = realloc(ini_entries, ini_entries_len + len + sizeof("\n\0"));
+						if (!pini_entries) {
+							goto out;
+						}
+						ini_entries = pini_entries;
 						memcpy(ini_entries + ini_entries_len, php_optarg, len);
 						memcpy(ini_entries + ini_entries_len + len, "\n\0", sizeof("\n\0"));
 						ini_entries_len += len + sizeof("\n\0") - 2;
 					}
 				} else {
-					ini_entries = realloc(ini_entries, ini_entries_len + len + sizeof("=1\n\0"));
+					if ((ini_entries_len + len + sizeof("=1\n\0")) >= SIZE_MAX) {
+						goto out;
+					}
+					pini_entries = realloc(ini_entries, ini_entries_len + len + sizeof("=1\n\0"));
+					if (!pini_entries) {
+						goto out;
+					}
+					ini_entries = pini_entries;
 					memcpy(ini_entries + ini_entries_len, php_optarg, len);
 					memcpy(ini_entries + ini_entries_len + len, "=1\n\0", sizeof("=1\n\0"));
 					ini_entries_len += len + sizeof("=1\n\0") - 2;
@@ -1329,7 +1350,15 @@ exit_loop:
 
 	if (sapi_module == &cli_sapi_module) {
 		if (ini_entries) {
-			ini_entries = realloc(ini_entries, ini_entries_len + sizeof(HARDCODED_INI));
+			char *pini_entries;
+			if ((ini_entries_len + sizeof(HARDCODED_INI)) >= SIZE_MAX) {
+				goto out;
+			}
+			pini_entries = realloc(ini_entries, ini_entries_len + sizeof(HARDCODED_INI));
+			if (!pini_entries) {
+				goto out;
+			}
+			ini_entries = pini_entries;
 			memmove(ini_entries + sizeof(HARDCODED_INI) - 2, ini_entries, ini_entries_len + 1);
 			memcpy(ini_entries, HARDCODED_INI, sizeof(HARDCODED_INI) - 2);
 		} else {

@@ -218,8 +218,21 @@ void zend_accel_blacklist_shutdown(zend_blacklist *blacklist)
 static inline void zend_accel_blacklist_allocate(zend_blacklist *blacklist)
 {
 	if (blacklist->pos == blacklist->size) {
+		if ((blacklist->size + ZEND_BLACKLIST_BLOCK_SIZE) >= INT_MAX) {
+			zend_accel_blacklist_shutdown(blacklist);
+			zend_accel_error(ACCEL_LOG_FATAL, "Blacklist increase: block size out of range\n");
+			return;
+		}
+
 		blacklist->size += ZEND_BLACKLIST_BLOCK_SIZE;
-		blacklist->entries = (zend_blacklist_entry *) realloc(blacklist->entries, sizeof(zend_blacklist_entry)*blacklist->size);
+		zend_blacklist_entry * entries = (zend_blacklist_entry *) realloc(blacklist->entries, sizeof(zend_blacklist_entry) * blacklist->size);
+		if (!entries) {
+			zend_accel_blacklist_shutdown(blacklist);
+			zend_accel_error(ACCEL_LOG_FATAL, "Blacklist increase: no memory\n");
+			return;
+		}
+
+		blacklist->entries = entries;
 	}
 }
 
