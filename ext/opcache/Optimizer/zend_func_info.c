@@ -37,6 +37,9 @@ typedef struct _func_info_t {
 	info_func_t info_func;
 } func_info_t;
 
+/* MSVC defines its own IN macro, undefine it here */
+#undef IN
+
 #define F0(name, info) \
 	{name, sizeof(name)-1, (FUNC_MAY_WARN | (info)), NULL}
 #define F1(name, info) \
