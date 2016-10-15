@@ -82,7 +82,7 @@ var_dump(base64_encode_array(mb_convert_encoding($euc_jp_string, 'UTF-8', 'EUC-J
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing mb_convert_encoding() : Circular references ***
 
 -- Convert to JIS --
@@ -95,7 +95,7 @@ array(2) {
 }
 Converted Strings:
 
-Warning: mb_convert_encoding(): Cannot convert recursively referenced values in /home/yohgaki/workspace/ext/git/oss/php.net/PHP-master/ext/mbstring/tests/mb_convert_encoding_array2.php on line 47
+Warning: mb_convert_encoding(): Cannot convert recursively referenced values in %s on line %d
 array(2) {
   [0]=>
   string(68) "GyRCRnxLXDhsJUYlLSU5JUgkRyQ5ISMbKEIwMTIzNBskQiM1IzYjNyM4IzkhIxsoQg=="
@@ -103,7 +103,7 @@ array(2) {
   string(68) "GyRCRnxLXDhsJUYlLSU5JUgkRyQ5ISMbKEIwMTIzNBskQiM1IzYjNyM4IzkhIxsoQg=="
 }
 
-Warning: mb_convert_encoding(): Cannot convert recursively referenced values in /home/yohgaki/workspace/ext/git/oss/php.net/PHP-master/ext/mbstring/tests/mb_convert_encoding_array2.php on line 48
+Warning: mb_convert_encoding(): Cannot convert recursively referenced values in %s on line %d
 array(2) {
   [0]=>
   string(68) "GyRCRnxLXDhsJUYlLSU5JUgkRyQ5ISMbKEIwMTIzNBskQiM1IzYjNyM4IzkhIxsoQg=="
@@ -111,7 +111,7 @@ array(2) {
   string(68) "GyRCRnxLXDhsJUYlLSU5JUgkRyQ5ISMbKEIwMTIzNBskQiM1IzYjNyM4IzkhIxsoQg=="
 }
 
-Warning: mb_convert_encoding(): Cannot convert recursively referenced values in /home/yohgaki/workspace/ext/git/oss/php.net/PHP-master/ext/mbstring/tests/mb_convert_encoding_array2.php on line 49
+Warning: mb_convert_encoding(): Cannot convert recursively referenced values in %s on line %d
 array(2) {
   [0]=>
   string(68) "GyRCRnxLXDhsJUYlLSU5JUgkRyQ5ISMbKEIwMTIzNBskQiM1IzYjNyM4IzkhIxsoQg=="
@@ -129,7 +129,7 @@ array(2) {
 }
 Converted Strings:
 
-Warning: mb_convert_encoding(): Cannot convert recursively referenced values in /home/yohgaki/workspace/ext/git/oss/php.net/PHP-master/ext/mbstring/tests/mb_convert_encoding_array2.php on line 55
+Warning: mb_convert_encoding(): Cannot convert recursively referenced values in %s on line %d
 array(2) {
   [0]=>
   string(52) "xvzL3LjspcalraW5pcikx6S5oaMwMTIzNKO1o7ajt6O4o7mhow=="
@@ -137,7 +137,7 @@ array(2) {
   string(52) "xvzL3LjspcalraW5pcikx6S5oaMwMTIzNKO1o7ajt6O4o7mhow=="
 }
 
-Warning: mb_convert_encoding(): Cannot convert recursively referenced values in /home/yohgaki/workspace/ext/git/oss/php.net/PHP-master/ext/mbstring/tests/mb_convert_encoding_array2.php on line 56
+Warning: mb_convert_encoding(): Cannot convert recursively referenced values in %s on line %d
 array(2) {
   [0]=>
   string(52) "xvzL3LjspcalraW5pcikx6S5oaMwMTIzNKO1o7ajt6O4o7mhow=="
@@ -145,7 +145,7 @@ array(2) {
   string(52) "xvzL3LjspcalraW5pcikx6S5oaMwMTIzNKO1o7ajt6O4o7mhow=="
 }
 
-Warning: mb_convert_encoding(): Cannot convert recursively referenced values in /home/yohgaki/workspace/ext/git/oss/php.net/PHP-master/ext/mbstring/tests/mb_convert_encoding_array2.php on line 57
+Warning: mb_convert_encoding(): Cannot convert recursively referenced values in %s on line %d
 array(2) {
   [0]=>
   string(52) "xvzL3LjspcalraW5pcikx6S5oaMwMTIzNKO1o7ajt6O4o7mhow=="
@@ -163,7 +163,7 @@ array(2) {
 }
 Converted Strings:
 
-Warning: mb_convert_encoding(): Cannot convert recursively referenced values in /home/yohgaki/workspace/ext/git/oss/php.net/PHP-master/ext/mbstring/tests/mb_convert_encoding_array2.php on line 63
+Warning: mb_convert_encoding(): Cannot convert recursively referenced values in %s on line %d
 array(2) {
   [0]=>
   string(52) "k/qWe4zqg2WDTINYg2eCxYK3gUIwMTIzNIJUglWCVoJXgliBQg=="
@@ -171,7 +171,7 @@ array(2) {
   string(52) "k/qWe4zqg2WDTINYg2eCxYK3gUIwMTIzNIJUglWCVoJXgliBQg=="
 }
 
-Warning: mb_convert_encoding(): Cannot convert recursively referenced values in /home/yohgaki/workspace/ext/git/oss/php.net/PHP-master/ext/mbstring/tests/mb_convert_encoding_array2.php on line 64
+Warning: mb_convert_encoding(): Cannot convert recursively referenced values in %s on line %d
 array(2) {
   [0]=>
   string(52) "k/qWe4zqg2WDTINYg2eCxYK3gUIwMTIzNIJUglWCVoJXgliBQg=="
@@ -179,7 +179,7 @@ array(2) {
   string(52) "k/qWe4zqg2WDTINYg2eCxYK3gUIwMTIzNIJUglWCVoJXgliBQg=="
 }
 
-Warning: mb_convert_encoding(): Cannot convert recursively referenced values in /home/yohgaki/workspace/ext/git/oss/php.net/PHP-master/ext/mbstring/tests/mb_convert_encoding_array2.php on line 65
+Warning: mb_convert_encoding(): Cannot convert recursively referenced values in %s on line %d
 array(2) {
   [0]=>
   string(52) "k/qWe4zqg2WDTINYg2eCxYK3gUIwMTIzNIJUglWCVoJXgliBQg=="
@@ -197,7 +197,7 @@ array(2) {
 }
 Converted Strings:
 
-Warning: mb_convert_encoding(): Cannot convert recursively referenced values in /home/yohgaki/workspace/ext/git/oss/php.net/PHP-master/ext/mbstring/tests/mb_convert_encoding_array2.php on line 71
+Warning: mb_convert_encoding(): Cannot convert recursively referenced values in %s on line %d
 array(2) {
   [0]=>
   string(72) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII="
@@ -205,7 +205,7 @@ array(2) {
   string(72) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII="
 }
 
-Warning: mb_convert_encoding(): Cannot convert recursively referenced values in /home/yohgaki/workspace/ext/git/oss/php.net/PHP-master/ext/mbstring/tests/mb_convert_encoding_array2.php on line 72
+Warning: mb_convert_encoding(): Cannot convert recursively referenced values in %s on line %d
 array(2) {
   [0]=>
   string(72) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII="
@@ -213,7 +213,7 @@ array(2) {
   string(72) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII="
 }
 
-Warning: mb_convert_encoding(): Cannot convert recursively referenced values in /home/yohgaki/workspace/ext/git/oss/php.net/PHP-master/ext/mbstring/tests/mb_convert_encoding_array2.php on line 73
+Warning: mb_convert_encoding(): Cannot convert recursively referenced values in %s on line %d
 array(2) {
   [0]=>
   string(72) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII="
