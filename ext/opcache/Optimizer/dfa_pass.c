@@ -149,20 +149,7 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa)
 				    i + 1 < op_array->last &&
 				    (op_array->opcodes[i+1].opcode == ZEND_JMPZ ||
 				     op_array->opcodes[i+1].opcode == ZEND_JMPNZ) &&
-				    (op_array->opcodes[i-1].opcode == ZEND_IS_IDENTICAL ||
-				     op_array->opcodes[i-1].opcode == ZEND_IS_NOT_IDENTICAL ||
-				     op_array->opcodes[i-1].opcode == ZEND_IS_EQUAL ||
-				     op_array->opcodes[i-1].opcode == ZEND_IS_NOT_EQUAL ||
-				     op_array->opcodes[i-1].opcode == ZEND_IS_SMALLER ||
-				     op_array->opcodes[i-1].opcode == ZEND_IS_SMALLER_OR_EQUAL ||
-				     op_array->opcodes[i-1].opcode == ZEND_CASE ||
-				     op_array->opcodes[i-1].opcode == ZEND_ISSET_ISEMPTY_VAR ||
-				     op_array->opcodes[i-1].opcode == ZEND_ISSET_ISEMPTY_STATIC_PROP ||
-				     op_array->opcodes[i-1].opcode == ZEND_ISSET_ISEMPTY_DIM_OBJ ||
-				     op_array->opcodes[i-1].opcode == ZEND_ISSET_ISEMPTY_PROP_OBJ ||
-				     op_array->opcodes[i-1].opcode == ZEND_INSTANCEOF ||
-				     op_array->opcodes[i-1].opcode == ZEND_TYPE_CHECK ||
-				     op_array->opcodes[i-1].opcode == ZEND_DEFINED))) {
+				    zend_is_smart_branch(op_array->opcodes + i - 1))) {
 					if (i != target) {
 						op_array->opcodes[target] = op_array->opcodes[i];
 						ssa->ops[target] = ssa->ops[i];

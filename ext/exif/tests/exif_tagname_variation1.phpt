@@ -2,7 +2,7 @@
 Test exif_tagname() function : usage variations  - different types for index argument
 --SKIPIF--
 <?php if (!extension_loaded('exif')) print 'skip exif extension not available';
-if (PHP_INT_SIZE != 8) die('skip 64-bit only');
+if (PHP_INT_SIZE != 4) die('skip 32-bit only');
 ?>
 --FILE--
 <?php
@@ -41,8 +41,6 @@ $values =  array (
   // float values
   10.5,
   -10.5,
-  10.1234567e10,
-  10.7654321E-10,
   .5,
 
   // array values
@@ -121,9 +119,13 @@ bool(false)
 -- Iteration 7 --
 bool(false)
 -- Iteration 8 --
-bool(false)
+
+Warning: exif_tagname() expects parameter 1 to be integer, array given in %s on line %d
+NULL
 -- Iteration 9 --
-bool(false)
+
+Warning: exif_tagname() expects parameter 1 to be integer, array given in %s on line %d
+NULL
 -- Iteration 10 --
 
 Warning: exif_tagname() expects parameter 1 to be integer, array given in %s on line %d
@@ -137,44 +139,36 @@ NULL
 Warning: exif_tagname() expects parameter 1 to be integer, array given in %s on line %d
 NULL
 -- Iteration 13 --
-
-Warning: exif_tagname() expects parameter 1 to be integer, array given in %s on line %d
-NULL
+bool(false)
 -- Iteration 14 --
-
-Warning: exif_tagname() expects parameter 1 to be integer, array given in %s on line %d
-NULL
+bool(false)
 -- Iteration 15 --
 bool(false)
 -- Iteration 16 --
 bool(false)
 -- Iteration 17 --
-bool(false)
+
+Warning: exif_tagname() expects parameter 1 to be integer, string given in %s on line %d
+NULL
 -- Iteration 18 --
-bool(false)
+
+Warning: exif_tagname() expects parameter 1 to be integer, string given in %s on line %d
+NULL
 -- Iteration 19 --
-
-Warning: exif_tagname() expects parameter 1 to be integer, string given in %s on line %d
-NULL
+bool(false)
 -- Iteration 20 --
-
-Warning: exif_tagname() expects parameter 1 to be integer, string given in %s on line %d
-NULL
+bool(false)
 -- Iteration 21 --
-bool(false)
--- Iteration 22 --
-bool(false)
--- Iteration 23 --
 
 Warning: exif_tagname() expects parameter 1 to be integer, object given in %s on line %d
 NULL
--- Iteration 24 --
+-- Iteration 22 --
 
 Warning: exif_tagname() expects parameter 1 to be integer, resource given in %s on line %d
 NULL
--- Iteration 25 --
+-- Iteration 23 --
 bool(false)
--- Iteration 26 --
+-- Iteration 24 --
 bool(false)
 Done
 

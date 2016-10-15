@@ -38,8 +38,8 @@
 # define timelib_free    free
 #endif
 
-#define TIMELIB_VERSION 201602
-#define TIMELIB_ASCII_VERSION "2016.02"
+#define TIMELIB_VERSION 201605
+#define TIMELIB_ASCII_VERSION "2016.05"
 
 #define TIMELIB_NONE             0x00
 #define TIMELIB_OVERRIDE_TIME    0x01
@@ -139,6 +139,7 @@ void timelib_time_set_option(timelib_time* tm, int option, void* option_value);
 void timelib_time_dtor(timelib_time* t);
 timelib_time* timelib_time_clone(timelib_time* orig);
 int timelib_time_compare(timelib_time *t1, timelib_time *t2);
+void timelib_set_fraction_from_timeval(timelib_time *t, struct timeval tp);
 
 timelib_time_offset* timelib_time_offset_ctor(void);
 void timelib_time_offset_dtor(timelib_time_offset* t);

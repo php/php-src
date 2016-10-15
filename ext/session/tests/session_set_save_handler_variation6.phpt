@@ -1,9 +1,11 @@
 --TEST--
 Test session_set_save_handler() function : test lazy_write
 --INI--
+session.use_strict_mode=0
 session.lazy_write=1
 session.save_path=
 session.name=PHPSESSID
+session.gc_probability=0
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--

@@ -49,20 +49,6 @@
 #include "php_oci8_int.h"
 #include "zend_hash.h"
 
-#if defined(__PTRDIFF_TYPE__)
-# define OCI8_INT_TO_PTR(I)  ((void*)(__PTRDIFF_TYPE__)(I))
-# define OCI8_PTR_TO_INT(P)  ((int)(__PTRDIFF_TYPE__)(P))
-#elif !defined(__GNUC__)
-#define OCI8_INT_TO_PTR(I)  ((void*)&((char*)0)[I])
-#define OCI8_PTR_TO_INT(P)  ((int)(((char*)P)-(char*)0))
-#elif defined(HAVE_STDINT_H)
-#define OCI8_INT_TO_PTR(I)  ((void*)(intptr_t)(I))
-#define OCI8_PTR_TO_INT(P)  ((int)(intptr_t)(P))
-#else
-#define OCI8_INT_TO_PTR(I)  ((void*)(I))
-#define OCI8_PTR_TO_INT(P)  ((int)(P))
-#endif
-
 ZEND_DECLARE_MODULE_GLOBALS(oci)
 static PHP_GINIT_FUNCTION(oci);
 static PHP_GSHUTDOWN_FUNCTION(oci);
@@ -2559,7 +2545,8 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 #else /* OCI_MAJOR_VERSION */
 	PHP_OCI_ZVAL_TO_STATEMENT(z_statement, invokedstatement);
 
-	if (invokedstatement->impres_flag == PHP_OCI_IMPRES_NO_CHILDREN) {
+	if (invokedstatement->impres_flag == PHP_OCI_IMPRES_NO_CHILDREN ||
+        invokedstatement->impres_flag == PHP_OCI_IMPRES_IS_CHILD) {
 		/* Already know there are no Implicit Result Sets */
 	    statement = invokedstatement;
 	} else if (invokedstatement->impres_flag == PHP_OCI_IMPRES_HAS_CHILDREN) {

@@ -44,9 +44,7 @@ pattern data block. This might be helpful in applications where the block is
 shared by different users. */
 
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #include "pcre_internal.h"
 

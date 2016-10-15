@@ -1,7 +1,9 @@
 
 #include <php_compat.h>
 
-#ifndef PHP_WIN32
+#ifdef PHP_WIN32
+# include <config.w32.h>
+#else
 # include <php_config.h>
 #endif
 
@@ -397,7 +399,9 @@ them both to 0; an emulation function will be used. */
 #undef SUPPORT_GCOV
 
 /* Define to any value to enable support for Just-In-Time compiling. */
+#if HAVE_PCRE_JIT_SUPPORT
 #define SUPPORT_JIT
+#endif
 
 /* Define to any value to allow pcregrep to be linked with libbz2, so that it
    is able to handle .bz2 files. */

@@ -15,6 +15,7 @@ DateInterval Object
     [h] => 12
     [i] => 30
     [s] => 5
+    [f] => 0
     [weekday] => 0
     [weekday_behavior] => 0
     [first_last_day_of] => 0
@@ -33,6 +34,7 @@ DateInterval Object
     [h] => 12
     [i] => 30
     [s] => 5
+    [f] => 0
     [weekday] => 0
     [weekday_behavior] => 0
     [first_last_day_of] => 0

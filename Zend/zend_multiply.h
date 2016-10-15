@@ -19,10 +19,32 @@
 
 /* $Id$ */
 
+#include "zend_portability.h"
+
 #ifndef ZEND_MULTIPLY_H
 #define ZEND_MULTIPLY_H
 
-#if (defined(__i386__) || defined(__x86_64__)) && defined(__GNUC__)
+#if PHP_HAVE_BUILTIN_SMULL_OVERFLOW && SIZEOF_LONG == SIZEOF_ZEND_LONG
+
+#define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
+	long __tmpvar;		 											\
+	if (((usedval) = __builtin_smull_overflow((a), (b), &__tmpvar))) {	\
+		(dval) = (double) (a) * (double) (b);						\
+	}																\
+	else (lval) = __tmpvar;											\
+} while (0)
+
+#elif PHP_HAVE_BUILTIN_SMULLL_OVERFLOW && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
+
+#define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
+	long long __tmpvar; 											\
+	if (((usedval) = __builtin_smulll_overflow((a), (b), &__tmpvar))) {	\
+		(dval) = (double) (a) * (double) (b);						\
+	}																\
+	else (lval) = __tmpvar;											\
+} while (0)
+
+#elif (defined(__i386__) || defined(__x86_64__)) && defined(__GNUC__)
 
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
 	zend_long __tmpvar; 													\
@@ -265,6 +287,18 @@ static zend_always_inline size_t zend_safe_address(size_t nmemb, size_t size, si
 	return res;
 }
 #endif
+
+static zend_always_inline size_t zend_safe_address_guarded(size_t nmemb, size_t size, size_t offset)
+{
+	int overflow;
+	size_t ret = zend_safe_address(nmemb, size, offset, &overflow);
+
+	if (UNEXPECTED(overflow)) {
+		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu * %zu + %zu)", nmemb, size, offset);
+		return 0;
+	}
+	return ret;
+}
 
 #endif /* ZEND_MULTIPLY_H */
 

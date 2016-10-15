@@ -215,11 +215,11 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_connection_state)
 MYSQLND_CLASS_METHODS_END;
 
 
-/* {{{ mysqlnd_upsert_status_init */
+/* {{{ mysqlnd_connection_state_init */
 PHPAPI void
 mysqlnd_connection_state_init(struct st_mysqlnd_connection_state * const state)
 {
-	DBG_ENTER("mysqlnd_error_info_init");
+	DBG_ENTER("mysqlnd_connection_state_init");
 	state->m = &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_connection_state);
 	state->state = CONN_ALLOCED;
 	DBG_VOID_RETURN;
@@ -730,7 +730,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 			conn->hostname.l = hostname.l;
 			{
 				char *p;
-				mnd_sprintf(&p, 0, "%s via TCP/IP", conn->hostname);
+				mnd_sprintf(&p, 0, "%s via TCP/IP", conn->hostname.s);
 				if (!p) {
 					SET_OOM_ERROR(conn->error_info);
 					goto err; /* OOM */

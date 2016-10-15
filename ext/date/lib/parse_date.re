@@ -52,14 +52,15 @@
 
 #define TIMELIB_UNSET   -99999
 
-#define TIMELIB_SECOND  1
-#define TIMELIB_MINUTE  2
-#define TIMELIB_HOUR    3
-#define TIMELIB_DAY     4
-#define TIMELIB_MONTH   5
-#define TIMELIB_YEAR    6
-#define TIMELIB_WEEKDAY 7
-#define TIMELIB_SPECIAL 8
+#define TIMELIB_SECOND   1
+#define TIMELIB_MINUTE   2
+#define TIMELIB_HOUR     3
+#define TIMELIB_DAY      4
+#define TIMELIB_MONTH    5
+#define TIMELIB_YEAR     6
+#define TIMELIB_WEEKDAY  7
+#define TIMELIB_SPECIAL  8
+#define TIMELIB_MICROSEC 9
 
 #define EOI      257
 #define TIME     258
@@ -190,6 +191,18 @@ const static timelib_tz_lookup_table timelib_timezone_utc[] = {
 };
 
 static timelib_relunit const timelib_relunit_lookup[] = {
+	{ "ms",           TIMELIB_MICROSEC, 1000 },
+	{ "msec",         TIMELIB_MICROSEC, 1000 },
+	{ "msecs",        TIMELIB_MICROSEC, 1000 },
+	{ "millisecond",  TIMELIB_MICROSEC, 1000 },
+	{ "milliseconds", TIMELIB_MICROSEC, 1000 },
+	{ "µs",           TIMELIB_MICROSEC,    1 },
+	{ "usec",         TIMELIB_MICROSEC,    1 },
+	{ "usecs",        TIMELIB_MICROSEC,    1 },
+	{ "µsec",         TIMELIB_MICROSEC,    1 },
+	{ "µsecs",        TIMELIB_MICROSEC,    1 },
+	{ "microsecond",  TIMELIB_MICROSEC,    1 },
+	{ "microseconds", TIMELIB_MICROSEC,    1 },
 	{ "sec",         TIMELIB_SECOND,  1 },
 	{ "secs",        TIMELIB_SECOND,  1 },
 	{ "second",      TIMELIB_SECOND,  1 },
@@ -394,8 +407,12 @@ static timelib_sll timelib_meridian(char **ptr, timelib_sll h)
 	}
 	++*ptr;
 	if (**ptr == '.') {
-		*ptr += 3;
-	} else {
+		++*ptr;
+	}
+	if (**ptr == 'M' || **ptr == 'm') {
+		++*ptr;
+	}
+	if (**ptr == '.') {
 		++*ptr;
 	}
 	return retval;
@@ -651,12 +668,13 @@ static void timelib_set_relative(char **ptr, timelib_sll amount, int behavior, S
 	}
 
 	switch (relunit->unit) {
-		case TIMELIB_SECOND: s->time->relative.s += amount * relunit->multiplier; break;
-		case TIMELIB_MINUTE: s->time->relative.i += amount * relunit->multiplier; break;
-		case TIMELIB_HOUR:   s->time->relative.h += amount * relunit->multiplier; break;
-		case TIMELIB_DAY:    s->time->relative.d += amount * relunit->multiplier; break;
-		case TIMELIB_MONTH:  s->time->relative.m += amount * relunit->multiplier; break;
-		case TIMELIB_YEAR:   s->time->relative.y += amount * relunit->multiplier; break;
+		case TIMELIB_MICROSEC: s->time->relative.f += (((double) amount * (double) relunit->multiplier) / 1000000); break;
+		case TIMELIB_SECOND:   s->time->relative.s += amount * relunit->multiplier; break;
+		case TIMELIB_MINUTE:   s->time->relative.i += amount * relunit->multiplier; break;
+		case TIMELIB_HOUR:     s->time->relative.h += amount * relunit->multiplier; break;
+		case TIMELIB_DAY:      s->time->relative.d += amount * relunit->multiplier; break;
+		case TIMELIB_MONTH:    s->time->relative.m += amount * relunit->multiplier; break;
+		case TIMELIB_YEAR:     s->time->relative.y += amount * relunit->multiplier; break;
 
 		case TIMELIB_WEEKDAY:
 			TIMELIB_HAVE_WEEKDAY_RELATIVE();
@@ -921,6 +939,7 @@ clf              = day "/" monthabbr "/" year4 ":" hour24lz ":" minutelz ":" sec
 
 /* Timestamp format: @1126396800 */
 timestamp        = "@" "-"? [0-9]+;
+timestampms      = "@" "-"? [0-9]+ "." [0-9]{6};
 
 /* To fix some ambiguities */
 dateshortwithtimeshort12  = datenoyear timeshort12;
@@ -934,7 +953,7 @@ dateshortwithtimelongtz = datenoyear iso8601normtz;
  */
 reltextnumber = 'first'|'second'|'third'|'fourth'|'fifth'|'sixth'|'seventh'|'eight'|'eighth'|'ninth'|'tenth'|'eleventh'|'twelfth';
 reltexttext = 'next'|'last'|'previous'|'this';
-reltextunit = (('sec'|'second'|'min'|'minute'|'hour'|'day'|'fortnight'|'forthnight'|'month'|'year') 's'?) | 'weeks' | daytext;
+reltextunit = 'ms' | 'µs' | (('msec'|'millisecond'|'µsec'|'microsecond'|'usec'|'sec'|'second'|'min'|'minute'|'hour'|'day'|'fortnight'|'forthnight'|'month'|'year') 's'?) | 'weeks' | daytext;
 
 relnumber = ([+-]*[ \t]*[0-9]+);
 relative = relnumber space? (reltextunit | 'week' );
@@ -1019,6 +1038,34 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		s->time->h = s->time->i = s->time->s = 0;
 		s->time->f = 0.0;
 		s->time->relative.s += i;
+		s->time->is_localtime = 1;
+		s->time->zone_type = TIMELIB_ZONETYPE_OFFSET;
+		s->time->z = 0;
+		s->time->dst = 0;
+
+		TIMELIB_DEINIT;
+		return TIMELIB_RELATIVE;
+	}
+
+	timestampms
+	{
+		timelib_ull i, ms;
+
+		TIMELIB_INIT;
+		TIMELIB_HAVE_RELATIVE();
+		TIMELIB_UNHAVE_DATE();
+		TIMELIB_UNHAVE_TIME();
+		TIMELIB_HAVE_TZ();
+
+		i = timelib_get_unsigned_nr((char **) &ptr, 24);
+		ms = timelib_get_unsigned_nr((char **) &ptr, 24);
+		s->time->y = 1970;
+		s->time->m = 1;
+		s->time->d = 1;
+		s->time->h = s->time->i = s->time->s = 0;
+		s->time->f = 0.0;
+		s->time->relative.s += i;
+		s->time->relative.f = ((double) ms) / 1000000.0;
 		s->time->is_localtime = 1;
 		s->time->zone_type = TIMELIB_ZONETYPE_OFFSET;
 		s->time->z = 0;
@@ -2028,7 +2075,6 @@ timelib_time *timelib_parse_from_format(char *format, char *string, size_t len, 
 				s->time->m = 1;
 				s->time->d = 1;
 				s->time->h = s->time->i = s->time->s = 0;
-				s->time->f = 0.0;
 				s->time->relative.s += tmp;
 				s->time->is_localtime = 1;
 				s->time->zone_type = TIMELIB_ZONETYPE_OFFSET;
@@ -2186,13 +2232,20 @@ void timelib_fill_holes(timelib_time *parsed, timelib_time *now, int options)
 		parsed->s = 0;
 		parsed->f = 0;
 	}
+	if (
+		parsed->y != TIMELIB_UNSET || parsed->m != TIMELIB_UNSET || parsed->d != TIMELIB_UNSET ||
+		parsed->h != TIMELIB_UNSET || parsed->i != TIMELIB_UNSET || parsed->s != TIMELIB_UNSET
+	) {
+		if (parsed->f == TIMELIB_UNSET) parsed->f = 0;
+	} else {
+		if (parsed->f == TIMELIB_UNSET) parsed->f = now->f != TIMELIB_UNSET ? now->f : 0;
+	}
 	if (parsed->y == TIMELIB_UNSET) parsed->y = now->y != TIMELIB_UNSET ? now->y : 0;
-	if (parsed->d == TIMELIB_UNSET) parsed->d = now->d != TIMELIB_UNSET ? now->d : 0;
 	if (parsed->m == TIMELIB_UNSET) parsed->m = now->m != TIMELIB_UNSET ? now->m : 0;
+	if (parsed->d == TIMELIB_UNSET) parsed->d = now->d != TIMELIB_UNSET ? now->d : 0;
 	if (parsed->h == TIMELIB_UNSET) parsed->h = now->h != TIMELIB_UNSET ? now->h : 0;
 	if (parsed->i == TIMELIB_UNSET) parsed->i = now->i != TIMELIB_UNSET ? now->i : 0;
 	if (parsed->s == TIMELIB_UNSET) parsed->s = now->s != TIMELIB_UNSET ? now->s : 0;
-	if (parsed->f == TIMELIB_UNSET) parsed->f = now->f != TIMELIB_UNSET ? now->f : 0;
 	if (parsed->z == TIMELIB_UNSET) parsed->z = now->z != TIMELIB_UNSET ? now->z : 0;
 	if (parsed->dst == TIMELIB_UNSET) parsed->dst = now->dst != TIMELIB_UNSET ? now->dst : 0;
 

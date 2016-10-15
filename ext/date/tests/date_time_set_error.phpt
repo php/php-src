@@ -24,8 +24,9 @@ var_dump( date_time_set($datetime, $hour) );
 echo "\n-- Testing date_time_set() function with more than expected no. of arguments --\n";
 $min = 15;
 $sec = 30;
+$microseconds = 123123;
 $extra_arg = 10;
-var_dump( date_time_set($datetime, $hour, $min, $sec, $extra_arg) );
+var_dump( date_time_set($datetime, $hour, $min, $sec, $microseconds, $extra_arg) );
 
 echo "\n-- Testing date_time_set() function with an invalid values for \$object argument --\n";
 $invalid_obj = new stdClass();
@@ -54,7 +55,7 @@ bool(false)
 
 -- Testing date_time_set() function with more than expected no. of arguments --
 
-Warning: date_time_set() expects at most 4 parameters, 5 given in %s on line %d
+Warning: date_time_set() expects at most 5 parameters, 6 given in %s on line %d
 bool(false)
 
 -- Testing date_time_set() function with an invalid values for $object argument --

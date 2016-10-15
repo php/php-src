@@ -1331,10 +1331,10 @@ static gdImagePtr gdImageScaleBilinearPalette(gdImagePtr im, const unsigned int 
 			f_a4 = gd_itofx(gdTrueColorGetAlpha(pixel4));
 
 			{
-				const char red = (char) gd_fxtoi(gd_mulfx(f_w1, f_r1) + gd_mulfx(f_w2, f_r2) + gd_mulfx(f_w3, f_r3) + gd_mulfx(f_w4, f_r4));
-				const char green = (char) gd_fxtoi(gd_mulfx(f_w1, f_g1) + gd_mulfx(f_w2, f_g2) + gd_mulfx(f_w3, f_g3) + gd_mulfx(f_w4, f_g4));
-				const char blue = (char) gd_fxtoi(gd_mulfx(f_w1, f_b1) + gd_mulfx(f_w2, f_b2) + gd_mulfx(f_w3, f_b3) + gd_mulfx(f_w4, f_b4));
-				const char alpha = (char) gd_fxtoi(gd_mulfx(f_w1, f_a1) + gd_mulfx(f_w2, f_a2) + gd_mulfx(f_w3, f_a3) + gd_mulfx(f_w4, f_a4));
+				const unsigned char red = (unsigned char) gd_fxtoi(gd_mulfx(f_w1, f_r1) + gd_mulfx(f_w2, f_r2) + gd_mulfx(f_w3, f_r3) + gd_mulfx(f_w4, f_r4));
+				const unsigned char green = (unsigned char) gd_fxtoi(gd_mulfx(f_w1, f_g1) + gd_mulfx(f_w2, f_g2) + gd_mulfx(f_w3, f_g3) + gd_mulfx(f_w4, f_g4));
+				const unsigned char blue = (unsigned char) gd_fxtoi(gd_mulfx(f_w1, f_b1) + gd_mulfx(f_w2, f_b2) + gd_mulfx(f_w3, f_b3) + gd_mulfx(f_w4, f_b4));
+				const unsigned char alpha = (unsigned char) gd_fxtoi(gd_mulfx(f_w1, f_a1) + gd_mulfx(f_w2, f_a2) + gd_mulfx(f_w3, f_a3) + gd_mulfx(f_w4, f_a4));
 
 				new_img->tpixels[dst_offset_v][dst_offset_h] = gdTrueColorAlpha(red, green, blue, alpha);
 			}
@@ -1509,13 +1509,8 @@ gdImagePtr gdImageScaleBicubicFixed(gdImagePtr src, const unsigned int width, co
 				src_offset_y[0] = m;
 			}
 
-			if (m < 1) {
-				src_offset_x[1] = n;
-				src_offset_y[1] = m;
-			} else {
-				src_offset_x[1] = n;
-				src_offset_y[1] = m;
-			}
+			src_offset_x[1] = n;
+			src_offset_y[1] = m;
 
 			if ((m < 1) || (n >= src_w - 1)) {
 				src_offset_x[2] = n;
@@ -1567,13 +1562,8 @@ gdImagePtr gdImageScaleBicubicFixed(gdImagePtr src, const unsigned int width, co
 				src_offset_y[8] = m;
 			}
 
-			if (m >= src_h - 1) {
-				src_offset_x[8] = n;
-				src_offset_y[8] = m;
-			} else {
-				src_offset_x[9] = n;
-				src_offset_y[9] = m;
-			}
+			src_offset_x[9] = n;
+			src_offset_y[9] = m;
 
 			if ((m >= src_h-1) || (n >= src_w-1)) {
 				src_offset_x[10] = n;
@@ -1599,13 +1589,8 @@ gdImagePtr gdImageScaleBicubicFixed(gdImagePtr src, const unsigned int width, co
 				src_offset_y[12] = m;
 			}
 
-			if (m >= src_h - 2) {
-				src_offset_x[13] = n;
-				src_offset_y[13] = m;
-			} else {
-				src_offset_x[13] = n;
-				src_offset_y[13] = m;
-			}
+			src_offset_x[13] = n;
+			src_offset_y[13] = m;
 
 			if ((m >= src_h - 2) || (n >= src_w - 1)) {
 				src_offset_x[14] = n;
@@ -2014,13 +1999,8 @@ gdImagePtr gdImageRotateBicubicFixed(gdImagePtr src, const float degrees, const 
 					src_offset_y[0] = m;
 				}
 
-				if (m < 1) {
-					src_offset_x[1] = n;
-					src_offset_y[1] = m;
-				} else {
-					src_offset_x[1] = n;
-					src_offset_y[1] = m ;
-				}
+				src_offset_x[1] = n;
+				src_offset_y[1] = m;
 
 				if ((m < 1) || (n >= src_w-1)) {
 					src_offset_x[2] = - 1;
@@ -2073,8 +2053,8 @@ gdImagePtr gdImageRotateBicubicFixed(gdImagePtr src, const float degrees, const 
 				}
 
 				if (m >= src_h-1) {
-					src_offset_x[8] = - 1;
-					src_offset_y[8] = - 1;
+					src_offset_x[9] = - 1;
+					src_offset_y[9] = - 1;
 				} else {
 					src_offset_x[9] = n;
 					src_offset_y[9] = m;

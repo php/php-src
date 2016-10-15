@@ -40,7 +40,9 @@
 # define HAVE_ATOLL 1
 #endif
 
-#define DEBUG_FILE_UPLOAD ZEND_DEBUG
+#ifndef DEBUG_FILE_UPLOAD
+# define DEBUG_FILE_UPLOAD 0
+#endif
 
 static int dummy_encoding_translation(void)
 {
@@ -1099,7 +1101,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 				multipart_event_file_end event_file_end;
 
 				event_file_end.post_bytes_processed = SG(read_post_bytes);
-				event_file_end.temp_filename = ZSTR_VAL(temp_filename);
+				event_file_end.temp_filename = temp_filename ? ZSTR_VAL(temp_filename) : NULL;
 				event_file_end.cancel_upload = cancel_upload;
 				if (php_rfc1867_callback(MULTIPART_EVENT_FILE_END, &event_file_end, &event_extra_data) == FAILURE) {
 					cancel_upload = UPLOAD_ERROR_X;

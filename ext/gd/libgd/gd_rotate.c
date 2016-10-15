@@ -346,9 +346,7 @@ gdImagePtr gdImageRotate270 (gdImagePtr src, int ignoretransparent)
 
 gdImagePtr gdImageRotate45 (gdImagePtr src, double dAngle, int clrBack, int ignoretransparent)
 {
-	typedef int (*FuncPtr)(gdImagePtr, int, int);
 	gdImagePtr dst1,dst2,dst3;
-	FuncPtr f;
 	double dRadAngle, dSinE, dTan, dShear;
 	double dOffset;     /* Variable skew offset */
 	int u, iShear, newx, newy;
@@ -363,22 +361,12 @@ gdImagePtr gdImageRotate45 (gdImagePtr src, double dAngle, int clrBack, int igno
 	newy = src->sy;
 
 	/* 1st shear */
-	if (src->trueColor) {
-		f = gdImageGetTrueColorPixel;
-	} else {
-		f = gdImageGetPixel;
-	}
-
 	dst1 = gdImageCreateTrueColor(newx, newy);
 	/******* Perform 1st shear (horizontal) ******/
 	if (dst1 == NULL) {
 		return NULL;
 	}
-#ifdef HAVE_GD_BUNDLED
-	dst1->alphaBlendingFlag = gdEffectReplace;
-#else
 	gdImageAlphaBlending(dst1, 0);
-#endif
 	if (dAngle == 0.0) {
 		/* Returns copy of src */
 		gdImageCopy (dst1, src,0,0,0,0,src->sx,src->sy);
@@ -395,10 +383,6 @@ gdImagePtr gdImageRotate45 (gdImagePtr src, double dAngle, int clrBack, int igno
 			dst1->transparent = gdTrueColorAlpha(gdImageRed(src, src->transparent), gdImageBlue(src, src->transparent), gdImageGreen(src, src->transparent), 127);
 		}
 	}
-
-	dRadAngle = dAngle * ROTATE_DEG2RAD; /* Angle in radians */
-	dSinE = sin (dRadAngle);
-	dTan = tan (dRadAngle / 2.0);
 
 	for (u = 0; u < dst1->sy; u++) {
 		if (dTan >= 0.0) {
@@ -433,22 +417,13 @@ gdImagePtr gdImageRotate45 (gdImagePtr src, double dAngle, int clrBack, int igno
 
 	newy = (int) ((double) src->sx * fabs( dSinE ) + (double) src->sy * cos (dRadAngle))+1;
 
-	if (src->trueColor) {
-		f = gdImageGetTrueColorPixel;
-	} else {
-		f = gdImageGetPixel;
-	}
 	dst2 = gdImageCreateTrueColor(newx, newy);
 	if (dst2 == NULL) {
 		gdImageDestroy(dst1);
 		return NULL;
 	}
 
-#ifdef HAVE_GD_BUNDLED
-	dst2->alphaBlendingFlag = gdEffectReplace;
-#else
 	gdImageAlphaBlending(dst2, 0);
-#endif
 
 	if (ignoretransparent) {
 		dst2->transparent = dst1->transparent;
@@ -465,22 +440,13 @@ gdImagePtr gdImageRotate45 (gdImagePtr src, double dAngle, int clrBack, int igno
 	newx = (int) ((double)src->sy * fabs (dSinE) + (double)src->sx * cos (dRadAngle)) + 1;
 	newy = dst2->sy;
 
-	if (src->trueColor) {
-		f = gdImageGetTrueColorPixel;
-	} else {
-		f = gdImageGetPixel;
-	}
 	dst3 = gdImageCreateTrueColor(newx, newy);
 	if (dst3 == NULL) {
 		gdImageDestroy(dst2);
 		return NULL;
 	}
 
-#ifdef HAVE_GD_BUNDLED
-	dst3->alphaBlendingFlag = gdEffectReplace;
-#else
 	gdImageAlphaBlending(dst3, 0);
-#endif
 
 	if (ignoretransparent) {
 		dst3->transparent = dst2->transparent;

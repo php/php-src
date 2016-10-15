@@ -25,7 +25,7 @@ $foo = new foo;
 $foo->testFoo(new foo);
 $foo->testBar(new bar);
 $foo->testBaz(new baz);
-$foo->testFoo(new stdClass); // Catchable fatal error
+$foo->testFoo(new stdClass); // Recoverable fatal error
 
 ?>
 --EXPECTF--

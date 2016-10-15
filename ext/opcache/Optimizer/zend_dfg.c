@@ -74,6 +74,8 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 						}
 						goto op1_use;
 					case ZEND_FE_RESET_R:
+					case ZEND_SEND_VAR:
+					case ZEND_CAST:
 						if (build_flags & ZEND_SSA_RC_INFERENCE) {
 							goto op1_def;
 						}

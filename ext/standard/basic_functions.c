@@ -2851,7 +2851,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(proc_nice,														arginfo_proc_nice)
 #endif
 
-	PHP_FALIAS(rand, mt_rand,												arginfo_mt_rand)
+	PHP_FE(rand,															arginfo_mt_rand)
 	PHP_FALIAS(srand, mt_srand,												arginfo_mt_srand)
 	PHP_FALIAS(getrandmax, mt_getrandmax,									arginfo_mt_getrandmax)
 	PHP_FE(mt_rand,															arginfo_mt_rand)
@@ -3481,7 +3481,14 @@ static void basic_globals_ctor(php_basic_globals *basic_globals_p) /* {{{ */
 	memset(&BG(serialize), 0, sizeof(BG(serialize)));
 	memset(&BG(unserialize), 0, sizeof(BG(unserialize)));
 
-	memset(&BG(url_adapt_state_ex), 0, sizeof(BG(url_adapt_state_ex)));
+	memset(&BG(url_adapt_session_ex), 0, sizeof(BG(url_adapt_session_ex)));
+	memset(&BG(url_adapt_output_ex), 0, sizeof(BG(url_adapt_output_ex)));
+
+	BG(url_adapt_session_ex).type = 1;
+	BG(url_adapt_output_ex).type  = 0;
+
+	zend_hash_init(&BG(url_adapt_session_hosts_ht), 0, NULL, NULL, 1);
+	zend_hash_init(&BG(url_adapt_output_hosts_ht), 0, NULL, NULL, 1);
 
 #if defined(_REENTRANT) && defined(HAVE_MBRLEN) && defined(HAVE_MBSTATE_T)
 	memset(&BG(mblen_state), 0, sizeof(BG(mblen_state)));
@@ -3495,10 +3502,17 @@ static void basic_globals_ctor(php_basic_globals *basic_globals_p) /* {{{ */
 
 static void basic_globals_dtor(php_basic_globals *basic_globals_p) /* {{{ */
 {
-	if (basic_globals_p->url_adapt_state_ex.tags) {
-		zend_hash_destroy(basic_globals_p->url_adapt_state_ex.tags);
-		free(basic_globals_p->url_adapt_state_ex.tags);
+	if (basic_globals_p->url_adapt_session_ex.tags) {
+		zend_hash_destroy(basic_globals_p->url_adapt_session_ex.tags);
+		free(basic_globals_p->url_adapt_session_ex.tags);
 	}
+	if (basic_globals_p->url_adapt_output_ex.tags) {
+		zend_hash_destroy(basic_globals_p->url_adapt_output_ex.tags);
+		free(basic_globals_p->url_adapt_output_ex.tags);
+	}
+
+	zend_hash_destroy(&basic_globals_p->url_adapt_session_hosts_ht);
+	zend_hash_destroy(&basic_globals_p->url_adapt_output_hosts_ht);
 }
 /* }}} */
 
@@ -3873,7 +3887,9 @@ PHP_FUNCTION(constant)
 			}
 		}
 	} else {
-		php_error_docref(NULL, E_WARNING, "Couldn't find constant %s", ZSTR_VAL(const_name));
+		if (!EG(exception)) {
+			php_error_docref(NULL, E_WARNING, "Couldn't find constant %s", ZSTR_VAL(const_name));
+		}
 		RETURN_NULL();
 	}
 }
@@ -4799,20 +4815,17 @@ PHP_FUNCTION(call_user_func)
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f*", &fci, &fci_cache, &fci.params, &fci.param_count) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, -1)
 		Z_PARAM_FUNC(fci, fci_cache)
 		Z_PARAM_VARIADIC('*', fci.params, fci.param_count)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	fci.retval = &retval;
 
 	if (zend_call_function(&fci, &fci_cache) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
+		if (Z_ISREF(retval)) {
+			zend_unwrap_reference(&retval);
+		}
 		ZVAL_COPY_VALUE(return_value, &retval);
 	}
 }
@@ -4827,21 +4840,18 @@ PHP_FUNCTION(call_user_func_array)
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "fa/", &fci, &fci_cache, &params) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_FUNC(fci, fci_cache)
 		Z_PARAM_ARRAY_EX(params, 0, 1)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	zend_fcall_info_args(&fci, params);
 	fci.retval = &retval;
 
 	if (zend_call_function(&fci, &fci_cache) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
+		if (Z_ISREF(retval)) {
+			zend_unwrap_reference(&retval);
+		}
 		ZVAL_COPY_VALUE(return_value, &retval);
 	}
 
@@ -4876,6 +4886,9 @@ PHP_FUNCTION(forward_static_call)
 	}
 
 	if (zend_call_function(&fci, &fci_cache) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
+		if (Z_ISREF(retval)) {
+			zend_unwrap_reference(&retval);
+		}
 		ZVAL_COPY_VALUE(return_value, &retval);
 	}
 }
@@ -4904,6 +4917,9 @@ PHP_FUNCTION(forward_static_call_array)
 	}
 
 	if (zend_call_function(&fci, &fci_cache) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
+		if (Z_ISREF(retval)) {
+			zend_unwrap_reference(&retval);
+		}
 		ZVAL_COPY_VALUE(return_value, &retval);
 	}
 

@@ -21,6 +21,8 @@ object(DateInterval)#1 (%d) {
   int(0)
   ["s"]=>
   int(0)
+  ["f"]=>
+  float(0)
   ["weekday"]=>
   int(0)
   ["weekday_behavior"]=>

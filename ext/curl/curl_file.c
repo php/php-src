@@ -137,6 +137,7 @@ ZEND_METHOD(CURLFile, setPostFilename)
    Unserialization handler */
 ZEND_METHOD(CURLFile, __wakeup)
 {
+	zend_unset_property(curl_CURLFile_class, getThis(), "name", sizeof("name")-1);
 	zend_update_property_string(curl_CURLFile_class, getThis(), "name", sizeof("name")-1, "");
 	zend_throw_exception(NULL, "Unserialization of CURLFile instances is not allowed", 0);
 }

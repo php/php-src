@@ -97,8 +97,8 @@ Static method:
 
 Warning: ReflectionMethod::invoke() expects at least 1 parameter, 0 given in %s on line %d
 NULL
-Called staticMethod()
-Exception: Using $this when not in object context
+
+Warning: ReflectionMethod::invoke() expects parameter 1 to be object, boolean given in %s on line %d
 NULL
 Called staticMethod()
 Exception: Using $this when not in object context

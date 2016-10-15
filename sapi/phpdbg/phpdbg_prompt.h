@@ -25,13 +25,15 @@
 void phpdbg_string_init(char *buffer);
 void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default);
 void phpdbg_try_file_init(char *init_file, size_t init_file_len, zend_bool free_init);
-int phpdbg_interactive(zend_bool allow_async_unsafe);
+int phpdbg_interactive(zend_bool allow_async_unsafe, char *input);
 int phpdbg_compile(void);
+int phpdbg_compile_stdin(zend_string *code);
 void phpdbg_force_interruption(void);
 /* }}} */
 
 /* {{{ phpdbg command handlers */
 PHPDBG_COMMAND(exec);
+PHPDBG_COMMAND(stdin);
 PHPDBG_COMMAND(step);
 PHPDBG_COMMAND(continue);
 PHPDBG_COMMAND(run);
@@ -50,6 +52,7 @@ PHPDBG_COMMAND(clear);
 PHPDBG_COMMAND(help);
 PHPDBG_COMMAND(sh);
 PHPDBG_COMMAND(dl);
+PHPDBG_COMMAND(generator);
 PHPDBG_COMMAND(set);
 PHPDBG_COMMAND(source);
 PHPDBG_COMMAND(export);

@@ -1669,7 +1669,7 @@ static inline void spl_dual_it_rewind(spl_dual_it_object *intern)
 {
 	spl_dual_it_free(intern);
 	intern->current.pos = 0;
-	if (intern->inner.iterator->funcs->rewind) {
+	if (intern->inner.iterator && intern->inner.iterator->funcs->rewind) {
 		intern->inner.iterator->funcs->rewind(intern->inner.iterator);
 	}
 }
@@ -2038,13 +2038,14 @@ SPL_METHOD(RegexIterator, accept)
 
 	if (Z_TYPE(intern->current.data) == IS_UNDEF) {
 		RETURN_FALSE;
-	} else if (Z_TYPE(intern->current.data) == IS_ARRAY) {
-		RETURN_FALSE;
 	}
 
 	if (intern->u.regex.flags & REGIT_USE_KEY) {
 		subject = zval_get_string(&intern->current.key);
 	} else {
+		if (Z_TYPE(intern->current.data) == IS_ARRAY) {
+			RETURN_FALSE;
+		}
 		subject = zval_get_string(&intern->current.data);
 	}
 
@@ -2800,7 +2801,7 @@ SPL_METHOD(CachingIterator, __toString)
 	if (Z_TYPE(intern->u.caching.zstr) == IS_STRING) {
 		RETURN_STR_COPY(Z_STR_P(&intern->u.caching.zstr));
 	} else {
-		RETURN_NULL();
+		RETURN_EMPTY_STRING();
 	}
 } /* }}} */
 

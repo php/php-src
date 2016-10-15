@@ -568,7 +568,7 @@ PHPAPI void _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 		/* allocate a buffer for reading chunks */
 		chunk_buf = emalloc(stream->chunk_size);
 
-		while (!stream->eof && !err_flag && (stream->writepos - stream->readpos < (off_t)size)) {
+		while (!stream->eof && !err_flag && (stream->writepos - stream->readpos < (zend_off_t)size)) {
 			size_t justread = 0;
 			int flags;
 			php_stream_bucket *bucket;
@@ -1769,11 +1769,6 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 
 	if ((*p == ':') && (n > 1) && (!strncmp("//", p+1, 2) || (n == 4 && !memcmp("data:", path, 5)))) {
 		protocol = path;
-	} else if (n == 5 && strncasecmp(path, "zlib:", 5) == 0) {
-		/* BC with older php scripts and zlib wrapper */
-		protocol = "compress.zlib";
-		n = 13;
-		php_error_docref(NULL, E_WARNING, "Use of \"zlib:\" wrapper is deprecated; please use \"compress.zlib://\" instead");
 	}
 
 	if (protocol) {

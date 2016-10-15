@@ -59,7 +59,7 @@ PHPAPI zend_string *php_base64_encode(const unsigned char *str, size_t length) /
 	unsigned char *p;
 	zend_string *result;
 
-	result = zend_string_alloc(((length + 2) / 3) * 4 * sizeof(char), 0);
+	result = zend_string_safe_alloc(((length + 2) / 3), 4 * sizeof(char), 0, 0);
 	p = (unsigned char *)ZSTR_VAL(result);
 
 	while (length > 2) { /* keep going until we have less than 24 bits */
@@ -144,17 +144,7 @@ PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length
 	/* run through the whole string, converting as we go */
 	while (length-- > 0) {
 		ch = *current++;
-		/* stop on null byte in non-strict mode (FIXME: is this really desired?) */
-		if (ch == 0 && !strict) {
-			break;
-		}
 		if (ch == base64_pad) {
-			/* fail if the padding character is second in a group (like V===) */
-			/* FIXME: why do we still allow invalid padding in other places in the middle of the string? */
-			if (i % 4 == 1) {
-				zend_string_free(result);
-				return NULL;
-			}
 			padding++;
 			continue;
 		}
@@ -172,8 +162,7 @@ PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length
 			}
 			/* fail on bad characters or if any data follows padding */
 			if (ch == -2 || padding) {
-				zend_string_free(result);
-				return NULL;
+				goto fail;
 			}
 		}
 
@@ -195,11 +184,24 @@ PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length
 		}
 		i++;
 	}
+	/* fail if the input is truncated (only one char in last group) */
+	if (strict && i % 4 == 1) {
+		goto fail;
+	}
+	/* fail if the padding length is wrong (not VV==, VVV=), but accept zero padding
+	 * RFC 4648: "In some circumstances, the use of padding [--] is not required" */
+	if (strict && padding && (padding > 2 || (i + padding) % 4 != 0)) {
+		goto fail;
+	}
 
 	ZSTR_LEN(result) = j;
 	ZSTR_VAL(result)[ZSTR_LEN(result)] = '\0';
 
 	return result;
+
+fail:
+	zend_string_free(result);
+	return NULL;
 }
 /* }}} */
 

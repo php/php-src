@@ -238,17 +238,17 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 		return 0;
 	}
 
-	stream = php_stream_open_wrapper(fullpath, "w+b", REPORT_ERRORS, NULL);
-
-	if (stream == NULL) {
+	zf = zip_fopen(za, file, 0);
+	if (zf == NULL) {
 		n = -1;
 		goto done;
 	}
 
-	zf = zip_fopen(za, file, 0);
-	if (zf == NULL) {
+	stream = php_stream_open_wrapper(fullpath, "w+b", REPORT_ERRORS, NULL);
+
+	if (stream == NULL) {
 		n = -1;
-		php_stream_close(stream);
+		zip_fclose(zf);
 		goto done;
 	}
 
@@ -1619,10 +1619,10 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 {
 	struct zip *intern;
 	zval *self = getThis();
-	char *path = NULL;
+	char *path = ".";
 	char *remove_path = NULL;
 	char *add_path = NULL;
-	size_t  add_path_len, remove_path_len = 0, path_len = 0;
+	size_t  add_path_len, remove_path_len = 0, path_len = 1;
 	zend_long remove_all_path = 0;
 	zend_long flags = 0;
 	zval *options = NULL;

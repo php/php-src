@@ -2977,7 +2977,7 @@ PHP_FUNCTION(imap_utf7_encode)
 	}
 
 	/* allocate output buffer */
-	out = zend_string_alloc(outlen, 0);
+	out = zend_string_safe_alloc(1, outlen, 0, 0);
 
 	/* encode input string */
 	outp = (unsigned char*)ZSTR_VAL(out);
@@ -3962,7 +3962,7 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 		bt_len++;
 		offset = 0;
 		addr = NULL;
-		rfc822_parse_adrlist(&addr, tempMailTo, NULL);
+		rfc822_parse_adrlist(&addr, tempMailTo, "NO HOST");
 		while (addr) {
 			if (addr->host == NULL || strcmp(addr->host, ERRHOST) == 0) {
 				PHP_IMAP_BAD_DEST;
@@ -3991,7 +3991,7 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 		bt_len++;
 		offset = 0;
 		addr = NULL;
-		rfc822_parse_adrlist(&addr, tempMailTo, NULL);
+		rfc822_parse_adrlist(&addr, tempMailTo, "NO HOST");
 		while (addr) {
 			if (addr->host == NULL || strcmp(addr->host, ERRHOST) == 0) {
 				PHP_IMAP_BAD_DEST;
@@ -4017,7 +4017,7 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 		bt_len++;
 		offset = 0;
 		addr = NULL;
-		rfc822_parse_adrlist(&addr, tempMailTo, NULL);
+		rfc822_parse_adrlist(&addr, tempMailTo, "NO HOST");
 		while (addr) {
 			if (addr->host == NULL || strcmp(addr->host, ERRHOST) == 0) {
 				PHP_IMAP_BAD_DEST;

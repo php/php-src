@@ -64,7 +64,6 @@
 #define timezone _timezone	/* timezone is called _timezone in LibC */
 #endif
 
-#define DEFAULT_KEY_LENGTH	512
 #define MIN_KEY_LENGTH		384
 
 #define OPENSSL_ALGO_SHA1 	1
@@ -1017,7 +1016,8 @@ static int add_oid_section(struct php_x509_request * req) /* {{{ */
 	}
 	for (i = 0; i < sk_CONF_VALUE_num(sktmp); i++) {
 		cnf = sk_CONF_VALUE_value(sktmp, i);
-		if (OBJ_create(cnf->value, cnf->name, cnf->name) == NID_undef) {
+		if (OBJ_sn2nid(cnf->name) == NID_undef && OBJ_ln2nid(cnf->name) == NID_undef &&
+				OBJ_create(cnf->value, cnf->name, cnf->name) == NID_undef) {
 			php_openssl_store_errors();
 			php_error_docref(NULL, E_WARNING, "problem creating object %s=%s", cnf->name, cnf->value);
 			return FAILURE;
@@ -4059,11 +4059,8 @@ zend_bool php_openssl_pkey_init_dsa(DSA *dsa, zval *data)
 
 	OPENSSL_PKEY_SET_BN(data, pub_key);
 	OPENSSL_PKEY_SET_BN(data, priv_key);
-	if (priv_key || pub_key) {
-		return 1;
-	}
-	if (!DSA_set0_key(dsa, pub_key, priv_key)) {
-		return 0;
+	if (pub_key) {
+		return DSA_set0_key(dsa, pub_key, priv_key);
 	}
 
 	/* generate key */
@@ -4098,11 +4095,8 @@ zend_bool php_openssl_pkey_init_dh(DH *dh, zval *data)
 
 	OPENSSL_PKEY_SET_BN(data, priv_key);
 	OPENSSL_PKEY_SET_BN(data, pub_key);
-	if (priv_key || pub_key) {
-		return 1;
-	}
-	if (!DH_set0_key(dh, pub_key, priv_key)) {
-		return 0;
+	if (pub_key) {
+		return DH_set0_key(dh, pub_key, priv_key);
 	}
 
 	/* generate key */
@@ -6293,6 +6287,7 @@ PHP_FUNCTION(openssl_encrypt)
 
 			base64_str = php_base64_encode((unsigned char*)ZSTR_VAL(outbuf), outlen);
 			zend_string_release(outbuf);
+			outbuf = base64_str;
 			RETVAL_STR(base64_str);
 		}
 		if (mode.is_aead && tag) {
@@ -6304,14 +6299,20 @@ PHP_FUNCTION(openssl_encrypt)
 				ZSTR_LEN(tag_str) = tag_len;
 				ZVAL_NEW_STR(tag, tag_str);
 			} else {
-				zend_string_release(tag_str);
 				php_error_docref(NULL, E_WARNING, "Retrieving verification tag failed");
+				zend_string_release(tag_str);
+				zend_string_release(outbuf);
+				RETVAL_FALSE;
 			}
 		} else if (tag) {
 			zval_dtor(tag);
 			ZVAL_NULL(tag);
 			php_error_docref(NULL, E_WARNING,
 					"The authenticated tag cannot be provided for cipher that doesn not support AEAD");
+		} else if (mode.is_aead) {
+			php_error_docref(NULL, E_WARNING, "A tag should be provided when using AEAD mode");
+			zend_string_release(outbuf);
+			RETVAL_FALSE;
 		}
 	} else {
 		php_openssl_store_errors();
@@ -6340,7 +6341,7 @@ PHP_FUNCTION(openssl_decrypt)
 	const EVP_CIPHER *cipher_type;
 	EVP_CIPHER_CTX *cipher_ctx;
 	struct php_openssl_cipher_mode mode;
-	int outlen, i = 0;
+	int i = 0, outlen;
 	zend_string *outbuf;
 	zend_string *base64_str = NULL;
 	zend_bool free_iv = 0, free_password = 0;
@@ -6375,7 +6376,7 @@ PHP_FUNCTION(openssl_decrypt)
 	php_openssl_load_cipher_mode(&mode, cipher_type);
 
 	if (!(options & OPENSSL_RAW_DATA)) {
-		base64_str = php_base64_decode((unsigned char*)data, (int)data_len);
+		base64_str = php_base64_decode((unsigned char*)data, data_len);
 		if (!base64_str) {
 			php_error_docref(NULL, E_WARNING, "Failed to base64 decode the input");
 			EVP_CIPHER_CTX_free(cipher_ctx);
@@ -6456,15 +6457,18 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 		return;
 	}
 
-	if (buffer_length <= 0) {
-		RETURN_FALSE;
-	}
-
 	if (zstrong_result_returned) {
 		zval_dtor(zstrong_result_returned);
 		ZVAL_FALSE(zstrong_result_returned);
 	}
 
+	if (buffer_length <= 0
+#ifndef PHP_WIN32
+		|| ZEND_LONG_INT_OVFL(buffer_length)
+#endif
+			) {
+		RETURN_FALSE;
+	}
 	buffer = zend_string_alloc(buffer_length, 0);
 
 #ifdef PHP_WIN32
@@ -6480,6 +6484,7 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 
 	PHP_OPENSSL_CHECK_LONG_TO_INT(buffer_length, length);
 	PHP_OPENSSL_RAND_ADD_TIME();
+	/* FIXME loop if requested size > INT_MAX */
 	if (RAND_bytes((unsigned char*)ZSTR_VAL(buffer), (int)buffer_length) <= 0) {
 		zend_string_release(buffer);
 		if (zstrong_result_returned) {

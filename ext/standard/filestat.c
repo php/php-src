@@ -110,59 +110,22 @@ PHP_RSHUTDOWN_FUNCTION(filestat) /* {{{ */
 static int php_disk_total_space(char *path, double *space) /* {{{ */
 #if defined(WINDOWS) /* {{{ */
 {
-	double bytestotal = 0;
-	HINSTANCE kernel32;
-	FARPROC gdfse;
-	typedef BOOL (WINAPI *gdfse_func)(LPCTSTR, PULARGE_INTEGER, PULARGE_INTEGER, PULARGE_INTEGER);
-	gdfse_func func;
-
-	/* These are used by GetDiskFreeSpaceEx, if available. */
 	ULARGE_INTEGER FreeBytesAvailableToCaller;
 	ULARGE_INTEGER TotalNumberOfBytes;
 	ULARGE_INTEGER TotalNumberOfFreeBytes;
+	PHP_WIN32_IOUTIL_INIT_W(path)
 
-	/* These are used by GetDiskFreeSpace otherwise. */
-	DWORD SectorsPerCluster;
-	DWORD BytesPerSector;
-	DWORD NumberOfFreeClusters;
-	DWORD TotalNumberOfClusters;
-
-	/* GetDiskFreeSpaceEx is only available in NT and Win95 post-OSR2,
-	   so we have to jump through some hoops to see if the function
-	   exists. */
-	kernel32 = LoadLibrary("kernel32.dll");
-	if (kernel32) {
-		gdfse = GetProcAddress(kernel32, "GetDiskFreeSpaceExA");
-		/* It's available, so we can call it. */
-		if (gdfse) {
-			func = (gdfse_func)gdfse;
-			if (func(path,
-						&FreeBytesAvailableToCaller,
-						&TotalNumberOfBytes,
-						&TotalNumberOfFreeBytes) == 0) {
-				php_error_docref(NULL, E_WARNING, "%s", php_win_err());
-				return FAILURE;
-			}
-
-			/* i know - this is ugly, but i works <thies@thieso.net> */
-			bytestotal  = TotalNumberOfBytes.HighPart *
-				(double) (((zend_ulong)1) << 31) * 2.0 +
-				TotalNumberOfBytes.LowPart;
-		} else { /* If it's not available, we just use GetDiskFreeSpace */
-			if (GetDiskFreeSpace(path,
-						&SectorsPerCluster, &BytesPerSector,
-						&NumberOfFreeClusters, &TotalNumberOfClusters) == 0) {
-				php_error_docref(NULL, E_WARNING, "%s", php_win_err());
-				return FAILURE;
-			}
-			bytestotal = (double)TotalNumberOfClusters * (double)SectorsPerCluster * (double)BytesPerSector;
-		}
-	} else {
-		php_error_docref(NULL, E_WARNING, "Unable to load kernel32.dll");
+	if (GetDiskFreeSpaceExW(pathw, &FreeBytesAvailableToCaller, &TotalNumberOfBytes, &TotalNumberOfFreeBytes) == 0) {
+		php_error_docref(NULL, E_WARNING, "%s", php_win_err());
+		PHP_WIN32_IOUTIL_CLEANUP_W()
 		return FAILURE;
 	}
 
-	*space = bytestotal;
+	/* i know - this is ugly, but i works <thies@thieso.net> */
+	*space = TotalNumberOfBytes.HighPart * (double) (((zend_ulong)1) << 31) * 2.0 + TotalNumberOfBytes.LowPart;
+
+	PHP_WIN32_IOUTIL_CLEANUP_W()
+
 	return SUCCESS;
 }
 /* }}} */
@@ -241,60 +204,22 @@ PHP_FUNCTION(disk_total_space)
 static int php_disk_free_space(char *path, double *space) /* {{{ */
 #if defined(WINDOWS) /* {{{ */
 {
-	double bytesfree = 0;
-
-	HINSTANCE kernel32;
-	FARPROC gdfse;
-	typedef BOOL (WINAPI *gdfse_func)(LPCTSTR, PULARGE_INTEGER, PULARGE_INTEGER, PULARGE_INTEGER);
-	gdfse_func func;
-
-	/* These are used by GetDiskFreeSpaceEx, if available. */
 	ULARGE_INTEGER FreeBytesAvailableToCaller;
 	ULARGE_INTEGER TotalNumberOfBytes;
 	ULARGE_INTEGER TotalNumberOfFreeBytes;
+	PHP_WIN32_IOUTIL_INIT_W(path)
 
-	/* These are used by GetDiskFreeSpace otherwise. */
-	DWORD SectorsPerCluster;
-	DWORD BytesPerSector;
-	DWORD NumberOfFreeClusters;
-	DWORD TotalNumberOfClusters;
-
-	/* GetDiskFreeSpaceEx is only available in NT and Win95 post-OSR2,
-	   so we have to jump through some hoops to see if the function
-	   exists. */
-	kernel32 = LoadLibrary("kernel32.dll");
-	if (kernel32) {
-		gdfse = GetProcAddress(kernel32, "GetDiskFreeSpaceExA");
-		/* It's available, so we can call it. */
-		if (gdfse) {
-			func = (gdfse_func)gdfse;
-			if (func(path,
-						&FreeBytesAvailableToCaller,
-						&TotalNumberOfBytes,
-						&TotalNumberOfFreeBytes) == 0) {
-				php_error_docref(NULL, E_WARNING, "%s", php_win_err());
-				return FAILURE;
-			}
-
-			/* i know - this is ugly, but i works <thies@thieso.net> */
-			bytesfree  = FreeBytesAvailableToCaller.HighPart *
-				(double) (((zend_ulong)1) << 31) * 2.0 +
-				FreeBytesAvailableToCaller.LowPart;
-		} else { /* If it's not available, we just use GetDiskFreeSpace */
-			if (GetDiskFreeSpace(path,
-						&SectorsPerCluster, &BytesPerSector,
-						&NumberOfFreeClusters, &TotalNumberOfClusters) == 0) {
-				php_error_docref(NULL, E_WARNING, "%s", php_win_err());
-				return FAILURE;
-			}
-			bytesfree = (double)NumberOfFreeClusters * (double)SectorsPerCluster * (double)BytesPerSector;
-		}
-	} else {
-		php_error_docref(NULL, E_WARNING, "Unable to load kernel32.dll");
+	if (GetDiskFreeSpaceExW(pathw, &FreeBytesAvailableToCaller, &TotalNumberOfBytes, &TotalNumberOfFreeBytes) == 0) {
+		php_error_docref(NULL, E_WARNING, "%s", php_win_err());
+		PHP_WIN32_IOUTIL_CLEANUP_W()
 		return FAILURE;
 	}
 
-	*space = bytesfree;
+	/* i know - this is ugly, but i works <thies@thieso.net> */
+	*space = FreeBytesAvailableToCaller.HighPart * (double) (((zend_ulong)1) << 31) * 2.0 + FreeBytesAvailableToCaller.LowPart;
+
+	PHP_WIN32_IOUTIL_CLEANUP_W()
+
 	return SUCCESS;
 }
 /* }}} */
@@ -1076,20 +1001,7 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 
 /* another quickie macro to make defining similar functions easier */
 /* {{{ FileFunction(name, funcnum) */
-#ifndef FAST_ZPP
-# define FileFunction(name, funcnum) \
-void name(INTERNAL_FUNCTION_PARAMETERS) { \
-	char *filename; \
-	size_t filename_len; \
-	\
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &filename, &filename_len) == FAILURE) { \
-		return; \
-	} \
-	\
-	php_stat(filename, (php_stat_len) filename_len, funcnum, return_value); \
-}
-#else
-# define FileFunction(name, funcnum) \
+#define FileFunction(name, funcnum) \
 void name(INTERNAL_FUNCTION_PARAMETERS) { \
 	char *filename; \
 	size_t filename_len; \
@@ -1100,7 +1012,6 @@ void name(INTERNAL_FUNCTION_PARAMETERS) { \
 	\
 	php_stat(filename, (php_stat_len) filename_len, funcnum, return_value); \
 }
-#endif
 /* }}} */
 
 /* {{{ proto int fileperms(string filename)

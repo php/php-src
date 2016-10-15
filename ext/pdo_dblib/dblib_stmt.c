@@ -95,22 +95,6 @@ static char *pdo_dblib_get_field_name(int type)
 }
 /* }}} */
 
-static void pdo_dblib_err_dtor(pdo_dblib_err *err)
-{
-	if (err->dberrstr) {
-		efree(err->dberrstr);
-		err->dberrstr = NULL;
-	}
-	if (err->lastmsg) {
-		efree(err->lastmsg);
-		err->lastmsg = NULL;
-	}
-	if (err->oserrstr) {
-		efree(err->oserrstr);
-		err->oserrstr = NULL;
-	}
-}
-
 static int pdo_dblib_stmt_cursor_closer(pdo_stmt_t *stmt)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
@@ -120,7 +104,7 @@ static int pdo_dblib_stmt_cursor_closer(pdo_stmt_t *stmt)
 	dbcancel(H->link);
 
 	pdo_dblib_err_dtor(&H->err);
-	
+
 	return 1;
 }
 
@@ -135,7 +119,7 @@ static int pdo_dblib_stmt_dtor(pdo_stmt_t *stmt)
 	return 1;
 }
 
-static int pdo_dblib_stmt_next_rowset(pdo_stmt_t *stmt)
+static int pdo_dblib_stmt_next_rowset_no_cancel(pdo_stmt_t *stmt)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 	pdo_dblib_db_handle *H = S->H;
@@ -158,6 +142,27 @@ static int pdo_dblib_stmt_next_rowset(pdo_stmt_t *stmt)
 	return 1;
 }
 
+static int pdo_dblib_stmt_next_rowset(pdo_stmt_t *stmt)
+{
+	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
+	pdo_dblib_db_handle *H = S->H;
+	RETCODE ret = SUCCESS;
+
+	/* Ideally use dbcanquery here, but there is a bug in FreeTDS's implementation of dbcanquery
+	 * It has been resolved but is currently only available in nightly builds
+	 */
+	while (NO_MORE_ROWS != ret) {
+		ret = dbnextrow(H->link);
+
+		if (FAIL == ret) {
+			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO_DBLIB: dbnextrow() returned FAIL");
+			return 0;
+		}
+	}
+
+	return pdo_dblib_stmt_next_rowset_no_cancel(stmt);
+}
+
 static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
@@ -176,7 +181,7 @@ static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt)
 		return 0;
 	}
 
-	ret = pdo_dblib_stmt_next_rowset(stmt);
+	ret = pdo_dblib_stmt_next_rowset_no_cancel(stmt);
 
 	stmt->row_count = DBCOUNT(H->link);
 	stmt->column_count = dbnumcols(H->link);
@@ -213,7 +218,7 @@ static int pdo_dblib_stmt_describe(pdo_stmt_t *stmt, int colno)
 	pdo_dblib_db_handle *H = S->H;
 	struct pdo_column_data *col;
 	char *fname;
-	
+
 	if(colno >= stmt->column_count || colno < 0)  {
 		return FAILURE;
 	}
@@ -266,6 +271,11 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 	if (data_len != 0 || data != NULL) {
 		if (stmt->dbh->stringify) {
 			switch (coltype) {
+				case SQLDECIMAL:
+				case SQLNUMERIC:
+				case SQLMONEY:
+				case SQLMONEY4:
+				case SQLMONEYN:
 				case SQLFLT4:
 				case SQLFLT8:
 				case SQLINT4:
@@ -361,31 +371,41 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 
 					break;
 				}
+				case SQLDECIMAL:
+				case SQLNUMERIC:
 				case SQLMONEY:
 				case SQLMONEY4:
 				case SQLMONEYN: {
-					DBFLT8 money_value;
-					dbconvert(NULL, coltype, data, 8, SQLFLT8, (LPBYTE)&money_value, -1);
+					DBFLT8 float_value;
+					dbconvert(NULL, coltype, data, 8, SQLFLT8, (LPBYTE)&float_value, -1);
 
 					zv = emalloc(sizeof(zval));
-					ZVAL_DOUBLE(zv, money_value);
-
-					if (stmt->dbh->stringify) {
-						convert_to_string(zv);
-					}
+					ZVAL_DOUBLE(zv, float_value);
 
 					break;
 				}
+
 #ifdef SQLUNIQUE
 				case SQLUNIQUE: {
 #else
 				case 36: { /* FreeTDS hack */
 #endif
-					zv = emalloc(sizeof(zval));
-					ZVAL_STRINGL(zv, data, 16); /* uniqueidentifier is a 16-byte binary number */
+					if (H->stringify_uniqueidentifier) { // 36-char hex string representation
+						tmp_data_len = 36;
+						tmp_data = safe_emalloc(tmp_data_len, sizeof(char), 1);
+						data_len = (unsigned int) dbconvert(NULL, SQLUNIQUE, (BYTE*)data, data_len, SQLCHAR, (BYTE*)tmp_data, tmp_data_len);
+						php_strtoupper(tmp_data, data_len);
+						zv = emalloc(sizeof(zval));
+						ZVAL_STRINGL(zv, tmp_data, data_len);
+						efree(tmp_data);
 
+					} else { // a 16-byte binary representation
+						zv = emalloc(sizeof(zval));
+						ZVAL_STRINGL(zv, data, 16);
+					}
 					break;
 				}
+
 				default: {
 					if (dbwillconvert(coltype, SQLCHAR)) {
 						tmp_data_len = 32 + (2 * (data_len)); /* FIXME: We allocate more than we need here */
@@ -479,4 +499,3 @@ struct pdo_stmt_methods dblib_stmt_methods = {
 	pdo_dblib_stmt_next_rowset, /* nextrow */
 	pdo_dblib_stmt_cursor_closer
 };
-
