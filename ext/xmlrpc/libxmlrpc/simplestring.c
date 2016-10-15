@@ -206,6 +206,7 @@ void simplestring_addn(simplestring* target, const char* source, size_t add_len)
       }
 
       if(target->len + add_len + 1 > target->size) {
+         char *str;   
          /* newsize is current length + new length */
          newsize = target->len + add_len + 1;
          incr = target->size * 2;
@@ -219,7 +220,7 @@ void simplestring_addn(simplestring* target, const char* source, size_t add_len)
                 simplestring_free(target);
                 return;
          }
-         char *str = (char*)realloc(target->str, newsize);
+         str = (char*)realloc(target->str, newsize);
          if (!str) {
                 simplestring_free(target);
                 return;

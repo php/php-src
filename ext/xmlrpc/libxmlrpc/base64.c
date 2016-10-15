@@ -35,12 +35,13 @@ void buffer_add(struct buffer_st *b, char c)
   *(b->ptr++) = c;
   b->offset++;
   if (b->offset == b->length) {
+    char *data;
     if (b->length + 512 >= INT_MAX) {
 	buffer_delete(b);
 	return;
     }
     b->length += 512;
-    char *data = realloc(b->data, b->length);
+    data = realloc(b->data, b->length);
     if (!data) {
 	buffer_delete(b);
 	return;

@@ -1295,12 +1295,13 @@ struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char *
 	while (( res = 
 		gethostbyname_r(host,hostbuf,*tmphstbuf,*hstbuflen,&hp,&herr))
 		&& (errno == ERANGE)) {
+		char *ptmphstbuf;
 		/* Enlarge the buffer. */
 		if (*hstbuflen * 2 >= SIZE_MAX) {
 			goto fail;
 		}
 		*hstbuflen *= 2;
-		char *ptmphstbuf = (char *)realloc(*tmphstbuf, *hstbuflen);
+		ptmphstbuf = (char *)realloc(*tmphstbuf, *hstbuflen);
 		if (!ptmphstbuf) {
 			goto fail;
 		}
@@ -1332,12 +1333,13 @@ struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char *
 	while ((NULL == ( hp = 
 		gethostbyname_r(host,hostbuf,*tmphstbuf,*hstbuflen,&herr)))
 		&& (errno == ERANGE)) {
+		char *ptmphstbuf;
 		/* Enlarge the buffer. */
 		if (*hstbuflen * 2 >= SIZE_MAX) {
 			goto fail;
 		}
 		*hstbuflen *= 2;
-		char *ptmphstbuf = (char *)realloc(*tmphstbuf, *hstbuflen);
+		ptmphstbuf = (char *)realloc(*tmphstbuf, *hstbuflen);
 		if (!ptmphstbuf) {
 			goto fail;
 		}
@@ -1357,8 +1359,9 @@ struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char *
 		*tmphstbuf = (char *)malloc (*hstbuflen);
 	} else {
 		if (*hstbuflen < sizeof(struct hostent_data)) {
+			char *ptmphstbuf;
 			*hstbuflen = sizeof(struct hostent_data);
-			char *ptmphstbuf = (char *)realloc(*tmphstbuf, *hstbuflen);
+			ptmphstbuf = (char *)realloc(*tmphstbuf, *hstbuflen);
 			if (!ptmphstbuf) {
 				goto fail;
 			}
