@@ -1297,7 +1297,7 @@ struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char *
 		&& (errno == ERANGE)) {
 		char *ptmphstbuf;
 		/* Enlarge the buffer. */
-		if (*hstbuflen * 2 >= SIZE_MAX) {
+		if (*hstbuflen > SIZE_MAX / 2) {
 			goto fail;
 		}
 		*hstbuflen *= 2;
@@ -1335,7 +1335,7 @@ struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char *
 		&& (errno == ERANGE)) {
 		char *ptmphstbuf;
 		/* Enlarge the buffer. */
-		if (*hstbuflen * 2 >= SIZE_MAX) {
+		if (*hstbuflen > SIZE_MAX / 2) {
 			goto fail;
 		}
 		*hstbuflen *= 2;
