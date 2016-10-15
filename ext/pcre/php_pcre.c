@@ -1584,7 +1584,7 @@ static PHP_FUNCTION(preg_replace_callback)
 	if (!zend_is_callable(replace, 0, &callback_name)) {
 		php_error_docref(NULL, E_WARNING, "Requires argument 2, '%s', to be a valid callback", ZSTR_VAL(callback_name));
 		zend_string_release(callback_name);
-		ZVAL_COPY(return_value, subject);
+		ZVAL_STR(return_value, zval_get_string(subject));
 		return;
 	}
 	zend_string_release(callback_name);

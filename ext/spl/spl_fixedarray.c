@@ -349,7 +349,7 @@ static zval *spl_fixedarray_object_read_dimension(zval *object, zval *offset, in
 	if (intern->fptr_offset_get) {
 		zval tmp;
 		if (!offset) {
-			ZVAL_UNDEF(&tmp);
+			ZVAL_NULL(&tmp);
 			offset = &tmp;
 		} else {
 			SEPARATE_ARG_IF_REF(offset);
