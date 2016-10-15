@@ -3335,8 +3335,7 @@ MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, cons
 					chash = (HashTable *)emalloc(sizeof(HashTable));
 					zend_hash_init(chash, 0, NULL, ZVAL_PTR_DTOR, 0);
 				}
-				Z_ARRVAL(entry_tmp) = chash;
-				Z_TYPE_INFO(entry_tmp) = IS_ARRAY_EX;
+				ZVAL_ARR(&entry_tmp, chash);
 				break;
 			case IS_OBJECT:
 			default:
