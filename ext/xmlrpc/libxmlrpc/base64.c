@@ -15,6 +15,7 @@ static const char rcsid[] = "#(@) $Id$";
 /*  ENCODE  --	Encode binary file into base64.  */
 #include <stdlib.h>
 #include <ctype.h>
+#include <limits.h>
 
 #include "base64.h"
 
@@ -34,8 +35,17 @@ void buffer_add(struct buffer_st *b, char c)
   *(b->ptr++) = c;
   b->offset++;
   if (b->offset == b->length) {
+    if (b->length + 512 >= INT_MAX) {
+	buffer_delete(b);
+	return;
+    }
     b->length += 512;
-    b->data = realloc(b->data, b->length);
+    char *data = realloc(b->data, b->length);
+    if (!data) {
+	buffer_delete(b);
+	return;
+    }
+    b->data = data;
     b->ptr = b->data + b->offset;
   }
 }
