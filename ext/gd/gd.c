@@ -958,10 +958,10 @@ const zend_function_entry gd_functions[] = {
 	PHP_FE(imagetypes,								arginfo_imagetypes)
 
 #if defined(HAVE_GD_JPG)
-	PHP_FE(jpeg2wbmp,								arginfo_jpeg2wbmp)
+	PHP_DEP_FE(jpeg2wbmp,							arginfo_jpeg2wbmp)
 #endif
 #if defined(HAVE_GD_PNG)
-	PHP_FE(png2wbmp,								arginfo_png2wbmp)
+	PHP_DEP_FE(png2wbmp,							arginfo_png2wbmp)
 #endif
 	PHP_FE(image2wbmp,								arginfo_image2wbmp)
 	PHP_FE(imagelayereffect,						arginfo_imagelayereffect)
@@ -4084,8 +4084,6 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 #ifdef HAVE_GD_JPG
     zend_long ignore_warning;
 #endif
-
-	php_error_docref(NULL, E_DEPRECATED, "This function is deprecated");
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pplll", &f_org, &f_org_len, &f_dest, &f_dest_len, &height, &width, &threshold) == FAILURE) {
 		return;
