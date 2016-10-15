@@ -136,7 +136,7 @@ END_EXTERN_C()
 #define strlcat php_strlcat
 #endif
 
-#ifndef HAVE_STRLCAT
+#ifndef HAVE_EXPLICIT_BZERO
 BEGIN_EXTERN_C()
 PHPAPI void php_explicit_bzero(void *dst, size_t siz);
 END_EXTERN_C()
