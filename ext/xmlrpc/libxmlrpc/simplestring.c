@@ -216,9 +216,15 @@ void simplestring_addn(simplestring* target, const char* source, size_t add_len)
          }
          if(newsize < (target->len + add_len + 1)) {
         	 /* some kind of overflow happened */
-        	 return;
+                simplestring_free(target);
+                return;
          }
-         target->str = (char*)realloc(target->str, newsize);
+         char *str = (char*)realloc(target->str, newsize);
+         if (!str) {
+                simplestring_free(target);
+                return;
+         }
+         target->str = str;
 
          target->size = target->str ? newsize : 0;
       }
