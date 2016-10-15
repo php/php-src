@@ -68,27 +68,31 @@ PHPAPI size_t php_strlcpy(dst, src, siz)
 	const char *src;
 	size_t siz;
 {
-	register char *d = dst;
-	register const char *s = src;
-	register size_t n = siz;
+	const char *s = src;
+	size_t n = siz;
 
 	/* Copy as many bytes as will fit */
-	if (n != 0 && --n != 0) {
-		do {
-			if ((*d++ = *s++) == 0)
+	if (n != 0) {
+		while (--n != 0) {
+			if ((*dst++ = *src++) == 0)
 				break;
-		} while (--n != 0);
+		}
 	}
 
 	/* Not enough room in dst, add NUL and traverse rest of src */
 	if (n == 0) {
 		if (siz != 0)
-			*d = '\0';		/* NUL-terminate dst */
-		while (*s++)
+			*dst = '\0';		/* NUL-terminate dst */
+		while (*src++)
 			;
 	}
 
-	return(s - src - 1);	/* count does not include NUL */
+	/*
+	 * Cast pointers to unsigned type before calculation, to avoid signed
+	 * overflow when the string ends where the MSB has changed.
+	 * Return value does not include NUL.
+	 */
+	return((uintptr_t)src - (uintptr_t)s - 1);
 }
 
 #endif /* !HAVE_STRLCPY */
