@@ -4085,6 +4085,8 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
     zend_long ignore_warning;
 #endif
 
+	php_error_docref(NULL, E_DEPRECATED, "This function is deprecated");
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pplll", &f_org, &f_org_len, &f_dest, &f_dest_len, &height, &width, &threshold) == FAILURE) {
 		return;
 	}
