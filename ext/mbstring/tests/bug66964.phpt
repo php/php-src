@@ -20,10 +20,10 @@ var_dump(mb_convert_variables('utf-8', 'utf-8', $a), $a);
 
 ?>
 --EXPECTF--
-Warning: mb_convert_variables(): %s on line %d
+Warning: mb_convert_variables(): Cannot handle recursive references in %s on line 3
 bool(false)
 
-Warning: mb_convert_variables(): %s on line %d
+Warning: mb_convert_variables(): Cannot handle recursive references in %s on line 4
 bool(false)
 string(5) "UTF-8"
 array(4) {
@@ -37,7 +37,7 @@ array(4) {
   string(21) "日本語テキスト"
 }
 
-Warning: mb_convert_variables(): %s on line %d
+Warning: mb_convert_variables(): Cannot handle recursive references in %s on line 14
 bool(false)
 array(5) {
   [0]=>
@@ -49,5 +49,16 @@ array(5) {
   [3]=>
   string(21) "日本語テキスト"
   [4]=>
-  *RECURSION*
+  &array(5) {
+    [0]=>
+    string(21) "日本語テキスト"
+    [1]=>
+    string(21) "日本語テキスト"
+    [2]=>
+    string(21) "日本語テキスト"
+    [3]=>
+    string(21) "日本語テキスト"
+    [4]=>
+    *RECURSION*
+  }
 }

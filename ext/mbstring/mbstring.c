@@ -3710,24 +3710,112 @@ PHP_FUNCTION(mb_convert_kana)
 }
 /* }}} */
 
-#define PHP_MBSTR_STACK_BLOCK_SIZE 32
+
+static int php_mb_detect_encoding_recursive(mbfl_encoding_detector *identd, zval *var, int *recursion_error) { /* {{{ */
+	mbfl_string string;
+	zval *hash_entry;
+	HashTable *target_hash;
+
+	switch(Z_TYPE_P(var)) {
+		case IS_STRING:
+			string.val = (unsigned char *)Z_STRVAL_P(var);
+			string.len = Z_STRLEN_P(var);
+			if (mbfl_encoding_detector_feed(identd, &string)) {
+				return SUCCESS; /* complete detecting */
+			}
+			break;
+		case IS_OBJECT:
+		case IS_ARRAY:
+			target_hash = HASH_OF(var);
+			if (++target_hash->u.v.nApplyCount > 1) {
+				--target_hash->u.v.nApplyCount;
+				*recursion_error = 1;
+				return FAILURE;
+			}
+			ZEND_HASH_FOREACH_VAL(target_hash, hash_entry) {
+				if (Z_TYPE_P(hash_entry) == IS_INDIRECT) {
+					hash_entry = Z_INDIRECT_P(hash_entry);
+				}
+				ZVAL_DEREF(hash_entry);
+				SEPARATE_ZVAL(hash_entry);
+				if (php_mb_detect_encoding_recursive(identd, hash_entry, recursion_error) == SUCCESS) {
+					--target_hash->u.v.nApplyCount;
+					return SUCCESS;
+				}
+			}
+			ZEND_HASH_FOREACH_END();
+			--target_hash->u.v.nApplyCount;
+			break;
+		default:
+			/* Ignore anything else */
+			break;
+	}
+	return FAILURE;
+}
+/* }}} */
+
+
+static int php_mb_convert_variables_recursive(mbfl_buffer_converter *convd, mbfl_string *string, mbfl_string *result, zval *var, int *recursion_error) { /* {{{ */
+	mbfl_string *ret;
+	zval *hash_entry;
+	HashTable *target_hash;
+
+	switch(Z_TYPE_P(var)) {
+		case IS_STRING:
+			string->val = (unsigned char *)Z_STRVAL_P(var);
+			string->len = Z_STRLEN_P(var);
+			ret = mbfl_buffer_converter_feed_result(convd, string, result);
+			if (ret != NULL) {
+				zval_ptr_dtor(var);
+				ZVAL_STRINGL(var, (char *)ret->val, ret->len);
+				efree(ret->val);
+			}
+			return SUCCESS;
+			break;
+		case IS_OBJECT:
+		case IS_ARRAY:
+			target_hash = HASH_OF(var);
+			if (++target_hash->u.v.nApplyCount > 1) {
+				--target_hash->u.v.nApplyCount;
+				*recursion_error = 1;
+				return FAILURE;
+			}
+			ZEND_HASH_FOREACH_VAL(target_hash, hash_entry) {
+				if (Z_TYPE_P(hash_entry) == IS_INDIRECT) {
+					hash_entry = Z_INDIRECT_P(hash_entry);
+				}
+				ZVAL_DEREF(hash_entry);
+				SEPARATE_ZVAL(hash_entry);
+				if (php_mb_convert_variables_recursive(convd, string, result, hash_entry, recursion_error) == FAILURE) {
+					--target_hash->u.v.nApplyCount;
+					return FAILURE;
+				}
+			}
+			ZEND_HASH_FOREACH_END();
+			--target_hash->u.v.nApplyCount;
+			break;
+		default:
+			/* Ignore anything else */
+			break;
+	}
+	return SUCCESS;
+} /* }}} */
+
 
 /* {{{ proto string mb_convert_variables(string to-encoding, mixed from-encoding, mixed vars [, ...])
    Converts the string resource in variables to desired encoding */
 PHP_FUNCTION(mb_convert_variables)
 {
-	zval *args, *stack, *var, *hash_entry, *hash_entry_ptr, *zfrom_enc;
-	HashTable *target_hash;
-	mbfl_string string, result, *ret;
+	zval *args, *var, *zfrom_enc;
+	mbfl_string string, result;
 	const mbfl_encoding *from_encoding, *to_encoding;
 	mbfl_encoding_detector *identd;
 	mbfl_buffer_converter *convd;
-	int n, argc, stack_level, stack_max;
+	int argc, n;
 	size_t to_enc_len;
 	size_t elistsz;
 	const mbfl_encoding **elist;
 	char *to_enc;
-	void *ptmp;
 	int recursion_error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz+", &to_enc, &to_enc_len, &zfrom_enc, &args, &argc) == FAILURE) {
@@ -3748,19 +3836,23 @@ PHP_FUNCTION(mb_convert_variables)
 	string.no_encoding = from_encoding->no_encoding;
 	string.no_language = MBSTRG(language);
 
-	/* pre-conversion encoding */
+	/* parse from encoding parameter */
 	elist = NULL;
 	elistsz = 0;
 	switch (Z_TYPE_P(zfrom_enc)) {
 		case IS_ARRAY:
 			php_mb_parse_encoding_array(zfrom_enc, &elist, &elistsz, 0);
 			break;
-		default:
+		case IS_STRING:
 			convert_to_string_ex(zfrom_enc);
 			php_mb_parse_encoding_list(Z_STRVAL_P(zfrom_enc), Z_STRLEN_P(zfrom_enc), &elist, &elistsz, 0);
 			break;
+		default:
+			php_error_docref(NULL, E_WARNING, "Invalid from encoding parameter");
+			break;
 	}
 
+	/* set from encoding */
 	if (elistsz <= 0) {
 		from_encoding = &mbfl_encoding_pass;
 	} else if (elistsz == 1) {
@@ -3768,91 +3860,36 @@ PHP_FUNCTION(mb_convert_variables)
 	} else {
 		/* auto detect */
 		from_encoding = NULL;
-		stack_max = PHP_MBSTR_STACK_BLOCK_SIZE;
-		stack = (zval *)safe_emalloc(stack_max, sizeof(zval), 0);
-		stack_level = 0;
 		identd = mbfl_encoding_detector_new2(elist, elistsz, MBSTRG(strict_detection));
-		if (identd != NULL) {
-			n = 0;
-			while (n < argc || stack_level > 0) {
-				if (stack_level <= 0) {
-					var = &args[n++];
-					ZVAL_DEREF(var);
-					SEPARATE_ZVAL_NOREF(var);
-					if (Z_TYPE_P(var) == IS_ARRAY || Z_TYPE_P(var) == IS_OBJECT) {
-						target_hash = HASH_OF(var);
-						if (target_hash != NULL) {
-							zend_hash_internal_pointer_reset(target_hash);
-						}
-					}
-				} else {
-					stack_level--;
-					var = &stack[stack_level];
-				}
-				if (Z_TYPE_P(var) == IS_ARRAY || Z_TYPE_P(var) == IS_OBJECT) {
-					target_hash = HASH_OF(var);
-					if (target_hash != NULL) {
-						while ((hash_entry = zend_hash_get_current_data(target_hash)) != NULL) {
-							if (++target_hash->u.v.nApplyCount > 1) {
-								--target_hash->u.v.nApplyCount;
-								recursion_error = 1;
-								goto detect_end;
-							}
-							zend_hash_move_forward(target_hash);
-							if (Z_TYPE_P(hash_entry) == IS_INDIRECT) {
-								hash_entry = Z_INDIRECT_P(hash_entry);
-							}
-							ZVAL_DEREF(hash_entry);
-							if (Z_TYPE_P(hash_entry) == IS_ARRAY || Z_TYPE_P(hash_entry) == IS_OBJECT) {
-								if (stack_level >= stack_max) {
-									stack_max += PHP_MBSTR_STACK_BLOCK_SIZE;
-									ptmp = erealloc(stack, sizeof(zval) * stack_max);
-									stack = (zval *)ptmp;
-								}
-								ZVAL_COPY_VALUE(&stack[stack_level], var);
-								stack_level++;
-								var = hash_entry;
-								target_hash = HASH_OF(var);
-								if (target_hash != NULL) {
-									zend_hash_internal_pointer_reset(target_hash);
-									continue;
-								}
-							} else if (Z_TYPE_P(hash_entry) == IS_STRING) {
-								string.val = (unsigned char *)Z_STRVAL_P(hash_entry);
-								string.len = Z_STRLEN_P(hash_entry);
-								if (mbfl_encoding_detector_feed(identd, &string)) {
-									goto detect_end;		/* complete detecting */
-								}
-							}
-						}
-					}
-				} else if (Z_TYPE_P(var) == IS_STRING) {
-					string.val = (unsigned char *)Z_STRVAL_P(var);
-					string.len = Z_STRLEN_P(var);
-					if (mbfl_encoding_detector_feed(identd, &string)) {
-						goto detect_end;		/* complete detecting */
-					}
-				}
+		if (identd == NULL) {
+			if (elist != NULL) {
+				efree((void *)elist);
 			}
-detect_end:
-			from_encoding = mbfl_encoding_detector_judge2(identd);
-			mbfl_encoding_detector_delete(identd);
+			php_error_docref(NULL, E_WARNING, "Failed to intialize encoding detector");
+			RETURN_FALSE;
 		}
-		if (recursion_error) {
-			while(stack_level-- && (var = &stack[stack_level])) {
-				if (HASH_OF(var)->u.v.nApplyCount > 1) {
-					HASH_OF(var)->u.v.nApplyCount--;
-				}
+
+		for(n = 0; n < argc; n++) {
+			var = &args[n];
+			ZVAL_DEREF(var);
+			SEPARATE_ZVAL_NOREF(var);
+			if (php_mb_detect_encoding_recursive(identd, var, &recursion_error) == SUCCESS) {
+				break;
 			}
-			efree(stack);
+			if (recursion_error) {
+				break;
+			}
+		}
+
+		from_encoding = mbfl_encoding_detector_judge2(identd);
+		mbfl_encoding_detector_delete(identd);
+		if (recursion_error) {
 			if (elist != NULL) {
 				efree((void *)elist);
 			}
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot handle recursive references");
 			RETURN_FALSE;
 		}
-		efree(stack);
-
 		if (!from_encoding) {
 			php_error_docref(NULL, E_WARNING, "Unable to detect encoding");
 			from_encoding = &mbfl_encoding_pass;
@@ -3861,6 +3898,7 @@ detect_end:
 	if (elist != NULL) {
 		efree((void *)elist);
 	}
+
 	/* create converter */
 	convd = NULL;
 	if (from_encoding != &mbfl_encoding_pass) {
@@ -3875,96 +3913,23 @@ detect_end:
 
 	/* convert */
 	if (convd != NULL) {
-		stack_max = PHP_MBSTR_STACK_BLOCK_SIZE;
-		stack = (zval*)safe_emalloc(stack_max, sizeof(zval), 0);
-		stack_level = 0;
-		n = 0;
-		while (n < argc || stack_level > 0) {
-			if (stack_level <= 0) {
-				var = &args[n++];
-				ZVAL_DEREF(var);
-				SEPARATE_ZVAL_NOREF(var);
-				if (Z_TYPE_P(var) == IS_ARRAY || Z_TYPE_P(var) == IS_OBJECT) {
-					target_hash = HASH_OF(var);
-					if (target_hash != NULL) {
-						zend_hash_internal_pointer_reset(target_hash);
-					}
+		for (n = 0; n < argc; n++) {
+			var = &args[n++];
+			ZVAL_DEREF(var);
+			SEPARATE_ZVAL_NOREF(var);
+			if (php_mb_convert_variables_recursive(convd, &string, &result, var, &recursion_error) == FAILURE) {
+				MBSTRG(illegalchars) += mbfl_buffer_illegalchars(convd);
+				mbfl_buffer_converter_delete(convd);
+				if (recursion_error) {
+					php_error_docref(NULL, E_WARNING, "Cannot handle recursive references");
+				} else {
+					php_error_docref(NULL, E_WARNING, "Failed to convert encoding");
 				}
-			} else {
-				stack_level--;
-				var = &stack[stack_level];
-			}
-			if (Z_TYPE_P(var) == IS_ARRAY || Z_TYPE_P(var) == IS_OBJECT) {
-				target_hash = HASH_OF(var);
-				if (target_hash != NULL) {
-					while ((hash_entry_ptr = zend_hash_get_current_data(target_hash)) != NULL) {
-						zend_hash_move_forward(target_hash);
-						if (Z_TYPE_P(hash_entry_ptr) == IS_INDIRECT) {
-							hash_entry_ptr = Z_INDIRECT_P(hash_entry_ptr);
-						}
-						hash_entry = hash_entry_ptr;
-						ZVAL_DEREF(hash_entry);
-						if (Z_TYPE_P(hash_entry) == IS_ARRAY || Z_TYPE_P(hash_entry) == IS_OBJECT) {
-							if (++(HASH_OF(hash_entry)->u.v.nApplyCount) > 1) {
-								--(HASH_OF(hash_entry)->u.v.nApplyCount);
-								recursion_error = 1;
-								goto conv_end;
-							}
-							if (stack_level >= stack_max) {
-								stack_max += PHP_MBSTR_STACK_BLOCK_SIZE;
-								ptmp = erealloc(stack, sizeof(zval) * stack_max);
-								stack = (zval *)ptmp;
-							}
-							ZVAL_COPY_VALUE(&stack[stack_level], var);
-							stack_level++;
-							var = hash_entry;
-							SEPARATE_ZVAL(hash_entry);
-							target_hash = HASH_OF(var);
-							if (target_hash != NULL) {
-								zend_hash_internal_pointer_reset(target_hash);
-								continue;
-							}
-						} else if (Z_TYPE_P(hash_entry) == IS_STRING) {
-							string.val = (unsigned char *)Z_STRVAL_P(hash_entry);
-							string.len = Z_STRLEN_P(hash_entry);
-							ret = mbfl_buffer_converter_feed_result(convd, &string, &result);
-							if (ret != NULL) {
-								zval_ptr_dtor(hash_entry_ptr);
-								// TODO: avoid reallocation ???
-								ZVAL_STRINGL(hash_entry_ptr, (char *)ret->val, ret->len);
-								efree(ret->val);
-							}
-						}
-					}
-				}
-			} else if (Z_TYPE_P(var) == IS_STRING) {
-				string.val = (unsigned char *)Z_STRVAL_P(var);
-				string.len = Z_STRLEN_P(var);
-				ret = mbfl_buffer_converter_feed_result(convd, &string, &result);
-				if (ret != NULL) {
-					zval_ptr_dtor(var);
-					// TODO: avoid reallocation ???
-					ZVAL_STRINGL(var, (char *)ret->val, ret->len);
-					efree(ret->val);
-				}
+				RETURN_FALSE;
 			}
 		}
-
-conv_end:
 		MBSTRG(illegalchars) += mbfl_buffer_illegalchars(convd);
 		mbfl_buffer_converter_delete(convd);
-
-		if (recursion_error) {
-			while(stack_level-- && (var = &stack[stack_level])) {
-				if (HASH_OF(var)->u.v.nApplyCount > 1) {
-					HASH_OF(var)->u.v.nApplyCount--;
-				}
-			}
-			efree(stack);
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot handle recursive references");
-			RETURN_FALSE;
-		}
-		efree(stack);
 	}
 
 	if (from_encoding) {
