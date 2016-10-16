@@ -1140,6 +1140,10 @@ static inline void phpdbg_sigint_handler(int signo) /* {{{ */
 			}
 		} else {
 			PHPDBG_G(flags) |= PHPDBG_IS_SIGNALED;
+			if (PHPDBG_G(flags) & PHPDBG_PREVENT_INTERACTIVE) {
+				PHPDBG_G(flags) |= PHPDBG_HAS_PAGINATION;
+				PHPDBG_G(flags) &= ~PHPDBG_PREVENT_INTERACTIVE;
+			}
 		}
 	}
 } /* }}} */
