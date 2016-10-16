@@ -1392,6 +1392,7 @@ int main(int argc, char **argv) /* {{{ */
 	int exit_status;
 	char *read_from_stdin = NULL;
 	zend_string *backup_phpdbg_compile = NULL;
+	zend_bool show_help = 0, show_version = 0;
 
 #ifndef _WIN32
 	struct sigaction sigio_struct;
@@ -1581,36 +1582,11 @@ phpdbg_main:
 			} break;
 
 			case 'h': {
-				ZEND_INIT_MODULE_GLOBALS(phpdbg, php_phpdbg_globals_ctor, NULL);
-				sapi_startup(phpdbg);
-				phpdbg->startup(phpdbg);
-				PHPDBG_G(flags) = 0;
-				/* It ain't gonna proceed to real execution anyway,
-					but the correct descriptor is needed already. */
-				PHPDBG_G(io)[PHPDBG_STDOUT].ptr = stdout;
-				PHPDBG_G(io)[PHPDBG_STDOUT].fd = fileno(stdout);
-				phpdbg_set_prompt(PHPDBG_DEFAULT_PROMPT);
-				phpdbg_do_help(NULL);
-				sapi_deactivate();
-				sapi_shutdown();
-				return 0;
+				show_help = 1;
 			} break;
 
 			case 'V': {
-				ZEND_INIT_MODULE_GLOBALS(phpdbg, php_phpdbg_globals_ctor, NULL);
-				sapi_startup(phpdbg);
-				phpdbg->startup(phpdbg);
-				printf(
-					"phpdbg %s (built: %s %s)\nPHP %s, Copyright (c) 1997-2016 The PHP Group\n%s",
-					PHPDBG_VERSION,
-					__DATE__,
-					__TIME__,
-					PHP_VERSION,
-					get_zend_version()
-				);
-				sapi_deactivate();
-				sapi_shutdown();
-				return 0;
+				show_version = 1;
 			} break;
 		}
 
@@ -1678,6 +1654,14 @@ phpdbg_main:
 
 	ZEND_INIT_MODULE_GLOBALS(phpdbg, php_phpdbg_globals_ctor, NULL);
 
+	/* set default colors */
+	phpdbg_set_color_ex(PHPDBG_COLOR_PROMPT,  PHPDBG_STRL("white-bold"));
+	phpdbg_set_color_ex(PHPDBG_COLOR_ERROR,   PHPDBG_STRL("red-bold"));
+	phpdbg_set_color_ex(PHPDBG_COLOR_NOTICE,  PHPDBG_STRL("green"));
+
+	/* set default prompt */
+	phpdbg_set_prompt(PHPDBG_DEFAULT_PROMPT);
+
 	if (settings > (zend_phpdbg_globals *) 0x2) {
 #ifdef ZTS
 		*((zend_phpdbg_globals *) (*((void ***) TSRMLS_CACHE))[TSRM_UNSHUFFLE_RSRC_ID(phpdbg_globals_id)]) = *settings;
@@ -1699,6 +1683,43 @@ phpdbg_main:
 		void* (*_malloc)(size_t);
 		void (*_free)(void*);
 		void* (*_realloc)(void*, size_t);
+
+		if (show_version || show_help) {
+			/* It ain't gonna proceed to real execution anyway,
+				but the correct descriptor is needed already. */
+			PHPDBG_G(io)[PHPDBG_STDOUT].ptr = stdout;
+			PHPDBG_G(io)[PHPDBG_STDOUT].fd = fileno(stdout);
+			if (show_help) {
+				phpdbg_do_help(NULL);
+			} else if (show_version) {
+				phpdbg_out(
+					"phpdbg %s (built: %s %s)\nPHP %s, Copyright (c) 1997-2016 The PHP Group\n%s",
+					PHPDBG_VERSION,
+					__DATE__,
+					__TIME__,
+					PHP_VERSION,
+					get_zend_version()
+				);
+			}
+			sapi_deactivate();
+			sapi_shutdown();
+			if (ini_entries) {
+				free(ini_entries);
+			}
+			if (ini_override) {
+				free(ini_override);
+			}
+			if (exec) {
+				free(exec);
+			}
+			if (oplog_file) {
+				free(oplog_file);
+			}
+			if (init_file) {
+				free(init_file);
+			}
+			goto free_and_return;
+		}
 
 		zend_try {
 			zend_signal_activate();
@@ -1838,14 +1859,6 @@ phpdbg_main:
 			free(oplog_file);
 			oplog_file = NULL;
 		}
-
-		/* set default colors */
-		phpdbg_set_color_ex(PHPDBG_COLOR_PROMPT,  PHPDBG_STRL("white-bold"));
-		phpdbg_set_color_ex(PHPDBG_COLOR_ERROR,   PHPDBG_STRL("red-bold"));
-		phpdbg_set_color_ex(PHPDBG_COLOR_NOTICE,  PHPDBG_STRL("green"));
-
-		/* set default prompt */
-		phpdbg_set_prompt(PHPDBG_DEFAULT_PROMPT);
 
 		{
 			php_stream_wrapper *wrapper = zend_hash_str_find_ptr(php_stream_get_url_stream_wrappers_hash(), ZEND_STRL("php"));
@@ -2158,6 +2171,7 @@ phpdbg_out:
 		free(sapi_name);
 	}
 
+free_and_return:
 	if (read_from_stdin) {
 		free(read_from_stdin);
 		read_from_stdin = NULL;
