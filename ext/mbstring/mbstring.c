@@ -3714,17 +3714,12 @@ PHP_FUNCTION(mb_convert_kana)
 static int php_mb_detect_encoding(mbfl_encoding_detector *identd, zval *var) { /* {{{ */
 	mbfl_string string;
 
-	switch(Z_TYPE_P(var)) {
-		case IS_STRING:
-			string.val = (unsigned char *)Z_STRVAL_P(var);
-			string.len = Z_STRLEN_P(var);
-			if (mbfl_encoding_detector_feed(identd, &string)) {
-				return SUCCESS; /* complete detecting */
-			}
-			break;
-		default:
-			/* Ignore anything else */
-			break;
+	if (Z_TYPE_P(var) == IS_STRING) {
+		string.val = (unsigned char *)Z_STRVAL_P(var);
+		string.len = Z_STRLEN_P(var);
+		if (mbfl_encoding_detector_feed(identd, &string)) {
+			return SUCCESS; /* complete detecting */
+		}
 	}
 	return FAILURE;
 }
