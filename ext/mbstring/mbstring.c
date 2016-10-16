@@ -3711,10 +3711,8 @@ PHP_FUNCTION(mb_convert_kana)
 /* }}} */
 
 
-static int php_mb_detect_encoding_recursive(mbfl_encoding_detector *identd, zval *var, int *recursion_error) { /* {{{ */
+static int php_mb_detect_encoding(mbfl_encoding_detector *identd, zval *var) { /* {{{ */
 	mbfl_string string;
-	zval *hash_entry;
-	HashTable *target_hash;
 
 	switch(Z_TYPE_P(var)) {
 		case IS_STRING:
@@ -3724,32 +3722,42 @@ static int php_mb_detect_encoding_recursive(mbfl_encoding_detector *identd, zval
 				return SUCCESS; /* complete detecting */
 			}
 			break;
-		case IS_OBJECT:
-		case IS_ARRAY:
-			target_hash = HASH_OF(var);
-			if (++target_hash->u.v.nApplyCount > 1) {
-				--target_hash->u.v.nApplyCount;
-				*recursion_error = 1;
-				return FAILURE;
-			}
-			ZEND_HASH_FOREACH_VAL(target_hash, hash_entry) {
-				if (Z_TYPE_P(hash_entry) == IS_INDIRECT) {
-					hash_entry = Z_INDIRECT_P(hash_entry);
-				}
-				ZVAL_DEREF(hash_entry);
-				SEPARATE_ZVAL(hash_entry);
-				if (php_mb_detect_encoding_recursive(identd, hash_entry, recursion_error) == SUCCESS) {
-					--target_hash->u.v.nApplyCount;
-					return SUCCESS;
-				}
-			}
-			ZEND_HASH_FOREACH_END();
-			--target_hash->u.v.nApplyCount;
-			break;
 		default:
 			/* Ignore anything else */
 			break;
 	}
+	return FAILURE;
+}
+/* }}} */
+
+
+static int php_mb_detect_encoding_recursive(mbfl_encoding_detector *identd, HashTable *target_hash, int *recursion_error) { /* {{{ */
+	zval *hash_entry;
+
+	if (++target_hash->u.v.nApplyCount > 1) {
+		--target_hash->u.v.nApplyCount;
+		*recursion_error = 1;
+		return FAILURE;
+	}
+	ZEND_HASH_FOREACH_VAL(target_hash, hash_entry) {
+		if (Z_TYPE_P(hash_entry) == IS_INDIRECT) {
+			hash_entry = Z_INDIRECT_P(hash_entry);
+		}
+		ZVAL_DEREF(hash_entry);
+		SEPARATE_ZVAL(hash_entry);
+		if (Z_TYPE_P(hash_entry) == IS_STRING
+			&& php_mb_detect_encoding(identd, hash_entry) == SUCCESS) {
+			break;
+		}
+		else if ((Z_TYPE_P(hash_entry) == IS_ARRAY || Z_TYPE_P(hash_entry) == IS_OBJECT)
+				 && php_mb_detect_encoding_recursive(identd, HASH_OF(hash_entry), recursion_error) == SUCCESS) {
+			--target_hash->u.v.nApplyCount;
+			return SUCCESS;
+		}
+	}
+	ZEND_HASH_FOREACH_END();
+	--target_hash->u.v.nApplyCount;
+
 	return FAILURE;
 }
 /* }}} */
@@ -3873,8 +3881,16 @@ PHP_FUNCTION(mb_convert_variables)
 			var = &args[n];
 			ZVAL_DEREF(var);
 			SEPARATE_ZVAL_NOREF(var);
-			if (php_mb_detect_encoding_recursive(identd, var, &recursion_error) == SUCCESS) {
-				break;
+			if (Z_TYPE_P(var) == IS_STRING) {
+				if (php_mb_detect_encoding(identd, var) == SUCCESS) {
+					break;
+				}
+			} else if (Z_TYPE_P(var) == IS_ARRAY || Z_TYPE_P(var) == IS_OBJECT) {
+				HashTable *hash;
+				hash = HASH_OF(var);
+				if (php_mb_detect_encoding_recursive(identd, hash, &recursion_error) == SUCCESS) {
+					break;
+				}
 			}
 			if (recursion_error) {
 				break;
