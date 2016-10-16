@@ -598,7 +598,9 @@ has been defined and none can be detected */
 	}
 
 	error = xmlParseChunk(parser->parser, (char *) data, data_len, is_final);
-	if (!error) {
+	if (error) {
+		return 0;
+	} else {
 		return 1;
 	}
 }
