@@ -23,7 +23,8 @@ PHP                                                                        NEWS
   . Add -s command line option / stdin command for reading script from stdin.
     (Bob)
   . Ignore non-executable opcodes in line mode of phpdbg_end_oplog(). (Bob)
-  . Fixed bug #70776 (Simple SIGINT does not have any effect). (Bob)
+  . Fixed bug #70776 (Simple SIGINT does not have any effect with -rr). (Bob)
+  . Fixed bug #71234 (INI files are loaded even invoked as -n --version). (Bob)
 
 - Session:
   . Fixed bug #73273 (session_unset() empties values from all variables in which
