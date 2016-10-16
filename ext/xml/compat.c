@@ -594,7 +594,9 @@ has been defined and none can be detected */
 #endif
 
 	error = xmlParseChunk(parser->parser, (char *) data, data_len, is_final);
-	if (!error) {
+	if (error) {
+		return 0;
+	} else {
 		return 1;
 	} else if (parser->parser->lastError.level > XML_ERR_WARNING ){
 		return 0;
