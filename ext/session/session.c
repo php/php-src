@@ -369,7 +369,7 @@ static zend_long php_session_gc(zend_bool immediate) /* {{{ */
 	return num;
 } /* }}} */
 
-static void php_session_initialize(void) /* {{{ */
+static int php_session_initialize(void) /* {{{ */
 {
 	zend_string *val = NULL;
 
@@ -377,8 +377,8 @@ static void php_session_initialize(void) /* {{{ */
 
 	if (!PS(mod)) {
 		PS(session_status) = php_session_disabled;
-		php_error_docref(NULL, E_ERROR, "No storage module chosen - failed to initialize session");
-		return;
+		php_error_docref(NULL, E_WARNING, "No storage module chosen - failed to initialize session");
+		return FAILURE;
 	}
 
 	/* Open session handler first */
@@ -386,8 +386,8 @@ static void php_session_initialize(void) /* {{{ */
 		/* || PS(mod_data) == NULL */ /* FIXME: open must set valid PS(mod_data) with success */
 	) {
 		php_session_abort();
-		php_error_docref(NULL, E_ERROR, "Failed to initialize storage module: %s (path: %s)", PS(mod)->s_name, PS(save_path));
-		return;
+		php_error_docref(NULL, E_WARNING, "Failed to initialize storage module: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+		return FAILURE;
 	}
 
 	/* If there is no ID, use session module to create one */
@@ -399,7 +399,7 @@ static void php_session_initialize(void) /* {{{ */
 		if (!PS(id)) {
 			php_session_abort();
 			zend_throw_error(NULL, "Failed to create session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
-			return;
+			return FAILURE;
 		}
 		if (PS(use_cookies)) {
 			PS(send_cookie) = 1;
@@ -418,7 +418,10 @@ static void php_session_initialize(void) /* {{{ */
 		}
 	}
 
-	php_session_reset_id();
+	if (php_session_reset_id() == FAILURE) {
+		php_session_abort();
+		return FAILURE;
+	}
 
 	/* Read data */
 	php_session_track_init();
@@ -427,7 +430,7 @@ static void php_session_initialize(void) /* {{{ */
 		/* Some broken save handler implementation returns FAILURE for non-existent session ID */
 		/* It's better to raise error for this, but disabled error for better compatibility */
 		php_error_docref(NULL, E_WARNING, "Failed to read session data: %s (path: %s)", PS(mod)->s_name, PS(save_path));
-		return;
+		return FAILURE;
 	}
 
 	/* GC must be done after read */
@@ -444,6 +447,7 @@ static void php_session_initialize(void) /* {{{ */
 		php_session_decode(val);
 		zend_string_release(val);
 	}
+	return SUCCESS;
 }
 /* }}} */
 
@@ -1353,7 +1357,9 @@ static void ppid2sid(zval *ppid) {
 	}
 }
 
-PHPAPI void php_session_reset_id(void) /* {{{ */
+
+/* Made to return int from 7.1, previously void */
+PHPAPI int php_session_reset_id(void) /* {{{ */
 {
 	int module_number = PS(module_number);
 	zval *sid, *data, *ppid;
@@ -1361,7 +1367,7 @@ PHPAPI void php_session_reset_id(void) /* {{{ */
 
 	if (!PS(id)) {
 		php_error_docref(NULL, E_WARNING, "Cannot set session ID - session ID is not initialized");
-		return;
+		return FAILURE;
 	}
 
 	if (PS(use_cookies) && PS(send_cookie)) {
@@ -1418,10 +1424,13 @@ PHPAPI void php_session_reset_id(void) /* {{{ */
 		zend_string_release(sname);
 		php_url_scanner_add_session_var(PS(session_name), strlen(PS(session_name)), ZSTR_VAL(PS(id)), ZSTR_LEN(PS(id)), 1);
 	}
+	return SUCCESS;
 }
 /* }}} */
 
-PHPAPI void php_session_start(void) /* {{{ */
+
+/* Made to return int from 7.1, previously void */
+PHPAPI int php_session_start(void) /* {{{ */
 {
 	zval *ppid;
 	zval *data;
@@ -1431,7 +1440,6 @@ PHPAPI void php_session_start(void) /* {{{ */
 	switch (PS(session_status)) {
 		case php_session_active:
 			php_error(E_NOTICE, "A session had already been started - ignoring session_start()");
-			return;
 			break;
 
 		case php_session_disabled:
@@ -1440,7 +1448,7 @@ PHPAPI void php_session_start(void) /* {{{ */
 				PS(mod) = _php_find_ps_module(value);
 				if (!PS(mod)) {
 					php_error_docref(NULL, E_WARNING, "Cannot find save handler '%s' - session startup failed", value);
-					return;
+					return FAILURE;
 				}
 			}
 			value = zend_ini_string("session.serialize_handler", sizeof("session.serialize_handler") - 1, 0);
@@ -1448,14 +1456,14 @@ PHPAPI void php_session_start(void) /* {{{ */
 				PS(serializer) = _php_find_ps_serializer(value);
 				if (!PS(serializer)) {
 					php_error_docref(NULL, E_WARNING, "Cannot find serialization handler '%s' - session startup failed", value);
-					return;
+					return FAILURE;
 				}
 			}
 			PS(session_status) = php_session_none;
-			/* fallthrough */
+			/* Fall through */
 
-		default:
 		case php_session_none:
+		default:
 			/* Setup internal flags */
 			PS(define_sid) = !PS(use_only_cookies); /* SID constant is defined when non-cookie ID is used */
 			PS(send_cookie) = PS(use_cookies) || PS(use_only_cookies);
@@ -1531,8 +1539,16 @@ PHPAPI void php_session_start(void) /* {{{ */
 		PS(id) = NULL;
 	}
 
-	php_session_initialize();
-	php_session_cache_limiter();
+	if (php_session_initialize() == FAILURE
+		|| php_session_cache_limiter() == -2) {
+		PS(session_status) = php_session_none;
+		if (PS(id)) {
+			zend_string_release(PS(id));
+			PS(id) = NULL;
+		}
+		return FAILURE;
+	}
+	return SUCCESS;
 }
 /* }}} */
 
@@ -2007,7 +2023,9 @@ static PHP_FUNCTION(session_regenerate_id)
 	if (PS(use_cookies)) {
 		PS(send_cookie) = 1;
 	}
-	php_session_reset_id();
+	if (php_session_reset_id() == FAILURE) {
+		RETURN_FALSE;
+	}
 
 	RETURN_TRUE;
 }
@@ -2208,6 +2226,12 @@ static PHP_FUNCTION(session_start)
 	php_session_start();
 
 	if (PS(session_status) != php_session_active) {
+		IF_SESSION_VARS() {
+			zval *sess_var = Z_REFVAL(PS(http_session_vars));
+			SEPARATE_ARRAY(sess_var);
+			/* Clean $_SESSION. */
+			zend_hash_clean(Z_ARRVAL_P(sess_var));
+		}
 		RETURN_FALSE;
 	}
 
