@@ -54,7 +54,7 @@ bool(true)
 Warning: ini_set(): open_basedir restriction in effect. File(%s) is not within the allowed path(s): (.) in %s on line 24
 string(0) ""
 
-Warning: session_start(): open_basedir restriction in effect. File(/tmp) is not within the allowed path(s): (.) in %s on line 26
+Warning: session_start(): open_basedir restriction in effect. File(%s) is not within the allowed path(s): (.) in %s on line 26
 
 Warning: session_start(): Failed to initialize storage module: files (path: ) in %s on line 26
 bool(false)
