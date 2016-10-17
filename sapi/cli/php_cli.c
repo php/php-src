@@ -1212,7 +1212,7 @@ int main(int argc, char *argv[])
 	 */
 	argv = save_ps_args(argc, argv);
 
-#ifdef PHP_WIN32
+#if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE)
 	php_win32_console_fileno_set_vt100(STDOUT_FILENO, TRUE);
 	php_win32_console_fileno_set_vt100(STDERR_FILENO, TRUE);
 #endif
