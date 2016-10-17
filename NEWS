@@ -133,8 +133,6 @@ PHP                                                                        NEWS
 15 Sep 2016, PHP 7.1.0RC2
 
 - Core:
-  . Fixed bug #73067 (__debugInfo crashes when throwing an exception).
-    (Laruence)
   . Fixed bug #73025 (Heap Buffer Overflow in virtual_popen of
     zend_virtual_cwd.c). (cmb)
   . Fixed bug #73058 (crypt broken when salt is 'too' long). (Anatol)
