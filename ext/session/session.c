@@ -2266,7 +2266,6 @@ static PHP_FUNCTION(session_gc)
 
 	num = php_session_gc(1);
 	if (num < 0) {
-		php_error_docref(NULL, E_WARNING, "Failed to perfom session GC");
 		RETURN_FALSE;
 	}
 
