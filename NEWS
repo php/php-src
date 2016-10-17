@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2016, PHP 7.1.0RC4
+19 Aug 2016, PHP 7.1.0RC4
 
 - Date:
   . Fixed bug #45554 (Inconsistent behavior of the u format char). (Derick)
