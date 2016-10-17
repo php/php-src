@@ -124,7 +124,7 @@ bool(true)
 bool(true)
 
 -- Iteration 4 --
-bool(true)
+bool(false)
 bool(true)
 bool(true)
 bool(true)
@@ -140,7 +140,7 @@ bool(true)
 bool(true)
 
 -- Iteration 6 --
-bool(true)
+bool(false)
 bool(true)
 bool(true)
 bool(true)
