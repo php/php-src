@@ -591,14 +591,21 @@ PHP_METHOD(sqlite3, query)
 static zval* sqlite_value_to_zval(sqlite3_stmt *stmt, int column) /* {{{ */
 {
 	zval *data;
+	sqlite3_int64 val;
+
 	MAKE_STD_ZVAL(data);
 	switch (sqlite3_column_type(stmt, column)) {
 		case SQLITE_INTEGER:
-			if ((sqlite3_column_int64(stmt, column)) >= INT_MAX || sqlite3_column_int64(stmt, column) <= INT_MIN) {
+			val = sqlite3_column_int64(stmt, column);
+#if LONG_MAX <= 2147483647
+			if (val > LONG_MAX || val < LONG_MIN) {
 				ZVAL_STRINGL(data, (char *)sqlite3_column_text(stmt, column), sqlite3_column_bytes(stmt, column), 1);
 			} else {
-				ZVAL_LONG(data, sqlite3_column_int64(stmt, column));
+#endif
+				ZVAL_LONG(data, val);
+#if LONG_MAX <= 2147483647
 			}
+#endif
 			break;
 
 		case SQLITE_FLOAT:

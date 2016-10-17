@@ -12,6 +12,9 @@ PHP                                                                        NEWS
 - SOAP:
   . Fixed bug #73037 (SoapServer reports Bad Request when gzipped). (Anatol)
 
+- SQLite3:
+  . Fixed bug #73333 (2147483647 is fetched as string). (cmb)
+
 - Standard:
   . Fixed bug #73203 (passing additional_parameters causes mail to fail). (cmb)
   . Fixed bug #73188 (use after free in userspace streams). (Sara)
