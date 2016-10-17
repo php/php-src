@@ -8,8 +8,6 @@ PHP                                                                        NEWS
   . Fixed bug #66773 (Autoload with Opcache allows importing conflicting class
     name to namespace). (Nikita)
   . Fixed bug #66862 ((Sub-)Namespaces unexpected behaviour). (Nikita)
-  . Fixed bug #73067 (__debugInfo crashes when throwing an exception).
-    (Laruence)
   . Fix pthreads detection when cross-compiling (ffontaine)
 
 - GD:
