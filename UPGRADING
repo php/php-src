@@ -64,6 +64,9 @@ PHP 7.2 UPGRADE NOTES
       'Multiline' = "FirstLine\r\n SecondLine",
     ];
 
+- XML:
+  . utf8_encode() and utf8_decode() have been moved to the Standard extension
+    as string functions.
 
 ========================================
 6. New Functions

@@ -1676,10 +1676,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 		goto end;
 	}
 	switch (option) {
-#ifdef WHEN_SUPPORTED_BY_MYSQLI
 		case MYSQL_OPT_READ_TIMEOUT:
 		case MYSQL_OPT_WRITE_TIMEOUT:
-#endif
 		case MYSQLND_OPT_SSL_KEY:
 		case MYSQLND_OPT_SSL_CERT:
 		case MYSQLND_OPT_SSL_CA:
