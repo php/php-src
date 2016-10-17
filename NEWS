@@ -39,5 +39,8 @@ PHP                                                                        NEWS
   . Fixed bug #73234 (Emulated statements let value dictate parameter type).
     (Adam Baratz)
 
+- XML:
+  . Moved utf8_encode() and utf8_decode() to the Standard extension. (Andrea)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
 
