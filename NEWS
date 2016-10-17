@@ -37,6 +37,9 @@ PHP                                                                        NEWS
   . Fixed bug #73237 (Nested object in "any" element overwrites other fields).
     (Keith Smiley)
 
+- SQLite3:
+  . Fixed bug #73333 (2147483647 is fetched as string). (cmb)
+
 - Standard:
   . Fixed bug #73203 (passing additional_parameters causes mail to fail). (cmb)
 
