@@ -85,11 +85,6 @@ PHP_WINUTIL_API BOOL php_win32_console_fileno_set_vt100(zend_long fileno, BOOL e
 					if (SetConsoleMode(handle, newMode)) {
 						result = TRUE;
 					}
-					else {
-						// SetConsoleMode sets the flags even if it fails, so let's revert them back
-						// (otherwise subsequent calls to GetConsoleMode will receive the new (invalid) flags
-						SetConsoleMode(handle, mode);
-					}
 				}
 			}
 		}
