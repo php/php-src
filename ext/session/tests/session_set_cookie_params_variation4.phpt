@@ -35,15 +35,14 @@ ob_end_flush();
 --EXPECTF--
 *** Testing session_set_cookie_params() : variation ***
 string(1) "1"
-NULL
+bool(true)
 string(1) "0"
 bool(true)
 string(1) "0"
-NULL
+bool(true)
 string(1) "1"
 bool(true)
 string(1) "1"
-NULL
+bool(true)
 string(1) "0"
 Done
-

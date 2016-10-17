@@ -26,10 +26,9 @@ ob_end_flush();
 ?>
 --EXPECTF--
 *** Testing session_set_cookie_params() : basic functionality ***
-NULL
 bool(true)
-NULL
 bool(true)
-NULL
+bool(true)
+bool(true)
+bool(true)
 Done
-

@@ -35,15 +35,14 @@ ob_end_flush();
 --EXPECTF--
 *** Testing session_set_cookie_params() : variation ***
 string(5) "/path"
-NULL
+bool(true)
 string(4) "/foo"
 bool(true)
 string(4) "/foo"
-NULL
+bool(true)
 string(5) "/blah"
 bool(true)
 string(5) "/blah"
-NULL
+bool(true)
 string(5) "/guff"
 Done
-

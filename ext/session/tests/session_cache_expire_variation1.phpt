@@ -34,6 +34,8 @@ int(360)
 int(360)
 int(1234567890)
 bool(true)
+
+Warning: session_cache_expire(): Cannot change cache expire when session is active in %s on line 17
 int(180)
 bool(true)
 int(180)
