@@ -264,10 +264,10 @@ bool(true)
 bool(true)
 bool(true)
 
-Warning: session_set_cookie_params() expects parameter 4 to be boolean, object given in /home/yohgaki/workspace/ext/git/oss/php.net/github-php-src/ext/session/tests/session_set_cookie_params_error.php on line 84
+Warning: session_set_cookie_params() expects parameter 4 to be boolean, object given in %s on line 84
 NULL
 
-Warning: session_set_cookie_params() expects parameter 5 to be boolean, object given in /home/yohgaki/workspace/ext/git/oss/php.net/github-php-src/ext/session/tests/session_set_cookie_params_error.php on line 85
+Warning: session_set_cookie_params() expects parameter 5 to be boolean, object given in %s on line 85
 NULL
 bool(true)
 

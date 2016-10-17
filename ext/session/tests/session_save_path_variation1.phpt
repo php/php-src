@@ -39,7 +39,7 @@ ob_end_flush();
 *** Testing session_save_path() : variation ***
 string(0) ""
 string(0) ""
-string(76) "%stests"
+string(%d) "%stests"
 bool(true)
 
 Warning: session_save_path(): Cannot change save path when session is active in %s on line 19
@@ -51,5 +51,5 @@ bool(false)
 Warning: session_save_path(): Cannot change save path when session is active in %s on line 21
 bool(false)
 bool(true)
-string(76) "%stests"
+string(%d) "%stests"
 Done
