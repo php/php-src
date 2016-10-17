@@ -5,6 +5,14 @@ PHP                                                                        NEWS
 
 19 Oct 2016, PHP 7.1.0RC4
 
+- Core:
+  . Fixed bug #73288 (Segfault in __clone > Exception.toString > __get).
+    (Laruence)
+  . Fixed for #73240 (Write out of bounds at number_format). (Stas)
+
+- BCmath:
+  . Fix bug #73190 (memcpy negative parameter _bc_new_num_ex). (Stas)
+
 - Date:
   . Fixed bug #45554 (Inconsistent behavior of the u format char). (Derick)
   . Fixed bug #48225 (DateTime parser doesn't set microseconds for "now").
@@ -20,6 +28,11 @@ PHP                                                                        NEWS
   . Fixed bug #73109 (timelib_meridian doesn't parse dots correctly). (Derick)
   . Fixed bug #73247 (DateTime constructor does not initialise microseconds
     property). (Derick)
+  . Fixed bug #73147 (Use After Free in PHP7 unserialize()). (Stas)
+  . Fixed bug #73189 (Memcpy negative size parameter php_resolve_path). (Stas)
+
+- DOM:
+  . Fixed bug #73150 (missing NULL check in dom_document_save_html). (Stas)
 
 - GD:
   . Fixed bug #73213 (Integer overflow in imageline() with antialiasing). (cmb)
@@ -28,12 +41,28 @@ PHP                                                                        NEWS
   . Fixed bug #73279 (Integer overflow in gdImageScaleBilinearPalette()). (cmb)
   . Fixed bug #73280 (Stack Buffer Overflow in GD dynamicGetbuf). (cmb)
 
+- Intl:
+  . Fixed bug #73007 (add locale length check). (Stas)
+  . Fixed bug #73218 (add mitigation for ICU int overflow). (Stas)
+
 - OCI8
   . Fixed bug #71148 (Bind reference overwritten on PHP 7). (Oracle Corp.)
+
+- OpenSSL:
+  . Fixed bug #73276 (crash in openssl_random_pseudo_bytes function). (Stas)
 
 - Session:
   . Fixed bug #73273 (session_unset() empties values from all variables in which
     is $_session stored). (Nikita)
+
+- SOAP:
+  . Fixed bug #73037 (SoapServer reports Bad Request when gzipped). (Anatol)
+  . Fixed bug #73237 (Nested object in "any" element overwrites other fields).
+    (Keith Smiley)
+
+- SimpleXML:
+  . Fixed bug #73293 (NULL pointer dereference in SimpleXMLElement::asXML()).
+    (Stas)
 
 - SQLite3:
   . Updated to SQLite3 3.15.0. (cmb)
