@@ -1645,9 +1645,7 @@ PHP_FUNCTION(stream_isatty)
 	php_stream *stream;
 	zend_long fileno;
 
-	int argc = ZEND_NUM_ARGS();
-
-	if (zend_parse_parameters(argc, "r", &zsrc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zsrc) == FAILURE) {
 		RETURN_FALSE;
 	}
 
