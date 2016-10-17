@@ -10,6 +10,7 @@ PHP                                                                        NEWS
   . Fixed bug #66862 ((Sub-)Namespaces unexpected behaviour). (Nikita)
   . Fixed bug #73067 (__debugInfo crashes when throwing an exception).
     (Laruence)
+  . Fix pthreads detection when cross-compiling (ffontaine)
 
 - GD:
   . Fixed bug #73213 (Integer overflow in imageline() with antialiasing). (cmb)
