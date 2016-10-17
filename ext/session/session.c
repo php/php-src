@@ -1440,6 +1440,7 @@ PHPAPI int php_session_start(void) /* {{{ */
 	switch (PS(session_status)) {
 		case php_session_active:
 			php_error(E_NOTICE, "A session had already been started - ignoring session_start()");
+			return FAILURE;
 			break;
 
 		case php_session_disabled:
