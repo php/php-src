@@ -9,6 +9,7 @@ PHP                                                                        NEWS
   . Fixed bug #73288 (Segfault in __clone > Exception.toString > __get).
     (Laruence)
   . Fixed for #73240 (Write out of bounds at number_format). (Stas)
+  . Fix pthreads detection when cross-compiling (ffontaine)
 
 - BCmath:
   . Fix bug #73190 (memcpy negative parameter _bc_new_num_ex). (Stas)
