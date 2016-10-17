@@ -28,11 +28,6 @@
 ***************************************************************************
 **************************************************************************/
 
-enum entity_charset { cs_utf_8, cs_8859_1, cs_cp1252, cs_8859_15, cs_cp1251,
-					  cs_8859_5, cs_cp866, cs_macroman, cs_koi8r, cs_big5,
-					  cs_gb2312, cs_big5hkscs, cs_sjis, cs_eucjp,
-					  cs_numelems /* used to count the number of charsets */
-					};
 #define CHARSET_UNICODE_COMPAT(cs)	((cs) <= cs_8859_1)
 #define CHARSET_SINGLE_BYTE(cs)		((cs) > cs_utf_8 && (cs) < cs_big5)
 #define CHARSET_PARTIAL_SUPPORT(cs)	((cs) >= cs_big5)

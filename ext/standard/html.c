@@ -98,7 +98,7 @@ static char *get_default_charset(void) {
 
 /* {{{ get_next_char
  */
-static inline unsigned int get_next_char(
+PHPAPI unsigned int get_next_char(
 		enum entity_charset charset,
 		const unsigned char *str,
 		size_t str_len,
@@ -373,7 +373,7 @@ static inline unsigned int get_next_char(
 /* {{{ entity_charset determine_charset
  * returns the charset identifier based on current locale or a hint.
  * defaults to UTF-8 */
-static enum entity_charset determine_charset(char *charset_hint)
+PHPAPI enum entity_charset determine_charset(char *charset_hint)
 {
 	size_t i;
 	enum entity_charset charset = cs_utf_8;
