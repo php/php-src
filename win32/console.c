@@ -41,9 +41,9 @@ PHP_WINUTIL_API BOOL php_win32_console_fileno_has_vt100(zend_long fileno)
 	HANDLE handle = (HANDLE) _get_osfhandle(fileno);
 
 	if (handle != INVALID_HANDLE_VALUE) {
-		DWORD cNumberOfEvents;
+		DWORD events;
 
-		if (fileno != 0 && !GetNumberOfConsoleInputEvents(handle, &cNumberOfEvents)) {
+		if (fileno != 0 && !GetNumberOfConsoleInputEvents(handle, &events)) {
 			// Not STDIN
 			DWORD mode;
 
@@ -63,9 +63,9 @@ PHP_WINUTIL_API BOOL php_win32_console_fileno_set_vt100(zend_long fileno, BOOL e
 	HANDLE handle = (HANDLE) _get_osfhandle(fileno);
 
 	if (handle != INVALID_HANDLE_VALUE) {
-		DWORD cNumberOfEvents;
+		DWORD events;
 
-		if (fileno != 0 && !GetNumberOfConsoleInputEvents(handle, &cNumberOfEvents)) {
+		if (fileno != 0 && !GetNumberOfConsoleInputEvents(handle, &events)) {
 			// Not STDIN
 			DWORD mode;
 
