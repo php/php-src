@@ -1723,7 +1723,7 @@ PHP_FUNCTION(sapi_windows_vt100_support)
 		RETURN_FALSE;
 	}
 
-	/* Check if the Windows standard handle is redirected to file */
+	/* Check if the file descriptor is a console */
 	if (!php_win32_console_fileno_is_console(fileno)) {
 		RETURN_FALSE;
 	}
