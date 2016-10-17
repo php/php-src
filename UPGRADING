@@ -71,6 +71,7 @@ PHP 7.2 UPGRADE NOTES
 
 - GD:
   . Added imagesetclip() and imagegetclip().
+  . Added imageopenpolygon().
 
 - Mbstring:
   . Added mb_chr() and mb_ord().
