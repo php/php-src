@@ -163,14 +163,15 @@ static zend_always_inline uint32_t _const_op_type(const zval *zv) {
 	} else if (Z_TYPE_P(zv) == IS_ARRAY) {
 		HashTable *ht = Z_ARRVAL_P(zv);
 		uint32_t tmp = MAY_BE_ARRAY;
+		zend_string *str;
+		zval *val;
 
 		if (Z_REFCOUNTED_P(zv)) {
 			tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 		} else {
 			tmp |= MAY_BE_RCN;
 		}
-		zend_string *str;
-		zval *val;
+
 		ZEND_HASH_FOREACH_STR_KEY_VAL(ht, str, val) {
 			if (str) {
 				tmp |= MAY_BE_ARRAY_KEY_STRING;

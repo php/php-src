@@ -536,7 +536,7 @@ PHPAPI zend_string *php_resolve_path(const char *filename, int filename_length, 
 		}
 		end = strchr(p, DEFAULT_DIR_SEPARATOR);
 		if (end) {
-			if ((end-ptr) + 1 + filename_length + 1 >= MAXPATHLEN) {
+			if (filename_length > (MAXPATHLEN - 2) || (end-ptr) > MAXPATHLEN || (end-ptr) + 1 + (size_t)filename_length + 1 >= MAXPATHLEN) {
 				ptr = end + 1;
 				continue;
 			}
@@ -545,9 +545,9 @@ PHPAPI zend_string *php_resolve_path(const char *filename, int filename_length, 
 			memcpy(trypath+(end-ptr)+1, filename, filename_length+1);
 			ptr = end+1;
 		} else {
-			int len = (int)strlen(ptr);
+			size_t len = strlen(ptr);
 
-			if (len + 1 + filename_length + 1 >= MAXPATHLEN) {
+			if (filename_length > (MAXPATHLEN - 2) || len > MAXPATHLEN || len + 1 + (size_t)filename_length + 1 >= MAXPATHLEN) {
 				break;
 			}
 			memcpy(trypath, ptr, len);
@@ -585,6 +585,7 @@ PHPAPI zend_string *php_resolve_path(const char *filename, int filename_length, 
 
 		while ((--exec_fname_length < SIZE_MAX) && !IS_SLASH(exec_fname[exec_fname_length]));
 		if (exec_fname_length > 0 &&
+			filename_length < (MAXPATHLEN - 2) &&
 		    exec_fname_length + 1 + filename_length + 1 < MAXPATHLEN) {
 			memcpy(trypath, exec_fname, exec_fname_length + 1);
 			memcpy(trypath+exec_fname_length + 1, filename, filename_length+1);

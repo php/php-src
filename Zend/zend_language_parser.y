@@ -1249,6 +1249,7 @@ encaps_var:
 encaps_var_offset:
 		T_STRING		{ $$ = $1; }
 	|	T_NUM_STRING	{ $$ = $1; }
+	|	'-' T_NUM_STRING { $$ = zend_ast_create(ZEND_AST_UNARY_MINUS, $2); }
 	|	T_VARIABLE		{ $$ = zend_ast_create(ZEND_AST_VAR, $1); }
 ;
 

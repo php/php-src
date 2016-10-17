@@ -108,12 +108,14 @@ void gd_stderr_error(int priority, const char *format, va_list args)
 	case GD_NOTICE:
 		fputs("GD Notice: ", stderr);
 		break;
+#ifndef PHP_WIN32
 	case GD_INFO:
 		fputs("GD Info: ", stderr);
 		break;
 	case GD_DEBUG:
 		fputs("GD Debug: ", stderr);
 		break;
+#endif
 	}
 	vfprintf(stderr, format, args);
 	fflush(stderr);
@@ -2656,6 +2658,17 @@ void gdImageCopyResampled (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, i
 
 void gdImagePolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 {
+	if (n <= 0) {
+		return;
+	}
+
+
+	gdImageLine (im, p->x, p->y, p[n - 1].x, p[n - 1].y, c);
+	gdImageOpenPolygon (im, p, n, c);
+}
+
+void gdImageOpenPolygon (gdImagePtr im, gdPointPtr p, int n, int c)
+{
 	int i;
 	int lx, ly;
 
@@ -2665,7 +2678,6 @@ void gdImagePolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 
 	lx = p->x;
 	ly = p->y;
-	gdImageLine(im, lx, ly, p[n - 1].x, p[n - 1].y, c);
 	for (i = 1; i < n; i++) {
 		p++;
 		gdImageLine(im, lx, ly, p->x, p->y, c);

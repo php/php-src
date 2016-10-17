@@ -23,8 +23,8 @@ prompt> [L8 %s ECHO                    1                                        
 >00008: echo 1;
  00009: 
 prompt> 1
-[L8 %s RETURN                  1                                                              %s]
-[Script ended normally]
+[L9 %s RETURN                  1                                                              %s]
+>00009: 
 prompt> 
 --FILE--
 <?php

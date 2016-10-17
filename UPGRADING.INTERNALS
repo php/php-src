@@ -23,6 +23,10 @@ PHP 7.1 INTERNALS UPGRADE NOTES
 
   b. Windows build system changes
 
+    *  nice() now have a Windows alternative that is implemented in win32/nice.c, using 
+	   SetPriorityClass(). See the implementation for more in-depth details. This also 
+	   defines HAVE_NICE.
+
 ========================
 3. Module changes
 ========================
