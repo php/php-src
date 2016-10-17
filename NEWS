@@ -46,6 +46,10 @@ PHP                                                                        NEWS
   . Fixed bug #73007 (add locale length check). (Stas)
   . Fixed bug #73218 (add mitigation for ICU int overflow). (Stas)
 
+- MySQLi:
+  . Introduced new constant MYSQLI_OPT_READ_TIMEOUT to overwrite read timeout.
+    To be used with mysqli_options(). (Andrey)
+
 - OCI8
   . Fixed bug #71148 (Bind reference overwritten on PHP 7). (Oracle Corp.)
 
