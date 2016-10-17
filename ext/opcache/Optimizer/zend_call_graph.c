@@ -80,64 +80,6 @@ static int zend_foreach_op_array(zend_call_graph *call_graph, zend_script *scrip
 	return SUCCESS;
 }
 
-static void zend_collect_args_info(zend_call_info *call_info)
-{
-	zend_op *opline = call_info->caller_init_opline;
-	zend_op *end = call_info->caller_call_opline;
-	uint32_t i;
-	int num;
-	int level = 0;
-
-	ZEND_ASSERT(opline && end);
-	if (!opline->extended_value) {
-		return;
-	}
-	for (i = 0; i < opline->extended_value; i++) {
-		call_info->arg_info[i].opline = NULL;
-	}
-	while (opline < end) {
-		opline++;
-		switch (opline->opcode) {
-			case ZEND_SEND_VAL:
-			case ZEND_SEND_VAR:
-			case ZEND_SEND_VAL_EX:
-			case ZEND_SEND_VAR_EX:
-			case ZEND_SEND_REF:
-			case ZEND_SEND_VAR_NO_REF:
-			case ZEND_SEND_VAR_NO_REF_EX:
-				num = opline->op2.num;
-				if (num > 0) {
-					num--;
-				}
-				if (!level) {
-					call_info->arg_info[num].opline = opline;
-				}
-				break;
-			case ZEND_SEND_ARRAY:
-			case ZEND_SEND_USER:
-			case ZEND_SEND_UNPACK:
-				// ???
-				break;
-			case ZEND_INIT_FCALL:
-			case ZEND_INIT_FCALL_BY_NAME:
-			case ZEND_INIT_NS_FCALL_BY_NAME:
-			case ZEND_INIT_DYNAMIC_CALL:
-			case ZEND_NEW:
-			case ZEND_INIT_METHOD_CALL:
-			case ZEND_INIT_STATIC_METHOD_CALL:
-			case ZEND_INIT_USER_CALL:
-				level++;
-				break;
-			case ZEND_DO_FCALL:
-			case ZEND_DO_ICALL:
-			case ZEND_DO_UCALL:
-			case ZEND_DO_FCALL_BY_NAME:
-				level--;
-				break;
-		}
-	}
-}
-
 static int zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_t build_flags, zend_op_array *op_array, zend_func_info *func_info)
 {
 	zend_op *opline = op_array->opcodes;
@@ -149,12 +91,13 @@ static int zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_t 
 	ALLOCA_FLAG(use_heap);
 
 	call_stack = do_alloca((op_array->last / 2) * sizeof(zend_call_info*), use_heap);
+	call_info = NULL;
 	while (opline != end) {
-		call_info = NULL;
 		switch (opline->opcode) {
 			case ZEND_INIT_FCALL:
 			case ZEND_INIT_METHOD_CALL:
 			case ZEND_INIT_STATIC_METHOD_CALL:
+				call_stack[call] = call_info;
 				func = zend_optimizer_get_called_func(
 					script, op_array, opline, (build_flags & ZEND_RT_CONSTANTS) != 0);
 				if (func) {
@@ -174,13 +117,15 @@ static int zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_t 
 						call_info->next_caller = callee_func_info ? callee_func_info->caller_info : NULL;
 					}
 				}
-				/* break missing intentionally */
+				call++;
+				break;
 			case ZEND_INIT_FCALL_BY_NAME:
 			case ZEND_INIT_NS_FCALL_BY_NAME:
 			case ZEND_INIT_DYNAMIC_CALL:
 			case ZEND_NEW:
 			case ZEND_INIT_USER_CALL:
 				call_stack[call] = call_info;
+				call_info = NULL;
 				call++;
 				break;
 			case ZEND_DO_FCALL:
@@ -188,11 +133,32 @@ static int zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_t 
 			case ZEND_DO_UCALL:
 			case ZEND_DO_FCALL_BY_NAME:
 				func_info->flags |= ZEND_FUNC_HAS_CALLS;
-				call--;
-				if (call_stack[call]) {
-					call_stack[call]->caller_call_opline = opline;
-					zend_collect_args_info(call_stack[call]);
+				if (call_info) {
+					call_info->caller_call_opline = opline;
 				}
+				call--;
+				call_info = call_stack[call];
+				break;
+			case ZEND_SEND_VAL:
+			case ZEND_SEND_VAR:
+			case ZEND_SEND_VAL_EX:
+			case ZEND_SEND_VAR_EX:
+			case ZEND_SEND_REF:
+			case ZEND_SEND_VAR_NO_REF:
+			case ZEND_SEND_VAR_NO_REF_EX:
+				if (call_info) {
+					uint32_t num = opline->op2.num;
+
+					if (num > 0) {
+						num--;
+					}
+					call_info->arg_info[num].opline = opline;
+				}
+				break;
+			case ZEND_SEND_ARRAY:
+			case ZEND_SEND_USER:
+			case ZEND_SEND_UNPACK:
+				/* TODO: set info about var_arg call ??? */
 				break;
 		}
 		opline++;
