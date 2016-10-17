@@ -18,6 +18,9 @@ PHP                                                                        NEWS
   . Fixed bug #73279 (Integer overflow in gdImageScaleBilinearPalette()). (cmb)
   . Fixed bug #73280 (Stack Buffer Overflow in GD dynamicGetbuf). (cmb)
 
+- OCI8
+  . Fixed bug #71148 (Bind reference overwritten on PHP 7). (Oracle Corp.)
+
 - phpdbg:
   . Properly allow for stdin input from a file. (Bob)
   . Add -s command line option / stdin command for reading script from stdin.
