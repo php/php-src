@@ -28,7 +28,7 @@ foreach ([
     if ($ra) {
       var_dump($ra->allowsNull());
       var_dump($ra->isBuiltin());
-      var_dump((string)$ra);
+      var_dump($ra->getName());
     }
   }
 }
@@ -48,7 +48,7 @@ foreach ([
     if ($ra) {
       var_dump($ra->allowsNull());
       var_dump($ra->isBuiltin());
-      var_dump((string)$ra);
+      var_dump($ra->getName());
     }
   }
 }
@@ -70,7 +70,7 @@ foreach ([
   if ($ra) {
     var_dump($ra->allowsNull());
     var_dump($ra->isBuiltin());
-    var_dump((string)$ra);
+    var_dump($ra->getName());
   }
 }
 
@@ -96,7 +96,7 @@ string(8) "callable"
 bool(true)
 bool(true)
 bool(false)
-string(9) "?stdClass"
+string(8) "stdClass"
 ** Function 0 - Parameter 4
 bool(false)
 ** Function 0 - Parameter 5

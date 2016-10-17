@@ -4,7 +4,7 @@ Bug #64106: Segfault on SplFixedArray[][x] = y when extended
 <?php
 
 class MyFixedArray extends SplFixedArray {
-    public function offsetGet($offset) {}
+    public function offsetGet($offset) { var_dump($offset); }
 }
 
 $array = new MyFixedArray(10);
@@ -12,4 +12,6 @@ $array[][1] = 10;
 
 ?>
 --EXPECTF--
+NULL
+
 Notice: Indirect modification of overloaded element of MyFixedArray has no effect in %s on line %d

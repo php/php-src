@@ -23,8 +23,10 @@
 
 #include "TSRM.h"
 
+zend_string *phpdbg_compile_stackframe(zend_execute_data *);
 void phpdbg_restore_frame(void);
 void phpdbg_switch_frame(int);
 void phpdbg_dump_backtrace(size_t);
+void phpdbg_open_generator_frame(zend_generator *);
 
 #endif /* PHPDBG_FRAME_H */

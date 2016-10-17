@@ -181,7 +181,11 @@ static int zend_ast_add_array_element(zval *result, zval *offset, zval *expr)
 {
 	switch (Z_TYPE_P(offset)) {
 		case IS_UNDEF:
-			zend_hash_next_index_insert(Z_ARRVAL_P(result), expr);
+			if (!zend_hash_next_index_insert(Z_ARRVAL_P(result), expr)) {
+				zend_error(E_WARNING,
+					"Cannot add element to the array as the next element is already occupied");
+				zval_ptr_dtor(expr);
+			}
 			break;
 		case IS_STRING:
 			zend_symtable_update(Z_ARRVAL_P(result), Z_STR_P(offset), expr);
@@ -201,6 +205,10 @@ static int zend_ast_add_array_element(zval *result, zval *offset, zval *expr)
 			break;
 		case IS_DOUBLE:
 			zend_hash_index_update(Z_ARRVAL_P(result), zend_dval_to_lval(Z_DVAL_P(offset)), expr);
+			break;
+		case IS_RESOURCE:
+			zend_error(E_NOTICE, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(offset), Z_RES_HANDLE_P(offset));
+			zend_hash_index_update(Z_ARRVAL_P(result), Z_RES_HANDLE_P(offset), expr);
 			break;
 		default:
 			zend_throw_error(NULL, "Illegal offset type");

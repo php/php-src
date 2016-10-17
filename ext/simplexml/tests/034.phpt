@@ -1,7 +1,5 @@
 --TEST--
 SimpleXML: cast to array
---FAIL--
-Length of cast array does not match expected length
 --SKIPIF--
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--

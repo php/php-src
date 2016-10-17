@@ -1510,20 +1510,6 @@ err:
 }
 /* }}} */
 
-#if 0
-/* {{{ php_pgsql_get_default_link
- */
-static int php_pgsql_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
-{
-	if (PGG(default_link)==-1) { /* no link opened yet, implicitly open one */
-		ht = 0;
-		php_pgsql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
-	}
-	return PGG(default_link);
-}
-/* }}} */
-#endif
-
 /* {{{ proto resource pg_connect(string connection_string[, int connect_type] | [string host, string port [, string options [, string tty,]]] string database)
    Open a PostgreSQL connection */
 PHP_FUNCTION(pg_connect)
@@ -4122,14 +4108,14 @@ PHP_FUNCTION(pg_copy_to)
 							  &pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len) == FAILURE) {
 		return;
 	}
-	if (!pg_delim) {
-		pg_delim = "\t";
-	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
 		RETURN_FALSE;
 	}
 
+	if (!pg_delim) {
+		pg_delim = "\t";
+	}
 	if (!pg_null_as) {
 		pg_null_as = estrdup("\\\\N");
 		free_pg_null = 1;
@@ -4255,16 +4241,17 @@ PHP_FUNCTION(pg_copy_from)
 							  &pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len) == FAILURE) {
 		return;
 	}
+
+	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
+		RETURN_FALSE;
+	}
+
 	if (!pg_delim) {
 		pg_delim = "\t";
 	}
 	if (!pg_null_as) {
 		pg_null_as = estrdup("\\\\N");
 		pg_null_as_free = 1;
-	}
-
-	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
 	}
 
 	spprintf(&query, 0, "COPY %s FROM STDIN DELIMITERS E'%c' WITH NULL AS E'%s'", table_name, *pg_delim, pg_null_as);

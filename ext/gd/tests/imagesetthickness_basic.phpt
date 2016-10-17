@@ -23,12 +23,8 @@ imagesetthickness($image, 5);
 // Draw the rectangle
 imagerectangle($image, 14, 14, 185, 85, $black);
 
-ob_start();
-imagegd($image);
-$img = ob_get_contents();
-ob_end_clean();
-
-echo md5(base64_encode($img));
+include_once __DIR__ . '/func.inc';
+test_image_equals_file(__DIR__ . '/imagesetthickness_basic.png', $image);
 ?>
 --EXPECT--
-1a6bc882772310d2e9b32cca2574236c
+The images are equal.

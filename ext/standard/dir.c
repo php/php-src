@@ -63,15 +63,6 @@ int dir_globals_id;
 php_dir_globals dir_globals;
 #endif
 
-#if 0
-typedef struct {
-	int id;
-	DIR *dir;
-} php_dir;
-
-static int le_dirp;
-#endif
-
 static zend_class_entry *dir_class_entry_ptr;
 
 #define FETCH_DIRP() \

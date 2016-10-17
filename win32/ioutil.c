@@ -425,6 +425,7 @@ PW32IO wchar_t *php_win32_ioutil_getcwd_w(const wchar_t *buf, int len)
 	if (!GetCurrentDirectoryW(len, buf)) {
 		err = GetLastError();
 		SET_ERRNO_FROM_WIN32_CODE(err);
+		free(tmp_buf);
 		return NULL;
 	}
 
@@ -466,6 +467,7 @@ PW32IO size_t php_win32_ioutil_dirname(char *path, size_t len)
 		endw--;
 	}
 	if (endw < pathw) {
+		free(startw);
 		/* The path only contained slashes */
 		path[0] = PHP_WIN32_IOUTIL_DEFAULT_SLASH;
 		path[1] = '\0';
@@ -477,6 +479,7 @@ PW32IO size_t php_win32_ioutil_dirname(char *path, size_t len)
 		endw--;
 	}
 	if (endw < pathw) {
+		free(startw);
 		path[0] = '.';
 		path[1] = '\0';
 		return 1 + len_adjust;
@@ -487,6 +490,7 @@ PW32IO size_t php_win32_ioutil_dirname(char *path, size_t len)
 		endw--;
 	}
 	if (endw < pathw) {
+		free(startw);
 		path[0] = PHP_WIN32_IOUTIL_DEFAULT_SLASH;
 		path[1] = '\0';
 		return 1 + len_adjust;

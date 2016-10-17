@@ -15,13 +15,8 @@ $image = imagecreatetruecolor( 100, 100 );
 // Draw a rectangle
 imagerectangle( $image, 0, 0, 50, 50, imagecolorallocate($image, 255, 255, 255) );
 
-ob_start(); 
-imagegd( $image );
-$img = ob_get_contents(); 
-ob_end_clean();
-
-echo md5(base64_encode($img));
-
+include_once __DIR__ . '/func.inc';
+test_image_equals_file(__DIR__ . '/imagerectangle_basic.png', $image);
 ?> 
 --EXPECT-- 
-e7f8ca8c63fb08b248f3ed6435983aed
+The images are equal.

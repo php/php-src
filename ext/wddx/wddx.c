@@ -230,7 +230,10 @@ static int wddx_stack_destroy(wddx_stack *stack)
 
 	if (stack->elements) {
 		for (i = 0; i < stack->top; i++) {
-			zval_ptr_dtor(&((st_entry *)stack->elements[i])->data);
+			if (Z_TYPE(((st_entry *)stack->elements[i])->data) != IS_UNDEF
+					&& ((st_entry *)stack->elements[i])->type != ST_FIELD)	{
+				zval_ptr_dtor(&((st_entry *)stack->elements[i])->data);
+			}
 			if (((st_entry *)stack->elements[i])->varname) {
 				efree(((st_entry *)stack->elements[i])->varname);
 			}
@@ -738,10 +741,10 @@ static void php_wddx_push_element(void *user_data, const XML_Char *name, const X
 		int i;
 
 		if (atts) for (i = 0; atts[i]; i++) {
-			if (!strcmp((char *)atts[i], EL_CHAR_CODE) && atts[++i] && atts[i][0]) {
+			if (!strcmp((char *)atts[i], EL_CHAR_CODE) && atts[i+1] && atts[i+1][0]) {
 				char tmp_buf[2];
 
-				snprintf(tmp_buf, sizeof(tmp_buf), "%c", (char)strtol((char *)atts[i], NULL, 16));
+				snprintf(tmp_buf, sizeof(tmp_buf), "%c", (char)strtol((char *)atts[i+1], NULL, 16));
 				php_wddx_process_data(user_data, (XML_Char *) tmp_buf, strlen(tmp_buf));
 				break;
 			}
@@ -756,13 +759,13 @@ static void php_wddx_push_element(void *user_data, const XML_Char *name, const X
 		int i;
 
 		if (atts) for (i = 0; atts[i]; i++) {
-			if (!strcmp((char *)atts[i], EL_VALUE) && atts[++i] && atts[i][0]) {
+			if (!strcmp((char *)atts[i], EL_VALUE) && atts[i+1] && atts[i+1][0]) {
 				ent.type = ST_BOOLEAN;
 				SET_STACK_VARNAME;
 
 				ZVAL_TRUE(&ent.data);
 				wddx_stack_push((wddx_stack *)stack, &ent, sizeof(st_entry));
-				php_wddx_process_data(user_data, atts[i], strlen((char *)atts[i]));
+				php_wddx_process_data(user_data, atts[i+1], strlen((char *)atts[i+1]));
 				break;
 			}
 		}
@@ -788,9 +791,9 @@ static void php_wddx_push_element(void *user_data, const XML_Char *name, const X
 		int i;
 
 		if (atts) for (i = 0; atts[i]; i++) {
-			if (!strcmp((char *)atts[i], EL_NAME) && atts[++i] && atts[i][0]) {
+			if (!strcmp((char *)atts[i], EL_NAME) && atts[i+1] && atts[i+1][0]) {
 				if (stack->varname) efree(stack->varname);
-				stack->varname = estrdup((char *)atts[i]);
+				stack->varname = estrdup((char *)atts[i+1]);
 				break;
 			}
 		}
@@ -802,11 +805,12 @@ static void php_wddx_push_element(void *user_data, const XML_Char *name, const X
 		array_init(&ent.data);
 
 		if (atts) for (i = 0; atts[i]; i++) {
-			if (!strcmp((char *)atts[i], "fieldNames") && atts[++i] && atts[i][0]) {
+			if (!strcmp((char *)atts[i], "fieldNames") && atts[i+1] && atts[i+1][0]) {
 				zval tmp;
 				char *key;
 				const char *p1, *p2, *endp;
 
+				i++;
 				endp = (char *)atts[i] + strlen((char *)atts[i]);
 				p1 = (char *)atts[i];
 				while ((p2 = php_memnstr(p1, ",", sizeof(",")-1, endp)) != NULL) {
@@ -836,13 +840,13 @@ static void php_wddx_push_element(void *user_data, const XML_Char *name, const X
 		ZVAL_UNDEF(&ent.data);
 
 		if (atts) for (i = 0; atts[i]; i++) {
-			if (!strcmp((char *)atts[i], EL_NAME) && atts[++i] && atts[i][0]) {
+			if (!strcmp((char *)atts[i], EL_NAME) && atts[i+1] && atts[i+1][0]) {
 				st_entry *recordset;
 				zval *field;
 
 				if (wddx_stack_top(stack, (void**)&recordset) == SUCCESS &&
 					recordset->type == ST_RECORDSET &&
-					(field = zend_hash_str_find(Z_ARRVAL(recordset->data), (char*)atts[i], strlen((char *)atts[i]))) != NULL) {
+					(field = zend_hash_str_find(Z_ARRVAL(recordset->data), (char*)atts[i+1], strlen((char *)atts[i+1]))) != NULL) {
 					ZVAL_COPY_VALUE(&ent.data, field);
 				}
 

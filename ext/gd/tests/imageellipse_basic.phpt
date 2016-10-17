@@ -16,12 +16,8 @@ $image = imagecreatetruecolor(400, 300);
 // Draw a white ellipse
 imageellipse($image, 200, 150, 300, 200, 16777215);
 
-ob_start();
-imagegd($image);
-$img = ob_get_contents();
-ob_end_clean();
-
-echo md5(base64_encode($img));
+include_once __DIR__ . '/func.inc';
+test_image_equals_file(__DIR__ . '/imageellipse_basic.png', $image);
 ?>
 --EXPECT--
-49c1544b012c3460c74cd04f1332d4ad
+The images are equal.

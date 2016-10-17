@@ -567,7 +567,6 @@ static inline zval *_get_obj_zval_ptr_ptr(int op_type, znode_op node, zend_execu
 static inline void zend_assign_to_variable_reference(zval *variable_ptr, zval *value_ptr)
 {
 	zend_reference *ref;
-	zval garbage;
 
 	if (EXPECTED(!Z_ISREF_P(value_ptr))) {
 		ZVAL_NEW_REF(value_ptr, value_ptr);
@@ -577,9 +576,18 @@ static inline void zend_assign_to_variable_reference(zval *variable_ptr, zval *v
 
 	ref = Z_REF_P(value_ptr);
 	GC_REFCOUNT(ref)++;
-	ZVAL_COPY_VALUE(&garbage, variable_ptr);
+	if (Z_REFCOUNTED_P(variable_ptr)) {
+		zend_refcounted *garbage = Z_COUNTED_P(variable_ptr);
+
+		if (--GC_REFCOUNT(garbage) == 0) {
+			ZVAL_REF(variable_ptr, ref);
+			zval_dtor_func(garbage);
+			return;
+		} else {
+			GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr);
+		}
+	}
 	ZVAL_REF(variable_ptr, ref);
-	zval_ptr_dtor(&garbage);
 }
 
 /* this should modify object only if it's empty */
@@ -696,20 +704,24 @@ static ZEND_COLD void zend_verify_arg_error(
 	const char *fname, *fsep, *fclass;
 	const char *need_msg, *need_kind, *need_or_null, *given_msg, *given_kind;
 
-	zend_verify_type_error_common(
-		zf, arg_info, ce, value,
-		&fname, &fsep, &fclass, &need_msg, &need_kind, &need_or_null, &given_msg, &given_kind);
+	if (value) {
+		zend_verify_type_error_common(
+			zf, arg_info, ce, value,
+			&fname, &fsep, &fclass, &need_msg, &need_kind, &need_or_null, &given_msg, &given_kind);
 
-	if (zf->common.type == ZEND_USER_FUNCTION) {
-		if (ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type)) {
-			zend_type_error("Argument %d passed to %s%s%s() must %s%s%s, %s%s given, called in %s on line %d",
-					arg_num, fclass, fsep, fname, need_msg, need_kind, need_or_null, given_msg, given_kind,
-					ZSTR_VAL(ptr->func->op_array.filename), ptr->opline->lineno);
+		if (zf->common.type == ZEND_USER_FUNCTION) {
+			if (ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type)) {
+				zend_type_error("Argument %d passed to %s%s%s() must %s%s%s, %s%s given, called in %s on line %d",
+						arg_num, fclass, fsep, fname, need_msg, need_kind, need_or_null, given_msg, given_kind,
+						ZSTR_VAL(ptr->func->op_array.filename), ptr->opline->lineno);
+			} else {
+				zend_type_error("Argument %d passed to %s%s%s() must %s%s%s, %s%s given", arg_num, fclass, fsep, fname, need_msg, need_kind, need_or_null, given_msg, given_kind);
+			}
 		} else {
 			zend_type_error("Argument %d passed to %s%s%s() must %s%s%s, %s%s given", arg_num, fclass, fsep, fname, need_msg, need_kind, need_or_null, given_msg, given_kind);
 		}
 	} else {
-		zend_type_error("Argument %d passed to %s%s%s() must %s%s%s, %s%s given", arg_num, fclass, fsep, fname, need_msg, need_kind, need_or_null, given_msg, given_kind);
+		zend_missing_arg_error(ptr);
 	}
 }
 
@@ -955,7 +967,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(zend_execute_data *
 	zend_execute_data *ptr = EX(prev_execute_data);
 
 	if (ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type)) {
-		zend_throw_error(NULL, "Too few arguments to function %s%s%s(), %d passed in %s on line %d and %s %d expected",
+		zend_throw_error(zend_ce_argument_count_error, "Too few arguments to function %s%s%s(), %d passed in %s on line %d and %s %d expected",
 			EX(func)->common.scope ? ZSTR_VAL(EX(func)->common.scope->name) : "",
 			EX(func)->common.scope ? "::" : "",
 			ZSTR_VAL(EX(func)->common.function_name),
@@ -965,7 +977,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(zend_execute_data *
 			EX(func)->common.required_num_args == EX(func)->common.num_args ? "exactly" : "at least",
 			EX(func)->common.required_num_args);
 	} else {
-		zend_throw_error(NULL, "Too few arguments to function %s%s%s(), %d passed and %s %d expected",
+		zend_throw_error(zend_ce_argument_count_error, "Too few arguments to function %s%s%s(), %d passed and %s %d expected",
 			EX(func)->common.scope ? ZSTR_VAL(EX(func)->common.scope->name) : "",
 			EX(func)->common.scope ? "::" : "",
 			ZSTR_VAL(EX(func)->common.function_name),
@@ -1282,7 +1294,7 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 	zend_long offset;
 
 	offset = zend_check_string_offset(dim, BP_VAR_W);
-	if (offset < (zend_long)(-Z_STRLEN_P(str))) {
+	if (offset < -(zend_long)Z_STRLEN_P(str)) {
 		/* Error on negative offset */
 		zend_error(E_WARNING, "Illegal string offset:  " ZEND_LONG_FMT, offset);
 		if (result) {
@@ -2647,6 +2659,9 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_object(zval *
 			ZEND_ASSERT(GC_TYPE((zend_object*)fbc->common.prototype) == IS_OBJECT);
 			GC_REFCOUNT((zend_object*)fbc->common.prototype)++;
 			call_info |= ZEND_CALL_CLOSURE;
+			if (fbc->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) {
+				call_info |= ZEND_CALL_FAKE_CLOSURE;
+			}
 		} else if (object) {
 			call_info |= ZEND_CALL_RELEASE_THIS;
 			GC_REFCOUNT(object)++; /* For $this pointer */

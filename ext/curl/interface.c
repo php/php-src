@@ -816,6 +816,9 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLE_SSL_ENGINE_NOTFOUND);
 	REGISTER_CURL_CONSTANT(CURLE_SSL_ENGINE_SETFAILED);
 	REGISTER_CURL_CONSTANT(CURLE_SSL_PEER_CERTIFICATE);
+#if LIBCURL_VERSION_NUM >= 0x072700 /* Available since 7.39.0 */
+	REGISTER_CURL_CONSTANT(CURLE_SSL_PINNEDPUBKEYNOTMATCH);
+#endif
 	REGISTER_CURL_CONSTANT(CURLE_TELNET_OPTION_SYNTAX);
 	REGISTER_CURL_CONSTANT(CURLE_TOO_MANY_REDIRECTS);
 	REGISTER_CURL_CONSTANT(CURLE_UNKNOWN_TELNET_OPTION);
@@ -1901,8 +1904,9 @@ static void create_certinfo(struct curl_certinfo *ci, zval *listcode)
 				int len;
 				char s[64];
 				char *tmp;
-				strncpy(s, slist->data, 64);
-				tmp = memchr(s, ':', 64);
+				strncpy(s, slist->data, sizeof(s));
+				s[sizeof(s)-1] = '\0';
+				tmp = memchr(s, ':', sizeof(s));
 				if(tmp) {
 					*tmp = '\0';
 					len = strlen(s);

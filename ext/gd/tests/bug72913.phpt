@@ -19,11 +19,10 @@ imagesavealpha($dst, true);
 
 imagecopy($dst, $src, 0,0, 0,0, 50,50);
 
-ob_start();
-imagegd($dst);
-echo md5(ob_get_clean()), PHP_EOL;
+include_once __DIR__ . '/func.inc';
+test_image_equals_file(__DIR__ . '/bug72913.png', $dst);
 ?>
 ==DONE==
 --EXPECT--
-f03c27f20710e21debd7090c660f1a1e
+The images are equal.
 ==DONE==

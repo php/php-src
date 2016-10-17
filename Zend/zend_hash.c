@@ -730,9 +730,6 @@ static zend_always_inline zval *_zend_hash_index_add_or_update_i(HashTable *ht, 
 					ht->pDestructor(&p->val);
 				}
 				ZVAL_COPY_VALUE(&p->val, pData);
-				if ((zend_long)h >= (zend_long)ht->nNextFreeElement) {
-					ht->nNextFreeElement = h < ZEND_LONG_MAX ? h + 1 : ZEND_LONG_MAX;
-				}
 				return &p->val;
 			} else { /* we have to keep the order :( */
 				goto convert_to_hash;
@@ -1420,13 +1417,17 @@ ZEND_API void ZEND_FASTCALL zend_symtable_clean(HashTable *ht)
 		} else if (ht->nNumUsed == ht->nNumOfElements) {
 			do {
 				i_zval_ptr_dtor(&p->val ZEND_FILE_LINE_CC);
-				zend_string_release(p->key);
+				if (EXPECTED(p->key)) {
+					zend_string_release(p->key);
+				}
 			} while (++p != end);
 		} else {
 			do {
 				if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
 					i_zval_ptr_dtor(&p->val ZEND_FILE_LINE_CC);
-					zend_string_release(p->key);
+					if (EXPECTED(p->key)) {
+						zend_string_release(p->key);
+					}
 				}
 			} while (++p != end);
 		}

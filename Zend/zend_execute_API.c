@@ -587,8 +587,6 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_class_entry *scope) /* {{{ */
 				ZVAL_EMPTY_STRING(p);
 			}
 		} else if (UNEXPECTED((const_value = zend_get_constant_ex(Z_STR_P(p), scope, Z_CONST_FLAGS_P(p))) == NULL)) {
-			char *actual = Z_STRVAL_P(p);
-
 			if (UNEXPECTED(EG(exception))) {
 				RESET_CONSTANT_VISITED(p);
 				return FAILURE;
@@ -603,26 +601,29 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_class_entry *scope) /* {{{ */
 					return FAILURE;
 				} else {
 					zend_string *save = Z_STR_P(p);
+					char *actual = Z_STRVAL_P(p);
 					size_t actual_len = Z_STRLEN_P(p);
 					char *slash = (char *) zend_memrchr(actual, '\\', actual_len);
 					if (slash) {
 						actual = slash + 1;
 						actual_len -= (actual - Z_STRVAL_P(p));
-						if (inline_change) {
-							zend_string *s = zend_string_init(actual, actual_len, 0);
-							Z_STR_P(p) = s;
-							Z_TYPE_FLAGS_P(p) = IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE;
-						}
 					}
 
-					zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",  actual,  actual);
+					zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'", actual, actual);
+					if (EG(exception)) {
+						RESET_CONSTANT_VISITED(p);
+						return FAILURE;
+					}
+
 					if (!inline_change) {
 						ZVAL_STRINGL(p, actual, actual_len);
 					} else {
-						Z_TYPE_INFO_P(p) = Z_REFCOUNTED_P(p) ?
-							IS_STRING_EX : IS_INTERNED_STRING_EX;
-						if (save && ZSTR_VAL(save) != actual) {
+						if (slash) {
+							ZVAL_STRINGL(p, actual, actual_len);
 							zend_string_release(save);
+						} else {
+							Z_TYPE_INFO_P(p) = Z_REFCOUNTED_P(p) ?
+								IS_STRING_EX : IS_INTERNED_STRING_EX;
 						}
 					}
 				}
@@ -814,9 +815,15 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 	}
 
 	if (UNEXPECTED(func->op_array.fn_flags & ZEND_ACC_CLOSURE)) {
+		uint32_t call_info;
+
 		ZEND_ASSERT(GC_TYPE((zend_object*)func->op_array.prototype) == IS_OBJECT);
 		GC_REFCOUNT((zend_object*)func->op_array.prototype)++;
-		ZEND_ADD_CALL_FLAG(call, ZEND_CALL_CLOSURE);
+		call_info = ZEND_CALL_CLOSURE;
+		if (func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) {
+			call_info |= ZEND_CALL_FAKE_CLOSURE;
+		}
+		ZEND_ADD_CALL_FLAG(call, call_info);
 	}
 
 	if (func->type == ZEND_USER_FUNCTION) {
