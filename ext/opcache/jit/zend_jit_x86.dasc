@@ -5234,12 +5234,12 @@ static int zend_jit_send_ref(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		if (op1_info & MAY_BE_UNDEF) {
 			if (op1_info & (MAY_BE_ANY|MAY_BE_REF)) {
 				|	IF_NOT_Z_TYPE FP + opline->op1.var, IS_UNDEF, >1
-			}
-			|	SET_Z_TYPE_INFO FP + opline->op1.var, IS_NULL
-			if (op1_info & (MAY_BE_ANY|MAY_BE_REF)) {
+				|	SET_Z_TYPE_INFO FP + opline->op1.var, IS_NULL
 				|	jmp >2
 				|1:
 			}
+			op1_info &= ~MAY_BE_UNDEF;
+			op1_info |= MAY_BE_NULL;
 		}
 	} else {
 		ZEND_ASSERT(0);
