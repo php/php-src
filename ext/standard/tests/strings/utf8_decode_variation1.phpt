@@ -1,20 +1,14 @@
 --TEST--
-Test utf8_encode() function : usage variations  - <type here specifics of this variation>
---SKIPIF--
-<?php 
-if (!extension_loaded("xml")) {
-	print "skip - XML extension not loaded"; 
-}	 
-?>
+Test utf8_decode() function : usage variations  - different types for data
 --FILE--
 <?php
-/* Prototype  : proto string utf8_encode(string data)
- * Description: Encodes an ISO-8859-1 string to UTF-8 
- * Source code: ext/xml/xml.c
+/* Prototype  : proto string utf8_decode(string data)
+ * Description: Converts a UTF-8 encoded string to ISO-8859-1 
+ * Source code: ext/standard/string.c
  * Alias to functions: 
  */
 
-echo "*** Testing utf8_encode() : usage variations ***\n";
+echo "*** Testing utf8_decode() : usage variations ***\n";
 error_reporting(E_ALL & ~E_NOTICE);
 
 class aClass {
@@ -80,13 +74,13 @@ $values = array(
 
 foreach($values as $value) {
       echo @"\nArg value $value \n";
-      var_dump( utf8_encode($value) );
+      var_dump( utf8_decode($value) );
 };
 
 echo "Done";
 ?>
 --EXPECTF--
-*** Testing utf8_encode() : usage variations ***
+*** Testing utf8_decode() : usage variations ***
 
 Arg value 0 
 string(1) "0"
@@ -117,27 +111,27 @@ string(3) "0.5"
 
 Arg value Array 
 
-Warning: utf8_encode() expects parameter 1 to be string, array given in %s on line %d
+Warning: utf8_decode() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
 Arg value Array 
 
-Warning: utf8_encode() expects parameter 1 to be string, array given in %s on line %d
+Warning: utf8_decode() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
 Arg value Array 
 
-Warning: utf8_encode() expects parameter 1 to be string, array given in %s on line %d
+Warning: utf8_decode() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
 Arg value Array 
 
-Warning: utf8_encode() expects parameter 1 to be string, array given in %s on line %d
+Warning: utf8_decode() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
 Arg value Array 
 
-Warning: utf8_encode() expects parameter 1 to be string, array given in %s on line %d
+Warning: utf8_decode() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
 Arg value  

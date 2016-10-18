@@ -35,6 +35,7 @@ PHP 7.2 UPGRADE NOTES
 - Standard:
   . Simplified password hashing API updated to support Argon2i hashes when PHP is compiled with libargon2
     (https://wiki.php.net/rfc/argon2_password_hash).
+  . proc_nice() is now supported on Windows platforms.
 
 ========================================
 3. Changes in SAPI modules
@@ -63,6 +64,9 @@ PHP 7.2 UPGRADE NOTES
       'Multiline' = "FirstLine\r\n SecondLine",
     ];
 
+- XML:
+  . utf8_encode() and utf8_decode() have been moved to the Standard extension
+    as string functions.
 
 ========================================
 6. New Functions
@@ -70,6 +74,7 @@ PHP 7.2 UPGRADE NOTES
 
 - GD:
   . Added imagesetclip() and imagegetclip().
+  . Added imageopenpolygon().
 
 - Mbstring:
   . Added mb_chr() and mb_ord().

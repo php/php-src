@@ -1,10 +1,5 @@
 --TEST--
 Bug #49687 Several utf8_decode deficiencies and vulnerabilities
---SKIPIF--
-<?php
-require_once("skipif.inc");
-if (!extension_loaded('xml')) die ("skip xml extension not available");
-?>
 --FILE--
 <?php
 

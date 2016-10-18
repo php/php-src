@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "gd.h"
 #include "gdhelpers.h"
+#include "gd_errors.h"
 
 #include "php.h"
 
@@ -91,30 +92,81 @@ static const unsigned char gd_toascii[256] =
 extern int gdCosT[];
 extern int gdSinT[];
 
+/**
+ * Group: Error Handling
+ */
+
+void gd_stderr_error(int priority, const char *format, va_list args)
+{
+	switch (priority) {
+	case GD_ERROR:
+		fputs("GD Error: ", stderr);
+		break;
+	case GD_WARNING:
+		fputs("GD Warning: ", stderr);
+		break;
+	case GD_NOTICE:
+		fputs("GD Notice: ", stderr);
+		break;
+#ifndef PHP_WIN32
+	case GD_INFO:
+		fputs("GD Info: ", stderr);
+		break;
+	case GD_DEBUG:
+		fputs("GD Debug: ", stderr);
+		break;
+#endif
+	}
+	vfprintf(stderr, format, args);
+	fflush(stderr);
+}
+
+static gdErrorMethod gd_error_method = gd_stderr_error;
+
+static void _gd_error_ex(int priority, const char *format, va_list args)
+{
+	if (gd_error_method) {
+		gd_error_method(priority, format, args);
+	}
+}
+
+void gd_error(const char *format, ...)
+{
+	va_list args;
+
+	va_start(args, format);
+	_gd_error_ex(GD_WARNING, format, args);
+	va_end(args);
+}
+void gd_error_ex(int priority, const char *format, ...)
+{
+	va_list args;
+
+	va_start(args, format);
+	_gd_error_ex(priority, format, args);
+	va_end(args);
+}
+
+/*
+	Function: gdSetErrorMethod
+*/
+void gdSetErrorMethod(gdErrorMethod error_method)
+{
+	gd_error_method = error_method;
+}
+
+/*
+	Function: gdClearErrorMethod
+*/
+void gdClearErrorMethod(void)
+{
+	gd_error_method = gd_stderr_error;
+}
+
 static void gdImageBrushApply(gdImagePtr im, int x, int y);
 static void gdImageTileApply(gdImagePtr im, int x, int y);
 static int gdAlphaOverlayColor(int src, int dst, int max);
 int gdImageGetTrueColorPixel(gdImagePtr im, int x, int y);
-
-void php_gd_error_ex(int type, const char *format, ...)
-{
-	va_list args;
-
-
-	va_start(args, format);
-	php_verror(NULL, "", type, format, args);
-	va_end(args);
-}
-
-void php_gd_error(const char *format, ...)
-{
-	va_list args;
-
-
-	va_start(args, format);
-	php_verror(NULL, "", E_WARNING, format, args);
-	va_end(args);
-}
 
 gdImagePtr gdImageCreate (int sx, int sy)
 {
@@ -2606,6 +2658,17 @@ void gdImageCopyResampled (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, i
 
 void gdImagePolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 {
+	if (n <= 0) {
+		return;
+	}
+
+
+	gdImageLine (im, p->x, p->y, p[n - 1].x, p[n - 1].y, c);
+	gdImageOpenPolygon (im, p, n, c);
+}
+
+void gdImageOpenPolygon (gdImagePtr im, gdPointPtr p, int n, int c)
+{
 	int i;
 	int lx, ly;
 
@@ -2615,7 +2678,6 @@ void gdImagePolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 
 	lx = p->x;
 	ly = p->y;
-	gdImageLine(im, lx, ly, p[n - 1].x, p[n - 1].y, c);
 	for (i = 1; i < n; i++) {
 		p++;
 		gdImageLine(im, lx, ly, p->x, p->y, c);

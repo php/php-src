@@ -772,7 +772,7 @@ PHPDBG_API zend_bool phpdbg_check_caught_ex(zend_execute_data *execute_data, zen
 					return 1;
 				}
 
-				catch = cur->extended_value;
+				catch += cur->extended_value / sizeof(zend_op);
 			} while (!cur->result.num);
 
 			return 0;

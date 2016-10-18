@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include "gd.h"
 #include "gdhelpers.h"
+#include "gd_errors.h"
 
 #include "php.h"
 
@@ -149,7 +150,7 @@ gdImagePtr gdImageCreateFromXbm(FILE * fd)
 		}
 	}
 
-	php_gd_error("EOF before image was complete");
+	gd_error("EOF before image was complete");
 	gdImageDestroy(im);
 	return 0;
 }

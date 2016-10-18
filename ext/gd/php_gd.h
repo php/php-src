@@ -174,6 +174,7 @@ PHP_FUNCTION(imageinterlace);
 PHP_FUNCTION(imageline);
 PHP_FUNCTION(imageloadfont);
 PHP_FUNCTION(imagepolygon);
+PHP_FUNCTION(imageopenpolygon);
 PHP_FUNCTION(imagerectangle);
 PHP_FUNCTION(imagesetpixel);
 PHP_FUNCTION(imagestring);
