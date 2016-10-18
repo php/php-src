@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016, PHP 5.6.28
 
+- Core:
+  . Fixed bug #73337 (try/catch not working with two exceptions inside a same
+    operation). (Dmitry)
+
 -GD:
   . Fixed bug #73213 (Integer overflow in imageline() with antialiasing). (cmb)
   . Fixed bug #73272 (imagescale() is not affected by, but affects

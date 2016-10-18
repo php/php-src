@@ -826,7 +826,10 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		if (EG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) {
 			*fci->retval_ptr_ptr = zend_generator_create_zval(EG(active_op_array) TSRMLS_CC);
 		} else {
+			const zend_op *current_opline_before_exception = EG(opline_before_exception);
+
 			zend_execute(EG(active_op_array) TSRMLS_CC);
+			EG(opline_before_exception) = current_opline_before_exception;
 		}
 
 		if (!fci->symbol_table && EG(active_symbol_table)) {
