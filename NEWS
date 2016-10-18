@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.1.0RC5
 
+- Core:
+  . Fixed bug #73215 (uniqid() should use better random source). (Yasuo)
+
 - SQLite3:
   . Fixed bug #73333 (2147483647 is fetched as string). (cmb)
 
