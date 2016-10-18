@@ -630,6 +630,7 @@ static PHP_INI_MH(OnUpdateSaveDir) /* {{{ */
 }
 /* }}} */
 
+
 static PHP_INI_MH(OnUpdateName) /* {{{ */
 {
 	SESSION_CHECK_ACTIVE_STATE;
