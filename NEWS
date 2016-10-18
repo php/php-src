@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.1.0RC5
 
 - Core:
+  . Fixed bug #73329 ((Float)"Nano" == NAN). (Anatol)
 
 - SQLite3:
   . Fixed bug #73333 (2147483647 is fetched as string). (cmb)
