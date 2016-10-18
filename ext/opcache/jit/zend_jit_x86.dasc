@@ -5922,36 +5922,15 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, zend_op_arra
 		|	ZVAL_COPY_VALUE r1, FP + opline->op1.var, op1_info, r0, eax, r2
 	} else if (opline->op1_type == IS_CV) {
 		if (op1_info & MAY_BE_REF) {
-			|	IF_Z_TYPE FP + opline->op1.var, IS_REFERENCE, >1
-			|.cold_code
-			|1:
-			|	// retval_ptr = Z_REFVAL_P(retval_ptr);
-			|	GET_Z_PTR r0, FP + opline->op1.var
-			|	//	ZVAL_COPY(return_value, retval_ptr);
-			|	GET_Z_TYPE_INFO edx, r0 + offsetof(zend_reference, val)
-			|	SET_Z_TYPE_INFO r1, edx
-			|	IF_REFCOUNTED dh, >2
-			|.if X64
-			|	GET_Z_PTR r2, r0 + offsetof(zend_reference, val)
-			|	SET_Z_PTR r1, r2
-			|.else
-			|	GET_Z_PTR r2, r0 + offsetof(zend_reference, val)
-			|	SET_Z_PTR r1, r2
-			|	GET_Z_W2 r2, r0 + offsetof(zend_reference, val)
-			|	SET_Z_W2 r1, r2
-			|.endif
-			|	jmp >3
-			|2:
-			|	GET_Z_PTR r2, r0 + offsetof(zend_reference, val)
-			|	SET_Z_PTR r1, r2
-			|	GC_ADDREF r2
-			|	jmp >3
-			|.code
+			|	lea r0, [FP + opline->op1.var]
+			|	ZVAL_DEREF r0, op1_info
+			|	ZVAL_COPY_VALUE_clobber_src r1, r0, op1_info, r0, eax, r2
+			|	TRY_ADDREF op1_info, ah, r2
+		} else {
+			|	ZVAL_COPY_VALUE r1, FP + opline->op1.var, op1_info, r0, eax, r2
+			|	// TODO: JIT: if (EXPECTED(!(EX_CALL_INFO() & ZEND_CALL_CODE))) ZVAL_NULL(retval_ptr); ???
+			|	TRY_ADDREF op1_info, ah, r2
 		}
-		|	ZVAL_COPY_VALUE r1, FP + opline->op1.var, op1_info, r0, eax, r2
-		|	// TODO: JIT: if (EXPECTED(!(EX_CALL_INFO() & ZEND_CALL_CODE))) ZVAL_NULL(retval_ptr); ???
-		|	TRY_ADDREF op1_info, ah, r2
-		|3:
 	} else {
 		if (op1_info & MAY_BE_REF) {
 			|	IF_Z_TYPE FP + opline->op1.var, IS_REFERENCE, >1
