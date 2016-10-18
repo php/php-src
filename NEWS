@@ -13,6 +13,7 @@ PHP                                                                        NEWS
     operation). (Dmitry)
   . Fixed bug #73338 (Exception thrown from error handler causes valgrind
     warnings (and crashes)). (Bob, Dmitry)
+  . Fixed bug #73329 ((Float)"Nano" == NAN). (Anatol)
 
 - GD:
   . Fixed bug #73213 (Integer overflow in imageline() with antialiasing). (cmb)
