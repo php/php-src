@@ -2964,12 +2964,14 @@ static void zend_update_type_info(const zend_op_array *op_array,
 			}
 			break;
 		case ZEND_SEND_VAR_EX:
-		case ZEND_SEND_VAR_NO_REF:
-		case ZEND_SEND_VAR_NO_REF_EX:
-		case ZEND_SEND_REF:
-// TODO: ???
 			if (ssa_ops[i].op1_def >= 0) {
 				tmp = (t1 & MAY_BE_UNDEF)|MAY_BE_REF|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_ANY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
+				UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
+			}
+			break;
+		case ZEND_SEND_REF:
+			if (ssa_ops[i].op1_def >= 0) {
+				tmp = MAY_BE_REF|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_ANY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
 				UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
 			}
 			break;
