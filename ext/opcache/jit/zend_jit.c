@@ -386,6 +386,7 @@ static int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_s
 				case ZEND_SEND_VAR_NO_REF_EX:
 				case ZEND_SEND_REF:
 				case ZEND_SEPARATE:
+				case ZEND_END_SILENCE:
 					break;
 				default:
 					/* destructor may be called */
