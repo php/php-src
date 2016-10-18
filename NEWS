@@ -3,7 +3,6 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.1.0RC5
 
 - Core:
-  . Fixed bug #73215 (uniqid() should use better random source). (Yasuo)
 
 - SQLite3:
   . Fixed bug #73333 (2147483647 is fetched as string). (cmb)
@@ -15,7 +14,6 @@ PHP                                                                        NEWS
     (Laruence)
   . Fixed for #73240 (Write out of bounds at number_format). (Stas)
   . Fix pthreads detection when cross-compiling (ffontaine)
-  . Fixed bug #73215 (uniqid() should use better random source). (Yasuo)
   . Fixed bug #73337 (try/catch not working with two exceptions inside a same
     operation). (Dmitry)
 
