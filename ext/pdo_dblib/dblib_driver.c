@@ -151,30 +151,67 @@ static zend_long dblib_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_l
 
 static int dblib_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, char **quoted, size_t *quotedlen, enum pdo_param_type paramtype)
 {
+	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
+	const char *hex = "0123456789abcdef";
+	zend_bool is_unicode = 0;
 
 	size_t i;
 	char * q;
 	*quotedlen = 0;
 
-	/* Detect quoted length, adding extra char for doubled single quotes */
-	for(i=0;i<unquotedlen;i++) {
-		if(unquoted[i] == '\'') ++*quotedlen;
-		++*quotedlen;
-	}
+	switch (PDO_PARAM_TYPE(paramtype)) {
+		case PDO_DBLIB_PARAM_BINARY:
+			*quotedlen = (unquotedlen * 2) + 2; /* 2 chars per byte +2 for "0x" prefix */
+			q = *quoted = emalloc(*quotedlen + 1); /* Add byte for terminal null */
 
-	*quotedlen += 2; /* +2 for opening, closing quotes */
-	q  = *quoted = emalloc(*quotedlen+1); /* Add byte for terminal null */
-	*q++ = '\'';
+			*q++ = '0';
+			*q++ = 'x';
+			for (i = 0; i < unquotedlen; i++) {
+				*q++ = hex[(*unquoted >> 4) & 0xF];
+				*q++ = hex[(*unquoted++) & 0xF];
+			}
 
-	for (i=0;i<unquotedlen;i++) {
-		if (unquoted[i] == '\'') {
+			break;
+
+		default:
+			if (H->unicode_strings) {
+				is_unicode = 1;
+			}
+			if ((paramtype & PDO_DBLIB_PARAM_STR_UNICODE) == PDO_DBLIB_PARAM_STR_UNICODE) {
+				is_unicode = 1;
+			}
+			if ((paramtype & PDO_DBLIB_PARAM_STR_ASCII) == PDO_DBLIB_PARAM_STR_ASCII) {
+				is_unicode = 0;
+			}
+
+			/* Detect quoted length, adding extra char for doubled single quotes */
+			for (i = 0; i < unquotedlen; i++) {
+				if (unquoted[i] == '\'') ++*quotedlen;
+				++*quotedlen;
+			}
+
+			*quotedlen += 2; /* +2 for opening, closing quotes */
+			if (is_unicode) {
+				++*quotedlen; /* N prefix */
+			}
+			q  = *quoted = emalloc(*quotedlen + 1); /* Add byte for terminal null */
+			if (is_unicode) {
+				*q++ = 'N';
+			}
 			*q++ = '\'';
+
+			for (i = 0; i < unquotedlen; i++) {
+				if (unquoted[i] == '\'') {
+					*q++ = '\'';
+					*q++ = '\'';
+				} else {
+					*q++ = unquoted[i];
+				}
+			}
 			*q++ = '\'';
-		} else {
-			*q++ = unquoted[i];
-		}
+
+			break;
 	}
-	*q++ = '\'';
 
 	*q = 0;
 
@@ -257,12 +294,17 @@ char *dblib_handle_last_id(pdo_dbh_t *dbh, const char *name, size_t *len)
 
 static int dblib_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 {
+	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
+
 	switch(attr) {
 		case PDO_ATTR_TIMEOUT:
 		case PDO_DBLIB_ATTR_QUERY_TIMEOUT:
 			return SUCCEED == dbsettime(zval_get_long(val)) ? 1 : 0;
 		case PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER:
-			((pdo_dblib_db_handle *)dbh->driver_data)->stringify_uniqueidentifier = zval_get_long(val);
+			H->stringify_uniqueidentifier = zval_get_long(val);
+			return 1;
+		case PDO_DBLIB_ATTR_UNICODE_STRINGS:
+			H->unicode_strings = zval_get_long(val);
 			return 1;
 		default:
 			return 0;
@@ -271,9 +313,15 @@ static int dblib_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 
 static int dblib_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_value)
 {
+	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
+
 	switch (attr) {
 		case PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER:
-			ZVAL_BOOL(return_value, ((pdo_dblib_db_handle *)dbh->driver_data)->stringify_uniqueidentifier);
+			ZVAL_BOOL(return_value, H->stringify_uniqueidentifier);
+			break;
+
+		case PDO_DBLIB_ATTR_UNICODE_STRINGS:
+			ZVAL_BOOL(return_value, H->unicode_strings);
 			break;
 
 		default:
@@ -348,6 +396,7 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 	H->login = dblogin();
 	H->err.sqlstate = dbh->error_code;
 	H->stringify_uniqueidentifier = 0;
+	H->unicode_strings = 0;
 
 	if (!H->login) {
 		goto cleanup;
@@ -369,6 +418,7 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		dbsettime(query_timeout); /* Statement Timeout */
 
 		H->stringify_uniqueidentifier = pdo_attr_lval(driver_options, PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER, 0);
+		H->unicode_strings = pdo_attr_lval(driver_options, PDO_DBLIB_ATTR_UNICODE_STRINGS, 0);
 	}
 
 	DBERRHANDLE(H->login, (EHANDLEFUNC) pdo_dblib_error_handler);

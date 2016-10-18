@@ -46,7 +46,7 @@ PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64);
 # define FALSE 0
 #endif
 
-#define PDO_DRIVER_API	20150127
+#define PDO_DRIVER_API	20161017
 
 enum pdo_param_type {
 	PDO_PARAM_NULL,
@@ -75,6 +75,11 @@ enum pdo_param_type {
 	   and the driver is responsible for adding correct type information to get_column_meta()
 	 */
 	PDO_PARAM_ZVAL,
+
+	/* this defines the start of the range for driver specific params.
+	 * Drivers should define their own param constants beginning with this
+	 * value. */
+	PDO_PARAM_DRIVER_SPECIFIC = 1000,
 
 	/* magic flag to denote a parameter as being input/output */
 	PDO_PARAM_INPUT_OUTPUT = 0x80000000
