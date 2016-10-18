@@ -285,3 +285,4 @@ win32/*.positions
 win32/ext
 win32/phpts.def
 win32/wsyslog.h
+/config.simple.bat
