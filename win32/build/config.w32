@@ -298,3 +298,8 @@ toolset_setup_codegen_arch();
 
 ARG_WITH("all-shared", "Force all the non obligatory extensions to be shared", "no");
 
+// Config profiles (--with-config-profile=<name>) will save a certain config to php-src/config.<name>.bat
+// so that it can be executed like: cofig.<name> instead of a long list of parameters
+//
+// Note, nice as a name is disallowed and will generate a warning and skip saaving
+ARG_WITH('config-profile', 'Name of the configuration profile to save this to in php-src/config.name.bat', 'no');

@@ -23,7 +23,6 @@ WScript.StdOut.WriteLine("Rebuilding configure.js");
 var FSO = WScript.CreateObject("Scripting.FileSystemObject");
 var C = FSO.CreateTextFile("configure.js", true);
 var B = FSO.CreateTextFile("configure.bat", true);
-var A = FSO.CreateTextFile("config.simple.bat", true);
 
 var modules = "";
 var MODULES = WScript.CreateObject("Scripting.Dictionary");
@@ -259,7 +258,3 @@ C.Write(file_get_contents("win32/build/configure.tail"));
 
 B.WriteLine("@echo off");
 B.WriteLine("cscript /nologo configure.js %*");
-
-// Generates config.simple.bat (configure --disable-all --enable-cli --with-mp)
-A.WriteLine("@echo off");
-A.WriteLine("cscript /nologo configure.js --disable-all --enable-cli --with-mp");
