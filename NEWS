@@ -15,6 +15,9 @@ PHP                                                                        NEWS
     (Laruence)
   . Fixed for #73240 (Write out of bounds at number_format). (Stas)
   . Fix pthreads detection when cross-compiling (ffontaine)
+  . Fixed bug #73215 (uniqid() should use better random source). (Yasuo)
+  . Fixed bug #73337 (try/catch not working with two exceptions inside a same
+    operation). (Dmitry)
 
 - BCmath:
   . Fix bug #73190 (memcpy negative parameter _bc_new_num_ex). (Stas)

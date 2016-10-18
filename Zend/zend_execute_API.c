@@ -820,10 +820,13 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 		ZEND_ADD_CALL_FLAG(call, ZEND_CALL_CLOSURE);
 	}
 
-	if (func->type == ZEND_USER_FUNCTION) {
+	if (func->type == ZEND_USER_FUNCTION) {		
 		int call_via_handler = (func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) != 0;
+		const zend_op *current_opline_before_exception = EG(opline_before_exception);
+
 		zend_init_execute_data(call, &func->op_array, fci->retval);
 		zend_execute_ex(call);
+		EG(opline_before_exception) = current_opline_before_exception;
 		if (call_via_handler) {
 			/* We must re-initialize function again */
 			fci_cache->initialized = 0;
