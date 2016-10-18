@@ -5104,10 +5104,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 			uint32_t func_info = zend_get_func_info(call_info, ssa);
 
 			if (func_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
-				|	lea r0, aword [r4 + 8]
-			}
-			if (func_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
-				|	ZVAL_PTR_DTOR r0, func_info, 1, 1, 0, op_array->filename, opline->lineno
+				|	ZVAL_PTR_DTOR r4 + 8, func_info, 1, 1, 0, op_array->filename, opline->lineno
 			}
 			|	add r4, 16 /* revert alloca() */
 		}
