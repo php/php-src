@@ -9,7 +9,6 @@ PHP                                                                        NEWS
     name to namespace). (Nikita)
   . Fixed bug #66862 ((Sub-)Namespaces unexpected behaviour). (Nikita)
   . Fix pthreads detection when cross-compiling (ffontaine)
-  . Fixed bug #73215 (uniqid() should use better random source). (Yasuo)
   . Fixed bug #73337 (try/catch not working with two exceptions inside a same
     operation). (Dmitry)
   . Fixed bug #73338 (Exception thrown from error handler causes valgrind
