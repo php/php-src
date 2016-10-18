@@ -10,6 +10,8 @@ PHP                                                                        NEWS
   . Fixed bug #66862 ((Sub-)Namespaces unexpected behaviour). (Nikita)
   . Fix pthreads detection when cross-compiling (ffontaine)
   . Fixed bug #73215 (uniqid() should use better random source). (Yasuo)
+  . Fixed bug #73337 (try/catch not working with two exceptions inside a same
+    operation). (Dmitry)
 
 - GD:
   . Fixed bug #73213 (Integer overflow in imageline() with antialiasing). (cmb)

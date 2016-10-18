@@ -852,8 +852,11 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 		EG(scope) = func->common.scope;
 		call->symbol_table = fci->symbol_table;
 		if (EXPECTED((func->op_array.fn_flags & ZEND_ACC_GENERATOR) == 0)) {
+			const zend_op *current_opline_before_exception = EG(opline_before_exception);
+
 			zend_init_execute_data(call, &func->op_array, fci->retval);
 			zend_execute_ex(call);
+			EG(opline_before_exception) = current_opline_before_exception;
 		} else {
 			zend_generator_create_zval(call, &func->op_array, fci->retval);
 		}
