@@ -12,6 +12,8 @@ PHP                                                                        NEWS
   . Fixed bug #73215 (uniqid() should use better random source). (Yasuo)
   . Fixed bug #73337 (try/catch not working with two exceptions inside a same
     operation). (Dmitry)
+  . Fixed bug #73338 (Exception thrown from error handler causes valgrind
+    warnings (and crashes)). (Bob, Dmitry)
 
 - GD:
   . Fixed bug #73213 (Integer overflow in imageline() with antialiasing). (cmb)
