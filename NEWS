@@ -9,6 +9,7 @@ PHP                                                                        NEWS
     name to namespace). (Nikita)
   . Fixed bug #66862 ((Sub-)Namespaces unexpected behaviour). (Nikita)
   . Fix pthreads detection when cross-compiling (ffontaine)
+  . Fixed bug #73215 (uniqid() should use better random source). (Yasuo)
 
 - GD:
   . Fixed bug #73213 (Integer overflow in imageline() with antialiasing). (cmb)
