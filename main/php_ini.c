@@ -381,7 +381,7 @@ int php_init_config(void)
 {
 	char *php_ini_file_name = NULL;
 	char *php_ini_search_path = NULL;
-	int php_ini_scanned_path_len;
+	size_t php_ini_scanned_path_len;
 	char *open_basedir;
 	int free_ini_search_path = 0;
 	zend_file_handle fh;
@@ -403,7 +403,7 @@ int php_init_config(void)
 		php_ini_search_path = sapi_module.php_ini_path_override;
 		free_ini_search_path = 0;
 	} else if (!sapi_module.php_ini_ignore) {
-		int search_path_size;
+		size_t search_path_size;
 		char *default_location;
 		char *env_location;
 		static const char paths_separator[] = { ZEND_PATHS_SEPARATOR, 0 };
@@ -450,7 +450,7 @@ int php_init_config(void)
 		 * Prepare search path
 		 */
 
-		search_path_size = MAXPATHLEN * 4 + (int)strlen(env_location) + 3 + 1;
+		search_path_size = MAXPATHLEN * 4 + strlen(env_location) + 3 + 1;
 		php_ini_search_path = (char *) emalloc(search_path_size);
 		free_ini_search_path = 1;
 		php_ini_search_path[0] = 0;
@@ -611,7 +611,7 @@ int php_init_config(void)
 		/* Or fall back using possible --with-config-file-scan-dir setting (defaults to empty string!) */
 		php_ini_scanned_path = PHP_CONFIG_FILE_SCAN_DIR;
 	}
-	php_ini_scanned_path_len = (int)strlen(php_ini_scanned_path);
+	php_ini_scanned_path_len = strlen(php_ini_scanned_path);
 
 	/* Scan and parse any .ini files found in scan path if path not empty. */
 	if (!sapi_module.php_ini_ignore && php_ini_scanned_path_len) {
@@ -623,9 +623,9 @@ int php_init_config(void)
 		zend_file_handle fh2;
 		zend_llist scanned_ini_list;
 		zend_llist_element *element;
-		int l, total_l = 0;
+		size_t l, total_l = 0;
 		char *bufpath, *debpath, *endpath;
-		int lenpath;
+		size_t lenpath;
 
 		zend_llist_init(&scanned_ini_list, sizeof(char *), (llist_dtor_func_t) free_estring, 1);
 		memset(&fh2, 0, sizeof(fh2));
@@ -641,7 +641,7 @@ int php_init_config(void)
 				   to allow "/foo/php.d:" or ":/foo/php.d" */
 				debpath = PHP_CONFIG_FILE_SCAN_DIR;
 			}
-			lenpath = (int)strlen(debpath);
+			lenpath = strlen(debpath);
 
 			if (lenpath > 0 && (ndir = php_scandir(debpath, &namelist, 0, php_alphasort)) > 0) {
 
@@ -668,7 +668,7 @@ int php_init_config(void)
 
 								if (zend_parse_ini_file(&fh2, 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t) php_ini_parser_cb, &configuration_hash) == SUCCESS) {
 									/* Here, add it to the list of ini files read */
-									l = (int)strlen(ini_file);
+									l = strlen(ini_file);
 									total_l += l + 2;
 									p = estrndup(ini_file, l);
 									zend_llist_add_element(&scanned_ini_list, &p);
@@ -684,8 +684,15 @@ int php_init_config(void)
 		efree(bufpath);
 
 		if (total_l) {
-			int php_ini_scanned_files_len = (php_ini_scanned_files) ? (int)strlen(php_ini_scanned_files) + 1 : 0;
-			php_ini_scanned_files = (char *) realloc(php_ini_scanned_files, php_ini_scanned_files_len + total_l + 1);
+			size_t php_ini_scanned_files_len = (php_ini_scanned_files) ? strlen(php_ini_scanned_files) + 1 : 0;
+			char *php_ini_scanned_files_t = (char *) realloc(php_ini_scanned_files, php_ini_scanned_files_len + total_l + 1);
+			if (!php_ini_scanned_files_t) {
+				zend_llist_destroy(&scanned_ini_list);
+				php_shutdown_config();
+				return FAILURE;
+			}
+
+			php_ini_scanned_files = php_ini_scanned_files_t;
 			if (!php_ini_scanned_files_len) {
 				*php_ini_scanned_files = '\0';
 			}

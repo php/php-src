@@ -1277,6 +1277,9 @@ PHPAPI int php_poll2(php_pollfd *ufds, unsigned int nfds, int timeout)
 }
 #endif
 
+#define FREETMPBUF()	\
+	free(*tmphstbuf);	\
+	*tmphstbuf = 0
 #if defined(HAVE_GETHOSTBYNAME_R)
 #ifdef HAVE_FUNC_GETHOSTBYNAME_R_6
 struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char **tmphstbuf,size_t *hstbuflen)
@@ -1292,9 +1295,17 @@ struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char *
 	while (( res = 
 		gethostbyname_r(host,hostbuf,*tmphstbuf,*hstbuflen,&hp,&herr))
 		&& (errno == ERANGE)) {
+		char *ptmphstbuf;
 		/* Enlarge the buffer. */
+		if (*hstbuflen > SIZE_MAX / 2) {
+			goto fail;
+		}
 		*hstbuflen *= 2;
-		*tmphstbuf = (char *)realloc (*tmphstbuf,*hstbuflen);
+		ptmphstbuf = (char *)realloc(*tmphstbuf, *hstbuflen);
+		if (!ptmphstbuf) {
+			goto fail;
+		}
+		*tmphstbuf = ptmphstbuf;
 	}
 
 	if (res != SUCCESS) {
@@ -1302,6 +1313,10 @@ struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char *
 	}
 		
 	return hp;
+fail:
+	FREETMPBUF();
+	return NULL;
+	
 }
 #endif
 #ifdef HAVE_FUNC_GETHOSTBYNAME_R_5
@@ -1318,11 +1333,22 @@ struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char *
 	while ((NULL == ( hp = 
 		gethostbyname_r(host,hostbuf,*tmphstbuf,*hstbuflen,&herr)))
 		&& (errno == ERANGE)) {
+		char *ptmphstbuf;
 		/* Enlarge the buffer. */
+		if (*hstbuflen > SIZE_MAX / 2) {
+			goto fail;
+		}
 		*hstbuflen *= 2;
-		*tmphstbuf = (char *)realloc (*tmphstbuf,*hstbuflen);
+		ptmphstbuf = (char *)realloc(*tmphstbuf, *hstbuflen);
+		if (!ptmphstbuf) {
+			goto fail;
+		}
+		*tmphstbuf = ptmphstbuf;
 	}
 	return hp;
+fail:
+	FREETMPBUF();
+	return NULL;
 }
 #endif
 #ifdef HAVE_FUNC_GETHOSTBYNAME_R_3
@@ -1333,8 +1359,13 @@ struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char *
 		*tmphstbuf = (char *)malloc (*hstbuflen);
 	} else {
 		if (*hstbuflen < sizeof(struct hostent_data)) {
+			char *ptmphstbuf;
 			*hstbuflen = sizeof(struct hostent_data);
-			*tmphstbuf = (char *)realloc(*tmphstbuf, *hstbuflen);
+			ptmphstbuf = (char *)realloc(*tmphstbuf, *hstbuflen);
+			if (!ptmphstbuf) {
+				goto fail;
+			}
+			*tmphstbuf = ptmphstbuf;
 		}
 	}
 	memset((void *)(*tmphstbuf),0,*hstbuflen);
@@ -1344,6 +1375,9 @@ struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char *
 	}
 
 	return hostbuf;
+fail:
+	FREETMPBUF();
+	return NULL;
 }
 #endif
 #endif

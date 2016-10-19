@@ -1361,7 +1361,7 @@ int main(int argc, char **argv) /* {{{ */
 	sapi_module_struct *phpdbg = &phpdbg_sapi_module;
 	char *sapi_name;
 	char *ini_entries;
-	int   ini_entries_len;
+	size_t   ini_entries_len;
 	char **zend_extensions = NULL;
 	zend_ulong zend_extensions_len = 0L;
 	zend_bool ini_ignore;
@@ -1462,13 +1462,20 @@ phpdbg_main:
 				ini_override = strdup(php_optarg);
 				break;
 			case 'd': {
-				int len = strlen(php_optarg);
-				char *val;
+				size_t len = strlen(php_optarg);
+				char *val, *pini_entries;
 
 				if ((val = strchr(php_optarg, '='))) {
 				  val++;
 				  if (!isalnum(*val) && *val != '"' && *val != '\'' && *val != '\0') {
-					  ini_entries = realloc(ini_entries, ini_entries_len + len + sizeof("\"\"\n\0"));
+					  if ((ini_entries_len + len + sizeof("\"\"\n\0")) >= SIZE_MAX) {
+						goto phpdbg_out;
+					  }
+					  pini_entries = realloc(ini_entries, ini_entries_len + len + sizeof("\"\"\n\0"));
+					  if (!pini_entries) {
+						goto phpdbg_out;
+					  }
+					  ini_entries = pini_entries;
 					  memcpy(ini_entries + ini_entries_len, php_optarg, (val - php_optarg));
 					  ini_entries_len += (val - php_optarg);
 					  memcpy(ini_entries + ini_entries_len, "\"", 1);
@@ -1478,13 +1485,27 @@ phpdbg_main:
 					  memcpy(ini_entries + ini_entries_len, "\"\n\0", sizeof("\"\n\0"));
 					  ini_entries_len += sizeof("\n\0\"") - 2;
 				  } else {
-					  ini_entries = realloc(ini_entries, ini_entries_len + len + sizeof("\n\0"));
+					  if ((ini_entries_len + len + sizeof("\n\0")) >= SIZE_MAX) {
+						goto phpdbg_out;
+					  }
+					  pini_entries = realloc(ini_entries, ini_entries_len + len + sizeof("\n\0"));
+					  if (!pini_entries) {
+						goto phpdbg_out;
+					  }
+					  ini_entries = pini_entries;
 					  memcpy(ini_entries + ini_entries_len, php_optarg, len);
 					  memcpy(ini_entries + ini_entries_len + len, "\n\0", sizeof("\n\0"));
 					  ini_entries_len += len + sizeof("\n\0") - 2;
 				  }
 				} else {
-				  ini_entries = realloc(ini_entries, ini_entries_len + len + sizeof("=1\n\0"));
+				  if ((ini_entries_len + len + sizeof("=1\n\0")) >= SIZE_MAX) {
+					goto phpdbg_out;
+				  }
+				  pini_entries = realloc(ini_entries, ini_entries_len + len + sizeof("=1\n\0"));
+				  if (!pini_entries) {
+					  goto phpdbg_out;
+				  }
+				  ini_entries = pini_entries;
 				  memcpy(ini_entries + ini_entries_len, php_optarg, len);
 				  memcpy(ini_entries + ini_entries_len + len, "=1\n\0", sizeof("=1\n\0"));
 				  ini_entries_len += len + sizeof("=1\n\0") - 2;
@@ -1619,7 +1640,15 @@ phpdbg_main:
 	phpdbg->php_ini_path_override = ini_override;
 
 	if (ini_entries) {
-		ini_entries = realloc(ini_entries, ini_entries_len + sizeof(phpdbg_ini_hardcoded));
+		char *pini_entries;
+		if ((ini_entries_len + sizeof(phpdbg_ini_hardcoded)) >= SIZE_MAX) {
+			goto phpdbg_out;
+		}
+		pini_entries = realloc(ini_entries, ini_entries_len + sizeof(phpdbg_ini_hardcoded));
+		if (!pini_entries) {
+			goto phpdbg_out;
+		}
+		ini_entries = pini_entries;
 		memmove(ini_entries + sizeof(phpdbg_ini_hardcoded) - 2, ini_entries, ini_entries_len + 1);
 		memcpy(ini_entries, phpdbg_ini_hardcoded, sizeof(phpdbg_ini_hardcoded) - 2);
 	} else {
@@ -1633,10 +1662,17 @@ phpdbg_main:
 
 		while (zend_extension < zend_extensions_len) {
 			const char *ze = zend_extensions[zend_extension];
+			char *pini_entries;
 			size_t ze_len = strlen(ze);
+			if ((ze_len + sizeof("zend_extension=\n")) >= SIZE_MAX) {
+				goto phpdbg_out;
+			}
 
-			ini_entries = realloc(
+			pini_entries = realloc(
 				ini_entries, ini_entries_len + (ze_len + (sizeof("zend_extension=\n"))));
+			if (!pini_entries) {
+				goto phpdbg_out;
+			}
 			memcpy(&ini_entries[ini_entries_len], "zend_extension=", (sizeof("zend_extension=\n")-1));
 			ini_entries_len += (sizeof("zend_extension=")-1);
 			memcpy(&ini_entries[ini_entries_len], ze, ze_len);

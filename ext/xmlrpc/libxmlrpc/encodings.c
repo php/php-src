@@ -45,6 +45,7 @@ static const char rcsid[] = "#(@) $Id$";
 
 #include <errno.h>
 #include <string.h>
+#include <limits.h>
 
 #ifdef HAVE_GICONV_H
 #include <giconv.h>
@@ -81,14 +82,16 @@ static char* convert(const char* src, int src_len, int *new_len, const char* fro
             while(inlenleft) {
                st = iconv(ic, (char**)&src, &inlenleft, &out_ptr, &outlenleft);
                if(st == -1) {
-                  if(errno == E2BIG) {
+                  if(errno == E2BIG && (outlen + inlenleft) < INT_MAX) {
                      int diff = out_ptr - outbuf;
                      outlen += inlenleft;
                      outlenleft += inlenleft;
-                     outbuf = (char*)realloc(outbuf, outlen + 1);
-                     if(!outbuf) {
+                     char *poutbuf = (char*)realloc(outbuf, outlen + 1);
+                     if (!poutbuf) {
+                        free(outbuf);
                         break;
                      }
+                     outbuf = poutbuf;
                      out_ptr = outbuf + diff;
                   }
                   else {
