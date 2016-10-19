@@ -182,7 +182,7 @@ struct _zend_array {
 				zend_uchar    flags,
 				zend_uchar    nApplyCount,
 				zend_uchar    nIteratorsCount,
-				zend_uchar    reserve)
+				zend_uchar    consistency)
 		} v;
 		uint32_t flags;
 	} u;
