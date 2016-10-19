@@ -578,7 +578,7 @@ int XMLRPC_ServerRegisterIntrospectionCallback(XMLRPC_SERVER server, XMLRPC_Intr
    int bSuccess = 0;
    if(server && cb) {
 
-      doc_method* dm = calloc(1, sizeof(doc_method));
+      doc_method* dm = ecalloc(1, sizeof(doc_method));
 
       if(dm) {
          dm->method = cb;

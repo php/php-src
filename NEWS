@@ -45,5 +45,8 @@ PHP                                                                        NEWS
 - XML:
   . Moved utf8_encode() and utf8_decode() to the Standard extension. (Andrea)
 
+- XMLRPC:
+  . Use Zend MM for allocation in bundled libxmlrpc (Joe)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
 
