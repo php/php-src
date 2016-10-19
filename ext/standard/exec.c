@@ -54,6 +54,10 @@
 #include <limits.h>
 #endif
 
+#ifdef PHP_WIN32
+# include "win32/nice.h"
+#endif
+
 static size_t cmd_max_len;
 
 /* {{{ PHP_MINIT_FUNCTION(exec) */

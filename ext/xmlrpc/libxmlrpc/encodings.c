@@ -41,6 +41,8 @@
 #include <stdlib.h>
 #endif
 
+#include <php.h>
+
 static const char rcsid[] = "#(@) $Id$";
 
 #include <errno.h>
@@ -74,7 +76,7 @@ static char* convert(const char* src, int src_len, int *new_len, const char* fro
       ic = iconv_open(to_enc, from_enc);
       if(ic != (iconv_t)-1) {
          size_t st;
-         outbuf = (char*)malloc(outlen + 1);
+         outbuf = (char*)emalloc(outlen + 1);
 
          if(outbuf) {
             out_ptr = (char*)outbuf;
@@ -85,14 +87,14 @@ static char* convert(const char* src, int src_len, int *new_len, const char* fro
                      int diff = out_ptr - outbuf;
                      outlen += inlenleft;
                      outlenleft += inlenleft;
-                     outbuf = (char*)realloc(outbuf, outlen + 1);
+                     outbuf = (char*)erealloc(outbuf, outlen + 1);
                      if(!outbuf) {
                         break;
                      }
                      out_ptr = outbuf + diff;
                   }
                   else {
-                     free(outbuf);
+                     efree(outbuf);
                      outbuf = 0;
                      break;
                   }
