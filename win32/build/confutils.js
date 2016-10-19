@@ -440,7 +440,7 @@ can be built that way. \
 		 'pcre-regex', 'fastcgi', 'force-cgi-redirect',
 		 'path-info-check', 'zts', 'ipv6', 'memory-limit',
 		 'zend-multibyte', 'fd-setsize', 'memory-manager',
-		 't1lib', 'pgi', 'pgo', 'all-shared', 'config-profile'
+		 'pgi', 'pgo', 'all-shared', 'config-profile'
 		);
 	var force;
 
