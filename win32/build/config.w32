@@ -155,7 +155,6 @@ ADD_SOURCES("main", "main.c snprintf.c spprintf.c getopt.c fopen_wrappers.c \
 	strlcat.c mergesort.c reentrancy.c php_variables.c php_ticks.c network.c \
 	php_open_temporary_file.c output.c internal_functions.c php_sprintf.c");
 ADD_FLAG("CFLAGS_BD_MAIN", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
-ADD_SOURCES("win32", "inet.c fnmatch.c sockets.c");
 
 AC_DEFINE('HAVE_STRNLEN', 1);
 
@@ -165,7 +164,8 @@ ADD_FLAG("CFLAGS_BD_MAIN_STREAMS", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 
 ADD_SOURCES("win32", "dllmain.c glob.c readdir.c \
 	registry.c select.c sendmail.c time.c winutil.c wsyslog.c globals.c \
-	getrusage.c ftok.c ioutil.c codepage.c nice.c");
+	getrusage.c ftok.c ioutil.c codepage.c nice.c \
+	inet.c fnmatch.c sockets.c");
 
 ADD_FLAG("CFLAGS_BD_WIN32", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 
