@@ -945,7 +945,7 @@ function CHECK_HEADER_ADD_INCLUDE(header_name, flag_name, path_to_check, use_env
 
 	if (typeof(add_to_flag_only) != "undefined") {
 		ADD_FLAG(flag_name, "/DHAVE_" + sym + "=" + have);
-	} else {
+	} else if (!configure_hdr.Exists('HAVE_' + sym)) {
 		AC_DEFINE("HAVE_" + sym, have, "have the " + header_name + " header file");
 	}
 
