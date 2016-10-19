@@ -1,0 +1,22 @@
+image: Visual Studio 2015
+
+clone_depth: 1
+
+cache:
+  - appveyor\temp\archives
+  - appveyor\temp\tools
+  - appveyor\temp\deps-x64
+  - appveyor\temp\deps-x86
+
+platform:
+  - x64
+  - x86
+
+build_script:
+  - ps: appveyor\compile.ps1
+
+test_script:
+  - set NO_INTERACTION=1
+  - set REPORT_EXIT_STATUS=1
+  - set PATH=%APPVEYOR_BUILD_FOLDER%\appveyor\temp\deps-%Platform%\bin;%PATH%
+  - appveyor\out-%Platform%\php.exe run-tests.php -p "%APPVEYOR_BUILD_FOLDER%\appveyor\out-%Platform%\php.exe" -g "FAIL,XFAIL,BORK,WARN,LEAK,SKIP" --offline --show-diff --set-timeout 120
