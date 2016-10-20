@@ -20,6 +20,7 @@ require_once('skipifconnectfailure.inc');
 		'MYSQLI_READ_DEFAULT_FILE'			=> true,
 		'MYSQLI_OPT_CONNECT_TIMEOUT'		=> true,
 		'MYSQLI_OPT_LOCAL_INFILE'			=> true,
+		'MYSQLI_OPT_READ_TIMEOUT'			=> true,
 		'MYSQLI_INIT_COMMAND'				=> true,
 		'MYSQLI_CLIENT_SSL'					=> true,
 		"MYSQLI_CLIENT_COMPRESS"			=> true,
