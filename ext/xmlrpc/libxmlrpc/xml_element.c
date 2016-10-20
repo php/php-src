@@ -119,9 +119,6 @@ static const char rcsid[] = "#(@) $Id$";
  ******/
 
 #include "ext/xml/expat_compat.h"
-#ifdef _WIN32
-#include "xmlrpc_win32.h"
-#endif
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>

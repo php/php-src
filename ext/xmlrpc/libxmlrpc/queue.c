@@ -97,9 +97,6 @@ static const char rcsid[] = "#(@) $Id$";
  *
  ****************************************************************/
 
-#ifdef _WIN32
-#include "xmlrpc_win32.h"
-#endif
 #include <stdlib.h>
 #include <php.h>
 #include "queue.h"
@@ -791,7 +788,7 @@ int Q_Sort(queue *q, int (*Comp)(const void *, const void *))
    /* Now allocate memory of array, array of pointers */
 
    queue_index = emalloc(q->size * sizeof(q->cursor->data));
-   if(index == NULL)
+   if(queue_index == NULL)
       return False_;
 
    queue_posn_index = emalloc(q->size * sizeof(q->cursor));

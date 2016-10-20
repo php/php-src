@@ -3483,6 +3483,10 @@ static int is_map(zval *array)
 	zend_string *key;
 	zend_ulong i = 0;
 
+	if (HT_IS_PACKED(Z_ARRVAL_P(array)) && HT_IS_WITHOUT_HOLES(Z_ARRVAL_P(array))) {
+		return FALSE;
+	}
+
 	ZEND_HASH_FOREACH_KEY(Z_ARRVAL_P(array), index, key) {
 		if (key || index != i) {
 			return TRUE;
