@@ -2977,17 +2977,10 @@ PHPAPI int php_array_merge_recursive(HashTable *dest, HashTable *src) /* {{{ */
 					return 0;
 				}
 
-				if (Z_ISREF_P(dest_entry)) {
-					if (Z_REFCOUNT_P(dest_entry) == 1) {
-						ZVAL_UNREF(dest_entry);
-					} else {
-						Z_DELREF_P(dest_entry);
-						ZVAL_DUP(dest_entry, dest_zval);
-					}
-					dest_zval = dest_entry;
-				} else {
-					SEPARATE_ZVAL(dest_zval);
-				}
+				ZEND_ASSERT(!Z_ISREF_P(dest_entry) || Z_REFCOUNT_P(dest_entry) > 1);
+				SEPARATE_ZVAL(dest_entry);
+				dest_zval = dest_entry;
+
 				if (Z_TYPE_P(dest_zval) == IS_NULL) {
 					convert_to_array_ex(dest_zval);
 					add_next_index_null(dest_zval);
@@ -3110,7 +3103,10 @@ PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src) /* {{{ *
 			php_error_docref(NULL, E_WARNING, "recursion detected");
 			return 0;
 		}
-		SEPARATE_ZVAL(dest_zval);
+
+		ZEND_ASSERT(!Z_ISREF_P(dest_entry) || Z_REFCOUNT_P(dest_entry) > 1);
+		SEPARATE_ZVAL(dest_entry);
+		dest_zval = dest_entry;
 
 		if (ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(dest_zval))) {
 			Z_ARRVAL_P(dest_zval)->u.v.nApplyCount++;
