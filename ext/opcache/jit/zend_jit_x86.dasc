@@ -4740,6 +4740,7 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, zen
 
 	|	// if (UNEXPECTED(used_stack > (size_t)(((char*)EG(vm_stack_end)) - (char*)call))) {
 	|	mov RX, aword [&EG(vm_stack_top)]
+	|	// Check Stack Overflow
 	|	mov r2, aword [&EG(vm_stack_end)]
 	|	sub r2, RX
 	if (func) {
@@ -4747,8 +4748,23 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, zen
 	} else {
 		|	cmp r2, FCARG1a
 	}
-	|	jb >2
+	|	jb >1
 	|	// EG(vm_stack_top) = (zval*)((char*)call + used_stack);
+	|.cold_code
+	|1:
+	if (func) {
+		|	mov FCARG1d, used_stack
+	}
+	if (func && func->type == ZEND_INTERNAL_FUNCTION) {
+		|	EXT_CALL zend_jit_int_extend_stack_helper, r0
+	} else {
+		|	mov FCARG2a, r0
+		|	EXT_CALL zend_jit_extend_stack_helper, r0
+	}
+	|	mov RX, r0
+	|	jmp >1
+	|.code
+
 	if (func) {
 		|	add aword [&EG(vm_stack_top)], used_stack
 	} else {
@@ -4778,21 +4794,6 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, zen
 	|	mov aword EX:RX->This.value.ptr, 0
 	|	// ZEND_CALL_NUM_ARGS(call) = num_args;
 	|	mov dword EX:RX->This.u2.num_args, opline->extended_value
-	|.cold_code
-	|2:
-	if (func) {
-		|	mov FCARG1d, used_stack
-	}
-	if (func && func->type == ZEND_INTERNAL_FUNCTION) {
-		|	EXT_CALL zend_jit_int_extend_stack_helper, r0
-	} else {
-		|	mov FCARG2a, r0
-		|	EXT_CALL zend_jit_extend_stack_helper, r0
-	}
-	|	mov RX, r0
-	|	jmp <1
-	|.code
-
 	return 1;
 }
 
