@@ -251,7 +251,7 @@ PHP_METHOD(sqlite3, lastInsertRowID)
 		return;
 	}
 
-	RETURN_LONG(sqlite3_last_insert_rowid(db_obj->db));
+	RETURN_LONG((zend_long) sqlite3_last_insert_rowid(db_obj->db));
 }
 /* }}} */
 
@@ -583,7 +583,7 @@ static void sqlite_value_to_zval(sqlite3_stmt *stmt, int column, zval *data) /* 
 				ZVAL_STRINGL(data, (char *)sqlite3_column_text(stmt, column), sqlite3_column_bytes(stmt, column));
 			} else {
 #endif
-				ZVAL_LONG(data, val);
+				ZVAL_LONG(data, (zend_long) val);
 #if LONG_MAX <= 2147483647
 			}
 #endif
