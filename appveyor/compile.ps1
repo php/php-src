@@ -185,8 +185,7 @@ call configure.bat ^
 	`"--enable-object-out-dir=$objOutDirectory`" ^
 	`"--with-prefix=$outputDirectory`" ^
 	`"--with-php-build=$dependenciesDirectory`" ^
-	--with-mp=auto ^
-	--without-xmlrpc
+	--with-mp=auto
 if errorlevel 1 exit /b 1
 echo $bits>`"$lastBuiltBitsFile`"
 
