@@ -42,6 +42,10 @@ PHP                                                                        NEWS
   . Fixed bug #73234 (Emulated statements let value dictate parameter type).
     (Adam Baratz)
 
+- SOAP:
+  . Fixed bug #69137 (Peer verification fails when using a proxy with SoapClient)
+    (Keith Smiley)
+
 - XML:
   . Moved utf8_encode() and utf8_decode() to the Standard extension. (Andrea)
 
