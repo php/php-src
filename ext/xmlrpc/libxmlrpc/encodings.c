@@ -30,17 +30,6 @@
 
 */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#ifndef PHP_WIN32
-#include <php_config.h>
-#else
-#include <config.w32.h>
-#include <stdlib.h>
-#endif
-
 #include <php.h>
 
 static const char rcsid[] = "#(@) $Id$";
