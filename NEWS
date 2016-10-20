@@ -27,6 +27,9 @@ PHP                                                                        NEWS
   . Fixed Redhat bug #1362571 (PHP not returning full results for
     exif_read_data function). (Kalle)
 
+- GD:
+  . Implemented imageresolution as getter and setter (Christoph)
+
 - GMP:
   . Fixed bug #70896 (gmp_fact() silently ignores non-integer input). (Sara)
 
