@@ -145,9 +145,6 @@ static const char rcsid[] = "#(@) $Id$";
 
 #include "ext/xml/expat_compat.h"
 #include "main/php_reentrancy.h"
-#ifdef _WIN32
-#include "xmlrpc_win32.h"
-#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
