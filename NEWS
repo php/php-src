@@ -67,6 +67,8 @@ PHP                                                                        NEWS
   . Fixed bug #73037 (SoapServer reports Bad Request when gzipped). (Anatol)
   . Fixed bug #73237 (Nested object in "any" element overwrites other fields).
     (Keith Smiley)
+  . Fixed bug #69137 (Peer verification fails when using a proxy with SoapClient)
+    (Keith Smiley)
 
 - SimpleXML:
   . Fixed bug #73293 (NULL pointer dereference in SimpleXMLElement::asXML()).
