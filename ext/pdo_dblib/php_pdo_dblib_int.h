@@ -116,6 +116,7 @@ typedef struct {
 
 	pdo_dblib_err err;
 	unsigned stringify_uniqueidentifier:1;
+	unsigned unicode_strings:1;
 } pdo_dblib_db_handle;
 
 typedef struct {
@@ -147,6 +148,13 @@ enum {
 	PDO_DBLIB_ATTR_CONNECTION_TIMEOUT = PDO_ATTR_DRIVER_SPECIFIC,
 	PDO_DBLIB_ATTR_QUERY_TIMEOUT,
 	PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER,
+	PDO_DBLIB_ATTR_UNICODE_STRINGS,
+};
+
+enum {
+	PDO_DBLIB_PARAM_BINARY = PDO_PARAM_DRIVER_SPECIFIC,
+	PDO_DBLIB_PARAM_STR_UNICODE = 0x40000000,
+	PDO_DBLIB_PARAM_STR_ASCII = 0x20000000,
 };
 
 #endif
