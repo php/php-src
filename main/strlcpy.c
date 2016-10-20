@@ -22,7 +22,7 @@
 
 #ifndef HAVE_STRLCPY
 
-/*	$OpenBSD: strlcpy.c,v 1.4 1999/05/01 18:56:41 millert Exp $	*/
+/*     $OpenBSD: strlcpy.c,v 1.15 2016/10/16 17:37:39 dtucker Exp $    */
 
 /*
  * Copyright (c) 1998 Todd C. Miller <Todd.Miller@courtesan.com>
@@ -52,7 +52,7 @@
  */
 
 #if defined(LIBC_SCCS) && !defined(lint)
-static char *rcsid = "$OpenBSD: strlcpy.c,v 1.4 1999/05/01 18:56:41 millert Exp $";
+static char *rcsid = "$OpenBSD: strlcpy.c,v 1.15 2016/10/16 17:37:39 dtucker Exp $";
 #endif /* LIBC_SCCS and not lint */
 
 #include <sys/types.h>

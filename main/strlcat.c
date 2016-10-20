@@ -22,7 +22,7 @@
 
 #ifndef HAVE_STRLCAT
 
-/*	$OpenBSD: strlcat.c,v 1.2 1999/06/17 16:28:58 millert Exp $	*/
+/*     $OpenBSD: strlcat.c,v 1.17 2016/10/14 18:19:04 dtucker Exp $    */
 
 /*
  * Copyright (c) 1998 Todd C. Miller <Todd.Miller@courtesan.com>
@@ -52,7 +52,7 @@
  */
 
 #if defined(LIBC_SCCS) && !defined(lint)
-static char *rcsid = "$OpenBSD: strlcat.c,v 1.2 1999/06/17 16:28:58 millert Exp $";
+static char *rcsid = "$OpenBSD: strlcat.c,v 1.17 2016/10/14 18:19:04 dtucker Exp $";
 #endif /* LIBC_SCCS and not lint */
 
 #include <sys/types.h>
