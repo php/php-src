@@ -370,6 +370,7 @@ static int zend_jit_disasm_init(void)
 	REGISTER_EG(current_execute_data);
 	REGISTER_EG(vm_stack_top);
 	REGISTER_EG(vm_stack_end);
+	REGISTER_EG(symbol_table);
 #undef  REGISTER_EG
 #define REGISTER_CG(n)  \
 	zend_jit_disasm_add_symbol("CG("#n")", \
