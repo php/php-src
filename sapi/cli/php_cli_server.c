@@ -1400,7 +1400,7 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 	*p = '\0';
 	q = p;
 	while (q > buf) {
-		if (!VCWD_STAT(buf, &sb)) {
+		if (!zend_stat(buf, &sb)) {
 			if (sb.st_mode & S_IFDIR) {
 				const char **file = index_files;
 				if (q[-1] != DEFAULT_SLASH) {
@@ -1409,7 +1409,7 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 				while (*file) {
 					size_t l = strlen(*file);
 					memmove(q, *file, l + 1);
-					if (!VCWD_STAT(buf, &sb) && (sb.st_mode & S_IFREG)) {
+					if (!zend_stat(buf, &sb) && (sb.st_mode & S_IFREG)) {
 						q += l;
 						break;
 					}
@@ -2502,7 +2502,7 @@ int do_cli_server(int argc, char **argv) /* {{{ */
 	if (document_root) {
 		zend_stat_t sb;
 
-		if (VCWD_STAT(document_root, &sb)) {
+		if (zend_stat(document_root, &sb)) {
 			fprintf(stderr, "Directory %s does not exist.\n", document_root);
 			return 1;
 		}
