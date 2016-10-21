@@ -161,6 +161,8 @@ $batch = @"
 @echo off
 setlocal
 
+set PATH=%SystemRoot%\System32;%SystemRoot%
+
 call `"$vcvarsall`" $architectureName2
 if errorlevel 1 exit /b 1
 call `"$toolsDirectory\bin\phpsdk_setvars.bat`"
