@@ -336,10 +336,8 @@ function conf_process_args()
 	args = WScript.Arguments;
 	for (i = 0; i < args.length; i++) {
 		arg = args(i);
-		// Ignore --with-config-profile for config.nice.bat
-		if (arg.toLowerCase().substring(0, arg.indexOf('=')) != '--with-config-profile' && arg != '--with-config-profile') {
-			nice += ' "' + arg + '"';
-		}
+		nice += ' "' + arg + '"';
+
 		if (arg == "--help") {
 			configure_help_mode = true;
 			break;
@@ -521,11 +519,7 @@ can be built that way. \
 
 	MFO = FSO.CreateTextFile("Makefile.objects", true);
 
-	STDOUT.WriteLine("Saving configure options to config.nice.bat");
-	var nicefile = FSO.CreateTextFile("config.nice.bat", true);
-	nicefile.WriteLine('@echo off');
-	nicefile.WriteLine(nice +  " %*");
-	nicefile.Close();
+	var profile = false;
 
 	if (PHP_CONFIG_PROFILE != 'no') {
 		if (PHP_CONFIG_PROFILE.toLowerCase() == 'nice') {
@@ -536,7 +530,19 @@ can be built that way. \
 			config_profile.WriteLine('@echo off');
 			config_profile.WriteLine(nice + ' %*');
 			config_profile.Close();
+
+			profile = true;
 		}
+	}
+
+	// Only generate an updated config.nice.bat file if a profile was not used
+	if (!profile) {
+		STDOUT.WriteLine("Saving configure options to config.nice.bat");
+
+		var nicefile = FSO.CreateTextFile("config.nice.bat", true);
+		nicefile.WriteLine('@echo off');
+		nicefile.WriteLine(nice +  " %*");
+		nicefile.Close();
 	}
 
 	AC_DEFINE('CONFIGURE_COMMAND', nice, "Configure line");

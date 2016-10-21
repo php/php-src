@@ -32,7 +32,7 @@ ZEND_API void zend_object_std_init(zend_object *object, zend_class_entry *ce)
 	zval *p, *end;
 
 	GC_REFCOUNT(object) = 1;
-	GC_TYPE_INFO(object) = IS_OBJECT;
+	GC_TYPE_INFO(object) = IS_OBJECT | (GC_COLLECTABLE << GC_FLAGS_SHIFT);
 	object->ce = ce;
 	object->properties = NULL;
 	zend_objects_store_put(object);

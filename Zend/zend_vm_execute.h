@@ -7785,18 +7785,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_VAR_SPEC_CONST_UNUSED_HA
 		if (Z_REFCOUNTED_P(var)) {
 			zend_refcounted *garbage = Z_COUNTED_P(var);
 
+			ZVAL_UNDEF(var);
 			if (!--GC_REFCOUNT(garbage)) {
-				ZVAL_UNDEF(var);
 				zval_dtor_func(garbage);
 			} else {
-				zval *z = var;
-				ZVAL_DEREF(z);
-				if (Z_COLLECTABLE_P(z) && UNEXPECTED(!Z_GC_INFO_P(z))) {
-					ZVAL_UNDEF(var);
-					gc_possible_root(Z_COUNTED_P(z));
-				} else {
-					ZVAL_UNDEF(var);
-				}
+				gc_check_possible_root(garbage);
 			}
 		} else {
 			ZVAL_UNDEF(var);
@@ -40516,18 +40509,19 @@ check_indirect:
 	variable_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->op1.var);
 
 	if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr))) {
-		uint32_t refcnt = Z_DELREF_P(variable_ptr);
+		zend_refcounted *ref = Z_COUNTED_P(variable_ptr);
+		uint32_t refcnt = --GC_REFCOUNT(ref);
 
 		if (EXPECTED(variable_ptr != value)) {
 			if (refcnt == 0) {
 				SAVE_OPLINE();
-				zval_dtor_func(Z_COUNTED_P(variable_ptr));
+				zval_dtor_func(ref);
 				if (UNEXPECTED(EG(exception))) {
 					ZVAL_NULL(variable_ptr);
 					HANDLE_EXCEPTION();
 				}
 			} else {
-				GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr);
+				gc_check_possible_root(ref);
 			}
 		}
 	}
@@ -42720,18 +42714,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_VAR_SPEC_CV_UNUSED_HANDL
 		if (Z_REFCOUNTED_P(var)) {
 			zend_refcounted *garbage = Z_COUNTED_P(var);
 
+			ZVAL_UNDEF(var);
 			if (!--GC_REFCOUNT(garbage)) {
-				ZVAL_UNDEF(var);
 				zval_dtor_func(garbage);
 			} else {
-				zval *z = var;
-				ZVAL_DEREF(z);
-				if (Z_COLLECTABLE_P(z) && UNEXPECTED(!Z_GC_INFO_P(z))) {
-					ZVAL_UNDEF(var);
-					gc_possible_root(Z_COUNTED_P(z));
-				} else {
-					ZVAL_UNDEF(var);
-				}
+				gc_check_possible_root(garbage);
 			}
 		} else {
 			ZVAL_UNDEF(var);
@@ -53909,18 +53896,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_VAR_SPEC_TMPVAR_UNUSED_H
 		if (Z_REFCOUNTED_P(var)) {
 			zend_refcounted *garbage = Z_COUNTED_P(var);
 
+			ZVAL_UNDEF(var);
 			if (!--GC_REFCOUNT(garbage)) {
-				ZVAL_UNDEF(var);
 				zval_dtor_func(garbage);
 			} else {
-				zval *z = var;
-				ZVAL_DEREF(z);
-				if (Z_COLLECTABLE_P(z) && UNEXPECTED(!Z_GC_INFO_P(z))) {
-					ZVAL_UNDEF(var);
-					gc_possible_root(Z_COUNTED_P(z));
-				} else {
-					ZVAL_UNDEF(var);
-				}
+				gc_check_possible_root(garbage);
 			}
 		} else {
 			ZVAL_UNDEF(var);

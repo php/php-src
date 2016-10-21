@@ -584,7 +584,7 @@ static inline void zend_assign_to_variable_reference(zval *variable_ptr, zval *v
 			zval_dtor_func(garbage);
 			return;
 		} else {
-			GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr);
+			gc_check_possible_root(garbage);
 		}
 	}
 	ZVAL_REF(variable_ptr, ref);
@@ -2063,12 +2063,12 @@ static zend_always_inline void i_free_compiled_variables(zend_execute_data *exec
 	zval *end = cv + EX(func)->op_array.last_var;
 	while (EXPECTED(cv != end)) {
 		if (Z_REFCOUNTED_P(cv)) {
-			if (!Z_DELREF_P(cv)) {
-				zend_refcounted *r = Z_COUNTED_P(cv);
+			zend_refcounted *r = Z_COUNTED_P(cv);
+			if (!--GC_REFCOUNT(r)) {
 				ZVAL_NULL(cv);
 				zval_dtor_func(r);
 			} else {
-				GC_ZVAL_CHECK_POSSIBLE_ROOT(cv);
+				gc_check_possible_root(r);
 			}
 		}
 		cv++;

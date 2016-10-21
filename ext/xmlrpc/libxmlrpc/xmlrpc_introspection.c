@@ -51,9 +51,6 @@
  *******/
 
 
-#ifdef _WIN32
-#include "xmlrpc_win32.h"
-#endif
 #include "queue.h"
 #include "xmlrpc.h"
 #include "xmlrpc_private.h"
