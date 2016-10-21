@@ -15,15 +15,7 @@ ob_end_clean();
 
 var_dump(is_array(PDO::getAvailableDrivers()));
 var_dump(is_array(pdo_drivers()));
-
-$driversMethod = sprintf('PDO drivers => %s', implode(', ', PDO::getAvailableDrivers()));
-$driversFunction = sprintf('PDO drivers => %s', implode(', ', pdo_drivers()));
-
-var_dump(strpos($info, $driversMethod) !== false);
-var_dump(strpos($info, $driversFunction) !== false);
 ?>
 --EXPECT--
-bool(true)
-bool(true)
 bool(true)
 bool(true)
