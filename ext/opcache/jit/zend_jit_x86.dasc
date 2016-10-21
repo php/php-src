@@ -791,14 +791,11 @@ static void* dasm_labels[zend_lb_MAX];
 |	dec	dword [zv]
 |.endmacro
 
-|.macro IF_GC_INFO, ptr, label
-|	cmp word [ptr + 6], 0
+|.macro IF_GC_MAY_NOT_LEAK, ptr, tmp_reg, label
+|	mov tmp_reg, dword [ptr + 4]
+|	and tmp_reg, (GC_INFO_MASK | (GC_COLLECTABLE << GC_FLAGS_SHIFT))
+|	cmp tmp_reg, (GC_COLLECTABLE << GC_FLAGS_SHIFT)
 |	jne label
-|.endmacro
-
-|.macro IF_NOT_GC_INFO, ptr, label
-|	cmp word [ptr + 6], 0
-|	je label
 |.endmacro
 
 |.macro ADDREF_CONST, zv, tmp_reg
@@ -943,21 +940,15 @@ static void* dasm_labels[zend_lb_MAX];
 ||		}
 ||		if (gc && RC_MAY_BE_N(op_info) && ((op_info) & (MAY_BE_REF|MAY_BE_ARRAY|MAY_BE_OBJECT))) {
 ||			if ((op_info) & MAY_BE_REF) {
-|				lea r1, [zv]
-|				// ZVAL_DEREF(z);
-|				ZVAL_DEREF r1, (op_info)
-|				// if (Z_COLLECTABLE_P(z))
-|				IF_NOT_Z_FLAGS r1, IS_TYPE_COLLECTABLE, >2
-|				// if (UNEXPECTED(!Z_GC_INFO_P(z)))
-|				GET_Z_PTR FCARG1a, r1
-|				IF_GC_INFO FCARG1a, >2
-||			} else {
-|				// if (Z_COLLECTABLE_P(z))
-|				IF_NOT_Z_FLAGS zv, IS_TYPE_COLLECTABLE, >2
-|				// if (UNEXPECTED(!Z_GC_INFO_P(z)))
 |				GET_Z_PTR FCARG1a, zv
-|				IF_GC_INFO FCARG1a, >2
+|				cmp byte [FCARG1a + 4], IS_REFERENCE
+|				jnz >1
+|				GET_Z_PTR FCARG1a, FCARG1a + offsetof(zend_reference, val)
+|				IF_NOT_Z_REFCOUNTED zv, >2
+|				GET_Z_PTR FCARG1a, zv
+|1:
 ||			}
+|			IF_GC_MAY_NOT_LEAK FCARG1a, eax, >2
 |			// gc_possible_root(Z_COUNTED_P(z))
 |			EXT_CALL gc_possible_root, r0
 ||			if (cold && ((op_info) & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE)))) {
@@ -1144,7 +1135,7 @@ static void* dasm_labels[zend_lb_MAX];
 ||#endif
 |.endmacro
 
-|.macro OBJ_RELEASE, reg, exit_label
+|.macro OBJ_RELEASE, reg, tmp_reg, exit_label
 |	GC_DELREF reg
 |	jne >1
 |	// zend_objects_store_del(obj);
@@ -1159,11 +1150,11 @@ static void* dasm_labels[zend_lb_MAX];
 |.endif
 |	jmp exit_label
 |1:
-|	// if (UNEXPECTED(!GC_INFO(obj))) {
-|	IF_GC_INFO reg, exit_label
+|	IF_GC_MAY_NOT_LEAK reg, tmp_reg, >1
 |	// gc_possible_root(obj)
 |	mov FCARG1a, reg
 |	EXT_CALL gc_possible_root, r0
+|1:
 |.endmacro
 
 |.macro SAVE_VALID_OPLINE, opline
@@ -3204,19 +3195,18 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 			|4:
 		}
 		if (RC_MAY_BE_N(var_info)) {
-			|	IF_NOT_Z_FLAGS Ra(var_reg)+var_offset, IS_TYPE_COLLECTABLE, >5
 			if (var_reg == FP) {
 				|	GET_Z_PTR FCARG1a, Ra(var_reg)+var_offset
-				|	IF_GC_INFO FCARG1a, >5
+				|	IF_GC_MAY_NOT_LEAK FCARG1a, eax, >5
 			} else if (var_reg != FCARG1a) {
 				|	GET_Z_PTR FCARG1a, Ra(var_reg)+var_offset
-				|	IF_GC_INFO FCARG1a, >5
+				|	IF_GC_MAY_NOT_LEAK FCARG1a, eax, >5
 				|	mov [r4], Ra(var_reg) // save
 			} else {
 				|	GET_Z_PTR r0, Ra(var_reg)+var_offset
-				|	IF_GC_INFO r0, >5
+				|	IF_GC_MAY_NOT_LEAK r0, r0, >5
 				|	mov [r4], Ra(var_reg) // save
-				|	mov FCARG1a, r0
+				|	GET_Z_PTR FCARG1a, Ra(var_reg)+var_offset
 			}
 			|	EXT_CALL gc_possible_root, r0
 			if (var_reg != FP) {
@@ -5807,7 +5797,7 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, zend_op_
 				|5:
 			}
 			|	// OBJ_RELEASE(object);
-			|	OBJ_RELEASE r0, >4
+			|	OBJ_RELEASE r0, ecx, >4
 			|	jmp >4
 			if (op_array->fn_flags & ZEND_ACC_STATIC) {
 				|.code
@@ -5823,7 +5813,7 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, zend_op_
 			|	// OBJ_RELEASE((zend_object*)execute_data->func->op_array.prototype);
 			|	mov r0, EX->func
 			|	mov r0, aword [r0 + offsetof(zend_op_array, prototype)]
-			|	OBJ_RELEASE r0, >4
+			|	OBJ_RELEASE r0, ecx, >4
 			|	jmp >4
 			|.code
 		}
@@ -6410,8 +6400,7 @@ static int zend_jit_bind_global(dasm_State **Dst, const zend_op *opline, zend_op
 		if (op1_info & (MAY_BE_ARRAY|MAY_BE_OBJECT)) {
 		|3:
 		// GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr)
-		|	IF_NOT_Z_REFCOUNTED FP + opline->op1.var, >5
-		|	IF_GC_INFO FCARG1a, >5
+		|	IF_GC_MAY_NOT_LEAK FCARG1a, eax, >5
 		|	mov aword [r4], r0 //save
 		|	EXT_CALL gc_possible_root, r1
 		|	mov r0, aword [r4] // restore
