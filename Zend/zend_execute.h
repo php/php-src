@@ -101,8 +101,7 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 				return variable_ptr;
 			} else { /* we need to split */
 				/* optimized version of GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr) */
-				if ((Z_COLLECTABLE_P(variable_ptr)) &&
-		    		UNEXPECTED(!GC_INFO(garbage))) {
+				if (UNEXPECTED(GC_MAY_LEAK(garbage))) {
 					gc_possible_root(garbage);
 				}
 			}
@@ -216,12 +215,12 @@ static zend_always_inline void zend_vm_stack_free_extra_args_ex(uint32_t call_in
 		do {
 			p--;
 			if (Z_REFCOUNTED_P(p)) {
-				if (!Z_DELREF_P(p)) {
-					zend_refcounted *r = Z_COUNTED_P(p);
+				zend_refcounted *r = Z_COUNTED_P(p);
+				if (!--GC_REFCOUNT(r)) {
 					ZVAL_NULL(p);
 					zval_dtor_func(r);
 				} else {
-					GC_ZVAL_CHECK_POSSIBLE_ROOT(p);
+					gc_check_possible_root(r);
 				}
 			}
 		} while (p != end);
