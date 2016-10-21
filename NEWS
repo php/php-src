@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #73329 ((Float)"Nano" == NAN). (Anatol)
 
+- CLI Server:
+  . Fixed bug #73360 (Unable to work in root with unicode chars). (Anatol)
+
 - SQLite3:
   . Fixed bug #73333 (2147483647 is fetched as string). (cmb)
 
