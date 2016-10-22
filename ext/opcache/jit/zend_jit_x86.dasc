@@ -6038,7 +6038,11 @@ static int zend_jit_fetch_dim_read(dasm_State **Dst, const zend_op *opline, zend
 			} else {
 				ZEND_ASSERT(0);
 			}
+			if ((op1_info & MAY_BE_ARRAY) ||
+				((op1_info & MAY_BE_OBJECT) ||
+				(opline->opcode != ZEND_FETCH_DIM_IS && (op1_info & MAY_BE_UNDEF)) || (op2_info & MAY_BE_UNDEF))) {
 			|	jmp >9 // END
+			}
 			|6:
 		}
 
@@ -6068,57 +6072,68 @@ static int zend_jit_fetch_dim_read(dasm_State **Dst, const zend_op *opline, zend
 			} else {
 				ZEND_ASSERT(0);
 			}
+			if ((op1_info & MAY_BE_ARRAY) ||
+				((opline->opcode != ZEND_FETCH_DIM_IS && (op1_info & MAY_BE_UNDEF)) || (op2_info & MAY_BE_UNDEF))) {
 			|	jmp >9 // END
+			}
 			|6:
 		}
 
 		if ((opline->opcode != ZEND_FETCH_DIM_IS && (op1_info & MAY_BE_UNDEF)) || (op2_info & MAY_BE_UNDEF)) {
 			|	SAVE_VALID_OPLINE opline
-			if (opline->opcode != ZEND_FETCH_DIM_IS && (op1_info & MAY_BE_UNDEF)) {
-				if (op1_info & MAY_BE_REF) {
-					|	IF_NOT_Z_TYPE FCARG1a, IS_UNDEF, >1
-				} else {
-					|	IF_NOT_Z_TYPE FP + opline->op1.var, IS_UNDEF, >1
-				}
-				|	// zend_error(E_NOTICE, "Undefined variable: %s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
-				|	mov FCARG1d, opline->op1.var
-				|	EXT_CALL zend_jit_undefined_op_helper, r0
-				|1:
-			}
-			if (op2_info & MAY_BE_UNDEF) {
-				|	IF_NOT_Z_TYPE FP + opline->op2.var, IS_UNDEF, >1
-				|	mov FCARG1d, opline->op2.var
-				|	EXT_CALL zend_jit_undefined_op_helper, r0
-				|1:
-			}
-			|	SET_Z_TYPE_INFO FP + opline->result.var, IS_NULL
-			|	jmp >9 // END
 		}
+
+		if (opline->opcode != ZEND_FETCH_DIM_IS && (op1_info & MAY_BE_UNDEF)) {
+			if (op1_info & MAY_BE_REF) {
+				|	IF_NOT_Z_TYPE FCARG1a, IS_UNDEF, >1
+			} else {
+				|	IF_NOT_Z_TYPE FP + opline->op1.var, IS_UNDEF, >1
+			}
+			|	// zend_error(E_NOTICE, "Undefined variable: %s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
+			|	mov FCARG1d, opline->op1.var
+			|	EXT_CALL zend_jit_undefined_op_helper, r0
+			|1:
+		}
+
+		if (op2_info & MAY_BE_UNDEF) {
+			|	IF_NOT_Z_TYPE FP + opline->op2.var, IS_UNDEF, >1
+			|	mov FCARG1d, opline->op2.var
+			|	EXT_CALL zend_jit_undefined_op_helper, r0
+			|1:
+		}
+
+		if ((op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_OBJECT)))) {
+			|	SET_Z_TYPE_INFO FP + opline->result.var, IS_NULL
+		}
+
 		if (op1_info & MAY_BE_ARRAY) {
+			|	jmp >9 // END
 			|.code
 		}
 	}
 
-	|8:
-	if (res_info & MAY_BE_REF) {
-	|	// ZVAL_COPY_UNREF
-	|	IF_NOT_Z_REFCOUNTED r0, >2
-	|	GET_Z_PTR r1, r0
-	|	IF_NOT_Z_TYPE r0, IS_REFERENCE, >1
-	|	cmp dword [r1], 1
-	|	jne >1
-	|	lea FCARG1a, [FP + opline->result.var]
-	|	mov FCARG2a, r0
-	|	EXT_CALL zend_jit_zval_copy_unref_helper, r0
-	|	jmp >9
-	|1:
-	|	GC_ADDREF r1
-	|2:
-	|	ZVAL_COPY_VALUE FP + opline->result.var, r0, MAY_BE_ANY, r1, ecx, r2
-	} else  {
-	|	// ZVAL_COPY
-	|	ZVAL_COPY_VALUE FP + opline->result.var, r0, MAY_BE_ANY, r1, ecx, r2
-	|	TRY_ADDREF res_info, ch, r2
+	if (op1_info & MAY_BE_ARRAY) {
+		|8:
+		if (res_info & MAY_BE_REF) {
+		|	// ZVAL_COPY_UNREF
+		|	IF_NOT_Z_REFCOUNTED r0, >2
+		|	GET_Z_PTR r1, r0
+		|	IF_NOT_Z_TYPE r0, IS_REFERENCE, >1
+		|	cmp dword [r1], 1
+		|	jne >1
+		|	lea FCARG1a, [FP + opline->result.var]
+		|	mov FCARG2a, r0
+		|	EXT_CALL zend_jit_zval_copy_unref_helper, r0
+		|	jmp >9
+		|1:
+		|	GC_ADDREF r1
+		|2:
+		|	ZVAL_COPY_VALUE FP + opline->result.var, r0, MAY_BE_ANY, r1, ecx, r2
+		} else  {
+		|	// ZVAL_COPY
+		|	ZVAL_COPY_VALUE FP + opline->result.var, r0, MAY_BE_ANY, r1, ecx, r2
+		|	TRY_ADDREF res_info, ch, r2
+		}
 	}
 	|9: // END
 
@@ -6558,6 +6573,7 @@ static int zend_jit_fetch_obj_r(dasm_State **Dst, zend_op *opline, zend_op_array
 		goto fallback;
 	}
 
+	res_info = RES_INFO();
 	op1_info = OP1_INFO();
 	if ((op1_info & MAY_BE_ANY) != MAY_BE_OBJECT) {
 		goto fallback;
