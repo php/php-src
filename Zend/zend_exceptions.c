@@ -776,14 +776,15 @@ ZEND_METHOD(exception, __toString)
 		Z_OBJPROP_P(exception)->u.v.nApplyCount++;
 		exception = GET_PROPERTY(exception, "previous");
 		if (exception && Z_TYPE_P(exception) == IS_OBJECT && Z_OBJPROP_P(exception)->u.v.nApplyCount > 0) {
-			exception = NULL;
+			break;
 		}
 	}
 	zval_dtor(&fname);
 
+	exception = getThis();
 	/* Reset apply counts */
 	while (exception && Z_TYPE_P(exception) == IS_OBJECT && (base_ce = i_get_exception_base(exception)) && instanceof_function(Z_OBJCE_P(exception), base_ce)) {
-		if(Z_OBJPROP_P(exception)->u.v.nApplyCount) {
+		if (Z_OBJPROP_P(exception)->u.v.nApplyCount) {
 			Z_OBJPROP_P(exception)->u.v.nApplyCount--;
 		} else {
 			break;

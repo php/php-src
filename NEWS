@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2016 PHP 7.0.13
 
 - Core:
+  . Fixed bug #73350 (Exception::__toString() cause circular references).
+    (Laruence)
   . Fixed bug #73181 (parse_str() without a second argument leads to crash).
     (Nikita)
   . Fixed bug #66773 (Autoload with Opcache allows importing conflicting class
