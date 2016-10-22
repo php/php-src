@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.1.0RC5
 
 - Core:
+  . Fixed bug #73350 (Exception::__toString() cause circular references).
+    (Laruence)
   . Fixed bug #73329 ((Float)"Nano" == NAN). (Anatol)
 
 - CLI Server:
