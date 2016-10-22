@@ -1115,7 +1115,7 @@ PHP_FUNCTION(deflate_add)
 {
 	zend_string *out;
 	char *in_buf;
-	size_t in_len, out_size;
+	size_t in_len, out_size, buffer_used;
 	zval *res;
 	z_stream *ctx;
 	zend_long flush_type = Z_SYNC_FLUSH;
@@ -1164,7 +1164,21 @@ PHP_FUNCTION(deflate_add)
 	ctx->avail_in = in_len;
 	ctx->avail_out = ZSTR_LEN(out);
 
-	status = deflate(ctx, flush_type);
+	buffer_used = 0;
+
+	do {
+		if (ctx->avail_out == 0) {
+			/* more output buffer space needed; realloc and try again */
+			/* adding 64 more bytes solved every issue I have seen    */
+			/* the + 1 is for the string terminator added below */
+			out = zend_string_realloc(out, ZSTR_LEN(out) + 64 + 1, 0);
+			ctx->avail_out = 64;
+			ctx->next_out = (Bytef *) ZSTR_VAL(out) + buffer_used;
+		}
+		status = deflate(ctx, flush_type);
+		buffer_used = ZSTR_LEN(out) - ctx->avail_out;
+	} while (status == Z_OK && ctx->avail_out == 0);
+
 	switch (status) {
 		case Z_OK:
 			ZSTR_LEN(out) = (char *) ctx->next_out - ZSTR_VAL(out);
