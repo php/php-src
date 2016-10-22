@@ -3204,7 +3204,7 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 				|	mov [r4], Ra(var_reg) // save
 			} else {
 				|	GET_Z_PTR r0, Ra(var_reg)+var_offset
-				|	IF_GC_MAY_NOT_LEAK r0, r0, >5
+				|	IF_GC_MAY_NOT_LEAK r0, eax, >5
 				|	mov [r4], Ra(var_reg) // save
 				|	GET_Z_PTR FCARG1a, Ra(var_reg)+var_offset
 			}
