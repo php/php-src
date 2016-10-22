@@ -641,6 +641,8 @@ static int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_s
 				default:
 					return 1;
 			}
+		case ZEND_ECHO:
+			return (t1 & (MAY_BE_OBJECT|MAY_BE_ARRAY));
 		default:
 			return 1;
 	}
