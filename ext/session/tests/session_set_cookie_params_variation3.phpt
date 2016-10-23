@@ -39,10 +39,12 @@ bool(true)
 string(4) "blah"
 bool(true)
 string(4) "blah"
+
+Warning: session_set_cookie_params(): Cannot change session cookie parameters when session is active in %s on line 18
+bool(false)
+string(4) "blah"
 bool(true)
-string(4) "guff"
-bool(true)
-string(4) "guff"
+string(4) "blah"
 bool(true)
 string(3) "foo"
 Done

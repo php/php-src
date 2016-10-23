@@ -41,10 +41,12 @@ bool(true)
 string(4) "3600"
 bool(true)
 string(4) "3600"
+
+Warning: session_set_cookie_params(): Cannot change session cookie parameters when session is active in /Users/yohgaki/git/oss/php.net/github-php-src/ext/session/tests/session_set_cookie_params_variation1.php on line 19
+bool(false)
+string(4) "3600"
 bool(true)
-string(4) "1800"
-bool(true)
-string(4) "1800"
+string(4) "3600"
 bool(true)
 string(10) "1234567890"
 Done

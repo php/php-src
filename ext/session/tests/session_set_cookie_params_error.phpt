@@ -124,6 +124,8 @@ bool(true)
 bool(true)
 
 -- Iteration 4 --
+
+Warning: session_set_cookie_params(): CookieLifetime cannot be negative in %s on line 81
 bool(false)
 bool(true)
 bool(true)
@@ -140,6 +142,8 @@ bool(true)
 bool(true)
 
 -- Iteration 6 --
+
+Warning: session_set_cookie_params(): CookieLifetime cannot be negative in %s on line 81
 bool(false)
 bool(true)
 bool(true)

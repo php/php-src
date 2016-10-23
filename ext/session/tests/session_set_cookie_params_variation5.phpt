@@ -39,10 +39,12 @@ bool(true)
 string(1) "0"
 bool(true)
 string(1) "0"
+
+Warning: session_set_cookie_params(): Cannot change session cookie parameters when session is active in %s on line 18
+bool(false)
+string(1) "0"
 bool(true)
-string(1) "1"
-bool(true)
-string(1) "1"
+string(1) "0"
 bool(true)
 string(1) "0"
 Done

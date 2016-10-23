@@ -39,10 +39,12 @@ bool(true)
 string(4) "/foo"
 bool(true)
 string(4) "/foo"
+
+Warning: session_set_cookie_params(): Cannot change session cookie parameters when session is active in %s on line 18
+bool(false)
+string(4) "/foo"
 bool(true)
-string(5) "/blah"
-bool(true)
-string(5) "/blah"
+string(4) "/foo"
 bool(true)
 string(5) "/guff"
 Done

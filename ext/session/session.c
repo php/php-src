@@ -660,6 +660,10 @@ static PHP_INI_MH(OnUpdateName) /* {{{ */
 static PHP_INI_MH(OnUpdateCookieLifetime) /* {{{ */
 {
 	SESSION_CHECK_OUTPUT_STATE;
+	if (atol(ZSTR_VAL(new_value)) < 0) {
+		php_error_docref(NULL, E_WARNING, "CookieLifetime cannot be negative");
+		return FAILURE;
+	}
 	return OnUpdateLongGEZero(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
 /* }}} */
@@ -726,6 +730,15 @@ static PHP_INI_MH(OnUpdateSidBits) /* {{{ */
 /* }}} */
 
 
+static PHP_INI_MH(OnUpdateLazyWrite) /* {{{ */
+{
+	SESSION_CHECK_ACTIVE_STATE;
+	return OnUpdateBool(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+}
+/* }}} */
+
+
+
 static PHP_INI_MH(OnUpdateRfc1867Freq) /* {{{ */
 {
 	int tmp;
@@ -771,7 +784,7 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("session.use_trans_sid",          "0",         PHP_INI_ALL, OnUpdateTransSid)
 	PHP_INI_ENTRY("session.sid_length",             "32",        PHP_INI_ALL, OnUpdateSidLength)
 	PHP_INI_ENTRY("session.sid_bits_per_character", "4",         PHP_INI_ALL, OnUpdateSidBits)
-	STD_PHP_INI_BOOLEAN("session.lazy_write",       "1",         PHP_INI_ALL, OnUpdateSessionBool,   lazy_write,         php_ps_globals,    ps_globals)
+	STD_PHP_INI_BOOLEAN("session.lazy_write",       "1",         PHP_INI_ALL, OnUpdateLazyWrite,     lazy_write,         php_ps_globals,    ps_globals)
 
 	/* Upload progress */
 	STD_PHP_INI_BOOLEAN("session.upload_progress.enabled",
@@ -1403,7 +1416,6 @@ static void ppid2sid(zval *ppid) {
 }
 
 
-/* Made to return int from 7.1, previously void */
 PHPAPI int php_session_reset_id(void) /* {{{ */
 {
 	int module_number = PS(module_number);
@@ -1474,7 +1486,6 @@ PHPAPI int php_session_reset_id(void) /* {{{ */
 /* }}} */
 
 
-/* Made to return int from 7.1, previously void */
 PHPAPI int php_session_start(void) /* {{{ */
 {
 	zval *ppid;
@@ -1663,8 +1674,9 @@ static PHP_FUNCTION(session_set_cookie_params)
 		return;
 	}
 
-	if (SG(headers_sent) && PS(use_cookies)) {
-		php_error_docref(NULL, E_WARNING, "Cannot set cookie parameters - headers already sent");
+ 
+	if (PS(session_status) == php_session_active) {
+		php_error_docref(NULL, E_WARNING, "Cannot change session cookie parameters when session is active");
 		RETURN_FALSE;
 	}
 
@@ -2354,11 +2366,6 @@ static PHP_FUNCTION(session_destroy)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
-	}
-
-	if (PS(session_status) != php_session_active) {
-		php_error_docref(NULL, E_WARNING, "Trying to destroy uninitialized session");
-		RETURN_FALSE;
 	}
 
 	RETURN_BOOL(php_session_destroy() == SUCCESS);
