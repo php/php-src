@@ -39,10 +39,17 @@
 #define HASH_FLAG_APPLY_PROTECTION (1<<1)
 #define HASH_FLAG_PACKED           (1<<2)
 #define HASH_FLAG_INITIALIZED      (1<<3)
-#define HASH_FLAG_STATIC_KEYS      (1<<4)
+#define HASH_FLAG_STATIC_KEYS      (1<<4) /* long and interned strings */
 #define HASH_FLAG_HAS_EMPTY_IND    (1<<5)
 
-#define HASH_MASK_CONSISTENCY      0xc0
+#define HT_IS_PACKED(ht) \
+	(((ht)->u.flags & HASH_FLAG_PACKED) != 0)
+
+#define HT_IS_WITHOUT_HOLES(ht) \
+	((ht)->nNumUsed == (ht)->nNumOfElements)
+
+#define HT_HAS_STATIC_KEYS_ONLY(ht) \
+	(((ht)->u.flags & (HASH_FLAG_PACKED|HASH_FLAG_STATIC_KEYS)) != 0)
 
 typedef struct _zend_hash_key {
 	zend_ulong h;

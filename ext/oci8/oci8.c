@@ -1387,6 +1387,11 @@ void php_oci_bind_hash_dtor(zval *data)
 {
 	php_oci_bind *bind = (php_oci_bind *) Z_PTR_P(data);
 
+	if (!Z_ISUNDEF(bind->parameter)) {
+		zval_ptr_dtor(&bind->parameter);
+		ZVAL_UNDEF(&bind->parameter);
+	}
+
 	if (bind->array.elements) {
 		efree(bind->array.elements);
 		bind->array.elements = NULL;

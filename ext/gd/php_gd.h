@@ -174,6 +174,7 @@ PHP_FUNCTION(imageinterlace);
 PHP_FUNCTION(imageline);
 PHP_FUNCTION(imageloadfont);
 PHP_FUNCTION(imagepolygon);
+PHP_FUNCTION(imageopenpolygon);
 PHP_FUNCTION(imagerectangle);
 PHP_FUNCTION(imagesetpixel);
 PHP_FUNCTION(imagestring);
@@ -197,6 +198,8 @@ PHP_FUNCTION(imagexbm);
 
 PHP_FUNCTION(imagefilter);
 PHP_FUNCTION(imageconvolution);
+
+PHP_FUNCTION(imageresolution);
 
 PHP_GD_API int phpi_get_le_gd(void);
 

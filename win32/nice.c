@@ -30,18 +30,21 @@
  *  +-----------------------+-----------------------------+
  *  | Expression            | Priority type                |
  *  +-----------------------+-----------------------------+
- *  | priority > 5          | REALTIME_PRIORITY_CLASS      |
+ *  | priority < -14        | REALTIME_PRIORITY_CLASS      |
  *  +-----------------------+-----------------------------+
- *  | priority == 5         | HIGH_PRIORITY_CLASS          |
+ *  | priority < -9         | HIGH_PRIORITY_CLASS          |
  *  +-----------------------+-----------------------------+
- *  | priority > 0          | ABOVE_NORMAL_PRIORITY_CLASS  |
+ *  | priority < -4         | ABOVE_NORMAL_PRIORITY_CLASS  |
  *  +-----------------------+-----------------------------+
- *  | priority == 0         | NORMAL_PRIORITY_CLASS        |
+ *  | priority > 4          | BELOW_NORMAL_PRIORITY_CLASS  |
  *  +-----------------------+-----------------------------+
- *  | priority < -5         | BELOW_NORMAL_PRIORITY_CLASS  |
+ *  | priority > 9          | IDLE_PRIORITY_CLASS          |
  *  +-----------------------+-----------------------------+
- *  | priority < -10        | IDLE_PRIORITY_CLASS          |
- *  +-----------------------+-----------------------------+
+ *
+ * If a value is between -4 and 4 (inclusive), then the priority will be set
+ * to NORMAL_PRIORITY_CLASS.
+ *
+ * These values tries to mimic that of the UNIX version of nice().
  *
  * This is applied to the main process, not per thread, although this could 
  * be implemented using SetThreadPriority() at one point.
@@ -51,16 +54,16 @@ PHPAPI int nice(zend_long p)
 {
 	DWORD dwFlag = NORMAL_PRIORITY_CLASS;
 
-	if (p > 5) {
+	if (p < -14) {
 		dwFlag = REALTIME_PRIORITY_CLASS;
-	} else if (p == 5) { 
+	} else if (p < -9) { 
 		dwFlag = HIGH_PRIORITY_CLASS;
-	} else if (p > 0) {
+	} else if (p < -4) {
 		dwFlag = ABOVE_NORMAL_PRIORITY_CLASS;
-	} else if (p < 0 && p < -5) {
-		dwFlag = BELOW_NORMAL_PRIORITY_CLASS;
-	} else if (p < -10) {
+	} else if (p > 9) {
 		dwFlag = IDLE_PRIORITY_CLASS;
+	} else if (p > 4) {
+		dwFlag = BELOW_NORMAL_PRIORITY_CLASS;
 	}
 
 	if (!SetPriorityClass(GetCurrentProcess(), dwFlag)) {

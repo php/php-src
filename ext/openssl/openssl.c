@@ -3866,11 +3866,12 @@ static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req
 #ifdef HAVE_EVP_PKEY_EC
 			case OPENSSL_KEYTYPE_EC:
 				{
+					EC_KEY *eckey;
 					if (req->curve_name == NID_undef) {
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing configuration value: 'curve_name' not set");
 						return NULL;
 					}
-					EC_KEY *eckey = EC_KEY_new_by_curve_name(req->curve_name);
+					eckey = EC_KEY_new_by_curve_name(req->curve_name);
 					if (eckey) {
 						EC_KEY_set_asn1_flag(eckey, OPENSSL_EC_NAMED_CURVE);
 						if (EC_KEY_generate_key(eckey) &&

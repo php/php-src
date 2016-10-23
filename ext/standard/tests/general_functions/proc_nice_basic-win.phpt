@@ -71,12 +71,12 @@ function get_priority_from_wmic() {
 $p = [
 	/* '<verbose name>' => ['<wmic value>', '<proc_nice value>'] */
 
-	'Idle' 		=> [6, -10], 
-	'Below normal'	=> [4, -3], 
+	'Idle' 		=> [4, 10], 
+	'Below normal'	=> [6, 5], 
 	'Normal'	=> [8, 0], 
-	'Above normal'	=> [10, 4], 
-	'High priority'	=> [13, 5], 
-	'Real time'	=> [24, 8]
+	'Above normal'	=> [10, -5], 
+	'High priority'	=> [13, -10], 
+	'Real time'	=> [24, -16]
 	];
 
 foreach ($p as $test => $data) {
@@ -84,13 +84,13 @@ foreach ($p as $test => $data) {
 
 	proc_nice($data[1]);
 
-	print (get_priority_from_wmic() === $data[0] ? 'Passed' : 'Failed') . PHP_EOL;
+	print (($wp = get_priority_from_wmic()) === $data[0] ? 'Passed' : 'Failed (' . $wp . ')') . PHP_EOL;
 }
 ?>
 --EXPECTF--
-Testing 'Idle' (-10): Passed
-Testing 'Below normal' (-3): Passed
+Testing 'Idle' (10): Passed
+Testing 'Below normal' (5): Passed
 Testing 'Normal' (0): Passed
-Testing 'Above normal' (4): Passed
-Testing 'High priority' (5): Passed
-Testing 'Real time' (8): Passed
+Testing 'Above normal' (-5): Passed
+Testing 'High priority' (-10): Passed
+Testing 'Real time' (-16): Passed
