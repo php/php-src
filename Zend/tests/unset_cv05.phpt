@@ -11,6 +11,7 @@ include(dirname(__FILE__).'/../../ext/session/tests/skipif.inc');
 ?>
 --FILE--
 <?php
+ob_start();
 $_SESSION = "ok\n";
 echo $_SESSION;
 session_start();
