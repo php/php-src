@@ -33,17 +33,16 @@ ob_end_flush();
 --EXPECTF--
 *** Testing session_start() : variation ***
 bool(true)
-NULL
 bool(true)
-NULL
 bool(true)
-NULL
 bool(true)
-NULL
 bool(true)
-NULL
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
 
-Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
+Warning: session_destroy(): Trying to destroy uninitialized session in %s on line 23
 bool(false)
 Done
-

@@ -57,7 +57,7 @@ Warning: Unknown: The session id is too long or contains illegal characters, val
 Warning: Unknown: Failed to read session data: files (path: ) in Unknown on line 0
 
 Warning: Unknown: Failed to write session data (files). Please verify that the current setting of session.save_path is correct () in Unknown on line 0
-string(%d) "%s"
+string(%d) ""
 bool(true)
 array(2) {
   [%u|b%"file1"]=>
