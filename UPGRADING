@@ -27,7 +27,8 @@ PHP 7.2 UPGRADE NOTES
 
 - Session:
   . Session is made to manage session status corretly and prevents invalid operations.
-    Almost all functions and INIs are affected.
+    Only inappropriate codes are affected by this change. If you have problems with this,
+    it means you have problem in your code.
     . Functions are made to set or return correct session status.
         session_start(), session_status(), session_regenerate_id()
     . Functions are made to return bool from null. These functions have void parameter
