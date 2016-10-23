@@ -1,7 +1,7 @@
 --TEST--
 SQLite3::prepare number of rows
 --SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc');
+<?php require_once(__DIR__ . '/skipif.inc');
 // Create an instance of the ReflectionMethod class
 try {
 	$method = new ReflectionMethod('sqlite3result', 'numRows');
@@ -12,7 +12,7 @@ try {
 --FILE--
 <?php
 
-require_once(dirname(__FILE__) . '/new_db.inc');
+require_once(__DIR__ . '/new_db.inc');
 define('TIMENOW', time());
 
 echo "Creating Table\n";

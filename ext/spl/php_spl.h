@@ -24,12 +24,6 @@
 
 #define PHP_SPL_VERSION PHP_VERSION
 
-#if 0
-#define SPL_DEBUG(x)	x
-#else
-#define SPL_DEBUG(x)
-#endif
-
 extern zend_module_entry spl_module_entry;
 #define phpext_spl_ptr &spl_module_entry
 
@@ -68,7 +62,7 @@ ZEND_BEGIN_MODULE_GLOBALS(spl)
 	int          autoload_running;
 ZEND_END_MODULE_GLOBALS(spl)
 
-ZEND_EXTERN_MODULE_GLOBALS(spl);
+ZEND_EXTERN_MODULE_GLOBALS(spl)
 #define SPL_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(spl, v)
 
 PHP_FUNCTION(spl_classes);

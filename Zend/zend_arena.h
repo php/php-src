@@ -103,11 +103,12 @@ static zend_always_inline void zend_arena_release(zend_arena **arena_ptr, void *
 	zend_arena *arena = *arena_ptr;
 
 	while (UNEXPECTED((char*)checkpoint > arena->end) ||
-	       UNEXPECTED((char*)checkpoint < (char*)arena)) {
+	       UNEXPECTED((char*)checkpoint <= (char*)arena)) {
 		zend_arena *prev = arena->prev;
 		efree(arena);
 		*arena_ptr = arena = prev;
 	}
+	ZEND_ASSERT((char*)checkpoint > (char*)arena && (char*)checkpoint <= arena->end);
 	arena->ptr = (char*)checkpoint;
 }
 

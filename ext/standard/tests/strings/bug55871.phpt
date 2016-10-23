@@ -41,6 +41,8 @@ array(1) {
   [0]=>
   string(0) ""
 }
+
+Warning: A non-numeric value encountered in %s on line %d
 array(1) {
   [0]=>
   string(40) "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"

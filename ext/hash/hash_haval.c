@@ -31,28 +31,28 @@ static const unsigned char PADDING[128] ={
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
-static const php_hash_uint32 D0[8] = {
+static const uint32_t D0[8] = {
 	0x243F6A88, 0x85A308D3, 0x13198A2E, 0x03707344, 0xA4093822, 0x299F31D0, 0x082EFA98, 0xEC4E6C89 };
 
-static const php_hash_uint32 K2[32] = {
+static const uint32_t K2[32] = {
 	0x452821E6, 0x38D01377, 0xBE5466CF, 0x34E90C6C, 0xC0AC29B7, 0xC97C50DD, 0x3F84D5B5, 0xB5470917,
 	0x9216D5D9, 0x8979FB1B, 0xD1310BA6, 0x98DFB5AC, 0x2FFD72DB, 0xD01ADFB7, 0xB8E1AFED, 0x6A267E96,
 	0xBA7C9045, 0xF12C7F99, 0x24A19947, 0xB3916CF7, 0x0801F2E2, 0x858EFC16, 0x636920D8, 0x71574E69,
 	0xA458FEA3, 0xF4933D7E, 0x0D95748F, 0x728EB658, 0x718BCD58, 0x82154AEE, 0x7B54A41D, 0xC25A59B5 };
 
-static const php_hash_uint32 K3[32] = {
+static const uint32_t K3[32] = {
 	0x9C30D539, 0x2AF26013, 0xC5D1B023, 0x286085F0, 0xCA417918, 0xB8DB38EF, 0x8E79DCB0, 0x603A180E,
 	0x6C9E0E8B, 0xB01E8A3E, 0xD71577C1, 0xBD314B27, 0x78AF2FDA, 0x55605C60, 0xE65525F3, 0xAA55AB94,
 	0x57489862, 0x63E81440, 0x55CA396A, 0x2AAB10B6, 0xB4CC5C34, 0x1141E8CE, 0xA15486AF, 0x7C72E993,
 	0xB3EE1411, 0x636FBC2A, 0x2BA9C55D, 0x741831F6, 0xCE5C3E16, 0x9B87931E, 0xAFD6BA33, 0x6C24CF5C };
 
-static const php_hash_uint32 K4[32] = {
+static const uint32_t K4[32] = {
 	0x7A325381, 0x28958677, 0x3B8F4898, 0x6B4BB9AF, 0xC4BFE81B, 0x66282193, 0x61D809CC, 0xFB21A991,
 	0x487CAC60, 0x5DEC8032, 0xEF845D5D, 0xE98575B1, 0xDC262302, 0xEB651B88, 0x23893E81, 0xD396ACC5,
 	0x0F6D6FF3, 0x83F44239, 0x2E0B4482, 0xA4842004, 0x69C8F04A, 0x9E1F9B5E, 0x21C66842, 0xF6E96C9A,
 	0x670C9C61, 0xABD388F0, 0x6A51A0D2, 0xD8542F68, 0x960FA728, 0xAB5133A3, 0x6EEF0B6C, 0x137A3BE4 };
 
-static const php_hash_uint32 K5[32] = {
+static const uint32_t K5[32] = {
 	0xBA3BF050, 0x7EFB2A98, 0xA1F1651D, 0x39AF0176, 0x66CA593E, 0x82430E88, 0x8CEE8619, 0x456F9FB4,
 	0x7D84A5C3, 0x3B8B5EBE, 0xE06F75D8, 0x85C12073, 0x401A449F, 0x56C16AA6, 0x4ED3AA62, 0x363F7706,
 	0x1BFEDF72, 0x429B023D, 0x37D0D724, 0xD00A1248, 0xDB0FEAD3, 0x49F1C09B, 0x075372C9, 0x80991B7B,
@@ -95,10 +95,10 @@ static const short M7[32] = {	7, 6, 5, 4, 3, 2, 1, 0, 7, 6, 5, 4, 3, 2, 1, 0,
 						7, 6, 5, 4, 3, 2, 1, 0, 7, 6, 5, 4, 3, 2, 1, 0 };
 
 /* {{{ Encode
-   Encodes input (php_hash_uint32) into output (unsigned char). Assumes len is
+   Encodes input (uint32_t) into output (unsigned char). Assumes len is
    a multiple of 4.
  */
-static void Encode(unsigned char *output, php_hash_uint32 *input, unsigned int len)
+static void Encode(unsigned char *output, uint32_t *input, unsigned int len)
 {
 	unsigned int i, j;
 
@@ -112,16 +112,16 @@ static void Encode(unsigned char *output, php_hash_uint32 *input, unsigned int l
 /* }}} */
 
 /* {{{ Decode
-   Decodes input (unsigned char) into output (php_hash_uint32). Assumes len is
+   Decodes input (unsigned char) into output (uint32_t). Assumes len is
    a multiple of 4.
  */
-static void Decode(php_hash_uint32 *output, const unsigned char *input, unsigned int len)
+static void Decode(uint32_t *output, const unsigned char *input, unsigned int len)
 {
 	unsigned int i, j;
 
 	for (i = 0, j = 0; j < len; i++, j += 4) {
-		output[i] = ((php_hash_uint32) input[j]) | (((php_hash_uint32) input[j + 1]) << 8) |
-			(((php_hash_uint32) input[j + 2]) << 16) | (((php_hash_uint32) input[j + 3]) << 24);
+		output[i] = ((uint32_t) input[j]) | (((uint32_t) input[j + 1]) << 8) |
+			(((uint32_t) input[j + 2]) << 16) | (((uint32_t) input[j + 3]) << 24);
 	}
 }
 /* }}} */
@@ -141,10 +141,10 @@ static void Decode(php_hash_uint32 *output, const unsigned char *input, unsigned
 
 /* {{{ PHP_3HAVALTransform
  */
-static void PHP_3HAVALTransform(php_hash_uint32 state[8], const unsigned char block[128])
+static void PHP_3HAVALTransform(uint32_t state[8], const unsigned char block[128])
 {
-	php_hash_uint32 E[8];
-	php_hash_uint32 x[32];
+	uint32_t E[8];
+	uint32_t x[32];
 	int i;
 
 	Decode(x, block, 128);
@@ -175,10 +175,10 @@ static void PHP_3HAVALTransform(php_hash_uint32 state[8], const unsigned char bl
 
 /* {{{ PHP_4HAVALTransform
  */
-static void PHP_4HAVALTransform(php_hash_uint32 state[8], const unsigned char block[128])
+static void PHP_4HAVALTransform(uint32_t state[8], const unsigned char block[128])
 {
-	php_hash_uint32 E[8];
-	php_hash_uint32 x[32];
+	uint32_t E[8];
+	uint32_t x[32];
 	int i;
 
 	Decode(x, block, 128);
@@ -212,10 +212,10 @@ static void PHP_4HAVALTransform(php_hash_uint32 state[8], const unsigned char bl
 
 /* {{{ PHP_5HAVALTransform
  */
-static void PHP_5HAVALTransform(php_hash_uint32 state[8], const unsigned char block[128])
+static void PHP_5HAVALTransform(uint32_t state[8], const unsigned char block[128])
 {
-	php_hash_uint32 E[8];
-	php_hash_uint32 x[32];
+	uint32_t E[8];
+	uint32_t x[32];
 	int i;
 
 	Decode(x, block, 128);
@@ -289,10 +289,10 @@ PHP_HASH_API void PHP_HAVALUpdate(PHP_HAVAL_CTX *context, const unsigned char *i
 	/* Compute number of bytes mod 128 */
 	index = (unsigned int) ((context->count[0] >> 3) & 0x7F);
 	/* Update number of bits */
-	if ((context->count[0] += ((php_hash_uint32) inputLen << 3)) < ((php_hash_uint32) inputLen << 3)) {
+	if ((context->count[0] += ((uint32_t) inputLen << 3)) < ((uint32_t) inputLen << 3)) {
 		context->count[1]++;
 	}
-	context->count[1] += ((php_hash_uint32) inputLen >> 29);
+	context->count[1] += ((uint32_t) inputLen >> 29);
 
 	partLen = 128 - index;
 

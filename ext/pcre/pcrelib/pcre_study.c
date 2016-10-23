@@ -69,6 +69,7 @@ Arguments:
   startcode       pointer to start of the whole pattern's code
   options         the compiling options
   recurses        chain of recurse_check to catch mutual recursion
+  countptr        pointer to call count (to catch over complexity)
 
 Returns:   the minimum length
            -1 if \C in UTF-8 mode or (*ACCEPT) was encountered
@@ -78,7 +79,8 @@ Returns:   the minimum length
 
 static int
 find_minlength(const REAL_PCRE *re, const pcre_uchar *code,
-  const pcre_uchar *startcode, int options, recurse_check *recurses)
+  const pcre_uchar *startcode, int options, recurse_check *recurses,
+  int *countptr)
 {
 int length = -1;
 /* PCRE_UTF16 has the same value as PCRE_UTF8. */
@@ -87,6 +89,8 @@ BOOL had_recurse = FALSE;
 recurse_check this_recurse;
 register int branchlength = 0;
 register pcre_uchar *cc = (pcre_uchar *)code + 1 + LINK_SIZE;
+
+if ((*countptr)++ > 1000) return -1;   /* too complex */
 
 if (*code == OP_CBRA || *code == OP_SCBRA ||
     *code == OP_CBRAPOS || *code == OP_SCBRAPOS) cc += IMM2_SIZE;
@@ -129,7 +133,7 @@ for (;;)
     case OP_SBRAPOS:
     case OP_ONCE:
     case OP_ONCE_NC:
-    d = find_minlength(re, cc, startcode, options, recurses);
+    d = find_minlength(re, cc, startcode, options, recurses, countptr);
     if (d < 0) return d;
     branchlength += d;
     do cc += GET(cc, 1); while (*cc == OP_ALT);
@@ -413,7 +417,8 @@ for (;;)
             int dd;
             this_recurse.prev = recurses;
             this_recurse.group = cs;
-            dd = find_minlength(re, cs, startcode, options, &this_recurse);
+            dd = find_minlength(re, cs, startcode, options, &this_recurse,
+              countptr);
             if (dd < d) d = dd;
             }
           }
@@ -449,7 +454,8 @@ for (;;)
           {
           this_recurse.prev = recurses;
           this_recurse.group = cs;
-          d = find_minlength(re, cs, startcode, options, &this_recurse);
+          d = find_minlength(re, cs, startcode, options, &this_recurse,
+            countptr);
           }
         }
       }
@@ -512,7 +518,7 @@ for (;;)
         this_recurse.prev = recurses;
         this_recurse.group = cs;
         branchlength += find_minlength(re, cs, startcode, options,
-          &this_recurse);
+          &this_recurse, countptr);
         }
       }
     cc += 1 + LINK_SIZE;
@@ -1451,6 +1457,7 @@ pcre32_study(const pcre32 *external_re, int options, const char **errorptr)
 #endif
 {
 int min;
+int count = 0;
 BOOL bits_set = FALSE;
 pcre_uint8 start_bits[32];
 PUBL(extra) *extra = NULL;
@@ -1537,7 +1544,7 @@ if ((re->options & PCRE_ANCHORED) == 0 &&
 
 /* Find the minimum length of subject string. */
 
-switch(min = find_minlength(re, code, code, re->options, NULL))
+switch(min = find_minlength(re, code, code, re->options, NULL, &count))
   {
   case -2: *errorptr = "internal error: missing capturing bracket"; return NULL;
   case -3: *errorptr = "internal error: opcode not recognized"; return NULL;

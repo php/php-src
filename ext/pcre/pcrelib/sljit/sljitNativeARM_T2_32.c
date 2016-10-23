@@ -1239,6 +1239,9 @@ extern int __aeabi_idivmod(int numerator, int denominator);
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_op0(struct sljit_compiler *compiler, sljit_si op)
 {
+	sljit_sw saved_reg_list[3];
+	sljit_sw saved_reg_count;
+
 	CHECK_ERROR();
 	CHECK(check_sljit_emit_op0(compiler, op));
 
@@ -1255,24 +1258,53 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_op0(struct sljit_compiler *compiler
 			| (reg_map[SLJIT_R0] << 12)
 			| (reg_map[SLJIT_R0] << 16)
 			| reg_map[SLJIT_R1]);
-	case SLJIT_LUDIV:
-	case SLJIT_LSDIV:
-		if (compiler->scratches >= 4) {
-			FAIL_IF(push_inst32(compiler, 0xf84d2d04 /* str r2, [sp, #-4]! */));
-			FAIL_IF(push_inst32(compiler, 0xf84dcd04 /* str ip, [sp, #-4]! */));
-		} else if (compiler->scratches >= 3)
-			FAIL_IF(push_inst32(compiler, 0xf84d2d08 /* str r2, [sp, #-8]! */));
+	case SLJIT_UDIVMOD:
+	case SLJIT_SDIVMOD:
+	case SLJIT_UDIVI:
+	case SLJIT_SDIVI:
+		SLJIT_COMPILE_ASSERT((SLJIT_UDIVMOD & 0x2) == 0 && SLJIT_UDIVI - 0x2 == SLJIT_UDIVMOD, bad_div_opcode_assignments);
+		SLJIT_COMPILE_ASSERT(reg_map[2] == 1 && reg_map[3] == 2 && reg_map[4] == 12, bad_register_mapping);
+
+		saved_reg_count = 0;
+		if (compiler->scratches >= 4)
+			saved_reg_list[saved_reg_count++] = 12;
+		if (compiler->scratches >= 3)
+			saved_reg_list[saved_reg_count++] = 2;
+		if (op >= SLJIT_UDIVI)
+			saved_reg_list[saved_reg_count++] = 1;
+
+		if (saved_reg_count > 0) {
+			FAIL_IF(push_inst32(compiler, 0xf84d0d00 | (saved_reg_count >= 3 ? 16 : 8)
+						| (saved_reg_list[0] << 12) /* str rX, [sp, #-8/-16]! */));
+			if (saved_reg_count >= 2) {
+				SLJIT_ASSERT(saved_reg_list[1] < 8);
+				FAIL_IF(push_inst16(compiler, 0x9001 | (saved_reg_list[1] << 8) /* str rX, [sp, #4] */));
+			}
+			if (saved_reg_count >= 3) {
+				SLJIT_ASSERT(saved_reg_list[2] < 8);
+				FAIL_IF(push_inst16(compiler, 0x9002 | (saved_reg_list[2] << 8) /* str rX, [sp, #8] */));
+			}
+		}
+
 #if defined(__GNUC__)
 		FAIL_IF(sljit_emit_ijump(compiler, SLJIT_FAST_CALL, SLJIT_IMM,
-			(op == SLJIT_LUDIV ? SLJIT_FUNC_OFFSET(__aeabi_uidivmod) : SLJIT_FUNC_OFFSET(__aeabi_idivmod))));
+			((op | 0x2) == SLJIT_UDIVI ? SLJIT_FUNC_OFFSET(__aeabi_uidivmod) : SLJIT_FUNC_OFFSET(__aeabi_idivmod))));
 #else
 #error "Software divmod functions are needed"
 #endif
-		if (compiler->scratches >= 4) {
-			FAIL_IF(push_inst32(compiler, 0xf85dcb04 /* ldr ip, [sp], #4 */));
-			return push_inst32(compiler, 0xf85d2b04 /* ldr r2, [sp], #4 */);
-		} else if (compiler->scratches >= 3)
-			return push_inst32(compiler, 0xf85d2b08 /* ldr r2, [sp], #8 */);
+
+		if (saved_reg_count > 0) {
+			if (saved_reg_count >= 3) {
+				SLJIT_ASSERT(saved_reg_list[2] < 8);
+				FAIL_IF(push_inst16(compiler, 0x9802 | (saved_reg_list[2] << 8) /* ldr rX, [sp, #8] */));
+			}
+			if (saved_reg_count >= 2) {
+				SLJIT_ASSERT(saved_reg_list[1] < 8);
+				FAIL_IF(push_inst16(compiler, 0x9801 | (saved_reg_list[1] << 8) /* ldr rX, [sp, #4] */));
+			}
+			return push_inst32(compiler, 0xf85d0b00 | (saved_reg_count >= 3 ? 16 : 8)
+						| (saved_reg_list[0] << 12) /* ldr rX, [sp], #8/16 */);
+		}
 		return SLJIT_SUCCESS;
 	}
 

@@ -25,7 +25,7 @@
 #include "phpdbg_prompt.h"
 #include "phpdbg_io.h"
 
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 static inline const char *phpdbg_command_name(const phpdbg_command_t *command, char *buffer) {
 	size_t pos = 0;

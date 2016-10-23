@@ -12,9 +12,8 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Andrey Hristov <andrey@mysql.com>                           |
-  |          Ulf Wendel <uwendel@mysql.com>                              |
-  |          Georg Richter <georg@mysql.com>                             |
+  | Authors: Andrey Hristov <andrey@php.net>                             |
+  |          Ulf Wendel <uw@php.net>                                     |
   +----------------------------------------------------------------------+
 */
 
@@ -59,20 +58,18 @@ typedef struct st_mysqlnd_memory_pool_chunk_llist MYSQLND_MEMORY_POOL_CHUNK_LLIS
 struct st_mysqlnd_memory_pool
 {
 	zend_uchar *arena;
-	unsigned int refcount;
 	unsigned int arena_size;
 	unsigned int free_size;
 
 	MYSQLND_MEMORY_POOL_CHUNK*	(*get_chunk)(MYSQLND_MEMORY_POOL * pool, unsigned int size);
+	enum_func_status	(*resize_chunk)(MYSQLND_MEMORY_POOL * pool, MYSQLND_MEMORY_POOL_CHUNK * chunk, unsigned int size);
+	void				(*free_chunk)(MYSQLND_MEMORY_POOL * pool, MYSQLND_MEMORY_POOL_CHUNK * chunk);
 };
 
 struct st_mysqlnd_memory_pool_chunk
 {
 	size_t				app;
-	MYSQLND_MEMORY_POOL	*pool;
 	zend_uchar			*ptr;
-	enum_func_status	(*resize_chunk)(MYSQLND_MEMORY_POOL_CHUNK * chunk, unsigned int size);
-	void				(*free_chunk)(MYSQLND_MEMORY_POOL_CHUNK * chunk);
 	unsigned int		size;
 	zend_bool			from_pool;
 };

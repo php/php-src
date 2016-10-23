@@ -5,6 +5,9 @@ Bug #64529 (Ran out of opcode space)
 if (substr(PHP_OS, 0, 3) == "WIN") {
 	die("skip non windows test");
 }
+if (!extension_loaded("readline") || !readline_info("done")) {
+	die("skip readline support required");
+}
 exec('which expect', $output, $ret);
 if ($ret) {
 	die("skip no expect installed");

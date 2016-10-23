@@ -48,56 +48,58 @@ $fp = fopen(__FILE__, "r");
 $inputs = array(
 
        // int data
-/*1*/  0,
+       0,
        1,
        12345,
+	   -5,
        -2345,
 
        // float data
-/*5*/  10.5,
-       -10.5,
+       10.5,
+       -9.5,
+       -100.3,
        12.3456789000e10,
        12.3456789000E-10,
        .5,
 
        // null data
-/*10*/ NULL,
+       NULL,
        null,
 
        // boolean data
-/*12*/ true,
+       true,
        false,
        TRUE,
        FALSE,
        
        // empty data
-/*16*/ "",
+       "",
        '',
 
        // string data
-/*18*/ "string",
+       "string",
        'string',
        $heredoc,
        
        // object data
-/*21*/ new classA(),
+       new classA(),
 
        // undefined data
-/*22*/ @$undefined_var,
+       @$undefined_var,
 
        // unset data
-/*23*/ @$unset_var,
+       @$unset_var,
 
        // resource variable
-/*24*/ $fp
+       $fp
 );
 
 // loop through each element of $inputs to check the behavior of iconv_strpos()
-$iterator = 1;
+
 foreach($inputs as $input) {
-  echo "\n-- Iteration $iterator --\n";
+  echo "--\n";
+  var_dump($input);
   var_dump( iconv_strpos($haystack, $needle, $input, $encoding));
-  $iterator++;
 };
 
 fclose($fp);
@@ -106,93 +108,100 @@ echo "Done";
 ?>
 --EXPECTF--
 *** Testing iconv_strpos() : usage variations ***
-
--- Iteration 1 --
+--
+int(0)
 int(8)
-
--- Iteration 2 --
+--
+int(1)
 int(8)
-
--- Iteration 3 --
+--
+int(12345)
 bool(false)
-
--- Iteration 4 --
+--
+int(-5)
+int(8)
+--
+int(-2345)
 
 Warning: iconv_strpos(): Offset not contained in string. in %s on line %d
 bool(false)
-
--- Iteration 5 --
+--
+float(10.5)
 bool(false)
-
--- Iteration 6 --
+--
+float(-9.5)
+int(8)
+--
+float(-100.3)
 
 Warning: iconv_strpos(): Offset not contained in string. in %s on line %d
 bool(false)
-
--- Iteration 7 --
+--
+float(123456789000)
 bool(false)
-
--- Iteration 8 --
+--
+float(1.23456789E-9)
 int(8)
-
--- Iteration 9 --
+--
+float(0.5)
 int(8)
-
--- Iteration 10 --
+--
+NULL
 int(8)
-
--- Iteration 11 --
+--
+NULL
 int(8)
-
--- Iteration 12 --
+--
+bool(true)
 int(8)
-
--- Iteration 13 --
+--
+bool(false)
 int(8)
-
--- Iteration 14 --
+--
+bool(true)
 int(8)
-
--- Iteration 15 --
+--
+bool(false)
 int(8)
-
--- Iteration 16 --
+--
+string(0) ""
 
 Warning: iconv_strpos() expects parameter 3 to be integer, string given in %s on line %d
 bool(false)
-
--- Iteration 17 --
-
-Warning: iconv_strpos() expects parameter 3 to be integer, string given in %s on line %d
-bool(false)
-
--- Iteration 18 --
+--
+string(0) ""
 
 Warning: iconv_strpos() expects parameter 3 to be integer, string given in %s on line %d
 bool(false)
-
--- Iteration 19 --
-
-Warning: iconv_strpos() expects parameter 3 to be integer, string given in %s on line %d
-bool(false)
-
--- Iteration 20 --
+--
+string(6) "string"
 
 Warning: iconv_strpos() expects parameter 3 to be integer, string given in %s on line %d
 bool(false)
+--
+string(6) "string"
 
--- Iteration 21 --
+Warning: iconv_strpos() expects parameter 3 to be integer, string given in %s on line %d
+bool(false)
+--
+string(11) "hello world"
+
+Warning: iconv_strpos() expects parameter 3 to be integer, string given in %s on line %d
+bool(false)
+--
+object(classA)#%d (%d) {
+}
 
 Warning: iconv_strpos() expects parameter 3 to be integer, object given in %s on line %d
 bool(false)
-
--- Iteration 22 --
+--
+NULL
 int(8)
-
--- Iteration 23 --
+--
+NULL
 int(8)
-
--- Iteration 24 --
+--
+resource(%d) of type (stream)
 
 Warning: iconv_strpos() expects parameter 3 to be integer, resource given in %s on line %d
 bool(false)

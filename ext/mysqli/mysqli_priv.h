@@ -78,10 +78,6 @@ extern void php_mysqli_report_error(const char *sqlstate, int errorno, const cha
 extern void php_mysqli_report_index(const char *query, unsigned int status);
 extern void php_mysqli_throw_sql_exception(char *sqlstate, int errorno, char *format, ...);
 
-#ifdef HAVE_SPL
-extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
-#endif
-
 #define PHP_MYSQLI_EXPORT(__type) PHP_MYSQLI_API __type
 
 PHP_MYSQLI_EXPORT(zend_object *) mysqli_objects_new(zend_class_entry *);

@@ -303,6 +303,17 @@ _zip_buffer_set_offset(zip_buffer_t *buffer, zip_uint64_t offset)
 }
 
 
+int
+_zip_buffer_skip(zip_buffer_t *buffer, zip_uint64_t length) {
+    zip_uint64_t offset = buffer->offset + length;
+    
+    if (offset < buffer->offset) {
+        buffer->ok = false;
+        return -1;
+    }
+    return _zip_buffer_set_offset(buffer, offset);
+}
+
 zip_uint64_t
 _zip_buffer_size(zip_buffer_t *buffer)
 {

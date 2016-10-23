@@ -23,7 +23,7 @@
 #include "phpdbg.h"
 #include "phpdbg_eol.h"
 
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 #define EOL_LIST_LEN 4
 struct phpdbg_eol_rep phpdbg_eol_list[EOL_LIST_LEN] = {

@@ -68,34 +68,6 @@ extern ZEND_API zend_ini_scanner_globals ini_scanner_globals;
 
 END_EXTERN_C()
 
-/* For limited downwards source compatibility */
-#define CLS_FETCH()
-#define ELS_FETCH()
-#define ALS_FETCH()
-#define PLS_FETCH()
-#define SLS_FETCH()
-#define CLS_D
-#define ELS_D
-#define ALS_D
-#define PLS_D
-#define SLS_D
-#define CLS_DC
-#define ELS_DC
-#define ALS_DC
-#define PLS_DC
-#define SLS_DC
-#define CLS_C
-#define ELS_C
-#define ALS_C
-#define PLS_C
-#define SLS_C
-#define CLS_CC
-#define ELS_CC
-#define ALS_CC
-#define PLS_CC
-#define SLS_CC
-
-
 #endif /* ZEND_GLOBALS_MACROS_H */
 
 /*

@@ -26,7 +26,7 @@
 #include "phpdbg_opcode.h"
 #include "zend_globals.h"
 
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 /* {{{ private api functions */
 static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_file(zend_op_array*);
@@ -230,7 +230,7 @@ PHPDBG_API void phpdbg_export_breakpoints_to_string(char **str) /* {{{ */
 	}
 } /* }}} */
 
-PHPDBG_API void phpdbg_set_breakpoint_file(const char *path, long line_num) /* {{{ */
+PHPDBG_API void phpdbg_set_breakpoint_file(const char *path, size_t path_len, long line_num) /* {{{ */
 {
 	php_stream_statbuf ssb;
 	char realpath[MAXPATHLEN];
@@ -240,10 +240,11 @@ PHPDBG_API void phpdbg_set_breakpoint_file(const char *path, long line_num) /* {
 
 	HashTable *broken, *file_breaks = &PHPDBG_G(bp)[PHPDBG_BREAK_FILE];
 	phpdbg_breakfile_t new_break;
-	size_t path_len = 0L;
 
-	if (VCWD_REALPATH(path, realpath)) {
-		path = realpath;
+	if (!path_len) {
+		if (VCWD_REALPATH(path, realpath)) {
+			path = realpath;
+		}
 	}
 	path_len = strlen(path);
 
@@ -563,12 +564,14 @@ PHPDBG_API int phpdbg_resolve_opline_break(phpdbg_breakopline_t *new_break) /* {
 		} else {
 			zend_execute_data *execute_data = EG(current_execute_data);
 			do {
-				zend_op_array *op_array = &execute_data->func->op_array;
-				if (op_array->function_name == NULL && op_array->scope == NULL && new_break->class_len == ZSTR_LEN(op_array->filename) && !memcmp(ZSTR_VAL(op_array->filename), new_break->class_name, new_break->class_len)) {
-					if (phpdbg_resolve_op_array_break(new_break, op_array) == SUCCESS) {
-						return SUCCESS;
-					} else {
-						return 2;
+				if (ZEND_USER_CODE(execute_data->func->common.type)) {
+					zend_op_array *op_array = &execute_data->func->op_array;
+					if (op_array->function_name == NULL && op_array->scope == NULL && new_break->class_len == ZSTR_LEN(op_array->filename) && !memcmp(ZSTR_VAL(op_array->filename), new_break->class_name, new_break->class_len)) {
+						if (phpdbg_resolve_op_array_break(new_break, op_array) == SUCCESS) {
+							return SUCCESS;
+						} else {
+							return 2;
+						}
 					}
 				}
 			} while ((execute_data = execute_data->prev_execute_data) != NULL);
@@ -884,21 +887,13 @@ static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_file(zend_op_array *op_
 {
 	HashTable *breaks;
 	phpdbg_breakbase_t *brake;
-	size_t path_len;
-	char realpath[MAXPATHLEN];
-	const char *path = ZSTR_VAL(op_array->filename);
-
-	if (VCWD_REALPATH(path, realpath)) {
-		path = realpath;
-	}
-
-	path_len = strlen(path);
 
 #if 0
-	phpdbg_debug("Op at: %.*s %d\n", path_len, path, (*EG(opline_ptr))->lineno);
+	phpdbg_debug("Op at: %.*s %d\n", ZSTR_LEN(op_array->filename), ZSTR_VAL(op_array->filename), (*EG(opline_ptr))->lineno);
 #endif
 
-	if (!(breaks = zend_hash_str_find_ptr(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE], path, path_len))) {
+	/* NOTE: realpath resolution should have happened at compile time - no reason to do it here again */
+	if (!(breaks = zend_hash_find_ptr(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE], op_array->filename))) {
 		return NULL;
 	}
 

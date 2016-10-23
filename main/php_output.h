@@ -146,7 +146,7 @@ ZEND_BEGIN_MODULE_GLOBALS(output)
 	int flags;
 ZEND_END_MODULE_GLOBALS(output)
 
-PHPAPI ZEND_EXTERN_MODULE_GLOBALS(output);
+PHPAPI ZEND_EXTERN_MODULE_GLOBALS(output)
 
 /* there should not be a need to use OG() from outside of output.c */
 #ifdef ZTS
@@ -159,8 +159,8 @@ PHPAPI ZEND_EXTERN_MODULE_GLOBALS(output);
 #define PHPWRITE(str, str_len)		php_output_write((str), (str_len))
 #define PHPWRITE_H(str, str_len)	php_output_write_unbuffered((str), (str_len))
 
-#define PUTC(c)						(php_output_write((const char *) &(c), 1), (c))
-#define PUTC_H(c)					(php_output_write_unbuffered((const char *) &(c), 1), (c))
+#define PUTC(c)						php_output_write((const char *) &(c), 1)
+#define PUTC_H(c)					php_output_write_unbuffered((const char *) &(c), 1)
 
 #define PUTS(str)					do {				\
 	const char *__str = (str);							\

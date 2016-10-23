@@ -147,7 +147,7 @@ PHP_XML_API zend_string *xml_utf8_encode(const char *, size_t, const XML_Char *)
 #define XML(v) ZEND_MODULE_GLOBALS_ACCESSOR(xml, v)
 
 #if defined(ZTS) && defined(COMPILE_DL_XML)
-ZEND_TSRMLS_CACHE_EXTERN();
+ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
 #endif /* PHP_XML_H */

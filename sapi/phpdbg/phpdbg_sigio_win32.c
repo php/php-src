@@ -23,7 +23,7 @@
 #include "phpdbg_sigio_win32.h"
 
 
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 
 VOID

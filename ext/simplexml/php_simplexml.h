@@ -45,9 +45,6 @@ extern zend_module_entry simplexml_module_entry;
 
 PHP_MINIT_FUNCTION(simplexml);
 PHP_MSHUTDOWN_FUNCTION(simplexml);
-#ifdef HAVE_SPL
-PHP_RINIT_FUNCTION(simplexml);
-#endif
 PHP_MINFO_FUNCTION(simplexml);
 
 typedef enum {

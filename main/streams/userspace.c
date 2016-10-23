@@ -299,9 +299,7 @@ static void user_stream_create_object(struct php_user_stream_wrapper *uwrap, php
 		zval retval;
 
 		fci.size = sizeof(fci);
-		fci.function_table = &uwrap->ce->function_table;
 		ZVAL_UNDEF(&fci.function_name);
-		fci.symbol_table = NULL;
 		fci.object = Z_OBJ_P(object);
 		fci.retval = &retval;
 		fci.param_count = 0;
@@ -310,7 +308,7 @@ static void user_stream_create_object(struct php_user_stream_wrapper *uwrap, php
 
 		fcc.initialized = 1;
 		fcc.function_handler = uwrap->ce->constructor;
-		fcc.calling_scope = EG(scope);
+		fcc.calling_scope = zend_get_executed_scope();
 		fcc.called_scope = Z_OBJCE_P(object);
 		fcc.object = Z_OBJ_P(object);
 
@@ -372,12 +370,17 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 
 	ZVAL_STRING(&zfuncname, USERSTREAM_OPEN);
 
-	call_result = call_user_function_ex(NULL,
-			Z_ISUNDEF(us->object)? NULL : &us->object,
-			&zfuncname,
-			&zretval,
-			4, args,
-			0, NULL	);
+	zend_try {
+		call_result = call_user_function_ex(NULL,
+				Z_ISUNDEF(us->object)? NULL : &us->object,
+				&zfuncname,
+				&zretval,
+				4, args,
+				0, NULL	);
+	} zend_catch {
+		FG(user_stream_current_filename) = NULL;
+		zend_bailout();
+	} zend_end_try();
 
 	if (call_result == SUCCESS && Z_TYPE(zretval) != IS_UNDEF && zval_is_true(&zretval)) {
 		/* the stream is now open! */

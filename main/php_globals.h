@@ -58,7 +58,6 @@ struct _php_core_globals {
 
 	zend_long output_buffering;
 
-	zend_bool sql_safe_mode;
 	zend_bool enable_dl;
 
 	char *output_handler;
@@ -147,7 +146,6 @@ struct _php_core_globals {
 	char *disable_functions;
 	char *disable_classes;
 	zend_bool allow_url_include;
-	zend_bool exit_on_timeout;
 #ifdef PHP_WIN32
 	zend_bool com_initialized;
 #endif

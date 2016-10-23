@@ -25,8 +25,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -112,7 +110,7 @@ PHP_FUNCTION(oci_bind_by_name)
 	zval *bind_var = NULL;
 	php_oci_statement *statement;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsz/|ll", &z_statement, &name, &name_len, &bind_var, &maxlen, &type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsz|ll", &z_statement, &name, &name_len, &bind_var, &maxlen, &type) == FAILURE) {
 		return;
 	}
 
@@ -240,31 +238,15 @@ PHP_FUNCTION(oci_lob_import)
 	size_t filename_len;
 
 	if (getThis()) {
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 3) || (PHP_MAJOR_VERSION > 5)
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &filename, &filename_len) == FAILURE) {
-#else
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &filename, &filename_len) == FAILURE) {
-#endif
 			return;
 		}
 	}
 	else {
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 3) || (PHP_MAJOR_VERSION > 5)
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "Op", &z_descriptor, oci_lob_class_entry_ptr, &filename, &filename_len) == FAILURE) {
-#else
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os", &z_descriptor, oci_lob_class_entry_ptr, &filename, &filename_len) == FAILURE) {
-#endif
 			return;
 		}	
 	}
-
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 4) || (PHP_MAJOR_VERSION < 5)
-	/* The "p" parsing parameter handles this case in PHP 5.4+ */
-	if (strlen(filename) != filename_len) {
-		php_error_docref(NULL, E_WARNING, "Filename cannot contain null bytes");
-		RETURN_FALSE;  
-	}
-#endif
 
 	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
@@ -899,11 +881,7 @@ PHP_FUNCTION(oci_lob_export)
 	ub4 lob_length;
 
 	if (getThis()) {
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 3) || (PHP_MAJOR_VERSION > 5)
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|ll", &filename, &filename_len, &start, &length) == FAILURE) {
-#else
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|ll", &filename, &filename_len, &start, &length) == FAILURE) {
-#endif
 			return;
 		}
 	
@@ -917,11 +895,7 @@ PHP_FUNCTION(oci_lob_export)
 		}
 	}
 	else {
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 3) || (PHP_MAJOR_VERSION > 5)
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "Op|ll", &z_descriptor, oci_lob_class_entry_ptr, &filename, &filename_len, &start, &length) == FAILURE) {
-#else
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os|ll", &z_descriptor, oci_lob_class_entry_ptr, &filename, &filename_len, &start, &length) == FAILURE) {
-#endif
 			return;
 		}
 			
@@ -934,14 +908,6 @@ PHP_FUNCTION(oci_lob_export)
 			RETURN_FALSE;
 		}
 	}
-
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 4) || (PHP_MAJOR_VERSION < 5)
-	/* The "p" parsing parameter handles this case in PHP 5.4+ */
-	if (strlen(filename) != filename_len) {
-		php_error_docref(NULL, E_WARNING, "Filename cannot contain null bytes");
-		RETURN_FALSE;  
-	}
-#endif
 
 	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
@@ -971,22 +937,11 @@ PHP_FUNCTION(oci_lob_export)
 		RETURN_FALSE;
 	}
 
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 4) || (PHP_MAJOR_VERSION < 5)
-	/* Safe mode has been removed in PHP 5.4 */
-	if (PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		RETURN_FALSE;
-	}
-#endif
-
 	if (php_check_open_basedir(filename)) {
 		RETURN_FALSE;
 	}
 
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 3) || (PHP_MAJOR_VERSION > 5)
 	stream = php_stream_open_wrapper_ex(filename, "w", REPORT_ERRORS, NULL, NULL);
-#else
-	stream = php_stream_open_wrapper_ex(filename, "w", ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, NULL);
-#endif
 
 	block_length = PHP_OCI_LOB_BUFFER_SIZE;
 	if (block_length > length) {
@@ -1423,15 +1378,17 @@ PHP_FUNCTION(oci_fetch_all)
 	PHP_OCI_ZVAL_TO_STATEMENT(z_statement, statement);
 
 	zval_dtor(array);
-	array_init(array);
 
 	while (skip--) {
 		if (php_oci_statement_fetch(statement, nrows)) {
+			array_init(array);
 			RETURN_LONG(0);
 		}
 	}
 
 	if (flags & PHP_OCI_FETCHSTATEMENT_BY_ROW) {
+		/* Fetch by Row: array will contain one sub-array per query row */
+		array_init(array);
 		columns = safe_emalloc(statement->ncolumns, sizeof(php_oci_out_column *), 0);
 
 		for (i = 0; i < statement->ncolumns; i++) {
@@ -1441,7 +1398,7 @@ PHP_FUNCTION(oci_fetch_all)
 		while (!php_oci_statement_fetch(statement, nrows)) {
 			zval row;
 			
-			array_init(&row);
+			array_init_size(&row, statement->ncolumns);
 
 			for (i = 0; i < statement->ncolumns; i++) {
 				php_oci_column_to_zval(columns[ i ], &element, PHP_OCI_RETURN_LOBS);
@@ -1452,7 +1409,7 @@ PHP_FUNCTION(oci_fetch_all)
 					zend_string *zvtmp;
 					zvtmp = zend_string_init(columns[ i ]->name, columns[ i ]->name_len, 0);
 					zend_symtable_update(Z_ARRVAL(row), zvtmp, &element);
-                   zend_string_release(zvtmp);
+					zend_string_release(zvtmp);
 				}
 			}
 
@@ -1467,6 +1424,8 @@ PHP_FUNCTION(oci_fetch_all)
 		efree(columns);
 
 	} else { /* default to BY_COLUMN */
+		/* Fetch by columns: array will contain one sub-array per query column */
+		array_init_size(array, statement->ncolumns);
 		columns = safe_emalloc(statement->ncolumns, sizeof(php_oci_out_column *), 0);
 		outarrs = safe_emalloc(statement->ncolumns, sizeof(zval*), 0);
 		
@@ -1483,9 +1442,9 @@ PHP_FUNCTION(oci_fetch_all)
 				columns[ i ] = php_oci_statement_get_column(statement, i + 1, NULL, 0);
 				
 				array_init(&tmp);
-                zvtmp = zend_string_init(columns[ i ]->name, columns[ i ]->name_len, 0);
+				zvtmp = zend_string_init(columns[ i ]->name, columns[ i ]->name_len, 0);
 				outarrs[ i ] = zend_symtable_update(Z_ARRVAL_P(array), zvtmp, &tmp);
-               zend_string_release(zvtmp);
+				zend_string_release(zvtmp);
 			}
 		}
 
@@ -1984,14 +1943,6 @@ PHP_FUNCTION(oci_password_change)
 	char *user, *pass_old, *pass_new, *dbname;
 	size_t user_len, pass_old_len, pass_new_len, dbname_len;
 	php_oci_connection *connection;
-
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 4) || (PHP_MAJOR_VERSION < 5)
-	/* Safe mode has been removed in PHP 5.4 */
-	if (PG(safe_mode)) {
-		php_error_docref(NULL, E_WARNING, "is disabled in Safe Mode");
-		RETURN_FALSE;
-	}
-#endif
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "rsss", &z_connection, &user, &user_len, &pass_old, &pass_old_len, &pass_new, &pass_new_len) == SUCCESS) {
 		PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);

@@ -69,17 +69,17 @@ $_SESSION['E'] = 'F';
 ?>
 --EXPECTF--
 open: path = /tmp, name = sid
-gc: maxlifetime = %d
 read: id = %s
+gc: maxlifetime = %d
 write: id = %s, data = A|s:1:"B";
 close
 open: path = /tmp, name = sid
-gc: maxlifetime = %d
 read: id = %s
+gc: maxlifetime = %d
 destroy: id = %s
 close
 open: path = /tmp, name = sid
-gc: maxlifetime = %d
 read: id = %s
+gc: maxlifetime = %d
 write: id = %s, data = E|s:1:"F";
 close

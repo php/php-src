@@ -217,7 +217,7 @@ php_stream_filter_status_t userfilter_filter(
 	}
 
 	if (bytes_consumed) {
-		*bytes_consumed = Z_LVAL_P(&args[2]);
+		*bytes_consumed = zval_get_long(&args[2]);
 	}
 
 	if (buckets_in->head) {
@@ -261,7 +261,7 @@ static php_stream_filter_ops userfilter_ops = {
 };
 
 static php_stream_filter *user_filter_factory_create(const char *filtername,
-		zval *filterparams, int persistent)
+		zval *filterparams, uint8_t persistent)
 {
 	struct php_user_filter_data *fdat = NULL;
 	php_stream_filter *filter;
@@ -452,7 +452,7 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 		if (!bucket->own_buf) {
 			bucket = php_stream_bucket_make_writeable(bucket);
 		}
-		if ((int)bucket->buflen != Z_STRLEN_P(pzdata)) {
+		if (bucket->buflen != Z_STRLEN_P(pzdata)) {
 			bucket->buf = perealloc(bucket->buf, Z_STRLEN_P(pzdata), bucket->is_persistent);
 			bucket->buflen = Z_STRLEN_P(pzdata);
 		}

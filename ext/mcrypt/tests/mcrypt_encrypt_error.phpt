@@ -41,10 +41,14 @@ var_dump( mcrypt_encrypt($cipher, $key, $data) );
 
 -- Testing mcrypt_encrypt() function with more than expected no. of arguments --
 
+Deprecated: Function mcrypt_encrypt() is deprecated in %s%emcrypt_encrypt_error.php on line 19
+
 Warning: mcrypt_encrypt() expects at most 5 parameters, 6 given in %s on line %d
 NULL
 
 -- Testing mcrypt_encrypt() function with less than expected no. of arguments --
+
+Deprecated: Function mcrypt_encrypt() is deprecated in %s%emcrypt_encrypt_error.php on line 26
 
 Warning: mcrypt_encrypt() expects at least 4 parameters, 3 given in %s on line %d
 NULL

@@ -45,7 +45,7 @@ ZEND_END_MODULE_GLOBALS(tidy)
 #define TG(v) ZEND_MODULE_GLOBALS_ACCESSOR(tidy, v)
 
 #if defined(ZTS) && defined(COMPILE_DL_TIDY)
-ZEND_TSRMLS_CACHE_EXTERN();
+ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
 #endif

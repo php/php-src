@@ -1501,7 +1501,7 @@ mbfl_strcut(
 		if (encoding->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE)) {
 			from &= -2;
 
-			if (from + length >= string->len) {
+			if (length >= string->len - from) {
 				length = string->len - from;
 			}
 
@@ -1510,14 +1510,14 @@ mbfl_strcut(
 		} else if (encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) {
 			from &= -4;
 
-			if (from + length >= string->len) {
+			if (length >= string->len - from) {
 				length = string->len - from;
 			}
 
 			start = string->val + from;
 			end   = start + (length & -4);
 		} else if ((encoding->flag & MBFL_ENCTYPE_SBCS)) {
-			if (from + length >= string->len) {
+			if (length >= string->len - from) {
 				length = string->len - from;
 			}
 
@@ -1539,7 +1539,7 @@ mbfl_strcut(
 			start = p;
 
 			/* search end position */
-			if ((start - string->val) + length >= (int)string->len) {
+			if (length >= (int)string->len - (start - string->val)) {
 				end = string->val + string->len;
 			} else {
 				for (q = p + length; p < q; p += (m = mbtab[*p]));

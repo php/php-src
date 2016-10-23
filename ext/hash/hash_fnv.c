@@ -147,8 +147,8 @@ PHP_HASH_API void PHP_FNV164Final(unsigned char digest[8], PHP_FNV164_CTX * cont
  * returns:
  *  32 bit hash as a static hash type
  */
-static php_hash_uint32
-fnv_32_buf(void *buf, size_t len, php_hash_uint32 hval, int alternate)
+static uint32_t
+fnv_32_buf(void *buf, size_t len, uint32_t hval, int alternate)
 {
 	unsigned char *bp = (unsigned char *)buf;   /* start of buffer */
 	unsigned char *be = bp + len;	   /* beyond end of buffer */
@@ -163,10 +163,10 @@ fnv_32_buf(void *buf, size_t len, php_hash_uint32 hval, int alternate)
 			hval *= PHP_FNV_32_PRIME;
 
 			/* xor the bottom with the current octet */
-			hval ^= (php_hash_uint32)*bp++;
+			hval ^= (uint32_t)*bp++;
 		} else {
 			/* xor the bottom with the current octet */
-			hval ^= (php_hash_uint32)*bp++;
+			hval ^= (uint32_t)*bp++;
 
 			/* multiply by the 32 bit FNV magic prime mod 2^32 */
 			hval *= PHP_FNV_32_PRIME;
@@ -189,8 +189,8 @@ fnv_32_buf(void *buf, size_t len, php_hash_uint32 hval, int alternate)
  * returns:
  *  64 bit hash as a static hash type
  */
-static php_hash_uint64
-fnv_64_buf(void *buf, size_t len, php_hash_uint64 hval, int alternate)
+static uint64_t
+fnv_64_buf(void *buf, size_t len, uint64_t hval, int alternate)
 {
 	unsigned char *bp = (unsigned char *)buf;   /* start of buffer */
 	unsigned char *be = bp + len;	   /* beyond end of buffer */
@@ -205,10 +205,10 @@ fnv_64_buf(void *buf, size_t len, php_hash_uint64 hval, int alternate)
 			hval *= PHP_FNV_64_PRIME;
 
 			/* xor the bottom with the current octet */
-			hval ^= (php_hash_uint64)*bp++;
+			hval ^= (uint64_t)*bp++;
 		 } else {
 			/* xor the bottom with the current octet */
-			hval ^= (php_hash_uint64)*bp++;
+			hval ^= (uint64_t)*bp++;
 
 			/* multiply by the 64 bit FNV magic prime mod 2^64 */
 			hval *= PHP_FNV_64_PRIME;

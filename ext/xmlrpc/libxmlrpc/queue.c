@@ -97,12 +97,9 @@ static const char rcsid[] = "#(@) $Id$";
  *
  ****************************************************************/
 
-#ifdef _WIN32
-#include "xmlrpc_win32.h"
-#endif
 #include <stdlib.h>
+#include <php.h>
 #include "queue.h"
-
 
 static void QuickSort(void *list[], int low, int high,
                       int (*Comp)(const void *, const void *));
@@ -111,8 +108,8 @@ static int  Q_BSearch(queue *q, void *key,
 
 /* The index: a pointer to pointers */
 
-static  void        **index;
-static  datanode    **posn_index;
+static  void        **queue_index;
+static  datanode    **queue_posn_index;
 
 
 /***
@@ -289,7 +286,7 @@ int Q_PushHead(queue *q, void *d)
       node    *n;
       datanode *p;
 
-      p = malloc(sizeof(datanode));
+      p = emalloc(sizeof(datanode));
       if(p == NULL)
          return False_;
 
@@ -341,7 +338,7 @@ int Q_PushTail(queue *q, void *d)
       node        *p;
       datanode    *n;
 
-      n = malloc(sizeof(datanode));
+      n = emalloc(sizeof(datanode));
       if(n == NULL)
          return False_;
 
@@ -397,7 +394,7 @@ void *Q_PopHead(queue *q)
 
    d = q->head->data;
    n = q->head->next;
-   free(q->head);
+   efree(q->head);
 
    q->size--;
 
@@ -440,7 +437,7 @@ void *Q_PopTail(queue *q)
 
    d = q->tail->data;
    p = q->tail->prev;
-   free(q->tail);
+   efree(q->tail);
    q->size--;
 
    if(q->size == 0)
@@ -539,7 +536,7 @@ void *Q_Iter_Del(queue *q, q_iter iter)
    p = ((node*)iter)->prev;
    d = ((node*)iter)->data;
 
-   free(iter);
+   efree(iter);
 
    if(p) {
       p->next = n;
@@ -783,20 +780,20 @@ int Q_Sort(queue *q, int (*Comp)(const void *, const void *))
    /* if already sorted free memory for tag array */
 
    if(q->sorted) {
-      free(index);
-      free(posn_index);
+      efree(queue_index);
+      efree(queue_posn_index);
       q->sorted = False_;
    }
 
    /* Now allocate memory of array, array of pointers */
 
-   index = malloc(q->size * sizeof(q->cursor->data));
-   if(index == NULL)
+   queue_index = emalloc(q->size * sizeof(q->cursor->data));
+   if(queue_index == NULL)
       return False_;
 
-   posn_index = malloc(q->size * sizeof(q->cursor));
-   if(posn_index == NULL) {
-      free(index);
+   queue_posn_index = emalloc(q->size * sizeof(q->cursor));
+   if(queue_posn_index == NULL) {
+      efree(queue_index);
       return False_;
    }
 
@@ -804,21 +801,21 @@ int Q_Sort(queue *q, int (*Comp)(const void *, const void *))
 
    d = Q_Head(q);
    for(i=0; i < q->size; i++) {
-      index[i] = d;
-      posn_index[i] = q->cursor;
+      queue_index[i] = d;
+      queue_posn_index[i] = q->cursor;
       d = Q_Next(q);
    }
 
    /* Now sort the index */
 
-   QuickSort(index, 0, q->size - 1, Comp);
+   QuickSort(queue_index, 0, q->size - 1, Comp);
 
    /* Rearrange the actual queue into correct order */
 
    dn = q->head;
    i = 0;
    while(dn != NULL) {
-      dn->data = index[i++];
+      dn->data = queue_index[i++];
       dn = dn->next;
    }
 
@@ -860,7 +857,7 @@ static int Q_BSearch( queue *q, void *key,
 
    while(low <= hi) {
       mid = (low + hi) / 2;
-      val = Comp(key, index[ mid ]);
+      val = Comp(key, queue_index[ mid ]);
 
       if(val < 0)
          hi = mid - 1;
@@ -912,9 +909,9 @@ void *Q_Seek(queue *q, void *data, int (*Comp)(const void *, const void *))
    if(idx < 0)
       return NULL;
 
-   q->cursor = posn_index[idx];
+   q->cursor = queue_posn_index[idx];
 
-   return index[idx];
+   return queue_index[idx];
 }
 
 

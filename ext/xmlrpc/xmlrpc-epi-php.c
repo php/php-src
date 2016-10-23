@@ -411,45 +411,46 @@ static void set_output_options(php_output_options* options, zval* output_opts)
 					}
 				}
 
-				/* encoding code set */
-				if ((val = zend_hash_str_find(Z_ARRVAL_P(output_opts), ENCODING_KEY, ENCODING_KEY_LEN)) != NULL) {
-					if (Z_TYPE_P(val) == IS_STRING) {
-						options->xmlrpc_out.xml_elem_opts.encoding = estrdup(Z_STRVAL_P(val));
-					}
+			}
+
+			/* encoding code set */
+			if ((val = zend_hash_str_find(Z_ARRVAL_P(output_opts), ENCODING_KEY, ENCODING_KEY_LEN)) != NULL) {
+				if (Z_TYPE_P(val) == IS_STRING) {
+					options->xmlrpc_out.xml_elem_opts.encoding = estrdup(Z_STRVAL_P(val));
 				}
+			}
 
-				/* escaping options */
-				if ((val = zend_hash_str_find(Z_ARRVAL_P(output_opts), ESCAPING_KEY, ESCAPING_KEY_LEN)) != NULL) {
-					/* multiple values allowed.  check if array */
-					if (Z_TYPE_P(val) == IS_ARRAY) {
-						zval* iter_val;
+			/* escaping options */
+			if ((val = zend_hash_str_find(Z_ARRVAL_P(output_opts), ESCAPING_KEY, ESCAPING_KEY_LEN)) != NULL) {
+				/* multiple values allowed.  check if array */
+				if (Z_TYPE_P(val) == IS_ARRAY) {
+					zval* iter_val;
 
-						options->xmlrpc_out.xml_elem_opts.escaping = xml_elem_no_escaping;
+					options->xmlrpc_out.xml_elem_opts.escaping = xml_elem_no_escaping;
 
-						ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(val), iter_val) {
-							if (Z_TYPE_P(iter_val) == IS_STRING && Z_STRVAL_P(iter_val)) {
-								if (!strcmp(Z_STRVAL_P(iter_val), ESCAPING_VALUE_CDATA)) {
-									options->xmlrpc_out.xml_elem_opts.escaping |= xml_elem_cdata_escaping;
-								} else if (!strcmp(Z_STRVAL_P(iter_val), ESCAPING_VALUE_NON_ASCII)) {
-									options->xmlrpc_out.xml_elem_opts.escaping |= xml_elem_non_ascii_escaping;
-								} else if (!strcmp(Z_STRVAL_P(iter_val), ESCAPING_VALUE_NON_PRINT)) {
-									options->xmlrpc_out.xml_elem_opts.escaping |= xml_elem_non_print_escaping;
-								} else if (!strcmp(Z_STRVAL_P(iter_val), ESCAPING_VALUE_MARKUP)) {
-									options->xmlrpc_out.xml_elem_opts.escaping |= xml_elem_markup_escaping;
-								}
+					ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(val), iter_val) {
+						if (Z_TYPE_P(iter_val) == IS_STRING && Z_STRVAL_P(iter_val)) {
+							if (!strcmp(Z_STRVAL_P(iter_val), ESCAPING_VALUE_CDATA)) {
+								options->xmlrpc_out.xml_elem_opts.escaping |= xml_elem_cdata_escaping;
+							} else if (!strcmp(Z_STRVAL_P(iter_val), ESCAPING_VALUE_NON_ASCII)) {
+								options->xmlrpc_out.xml_elem_opts.escaping |= xml_elem_non_ascii_escaping;
+							} else if (!strcmp(Z_STRVAL_P(iter_val), ESCAPING_VALUE_NON_PRINT)) {
+								options->xmlrpc_out.xml_elem_opts.escaping |= xml_elem_non_print_escaping;
+							} else if (!strcmp(Z_STRVAL_P(iter_val), ESCAPING_VALUE_MARKUP)) {
+								options->xmlrpc_out.xml_elem_opts.escaping |= xml_elem_markup_escaping;
 							}
-						} ZEND_HASH_FOREACH_END();
-						/* else, check for single value */
-					} else if (Z_TYPE_P(val) == IS_STRING) {
-						if (!strcmp(Z_STRVAL_P(val), ESCAPING_VALUE_CDATA)) {
-							options->xmlrpc_out.xml_elem_opts.escaping = xml_elem_cdata_escaping;
-						} else if (!strcmp(Z_STRVAL_P(val), ESCAPING_VALUE_NON_ASCII)) {
-							options->xmlrpc_out.xml_elem_opts.escaping = xml_elem_non_ascii_escaping;
-						} else if (!strcmp(Z_STRVAL_P(val), ESCAPING_VALUE_NON_PRINT)) {
-							options->xmlrpc_out.xml_elem_opts.escaping = xml_elem_non_print_escaping;
-						} else if (!strcmp(Z_STRVAL_P(val), ESCAPING_VALUE_MARKUP)) {
-							options->xmlrpc_out.xml_elem_opts.escaping = xml_elem_markup_escaping;
 						}
+					} ZEND_HASH_FOREACH_END();
+					/* else, check for single value */
+				} else if (Z_TYPE_P(val) == IS_STRING) {
+					if (!strcmp(Z_STRVAL_P(val), ESCAPING_VALUE_CDATA)) {
+						options->xmlrpc_out.xml_elem_opts.escaping = xml_elem_cdata_escaping;
+					} else if (!strcmp(Z_STRVAL_P(val), ESCAPING_VALUE_NON_ASCII)) {
+						options->xmlrpc_out.xml_elem_opts.escaping = xml_elem_non_ascii_escaping;
+					} else if (!strcmp(Z_STRVAL_P(val), ESCAPING_VALUE_NON_PRINT)) {
+						options->xmlrpc_out.xml_elem_opts.escaping = xml_elem_non_print_escaping;
+					} else if (!strcmp(Z_STRVAL_P(val), ESCAPING_VALUE_MARKUP)) {
+						options->xmlrpc_out.xml_elem_opts.escaping = xml_elem_markup_escaping;
 					}
 				}
 			}
@@ -534,7 +535,7 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 					xReturn = XMLRPC_CreateValueBoolean(key, Z_TYPE(val) == IS_TRUE);
 					break;
 				case xmlrpc_int:
-					convert_to_long(&val);
+					ZVAL_LONG(&val, zval_get_long(&val));
 					xReturn = XMLRPC_CreateValueInt(key, Z_LVAL(val));
 					break;
 				case xmlrpc_double:
@@ -556,7 +557,7 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 
 						ht = HASH_OF(&val);
 						if (ht && ht->u.v.nApplyCount > 1) {
-							php_error_docref(NULL, E_ERROR, "XML-RPC doesn't support circular references");
+							zend_throw_error(NULL, "XML-RPC doesn't support circular references");
 							return NULL;
 						}
 
@@ -567,6 +568,7 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 						xReturn = XMLRPC_CreateVector(key, vtype);
 
 						ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL(val_arr), num_index, my_key, pIter) {
+							ZVAL_DEREF(pIter);
 							ht = HASH_OF(pIter);
 							if (ht) {
 								ht->u.v.nApplyCount++;
@@ -575,7 +577,7 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 								char *num_str = NULL;
 
 								if (vtype != xmlrpc_vector_array) {
-									spprintf(&num_str, 0, "%ld", num_index);
+									spprintf(&num_str, 0, ZEND_LONG_FMT, num_index);
 								}
 
 								XMLRPC_AddValueToVector(xReturn, PHP_to_XMLRPC_worker(num_str, pIter, depth++));
@@ -699,7 +701,7 @@ PHP_FUNCTION(xmlrpc_encode_request)
 			outBuf = XMLRPC_REQUEST_ToXML(xRequest, 0);
 			if (outBuf) {
 				RETVAL_STRING(outBuf);
-				free(outBuf);
+				efree(outBuf);
 			}
 			XMLRPC_RequestFree(xRequest, 1);
 		}
@@ -733,7 +735,7 @@ PHP_FUNCTION(xmlrpc_encode)
 		if (xOut) {
 			if (outBuf) {
 				RETVAL_STRING(outBuf);
-				free(outBuf);
+				efree(outBuf);
 			}
 			/* cleanup */
 			XMLRPC_CleanupValue(xOut);
@@ -1100,7 +1102,7 @@ PHP_FUNCTION(xmlrpc_server_call_method)
 				outBuf = XMLRPC_REQUEST_ToXML(xResponse, &buf_len);
 				if (outBuf) {
 					RETVAL_STRINGL(outBuf, buf_len);
-					free(outBuf);
+					efree(outBuf);
 				}
 				/* cleanup after ourselves.  what a sty! */
 				XMLRPC_RequestFree(xResponse, 0);

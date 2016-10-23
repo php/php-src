@@ -127,7 +127,7 @@ PHPAPI int php_flock(int fd, int operation)
     {0, 0, 0, 0, NULL};
 	DWORD err;
 
-    if (hdl < 0) {
+    if (INVALID_HANDLE_VALUE == hdl) {
 		_set_errno(EBADF);
         return -1;              /* error in file descriptor */
 	}

@@ -22,7 +22,7 @@
 #include "zend_ssa.h"
 
 /* func flags */
-#define ZEND_FUNC_TOO_DYNAMIC              (1<<0)
+#define ZEND_FUNC_INDIRECT_VAR_ACCESS      (1<<0)
 #define ZEND_FUNC_HAS_CALLS                (1<<1)
 #define ZEND_FUNC_VARARG                   (1<<2)
 #define ZEND_FUNC_NO_LOOPS                 (1<<3)
@@ -35,7 +35,6 @@
  * returned by zend_get_func_info()
  */
 #define FUNC_MAY_WARN                      (1<<30)
-#define FUNC_MAY_INLINE                    (1<<31)
 
 typedef struct _zend_func_info zend_func_info;
 typedef struct _zend_call_info zend_call_info;

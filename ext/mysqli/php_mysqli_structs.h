@@ -216,10 +216,6 @@ extern zend_object_iterator *php_mysqli_result_get_iterator(zend_class_entry *ce
 
 extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend_long fetchtype);
 
-#ifdef HAVE_SPL
-extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
-#endif
-
 #define MYSQLI_DISABLE_MQ if (mysql->multi_query) { \
 	mysql_set_server_option(mysql->mysql, MYSQL_OPTION_MULTI_STATEMENTS_OFF); \
 	mysql->multi_query = 0; \
@@ -345,7 +341,7 @@ ZEND_END_MODULE_GLOBALS(mysqli)
 #define MyG(v) ZEND_MODULE_GLOBALS_ACCESSOR(mysqli, v)
 
 #if defined(ZTS) && defined(COMPILE_DL_MYSQLI)
-ZEND_TSRMLS_CACHE_EXTERN();
+ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
 #define my_estrdup(x) (x) ? estrdup(x) : NULL

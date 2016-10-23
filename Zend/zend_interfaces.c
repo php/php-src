@@ -55,12 +55,10 @@ ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_fun
 	fci.param_count = param_count;
 	fci.params = params;
 	fci.no_separation = 1;
-	fci.symbol_table = NULL;
 
 	if (!fn_proxy && !obj_ce) {
 		/* no interest in caching and no information already present that is
 		 * needed later inside zend_call_function. */
-		fci.function_table = !object ? EG(function_table) : NULL;
 		result = zend_call_function(&fci, NULL);
 		zval_ptr_dtor(&fci.function_name);
 	} else {
@@ -191,16 +189,6 @@ ZEND_API zval *zend_user_it_get_current_data(zend_object_iterator *_iter)
 	}
 	return &iter->value;
 }
-/* }}} */
-
-/* {{{ zend_user_it_get_current_key_default */
-#if 0
-static int zend_user_it_get_current_key_default(zend_object_iterator *_iter, char **str_key, uint *str_key_len, ulong *int_key)
-{
-	*int_key = _iter->index;
-	return HASH_KEY_IS_LONG;
-}
-#endif
 /* }}} */
 
 /* {{{ zend_user_it_get_current_key */
@@ -396,15 +384,6 @@ static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry
 /* {{{ zend_implement_arrayaccess */
 static int zend_implement_arrayaccess(zend_class_entry *interface, zend_class_entry *class_type)
 {
-#if 0
-	/* get ht from ce */
-	if (ht->read_dimension != zend_std_read_dimension
-	||  ht->write_dimension != zend_std_write_dimension
-	||  ht->has_dimension != zend_std_has_dimension
-	||  ht->unset_dimension != zend_std_unset_dimension) {
-		return FAILURE;
-	}
-#endif
 	return SUCCESS;
 }
 /* }}}*/

@@ -241,6 +241,8 @@ int fpm_signals_init_child() /* {{{ */
 		zlog(ZLOG_SYSERROR, "failed to init child signals: sigaction()");
 		return -1;
 	}
+
+	zend_signal_init();
 	return 0;
 }
 /* }}} */

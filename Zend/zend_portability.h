@@ -284,7 +284,7 @@ char *alloca();
 #  endif
 # elif defined(_MSC_VER)
 #  define zend_always_inline __forceinline
-#  define zend_never_inline
+#  define zend_never_inline __declspec(noinline)
 # else
 #  if __has_attribute(always_inline)
 #   define zend_always_inline inline __attribute__((always_inline))

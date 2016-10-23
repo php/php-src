@@ -24,7 +24,7 @@
 
 typedef struct {
 	unsigned char state[200]; // 5 * 5 * sizeof(uint64)
-	php_hash_uint32 pos;
+	uint32_t pos;
 } PHP_SHA3_CTX;
 
 typedef PHP_SHA3_CTX PHP_SHA3_224_CTX;

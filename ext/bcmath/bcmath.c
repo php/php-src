@@ -128,7 +128,7 @@ zend_module_entry bcmath_module_entry = {
 
 #ifdef COMPILE_DL_BCMATH
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(bcmath)
 #endif
@@ -207,6 +207,21 @@ static void php_str2num(bc_num *num, char *str)
 }
 /* }}} */
 
+/* {{{ split_bc_num
+   Convert to bc_num detecting scale */
+static bc_num split_bc_num(bc_num num) {
+	bc_num newnum;
+	if (num->n_refs >= 1) {
+		return num;
+	}
+	newnum = _bc_new_num_ex(0, 0, 0);
+	*newnum = *num;
+	newnum->n_refs = 1;
+	num->n_refs--;
+	return newnum;
+}
+/* }}} */
+
 /* {{{ proto string bcadd(string left_operand, string right_operand [, int scale])
    Returns the sum of two arbitrary precision numbers */
 PHP_FUNCTION(bcadd)
@@ -233,6 +248,7 @@ PHP_FUNCTION(bcadd)
 	bc_add (first, second, &result, scale);
 
 	if (result->n_scale > scale) {
+		result = split_bc_num(result);
 		result->n_scale = scale;
 	}
 
@@ -270,6 +286,7 @@ PHP_FUNCTION(bcsub)
 	bc_sub (first, second, &result, scale);
 
 	if (result->n_scale > scale) {
+		result = split_bc_num(result);
 		result->n_scale = scale;
 	}
 
@@ -307,6 +324,7 @@ PHP_FUNCTION(bcmul)
 	bc_multiply (first, second, &result, scale);
 
 	if (result->n_scale > scale) {
+		result = split_bc_num(result);
 		result->n_scale = scale;
 	}
 
@@ -345,6 +363,7 @@ PHP_FUNCTION(bcdiv)
 	switch (bc_divide(first, second, &result, scale)) {
 		case 0: /* OK */
 			if (result->n_scale > scale) {
+				result = split_bc_num(result);
 				result->n_scale = scale;
 			}
 			RETVAL_STR(bc_num2str(result));
@@ -420,8 +439,9 @@ PHP_FUNCTION(bcpowmod)
 	scale_int = (int) ((int)scale < 0 ? 0 : scale);
 
 	if (bc_raisemod(first, second, mod, &result, scale_int) != -1) {
-		if (result->n_scale > scale) {
-			result->n_scale = (int)scale;
+		if (result->n_scale > scale_int) {
+			result = split_bc_num(result);
+			result->n_scale = scale_int;
 		}
 		RETVAL_STR(bc_num2str(result));
 	} else {
@@ -462,6 +482,7 @@ PHP_FUNCTION(bcpow)
 	bc_raise (first, second, &result, scale);
 
 	if (result->n_scale > scale) {
+		result = split_bc_num(result);
 		result->n_scale = scale;
 	}
 
@@ -496,6 +517,7 @@ PHP_FUNCTION(bcsqrt)
 
 	if (bc_sqrt (&result, scale) != 0) {
 		if (result->n_scale > scale) {
+			result = split_bc_num(result);
 			result->n_scale = scale;
 		}
 		RETVAL_STR(bc_num2str(result));

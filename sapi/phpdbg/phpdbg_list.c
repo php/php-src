@@ -33,7 +33,7 @@
 #include "php_streams.h"
 #include "zend_exceptions.h"
 
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 #define PHPDBG_LIST_COMMAND_D(f, h, a, m, l, s, flags) \
 	PHPDBG_COMMAND_D_EXP(f, h, a, m, l, s, &phpdbg_prompt_commands[12], flags)
@@ -62,9 +62,15 @@ PHPDBG_LIST(lines) /* {{{ */
 		} break;
 
 		case FILE_PARAM: {
-			zend_string *file = zend_string_init(param->file.name, strlen(param->file.name), 0);
+			zend_string *file;
+			char resolved_path_buf[MAXPATHLEN];
+			const char *abspath = param->file.name;
+			if (VCWD_REALPATH(abspath, resolved_path_buf)) {
+				abspath = resolved_path_buf;
+			}
+			file = zend_string_init(abspath, strlen(abspath), 0);
 			phpdbg_list_file(file, param->file.line, 0, 0);
-			efree(file);
+			zend_string_release(file);
 		} break;
 
 		phpdbg_default_switch_case();
@@ -127,16 +133,8 @@ void phpdbg_list_file(zend_string *filename, uint count, int offset, uint highli
 {
 	uint line, lastline;
 	phpdbg_file_source *data;
-	char resolved_path_buf[MAXPATHLEN];
-	const char *abspath;
 
-	if (VCWD_REALPATH(ZSTR_VAL(filename), resolved_path_buf)) {
-		abspath = resolved_path_buf;
-	} else {
-		abspath = ZSTR_VAL(filename);
-	}
-
-	if (!(data = zend_hash_str_find_ptr(&PHPDBG_G(file_sources), abspath, strlen(abspath)))) {
+	if (!(data = zend_hash_find_ptr(&PHPDBG_G(file_sources), filename))) {
 		phpdbg_error("list", "type=\"unknownfile\"", "Could not find information about included file...");
 		return;
 	}
@@ -200,11 +198,12 @@ void phpdbg_list_function_byname(const char *str, size_t len) /* {{{ */
 
 	/* search active scope if begins with period */
 	if (func_name[0] == '.') {
-		if (EG(scope)) {
+		zend_class_entry *scope = zend_get_executed_scope();
+		if (scope) {
 			func_name++;
 			func_name_len--;
 
-			func_table = &EG(scope)->function_table;
+			func_table = &scope->function_table;
 		} else {
 			phpdbg_error("inactive", "type=\"noclasses\"", "No active class");
 			return;
@@ -232,6 +231,7 @@ void phpdbg_list_function_byname(const char *str, size_t len) /* {{{ */
 	efree(func_name);
 } /* }}} */
 
+/* Note: do not free the original file handler, let original compile_file() or caller do that. Caller may rely on its value to check success */
 zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 	phpdbg_file_source data, *dataptr;
 	zend_file_handle fake;
@@ -242,7 +242,7 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 	char resolved_path_buf[MAXPATHLEN];
 
 	if (zend_stream_fixup(file, &bufptr, &data.len) == FAILURE) {
-		return NULL;
+		return PHPDBG_G(compile_file)(file, type);
 	}
 
 	data.buf = emalloc(data.len + ZEND_MMAP_AHEAD + 1);
@@ -279,9 +279,14 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 	if (ret == NULL) {
 		efree(data.buf);
 		efree(dataptr);
+
+		fake.opened_path = NULL;
+		zend_file_handle_dtor(&fake);
+
 		return NULL;
 	}
 
+	dataptr->filename = estrdup(dataptr->filename);
 	dataptr = erealloc(dataptr, sizeof(phpdbg_file_source) + sizeof(uint) * line);
 	zend_hash_str_add_ptr(&PHPDBG_G(file_sources), filename, strlen(filename), dataptr);
 	phpdbg_resolve_pending_file_break(filename);
@@ -300,6 +305,17 @@ zend_op_array *phpdbg_init_compile_file(zend_file_handle *file, int type) {
 
 	if (VCWD_REALPATH(filename, resolved_path_buf)) {
 		filename = resolved_path_buf;
+
+		if (file->opened_path) {
+			zend_string_release(file->opened_path);
+			file->opened_path = zend_string_init(filename, strlen(filename), 0);
+		} else {
+			if (file->free_filename) {
+				efree((char *) file->filename);
+			}
+			file->free_filename = 0;
+			file->filename = filename;
+		}
 	}
 
 	op_array = PHPDBG_G(init_compile_file)(file, type);
@@ -350,7 +366,7 @@ zend_op_array *phpdbg_compile_string(zval *source_string, char *filename) {
 		return NULL;
 	}
 
-	fake_name = strpprintf(0, "%s\0%p", filename, op_array->opcodes);
+	fake_name = strpprintf(0, "%s%c%p", filename, 0, op_array->opcodes);
 
 	dataptr = erealloc(dataptr, sizeof(phpdbg_file_source) + sizeof(uint) * line);
 	zend_hash_add_ptr(&PHPDBG_G(file_sources), fake_name, dataptr);
@@ -366,22 +382,9 @@ zend_op_array *phpdbg_compile_string(zval *source_string, char *filename) {
 	return op_array;
 }
 
-void phpdbg_free_file_source(zval *zv) {
-	phpdbg_file_source *data = Z_PTR_P(zv);
-
-	if (data->buf) {
-		efree(data->buf);
-	}
-
-	destroy_op_array(&data->op_array);
-
-	efree(data);
-}
-
 void phpdbg_init_list(void) {
 	PHPDBG_G(compile_file) = zend_compile_file;
 	PHPDBG_G(compile_string) = zend_compile_string;
-	zend_hash_init(&PHPDBG_G(file_sources), 1, NULL, (dtor_func_t) phpdbg_free_file_source, 0);
 	zend_compile_file = phpdbg_compile_file;
 	zend_compile_string = phpdbg_compile_string;
 }

@@ -12,12 +12,11 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Andrey Hristov <andrey@mysql.com>                           |
-  |          Ulf Wendel <uwendel@mysql.com>                              |
-  |          Georg Richter <georg@mysql.com>                             |
+  | Authors: Andrey Hristov <andrey@php.net>                             |
+  |          Ulf Wendel <uw@php.net>                                     |
+  |          Georg Richter <georg@php.net>                               |
   +----------------------------------------------------------------------+
 */
-/* $Id$ */
 
 #ifndef MYSQLND_H
 #define MYSQLND_H
@@ -332,7 +331,7 @@ PHPAPI ZEND_EXTERN_MODULE_GLOBALS(mysqlnd)
 #define MYSQLND_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(mysqlnd, v)
 
 #if defined(ZTS) && defined(COMPILE_DL_MYSQLND)
-ZEND_TSRMLS_CACHE_EXTERN();
+ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
 

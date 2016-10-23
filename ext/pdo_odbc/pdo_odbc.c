@@ -37,12 +37,10 @@ const zend_function_entry pdo_odbc_functions[] = {
 /* }}} */
 
 /* {{{ pdo_odbc_deps[] */
-#if ZEND_MODULE_API_NO >= 20050922
 static const zend_module_dep pdo_odbc_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
 	ZEND_MOD_END
 };
-#endif
 /* }}} */
 
 /* {{{ pdo_odbc_module_entry */
@@ -66,8 +64,8 @@ ZEND_GET_MODULE(pdo_odbc)
 #endif
 
 #ifdef SQL_ATTR_CONNECTION_POOLING
-SQLUINTEGER pdo_odbc_pool_on = SQL_CP_OFF;
-SQLUINTEGER pdo_odbc_pool_mode = SQL_CP_ONE_PER_HENV;
+zend_ulong pdo_odbc_pool_on = SQL_CP_OFF;
+zend_ulong pdo_odbc_pool_mode = SQL_CP_ONE_PER_HENV;
 #endif
 
 #if defined(DB2CLI_VER) && !defined(PHP_WIN32)
@@ -123,7 +121,7 @@ PHP_MINIT_FUNCTION(pdo_odbc)
 	} else if (*pooling_val == '\0' || strcasecmp(pooling_val, "off") == 0) {
 		pdo_odbc_pool_on = SQL_CP_OFF;
 	} else {
-		php_error_docref(NULL, E_ERROR, "Error in pdo_odbc.connection_pooling configuration.  Value MUST be one of 'strict', 'relaxed' or 'off'");
+		php_error_docref(NULL, E_CORE_ERROR, "Error in pdo_odbc.connection_pooling configuration.  Value MUST be one of 'strict', 'relaxed' or 'off'");
 		return FAILURE;
 	}
 

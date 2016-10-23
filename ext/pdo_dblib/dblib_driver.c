@@ -48,13 +48,18 @@ static int dblib_fetch_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info)
 		einfo = &S->err;
 	}
 
-	if (einfo->dberr == SYBESMSG && einfo->lastmsg) {
+	if (einfo->lastmsg) {
 		msg = einfo->lastmsg;
-	} else if (einfo->dberr == SYBESMSG && DBLIB_G(err).lastmsg) {
+	} else if (DBLIB_G(err).lastmsg) {
 		msg = DBLIB_G(err).lastmsg;
 		DBLIB_G(err).lastmsg = NULL;
 	} else {
 		msg = einfo->dberrstr;
+	}
+
+	/* don't return anything if there's nothing to return */
+	if (msg == NULL && einfo->dberr == 0 && einfo->oserr == 0 && einfo->severity == 0) {
+		return 0;
 	}
 
 	spprintf(&message, 0, "%s [%d] (severity %d) [%s]",
@@ -78,6 +83,7 @@ static int dblib_handle_closer(pdo_dbh_t *dbh)
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 
 	if (H) {
+		pdo_dblib_err_dtor(&H->err);
 		if (H->link) {
 			dbclose(H->link);
 			H->link = NULL;
@@ -101,6 +107,7 @@ static int dblib_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len
 	stmt->driver_data = S;
 	stmt->methods = &dblib_stmt_methods;
 	stmt->supports_placeholders = PDO_PLACEHOLDER_NONE;
+	S->computed_column_name_count = 0;
 	S->err.sqlstate = stmt->error_code;
 
 	return 1;
@@ -145,55 +152,29 @@ static zend_long dblib_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_l
 static int dblib_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, char **quoted, size_t *quotedlen, enum pdo_param_type paramtype)
 {
 
-	int useBinaryEncoding = 0;
-	const char * hex = "0123456789abcdef";
-	int i;
+	size_t i;
 	char * q;
 	*quotedlen = 0;
 
-	/*
-	 * Detect quoted length and if we should use binary encoding
-	 */
+	/* Detect quoted length, adding extra char for doubled single quotes */
 	for(i=0;i<unquotedlen;i++) {
-		if( 32 > unquoted[i] || 127 < unquoted[i] ) {
-			useBinaryEncoding = 1;
-			break;
-		}
 		if(unquoted[i] == '\'') ++*quotedlen;
 		++*quotedlen;
 	}
 
-	if(useBinaryEncoding) {
-		/*
-		 * Binary safe quoting
-		 * Will implicitly convert for all data types except Text, DateTime & SmallDateTime
-		 *
-		 */
-		*quotedlen = (unquotedlen * 2) + 2; /* 2 chars per byte +2 for "0x" prefix */
-		q = *quoted = emalloc(*quotedlen);
+	*quotedlen += 2; /* +2 for opening, closing quotes */
+	q  = *quoted = emalloc(*quotedlen+1); /* Add byte for terminal null */
+	*q++ = '\'';
 
-		*q++ = '0';
-		*q++ = 'x';
-		for (i=0;i<unquotedlen;i++) {
-			*q++ = hex[ (*unquoted>>4)&0xF];
-			*q++ = hex[ (*unquoted++)&0xF];
+	for (i=0;i<unquotedlen;i++) {
+		if (unquoted[i] == '\'') {
+			*q++ = '\'';
+			*q++ = '\'';
+		} else {
+			*q++ = unquoted[i];
 		}
-	} else {
-		/* Alpha/Numeric Quoting */
-		*quotedlen += 2; /* +2 for opening, closing quotes */
-		q  = *quoted = emalloc(*quotedlen);
-		*q++ = '\'';
-
-		for (i=0;i<unquotedlen;i++) {
-			if (unquoted[i] == '\'') {
-				*q++ = '\'';
-				*q++ = '\'';
-			} else {
-				*q++ = unquoted[i];
-			}
-		}
-		*q++ = '\'';
 	}
+	*q++ = '\'';
 
 	*q = 0;
 
@@ -278,17 +259,28 @@ static int dblib_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 {
 	switch(attr) {
 		case PDO_ATTR_TIMEOUT:
-			return 0;
-		default:
+		case PDO_DBLIB_ATTR_QUERY_TIMEOUT:
+			return SUCCEED == dbsettime(zval_get_long(val)) ? 1 : 0;
+		case PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER:
+			((pdo_dblib_db_handle *)dbh->driver_data)->stringify_uniqueidentifier = zval_get_long(val);
 			return 1;
+		default:
+			return 0;
 	}
-
 }
 
 static int dblib_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_value)
 {
-	/* dblib_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data; */
-	return 0;
+	switch (attr) {
+		case PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER:
+			ZVAL_BOOL(return_value, ((pdo_dblib_db_handle *)dbh->driver_data)->stringify_uniqueidentifier);
+			break;
+
+		default:
+			return 0;
+	}
+
+	return 1;
 }
 
 static struct pdo_dbh_methods dblib_methods = {
@@ -327,13 +319,17 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		,{"7.2",DBVERSION_72}
 		,{"8.0",DBVERSION_72}
 #endif
+#ifdef DBVERSION_73
+		,{"7.3",DBVERSION_73}
+#endif
+#ifdef DBVERSION_74
+		,{"7.4",DBVERSION_74}
+#endif
 		,{"10.0",DBVERSION_100}
 		,{"auto",0} /* Only works with FreeTDS. Other drivers will bork */
 
 	};
-
-	nvers = sizeof(tdsver)/sizeof(tdsver[0]);
-
+	
 	struct pdo_data_src_parser vars[] = {
 		{ "charset",	NULL,	0 }
 		,{ "appname",	"PHP " PDO_DBLIB_FLAVOUR,	0 }
@@ -344,21 +340,35 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 	};
 
 	nvars = sizeof(vars)/sizeof(vars[0]);
-
+	nvers = sizeof(tdsver)/sizeof(tdsver[0]);
+	
 	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, nvars);
-
-	if (driver_options) {
-		int timeout = pdo_attr_lval(driver_options, PDO_ATTR_TIMEOUT, 30);
-		dbsetlogintime(timeout); /* Connection/Login Timeout */
-		dbsettime(timeout); /* Statement Timeout */
-	}
 
 	H = pecalloc(1, sizeof(*H), dbh->is_persistent);
 	H->login = dblogin();
 	H->err.sqlstate = dbh->error_code;
+	H->stringify_uniqueidentifier = 0;
 
 	if (!H->login) {
 		goto cleanup;
+	}
+
+	if (driver_options) {
+		int connect_timeout = pdo_attr_lval(driver_options, PDO_DBLIB_ATTR_CONNECTION_TIMEOUT, -1);
+		int query_timeout = pdo_attr_lval(driver_options, PDO_DBLIB_ATTR_QUERY_TIMEOUT, -1);
+		int timeout = pdo_attr_lval(driver_options, PDO_ATTR_TIMEOUT, 30);
+
+		if (connect_timeout == -1) {
+			connect_timeout = timeout;
+		}
+		if (query_timeout == -1) {
+			query_timeout = timeout;
+		}
+
+		dbsetlogintime(connect_timeout); /* Connection/Login Timeout */
+		dbsettime(query_timeout); /* Statement Timeout */
+
+		H->stringify_uniqueidentifier = pdo_attr_lval(driver_options, PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER, 0);
 	}
 
 	DBERRHANDLE(H->login, (EHANDLEFUNC) pdo_dblib_error_handler);

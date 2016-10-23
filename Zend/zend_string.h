@@ -32,6 +32,7 @@ ZEND_API extern void (*zend_interned_strings_restore)(void);
 ZEND_API zend_ulong zend_hash_func(const char *str, size_t len);
 void zend_interned_strings_init(void);
 void zend_interned_strings_dtor(void);
+void zend_known_interned_strings_init(zend_string ***, uint32_t *);
 
 END_EXTERN_C()
 
@@ -323,7 +324,7 @@ static zend_always_inline zend_bool zend_string_equals(zend_string *s1, zend_str
 
 static zend_always_inline zend_ulong zend_inline_hash_func(const char *str, size_t len)
 {
-	register zend_ulong hash = Z_UL(5381);
+	zend_ulong hash = Z_UL(5381);
 
 	/* variant with the hash unrolled eight times */
 	for (; len >= 8; len -= 8) {
@@ -358,29 +359,67 @@ EMPTY_SWITCH_DEFAULT_CASE()
 #endif
 }
 
-static zend_always_inline void zend_interned_empty_string_init(zend_string **s)
+#ifdef ZTS
+static zend_always_inline zend_string* zend_zts_interned_string_init(const char *val, size_t len)
 {
 	zend_string *str;
 
-	str = zend_string_alloc(sizeof("")-1, 1);
-	ZSTR_VAL(str)[0] = '\000';
+	str = zend_string_init(val, len, 1);
 
-#ifndef ZTS
-	*s = zend_new_interned_string(str);
-#else
 	zend_string_hash_val(str);
 	GC_FLAGS(str) |= IS_STR_INTERNED;
-	*s = str;
-#endif
+	return str;
 }
 
-static zend_always_inline void zend_interned_empty_string_free(zend_string **s)
+static zend_always_inline void zend_zts_interned_string_free(zend_string **s)
 {
 	if (NULL != *s) {
 		free(*s);
 		*s = NULL;
 	}
 }
+#endif
+
+#define ZEND_KNOWN_STRINGS(_) \
+	_(ZEND_STR_FILE,                   "file") \
+	_(ZEND_STR_LINE,                   "line") \
+	_(ZEND_STR_FUNCTION,               "function") \
+	_(ZEND_STR_CLASS,                  "class") \
+	_(ZEND_STR_OBJECT,                 "object") \
+	_(ZEND_STR_TYPE,                   "type") \
+	_(ZEND_STR_OBJECT_OPERATOR,        "->") \
+	_(ZEND_STR_PAAMAYIM_NEKUDOTAYIM,   "::") \
+	_(ZEND_STR_ARGS,                   "args") \
+	_(ZEND_STR_UNKNOWN,                "unknown") \
+	_(ZEND_STR_EVAL,                   "eval") \
+	_(ZEND_STR_INCLUDE,                "include") \
+	_(ZEND_STR_REQUIRE,                "require") \
+	_(ZEND_STR_INCLUDE_ONCE,           "include_once") \
+	_(ZEND_STR_REQUIRE_ONCE,           "require_once") \
+	_(ZEND_STR_SCALAR,                 "scalar") \
+	_(ZEND_STR_ERROR_REPORTING,        "error_reporting") \
+	_(ZEND_STR_STATIC,                 "static") \
+	_(ZEND_STR_THIS,                   "this") \
+	_(ZEND_STR_VALUE,                  "value") \
+	_(ZEND_STR_KEY,                    "key") \
+	_(ZEND_STR_MAGIC_AUTOLOAD,         "__autoload") \
+	_(ZEND_STR_MAGIC_INVOKE,           "__invoke") \
+	_(ZEND_STR_PREVIOUS,               "previous") \
+	_(ZEND_STR_CODE,                   "code") \
+	_(ZEND_STR_MESSAGE,                "message") \
+	_(ZEND_STR_SEVERITY,               "severity") \
+	_(ZEND_STR_STRING,                 "string") \
+	_(ZEND_STR_TRACE,                  "trace") \
+
+
+typedef enum _zend_known_string_id {
+#define _ZEND_STR_ID(id, str) id,
+ZEND_KNOWN_STRINGS(_ZEND_STR_ID)
+#undef _ZEND_STR_ID
+	ZEND_STR_LAST_KNOWN
+} zend_known_string_id;
+
+ZEND_API uint32_t zend_intern_known_strings(const char **strings, uint32_t count);
 
 #endif /* ZEND_STRING_H */
 

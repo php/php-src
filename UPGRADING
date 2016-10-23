@@ -1,4 +1,4 @@
-PHP 7.1 UPGRADE NOTES
+PHP 7.2 UPGRADE NOTES
 
 1. Backward Incompatible Changes
 2. New Features
@@ -18,16 +18,24 @@ PHP 7.1 UPGRADE NOTES
 ========================================
 1. Backward Incompatible Changes
 ========================================
+
 - Core:
-  . 'void' can no longer be used as the name of a class, interface, or trait.
-    This applies to declarations, class_alias() and use statements.
+  . gettype() will now return "resource (closed)" instead of "unknown type" for
+    closed resources.
+  . is_object() will now return true for objects of class
+    __PHP_Incomplete_Class.
 
 ========================================
 2. New Features
 ========================================
-- Core
-  . Added void return type, which requires that a function not return a value.
-    (RFC: https://wiki.php.net/rfc/void_return_type)
+
+- PCRE:
+  . Added `J` modifier for setting PCRE_DUPNAMES.
+
+- Standard:
+  . Simplified password hashing API updated to support Argon2i hashes when PHP is compiled with libargon2
+    (https://wiki.php.net/rfc/argon2_password_hash).
+  . proc_nice() is now supported on Windows platforms.
 
 ========================================
 3. Changes in SAPI modules
@@ -40,26 +48,42 @@ PHP 7.1 UPGRADE NOTES
 ========================================
 5. Changed Functions
 ========================================
-- get_headers() has an extra parameter which allows passing a custom stream
-  context.
-- The first $varname argument for getenv() is no longer mandatory, the
-  current environment variables will be returned as an associative array
-  when omitted.
-- long2ip() accepts integer as parameter now
-- pg_last_notice() accepts optional long parameter to specify operation.
-  PGSQL_NOTICE_LAST - Get last notice (Default)
-  PGSQL_NOTICE_ALL - Get all stored notices
-  PGSQL_NOTICE_CLEAR - Remove all stored notices
-  It returns empty string or array on successful PGSQL_NOTICE_LAST/ALL calls.
-  It returned FALSE for empty notice previously.
-- pg_fetch_all() accepts 2nd optional result type parameter like
-  pg_fetch_row().
-- pg_select() accepts 4th optional result type parameter like pg_fetch_row().
-- parse_url() is more restrictive now and supports RFC3986.
+
+- Standard:
+  . password_hash() can generate Argon2i hashes when the algorithm is set to PASSWORD_ARGON2I. 
+    When using PASSWORD_ARGON2I, the following cost factors may be set: 'memory_cost', 'time_cost', 
+    and 'threads'. These cost factors will default to 'PASSWORD_ARGON2_DEFAULT_MEMORY_COST', 
+    'PASSWORD_ARGON2_DEFAULT_TIME_COST', and 'PASSWORD_ARGON2_DEFAULT_THREADS' respectively if not set.
+  . password_verify() can verify Argon2i hashes.
+  . password_get_info() and password_needs_rehash() can accept Argon2i hashes.
+  . mail()/mb_send_mail() accept array $extra_header. Array paramter is checked against RFC 2822.
+    Array format is 
+    $extra_headers = [
+      'Header-Name' => 'Header value',
+      'Multiple' => ['One header', 'Another header'],
+      'Multiline' = "FirstLine\r\n SecondLine",
+    ];
+
+- XML:
+  . utf8_encode() and utf8_decode() have been moved to the Standard extension
+    as string functions.
 
 ========================================
 6. New Functions
 ========================================
+
+- GD:
+  . Added imagesetclip() and imagegetclip().
+  . Added imageopenpolygon().
+  . Added imageresolution().
+
+- Mbstring:
+  . Added mb_chr() and mb_ord().
+  . Added mb_scurb() that scrub broken multibyte strings.
+
+- Sockets:
+  . Added socket_addrinfo_lookup(), socket_addrinfo_connect(),
+    socket_addrinfo_bind() and socket_addrinfo_explain().
 
 ========================================
 7. New Classes and Interfaces
@@ -72,33 +96,47 @@ PHP 7.1 UPGRADE NOTES
 ========================================
 9. Other Changes to Extensions
 ========================================
-- SQLite3:
-  . Upgraded bundled SQLite lib to 3.9.2
+
+- EXIF:
+   . Added extended exif tag support for the following formats: 
+     Samsung, DJI, Panasonic, Sony, Pentax, Minolta & Sigma/Foveon.
+
+- GD:
+  . Removed --enable-gd-native-ttf configuration option which was unused as
+    of PHP 5.5.0 anyway.
+  . imagegd() stores truecolor images as real truecolor images. Formerly, they
+    have been converted to palette.
+  . imageantialias() is now also available if compiled with a system libgd.
+
+- Mbstring
+  . mb_check_encoding() accepts array parameter. Both key and value
+    ecodings are checked recursively.
+  . mb_convert_encoding() accepts array parameter. Only value encodings
+    are converted recursively.
 
 ========================================
 10. New Global Constants
 ========================================
 
-- Pgsql:
-  PGSQL_NOTICE_LAST
-  PGSQL_NOTICE_ALL
-  PGSQL_NOTICE_CLEAR
+- GD:
+  . IMG_EFFECT_MULTIPLY
+
+- Standard:
+  . PASSWORD_ARGON2_DEFAULT_MEMORY_COST
+  . PASSWORD_ARGON2_DEFAULT_TIME_COST
+  . PASSWORD_ARGON2_DEFAULT_THREADS
+  . PASSWORD_ARGON2I
 
 ========================================
 11. Changes to INI File Handling
 ========================================
 
+- sql.safe_mode
+  . This INI directive have been removed.
+
 ========================================
 12. Windows Support
 ========================================
-
-- Core:
-  . Support for ftok()
-
-- FCGI
-  . PHP_FCGI_CHILDREN is respected. If this environment variable is defined,
-    the first php-fcgi.exe process will exec the specified number of children.
-    Those will share the same TCP socket. 
 
 ========================================
 13. Other Changes

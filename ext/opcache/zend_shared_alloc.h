@@ -128,6 +128,8 @@ void *zend_shared_alloc(size_t size);
 void *_zend_shared_memdup(void *p, size_t size, zend_bool free_source);
 int  zend_shared_memdup_size(void *p, size_t size);
 
+int zend_accel_in_shm(void *ptr);
+
 typedef union _align_test {
 	void   *ptr;
 	double  dbl;

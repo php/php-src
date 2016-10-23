@@ -24,7 +24,7 @@
 #include "ext/standard/basic_functions.h"
 
 typedef struct {
-	php_hash_uint32 state;
+	uint32_t state;
 } PHP_ADLER32_CTX;
 
 PHP_HASH_API void PHP_ADLER32Init(PHP_ADLER32_CTX *context);

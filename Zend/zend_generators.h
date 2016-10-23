@@ -62,8 +62,8 @@ struct _zend_generator {
 	/* The suspended execution context. */
 	zend_execute_data *execute_data;
 
-	/* The separate stack used by generator */
-	zend_vm_stack stack;
+	/* Frozen call stack for "yield" used in context of other calls */
+	zend_execute_data *frozen_call_stack;
 
 	/* Current value */
 	zval value;
@@ -82,7 +82,7 @@ struct _zend_generator {
 	 * by-value foreach. */
 	zval values;
 
-	/* Node of waiting generators when multiple "yield *" expressions
+	/* Node of waiting generators when multiple "yield from" expressions
 	 * are nested. */
 	zend_generator_node node;
 
@@ -91,6 +91,9 @@ struct _zend_generator {
 
 	/* ZEND_GENERATOR_* flags */
 	zend_uchar flags;
+
+	zval *gc_buffer;
+	uint32_t gc_buffer_size;
 };
 
 static const zend_uchar ZEND_GENERATOR_CURRENTLY_RUNNING = 0x1;
@@ -99,9 +102,11 @@ static const zend_uchar ZEND_GENERATOR_AT_FIRST_YIELD    = 0x4;
 static const zend_uchar ZEND_GENERATOR_DO_INIT           = 0x8;
 
 void zend_register_generator_ce(void);
-ZEND_API void zend_generator_create_zval(zend_execute_data *call, zend_op_array *op_array, zval *return_value);
 ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished_execution);
 ZEND_API void zend_generator_resume(zend_generator *generator);
+
+ZEND_API void zend_generator_restore_call_stack(zend_generator *generator);
+ZEND_API zend_execute_data* zend_generator_freeze_call_stack(zend_execute_data *execute_data);
 
 void zend_generator_yield_from(zend_generator *generator, zend_generator *from);
 ZEND_API zend_execute_data *zend_generator_check_placeholder_frame(zend_execute_data *ptr);

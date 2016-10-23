@@ -29,8 +29,8 @@
 
 /* SNEFRU context */
 typedef struct {
-	php_hash_uint32 state[16];
-	php_hash_uint32 count[2];
+	uint32_t state[16];
+	uint32_t count[2];
 	unsigned char length;
 	unsigned char buffer[32];
 } PHP_SNEFRU_CTX;

@@ -1064,6 +1064,7 @@ pcre_uchar *alternative;
 pcre_uchar *end = NULL;
 int private_data_ptr = *private_data_start;
 int space, size, bracketlen;
+BOOL repeat_check = TRUE;
 
 while (cc < ccend)
   {
@@ -1071,9 +1072,10 @@ while (cc < ccend)
   size = 0;
   bracketlen = 0;
   if (private_data_ptr > SLJIT_MAX_LOCAL_SIZE)
-    return;
+    break;
 
-  if (*cc == OP_ONCE || *cc == OP_ONCE_NC || *cc == OP_BRA || *cc == OP_CBRA || *cc == OP_COND)
+  if (repeat_check && (*cc == OP_ONCE || *cc == OP_ONCE_NC || *cc == OP_BRA || *cc == OP_CBRA || *cc == OP_COND))
+    {
     if (detect_repeat(common, cc))
       {
       /* These brackets are converted to repeats, so no global
@@ -1081,6 +1083,8 @@ while (cc < ccend)
       if (cc >= end)
         end = bracketend(cc);
       }
+    }
+  repeat_check = TRUE;
 
   switch(*cc)
     {
@@ -1136,6 +1140,13 @@ while (cc < ccend)
     bracketlen = 1 + LINK_SIZE + IMM2_SIZE;
     break;
 
+    case OP_BRAZERO:
+    case OP_BRAMINZERO:
+    case OP_BRAPOSZERO:
+    repeat_check = FALSE;
+    size = 1;
+    break;
+
     CASE_ITERATOR_PRIVATE_DATA_1
     space = 1;
     size = -2;
@@ -1162,9 +1173,14 @@ while (cc < ccend)
     size = 1;
     break;
 
-    CASE_ITERATOR_TYPE_PRIVATE_DATA_2B
+    case OP_TYPEUPTO:
     if (cc[1 + IMM2_SIZE] != OP_ANYNL && cc[1 + IMM2_SIZE] != OP_EXTUNI)
       space = 2;
+    size = 1 + IMM2_SIZE;
+    break;
+
+    case OP_TYPEMINUPTO:
+    space = 2;
     size = 1 + IMM2_SIZE;
     break;
 
@@ -1314,6 +1330,13 @@ while (cc < ccend)
       }
     length += 3;
     cc += 1 + LINK_SIZE + IMM2_SIZE;
+    break;
+
+    case OP_THEN:
+    stack_restore = TRUE;
+    if (common->control_head_ptr != 0)
+      *needs_control_head = TRUE;
+    cc ++;
     break;
 
     default:
@@ -2220,6 +2243,7 @@ while (current != NULL)
     SLJIT_ASSERT_STOP();
     break;
     }
+  SLJIT_ASSERT(current > (sljit_sw*)current[-1]);
   current = (sljit_sw*)current[-1];
   }
 return -1;
@@ -3209,7 +3233,7 @@ bytes[len] = byte;
 bytes[0] = len;
 }
 
-static int scan_prefix(compiler_common *common, pcre_uchar *cc, pcre_uint32 *chars, pcre_uint8 *bytes, int max_chars)
+static int scan_prefix(compiler_common *common, pcre_uchar *cc, pcre_uint32 *chars, pcre_uint8 *bytes, int max_chars, pcre_uint32 *rec_count)
 {
 /* Recursive function, which scans prefix literals. */
 BOOL last, any, caseless;
@@ -3227,9 +3251,14 @@ pcre_uchar othercase[1];
 repeat = 1;
 while (TRUE)
   {
+  if (*rec_count == 0)
+    return 0;
+  (*rec_count)--;
+
   last = TRUE;
   any = FALSE;
   caseless = FALSE;
+
   switch (*cc)
     {
     case OP_CHARI:
@@ -3291,7 +3320,7 @@ while (TRUE)
 #ifdef SUPPORT_UTF
     if (common->utf && HAS_EXTRALEN(*cc)) len += GET_EXTRALEN(*cc);
 #endif
-    max_chars = scan_prefix(common, cc + len, chars, bytes, max_chars);
+    max_chars = scan_prefix(common, cc + len, chars, bytes, max_chars, rec_count);
     if (max_chars == 0)
       return consumed;
     last = FALSE;
@@ -3314,7 +3343,7 @@ while (TRUE)
     alternative = cc + GET(cc, 1);
     while (*alternative == OP_ALT)
       {
-      max_chars = scan_prefix(common, alternative + 1 + LINK_SIZE, chars, bytes, max_chars);
+      max_chars = scan_prefix(common, alternative + 1 + LINK_SIZE, chars, bytes, max_chars, rec_count);
       if (max_chars == 0)
         return consumed;
       alternative += GET(alternative, 1);
@@ -3556,6 +3585,7 @@ int i, max, from;
 int range_right = -1, range_len = 3 - 1;
 sljit_ub *update_table = NULL;
 BOOL in_range;
+pcre_uint32 rec_count;
 
 for (i = 0; i < MAX_N_CHARS; i++)
   {
@@ -3564,7 +3594,8 @@ for (i = 0; i < MAX_N_CHARS; i++)
   bytes[i * MAX_N_BYTES] = 0;
   }
 
-max = scan_prefix(common, common->start, chars, bytes, MAX_N_CHARS);
+rec_count = 10000;
+max = scan_prefix(common, common->start, chars, bytes, MAX_N_CHARS, &rec_count);
 
 if (max <= 1)
   return FALSE;
@@ -4311,8 +4342,10 @@ switch(length)
   case 4:
   if ((ranges[1] - ranges[0]) == (ranges[3] - ranges[2])
       && (ranges[0] | (ranges[2] - ranges[0])) == ranges[2]
+      && (ranges[1] & (ranges[2] - ranges[0])) == 0
       && is_powerof2(ranges[2] - ranges[0]))
     {
+    SLJIT_ASSERT((ranges[0] & (ranges[2] - ranges[0])) == 0 && (ranges[2] & ranges[3] & (ranges[2] - ranges[0])) != 0);
     OP2(SLJIT_OR, TMP1, 0, TMP1, 0, SLJIT_IMM, ranges[2] - ranges[0]);
     if (ranges[2] + 1 != ranges[3])
       {
@@ -4900,9 +4933,10 @@ else if ((cc[-1] & XCL_MAP) != 0)
   if (!check_class_ranges(common, (const pcre_uint8 *)cc, FALSE, TRUE, list))
     {
 #ifdef COMPILE_PCRE8
-    SLJIT_ASSERT(common->utf);
+    jump = NULL;
+    if (common->utf)
 #endif
-    jump = CMP(SLJIT_GREATER, TMP1, 0, SLJIT_IMM, 255);
+      jump = CMP(SLJIT_GREATER, TMP1, 0, SLJIT_IMM, 255);
 
     OP2(SLJIT_AND, TMP2, 0, TMP1, 0, SLJIT_IMM, 0x7);
     OP2(SLJIT_LSHR, TMP1, 0, TMP1, 0, SLJIT_IMM, 3);
@@ -4911,7 +4945,10 @@ else if ((cc[-1] & XCL_MAP) != 0)
     OP2(SLJIT_AND | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, TMP2, 0);
     add_jump(compiler, list, JUMP(SLJIT_NOT_ZERO));
 
-    JUMPHERE(jump);
+#ifdef COMPILE_PCRE8
+    if (common->utf)
+#endif
+      JUMPHERE(jump);
     }
 
   OP1(SLJIT_MOV, TMP1, 0, TMP3, 0);
@@ -5219,7 +5256,7 @@ while (*cc != XCL_END)
       OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_UNUSED, 0, SLJIT_LESS_EQUAL);
 
       SET_CHAR_OFFSET(0);
-      OP2(SLJIT_SUB | SLJIT_SET_U, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 0xff);
+      OP2(SLJIT_SUB | SLJIT_SET_U, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 0x7f);
       OP_FLAGS(SLJIT_AND, TMP2, 0, TMP2, 0, SLJIT_LESS_EQUAL);
 
       SET_TYPE_OFFSET(ucp_Pc);
@@ -7665,6 +7702,10 @@ while (*cc != OP_KETRPOS)
       OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), STR_PTR, 0);
       }
 
+    /* Even if the match is empty, we need to reset the control head. */
+    if (needs_control_head)
+      OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), common->control_head_ptr, SLJIT_MEM1(STACK_TOP), STACK(stack));
+
     if (opcode == OP_SBRAPOS || opcode == OP_SCBRAPOS)
       add_jump(compiler, &emptymatch, CMP(SLJIT_EQUAL, TMP1, 0, STR_PTR, 0));
 
@@ -7692,6 +7733,10 @@ while (*cc != OP_KETRPOS)
       OP1(SLJIT_MOV, SLJIT_MEM1(TMP2), (framesize + 1) * sizeof(sljit_sw), STR_PTR, 0);
       }
 
+    /* Even if the match is empty, we need to reset the control head. */
+    if (needs_control_head)
+      OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), common->control_head_ptr, SLJIT_MEM1(STACK_TOP), STACK(stack));
+
     if (opcode == OP_SBRAPOS || opcode == OP_SCBRAPOS)
       add_jump(compiler, &emptymatch, CMP(SLJIT_EQUAL, TMP1, 0, STR_PTR, 0));
 
@@ -7703,9 +7748,6 @@ while (*cc != OP_KETRPOS)
         OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), SLJIT_IMM, 0);
       }
     }
-
-  if (needs_control_head)
-    OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), common->control_head_ptr, SLJIT_MEM1(STACK_TOP), STACK(stack));
 
   JUMPTO(SLJIT_JUMP, loop);
   flush_stubs(common);
@@ -8441,8 +8483,7 @@ while (cc < ccend)
       OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), STR_PTR, 0);
       }
     BACKTRACK_AS(braminzero_backtrack)->matchingpath = LABEL();
-    if (cc[1] > OP_ASSERTBACK_NOT)
-      count_match(common);
+    count_match(common);
     break;
 
     case OP_ONCE:
@@ -9624,7 +9665,7 @@ static SLJIT_INLINE void compile_recurse(compiler_common *common)
 DEFINE_COMPILER;
 pcre_uchar *cc = common->start + common->currententry->start;
 pcre_uchar *ccbegin = cc + 1 + LINK_SIZE + (*cc == OP_BRA ? 0 : IMM2_SIZE);
-pcre_uchar *ccend = bracketend(cc);
+pcre_uchar *ccend = bracketend(cc) - (1 + LINK_SIZE);
 BOOL needs_control_head;
 int framesize = get_framesize(common, cc, NULL, TRUE, &needs_control_head);
 int private_data_size = get_private_data_copy_length(common, ccbegin, ccend, needs_control_head);
@@ -9648,6 +9689,7 @@ set_jumps(common->currententry->calls, common->currententry->entry);
 
 sljit_emit_fast_enter(compiler, TMP2, 0);
 allocate_stack(common, private_data_size + framesize + alternativesize);
+count_match(common);
 OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(private_data_size + framesize + alternativesize - 1), TMP2, 0);
 copy_private_data(common, ccbegin, ccend, TRUE, private_data_size + framesize + alternativesize, framesize + alternativesize, needs_control_head);
 if (needs_control_head)
@@ -9992,6 +10034,7 @@ OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, stack));
 OP1(SLJIT_MOV_UI, TMP1, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, limit_match));
 OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(struct sljit_stack, base));
 OP1(SLJIT_MOV, STACK_LIMIT, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(struct sljit_stack, limit));
+OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, SLJIT_IMM, 1);
 OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LIMIT_MATCH, TMP1, 0);
 
 if (mode == JIT_PARTIAL_SOFT_COMPILE)

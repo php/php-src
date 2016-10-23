@@ -1,6 +1,6 @@
 /*
 zip_source_win32file.c -- create data source from HANDLE (Win32)
-Copyright (C) 1999-2015 Dieter Baron and Thomas Klausner
+Copyright (C) 1999-2016 Dieter Baron and Thomas Klausner
 
 This file is part of libzip, a library to manipulate ZIP archives.
 The authors can be contacted at <libzip@nih.at>
@@ -33,7 +33,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include <wchar.h>
-#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -409,6 +408,7 @@ _win32_read_file(void *state, void *data, zip_uint64_t len, zip_source_cmd_t cmd
 static int
 _win32_create_temp_file(_zip_source_win32_read_file_t *ctx)
 {
+    zip_uint32_t value;
     /*
     Windows has GetTempFileName(), but it closes the file after
     creation, leaving it open to a horrible race condition. So
@@ -423,7 +423,6 @@ _win32_create_temp_file(_zip_source_win32_read_file_t *ctx)
     PSECURITY_ATTRIBUTES psa = NULL;
     DWORD len;
     BOOL success;
-	zip_uint32_t value;
 
     /*
     Read the DACL from the original file, so we can copy it to the temp file.

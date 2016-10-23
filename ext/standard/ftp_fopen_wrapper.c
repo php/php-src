@@ -82,6 +82,7 @@ typedef struct _php_ftp_dirstream_data {
  */
 static inline int get_ftp_result(php_stream *stream, char *buffer, size_t buffer_size)
 {
+	buffer[0] = '\0'; /* in case read fails to read anything */
 	while (php_stream_gets(stream, buffer, buffer_size-1) &&
 		   !(isdigit((int) buffer[0]) && isdigit((int) buffer[1]) &&
 			 isdigit((int) buffer[2]) && buffer[3] == ' '));
@@ -187,7 +188,8 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 			/* get the response */
 			result = GET_FTP_RESULT(stream);
 			if (result != 334) {
-				use_ssl = 0;
+				php_stream_wrapper_log_error(wrapper, options, "Server doesn't support FTPS.");
+				goto connect_errexit;
 			} else {
 				/* we must reuse the old SSL session id */
 				/* if we talk to an old ftpd-ssl */
@@ -531,10 +533,10 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 			(tmpzval = php_stream_context_get_option(context, "ftp", "resume_pos")) != NULL &&
 			Z_TYPE_P(tmpzval) == IS_LONG &&
 			Z_LVAL_P(tmpzval) > 0) {
-			php_stream_printf(stream, "REST %pd\r\n", Z_LVAL_P(tmpzval));
+			php_stream_printf(stream, "REST " ZEND_LONG_FMT "\r\n", Z_LVAL_P(tmpzval));
 			result = GET_FTP_RESULT(stream);
 			if (result < 300 || result > 399) {
-				php_stream_wrapper_log_error(wrapper, options, "Unable to resume from offset %pd", Z_LVAL_P(tmpzval));
+				php_stream_wrapper_log_error(wrapper, options, "Unable to resume from offset " ZEND_LONG_FMT, Z_LVAL_P(tmpzval));
 				goto errexit;
 			}
 		}
@@ -707,6 +709,9 @@ php_stream * php_stream_ftp_opendir(php_stream_wrapper *wrapper, const char *pat
 	if (result > 299 || result < 200)
 		goto opendir_errexit;
 
+	// tmp_line isn't relevant after the php_fopen_do_pasv().
+	tmp_line[0] = '\0';
+
 	/* set up the passive connection */
 	portno = php_fopen_do_pasv(stream, ip, sizeof(ip), &hoststart);
 
@@ -714,16 +719,17 @@ php_stream * php_stream_ftp_opendir(php_stream_wrapper *wrapper, const char *pat
 		goto opendir_errexit;
 	}
 
-	php_stream_printf(stream, "NLST %s\r\n", (resource->path != NULL ? resource->path : "/"));
-
 	/* open the data channel */
 	if (hoststart == NULL) {
 		hoststart = resource->host;
 	}
+
 	datastream = php_stream_sock_open_host(hoststart, portno, SOCK_STREAM, 0, 0);
 	if (datastream == NULL) {
 		goto opendir_errexit;
 	}
+
+	php_stream_printf(stream, "NLST %s\r\n", (resource->path != NULL ? resource->path : "/"));
 
 	result = GET_FTP_RESULT(stream);
 	if (result != 150 && result != 125) {
@@ -736,10 +742,9 @@ php_stream * php_stream_ftp_opendir(php_stream_wrapper *wrapper, const char *pat
 	}
 
 	php_stream_context_set(datastream, context);
-
-	if (use_ssl_on_data && (php_stream_xport_crypto_setup(stream,
+	if (use_ssl_on_data && (php_stream_xport_crypto_setup(datastream,
 			STREAM_CRYPTO_METHOD_SSLv23_CLIENT, NULL) < 0 ||
-			php_stream_xport_crypto_enable(stream, 1) < 0)) {
+			php_stream_xport_crypto_enable(datastream, 1) < 0)) {
 
 		php_stream_wrapper_log_error(wrapper, options, "Unable to activate SSL mode");
 		php_stream_close(datastream);
@@ -828,11 +833,11 @@ static int php_stream_ftp_url_stat(php_stream_wrapper *wrapper, const char *url,
 		struct tm tm, tmbuf, *gmt;
 		time_t stamp;
 
-		while (p - tmp_line < sizeof(tmp_line) && !isdigit(*p)) {
+		while ((size_t)(p - tmp_line) < sizeof(tmp_line) && !isdigit(*p)) {
 			p++;
 		}
 
-		if (p - tmp_line > sizeof(tmp_line)) {
+		if ((size_t)(p - tmp_line) > sizeof(tmp_line)) {
 			goto mdtm_error;
 		}
 
@@ -1177,7 +1182,8 @@ static php_stream_wrapper_ops ftp_stream_wops = {
 	php_stream_ftp_unlink, /* unlink */
 	php_stream_ftp_rename, /* rename */
 	php_stream_ftp_mkdir,  /* mkdir */
-	php_stream_ftp_rmdir   /* rmdir */
+	php_stream_ftp_rmdir,  /* rmdir */
+	NULL
 };
 
 PHPAPI php_stream_wrapper php_stream_ftp_wrapper =	{

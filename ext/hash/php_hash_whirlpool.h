@@ -23,7 +23,7 @@
 
 /* WHIRLPOOL context */
 typedef struct {
-	php_hash_uint64 state[8];
+	uint64_t state[8];
 	unsigned char bitlength[32];
 	struct {
 		int pos;

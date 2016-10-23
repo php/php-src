@@ -45,7 +45,7 @@ $done = 0;
 $a = [0,1,2,3,4];
 foreach($a as &$v) {
 	echo "$v\n";
-	if ($done && $v == 3) {
+	if (!$done && $v == 3) {
 		$done = 1;
 		array_splice($a, 1, 2, $replacement);
 	}

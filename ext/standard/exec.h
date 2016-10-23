@@ -33,6 +33,7 @@ PHP_FUNCTION(proc_close);
 PHP_FUNCTION(proc_terminate);
 PHP_FUNCTION(proc_nice);
 PHP_MINIT_FUNCTION(proc_open);
+PHP_MINIT_FUNCTION(exec);
 
 PHPAPI zend_string *php_escape_shell_cmd(char *);
 PHPAPI zend_string *php_escape_shell_arg(char *);

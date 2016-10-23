@@ -39,24 +39,18 @@ const zend_function_entry pdo_dblib_functions[] = {
 	PHP_FE_END
 };
 
-#if ZEND_MODULE_API_NO >= 20050922
 static const zend_module_dep pdo_dblib_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
 	ZEND_MOD_END
 };
-#endif
 
 #if PDO_DBLIB_IS_MSSQL
 zend_module_entry pdo_mssql_module_entry = {
 #else
 zend_module_entry pdo_dblib_module_entry = {
 #endif
-#if ZEND_MODULE_API_NO >= 20050922
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_dblib_deps,
-#else
-	STANDARD_MODULE_HEADER,
-#endif
 #if PDO_DBLIB_IS_MSSQL
 	"pdo_mssql",
 #elif defined(PHP_WIN32)
@@ -152,6 +146,26 @@ int pdo_dblib_msg_handler(DBPROCESS *dbproc, DBINT msgno, int msgstate,
 	return 0;
 }
 
+void pdo_dblib_err_dtor(pdo_dblib_err *err)
+{
+	if (!err) {
+		return;
+	}
+
+	if (err->dberrstr) {
+		efree(err->dberrstr);
+		err->dberrstr = NULL;
+	}
+	if (err->lastmsg) {
+		efree(err->lastmsg);
+		err->lastmsg = NULL;
+	}
+	if (err->oserrstr) {
+		efree(err->oserrstr);
+		err->oserrstr = NULL;
+	}
+}
+
 static PHP_GINIT_FUNCTION(dblib)
 {
 	memset(dblib_globals, 0, sizeof(*dblib_globals));
@@ -177,6 +191,10 @@ PHP_RSHUTDOWN_FUNCTION(pdo_dblib)
 
 PHP_MINIT_FUNCTION(pdo_dblib)
 {
+	REGISTER_PDO_CLASS_CONST_LONG("DBLIB_ATTR_CONNECTION_TIMEOUT", (long) PDO_DBLIB_ATTR_CONNECTION_TIMEOUT);
+	REGISTER_PDO_CLASS_CONST_LONG("DBLIB_ATTR_QUERY_TIMEOUT", (long) PDO_DBLIB_ATTR_QUERY_TIMEOUT);
+	REGISTER_PDO_CLASS_CONST_LONG("DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER", (long) PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER);
+
 	if (FAIL == dbinit()) {
 		return FAILURE;
 	}

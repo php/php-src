@@ -180,7 +180,7 @@ static int phar_compare_dir_name(const void *a, const void *b)  /* {{{ */
 static php_stream *phar_make_dirstream(char *dir, HashTable *manifest) /* {{{ */
 {
 	HashTable *data;
-	int dirlen = strlen(dir);
+	size_t dirlen = strlen(dir);
 	char *entry, *found, *save;
 	zend_string *str_key;
 	uint keylen;
@@ -205,7 +205,7 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest) /* {{{ */
 
 		keylen = ZSTR_LEN(str_key);
 		if (keylen <= (uint)dirlen) {
-			if (keylen < (uint)dirlen || !strncmp(ZSTR_VAL(str_key), dir, dirlen)) {
+			if (keylen == 0 || keylen < (uint)dirlen || !strncmp(ZSTR_VAL(str_key), dir, dirlen)) {
 				if (SUCCESS != zend_hash_move_forward(manifest)) {
 					break;
 				}

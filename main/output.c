@@ -665,7 +665,7 @@ PHPAPI int php_output_handler_alias_register(const char *name, size_t name_len, 
 }
 /* }}} */
 
-/* {{{ SUCCESS|FAILURE php_output_handler_hook(php_output_handler_hook_t type, void *arg TSMRLS_DC)
+/* {{{ SUCCESS|FAILURE php_output_handler_hook(php_output_handler_hook_t type, void *arg)
  * Output handler hook for output handler functions to check/modify the current handlers abilities */
 PHPAPI int php_output_handler_hook(php_output_handler_hook_t type, void *arg)
 {
@@ -715,7 +715,7 @@ PHPAPI void php_output_handler_dtor(php_output_handler *handler)
 }
 /* }}} */
 
-/* {{{ void php_output_handler_free(php_output_handler **handler TSMRLS_DC)
+/* {{{ void php_output_handler_free(php_output_handler **handler)
  * Destroy and free an output handler */
 PHPAPI void php_output_handler_free(php_output_handler **h)
 {

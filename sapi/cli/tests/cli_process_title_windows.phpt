@@ -21,7 +21,7 @@ if (shell_exec('PowerShell -Help') === NULL)
 // cli_set_process_title(). We're only making the API calls to ensure there are
 // no warnings/errors.
 
-$is_windows8 = false;
+$is_windows8_or_above = false;
 $ps_output = shell_exec("PowerShell -NoProfile \"(Get-Host).UI.RawUI.WindowTitle\"");
 if ($ps_output === null)
 {
@@ -31,8 +31,8 @@ if ($ps_output === null)
 
 $ps_output = trim($ps_output);
 $end_title_windows8 = ": Windows PowerShell";
-if (($ps_output == "Windows PowerShell") || (strlen($ps_output) > strlen($end_title_windows8) && substr($ps_output,-strlen($end_title_windows8)) === $end_title_windows8))
-  $is_windows8 = true;
+if (($ps_output == "Windows PowerShell") || (strlen($ps_output) > strlen($end_title_windows8) && substr($ps_output,-strlen($end_title_windows8)) === $end_title_windows8) || PHP_WINDOWS_VERSION_MAJOR >= 10)
+  $is_windows8_or_above = true;
 
 echo "*** Testing setting the process title ***\n";
 
@@ -42,7 +42,7 @@ $pid = getmypid();
 if (cli_set_process_title($original_title) === true)
   echo "Successfully set title\n";
 
-if ($is_windows8)
+if ($is_windows8_or_above)
 {
   $loaded_title = $original_title;
 }

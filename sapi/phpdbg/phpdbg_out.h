@@ -34,20 +34,11 @@ enum {
 	P_LOG
 };
 
-#ifdef ZTS
-PHPDBG_API int phpdbg_print(int severity, int fd, const char *tag, const char *xmlfmt, const char *strfmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 6, 7);
-PHPDBG_API int phpdbg_xml_internal(int fd, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
-PHPDBG_API int phpdbg_log_internal(int fd, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
-PHPDBG_API int phpdbg_out_internal(int fd, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
-PHPDBG_API int phpdbg_rlog_internal(int fd, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
-#else
 PHPDBG_API int phpdbg_print(int severity, int fd, const char *tag, const char *xmlfmt, const char *strfmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 5, 6);
 PHPDBG_API int phpdbg_xml_internal(int fd, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
 PHPDBG_API int phpdbg_log_internal(int fd, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
 PHPDBG_API int phpdbg_out_internal(int fd, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
 PHPDBG_API int phpdbg_rlog_internal(int fd, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
-#endif
-
 
 #define phpdbg_error(tag, xmlfmt, strfmt, ...)              phpdbg_print(P_ERROR  , PHPDBG_G(io)[PHPDBG_STDOUT].fd, tag,  xmlfmt, strfmt, ##__VA_ARGS__)
 #define phpdbg_notice(tag, xmlfmt, strfmt, ...)             phpdbg_print(P_NOTICE , PHPDBG_G(io)[PHPDBG_STDOUT].fd, tag,  xmlfmt, strfmt, ##__VA_ARGS__)

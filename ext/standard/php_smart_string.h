@@ -52,19 +52,22 @@
 #define SMART_STRING_DO_REALLOC(d, what) \
 	(d)->c = SMART_STRING_REALLOC((d)->c, (d)->a + 1, (what))
 
-#define smart_string_alloc4(d, n, what, newlen) do {					\
+#define smart_string_alloc4(d, n, what, newlen) do {				\
 	if (!(d)->c) {													\
 		(d)->len = 0;												\
 		newlen = (n);												\
-		(d)->a = newlen < SMART_STRING_START_SIZE 						\
-				? SMART_STRING_START_SIZE 								\
-				: newlen + SMART_STRING_PREALLOC;						\
-		SMART_STRING_DO_REALLOC(d, what);								\
+		(d)->a = newlen < SMART_STRING_START_SIZE 					\
+				? SMART_STRING_START_SIZE 							\
+				: newlen + SMART_STRING_PREALLOC;					\
+		SMART_STRING_DO_REALLOC(d, what);							\
 	} else {														\
+		if(UNEXPECTED((size_t)n > SIZE_MAX - (d)->len)) {					\
+			zend_error(E_ERROR, "String size overflow");			\
+		}															\
 		newlen = (d)->len + (n);									\
 		if (newlen >= (d)->a) {										\
-			(d)->a = newlen + SMART_STRING_PREALLOC;					\
-			SMART_STRING_DO_REALLOC(d, what);							\
+			(d)->a = newlen + SMART_STRING_PREALLOC;				\
+			SMART_STRING_DO_REALLOC(d, what);						\
 		}															\
 	}																\
 } while (0)
@@ -93,7 +96,7 @@
 	smart_string_append_unsigned_ex((dest), (val), 0)
 
 #define smart_string_appendc_ex(dest, ch, what) do {					\
-	register size_t __nl;											\
+	size_t __nl;													\
 	smart_string_alloc4((dest), 1, (what), __nl);						\
 	(dest)->len = __nl;												\
 	((unsigned char *) (dest)->c)[(dest)->len - 1] = (ch);			\
@@ -109,7 +112,7 @@
 } while (0)
 
 #define smart_string_appendl_ex(dest, src, nlen, what) do {			\
-	register size_t __nl;											\
+	size_t __nl;													\
 	smart_string *__dest = (smart_string *) (dest);						\
 																	\
 	smart_string_alloc4(__dest, (nlen), (what), __nl);					\

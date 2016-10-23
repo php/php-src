@@ -574,6 +574,24 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno)
 			sizeof(S->cols[colno].colname)-1, &colnamelen,
 			&S->cols[colno].coltype, &colsize, NULL, NULL);
 
+	/* This fixes a known issue with SQL Server and (max) lengths,
+	may affect others as well.  If we are SQL_VARCHAR,
+	SQL_VARBINARY, or SQL_WVARCHAR (or any of the long variations)
+	and zero is returned from colsize then consider it long */
+	if (0 == colsize && 
+		(S->cols[colno].coltype == SQL_VARCHAR ||
+		 S->cols[colno].coltype == SQL_LONGVARCHAR ||
+#ifdef SQL_WVARCHAR
+		 S->cols[colno].coltype == SQL_WVARCHAR ||
+#endif
+#ifdef SQL_WLONGVARCHAR
+		 S->cols[colno].coltype == SQL_WLONGVARCHAR ||
+#endif
+		 S->cols[colno].coltype == SQL_VARBINARY ||
+		 S->cols[colno].coltype == SQL_LONGVARBINARY)) {
+			 S->going_long = 1;
+	}
+
 	if (rc != SQL_SUCCESS) {
 		pdo_odbc_stmt_error("SQLDescribeCol");
 		if (rc != SQL_SUCCESS_WITH_INFO) {

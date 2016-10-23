@@ -24,7 +24,8 @@ $bar1->Name = 'outside';
 $bar1->echoName();
 $List->echoName();
 
-$bar1 =& foo2(new foo('constructor'));
+$foo = new foo('constructor');
+$bar1 =& foo2($foo);
 $bar1->Name = 'outside';
 $bar1->echoName();
 

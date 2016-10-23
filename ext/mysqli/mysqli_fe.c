@@ -63,10 +63,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_class_mysqli_stmt_bind_param, 0)
 	ZEND_ARG_VARIADIC_INFO(1, vars)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(all_args_force_by_ref, 0)
-	ZEND_ARG_VARIADIC_INFO(1, vars)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_poll, 0, 0, 4)
 	ZEND_ARG_ARRAY_INFO(1, read, 1)
 	ZEND_ARG_ARRAY_INFO(1, write, 1)
@@ -243,18 +239,14 @@ ZEND_END_ARG_INFO()
 
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_fetch_object, 0, 0, 1)
-#if PHP_VERSION_ID > 50399
 	MYSQLI_ZEND_ARG_OBJ_INFO_RESULT()
 	ZEND_ARG_INFO(0, class_name)
 	ZEND_ARG_ARRAY_INFO(0, params, 0)
-#endif
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_fetch_object, 0, 0, 0)
-#if PHP_VERSION_ID > 50399
 	ZEND_ARG_INFO(0, class_name)
 	ZEND_ARG_ARRAY_INFO(0, params, 0)
-#endif
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_kill, 0, 0, 2)
@@ -583,7 +575,7 @@ const zend_function_entry mysqli_link_methods[] = {
 	PHP_FALIAS(thread_safe, mysqli_thread_safe, arginfo_mysqli_no_params)
 	PHP_FALIAS(use_result, mysqli_use_result, arginfo_mysqli_no_params)
 	PHP_FALIAS(refresh,mysqli_refresh, arginfo_class_mysqli_refresh)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 
@@ -608,7 +600,7 @@ const zend_function_entry mysqli_result_methods[] = {
 	PHP_FALIAS(fetch_row, mysqli_fetch_row, arginfo_mysqli_no_params)
 	PHP_FALIAS(field_seek, mysqli_field_seek, arginfo_class_mysqli_result_and_fieldnr)
 	PHP_FALIAS(free_result, mysqli_free_result, arginfo_mysqli_no_params)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 
@@ -641,7 +633,7 @@ const zend_function_entry mysqli_stmt_methods[] = {
 #if defined(MYSQLI_USE_MYSQLND)
 	PHP_FALIAS(get_result, mysqli_stmt_get_result, arginfo_mysqli_no_params)
 #endif
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

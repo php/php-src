@@ -26,7 +26,6 @@ typedef struct _zend_dfg {
 	int         vars;
 	uint32_t    size;
 	zend_bitset tmp;
-	zend_bitset gen;
 	zend_bitset def;
 	zend_bitset use;
 	zend_bitset in;
@@ -44,7 +43,7 @@ typedef struct _zend_dfg {
 
 BEGIN_EXTERN_C()
 
-int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg *dfg);
+int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg *dfg, uint32_t build_flags);
 
 END_EXTERN_C()
 

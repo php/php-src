@@ -523,7 +523,10 @@ static struct pdo_dbh_methods mysql_methods = {
 	pdo_mysql_last_insert_id,
 	pdo_mysql_fetch_error_func,
 	pdo_mysql_get_attribute,
-	pdo_mysql_check_liveness
+	pdo_mysql_check_liveness,
+	NULL,
+	NULL,
+	NULL
 };
 /* }}} */
 
@@ -537,7 +540,8 @@ static struct pdo_dbh_methods mysql_methods = {
 static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 {
 	pdo_mysql_db_handle *H;
-	int i, ret = 0;
+	size_t i;
+	int ret = 0;
 	char *host = NULL, *unix_socket = NULL;
 	unsigned int port = 3306;
 	char *dbname;
@@ -630,12 +634,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		}
 
 #ifndef PDO_USE_MYSQLND
-#if PHP_API_VERSION < 20100412
-		if ((PG(open_basedir) && PG(open_basedir)[0] != '\0') || PG(safe_mode))
-#else
-		if (PG(open_basedir) && PG(open_basedir)[0] != '\0')
-#endif
-		{
+		if (PG(open_basedir) && PG(open_basedir)[0] != '\0') {
 			local_infile = 0;
 		}
 #endif

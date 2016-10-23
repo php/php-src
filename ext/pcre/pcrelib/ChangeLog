@@ -1,6 +1,182 @@
 ChangeLog for PCRE
 ------------------
 
+Note that the PCRE 8.xx series (PCRE1) is now in a bugfix-only state. All
+development is happening in the PCRE2 10.xx series.
+
+Version 8.38 23-November-2015
+-----------------------------
+
+1.  If a group that contained a recursive back reference also contained a
+    forward reference subroutine call followed by a non-forward-reference
+    subroutine call, for example /.((?2)(?R)\1)()/, pcre2_compile() failed to
+    compile correct code, leading to undefined behaviour or an internally
+    detected error. This bug was discovered by the LLVM fuzzer.
+
+2.  Quantification of certain items (e.g. atomic back references) could cause
+    incorrect code to be compiled when recursive forward references were
+    involved. For example, in this pattern: /(?1)()((((((\1++))\x85)+)|))/.
+    This bug was discovered by the LLVM fuzzer.
+
+3.  A repeated conditional group whose condition was a reference by name caused
+    a buffer overflow if there was more than one group with the given name.
+    This bug was discovered by the LLVM fuzzer.
+
+4.  A recursive back reference by name within a group that had the same name as
+    another group caused a buffer overflow. For example:
+    /(?J)(?'d'(?'d'\g{d}))/. This bug was discovered by the LLVM fuzzer.
+
+5.  A forward reference by name to a group whose number is the same as the
+    current group, for example in this pattern: /(?|(\k'Pm')|(?'Pm'))/, caused
+    a buffer overflow at compile time. This bug was discovered by the LLVM
+    fuzzer.
+
+6.  A lookbehind assertion within a set of mutually recursive subpatterns could
+    provoke a buffer overflow. This bug was discovered by the LLVM fuzzer.
+
+7.  Another buffer overflow bug involved duplicate named groups with a
+    reference between their definition, with a group that reset capture
+    numbers, for example: /(?J:(?|(?'R')(\k'R')|((?'R'))))/. This has been
+    fixed by always allowing for more memory, even if not needed. (A proper fix
+    is implemented in PCRE2, but it involves more refactoring.)
+
+8.  There was no check for integer overflow in subroutine calls such as (?123).
+
+9.  The table entry for \l in EBCDIC environments was incorrect, leading to its
+    being treated as a literal 'l' instead of causing an error.
+
+10. There was a buffer overflow if pcre_exec() was called with an ovector of
+    size 1. This bug was found by american fuzzy lop.
+
+11. If a non-capturing group containing a conditional group that could match
+    an empty string was repeated, it was not identified as matching an empty
+    string itself. For example: /^(?:(?(1)x|)+)+$()/.
+
+12. In an EBCDIC environment, pcretest was mishandling the escape sequences
+    \a and \e in test subject lines.
+
+13. In an EBCDIC environment, \a in a pattern was converted to the ASCII
+    instead of the EBCDIC value.
+
+14. The handling of \c in an EBCDIC environment has been revised so that it is
+    now compatible with the specification in Perl's perlebcdic page.
+
+15. The EBCDIC character 0x41 is a non-breaking space, equivalent to 0xa0 in
+    ASCII/Unicode. This has now been added to the list of characters that are
+    recognized as white space in EBCDIC.
+
+16. When PCRE was compiled without UCP support, the use of \p and \P gave an
+    error (correctly) when used outside a class, but did not give an error
+    within a class.
+
+17. \h within a class was incorrectly compiled in EBCDIC environments.
+
+18. A pattern with an unmatched closing parenthesis that contained a backward
+    assertion which itself contained a forward reference caused buffer
+    overflow. And example pattern is: /(?=di(?<=(?1))|(?=(.))))/.
+
+19. JIT should return with error when the compiled pattern requires more stack
+    space than the maximum.
+
+20. A possessively repeated conditional group that could match an empty string,
+    for example, /(?(R))*+/, was incorrectly compiled.
+
+21. Fix infinite recursion in the JIT compiler when certain patterns such as
+    /(?:|a|){100}x/ are analysed.
+
+22. Some patterns with character classes involving [: and \\ were incorrectly
+    compiled and could cause reading from uninitialized memory or an incorrect
+    error diagnosis.
+
+23. Pathological patterns containing many nested occurrences of [: caused
+    pcre_compile() to run for a very long time.
+
+24. A conditional group with only one branch has an implicit empty alternative
+    branch and must therefore be treated as potentially matching an empty
+    string.
+
+25. If (?R was followed by - or + incorrect behaviour happened instead of a
+    diagnostic.
+
+26. Arrange to give up on finding the minimum matching length for overly
+    complex patterns.
+
+27. Similar to (4) above: in a pattern with duplicated named groups and an
+    occurrence of (?| it is possible for an apparently non-recursive back
+    reference to become recursive if a later named group with the relevant
+    number is encountered. This could lead to a buffer overflow. Wen Guanxing
+    from Venustech ADLAB discovered this bug.
+
+28. If pcregrep was given the -q option with -c or -l, or when handling a
+    binary file, it incorrectly wrote output to stdout.
+
+29. The JIT compiler did not restore the control verb head in case of *THEN
+    control verbs. This issue was found by Karl Skomski with a custom LLVM
+    fuzzer.
+
+30. Error messages for syntax errors following \g and \k were giving inaccurate
+    offsets in the pattern.
+
+31. Added a check for integer overflow in conditions (?(<digits>) and
+    (?(R<digits>). This omission was discovered by Karl Skomski with the LLVM
+    fuzzer.
+
+32. Handling recursive references such as (?2) when the reference is to a group
+    later in the pattern uses code that is very hacked about and error-prone.
+    It has been re-written for PCRE2. Here in PCRE1, a check has been added to
+    give an internal error if it is obvious that compiling has gone wrong.
+
+33. The JIT compiler should not check repeats after a {0,1} repeat byte code.
+    This issue was found by Karl Skomski with a custom LLVM fuzzer.
+
+34. The JIT compiler should restore the control chain for empty possessive
+    repeats. This issue was found by Karl Skomski with a custom LLVM fuzzer.
+
+35. Match limit check added to JIT recursion. This issue was found by Karl
+    Skomski with a custom LLVM fuzzer.
+
+36. Yet another case similar to 27 above has been circumvented by an
+    unconditional allocation of extra memory. This issue is fixed "properly" in
+    PCRE2 by refactoring the way references are handled. Wen Guanxing
+    from Venustech ADLAB discovered this bug.
+
+37. Fix two assertion fails in JIT. These issues were found by Karl Skomski
+    with a custom LLVM fuzzer.
+
+38. Fixed a corner case of range optimization in JIT.
+
+39. An incorrect error "overran compiling workspace" was given if there were
+    exactly enough group forward references such that the last one extended
+    into the workspace safety margin. The next one would have expanded the
+    workspace. The test for overflow was not including the safety margin.
+
+40. A match limit issue is fixed in JIT which was found by Karl Skomski
+    with a custom LLVM fuzzer.
+
+41. Remove the use of /dev/null in testdata/testinput2, because it doesn't
+    work under Windows. (Why has it taken so long for anyone to notice?)
+
+42. In a character class such as [\W\p{Any}] where both a negative-type escape
+    ("not a word character") and a property escape were present, the property
+    escape was being ignored.
+
+43. Fix crash caused by very long (*MARK) or (*THEN) names.
+
+44. A sequence such as [[:punct:]b] that is, a POSIX character class followed
+    by a single ASCII character in a class item, was incorrectly compiled in
+    UCP mode. The POSIX class got lost, but only if the single character
+    followed it.
+
+45. [:punct:] in UCP mode was matching some characters in the range 128-255
+    that should not have been matched.
+
+46. If [:^ascii:] or [:^xdigit:] or [:^cntrl:] are present in a non-negated
+    class, all characters with code points greater than 255 are in the class.
+    When a Unicode property was also in the class (if PCRE_UCP is set, escapes
+    such as \w are turned into Unicode properties), wide characters were not
+    correctly handled, and could fail to match.
+
+
 Version 8.37 28-April-2015
 --------------------------
 

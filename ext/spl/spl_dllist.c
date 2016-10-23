@@ -156,7 +156,7 @@ static void spl_ptr_llist_destroy(spl_ptr_llist *llist) /* {{{ */
 
 	while (current) {
 		next = current->next;
-		if(current && dtor) {
+		if (dtor) {
 			dtor(current);
 		}
 		SPL_LLIST_DELREF(current);
@@ -830,7 +830,6 @@ SPL_METHOD(SplDoublyLinkedList, offsetSet)
 		index = spl_offset_convert_to_long(zindex);
 
 		if (index < 0 || index >= intern->llist->count) {
-			zval_ptr_dtor(value);
 			zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid or out of range", 0);
 			return;
 		}
@@ -1224,7 +1223,7 @@ SPL_METHOD(SplDoublyLinkedList, unserialize)
 
 error:
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-	zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Error at offset %pd of %d bytes", (zend_long)((char*)p - buf), buf_len);
+	zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Error at offset %zd of %zd bytes", ((char*)p - buf), buf_len);
 	return;
 
 } /* }}} */
@@ -1292,7 +1291,8 @@ zend_object_iterator_funcs spl_dllist_it_funcs = {
 	spl_dllist_it_get_current_data,
 	spl_dllist_it_get_current_key,
 	spl_dllist_it_move_forward,
-	spl_dllist_it_rewind
+	spl_dllist_it_rewind,
+	NULL
 }; /* }}} */
 
 zend_object_iterator *spl_dllist_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */

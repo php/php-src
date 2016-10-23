@@ -65,10 +65,14 @@ echo "\n*** Done ***\n";
 --EXPECTF--
 *** Testing tempnam() with invalid/non-existing directory names ***
 -- Iteration 0 --
+
+Notice: tempnam(): file created in the system's temporary directory in %stempnam_variation7-win32.php on line %d
 File name is => %s%et%s
 File permissions are => 100666
 File created in => temp dir
 -- Iteration 1 --
+
+Notice: tempnam(): file created in the system's temporary directory in %stempnam_variation7-win32.php on line %d
 File name is => %s%et%s
 File permissions are => 100666
 File created in => temp dir
@@ -85,6 +89,8 @@ File name is => %s%et%s
 File permissions are => 100666
 File created in => temp dir
 -- Iteration 5 --
+
+Notice: tempnam(): file created in the system's temporary directory in %stempnam_variation7-win32.php on line %d
 File name is => %s%et%s
 File permissions are => 100666
 File created in => temp dir
@@ -101,10 +107,14 @@ Warning: tempnam() expects parameter 1 to be a valid path, array given in %s on 
 
 Warning: unlink(): %r(Invalid argument|No such file or directory)%r in %s on line %d
 -- Iteration 8 --
+
+Notice: tempnam(): file created in the system's temporary directory in %stempnam_variation7-win32.php on line %d
 File name is => %s%et%s
 File permissions are => 100666
 File created in => temp dir
 -- Iteration 9 --
+
+Notice: tempnam(): file created in the system's temporary directory in %stempnam_variation7-win32.php on line %d
 File name is => %s%et%s
 File permissions are => 100666
 File created in => temp dir

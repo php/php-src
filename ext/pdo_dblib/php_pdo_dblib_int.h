@@ -108,16 +108,20 @@ typedef struct {
 	char *lastmsg;
 } pdo_dblib_err;
 
+void pdo_dblib_err_dtor(pdo_dblib_err *err);
+
 typedef struct {
 	LOGINREC	*login;
 	DBPROCESS	*link;
 
 	pdo_dblib_err err;
+	unsigned stringify_uniqueidentifier:1;
 } pdo_dblib_db_handle;
 
 typedef struct {
 	pdo_dblib_db_handle *H;
 	pdo_dblib_err err;
+	unsigned int computed_column_name_count;
 } pdo_dblib_stmt;
 
 typedef struct {
@@ -137,7 +141,13 @@ ZEND_END_MODULE_GLOBALS(dblib)
 # define DBLIB_G(v) (dblib_globals.v)
 #endif
 
-ZEND_EXTERN_MODULE_GLOBALS(dblib);
+ZEND_EXTERN_MODULE_GLOBALS(dblib)
+
+enum {
+	PDO_DBLIB_ATTR_CONNECTION_TIMEOUT = PDO_ATTR_DRIVER_SPECIFIC,
+	PDO_DBLIB_ATTR_QUERY_TIMEOUT,
+	PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER,
+};
 
 #endif
 

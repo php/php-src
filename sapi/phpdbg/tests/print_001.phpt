@@ -31,7 +31,7 @@ L9-9 Foo\Bar::baz() %s - %s + 1 ops
  L9    #0     RETURN                  null                                                          
 prompt> [Not Executing!]
 prompt> [Context %s (11 ops)]
-L1-19 {main}() %s - %s + 11 ops
+L1-21 {main}() %s - %s + 11 ops
  L4    #0     NOP                                                                                   
  L14   #1     NOP                                                                                   
  L18   #2     NEW                     "Foo\\Bar"                                @1                  
@@ -42,7 +42,7 @@ L1-19 {main}() %s - %s + 11 ops
  L19   #7     INIT_FCALL%s %d %s "foo"                                    
  L19   #8     SEND_VAL                "test"               1                                        
  L19   #9     DO_FCALL                                                                              
- L19   #10    RETURN                  1                                                             
+ L21   #10    RETURN                  1                                                             
 prompt> 
 --FILE--
 <?php
