@@ -38,6 +38,7 @@ Content-Disposition: form-data; name="file2"; filename="file2.txt"
 --FILE--
 <?php
 error_reporting(0);
+ob_start();
 session_start();
 var_dump(session_id());
 var_dump(basename(__FILE__) == $_POST[ini_get("session.upload_progress.name")]);
@@ -87,4 +88,50 @@ array(2) {
     int(1)
   }
 }
-NULL
+array(5) {
+  ["start_time"]=>
+  int(%d)
+  ["content_length"]=>
+  int(469)
+  ["bytes_processed"]=>
+  int(469)
+  ["done"]=>
+  bool(true)
+  ["files"]=>
+  array(2) {
+    [0]=>
+    array(7) {
+      ["field_name"]=>
+      string(5) "file1"
+      ["name"]=>
+      string(9) "file1.txt"
+      ["tmp_name"]=>
+      string(%d) "%s"
+      ["error"]=>
+      int(0)
+      ["done"]=>
+      bool(true)
+      ["start_time"]=>
+      int(%d)
+      ["bytes_processed"]=>
+      int(1)
+    }
+    [1]=>
+    array(7) {
+      ["field_name"]=>
+      string(5) "file2"
+      ["name"]=>
+      string(9) "file2.txt"
+      ["tmp_name"]=>
+      string(%d) "%s"
+      ["error"]=>
+      int(0)
+      ["done"]=>
+      bool(true)
+      ["start_time"]=>
+      int(%d)
+      ["bytes_processed"]=>
+      int(1)
+    }
+  }
+}

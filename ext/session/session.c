@@ -1675,7 +1675,7 @@ PHPAPI void session_adapt_url(const char *url, size_t urllen, char **new, size_t
    * Userspace exported functions *
    ******************************** */
 
-/* {{{ proto void session_set_cookie_params(int lifetime [, string path [, string domain [, bool secure[, bool httponly]]]])
+/* {{{ proto bool session_set_cookie_params(int lifetime [, string path [, string domain [, bool secure[, bool httponly]]]])
    Set session cookie parameters */
 static PHP_FUNCTION(session_set_cookie_params)
 {
@@ -1693,6 +1693,11 @@ static PHP_FUNCTION(session_set_cookie_params)
  
 	if (PS(session_status) == php_session_active) {
 		php_error_docref(NULL, E_WARNING, "Cannot change session cookie parameters when session is active");
+		RETURN_FALSE;
+	}
+
+	if (SG(headers_sent)) {
+		php_error_docref(NULL, E_WARNING, "Cannot change session cookie parameters when headers already sent");
 		RETURN_FALSE;
 	}
 
@@ -1777,6 +1782,11 @@ static PHP_FUNCTION(session_name)
 		RETURN_FALSE;
 	}
 
+	if (SG(headers_sent)) {
+		php_error_docref(NULL, E_WARNING, "Cannot change session name when headers already sent");
+		RETURN_FALSE;
+	}
+
 	RETVAL_STRING(PS(session_name));
 
 	if (name) {
@@ -1800,6 +1810,11 @@ static PHP_FUNCTION(session_module_name)
 
 	if (name && PS(session_status) == php_session_active) {
 		php_error_docref(NULL, E_WARNING, "Cannot change save handler module when session is active");
+		RETURN_FALSE;
+	}
+
+	if (SG(headers_sent)) {
+		php_error_docref(NULL, E_WARNING, "Cannot change save handler module when headers already sent");
 		RETURN_FALSE;
 	}
 
@@ -1829,7 +1844,7 @@ static PHP_FUNCTION(session_module_name)
 }
 /* }}} */
 
-/* {{{ proto void session_set_save_handler(string open, string close, string read, string write, string destroy, string gc, string create_sid)
+/* {{{ proto bool session_set_save_handler(string open, string close, string read, string write, string destroy, string gc, string create_sid)
    Sets user-level functions */
 static PHP_FUNCTION(session_set_save_handler)
 {
@@ -1840,6 +1855,11 @@ static PHP_FUNCTION(session_set_save_handler)
 
 	if (PS(session_status) == php_session_active) {
 		php_error_docref(NULL, E_WARNING, "Cannot change save handler when session is active");
+		RETURN_FALSE;
+	}
+
+	if (SG(headers_sent)) {
+		php_error_docref(NULL, E_WARNING, "Cannot change save handler when headers already sent");
 		RETURN_FALSE;
 	}
 
@@ -2001,6 +2021,11 @@ static PHP_FUNCTION(session_save_path)
 		RETURN_FALSE;
 	}
 
+	if (SG(headers_sent)) {
+		php_error_docref(NULL, E_WARNING, "Cannot change save path when headers already sent");
+		RETURN_FALSE;
+	}
+
 	RETVAL_STRING(PS(save_path));
 
 	if (name) {
@@ -2025,6 +2050,11 @@ static PHP_FUNCTION(session_id)
 
 	if (zend_parse_parameters(argc, "|S", &name) == FAILURE) {
 		return;
+	}
+
+	if (name && SG(headers_sent)) {
+		php_error_docref(NULL, E_WARNING, "Cannot change session id when headers already sent");
+		RETURN_FALSE;
 	}
 
 	if (PS(id)) {
@@ -2065,7 +2095,7 @@ static PHP_FUNCTION(session_regenerate_id)
 		RETURN_FALSE;
 	}
 
-	if (SG(headers_sent) && PS(use_cookies)) {
+	if (SG(headers_sent)) {
 		php_error_docref(NULL, E_WARNING, "Cannot regenerate session id - headers already sent");
 		RETURN_FALSE;
 	}
@@ -2149,7 +2179,7 @@ static PHP_FUNCTION(session_regenerate_id)
 }
 /* }}} */
 
-/* {{{ proto void session_create_id([string prefix])
+/* {{{ proto string session_create_id([string prefix])
    Generate new session ID. Intended for user save handlers. */
 /* This is not used yet */
 static PHP_FUNCTION(session_create_id)
@@ -2210,13 +2240,18 @@ static PHP_FUNCTION(session_cache_limiter)
 	zend_string *limiter = NULL;
 	zend_string *ini_name;
 
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S", &limiter) == FAILURE) {
+		return;
+	}
+
 	if (PS(session_status) == php_session_active) {
 		php_error_docref(NULL, E_WARNING, "Cannot change cache limiter when session is active");
 		RETURN_FALSE;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S", &limiter) == FAILURE) {
-		return;
+	if (SG(headers_sent)) {
+		php_error_docref(NULL, E_WARNING, "Cannot change cache limiter when headers already sent");
+		RETURN_FALSE;
 	}
 
 	RETVAL_STRING(PS(cache_limiter));
@@ -2243,6 +2278,11 @@ static PHP_FUNCTION(session_cache_expire)
 	if (PS(session_status) == php_session_active) {
 		php_error_docref(NULL, E_WARNING, "Cannot change cache expire when session is active");
 		RETURN_LONG(PS(cache_expire));
+	}
+
+	if (SG(headers_sent)) {
+		php_error_docref(NULL, E_WARNING, "Cannot change cache expire when headers already sent");
+		RETURN_FALSE;
 	}
 
 	RETVAL_LONG(PS(cache_expire));
@@ -2326,6 +2366,16 @@ static PHP_FUNCTION(session_start)
 	if (PS(session_status) == php_session_active) {
 		php_error_docref(NULL, E_NOTICE, "A session had already been started - ignoring");
 		RETURN_TRUE;
+	}
+
+	/*
+	 * TODO: To prevent unusable session with trans sid, actual output started status is
+	 * required. i.e. There shouldn't be any outputs in output buffer, otherwise session
+	 * module is unable to rewrite output.
+	 */
+	if (SG(headers_sent)) {
+		php_error_docref(NULL, E_WARNING, "Cannot start session when headers already sent");
+		RETURN_FALSE;
 	}
 
 	/* set options */
