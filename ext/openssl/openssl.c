@@ -3910,7 +3910,6 @@ static int php_openssl_is_private_key(EVP_PKEY* pkey)
 	assert(pkey != NULL);
 
 	switch (EVP_PKEY_id(pkey)) {
-#ifndef NO_RSA
 		case EVP_PKEY_RSA:
 		case EVP_PKEY_RSA2:
 			{
@@ -3925,8 +3924,6 @@ static int php_openssl_is_private_key(EVP_PKEY* pkey)
 				}
 			}
 			break;
-#endif
-#ifndef NO_DSA
 		case EVP_PKEY_DSA:
 		case EVP_PKEY_DSA1:
 		case EVP_PKEY_DSA2:
@@ -3949,8 +3946,6 @@ static int php_openssl_is_private_key(EVP_PKEY* pkey)
 				}
 			}
 			break;
-#endif
-#ifndef NO_DH
 		case EVP_PKEY_DH:
 			{
 				DH *dh = EVP_PKEY_get0_DH(pkey);
@@ -3969,7 +3964,6 @@ static int php_openssl_is_private_key(EVP_PKEY* pkey)
 				}
 			}
 			break;
-#endif
 #ifdef HAVE_EVP_PKEY_EC
 		case EVP_PKEY_EC:
 			{
