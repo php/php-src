@@ -528,7 +528,9 @@ static void php_session_normalize_vars() /* {{{ */
 static PHP_INI_MH(OnUpdateSaveHandler) /* {{{ */
 {
 	ps_module *tmp;
+
 	SESSION_CHECK_ACTIVE_STATE;
+	SESSION_CHECK_OUTPUT_STATE;
 
 	tmp = _php_find_ps_module(ZSTR_VAL(new_value));
 
@@ -558,7 +560,9 @@ static PHP_INI_MH(OnUpdateSaveHandler) /* {{{ */
 static PHP_INI_MH(OnUpdateSerializer) /* {{{ */
 {
 	const ps_serializer *tmp;
+
 	SESSION_CHECK_ACTIVE_STATE;
+	SESSION_CHECK_OUTPUT_STATE;
 
 	tmp = _php_find_ps_serializer(ZSTR_VAL(new_value));
 
@@ -586,6 +590,7 @@ static PHP_INI_MH(OnUpdateSerializer) /* {{{ */
 static PHP_INI_MH(OnUpdateTransSid) /* {{{ */
 {
 	SESSION_CHECK_ACTIVE_STATE;
+	SESSION_CHECK_OUTPUT_STATE;
 
 	if (!strncasecmp(ZSTR_VAL(new_value), "on", sizeof("on"))) {
 		PS(use_trans_sid) = (zend_bool) 1;
@@ -601,6 +606,7 @@ static PHP_INI_MH(OnUpdateTransSid) /* {{{ */
 static PHP_INI_MH(OnUpdateSaveDir) /* {{{ */
 {
 	SESSION_CHECK_ACTIVE_STATE;
+	SESSION_CHECK_OUTPUT_STATE;
 
 	/* Only do the safemode/open_basedir check at runtime */
 	if (stage == PHP_INI_STAGE_RUNTIME || stage == PHP_INI_STAGE_HTACCESS) {
@@ -634,6 +640,7 @@ static PHP_INI_MH(OnUpdateSaveDir) /* {{{ */
 static PHP_INI_MH(OnUpdateName) /* {{{ */
 {
 	SESSION_CHECK_ACTIVE_STATE;
+	SESSION_CHECK_OUTPUT_STATE;
 
 	/* Numeric session.name won't work at all */
 	if ((!ZSTR_LEN(new_value) || is_numeric_string(ZSTR_VAL(new_value), ZSTR_LEN(new_value), NULL, NULL, 0))) {
@@ -659,6 +666,7 @@ static PHP_INI_MH(OnUpdateName) /* {{{ */
 
 static PHP_INI_MH(OnUpdateCookieLifetime) /* {{{ */
 {
+	SESSION_CHECK_ACTIVE_STATE;
 	SESSION_CHECK_OUTPUT_STATE;
 	if (atol(ZSTR_VAL(new_value)) < 0) {
 		php_error_docref(NULL, E_WARNING, "CookieLifetime cannot be negative");
@@ -669,8 +677,9 @@ static PHP_INI_MH(OnUpdateCookieLifetime) /* {{{ */
 /* }}} */
 
 
-static PHP_INI_MH(OnUpdateCacheExpire) /* {{{ */
+static PHP_INI_MH(OnUpdateSessionLong) /* {{{ */
 {
+	SESSION_CHECK_ACTIVE_STATE;
 	SESSION_CHECK_OUTPUT_STATE;
 	return OnUpdateLong(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
@@ -679,6 +688,7 @@ static PHP_INI_MH(OnUpdateCacheExpire) /* {{{ */
 
 static PHP_INI_MH(OnUpdateSessionString) /* {{{ */
 {
+	SESSION_CHECK_ACTIVE_STATE;
 	SESSION_CHECK_OUTPUT_STATE;
 	return OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
@@ -688,6 +698,7 @@ static PHP_INI_MH(OnUpdateSessionString) /* {{{ */
 static PHP_INI_MH(OnUpdateSessionBool) /* {{{ */
 {
 	SESSION_CHECK_OUTPUT_STATE;
+	SESSION_CHECK_ACTIVE_STATE;
 	return OnUpdateBool(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
 /* }}} */
@@ -698,6 +709,8 @@ static PHP_INI_MH(OnUpdateSidLength) /* {{{ */
 	zend_long val;
 	char *endptr = NULL;
 
+	SESSION_CHECK_OUTPUT_STATE;
+	SESSION_CHECK_ACTIVE_STATE;
 	val = ZEND_STRTOL(ZSTR_VAL(new_value), &endptr, 10);
 	if (endptr && (*endptr == '\0')
 		&& val >= 22 && val <= PS_MAX_SID_LENGTH) {
@@ -716,6 +729,8 @@ static PHP_INI_MH(OnUpdateSidBits) /* {{{ */
 	zend_long val;
 	char *endptr = NULL;
 
+	SESSION_CHECK_OUTPUT_STATE;
+	SESSION_CHECK_ACTIVE_STATE;
 	val = ZEND_STRTOL(ZSTR_VAL(new_value), &endptr, 10);
 	if (endptr && (*endptr == '\0')
 		&& val >= 4 && val <=6) {
@@ -733,6 +748,7 @@ static PHP_INI_MH(OnUpdateSidBits) /* {{{ */
 static PHP_INI_MH(OnUpdateLazyWrite) /* {{{ */
 {
 	SESSION_CHECK_ACTIVE_STATE;
+	SESSION_CHECK_OUTPUT_STATE;
 	return OnUpdateBool(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
 /* }}} */
@@ -766,9 +782,9 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("session.name",               "PHPSESSID", PHP_INI_ALL, OnUpdateName,          session_name,       php_ps_globals,    ps_globals)
 	PHP_INI_ENTRY("session.save_handler",           "files",     PHP_INI_ALL, OnUpdateSaveHandler)
 	STD_PHP_INI_BOOLEAN("session.auto_start",       "0",         PHP_INI_PERDIR, OnUpdateBool,       auto_start,         php_ps_globals,    ps_globals)
-	STD_PHP_INI_ENTRY("session.gc_probability",     "1",         PHP_INI_ALL, OnUpdateLong,          gc_probability,     php_ps_globals,    ps_globals)
-	STD_PHP_INI_ENTRY("session.gc_divisor",         "100",       PHP_INI_ALL, OnUpdateLong,          gc_divisor,         php_ps_globals,    ps_globals)
-	STD_PHP_INI_ENTRY("session.gc_maxlifetime",     "1440",      PHP_INI_ALL, OnUpdateLong,          gc_maxlifetime,     php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.gc_probability",     "1",         PHP_INI_ALL, OnUpdateSessionLong,          gc_probability,     php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.gc_divisor",         "100",       PHP_INI_ALL, OnUpdateSessionLong,          gc_divisor,         php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.gc_maxlifetime",     "1440",      PHP_INI_ALL, OnUpdateSessionLong,          gc_maxlifetime,     php_ps_globals,    ps_globals)
 	PHP_INI_ENTRY("session.serialize_handler",      "php",       PHP_INI_ALL, OnUpdateSerializer)
 	STD_PHP_INI_ENTRY("session.cookie_lifetime",    "0",         PHP_INI_ALL, OnUpdateCookieLifetime,cookie_lifetime,    php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.cookie_path",        "/",         PHP_INI_ALL, OnUpdateSessionString, cookie_path,        php_ps_globals,    ps_globals)
@@ -778,9 +794,9 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("session.use_cookies",        "1",         PHP_INI_ALL, OnUpdateSessionBool,   use_cookies,        php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.use_only_cookies",   "1",         PHP_INI_ALL, OnUpdateSessionBool,   use_only_cookies,   php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.use_strict_mode",    "0",         PHP_INI_ALL, OnUpdateSessionBool,   use_strict_mode,    php_ps_globals,    ps_globals)
-	STD_PHP_INI_ENTRY("session.referer_check",      "0",         PHP_INI_ALL, OnUpdateSessionString, extern_referer_chk, php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.referer_check",      "",          PHP_INI_ALL, OnUpdateSessionString, extern_referer_chk, php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.cache_limiter",      "nocache",   PHP_INI_ALL, OnUpdateSessionString, cache_limiter,      php_ps_globals,    ps_globals)
-	STD_PHP_INI_ENTRY("session.cache_expire",       "180",       PHP_INI_ALL, OnUpdateCacheExpire,   cache_expire,       php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.cache_expire",       "180",       PHP_INI_ALL, OnUpdateSessionLong,   cache_expire,       php_ps_globals,    ps_globals)
 	PHP_INI_ENTRY("session.use_trans_sid",          "0",         PHP_INI_ALL, OnUpdateTransSid)
 	PHP_INI_ENTRY("session.sid_length",             "32",        PHP_INI_ALL, OnUpdateSidLength)
 	PHP_INI_ENTRY("session.sid_bits_per_character", "4",         PHP_INI_ALL, OnUpdateSidBits)
