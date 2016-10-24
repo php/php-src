@@ -2996,7 +2996,7 @@ ZEND_METHOD(reflection_type, isBuiltin)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	RETVAL_BOOL(param->arg_info->type_hint != IS_OBJECT || ((zend_internal_arg_info*)param->arg_info)->class_name == NULL);
+	RETVAL_BOOL(param->arg_info->class_name == NULL);
 }
 /* }}} */
 
