@@ -20,8 +20,6 @@ function stream_notification_callback($notification_code, $severity, $message, $
     }
 }
 
-$ctx = stream_context_create();
-
 function do_test($num_spaces, $leave_trailing_space=false) {
   // SOAPClient exhibits the bug because it forces HTTP/1.1,
   // whereas file_get_contents() uses HTTP/1.0 by default.
