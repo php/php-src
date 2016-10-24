@@ -16,38 +16,30 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id:$ */
+#define HAVE_VTUNE 1
 
-#ifndef HAVE_JIT_H
-#define HAVE_JIT_H
+#include "jit/vtune/jitprofiling.h"
+#include "jit/vtune/jitprofiling.c"
 
-#define ZEND_JIT_LEVEL_NONE        0     /* no JIT */
-#define ZEND_JIT_LEVEL_MINIMAL     1     /* minimal JIT (subroutine threading) */
-#define ZEND_JIT_LEVEL_INLINE      2     /* selective inline threading */
-#define ZEND_JIT_LEVEL_OPT_FUNC    3     /* optimized JIT based on Type-Inference */
-#define ZEND_JIT_LEVEL_OPT_SCRIPT  4     /* optimized JIT based on Type-Inference and inner-procedure analises */
+static void zend_jit_vtune_register(const char *name,
+                                    const void *start,
+                                    size_t      size)
+{
+	iJIT_Method_Load jmethod = {0};
 
-#define ZEND_JIT_LEVEL_DEFAULT     "4"
+	if (iJIT_IsProfilingActive() != iJIT_SAMPLING_ON) {
+		return;
+	}
 
-#define ZEND_JIT_DEBUG_ASM       (1<<0)
-#define ZEND_JIT_DEBUG_SSA       (1<<1)
+	jmethod.method_id = iJIT_GetNewMethodID();
+	jmethod.method_name = (char*)name;
+	jmethod.class_file_name = NULL;
+	jmethod.source_file_name = NULL;
+	jmethod.method_load_address = (void*)start;
+	jmethod.method_size = size;
 
-#define ZEND_JIT_DEBUG_GDB       (1<<4)
-#define ZEND_JIT_DEBUG_PERF      (1<<5)
-#define ZEND_JIT_DEBUG_OPROFILE  (1<<6)
-#define ZEND_JIT_DEBUG_VTUNE     (1<<7)
-
-
-ZEND_API int  zend_jit_op_array(zend_op_array *op_array, zend_script *script);
-ZEND_API int  zend_jit_script(zend_script *script);
-ZEND_API void zend_jit_unprotect(void);
-ZEND_API void zend_jit_protect(void);
-ZEND_API int  zend_jit_startup(zend_long jit_level, size_t size);
-ZEND_API void zend_jit_shutdown(void);
-ZEND_API void zend_jit_status(zval *ret);
-
-#endif /* HAVE_JIT_H */
-
+	iJIT_NotifyEvent(iJVM_EVENT_TYPE_METHOD_LOAD_FINISHED, (void*)&jmethod);
+}
 /*
  * Local variables:
  * tab-width: 4

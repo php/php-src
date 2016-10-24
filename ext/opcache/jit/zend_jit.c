@@ -81,6 +81,7 @@ static int zend_may_overflow(const zend_op *opline, zend_op_array *op_array, zen
 #ifdef HAVE_OPROFILE
 # include "jit/zend_jit_oprofile.c"
 #endif
+#include "jit/zend_jit_vtune.c"
 
 #if _WIN32
 # include <Windows.h>
@@ -144,7 +145,7 @@ static void *dasm_link_and_encode(dasm_State    **dasm_state,
 	size_t size;
 	int ret;
 	void *entry;
-#if defined(HAVE_DISASM) || defined(HAVE_GDB) || defined(HAVE_OPROFILE) || defined(HAVE_PERFTOOLS)
+#if defined(HAVE_DISASM) || defined(HAVE_GDB) || defined(HAVE_OPROFILE) || defined(HAVE_PERFTOOLS) || defined(HAVE_VTUNE)
 	zend_string *str = NULL;
 #endif
 
@@ -186,9 +187,9 @@ static void *dasm_link_and_encode(dasm_State    **dasm_state,
 		}
 	}
 
-#if defined(HAVE_DISASM) || defined(HAVE_GDB) || defined(HAVE_OPROFILE) || defined(HAVE_PERFTOOLS)
+#if defined(HAVE_DISASM) || defined(HAVE_GDB) || defined(HAVE_OPROFILE) || defined(HAVE_PERFTOOLS) || defined(HAVE_VTUNE)
     if (!name) {
-		if (ZCG(accel_directives).jit_debug & (ZEND_JIT_DEBUG_ASM|ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_OPROFILE|ZEND_JIT_DEBUG_PERF)) {
+		if (ZCG(accel_directives).jit_debug & (ZEND_JIT_DEBUG_ASM|ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_OPROFILE|ZEND_JIT_DEBUG_PERF|ZEND_JIT_DEBUG_VTUNE)) {
 			str = zend_jit_func_name(op_array);
 			if (str) {
 				name = ZSTR_VAL(str);
@@ -242,7 +243,18 @@ static void *dasm_link_and_encode(dasm_State    **dasm_state,
 	}
 #endif
 
-#if defined(HAVE_DISASM) || defined(HAVE_GDB) || defined(HAVE_OPROFILE) || defined(HAVE_PERFTOOLS)
+#ifdef HAVE_VTUNE
+	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_VTUNE) {
+		if (name) {
+			zend_jit_vtune_register(
+				name,
+				entry,
+				size);
+		}
+	}
+#endif
+
+#if defined(HAVE_DISASM) || defined(HAVE_GDB) || defined(HAVE_OPROFILE) || defined(HAVE_PERFTOOLS) || defined(HAVE_VTUNE)
 	if (str) {
 		zend_string_release(str);
 	}
