@@ -453,6 +453,16 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 	zend_ulong idx;
 	char tmp_buf[WDDX_BUF_LEN];
 	HashTable *objhash, *sleephash;
+	zend_class_entry *ce;
+	PHP_CLASS_ATTRIBUTES;
+
+	PHP_SET_CLASS_ATTRIBUTES(obj);
+	ce = Z_OBJCE_P(obj);
+	if (!ce || ce->serialize || ce->unserialize) {
+		php_error_docref(NULL, E_WARNING, "Class %s can not be serialized", ZSTR_VAL(class_name));
+		PHP_CLEANUP_CLASS_ATTRIBUTES();
+		return;
+	}
 
 	ZVAL_STRING(&fname, "__sleep");
 	/*
@@ -473,8 +483,6 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 			php_wddx_add_chunk_static(packet, WDDX_STRING_E);
 			php_wddx_add_chunk_static(packet, WDDX_VAR_E);
 
-			PHP_CLEANUP_CLASS_ATTRIBUTES();
-
 			objhash = Z_OBJPROP_P(obj);
 
 			ZEND_HASH_FOREACH_VAL(sleephash, varname) {
@@ -491,9 +499,7 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 			php_wddx_add_chunk_static(packet, WDDX_STRUCT_E);
 		}
 	} else {
-		PHP_CLASS_ATTRIBUTES;
-
-		PHP_SET_CLASS_ATTRIBUTES(obj);
+		uint key_len;
 
 		php_wddx_add_chunk_static(packet, WDDX_STRUCT_S);
 		snprintf(tmp_buf, WDDX_BUF_LEN, WDDX_VAR_S, PHP_CLASS_NAME_VAR);
@@ -502,8 +508,6 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 		php_wddx_add_chunk_ex(packet, ZSTR_VAL(class_name), ZSTR_LEN(class_name));
 		php_wddx_add_chunk_static(packet, WDDX_STRING_E);
 		php_wddx_add_chunk_static(packet, WDDX_VAR_E);
-
-		PHP_CLEANUP_CLASS_ATTRIBUTES();
 
 		objhash = Z_OBJPROP_P(obj);
 		ZEND_HASH_FOREACH_KEY_VAL(objhash, idx, key, ent) {
@@ -527,6 +531,8 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 		} ZEND_HASH_FOREACH_END();
 		php_wddx_add_chunk_static(packet, WDDX_STRUCT_E);
 	}
+
+	PHP_CLEANUP_CLASS_ATTRIBUTES();
 
 	zval_ptr_dtor(&fname);
 	zval_ptr_dtor(&retval);
@@ -947,23 +953,28 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 							pce = PHP_IC_ENTRY;
 						}
 
-						/* Initialize target object */
-						object_init_ex(&obj, pce);
+						if (pce != PHP_IC_ENTRY && (pce->serialize || pce->unserialize)) {
+							ZVAL_UNDEF(&ent2->data);
+							php_error_docref(NULL, E_WARNING, "Class %s can not be unserialized", Z_STRVAL(ent1->data));
+						} else {
+							/* Initialize target object */
+							object_init_ex(&obj, pce);
 
-						/* Merge current hashtable with object's default properties */
-						zend_hash_merge(Z_OBJPROP(obj),
-										Z_ARRVAL(ent2->data),
-										zval_add_ref, 0);
+							/* Merge current hashtable with object's default properties */
+							zend_hash_merge(Z_OBJPROP(obj),
+											Z_ARRVAL(ent2->data),
+											zval_add_ref, 0);
 
-						if (incomplete_class) {
-							php_store_class_name(&obj, Z_STRVAL(ent1->data), Z_STRLEN(ent1->data));
+							if (incomplete_class) {
+								php_store_class_name(&obj, Z_STRVAL(ent1->data), Z_STRLEN(ent1->data));
+							}
+
+							/* Clean up old array entry */
+							zval_ptr_dtor(&ent2->data);
+
+							/* Set stack entry to point to the newly created object */
+							ZVAL_COPY_VALUE(&ent2->data, &obj);
 						}
-
-						/* Clean up old array entry */
-						zval_ptr_dtor(&ent2->data);
-
-						/* Set stack entry to point to the newly created object */
-						ZVAL_COPY_VALUE(&ent2->data, &obj);
 
 						/* Clean up class name var entry */
 						zval_ptr_dtor(&ent1->data);
