@@ -141,7 +141,8 @@ static int php_check_dots(const char *element, int n)
 	memcpy((d)->cwd, (s)->cwd, (s)->cwd_length+1);
 
 #define CWD_STATE_FREE(s)			\
-	efree((s)->cwd);
+	efree((s)->cwd); \
+	(s)->cwd_length = 0;
 
 #ifdef ZEND_WIN32
 # define CWD_STATE_FREE_ERR(state) do { \
