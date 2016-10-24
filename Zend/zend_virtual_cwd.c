@@ -32,7 +32,6 @@
 
 #include "zend.h"
 #include "zend_virtual_cwd.h"
-#include "tsrm_strtok_r.h"
 
 #ifdef ZEND_WIN32
 #include <io.h>
@@ -84,56 +83,6 @@ cwd_state main_cwd_state; /* True global */
 #else
 #include <direct.h>
 #endif
-
-#ifdef ZEND_WIN32
-#include <tchar.h>
-#define tsrm_strtok_r(a,b,c) _tcstok((a),(b))
-#define TOKENIZER_STRING "/\\"
-
-static int php_check_dots(const char *element, int n)
-{
-	while (n-- > 0) if (element[n] != '.') break;
-
-	return (n != -1);
-}
-
-#define IS_DIRECTORY_UP(element, len) \
-	(len >= 2 && !php_check_dots(element, len))
-
-#define IS_DIRECTORY_CURRENT(element, len) \
-	(len == 1 && element[0] == '.')
-
-#elif defined(NETWARE)
-/* NetWare has strtok() (in LibC) and allows both slashes in paths, like Windows --
-   but rest of the stuff is like Unix */
-/* strtok() call in LibC is abending when used in a different address space -- hence using
-   PHP's version itself for now */
-/*#define tsrm_strtok_r(a,b,c) strtok((a),(b))*/
-#define TOKENIZER_STRING "/\\"
-
-#else
-#define TOKENIZER_STRING "/"
-#endif
-
-/* default macros */
-
-#ifndef IS_DIRECTORY_UP
-#define IS_DIRECTORY_UP(element, len) \
-	(len == 2 && element[0] == '.' && element[1] == '.')
-#endif
-
-#ifndef IS_DIRECTORY_CURRENT
-#define IS_DIRECTORY_CURRENT(element, len) \
-	(len == 1 && element[0] == '.')
-#endif
-
-/* define this to check semantics */
-#define IS_DIR_OK(s) (1)
-
-#ifndef IS_DIR_OK
-#define IS_DIR_OK(state) (php_is_dir_ok(state) == 0)
-#endif
-
 
 #define CWD_STATE_COPY(d, s)				\
 	(d)->cwd_length = (s)->cwd_length;		\
