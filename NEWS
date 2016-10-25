@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2016 PHP 7.0.13
+?? ??? 2016 PHP 7.0.14
+
+
+
+10 Nov 2016 PHP 7.0.13
 
 - Core:
   . Fixed bug #73350 (Exception::__toString() cause circular references).
