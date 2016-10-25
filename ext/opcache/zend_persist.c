@@ -836,6 +836,10 @@ static void zend_accel_persist_class_table(HashTable *class_table)
 
 zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script, char **key, unsigned int key_length)
 {
+#ifdef HAVE_JIT
+	zend_long orig_jit_level = 0;
+#endif
+	
 	script->mem = ZCG(mem);
 
 	ZEND_ASSERT(((zend_uintptr_t)ZCG(mem) & 0x7) == 0); /* should be 8 byte aligned */
@@ -859,7 +863,12 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 
 #ifdef HAVE_JIT
 	if (ZCG(accel_directives).jit_level) {
-		zend_jit_unprotect();
+		if (key) {
+			zend_jit_unprotect();
+		} else {
+			orig_jit_level = ZCG(accel_directives).jit_level;
+			ZCG(accel_directives).jit_level = 0;
+		}
 	}
 #endif
 
@@ -875,6 +884,8 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 			zend_jit_script(&script->script);
 		}
 		zend_jit_protect();
+	} else if (!key) {
+		ZCG(accel_directives).jit_level = orig_jit_level;
 	}
 #endif
 
