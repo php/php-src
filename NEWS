@@ -273,6 +273,8 @@ PHP                                                                        NEWS
   . Fixed bug #72697 (select_colors write out-of-bounds). (Stas)
   . Fixed bug #72709 (imagesetstyle() causes OOB read for empty $styles). (cmb)
   . Fixed bug #72730 (imagegammacorrect allows arbitrary write access). (Stas)
+  . Fixed bug #72494 (imagecropauto out-of-bounds access). (Fernando, Pierre,
+    cmb)
 
 - Intl:
   . Partially fixed #72506 (idn_to_ascii for UTS #46 incorrect for long domain
