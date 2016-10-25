@@ -890,8 +890,8 @@ static void* dasm_labels[zend_lb_MAX];
 // zval should be in FCARG1a
 |.macro ZVAL_DTOR_FUNC, var_info, filename, lineno // arg1 must be in FCARG1a
 ||do {
-||	if (has_concrete_type(var_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
-||		zend_uchar type = concrete_type(var_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
+||	if (has_concrete_type((var_info) & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+||		zend_uchar type = concrete_type((var_info) & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
 ||		if (type == IS_STRING && !ZEND_DEBUG) {
 |			test byte [FCARG1a + 5], IS_STR_PERSISTENT
 |			jnz >1
