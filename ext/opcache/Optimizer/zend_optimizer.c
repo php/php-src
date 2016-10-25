@@ -546,11 +546,16 @@ zend_function *zend_optimizer_get_called_func(
 		{
 			zend_string *function_name = Z_STR_P(GET_OP(op2));
 			zend_function *func;
-			if ((func = zend_hash_find_ptr(&script->function_table, function_name)) != NULL) {
+			if (script && (func = zend_hash_find_ptr(&script->function_table, function_name)) != NULL) {
 				return func;
 			} else if ((func = zend_hash_find_ptr(EG(function_table), function_name)) != NULL) {
-				ZEND_ASSERT(func->type == ZEND_INTERNAL_FUNCTION);
-				return func;
+				if (func->type == ZEND_INTERNAL_FUNCTION) {
+					return func;
+				} else if (func->type == ZEND_USER_FUNCTION &&
+				           func->op_array.filename &&
+				           func->op_array.filename == op_array->filename) {
+					return func;
+				}
 			}
 			break;
 		}
@@ -558,7 +563,18 @@ zend_function *zend_optimizer_get_called_func(
 		case ZEND_INIT_NS_FCALL_BY_NAME:
 			if (opline->op2_type == IS_CONST && Z_TYPE_P(GET_OP(op2)) == IS_STRING) {
 				zval *function_name = GET_OP(op2) + 1;
-				return zend_hash_find_ptr(&script->function_table, Z_STR_P(function_name));
+				zend_function *func;
+				if (script && (func = zend_hash_find_ptr(&script->function_table, Z_STR_P(function_name)))) {
+					return func;
+				} else if ((func = zend_hash_find_ptr(EG(function_table), function_name)) != NULL) {
+					if (func->type == ZEND_INTERNAL_FUNCTION) {
+						return func;
+					} else if (func->type == ZEND_USER_FUNCTION &&
+					           func->op_array.filename &&
+					           func->op_array.filename == op_array->filename) {
+						return func;
+					}
+				}
 			}
 			break;
 		case ZEND_INIT_STATIC_METHOD_CALL:
@@ -566,7 +582,17 @@ zend_function *zend_optimizer_get_called_func(
 				zend_class_entry *ce = NULL;
 				if (opline->op1_type == IS_CONST && Z_TYPE_P(GET_OP(op1)) == IS_STRING) {
 					zend_string *class_name = Z_STR_P(GET_OP(op1) + 1);
-					ce = zend_hash_find_ptr(&script->class_table, class_name);
+					if (script && (ce = zend_hash_find_ptr(&script->class_table, class_name))) {
+						/* pass */
+					} else if ((ce = zend_hash_find_ptr(EG(class_table), class_name))) {
+						if (ce->type == ZEND_INTERNAL_CLASS) {
+							/* pass */
+						} else if (ce->type != ZEND_USER_CLASS ||
+						           !ce->info.user.filename ||
+						           ce->info.user.filename != op_array->filename) {
+							ce = NULL;
+						}
+					}
 				} else if (opline->op1_type == IS_UNUSED && op_array->scope
 						&& !(op_array->scope->ce_flags & ZEND_ACC_TRAIT)
 						&& (opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF) {
