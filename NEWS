@@ -377,6 +377,8 @@ PHP                                                                        NEWS
   . Fixed bug #68712 (suspicious if-else statements). (cmb)
   . Fixed bug #72697 (select_colors write out-of-bounds). (Stas)
   . Fixed bug #72730 (imagegammacorrect allows arbitrary write access). (Stas)
+  . Fixed bug #72494 (imagecropauto out-of-bounds access). (Fernando, Pierre,
+    cmb)
 
 - Intl:
   . Fixed bug #72639 (Segfault when instantiating class that extends
