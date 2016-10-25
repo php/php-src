@@ -1368,6 +1368,17 @@ jit_failure:
 	return FAILURE;
 }
 
+static int zend_jit_collect_calls(zend_op_array *op_array, zend_script *script)
+{
+	zend_func_info *func_info =
+		zend_arena_calloc(&CG(arena), 1, sizeof(zend_func_info));
+
+	ZEND_SET_FUNC_INFO(op_array, func_info);
+	func_info->num_args = -1;
+	func_info->return_value_used = -1;
+	return zend_analyze_calls(&CG(arena), script, ZEND_RT_CONSTANTS | ZEND_CALL_TREE, op_array, func_info);
+}
+
 static int zend_real_jit_func(zend_op_array *op_array, zend_script *script)
 {
 	uint32_t flags = 0;
@@ -1395,8 +1406,19 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script)
 		zend_dump_op_array(op_array, ZEND_DUMP_HIDE_UNREACHABLE|ZEND_DUMP_RC_INFERENCE|ZEND_DUMP_SSA|ZEND_DUMP_RT_CONSTANTS, "JIT", &ssa);
 	}
 
+	if (zend_jit_level >= ZEND_JIT_LEVEL_OPT_SCRIPT) {
+		if (zend_jit_collect_calls(op_array, script) != SUCCESS) {
+			ZEND_SET_FUNC_INFO(op_array, NULL);
+			goto jit_failure;
+		}
+	}
+
 	if (zend_jit(op_array, &ssa) != SUCCESS) {
 		goto jit_failure;
+	}
+
+	if (zend_jit_level >= ZEND_JIT_LEVEL_OPT_SCRIPT) {
+		ZEND_SET_FUNC_INFO(op_array, NULL);
 	}
 
 	zend_arena_release(&CG(arena), checkpoint);
