@@ -1707,6 +1707,14 @@ ZEND_API void zend_jit_shutdown(void)
 	}
 }
 
+ZEND_API void zend_jit_activate(void)
+{
+}
+
+ZEND_API void zend_jit_deactivate(void)
+{
+}
+
 #else /* HAVE_JIT */
 
 ZEND_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
@@ -1733,6 +1741,14 @@ ZEND_API int zend_jit_startup(zend_long jit, size_t size)
 }
 
 ZEND_API void zend_jit_shutdown(void)
+{
+}
+
+ZEND_API void zend_jit_activate(void)
+{
+}
+
+ZEND_API void zend_jit_deactivate(void)
 {
 }
 

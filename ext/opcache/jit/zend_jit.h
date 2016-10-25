@@ -32,6 +32,8 @@
 
 #define ZEND_JIT_ON_SCRIPT_LOAD    0
 #define ZEND_JIT_ON_FIRST_EXEC     1
+#define ZEND_JIT_ON_PROF_REQUEST   2
+#define ZEND_JIT_ON_HOT_COUNTERS   3
 
 #define ZEND_JIT_TRIGGER(n)        (((n) / 10) % 10)
 
@@ -45,13 +47,14 @@
 #define ZEND_JIT_DEBUG_OPROFILE  (1<<6)
 #define ZEND_JIT_DEBUG_VTUNE     (1<<7)
 
-
 ZEND_API int  zend_jit_op_array(zend_op_array *op_array, zend_script *script);
 ZEND_API int  zend_jit_script(zend_script *script);
 ZEND_API void zend_jit_unprotect(void);
 ZEND_API void zend_jit_protect(void);
 ZEND_API int  zend_jit_startup(zend_long jit, size_t size);
 ZEND_API void zend_jit_shutdown(void);
+ZEND_API void zend_jit_activate(void);
+ZEND_API void zend_jit_deactivate(void);
 ZEND_API void zend_jit_status(zval *ret);
 
 #endif /* HAVE_JIT_H */

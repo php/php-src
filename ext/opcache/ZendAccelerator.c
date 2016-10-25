@@ -2158,6 +2158,10 @@ static void accel_activate(void)
 	} else if (reset_pcre) {
 		accel_reset_pcre_cache();
 	}
+
+#ifdef HAVE_JIT
+	zend_jit_activate();
+#endif
 }
 
 #if !ZEND_DEBUG
@@ -2376,6 +2380,10 @@ static void accel_deactivate(void)
 	if (!ZCG(enabled) || !accel_startup_ok) {
 		return;
 	}
+
+#ifdef HAVE_JIT
+	zend_jit_deactivate();
+#endif
 
 #if !ZEND_DEBUG
 	if (ZCG(accel_directives).fast_shutdown && is_zend_mm()) {
