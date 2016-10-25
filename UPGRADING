@@ -335,6 +335,7 @@ PHP 7.1 UPGRADE NOTES
     now throw an instance of Error instead of resulting in a fatal error
     when a function is called that must generate a session ID.
   . Only CSPRNG is used to generate session ID.
+  . session_regenerate_id() saves old session and start new one.
 
 - SimpleXML:
   . Creating an unnamed or duplicate attribute will throw an instance of Error
