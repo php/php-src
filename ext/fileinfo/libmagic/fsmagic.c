@@ -32,7 +32,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: fsmagic.c,v 1.74 2014/10/13 20:21:49 christos Exp $")
+FILE_RCSID("@(#)$File: fsmagic.c,v 1.76 2015/04/09 20:01:41 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -99,7 +99,7 @@ file_fsmagic(struct magic_set *ms, const char *fn, zend_stat_t *sb, php_stream *
 	int ret, did = 0;
 	int mime = ms->flags & MAGIC_MIME;
 
-	if (ms->flags & MAGIC_APPLE)
+	if (ms->flags & (MAGIC_APPLE|MAGIC_EXTENSION))
 		return 0;
 
 	if (fn == NULL && !stream) {
@@ -238,15 +238,15 @@ file_fsmagic(struct magic_set *ms, const char *fn, zend_stat_t *sb, php_stream *
 		 * size for raw disk partitions. (If the block special device
 		 * really has zero length, the fact that it is empty will be
 		 * detected and reported correctly when we read the file.)
-	 */
-	if ((ms->flags & MAGIC_DEVICES) == 0 && sb->st_size == 0) {
-		if (mime) {
-			if (handle_mime(ms, mime, "x-empty") == -1)
-				return -1;
+		 */
+		if ((ms->flags & MAGIC_DEVICES) == 0 && sb->st_size == 0) {
+			if (mime) {
+				if (handle_mime(ms, mime, "x-empty") == -1)
+					return -1;
 			} else if (file_printf(ms, "%sempty", COMMA) == -1)
-			return -1;
+				return -1;
 			break;
-	}
+		}
 		ret = 0;
 		break;
 
@@ -256,5 +256,9 @@ file_fsmagic(struct magic_set *ms, const char *fn, zend_stat_t *sb, php_stream *
 		/*NOTREACHED*/
 	}
 
+	if (!mime && did && ret == 0) {
+	    if (file_printf(ms, " ") == -1)
+		    return -1;
+	}
 	return ret;
 }

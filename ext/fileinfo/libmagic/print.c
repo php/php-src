@@ -32,13 +32,11 @@
 #include "php.h"
 
 #include "file.h"
-#include "cdf.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: print.c,v 1.78 2015/01/06 02:04:10 christos Exp $")
+FILE_RCSID("@(#)$File: print.c,v 1.81 2016/01/19 15:09:03 christos Exp $")
 #endif  /* lint */
 
-#include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -53,6 +51,8 @@ FILE_RCSID("@(#)$File: print.c,v 1.78 2015/01/06 02:04:10 christos Exp $")
 #endif
 
 #define SZOF(a)	(sizeof(a) / sizeof(a[0]))
+
+#include "cdf.h"
 
 /*VARARGS*/
 protected void
