@@ -25,9 +25,17 @@
 #define ZEND_JIT_LEVEL_MINIMAL     1     /* minimal JIT (subroutine threading) */
 #define ZEND_JIT_LEVEL_INLINE      2     /* selective inline threading */
 #define ZEND_JIT_LEVEL_OPT_FUNC    3     /* optimized JIT based on Type-Inference */
-#define ZEND_JIT_LEVEL_OPT_SCRIPT  4     /* optimized JIT based on Type-Inference and inner-procedure analises */
+#define ZEND_JIT_LEVEL_OPT_FUNCS   4     /* optimized JIT based on Type-Inference and call-tree */
+#define ZEND_JIT_LEVEL_OPT_SCRIPT  5     /* optimized JIT based on Type-Inference and inner-procedure analises */
 
-#define ZEND_JIT_LEVEL_DEFAULT     "4"
+#define ZEND_JIT_LEVEL(n)          ((n) % 10)
+
+#define ZEND_JIT_ON_SCRIPT_LOAD    0
+#define ZEND_JIT_ON_FIRST_EXEC     1
+
+#define ZEND_JIT_TRIGGER(n)        (((n) / 10) % 10)
+
+#define ZEND_JIT_DEFAULT           "5"
 
 #define ZEND_JIT_DEBUG_ASM       (1<<0)
 #define ZEND_JIT_DEBUG_SSA       (1<<1)
@@ -42,7 +50,7 @@ ZEND_API int  zend_jit_op_array(zend_op_array *op_array, zend_script *script);
 ZEND_API int  zend_jit_script(zend_script *script);
 ZEND_API void zend_jit_unprotect(void);
 ZEND_API void zend_jit_protect(void);
-ZEND_API int  zend_jit_startup(zend_long jit_level, size_t size);
+ZEND_API int  zend_jit_startup(zend_long jit, size_t size);
 ZEND_API void zend_jit_shutdown(void);
 ZEND_API void zend_jit_status(zval *ret);
 

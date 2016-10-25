@@ -17,6 +17,7 @@
 */
 
 #include <ZendAccelerator.h>
+#include "zend_shared_alloc.h"
 #include "Zend/zend_execute.h"
 #include "Zend/zend_vm.h"
 #include "Zend/zend_exceptions.h"
@@ -34,7 +35,6 @@
 
 //#define CONTEXT_THREADED_JIT
 #define PREFER_MAP_32BIT
-//#define ZEND_RUNTIME_JIT
 //#define ZEND_JIT_RECORD
 //#define ZEND_JIT_FILTER
 #define ZEND_JIT_USE_RC_INFERENCE
@@ -64,7 +64,8 @@ typedef struct _zend_jit_stub {
 #define JIT_STUB(name) \
 	{JIT_STUB_PREFIX #name, zend_jit_ ## name ## _stub}
 
-static zend_long zend_jit_level = 0;
+static zend_uchar zend_jit_level = 0;
+static zend_uchar zend_jit_trigger = 0;
 static void *dasm_buf = NULL;
 static void *dasm_end = NULL;
 static void **dasm_ptr = NULL;
@@ -99,6 +100,7 @@ ZEND_API void zend_jit_status(zval *ret)
 	zval stats;
 	array_init(&stats);
 	add_assoc_long(&stats, "level", zend_jit_level);
+	add_assoc_long(&stats, "trigger", zend_jit_trigger);
 	if (dasm_buf) {
 		add_assoc_long(&stats, "buffer_size", (char*)dasm_end - (char*)dasm_buf);
 		add_assoc_long(&stats, "buffer_free", (char*)dasm_end - (char*)*dasm_ptr);
@@ -1406,7 +1408,7 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script)
 		zend_dump_op_array(op_array, ZEND_DUMP_HIDE_UNREACHABLE|ZEND_DUMP_RC_INFERENCE|ZEND_DUMP_SSA|ZEND_DUMP_RT_CONSTANTS, "JIT", &ssa);
 	}
 
-	if (zend_jit_level >= ZEND_JIT_LEVEL_OPT_SCRIPT) {
+	if (zend_jit_level >= ZEND_JIT_LEVEL_OPT_FUNCS) {
 		if (zend_jit_collect_calls(op_array, script) != SUCCESS) {
 			ZEND_SET_FUNC_INFO(op_array, NULL);
 			goto jit_failure;
@@ -1417,7 +1419,7 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script)
 		goto jit_failure;
 	}
 
-	if (zend_jit_level >= ZEND_JIT_LEVEL_OPT_SCRIPT) {
+	if (zend_jit_level >= ZEND_JIT_LEVEL_OPT_FUNCS) {
 		ZEND_SET_FUNC_INFO(op_array, NULL);
 	}
 
@@ -1429,18 +1431,14 @@ jit_failure:
 	return FAILURE;
 }
 
-
-#ifdef ZEND_RUNTIME_JIT
-
 /* memory write protection */
-void zend_accel_shared_protect(int mode);
-
 #define SHM_PROTECT() \
 	do { \
 		if (ZCG(accel_directives).protect_memory) { \
 			zend_accel_shared_protect(1); \
 		} \
 	} while (0)
+
 #define SHM_UNPROTECT() \
 	do { \
 		if (ZCG(accel_directives).protect_memory) { \
@@ -1476,24 +1474,25 @@ static void ZEND_FASTCALL zend_runtime_jit(void)
 
 	/* JIT-ed code is going to be called by VM */
 }
-#endif
 
 ZEND_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 {
-#ifdef ZEND_RUNTIME_JIT
-	zend_op *opline = op_array->opcodes;
+	if (zend_jit_trigger == ZEND_JIT_ON_FIRST_EXEC) {
+		zend_op *opline = op_array->opcodes;
 
-	/* Set run-time JIT handler */
-	while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
+		/* Set run-time JIT handler */
+		while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
+			opline->handler = (const void*)zend_runtime_jit;
+			opline++;
+		}
+		ZEND_SET_FUNC_INFO(op_array, (void*)opline->handler);
 		opline->handler = (const void*)zend_runtime_jit;
-		opline++;
+		return SUCCESS;
+	} else if (zend_jit_trigger == ZEND_JIT_ON_SCRIPT_LOAD) {
+		return zend_real_jit_func(op_array, script);
+	} else {
+		ZEND_ASSERT(0);
 	}
-	ZEND_SET_FUNC_INFO(op_array, (void*)opline->handler);
-	opline->handler = (const void*)zend_runtime_jit;
-	return SUCCESS;
-#else
-	return zend_real_jit_func(op_array, script);
-#endif
 }
 
 ZEND_API int zend_jit_script(zend_script *script)
@@ -1514,54 +1513,56 @@ ZEND_API int zend_jit_script(zend_script *script)
 		goto jit_failure;
 	}
 
-#ifdef ZEND_RUNTIME_JIT
-	for (i = 0; i < call_graph.op_arrays_count; i++) {
-		ZEND_SET_FUNC_INFO(call_graph.op_arrays[i], NULL);
-		if (zend_jit_op_array(call_graph.op_arrays[i], script) != SUCCESS) {
-			goto jit_failure;
-		}
-	}
-#else
-	for (i = 0; i < call_graph.op_arrays_count; i++) {
-		info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
-		if (info) {
-			if (zend_jit_op_array_analyze1(call_graph.op_arrays[i], script, &info->ssa, &info->flags) != SUCCESS) {
+	if (zend_jit_trigger == ZEND_JIT_ON_FIRST_EXEC) {
+		for (i = 0; i < call_graph.op_arrays_count; i++) {
+			ZEND_SET_FUNC_INFO(call_graph.op_arrays[i], NULL);
+			if (zend_jit_op_array(call_graph.op_arrays[i], script) != SUCCESS) {
 				goto jit_failure;
 			}
 		}
-	}
-
-	for (i = 0; i < call_graph.op_arrays_count; i++) {
-		info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
-		if (info) {
-			if (zend_jit_op_array_analyze2(call_graph.op_arrays[i], script, &info->ssa, &info->flags) != SUCCESS) {
-				goto jit_failure;
-			}
-		}
-	}
-
-	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_SSA) {
+	} else if (zend_jit_trigger == ZEND_JIT_ON_SCRIPT_LOAD) {
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
 			info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
 			if (info) {
-				zend_dump_op_array(call_graph.op_arrays[i], ZEND_DUMP_HIDE_UNREACHABLE|ZEND_DUMP_RC_INFERENCE|ZEND_DUMP_SSA|ZEND_DUMP_RT_CONSTANTS, "JIT", &info->ssa);
+				if (zend_jit_op_array_analyze1(call_graph.op_arrays[i], script, &info->ssa, &info->flags) != SUCCESS) {
+					goto jit_failure;
+				}
 			}
 		}
-	}
 
-	for (i = 0; i < call_graph.op_arrays_count; i++) {
-		info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
-		if (info) {
-			if (zend_jit(call_graph.op_arrays[i], &info->ssa) != SUCCESS) {
-				goto jit_failure;
+		for (i = 0; i < call_graph.op_arrays_count; i++) {
+			info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
+			if (info) {
+				if (zend_jit_op_array_analyze2(call_graph.op_arrays[i], script, &info->ssa, &info->flags) != SUCCESS) {
+					goto jit_failure;
+				}
 			}
 		}
-	}
 
-	for (i = 0; i < call_graph.op_arrays_count; i++) {
-		ZEND_SET_FUNC_INFO(call_graph.op_arrays[i], NULL);
+		if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_SSA) {
+			for (i = 0; i < call_graph.op_arrays_count; i++) {
+				info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
+				if (info) {
+					zend_dump_op_array(call_graph.op_arrays[i], ZEND_DUMP_HIDE_UNREACHABLE|ZEND_DUMP_RC_INFERENCE|ZEND_DUMP_SSA|ZEND_DUMP_RT_CONSTANTS, "JIT", &info->ssa);
+				}
+			}
+		}
+
+		for (i = 0; i < call_graph.op_arrays_count; i++) {
+			info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
+			if (info) {
+				if (zend_jit(call_graph.op_arrays[i], &info->ssa) != SUCCESS) {
+					goto jit_failure;
+				}
+			}
+		}
+
+		for (i = 0; i < call_graph.op_arrays_count; i++) {
+			ZEND_SET_FUNC_INFO(call_graph.op_arrays[i], NULL);
+		}
+	} else {
+		ZEND_ASSERT(0);
 	}
-#endif
 
 	zend_arena_release(&CG(arena), checkpoint);
 	return SUCCESS;
@@ -1617,13 +1618,14 @@ static int zend_jit_make_stubs(void)
 	return 1;
 }
 
-ZEND_API int zend_jit_startup(zend_long jit_level, size_t size)
+ZEND_API int zend_jit_startup(zend_long jit, size_t size)
 {
 	size_t page_size = jit_page_size();
 	int shared = 1;
 	int ret;
 
-	zend_jit_level = jit_level;
+	zend_jit_level = ZEND_JIT_LEVEL(jit);
+	zend_jit_trigger = ZEND_JIT_TRIGGER(jit);
 
 #ifdef HAVE_GDB
 	zend_jit_gdb_init();
@@ -1725,7 +1727,7 @@ ZEND_API void zend_jit_protect(void)
 {
 }
 
-ZEND_API int zend_jit_startup(zend_long jit_level, size_t size)
+ZEND_API int zend_jit_startup(zend_long jit, size_t size)
 {
 	return FAILURE;
 }

@@ -5044,8 +5044,14 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 
 		|	//EX_LOAD_LITERALS(op_array);
 		|.if X64
-		|	LOAD_ADDR r0, func->op_array.literals
-		|	mov EX:RX->literals, r0
+		||	if (zend_accel_in_shm(func->op_array.literals)) {
+		|		LOAD_ADDR r0, func->op_array.literals
+		|		mov EX:RX->literals, r0
+		||	} else {
+		|		mov r0, EX:RX->func
+		|		mov	r0, aword [r0 + offsetof(zend_op_array, literals)]
+		|		mov EX:RX->literals, r0
+		||	}
 		|.endif
 
 		|	// EG(current_execute_data) = execute_data;
@@ -5053,7 +5059,15 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		|	mov FP, RX
 
 		|	// opline = op_array->opcodes;
-		|	LOAD_ADDR IP, (func->op_array.opcodes + call_info->num_args)
+		if (zend_accel_in_shm(func->op_array.opcodes)) {
+			|	LOAD_ADDR IP, (func->op_array.opcodes + call_info->num_args)
+		} else {
+			|	mov r0, EX->func
+			|	mov	IP, aword [r0 + offsetof(zend_op_array, opcodes)]
+			if (call_info->num_args) {
+				|	add IP, (call_info->num_args * sizeof(zend_op))
+			}
+		}
 
 		if (func && op_array == &func->op_array) {
 			/* recursive call */

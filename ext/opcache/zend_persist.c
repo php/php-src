@@ -570,8 +570,8 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 	ZCG(mem) = (void*)((char*)ZCG(mem) + ZEND_ALIGNED_SIZE(zend_extensions_op_array_persist(op_array, ZCG(mem))));
 
 #ifdef HAVE_JIT
-	if (ZCG(accel_directives).jit_level &&
-	    ZCG(accel_directives).jit_level <= ZEND_JIT_LEVEL_OPT_FUNC) {
+	if (ZCG(accel_directives).jit &&
+	    ZEND_JIT_LEVEL(ZCG(accel_directives).jit) <= ZEND_JIT_LEVEL_OPT_FUNCS) {
 		zend_jit_op_array(op_array, ZCG(current_persistent_script) ? &ZCG(current_persistent_script)->script : NULL);
 	}
 #endif
@@ -837,7 +837,7 @@ static void zend_accel_persist_class_table(HashTable *class_table)
 zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script, char **key, unsigned int key_length)
 {
 #ifdef HAVE_JIT
-	zend_long orig_jit_level = 0;
+	zend_long orig_jit = 0;
 #endif
 	
 	script->mem = ZCG(mem);
@@ -862,12 +862,12 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	ZCG(mem) = (void*)((char*)ZCG(mem) + script->arena_size);
 
 #ifdef HAVE_JIT
-	if (ZCG(accel_directives).jit_level) {
+	if (ZCG(accel_directives).jit) {
 		if (key) {
 			zend_jit_unprotect();
 		} else {
-			orig_jit_level = ZCG(accel_directives).jit_level;
-			ZCG(accel_directives).jit_level = 0;
+			orig_jit = ZCG(accel_directives).jit;
+			ZCG(accel_directives).jit = 0;
 		}
 	}
 #endif
@@ -879,13 +879,13 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	ZCG(current_persistent_script) = NULL;
 
 #ifdef HAVE_JIT
-	if (ZCG(accel_directives).jit_level) {
-		if (ZCG(accel_directives).jit_level >= ZEND_JIT_LEVEL_OPT_SCRIPT) {
+	if (ZCG(accel_directives).jit) {
+		if (ZEND_JIT_LEVEL(ZCG(accel_directives).jit) >= ZEND_JIT_LEVEL_OPT_SCRIPT) {
 			zend_jit_script(&script->script);
 		}
 		zend_jit_protect();
 	} else if (!key) {
-		ZCG(accel_directives).jit_level = orig_jit_level;
+		ZCG(accel_directives).jit = orig_jit;
 	}
 #endif
 
