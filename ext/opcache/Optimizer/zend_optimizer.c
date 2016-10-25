@@ -566,7 +566,7 @@ zend_function *zend_optimizer_get_called_func(
 				zend_function *func;
 				if (script && (func = zend_hash_find_ptr(&script->function_table, Z_STR_P(function_name)))) {
 					return func;
-				} else if ((func = zend_hash_find_ptr(EG(function_table), function_name)) != NULL) {
+				} else if ((func = zend_hash_find_ptr(EG(function_table), Z_STR_P(function_name))) != NULL) {
 					if (func->type == ZEND_INTERNAL_FUNCTION) {
 						return func;
 					} else if (func->type == ZEND_USER_FUNCTION &&
