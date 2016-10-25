@@ -546,7 +546,8 @@ PHP                                                                        NEWS
     (Pierre)
   . Fixed bug #72482 (Ilegal write/read access caused by gdImageAALine
     overflow). (Pierre)
-  . Fixed bug #72494 (imagecropauto out-of-bounds access). (Pierre)
+  . Fixed bug #72494 (imagecropauto out-of-bounds access). (Fernando, Pierre,
+    cmb)
 
 - Intl:
   . Partially fixed #72506 (idn_to_ascii for UTS #46 incorrect for long domain
