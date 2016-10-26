@@ -1497,9 +1497,7 @@ void zend_jit_check_funcs(HashTable *function_table, zend_bool is_method) {
 			opline->handler = ZEND_FUNC_INFO(op_array);
 			ZEND_SET_FUNC_INFO(op_array, NULL);
 			if (((double)count / (double)zend_jit_count) > 0.005) {
-				zend_jit_unprotect();
 				zend_real_jit_func(op_array, NULL);
-				zend_jit_protect();
 			}
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -1772,7 +1770,9 @@ ZEND_API void zend_jit_deactivate(void)
 		} else {
 			zend_class_entry *ce;
 
-			zend_shared_alloc_lock();
+			SHM_UNPROTECT();
+			zend_jit_unprotect();
+
 			zend_jit_check_funcs(EG(function_table), 0);
 			ZEND_HASH_REVERSE_FOREACH_PTR(EG(class_table), ce) {
 				if (ce->type == ZEND_INTERNAL_CLASS) {
@@ -1780,7 +1780,9 @@ ZEND_API void zend_jit_deactivate(void)
 				}
 				zend_jit_check_funcs(&ce->function_table, 1);
 			} ZEND_HASH_FOREACH_END();
-			zend_shared_alloc_unlock();
+
+			zend_jit_protect();
+			SHM_PROTECT();
 
 			zend_jit_count = 0;
 		}
