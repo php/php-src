@@ -2,6 +2,10 @@
 bool checkdnsrr ( string $host [, string $type = "MX" ] );
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br> - @phpsp - sao paulo - br
+--SKIPIF--
+<?php
+if (getenv("SKIP_ONLINE_TESTS")) { die('skip: online test'); }
+?>
 --FILE--
 <?php
 $serverUrl = "bugs.php.net";
