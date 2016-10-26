@@ -10,8 +10,8 @@ if (!extension_loaded('curl'))
 --FILE--
 <?php
 $urls = array(
-    "it.yahoo.com/",
-    "fr.yahoo.com/"
+    "bugs.php.net",
+    "pear.php.net"
 );
 
 $mh = curl_multi_init();
