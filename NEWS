@@ -2,7 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016 PHP 7.0.14
 
-
+- Core:
+  . Fixded bug #72736 (Slow performance when fetching large dataset with mysqli
+    / PDO). (Dmitry)
 
 10 Nov 2016 PHP 7.0.13
 
