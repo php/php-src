@@ -11,7 +11,7 @@ if (phpversion() < "5.3.0") {
 --FILE--
 <?php
 $serverUri = "tcp://127.0.0.1:31854";
-$serverUrl = "http://yahoo.com";
+$serverUrl = "http://php.net";
 $stringSocket = "out of band data.";
 $stringFWrite = "normal data to transmit";
 $sock = stream_socket_server($serverUri, $errno, $errstr);
