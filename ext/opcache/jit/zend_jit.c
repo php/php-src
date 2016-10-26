@@ -1558,7 +1558,8 @@ ZEND_API int zend_jit_script(zend_script *script)
 		goto jit_failure;
 	}
 
-	if (zend_jit_trigger == ZEND_JIT_ON_FIRST_EXEC) {
+	if (zend_jit_trigger == ZEND_JIT_ON_FIRST_EXEC ||
+	    zend_jit_trigger == ZEND_JIT_ON_PROF_REQUEST) {
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
 			ZEND_SET_FUNC_INFO(call_graph.op_arrays[i], NULL);
 			if (zend_jit_op_array(call_graph.op_arrays[i], script) != SUCCESS) {
