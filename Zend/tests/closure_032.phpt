@@ -26,6 +26,7 @@ Array
                     [0] => 23
                 )
 
+            [strict_types] => 0
         )
 
 )
@@ -42,6 +43,7 @@ Array
                     [0] => 23
                 )
 
+            [strict_types] => 0
         )
 
     [1] => Array
@@ -62,6 +64,7 @@ Array
 
                 )
 
+            [strict_types] => 0
         )
 
 )

@@ -24,7 +24,7 @@ array(2) {
     string(4) "eval"
   }
   [1]=>
-  array(7) {
+  array(8) {
     ["file"]=>
     string(%d) "%sbug73156.php"
     ["line"]=>
@@ -46,5 +46,7 @@ array(2) {
       array(0) {
       }
     }
+    ["strict_types"]=>
+    int(0)
   }
 }

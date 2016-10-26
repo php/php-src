@@ -41,6 +41,7 @@ Array
             [function] => Bmethod
             [class] => B
             [type] => ->
+            [strict_types] => 0
         )
 
 )
@@ -53,6 +54,7 @@ Array
             [function] => Bmethod
             [class] => B
             [type] => ->
+            [strict_types] => 0
         )
 
 )
