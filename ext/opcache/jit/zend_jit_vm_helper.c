@@ -19,6 +19,11 @@
 
 #include "Zend/zend_execute.h"
 #include "Zend/zend_exceptions.h"
+
+#include <ZendAccelerator.h>
+#include "Optimizer/zend_func_info.h"
+#include "zend_jit.h"
+
 #include "zend_jit_vm_helper.h"
 
 #pragma GCC diagnostic ignored "-Wvolatile-register-var"
@@ -110,6 +115,15 @@ void ZEND_FASTCALL zend_jit_loop_header_helper(void)
 		EX(func)->op_array.function_name ? ZSTR_VAL(EX(func)->op_array.function_name) : "",
 		ZSTR_VAL(EX(func)->op_array.filename),
 		opline->lineno);
+}
+
+void ZEND_FASTCALL zend_jit_profile_helper(void)
+{
+	zend_op_array *op_array = (zend_op_array*)EX(func);
+	const void *handler = (const void*)ZEND_FUNC_INFO(op_array);
+	++(ZEND_COUNTER_INFO(op_array));
+	++zend_jit_count;
+	return ((zend_vm_opcode_handler_t)handler)();
 }
 
 /*

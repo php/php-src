@@ -66,6 +66,10 @@ typedef struct _zend_jit_stub {
 
 static zend_uchar zend_jit_level = 0;
 static zend_uchar zend_jit_trigger = 0;
+
+zend_ulong zend_jit_count = 0;
+int zend_jit_counter_rid = -1;
+
 static void *dasm_buf = NULL;
 static void *dasm_end = NULL;
 static void **dasm_ptr = NULL;
@@ -1446,8 +1450,6 @@ jit_failure:
 		} \
 	} while (0)
 
-typedef void (ZEND_FASTCALL *zend_vm_opcode_handler_t)(void);
-
 /* Run-time JIT handler */
 static void ZEND_FASTCALL zend_runtime_jit(void)
 {
@@ -1475,18 +1477,63 @@ static void ZEND_FASTCALL zend_runtime_jit(void)
 	/* JIT-ed code is going to be called by VM */
 }
 
+void zend_jit_check_funcs(HashTable *function_table, zend_bool is_method) {
+	zend_op *opline;
+	zend_function *func;
+	zend_op_array *op_array;
+
+	ZEND_HASH_REVERSE_FOREACH_PTR(function_table, func) {
+		if (func->type == ZEND_INTERNAL_FUNCTION) {
+			break;
+		}
+		op_array = &func->op_array;
+		opline = op_array->opcodes;
+		while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
+			opline++;
+		}
+		if (opline->handler == zend_jit_profile_helper) {
+			zend_ulong count = (zend_ulong)ZEND_COUNTER_INFO(op_array);
+			ZEND_COUNTER_INFO(op_array) = 0;
+			opline->handler = ZEND_FUNC_INFO(op_array);
+			ZEND_SET_FUNC_INFO(op_array, NULL);
+			if (((double)count / (double)zend_jit_count) > 0.005) {
+				zend_jit_unprotect();
+				zend_real_jit_func(op_array, NULL);
+				zend_jit_protect();
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+}
+
 ZEND_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 {
+	if (dasm_ptr == NULL) {
+		return FAILURE;
+	}
+
 	if (zend_jit_trigger == ZEND_JIT_ON_FIRST_EXEC) {
 		zend_op *opline = op_array->opcodes;
 
 		/* Set run-time JIT handler */
 		while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
-			opline->handler = (const void*)zend_runtime_jit;
+			opline->handler = (void*)zend_runtime_jit;
 			opline++;
 		}
 		ZEND_SET_FUNC_INFO(op_array, (void*)opline->handler);
-		opline->handler = (const void*)zend_runtime_jit;
+		opline->handler = (void*)zend_runtime_jit;
+
+		return SUCCESS;
+	} else if (zend_jit_trigger == ZEND_JIT_ON_PROF_REQUEST) {
+		zend_op *opline = op_array->opcodes;
+
+		if (op_array->function_name) {
+			while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
+				opline++;
+			}
+			ZEND_SET_FUNC_INFO(op_array, (void*)opline->handler);
+			opline->handler = zend_jit_profile_helper;
+		}
+
 		return SUCCESS;
 	} else if (zend_jit_trigger == ZEND_JIT_ON_SCRIPT_LOAD) {
 		return zend_real_jit_func(op_array, script);
@@ -1627,6 +1674,12 @@ ZEND_API int zend_jit_startup(zend_long jit, size_t size)
 	zend_jit_level = ZEND_JIT_LEVEL(jit);
 	zend_jit_trigger = ZEND_JIT_TRIGGER(jit);
 
+	if (zend_jit_trigger == ZEND_JIT_ON_PROF_REQUEST) {
+		zend_extension dummy;
+		zend_jit_counter_rid = zend_get_resource_handle(&dummy);
+		ZEND_ASSERT(zend_jit_counter_rid != -1);
+	}
+
 #ifdef HAVE_GDB
 	zend_jit_gdb_init();
 #endif
@@ -1713,6 +1766,25 @@ ZEND_API void zend_jit_activate(void)
 
 ZEND_API void zend_jit_deactivate(void)
 {
+	if (zend_jit_trigger == ZEND_JIT_ON_PROF_REQUEST) {
+		if (!zend_jit_count) {
+			return;
+		} else {
+			zend_class_entry *ce;
+
+			zend_shared_alloc_lock();
+			zend_jit_check_funcs(EG(function_table), 0);
+			ZEND_HASH_REVERSE_FOREACH_PTR(EG(class_table), ce) {
+				if (ce->type == ZEND_INTERNAL_CLASS) {
+					break;
+				}
+				zend_jit_check_funcs(&ce->function_table, 1);
+			} ZEND_HASH_FOREACH_END();
+			zend_shared_alloc_unlock();
+
+			zend_jit_count = 0;
+		}
+	}
 }
 
 #else /* HAVE_JIT */
