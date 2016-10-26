@@ -125,6 +125,40 @@ void ZEND_FASTCALL zend_jit_profile_helper(void)
 	return ((zend_vm_opcode_handler_t)handler)();
 }
 
+void ZEND_FASTCALL zend_jit_func_counter_helper(void)
+{
+	unsigned int n = ((uintptr_t)EX(func) >> 3)  %
+		(sizeof(zend_jit_hot_counters) / sizeof(zend_jit_hot_counters[0]));
+
+	zend_jit_hot_counters[n] -= ZEND_JIT_HOT_FUNC_COST;
+
+	if (UNEXPECTED(zend_jit_hot_counters[n] <= 0)) {
+		zend_jit_hot_counters[n] = ZEND_JIT_HOT_COUNTER_INIT;
+		zend_jit_hot_func(execute_data, opline);
+	} else {
+		zend_vm_opcode_handler_t *handlers =
+			(zend_vm_opcode_handler_t*)ZEND_FUNC_INFO(&EX(func)->op_array);
+		handlers[opline - EX(func)->op_array.opcodes]();
+	}
+}
+
+void ZEND_FASTCALL zend_jit_loop_counter_helper(void)
+{
+	unsigned int n = ((uintptr_t)EX(func) >> 3)  %
+		(sizeof(zend_jit_hot_counters) / sizeof(zend_jit_hot_counters[0]));
+
+	zend_jit_hot_counters[n] -= ZEND_JIT_HOT_LOOP_COST;
+
+	if (UNEXPECTED(zend_jit_hot_counters[n] <= 0)) {
+		zend_jit_hot_counters[n] = ZEND_JIT_HOT_COUNTER_INIT;
+		zend_jit_hot_func(execute_data, opline);
+	} else {
+		zend_vm_opcode_handler_t *handlers =
+			(zend_vm_opcode_handler_t*)ZEND_FUNC_INFO(&EX(func)->op_array);
+		handlers[opline - EX(func)->op_array.opcodes]();
+	}
+}
+
 /*
  * Local variables:
  * tab-width: 4

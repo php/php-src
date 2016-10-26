@@ -45,6 +45,13 @@
  */
 #define ZEND_JIT_PROF_THRESHOLD    0.005
 
+/* Hot Counters based JIT parameters.
+ * TODO: this setting should be configurable
+ */
+#define ZEND_JIT_HOT_FUNC_COST     1
+#define ZEND_JIT_HOT_LOOP_COST     2
+#define ZEND_JIT_HOT_COUNTER_INIT  1000
+
 #define ZEND_JIT_DEBUG_ASM       (1<<0)
 #define ZEND_JIT_DEBUG_SSA       (1<<1)
 

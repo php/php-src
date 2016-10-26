@@ -26,6 +26,13 @@ extern int zend_jit_profile_counter_rid;
 
 #define ZEND_COUNTER_INFO(op_array)  ((op_array)->reserved[zend_jit_profile_counter_rid])
 
+/* Hot Counters */
+#define ZEND_HOT_COUNTERS_COUNT 64
+
+extern int16_t zend_jit_hot_counters[ZEND_HOT_COUNTERS_COUNT];
+
+void zend_jit_hot_func(zend_execute_data *execute_data, const zend_op *opline);
+
 /* VM handlers */
 typedef void (ZEND_FASTCALL *zend_vm_opcode_handler_t)(void);
 
@@ -35,6 +42,8 @@ void ZEND_FASTCALL zend_jit_leave_top_func_helper(uint32_t call_info);
 void ZEND_FASTCALL zend_jit_func_header_helper(void);
 void ZEND_FASTCALL zend_jit_loop_header_helper(void);
 void ZEND_FASTCALL zend_jit_profile_helper(void);
+void ZEND_FASTCALL zend_jit_func_counter_helper(void);
+void ZEND_FASTCALL zend_jit_loop_counter_helper(void);
 
 #endif /* ZEND_JIT_INTERNAL_H */
 
