@@ -6,5 +6,5 @@ marcosptf - <marcosptf@yahoo.com.br> - @phpsp - sao paulo - br
 <?php
 var_dump(is_string(php_ini_scanned_files()));
 ?>
---EXPECTF--
-bool(%s)
+--EXPECT--
+bool(true)
