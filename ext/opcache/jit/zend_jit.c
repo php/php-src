@@ -1516,11 +1516,11 @@ ZEND_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 
 		/* Set run-time JIT handler */
 		while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
-			opline->handler = (void*)zend_runtime_jit;
+			opline->handler = (const void*)zend_runtime_jit;
 			opline++;
 		}
 		ZEND_SET_FUNC_INFO(op_array, (void*)opline->handler);
-		opline->handler = (void*)zend_runtime_jit;
+		opline->handler = (const void*)zend_runtime_jit;
 
 		return SUCCESS;
 	} else if (zend_jit_trigger == ZEND_JIT_ON_PROF_REQUEST) {
