@@ -39,6 +39,12 @@
 
 #define ZEND_JIT_DEFAULT           "5"
 
+/* Makes profile based JIT (opcache.jit=2*) to generate code only for most
+ * offten called functions (above the threshold).
+ * TODO: this setting should be configurable
+ */
+#define ZEND_JIT_PROF_THRESHOLD    0.005
+
 #define ZEND_JIT_DEBUG_ASM       (1<<0)
 #define ZEND_JIT_DEBUG_SSA       (1<<1)
 

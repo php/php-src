@@ -1496,7 +1496,7 @@ void zend_jit_check_funcs(HashTable *function_table, zend_bool is_method) {
 			ZEND_COUNTER_INFO(op_array) = 0;
 			opline->handler = ZEND_FUNC_INFO(op_array);
 			ZEND_SET_FUNC_INFO(op_array, NULL);
-			if (((double)counter / (double)zend_jit_profile_counter) > 0.005) {
+			if (((double)counter / (double)zend_jit_profile_counter) > ZEND_JIT_PROF_THRESHOLD) {
 				zend_real_jit_func(op_array, NULL);
 			}
 		}
