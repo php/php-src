@@ -1770,6 +1770,7 @@ ZEND_API void zend_jit_deactivate(void)
 		} else {
 			zend_class_entry *ce;
 
+			zend_shared_alloc_lock();
 			SHM_UNPROTECT();
 			zend_jit_unprotect();
 
@@ -1783,6 +1784,7 @@ ZEND_API void zend_jit_deactivate(void)
 
 			zend_jit_protect();
 			SHM_PROTECT();
+			zend_shared_alloc_unlock();
 
 			zend_jit_count = 0;
 		}
