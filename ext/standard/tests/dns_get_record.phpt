@@ -2,6 +2,10 @@
 array dns_get_record ( string $hostname [, int $type = DNS_ANY [, array &$authns [, array &$addtl [, bool &$raw = false ]]]] );
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br> - @phpsp - sao paulo - br
+--SKIPIF--
+<?php
+if (getenv("SKIP_ONLINE_TESTS")) { die('skip: online test'); }
+?>
 --FILE--
 <?php
 $hostname = "yahoo.com";
