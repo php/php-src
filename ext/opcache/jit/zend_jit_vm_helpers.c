@@ -23,8 +23,7 @@
 #include <ZendAccelerator.h>
 #include "Optimizer/zend_func_info.h"
 #include "zend_jit.h"
-
-#include "zend_jit_vm_helper.h"
+#include "zend_jit_internal.h"
 
 #pragma GCC diagnostic ignored "-Wvolatile-register-var"
 #if defined(__x86_64__)
@@ -122,7 +121,7 @@ void ZEND_FASTCALL zend_jit_profile_helper(void)
 	zend_op_array *op_array = (zend_op_array*)EX(func);
 	const void *handler = (const void*)ZEND_FUNC_INFO(op_array);
 	++(ZEND_COUNTER_INFO(op_array));
-	++zend_jit_count;
+	++zend_jit_profile_counter;
 	return ((zend_vm_opcode_handler_t)handler)();
 }
 

@@ -17,16 +17,26 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef ZEND_JIT_VM_HELPER
-#define ZEND_JIT_VM_HELPER
+#ifndef ZEND_JIT_INTERNAL_H
+#define ZEND_JIT_INTERNAL_H
 
+/* Profiler */
+extern zend_ulong zend_jit_profile_counter;
+extern int zend_jit_profile_counter_rid;
+
+#define ZEND_COUNTER_INFO(op_array)  ((op_array)->reserved[zend_jit_profile_counter_rid])
+
+/* VM handlers */
+typedef void (ZEND_FASTCALL *zend_vm_opcode_handler_t)(void);
+
+/* VM helpers */
 void ZEND_FASTCALL zend_jit_leave_nested_func_helper(uint32_t call_info);
 void ZEND_FASTCALL zend_jit_leave_top_func_helper(uint32_t call_info);
 void ZEND_FASTCALL zend_jit_func_header_helper(void);
 void ZEND_FASTCALL zend_jit_loop_header_helper(void);
 void ZEND_FASTCALL zend_jit_profile_helper(void);
 
-#endif
+#endif /* ZEND_JIT_INTERNAL_H */
 
 /*
  * Local variables:

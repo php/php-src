@@ -23,7 +23,7 @@
 #include "Zend/zend_exceptions.h"
 #include "zend_smart_str.h"
 #include "jit/zend_jit.h"
-#include "jit/zend_jit_vm_helper.h"
+#include "jit/zend_jit_internal.h"
 
 #ifdef HAVE_JIT
 
@@ -67,8 +67,8 @@ typedef struct _zend_jit_stub {
 static zend_uchar zend_jit_level = 0;
 static zend_uchar zend_jit_trigger = 0;
 
-zend_ulong zend_jit_count = 0;
-int zend_jit_counter_rid = -1;
+zend_ulong zend_jit_profile_counter = 0;
+int zend_jit_profile_counter_rid = -1;
 
 static void *dasm_buf = NULL;
 static void *dasm_end = NULL;
@@ -1492,11 +1492,11 @@ void zend_jit_check_funcs(HashTable *function_table, zend_bool is_method) {
 			opline++;
 		}
 		if (opline->handler == zend_jit_profile_helper) {
-			zend_ulong count = (zend_ulong)ZEND_COUNTER_INFO(op_array);
+			zend_ulong counter = (zend_ulong)ZEND_COUNTER_INFO(op_array);
 			ZEND_COUNTER_INFO(op_array) = 0;
 			opline->handler = ZEND_FUNC_INFO(op_array);
 			ZEND_SET_FUNC_INFO(op_array, NULL);
-			if (((double)count / (double)zend_jit_count) > 0.005) {
+			if (((double)counter / (double)zend_jit_profile_counter) > 0.005) {
 				zend_real_jit_func(op_array, NULL);
 			}
 		}
@@ -1674,8 +1674,8 @@ ZEND_API int zend_jit_startup(zend_long jit, size_t size)
 
 	if (zend_jit_trigger == ZEND_JIT_ON_PROF_REQUEST) {
 		zend_extension dummy;
-		zend_jit_counter_rid = zend_get_resource_handle(&dummy);
-		ZEND_ASSERT(zend_jit_counter_rid != -1);
+		zend_jit_profile_counter_rid = zend_get_resource_handle(&dummy);
+		ZEND_ASSERT(zend_jit_profile_counter_rid != -1);
 	}
 
 #ifdef HAVE_GDB
@@ -1765,7 +1765,7 @@ ZEND_API void zend_jit_activate(void)
 ZEND_API void zend_jit_deactivate(void)
 {
 	if (zend_jit_trigger == ZEND_JIT_ON_PROF_REQUEST) {
-		if (!zend_jit_count) {
+		if (!zend_jit_profile_counter) {
 			return;
 		} else {
 			zend_class_entry *ce;
@@ -1786,7 +1786,7 @@ ZEND_API void zend_jit_deactivate(void)
 			SHM_PROTECT();
 			zend_shared_alloc_unlock();
 
-			zend_jit_count = 0;
+			zend_jit_profile_counter = 0;
 		}
 	}
 }
