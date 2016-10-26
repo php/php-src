@@ -2,15 +2,9 @@
 bool checkdnsrr ( string $host [, string $type = "MX" ] );
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br> - @phpsp - sao paulo - br
---SKIPIF--
-<?php
-if (phpversion() < "5.3.0") {
-    die('SKIP php version so lower.');
-}
-?>
 --FILE--
 <?php
-$serverUrl = "yahoo.com";
+$serverUrl = "bugs.php.net";
 var_dump(checkdnsrr());
 var_dump(checkdnsrr($serverUrl));
 var_dump(checkdnsrr($serverUrl, "A"));
