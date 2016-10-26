@@ -4,9 +4,7 @@ int stream_socket_sendto ( resource $socket , string $data [, int $flags = 0 [, 
 marcosptf - <marcosptf@yahoo.com.br> - @phpsp - sao paulo - br
 --SKIPIF--
 <?php
-if (phpversion() < "5.3.0") {
-    die('SKIP php version so lower.');
-}
+if (getenv("SKIP_ONLINE_TESTS")) { die('skip: online test'); }
 ?>
 --FILE--
 <?php
