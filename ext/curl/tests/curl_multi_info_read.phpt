@@ -33,6 +33,6 @@ foreach ($urls as $i => $url) {
     curl_close($conn[$i]);
 }
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
