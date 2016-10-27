@@ -37,7 +37,7 @@ object(DOMException)#%d (%d) {
   ["trace":"Exception":private]=>
   array(1) {
     [0]=>
-    array(6) {
+    array(7) {
       ["file"]=>
       string(%d) "%sdom003.php"
       ["line"]=>
@@ -53,6 +53,8 @@ object(DOMException)#%d (%d) {
         [0]=>
         DOMElement
       }
+      ["strict_types"]=>
+      int(0)
     }
   }
   ["previous":"Exception":private]=>

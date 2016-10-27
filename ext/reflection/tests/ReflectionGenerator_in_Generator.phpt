@@ -46,7 +46,7 @@ object(ReflectionFunction)#4 (1) {
 NULL
 array(1) {
   [0]=>
-  array(4) {
+  array(5) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
@@ -56,6 +56,8 @@ array(1) {
     ["args"]=>
     array(0) {
     }
+    ["strict_types"]=>
+    int(0)
   }
 }
 int(%d)

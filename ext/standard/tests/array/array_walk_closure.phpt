@@ -205,7 +205,7 @@ End result:int(42)
 closure and exception
 array(2) {
   [0]=>
-  array(2) {
+  array(3) {
     ["function"]=>
     string(9) "{closure}"
     ["args"]=>
@@ -215,9 +215,11 @@ array(2) {
       [1]=>
       string(3) "two"
     }
+    ["strict_types"]=>
+    int(0)
   }
   [1]=>
-  array(4) {
+  array(5) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
@@ -246,6 +248,8 @@ array(2) {
         }
       }
     }
+    ["strict_types"]=>
+    int(0)
   }
 }
 Done

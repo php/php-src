@@ -49,7 +49,7 @@ object(DOMException)#%d (7) {
   ["trace":"Exception":private]=>
   array(1) {
     [0]=>
-    array(6) {
+    array(7) {
       ["file"]=>
       string(%d) "%sdom_set_attr_node.php"
       ["line"]=>
@@ -65,6 +65,8 @@ object(DOMException)#%d (7) {
         [0]=>
         DOMAttr
       }
+      ["strict_types"]=>
+      int(0)
     }
   }
   ["previous":"Exception":private]=>
