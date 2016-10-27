@@ -26,17 +26,6 @@ if (is_resource($sock)) {
     die("Test stream_socket_enable_crypto has failed; Unable to connect: {$errstr} ({$errno})");
 }
 ?>
---CLEAN--
-<?php
-fclose($sock);
-unset($sock);
-unset($serverUri);
-unset($serverUrl);
-unset($stringSocket);
-unset($errno);
-unset($errstr);
-?>
-
 --EXPECTF--
 Notice: fwrite(): send of %i bytes failed with errno=%i Broken pipe in %s on line %i
 
