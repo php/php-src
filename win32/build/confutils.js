@@ -2347,7 +2347,7 @@ function generate_makefile()
 		}
 	}
 	MF.WriteLine("set-test-env:");
-	MF.WriteLine("	@set PATH=" + extra_path + ";%PATH%");
+	MF.WriteLine("	@set PATH=" + extra_path + ";$(PATH)");
 
 	MF.WriteBlankLines(2);
 
