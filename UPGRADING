@@ -118,6 +118,12 @@ PHP 7.2 UPGRADE NOTES
 10. New Global Constants
 ========================================
 
+- Core:
+  . PHP_FLOAT_DIG
+  . PHP_FLOAT_EPSILON
+  . PHP_FLOAT_MIN
+  . PHP_FLOAT_MAX
+
 - GD:
   . IMG_EFFECT_MULTIPLY
 
