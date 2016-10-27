@@ -384,11 +384,7 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 					break;
 				}
 
-#ifdef SQLUNIQUE
 				case SQLUNIQUE: {
-#else
-				case 36: { /* FreeTDS hack */
-#endif
 					if (H->stringify_uniqueidentifier) { // 36-char hex string representation
 						tmp_data_len = 36;
 						tmp_data = safe_emalloc(tmp_data_len, sizeof(char), 1);
