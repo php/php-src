@@ -174,6 +174,8 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
 #endif
 
 	pg->eol = PHPDBG_EOL_LF;
+
+	pg->stdin_file = NULL;
 } /* }}} */
 
 static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
