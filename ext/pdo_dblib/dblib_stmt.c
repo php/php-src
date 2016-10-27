@@ -268,7 +268,9 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 	data_len = dbdatlen(H->link, colno+1);
 
 	if (data_len != 0 || data != NULL) {
-		if (stmt->dbh->stringify) {
+		/* force stringify if DBBIGINT won't fit in zend_long */
+		/* this should only be an issue for 32-bit machines */
+		if (stmt->dbh->stringify || (coltype == SQLINT8 && sizeof(zend_long) < sizeof(DBBIGINT))) {
 			switch (coltype) {
 				case SQLDECIMAL:
 				case SQLNUMERIC:
@@ -277,6 +279,7 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 				case SQLMONEYN:
 				case SQLFLT4:
 				case SQLFLT8:
+				case SQLINT8:
 				case SQLINT4:
 				case SQLINT2:
 				case SQLINT1:
@@ -351,22 +354,28 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 
 					break;
 				}
+				case SQLINT8: {
+					zv = emalloc(sizeof(zval));
+					ZVAL_LONG(zv, *(DBBIGINT *) data);
+
+					break;
+				}
 				case SQLINT4: {
 					zv = emalloc(sizeof(zval));
-					ZVAL_LONG(zv, (long) ((int) *(DBINT *) data));
+					ZVAL_LONG(zv, *(DBINT *) data);
 
 					break;
 				}
 				case SQLINT2: {
 					zv = emalloc(sizeof(zval));
-					ZVAL_LONG(zv, (long) ((int) *(DBSMALLINT *) data));
+					ZVAL_LONG(zv, *(DBSMALLINT *) data);
 
 					break;
 				}
 				case SQLINT1:
 				case SQLBIT: {
 					zv = emalloc(sizeof(zval));
-					ZVAL_LONG(zv, (long) ((int) *(DBTINYINT *) data));
+					ZVAL_LONG(zv, *(DBTINYINT *) data);
 
 					break;
 				}

@@ -44,6 +44,7 @@ PHP                                                                        NEWS
 - PDO_DBlib:
   . Fixed bug #73234 (Emulated statements let value dictate parameter type).
     (Adam Baratz)
+  . Fixed bug #73396 (bigint columns are returned as strings).
 
 - SOAP:
   . Fixed bug #69137 (Peer verification fails when using a proxy with SoapClient)
