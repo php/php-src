@@ -167,7 +167,6 @@ static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 	pdo_dblib_db_handle *H = S->H;
-	RETCODE ret;
 
 	dbsetuserdata(H->link, (BYTE*) &S->err);
 
@@ -181,7 +180,7 @@ static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt)
 		return 0;
 	}
 
-	ret = pdo_dblib_stmt_next_rowset_no_cancel(stmt);
+	pdo_dblib_stmt_next_rowset_no_cancel(stmt);
 
 	stmt->row_count = DBCOUNT(H->link);
 	stmt->column_count = dbnumcols(H->link);
