@@ -5911,10 +5911,12 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, zend_op_arra
 		|	jz >1
 		|.cold_code
 		|1:
-		||	if (jit_return_label >= 0) {
-		|		IF_NOT_Z_REFCOUNTED FP + opline->op1.var, =>jit_return_label
-		||	} else {
-		|		IF_NOT_Z_REFCOUNTED FP + opline->op1.var, >9
+		||	if (op1_info & ((MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+		||		if (jit_return_label >= 0) {
+		|			IF_NOT_Z_REFCOUNTED FP + opline->op1.var, =>jit_return_label
+		||		} else {
+		|			IF_NOT_Z_REFCOUNTED FP + opline->op1.var, >9
+		||		}
 		||	}
 		|	GET_Z_PTR FCARG1a, FP + opline->op1.var
 		|	GC_DELREF FCARG1a
@@ -6158,7 +6160,9 @@ static int zend_jit_fetch_dim_read(dasm_State **Dst, const zend_op *opline, zend
 		|8:
 		if (res_info & MAY_BE_REF) {
 		|	// ZVAL_COPY_UNREF
-		|	IF_NOT_Z_REFCOUNTED r0, >2
+			if (res_info & ((MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+			|	IF_NOT_Z_REFCOUNTED r0, >2
+			}
 		|	GET_Z_PTR r1, r0
 		|	IF_NOT_Z_TYPE r0, IS_REFERENCE, >1
 		|	cmp dword [r1], 1
@@ -6655,7 +6659,9 @@ static int zend_jit_fetch_obj_r(dasm_State **Dst, zend_op *opline, zend_op_array
 	|	// ZVAL_COPY_UNREF
 	if (res_info & MAY_BE_REF) {
 	|	// ZVAL_COPY_UNREF
-	|	IF_NOT_Z_REFCOUNTED r0, >2
+		if (res_info & ((MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+		|	IF_NOT_Z_REFCOUNTED r0, >2
+		}
 	|	GET_Z_PTR r1, r0
 	|	IF_NOT_Z_TYPE r0, IS_REFERENCE, >1
 	|	cmp dword [r1], 1
