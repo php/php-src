@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2016, PHP 5.6.28
+?? ??? 2016, PHP 5.6.29
+
+
+10 Nov 2016, PHP 5.6.28
 
 - Core:
   . Fixed bug #73337 (try/catch not working with two exceptions inside a same
