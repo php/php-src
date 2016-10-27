@@ -2127,6 +2127,21 @@ function generate_makefile()
 	}
 	TF.Close();
 
+	MF.WriteBlankLines(1);
+
+	var extra_path = PHP_PHP_BUILD + "\\bin";
+	if (PHP_EXTRA_LIBS.length) {
+		path = PHP_EXTRA_LIBS.split(';');
+		for (i = 0; i < path.length; i++) {
+			f = FSO.GetAbsolutePathName(path[i] + "\\..\\bin");
+			if (FSO.FolderExists(f)) {
+				extra_path = extra_path + ";" + f;
+			}
+		}
+	}
+	MF.WriteLine("set-test-env:");
+	MF.WriteLine("	@set PATH=" + extra_path + ";%PATH%");
+
 	MF.WriteBlankLines(2);
 
 	MFO.Close();
