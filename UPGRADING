@@ -123,10 +123,12 @@ PHP 7.2 UPGRADE NOTES
 ========================================
 
 - Core:
-  . PHP_FLOAT_DIG
-  . PHP_FLOAT_EPSILON
-  . PHP_FLOAT_MIN
-  . PHP_FLOAT_MAX
+  . PHP_FLOAT_DIG     number of decimal digits, that can be rounded into a
+                      float and back without precision loss
+  . PHP_FLOAT_EPSILON smallest representable positive number x, so then
+                      x + 1.0 != 1.0
+  . PHP_FLOAT_MIN     max representable float number
+  . PHP_FLOAT_MAX     min representable float number
 
 - GD:
   . IMG_EFFECT_MULTIPLY
