@@ -12,6 +12,8 @@ PHP                                                                        NEWS
   . Fixed bug #73215 (uniqid() should use better random source). (Yasuo)
   . Fixed bug #73337 (try/catch not working with two exceptions inside a same
     operation). (Dmitry)
+  . Implemented FR #72768 (Add ENABLE_VIRTUAL_TERMINAL_PROCESSING flag for
+    php.exe). (Michele Locati)
 
 - EXIF:
   . Added support for vendor specific tags for the following formats:
