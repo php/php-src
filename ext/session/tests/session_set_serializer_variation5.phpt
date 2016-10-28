@@ -60,7 +60,7 @@ decoding:
 bool(true)
 encoded: a:0:{}
 
-Catchable fatal error: session_commit(): Session decode callback expects string or FALSE return value in %s on line %d
+Recoverable fatal error: session_commit(): Session decode callback expects string or FALSE return value in %s on line 32
 encoded: a:0:{}
 
-Catchable fatal error: Unknown: Session decode callback expects string or FALSE return value in Unknown on line 0
+Recoverable fatal error: Unknown: Session decode callback expects string or FALSE return value in Unknown on line 0

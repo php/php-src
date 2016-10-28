@@ -67,5 +67,5 @@ ob_end_flush();
 bool(true)
 decoding: 
 
-Catchable fatal error: session_start(): User session decode function must return array in %s on line %d
+Recoverable fatal error: session_start(): User session decode function must return array in %s on line 30
 encoded: a:0:{}

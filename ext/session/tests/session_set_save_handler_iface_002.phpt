@@ -86,5 +86,5 @@ session_start();
 bool(true)
 
 Warning: session_set_save_handler() expects parameter 1 to be SessionHandlerInterface, object given in %s
-bool(false)
+NULL
 good handler writing

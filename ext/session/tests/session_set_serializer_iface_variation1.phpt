@@ -66,4 +66,5 @@ ob_end_flush();
 
 Warning: session_set_serializer() expects parameter 1 to be SessionSerializerInterface, object given in %s on line %d
 
-Catchable fatal error: session_set_serializer(): Only SessionSerializerInterface object can be used as session serializer object in %s on line %d
+Recoverable fatal error: session_set_serializer(): Only SessionSerializerInterface object can be used as session serializer object in %s on line 28
+

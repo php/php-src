@@ -53,4 +53,4 @@ ob_end_flush();
 --EXPECTF--
 *** Testing session_set_serializer() : basic functionality ***
 
-Catchable fatal error: session_set_serializer(): Argument 2 is not a valid callback in %s on line %d
+Recoverable fatal error: session_set_serializer(): Argument 2 is not a valid callback in %s on line 26

@@ -76,7 +76,8 @@ array(3) {
 }
 encoded: a:3:{s:4:"Blah";s:12:"Hello World!";s:3:"Foo";b:0;s:4:"Guff";i:1234567890;}
 
-Catchable fatal error: session_write_close(): Session decode callback expects string or FALSE return value in %s on line %d
+Recoverable fatal error: session_write_close(): Session decode callback expects string or FALSE return value in %s on line 37
 encoded: a:3:{s:4:"Blah";s:12:"Hello World!";s:3:"Foo";b:0;s:4:"Guff";i:1234567890;}
 
-Catchable fatal error: Unknown: Session decode callback expects string or FALSE return value in Unknown on line 0
+Recoverable fatal error: Unknown: Session decode callback expects string or FALSE return value in Unknown on line 0
+
