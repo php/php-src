@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixded bug #72736 (Slow performance when fetching large dataset with mysqli
     / PDO). (Dmitry)
 
+- PCRE:
+  . Fixed bug #73392 (A use-after-free in zend allocator management). 
+    (Laruence)
+
 10 Nov 2016 PHP 7.0.13
 
 - Core:
