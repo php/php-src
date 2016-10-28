@@ -167,7 +167,6 @@ static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 	pdo_dblib_db_handle *H = S->H;
-	RETCODE ret;
 
 	dbsetuserdata(H->link, (BYTE*) &S->err);
 
@@ -181,7 +180,7 @@ static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt)
 		return 0;
 	}
 
-	ret = pdo_dblib_stmt_next_rowset_no_cancel(stmt);
+	pdo_dblib_stmt_next_rowset_no_cancel(stmt);
 
 	stmt->row_count = DBCOUNT(H->link);
 	stmt->column_count = dbnumcols(H->link);
@@ -269,7 +268,9 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 	data_len = dbdatlen(H->link, colno+1);
 
 	if (data_len != 0 || data != NULL) {
-		if (stmt->dbh->stringify) {
+		/* force stringify if DBBIGINT won't fit in zend_long */
+		/* this should only be an issue for 32-bit machines */
+		if (stmt->dbh->stringify || (coltype == SQLINT8 && sizeof(zend_long) < sizeof(DBBIGINT))) {
 			switch (coltype) {
 				case SQLDECIMAL:
 				case SQLNUMERIC:
@@ -278,6 +279,7 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 				case SQLMONEYN:
 				case SQLFLT4:
 				case SQLFLT8:
+				case SQLINT8:
 				case SQLINT4:
 				case SQLINT2:
 				case SQLINT1:
@@ -352,22 +354,28 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 
 					break;
 				}
+				case SQLINT8: {
+					zv = emalloc(sizeof(zval));
+					ZVAL_LONG(zv, *(DBBIGINT *) data);
+
+					break;
+				}
 				case SQLINT4: {
 					zv = emalloc(sizeof(zval));
-					ZVAL_LONG(zv, (long) ((int) *(DBINT *) data));
+					ZVAL_LONG(zv, *(DBINT *) data);
 
 					break;
 				}
 				case SQLINT2: {
 					zv = emalloc(sizeof(zval));
-					ZVAL_LONG(zv, (long) ((int) *(DBSMALLINT *) data));
+					ZVAL_LONG(zv, *(DBSMALLINT *) data);
 
 					break;
 				}
 				case SQLINT1:
 				case SQLBIT: {
 					zv = emalloc(sizeof(zval));
-					ZVAL_LONG(zv, (long) ((int) *(DBTINYINT *) data));
+					ZVAL_LONG(zv, *(DBTINYINT *) data);
 
 					break;
 				}
@@ -385,11 +393,7 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 					break;
 				}
 
-#ifdef SQLUNIQUE
 				case SQLUNIQUE: {
-#else
-				case 36: { /* FreeTDS hack */
-#endif
 					if (H->stringify_uniqueidentifier) { // 36-char hex string representation
 						tmp_data_len = 36;
 						tmp_data = safe_emalloc(tmp_data_len, sizeof(char), 1);
