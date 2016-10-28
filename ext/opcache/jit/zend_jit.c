@@ -1191,16 +1191,25 @@ pass:
 							goto jit_failure;
 						}
 						goto done;
+					case ZEND_BOOL:
+					case ZEND_BOOL_NOT:
+						if (!zend_jit_bool_jmpznz(&dasm_state, opline, b, op_array, ssa)) {
+							goto jit_failure;
+						}
+						goto done;
 					case ZEND_JMPZ:
 					case ZEND_JMPNZ:
 					case ZEND_JMPZNZ:
+					case ZEND_JMPZ_EX:
+					case ZEND_JMPNZ_EX:
 						if ((opline-1)->opcode == ZEND_IS_EQUAL ||
 						    (opline-1)->opcode == ZEND_IS_NOT_EQUAL ||
 						    (opline-1)->opcode == ZEND_IS_SMALLER ||
 						    (opline-1)->opcode == ZEND_IS_SMALLER_OR_EQUAL ||
 						    (opline-1)->opcode == ZEND_CASE) {
 							/* skip */
-						} else if ((opline->opcode != ZEND_JMPZNZ) &&
+						} else if ((opline->opcode == ZEND_JMPZ ||
+						           (opline->opcode == ZEND_JMPNZ)) &&
 						    ((opline-1)->opcode == ZEND_IS_IDENTICAL ||
 						     (opline-1)->opcode == ZEND_IS_NOT_IDENTICAL ||
 						     (opline-1)->opcode == ZEND_ISSET_ISEMPTY_VAR ||
@@ -1214,8 +1223,10 @@ pass:
 							if (!zend_jit_cond_jmp(&dasm_state, opline + 1, ssa->cfg.blocks[b].successors[0])) {
 								goto jit_failure;
 							}
-						} else if (!zend_jit_jmpznz(&dasm_state, opline, b, op_array, ssa)) {
-							goto jit_failure;
+						} else {
+							if (!zend_jit_bool_jmpznz(&dasm_state, opline, b, op_array, ssa)) {
+								goto jit_failure;
+							}
 						}
 						goto done;
 					case ZEND_FETCH_DIM_R:
