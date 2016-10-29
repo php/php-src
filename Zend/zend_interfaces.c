@@ -48,9 +48,7 @@ ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_fun
 	}
 
 	fci.size = sizeof(fci);
-	/*fci.function_table = NULL; will be read form zend_class_entry of object if needed */
-	fci.object = (object && Z_TYPE_P(object) == IS_OBJECT) ? Z_OBJ_P(object) : NULL;
-	ZVAL_STRINGL(&fci.function_name, function_name, function_name_len);
+	fci.object = object ? Z_OBJ_P(object) : NULL;
 	fci.retval = retval_ptr ? retval_ptr : &retval;
 	fci.param_count = param_count;
 	fci.params = params;
@@ -59,22 +57,22 @@ ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_fun
 	if (!fn_proxy && !obj_ce) {
 		/* no interest in caching and no information already present that is
 		 * needed later inside zend_call_function. */
+		ZVAL_STRINGL(&fci.function_name, function_name, function_name_len);
 		result = zend_call_function(&fci, NULL);
 		zval_ptr_dtor(&fci.function_name);
 	} else {
 		zend_fcall_info_cache fcic;
+		ZVAL_UNDEF(&fci.function_name); /* Unused */
 
 		fcic.initialized = 1;
 		if (!obj_ce) {
 			obj_ce = object ? Z_OBJCE_P(object) : NULL;
 		}
-		if (obj_ce) {
-			function_table = &obj_ce->function_table;
-		} else {
-			function_table = EG(function_table);
-		}
 		if (!fn_proxy || !*fn_proxy) {
-			if ((fcic.function_handler = zend_hash_find_ptr(function_table, Z_STR(fci.function_name))) == NULL) {
+			HashTable *function_table = obj_ce ? &obj_ce->function_table : EG(function_table);
+			fcic.function_handler = zend_hash_str_find_ptr(
+				function_table, function_name, function_name_len);
+			if (fcic.function_handler == NULL) {
 				/* error at c-level */
 				zend_error_noreturn(E_CORE_ERROR, "Couldn't find implementation for method %s%s%s", obj_ce ? ZSTR_VAL(obj_ce->name) : "", obj_ce ? "::" : "", function_name);
 			}
@@ -84,6 +82,7 @@ ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_fun
 		} else {
 			fcic.function_handler = *fn_proxy;
 		}
+
 		fcic.calling_scope = obj_ce;
 		if (object) {
 			fcic.called_scope = Z_OBJCE_P(object);
@@ -100,7 +99,6 @@ ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_fun
 		}
 		fcic.object = object ? Z_OBJ_P(object) : NULL;
 		result = zend_call_function(&fci, &fcic);
-		zval_ptr_dtor(&fci.function_name);
 	}
 	if (result == FAILURE) {
 		/* error at c-level */
