@@ -1847,7 +1847,7 @@ function generate_test_php_ini()
 		return;
 	}
 
-	var ini_dir = PHP_OBJECT_OUT_DIR + ("yes" == PHP_DEBUG ? "Debug" : "Release") + (PHP_ZTS ? "_TS" : "");
+	var ini_dir = PHP_OBJECT_OUT_DIR + ("yes" == PHP_DEBUG ? "Debug" : "Release") + ("yes" == PHP_ZTS ? "_TS" : "");
 	PHP_TEST_INI_PATH = ini_dir + "\\test.ini";
 
 	if (FSO.FileExists(PHP_TEST_INI_PATH)) {
