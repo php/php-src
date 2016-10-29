@@ -1523,7 +1523,10 @@ static int preg_replace_impl(zval *return_value, zval *regex, zval *replace, zva
 				RETVAL_STR(result);
 			} else {
 				zend_string_release(result);
+				RETVAL_NULL();
 			}
+		} else {
+			RETVAL_NULL();
 		}
 	}
 
@@ -1616,7 +1619,6 @@ static PHP_FUNCTION(preg_replace_callback_array)
 		Z_PARAM_ZVAL_EX(zcount, 0, 1)
 	ZEND_PARSE_PARAMETERS_END();
 
-	ZVAL_UNDEF(&zv);
 	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(pattern), str_idx, replace) {
 		if (str_idx) {
 			ZVAL_STR_COPY(&regex, str_idx);
@@ -1644,10 +1646,6 @@ static PHP_FUNCTION(preg_replace_callback_array)
 		}
 
 		zval_ptr_dtor(&regex);
-
-		if (Z_ISUNDEF(zv)) {
-			RETURN_NULL();
-		}
 
 		ZVAL_COPY_VALUE(return_value, &zv);
 

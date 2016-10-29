@@ -165,7 +165,7 @@ ADD_FLAG("CFLAGS_BD_MAIN_STREAMS", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 ADD_SOURCES("win32", "dllmain.c glob.c readdir.c \
 	registry.c select.c sendmail.c time.c winutil.c wsyslog.c globals.c \
 	getrusage.c ftok.c ioutil.c codepage.c nice.c \
-	inet.c fnmatch.c sockets.c");
+	inet.c fnmatch.c sockets.c console.c");
 
 ADD_FLAG("CFLAGS_BD_WIN32", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 
@@ -303,3 +303,10 @@ ARG_WITH("all-shared", "Force all the non obligatory extensions to be shared", "
 //
 // Note, nice as a name is disallowed and will generate a warning and skip saving
 ARG_WITH('config-profile', 'Name of the configuration profile to save this to in php-src/config.name.bat', 'no');
+
+ARG_ENABLE("test-ini", "Enable automatic php.ini generation. The test.ini will be put \
+		into the build dir and used to automatically load the shared extensions.", "yes");
+
+ARG_WITH("test-ini-ext-exclude", "Comma separated list of shared extensions to \
+		be excluded from the test.ini", "no");
+
