@@ -72,6 +72,10 @@ PHP 7.2 UPGRADE NOTES
 6. New Functions
 ========================================
 
+- Core:
+  . Added stream_isatty().
+  . Added sapi_windows_vt100_support().
+
 - GD:
   . Added imagesetclip() and imagegetclip().
   . Added imageopenpolygon().
@@ -119,10 +123,12 @@ PHP 7.2 UPGRADE NOTES
 ========================================
 
 - Core:
-  . PHP_FLOAT_DIG
-  . PHP_FLOAT_EPSILON
-  . PHP_FLOAT_MIN
-  . PHP_FLOAT_MAX
+  . PHP_FLOAT_DIG     number of decimal digits, that can be rounded into a
+                      float and back without precision loss
+  . PHP_FLOAT_EPSILON smallest representable positive number x, so then
+                      x + 1.0 != 1.0
+  . PHP_FLOAT_MIN     min representable float number
+  . PHP_FLOAT_MAX     max representable float number
 
 - GD:
   . IMG_EFFECT_MULTIPLY
@@ -143,6 +149,13 @@ PHP 7.2 UPGRADE NOTES
 ========================================
 12. Windows Support
 ========================================
+
+- Support for VT100 console mode
+
+  On systems starting with 10.0.10586, cmd.exe supports ANSI escape sequences.
+  The corresponding console mode is enabled by default on CLI on suitable
+  systems. As well, the function sapi_windows_vt100_support() is provided,
+  to control and query the corresponding information in the scripts.
 
 ========================================
 13. Other Changes
