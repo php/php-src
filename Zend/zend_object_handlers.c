@@ -206,10 +206,8 @@ static void zend_std_call_getter(zval *object, zval *member, zval *retval) /* {{
 }
 /* }}} */
 
-static int zend_std_call_setter(zval *object, zval *member, zval *value) /* {{{ */
+static void zend_std_call_setter(zval *object, zval *member, zval *value) /* {{{ */
 {
-	zval retval;
-	int result;
 	zend_class_entry *ce = Z_OBJCE_P(object);
 	zend_class_entry *orig_fake_scope = EG(fake_scope);
 
@@ -218,20 +216,10 @@ static int zend_std_call_setter(zval *object, zval *member, zval *value) /* {{{ 
 	/* __set handler is called with two arguments:
 	     property name
 	     value to be set
-
-	   it should return whether the call was successful or not
 	*/
-	zend_call_method_with_2_params(object, ce, &ce->__set, ZEND_SET_FUNC_NAME, &retval, member, value);
+	zend_call_method_with_2_params(object, ce, &ce->__set, ZEND_SET_FUNC_NAME, NULL, member, value);
 
-	if (Z_TYPE(retval) != IS_UNDEF) {
-		result = i_zend_is_true(&retval) ? SUCCESS : FAILURE;
-		zval_ptr_dtor(&retval);
-		EG(fake_scope) = orig_fake_scope;
-		return result;
-	} else {
-		EG(fake_scope) = orig_fake_scope;
-		return FAILURE;
-	}
+	EG(fake_scope) = orig_fake_scope;
 }
 /* }}} */
 
@@ -732,9 +720,7 @@ found:
 
 			ZVAL_COPY(&tmp_object, object);
 			(*guard) |= IN_SET; /* prevent circular setting */
-			if (zend_std_call_setter(&tmp_object, member, value) != SUCCESS) {
-				/* for now, just ignore it - __set should take care of warnings, etc. */
-			}
+			zend_std_call_setter(&tmp_object, member, value);
 			(*guard) &= ~IN_SET;
 			zval_ptr_dtor(&tmp_object);
 		} else if (EXPECTED(property_offset != ZEND_WRONG_PROPERTY_OFFSET)) {
