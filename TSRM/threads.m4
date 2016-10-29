@@ -66,10 +66,9 @@ dnl
 dnl Check whether the current setup can use POSIX threads calls
 dnl
 AC_DEFUN([PTHREADS_CHECK_COMPILE], [
-AC_TRY_LINK( [
+AC_LINK_IFELSE([ AC_LANG_SOURCE([
 #include <pthread.h>
 #include <stddef.h>
-  ], [
 
 void *thread_routine(void *data) {
     return data;
@@ -81,7 +80,7 @@ int main() {
     int data = 1;
     pthread_mutexattr_init(&mattr);
     return pthread_create(&thd, NULL, thread_routine, &data);
-} ], [
+} ]) ], [
   pthreads_checked=yes
   ], [
   pthreads_checked=no
