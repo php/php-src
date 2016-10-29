@@ -294,3 +294,9 @@ toolset_setup_codegen_arch();
 
 ARG_WITH("all-shared", "Force all the non obligatory extensions to be shared", "no");
 
+ARG_ENABLE("test-ini", "Enable automatic php.ini generation. The test.ini will be put \
+		into the build dir and used to automatically load the shared extensions.", "yes");
+
+ARG_WITH("test-ini-ext-exclude", "Comma separated list of shared extensions to \
+		be excluded from the test.ini", "no");
+

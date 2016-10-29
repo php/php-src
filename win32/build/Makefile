@@ -151,8 +151,13 @@ clean-pgo: clean-all
 	-del /f /q $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)$(PHP_ZTS_ARCHIVE_POSTFIX)-Win32-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE).zip
 	-del /f /q $(BUILD_DIR)\php-test-pack-$(PHP_VERSION_STRING).zip
 
+!if $(PHP_TEST_INI_PATH) == ""
 test: set-test-env
 	"$(BUILD_DIR)\php.exe" -d open_basedir= -d output_buffering=0 run-tests.php $(TESTS) -p "$(BUILD_DIR)\php.exe"
+!else
+test: set-test-env
+	"$(BUILD_DIR)\php.exe" -c $(PHP_TEST_INI_PATH) -d open_basedir= -d output_buffering=0 run-tests.php $(TESTS) -p "$(BUILD_DIR)\php.exe"
+!endif
 
 build-snap: generated_files
 	SET PATH=$(PATH);$(PHP_BUILD)\bin
