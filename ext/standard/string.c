@@ -963,6 +963,11 @@ PHP_FUNCTION(wordwrap)
 		RETURN_FALSE;
 	}
 
+	if (linelength < 0) {
+		php_error_docref(NULL, E_WARNING, "Length should be non-negative");
+		RETURN_FALSE;
+	}
+
 	/* Special case for a single-character break as it needs no
 	   additional storage space */
 	if (breakchar_len == 1 && !docut) {

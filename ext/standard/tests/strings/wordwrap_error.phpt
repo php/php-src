@@ -72,7 +72,11 @@ string(39) "testing<br />\nwordwrap<br />\nfunction"
 Warning: wordwrap(): Can't force cut when width is zero in %s on line %d
 bool(false)
 -- width = -10 & cut = false --
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+
+Warning: wordwrap(): Length should be non-negative in %s.php on line %d
+bool(false)
 -- width = -10 & cut = true --
-string(223) "<br />\nt<br />\ne<br />\ns<br />\nt<br />\ni<br />\nn<br />\ng<br />\n<br />\nw<br />\no<br />\nr<br />\nd<br />\nw<br />\nr<br />\na<br />\np<br />\n<br />\nf<br />\nu<br />\nn<br />\nc<br />\nt<br />\ni<br />\no<br />\nn"
+
+Warning: wordwrap(): Length should be non-negative in %s.php on line %d
+bool(false)
 Done
