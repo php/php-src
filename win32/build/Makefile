@@ -152,15 +152,14 @@ clean-pgo: clean-all
 	-del /f /q $(BUILD_DIR)\php-test-pack-$(PHP_VERSION_STRING).zip
 
 !if $(PHP_TEST_INI_PATH) == ""
-test: set-test-env
+test: set-tmp-env
 	"$(BUILD_DIR)\php.exe" -d open_basedir= -d output_buffering=0 run-tests.php $(TESTS) -p "$(BUILD_DIR)\php.exe"
 !else
-test: set-test-env
+test: set-tmp-env
 	"$(BUILD_DIR)\php.exe" -n -c $(PHP_TEST_INI_PATH) -d open_basedir= -d output_buffering=0 -d memory_limit=-1 run-tests.php -p "$(BUILD_DIR)\php.exe" -n -c $(PHP_TEST_INI_PATH) $(TESTS)
 !endif
 
-build-snap: generated_files
-	SET PATH=$(PATH);$(PHP_BUILD)\bin
+build-snap: set-tmp-env generated_files
 	@$(MAKE) "$(BUILD_DIR)\$(PHPDLL)"
 	-for %T in ($(SAPI_TARGETS)) do $(MAKE) /I /nologo "%T"
 	-for %T in ($(EXT_TARGETS)) do $(MAKE) /I /nologo "%T"
