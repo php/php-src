@@ -1840,7 +1840,7 @@ function is_on_exclude_list_for_test_ini(list, name)
 	return false;
 }
 
-function generate_test_php_ini()
+function generate_tmp_php_ini()
 {
 	if ("no" == PHP_TEST_INI) {
 		/* Test ini generation is disabled. */
@@ -1918,7 +1918,7 @@ function generate_files()
 
 	STDOUT.WriteLine("Generating files...");
 	if (!MODE_PHPIZE) {
-		generate_test_php_ini();
+		generate_tmp_php_ini();
 	}
 	generate_makefile();
 	if (!MODE_PHPIZE) {
@@ -2351,7 +2351,7 @@ function generate_makefile()
 
 	if (!MODE_PHPIZE) {
 		var val = "yes" == PHP_TEST_INI ? PHP_TEST_INI_PATH : "";
-		/* Be sure it's done after generate_test_php_ini(). */
+		/* Be sure it's done after generate_tmp_php_ini(). */
 		MF.WriteLine("PHP_TEST_INI_PATH=\"" + val + "\"");
 	}
 
@@ -2404,7 +2404,7 @@ function generate_makefile()
 
 	MF.WriteBlankLines(1);
 
-	var extra_path = PHP_PHP_BUILD + "\\bin";
+	var extra_path = "$(PHP_BUILD)\\bin";
 	if (PHP_EXTRA_LIBS.length) {
 		path = PHP_EXTRA_LIBS.split(';');
 		for (i = 0; i < path.length; i++) {
@@ -2414,7 +2414,7 @@ function generate_makefile()
 			}
 		}
 	}
-	MF.WriteLine("set-test-env:");
+	MF.WriteLine("set-tmp-env:");
 	MF.WriteLine("	@set PATH=" + extra_path + ";$(PATH)");
 
 	MF.WriteBlankLines(2);
