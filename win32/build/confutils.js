@@ -655,7 +655,6 @@ function copy_dep_pdb_into_build_dir(libpath)
 	var names = [];
 
 	var libname = FSO.GetFileName(libpath);
-	names.push(libname.replace(new RegExp("\\.lib$"), ".pdb"));
 
 	/* Within same .lib, everything should be bound to the same .pdb. No check
 		for every single object in the static libs. */
@@ -676,6 +675,10 @@ function copy_dep_pdb_into_build_dir(libpath)
 			}
 		}
 	}
+
+	/* This is rather a fallback, if the bin has no debug section or
+		something went wrong with parsing. */
+	names.push(libname.replace(new RegExp("\\.lib$"), ".pdb"));
 
 	for (var k = 0; k < names.length; k++) {
 		var pdbname = names[k];
