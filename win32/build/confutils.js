@@ -667,6 +667,62 @@ function find_pattern_in_path(pattern, path)
 	return false;
 }
 
+function copy_dep_pdb_into_build_dir(libpath)
+{
+	var candidate;
+	var build_dir = get_define("BUILD_DIR");
+	var libdir = FSO.GetParentFolderName(libpath);
+	var bindir = FSO.GetAbsolutePathName(libdir + "\\..\\bin");
+
+	var names = [];
+
+	var libname = FSO.GetFileName(libpath);
+	names.push(libname.replace(new RegExp("\\.lib$"), ".pdb"));
+
+	/* Within same .lib, everything should be bound to the same .pdb. No check
+		for every single object in the static libs. */
+	var _tmp = execute("dumpbin /section:.debug$T /rawdata:1,256 " + libpath);
+	if (!_tmp.match("LNK4039")) {
+		if (_tmp.match(/\d{2,}:\s+([a-z0-9\s]+)/i)) {
+			var m = RegExp.$1;
+			var a = m.split(/ /);
+			var s = "";
+			for (var i in a) {
+				s = s + String.fromCharCode(parseInt("0x" + a[i]));
+			}
+
+			if (s.match(/([^\\]+\.pdb)/i)) {
+				if (RegExp.$1 != names[0]) {
+					names.push(RegExp.$1);
+				}
+			}
+		}
+	}
+
+	/*if ("libxml2_a_dll.lib" == libname || "libcrypt.lib" == libname || "libcrypt_a.lib" == libname) {
+		WARNING("dumpbin /section:.debug$T /rawdata " + libpath);
+		ERROR(names);
+	}*/
+
+	for (var k = 0; k < names.length; k++) {
+		var pdbname = names[k];
+
+		candidate = bindir + "\\" + pdbname;
+		if (FSO.FileExists(candidate)) {
+			FSO.CopyFile(candidate, build_dir + "\\" + pdbname, true);
+			return true;
+		}
+
+		candidate = libdir + "\\" + pdbname;
+		if (FSO.FileExists(candidate)) {
+			FSO.CopyFile(candidate, build_dir + "\\" + pdbname, true);
+			return true;
+		}
+	}
+
+	return false;
+}
+
 function CHECK_LIB(libnames, target, path_to_check, common_name)
 {
 	STDOUT.Write("Checking for library " + libnames + " ... ");
@@ -749,6 +805,8 @@ function CHECK_LIB(libnames, target, path_to_check, common_name)
 
 			STDOUT.WriteLine(location);
 
+			copy_dep_pdb_into_build_dir(location);
+
 			return location;
 		}
 
@@ -761,6 +819,7 @@ function CHECK_LIB(libnames, target, path_to_check, common_name)
 			ADD_FLAG("LIBS" + target, libname);
 
 			STDOUT.WriteLine("<in LIB path> " + libname);
+
 			return location;
 		}
 
@@ -771,6 +830,7 @@ function CHECK_LIB(libnames, target, path_to_check, common_name)
 			libname = FSO.GetFileName(location);
 			ADD_FLAG("LIBS" + target, libname);
 			STDOUT.WriteLine("<in extra libs path>");
+			copy_dep_pdb_into_build_dir(location);
 			return location;
 		}
 	}
