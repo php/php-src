@@ -4878,7 +4878,7 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, int b, 
 				|	add eax, 2
 			}
 			|	SET_Z_TYPE_INFO FP + opline->result.var, eax
-			|	FREE_OP opline->op1_type, opline->op1, op1_info, 1, op_array, opline->lineno
+			|	FREE_OP opline->op1_type, opline->op1, op1_info, !(op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG)), op_array, opline->lineno
 			if (zend_may_throw(opline, op_array, ssa)) {
 				if (!zend_jit_check_exception(Dst)) {
 					return 0;
