@@ -699,11 +699,6 @@ function copy_dep_pdb_into_build_dir(libpath)
 		}
 	}
 
-	/*if ("libxml2_a_dll.lib" == libname || "libcrypt.lib" == libname || "libcrypt_a.lib" == libname) {
-		WARNING("dumpbin /section:.debug$T /rawdata " + libpath);
-		ERROR(names);
-	}*/
-
 	for (var k = 0; k < names.length; k++) {
 		var pdbname = names[k];
 
