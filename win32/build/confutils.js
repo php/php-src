@@ -2197,7 +2197,7 @@ function generate_makefile()
 
 	MF.WriteBlankLines(1);
 
-	var extra_path = PHP_PHP_BUILD + "\\bin";
+	var extra_path = "$(PHP_BUILD)\\bin";
 	if (PHP_EXTRA_LIBS.length) {
 		path = PHP_EXTRA_LIBS.split(';');
 		for (i = 0; i < path.length; i++) {
