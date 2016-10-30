@@ -1240,13 +1240,11 @@ pass:
 							goto jit_failure;
 						}
 						goto done;
-						/*
 					case ZEND_FETCH_OBJ_R:
 						if (!zend_jit_fetch_obj_r(&dasm_state, opline, op_array, ssa)) {
 							goto jit_failure;
 						}
 						goto done;
-						*/
 					case ZEND_BIND_GLOBAL:
 						if (!zend_jit_bind_global(&dasm_state, opline, op_array, ssa)) {
 							goto jit_failure;

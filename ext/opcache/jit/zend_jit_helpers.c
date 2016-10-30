@@ -1306,12 +1306,6 @@ static void ZEND_FASTCALL zend_jit_free_call_frame(zend_execute_data *call)
 	zend_vm_stack_free_call_frame(call);
 }
 
-static void ZEND_FASTCALL zend_jit_zval_copy_unref_helper(zval *dst, zval *src)
-{
-	ZVAL_UNREF(src);
-	ZVAL_COPY(dst, src);
-}
-
 static zval* ZEND_FASTCALL zend_jit_new_ref_helper(zval *value)
 {
 	zend_reference *ref = (zend_reference*)emalloc(sizeof(zend_reference));
@@ -1589,6 +1583,27 @@ static void ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, zend_op_array *op_
 	return;
 err:
 	zend_verify_arg_error((zend_function*)op_array, arg_info, arg_num, ce, arg);
+}
+
+static void ZEND_FASTCALL zend_jit_zval_copy_unref_helper(zval *dst, zval *src)
+{
+	ZVAL_UNREF(src);
+	ZVAL_COPY(dst, src);
+}
+
+static void ZEND_FASTCALL zend_jit_fetch_obj_r_slow(zval *container, zval *offset, zval *result)
+{
+	zval *retval;
+	zend_object *zobj = Z_OBJ_P(container);
+	if (UNEXPECTED(zobj->handlers->read_property == NULL)) {
+		zend_error(E_NOTICE, "Trying to get property of non-object");
+		ZVAL_NULL(result);
+	} else {
+		retval = zobj->handlers->read_property(container, offset, BP_VAR_R, NULL, result);
+		if (retval != result) {
+			ZVAL_COPY_UNREF(result, retval);
+		}
+	}
 }
 
 /*

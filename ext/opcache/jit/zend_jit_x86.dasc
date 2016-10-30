@@ -1615,6 +1615,25 @@ static int zend_jit_cannot_add_element_stub(dasm_State **Dst)
 	return 1;
 }
 
+static int zend_jit_not_obj_stub(dasm_State **Dst)
+{
+	|->no_obj:
+	|8:
+	|.if X64
+	|	mov CARG1, 0
+	|	LOAD_ADDR CARG2, "Using $this when not in object context"
+	|	EXT_CALL zend_throw_error, r0
+	|.else
+	|	sub r4, 8
+	|	push "Using $this when not in object context"
+	|	push 0
+	|	EXT_CALL zend_throw_error, r0
+	|	add r4, 16
+	|.endif
+	|	jmp ->exception_handler
+	return 1;
+}
+
 static const zend_jit_stub zend_jit_stubs[] = {
 	JIT_STUB(interrupt_handler),
 	JIT_STUB(exception_handler),
@@ -1628,6 +1647,7 @@ static const zend_jit_stub zend_jit_stubs[] = {
 	JIT_STUB(undefined_offset_ex),
 	JIT_STUB(undefined_index_ex),
 	JIT_STUB(cannot_add_element_ex),
+	JIT_STUB(not_obj),
 };
 
 static int zend_jit_align_func(dasm_State **Dst)
@@ -6872,25 +6892,32 @@ static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, zend_op_a
 
 static int zend_jit_fetch_obj_r(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
 {
-	uint32_t op1_info, res_info;
-	zend_ssa_var_info *op1_ssa;
+	uint32_t op1_info;
 	zval *member, *zv;
+	zend_class_entry *ce;
 	zend_property_info *info;
+	zend_ssa_var_info *op1_ssa;
 
-	/* TODO: supports IS_UNUSED? */
-	if (opline->op1_type != IS_CV || opline->op2_type != IS_CONST || !ssa->ops || !ssa->var_info) {
+	if (opline->op2_type != IS_CONST || !ssa->ops || !ssa->var_info) {
 		goto fallback;
 	}
 
-	res_info = RES_INFO();
-	op1_info = OP1_INFO();
-	if ((op1_info & MAY_BE_ANY) != MAY_BE_OBJECT) {
-		goto fallback;
-	}
+	if (opline->op1_type == IS_UNUSED) {
+		if (!op_array->scope) {
+			goto fallback;
+		}
+		ce = op_array->scope;
+	} else {
+		op1_info = OP1_INFO();
+		if ((op1_info & MAY_BE_ANY) != MAY_BE_OBJECT) {
+			goto fallback;
+		}
 
-	op1_ssa = &ssa->var_info[ssa->ops[opline - op_array->opcodes].op1_use];
-	if (!op1_ssa->ce || op1_ssa->is_instanceof || op1_ssa->ce->create_object) {
-		goto fallback;
+		op1_ssa = &ssa->var_info[ssa->ops[opline - op_array->opcodes].op1_use];
+		if (!op1_ssa->ce || op1_ssa->is_instanceof || op1_ssa->ce->create_object) {
+			goto fallback;
+		}
+		ce = op1_ssa->ce;
 	}
 
 	member = RT_CONSTANT(op_array, opline->op2);
@@ -6898,69 +6925,71 @@ static int zend_jit_fetch_obj_r(dasm_State **Dst, zend_op *opline, zend_op_array
 		goto fallback;
 	}
 
-	zv = zend_hash_find(&op1_ssa->ce->properties_info, Z_STR_P(member));
+	zv = zend_hash_find(&ce->properties_info, Z_STR_P(member));
 	if (zv == NULL) {
 		goto fallback;
 	}
 
 	info = (zend_property_info*)Z_PTR_P(zv);
-	if (!(info->flags & ZEND_ACC_PUBLIC) || info->offset == ZEND_WRONG_PROPERTY_OFFSET) {
+	if (info->offset == ZEND_WRONG_PROPERTY_OFFSET) {
+		goto fallback;
+	}
+	if (!(info->flags & ZEND_ACC_PUBLIC) &&	(opline->op2_type != IS_UNUSED || info->ce != ce)) {
 		goto fallback;
 	}
 
-	if (opline->op1_type == IS_CV) {
-	|	lea r0, [FP + opline->op1.var]
-	|	ZVAL_DEREF r0, op1_info
+	if (opline->op1_type == IS_UNUSED) {
+	|	lea r1, EX->This
+	|	IF_Z_TYPE r1, IS_UNDEF, ->not_obj
 	} else {
-	|	lea r0, EX->This
+	|	lea r1, [FP + opline->op1.var]
+	|	ZVAL_DEREF r1, op1_info
 	}
-	if (op1_info & MAY_BE_UNDEF) {
-	|	IF_Z_TYPE r0, IS_UNDEF, >8
-	}
-	|	mov r0, [r0]
+	|	mov r0, [r1]
 	|   lea r0, [r0 + info->offset]
-	|	// ZVAL_COPY_UNREF
-	if (res_info & MAY_BE_REF) {
-	|	// ZVAL_COPY_UNREF
-		if (res_info & ((MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
-		|	IF_NOT_Z_REFCOUNTED r0, >2
-		}
+	|	mov edx, dword [r0 + 8]
+	|	IF_TYPE dl, IS_UNDEF, >5
 	|	GET_Z_PTR r1, r0
-	|	IF_NOT_Z_TYPE r0, IS_REFERENCE, >1
-	|	cmp dword [r1], 1
-	|	jne >1
-	|	lea FCARG1a, [FP + opline->result.var]
-	|	mov FCARG2a, r0
-	|	EXT_CALL zend_jit_zval_copy_unref_helper, r0
-	|	jmp >9
+	|	IF_NOT_REFCOUNTED dh, >2
+	|	IF_TYPE dl, IS_REFERENCE, >6
 	|1:
 	|	GC_ADDREF r1
 	|2:
-	|	ZVAL_COPY_VALUE FP + opline->result.var, r0, MAY_BE_ANY, r1, ecx, r2
-	} else  {
-	|	// ZVAL_COPY
-	|	ZVAL_COPY_VALUE FP + opline->result.var, r0, MAY_BE_ANY, r1, ecx, r2
-	|	TRY_ADDREF res_info, ch, r2
-	}
-	|9: // END
-
-	if (op1_info & MAY_BE_UNDEF) {
-	|.cold_code
-	|8:
 	|.if X64
-	|	mov CARG1, 0
-	|	LOAD_ADDR CARG2, "Using $this when not in object context"
-	|	EXT_CALL zend_throw_error, r0
+	|	SET_Z_PTR FP + opline->result.var, r1
 	|.else
-	|	sub r4, 8
-	|	push "Using $this when not in object context"
-	|	push 0
-	|	EXT_CALL zend_throw_error, r0
+	|	SET_Z_PTR FP + opline->result.var, r1
+	|	GET_Z_W2 r1, r0
+	|	SET_Z_W2 FP + opline->result.var, r1
+	|.endif
+	|	SET_Z_TYPE_INFO FP + opline->result.var, edx
+	|4: // END
+
+	|	FREE_OP opline->op1_type, opline->op1, op1_info, 1, op_array, opline->lineno
+
+	|.cold_code
+	|5:
+	|	mov FCARG1a, r1
+	|	LOAD_ADDR FCARG2a, member
+	|.if X64
+	|	lea CARG3, [FP + opline->result.var]
+	|	EXT_CALL zend_jit_fetch_obj_r_slow, r0
+	|.else
+	|	sub r4, 12
+	|	lea r0, [FP + opline->result.var]
+	|	push r0
+	|	EXT_CALL zend_jit_fetch_obj_r_slow, r0
 	|	add r4, 16
 	|.endif
-	|	jmp <9
-	|.code
-	}
+	|	jmp <4
+	|6:
+	|	cmp dword [r1], 1
+	|	jne <1
+	|	lea FCARG1a, [FP + opline->result.var]
+	|	mov FCARG2a, r0
+	|	EXT_CALL zend_jit_zval_copy_unref_helper, r0
+	|	jmp <4
+	|.code;
 
 	return 1;
 
