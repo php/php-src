@@ -259,8 +259,9 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 	pdo_dblib_db_handle *H = S->H;
 
 	int coltype;
-	char *data, *tmp_data;
-	unsigned int data_len, tmp_data_len;
+	LPBYTE data;
+	DBCHAR *tmp_data;
+	DBINT data_len, tmp_data_len;
 	zval *zv = NULL;
 
 	coltype = dbcoltype(H->link, colno+1);
@@ -287,7 +288,7 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 					if (dbwillconvert(coltype, SQLCHAR)) {
 						tmp_data_len = 32 + (2 * (data_len)); /* FIXME: We allocate more than we need here */
 						tmp_data = emalloc(tmp_data_len);
-						data_len = dbconvert(NULL, coltype, data, data_len, SQLCHAR, tmp_data, -1);
+						data_len = dbconvert(NULL, coltype, data, data_len, SQLCHAR, (LPBYTE) tmp_data, -1);
 
 						zv = emalloc(sizeof(zval));
 						ZVAL_STRING(zv, tmp_data);
@@ -314,7 +315,7 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 				case SQLBINARY:
 				case SQLIMAGE: {
 					zv = emalloc(sizeof(zval));
-					ZVAL_STRINGL(zv, data, data_len);
+					ZVAL_STRINGL(zv, (DBCHAR *) data, data_len);
 
 					break;
 				}
@@ -344,13 +345,13 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 				}
 				case SQLFLT4: {
 					zv = emalloc(sizeof(zval));
-					ZVAL_DOUBLE(zv, (double) (*(DBFLT4 *) data));
+					ZVAL_DOUBLE(zv, *(DBFLT4 *) data);
 
 					break;
 				}
 				case SQLFLT8: {
 					zv = emalloc(sizeof(zval));
-					ZVAL_DOUBLE(zv, (double) (*(DBFLT8 *) data));
+					ZVAL_DOUBLE(zv, *(DBFLT8 *) data);
 
 					break;
 				}
@@ -385,7 +386,7 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 				case SQLMONEY4:
 				case SQLMONEYN: {
 					DBFLT8 float_value;
-					dbconvert(NULL, coltype, data, 8, SQLFLT8, (LPBYTE)&float_value, -1);
+					dbconvert(NULL, coltype, data, 8, SQLFLT8, (LPBYTE) &float_value, -1);
 
 					zv = emalloc(sizeof(zval));
 					ZVAL_DOUBLE(zv, float_value);
@@ -398,7 +399,7 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 						/* 36-char hex string representation */
 						tmp_data_len = 36;
 						tmp_data = safe_emalloc(tmp_data_len, sizeof(char), 1);
-						data_len = (unsigned int) dbconvert(NULL, SQLUNIQUE, (BYTE*)data, data_len, SQLCHAR, (BYTE*)tmp_data, tmp_data_len);
+						data_len = dbconvert(NULL, SQLUNIQUE, data, data_len, SQLCHAR, (LPBYTE) tmp_data, tmp_data_len);
 						php_strtoupper(tmp_data, data_len);
 						zv = emalloc(sizeof(zval));
 						ZVAL_STRINGL(zv, tmp_data, data_len);
@@ -407,7 +408,7 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 					} else {
 						/* 16-byte binary representation */
 						zv = emalloc(sizeof(zval));
-						ZVAL_STRINGL(zv, data, 16);
+						ZVAL_STRINGL(zv, (DBCHAR *) data, 16);
 					}
 					break;
 				}
@@ -416,7 +417,7 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 					if (dbwillconvert(coltype, SQLCHAR)) {
 						tmp_data_len = 32 + (2 * (data_len)); /* FIXME: We allocate more than we need here */
 						tmp_data = emalloc(tmp_data_len);
-						data_len = dbconvert(NULL, coltype, data, data_len, SQLCHAR, tmp_data, -1);
+						data_len = dbconvert(NULL, coltype, data, data_len, SQLCHAR, (LPBYTE) tmp_data, -1);
 
 						zv = emalloc(sizeof(zval));
 						ZVAL_STRING(zv, tmp_data);
