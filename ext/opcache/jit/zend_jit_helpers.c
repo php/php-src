@@ -229,6 +229,12 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_r_helper(zend_array *ht, zval *dim,
 	}
 
 	switch (Z_TYPE_P(dim)) {
+		case IS_LONG:
+			hval = Z_LVAL_P(dim);
+			goto num_index;
+		case IS_STRING:
+			offset_key = Z_STR_P(dim);
+			goto str_index;
 		case IS_UNDEF:
 			zend_jit_undefined_op_helper(EG(current_execute_data)->opline->op2.var);
 			/* break missing intentionally */
@@ -295,6 +301,12 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_is_helper(zend_array *ht, zval *dim
 	}
 
 	switch (Z_TYPE_P(dim)) {
+		case IS_LONG:
+			hval = Z_LVAL_P(dim);
+			goto num_index;
+		case IS_STRING:
+			offset_key = Z_STR_P(dim);
+			goto str_index;
 		case IS_UNDEF:
 			zend_jit_undefined_op_helper(EG(current_execute_data)->opline->op2.var);
 			/* break missing intentionally */
@@ -358,6 +370,12 @@ static int ZEND_FASTCALL zend_jit_fetch_dim_isset_helper(zend_array *ht, zval *d
 	}
 
 	switch (Z_TYPE_P(dim)) {
+		case IS_LONG:
+			hval = Z_LVAL_P(dim);
+			goto num_index;
+		case IS_STRING:
+			offset_key = Z_STR_P(dim);
+			goto str_index;
 		case IS_UNDEF:
 			zend_jit_undefined_op_helper(EG(current_execute_data)->opline->op2.var);
 			/* break missing intentionally */
@@ -419,6 +437,12 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_rw_helper(zend_array *ht, zval *di
 	}
 
 	switch (Z_TYPE_P(dim)) {
+		case IS_LONG:
+			hval = Z_LVAL_P(dim);
+			goto num_index;
+		case IS_STRING:
+			offset_key = Z_STR_P(dim);
+			goto str_index;
 		case IS_UNDEF:
 			zend_jit_undefined_op_helper(EG(current_execute_data)->opline->op2.var);
 			/* break missing intentionally */
@@ -481,6 +505,12 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim
 	}
 
 	switch (Z_TYPE_P(dim)) {
+		case IS_LONG:
+			hval = Z_LVAL_P(dim);
+			goto num_index;
+		case IS_STRING:
+			offset_key = Z_STR_P(dim);
+			goto str_index;
 		case IS_UNDEF:
 			zend_jit_undefined_op_helper(EG(current_execute_data)->opline->op2.var);
 			/* break missing intentionally */
