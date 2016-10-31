@@ -130,6 +130,10 @@ PHP_FUNCTION(intval)
 	zval *num;
 	zend_long base = 10;
 
+	zend_long strlen;
+	char *strval;
+	char *tmpval;
+
 	if (ZEND_NUM_ARGS() != 1 && ZEND_NUM_ARGS() != 2) {
 		WRONG_PARAM_COUNT;
 	}
@@ -141,10 +145,20 @@ PHP_FUNCTION(intval)
 
 	if (Z_TYPE_P(num) != IS_STRING || base == 10) {
 		RETVAL_LONG(zval_get_long(num));
-	} else if (Z_STRLEN_P(num) > 2 && Z_STRVAL_P(num)[0] == '0' && Z_STRVAL_P(num)[1] == 'b') {
-		RETVAL_LONG(ZEND_STRTOL(Z_STRVAL_P(num) + 2, NULL, 2));
 	} else {
-		RETVAL_LONG(ZEND_STRTOL(Z_STRVAL_P(num), NULL, base));
+		strval = Z_STRVAL_P(num);
+		strlen = Z_STRLEN_P(num);
+		if (strlen > 2 && strval[0] == '0' && strval[1] == 'b') {
+			RETVAL_LONG(ZEND_STRTOL(strval + 2, NULL, 2));
+		} else if (strlen > 3 && strval[0] == '-' && strval[1] == '0' && strval[2] == 'b') {
+			tmpval = emalloc(strlen - 2);
+			tmpval[0] = '-';
+			strncpy(tmpval + 1, strval + 3, strlen - 3);
+			RETVAL_LONG(ZEND_STRTOL(tmpval, NULL, 2));
+			efree(tmpval);
+		} else {
+			RETVAL_LONG(ZEND_STRTOL(Z_STRVAL_P(num), NULL, base));
+		}
 	}
 }
 /* }}} */
