@@ -6123,7 +6123,9 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, zend_op_
 			}
 			|	// OBJ_RELEASE(object);
 			|	OBJ_RELEASE r0, ecx, >4
-			|	jmp >4
+			if (op_array->fn_flags & (ZEND_ACC_CLOSURE|ZEND_ACC_STATIC)) {
+				|	jmp >4
+			}
 			if (op_array->fn_flags & ZEND_ACC_STATIC) {
 				|.code
 			} else {
