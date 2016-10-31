@@ -668,7 +668,7 @@ int DSA_set0_key(DSA *d, BIGNUM *pub_key, BIGNUM *priv_key)
 	return 1;
 }
 
-#if OPENSSL_VERSION_NUMBER < 0x10002000L
+#if OPENSSL_VERSION_NUMBER < 0x10002000L || defined (LIBRESSL_VERSION_NUMBER)
 
 static int X509_get_signature_nid(const X509 *x)
 {
@@ -4370,7 +4370,7 @@ PHP_FUNCTION(openssl_pkey_export_to_file)
 		switch (EVP_PKEY_base_id(key)) {
 #ifdef HAVE_EVP_PKEY_EC
 			case EVP_PKEY_EC:
-				pem_write = PEM_write_bio_ECPrivateKey(bio_out, EVP_PKEY_get1_EC_KEY(key), cipher, (unsigned char *)passphrase, (int)passphrase_len, NULL, NULL);
+				pem_write = PEM_write_bio_ECPrivateKey(bio_out, EVP_PKEY_get0_EC_KEY(key), cipher, (unsigned char *)passphrase, (int)passphrase_len, NULL, NULL);
 				break;
 #endif
 			default:
@@ -4444,7 +4444,7 @@ PHP_FUNCTION(openssl_pkey_export)
 		switch (EVP_PKEY_base_id(key)) {
 #ifdef HAVE_EVP_PKEY_EC
 			case EVP_PKEY_EC:
-				pem_write = PEM_write_bio_ECPrivateKey(bio_out, EVP_PKEY_get1_EC_KEY(key), cipher, (unsigned char *)passphrase, (int)passphrase_len, NULL, NULL);
+				pem_write = PEM_write_bio_ECPrivateKey(bio_out, EVP_PKEY_get0_EC_KEY(key), cipher, (unsigned char *)passphrase, (int)passphrase_len, NULL, NULL);
 				break;
 #endif
 			default:
@@ -4656,7 +4656,7 @@ PHP_FUNCTION(openssl_pkey_get_details)
 				ASN1_OBJECT *obj;
 				// openssl recommends a buffer length of 80
 				char oir_buf[80];
-				const EC_KEY *ec_key = EVP_PKEY_get1_EC_KEY(pkey);
+				const EC_KEY *ec_key = EVP_PKEY_get0_EC_KEY(pkey);
 				BIGNUM *x = BN_new();
 				BIGNUM *y = BN_new();
 				const BIGNUM *d;
