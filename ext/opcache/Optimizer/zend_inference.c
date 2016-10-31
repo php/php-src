@@ -1054,6 +1054,17 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 		case ZEND_QM_ASSIGN:
 		case ZEND_JMP_SET:
 		case ZEND_COALESCE:
+			if (ssa->ops[line].op1_def == var) {
+				if (ssa->ops[line].op1_def >= 0) {
+					if (OP1_HAS_RANGE()) {
+						tmp->underflow = OP1_RANGE_UNDERFLOW();
+						tmp->min = OP1_MIN_RANGE();
+						tmp->max = OP1_MAX_RANGE();
+						tmp->overflow  = OP1_RANGE_OVERFLOW();
+						return 1;
+					}
+				}
+			}
 			if (ssa->ops[line].result_def == var) {
 				if (OP1_HAS_RANGE()) {
 					tmp->min = OP1_MIN_RANGE();
@@ -2549,6 +2560,14 @@ static void zend_update_type_info(const zend_op_array *op_array,
 		case ZEND_QM_ASSIGN:
 		case ZEND_JMP_SET:
 		case ZEND_COALESCE:
+			if (ssa_ops[i].op1_def >= 0) {
+				tmp = t1;
+				if ((t1 & (MAY_BE_RC1|MAY_BE_REF)) && (opline->op1_type == IS_CV)) {
+					tmp |= MAY_BE_RCN;
+				}
+				UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
+				COPY_SSA_OBJ_TYPE(ssa_ops[i].op1_use, ssa_ops[i].op1_def);
+			}
 			tmp = t1 & ~(MAY_BE_UNDEF|MAY_BE_REF);
 			if (t1 & MAY_BE_UNDEF) {
 				tmp |= MAY_BE_NULL;
