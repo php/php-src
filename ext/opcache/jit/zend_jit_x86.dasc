@@ -6893,7 +6893,7 @@ static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, zend_op_a
 static int zend_jit_fetch_obj_r(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
 {
 	uint32_t op1_info;
-	zval *member, *zv;
+	zval *member;
 	zend_class_entry *ce;
 	zend_property_info *info;
 	zend_ssa_var_info *op1_ssa;
@@ -6909,7 +6909,7 @@ static int zend_jit_fetch_obj_r(dasm_State **Dst, zend_op *opline, zend_op_array
 		ce = op_array->scope;
 	} else {
 		op1_info = OP1_INFO();
-		if ((op1_info & MAY_BE_ANY) != MAY_BE_OBJECT) {
+		if ((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) != MAY_BE_OBJECT) {
 			goto fallback;
 		}
 
@@ -6925,16 +6925,12 @@ static int zend_jit_fetch_obj_r(dasm_State **Dst, zend_op *opline, zend_op_array
 		goto fallback;
 	}
 
-	zv = zend_hash_find(&ce->properties_info, Z_STR_P(member));
-	if (zv == NULL) {
+	info = (zend_property_info*)zend_hash_find_ptr(&ce->properties_info, Z_STR_P(member));
+	if (info == NULL || info->offset == ZEND_WRONG_PROPERTY_OFFSET) {
 		goto fallback;
 	}
 
-	info = (zend_property_info*)Z_PTR_P(zv);
-	if (info->offset == ZEND_WRONG_PROPERTY_OFFSET) {
-		goto fallback;
-	}
-	if (!(info->flags & ZEND_ACC_PUBLIC) &&	(opline->op2_type != IS_UNUSED || info->ce != ce)) {
+	if (!(info->flags & ZEND_ACC_PUBLIC) && (opline->op1_type != IS_UNUSED || info->ce != ce)) {
 		goto fallback;
 	}
 
