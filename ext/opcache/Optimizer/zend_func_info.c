@@ -347,7 +347,7 @@ static const func_info_t func_infos[] = {
 	F1("ucfirst",                      MAY_BE_NULL | MAY_BE_STRING),
 	F1("lcfirst",                      MAY_BE_NULL | MAY_BE_STRING),
 	F1("ucwords",                      MAY_BE_NULL | MAY_BE_STRING),
-	F1("strtr",                        MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
+	FN("strtr",                        MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	FN("addslashes",                   MAY_BE_NULL | MAY_BE_STRING),
 	F1("addcslashes",                  MAY_BE_NULL | MAY_BE_STRING),
 	FN("rtrim",                        MAY_BE_NULL | MAY_BE_STRING),
