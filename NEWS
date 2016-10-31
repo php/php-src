@@ -6,13 +6,17 @@ PHP                                                                        NEWS
   . Fixded bug #72736 (Slow performance when fetching large dataset with mysqli
     / PDO). (Dmitry)
 
-- PCRE:
-  . Fixed bug #73392 (A use-after-free in zend allocator management). 
-    (Laruence)
+- Date:
+  . Fixed bug #73426 (createFromFormat with 'z' format char results in
+    incorrect time). (Derick)
 
 - JSON:
   . Introduced encoder struct instead of global which fixes bugs #66025 and
     #73254 related to pretty print indentation. (Jakub Zelenka)
+
+- PCRE:
+  . Fixed bug #73392 (A use-after-free in zend allocator management). 
+    (Laruence)
 
 27 Oct 2016, PHP 7.1.0RC5
 
