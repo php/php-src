@@ -141,6 +141,8 @@ PHP_FUNCTION(intval)
 
 	if (Z_TYPE_P(num) != IS_STRING || base == 10) {
 		RETVAL_LONG(zval_get_long(num));
+	} else if (Z_STRLEN_P(num) > 2 && Z_STRVAL_P(num)[0] == '0' && Z_STRVAL_P(num)[1] == 'b') {
+		RETVAL_LONG(ZEND_STRTOL(Z_STRVAL_P(num) + 2, NULL, 2));
 	} else {
 		RETVAL_LONG(ZEND_STRTOL(Z_STRVAL_P(num), NULL, base));
 	}
