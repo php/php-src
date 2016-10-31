@@ -394,7 +394,8 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 				}
 
 				case SQLUNIQUE: {
-					if (H->stringify_uniqueidentifier) { // 36-char hex string representation
+					if (H->stringify_uniqueidentifier) {
+						/* 36-char hex string representation */
 						tmp_data_len = 36;
 						tmp_data = safe_emalloc(tmp_data_len, sizeof(char), 1);
 						data_len = (unsigned int) dbconvert(NULL, SQLUNIQUE, (BYTE*)data, data_len, SQLCHAR, (BYTE*)tmp_data, tmp_data_len);
@@ -403,7 +404,8 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 						ZVAL_STRINGL(zv, tmp_data, data_len);
 						efree(tmp_data);
 
-					} else { // a 16-byte binary representation
+					} else {
+						/* 16-byte binary representation */
 						zv = emalloc(sizeof(zval));
 						ZVAL_STRINGL(zv, data, 16);
 					}
