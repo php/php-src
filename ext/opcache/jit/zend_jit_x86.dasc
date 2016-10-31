@@ -2369,11 +2369,6 @@ static int zend_jit_math_helper(dasm_State    **Dst,
 /* Labels: 1,2,3,4,5,6 */
 {
 	zend_bool same_ops = (op1_type == op2_type) && (op1.var == op2.var);
-	zend_bool has_slow =
-		(op1_info & (MAY_BE_LONG|MAY_BE_DOUBLE)) &&
-		(op2_info & (MAY_BE_LONG|MAY_BE_DOUBLE)) &&
-		((op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE))) ||
-		 (op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE))));
 
 	if ((op1_info & MAY_BE_LONG) && (op2_info & MAY_BE_LONG)) {
 		if (op1_info & (MAY_BE_ANY-MAY_BE_LONG)) {
@@ -2506,8 +2501,12 @@ static int zend_jit_math_helper(dasm_State    **Dst,
 
 	|5:
 
-	if (has_slow) {
-		|.cold_code
+	if ((op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE))) ||
+		(op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE)))) {
+		if ((op1_info & (MAY_BE_LONG|MAY_BE_DOUBLE)) &&
+		    (op2_info & (MAY_BE_LONG|MAY_BE_DOUBLE))) {
+			|.cold_code
+		}
 		|6:
 		|	SAVE_VALID_OPLINE opline
 		if (separate_op1) {
@@ -2555,8 +2554,11 @@ static int zend_jit_math_helper(dasm_State    **Dst,
 		||	if (zend_may_throw(opline, op_array, ssa)) {
 		||		zend_jit_check_exception(Dst);
 		||	}
-		|	jmp <5
-		|.code
+		if ((op1_info & (MAY_BE_LONG|MAY_BE_DOUBLE)) &&
+		    (op2_info & (MAY_BE_LONG|MAY_BE_DOUBLE))) {
+			|	jmp <5
+			|.code
+		}
 	}
 
 	return 1;
