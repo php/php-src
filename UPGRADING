@@ -107,7 +107,7 @@ PHP 7.1 UPGRADE NOTES
   . Dropped sslv2 stream.
 
 - Session:
-  . Session ID is generated from CSPNG directly. As a result, Session ID length
+  . Session ID is generated from CSPRNG directly. As a result, Session ID length
     could be any length between 22 and 256. Note: Max size of session ID depends
     on save handler you are using.
   . Following INIs are removed
