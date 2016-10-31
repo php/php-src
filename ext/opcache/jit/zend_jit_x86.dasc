@@ -6729,7 +6729,7 @@ static int zend_jit_bind_global(dasm_State **Dst, const zend_op *opline, zend_op
 		if (op1_info & (MAY_BE_ARRAY|MAY_BE_OBJECT)) {
 		|3:
 		// GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr)
-		|	IF_GC_MAY_NOT_LEAK FCARG1a, eax, >5
+		|	IF_GC_MAY_NOT_LEAK FCARG1a, edx, >5
 		|	mov aword [r4], r0 //save
 		|	EXT_CALL gc_possible_root, r1
 		|	mov r0, aword [r4] // restore
