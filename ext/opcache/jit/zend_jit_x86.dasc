@@ -5839,20 +5839,12 @@ static int zend_jit_type_check(dasm_State **Dst, const zend_op *opline, int b, i
 				    (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
 					if ((op1_info) & (MAY_BE_ANY-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
 						|	// if (Z_REFCOUNTED_P(cv)) {
-						if (op1_info & MAY_BE_REF) {
-							|	IF_Z_REFCOUNTED r0, >1
-						} else {
-							|	IF_Z_REFCOUNTED FP + opline->op1.var, >1
-						}
+						|	IF_Z_REFCOUNTED FP + opline->op1.var, >1
 						|.cold_code
 						|1:
 					}
 					|	// if (!Z_DELREF_P(cv)) {
-					if (op1_info & MAY_BE_REF) {
-						|	GET_Z_PTR FCARG1a, r0
-					} else {
-						|	GET_Z_PTR FCARG1a, FP + opline->op1.var
-					}
+					|	GET_Z_PTR FCARG1a, FP + opline->op1.var
 					|	GC_DELREF FCARG1a
 					if (RC_MAY_BE_1(op1_info)) {
 						if (RC_MAY_BE_N(op1_info)) {
@@ -5924,20 +5916,12 @@ static int zend_jit_type_check(dasm_State **Dst, const zend_op *opline, int b, i
 				    (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
 					if ((op1_info) & (MAY_BE_ANY-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
 						|	// if (Z_REFCOUNTED_P(cv)) {
-						if (op1_info & MAY_BE_REF) {
-							|	IF_Z_REFCOUNTED r0, >1
-						} else {
-							|	IF_Z_REFCOUNTED FP + opline->op1.var, >1
-						}
+						|	IF_Z_REFCOUNTED FP + opline->op1.var, >1
 						|.cold_code
 						|1:
 					}
 					|	// if (!Z_DELREF_P(cv)) {
-					if (op1_info & MAY_BE_REF) {
-						|	GET_Z_PTR FCARG1a, r0
-					} else {
-						|	GET_Z_PTR FCARG1a, FP + opline->op1.var
-					}
+					|	GET_Z_PTR FCARG1a, FP + opline->op1.var
 					|	GC_DELREF FCARG1a
 					if (RC_MAY_BE_1(op1_info)) {
 						if (RC_MAY_BE_N(op1_info)) {
