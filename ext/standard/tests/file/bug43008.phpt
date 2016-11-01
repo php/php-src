@@ -4,6 +4,8 @@ Bug #43008 (php://filter uris ignore url encoded filternames and can't handle sl
 <?php
 if (!extension_loaded("iconv")) die("skip iconv extension not available");
 ?>
+--INI--
+allow_url_fopen=1
 --FILE--
 <?php
 $url = b""
