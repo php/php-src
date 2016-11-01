@@ -213,6 +213,7 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_TRAIT						0x80
 #define ZEND_ACC_ANON_CLASS                 0x100
 #define ZEND_ACC_ANON_BOUND                 0x200
+#define ZEND_ACC_INHERITED                  0x400
 
 /* method flags (visibility) */
 /* The order of those must be kept - public < protected < private */

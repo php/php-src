@@ -5949,6 +5949,7 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 		}
 
 		zend_compile_class_ref(&extends_node, extends_ast, 0);
+		ce->ce_flags |= ZEND_ACC_INHERITED;
 	}
 
 	opline = get_next_op(CG(active_op_array));
