@@ -154,9 +154,15 @@ clean-pgo: clean-all
 !if $(PHP_TEST_INI_PATH) == ""
 test: set-tmp-env
 	"$(BUILD_DIR)\php.exe" -d open_basedir= -d output_buffering=0 run-tests.php $(TESTS) -p "$(BUILD_DIR)\php.exe"
+
+run: set-tmp-env
+	"$(BUILD_DIR)\php.exe" $(ARGS)
 !else
 test: set-tmp-env
 	"$(BUILD_DIR)\php.exe" -n -c $(PHP_TEST_INI_PATH) -d open_basedir= -d output_buffering=0 -d memory_limit=-1 run-tests.php -p "$(BUILD_DIR)\php.exe" -n -c $(PHP_TEST_INI_PATH) $(TESTS)
+
+run: set-tmp-env
+	"$(BUILD_DIR)\php.exe" -n -c $(PHP_TEST_INI_PATH) $(ARGS)
 !endif
 
 build-snap: set-tmp-env generated_files
