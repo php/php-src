@@ -1,5 +1,7 @@
 --TEST--
 bug 40459 - Test whether the constructor of the user-space stream wrapper is called when stream functions are called
+--INI--
+allow_url_fopen=1
 --FILE--
 <?php
 // Test whether the constructor of the user-space stream wrapper is called when stream functions are called
