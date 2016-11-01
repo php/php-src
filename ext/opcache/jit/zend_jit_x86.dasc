@@ -1617,7 +1617,7 @@ static int zend_jit_cannot_add_element_stub(dasm_State **Dst)
 
 static int zend_jit_not_obj_stub(dasm_State **Dst)
 {
-	|->no_obj:
+	|->not_obj:
 	|8:
 	|.if X64
 	|	mov CARG1, 0
@@ -6878,34 +6878,67 @@ static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, zend_op_a
 	return 1;
 }
 
+static uint32_t zend_get_known_property_offset(zend_class_entry *ce, zend_string *member, zend_bool on_this, zend_string *filename)
+{
+	zend_property_info *info;
+
+	if (!ce || (ce->ce_flags & ZEND_ACC_TRAIT)) {
+		return ZEND_WRONG_PROPERTY_OFFSET;
+	}
+
+	if (ce->info.user.filename != filename) {
+		/* class declaration might be changed infdependently */
+		return ZEND_WRONG_PROPERTY_OFFSET;
+	}
+
+	if (ce->ce_flags & ZEND_ACC_INHERITED) {
+		if (!ce->parent) {
+			/* propery offests may be changed by inheritance */
+			return ZEND_WRONG_PROPERTY_OFFSET;
+		} else {
+			zend_class_entry *parent = ce->parent;
+
+			do {
+				if (parent->type == ZEND_INTERNAL_CLASS) {
+					break;
+				} else if (parent->info.user.filename != filename) {
+					/* some of parents class declarations might be changed infdependently */
+					/* TODO: this check may be not enough, because even
+					 * in the same it's possible to conditionnaly define
+					 * few classes with the same name, and "parent" may
+					 * change from request to request.
+					 */
+					return ZEND_WRONG_PROPERTY_OFFSET;
+				}
+				parent = parent->parent;
+			} while (parent);
+		}
+	}
+
+	info = (zend_property_info*)zend_hash_find_ptr(&ce->properties_info, member);
+	if (info == NULL ||
+	    info->offset == ZEND_WRONG_PROPERTY_OFFSET ||
+	    (info->flags & ZEND_ACC_STATIC)) {
+		return ZEND_WRONG_PROPERTY_OFFSET;
+	}
+
+	if (!(info->flags & ZEND_ACC_PUBLIC) &&
+	    (!on_this || info->ce != ce)) {
+		return ZEND_WRONG_PROPERTY_OFFSET;
+	}
+
+	return info->offset;
+}
+
 static int zend_jit_fetch_obj_r(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
 {
 	uint32_t op1_info;
+	zend_class_entry *ce = NULL;
 	zval *member;
-	zend_class_entry *ce;
-	zend_property_info *info;
-	zend_ssa_var_info *op1_ssa;
+	uint32_t offset;
 
-	if (opline->op2_type != IS_CONST || !ssa->ops || !ssa->var_info) {
+	if (opline->op2_type != IS_CONST) {
 		goto fallback;
-	}
-
-	if (opline->op1_type == IS_UNUSED) {
-		if (!op_array->scope) {
-			goto fallback;
-		}
-		ce = op_array->scope;
-	} else {
-		op1_info = OP1_INFO();
-		if ((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) != MAY_BE_OBJECT) {
-			goto fallback;
-		}
-
-		op1_ssa = &ssa->var_info[ssa->ops[opline - op_array->opcodes].op1_use];
-		if (!op1_ssa->ce || op1_ssa->is_instanceof || op1_ssa->ce->create_object) {
-			goto fallback;
-		}
-		ce = op1_ssa->ce;
 	}
 
 	member = RT_CONSTANT(op_array, opline->op2);
@@ -6913,66 +6946,128 @@ static int zend_jit_fetch_obj_r(dasm_State **Dst, zend_op *opline, zend_op_array
 		goto fallback;
 	}
 
-	info = (zend_property_info*)zend_hash_find_ptr(&ce->properties_info, Z_STR_P(member));
-	if (info == NULL || info->offset == ZEND_WRONG_PROPERTY_OFFSET) {
+	if (opline->op1_type == IS_UNUSED) {
+		op1_info = MAY_BE_OBJECT|MAY_BE_RC1|MAY_BE_RCN;
+		ce = op_array->scope;
+	} else {
+		op1_info = OP1_INFO();
+		if (ssa->var_info && ssa->ops) {
+			zend_ssa_var_info *op1_ssa =
+				ssa->var_info + ssa->ops[opline - op_array->opcodes].op1_use;
+
+			if (op1_ssa->ce && !op1_ssa->is_instanceof && !op1_ssa->ce->create_object) {
+				ce = op1_ssa->ce;
+			}
+		}
+	}
+
+	if (!(op1_info & MAY_BE_OBJECT)) {
 		goto fallback;
 	}
 
-	if (!(info->flags & ZEND_ACC_PUBLIC) && (opline->op1_type != IS_UNUSED || info->ce != ce)) {
+	offset = zend_get_known_property_offset(ce, Z_STR_P(member), opline->op1_type == IS_UNUSED, op_array->filename);
+	if (offset == ZEND_WRONG_PROPERTY_OFFSET) {
+		// TODO: JIT using run_time_cache ???
 		goto fallback;
 	}
 
 	if (opline->op1_type == IS_UNUSED) {
-	|	lea r1, EX->This
-	|	IF_Z_TYPE r1, IS_UNDEF, ->not_obj
+		|	IF_Z_TYPE FP + offsetof(zend_execute_data, This), IS_UNDEF, ->not_obj
+		|	GET_Z_PTR FCARG1a, FP + offsetof(zend_execute_data, This)
+	} else if (op1_info & MAY_BE_REF) {
+		|	lea r0, [FP + opline->op1.var]
+		|	ZVAL_DEREF r0, op1_info
+		|	IF_NOT_Z_TYPE r0, IS_OBJECT, >7
+		|	GET_Z_PTR FCARG1a, r0
 	} else {
-	|	lea r1, [FP + opline->op1.var]
-	|	ZVAL_DEREF r1, op1_info
+		if (op1_info & ((MAY_BE_UNDEF|MAY_BE_ANY)- MAY_BE_OBJECT)) {
+			|	IF_NOT_Z_TYPE FP + opline->op1.var, IS_OBJECT, >7
+		}
+		|	GET_Z_PTR FCARG1a, FP + opline->op1.var
 	}
-	|	mov r0, [r1]
-	|   lea r0, [r0 + info->offset]
-	|	mov edx, dword [r0 + 8]
+
+	|	mov edx, dword [FCARG1a + offset + 8]
 	|	IF_TYPE dl, IS_UNDEF, >5
-	|	GET_Z_PTR r1, r0
+	|	GET_Z_PTR r0, FCARG1a + offset
 	|	IF_NOT_REFCOUNTED dh, >2
 	|	IF_TYPE dl, IS_REFERENCE, >6
 	|1:
-	|	GC_ADDREF r1
+	|	GC_ADDREF r0
 	|2:
 	|.if X64
-	|	SET_Z_PTR FP + opline->result.var, r1
+	|	SET_Z_PTR FP + opline->result.var, r0
 	|.else
-	|	SET_Z_PTR FP + opline->result.var, r1
-	|	GET_Z_W2 r1, r0
-	|	SET_Z_W2 FP + opline->result.var, r1
+	|	SET_Z_PTR FP + opline->result.var, r0
+	|	GET_Z_W2 r0, FCARG1a + offset
+	|	SET_Z_W2 FP + opline->result.var, r0
 	|.endif
 	|	SET_Z_TYPE_INFO FP + opline->result.var, edx
 	|4: // END
 
 	|	FREE_OP opline->op1_type, opline->op1, op1_info, 1, op_array, opline->lineno
 
+	if (zend_may_throw(opline, op_array, ssa)) {
+		if (!zend_jit_check_exception(Dst)) {
+			return 0;
+		}
+	}
+
 	|.cold_code
 	|5:
-	|	mov FCARG1a, r1
+	if (opline->op1_type == IS_UNUSED) {
+		|	lea FCARG1a, EX->This
+	} else if (op1_info & MAY_BE_REF) {
+		|	mov FCARG1a, r0
+	} else {
+		|	lea FCARG1a, [FP + opline->op1.var]
+	}
 	|	LOAD_ADDR FCARG2a, member
 	|.if X64
 	|	lea CARG3, [FP + opline->result.var]
 	|	EXT_CALL zend_jit_fetch_obj_r_slow, r0
 	|.else
-	|	sub r4, 12
 	|	lea r0, [FP + opline->result.var]
 	|	push r0
 	|	EXT_CALL zend_jit_fetch_obj_r_slow, r0
-	|	add r4, 16
 	|.endif
 	|	jmp <4
 	|6:
-	|	cmp dword [r1], 1
+	|	cmp dword [r0], 1
 	|	jne <1
+	|	lea FCARG2a, [FCARG1a + offset]
 	|	lea FCARG1a, [FP + opline->result.var]
-	|	mov FCARG2a, r0
 	|	EXT_CALL zend_jit_zval_copy_unref_helper, r0
 	|	jmp <4
+
+	if (op1_info & ((MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)- MAY_BE_OBJECT)) {
+		|7:
+		|	SAVE_VALID_OPLINE opline
+		if (op1_info & MAY_BE_UNDEF) {
+			if (op1_info & MAY_BE_ANY) {
+				if (op1_info & MAY_BE_REF) {
+					|	IF_NOT_Z_TYPE FCARG1a, IS_UNDEF, >1
+				} else {
+					|	IF_NOT_Z_TYPE FP + opline->op1.var, IS_UNDEF, >1
+				}
+			}
+			|	mov FCARG1d, opline->op1.var
+			|	EXT_CALL zend_jit_undefined_op_helper, r0
+			|1:
+		}
+		|.if X64
+		|	mov CARG1, E_NOTICE
+		|	LOAD_ADDR CARG2, "Trying to get property of non-object"
+		|	EXT_CALL zend_error, r0
+		|.else
+		|	sub r4, 8
+		|	push "Trying to get property of non-object"
+		|	push E_NOTICE
+		|	EXT_CALL zend_error, r0
+		|	add r4, 26
+		|.endif
+		|	SET_Z_TYPE_INFO FP + opline->result.var, IS_NULL
+		|	jmp <4
+	}
 	|.code;
 
 	return 1;
