@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug #73392 (A use-after-free in zend allocator management). 
     (Laruence)
 
+- SPL:
+  . Fixed bug #73423 (Reproducible crash with GDB backtrace). (Laruence)
+
 10 Nov 2016 PHP 7.0.13
 
 - Core:
