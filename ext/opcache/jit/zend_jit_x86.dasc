@@ -6987,8 +6987,8 @@ static int zend_jit_fetch_obj_r(dasm_State **Dst, zend_op *opline, zend_op_array
 		|	mov r2, aword [r0 + Z_CACHE_SLOT_P(member)]
 		|	cmp r2, aword [FCARG1a + offsetof(zend_object, ce)]
 		|	jne >5
-		|	mov r0, aword [r0 + Z_CACHE_SLOT_P(member) + sizeof(void*)]
-		|	cmp r0, (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET
+		|	mov eax, dword [r0 + Z_CACHE_SLOT_P(member) + sizeof(void*)]
+		|	cmp eax, (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET
 		|	je >8 // dynamic property
 		|	mov edx, dword [FCARG1a + r0 + 8]
 		|	IF_TYPE dl, IS_UNDEF, >5
