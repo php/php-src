@@ -6930,7 +6930,7 @@ static uint32_t zend_get_known_property_offset(zend_class_entry *ce, zend_string
 	return info->offset;
 }
 
-static int zend_jit_fetch_obj_r(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
+static int zend_jit_fetch_obj_read(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
 {
 	uint32_t op1_info;
 	zend_class_entry *ce = NULL;
@@ -7000,7 +7000,9 @@ static int zend_jit_fetch_obj_r(dasm_State **Dst, zend_op *opline, zend_op_array
 		|	GET_Z_PTR r0, FCARG1a + offset
 	}
 	|	IF_NOT_REFCOUNTED dh, >2
-	|	IF_TYPE dl, IS_REFERENCE, >6
+	if (opline->opcode == ZEND_FETCH_OBJ_R) {
+		|	IF_TYPE dl, IS_REFERENCE, >6
+	}
 	|1:
 	|	GC_ADDREF r0
 	|2:
@@ -7027,46 +7029,57 @@ static int zend_jit_fetch_obj_r(dasm_State **Dst, zend_op *opline, zend_op_array
 	|	push r0
 	|.endif
 	|	SAVE_VALID_OPLINE opline
-	|	EXT_CALL zend_jit_fetch_obj_r_slow, r0
-	|	jmp >9
-	|6:
-	|	cmp dword [r0], 1
-	|	jne <1
-	if (offset == ZEND_WRONG_PROPERTY_OFFSET) {
-		|	mov FCARG2a, FCARG1a
+	if (opline->opcode == ZEND_FETCH_OBJ_R) {
+		|	EXT_CALL zend_jit_fetch_obj_r_slow, r0
+	} else if (opline->opcode == ZEND_FETCH_OBJ_IS) {
+		|	EXT_CALL zend_jit_fetch_obj_is_slow, r0
 	} else {
-		|	lea FCARG2a, [FCARG1a + offset]
+		ZEND_ASSERT(0);
 	}
-	|	lea FCARG1a, [FP + opline->result.var]
-	|	EXT_CALL zend_jit_zval_copy_unref_helper, r0
 	|	jmp >9
+
+	if (opline->opcode == ZEND_FETCH_OBJ_R) {
+		|6:
+		|	cmp dword [r0], 1
+		|	jne <1
+		if (offset == ZEND_WRONG_PROPERTY_OFFSET) {
+			|	mov FCARG2a, FCARG1a
+		} else {
+			|	lea FCARG2a, [FCARG1a + offset]
+		}
+		|	lea FCARG1a, [FP + opline->result.var]
+		|	EXT_CALL zend_jit_zval_copy_unref_helper, r0
+		|	jmp >9
+	}
 
 	if (op1_info & ((MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)- MAY_BE_OBJECT)) {
 		|7:
-		|	SAVE_VALID_OPLINE opline
-		if (op1_info & MAY_BE_UNDEF) {
-			if (op1_info & MAY_BE_ANY) {
-				if (op1_info & MAY_BE_REF) {
-					|	IF_NOT_Z_TYPE r0, IS_UNDEF, >1
-				} else {
-					|	IF_NOT_Z_TYPE FP + opline->op1.var, IS_UNDEF, >1
+		if (opline->opcode == ZEND_FETCH_OBJ_R) {
+			|	SAVE_VALID_OPLINE opline
+			if (op1_info & MAY_BE_UNDEF) {
+				if (op1_info & MAY_BE_ANY) {
+					if (op1_info & MAY_BE_REF) {
+						|	IF_NOT_Z_TYPE r0, IS_UNDEF, >1
+					} else {
+						|	IF_NOT_Z_TYPE FP + opline->op1.var, IS_UNDEF, >1
+					}
 				}
+				|	mov FCARG1d, opline->op1.var
+				|	EXT_CALL zend_jit_undefined_op_helper, r0
+				|1:
 			}
-			|	mov FCARG1d, opline->op1.var
-			|	EXT_CALL zend_jit_undefined_op_helper, r0
-			|1:
+			|.if X64
+			|	mov CARG1, E_NOTICE
+			|	LOAD_ADDR CARG2, "Trying to get property of non-object"
+			|	EXT_CALL zend_error, r0
+			|.else
+			|	sub r4, 8
+			|	push "Trying to get property of non-object"
+			|	push E_NOTICE
+			|	EXT_CALL zend_error, r0
+			|	add r4, 16
+			|.endif
 		}
-		|.if X64
-		|	mov CARG1, E_NOTICE
-		|	LOAD_ADDR CARG2, "Trying to get property of non-object"
-		|	EXT_CALL zend_error, r0
-		|.else
-		|	sub r4, 8
-		|	push "Trying to get property of non-object"
-		|	push E_NOTICE
-		|	EXT_CALL zend_error, r0
-		|	add r4, 16
-		|.endif
 		|	SET_Z_TYPE_INFO FP + opline->result.var, IS_NULL
 		|	jmp >9
 	}
@@ -7081,7 +7094,11 @@ static int zend_jit_fetch_obj_r(dasm_State **Dst, zend_op *opline, zend_op_array
 		|	push r0
 		|.endif
 		|	SAVE_VALID_OPLINE opline
-		|	EXT_CALL zend_jit_fetch_obj_r_dynamic, r0
+		if (opline->opcode == ZEND_FETCH_OBJ_R) {
+			|	EXT_CALL zend_jit_fetch_obj_r_dynamic, r0
+		} else if (opline->opcode == ZEND_FETCH_OBJ_IS) {
+			|	EXT_CALL zend_jit_fetch_obj_is_dynamic, r0
+		}
 		|	jmp >9
 	}
 

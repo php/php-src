@@ -1241,7 +1241,8 @@ pass:
 						}
 						goto done;
 					case ZEND_FETCH_OBJ_R:
-						if (!zend_jit_fetch_obj_r(&dasm_state, opline, op_array, ssa)) {
+					case ZEND_FETCH_OBJ_IS:
+						if (!zend_jit_fetch_obj_read(&dasm_state, opline, op_array, ssa)) {
 							goto jit_failure;
 						}
 						goto done;

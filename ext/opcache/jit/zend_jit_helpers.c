@@ -1652,6 +1652,36 @@ static void ZEND_FASTCALL zend_jit_fetch_obj_r_dynamic(zend_object *zobj, zval *
 	zend_jit_fetch_obj_r_slow(zobj, offset, result);
 }
 
+static void ZEND_FASTCALL zend_jit_fetch_obj_is_slow(zend_object *zobj, zval *offset, zval *result)
+{
+	zval *retval;
+	zend_execute_data *execute_data = EG(current_execute_data);
+	zval tmp;
+
+	if (UNEXPECTED(zobj->handlers->read_property == NULL)) {
+		ZVAL_NULL(result);
+	} else {
+		ZVAL_OBJ(&tmp, zobj);
+		retval = zobj->handlers->read_property(&tmp, offset, BP_VAR_IS, CACHE_ADDR(Z_CACHE_SLOT_P(offset)), result);
+		if (retval != result) {
+			ZVAL_COPY(result, retval);
+		}
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_fetch_obj_is_dynamic(zend_object *zobj, zval *offset, zval *result)
+{
+	if (zobj->properties) {
+		zval *retval = zend_hash_find(zobj->properties, Z_STR_P(offset));
+
+		if (EXPECTED(retval)) {
+			ZVAL_COPY(result, retval);
+			return;
+		}
+	}
+	zend_jit_fetch_obj_is_slow(zobj, offset, result);
+}
+
 /*
  * Local variables:
  * tab-width: 4
