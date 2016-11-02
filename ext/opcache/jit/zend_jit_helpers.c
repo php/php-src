@@ -1621,19 +1621,35 @@ static void ZEND_FASTCALL zend_jit_zval_copy_unref_helper(zval *dst, zval *src)
 	ZVAL_COPY(dst, src);
 }
 
-static void ZEND_FASTCALL zend_jit_fetch_obj_r_slow(zval *container, zval *offset, zval *result)
+static void ZEND_FASTCALL zend_jit_fetch_obj_r_slow(zend_object *zobj, zval *offset, zval *result)
 {
 	zval *retval;
-	zend_object *zobj = Z_OBJ_P(container);
+	zend_execute_data *execute_data = EG(current_execute_data);
+	zval tmp;
+
 	if (UNEXPECTED(zobj->handlers->read_property == NULL)) {
 		zend_error(E_NOTICE, "Trying to get property of non-object");
 		ZVAL_NULL(result);
 	} else {
-		retval = zobj->handlers->read_property(container, offset, BP_VAR_R, NULL, result);
+		ZVAL_OBJ(&tmp, zobj);
+		retval = zobj->handlers->read_property(&tmp, offset, BP_VAR_R, CACHE_ADDR(Z_CACHE_SLOT_P(offset)), result);
 		if (retval != result) {
 			ZVAL_COPY_UNREF(result, retval);
 		}
 	}
+}
+
+static void ZEND_FASTCALL zend_jit_fetch_obj_r_dynamic(zend_object *zobj, zval *offset, zval *result)
+{
+	if (zobj->properties) {
+		zval *retval = zend_hash_find(zobj->properties, Z_STR_P(offset));
+
+		if (EXPECTED(retval)) {
+			ZVAL_COPY_UNREF(result, retval);
+			return;
+		}
+	}
+	zend_jit_fetch_obj_r_slow(zobj, offset, result);
 }
 
 /*

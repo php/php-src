@@ -6966,10 +6966,6 @@ static int zend_jit_fetch_obj_r(dasm_State **Dst, zend_op *opline, zend_op_array
 	}
 
 	offset = zend_get_known_property_offset(ce, Z_STR_P(member), opline->op1_type == IS_UNUSED, op_array->filename);
-	if (offset == ZEND_WRONG_PROPERTY_OFFSET) {
-		// TODO: JIT using run_time_cache ???
-		goto fallback;
-	}
 
 	if (opline->op1_type == IS_UNUSED) {
 		|	IF_Z_TYPE FP + offsetof(zend_execute_data, This), IS_UNDEF, ->not_obj
@@ -6986,9 +6982,23 @@ static int zend_jit_fetch_obj_r(dasm_State **Dst, zend_op *opline, zend_op_array
 		|	GET_Z_PTR FCARG1a, FP + opline->op1.var
 	}
 
-	|	mov edx, dword [FCARG1a + offset + 8]
-	|	IF_TYPE dl, IS_UNDEF, >5
-	|	GET_Z_PTR r0, FCARG1a + offset
+	if (offset == ZEND_WRONG_PROPERTY_OFFSET) {
+		|	mov r0,	EX->run_time_cache
+		|	mov r2, aword [r0 + Z_CACHE_SLOT_P(member)]
+		|	cmp r2, aword [FCARG1a + offsetof(zend_object, ce)]
+		|	jne >5
+		|	mov r0, aword [r0 + Z_CACHE_SLOT_P(member) + sizeof(void*)]
+		|	cmp r0, (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET
+		|	je >8 // dynamic property
+		|	mov edx, dword [FCARG1a + r0 + 8]
+		|	IF_TYPE dl, IS_UNDEF, >5
+		|	add FCARG1a, r0
+		|	GET_Z_PTR r0, FCARG1a
+	} else {
+		|	mov edx, dword [FCARG1a + offset + 8]
+		|	IF_TYPE dl, IS_UNDEF, >5
+		|	GET_Z_PTR r0, FCARG1a + offset
+	}
 	|	IF_NOT_REFCOUNTED dh, >2
 	|	IF_TYPE dl, IS_REFERENCE, >6
 	|1:
@@ -6998,46 +7008,38 @@ static int zend_jit_fetch_obj_r(dasm_State **Dst, zend_op *opline, zend_op_array
 	|	SET_Z_PTR FP + opline->result.var, r0
 	|.else
 	|	SET_Z_PTR FP + opline->result.var, r0
-	|	GET_Z_W2 r0, FCARG1a + offset
+	if (offset == ZEND_WRONG_PROPERTY_OFFSET) {
+		|	GET_Z_W2 r0, FCARG1a
+	} else {
+		|	GET_Z_W2 r0, FCARG1a + offset
+	}
 	|	SET_Z_W2 FP + opline->result.var, r0
 	|.endif
 	|	SET_Z_TYPE_INFO FP + opline->result.var, edx
-	|4: // END
-
-	|	FREE_OP opline->op1_type, opline->op1, op1_info, 1, op_array, opline->lineno
-
-	if (zend_may_throw(opline, op_array, ssa)) {
-		if (!zend_jit_check_exception(Dst)) {
-			return 0;
-		}
-	}
 
 	|.cold_code
 	|5:
-	if (opline->op1_type == IS_UNUSED) {
-		|	lea FCARG1a, EX->This
-	} else if (op1_info & MAY_BE_REF) {
-		|	mov FCARG1a, r0
-	} else {
-		|	lea FCARG1a, [FP + opline->op1.var]
-	}
 	|	LOAD_ADDR FCARG2a, member
 	|.if X64
 	|	lea CARG3, [FP + opline->result.var]
-	|	EXT_CALL zend_jit_fetch_obj_r_slow, r0
 	|.else
 	|	lea r0, [FP + opline->result.var]
 	|	push r0
-	|	EXT_CALL zend_jit_fetch_obj_r_slow, r0
 	|.endif
-	|	jmp <4
+	|	SAVE_VALID_OPLINE opline
+	|	EXT_CALL zend_jit_fetch_obj_r_slow, r0
+	|	jmp >9
 	|6:
 	|	cmp dword [r0], 1
 	|	jne <1
-	|	lea FCARG2a, [FCARG1a + offset]
+	if (offset == ZEND_WRONG_PROPERTY_OFFSET) {
+		|	mov FCARG2a, FCARG1a
+	} else {
+		|	lea FCARG2a, [FCARG1a + offset]
+	}
 	|	lea FCARG1a, [FP + opline->result.var]
 	|	EXT_CALL zend_jit_zval_copy_unref_helper, r0
-	|	jmp <4
+	|	jmp >9
 
 	if (op1_info & ((MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)- MAY_BE_OBJECT)) {
 		|7:
@@ -7045,7 +7047,7 @@ static int zend_jit_fetch_obj_r(dasm_State **Dst, zend_op *opline, zend_op_array
 		if (op1_info & MAY_BE_UNDEF) {
 			if (op1_info & MAY_BE_ANY) {
 				if (op1_info & MAY_BE_REF) {
-					|	IF_NOT_Z_TYPE FCARG1a, IS_UNDEF, >1
+					|	IF_NOT_Z_TYPE r0, IS_UNDEF, >1
 				} else {
 					|	IF_NOT_Z_TYPE FP + opline->op1.var, IS_UNDEF, >1
 				}
@@ -7063,12 +7065,35 @@ static int zend_jit_fetch_obj_r(dasm_State **Dst, zend_op *opline, zend_op_array
 		|	push "Trying to get property of non-object"
 		|	push E_NOTICE
 		|	EXT_CALL zend_error, r0
-		|	add r4, 26
+		|	add r4, 16
 		|.endif
 		|	SET_Z_TYPE_INFO FP + opline->result.var, IS_NULL
-		|	jmp <4
+		|	jmp >9
 	}
+
+	if (offset == ZEND_WRONG_PROPERTY_OFFSET) {
+		|8:
+		|	LOAD_ADDR FCARG2a, member
+		|.if X64
+		|	lea CARG3, [FP + opline->result.var]
+		|.else
+		|	lea r0, [FP + opline->result.var]
+		|	push r0
+		|.endif
+		|	SAVE_VALID_OPLINE opline
+		|	EXT_CALL zend_jit_fetch_obj_r_dynamic, r0
+		|	jmp >9
+	}
+
 	|.code;
+	|9: // END
+	|	FREE_OP opline->op1_type, opline->op1, op1_info, 1, op_array, opline->lineno
+
+	if (zend_may_throw(opline, op_array, ssa)) {
+		if (!zend_jit_check_exception(Dst)) {
+			return 0;
+		}
+	}
 
 	return 1;
 
