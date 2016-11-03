@@ -145,21 +145,26 @@ PHP_FUNCTION(intval)
 
 	if (Z_TYPE_P(num) != IS_STRING || base == 10) {
 		RETVAL_LONG(zval_get_long(num));
-	} else {
+		return;
+	}
+	
+	strlen = Z_STRLEN_P(num);
+	/* Length of 3+ covers "0b#" and "-0b" (which results in 0) */
+	if (strlen > 2) {
 		strval = Z_STRVAL_P(num);
-		strlen = Z_STRLEN_P(num);
-		if (strlen > 2 && strval[0] == '0' && strval[1] == 'b') {
-			RETVAL_LONG(ZEND_STRTOL(strval + 2, NULL, 2));
-		} else if (strlen > 3 && strval[0] == '-' && strval[1] == '0' && strval[2] == 'b') {
-			tmpval = emalloc(strlen - 2);
-			tmpval[0] = '-';
-			strncpy(tmpval + 1, strval + 3, strlen - 3);
-			RETVAL_LONG(ZEND_STRTOL(tmpval, NULL, 2));
-			efree(tmpval);
-		} else {
-			RETVAL_LONG(ZEND_STRTOL(Z_STRVAL_P(num), NULL, base));
+		tmpval = strval + (strval[0] == '-');
+
+		if (tmpval[0] == '0' && tmpval[1] == 'b') {
+			/* This effectively causes the string to have two leading zeros */
+			tmpval[1] = '0';
+			/* Deliberate use of strval here to include the unary minus if present */
+			RETVAL_LONG(ZEND_STRTOL(strval, NULL, 2));
+			tmpval[1] = 'b';
+			return;
 		}
 	}
+
+	RETVAL_LONG(ZEND_STRTOL(Z_STRVAL_P(num), NULL, base));
 }
 /* }}} */
 
