@@ -440,8 +440,9 @@ static int firebird_bind_blob(pdo_stmt_t *stmt, ISC_QUAD *blob_id, zval *param)
 		put_cnt += chunk_size;
 	}
 
-	if (Z_TYPE_P(param) != IS_STRING)
+	if (Z_TYPE_P(param) != IS_STRING) {
 		zval_dtor(&data);
+	}
 
 	if (isc_close_blob(H->isc_status, &h)) {
 		RECORD_ERROR(stmt);
@@ -548,7 +549,7 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 
 				case SQL_BLOB: {
 					if (Z_TYPE_P(parameter) == IS_NULL) {
-						// Check if this field allow NULL values
+						/* Check if field allow NULL values */
 						if (~var->sqltype & 1) {
 							strcpy(stmt->error_code, "HY105");
 							S->H->last_app_error = "Parameter requires non-null value";
