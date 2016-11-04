@@ -533,7 +533,7 @@ static PHP_FUNCTION(bzcompress)
 		   so we erealloc() the buffer to the proper size */
 		dest = erealloc(dest, dest_len + 1);
 		dest[dest_len] = 0;
-		RETURN_STRINGL(dest, dest_len, 0);
+		RETURN_STRINGL_CHECK(dest, dest_len, 0);
 	}
 }
 /* }}} */
