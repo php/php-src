@@ -133,7 +133,7 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_
 
 	if (type != 3) {
 		b = buf;
-		
+
 		while (php_stream_get_line(stream, b, EXEC_INPUT_BUF, &bufl)) {
 			/* no new line found, let's read some more */
 			if (b[bufl - 1] != '\n' && !php_stream_eof(stream)) {
@@ -330,7 +330,7 @@ PHPAPI char *php_escape_shell_cmd(char *str)
 				cmd[y++] = str[x];
 				break;
 #else
-			/* % is Windows specific for enviromental variables, ^%PATH% will 
+			/* % is Windows specific for enviromental variables, ^%PATH% will
 				output PATH while ^%PATH^% will not. escapeshellcmd will escape all % and !.
 			*/
 			case '%':
@@ -492,7 +492,7 @@ PHP_FUNCTION(escapeshellcmd)
 			return;
 		}
 		cmd = php_escape_shell_cmd(command);
-		RETVAL_STRING(cmd, 0);
+		RETVAL_STRINGL_CHECK(cmd, strlen(cmd), 0);
 	} else {
 		RETVAL_EMPTY_STRING();
 	}
@@ -517,7 +517,7 @@ PHP_FUNCTION(escapeshellarg)
 			return;
 		}
 		cmd = php_escape_shell_arg(argument);
-		RETVAL_STRING(cmd, 0);
+		RETVAL_STRINGL_CHECK(cmd, strlen(cmd), 0);
 	}
 }
 /* }}} */
@@ -551,7 +551,7 @@ PHP_FUNCTION(shell_exec)
 	php_stream_close(stream);
 
 	if (total_readbytes > 0) {
-		RETVAL_STRINGL(ret, total_readbytes, 0);
+		RETVAL_STRINGL_CHECK(ret, total_readbytes, 0);
 	}
 }
 /* }}} */

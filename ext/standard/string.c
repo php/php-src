@@ -908,11 +908,7 @@ PHP_FUNCTION(wordwrap)
 		RETURN_FALSE;
 	}
 
-	if (linelength < 0) {
-		/* For BC */
-		linelength = 0;
-	}
-	if (linelength > INT_MAX) {
+	if (linelength < 0 || linelength > INT_MAX) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length should be between 0 and %d", INT_MAX);
 		RETURN_FALSE;
 	}

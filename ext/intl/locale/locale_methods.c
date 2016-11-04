@@ -263,6 +263,9 @@ static char* get_icu_value_internal( const char* loc_name , char* tag_name, int*
 	int32_t     	buflen          = 512;
 	UErrorCode  	status          = U_ZERO_ERROR;
 
+	if (strlen(loc_name) > INTL_MAX_LOCALE_LEN) {
+		return NULL;
+	}
 
 	if( strcmp(tag_name, LOC_CANONICALIZE_TAG) != 0 ){
 		/* Handle  grandfathered languages */
@@ -395,7 +398,7 @@ static void get_icu_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAMETERS)
 	if(loc_name_len == 0) {
 		loc_name = intl_locale_get_default(TSRMLS_C);
 	}
-	
+
 	INTL_CHECK_LOCALE_LEN(strlen(loc_name));
 
 	/* Call ICU get */
@@ -701,6 +704,8 @@ PHP_FUNCTION( locale_get_keywords )
 
         RETURN_FALSE;
     }
+
+	INTL_CHECK_LOCALE_LEN(strlen(loc_name));
 
     if(loc_name_len == 0) {
         loc_name = intl_locale_get_default(TSRMLS_C);
@@ -1108,6 +1113,8 @@ PHP_FUNCTION(locale_parse)
 
         RETURN_FALSE;
     }
+
+    INTL_CHECK_LOCALE_LEN(strlen(loc_name));
 
     if(loc_name_len == 0) {
         loc_name = intl_locale_get_default(TSRMLS_C);
