@@ -182,7 +182,7 @@ static void _breakiterator_parts_move_forward(zend_object_iterator *iter TSRMLS_
 	}
 	assert(next <= slen && next >= cur);
 	len = next - cur;
-	res = static_cast<char*>(emalloc(len + 1));
+	res = static_cast<char*>(safe_emalloc(len, 1, 1));
 
 	memcpy(res, &s[cur], len);
 	res[len] = '\0';

@@ -57,7 +57,8 @@
 		newlen = (n);												\
 		(d)->a = newlen < SMART_STR_START_SIZE 						\
 				? SMART_STR_START_SIZE 								\
-				: newlen + SMART_STR_PREALLOC;						\
+				: (newlen >= (INT_MAX - SMART_STR_PREALLOC)? newlen \
+							: (newlen + SMART_STR_PREALLOC));		\
 		SMART_STR_DO_REALLOC(d, what);								\
 	} else {														\
 		newlen = (d)->len + (n);									\
