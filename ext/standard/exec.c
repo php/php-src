@@ -321,7 +321,7 @@ PHPAPI zend_string *php_escape_shell_cmd(char *str)
 				ZSTR_VAL(cmd)[y++] = str[x];
 				break;
 #else
-			/* % is Windows specific for environmental variables, ^%PATH% will 
+			/* % is Windows specific for environmental variables, ^%PATH% will
 				output PATH while ^%PATH^% will not. escapeshellcmd->val will escape all % and !.
 			*/
 			case '%':
@@ -482,8 +482,7 @@ PHP_FUNCTION(escapeshellcmd)
 			php_error_docref(NULL, E_ERROR, "Input string contains NULL bytes");
 			return;
 		}
-		cmd = php_escape_shell_cmd(command);
-		RETVAL_STRINGL_CHECK(cmd, strlen(cmd), 0);
+		RETVAL_STR(php_escape_shell_cmd(command));
 	} else {
 		RETVAL_EMPTY_STRING();
 	}
@@ -506,8 +505,7 @@ PHP_FUNCTION(escapeshellarg)
 			php_error_docref(NULL, E_ERROR, "Input string contains NULL bytes");
 			return;
 		}
-		cmd = php_escape_shell_arg(argument);
-		RETVAL_STRINGL_CHECK(cmd, strlen(cmd), 0);
+		RETVAL_STR(php_escape_shell_arg(argument));
 	}
 }
 /* }}} */
@@ -539,8 +537,8 @@ PHP_FUNCTION(shell_exec)
 	ret = php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, 0);
 	php_stream_close(stream);
 
-	if (total_readbytes > 0) {
-		RETVAL_STRINGL_CHECK(ret, total_readbytes, 0);
+	if (ret && ZSTR_LEN(ret) > 0) {
+		RETVAL_STR(ret);
 	}
 }
 /* }}} */
