@@ -5453,7 +5453,7 @@ PHP_FUNCTION(openssl_encrypt)
 {
 	long options = 0;
 	char *data, *method, *password, *iv = "";
-	int data_len, method_len, password_len, iv_len = 0, max_iv_len;
+	int data_len, method_len, password_len, iv_len = 0, max_iv_len, tag_len=0;
 	const EVP_CIPHER *cipher_type;
 	EVP_CIPHER_CTX cipher_ctx;
 	int i=0, outlen, keylen;
@@ -5467,6 +5467,10 @@ PHP_FUNCTION(openssl_encrypt)
 	if (!cipher_type) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown cipher algorithm");
 		RETURN_FALSE;
+	}
+
+	if (cipher_type==EVP_aes_128_gcm() || cipher_type==EVP_aes_192_gcm() || cipher_type==EVP_aes_256_gcm()) {
+		tag_len = 16;
 	}
 
 	keylen = EVP_CIPHER_key_length(cipher_type);
@@ -5484,7 +5488,7 @@ PHP_FUNCTION(openssl_encrypt)
 	}
 	free_iv = php_openssl_validate_iv(&iv, &iv_len, max_iv_len TSRMLS_CC);
 
-	outlen = data_len + EVP_CIPHER_block_size(cipher_type);
+	outlen = data_len + EVP_CIPHER_block_size(cipher_type) + tag_len;
 	outbuf = emalloc(outlen + 1);
 
 	EVP_EncryptInit(&cipher_ctx, cipher_type, NULL, NULL);
@@ -5501,6 +5505,12 @@ PHP_FUNCTION(openssl_encrypt)
 	outlen = i;
 	if (EVP_EncryptFinal(&cipher_ctx, (unsigned char *)outbuf + i, &i)) {
 		outlen += i;
+		
+		if (tag_len > 0) {
+			EVP_CIPHER_CTX_ctrl(&cipher_ctx, EVP_CTRL_GCM_GET_TAG, tag_len, (unsigned char *)outbuf+outlen);
+			outlen+=tag_len;
+		}
+
 		if (options & OPENSSL_RAW_DATA) {
 			outbuf[outlen] = '\0';
 			RETVAL_STRINGL((char *)outbuf, outlen, 0);
@@ -5532,7 +5542,7 @@ PHP_FUNCTION(openssl_decrypt)
 {
 	long options = 0;
 	char *data, *method, *password, *iv = "";
-	int data_len, method_len, password_len, iv_len = 0;
+	int data_len, method_len, password_len, iv_len = 0, tag_len=0;
 	const EVP_CIPHER *cipher_type;
 	EVP_CIPHER_CTX cipher_ctx;
 	int i, outlen, keylen;
@@ -5554,6 +5564,10 @@ PHP_FUNCTION(openssl_decrypt)
 	if (!cipher_type) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown cipher algorithm");
 		RETURN_FALSE;
+	}
+
+	if (cipher_type==EVP_aes_128_gcm() || cipher_type==EVP_aes_192_gcm() || cipher_type==EVP_aes_256_gcm()) {
+		tag_len=16;
 	}
 
 	if (!(options & OPENSSL_RAW_DATA)) {
@@ -5584,11 +5598,14 @@ PHP_FUNCTION(openssl_decrypt)
 	if (password_len > keylen) {
 		EVP_CIPHER_CTX_set_key_length(&cipher_ctx, password_len);
 	}
+	if (tag_len>0) {
+		EVP_CIPHER_CTX_ctrl(&cipher_ctx, EVP_CTRL_GCM_SET_TAG, tag_len, (unsigned char*)data + data_len - tag_len);
+	}
 	EVP_DecryptInit_ex(&cipher_ctx, NULL, NULL, key, (unsigned char *)iv);
 	if (options & OPENSSL_ZERO_PADDING) {
 		EVP_CIPHER_CTX_set_padding(&cipher_ctx, 0);
 	}
-	EVP_DecryptUpdate(&cipher_ctx, outbuf, &i, (unsigned char *)data, data_len);
+	EVP_DecryptUpdate(&cipher_ctx, outbuf, &i, (unsigned char *)data, data_len-tag_len);
 	outlen = i;
 	if (EVP_DecryptFinal(&cipher_ctx, (unsigned char *)outbuf + i, &i)) {
 		outlen += i;
