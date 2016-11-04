@@ -673,7 +673,7 @@ static PHP_FUNCTION(name) \
 	if (SUCCESS != php_zlib_encode(in_buf, in_len, &out_buf, &out_len, encoding, level TSRMLS_CC)) { \
 		RETURN_FALSE; \
 	} \
-	RETURN_STRINGL(out_buf, out_len, 0); \
+	RETVAL_STRINGL_CHECK(out_buf, out_len, 0); \
 }
 
 #define PHP_ZLIB_DECODE_FUNC(name, encoding) \

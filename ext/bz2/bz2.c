@@ -513,7 +513,7 @@ static PHP_FUNCTION(bzcompress)
 	dest_len   = (unsigned int) (source_len + (0.01 * source_len) + 600);
 
 	/* Allocate the destination buffer */
-	dest = emalloc(dest_len + 1);
+	dest = safe_emalloc(dest_len, 1, 1);
 
 	/* Handle the optional arguments */
 	if (argc > 1) {
