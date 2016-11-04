@@ -1884,7 +1884,7 @@ function generate_tmp_php_ini()
 	}
 
 	var ini_dir = PHP_OBJECT_OUT_DIR + ("yes" == PHP_DEBUG ? "Debug" : "Release") + ("yes" == PHP_ZTS ? "_TS" : "");
-	PHP_TEST_INI_PATH = ini_dir + "\\test.ini";
+	PHP_TEST_INI_PATH = ini_dir + "\\tmp-php.ini";
 
 	if (FSO.FileExists(PHP_TEST_INI_PATH)) {
 		STDOUT.WriteLine("Generating " + PHP_TEST_INI_PATH + " ...");
