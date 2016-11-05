@@ -1537,7 +1537,7 @@ PHP_FUNCTION(pg_connect_poll)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &pgsql_link) == FAILURE) {
 		return;
 	}
-	
+
 	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
 		RETURN_FALSE;
 	}
@@ -4356,7 +4356,7 @@ PHP_FUNCTION(pg_escape_string)
 			break;
 	}
 
-	to = zend_string_alloc(ZSTR_LEN(from) * 2, 0);
+	to = zend_string_safe_alloc(ZSTR_LEN(from), 2, 0, 0);
 #ifdef HAVE_PQESCAPE_CONN
 	if (link) {
 		if ((pgsql = (PGconn *)zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink)) == NULL) {
@@ -4408,7 +4408,7 @@ PHP_FUNCTION(pg_escape_bytea)
 			RETURN_FALSE;
 		}
 		to = (char *)PQescapeByteaConn(pgsql, (unsigned char *)from, (size_t)from_len, &to_len);
-	} else 
+	} else
 #endif
 		to = (char *)PQescapeBytea((unsigned char*)from, from_len, &to_len);
 
