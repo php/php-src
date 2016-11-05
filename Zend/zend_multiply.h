@@ -278,6 +278,19 @@ static zend_always_inline size_t zend_safe_address_guarded(size_t nmemb, size_t 
 	return ret;
 }
 
+/* A bit more generic version of the same */
+static zend_always_inline size_t zend_safe_addmult(size_t nmemb, size_t size, size_t offset, const char *message)
+{
+	int overflow;
+	size_t ret = zend_safe_address(nmemb, size, offset, &overflow);
+
+	if (UNEXPECTED(overflow)) {
+		zend_error_noreturn(E_ERROR, "Possible integer overflow in %s (%zu * %zu + %zu)", message, nmemb, size, offset);
+		return 0;
+	}
+	return ret;
+}
+
 #endif /* ZEND_MULTIPLY_H */
 
 /*
