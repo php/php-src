@@ -199,7 +199,7 @@ static inline void spl_filesystem_object_get_file_name(spl_filesystem_object *in
 			if (intern->file_name) {
 				efree(intern->file_name);
 			}
-			intern->file_name_len = (int)spprintf(&intern->file_name, 0, "%s%c%s",
+			intern->file_name_len = spprintf(&intern->file_name, 0, "%s%c%s",
 			                                 spl_filesystem_object_get_path(intern, NULL),
 			                                 slash, intern->u.dir.entry.d_name);
 			break;
@@ -232,7 +232,7 @@ static void spl_filesystem_dir_open(spl_filesystem_object* intern, char *path)
 	int skip_dots = SPL_HAS_FLAG(intern->flags, SPL_FILE_DIR_SKIPDOTS);
 
 	intern->type = SPL_FS_DIR;
-	intern->_path_len = (int)strlen(path);
+	intern->_path_len = strlen(path);
 	intern->u.dir.dirp = php_stream_opendir(path, REPORT_ERRORS, FG(default_context));
 
 	if (intern->_path_len > 1 && IS_SLASH_AT(path, intern->_path_len-1)) {
@@ -383,7 +383,7 @@ void spl_filesystem_info_set_filename(spl_filesystem_object *intern, char *path,
 	}
 
 	intern->file_name = use_copy ? estrndup(path, len) : path;
-	intern->file_name_len = (int)len;
+	intern->file_name_len = len;
 
 	while (intern->file_name_len > 1 && IS_SLASH_AT(intern->file_name, intern->file_name_len-1)) {
 		intern->file_name[intern->file_name_len-1] = 0;
@@ -397,7 +397,7 @@ void spl_filesystem_info_set_filename(spl_filesystem_object *intern, char *path,
 	p2 = 0;
 #endif
 	if (p1 || p2) {
-		intern->_path_len = (int)((p1 > p2 ? p1 : p2) - intern->file_name);
+		intern->_path_len = ((p1 > p2 ? p1 : p2) - intern->file_name);
 	} else {
 		intern->_path_len = 0;
 	}
@@ -408,7 +408,7 @@ void spl_filesystem_info_set_filename(spl_filesystem_object *intern, char *path,
 	intern->_path = estrndup(path, intern->_path_len);
 } /* }}} */
 
-static spl_filesystem_object *spl_filesystem_object_create_info(spl_filesystem_object *source, char *file_path, int file_path_len, int use_copy, zend_class_entry *ce, zval *return_value) /* {{{ */
+static spl_filesystem_object *spl_filesystem_object_create_info(spl_filesystem_object *source, char *file_path, size_t file_path_len, int use_copy, zend_class_entry *ce, zval *return_value) /* {{{ */
 {
 	spl_filesystem_object *intern;
 	zval arg1;
@@ -917,7 +917,7 @@ SPL_METHOD(SplFileInfo, getExtension)
 	const char *p;
 	size_t flen;
 	size_t path_len;
-	int idx;
+	size_t idx;
 	zend_string *ret;
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -938,7 +938,7 @@ SPL_METHOD(SplFileInfo, getExtension)
 
 	p = zend_memrchr(ZSTR_VAL(ret), '.', ZSTR_LEN(ret));
 	if (p) {
-		idx = (int)(p - ZSTR_VAL(ret));
+		idx = p - ZSTR_VAL(ret);
 		RETVAL_STRINGL(ZSTR_VAL(ret) + idx + 1, ZSTR_LEN(ret) - idx - 1);
 		zend_string_release(ret);
 		return;
@@ -955,7 +955,7 @@ SPL_METHOD(DirectoryIterator, getExtension)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	const char *p;
-	int idx;
+	size_t idx;
 	zend_string *fname;
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -966,7 +966,7 @@ SPL_METHOD(DirectoryIterator, getExtension)
 
 	p = zend_memrchr(ZSTR_VAL(fname), '.', ZSTR_LEN(fname));
 	if (p) {
-		idx = (int)(p - ZSTR_VAL(fname));
+		idx = p - ZSTR_VAL(fname);
 		RETVAL_STRINGL(ZSTR_VAL(fname) + idx + 1, ZSTR_LEN(fname) - idx - 1);
 		zend_string_release(fname);
 	} else {
@@ -1384,7 +1384,7 @@ SPL_METHOD(SplFileInfo, getPathInfo)
 		if (path) {
 			char *dpath = estrndup(path, path_len);
 			path_len = php_dirname(dpath, path_len);
-			spl_filesystem_object_create_info(intern, dpath, (int)path_len, 1, ce, return_value);
+			spl_filesystem_object_create_info(intern, dpath, path_len, 1, ce, return_value);
 			efree(dpath);
 		}
 	}
@@ -1508,9 +1508,9 @@ SPL_METHOD(RecursiveDirectoryIterator, getChildren)
 	subdir = Z_SPLFILESYSTEM_P(return_value);
 	if (subdir) {
 		if (intern->u.dir.sub_path && intern->u.dir.sub_path[0]) {
-			subdir->u.dir.sub_path_len = (int)spprintf(&subdir->u.dir.sub_path, 0, "%s%c%s", intern->u.dir.sub_path, slash, intern->u.dir.entry.d_name);
+			subdir->u.dir.sub_path_len = spprintf(&subdir->u.dir.sub_path, 0, "%s%c%s", intern->u.dir.sub_path, slash, intern->u.dir.entry.d_name);
 		} else {
-			subdir->u.dir.sub_path_len = (int)strlen(intern->u.dir.entry.d_name);
+			subdir->u.dir.sub_path_len = strlen(intern->u.dir.entry.d_name);
 			subdir->u.dir.sub_path = estrndup(intern->u.dir.entry.d_name, subdir->u.dir.sub_path_len);
 		}
 		subdir->info_class = intern->info_class;
@@ -2294,7 +2294,7 @@ SPL_METHOD(SplFileObject, __construct)
 		p2 = 0;
 #endif
 		if (p1 || p2) {
-			intern->_path_len = (int)((p1 > p2 ? p1 : p2) - tmp_path);
+			intern->_path_len = ((p1 > p2 ? p1 : p2) - tmp_path);
 		} else {
 			intern->_path_len = 0;
 		}
