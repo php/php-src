@@ -108,6 +108,8 @@ PHP 7.2 UPGRADE NOTES
       'Multiple' => ['One header', 'Another header'],
       'Multiline' = "FirstLine\r\n SecondLine",
     ];
+  . count() now raises a warning when an invalid parameter is passed.
+    Only arrays and objects implementing the Countable interface should be passed.
 
 - XML:
   . utf8_encode() and utf8_decode() have been moved to the Standard extension
