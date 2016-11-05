@@ -2487,7 +2487,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_symtable_to_proptable(HashTable *ht)
 	zend_string *str_key;
 	zval *zv;
 
-	if (UNEXPECTED(ht->u.flags & HASH_FLAG_PACKED)) {
+	if (UNEXPECTED(HT_IS_PACKED(ht))) {
 		goto convert;
 	}
 
