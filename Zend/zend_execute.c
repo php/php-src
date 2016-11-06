@@ -646,7 +646,10 @@ static ZEND_COLD void zend_verify_type_error_common(
 
 	switch (arg_info->type_hint) {
 		case IS_OBJECT:
-			if (ce) {
+			if (!arg_info->class_name) {
+				*need_msg = "be an ";
+				*need_kind = "object";
+			} else if (ce) {
 				if (ce->ce_flags & ZEND_ACC_INTERFACE) {
 					*need_msg = "implement interface ";
 					is_interface = 1;
@@ -658,8 +661,8 @@ static ZEND_COLD void zend_verify_type_error_common(
 				/* We don't know whether it's a class or interface, assume it's a class */
 				*need_msg = "be an instance of ";
 				*need_kind = zf->common.type == ZEND_INTERNAL_FUNCTION
-					? ((zend_internal_arg_info *) arg_info)->class_name
-					: ZSTR_VAL(arg_info->class_name);
+						? ((zend_internal_arg_info *) arg_info)->class_name
+						: ZSTR_VAL(arg_info->class_name);
 			}
 			break;
 		case IS_CALLABLE:
@@ -925,6 +928,8 @@ static zend_always_inline zend_bool zend_check_type(
 			}
 		}
 		return 0;
+	// } else if (arg_info->type_hint == IS_OBJECT) {
+
 	} else if (arg_info->type_hint == IS_CALLABLE) {
 		return zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL);
 	} else if (arg_info->type_hint == IS_ITERABLE) {
