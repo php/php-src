@@ -28,26 +28,26 @@ echo "*** Testing mcrypt : Rijndael128 functionality ***\n";
 
 $cipher = MCRYPT_RIJNDAEL_128;
 $mode = MCRYPT_MODE_CBC;
-$data = b'This is the secret message which must be encrypted';
+$data = 'This is the secret message which must be encrypted';
 
 // keys up to 128 bits (16 bytes)
 $keys = array(
    null, 
    '', 
-   b'12345678', 
-   b'1234567890123456'
+   '12345678', 
+   '1234567890123456'
 );
 // rijndael128 is a block cipher of 128 bits (16 bytes)
 $ivs = array(
    null, 
    '', 
-   b'12345678', 
-   b'1234567890123456', 
-   b'12345678901234567'
+   '12345678', 
+   '1234567890123456', 
+   '12345678901234567'
 );
 
 
-$iv = b'1234567890123456';
+$iv = '1234567890123456';
 echo "\n--- testing different key lengths\n";
 foreach ($keys as $key) {
    echo "\nkey length=".strlen($key)."\n";
@@ -55,7 +55,7 @@ foreach ($keys as $key) {
    var_dump(bin2hex($res));
 }
 
-$key = b'1234567890123456';  
+$key = '1234567890123456';  
 echo "\n--- testing different iv lengths\n";
 foreach ($ivs as $iv) {
    echo "\niv length=".strlen($iv)."\n";

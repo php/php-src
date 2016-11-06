@@ -20,7 +20,7 @@ function_exists('mb_substr') or die("skip mb_substr() is not available in this b
 echo "*** Testing mb_substr() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$str = b'string_val';
+$str = 'string_val';
 $start = 1;
 $length = 5;
 

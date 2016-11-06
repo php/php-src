@@ -31,7 +31,7 @@ foreach ($files as $n => $file) {
 $tar->close();
 
 $fp = fopen($alias . '/b/c.php', 'wb');
-fwrite($fp, b"extra");
+fwrite($fp, "extra");
 fclose($fp);
 echo "===CLOSE===\n";
 $phar = new Phar($fname);

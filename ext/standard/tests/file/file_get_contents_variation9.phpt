@@ -25,7 +25,7 @@ $chainlink = dirname(__FILE__).'/fileGetContentsVar9.ChainLink';
 $h = fopen($filename,"w");
 //Data should be more than the size of a link.
 for ($i = 1; $i <= 10; $i++) {
-   fwrite($h, b"Here is a repeated amount of data");
+   fwrite($h, "Here is a repeated amount of data");
 }
 fclose($h);
 

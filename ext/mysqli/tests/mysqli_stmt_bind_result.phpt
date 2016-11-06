@@ -276,9 +276,9 @@ require_once('skipifconnectfailure.inc');
 
 	// Note: you cannot insert any blob values this way. But you can check the API at least partly this way
 	// Extra BLOB tests are in mysqli_stmt_send_long()
-	func_mysqli_stmt_bind_result($link, $engine, "b", "BLOB", b"", 1580);
+	func_mysqli_stmt_bind_result($link, $engine, "b", "BLOB", "", 1580);
 	func_mysqli_stmt_bind_result($link, $engine, "b", "TEXT", "", 1600, $hint_str_or_unicode);
-	func_mysqli_stmt_bind_result($link, $engine, "b", "MEDIUMBLOB", b"", 1620);
+	func_mysqli_stmt_bind_result($link, $engine, "b", "MEDIUMBLOB", "", 1620);
 	func_mysqli_stmt_bind_result($link, $engine, "b", "MEDIUMTEXT", "", 1640, $hint_str_or_unicode);
 
 	/* Is this one related? http://bugs.php.net/bug.php?id=35759 */

@@ -11,7 +11,7 @@ phar.require_hash=0
 <?php
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
-$file = b"<?php __HALT_COMPILER(); ?>";
+$file = "<?php __HALT_COMPILER(); ?>";
 
 $files = array();
 $files['a.php']   = '<?php echo "This is a\n"; require \''.$pname.'/b.php\'; ?>';
@@ -50,7 +50,7 @@ var_dump(fseek($a, 0, SEEK_END), ftell($a));
 var_dump(fseek($a, -1), ftell($a));
 var_dump(fseek($a, 1), ftell($a));
 echo "fwrite on dir handle\n";
-var_dump(fwrite($a, b'hi'));
+var_dump(fwrite($a, 'hi'));
 var_dump(fstat($a));
 closedir($a);
 echo "opendir edge cases\n";
