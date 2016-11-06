@@ -2,8 +2,8 @@
 @unlink(dirname(__FILE__) . '/frontcontroller14.phar');
 $a = new Phar(dirname(__FILE__) . '/frontcontroller14.phar');
 $a['html/index.php'] = '<?php
-var_dump($_SERVER[b"PATH_INFO"]);
-var_dump($_SERVER[b"PATH_TRANSLATED"]);
+var_dump($_SERVER["PATH_INFO"]);
+var_dump($_SERVER["PATH_TRANSLATED"]);
 ';
 $a->setStub('<?php
 function s($a)

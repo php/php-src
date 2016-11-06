@@ -66,8 +66,8 @@ if (($tmp[1] !== 'localhost') && ($tmp[1] !== '127.0.0.1'))
 		}
 
 		$fp = fopen($filename, "w");
-		fwrite($fp, b"1;foo\n");
-		fwrite($fp, b"2;bar");
+		fwrite($fp, "1;foo\n");
+		fwrite($fp, "2;bar");
 		fclose($fp);
 
 		$sql = sprintf("LOAD DATA LOCAL INFILE %s INTO TABLE test FIELDS TERMINATED BY ';' LINES TERMINATED  BY '\n'", $db->quote($filename));

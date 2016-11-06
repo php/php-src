@@ -27,7 +27,7 @@ set_error_handler('test_error_handler');
 $filename = 'FileGetContentsVar5.tmp';
 $absFile = dirname(__FILE__).'/'.$filename;
 $h = fopen($absFile,"w");
-fwrite($h, b"contents read");
+fwrite($h, "contents read");
 fclose($h);
 
 

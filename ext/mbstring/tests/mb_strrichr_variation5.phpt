@@ -18,10 +18,10 @@ echo "*** Testing mb_strrichr() : basic functionality ***\n";
 mb_internal_encoding('UTF-8');
 
 //ascii mixed case, multiple needles
-$string_ascii = b'abcDef zBcDyx';
-$needle_ascii_upper = b"BCD";
-$needle_ascii_mixed = b"bCd";
-$needle_ascii_lower = b"bcd";
+$string_ascii = 'abcDef zBcDyx';
+$needle_ascii_upper = "BCD";
+$needle_ascii_mixed = "bCd";
+$needle_ascii_lower = "bcd";
 
 //Greek string in mixed case UTF-8 with multiple needles
 $string_mb = base64_decode('zrrOu868zr3Ovs6fzqDOoSDOus67zpzOnc6+zr/OoA==');
