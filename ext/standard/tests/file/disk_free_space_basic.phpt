@@ -44,9 +44,6 @@ else {
   var_dump($space1, $space2);
 }
 
-echo "*** Testing with Binary Input ***\n";
-var_dump( disk_free_space(b"$file_path") ); 
-
 echo"\n--- Done ---";
 ?>
 
@@ -70,7 +67,5 @@ float(%d)
 float(%d)
 
  Free Space Value Is Correct
-*** Testing with Binary Input ***
-float(%d)
 
 --- Done ---

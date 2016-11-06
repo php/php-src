@@ -55,13 +55,6 @@ $pattern_arr = array(
 29 => "MATCH.TMP",
 30 => "MATCH*",
 31 => $file_name,
-
-/* binary inputs */
-32 => b"match*",
-33 => b"*.tmp",
-34 => b"mat*",
-35 => b"mat*tmp",
-36 => b"m*t",
 );
 
 for( $i = 0; $i<count($pattern_arr); $i++ ) {
@@ -101,9 +94,6 @@ $str_arr = array(
   'string',
   "str\0ing",
   "stringstring",
-
-  /* binary input */
-  b"string"
 );
 match($str_arr, $str_arr);
 
@@ -204,16 +194,6 @@ bool(false)
 bool(false)
 -- Iteration 31 --
 bool(true)
--- Iteration 32 --
-bool(false)
--- Iteration 33 --
-bool(true)
--- Iteration 34 --
-bool(false)
--- Iteration 35 --
-bool(false)
--- Iteration 36 --
-bool(false)
 
 *** Testing fnmatch() with other types other than files ***
 --- With Integers ---
@@ -271,11 +251,7 @@ bool(true)
 Warning: fnmatch() expects parameter 2 to be a valid path, string given in %s on line %d
 NULL
 bool(false)
-bool(true)
 -- Iteration 1 --
-
-Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
 
 Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
 NULL
@@ -301,11 +277,7 @@ bool(true)
 Warning: fnmatch() expects parameter 2 to be a valid path, string given in %s on line %d
 NULL
 bool(false)
-bool(true)
 -- Iteration 3 --
-
-Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
 
 Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
 NULL
@@ -330,18 +302,6 @@ bool(false)
 
 Warning: fnmatch() expects parameter 2 to be a valid path, string given in %s on line %d
 NULL
-bool(true)
-bool(false)
--- Iteration 5 --
-bool(true)
-
-Warning: fnmatch() expects parameter 2 to be a valid path, string given in %s on line %d
-NULL
-bool(true)
-
-Warning: fnmatch() expects parameter 2 to be a valid path, string given in %s on line %d
-NULL
-bool(false)
 bool(true)
 
 --- With booleans ---
