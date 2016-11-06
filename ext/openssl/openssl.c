@@ -4059,7 +4059,7 @@ PHP_FUNCTION(openssl_pbkdf2)
 		return;
 	}
 
-	if (key_length <= 0) {
+	if (key_length <= 0 || key_length > INT_MAX) {
 		RETURN_FALSE;
 	}
 

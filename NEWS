@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #73402 (Opcache segfault when using class constant to call a
     method). (Laruence)
 
+- OpenSSL
+  . Fixed bug #72776 (Invalid parameter in memcpy function trough
+    openssl_pbkdf2). (Jakub Zelenka)
+
 10 Nov 2016, PHP 5.6.28
 
 - Core:
