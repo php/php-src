@@ -56,7 +56,6 @@ config.cache
 config.h.in
 config.log
 config.nice
-config.nice.bat
 config.status
 config.sub
 config_vars.mk
@@ -148,6 +147,7 @@ tests/*/*/*.sh
 */tests/*/*/*.sh
 */*/tests/*.diff
 */*/tests/*.out
+*/*/tests/*.out.png
 */*/tests/*.php
 */*/tests/*.exp
 */*/tests/*.log
@@ -284,3 +284,4 @@ win32/*.positions
 win32/ext
 win32/phpts.def
 win32/wsyslog.h
+config.*.bat

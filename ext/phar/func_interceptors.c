@@ -200,7 +200,7 @@ phar_it:
 			}
 
 			if (offset > 0 && php_stream_seek(stream, offset, SEEK_SET) < 0) {
-				php_error_docref(NULL, E_WARNING, "Failed to seek to position %pd in the stream", offset);
+				php_error_docref(NULL, E_WARNING, "Failed to seek to position " ZEND_LONG_FMT " in the stream", offset);
 				php_stream_close(stream);
 				RETURN_FALSE;
 			}

@@ -727,7 +727,8 @@ static struct pdo_dbh_methods sqlite_methods = {
 	pdo_sqlite_get_attribute,
 	NULL,	/* check_liveness: not needed */
 	get_driver_methods,
-	pdo_sqlite_request_shutdown
+	pdo_sqlite_request_shutdown,
+	NULL
 };
 
 static char *make_filename_safe(const char *filename)

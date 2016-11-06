@@ -59,7 +59,7 @@ PHPAPI zend_string *php_base64_encode(const unsigned char *str, size_t length) /
 	unsigned char *p;
 	zend_string *result;
 
-	result = zend_string_alloc(((length + 2) / 3) * 4 * sizeof(char), 0);
+	result = zend_string_safe_alloc(((length + 2) / 3), 4 * sizeof(char), 0, 0);
 	p = (unsigned char *)ZSTR_VAL(result);
 
 	while (length > 2) { /* keep going until we have less than 24 bits */
@@ -136,36 +136,34 @@ PHPAPI zend_string *php_base64_decode(const unsigned char *str, size_t length) /
 PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length, zend_bool strict) /* {{{ */
 {
 	const unsigned char *current = str;
-	int ch, i = 0, j = 0, k;
-	/* this sucks for threaded environments */
+	int ch, i = 0, j = 0, padding = 0;
 	zend_string *result;
 
 	result = zend_string_alloc(length, 0);
 
 	/* run through the whole string, converting as we go */
-	while ((ch = *current++) != '\0' && length-- > 0) {
+	while (length-- > 0) {
+		ch = *current++;
 		if (ch == base64_pad) {
-			if (*current != '=' && ((i % 4) == 1 || (strict && length > 0))) {
-				if ((i % 4) != 1) {
-					while (isspace(*(++current))) {
-						continue;
-					}
-					if (*current == '\0') {
-						continue;
-					}
-				}
-				zend_string_free(result);
-				return NULL;
-			}
+			padding++;
 			continue;
 		}
 
 		ch = base64_reverse_table[ch];
-		if ((!strict && ch < 0) || ch == -1) { /* a space or some other separator character, we simply skip over */
-			continue;
-		} else if (ch == -2) {
-			zend_string_free(result);
-			return NULL;
+		if (!strict) {
+			/* skip unknown characters and whitespace */
+			if (ch < 0) {
+				continue;
+			}
+		} else {
+			/* skip whitespace */
+			if (ch == -1) {
+				continue;
+			}
+			/* fail on bad characters or if any data follows padding */
+			if (ch == -2 || padding) {
+				goto fail;
+			}
 		}
 
 		switch(i % 4) {
@@ -186,24 +184,24 @@ PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length
 		}
 		i++;
 	}
-
-	k = j;
-	/* mop things up if we ended on a boundary */
-	if (ch == base64_pad) {
-		switch(i % 4) {
-		case 1:
-			zend_string_free(result);
-			return NULL;
-		case 2:
-			k++;
-		case 3:
-			ZSTR_VAL(result)[k] = 0;
-		}
+	/* fail if the input is truncated (only one char in last group) */
+	if (strict && i % 4 == 1) {
+		goto fail;
 	}
+	/* fail if the padding length is wrong (not VV==, VVV=), but accept zero padding
+	 * RFC 4648: "In some circumstances, the use of padding [--] is not required" */
+	if (strict && padding && (padding > 2 || (i + padding) % 4 != 0)) {
+		goto fail;
+	}
+
 	ZSTR_LEN(result) = j;
 	ZSTR_VAL(result)[ZSTR_LEN(result)] = '\0';
 
 	return result;
+
+fail:
+	zend_string_free(result);
+	return NULL;
 }
 /* }}} */
 

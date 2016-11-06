@@ -54,6 +54,9 @@ Zend\zend_ini_parser.c Zend\zend_ini_parser.h: Zend\zend_ini_parser.y
 
 Zend\zend_language_parser.c Zend\zend_language_parser.h: Zend\zend_language_parser.y
 	$(BISON) --output=Zend/zend_language_parser.c -v -d -p zend Zend/zend_language_parser.y
+	@if "$(SED)" neq "" $(SED) -i "s,^int zendparse\(.*\),ZEND_API int zendparse\1,g" Zend/zend_language_parser.c
+	@if "$(SED)" neq "" $(SED) -i "s,^int zendparse\(.*\),ZEND_API int zendparse\1,g" Zend/zend_language_parser.h
+	@if "$(SED)" neq "" $(SED) -i "s,^#ifndef YYTOKENTYPE,#include \"zend.h\"\n#ifndef YYTOKENTYPE,g" Zend/zend_language_parser.h
 
 sapi\phpdbg\phpdbg_parser.c sapi\phpdbg\phpdbg_parser.h: sapi\phpdbg\phpdbg_parser.y
 	$(BISON) --output=sapi/phpdbg/phpdbg_parser.c -v -d -p phpdbg_ sapi/phpdbg/phpdbg_parser.y
@@ -148,11 +151,21 @@ clean-pgo: clean-all
 	-del /f /q $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)$(PHP_ZTS_ARCHIVE_POSTFIX)-Win32-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE).zip
 	-del /f /q $(BUILD_DIR)\php-test-pack-$(PHP_VERSION_STRING).zip
 
-test:
+!if $(PHP_TEST_INI_PATH) == ""
+test: set-tmp-env
 	"$(BUILD_DIR)\php.exe" -d open_basedir= -d output_buffering=0 run-tests.php $(TESTS) -p "$(BUILD_DIR)\php.exe"
 
-build-snap: generated_files
-	SET PATH=$(PATH);$(PHP_BUILD)\bin
+run: set-tmp-env
+	"$(BUILD_DIR)\php.exe" $(ARGS)
+!else
+test: set-tmp-env
+	"$(BUILD_DIR)\php.exe" -n -c $(PHP_TEST_INI_PATH) -d open_basedir= -d output_buffering=0 -d memory_limit=-1 run-tests.php -p "$(BUILD_DIR)\php.exe" -n -c $(PHP_TEST_INI_PATH) $(TESTS)
+
+run: set-tmp-env
+	"$(BUILD_DIR)\php.exe" -n -c $(PHP_TEST_INI_PATH) $(ARGS)
+!endif
+
+build-snap: set-tmp-env generated_files
 	@$(MAKE) "$(BUILD_DIR)\$(PHPDLL)"
 	-for %T in ($(SAPI_TARGETS)) do $(MAKE) /I /nologo "%T"
 	-for %T in ($(EXT_TARGETS)) do $(MAKE) /I /nologo "%T"
@@ -195,6 +208,7 @@ build-lib: build-ext-libs
 build-devel: build-headers build-lib
 	@if not exist $(BUILD_DIR_DEV)\script mkdir $(BUILD_DIR_DEV)\script >nul
 	@if not exist $(BUILD_DIR_DEV)\build mkdir $(BUILD_DIR_DEV)\build >nul
+	@copy run-tests.php $(BUILD_DIR_DEV)\script\ /y >nul
 	@copy win32\build\confutils.js $(BUILD_DIR_DEV)\script\ /y >nul
 	@copy win32\build\configure.tail $(BUILD_DIR_DEV)\script\ /y >nul
 	@copy win32\build\config.w32.phpize.in $(BUILD_DIR_DEV)\script\ /y >nul

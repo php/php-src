@@ -38,7 +38,7 @@ static inline unsigned char idx(unsigned char x, unsigned char y) {
 
 #ifdef WORDS_BIGENDIAN
 static inline uint64_t load64(const unsigned char* x) {
-	unsigned char i;
+	char i;
 	uint64_t ret = 0;
 	for (i = 7; i >= 0; --i) {
 		ret <<= 8;
@@ -47,14 +47,14 @@ static inline uint64_t load64(const unsigned char* x) {
 	return ret;
 }
 static inline void store64(unsigned char* x, uint64_t val) {
-	unsigned char i;
+	char i;
 	for (i = 0; i < 8; ++i) {
 		x[i] = val & 0xFF;
 		val >>= 8;
 	}
 }
 static inline void xor64(unsigned char* x, uint64_t val) {
-	unsigned char i;
+	char i;
 	for (i = 0; i < 8; ++i) {
 		x[i] ^= val & 0xFF;
 		val >>= 8;
@@ -153,9 +153,9 @@ static void PHP_SHA3_Init(PHP_SHA3_CTX* ctx,
 static void PHP_SHA3_Update(PHP_SHA3_CTX* ctx,
                             const unsigned char* buf,
                             unsigned int count,
-                            int block_size) {
+                            size_t block_size) {
 	while (count > 0) {
-		int len = block_size - ctx->pos;
+		unsigned int len = block_size - ctx->pos;
 		if (len > count) len = count;
 		count -= len;
 		while (len-- > 0) {

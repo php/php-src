@@ -32,6 +32,18 @@ static int month_tab[12]          = {   0,  31,  59,  90, 120, 151, 181, 212, 24
 static int days_in_month_leap[13] = {  31,  31,  29,  31,  30,  31,  30,  31,  31,  30,  31,  30,  31 };
 static int days_in_month[13]      = {  31,  31,  28,  31,  30,  31,  30,  31,  31,  30,  31,  30,  31 };
 
+static void do_range_limit_fraction(double *fraction, timelib_sll *seconds)
+{
+	if (*fraction < 0) {
+		*fraction += 1;
+		*seconds -= 1;
+	}
+	if (*fraction > 1) {
+		*fraction -= 1;
+		*seconds += 1;
+	}
+}
+
 static void do_range_limit(timelib_sll start, timelib_sll end, timelib_sll adj, timelib_sll *a, timelib_sll *b)
 {
 	if (*a < start) {
@@ -192,6 +204,7 @@ void timelib_do_rel_normalize(timelib_time *base, timelib_rel_time *rt)
 
 void timelib_do_normalize(timelib_time* time)
 {
+	if (time->f != TIMELIB_UNSET) do_range_limit_fraction(&time->f, &time->s);
 	if (time->s != TIMELIB_UNSET) do_range_limit(0, 60, 60, &time->s, &time->i);
 	if (time->s != TIMELIB_UNSET) do_range_limit(0, 60, 60, &time->i, &time->h);
 	if (time->s != TIMELIB_UNSET) do_range_limit(0, 24, 24, &time->h, &time->d);
@@ -209,6 +222,8 @@ static void do_adjust_relative(timelib_time* time)
 	timelib_do_normalize(time);
 
 	if (time->have_relative) {
+		time->f += time->relative.f;
+
 		time->s += time->relative.s;
 		time->i += time->relative.i;
 		time->h += time->relative.h;

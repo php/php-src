@@ -105,8 +105,6 @@ struct _zend_compiler_globals {
 
 	uint32_t compiler_options; /* set of ZEND_COMPILE_* constants */
 
-	HashTable const_filenames;
-
 	zend_oparray_context context;
 	zend_file_context file_context;
 
@@ -177,6 +175,7 @@ struct _zend_executor_globals {
 	/* for extended information support */
 	zend_bool no_extensions;
 
+	zend_bool vm_interrupt;
 	zend_bool timed_out;
 	zend_long hard_timeout;
 
@@ -291,7 +290,8 @@ struct _zend_php_scanner_globals {
 	int scanned_string_len;
 
 	/* hooks */
-	void (* on_event)(zend_php_scanner_event event, int token, int line);
+	void (*on_event)(zend_php_scanner_event event, int token, int line, void *context);
+	void *on_event_context;
 };
 
 #endif /* ZEND_GLOBALS_H */

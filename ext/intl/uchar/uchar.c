@@ -8,12 +8,21 @@
 
 static inline int convert_cp(UChar32* pcp, zval *zcp) {
 	zend_long cp = -1;
+
 	if (Z_TYPE_P(zcp) == IS_LONG) {
 		cp = Z_LVAL_P(zcp);
 	} else if (Z_TYPE_P(zcp) == IS_STRING) {
-		int i = 0;
-		U8_NEXT(Z_STRVAL_P(zcp), i, Z_STRLEN_P(zcp), cp);
-		if (i != Z_STRLEN_P(zcp)) {
+		int32_t i = 0;
+		size_t zcp_len = Z_STRLEN_P(zcp);
+
+		if (ZEND_SIZE_T_INT_OVFL(zcp_len)) {
+			intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
+			intl_error_set_custom_msg(NULL, "Input string is too long.", 0);
+			return FAILURE;
+		}
+
+		U8_NEXT(Z_STRVAL_P(zcp), i, zcp_len, cp);
+		if ((size_t)i != zcp_len) {
 			intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
 			intl_error_set_custom_msg(NULL, "Passing a UTF-8 character for codepoint requires a string which is exactly one UTF-8 codepoint long.", 0);
 			return FAILURE;
@@ -557,8 +566,8 @@ IC_METHOD(getFC_NFKC_Closure) {
 
 	error = U_ZERO_ERROR;
 	u8str = intl_convert_utf16_to_utf8(closure, closure_len, &error);
-	efree(closure);
 	INTL_CHECK_STATUS(error, "Failed converting output to UTF8");
+	efree(closure);
 	RETVAL_NEW_STR(u8str);
 }
 /* }}} */

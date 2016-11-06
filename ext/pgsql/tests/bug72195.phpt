@@ -9,7 +9,7 @@ $var1 = $val;
 printf("%x\n", count($val));
 @pg_pconnect($var1, "2", "3", "4");
 $var1 = "";
-tempnam('/tmp', 'ABCDEFGHI');
+tempnam(sys_get_temp_dir(), 'ABCDEFGHI');
 printf("%x\n", count($val));
 ?>
 --EXPECT--

@@ -63,6 +63,9 @@ toolset_setup_common_cflags();
 ARG_WITH('mp', 'Tell Visual Studio use up to [n,auto,disable] processes for compilation', 'auto');
 var PHP_MP_DISABLED = true;
 if (VS_TOOLSET && PHP_MP != 'disable') {
+	if(PHP_DEBUG == 'yes') {
+		STDOUT.WriteLine('WARNING: Debug builds cannot be built using multi processing');
+	} else {
 		// no from disable-all 
 		if(PHP_MP == 'auto' || PHP_MP == 'no') {
 			 ADD_FLAG('CFLAGS', ' /MP ');
@@ -75,6 +78,7 @@ if (VS_TOOLSET && PHP_MP != 'disable') {
 				STDOUT.WriteLine('WARNING: Invalid argument for MP: ' + PHP_MP);
 			}
 		}
+	}
 }
 
 if (!PHP_MP_DISABLED) {
@@ -151,7 +155,6 @@ ADD_SOURCES("main", "main.c snprintf.c spprintf.c getopt.c fopen_wrappers.c \
 	strlcat.c mergesort.c reentrancy.c php_variables.c php_ticks.c network.c \
 	php_open_temporary_file.c output.c internal_functions.c php_sprintf.c");
 ADD_FLAG("CFLAGS_BD_MAIN", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
-ADD_SOURCES("win32", "inet.c fnmatch.c sockets.c");
 
 AC_DEFINE('HAVE_STRNLEN', 1);
 
@@ -161,7 +164,8 @@ ADD_FLAG("CFLAGS_BD_MAIN_STREAMS", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 
 ADD_SOURCES("win32", "dllmain.c glob.c readdir.c \
 	registry.c select.c sendmail.c time.c winutil.c wsyslog.c globals.c \
-	getrusage.c ftok.c");
+	getrusage.c ftok.c ioutil.c codepage.c nice.c \
+	inet.c fnmatch.c sockets.c console.c");
 
 ADD_FLAG("CFLAGS_BD_WIN32", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 
@@ -212,11 +216,44 @@ if (PHP_SECURITY_FLAGS == "yes") {
 	ADD_FLAG("LDFLAGS", "/NXCOMPAT /DYNAMICBASE ");
 }
 
-/* XXX add and implement clang keyword for clang analyzer */
-ARG_WITH("analyzer", "Enable static analyzer. Pass vs for Visual Studio, pvs for PVS-Studio", "no");
+ARG_WITH("analyzer", "Enable static analyzer. Pass vs for Visual Studio, clang for clang, cppcheck for Cppcheck, pvs for PVS-Studio", "no");
 if (PHP_ANALYZER == "vs") {
 	ADD_FLAG("CFLAGS", " /analyze ");
 	ADD_FLAG("CFLAGS", " /wd6308 ");
+} else if (PHP_ANALYZER == "clang") {
+	var clang_cl = false;
+
+	if (FSO.FileExists(PROGRAM_FILES + "\\LLVM\\bin\\clang-cl.exe")) {
+		clang_cl = PROGRAM_FILES + "\\LLVM\\bin\\clang-cl.exe";
+	} else if (FSO.FileExists(PROGRAM_FILESx86 + "\\LLVM\\bin\\clang-cl.exe")) {
+		clang_cl = PROGRAM_FILESx86 + "\\LLVM\\bin\\clang-cl.exe";
+	}
+
+	if (!clang_cl) {
+		if (false == PATH_PROG('clang-cl', null, 'CLANG_CL')) {
+			WARNING("Couldn't find clang binaries, static analyze was disabled");
+			PHP_ANALYZER = "no";
+		}
+	} else {
+		DEFINE("CLANG_CL", clang_cl);
+	}
+} else if (PHP_ANALYZER == "cppcheck") {
+
+	var cppcheck = false;
+
+	if (FSO.FileExists(PROGRAM_FILES + "\\Cppcheck\\cppcheck.exe")) {
+		cppcheck = PROGRAM_FILES + "\\Cppcheck\\cppcheck.exe";
+	} else if (FSO.FileExists(PROGRAM_FILESx86 + "\\Cppcheck\\cppcheck.exe")) {
+		cppcheck = PROGRAM_FILESx86 + "\\Cppcheck\\cppcheck.exe";
+	}
+	if (!cppcheck) {
+		if (false == PATH_PROG('cppcheck', null, 'CPPCHECK')) {
+			WARNING("Couldn't find Cppcheck binaries, static analyze was disabled");
+			PHP_ANALYZER = "no";
+		}
+	} else {
+		DEFINE("CPPCHECK", cppcheck);
+	}
 } else if (PHP_ANALYZER == "pvs") {
 	var pvs_studio = false;
 
@@ -260,4 +297,16 @@ ARG_WITH("codegen-arch", "Architecture for code generation: ia32, sse, sse2, avx
 toolset_setup_codegen_arch();
 
 ARG_WITH("all-shared", "Force all the non obligatory extensions to be shared", "no");
+
+// Config profiles (--with-config-profile=<name>) will save a certain config to php-src/config.<name>.bat
+// so that it can be executed like: cofig.<name> instead of a long list of parameters
+//
+// Note, nice as a name is disallowed and will generate a warning and skip saving
+ARG_WITH('config-profile', 'Name of the configuration profile to save this to in php-src/config.name.bat', 'no');
+
+ARG_ENABLE("test-ini", "Enable automatic php.ini generation. The test.ini will be put \
+		into the build dir and used to automatically load the shared extensions.", "yes");
+
+ARG_WITH("test-ini-ext-exclude", "Comma separated list of shared extensions to \
+		be excluded from the test.ini", "no");
 

@@ -182,7 +182,7 @@ struct _zend_array {
 				zend_uchar    flags,
 				zend_uchar    nApplyCount,
 				zend_uchar    nIteratorsCount,
-				zend_uchar    reserve)
+				zend_uchar    consistency)
 		} v;
 		uint32_t flags;
 	} u;
@@ -319,12 +319,13 @@ struct _zend_ast_ref {
 /* fake types */
 #define _IS_BOOL					13
 #define IS_CALLABLE					14
+#define IS_ITERABLE					19
 #define IS_VOID						18
 
 /* internal types */
 #define IS_INDIRECT             	15
 #define IS_PTR						17
-#define _IS_ERROR					19
+#define _IS_ERROR					20
 
 static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 	return pz->u1.v.type;
@@ -389,24 +390,33 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_GC_TYPE_INFO(zval)		GC_TYPE_INFO(Z_COUNTED(zval))
 #define Z_GC_TYPE_INFO_P(zval_p)	Z_GC_TYPE_INFO(*(zval_p))
 
+#define GC_FLAGS_SHIFT				8
+#define GC_INFO_SHIFT				16
+#define GC_INFO_MASK				0xffff0000
+
+/* zval.value->gc.u.v.flags */
+#define GC_COLLECTABLE				(1<<7)
+
+#define GC_ARRAY					(IS_ARRAY          | (GC_COLLECTABLE << GC_FLAGS_SHIFT))
+#define GC_OBJECT					(IS_OBJECT         | (GC_COLLECTABLE << GC_FLAGS_SHIFT))
+
 /* zval.u1.v.type_flags */
 #define IS_TYPE_CONSTANT			(1<<0)
 #define IS_TYPE_IMMUTABLE			(1<<1)
 #define IS_TYPE_REFCOUNTED			(1<<2)
-#define IS_TYPE_COLLECTABLE			(1<<3)
 #define IS_TYPE_COPYABLE			(1<<4)
 
 /* extended types */
 #define IS_INTERNED_STRING_EX		IS_STRING
 
-#define IS_STRING_EX				(IS_STRING         | ((                   IS_TYPE_REFCOUNTED |                       IS_TYPE_COPYABLE) << Z_TYPE_FLAGS_SHIFT))
-#define IS_ARRAY_EX					(IS_ARRAY          | ((                   IS_TYPE_REFCOUNTED | IS_TYPE_COLLECTABLE | IS_TYPE_COPYABLE) << Z_TYPE_FLAGS_SHIFT))
-#define IS_OBJECT_EX				(IS_OBJECT         | ((                   IS_TYPE_REFCOUNTED | IS_TYPE_COLLECTABLE                   ) << Z_TYPE_FLAGS_SHIFT))
-#define IS_RESOURCE_EX				(IS_RESOURCE       | ((                   IS_TYPE_REFCOUNTED                                         ) << Z_TYPE_FLAGS_SHIFT))
-#define IS_REFERENCE_EX				(IS_REFERENCE      | ((                   IS_TYPE_REFCOUNTED                                         ) << Z_TYPE_FLAGS_SHIFT))
+#define IS_STRING_EX				(IS_STRING         | ((                   IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE) << Z_TYPE_FLAGS_SHIFT))
+#define IS_ARRAY_EX					(IS_ARRAY          | ((                   IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE) << Z_TYPE_FLAGS_SHIFT))
+#define IS_OBJECT_EX				(IS_OBJECT         | ((                   IS_TYPE_REFCOUNTED                   ) << Z_TYPE_FLAGS_SHIFT))
+#define IS_RESOURCE_EX				(IS_RESOURCE       | ((                   IS_TYPE_REFCOUNTED                   ) << Z_TYPE_FLAGS_SHIFT))
+#define IS_REFERENCE_EX				(IS_REFERENCE      | ((                   IS_TYPE_REFCOUNTED                   ) << Z_TYPE_FLAGS_SHIFT))
 
-#define IS_CONSTANT_EX				(IS_CONSTANT       | ((IS_TYPE_CONSTANT | IS_TYPE_REFCOUNTED |                       IS_TYPE_COPYABLE) << Z_TYPE_FLAGS_SHIFT))
-#define IS_CONSTANT_AST_EX			(IS_CONSTANT_AST   | ((IS_TYPE_CONSTANT | IS_TYPE_REFCOUNTED |                       IS_TYPE_COPYABLE) << Z_TYPE_FLAGS_SHIFT))
+#define IS_CONSTANT_EX				(IS_CONSTANT       | ((IS_TYPE_CONSTANT | IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE) << Z_TYPE_FLAGS_SHIFT))
+#define IS_CONSTANT_AST_EX			(IS_CONSTANT_AST   | ((IS_TYPE_CONSTANT | IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE) << Z_TYPE_FLAGS_SHIFT))
 
 /* zval.u1.v.const_flags */
 #define IS_CONSTANT_UNQUALIFIED		0x010
@@ -462,9 +472,6 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_REFCOUNTED(zval)			((Z_TYPE_FLAGS(zval) & IS_TYPE_REFCOUNTED) != 0)
 #define Z_REFCOUNTED_P(zval_p)		Z_REFCOUNTED(*(zval_p))
 
-#define Z_COLLECTABLE(zval)			((Z_TYPE_FLAGS(zval) & IS_TYPE_COLLECTABLE) != 0)
-#define Z_COLLECTABLE_P(zval_p)		Z_COLLECTABLE(*(zval_p))
-
 #define Z_COPYABLE(zval)			((Z_TYPE_FLAGS(zval) & IS_TYPE_COPYABLE) != 0)
 #define Z_COPYABLE_P(zval_p)		Z_COPYABLE(*(zval_p))
 
@@ -480,9 +487,6 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 
 #define Z_OPT_REFCOUNTED(zval)		((Z_TYPE_INFO(zval) & (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT)) != 0)
 #define Z_OPT_REFCOUNTED_P(zval_p)	Z_OPT_REFCOUNTED(*(zval_p))
-
-#define Z_OPT_COLLECTABLE(zval)		((Z_TYPE_INFO(zval) & (IS_TYPE_COLLECTABLE << Z_TYPE_FLAGS_SHIFT)) != 0)
-#define Z_OPT_COLLECTABLE_P(zval_p)	Z_OPT_COLLECTABLE(*(zval_p))
 
 #define Z_OPT_COPYABLE(zval)		((Z_TYPE_INFO(zval) & (IS_TYPE_COPYABLE << Z_TYPE_FLAGS_SHIFT)) != 0)
 #define Z_OPT_COPYABLE_P(zval_p)	Z_OPT_COPYABLE(*(zval_p))
@@ -915,6 +919,23 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 		ZVAL_COPY_VALUE(_z, &ref->val);					\
 		efree_size(ref, sizeof(zend_reference));		\
 	} while (0)
+
+#define ZVAL_COPY_UNREF(z, v) do {						\
+		zval *_z3 = (v);								\
+		if (Z_REFCOUNTED_P(_z3)) {						\
+			if (UNEXPECTED(Z_ISREF_P(_z3))				\
+			 && UNEXPECTED(Z_REFCOUNT_P(_z3) == 1)) {	\
+				ZVAL_UNREF(_z3);						\
+				if (Z_REFCOUNTED_P(_z3)) {				\
+					Z_ADDREF_P(_z3);					\
+				}										\
+			} else {									\
+				Z_ADDREF_P(_z3);						\
+			}											\
+		}												\
+		ZVAL_COPY_VALUE(z, _z3);						\
+	} while (0)
+
 
 #define SEPARATE_STRING(zv) do {						\
 		zval *_zv = (zv);								\

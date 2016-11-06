@@ -77,25 +77,35 @@ static void zend_win_error_message(int type, char *msg, int err)
 static char *create_name_with_username(char *name)
 {
 	static char newname[MAXPATHLEN + UNLEN + 4 + 1 + 32];
-	char uname[UNLEN + 1];
-	DWORD unsize = UNLEN;
+	char *uname;
 
-	GetUserName(uname, &unsize);
+	uname = php_win32_get_username();
+	if (!uname) {
+		return NULL;
+	}
 	snprintf(newname, sizeof(newname) - 1, "%s@%s@%.32s", name, uname, ZCG(system_id));
+
+	free(uname);
+
 	return newname;
 }
 
 static char *get_mmap_base_file(void)
 {
 	static char windir[MAXPATHLEN+UNLEN + 3 + sizeof("\\\\@") + 1 + 32];
-	char uname[UNLEN + 1];
-	DWORD unsize = UNLEN;
+	char *uname;
 	int l;
 
+	uname = php_win32_get_username();
+	if (!uname) {
+		return NULL;
+	}
 	GetTempPath(MAXPATHLEN, windir);
-	GetUserName(uname, &unsize);
 	l = strlen(windir);
 	snprintf(windir + l, sizeof(windir) - l - 1, "\\%s@%s@%.32s", ACCEL_FILEMAP_BASE, uname, ZCG(system_id));
+
+	free(uname);
+
 	return windir;
 }
 
@@ -176,7 +186,7 @@ static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
 		}
 #endif
 	    err = ERROR_INVALID_ADDRESS;
-		zend_win_error_message(ACCEL_LOG_FATAL, "Base address marks unusable memory region. Please setup opcache.file_cache and opcache.file_cache_callback directives for more convenient Opcache usage", err);
+		zend_win_error_message(ACCEL_LOG_FATAL, "Base address marks unusable memory region. Please setup opcache.file_cache and opcache.file_cache_fallback directives for more convenient Opcache usage", err);
 		return ALLOC_FAILURE;
    	}
 

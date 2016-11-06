@@ -39,7 +39,7 @@
 #define PS_READ_ARGS     void **mod_data, zend_string *key, zend_string **val, zend_long maxlifetime
 #define PS_WRITE_ARGS    void **mod_data, zend_string *key, zend_string *val, zend_long maxlifetime
 #define PS_DESTROY_ARGS  void **mod_data, zend_string *key
-#define PS_GC_ARGS       void **mod_data, zend_long maxlifetime, int *nrdels
+#define PS_GC_ARGS       void **mod_data, zend_long maxlifetime, zend_long *nrdels
 #define PS_CREATE_SID_ARGS void **mod_data
 #define PS_VALIDATE_SID_ARGS void **mod_data, zend_string *key
 #define PS_UPDATE_TIMESTAMP_ARGS void **mod_data, zend_string *key, zend_string *val, zend_long maxlifetime
@@ -51,7 +51,7 @@ typedef struct ps_module_struct {
 	int (*s_read)(PS_READ_ARGS);
 	int (*s_write)(PS_WRITE_ARGS);
 	int (*s_destroy)(PS_DESTROY_ARGS);
-	int (*s_gc)(PS_GC_ARGS);
+	zend_long (*s_gc)(PS_GC_ARGS);
 	zend_string *(*s_create_sid)(PS_CREATE_SID_ARGS);
 	int (*s_validate_sid)(PS_VALIDATE_SID_ARGS);
 	int (*s_update_timestamp)(PS_UPDATE_TIMESTAMP_ARGS);
@@ -65,7 +65,7 @@ typedef struct ps_module_struct {
 #define PS_READ_FUNC(x) 	int ps_read_##x(PS_READ_ARGS)
 #define PS_WRITE_FUNC(x) 	int ps_write_##x(PS_WRITE_ARGS)
 #define PS_DESTROY_FUNC(x) 	int ps_delete_##x(PS_DESTROY_ARGS)
-#define PS_GC_FUNC(x) 		int ps_gc_##x(PS_GC_ARGS)
+#define PS_GC_FUNC(x) 		zend_long ps_gc_##x(PS_GC_ARGS)
 #define PS_CREATE_SID_FUNC(x)	zend_string *ps_create_sid_##x(PS_CREATE_SID_ARGS)
 #define PS_VALIDATE_SID_FUNC(x)	int ps_validate_sid_##x(PS_VALIDATE_SID_ARGS)
 #define PS_UPDATE_TIMESTAMP_FUNC(x) 	int ps_update_timestamp_##x(PS_UPDATE_TIMESTAMP_ARGS)
@@ -151,9 +151,7 @@ typedef struct _php_ps_globals {
 	char *session_name;
 	zend_string *id;
 	char *extern_referer_chk;
-	char *entropy_file;
 	char *cache_limiter;
-	zend_long entropy_length;
 	zend_long cookie_lifetime;
 	char *cookie_path;
 	char *cookie_domain;
@@ -191,11 +189,8 @@ typedef struct _php_ps_globals {
 	zend_bool use_only_cookies;
 	zend_bool use_trans_sid; /* contains the INI value of whether to use trans-sid */
 
-	zend_long hash_func;
-#if defined(HAVE_HASH_EXT) && !defined(COMPILE_DL_HASH)
-	php_hash_ops *hash_ops;
-#endif
-	zend_long hash_bits_per_character;
+	zend_long sid_length;
+	zend_long sid_bits_per_character;
 	int send_cookie;
 	int define_sid;
 
@@ -299,11 +294,11 @@ PHPAPI void php_session_reset_id(void);
 	HashTable *_ht = Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars)));	\
 	ZEND_HASH_FOREACH_KEY(_ht, num_key, key) {						\
 		if (key == NULL) {											\
-			php_error_docref(NULL, E_NOTICE,				\
-					"Skipping numeric key %pd", num_key);			\
+			php_error_docref(NULL, E_NOTICE,						\
+					"Skipping numeric key " ZEND_LONG_FMT, num_key);\
 			continue;												\
 		}															\
-		if ((struc = php_get_session_var(key))) {			\
+		if ((struc = php_get_session_var(key))) {					\
 			code;		 											\
 		} 															\
 	} ZEND_HASH_FOREACH_END();										\

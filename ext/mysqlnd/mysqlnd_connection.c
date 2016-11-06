@@ -215,11 +215,11 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_connection_state)
 MYSQLND_CLASS_METHODS_END;
 
 
-/* {{{ mysqlnd_upsert_status_init */
+/* {{{ mysqlnd_connection_state_init */
 PHPAPI void
 mysqlnd_connection_state_init(struct st_mysqlnd_connection_state * const state)
 {
-	DBG_ENTER("mysqlnd_error_info_init");
+	DBG_ENTER("mysqlnd_connection_state_init");
 	state->m = &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_connection_state);
 	state->state = CONN_ALLOCED;
 	DBG_VOID_RETURN;
@@ -620,7 +620,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 
 	DBG_INF_FMT("host=%s user=%s db=%s port=%u flags=%u persistent=%u state=%u",
 				hostname.s?hostname.s:"", username.s?username.s:"", database.s?database.s:"", port, mysql_flags,
-				conn? conn->persistent:0, conn? GET_CONNECTION_STATE(&conn->state):-1);
+				conn? conn->persistent:0, conn? (int)GET_CONNECTION_STATE(&conn->state):-1);
 
 	if (GET_CONNECTION_STATE(&conn->state) > CONN_ALLOCED) {
 		DBG_INF("Connecting on a connected handle.");
@@ -730,7 +730,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 			conn->hostname.l = hostname.l;
 			{
 				char *p;
-				mnd_sprintf(&p, 0, "%s via TCP/IP", conn->hostname);
+				mnd_sprintf(&p, 0, "%s via TCP/IP", conn->hostname.s);
 				if (!p) {
 					SET_OOM_ERROR(conn->error_info);
 					goto err; /* OOM */
@@ -1676,10 +1676,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 		goto end;
 	}
 	switch (option) {
-#ifdef WHEN_SUPPORTED_BY_MYSQLI
 		case MYSQL_OPT_READ_TIMEOUT:
 		case MYSQL_OPT_WRITE_TIMEOUT:
-#endif
 		case MYSQLND_OPT_SSL_KEY:
 		case MYSQLND_OPT_SSL_CERT:
 		case MYSQLND_OPT_SSL_CA:

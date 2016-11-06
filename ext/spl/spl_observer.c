@@ -51,7 +51,7 @@ ZEND_END_ARG_INFO();
 
 static const zend_function_entry spl_funcs_SplObserver[] = {
 	SPL_ABSTRACT_ME(SplObserver, update,   arginfo_SplObserver_update)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 ZEND_BEGIN_ARG_INFO(arginfo_SplSubject_attach, 0)
@@ -69,7 +69,7 @@ static const zend_function_entry spl_funcs_SplSubject[] = {
 	SPL_ABSTRACT_ME(SplSubject,  attach,   arginfo_SplSubject_attach)
 	SPL_ABSTRACT_ME(SplSubject,  detach,   arginfo_SplSubject_attach)
 	SPL_ABSTRACT_ME(SplSubject,  notify,   arginfo_SplSubject_void)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 PHPAPI zend_class_entry     *spl_ce_SplObserver;
@@ -788,6 +788,9 @@ SPL_METHOD(SplObjectStorage, unserialize)
 	--p; /* for ';' */
 	count = Z_LVAL_P(pcount);
 
+	ZVAL_UNDEF(&entry);
+	ZVAL_UNDEF(&inf);
+
 	while (count-- > 0) {
 		spl_SplObjectStorageElement *pelement;
 		zend_hash_key key;
@@ -803,18 +806,17 @@ SPL_METHOD(SplObjectStorage, unserialize)
 		if (!php_var_unserialize(&entry, &p, s + buf_len, &var_hash)) {
 			goto outexcept;
 		}
-		if (Z_TYPE(entry) != IS_OBJECT) {
-			zval_ptr_dtor(&entry);
-			goto outexcept;
-		}
 		if (*p == ',') { /* new version has inf */
 			++p;
 			if (!php_var_unserialize(&inf, &p, s + buf_len, &var_hash)) {
 				zval_ptr_dtor(&entry);
 				goto outexcept;
 			}
-		} else {
-			ZVAL_UNDEF(&inf);
+		}
+		if (Z_TYPE(entry) != IS_OBJECT) {
+			zval_ptr_dtor(&entry);
+			zval_ptr_dtor(&inf);
+			goto outexcept;
 		}
 
 		if (spl_object_storage_get_hash(&key, intern, getThis(), &entry) == FAILURE) {
@@ -865,7 +867,7 @@ SPL_METHOD(SplObjectStorage, unserialize)
 
 outexcept:
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-	zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Error at offset %pd of %d bytes", (zend_long)((char*)p - buf), buf_len);
+	zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Error at offset %zd of %zd bytes", ((char*)p - buf), buf_len);
 	return;
 
 } /* }}} */
@@ -924,7 +926,7 @@ static const zend_function_entry spl_funcs_SplObjectStorage[] = {
 	SPL_MA(SplObjectStorage, offsetSet,    SplObjectStorage, attach,   arginfo_attach, 0)
 	SPL_MA(SplObjectStorage, offsetUnset,  SplObjectStorage, detach,   arginfo_offsetGet, 0)
 	SPL_ME(SplObjectStorage, offsetGet,    arginfo_offsetGet,     0)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 typedef enum {
@@ -1233,7 +1235,7 @@ static const zend_function_entry spl_funcs_MultipleIterator[] = {
 	SPL_ME(MultipleIterator,  key,                    arginfo_splobject_void,                     0)
 	SPL_ME(MultipleIterator,  current,                arginfo_splobject_void,                     0)
 	SPL_ME(MultipleIterator,  next,                   arginfo_splobject_void,                     0)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 /* {{{ PHP_MINIT_FUNCTION(spl_observer) */

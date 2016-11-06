@@ -31,9 +31,14 @@
 #include "zend_smart_str.h"
 #include "basic_functions.h"
 #include "php_incomplete_class.h"
+/* }}} */
+
+struct php_serialize_data {
+	HashTable ht;
+	uint32_t n;
+};
 
 #define COMMON (is_ref ? "&" : "")
-/* }}} */
 
 static void php_array_element_dump(zval *zv, zend_ulong index, zend_string *key, int level) /* {{{ */
 {
@@ -198,7 +203,7 @@ again:
 			break;
 		case IS_RESOURCE: {
 			const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(struc));
-			php_printf("%sresource(%pd) of type (%s)\n", COMMON, Z_RES_P(struc)->handle, type_name ? type_name : "Unknown");
+			php_printf("%sresource(%d) of type (%s)\n", COMMON, Z_RES_P(struc)->handle, type_name ? type_name : "Unknown");
 			break;
 		}
 		case IS_REFERENCE:
@@ -489,8 +494,7 @@ static void php_object_element_export(zval *zv, zend_ulong index, zend_string *k
 PHPAPI void php_var_export_ex(zval *struc, int level, smart_str *buf) /* {{{ */
 {
 	HashTable *myht;
-	char *tmp_str;
-	size_t tmp_len;
+	char tmp_str[PHP_DOUBLE_MAX_LENGTH];
 	zend_string *ztmp, *ztmp2;
 	zend_ulong index;
 	zend_string *key;
@@ -511,8 +515,8 @@ again:
 			smart_str_append_long(buf, Z_LVAL_P(struc));
 			break;
 		case IS_DOUBLE:
-			tmp_len = spprintf(&tmp_str, 0,"%.*H", PG(serialize_precision), Z_DVAL_P(struc));
-			smart_str_appendl(buf, tmp_str, tmp_len);
+			php_gcvt(Z_DVAL_P(struc), (int)PG(serialize_precision), '.', 'E', tmp_str);
+			smart_str_appends(buf, tmp_str);
 			/* Without a decimal point, PHP treats a number literal as an int.
 			 * This check even works for scientific notation, because the
 			 * mantissa always contains a decimal point.
@@ -522,7 +526,6 @@ again:
 			if (zend_finite(Z_DVAL_P(struc)) && NULL == strchr(tmp_str, '.')) {
 				smart_str_appendl(buf, ".0", 2);
 			}
-			efree(tmp_str);
 			break;
 		case IS_STRING:
 			ztmp = php_addcslashes(Z_STR_P(struc), 0, "'\\", 2);
@@ -897,16 +900,13 @@ again:
 			return;
 
 		case IS_DOUBLE: {
-				char *s;
-
-				smart_str_appendl(buf, "d:", 2);
-				s = (char *) safe_emalloc(PG(serialize_precision), 1, MAX_LENGTH_OF_DOUBLE + 1);
-				php_gcvt(Z_DVAL_P(struc), (int)PG(serialize_precision), '.', 'E', s);
-				smart_str_appends(buf, s);
-				smart_str_appendc(buf, ';');
-				efree(s);
-				return;
-			}
+			char tmp_str[PHP_DOUBLE_MAX_LENGTH];
+			smart_str_appendl(buf, "d:", 2);
+			php_gcvt(Z_DVAL_P(struc), (int)PG(serialize_precision), '.', 'E', tmp_str);
+			smart_str_appends(buf, tmp_str);
+			smart_str_appendc(buf, ';');
+			return;
+		}
 
 		case IS_STRING:
 			php_var_serialize_string(buf, Z_STRVAL_P(struc), Z_STRLEN_P(struc));
@@ -1051,6 +1051,35 @@ PHPAPI void php_var_serialize(smart_str *buf, zval *struc, php_serialize_data_t 
 }
 /* }}} */
 
+PHPAPI php_serialize_data_t php_var_serialize_init() {
+	struct php_serialize_data *d;
+	/* fprintf(stderr, "SERIALIZE_INIT      == lock: %u, level: %u\n", BG(serialize_lock), BG(serialize).level); */
+	if (BG(serialize_lock) || !BG(serialize).level) {
+		d = emalloc(sizeof(struct php_serialize_data));
+		zend_hash_init(&d->ht, 16, NULL, ZVAL_PTR_DTOR, 0);
+		d->n = 0;
+		if (!BG(serialize_lock)) {
+			BG(serialize).data = d;
+			BG(serialize).level = 1;
+		}
+	} else {
+		d = BG(serialize).data;
+		++BG(serialize).level;
+	}
+	return d;
+}
+
+PHPAPI void php_var_serialize_destroy(php_serialize_data_t d) {
+	/* fprintf(stderr, "SERIALIZE_DESTROY   == lock: %u, level: %u\n", BG(serialize_lock), BG(serialize).level); */
+	if (BG(serialize_lock) || BG(serialize).level == 1) {
+		zend_hash_destroy(&d->ht);
+		efree(d);
+	}
+	if (!BG(serialize_lock) && !--BG(serialize).level) {
+		BG(serialize).data = NULL;
+	}
+}
+
 /* {{{ proto string serialize(mixed variable)
    Returns a string representation of variable (which can later be unserialized) */
 PHP_FUNCTION(serialize)
@@ -1089,7 +1118,8 @@ PHP_FUNCTION(unserialize)
 	const unsigned char *p;
 	php_unserialize_data_t var_hash;
 	zval *options = NULL, *classes = NULL;
-	HashTable *class_hash = NULL;
+	zval *retval;
+	HashTable *class_hash = NULL, *prev_class_hash;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|a", &buf, &buf_len, &options) == FAILURE) {
 		RETURN_FALSE;
@@ -1101,8 +1131,16 @@ PHP_FUNCTION(unserialize)
 
 	p = (const unsigned char*) buf;
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
-	if(options != NULL) {
+
+	prev_class_hash = php_var_unserialize_get_allowed_classes(var_hash);
+	if (options != NULL) {
 		classes = zend_hash_str_find(Z_ARRVAL_P(options), "allowed_classes", sizeof("allowed_classes")-1);
+		if (classes && Z_TYPE_P(classes) != IS_ARRAY && Z_TYPE_P(classes) != IS_TRUE && Z_TYPE_P(classes) != IS_FALSE) {
+			php_error_docref(NULL, E_WARNING, "allowed_classes option should be array or boolean");
+			PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+			RETURN_FALSE;
+		}
+
 		if(classes && (Z_TYPE_P(classes) == IS_ARRAY || !zend_is_true(classes))) {
 			ALLOC_HASHTABLE(class_hash);
 			zend_hash_init(class_hash, (Z_TYPE_P(classes) == IS_ARRAY)?zend_hash_num_elements(Z_ARRVAL_P(classes)):0, NULL, NULL, 0);
@@ -1118,35 +1156,29 @@ PHP_FUNCTION(unserialize)
 		        zend_string_release(lcname);
 			} ZEND_HASH_FOREACH_END();
 		}
+		php_var_unserialize_set_allowed_classes(var_hash, class_hash);
 	}
 
-	if (!php_var_unserialize_ex(return_value, &p, p + buf_len, &var_hash, class_hash)) {
-		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-		if (class_hash) {
-			zend_hash_destroy(class_hash);
-			FREE_HASHTABLE(class_hash);
-		}
-		zval_ptr_dtor(return_value);
+	retval = var_tmp_var(&var_hash);
+	if (!php_var_unserialize(retval, &p, p + buf_len, &var_hash)) {
 		if (!EG(exception)) {
 			php_error_docref(NULL, E_NOTICE, "Error at offset " ZEND_LONG_FMT " of %zd bytes",
 				(zend_long)((char*)p - buf), buf_len);
 		}
-		RETURN_FALSE;
-	}
-	/* We should keep an reference to return_value to prevent it from being dtor
-	   in case nesting calls to unserialize */
-	var_push_dtor(&var_hash, return_value);
-
-	/* Ensure return value is a value */
-	if (Z_ISREF_P(return_value)) {
-		zend_unwrap_reference(return_value);
+		RETVAL_FALSE;
+	} else {
+		ZVAL_DEREF(retval);
+		ZVAL_COPY(return_value, retval);
 	}
 
-	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 	if (class_hash) {
 		zend_hash_destroy(class_hash);
 		FREE_HASHTABLE(class_hash);
 	}
+
+	/* Reset to previous allowed_classes in case this is a nested call */
+	php_var_unserialize_set_allowed_classes(var_hash, prev_class_hash);
+	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 }
 /* }}} */
 

@@ -54,7 +54,7 @@ extern ZEND_API const zend_internal_function zend_pass_function;
 
 ZEND_API void ZEND_FASTCALL zend_check_internal_arg_type(zend_function *zf, uint32_t arg_num, zval *arg);
 ZEND_API int  ZEND_FASTCALL zend_check_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot);
-ZEND_API void ZEND_FASTCALL zend_check_missing_arg(zend_execute_data *execute_data, uint32_t arg_num, void **cache_slot);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(zend_execute_data *execute_data);
 
 static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value, zend_uchar value_type)
 {
@@ -101,8 +101,7 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 				return variable_ptr;
 			} else { /* we need to split */
 				/* optimized version of GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr) */
-				if ((Z_COLLECTABLE_P(variable_ptr)) &&
-		    		UNEXPECTED(!GC_INFO(garbage))) {
+				if (UNEXPECTED(GC_MAY_LEAK(garbage))) {
 					gc_possible_root(garbage);
 				}
 			}
@@ -216,12 +215,12 @@ static zend_always_inline void zend_vm_stack_free_extra_args_ex(uint32_t call_in
 		do {
 			p--;
 			if (Z_REFCOUNTED_P(p)) {
-				if (!Z_DELREF_P(p)) {
-					zend_refcounted *r = Z_COUNTED_P(p);
+				zend_refcounted *r = Z_COUNTED_P(p);
+				if (!--GC_REFCOUNT(r)) {
 					ZVAL_NULL(p);
 					zval_dtor_func(r);
 				} else {
-					GC_ZVAL_CHECK_POSSIBLE_ROOT(p);
+					gc_check_possible_root(r);
 				}
 			}
 		} while (p != end);

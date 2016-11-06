@@ -720,7 +720,6 @@ PHP_ICONV_API php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len, 
 
 			default:
 				/* other error */
-				retval = PHP_ICONV_ERR_UNKNOWN;
 				zend_string_free(out_buf);
 				return PHP_ICONV_ERR_UNKNOWN;
 		}
@@ -858,7 +857,7 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 	}
 
 
-	if ((size_t)offset >= total_len) {
+	if ((size_t)offset > total_len) {
 		return PHP_ICONV_ERR_SUCCESS;
 	}
 
@@ -2108,7 +2107,7 @@ PHP_FUNCTION(iconv_substr)
 	err = _php_iconv_substr(&retval, ZSTR_VAL(str), ZSTR_LEN(str), offset, length, charset);
 	_php_iconv_show_error(err, GENERIC_SUPERSET_NAME, charset);
 
-	if (err == PHP_ICONV_ERR_SUCCESS && ZSTR_LEN(str) > 0 && retval.s != NULL) {
+	if (err == PHP_ICONV_ERR_SUCCESS && ZSTR_LEN(str) >= 0 && retval.s != NULL) {
 		RETURN_NEW_STR(retval.s);
 	}
 	smart_str_free(&retval);
@@ -2870,7 +2869,7 @@ static php_stream_filter_ops php_iconv_stream_filter_ops = {
 };
 
 /* {{{ php_iconv_stream_filter_create */
-static php_stream_filter *php_iconv_stream_filter_factory_create(const char *name, zval *params, int persistent)
+static php_stream_filter *php_iconv_stream_filter_factory_create(const char *name, zval *params, uint8_t persistent)
 {
 	php_stream_filter *retval = NULL;
 	php_iconv_stream_filter *inst;

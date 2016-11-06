@@ -375,12 +375,14 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 			if (Z_TYPE_P(ret_constant) == IS_CONSTANT_AST) {
 				if (IS_CONSTANT_VISITED(ret_constant)) {
 					zend_throw_error(NULL, "Cannot declare self-referencing constant '%s::%s'", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
+					ret_constant = NULL;
 					goto failure;
 				}
 				MARK_CONSTANT_VISITED(ret_constant);
 			}
 			if (UNEXPECTED(zval_update_constant_ex(ret_constant, ce) != SUCCESS)) {
 				RESET_CONSTANT_VISITED(ret_constant);
+				ret_constant = NULL;
 				goto failure;
 			}
 			RESET_CONSTANT_VISITED(ret_constant);

@@ -176,13 +176,22 @@ PS_DESTROY_FUNC(user)
 PS_GC_FUNC(user)
 {
 	zval args[1];
-	STDVARS;
+	zval retval;
 
 	ZVAL_LONG(&args[0], maxlifetime);
 
 	ps_call_handler(&PSF(gc), 1, args, &retval);
 
-	FINISH;
+	if (Z_TYPE(retval) == IS_LONG) {
+		convert_to_long(&retval);
+		return Z_LVAL(retval);
+	}
+	/* This is for older API compatibility */
+	if (Z_TYPE(retval) == IS_TRUE) {
+		return 1;
+	}
+	/* Anything else is some kind of error */
+	return -1; // Error
 }
 
 PS_CREATE_SID_FUNC(user)
@@ -200,12 +209,12 @@ PS_CREATE_SID_FUNC(user)
 			}
 			zval_ptr_dtor(&retval);
 		} else {
-			php_error_docref(NULL, E_ERROR, "No session id returned by function");
+			zend_throw_error(NULL, "No session id returned by function");
 			return NULL;
 		}
 
 		if (!id) {
-			php_error_docref(NULL, E_ERROR, "Session id must be a string");
+			zend_throw_error(NULL, "Session id must be a string");
 			return NULL;
 		}
 

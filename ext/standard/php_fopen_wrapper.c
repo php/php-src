@@ -90,7 +90,11 @@ static size_t php_stream_input_read(php_stream *stream, char *buf, size_t count)
 		}
 	}
 
-	php_stream_seek(input->body, input->position, SEEK_SET);
+	if (!input->body->readfilters.head) {
+		/* If the input stream contains filters, it's not really seekable. The
+			input->position is likely to be wrong for unfiltered data. */
+		php_stream_seek(input->body, input->position, SEEK_SET);
+	}
 	read = php_stream_read(input->body, buf, count);
 
 	if (!read || read == (size_t) -1) {
@@ -195,7 +199,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 			path += 11;
 			max_memory = ZEND_STRTOL(path, NULL, 10);
 			if (max_memory < 0) {
-				php_error_docref(NULL, E_RECOVERABLE_ERROR, "Max memory must be >= 0");
+				zend_throw_error(NULL, "Max memory must be >= 0");
 				return NULL;
 			}
 		}
@@ -353,7 +357,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 		pathdup = estrndup(path + 6, strlen(path + 6));
 		p = strstr(pathdup, "/resource=");
 		if (!p) {
-			php_error_docref(NULL, E_RECOVERABLE_ERROR, "No URL resource specified");
+			zend_throw_error(NULL, "No URL resource specified");
 			efree(pathdup);
 			return NULL;
 		}
@@ -437,7 +441,8 @@ static php_stream_wrapper_ops php_stdio_wops = {
 	NULL, /* unlink */
 	NULL, /* rename */
 	NULL, /* mkdir */
-	NULL  /* rmdir */
+	NULL, /* rmdir */
+	NULL
 };
 
 PHPAPI php_stream_wrapper php_stream_php_wrapper =	{

@@ -64,8 +64,12 @@ typedef unsigned long int uint32_t;
 # endif
 #endif
 
-#ifdef HAVE_LOCALE_H
-#define USE_LOCALE 1
+#ifdef USE_LOCALE
+#undef USE_LOCALE
+#endif
+
+#ifndef NO_INFNAN_CHECK
+#define NO_INFNAN_CHECK
 #endif
 
 #ifdef WORDS_BIGENDIAN

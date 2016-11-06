@@ -39,10 +39,17 @@
 #define HASH_FLAG_APPLY_PROTECTION (1<<1)
 #define HASH_FLAG_PACKED           (1<<2)
 #define HASH_FLAG_INITIALIZED      (1<<3)
-#define HASH_FLAG_STATIC_KEYS      (1<<4)
+#define HASH_FLAG_STATIC_KEYS      (1<<4) /* long and interned strings */
 #define HASH_FLAG_HAS_EMPTY_IND    (1<<5)
 
-#define HASH_MASK_CONSISTENCY      0xc0
+#define HT_IS_PACKED(ht) \
+	(((ht)->u.flags & HASH_FLAG_PACKED) != 0)
+
+#define HT_IS_WITHOUT_HOLES(ht) \
+	((ht)->nNumUsed == (ht)->nNumOfElements)
+
+#define HT_HAS_STATIC_KEYS_ONLY(ht) \
+	(((ht)->u.flags & (HASH_FLAG_PACKED|HASH_FLAG_STATIC_KEYS)) != 0)
 
 typedef struct _zend_hash_key {
 	zend_ulong h;
@@ -158,7 +165,7 @@ ZEND_API zval* ZEND_FASTCALL _zend_hash_index_find(const HashTable *ht, zend_ulo
 
 #define ZEND_HASH_INDEX_FIND(_ht, _h, _ret, _not_found) do { \
 		if (EXPECTED((_ht)->u.flags & HASH_FLAG_PACKED)) { \
-			if (EXPECTED((_h) < (_ht)->nNumUsed)) { \
+			if (EXPECTED((zend_ulong)(_h) < (zend_ulong)(_ht)->nNumUsed)) { \
 				_ret = &_ht->arData[_h].val; \
 				if (UNEXPECTED(Z_TYPE_P(_ret) == IS_UNDEF)) { \
 					goto _not_found; \

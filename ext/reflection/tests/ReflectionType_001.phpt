@@ -28,7 +28,7 @@ foreach ([
     if ($ra) {
       var_dump($ra->allowsNull());
       var_dump($ra->isBuiltin());
-      var_dump((string)$ra);
+      var_dump($ra->getName());
     }
   }
 }
@@ -48,7 +48,7 @@ foreach ([
     if ($ra) {
       var_dump($ra->allowsNull());
       var_dump($ra->isBuiltin());
-      var_dump((string)$ra);
+      var_dump($ra->getName());
     }
   }
 }
@@ -70,7 +70,7 @@ foreach ([
   if ($ra) {
     var_dump($ra->allowsNull());
     var_dump($ra->isBuiltin());
-    var_dump((string)$ra);
+    var_dump($ra->getName());
   }
 }
 
@@ -96,6 +96,7 @@ foreach ($reflector->getProperties() as $name => $property) {
 }
 
 echo "** property types\n";
+?>
 --EXPECT--
 *** functions
 ** Function 0 - Parameter 0

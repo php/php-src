@@ -291,6 +291,9 @@ ftp_login(ftpbuf_t *ftp, const char *user, const char *pass)
 #endif
 		SSL_CTX_set_options(ctx, ssl_ctx_options);
 
+		/* allow SSL to re-use sessions */
+		SSL_CTX_set_session_cache_mode(ctx, SSL_SESS_CACHE_BOTH);
+
 		ftp->ssl_handle = SSL_new(ctx);
 		if (ftp->ssl_handle == NULL) {
 			php_error_docref(NULL, E_WARNING, "failed to create the SSL handle");
@@ -866,7 +869,7 @@ ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, 
 	}
 
 	while ((rcvd = my_recv(ftp, data->fd, data->buf, FTP_BUFSIZE))) {
-		if (rcvd == -1) {
+		if (rcvd == (size_t)-1) {
 			goto bail;
 		}
 
@@ -1637,7 +1640,7 @@ data_accept(databuf_t *data, ftpbuf_t *ftp)
 
 #ifdef HAVE_FTP_SSL
 	SSL_CTX		*ctx;
-	zend_long ssl_ctx_options = SSL_OP_ALL;
+	SSL_SESSION *session;
 	int err, res;
 	zend_bool retry;
 #endif
@@ -1660,29 +1663,38 @@ data_accepted:
 
 	/* now enable ssl if we need to */
 	if (ftp->use_ssl && ftp->use_ssl_for_data) {
-		ctx = SSL_CTX_new(SSLv23_client_method());
+		ctx = SSL_get_SSL_CTX(ftp->ssl_handle);
 		if (ctx == NULL) {
-			php_error_docref(NULL, E_WARNING, "data_accept: failed to create the SSL context");
+			php_error_docref(NULL, E_WARNING, "data_accept: failed to retreive the existing SSL context");
 			return 0;
 		}
-
-#if OPENSSL_VERSION_NUMBER >= 0x0090605fL
-		ssl_ctx_options &= ~SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS;
-#endif
-		SSL_CTX_set_options(ctx, ssl_ctx_options);
 
 		data->ssl_handle = SSL_new(ctx);
 		if (data->ssl_handle == NULL) {
 			php_error_docref(NULL, E_WARNING, "data_accept: failed to create the SSL handle");
-			SSL_CTX_free(ctx);
 			return 0;
 		}
-
 
 		SSL_set_fd(data->ssl_handle, data->fd);
 
 		if (ftp->old_ssl) {
 			SSL_copy_session_id(data->ssl_handle, ftp->ssl_handle);
+		}
+
+		/* get the session from the control connection so we can re-use it */
+		session = SSL_get_session(ftp->ssl_handle);
+		if (session == NULL) {
+			php_error_docref(NULL, E_WARNING, "data_accept: failed to retreive the existing SSL session");
+			SSL_free(data->ssl_handle);
+			return 0;
+		}
+
+		/* and set it on the data connection */
+		res = SSL_set_session(data->ssl_handle, session);
+		if (res == 0) {
+			php_error_docref(NULL, E_WARNING, "data_accept: failed to set the existing SSL session");
+			SSL_free(data->ssl_handle);
+			return 0;
 		}
 
 		do {
@@ -1745,10 +1757,7 @@ data_close(ftpbuf_t *ftp, databuf_t *data)
 	if (data->listener != -1) {
 #ifdef HAVE_FTP_SSL
 		if (data->ssl_active) {
-
-			ctx = SSL_get_SSL_CTX(data->ssl_handle);
-			SSL_CTX_free(ctx);
-
+			/* don't free the data context, it's the same as the control */
 			SSL_shutdown(data->ssl_handle);
 			SSL_free(data->ssl_handle);
 			data->ssl_active = 0;
@@ -1759,9 +1768,7 @@ data_close(ftpbuf_t *ftp, databuf_t *data)
 	if (data->fd != -1) {
 #ifdef HAVE_FTP_SSL
 		if (data->ssl_active) {
-			ctx = SSL_get_SSL_CTX(data->ssl_handle);
-			SSL_CTX_free(ctx);
-
+			/* don't free the data context, it's the same as the control */
 			SSL_shutdown(data->ssl_handle);
 			SSL_free(data->ssl_handle);
 			data->ssl_active = 0;
@@ -1829,7 +1836,7 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path)
 	lines = 0;
 	lastch = 0;
 	while ((rcvd = my_recv(ftp, data->fd, data->buf, FTP_BUFSIZE))) {
-		if (rcvd == -1 || rcvd > ((size_t)(-1))-size) {
+		if (rcvd == (size_t)-1 || rcvd > ((size_t)(-1))-size) {
 			goto bail;
 		}
 
@@ -1958,7 +1965,7 @@ ftp_nb_continue_read(ftpbuf_t *ftp)
 
 	lastch = ftp->lastch;
 	if ((rcvd = my_recv(ftp, data->fd, data->buf, FTP_BUFSIZE))) {
-		if (rcvd == -1) {
+		if (rcvd == (size_t)-1) {
 			goto bail;
 		}
 

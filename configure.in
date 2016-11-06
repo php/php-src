@@ -118,7 +118,7 @@ int zend_sprintf(char *buffer, const char *format, ...);
 ])
 
 PHP_MAJOR_VERSION=7
-PHP_MINOR_VERSION=1
+PHP_MINOR_VERSION=2
 PHP_RELEASE_VERSION=0
 PHP_EXTRA_VERSION="-dev"
 PHP_VERSION="$PHP_MAJOR_VERSION.$PHP_MINOR_VERSION.$PHP_RELEASE_VERSION$PHP_EXTRA_VERSION"
@@ -583,6 +583,18 @@ dnl Check __builtin_ctzl
 PHP_CHECK_BUILTIN_CTZL
 dnl Check __builtin_ctzll
 PHP_CHECK_BUILTIN_CTZLL
+dnl Check __builtin_smull_overflow
+PHP_CHECK_BUILTIN_SMULL_OVERFLOW
+dnl Check __builtin_smulll_overflow
+PHP_CHECK_BUILTIN_SMULLL_OVERFLOW
+dnl Check __builtin_saddl_overflow
+PHP_CHECK_BUILTIN_SADDL_OVERFLOW
+dnl Check __builtin_saddll_overflow
+PHP_CHECK_BUILTIN_SADDLL_OVERFLOW
+dnl Check __builtin_ssubl_overflow
+PHP_CHECK_BUILTIN_SSUBL_OVERFLOW
+dnl Check __builtin_ssubll_overflow
+PHP_CHECK_BUILTIN_SSUBLL_OVERFLOW
 
 dnl Check for members of the stat structure
 AC_STRUCT_ST_BLKSIZE
@@ -799,7 +811,7 @@ if test "$PHP_GCOV" = "yes"; then
   dnl min: 1.5 (i.e. 105, major * 100 + minor for easier comparison)
   ltp_version_min="105"
   dnl non-working versions, e.g. "1.8 1.18";
-  dnl remove "none" when introducing the first incompatible LTP version an 
+  dnl remove "none" when introducing the first incompatible LTP version and
   dnl separate any following additions by spaces
   ltp_version_exclude="1.8"
 

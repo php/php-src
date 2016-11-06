@@ -25,8 +25,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #if HAVE_OCI8
 # ifndef PHP_OCI8_INT_H
 #  define PHP_OCI8_INT_H
@@ -245,6 +243,7 @@ typedef struct {
 typedef struct { 
 	OCIBind				*bind;					/* bind handle */
 	zval				*zval;					/* value */
+	zval				parameter;				/* a copy of bound variable used for oci_bind_by_name */
 	dvoid				*descriptor;			/* used for binding of LOBS etc */
 	OCIStmt				*statement;				/* used for binding REFCURSORs */
 	php_oci_statement	*parent_statement;		/* pointer to the parent statement */

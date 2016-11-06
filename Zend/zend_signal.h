@@ -23,9 +23,11 @@
 #ifndef ZEND_SIGNAL_H
 #define ZEND_SIGNAL_H
 
-#ifdef HAVE_SIGNAL_H
-#include <signal.h>
-#endif
+#ifdef ZEND_SIGNALS
+
+# ifdef HAVE_SIGNAL_H
+#  include <signal.h>
+# endif
 
 #ifndef NSIG
 #define NSIG 65
@@ -63,39 +65,49 @@ typedef struct _zend_signal_globals_t {
 	zend_signal_queue_t pstorage[ZEND_SIGNAL_QUEUE_SIZE], *phead, *ptail, *pavail; /* pending queue */
 } zend_signal_globals_t;
 
-#ifdef ZTS
-# define SIGG(v) ZEND_TSRMG(zend_signal_globals_id, zend_signal_globals_t *, v)
+# ifdef ZTS
+#  define SIGG(v) ZEND_TSRMG(zend_signal_globals_id, zend_signal_globals_t *, v)
 BEGIN_EXTERN_C()
 ZEND_API extern int zend_signal_globals_id;
 END_EXTERN_C()
-# define ZEND_SIGNAL_BLOCK_INTERRUPUTIONS() if (EXPECTED(zend_signal_globals_id)) { SIGG(depth)++; }
-# define ZEND_SIGNAL_UNBLOCK_INTERRUPTIONS() if (EXPECTED(zend_signal_globals_id) && UNEXPECTED(((SIGG(depth)--) == SIGG(blocked)))) { zend_signal_handler_unblock(); }
-#else /* ZTS */
-# define SIGG(v) (zend_signal_globals.v)
-extern ZEND_API zend_signal_globals_t zend_signal_globals;
-# define ZEND_SIGNAL_BLOCK_INTERRUPUTIONS()  SIGG(depth)++;
-# define ZEND_SIGNAL_UNBLOCK_INTERRUPTIONS() if (((SIGG(depth)--) == SIGG(blocked))) { zend_signal_handler_unblock(); }
-#endif /* not ZTS */
+# else
+#  define SIGG(v) (zend_signal_globals.v)
+BEGIN_EXTERN_C()
+ZEND_API extern zend_signal_globals_t zend_signal_globals;
+END_EXTERN_C()
+# endif /* not ZTS */
 
-# define SIGNAL_BEGIN_CRITICAL() 	sigset_t oldmask; \
-	zend_sigprocmask(SIG_BLOCK, &global_sigmask, &oldmask);
-# define SIGNAL_END_CRITICAL()		zend_sigprocmask(SIG_SETMASK, &oldmask, NULL);
+# ifdef ZTS
+#  define ZEND_SIGNAL_BLOCK_INTERRUPTIONS() if (EXPECTED(zend_signal_globals_id)) { SIGG(depth)++; }
+#  define ZEND_SIGNAL_UNBLOCK_INTERRUPTIONS() if (EXPECTED(zend_signal_globals_id) && UNEXPECTED(((SIGG(depth)--) == SIGG(blocked)))) { zend_signal_handler_unblock(); }
+# else /* ZTS */
+#  define ZEND_SIGNAL_BLOCK_INTERRUPTIONS()  SIGG(depth)++;
+#  define ZEND_SIGNAL_UNBLOCK_INTERRUPTIONS() if (((SIGG(depth)--) == SIGG(blocked))) { zend_signal_handler_unblock(); }
+# endif /* not ZTS */
 
-void zend_signal_handler_defer(int signo, siginfo_t *siginfo, void *context);
-ZEND_API void zend_signal_handler_unblock();
+ZEND_API void zend_signal_handler_unblock(void);
 void zend_signal_activate(void);
 void zend_signal_deactivate(void);
-void zend_signal_startup();
-void zend_signal_init();
-void zend_signal_shutdown(void);
+void zend_signal_startup(void);
+void zend_signal_init(void);
+
 ZEND_API int zend_signal(int signo, void (*handler)(int));
 ZEND_API int zend_sigaction(int signo, const struct sigaction *act, struct sigaction *oldact);
 
-#ifdef ZTS
-#define zend_sigprocmask(signo, set, oldset) tsrm_sigmask((signo), (set), (oldset))
-#else
-#define zend_sigprocmask(signo, set, oldset) sigprocmask((signo), (set), (oldset))
-#endif
+#else /* ZEND_SIGNALS */
+
+# define ZEND_SIGNAL_BLOCK_INTERRUPTIONS()
+# define ZEND_SIGNAL_UNBLOCK_INTERRUPTIONS()
+
+# define zend_signal_activate()
+# define zend_signal_deactivate()
+# define zend_signal_startup()
+# define zend_signal_init()
+
+# define zend_signal(signo, handler)           signal(signo, handler)
+# define zend_sigaction(signo, act, oldact)    sigaction(signo, act, oldact)
+
+#endif /* ZEND_SIGNALS */
 
 #endif /* ZEND_SIGNAL_H */
 

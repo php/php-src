@@ -208,7 +208,7 @@ static inline void php_hash_string_xor(unsigned char *out, const unsigned char *
 
 static inline void php_hash_hmac_prep_key(unsigned char *K, const php_hash_ops *ops, void *context, const unsigned char *key, const size_t key_len) {
 	memset(K, 0, ops->block_size);
-	if (key_len > ops->block_size) {
+	if (key_len > (size_t)ops->block_size) {
 		/* Reduce the key first */
 		ops->hash_init(context);
 		ops->hash_update(context, key, key_len);
@@ -367,7 +367,7 @@ PHP_FUNCTION(hash_init)
 
 		memset(K, 0, ops->block_size);
 
-		if (key_len > ops->block_size) {
+		if (key_len > (size_t)ops->block_size) {
 			/* Reduce the key first */
 			ops->hash_update(context, (unsigned char *) key, key_len);
 			ops->hash_final((unsigned char *) K, context);
@@ -729,7 +729,8 @@ PHP_FUNCTION(hash_equals)
 {
 	zval *known_zval, *user_zval;
 	char *known_str, *user_str;
-	int result = 0, j;
+	int result = 0;
+	size_t j;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &known_zval, &user_zval) == FAILURE) {
 		return;

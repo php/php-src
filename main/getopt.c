@@ -89,7 +89,7 @@ PHPAPI int php_getopt(int argc, char* const *argv, const opt_struct opts[], char
 	}
 	if ((argv[*optind][0] == '-') && (argv[*optind][1] == '-')) {
 		const char *pos;
-		int arg_end = (int)strlen(argv[*optind])-1;
+		size_t arg_end = strlen(argv[*optind])-1;
 
 		/* '--' indicates end of args if not followed by a known long option name */
 		if (argv[*optind][2] == '\0') {

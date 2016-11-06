@@ -55,6 +55,7 @@
 #ifdef ZEND_WIN32
 #include "readdir.h"
 #include <sys/utime.h>
+#include "win32/ioutil.h"
 /* mode_t isn't defined on Windows */
 typedef unsigned short mode_t;
 
@@ -289,33 +290,41 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
 
 #else
 
-#define VCWD_GETCWD(buff, size) getcwd(buff, size)
-#define VCWD_FOPEN(path, mode)  fopen(path, mode)
-#define VCWD_OPEN(path, flags) open(path, flags)
-#define VCWD_OPEN_MODE(path, flags, mode)	open(path, flags, mode)
 #define VCWD_CREAT(path, mode) creat(path, mode)
 /* rename on windows will fail if newname already exists.
    MoveFileEx has to be used */
 #if defined(ZEND_WIN32)
-# define VCWD_RENAME(oldname, newname) (MoveFileEx(oldname, newname, MOVEFILE_REPLACE_EXISTING|MOVEFILE_COPY_ALLOWED) == 0 ? -1 : 0)
+#define VCWD_FOPEN(path, mode)  php_win32_ioutil_fopen(path, mode)
+#define VCWD_OPEN(path, flags) php_win32_ioutil_open(path, flags)
+#define VCWD_OPEN_MODE(path, flags, mode) php_win32_ioutil_open(path, flags, mode)
+# define VCWD_RENAME(oldname, newname) php_win32_ioutil_rename(oldname, newname)
+#define VCWD_MKDIR(pathname, mode) php_win32_ioutil_mkdir(pathname, mode)
+#define VCWD_RMDIR(pathname) php_win32_ioutil_rmdir(pathname)
+#define VCWD_UNLINK(path) php_win32_ioutil_unlink(path)
+#define VCWD_CHDIR(path) php_win32_ioutil_chdir(path)
+#define VCWD_ACCESS(pathname, mode) tsrm_win32_access(pathname, mode)
+#define VCWD_GETCWD(buff, size) php_win32_ioutil_getcwd(buff, size)
+#define VCWD_CHMOD(path, mode) php_win32_ioutil_chmod(path, mode)
 #else
+#define VCWD_FOPEN(path, mode)  fopen(path, mode)
+#define VCWD_OPEN(path, flags) open(path, flags)
+#define VCWD_OPEN_MODE(path, flags, mode)	open(path, flags, mode)
 # define VCWD_RENAME(oldname, newname) rename(oldname, newname)
-#endif
+#define VCWD_MKDIR(pathname, mode) mkdir(pathname, mode)
+#define VCWD_RMDIR(pathname) rmdir(pathname)
+#define VCWD_UNLINK(path) unlink(path)
 #define VCWD_CHDIR(path) chdir(path)
+#define VCWD_ACCESS(pathname, mode) access(pathname, mode)
+#define VCWD_GETCWD(buff, size) getcwd(buff, size)
+#define VCWD_CHMOD(path, mode) chmod(path, mode)
+#endif
+
 #define VCWD_CHDIR_FILE(path) virtual_chdir_file(path, chdir)
 #define VCWD_GETWD(buf) getwd(buf)
 #define VCWD_STAT(path, buff) php_sys_stat(path, buff)
 #define VCWD_LSTAT(path, buff) lstat(path, buff)
-#define VCWD_UNLINK(path) unlink(path)
-#define VCWD_MKDIR(pathname, mode) mkdir(pathname, mode)
-#define VCWD_RMDIR(pathname) rmdir(pathname)
 #define VCWD_OPENDIR(pathname) opendir(pathname)
 #define VCWD_POPEN(command, type) popen(command, type)
-#if defined(ZEND_WIN32)
-#define VCWD_ACCESS(pathname, mode) tsrm_win32_access(pathname, mode)
-#else
-#define VCWD_ACCESS(pathname, mode) access(pathname, mode)
-#endif
 
 #define VCWD_REALPATH(path, real_path) tsrm_realpath(path, real_path)
 
@@ -327,7 +336,6 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
 # endif
 #endif
 
-#define VCWD_CHMOD(path, mode) chmod(path, mode)
 #if !defined(ZEND_WIN32) && !defined(NETWARE)
 #define VCWD_CHOWN(path, owner, group) chown(path, owner, group)
 #if HAVE_LCHOWN

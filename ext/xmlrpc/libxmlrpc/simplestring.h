@@ -50,8 +50,8 @@ extern "C" {
  */
 typedef struct _simplestring {
    char* str;         /* string buf               */
-   int len;           /* length of string/buf     */
-   int size;          /* size of allocated buffer */
+   size_t len;           /* length of string/buf     */
+   size_t size;          /* size of allocated buffer */
 } simplestring;
 /******/
 
@@ -63,7 +63,7 @@ void simplestring_init(simplestring* string);
 void simplestring_clear(simplestring* string);
 void simplestring_free(simplestring* string);
 void simplestring_add(simplestring* string, const char* add);
-void simplestring_addn(simplestring* string, const char* add, int add_len);
+void simplestring_addn(simplestring* string, const char* add, size_t add_len);
 
 #ifdef __cplusplus
 }

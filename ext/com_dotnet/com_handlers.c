@@ -279,7 +279,6 @@ static union _zend_function *com_method_get(zend_object **object_ptr, zend_strin
 		f.fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
 		f.function_name = zend_string_copy(name);
 		f.handler = PHP_FN(com_method_handler);
-		zend_set_function_arg_flags((zend_function*)&f);
 
 		fptr = &f;
 
@@ -305,7 +304,7 @@ static union _zend_function *com_method_get(zend_object **object_ptr, zend_strin
 							for (i = 0; i < bindptr.lpfuncdesc->cParams; i++) {
 								f.arg_info[i].allow_null = 1;
 								if (bindptr.lpfuncdesc->lprgelemdescParam[i].paramdesc.wParamFlags & PARAMFLAG_FOUT) {
-									f.arg_info[i].pass_by_reference = 1;
+									f.arg_info[i].pass_by_reference = ZEND_SEND_BY_REF;
 								}
 							}
 
@@ -335,15 +334,14 @@ static union _zend_function *com_method_get(zend_object **object_ptr, zend_strin
 			}
 		}
 
-		if (fptr) {
-			/* save this method in the cache */
-			if (!obj->method_cache) {
-				ALLOC_HASHTABLE(obj->method_cache);
-				zend_hash_init(obj->method_cache, 2, NULL, function_dtor, 0);
-			}
-
-			zend_hash_update_mem(obj->method_cache, name, &f, sizeof(f));
+		zend_set_function_arg_flags((zend_function*)&f);
+		/* save this method in the cache */
+		if (!obj->method_cache) {
+			ALLOC_HASHTABLE(obj->method_cache);
+			zend_hash_init(obj->method_cache, 2, NULL, function_dtor, 0);
 		}
+
+		zend_hash_update_mem(obj->method_cache, name, &f, sizeof(f));
 	}
 
 	if (fptr) {

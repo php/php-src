@@ -158,7 +158,11 @@ typedef struct _zend_fcall_info_cache {
 #define ZEND_INIT_MODULE_GLOBALS(module_name, globals_ctor, globals_dtor)	\
 	ts_allocate_id(&module_name##_globals_id, sizeof(zend_##module_name##_globals), (ts_allocate_ctor) globals_ctor, (ts_allocate_dtor) globals_dtor);
 #define ZEND_MODULE_GLOBALS_ACCESSOR(module_name, v) ZEND_TSRMG(module_name##_globals_id, zend_##module_name##_globals *, v)
+#if ZEND_ENABLE_STATIC_TSRMLS_CACHE
+#define ZEND_MODULE_GLOBALS_BULK(module_name) TSRMG_BULK_STATIC(module_name##_globals_id, zend_##module_name##_globals *)
+#else
 #define ZEND_MODULE_GLOBALS_BULK(module_name) TSRMG_BULK(module_name##_globals_id, zend_##module_name##_globals *)
+#endif
 
 #else
 
@@ -345,6 +349,7 @@ ZEND_API void zend_update_property_double(zend_class_entry *scope, zval *object,
 ZEND_API void zend_update_property_str(zend_class_entry *scope, zval *object, const char *name, size_t name_length, zend_string *value);
 ZEND_API void zend_update_property_string(zend_class_entry *scope, zval *object, const char *name, size_t name_length, const char *value);
 ZEND_API void zend_update_property_stringl(zend_class_entry *scope, zval *object, const char *name, size_t name_length, const char *value, size_t value_length);
+ZEND_API void zend_unset_property(zend_class_entry *scope, zval *object, const char *name, size_t name_length);
 
 ZEND_API int zend_update_static_property(zend_class_entry *scope, const char *name, size_t name_length, zval *value);
 ZEND_API int zend_update_static_property_null(zend_class_entry *scope, const char *name, size_t name_length);
@@ -553,6 +558,8 @@ ZEND_API zend_string *zend_resolve_method_name(zend_class_entry *ce, zend_functi
 
 ZEND_API const char *zend_get_object_type(const zend_class_entry *ce);
 
+ZEND_API zend_bool zend_is_iterable(zval *iterable);
+
 #define add_method(arg, key, method)	add_assoc_function((arg), (key), (method))
 
 ZEND_API ZEND_FUNCTION(display_disabled_function);
@@ -570,7 +577,7 @@ END_EXTERN_C()
 #endif
 
 #define CHECK_ZVAL_NULL_PATH(p) (Z_STRLEN_P(p) != strlen(Z_STRVAL_P(p)))
-#define CHECK_NULL_PATH(p, l) (strlen(p) != l)
+#define CHECK_NULL_PATH(p, l) (strlen(p) != (size_t)(l))
 
 #define ZVAL_STRINGL(z, s, l) do {				\
 		ZVAL_NEW_STR(z, zend_string_init(s, l, 0));		\
@@ -673,12 +680,10 @@ END_EXTERN_C()
 
 /* Fast parameter parsing API */
 
-/* This API should be used only for really often used functions.
- * (Keep the original parsing code and wrap usage with #ifndef FAST_ZPP)
+/* Fast ZPP is always enabled now; this define is left in for compatibility
+ * with any existing conditional compilation blocks.
  */
 #define FAST_ZPP 1
-
-#ifdef FAST_ZPP
 
 #define Z_EXPECTED_TYPES(_) \
 	_(Z_EXPECTED_LONG,		"integer") \
@@ -865,7 +870,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int severity, in
 /* old "h" */
 #define Z_PARAM_ARRAY_HT_EX(dest, check_null, separate) \
 		Z_PARAM_PROLOGUE(separate); \
-		if (UNEXPECTED(!zend_parse_arg_array_ht(_arg, &dest, check_null, 0))) { \
+		if (UNEXPECTED(!zend_parse_arg_array_ht(_arg, &dest, check_null, 0, separate))) { \
 			_expected_type = Z_EXPECTED_ARRAY; \
 			error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
@@ -877,7 +882,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int severity, in
 /* old "H" */
 #define Z_PARAM_ARRAY_OR_OBJECT_HT_EX(dest, check_null, separate) \
 		Z_PARAM_PROLOGUE(separate); \
-		if (UNEXPECTED(!zend_parse_arg_array_ht(_arg, &dest, check_null, 1))) { \
+		if (UNEXPECTED(!zend_parse_arg_array_ht(_arg, &dest, check_null, 1, separate))) { \
 			_expected_type = Z_EXPECTED_ARRAY; \
 			error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
@@ -1042,8 +1047,6 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int severity, in
 #define Z_PARAM_VARIADIC(spec, dest, dest_num) \
 	Z_PARAM_VARIADIC_EX(spec, dest, dest_num, 0)
 
-#endif /* FAST_ZPP */
-
 /* End of new parameter parsing API */
 
 /* Inlined implementations shared by new and old parameter parsing APIs */
@@ -1180,11 +1183,19 @@ static zend_always_inline int zend_parse_arg_array(zval *arg, zval **dest, int c
 	return 1;
 }
 
-static zend_always_inline int zend_parse_arg_array_ht(zval *arg, HashTable **dest, int check_null, int or_object)
+static zend_always_inline int zend_parse_arg_array_ht(zval *arg, HashTable **dest, int check_null, int or_object, int separate)
 {
 	if (EXPECTED(Z_TYPE_P(arg) == IS_ARRAY)) {
 		*dest = Z_ARRVAL_P(arg);
 	} else if (or_object && EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
+		if (separate
+		 && Z_OBJ_P(arg)->properties
+		 && UNEXPECTED(GC_REFCOUNT(Z_OBJ_P(arg)->properties) > 1)) {
+			if (EXPECTED(!(GC_FLAGS(Z_OBJ_P(arg)->properties) & IS_ARRAY_IMMUTABLE))) {
+				GC_REFCOUNT(Z_OBJ_P(arg)->properties)--;
+			}
+			Z_OBJ_P(arg)->properties = zend_array_dup(Z_OBJ_P(arg)->properties);
+		}
 		*dest = Z_OBJ_HT_P(arg)->get_properties(arg);
 	} else if (check_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
 		*dest = NULL;

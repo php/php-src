@@ -25,7 +25,11 @@ echo "\n--- Testing with a callback with too few parameters ---\n";
 var_dump(array_reduce($array, "oneArg", 2));
 
 echo "\n--- Testing with a callback with too many parameters ---\n";
-var_dump(array_reduce($array, "threeArgs", 2));
+try {
+	var_dump(array_reduce($array, "threeArgs", 2));
+} catch (Throwable $e) {
+	echo "Exception: " . $e->getMessage() . "\n";
+}
 
 ?>
 ===DONE===
@@ -36,9 +40,5 @@ var_dump(array_reduce($array, "threeArgs", 2));
 int(2)
 
 --- Testing with a callback with too many parameters ---
-
-Warning: Missing argument 3 for threeArgs() in %sarray_reduce_variation1.php on line %d
-
-Notice: Undefined variable: x in %sarray_reduce_variation1.php on line %d
-int(3)
+Exception: Too few arguments to function threeArgs(), 2 passed and exactly 3 expected
 ===DONE===
