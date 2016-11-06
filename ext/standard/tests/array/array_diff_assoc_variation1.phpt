@@ -70,22 +70,18 @@ $inputs = array(
 /*18*/ "string",
        'string',
        $heredoc,
-       
-       // binary data
-/*21*/ b"binary",
-	   (binary)"binary",
 	   
        // object data
-/*23*/ new classA(),
+/*21*/ new classA(),
 
        // undefined data
-/*24*/ @$undefined_var,
+/*22*/ @$undefined_var,
 
        // unset data
-/*25*/ @$unset_var,
+/*23*/ @$unset_var,
 
        // resource variable
-/*26*/ $fp,
+/*24*/ $fp,
 );
 
 // loop through each element of $inputs to check the behavior of array_diff_assoc
@@ -218,16 +214,6 @@ Warning: array_diff_assoc(): Argument #1 is not an array in %s on line %d
 NULL
 
 -- Iteration 24 --
-
-Warning: array_diff_assoc(): Argument #1 is not an array in %s on line %d
-NULL
-
--- Iteration 25 --
-
-Warning: array_diff_assoc(): Argument #1 is not an array in %s on line %d
-NULL
-
--- Iteration 26 --
 
 Warning: array_diff_assoc(): Argument #1 is not an array in %s on line %d
 NULL

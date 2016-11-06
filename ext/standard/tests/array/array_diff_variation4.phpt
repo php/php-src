@@ -75,19 +75,13 @@ $values = array(
       "string",
       'string',
       $heredoc),
-      
-/*8*/      
-"binary" => array(
-       // binary data
-       b"binary",
-	   (binary)"binary"),
 	   
-/*9*/	   
+/*8*/	   
 "undefined" => array(
       // undefined data
       @$undefined_var),
 
-/*10*/
+/*9*/
 "unset" => array(      
       // unset data
       @$unset_var)
@@ -167,14 +161,6 @@ array(2) {
 }
 
  Iteration: 9 
-array(2) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-}
-
- Iteration: 10 
 array(2) {
   [0]=>
   int(1)

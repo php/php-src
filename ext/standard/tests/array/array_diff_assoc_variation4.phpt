@@ -71,20 +71,14 @@ $inputs = array(
       "string" => 'stringd',
       'string' => 'strings',
       $heredoc => 'stringh'),
-       
-       // binary data
-/*7*/
-'binary' => array(
-      b"binary1" => 'binary 1',
-	  (binary)"binary2" => 'binary 2'),
 
        // undefined data
-/*8*/
+/*7*/
 'undefined' => array(
       @$undefined_var => 'undefined'),
 
        // unset data
-/*9*/
+/*8*/
 'unset' => array(
       @$unset_var => 'unset'),
 
@@ -156,20 +150,12 @@ array(2) {
 }
 
 -- Iteration 7 --
-array(2) {
-  ["binary1"]=>
-  string(8) "binary 1"
-  ["binary2"]=>
-  string(8) "binary 2"
-}
-
--- Iteration 8 --
 array(1) {
   [""]=>
   string(9) "undefined"
 }
 
--- Iteration 9 --
+-- Iteration 8 --
 array(1) {
   [""]=>
   string(5) "unset"
