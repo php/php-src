@@ -1963,10 +1963,9 @@ inline_char_handler:
 }
 
 
-<ST_IN_SCRIPTING>b?['] {
+<ST_IN_SCRIPTING>['] {
 	register char *s, *t;
 	char *end;
-	int bprefix = (yytext[0] != '\'') ? 1 : 0;
 
 	while (1) {
 		if (YYCURSOR < YYLIMIT) {
@@ -1989,7 +1988,7 @@ inline_char_handler:
 		}
 	}
 
-	ZVAL_STRINGL(zendlval, yytext+bprefix+1, yyleng-bprefix-2);
+	ZVAL_STRINGL(zendlval, yytext+1, yyleng-2);
 
 	/* convert escape sequences */
 	s = t = Z_STRVAL_P(zendlval);
@@ -2032,14 +2031,13 @@ inline_char_handler:
 }
 
 
-<ST_IN_SCRIPTING>b?["] {
-	int bprefix = (yytext[0] != '"') ? 1 : 0;
+<ST_IN_SCRIPTING>["] {
 
 	while (YYCURSOR < YYLIMIT) {
 		switch (*YYCURSOR++) {
 			case '"':
 				yyleng = YYCURSOR - SCNG(yy_text);
-				zend_scan_escape_string(zendlval, yytext+bprefix+1, yyleng-bprefix-2, '"');
+				zend_scan_escape_string(zendlval, yytext+1, yyleng-2, '"');
 				RETURN_TOKEN(T_CONSTANT_ENCAPSED_STRING);
 			case '$':
 				if (IS_LABEL_START(*YYCURSOR) || *YYCURSOR == '{') {
@@ -2074,14 +2072,13 @@ inline_char_handler:
 }
 
 
-<ST_IN_SCRIPTING>b?"<<<"{TABS_AND_SPACES}({LABEL}|([']{LABEL}['])|(["]{LABEL}["])){NEWLINE} {
+<ST_IN_SCRIPTING>"<<<"{TABS_AND_SPACES}({LABEL}|([']{LABEL}['])|(["]{LABEL}["])){NEWLINE} {
 	char *s;
-	int bprefix = (yytext[0] != '<') ? 1 : 0;
 	zend_heredoc_label *heredoc_label = emalloc(sizeof(zend_heredoc_label));
 
 	CG(zend_lineno)++;
-	heredoc_label->length = yyleng-bprefix-3-1-(yytext[yyleng-2]=='\r'?1:0);
-	s = yytext+bprefix+3;
+	heredoc_label->length = yyleng-3-1-(yytext[yyleng-2]=='\r'?1:0);
+	s = yytext+3;
 	while ((*s == ' ') || (*s == '\t')) {
 		s++;
 		heredoc_label->length--;
