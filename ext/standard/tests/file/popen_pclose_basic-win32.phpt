@@ -45,8 +45,8 @@ $sysroot = exec('echo %SYSTEMROOT%');
 $file_handle = popen("$sysroot/system32/sort", "w");
 $newline = "\n";
 foreach($arr as $str) {
-  fwrite($file_handle, (binary)$str);
-  fwrite($file_handle, (binary)(binary)(binary)(binary)(binary)(binary)(binary)(binary)(binary)$newline);
+  fwrite($file_handle, (string)$str);
+  fwrite($file_handle, (string)(string)(string)(string)(string)(string)(string)(string)(string)$newline);
 }
 pclose($file_handle);
 
