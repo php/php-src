@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #73392 (A use-after-free in zend allocator management). 
     (Laruence)
 
+- PDO_Firebird:
+  . Fixed bug #73087, #61183, #71494 (Memory corruption in bindParam).
+    (Dorin Marcoci)
+
 - SPL:
   . Fixed bug #73423 (Reproducible crash with GDB backtrace). (Laruence)
 
