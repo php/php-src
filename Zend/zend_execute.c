@@ -928,8 +928,6 @@ static zend_always_inline zend_bool zend_check_type(
 			}
 		}
 		return 0;
-	// } else if (arg_info->type_hint == IS_OBJECT) {
-
 	} else if (arg_info->type_hint == IS_CALLABLE) {
 		return zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL);
 	} else if (arg_info->type_hint == IS_ITERABLE) {
