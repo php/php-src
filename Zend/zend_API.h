@@ -667,6 +667,7 @@ END_EXTERN_C()
 	}										\
 	RETVAL_STRINGL((s), (int)__len, (dup)); \
 } while (0)
+#define RETURN_STRINGL_CHECK(s, len, dup) { RETVAL_STRINGL_CHECK(s, len, dup); return; }
 
 
 #define SET_VAR_STRING(n, v) {																				\
