@@ -59,22 +59,12 @@
 			register_shutdown_function("shutdown_clean", $file);
 		}
 
-		if ((version_compare(PHP_VERSION, '6.0', '==') == 1)) {
-			if (!fwrite($fp, (binary)"'97';'x';\n") ||
-				!fwrite($fp, (binary)"'98';'y';\n") ||
-				!fwrite($fp, (binary)"99;'z';\n")) {
-				if ($verbose)
-					printf("[%03d + 2] Cannot write CVS file '%s'\n", $offset, $file);
-				return NULL;
-			}
-		} else {
-			if (!fwrite($fp, "97;'x';\n") ||
-				!fwrite($fp, "98;'y';\n") ||
-				!fwrite($fp, "99;'z';\n")) {
-				if ($verbose)
-					printf("[%03d + 3] Cannot write CVS file '%s'\n", $offset, $file);
-				return NULL;
-			}
+		if (!fwrite($fp, "97;'x';\n") ||
+			!fwrite($fp, "98;'y';\n") ||
+			!fwrite($fp, "99;'z';\n")) {
+			if ($verbose)
+				printf("[%03d + 3] Cannot write CVS file '%s'\n", $offset, $file);
+			return NULL;
 		}
 
 		fclose($fp);

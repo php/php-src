@@ -114,15 +114,15 @@ class Extract_Phar
     {
         $fp = fopen(__FILE__, 'rb');
         fseek($fp, self::LEN);
-        $L = unpack('V', $a = (binary)fread($fp, 4));
-        $m = (binary)'';
+        $L = unpack('V', $a = fread($fp, 4));
+        $m = '';
 
         do {
             $read = 8192;
             if ($L[1] - strlen($m) < 8192) {
                 $read = $L[1] - strlen($m);
             }
-            $last = (binary)fread($fp, $read);
+            $last = fread($fp, $read);
             $m .= $last;
         } while (strlen($last) && strlen($m) < $L[1]);
 
@@ -268,7 +268,7 @@ class Extract_Phar
                 $stat[7] . ")");
         }
 
-        if ($entry[3] != sprintf("%u", crc32((binary)$data) & 0xffffffff)) {
+        if ($entry[3] != sprintf("%u", crc32($data) & 0xffffffff)) {
             die("Invalid internal .phar file (checksum error)");
         }
 
