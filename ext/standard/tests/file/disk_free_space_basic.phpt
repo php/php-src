@@ -30,7 +30,7 @@ var_dump( $space1 );
 
 $fh = fopen($file_path.$dir."/disk_free_space.tmp", "a");
 $data = str_repeat("x", 0xffff);
-fwrite($fh, (binary)$data);
+fwrite($fh, $data);
 fclose($fh);
 
 echo "\n Free Space after writing to a file\n";

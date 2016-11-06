@@ -35,7 +35,7 @@ $xml =<<<EOF
 </sxe>
 EOF;
 
-$sxe = simplexml_load_string((binary)$xml, 'SimpleXMLIterator');
+$sxe = simplexml_load_string($xml, 'SimpleXMLIterator');
 
 foreach($sxe->getChildren() as $name => $data) {
 	var_dump($name);

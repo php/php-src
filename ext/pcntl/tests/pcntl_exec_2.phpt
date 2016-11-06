@@ -10,7 +10,7 @@ if (!getenv("TEST_PHP_EXECUTABLE") || !is_executable(getenv("TEST_PHP_EXECUTABLE
 --FILE--
 <?php
 if (getenv("PCNTL_EXEC_TEST_IS_CHILD")) {
-	var_dump((binary)getenv("FOO"));
+	var_dump(getenv("FOO"));
 	exit;
 }
 echo "ok\n";
