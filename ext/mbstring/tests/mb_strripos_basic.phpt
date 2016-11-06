@@ -23,26 +23,26 @@ mb_internal_encoding('UTF-8');
 
 //ascii strings
 $ascii_haystacks = array(
-   b'abc defabc   def',
-   b'ABC DEFABC   DEF',
-   b'Abc dEFaBC   Def',
+   'abc defabc   def',
+   'ABC DEFABC   DEF',
+   'Abc dEFaBC   Def',
 );
 
 $ascii_needles = array(
    // 4 good ones
-   b'DE',
-   b'de',
-   b'De',
-   b'dE',
+   'DE',
+   'de',
+   'De',
+   'dE',
    
    //flag a swap between good and bad
    '!', 
    
    // 4 bad ones
-   b'df',
-   b'Df',
-   b'dF', 
-   b'DF'
+   'df',
+   'Df',
+   'dF', 
+   'DF'
 );
 
 //greek strings in UTF-8

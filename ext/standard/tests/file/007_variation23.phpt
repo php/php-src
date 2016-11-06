@@ -21,7 +21,7 @@ Test fopen and fclose() functions - usage variations - "xb" mode
    and fclose function
 */
 $file_path = dirname(__FILE__);
-$string = b"abcdefghij\nmnopqrst\tuvwxyz\n0123456789";
+$string = "abcdefghij\nmnopqrst\tuvwxyz\n0123456789";
 $file = $file_path."/007_variation23.tmp";
 
 echo "*** Test fopen() & fclose() functions:  with 'xb' mode ***\n";

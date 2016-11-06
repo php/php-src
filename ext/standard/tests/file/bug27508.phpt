@@ -56,9 +56,9 @@ if (!$fp) {
   die("fopen failed");
 }
 
-fwrite($fp, b"line1\n");
-fwrite($fp, b"line2\n");
-fwrite($fp, b"line3\n");
+fwrite($fp, "line1\n");
+fwrite($fp, "line2\n");
+fwrite($fp, "line3\n");
 
 debug_zval_dump(feof($fp));
 rewind($fp);

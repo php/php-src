@@ -19,7 +19,7 @@ return false;
 
 /* Writing into file */ 
 $filename = "DataFile.txt";
-$content = b"Add this to the file\n";
+$content = "Add this to the file\n";
 if (is_writable($filename)) {
   if (fwrite($handle2, $content) === FALSE) {
     echo "Cannot write to file ($filename)";
