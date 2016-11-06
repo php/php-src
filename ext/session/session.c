@@ -166,19 +166,14 @@ static int php_session_destroy(void) /* {{{ */
 
 PHPAPI void php_add_session_var(zend_string *name) /* {{{ */
 {
-	zval *sym_track = NULL;
-
 	IF_SESSION_VARS() {
-		sym_track = zend_hash_find(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))), name);
-	} else {
-		return;
-	}
-
-	if (sym_track == NULL) {
-		zval empty_var;
-
-		ZVAL_NULL(&empty_var);
-		zend_hash_update(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))), name, &empty_var);
+		zval *sess_var = Z_REFVAL(PS(http_session_vars));
+		SEPARATE_ARRAY(sess_var);
+		if (!zend_hash_exists(Z_ARRVAL_P(sess_var), name)) {
+			zval empty_var;
+			ZVAL_NULL(&empty_var);
+			zend_hash_update(Z_ARRVAL_P(sess_var), name, &empty_var);
+		}
 	}
 }
 /* }}} */
@@ -186,7 +181,9 @@ PHPAPI void php_add_session_var(zend_string *name) /* {{{ */
 PHPAPI zval* php_set_session_var(zend_string *name, zval *state_val, php_unserialize_data_t *var_hash) /* {{{ */
 {
 	IF_SESSION_VARS() {
-		return zend_hash_update(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))), name, state_val);
+		zval *sess_var = Z_REFVAL(PS(http_session_vars));
+		SEPARATE_ARRAY(sess_var);
+		return zend_hash_update(Z_ARRVAL_P(sess_var), name, state_val);
 	}
 	return NULL;
 }
@@ -353,19 +350,23 @@ PHPAPI int php_session_valid_key(const char *key) /* {{{ */
 /* }}} */
 
 
-static void php_session_gc(void) /* {{{ */
+static zend_long php_session_gc(zend_bool immediate) /* {{{ */
 {
 	int nrand;
+	zend_long num = -1;
 
 	/* GC must be done before reading session data. */
-	if ((PS(mod_data) || PS(mod_user_implemented)) && PS(gc_probability) > 0) {
-		int nrdels = -1;
-
-		nrand = (int) ((float) PS(gc_divisor) * php_combined_lcg());
-		if (nrand < PS(gc_probability)) {
-			PS(mod)->s_gc(&PS(mod_data), PS(gc_maxlifetime), &nrdels);
+	if ((PS(mod_data) || PS(mod_user_implemented))) {
+		if (immediate) {
+			PS(mod)->s_gc(&PS(mod_data), PS(gc_maxlifetime), &num);
+			return num;
+		}
+		nrand = (zend_long) ((float) PS(gc_divisor) * php_combined_lcg());
+		if (PS(gc_probability) > 0 && nrand < PS(gc_probability)) {
+			PS(mod)->s_gc(&PS(mod_data), PS(gc_maxlifetime), &num);
 		}
 	}
+	return num;
 } /* }}} */
 
 static void php_session_initialize(void) /* {{{ */
@@ -430,7 +431,7 @@ static void php_session_initialize(void) /* {{{ */
 	}
 
 	/* GC must be done after read */
-	php_session_gc();
+	php_session_gc(0);
 
 	if (PS(session_vars)) {
 		zend_string_release(PS(session_vars));
@@ -765,12 +766,19 @@ PS_SERIALIZER_DECODE_FUNC(php_serialize) /* {{{ */
 	const char *endptr = val + vallen;
 	zval session_vars;
 	php_unserialize_data_t var_hash;
+	int result;
 	zend_string *var_name = zend_string_init("_SESSION", sizeof("_SESSION") - 1, 0);
 
 	ZVAL_NULL(&session_vars);
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
-	php_var_unserialize(&session_vars, (const unsigned char **)&val, (const unsigned char *)endptr, &var_hash);
+	result = php_var_unserialize(
+		&session_vars, (const unsigned char **)&val, (const unsigned char *)endptr, &var_hash);
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+	if (!result) {
+		zval_ptr_dtor(&session_vars);
+		ZVAL_NULL(&session_vars);
+	}
+
 	if (!Z_ISUNDEF(PS(http_session_vars))) {
 		zval_ptr_dtor(&PS(http_session_vars));
 	}
@@ -827,7 +835,6 @@ PS_SERIALIZER_DECODE_FUNC(php_binary) /* {{{ */
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 
 	for (p = val; p < endptr; ) {
-		zval *tmp;
 		namelen = ((unsigned char)(*p)) & (~PS_BIN_UNDEF);
 
 		if (namelen < 0 || namelen > PS_BIN_MAX || (p + namelen) >= endptr) {
@@ -841,20 +848,12 @@ PS_SERIALIZER_DECODE_FUNC(php_binary) /* {{{ */
 
 		p += namelen + 1;
 
-		if ((tmp = zend_hash_find(&EG(symbol_table), name))) {
-			if ((Z_TYPE_P(tmp) == IS_ARRAY &&
-				Z_ARRVAL_P(tmp) == &EG(symbol_table)) || tmp == &PS(http_session_vars)) {
-				zend_string_release(name);
-				continue;
-			}
-		}
-
 		if (has_value) {
 			zval *current, rv;
 			current = var_tmp_var(&var_hash);
 			if (php_var_unserialize(current, (const unsigned char **) &p, (const unsigned char *) endptr, &var_hash)) {
 				ZVAL_PTR(&rv, current);
-				php_set_session_var(name, &rv, &var_hash );
+				php_set_session_var(name, &rv, &var_hash);
 			} else {
 				zend_string_release(name);
 				php_session_normalize_vars();
@@ -922,7 +921,6 @@ PS_SERIALIZER_DECODE_FUNC(php) /* {{{ */
 	p = val;
 
 	while (p < endptr) {
-		zval *tmp;
 		q = p;
 		while (*q != PS_DELIMITER) {
 			if (++q >= endptr) goto break_outer_loop;
@@ -938,13 +936,6 @@ PS_SERIALIZER_DECODE_FUNC(php) /* {{{ */
 		name = zend_string_init(p, namelen, 0);
 		q++;
 
-		if ((tmp = zend_hash_find(&EG(symbol_table), name))) {
-			if ((Z_TYPE_P(tmp) == IS_ARRAY &&
-				Z_ARRVAL_P(tmp) == &EG(symbol_table)) || tmp == &PS(http_session_vars)) {
-				goto skip;
-			}
-		}
-
 		if (has_value) {
 			zval *current, rv;
 			current = var_tmp_var(&var_hash);
@@ -959,7 +950,6 @@ PS_SERIALIZER_DECODE_FUNC(php) /* {{{ */
 		} else {
 			PS_ADD_VARL(name);
 		}
-skip:
 		zend_string_release(name);
 
 		p = q;
@@ -1487,52 +1477,50 @@ PHPAPI void php_session_start(void) /* {{{ */
 			if (Z_TYPE_P(data) == IS_ARRAY && (ppid = zend_hash_str_find(Z_ARRVAL_P(data), PS(session_name), lensess))) {
 				ppid2sid(ppid);
 				PS(send_cookie) = 0;
+				PS(define_sid) = 0;
 			}
 		}
-
-		if (PS(define_sid) && !PS(id) && (data = zend_hash_str_find(&EG(symbol_table), "_GET", sizeof("_GET") - 1))) {
-			ZVAL_DEREF(data);
-			if (Z_TYPE_P(data) == IS_ARRAY && (ppid = zend_hash_str_find(Z_ARRVAL_P(data), PS(session_name), lensess))) {
-				ppid2sid(ppid);
+		/* Initilize session ID from non cookie values */
+		if (!PS(use_only_cookies)) {
+			if (!PS(id) && (data = zend_hash_str_find(&EG(symbol_table), "_GET", sizeof("_GET") - 1))) {
+				ZVAL_DEREF(data);
+				if (Z_TYPE_P(data) == IS_ARRAY && (ppid = zend_hash_str_find(Z_ARRVAL_P(data), PS(session_name), lensess))) {
+					ppid2sid(ppid);
+				}
 			}
-		}
-
-		if (PS(define_sid) && !PS(id) && (data = zend_hash_str_find(&EG(symbol_table), "_POST", sizeof("_POST") - 1))) {
-			ZVAL_DEREF(data);
-			if (Z_TYPE_P(data) == IS_ARRAY && (ppid = zend_hash_str_find(Z_ARRVAL_P(data), PS(session_name), lensess))) {
-				ppid2sid(ppid);
+			if (!PS(id) && (data = zend_hash_str_find(&EG(symbol_table), "_POST", sizeof("_POST") - 1))) {
+				ZVAL_DEREF(data);
+				if (Z_TYPE_P(data) == IS_ARRAY && (ppid = zend_hash_str_find(Z_ARRVAL_P(data), PS(session_name), lensess))) {
+					ppid2sid(ppid);
+				}
 			}
-		}
-
-		/* Check the REQUEST_URI symbol for a string of the form
-		 * '<session-name>=<session-id>' to allow URLs of the form
-		 * http://yoursite/<session-name>=<session-id>/script.php */
-		if (PS(define_sid) && !PS(id) &&
-			zend_is_auto_global_str("_SERVER", sizeof("_SERVER") - 1) == SUCCESS &&
-			(data = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "REQUEST_URI", sizeof("REQUEST_URI") - 1)) &&
-			Z_TYPE_P(data) == IS_STRING &&
-			(p = strstr(Z_STRVAL_P(data), PS(session_name))) &&
-			p[lensess] == '='
-		) {
-			char *q;
-			p += lensess + 1;
-			if ((q = strpbrk(p, "/?\\"))) {
-				PS(id) = zend_string_init(p, q - p, 0);
+			/* Check the REQUEST_URI symbol for a string of the form
+			 * '<session-name>=<session-id>' to allow URLs of the form
+			 * http://yoursite/<session-name>=<session-id>/script.php */
+			if (!PS(id) && zend_is_auto_global_str("_SERVER", sizeof("_SERVER") - 1) == SUCCESS &&
+				(data = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "REQUEST_URI", sizeof("REQUEST_URI") - 1)) &&
+				Z_TYPE_P(data) == IS_STRING &&
+				(p = strstr(Z_STRVAL_P(data), PS(session_name))) &&
+				p[lensess] == '='
+				) {
+				char *q;
+				p += lensess + 1;
+				if ((q = strpbrk(p, "/?\\"))) {
+					PS(id) = zend_string_init(p, q - p, 0);
+				}
 			}
-		}
-
-		/* Check whether the current request was referred to by
-		 * an external site which invalidates the previously found id. */
-		if (PS(define_sid) && PS(id) &&
-			PS(extern_referer_chk)[0] != '\0' &&
-			!Z_ISUNDEF(PG(http_globals)[TRACK_VARS_SERVER]) &&
-			(data = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_REFERER", sizeof("HTTP_REFERER") - 1)) &&
-			Z_TYPE_P(data) == IS_STRING &&
-			Z_STRLEN_P(data) != 0 &&
-			strstr(Z_STRVAL_P(data), PS(extern_referer_chk)) == NULL
-		) {
-			zend_string_release(PS(id));
-			PS(id) = NULL;
+			/* Check whether the current request was referred to by
+			 * an external site which invalidates the previously found id. */
+			if (PS(id) && PS(extern_referer_chk)[0] != '\0' &&
+				!Z_ISUNDEF(PG(http_globals)[TRACK_VARS_SERVER]) &&
+				(data = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_REFERER", sizeof("HTTP_REFERER") - 1)) &&
+				Z_TYPE_P(data) == IS_STRING &&
+				Z_STRLEN_P(data) != 0 &&
+				strstr(Z_STRVAL_P(data), PS(extern_referer_chk)) == NULL
+			) {
+				zend_string_release(PS(id));
+				PS(id) = NULL;
+			}
 		}
 	}
 
@@ -2027,7 +2015,6 @@ static PHP_FUNCTION(session_regenerate_id)
 
 /* {{{ proto void session_create_id([string prefix])
    Generate new session ID. Intended for user save handlers. */
-#if 0
 /* This is not used yet */
 static PHP_FUNCTION(session_create_id)
 {
@@ -2049,7 +2036,20 @@ static PHP_FUNCTION(session_create_id)
 	}
 
 	if (PS(session_status) == php_session_active) {
-		new_id = PS(mod)->s_create_sid(&PS(mod_data));
+		int limit = 3;
+		while (limit--) {
+			new_id = PS(mod)->s_create_sid(&PS(mod_data));
+			if (!PS(mod)->s_validate_sid) {
+				break;
+			} else {
+				/* Detect collision and retry */
+				if (PS(mod)->s_validate_sid(&PS(mod_data), new_id) == FAILURE) {
+					zend_string_release(new_id);
+					continue;
+				}
+				break;
+			}
+		}
 	} else {
 		new_id = php_session_create_id(NULL);
 	}
@@ -2064,9 +2064,7 @@ static PHP_FUNCTION(session_create_id)
 	}
 	smart_str_0(&id);
 	RETVAL_NEW_STR(id.s);
-	smart_str_free(&id);
 }
-#endif
 /* }}} */
 
 /* {{{ proto string session_cache_limiter([string new_cache_limiter])
@@ -2242,13 +2240,39 @@ static PHP_FUNCTION(session_unset)
 	}
 
 	IF_SESSION_VARS() {
-		HashTable *ht_sess_var = Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars)));
+		zval *sess_var = Z_REFVAL(PS(http_session_vars));
+		SEPARATE_ARRAY(sess_var);
 
 		/* Clean $_SESSION. */
-		zend_hash_clean(ht_sess_var);
+		zend_hash_clean(Z_ARRVAL_P(sess_var));
 	}
 }
 /* }}} */
+
+/* {{{ proto int session_gc(void)
+   Perform GC and return number of deleted sessions */
+static PHP_FUNCTION(session_gc)
+{
+	zend_long num;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	if (PS(session_status) != php_session_active) {
+		php_error_docref(NULL, E_WARNING, "Session is not active");
+		RETURN_FALSE;
+	}
+
+	num = php_session_gc(1);
+	if (num < 0) {
+		RETURN_FALSE;
+	}
+
+	RETURN_LONG(num);
+}
+/* }}} */
+
 
 /* {{{ proto void session_write_close(void)
    Write session data and end session */
@@ -2337,6 +2361,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_session_id, 0, 0, 0)
 	ZEND_ARG_INFO(0, id)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_session_create_id, 0, 0, 0)
+	ZEND_ARG_INFO(0, prefix)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_session_regenerate_id, 0, 0, 0)
 	ZEND_ARG_INFO(0, delete_old_session)
 ZEND_END_ARG_INFO()
@@ -2421,12 +2449,14 @@ static const zend_function_entry session_functions[] = {
 	PHP_FE(session_module_name,       arginfo_session_module_name)
 	PHP_FE(session_save_path,         arginfo_session_save_path)
 	PHP_FE(session_id,                arginfo_session_id)
+	PHP_FE(session_create_id,         arginfo_session_create_id)
 	PHP_FE(session_regenerate_id,     arginfo_session_regenerate_id)
 	PHP_FE(session_decode,            arginfo_session_decode)
 	PHP_FE(session_encode,            arginfo_session_void)
 	PHP_FE(session_start,             arginfo_session_void)
 	PHP_FE(session_destroy,           arginfo_session_void)
 	PHP_FE(session_unset,             arginfo_session_void)
+	PHP_FE(session_gc,                arginfo_session_void)
 	PHP_FE(session_set_save_handler,  arginfo_session_set_save_handler)
 	PHP_FE(session_cache_limiter,     arginfo_session_cache_limiter)
 	PHP_FE(session_cache_expire,      arginfo_session_cache_expire)
@@ -2779,9 +2809,12 @@ static void php_session_rfc1867_update(php_session_rfc1867_progress *progress, i
 	php_session_initialize();
 	PS(session_status) = php_session_active;
 	IF_SESSION_VARS() {
+		zval *sess_var = Z_REFVAL(PS(http_session_vars));
+		SEPARATE_ARRAY(sess_var);
+
 		progress->cancel_upload |= php_check_cancel_upload(progress);
-		if (Z_REFCOUNTED(progress->data)) Z_ADDREF(progress->data);
-		zend_hash_update(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))), progress->key.s, &progress->data);
+		Z_TRY_ADDREF(progress->data);
+		zend_hash_update(Z_ARRVAL_P(sess_var), progress->key.s, &progress->data);
 	}
 	php_session_flush(1);
 } /* }}} */
@@ -2791,7 +2824,9 @@ static void php_session_rfc1867_cleanup(php_session_rfc1867_progress *progress) 
 	php_session_initialize();
 	PS(session_status) = php_session_active;
 	IF_SESSION_VARS() {
-		zend_hash_del(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))), progress->key.s);
+		zval *sess_var = Z_REFVAL(PS(http_session_vars));
+		SEPARATE_ARRAY(sess_var);
+		zend_hash_del(Z_ARRVAL_P(sess_var), progress->key.s);
 	}
 	php_session_flush(1);
 } /* }}} */

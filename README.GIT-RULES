@@ -38,21 +38,26 @@ Having said that, here are the organizational rules::
    6. Test your changes before committing them. We mean it. Really.
       To do so use "make test".
 
-   7. For development use the --enable-maintainer-zts switch to ensure your
-      code handles TSRM correctly and doesn't break for those who need that.
+   7. For development use the --enable-debug switch to avoid memory leaks
+      and the --enable-maintainer-zts switch to ensure your code handles
+      TSRM correctly and doesn't break for those who need that.
 
 Currently we have the following branches in use::
 
   master    The active development branch. 
 
+  PHP-7.1   Is used to release the PHP 7.1.x series. This is a prerelease
+            version.
+
+  PHP-7.0   Is used to release the PHP 7.0.x series. This is a current
+            stable version and is open for bugfixes only.
+
   PHP-5.6   Is used to release the PHP 5.6.x series. This is a current
             stable version and is open for bugfixes only.
 
-  PHP-5.5   Is used to release the PHP 5.5.x series. This is an old
-            stable version and is open for security fixes only.
+  PHP-5.5   This branch is closed.
 
-  PHP-5.4   Is used to release the PHP 5.4.x series. This is an old
-            stable version and is open for security fixes only.
+  PHP-5.4   This branch is closed.
 
   PHP-5.3   This branch is closed.
 

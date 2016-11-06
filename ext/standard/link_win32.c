@@ -157,6 +157,7 @@ PHP_FUNCTION(symlink)
 		RETURN_FALSE;
 	}
 	if ((attr = GetFileAttributesW(dstw)) == INVALID_FILE_ATTRIBUTES) {
+		free(dstw);
 		php_error_docref(NULL, E_WARNING, "Could not fetch file information(error %d)", GetLastError());
 		RETURN_FALSE;
 	}

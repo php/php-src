@@ -54,6 +54,10 @@
 #include <limits.h>
 #endif
 
+#ifdef PHP_WIN32
+# include "win32/nice.h"
+#endif
+
 static size_t cmd_max_len;
 
 /* {{{ PHP_MINIT_FUNCTION(exec) */
@@ -321,7 +325,7 @@ PHPAPI zend_string *php_escape_shell_cmd(char *str)
 				ZSTR_VAL(cmd)[y++] = str[x];
 				break;
 #else
-			/* % is Windows specific for environmental variables, ^%PATH% will 
+			/* % is Windows specific for environmental variables, ^%PATH% will
 				output PATH while ^%PATH^% will not. escapeshellcmd->val will escape all % and !.
 			*/
 			case '%':
@@ -363,7 +367,7 @@ PHPAPI zend_string *php_escape_shell_cmd(char *str)
 	}
 	ZSTR_VAL(cmd)[y] = '\0';
 
-	if (y - 1 > cmd_max_len) {
+	if (y > cmd_max_len + 1) {
 		php_error_docref(NULL, E_ERROR, "Escaped command exceeds the allowed length of %d bytes", cmd_max_len);
 		zend_string_release(cmd);
 		return ZSTR_EMPTY_ALLOC();
@@ -450,7 +454,7 @@ PHPAPI zend_string *php_escape_shell_arg(char *str)
 #endif
 	ZSTR_VAL(cmd)[y] = '\0';
 
-	if (y - 1 > cmd_max_len) {
+	if (y > cmd_max_len + 1) {
 		php_error_docref(NULL, E_ERROR, "Escaped argument exceeds the allowed length of %d bytes", cmd_max_len);
 		zend_string_release(cmd);
 		return ZSTR_EMPTY_ALLOC();
@@ -557,7 +561,11 @@ PHP_FUNCTION(proc_nice)
 	errno = 0;
 	php_ignore_value(nice(pri));
 	if (errno) {
+#ifdef PHP_WIN32
+		php_error_docref(NULL, E_WARNING, php_win_err());
+#else
 		php_error_docref(NULL, E_WARNING, "Only a super user may attempt to increase the priority of a process");
+#endif
 		RETURN_FALSE;
 	}
 

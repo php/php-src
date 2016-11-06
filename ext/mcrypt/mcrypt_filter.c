@@ -149,7 +149,7 @@ static php_stream_filter_ops php_mcrypt_filter_ops = {
 /* {{{ php_mcrypt_filter_create
  * Instantiate mcrypt filter
  */
-static php_stream_filter *php_mcrypt_filter_create(const char *filtername, zval *filterparams, int persistent)
+static php_stream_filter *php_mcrypt_filter_create(const char *filtername, zval *filterparams, uint8_t persistent)
 {
 	int encrypt = 1, iv_len, key_len, keyl, result;
 	const char *cipher = filtername + sizeof("mcrypt.") - 1;

@@ -28,6 +28,6 @@ result=Monday 1990-10-22 00:00:00 WART 0
 wanted=Monday            00:00:00
 
 TZ=Asia/Tbilisi - Is it OK for this to be 2 AM?
-tStamp=Sunday 2005-03-20 17:17:17 GET 0
-result=Sunday 2005-03-27 00:00:00 GET 0
+tStamp=Sunday 2005-03-20 17:17:17 +03 0
+result=Sunday 2005-03-27 00:00:00 +03 0
 wanted=Sunday            00:00:00

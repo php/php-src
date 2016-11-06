@@ -566,8 +566,8 @@ IC_METHOD(getFC_NFKC_Closure) {
 
 	error = U_ZERO_ERROR;
 	u8str = intl_convert_utf16_to_utf8(closure, closure_len, &error);
-	efree(closure);
 	INTL_CHECK_STATUS(error, "Failed converting output to UTF8");
+	efree(closure);
 	RETVAL_NEW_STR(u8str);
 }
 /* }}} */

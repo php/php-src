@@ -26,7 +26,7 @@
  * and have been modified to work with PHP.
  */
 
-static void usage_to_timeval(FILETIME *ft, struct timeval *tv)
+static zend_always_inline void usage_to_timeval(FILETIME *ft, struct timeval *tv)
 {
 	ULARGE_INTEGER time;
 

@@ -22,6 +22,7 @@
 #define PHPDBG_CMD_H
 
 #include "TSRM.h"
+#include "zend_generators.h"
 
 /* {{{ Command and Parameter */
 enum {
@@ -113,6 +114,7 @@ struct _phpdbg_command_t {
 
 typedef struct {
 	int num;
+	zend_generator *generator;
 	zend_execute_data *execute_data;
 } phpdbg_frame_t;
 /* }}} */

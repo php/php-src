@@ -32,7 +32,6 @@
 
 #include "zend.h"
 #include "zend_virtual_cwd.h"
-#include "tsrm_strtok_r.h"
 
 #ifdef ZEND_WIN32
 #include <io.h>
@@ -85,63 +84,14 @@ cwd_state main_cwd_state; /* True global */
 #include <direct.h>
 #endif
 
-#ifdef ZEND_WIN32
-#include <tchar.h>
-#define tsrm_strtok_r(a,b,c) _tcstok((a),(b))
-#define TOKENIZER_STRING "/\\"
-
-static int php_check_dots(const char *element, int n)
-{
-	while (n-- > 0) if (element[n] != '.') break;
-
-	return (n != -1);
-}
-
-#define IS_DIRECTORY_UP(element, len) \
-	(len >= 2 && !php_check_dots(element, len))
-
-#define IS_DIRECTORY_CURRENT(element, len) \
-	(len == 1 && element[0] == '.')
-
-#elif defined(NETWARE)
-/* NetWare has strtok() (in LibC) and allows both slashes in paths, like Windows --
-   but rest of the stuff is like Unix */
-/* strtok() call in LibC is abending when used in a different address space -- hence using
-   PHP's version itself for now */
-/*#define tsrm_strtok_r(a,b,c) strtok((a),(b))*/
-#define TOKENIZER_STRING "/\\"
-
-#else
-#define TOKENIZER_STRING "/"
-#endif
-
-/* default macros */
-
-#ifndef IS_DIRECTORY_UP
-#define IS_DIRECTORY_UP(element, len) \
-	(len == 2 && element[0] == '.' && element[1] == '.')
-#endif
-
-#ifndef IS_DIRECTORY_CURRENT
-#define IS_DIRECTORY_CURRENT(element, len) \
-	(len == 1 && element[0] == '.')
-#endif
-
-/* define this to check semantics */
-#define IS_DIR_OK(s) (1)
-
-#ifndef IS_DIR_OK
-#define IS_DIR_OK(state) (php_is_dir_ok(state) == 0)
-#endif
-
-
 #define CWD_STATE_COPY(d, s)				\
 	(d)->cwd_length = (s)->cwd_length;		\
 	(d)->cwd = (char *) emalloc((s)->cwd_length+1);	\
 	memcpy((d)->cwd, (s)->cwd, (s)->cwd_length+1);
 
 #define CWD_STATE_FREE(s)			\
-	efree((s)->cwd);
+	efree((s)->cwd); \
+	(s)->cwd_length = 0;
 
 #ifdef ZEND_WIN32
 # define CWD_STATE_FREE_ERR(state) do { \
@@ -328,32 +278,19 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 		buf->st_dev = buf->st_rdev = 0;
 	} else {
 		wchar_t cur_path[MAXPATHLEN+1];
-		DWORD len = sizeof(cur_path);
-		wchar_t *tmp = cur_path;
 
-		while(1) {
-			DWORD r = GetCurrentDirectoryW(len, tmp);
-			if (r < len) {
-				if (tmp[1] == L':') {
-					if (pathw[0] >= L'A' && pathw[0] <= L'Z') {
-						buf->st_dev = buf->st_rdev = pathw[0] - L'A';
-					} else {
-						buf->st_dev = buf->st_rdev = pathw[0] - L'a';
-					}
+		if (NULL != _wgetcwd(cur_path, sizeof(cur_path)/sizeof(wchar_t))) {
+			if (cur_path[1] == L':') {
+				if (pathw[0] >= L'A' && pathw[0] <= L'Z') {
+					buf->st_dev = buf->st_rdev = pathw[0] - L'A';
 				} else {
-					buf->st_dev = buf->st_rdev = -1;
+					buf->st_dev = buf->st_rdev = pathw[0] - L'a';
 				}
-				break;
-			} else if (!r) {
-				buf->st_dev = buf->st_rdev = -1;
-				break;
 			} else {
-				len = r+1;
-				tmp = (wchar_t*)malloc(len*sizeof(wchar_t));
+				buf->st_dev = buf->st_rdev = -1;
 			}
-		}
-		if (tmp != cur_path) {
-			free(tmp);
+		} else {
+			buf->st_dev = buf->st_rdev = -1;
 		}
 	}
 
@@ -934,7 +871,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			wchar_t * reparsetarget;
 			BOOL isVolume = FALSE;
 			char *printname = NULL, *substitutename = NULL;
-			int printname_len, substitutename_len;
+			int substitutename_len;
 			int substitutename_off = 0;
 
 			if(++(*ll) > LINK_MAX) {
@@ -969,7 +906,6 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 
 			if(pbuffer->ReparseTag == IO_REPARSE_TAG_SYMLINK) {
 				reparsetarget = pbuffer->SymbolicLinkReparseBuffer.ReparseTarget;
-				printname_len = pbuffer->MountPointReparseBuffer.PrintNameLength / sizeof(WCHAR);
 				isabsolute = (pbuffer->SymbolicLinkReparseBuffer.Flags == 0) ? 1 : 0;
 				printname = php_win32_ioutil_w_to_any(reparsetarget + pbuffer->MountPointReparseBuffer.PrintNameOffset  / sizeof(WCHAR));
 				if (!printname) {
@@ -992,7 +928,6 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			else if(pbuffer->ReparseTag == IO_REPARSE_TAG_MOUNT_POINT) {
 				isabsolute = 1;
 				reparsetarget = pbuffer->MountPointReparseBuffer.ReparseTarget;
-				printname_len = pbuffer->MountPointReparseBuffer.PrintNameLength / sizeof(WCHAR);
 				printname = php_win32_ioutil_w_to_any(reparsetarget + pbuffer->MountPointReparseBuffer.PrintNameOffset  / sizeof(WCHAR));
 				if (!printname) {
 					free_alloca(pbuffer, use_heap_large);
@@ -1406,6 +1341,7 @@ verify:
 
 		tmp = erealloc(state->cwd, state->cwd_length+1);
 		if (tmp == NULL) {
+			CWD_STATE_FREE(&old_state);
 #if VIRTUAL_CWD_DEBUG
 			fprintf (stderr, "Out of memory\n");
 #endif
@@ -1939,7 +1875,7 @@ CWD_API FILE *virtual_popen(const char *command, const char *type) /* {{{ */
 #else /* Unix */
 CWD_API FILE *virtual_popen(const char *command, const char *type) /* {{{ */
 {
-	int command_length;
+	size_t command_length;
 	int dir_length, extra = 0;
 	char *command_line;
 	char *ptr, *dir;

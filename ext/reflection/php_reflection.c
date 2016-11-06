@@ -1555,17 +1555,11 @@ ZEND_METHOD(reflection, export)
 	int result;
 	zend_bool return_output = 0;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &object, reflector_ptr, &return_output) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_OBJECT_OF_CLASS(object, reflector_ptr)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(return_output)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	/* Invoke the __toString() method */
 	ZVAL_STRINGL(&fname, "__tostring", sizeof("__tostring") - 1);
@@ -1991,6 +1985,9 @@ ZEND_METHOD(reflection_function, invoke)
 	}
 
 	if (Z_TYPE(retval) != IS_UNDEF) {
+		if (Z_ISREF(retval)) {
+			zend_unwrap_reference(&retval);
+		}
 		ZVAL_COPY_VALUE(return_value, &retval);
 	}
 }
@@ -2054,6 +2051,9 @@ ZEND_METHOD(reflection_function, invokeArgs)
 	}
 
 	if (Z_TYPE(retval) != IS_UNDEF) {
+		if (Z_ISREF(retval)) {
+			zend_unwrap_reference(&retval);
+		}
 		ZVAL_COPY_VALUE(return_value, &retval);
 	}
 }
@@ -3031,22 +3031,13 @@ ZEND_METHOD(reflection_type, __toString)
 {
 	reflection_object *intern;
 	type_reference *param;
-	zend_string *str;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 	
-	str = reflection_type_name(param);
-	
-	if (param->arg_info->allow_null) {
-		str = zend_string_extend(str, ZSTR_LEN(str) + 1, 0);
-		memmove(ZSTR_VAL(str) + 1, ZSTR_VAL(str), ZSTR_LEN(str) + 1);
-		ZSTR_VAL(str)[0] = '?';
-	}
-	
-	RETURN_STR(str);
+	RETURN_STR(reflection_type_name(param));
 }
 /* }}} */
 
@@ -3341,6 +3332,9 @@ static void reflection_method_invoke(INTERNAL_FUNCTION_PARAMETERS, int variadic)
 	}
 
 	if (Z_TYPE(retval) != IS_UNDEF) {
+		if (Z_ISREF(retval)) {
+			zend_unwrap_reference(&retval);
+		}
 		ZVAL_COPY_VALUE(return_value, &retval);
 	}
 }
@@ -4792,7 +4786,7 @@ ZEND_METHOD(reflection_class, getModifiers)
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	RETURN_LONG(ce->ce_flags & ~(ZEND_ACC_CONSTANTS_UPDATED|ZEND_ACC_USE_GUARDS));
+	RETURN_LONG(ce->ce_flags & ~(ZEND_ACC_CONSTANTS_UPDATED|ZEND_ACC_USE_GUARDS|ZEND_ACC_INHERITED));
 }
 /* }}} */
 
@@ -6719,6 +6713,9 @@ static const zend_function_entry reflection_type_functions[] = {
 	ZEND_ME(reflection, __clone, arginfo_reflection__void, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
 	ZEND_ME(reflection_type, allowsNull, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_type, isBuiltin, arginfo_reflection__void, 0)
+	/* ReflectionType::__toString() is deprecated, but we currently do not mark it as such
+	 * due to bad interaction with the PHPUnit error handler and exceptions in __toString().
+	 * See PR2137. */
 	ZEND_ME(reflection_type, __toString, arginfo_reflection__void, 0)
 	PHP_FE_END
 };

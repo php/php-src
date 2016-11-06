@@ -31,7 +31,7 @@ static zend_object_handlers zend_generator_handlers;
 
 static zend_object *zend_generator_create(zend_class_entry *class_type);
 
-static void zend_restore_call_stack(zend_generator *generator) /* {{{ */
+ZEND_API void zend_generator_restore_call_stack(zend_generator *generator) /* {{{ */
 {
 	zend_execute_data *call, *new_call, *prev_call = NULL;
 
@@ -57,7 +57,7 @@ static void zend_restore_call_stack(zend_generator *generator) /* {{{ */
 }
 /* }}} */
 
-static zend_execute_data* zend_freeze_call_stack(zend_execute_data *execute_data) /* {{{ */
+ZEND_API zend_execute_data* zend_generator_freeze_call_stack(zend_execute_data *execute_data) /* {{{ */
 {
 	size_t used_stack;
 	zend_execute_data *call, *new_call, *prev_call = NULL;
@@ -106,7 +106,7 @@ static void zend_generator_cleanup_unfinished_execution(
 		uint32_t op_num = execute_data->opline - execute_data->func->op_array.opcodes - 1;
 
 		if (UNEXPECTED(generator->frozen_call_stack)) {
-			zend_restore_call_stack(generator);
+			zend_generator_restore_call_stack(generator);
 		}
 		zend_cleanup_unfinished_execution(execute_data, op_num, 0);
 	}
@@ -808,7 +808,7 @@ try_again:
 
 		if (UNEXPECTED(generator->frozen_call_stack)) {
 			/* Restore frozen call-stack */
-			zend_restore_call_stack(generator);
+			zend_generator_restore_call_stack(generator);
 		}
 
 		/* Resume execution */
@@ -820,7 +820,7 @@ try_again:
 		if (EXPECTED(generator->execute_data) &&
 		    UNEXPECTED(generator->execute_data->call)) {
 			/* Frize call-stack */
-			generator->frozen_call_stack = zend_freeze_call_stack(generator->execute_data);
+			generator->frozen_call_stack = zend_generator_freeze_call_stack(generator->execute_data);
 		}
 
 		/* Restore executor globals */
@@ -980,15 +980,9 @@ ZEND_METHOD(Generator, send)
 	zval *value;
 	zend_generator *generator, *root;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &value) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_ZVAL(value)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	generator = (zend_generator *) Z_OBJ_P(getThis());
 
@@ -1024,15 +1018,9 @@ ZEND_METHOD(Generator, throw)
 	zval *exception, exception_copy;
 	zend_generator *generator;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &exception) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_ZVAL(exception)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	ZVAL_DUP(&exception_copy, exception);
 

@@ -49,20 +49,6 @@
 #include "php_oci8_int.h"
 #include "zend_hash.h"
 
-#if defined(__PTRDIFF_TYPE__)
-# define OCI8_INT_TO_PTR(I)  ((void*)(__PTRDIFF_TYPE__)(I))
-# define OCI8_PTR_TO_INT(P)  ((int)(__PTRDIFF_TYPE__)(P))
-#elif !defined(__GNUC__)
-#define OCI8_INT_TO_PTR(I)  ((void*)&((char*)0)[I])
-#define OCI8_PTR_TO_INT(P)  ((int)(((char*)P)-(char*)0))
-#elif defined(HAVE_STDINT_H)
-#define OCI8_INT_TO_PTR(I)  ((void*)(intptr_t)(I))
-#define OCI8_PTR_TO_INT(P)  ((int)(intptr_t)(P))
-#else
-#define OCI8_INT_TO_PTR(I)  ((void*)(I))
-#define OCI8_PTR_TO_INT(P)  ((int)(P))
-#endif
-
 ZEND_DECLARE_MODULE_GLOBALS(oci)
 static PHP_GINIT_FUNCTION(oci);
 static PHP_GSHUTDOWN_FUNCTION(oci);
@@ -1400,6 +1386,11 @@ void php_oci_define_hash_dtor(zval *data)
 void php_oci_bind_hash_dtor(zval *data)
 {
 	php_oci_bind *bind = (php_oci_bind *) Z_PTR_P(data);
+
+	if (!Z_ISUNDEF(bind->parameter)) {
+		zval_ptr_dtor(&bind->parameter);
+		ZVAL_UNDEF(&bind->parameter);
+	}
 
 	if (bind->array.elements) {
 		efree(bind->array.elements);

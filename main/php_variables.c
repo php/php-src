@@ -114,7 +114,8 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 
 		while (ex) {
 			if (ex->func && ZEND_USER_CODE(ex->func->common.type)) {
-				if (ex->symbol_table == symtable1) {
+				if ((ZEND_CALL_INFO(ex) & ZEND_CALL_HAS_SYMBOL_TABLE)
+						&& ex->symbol_table == symtable1) {
 					if (memcmp(var, "this", sizeof("this")-1) == 0) {
 						zend_throw_error(NULL, "Cannot re-assign $this");
 						zval_dtor(val);

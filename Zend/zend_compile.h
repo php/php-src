@@ -121,6 +121,8 @@ typedef struct _zend_file_context {
 	HashTable *imports;
 	HashTable *imports_function;
 	HashTable *imports_const;
+
+	HashTable seen_symbols;
 } zend_file_context;
 
 typedef union _zend_parser_stack_elem {
@@ -213,6 +215,7 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_TRAIT						0x80
 #define ZEND_ACC_ANON_CLASS                 0x100
 #define ZEND_ACC_ANON_BOUND                 0x200
+#define ZEND_ACC_INHERITED                  0x400
 
 /* method flags (visibility) */
 /* The order of those must be kept - public < protected < private */
@@ -253,6 +256,7 @@ typedef struct _zend_oparray_context {
 
 
 #define ZEND_ACC_CLOSURE              0x100000
+#define ZEND_ACC_FAKE_CLOSURE         0x40
 #define ZEND_ACC_GENERATOR            0x800000
 
 #define ZEND_ACC_NO_RT_ARENA          0x80000
@@ -473,6 +477,7 @@ struct _zend_execute_data {
 #define ZEND_CALL_ALLOCATED          (1 << 7)
 #define ZEND_CALL_GENERATOR          (1 << 8)
 #define ZEND_CALL_DYNAMIC            (1 << 9)
+#define ZEND_CALL_FAKE_CLOSURE       (1 << 10)
 
 #define ZEND_CALL_INFO_SHIFT         16
 
@@ -791,6 +796,7 @@ ZEND_API char *zend_make_compiled_string_description(const char *name);
 ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers);
 uint32_t zend_get_class_fetch_type(zend_string *name);
 ZEND_API zend_uchar zend_get_call_op(const zend_op *init_op, zend_function *fbc);
+ZEND_API int zend_is_smart_branch(zend_op *opline);
 
 typedef zend_bool (*zend_auto_global_callback)(zend_string *name);
 typedef struct _zend_auto_global {
@@ -960,6 +966,11 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 #define ZEND_ARRAY_ELEMENT_REF		(1<<0)
 #define ZEND_ARRAY_NOT_PACKED		(1<<1)
 #define ZEND_ARRAY_SIZE_SHIFT		2
+
+/* For "use" AST nodes and the seen symbol table */
+#define ZEND_SYMBOL_CLASS    (1<<0)
+#define ZEND_SYMBOL_FUNCTION (1<<1)
+#define ZEND_SYMBOL_CONST    (1<<2)
 
 /* Pseudo-opcodes that are used only temporarily during compilation */
 #define ZEND_GOTO  253

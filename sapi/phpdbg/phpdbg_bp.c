@@ -230,7 +230,7 @@ PHPDBG_API void phpdbg_export_breakpoints_to_string(char **str) /* {{{ */
 	}
 } /* }}} */
 
-PHPDBG_API void phpdbg_set_breakpoint_file(const char *path, long line_num) /* {{{ */
+PHPDBG_API void phpdbg_set_breakpoint_file(const char *path, size_t path_len, long line_num) /* {{{ */
 {
 	php_stream_statbuf ssb;
 	char realpath[MAXPATHLEN];
@@ -240,10 +240,11 @@ PHPDBG_API void phpdbg_set_breakpoint_file(const char *path, long line_num) /* {
 
 	HashTable *broken, *file_breaks = &PHPDBG_G(bp)[PHPDBG_BREAK_FILE];
 	phpdbg_breakfile_t new_break;
-	size_t path_len = 0L;
 
-	if (VCWD_REALPATH(path, realpath)) {
-		path = realpath;
+	if (!path_len) {
+		if (VCWD_REALPATH(path, realpath)) {
+			path = realpath;
+		}
 	}
 	path_len = strlen(path);
 
@@ -886,21 +887,13 @@ static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_file(zend_op_array *op_
 {
 	HashTable *breaks;
 	phpdbg_breakbase_t *brake;
-	size_t path_len;
-	char realpath[MAXPATHLEN];
-	const char *path = ZSTR_VAL(op_array->filename);
-
-	if (VCWD_REALPATH(path, realpath)) {
-		path = realpath;
-	}
-
-	path_len = strlen(path);
 
 #if 0
-	phpdbg_debug("Op at: %.*s %d\n", path_len, path, (*EG(opline_ptr))->lineno);
+	phpdbg_debug("Op at: %.*s %d\n", ZSTR_LEN(op_array->filename), ZSTR_VAL(op_array->filename), (*EG(opline_ptr))->lineno);
 #endif
 
-	if (!(breaks = zend_hash_str_find_ptr(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE], path, path_len))) {
+	/* NOTE: realpath resolution should have happened at compile time - no reason to do it here again */
+	if (!(breaks = zend_hash_find_ptr(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE], op_array->filename))) {
 		return NULL;
 	}
 

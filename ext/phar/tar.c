@@ -286,7 +286,7 @@ bail:
 			}
 			curloc = php_stream_tell(fp);
 			read = php_stream_read(fp, buf, size);
-			if (read != size) {
+			if (read != size || read <= 8) {
 				if (error) {
 					spprintf(error, 4096, "phar error: tar-based phar \"%s\" signature cannot be read", fname);
 				}
@@ -959,6 +959,8 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 	entry.tar_type = '0';
 	entry.phar = phar;
 	entry.fp_type = PHAR_MOD;
+	entry.fp = NULL;
+	entry.filename = NULL;
 
 	if (phar->is_persistent) {
 		if (error) {
@@ -977,6 +979,7 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 		entry.filename_len = sizeof(".phar/alias.txt")-1;
 		entry.fp = php_stream_fopen_tmpfile();
 		if (entry.fp == NULL) {
+			efree(entry.filename);
 			spprintf(error, 0, "phar error: unable to create temporary file");
 			return -1;
 		}
@@ -984,6 +987,8 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 			if (error) {
 				spprintf(error, 0, "unable to set alias in tar-based phar \"%s\"", phar->fname);
 			}
+			php_stream_close(entry.fp);
+			efree(entry.filename);
 			return EOF;
 		}
 
@@ -993,8 +998,12 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 			if (error) {
 				spprintf(error, 0, "unable to set alias in tar-based phar \"%s\"", phar->fname);
 			}
+			php_stream_close(entry.fp);
+			efree(entry.filename);
 			return EOF;
 		}
+		/* At this point the entry is saved into the manifest. The manifest destroy
+			routine will care about any resources to be freed. */
 	} else {
 		zend_hash_str_del(&phar->manifest, ".phar/alias.txt", sizeof(".phar/alias.txt")-1);
 	}

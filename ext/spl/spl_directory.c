@@ -356,7 +356,7 @@ static zend_object *spl_filesystem_object_clone(zval *zobject)
 			break;
 		case SPL_FS_FILE:
 			zend_throw_error(NULL, "An object of class %s cannot be cloned", ZSTR_VAL(old_object->ce->name));
-			return NULL;
+			return new_object;
 	}
 
 	intern->file_class = source->file_class;
