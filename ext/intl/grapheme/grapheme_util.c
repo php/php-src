@@ -334,6 +334,52 @@ int32_t grapheme_get_haystack_offset(UBreakIterator* bi, int32_t offset)
 }
 /* }}} */
 
+typedef int32_t (*ubrk_start_t)(UBreakIterator *); // ubrk_first or ubrk_last
+typedef int32_t (*ubrk_move_t)(UBreakIterator *);  // ubrk_next or ubrk_previous
+
+/* {{{ 	utf16_grapheme_to_cu - convert grapheme offset to UTF-16 code unit offset */
+int32_t utf16_grapheme_to_cu(UBreakIterator *ubrk, int32_t offset)
+{
+	int32_t i, pos;
+	ubrk_start_t s;
+	ubrk_move_t m;
+
+	if (0 == offset) {
+		return 0;
+	}
+	if (offset < 0) {
+		s = ubrk_last;
+		m = ubrk_previous;
+		offset = -offset;
+	} else {
+		s = ubrk_first;
+		m = ubrk_next;
+	}
+	if (UBRK_DONE != (pos = s(ubrk))) {
+		for (i = 0; i < offset && UBRK_DONE != (pos = m(ubrk)); i++) {
+			;
+		}
+	}
+
+	return pos;
+}
+
+/* {{{ 	utf16_cu_to_grapheme - convert UTF-16 code unit offset to grapheme offset */
+int32_t utf16_cu_to_grapheme(UBreakIterator *ubrk, int32_t pos)
+{
+	int32_t l, u, offset;
+
+	offset = 0;
+	if (UBRK_DONE != (l = ubrk_first(ubrk))) {
+		while (l < pos && UBRK_DONE != (u = ubrk_next(ubrk))) {
+			l = u;
+			++offset;
+		}
+	}
+
+	return offset;
+}
+
 /* {{{ grapheme_strrpos_ascii: borrowed from the php ext/standard/string.c */
  zend_long
 grapheme_strrpos_ascii(char *haystack, size_t haystack_len, char *needle, size_t needle_len, int32_t offset)

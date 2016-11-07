@@ -36,7 +36,8 @@ int32_t grapheme_count_graphemes(UBreakIterator *bi, UChar *string, int32_t stri
 
 int32_t grapheme_get_haystack_offset(UBreakIterator* bi, int32_t offset);
 
-UBreakIterator* grapheme_get_break_iterator(void *stack_buffer, UErrorCode *status );
+int32_t utf16_cu_to_grapheme(UBreakIterator *ubrk, int32_t pos);
+int32_t utf16_grapheme_to_cu(UBreakIterator *ubrk, int32_t offset);
 
 /* OUTSIDE_STRING: check if (possibly negative) long offset is outside the string with int32_t length */
 #define OUTSIDE_STRING(offset, max_len) ( offset <= INT32_MIN || offset > INT32_MAX || (offset < 0 ? -offset > (zend_long) max_len : offset >= (zend_long) max_len) )

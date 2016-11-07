@@ -29,6 +29,7 @@
 #include "collator/collator_attr.h"
 #include "collator/collator_compare.h"
 #include "collator/collator_sort.h"
+#include "collator/collator_string.h"
 #include "collator/collator_convert.h"
 #include "collator/collator_locale.h"
 #include "collator/collator_create.h"
@@ -152,6 +153,29 @@ ZEND_BEGIN_ARG_INFO_EX(collator_sort_args, 0, 0, 2)
 	ZEND_ARG_OBJ_INFO(0, object, Collator, 0)
 	ZEND_ARG_ARRAY_INFO(1, arr, 0)
 	ZEND_ARG_INFO(0, sort_flags)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(collator_replace_args, 0, 0, 4)
+	ZEND_ARG_OBJ_INFO(0, object, Collator, 0)
+	ZEND_ARG_INFO(0, string)
+	ZEND_ARG_INFO(0, search)
+	ZEND_ARG_INFO(0, replacement)
+	ZEND_ARG_INFO(1, count)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(collator_index_args, 0, 0, 3)
+	ZEND_ARG_OBJ_INFO(0, object, Collator, 0)
+	ZEND_ARG_INFO(0, haystack)
+	ZEND_ARG_INFO(0, needle)
+	ZEND_ARG_INFO(0, start)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(collator_find_args, 0, 0, 3)
+	ZEND_ARG_OBJ_INFO(0, object, Collator, 0)
+	ZEND_ARG_INFO(0, haystack)
+	ZEND_ARG_INFO(0, needle)
+	ZEND_ARG_INFO(0, start)
+	ZEND_ARG_INFO(0, before)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(numfmt_parse_arginfo, 0, 0, 2)
@@ -635,6 +659,13 @@ zend_function_entry intl_functions[] = {
 	PHP_FE( collator_get_error_code, collator_0_args )
 	PHP_FE( collator_get_error_message, collator_0_args )
 	PHP_FE( collator_get_sort_key, collator_2_args )
+	PHP_FE( collator_replace, collator_replace_args )
+	PHP_FE( collator_rindex, collator_index_args )
+	PHP_FE( collator_lindex, collator_index_args )
+	PHP_FE( collator_rfind, collator_find_args )
+	PHP_FE( collator_lfind, collator_find_args )
+	PHP_FE( collator_startswith, collator_2_args )
+	PHP_FE( collator_endswith, collator_2_args )
 
 	/* formatter functions */
 	PHP_FE( numfmt_create, arginfo_numfmt_create )

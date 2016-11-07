@@ -24,6 +24,7 @@ if test "$PHP_INTL" != "no"; then
     collator/collator.c \
     collator/collator_class.c \
     collator/collator_sort.c \
+    collator/collator_string.c \
     collator/collator_convert.c \
     collator/collator_locale.c \
     collator/collator_compare.c \

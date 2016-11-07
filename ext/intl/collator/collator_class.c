@@ -20,6 +20,7 @@
 #include "collator_attr.h"
 #include "collator_compare.h"
 #include "collator_sort.h"
+#include "collator_string.h"
 #include "collator_convert.h"
 #include "collator_locale.h"
 #include "collator_create.h"
@@ -88,6 +89,26 @@ ZEND_BEGIN_ARG_INFO_EX( collator_sort_args, 0, 0, 1 )
 	ZEND_ARG_INFO( 0, flags )
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX( collator_replace_args, 0, 0, 3 )
+	ZEND_ARG_INFO(0, string)
+	ZEND_ARG_INFO(0, search)
+	ZEND_ARG_INFO(0, replacement)
+	ZEND_ARG_INFO(1, count)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX( collator_index_args, 0, 0, 2 )
+	ZEND_ARG_INFO(0, haystack)
+	ZEND_ARG_INFO(0, needle)
+	ZEND_ARG_INFO(0, start)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX( collator_find_args, 0, 0, 2 )
+	ZEND_ARG_INFO(0, haystack)
+	ZEND_ARG_INFO(0, needle)
+	ZEND_ARG_INFO(0, start)
+	ZEND_ARG_INFO(0, before)
+ZEND_END_ARG_INFO()
+
 /* }}} */
 
 /* {{{ Collator_class_functions
@@ -109,6 +130,13 @@ zend_function_entry Collator_class_functions[] = {
 	PHP_NAMED_FE( getErrorCode, ZEND_FN( collator_get_error_code ), collator_0_args )
 	PHP_NAMED_FE( getErrorMessage, ZEND_FN( collator_get_error_message ), collator_0_args )
 	PHP_NAMED_FE( getSortKey, ZEND_FN( collator_get_sort_key ), collator_2_args )
+	PHP_NAMED_FE( replace, ZEND_FN( collator_replace ), collator_replace_args )
+	PHP_NAMED_FE( rindex, ZEND_FN( collator_rindex ), collator_index_args )
+	PHP_NAMED_FE( lindex, ZEND_FN( collator_lindex ), collator_index_args )
+	PHP_NAMED_FE( rfind, ZEND_FN( collator_rfind ), collator_find_args )
+	PHP_NAMED_FE( lfind, ZEND_FN( collator_lfind ), collator_find_args )
+	PHP_NAMED_FE( startsWith, ZEND_FN( collator_startswith ), collator_2_args )
+	PHP_NAMED_FE( endsWith, ZEND_FN( collator_endswith ), collator_2_args )
 	PHP_FE_END
 };
 /* }}} */
