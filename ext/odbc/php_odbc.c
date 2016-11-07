@@ -876,9 +876,7 @@ PHP_MINFO_FUNCTION(odbc)
 /* {{{ odbc_sql_error */
 void odbc_sql_error(ODBC_SQL_ERROR_PARAMS)
 {
-	char   	    state[6];
 	SQLINTEGER	error;        /* Not used */
-	char   	    errormsg[SQL_MAX_MESSAGE_LENGTH];
 	SQLSMALLINT	errormsgsize; /* Not used */
 	RETCODE rc;
 	ODBC_SQL_ENV_T henv;
@@ -897,21 +895,19 @@ void odbc_sql_error(ODBC_SQL_ERROR_PARAMS)
 	   while(henv != SQL_NULL_HENV){
 		do {
 	 */
-	rc = SQLError(henv, conn, stmt, state, &error, errormsg, sizeof(errormsg)-1, &errormsgsize);
+	rc = SQLError(henv, conn, stmt, ODBCG(laststate), &error, ODBCG(lasterrormsg), sizeof(ODBCG(lasterrormsg))-1, &errormsgsize);
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
-		snprintf(state, sizeof(state), "HY000");
-		snprintf(errormsg, sizeof(errormsg), "Failed to fetch error message");
+		snprintf(ODBCG(laststate), sizeof(ODBCG(laststate)), "HY000");
+		snprintf(ODBCG(lasterrormsg), sizeof(ODBCG(lasterrormsg)), "Failed to fetch error message");
 	}
 	if (conn_resource) {
-		memcpy(conn_resource->laststate, state, sizeof(state));
-		memcpy(conn_resource->lasterrormsg, errormsg, sizeof(errormsg));
+		memcpy(conn_resource->laststate, ODBCG(laststate), sizeof(ODBCG(laststate)));
+		memcpy(conn_resource->lasterrormsg, ODBCG(lasterrormsg), sizeof(ODBCG(lasterrormsg)));
 	}
-	memcpy(ODBCG(laststate), state, sizeof(state));
-	memcpy(ODBCG(lasterrormsg), errormsg, sizeof(errormsg));
 	if (func) {
-		php_error_docref(NULL, E_WARNING, "SQL error: %s, SQL state %s in %s", errormsg, state, func);
+		php_error_docref(NULL, E_WARNING, "SQL error: %s, SQL state %s in %s", ODBCG(lasterrormsg), ODBCG(laststate), func);
 	} else {
-		php_error_docref(NULL, E_WARNING, "SQL error: %s, SQL state %s", errormsg, state);
+		php_error_docref(NULL, E_WARNING, "SQL error: %s, SQL state %s", ODBCG(lasterrormsg), ODBCG(laststate));
 	}
 	/*		
 		} while (SQL_SUCCEEDED(rc));
