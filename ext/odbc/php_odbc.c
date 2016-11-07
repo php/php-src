@@ -2442,6 +2442,7 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 	RETCODE rc;
 	
 	*conn = (odbc_connection *)pemalloc(sizeof(odbc_connection), persistent);
+	memset(*conn, 0, sizeof(odbc_connection));
 	(*conn)->persistent = persistent;
 	SQLAllocEnv(&((*conn)->henv));
 	SQLAllocConnect((*conn)->henv, &((*conn)->hdbc));
@@ -3047,38 +3048,30 @@ static void php_odbc_lasterror(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	odbc_connection *conn;
 	zval *pv_handle;
-	zend_string *ptr;
-	int len;
+	char *ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|r", &pv_handle) == FAILURE) {
 		return;
-	}
-
-	if (mode == 0) {  /* last state */
-		len = 6;
-	} else { /* last error message */
-		len = SQL_MAX_MESSAGE_LENGTH;
 	}
 
 	if (ZEND_NUM_ARGS() == 1) {
 		if (!(conn = (odbc_connection *)zend_fetch_resource2(Z_RES_P(pv_handle), "ODBC-Link", le_conn, le_pconn))) {
 			RETURN_FALSE;
 		}
-		ptr = zend_string_alloc(len + 1, 0);
 		if (mode == 0) {
-			strlcpy(ZSTR_VAL(ptr), conn->laststate, len+1);
+			ret = conn->laststate;
 		} else {
-			strlcpy(ZSTR_VAL(ptr), conn->lasterrormsg, len+1);
+			ret = conn->lasterrormsg;
 		}
 	} else {
-		ptr = zend_string_alloc(len, 0);
 		if (mode == 0) {
-			strlcpy(ZSTR_VAL(ptr), ODBCG(laststate), len+1);
+			ret = ODBCG(laststate);
 		} else {
-			strlcpy(ZSTR_VAL(ptr), ODBCG(lasterrormsg), len+1);
+			ret = ODBCG(lasterrormsg);
 		}
 	}
-	RETVAL_STR(ptr);
+
+	RETURN_STRING(ret);
 }
 /* }}} */
 
