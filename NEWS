@@ -17,6 +17,10 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug #67474 (getElementsByTagNameNS filter on default ns). (aboks)
 
+- Mysqli:
+  . Fixed bug #73462 (Persistent connections don't set $connect_errno).
+    (darkain)
+
 - Mysqlnd:
   . Fixed issue with decoding BIT columns when having more than one rows in the
     result set. 7.0+ problem. (Andrey)
