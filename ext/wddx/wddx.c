@@ -952,6 +952,7 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 						}
 
 						if (pce != PHP_IC_ENTRY && (pce->serialize || pce->unserialize)) {
+							zval_ptr_dtor(&ent2->data);
 							ZVAL_UNDEF(&ent2->data);
 							php_error_docref(NULL, E_WARNING, "Class %s can not be unserialized", Z_STRVAL(ent1->data));
 						} else {
