@@ -39,6 +39,9 @@ PHP                                                                        NEWS
 - CLI Server:
   . Fixed bug #73360 (Unable to work in root with unicode chars). (Anatol)
 
+- Standard:
+  . Fixed bug #73192 (parse_url return wrong hostname). (Nikita)
+
 - SQLite3:
   . Fixed bug #73333 (2147483647 is fetched as string). (cmb)
 
