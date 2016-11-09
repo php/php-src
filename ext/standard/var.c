@@ -1065,6 +1065,7 @@ PHP_FUNCTION(unserialize)
 	const unsigned char *p;
 	php_unserialize_data_t var_hash;
 	zval *options = NULL, *classes = NULL;
+	zval *retval;
 	HashTable *class_hash = NULL, *prev_class_hash;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|a", &buf, &buf_len, &options) == FAILURE) {
@@ -1105,22 +1106,16 @@ PHP_FUNCTION(unserialize)
 		php_var_unserialize_set_allowed_classes(var_hash, class_hash);
 	}
 
-	if (!php_var_unserialize(return_value, &p, p + buf_len, &var_hash)) {
-		zval_ptr_dtor(return_value);
+	retval = var_tmp_var(&var_hash);
+	if (!php_var_unserialize(retval, &p, p + buf_len, &var_hash)) {
 		if (!EG(exception)) {
 			php_error_docref(NULL, E_NOTICE, "Error at offset " ZEND_LONG_FMT " of %zd bytes",
 				(zend_long)((char*)p - buf), buf_len);
 		}
 		RETVAL_FALSE;
 	} else {
-		/* We should keep an reference to return_value to prevent it from being dtor
-		   in case nesting calls to unserialize */
-		var_push_dtor(&var_hash, return_value);
-
-		/* Ensure return value is a value */
-		if (Z_ISREF_P(return_value)) {
-			zend_unwrap_reference(return_value);
-		}
+		ZVAL_DEREF(retval);
+		ZVAL_COPY(return_value, retval);
 	}
 
 	if (class_hash) {

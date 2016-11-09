@@ -2136,11 +2136,6 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 		php_printf("\nwinsock.dll unusable. %d\n", WSAGetLastError());
 		return FAILURE;
 	}
-	/* Check that we actually got the requested WSA version */
-	if (LOBYTE(wsaData.wVersion) != 2 || HIBYTE(wsaData.wVersion) != 0) {
-		php_printf("\nwinsock.dll unusable. Requested version: %d.%d, got %d.%d", LOBYTE(wVersionRequested), HIBYTE(wVersionRequested), LOBYTE(wsaData.wVersion), HIBYTE(wsaData.wVersion));
-		return FAILURE;
-	}
 #endif
 
 	le_index_ptr = zend_register_list_destructors_ex(NULL, NULL, "index pointer", 0);
