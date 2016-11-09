@@ -82,6 +82,7 @@ PHP                                                                        NEWS
   . Fixed bug #73203 (passing additional_parameters causes mail to fail). (cmb)
   . Fixed bug #71241 (array_replace_recursive sometimes mutates its parameters).
     (adsr)
+  . Fixed bug #73192 (parse_url return wrong hostname). (Nikita)
 
 - Wddx:
   . Fixed bug #73331 (NULL Pointer Dereference in WDDX Packet Deserialization
