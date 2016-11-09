@@ -44,6 +44,14 @@ PHP                                                                        NEWS
     imagesetinterpolation()). (cmb)
   . Fixed bug #73279 (Integer overflow in gdImageScaleBilinearPalette()). (cmb)
   . Fixed bug #73280 (Stack Buffer Overflow in GD dynamicGetbuf). (cmb)
+  . Fixed bug #72482 (Ilegal write/read access caused by gdImageAALine
+    overflow). (cmb)
+  . Fixed bug #72696 (imagefilltoborder stackoverflow on truecolor images).
+    (cmb)
+
+- IMAP:
+  . Fixed bug #73418 (Integer Overflow in "_php_imap_mail" leads to crash).
+    (Anatol)
 
 - OCI8
   . Fixed bug #71148 (Bind reference overwritten on PHP 7). (Oracle Corp.)
@@ -74,6 +82,10 @@ PHP                                                                        NEWS
   . Fixed bug #73203 (passing additional_parameters causes mail to fail). (cmb)
   . Fixed bug #71241 (array_replace_recursive sometimes mutates its parameters).
     (adsr)
+
+- Wddx:
+  . Fixed bug #73331 (NULL Pointer Dereference in WDDX Packet Deserialization
+    with PDORow). (Stas)
 
 13 Oct 2016 PHP 7.0.12
 
