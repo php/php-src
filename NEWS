@@ -16,12 +16,25 @@ PHP                                                                        NEWS
   . Fixed bug #73337 (try/catch not working with two exceptions inside a same
     operation). (Dmitry)
 
+- Bz2:
+  . Fixed bug #73356 (crash in bzcompress function). (Stas)
+
 -GD:
   . Fixed bug #73213 (Integer overflow in imageline() with antialiasing). (cmb)
   . Fixed bug #73272 (imagescale() is not affected by, but affects
     imagesetinterpolation()). (cmb)
   . Fixed bug #73279 (Integer overflow in gdImageScaleBilinearPalette()). (cmb)
   . Fixed bug #73280 (Stack Buffer Overflow in GD dynamicGetbuf). (cmb)
+  . Fixed bug #72482 (Illegal write/read access caused by gdImageAALine overflow).
+    (cmb)
+  . Fixed bug #72696 (imagefilltoborder stackoverflow on truecolor images). (cmb)
+
+- Imap:
+  . Fixed bug #73418 (Integer Overflow in "_php_imap_mail" leads Heap Overflow).
+    (Anatol)
+
+- SPL:
+  . Fixed bug #73144 (Use-after-free in ArrayObject Deserialization). (Stas)
 
 - SOAP:
   . Fixed bug #73037 (SoapServer reports Bad Request when gzipped). (Anatol)
@@ -32,6 +45,10 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #73203 (passing additional_parameters causes mail to fail). (cmb)
   . Fixed bug #73188 (use after free in userspace streams). (Sara)
+
+- Wddx:
+  . Fixed bug #73331 (NULL Pointer Dereference in WDDX Packet Deserialization
+    with PDORow). (Stas)
 
 13 Oct 2016, PHP 5.6.27
 
