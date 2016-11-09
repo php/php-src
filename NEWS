@@ -45,6 +45,7 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #73203 (passing additional_parameters causes mail to fail). (cmb)
   . Fixed bug #73188 (use after free in userspace streams). (Sara)
+  . Fixed bug #73192 (parse_url return wrong hostname). (Nikita)
 
 - Wddx:
   . Fixed bug #73331 (NULL Pointer Dereference in WDDX Packet Deserialization
