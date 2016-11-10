@@ -254,12 +254,9 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					src = VAR_SOURCE(opline->op1);
 					if (src &&
 					    (src->opcode == ZEND_BOOL || src->opcode == ZEND_BOOL_NOT)) {
-						/* T = BOOL(X), FREE(T) => NOP */
-						if (ZEND_OP1_TYPE(src) == IS_CONST) {
-							literal_dtor(&ZEND_OP1_LITERAL(src));
-						}
+						/* T = BOOL(X), FREE(T) => T = BOOL(X) */
+						/* The remaining BOOL is removed by a separate optimization */
 						VAR_SOURCE(opline->op1) = NULL;
-						MAKE_NOP(src);
 						MAKE_NOP(opline);
 					}
 				} else if (opline->op1_type == IS_VAR) {
@@ -1660,7 +1657,7 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 							if (ZEND_OP1_TYPE(opline) == IS_CV) {
 								opline->opcode = ZEND_CHECK_VAR;
 								SET_UNUSED(opline->result);
-							} else if (ZEND_OP1_TYPE(opline) == IS_TMP_VAR) {
+							} else if (ZEND_OP1_TYPE(opline) & (IS_TMP_VAR|IS_VAR)) {
 								opline->opcode = ZEND_FREE;
 								SET_UNUSED(opline->result);
 							} else {
