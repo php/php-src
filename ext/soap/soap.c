@@ -941,6 +941,8 @@ PHP_METHOD(SoapFault, __toString)
 	zend_string *str;
 	zend_fcall_info fci;
 	zval *this_ptr;
+	zend_string *faultcode_val, *faultstring_val, *file_val;
+	zend_long line_val;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -966,16 +968,19 @@ PHP_METHOD(SoapFault, __toString)
 
 	zval_ptr_dtor(&fci.function_name);
 
-	convert_to_string(faultcode);
-	convert_to_string(faultstring);
-	convert_to_string(file);
-	convert_to_long(line);
+	faultcode_val = zval_get_string(faultcode);
+	faultstring_val = zval_get_string(faultstring);
+	file_val = zval_get_string(file);
+	line_val = zval_get_long(line);
 	convert_to_string(&trace);
 
 	str = strpprintf(0, "SoapFault exception: [%s] %s in %s:%pd\nStack trace:\n%s",
-	               Z_STRVAL_P(faultcode), Z_STRVAL_P(faultstring), Z_STRVAL_P(file), Z_LVAL_P(line),
+	               ZSTR_VAL(faultcode_val), ZSTR_VAL(faultstring_val), ZSTR_VAL(file_val), line_val,
 	               Z_STRLEN(trace) ? Z_STRVAL(trace) : "#0 {main}\n");
 
+	zend_string_release(file_val);
+	zend_string_release(faultstring_val);
+	zend_string_release(faultcode_val);
 	zval_ptr_dtor(&trace);
 
 	RETVAL_STR(str);
