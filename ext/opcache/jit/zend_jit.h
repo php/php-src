@@ -50,7 +50,7 @@
  */
 #define ZEND_JIT_HOT_FUNC_COST     1
 #define ZEND_JIT_HOT_LOOP_COST     2
-#define ZEND_JIT_HOT_COUNTER_INIT  1000
+#define ZEND_JIT_HOT_COUNTER_INIT  127
 
 #define ZEND_JIT_DEBUG_ASM       (1<<0)
 #define ZEND_JIT_DEBUG_SSA       (1<<1)

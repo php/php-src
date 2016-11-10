@@ -27,7 +27,7 @@ extern int zend_jit_profile_counter_rid;
 #define ZEND_COUNTER_INFO(op_array)  ((op_array)->reserved[zend_jit_profile_counter_rid])
 
 /* Hot Counters */
-#define ZEND_HOT_COUNTERS_COUNT 64
+#define ZEND_HOT_COUNTERS_COUNT 128
 
 extern int16_t zend_jit_hot_counters[ZEND_HOT_COUNTERS_COUNT];
 

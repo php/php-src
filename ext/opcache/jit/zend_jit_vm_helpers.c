@@ -125,9 +125,30 @@ void ZEND_FASTCALL zend_jit_profile_helper(void)
 	return ((zend_vm_opcode_handler_t)handler)();
 }
 
+static zend_always_inline zend_long _op_array_hash(const zend_op_array *op_array)
+{
+	uintptr_t x;
+
+	if (op_array->function_name) {
+		x = (uintptr_t)op_array >> 3;
+	} else {
+		x = (uintptr_t)op_array->filename >> 3;
+	}
+#if SIZEOF_SIZE_T == 4
+	x = ((x >> 16) ^ x) * 0x45d9f3b;
+	x = ((x >> 16) ^ x) * 0x45d9f3b;
+	x = (x >> 16) ^ x;
+#elif SIZEOF_SIZE_T == 8
+	x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9;
+	x = (x ^ (x >> 27)) * 0x94d049bb133111eb;
+	x = x ^ (x >> 31);
+#endif
+	return x;
+}
+
 void ZEND_FASTCALL zend_jit_func_counter_helper(void)
 {
-	unsigned int n = ((uintptr_t)EX(func) >> 3)  %
+	unsigned int n = _op_array_hash(&EX(func)->op_array)  %
 		(sizeof(zend_jit_hot_counters) / sizeof(zend_jit_hot_counters[0]));
 
 	zend_jit_hot_counters[n] -= ZEND_JIT_HOT_FUNC_COST;
@@ -144,7 +165,7 @@ void ZEND_FASTCALL zend_jit_func_counter_helper(void)
 
 void ZEND_FASTCALL zend_jit_loop_counter_helper(void)
 {
-	unsigned int n = ((uintptr_t)EX(func) >> 3)  %
+	unsigned int n = _op_array_hash(&EX(func)->op_array)  %
 		(sizeof(zend_jit_hot_counters) / sizeof(zend_jit_hot_counters[0]));
 
 	zend_jit_hot_counters[n] -= ZEND_JIT_HOT_LOOP_COST;
