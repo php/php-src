@@ -1,7 +1,5 @@
 --TEST--
 Bug #70172 - Use After Free Vulnerability in unserialize()
---XFAIL--
-Unfinished merge, needs fix.
 --FILE--
 <?php
 class obj implements Serializable {
@@ -61,7 +59,7 @@ array(2) {
     [0]=>
     array(1) {
       [0]=>
-      &object(obj2)#%d (1) {
+      object(obj2)#%d (1) {
         ["ryat"]=>
         int(1)
       }

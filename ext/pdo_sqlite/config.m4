@@ -79,7 +79,7 @@ if test "$PHP_PDO_SQLITE" != "no"; then
         threadsafe_flags="-DSQLITE_THREADSAFE=0"
       fi
 
-      other_flags="-DSQLITE_ENABLE_FTS3=1 -DSQLITE_CORE=1 -DSQLITE_ENABLE_COLUMN_METADATA=1"
+      other_flags="-DSQLITE_ENABLE_FTS3=1 -DSQLITE_ENABLE_FTS4=1 -DSQLITE_ENABLE_FTS5=1 -DSQLITE_CORE=1 -DSQLITE_ENABLE_COLUMN_METADATA=1"
 
 	  dnl As long as intl is not shared we can have ICU support
       if test "$PHP_INTL" = "yes" && test "$PHP_INTL_SHARED" != "yes"; then

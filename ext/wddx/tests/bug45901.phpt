@@ -14,5 +14,7 @@ echo wddx_serialize_value($xml, 'Variables') . "\n";
 echo "DONE";
 ?>
 --EXPECTF--
-<wddxPacket version='1.0'><header><comment>Variables</comment></header><data><struct><var name='php_class_name'><string>SimpleXMLElement</string></var><var name='test'><struct><var name='php_class_name'><string>SimpleXMLElement</string></var></struct></var></struct></data></wddxPacket>
+
+Warning: wddx_serialize_value(): Class SimpleXMLElement can not be serialized in %sbug45901.php on line %d
+<wddxPacket version='1.0'><header><comment>Variables</comment></header><data></data></wddxPacket>
 DONE
