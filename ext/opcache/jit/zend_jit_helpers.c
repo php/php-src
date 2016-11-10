@@ -1682,6 +1682,11 @@ static void ZEND_FASTCALL zend_jit_fetch_obj_is_dynamic(zend_object *zobj, zval 
 	zend_jit_fetch_obj_is_slow(zobj, offset, result);
 }
 
+static void ZEND_FASTCALL zend_jit_vm_stack_free_args_helper(zend_execute_data *call)
+{
+	zend_vm_stack_free_args(call);
+}
+
 /*
  * Local variables:
  * tab-width: 4

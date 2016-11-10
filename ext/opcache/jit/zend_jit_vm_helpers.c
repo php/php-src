@@ -87,6 +87,43 @@ void ZEND_FASTCALL zend_jit_leave_top_func_helper(uint32_t call_info)
 	opline = NULL;
 }
 
+void ZEND_FASTCALL zend_jit_copy_extra_args_helper(void)
+{
+	zend_op_array *op_array = &EX(func)->op_array;
+
+	if (EXPECTED(!(op_array->fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE))) {
+		uint32_t first_extra_arg = op_array->num_args;
+		uint32_t num_args = EX_NUM_ARGS();
+		zval *end, *src, *dst;
+		uint32_t type_flags = 0;
+
+		if (EXPECTED((op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0)) {
+			/* Skip useless ZEND_RECV and ZEND_RECV_INIT opcodes */
+			opline += first_extra_arg;
+		}
+
+		/* move extra args into separate array after all CV and TMP vars */
+		end = EX_VAR_NUM(first_extra_arg - 1);
+		src = end + (num_args - first_extra_arg);
+		dst = src + (op_array->last_var + op_array->T - first_extra_arg);
+		if (EXPECTED(src != dst)) {
+			do {
+				type_flags |= Z_TYPE_INFO_P(src);
+				ZVAL_COPY_VALUE(dst, src);
+				ZVAL_UNDEF(src);
+				src--;
+				dst--;
+			} while (src != end);
+		} else {
+			do {
+				type_flags |= Z_TYPE_INFO_P(src);
+				src--;
+			} while (src != end);
+		}
+		ZEND_ADD_CALL_FLAG(execute_data, ((type_flags >> Z_TYPE_FLAGS_SHIFT) & IS_TYPE_REFCOUNTED));
+	}
+}
+
 /* The recorded log may be postprocessed to identify the hot functions and
  * loops.
  *

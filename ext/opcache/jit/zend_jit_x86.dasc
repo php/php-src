@@ -5241,8 +5241,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		}
 	}
 	if (!func) {
-		// TODO: add support for unknown functions ???
-		goto fallback;
+		/* resolve function ar run time */
 	} else if (func->type == ZEND_USER_FUNCTION) {
 		if (call_info->num_args > func->op_array.num_args ||
 		    (opline-1)->opcode == ZEND_SEND_UNPACK ||
@@ -5287,29 +5286,33 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 
 	|	//call->prev_execute_data = execute_data;
 	|	mov EX:RX->prev_execute_data, EX
-	|
 
-	if (func && func->type == ZEND_USER_FUNCTION) {
-		|	// EX(call) = NULL;
-		|	mov aword EX:RX->call, 0
+	if (!func) {
+		|	mov r0, EX:RX->func
+		|	cmp byte [r0 + offsetof(zend_function, type)], ZEND_USER_FUNCTION
+		|	jne >8
 	}
 
-	if (func && func->type == ZEND_USER_FUNCTION) {
+	if (!func || func->type == ZEND_USER_FUNCTION) {
+		|	// EX(call) = NULL;
+		|	mov aword EX:RX->call, 0
 
 		if (RETURN_VALUE_USED(opline)) {
 			|	// ZVAL_NULL(EX_VAR(opline->result.var));
 			|	SET_Z_TYPE_INFO FP + opline->result.var, IS_NULL
 			|	// EX(return_value) = EX_VAR(opline->result.var);
-			|	lea r0, aword [FP + opline->result.var]
-			|	mov aword EX:RX->return_value, r0
+			|	lea r2, aword [FP + opline->result.var]
+			|	mov aword EX:RX->return_value, r2
 		} else {
 			|	// EX(return_value) = 0;
 			|	mov aword EX:RX->return_value, 0
 		}
 
-		for (i = call_info->num_args; i < func->op_array.last_var; i++) {
-			uint32_t n = (uint32_t)(uintptr_t)ZEND_CALL_VAR_NUM(NULL, i);
-			|	SET_Z_TYPE_INFO RX + n, IS_UNDEF
+		if (func) {
+			for (i = call_info->num_args; i < func->op_array.last_var; i++) {
+				uint32_t n = (uint32_t)(uintptr_t)ZEND_CALL_VAR_NUM(NULL, i);
+				|	SET_Z_TYPE_INFO RX + n, IS_UNDEF
+			}
 		}
 
 		//EX_LOAD_RUN_TIME_CACHE(op_array);
@@ -5317,25 +5320,29 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 			if (func && op_array == &func->op_array) {
 				/* recursive call */
 				if (func->op_array.cache_size > sizeof(void*)) {
-					|	mov r0, EX->run_time_cache
-					|	mov EX:RX->run_time_cache, r0
+					|	mov r2, EX->run_time_cache
+					|	mov EX:RX->run_time_cache, r2
 				}
 			} else {
-				|	mov r2, EX:RX->func
-				|	mov r0, aword [r2 + offsetof(zend_op_array, run_time_cache)]
-				|	mov EX:RX->run_time_cache, r0
+				if (func) {
+					|	mov r0, EX:RX->func
+				}
+				|	mov r2, aword [r0 + offsetof(zend_op_array, run_time_cache)]
+				|	mov EX:RX->run_time_cache, r2
 			}
 		}
 
 		|	//EX_LOAD_LITERALS(op_array);
 		|.if X64
-		||	if (zend_accel_in_shm(func->op_array.literals)) {
-		|		LOAD_ADDR r0, func->op_array.literals
-		|		mov EX:RX->literals, r0
+		||	if (func && zend_accel_in_shm(func->op_array.literals)) {
+		|		LOAD_ADDR r2, func->op_array.literals
+		|		mov EX:RX->literals, r2
 		||	} else {
-		|		mov r0, EX:RX->func
-		|		mov	r0, aword [r0 + offsetof(zend_op_array, literals)]
-		|		mov EX:RX->literals, r0
+		||		if (func) {
+		|			mov r0, EX:RX->func
+		||		}
+		|		mov	r2, aword [r0 + offsetof(zend_op_array, literals)]
+		|		mov EX:RX->literals, r2
 		||	}
 		|.endif
 
@@ -5344,14 +5351,63 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		|	mov FP, RX
 
 		|	// opline = op_array->opcodes;
-		if (zend_accel_in_shm(func->op_array.opcodes)) {
-			|	LOAD_ADDR IP, (func->op_array.opcodes + call_info->num_args)
-		} else {
-			|	mov r0, EX->func
-			|	mov	IP, aword [r0 + offsetof(zend_op_array, opcodes)]
-			if (call_info->num_args) {
-				|	add IP, (call_info->num_args * sizeof(zend_op))
+		if (func) {
+			if (func && zend_accel_in_shm(func->op_array.opcodes)) {
+				|	LOAD_ADDR IP, (func->op_array.opcodes + call_info->num_args)
+			} else {
+				if (func) {
+					|	mov r0, EX->func
+				}
+				|	mov	IP, aword [r0 + offsetof(zend_op_array, opcodes)]
+				if (call_info->num_args) {
+					|	add IP, (call_info->num_args * sizeof(zend_op))
+				}
 			}
+		} else {
+			|	// opline = op_array->opcodes
+			|	mov	IP, aword [r0 + offsetof(zend_op_array, opcodes)]
+			|	// first_extra_arg = op_array->num_args;
+			|	mov edx, dword [r0 + offsetof(zend_op_array, num_args)]
+			|	// num_args = EX_NUM_ARGS();
+			|	mov ecx, dword [FP + offsetof(zend_execute_data, This.u2.num_args)]
+			|	// 	if (UNEXPECTED(num_args > first_extra_arg))
+			|	cmp edx, ecx
+			|	jl >1
+			|.cold_code
+			|1:
+			|	EXT_CALL zend_jit_copy_extra_args_helper, r0
+			|	mov r0, EX->func // reload
+			|	mov ecx, dword [FP + offsetof(zend_execute_data, This.u2.num_args)] // reload
+			|	jmp >1
+			|.code
+			|	// if (EXPECTED((op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0))
+			|	test dword [r0 + offsetof(zend_op_array, fn_flags)], ZEND_ACC_HAS_TYPE_HINTS
+			|	jnz >1
+			|	// opline += num_args;
+			|.if X64
+			|	movsd r2, ecx
+			|	imul r2, r2, sizeof(zend_op)
+			|.else
+			|	imul r2, ecx, sizeof(zend_op)
+			|.endif
+			|	add IP, r2
+			|1:
+			|	// if (EXPECTED((int)num_args < op_array->last_var)) {
+			|	mov eax, dword [r0 + offsetof(zend_op_array, last_var)]
+			|	sub eax, ecx
+			|	jle >3 //???
+			|	// zval *var = EX_VAR_NUM(num_args);
+			|.if X64
+			|	movsd r1, ecx
+			|.endif
+			|	shl r1, 4
+			|	lea r1, [FP + r1 + (ZEND_CALL_FRAME_SLOT * sizeof(zval))]
+			|2:
+			|	SET_Z_TYPE_INFO r1, IS_UNDEF
+			|	sub eax, 1
+			|	lea r1, [r1 + 16]
+			|	jne <2
+			|3:
 		}
 
 		if (func && op_array == &func->op_array) {
@@ -5369,7 +5425,12 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 			|	jmp aword [IP]
 #endif
 		}
-	} else if (func && func->type == ZEND_INTERNAL_FUNCTION) {
+	}
+
+	if (!func || func->type == ZEND_INTERNAL_FUNCTION) {
+		if (!func) {
+			|8:
+		}
 		if (RETURN_VALUE_USED(opline)) {
 			|	// ZVAL_NULL(EX_VAR(opline->result.var));
 			|	lea FCARG2a, aword [FP + opline->result.var]
@@ -5388,12 +5449,20 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		|	// fbc->internal_function.handler(call, ret);
 		|.if X64
 		|	mov FCARG1a, RX
-		|	EXT_CALL func->internal_function.handler, r0
+		if (func) {
+			|	EXT_CALL func->internal_function.handler, r0
+		} else {
+			|	call aword [r0 + offsetof(zend_internal_function, handler)]
+		}
 		|.else
 		|	sub r4, 8
 		|	push FCARG2a
 		|	push RX
-		|	EXT_CALL func->internal_function.handler, r0
+		if (func) {
+			|	EXT_CALL func->internal_function.handler, r0
+		} else {
+			|	call aword [r0 + offsetof(zend_internal_function, handler)]
+		}
 		|	add r4, 16
 		|.endif
 
@@ -5401,9 +5470,14 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		|	mov aword [&EG(current_execute_data)], FP
 
 		|	// zend_vm_stack_free_args(call);
-		for (i = 0; i < call_info->num_args; i++ ) {
-			uint32_t offset = (uint32_t)(uintptr_t)ZEND_CALL_VAR_NUM(NULL, i);
-			|	ZVAL_PTR_DTOR RX + offset, MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN, 0, 1, 1, op_array->filename, opline->lineno
+		if (func) {
+			for (i = 0; i < call_info->num_args; i++ ) {
+				uint32_t offset = (uint32_t)(uintptr_t)ZEND_CALL_VAR_NUM(NULL, i);
+				|	ZVAL_PTR_DTOR RX + offset, MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN, 0, 1, 1, op_array->filename, opline->lineno
+			}
+		} else {
+			|	mov FCARG1a, RX 
+			|	EXT_CALL zend_jit_vm_stack_free_args_helper, r0
 		}
 
 		|	// zend_vm_stack_free_call_frame(call);
@@ -5419,7 +5493,9 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		|1:
 
 		if (opline->result_type == IS_UNUSED) {
-			uint32_t func_info = zend_get_func_info(call_info, ssa);
+			uint32_t func_info = call_info ?
+				zend_get_func_info(call_info, ssa) :
+				(MAY_BE_ANY|MAY_BE_REF|MAY_BE_RC1|MAY_BE_RCN);
 
 			if (func_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
 				|	ZVAL_PTR_DTOR r4 + 8, func_info, 1, 1, 0, op_array->filename, opline->lineno
@@ -5432,7 +5508,18 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		|	jne ->icall_throw_handler
 
 		// TODO: Can we avoid checking for interrupts after each call ???
-		return zend_jit_check_timeout(Dst, opline + 1);
+		if (!zend_jit_check_timeout(Dst, opline + 1)) {
+			return 0;
+		}
+		if (opline->opcode != ZEND_DO_ICALL) {
+			uint32_t target_label = ssa->cfg.map[opline - op_array->opcodes] + 1;
+
+			|	jmp =>target_label
+		}
+	}
+
+	if (!func) {
+		|9:
 	}
 
 	return 1;
