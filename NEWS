@@ -1,14 +1,25 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.1.0RC6
+?? ??? ????, PHP 7.1
+
+
+10 Nov 2016, PHP 7.1.0RC6
 
 - Core:
   . Fixded bug #72736 (Slow performance when fetching large dataset with mysqli
     / PDO). (Dmitry)
+  . Fixed bug #72482 (Ilegal write/read access caused by gdImageAALine
+    overflow). (cmb)
+  . Fixed bug #72696 (imagefilltoborder stackoverflow on truecolor images).
+    (cmb)
 
 - Date:
   . Fixed bug #73426 (createFromFormat with 'z' format char results in
     incorrect time). (Derick)
+
+- IMAP:
+  . Fixed bug #73418 (Integer Overflow in "_php_imap_mail" leads to crash).
+    (Anatol)
 
 - JSON:
   . Introduced encoder struct instead of global which fixes bugs #66025 and
@@ -28,6 +39,10 @@ PHP                                                                        NEWS
 
 - SPL:
   . Fixed bug #73423 (Reproducible crash with GDB backtrace). (Laruence)
+
+- Wddx:
+  . Fixed bug #73331 (NULL Pointer Dereference in WDDX Packet Deserialization
+    with PDORow). (Stas)
 
 27 Oct 2016, PHP 7.1.0RC5
 
