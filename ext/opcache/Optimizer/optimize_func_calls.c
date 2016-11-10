@@ -222,6 +222,14 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 							opline->opcode = ZEND_FETCH_STATIC_PROP_W;
 						}
 					} else {
+						if (opline->opcode == ZEND_FETCH_DIM_FUNC_ARG
+								&& opline->op2_type == IS_UNUSED) {
+							/* FETCH_DIM_FUNC_ARG supports UNUSED op2, while FETCH_DIM_R does not.
+							 * Performing the replacement would create an invalid opcode. */
+							call_stack[call - 1].try_inline = 0;
+							break;
+						}
+
 						opline->extended_value &= ZEND_FETCH_TYPE_MASK;
 						if (opline->opcode != ZEND_FETCH_STATIC_PROP_FUNC_ARG) {
 							opline->opcode -= 12;
