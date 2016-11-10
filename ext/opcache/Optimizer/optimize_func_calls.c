@@ -158,11 +158,11 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			case ZEND_INIT_STATIC_METHOD_CALL:
 			case ZEND_INIT_METHOD_CALL:
 			case ZEND_INIT_FCALL:
+			case ZEND_NEW:
 				call_stack[call].func = zend_optimizer_get_called_func(
 					ctx->script, op_array, opline, 0);
-				call_stack[call].try_inline = 1;
+				call_stack[call].try_inline = opline->opcode != ZEND_NEW;
 				/* break missing intentionally */
-			case ZEND_NEW:
 			case ZEND_INIT_DYNAMIC_CALL:
 			case ZEND_INIT_USER_CALL:
 				call_stack[call].opline = opline;
@@ -194,7 +194,8 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						fcall->op2.constant = fcall->op2.constant + 1;
 						opline->opcode = zend_get_call_op(fcall, call_stack[call].func);
 					} else if (fcall->opcode == ZEND_INIT_STATIC_METHOD_CALL
-							|| fcall->opcode == ZEND_INIT_METHOD_CALL) {
+							|| fcall->opcode == ZEND_INIT_METHOD_CALL
+							|| fcall->opcode == ZEND_NEW) {
 						/* We don't have specialized opcodes for this, do nothing */
 					} else {
 						ZEND_ASSERT(0);
