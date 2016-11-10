@@ -1659,6 +1659,7 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 						case ZEND_BOOL_NOT:
 							if (ZEND_OP1_TYPE(opline) == IS_TMP_VAR) {
 								opline->opcode = ZEND_FREE;
+								SET_UNUSED(opline->result);
 							} else {
 								if (ZEND_OP1_TYPE(opline) == IS_CONST) {
 									literal_dtor(&ZEND_OP1_LITERAL(opline));
