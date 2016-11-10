@@ -51,7 +51,7 @@ PHP_FUNCTION( numfmt_parse )
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os|lz/!",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os|ll!",
 		&object, NumberFormatter_ce_ptr,  &str, &str_len, &type, &zposition ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -60,19 +60,17 @@ PHP_FUNCTION( numfmt_parse )
 		RETURN_FALSE;
 	}
 
+	if(zposition) {
+		position = (int32_t)Z_LVAL_P( zposition );
+		position_p = &position;
+	}
+
 	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
 
 	/* Convert given string to UTF-16. */
 	intl_convert_utf8_to_utf16(&sstr, &sstr_len, str, str_len, &INTL_DATA_ERROR_CODE(nfo));
 	INTL_METHOD_CHECK_STATUS( nfo, "String conversion to UTF-16 failed" );
-
-	if(zposition) {
-		ZVAL_DEREF(zposition);
-		convert_to_long(zposition);
-		position = (int32_t)Z_LVAL_P( zposition );
-		position_p = &position;
-	}
 
 #if ICU_LOCALE_BUG && defined(LC_NUMERIC)
 	/* need to copy here since setlocale may change it later */

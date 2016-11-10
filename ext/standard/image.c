@@ -1470,7 +1470,7 @@ static void php_getimagesize_from_any(INTERNAL_FUNCTION_PARAMETERS, int mode) { 
 	size_t input_len;
 	const int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc, "s|z/", &input, &input_len, &info) == FAILURE) {
+	if (zend_parse_parameters(argc, "s|t", &input, &input_len, &info) == FAILURE) {
 			return;
 	}
 

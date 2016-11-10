@@ -292,6 +292,7 @@ struct _zend_resource {
 struct _zend_reference {
 	zend_refcounted_h gc;
 	zval              val;
+	zend_class_entry *type;
 };
 
 struct _zend_ast_ref {
@@ -572,6 +573,9 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_REFVAL(zval)				&Z_REF(zval)->val
 #define Z_REFVAL_P(zval_p)			Z_REFVAL(*(zval_p))
 
+#define Z_REFTYPE(zval)				&Z_REF(zval)->type
+#define Z_REFTYPE_P(zval_p)			Z_REFTYPE(*(zval_p))
+
 #define Z_AST(zval)					(zval).value.ast
 #define Z_AST_P(zval_p)				Z_AST(*(zval_p))
 
@@ -733,6 +737,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 		(zend_reference *) emalloc(sizeof(zend_reference));		\
 		GC_REFCOUNT(_ref) = 1;									\
 		GC_TYPE_INFO(_ref) = IS_REFERENCE;						\
+		_ref->type = NULL;									\
 		Z_REF_P(z) = _ref;										\
 		Z_TYPE_INFO_P(z) = IS_REFERENCE_EX;						\
 	} while (0)
@@ -743,6 +748,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 		GC_REFCOUNT(_ref) = 1;									\
 		GC_TYPE_INFO(_ref) = IS_REFERENCE;						\
 		ZVAL_COPY_VALUE(&_ref->val, r);							\
+		_ref->type = NULL;									\
 		Z_REF_P(z) = _ref;										\
 		Z_TYPE_INFO_P(z) = IS_REFERENCE_EX;						\
 	} while (0)

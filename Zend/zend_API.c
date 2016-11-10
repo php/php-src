@@ -500,9 +500,13 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 	int check_null = 0;
 	int separate = 0;
 	zval *real_arg = arg;
+	void *ref_type = NULL;
 
 	/* scan through modifiers */
-	ZVAL_DEREF(arg);
+	if (UNEXPECTED(Z_ISREF_P(arg))) {
+		ref_type = Z_REF_P(arg)->type;
+		arg = Z_REFVAL_P(arg);
+	}
 	while (1) {
 		if (*spec_walk == '/') {
 			SEPARATE_ZVAL_NOREF(arg);
@@ -527,7 +531,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 					is_null = va_arg(*va, zend_bool *);
 				}
 
-				if (!zend_parse_arg_long(arg, p, is_null, check_null, c == 'L')) {
+				if (!zend_parse_arg_long(arg, p, is_null, check_null, c == 'L', ref_type)) {
 					return "integer";
 				}
 			}
@@ -542,7 +546,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 					is_null = va_arg(*va, zend_bool *);
 				}
 
-				if (!zend_parse_arg_double(arg, p, is_null, check_null)) {
+				if (!zend_parse_arg_double(arg, p, is_null, check_null, ref_type)) {
 					return "float";
 				}
 			}
@@ -552,7 +556,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 			{
 				char **p = va_arg(*va, char **);
 				size_t *pl = va_arg(*va, size_t *);
-				if (!zend_parse_arg_string(arg, p, pl, check_null)) {
+				if (!zend_parse_arg_string(arg, p, pl, check_null, ref_type)) {
 					return "string";
 				}
 			}
@@ -562,7 +566,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 			{
 				char **p = va_arg(*va, char **);
 				size_t *pl = va_arg(*va, size_t *);
-				if (!zend_parse_arg_path(arg, p, pl, check_null)) {
+				if (!zend_parse_arg_path(arg, p, pl, check_null, ref_type)) {
 					return "a valid path";
 				}
 			}
@@ -571,7 +575,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 		case 'P':
 			{
 				zend_string **str = va_arg(*va, zend_string **);
-				if (!zend_parse_arg_path_str(arg, str, check_null)) {
+				if (!zend_parse_arg_path_str(arg, str, check_null, ref_type)) {
 					return "a valid path";
 				}
 			}
@@ -580,7 +584,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 		case 'S':
 			{
 				zend_string **str = va_arg(*va, zend_string **);
-				if (!zend_parse_arg_str(arg, str, check_null)) {
+				if (!zend_parse_arg_str(arg, str, check_null, ref_type)) {
 					return "string";
 				}
 			}
@@ -595,7 +599,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 					is_null = va_arg(*va, zend_bool *);
 				}
 
-				if (!zend_parse_arg_bool(arg, p, is_null, check_null)) {
+				if (!zend_parse_arg_bool(arg, p, is_null, check_null, ref_type)) {
 					return "boolean";
 				}
 			}
@@ -632,6 +636,17 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 				}
 			}
 			break;
+
+		case 't':
+			{
+				zval **p = va_arg(*va, zval **);
+
+				if (ref_type && !zend_verify_ref_type_assignable(ref_type, IS_ARRAY)) {
+					return "array";
+				}
+
+				zend_parse_arg_zval_deref(real_arg, p, check_null);
+			}
 
 		case 'o':
 			{
@@ -825,7 +840,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 			case 'f': case 'A':
 			case 'H': case 'p':
 			case 'S': case 'P':
-			case 'L':
+			case 'L': case 't':
 				max_num_args++;
 				break;
 

@@ -576,6 +576,17 @@ $op_data_get_zval_ptr_deref = array(
 	"TMPVARCV" => "???",
 );
 
+$op_data_get_zval_ptr_ptr = array(
+	"ANY"      => "get_zval_ptr_ptr((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data, \\1)",
+	"TMP"      => "NULL",
+	"VAR"      => "_get_zval_ptr_ptr_var((opline+1)->op1.var, execute_data, &free_op_data)",
+	"CONST"    => "NULL",
+	"UNUSED"   => "NULL",
+	"CV"       => "_get_zval_ptr_cv_\\1(execute_data, (opline+1)->op1.var)",
+	"TMPVAR"   => "???",
+	"TMPVARCV" => "???",
+);
+
 $op_data_free_op = array(
 	"ANY"      => "FREE_OP(free_op_data)",
 	"TMP"      => "zval_ptr_dtor_nogc(free_op_data)",
@@ -584,6 +595,17 @@ $op_data_free_op = array(
 	"UNUSED"   => "",
 	"CV"       => "",
 	"TMPVAR"   => "zval_ptr_dtor_nogc(free_op_data)",
+	"TMPVARCV" => "???",
+);
+
+$op_data_free_op_var_ptr = array(
+	"ANY"      => "if (free_op_data) {zval_ptr_dtor_nogc(free_op_data);}",
+	"TMP"      => "",
+	"VAR"      => "if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);}",
+	"CONST"    => "",
+	"UNUSED"   => "",
+	"CV"       => "",
+	"TMPVAR"   => "???",
 	"TMPVARCV" => "???",
 );
 
@@ -642,8 +664,10 @@ function helper_name($name, $spec, $op1, $op2) {
 	return $name.($spec?"_SPEC":"").$prefix[$op1].$prefix[$op2];
 }
 
-function opcode_name($name, $spec, $op1, $op2) {
+function opcode_name($name, $spec, $op1, $op2, $extra_spec) {
 	global $prefix, $opnames, $opcodes;
+
+	$extra = "";
 
 	if (isset($opnames[$name])) {
 		$opcode = $opcodes[$opnames[$name]];
@@ -657,8 +681,12 @@ function opcode_name($name, $spec, $op1, $op2) {
 		    isset($opcode["op2"]["ANY"])) {
 			$op2 = "ANY";
 		}
+		/* forward common specs (e.g. in ZEND_VM_DISPATCH_TO_HANDLER) */
+		if (isset($extra_spec, $opcode["spec"])) {
+			$extra = extra_spec_name(array_intersect_key($extra_spec, $opcode["spec"]));
+		}
 	}
-	return $name.($spec?"_SPEC":"").$prefix[$op1].$prefix[$op2];
+	return $name.($spec?"_SPEC":"").$prefix[$op1].$prefix[$op2].$extra;
 }
 
 // Generates code for opcode handler or helper
@@ -676,8 +704,9 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 		$op1_free, $op2_free, $op1_free_unfetched, $op2_free_unfetched,
 		$op1_free_op, $op2_free_op, $op1_free_op_if_var, $op2_free_op_if_var,
 		$op1_free_op_var_ptr, $op2_free_op_var_ptr, $prefix,
-		$op_data_type, $op_data_get_zval_ptr, $op_data_get_zval_ptr_deref,
-		$op_data_free_op, $op_data_free_unfetched;
+		$op_data_type, $op_data_get_zval_ptr,
+		$op_data_get_zval_ptr_deref, $op_data_get_zval_ptr_ptr,
+		$op_data_free_op, $op_data_free_op_var_ptr, $op_data_free_unfetched;
 
 	// Specializing
 	$code = preg_replace(
@@ -727,7 +756,9 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 			"/OP_DATA_TYPE/",
 			"/GET_OP_DATA_ZVAL_PTR\(([^)]*)\)/",
 			"/GET_OP_DATA_ZVAL_PTR_DEREF\(([^)]*)\)/",
+			"/GET_OP_DATA_ZVAL_PTR_PTR\(([^)]*)\)/",
 			"/FREE_OP_DATA\(\)/",
+			"/FREE_OP_DATA_VAR_PTR\(\)/",
 			"/FREE_UNFETCHED_OP_DATA\(\)/",
 			"/RETURN_VALUE_USED\(opline\)/",
 			"/arg_num <= MAX_ARG_FLAG_NUM/",
@@ -782,7 +813,9 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 			$op_data_type[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
 			$op_data_get_zval_ptr[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
 			$op_data_get_zval_ptr_deref[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
+			$op_data_get_zval_ptr_ptr[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
 			$op_data_free_op[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
+			$op_data_free_op_var_ptr[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
 			$op_data_free_unfetched[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
 			isset($extra_spec['RETVAL']) ? $extra_spec['RETVAL'] : "RETURN_VALUE_USED(opline)",
 			isset($extra_spec['QUICK_ARG']) ? $extra_spec['QUICK_ARG'] : "arg_num <= MAX_ARG_FLAG_NUM",
@@ -816,11 +849,11 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 					"/ZEND_VM_DISPATCH_TO_HANDLER\(\s*([A-Z_]*)\s*\)/m",
 					"/ZEND_VM_DISPATCH_TO_HELPER\(\s*([A-Za-z_]*)\s*(,[^)]*)?\)/m",
 				),
-				function($matches) use ($spec, $prefix, $op1, $op2) {
+				function($matches) use ($spec, $prefix, $op1, $op2, $extra_spec) {
 					if (strncasecmp($matches[0], "EXECUTE_DATA", strlen("EXECUTE_DATA")) == 0) {
 						return "execute_data";
 					} else if (strncasecmp($matches[0], "ZEND_VM_DISPATCH_TO_HANDLER", strlen("ZEND_VM_DISPATCH_TO_HANDLER")) == 0) {
-						return "ZEND_VM_TAIL_CALL(" . opcode_name($matches[1], $spec, $op1, $op2) . "_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU))";
+						return "ZEND_VM_TAIL_CALL(" . opcode_name($matches[1], $spec, $op1, $op2, $extra_spec) . "_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU))";
 					} else {
 						// ZEND_VM_DISPATCH_TO_HELPER
 						if (isset($matches[2])) {
@@ -840,11 +873,11 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 					"/ZEND_VM_DISPATCH_TO_HANDLER\(\s*([A-Z_]*)\s*\)/m",
 					"/ZEND_VM_DISPATCH_TO_HELPER\(\s*([A-Za-z_]*)\s*(,[^)]*)?\)/m",
 				),
-				function($matches) use ($spec, $prefix, $op1, $op2) {
+				function($matches) use ($spec, $prefix, $op1, $op2, $extra_spec) {
 					if (strncasecmp($matches[0], "EXECUTE_DATA", strlen("EXECUTE_DATA")) == 0) {
 						return "execute_data";
 					} else if (strncasecmp($matches[0], "ZEND_VM_DISPATCH_TO_HANDLER", strlen("ZEND_VM_DISPATCH_TO_HANDLER")) == 0) {
-						return "goto " . opcode_name($matches[1], $spec, $op1, $op2) . "_LABEL";
+						return "goto " . opcode_name($matches[1], $spec, $op1, $op2, $extra_spec) . "_LABEL";
 					} else {
 						// ZEND_VM_DISPATCH_TO_HELPER
 						if (isset($matches[2])) {
@@ -864,11 +897,11 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 					"/ZEND_VM_DISPATCH_TO_HANDLER\(\s*([A-Z_]*)\s*\)/m",
 					"/ZEND_VM_DISPATCH_TO_HELPER\(\s*([A-Za-z_]*)\s*(,[^)]*)?\)/m",
 				),
-				function($matches) use ($spec, $prefix, $op1, $op2) {
+				function($matches) use ($spec, $prefix, $op1, $op2, $extra_spec) {
 					if (strncasecmp($matches[0], "EXECUTE_DATA", strlen("EXECUTE_DATA")) == 0) {
 						return "execute_data";
 					} else if (strncasecmp($matches[0], "ZEND_VM_DISPATCH_TO_HANDLER", strlen("ZEND_VM_DISPATCH_TO_HANDLER")) == 0) {
-						return "goto " . opcode_name($matches[1], $spec, $op1, $op2) . "_HANDLER";
+						return "goto " . opcode_name($matches[1], $spec, $op1, $op2, $extra_spec) . "_HANDLER";
 					} else {
 						// ZEND_VM_DISPATCH_TO_HELPER
 						if (isset($matches[2])) {

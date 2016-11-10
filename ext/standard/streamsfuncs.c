@@ -102,7 +102,7 @@ PHP_FUNCTION(stream_socket_client)
 
 	RETVAL_FALSE;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|z/z/dlr", &host, &zerrno, &zerrstr, &timeout, &flags, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|zzdlr", &host, &zerrno, &zerrstr, &timeout, &flags, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -121,13 +121,11 @@ PHP_FUNCTION(stream_socket_client)
 	tv.tv_sec = conv / 1000000;
 	tv.tv_usec = conv % 1000000;
 #endif
-	if (zerrno)	{
-		zval_dtor(zerrno);
-		ZVAL_LONG(zerrno, 0);
+	if (zerrno) {
+		ZEND_TRY_ASSIGN_LONG(zerrno, 0);
 	}
 	if (zerrstr) {
-		zval_dtor(zerrstr);
-		ZVAL_EMPTY_STRING(zerrstr);
+		ZEND_TRY_ASSIGN_EMPTY_STRING(zerrstr);
 	}
 
 	stream = php_stream_xport_create(ZSTR_VAL(host), ZSTR_LEN(host), REPORT_ERRORS,
@@ -148,14 +146,12 @@ PHP_FUNCTION(stream_socket_client)
 		efree(hashkey);
 	}
 
-	if (stream == NULL)	{
+	if (stream == NULL) {
 		if (zerrno) {
-			zval_dtor(zerrno);
-			ZVAL_LONG(zerrno, err);
+			ZEND_TRY_ASSIGN_LONG(zerrno, err);
 		}
 		if (zerrstr && errstr) {
-			zval_dtor(zerrstr);
-			ZVAL_STR(zerrstr, errstr);
+			ZEND_TRY_ASSIGN_STR(zerrstr, errstr);
 		} else if (errstr) {
 			zend_string_release(errstr);
 		}
@@ -186,7 +182,7 @@ PHP_FUNCTION(stream_socket_server)
 
 	RETVAL_FALSE;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|z/z/lr", &host, &host_len, &zerrno, &zerrstr, &flags, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|zzlr", &host, &host_len, &zerrno, &zerrstr, &flags, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -196,13 +192,11 @@ PHP_FUNCTION(stream_socket_server)
 		GC_REFCOUNT(context->res)++;
 	}
 
-	if (zerrno)	{
-		zval_dtor(zerrno);
-		ZVAL_LONG(zerrno, 0);
+	if (zerrno) {
+		ZEND_TRY_ASSIGN_LONG(zerrno, 0);
 	}
 	if (zerrstr) {
-		zval_dtor(zerrstr);
-		ZVAL_EMPTY_STRING(zerrstr);
+		ZEND_TRY_ASSIGN_EMPTY_STRING(zerrstr);
 	}
 
 	stream = php_stream_xport_create(host, host_len, REPORT_ERRORS,
@@ -213,14 +207,12 @@ PHP_FUNCTION(stream_socket_server)
 		php_error_docref(NULL, E_WARNING, "unable to connect to %s (%s)", host, errstr == NULL ? "Unknown error" : ZSTR_VAL(errstr));
 	}
 
-	if (stream == NULL)	{
+	if (stream == NULL) {
 		if (zerrno) {
-			zval_dtor(zerrno);
-			ZVAL_LONG(zerrno, err);
+			ZEND_TRY_ASSIGN_LONG(zerrno, err);
 		}
 		if (zerrstr && errstr) {
-			zval_dtor(zerrstr);
-			ZVAL_STR(zerrstr, errstr);
+			ZEND_TRY_ASSIGN_STR(zerrstr, errstr);
 		} else if (errstr) {
 			zend_string_release(errstr);
 		}
@@ -252,7 +244,7 @@ PHP_FUNCTION(stream_socket_accept)
 		Z_PARAM_RESOURCE(zstream)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_DOUBLE(timeout)
-		Z_PARAM_ZVAL_EX(zpeername, 0, 1)
+		Z_PARAM_ZVAL(zpeername)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	php_stream_from_zval(stream, zstream);
@@ -266,10 +258,6 @@ PHP_FUNCTION(stream_socket_accept)
 	tv.tv_sec = conv / 1000000;
 	tv.tv_usec = conv % 1000000;
 #endif
-	if (zpeername) {
-		zval_dtor(zpeername);
-		ZVAL_NULL(zpeername);
-	}
 
 	if (0 == php_stream_xport_accept(stream, &clistream,
 				zpeername ? &peername : NULL,
@@ -278,7 +266,7 @@ PHP_FUNCTION(stream_socket_accept)
 				) && clistream) {
 
 		if (peername) {
-			ZVAL_STR(zpeername, peername);
+			ZEND_TRY_ASSIGN_STR(zpeername, peername);
 		}
 		php_stream_to_zval(clistream, return_value);
 	} else {
@@ -360,15 +348,14 @@ PHP_FUNCTION(stream_socket_recvfrom)
 	zend_long flags = 0;
 	int recvd;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl|lz/", &zstream, &to_read, &flags, &zremote) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl|lz", &zstream, &to_read, &flags, &zremote) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	php_stream_from_zval(stream, zstream);
 
 	if (zremote) {
-		zval_dtor(zremote);
-		ZVAL_NULL(zremote);
+		ZEND_TRY_ASSIGN_NULL(zremote);
 	}
 
 	if (to_read <= 0) {
@@ -384,7 +371,7 @@ PHP_FUNCTION(stream_socket_recvfrom)
 
 	if (recvd >= 0) {
 		if (zremote && remote_addr) {
-			ZVAL_STR(zremote, remote_addr);
+			ZEND_TRY_ASSIGN_STR(zremote, remote_addr);
 		}
 		ZSTR_VAL(read_buf)[recvd] = '\0';
 		ZSTR_LEN(read_buf) = recvd;

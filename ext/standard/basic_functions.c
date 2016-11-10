@@ -4299,14 +4299,13 @@ PHP_FUNCTION(getopt)
 	int optname_len = 0;
 	opt_struct *opts, *orig_opts;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|az/", &options, &options_len, &p_longopts, &zoptind) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|az", &options, &options_len, &p_longopts, &zoptind) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	/* Init zoptind to 1 */
 	if (zoptind) {
-		zval_dtor(zoptind);
-		ZVAL_LONG(zoptind, 1);
+		ZEND_TRY_ASSIGN_LONG(zoptind, 1);
 	}
 
 	/* Get argv from the global symbol table. We calculate argc ourselves
@@ -4452,7 +4451,7 @@ PHP_FUNCTION(getopt)
 
 	/* Set zoptind to php_optind */
 	if (zoptind) {
-		ZVAL_LONG(zoptind, php_optind);
+		ZEND_TRY_ASSIGN_LONG(zoptind, php_optind);
 	}
 
 	free_longopts(orig_opts);

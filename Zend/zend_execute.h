@@ -56,7 +56,42 @@ ZEND_API void ZEND_FASTCALL zend_check_internal_arg_type(zend_function *zf, uint
 ZEND_API int  ZEND_FASTCALL zend_check_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(zend_execute_data *execute_data);
 
-static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value, zend_uchar value_type)
+static zend_always_inline void *zend_get_prop_info_ref_type(zend_property_info *prop_info) {
+	if (prop_info->type == IS_OBJECT && UNEXPECTED(!prop_info->type_ce)) {
+		if (zend_string_equals_literal_ci(prop_info->type_name, "self")) {
+			prop_info->type_ce = prop_info->ce;
+		} else if (zend_string_equals_literal_ci(prop_info->type_name, "parent")) {
+			if (!prop_info->ce->parent) {
+				zend_throw_error(NULL, "Cannot access parent:: when current class scope has no parent");
+				return (void *) 0xFE;
+			}
+			prop_info->type_ce = prop_info->ce->parent;
+		} else {
+			prop_info->type_ce = zend_lookup_class(prop_info->type_name);
+			if (!prop_info->type_ce) {
+				zend_throw_error(NULL, "Class %s must be loaded when used by reference for property type", ZSTR_VAL(prop_info->type_name));
+				return (void *) 0xFE;
+			}
+		}
+	}
+
+	return (void *) (((prop_info->type & ~IS_OBJECT) << 1) | prop_info->allow_null | (uintptr_t) prop_info->type_ce);
+}
+
+/* do not call when new_type == IS_REFERENCE or new_type == IS_OBJECT! */
+static zend_always_inline zend_bool zend_verify_ref_type_assignable(void *type, zend_uchar new_type) {
+	if (0xFF >= (uintptr_t) type) {
+		zend_uchar cur_type = ((uintptr_t) type) >> 1;
+		return new_type == cur_type || (new_type == _IS_BOOL && (cur_type == IS_FALSE || cur_type == IS_TRUE));
+	} else {
+		return (0x1 & (uintptr_t) type) && new_type == IS_NULL;
+	}
+}
+
+ZEND_API zend_bool zend_verify_ref_type_assignable_zval(void *type, zval *zv, zend_bool strict);
+ZEND_API ZEND_COLD void zend_throw_ref_type_error(void *type, zval *zv);
+
+static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value, zend_uchar value_type, zend_bool strict)
 {
 	zend_refcounted *ref = NULL;
 
@@ -70,6 +105,11 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 			zend_refcounted *garbage;
 
 			if (Z_ISREF_P(variable_ptr)) {
+				if (!zend_verify_ref_type_assignable_zval(Z_REF_P(variable_ptr)->type, value, strict)) {
+					zend_throw_ref_type_error(Z_REF_P(variable_ptr)->type, value);
+					return Z_REFVAL_P(variable_ptr);
+				}
+
 				variable_ptr = Z_REFVAL_P(variable_ptr);
 				if (EXPECTED(!Z_REFCOUNTED_P(variable_ptr))) {
 					break;

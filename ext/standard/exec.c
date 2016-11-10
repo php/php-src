@@ -214,11 +214,11 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 	int ret;
 
 	if (mode) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|z/", &cmd, &cmd_len, &ret_code) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|t", &cmd, &cmd_len, &ret_code) == FAILURE) {
 			RETURN_FALSE;
 		}
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|z/z/", &cmd, &cmd_len, &ret_array, &ret_code) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|tz", &cmd, &cmd_len, &ret_array, &ret_code) == FAILURE) {
 			RETURN_FALSE;
 		}
 	}
@@ -241,8 +241,7 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		ret = php_exec(2, cmd, ret_array, return_value);
 	}
 	if (ret_code) {
-		zval_dtor(ret_code);
-		ZVAL_LONG(ret_code, ret);
+		ZEND_TRY_ASSIGN_LONG(ret_code, ret);
 	}
 }
 /* }}} */

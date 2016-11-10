@@ -341,7 +341,7 @@ PHP_FUNCTION(flock)
 	php_stream *stream;
 	zend_long operation = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl|z/", &res, &operation, &wouldblock) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl|z", &res, &operation, &wouldblock) == FAILURE) {
 		return;
 	}
 
@@ -354,15 +354,14 @@ PHP_FUNCTION(flock)
 	}
 
 	if (wouldblock) {
-		zval_dtor(wouldblock);
-		ZVAL_LONG(wouldblock, 0);
+		ZEND_TRY_ASSIGN_LONG(wouldblock, 0);
 	}
 
 	/* flock_values contains all possible actions if (operation & 4) we won't block on the lock */
 	act = flock_values[act - 1] | (operation & PHP_LOCK_NB ? LOCK_NB : 0);
 	if (php_stream_lock(stream, act)) {
 		if (operation && errno == EWOULDBLOCK && wouldblock) {
-			ZVAL_LONG(wouldblock, 1);
+			ZEND_TRY_ASSIGN_LONG(wouldblock, 1);
 		}
 		RETURN_FALSE;
 	}

@@ -720,7 +720,7 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, v
 				zval tmp, *val;
 
 				if (UNEXPECTED(prop_info)) {
-					val = zend_verify_property_type(prop_info, value, &tmp, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)));
+					val = zend_verify_property_type(prop_info, value, &tmp, EG(current_execute_data) && ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)));
 					if (UNEXPECTED(!val)) {
 						zend_verify_property_type_error(prop_info, Z_STR_P(member), value);
 						goto exit;
@@ -728,7 +728,7 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, v
 					value = val;
 				}
 found:
-				zend_assign_to_variable(variable_ptr, value, IS_CV);
+				zend_assign_to_variable(variable_ptr, value, IS_CV, EG(current_execute_data) && ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)));
 				goto exit;
 			}
 		} else if (EXPECTED(zobj->properties != NULL)) {
