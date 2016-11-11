@@ -53,7 +53,6 @@ PHP_METHOD(SessionHandler, open)
 	}
 
 	PS(mod_user_is_open) = 1;
-	PS(in_save_handler) = 1;
 
 	zend_try {
 		ret = PS(default_mod)->s_open(&PS(mod_data), save_path, session_name);
@@ -62,7 +61,6 @@ PHP_METHOD(SessionHandler, open)
 		zend_bailout();
 	} zend_end_try();
 
-	PS(in_save_handler) = 0;
 	RETVAL_BOOL(SUCCESS == ret);
 }
 /* }}} */
@@ -80,7 +78,6 @@ PHP_METHOD(SessionHandler, close)
 	zend_parse_parameters_none();
 
 	PS(mod_user_is_open) = 0;
-	PS(in_save_handler) = 1;
 
 	zend_try {
 		ret = PS(default_mod)->s_close(&PS(mod_data));
@@ -89,7 +86,6 @@ PHP_METHOD(SessionHandler, close)
 		zend_bailout();
 	} zend_end_try();
 
-	PS(in_save_handler) = 0;
 	RETVAL_BOOL(SUCCESS == ret);
 }
 /* }}} */
@@ -120,7 +116,6 @@ PHP_METHOD(SessionHandler, read)
 PHP_METHOD(SessionHandler, write)
 {
 	zend_string *key, *val;
-	zend_bool ret;
 
 	PS_SANITY_CHECK_IS_OPEN;
 
@@ -128,11 +123,7 @@ PHP_METHOD(SessionHandler, write)
 		return;
 	}
 
-	PS(in_save_handler) = 1;
-	ret = PS(default_mod)->s_write(&PS(mod_data), key, val, PS(gc_maxlifetime));
-	PS(in_save_handler) = 0;
-
-	RETURN_BOOL(SUCCESS == ret);
+	RETURN_BOOL(SUCCESS == PS(default_mod)->s_write(&PS(mod_data), key, val, PS(gc_maxlifetime)));
 }
 /* }}} */
 
@@ -141,7 +132,6 @@ PHP_METHOD(SessionHandler, write)
 PHP_METHOD(SessionHandler, destroy)
 {
 	zend_string *key;
-	zend_bool ret;
 
 	PS_SANITY_CHECK_IS_OPEN;
 
@@ -149,11 +139,7 @@ PHP_METHOD(SessionHandler, destroy)
 		return;
 	}
 
-	PS(in_save_handler) = 1;
-	ret = PS(default_mod)->s_destroy(&PS(mod_data), key);
-	PS(in_save_handler) = 0;
-
-	RETURN_BOOL(SUCCESS == ret);
+	RETURN_BOOL(SUCCESS == PS(default_mod)->s_destroy(&PS(mod_data), key));
 }
 /* }}} */
 
@@ -170,12 +156,9 @@ PHP_METHOD(SessionHandler, gc)
 		return;
 	}
 
-	PS(in_save_handler) = 1;
 	if (PS(default_mod)->s_gc(&PS(mod_data), maxlifetime, &nrdels) == FAILURE) {
-		PS(in_save_handler) = 0;
 		RETURN_FALSE;
 	}
-	PS(in_save_handler) = 0;
 	RETURN_LONG(nrdels);
 }
 /* }}} */
@@ -192,9 +175,7 @@ PHP_METHOD(SessionHandler, create_sid)
 	    return;
 	}
 
-	PS(in_save_handler) = 1;
 	id = PS(default_mod)->s_create_sid(&PS(mod_data));
-	PS(in_save_handler) = 0;
 
 	RETURN_STR(id);
 }
@@ -222,7 +203,6 @@ PHP_METHOD(SessionHandler, validateId)
 PHP_METHOD(SessionHandler, updateTimestamp)
 {
 	zend_string *key, *val;
-	zend_bool ret;
 
 	PS_SANITY_CHECK_IS_OPEN;
 
@@ -230,11 +210,7 @@ PHP_METHOD(SessionHandler, updateTimestamp)
 		return;
 	}
 
-	PS(in_save_handler) = 1;
-	ret = PS(default_mod)->s_write(&PS(mod_data), key, val, PS(gc_maxlifetime));
-	PS(in_save_handler) = 0;
-
 	/* Legacy save handler may not support update_timestamp API. Just write. */
-	RETVAL_BOOL(SUCCESS == ret);
+	RETVAL_BOOL(SUCCESS == PS(default_mod)->s_write(&PS(mod_data), key, val, PS(gc_maxlifetime)));
 }
 /* }}} */
