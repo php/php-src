@@ -5385,7 +5385,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 			|	jnz >1
 			|	// opline += num_args;
 			|.if X64
-			|	movsd r2, ecx
+			|	movsxd r2, ecx
 			|	imul r2, r2, sizeof(zend_op)
 			|.else
 			|	imul r2, ecx, sizeof(zend_op)
@@ -5398,7 +5398,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 			|	jle >3 //???
 			|	// zval *var = EX_VAR_NUM(num_args);
 			|.if X64
-			|	movsd r1, ecx
+			|	movsxd r1, ecx
 			|.endif
 			|	shl r1, 4
 			|	lea r1, [FP + r1 + (ZEND_CALL_FRAME_SLOT * sizeof(zval))]
