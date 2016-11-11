@@ -124,6 +124,20 @@ void ZEND_FASTCALL zend_jit_copy_extra_args_helper(void)
 	}
 }
 
+void ZEND_FASTCALL zend_jit_deprecated_or_abstract_helper(void)
+{
+	zend_function *fbc = ((zend_execute_data*)(opline))->func;
+
+	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_ABSTRACT) != 0)) {
+		zend_throw_error(NULL, "Cannot call abstract method %s::%s()", ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+	} else if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
+		zend_error(E_DEPRECATED, "Function %s%s%s() is deprecated",
+			fbc->common.scope ? ZSTR_VAL(fbc->common.scope->name) : "",
+			fbc->common.scope ? "::" : "",
+			ZSTR_VAL(fbc->common.function_name));
+	}
+}
+
 /* The recorded log may be postprocessed to identify the hot functions and
  * loops.
  *

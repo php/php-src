@@ -1169,6 +1169,7 @@ pass:
 					case ZEND_DO_UCALL:
 					case ZEND_DO_ICALL:
 //					case ZEND_DO_FCALL_BY_NAME:
+//					case ZEND_DO_FCALL:
 						if (!zend_jit_do_fcall(&dasm_state, opline, op_array, ssa, call_level)) {
 							goto jit_failure;
 						}

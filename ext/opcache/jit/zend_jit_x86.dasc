@@ -5100,27 +5100,21 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, zen
 	return 1;
 }
 
-static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, zend_op_array *op_array, zend_ssa *ssa)
+static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, zend_op_array *op_array, zend_ssa *ssa, const zend_op *opline)
 {
-	const zend_op *opline, *end;
 	int skip;
 
 	if (!call_info) {
-		return 1;
-	}
+		const zend_op *end = op_array->opcodes + op_array->last;
 
-	opline = call_info->caller_init_opline;
-	end = call_info->caller_call_opline;
-
-	if (end - op_array->opcodes >= ssa->cfg.blocks[b].start + ssa->cfg.blocks[b].len) {
-		/* INIT_FCALL and DO_FCALL in different BasicBlocks */
-		return 1;
-	}
-
-	opline++;
-	skip = 1;
-	while (opline != end) {
-		if (skip) {
+		opline++;
+		skip = 1;
+		while (opline != end) {
+			if (!skip) {
+				if (zend_may_throw(opline, op_array, ssa)) {
+					return 1;
+				}
+			}
 			switch (opline->opcode) {
 				case ZEND_SEND_VAL:
 				case ZEND_SEND_VAR:
@@ -5134,17 +5128,84 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, zend
 				case ZEND_SEND_ARRAY:
 				case ZEND_SEND_USER:
 				case ZEND_SEND_UNPACK:
+				case ZEND_INIT_FCALL:
+				case ZEND_INIT_METHOD_CALL:
+				case ZEND_INIT_STATIC_METHOD_CALL:
+				case ZEND_INIT_FCALL_BY_NAME:
+				case ZEND_INIT_NS_FCALL_BY_NAME:
+				case ZEND_INIT_DYNAMIC_CALL:
+				case ZEND_NEW:
+				case ZEND_INIT_USER_CALL:
+				case ZEND_FAST_CALL:
+				case ZEND_JMP:
+				case ZEND_JMPZNZ:
+				case ZEND_JMPZ:
+				case ZEND_JMPNZ:
+				case ZEND_JMPZ_EX:
+				case ZEND_JMPNZ_EX:
+				case ZEND_FE_RESET_R:
+				case ZEND_FE_RESET_RW:
+				case ZEND_JMP_SET:
+				case ZEND_COALESCE:
+				case ZEND_ASSERT_CHECK:
+				case ZEND_CATCH:
+				case ZEND_DECLARE_ANON_CLASS:
+				case ZEND_DECLARE_ANON_INHERITED_CLASS:
+				case ZEND_FE_FETCH_R:
+				case ZEND_FE_FETCH_RW:
 					return 1;
+				case ZEND_DO_ICALL:
+				case ZEND_DO_UCALL:
+				case ZEND_DO_FCALL_BY_NAME:
+				case ZEND_DO_FCALL:
+					end = opline;
+					if (end - op_array->opcodes >= ssa->cfg.blocks[b].start + ssa->cfg.blocks[b].len) {
+						/* INIT_FCALL and DO_FCALL in different BasicBlocks */
+						return 1;
+					}
+					return 0;
 			}
-		} else {
-			if (zend_may_throw(opline, op_array, ssa)) {
-				return 1;
-			}
+			opline++;
 		}
-		opline++;
-	}
 
-	return 0;
+		return 1;
+	} else {
+		const zend_op *end = call_info->caller_call_opline;
+
+		if (end - op_array->opcodes >= ssa->cfg.blocks[b].start + ssa->cfg.blocks[b].len) {
+			/* INIT_FCALL and DO_FCALL in different BasicBlocks */
+			return 1;
+		}
+
+		opline++;
+		skip = 1;
+		while (opline != end) {
+			if (skip) {
+				switch (opline->opcode) {
+					case ZEND_SEND_VAL:
+					case ZEND_SEND_VAR:
+					case ZEND_SEND_VAL_EX:
+					case ZEND_SEND_VAR_EX:
+					case ZEND_SEND_REF:
+					case ZEND_SEND_VAR_NO_REF:
+					case ZEND_SEND_VAR_NO_REF_EX:
+						skip = 0;
+						break;
+					case ZEND_SEND_ARRAY:
+					case ZEND_SEND_USER:
+					case ZEND_SEND_UNPACK:
+						return 1;
+				}
+			} else {
+				if (zend_may_throw(opline, op_array, ssa)) {
+					return 1;
+				}
+			}
+			opline++;
+		}
+
+		return 0;
+	}
 }
 
 static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t b, zend_op_array *op_array, zend_ssa *ssa, int call_level)
@@ -5197,6 +5258,7 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 			ZEND_ASSERT(0);
 		}
 		if (opline->opcode != ZEND_INIT_FCALL) {
+			// TODO: INIT_FCALL may fail in some cases ???
 			|	test r0, r0
 			|	jz ->exception_handler
 		}
@@ -5212,7 +5274,7 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 		return 0;
 	}
 
-	if (zend_jit_needs_call_chain(call_info, b, op_array, ssa)) {
+	if (zend_jit_needs_call_chain(call_info, b, op_array, ssa, opline)) {
 		if (!zend_jit_save_call_chain(Dst, call_level)) {
 			return 0;
 		}
@@ -5291,6 +5353,30 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		|	mov r0, EX:RX->func
 		|	cmp byte [r0 + offsetof(zend_function, type)], ZEND_USER_FUNCTION
 		|	jne >8
+	}
+
+	if (opline->opcode == ZEND_DO_FCALL) {
+		if (!func) {
+			|	test dword [r0 + offsetof(zend_op_array, fn_flags)], (ZEND_ACC_DEPRECATED|ZEND_ACC_ABSTRACT)
+			|	jnz >1
+			|.cold_code
+			|1:
+			|	EXT_CALL zend_jit_deprecated_or_abstract_helper, r0
+			|	cmp aword [&EG(exception)], 0
+			|	jne ->exception_handler
+			|	mov r0, EX->func // reload
+			|	jmp >1
+			|.code
+			|1:
+		} else if (func->common.fn_flags & ZEND_ACC_ABSTRACT) {
+			|	EXT_CALL zend_jit_deprecated_or_abstract_helper, r0
+			|	jmp ->exception_handler
+		} else if (func->common.fn_flags & ZEND_ACC_DEPRECATED) {
+			|	EXT_CALL zend_jit_deprecated_or_abstract_helper, r0
+			|	cmp aword [&EG(exception)], 0
+			|	jne ->exception_handler
+			|	mov r0, EX->func // reload
+		}
 	}
 
 	if (!func || func->type == ZEND_USER_FUNCTION) {
@@ -5393,8 +5479,8 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 			|	add IP, r2
 			|1:
 			|	// if (EXPECTED((int)num_args < op_array->last_var)) {
-			|	mov eax, dword [r0 + offsetof(zend_op_array, last_var)]
-			|	sub eax, ecx
+			|	mov edx, dword [r0 + offsetof(zend_op_array, last_var)]
+			|	sub edx, ecx
 			|	jle >3 //???
 			|	// zval *var = EX_VAR_NUM(num_args);
 			|.if X64
@@ -5404,7 +5490,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 			|	lea r1, [FP + r1 + (ZEND_CALL_FRAME_SLOT * sizeof(zval))]
 			|2:
 			|	SET_Z_TYPE_INFO r1, IS_UNDEF
-			|	sub eax, 1
+			|	sub edx, 1
 			|	lea r1, [r1 + 16]
 			|	jne <2
 			|3:
@@ -5430,6 +5516,29 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 	if (!func || func->type == ZEND_INTERNAL_FUNCTION) {
 		if (!func) {
 			|8:
+		}
+		if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
+			if (!func) {
+				|	test dword [r0 + offsetof(zend_op_array, fn_flags)], (ZEND_ACC_DEPRECATED|ZEND_ACC_ABSTRACT)
+				|	jnz >1
+				|.cold_code
+				|1:
+				|	EXT_CALL zend_jit_deprecated_or_abstract_helper, r0
+				|	cmp aword [&EG(exception)], 0
+				|	jne ->exception_handler
+				|	mov r0, EX->func // reload
+				|	jmp >1
+				|.code
+				|1:
+			} else if (func->common.fn_flags & ZEND_ACC_ABSTRACT) {
+				|	EXT_CALL zend_jit_deprecated_or_abstract_helper, r0
+				|	jmp ->exception_handler
+			} else if (func->common.fn_flags & ZEND_ACC_DEPRECATED) {
+				|	EXT_CALL zend_jit_deprecated_or_abstract_helper, r0
+				|	cmp aword [&EG(exception)], 0
+				|	jne ->exception_handler
+				|	mov r0, EX->func // reload
+			}
 		}
 		if (RETURN_VALUE_USED(opline)) {
 			|	// ZVAL_NULL(EX_VAR(opline->result.var));
@@ -5478,6 +5587,21 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		} else {
 			|	mov FCARG1a, RX 
 			|	EXT_CALL zend_jit_vm_stack_free_args_helper, r0
+		}
+
+		if (opline->opcode == ZEND_DO_FCALL) {
+			// TODO: optimize ???
+			|	// if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS))
+			|	test byte [RX + offsetof(zend_execute_data, This.u1.type_info) + 2], ZEND_CALL_RELEASE_THIS
+			|	jnz >1
+			|.cold_code
+			|1:
+			|	// OBJ_RELEASE(object);
+			|	GET_Z_PTR r0, RX + offsetof(zend_execute_data, This)
+			|	OBJ_RELEASE r0, ecx, >2
+			|	jmp >2
+			|.code
+			|2:
 		}
 
 		|	// zend_vm_stack_free_call_frame(call);
