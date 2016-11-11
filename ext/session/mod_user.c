@@ -75,15 +75,7 @@ PS_OPEN_FUNC(user)
 	zval args[2];
 	STDVARS;
 
-	if (PS(in_save_handler)) {
-		PS(in_save_handler) = 0;
-		php_error_docref(NULL, E_WARNING, "Cannot call save handler function recursive manner");
-		return FAILURE;
-	}
-	PS(in_save_handler) = 1;
-
 	if (Z_ISUNDEF(PSF(open))) {
-		PS(in_save_handler) = 0;
 		php_error_docref(NULL, E_WARNING,
 			"user session functions not defined");
 
@@ -96,7 +88,6 @@ PS_OPEN_FUNC(user)
 	zend_try {
 		ps_call_handler(&PSF(open), 2, args, &retval);
 	} zend_catch {
-		PS(in_save_handler) = 0;
 		PS(session_status) = php_session_none;
 		if (!Z_ISUNDEF(retval)) {
 			zval_ptr_dtor(&retval);
@@ -106,7 +97,6 @@ PS_OPEN_FUNC(user)
 
 	PS(mod_user_implemented) = 1;
 
-	PS(in_save_handler) = 0;
 	FINISH;
 }
 
@@ -115,16 +105,8 @@ PS_CLOSE_FUNC(user)
 	zend_bool bailout = 0;
 	STDVARS;
 
-	if (PS(in_save_handler)) {
-		PS(in_save_handler) = 0;
-		php_error_docref(NULL, E_WARNING, "Cannot call save handler function recursive manner");
-		return FAILURE;
-	}
-	PS(in_save_handler) = 1;
-
 	if (!PS(mod_user_implemented)) {
 		/* already closed */
-		PS(in_save_handler) = 0;
 		return SUCCESS;
 	}
 
@@ -137,14 +119,12 @@ PS_CLOSE_FUNC(user)
 	PS(mod_user_implemented) = 0;
 
 	if (bailout) {
-		PS(in_save_handler) = 0;
 		if (!Z_ISUNDEF(retval)) {
 			zval_ptr_dtor(&retval);
 		}
 		zend_bailout();
 	}
 
-	PS(in_save_handler) = 0;
 	FINISH;
 }
 
@@ -152,13 +132,6 @@ PS_READ_FUNC(user)
 {
 	zval args[1];
 	STDVARS;
-
-	if (PS(in_save_handler)) {
-		PS(in_save_handler) = 0;
-		php_error_docref(NULL, E_WARNING, "Cannot call save handler function recursive manner");
-		return FAILURE;
-	}
-	PS(in_save_handler) = 1;
 
 	ZVAL_STR_COPY(&args[0], key);
 
@@ -172,7 +145,6 @@ PS_READ_FUNC(user)
 		zval_ptr_dtor(&retval);
 	}
 
-	PS(in_save_handler) = 0;
 	return ret;
 }
 
@@ -181,19 +153,11 @@ PS_WRITE_FUNC(user)
 	zval args[2];
 	STDVARS;
 
-	if (PS(in_save_handler)) {
-		PS(in_save_handler) = 0;
-		php_error_docref(NULL, E_WARNING, "Cannot call save handler function recursive manner");
-		return FAILURE;
-	}
-	PS(in_save_handler) = 1;
-
 	ZVAL_STR_COPY(&args[0], key);
 	ZVAL_STR_COPY(&args[1], val);
 
 	ps_call_handler(&PSF(write), 2, args, &retval);
 
-	PS(in_save_handler) = 0;
 	FINISH;
 }
 
@@ -202,18 +166,10 @@ PS_DESTROY_FUNC(user)
 	zval args[1];
 	STDVARS;
 
-	if (PS(in_save_handler)) {
-		PS(in_save_handler) = 0;
-		php_error_docref(NULL, E_WARNING, "Cannot call save handler function recursive manner");
-		return FAILURE;
-	}
-	PS(in_save_handler) = 1;
-
 	ZVAL_STR_COPY(&args[0], key);
 
 	ps_call_handler(&PSF(destroy), 1, args, &retval);
 
-	PS(in_save_handler) = 0;
 	FINISH;
 }
 
@@ -222,41 +178,24 @@ PS_GC_FUNC(user)
 	zval args[1];
 	zval retval;
 
-	if (PS(in_save_handler)) {
-		PS(in_save_handler) = 0;
-		php_error_docref(NULL, E_WARNING, "Cannot call save handler function recursive manner");
-		return FAILURE;
-	}
-	PS(in_save_handler) = 1;
-
 	ZVAL_LONG(&args[0], maxlifetime);
 
 	ps_call_handler(&PSF(gc), 1, args, &retval);
 
 	if (Z_TYPE(retval) == IS_LONG) {
 		convert_to_long(&retval);
-		PS(in_save_handler) = 0;
 		return Z_LVAL(retval);
 	}
 	/* This is for older API compatibility */
 	if (Z_TYPE(retval) == IS_TRUE) {
-		PS(in_save_handler) = 0;
 		return 1;
 	}
-	PS(in_save_handler) = 0;
 	/* Anything else is some kind of error */
 	return -1; // Error
 }
 
 PS_CREATE_SID_FUNC(user)
 {
-	if (PS(in_save_handler)) {
-		PS(in_save_handler) = 0;
-		php_error_docref(NULL, E_WARNING, "Cannot call save handler function recursive manner");
-		return FAILURE;
-	}
-	PS(in_save_handler) = 1;
-
 	/* maintain backwards compatibility */
 	if (!Z_ISUNDEF(PSF(create_sid))) {
 		zend_string *id = NULL;
@@ -270,35 +209,24 @@ PS_CREATE_SID_FUNC(user)
 			}
 			zval_ptr_dtor(&retval);
 		} else {
-			PS(in_save_handler) = 0;
 			zend_throw_error(NULL, "No session id returned by function");
 			return NULL;
 		}
 
 		if (!id) {
-			PS(in_save_handler) = 0;
 			zend_throw_error(NULL, "Session id must be a string");
 			return NULL;
 		}
 
-		PS(in_save_handler) = 0;
 		return id;
 	}
 
-	PS(in_save_handler) = 0;
 	/* function as defined by PS_MOD */
 	return php_session_create_id(mod_data);
 }
 
 PS_VALIDATE_SID_FUNC(user)
 {
-	if (PS(in_save_handler)) {
-		PS(in_save_handler) = 0;
-		php_error_docref(NULL, E_WARNING, "Cannot call save handler function recursive manner");
-		return FAILURE;
-	}
-	PS(in_save_handler) = 1;
-
 	/* maintain backwards compatibility */
 	if (!Z_ISUNDEF(PSF(validate_sid))) {
 		zval args[1];
@@ -308,11 +236,9 @@ PS_VALIDATE_SID_FUNC(user)
 
 		ps_call_handler(&PSF(validate_sid), 1, args, &retval);
 
-		PS(in_save_handler) = 0;
 		FINISH;
 	}
 
-	PS(in_save_handler) = 0;
 	/* dummy function defined by PS_MOD */
 	return php_session_validate_sid(mod_data, key);
 }
@@ -321,13 +247,6 @@ PS_UPDATE_TIMESTAMP_FUNC(user)
 {
 	zval args[2];
 	STDVARS;
-
-	if (PS(in_save_handler)) {
-		PS(in_save_handler) = 0;
-		php_error_docref(NULL, E_WARNING, "Cannot call save handler function recursive manner");
-		return FAILURE;
-	}
-	PS(in_save_handler) = 1;
 
 	ZVAL_STR_COPY(&args[0], key);
 	ZVAL_STR_COPY(&args[1], val);
@@ -339,7 +258,6 @@ PS_UPDATE_TIMESTAMP_FUNC(user)
 		ps_call_handler(&PSF(write), 2, args, &retval);
 	}
 
-	PS(in_save_handler) = 0;
 	FINISH;
 }
 
