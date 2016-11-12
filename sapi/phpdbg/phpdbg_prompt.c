@@ -528,7 +528,7 @@ int phpdbg_compile_stdin(zend_string *code) {
 
 	ZVAL_STR(&zv, code);
 
-	PHPDBG_G(ops) = zend_compile_string(&zv, "-");
+	PHPDBG_G(ops) = zend_compile_string(&zv, "Standard input code");
 
 	zend_string_release(code);
 
@@ -539,7 +539,7 @@ int phpdbg_compile_stdin(zend_string *code) {
 	if (PHPDBG_G(exec)) {
 		efree(PHPDBG_G(exec));
 	}
-	PHPDBG_G(exec) = estrdup("-");
+	PHPDBG_G(exec) = estrdup("Standard input code");
 	PHPDBG_G(exec_len) = 1;
 	{ /* remove leading ?> from source */
 		int i;
@@ -549,11 +549,11 @@ int phpdbg_compile_stdin(zend_string *code) {
 		PHPDBG_G(file_sources).pDestructor = NULL;
 		zend_hash_del(&PHPDBG_G(file_sources), source_path);
 		PHPDBG_G(file_sources).pDestructor = dtor;
-		zend_hash_str_update_ptr(&PHPDBG_G(file_sources), "-", 1, data);
+		zend_hash_str_update_ptr(&PHPDBG_G(file_sources), "Standard input code", 1, data);
 		zend_string_release(source_path);
 
 		efree(data->filename);
-		data->filename = estrdup("-");
+		data->filename = estrdup("Standard input code");
 
 		for (i = 1; i <= data->lines; i++) {
 			data->line[i] -= 2;
