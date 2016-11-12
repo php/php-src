@@ -2,11 +2,13 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.1
 
-
-10 Nov 2016, PHP 7.1.0RC6
-
 - Calendar:
   . Fix integer overflows (Joshua Rogers)
+
+- XML:
+  . Fixed bug #72135 (malformed XML causes fault) (edgarsandi)
+
+10 Nov 2016, PHP 7.1.0RC6
 
 - Core:
   . Fixded bug #72736 (Slow performance when fetching large dataset with mysqli
@@ -48,6 +50,7 @@ PHP                                                                        NEWS
     with PDORow). (Stas)
 
 27 Oct 2016, PHP 7.1.0RC5
+=======
 
 - Core:
   . Fixed bug #73350 (Exception::__toString() cause circular references).
