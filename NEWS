@@ -24,6 +24,9 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #73423 (Reproducible crash with GDB backtrace). (Laruence)
 
+- XML:
+  . Fixed bug #72135 (malformed XML causes fault) (edgarsandi)
+
 10 Nov 2016 PHP 7.0.13
 
 - Core:
