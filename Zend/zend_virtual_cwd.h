@@ -73,19 +73,6 @@ typedef unsigned short mode_t;
 #define IS_ABSOLUTE_PATH(path, len) \
 	(len >= 2 && (/* is local */isalpha(path[0]) && path[1] == ':' || /* is UNC */IS_SLASH(path[0]) && IS_SLASH(path[1])))
 
-#elif defined(NETWARE)
-#ifdef HAVE_DIRENT_H
-#include <dirent.h>
-#endif
-
-#define DEFAULT_SLASH '/'
-#define DEFAULT_DIR_SEPARATOR	';'
-#define IS_SLASH(c)	((c) == '/' || (c) == '\\')
-#define IS_SLASH_P(c)	IS_SLASH(*(c))
-/* Colon indicates volume name, either first character should be forward slash or backward slash */
-#define IS_ABSOLUTE_PATH(path, len) \
-    ((strchr(path, ':') != NULL) || ((len >= 1) && ((path[0] == '/') || (path[0] == '\\'))))
-
 #else
 #ifdef HAVE_DIRENT_H
 #include <dirent.h>
@@ -193,7 +180,7 @@ CWD_API int virtual_access(const char *pathname, int mode);
 CWD_API int virtual_utime(const char *filename, struct utimbuf *buf);
 #endif
 CWD_API int virtual_chmod(const char *filename, mode_t mode);
-#if !defined(ZEND_WIN32) && !defined(NETWARE)
+#if !defined(ZEND_WIN32)
 CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group, int link);
 #endif
 
@@ -281,7 +268,7 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
 #define VCWD_UTIME(path, time) virtual_utime(path, time)
 #endif
 #define VCWD_CHMOD(path, mode) virtual_chmod(path, mode)
-#if !defined(ZEND_WIN32) && !defined(NETWARE)
+#if !defined(ZEND_WIN32)
 #define VCWD_CHOWN(path, owner, group) virtual_chown(path, owner, group, 0)
 #if HAVE_LCHOWN
 #define VCWD_LCHOWN(path, owner, group) virtual_chown(path, owner, group, 1)
@@ -336,7 +323,7 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
 # endif
 #endif
 
-#if !defined(ZEND_WIN32) && !defined(NETWARE)
+#if !defined(ZEND_WIN32)
 #define VCWD_CHOWN(path, owner, group) chown(path, owner, group)
 #if HAVE_LCHOWN
 #define VCWD_LCHOWN(path, owner, group) lchown(path, owner, group)

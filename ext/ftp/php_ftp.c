@@ -25,10 +25,6 @@
 
 #include "php.h"
 
-#if defined(NETWARE) && defined(USE_WINSOCK)
-#include <novsock2.h>
-#endif
-
 #ifdef HAVE_FTP_SSL
 # include <openssl/ssl.h>
 #endif

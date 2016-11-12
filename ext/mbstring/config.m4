@@ -87,15 +87,7 @@ int foo(int x, ...) {
 }
 int main() { return foo(10, "", 3.14); }
         ], [php_cv_mbstring_stdarg=yes], [php_cv_mbstring_stdarg=no], [
-          dnl cross-compile needs something here
-          case $host_alias in
-          *netware*)
-          php_cv_mbstring_stdarg=yes
-          ;;
-          *)
           php_cv_mbstring_stdarg=no
-          ;;
-          esac
         ])
       ])
 

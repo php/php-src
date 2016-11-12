@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Removed the sql.safe_mode directive. (Kalle)
+  . Removed support for Netware. (Kalle)
   . Fixed bug #54535 (WSA cleanup executes before MSHUTDOWN). (Kalle)
   . Implemented FR #69791 (Disallow mail header injections by extra headers)
     (Yasuo)

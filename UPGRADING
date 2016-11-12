@@ -24,6 +24,7 @@ PHP 7.2 UPGRADE NOTES
     closed resources.
   . is_object() will now return true for objects of class
     __PHP_Incomplete_Class.
+  . Support for Netware operating systems have been removed.
 
 ========================================
 2. New Features

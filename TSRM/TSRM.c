@@ -318,15 +318,6 @@ TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id)
 	int hash_value;
 	tsrm_tls_entry *thread_resources;
 
-#ifdef NETWARE
-	/* The below if loop is added for NetWare to fix an abend while unloading PHP
-	 * when an Apache unload command is issued on the system console.
-	 * While exiting from PHP, at the end for some reason, this function is called
-	 * with tsrm_tls_table = NULL. When this happened, the server abends when
-	 * tsrm_tls_table is accessed since it is NULL.
-	 */
-	if(tsrm_tls_table) {
-#endif
 	if (!th_id) {
 		/* Fast path for looking up the resources for the current
 		 * thread. Its used by just about every call to
@@ -380,9 +371,6 @@ TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id)
 	 * changes to the structure as we read it.
 	 */
 	TSRM_SAFE_RETURN_RSRC(thread_resources->storage, id, thread_resources->count);
-#ifdef NETWARE
-	}	/* if(tsrm_tls_table) */
-#endif
 }
 
 /* frees an interpreter context.  You are responsible for making sure that
