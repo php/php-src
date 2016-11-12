@@ -1824,7 +1824,7 @@ static void zend_infer_ranges_warmup(const zend_op_array *op_array, zend_ssa *ss
 	int worklist_len = zend_bitset_len(ssa->vars_count);
 	int j, n;
 	zend_ssa_range tmp;
-	ALLOCA_FLAG(use_heap);
+	ALLOCA_FLAG(use_heap)
 	zend_bitset worklist = do_alloca(sizeof(zend_ulong) * worklist_len * 2, use_heap);
 	zend_bitset visited = worklist + worklist_len;
 #ifdef NEG_RANGE
