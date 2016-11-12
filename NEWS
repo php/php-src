@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 
 10 Nov 2016, PHP 7.1.0RC6
 
+- Calendar:
+  . Fix integer overflows (Joshua Rogers)
+
 - Core:
   . Fixded bug #72736 (Slow performance when fetching large dataset with mysqli
     / PDO). (Dmitry)
