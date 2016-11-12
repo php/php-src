@@ -806,10 +806,10 @@ dnl
 dnl PHP_BUILD_PROGRAM
 dnl
 AC_DEFUN([PHP_BUILD_PROGRAM],[
-  php_c_pre='$(LIBTOOL) --mode=compile $(CC)'
+  php_c_pre='$(V_CC)$(LIBTOOL) --mode=compile $(CC)'
   php_c_meta='$(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)'
   php_c_post=
-  php_cxx_pre='$(LIBTOOL) --mode=compile $(CXX)'
+  php_cxx_pre='$(V_CXX)$(LIBTOOL) --mode=compile $(CXX)'
   php_cxx_meta='$(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS)'
   php_cxx_post=
   php_lo=lo
@@ -819,10 +819,10 @@ AC_DEFUN([PHP_BUILD_PROGRAM],[
     no)  pic_setting='-prefer-non-pic';;
   esac
 
-  shared_c_pre='$(LIBTOOL) --mode=compile $(CC)'
+  shared_c_pre='$(V_CC)$(LIBTOOL) --mode=compile $(CC)'
   shared_c_meta='$(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) '$pic_setting
   shared_c_post=
-  shared_cxx_pre='$(LIBTOOL) --mode=compile $(CXX)'
+  shared_cxx_pre='$(V_CXX)$(LIBTOOL) --mode=compile $(CXX)'
   shared_cxx_meta='$(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS) '$pic_setting
   shared_cxx_post=
   shared_lo=lo
@@ -840,15 +840,15 @@ AC_DEFUN([PHP_SHARED_MODULE],[
   case $host_alias in
     *aix*[)]
       suffix=so
-      link_cmd='$(LIBTOOL) --mode=link ifelse($4,,[$(CC)],[$(CXX)]) $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS) -Wl,-G -o '$3'/$1.la -export-dynamic -avoid-version -prefer-pic -module -rpath $(phplibdir) $(EXTRA_LDFLAGS) $($2) $(translit($1,a-z_-,A-Z__)_SHARED_LIBADD) && mv -f '$3'/.libs/$1.so '$3'/$1.so'
+      link_cmd='ifelse($4,,[$(V_CCLD)],[$(V_CXXLD)])$(LIBTOOL) --mode=link ifelse($4,,[$(CC)],[$(CXX)]) $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS) -Wl,-G -o '$3'/$1.la -export-dynamic -avoid-version -prefer-pic -module -rpath $(phplibdir) $(EXTRA_LDFLAGS) $($2) $(translit($1,a-z_-,A-Z__)_SHARED_LIBADD) && mv -f '$3'/.libs/$1.so '$3'/$1.so'
       ;;
     *netware*[)]
       suffix=nlm
-      link_cmd='$(LIBTOOL) --mode=link ifelse($4,,[$(CC)],[$(CXX)]) $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS) -o [$]@ -shared -export-dynamic -avoid-version -prefer-pic -module -rpath $(phplibdir) $(EXTRA_LDFLAGS) $($2) ifelse($1, php7lib, , -L$(top_builddir)/netware -lphp7lib) $(translit(ifelse($1, php7lib, $1, m4_substr($1, 3)),a-z_-,A-Z__)_SHARED_LIBADD)'
+      link_cmd='ifelse($4,,[$(V_CCLD)],[$(V_CXXLD)])$(LIBTOOL) --mode=link ifelse($4,,[$(CC)],[$(CXX)]) $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS) -o [$]@ -shared -export-dynamic -avoid-version -prefer-pic -module -rpath $(phplibdir) $(EXTRA_LDFLAGS) $($2) ifelse($1, php7lib, , -L$(top_builddir)/netware -lphp7lib) $(translit(ifelse($1, php7lib, $1, m4_substr($1, 3)),a-z_-,A-Z__)_SHARED_LIBADD)'
       ;;
     *[)]
       suffix=la
-      link_cmd='$(LIBTOOL) --mode=link ifelse($4,,[$(CC)],[$(CXX)]) $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS) -o [$]@ -export-dynamic -avoid-version -prefer-pic -module -rpath $(phplibdir) $(EXTRA_LDFLAGS) $($2) $(translit($1,a-z_-,A-Z__)_SHARED_LIBADD)'
+      link_cmd='ifelse($4,,[$(V_CCLD)],[$(V_CXXLD)])$(LIBTOOL) --mode=link ifelse($4,,[$(CC)],[$(CXX)]) $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS) -o [$]@ -export-dynamic -avoid-version -prefer-pic -module -rpath $(phplibdir) $(EXTRA_LDFLAGS) $($2) $(translit($1,a-z_-,A-Z__)_SHARED_LIBADD)'
       ;;
   esac
 

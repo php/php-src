@@ -2,6 +2,32 @@ mkinstalldirs = $(top_srcdir)/build/shtool mkdir -p
 INSTALL = $(top_srcdir)/build/shtool install -c
 INSTALL_DATA = $(INSTALL) -m 644
 
+DEFAULT_VERBOSITY = 0
+V_GEN = $(v_GEN_$(V))
+v_GEN_ = $(v_GEN_$(DEFAULT_VERBOSITY))
+v_GEN_0 = @echo "  GEN     " $@;
+v_GEN_1 =
+
+V_CC = $(v_CC_$(V))
+v_CC_ = $(v_CC_$(DEFAULT_VERBOSITY))
+v_CC_0 = @echo "  CC      " $@;
+v_CC_1 =
+
+V_CXX = $(v_CXX_$(V))
+v_CXX_ = $(v_CXX_$(DEFAULT_VERBOSITY))
+v_CXX_0 = @echo "  CXX     " $@;
+v_CXX_1 =
+
+V_CCLD = $(v_CCLD_$(V))
+v_CCLD_ = $(v_CCLD_$(DEFAULT_VERBOSITY))
+v_CCLD_0 = @echo "  CCLD    " $@;
+v_CCLD_1 =
+
+V_CXXLD = $(v_CXXLD_$(V))
+v_CXXLD_ = $(v_CXXLD_$(DEFAULT_VERBOSITY))
+v_CXXLD_0 = @echo "  CXXLD   " $@;
+v_CXXLD_1 =
+
 DEFS = -DPHP_ATOM_INC -I$(top_builddir)/include -I$(top_builddir)/main -I$(top_srcdir)
 COMMON_FLAGS = $(DEFS) $(INCLUDES) $(EXTRA_INCLUDES) $(CPPFLAGS) $(PHP_FRAMEWORKPATH)
 
