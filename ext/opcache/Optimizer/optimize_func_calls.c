@@ -71,8 +71,6 @@ static void zend_delete_call_instructions(zend_op *opline)
 				break;
 			case ZEND_SEND_VAL:
 			case ZEND_SEND_VAR:
-			case ZEND_SEND_VAR_NO_REF:
-			case ZEND_SEND_REF:
 				if (call == 0) {
 					if (opline->op1_type == IS_CONST) {
 						MAKE_NOP(opline);
@@ -102,6 +100,8 @@ static void zend_try_inline_call(zend_op_array *op_array, zend_op *fcall, zend_o
 		zend_op *ret_opline = func->op_array.opcodes + func->op_array.num_args;
 
 		if (ret_opline->op1_type == IS_CONST) {
+			uint32_t i, num_args = func->op_array.num_args;
+			num_args += (func->op_array.fn_flags & ZEND_ACC_VARIADIC) != 0;
 
 			if (fcall->opcode == ZEND_INIT_METHOD_CALL && fcall->op1_type == IS_UNUSED) {
 				/* TODO: we can't inlne methods, because $this may be used
@@ -109,17 +109,27 @@ static void zend_try_inline_call(zend_op_array *op_array, zend_op *fcall, zend_o
 				 */
 				return;
 			}
+
+			for (i = 0; i < num_args; i++) {
+				/* Don't inline functions with by-reference arguments. This would require
+				 * correct handling of INDIRECT arguments. */
+				if (func->op_array.arg_info[i].pass_by_reference) {
+					return;
+				}
+			}
+
 			if (fcall->extended_value < func->op_array.num_args) {
 				/* don't inline funcions with named constants in default arguments */
-				uint32_t n = fcall->extended_value;
+				i = fcall->extended_value;
 
 				do {
-					if (Z_CONSTANT_P(RT_CONSTANT(&func->op_array, func->op_array.opcodes[n].op2))) {
+					if (Z_CONSTANT_P(RT_CONSTANT(&func->op_array, func->op_array.opcodes[i].op2))) {
 						return;
 					}
-					n++;
-				} while (n < func->op_array.num_args);
+					i++;
+				} while (i < func->op_array.num_args);
 			}
+
 			if (RETURN_VALUE_USED(opline)) {
 				zval zv;
 
