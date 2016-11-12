@@ -261,11 +261,7 @@ static int php_disk_free_space(char *path, double *space) /* {{{ */
 		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
 		return FAILURE;
 	}
-#ifdef NETWARE
-	bytesfree = (((double)buf.f_bsize) * ((double)buf.f_bfree));
-#else
 	bytesfree = (((double)buf.f_bsize) * ((double)buf.f_bavail));
-#endif
 #endif
 
 	*space = bytesfree;
@@ -298,7 +294,7 @@ PHP_FUNCTION(disk_free_space)
 }
 /* }}} */
 
-#if !defined(WINDOWS) && !defined(NETWARE)
+#ifndef PHP_WIN32
 PHPAPI int php_get_gid_by_name(const char *name, gid_t *gid)
 {
 #if defined(ZTS) && defined(HAVE_GETGRNAM_R) && defined(_SC_GETGR_R_SIZE_MAX)
@@ -411,7 +407,6 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 }
 /* }}} */
 
-#ifndef NETWARE
 /* {{{ proto bool chgrp(string filename, mixed group)
    Change file group */
 PHP_FUNCTION(chgrp)
@@ -433,9 +428,8 @@ PHP_FUNCTION(lchgrp)
 }
 #endif
 /* }}} */
-#endif /* !NETWARE */
 
-#if !defined(WINDOWS) && !defined(NETWARE)
+#ifndef PHP_WIN32
 PHPAPI uid_t php_get_uid_by_name(const char *name, uid_t *uid)
 {
 #if defined(ZTS) && defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWNAM_R)
@@ -550,7 +544,6 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 /* }}} */
 
 
-#ifndef NETWARE
 /* {{{ proto bool chown (string filename, mixed user)
    Change file owner */
 PHP_FUNCTION(chown)
@@ -573,7 +566,6 @@ PHP_FUNCTION(lchown)
 }
 #endif
 /* }}} */
-#endif /* !NETWARE */
 
 /* {{{ proto bool chmod(string filename, int mode)
    Change file mode */
@@ -826,8 +818,6 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 
 	stat_sb = &ssb.sb;
 
-
-#ifndef NETWARE
 	if (type >= FS_IS_W && type <= FS_IS_X) {
 		if(ssb.sb.st_uid==getuid()) {
 			rmask=S_IRUSR;
@@ -857,12 +847,9 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 			}
 		}
 	}
-#endif
 
-#ifndef NETWARE
 	if (IS_ABLE_CHECK(type) && getuid() == 0) {
-		/* root has special perms on plain_wrapper
-		   But we don't know about root under Netware */
+		/* root has special perms on plain_wrapper */
 		if (wrapper == &php_plain_files_wrapper) {
 			if (type == FS_IS_X) {
 				xmask = S_IXROOT;
@@ -871,7 +858,6 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 			}
 		}
 	}
-#endif
 
 	switch (type) {
 	case FS_PERMS:

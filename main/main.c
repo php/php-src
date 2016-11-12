@@ -34,11 +34,6 @@
 #include "win32/php_win32_globals.h"
 #include "win32/winutil.h"
 #include <process.h>
-#elif defined(NETWARE)
-#include <sys/timeval.h>
-#ifdef USE_WINSOCK
-#include <novsock2.h>
-#endif
 #endif
 #if HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -505,8 +500,8 @@ PHP_INI_MH(OnChangeBrowscap);
  * PHP_INCLUDE_PATH
  */
 
- /* Windows and Netware use the internal mail */
-#if defined(PHP_WIN32) || defined(NETWARE)
+ /* Windows use the internal mail */
+#if defined(PHP_WIN32)
 # define DEFAULT_SENDMAIL_PATH NULL
 #elif defined(PHP_PROG_SENDMAIL)
 # define DEFAULT_SENDMAIL_PATH PHP_PROG_SENDMAIL " -t -i "
@@ -2055,7 +2050,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	char *php_os;
 	zend_module_entry *module;
 
-#if defined(PHP_WIN32) || (defined(NETWARE) && defined(USE_WINSOCK))
+#ifdef PHP_WIN32
 	WORD wVersionRequested = MAKEWORD(2, 0);
 	WSADATA wsaData;
 #endif
@@ -2130,7 +2125,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	tzset();
 #endif
 
-#if defined(PHP_WIN32) || (defined(NETWARE) && defined(USE_WINSOCK))
+#ifdef PHP_WIN32
 	/* start up winsock services */
 	if (WSAStartup(wVersionRequested, &wsaData) != 0) {
 		php_printf("\nwinsock.dll unusable. %d\n", WSAGetLastError());
@@ -2398,7 +2393,7 @@ void php_module_shutdown(void)
 
 	zend_shutdown();
 
-#if defined(PHP_WIN32) || (defined(NETWARE) && defined(USE_WINSOCK))
+#ifdef PHP_WIN32
 	/*close winsock */
 	WSACleanup();
 #endif

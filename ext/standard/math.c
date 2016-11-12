@@ -277,7 +277,7 @@ static double php_log1p(double x)
 */
 static double php_expm1(double x)
 {
-#if !defined(PHP_WIN32) && !defined(NETWARE)
+#ifndef PHP_WIN32
 	return(expm1(x));
 #else
 	return(exp(x) - 1);

@@ -38,15 +38,6 @@
 #include <time.h>
 #ifdef PHP_WIN32
 #include <winsock2.h>
-#elif defined(NETWARE)
-#ifdef USE_WINSOCK    /* Modified to use Winsock (NOVSOCK2.H), at least for now */
-#include <novsock2.h>
-#else
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#endif
-#else
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -71,11 +62,6 @@
 
 #include "ftp.h"
 #include "ext/standard/fsock.h"
-
-/* Additional headers for NetWare */
-#if defined(NETWARE) && !defined(USE_WINSOCK)
-#include <sys/select.h>
-#endif
 
 /* sends an ftp command, returns true on success, false on error.
  * it sends the string "cmd args\r\n" if args is non-null, or
@@ -1283,7 +1269,7 @@ my_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 			if (n == 0) {
 				_set_errno(ETIMEDOUT);
 			}
-#elif !(defined(NETWARE) && defined(USE_WINSOCK))
+#else
 			if (n == 0) {
 				errno = ETIMEDOUT;
 			}
@@ -1372,7 +1358,7 @@ my_recv(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 		if (n == 0) {
 			_set_errno(ETIMEDOUT);
 		}
-#elif !(defined(NETWARE) && defined(USE_WINSOCK))
+#else
 		if (n == 0) {
 			errno = ETIMEDOUT;
 		}
@@ -1447,7 +1433,7 @@ data_available(ftpbuf_t *ftp, php_socket_t s)
 		if (n == 0) {
 			_set_errno(ETIMEDOUT);
 		}
-#elif !(defined(NETWARE) && defined(USE_WINSOCK))
+#else
 		if (n == 0) {
 			errno = ETIMEDOUT;
 		}
@@ -1471,7 +1457,7 @@ data_writeable(ftpbuf_t *ftp, php_socket_t s)
 		if (n == 0) {
 			_set_errno(ETIMEDOUT);
 		}
-#elif !(defined(NETWARE) && defined(USE_WINSOCK))
+#else
 		if (n == 0) {
 			errno = ETIMEDOUT;
 		}
@@ -1496,7 +1482,7 @@ my_accept(ftpbuf_t *ftp, php_socket_t s, struct sockaddr *addr, socklen_t *addrl
 		if (n == 0) {
 			_set_errno(ETIMEDOUT);
 		}
-#elif !(defined(NETWARE) && defined(USE_WINSOCK))
+#else
 		if (n == 0) {
 			errno = ETIMEDOUT;
 		}

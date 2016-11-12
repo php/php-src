@@ -491,42 +491,24 @@ void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stream_stat
 		ssb->sb.st_mode = data->flags & PHAR_ENT_PERM_MASK;
 		ssb->sb.st_mode |= S_IFREG; /* regular file */
 		/* timestamp is just the timestamp when this was added to the phar */
-#ifdef NETWARE
-		ssb->sb.st_mtime.tv_sec = data->timestamp;
-		ssb->sb.st_atime.tv_sec = data->timestamp;
-		ssb->sb.st_ctime.tv_sec = data->timestamp;
-#else
 		ssb->sb.st_mtime = data->timestamp;
 		ssb->sb.st_atime = data->timestamp;
 		ssb->sb.st_ctime = data->timestamp;
-#endif
 	} else if (!is_temp_dir && data->is_dir) {
 		ssb->sb.st_size = 0;
 		ssb->sb.st_mode = data->flags & PHAR_ENT_PERM_MASK;
 		ssb->sb.st_mode |= S_IFDIR; /* regular directory */
 		/* timestamp is just the timestamp when this was added to the phar */
-#ifdef NETWARE
-		ssb->sb.st_mtime.tv_sec = data->timestamp;
-		ssb->sb.st_atime.tv_sec = data->timestamp;
-		ssb->sb.st_ctime.tv_sec = data->timestamp;
-#else
 		ssb->sb.st_mtime = data->timestamp;
 		ssb->sb.st_atime = data->timestamp;
 		ssb->sb.st_ctime = data->timestamp;
-#endif
 	} else {
 		ssb->sb.st_size = 0;
 		ssb->sb.st_mode = 0777;
 		ssb->sb.st_mode |= S_IFDIR; /* regular directory */
-#ifdef NETWARE
-		ssb->sb.st_mtime.tv_sec = phar->max_timestamp;
-		ssb->sb.st_atime.tv_sec = phar->max_timestamp;
-		ssb->sb.st_ctime.tv_sec = phar->max_timestamp;
-#else
 		ssb->sb.st_mtime = phar->max_timestamp;
 		ssb->sb.st_atime = phar->max_timestamp;
 		ssb->sb.st_ctime = phar->max_timestamp;
-#endif
 	}
 	if (!phar->is_writeable) {
 		ssb->sb.st_mode = (ssb->sb.st_mode & 0555) | (ssb->sb.st_mode & ~0777);

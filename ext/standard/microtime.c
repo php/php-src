@@ -26,9 +26,6 @@
 #ifdef PHP_WIN32
 #include "win32/time.h"
 #include "win32/getrusage.h"
-#elif defined(NETWARE)
-#include <sys/timeval.h>
-#include <sys/time.h>
 #else
 #include <sys/time.h>
 #endif
