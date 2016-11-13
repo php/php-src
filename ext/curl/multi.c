@@ -318,7 +318,7 @@ PHP_FUNCTION(curl_multi_info_read)
 	int        queued_msgs;
 	zval      *zmsgs_in_queue = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|z/", &z_mh, &zmsgs_in_queue) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|z", &z_mh, &zmsgs_in_queue) == FAILURE) {
 		return;
 	}
 
@@ -330,9 +330,9 @@ PHP_FUNCTION(curl_multi_info_read)
 	if (tmp_msg == NULL) {
 		RETURN_FALSE;
 	}
+
 	if (zmsgs_in_queue) {
-		zval_dtor(zmsgs_in_queue);
-		ZVAL_LONG(zmsgs_in_queue, queued_msgs);
+		ZEND_TRY_ASSIGN_LONG(zmsgs_in_queue, queued_msgs);
 	}
 
 	array_init(return_value);

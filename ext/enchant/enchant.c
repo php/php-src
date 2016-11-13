@@ -710,7 +710,7 @@ PHP_FUNCTION(enchant_dict_quick_check)
 	size_t wordlen;
 	enchant_dict *pdict;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|z/", &dict, &word, &wordlen, &sugg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|t", &dict, &word, &wordlen, &sugg) == FAILURE) {
 		RETURN_FALSE;
 	}
 

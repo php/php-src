@@ -2127,7 +2127,7 @@ PHP_FUNCTION(ldap_get_option)
 	ldap_linkdata *ld;
 	zend_long option;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rlz/", &link, &option, &retval) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rlz", &link, &option, &retval) != SUCCESS) {
 		return;
 	}
 
@@ -2169,8 +2169,7 @@ PHP_FUNCTION(ldap_get_option)
 			if (ldap_get_option(ld->link, option, &val)) {
 				RETURN_FALSE;
 			}
-			zval_ptr_dtor(retval);
-			ZVAL_LONG(retval, val);
+			ZEND_TRY_ASSIGN_LONG(retval, val);
 		} break;
 #ifdef LDAP_OPT_NETWORK_TIMEOUT
 	case LDAP_OPT_NETWORK_TIMEOUT:
@@ -2186,8 +2185,7 @@ PHP_FUNCTION(ldap_get_option)
 			if (!timeout) {
 				RETURN_FALSE;
 			}
-			zval_ptr_dtor(retval);
-			ZVAL_LONG(retval, timeout->tv_sec);
+			ZEND_TRY_ASSIGN_LONG(retval, timeout->tv_sec);
 			ldap_memfree(timeout);
 		} break;
 #elif defined(LDAP_X_OPT_CONNECT_TIMEOUT)
@@ -2198,8 +2196,7 @@ PHP_FUNCTION(ldap_get_option)
 			if (ldap_get_option(ld->link, LDAP_X_OPT_CONNECT_TIMEOUT, &timeout)) {
 				RETURN_FALSE;
 			}
-			zval_ptr_dtor(retval);
-			ZVAL_LONG(retval, (timeout / 1000));
+			ZEND_TRY_ASSIGN_LONG(retval, (timeout / 1000));
 		} break;
 #endif
 #ifdef LDAP_OPT_TIMEOUT
@@ -2216,8 +2213,7 @@ PHP_FUNCTION(ldap_get_option)
 			if (!timeout) {
 				RETURN_FALSE;
 			}
-			zval_dtor(retval);
-			ZVAL_LONG(retval, timeout->tv_sec);
+			ZEND_TRY_ASSIGN_LONG(retval, timeout->tv_sec);
 			ldap_memfree(timeout);
 		} break;
 #endif
@@ -2264,8 +2260,7 @@ PHP_FUNCTION(ldap_get_option)
 				}
 				RETURN_FALSE;
 			}
-			zval_ptr_dtor(retval);
-			ZVAL_STRING(retval, val);
+			ZEND_TRY_ASSIGN_STRING(retval, val);
 			ldap_memfree(val);
 		} break;
 /* options not implemented

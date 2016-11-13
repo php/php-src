@@ -4532,7 +4532,7 @@ PHP_FUNCTION(exif_thumbnail)
 		WRONG_PARAM_COUNT;
 	}
 
-	if (zend_parse_parameters(arg_c, "p|z/z/z/", &p_name, &p_name_len, &p_width, &p_height, &p_imagetype) == FAILURE) {
+	if (zend_parse_parameters(arg_c, "p|zzz", &p_name, &p_name_len, &p_width, &p_height, &p_imagetype) == FAILURE) {
 		return;
 	}
 
@@ -4559,14 +4559,11 @@ PHP_FUNCTION(exif_thumbnail)
 		if (!ImageInfo.Thumbnail.width || !ImageInfo.Thumbnail.height) {
 			exif_scan_thumbnail(&ImageInfo);
 		}
-		zval_dtor(p_width);
-		zval_dtor(p_height);
-		ZVAL_LONG(p_width,  ImageInfo.Thumbnail.width);
-		ZVAL_LONG(p_height, ImageInfo.Thumbnail.height);
+		ZEND_TRY_ASSIGN_LONG(p_width,  ImageInfo.Thumbnail.width);
+		ZEND_TRY_ASSIGN_LONG(p_height, ImageInfo.Thumbnail.height);
 	}
 	if (arg_c >= 4)	{
-		zval_dtor(p_imagetype);
-		ZVAL_LONG(p_imagetype, ImageInfo.Thumbnail.filetype);
+		ZEND_TRY_ASSIGN_LONG(p_imagetype, ImageInfo.Thumbnail.filetype);
 	}
 
 #ifdef EXIF_DEBUG
