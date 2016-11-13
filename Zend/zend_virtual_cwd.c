@@ -648,7 +648,7 @@ static inline void realpath_cache_add(const char *path, int path_len, const char
 			memcpy(bucket->realpath, realpath, realpath_len+1);
 		}
 		bucket->realpath_len = realpath_len;
-		bucket->is_dir = is_dir;
+		bucket->is_dir = is_dir > 0;
 #ifdef ZEND_WIN32
 		bucket->is_rvalid   = 0;
 		bucket->is_readable = 0;

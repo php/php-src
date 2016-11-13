@@ -204,14 +204,14 @@ typedef struct _realpath_cache_bucket {
 	char                          *realpath;
 	struct _realpath_cache_bucket *next;
 	time_t                         expires;
-	int                            path_len;
-	int                            realpath_len;
-	int                            is_dir;
+	uint16_t                       path_len;
+	uint16_t                       realpath_len;
+	uint8_t                        is_dir:1;
 #ifdef ZEND_WIN32
-	unsigned char                  is_rvalid;
-	unsigned char                  is_readable;
-	unsigned char                  is_wvalid;
-	unsigned char                  is_writable;
+	uint8_t                        is_rvalid:1;
+	uint8_t                        is_readable:1;
+	uint8_t                        is_wvalid:1;
+	uint8_t                        is_writable:1;
 #endif
 } realpath_cache_bucket;
 
