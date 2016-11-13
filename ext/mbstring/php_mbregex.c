@@ -699,7 +699,7 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	OnigOptionType options;
 	char *str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zs|z/", &arg_pattern, &string, &string_len, &array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zs|t", &arg_pattern, &string, &string_len, &array) == FAILURE) {
 		RETURN_FALSE;
 	}
 

@@ -2092,7 +2092,7 @@ PHP_FUNCTION(mb_parse_str)
 	const mbfl_encoding *detected;
 
 	track_vars_array = NULL;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|z/", &encstr, &encstr_len, &track_vars_array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|t", &encstr, &encstr_len, &track_vars_array) == FAILURE) {
 		return;
 	}
 

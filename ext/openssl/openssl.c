@@ -2046,7 +2046,7 @@ PHP_FUNCTION(openssl_x509_export)
 	BIO * bio_out;
 	zend_resource *certresource;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz/|b", &zcert, &zout, &notext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz|b", &zcert, &zout, &notext) == FAILURE) {
 		return;
 	}
 	RETVAL_FALSE;
@@ -2068,9 +2068,8 @@ PHP_FUNCTION(openssl_x509_export)
 	if (PEM_write_bio_X509(bio_out, cert)) {
 		BUF_MEM *bio_buf;
 
-		zval_dtor(zout);
 		BIO_get_mem_ptr(bio_out, &bio_buf);
-		ZVAL_STRINGL(zout, bio_buf->data, bio_buf->length);
+		ZEND_TRY_ASSIGN_STRINGL(zout, bio_buf->data, bio_buf->length);
 
 		RETVAL_TRUE;
 	} else {
@@ -2802,7 +2801,7 @@ PHP_FUNCTION(openssl_pkcs12_export)
 	zval * item;
 	STACK_OF(X509) *ca = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz/zs|a", &zcert, &zout, &zpkey, &pass, &pass_len, &args) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zzzs|a", &zcert, &zout, &zpkey, &pass, &pass_len, &args) == FAILURE)
 		return;
 
 	RETVAL_FALSE;
@@ -2837,9 +2836,8 @@ PHP_FUNCTION(openssl_pkcs12_export)
 		if (i2d_PKCS12_bio(bio_out, p12)) {
 			BUF_MEM *bio_buf;
 
-			zval_dtor(zout);
 			BIO_get_mem_ptr(bio_out, &bio_buf);
-			ZVAL_STRINGL(zout, bio_buf->data, bio_buf->length);
+			ZEND_TRY_ASSIGN_STRINGL(zout, bio_buf->data, bio_buf->length);
 
 			RETVAL_TRUE;
 		} else {
@@ -2878,7 +2876,7 @@ PHP_FUNCTION(openssl_pkcs12_read)
 	BIO * bio_in = NULL;
 	int i;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz/s", &zp12, &zp12_len, &zout, &pass, &pass_len) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sts", &zp12, &zp12_len, &zout, &pass, &pass_len) == FAILURE)
 		return;
 
 	RETVAL_FALSE;
@@ -3246,7 +3244,7 @@ PHP_FUNCTION(openssl_csr_export)
 	BIO * bio_out;
 	zend_resource *csr_resource;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz/|b", &zcsr, &zout, &notext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz|b", &zcsr, &zout, &notext) == FAILURE) {
 		return;
 	}
 
@@ -3269,8 +3267,7 @@ PHP_FUNCTION(openssl_csr_export)
 		BUF_MEM *bio_buf;
 
 		BIO_get_mem_ptr(bio_out, &bio_buf);
-		zval_dtor(zout);
-		ZVAL_STRINGL(zout, bio_buf->data, bio_buf->length);
+		ZEND_TRY_ASSIGN_STRINGL(zout, bio_buf->data, bio_buf->length);
 
 		RETVAL_TRUE;
 	} else {
