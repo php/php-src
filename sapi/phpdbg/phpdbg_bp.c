@@ -136,7 +136,7 @@ PHPDBG_API void phpdbg_export_breakpoints_to_string(char **str) /* {{{ */
 					switch (brake->type) {
 						case PHPDBG_BREAK_FILE: {
 							phpdbg_asprintf(&new_str,
-								"%sbreak %s:%lu\n", *str,
+								"%sbreak \"%s\":%lu\n", *str,
 								((phpdbg_breakfile_t*)brake)->filename,
 								((phpdbg_breakfile_t*)brake)->line);
 						} break;
