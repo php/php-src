@@ -599,13 +599,6 @@ has been defined and none can be detected */
 
 	error = xmlParseChunk(parser->parser, (char *) data, data_len, is_final);
 	if (error) {
-<<<<<<< HEAD
-		return 0;
-	} else {
-		return 1;
-	} else if (parser->parser->lastError.level > XML_ERR_WARNING ){
-=======
->>>>>>> PHP-7.1
 		return 0;
 	} else {
 		return 1;

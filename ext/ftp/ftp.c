@@ -38,6 +38,7 @@
 #include <time.h>
 #ifdef PHP_WIN32
 #include <winsock2.h>
+#else
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
