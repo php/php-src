@@ -9,6 +9,9 @@ PHP                                                                        NEWS
   . Fixded bug #72736 (Slow performance when fetching large dataset with mysqli
     / PDO). (Dmitry)
 
+- Date:
+  . Fixed bug #69587 (DateInterval properties and isset). (jhdxr)
+
 - ODBC:
   . Fixed bug #73448 (odbc_errormsg returns trash, always 513 bytes).
     (Anatol)
