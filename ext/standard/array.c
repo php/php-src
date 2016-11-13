@@ -773,6 +773,38 @@ PHPAPI zend_long php_count_recursive(zval *array, zend_long mode) /* {{{ */
 }
 /* }}} */
 
+/* {{{ proto bool is_countable(mixed var)
+   Returns true if variable is countable using count() */
+PHP_FUNCTION(is_countable)
+{
+	zval *array;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(array)
+	ZEND_PARSE_PARAMETERS_END();
+
+	switch (Z_TYPE_P(array)) {
+		case IS_ARRAY:
+			RETURN_TRUE;
+			return;
+		case IS_OBJECT:
+			/* first, we check if the handler is defined */
+			if (Z_OBJ_HT_P(array)->count_elements) {
+				RETURN_TRUE;
+				return;
+			}
+			/* if not check if the object implements Countable */
+			if (instanceof_function(Z_OBJCE_P(array), spl_ce_Countable)) {
+				RETURN_TRUE;
+				return;
+			}
+		default:
+			RETURN_FALSE;
+			break;
+	}
+}
+/* }}} */
+
 /* {{{ proto int count(mixed var [, int mode])
    Count the number of elements in a variable (usually an array) */
 PHP_FUNCTION(count)

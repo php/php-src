@@ -224,6 +224,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ksort, 0, 0, 1)
 	ZEND_ARG_INFO(0, sort_flags)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_is_countable, 0)
+	ZEND_ARG_INFO(0, var)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_count, 0, 0, 1)
 	ZEND_ARG_INFO(0, var)
 	ZEND_ARG_INFO(0, mode)
@@ -3311,6 +3315,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(shuffle,															arginfo_shuffle)
 	PHP_FE(array_walk,														arginfo_array_walk)
 	PHP_FE(array_walk_recursive,											arginfo_array_walk_recursive)
+	PHP_FE(is_countable,													arginfo_is_countable)
 	PHP_FE(count,															arginfo_count)
 	PHP_FE(end,																arginfo_end)
 	PHP_FE(prev,															arginfo_prev)
