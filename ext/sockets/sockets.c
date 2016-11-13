@@ -1269,7 +1269,7 @@ PHP_FUNCTION(socket_getsockname)
 	char					*addr_string;
 	socklen_t				salen = sizeof(php_sockaddr_storage);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz/|z/", &arg1, &addr, &port) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz|z", &arg1, &addr, &port) == FAILURE) {
 		return;
 	}
 
@@ -1293,12 +1293,10 @@ PHP_FUNCTION(socket_getsockname)
 		case AF_INET6:
 			sin6 = (struct sockaddr_in6 *) sa;
 			inet_ntop(AF_INET6, &sin6->sin6_addr, addr6, INET6_ADDRSTRLEN);
-			zval_dtor(addr);
-			ZVAL_STRING(addr, addr6);
+			ZEND_TRY_ASSIGN_STRING(addr, addr6);
 
 			if (port != NULL) {
-				zval_dtor(port);
-				ZVAL_LONG(port, htons(sin6->sin6_port));
+				ZEND_TRY_ASSIGN_LONG(port, htons(sin6->sin6_port));
 			}
 			RETURN_TRUE;
 			break;
@@ -1310,12 +1308,10 @@ PHP_FUNCTION(socket_getsockname)
 			addr_string = inet_ntoa(sin->sin_addr);
 			inet_ntoa_lock = 0;
 
-			zval_dtor(addr);
-			ZVAL_STRING(addr, addr_string);
+			ZEND_TRY_ASSIGN_STRING(addr, addr_string);
 
 			if (port != NULL) {
-				zval_dtor(port);
-				ZVAL_LONG(port, htons(sin->sin_port));
+				ZEND_TRY_ASSIGN_LONG(port, htons(sin->sin_port));
 			}
 			RETURN_TRUE;
 			break;
@@ -1323,8 +1319,7 @@ PHP_FUNCTION(socket_getsockname)
 		case AF_UNIX:
 			s_un = (struct sockaddr_un *) sa;
 
-			zval_dtor(addr);
-			ZVAL_STRING(addr, s_un->sun_path);
+			ZEND_TRY_ASSIGN_STRING(addr, s_un->sun_path);
 			RETURN_TRUE;
 			break;
 
@@ -1352,7 +1347,7 @@ PHP_FUNCTION(socket_getpeername)
 	char					*addr_string;
 	socklen_t				salen = sizeof(php_sockaddr_storage);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz/|z/", &arg1, &arg2, &arg3) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz|z", &arg1, &arg2, &arg3) == FAILURE) {
 		return;
 	}
 
@@ -1372,12 +1367,11 @@ PHP_FUNCTION(socket_getpeername)
 		case AF_INET6:
 			sin6 = (struct sockaddr_in6 *) sa;
 			inet_ntop(AF_INET6, &sin6->sin6_addr, addr6, INET6_ADDRSTRLEN);
-			zval_dtor(arg2);
-			ZVAL_STRING(arg2, addr6);
+
+			ZEND_TRY_ASSIGN_STRING(arg2, addr6);
 
 			if (arg3 != NULL) {
-				zval_dtor(arg3);
-				ZVAL_LONG(arg3, htons(sin6->sin6_port));
+				ZEND_TRY_ASSIGN_LONG(arg3, htons(sin6->sin6_port));
 			}
 
 			RETURN_TRUE;
@@ -1390,12 +1384,10 @@ PHP_FUNCTION(socket_getpeername)
 			addr_string = inet_ntoa(sin->sin_addr);
 			inet_ntoa_lock = 0;
 
-			zval_dtor(arg2);
-			ZVAL_STRING(arg2, addr_string);
+			ZEND_TRY_ASSIGN_STRING(arg2, addr_string);
 
 			if (arg3 != NULL) {
-				zval_dtor(arg3);
-				ZVAL_LONG(arg3, htons(sin->sin_port));
+				ZEND_TRY_ASSIGN_LONG(arg3, htons(sin->sin_port));
 			}
 
 			RETURN_TRUE;
@@ -1404,8 +1396,7 @@ PHP_FUNCTION(socket_getpeername)
 		case AF_UNIX:
 			s_un = (struct sockaddr_un *) sa;
 
-			zval_dtor(arg2);
-			ZVAL_STRING(arg2, s_un->sun_path);
+			ZEND_TRY_ASSIGN_STRING(arg2, s_un->sun_path);
 			RETURN_TRUE;
 			break;
 
