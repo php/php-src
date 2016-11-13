@@ -13,7 +13,7 @@ function test($what)
 	echo "===$what\n";
 	eval("var_dump(isset(\$$what));");
 	eval("var_dump((bool)\$$what);");
-	eval("var_dump(count(\$$what));");
+	eval("if (isset(\$$what)) var_dump(count(\$$what));");
 	eval("var_dump(\$$what);");
 }
 
@@ -168,7 +168,6 @@ object(SimpleXMLElement)#%d (2) {
 ===sxe->elem1[0]->elem2->bla
 bool(false)
 bool(false)
-int(0)
 object(SimpleXMLElement)#%d (0) {
 }
 ===sxe->elem1[0]["attr1"]
@@ -182,7 +181,6 @@ object(SimpleXMLElement)#%d (1) {
 ===sxe->elem1[0]->attr1
 bool(false)
 bool(false)
-int(0)
 object(SimpleXMLElement)#%d (0) {
 }
 ===sxe->elem1[1]
@@ -201,7 +199,6 @@ object(SimpleXMLElement)#%d (1) {
 ===sxe->elem1[2]
 bool(false)
 bool(false)
-int(0)
 NULL
 ===sxe->elem11
 bool(true)
@@ -233,22 +230,18 @@ object(SimpleXMLElement)#%d (0) {
 ===sxe->elem22
 bool(false)
 bool(false)
-int(0)
 object(SimpleXMLElement)#%d (0) {
 }
 ===sxe->elem22->elem222
 bool(false)
 bool(false)
-int(0)
 NULL
 ===sxe->elem22->attr22
 bool(false)
 bool(false)
-int(0)
 NULL
 ===sxe->elem22["attr22"]
 bool(false)
 bool(false)
-int(0)
 NULL
 ===DONE===
