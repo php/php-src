@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Calendar:
   . Fix integer overflows (Joshua Rogers)
 
+- Date:
+  . Fixed bug #69587 (DateInterval properties and isset). (jhdxr)
+
 - XML:
   . Fixed bug #72135 (malformed XML causes fault) (edgarsandi)
 
