@@ -160,7 +160,9 @@ static int phar_compare_dir_name(const void *a, const void *b)  /* {{{ */
 
 	f = (Bucket *) a;
 	s = (Bucket *) b;
-	result = zend_binary_strcmp(ZSTR_VAL(f->key), ZSTR_LEN(f->key), ZSTR_VAL(s->key), ZSTR_LEN(s->key));
+	result = zend_binary_strcmp(
+		ZSTR_VAL(f->key.str), ZSTR_LEN(f->key.str),
+		ZSTR_VAL(s->key.str), ZSTR_LEN(s->key.str));
 
 	if (result < 0) {
 		return -1;

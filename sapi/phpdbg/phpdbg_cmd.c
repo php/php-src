@@ -24,6 +24,7 @@
 #include "phpdbg_set.h"
 #include "phpdbg_prompt.h"
 #include "phpdbg_io.h"
+#include "zend_hash_func.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 

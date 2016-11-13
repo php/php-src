@@ -3543,8 +3543,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_R_SPEC_CONST_HANDLER(
 				if ((EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
 				     (EXPECTED(Z_TYPE(p->val) != IS_INDIRECT) ||
 				      EXPECTED(Z_TYPE_P(Z_INDIRECT(p->val)) != IS_UNDEF))) &&
-				    (UNEXPECTED(!p->key) ||
-				     EXPECTED(zend_check_property_access(Z_OBJ_P(array_ptr), p->key) == SUCCESS))) {
+				    (UNEXPECTED(!zend_bucket_has_str_key(p)) ||
+				     EXPECTED(zend_check_property_access(Z_OBJ_P(array_ptr), p->key.str) == SUCCESS))) {
 					break;
 				}
 				pos++;
@@ -3695,8 +3695,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CONST_HANDLER
 				if ((EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
 				     (EXPECTED(Z_TYPE(p->val) != IS_INDIRECT) ||
 				      EXPECTED(Z_TYPE_P(Z_INDIRECT(p->val)) != IS_UNDEF))) &&
-				    (UNEXPECTED(!p->key) ||
-				     EXPECTED(zend_check_property_access(Z_OBJ_P(array_ptr), p->key) == SUCCESS))) {
+				    (UNEXPECTED(!zend_bucket_has_str_key(p)) ||
+				     EXPECTED(zend_check_property_access(Z_OBJ_P(array_ptr), p->key.str) == SUCCESS))) {
 					break;
 				}
 				pos++;
@@ -12851,8 +12851,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_R_SPEC_TMP_HANDLER(ZE
 				if ((EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
 				     (EXPECTED(Z_TYPE(p->val) != IS_INDIRECT) ||
 				      EXPECTED(Z_TYPE_P(Z_INDIRECT(p->val)) != IS_UNDEF))) &&
-				    (UNEXPECTED(!p->key) ||
-				     EXPECTED(zend_check_property_access(Z_OBJ_P(array_ptr), p->key) == SUCCESS))) {
+				    (UNEXPECTED(!zend_bucket_has_str_key(p)) ||
+				     EXPECTED(zend_check_property_access(Z_OBJ_P(array_ptr), p->key.str) == SUCCESS))) {
 					break;
 				}
 				pos++;
@@ -13004,8 +13004,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_TMP_HANDLER(Z
 				if ((EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
 				     (EXPECTED(Z_TYPE(p->val) != IS_INDIRECT) ||
 				      EXPECTED(Z_TYPE_P(Z_INDIRECT(p->val)) != IS_UNDEF))) &&
-				    (UNEXPECTED(!p->key) ||
-				     EXPECTED(zend_check_property_access(Z_OBJ_P(array_ptr), p->key) == SUCCESS))) {
+				    (UNEXPECTED(!zend_bucket_has_str_key(p)) ||
+				     EXPECTED(zend_check_property_access(Z_OBJ_P(array_ptr), p->key.str) == SUCCESS))) {
 					break;
 				}
 				pos++;
@@ -16412,8 +16412,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_R_SPEC_VAR_HANDLER(ZE
 				if ((EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
 				     (EXPECTED(Z_TYPE(p->val) != IS_INDIRECT) ||
 				      EXPECTED(Z_TYPE_P(Z_INDIRECT(p->val)) != IS_UNDEF))) &&
-				    (UNEXPECTED(!p->key) ||
-				     EXPECTED(zend_check_property_access(Z_OBJ_P(array_ptr), p->key) == SUCCESS))) {
+				    (UNEXPECTED(!zend_bucket_has_str_key(p)) ||
+				     EXPECTED(zend_check_property_access(Z_OBJ_P(array_ptr), p->key.str) == SUCCESS))) {
 					break;
 				}
 				pos++;
@@ -16567,8 +16567,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_VAR_HANDLER(Z
 				if ((EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
 				     (EXPECTED(Z_TYPE(p->val) != IS_INDIRECT) ||
 				      EXPECTED(Z_TYPE_P(Z_INDIRECT(p->val)) != IS_UNDEF))) &&
-				    (UNEXPECTED(!p->key) ||
-				     EXPECTED(zend_check_property_access(Z_OBJ_P(array_ptr), p->key) == SUCCESS))) {
+				    (UNEXPECTED(!zend_bucket_has_str_key(p)) ||
+				     EXPECTED(zend_check_property_access(Z_OBJ_P(array_ptr), p->key.str) == SUCCESS))) {
 					break;
 				}
 				pos++;
@@ -16690,10 +16690,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_R_SPEC_VAR_HANDLER(ZE
 		}
 		Z_FE_POS_P(array) = pos + 1;
 		if (opline->result_type & (IS_TMP_VAR|IS_CV)) {
-			if (!p->key) {
-				ZVAL_LONG(EX_VAR(opline->result.var), p->h);
+			if (!zend_bucket_has_str_key(p)) {
+				ZVAL_LONG(EX_VAR(opline->result.var), p->key.num);
 			} else {
-				ZVAL_STR_COPY(EX_VAR(opline->result.var), p->key);
+				ZVAL_STR_COPY(EX_VAR(opline->result.var), p->key.str);
 			}
 		}
 	} else if (EXPECTED(Z_TYPE_P(array) == IS_OBJECT)) {
@@ -16726,23 +16726,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_R_SPEC_VAR_HANDLER(ZE
 						continue;
 					}
 				}
-				if (UNEXPECTED(!p->key) ||
-				    EXPECTED(zend_check_property_access(Z_OBJ_P(array), p->key) == SUCCESS)) {
+				if (UNEXPECTED(!zend_bucket_has_str_key(p)) ||
+				    EXPECTED(zend_check_property_access(Z_OBJ_P(array), p->key.str) == SUCCESS)) {
 					break;
 				}
 				pos++;
 				p++;
 			}
 			if (opline->result_type & (IS_TMP_VAR|IS_CV)) {
-				if (UNEXPECTED(!p->key)) {
-					ZVAL_LONG(EX_VAR(opline->result.var), p->h);
-				} else if (ZSTR_VAL(p->key)[0]) {
-					ZVAL_STR_COPY(EX_VAR(opline->result.var), p->key);
+				if (UNEXPECTED(!zend_bucket_has_str_key(p))) {
+					ZVAL_LONG(EX_VAR(opline->result.var), p->key.num);
+				} else if (ZSTR_VAL(p->key.str)[0]) {
+					ZVAL_STR_COPY(EX_VAR(opline->result.var), p->key.str);
 				} else {
 					const char *class_name, *prop_name;
 					size_t prop_name_len;
 					zend_unmangle_property_name_ex(
-						p->key, &class_name, &prop_name, &prop_name_len);
+						p->key.str, &class_name, &prop_name, &prop_name_len);
 					ZVAL_STRINGL(EX_VAR(opline->result.var), prop_name, prop_name_len);
 				}
 			}
@@ -16756,8 +16756,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_R_SPEC_VAR_HANDLER(ZE
 				if ((EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
 				     (EXPECTED(Z_TYPE(p->val) != IS_INDIRECT) ||
 				      EXPECTED(Z_TYPE_P(Z_INDIRECT(p->val)) != IS_UNDEF))) &&
-				    (UNEXPECTED(!p->key) ||
-				     EXPECTED(zend_check_property_access(Z_OBJ_P(array), p->key) == SUCCESS))) {
+				    (UNEXPECTED(!zend_bucket_has_str_key(p)) ||
+				     EXPECTED(zend_check_property_access(Z_OBJ_P(array), p->key.str) == SUCCESS))) {
 					break;
 				}
 			}
@@ -16864,10 +16864,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_RW_SPEC_VAR_HANDLER(Z
 			break;
 		}
 		if (opline->result_type & (IS_TMP_VAR|IS_CV)) {
-			if (!p->key) {
-				ZVAL_LONG(EX_VAR(opline->result.var), p->h);
+			if (!zend_bucket_has_str_key(p)) {
+				ZVAL_LONG(EX_VAR(opline->result.var), p->key.num);
 			} else {
-				ZVAL_STR_COPY(EX_VAR(opline->result.var), p->key);
+				ZVAL_STR_COPY(EX_VAR(opline->result.var), p->key.str);
 			}
 		}
 		while (1) {
@@ -16914,23 +16914,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_RW_SPEC_VAR_HANDLER(Z
 						continue;
 					}
 				}
-				if (UNEXPECTED(!p->key) ||
-				    EXPECTED(zend_check_property_access(Z_OBJ_P(array), p->key) == SUCCESS)) {
+				if (UNEXPECTED(!zend_bucket_has_str_key(p)) ||
+				    EXPECTED(zend_check_property_access(Z_OBJ_P(array), p->key.str) == SUCCESS)) {
 					break;
 				}
 				pos++;
 				p++;
 			}
 			if (opline->result_type & (IS_TMP_VAR|IS_CV)) {
-				if (UNEXPECTED(!p->key)) {
-					ZVAL_LONG(EX_VAR(opline->result.var), p->h);
-				} else if (ZSTR_VAL(p->key)[0]) {
-					ZVAL_STR_COPY(EX_VAR(opline->result.var), p->key);
+				if (UNEXPECTED(!zend_bucket_has_str_key(p))) {
+					ZVAL_LONG(EX_VAR(opline->result.var), p->key.num);
+				} else if (ZSTR_VAL(p->key.str)[0]) {
+					ZVAL_STR_COPY(EX_VAR(opline->result.var), p->key.str);
 				} else {
 					const char *class_name, *prop_name;
 					size_t prop_name_len;
 					zend_unmangle_property_name_ex(
-						p->key, &class_name, &prop_name, &prop_name_len);
+						p->key.str, &class_name, &prop_name, &prop_name_len);
 					ZVAL_STRINGL(EX_VAR(opline->result.var), prop_name, prop_name_len);
 				}
 			}
@@ -16944,8 +16944,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_RW_SPEC_VAR_HANDLER(Z
 				if ((EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
 				     (EXPECTED(Z_TYPE(p->val) != IS_INDIRECT) ||
 				      EXPECTED(Z_TYPE_P(Z_INDIRECT(p->val)) != IS_UNDEF))) &&
-				    (UNEXPECTED(!p->key) ||
-				     EXPECTED(zend_check_property_access(Z_OBJ_P(array), p->key) == SUCCESS))) {
+				    (UNEXPECTED(!zend_bucket_has_str_key(p)) ||
+				     EXPECTED(zend_check_property_access(Z_OBJ_P(array), p->key.str) == SUCCESS))) {
 					break;
 				}
 			}
@@ -35490,8 +35490,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_R_SPEC_CV_HANDLER(ZEN
 				if ((EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
 				     (EXPECTED(Z_TYPE(p->val) != IS_INDIRECT) ||
 				      EXPECTED(Z_TYPE_P(Z_INDIRECT(p->val)) != IS_UNDEF))) &&
-				    (UNEXPECTED(!p->key) ||
-				     EXPECTED(zend_check_property_access(Z_OBJ_P(array_ptr), p->key) == SUCCESS))) {
+				    (UNEXPECTED(!zend_bucket_has_str_key(p)) ||
+				     EXPECTED(zend_check_property_access(Z_OBJ_P(array_ptr), p->key.str) == SUCCESS))) {
 					break;
 				}
 				pos++;
@@ -35642,8 +35642,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CV_HANDLER(ZE
 				if ((EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
 				     (EXPECTED(Z_TYPE(p->val) != IS_INDIRECT) ||
 				      EXPECTED(Z_TYPE_P(Z_INDIRECT(p->val)) != IS_UNDEF))) &&
-				    (UNEXPECTED(!p->key) ||
-				     EXPECTED(zend_check_property_access(Z_OBJ_P(array_ptr), p->key) == SUCCESS))) {
+				    (UNEXPECTED(!zend_bucket_has_str_key(p)) ||
+				     EXPECTED(zend_check_property_access(Z_OBJ_P(array_ptr), p->key.str) == SUCCESS))) {
 					break;
 				}
 				pos++;
@@ -40463,11 +40463,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BIND_GLOBAL_SPEC_CV_CONST_HAND
 		Bucket *p = EG(symbol_table).arData + idx;
 
 		if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
-	        (EXPECTED(p->key == Z_STR_P(varname)) ||
-	         (EXPECTED(p->h == ZSTR_H(Z_STR_P(varname))) &&
-	          EXPECTED(p->key != NULL) &&
-	          EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(varname)) &&
-	          EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(varname), Z_STRLEN_P(varname)) == 0)))) {
+			EXPECTED(p->h == ZSTR_H(Z_STR_P(varname))) &&
+	        (EXPECTED(p->key.str == Z_STR_P(varname)) ||
+	         (EXPECTED(ZSTR_LEN(p->key.str) == Z_STRLEN_P(varname)) &&
+	          EXPECTED(memcmp(ZSTR_VAL(p->key.str), Z_STRVAL_P(varname), Z_STRLEN_P(varname)) == 0)))) {
 
 			value = &EG(symbol_table).arData[idx].val;
 			goto check_indirect;

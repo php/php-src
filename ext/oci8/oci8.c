@@ -34,6 +34,7 @@
 #include "ext/standard/info.h"
 #include "php_ini.h"
 #include "zend_smart_str.h"
+#include "zend_hash_func.h"
 
 #if HAVE_OCI8
 

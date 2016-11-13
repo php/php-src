@@ -188,14 +188,16 @@ static int ini_key_compare(const void *a, const void *b) /* {{{ */
 	f = (const Bucket *) a;
 	s = (const Bucket *) b;
 
-	if (!f->key && !s->key) { /* both numeric */
+	if (!zend_bucket_has_str_key(f) && !zend_bucket_has_str_key(s)) { /* both numeric */
 		return ZEND_NORMALIZE_BOOL(f->h - s->h);
-	} else if (!f->key) { /* f is numeric, s is not */
+	} else if (!zend_bucket_has_str_key(f)) { /* f is numeric, s is not */
 		return -1;
-	} else if (!s->key) { /* s is numeric, f is not */
+	} else if (!zend_bucket_has_str_key(s)) { /* s is numeric, f is not */
 		return 1;
 	} else { /* both strings */
-		return zend_binary_strcasecmp(ZSTR_VAL(f->key), ZSTR_LEN(f->key), ZSTR_VAL(s->key), ZSTR_LEN(s->key));
+		return zend_binary_strcasecmp(
+				ZSTR_VAL(f->key.str), ZSTR_LEN(f->key.str),
+				ZSTR_VAL(s->key.str), ZSTR_LEN(s->key.str));
 	}
 }
 /* }}} */
