@@ -176,7 +176,7 @@ PHPDBG_API void phpdbg_export_breakpoints_to_string(char **str) /* {{{ */
 							zend_string *filename = php_addcslashes(zend_string_init(((phpdbg_breakopline_t*)brake)->class_name, strlen(((phpdbg_breakopline_t*)brake)->class_name), 0), 1, "\\\"\n", 3);
 							phpdbg_asprintf(&new_str,
 								"%sbreak \"%s\":#%llu\n", *str,
-								filename,
+								ZSTR_VAL(filename),
 								((phpdbg_breakopline_t*)brake)->opline_num);
 							zend_string_release(filename);
 						} break;
@@ -208,7 +208,7 @@ PHPDBG_API void phpdbg_export_breakpoints_to_string(char **str) /* {{{ */
 										zend_string *filename = php_addcslashes(zend_string_init(conditional->param.file.name, strlen(conditional->param.file.name), 0), 1, "\\\"\n", 3);
 										phpdbg_asprintf(&new_str,
 											"%sbreak at \"%s\":%lu if %s\n", *str,
-											conditional->param.file.name, conditional->param.file.line,
+											ZSTR_VAL(filename), conditional->param.file.line,
 											conditional->code);
 										zend_string_release(filename);
 									} break;
