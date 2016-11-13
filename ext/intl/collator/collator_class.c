@@ -131,6 +131,7 @@ zend_function_entry Collator_class_functions[] = {
 	PHP_NAMED_FE( getErrorMessage, ZEND_FN( collator_get_error_message ), collator_0_args )
 	PHP_NAMED_FE( getSortKey, ZEND_FN( collator_get_sort_key ), collator_2_args )
 	PHP_NAMED_FE( replace, ZEND_FN( collator_replace ), collator_replace_args )
+	PHP_NAMED_FE( replaceCallback, ZEND_FN( collator_replace_callback ), collator_replace_args )
 	PHP_NAMED_FE( rindex, ZEND_FN( collator_rindex ), collator_index_args )
 	PHP_NAMED_FE( lindex, ZEND_FN( collator_lindex ), collator_index_args )
 	PHP_NAMED_FE( rfind, ZEND_FN( collator_rfind ), collator_find_args )

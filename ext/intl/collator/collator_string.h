@@ -5,6 +5,7 @@
 # include <php.h>
 
 PHP_FUNCTION( collator_replace );
+PHP_FUNCTION( collator_replace_callback );
 
 PHP_FUNCTION( collator_rfind );
 PHP_FUNCTION( collator_lfind );

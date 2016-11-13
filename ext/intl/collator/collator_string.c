@@ -11,8 +11,10 @@
 
 #include <unicode/usearch.h>
 
-#undef COLLATOR_CHECK_STATUS
-#define COLLATOR_CHECK_STATUS(ro, msg)                                \
+#define ARRAY_SIZE(array) \
+	(sizeof(array) / sizeof((array)[0]))
+
+#define COLLATOR_STRING_CHECK_STATUS(ro, msg)                         \
 	do {                                                              \
 		intl_error_set_code(NULL, COLLATOR_ERROR_CODE(ro));           \
 		if (U_FAILURE(COLLATOR_ERROR_CODE(ro))) {                     \
@@ -26,13 +28,13 @@
 		to = NULL;                                                                           \
 		to_len = 0;                                                                          \
 		intl_convert_utf8_to_utf16(&to, &to_len, from, from_len, COLLATOR_ERROR_CODE_P(ro)); \
-		COLLATOR_CHECK_STATUS(ro, "string conversion of " #from " to UTF-16 failed");        \
+		COLLATOR_STRING_CHECK_STATUS(ro, "string conversion of " #from " to UTF-16 failed"); \
 	} while (0);
 
-#define UTF16_TO_UTF8(ro, to, from, from_len)                                        \
-	do {                                                                             \
-		to = intl_convert_utf16_to_utf8(from, from_len, COLLATOR_ERROR_CODE_P(ro));  \
-		COLLATOR_CHECK_STATUS(ro, "string conversion of " #from " to UTF-8 failed"); \
+#define UTF16_TO_UTF8(ro, to, from, from_len)                                               \
+	do {                                                                                    \
+		to = intl_convert_utf16_to_utf8(from, from_len, COLLATOR_ERROR_CODE_P(ro));         \
+		COLLATOR_STRING_CHECK_STATUS(ro, "string conversion of " #from " to UTF-8 failed"); \
 	} while (0);
 
 static void starts_or_ends_with(INTERNAL_FUNCTION_PARAMETERS, int first)
@@ -63,16 +65,16 @@ static void starts_or_ends_with(INTERNAL_FUNCTION_PARAMETERS, int first)
 	UTF8_TO_UTF16(co, uhaystack, uhaystack_len, ZSTR_VAL(haystack), ZSTR_LEN(haystack));
 	UTF8_TO_UTF16(co, uneedle, uneedle_len, ZSTR_VAL(needle), ZSTR_LEN(needle));
 	uss = usearch_openFromCollator(uneedle, uneedle_len, uhaystack, uhaystack_len, co->ucoll, NULL, COLLATOR_ERROR_CODE_P( co ));
-	COLLATOR_CHECK_STATUS(co, "failed creating UStringSearch");
+	COLLATOR_STRING_CHECK_STATUS(co, "failed creating UStringSearch");
 
 	if (first) {
 		RETVAL_BOOL(0 == usearch_first(uss, COLLATOR_ERROR_CODE_P( co )));
-		COLLATOR_CHECK_STATUS(co, "failed while searching");
+		COLLATOR_STRING_CHECK_STATUS(co, "failed while searching");
 	} else {
 		int32_t lastMatch;
 
 		lastMatch = usearch_last(uss, COLLATOR_ERROR_CODE_P( co ));
-		COLLATOR_CHECK_STATUS(co, "failed while searching");
+		COLLATOR_STRING_CHECK_STATUS(co, "failed while searching");
 		RETVAL_BOOL(uhaystack_len == lastMatch + usearch_getMatchedLength(uss));
 	}
 	if (FALSE) {
@@ -154,9 +156,9 @@ static void collator_index(INTERNAL_FUNCTION_PARAMETERS, int search_first, int w
 	UTF8_TO_UTF16(co, uhaystack, uhaystack_len, ZSTR_VAL(haystack), ZSTR_LEN(haystack));
 	UTF8_TO_UTF16(co, uneedle, uneedle_len, ZSTR_VAL(needle), ZSTR_LEN(needle));
 	ubrk = grapheme_get_break_iterator((void*) u_break_iterator_buffer, COLLATOR_ERROR_CODE_P( co ));
-	COLLATOR_CHECK_STATUS(co, "failed cloning UBreakIterator");
+	COLLATOR_STRING_CHECK_STATUS(co, "failed cloning UBreakIterator");
 	ubrk_setText(ubrk, uhaystack, uhaystack_len, COLLATOR_ERROR_CODE_P( co ));
-	COLLATOR_CHECK_STATUS(co, "failed binding text to UBreakIterator");
+	COLLATOR_STRING_CHECK_STATUS(co, "failed binding text to UBreakIterator");
 	if (0 != startoffset) {
 		if (UBRK_DONE == (cuoffset = utf16_grapheme_to_cu(ubrk, startoffset))) {
 			intl_error_set(NULL, U_INDEX_OUTOFBOUNDS_ERROR, "offset is out of bounds", 0);
@@ -170,16 +172,16 @@ static void collator_index(INTERNAL_FUNCTION_PARAMETERS, int search_first, int w
 		}
 	}
 	uss = usearch_openFromCollator(uneedle, uneedle_len, uhaystack, uhaystack_len, co->ucoll, ubrk, COLLATOR_ERROR_CODE_P( co ));
-	COLLATOR_CHECK_STATUS(co, "failed creating UStringSearch");
+	COLLATOR_STRING_CHECK_STATUS(co, "failed creating UStringSearch");
 
 	if (search_first) {
 		match_start = usearch_following(uss, cuoffset, COLLATOR_ERROR_CODE_P( co ));
 	} else {
 		usearch_setAttribute(uss, USEARCH_OVERLAP, USEARCH_ON, COLLATOR_ERROR_CODE_P( co ));
-		COLLATOR_CHECK_STATUS(co, "failed switching overlap attribute to on");
+		COLLATOR_STRING_CHECK_STATUS(co, "failed switching overlap attribute to on");
 		match_start = usearch_preceding(uss, cuoffset, COLLATOR_ERROR_CODE_P( co ));
 	}
-	COLLATOR_CHECK_STATUS(co, "failed while searching");
+	COLLATOR_STRING_CHECK_STATUS(co, "failed while searching");
 	if (USEARCH_DONE != match_start) {
 		if (want_only_pos) {
 			RETVAL_LONG((long) utf16_cu_to_grapheme(ubrk, match_start));
@@ -285,7 +287,7 @@ static void utf16_replace_len(
 	}
 	diff_len = ureplacement_len - match_cu_length;
 	if (diff_len > 0) {
-		*ucopy = safe_erealloc(*ucopy, *ucopy_len + diff_len, sizeof(**ucopy), 1 * sizeof(**ucopy)); // reference may no longer be valid from this point
+		*ucopy = safe_erealloc(*ucopy, *ucopy_len + diff_len, sizeof(**ucopy), 1 * sizeof(**ucopy)); /* reference may no longer be valid from this point */
 	}
 	if (ureplacement_len != match_cu_length) {
 		u_memmove(*ucopy + real_offset + match_cu_length + diff_len, *ucopy + real_offset + match_cu_length, *ucopy_len - real_offset - match_cu_length);
@@ -294,12 +296,7 @@ static void utf16_replace_len(
 	*ucopy_len += diff_len;
 }
 
-/* {{{ proto string Collator::replace( Collator $coll, string $subject, string $search, string $replacement [, int &$count ] )
- * Replace all matches of search, according to collation, by replacement in subject. }}} */
-/* {{{ proto string collator_replace(  Collator $coll, string $subject, string $search, string $replacement [, int &$count ] )
- * Replace all matches of search, according to collation, by replacement in subject.
- */
-PHP_FUNCTION(collator_replace)
+static void collator_replace_common(INTERNAL_FUNCTION_PARAMETERS, int callable)
 {
 	int32_t l;
 	zval *zcount = NULL;
@@ -313,13 +310,24 @@ PHP_FUNCTION(collator_replace)
 	int32_t ureplace_len = 0;
 	UChar *uresult = NULL;
 	int32_t uresult_len = 0;
+	zval cb_args[1], cb_retval;
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
 	zend_string *search, *replace, *subject, *result = NULL;
 
 	COLLATOR_METHOD_INIT_VARS
-	if ( FAILURE == zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "OSSS|z/", &object, Collator_ce_ptr, &subject, &search, &replace, &zcount )) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "collator_replace: unable to parse input params", 0 );
+	if (callable) {
+		if ( FAILURE == zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "OSSf|z/", &object, Collator_ce_ptr, &subject, &search, &fci, &fci_cache, &zcount )) {
+			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "collator_replace_callback: unable to parse input params", 0 );
 
-		RETURN_FALSE;
+			RETURN_FALSE;
+		}
+	} else {
+		if ( FAILURE == zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "OSSS|z/", &object, Collator_ce_ptr, &subject, &search, &replace, &zcount )) {
+			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "collator_replace: unable to parse input params", 0 );
+
+			RETURN_FALSE;
+		}
 	}
 	COLLATOR_METHOD_FETCH_OBJECT;
 	if (!co || !co->ucoll) {
@@ -330,19 +338,44 @@ PHP_FUNCTION(collator_replace)
 		RETURN_FALSE;
 	}
 
+	fci.params = cb_args;
+	fci.retval = &cb_retval;
+	fci.param_count = ARRAY_SIZE(cb_args);
 	UTF8_TO_UTF16(co, usearch, usearch_len, ZSTR_VAL(search), ZSTR_LEN(search));
 	UTF8_TO_UTF16(co, usubject, usubject_len, ZSTR_VAL(subject), ZSTR_LEN(subject));
 	uss = usearch_openFromCollator(usearch, usearch_len, usubject, usubject_len, co->ucoll, NULL, COLLATOR_ERROR_CODE_P( co ));
-	COLLATOR_CHECK_STATUS(co, "failed creating UStringSearch");
-	UTF8_TO_UTF16(co, ureplace, ureplace_len, ZSTR_VAL(replace), ZSTR_LEN(replace));
+	COLLATOR_STRING_CHECK_STATUS(co, "failed creating UStringSearch");
+	if (!callable) {
+		UTF8_TO_UTF16(co, ureplace, ureplace_len, ZSTR_VAL(replace), ZSTR_LEN(replace));
+	}
 	uresult_len = usubject_len;
 	uresult = safe_emalloc(usubject_len, sizeof(*usubject), 1 * sizeof(*usubject));
 	u_memcpy(uresult, usubject, usubject_len);
 	uresult[uresult_len] = 0;
 	for (l = usearch_first(uss, COLLATOR_ERROR_CODE_P( co )); U_SUCCESS(COLLATOR_ERROR_CODE( co )) && USEARCH_DONE != l; l = usearch_next(uss, COLLATOR_ERROR_CODE_P( co )), count++) {
+		if (callable) {
+			zend_string *tmp;
+
+			UTF16_TO_UTF8(co, tmp, usubject + l, usearch_getMatchedLength(uss));
+			ZVAL_NEW_STR(&cb_args[0], tmp);
+			if (SUCCESS != zend_call_function(&fci, &fci_cache)) {
+				zval_dtor(&cb_retval);
+				zval_dtor(&cb_args[0]);
+				COLLATOR_STRING_CHECK_STATUS(co, "an error occurred while invoking the replace callback");
+			}
+			convert_to_string(&cb_retval);
+			UTF8_TO_UTF16(co, ureplace, ureplace_len, Z_STRVAL(cb_retval), Z_STRLEN(cb_retval));
+			zval_dtor(&cb_retval);
+			zval_dtor(&cb_args[0]);
+		}
 		utf16_replace_len(&uresult, &uresult_len, ureplace, ureplace_len, usubject, usubject_len, l, usearch_getMatchedLength(uss), REPLACE_FORWARD);
+		if (callable) {
+			efree(ureplace);
+			ureplace = NULL;
+			ureplace_len = 0;
+		}
 	}
-	COLLATOR_CHECK_STATUS(co, "failed while searching");
+	COLLATOR_STRING_CHECK_STATUS(co, "failed while searching");
 	UTF16_TO_UTF8(co, result, uresult, uresult_len);
 	RETVAL_STR(result);
 
@@ -372,6 +405,27 @@ end:
 		zval_dtor(zcount);
 		ZVAL_LONG(zcount, count);
 	}
+}
+
+/* {{{ proto string Collator::replace( Collator $coll, string $subject, string $search, string $replacement [, int &$count ] )
+ * Replace all matches of search, according to collation, by replacement in subject. }}} */
+/* {{{ proto string collator_replace( Collator $coll, string $subject, string $search, string $replacement [, int &$count ] )
+ * Replace all matches of search, according to collation, by replacement in subject.
+ */
+PHP_FUNCTION(collator_replace)
+{
+	collator_replace_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, FALSE);
+}
+/* }}} */
+
+/* {{{ proto string Collator::replaceCallback( Collator $coll, string $subject, string $search, callable $callback [, int &$count ] )
+ * Replace all matches of search, according to collation, in subject using a callback. }}} */
+/* {{{ proto string collator_replace_callback( Collator $coll, string $subject, string $search, callable $callback [, int &$count ] )
+ * Replace all matches of search, according to collation, in subject using a callback.
+ */
+PHP_FUNCTION(collator_replace_callback)
+{
+	collator_replace_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, TRUE);
 }
 /* }}} */
 
