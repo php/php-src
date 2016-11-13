@@ -19,6 +19,9 @@ PHP                                                                        NEWS
   . Implemented FR #72768 (Add ENABLE_VIRTUAL_TERMINAL_PROCESSING flag for
     php.exe). (Michele Locati)
 
+- Date:
+  . Fixed bug #69587 (DateInterval properties and isset). (jhdxr)
+
 - EXIF:
   . Added support for vendor specific tags for the following formats:
     Samsung, DJI, Panasonic, Sony, Pentax, Minolta & Sigma/Foveon. (Kalle)
@@ -65,4 +68,3 @@ PHP                                                                        NEWS
   . Use Zend MM for allocation in bundled libxmlrpc (Joe)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
-
