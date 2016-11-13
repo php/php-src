@@ -248,7 +248,7 @@ PHP_FUNCTION(curl_multi_exec)
 	int        still_running;
 	CURLMcode error = CURLM_OK;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz/", &z_mh, &z_still_running) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rZl", &z_mh, &z_still_running) == FAILURE) {
 		return;
 	}
 
@@ -272,7 +272,6 @@ PHP_FUNCTION(curl_multi_exec)
 		}
 	}
 
-	convert_to_long(z_still_running);
 	still_running = Z_LVAL_P(z_still_running);
 	error = curl_multi_perform(mh->multi, &still_running);
 	ZVAL_LONG(z_still_running, still_running);

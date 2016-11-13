@@ -531,7 +531,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 					is_null = va_arg(*va, zend_bool *);
 				}
 
-				if (!zend_parse_arg_long(arg, p, is_null, check_null, c == 'L', ref_type)) {
+				if (!zend_parse_arg_long(arg, p, is_null, check_null, c == 'L')) {
 					return "integer";
 				}
 			}
@@ -546,7 +546,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 					is_null = va_arg(*va, zend_bool *);
 				}
 
-				if (!zend_parse_arg_double(arg, p, is_null, check_null, ref_type)) {
+				if (!zend_parse_arg_double(arg, p, is_null, check_null)) {
 					return "float";
 				}
 			}
@@ -556,7 +556,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 			{
 				char **p = va_arg(*va, char **);
 				size_t *pl = va_arg(*va, size_t *);
-				if (!zend_parse_arg_string(arg, p, pl, check_null, ref_type)) {
+				if (!zend_parse_arg_string(arg, p, pl, check_null)) {
 					return "string";
 				}
 			}
@@ -566,7 +566,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 			{
 				char **p = va_arg(*va, char **);
 				size_t *pl = va_arg(*va, size_t *);
-				if (!zend_parse_arg_path(arg, p, pl, check_null, ref_type)) {
+				if (!zend_parse_arg_path(arg, p, pl, check_null)) {
 					return "a valid path";
 				}
 			}
@@ -575,7 +575,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 		case 'P':
 			{
 				zend_string **str = va_arg(*va, zend_string **);
-				if (!zend_parse_arg_path_str(arg, str, check_null, ref_type)) {
+				if (!zend_parse_arg_path_str(arg, str, check_null)) {
 					return "a valid path";
 				}
 			}
@@ -584,7 +584,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 		case 'S':
 			{
 				zend_string **str = va_arg(*va, zend_string **);
-				if (!zend_parse_arg_str(arg, str, check_null, ref_type)) {
+				if (!zend_parse_arg_str(arg, str, check_null)) {
 					return "string";
 				}
 			}
@@ -599,7 +599,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 					is_null = va_arg(*va, zend_bool *);
 				}
 
-				if (!zend_parse_arg_bool(arg, p, is_null, check_null, ref_type)) {
+				if (!zend_parse_arg_bool(arg, p, is_null, check_null)) {
 					return "boolean";
 				}
 			}
@@ -749,10 +749,122 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 			break;
 
 		case 'Z':
-			/* 'Z' iz not supported anymore and should be replaced with 'z' */
-			ZEND_ASSERT(c != 'Z');
-		default:
-			return "unknown";
+			{
+				if (Z_TYPE_P(arg) == IS_NULL) {
+					if (!check_null) {
+						return "a non-null value";
+					}
+
+					if (ref_type) {
+						zend_uchar type;
+						char *expected;
+						switch (*spec_walk) {
+							case 'l':
+							case 'L':
+								type = IS_LONG;
+								expected = "integer";
+								break;
+								case 'd':
+								type = IS_DOUBLE;
+								expected = "double";
+								break;
+							case 's':
+							case 'S':
+								type = IS_STRING;
+								expected = "string";
+								break;
+							case 'p':
+							case 'P':
+								type = IS_STRING;
+								expected = "a valid path";
+								break;
+							case 'b':
+								type = _IS_BOOL;
+								expected = "boolean";
+								break;
+
+							default:
+								return "unknown";
+						}
+						if (!zend_verify_ref_type_assignable(ref_type, type)) {
+							return expected;
+						}
+					}
+				} else {
+					switch (*spec_walk) {
+						case 'l':
+							if (Z_TYPE_P(arg) != IS_LONG) {
+								zend_long l;
+								if (ref_type || !zend_parse_arg_long_slow(arg, &l)) {
+									return "integer";
+								}
+								ZVAL_LONG(arg, l);
+							}
+						break;
+
+						case 'L':
+							if (Z_TYPE_P(arg) != IS_LONG) {
+							zend_long l;
+								if (ref_type || !zend_parse_arg_long_cap_slow(arg, &l)) {
+									return "integer";
+								}
+								ZVAL_LONG(arg, l);
+							}
+						break;
+
+						case 'd':
+							if (Z_TYPE_P(arg) != IS_DOUBLE) {
+								double d;
+								if (ref_type || !zend_parse_arg_double_slow(arg, &d)) {
+									return "double";
+								}
+								ZVAL_DOUBLE(arg, d);
+							}
+						break;
+
+						case 's':
+						case 'S':
+							if (Z_TYPE_P(arg) != IS_STRING) {
+								zend_string *s;
+								if (ref_type || !zend_parse_arg_str_slow(arg, &s)) {
+									return "string";
+								}
+								ZVAL_STR(arg, s);
+							}
+						break;
+
+						case 'p':
+						case 'P':
+							if (Z_TYPE_P(arg) != IS_STRING) {
+								zend_string *s;
+								if (ref_type || !zend_parse_arg_path_str(arg, &s, 0)) {
+									return "a valid path";
+								}
+								ZVAL_STR(arg, s);
+							} else if (UNEXPECTED(CHECK_NULL_PATH(Z_STRVAL_P(arg), Z_STRLEN_P(arg)))) {
+								return "a valid path";
+							}
+						break;
+
+						case 'b':
+							if (Z_TYPE_P(arg) != IS_TRUE && Z_TYPE_P(arg) != IS_FALSE) {
+								zend_bool b;
+								if (ref_type || !zend_parse_arg_bool_slow(arg, &b)) {
+									return "boolean";
+								}
+								ZVAL_BOOL(arg, b);
+							}
+						break;
+
+						default:
+							return "unknown";
+					}
+				}
+
+				*((zval **) va_arg(*va, zval **)) = arg;
+				++spec_walk;
+			}
+			break;
 	}
 
 	*spec = spec_walk;
@@ -836,7 +948,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 			case 's': case 'b':
 			case 'r': case 'a':
 			case 'o': case 'O':
-			case 'z': case 'Z':
+			case 'z':
 			case 'C': case 'h':
 			case 'f': case 'A':
 			case 'H': case 'p':
@@ -851,6 +963,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 
 			case '/':
 			case '!':
+			case 'Z':
 				/* Pass */
 				break;
 
