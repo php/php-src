@@ -23,7 +23,7 @@ Class books extends domDocument {
 
 $dom = new books;
 
-$dom->load(dirname(__FILE__)."/book.xml");
+$dom->load(__DIR__."/book.xml");
 $dom->addBook("PHP de Luxe", "Richard Samar, Christian Stocker");
 print $dom->saveXML();
 --EXPECT--

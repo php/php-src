@@ -5,7 +5,7 @@ SELECT tests with duplicate column anmes
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 // Initialization
 

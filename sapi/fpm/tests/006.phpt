@@ -10,7 +10,7 @@ FPM: Test IPv6 allowed clients (bug #68428)
 
 include "include.inc";
 
-$logfile = dirname(__FILE__).'/php-fpm.log.tmp';
+$logfile = __DIR__.'/php-fpm.log.tmp';
 $port = 9000+PHP_INT_SIZE;
 
 $cfg = <<<EOT
@@ -55,6 +55,6 @@ IPv4 error
 IPv6 ok
 --CLEAN--
 <?php
-    $logfile = dirname(__FILE__).'/php-fpm.log.tmp';
+    $logfile = __DIR__.'/php-fpm.log.tmp';
     @unlink($logfile);
 ?>

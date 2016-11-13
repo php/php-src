@@ -5,7 +5,7 @@ oci_execute() and invalid execute mode
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
+require __DIR__."/connect.inc";
 
 $pc = oci_pconnect($user, $password, $dbase);
 

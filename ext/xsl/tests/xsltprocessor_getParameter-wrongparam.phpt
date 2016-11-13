@@ -8,7 +8,7 @@ Check xsltprocessor::getparameter error handling
 ?>
 --FILE--
 <?php
-include dirname(__FILE__) .'/prepare.inc';
+include __DIR__ .'/prepare.inc';
 var_dump($proc->getParameter());
 var_dump($proc->getParameter(array(), array()));
 var_dump($proc->getParameter('', array()));

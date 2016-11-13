@@ -9,7 +9,7 @@ if (!GD_BUNDLED && version_compare(GD_VERSION, '2.2.2', '<')) {
 ?>
 --FILE--
 <?php
-$fname = dirname(__FILE__) . DIRECTORY_SEPARATOR . "bug72339.gd";
+$fname = __DIR__ . DIRECTORY_SEPARATOR . "bug72339.gd";
 
 $fh = fopen($fname, "w");
 fwrite($fh, "gd2\x00");

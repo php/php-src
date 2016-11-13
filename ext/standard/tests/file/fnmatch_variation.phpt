@@ -13,7 +13,7 @@ if (!function_exists('fnmatch'))
 */
 
 echo "*** Testing fnmatch() with file and various patterns ***\n";
-$file_name = dirname(__FILE__)."/match.tmp";
+$file_name = __DIR__."/match.tmp";
 
 /* avoid using \, it breaks the pattern */
 if (substr(PHP_OS, 0, 3) == 'WIN') {

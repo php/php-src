@@ -5,7 +5,7 @@ oci_pconnect() & oci_new_connect()
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
+require __DIR__."/connect.inc";
 
 if (!empty($dbase)) {
 	var_dump($c1 = oci_pconnect($user, $password, $dbase));

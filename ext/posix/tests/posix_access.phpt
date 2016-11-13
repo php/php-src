@@ -19,7 +19,7 @@ if (PHP_VERSION_ID < 503099) {
 ?>
 --FILE--
 <?php
-$filename = dirname(__FILE__) . '/foo.test';
+$filename = __DIR__ . '/foo.test';
 $fp = fopen($filename,"w");
 fwrite($fp,"foo");
 fclose($fp);
@@ -39,7 +39,7 @@ var_dump(posix_access($filename, POSIX_X_OK));
 ===DONE===
 --CLEAN--
 <?php
-$filename = dirname(__FILE__) . '/foo.test';
+$filename = __DIR__ . '/foo.test';
 chmod ($filename, 0700);
 unlink($filename);
 ?>

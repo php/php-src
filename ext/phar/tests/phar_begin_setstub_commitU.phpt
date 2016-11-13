@@ -10,7 +10,7 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
-$p = new Phar(dirname(__FILE__) . '/brandnewphar.phar', 0, 'brandnewphar.phar');
+$p = new Phar(__DIR__ . '/brandnewphar.phar', 0, 'brandnewphar.phar');
 //var_dump($p->getStub());
 var_dump($p->isBuffering());
 $p->startBuffering();
@@ -33,7 +33,7 @@ var_dump($p->getStub());
 ===DONE===
 --CLEAN--
 <?php 
-unlink(dirname(__FILE__) . '/brandnewphar.phar');
+unlink(__DIR__ . '/brandnewphar.phar');
 ?>
 --EXPECT--
 bool(false)

@@ -7,7 +7,7 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
-chdir(dirname(__FILE__));
+chdir(__DIR__);
 try {
 	$p = new Phar('brandnewphar.phar');
 	$p['file1.txt'] = 'hi';
@@ -29,7 +29,7 @@ __HALT_COMPILER();
 ===DONE===
 --CLEAN--
 <?php 
-unlink(dirname(__FILE__) . '/brandnewphar.phar');
+unlink(__DIR__ . '/brandnewphar.phar');
 ?>
 --EXPECT--
 int(6651)

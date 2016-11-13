@@ -26,7 +26,7 @@ function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
 set_error_handler('test_error_handler');
 
 // Initialise function arguments not being substituted (if any)
-$filename = dirname(__FILE__)."/004.txt.gz";
+$filename = __DIR__."/004.txt.gz";
 $use_include_path = false;
 
 //get an unset variable

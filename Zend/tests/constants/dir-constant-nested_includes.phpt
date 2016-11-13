@@ -3,7 +3,7 @@ __DIR__ constant test with nested includes
 --FILE--
 <?php
 echo __DIR__ . "\n";
-echo dirname(__FILE__) . "\n";
+echo __DIR__ . "\n";
 include 'fixtures/folder1/fixture.inc';
 include 'fixtures/folder1/subfolder1/fixture.inc';
 include 'fixtures/folder1/subfolder2/fixture.inc';

@@ -5,7 +5,7 @@ Test chdir()/getcwd() with a dir for multibyte filenames
 
 <?php
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 
 skip_if_not_win();
@@ -20,7 +20,7 @@ skip_if_no_required_exts();
 <?php
 
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $prefix = create_data("dir_mb");
 $dirw = $prefix . DIRECTORY_SEPARATOR . "テストマルチバイト・パス42";

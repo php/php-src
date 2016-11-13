@@ -6,8 +6,8 @@ Phar: test to ensure phar.readonly cannot be circumvented
 phar.readonly=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
-$fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.1.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.1.php';
 $a = new Phar($fname);
 $a->setStub('<?php
 Phar::mapPhar();
@@ -29,7 +29,7 @@ include $fname2;
 ?>
 ===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.1.php'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.1.php'); ?>
 --EXPECT--
 bool(false)
 Write operations disabled by the php.ini setting phar.readonly

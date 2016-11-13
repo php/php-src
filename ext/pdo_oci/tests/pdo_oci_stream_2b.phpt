@@ -4,7 +4,7 @@ PDO OCI: Fetches 10K records from a table that contains 1 number and 2 LOB colum
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_oci')) die('skip not loaded');
 if (getenv('SKIP_SLOW_TESTS')) die('skip slow tests excluded by request');
-require(dirname(__FILE__).'/../../pdo/tests/pdo_test.inc');
+require(__DIR__.'/../../pdo/tests/pdo_test.inc');
 PDOTest::skip();
 ?>
 --FILE--

@@ -2,7 +2,7 @@
 Test mkdir/rmdir cp932
 --SKIPIF--
 <?php
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 skip_if_not_win();
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
@@ -19,7 +19,7 @@ default_charset=cp932
 #vim: set encoding=cp932
 */
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $item = "テストマルチバイト・パス"; // cp932 string
 $prefix = create_data("dir_cp932", "${item}42", 932);

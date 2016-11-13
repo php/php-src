@@ -12,7 +12,7 @@ if(!defined("GLOB_BRACE")) die ('skip');
 ?>
 --FILE--
 <?php
-$dirname = dirname(__FILE__) . '/';
+$dirname = __DIR__ . '/';
 include $dirname . 'utils.inc';
 $file = $dirname . '__tmp_oo_addglob.zip';
 
@@ -37,7 +37,7 @@ if ($zip->status == ZIPARCHIVE::ER_OK) {
 ?>
 --CLEAN--
 <?php
-$dirname = dirname(__FILE__) . '/';
+$dirname = __DIR__ . '/';
 unlink($dirname . '__tmp_oo_addglob.zip');
 unlink($dirname . 'foo.txt');
 unlink($dirname . 'bar.baz');

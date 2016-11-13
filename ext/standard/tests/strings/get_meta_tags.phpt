@@ -3,7 +3,7 @@ get_meta_tags() tests
 --FILE--
 <?php
 
-$filename = dirname(__FILE__)."/get_meta_tags.html";
+$filename = __DIR__."/get_meta_tags.html";
 
 $data = <<<DATA
 <meta name="author" content="name">

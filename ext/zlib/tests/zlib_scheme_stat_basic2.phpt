@@ -8,7 +8,7 @@ if (!extension_loaded("zlib")) {
 ?>
 --FILE--
 <?php
-$inputFileName = dirname(__FILE__)."/004.txt.gz";
+$inputFileName = __DIR__."/004.txt.gz";
 $srcFile = "compress.zlib://$inputFileName";
 echo "file_exists=";
 var_dump(file_exists($srcFile));

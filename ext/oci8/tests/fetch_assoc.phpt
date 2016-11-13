@@ -5,7 +5,7 @@ oci_fetch_assoc()
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
+require __DIR__."/connect.inc";
 
 $stmtarray = array(
 	"drop table fetch_assoc_tab",

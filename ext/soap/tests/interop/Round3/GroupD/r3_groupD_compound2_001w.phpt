@@ -25,7 +25,7 @@ class Employee {
 $person = new Person(32,12345,'Shane',TRUE);
 $employee = new Employee($person,12345,1000000.00);
 
-$client = new SoapClient(dirname(__FILE__)."/round3_groupD_compound2.wsdl",array("trace"=>1,"exceptions"=>0));
+$client = new SoapClient(__DIR__."/round3_groupD_compound2.wsdl",array("trace"=>1,"exceptions"=>0));
 $client->echoEmployee($employee);
 echo $client->__getlastrequest();
 $HTTP_RAW_POST_DATA = $client->__getlastrequest();

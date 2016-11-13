@@ -11,7 +11,7 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
  */
 
 echo "*** Testing file() : variation ***\n";
-$testfile = dirname(__FILE__)."/fileVar9.txt";
+$testfile = __DIR__."/fileVar9.txt";
 
 $contents = array(
    "File ends on a single character\na",

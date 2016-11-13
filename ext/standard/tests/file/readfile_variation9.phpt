@@ -13,7 +13,7 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 echo "*** Testing readfile() : variation ***\n";
 $mainDir = "readfileVar8";
 $subDir = "readfileVar8Sub";
-$absMainDir = dirname(__FILE__)."/".$mainDir;
+$absMainDir = __DIR__."/".$mainDir;
 mkdir($absMainDir);
 $absSubDir = $absMainDir."/".$subDir;
 mkdir($absSubDir);
@@ -28,7 +28,7 @@ fclose($h);
 
 
 $old_dir_path = getcwd();
-chdir(dirname(__FILE__));
+chdir(__DIR__);
 
 $allDirs = array(
   // absolute paths

@@ -7,7 +7,7 @@ XML_SAX_IMPL == 'libxml' && die('skip this test is not intended for libxml SAX p
 ?>
 --FILE--
 <?php
-chdir(dirname(__FILE__));
+chdir(__DIR__);
 
 $xml_parser = xml_parser_create();
 xml_parser_set_option($xml_parser, XML_OPTION_CASE_FOLDING, 1);

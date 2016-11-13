@@ -9,7 +9,7 @@ if (version_compare(PHP_VERSION, "6.0", "!=")) die("skip Unicode support require
 phar.cache_list={PWD}/files/nophar.phar
 --FILE--
 <?php
-$pname = 'phar://' . dirname(__FILE__) . '/files/nophar.phar';
+$pname = 'phar://' . __DIR__ . '/files/nophar.phar';
 var_dump(file_get_contents($pname . '/b/c.php'));
 $a = opendir($pname);
 while (false !== ($b = readdir($a))) {
@@ -24,7 +24,7 @@ var_dump(is_dir($pname . '/b/c.php'));
 ?>
 ===DONE===
 --EXPECTF--
-string(131) "<?php echo "in b\n";$a = fopen("index.php", "r", true);echo stream_get_contents($a);fclose($a);include dirname(__FILE__) . "/../d";"
+string(131) "<?php echo "in b\n";$a = fopen("index.php", "r", true);echo stream_get_contents($a);fclose($a);include __DIR__ . "/../d";"
 unicode(1) "b"
 unicode(1) "d"
 unicode(9) "index.php"

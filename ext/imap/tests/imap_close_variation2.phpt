@@ -2,7 +2,7 @@
 Test imap_close() function : usage variations - different data types as $options arg
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
@@ -18,7 +18,7 @@ require_once(dirname(__FILE__).'/skipif.inc');
 echo "*** Testing imap_close() : usage variations ***\n";
 
 // include file for imap_stream
-require_once(dirname(__FILE__).'/imap_include.inc');
+require_once(__DIR__.'/imap_include.inc');
 
 // create mailbox to test whether options has been set to CL_EXPUNGE
 $stream_id = setup_test_mailbox('', 3, $mailbox);
@@ -113,7 +113,7 @@ foreach($inputs as $input) {
 ===DONE===
 --CLEAN--
 <?php
-require_once(dirname(__FILE__).'/clean.inc');
+require_once(__DIR__.'/clean.inc');
 ?>
 --EXPECTF--
 *** Testing imap_close() : usage variations ***

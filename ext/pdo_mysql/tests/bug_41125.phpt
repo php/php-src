@@ -2,8 +2,8 @@
 Bug #41125 (PDO mysql + quote() + prepare() can result in segfault)
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 
 $db = MySQLPDOTest::factory();
@@ -20,7 +20,7 @@ if ($version < 40100)
 ?>
 --FILE--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 $db = MySQLPDOTest::factory();
 $db->exec("DROP TABLE IF EXISTS test");
 
@@ -40,7 +40,7 @@ print "done!";
 ?>
 --CLEAN--
 <?php
-require dirname(__FILE__) . '/mysql_pdo_test.inc';
+require __DIR__ . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 $db->exec("DROP TABLE IF EXISTS test");
 ?>

@@ -16,7 +16,7 @@ Test dir() function : usage variations - unexpected value for 'context' argument
 echo "*** Testing dir() : unexpected values for \$context argument ***\n";
 
 // create the temporary directory
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $directory = $file_path."/dir_variation2";
 @mkdir($directory);
 
@@ -101,7 +101,7 @@ echo "Done";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $directory = $file_path."/dir_variation2";
 
 rmdir($directory);

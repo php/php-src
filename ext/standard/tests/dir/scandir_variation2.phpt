@@ -16,7 +16,7 @@ Test scandir() function : usage variations - diff data types as $sorting_order a
 echo "*** Testing scandir() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$dir = dirname(__FILE__) . '/scandir_variation2';
+$dir = __DIR__ . '/scandir_variation2';
 mkdir($dir);
 
 //get an unset variable
@@ -101,7 +101,7 @@ fclose($fp);
 ===DONE===
 --CLEAN--
 <?php
-$dir = dirname(__FILE__) . '/scandir_variation2';
+$dir = __DIR__ . '/scandir_variation2';
 rmdir($dir);
 ?>
 --EXPECTF--

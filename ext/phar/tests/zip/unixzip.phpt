@@ -5,7 +5,7 @@ Phar: test a zip archive created by unix "zip" command
 <?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
 --FILE--
 <?php
-$a = new PharData(dirname(__FILE__) . '/files/zip.zip');
+$a = new PharData(__DIR__ . '/files/zip.zip');
 foreach ($a as $b) {
 	if ($b->isDir()) {
 		echo "dir " . $b->getPathName() . "\n";

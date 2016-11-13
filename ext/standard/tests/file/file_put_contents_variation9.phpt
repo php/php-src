@@ -17,10 +17,10 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 
 echo "*** Testing file_put_contents() : usage variation ***\n";
 
-$filename = dirname(__FILE__).'/filePutContentsVar9.tmp';
-$softlink = dirname(__FILE__).'/filePutContentsVar9.SoftLink';
-$hardlink = dirname(__FILE__).'/filePutContentsVar9.HardLink';
-$chainlink = dirname(__FILE__).'/filePutContentsVar9.ChainLink';
+$filename = __DIR__.'/filePutContentsVar9.tmp';
+$softlink = __DIR__.'/filePutContentsVar9.SoftLink';
+$hardlink = __DIR__.'/filePutContentsVar9.HardLink';
+$chainlink = __DIR__.'/filePutContentsVar9.ChainLink';
 
 
 // link files even though it original file doesn't exist yet

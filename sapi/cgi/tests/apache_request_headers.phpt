@@ -13,7 +13,7 @@ include "include.inc";
 $php = get_cgi_path();
 reset_env_vars();
 
-$file = dirname(__FILE__)."/012.test.php";
+$file = __DIR__."/012.test.php";
 
 file_put_contents($file, '<?php print_r(apache_request_headers()); ?>');
 

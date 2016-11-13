@@ -10,8 +10,8 @@ FPM: Test IPv6 all addresses and access_log (bug #68421)
 
 include "include.inc";
 
-$logfile = dirname(__FILE__).'/php-fpm.log.tmp';
-$accfile = dirname(__FILE__).'/php-fpm.acc.tmp';
+$logfile = __DIR__.'/php-fpm.log.tmp';
+$accfile = __DIR__.'/php-fpm.acc.tmp';
 $port = 9000+PHP_INT_SIZE;
 
 $cfg = <<<EOT
@@ -64,8 +64,8 @@ IPv6 ok
 ::1 %s "GET /ping" 200
 --CLEAN--
 <?php
-    $logfile = dirname(__FILE__).'/php-fpm.log.tmp';
+    $logfile = __DIR__.'/php-fpm.log.tmp';
     @unlink($logfile);
-	$accfile = dirname(__FILE__).'/php-fpm.acc.tmp';
+	$accfile = __DIR__.'/php-fpm.acc.tmp';
     @unlink($accfile);
 ?>

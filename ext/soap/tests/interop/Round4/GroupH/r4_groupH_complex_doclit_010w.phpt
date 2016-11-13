@@ -36,7 +36,7 @@ class MoreExtendedStruct extends ExtendedStruct {
 $s1 = new BaseStruct(new SOAPStruct("s1",1,1.1),1);
 $s2 = new ExtendedStruct(new SOAPStruct("s2",2,2.2),2,"arg",-3,5);
 $s3 = new MoreExtendedStruct(new SOAPStruct("s3",3,3.3),3,"arg",-3,5,true);
-$client = new SoapClient(dirname(__FILE__)."/round4_groupH_complex_doclit.wsdl",array("trace"=>1,"exceptions"=>0));
+$client = new SoapClient(__DIR__."/round4_groupH_complex_doclit.wsdl",array("trace"=>1,"exceptions"=>0));
 $client->echoMultipleFaults2(array("whichFault" => 4,
                                    "param1"     => $s1,
                                    "param2"     => $s2,

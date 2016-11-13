@@ -2,8 +2,8 @@
 MySQL PDO->prepare() and 1295 (ER_UNSUPPORTED_PS)
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 
 // Run test only locally - not against remote hosts
@@ -47,7 +47,7 @@ if (($tmp[1] !== 'localhost') && ($tmp[1] !== '127.0.0.1'))
 		return true;
 	}
 
-	require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+	require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 	$db = MySQLPDOTest::factory();
 	// Run with native PS.
 	// The test is about checking the fallback to emulation
@@ -105,7 +105,7 @@ if (($tmp[1] !== 'localhost') && ($tmp[1] !== '127.0.0.1'))
 ?>
 --CLEAN--
 <?php
-require dirname(__FILE__) . '/mysql_pdo_test.inc';
+require __DIR__ . '/mysql_pdo_test.inc';
 MySQLPDOTest::dropTestTable();
 ?>
 --EXPECTF--

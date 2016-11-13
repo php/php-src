@@ -11,7 +11,7 @@ opcache.file_update_protection=0
 <?php if (getenv("SKIP_SLOW_TESTS")) die("skip slow tests excluded by request") ?>
 --FILE--
 <?php
-define("FILENAME", dirname(__FILE__) . "/issuer0140.inc.php");
+define("FILENAME", __DIR__ . "/issuer0140.inc.php");
 file_put_contents(FILENAME, "1\n");
 
 var_dump(is_readable(FILENAME));

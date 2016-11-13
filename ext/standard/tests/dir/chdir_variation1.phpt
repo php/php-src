@@ -14,7 +14,7 @@ Test chdir() function : usage variations - different data type as $directory arg
 echo "*** Testing chdir() : usage variations ***\n";
 
 // create the temporary directory
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dir_path = $file_path."/chdir_basic";
 @mkdir($dir_path);
 
@@ -106,7 +106,7 @@ fclose($fp);
 ===DONE===
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dir_path = $file_path."/chdir_basic";
 
 rmdir($dir_path);

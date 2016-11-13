@@ -10,7 +10,7 @@ if (!extension_loaded("zlib")) {
 <?php
 
 
-$f = dirname(__FILE__)."/004.txt.gz";
+$f = __DIR__."/004.txt.gz";
 $h = gzopen($f, 'r');
 $extra_arg = 'nothing';
 var_dump(gzpassthru( $h, $extra_arg ) );

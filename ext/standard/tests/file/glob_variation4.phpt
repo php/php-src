@@ -2,7 +2,7 @@
 Test glob() function: ensure no platform difference, variation 2
 --FILE--
 <?php
-$path = dirname(__FILE__);
+$path = __DIR__;
 
 ini_set('open_basedir', $path);
 

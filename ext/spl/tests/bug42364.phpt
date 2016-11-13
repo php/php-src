@@ -2,7 +2,7 @@
 Bug #42364 (Crash when using getRealPath with DirectoryIterator)
 --FILE--
 <?php
-$it = new DirectoryIterator(dirname(__FILE__));
+$it = new DirectoryIterator(__DIR__);
 
 $count = 0;
 

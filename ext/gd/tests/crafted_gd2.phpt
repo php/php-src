@@ -8,7 +8,7 @@ Test max colors for a gd image.
 ?>
 --FILE--
 <?php
-imagecreatefromgd(dirname(__FILE__) . '/crafted.gd2');
+imagecreatefromgd(__DIR__ . '/crafted.gd2');
 ?>
 --EXPECTF--
 

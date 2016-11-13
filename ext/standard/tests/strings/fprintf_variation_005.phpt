@@ -2,7 +2,7 @@
 Test fprintf() function (variation - 5)
 --SKIPIF--
 <?php
-$data_file = dirname(__FILE__) . '/dump.txt';
+$data_file = __DIR__ . '/dump.txt';
 if (!($fp = fopen($data_file, 'w'))) {
   die('skip File dump.txt could not be created');
 }
@@ -13,7 +13,7 @@ if (!($fp = fopen($data_file, 'w'))) {
 $int_numbers = array( 0, 1, -1, 2.7, -2.7, 23333333, -23333333, "1234" );
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/dump.txt';
+$data_file = __DIR__ . '/dump.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
 

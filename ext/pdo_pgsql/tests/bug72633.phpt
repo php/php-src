@@ -3,16 +3,16 @@ PDO PgSQL Bug #72633 (Postgres PDO lastInsertId() should work without specifying
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
-require dirname(__FILE__) . '/config.inc';
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
+require __DIR__ . '/config.inc';
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();
 ?>
 --FILE--
 <?php
 
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 
-$db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
+$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 

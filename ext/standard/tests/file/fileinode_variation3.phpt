@@ -11,7 +11,7 @@ Description: Returns the inode number of the file, or FALSE in case of an error.
 
 /* Passing file names with different notations, using slashes, wild-card chars */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Testing fileinode() with different notations of file names ***\n";
 $dir_name = $file_path."/fileinode_variation3";
@@ -49,7 +49,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dir_name = $file_path."/fileinode_variation3";
 unlink($dir_name."/fileinode_variation3.tmp");
 rmdir($dir_name);

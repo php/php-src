@@ -6,9 +6,9 @@ Phar: Phar::mount
 phar.readonly=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
-$fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar';
+$fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.tar';
 
 $a = new Phar($fname);
 $a['index.php'] = '<?php
@@ -51,13 +51,13 @@ echo substr($a['testit2']->getContent(),0, 50),"\n";
 ?>
 ===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
 --EXPECTF--
 Mounting of testit to %sphar_mount.php within phar %sphar_mount.phar.php failed
 Can only mount internal paths within a phar archive, use a relative path instead of "phar://%sphar_mount.phar.php/testit1"
 Mounting of testit to %sphar_mount.php within phar %sphar_mount.phar.tar failed
 Mounting of /oops to /home/oops/../../etc/passwd: within phar %sphar_mount.phar.php failed
 <?php
-$fname = dirname(__FILE__) . '/' . basename(
+$fname = __DIR__ . '/' . basename(
 ===DONE===

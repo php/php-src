@@ -14,7 +14,7 @@ Test rewinddir() function : usage variations - operate on a closed directory
 
 echo "*** Testing rewinddir() : usage variations ***\n";
 
-$dir_path = dirname(__FILE__) . '/rewinddir_variation2';
+$dir_path = __DIR__ . '/rewinddir_variation2';
 mkdir($dir_path);
 
 echo "\n-- Create the directory handle, read and close the directory --\n";
@@ -28,7 +28,7 @@ var_dump(rewinddir($dir_handle));
 ===DONE===
 --CLEAN--
 <?php
-$dir_path = dirname(__FILE__) . '/rewinddir_variation2';
+$dir_path = __DIR__ . '/rewinddir_variation2';
 rmdir($dir_path);
 ?>
 --EXPECTF--

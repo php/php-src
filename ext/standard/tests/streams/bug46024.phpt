@@ -9,7 +9,7 @@ $pipes = array();
 $proc = proc_open(
 	"$php -n -i"
 	,array(0 => array('pipe', 'r'), 1 => array('pipe', 'w'))
-	,$pipes, dirname(__FILE__), array(), array('binary_pipes' => true)
+	,$pipes, __DIR__, array(), array('binary_pipes' => true)
 );
 var_dump($proc);
 if (!$proc) {

@@ -8,7 +8,7 @@ Bug #39780 (PNG image with CRC/data error raises a fatal error)
 --FILE--
 <?php
 
-$im = imagecreatefrompng(dirname(__FILE__) . '/bug39780.png');
+$im = imagecreatefrompng(__DIR__ . '/bug39780.png');
 var_dump($im);
 ?>
 --EXPECTF--

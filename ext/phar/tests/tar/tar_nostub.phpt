@@ -8,10 +8,10 @@ phar.readonly=1
 phar.require_hash=0
 --FILE--
 <?php
-include dirname(__FILE__) . '/files/tarmaker.php.inc';
-$fname = dirname(__FILE__) . '/tar_004.phar.tar';
+include __DIR__ . '/files/tarmaker.php.inc';
+$fname = __DIR__ . '/tar_004.phar.tar';
 $alias = 'phar://' . $fname;
-$fname2 = dirname(__FILE__) . '/tar_004.tar';
+$fname2 = __DIR__ . '/tar_004.tar';
 
 $tar = new tarmaker($fname, 'none');
 $tar->init();
@@ -39,8 +39,8 @@ try {
 ===DONE===
 --CLEAN--
 <?php
-@unlink(dirname(__FILE__) . '/tar_004.phar.tar');
-@unlink(dirname(__FILE__) . '/tar_004.tar');
+@unlink(__DIR__ . '/tar_004.phar.tar');
+@unlink(__DIR__ . '/tar_004.tar');
 ?>
 --EXPECTF--
 RecursiveDirectoryIterator::__construct(phar://%star_004.phar.tar/): failed to open dir: '%star_004.phar.tar' is not a phar archive. Use PharData::__construct() for a standard zip or tar archive

@@ -5,7 +5,7 @@ XMLReader: libxml2 XML Reader, attributes test
 --FILE--
 <?php 
 /* $Id$ */
-$filename = dirname(__FILE__) . '/_004.xml';
+$filename = __DIR__ . '/_004.xml';
 
 $xmlstring = '<?xml version="1.0" encoding="UTF-8"?>
 <books><book num="1" idx="2">book1</book></books>';

@@ -6,7 +6,7 @@ Test glob() function: error conditions
    Description: Find pathnames matching a pattern
 */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 // temp dir created
 mkdir("$file_path/glob_error");
@@ -18,20 +18,20 @@ echo "*** Testing glob() : error conditions ***\n";
 
 echo "-- Testing glob() with unexpected no. of arguments --\n";
 var_dump( glob() );  // args < expected
-var_dump( glob(dirname(__FILE__)."/glob_error/wonder12345", GLOB_ERR, 3) );  // args > expected
+var_dump( glob(__DIR__."/glob_error/wonder12345", GLOB_ERR, 3) );  // args > expected
 
 echo "\n-- Testing glob() with invalid arguments --\n";
-var_dump( glob(dirname(__FILE__)."/glob_error/wonder12345", '') );
-var_dump( glob(dirname(__FILE__)."/glob_error/wonder12345", "string") );
+var_dump( glob(__DIR__."/glob_error/wonder12345", '') );
+var_dump( glob(__DIR__."/glob_error/wonder12345", "string") );
 
 echo "Done\n";
 ?>
 --CLEAN--
 <?php
 // temp file deleted
-unlink(dirname(__FILE__)."/glob_error/wonder12345");
+unlink(__DIR__."/glob_error/wonder12345");
 // temp dir deleted
-rmdir(dirname(__FILE__)."/glob_error");
+rmdir(__DIR__."/glob_error");
 ?>
 --EXPECTF--
 *** Testing glob() : error conditions ***

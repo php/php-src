@@ -28,7 +28,7 @@ set_error_handler("foo");
 echo "**** Testing gettype() and settype() functions ****\n";
 
 $fp = fopen(__FILE__, "r");
-$dfp = opendir( dirname(__FILE__) );
+$dfp = opendir( __DIR__ );
 
 $var1 = "another string";
 $var2 = array(2,3,4);

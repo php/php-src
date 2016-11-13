@@ -6,7 +6,7 @@ Bug #38212 (Seg Fault on invalid imagecreatefromgd2part() parameters)
 ?>
 --FILE--
 <?php
-$file = dirname(__FILE__) . '/bug38212私はガラスを食べられます.gd2';
+$file = __DIR__ . '/bug38212私はガラスを食べられます.gd2';
 $im1 = imagecreatetruecolor(10,100);
 imagefill($im1, 0,0, 0xffffff);
 imagegd2($im1, $file);

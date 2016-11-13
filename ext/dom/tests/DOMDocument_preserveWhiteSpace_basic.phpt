@@ -9,7 +9,7 @@ Lev Radin <prokurator@gmail.com>
 <?php
 
 $doc = new DOMDocument;
-$doc->load(dirname(__FILE__)."/book.xml");
+$doc->load(__DIR__."/book.xml");
 
 var_dump($doc->preserveWhiteSpace);
 

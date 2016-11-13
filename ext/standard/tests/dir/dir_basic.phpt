@@ -11,10 +11,10 @@ Test dir() function : basic functionality
 echo "*** Testing dir() : basic functionality ***\n";
 
 // include the file.inc for Function: function create_files()
-include(dirname(__FILE__)."/../file/file.inc");
+include(__DIR__."/../file/file.inc");
 
 // create the temporary directory
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dir_path = $file_path."/dir_basic";
 @mkdir($dir_path);
 
@@ -47,7 +47,7 @@ echo "Done";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dir_path = $file_path."/dir_basic";
 
 rmdir($dir_path);

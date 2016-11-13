@@ -18,7 +18,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
  */
 
 echo "*** Testing chdir() : basic functionality ***\n";
-$base_dir_path = dirname(__FILE__);
+$base_dir_path = __DIR__;
 
 $level_one_dir_name = "私はガラスを食べられますlevel_one";
 $level_one_dir_path = "$base_dir_path/$level_one_dir_name";
@@ -42,7 +42,7 @@ var_dump(getcwd());
 ===DONE===
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 chdir($file_path);
 rmdir("$file_path/私はガラスを食べられますlevel_one/私はガラスを食べられますlevel_two");
 rmdir("$file_path/私はガラスを食べられますlevel_one");

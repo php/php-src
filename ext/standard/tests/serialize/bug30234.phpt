@@ -9,7 +9,7 @@ Bug #30234 (__autoload() not invoked for interfaces)
 
 function __autoload($class_name)
 {
-	require_once(dirname(__FILE__) . '/' . strtolower($class_name) . '.p5c');
+	require_once(__DIR__ . '/' . strtolower($class_name) . '.p5c');
 	echo __FUNCTION__ . '(' . $class_name . ")\n";
 }
 

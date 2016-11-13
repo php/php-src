@@ -7,7 +7,7 @@ Test rename() function: basic functionality
 */
 
 echo "*** Testing rename() on non-existing file ***\n";
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require "$file_path/file.inc";
 
 $src_name = "$file_path/rename_basic.tmp";
@@ -34,7 +34,7 @@ var_dump( compare_stats($old_stat, $new_stat, $keys_to_compare) );
 ===Done===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__)."/rename_basic_new.tmp");
+unlink(__DIR__."/rename_basic_new.tmp");
 ?>
 --EXPECT--
 *** Testing rename() on non-existing file ***

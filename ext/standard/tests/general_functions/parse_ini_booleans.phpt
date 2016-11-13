@@ -3,7 +3,7 @@ parse_ini_file() boolean operators
 --FILE--
 <?php
 
-$ini_file = dirname(__FILE__)."/parse_ini_booleans.data";
+$ini_file = __DIR__."/parse_ini_booleans.data";
 
 var_dump(parse_ini_file($ini_file, 1));
 

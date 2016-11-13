@@ -20,7 +20,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 echo "*** Testing chdir() : usage variations ***\n";
 
 // create the temporary directory
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dir_path = $file_path."/私はガラスを食べられますchdir_basic";
 @mkdir($dir_path);
 
@@ -112,7 +112,7 @@ fclose($fp);
 ===DONE===
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dir_path = $file_path."/私はガラスを食べられますchdir_basic";
 
 rmdir($dir_path);

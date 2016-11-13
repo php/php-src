@@ -10,7 +10,7 @@ if (getenv("SKIP_IO_CAPTURE_TESTS")) {
 STDOUT
 --FILE--
 <?php
-require dirname(__FILE__).'/stream_isatty.inc';
+require __DIR__.'/stream_isatty.inc';
 testToStdOut();
 ?>
 --EXPECTF--

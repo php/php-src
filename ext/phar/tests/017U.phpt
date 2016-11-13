@@ -9,7 +9,7 @@ if (version_compare(PHP_VERSION, "6.0", "!=")) die("skip Unicode support require
 phar.require_hash=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 $file = b"<?php
 Phar::mapPhar('hio');
@@ -25,7 +25,7 @@ include $pname;
 $dir = opendir('phar://hio');
 ?>
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
 unicode(%d) "%s017U.phar.php"
 bool(true)

@@ -5,7 +5,7 @@ oci_bind_array_by_name() and invalid values 9
 --FILE--
 <?php
 
-require dirname(__FILE__).'/connect.inc';
+require __DIR__.'/connect.inc';
 
 var_dump(oci_bind_array_by_name($c, ":c1", $array, 5, 5, SQLT_CHR));
 

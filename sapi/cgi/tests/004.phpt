@@ -12,7 +12,7 @@ include "include.inc";
 $php = get_cgi_path();
 reset_env_vars();
 
-$filename = dirname(__FILE__).'/004.test.php';
+$filename = __DIR__.'/004.test.php';
 $code ='
 <?php
 

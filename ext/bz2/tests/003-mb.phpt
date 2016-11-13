@@ -5,7 +5,7 @@ bzread() tests
 --FILE--
 <?php
 
-$fd = bzopen(dirname(__FILE__)."/003私はガラスを食べられます.txt.bz2","r");
+$fd = bzopen(__DIR__."/003私はガラスを食べられます.txt.bz2","r");
 var_dump(bzread());
 var_dump(bzread($fd, 1 ,0));
 var_dump(bzread($fd, 0));

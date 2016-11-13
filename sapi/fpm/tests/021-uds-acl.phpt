@@ -19,8 +19,8 @@ if (test_fpm_conf($cfg, $msg) == false) { die("skip " .  $msg); }
 
 include "include.inc";
 
-$logfile = dirname(__FILE__).'/php-fpm.log.tmp';
-$socket  = dirname(__FILE__).'/php-fpm.sock';
+$logfile = __DIR__.'/php-fpm.log.tmp';
+$socket  = __DIR__.'/php-fpm.sock';
 
 // Select 3 users and 2 groups known by system (avoid root)
 $users = $groups = [];
@@ -91,6 +91,6 @@ other::---
 [%s] NOTICE: exiting, bye-bye!
 --CLEAN--
 <?php
-    $logfile = dirname(__FILE__).'/php-fpm.log.tmp';
+    $logfile = __DIR__.'/php-fpm.log.tmp';
     @unlink($logfile);
 ?>

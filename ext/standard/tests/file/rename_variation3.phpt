@@ -9,7 +9,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 --FILE--
 <?php
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 $dest_dir = "$file_path/rename_variation3_dir";
 // create the $dest_dir
@@ -43,7 +43,7 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink($file_path."/rename_variation3_hard_link1.tmp");
 rmdir($file_path."/rename_variation3_dir");
 ?>

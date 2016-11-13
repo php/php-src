@@ -7,8 +7,8 @@ FPM: Test reload configuration (bug #68442)
 
 include "include.inc";
 
-$logfile = dirname(__FILE__).'/php-fpm.log.tmp';
-$pidfile = dirname(__FILE__).'/php-fpm.pid';
+$logfile = __DIR__.'/php-fpm.log.tmp';
+$pidfile = __DIR__.'/php-fpm.pid';
 $port = 9000+PHP_INT_SIZE;
 
 $cfg = <<<EOT
@@ -72,8 +72,8 @@ int(%d)
 IPv4 ok
 --CLEAN--
 <?php
-    $logfile = dirname(__FILE__).'/php-fpm.log.tmp';
+    $logfile = __DIR__.'/php-fpm.log.tmp';
     @unlink($logfile);
-	$pidfile = dirname(__FILE__).'/php-fpm.pid';
+	$pidfile = __DIR__.'/php-fpm.pid';
     @unlink($pidfile);
 ?>

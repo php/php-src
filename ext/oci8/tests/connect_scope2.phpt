@@ -5,7 +5,7 @@ Test oci_pconnect end-of-scope when statement returned
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/details.inc');
+require(__DIR__.'/details.inc');
 
 // Initialization
 

@@ -41,9 +41,9 @@ function test($name, $lc, $lp)
 	}
 }
 
-test(dirname(__FILE__) . '/' . 'fileobject_001a.txt', 't', substr(dirname(__FILE__),-1));
-test(dirname(__FILE__) . '/', substr(dirname(__FILE__),-1), 'l');
-test(dirname(__FILE__),       substr(dirname(__FILE__),-1), 'l');
+test(__DIR__ . '/' . 'fileobject_001a.txt', 't', substr(__DIR__,-1));
+test(__DIR__ . '/', substr(__DIR__,-1), 'l');
+test(__DIR__,       substr(__DIR__,-1), 'l');
 
 ?>
 ===DONE===

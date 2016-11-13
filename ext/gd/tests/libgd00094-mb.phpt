@@ -7,7 +7,7 @@ libgd #94 (imagecreatefromxbm can crash if gdImageCreate fails)
 ?>
 --FILE--
 <?php
-$im = imagecreatefromxbm(dirname(__FILE__) . '/libgd00094私はガラスを食べられます.xbm');
+$im = imagecreatefromxbm(__DIR__ . '/libgd00094私はガラスを食べられます.xbm');
 var_dump($im);
 ?>
 --EXPECTF--

@@ -16,7 +16,7 @@ error_reporting = E_WARNING
 // See http://news.php.net/php.internals/50202
 //     http://svn.php.net/viewvc?view=revision&revision=311870
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 // Run Test
 

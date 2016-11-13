@@ -8,7 +8,7 @@ Test is_file() function: error conditions
 */
 
 echo "*** Testing is_file() error conditions ***";
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 var_dump( is_file() );  // Zero No. of args
 
 /* no of args > expected */
@@ -28,7 +28,7 @@ echo "\n*** Done ***";
 
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 if(file_exists($file_path."/is_file_error.tmp")) {
   unlink($file_path."/is_file_error.tmp");
 }

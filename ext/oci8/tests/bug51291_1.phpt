@@ -5,7 +5,7 @@ Bug #51291 (oci_error() doesn't report last error when called two times)
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 echo "Test 1 - Parse\n";
 

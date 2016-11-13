@@ -7,7 +7,7 @@ if (!extension_loaded('xsl')) die("skip Extension XSL is required\n");
 --FILE--
 <?php
 
-$base = 'file://' . dirname(__FILE__) . DIRECTORY_SEPARATOR . '53965';
+$base = 'file://' . __DIR__ . DIRECTORY_SEPARATOR . '53965';
 
 $xml = new DOMDocument();
 $xml->load($base . DIRECTORY_SEPARATOR . 'collection.xml');

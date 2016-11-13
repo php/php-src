@@ -5,7 +5,7 @@ XMLReader: libxml2 XML Reader, file data
 --FILE--
 <?php 
 /* $Id$ */
-$filename = dirname(__FILE__) . '/_002.xml';
+$filename = __DIR__ . '/_002.xml';
 $xmlstring = '<?xml version="1.0" encoding="UTF-8"?>
 <books></books>';
 file_put_contents($filename, $xmlstring);

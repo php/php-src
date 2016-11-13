@@ -16,10 +16,10 @@ if(substr(PHP_OS, 0, 3) == "WIN")
  */
 
 echo "*** Testing file_get_contents() : variation ***\n";
-$filename = dirname(__FILE__).'/fileGetContentsVar9.tmp';
-$softlink = dirname(__FILE__).'/fileGetContentsVar9.SoftLink';
-$hardlink = dirname(__FILE__).'/fileGetContentsVar9.HardLink';
-$chainlink = dirname(__FILE__).'/fileGetContentsVar9.ChainLink';
+$filename = __DIR__.'/fileGetContentsVar9.tmp';
+$softlink = __DIR__.'/fileGetContentsVar9.SoftLink';
+$hardlink = __DIR__.'/fileGetContentsVar9.HardLink';
+$chainlink = __DIR__.'/fileGetContentsVar9.ChainLink';
 
 // create file
 $h = fopen($filename,"w");

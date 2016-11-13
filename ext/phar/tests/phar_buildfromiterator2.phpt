@@ -8,7 +8,7 @@ phar.readonly=0
 --FILE--
 <?php
 try {
-	$phar = new Phar(dirname(__FILE__) . '/buildfromiterator2.phar');
+	$phar = new Phar(__DIR__ . '/buildfromiterator2.phar');
 	$phar->buildFromIterator(new stdClass);
 } catch (Exception $e) {
 	var_dump(get_class($e));
@@ -18,7 +18,7 @@ try {
 ===DONE===
 --CLEAN--
 <?php 
-unlink(dirname(__FILE__) . '/buildfromiterator2.phar');
+unlink(__DIR__ . '/buildfromiterator2.phar');
 __HALT_COMPILER();
 ?>
 --EXPECTF--

@@ -8,7 +8,7 @@ if (!extension_loaded('zlib')) die ('skip zlib extension not available in this b
 <?php
 
 
-$filename = $filename = dirname(__FILE__)."/004.txt.gz";
+$filename = $filename = __DIR__."/004.txt.gz";
 
 
 $heredoc = <<<EOT

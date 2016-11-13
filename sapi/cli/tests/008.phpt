@@ -12,7 +12,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 $php = getenv('TEST_PHP_EXECUTABLE');
 
-$filename = dirname(__FILE__).'/008.test.php';
+$filename = __DIR__.'/008.test.php';
 $code ='
 <?php
 

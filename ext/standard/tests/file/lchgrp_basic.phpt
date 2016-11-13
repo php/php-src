@@ -7,8 +7,8 @@ if (!function_exists("posix_getgid")) die("skip no posix_getgid()");
 ?>
 --FILE--
 <?php
-$filename = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'lchgrp.txt';
-$symlink = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'symlink.txt';
+$filename = __DIR__ . DIRECTORY_SEPARATOR . 'lchgrp.txt';
+$symlink = __DIR__ . DIRECTORY_SEPARATOR . 'symlink.txt';
 
 $gid = posix_getgid();
 
@@ -22,8 +22,8 @@ var_dump( filegroup( $symlink ) === $gid );
 --CLEAN--
 <?php
 
-$filename = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'lchgrp.txt';
-$symlink = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'symlink.txt';
+$filename = __DIR__ . DIRECTORY_SEPARATOR . 'lchgrp.txt';
+$symlink = __DIR__ . DIRECTORY_SEPARATOR . 'symlink.txt';
 unlink($filename);
 unlink($symlink);
 

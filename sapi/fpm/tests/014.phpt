@@ -7,7 +7,7 @@ FPM: Test for pm.start_servers default calculation message being a notice and no
 
 include "include.inc";
 
-$logfile = dirname(__FILE__).'/php-fpm.log.tmp';
+$logfile = __DIR__.'/php-fpm.log.tmp';
 $port = 9000+PHP_INT_SIZE;
 
 $cfg = <<<EOT
@@ -49,6 +49,6 @@ Started
 Done
 --CLEAN--
 <?php
-	$logfile = dirname(__FILE__).'/php-fpm.log.tmp';
+	$logfile = __DIR__.'/php-fpm.log.tmp';
 	@unlink($logfile);
 ?>

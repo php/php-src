@@ -16,7 +16,7 @@ ORACLE_HOME=""
 --FILE--
 <?php
 
-require dirname(__FILE__)."/details.inc";
+require __DIR__."/details.inc";
 
 if (!empty($dbase)) {
 	var_dump(ocilogon($user, $password, $dbase));

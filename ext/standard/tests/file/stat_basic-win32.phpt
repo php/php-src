@@ -13,7 +13,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
    Description: Gives information about a file
 */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require("$file_path/file.inc");
 
 echo "*** Testing stat() : basic functionality ***\n";
@@ -64,7 +64,7 @@ echo "\n---Done---";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink("$file_path/stat_basic/stat_basic.tmp");
 rmdir("$file_path/stat_basic");
 ?>

@@ -7,7 +7,7 @@ class foo {
         return __METHOD__;
     }
 }
-$file = dirname(__FILE__)."/file_put_contents.txt";
+$file = __DIR__."/file_put_contents.txt";
 
 $context = stream_context_create();
 

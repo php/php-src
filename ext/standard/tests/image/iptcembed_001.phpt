@@ -3,7 +3,7 @@ iptcembed() and wrong file
 --FILE--
 <?php
 
-$file = dirname(__FILE__).'/iptcembed_001.data';
+$file = __DIR__.'/iptcembed_001.data';
 $fp = fopen($file, "w");
 fwrite($fp, "-1-1");
 fclose($fp);

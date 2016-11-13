@@ -15,7 +15,7 @@ xpm --> png conversion test
 ?>
 --FILE--
 <?php
-	$cwd = dirname(__FILE__);
+	$cwd = __DIR__;
 
 	echo "XPM to PNG conversion: ";
 	echo imagepng(imagecreatefromxpm($cwd . "/conv_test.xpm"), $cwd . "/test_xpm.png") ? 'ok' : 'failed';

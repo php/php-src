@@ -41,7 +41,7 @@ echo "*** Testing getimagesize() : basic functionality ***\n";
 // loop through each element of the array for imagetype
 foreach($imagetype_filenames as $key => $filename) {
       echo "\n-- $key ($filename) --\n";
-      var_dump( getimagesize(dirname(__FILE__)."/$filename", $info) );
+      var_dump( getimagesize(__DIR__."/$filename", $info) );
       var_dump( $info );
 };
 ?>

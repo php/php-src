@@ -3,14 +3,14 @@ Bug #47281 ($php_errormsg is limited in size of characters)
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => false, 'timesten' => true);  // test runs on these DBs: shorter message length in TimesTen
-require(dirname(__FILE__).'/skipif.inc');
+require(__DIR__.'/skipif.inc');
 ?>
 --ENV--
 NLS_LANG=.AL32UTF8
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 // Initialization
 

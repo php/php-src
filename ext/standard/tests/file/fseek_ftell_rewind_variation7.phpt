@@ -28,14 +28,14 @@ $file_content_types = array( "text_with_new_line","alphanumeric");
 
 $offset = array(-1,0,1,512,600);// different offsets
 
-$filename = dirname(__FILE__)."/fseek_ftell_rewind_variation7.tmp"; // this is name of the file created by create_files()
+$filename = __DIR__."/fseek_ftell_rewind_variation7.tmp"; // this is name of the file created by create_files()
 
 /* open the file using $files_modes and perform fseek(),ftell() and rewind() on it */
 foreach($file_content_types as $file_content_type){
   echo "\n-- File having data of type ". $file_content_type ." --\n";
   foreach($file_modes as $file_mode) {
     echo "-- File opened in mode ".$file_mode." --\n";
-    create_files ( dirname(__FILE__), 1, $file_content_type, 0755, 512, "w", "fseek_ftell_rewind_variation"
+    create_files ( __DIR__, 1, $file_content_type, 0755, 512, "w", "fseek_ftell_rewind_variation"
                       ,7,"bytes",".tmp"); //create a file with 512 bytes size
     $file_handle = fopen($filename, $file_mode);
     if (!$file_handle) {

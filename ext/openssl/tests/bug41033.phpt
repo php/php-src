@@ -7,8 +7,8 @@ if (OPENSSL_VERSION_NUMBER < 0x009070af) die("skip");
 ?>
 --FILE--
 <?php
-$prv = 'file://' . dirname(__FILE__) . '/' . 'bug41033.pem';
-$pub = 'file://' . dirname(__FILE__) . '/' . 'bug41033pub.pem';
+$prv = 'file://' . __DIR__ . '/' . 'bug41033.pem';
+$pub = 'file://' . __DIR__ . '/' . 'bug41033pub.pem';
 
 
 $prkeyid = openssl_get_privatekey($prv, "1234");

@@ -9,7 +9,7 @@ Test is_dir() function: usage variations - diff. path notations
 
 /* Passing dir names with different notations, using slashes, wild-card chars */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Testing is_dir() with different notations of dir names ***";
 $dir_name = "/is_dir_variation4";
@@ -46,7 +46,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dir_name = $file_path."/is_dir_variation4";
 rmdir($dir_name);
 ?>

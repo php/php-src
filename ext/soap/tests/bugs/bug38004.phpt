@@ -28,7 +28,7 @@ class TestSoapClient extends SoapClient {
   }
 }
 
-$client = new TestSoapClient(dirname(__FILE__).'/bug38004.wsdl');
+$client = new TestSoapClient(__DIR__.'/bug38004.wsdl');
 $strA = 'test &amp; test';
 $strB = 'test & test';
 $res = $client->Test(array('strA'=>$strA, 'strB'=>$strB));

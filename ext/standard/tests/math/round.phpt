@@ -31,7 +31,7 @@ $tests = <<<TESTS
  LONG_MAX   ~== floor(LONG_MAX + 0.5)
 TESTS;
 
-include(dirname(__FILE__) . '/../../../../tests/quicktester.inc');
+include(__DIR__ . '/../../../../tests/quicktester.inc');
 --EXPECT--
 1,1,0,0
 OK

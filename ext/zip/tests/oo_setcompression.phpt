@@ -7,7 +7,7 @@ if (!extension_loaded('zip')) die('skip');
 ?>
 --FILE--
 <?php
-$tmpfile = dirname(__FILE__) . '/__tmp_oo_set_compression.zip';
+$tmpfile = __DIR__ . '/__tmp_oo_set_compression.zip';
 
 if (file_exists($tmpfile)) {
 	unlink($tmpfile);
@@ -53,7 +53,7 @@ zip_close($zip);
 ?>
 --CLEAN--
 <?php
-$tmpfile = dirname(__FILE__) . '/__tmp_oo_set_compression.zip';
+$tmpfile = __DIR__ . '/__tmp_oo_set_compression.zip';
 unlink($tmpfile);
 ?>
 --EXPECT--

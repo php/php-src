@@ -32,7 +32,7 @@ $file_content_types = array( "text_with_new_line","alphanumeric");
 
 $offset = array(-1,0,1,512,600); // different offsets
 
-$filename = dirname(__FILE__)."/fseek_ftell_rewind_variation8.tmp"; // this is name of the file created by create_files()
+$filename = __DIR__."/fseek_ftell_rewind_variation8.tmp"; // this is name of the file created by create_files()
 
 /* open the file using $files_modes and perform fseek(),ftell() and rewind() on it */
 foreach($file_content_types as $file_content_type){

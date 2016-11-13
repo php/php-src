@@ -2,7 +2,7 @@
 Test imap_close() function : basic functionality
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
@@ -14,7 +14,7 @@ require_once(dirname(__FILE__).'/skipif.inc');
 echo "*** Testing imap_close() : basic functionality ***\n";
 
 // include file for required variables in imap_open()
-require_once(dirname(__FILE__).'/imap_include.inc');
+require_once(__DIR__.'/imap_include.inc');
 
 // Initialize required variables
 $stream_id = setup_test_mailbox('', 3, $mailbox); // set up temp mailbox with 3 messages
@@ -40,7 +40,7 @@ var_dump( imap_close($stream_id) );
 ===DONE===
 --CLEAN--
 <?php
-require_once(dirname(__FILE__).'/clean.inc');
+require_once(__DIR__.'/clean.inc');
 ?>
 --EXPECTF--
 *** Testing imap_close() : basic functionality ***

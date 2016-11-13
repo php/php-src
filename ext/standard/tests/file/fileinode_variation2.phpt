@@ -11,7 +11,7 @@ Description: Returns the inode number of the file, or FALSE in case of an error.
 
 /* Testing fileinode() with invalid arguments -int, float, bool, NULL, resource */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $file_handle = fopen($file_path."/fileinode_variation2.tmp", "w");
 
 echo "*** Testing Invalid file types ***\n";
@@ -41,7 +41,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink($file_path."/fileinode_variation2.tmp");
 ?>
 --EXPECTF--

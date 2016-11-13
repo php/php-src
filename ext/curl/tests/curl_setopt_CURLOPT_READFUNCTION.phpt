@@ -19,7 +19,7 @@ function custom_readfunction($oCurl, $hReadHandle, $iMaxOut)
   return $sData;
 }
 
-$sFileBase  = dirname(__FILE__).DIRECTORY_SEPARATOR.'curl_opt_CURLOPT_READFUNCTION';
+$sFileBase  = __DIR__.DIRECTORY_SEPARATOR.'curl_opt_CURLOPT_READFUNCTION';
 $sReadFile  = $sFileBase.'_in.tmp';
 $sWriteFile = $sFileBase.'_out.tmp';
 $sWriteUrl  = 'file://'.$sWriteFile;
@@ -43,7 +43,7 @@ var_dump($sOutput);
 ===DONE===
 --CLEAN--
 <?php
-$sFileBase  = dirname(__FILE__).DIRECTORY_SEPARATOR.'curl_opt_CURLOPT_READFUNCTION';
+$sFileBase  = __DIR__.DIRECTORY_SEPARATOR.'curl_opt_CURLOPT_READFUNCTION';
 $sReadFile  = $sFileBase.'_in.tmp';
 $sWriteFile = $sFileBase.'_out.tmp';
 unlink($sReadFile);

@@ -4,11 +4,11 @@ PDO_DBLIB: Set query timeouts
 <?php
 if (!extension_loaded('pdo_dblib')) die('skip not loaded');
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
-require dirname(__FILE__) . '/config.inc';
+require __DIR__ . '/config.inc';
 ?>
 --FILE--
 <?php
-require dirname(__FILE__) . '/config.inc';
+require __DIR__ . '/config.inc';
 
 $sql = 'WAITFOR DELAY \'00:00:02\'';
 

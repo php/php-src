@@ -11,7 +11,7 @@ function do_autoload($class_name)
 {
 	if ($class_name != 'autoload_not_available')
 	{
-		require_once(dirname(__FILE__) . '/' . strtolower($class_name) . '.p5c');
+		require_once(__DIR__ . '/' . strtolower($class_name) . '.p5c');
 	}
 	echo __FUNCTION__ . "($class_name)\n";
 }

@@ -15,7 +15,7 @@ include "skipapparmor.inc";
 
 include "include.inc";
 
-$logfile = dirname(__FILE__).'/php-fpm.log.tmp';
+$logfile = __DIR__.'/php-fpm.log.tmp';
 
 $cfg = <<<EOT
 [global]
@@ -49,6 +49,6 @@ string(%d) "%s
 "
 --CLEAN--
 <?php
-    $logfile = dirname(__FILE__).'/php-fpm.log.tmp';
+    $logfile = __DIR__.'/php-fpm.log.tmp';
     @unlink($logfile);
 ?>

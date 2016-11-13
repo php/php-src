@@ -31,7 +31,7 @@ $options=Array(
 		'classmap' => array('book'=>'book', 'wsdltype2'=>'classname2')
 		);
 
-$client = new TestSoapClient(dirname(__FILE__)."/classmap.wsdl",$options);
+$client = new TestSoapClient(__DIR__."/classmap.wsdl",$options);
 $ret = $client->dotest2("???");
 var_dump($ret);
 echo "ok\n";

@@ -3,7 +3,7 @@ proc_open() with invalid pipes
 --FILE--
 <?php
 
-include dirname(__FILE__) . "/proc_open_pipes.inc";
+include __DIR__ . "/proc_open_pipes.inc";
 
 for ($i = 3; $i<= 5; $i++) {
 	$spec[$i] = array('pipe', 'w');
@@ -30,7 +30,7 @@ echo "END\n";
 ?>
 --CLEAN--
 <?php
-include dirname(__FILE__) . "/proc_open_pipes.inc";
+include __DIR__ . "/proc_open_pipes.inc";
 
 unlink_sleep_script();
 

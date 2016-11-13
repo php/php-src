@@ -20,7 +20,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 echo "*** Testing scandir() : usage variations ***\n";
 
 // create the temporary directories
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dir_path = $file_path . "/scandir_variation6";
 $sub_dir_path = $dir_path . "/sub_dir1";
 
@@ -41,7 +41,7 @@ var_dump( scandir($dir_path . "/sub?dir1") );
 ===DONE===
 --CLEAN--
 <?php
-$dir_path = dirname(__FILE__) . "/scandir_variation6";
+$dir_path = __DIR__ . "/scandir_variation6";
 $sub_dir_path = $dir_path . "/sub_dir1";
 
 rmdir($sub_dir_path);

@@ -6,7 +6,7 @@ if (getenv("USE_ZEND_ALLOC") !== "0") {
     print "skip Need Zend MM disabled";
 }
 ?>
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
+<?php require_once(__DIR__ . '/skipif.inc'); ?>
 --INI--
 html_errors=1
 --FILE--

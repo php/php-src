@@ -20,9 +20,9 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 echo "*** Testing scandir() : usage variations ***\n";
 
 // include for create_files/delete_files functions
-include (dirname(__FILE__) . '/../file/file.inc');
+include (__DIR__ . '/../file/file.inc');
 
-$base_dir_path = dirname(__FILE__);
+$base_dir_path = __DIR__;
 
 $level_one_dir_path = "$base_dir_path/私はガラスを食べられますlevel_one";
 $level_two_dir_path = "$level_one_dir_path/私はガラスを食べられますlevel_two";
@@ -67,7 +67,7 @@ var_dump(scandir('../../私はガラスを食べられますlevel_one'));
 ===DONE===
 --CLEAN--
 <?php
-$dir_path = dirname(__FILE__);
+$dir_path = __DIR__;
 rmdir("$dir_path/私はガラスを食べられますlevel_one/私はガラスを食べられますlevel_two");
 rmdir("$dir_path/私はガラスを食べられますlevel_one");
 ?>

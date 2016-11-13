@@ -14,7 +14,7 @@ zlib.output_compression=0
 */
 echo "*** Testing read_exif_data() : basic functionality ***\n";
 
-print_r(read_exif_data(dirname(__FILE__).'/test2.jpg'));
+print_r(read_exif_data(__DIR__.'/test2.jpg'));
 ?>
 ===Done===
 --EXPECTF--

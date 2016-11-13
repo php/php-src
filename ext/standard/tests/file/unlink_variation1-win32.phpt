@@ -17,7 +17,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 */
 
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 // temp dir name used here
 $dirname = "$file_path/unlink_variation1";

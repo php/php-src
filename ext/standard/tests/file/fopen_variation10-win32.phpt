@@ -23,7 +23,7 @@ if (!is_writable('c:\\fopen_variation10.tmp')) {
 echo "*** Testing fopen() : variation ***\n";
 
 // fopen with interesting windows paths.
-$testdir = dirname(__FILE__).'/fopen10.tmpDir';
+$testdir = __DIR__.'/fopen10.tmpDir';
 $rootdir = 'fopen10.tmpdirTwo';
 mkdir($testdir);
 mkdir('c:\\'.$rootdir);

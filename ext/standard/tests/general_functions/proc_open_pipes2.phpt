@@ -3,7 +3,7 @@ proc_open() with no pipes
 --FILE--
 <?php
 
-include dirname(__FILE__) . "/proc_open_pipes.inc";
+include __DIR__ . "/proc_open_pipes.inc";
 
 $spec = array();
 
@@ -17,7 +17,7 @@ var_dump($pipes);
 ?>
 --CLEAN--
 <?php
-include dirname(__FILE__) . "/proc_open_pipes.inc";
+include __DIR__ . "/proc_open_pipes.inc";
 
 unlink_sleep_script();
 
