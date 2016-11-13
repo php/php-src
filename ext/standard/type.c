@@ -358,7 +358,7 @@ PHP_FUNCTION(is_callable)
 	zend_bool syntax_only = 0;
 	int check_flags = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|bz/", &var,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|bz", &var,
 							  &syntax_only, &callable_name) == FAILURE) {
 		return;
 	}
@@ -368,13 +368,12 @@ PHP_FUNCTION(is_callable)
 	}
 	if (ZEND_NUM_ARGS() > 2) {
 		retval = zend_is_callable_ex(var, NULL, check_flags, &name, NULL, &error);
-		zval_dtor(callable_name);
 		//??? is it necessary to be consistent with old PHP ("\0" support)
 		if (UNEXPECTED(ZSTR_LEN(name) != strlen(ZSTR_VAL(name)))) {
-			ZVAL_STRINGL(callable_name, ZSTR_VAL(name), strlen(ZSTR_VAL(name)));
+			ZEND_STR_ASSIGN_STRINGL(callable_name, ZSTR_VAL(name), strlen(ZSTR_VAL(name)));
 			zend_string_release(name);
 		} else {
-			ZVAL_STR(callable_name, name);
+			ZEND_STR_ASSIGN_STR(callable_name, name);
 		}
 	} else {
 		retval = zend_is_callable_ex(var, NULL, check_flags, NULL, NULL, &error);

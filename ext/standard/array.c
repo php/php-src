@@ -2801,7 +2801,7 @@ PHP_FUNCTION(array_splice)
 			length = 0;
 	int		num_in;				/* Number of elements in the input array */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a/l|lz/", &array, &offset, &length, &repl_array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a/l|lt", &array, &offset, &length, &repl_array) == FAILURE) {
 		return;
 	}
 
@@ -2809,11 +2809,6 @@ PHP_FUNCTION(array_splice)
 
 	if (ZEND_NUM_ARGS() < 3) {
 		length = num_in;
-	}
-
-	if (ZEND_NUM_ARGS() == 4) {
-		/* Make sure the last argument, if passed, is an array */
-		convert_to_array_ex(repl_array);
 	}
 
 	/* Don't create the array of removed elements if it's not going
