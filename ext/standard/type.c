@@ -370,10 +370,10 @@ PHP_FUNCTION(is_callable)
 		retval = zend_is_callable_ex(var, NULL, check_flags, &name, NULL, &error);
 		//??? is it necessary to be consistent with old PHP ("\0" support)
 		if (UNEXPECTED(ZSTR_LEN(name) != strlen(ZSTR_VAL(name)))) {
-			ZEND_STR_ASSIGN_STRINGL(callable_name, ZSTR_VAL(name), strlen(ZSTR_VAL(name)));
+			ZEND_TRY_ASSIGN_STRINGL(callable_name, ZSTR_VAL(name), strlen(ZSTR_VAL(name)));
 			zend_string_release(name);
 		} else {
-			ZEND_STR_ASSIGN_STR(callable_name, name);
+			ZEND_TRY_ASSIGN_STR(callable_name, name);
 		}
 	} else {
 		retval = zend_is_callable_ex(var, NULL, check_flags, NULL, NULL, &error);
