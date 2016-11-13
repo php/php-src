@@ -709,11 +709,11 @@ PHP_FUNCTION(pcntl_wait)
 	struct rusage rusage;
 #endif
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Z!l|lt", &z_status, &options, &z_rusage) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|lt", &z_status, &options, &z_rusage) == FAILURE) {
 		return;
 	}
 
-	status = Z_ISNULL_P(z_status) ? 0 : Z_LVAL_P(z_status);
+	status = zval_get_long(z_status);
 #ifdef HAVE_WAIT3
 	if (z_rusage) {
 		if (Z_TYPE_P(z_rusage) != IS_ARRAY) {
@@ -743,7 +743,7 @@ PHP_FUNCTION(pcntl_wait)
 	}
 #endif
 
-	ZVAL_LONG(z_status, status);
+	ZEND_TRY_ASSIGN_LONG(z_status, status);
 
 	RETURN_LONG((zend_long) child_id);
 }
