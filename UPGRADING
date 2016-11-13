@@ -46,6 +46,10 @@ PHP 7.2 UPGRADE NOTES
 4. Deprecated Functionality
 ========================================
 
+- GD:
+  . png2wbmp() and jpeg2wbmp() have been deprecated, and will be removed as of
+    PHP 8.0.0.
+
 ========================================
 5. Changed Functions
 ========================================

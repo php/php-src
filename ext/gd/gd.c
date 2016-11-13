@@ -972,10 +972,10 @@ const zend_function_entry gd_functions[] = {
 	PHP_FE(imagetypes,								arginfo_imagetypes)
 
 #if defined(HAVE_GD_JPG)
-	PHP_FE(jpeg2wbmp,								arginfo_jpeg2wbmp)
+	PHP_DEP_FE(jpeg2wbmp,							arginfo_jpeg2wbmp)
 #endif
 #if defined(HAVE_GD_PNG)
-	PHP_FE(png2wbmp,								arginfo_png2wbmp)
+	PHP_DEP_FE(png2wbmp,							arginfo_png2wbmp)
 #endif
 	PHP_FE(image2wbmp,								arginfo_image2wbmp)
 	PHP_FE(imagelayereffect,						arginfo_imagelayereffect)
