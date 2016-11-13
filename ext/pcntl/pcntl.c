@@ -656,7 +656,7 @@ PHP_FUNCTION(pcntl_waitpid)
 	struct rusage rusage;
 #endif
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lz/|lz/", &pid, &z_status, &options, &z_rusage) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lz|lt/", &pid, &z_status, &options, &z_rusage) == FAILURE) {
 		return;
 	}
 
@@ -667,8 +667,6 @@ PHP_FUNCTION(pcntl_waitpid)
 		if (Z_TYPE_P(z_rusage) != IS_ARRAY) {
 			zval_dtor(z_rusage);
 			array_init(z_rusage);
-		} else {
-			zend_hash_clean(Z_ARRVAL_P(z_rusage));
 		}
 
 		memset(&rusage, 0, sizeof(struct rusage));
@@ -690,8 +688,7 @@ PHP_FUNCTION(pcntl_waitpid)
 	}
 #endif
 
-	zval_dtor(z_status);
-	ZVAL_LONG(z_status, status);
+	ZEND_TRY_ASSIGN_LONG(z_status, status);
 
 	RETURN_LONG((zend_long) child_id);
 }
@@ -1084,7 +1081,7 @@ PHP_FUNCTION(pcntl_sigprocmask)
 	zval         *user_set, *user_oldset = NULL, *user_signo;
 	sigset_t      set, oldset;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "la|z/", &how, &user_set, &user_oldset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "la|t/", &how, &user_set, &user_oldset) == FAILURE) {
 		return;
 	}
 
@@ -1113,9 +1110,8 @@ PHP_FUNCTION(pcntl_sigprocmask)
 		if (Z_TYPE_P(user_oldset) != IS_ARRAY) {
 			zval_dtor(user_oldset);
 			array_init(user_oldset);
-		} else {
-			zend_hash_clean(Z_ARRVAL_P(user_oldset));
 		}
+
 		for (signo = 1; signo < MAX(NSIG-1, SIGRTMAX); ++signo) {
 			if (sigismember(&oldset, signo) != 1) {
 				continue;
@@ -1141,11 +1137,11 @@ static void pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAMETERS, int timedwait) /* {{
 	struct timespec  timeout;
 
 	if (timedwait) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|z/ll", &user_set, &user_siginfo, &tv_sec, &tv_nsec) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|t/ll", &user_set, &user_siginfo, &tv_sec, &tv_nsec) == FAILURE) {
 			return;
 		}
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|z/", &user_set, &user_siginfo) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|t/", &user_set, &user_siginfo) == FAILURE) {
 			return;
 		}
 	}
@@ -1212,9 +1208,8 @@ static void pcntl_siginfo_to_zval(int signo, siginfo_t *siginfo, zval *user_sigi
 		if (Z_TYPE_P(user_siginfo) != IS_ARRAY) {
 			zval_dtor(user_siginfo);
 			array_init(user_siginfo);
-		} else {
-			zend_hash_clean(Z_ARRVAL_P(user_siginfo));
 		}
+
 		add_assoc_long_ex(user_siginfo, "signo", sizeof("signo")-1, siginfo->si_signo);
 		add_assoc_long_ex(user_siginfo, "errno", sizeof("errno")-1, siginfo->si_errno);
 		add_assoc_long_ex(user_siginfo, "code",  sizeof("code")-1,  siginfo->si_code);
