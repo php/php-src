@@ -8089,6 +8089,7 @@ ZEND_VM_C_LABEL(check_indirect):
 		GC_REFCOUNT(ref) = 2;
 		GC_TYPE_INFO(ref) = IS_REFERENCE;
 		ZVAL_COPY_VALUE(&ref->val, value);
+		ref->type = NULL;
 		Z_REF_P(value) = ref;
 		Z_TYPE_INFO_P(value) = IS_REFERENCE_EX;
 	} else {

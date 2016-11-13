@@ -645,8 +645,9 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 					return "array";
 				}
 
-				zend_parse_arg_zval_deref(real_arg, p, check_null);
+				zend_parse_arg_zval_deref(arg, p, check_null);
 			}
+			break;
 
 		case 'o':
 			{

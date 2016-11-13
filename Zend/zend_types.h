@@ -759,6 +759,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 		GC_REFCOUNT(_ref) = 1;									\
 		GC_TYPE_INFO(_ref) = IS_REFERENCE;						\
 		ZVAL_COPY_VALUE(&_ref->val, r);							\
+		_ref->type = NULL;									\
 		Z_REF_P(z) = _ref;										\
 		Z_TYPE_INFO_P(z) = IS_REFERENCE_EX;						\
 	} while (0)
