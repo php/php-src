@@ -30,6 +30,9 @@ PHP                                                                        NEWS
   . Introduced encoder struct instead of global which fixes bugs #66025 and
     #73254 related to pretty print indentation. (Jakub Zelenka)
 
+- Date:
+  . Fixed bug #69587 (DateInterval properties and isset). (jhdxr)
+
 - ODBC:
   . Fixed bug #73448 (odbc_errormsg returns trash, always 513 bytes).
     (Anatol)
