@@ -537,16 +537,16 @@ int phpdbg_compile_stdin(zend_string *code) {
 		efree(PHPDBG_G(exec));
 	}
 	PHPDBG_G(exec) = estrdup("Standard input code");
-	PHPDBG_G(exec_len) = 1;
+	PHPDBG_G(exec_len) = sizeof("Standard input code") - 1;
 	{ /* remove leading ?> from source */
 		int i;
-		zend_string *source_path = strpprintf(0, "-%c%p", 0, PHPDBG_G(ops)->opcodes);
+		zend_string *source_path = strpprintf(0, "Standard input code%c%p", 0, PHPDBG_G(ops)->opcodes);
 		phpdbg_file_source *data = zend_hash_find_ptr(&PHPDBG_G(file_sources), source_path);
 		dtor_func_t dtor = PHPDBG_G(file_sources).pDestructor;
 		PHPDBG_G(file_sources).pDestructor = NULL;
 		zend_hash_del(&PHPDBG_G(file_sources), source_path);
 		PHPDBG_G(file_sources).pDestructor = dtor;
-		zend_hash_str_update_ptr(&PHPDBG_G(file_sources), "Standard input code", 1, data);
+		zend_hash_str_update_ptr(&PHPDBG_G(file_sources), "Standard input code", sizeof("Standard input code")-1, data);
 		zend_string_release(source_path);
 
 		efree(data->filename);
@@ -559,7 +559,7 @@ int phpdbg_compile_stdin(zend_string *code) {
 		memmove(data->buf, data->buf + 2, data->len);
 	}
 
-	phpdbg_notice("compile", "context=\"-\"", "Successful compilation of stdin input");
+	phpdbg_notice("compile", "context=\"Standard input code\"", "Successful compilation of stdin input");
 
 	return SUCCESS;
 }
