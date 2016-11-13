@@ -573,7 +573,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_REFVAL(zval)				&Z_REF(zval)->val
 #define Z_REFVAL_P(zval_p)			Z_REFVAL(*(zval_p))
 
-#define Z_REFTYPE(zval)				&Z_REF(zval)->type
+#define Z_REFTYPE(zval)				Z_REF(zval)->type
 #define Z_REFTYPE_P(zval_p)			Z_REFTYPE(*(zval_p))
 
 #define Z_AST(zval)					(zval).value.ast
