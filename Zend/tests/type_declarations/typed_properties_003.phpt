@@ -1,5 +1,5 @@
 --TEST--
-Test typed properties error condition (fetch reference)
+Test typed properties error condition (fetch uninitialized by reference)
 --FILE--
 <?php
 $thing = new class() {
@@ -9,7 +9,7 @@ $thing = new class() {
 $var = &$thing->int;
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: Typed property class@anonymous::$int must not be referenced in %s:%d
+Fatal error: Uncaught Error: Cannot access uninitialized non-nullable property by reference in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

@@ -3085,6 +3085,7 @@ void zend_compile_assign_ref(znode *result, zend_ast *ast) /* {{{ */
 	if (target_node.op_type == IS_VAR && opline->opcode == ZEND_FETCH_OBJ_W) {
 		opline->opcode = ZEND_ASSIGN_OBJ_REF;
 		zend_emit_op_data(&source_node);
+		zend_make_var_result(result, opline);
 	} else {
 		opline = zend_emit_op(result, ZEND_ASSIGN_REF, &target_node, &source_node);
 	}

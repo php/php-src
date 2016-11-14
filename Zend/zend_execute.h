@@ -80,12 +80,10 @@ static zend_always_inline void *zend_get_prop_info_ref_type(zend_property_info *
 
 /* do not call when new_type == IS_REFERENCE or new_type == IS_OBJECT! */
 static zend_always_inline zend_bool zend_verify_ref_type_assignable(void *type, zend_uchar new_type) {
-	if (0xFF >= (uintptr_t) type) {
-		zend_uchar cur_type = ((uintptr_t) type) >> 1;
-		return new_type == cur_type || (new_type == _IS_BOOL && (cur_type == IS_FALSE || cur_type == IS_TRUE));
-	} else {
-		return (0x1 & (uintptr_t) type) && new_type == IS_NULL;
-	}
+	zend_uchar cur_type = ((uintptr_t) type) >> 1;
+	return new_type == cur_type
+	    || ((0x1 & (uintptr_t) type) && new_type == IS_NULL)
+	    || (new_type == _IS_BOOL && (cur_type == IS_FALSE || cur_type == IS_TRUE));
 }
 
 ZEND_API zend_bool zend_verify_ref_type_assignable_zval(void *type, zval *zv, zend_bool strict);

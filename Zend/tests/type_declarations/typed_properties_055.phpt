@@ -11,7 +11,7 @@ class B {
 }
 $f = function (&$n) {
 	var_dump($n);
-	$i = "ops";
+	$n = "ops";
 };
 $o = new B;
 $o->a = new A;
@@ -20,8 +20,10 @@ $f($o->a->bar);
 ?>
 --EXPECTF--
 int(1)
+int(2)
 
-Fatal error: Uncaught TypeError: Typed property A::$bar must not be referenced in %styped_properties_055.php:16
+Fatal error: Uncaught TypeError: Cannot assign string to reference of type integer in %s:%d
 Stack trace:
-#0 {main}
-  thrown in %styped_properties_055.php on line 16
+#0 %s(%d): {closure}(2)
+#1 {main}
+  thrown in %s on line %d

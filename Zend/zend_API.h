@@ -693,6 +693,7 @@ static zend_always_inline int zend_try_assign(zval *zv, zval *arg) {
 			return FAILURE;
 		}
 	} else {
+		ZVAL_DEREF(zv);
 		zval_ptr_dtor(zv);
 		ZVAL_COPY(zv, arg);
 	}

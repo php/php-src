@@ -1,27 +1,55 @@
 --TEST--
-Error message should be the same independently of called function
+Test increment functions on typed property references
 --FILE--
 <?php
-class Foo {
-	public int $bar;
-}
+$foo = new class {
+	public ?int $bar;
+};
 
-function foo(&$x) {
-}
+$bar = &$foo->bar;
 
-$f = function (&$x) {};
+$bar *= 1;
 
-$foo = new Foo();
+var_dump($bar--);
+var_dump(--$bar);
+var_dump(++$bar);
+var_dump($bar++);
+
+$bar = PHP_INT_MAX;
+
 try {
-	foo($foo->bar);
+	var_dump($bar++);
 } catch (Throwable $e) {
 	echo $e->getMessage() . "\n";
 }
+
 try {
-	$f($foo->bar);
+	var_dump(++$bar);
 } catch (Throwable $e) {
 	echo $e->getMessage() . "\n";
 }
+
+$bar = PHP_INT_MIN;
+
+try {
+	var_dump($bar--);
+} catch (Throwable $e) {
+	echo $e->getMessage() . "\n";
+}
+
+try {
+	var_dump(--$bar);
+} catch (Throwable $e) {
+	echo $e->getMessage() . "\n";
+}
+?>
 --EXPECT--
-Typed property Foo::$bar must not be referenced
-Typed property Foo::$bar must not be referenced
+int(0)
+int(-2)
+int(-1)
+int(-1)
+Cannot assign float to reference of type ?integer
+Cannot assign float to reference of type ?integer
+Cannot assign float to reference of type ?integer
+Cannot assign float to reference of type ?integer
+

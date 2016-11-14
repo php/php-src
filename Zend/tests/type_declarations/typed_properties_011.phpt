@@ -1,5 +1,5 @@
 --TEST--
-Test typed properties disallow fetch reference for init array
+Test typed properties allow fetch reference for init array
 --FILE--
 <?php
 class Foo {
@@ -9,11 +9,10 @@ class Foo {
 $foo = new Foo();
 
 $array = [&$foo->bar];
+var_dump($array);
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: Typed property Foo::$bar must not be referenced in %s:8
-Stack trace:
-#0 {main}
-  thrown in %s on line 8
-
-
+array(1) {
+  [0]=>
+  &int(1)
+}

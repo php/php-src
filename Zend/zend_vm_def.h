@@ -957,7 +957,7 @@ ZEND_VM_HELPER(zend_binary_assign_op_helper, VAR|CV, CONST|TMPVAR|CV, binary_op_
 	} else {
 		void *type = NULL;
 		if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
-			type = Z_REF_P(var_ptr)->type;
+			type = Z_REFTYPE_P(var_ptr);
 			var_ptr = Z_REFVAL_P(var_ptr);
 		}
 
@@ -1496,7 +1496,7 @@ ZEND_VM_HANDLER(34, ZEND_PRE_INC, VAR|CV, ANY, SPEC(RETVAL))
 	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
-		type = Z_REF_P(var_ptr)->type;
+		type = Z_REFTYPE_P(var_ptr);
 		var_ptr = Z_REFVAL_P(var_ptr);
 	}
 
@@ -1513,6 +1513,8 @@ ZEND_VM_HANDLER(34, ZEND_PRE_INC, VAR|CV, ANY, SPEC(RETVAL))
 			zend_throw_ref_type_error(type, var_ptr);
 			zval_ptr_dtor(var_ptr);
 			ZVAL_COPY_VALUE(var_ptr, &old);
+			FREE_OP1_VAR_PTR();
+			HANDLE_EXCEPTION();
 		}
 	} else {
 		SEPARATE_ZVAL_NOREF(var_ptr);
@@ -1557,7 +1559,7 @@ ZEND_VM_HANDLER(35, ZEND_PRE_DEC, VAR|CV, ANY, SPEC(RETVAL))
 	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
-		type = Z_REF_P(var_ptr)->type;
+		type = Z_REFTYPE_P(var_ptr);
 		var_ptr = Z_REFVAL_P(var_ptr);
 	}
 
@@ -1574,6 +1576,8 @@ ZEND_VM_HANDLER(35, ZEND_PRE_DEC, VAR|CV, ANY, SPEC(RETVAL))
 			zend_throw_ref_type_error(type, var_ptr);
 			zval_ptr_dtor(var_ptr);
 			ZVAL_COPY_VALUE(var_ptr, &old);
+			FREE_OP1_VAR_PTR();
+			HANDLE_EXCEPTION();
 		}
 	} else {
 		SEPARATE_ZVAL_NOREF(var_ptr);
@@ -1614,7 +1618,7 @@ ZEND_VM_HANDLER(36, ZEND_POST_INC, VAR|CV, ANY)
 	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
-		type = Z_REF_P(var_ptr)->type;
+		type = Z_REFTYPE_P(var_ptr);
 		var_ptr = Z_REFVAL_P(var_ptr);
 	}
 
@@ -1659,7 +1663,7 @@ ZEND_VM_HANDLER(37, ZEND_POST_DEC, VAR|CV, ANY)
 	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
-		type = Z_REF_P(var_ptr)->type;
+		type = Z_REFTYPE_P(var_ptr);
 		var_ptr = Z_REFVAL_P(var_ptr);
 	}
 
@@ -2792,7 +2796,7 @@ ZEND_VM_HANDLER(100, ZEND_ASSIGN_OBJ_REF, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, S
 
 	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-	container = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
+	container = GET_OP1_OBJ_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
 		zend_throw_error(NULL, "Using $this when not in object context");
 		FREE_OP2();
@@ -2835,33 +2839,36 @@ ZEND_VM_HANDLER(100, ZEND_ASSIGN_OBJ_REF, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, S
 				if (Z_TYPE_P(value_ptr) == IS_REFERENCE) {
 					uintptr_t old_type = (uintptr_t) Z_REF_P(value_ptr)->type;
 					zend_bool error = 0;
-	
-					if (!(old_type & 0x1)) {
-						type = (void *) (~0x1 & (uintptr_t) type); /* remove allow_null if not allowed on assigned reference */
-					}
-					if ((~0x1 & old_type) != (uintptr_t) type) {
-						if (0xFF < (uintptr_t) type || 0xFF < old_type) {
-							if (instanceof_function(prop_info->type_ce, (zend_class_entry *) (~0x1 & old_type))) {
-								type = (void *) (old_type & (~!(0x1 & (uintptr_t) type))); /* remove allow_null if not allowed on current property */
-							} else if (!instanceof_function((zend_class_entry *) (~0x1 & old_type), prop_info->type_ce)) {
+
+					if (old_type != NULL) {
+						if (!(old_type & 0x1)) {
+							type = (void *) (~0x1 & (uintptr_t) type); /* remove allow_null if not allowed on assigned reference */
+						}
+						if ((~0x1 & old_type) != (uintptr_t) type) {
+							if (0xFF < (uintptr_t) type || 0xFF < old_type) {
+								if (instanceof_function(prop_info->type_ce, (zend_class_entry *) (~0x1 & old_type))) {
+									type = (void *) (old_type & (~!(0x1 & (uintptr_t) type))); /* remove allow_null if not allowed on current property */
+								} else if (!instanceof_function((zend_class_entry *) (~0x1 & old_type), prop_info->type_ce)) {
+									error = 1;
+								}
+							} else {
 								error = 1;
 							}
-						} else {
-							error = 1;
 						}
-					}
-					if (error) {
-						zend_throw_exception_ex(
-							zend_ce_type_error, prop_info->type,
-							"Property and reference types %s%s and %s%s are not compatible",
-							prop_info->allow_null ? "?" : "",
-							prop_info->type == IS_OBJECT ? ZSTR_VAL(prop_info->type_ce->name) : zend_get_type_by_const(prop_info->type),
-							(old_type & 0x1) ? "?" : "",
-							(old_type < 0xFF) ? ZSTR_VAL(((zend_class_entry *) (old_type & ~0x1))->name) : zend_get_type_by_const(old_type >> 1)
-						);
+						if (error) {
+							zend_throw_exception_ex(
+								zend_ce_type_error, prop_info->type,
+								"Property and reference types %s%s and %s%s are not compatible",
+								prop_info->allow_null ? "?" : "",
+								prop_info->type == IS_OBJECT ? ZSTR_VAL(prop_info->type_ce->name) : zend_get_type_by_const(prop_info->type),
+								(old_type & 0x1) ? "?" : "",
+								(old_type > 0xFF) ? ZSTR_VAL(((zend_class_entry *) (old_type & ~0x1))->name) : zend_get_type_by_const(old_type >> 1)
+							);
+						}
 					}
 				}
 				if (!i_zend_verify_ref_type_assignable_zval(type, value_ptr, ZEND_CALL_USES_STRICT_TYPES(execute_data))) {
+					ZVAL_DEREF(value_ptr);
 					zend_throw_ref_type_error(type, value_ptr);
 					FREE_OP1_VAR_PTR();
 					FREE_OP2();
@@ -2881,7 +2888,7 @@ ZEND_VM_HANDLER(100, ZEND_ASSIGN_OBJ_REF, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, S
 	FREE_OP1_VAR_PTR();
 	FREE_OP2();
 	FREE_OP_DATA_VAR_PTR();
-	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE_EX(1, 2);
 }
 
 ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
@@ -8462,6 +8469,7 @@ ZEND_VM_HANDLER(183, ZEND_BIND_STATIC, CV, CONST, REF)
 			GC_REFCOUNT(ref) = 2;
 			GC_TYPE_INFO(ref) = IS_REFERENCE;
 			ZVAL_COPY_VALUE(&ref->val, value);
+			ref->type = NULL;
 			Z_REF_P(value) = ref;
 			Z_TYPE_INFO_P(value) = IS_REFERENCE_EX;
 			ZVAL_REF(variable_ptr, ref);
