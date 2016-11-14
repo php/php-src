@@ -1251,12 +1251,9 @@ ZEND_FUNCTION(get_object_vars)
 	if (!zobj->ce->default_properties_count && properties == zobj->properties && !ZEND_HASH_GET_APPLY_COUNT(properties)) {
 		/* fast copy */
 		if (EXPECTED(zobj->handlers == &std_object_handlers)) {
-			if (EXPECTED(!(GC_FLAGS(properties) & IS_ARRAY_IMMUTABLE))) {
-				GC_REFCOUNT(properties)++;
-			}
-			RETURN_ARR(properties);
+			RETURN_ARR(zend_proptable_to_symtable(properties, 0));
 		}
-		RETURN_ARR(zend_array_dup(properties));
+		RETURN_ARR(zend_proptable_to_symtable(properties, 1));
 	} else {
 		array_init_size(return_value, zend_hash_num_elements(properties));
 
@@ -1273,9 +1270,19 @@ ZEND_FUNCTION(get_object_vars)
 						const char *prop_name, *class_name;
 						size_t prop_len;
 						zend_unmangle_property_name_ex(key, &class_name, &prop_name, &prop_len);
+						/* We assume here that a mangled property name is never
+						 * numeric. This is probably a safe assumption, but
+						 * theoretically someone might write an extension with
+						 * private, numeric properties. Well, too bad.
+						 */
 						zend_hash_str_add_new(Z_ARRVAL_P(return_value), prop_name, prop_len, value);
 					} else {
-						zend_hash_add_new(Z_ARRVAL_P(return_value), key, value);
+						zend_ulong num_key;
+						if (ZEND_HANDLE_NUMERIC(key, num_key)) {
+							zend_hash_index_add_new(Z_ARRVAL_P(return_value), num_key, value);
+						} else {
+							zend_hash_add_new(Z_ARRVAL_P(return_value), key, value);
+						}
 					}
 				}
 			}
