@@ -29,7 +29,7 @@ PHP 7.2 UPGRADE NOTES
     versions, where integer keys would become inaccessible properties with
     integer names.
   . Casting objects to arrays (with (object) or settype()), and retrieving
-    object properties in an array with get_objectt_vars(), will now convert
+    object properties in an array with get_object_vars(), will now convert
     numeric string property names (that is, property names of the format
     /^(0|(-?[1-9][0-9]*))$/ where PHP_INT_MIN <= n <= PHP_INT_MAX) to integer
     keys. This fixes the behaviour of previous versions, where numeric string
