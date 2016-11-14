@@ -20,6 +20,7 @@ PHP                                                                        NEWS
     php.exe). (Michele Locati)
   . Implemented "Convert numeric keys in object/array casts" RFC, fixes
     bugs #53838, #61655, #66173, #70925, #72254, etc. (Andrea)
+  . Added is_countable() to check if the parameter is safe to pass to count(). (Craig Duncan)
 
 - Date:
   . Fixed bug #69587 (DateInterval properties and isset). (jhdxr)

@@ -77,6 +77,7 @@ PHP 7.2 UPGRADE NOTES
   . Simplified password hashing API updated to support Argon2i hashes when PHP is compiled with libargon2
     (https://wiki.php.net/rfc/argon2_password_hash).
   . proc_nice() is now supported on Windows platforms.
+  . Added is_countable() to check if the parameter is safe to pass to count().
 
 ========================================
 3. Changes in SAPI modules
