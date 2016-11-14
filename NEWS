@@ -18,6 +18,8 @@ PHP                                                                        NEWS
     operation). (Dmitry)
   . Implemented FR #72768 (Add ENABLE_VIRTUAL_TERMINAL_PROCESSING flag for
     php.exe). (Michele Locati)
+  . Implemented "Convert numeric keys in object/array casts" RFC, fixes
+    bugs #53838, #61655, #66173, #70925, #72254, etc. (Andrea)
 
 - Date:
   . Fixed bug #69587 (DateInterval properties and isset). (jhdxr)

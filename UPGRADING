@@ -25,6 +25,16 @@ PHP 7.2 UPGRADE NOTES
   . is_object() will now return true for objects of class
     __PHP_Incomplete_Class.
   . Support for Netware operating systems have been removed.
+  . Casting arrays to objects (with (object) or settype()) will now covert
+    integer keys to string property names. This fixes the behaviour of previous
+    versions, where integer keys would become inaccessible properties with
+    integer names.
+  . Casting objects to arrays (with (object) or settype()), and retrieving
+    object properties in an array with get_object_vars(), will now convert
+    numeric string property names (that is, property names of the format
+    /^(0|(-?[1-9][0-9]*))$/ where PHP_INT_MIN <= n <= PHP_INT_MAX) to integer
+    keys. This fixes the behaviour of previous versions, where numeric string
+    property names would become inaccessible string keys.
 
 ========================================
 2. New Features
