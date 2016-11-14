@@ -10,7 +10,8 @@ require dirname(__FILE__) . '/config.inc';
 <?php
 require dirname(__FILE__) . '/config.inc';
 
-$stmt = $db->query("create table #wf_pdo(id int);" .
+$stmt = $db->query(
+"create table #wf_pdo(id int);" .
 "insert into #wf_pdo values(1), (2), (3);" .
 "select * from #wf_pdo;" .
 "begin transaction;" .
@@ -18,7 +19,8 @@ $stmt = $db->query("create table #wf_pdo(id int);" .
 "rollback transaction;" .
 "select * from #wf_pdo;" .
 "delete from #wf_pdo;" .
-"drop table #wf_pdo;");
+"drop table #wf_pdo;"
+);
 
 // check results from the create table
 var_dump($stmt->rowCount());

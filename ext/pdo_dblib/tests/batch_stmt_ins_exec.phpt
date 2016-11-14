@@ -17,7 +17,8 @@ $db->query(
 "begin " .
 "  insert into #wf_pdo values(2), (3), (4); " .
 "  select * from #wf_pdo; " .
-"end; ");
+"end; "
+);
 
 // now lets get some results
 $stmt = $db->query(

@@ -10,7 +10,8 @@ require dirname(__FILE__) . '/config.inc';
 <?php
 require dirname(__FILE__) . '/config.inc';
 
-$stmt = $db->query("create table #wf_pdo(id int); " .
+$stmt = $db->query(
+"create table #wf_pdo(id int); " .
 "set rowcount 2; " .
 "insert into #wf_pdo values(1), (2), (3); " .
 "insert into #wf_pdo values(4), (5), (6); " .
