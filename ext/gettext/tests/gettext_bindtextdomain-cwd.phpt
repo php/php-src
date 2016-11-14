@@ -10,7 +10,7 @@ if (!setlocale(LC_ALL, 'en_US.UTF-8')) {
 }
 --FILE--
 <?php
-$base_dir = dirname(__FILE__);
+$base_dir = __DIR__;
 chdir($base_dir);
 setlocale(LC_ALL, 'en_US.UTF-8');
 bindtextdomain('messages',null);

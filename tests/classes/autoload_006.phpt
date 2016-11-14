@@ -10,7 +10,7 @@ ZE2 Autoload from destructor
 
 function __autoload($class_name)
 {
-	require_once(dirname(__FILE__) . '/' . strtolower($class_name) . '.p5c');
+	require_once(__DIR__ . '/' . strtolower($class_name) . '.p5c');
 	echo __FUNCTION__ . '(' . $class_name . ")\n";
 }
 

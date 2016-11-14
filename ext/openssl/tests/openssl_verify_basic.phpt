@@ -5,8 +5,8 @@ openssl_verify() tests
 --FILE--
 <?php
 $data = "Testing openssl_verify()";
-$privkey = "file://" . dirname(__FILE__) . "/private_rsa_1024.key";
-$pubkey = "file://" . dirname(__FILE__) . "/public.key";
+$privkey = "file://" . __DIR__ . "/private_rsa_1024.key";
+$pubkey = "file://" . __DIR__ . "/public.key";
 $wrong = "wrong";
 
 openssl_sign($data, $sign, $privkey);

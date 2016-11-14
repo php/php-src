@@ -11,7 +11,7 @@ include 'server.inc';
 $host = curl_cli_server_start();
 $ch = curl_init($host);
 
-$temp_file = dirname(__FILE__) . '/curl_file_deleted_before_curl_close.tmp';
+$temp_file = __DIR__ . '/curl_file_deleted_before_curl_close.tmp';
 if (file_exists($temp_file)) {
 	unlink($temp_file); // file should not exist before test
 }
@@ -33,7 +33,7 @@ echo "Closed correctly\n";
 ?>
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/curl_file_deleted_before_curl_close.tmp');
+unlink(__DIR__ . '/curl_file_deleted_before_curl_close.tmp');
 ?>
 --EXPECT--
 Closed correctly

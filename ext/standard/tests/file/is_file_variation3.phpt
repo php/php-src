@@ -9,7 +9,7 @@ Test is_file() function: usage variations - invalid filenames
 
 /* Testing is_file() with invalid arguments -int, float, bool, NULL, resource */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $file_handle = fopen($file_path."/is_file_variation3.tmp", "w");
 
 echo "*** Testing Invalid file types ***\n";
@@ -39,7 +39,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink($file_path."/is_file_variation3.tmp");
 ?>
 --EXPECTF--

@@ -3,11 +3,11 @@
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo_dblib')) die('skip not loaded');
-require dirname(__FILE__) . '/config.inc';
+require __DIR__ . '/config.inc';
 ?>
 --FILE--
 <?php
-require dirname(__FILE__) . '/config.inc';
+require __DIR__ . '/config.inc';
 
 /*We see these rows */
 $db->query("CREATE table php_test(val int)");

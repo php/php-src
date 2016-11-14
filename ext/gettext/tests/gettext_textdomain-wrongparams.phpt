@@ -12,7 +12,7 @@ Check how textdomain() with wrong parameters behaves.
 --FILE--
 <?php // $Id$
 
-chdir(dirname(__FILE__));
+chdir(__DIR__);
 setlocale(LC_ALL, 'en_US.UTF-8');
 bindtextdomain ("messages", "./locale");
 textdomain (array());

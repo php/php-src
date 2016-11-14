@@ -9,7 +9,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 --FILE--
 <?php
 
-$script_directory = dirname(__FILE__);
+$script_directory = __DIR__;
 chdir($script_directory);
 $test_dirname = basename(__FILE__, ".php") . "私はガラスを食べられますtestdir";
 mkdir($test_dirname);

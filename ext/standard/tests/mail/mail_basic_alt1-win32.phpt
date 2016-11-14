@@ -7,7 +7,7 @@ if( substr(PHP_OS, 0, 3) != 'WIN' ) {
    die('skip...Windows only test');
 }
 
-require_once(dirname(__FILE__).'/mail_skipif.inc');
+require_once(__DIR__.'/mail_skipif.inc');
 ?>
 --INI--
 max_execution_time = 120
@@ -25,7 +25,7 @@ ini_set("smtp_port", 25);
 ini_set("sendmail_from", "user@example.com");
 
 echo "*** Testing mail() : basic functionality ***\n";
-require_once(dirname(__FILE__).'/mail_include.inc');
+require_once(__DIR__.'/mail_include.inc');
 $subject_prefix = "!**PHPT**!";
 
 $to = "$username";

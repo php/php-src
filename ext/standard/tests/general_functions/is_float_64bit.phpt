@@ -59,7 +59,7 @@ foreach ($floats as $float ) {
 echo "\n*** Testing is_float(), is_double() & is_real() with non float values ***\n";
 // get a resource type variable
 $fp = fopen (__FILE__, "r");
-$dfp = opendir ( dirname(__FILE__) );
+$dfp = opendir ( __DIR__ );
 
 // unset variable
 $unset_var = 10;

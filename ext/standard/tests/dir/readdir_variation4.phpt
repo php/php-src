@@ -14,7 +14,7 @@ Test readdir() function : usage variations - different file names
 
 echo "*** Testing readdir() : usage variations ***\n";
 
-$dir_path = dirname(__FILE__) . "/readdir_variation4/";
+$dir_path = __DIR__ . "/readdir_variation4/";
 mkdir($dir_path);
 
 // heredoc string
@@ -78,7 +78,7 @@ closedir($dir_handle);
 ===DONE===
 --CLEAN--
 <?php
-$dir_path = dirname(__FILE__) . "/readdir_variation4/";
+$dir_path = __DIR__ . "/readdir_variation4/";
 rmdir($dir_path);
 ?>
 --EXPECTF--

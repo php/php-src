@@ -7,7 +7,7 @@ if (!extension_loaded('curl')) print 'skip';
 --FILE--
 <?php
  	$ch = curl_init();
-	curl_setopt($ch, CURLOPT_URL, 'file://'. dirname(__FILE__) . DIRECTORY_SEPARATOR .'curl_testdata1.txt');
+	curl_setopt($ch, CURLOPT_URL, 'file://'. __DIR__ . DIRECTORY_SEPARATOR .'curl_testdata1.txt');
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
 
 	$mh = curl_multi_init();

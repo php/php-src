@@ -14,9 +14,9 @@ Test scandir() function : usage variations - different relative paths
 echo "*** Testing scandir() : usage variations ***\n";
 
 // include for create_files/delete_files functions
-include (dirname(__FILE__) . '/../file/file.inc');
+include (__DIR__ . '/../file/file.inc');
 
-$base_dir_path = dirname(__FILE__);
+$base_dir_path = __DIR__;
 
 $level_one_dir_path = "$base_dir_path/level_one";
 $level_two_dir_path = "$level_one_dir_path/level_two";
@@ -61,7 +61,7 @@ var_dump(scandir('../../level_one'));
 ===DONE===
 --CLEAN--
 <?php
-$dir_path = dirname(__FILE__);
+$dir_path = __DIR__;
 rmdir("$dir_path/level_one/level_two");
 rmdir("$dir_path/level_one");
 ?>

@@ -8,7 +8,7 @@ libgd #86 (Possible infinite loop in imagecreatefrompng)
 --FILE--
 <?php
 
-$im = imagecreatefrompng(dirname(__FILE__) . '/libgd00086.png');
+$im = imagecreatefrompng(__DIR__ . '/libgd00086.png');
 var_dump($im);
 ?>
 --EXPECTF--

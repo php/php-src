@@ -30,7 +30,7 @@ $options=Array(
 		                         "to_xml"  => "book_to_xml"))
 		);
 
-$client = new TestSoapClient(dirname(__FILE__)."/classmap.wsdl",$options);
+$client = new TestSoapClient(__DIR__."/classmap.wsdl",$options);
 $book = new book();
 $book->a = "foo";
 $book->b = "bar";

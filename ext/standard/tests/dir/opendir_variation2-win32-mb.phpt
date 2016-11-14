@@ -22,7 +22,7 @@ echo "*** Testing opendir() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
 // create temporary directory for test, removed in CLEAN section
-$path = dirname(__FILE__) . "/私はガラスを食べられますopendir_variation2";
+$path = __DIR__ . "/私はガラスを食べられますopendir_variation2";
 mkdir($path);
 
 
@@ -112,7 +112,7 @@ fclose($fp);
 ===DONE===
 --CLEAN--
 <?php
-$path = dirname(__FILE__) . "/私はガラスを食べられますopendir_variation2";
+$path = __DIR__ . "/私はガラスを食べられますopendir_variation2";
 rmdir($path);
 ?>
 --EXPECTF--

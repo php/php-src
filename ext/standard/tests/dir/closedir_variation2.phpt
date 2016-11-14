@@ -15,7 +15,7 @@ Test closedir() function : usage variations - close directory handle twice
 echo "*** Testing closedir() : usage variations ***\n";
 
 //create temporary directory for test, removed in CLEAN section
-$directory = dirname(__FILE__) . "/closedir_variation2";
+$directory = __DIR__ . "/closedir_variation2";
 mkdir($directory);
 
 $dh = opendir($directory);
@@ -33,7 +33,7 @@ var_dump($dh);
 ===DONE===
 --CLEAN--
 <?php
-$directory = dirname(__FILE__) . "/closedir_variation2";
+$directory = __DIR__ . "/closedir_variation2";
 rmdir($directory);
 ?>
 --EXPECTF--

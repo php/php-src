@@ -10,7 +10,7 @@ allow_url_fopen=1
    1.2.7 on at least Windows and Darwin. Using unoptimized
    zlib build fixes the issue. */
 
-require dirname(__FILE__) . "/bug_52944_corrupted_data.inc";
+require __DIR__ . "/bug_52944_corrupted_data.inc";
 
 $fp = fopen('data://text/plain;base64,' . $data, 'r');
 stream_filter_append($fp, 'zlib.inflate', STREAM_FILTER_READ);

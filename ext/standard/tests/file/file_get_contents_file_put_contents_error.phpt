@@ -13,7 +13,7 @@ Test file-get_contents() and file_put_contents() functions : error conditions
 
 echo "*** Testing error conditions ***\n";
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "\n-- Testing with  Non-existing file --\n";
 print( file_get_contents("/no/such/file/or/dir") );
@@ -38,7 +38,7 @@ echo "\n*** Done ***\n";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink($file_path."/file_put_contents.tmp");
 unlink($file_path."/file_put_contents1.tmp");
 

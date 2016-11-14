@@ -14,10 +14,10 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 /* test is_executable() with file having different filepath notation */
 
-require dirname(__FILE__).'/file.inc';
+require __DIR__.'/file.inc';
 echo "*** Testing is_executable(): usage variations ***\n";
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 mkdir("$file_path/is_executable_variation1");
 
 // create a new temporary file
@@ -60,8 +60,8 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-unlink(dirname(__FILE__)."/is_executable_variation1/bar.tmp");
-rmdir(dirname(__FILE__)."/is_executable_variation1/");
+unlink(__DIR__."/is_executable_variation1/bar.tmp");
+rmdir(__DIR__."/is_executable_variation1/");
 ?>
 --EXPECTF--
 *** Testing is_executable(): usage variations ***

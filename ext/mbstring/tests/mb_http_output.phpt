@@ -6,7 +6,7 @@ mb_http_output()
 <?php
 //TODO: Add more encoding. Wrong parameter type test.
 //$debug = true;
-ini_set('include_path', dirname(__FILE__));
+ini_set('include_path', __DIR__);
 include_once('common.inc');
 
 // Set HTTP output encoding to ASCII

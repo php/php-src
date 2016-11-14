@@ -22,7 +22,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 echo "*** Testing dir() : unexpected values for \$context argument ***\n";
 
 // create the temporary directory
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $directory = $file_path."/私はガラスを食べられますdir_variation2";
 @mkdir($directory);
 
@@ -107,7 +107,7 @@ echo "Done";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $directory = $file_path."/私はガラスを食べられますdir_variation2";
 
 rmdir($directory);

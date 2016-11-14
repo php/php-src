@@ -12,7 +12,7 @@ png compression test
 ?>
 --FILE--
 <?php
-	$cwd = dirname(__FILE__);
+	$cwd = __DIR__;
 
 	echo "PNG compression test: ";
 

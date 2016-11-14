@@ -11,7 +11,7 @@ echo "*** Testing sprintf() : integer formats with resource values ***\n";
 
 // resource type variable
 $fp = fopen (__FILE__, "r");
-$dfp = opendir ( dirname(__FILE__) );
+$dfp = opendir ( __DIR__ );
 
 $fp_copy = $fp;
 $dfp_copy = $dfp;

@@ -10,7 +10,7 @@ FPM: Test IPv4/IPv6 support
 
 include "include.inc";
 
-$logfile = dirname(__FILE__).'/php-fpm.log.tmp';
+$logfile = __DIR__.'/php-fpm.log.tmp';
 $port = 9000+PHP_INT_SIZE;
 
 $cfg = <<<EOT
@@ -57,6 +57,6 @@ Done IPv4
 Done IPv6
 --CLEAN--
 <?php
-    $logfile = dirname(__FILE__).'/php-fpm.log.tmp';
+    $logfile = __DIR__.'/php-fpm.log.tmp';
     @unlink($logfile);
 ?>

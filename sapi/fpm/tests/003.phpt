@@ -10,7 +10,7 @@ FPM: Test IPv6 support
 
 include "include.inc";
 
-$logfile = dirname(__FILE__).'/php-fpm.log.tmp';
+$logfile = __DIR__.'/php-fpm.log.tmp';
 $port = 9000+PHP_INT_SIZE;
 
 $cfg = <<<EOT
@@ -49,6 +49,6 @@ if (is_resource($fpm)) {
 Done
 --CLEAN--
 <?php
-    $logfile = dirname(__FILE__).'/php-fpm.log.tmp';
+    $logfile = __DIR__.'/php-fpm.log.tmp';
     @unlink($logfile);
 ?>

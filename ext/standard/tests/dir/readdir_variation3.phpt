@@ -15,10 +15,10 @@ Test readdir() function : usage variations - sub-directories
 echo "*** Testing readdir() : usage variations ***\n";
 
 // include the file.inc for Function: function create_files()
-chdir(dirname(__FILE__));
-include(dirname(__FILE__)."/../file/file.inc");
+chdir(__DIR__);
+include(__DIR__."/../file/file.inc");
 
-$path_top = dirname(__FILE__) . '/readdir_variation3';
+$path_top = __DIR__ . '/readdir_variation3';
 $path_sub = $path_top . '/sub_folder';
 mkdir($path_top);
 mkdir($path_sub);
@@ -46,7 +46,7 @@ closedir($dir_handle);
 ===DONE===
 --CLEAN--
 <?php
-$path_top = dirname(__FILE__) . '/readdir_variation3';
+$path_top = __DIR__ . '/readdir_variation3';
 $path_sub = $path_top . '/sub_folder';
 rmdir($path_sub);
 rmdir($path_top);

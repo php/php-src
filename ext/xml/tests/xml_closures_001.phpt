@@ -4,7 +4,7 @@ XML parser test using closures as callbacks
 <?php include("skipif.inc"); ?>
 --FILE--
 <?php
-chdir(dirname(__FILE__));
+chdir(__DIR__);
 
 $start_element = function ($xp, $elem, $attribs)
 {

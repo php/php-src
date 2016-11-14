@@ -3,7 +3,7 @@ Bug #30362 (stream_get_line() not working as documented)
 --FILE--
 <?php
 
-$resource = fopen(dirname(__FILE__).'/bug30362.txt', 'rb');
+$resource = fopen(__DIR__.'/bug30362.txt', 'rb');
 
 for ($i = 0; ($i < 10) && !feof($resource); ++$i ) {
     $a = "Y";

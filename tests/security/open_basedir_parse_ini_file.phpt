@@ -12,7 +12,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 <?php
 require_once "open_basedir.inc";
 test_open_basedir_before("parse_ini_file");
-$directory = dirname(__FILE__);
+$directory = __DIR__;
 
 var_dump(parse_ini_file("../bad"));
 var_dump(parse_ini_file("../bad/bad.txt"));

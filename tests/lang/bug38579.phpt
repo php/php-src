@@ -8,7 +8,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-$file = dirname(__FILE__)."/bug38579.inc";
+$file = __DIR__."/bug38579.inc";
 include_once(strtolower($file));
 include_once(strtoupper($file));
 ?>

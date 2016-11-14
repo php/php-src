@@ -25,7 +25,7 @@ var_dump( opendir() );
 
 //Test opendir with one more than the expected number of arguments
 echo "\n-- Testing opendir() function with more than expected no. of arguments --\n";
-$path = dirname(__FILE__) . "/私はガラスを食べられますopendir_error";
+$path = __DIR__ . "/私はガラスを食べられますopendir_error";
 mkdir($path);
 $context = stream_context_create();
 
@@ -35,7 +35,7 @@ var_dump( opendir($path, $context, $extra_arg) );
 ===DONE===
 --CLEAN--
 <?php
-$path = dirname(__FILE__) . "/私はガラスを食べられますopendir_error";
+$path = __DIR__ . "/私はガラスを食べられますopendir_error";
 rmdir($path);
 ?>
 --EXPECTF--

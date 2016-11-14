@@ -1,11 +1,11 @@
 --TEST--
 Bug #61964 (finfo_open with directory cause invalid free)
 --SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
+<?php require_once(__DIR__ . '/skipif.inc'); ?>
 --FILE--
 <?php
 
-$magic_file = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'magic';
+$magic_file = __DIR__ . DIRECTORY_SEPARATOR . 'magic';
 
 $ret = @finfo_open(FILEINFO_NONE, $magic_file . ".non-exits");
 var_dump($ret);

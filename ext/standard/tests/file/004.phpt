@@ -2,7 +2,7 @@
 file_put_contents() test
 --FILE--
 <?php
-	chdir(dirname(__FILE__));
+	chdir(__DIR__);
 	for ($i = 1; $i < 6; $i++) {
 		@unlink("./TEST{$i}");
 	}

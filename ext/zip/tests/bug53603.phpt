@@ -17,7 +17,7 @@ class TestStream {
 
 stream_wrapper_register("teststream", "TestStream");
 
-$dirname = dirname(__FILE__) . '/';
+$dirname = __DIR__ . '/';
 $file = $dirname . 'test_with_comment.zip';
 $zip = new ZipArchive;
 if ($zip->open($file) !== TRUE) {

@@ -11,9 +11,9 @@ is expected to fail
 ?>
 --FILE--
 <?php
-include dirname(__FILE__) .'/prepare.inc';
+include __DIR__ .'/prepare.inc';
 $phpfuncxsl = new domDocument();
-$phpfuncxsl->load(dirname(__FILE__)."/phpfunc-nostring.xsl");
+$phpfuncxsl->load(__DIR__."/phpfunc-nostring.xsl");
 if(!$phpfuncxsl) {
   echo "Error while parsing the xsl document\n";
   exit;

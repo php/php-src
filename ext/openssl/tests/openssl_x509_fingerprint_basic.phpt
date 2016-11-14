@@ -7,7 +7,7 @@ if (!extension_loaded("openssl")) die("skip");
 --FILE--
 <?php
 
-$cert = "file://" . dirname(__FILE__) . "/cert.crt";
+$cert = "file://" . __DIR__ . "/cert.crt";
 
 echo "** Testing with no parameters **\n";
 var_dump(openssl_x509_fingerprint());

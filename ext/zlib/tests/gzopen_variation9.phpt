@@ -18,7 +18,7 @@ echo "*** Testing gzopen() : variation ***\n";
 
 $modes = array('r+', 'rf', 'w+' , 'e');
 
-$file = dirname(__FILE__)."/004.txt.gz";
+$file = __DIR__."/004.txt.gz";
 
 foreach ($modes as $mode) {
     echo "mode=$mode\n";

@@ -6,7 +6,7 @@ imagecreatefromwbmp
 ?>
 --FILE--
 <?php
-$file = dirname(__FILE__) . '/src.wbmp';
+$file = __DIR__ . '/src.wbmp';
 
 $im2 = imagecreatefromwbmp($file);
 echo 'test create from wbmp: ';

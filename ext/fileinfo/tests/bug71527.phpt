@@ -8,7 +8,7 @@ if (!class_exists('finfo'))
 USE_ZEND_ALLOC=0
 --FILE--
 <?php
-	$finfo = finfo_open(FILEINFO_NONE, dirname(__FILE__) . DIRECTORY_SEPARATOR . "bug71527.magic");
+	$finfo = finfo_open(FILEINFO_NONE, __DIR__ . DIRECTORY_SEPARATOR . "bug71527.magic");
 	$info = finfo_file($finfo, __FILE__);
 	var_dump($info);
 ?>

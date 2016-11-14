@@ -18,7 +18,7 @@ Description: Returns the type of the file. Possible values are fifo, char,
 */
 
 echo "*** Testing filetype() with various types ***\n";
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $file1 = $file_path."/filetype1_variation.tmp";
 $file2 = $file_path."/filetype2_variation.tmp";
 $file3 = $file_path."/filetype3_variation.tmp";

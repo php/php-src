@@ -6,7 +6,7 @@ variables_order="egpcs"
 <?php
 
 function test() {
-	include dirname(__FILE__)."/globals.inc";
+	include __DIR__."/globals.inc";
 }
 
 test();

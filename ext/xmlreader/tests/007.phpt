@@ -7,8 +7,8 @@ XMLReader: libxml2 XML Reader, setRelaxNGSchema
 /* $Id$ */
 
 $xmlstring = '<TEI.2>hello</TEI.2>';
-$relaxngfile = dirname(__FILE__) . '/relaxNG.rng'; 
-$file = dirname(__FILE__) . '/_007.xml';
+$relaxngfile = __DIR__ . '/relaxNG.rng'; 
+$file = __DIR__ . '/_007.xml';
 file_put_contents($file, $xmlstring);
 
 $reader = new XMLReader();

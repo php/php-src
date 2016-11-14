@@ -10,7 +10,7 @@ if (!setlocale(LC_ALL, 'en_US.UTF-8')) {
 }
 --FILE--
 <?php
-chdir(dirname(__FILE__));
+chdir(__DIR__);
 setlocale(LC_ALL, 'en_US.UTF-8');
 bindtextdomain('dngettextTest', './locale');
 

@@ -19,7 +19,7 @@ if (!(strpos($inf, 'MSVC9') || strpos($inf, 'MSVC8'))) die("skip Not Valid for b
  * Prototype: int pclose ( resource handle );
  * Description: Closes process file pointer.
  */
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 echo "*** Testing for error conditions ***\n";
 var_dump( popen() );  // Zero Arguments
 var_dump( popen("abc.txt") );   // Single Argument
@@ -33,7 +33,7 @@ echo "\n--- Done ---";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink($file_path."/popen.tmp");
 ?>
 --EXPECTF--

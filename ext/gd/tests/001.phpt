@@ -5,7 +5,7 @@ imagecreatefrompng() and empty/missing file
 --FILE--
 <?php
 
-$file = dirname(__FILE__)."/001.test";
+$file = __DIR__."/001.test";
 @unlink($file);
 
 var_dump(imagecreatefrompng($file));

@@ -9,7 +9,7 @@ Test is_dir() function: usage variations - invalid arguments
 
 /* Passing invalid arguments to is_dir() */
 
-$dir_handle = opendir( dirname(__FILE__) );
+$dir_handle = opendir( __DIR__ );
 
 echo "*** Testing is_dir() with Invalid arguments: expected bool(false) ***\n";
 $dirnames = array(

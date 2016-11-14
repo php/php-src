@@ -20,7 +20,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 
 echo "*** Testing rewinddir() : usage variations ***\n";
 
-$dir_path = dirname(__FILE__) . '/私はガラスを食べられますrewinddir_variation2';
+$dir_path = __DIR__ . '/私はガラスを食べられますrewinddir_variation2';
 mkdir($dir_path);
 
 echo "\n-- Create the directory handle, read and close the directory --\n";
@@ -34,7 +34,7 @@ var_dump(rewinddir($dir_handle));
 ===DONE===
 --CLEAN--
 <?php
-$dir_path = dirname(__FILE__) . '/私はガラスを食べられますrewinddir_variation2';
+$dir_path = __DIR__ . '/私はガラスを食べられますrewinddir_variation2';
 rmdir($dir_path);
 ?>
 --EXPECTF--

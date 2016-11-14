@@ -7,7 +7,7 @@ if (OPENSSL_VERSION_NUMBER < 0x009070af) die("skip");
 ?>
 --FILE--
 <?php 
-$dir = dirname(__FILE__);
+$dir = __DIR__;
 $file_pub = $dir . '/bug37820cert.pem';
 $file_key = $dir . '/bug37820key.pem';
 

@@ -5,7 +5,7 @@ Paul Sohier
 #phptestfest utrecht
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
@@ -20,7 +20,7 @@ echo "Checking with incorrect parameters\n" ;
 imap_open('', '', '');
 imap_open('', '', '', -1);
 
-require_once(dirname(__FILE__).'/imap_include.inc');
+require_once(__DIR__.'/imap_include.inc');
 imap_open($default_mailbox, $username, $password, NIL, -1);
 
 ?>

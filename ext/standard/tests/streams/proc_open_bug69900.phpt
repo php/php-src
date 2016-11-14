@@ -5,7 +5,7 @@ Bug #69900 Commandline input/output weird behaviour with STDIO
 
 error_reporting(E_ALL);
 
-$fl = dirname(__FILE__) . DIRECTORY_SEPARATOR . "test69900.php";
+$fl = __DIR__ . DIRECTORY_SEPARATOR . "test69900.php";
 
 $test_content = '<?php
 
@@ -45,7 +45,7 @@ proc_close($process);
 ===DONE===
 --CLEAN--
 <?php
-$fl = dirname(__FILE__) . DIRECTORY_SEPARATOR . "test69900.php";
+$fl = __DIR__ . DIRECTORY_SEPARATOR . "test69900.php";
 @unlink($fl);
 ?>
 --EXPECT--

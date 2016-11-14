@@ -14,7 +14,7 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 /* Passing invalid/non-existing args for $prefix */
 
 echo "*** Testing tempnam() with obscure prefixes ***\n";
-$file_path = dirname(__FILE__)."/tempnamVar3";
+$file_path = __DIR__."/tempnamVar3";
 if (!mkdir($file_path)) {
 	echo "Failed, cannot create temp dir $filepath\n";
 	exit(1);

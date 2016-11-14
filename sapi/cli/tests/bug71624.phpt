@@ -9,7 +9,7 @@ include "skipif.inc";
 
 $php = getenv('TEST_PHP_EXECUTABLE');
 
-$filename_txt = dirname(__FILE__) . DIRECTORY_SEPARATOR . "bug71624.test.txt";
+$filename_txt = __DIR__ . DIRECTORY_SEPARATOR . "bug71624.test.txt";
 
 $txt = 'foo
 test

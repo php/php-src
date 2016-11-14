@@ -3,7 +3,7 @@ fscanf() tests
 --FILE--
 <?php
 
-$filename = dirname(__FILE__)."/fscanf.dat";
+$filename = __DIR__."/fscanf.dat";
 
 var_dump(fscanf());
 var_dump(fscanf(array()));

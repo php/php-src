@@ -6,7 +6,7 @@ Bug #20087 (Assertion failure)
 register_globals calls killed the ability for mb_parse_str() to register into the global scope
 --FILE--
 <?php
-ini_set('include_path', dirname(__FILE__));
+ini_set('include_path', __DIR__);
 include_once('common.inc');
 $testmoo = "blah blah";
 var_dump(mb_parse_str("testmoo"));

@@ -23,7 +23,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 /* Variation 2 : Create hard link to non-existent file */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 // non-existing filename
 $non_existent_file = "$file_path/non_existent_file_variation2.tmp";
 // non-existing linkname

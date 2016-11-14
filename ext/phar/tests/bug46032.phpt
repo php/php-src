@@ -6,7 +6,7 @@ Phar: bug #46032: PharData::__construct wrong memory read
 --FILE--
 <?php
 
-$a = dirname(__FILE__) .'/mytest';
+$a = __DIR__ .'/mytest';
 
 try {
 	new phar($a);

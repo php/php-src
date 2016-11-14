@@ -10,9 +10,9 @@ Daniel Convissor <danielc@php.net>
 
 $doc = new DOMDocument;
 
-$doc->load(dirname(__FILE__)."/book.xml");
+$doc->load(__DIR__."/book.xml");
 
-$result = $doc->schemaValidate(dirname(__FILE__)."/book-non-conforming-schema.xsd");
+$result = $doc->schemaValidate(__DIR__."/book-non-conforming-schema.xsd");
 var_dump($result);
 
 ?>

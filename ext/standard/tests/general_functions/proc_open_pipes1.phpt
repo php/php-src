@@ -3,7 +3,7 @@ proc_open() with > 16 pipes
 --FILE--
 <?php
 
-include dirname(__FILE__) . "/proc_open_pipes.inc";
+include __DIR__ . "/proc_open_pipes.inc";
 
 for ($i = 3; $i<= 30; $i++) {
 	$spec[$i] = array('pipe', 'w');
@@ -19,7 +19,7 @@ var_dump($pipes);
 ?>
 --CLEAN--
 <?php
-include dirname(__FILE__) . "/proc_open_pipes.inc";
+include __DIR__ . "/proc_open_pipes.inc";
 
 unlink_sleep_script();
 

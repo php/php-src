@@ -15,7 +15,7 @@ if(substr(PHP_OS, 0, 3) != 'WIN' )
  */
 
 echo "*** Testing error conditions ***\n";
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 var_dump( disk_free_space() ); // Zero Arguments
 var_dump( diskfreespace() );
 
@@ -36,7 +36,7 @@ echo"\n-- Done --";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink($file_path."/disk_free_space.tmp");
 
 ?>

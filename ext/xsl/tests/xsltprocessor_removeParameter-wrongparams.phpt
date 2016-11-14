@@ -8,7 +8,7 @@ Check xsltprocessor::removeParameter wrong parameter handling
 ?>
 --FILE--
 <?php
-include dirname(__FILE__) .'/prepare.inc';
+include __DIR__ .'/prepare.inc';
 $proc->removeParameter();
 $proc->removeParameter(array(), array());
 $proc->removeParameter('', array());

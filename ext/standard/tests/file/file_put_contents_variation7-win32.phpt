@@ -19,13 +19,13 @@ echo "*** Testing file_put_contents() : usage variation ***\n";
 
 $mainDir = "filePutContentsVar7.dir";
 $subDir = "filePutContentsVar7Sub";
-$absMainDir = dirname(__FILE__)."/".$mainDir;
+$absMainDir = __DIR__."/".$mainDir;
 mkdir($absMainDir);
 $absSubDir = $absMainDir."\\".$subDir;
 mkdir($absSubDir);
 
 $old_dir_path = getcwd();
-chdir(dirname(__FILE__));
+chdir(__DIR__);
 $unixifiedDir = '/'.substr(str_replace('\\','/',$absSubDir),3);
 
 

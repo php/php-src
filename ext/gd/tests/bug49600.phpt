@@ -8,7 +8,7 @@ Bug #49600 (imageTTFText text shifted right)
 ?>
 --FILE--
 <?php
-$cwd = dirname(__FILE__);
+$cwd = __DIR__;
 $font = "$cwd/Tuffy.ttf";
 $image = imagecreatetruecolor(50, 50);
 $color = imagecolorallocate($image, 255, 255, 255);

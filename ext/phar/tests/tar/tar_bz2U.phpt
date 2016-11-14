@@ -12,11 +12,11 @@ phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
-include dirname(__FILE__) . '/files/tarmaker.php.inc';
+include __DIR__ . '/files/tarmaker.php.inc';
 
-$fname = dirname(__FILE__) . '/tar_bz2U.phar';
+$fname = __DIR__ . '/tar_bz2U.phar';
 $alias = 'phar://' . $fname;
-$fname2 = dirname(__FILE__) . '/tar_bz2U.phar.tar';
+$fname2 = __DIR__ . '/tar_bz2U.phar.tar';
 $alias2 = 'phar://' . $fname2;
 
 $tar = new tarmaker($fname, 'bz2');
@@ -50,8 +50,8 @@ var_dump($phar2->isCompressed() == Phar::BZ2);
 ===DONE===
 --CLEAN--
 <?php
-@unlink(dirname(__FILE__) . '/tar_bz2U.phar');
-@unlink(dirname(__FILE__) . '/tar_bz2U.phar.tar');
+@unlink(__DIR__ . '/tar_bz2U.phar');
+@unlink(__DIR__ . '/tar_bz2U.phar.tar');
 ?>
 --EXPECTF--
 unicode(%d) "%star_bz2U.phar"

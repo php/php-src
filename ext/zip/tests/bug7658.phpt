@@ -24,7 +24,7 @@ $expect = array(
 	"settings.xml",
 	"META-INF/manifest.xml",
 );
-$dirname = dirname(__FILE__) . '/';
+$dirname = __DIR__ . '/';
 include $dirname . 'utils.inc';
 $file = $dirname . '__tmp_bug7658.odt';
 $zip = new ZipArchive();

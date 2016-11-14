@@ -12,7 +12,7 @@ jpeg <--> gd1/gd2 conversion test
 ?>
 --FILE--
 <?php
-	$cwd = dirname(__FILE__);
+	$cwd = __DIR__;
 
 	echo "JPEG to GD1 conversion: ";
 	echo imagegd(imagecreatefromjpeg($cwd . "/conv_test私はガラスを食べられます.jpeg"), $cwd . "/test私はガラスを食べられます.gd1") ? 'ok' : 'failed';

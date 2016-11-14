@@ -7,7 +7,7 @@ Bug #53504 imagettfbbox/imageftbbox gives incorrect values for bounding box
 ?>
 --FILE--
 <?php
-$cwd = dirname(__FILE__);
+$cwd = __DIR__;
 $font = "$cwd/Tuffy.ttf";
 
 $g = imagecreate(800, 800);
@@ -84,7 +84,7 @@ foreach ($tests as $testnum => $test) {
 imagepng($g, "$cwd/bug53504.png");
 ?>
 --CLEAN--
-<?php @unlink(dirname(__FILE__) . '/bug53504.png'); ?>
+<?php @unlink(__DIR__ . '/bug53504.png'); ?>
 --EXPECT--
  0: ........
  1: ........

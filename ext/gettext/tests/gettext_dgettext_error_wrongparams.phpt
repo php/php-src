@@ -12,7 +12,7 @@ Check how dgettext() with wrong parameter types and wrong parameter cou types an
 ?>
 --FILE--
 <?php 
-    chdir(dirname(__FILE__));
+    chdir(__DIR__);
     setlocale(LC_ALL, 'en_US.UTF-8');
     dgettext ('foo');
     dgettext ();

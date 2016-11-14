@@ -12,7 +12,7 @@ Test chdir() function : basic functionality
  */
 
 echo "*** Testing chdir() : basic functionality ***\n";
-$base_dir_path = dirname(__FILE__);
+$base_dir_path = __DIR__;
 
 $level1_one_dir_name = "level1_one";
 $level1_one_dir_path = "$base_dir_path/$level1_one_dir_name";
@@ -36,7 +36,7 @@ var_dump(getcwd());
 ===DONE===
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 rmdir("$file_path/level1_one/level1_two");
 rmdir("$file_path/level1_one");
 ?>

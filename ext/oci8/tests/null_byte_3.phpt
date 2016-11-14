@@ -8,7 +8,7 @@ error_reporting = E_WARNING
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 // Run Test
 

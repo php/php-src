@@ -26,7 +26,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
                  Update the file through hard link
                  Check size of file and hard link
 */
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Accessing and updating data of file through hard link ***\n";
 // Creating file and inserting data into it

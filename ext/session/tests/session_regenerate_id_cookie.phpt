@@ -26,7 +26,7 @@ require __DIR__.'/../../../sapi/cgi/tests/include.inc';
 $php = get_cgi_path();
 reset_env_vars();
 
-$file = dirname(__FILE__)."/session_regenerate_id_cookie.test.php";
+$file = __DIR__."/session_regenerate_id_cookie.test.php";
 
 file_put_contents($file, '<?php
 ob_start();

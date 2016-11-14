@@ -17,7 +17,7 @@ if (!defined('GLOB_BRACE')) {
 
 echo "*** Testing glob() : usage variations ***\n";
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 // temp dir created
 mkdir("$file_path/glob_variation");
@@ -83,7 +83,7 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 rmdir("$file_path/glob_variation/wonder1/wonder2");
 rmdir("$file_path/glob_variation/wonder1/");
 rmdir("$file_path/glob_variation/");

@@ -21,7 +21,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
    Description: Gets information about a link
 */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Testing symlink(), linkinfo(), link() and is_link() : basic functionality ***\n";
 
@@ -66,7 +66,7 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-$dirname = dirname(__FILE__)."/symlink_link_linkinfo_is_link_basic2";
+$dirname = __DIR__."/symlink_link_linkinfo_is_link_basic2";
 rmdir($dirname);
 ?>
 --EXPECTF--

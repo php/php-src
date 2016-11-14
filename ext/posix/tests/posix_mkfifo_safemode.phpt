@@ -25,14 +25,14 @@ if (PHP_VERSION_ID < 503099) {
 <?php
 var_dump(posix_mkfifo('/tmp/foobar', 0644));
 
-$dir = dirname(__FILE__) . '/foo';
+$dir = __DIR__ . '/foo';
 mkdir ($dir);
 var_dump(posix_mkfifo($dir . '/bar', 0644));
 ?>
 ===DONE===
 --CLEAN--
 <?php
-$dir = dirname(__FILE__) . '/foo';
+$dir = __DIR__ . '/foo';
 unlink($dir . '/bar');
 rmdir($dir);
 ?>

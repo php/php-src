@@ -5,7 +5,7 @@ oci_field_*() family: error cases
 --FILE--
 <?php
 
-require(dirname(__FILE__)."/connect.inc");
+require(__DIR__."/connect.inc");
 
 // Initialize
 

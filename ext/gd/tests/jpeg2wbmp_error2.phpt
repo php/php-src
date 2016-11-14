@@ -14,7 +14,7 @@ if(!function_exists('jpeg2wbmp')) {
 ?>
 --FILE--
 <?php
-$file = dirname(__FILE__) .'/simpletext.wbmp';
+$file = __DIR__ .'/simpletext.wbmp';
 jpeg2wbmp('', $file, 20, 120, 8);
 jpeg2wbmp(null, $file, 20, 120, 8);
 jpeg2wbmp(false, $file, 20, 120, 8);
@@ -33,5 +33,5 @@ Deprecated: Function jpeg2wbmp() is deprecated in %s on line %d
 Warning: jpeg2wbmp(): Unable to open '' for reading in %s on line %d
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) .'/simpletext.wbmp');
+unlink(__DIR__ .'/simpletext.wbmp');
 ?>

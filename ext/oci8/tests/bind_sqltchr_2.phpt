@@ -5,7 +5,7 @@ PL/SQL bind with SQLT_CHR
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 // Initialization
 

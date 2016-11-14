@@ -1,20 +1,20 @@
 --TEST--
 Test 12: Using Associative Array of Parameters
 --SKIPIF--
-<?php require_once dirname(__FILE__) .'/skipif.inc'; ?>
+<?php require_once __DIR__ .'/skipif.inc'; ?>
 --FILE--
 <?php
 echo "Test 12: Using Associative Array of Parameters";
 
 $dom = new domDocument;
-$dom->load(dirname(__FILE__)."/xslt.xml");
+$dom->load(__DIR__."/xslt.xml");
 if(!$dom) {
   echo "Error while parsing the document\n";
   exit;
 }
 
 $xsl = new domDocument;
-$xsl->load(dirname(__FILE__)."/xslt012.xsl");
+$xsl->load(__DIR__."/xslt012.xsl");
 if(!$xsl) {
   echo "Error while parsing the document\n";
   exit;

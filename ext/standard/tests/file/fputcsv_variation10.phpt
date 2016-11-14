@@ -22,7 +22,7 @@ $fields = array( array('water_fruit\n'),
                 array("")
          );
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $filename = "$file_path/fputcsv_variation10.tmp";
 
 $file_modes = array ("r+", "r+b", "r+t",

@@ -16,7 +16,7 @@ class Person {
     }
 }
 $person = new Person(32,12345,'Shane',TRUE);
-$client = new SoapClient(dirname(__FILE__)."/round3_groupD_compound1.wsdl",array("trace"=>1,"exceptions"=>0));
+$client = new SoapClient(__DIR__."/round3_groupD_compound1.wsdl",array("trace"=>1,"exceptions"=>0));
 $client->echoPerson($person);
 echo $client->__getlastrequest();
 $HTTP_RAW_POST_DATA = $client->__getlastrequest();

@@ -24,7 +24,7 @@ $csv_lists = array (
   array('\\', '"water"\\"fruit"\\"""'),
 );
 
-$filename = dirname(__FILE__) . '/fgetcsv_variation17.tmp';
+$filename = __DIR__ . '/fgetcsv_variation17.tmp';
 @unlink($filename);
 
 $file_modes = array ("r","rb", "rt", "r+", "r+b", "r+t",

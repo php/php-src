@@ -18,13 +18,13 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 echo "*** Testing parse_ini_file() : variation ***\n";
 $mainDir = "parseIniFileVar私はガラスを食べられます.dir";
 $subDir = "parseIniFileVar私はガラスを食べられますSub";
-$absMainDir = dirname(__FILE__)."\\".$mainDir;
+$absMainDir = __DIR__."\\".$mainDir;
 mkdir($absMainDir);
 $absSubDir = $absMainDir."\\".$subDir;
 mkdir($absSubDir);
 
 $old_dir_path = getcwd();
-chdir(dirname(__FILE__));
+chdir(__DIR__);
 $unixifiedDir = '/'.substr(str_replace('\\','/',$absSubDir),3);
 
 $allDirs = array(

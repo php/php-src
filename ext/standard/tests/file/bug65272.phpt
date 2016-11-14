@@ -7,7 +7,7 @@ if (stripos(PHP_OS, 'win') !== 0) die("skip windows required");
 --FILE--
 <?php
 
-$file = dirname(__FILE__)."/flock.dat";
+$file = __DIR__."/flock.dat";
 
 $fp1 = fopen($file, "w");
 var_dump(flock($fp1, LOCK_SH));

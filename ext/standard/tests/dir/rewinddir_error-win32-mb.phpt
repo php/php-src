@@ -24,7 +24,7 @@ echo "*** Testing rewinddir() : error conditions ***\n";
 //Test rewinddir with one more than the expected number of arguments
 echo "\n-- Testing rewinddir() function with more than expected no. of arguments --\n";
 
-$dir_path = dirname(__FILE__) . "/私はガラスを食べられますrewinddir_error";
+$dir_path = __DIR__ . "/私はガラスを食べられますrewinddir_error";
 mkdir($dir_path);
 $dir_handle = opendir($dir_path);
 $extra_arg = 10;
@@ -35,7 +35,7 @@ closedir($dir_handle);
 ===DONE===
 --CLEAN--
 <?php
-$dir_path = dirname(__FILE__) . "/私はガラスを食べられますrewinddir_error";
+$dir_path = __DIR__ . "/私はガラスを食べられますrewinddir_error";
 rmdir($dir_path);
 ?>
 --EXPECTF--

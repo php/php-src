@@ -15,7 +15,7 @@ include ("file.inc");
 
 echo "*** Testing fwrite() : error conditions ***\n";
 
-$filename = dirname(__FILE__)."/fwrite_error.tmp";
+$filename = __DIR__."/fwrite_error.tmp";
 
 echo "-- Testing fwrite() with less than expected number of arguments --\n";
 // zero argument
@@ -66,7 +66,7 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-$filename = dirname(__FILE__)."/fwrite_error.tmp";
+$filename = __DIR__."/fwrite_error.tmp";
 unlink( $filename );
 ?>
 --EXPECTF--

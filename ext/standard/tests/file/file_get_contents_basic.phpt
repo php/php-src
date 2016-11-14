@@ -10,7 +10,7 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
  *  Description: Reads entire file into a string
  */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 include($file_path."/file.inc");
 
 echo "*** Testing the basic functionality of the file_get_contents() function ***\n";

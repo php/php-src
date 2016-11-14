@@ -63,7 +63,7 @@ echo "\n*** Testing intval() on non integer types ***\n";
 // get a resource type variable
 $fp = fopen (__FILE__, "r");
 fclose($fp);
-$dfp = opendir ( dirname(__FILE__) );
+$dfp = opendir ( __DIR__ );
 closedir($dfp);
 
 // unset variable

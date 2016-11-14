@@ -9,7 +9,7 @@ if (!defined('GLOB_BRACE')) {
 --FILE--
 <?php
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 // temp dirname used here
 $dirname = "$file_path/bug69628";
@@ -33,7 +33,7 @@ function sort_var_dump($results) {
 --CLEAN--
 <?php
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink("$file_path/bug69628/image.jPg");
 unlink("$file_path/bug69628/image.gIf");
 unlink("$file_path/bug69628/image.png");

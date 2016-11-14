@@ -13,7 +13,7 @@ Test opendir() function : usage variations - different relative paths
 
 echo "*** Testing opendir() : usage variation ***\n";
 
-$base_dir_path = dirname(__FILE__);
+$base_dir_path = __DIR__;
 
 $level_one_dir_name = "level_one";
 $level_one_dir_path = "$base_dir_path/$level_one_dir_name";
@@ -72,7 +72,7 @@ function clean_dh($dh){
 ===DONE===
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 rmdir("$file_path/level_one/level_two");
 rmdir("$file_path/level_one");
 ?>

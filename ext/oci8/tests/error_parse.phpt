@@ -10,7 +10,7 @@ Test error handling when persistent connection is passed to oci_error()
 // was fixed and the behavior of oci_error() for all connections types
 // was made consistent.
 
-require(dirname(__FILE__).'/details.inc');
+require(__DIR__.'/details.inc');
 
 // Test parse error for normal connection
 

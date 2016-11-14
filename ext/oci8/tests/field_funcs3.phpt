@@ -5,7 +5,7 @@ oci_field_*() family: basic column types
 --FILE--
 <?php
 
-require(dirname(__FILE__)."/connect.inc");
+require(__DIR__."/connect.inc");
 
 // Initialization
 $stmtarray = array(

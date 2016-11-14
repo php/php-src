@@ -8,7 +8,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-$dirname = dirname(__FILE__);
+$dirname = __DIR__;
 $file1 = $dirname . DIRECTORY_SEPARATOR . "file1.txt";
 $file2 = $dirname . DIRECTORY_SEPARATOR . "file2.txt";
 

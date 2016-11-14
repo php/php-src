@@ -11,12 +11,12 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.zip';
-$fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.2.phar.zip';
-$fname3 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.3.phar.zip';
-$fname4 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.4.phar.zip';
-$fname5 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.5.phar.zip';
-$fname6 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.6.phar.zip';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.zip';
+$fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.2.phar.zip';
+$fname3 = __DIR__ . '/' . basename(__FILE__, '.php') . '.3.phar.zip';
+$fname4 = __DIR__ . '/' . basename(__FILE__, '.php') . '.4.phar.zip';
+$fname5 = __DIR__ . '/' . basename(__FILE__, '.php') . '.5.phar.zip';
+$fname6 = __DIR__ . '/' . basename(__FILE__, '.php') . '.6.phar.zip';
 $p = new Phar($fname);
 $p['file1.txt'] = 'hi';
 var_dump($p->getSignature());
@@ -49,7 +49,7 @@ var_dump($p->getSignature());
 echo $e->getMessage();
 }
 try {
-$config = dirname(__FILE__) . '/../files/openssl.cnf';
+$config = __DIR__ . '/../files/openssl.cnf';
 $config_arg = array('config' => $config);
 $keys=openssl_pkey_new($config_arg);
 openssl_pkey_export($keys, $privkey, NULL, $config_arg);
@@ -67,13 +67,13 @@ echo $e->getMessage();
 ===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar.zip');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.3.phar.zip');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.4.phar.zip');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.5.phar.zip');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.6.phar.zip');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.6.phar.zip.pubkey');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.phar.zip');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.3.phar.zip');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.4.phar.zip');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.5.phar.zip');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.6.phar.zip');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.6.phar.zip.pubkey');
 ?>
 --EXPECTF--
 array(2) {

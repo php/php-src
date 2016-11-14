@@ -14,10 +14,10 @@ Test readdir() function : basic functionality
 echo "*** Testing readdir() : basic functionality ***\n";
 
 // include the file.inc for Function: function create_files()
-chdir(dirname(__FILE__));
-include(dirname(__FILE__)."/../file/file.inc");
+chdir(__DIR__);
+include(__DIR__."/../file/file.inc");
 
-$path = dirname(__FILE__) . '/readdir_basic';
+$path = __DIR__ . '/readdir_basic';
 mkdir($path);
 create_files($path, 3);
 
@@ -49,7 +49,7 @@ closedir($dh);
 ===DONE===
 --CLEAN--
 <?php
-$path = dirname(__FILE__) . '/readdir_basic';
+$path = __DIR__ . '/readdir_basic';
 rmdir($path);
 ?>
 --EXPECTF--

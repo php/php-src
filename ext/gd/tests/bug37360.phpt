@@ -6,7 +6,7 @@ Bug #37360 (gdimagecreatefromgif, bad image sizes)
 ?>
 --FILE--
 <?php
-$im = imagecreatefromgif(dirname(__FILE__) . '/bug37360.gif');
+$im = imagecreatefromgif(__DIR__ . '/bug37360.gif');
 var_dump($im);
 ?>
 --EXPECTF--

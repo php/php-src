@@ -11,7 +11,7 @@ Test ngettext() functionality
 ?>
 --FILE--
 <?php // $Id$
-chdir(dirname(__FILE__));
+chdir(__DIR__);
 setlocale(LC_ALL, 'en_US.UTF-8');
 bindtextdomain('dngettextTest', './locale');
 textdomain('dngettextTest');

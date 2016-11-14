@@ -23,7 +23,7 @@ echo "*** Testing dir() : checking with valid and invalid paths ***\n";
 
 /* create the temporary directories */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 // directory dir_variation91 with one sub-directory sub_dir11 and sub-sub-directory sub_dir111
 $dir_path1 = $file_path."/dir_variation91";
@@ -58,7 +58,7 @@ echo "Done";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 $dir_path1 = $file_path."/dir_variation91";
 $sub_dir11 = $dir_path1."/sub_dir11";

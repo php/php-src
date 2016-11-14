@@ -10,7 +10,7 @@ if ("cli" != php_sapi_name()) {
 <?php
 $output = array();
 
-$test_fl = dirname(__FILE__) . DIRECTORY_SEPARATOR . md5(uniqid());
+$test_fl = __DIR__ . DIRECTORY_SEPARATOR . md5(uniqid());
 file_put_contents($test_fl, '<?php echo "abc\f\n \n";');
 
 exec(PHP_BINARY . " -n $test_fl", $output);

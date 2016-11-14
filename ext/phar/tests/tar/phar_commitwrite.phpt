@@ -10,7 +10,7 @@ TEMP=.
 TMP=.
 --FILE--
 <?php
-$p = new Phar(dirname(__FILE__) . '/brandnewphar.phar.tar', 0, 'brandnewphar.phar');
+$p = new Phar(__DIR__ . '/brandnewphar.phar.tar', 0, 'brandnewphar.phar');
 $p['file1.txt'] = 'hi';
 $p->stopBuffering();
 var_dump($p->getStub());
@@ -29,7 +29,7 @@ var_dump($p->isFileFormat(Phar::TAR));
 ===DONE===
 --CLEAN--
 <?php 
-unlink(dirname(__FILE__) . '/brandnewphar.phar.tar');
+unlink(__DIR__ . '/brandnewphar.phar.tar');
 ?>
 --EXPECT--
 string(60) "<?php // tar-based phar archive stub file

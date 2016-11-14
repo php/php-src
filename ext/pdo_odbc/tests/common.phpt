@@ -46,7 +46,7 @@ if (false !== getenv('PDOTEST_DSN')) {
 	// on Windows and user didn't set PDOTEST_DSN, try this as a fallback:
 	// check if MS Access DB is installed, and if yes, try using it. create a temporary MS access database.
 	//
-	$path = realpath(dirname(__FILE__)) . '\pdo_odbc.mdb';
+	$path = realpath(__DIR__) . '\pdo_odbc.mdb';
 	if (!file_exists($path)) {
 		try {
 			// try to create database

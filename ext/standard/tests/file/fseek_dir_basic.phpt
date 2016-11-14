@@ -4,9 +4,9 @@ Testing fseek() on a directory stream
 <?php
 
 // include the file.inc for Function: function create_files()
-require(dirname(__FILE__) . '/file.inc');
+require(__DIR__ . '/file.inc');
 
-$path = dirname(__FILE__) . '/fseek_dir_basic';
+$path = __DIR__ . '/fseek_dir_basic';
 mkdir($path);
 create_files($path, 3);
 

@@ -11,7 +11,7 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 
 echo "*** Testing error conditions ***\n";
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 include($file_path."/file.inc");
 
 echo "\n-- Testing with  Non-existing file --\n";
@@ -37,7 +37,7 @@ echo "\n*** Done ***\n";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 if(file_exists($file_path."/file_put_contents_error.tmp")) {
   unlink($file_path."/file_put_contents_error.tmp");
 }

@@ -11,7 +11,7 @@ catch_workers_output = yes seems not reliable
 
 include "include.inc";
 
-$logfile = dirname(__FILE__).'/php-fpm.log.tmp';
+$logfile = __DIR__.'/php-fpm.log.tmp';
 $port1 = 9000+PHP_INT_SIZE;
 $port2 = 9001+PHP_INT_SIZE;
 
@@ -86,6 +86,6 @@ Error 2
 Done
 --CLEAN--
 <?php
-	$logfile = dirname(__FILE__).'/php-fpm.log.tmp';
+	$logfile = __DIR__.'/php-fpm.log.tmp';
 	@unlink($logfile);
 ?>

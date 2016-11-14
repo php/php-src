@@ -60,7 +60,7 @@ $args_array = array(
 );
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/vfprintf_variation8.txt';
+$data_file = __DIR__ . '/vfprintf_variation8.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
 

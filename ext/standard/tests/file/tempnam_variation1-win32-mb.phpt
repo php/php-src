@@ -13,7 +13,7 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 
 /* Creating number of unique files by passing a file name as prefix */
 
-$file_path = dirname(__FILE__)."/tempnamVar1_私はガラスを食べられます";
+$file_path = __DIR__."/tempnamVar1_私はガラスを食べられます";
 mkdir($file_path);
 
 echo "*** Testing tempnam() in creation of unique files ***\n";

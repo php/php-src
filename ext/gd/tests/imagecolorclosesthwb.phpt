@@ -7,7 +7,7 @@ imagecolorclosesthwb() test
 ?>
 --FILE--
 <?php
-	$im = imagecreatefrompng(dirname(__FILE__).'/test.png');
+	$im = imagecreatefrompng(__DIR__.'/test.png');
 
 	var_dump(imagecolorclosesthwb($im, 255, 50, 0));
 

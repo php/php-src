@@ -5,7 +5,7 @@ oci_define_by_name() on partial number of columns
 --FILE--
 <?php
 
-require(dirname(__FILE__)."/connect.inc");
+require(__DIR__."/connect.inc");
 
 // Initialize
 

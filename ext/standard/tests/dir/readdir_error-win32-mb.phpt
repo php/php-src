@@ -23,7 +23,7 @@ echo "*** Testing readdir() : error conditions ***\n";
 //Test readdir with one more than the expected number of arguments
 echo "\n-- Testing readdir() function with more than expected no. of arguments --\n";
 
-$path = dirname(__FILE__) . "/私はガラスを食べられますreaddir_error";
+$path = __DIR__ . "/私はガラスを食べられますreaddir_error";
 mkdir($path);
 $dir_handle = opendir($path);
 $extra_arg = 10;
@@ -36,7 +36,7 @@ closedir($dir_handle);
 ===DONE===
 --CLEAN--
 <?php
-$path = dirname(__FILE__) . "/私はガラスを食べられますreaddir_error";
+$path = __DIR__ . "/私はガラスを食べられますreaddir_error";
 rmdir($path);
 ?> 
 --EXPECTF--

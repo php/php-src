@@ -6,7 +6,7 @@ Phar: PharFileInfo::setMetadata/delMetadata extra code coverage
 phar.readonly=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar';
 $pname = 'phar://' . $fname;
 
 $phar = new Phar($fname);
@@ -41,8 +41,8 @@ $b->setMetadata(1,2,3);
 ?>
 ===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar'); ?>
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar'); ?>
 --EXPECTF--
 Phar entry is a temporary directory (not an actual entry in the archive), cannot set metadata
 Phar entry is a temporary directory (not an actual entry in the archive), cannot delete metadata

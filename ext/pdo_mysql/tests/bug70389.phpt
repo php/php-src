@@ -2,13 +2,13 @@
 Bug #70389 (PDO constructor changes unrelated variables)
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
-require(dirname(__FILE__). DIRECTORY_SEPARATOR . 'config.inc');
+require(__DIR__. DIRECTORY_SEPARATOR . 'config.inc');
 $flags = [
 	PDO::MYSQL_ATTR_FOUND_ROWS	=> true,
 	PDO::MYSQL_ATTR_LOCAL_INFILE	=> true,

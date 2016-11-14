@@ -8,7 +8,7 @@ Test fflush() function: error conditions
 */
 
 echo "*** Testing error conditions ***\n";
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 // zero argument
 echo "-- Testing fflush(): with zero argument --\n";
@@ -46,7 +46,7 @@ echo "\n*** Done ***";
 
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink("$file_path/fflush_error.tmp");
 ?>
 

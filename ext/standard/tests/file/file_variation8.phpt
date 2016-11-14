@@ -13,13 +13,13 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 echo "*** Testing file() : variation ***\n";
 $mainDir = "fileVar8.dir";
 $subDir = "fileVar8Sub";
-$absMainDir = dirname(__FILE__)."/".$mainDir;
+$absMainDir = __DIR__."/".$mainDir;
 mkdir($absMainDir);
 $absSubDir = $absMainDir."/".$subDir;
 mkdir($absSubDir);
 
 $old_dir_path = getcwd();
-chdir(dirname(__FILE__));
+chdir(__DIR__);
 
 $allDirs = array(
   // absolute paths

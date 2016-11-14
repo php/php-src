@@ -10,7 +10,7 @@ ZE2 Autoload and get_class_methods
 
 function __autoload($class_name)
 {
-	require_once(dirname(__FILE__) . '/' . $class_name . '.p5c');
+	require_once(__DIR__ . '/' . $class_name . '.p5c');
 	echo __FUNCTION__ . '(' . $class_name . ")\n";
 }
 

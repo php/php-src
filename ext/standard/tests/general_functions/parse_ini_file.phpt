@@ -5,7 +5,7 @@ parse_ini_file() multiple calls
 --FILE--
 <?php
 
-$filename = dirname(__FILE__)."/parse_ini_file.dat";
+$filename = __DIR__."/parse_ini_file.dat";
 @unlink($filename); /* Make sure the file really does not exist! */
 
 var_dump(parse_ini_file());

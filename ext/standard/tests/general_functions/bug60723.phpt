@@ -5,7 +5,7 @@ date.timezone=ASIA/Chongqing
 log_errors=On
 --FILE--
 <?php
-$dir = dirname(__FILE__);
+$dir = __DIR__;
 $log = $dir . "/tmp.err";
 ini_set("error_log", $log);
 echo $aa;

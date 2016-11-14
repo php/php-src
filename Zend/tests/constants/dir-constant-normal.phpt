@@ -3,7 +3,7 @@ Standard behaviour of __DIR__
 --FILE--
 <?php
 echo __DIR__ . "\n";
-echo dirname(__FILE__) . "\n";
+echo __DIR__ . "\n";
 ?>
 --EXPECTF--
 %stests%sconstants

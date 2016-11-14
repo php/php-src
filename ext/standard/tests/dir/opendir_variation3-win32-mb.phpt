@@ -19,7 +19,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 
 echo "*** Testing opendir() : usage variation ***\n";
 
-$path = dirname(__FILE__) . "/私はガラスを食べられますopendir_variation3";
+$path = __DIR__ . "/私はガラスを食べられますopendir_variation3";
 mkdir($path);
 
 echo "\n-- Open directory first time: --\n";
@@ -40,7 +40,7 @@ closedir($dh2);
 ===DONE===
 --CLEAN--
 <?php
-$path = dirname(__FILE__) . "/私はガラスを食べられますopendir_variation3";
+$path = __DIR__ . "/私はガラスを食べられますopendir_variation3";
 rmdir($path);
 ?>
 --EXPECTF--

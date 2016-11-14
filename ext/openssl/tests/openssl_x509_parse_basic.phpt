@@ -6,7 +6,7 @@ if (OPENSSL_VERSION_NUMBER < 0x10000000) die("skip Output requires OpenSSL 1.0")
 ?>
 --FILE--
 <?php
-$cert = "file://" . dirname(__FILE__) . "/cert.crt";
+$cert = "file://" . __DIR__ . "/cert.crt";
 
 var_dump(openssl_x509_parse($cert));
 var_dump(openssl_x509_parse($cert, false));

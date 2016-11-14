@@ -19,7 +19,7 @@ var_dump( scandir() );
 
 //Test scandir with one more than the expected number of arguments
 echo "\n-- Testing scandir() function with more than expected no. of arguments --\n";
-$dir = dirname(__FILE__) . '/scandir_error';
+$dir = __DIR__ . '/scandir_error';
 mkdir($dir);
 $sorting_order = 10;
 $context = stream_context_create();
@@ -29,7 +29,7 @@ var_dump( scandir($dir, $sorting_order, $context, $extra_arg) );
 ===DONE===
 --CLEAN--
 <?php
-$directory = dirname(__FILE__) . '/scandir_error';
+$directory = __DIR__ . '/scandir_error';
 rmdir($directory);
 ?>
 --EXPECTF--

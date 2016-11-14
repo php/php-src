@@ -12,7 +12,7 @@ zlib.output_compression=0
   test2.jpg is the same image but contains Exif/Comment information and a
             copy of test1.jpg as a thumbnail.
 */
-var_dump(exif_read_data(dirname(__FILE__).'/test2.jpg','',true,false));
+var_dump(exif_read_data(__DIR__.'/test2.jpg','',true,false));
 ?>
 --EXPECTF--
 array(5) {

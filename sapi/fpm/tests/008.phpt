@@ -22,7 +22,7 @@ if (test_fpm_conf($cfg, $msg) == false) {
 
 include "include.inc";
 
-$logfile = dirname(__FILE__).'/php-fpm.log.tmp';
+$logfile = __DIR__.'/php-fpm.log.tmp';
 $port1 = 9000+PHP_INT_SIZE;
 $port2 = 9001+PHP_INT_SIZE;
 $port3 = 9002+PHP_INT_SIZE;
@@ -94,6 +94,6 @@ int(%d)
 Static ok
 --CLEAN--
 <?php
-    $logfile = dirname(__FILE__).'/php-fpm.log.tmp';
+    $logfile = __DIR__.'/php-fpm.log.tmp';
     @unlink($logfile);
 ?>

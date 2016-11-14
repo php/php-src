@@ -7,8 +7,8 @@ FPM: Test Unix Domain Socket
 
 include "include.inc";
 
-$logfile = dirname(__FILE__).'/php-fpm.log.tmp';
-$socket  = dirname(__FILE__).'/php-fpm.sock';
+$logfile = __DIR__.'/php-fpm.log.tmp';
+$socket  = __DIR__.'/php-fpm.sock';
 
 $cfg = <<<EOT
 [global]
@@ -48,6 +48,6 @@ int(%d)
 UDS ok
 --CLEAN--
 <?php
-    $logfile = dirname(__FILE__).'/php-fpm.log.tmp';
+    $logfile = __DIR__.'/php-fpm.log.tmp';
     @unlink($logfile);
 ?>

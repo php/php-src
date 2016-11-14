@@ -8,7 +8,7 @@ if(!extension_loaded('zip')) die('skip');
 --FILE--
 <?php
 $filename = 'MYLOGOV2.GFX';
-$zipname = dirname(__FILE__) . "/pecl12414.zip";
+$zipname = __DIR__ . "/pecl12414.zip";
 $za = new ZipArchive();
 $res =$za->open($zipname);
 if ($res === TRUE) {

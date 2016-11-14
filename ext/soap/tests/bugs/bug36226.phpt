@@ -8,7 +8,7 @@ soap.wsdl_cache_enabled=0
 <?php
 ini_set("soap.wsdl_cache_enabled",0);
 $timestamp = "2005-11-08T11:22:07+03:00";
-$wsdl = dirname(__FILE__)."/bug35142.wsdl";
+$wsdl = __DIR__."/bug35142.wsdl";
 
 function PostEvents($x) {
 	var_dump($x);

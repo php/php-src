@@ -13,9 +13,9 @@ phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/phar_gzip.phar';
+$fname = __DIR__ . '/phar_gzip.phar';
 $pname = 'phar://' . $fname;
-$fname2 = dirname(__FILE__) . '/phar_gzip.2.phar';
+$fname2 = __DIR__ . '/phar_gzip.2.phar';
 $pname2 = 'phar://' . $fname2;
 
 $file = '<?php
@@ -46,8 +46,8 @@ var_dump($b->isCompressed() == Phar::GZ);
 ===DONE===
 --CLEAN--
 <?php
-@unlink(dirname(__FILE__) . '/phar_gzip.phar');
-@unlink(dirname(__FILE__) . '/phar_gzip.2.phar');
+@unlink(__DIR__ . '/phar_gzip.phar');
+@unlink(__DIR__ . '/phar_gzip.2.phar');
 ?>
 --EXPECTF--
 unicode(9) "it worked"

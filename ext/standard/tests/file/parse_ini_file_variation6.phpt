@@ -13,13 +13,13 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 echo "*** Testing parse_ini_file() : variation ***\n";
 $mainDir = "parseIniFileVar6.dir";
 $subDir = "parseIniFileVar6Sub";
-$absMainDir = dirname(__FILE__)."/".$mainDir;
+$absMainDir = __DIR__."/".$mainDir;
 mkdir($absMainDir);
 $absSubDir = $absMainDir."/".$subDir;
 mkdir($absSubDir);
 
 $old_dir_path = getcwd();
-chdir(dirname(__FILE__));
+chdir(__DIR__);
 
 $allDirs = array(
   // absolute paths
