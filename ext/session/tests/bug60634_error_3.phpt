@@ -49,4 +49,4 @@ Stack trace:
 #1 {main}
   thrown in %s on line %d
 
-Warning: Unknown: Cannot call save handler function recursive manner in Unknown on line 0
+Warning: Unknown: Cannot call session save handler in a recursive manner in Unknown on line 0
