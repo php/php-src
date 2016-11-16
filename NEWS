@@ -60,6 +60,9 @@ PHP                                                                        NEWS
     (Adam Baratz)
   . Fixed bug #73396 (bigint columns are returned as strings). (Adam Baratz)
 
+- Session:
+  . Fixed bug #73461 (Prohibit session save handler recursion) . (yohgaki)
+
 - SOAP:
   . Fixed bug #69137 (Peer verification fails when using a proxy with SoapClient)
     (Keith Smiley)
