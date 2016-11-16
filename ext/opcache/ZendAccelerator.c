@@ -2105,18 +2105,16 @@ static void accel_activate(void)
 		if (stat("/", &buf) != 0) {
 			ZCG(root_hash) = 0;
 		} else {
-			zend_ulong x = buf.st_ino;
-
-#if SIZEOF_ZEND_LONG == 4
-			x = ((x >> 16) ^ x) * 0x45d9f3b;
-			x = ((x >> 16) ^ x) * 0x45d9f3b;
-			x = (x >> 16) ^ x;
-#elif SIZEOF_ZEND_LONG == 8
-			x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9;
-			x = (x ^ (x >> 27)) * 0x94d049bb133111eb;
-			x = x ^ (x >> 31);
-#endif
-			ZCG(root_hash) = x;
+			ZCG(root_hash) = buf.st_ino;
+			if (sizeof(buf.st_ino) > sizeof(ZCG(root_hash))) {
+				if (ZCG(root_hash) != buf.st_ino) {
+					zend_string *key = zend_string_init("opcache.enable", sizeof("opcache.enable")-1, 0);
+					zend_alter_ini_entry_chars(key, "0", 1, ZEND_INI_SYSTEM, ZEND_INI_STAGE_RUNTIME);
+					zend_string_release(key);
+					zend_accel_error(ACCEL_LOG_WARNING, "Can't cache files in chroot() directory with too big inode");
+					return;
+				}
+			}
 		}
 	} else {
 		ZCG(root_hash) = 0;
