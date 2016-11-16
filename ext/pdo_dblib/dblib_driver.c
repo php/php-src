@@ -272,11 +272,6 @@ static int dblib_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 static int dblib_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_value)
 {
 	switch (attr) {
-		case PDO_ATTR_EMULATE_PREPARES:
-			/* this is the only option available, but expose it so common tests and whatever else can introspect */
-			ZVAL_TRUE(return_value);
-			break;
-
 		case PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER:
 			ZVAL_BOOL(return_value, ((pdo_dblib_db_handle *)dbh->driver_data)->stringify_uniqueidentifier);
 			break;
