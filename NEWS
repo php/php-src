@@ -8,6 +8,9 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug #69587 (DateInterval properties and isset). (jhdxr)
 
+- Session:
+  . Fixed bug #73461 (Prohibit session save handler recursion) . (yohgaki)
+
 - SQLite3:
   . Update to SQLite 3.15.1. (cmb)
 
