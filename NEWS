@@ -8,6 +8,9 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug #69587 (DateInterval properties and isset). (jhdxr)
 
+- Mbstring:
+  . Fixed bug #73532 (Null pointer dereference in mb_eregi). (Laruence)
+
 - SQLite3:
   . Update to SQLite 3.15.1. (cmb)
 
