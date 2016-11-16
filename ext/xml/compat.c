@@ -593,10 +593,12 @@ has been defined and none can be detected */
 	}
 #endif
 
+	if (parser->parser->lastError.level >= XML_ERR_WARNING) {
+		return 0;
+	}
+
 	error = xmlParseChunk(parser->parser, (char *) data, data_len, is_final);
-	if (!error) {
-		return 1;
-	} else if (parser->parser->lastError.level > XML_ERR_WARNING ){
+	if (error) {
 		return 0;
 	} else {
 		return 1;

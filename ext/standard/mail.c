@@ -52,11 +52,6 @@
 #include "win32/sendmail.h"
 #endif
 
-#ifdef NETWARE
-#define EX_OK           0       /* successful termination */
-#define EX_TEMPFAIL     75      /* temp failure; user is invited to retry */
-#endif
-
 #define SKIP_LONG_HEADER_SEP(str, pos)																	\
 	if (str[pos] == '\r' && str[pos + 1] == '\n' && (str[pos + 2] == ' ' || str[pos + 2] == '\t')) {	\
 		pos += 2;																						\
@@ -468,7 +463,7 @@ static int php_mail_detect_multiple_crlf(char *hdr) {
  */
 PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char *extra_cmd)
 {
-#if (defined PHP_WIN32 || defined NETWARE)
+#ifdef PHP_WIN32 
 	int tsm_err;
 	char *tsm_errmsg = NULL;
 #endif
@@ -539,7 +534,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	}
 
 	if (!sendmail_path) {
-#if (defined PHP_WIN32 || defined NETWARE)
+#ifdef PHP_WIN32
 		/* handle old style win smtp sending */
 		if (TSendMail(INI_STR("SMTP"), &tsm_err, &tsm_errmsg, hdr, subject, to, message, NULL, NULL, NULL) == FAILURE) {
 			if (tsm_errmsg) {

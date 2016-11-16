@@ -24,6 +24,17 @@ PHP 7.2 UPGRADE NOTES
     closed resources.
   . is_object() will now return true for objects of class
     __PHP_Incomplete_Class.
+  . Support for Netware operating systems have been removed.
+  . Casting arrays to objects (with (object) or settype()) will now covert
+    integer keys to string property names. This fixes the behaviour of previous
+    versions, where integer keys would become inaccessible properties with
+    integer names.
+  . Casting objects to arrays (with (array) or settype()), and retrieving
+    object properties in an array with get_object_vars(), will now convert
+    numeric string property names (that is, property names of the format
+    /^(0|(-?[1-9][0-9]*))$/ where PHP_INT_MIN <= n <= PHP_INT_MAX) to integer
+    keys. This fixes the behaviour of previous versions, where numeric string
+    property names would become inaccessible string keys.
 
 - Session:
   . Session is made to manage session status corretly and prevents invalid operations.
@@ -74,6 +85,10 @@ PHP 7.2 UPGRADE NOTES
 ========================================
 4. Deprecated Functionality
 ========================================
+
+- GD:
+  . png2wbmp() and jpeg2wbmp() have been deprecated, and will be removed as of
+    PHP 8.0.0.
 
 ========================================
 5. Changed Functions

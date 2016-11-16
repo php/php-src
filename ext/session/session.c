@@ -112,6 +112,7 @@ static inline void php_rinit_session_globals(void) /* {{{ */
 	/* TODO: These could be moved to MINIT and removed. These should be initialized by php_rshutdown_session_globals() always when execution is finished. */
 	PS(id) = NULL;
 	PS(session_status) = php_session_none;
+	PS(in_save_handler) = 0;
 	PS(mod_data) = NULL;
 	PS(mod_user_is_open) = 0;
 	PS(define_sid) = 1;
@@ -2201,7 +2202,7 @@ static PHP_FUNCTION(session_create_id)
 		}
 	}
 
-	if (PS(session_status) == php_session_active) {
+	if (!PS(in_save_handler) && PS(session_status) == php_session_active) {
 		int limit = 3;
 		while (limit--) {
 			new_id = PS(mod)->s_create_sid(&PS(mod_data));
@@ -2801,9 +2802,11 @@ static PHP_RSHUTDOWN_FUNCTION(session) /* {{{ */
 {
 	int i;
 
-	zend_try {
-		php_session_flush(1);
-	} zend_end_try();
+	if (PS(session_status) == php_session_active) {
+		zend_try {
+			php_session_flush(1);
+		} zend_end_try();
+	}
 	php_rshutdown_session_globals();
 
 	/* this should NOT be done in php_rshutdown_session_globals() */

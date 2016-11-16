@@ -66,12 +66,6 @@
 #	define PHP_EOL "\n"
 #endif
 
-#ifdef NETWARE
-/* For php_get_uname() function */
-#define PHP_UNAME  "NetWare"
-#define PHP_OS      PHP_UNAME
-#endif
-
 #if HAVE_ASSERT_H
 #if PHP_DEBUG
 #undef NDEBUG

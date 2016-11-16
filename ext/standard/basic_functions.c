@@ -62,10 +62,6 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #include <sys/stat.h>
 #endif
 
-#ifdef NETWARE
-#include <netinet/in.h>
-#endif
-
 #ifndef PHP_WIN32
 # include <netdb.h>
 #else
@@ -965,7 +961,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_gethostname, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !(defined(__BEOS__) || defined(NETWARE)))
+#if defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !defined(__BEOS__))
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dns_check_record, 0, 0, 1)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, type)
@@ -987,7 +983,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_dns_get_mx, 0, 0, 2)
 ZEND_END_ARG_INFO()
 # endif
 
-#endif /* defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !(defined(__BEOS__) || defined(NETWARE))) */
+#endif /* defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !defined(__BEOS__)) */
 /* }}} */
 
 /* {{{ exec.c */
@@ -1206,7 +1202,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_fgetcsv, 0, 0, 1)
 	ZEND_ARG_INFO(0, escape)
 ZEND_END_ARG_INFO()
 
-#if (!defined(__BEOS__) && !defined(NETWARE) && HAVE_REALPATH) || defined(ZTS)
+#if (!defined(__BEOS__) && HAVE_REALPATH) || defined(ZTS)
 ZEND_BEGIN_ARG_INFO(arginfo_realpath, 0)
 	ZEND_ARG_INFO(0, path)
 ZEND_END_ARG_INFO()
@@ -1232,7 +1228,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_disk_free_space, 0)
 	ZEND_ARG_INFO(0, path)
 ZEND_END_ARG_INFO()
 
-#ifndef NETWARE
 ZEND_BEGIN_ARG_INFO(arginfo_chgrp, 0)
 	ZEND_ARG_INFO(0, filename)
 	ZEND_ARG_INFO(0, group)
@@ -1242,7 +1237,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_chown, 0)
 	ZEND_ARG_INFO(0, filename)
 	ZEND_ARG_INFO(0, user)
 ZEND_END_ARG_INFO()
-#endif
 
 #if HAVE_LCHOWN
 ZEND_BEGIN_ARG_INFO(arginfo_lchgrp, 0)
@@ -3063,7 +3057,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(gethostname,													arginfo_gethostname)
 #endif
 
-#if defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !(defined(__BEOS__) || defined(NETWARE)))
+#if defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !defined(__BEOS__))
 
 	PHP_FE(dns_check_record,												arginfo_dns_check_record)
 	PHP_FALIAS(checkdnsrr,			dns_check_record,						arginfo_dns_check_record)
@@ -3192,7 +3186,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 
 	PHP_FALIAS(socket_get_status, stream_get_meta_data,						arginfo_stream_get_meta_data)
 
-#if (!defined(__BEOS__) && !defined(NETWARE) && HAVE_REALPATH) || defined(ZTS)
+#if (!defined(__BEOS__) && HAVE_REALPATH) || defined(ZTS)
 	PHP_FE(realpath,														arginfo_realpath)
 #endif
 
@@ -3251,10 +3245,8 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(is_link,															arginfo_is_link)
 	PHP_NAMED_FE(stat,				php_if_stat,							arginfo_stat)
 	PHP_NAMED_FE(lstat,				php_if_lstat,							arginfo_lstat)
-#ifndef NETWARE
 	PHP_FE(chown,															arginfo_chown)
 	PHP_FE(chgrp,															arginfo_chgrp)
-#endif
 #if HAVE_LCHOWN
 	PHP_FE(lchown,															arginfo_lchown)
 #endif
@@ -3705,7 +3697,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	php_register_url_stream_wrapper("http", &php_stream_http_wrapper);
 	php_register_url_stream_wrapper("ftp", &php_stream_ftp_wrapper);
 
-#if defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !(defined(__BEOS__) || defined(NETWARE)))
+#if defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !defined(__BEOS__))
 # if defined(PHP_WIN32) || HAVE_FULL_DNS_FUNCS
 	BASIC_MINIT_SUBMODULE(dns)
 # endif

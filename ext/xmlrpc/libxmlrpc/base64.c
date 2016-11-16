@@ -32,6 +32,9 @@ void buffer_new(struct buffer_st *b)
 
 void buffer_add(struct buffer_st *b, char c)
 {
+  if ((INT_MAX - b->length) <= 512) {
+		return;
+  }
   *(b->ptr++) = c;
   b->offset++;
   if (b->offset == b->length) {
@@ -80,7 +83,7 @@ void base64_encode_xmlrpc(struct buffer_st *b, const char *source, int length)
     for (n = 0; n < 3; n++) {
       c = *(source++);
       offset++;
-      if (offset > length) {
+      if (offset > length || offset <= 0) {
 	hiteof = 1;
 	break;
       }

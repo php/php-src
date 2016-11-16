@@ -76,6 +76,9 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 					case ZEND_FE_RESET_R:
 					case ZEND_SEND_VAR:
 					case ZEND_CAST:
+					case ZEND_QM_ASSIGN:
+					case ZEND_JMP_SET:
+					case ZEND_COALESCE:
 						if (build_flags & ZEND_SSA_RC_INFERENCE) {
 							goto op1_def;
 						}

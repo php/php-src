@@ -31,11 +31,7 @@
 #include <fcntl.h>
 
 #include "zend_smart_str.h"
-#ifndef NETWARE
 #include "ext/standard/php_standard.h"
-#else
-#include "ext/standard/basic_functions.h"
-#endif
 
 #include "apr_strings.h"
 #include "ap_config.h"
@@ -53,9 +49,9 @@
 
 #include "php_apache.h"
 
-/* UnixWare and Netware define shutdown to _shutdown, which causes problems later
+/* UnixWare define shutdown to _shutdown, which causes problems later
  * on when using a structure member named shutdown. Since this source
- * file does not use the system call shutdown, it is safe to #undef it.K
+ * file does not use the system call shutdown, it is safe to #undef it.
  */
 #undef shutdown
 
@@ -223,16 +219,9 @@ php_apache_sapi_get_stat(void)
 #endif
 	ctx->finfo.st_dev = ctx->r->finfo.device;
 	ctx->finfo.st_ino = ctx->r->finfo.inode;
-#if defined(NETWARE) && defined(CLIB_STAT_PATCH)
-	ctx->finfo.st_atime.tv_sec = apr_time_sec(ctx->r->finfo.atime);
-	ctx->finfo.st_mtime.tv_sec = apr_time_sec(ctx->r->finfo.mtime);
-	ctx->finfo.st_ctime.tv_sec = apr_time_sec(ctx->r->finfo.ctime);
-#else
 	ctx->finfo.st_atime = apr_time_sec(ctx->r->finfo.atime);
 	ctx->finfo.st_mtime = apr_time_sec(ctx->r->finfo.mtime);
 	ctx->finfo.st_ctime = apr_time_sec(ctx->r->finfo.ctime);
-#endif
-
 	ctx->finfo.st_size = ctx->r->finfo.size;
 	ctx->finfo.st_nlink = ctx->r->finfo.nlink;
 

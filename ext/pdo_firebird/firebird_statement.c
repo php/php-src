@@ -413,6 +413,7 @@ static int firebird_bind_blob(pdo_stmt_t *stmt, ISC_QUAD *blob_id, zval *param)
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	pdo_firebird_db_handle *H = S->H;
 	isc_blob_handle h = PDO_FIREBIRD_HANDLE_INITIALIZER;
+	zval data;
 	zend_ulong put_cnt = 0, rem_cnt;
 	unsigned short chunk_size;
 	int result = 1;
@@ -422,14 +423,16 @@ static int firebird_bind_blob(pdo_stmt_t *stmt, ISC_QUAD *blob_id, zval *param)
 		return 0;
 	}
 
-	SEPARATE_ZVAL(param);
-	convert_to_string_ex(param);
+	data = *param;
 
-	for (rem_cnt = Z_STRLEN_P(param); rem_cnt > 0; rem_cnt -= chunk_size)  {
+	if (Z_TYPE_P(param) != IS_STRING) {
+		zval_copy_ctor(&data);
+		convert_to_string(&data);
+	}
 
+	for (rem_cnt = Z_STRLEN(data); rem_cnt > 0; rem_cnt -= chunk_size) {
 		chunk_size = rem_cnt > USHRT_MAX ? USHRT_MAX : (unsigned short)rem_cnt;
-
-		if (isc_put_segment(H->isc_status, &h, chunk_size, &Z_STRVAL_P(param)[put_cnt])) {
+		if (isc_put_segment(H->isc_status, &h, chunk_size, &Z_STRVAL(data)[put_cnt])) {
 			RECORD_ERROR(stmt);
 			result = 0;
 			break;
@@ -437,7 +440,9 @@ static int firebird_bind_blob(pdo_stmt_t *stmt, ISC_QUAD *blob_id, zval *param)
 		put_cnt += chunk_size;
 	}
 
-	zval_dtor(param);
+	if (Z_TYPE_P(param) != IS_STRING) {
+		zval_dtor(&data);
+	}
 
 	if (isc_close_blob(H->isc_status, &h)) {
 		RECORD_ERROR(stmt);
@@ -542,8 +547,19 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 					S->H->last_app_error = "Cannot bind to array field";
 					return 0;
 
-				case SQL_BLOB:
+				case SQL_BLOB: {
+					if (Z_TYPE_P(parameter) == IS_NULL) {
+						/* Check if field allow NULL values */
+						if (~var->sqltype & 1) {
+							strcpy(stmt->error_code, "HY105");
+							S->H->last_app_error = "Parameter requires non-null value";
+							return 0;
+						}
+						*var->sqlind = -1;
+						return 1;
+					}
 					return firebird_bind_blob(stmt, (ISC_QUAD*)var->sqldata, parameter);
+				}
 			}
 
 			/* check if a NULL should be inserted */

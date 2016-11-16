@@ -59,7 +59,7 @@ PHP_FUNCTION(gethostbynamel);
 PHP_FUNCTION(gethostname);
 #endif
 
-#if defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !(defined(__BEOS__) || defined(NETWARE)))
+#if defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !defined(__BEOS__))
 PHP_FUNCTION(dns_check_record);
 
 # if defined(PHP_WIN32) || HAVE_FULL_DNS_FUNCS
@@ -68,7 +68,7 @@ PHP_FUNCTION(dns_get_record);
 PHP_MINIT_FUNCTION(dns);
 # endif
 
-#endif /* defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !(defined(__BEOS__) || defined(NETWARE))) */
+#endif /* defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !defined(__BEOS__)) */
 
 #ifndef INT16SZ
 #define INT16SZ		2
