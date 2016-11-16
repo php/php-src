@@ -182,6 +182,7 @@ typedef struct _php_ps_globals {
 	} mod_user_names;
 	int mod_user_implemented;
 	int mod_user_is_open;
+	int mod_user_internal;
 	const struct ps_serializer_struct *serializer;
 	zval http_session_vars;
 	zend_bool auto_start;

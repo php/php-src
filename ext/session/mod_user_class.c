@@ -29,6 +29,10 @@
 	if (PS(default_mod) == NULL) {				\
 		php_error_docref(NULL, E_CORE_ERROR, "Cannot call default session handler"); \
 		RETURN_FALSE;						\
+	} \
+	if (!PS(mod_user_internal)) { \
+		php_error_docref(NULL, E_CORE_ERROR, "Cannot call session handler from user script"); \
+		RETURN_FALSE;						\
 	}
 
 #define PS_SANITY_CHECK_IS_OPEN				\
