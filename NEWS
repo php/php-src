@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug #73402 (Opcache segfault when using class constant to call a
     method). (Laruence)
+  . Fixed bug #69090 (check cached files permissions)
 
 - OpenSSL
   . Fixed bug #72776 (Invalid parameter in memcpy function trough

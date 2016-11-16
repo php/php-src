@@ -230,6 +230,8 @@ typedef struct _zend_accel_directives {
 	zend_bool      file_override_enabled;
 	zend_bool      inherited_hack;
 	zend_bool      enable_cli;
+	zend_bool      validate_permission;
+	zend_bool      validate_root;
 	unsigned long  revalidate_freq;
 	unsigned long  file_update_protection;
 	char          *error_log;
@@ -264,6 +266,9 @@ typedef struct _zend_accel_globals {
 	int                     include_path_len; /* "include_path" string length */
 	int                     include_path_check;
 	time_t                  request_time;
+#ifndef ZEND_WIN32
+	unsigned long           root_hash;
+#endif
 	/* preallocated shared-memory block to save current script */
 	void                   *mem;
 	/* cache to save hash lookup on the same INCLUDE opcode */
