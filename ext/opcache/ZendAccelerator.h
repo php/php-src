@@ -203,7 +203,9 @@ typedef struct _zend_accel_directives {
 	zend_bool      inherited_hack;
 	zend_bool      enable_cli;
 	zend_bool      validate_permission;
+#ifndef ZEND_WIN32
 	zend_bool      validate_root;
+#endif
 	zend_ulong     revalidate_freq;
 	zend_ulong     file_update_protection;
 	char          *error_log;
