@@ -86,6 +86,9 @@ zend_accel_hash_entry* zend_accel_hash_update(zend_accel_hash *accel_hash, char 
 	}
 
 	hash_value = zend_inline_hash_func(key, key_length);
+#ifndef ZEND_WIN32
+	hash_value ^= ZCG(root_hash);
+#endif
 	index = hash_value % accel_hash->max_num_entries;
 
 	/* try to see if the element already exists in the hash */
@@ -139,9 +142,15 @@ zend_accel_hash_entry* zend_accel_hash_update(zend_accel_hash *accel_hash, char 
 
 static zend_always_inline void* zend_accel_hash_find_ex(zend_accel_hash *accel_hash, char *key, uint32_t key_length, zend_ulong hash_value, int data)
 {
-	zend_ulong index = hash_value % accel_hash->max_num_entries;
-	zend_accel_hash_entry *entry = accel_hash->hash_table[index];
+	zend_ulong index;
+	zend_accel_hash_entry *entry;
 
+#ifndef ZEND_WIN32
+	hash_value ^= ZCG(root_hash);
+#endif
+	index = hash_value % accel_hash->max_num_entries;
+
+	entry = accel_hash->hash_table[index];
 	while (entry) {
 		if (entry->hash_value == hash_value
 			&& entry->key_length == key_length
@@ -224,6 +233,9 @@ int zend_accel_hash_unlink(zend_accel_hash *accel_hash, char *key, uint32_t key_
     zend_accel_hash_entry *entry, *last_entry=NULL;
 
 	hash_value = zend_inline_hash_func(key, key_length);
+#ifndef ZEND_WIN32
+	hash_value ^= ZCG(root_hash);
+#endif
 	index = hash_value % accel_hash->max_num_entries;
 
 	entry = accel_hash->hash_table[index];

@@ -11,6 +11,9 @@ PHP                                                                        NEWS
 - Mbstring:
   . Fixed bug #73532 (Null pointer dereference in mb_eregi). (Laruence)
 
+- Opcache:
+  . Fixed bug #69090 (check cached files permissions)
+
 - SQLite3:
   . Update to SQLite 3.15.1. (cmb)
 
