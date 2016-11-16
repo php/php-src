@@ -35,6 +35,10 @@ PHP                                                                        NEWS
   . Fixed bug #73418 (Integer Overflow in "_php_imap_mail" leads to crash).
     (Anatol)
 
+- Interbase:
+  . Fixed bug #73512 (Fails to find firebird headers as don't use fb_config
+    output). (Remi)
+
 - JSON:
   . Introduced encoder struct instead of global which fixes bugs #66025 and
     #73254 related to pretty print indentation. (Jakub Zelenka)
