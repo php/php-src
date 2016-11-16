@@ -1339,7 +1339,7 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 	/* store script structure in the hash table */
 	bucket = zend_accel_hash_update(&ZCSG(hash), ZSTR_VAL(new_persistent_script->full_path), ZSTR_LEN(new_persistent_script->full_path), 0, new_persistent_script);
 	if (bucket) {
-		zend_accel_error(ACCEL_LOG_INFO, "Cached script '%s'", new_persistent_script->full_path);
+		zend_accel_error(ACCEL_LOG_INFO, "Cached script '%s'", ZSTR_VAL(new_persistent_script->full_path));
 		if (key &&
 		    /* key may contain non-persistent PHAR aliases (see issues #115 and #149) */
 		    memcmp(key, "phar://", sizeof("phar://") - 1) != 0 &&
@@ -1806,7 +1806,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		if (checksum != persistent_script->dynamic_members.checksum ) {
 			/* The checksum is wrong */
 			zend_accel_error(ACCEL_LOG_INFO, "Checksum failed for '%s':  expected=0x%0.8X, found=0x%0.8X",
-							 persistent_script->full_path, persistent_script->dynamic_members.checksum, checksum);
+							 ZSTR_VAL(persistent_script->full_path), persistent_script->dynamic_members.checksum, checksum);
 			zend_shared_alloc_lock();
 			if (!persistent_script->corrupted) {
 				persistent_script->corrupted = 1;
