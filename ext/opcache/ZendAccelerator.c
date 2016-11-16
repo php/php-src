@@ -1596,7 +1596,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type T
 	if (EXPECTED(persistent_script != NULL) &&
 	    UNEXPECTED(ZCG(accel_directives).validate_permission) &&
 	    file_handle->type == ZEND_HANDLE_FILENAME &&
-	    UNEXPECTED(access(file_handle->filename, R_OK) != 0)) {
+	    UNEXPECTED(access(persistent_script->full_path, R_OK) != 0)) {
 		if (type == ZEND_REQUIRE) {
 #if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
 			zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename);
