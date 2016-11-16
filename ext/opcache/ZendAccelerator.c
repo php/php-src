@@ -1763,6 +1763,20 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		ZCG(counted) = 1;
 	}
 
+	/* Revalidate acessibility of cached file */
+	if (EXPECTED(persistent_script != NULL) &&
+	    UNEXPECTED(ZCG(accel_directives).validate_permission) &&
+	    file_handle->type == ZEND_HANDLE_FILENAME &&
+	    UNEXPECTED(access(file_handle->filename, R_OK) != 0)) {
+		if (type == ZEND_REQUIRE) {
+			zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename TSRMLS_CC);
+			zend_bailout();
+		} else {
+			zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename TSRMLS_CC);
+		}
+		return NULL;
+	}
+
 	SHM_UNPROTECT();
 
 	/* If script is found then validate_timestamps if option is enabled */
@@ -2067,6 +2081,31 @@ static void accel_activate(void)
 #ifdef HAVE_OPCACHE_FILE_CACHE
 	if (ZCG(accel_directives).file_cache_only) {
 		return;
+	}
+#endif
+
+#ifndef ZEND_WIN32
+	if (ZCG(accel_directives).validate_root) {
+		struct stat buf;
+
+		if (stat("/", &buf) != 0) {
+			ZCG(root_hash) = 0;
+		} else {
+			zend_ulong x = buf.st_ino;
+
+#if SIZEOF_ZEND_LONG == 4
+			x = ((x >> 16) ^ x) * 0x45d9f3b;
+			x = ((x >> 16) ^ x) * 0x45d9f3b;
+			x = (x >> 16) ^ x;
+#elif SIZEOF_ZEND_LONG == 8
+			x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9;
+			x = (x ^ (x >> 27)) * 0x94d049bb133111eb;
+			x = x ^ (x >> 31);
+#endif
+			ZCG(root_hash) = x;
+		}
+	} else {
+		ZCG(root_hash) = 0;
 	}
 #endif
 

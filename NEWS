@@ -16,6 +16,9 @@ PHP                                                                        NEWS
   . Fixed bug #73448 (odbc_errormsg returns trash, always 513 bytes).
     (Anatol)
 
+- Opcache:
+  . Fixed bug #69090 (check cached files permissions)
+
 - PCRE:
   . Fixed bug #73392 (A use-after-free in zend allocator management). 
     (Laruence)
