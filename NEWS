@@ -30,6 +30,9 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #73423 (Reproducible crash with GDB backtrace). (Laruence)
 
+- SQLite3:
+  . Fixed bug #73530 (Unsetting result set may reset other result set). (cmb)
+
 - XML:
   . Fixed bug #72135 (malformed XML causes fault) (edgarsandi)
 
