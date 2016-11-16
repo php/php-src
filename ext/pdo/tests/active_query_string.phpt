@@ -19,6 +19,8 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
 
+$quoted_true = $db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'pgsql' ? "'t'" : '1';
+
 $stmt = $db->query('SELECT 1');
 var_dump($stmt->activeQueryString()); // works with statements without bound values
 
@@ -31,21 +33,28 @@ $stmt->bindValue(':null', null, PDO::PARAM_NULL);
 var_dump($stmt->activeQueryString()); // will return unparsed query before execution
 
 $stmt->execute();
-var_dump($stmt->activeQueryString()); // will return parsed query after execution
-var_dump($stmt->activeQueryString()); // can be called repeatedly
+
+// will return parsed query after execution
+var_dump($stmt->activeQueryString() == "SELECT " . $quoted_true . ", 123, 'foo', NULL");
+// can be called repeatedly
+var_dump($stmt->activeQueryString() == "SELECT " . $quoted_true . ", 123, 'foo', NULL");
 
 $stmt->execute();
-var_dump($stmt->activeQueryString()); // works if the statement is executed again
+
+// works if the statement is executed again
+var_dump($stmt->activeQueryString() == "SELECT " . $quoted_true . ", 123, 'foo', NULL");
 
 $stmt->bindValue(':int', 456, PDO::PARAM_INT);
 $stmt->execute();
-var_dump($stmt->activeQueryString()); // works with altered values
+
+// works with altered values
+var_dump($stmt->activeQueryString() == "SELECT " . $quoted_true . ", 456, 'foo', NULL");
 
 ?>
 --EXPECT--
 string(8) "SELECT 1"
 string(34) "SELECT :bool, :int, :string, :null"
-string(26) "SELECT 1, 123, 'foo', NULL"
-string(26) "SELECT 1, 123, 'foo', NULL"
-string(26) "SELECT 1, 123, 'foo', NULL"
-string(26) "SELECT 1, 456, 'foo', NULL"
+bool(true)
+bool(true)
+bool(true)
+bool(true)
