@@ -1,6 +1,5 @@
 --TEST--
  PDO_DBLIB driver supports using sql servers exceptions
- this test will fail when using the dblib driver that hasn't been patched
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo_dblib')) die('skip not loaded');
@@ -11,18 +10,18 @@ require dirname(__FILE__) . '/config.inc';
 require dirname(__FILE__) . '/config.inc';
 
 $stmt = $db->query(
-"create table #wf_pdo(id int);" .
-"insert into #wf_pdo values(1), (2), (3);" .
-"select * from #wf_pdo;" .
+"create table #php_pdo(id int);" .
+"insert into #php_pdo values(1), (2), (3);" .
+"select * from #php_pdo;" .
 "begin try " .
-"  update #wf_pdo set id = 'f';" .
+"  update #php_pdo set id = 'f';" .
 "end try " .
 "begin catch " .
 "  throw;" .
 "end catch " .
-"select * from #wf_pdo;" .
-"delete from #wf_pdo;" .
-"drop table #wf_pdo;"
+"select * from #php_pdo;" .
+"delete from #php_pdo;" .
+"drop table #php_pdo;"
 );
 
 // check results from the create table
@@ -73,6 +72,8 @@ var_dump($stmt->rowCount());
 var_dump($stmt->nextRowset());
 
 ?>
+--XFAIL--
+ this test will fail when using the dblib driver that hasn't been patched
 --EXPECT--
 int(-1)
 bool(true)
