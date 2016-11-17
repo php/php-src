@@ -122,7 +122,7 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 		if (*(e + 1) == '\0') { /* only scheme is available */
 			ret->scheme = estrndup(s, (e - s));
 			php_replace_controlchars_ex(ret->scheme, (e - s));
-			goto end;
+			return ret;
 		}
 
 		/*
@@ -145,8 +145,7 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 			ret->scheme = estrndup(s, (e-s));
 			php_replace_controlchars_ex(ret->scheme, (e - s));
 
-			length -= ++e - s;
-			s = e;
+			s = e + 1;
 			goto just_path;
 		} else {
 			ret->scheme = estrndup(s, (e-s));
@@ -162,18 +161,12 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 						if (*(e + 5) == ':') {
 							s = e + 4;
 						}
-						goto nohost;
+						goto just_path;
 					}
 				}
 			} else {
-				if (!strncasecmp("file", ret->scheme, sizeof("file"))) {
-					s = e + 1;
-					goto nohost;
-				} else {
-					length -= ++e - s;
-					s = e;
-					goto just_path;
-				}
+				s = e + 1;
+				goto just_path;
 			}
 		}
 	} else if (e) { /* no scheme; starts with colon: look for port */
@@ -212,9 +205,7 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 	} else if (*s == '/' && *(s + 1) == '/') { /* relative-scheme URL */
 		s += 2;
 	} else {
-		just_path:
-		ue = s + length;
-		goto nohost;
+		goto just_path;
 	}
 
 	e = s + strcspn(s, "/?#");
@@ -296,7 +287,7 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 
 	s = e;
 
-	nohost:
+	just_path:
 
 	if ((p = memchr(s, '?', (ue - s)))) {
 		pp = memchr(s, '#', (ue - s));
@@ -343,7 +334,6 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 		ret->path = estrndup(s, (ue-s));
 		php_replace_controlchars_ex(ret->path, (ue - s));
 	}
-end:
 	return ret;
 }
 /* }}} */
