@@ -65,7 +65,7 @@ Starting session again..!
 decoding: a:0:{}
 bool(true)
 encoded: a:0:{}
-NULL
+bool(true)
 Cleanup..
 decoding: a:0:{}
 bool(true)
