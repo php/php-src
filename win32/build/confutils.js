@@ -38,6 +38,11 @@ var CLANGVERS = -1;
 var INTELVERS = -1;
 var COMPILER_NUMERIC_VERSION = -1;
 var COMPILER_NAME = "unknown";
+var PHP_OBJECT_OUT_DIR = "";
+
+var PHP_TEST_INI_PATH = "";
+var PHP_TEST_INI = "";
+var PHP_TEST_INI_EXT_EXCLUDE = "";
 
 var WINVER = "0x0600"; /* Vista */
 
@@ -662,6 +667,60 @@ function find_pattern_in_path(pattern, path)
 	return false;
 }
 
+function copy_dep_pdb_into_build_dir(libpath)
+{
+	var candidate;
+	var build_dir = get_define("BUILD_DIR");
+	var libdir = FSO.GetParentFolderName(libpath);
+	var bindir = FSO.GetAbsolutePathName(libdir + "\\..\\bin");
+
+	var names = [];
+
+	var libname = FSO.GetFileName(libpath);
+
+	/* Within same .lib, everything should be bound to the same .pdb. No check
+		for every single object in the static libs. */
+	var _tmp = execute("dumpbin /section:.debug$T /rawdata:1,256 " + libpath);
+	if (!_tmp.match("LNK4039")) {
+		if (_tmp.match(/\d{2,}:\s+([a-z0-9\s]+)/i)) {
+			var m = RegExp.$1;
+			var a = m.split(/ /);
+			var s = "";
+			for (var i in a) {
+				s = s + String.fromCharCode(parseInt("0x" + a[i]));
+			}
+
+			if (s.match(/([^\\]+\.pdb)/i)) {
+				if (RegExp.$1 != names[0]) {
+					names.push(RegExp.$1);
+				}
+			}
+		}
+	}
+
+	/* This is rather a fallback, if the bin has no debug section or
+		something went wrong with parsing. */
+	names.push(libname.replace(new RegExp("\\.lib$"), ".pdb"));
+
+	for (var k = 0; k < names.length; k++) {
+		var pdbname = names[k];
+
+		candidate = bindir + "\\" + pdbname;
+		if (FSO.FileExists(candidate)) {
+			FSO.CopyFile(candidate, build_dir + "\\" + pdbname, true);
+			return true;
+		}
+
+		candidate = libdir + "\\" + pdbname;
+		if (FSO.FileExists(candidate)) {
+			FSO.CopyFile(candidate, build_dir + "\\" + pdbname, true);
+			return true;
+		}
+	}
+
+	return false;
+}
+
 function CHECK_LIB(libnames, target, path_to_check, common_name)
 {
 	STDOUT.Write("Checking for library " + libnames + " ... ");
@@ -744,6 +803,8 @@ function CHECK_LIB(libnames, target, path_to_check, common_name)
 
 			STDOUT.WriteLine(location);
 
+			copy_dep_pdb_into_build_dir(location);
+
 			return location;
 		}
 
@@ -756,6 +817,7 @@ function CHECK_LIB(libnames, target, path_to_check, common_name)
 			ADD_FLAG("LIBS" + target, libname);
 
 			STDOUT.WriteLine("<in LIB path> " + libname);
+
 			return location;
 		}
 
@@ -766,6 +828,7 @@ function CHECK_LIB(libnames, target, path_to_check, common_name)
 			libname = FSO.GetFileName(location);
 			ADD_FLAG("LIBS" + target, libname);
 			STDOUT.WriteLine("<in extra libs path>");
+			copy_dep_pdb_into_build_dir(location);
 			return location;
 		}
 	}
@@ -1824,6 +1887,60 @@ function write_summary()
 	STDOUT.WriteBlankLines(2);
 }
 
+function is_on_exclude_list_for_test_ini(list, name)
+{
+	for (var i in list) {
+		if (name == list[i]) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+function generate_tmp_php_ini()
+{
+	if ("no" == PHP_TEST_INI) {
+		/* Test ini generation is disabled. */
+		return;
+	}
+
+	var ini_dir = PHP_OBJECT_OUT_DIR + ("yes" == PHP_DEBUG ? "Debug" : "Release") + ("yes" == PHP_ZTS ? "_TS" : "");
+	PHP_TEST_INI_PATH = ini_dir + "\\tmp-php.ini";
+
+	if (FSO.FileExists(PHP_TEST_INI_PATH)) {
+		STDOUT.WriteLine("Generating " + PHP_TEST_INI_PATH + " ...");
+		var INI = FSO.OpenTextFile(PHP_TEST_INI_PATH, 2);
+	} else {
+		STDOUT.WriteLine("Regenerating " + PHP_TEST_INI_PATH + " ...");
+		var INI = FSO.CreateTextFile(PHP_TEST_INI_PATH, true);
+	}
+
+	var ext_list = PHP_TEST_INI_EXT_EXCLUDE.split(",");
+	INI.WriteLine("extension_dir=" + ini_dir);
+	for (var i in extensions_enabled) {
+		if ("shared" != extensions_enabled[i][1]) {
+			continue;
+		}
+		
+		var directive = "extension";
+		if ("opcache" == extensions_enabled[i][0]) {
+			directive = "zend_extension";
+		}
+
+		var ext_name = extensions_enabled[i][0];
+		if ("gd" == ext_name) {
+			ext_name = "gd2";
+		}
+
+		if (!is_on_exclude_list_for_test_ini(ext_list, ext_name)) {
+			INI.WriteLine(directive + "=php_" + ext_name + ".dll");
+		}
+	}
+
+	INI.Close();;
+}
+
 function generate_files()
 {
 	var i, dir, bd, last;
@@ -1858,6 +1975,9 @@ function generate_files()
 	}
 
 	STDOUT.WriteLine("Generating files...");
+	if (!MODE_PHPIZE) {
+		generate_tmp_php_ini();
+	}
 	generate_makefile();
 	if (!MODE_PHPIZE) {
 		generate_internal_functions();
@@ -2287,6 +2407,12 @@ function generate_makefile()
 		handle_analyzer_makefile_flags(MF, keys[i], val);
 	}
 
+	if (!MODE_PHPIZE) {
+		var val = "yes" == PHP_TEST_INI ? PHP_TEST_INI_PATH : "";
+		/* Be sure it's done after generate_tmp_php_ini(). */
+		MF.WriteLine("PHP_TEST_INI_PATH=\"" + val + "\"");
+	}
+
 	MF.WriteBlankLines(1);
 	if (MODE_PHPIZE) {
 		var TF = FSO.OpenTextFile(PHP_DIR + "/script/Makefile.phpize", 1);
@@ -2336,7 +2462,7 @@ function generate_makefile()
 
 	MF.WriteBlankLines(1);
 
-	var extra_path = PHP_PHP_BUILD + "\\bin";
+	var extra_path = "$(PHP_BUILD)\\bin";
 	if (PHP_EXTRA_LIBS.length) {
 		path = PHP_EXTRA_LIBS.split(';');
 		for (i = 0; i < path.length; i++) {
@@ -2346,7 +2472,7 @@ function generate_makefile()
 			}
 		}
 	}
-	MF.WriteLine("set-test-env:");
+	MF.WriteLine("set-tmp-env:");
 	MF.WriteLine("	@set PATH=" + extra_path + ";$(PATH)");
 
 	MF.WriteBlankLines(2);
@@ -2895,7 +3021,7 @@ function toolset_setup_common_cflags()
 	/D LIBZEND_EXPORTS /D TSRM_EXPORTS /D SAPI_EXPORTS /D WINVER=" + WINVER);
 
 	DEFINE('CFLAGS_PHP_OBJ', '$(CFLAGS_PHP) $(STATIC_EXT_CFLAGS)');
-1
+
 	// General CFLAGS for building objects
 	DEFINE("CFLAGS", "/nologo $(BASE_INCLUDES) /D _WINDOWS \
 		/D ZEND_WIN32=1 /D PHP_WIN32=1 /D WIN32 /D _MBCS /W3");

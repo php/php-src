@@ -32,7 +32,7 @@ prompt> string(4) "test"
  00017: 
 prompt> [Variables in foo() (1)]
 Address            Refs    Type      Variable
-%s 1       string    $baz
+%s %d       string    $baz
 string (4) "test"
 prompt> [Superglobal variables (8)]
 Address            Refs    Type      Variable

@@ -38,6 +38,7 @@
 #ifdef PHP_WIN32
 #include "win32/time.h"
 #include "win32/signal.h"
+#include "win32/console.h"
 #include <process.h>
 #include <shellapi.h>
 #endif
@@ -242,6 +243,9 @@ static void print_extensions(void) /* {{{ */
 
 #ifndef STDOUT_FILENO
 #define STDOUT_FILENO 1
+#endif
+#ifndef STDERR_FILENO
+#define STDERR_FILENO 2
 #endif
 
 static inline int sapi_cli_select(int fd)
@@ -941,7 +945,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 			/* here but this would make things only more complicated. And it */
 			/* is consitent with the way -R works where the stdin file handle*/
 			/* is also accessible. */
-			file_handle.filename = "-";
+			file_handle.filename = "Standard input code";
 			file_handle.handle.fp = stdin;
 		}
 		file_handle.type = ZEND_HANDLE_FP;
@@ -980,7 +984,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 		PG(during_request_startup) = 0;
 		switch (behavior) {
 		case PHP_MODE_STANDARD:
-			if (strcmp(file_handle.filename, "-")) {
+			if (strcmp(file_handle.filename, "Standard input code")) {
 				cli_register_file_handles();
 			}
 
@@ -1207,6 +1211,11 @@ int main(int argc, char *argv[])
 	 * in any way.
 	 */
 	argv = save_ps_args(argc, argv);
+
+#if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE)
+	php_win32_console_fileno_set_vt100(STDOUT_FILENO, TRUE);
+	php_win32_console_fileno_set_vt100(STDERR_FILENO, TRUE);
+#endif
 
 	cli_sapi_module.additional_functions = additional_functions;
 

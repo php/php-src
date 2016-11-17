@@ -22,20 +22,14 @@
 #include "php.h"				/*php specific */
 #include <stdio.h>
 #include <stdlib.h>
-#ifndef NETWARE
 #include <winsock2.h>
 #include "time.h"
 # include <Ws2tcpip.h>
-#else	/* NETWARE */
-#include <netware/sendmail_nw.h>
-#endif	/* NETWARE */
 #include <string.h>
 #include <math.h>
-#ifndef NETWARE
 #include <malloc.h>
 #include <memory.h>
 #include <winbase.h>
-#endif	/* NETWARE */
 #include "sendmail.h"
 #include "php_ini.h"
 #include "inet.h"
@@ -72,11 +66,7 @@
 
 
 char seps[] = " ,\t\n";
-#ifndef NETWARE
 char *php_mailer = "PHP 7 WIN32";
-#else
-char *php_mailer = "PHP 7 NetWare";
-#endif	/* NETWARE */
 
 /* Error messages */
 static char *ErrorMessages[] =

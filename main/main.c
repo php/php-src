@@ -34,11 +34,6 @@
 #include "win32/php_win32_globals.h"
 #include "win32/winutil.h"
 #include <process.h>
-#elif defined(NETWARE)
-#include <sys/timeval.h>
-#ifdef USE_WINSOCK
-#include <novsock2.h>
-#endif
 #endif
 #if HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -505,8 +500,8 @@ PHP_INI_MH(OnChangeBrowscap);
  * PHP_INCLUDE_PATH
  */
 
- /* Windows and Netware use the internal mail */
-#if defined(PHP_WIN32) || defined(NETWARE)
+ /* Windows use the internal mail */
+#if defined(PHP_WIN32)
 # define DEFAULT_SENDMAIL_PATH NULL
 #elif defined(PHP_PROG_SENDMAIL)
 # define DEFAULT_SENDMAIL_PATH PHP_PROG_SENDMAIL " -t -i "
@@ -2055,7 +2050,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	char *php_os;
 	zend_module_entry *module;
 
-#if defined(PHP_WIN32) || (defined(NETWARE) && defined(USE_WINSOCK))
+#ifdef PHP_WIN32
 	WORD wVersionRequested = MAKEWORD(2, 0);
 	WSADATA wsaData;
 #endif
@@ -2130,15 +2125,10 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	tzset();
 #endif
 
-#if defined(PHP_WIN32) || (defined(NETWARE) && defined(USE_WINSOCK))
+#ifdef PHP_WIN32
 	/* start up winsock services */
 	if (WSAStartup(wVersionRequested, &wsaData) != 0) {
 		php_printf("\nwinsock.dll unusable. %d\n", WSAGetLastError());
-		return FAILURE;
-	}
-	/* Check that we actually got the requested WSA version */
-	if (LOBYTE(wsaData.wVersion) != 2 || HIBYTE(wsaData.wVersion) != 0) {
-		php_printf("\nwinsock.dll unusable. Requested version: %d.%d, got %d.%d", LOBYTE(wVersionRequested), HIBYTE(wVersionRequested), LOBYTE(wsaData.wVersion), HIBYTE(wsaData.wVersion));
 		return FAILURE;
 	}
 #endif
@@ -2403,7 +2393,7 @@ void php_module_shutdown(void)
 
 	zend_shutdown();
 
-#if defined(PHP_WIN32) || (defined(NETWARE) && defined(USE_WINSOCK))
+#ifdef PHP_WIN32
 	/*close winsock */
 	WSACleanup();
 #endif
@@ -2488,7 +2478,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file)
 		 *   otherwise it will get opened and added to the included_files list in zend_execute_scripts
 		 */
  		if (primary_file->filename &&
- 		    (primary_file->filename[0] != '-' || primary_file->filename[1] != 0) &&
+ 		    strcmp("Standard input code", primary_file->filename) &&
  			primary_file->opened_path == NULL &&
  			primary_file->type != ZEND_HANDLE_FILENAME
 		) {

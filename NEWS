@@ -1,9 +1,13 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2016, PHP 7.2.0alpha1
+?? ??? ????, PHP 7.2
+
+- Calendar:
+  . Fix integer overflows (Joshua Rogers)
 
 - Core:
   . Removed the sql.safe_mode directive. (Kalle)
+  . Removed support for Netware. (Kalle)
   . Fixed bug #54535 (WSA cleanup executes before MSHUTDOWN). (Kalle)
   . Implemented FR #69791 (Disallow mail header injections by extra headers)
     (Yasuo)
@@ -12,6 +16,13 @@ PHP                                                                        NEWS
   . Fixed bug #73215 (uniqid() should use better random source). (Yasuo)
   . Fixed bug #73337 (try/catch not working with two exceptions inside a same
     operation). (Dmitry)
+  . Implemented FR #72768 (Add ENABLE_VIRTUAL_TERMINAL_PROCESSING flag for
+    php.exe). (Michele Locati)
+  . Implemented "Convert numeric keys in object/array casts" RFC, fixes
+    bugs #53838, #61655, #66173, #70925, #72254, etc. (Andrea)
+
+- Date:
+  . Fixed bug #69587 (DateInterval properties and isset). (jhdxr)
 
 - EXIF:
   . Added support for vendor specific tags for the following formats:
@@ -44,7 +55,10 @@ PHP                                                                        NEWS
 - PDO_DBlib:
   . Fixed bug #73234 (Emulated statements let value dictate parameter type).
     (Adam Baratz)
-  . Fixed bug #73396 (bigint columns are returned as strings).
+  . Fixed bug #73396 (bigint columns are returned as strings). (Adam Baratz)
+
+- Session:
+  . Fixed bug #73461 (Prohibit session save handler recursion) . (yohgaki)
 
 - SOAP:
   . Fixed bug #69137 (Peer verification fails when using a proxy with SoapClient)
@@ -52,9 +66,9 @@ PHP                                                                        NEWS
 
 - XML:
   . Moved utf8_encode() and utf8_decode() to the Standard extension. (Andrea)
+  . Fixed bug #72135 (malformed XML causes fault) (edgarsandi)
 
 - XMLRPC:
   . Use Zend MM for allocation in bundled libxmlrpc (Joe)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
-

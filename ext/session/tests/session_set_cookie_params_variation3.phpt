@@ -35,15 +35,16 @@ ob_end_flush();
 --EXPECTF--
 *** Testing session_set_cookie_params() : variation ***
 string(3) "foo"
-NULL
+bool(true)
 string(4) "blah"
 bool(true)
 string(4) "blah"
-NULL
-string(4) "guff"
+
+Warning: session_set_cookie_params(): Cannot change session cookie parameters when session is active in %s on line 18
+bool(false)
+string(4) "blah"
 bool(true)
-string(4) "guff"
-NULL
+string(4) "blah"
+bool(true)
 string(3) "foo"
 Done
-

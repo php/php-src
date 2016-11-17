@@ -53,10 +53,6 @@
 # endif
 #endif
 
-#ifdef NETWARE
-#include <fsio.h>
-#endif
-
 #ifndef HAVE_REALPATH
 #define realpath(x,y) strcpy(y,x)
 #endif
@@ -65,8 +61,8 @@
 
 #include "TSRM.h"
 
-/* Only need mutex for popen() in Windows and NetWare because it doesn't chdir() on UNIX */
-#if (defined(ZEND_WIN32) || defined(NETWARE)) && defined(ZTS)
+/* Only need mutex for popen() in Windows because it doesn't chdir() on UNIX */
+#if defined(ZEND_WIN32) && defined(ZTS)
 MUTEX_T cwd_mutex;
 #endif
 
@@ -407,23 +403,12 @@ CWD_API void virtual_cwd_startup(void) /* {{{ */
 	char cwd[MAXPATHLEN];
 	char *result;
 
-#ifdef NETWARE
-	result = getcwdpath(cwd, NULL, 1);
-	if(result)
-	{
-		char *c=cwd;
-		while(c = strchr(c, '\\'))
-		{
-			*c='/';
-			++c;
-		}
-	}
-#else
+
 #ifdef ZEND_WIN32
 	ZeroMemory(&cwd, sizeof(cwd));
 #endif
 	result = getcwd(cwd, sizeof(cwd));
-#endif
+
 	if (!result) {
 		cwd[0] = '\0';
 	}
@@ -442,7 +427,7 @@ CWD_API void virtual_cwd_startup(void) /* {{{ */
 	cwd_globals_ctor(&cwd_globals);
 #endif
 
-#if (defined(ZEND_WIN32) || defined(NETWARE)) && defined(ZTS)
+#if (defined(ZEND_WIN32)) && defined(ZTS)
 	cwd_mutex = tsrm_mutex_alloc();
 #endif
 }
@@ -453,7 +438,7 @@ CWD_API void virtual_cwd_shutdown(void) /* {{{ */
 #ifndef ZTS
 	cwd_globals_dtor(&cwd_globals);
 #endif
-#if (defined(ZEND_WIN32) || defined(NETWARE)) && defined(ZTS)
+#if (defined(ZEND_WIN32)) && defined(ZTS)
 	tsrm_mutex_free(cwd_mutex);
 #endif
 
@@ -663,7 +648,7 @@ static inline void realpath_cache_add(const char *path, int path_len, const char
 			memcpy(bucket->realpath, realpath, realpath_len+1);
 		}
 		bucket->realpath_len = realpath_len;
-		bucket->is_dir = is_dir;
+		bucket->is_dir = is_dir > 0;
 #ifdef ZEND_WIN32
 		bucket->is_rvalid   = 0;
 		bucket->is_readable = 0;
@@ -1054,11 +1039,6 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 					return -1;
 				}
 			}
-
-#elif defined(NETWARE)
-		save = 0;
-		tmp = do_alloca(len+1, use_heap);
-		memcpy(tmp, path, len+1);
 #else
 		if (save && php_sys_lstat(path, &st) < 0) {
 			if (use_realpath == CWD_REALPATH) {
@@ -1295,18 +1275,6 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 		resolved_path[0] = toupper(resolved_path[0]);
 		resolved_path[2] = DEFAULT_SLASH;
 		start = 3;
-	}
-#elif defined(NETWARE)
-	if (IS_ABSOLUTE_PATH(resolved_path, path_length)) {
-		/* skip VOLUME name */
-		start = 0;
-		while (start != ':') {
-			if (resolved_path[start] == 0) return -1;
-			start++;
-		}
-		start++;
-		if (!IS_SLASH(resolved_path[start])) return -1;
-		resolved_path[start++] = DEFAULT_SLASH;
 	}
 #endif
 
@@ -1595,7 +1563,7 @@ CWD_API int virtual_chmod(const char *filename, mode_t mode) /* {{{ */
 }
 /* }}} */
 
-#if !defined(ZEND_WIN32) && !defined(NETWARE)
+#if !defined(ZEND_WIN32)
 CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group, int link) /* {{{ */
 {
 	cwd_state new_state;
@@ -1840,36 +1808,6 @@ CWD_API DIR *virtual_opendir(const char *pathname) /* {{{ */
 CWD_API FILE *virtual_popen(const char *command, const char *type) /* {{{ */
 {
 	return popen_ex(command, type, CWDG(cwd).cwd, NULL);
-}
-/* }}} */
-#elif defined(NETWARE)
-/* On NetWare, the trick of prepending "cd cwd; " doesn't work so we need to perform
-   a VCWD_CHDIR() and mutex it
- */
-CWD_API FILE *virtual_popen(const char *command, const char *type) /* {{{ */
-{
-	char prev_cwd[MAXPATHLEN];
-	char *getcwd_result;
-	FILE *retval;
-
-	getcwd_result = VCWD_GETCWD(prev_cwd, MAXPATHLEN);
-	if (!getcwd_result) {
-		return NULL;
-	}
-
-#ifdef ZTS
-	tsrm_mutex_lock(cwd_mutex);
-#endif
-
-	VCWD_CHDIR(CWDG(cwd).cwd);
-	retval = popen(command, type);
-	VCWD_CHDIR(prev_cwd);
-
-#ifdef ZTS
-	tsrm_mutex_unlock(cwd_mutex);
-#endif
-
-	return retval;
 }
 /* }}} */
 #else /* Unix */

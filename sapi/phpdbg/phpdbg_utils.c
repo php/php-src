@@ -819,7 +819,7 @@ char *phpdbg_short_zval_print(zval *zv, int maxlen) /* {{{ */
 			break;
 		case IS_STRING: {
 			int i;
-			zend_string *str = php_addcslashes(Z_STR_P(zv), 0, "\\\"", 2);
+			zend_string *str = php_addcslashes(Z_STR_P(zv), 0, "\\\"\n\t\0", 5);
 			for (i = 0; i < ZSTR_LEN(str); i++) {
 				if (ZSTR_VAL(str)[i] < 32) {
 					ZSTR_VAL(str)[i] = ' ';
