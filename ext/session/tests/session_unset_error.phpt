@@ -96,75 +96,122 @@ ob_end_flush();
 *** Testing session_unset() : error functionality ***
 
 -- Iteration 1 --
-bool(false)
+
+Warning: session_unset() expects exactly 0 parameters, 1 given in %s on line 82
+NULL
 
 -- Iteration 2 --
-bool(false)
+
+Warning: session_unset() expects exactly 0 parameters, 1 given in %s on line 82
+NULL
 
 -- Iteration 3 --
-bool(false)
+
+Warning: session_unset() expects exactly 0 parameters, 1 given in %s on line 82
+NULL
 
 -- Iteration 4 --
-bool(false)
+
+Warning: session_unset() expects exactly 0 parameters, 1 given in %s on line 82
+NULL
 
 -- Iteration 5 --
-bool(false)
+
+Warning: session_unset() expects exactly 0 parameters, 1 given in %s on line 82
+NULL
 
 -- Iteration 6 --
-bool(false)
+
+Warning: session_unset() expects exactly 0 parameters, 1 given in %s on line 82
+NULL
 
 -- Iteration 7 --
-bool(false)
+
+Warning: session_unset() expects exactly 0 parameters, 1 given in %s on line 82
+NULL
 
 -- Iteration 8 --
-bool(false)
+
+Warning: session_unset() expects exactly 0 parameters, 1 given in %s on line 82
+NULL
 
 -- Iteration 9 --
-bool(false)
+
+Warning: session_unset() expects exactly 0 parameters, 1 given in %s on line 82
+NULL
 
 -- Iteration 10 --
-bool(false)
+
+Warning: session_unset() expects exactly 0 parameters, 1 given in %s on line 82
+NULL
 
 -- Iteration 11 --
-bool(false)
+
+Warning: session_unset() expects exactly 0 parameters, 1 given in %s on line 82
+NULL
 
 -- Iteration 12 --
-bool(false)
+
+Warning: session_unset() expects exactly 0 parameters, 1 given in %s on line 82
+NULL
 
 -- Iteration 13 --
-bool(false)
+
+Warning: session_unset() expects exactly 0 parameters, 1 given in %s on line 82
+NULL
 
 -- Iteration 14 --
-bool(false)
+
+Warning: session_unset() expects exactly 0 parameters, 1 given in %s on line 82
+NULL
 
 -- Iteration 15 --
-bool(false)
+
+Warning: session_unset() expects exactly 0 parameters, 1 given in %s on line 82
+NULL
 
 -- Iteration 16 --
-bool(false)
+
+Warning: session_unset() expects exactly 0 parameters, 1 given in %s on line 82
+NULL
 
 -- Iteration 17 --
-bool(false)
+
+Warning: session_unset() expects exactly 0 parameters, 1 given in %s on line 82
+NULL
 
 -- Iteration 18 --
-bool(false)
+
+Warning: session_unset() expects exactly 0 parameters, 1 given in %s on line 82
+NULL
 
 -- Iteration 19 --
-bool(false)
+
+Warning: session_unset() expects exactly 0 parameters, 1 given in %s on line 82
+NULL
 
 -- Iteration 20 --
-bool(false)
+
+Warning: session_unset() expects exactly 0 parameters, 1 given in %s on line 82
+NULL
 
 -- Iteration 21 --
-bool(false)
+
+Warning: session_unset() expects exactly 0 parameters, 1 given in %s on line 82
+NULL
 
 -- Iteration 22 --
-bool(false)
+
+Warning: session_unset() expects exactly 0 parameters, 1 given in %s on line 82
+NULL
 
 -- Iteration 23 --
-bool(false)
+
+Warning: session_unset() expects exactly 0 parameters, 1 given in %s on line 82
+NULL
 
 -- Iteration 24 --
-bool(false)
-Done
 
+Warning: session_unset() expects exactly 0 parameters, 1 given in %s on line 82
+NULL
+Done

@@ -35,7 +35,7 @@ Warning: session_encode(): Cannot encode non-existent session in %s on line %d
 bool(false)
 bool(true)
 bool(false)
-NULL
+bool(true)
 bool(false)
 bool(true)
 bool(false)
