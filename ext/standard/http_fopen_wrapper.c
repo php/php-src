@@ -706,7 +706,7 @@ finish:
 				while (
 					!php_stream_eof(stream)
 					&& php_stream_get_line(stream, tmp_line, sizeof(tmp_line) - 1, &tmp_line_len) != NULL
-					&& ( tmp_line_len < 6 || strncasecmp(tmp_line, "HTTP/1", 6) )
+					&& ( tmp_line_len < sizeof("HTTP/1") - 1 || strncasecmp(tmp_line, "HTTP/1", sizeof("HTTP/1") - 1) )
 				);
 
 				if (tmp_line_len > 9) {
