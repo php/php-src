@@ -439,7 +439,7 @@ ob_end_flush();
   <input type="text" name="test2" />
 </form>
 
-NULL
+bool(true)
 *** Cleanup ***
 bool(true)
 string(6) "testid"

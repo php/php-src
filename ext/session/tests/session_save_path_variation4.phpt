@@ -51,9 +51,17 @@ var_dump(rmdir($sessions));
 bool(true)
 bool(true)
 
-Warning: ini_set(): open_basedir restriction in effect. File(%s) is not within the allowed path(s): (.) in %s on line %d
+Warning: ini_set(): open_basedir restriction in effect. File(%s) is not within the allowed path(s): (.) in %s on line 24
 string(0) ""
 
-Warning: session_start(): open_basedir restriction in effect. File(%s) is not within the allowed path(s): (.) in %s on line %d
+Warning: session_start(): open_basedir restriction in effect. File(%s) is not within the allowed path(s): (.) in %s on line 26
 
-Fatal error: session_start(): Failed to initialize storage module: files (path: ) in %s on line %d
+Warning: session_start(): Failed to initialize storage module: files (path: ) in %s on line 26
+bool(false)
+string(0) ""
+
+Warning: session_destroy(): Trying to destroy uninitialized session in %s on line 28
+bool(false)
+string(0) ""
+bool(true)
+Done
