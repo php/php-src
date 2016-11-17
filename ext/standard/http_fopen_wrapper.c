@@ -699,6 +699,24 @@ finish:
 			if ((options & STREAM_ONLY_GET_HEADERS) || ignore_errors) {
 				reqok = 1;
 			}
+
+			/* status codes of 1xx are "informational", and will be followed by a real response
+			 * e.g "100 Continue". RFC 7231 states that unexpected 1xx status MUST be parsed,
+			 * and MAY be ignored. As such, we need to skip ahead to the "real" status*/
+			if (response_code >= 100 && response_code < 200) {
+				/* consume lines until we find a line starting 'HTTP/1' */
+				while (
+					!php_stream_eof(stream)
+					&& php_stream_get_line(stream, tmp_line, sizeof(tmp_line) - 1, &tmp_line_len) != NULL
+					&& ( tmp_line_len < sizeof("HTTP/1") - 1 || strncasecmp(tmp_line, "HTTP/1", sizeof("HTTP/1") - 1) )
+				);
+
+				if (tmp_line_len > 9) {
+					response_code = atoi(tmp_line + 9);
+				} else {
+					response_code = 0;
+				}
+			}
 			/* all status codes in the 2xx range are defined by the specification as successful;
 			 * all status codes in the 3xx range are for redirection, and so also should never
 			 * fail */
