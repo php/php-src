@@ -1,17 +1,16 @@
 --TEST--
-Test sizeof() function : usage variations - different values for 'mode' argument 
+Test count() function : usage variations - different values for 'mode' argument 
 --FILE--
 <?php
-/* Prototype  : int sizeof($mixed var[, int $mode])
+/* Prototype  : int count($mixed var[, int $mode])
  * Description: Counts an elements in an array. If Standard PHP library is installed,
  * it will return the properties of an object.
  * Source code: ext/standard/basic_functions.c
- * Alias to functions: count()
  */
 
-echo "*** Testing sizeof() : usage variations ***\n";
+echo "*** Testing count() : usage variations ***\n";
 
-echo "--- Testing sizeof() with different values for 'mode' argument ---\n";
+echo "--- Testing count() with different values for 'mode' argument ---\n";
 $array1 = array(1, 2, 3, 4, array(1.0, 2.0, array()), array() );
 
 // get a resource variable
@@ -54,14 +53,14 @@ $mode_values = array (
 );
   
 // loop through the each element of $modes_array for 'mode' argument 
-// and check the working of sizeof()
+// and check the working of count()
 $counter = 1;
 for($i = 0; $i < count($mode_values); $i++)
 {
   echo "-- Iteration $counter --\n";
   $mode = $mode_values[$i];
   
-  var_dump( sizeof($array1, $mode) );
+  var_dump( count($array1, $mode) );
 
   $counter++;
 }
@@ -71,8 +70,8 @@ fclose($fp);
 echo "Done";
 ?>
 --EXPECTF--
-*** Testing sizeof() : usage variations ***
---- Testing sizeof() with different values for 'mode' argument ---
+*** Testing count() : usage variations ***
+--- Testing count() with different values for 'mode' argument ---
 -- Iteration 1 --
 int(6)
 -- Iteration 2 --
@@ -105,28 +104,28 @@ int(6)
 int(6)
 -- Iteration 16 --
 
-Warning: sizeof() expects parameter 2 to be integer, string given in %s on line %d
+Warning: count() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 -- Iteration 17 --
 
-Warning: sizeof() expects parameter 2 to be integer, string given in %s on line %d
+Warning: count() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 -- Iteration 18 --
 
-Warning: sizeof() expects parameter 2 to be integer, string given in %s on line %d
+Warning: count() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 -- Iteration 19 --
 
-Warning: sizeof() expects parameter 2 to be integer, string given in %s on line %d
+Warning: count() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 -- Iteration 20 --
 int(6)
 -- Iteration 21 --
 
-Warning: sizeof() expects parameter 2 to be integer, object given in %s on line %d
+Warning: count() expects parameter 2 to be integer, object given in %s on line %d
 NULL
 -- Iteration 22 --
 
-Warning: sizeof() expects parameter 2 to be integer, resource given in %s on line %d
+Warning: count() expects parameter 2 to be integer, resource given in %s on line %d
 NULL
 Done

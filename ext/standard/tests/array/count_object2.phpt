@@ -1,17 +1,16 @@
 --TEST--
-Test sizeof() function : object functionality - objects without Countable interface
+Test count() function : object functionality - objects without Countable interface
 --FILE--
 <?php
-/* Prototype  : int sizeof($mixed var[, int $mode] )
+/* Prototype  : int count($mixed var[, int $mode] )
  * Description: Counts an elements in an array. If Standard PHP library is installed,
  * it will return the properties of an object.
  * Source code: ext/standard/basic_functions.c
- * Alias to functions: count()
  */
 
-echo "*** Testing sizeof() : object functionality ***\n";
+echo "*** Testing count() : object functionality ***\n";
 
-echo "--- Testing sizeof() with objects which doesn't implement Countable interface ---\n";
+echo "--- Testing count() with objects which doesn't implement Countable interface ---\n";
 
 // class without member
 class test
@@ -81,15 +80,15 @@ for($i = 0; $i < count($objects); $i++)
   $var = $objects[$i];
 
   echo "Default Mode: ";
-  var_dump( sizeof($var) );
+  var_dump( count($var) );
   echo "\n";
   
   echo "COUNT_NORMAL Mode: ";
-  var_dump( sizeof($var, COUNT_NORMAL) );
+  var_dump( count($var, COUNT_NORMAL) );
   echo "\n";
 
   echo "COUNT_RECURSIVE Mode: ";
-  var_dump( sizeof($var, COUNT_RECURSIVE) );
+  var_dump( count($var, COUNT_RECURSIVE) );
   echo "\n";
  
   $counter++;
@@ -98,8 +97,8 @@ for($i = 0; $i < count($objects); $i++)
 echo "Done";
 ?>
 --EXPECTF--
-*** Testing sizeof() : object functionality ***
---- Testing sizeof() with objects which doesn't implement Countable interface ---
+*** Testing count() : object functionality ***
+--- Testing count() with objects which doesn't implement Countable interface ---
 -- Iteration 1 --
 Default Mode: int(1)
 

@@ -3375,7 +3375,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 
 	/* aliases from array.c */
 	PHP_FALIAS(pos,					current,								arginfo_current)
-	PHP_FALIAS(sizeof,				count,									arginfo_count)
+	PHP_DEP_FALIAS(sizeof,			count,									arginfo_count)
 	PHP_FALIAS(key_exists,			array_key_exists,						arginfo_array_key_exists)
 
 	/* functions from assert.c */
