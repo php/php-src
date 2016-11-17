@@ -2524,10 +2524,10 @@ static void zend_update_type_info(const zend_op_array *op_array,
 						tmp |= (t1 & MAY_BE_RC1) | MAY_BE_RCN;
 					} else if ((opline->extended_value == IS_ARRAY ||
 					            opline->extended_value == IS_OBJECT) &&
-					           (tmp & (MAY_BE_ARRAY|MAY_BE_OBJECT))) {
+					           (t1 & (MAY_BE_ARRAY|MAY_BE_OBJECT))) {
 							tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 					} else if (opline->extended_value == IS_STRING &&
-					           (t1 & MAY_BE_STRING)) {
+					           (t1 & (MAY_BE_STRING|MAY_BE_OBJECT))) {
 						tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 					} else {
 						tmp |= MAY_BE_RC1;
