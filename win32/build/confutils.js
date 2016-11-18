@@ -2610,9 +2610,20 @@ function toolset_setup_compiler()
 			ERROR("Unsupported MS C++ Compiler, VC11 (2011) minimum is required");
 		}
 
-		AC_DEFINE('COMPILER', COMPILER_NAME, "Detected compiler version");
-		DEFINE("PHP_COMPILER_SHORT", VC_VERSIONS_SHORT[VCVERS]);
-		AC_DEFINE('PHP_COMPILER_ID', VC_VERSIONS_SHORT[VCVERS], "Compiler compatibility ID");
+		if (undefined == COMPILER_NAME) {
+			var tmp = probe_binary(PHP_CL);
+			COMPILER_NAME = "MSVC " + tmp + ", untested";
+
+			WARNING("Using unknown MSVC version " + tmp);
+
+			AC_DEFINE('COMPILER', COMPILER_NAME, "Detected compiler version");
+			DEFINE("PHP_COMPILER_SHORT", tmp);
+			AC_DEFINE('PHP_COMPILER_ID', tmp, "Compiler compatibility ID");
+		} else {
+			AC_DEFINE('COMPILER', COMPILER_NAME, "Detected compiler version");
+			DEFINE("PHP_COMPILER_SHORT", VC_VERSIONS_SHORT[VCVERS]);
+			AC_DEFINE('PHP_COMPILER_ID', VC_VERSIONS_SHORT[VCVERS], "Compiler compatibility ID");
+		}
 	} else if (CLANG_TOOLSET) {
 		CLANGVERS = COMPILER_NUMERIC_VERSION;
 
@@ -2732,8 +2743,15 @@ function toolset_get_compiler_name()
 	var version;
 
 	if (VS_TOOLSET) {
+		var name = undefined;
+
 		version = probe_binary(PHP_CL).substr(0, 5).replace('.', '');
-		return VC_VERSIONS[version];
+
+		if (undefined != VC_VERSIONS[version]) {
+			name = VC_VERSIONS[version];
+		}
+
+		return name;
 	} else if (CLANG_TOOLSET || ICC_TOOLSET) {
 		var command = 'cmd /c ""' + PHP_CL + '" -v"';
 		var full = execute(command + '" 2>&1"');
