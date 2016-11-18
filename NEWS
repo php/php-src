@@ -27,8 +27,9 @@ PHP                                                                        NEWS
   . Fixed bug #73530 (Unsetting result set may reset other result set). (cmb)
 
 - Standard:
-   . Fixed bug #73297 (HTTP stream wrapper should ignore HTTP 100 Continue).
-     (rowan dot collins at gmail dot com)
+  . Fixed bug #73297 (HTTP stream wrapper should ignore HTTP 100 Continue).
+    (rowan dot collins at gmail dot com)
+  . Fixed bug #73303 (Scope not inherited by eval in assert()). (nikic)
 
 - XML:
   . Fixed bug #72135 (malformed XML causes fault) (edgarsandi)
@@ -36,7 +37,7 @@ PHP                                                                        NEWS
 10 Nov 2016, PHP 7.1.0RC6
 
 - Core:
-  . Fixded bug #72736 (Slow performance when fetching large dataset with mysqli
+  . Fixed bug #72736 (Slow performance when fetching large dataset with mysqli
     / PDO). (Dmitry)
   . Fixed bug #72482 (Ilegal write/read access caused by gdImageAALine
     overflow). (cmb)
