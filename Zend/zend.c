@@ -134,9 +134,6 @@ ZEND_INI_BEGIN()
  	STD_ZEND_INI_BOOLEAN("zend.multibyte", "0", ZEND_INI_PERDIR, OnUpdateBool, multibyte,      zend_compiler_globals, compiler_globals)
  	ZEND_INI_ENTRY("zend.script_encoding",			NULL,		ZEND_INI_ALL,		OnUpdateScriptEncoding)
  	STD_ZEND_INI_BOOLEAN("zend.detect_unicode",			"1",	ZEND_INI_ALL,		OnUpdateBool, detect_unicode, zend_compiler_globals, compiler_globals)
-#if HAVE_DTRACE
-	STD_ZEND_INI_BOOLEAN("zend.enable_dtrace",			"0",	ZEND_INI_SYSTEM,	OnUpdateBool, dtrace_enable,  zend_executor_globals, executor_globals)
-#endif
 #ifdef ZEND_SIGNALS
 	STD_ZEND_INI_BOOLEAN("zend.signal_check", "0", ZEND_INI_SYSTEM, OnUpdateBool, check, zend_signal_globals_t, zend_signal_globals)
 #endif
@@ -694,9 +691,16 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 
 	zend_interrupt_function = NULL;
 
+#if HAVE_DTRACE
+/* build with dtrace support */
+	zend_compile_file = dtrace_compile_file;
+	zend_execute_ex = dtrace_execute_ex;
+	zend_execute_internal = dtrace_execute_internal;
+#else
 	zend_compile_file = compile_file;
 	zend_execute_ex = execute_ex;
 	zend_execute_internal = NULL;
+#endif /* HAVE_SYS_SDT_H */
 	zend_compile_string = compile_string;
 	zend_throw_exception_hook = NULL;
 
@@ -821,14 +825,6 @@ void zend_post_startup(void) /* {{{ */
 	zend_copy_ini_directives();
 #else
 	virtual_cwd_deactivate();
-#endif
-#if HAVE_DTRACE
-	/* build with dtrace support */
-	if (EG(dtrace_enable)) {
-		zend_compile_file = dtrace_compile_file;
-		zend_execute_ex = dtrace_execute_ex;
-		zend_execute_internal = dtrace_execute_internal;
-	}
 #endif
 }
 /* }}} */
