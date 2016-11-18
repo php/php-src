@@ -217,6 +217,10 @@ struct _zend_executor_globals {
 	zend_bool active;
 	zend_bool valid_symbol_table;
 
+#if HAVE_DTRACE
+	zend_bool dtrace_enable;
+#endif
+
 	zend_long assertions;
 
 	uint32_t           ht_iterators_count;     /* number of allocatd slots */
