@@ -17,6 +17,9 @@ PHP                                                                        NEWS
     This may be enabled again using envirionment variable USE_ZEND_DTRACE=1.
     (Dmitry)
 
+- Mysqlnd:
+  . Fixed bug #64526 (Add missing mysqlnd.* parameters to php.ini-*). (cmb)
+
 - ODBC:
   . Fixed bug #73448 (odbc_errormsg returns trash, always 513 bytes).
     (Anatol)
