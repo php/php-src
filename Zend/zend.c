@@ -678,9 +678,19 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 
 #if HAVE_DTRACE
 /* build with dtrace support */
-	zend_compile_file = dtrace_compile_file;
-	zend_execute_ex = dtrace_execute_ex;
-	zend_execute_internal = dtrace_execute_internal;
+	{
+		char *tmp = getenv("USE_ZEND_DTRACE");
+
+		if (tmp && zend_atoi(tmp, 0)) {
+			zend_compile_file = dtrace_compile_file;
+			zend_execute_ex = dtrace_execute_ex;
+			zend_execute_internal = dtrace_execute_internal;
+		} else {
+			zend_compile_file = compile_file;
+			zend_execute_ex = execute_ex;
+			zend_execute_internal = NULL;
+		}
+	}
 #else
 	zend_compile_file = compile_file;
 	zend_execute_ex = execute_ex;

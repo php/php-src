@@ -12,6 +12,11 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug #69587 (DateInterval properties and isset). (jhdxr)
 
+- DTrace:
+  . Disabled PHP call tracing by default (it makes significant overhead).
+    This may be enabled again using envirionment variable USE_ZEND_DTRACE=1.
+    (Dmitry)
+
 - ODBC:
   . Fixed bug #73448 (odbc_errormsg returns trash, always 513 bytes).
     (Anatol)
