@@ -289,51 +289,32 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 
 	just_path:
 
-	if ((p = memchr(s, '?', (ue - s)))) {
-		pp = memchr(s, '#', (ue - s));
-
-		if (pp && pp < p) {
-			if (pp - s) {
-				ret->path = estrndup(s, (pp-s));
-				php_replace_controlchars_ex(ret->path, (pp - s));
-			}
-			p = pp;
-			goto label_parse;
-		}
-
-		if (p - s) {
-			ret->path = estrndup(s, (p-s));
-			php_replace_controlchars_ex(ret->path, (p - s));
-		}
-
-		if (pp) {
-			if (pp - ++p) {
-				ret->query = estrndup(p, (pp-p));
-				php_replace_controlchars_ex(ret->query, (pp - p));
-			}
-			p = pp;
-			goto label_parse;
-		} else if (++p - ue) {
-			ret->query = estrndup(p, (ue-p));
-			php_replace_controlchars_ex(ret->query, (ue - p));
-		}
-	} else if ((p = memchr(s, '#', (ue - s)))) {
-		if (p - s) {
-			ret->path = estrndup(s, (p-s));
-			php_replace_controlchars_ex(ret->path, (p - s));
-		}
-
-		label_parse:
+	e = ue;
+	p = memchr(s, '#', (e - s));
+	if (p) {
 		p++;
-
-		if (ue - p) {
-			ret->fragment = estrndup(p, (ue-p));
-			php_replace_controlchars_ex(ret->fragment, (ue - p));
+		if (p < e) {
+			ret->fragment = estrndup(p, (e - p));
+			php_replace_controlchars_ex(ret->fragment, (e - p));
 		}
-	} else {
-		ret->path = estrndup(s, (ue-s));
-		php_replace_controlchars_ex(ret->path, (ue - s));
+		e = p-1;
 	}
+
+	p = memchr(s, '?', (e - s));
+	if (p) {
+		p++;
+		if (p < e) {
+			ret->query = estrndup(p, (e - p));
+			php_replace_controlchars_ex(ret->query, (e - p));
+		}
+		e = p-1;
+	}
+
+	if (s < e || s == ue) {
+		ret->path = estrndup(s, (e - s));
+		php_replace_controlchars_ex(ret->path, (e - s));
+	}
+
 	return ret;
 }
 /* }}} */
