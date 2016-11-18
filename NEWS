@@ -16,6 +16,9 @@ PHP                                                                        NEWS
 - Mbstring:
   . Fixed bug #73532 (Null pointer dereference in mb_eregi). (Laruence)
 
+- Mysqlnd:
+  . Fixed bug #64526 (Add missing mysqlnd.* parameters to php.ini-*). (cmb)
+
 - Opcache:
   . Fixed bug #69090 (check cached files permissions)
 
