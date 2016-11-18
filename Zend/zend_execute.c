@@ -954,7 +954,7 @@ zval* zend_verify_property_type(zend_property_info *info, zval *property, zval *
 	return i_zend_verify_property_type(info, property, tmp, strict);
 }
 
-static zend_always_inline zend_bool i_zend_verify_ref_type_assignable_zval(void *type, zval *zv, zend_bool strict) {
+static zend_always_inline zend_bool i_zend_verify_ref_type_assignable_zval(zend_reftype type, zval *zv, zend_bool strict) {
 	zend_uchar cur_type;
 
 	if (!type) {
@@ -980,7 +980,7 @@ static zend_always_inline zend_bool i_zend_verify_ref_type_assignable_zval(void 
 	return zend_verify_scalar_type_hint(cur_type, zv, zv, strict);
 }
 
-ZEND_API zend_bool zend_verify_ref_type_assignable_zval(void *type, zval *zv, zend_bool strict)
+ZEND_API zend_bool zend_verify_ref_type_assignable_zval(zend_reftype type, zval *zv, zend_bool strict)
 {
 	return i_zend_verify_ref_type_assignable_zval(type, zv, strict);
 }
@@ -1243,15 +1243,32 @@ static zend_never_inline void zend_binary_assign_op_obj_dim(zval *object, zval *
 			}
 			ZVAL_COPY_VALUE(z, value);
 		}
-		binary_op(&res, Z_ISREF_P(z) ? Z_REFVAL_P(z) : z, value);
-		Z_OBJ_HT_P(object)->write_dimension(object, property, &res);
+		if (UNEXPECTED(Z_ISREF_P(z))) {
+			zend_reftype type = Z_REFTYPE_P(z);
+			zval *ref  = Z_REFVAL_P(z);
+			binary_op(&res, ref, value);
+			if (type && !zend_verify_ref_type_assignable_zval(type, &res, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)))) {
+				zend_throw_ref_type_error(type, &res);
+				zval_ptr_dtor(&res);
+				if (z == &rv) {
+					zval_ptr_dtor(&rv);
+				}
+				return;
+			}
+			zval_ptr_dtor(ref);
+			ZVAL_COPY(ref, &res);
+		} else {
+			binary_op(&res, z, value);
+			Z_OBJ_HT_P(object)->write_dimension(object, property, &res);
+		}
 		if (z == &rv) {
 			zval_ptr_dtor(&rv);
 		}
 		if (retval) {
-			ZVAL_COPY(retval, &res);
+			ZVAL_COPY_VALUE(retval, &res);
+		} else {
+			zval_ptr_dtor(&res);
 		}
-		zval_ptr_dtor(&res);
 	} else {
 		zend_error(E_WARNING, "Attempt to assign property of non-object");
 		if (retval) {
@@ -1490,7 +1507,7 @@ static zend_never_inline void zend_post_incdec_overloaded_property(zval *object,
 {
 	if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 		zval rv, obj;
-		zval *z;
+		zval *z, *tmp;
 		zval z_copy;
 
 		ZVAL_OBJ(&obj, Z_OBJ_P(object));
@@ -1510,21 +1527,42 @@ static zend_never_inline void zend_post_incdec_overloaded_property(zval *object,
 			ZVAL_COPY_VALUE(z, value);
 		}
 
-		if (UNEXPECTED(Z_TYPE_P(z) == IS_REFERENCE)) {
-			ZVAL_COPY(result, Z_REFVAL_P(z));
+		if (UNEXPECTED(Z_ISREF_P(z))) {
+			zend_reftype ref_type = Z_REFTYPE_P(z);
+			tmp = Z_REFVAL_P(z);
+			ZVAL_COPY(result, tmp);
+			zend_property_info *prop_info;
+
+			if (inc) {
+				increment_function(tmp);
+			} else {
+				decrement_function(tmp);
+			}
+
+			if (UNEXPECTED(ref_type || (prop_info = zend_object_fetch_property_type_info(Z_OBJCE(obj), Z_STR_P(property), NULL)))) {
+				/* ref types are always stricter than prop types */
+				if (UNEXPECTED(ref_type ? !zend_verify_ref_type_assignable_zval(ref_type, tmp, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))) : !zend_verify_property_type(prop_info, &z_copy, &z_copy, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))))) {
+					if (ref_type) {
+						zend_throw_ref_type_error(ref_type, tmp);
+					} else {
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), tmp);
+					}
+					zval_ptr_dtor(tmp);
+					ZVAL_COPY_VALUE(tmp, result);
+				}
+			}
 		} else {
 			ZVAL_COPY(result, z);
+			if (inc) {
+				increment_function(z);
+			} else {
+				decrement_function(z);
+			}
+			Z_OBJ_HT(obj)->write_property(&obj, property, z, cache_slot);
+			zval_ptr_dtor(z);
 		}
-		ZVAL_DUP(&z_copy, result);
-		if (inc) {
-			increment_function(&z_copy);
-		} else {
-			decrement_function(&z_copy);
-		}
-		Z_OBJ_HT(obj)->write_property(&obj, property, &z_copy, cache_slot);
-		OBJ_RELEASE(Z_OBJ(obj));
-		zval_ptr_dtor(&z_copy);
 		zval_ptr_dtor(z);
+		OBJ_RELEASE(Z_OBJ(obj));
 	} else {
 		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
 		ZVAL_NULL(result);
@@ -1537,7 +1575,6 @@ static zend_never_inline void zend_pre_incdec_overloaded_property(zval *object, 
 
 	if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 		zval *z, obj;
-		zend_property_info *prop_info;
 				
 		ZVAL_OBJ(&obj, Z_OBJ_P(object));
 		Z_ADDREF(obj);
@@ -1557,37 +1594,51 @@ static zend_never_inline void zend_pre_incdec_overloaded_property(zval *object, 
 			ZVAL_COPY_VALUE(z, value);
 		}
 
-		prop_info = zend_object_fetch_property_type_info(Z_OBJCE(obj), Z_STR_P(property), NULL);
+		if (UNEXPECTED(Z_ISREF_P(z))) { /* binary ops on &__get() should not be written again */
+			zend_property_info *prop_info;
+			zend_reftype ref_type = Z_REFTYPE_P(z);
+			zval *tmp = Z_REFVAL_P(z);
 
-		if (UNEXPECTED(prop_info)) {
-			/* special case for typed properties */
-			zval z_copy;
+			if (UNEXPECTED(ref_type || (prop_info = zend_object_fetch_property_type_info(Z_OBJCE(obj), Z_STR_P(property), NULL)))) {
+				/* special case for typed values */
+				zval z_copy;
 
-			ZVAL_DUP(&z_copy, z);
-			if (inc) {
-				increment_function(&z_copy);
+				ZVAL_COPY(&z_copy, tmp);
+				if (inc) {
+					increment_function(&z_copy);
+				} else {
+					decrement_function(&z_copy);
+				}
+
+				/* ref types are always stricter than prop types */
+				if (EXPECTED(ref_type ? zend_verify_ref_type_assignable_zval(ref_type, &z_copy, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))) : zend_verify_property_type(prop_info, &z_copy, &z_copy, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))) != NULL)) {
+					zval_ptr_dtor(tmp);
+					ZVAL_COPY_VALUE(tmp, &z_copy);
+				} else {
+					if (ref_type) {
+						zend_throw_ref_type_error(ref_type, &z_copy);
+					} else {
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), &z_copy);
+					}
+					zval_ptr_dtor(&z_copy);
+				}
 			} else {
-				decrement_function(&z_copy);
+				if (inc) {
+					increment_function(tmp);
+				} else {
+					decrement_function(tmp);
+				}
 			}
-			if (UNEXPECTED(result)) {
-				ZVAL_COPY(result, &z_copy);
-			}
-			Z_OBJ_HT(obj)->write_property(&obj, property, &z_copy, cache_slot);
-			OBJ_RELEASE(Z_OBJ(obj));
-			zval_ptr_dtor(&z_copy);
-			return;
-		}
-
-		ZVAL_DEREF(z);
-		SEPARATE_ZVAL_NOREF(z);
-		if (inc) {
-			increment_function(z);
 		} else {
-			decrement_function(z);
-		}
-		Z_OBJ_HT(obj)->write_property(&obj, property, z, cache_slot);
-		if (UNEXPECTED(result) && EXPECTED(!EG(exception))) {
-			ZVAL_COPY(result, z);
+			if (inc) {
+				increment_function(z);
+			} else {
+				decrement_function(z);
+			}
+			Z_OBJ_HT(obj)->write_property(&obj, property, z, cache_slot);
+			if (UNEXPECTED(result) && EXPECTED(!EG(exception))) {
+				ZVAL_COPY(result, z);
+			}
 		}
 		OBJ_RELEASE(Z_OBJ(obj));
 		zval_ptr_dtor(z);
@@ -1602,8 +1653,7 @@ static zend_never_inline void zend_pre_incdec_overloaded_property(zval *object, 
 static zend_never_inline void zend_assign_op_overloaded_property(zval *object, zval *property, void **cache_slot, zval *value, binary_op_type binary_op, zval *result)
 {
 	zval *z;
-	zval rv, obj;
-	zval *zptr;
+	zval rv, obj, z_copy;
 	zend_property_info *prop_info;
 
 	ZVAL_OBJ(&obj, Z_OBJ_P(object));
@@ -1626,30 +1676,47 @@ static zend_never_inline void zend_assign_op_overloaded_property(zval *object, z
 
 		prop_info = zend_object_fetch_property_type_info(Z_OBJCE(obj), Z_STR_P(property), NULL);
 
-		if (UNEXPECTED(prop_info)) {
-			/* special case for typed properties */
-			zval z_copy;
+		if (UNEXPECTED(Z_ISREF_P(z))) { /* binary ops on &__get() should not be written again */
+			zend_reftype ref_type = Z_REFTYPE_P(z);
+			zval *tmp = Z_REFVAL_P(z);
 
-			ZVAL_DUP(&z_copy, z);
-			binary_op(&z_copy, &z_copy, value);
-			Z_OBJ_HT(obj)->write_property(&obj, property, &z_copy, cache_slot);
-			if (UNEXPECTED(result) && EXPECTED(!EG(exception))) {
-				ZVAL_COPY(result, z);
+			if (UNEXPECTED(ref_type || prop_info)) {
+				/* special case for typed values */
+				binary_op(&z_copy, tmp, value);
+
+				/* ref types are always stricter than prop types */
+				if (EXPECTED(ref_type ? zend_verify_ref_type_assignable_zval(ref_type, &z_copy, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))) : zend_verify_property_type(prop_info, &z_copy, &z_copy, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))) != NULL)) {
+					zval_ptr_dtor(tmp);
+					ZVAL_COPY_VALUE(tmp, &z_copy);
+				} else {
+					if (ref_type) {
+						zend_throw_ref_type_error(ref_type, &z_copy);
+					} else {
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), &z_copy);
+					}
+					zval_ptr_dtor(&z_copy);
+				}
+			} else {
+				SEPARATE_ZVAL_NOREF(tmp);
+				binary_op(tmp, tmp, value);
 			}
-			zval_ptr_dtor(&z_copy);
-			OBJ_RELEASE(Z_OBJ(obj));
-			return;
+		} else {
+			if (UNEXPECTED(prop_info)) {
+				binary_op(&z_copy, z, value);
+				Z_OBJ_HT(obj)->write_property(&obj, property, &z_copy, cache_slot);
+				zval_ptr_dtor(z);
+				z = &z_copy;
+			} else {
+				SEPARATE_ZVAL_NOREF(z);
+				binary_op(z, z, value);
+				Z_OBJ_HT(obj)->write_property(&obj, property, z, cache_slot);
+			}
 		}
 
-		zptr = z;
-		ZVAL_DEREF(z);
-		SEPARATE_ZVAL_NOREF(z);
-		binary_op(z, z, value);
-		Z_OBJ_HT(obj)->write_property(&obj, property, z, cache_slot);
-		if (UNEXPECTED(result)) {
+		if (UNEXPECTED(result) && EXPECTED(!EG(exception))) {
 			ZVAL_COPY(result, z);
 		}
-		zval_ptr_dtor(zptr);
+		zval_ptr_dtor(z);
 	} else {
 		zend_error(E_WARNING, "Attempt to assign property of non-object");
 		if (UNEXPECTED(result)) {

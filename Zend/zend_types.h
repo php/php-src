@@ -289,10 +289,12 @@ struct _zend_resource {
 	void             *ptr;
 };
 
+typedef void * zend_reftype;
+
 struct _zend_reference {
 	zend_refcounted_h gc;
 	zval              val;
-	zend_class_entry *type;
+	zend_reftype      type;
 };
 
 struct _zend_ast_ref {
