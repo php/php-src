@@ -1412,7 +1412,7 @@ PHP_FUNCTION(xml_parse_into_struct)
 	size_t data_len;
 	int ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rst/|t/", &pind, &data, &data_len, &xdata, &info) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rst|t", &pind, &data, &data_len, &xdata, &info) == FAILURE) {
 		return;
 	}
 

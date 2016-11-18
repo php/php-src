@@ -21373,6 +21373,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_VAR_VAR_HANDLE
 	variable_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
 
 	if (IS_VAR == IS_VAR &&
+	   UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT) &&
+	   UNEXPECTED(!Z_ISERROR_P(variable_ptr)) &&
+	   UNEXPECTED(!Z_ISREF_P(variable_ptr))) {
+		zend_throw_error(NULL, "Cannot assign by reference to an array dimension of an object");
+		if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+		if (UNEXPECTED(free_op2)) {zval_ptr_dtor_nogc(free_op2);};
+		HANDLE_EXCEPTION();
+	} else if (IS_VAR == IS_VAR &&
 	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
 			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
 		zend_error(E_NOTICE, "Only variables should be assigned by reference");
@@ -25491,7 +25499,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_VAR_CV_HANDLER
 	value_ptr = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->op2.var);
 	variable_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
 
-	if (IS_CV == IS_VAR &&
+	if (IS_VAR == IS_VAR &&
+	   UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT) &&
+	   UNEXPECTED(!Z_ISERROR_P(variable_ptr)) &&
+	   UNEXPECTED(!Z_ISREF_P(variable_ptr))) {
+		zend_throw_error(NULL, "Cannot assign by reference to an array dimension of an object");
+		if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+
+		HANDLE_EXCEPTION();
+	} else if (IS_CV == IS_VAR &&
 	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
 			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
 		zend_error(E_NOTICE, "Only variables should be assigned by reference");
@@ -44903,7 +44919,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_CV_VAR_HANDLER
 	value_ptr = _get_zval_ptr_ptr_var(opline->op2.var, execute_data, &free_op2);
 	variable_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->op1.var);
 
-	if (IS_VAR == IS_VAR &&
+	if (IS_CV == IS_VAR &&
+	   UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT) &&
+	   UNEXPECTED(!Z_ISERROR_P(variable_ptr)) &&
+	   UNEXPECTED(!Z_ISREF_P(variable_ptr))) {
+		zend_throw_error(NULL, "Cannot assign by reference to an array dimension of an object");
+
+		if (UNEXPECTED(free_op2)) {zval_ptr_dtor_nogc(free_op2);};
+		HANDLE_EXCEPTION();
+	} else if (IS_VAR == IS_VAR &&
 	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
 			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
 		zend_error(E_NOTICE, "Only variables should be assigned by reference");
@@ -50439,6 +50463,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_CV_CV_HANDLER(
 	variable_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->op1.var);
 
 	if (IS_CV == IS_VAR &&
+	   UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT) &&
+	   UNEXPECTED(!Z_ISERROR_P(variable_ptr)) &&
+	   UNEXPECTED(!Z_ISREF_P(variable_ptr))) {
+		zend_throw_error(NULL, "Cannot assign by reference to an array dimension of an object");
+
+
+		HANDLE_EXCEPTION();
+	} else if (IS_CV == IS_VAR &&
 	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
 			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
 		zend_error(E_NOTICE, "Only variables should be assigned by reference");

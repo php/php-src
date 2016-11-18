@@ -2778,7 +2778,15 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV, SRC)
 	value_ptr = GET_OP2_ZVAL_PTR_PTR(BP_VAR_W);
 	variable_ptr = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
 
-	if (OP2_TYPE == IS_VAR &&
+	if (OP1_TYPE == IS_VAR &&
+	   UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT) &&
+	   UNEXPECTED(!Z_ISERROR_P(variable_ptr)) &&
+	   UNEXPECTED(!Z_ISREF_P(variable_ptr))) {
+		zend_throw_error(NULL, "Cannot assign by reference to an array dimension of an object");
+		FREE_OP1_VAR_PTR();
+		FREE_OP2_VAR_PTR();
+		HANDLE_EXCEPTION();
+	} else if (OP2_TYPE == IS_VAR &&
 	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
 			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
 		zend_error(E_NOTICE, "Only variables should be assigned by reference");
