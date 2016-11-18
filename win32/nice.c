@@ -30,8 +30,6 @@
  *  +-----------------------+-----------------------------+
  *  | Expression            | Priority type                |
  *  +-----------------------+-----------------------------+
- *  | priority < -14        | REALTIME_PRIORITY_CLASS      |
- *  +-----------------------+-----------------------------+
  *  | priority < -9         | HIGH_PRIORITY_CLASS          |
  *  +-----------------------+-----------------------------+
  *  | priority < -4         | ABOVE_NORMAL_PRIORITY_CLASS  |
@@ -48,15 +46,15 @@
  *
  * This is applied to the main process, not per thread, although this could 
  * be implemented using SetThreadPriority() at one point.
+ *
+ * Note, it is intended that some priority classes are left out.
  */
 
 PHPAPI int nice(zend_long p)
 {
 	DWORD dwFlag = NORMAL_PRIORITY_CLASS;
 
-	if (p < -14) {
-		dwFlag = REALTIME_PRIORITY_CLASS;
-	} else if (p < -9) { 
+	if (p < -9) { 
 		dwFlag = HIGH_PRIORITY_CLASS;
 	} else if (p < -4) {
 		dwFlag = ABOVE_NORMAL_PRIORITY_CLASS;
