@@ -153,7 +153,7 @@ PHP_FUNCTION( numfmt_parse_currency )
 	INTL_METHOD_CHECK_STATUS( nfo, "String conversion to UTF-16 failed" );
 
 	if(zposition) {
-		position = (int32_t) zend_get_long(zposition);
+		position = (int32_t) zval_get_long(zposition);
 		position_p = &position;
 	}
 
