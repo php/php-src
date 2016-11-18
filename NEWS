@@ -8,10 +8,6 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug #69587 (DateInterval properties and isset). (jhdxr)
 
-- DTrace
-  . Introduced zend.enable_dtrace INI directive to enable/disable PHP
-    call tracing. It's disabled by default. (Dmitry)
-
 - Mbstring:
   . Fixed bug #73532 (Null pointer dereference in mb_eregi). (Laruence)
 
