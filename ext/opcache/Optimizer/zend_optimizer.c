@@ -537,6 +537,33 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 	return 1;
 }
 
+static zend_class_entry *get_class_entry_from_op1(
+		zend_script *script, zend_op_array *op_array, zend_op *opline, zend_bool rt_constants) {
+	if (opline->op1_type == IS_CONST) {
+		zval *op1 = CRT_CONSTANT_EX(op_array, opline->op1, rt_constants);
+		if (Z_TYPE_P(op1) == IS_STRING) {
+			zend_string *class_name = Z_STR_P(op1 + 1);
+			zend_class_entry *ce;
+			if (script && (ce = zend_hash_find_ptr(&script->class_table, class_name))) {
+				return ce;
+			} else if ((ce = zend_hash_find_ptr(EG(class_table), class_name))) {
+				if (ce->type == ZEND_INTERNAL_CLASS) {
+					return ce;
+				} else if (ce->type == ZEND_USER_CLASS &&
+						   ce->info.user.filename &&
+						   ce->info.user.filename == op_array->filename) {
+					return ce;
+				}
+			}
+		}
+	} else if (opline->op1_type == IS_UNUSED && op_array->scope
+			&& !(op_array->scope->ce_flags & ZEND_ACC_TRAIT)
+			&& (opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF) {
+		return op_array->scope;
+	}
+	return NULL;
+}
+
 zend_function *zend_optimizer_get_called_func(
 		zend_script *script, zend_op_array *op_array, zend_op *opline, zend_bool rt_constants)
 {
@@ -579,25 +606,8 @@ zend_function *zend_optimizer_get_called_func(
 			break;
 		case ZEND_INIT_STATIC_METHOD_CALL:
 			if (opline->op2_type == IS_CONST && Z_TYPE_P(GET_OP(op2)) == IS_STRING) {
-				zend_class_entry *ce = NULL;
-				if (opline->op1_type == IS_CONST && Z_TYPE_P(GET_OP(op1)) == IS_STRING) {
-					zend_string *class_name = Z_STR_P(GET_OP(op1) + 1);
-					if (script && (ce = zend_hash_find_ptr(&script->class_table, class_name))) {
-						/* pass */
-					} else if ((ce = zend_hash_find_ptr(EG(class_table), class_name))) {
-						if (ce->type == ZEND_INTERNAL_CLASS) {
-							/* pass */
-						} else if (ce->type != ZEND_USER_CLASS ||
-						           !ce->info.user.filename ||
-						           ce->info.user.filename != op_array->filename) {
-							ce = NULL;
-						}
-					}
-				} else if (opline->op1_type == IS_UNUSED && op_array->scope
-						&& !(op_array->scope->ce_flags & ZEND_ACC_TRAIT)
-						&& (opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF) {
-					ce = op_array->scope;
-				}
+				zend_class_entry *ce = get_class_entry_from_op1(
+					script, op_array, opline, rt_constants);
 				if (ce) {
 					zend_string *func_name = Z_STR_P(GET_OP(op2) + 1);
 					return zend_hash_find_ptr(&ce->function_table, func_name);
@@ -622,6 +632,15 @@ zend_function *zend_optimizer_get_called_func(
 				}
 			}
 			break;
+		case ZEND_NEW:
+		{
+			zend_class_entry *ce = get_class_entry_from_op1(
+				script, op_array, opline, rt_constants);
+			if (ce && ce->type == ZEND_USER_CLASS) {
+				return ce->constructor;
+			}
+			break;
+		}
 	}
 	return NULL;
 #undef GET_OP

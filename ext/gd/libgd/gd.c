@@ -1055,7 +1055,7 @@ void gdImageLine (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
 	}
 
 	/* 2.0.10: Nick Atty: clip to edges of drawing rectangle, return if no points need to be drawn */
-	if (!clip_1d(&x1,&y1,&x2,&y2,gdImageSX(im)) || !clip_1d(&y1,&x1,&y2,&x2,gdImageSY(im))) {
+	if (!clip_1d(&x1,&y1,&x2,&y2,gdImageSX(im)-1) || !clip_1d(&y1,&x1,&y2,&x2,gdImageSY(im)-1)) {
 		return;
 	}
 
@@ -1239,54 +1239,9 @@ void gdImageAALine (gdImagePtr im, int x1, int y1, int x2, int y2, int col)
 	long x, y, inc, frac;
 	long dx, dy,tmp;
 
-	if (y1 < 0 && y2 < 0) {
+	/* 2.0.10: Nick Atty: clip to edges of drawing rectangle, return if no points need to be drawn */
+	if (!clip_1d(&x1,&y1,&x2,&y2,gdImageSX(im)-1) || !clip_1d(&y1,&x1,&y2,&x2,gdImageSY(im)-1)) {
 		return;
-	}
-	if (y1 < 0) {
-		x1 += (y1 * (x1 - x2)) / (y2 - y1);
-		y1 = 0;
-	}
-	if (y2 < 0) {
-		x2 += (y2 * (x1 - x2)) / (y2 - y1);
-		y2 = 0;
-	}
-
-	/* bottom edge */
-	if (y1 >= im->sy && y2 >= im->sy) {
-		return;
-	}
-	if (y1 >= im->sy) {
-		x1 -= ((im->sy - y1) * (x1 - x2)) / (y2 - y1);
-		y1 = im->sy - 1;
-	}
-	if (y2 >= im->sy) {
-		x2 -= ((im->sy - y2) * (x1 - x2)) / (y2 - y1);
-		y2 = im->sy - 1;
-	}
-
-	/* left edge */
-	if (x1 < 0 && x2 < 0) {
-		return;
-	}
-	if (x1 < 0) {
-		y1 += (x1 * (y1 - y2)) / (x2 - x1);
-		x1 = 0;
-	}
-	if (x2 < 0) {
-		y2 += (x2 * (y1 - y2)) / (x2 - x1);
-		x2 = 0;
-	}
-	/* right edge */
-	if (x1 >= im->sx && x2 >= im->sx) {
-		return;
-	}
-	if (x1 >= im->sx) {
-		y1 -= ((im->sx - x1) * (y1 - y2)) / (x2 - x1);
-		x1 = im->sx - 1;
-	}
-	if (x2 >= im->sx) {
-		y2 -= ((im->sx - x2) * (y1 - y2)) / (x2 - x1);
-		x2 = im->sx - 1;
 	}
 
 	dx = x2 - x1;
@@ -1824,7 +1779,7 @@ void gdImageFillToBorder (gdImagePtr im, int x, int y, int border, int color)
 	int leftLimit = -1, rightLimit;
 	int i, restoreAlphaBlending = 0;
 
-	if (border < 0) {
+	if (border < 0 || color < 0) {
 		/* Refuse to fill to a non-solid border */
 		return;
 	}

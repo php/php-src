@@ -1771,6 +1771,20 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		ZCG(counted) = 1;
 	}
 
+	/* Revalidate acessibility of cached file */
+	if (EXPECTED(persistent_script != NULL) &&
+	    UNEXPECTED(ZCG(accel_directives).validate_permission) &&
+	    file_handle->type == ZEND_HANDLE_FILENAME &&
+	    UNEXPECTED(access(ZSTR_VAL(persistent_script->script.filename), R_OK) != 0)) {
+		if (type == ZEND_REQUIRE) {
+			zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename TSRMLS_CC);
+			zend_bailout();
+		} else {
+			zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename TSRMLS_CC);
+		}
+		return NULL;
+	}
+
 	HANDLE_BLOCK_INTERRUPTIONS();
 	SHM_UNPROTECT();
 
@@ -2081,6 +2095,29 @@ static void accel_activate(void)
 #ifdef HAVE_OPCACHE_FILE_CACHE
 	if (ZCG(accel_directives).file_cache_only) {
 		return;
+	}
+#endif
+
+#ifndef ZEND_WIN32
+	if (ZCG(accel_directives).validate_root) {
+		struct stat buf;
+
+		if (stat("/", &buf) != 0) {
+			ZCG(root_hash) = 0;
+		} else {
+			ZCG(root_hash) = buf.st_ino;
+			if (sizeof(buf.st_ino) > sizeof(ZCG(root_hash))) {
+				if (ZCG(root_hash) != buf.st_ino) {
+					zend_string *key = zend_string_init("opcache.enable", sizeof("opcache.enable")-1, 0);
+					zend_alter_ini_entry_chars(key, "0", 1, ZEND_INI_SYSTEM, ZEND_INI_STAGE_RUNTIME);
+					zend_string_release(key);
+					zend_accel_error(ACCEL_LOG_WARNING, "Can't cache files in chroot() directory with too big inode");
+					return;
+				}
+			}
+		}
+	} else {
+		ZCG(root_hash) = 0;
 	}
 #endif
 

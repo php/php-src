@@ -1,5 +1,5 @@
 --TEST--
-Bug 72790: wddx_deserialize null dereference with invalid xml
+Bug #72790: wddx_deserialize null dereference with invalid xml
 --SKIPIF--
 <?php
 if (!extension_loaded('wddx')) {
