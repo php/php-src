@@ -664,10 +664,8 @@ PHP_FUNCTION(pcntl_waitpid)
 
 #ifdef HAVE_WAIT4
 	if (z_rusage) {
-		if (Z_TYPE_P(z_rusage) != IS_ARRAY) {
-			zval_dtor(z_rusage);
-			array_init(z_rusage);
-		}
+		zval_dtor(z_rusage);
+		array_init(z_rusage);
 
 		memset(&rusage, 0, sizeof(struct rusage));
 		child_id = wait4((pid_t) pid, &status, options, &rusage);
@@ -1107,10 +1105,8 @@ PHP_FUNCTION(pcntl_sigprocmask)
 	}
 
 	if (user_oldset != NULL) {
-		if (Z_TYPE_P(user_oldset) != IS_ARRAY) {
-			zval_dtor(user_oldset);
-			array_init(user_oldset);
-		}
+		zval_dtor(user_oldset);
+		array_init(user_oldset);
 
 		for (signo = 1; signo < MAX(NSIG-1, SIGRTMAX); ++signo) {
 			if (sigismember(&oldset, signo) != 1) {
@@ -1205,10 +1201,8 @@ PHP_FUNCTION(pcntl_sigtimedwait)
 static void pcntl_siginfo_to_zval(int signo, siginfo_t *siginfo, zval *user_siginfo) /* {{{ */
 {
 	if (signo > 0 && user_siginfo) {
-		if (Z_TYPE_P(user_siginfo) != IS_ARRAY) {
-			zval_dtor(user_siginfo);
-			array_init(user_siginfo);
-		}
+		zval_dtor(user_siginfo);
+		array_init(user_siginfo);
 
 		add_assoc_long_ex(user_siginfo, "signo", sizeof("signo")-1, siginfo->si_signo);
 		add_assoc_long_ex(user_siginfo, "errno", sizeof("errno")-1, siginfo->si_errno);
