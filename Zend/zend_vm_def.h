@@ -6315,20 +6315,6 @@ ZEND_VM_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, JMP_ADDR)
 		FREE_OP1_VAR_PTR();
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	} else if (OP1_TYPE != IS_CONST && EXPECTED(Z_TYPE_P(array_ptr) == IS_OBJECT)) {
-		if (UNEXPECTED(ZEND_CLASS_HAS_TYPE_HINTS(Z_OBJCE_P(array_ptr)))) {
-ZEND_VM_C_LABEL(fe_reset_rw_typed):
-			zend_throw_exception_ex(
-				zend_ce_type_error, 0,
-				"Typed properties exist in %s: foreach by reference is disallowed",
-				ZSTR_VAL(Z_OBJCE_P(array_ptr)->name));
-			if (OP1_TYPE == IS_VAR) {
-				FREE_OP1_VAR_PTR();
-			} else {
-				FREE_OP1();
-			}
-			HANDLE_EXCEPTION();
-		}
-
 		if (!Z_OBJCE_P(array_ptr)->get_iterator) {
 			if (OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) {
 				if (array_ptr == array_ref) {
@@ -6374,10 +6360,6 @@ ZEND_VM_C_LABEL(fe_reset_rw_typed):
 			zend_class_entry *ce = Z_OBJCE_P(array_ptr);
 			zend_object_iterator *iter;
 			zend_bool is_empty;
-
-			if (UNEXPECTED(ZEND_CLASS_HAS_TYPE_HINTS(ce))) {
-				ZEND_VM_C_GOTO(fe_reset_rw_typed);
-			}
 
 			iter = ce->get_iterator(ce, array_ptr, 1);
 
@@ -6706,18 +6688,21 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY, JMP_ADDR)
 				} else if (UNEXPECTED(value_type == IS_INDIRECT)) {
 					value = Z_INDIRECT_P(value);
 					value_type = Z_TYPE_INFO_P(value);
-					if (UNEXPECTED(value_type == IS_UNDEF)) {
+					if (UNEXPECTED(value_type == IS_UNDEF) || UNEXPECTED(zend_check_property_access(Z_OBJ_P(array), p->key) != SUCCESS)) {
 						pos++;
 						p++;
 						continue;
 					}
+					if ((value_type & Z_TYPE_MASK) != IS_REFERENCE) {
+						zend_property_info *prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(array), p->key, NULL);
+						if (UNEXPECTED(prop_info)) {
+							ZVAL_NEW_REF(value, value);
+							Z_REFTYPE_P(value) = zend_get_prop_info_ref_type(prop_info);
+							value_type = IS_REFERENCE_EX;
+						}
+					}
 				}
-				if (UNEXPECTED(!p->key) ||
-				    EXPECTED(zend_check_property_access(Z_OBJ_P(array), p->key) == SUCCESS)) {
-					break;
-				}
-				pos++;
-				p++;
+				break;
 			}
 			if (opline->result_type & (IS_TMP_VAR|IS_CV)) {
 				if (UNEXPECTED(!p->key)) {

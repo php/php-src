@@ -1,15 +1,30 @@
 --TEST--
-foreach() leaks on object with typed properties
+foreach() must return properly typed references
 --FILE--
 <?php
 class Foo {
-	public int $bar;
+	public int $bar = 0;
+	public float $baz = 0.5;
 }
 
-try {
-	foreach (new Foo() as &$val) {}
-} catch (Throwable $e) {
-	echo $e->getMessage() . "\n";
+foreach ($foo = new Foo as $k => &$val) {
+	var_dump($val);
+
+	$val = 20;
+	var_dump($foo->$k);
+
+	try {
+		$val = [];
+		var_dump($foo->$k);
+	} catch (Throwable $e) {
+		echo $e->getMessage(), "\n";
+	}
 }
+?>
 --EXPECT--
-Typed properties exist in Foo: foreach by reference is disallowed
+int(0)
+int(20)
+Cannot assign array to reference of type integer
+float(0.5)
+float(20)
+Cannot assign array to reference of type float

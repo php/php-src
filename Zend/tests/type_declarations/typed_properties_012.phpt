@@ -1,5 +1,5 @@
 --TEST--
-Test typed properties disallow fetch reference for foreach
+Test typed properties allow fetch reference for foreach
 --FILE--
 <?php
 class Foo {
@@ -7,12 +7,13 @@ class Foo {
 }
 
 $foo = new Foo();
-foreach ($foo as &$prop);
+foreach ($foo as &$prop) {
+	$prop++;
+}
+var_dump($foo);
 ?>
---EXPECTF--
-Fatal error: Uncaught TypeError: Typed properties exist in Foo: foreach by reference is disallowed in %s:7
-Stack trace:
-#0 {main}
-  thrown in %s on line 7
-
-
+--EXPECT--
+object(Foo)#1 (1) {
+  ["bar"]=>
+  &int(2)
+}
