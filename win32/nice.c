@@ -47,7 +47,18 @@
  * This is applied to the main process, not per thread, although this could 
  * be implemented using SetThreadPriority() at one point.
  *
- * Note, it is intended that some priority classes are left out.
+ * Note, the following priority classes are left out with intention:
+ *
+ *   . REALTIME_PRIORITY_CLASS
+ *     Realtime priority class requires special system permissions to set, and 
+ *     can be dangerous in certain cases.
+ *
+ *   . PROCESS_MODE_BACKGROUND_BEGIN
+ *   . PROCESS_MODE_BACKGROUND_END
+ *     Process mode is not covered because it can easily forgotten to be changed 
+ *     back and can cause unforseen side effects that is hard to debug. Besides 
+ *     that, these do generally not really fit into making a Windows somewhat
+ *     compatible nice() function.
  */
 
 PHPAPI int nice(zend_long p)
