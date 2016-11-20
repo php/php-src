@@ -1695,7 +1695,7 @@ phpdbg_main:
 			PHPDBG_G(io)[PHPDBG_STDOUT].ptr = stdout;
 			PHPDBG_G(io)[PHPDBG_STDOUT].fd = fileno(stdout);
 			if (show_help) {
-				phpdbg_do_help(NULL);
+				phpdbg_do_help_cmd(exec);
 			} else if (show_version) {
 				phpdbg_out(
 					"phpdbg %s (built: %s %s)\nPHP %s, Copyright (c) 1997-2016 The PHP Group\n%s",
