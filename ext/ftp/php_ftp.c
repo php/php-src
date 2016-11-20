@@ -592,7 +592,7 @@ PHP_FUNCTION(ftp_mkdir)
 		RETURN_FALSE;
 	}
 
-	/* create directorie */
+	/* create directory */
 	if (NULL == (tmp = ftp_mkdir(ftp, dir, dir_len))) {
 		php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
 		RETURN_FALSE;
