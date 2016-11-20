@@ -37,6 +37,10 @@ PHP                                                                        NEWS
   . Fixed bug #73087, #61183, #71494 (Memory corruption in bindParam).
     (Dorin Marcoci)
 
+- Soap:
+  . Fixed bug #73538 (SoapClient::__setSoapHeaders doesn't overwrite SOAP
+    headers). (duncan3dc)
+
 - SPL:
   . Fixed bug #73423 (Reproducible crash with GDB backtrace). (Laruence)
 
