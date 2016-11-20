@@ -2809,7 +2809,8 @@ function toolset_setup_compiler()
 		// 1600 is vs.net 2010
 		// 1700 is vs.net 2011
 		// 1800 is vs.net 2012
-		// 1900 is vs.net 2014
+		// 1900 is vs.net 2015
+		// 1910 is vs.net 2017
 		// Which version of the compiler do we have?
 		VCVERS = COMPILER_NUMERIC_VERSION;
 
