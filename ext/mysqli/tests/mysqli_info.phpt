@@ -67,9 +67,9 @@ require_once('skipifconnectfailure.inc');
 				/* ignore this error */
 				break;
 
-			if (!fwrite($fp, b"100;'a';\n") ||
-				!fwrite($fp, b"101;'b';\n") ||
-				!fwrite($fp, b"102;'c';\n")) {
+			if (!fwrite($fp, "100;'a';\n") ||
+				!fwrite($fp, "101;'b';\n") ||
+				!fwrite($fp, "102;'c';\n")) {
 				@unlink($file);
 				break;
 			}

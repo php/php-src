@@ -21,8 +21,8 @@ if (PHP_INT_SIZE != 8) die('skip 64-bit only');
 echo "*** Testing mb_strripos() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$needle = b'A';
-$haystack = b'string_val';
+$needle = 'A';
+$haystack = 'string_val';
 $encoding = 'utf-8';
 
 //get an unset variable
@@ -33,12 +33,12 @@ unset ($unset_var);
 class classA
 {
   public function __toString() {
-    return b"Class A object";
+    return "Class A object";
   }
 }
 
 // heredoc string
-$heredoc = b<<<EOT
+$heredoc = <<<EOT
 hello world
 EOT;
 
@@ -76,8 +76,8 @@ $inputs = array(
        '',
 
        // string data
-/*18*/ b"string",
-       b'string',
+/*18*/ "string",
+       'string',
        $heredoc,
        
        // object data

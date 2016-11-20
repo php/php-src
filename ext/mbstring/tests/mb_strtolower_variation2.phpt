@@ -20,7 +20,7 @@ function_exists('mb_strtolower') or die("skip mb_strtolower() is not available i
 echo "*** Testing mb_strtolower() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$sourcestring = b'Hello, World';
+$sourcestring = 'Hello, World';
 
 //get an unset variable
 $unset_var = 10;

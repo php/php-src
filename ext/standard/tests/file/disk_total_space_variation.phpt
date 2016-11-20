@@ -53,9 +53,6 @@ foreach($dirs_arr as $dir1) {
   $count++;
 }
 
-echo "*** Testing with Binary Input ***\n";
-var_dump( disk_total_space(b"$file_path") ); 
-
 echo"\n--- Done ---";
 ?>
 
@@ -117,7 +114,5 @@ NULL
 
 Warning: disk_total_space() expects parameter 1 to be a valid path, string given in %s on line %d
 NULL
-*** Testing with Binary Input ***
-float(%d)
 
 --- Done ---

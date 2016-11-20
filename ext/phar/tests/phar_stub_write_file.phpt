@@ -10,7 +10,7 @@ allow_url_fopen=1
 <?php
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
-$stub = b'<?php echo "first stub\n"; __HALT_COMPILER(); ?>';
+$stub = '<?php echo "first stub\n"; __HALT_COMPILER(); ?>';
 $file = $stub;
 
 $files = array();

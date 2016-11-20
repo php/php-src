@@ -1,5 +1,5 @@
 --TEST--
-SPL: RecursiveTreeIterator and binary vs unicode (PHP 6.0+)
+SPL: RecursiveTreeIterator and strings
 --INI--
 error_reporting=E_ALL&~E_NOTICE
 --FILE--
@@ -7,11 +7,11 @@ error_reporting=E_ALL&~E_NOTICE
 
 $ary = array(
 	0 => array(
-		(binary) "binary",
+		"string",
 		"abc2",
 		1,
 	),
-	(binary) "binary" => array(
+	"string" => array(
 		2,
 		"b",
 		3 => array(
@@ -42,7 +42,7 @@ foreach($it as $k => $v) {
 ===DONE===
 --EXPECT--
 string(7) "|-Array"
-string(10) "| |-binary"
+string(10) "| |-string"
 string(8) "| |-abc2"
 string(5) "| \-1"
 string(7) "\-Array"
@@ -61,7 +61,7 @@ string(3) "|-0"
 string(5) "| |-0"
 string(5) "| |-1"
 string(5) "| \-2"
-string(8) "\-binary"
+string(8) "\-string"
 string(5) "  |-0"
 string(5) "  |-1"
 string(5) "  |-3"
@@ -78,15 +78,15 @@ string(3) "|-0"
 string(5) "Array"
 string(7) "|-Array"
 string(5) "| |-0"
-string(6) "binary"
-string(10) "| |-binary"
+string(6) "string"
+string(10) "| |-string"
 string(5) "| |-1"
 string(4) "abc2"
 string(8) "| |-abc2"
 string(5) "| \-2"
 string(1) "1"
 string(5) "| \-1"
-string(8) "\-binary"
+string(8) "\-string"
 string(5) "Array"
 string(7) "\-Array"
 string(5) "  |-0"

@@ -79,25 +79,19 @@ $inputs = array(
        "string",
        'string',
        $heredoc),
-       
-       // binary data
-/*7*/
-'binary' => array(
-       b"binary",
-	   (binary)"binary"),
 	   
        // object data
-/*8*/
+/*7*/
 'object' => array(
       new classA()),
 
        // undefined data
-/*9*/
+/*8*/
 'undefined' => array(
        @$undefined_var),
 
        // unset data
-/*10*/
+/*9*/
 'unset' => array(
       @$unset_var),
 );
@@ -178,27 +172,19 @@ array(3) {
 }
 
 -- Iteration 7 --
-array(2) {
-  [0]=>
-  string(6) "binary"
-  [1]=>
-  string(6) "binary"
-}
-
--- Iteration 8 --
 array(1) {
   [0]=>
   object(classA)#%d (0) {
   }
 }
 
--- Iteration 9 --
+-- Iteration 8 --
 array(1) {
   [0]=>
   NULL
 }
 
--- Iteration 10 --
+-- Iteration 9 --
 array(1) {
   [0]=>
   NULL

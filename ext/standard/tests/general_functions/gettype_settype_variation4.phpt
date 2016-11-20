@@ -163,21 +163,6 @@ $var_values = array (
   /* undefined/unset vars */
   $unset_var,
   $undef_var,
-  
-  /* binary strings */
-  b"0",
-  b'0',
-  b"10string",
-  b'10string',
-  b"+0123",
-  b'-0123',
-  b"0xff",
-  b'0x55',
-  b'1e2',
-  b'2974394749328742328432',
-  b"1e2",
-  b'10string',
-  b"10string"
 );
 
 // test conversion to these types                 
@@ -646,66 +631,6 @@ string(6) "string"
 bool(true)
 bool(false)
 string(7) "boolean"
--- Iteration 87 --
-string(6) "string"
-bool(true)
-bool(false)
-string(7) "boolean"
--- Iteration 88 --
-string(6) "string"
-bool(true)
-bool(true)
-string(7) "boolean"
--- Iteration 89 --
-string(6) "string"
-bool(true)
-bool(true)
-string(7) "boolean"
--- Iteration 90 --
-string(6) "string"
-bool(true)
-bool(true)
-string(7) "boolean"
--- Iteration 91 --
-string(6) "string"
-bool(true)
-bool(true)
-string(7) "boolean"
--- Iteration 92 --
-string(6) "string"
-bool(true)
-bool(true)
-string(7) "boolean"
--- Iteration 93 --
-string(6) "string"
-bool(true)
-bool(true)
-string(7) "boolean"
--- Iteration 94 --
-string(6) "string"
-bool(true)
-bool(true)
-string(7) "boolean"
--- Iteration 95 --
-string(6) "string"
-bool(true)
-bool(true)
-string(7) "boolean"
--- Iteration 96 --
-string(6) "string"
-bool(true)
-bool(true)
-string(7) "boolean"
--- Iteration 97 --
-string(6) "string"
-bool(true)
-bool(true)
-string(7) "boolean"
--- Iteration 98 --
-string(6) "string"
-bool(true)
-bool(true)
-string(7) "boolean"
 
 -- Setting type of data to bool --
 -- Iteration 1 --
@@ -1137,65 +1062,5 @@ string(7) "boolean"
 string(6) "string"
 bool(true)
 bool(false)
-string(7) "boolean"
--- Iteration 87 --
-string(6) "string"
-bool(true)
-bool(false)
-string(7) "boolean"
--- Iteration 88 --
-string(6) "string"
-bool(true)
-bool(true)
-string(7) "boolean"
--- Iteration 89 --
-string(6) "string"
-bool(true)
-bool(true)
-string(7) "boolean"
--- Iteration 90 --
-string(6) "string"
-bool(true)
-bool(true)
-string(7) "boolean"
--- Iteration 91 --
-string(6) "string"
-bool(true)
-bool(true)
-string(7) "boolean"
--- Iteration 92 --
-string(6) "string"
-bool(true)
-bool(true)
-string(7) "boolean"
--- Iteration 93 --
-string(6) "string"
-bool(true)
-bool(true)
-string(7) "boolean"
--- Iteration 94 --
-string(6) "string"
-bool(true)
-bool(true)
-string(7) "boolean"
--- Iteration 95 --
-string(6) "string"
-bool(true)
-bool(true)
-string(7) "boolean"
--- Iteration 96 --
-string(6) "string"
-bool(true)
-bool(true)
-string(7) "boolean"
--- Iteration 97 --
-string(6) "string"
-bool(true)
-bool(true)
-string(7) "boolean"
--- Iteration 98 --
-string(6) "string"
-bool(true)
-bool(true)
 string(7) "boolean"
 Done
