@@ -1735,9 +1735,6 @@ data_accepted:
 databuf_t*
 data_close(ftpbuf_t *ftp, databuf_t *data)
 {
-#ifdef HAVE_FTP_SSL
-	SSL_CTX		*ctx;
-#endif
 	if (data == NULL) {
 		return NULL;
 	}
