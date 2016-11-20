@@ -11,7 +11,7 @@ echo "*** Testing ftruncate() : error conditions ***\n";
 
 $filename = dirname(__FILE__)."/ftruncate_error.tmp";
 $file_handle = fopen($filename, "w" );
-fwrite($file_handle, (binary)"Testing ftruncate error conditions \n");
+fwrite($file_handle, "Testing ftruncate error conditions \n");
 fflush($file_handle);
 echo "\n Initial file size = ".filesize($filename)."\n";
 

@@ -9,10 +9,10 @@ if (!function_exists("inet_pton")) die("skip no inet_pton()");
 <?php
 
 $packed = chr(127) . chr(0) . chr(0) . chr(1);
-var_dump(inet_ntop((binary)$packed));
+var_dump(inet_ntop($packed));
 
 $packed = chr(255) . chr(255) . chr(255) . chr(0);
-var_dump(inet_ntop((binary)$packed));
+var_dump(inet_ntop($packed));
 
 var_dump(inet_ntop());
 var_dump(inet_ntop(-1));
