@@ -29,6 +29,10 @@ PHP                                                                        NEWS
 - PCRE:
   . Fixed bug #73483 (Segmentation fault on pcre_replace_callback). (Laruence)
 
+- Soap:
+  . Fixed bug #73538 (SoapClient::__setSoapHeaders doesn't overwrite SOAP 
+    headers). (duncan3dc)
+
 - SQLite3:
   . Update to SQLite 3.15.1. (cmb)
   . Fixed bug #73530 (Unsetting result set may reset other result set). (cmb)
