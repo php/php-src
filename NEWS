@@ -22,6 +22,10 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug #69090 (check cached files permissions)
 
+- OpenSSL:
+  . Fixed bug #73478 (openssl_pkey_new() generates wrong pub/priv keys with
+    Diffie Hellman). (Jakub Zelenka)
+
 - PCRE:
   . Fixed bug #73483 (Segmentation fault on pcre_replace_callback). (Laruence)
 
