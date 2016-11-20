@@ -5,8 +5,6 @@ MySQL PDOStatement->fetch(), PDO::FETCH_SERIALIZE
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
-if (version_compare(PHP_VERSION, '5.1.0', '<'))
-	die("skip Needs 5.1.0 and Interface Serializable");
 ?>
 --FILE--
 <?php
