@@ -200,7 +200,7 @@ require_once('skipifconnectfailure.inc');
 		}
 	}
 
-	if (($IS_MYSQLND && version_compare(PHP_VERSION, ' 5.4.12-dev', '>=')) || (!$IS_MYSQLND && ($version > 50610))) {
+	if ($IS_MYSQLND || (!$IS_MYSQLND && ($version > 50610))) {
 		/* could be that MySQL/libmysql 5.6.9 had the flag already but it was no stable release */
 		$expected_constants["MYSQLI_OPT_CAN_HANDLE_EXPIRED_PASSWORDS"] = true;
 		$expected_constants["MYSQLI_CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS"] = true;

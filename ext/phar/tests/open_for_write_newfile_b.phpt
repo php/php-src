@@ -3,7 +3,6 @@ Phar: fopen a .phar for writing (new file)
 --SKIPIF--
 <?php
 if (!extension_loaded("phar")) die("skip");
-if (version_compare(PHP_VERSION, "5.3", "<")) die("skip requires 5.3 or later");
 ?>
 --INI--
 phar.readonly=1

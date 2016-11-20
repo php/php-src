@@ -5,10 +5,6 @@ mysqli_stmt_bind_param used with call_user_func_array() (see also bug #43568)
 require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
-
-// TODO remove once a decision has been made on call_user_func_array()
-if (version_compare(PHP_VERSION, '5.3.0-dev') == -1)
-	die("skip needs PHP 5.3.0-dev+, see http://bugs.php.net/bug.php?id=43568");
 ?>
 --FILE--
 <?php

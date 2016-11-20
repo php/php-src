@@ -60,10 +60,6 @@ require_once('skipifconnectfailure.inc');
 		'use_result'			=> true,
 	);
 
-	if (version_compare(PHP_VERSION, '5.3.99', '<=')) {
-		$expected_methods['client_encoding'] = true;
-	}
-
 	if ($IS_MYSQLND) {
 		// mysqlnd only
 		/* $expected_methods['get_client_stats']	= true; */
@@ -118,10 +114,8 @@ require_once('skipifconnectfailure.inc');
 		"warning_count"		=> true,
 	);
 
-	if (version_compare(PHP_VERSION, '5.3.99', '>')) {
-	  $expected_class_variables["error_list"] = true;
-	  $expected_object_variables["error_list"] = true;
-	}
+	$expected_class_variables["error_list"] = true;
+	$expected_object_variables["error_list"] = true;
 
 	$variables = get_class_vars(get_class($mysqli));
 	foreach ($variables as $var => $v) {
@@ -188,10 +182,8 @@ require_once('skipifconnectfailure.inc');
 		$mysqli->error, gettype($mysqli->error),
 		mysqli_error($link), gettype(mysqli_error($link)));
 
-	if (version_compare(PHP_VERSION, '5.3.99', '>')) {
-		assert(mysqli_error_list($link) === $mysqli->error_list);
-		assert(is_array($mysqli->error_list));
-	}
+	assert(mysqli_error_list($link) === $mysqli->error_list);
+	assert(is_array($mysqli->error_list));
 
 	assert(mysqli_field_count($link) === $mysqli->field_count);
 	printf("mysqli->field_count = '%s'/%s ('%s'/%s)\n",

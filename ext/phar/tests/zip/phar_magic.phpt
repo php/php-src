@@ -3,7 +3,6 @@ Phar: include/fopen magic zip-based
 --SKIPIF--
 <?php
 if (!extension_loaded("phar")) die("skip");
-if (version_compare(PHP_VERSION, "6.0", "==")) die("skip pre-unicode version of PHP required");
 ?>
 --INI--
 phar.require_hash=0
@@ -21,9 +20,6 @@ $p->setStub('<?php
 var_dump(__FILE__);
 var_dump(substr(__FILE__, 0, 4) != "phar");
 set_include_path("phar://" . __FILE__);
-if (version_compare(PHP_VERSION, "5.3", "<")) {
-Phar::interceptFileFuncs();
-}
 include "phar://" . __FILE__ . "/a";
 __HALT_COMPILER();');
 include $pname;
