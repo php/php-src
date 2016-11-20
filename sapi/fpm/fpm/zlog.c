@@ -186,11 +186,11 @@ void vzlog(const char *function, int line, int flags, const char *fmt, va_list a
 #endif
 	{
 		buf[len++] = '\n';
-		quiet_write(zlog_fd > -1 ? zlog_fd : STDERR_FILENO, buf, len);
+		write(zlog_fd > -1 ? zlog_fd : STDERR_FILENO, buf, len);
 	}
 
 	if (zlog_fd != STDERR_FILENO && zlog_fd != -1 && !launched && (flags & ZLOG_LEVEL_MASK) >= ZLOG_NOTICE) {
-		quiet_write(STDERR_FILENO, buf, len);
+		write(STDERR_FILENO, buf, len);
 	}
 }
 /* }}} */

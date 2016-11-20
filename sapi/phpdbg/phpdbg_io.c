@@ -203,7 +203,7 @@ static int phpdbg_output_pager(int sock, const char *ptr, int len) {
 			
 			if (memchr(p, '\n', endp - p)) {
 				char buf[PHPDBG_MAX_CMD];
-				quiet_write(sock, ZEND_STRL("\r---Type <return> to continue or q <return> to quit---"));
+				write(sock, ZEND_STRL("\r---Type <return> to continue or q <return> to quit---"));
 				phpdbg_consume_stdin_line(buf);
 				if (*buf == 'q') {
 					break;
