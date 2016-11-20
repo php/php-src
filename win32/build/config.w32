@@ -310,3 +310,6 @@ ARG_ENABLE("test-ini", "Enable automatic php.ini generation. The test.ini will b
 ARG_WITH("test-ini-ext-exclude", "Comma separated list of shared extensions to \
 		be excluded from the test.ini", "no");
 
+
+ARG_ENABLE('asm', 'Enable .asm output for .c files', 'no');
+setup_asm();

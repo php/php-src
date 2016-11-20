@@ -3147,6 +3147,19 @@ function object_out_dir_option_handle()
 	}
 }
 
+function setup_asm()
+{
+	if (PHP_ASM != 'no') {
+		if (!FSO.FolderExists(configure_subst.Item('BUILD_DIR') + '\\asm')) {
+			FSO.CreateFolder(configure_subst.Item('BUILD_DIR') + '\\asm');
+		}
+
+		ADD_FLAG('CFLAGS', ' /Fa' + configure_subst.Item('BUILD_DIR') + '\\asm\\');
+
+		STDOUT.WriteLine('Enabling .asm output for .c files');
+	}
+}
+
 function setup_zts_stuff()
 {
 	if (PHP_ZTS == "yes") {
