@@ -113,6 +113,8 @@
 #define memcpy(...) memcpy_tmp(__VA_ARGS__)
 #endif
 
+#define quiet_write(...) ZEND_IGNORE_VALUE(write(__VA_ARGS__))
+
 #if !defined(PHPDBG_WEBDATA_TRANSFER_H) && !defined(PHPDBG_WEBHELPER_H)
 
 #ifdef ZTS
