@@ -17,6 +17,9 @@ PHP                                                                        NEWS
     This may be enabled again using envirionment variable USE_ZEND_DTRACE=1.
     (Dmitry)
 
+- JSON:
+  . Fixed bug #73526 (php_json_encode depth issue). (Jakub Zelenka)
+
 - Mysqlnd:
   . Fixed bug #64526 (Add missing mysqlnd.* parameters to php.ini-*). (cmb)
 
