@@ -33,6 +33,7 @@
 #include "zend_alloc.h"
 #include "phpdbg_eol.h"
 #include "phpdbg_print.h"
+#include "phpdbg_help.h"
 
 #include "ext/standard/basic_functions.h"
 

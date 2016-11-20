@@ -1183,7 +1183,6 @@ ZEND_API int zend_eval_string_ex(char *str, zval *retval_ptr, char *string_name,
 
 ZEND_API void zend_timeout(int dummy) /* {{{ */
 {
-
 	if (zend_on_timeout) {
 #ifdef ZEND_SIGNALS
 		/*
