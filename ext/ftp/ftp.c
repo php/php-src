@@ -560,7 +560,7 @@ ftp_cdup(ftpbuf_t *ftp)
 /* {{{ ftp_mkdir
  */
 zend_string*
-ftp_mkdir(ftpbuf_t *ftp, const char *dir)
+ftp_mkdir(ftpbuf_t *ftp, const char *dir, const size_t dir_len)
 {
 	char *mkd, *end;
 	zend_string *ret;
@@ -576,7 +576,7 @@ ftp_mkdir(ftpbuf_t *ftp, const char *dir)
 	}
 	/* copy out the dir from response */
 	if ((mkd = strchr(ftp->inbuf, '"')) == NULL) {
-		return zend_string_init(dir, strlen(dir), 0);
+		return zend_string_init(dir, dir_len, 0);
 	}
 	if ((end = strrchr(++mkd, '"')) == NULL) {
 		return NULL;

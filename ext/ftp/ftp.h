@@ -135,7 +135,7 @@ int		ftp_cdup(ftpbuf_t *ftp);
 /* creates a directory, return the directory name on success, NULL on error.
  * the return value must be freed
  */
-zend_string* ftp_mkdir(ftpbuf_t *ftp, const char *dir);
+zend_string* ftp_mkdir(ftpbuf_t *ftp, const char *dir, const size_t dir_len);
 
 /* removes a directory, return true on success, false on error */
 int		ftp_rmdir(ftpbuf_t *ftp, const char *dir);
