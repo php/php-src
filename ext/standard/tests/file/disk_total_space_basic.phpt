@@ -20,7 +20,7 @@ $dir = "/disk_total_space";
 mkdir($file_path.$dir);
 var_dump( disk_total_space($file_path.$dir) );
 $fh = fopen($file_path.$dir."/disk_total_space.tmp", "w");
-fwrite($fh, (binary)"Garbage Data Garbage Data Garbage Data Garbage Data Garbage Data Garbage Data Garbage Data");
+fwrite($fh, "Garbage Data Garbage Data Garbage Data Garbage Data Garbage Data Garbage Data Garbage Data");
 
 fclose($fh);
 

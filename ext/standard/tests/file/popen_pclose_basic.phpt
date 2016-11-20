@@ -47,8 +47,8 @@ $file_handle = popen("sort", "w");
 $counter = 0;
 $newline = "\n";
 foreach($arr as $str) {
-  fwrite($file_handle, (binary)$str);
-  fwrite($file_handle, (binary)$newline);
+  fwrite($file_handle, $str);
+  fwrite($file_handle, $newline);
 }
 pclose($file_handle);
 
