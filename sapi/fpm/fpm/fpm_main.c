@@ -1865,7 +1865,7 @@ consult the installation file that came with this distribution, or visit \n\
 		if (fpm_globals.send_config_pipe[1]) {
 			int writeval = 0;
 			zlog(ZLOG_DEBUG, "Sending \"0\" (error) to parent via fd=%d", fpm_globals.send_config_pipe[1]);
-			write(fpm_globals.send_config_pipe[1], &writeval, sizeof(writeval));
+			zend_quiet_write(fpm_globals.send_config_pipe[1], &writeval, sizeof(writeval));
 			close(fpm_globals.send_config_pipe[1]);
 		}
 		return FPM_EXIT_CONFIG;
@@ -1874,7 +1874,7 @@ consult the installation file that came with this distribution, or visit \n\
 	if (fpm_globals.send_config_pipe[1]) {
 		int writeval = 1;
 		zlog(ZLOG_DEBUG, "Sending \"1\" (OK) to parent via fd=%d", fpm_globals.send_config_pipe[1]);
-		write(fpm_globals.send_config_pipe[1], &writeval, sizeof(writeval));
+		zend_quiet_write(fpm_globals.send_config_pipe[1], &writeval, sizeof(writeval));
 		close(fpm_globals.send_config_pipe[1]);
 	}
 	fpm_is_running = 1;
