@@ -123,7 +123,7 @@
 # define ZEND_IGNORE_VALUE(x) ((void) (x))
 #endif
 
-#define quiet_write(...) ZEND_IGNORE_VALUE(write(__VA_ARGS__))
+#define zend_quiet_write(...) ZEND_IGNORE_VALUE(write(__VA_ARGS__))
 
 /* all HAVE_XXX test have to be after the include of zend_config above */
 

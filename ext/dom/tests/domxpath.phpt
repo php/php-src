@@ -21,7 +21,7 @@ function MyAverage($nodelist) {
 }
 
 $dom = new DOMDocument;
-$dom->loadXML(b'<root xmlns="urn::default"><child>myval</child></root>');
+$dom->loadXML('<root xmlns="urn::default"><child>myval</child></root>');
 
 $xpath = new DOMXPath($dom);
 

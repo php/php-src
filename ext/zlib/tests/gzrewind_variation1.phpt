@@ -10,9 +10,9 @@ if (!extension_loaded("zlib")) {
 <?php
 $f = "temp2.txt.gz";
 $h = gzopen($f, 'w');
-gzwrite($h, b'The first string.');
+gzwrite($h, 'The first string.');
 var_dump(gzrewind($h));
-gzwrite($h, b'The second string.');
+gzwrite($h, 'The second string.');
 gzclose($h);
 
 $h = gzopen($f, 'r');

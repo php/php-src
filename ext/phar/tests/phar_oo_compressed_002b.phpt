@@ -30,10 +30,10 @@ var_dump($phar['c']->isCompressed());
 
 $context = stream_context_create(array('phar'=>array('compress'=>Phar::BZ2)));
 
-file_put_contents($pname . '/b', b'new b');
-file_put_contents($pname . '/c', b'new c', 0, $context);
-file_put_contents($pname . '/d', b'new d');
-file_put_contents($pname . '/e', b'new e', 0, $context);
+file_put_contents($pname . '/b', 'new b');
+file_put_contents($pname . '/c', 'new c', 0, $context);
+file_put_contents($pname . '/d', 'new d');
+file_put_contents($pname . '/e', 'new e', 0, $context);
 
 $phar = new Phar($fname);
 var_dump(file_get_contents($pname . '/a'));
