@@ -5596,8 +5596,19 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 			|	jnz >1
 			|.cold_code
 			|1:
-			|	// OBJ_RELEASE(object);
 			|	GET_Z_PTR r0, RX + offsetof(zend_execute_data, This)
+			if (opline->op1.num & ZEND_CALL_CTOR) {
+				|	// if (UNEXPECTED(EG(exception)
+				|	cmp aword [&EG(exception)], 0
+				|	je >1
+				|	// GC_REFCOUNT(object)--;
+				|	GC_DELREF r0
+				|	// zend_object_store_ctor_failed(object);
+				|	// GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
+				|	or byte [r0 + offsetof(zend_object, gc.u.v.flags)], IS_OBJ_DESTRUCTOR_CALLED
+				|1:
+			}
+			|	// OBJ_RELEASE(object);
 			|	OBJ_RELEASE r0, ecx, >2
 			|	jmp >2
 			|.code
@@ -6303,17 +6314,8 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, zend_op_
 				|	// GC_REFCOUNT(object)--;
 				|	GC_DELREF r0
 				|	// zend_object_store_ctor_failed(object);
-				|.if X64
-				|	mov CARG1, r0
-				|	EXT_CALL zend_object_store_ctor_failed, r0
-				|.else
-				|	sub r4, 12
-				|	push r0
-				|	EXT_CALL zend_object_store_ctor_failed, r0
-				|	add r4, 16
-				|.endif
-				|	// reload registers
-				|	mov r0, EX->This.value.obj
+				|	// GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
+				|	or byte [r0 + offsetof(zend_object, gc.u.v.flags)], IS_OBJ_DESTRUCTOR_CALLED
 				|	jmp >5
 				|.code
 				|5:
