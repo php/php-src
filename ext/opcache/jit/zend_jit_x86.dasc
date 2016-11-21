@@ -5364,7 +5364,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 			|	EXT_CALL zend_jit_deprecated_or_abstract_helper, r0
 			|	cmp aword [&EG(exception)], 0
 			|	jne ->exception_handler
-			|	mov r0, EX->func // reload
+			|	mov r0, EX:RX->func // reload
 			|	jmp >1
 			|.code
 			|1:
@@ -5375,7 +5375,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 			|	EXT_CALL zend_jit_deprecated_or_abstract_helper, r0
 			|	cmp aword [&EG(exception)], 0
 			|	jne ->exception_handler
-			|	mov r0, EX->func // reload
+			|	mov r0, EX:RX->func // reload
 		}
 	}
 
@@ -5526,7 +5526,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 				|	EXT_CALL zend_jit_deprecated_or_abstract_helper, r0
 				|	cmp aword [&EG(exception)], 0
 				|	jne ->exception_handler
-				|	mov r0, EX->func // reload
+				|	mov r0, EX:RX->func // reload
 				|	jmp >1
 				|.code
 				|1:
@@ -5537,9 +5537,10 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 				|	EXT_CALL zend_jit_deprecated_or_abstract_helper, r0
 				|	cmp aword [&EG(exception)], 0
 				|	jne ->exception_handler
-				|	mov r0, EX->func // reload
+				|	mov r0, EX:RX->func // reload
 			}
 		}
+
 		if (RETURN_VALUE_USED(opline)) {
 			|	// ZVAL_NULL(EX_VAR(opline->result.var));
 			|	lea FCARG2a, aword [FP + opline->result.var]
@@ -5552,6 +5553,31 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 
 		|	// EG(current_execute_data) = execute_data;
 		|	mov aword [&EG(current_execute_data)], RX
+
+		if (!func || (func->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+			if (!func) {
+				|	test dword [r0 + offsetof(zend_op_array, fn_flags)], ZEND_ACC_HAS_TYPE_HINTS
+				|	jnz >1
+				|.cold_code
+			}
+			|1:
+			|	mov FCARG1a, RX
+			|	EXT_CALL zend_jit_verify_internal_arg_types_helper, r0
+			|	test r0, r0
+			|	je >8
+			|	// reload
+			if (RETURN_VALUE_USED(opline)) {
+				|	lea FCARG2a, aword [FP + opline->result.var]
+			} else {
+				|	lea FCARG2a, aword [r4 + 8]
+			}
+			if (!func) {
+				|	mov r0, EX:RX->func // reload
+				|	jmp >1
+				|.code
+			}
+			|1:
+		}
 
 		zend_jit_reset_opline(Dst, NULL);
 
@@ -5589,6 +5615,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 			|	EXT_CALL zend_jit_vm_stack_free_args_helper, r0
 		}
 
+		|8:
 		if (opline->opcode == ZEND_DO_FCALL) {
 			// TODO: optimize ???
 			|	// if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS))

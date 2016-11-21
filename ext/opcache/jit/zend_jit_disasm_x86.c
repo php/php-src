@@ -430,6 +430,7 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_vm_stack_free_args_helper);
 	REGISTER_HELPER(zend_jit_copy_extra_args_helper);
 	REGISTER_HELPER(zend_jit_deprecated_or_abstract_helper);
+	REGISTER_HELPER(zend_jit_verify_internal_arg_types_helper);
 #undef  REGISTER_HELPER
 
 	zend_elf_load_symbols();
