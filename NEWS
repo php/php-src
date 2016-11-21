@@ -44,6 +44,7 @@ PHP                                                                        NEWS
 - Soap:
   . Fixed bug #73538 (SoapClient::__setSoapHeaders doesn't overwrite SOAP
     headers). (duncan3dc)
+  . Fixed bug #73452 (Segfault (Regression for #69152)). (Dmitry)
 
 - SPL:
   . Fixed bug #73423 (Reproducible crash with GDB backtrace). (Laruence)
