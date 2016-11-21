@@ -210,12 +210,6 @@ ZEND_API void zend_object_store_set_object(zval *zobject, zend_object *object)
 	EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(zobject)] = object;
 }
 
-/* Called when the ctor was terminated by an exception */
-ZEND_API void zend_object_store_ctor_failed(zend_object *obj)
-{
-	GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
-}
-
 ZEND_API zend_object_handlers *zend_get_std_object_handlers(void)
 {
 	return &std_object_handlers;
