@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.1
 
+- Core:
+  . Fixed memory leak(null coalescing operator with Spl hash). (Tyson Andre)
+
 - Calendar:
   . Fix integer overflows (Joshua Rogers)
 
