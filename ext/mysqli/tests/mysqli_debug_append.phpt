@@ -46,7 +46,7 @@ if (!$IS_MYSQLND)
 		printf("[004] Cannot create trace file to test append mode\n");
 	} else {
 
-		if (!fwrite($fp, (binary) 'mysqli_debug.phpt test line'))
+		if (!fwrite($fp, 'mysqli_debug.phpt test line'))
 			printf("[005] Cannot write to trace file.\n");
 		fclose($fp);
 

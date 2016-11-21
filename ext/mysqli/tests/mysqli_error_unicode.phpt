@@ -24,10 +24,6 @@ require_once('skipifconnectfailure.inc');
 			$host, $user, $db, $port, $socket);
 	}
 
-	if (!(version_compare(PHP_VERSION, '6.0', '==') == 1)) {
-		mysqli_query($link, "set names utf8");
-	}
-
 	$tmp = mysqli_error($link);
 	if (!is_string($tmp) || ('' !== $tmp))
 		printf("[004] Expecting string/empty, got %s/%s. [%d] %s\n", gettype($tmp), $tmp, mysqli_errno($link), mysqli_error($link));

@@ -3,7 +3,6 @@ Phar: fopen a .phar for writing (existing file) zip-based
 --SKIPIF--
 <?php
 if (!extension_loaded("phar")) die("skip");
-if (version_compare(PHP_VERSION, "5.3", "<")) die("skip requires 5.3 or later");
 ?>
 --INI--
 phar.readonly=0
@@ -31,7 +30,7 @@ $phar->stopBuffering();
 ini_set('phar.readonly', 1);
 
 $fp = fopen($alias . '/b/c.php', 'wb');
-fwrite($fp, b'extra');
+fwrite($fp, 'extra');
 fclose($fp);
 include $alias . '/b/c.php';
 ?>

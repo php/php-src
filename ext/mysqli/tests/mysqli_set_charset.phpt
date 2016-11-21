@@ -6,10 +6,6 @@ require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 
-if (version_compare(PHP_VERSION, '6.0', '==') == 1) {
-	die('skip set character set not functional with PHP 6 (fomerly PHP 6 && unicode.semantics=On)');
-}
-
 if (!function_exists('mysqli_set_charset'))
  	die("skip Function not available");
 

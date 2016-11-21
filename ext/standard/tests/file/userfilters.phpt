@@ -20,7 +20,7 @@ class testfilter extends php_user_filter {
 
 stream_filter_register('testfilter','testfilter');
 
-$text = b"Hello There!";
+$text = "Hello There!";
 
 $fp = tmpfile();
 fwrite($fp, $text);

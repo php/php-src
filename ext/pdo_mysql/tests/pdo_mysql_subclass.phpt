@@ -5,8 +5,6 @@ MySQL PDOStatement->execute()/fetch(), Non-SELECT
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
-if (version_compare(PHP_VERSION, '5.0.0', '<'))
-	die("skip Requires PHP 5.0+");
 ?>
 --FILE--
 <?php

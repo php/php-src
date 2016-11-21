@@ -2,10 +2,6 @@
 Test http_build_query() function: usage variations - testing four parameter added in PHP 5.4.0
 --CREDITS--
 Adam Gegotek <adam [dot] gegotek [at] gmail [dot] com>
---SKIPIF--
-<?php 
-  if (version_compare(PHP_VERSION, '5.4.0', '<')) die("skip this test if PHP_VERSION is less than 5.4.0");
-?>
 --FILE--
 <?php
 /* Prototype  : string http_build_query ( mixed $query_data [, string $numeric_prefix [, string $arg_separator [, int $enc_type = PHP_QUERY_RFC1738 ]]] )

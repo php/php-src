@@ -22,7 +22,7 @@ echo "*** Testing iconv_mime_decode() : usage variations ***\n";
 // Some of the parameters actually passed to charset will request to use
 // a default charset determined by the platform. In order for this test to
 // run on both linux and windows, the subject will have to be ascii only.
-$header = b'Subject: =?UTF-8?B?QSBTYW1wbGUgVGVzdA==?=';
+$header = 'Subject: =?UTF-8?B?QSBTYW1wbGUgVGVzdA==?=';
 $mode = ICONV_MIME_DECODE_CONTINUE_ON_ERROR;
 $charset = 'UTF-8';
 

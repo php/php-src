@@ -28,9 +28,9 @@ foreach ($offsets as $i) {
 	var_dump( mb_strrpos($string_mb, $needle, $i, 'UTF-8') );
 	echo "ASCII String:\n";
 	echo "mb_strrpos:\n";
-	var_dump(mb_strrpos(b'This is na English ta', b'a', $i));
+	var_dump(mb_strrpos('This is na English ta', 'a', $i));
 	echo "strrpos:\n";
-	var_dump(strrpos(b'This is na English ta', b'a', $i));
+	var_dump(strrpos('This is na English ta', 'a', $i));
 }
 ?>
 

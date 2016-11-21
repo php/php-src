@@ -45,4 +45,6 @@ typedef struct _phpdbg_help_text_t {
 } phpdbg_help_text_t;
 
 extern phpdbg_help_text_t phpdbg_help_text[];
+
+extern void phpdbg_do_help_cmd(char *type);
 #endif /* PHPDBG_HELP_H */

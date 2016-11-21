@@ -18,7 +18,7 @@ $file_path = dirname(__FILE__);
 echo "*** Testing filesize(): usage variations ***\n"; 
 $filename =  $file_path."/filesize_variation3.tmp";
 $file_handle = fopen($filename, "w");
-fwrite($file_handle, (binary)str_repeat("Hello,World ", 1000) ); // create file of size 12000 bytes
+fwrite($file_handle, str_repeat("Hello,World ", 1000) ); // create file of size 12000 bytes
 fclose($file_handle);
 
 echo "-- Testing filesize() after truncating the file to a new length --\n";

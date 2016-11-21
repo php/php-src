@@ -22,8 +22,8 @@ echo "*** Testing mb_substr_count() : usage variations ***\n";
 
 
 echo "\n-- ASCII String --\n";
-$string_ascii = b'abcabcabc';
-var_dump(mb_substr_count($string_ascii, b'abcabc')); //needle overlaps in haystack
+$string_ascii = 'abcabcabc';
+var_dump(mb_substr_count($string_ascii, 'abcabc')); //needle overlaps in haystack
 
 echo "\n-- Multibyte String --\n";
 $string_mb = base64_decode('5pel5pys6Kqe5pel5pys6Kqe5pel5pys6Kqe');
