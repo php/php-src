@@ -29,6 +29,9 @@ else {
 	echo pg_last_error()."\n";
 }
 
+// Create view here
+pg_query($db,$view_def);
+
 pg_close($db);
 
 echo "OK";
