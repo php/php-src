@@ -1996,6 +1996,12 @@ ldap.max_links = -1
 ; Useful for internal debugging only.
 ;opcache.protect_memory=0
 
+; Validate cached file permissions.
+; opcache.validate_permission=0
+
+; Prevent name collisions in chroot'ed environment.
+; opcache.validate_root=0
+
 [curl]
 ; A default value for the CURLOPT_CAINFO option. This is required to be an
 ; absolute path.
