@@ -2,12 +2,13 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016 PHP 7.0.14
 
-- Calendar:
-  . Fix integer overflows (Joshua Rogers)
-
 - Core:
+  . Fixed memory leak(null coalescing operator with Spl hash). (Tyson Andre)
   . Fixded bug #72736 (Slow performance when fetching large dataset with mysqli
     / PDO). (Dmitry)
+
+- Calendar:
+  . Fix integer overflows (Joshua Rogers)
 
 - Date:
   . Fixed bug #69587 (DateInterval properties and isset). (jhdxr)
