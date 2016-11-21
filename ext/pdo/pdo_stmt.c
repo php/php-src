@@ -2581,7 +2581,7 @@ static int row_prop_exists(zval *object, zval *member, int check_empty, void **c
 					int res;
 					zval val;
 
-					fetch_value(stmt, &val, colno, NULL TSRMLS_CC);
+					fetch_value(stmt, &val, colno, NULL);
 					res = check_empty ? i_zend_is_true(&val) : Z_TYPE(val) != IS_NULL;
 					zval_dtor(&val);
 
