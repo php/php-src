@@ -904,6 +904,7 @@ PHP_METHOD(SoapFault, SoapFault)
 PHP_METHOD(SoapFault, __toString)
 {
 	zval *faultcode, *faultstring, *file, *line, *trace;
+	zval *faultcode_cp, *faultstring_cp, *file_cp, *line_cp;
 	char *str;
 	int len;
 	zend_fcall_info fci;
@@ -932,16 +933,36 @@ PHP_METHOD(SoapFault, __toString)
 
 	zend_call_function(&fci, NULL TSRMLS_CC);
 
-	convert_to_string(faultcode);
-	convert_to_string(faultstring);
-	convert_to_string(file);
-	convert_to_long(line);
+	ALLOC_ZVAL(faultcode_cp);
+	INIT_PZVAL_COPY(faultcode_cp, faultcode);
+	zval_copy_ctor(faultcode_cp);
+
+	ALLOC_ZVAL(faultstring_cp);
+	INIT_PZVAL_COPY(faultstring_cp, faultstring);
+	zval_copy_ctor(faultstring_cp);
+
+	ALLOC_ZVAL(file_cp);
+	INIT_PZVAL_COPY(file_cp, file);
+	zval_copy_ctor(file_cp);
+
+	ALLOC_ZVAL(line_cp);
+	INIT_PZVAL_COPY(line_cp, line);
+	zval_copy_ctor(line_cp);
+
+	convert_to_string(faultcode_cp);
+	convert_to_string(faultstring_cp);
+	convert_to_string(file_cp);
+	convert_to_long(line_cp);
 	convert_to_string(trace);
 
 	len = spprintf(&str, 0, "SoapFault exception: [%s] %s in %s:%ld\nStack trace:\n%s",
-	               Z_STRVAL_P(faultcode), Z_STRVAL_P(faultstring), Z_STRVAL_P(file), Z_LVAL_P(line),
+	               Z_STRVAL_P(faultcode_cp), Z_STRVAL_P(faultstring_cp), Z_STRVAL_P(file_cp), Z_LVAL_P(line_cp),
 	               Z_STRLEN_P(trace) ? Z_STRVAL_P(trace) : "#0 {main}\n");
 
+	zval_ptr_dtor(&faultcode_cp);
+	zval_ptr_dtor(&faultstring_cp);
+	zval_ptr_dtor(&file_cp);
+	zval_ptr_dtor(&line_cp);
 	zval_ptr_dtor(&trace);
 
 	RETURN_STRINGL(str, len, 0);
