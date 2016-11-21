@@ -14,6 +14,9 @@ PHP                                                                        NEWS
   . Fixed bug #72776 (Invalid parameter in memcpy function trough
     openssl_pbkdf2). (Jakub Zelenka)
 
+- Postgres:
+  . Fixed bug #73498 (Incorrect SQL generated for pg_copy_to()). (Craig Duncan)
+
 - SOAP:
   . Fixed bug #73452 (Segfault (Regression for #69152)). (Dmitry)
 
