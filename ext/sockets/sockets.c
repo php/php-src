@@ -2370,7 +2370,7 @@ PHP_FUNCTION(socket_export_stream)
 	char *protocol = NULL;
 	size_t protocollen = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zsocket) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zsocket) == FAILURE) {
 		return;
 	}
 	if ((socket = (php_socket *) zend_fetch_resource(Z_RES_P(zsocket), le_socket_name, le_socket)) == NULL) {

@@ -261,12 +261,12 @@ static PHP_FUNCTION(json_decode)
 	}
 
 	if (depth <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Depth must be greater than zero");
+		php_error_docref(NULL, E_WARNING, "Depth must be greater than zero");
 		RETURN_NULL();
 	}
 
 	if (depth > INT_MAX) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Depth must be lower than %d", INT_MAX);
+		php_error_docref(NULL, E_WARNING, "Depth must be lower than %d", INT_MAX);
 		RETURN_NULL();
 	}
 
