@@ -115,10 +115,10 @@ static void zend_ini_add_string(zval *result, zval *op1, zval *op2)
 		/* ZEND_ASSERT(!Z_REFCOUNTED_P(op1)); */
 		if (ZEND_SYSTEM_INI) {
 			ZVAL_PSTRINGL(op1, ZSTR_VAL(str), ZSTR_LEN(str));
+			zend_string_release(str);
 		} else {
 			ZVAL_STR(op1, str);
 		}
-		zend_string_release(str);
 	}
 	op1_len = (int)Z_STRLEN_P(op1);
 	
