@@ -31,23 +31,23 @@ var_dump($h);
 ?>
 --EXPECTF--
 object(ext_heap)#%d (4) {
-  [%u|b%"fail"]=>
+  ["fail"]=>
   bool(true)
-  [%u|b%"flags":%u|b%"SplHeap":private]=>
+  ["flags":"SplHeap":private]=>
   int(0)
-  [%u|b%"isCorrupted":%u|b%"SplHeap":private]=>
+  ["isCorrupted":"SplHeap":private]=>
   bool(true)
-  [%u|b%"heap":%u|b%"SplHeap":private]=>
+  ["heap":"SplHeap":private]=>
   array(2) {
     [0]=>
     array(1) {
       [0]=>
-      %unicode|string%(7) "foobar2"
+      string(7) "foobar2"
     }
     [1]=>
     array(1) {
       [0]=>
-      %unicode|string%(7) "foobar1"
+      string(7) "foobar1"
     }
   }
 }

@@ -158,23 +158,23 @@ require_once('skipifconnectfailure.inc');
 ?>
 --EXPECTF--
 array(1) {
-  [%u|b%"testing"]=>
-  %unicode|string%(19) "mysqli.default_port"
+  ["testing"]=>
+  string(19) "mysqli.default_port"
 }
 array(1) {
-  [%u|b%"testing"]=>
-  %unicode|string%(17) "mysqli.default_pw"
+  ["testing"]=>
+  string(17) "mysqli.default_pw"
 }
 array(1) {
-  [%u|b%"testing"]=>
-  %unicode|string%(19) "mysqli.default_user"
+  ["testing"]=>
+  string(19) "mysqli.default_user"
 }
 array(1) {
-  [%u|b%"all_defaults"]=>
-  %unicode|string%(13) "have been set"
+  ["all_defaults"]=>
+  string(13) "have been set"
 }
 array(1) {
-  [%u|b%"all_defaults"]=>
-  %unicode|string%(13) "have been set"
+  ["all_defaults"]=>
+  string(13) "have been set"
 }
 done!

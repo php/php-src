@@ -59,24 +59,24 @@ $db->exec('DROP TABLE IF EXISTS testz');
 bool(true)
 myclass::__construct()
 object(myclass)#%d (1) {
-  [%u|b%"value"]=>
-  %unicode|string%(1) "1"
+  ["value"]=>
+  string(1) "1"
 }
 myclass::__construct()
 object(myclass2)#%d (1) {
-  [%u|b%"value"]=>
-  %unicode|string%(1) "2"
+  ["value"]=>
+  string(1) "2"
 }
 myclass::__construct()
 array(2) {
   [0]=>
   object(myclass)#%d (1) {
-    [%u|b%"value"]=>
+    ["value"]=>
     NULL
   }
   [1]=>
   object(stdClass)#%d (1) {
-    [%u|b%"value"]=>
+    ["value"]=>
     NULL
   }
 }
