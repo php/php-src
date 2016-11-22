@@ -2861,8 +2861,9 @@ already_compiled:
 }
 /* }}} */
 
-static zend_never_inline int zend_do_fcall_overloaded(zend_function *fbc, zend_execute_data *call, zval *ret) /* {{{ */
+ZEND_API int ZEND_FASTCALL zend_do_fcall_overloaded(zend_execute_data *call, zval *ret) /* {{{ */
 {
+	zend_function *fbc = call->func;
 	zend_object *object;
 
 	/* Not sure what should be done here if it's a static method */

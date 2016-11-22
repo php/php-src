@@ -995,7 +995,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETVAL_UNUSED_HA
 
 		call->prev_execute_data = execute_data;
 
-		if (UNEXPECTED(!zend_do_fcall_overloaded(fbc, call, ret))) {
+		if (UNEXPECTED(!zend_do_fcall_overloaded(call, ret))) {
 			HANDLE_EXCEPTION();
 		}
 
@@ -1122,7 +1122,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETVAL_USED_HAND
 
 		call->prev_execute_data = execute_data;
 
-		if (UNEXPECTED(!zend_do_fcall_overloaded(fbc, call, ret))) {
+		if (UNEXPECTED(!zend_do_fcall_overloaded(call, ret))) {
 			HANDLE_EXCEPTION();
 		}
 

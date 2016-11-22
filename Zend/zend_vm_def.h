@@ -3861,7 +3861,7 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY, SPEC(RETVAL))
 
 		call->prev_execute_data = execute_data;
 
-		if (UNEXPECTED(!zend_do_fcall_overloaded(fbc, call, ret))) {
+		if (UNEXPECTED(!zend_do_fcall_overloaded(call, ret))) {
 			HANDLE_EXCEPTION();
 		}
 
