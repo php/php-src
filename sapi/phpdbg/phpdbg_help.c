@@ -209,6 +209,26 @@ static int get_command(
 
 } /* }}} */
 
+void phpdbg_do_help_cmd(char *type) { /* {{{ */
+	char *help;
+
+	if (!type) {
+		pretty_print(get_help("overview!"));
+		return;
+	}
+
+	help = get_help(type);
+
+	if (!help || memcmp(help, "", sizeof("")) == SUCCESS) {
+		pretty_print(get_help("overview!"));
+		pretty_print(
+			"\nrequested help page could not be found");
+		return;
+	}
+
+	pretty_print(help);
+} /* }}} */
+
 PHPDBG_COMMAND(help) /* {{{ */
 {
 	phpdbg_command_t const *cmd;

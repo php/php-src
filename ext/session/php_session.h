@@ -204,6 +204,7 @@ typedef struct _php_ps_globals {
 
 	zend_bool use_strict_mode; /* whether or not PHP accepts unknown session ids */
 	zend_bool lazy_write; /* omit session write when it is possible */
+	zend_bool in_save_handler; /* state that if session is in save handler or not */
 	zend_string *session_vars; /* serialized original session data */
 } php_ps_globals;
 

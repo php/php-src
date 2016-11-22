@@ -312,6 +312,10 @@ static inline zend_bool can_elide_return_type_check(
 	zend_ssa_var_info *use_info = &ssa->var_info[ssa_op->op1_use];
 	zend_ssa_var_info *def_info = &ssa->var_info[ssa_op->op1_def];
 
+	if (use_info->type & MAY_BE_REF) {
+		return 0;
+	}
+
 	/* A type is possible that is not in the allowed types */
 	if ((use_info->type & (MAY_BE_ANY|MAY_BE_UNDEF)) & ~(def_info->type & MAY_BE_ANY)) {
 		return 0;

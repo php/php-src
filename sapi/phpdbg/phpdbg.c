@@ -1397,6 +1397,10 @@ int main(int argc, char **argv) /* {{{ */
 	char *read_from_stdin = NULL;
 	zend_string *backup_phpdbg_compile = NULL;
 	zend_bool show_help = 0, show_version = 0;
+	void* (*_malloc)(size_t);
+	void (*_free)(void*);
+	void* (*_realloc)(void*, size_t);
+
 
 #ifndef _WIN32
 	struct sigaction sigio_struct;
@@ -1684,9 +1688,6 @@ phpdbg_main:
     EXCEPTION_POINTERS *xp;
     __try {
 #endif
-		void* (*_malloc)(size_t);
-		void (*_free)(void*);
-		void* (*_realloc)(void*, size_t);
 
 		if (show_version || show_help) {
 			/* It ain't gonna proceed to real execution anyway,
@@ -1694,7 +1695,7 @@ phpdbg_main:
 			PHPDBG_G(io)[PHPDBG_STDOUT].ptr = stdout;
 			PHPDBG_G(io)[PHPDBG_STDOUT].fd = fileno(stdout);
 			if (show_help) {
-				phpdbg_do_help(NULL);
+				phpdbg_do_help_cmd(exec);
 			} else if (show_version) {
 				phpdbg_out(
 					"phpdbg %s (built: %s %s)\nPHP %s, Copyright (c) 1997-2016 The PHP Group\n%s",
@@ -1766,6 +1767,8 @@ phpdbg_main:
 		} else {
 			zend_mm_set_custom_handlers(mm_heap, _malloc, _free, _realloc);
 		}
+
+		_free = PHPDBG_G(original_free_function);
 
 
 		phpdbg_init_list();
@@ -2167,10 +2170,6 @@ phpdbg_out:
 
 	sapi_shutdown();
 
-#ifdef ZTS
-	ts_free_id(phpdbg_globals_id);
-#endif
-
 	if (sapi_name) {
 		free(sapi_name);
 	}
@@ -2182,6 +2181,13 @@ free_and_return:
 	}
 
 #ifdef ZTS
+	/* reset to original handlers - otherwise PHPDBG_G() in phpdbg_watch_efree will be segfaulty (with e.g. USE_ZEND_ALLOC=0) */
+	if (!use_mm_wrappers) {
+		zend_mm_set_custom_handlers(zend_mm_get_heap(), _malloc, _free, _realloc);
+	}
+
+	ts_free_id(phpdbg_globals_id);
+
 	tsrm_shutdown();
 #endif
 
