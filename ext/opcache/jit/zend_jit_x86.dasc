@@ -5307,6 +5307,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 	} else if (func->type == ZEND_USER_FUNCTION) {
 		if (call_info->num_args > func->op_array.num_args ||
 		    (opline-1)->opcode == ZEND_SEND_UNPACK ||
+		    (opline-1)->opcode == ZEND_SEND_ARRAY ||
 		    (func->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0) {
 			goto fallback;
 		}
@@ -5316,7 +5317,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 			goto fallback;
 		}
 #endif
-		if ((opline-1)->opcode == ZEND_SEND_UNPACK) {
+		if ((opline-1)->opcode == ZEND_SEND_UNPACK || (opline-1)->opcode == ZEND_SEND_ARRAY) {
 			goto fallback;
 		}
 	} else {
@@ -5351,8 +5352,6 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 
 	if (!func) {
 		|	mov r0, EX:RX->func
-		|	cmp byte [r0 + offsetof(zend_function, type)], ZEND_USER_FUNCTION
-		|	jne >8
 	}
 
 	if (opline->opcode == ZEND_DO_FCALL) {
@@ -5377,6 +5376,11 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 			|	jne ->exception_handler
 			|	mov r0, EX:RX->func // reload
 		}
+	}
+
+	if (!func) {
+		|	cmp byte [r0 + offsetof(zend_function, type)], ZEND_USER_FUNCTION
+		|	jne >8
 	}
 
 	if (!func || func->type == ZEND_USER_FUNCTION) {
@@ -5516,6 +5520,29 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 	if (!func || func->type == ZEND_INTERNAL_FUNCTION) {
 		if (!func) {
 			|8:
+			if (opline->opcode == ZEND_DO_FCALL) {
+				|	jg >8
+				|.cold_code
+				|8:
+				if (RETURN_VALUE_USED(opline)) {
+					|	// ZVAL_NULL(EX_VAR(opline->result.var));
+					|	lea FCARG2a, aword [FP + opline->result.var]
+					|	SET_Z_TYPE_INFO FCARG2a, IS_NULL
+				} else {
+					|	sub r4, 16 /* alloca() */
+					|	lea FCARG2a, aword [r4 + 8]
+					|	SET_Z_TYPE_INFO FCARG2a, IS_NULL
+				}
+				|	mov FCARG1a, RX
+				|	EXT_CALL zend_do_fcall_overloaded, r0
+				|	test r0, r0
+				|	jne >8
+				if (!RETURN_VALUE_USED(opline)) {
+					|	add r4, 16 /* revert alloca() */
+				}
+				|	jmp ->exception_handler
+				|.code
+			}
 		}
 		if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
 			if (!func) {
