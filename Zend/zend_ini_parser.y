@@ -109,16 +109,16 @@ static void zend_ini_init_string(zval *result)
 static void zend_ini_add_string(zval *result, zval *op1, zval *op2)
 {
 	int length, op1_len;
+	zend_string *str = NULL;
 
 	if (Z_TYPE_P(op1) != IS_STRING) {
-		zend_string *str = zval_get_string(op1);
+		str = zval_get_string(op1);
 		/* ZEND_ASSERT(!Z_REFCOUNTED_P(op1)); */
 		if (ZEND_SYSTEM_INI) {
 			ZVAL_PSTRINGL(op1, ZSTR_VAL(str), ZSTR_LEN(str));
 		} else {
 			ZVAL_STR(op1, str);
 		}
-		zend_string_release(str);
 	}
 	op1_len = (int)Z_STRLEN_P(op1);
 	
@@ -129,6 +129,10 @@ static void zend_ini_add_string(zval *result, zval *op1, zval *op2)
 
 	ZVAL_NEW_STR(result, zend_string_extend(Z_STR_P(op1), length, ZEND_SYSTEM_INI));
 	memcpy(Z_STRVAL_P(result) + op1_len, Z_STRVAL_P(op2), Z_STRLEN_P(op2) + 1);
+
+	if (str) {
+		zend_string_release(str);
+	}
 }
 /* }}} */
 
