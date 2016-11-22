@@ -2937,13 +2937,13 @@ static zend_never_inline int zend_do_fcall_overloaded(zend_function *fbc, zend_e
 #define ZEND_VM_SET_RELATIVE_OPCODE(opline, offset) \
 	ZEND_VM_SET_OPCODE(ZEND_OFFSET_TO_OPLINE(opline, offset))
 
-#define ZEND_VM_JMP(new_op) \
-	if (EXPECTED(!EG(exception))) { \
+#define ZEND_VM_JMP(new_op) do { \
+		if (UNEXPECTED(EG(exception))) { \
+			HANDLE_EXCEPTION(); \
+		} \
 		ZEND_VM_SET_OPCODE(new_op); \
-	} else { \
-		LOAD_OPLINE(); \
-	} \
-	ZEND_VM_CONTINUE()
+		ZEND_VM_CONTINUE(); \
+	} while (0)
 
 #define ZEND_VM_INC_OPCODE() \
 	OPLINE++
