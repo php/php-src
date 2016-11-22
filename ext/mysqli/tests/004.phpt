@@ -64,26 +64,26 @@ mysqli_close($link);
 --EXPECTF--
 array(2) {
   [0]=>
-  %unicode|string%(10) "1234567890"
+  string(10) "1234567890"
   [1]=>
-  %unicode|string%(15) "this is a test0"
+  string(15) "this is a test0"
 }
 array(2) {
   [0]=>
-  %unicode|string%(10) "1234567891"
+  string(10) "1234567891"
   [1]=>
-  %unicode|string%(15) "this is a test1"
+  string(15) "this is a test1"
 }
 array(2) {
   [0]=>
-  %unicode|string%(10) "1234567892"
+  string(10) "1234567892"
   [1]=>
-  %unicode|string%(15) "this is a test2"
+  string(15) "this is a test2"
 }
 array(2) {
   [0]=>
-  %unicode|string%(10) "1234567893"
+  string(10) "1234567893"
   [1]=>
-  %unicode|string%(15) "this is a test3"
+  string(15) "this is a test3"
 }
 done!

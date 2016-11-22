@@ -10,4 +10,4 @@ $a['foo'] = 'changed.foo';
 var_dump($nonref);
 ?>
 --EXPECTF--
-%unicode|string%(12) "original.foo"
+string(12) "original.foo"

@@ -156,27 +156,27 @@ NULL
 NULL
 
 --empty string DQ--
-Error: 2 - ob_implicit_flush() expects parameter 1 to be integer, %unicode_string_optional% given, %s(97)
+Error: 2 - ob_implicit_flush() expects parameter 1 to be integer, string given, %s(97)
 NULL
 
 --empty string SQ--
-Error: 2 - ob_implicit_flush() expects parameter 1 to be integer, %unicode_string_optional% given, %s(97)
+Error: 2 - ob_implicit_flush() expects parameter 1 to be integer, string given, %s(97)
 NULL
 
 --string DQ--
-Error: 2 - ob_implicit_flush() expects parameter 1 to be integer, %unicode_string_optional% given, %s(97)
+Error: 2 - ob_implicit_flush() expects parameter 1 to be integer, string given, %s(97)
 NULL
 
 --string SQ--
-Error: 2 - ob_implicit_flush() expects parameter 1 to be integer, %unicode_string_optional% given, %s(97)
+Error: 2 - ob_implicit_flush() expects parameter 1 to be integer, string given, %s(97)
 NULL
 
 --mixed case string--
-Error: 2 - ob_implicit_flush() expects parameter 1 to be integer, %unicode_string_optional% given, %s(97)
+Error: 2 - ob_implicit_flush() expects parameter 1 to be integer, string given, %s(97)
 NULL
 
 --heredoc--
-Error: 2 - ob_implicit_flush() expects parameter 1 to be integer, %unicode_string_optional% given, %s(97)
+Error: 2 - ob_implicit_flush() expects parameter 1 to be integer, string given, %s(97)
 NULL
 
 --instance of classWithToString--

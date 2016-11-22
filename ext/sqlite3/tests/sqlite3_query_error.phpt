@@ -26,7 +26,7 @@ Testing SQLite3 query without parameters
 Warning: SQLite3::query() expects exactly 1 parameter, 0 given in %s on line %d
 Testing SQLite3 query with one array parameter
 
-Warning: SQLite3::query() expects parameter 1 to be %binary_string_optional%, array given in %s on line %d
+Warning: SQLite3::query() expects parameter 1 to be string, array given in %s on line %d
 Testing SQLite3 qeury with empty string parameter
 bool(false)
 Done

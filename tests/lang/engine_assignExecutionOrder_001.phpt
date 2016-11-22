@@ -84,7 +84,7 @@ Order with array assignment:
 in f()
 in g()
 array(1) {
-  [%u|b%"name"]=>
+  ["name"]=>
   %string|unicode%(14) "assigned value"
 }
 
@@ -93,7 +93,7 @@ Order with object property assignment:
 in f()
 in g()
 object(stdClass)#%d (1) {
-  [%u|b%"assigned value"]=>
+  ["assigned value"]=>
   %string|unicode%(14) "assigned value"
 }
 
@@ -102,11 +102,11 @@ Order with nested object property assignment:
 in f()
 in g()
 object(stdClass)#%d (1) {
-  [%u|b%"o1"]=>
+  ["o1"]=>
   object(stdClass)#%d (1) {
-    [%u|b%"o2"]=>
+    ["o2"]=>
     object(stdClass)#%d (1) {
-      [%u|b%"assigned value"]=>
+      ["assigned value"]=>
       %string|unicode%(14) "assigned value"
     }
   }
@@ -117,9 +117,9 @@ Order with dim_list property assignment:
 in f()
 in g()
 object(stdClass)#%d (1) {
-  [%u|b%"a"]=>
+  ["a"]=>
   array(1) {
-    [%u|b%"assigned value"]=>
+    ["assigned value"]=>
     %string|unicode%(14) "assigned value"
   }
 }
@@ -135,7 +135,7 @@ Order with static array property assignment:
 in f()
 in g()
 array(1) {
-  [%u|b%"name"]=>
+  ["name"]=>
   %string|unicode%(14) "assigned value"
 }
 

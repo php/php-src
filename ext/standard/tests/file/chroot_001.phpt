@@ -27,4 +27,4 @@ rmdir("chroot_001_x");
 bool(true)
 bool(true)
 bool(false)
-%unicode|string%(1) "/"
+string(1) "/"

@@ -87,13 +87,13 @@ query('SELECT * FROM test ORDER BY id ASC')
 array(2) {
   [0]=>
   array(1) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "1"
+    ["id"]=>
+    string(1) "1"
   }
   [1]=>
   array(1) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "2"
+    ["id"]=>
+    string(1) "2"
   }
 }
 bool(false)

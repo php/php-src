@@ -60,7 +60,7 @@ MySQLPDOTest::dropTestTable();
 Emulated Prepared Statements...
 array(3) {
   [0]=>
-  %unicode|string%(5) "00000"
+  string(5) "00000"
   [1]=>
   NULL
   [2]=>
@@ -69,13 +69,13 @@ array(3) {
 array(1) {
   [0]=>
   array(1) {
-    [%u|b%"label"]=>
-    %unicode|string%(1) "a"
+    ["label"]=>
+    string(1) "a"
   }
 }
 array(3) {
   [0]=>
-  %unicode|string%(5) "00000"
+  string(5) "00000"
   [1]=>
   NULL
   [2]=>
@@ -84,15 +84,15 @@ array(3) {
 array(1) {
   [0]=>
   array(1) {
-    [%u|b%"label"]=>
-    %unicode|string%(1) "a"
+    ["label"]=>
+    string(1) "a"
   }
 }
 array(1) {
   [0]=>
   array(1) {
-    [%u|b%"label"]=>
-    %unicode|string%(1) "a"
+    ["label"]=>
+    string(1) "a"
   }
 }
 Native Prepared Statements...

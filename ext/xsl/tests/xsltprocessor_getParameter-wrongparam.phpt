@@ -16,10 +16,10 @@ var_dump($proc->getParameter('', array()));
 Warning: XSLTProcessor::getParameter() expects exactly 2 parameters, 0 given in %s on line %d
 bool(false)
 
-Warning: XSLTProcessor::getParameter() expects parameter 1 to be %binary_string_optional%, array given in %s on line %d
+Warning: XSLTProcessor::getParameter() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
-Warning: XSLTProcessor::getParameter() expects parameter 2 to be %binary_string_optional%, array given in %s on line %d
+Warning: XSLTProcessor::getParameter() expects parameter 2 to be string, array given in %s on line %d
 bool(false)
 --CREDITS--
 Christian Weiske, cweiske@php.net

@@ -19,6 +19,6 @@ unlink(__DIR__.'/parse.ini');
 ?>
 --EXPECTF--
 array(1) {
-  [%u|b%"part1.*.part2"]=>
-  %unicode|string%(1) "1"
+  ["part1.*.part2"]=>
+  string(1) "1"
 }

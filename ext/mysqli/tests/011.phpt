@@ -73,6 +73,6 @@ array(8) {
   [6]=>
   string(6) "foobar"
   [7]=>
-  %unicode|string%(11) "mysql rulez"
+  string(11) "mysql rulez"
 }
 done!

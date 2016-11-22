@@ -201,7 +201,7 @@ Sequence out of range
 -- Testing with second argument value: array(0) {
 }
 
-Warning: imap_fetch_overview() expects parameter 2 to be %binary_string_optional%, array given in %s on line %d
+Warning: imap_fetch_overview() expects parameter 2 to be string, array given in %s on line %d
 Sequence out of range
 
 -- Testing with second argument value: %string|unicode%(6) "string"
@@ -225,6 +225,6 @@ Syntax error in sequence
 
 -- Testing with second argument value: resource(%d) of type (stream)
 
-Warning: imap_fetch_overview() expects parameter 2 to be %binary_string_optional%, resource given in %s on line %d
+Warning: imap_fetch_overview() expects parameter 2 to be string, resource given in %s on line %d
 Syntax error in sequence
 ===DONE===

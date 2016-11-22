@@ -61,85 +61,85 @@ foreach($classes as $class) {
 --EXPECTF--
 Reflecting on class pubf: 
   --> Check for s: object(ReflectionProperty)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(1) "s"
-  [%u|b%"class"]=>
-  %unicode|string%(4) "pubf"
+  ["name"]=>
+  string(1) "s"
+  ["class"]=>
+  string(4) "pubf"
 }
   --> Check for a: object(ReflectionProperty)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(1) "a"
-  [%u|b%"class"]=>
-  %unicode|string%(4) "pubf"
+  ["name"]=>
+  string(1) "a"
+  ["class"]=>
+  string(4) "pubf"
 }
   --> Check for A: Property A does not exist
   --> Check for doesntExist: Property doesntExist does not exist
 Reflecting on class subpubf: 
   --> Check for s: object(ReflectionProperty)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(1) "s"
-  [%u|b%"class"]=>
-  %unicode|string%(4) "pubf"
+  ["name"]=>
+  string(1) "s"
+  ["class"]=>
+  string(4) "pubf"
 }
   --> Check for a: object(ReflectionProperty)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(1) "a"
-  [%u|b%"class"]=>
-  %unicode|string%(4) "pubf"
+  ["name"]=>
+  string(1) "a"
+  ["class"]=>
+  string(4) "pubf"
 }
   --> Check for A: Property A does not exist
   --> Check for doesntExist: Property doesntExist does not exist
 Reflecting on class protf: 
   --> Check for s: object(ReflectionProperty)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(1) "s"
-  [%u|b%"class"]=>
-  %unicode|string%(5) "protf"
+  ["name"]=>
+  string(1) "s"
+  ["class"]=>
+  string(5) "protf"
 }
   --> Check for a: object(ReflectionProperty)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(1) "a"
-  [%u|b%"class"]=>
-  %unicode|string%(5) "protf"
+  ["name"]=>
+  string(1) "a"
+  ["class"]=>
+  string(5) "protf"
 }
   --> Check for A: Property A does not exist
   --> Check for doesntExist: Property doesntExist does not exist
 Reflecting on class subprotf: 
   --> Check for s: object(ReflectionProperty)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(1) "s"
-  [%u|b%"class"]=>
-  %unicode|string%(5) "protf"
+  ["name"]=>
+  string(1) "s"
+  ["class"]=>
+  string(5) "protf"
 }
   --> Check for a: object(ReflectionProperty)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(1) "a"
-  [%u|b%"class"]=>
-  %unicode|string%(5) "protf"
+  ["name"]=>
+  string(1) "a"
+  ["class"]=>
+  string(5) "protf"
 }
   --> Check for A: Property A does not exist
   --> Check for doesntExist: Property doesntExist does not exist
 Reflecting on class privf: 
   --> Check for s: object(ReflectionProperty)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(1) "s"
-  [%u|b%"class"]=>
-  %unicode|string%(5) "privf"
+  ["name"]=>
+  string(1) "s"
+  ["class"]=>
+  string(5) "privf"
 }
   --> Check for a: object(ReflectionProperty)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(1) "a"
-  [%u|b%"class"]=>
-  %unicode|string%(5) "privf"
+  ["name"]=>
+  string(1) "a"
+  ["class"]=>
+  string(5) "privf"
 }
   --> Check for A: Property A does not exist
   --> Check for doesntExist: Property doesntExist does not exist
 Reflecting on class subprivf: 
   --> Check for s: object(ReflectionProperty)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(1) "s"
-  [%u|b%"class"]=>
-  %unicode|string%(5) "privf"
+  ["name"]=>
+  string(1) "s"
+  ["class"]=>
+  string(5) "privf"
 }
   --> Check for a: Property a does not exist
   --> Check for A: Property A does not exist

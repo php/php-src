@@ -41,8 +41,8 @@ mysqli_stmt_bind_result (SHOW)
 --EXPECTF--
 array(2) {
   [0]=>
-  %unicode|string%(4) "port"
+  string(4) "port"
   [1]=>
-  %unicode|string%(%d) "%s"
+  string(%d) "%s"
 }
 done!

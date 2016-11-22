@@ -36,13 +36,13 @@ error_reporting=E_ALL
 	print "done!";
 ?>
 --EXPECTF--
-%unicode|string%(58) "CREATE TABLE test_%s(id INT)"
-%unicode|string%(5) "00000"
+string(58) "CREATE TABLE test_%s(id INT)"
+string(5) "00000"
 array(1) {
   [0]=>
   array(1) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "1"
+    ["id"]=>
+    string(1) "1"
   }
 }
 done!

@@ -46,8 +46,8 @@ $c->func('This should work!');
 
 ?>
 --EXPECTF--
-%unicode|string%(27) "A::func2: This should work!"
-%unicode|string%(27) "A::func3: This should work!"
+string(27) "A::func2: This should work!"
+string(27) "A::func3: This should work!"
 
 Warning: call_user_func_array() expects parameter 1 to be a valid callback, cannot access private method A::func22() in %s on line %d
 

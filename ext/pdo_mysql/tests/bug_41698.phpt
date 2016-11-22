@@ -26,12 +26,12 @@ var_dump($db->query('SELECT * from test')->fetchAll(PDO::FETCH_ASSOC));
 array(2) {
   [0]=>
   array(1) {
-    [%u|b%"floatval"]=>
-    %unicode|string%(8) "2.340000"
+    ["floatval"]=>
+    string(8) "2.340000"
   }
   [1]=>
   array(1) {
-    [%u|b%"floatval"]=>
-    %unicode|string%(8) "4.560000"
+    ["floatval"]=>
+    string(8) "4.560000"
   }
 }

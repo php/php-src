@@ -24,16 +24,16 @@ var_dump(snmp2_getnext($hostname, $community, array('.1.3.6.1.2.1.1.1.0', '.1.3.
 ?>
 --EXPECTF--
 Single OID
-%unicode|string%(%d) "%s"
+string(%d) "%s"
 Single OID in array
 array(1) {
   ["%s"]=>
-  %unicode|string%(%d) "%s"
+  string(%d) "%s"
 }
 Multiple OID
 array(2) {
   ["%s"]=>
-  %unicode|string%(%d) "%s"
+  string(%d) "%s"
   ["%s"]=>
-  %unicode|string%(%d) "%d"
+  string(%d) "%d"
 }

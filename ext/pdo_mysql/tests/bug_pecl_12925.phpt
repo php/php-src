@@ -47,16 +47,16 @@ Emulated...
 array(1) {
   [0]=>
   array(1) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "c"
+    ["id"]=>
+    string(1) "c"
   }
 }
 Native...
 array(1) {
   [0]=>
   array(1) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "c"
+    ["id"]=>
+    string(1) "c"
   }
 }
 done!

@@ -64,10 +64,10 @@ array(4) {
   [0]=>
   int(1)
   [1]=>
-  %unicode|string%(3) "foo"
+  string(3) "foo"
   [2]=>
   int(2)
   [3]=>
-  %unicode|string%(3) "bar"
+  string(3) "bar"
 }
 done!

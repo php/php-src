@@ -7,4 +7,4 @@ Bug #44779 (filter returns NULL in CLI when it shouldn't)
 var_dump(filter_input(INPUT_SERVER, "PHP_SELF"));
 ?>
 --EXPECTF--
-%unicode|string%(%d) "%s"
+string(%d) "%s"

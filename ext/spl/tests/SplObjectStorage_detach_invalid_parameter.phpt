@@ -29,7 +29,7 @@ NULL
 Warning: SplObjectStorage::detach() expects parameter 1 to be object, boolean given in %s on line %d
 NULL
 
-Warning: SplObjectStorage::detach() expects parameter 1 to be object, %unicode_string_optional% given in %s on line %d
+Warning: SplObjectStorage::detach() expects parameter 1 to be object, string given in %s on line %d
 NULL
 
 Warning: SplObjectStorage::detach() expects parameter 1 to be object, integer given in %s on line %d

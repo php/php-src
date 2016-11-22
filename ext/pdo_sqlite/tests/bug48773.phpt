@@ -29,6 +29,6 @@ var_dump($stmt);
 ?>
 --EXPECTF--
 object(bar)#%d (1) {
-  [%u|b%"queryString"]=>
-  %unicode|string%(8) "SELECT 1"
+  ["queryString"]=>
+  string(8) "SELECT 1"
 }

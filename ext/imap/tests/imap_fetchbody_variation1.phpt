@@ -174,12 +174,12 @@ NULL
 
 -- Iteration 16 --
 
-Warning: imap_fetchbody() expects parameter 1 to be resource, %unicode_string_optional% given in %s on line 85
+Warning: imap_fetchbody() expects parameter 1 to be resource, string given in %s on line 85
 NULL
 
 -- Iteration 17 --
 
-Warning: imap_fetchbody() expects parameter 1 to be resource, %unicode_string_optional% given in %s on line 85
+Warning: imap_fetchbody() expects parameter 1 to be resource, string given in %s on line 85
 NULL
 
 -- Iteration 18 --
@@ -189,17 +189,17 @@ NULL
 
 -- Iteration 19 --
 
-Warning: imap_fetchbody() expects parameter 1 to be resource, %unicode_string_optional% given in %s on line 85
+Warning: imap_fetchbody() expects parameter 1 to be resource, string given in %s on line 85
 NULL
 
 -- Iteration 20 --
 
-Warning: imap_fetchbody() expects parameter 1 to be resource, %unicode_string_optional% given in %s on line 85
+Warning: imap_fetchbody() expects parameter 1 to be resource, string given in %s on line 85
 NULL
 
 -- Iteration 21 --
 
-Warning: imap_fetchbody() expects parameter 1 to be resource, %unicode_string_optional% given in %s on line 85
+Warning: imap_fetchbody() expects parameter 1 to be resource, string given in %s on line 85
 NULL
 
 -- Iteration 22 --

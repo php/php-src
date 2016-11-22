@@ -7,4 +7,4 @@ PHPNW Testfest 2009 - Lorna Mitchell
 echo SplFixedArray::fromArray('hello');
 ?>
 --EXPECTF--
-Warning: SplFixedArray::fromArray() expects parameter 1 to be array, %unicode_string_optional% given in %s on line %d
+Warning: SplFixedArray::fromArray() expects parameter 1 to be array, string given in %s on line %d

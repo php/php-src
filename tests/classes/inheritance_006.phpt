@@ -17,8 +17,8 @@ var_dump(new C);
 ?>
 --EXPECTF--
 object(C)#%d (2) {
-  [%u|b%"c":%u|b%"B":private]=>
+  ["c":"B":private]=>
   NULL
-  [%u|b%"c":%u|b%"A":private]=>
+  ["c":"A":private]=>
   NULL
 }

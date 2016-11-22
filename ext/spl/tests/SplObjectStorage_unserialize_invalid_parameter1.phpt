@@ -19,9 +19,9 @@ foreach($data_provider as $input) {
 
 ?>
 --EXPECTF--
-Warning: SplObjectStorage::unserialize() expects parameter 1 to be %binary_string_optional%, array given in %s on line %d
+Warning: SplObjectStorage::unserialize() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: SplObjectStorage::unserialize() expects parameter 1 to be %binary_string_optional%, object given in %s on line %d
+Warning: SplObjectStorage::unserialize() expects parameter 1 to be string, object given in %s on line %d
 NULL
 

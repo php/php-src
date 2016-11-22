@@ -58,22 +58,22 @@ Warning: snmpget() expects parameter 5 to be integer,%s given in %s on line %d
 bool(false)
 Checking working
 Single OID, default timeout and retries
-%unicode|string%(%d) "%s"
+string(%d) "%s"
 Single OID, default retries
-%unicode|string%(%d) "%s"
+string(%d) "%s"
 Single OID
-%unicode|string%(%d) "%s"
+string(%d) "%s"
 Single OID in array
 array(1) {
   ["%s"]=>
-  %unicode|string%(%d) "%s"
+  string(%d) "%s"
 }
 Multiple OID
 array(2) {
   ["%s"]=>
-  %unicode|string%(%d) "%s"
+  string(%d) "%s"
   ["%s"]=>
-  %unicode|string%(%d) "%d"
+  string(%d) "%d"
 }
 More error handling
 Single OID
@@ -102,5 +102,5 @@ Multiple OID
 Warning: snmpget(): Error in packet at 'SNMPv2-MIB::sysUpTime.220': (noSuchName) There is no such variable name in this MIB. in %s on line %d
 array(1) {
   ["%s"]=>
-  %unicode|string%(%d) "%s"
+  string(%d) "%s"
 }

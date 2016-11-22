@@ -36,14 +36,14 @@ $db->exec('DROP TABLE IF EXISTS test2');
 --EXPECTF--
 array(2) {
   [0]=>
-  %unicode|string%(7) "testing"
+  string(7) "testing"
   [1]=>
-  %unicode|string%(7) "testing"
+  string(7) "testing"
 }
 bool(true)
 array(2) {
   [0]=>
-  %unicode|string%(5) "00000"
+  string(5) "00000"
   [1]=>
   NULL
 }

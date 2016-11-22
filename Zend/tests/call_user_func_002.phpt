@@ -14,7 +14,7 @@ call_user_func(array($foo, ''));
 
 ?>
 --EXPECTF--
-%unicode|string%(3) "foo"
+string(3) "foo"
 
 Warning: call_user_func() expects parameter 1 to be a valid callback, class 'foo' not found in %s on line %d
 

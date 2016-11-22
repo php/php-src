@@ -72,7 +72,7 @@ mysqli_close($link);
 ?>
 --EXPECTF--
 foo-bar
-%unicode|string%-%unicode|string%
+string-string
 rab-oof
-%unicode|string%-%unicode|string%
+string-string
 done!

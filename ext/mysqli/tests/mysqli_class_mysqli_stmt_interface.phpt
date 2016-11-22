@@ -194,5 +194,5 @@ stmt->unknown = '13'
 
 Prepare using the constructor:
 
-Warning: mysqli_stmt::__construct() expects parameter 2 to be %binary_string_optional%, object given in %s on line %d
+Warning: mysqli_stmt::__construct() expects parameter 2 to be string, object given in %s on line %d
 done!

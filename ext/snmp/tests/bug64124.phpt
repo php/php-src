@@ -32,9 +32,9 @@ var_dump(snmpget($checkvar, $community, '.1.3.6.1.2.1.1.1.0'));
 var_dump(($checkvar === $hostname6_port));
 ?>
 --EXPECTF--
-%unicode|string%(%d) "%s"
+string(%d) "%s"
 bool(true)
-%unicode|string%(%d) "%s"
+string(%d) "%s"
 bool(true)
-%unicode|string%(%d) "%s"
+string(%d) "%s"
 bool(true)

@@ -60,18 +60,18 @@ Warning: snmp2_get(): Got empty OID array in %s on line %d
 bool(false)
 Checking working
 Single OID
-%unicode|string%(%d) "%s"
+string(%d) "%s"
 Single OID in array
 array(1) {
   ["%s"]=>
-  %unicode|string%(%d) "%s"
+  string(%d) "%s"
 }
 Multiple OID
 array(2) {
   ["%s"]=>
-  %unicode|string%(%d) "%s"
+  string(%d) "%s"
   ["%s"]=>
-  %unicode|string%(%d) "%d"
+  string(%d) "%d"
 }
 More error handling
 Single OID
@@ -100,5 +100,5 @@ Multiple OID
 Warning: snmp2_get(): Error in packet at 'SNMPv2-MIB::sysUpTime.220': No Such Instance currently exists at this OID in %s on line %d
 array(1) {
   ["%s"]=>
-  %unicode|string%(%d) "%s"
+  string(%d) "%s"
 }

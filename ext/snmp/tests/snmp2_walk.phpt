@@ -67,16 +67,16 @@ Warning: snmp2_walk() expects parameter 5 to be integer, %s given in %s on line 
 bool(false)
 Checking working
 Single OID
-%unicode|string%(5) "array"
+string(5) "array"
 int(%d)
-%unicode|string%(6) "string"
-%unicode|string%(6) "string"
+string(6) "string"
+string(6) "string"
 Single OID in array
-%unicode|string%(5) "array"
-%unicode|string%(6) "string"
+string(5) "array"
+string(6) "string"
 Default OID
-%unicode|string%(5) "array"
-%unicode|string%(6) "string"
+string(5) "array"
+string(6) "string"
 More error handling
 Single incorrect OID
 

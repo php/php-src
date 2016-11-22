@@ -12,7 +12,7 @@ var_dump($db->loadExtension(array()));
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: SQLite3::loadExtension() expects parameter 1 to be %binary_string_optional%, array given in %s on line %d
+Warning: SQLite3::loadExtension() expects parameter 1 to be string, array given in %s on line %d
 NULL
 Done
 

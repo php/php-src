@@ -68,10 +68,10 @@ $db->exec('DROP TABLE IF EXISTS test');
 array(1) {
   [0]=>
   array(2) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "1"
-    [%u|b%"label"]=>
-    %unicode|string%(1) "?"
+    ["id"]=>
+    string(1) "1"
+    ["label"]=>
+    string(1) "?"
   }
 }
 now the same with native PS

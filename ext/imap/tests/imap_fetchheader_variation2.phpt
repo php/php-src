@@ -126,7 +126,7 @@ Warning: imap_fetchheader(): Bad message number in %s on line %d
 bool(false)
 
 -- Iteration 2 --
-%unicode|string%(%d) "From: foo@anywhere.com
+string(%d) "From: foo@anywhere.com
 Subject: Test msg 1
 To: %s
 MIME-Version: 1.0
@@ -180,7 +180,7 @@ Warning: imap_fetchheader(): Bad message number in %s on line %d
 bool(false)
 
 -- Iteration 12 --
-%unicode|string%(%d) "From: foo@anywhere.com
+string(%d) "From: foo@anywhere.com
 Subject: Test msg 1
 To: %s
 MIME-Version: 1.0
@@ -194,7 +194,7 @@ Warning: imap_fetchheader(): Bad message number in %s on line %d
 bool(false)
 
 -- Iteration 14 --
-%unicode|string%(%d) "From: foo@anywhere.com
+string(%d) "From: foo@anywhere.com
 Subject: Test msg 1
 To: %s
 MIME-Version: 1.0
@@ -209,27 +209,27 @@ bool(false)
 
 -- Iteration 16 --
 
-Warning: imap_fetchheader() expects parameter 2 to be integer, %unicode_string_optional% given in %s on line %d
+Warning: imap_fetchheader() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 17 --
 
-Warning: imap_fetchheader() expects parameter 2 to be integer, %unicode_string_optional% given in %s on line %d
+Warning: imap_fetchheader() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
 
-Warning: imap_fetchheader() expects parameter 2 to be integer, %unicode_string_optional% given in %s on line %d
+Warning: imap_fetchheader() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 19 --
 
-Warning: imap_fetchheader() expects parameter 2 to be integer, %unicode_string_optional% given in %s on line %d
+Warning: imap_fetchheader() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: imap_fetchheader() expects parameter 2 to be integer, %unicode_string_optional% given in %s on line %d
+Warning: imap_fetchheader() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 21 --

@@ -33,11 +33,11 @@ var_dump($ao->p);
 
 --> Access the real property:
 bool(true)
-%unicode|string%(15) "object property"
+string(15) "object property"
 
 --> Remove the real property and access the array element:
 bool(true)
-%unicode|string%(13) "array element"
+string(13) "array element"
 
 --> Remove the array element and try access again:
 bool(false)
@@ -47,5 +47,5 @@ NULL
 
 --> Re-add the real property:
 bool(true)
-%unicode|string%(15) "object property"
+string(15) "object property"
 
