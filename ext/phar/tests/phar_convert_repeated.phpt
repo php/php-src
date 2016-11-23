@@ -50,7 +50,7 @@ var_dump($phar->getAlias());
 
 echo "================= convertToPhar() ====================\n";
 
-$phar = $phar->convertToExecutable(Phar::PHAR, Phar::NONE, '.2.phar');
+$phar = $phar->convertToExecutable(Phar::PHAR, Phar::NONE, '.phar.pharfile');
 var_dump($phar->isFileFormat(Phar::PHAR));
 var_dump($phar->isFileFormat(Phar::TAR));
 var_dump($phar->isFileFormat(Phar::ZIP));
@@ -59,7 +59,7 @@ var_dump($phar->getAlias());
 
 echo "================= convertToZip() =====================\n";
 
-$phar = $phar->convertToExecutable(Phar::ZIP, Phar::NONE, '.2.phar.zip');
+$phar = $phar->convertToExecutable(Phar::ZIP, Phar::NONE, '.phar.zipfile');
 var_dump($phar->isFileFormat(Phar::PHAR));
 var_dump($phar->isFileFormat(Phar::TAR));
 var_dump($phar->isFileFormat(Phar::ZIP));
@@ -68,7 +68,7 @@ var_dump($phar->getAlias());
 
 echo "================= convertToTar() =====================\n";
 
-$phar = $phar->convertToExecutable(Phar::TAR, Phar::NONE, '2.phar.tar');
+$phar = $phar->convertToExecutable(Phar::TAR, Phar::NONE, '.phar.tarfile');
 var_dump($phar->isFileFormat(Phar::PHAR));
 var_dump($phar->isFileFormat(Phar::TAR));
 var_dump($phar->isFileFormat(Phar::ZIP));
@@ -77,7 +77,7 @@ var_dump($phar->getAlias());
 
 echo "================= convertToZip() =====================\n";
 
-$phar = $phar->convertToExecutable(Phar::ZIP, Phar::NONE, '3.phar.zip');
+$phar = $phar->convertToExecutable(Phar::ZIP, Phar::NONE, '.phar.zip2');
 var_dump($phar->isFileFormat(Phar::PHAR));
 var_dump($phar->isFileFormat(Phar::TAR));
 var_dump($phar->isFileFormat(Phar::ZIP));
@@ -91,12 +91,12 @@ var_dump($phar->getAlias());
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar.zip');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar.tar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.3.phar.zip');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.3.phar.tar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.3.phar');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zipfile');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tarfile');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.pharfile');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zipfile');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tarfile');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip2');
 ?>
 --EXPECTF--
 =================== new Phar() =======================

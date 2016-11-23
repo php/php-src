@@ -1975,7 +1975,8 @@ static zend_object *phar_rename_archive(phar_archive_data **sphar, char *ext, ze
 	phar_archive_data *phar = *sphar;
 	char *oldpath = NULL;
 	char *basename = NULL, *basepath = NULL;
-	char *newname = NULL, *newpath = NULL;
+	char *newbasename = NULL, *newname = NULL, *newpath = NULL;
+	char *oldname_ext = NULL;
 	zval ret, arg1;
 	zend_class_entry *ce;
 	char *error;
@@ -2046,18 +2047,33 @@ static zend_object *phar_rename_archive(phar_archive_data **sphar, char *ext, ze
 	}
 
 	oldpath = estrndup(phar->fname, phar->fname_len);
-	if ((oldname = zend_memrchr(phar->fname, '/', phar->fname_len))) {
-		++oldname;
-	} else {
-		oldname = phar->fname;
-	}
+	oldname = zend_memrchr(phar->fname, '/', phar->fname_len);
+	++oldname;
 	oldname_len = strlen(oldname);
 
 	basename = estrndup(oldname, oldname_len);
-	spprintf(&newname, 0, "%s.%s", strtok(basename, "."), ext);
+	
+	/* find extension name: .phar suffixed with anything and .zip* and .tar* without .phar for data archives */
+	oldname_ext = strstr(basename, ".phar");
+	if (oldname_ext == NULL) {
+		oldname_ext = strstr(basename, ".tar");
+		if (oldname_ext == NULL) {
+			oldname_ext = strstr(basename, ".tgz");
+			if (oldname_ext == NULL) {
+				oldname_ext = strstr(basename, ".zip");
+			}
+		}
+	}
+
+	newbasename = basename;
+
+	if (oldname_ext != NULL) {
+		newbasename = estrndup(basename, (oldname_ext - basename));
+	}
+
+	spprintf(&newname, 0, "%s.%s", newbasename, ext);
+	efree(newbasename);
 	efree(basename);
-
-
 
 	basepath = estrndup(oldpath, (strlen(oldpath) - oldname_len));
 	phar->fname_len = spprintf(&newpath, 0, "%s%s", basepath, newname);
