@@ -23,6 +23,8 @@ PHP                                                                        NEWS
   . Fixed bug #64526 (Add missing mysqlnd.* parameters to php.ini-*). (cmb)
 
 - Opcache:
+  . Fixed bug #73583 (Segfaults when conditionally declared class and function
+    have the same name). (Laruence)
   . Fixed bug #69090 (check cached files permissions)
 
 - OpenSSL:
