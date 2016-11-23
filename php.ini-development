@@ -1895,10 +1895,10 @@ ldap.max_links = -1
 ;opcache.huge_code_pages=0
 
 ; Validate cached file permissions.
-; opcache.validate_permission=0
+;opcache.validate_permission=0
 
 ; Prevent name collisions in chroot'ed environment.
-; opcache.validate_root=0
+;opcache.validate_root=0
 
 [curl]
 ; A default value for the CURLOPT_CAINFO option. This is required to be an
