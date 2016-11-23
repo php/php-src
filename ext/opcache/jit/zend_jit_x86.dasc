@@ -1379,7 +1379,6 @@ static int zend_jit_leave_throw_stub(dasm_State **Dst)
 static int zend_jit_icall_throw_stub(dasm_State **Dst)
 {
 	|->icall_throw_handler:
-	|	mov IP, EX->opline
 	|	//	zend_throw_exception_internal(NULL);
 	|.if X64
 	|	xor CARG1, CARG1
@@ -5694,7 +5693,12 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 
 		|	// if (UNEXPECTED(EG(exception) != NULL)) {
 		|	cmp aword [&EG(exception)], 0
-		|	jne ->icall_throw_handler
+		|	jne >1
+		|.cold_code
+		|1:
+		|	LOAD_ADDR IP, opline
+		|	jmp ->icall_throw_handler
+		|.code
 
 		// TODO: Can we avoid checking for interrupts after each call ???
 		if (!zend_jit_check_timeout(Dst, opline + 1)) {
@@ -7235,7 +7239,12 @@ static int zend_jit_fetch_obj_read(dasm_State **Dst, zend_op *opline, zend_op_ar
 	offset = zend_get_known_property_offset(ce, Z_STR_P(member), opline->op1_type == IS_UNUSED, op_array->filename);
 
 	if (opline->op1_type == IS_UNUSED) {
-		|	IF_Z_TYPE FP + offsetof(zend_execute_data, This), IS_UNDEF, ->not_obj
+		|	IF_Z_TYPE FP + offsetof(zend_execute_data, This), IS_UNDEF, >1
+		|.cold_code
+		|1:
+		|	SAVE_VALID_OPLINE opline
+		|	jmp ->not_obj
+		|.code
 		|	GET_Z_PTR FCARG1a, FP + offsetof(zend_execute_data, This)
 	} else if (op1_info & MAY_BE_REF) {
 		|	lea r0, [FP + opline->op1.var]
