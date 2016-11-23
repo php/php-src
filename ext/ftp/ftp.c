@@ -703,7 +703,7 @@ ftp_list(ftpbuf_t *ftp, const char *path, const size_t path_len, int recursive)
 int
 ftp_type(ftpbuf_t *ftp, ftptype_t type)
 {
-	char typechar[2];
+	const char *typechar;
 
 	if (ftp == NULL) {
 		return 0;
@@ -712,13 +712,13 @@ ftp_type(ftpbuf_t *ftp, ftptype_t type)
 		return 1;
 	}
 	if (type == FTPTYPE_ASCII) {
-		typechar[0] = 'A';
+		typechar = "A";
 	} else if (type == FTPTYPE_IMAGE) {
-		typechar[0] = 'I';
+		typechar = "I";
 	} else {
 		return 0;
 	}
-	if (!ftp_putcmd(ftp, "TYPE", sizeof("TYPE")-1, typechar, 2)) {
+	if (!ftp_putcmd(ftp, "TYPE", sizeof("TYPE")-1, typechar, 1)) {
 		return 0;
 	}
 	if (!ftp_getresp(ftp) || ftp->resp != 200) {
