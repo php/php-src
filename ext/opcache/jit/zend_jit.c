@@ -1621,6 +1621,24 @@ static int zend_jit_setup_hot_counters(zend_op_array *op_array)
 	return SUCCESS;
 }
 
+static int zend_needs_manual_jit(const zend_op_array *op_array)
+{
+	if (op_array->doc_comment) {
+		const char *s = ZSTR_VAL(op_array->doc_comment);
+		const char *p = strstr(s, "@jit");
+
+		if (p) {
+			size_t l = ZSTR_LEN(op_array->doc_comment);
+
+			if ((p == s + 3 || *(p-1) <= ' ') &&
+			    (p + 6 == s + l || *(p+4) <= ' ')) {
+				return 1;
+			}
+		}
+	}
+	return 0;
+}
+
 ZEND_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 {
 	if (dasm_ptr == NULL) {
@@ -1655,6 +1673,12 @@ ZEND_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 		return zend_jit_setup_hot_counters(op_array);
 	} else if (zend_jit_trigger == ZEND_JIT_ON_SCRIPT_LOAD) {
 		return zend_real_jit_func(op_array, script, NULL);
+	} else if (zend_jit_trigger == ZEND_JIT_ON_DOC_COMMENT) {
+		if (zend_needs_manual_jit(op_array)) {
+			return zend_real_jit_func(op_array, script, NULL);
+		} else {
+			return SUCCESS;
+		}
 	} else {
 		ZEND_ASSERT(0);
 	}
@@ -1687,7 +1711,21 @@ ZEND_API int zend_jit_script(zend_script *script)
 				goto jit_failure;
 			}
 		}
-	} else if (zend_jit_trigger == ZEND_JIT_ON_SCRIPT_LOAD) {
+	} else if (zend_jit_trigger == ZEND_JIT_ON_SCRIPT_LOAD ||
+	           zend_jit_trigger == ZEND_JIT_ON_DOC_COMMENT) {
+
+		if (zend_jit_trigger == ZEND_JIT_ON_DOC_COMMENT) {
+			int do_jit = 0;
+			for (i = 0; i < call_graph.op_arrays_count; i++) {
+				if (zend_needs_manual_jit(call_graph.op_arrays[i])) {
+					do_jit = 1;
+					break;
+				}
+			}
+			if (!do_jit) {
+				goto jit_failure;
+			}
+		}
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
 			info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
 			if (info) {
@@ -1698,6 +1736,10 @@ ZEND_API int zend_jit_script(zend_script *script)
 		}
 
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
+			if (zend_jit_trigger == ZEND_JIT_ON_DOC_COMMENT &&
+			    !zend_needs_manual_jit(call_graph.op_arrays[i])) {
+				continue;
+			}
 			info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
 			if (info) {
 				if (zend_jit_op_array_analyze2(call_graph.op_arrays[i], script, &info->ssa, &info->flags) != SUCCESS) {
@@ -1708,6 +1750,10 @@ ZEND_API int zend_jit_script(zend_script *script)
 
 		if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_SSA) {
 			for (i = 0; i < call_graph.op_arrays_count; i++) {
+				if (zend_jit_trigger == ZEND_JIT_ON_DOC_COMMENT &&
+				    !zend_needs_manual_jit(call_graph.op_arrays[i])) {
+					continue;
+				}
 				info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
 				if (info) {
 					zend_dump_op_array(call_graph.op_arrays[i], ZEND_DUMP_HIDE_UNREACHABLE|ZEND_DUMP_RC_INFERENCE|ZEND_DUMP_SSA|ZEND_DUMP_RT_CONSTANTS, "JIT", &info->ssa);
@@ -1716,6 +1762,10 @@ ZEND_API int zend_jit_script(zend_script *script)
 		}
 
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
+			if (zend_jit_trigger == ZEND_JIT_ON_DOC_COMMENT &&
+			    !zend_needs_manual_jit(call_graph.op_arrays[i])) {
+				continue;
+			}
 			info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
 			if (info) {
 				if (zend_jit(call_graph.op_arrays[i], &info->ssa, NULL) != SUCCESS) {
