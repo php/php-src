@@ -187,6 +187,7 @@ See also: https://wiki.php.net/rfc/deprecations_php_7_2
   . count() now raises a warning when an invalid parameter is passed.
     Only arrays and objects implementing the Countable interface should be passed.
   . pack() and unpack() now support float and double in both little and big endian.
+  . number_format() ensures zero values never contain a negative sign.
 
 - XML:
   . utf8_encode() and utf8_decode() have been moved to the Standard extension

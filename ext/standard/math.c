@@ -1143,6 +1143,11 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 		return tmpbuf;
 	}
 
+	/* Check if the number is no longer negative after rounding */
+	if (is_negative && d == 0) {
+		is_negative = 0;
+	}
+
 	/* find decimal point, if expected */
 	if (dec) {
 		dp = strpbrk(ZSTR_VAL(tmpbuf), ".,");
