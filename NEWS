@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.1
 
 - Core:
+  . Fixed bug #73585 (Logging of "Internal Zend error - Missing class
+    information" missing class name). (Laruence)
   . Fixed memory leak(null coalescing operator with Spl hash). (Tyson Andre)
 
 - Calendar:
