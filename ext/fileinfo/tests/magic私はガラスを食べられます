@@ -4721,22 +4721,6 @@
 # might add another one or two as time goes by...
 #
 ### JAVA START ###
-0	belong		0xcafebabe
->4	belong		>30		compiled Java class data,
-!:mime	application/x-java-applet
->>6	beshort		x	        version %d.
->>4	beshort		x       	\b%d
-# Which is which?
-#>>4	belong		0x032d		(Java 1.0)
-#>>4	belong		0x032d		(Java 1.1)
->>4	belong		0x002e		(Java 1.2)
->>4	belong		0x002f		(Java 1.3)
->>4	belong		0x0030		(Java 1.4)
->>4	belong		0x0031		(Java 1.5)
->>4	belong		0x0032		(Java 1.6)
->>4	belong		0x0033		(Java 1.7)
->>4	belong		0x0034		(Java 1.8)
-
 0	belong		0xcafed00d	JAR compressed with pack200,
 >5	byte		x		version %d.
 >4	byte		x		\b%d
@@ -4758,15 +4742,28 @@
 
 0	belong		0xcafebabe
 >4	belong		1		Mach-O universal binary with 1 architecture:
-!:mime application/x-mach-binary
 >>8	use		mach-o		\b
+0	belong		0xcafebabe
+>4	belong		>30		compiled Java class data,
+!:mime	application/x-java-applet
+>>6	beshort		x	        version %d.
+>>4	beshort		x       	\b%d
+# Which is which?
+#>>4	belong		0x032d		(Java 1.0)
+#>>4	belong		0x032d		(Java 1.1)
+>>4	belong		0x002e		(Java 1.2)
+>>4	belong		0x002f		(Java 1.3)
+>>4	belong		0x0030		(Java 1.4)
+>>4	belong		0x0031		(Java 1.5)
+>>4	belong		0x0032		(Java 1.6)
+>>4	belong		0x0033		(Java 1.7)
+>>4	belong		0x0034		(Java 1.8)
 >4	belong		>1
 >>4	belong		<20		Mach-O universal binary with %d architectures:
-!:mime application/x-mach-binary
 >>>8	use		mach-o		\b
->>4	belong		2
+>>4	belong		>2
 >>>28	use		mach-o		\b
->>4	belong		3
+>>4	belong		>3
 >>>48	use		mach-o		\b
 >>4	belong		4
 >>>68	use		mach-o		\b
@@ -5184,7 +5181,7 @@
 !:mime	text/x-awk
 0	string/wt	#!\ /usr/bin/awk	awk script text executable
 !:mime	text/x-awk
-0	regex/4096	=^\\s{0,100}BEGIN\\s{0,100}[{]	awk or perl script text
+0	regex/4096	=^\\s{0,100}BEGIN\\s{0,100}[{]	awk script text
 
 # AT&T Bell Labs' Plan 9 shell
 0	string/wt	#!\ /bin/rc	Plan 9 rc shell script text executable
@@ -8469,7 +8466,7 @@
 30		search/481	\x55\xAA	
 # to display DOS/MBR boot sector (40) before old one (strength=50+21),Syslinux bootloader (71),SYSLINUX MBR (37+36),NetBSD mbr (110),AdvanceMAME mbr (111)
 # DOS BPB information (70) and after DOS floppy (120) like in previous file version
-!:strength +65
+!:strength +0
 # for sector sizes < 512 Bytes
 >11		uleshort	<512		
 >>(11.s-2)	uleshort	0xAA55		DOS/MBR boot sector
@@ -8481,7 +8478,7 @@
 0x1FE          leshort         0xAA55         	DOS/MBR boot sector
 #
 # to display information (50) before DOS BPB (strength=70) and after DOS floppy (120) like in old file version
-!:strength +65
+!:strength +0
 >2		string		OSBS		OS/BS MBR
 # added by Joerg Jenderek at Feb 2013 according to http://thestarman.pcministry.com/asm/mbr/
 # and http://en.wikipedia.org/wiki/Master_Boot_Record
@@ -17236,7 +17233,7 @@
 # GRR: line below too general as it catches also 
 # rt.lib DYADISKS.PIC and many more
 # start with assembler instruction MOV
-0	ubyte		0x8c		
+#0	ubyte		0x8c		
 # skip "AppleWorks word processor data" like ARTICLE.1 ./apple
 >4	string			!O====	
 # skip some unknown basic binaries like RocketRnger.SHR
@@ -17260,17 +17257,17 @@
 # updated by Joerg Jenderek at Oct 2008
 0	ulelong		0xffff10eb	DR-DOS executable (COM)
 # byte 0xeb conflicts with "sequent" magic leshort 0xn2eb
-0	ubeshort&0xeb8d	>0xeb00		
+#0	ubeshort&0xeb8d	>0xeb00		
 # DR-DOS STACKER.COM SCREATE.SYS missed
 
 0       name    msdos-com
 >0  byte        x               DOS executable (COM)
 >6	string		SFX\ of\ LHarc	\b, %s
->0x1FE leshort	0xAA55		    \b, boot code
->85	string		UPX		        \b, UPX compressed
->4	string		\ $ARX		    \b, ARX self-extracting archive
->4	string		\ $LHarc	    \b, LHarc self-extracting archive
->0x20e string	SFX\ by\ LARC	\b, LARC self-extracting archive
+#>0x1FE leshort	0xAA55		    \b, boot code
+#>85	string		UPX		        \b, UPX compressed
+#>4	string		\ $ARX		    \b, ARX self-extracting archive
+#>4	string		\ $LHarc	    \b, LHarc self-extracting archive
+#>0x20e string	SFX\ by\ LARC	\b, LARC self-extracting archive
 
 # JMP 8bit
 0	        byte	0xeb
@@ -17340,27 +17337,27 @@
 # GRR search is not working
 #2	search/28	\xcd\x21	COM executable for MS-DOS
 #WHICHFAT.cOM
-2	string	\xcd\x21		COM executable for DOS
+#2	string	\xcd\x21		COM executable for DOS
 #DELTREE.cOM DELTREE2.cOM
-4	string	\xcd\x21		COM executable for DOS
+#4	string	\xcd\x21		COM executable for DOS
 #IFMEMDSK.cOM ASSIGN.cOM COMP.cOM
-5	string	\xcd\x21		COM executable for DOS
+#5	string	\xcd\x21		COM executable for DOS
 #DELTMP.COm HASFAT32.cOM
-7	string	\xcd\x21		
->0	byte	!0xb8			COM executable for DOS
+#7	string	\xcd\x21		
+#>0	byte	!0xb8			COM executable for DOS
 #COMP.cOM MORE.COm
-10	string	\xcd\x21		
->5	string	!\xcd\x21		COM executable for DOS
+#10	string	\xcd\x21		
+#>5	string	!\xcd\x21		COM executable for DOS
 #comecho.com
-13	string	\xcd\x21		COM executable for DOS
+#13	string	\xcd\x21		COM executable for DOS
 #HELP.COm EDIT.coM
-18	string	\xcd\x21		COM executable for MS-DOS
+#18	string	\xcd\x21		COM executable for MS-DOS
 #NWRPLTRM.COm
-23	string	\xcd\x21		COM executable for MS-DOS
+#23	string	\xcd\x21		COM executable for MS-DOS
 #LOADFIX.cOm LOADFIX.cOm
-30	string	\xcd\x21		COM executable for MS-DOS
+#30	string	\xcd\x21		COM executable for MS-DOS
 #syslinux.com 3.11
-70	string	\xcd\x21		COM executable for DOS
+#70	string	\xcd\x21		COM executable for DOS
 # many compressed/converted COMs start with a copy loop instead of a jump
 0x6	search/0xa	\xfc\x57\xf3\xa5\xc3	COM executable for MS-DOS
 0x6	search/0xa	\xfc\x57\xf3\xa4\xc3	COM executable for DOS
@@ -19562,40 +19559,54 @@
 # Send additions to <perl5-porters@perl.org>
 0	search/1024	eval\ "exec\ perl		Perl script text
 !:mime	text/x-perl
+!:strength + 30
 0	search/1024	eval\ "exec\ /bin/perl		Perl script text
 !:mime	text/x-perl
+!:strength + 30
 0	search/1024	eval\ "exec\ /usr/bin/perl	Perl script text
 !:mime	text/x-perl
+!:strength + 30
 0	search/1024	eval\ "exec\ /usr/local/bin/perl	Perl script text
 !:mime	text/x-perl
+!:strength + 30
 0	search/1024	eval\ 'exec\ perl		Perl script text
 !:mime	text/x-perl
+!:strength + 30
 0	search/1024	eval\ 'exec\ /bin/perl		Perl script text
 !:mime	text/x-perl
+!:strength + 30
 0	search/1024	eval\ 'exec\ /usr/bin/perl	Perl script text
 !:mime	text/x-perl
+!:strength + 30
 0	search/1024	eval\ 'exec\ /usr/local/bin/perl	Perl script text
 !:mime	text/x-perl
+!:strength + 30
 0	search/1024	eval\ '(exit\ $?0)'\ &&\ eval\ 'exec	Perl script text
 !:mime	text/x-perl
+!:strength + 1
 0	string	#!/usr/bin/env\ perl	Perl script text executable
 !:mime	text/x-perl
+!:strength + 30
 0	string	#!\ /usr/bin/env\ perl	Perl script text executable
 !:mime	text/x-perl
+!:strength + 30
 0	string	#!
 >0	regex	\^#!.*/bin/perl([[:space:]].*)*$	Perl script text executable
 !:mime	text/x-perl
+!:strength + 30
 
 # by Dmitry V. Levin and Alexey Tourbin
 # check the first line
 0	search/1024	package
 >0	regex		\^package[\ \t]+[0-9A-Za-z_:]+\ *;	Perl5 module source text
+!:mime  text/x-perl
 !:strength + 10
 # not 'p', check other lines
 0	search/1024	!p
 >0	regex		\^package[\ \t]+[0-9A-Za-z_:]+\ *;
 >>0	regex		\^1\ *;|\^(use|sub|my)\ .*[(;{=]	Perl5 module source text
-!:strength + 10
+!:mime  text/x-perl
+!:strength + 40
 
 # Perl POD documents
 # From: Tom Hukins <tom@eborcom.com>
@@ -20565,20 +20576,24 @@
 # from module.submodule import func1, func2
 0	regex	\^from\\s+(\\w|\\.)+\\s+import.*$	Python script text executable
 !:mime text/x-python
+!:strength + 15
 
 # def __init__ (self, ...):
 0	search/4096	def\ __init__
 >&0	search/64 self	Python script text executable
 !:mime text/x-python
+!:strength + 15
 
 # comments
-#0	search/4096	'''
-#>&0	regex	.*'''$	Python script text executable
-#!:mime text/x-python
+0	search/4096	'''
+>&0	regex	.*'''$	Python script text executable
+!:mime text/x-python
+!:strength + 15
 
-#0	search/4096	"""
-#>&0	regex	.*"""$	Python script text executable
-#!:mime text/x-python
+0	search/4096	"""
+>&0	regex	.*"""$	Python script text executable
+!:mime text/x-python
+!:strength + 15
 
 # try:
 # except: or finally:
@@ -20588,11 +20603,13 @@
 !:mime text/x-python
 >&0	search/4096	finally:	Python script text executable
 !:mime text/x-python
+!:strength + 15
 
 # def name(args, args):
-0	regex	 \^(\ |\\t){0,50}def\ {1,50}[a-zA-Z]{1,100}
->&0	regex	\ {0,50}\\(([a-zA-Z]|,|\ ){1,255}\\):$ Python script text executable
+0	regex	 \^(\ |\\t)*def\ +[a-zA-Z]+
+>&0	regex	\ *\\(([a-zA-Z]|,|\ )*\\):$ Python script text executable
 !:mime text/x-python
+!:strength + 15
 
 #------------------------------------------------------------------------------
 # $File: qt,v 1.2 2014/12/16 19:49:29 christos Exp $
@@ -21004,6 +21021,7 @@
 >>8	beshort		17		SuperH
 >>8	beshort		18		Xtensa
 >>8	beshort		255		noarch
+>>10	string		x		%s
 
 #delta RPM    Daniel Novotny (dnovotny@redhat.com)
 0	string		drpm		Delta RPM
@@ -21212,6 +21230,8 @@
 0	search/1		-----BEGIN\ CERTIFICATE------	RFC1421 Security Certificate text
 0	search/1		-----BEGIN\ NEW\ CERTIFICATE	RFC1421 Security Certificate Signing Request text
 0	belong	0xedfeedfe	Sun 'jks' Java Keystore File data
+
+0	string \0volume_key	volume_key escrow packet
 # Type:	SE Linux policy modules *.pp reference policy
 #	for Fedora 5 to 9, RHEL5, and Debian Etch and Lenny.
 # URL:	http://doc.coker.com.au/computers/selinux-magic
@@ -23539,27 +23559,35 @@
 
 0	string/t		#!\ /			a
 >3	string		>\0			%s script text executable
+!:strength / 10
 
 0	string/b		#!\ /			a
 >3	string		>\0			%s script executable (binary data)
+!:strength / 10
 
 0	string/t		#!\t/			a
 >3	string		>\0			%s script text executable
+!:strength / 10
 
 0	string/b		#!\t/			a
 >3	string		>\0			%s script executable (binary data)
+!:strength / 10
 
 0	string/t		#!/			a
 >2	string		>\0			%s script text executable
+!:strength / 10
 
 0	string/b		#!/			a
 >2	string		>\0			%s script executable (binary data)
+!:strength / 10
 
 0	string/t		#!\ 			script text executable
 >3	string		>\0			for %s
+!:strength / 10
 
 0	string/b		#!\ 			script executable
 >3	string		>\0			for %s (binary data)
+!:strength / 10
 
 # using env
 0	string/t	#!/usr/bin/env		a
