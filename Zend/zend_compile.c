@@ -1084,7 +1084,11 @@ ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opli
 		rtd_key = lcname + 1;
 	}
 
-	function = zend_hash_find_ptr(function_table, Z_STR_P(rtd_key));
+	if ((function = zend_hash_find_ptr(function_table, Z_STR_P(rtd_key))) == NULL) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Internal Zend error - Missing information for function %s", Z_STRVAL_P(lcname));
+		return FAILURE;
+	}
+
 	new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 	memcpy(new_function, function, sizeof(zend_op_array));
 	if (zend_hash_add_ptr(function_table, Z_STR_P(lcname), new_function) == NULL) {
@@ -1125,7 +1129,7 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const ze
 		rtd_key = lcname + 1;
 	}
 	if ((ce = zend_hash_find_ptr(class_table, Z_STR_P(rtd_key))) == NULL) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Internal Zend error - Missing class information for %s", Z_STRVAL_P(rtd_key));
+		zend_error_noreturn(E_COMPILE_ERROR, "Internal Zend error - Missing information for class %s", Z_STRVAL_P(lcname));
 		return NULL;
 	}
 	ce->refcount++;
