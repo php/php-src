@@ -55,6 +55,10 @@ AC_DEFUN([PHP_MBSTRING_EXTENSION], [
     fi
   fi
   
+  if test "$PHP_MBSTRING_BUNDLED_ONIG" = "1"; then 
+    cp $ext_srcdir/oniguruma/src/oniguruma.h $ext_srcdir/oniguruma/oniguruma.h
+  fi
+
   for cfg in $PHP_MBSTRING_EXTRA_CONFIG_HEADERS; do
     cat > $ext_builddir/$cfg <<EOF
 #include "$out"
@@ -70,6 +74,7 @@ AC_DEFUN([PHP_MBSTRING_SETUP_MBREGEX], [
       dnl
       dnl Bundled oniguruma
       dnl
+      PHP_MBSTRING_BUNDLED_ONIG=1
       if test "$PHP_MBREGEX_BACKTRACK" != "no"; then
         AC_DEFINE([USE_COMBINATION_EXPLOSION_CHECK],1,[whether to check multibyte regex backtrack])
       fi
@@ -162,12 +167,12 @@ int main() { return foo(10, "", 3.14); }
                 oniguruma/src/utf32_le.c
                 oniguruma/src/utf8.c
       ])
-      cp $ext_builddir/oniguruma/src/oniguruma.h $ext_builddir/oniguruma/oniguruma.h
       PHP_MBSTRING_ADD_INSTALL_HEADERS([oniguruma/oniguruma.h])
     else
       dnl
       dnl External oniguruma
       dnl
+      PHP_MBSTRING_BUNDLED_ONIG=0
       if test ! -f "$PHP_ONIG/include/oniguruma.h"; then
         AC_MSG_ERROR([oniguruma.h not found in $PHP_ONIG/include])
       fi
