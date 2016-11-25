@@ -108,49 +108,61 @@ int main() { return foo(10, "", 3.14); }
       PHP_MBSTRING_ADD_BUILD_DIR([oniguruma])
       PHP_MBSTRING_ADD_BUILD_DIR([oniguruma/enc])
       PHP_MBSTRING_ADD_INCLUDE([oniguruma])
-      PHP_MBSTRING_ADD_CONFIG_HEADER([oniguruma/config.h])
+      PHP_MBSTRING_ADD_CONFIG_HEADER([oniguruma/src/config.h])
       PHP_MBSTRING_ADD_SOURCES([
-        oniguruma/regcomp.c
-        oniguruma/regerror.c
-        oniguruma/regexec.c
-        oniguruma/reggnu.c
-        oniguruma/regparse.c
-        oniguruma/regenc.c
-        oniguruma/regext.c
-        oniguruma/regsyntax.c
-        oniguruma/regtrav.c
-        oniguruma/regversion.c
-        oniguruma/st.c
-        oniguruma/enc/unicode.c
-        oniguruma/enc/ascii.c
-        oniguruma/enc/utf8.c
-        oniguruma/enc/euc_jp.c
-        oniguruma/enc/euc_tw.c
-        oniguruma/enc/euc_kr.c
-        oniguruma/enc/sjis.c
-        oniguruma/enc/iso8859_1.c
-        oniguruma/enc/iso8859_2.c
-        oniguruma/enc/iso8859_3.c
-        oniguruma/enc/iso8859_4.c
-        oniguruma/enc/iso8859_5.c
-        oniguruma/enc/iso8859_6.c
-        oniguruma/enc/iso8859_7.c
-        oniguruma/enc/iso8859_8.c
-        oniguruma/enc/iso8859_9.c
-        oniguruma/enc/iso8859_10.c
-        oniguruma/enc/iso8859_11.c
-        oniguruma/enc/iso8859_13.c
-        oniguruma/enc/iso8859_14.c
-        oniguruma/enc/iso8859_15.c
-        oniguruma/enc/iso8859_16.c
-        oniguruma/enc/koi8.c
-        oniguruma/enc/koi8_r.c
-        oniguruma/enc/big5.c
-        oniguruma/enc/utf16_be.c
-        oniguruma/enc/utf16_le.c
-        oniguruma/enc/utf32_be.c
-        oniguruma/enc/utf32_le.c
+		oniguruma/src/ascii.c
+                oniguruma/src/big5.c
+                oniguruma/src/cp1251.c
+                oniguruma/src/euc_jp.c
+                oniguruma/src/euc_jp_prop.c
+                oniguruma/src/euc_kr.c
+                oniguruma/src/euc_tw.c
+                oniguruma/src/gb18030.c
+                oniguruma/src/iso8859_1.c
+                oniguruma/src/iso8859_10.c
+                oniguruma/src/iso8859_11.c
+                oniguruma/src/iso8859_13.c
+                oniguruma/src/iso8859_14.c
+                oniguruma/src/iso8859_15.c
+                oniguruma/src/iso8859_16.c
+                oniguruma/src/iso8859_2.c
+                oniguruma/src/iso8859_3.c
+                oniguruma/src/iso8859_4.c
+                oniguruma/src/iso8859_5.c
+                oniguruma/src/iso8859_6.c
+                oniguruma/src/iso8859_7.c
+                oniguruma/src/iso8859_8.c
+                oniguruma/src/iso8859_9.c
+                oniguruma/src/koi8.c
+                oniguruma/src/koi8_r.c
+                oniguruma/src/onig_init.c
+                oniguruma/src/regcomp.c
+                oniguruma/src/regenc.c
+                oniguruma/src/regerror.c
+                oniguruma/src/regexec.c
+                oniguruma/src/regext.c
+                oniguruma/src/reggnu.c
+                oniguruma/src/regparse.c
+                oniguruma/src/regposerr.c
+                oniguruma/src/regposix.c
+                oniguruma/src/regsyntax.c
+                oniguruma/src/regtrav.c
+                oniguruma/src/regversion.c
+                oniguruma/src/sjis.c
+                oniguruma/src/sjis_prop.c
+                oniguruma/src/st.c
+                oniguruma/src/unicode.c
+                oniguruma/src/unicode_fold1_key.c
+                oniguruma/src/unicode_fold2_key.c
+                oniguruma/src/unicode_fold3_key.c
+                oniguruma/src/unicode_unfold_key.c
+                oniguruma/src/utf16_be.c
+                oniguruma/src/utf16_le.c
+                oniguruma/src/utf32_be.c
+                oniguruma/src/utf32_le.c
+                oniguruma/src/utf8.c
       ])
+      cp $ext_builddir/oniguruma/src/oniguruma.h $ext_builddir/oniguruma/oniguruma.h
       PHP_MBSTRING_ADD_INSTALL_HEADERS([oniguruma/oniguruma.h])
     else
       dnl
