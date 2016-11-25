@@ -7395,6 +7395,35 @@ fallback:
 	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
 }
 
+static int zend_jit_free(dasm_State **Dst, const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
+{
+	uint32_t op1_info = OP1_INFO();
+
+	if (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
+		if (zend_may_throw(opline, op_array, ssa)) {
+			|	SAVE_VALID_OPLINE, opline
+		}
+		if (opline->opcode == ZEND_FE_FREE && (op1_info & (MAY_BE_OBJECT|MAY_BE_REF))) {
+			if (op1_info & MAY_BE_ARRAY) {
+				|	IF_Z_TYPE FP + opline->op1.var, IS_ARRAY, >7
+			}
+			|	mov FCARG1d, dword [FP + opline->op1.var + offsetof(zval, u2.fe_iter_idx)]
+			|	cmp FCARG1d, -1
+			|	je >7
+			|	EXT_CALL zend_hash_iterator_del, r0
+			|7:
+		}
+		|	ZVAL_PTR_DTOR FP + opline->op1.var, op1_info, 0, 0, 0, op_array->filename, opline->lineno
+		if (zend_may_throw(opline, op_array, ssa)) {
+			if (!zend_jit_check_exception(Dst)) {
+				return 0;
+			}
+		}
+	}
+
+	return 1;
+}
+
 #ifdef ZEND_JIT_RECORD
 static int zend_jit_func_header(dasm_State **Dst, zend_op_array *op_array)
 {

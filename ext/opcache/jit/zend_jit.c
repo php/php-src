@@ -1258,6 +1258,12 @@ pass:
 							goto jit_failure;
 						}
 						goto done;
+					case ZEND_FREE:
+					case ZEND_FE_FREE:
+						if (!zend_jit_free(&dasm_state, opline, op_array, ssa)) {
+							goto jit_failure;
+						}
+						goto done;
 					default:
 						break;
 				}
