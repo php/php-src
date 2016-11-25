@@ -178,7 +178,7 @@ PHP 7.2 UPGRADE NOTES
   . PHP_FLOAT_MAX     max representable float number
 
 - Fileinfo:
-  . FILEINFO_EXTENSION include list of possible file extensinos
+  . FILEINFO_EXTENSION include list of possible file extensions
 
 - GD:
   . IMG_EFFECT_MULTIPLY
