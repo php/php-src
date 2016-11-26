@@ -4,6 +4,10 @@ PHP                                                                        NEWS
 
 08 Dec 2016, PHP 5.6.29
 
+- Mbstring:
+  . Fixed bug #73505 (string length overflow in mbfl_memory_device_output
+    function). (Stas)
+
 - Mysqlnd:
   . Fixed bug #64526 (Add missing mysqlnd.* parameters to php.ini-*). (cmb)
 

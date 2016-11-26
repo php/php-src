@@ -20,8 +20,6 @@
 
 /* $Id$ */
 
-/* Synced with php 3.0 revision 1.193 1999-06-16 [ssb] */
-
 #include <stdio.h>
 #include "php.h"
 #include "php_rand.h"
