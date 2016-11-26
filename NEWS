@@ -35,6 +35,7 @@ PHP                                                                        NEWS
 
 - PCRE:
   . Fixed bug #73483 (Segmentation fault on pcre_replace_callback). (Laruence)
+  . Fixed bug #73612 (preg_*() may leak memory). (cmb)
 
 - Postgres:
   . Fixed bug #73498 (Incorrect SQL generated for pg_copy_to()). (Craig Duncan)
