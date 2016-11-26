@@ -726,7 +726,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 
 	/* Overwrite the passed-in value for subpatterns with an empty array. */
 	if (subpats != NULL) {
-		zval_dtor(subpats);
+		zval_ptr_dtor(subpats);
 		array_init(subpats);
 	}
 
@@ -1592,7 +1592,7 @@ static PHP_FUNCTION(preg_replace)
 
 	replace_count = preg_replace_impl(return_value, regex, replace, subject, limit, 0, 0);
 	if (zcount) {
-		zval_dtor(zcount);
+		zval_ptr_dtor(zcount);
 		ZVAL_LONG(zcount, replace_count);
 	}
 }
@@ -1627,7 +1627,7 @@ static PHP_FUNCTION(preg_replace_callback)
 
 	replace_count = preg_replace_impl(return_value, regex, replace, subject, limit, 1, 0);
 	if (zcount) {
-		zval_dtor(zcount);
+		zval_ptr_dtor(zcount);
 		ZVAL_LONG(zcount, replace_count);
 	}
 }
@@ -1689,7 +1689,7 @@ static PHP_FUNCTION(preg_replace_callback_array)
 	} ZEND_HASH_FOREACH_END();
 
 	if (zcount) {
-		zval_dtor(zcount);
+		zval_ptr_dtor(zcount);
 		ZVAL_LONG(zcount, replace_count);
 	}
 }
@@ -1720,7 +1720,7 @@ static PHP_FUNCTION(preg_filter)
 
 	replace_count = preg_replace_impl(return_value, regex, replace, subject, limit, 0, 1);
 	if (zcount) {
-		zval_dtor(zcount);
+		zval_ptr_dtor(zcount);
 		ZVAL_LONG(zcount, replace_count);
 	}
 }

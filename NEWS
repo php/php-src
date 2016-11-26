@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #73585 (Logging of "Internal Zend error - Missing class
     information" missing class name). (Laruence)
 
+- PCRE:
+  . Fixed bug #73612 (preg_*() may leak memory). (cmb)
+
 08 Dec 2016 PHP 7.0.14
 
 - Core:
