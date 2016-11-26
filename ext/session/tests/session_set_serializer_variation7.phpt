@@ -58,7 +58,7 @@ decoding:
 bool(true)
 bool(true)
 
-Warning: session_set_serializer(): Cannot change session serializer while session is active in /home/yohgaki/workspace/ext/git/oss/php.net/github-php-src/ext/session/tests/session_set_serializer_variation7.php on line 29
+Warning: session_set_serializer(): Cannot change session serializer while session is active in %s on line 29
 bool(false)
 encoded: a:0:{}
 Starting session again..!
