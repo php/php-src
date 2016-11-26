@@ -78,13 +78,13 @@ $ret = session_set_save_handler(array($handler, 'open'), array($handler, 'close'
 var_dump($ret);
 $ret = session_set_save_handler($handler);
 var_dump($ret);
-
-session_start();
-
+var_dump(session_start());
+?>
 --EXPECTF--
 *** Testing session_set_save_handler() function: interface wrong ***
 bool(true)
 
 Warning: session_set_save_handler() expects parameter 1 to be SessionHandlerInterface, object given in %s
 NULL
+bool(true)
 good handler writing
