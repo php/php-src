@@ -543,7 +543,7 @@ int start_accel_module(void)
    Get the scripts which are accelerated by ZendAccelerator */
 static int accelerator_get_scripts(zval *return_value)
 {
-	uint i;
+	uint32_t i;
 	zval persistent_script_report;
 	zend_accel_hash_entry *cache_entry;
 	struct tm *ta;

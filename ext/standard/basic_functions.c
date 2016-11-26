@@ -4633,7 +4633,7 @@ PHP_FUNCTION(get_cfg_var)
 		return;
 	}
 
-	retval = cfg_get_entry(varname, (uint)varname_len);
+	retval = cfg_get_entry(varname, (uint32_t)varname_len);
 
 	if (retval) {
 		if (Z_TYPE_P(retval) == IS_ARRAY) {
@@ -5295,7 +5295,7 @@ PHP_FUNCTION(ini_get)
 		return;
 	}
 
-	str = zend_ini_string(varname, (uint)varname_len, 0);
+	str = zend_ini_string(varname, (uint32_t)varname_len, 0);
 
 	if (!str) {
 		RETURN_FALSE;

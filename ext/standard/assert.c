@@ -215,7 +215,7 @@ PHP_FUNCTION(assert)
 		zval *args = safe_emalloc(!description ? 3 : 4, sizeof(zval), 0);
 		zval retval;
 		int i;
-		uint lineno = zend_get_executed_lineno();
+		uint32_t lineno = zend_get_executed_lineno();
 		const char *filename = zend_get_executed_filename();
 
 		ZVAL_STRING(&args[0], SAFE_STRING(filename));

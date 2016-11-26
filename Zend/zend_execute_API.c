@@ -505,7 +505,7 @@ ZEND_API zend_string *zend_get_executed_filename_ex(void) /* {{{ */
 }
 /* }}} */
 
-ZEND_API uint zend_get_executed_lineno(void) /* {{{ */
+ZEND_API uint32_t zend_get_executed_lineno(void) /* {{{ */
 {
 	zend_execute_data *ex = EG(current_execute_data);
 
@@ -1185,7 +1185,7 @@ static void zend_timeout_handler(int dummy) /* {{{ */
     if (EG(timed_out)) {
 		/* Die on hard timeout */
 		const char *error_filename = NULL;
-		uint error_lineno = 0;
+		uint32_t error_lineno = 0;
 		char log_buffer[2048];
 		int output_len = 0;
 

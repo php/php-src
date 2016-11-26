@@ -3766,7 +3766,7 @@ static void array_bucketindex_swap(void *p, void *q) /* {{{ */
 PHP_FUNCTION(array_unique)
 {
 	zval *array;
-	uint idx;
+	uint32_t idx;
 	Bucket *p;
 	struct bucketindex *arTmp, *cmpdata, *lastkept;
 	unsigned int i;
@@ -3862,7 +3862,7 @@ static int zval_user_compare(zval *a, zval *b) /* {{{ */
 
 static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_type) /* {{{ */
 {
-    uint idx;
+    uint32_t idx;
 	Bucket *p;
 	int argc, i;
 	zval *args;
@@ -3963,7 +3963,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 	zval *args = NULL;
 	HashTable *hash;
 	int arr_argc, i, c = 0;
-	uint idx;
+	uint32_t idx;
 	Bucket **lists, *list, **ptrs, *p;
 	uint32_t req_args;
 	char *param_spec;
@@ -4290,7 +4290,7 @@ PHP_FUNCTION(array_uintersect_uassoc)
 
 static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_type) /* {{{ */
 {
-    uint idx;
+    uint32_t idx;
 	Bucket *p;
 	int argc, i;
 	zval *args;
@@ -4386,7 +4386,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 	zval *args = NULL;
 	HashTable *hash;
 	int arr_argc, i, c;
-	uint idx;
+	uint32_t idx;
 	Bucket **lists, *list, **ptrs, *p;
 	uint32_t req_args;
 	char *param_spec;
@@ -4819,7 +4819,7 @@ PHP_FUNCTION(array_multisort)
 	zval*			args;
 	zval**			arrays;
 	Bucket**		indirect;
-	uint            idx;
+	uint32_t            idx;
 	Bucket*			p;
 	HashTable*		hash;
 	int				argc;

@@ -783,7 +783,7 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 			if (UNEXPECTED(Z_TYPE_P(_z) == IS_UNDEF)) continue;
 
 #define ZEND_HASH_REVERSE_FOREACH(_ht, indirect) do { \
-		uint _idx; \
+		uint32_t _idx; \
 		for (_idx = (_ht)->nNumUsed; _idx > 0; _idx--) { \
 			Bucket *_p = (_ht)->arData + _idx - 1; \
 			zval *_z = &_p->val; \
