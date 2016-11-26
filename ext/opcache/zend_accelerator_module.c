@@ -107,6 +107,8 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
 #else
 	char *base = (char *) ts_resource(*((int *) mh_arg2));
 #endif
+	zend_long megabyte, overflow;
+	double dummy;
 
 	/* keep the compiler happy */
 	(void)entry; (void)mh_arg2; (void)mh_arg3; (void)stage;
@@ -130,7 +132,11 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
 
 		ini_entry->value = zend_string_init(new_new_value, 1, 1);
 	}
-	*p = memsize * (1024 * 1024);
+	megabyte = 1024 * 1024;
+	ZEND_SIGNED_MULTIPLY_LONG(memsize, megabyte, *p, dummy, overflow);
+	if (UNEXPECTED(overflow)) {
+		*p = ZEND_ULONG_MAX;
+	}
 	return SUCCESS;
 }
 

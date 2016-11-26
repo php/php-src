@@ -1637,7 +1637,7 @@ TEST $file
 		$IN_REDIRECT['dir'] = realpath(dirname($file));
 		$IN_REDIRECT['prefix'] = trim($section_text['TEST']);
 
-		if (count($IN_REDIRECT['TESTS']) == 1) {
+		if (!empty($IN_REDIRECT['TESTS'])) {
 
 			if (is_array($org_file)) {
 				$test_files[] = $org_file[1];

@@ -1092,6 +1092,8 @@ ZEND_API int zend_eval_stringl(char *str, size_t str_len, zval *retval_ptr, char
 
 		EG(no_extensions)=1;
 
+		new_op_array->scope = zend_get_executed_scope();
+
 		zend_try {
 			ZVAL_UNDEF(&local_retval);
 			zend_execute(new_op_array, &local_retval);

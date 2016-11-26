@@ -1124,10 +1124,8 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const ze
 		lcname = RT_CONSTANT(op_array, opline->op1);
 		rtd_key = lcname + 1;
 	}
-	if ((ce = zend_hash_find_ptr(class_table, Z_STR_P(rtd_key))) == NULL) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Internal Zend error - Missing class information for %s", Z_STRVAL_P(rtd_key));
-		return NULL;
-	}
+	ce = zend_hash_find_ptr(class_table, Z_STR_P(rtd_key));
+	ZEND_ASSERT(ce);
 	ce->refcount++;
 	if (zend_hash_add_ptr(class_table, Z_STR_P(lcname), ce) == NULL) {
 		ce->refcount--;

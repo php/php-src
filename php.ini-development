@@ -1195,6 +1195,19 @@ mysqlnd.collect_statistics = On
 ; http://php.net/mysqlnd.collect_memory_statistics
 mysqlnd.collect_memory_statistics = On
 
+; Records communication from all extensions using mysqlnd to the specified log
+; file.
+; http://php.net/mysqlnd.debug
+;mysqlnd.debug =
+
+; Defines which queries will be logged.
+; http://php.net/mysqlnd.log_mask
+;mysqlnd.log_mask = 0
+
+; Default size of the mysqlnd memory pool, which is used by result sets.
+; http://php.net/mysqlnd.mempool_default_size
+;mysqlnd.mempool_default_size = 16000
+
 ; Size of a pre-allocated buffer used when sending commands to MySQL in bytes.
 ; http://php.net/mysqlnd.net_cmd_buffer_size
 ;mysqlnd.net_cmd_buffer_size = 2048
@@ -1203,6 +1216,15 @@ mysqlnd.collect_memory_statistics = On
 ; bytes.
 ; http://php.net/mysqlnd.net_read_buffer_size
 ;mysqlnd.net_read_buffer_size = 32768
+
+; Timeout for network requests in seconds.
+; http://php.net/mysqlnd.net_read_timeout
+;mysqlnd.net_read_timeout = 31536000
+
+; SHA-256 Authentication Plugin related. File with the MySQL server public RSA
+; key.
+; http://php.net/mysqlnd.sha256_server_public_key
+;mysqlnd.sha256_server_public_key =
 
 [OCI8]
 
@@ -1871,6 +1893,12 @@ ldap.max_links = -1
 ; Enables or disables copying of PHP code (text segment) into HUGE PAGES.
 ; This should improve performance, but requires appropriate OS configuration.
 ;opcache.huge_code_pages=0
+
+; Validate cached file permissions.
+;opcache.validate_permission=0
+
+; Prevent name collisions in chroot'ed environment.
+;opcache.validate_root=0
 
 [curl]
 ; A default value for the CURLOPT_CAINFO option. This is required to be an

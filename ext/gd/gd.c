@@ -1061,7 +1061,7 @@ void php_gd_error_method(int type, const char *format, va_list args)
 		default:
 			type = E_ERROR;
 	}
-	php_verror(NULL, "", type, format, args TSRMLS_CC);
+	php_verror(NULL, "", type, format, args);
 }
 /* }}} */
 
@@ -3047,7 +3047,7 @@ PHP_FUNCTION(imagegammacorrect)
 	}
 
 	if ( input <= 0.0 || output <= 0.0 ) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Gamma values should be positive");
+		php_error_docref(NULL, E_WARNING, "Gamma values should be positive");
 		RETURN_FALSE;
 	}
 
@@ -4735,7 +4735,7 @@ PHP_FUNCTION(imagecropauto)
 
 		case GD_CROP_THRESHOLD:
 			if (color < 0 || (!gdImageTrueColor(im) && color >= gdImageColorsTotal(im))) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Color argument missing with threshold mode");
+				php_error_docref(NULL, E_WARNING, "Color argument missing with threshold mode");
 				RETURN_FALSE;
 			}
 			im_crop = gdImageCropThreshold(im, color, (float) threshold);

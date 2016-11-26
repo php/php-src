@@ -56,19 +56,19 @@ mysqli_close($link);
 --EXPECTF--
 test_class::__construct(1,2)
 object(test_class)#%d (7) {
-  [%u|b%"c1"]=>
-  %unicode|string%(1) "0"
-  [%u|b%"c2"]=>
-  %unicode|string%(5) "35999"
-  [%u|b%"c3"]=>
+  ["c1"]=>
+  string(1) "0"
+  ["c2"]=>
+  string(5) "35999"
+  ["c3"]=>
   NULL
-  [%u|b%"c4"]=>
-  %unicode|string%(4) "-500"
-  [%u|b%"c5"]=>
-  %unicode|string%(6) "-32768"
-  [%u|b%"c6"]=>
-  %unicode|string%(1) "0"
-  [%u|b%"c7"]=>
-  %unicode|string%(1) "0"
+  ["c4"]=>
+  string(4) "-500"
+  ["c5"]=>
+  string(6) "-32768"
+  ["c6"]=>
+  string(1) "0"
+  ["c7"]=>
+  string(1) "0"
 }
 Done

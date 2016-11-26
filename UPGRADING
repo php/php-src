@@ -108,6 +108,8 @@ PHP 7.2 UPGRADE NOTES
       'Multiple' => ['One header', 'Another header'],
       'Multiline' = "FirstLine\r\n SecondLine",
     ];
+  . count() now raises a warning when an invalid parameter is passed.
+    Only arrays and objects implementing the Countable interface should be passed.
 
 - XML:
   . utf8_encode() and utf8_decode() have been moved to the Standard extension
@@ -174,6 +176,9 @@ PHP 7.2 UPGRADE NOTES
                       x + 1.0 != 1.0
   . PHP_FLOAT_MIN     min representable float number
   . PHP_FLOAT_MAX     max representable float number
+
+- Fileinfo:
+  . FILEINFO_EXTENSION include list of possible file extensions
 
 - GD:
   . IMG_EFFECT_MULTIPLY

@@ -5844,8 +5844,6 @@ PHP_FUNCTION(move_uploaded_file)
  */
 static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_type, zval *arr)
 {
-	zval element;
-
 	switch (callback_type) {
 
 		case ZEND_INI_PARSER_ENTRY:
@@ -5853,8 +5851,8 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int cal
 				/* bare string - nothing to do */
 				break;
 			}
-			ZVAL_DUP(&element, arg2);
-			zend_symtable_update(Z_ARRVAL_P(arr), Z_STR_P(arg1), &element);
+			Z_TRY_ADDREF_P(arg2);
+			zend_symtable_update(Z_ARRVAL_P(arr), Z_STR_P(arg1), arg2);
 			break;
 
 		case ZEND_INI_PARSER_POP_ENTRY:
@@ -5884,12 +5882,11 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int cal
 				array_init(find_hash);
 			}
 
-			ZVAL_DUP(&element, arg2);
 			if (!arg3 || (Z_TYPE_P(arg3) == IS_STRING && Z_STRLEN_P(arg3) == 0)) {
-				add_next_index_zval(find_hash, &element);
+				Z_TRY_ADDREF_P(arg2);
+				add_next_index_zval(find_hash, arg2);
 			} else {
-				array_set_zval_key(Z_ARRVAL_P(find_hash), arg3, &element);
-				zval_ptr_dtor(&element);
+				array_set_zval_key(Z_ARRVAL_P(find_hash), arg3, arg2);
 			}
 		}
 		break;

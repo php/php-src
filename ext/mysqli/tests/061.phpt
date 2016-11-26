@@ -32,7 +32,7 @@ mysqli_close($link);
 	/* create temporary file */
 	$filename = dirname(__FILE__) . "061.csv";
 	$fp = fopen($filename, "w");
-	fwrite($fp, b"foo;bar");
+	fwrite($fp, "foo;bar");
 	fclose($fp);
 
 	if (!mysqli_query($link,"DROP TABLE IF EXISTS t_061"))
@@ -72,7 +72,7 @@ mysqli_close($link);
 ?>
 --EXPECTF--
 foo-bar
-%unicode|string%-%unicode|string%
+string-string
 rab-oof
-%unicode|string%-%unicode|string%
+string-string
 done!
