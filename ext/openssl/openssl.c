@@ -4092,7 +4092,7 @@ zend_bool php_openssl_pkey_init_dsa(DSA *dsa, zval *data)
 /* }}} */
 
 /* {{{ php_openssl_dh_pub_from_priv */
-static BIGNUM *php_openssl_dh_pub_from_priv(DH *dh, BIGNUM *priv_key, BIGNUM *g, BIGNUM *p)
+static BIGNUM *php_openssl_dh_pub_from_priv(BIGNUM *priv_key, BIGNUM *g, BIGNUM *p)
 {
 	BIGNUM *pub_key, *priv_key_const_time;
 	BN_CTX *ctx;
@@ -4110,7 +4110,7 @@ static BIGNUM *php_openssl_dh_pub_from_priv(DH *dh, BIGNUM *priv_key, BIGNUM *g,
 		return NULL;
 	}
 	ctx = BN_CTX_new();
-	if (priv_key_const_time == NULL) {
+	if (ctx == NULL) {
 		BN_free(pub_key);
 		BN_free(priv_key_const_time);
 		php_openssl_store_errors();
@@ -4150,7 +4150,7 @@ zend_bool php_openssl_pkey_init_dh(DH *dh, zval *data)
 		return DH_set0_key(dh, pub_key, priv_key);
 	}
 	if (priv_key) {
-		pub_key = php_openssl_dh_pub_from_priv(dh, priv_key, g, p);
+		pub_key = php_openssl_dh_pub_from_priv(priv_key, g, p);
 		if (pub_key == NULL) {
 			return 0;
 		}
