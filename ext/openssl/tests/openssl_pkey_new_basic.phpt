@@ -86,8 +86,8 @@ $details = openssl_pkey_get_details($dh);
 $dh_details = $details['dh'];
 openssl_pkey_test_cmp($phex, $dh_details['p']);
 var_dump($dh_details['g']);
-var_dump(strlen($dh_details['pub_key']));
-var_dump(strlen($dh_details['priv_key']));
+var_dump(strlen($dh_details['pub_key']) > 0);
+var_dump(strlen($dh_details['priv_key']) > 0);
 ?>
 --EXPECT--
 int(0)
@@ -102,5 +102,5 @@ int(20)
 int(128)
 int(0)
 string(1) "2"
-int(128)
-int(128)
+bool(true)
+bool(true)
