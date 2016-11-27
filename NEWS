@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #73549 (Use after free when stream is passed to imagepng). (cmb)
 
+- Intl:
+  . Fixed bug #68447 (grapheme_extract take an extra trailing character). 
+    (SATŌ Kentarō)
+
 08 Dec 2016, PHP 5.6.29
 
 - Mbstring:
