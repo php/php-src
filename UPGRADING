@@ -206,6 +206,8 @@ PHP 7.1 UPGRADE NOTES
   disables escaping of U+2028 and U+2029 characters when
   JSON_UNESCAPED_UNICODE is supplied.
 - long2ip() accepts integer as parameter now
+- openssl_encrypt and openssl_decrypt have extra parameters for handling
+  authenticated encryption (tag, aad, tag_length) and decryption (tag, aad).
 - pg_last_notice() accepts optional long parameter to specify operation.
   PGSQL_NOTICE_LAST - Get last notice (Default)
   PGSQL_NOTICE_ALL - Get all stored notices
