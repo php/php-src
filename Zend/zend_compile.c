@@ -4525,15 +4525,15 @@ void zend_compile_foreach(zend_ast *ast) /* {{{ */
 
 	zend_emit_jump(opnum_fetch);
 
-	opline = &CG(active_op_array)->opcodes[opnum_reset];
-	opline->op2.opline_num = get_next_op_number(CG(active_op_array));
-
 	opline = &CG(active_op_array)->opcodes[opnum_fetch];
 	opline->extended_value = get_next_op_number(CG(active_op_array));
 
 	zend_end_loop(opnum_fetch, &reset_node);
 
-	opline = zend_emit_op(NULL, ZEND_FE_FREE, &reset_node, NULL);
+	zend_emit_op(NULL, ZEND_FE_FREE, &reset_node, NULL);
+
+	opline = &CG(active_op_array)->opcodes[opnum_reset];
+	opline->op2.opline_num = get_next_op_number(CG(active_op_array));
 }
 /* }}} */
 
