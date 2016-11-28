@@ -693,7 +693,7 @@ static void php_wddx_add_var(wddx_packet *packet, zval *name_var)
 			return;
 		}
 
-		if (Z_IMMUTABLE_P(name_var)) {
+		if (!Z_REFCOUNTED_P(name_var)) {
 			ZEND_HASH_FOREACH_VAL(target_hash, val) {
 				php_wddx_add_var(packet, val);
 			} ZEND_HASH_FOREACH_END();

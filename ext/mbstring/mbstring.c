@@ -3939,7 +3939,7 @@ PHP_FUNCTION(mb_convert_variables)
 					target_hash = HASH_OF(var);
 					if (target_hash != NULL) {
 						while ((hash_entry = zend_hash_get_current_data(target_hash)) != NULL) {
-							if (!Z_IMMUTABLE_P(var)) {
+							if (Z_REFCOUNTED_P(var)) {
 								if (++target_hash->u.v.nApplyCount > 1) {
 									--target_hash->u.v.nApplyCount;
 									recursion_error = 1;
@@ -3988,7 +3988,7 @@ detect_end:
 		}
 		if (recursion_error) {
 			while(stack_level-- && (var = &stack[stack_level])) {
-				if (!Z_IMMUTABLE_P(var)) {
+				if (Z_REFCOUNTED_P(var)) {
 					if (HASH_OF(var)->u.v.nApplyCount > 1) {
 						HASH_OF(var)->u.v.nApplyCount--;
 					}
@@ -4055,7 +4055,7 @@ detect_end:
 						hash_entry = hash_entry_ptr;
 						ZVAL_DEREF(hash_entry);
 						if (Z_TYPE_P(hash_entry) == IS_ARRAY || Z_TYPE_P(hash_entry) == IS_OBJECT) {
-							if (!Z_IMMUTABLE_P(hash_entry)) {
+							if (Z_REFCOUNTED_P(hash_entry)) {
 								if (++(HASH_OF(hash_entry)->u.v.nApplyCount) > 1) {
 									--(HASH_OF(hash_entry)->u.v.nApplyCount);
 									recursion_error = 1;
@@ -4108,7 +4108,7 @@ conv_end:
 
 		if (recursion_error) {
 			while(stack_level-- && (var = &stack[stack_level])) {
-				if (!Z_IMMUTABLE_P(var)) {
+				if (Z_REFCOUNTED_P(var)) {
 					if (HASH_OF(var)->u.v.nApplyCount > 1) {
 						HASH_OF(var)->u.v.nApplyCount--;
 					}

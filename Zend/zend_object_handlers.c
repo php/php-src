@@ -163,7 +163,7 @@ ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp) /* {{{ *
 
 	zend_call_method_with_0_params(object, ce, &ce->__debugInfo, ZEND_DEBUGINFO_FUNC_NAME, &retval);
 	if (Z_TYPE(retval) == IS_ARRAY) {
-		if (Z_IMMUTABLE(retval)) {
+		if (!Z_REFCOUNTED(retval)) {
 			*is_temp = 1;
 			return zend_array_dup(Z_ARRVAL(retval));
 		} else if (Z_REFCOUNT(retval) <= 1) {
