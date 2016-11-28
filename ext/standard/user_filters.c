@@ -175,7 +175,7 @@ php_stream_filter_status_t userfilter_filter(
 		return ret;
 	}
 
-	if (!zend_hash_str_exists(Z_OBJPROP_P(obj), "stream", sizeof("stream")-1)) {
+	if (!zend_hash_str_exists_ind(Z_OBJPROP_P(obj), "stream", sizeof("stream")-1)) {
 		zval tmp;
 
 		/* Give the userfilter class a hook back to the stream */

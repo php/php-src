@@ -9,6 +9,10 @@ PHP                                                                        NEWS
 - PCRE:
   . Fixed bug #73612 (preg_*() may leak memory). (cmb)
 
+- Streams:
+  . Fixed bug #73586 (php_user_filter::$stream is not set to the stream the
+    filter is working on). (Dmitry)
+
 08 Dec 2016 PHP 7.0.14
 
 - Core:
