@@ -1976,9 +1976,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CALL_TRAMPOLINE_SPEC_HANDLER(Z
 	fbc = call->func;
 
 	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)) {
-
-		ZEND_ASSERT(!(fbc->common.fn_flags & ZEND_ACC_GENERATOR));
-
 		if (UNEXPECTED(!fbc->op_array.run_time_cache)) {
 			init_func_run_time_cache(&fbc->op_array);
 		}
