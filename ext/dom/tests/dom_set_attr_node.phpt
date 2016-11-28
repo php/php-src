@@ -62,7 +62,7 @@ object(DOMException)#%d (7) {
       array(1) {
         [0]=>
         
-Warning: var_dump(): Not yet implemented in %s on line %d
+Warning: var_dump(): %s
 DOMAttr
       }
     }
