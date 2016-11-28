@@ -19,9 +19,9 @@
 
 #if 0 && (defined(__linux__) || defined(sun) || defined(__IRIX__))
 # define _BSD_SOURCE 		/* linux wants this when XOPEN mode is on */
-# define _BSD_COMPAT		/* irix: uint */
+# define _BSD_COMPAT		/* irix: uint32_t */
 # define _XOPEN_SOURCE 500  /* turn on Unix98 */
-# define __EXTENSIONS__	1	/* Solaris: uint */
+# define __EXTENSIONS__	1	/* Solaris: uint32_t */
 #endif
 
 #include "php.h"
@@ -146,7 +146,7 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 		zend_string_release(str);
 	} ZEND_HASH_FOREACH_END();
 
-	assert((uint)(p - env.envp) <= sizeenv);
+	assert((uint32_t)(p - env.envp) <= sizeenv);
 
 	zend_hash_destroy(env_hash);
 	FREE_HASHTABLE(env_hash);

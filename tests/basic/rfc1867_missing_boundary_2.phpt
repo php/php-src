@@ -17,17 +17,17 @@ var_dump($_POST);
 ?>
 --EXPECTF--
 array(1) {
-  [%u|b%"file1"]=>
+  ["file1"]=>
   array(5) {
-    [%u|b%"name"]=>
+    ["name"]=>
     %string|unicode%(9) "file1.txt"
-    [%u|b%"type"]=>
+    ["type"]=>
     %string|unicode%(0) ""
-    [%u|b%"tmp_name"]=>
+    ["tmp_name"]=>
     %string|unicode%(0) ""
-    [%u|b%"error"]=>
+    ["error"]=>
     int(3)
-    [%u|b%"size"]=>
+    ["size"]=>
     int(0)
   }
 }

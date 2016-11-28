@@ -56,59 +56,59 @@ if (!$IS_MYSQLND)
 array(1) refcount(%d){
   [0]=>
   array(4) refcount(%d){
-    [%u|b%"row_ref"]=>
+    ["row_ref"]=>
     &NULL
-    [%u|b%"row_copy"]=>
+    ["row_copy"]=>
     array(2) refcount(1){
-      [%u|b%"id"]=>
-      %unicode|string%(1) "1" refcount(%d)
-      [%u|b%"label"]=>
-      %unicode|string%(1) "a" refcount(%d)
+      ["id"]=>
+      string(1) "1" refcount(%d)
+      ["label"]=>
+      string(1) "a" refcount(%d)
     }
-    [%u|b%"id_ref"]=>
-    %unicode|string%(1) "1" refcount(%d)
-    [%u|b%"id_copy"]=>
-    %unicode|string%(1) "1" refcount(%d)
+    ["id_ref"]=>
+    string(1) "1" refcount(%d)
+    ["id_copy"]=>
+    string(1) "1" refcount(%d)
   }
 }
 array(2) refcount(%d){
   [0]=>
   array(4) refcount(%d){
-    [%u|b%"row_ref"]=>
+    ["row_ref"]=>
     &NULL
-    [%u|b%"row_copy"]=>
+    ["row_copy"]=>
     array(2) refcount(%d){
-      [%u|b%"id"]=>
-      %unicode|string%(1) "1" refcount(%d)
-      [%u|b%"label"]=>
-      %unicode|string%(1) "a" refcount(%d)
+      ["id"]=>
+      string(1) "1" refcount(%d)
+      ["label"]=>
+      string(1) "a" refcount(%d)
     }
-    [%u|b%"id_ref"]=>
-    %unicode|string%(1) "1" refcount(%d)
-    [%u|b%"id_copy"]=>
-    %unicode|string%(1) "1" refcount(%d)
+    ["id_ref"]=>
+    string(1) "1" refcount(%d)
+    ["id_copy"]=>
+    string(1) "1" refcount(%d)
   }
   [1]=>
   array(5) refcount(%d){
-    [%u|b%"row_ref"]=>
+    ["row_ref"]=>
     &array(2) refcount(%d){
-      [%u|b%"id"]=>
-      &%unicode|string%(1) "2" refcount(%d)
-      [%u|b%"label"]=>
-      %unicode|string%(1) "b" refcount(%d)
+      ["id"]=>
+      &string(1) "2" refcount(%d)
+      ["label"]=>
+      string(1) "b" refcount(%d)
     }
-    [%u|b%"row_copy"]=>
+    ["row_copy"]=>
     array(2) refcount(%d){
-      [%u|b%"id"]=>
-      %unicode|string%(1) "2" refcount(%d)
-      [%u|b%"label"]=>
-      %unicode|string%(1) "b" refcount(%d)
+      ["id"]=>
+      string(1) "2" refcount(%d)
+      ["label"]=>
+      string(1) "b" refcount(%d)
     }
-    [%u|b%"id_ref"]=>
-    &%unicode|string%(1) "2" refcount(%d)
-    [%u|b%"id_copy"]=>
-    %unicode|string%(1) "2" refcount(%d)
-    [%u|b%"id_copy_mod"]=>
+    ["id_ref"]=>
+    &string(1) "2" refcount(%d)
+    ["id_copy"]=>
+    string(1) "2" refcount(%d)
+    ["id_copy_mod"]=>
     int(2)
   }
 }

@@ -292,7 +292,7 @@ static zval *result_lengths_read(mysqli_object *obj, zval *retval)
 #else
 	const zend_ulong *ret;
 #endif
-	uint field_count;
+	uint32_t field_count;
 
 	CHECK_STATUS(MYSQLI_STATUS_VALID);
 	p = (MYSQL_RES *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;

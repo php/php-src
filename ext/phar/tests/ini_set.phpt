@@ -20,11 +20,11 @@ var_dump(ini_get('phar.readonly'));
 __HALT_COMPILER();
 ?>
 --EXPECTF--
-%unicode|string%(1) "1"
-%unicode|string%(1) "1"
-%unicode|string%(1) "1"
-%unicode|string%(1) "1"
+string(1) "1"
+string(1) "1"
+string(1) "1"
+string(1) "1"
 bool(false)
 bool(false)
-%unicode|string%(1) "1"
-%unicode|string%(1) "1"
+string(1) "1"
+string(1) "1"

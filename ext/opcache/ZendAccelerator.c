@@ -367,8 +367,8 @@ static void accel_interned_strings_restore_for_php(void)
 #ifndef ZTS
 static void accel_interned_strings_restore_state(void)
 {
-    uint idx = ZCSG(interned_strings).nNumUsed;
-    uint nIndex;
+    uint32_t idx = ZCSG(interned_strings).nNumUsed;
+    uint32_t nIndex;
     Bucket *p;
 
 	memset(ZCSG(interned_strings_saved_top),
@@ -405,8 +405,8 @@ static zend_string *accel_find_interned_string(zend_string *str)
 {
 /* for now interned strings are supported only for non-ZTS build */
 	zend_ulong h;
-	uint nIndex;
-	uint idx;
+	uint32_t nIndex;
+	uint32_t idx;
 	Bucket *arData, *p;
 
 	if (IS_ACCEL_INTERNED(str)) {
@@ -445,8 +445,8 @@ zend_string *accel_new_interned_string(zend_string *str)
 /* for now interned strings are supported only for non-ZTS build */
 #ifndef ZTS
 	zend_ulong h;
-	uint nIndex;
-	uint idx;
+	uint32_t nIndex;
+	uint32_t idx;
 	Bucket *p;
 
 #ifdef HAVE_OPCACHE_FILE_CACHE
@@ -516,7 +516,7 @@ zend_string *accel_new_interned_string(zend_string *str)
 /* Copy PHP interned strings from PHP process memory into the shared memory */
 static void accel_use_shm_interned_strings(void)
 {
-	uint idx, j;
+	uint32_t idx, j;
 	Bucket *p, *q;
 
 	/* empty string */
@@ -1207,7 +1207,7 @@ static void zend_accel_add_key(char *key, unsigned int key_length, zend_accel_ha
 #ifdef HAVE_OPCACHE_FILE_CACHE
 static zend_persistent_script *cache_script_in_file_cache(zend_persistent_script *new_persistent_script, int *from_shared_memory)
 {
-	uint memory_used;
+	uint32_t memory_used;
 
 	/* Check if script may be stored in shared memory */
 	if (!zend_accel_script_persistable(new_persistent_script)) {
@@ -1265,7 +1265,7 @@ static zend_persistent_script *cache_script_in_file_cache(zend_persistent_script
 static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_script *new_persistent_script, char *key, unsigned int key_length, int *from_shared_memory)
 {
 	zend_accel_hash_entry *bucket;
-	uint memory_used;
+	uint32_t memory_used;
 
 	/* Check if script may be stored in shared memory */
 	if (!zend_accel_script_persistable(new_persistent_script)) {

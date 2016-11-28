@@ -1332,7 +1332,7 @@ static PHP_INI_MH(OnUpdate_mbstring_http_output)
 /* }}} */
 
 /* {{{ static _php_mb_ini_mbstring_internal_encoding_set */
-int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, uint new_value_length)
+int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, uint32_t new_value_length)
 {
 	const mbfl_encoding *encoding;
 

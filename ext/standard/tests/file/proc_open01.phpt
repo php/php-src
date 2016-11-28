@@ -57,7 +57,7 @@ array(2) {
   [1]=>
   resource(%d) of type (stream)
 }
-%unicode|string%(5) "yay!
+string(5) "yay!
 "
 array(3) {
   [0]=>
