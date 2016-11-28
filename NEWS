@@ -54,6 +54,10 @@ PHP                                                                        NEWS
     (rowan dot collins at gmail dot com)
   . Fixed bug #73303 (Scope not inherited by eval in assert()). (nikic)
 
+- Streams:
+  . Fixed bug #73586 (php_user_filter::$stream is not set to the stream the
+    filter is working on). (Dmitry)
+
 - XML:
   . Fixed bug #72135 (malformed XML causes fault) (edgarsandi)
 
