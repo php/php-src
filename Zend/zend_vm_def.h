@@ -5744,7 +5744,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET_R, CONST|TMP|VAR|CV, JMP_ADDR)
 			while (1) {
 				if (UNEXPECTED(pos >= fe_ht->nNumUsed)) {
 					FREE_OP1_IF_VAR();
-					Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
+					zval_ptr_dtor_nogc(EX_VAR(opline->result.var));
 					ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 				}
 				if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
@@ -5790,27 +5790,20 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET_R, CONST|TMP|VAR|CV, JMP_ADDR)
 
 			is_empty = iter->funcs->valid(iter) != SUCCESS;
 
-			if (UNEXPECTED(EG(exception) != NULL)) {
-				OBJ_RELEASE(&iter->std);
-				FREE_OP1();
-				HANDLE_EXCEPTION();
-			}
-			iter->index = -1; /* will be set to 0 before using next handler */
-
-			ZVAL_OBJ(EX_VAR(opline->result.var), &iter->std);
-			Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
-
 			FREE_OP1();
 			if (is_empty) {
+				OBJ_RELEASE(&iter->std);
 				ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 			} else {
+				iter->index = -1; /* will be set to 0 before using next handler */
+
+				ZVAL_OBJ(EX_VAR(opline->result.var), &iter->std);
+				Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
 				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 			}
 		}
 	} else {
 		zend_error(E_WARNING, "Invalid argument supplied for foreach()");
-		ZVAL_UNDEF(EX_VAR(opline->result.var));
-		Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
 		FREE_OP1();
 		ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 	}
@@ -5859,7 +5852,7 @@ ZEND_VM_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, JMP_ADDR)
 		while (1) {
 			if (UNEXPECTED(pos >= fe_ht->nNumUsed)) {
 				FREE_OP1_VAR_PTR();
-				Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
+				zval_ptr_dtor_nogc(EX_VAR(opline->result.var));
 				ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 			}
 			if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
@@ -5899,7 +5892,7 @@ ZEND_VM_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, JMP_ADDR)
 			while (1) {
 				if (UNEXPECTED(pos >= fe_ht->nNumUsed)) {
 					FREE_OP1_VAR_PTR();
-					Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
+					zval_ptr_dtor_nogc(EX_VAR(opline->result.var));
 					ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 				}
 				if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
@@ -5959,10 +5952,6 @@ ZEND_VM_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, JMP_ADDR)
 				}
 				HANDLE_EXCEPTION();
 			}
-			iter->index = -1; /* will be set to 0 before using next handler */
-
-			ZVAL_OBJ(EX_VAR(opline->result.var), &iter->std);
-			Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
 
 			if (OP1_TYPE == IS_VAR) {
 				FREE_OP1_VAR_PTR();
@@ -5970,15 +5959,18 @@ ZEND_VM_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, JMP_ADDR)
 				FREE_OP1();
 			}
 			if (is_empty) {
+				zval_ptr_dtor_nogc(&iter->std);
 				ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 			} else {
+				iter->index = -1; /* will be set to 0 before using next handler */
+
+				ZVAL_OBJ(EX_VAR(opline->result.var), &iter->std);
+				Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
 				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 			}
 		}
 	} else {
 		zend_error(E_WARNING, "Invalid argument supplied for foreach()");
-		ZVAL_UNDEF(EX_VAR(opline->result.var));
-		Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
 		if (OP1_TYPE == IS_VAR) {
 			FREE_OP1_VAR_PTR();
 		} else {
