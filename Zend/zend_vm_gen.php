@@ -1607,7 +1607,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 							out($f,"#endif\n");
 							out($f,"#undef HANDLE_EXCEPTION\n");
 							out($f,"#undef HANDLE_EXCEPTION_LEAVE\n");
-							out($f,"#define HANDLE_EXCEPTION() LOAD_OPLINE(); ZEND_VM_CONTINUE()\n");
+							out($f,"#define HANDLE_EXCEPTION() ZEND_VM_UNDEF_RETVAL(); LOAD_OPLINE(); ZEND_VM_CONTINUE()\n");
 							out($f,"#define HANDLE_EXCEPTION_LEAVE() LOAD_OPLINE(); ZEND_VM_LEAVE()\n");
 							out($f,"#if defined(ZEND_VM_FP_GLOBAL_REG)\n");
 							out($f,"# define ZEND_VM_ENTER()           execute_data = EG(current_execute_data); LOAD_OPLINE(); ZEND_VM_INTERRUPT_CHECK(); ZEND_VM_CONTINUE()\n");
@@ -1646,7 +1646,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 							out($f,"#define SAVE_OPLINE() EX(opline) = opline\n");
 							out($f,"#undef HANDLE_EXCEPTION\n");
 							out($f,"#undef HANDLE_EXCEPTION_LEAVE\n");
-							out($f,"#define HANDLE_EXCEPTION() LOAD_OPLINE(); ZEND_VM_CONTINUE()\n");
+							out($f,"#define HANDLE_EXCEPTION() ZEND_VM_UNDEF_RETVAL(); LOAD_OPLINE(); ZEND_VM_CONTINUE()\n");
 							out($f,"#define HANDLE_EXCEPTION_LEAVE() LOAD_OPLINE(); ZEND_VM_LEAVE()\n");
 							out($f,"#define ZEND_VM_CONTINUE() goto zend_vm_continue\n");
 							out($f,"#define ZEND_VM_RETURN()   return\n");
@@ -1678,10 +1678,10 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 							out($f,"#undef HANDLE_EXCEPTION\n");
 							out($f,"#undef HANDLE_EXCEPTION_LEAVE\n");
 							if (ZEND_VM_SPEC) {
-								out($f,"#define HANDLE_EXCEPTION() goto ZEND_HANDLE_EXCEPTION_SPEC_HANDLER\n");
+								out($f,"#define HANDLE_EXCEPTION() ZEND_VM_UNDEF_RETVAL(); goto ZEND_HANDLE_EXCEPTION_SPEC_HANDLER\n");
 								out($f,"#define HANDLE_EXCEPTION_LEAVE() goto ZEND_HANDLE_EXCEPTION_SPEC_HANDLER\n");
 							} else {
-								out($f,"#define HANDLE_EXCEPTION() goto ZEND_HANDLE_EXCEPTION_HANDLER\n");
+								out($f,"#define HANDLE_EXCEPTION() ZEND_VM_UNDEF_RETVAL(); goto ZEND_HANDLE_EXCEPTION_HANDLER\n");
 								out($f,"#define HANDLE_EXCEPTION_LEAVE() goto ZEND_HANDLE_EXCEPTION_HANDLER\n");
 							}
 							out($f,"#define ZEND_VM_CONTINUE() goto *(void**)(OPLINE->handler)\n");
@@ -2441,7 +2441,7 @@ function gen_vm($def, $skel) {
 		out($f,"#define SAVE_OPLINE()\n");
 		out($f,"#undef HANDLE_EXCEPTION\n");
 		out($f,"#undef HANDLE_EXCEPTION_LEAVE\n");
-		out($f,"#define HANDLE_EXCEPTION() LOAD_OPLINE(); ZEND_VM_CONTINUE()\n");
+		out($f,"#define HANDLE_EXCEPTION() ZEND_VM_UNDEF_RETVAL(); LOAD_OPLINE(); ZEND_VM_CONTINUE()\n");
 		out($f,"#define HANDLE_EXCEPTION_LEAVE() LOAD_OPLINE(); ZEND_VM_LEAVE()\n");
 		out($f,"#undef ZEND_VM_CONTINUE\n");
 		out($f,"#undef ZEND_VM_RETURN\n");
