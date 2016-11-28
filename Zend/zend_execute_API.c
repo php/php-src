@@ -573,7 +573,7 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_class_entry *scope) /* {{{ */
 			zend_throw_error(NULL, "Cannot declare self-referencing constant '%s'", Z_STRVAL_P(p));
 			return FAILURE;
 		}
-		inline_change = (Z_TYPE_FLAGS_P(p) & IS_TYPE_IMMUTABLE) == 0;
+		inline_change = (Z_TYPE_FLAGS_P(p) & IS_TYPE_REFCOUNTED) != 0;
 		SEPARATE_ZVAL_NOREF(p);
 		MARK_CONSTANT_VISITED(p);
 		if (Z_CONST_FLAGS_P(p) & IS_CONSTANT_CLASS) {
@@ -638,7 +638,7 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_class_entry *scope) /* {{{ */
 	} else if (Z_TYPE_P(p) == IS_CONSTANT_AST) {
 		zval tmp;
 
-		inline_change = (Z_TYPE_FLAGS_P(p) & IS_TYPE_IMMUTABLE) == 0;
+		inline_change = (Z_TYPE_FLAGS_P(p) & IS_TYPE_REFCOUNTED) != 0;
 		if (UNEXPECTED(zend_ast_evaluate(&tmp, Z_ASTVAL_P(p), scope) != SUCCESS)) {
 			return FAILURE;
 		}
