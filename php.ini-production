@@ -597,14 +597,14 @@ html_errors = On
 ; PHP's default setting is "&".
 ; http://php.net/arg-separator.output
 ; Example:
-;arg_separator.output = "&amp;"
+;arg_separator.output = "&"
 
 ; List of separator(s) used by PHP to parse input URLs into variables.
 ; PHP's default setting is "&".
 ; NOTE: Every character in this directive is considered as separator!
 ; http://php.net/arg-separator.input
 ; Example:
-;arg_separator.input = ";&"
+;arg_separator.input = "&"
 
 ; This directive determines which super global arrays are registered when PHP
 ; starts up. G,P,C,E & S are abbreviations for the following respective super
