@@ -111,7 +111,7 @@ int main() { return foo(10, "", 3.14); }
       AC_DEFINE([HAVE_ONIG], [1], [Define to 1 if the oniguruma library is available]) 
       PHP_MBSTRING_ADD_CFLAG([-DNOT_RUBY])
       PHP_MBSTRING_ADD_BUILD_DIR([oniguruma])
-      PHP_MBSTRING_ADD_BUILD_DIR([oniguruma/enc])
+      PHP_MBSTRING_ADD_BUILD_DIR([oniguruma/src])
       PHP_MBSTRING_ADD_INCLUDE([oniguruma])
       PHP_MBSTRING_ADD_CONFIG_HEADER([oniguruma/src/config.h])
       PHP_MBSTRING_ADD_SOURCES([
