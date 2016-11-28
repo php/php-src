@@ -865,8 +865,8 @@ static void* dasm_labels[zend_lb_MAX];
 |.macro ZVAL_COPY_CTOR, val_info, type_flags_reg, value_ptr_reg, filename, lineno
 ||if (val_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
 ||	if (val_info & (MAY_BE_STRING|MAY_BE_ARRAY)) {
-|		IF_NOT_FLAGS type_flags_reg, IS_TYPE_REFCOUNTED + IS_TYPE_IMMUTABLE, >2
-|		IF_NOT_FLAGS type_flags_reg, IS_TYPE_COPYABLE + IS_TYPE_IMMUTABLE, >1
+|		IF_NOT_FLAGS type_flags_reg, IS_TYPE_REFCOUNTED + IS_TYPE_COPYABLE, >2
+|		IF_NOT_FLAGS type_flags_reg, IS_TYPE_COPYABLE, >1
 |		GC_ADDREF value_ptr_reg
 |		jmp >2
 |1:
@@ -1000,18 +1000,18 @@ static void* dasm_labels[zend_lb_MAX];
 |.macro SEPARATE_ZVAL_NOREF, zv, op_info, cold, filename, lineno
 ||	if ((op_info & (MAY_BE_STRING|MAY_BE_ARRAY)) && RC_MAY_BE_N(op_info)) {
 ||		if (cold) {
-|			IF_Z_FLAGS zv, IS_TYPE_COPYABLE + IS_TYPE_IMMUTABLE, >1
+|			IF_Z_FLAGS zv, IS_TYPE_COPYABLE, >1
 |.cold_code
 |1:
 ||		} else {
-|			IF_NOT_Z_FLAGS zv, IS_TYPE_COPYABLE + IS_TYPE_IMMUTABLE, >2
+|			IF_NOT_Z_FLAGS zv, IS_TYPE_COPYABLE, >2
 ||		}
 |		GET_Z_PTR r0, zv
 ||		if (RC_MAY_BE_1(op_info)) {
 |			cmp dword [r0], 1 // if (GC_REFCOUNTED() > 1)
 |			jbe >2
 ||		}
-|		IF_Z_FLAGS zv, IS_TYPE_IMMUTABLE, >1
+|		IF_NOT_Z_FLAGS zv, IS_TYPE_REFCOUNTED, >1
 |		GC_DELREF r0
 |1:
 |		lea FCARG1a, [zv]
@@ -1027,18 +1027,18 @@ static void* dasm_labels[zend_lb_MAX];
 |.macro SEPARATE_ZVAL_NOREF_REG, op_info, cold, filename, lineno
 ||	if ((op_info & (MAY_BE_STRING|MAY_BE_ARRAY)) && RC_MAY_BE_N(op_info)) {
 ||		if (cold) {
-|			IF_Z_FLAGS FCARG1a, IS_TYPE_COPYABLE + IS_TYPE_IMMUTABLE, >1
+|			IF_Z_FLAGS FCARG1a, IS_TYPE_COPYABLE, >1
 |.cold_code
 |1:
 ||		} else {
-|			IF_NOT_Z_FLAGS FCARG1a, IS_TYPE_COPYABLE + IS_TYPE_IMMUTABLE, >2
+|			IF_NOT_Z_FLAGS FCARG1a, IS_TYPE_COPYABLE, >2
 ||		}
 |		GET_Z_PTR r0, FCARG1a
 ||		if (RC_MAY_BE_1(op_info)) {
 |			cmp dword [r0], 1 // if (GC_REFCOUNTED() > 1)
 |			jbe >2
 ||		}
-|		IF_Z_FLAGS FCARG1a, IS_TYPE_IMMUTABLE, >1
+|		IF_NOT_Z_FLAGS FCARG1a, IS_TYPE_REFCOUNTED, >1
 |		GC_DELREF r0
 |1:
 |		mov aword [r4], FCARG1a // save
@@ -1065,7 +1065,7 @@ static void* dasm_labels[zend_lb_MAX];
 |				jbe >2
 ||			}
 ||		}
-|		IF_Z_FLAGS FP + op.var, IS_TYPE_IMMUTABLE, >1
+|		IF_NOT_Z_FLAGS FP + op.var, IS_TYPE_REFCOUNTED, >1
 |		GC_DELREF FCARG1a
 |1:
 |		LOAD_ZVAL_ADDR FCARG1a, op_type, op
@@ -1094,7 +1094,7 @@ static void* dasm_labels[zend_lb_MAX];
 |				jbe >2
 ||			}
 ||		}
-|		IF_Z_FLAGS FCARG1a, IS_TYPE_IMMUTABLE, >1
+|		IF_NOT_Z_FLAGS FCARG1a, IS_TYPE_REFCOUNTED, >1
 |		GC_DELREF r0
 |1:
 |		mov aword [r4], FCARG1a // save
@@ -1977,8 +1977,8 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, zend_op_arr
 		|			//ZVAL_COPY_CTOR op1_info, ah, r2, op_array->filename, opline->lineno
 		||			if (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
 		||				if (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY)) {
-		|					IF_NOT_FLAGS ah, IS_TYPE_REFCOUNTED + IS_TYPE_IMMUTABLE, >2
-		|					IF_FLAGS ah, IS_TYPE_COPYABLE + IS_TYPE_IMMUTABLE, >1
+		|					IF_NOT_FLAGS ah, IS_TYPE_REFCOUNTED + IS_TYPE_COPYABLE, >2
+		|					IF_FLAGS ah, IS_TYPE_COPYABLE, >1
 		|					GC_ADDREF r2
 		|					jmp >2
 		|1:
