@@ -5637,7 +5637,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 				|	ZVAL_PTR_DTOR RX + offset, MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN, 0, 1, 1, op_array->filename, opline->lineno
 			}
 		} else {
-			|	mov FCARG1a, RX 
+			|	mov FCARG1a, RX
 			|	EXT_CALL zend_jit_vm_stack_free_args_helper, r0
 		}
 
@@ -6043,6 +6043,79 @@ static int zend_jit_smart_false(dasm_State **Dst, const zend_op *opline, int b, 
 			|	jmp >7
 		}
 	}
+
+	return 1;
+}
+
+static int zend_jit_defined(dasm_State **Dst, const zend_op *opline, int b, int *opnum, zend_op_array *op_array, zend_ssa *ssa)
+{
+	zend_bool smart_branch = 0;
+	uint32_t defined_label = (uint32_t)-1;
+	uint32_t undefined_label = (uint32_t)-1;
+	zval *zv = RT_CONSTANT(op_array, opline->op1);
+
+	if (((opline+1)->opcode == ZEND_JMPZ ||
+	     (opline+1)->opcode == ZEND_JMPNZ ||
+	     (opline+1)->opcode == ZEND_JMPZNZ) &&
+	    (opline+1)->op1_type == IS_TMP_VAR &&
+	    (opline+1)->op1.var == opline->result.var) {
+		(*opnum)++;
+		smart_branch = 1;
+	}
+
+	if (smart_branch) {
+		if ((opline+1)->opcode == ZEND_JMPZ) {
+			undefined_label = ssa->cfg.blocks[b].successors[0];
+		} else if ((opline+1)->opcode == ZEND_JMPNZ) {
+			defined_label = ssa->cfg.blocks[b].successors[0];
+		} else if ((opline+1)->opcode == ZEND_JMPZNZ) {
+			undefined_label = ssa->cfg.blocks[b].successors[0];
+			defined_label = ssa->cfg.blocks[b].successors[1];
+		} else {
+			ZEND_ASSERT(0);
+		}
+	}
+
+	|	// if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)))) {
+	|	mov r0,	EX->run_time_cache
+	|	mov r0, aword [r0 + Z_CACHE_SLOT_P(zv)]
+	|	test r0, r0
+	|	jz >1
+	|.cold_code
+	|1:
+	|	LOAD_ADDR FCARG1a, zv
+	|	mov FCARG2d, 0
+	|	EXT_CALL zend_quick_get_constant, r0
+	|	test r0, r0
+	if (smart_branch) {
+		if (undefined_label != (uint32_t)-1) {
+			|	jz =>undefined_label
+		} else {
+			|	jz >3
+		}
+	}
+	|	mov r0,	EX->run_time_cache
+	|	mov r0, aword [r0 + Z_CACHE_SLOT_P(zv)]
+	if (smart_branch) {
+		if (defined_label != (uint32_t)-1) {
+			|	jmp =>defined_label
+		} else {
+			|	jmp >3
+		}
+	} else {
+		|	add eax, IS_FALSE
+		|	SET_Z_TYPE_INFO FP + opline->result.var, eax
+		|	jmp >3
+	}
+	|.code
+	if (smart_branch) {
+		if (defined_label != (uint32_t)-1) {
+			|	jmp =>defined_label
+		}
+	} else {
+		|	SET_Z_TYPE_INFO FP + opline->result.var, IS_TRUE
+	}
+	|3:
 
 	return 1;
 }

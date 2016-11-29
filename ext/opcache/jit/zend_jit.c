@@ -21,6 +21,7 @@
 #include "Zend/zend_execute.h"
 #include "Zend/zend_vm.h"
 #include "Zend/zend_exceptions.h"
+#include "Zend/zend_constants.h"
 #include "zend_smart_str.h"
 #include "jit/zend_jit.h"
 #include "jit/zend_jit_internal.h"
@@ -1180,6 +1181,11 @@ pass:
 					case ZEND_IS_SMALLER_OR_EQUAL:
 					case ZEND_CASE:
 						if (!zend_jit_cmp(&dasm_state, opline, b, &i, op_array, ssa)) {
+							goto jit_failure;
+						}
+						goto done;
+					case ZEND_DEFINED:
+						if (!zend_jit_defined(&dasm_state, opline, b, &i, op_array, ssa)) {
 							goto jit_failure;
 						}
 						goto done;
