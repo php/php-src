@@ -4677,6 +4677,314 @@ static int zend_jit_cmp(dasm_State **Dst, const zend_op *opline, int b, int *opn
 	return 1;
 }
 
+static int zend_jit_identical(dasm_State **Dst, const zend_op *opline, int b, int *opnum, zend_op_array *op_array, zend_ssa *ssa)
+{
+	zend_bool smart_branch = 0;
+	uint32_t identical_label = (uint32_t)-1;
+	uint32_t not_identical_label = (uint32_t)-1;
+	uint32_t op1_info, op2_info;
+
+	op1_info = OP1_INFO();
+	op2_info = OP2_INFO();
+	if (((opline+1)->opcode == ZEND_JMPZ ||
+	     (opline+1)->opcode == ZEND_JMPNZ ||
+	     (opline+1)->opcode == ZEND_JMPZNZ) &&
+	    (opline+1)->op1_type == IS_TMP_VAR &&
+	    (opline+1)->op1.var == opline->result.var) {
+		(*opnum)++;
+		smart_branch = 1;
+	}
+
+	if (smart_branch) {
+		if (opline->opcode == ZEND_IS_IDENTICAL) {
+			if ((opline+1)->opcode == ZEND_JMPZ) {
+				not_identical_label = ssa->cfg.blocks[b].successors[0];
+			} else if ((opline+1)->opcode == ZEND_JMPNZ) {
+				identical_label = ssa->cfg.blocks[b].successors[0];
+			} else if ((opline+1)->opcode == ZEND_JMPZNZ) {
+				not_identical_label = ssa->cfg.blocks[b].successors[0];
+				identical_label = ssa->cfg.blocks[b].successors[1];
+			} else {
+				ZEND_ASSERT(0);
+			}
+		} else if (opline->opcode == ZEND_IS_NOT_IDENTICAL) {
+			if ((opline+1)->opcode == ZEND_JMPZ) {
+				identical_label = ssa->cfg.blocks[b].successors[0];
+			} else if ((opline+1)->opcode == ZEND_JMPNZ) {
+				not_identical_label = ssa->cfg.blocks[b].successors[0];
+			} else if ((opline+1)->opcode == ZEND_JMPZNZ) {
+				identical_label = ssa->cfg.blocks[b].successors[0];
+				not_identical_label = ssa->cfg.blocks[b].successors[1];
+			} else {
+				ZEND_ASSERT(0);
+			}
+		} else {
+			ZEND_ASSERT(0);
+		}
+	}
+
+	if ((op1_info & MAY_BE_UNDEF) && (op2_info & MAY_BE_UNDEF)) {
+		op1_info |= MAY_BE_NULL;
+		op2_info |= MAY_BE_NULL;
+		|	LOAD_ZVAL_ADDR FCARG1a, IS_CV, opline->op1
+		|	IF_Z_TYPE FCARG1a, IS_UNDEF, >1
+		|.cold_code
+		|1:
+		|	// zend_error(E_NOTICE, "Undefined variable: %s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
+		|	SAVE_VALID_OPLINE opline
+		|	mov FCARG1d, opline->op1.var
+		|	EXT_CALL zend_jit_undefined_op_helper, r0
+		||	if (zend_may_throw(opline, op_array, ssa)) {
+		||		zend_jit_check_exception(Dst);
+		||	}
+		|	LOAD_ADDR FCARG1a, &EG(uninitialized_zval)
+		|	jmp >1
+		|.code
+		|1:
+		|	LOAD_ZVAL_ADDR FCARG2a, IS_CV, opline->op2
+		|	IF_Z_TYPE FCARG2a, IS_UNDEF, >1
+		|.cold_code
+		|1:
+		|	// zend_error(E_NOTICE, "Undefined variable: %s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
+		|	SAVE_VALID_OPLINE opline
+		|	mov aword [r4], FCARG1a // save
+		|	mov FCARG1d, opline->op2.var
+		|	EXT_CALL zend_jit_undefined_op_helper, r0
+		||	if (zend_may_throw(opline, op_array, ssa)) {
+		||		zend_jit_check_exception(Dst);
+		||	}
+		|	mov FCARG1a, aword [r4] // restore
+		|	LOAD_ADDR FCARG2a, &EG(uninitialized_zval)
+		|	jmp >1
+		|.code
+		|1:
+	} else if (op1_info & MAY_BE_UNDEF) {
+		op1_info |= MAY_BE_NULL;
+		|	LOAD_ZVAL_ADDR FCARG1a, IS_CV, opline->op1
+		|	IF_Z_TYPE FCARG1a, IS_UNDEF, >1
+		|.cold_code
+		|1:
+		|	// zend_error(E_NOTICE, "Undefined variable: %s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
+		|	SAVE_VALID_OPLINE opline
+		|	mov FCARG1d, opline->op1.var
+		|	EXT_CALL zend_jit_undefined_op_helper, r0
+		||	if (zend_may_throw(opline, op_array, ssa)) {
+		||		zend_jit_check_exception(Dst);
+		||	}
+		|	LOAD_ADDR FCARG1a, &EG(uninitialized_zval)
+		|	jmp >1
+		|.code
+		|1:
+		if (opline->op2_type != IS_CONST) {
+			|	LOAD_ZVAL_ADDR FCARG2a, opline->op2_type, opline->op2
+		}
+	} else if (op2_info & MAY_BE_UNDEF) {
+		op2_info |= MAY_BE_NULL;
+		|	LOAD_ZVAL_ADDR FCARG2a, IS_CV, opline->op2
+		|	IF_Z_TYPE FCARG2a, IS_UNDEF, >1
+		|.cold_code
+		|1:
+		|	// zend_error(E_NOTICE, "Undefined variable: %s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
+		|	SAVE_VALID_OPLINE opline
+		|	mov FCARG1d, opline->op2.var
+		|	EXT_CALL zend_jit_undefined_op_helper, r0
+		||	if (zend_may_throw(opline, op_array, ssa)) {
+		||		zend_jit_check_exception(Dst);
+		||	}
+		|	LOAD_ADDR FCARG2a, &EG(uninitialized_zval)
+		|	jmp >1
+		|.code
+		|1:
+		if (opline->op1_type != IS_CONST) {
+			|	LOAD_ZVAL_ADDR FCARG1a, opline->op1_type, opline->op1
+		}
+	} else {
+		if (opline->op1_type != IS_CONST) {
+			|	LOAD_ZVAL_ADDR FCARG1a, opline->op1_type, opline->op1
+		}
+		if (opline->op2_type != IS_CONST) {
+			|	LOAD_ZVAL_ADDR FCARG2a, opline->op2_type, opline->op2
+		}
+	}
+	if (opline->op1_type & (IS_CV|IS_VAR)) {
+		|	ZVAL_DEREF FCARG1a, op1_info
+	}
+	if (opline->op2_type & (IS_CV|IS_VAR)) {
+		|	ZVAL_DEREF FCARG2a, op2_info
+	}
+
+	if ((op1_info & op2_info & MAY_BE_ANY) == 0) {
+		if (((opline->op1_type & (IS_VAR|IS_TMP_VAR)) &&
+		     (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) ||
+		    ((opline->op2_type & (IS_VAR|IS_TMP_VAR)) &&
+		     (op2_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)))) {
+			|	SAVE_VALID_OPLINE opline
+			|	FREE_OP opline->op1_type, opline->op1, op1_info, 1, op_array, opline->lineno
+			|	FREE_OP opline->op2_type, opline->op2, op2_info, 1, op_array, opline->lineno
+			zend_jit_check_exception(Dst);
+		}
+		if (smart_branch) {
+			if (not_identical_label != (uint32_t)-1) {
+				|	jmp =>not_identical_label
+			}
+		} else {
+			|	SET_Z_TYPE_INFO FP + opline->result.var, (opline->opcode == ZEND_IS_IDENTICAL ? IS_FALSE : IS_TRUE)
+		}
+	} else if (has_concrete_type(op1_info) &&
+	           has_concrete_type(op2_info) &&
+	           concrete_type(op1_info) == concrete_type(op2_info) &&
+	           concrete_type(op1_info) <= IS_TRUE) {
+		if (smart_branch) {
+			if (identical_label != (uint32_t)-1) {
+				|	jmp =>identical_label
+			}
+		} else {
+			|	SET_Z_TYPE_INFO FP + opline->result.var, (opline->opcode == ZEND_IS_IDENTICAL ? IS_TRUE : IS_FALSE)
+		}
+	} else if (opline->op1_type == IS_CONST && opline->op2_type == IS_CONST) {
+		if (zend_is_identical(RT_CONSTANT(op_array, opline->op1), RT_CONSTANT(op_array, opline->op2))) {
+			if (smart_branch) {
+				if (identical_label != (uint32_t)-1) {
+					|	jmp =>identical_label
+				}
+			} else {
+				|	SET_Z_TYPE_INFO FP + opline->result.var, (opline->opcode == ZEND_IS_IDENTICAL ? IS_TRUE : IS_FALSE)
+			}
+		} else {
+			if (smart_branch) {
+				if (not_identical_label != (uint32_t)-1) {
+					|	jmp =>not_identical_label
+				}
+			} else {
+				|	SET_Z_TYPE_INFO FP + opline->result.var, (opline->opcode == ZEND_IS_IDENTICAL ? IS_FALSE : IS_TRUE)
+			}
+		}
+	} else if (opline->op1_type == IS_CONST && Z_TYPE_P(RT_CONSTANT(op_array, opline->op1)) <= IS_TRUE) {
+		zval *val = RT_CONSTANT(op_array, opline->op1);
+
+		|	cmp byte [FCARG2a + offsetof(zval, u1.v.type)], Z_TYPE_P(val)
+		if (smart_branch) {
+			if (opline->op2_type == IS_VAR && (op2_info & MAY_BE_REF)) {
+				|	jne >8
+				|	SAVE_VALID_OPLINE opline
+				|	FREE_OP opline->op2_type, opline->op2, op2_info, 1, op_array, opline->lineno
+				zend_jit_check_exception(Dst);
+				if (identical_label != (uint32_t)-1) {
+					|	jmp =>identical_label
+				} else {
+					|	jmp >9
+				}
+				|8:
+			} else if (identical_label != (uint32_t)-1) {
+				|	je =>identical_label
+			} else {
+				|	je >9
+			}
+		} else {
+			if (opline->opcode == ZEND_IS_IDENTICAL) {
+				|	sete al
+			} else {
+				|	setne al
+			}
+			|	movzx eax, al
+			|	lea eax, [eax + 2]
+			|	SET_Z_TYPE_INFO FP + opline->result.var, eax
+		}
+		if ((opline->op2_type & (IS_VAR|IS_TMP_VAR)) &&
+		    (op2_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
+			|	SAVE_VALID_OPLINE opline
+			|	FREE_OP opline->op2_type, opline->op2, op2_info, 1, op_array, opline->lineno
+			zend_jit_check_exception(Dst);
+		}
+		if (smart_branch && not_identical_label != (uint32_t)-1) {
+			|	jmp =>not_identical_label
+		}
+	} else if (opline->op2_type == IS_CONST && Z_TYPE_P(RT_CONSTANT(op_array, opline->op2)) <= IS_TRUE) {
+		zval *val = RT_CONSTANT(op_array, opline->op2);
+
+		|	cmp byte [FCARG1a + offsetof(zval, u1.v.type)], Z_TYPE_P(val)
+		if (smart_branch) {
+			if (opline->op1_type == IS_VAR && (op1_info & MAY_BE_REF)) {
+				|	jne >8
+				|	SAVE_VALID_OPLINE opline
+				|	FREE_OP opline->op1_type, opline->op1, op1_info, 1, op_array, opline->lineno
+				zend_jit_check_exception(Dst);
+				if (identical_label != (uint32_t)-1) {
+					|	jmp =>identical_label
+				} else {
+					|	jmp >9
+				}
+				|8:
+			} else if (identical_label != (uint32_t)-1) {
+				|	je =>identical_label
+			} else {
+				|	je >9
+			}
+		} else {
+			if (opline->opcode == ZEND_IS_IDENTICAL) {
+				|	sete al
+			} else {
+				|	setne al
+			}
+			|	movzx eax, al
+			|	lea eax, [eax + 2]
+			|	SET_Z_TYPE_INFO FP + opline->result.var, eax
+		}
+		if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) &&
+		    (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
+			|	SAVE_VALID_OPLINE opline
+			|	FREE_OP opline->op1_type, opline->op1, op1_info, 1, op_array, opline->lineno
+			zend_jit_check_exception(Dst);
+		}
+		if (smart_branch && not_identical_label != (uint32_t)-1) {
+			|	jmp =>not_identical_label
+		}
+	} else {
+		if (opline->op1_type == IS_CONST) {
+			|	LOAD_ZVAL_ADDR FCARG1a, opline->op1_type, opline->op1
+		}
+		if (opline->op2_type == IS_CONST) {
+			|	LOAD_ZVAL_ADDR FCARG2a, opline->op2_type, opline->op2
+		}
+		|	EXT_CALL zend_is_identical, r0
+			if (((opline->op1_type & (IS_VAR|IS_TMP_VAR)) &&
+			     (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) ||
+			    ((opline->op2_type & (IS_VAR|IS_TMP_VAR)) &&
+			     (op2_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)))) {
+				|	mov aword [r4], r0 // save
+				|	SAVE_VALID_OPLINE opline
+				|	FREE_OP opline->op1_type, opline->op1, op1_info, 1, op_array, opline->lineno
+				|	FREE_OP opline->op2_type, opline->op2, op2_info, 1, op_array, opline->lineno
+				zend_jit_check_exception(Dst);
+				|	mov r0, aword [r4] // restore
+			}
+		|	test r0, r0
+		if (smart_branch) {
+			if (not_identical_label != (uint32_t)-1) {
+				|	jz =>not_identical_label
+				if (identical_label != (uint32_t)-1) {
+					|	jmp =>identical_label
+				}
+			} else if (identical_label != (uint32_t)-1) {
+				|	jnz =>identical_label
+			}
+		} else {
+			if (opline->opcode == ZEND_IS_IDENTICAL) {
+				|	setnz al
+			} else {
+				|	setz al
+			}
+			|	movzx eax, al
+			|	lea eax, [eax + 2]
+			|	SET_Z_TYPE_INFO FP + opline->result.var, eax
+		}
+	}
+
+	|9:
+
+	return 1;
+}
+
 static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, int b, zend_op_array *op_array, zend_ssa *ssa)
 {
 	uint32_t op1_info = OP1_INFO();

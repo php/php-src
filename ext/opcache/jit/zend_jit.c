@@ -1184,6 +1184,12 @@ pass:
 							goto jit_failure;
 						}
 						goto done;
+					case ZEND_IS_IDENTICAL:
+					case ZEND_IS_NOT_IDENTICAL:
+						if (!zend_jit_identical(&dasm_state, opline, b, &i, op_array, ssa)) {
+							goto jit_failure;
+						}
+						goto done;
 					case ZEND_DEFINED:
 						if (!zend_jit_defined(&dasm_state, opline, b, &i, op_array, ssa)) {
 							goto jit_failure;
