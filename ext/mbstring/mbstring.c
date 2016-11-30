@@ -3852,7 +3852,7 @@ detect_end:
 			if (elist != NULL) {
 				efree((void *)elist);
 			}
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot handle recursive references");
+			php_error_docref(NULL, E_WARNING, "Cannot handle recursive references");
 			RETURN_FALSE;
 		}
 		efree(stack);
@@ -3969,7 +3969,7 @@ conv_end:
 				}
 			}
 			efree(stack);
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot handle recursive references");
+			php_error_docref(NULL, E_WARNING, "Cannot handle recursive references");
 			RETURN_FALSE;
 		}
 		efree(stack);

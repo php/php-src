@@ -1738,7 +1738,8 @@ ZEND_VM_HELPER(zend_fetch_static_prop_helper, CONST|TMPVAR|CV, UNUSED|CONST|VAR,
 		}
 	}
 	retval = zend_std_get_static_property(ce, name, 0);
-	if (UNEXPECTED(EG(exception))) {
+	if (UNEXPECTED(retval == NULL)) {
+		ZEND_ASSERT(EG(exception));
 		if (OP1_TYPE != IS_CONST) {
 			zend_string_release(name);
 		}
@@ -1756,7 +1757,6 @@ ZEND_VM_HELPER(zend_fetch_static_prop_helper, CONST|TMPVAR|CV, UNUSED|CONST|VAR,
 	}
 
 ZEND_VM_C_LABEL(fetch_static_prop_return):
-	ZEND_ASSERT(retval != NULL);
 	if (type == BP_VAR_R || type == BP_VAR_IS) {
 		ZVAL_COPY_UNREF(EX_VAR(opline->result.var), retval);
 	} else {
@@ -2709,9 +2709,6 @@ ZEND_VM_HANDLER(43, ZEND_JMPZ, CONST|TMPVAR|CV, JMP_ADDR)
 		opline = OP_JMP_ADDR(opline, opline->op2);
 	}
 	FREE_OP1();
-	if (UNEXPECTED(EG(exception) != NULL)) {
-		HANDLE_EXCEPTION();
-	}
 	ZEND_VM_JMP(opline);
 }
 
@@ -2743,9 +2740,6 @@ ZEND_VM_HANDLER(44, ZEND_JMPNZ, CONST|TMPVAR|CV, JMP_ADDR)
 		opline++;
 	}
 	FREE_OP1();
-	if (UNEXPECTED(EG(exception) != NULL)) {
-		HANDLE_EXCEPTION();
-	}
 	ZEND_VM_JMP(opline);
 }
 
@@ -2780,9 +2774,6 @@ ZEND_VM_HANDLER(45, ZEND_JMPZNZ, CONST|TMPVAR|CV, JMP_ADDR, JMP_ADDR)
 		opline = OP_JMP_ADDR(opline, opline->op2);
 	}
 	FREE_OP1();
-	if (UNEXPECTED(EG(exception) != NULL)) {
-		HANDLE_EXCEPTION();
-	}
 	ZEND_VM_JMP(opline);
 }
 
@@ -2823,9 +2814,6 @@ ZEND_VM_HANDLER(46, ZEND_JMPZ_EX, CONST|TMPVAR|CV, JMP_ADDR)
 		ZVAL_FALSE(EX_VAR(opline->result.var));
 		opline = OP_JMP_ADDR(opline, opline->op2);
 	}
-	if (UNEXPECTED(EG(exception) != NULL)) {
-		HANDLE_EXCEPTION();
-	}
 	ZEND_VM_JMP(opline);
 }
 
@@ -2862,9 +2850,6 @@ ZEND_VM_HANDLER(47, ZEND_JMPNZ_EX, CONST|TMPVAR|CV, JMP_ADDR)
 	} else {
 		ZVAL_FALSE(EX_VAR(opline->result.var));
 		opline++;
-	}
-	if (UNEXPECTED(EG(exception) != NULL)) {
-		HANDLE_EXCEPTION();
 	}
 	ZEND_VM_JMP(opline);
 }
@@ -7979,9 +7964,6 @@ ZEND_VM_HANDLER(158, ZEND_CALL_TRAMPOLINE, ANY, ANY)
 	fbc = call->func;
 
 	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)) {
-
-		ZEND_ASSERT(!(fbc->common.fn_flags & ZEND_ACC_GENERATOR));
-
 		if (UNEXPECTED(!fbc->op_array.run_time_cache)) {
 			init_func_run_time_cache(&fbc->op_array);
 		}
