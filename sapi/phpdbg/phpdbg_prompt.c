@@ -345,7 +345,9 @@ void phpdbg_try_file_init(char *init_file, size_t init_file_len, zend_bool free_
 
 void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default) /* {{{ */
 {
-	if (!init_file && use_default) {
+	if (init_file) {
+		phpdbg_try_file_init(init_file, init_file_len, 1);
+	} else if (use_default) {
 		char *scan_dir = getenv("PHP_INI_SCAN_DIR");
 		char *sys_ini;
 		int i;
@@ -378,8 +380,6 @@ void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default) /
 		}
 
 		phpdbg_try_file_init(PHPDBG_STRL(PHPDBG_INIT_FILENAME), 0);
-	} else {
-		phpdbg_try_file_init(init_file, init_file_len, 1);
 	}
 }
 /* }}} */
