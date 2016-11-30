@@ -6200,7 +6200,9 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, zend_op_ar
 	uint32_t op1_info;
 	uint32_t arg_num = opline->op2.num;
 
-	if (opline->opcode == ZEND_SEND_VAR_EX && arg_num > MAX_ARG_FLAG_NUM) {
+	if ((opline->opcode == ZEND_SEND_VAR_EX ||
+	     opline->opcode == ZEND_SEND_VAR_NO_REF_EX) &&
+	    arg_num > MAX_ARG_FLAG_NUM) {
 		goto fallback;
 	}
 
@@ -6212,8 +6214,14 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		|	mov RX, EX->call
 	}
 
-	if (opline->opcode == ZEND_SEND_VAR_EX) {
-		uint32_t mask = ZEND_SEND_BY_REF << ((arg_num + 3) * 2);
+	if (opline->opcode == ZEND_SEND_VAR_EX || opline->opcode == ZEND_SEND_VAR_NO_REF_EX) {
+		uint32_t mask;
+
+		if (opline->opcode == ZEND_SEND_VAR_EX) {
+			mask = ZEND_SEND_BY_REF << ((arg_num + 3) * 2);
+		} else {
+			mask = (ZEND_SEND_BY_REF|ZEND_SEND_PREFER_REF) << ((arg_num + 3) * 2);
+		}
 
 		|	mov r0, EX:RX->func
 		if (arg_num <= MAX_ARG_FLAG_NUM) {
@@ -6226,8 +6234,38 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		|.cold_code
 		|1:
 
-		if (!zend_jit_send_ref(Dst, opline, op_array, ssa, 1)) {
-			return 0;
+		if (opline->opcode == ZEND_SEND_VAR_EX) {
+			if (!zend_jit_send_ref(Dst, opline, op_array, ssa, 1)) {
+				return 0;
+			}
+		} else if (opline->opcode == ZEND_SEND_VAR_NO_REF_EX) {
+			mask = ZEND_SEND_PREFER_REF << ((arg_num + 3) * 2);
+
+			|	ZVAL_COPY_VALUE RX + opline->result.var, FP + opline->op1.var, op1_info, r1, ecx, r2
+			if (op1_info & MAY_BE_REF) {
+				|	cmp cl, IS_REFERENCE
+				|	je >7
+			}
+			|	test dword [r0 + offsetof(zend_function, quick_arg_flags)], mask
+			|	jnz >7
+			|	SAVE_VALID_OPLINE opline
+			|.if X64
+			|	mov CARG1, E_NOTICE
+			|	LOAD_ADDR CARG2, "Only variables should be passed by reference"
+			|	EXT_CALL zend_error, r0
+			|	add r4, 8
+			|.else
+			|	sub r4, 8
+			|	push "Only variables should be passed by reference"
+			|	push E_NOTICE
+			|	EXT_CALL zend_error, r0
+			|	add r4, 16
+			|.endif
+			if (!zend_jit_check_exception(Dst)) {
+				return 0;
+			}
+		} else {
+			ZEND_ASSERT(0);
 		}
 
 		|	jmp >7
@@ -6252,7 +6290,29 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		}
 	}
 
-	if (op1_info & (MAY_BE_ANY|MAY_BE_REF)) {
+	if (opline->opcode == ZEND_SEND_VAR_NO_REF) {
+		|	ZVAL_COPY_VALUE RX + opline->result.var, FP + opline->op1.var, op1_info, r1, ecx, r2
+		if (op1_info & MAY_BE_REF) {
+			|	cmp cl, IS_REFERENCE
+			|	je >7
+		}
+		|	SAVE_VALID_OPLINE opline
+		|.if X64
+		|	mov CARG1, E_NOTICE
+		|	LOAD_ADDR CARG2, "Only variables should be passed by reference"
+		|	EXT_CALL zend_error, r0
+		|	add r4, 8
+		|.else
+		|	sub r4, 8
+		|	push "Only variables should be passed by reference"
+		|	push E_NOTICE
+		|	EXT_CALL zend_error, r0
+		|	add r4, 16
+		|.endif
+		if (!zend_jit_check_exception(Dst)) {
+			return 0;
+		}
+	} else if (op1_info & (MAY_BE_ANY|MAY_BE_REF)) {
 		if (op1_info & MAY_BE_REF) {
 			if (opline->op1_type == IS_CV) {
 				|	lea FCARG1a, [FP + opline->op1.var]
