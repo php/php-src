@@ -1874,9 +1874,7 @@ phpdbg_main:
 		/* initialize from file */
 		PHPDBG_G(flags) |= PHPDBG_IS_INITIALIZING;
 		zend_try {
-			if (init_file) {
-				phpdbg_init(init_file, init_file_len, init_file_default);
-			}
+			phpdbg_init(init_file, init_file_len, init_file_default);
 		} zend_end_try();
 		PHPDBG_G(flags) &= ~PHPDBG_IS_INITIALIZING;
 
