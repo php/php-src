@@ -2,7 +2,7 @@
 Bug #73615 (phpdbg without option never load .phpdbginit at startup)
 --SKIPIF--
 <?php
-if (!getenv('TEST_PHPDBG_EXECUTABLE')) die("No TEST_PHPDBG_EXECUTABLE specified");
+if (!getenv('TEST_PHPDBG_EXECUTABLE')) die("SKIP: No TEST_PHPDBG_EXECUTABLE specified");
 ?>
 --FILE--
 <?php
