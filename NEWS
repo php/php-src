@@ -1,22 +1,94 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.1
+?? ??? 2016, PHP 7.1.0
 
+- Core:
+  . Fixed bug #73585 (Logging of "Internal Zend error - Missing class
+    information" missing class name). (Laruence)
+  . Fixed memory leak(null coalescing operator with Spl hash). (Tyson Andre)
 
+- Calendar:
+  . Fix integer overflows (Joshua Rogers)
+
+- Date:
+  . Fixed bug #69587 (DateInterval properties and isset). (jhdxr)
+
+- DTrace:
+  . Disabled PHP call tracing by default (it makes significant overhead).
+    This may be enabled again using envirionment variable USE_ZEND_DTRACE=1.
+    (Dmitry)
+
+- Mbstring:
+  . Fixed bug #73532 (Null pointer dereference in mb_eregi). (Laruence)
+
+- Mysqlnd:
+  . Fixed bug #64526 (Add missing mysqlnd.* parameters to php.ini-*). (cmb)
+
+- Opcache:
+  . Fixed bug #73583 (Segfaults when conditionally declared class and function
+    have the same name). (Laruence)
+  . Fixed bug #69090 (check cached files permissions)
+
+- OpenSSL:
+  . Fixed bug #73478 (openssl_pkey_new() generates wrong pub/priv keys with
+    Diffie Hellman). (Jakub Zelenka)
+
+- PCRE:
+  . Fixed bug #73483 (Segmentation fault on pcre_replace_callback). (Laruence)
+  . Fixed bug #73612 (preg_*() may leak memory). (cmb)
+
+- Postgres:
+  . Fixed bug #73498 (Incorrect SQL generated for pg_copy_to()). (Craig Duncan)
+
+- Soap:
+  . Fixed bug #73538 (SoapClient::__setSoapHeaders doesn't overwrite SOAP 
+    headers). (duncan3dc)
+  . Fixed bug #73452 (Segfault (Regression for #69152)). (Dmitry)
+
+- SQLite3:
+  . Update to SQLite 3.15.1. (cmb)
+  . Fixed bug #73530 (Unsetting result set may reset other result set). (cmb)
+
+- Standard:
+  . Fixed bug #73297 (HTTP stream wrapper should ignore HTTP 100 Continue).
+    (rowan dot collins at gmail dot com)
+  . Fixed bug #73303 (Scope not inherited by eval in assert()). (nikic)
+
+- Streams:
+  . Fixed bug #73586 (php_user_filter::$stream is not set to the stream the
+    filter is working on). (Dmitry)
+
+- XML:
+  . Fixed bug #72135 (malformed XML causes fault) (edgarsandi)
 
 10 Nov 2016, PHP 7.1.0RC6
 
 - Core:
-  . Fixded bug #72736 (Slow performance when fetching large dataset with mysqli
+  . Fixed bug #72736 (Slow performance when fetching large dataset with mysqli
     / PDO). (Dmitry)
+  . Fixed bug #72482 (Ilegal write/read access caused by gdImageAALine
+    overflow). (cmb)
+  . Fixed bug #72696 (imagefilltoborder stackoverflow on truecolor images).
+    (cmb)
 
 - Date:
   . Fixed bug #73426 (createFromFormat with 'z' format char results in
     incorrect time). (Derick)
 
+- IMAP:
+  . Fixed bug #73418 (Integer Overflow in "_php_imap_mail" leads to crash).
+    (Anatol)
+
+- Interbase:
+  . Fixed bug #73512 (Fails to find firebird headers as don't use fb_config
+    output). (Remi)
+
 - JSON:
   . Introduced encoder struct instead of global which fixes bugs #66025 and
     #73254 related to pretty print indentation. (Jakub Zelenka)
+
+- Date:
+  . Fixed bug #69587 (DateInterval properties and isset). (jhdxr)
 
 - ODBC:
   . Fixed bug #73448 (odbc_errormsg returns trash, always 513 bytes).
@@ -33,7 +105,12 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #73423 (Reproducible crash with GDB backtrace). (Laruence)
 
+- Wddx:
+  . Fixed bug #73331 (NULL Pointer Dereference in WDDX Packet Deserialization
+    with PDORow). (Stas)
+
 27 Oct 2016, PHP 7.1.0RC5
+=======
 
 - Core:
   . Fixed bug #73350 (Exception::__toString() cause circular references).
@@ -42,6 +119,9 @@ PHP                                                                        NEWS
 
 - CLI Server:
   . Fixed bug #73360 (Unable to work in root with unicode chars). (Anatol)
+
+- Standard:
+  . Fixed bug #73192 (parse_url return wrong hostname). (Nikita)
 
 - SQLite3:
   . Fixed bug #73333 (2147483647 is fetched as string). (cmb)
