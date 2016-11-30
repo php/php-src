@@ -1628,7 +1628,7 @@ PHP_FUNCTION(locale_accept_from_http)
 			len = end ? end-start : http_accept_len-(start-http_accept);
 			if(len > ULOC_FULLNAME_CAPACITY) {
 				intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-						"locale_accept_from_http: locale string too long", 0 TSRMLS_CC );
+						"locale_accept_from_http: locale string too long", 0 );
 				RETURN_FALSE;
 			}
 			if(end) {

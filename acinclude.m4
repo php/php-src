@@ -2264,7 +2264,7 @@ AC_DEFUN([PHP_SETUP_KERBEROS],[
   fi
 
   dnl If krb5-config is found try using it
-  if test "$PHP_KERBEROS" = "yes" && test -x "$KRB5_CONFIG"; then
+  if test "$PHP_KERBEROS" != "no" && test -x "$KRB5_CONFIG"; then
     KERBEROS_LIBS=`$KRB5_CONFIG --libs gssapi`
     KERBEROS_CFLAGS=`$KRB5_CONFIG --cflags gssapi`
 
@@ -2678,7 +2678,7 @@ EOF
     if test -n "$val"; then
       echo "$var='$val' \\" >> $1
       if test `expr "X$ac_configure_args" : ".*${var}.*"` != 0; then
-        clean_configure_args=$(echo $clean_configure_args | sed -e "s/'$var=$val'//")
+        clean_configure_args=$(echo $clean_configure_args | sed -e "s#'$var=$val'##")
       fi
     fi
   done

@@ -107,6 +107,8 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
 #else
 	char *base = (char *) ts_resource(*((int *) mh_arg2));
 #endif
+	zend_long megabyte, overflow;
+	double dummy;
 
 	/* keep the compiler happy */
 	(void)entry; (void)mh_arg2; (void)mh_arg3; (void)stage;
@@ -130,7 +132,11 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
 
 		ini_entry->value = zend_string_init(new_new_value, 1, 1);
 	}
-	*p = memsize * (1024 * 1024);
+	megabyte = 1024 * 1024;
+	ZEND_SIGNED_MULTIPLY_LONG(memsize, megabyte, *p, dummy, overflow);
+	if (UNEXPECTED(overflow)) {
+		*p = ZEND_ULONG_MAX;
+	}
 	return SUCCESS;
 }
 
@@ -273,7 +279,9 @@ ZEND_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("opcache.use_cwd"            , "1", PHP_INI_SYSTEM, OnUpdateBool, accel_directives.use_cwd            , zend_accel_globals, accel_globals)
 	STD_PHP_INI_BOOLEAN("opcache.validate_timestamps", "1", PHP_INI_ALL   , OnUpdateBool, accel_directives.validate_timestamps, zend_accel_globals, accel_globals)
 	STD_PHP_INI_BOOLEAN("opcache.validate_permission", "0", PHP_INI_SYSTEM, OnUpdateBool, accel_directives.validate_permission, zend_accel_globals, accel_globals)
+#ifndef ZEND_WIN32
 	STD_PHP_INI_BOOLEAN("opcache.validate_root"      , "0", PHP_INI_SYSTEM, OnUpdateBool, accel_directives.validate_root      , zend_accel_globals, accel_globals)
+#endif
 	STD_PHP_INI_BOOLEAN("opcache.inherited_hack"     , "1", PHP_INI_SYSTEM, OnUpdateBool, accel_directives.inherited_hack     , zend_accel_globals, accel_globals)
 	STD_PHP_INI_BOOLEAN("opcache.dups_fix"           , "0", PHP_INI_ALL   , OnUpdateBool, accel_directives.ignore_dups        , zend_accel_globals, accel_globals)
 	STD_PHP_INI_BOOLEAN("opcache.revalidate_path"    , "0", PHP_INI_ALL   , OnUpdateBool, accel_directives.revalidate_path    , zend_accel_globals, accel_globals)
@@ -693,7 +701,9 @@ static ZEND_FUNCTION(opcache_get_configuration)
 	add_assoc_bool(&directives, "opcache.use_cwd",             ZCG(accel_directives).use_cwd);
 	add_assoc_bool(&directives, "opcache.validate_timestamps", ZCG(accel_directives).validate_timestamps);
 	add_assoc_bool(&directives, "opcache.validate_permission", ZCG(accel_directives).validate_permission);
+#ifndef ZEND_WIN32
 	add_assoc_bool(&directives, "opcache.validate_root",       ZCG(accel_directives).validate_root);
+#endif
 	add_assoc_bool(&directives, "opcache.inherited_hack",      ZCG(accel_directives).inherited_hack);
 	add_assoc_bool(&directives, "opcache.dups_fix",            ZCG(accel_directives).ignore_dups);
 	add_assoc_bool(&directives, "opcache.revalidate_path",     ZCG(accel_directives).revalidate_path);

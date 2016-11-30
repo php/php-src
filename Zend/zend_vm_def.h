@@ -7928,17 +7928,27 @@ ZEND_VM_HANDLER(158, ZEND_CALL_TRAMPOLINE, ANY, ANY)
 
 	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)) {
 
-		ZEND_ASSERT(!(fbc->common.fn_flags & ZEND_ACC_GENERATOR));
-
-		call->symbol_table = NULL;
-		i_init_func_execute_data(call, &fbc->op_array,
-				ret, (fbc->common.fn_flags & ZEND_ACC_STATIC) == 0);
-
-		if (EXPECTED(zend_execute_ex == execute_ex)) {
-			ZEND_VM_ENTER();
+		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
+			if (ret) {
+				zend_generator_create_zval(call, &fbc->op_array, ret);
+				Z_VAR_FLAGS_P(ret) = 0;
+			} else {
+				if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_CLOSURE)) {
+					OBJ_RELEASE((zend_object*)fbc->op_array.prototype);
+				}
+				zend_vm_stack_free_args(call);
+			}
 		} else {
-			ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
-			zend_execute_ex(call);
+			call->symbol_table = NULL;
+			i_init_func_execute_data(call, &fbc->op_array,
+					ret, (fbc->common.fn_flags & ZEND_ACC_STATIC) == 0);
+
+			if (EXPECTED(zend_execute_ex == execute_ex)) {
+				ZEND_VM_ENTER();
+			} else {
+				ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
+				zend_execute_ex(call);
+			}
 		}
 	} else {
 		zval retval;

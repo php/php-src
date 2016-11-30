@@ -301,6 +301,16 @@ static zend_always_inline zval *zend_hash_str_find_ind(const HashTable *ht, cons
 }
 
 
+static zend_always_inline int zend_hash_str_exists_ind(const HashTable *ht, const char *str, size_t len)
+{
+	zval *zv;
+
+	zv = zend_hash_str_find(ht, str, len);
+	return zv && (Z_TYPE_P(zv) != IS_INDIRECT ||
+			Z_TYPE_P(Z_INDIRECT_P(zv)) != IS_UNDEF);
+}
+
+
 static zend_always_inline zval *zend_symtable_update(HashTable *ht, zend_string *key, zval *pData)
 {
 	zend_ulong idx;

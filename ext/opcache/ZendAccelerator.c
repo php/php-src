@@ -1339,7 +1339,7 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 	/* store script structure in the hash table */
 	bucket = zend_accel_hash_update(&ZCSG(hash), ZSTR_VAL(new_persistent_script->full_path), ZSTR_LEN(new_persistent_script->full_path), 0, new_persistent_script);
 	if (bucket) {
-		zend_accel_error(ACCEL_LOG_INFO, "Cached script '%s'", new_persistent_script->full_path);
+		zend_accel_error(ACCEL_LOG_INFO, "Cached script '%s'", ZSTR_VAL(new_persistent_script->full_path));
 		if (key &&
 		    /* key may contain non-persistent PHAR aliases (see issues #115 and #149) */
 		    memcmp(key, "phar://", sizeof("phar://") - 1) != 0 &&
@@ -1767,12 +1767,12 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 	if (EXPECTED(persistent_script != NULL) &&
 	    UNEXPECTED(ZCG(accel_directives).validate_permission) &&
 	    file_handle->type == ZEND_HANDLE_FILENAME &&
-	    UNEXPECTED(access(file_handle->filename, R_OK) != 0)) {
+	    UNEXPECTED(access(ZSTR_VAL(persistent_script->full_path), R_OK) != 0)) {
 		if (type == ZEND_REQUIRE) {
-			zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename TSRMLS_CC);
+			zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename);
 			zend_bailout();
 		} else {
-			zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename TSRMLS_CC);
+			zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
 		}
 		return NULL;
 	}
@@ -1806,7 +1806,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		if (checksum != persistent_script->dynamic_members.checksum ) {
 			/* The checksum is wrong */
 			zend_accel_error(ACCEL_LOG_INFO, "Checksum failed for '%s':  expected=0x%0.8X, found=0x%0.8X",
-							 persistent_script->full_path, persistent_script->dynamic_members.checksum, checksum);
+							 ZSTR_VAL(persistent_script->full_path), persistent_script->dynamic_members.checksum, checksum);
 			zend_shared_alloc_lock();
 			if (!persistent_script->corrupted) {
 				persistent_script->corrupted = 1;
@@ -2091,18 +2091,16 @@ static void accel_activate(void)
 		if (stat("/", &buf) != 0) {
 			ZCG(root_hash) = 0;
 		} else {
-			zend_ulong x = buf.st_ino;
-
-#if SIZEOF_ZEND_LONG == 4
-			x = ((x >> 16) ^ x) * 0x45d9f3b;
-			x = ((x >> 16) ^ x) * 0x45d9f3b;
-			x = (x >> 16) ^ x;
-#elif SIZEOF_ZEND_LONG == 8
-			x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9;
-			x = (x ^ (x >> 27)) * 0x94d049bb133111eb;
-			x = x ^ (x >> 31);
-#endif
-			ZCG(root_hash) = x;
+			ZCG(root_hash) = buf.st_ino;
+			if (sizeof(buf.st_ino) > sizeof(ZCG(root_hash))) {
+				if (ZCG(root_hash) != buf.st_ino) {
+					zend_string *key = zend_string_init("opcache.enable", sizeof("opcache.enable")-1, 0);
+					zend_alter_ini_entry_chars(key, "0", 1, ZEND_INI_SYSTEM, ZEND_INI_STAGE_RUNTIME);
+					zend_string_release(key);
+					zend_accel_error(ACCEL_LOG_WARNING, "Can't cache files in chroot() directory with too big inode");
+					return;
+				}
+			}
 		}
 	} else {
 		ZCG(root_hash) = 0;

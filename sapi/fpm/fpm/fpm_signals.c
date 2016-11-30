@@ -174,7 +174,7 @@ static void sig_handler(int signo) /* {{{ */
 
 	saved_errno = errno;
 	s = sig_chars[signo];
-	write(sp[1], &s, sizeof(s));
+	zend_quiet_write(sp[1], &s, sizeof(s));
 	errno = saved_errno;
 }
 /* }}} */

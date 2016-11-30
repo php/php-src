@@ -1412,11 +1412,11 @@ static zend_never_inline void zend_pre_incdec_overloaded_property(zval *object, 
 	zval rv;
 
 	if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
-		zval *z, obj;
+		zval *z, *zptr, obj;
 				
 		ZVAL_OBJ(&obj, Z_OBJ_P(object));
 		Z_ADDREF(obj);
-		z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, cache_slot, &rv);
+		zptr = z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, cache_slot, &rv);
 		if (UNEXPECTED(EG(exception))) {
 			OBJ_RELEASE(Z_OBJ(obj));
 			return;
@@ -1443,7 +1443,7 @@ static zend_never_inline void zend_pre_incdec_overloaded_property(zval *object, 
 		}
 		Z_OBJ_HT(obj)->write_property(&obj, property, z, cache_slot);
 		OBJ_RELEASE(Z_OBJ(obj));
-		zval_ptr_dtor(z);
+		zval_ptr_dtor(zptr);
 	} else {
 		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
 		if (UNEXPECTED(result)) {

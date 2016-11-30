@@ -3209,12 +3209,8 @@ PHP_METHOD(SoapClient, __setSoapHeaders)
 	if (headers == NULL || Z_TYPE_P(headers) == IS_NULL) {
 		zend_hash_str_del(Z_OBJPROP_P(this_ptr), "__default_headers", sizeof("__default_headers")-1);
 	} else if (Z_TYPE_P(headers) == IS_ARRAY) {
-		zval *default_headers;
-
 		verify_soap_headers_array(Z_ARRVAL_P(headers));
-		if ((default_headers = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "__default_headers", sizeof("__default_headers")-1)) == NULL) {
-			add_property_zval(this_ptr, "__default_headers", headers);
-		}
+		add_property_zval(this_ptr, "__default_headers", headers);
 	} else if (Z_TYPE_P(headers) == IS_OBJECT &&
 	           instanceof_function(Z_OBJCE_P(headers), soap_header_class_entry)) {
 		zval default_headers;

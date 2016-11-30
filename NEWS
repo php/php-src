@@ -1,25 +1,56 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2016 PHP 7.0.14
+?? ??? 2016 PHP 7.0.15
+
+- Core:
+  . Fixed bug #73585 (Logging of "Internal Zend error - Missing class
+    information" missing class name). (Laruence)
+
+- PCRE:
+  . Fixed bug #73612 (preg_*() may leak memory). (cmb)
+
+- Streams:
+  . Fixed bug #73586 (php_user_filter::$stream is not set to the stream the
+    filter is working on). (Dmitry)
+
+- Phpdbg:
+  . Fixed bug #73615 (phpdbg without option never load .phpdbginit at startup).
+    (Bob)
+
+08 Dec 2016 PHP 7.0.14
+
+- Core:
+  . Fixed memory leak(null coalescing operator with Spl hash). (Tyson Andre)
+  . Fixded bug #72736 (Slow performance when fetching large dataset with mysqli
+    / PDO). (Dmitry)
 
 - Calendar:
   . Fix integer overflows (Joshua Rogers)
 
-- Core:
-  . Fixded bug #72736 (Slow performance when fetching large dataset with mysqli
-    / PDO). (Dmitry)
-
 - Date:
   . Fixed bug #69587 (DateInterval properties and isset). (jhdxr)
+
+- DTrace:
+  . Disabled PHP call tracing by default (it makes significant overhead).
+    This may be enabled again using envirionment variable USE_ZEND_DTRACE=1.
+    (Dmitry)
+
+- JSON:
+  . Fixed bug #73526 (php_json_encode depth issue). (Jakub Zelenka)
+
+- Mysqlnd:
+  . Fixed bug #64526 (Add missing mysqlnd.* parameters to php.ini-*). (cmb)
 
 - ODBC:
   . Fixed bug #73448 (odbc_errormsg returns trash, always 513 bytes).
     (Anatol)
 
 - Opcache:
-  . Fixed bug #69090 (check cached files permissions)
+  . Fixed bug #69090 (check cached files permissions). (dmitry)
+  . Fixed bug #73546 (Logging for opcache has an empty file name). (mhagstrand)
 
 - PCRE:
+  . Fixed bug #73483 (Segmentation fault on pcre_replace_callback). (Laruence)
   . Fixed bug #73392 (A use-after-free in zend allocator management). 
     (Laruence)
 
@@ -27,11 +58,23 @@ PHP                                                                        NEWS
   . Fixed bug #73087, #61183, #71494 (Memory corruption in bindParam).
     (Dorin Marcoci)
 
+- Postgres:
+  . Fixed bug #73498 (Incorrect SQL generated for pg_copy_to()). (Craig Duncan)
+
+- Soap:
+  . Fixed bug #73538 (SoapClient::__setSoapHeaders doesn't overwrite SOAP
+    headers). (duncan3dc)
+  . Fixed bug #73452 (Segfault (Regression for #69152)). (Dmitry)
+
 - SPL:
   . Fixed bug #73423 (Reproducible crash with GDB backtrace). (Laruence)
 
 - SQLite3:
   . Fixed bug #73530 (Unsetting result set may reset other result set). (cmb)
+
+- Standard:
+   . Fixed bug #73297 (HTTP stream wrapper should ignore HTTP 100 Continue).
+     (rowan dot collins at gmail dot com)
 
 - XML:
   . Fixed bug #72135 (malformed XML causes fault) (edgarsandi)
