@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2016, PHP 7.1.0
+01 Dec 2016, PHP 7.1.0
 
 - Core:
   . Fixed bug #73585 (Logging of "Internal Zend error - Missing class
