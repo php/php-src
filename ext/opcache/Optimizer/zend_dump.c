@@ -422,6 +422,8 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 			fprintf(stderr, " (dim)");
 		} else if (opline->extended_value == ZEND_ASSIGN_OBJ) {
 			fprintf(stderr, " (obj)");
+		} else if (opline->extended_value == ZEND_ASSIGN_STATIC_PROP) {
+			fprintf(stderr, " (static prop)");
 		}
 	} else if (ZEND_VM_EXT_CLASS_FETCH == (flags & ZEND_VM_EXT_MASK)) {
 		zend_dump_class_fetch_type(opline->extended_value);

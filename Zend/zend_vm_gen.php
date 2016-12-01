@@ -739,6 +739,7 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 			"/opline->extended_value\s*==\s*0/",
 			"/opline->extended_value\s*==\s*ZEND_ASSIGN_DIM/",
 			"/opline->extended_value\s*==\s*ZEND_ASSIGN_OBJ/",
+			"/opline->extended_value\s*==\s*ZEND_ASSIGN_STATIC_PROP/",
 		),
 		array(
 			$op1_type[$op1],
@@ -804,6 +805,9 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 				: "\\0",
 			isset($extra_spec['DIM_OBJ']) ?
 				($extra_spec['DIM_OBJ'] == 2 ? "1" : "0")
+				: "\\0",
+			isset($extra_spec['DIM_OBJ']) ?
+				($extra_spec['DIM_OBJ'] == 3 ? "1" : "0")
 				: "\\0",
 		),
 		$code);
@@ -950,7 +954,9 @@ function skip_extra_spec_function($op1, $op2, $extra_spec) {
 	}
 
 	if (isset($extra_spec["DIM_OBJ"]) &&
-	    (($op2 == "UNUSED" && $extra_spec["DIM_OBJ"] != 1) ||
+	    ((($op1 == "CONST" || $op1 == "TMP") && $extra_spec["DIM_OBJ"] != 3) ||
+	     ($op2 == "UNUSED" && $extra_spec["DIM_OBJ"] != 1 && $extra_spec["DIM_OBJ"] != 3) ||
+	     ($op2 == "CV" && $extra_spec["DIM_OBJ"] == 3) ||
 	     ($op1 == "UNUSED" && $extra_spec["DIM_OBJ"] != 2))) {
 	    // Skip useless handlers
 		return true;
@@ -1366,6 +1372,8 @@ function extra_spec_name($extra_spec) {
 			$s .= "_DIM";
 		} else if ($extra_spec["DIM_OBJ"] == 2) {
 			$s .= "_OBJ";
+		} else if ($extra_spec["DIM_OBJ"] == 3) {
+			$s .= "_STATIC_PROP";
 		}
 	}
 	return $s;
@@ -1912,7 +1920,7 @@ function parse_spec_rules($def, $lineno, $str) {
 					$ret["SMART_BRANCH"] = array(0, 1, 2);
 					break;
 				case "DIM_OBJ":
-					$ret["DIM_OBJ"] = array(0, 1, 2);
+					$ret["DIM_OBJ"] = array(0, 1, 2, 3);
 					break;
 				case "NO_CONST_CONST":
 					$ret["NO_CONST_CONST"] = array(1);
@@ -2315,11 +2323,13 @@ function gen_vm($def, $skel) {
 		}
 		if (isset($used_extra_spec["DIM_OBJ"])) {
 			out($f, "\tif (spec & SPEC_RULE_DIM_OBJ) {\n");
-			out($f,	"\t\toffset = offset * 3;\n");
+			out($f,	"\t\toffset = offset * 4;\n");
 			out($f, "\t\tif (op->extended_value == ZEND_ASSIGN_DIM) {\n");
 			out($f,	"\t\t\toffset += 1;\n");
 			out($f, "\t\t} else if (op->extended_value == ZEND_ASSIGN_OBJ) {\n");
 			out($f,	"\t\t\toffset += 2;\n");
+			out($f, "\t\t} else if (op->extended_value == ZEND_ASSIGN_STATIC_PROP) {\n");
+			out($f,	"\t\t\toffset += 3;\n");
 			out($f, "\t\t}\n");
 			out($f, "\t}\n");
 		}

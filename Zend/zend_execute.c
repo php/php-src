@@ -2005,6 +2005,82 @@ use_read_property:
 	}
 }
 
+static zend_always_inline zval *zend_fetch_static_prop_address(zend_execute_data *execute_data, zval *varname, uint32_t varname_op_type, const znode_op *class, uint32_t class_op_type, void **polymorphic_cache_slot, void **ce_cache_slot)
+{
+	zval *retval;
+	zend_string *name;
+	zend_class_entry *ce;
+
+	if (varname_op_type == IS_CONST) {
+		name = Z_STR_P(varname);
+	} else if (EXPECTED(Z_TYPE_P(varname) == IS_STRING)) {
+		name = Z_STR_P(varname);
+		zend_string_addref(name);
+	} else {
+		if (varname_op_type == IS_CV && UNEXPECTED(Z_TYPE_P(varname) == IS_UNDEF)) {
+			zval_undefined_cv(EX(opline)->op1.var, execute_data);
+		}
+		name = zval_get_string(varname);
+	}
+
+	if (class_op_type == IS_CONST) {
+		if (polymorphic_cache_slot && EXPECTED((ce = CACHED_PTR_EX(polymorphic_cache_slot)) != NULL)) {
+			retval = CACHED_PTR_EX(polymorphic_cache_slot + 1);
+			/* check if static properties were destoyed */
+			if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
+				zend_throw_error(NULL, "Access to undeclared static property: %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+				return NULL;
+			} else {
+				return retval;
+			}
+		} else if (ce_cache_slot && UNEXPECTED((ce = CACHED_PTR_EX(ce_cache_slot)) == NULL)) {
+			ce = zend_fetch_class_by_name(Z_STR_P(EX_CONSTANT(*class)), EX_CONSTANT(*class) + 1, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
+			if (UNEXPECTED(ce == NULL)) {
+				ZEND_ASSERT(EG(exception));
+				if (varname_op_type != IS_CONST) {
+					zend_string_release(name);
+				}
+				return NULL;
+			} 
+			CACHE_PTR_EX(ce_cache_slot, ce);
+		}
+	} else {
+		if (class_op_type == IS_UNUSED) {
+			ce = zend_fetch_class(NULL, class->num);
+			if (UNEXPECTED(ce == NULL)) {
+				ZEND_ASSERT(EG(exception));
+				if (varname_op_type != IS_CONST) {
+					zend_string_release(name);
+				}
+				return NULL;
+			}
+		} else {
+			ce = Z_CE_P(EX_VAR(class->var));
+		}
+		if (varname_op_type == IS_CONST && (retval = CACHED_POLYMORPHIC_PTR_EX(polymorphic_cache_slot, ce)) != NULL) {
+			/* check if static properties were destoyed */
+			if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
+				zend_throw_error(NULL, "Access to undeclared static property: %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+				return NULL;
+			} else {
+				return retval;
+			}
+		}
+	}
+
+	retval = zend_std_get_static_property(ce, name, 0);
+
+	if (varname_op_type != IS_CONST) {
+		zend_string_release(name);
+	}
+
+	if (retval && polymorphic_cache_slot) {
+		CACHE_POLYMORPHIC_PTR_EX(polymorphic_cache_slot, ce, retval);
+	}
+
+	return retval;
+}
+
 #if ZEND_INTENSIVE_DEBUGGING
 
 #define CHECK_SYMBOL_TABLES()													\
