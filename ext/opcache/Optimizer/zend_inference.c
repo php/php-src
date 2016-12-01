@@ -3476,6 +3476,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 		case ZEND_VERIFY_RETURN_TYPE:
 			if (t1 & MAY_BE_REF) {
 				tmp = t1;
+				ce = NULL;
 			} else {
 				zend_arg_info *ret_info = op_array->arg_info - 1;
 
