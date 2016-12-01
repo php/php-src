@@ -1184,6 +1184,10 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, const c
 	ALLOCA_FLAG(use_heap)
 
 	if (EXPECTED(key != NULL)) {
+#if (ZEND_GCC_VERSION == 4009) && !(defined(ZTS) && defined(NETWARE)) && !(defined(ZTS) && defined(HPUX)) && !defined(DARWIN)
+		/* This is a workaround for bug in GCC 4.9.2 */
+		use_heap = 0;
+#endif
 		lc_function_name = Z_STRVAL(key->constant);
 		hash_value = key->hash_value;
 	} else {
