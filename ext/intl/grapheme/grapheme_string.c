@@ -774,9 +774,9 @@ PHP_FUNCTION(grapheme_extract)
 {
 	char *str, *pstr;
 	UText ut = UTEXT_INITIALIZER;
-	int str_len;
-	long size; /* maximum number of grapheme clusters, bytes, or characters (based on extract_type) to return */
-	long lstart = 0; /* starting position in str in bytes */
+	size_t str_len;
+	zend_long size; /* maximum number of grapheme clusters, bytes, or characters (based on extract_type) to return */
+	zend_long lstart = 0; /* starting position in str in bytes */
 	int32_t start = 0;
 	zend_long extract_type = GRAPHEME_EXTRACT_TYPE_COUNT;
 	UErrorCode status;
