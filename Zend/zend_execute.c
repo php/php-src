@@ -1415,7 +1415,9 @@ static zend_never_inline void zend_pre_incdec_overloaded_property(zval *object, 
 		zptr = z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, cache_slot, &rv);
 		if (UNEXPECTED(EG(exception))) {
 			OBJ_RELEASE(Z_OBJ(obj));
-			ZVAL_UNDEF(result);
+			if (result) {
+				ZVAL_UNDEF(result);
+			}
 			return;
 		}
 
