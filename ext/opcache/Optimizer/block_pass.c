@@ -862,14 +862,12 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 			case ZEND_JMPNZ:
 			case ZEND_JMPZ_EX:
 			case ZEND_JMPNZ_EX:
+			case ZEND_FE_RESET_R:
+			case ZEND_FE_RESET_RW:
 			case ZEND_JMP_SET:
 			case ZEND_COALESCE:
 			case ZEND_ASSERT_CHECK:
 				ZEND_SET_OP_JMP_ADDR(opline, opline->op2, new_opcodes + blocks[b->successors[0]].start);
-				break;
-			case ZEND_FE_RESET_R:
-			case ZEND_FE_RESET_RW:
-				ZEND_SET_OP_JMP_ADDR(opline, opline->op2, new_opcodes + blocks[b->successors[0]].start + 1);
 				break;
 			case ZEND_CATCH:
 				if (!opline->result.var) {
