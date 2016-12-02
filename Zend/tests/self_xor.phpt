@@ -18,10 +18,10 @@ var_dump($s1);
 $s2 ^= 33;
 var_dump($s2);
 
-$s3 |= " ";
+$s3 ^= " ";
 var_dump($s3);
 
-$s4 |= "  ";
+$s4 ^= "  ";
 var_dump($s4);
 
 echo "Done\n";
@@ -30,6 +30,6 @@ echo "Done\n";
 int(109)
 int(11)
 int(45312)
-string(1) "f"
-string(2) "ff"
+string(1) "F"
+string(2) "FF"
 Done
