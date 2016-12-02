@@ -17475,9 +17475,7 @@ assign_dim_op_convert_to_array:
 					zend_check_string_offset(dim, BP_VAR_RW);
 					zend_wrong_string_offset();
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_UNDEF(EX_VAR(opline->result.var));
-				}
+				ZVAL_UNDEF(EX_VAR(opline->result.var));
 			} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 				goto assign_dim_op_convert_to_array;
 			} else {
@@ -20892,9 +20890,7 @@ assign_dim_op_convert_to_array:
 					zend_check_string_offset(dim, BP_VAR_RW);
 					zend_wrong_string_offset();
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_UNDEF(EX_VAR(opline->result.var));
-				}
+				ZVAL_UNDEF(EX_VAR(opline->result.var));
 			} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 				goto assign_dim_op_convert_to_array;
 			} else {
@@ -22260,9 +22256,7 @@ assign_dim_op_convert_to_array:
 					zend_check_string_offset(dim, BP_VAR_RW);
 					zend_wrong_string_offset();
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_UNDEF(EX_VAR(opline->result.var));
-				}
+				ZVAL_UNDEF(EX_VAR(opline->result.var));
 			} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 				goto assign_dim_op_convert_to_array;
 			} else {
@@ -25204,9 +25198,7 @@ assign_dim_op_convert_to_array:
 					zend_check_string_offset(dim, BP_VAR_RW);
 					zend_wrong_string_offset();
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_UNDEF(EX_VAR(opline->result.var));
-				}
+				ZVAL_UNDEF(EX_VAR(opline->result.var));
 			} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 				goto assign_dim_op_convert_to_array;
 			} else {
@@ -36868,9 +36860,7 @@ assign_dim_op_convert_to_array:
 					zend_check_string_offset(dim, BP_VAR_RW);
 					zend_wrong_string_offset();
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_UNDEF(EX_VAR(opline->result.var));
-				}
+				ZVAL_UNDEF(EX_VAR(opline->result.var));
 			} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 				goto assign_dim_op_convert_to_array;
 			} else {
@@ -41460,9 +41450,7 @@ assign_dim_op_convert_to_array:
 					zend_check_string_offset(dim, BP_VAR_RW);
 					zend_wrong_string_offset();
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_UNDEF(EX_VAR(opline->result.var));
-				}
+				ZVAL_UNDEF(EX_VAR(opline->result.var));
 			} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 				goto assign_dim_op_convert_to_array;
 			} else {
@@ -43927,9 +43915,7 @@ assign_dim_op_convert_to_array:
 					zend_check_string_offset(dim, BP_VAR_RW);
 					zend_wrong_string_offset();
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_UNDEF(EX_VAR(opline->result.var));
-				}
+				ZVAL_UNDEF(EX_VAR(opline->result.var));
 			} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 				goto assign_dim_op_convert_to_array;
 			} else {
@@ -47997,9 +47983,7 @@ assign_dim_op_convert_to_array:
 					zend_check_string_offset(dim, BP_VAR_RW);
 					zend_wrong_string_offset();
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_UNDEF(EX_VAR(opline->result.var));
-				}
+				ZVAL_UNDEF(EX_VAR(opline->result.var));
 			} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 				goto assign_dim_op_convert_to_array;
 			} else {
