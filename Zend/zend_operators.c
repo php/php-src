@@ -1642,6 +1642,10 @@ ZEND_API int ZEND_FASTCALL concat_function(zval *result, zval *op1, zval *op2) /
 			ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_CONCAT, concat_function);
 			use_copy1 = zend_make_printable_zval(op1, &op1_copy);
 			if (use_copy1) {
+				if (UNEXPECTED(EG(exception))) {
+					zval_dtor(&op1_copy);
+					return FAILURE;
+				}
 				if (result == op1) {
 					if (UNEXPECTED(op1 == op2)) {
 						op2 = &op1_copy;
@@ -1660,6 +1664,13 @@ ZEND_API int ZEND_FASTCALL concat_function(zval *result, zval *op1, zval *op2) /
 			ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(ZEND_CONCAT);
 			use_copy2 = zend_make_printable_zval(op2, &op2_copy);
 			if (use_copy2) {
+				if (UNEXPECTED(EG(exception))) {
+					if (UNEXPECTED(use_copy1)) {
+						zval_dtor(op1);
+					}
+					zval_dtor(&op2_copy);
+					return FAILURE;
+				}
 				op2 = &op2_copy;
 			}
 		}
