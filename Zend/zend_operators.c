@@ -1349,6 +1349,9 @@ ZEND_API int ZEND_FASTCALL bitwise_or_function(zval *result, zval *op1, zval *op
 		if (EXPECTED(Z_STRLEN_P(op1) >= Z_STRLEN_P(op2))) {
 			if (EXPECTED(Z_STRLEN_P(op1) == Z_STRLEN_P(op2)) && Z_STRLEN_P(op1) == 1) {
 				zend_uchar or = (zend_uchar) (*Z_STRVAL_P(op1) | *Z_STRVAL_P(op2));
+				if (result==op1) {
+					zend_string_release(Z_STR_P(result));
+				}
 				if (CG(one_char_string)[or]) {
 					ZVAL_INTERNED_STR(result, CG(one_char_string)[or]);
 				} else {
@@ -1416,6 +1419,9 @@ ZEND_API int ZEND_FASTCALL bitwise_and_function(zval *result, zval *op1, zval *o
 		if (EXPECTED(Z_STRLEN_P(op1) >= Z_STRLEN_P(op2))) {
 			if (EXPECTED(Z_STRLEN_P(op1) == Z_STRLEN_P(op2)) && Z_STRLEN_P(op1) == 1) {
 				zend_uchar and = (zend_uchar) (*Z_STRVAL_P(op1) & *Z_STRVAL_P(op2));
+				if (result==op1) {
+					zend_string_release(Z_STR_P(result));
+				}
 				if (CG(one_char_string)[and]) {
 					ZVAL_INTERNED_STR(result, CG(one_char_string)[and]);
 				} else {
@@ -1483,6 +1489,9 @@ ZEND_API int ZEND_FASTCALL bitwise_xor_function(zval *result, zval *op1, zval *o
 		if (EXPECTED(Z_STRLEN_P(op1) >= Z_STRLEN_P(op2))) {
 			if (EXPECTED(Z_STRLEN_P(op1) == Z_STRLEN_P(op2)) && Z_STRLEN_P(op1) == 1) {
 				zend_uchar xor = (zend_uchar) (*Z_STRVAL_P(op1) ^ *Z_STRVAL_P(op2));
+				if (result==op1) {
+					zend_string_release(Z_STR_P(result));
+				}
 				if (CG(one_char_string)[xor]) {
 					ZVAL_INTERNED_STR(result, CG(one_char_string)[xor]);
 				} else {
