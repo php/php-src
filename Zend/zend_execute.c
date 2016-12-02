@@ -1369,6 +1369,7 @@ static zend_never_inline void zend_post_incdec_overloaded_property(zval *object,
 		z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, cache_slot, &rv);
 		if (UNEXPECTED(EG(exception))) {
 			OBJ_RELEASE(Z_OBJ(obj));
+			ZVAL_UNDEF(result);
 			return;
 		}
 
@@ -1414,6 +1415,9 @@ static zend_never_inline void zend_pre_incdec_overloaded_property(zval *object, 
 		zptr = z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, cache_slot, &rv);
 		if (UNEXPECTED(EG(exception))) {
 			OBJ_RELEASE(Z_OBJ(obj));
+			if (result) {
+				ZVAL_UNDEF(result);
+			}
 			return;
 		}
 
@@ -1459,6 +1463,9 @@ static zend_never_inline void zend_assign_op_overloaded_property(zval *object, z
 		z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, cache_slot, &rv);
 		if (UNEXPECTED(EG(exception))) {
 			OBJ_RELEASE(Z_OBJ(obj));
+			if (result) {
+				ZVAL_UNDEF(result);
+			}
 			return;
 		}
 		if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
@@ -2941,12 +2948,16 @@ ZEND_API int ZEND_FASTCALL zend_do_fcall_overloaded(zend_execute_data *call, zva
 #define ZEND_VM_SET_RELATIVE_OPCODE(opline, offset) \
 	ZEND_VM_SET_OPCODE(ZEND_OFFSET_TO_OPLINE(opline, offset))
 
+#define ZEND_VM_JMP_NO_EXCEPTION(new_op) do { \
+		ZEND_VM_SET_OPCODE(new_op); \
+		ZEND_VM_CONTINUE(); \
+	} while (0)
+
 #define ZEND_VM_JMP(new_op) do { \
 		if (UNEXPECTED(EG(exception))) { \
 			HANDLE_EXCEPTION(); \
 		} \
-		ZEND_VM_SET_OPCODE(new_op); \
-		ZEND_VM_CONTINUE(); \
+		ZEND_VM_JMP_NO_EXCEPTION(new_op); \
 	} while (0)
 
 #define ZEND_VM_INC_OPCODE() \
@@ -3023,6 +3034,11 @@ ZEND_API int ZEND_FASTCALL zend_do_fcall_overloaded(zend_execute_data *call, zva
 	_get_zval_cv_lookup_ ## type(ptr, opline->op1.var, execute_data)
 #define GET_OP2_UNDEF_CV(ptr, type) \
 	_get_zval_cv_lookup_ ## type(ptr, opline->op2.var, execute_data)
+
+#define ZEND_VM_UNDEF_RETVAL() \
+	if (opline->result_type & (IS_VAR | IS_TMP_VAR)) { \
+		ZVAL_UNDEF(EX_VAR(opline->result.var)); \
+	}
 
 #include "zend_vm_execute.h"
 
