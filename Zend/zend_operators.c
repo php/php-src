@@ -1600,10 +1600,10 @@ ZEND_API int ZEND_FASTCALL shift_right_function(zval *result, zval *op1, zval *o
 	/* prevent wrapping quirkiness on some processors where >> 64 + x == >> x */
 	if (UNEXPECTED((zend_ulong)op2_lval >= SIZEOF_ZEND_LONG * 8)) {
 		if (EXPECTED(op2_lval > 0)) {
-			ZVAL_LONG(result, (op1_lval < 0) ? -1 : 0);
 			if (op1 == result) {
 				zval_dtor(result);
 			}
+			ZVAL_LONG(result, (op1_lval < 0) ? -1 : 0);
 			return SUCCESS;
 		} else {
 			if (EG(current_execute_data) && !CG(in_compilation)) {
