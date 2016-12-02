@@ -3725,7 +3725,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CONST_HANDLER
 
 			}
 			if (is_empty) {
-				OBJ_RELEASE(&iter->std);
+				zval_ptr_dtor_nogc(&iter->std);
 				ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 			} else {
 				iter->index = -1; /* will be set to 0 before using next handler */
@@ -13032,7 +13032,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_TMP_HANDLER(Z
 				zval_ptr_dtor_nogc(free_op1);
 			}
 			if (is_empty) {
-				OBJ_RELEASE(&iter->std);
+				zval_ptr_dtor_nogc(&iter->std);
 				ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 			} else {
 				iter->index = -1; /* will be set to 0 before using next handler */
@@ -16586,7 +16586,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_VAR_HANDLER(Z
 				zval_ptr_dtor_nogc(free_op1);
 			}
 			if (is_empty) {
-				OBJ_RELEASE(&iter->std);
+				zval_ptr_dtor_nogc(&iter->std);
 				ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 			} else {
 				iter->index = -1; /* will be set to 0 before using next handler */
@@ -35611,7 +35611,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CV_HANDLER(ZE
 
 			}
 			if (is_empty) {
-				OBJ_RELEASE(&iter->std);
+				zval_ptr_dtor_nogc(&iter->std);
 				ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 			} else {
 				iter->index = -1; /* will be set to 0 before using next handler */

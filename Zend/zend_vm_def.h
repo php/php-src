@@ -5959,7 +5959,7 @@ ZEND_VM_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, JMP_ADDR)
 				FREE_OP1();
 			}
 			if (is_empty) {
-				OBJ_RELEASE(&iter->std);
+				zval_ptr_dtor_nogc(&iter->std);
 				ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 			} else {
 				iter->index = -1; /* will be set to 0 before using next handler */
