@@ -87,7 +87,7 @@
 #  define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {       \
 	__int64 __high; \
 	__int64 __low = _mul128((a), (b), &__high); \
-	if ((__low >> 63i64) == __high) { \
+	if ((__low >> 63I64) == __high) { \
 		(usedval) = 0; \
 		(lval) = __low; \
 	} else { \
