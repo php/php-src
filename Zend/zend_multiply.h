@@ -84,6 +84,7 @@
 #elif defined(ZEND_WIN32)
 
 # ifdef _M_X64
+#  pragma intrinsic(_mul128)
 #  define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {       \
 	__int64 __high; \
 	__int64 __low = _mul128((a), (b), &__high); \
