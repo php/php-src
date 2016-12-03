@@ -2142,7 +2142,7 @@ ZEND_VM_HANDLER(136, ZEND_ASSIGN_OBJ, VAR|UNUSED|CV, CONST|TMPVAR|CV)
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(object) == NULL)) {
 		zend_throw_error(NULL, "Using $this when not in object context");
 		FREE_UNFETCHED_OP2();
-		FREE_UNFETCHED_OP_DATA();
+		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
 		HANDLE_EXCEPTION();
 	}
 
@@ -2151,6 +2151,7 @@ ZEND_VM_HANDLER(136, ZEND_ASSIGN_OBJ, VAR|UNUSED|CV, CONST|TMPVAR|CV)
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_throw_error(NULL, "Cannot use string offset as an array");
 		FREE_OP2();
+		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
 		HANDLE_EXCEPTION();
 	}
 	zend_assign_to_object(UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, object, OP1_TYPE, property_name, OP2_TYPE, (opline+1)->op1_type, (opline+1)->op1, execute_data, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property_name)) : NULL));

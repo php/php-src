@@ -17530,7 +17530,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_HAND
 	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_OBJ_P(object) == NULL)) {
 		zend_throw_error(NULL, "Using $this when not in object context");
 
-		FREE_UNFETCHED_OP_DATA();
+		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
 		HANDLE_EXCEPTION();
 	}
 
@@ -17539,6 +17539,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_HAND
 	if (IS_VAR == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_throw_error(NULL, "Cannot use string offset as an array");
 
+		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
 		HANDLE_EXCEPTION();
 	}
 	zend_assign_to_object(UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, object, IS_VAR, property_name, IS_CONST, (opline+1)->op1_type, (opline+1)->op1, execute_data, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property_name)) : NULL));
@@ -20755,7 +20756,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CV_HANDLER
 	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_OBJ_P(object) == NULL)) {
 		zend_throw_error(NULL, "Using $this when not in object context");
 
-		FREE_UNFETCHED_OP_DATA();
+		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
 		HANDLE_EXCEPTION();
 	}
 
@@ -20764,6 +20765,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CV_HANDLER
 	if (IS_VAR == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_throw_error(NULL, "Cannot use string offset as an array");
 
+		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
 		HANDLE_EXCEPTION();
 	}
 	zend_assign_to_object(UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, object, IS_VAR, property_name, IS_CV, (opline+1)->op1_type, (opline+1)->op1, execute_data, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property_name)) : NULL));
@@ -22436,7 +22438,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_HAN
 	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_OBJ_P(object) == NULL)) {
 		zend_throw_error(NULL, "Using $this when not in object context");
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		FREE_UNFETCHED_OP_DATA();
+		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
 		HANDLE_EXCEPTION();
 	}
 
@@ -22445,6 +22447,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_HAN
 	if (IS_VAR == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_throw_error(NULL, "Cannot use string offset as an array");
 		zval_ptr_dtor_nogc(free_op2);
+		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
 		HANDLE_EXCEPTION();
 	}
 	zend_assign_to_object(UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, object, IS_VAR, property_name, (IS_TMP_VAR|IS_VAR), (opline+1)->op1_type, (opline+1)->op1, execute_data, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property_name)) : NULL));
@@ -23921,7 +23924,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_H
 	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_OBJ_P(object) == NULL)) {
 		zend_throw_error(NULL, "Using $this when not in object context");
 
-		FREE_UNFETCHED_OP_DATA();
+		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
 		HANDLE_EXCEPTION();
 	}
 
@@ -23930,6 +23933,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_H
 	if (IS_UNUSED == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_throw_error(NULL, "Cannot use string offset as an array");
 
+		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
 		HANDLE_EXCEPTION();
 	}
 	zend_assign_to_object(UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, object, IS_UNUSED, property_name, IS_CONST, (opline+1)->op1_type, (opline+1)->op1, execute_data, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property_name)) : NULL));
@@ -26353,7 +26357,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_HAND
 	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_OBJ_P(object) == NULL)) {
 		zend_throw_error(NULL, "Using $this when not in object context");
 
-		FREE_UNFETCHED_OP_DATA();
+		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
 		HANDLE_EXCEPTION();
 	}
 
@@ -26362,6 +26366,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_HAND
 	if (IS_UNUSED == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_throw_error(NULL, "Cannot use string offset as an array");
 
+		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
 		HANDLE_EXCEPTION();
 	}
 	zend_assign_to_object(UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, object, IS_UNUSED, property_name, IS_CV, (opline+1)->op1_type, (opline+1)->op1, execute_data, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property_name)) : NULL));
@@ -27862,7 +27867,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_
 	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_OBJ_P(object) == NULL)) {
 		zend_throw_error(NULL, "Using $this when not in object context");
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		FREE_UNFETCHED_OP_DATA();
+		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
 		HANDLE_EXCEPTION();
 	}
 
@@ -27871,6 +27876,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_
 	if (IS_UNUSED == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_throw_error(NULL, "Cannot use string offset as an array");
 		zval_ptr_dtor_nogc(free_op2);
+		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
 		HANDLE_EXCEPTION();
 	}
 	zend_assign_to_object(UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, object, IS_UNUSED, property_name, (IS_TMP_VAR|IS_VAR), (opline+1)->op1_type, (opline+1)->op1, execute_data, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property_name)) : NULL));
@@ -31983,7 +31989,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CONST_HANDL
 	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_OBJ_P(object) == NULL)) {
 		zend_throw_error(NULL, "Using $this when not in object context");
 
-		FREE_UNFETCHED_OP_DATA();
+		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
 		HANDLE_EXCEPTION();
 	}
 
@@ -31992,6 +31998,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CONST_HANDL
 	if (IS_CV == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_throw_error(NULL, "Cannot use string offset as an array");
 
+		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
 		HANDLE_EXCEPTION();
 	}
 	zend_assign_to_object(UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, object, IS_CV, property_name, IS_CONST, (opline+1)->op1_type, (opline+1)->op1, execute_data, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property_name)) : NULL));
@@ -37033,7 +37040,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CV_HANDLER(
 	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_OBJ_P(object) == NULL)) {
 		zend_throw_error(NULL, "Using $this when not in object context");
 
-		FREE_UNFETCHED_OP_DATA();
+		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
 		HANDLE_EXCEPTION();
 	}
 
@@ -37042,6 +37049,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CV_HANDLER(
 	if (IS_CV == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_throw_error(NULL, "Cannot use string offset as an array");
 
+		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
 		HANDLE_EXCEPTION();
 	}
 	zend_assign_to_object(UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, object, IS_CV, property_name, IS_CV, (opline+1)->op1_type, (opline+1)->op1, execute_data, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property_name)) : NULL));
@@ -39720,7 +39728,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_HAND
 	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_OBJ_P(object) == NULL)) {
 		zend_throw_error(NULL, "Using $this when not in object context");
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		FREE_UNFETCHED_OP_DATA();
+		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
 		HANDLE_EXCEPTION();
 	}
 
@@ -39729,6 +39737,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_HAND
 	if (IS_CV == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_throw_error(NULL, "Cannot use string offset as an array");
 		zval_ptr_dtor_nogc(free_op2);
+		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
 		HANDLE_EXCEPTION();
 	}
 	zend_assign_to_object(UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, object, IS_CV, property_name, (IS_TMP_VAR|IS_VAR), (opline+1)->op1_type, (opline+1)->op1, execute_data, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property_name)) : NULL));
