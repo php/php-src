@@ -83,7 +83,20 @@
 
 #elif defined(ZEND_WIN32)
 
-#define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
+# ifdef _M_X64
+#  define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {       \
+	__int64 __high; \
+	__int64 __low = _mul128((a), (b), &__high); \
+	if ((__low >> 63i64) == __high) { \
+		(usedval) = 0; \
+		(lval) = __low; \
+	} else { \
+		(usedval) = 1; \
+		(dval) = (double)(a) * (double)(b); \
+	} \
+} while (0)
+# else
+#  define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
 	zend_long   __lres  = (a) * (b);										\
 	long double __dres  = (long double)(a) * (long double)(b);		\
 	long double __delta = (long double) __lres - __dres;			\
@@ -93,6 +106,7 @@
 		(lval) = __lres;											\
 	}																\
 } while (0)
+# endif
 
 #elif defined(__powerpc64__) && defined(__GNUC__)
 
