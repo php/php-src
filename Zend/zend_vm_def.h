@@ -2227,6 +2227,7 @@ ZEND_VM_HANDLER(136, ZEND_ASSIGN_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, SPEC(
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
 		zend_throw_error(NULL, "Using $this when not in object context");
 		FREE_UNFETCHED_OP2();
+		FREE_UNFETCHED_OP_DATA();
 		HANDLE_EXCEPTION();
 	}
 
