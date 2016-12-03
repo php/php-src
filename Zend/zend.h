@@ -22,7 +22,7 @@
 #ifndef ZEND_H
 #define ZEND_H
 
-#define ZEND_VERSION "3.1.0-dev"
+#define ZEND_VERSION "3.2.0-dev"
 
 #define ZEND_ENGINE_3
 
@@ -178,7 +178,7 @@ struct _zend_class_entry {
 };
 
 typedef struct _zend_utility_functions {
-	void (*error_function)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
+	void (*error_function)(int type, const char *error_filename, const uint32_t error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
 	size_t (*printf_function)(const char *format, ...) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 1, 2);
 	size_t (*write_function)(const char *str, size_t str_length);
 	FILE *(*fopen_function)(const char *filename, zend_string **opened_path);
@@ -195,7 +195,7 @@ typedef struct _zend_utility_functions {
 
 typedef struct _zend_utility_values {
 	char *import_use_extension;
-	uint import_use_extension_length;
+	uint32_t import_use_extension_length;
 	zend_bool html_errors;
 } zend_utility_values;
 
@@ -226,7 +226,7 @@ void zend_register_standard_ini_entries(void);
 void zend_post_startup(void);
 void zend_set_utility_values(zend_utility_values *utility_values);
 
-ZEND_API ZEND_COLD void _zend_bailout(char *filename, uint lineno);
+ZEND_API ZEND_COLD void _zend_bailout(char *filename, uint32_t lineno);
 
 ZEND_API char *get_zend_version(void);
 ZEND_API int zend_make_printable_zval(zval *expr, zval *expr_copy);
@@ -259,7 +259,7 @@ extern ZEND_API zend_write_func_t zend_write;
 extern ZEND_API FILE *(*zend_fopen)(const char *filename, zend_string **opened_path);
 extern ZEND_API void (*zend_ticks_function)(int ticks);
 extern ZEND_API void (*zend_interrupt_function)(zend_execute_data *execute_data);
-extern ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
+extern ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
 extern ZEND_API void (*zend_on_timeout)(int seconds);
 extern ZEND_API int (*zend_stream_open_function)(const char *filename, zend_file_handle *handle);
 extern size_t (*zend_vspprintf)(char **pbuf, size_t max_len, const char *format, va_list ap);

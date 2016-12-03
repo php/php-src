@@ -28,7 +28,7 @@ if ($privkey === false)
     die("failed to create private key");
 
 $passphrase = "banana";
-$key_file_name = tempnam("/tmp", "ssl");
+$key_file_name = tempnam(sys_get_temp_dir(), "ssl");
 if ($key_file_name === false)
     die("failed to get a temporary filename!");
 

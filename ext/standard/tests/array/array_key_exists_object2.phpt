@@ -61,11 +61,11 @@ $key = var3:
 bool(false)
 $class1:
 object(myClass)#1 (3) {
-  [%b|u%"var1"]=>
-  %unicode|string%(1) "a"
-  [%b|u%"var2":protected]=>
-  %unicode|string%(1) "b"
-  [%b|u%"var3":%b|u%"myClass":private]=>
+  ["var1"]=>
+  string(1) "a"
+  ["var2":protected]=>
+  string(1) "b"
+  ["var3":"myClass":private]=>
   NULL
 }
 
@@ -74,11 +74,11 @@ $key = var3:
 bool(false)
 $class2:
 object(myClass)#2 (3) {
-  [%b|u%"var1"]=>
-  %unicode|string%(1) "x"
-  [%b|u%"var2":protected]=>
-  %unicode|string%(1) "y"
-  [%b|u%"var3":%b|u%"myClass":private]=>
-  %unicode|string%(1) "z"
+  ["var1"]=>
+  string(1) "x"
+  ["var2":protected]=>
+  string(1) "y"
+  ["var3":"myClass":private]=>
+  string(1) "z"
 }
 Done

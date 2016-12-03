@@ -29,7 +29,7 @@ echo "after seek back 20: ".bin2hex(fread($h,1))."\n";
 
 echo "--- fseek beyond end of file ---\n";
 var_dump(fseek($h, 16, SEEK_SET));
-fwrite($h, b"end");
+fwrite($h, "end");
 fseek($h ,0, SEEK_SET);
 $data = fread($h, 4096);
 echo bin2hex($data)."\n";

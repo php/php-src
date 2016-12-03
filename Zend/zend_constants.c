@@ -438,7 +438,7 @@ failure:
 	}
 }
 
-zend_constant *zend_quick_get_constant(const zval *key, uint32_t flags)
+ZEND_API zend_constant* ZEND_FASTCALL zend_quick_get_constant(const zval *key, uint32_t flags)
 {
 	zend_constant *c;
 

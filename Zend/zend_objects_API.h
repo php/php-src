@@ -61,7 +61,12 @@ ZEND_API void zend_objects_store_free(zend_object *object);
 
 /* See comment in zend_objects_API.c before you use this */
 ZEND_API void zend_object_store_set_object(zval *zobject, zend_object *object);
-ZEND_API void zend_object_store_ctor_failed(zend_object *object);
+
+/* Called when the ctor was terminated by an exception */
+static zend_always_inline void zend_object_store_ctor_failed(zend_object *obj)
+{
+	GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
+}
 
 ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects);
 

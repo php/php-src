@@ -32,10 +32,15 @@ ob_end_flush();
 *** Testing session_cache_limiter() : variation ***
 string(7) "nocache"
 bool(true)
-string(7) "nocache"
-string(7) "nocache"
-string(6) "public"
-bool(true)
-string(6) "public"
-Done
 
+Warning: session_cache_limiter(): Cannot change cache limiter when session is active in %s on line 15
+bool(false)
+
+Warning: session_cache_limiter(): Cannot change cache limiter when session is active in %s on line 16
+bool(false)
+
+Warning: session_cache_limiter(): Cannot change cache limiter when session is active in %s on line 17
+bool(false)
+bool(true)
+string(7) "nocache"
+Done

@@ -3,6 +3,9 @@ Variation of bug #48203 with curl_multi_exec (Crash when file pointers passed to
 --SKIPIF--
 <?php
 include 'skipif.inc';
+if(substr(PHP_OS, 0, 3) == 'WIN' ) {
+    die('skip not for Windows');
+}
 ?>
 --FILE--
 <?php

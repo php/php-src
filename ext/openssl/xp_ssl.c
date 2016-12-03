@@ -52,10 +52,6 @@
 #undef X509_EXTENSIONS
 #endif
 
-#ifdef NETWARE
-#include <sys/select.h>
-#endif
-
 #ifndef OPENSSL_NO_SSL3
 #define HAVE_SSL3 1
 #endif

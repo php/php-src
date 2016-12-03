@@ -53,7 +53,7 @@ ZEND_API FILE *(*zend_fopen)(const char *filename, zend_string **opened_path);
 ZEND_API int (*zend_stream_open_function)(const char *filename, zend_file_handle *handle);
 ZEND_API void (*zend_ticks_function)(int ticks);
 ZEND_API void (*zend_interrupt_function)(zend_execute_data *execute_data);
-ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
+ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, const char *format, va_list args);
 size_t (*zend_vspprintf)(char **pbuf, size_t max_len, const char *format, va_list ap);
 zend_string *(*zend_vstrpprintf)(size_t max_len, const char *format, va_list ap);
 ZEND_API char *(*zend_getenv)(char *name, size_t name_len);
@@ -155,7 +155,7 @@ ZEND_API zend_utility_values zend_uv;
 
 /* version information */
 static char *zend_version_info;
-static uint zend_version_info_length;
+static uint32_t zend_version_info_length;
 #define ZEND_CORE_VERSION_INFO	"Zend Engine v" ZEND_VERSION ", Copyright (c) 1998-2016 Zend Technologies\n"
 #define PRINT_ZVAL_INDENT 4
 
@@ -693,9 +693,19 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 
 #if HAVE_DTRACE
 /* build with dtrace support */
-	zend_compile_file = dtrace_compile_file;
-	zend_execute_ex = dtrace_execute_ex;
-	zend_execute_internal = dtrace_execute_internal;
+	{
+		char *tmp = getenv("USE_ZEND_DTRACE");
+
+		if (tmp && zend_atoi(tmp, 0)) {
+			zend_compile_file = dtrace_compile_file;
+			zend_execute_ex = dtrace_execute_ex;
+			zend_execute_internal = dtrace_execute_internal;
+		} else {
+			zend_compile_file = compile_file;
+			zend_execute_ex = execute_ex;
+			zend_execute_internal = NULL;
+		}
+	}
 #else
 	zend_compile_file = compile_file;
 	zend_execute_ex = execute_ex;
@@ -893,7 +903,7 @@ void zend_shutdown(void) /* {{{ */
 void zend_set_utility_values(zend_utility_values *utility_values) /* {{{ */
 {
 	zend_uv = *utility_values;
-	zend_uv.import_use_extension_length = (uint)strlen(zend_uv.import_use_extension);
+	zend_uv.import_use_extension_length = (uint32_t)strlen(zend_uv.import_use_extension);
 }
 /* }}} */
 
@@ -910,7 +920,7 @@ ZEND_COLD void zenderror(const char *error) /* {{{ */
 /* }}} */
 
 BEGIN_EXTERN_C()
-ZEND_API ZEND_COLD void _zend_bailout(char *filename, uint lineno) /* {{{ */
+ZEND_API ZEND_COLD void _zend_bailout(char *filename, uint32_t lineno) /* {{{ */
 {
 
 	if (!EG(bailout)) {
@@ -929,9 +939,9 @@ END_EXTERN_C()
 ZEND_API void zend_append_version_info(const zend_extension *extension) /* {{{ */
 {
 	char *new_info;
-	uint new_info_length;
+	uint32_t new_info_length;
 
-	new_info_length = (uint)(sizeof("    with  v, , by \n")
+	new_info_length = (uint32_t)(sizeof("    with  v, , by \n")
 						+ strlen(extension->name)
 						+ strlen(extension->version)
 						+ strlen(extension->copyright)
@@ -1063,7 +1073,7 @@ static ZEND_COLD void zend_error_va_list(int type, const char *format, va_list a
 	zval params[5];
 	zval retval;
 	const char *error_filename;
-	uint error_lineno = 0;
+	uint32_t error_lineno = 0;
 	zval orig_user_error_handler;
 	zend_bool in_compilation;
 	zend_class_entry *saved_class_entry;

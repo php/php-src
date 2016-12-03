@@ -972,10 +972,10 @@ const zend_function_entry gd_functions[] = {
 	PHP_FE(imagetypes,								arginfo_imagetypes)
 
 #if defined(HAVE_GD_JPG)
-	PHP_FE(jpeg2wbmp,								arginfo_jpeg2wbmp)
+	PHP_DEP_FE(jpeg2wbmp,							arginfo_jpeg2wbmp)
 #endif
 #if defined(HAVE_GD_PNG)
-	PHP_FE(png2wbmp,								arginfo_png2wbmp)
+	PHP_DEP_FE(png2wbmp,							arginfo_png2wbmp)
 #endif
 	PHP_FE(image2wbmp,								arginfo_image2wbmp)
 	PHP_FE(imagelayereffect,						arginfo_imagelayereffect)
@@ -1061,7 +1061,7 @@ void php_gd_error_method(int type, const char *format, va_list args)
 		default:
 			type = E_ERROR;
 	}
-	php_verror(NULL, "", type, format, args TSRMLS_CC);
+	php_verror(NULL, "", type, format, args);
 }
 /* }}} */
 
@@ -3047,7 +3047,7 @@ PHP_FUNCTION(imagegammacorrect)
 	}
 
 	if ( input <= 0.0 || output <= 0.0 ) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Gamma values should be positive");
+		php_error_docref(NULL, E_WARNING, "Gamma values should be positive");
 		RETURN_FALSE;
 	}
 
@@ -4735,7 +4735,7 @@ PHP_FUNCTION(imagecropauto)
 
 		case GD_CROP_THRESHOLD:
 			if (color < 0 || (!gdImageTrueColor(im) && color >= gdImageColorsTotal(im))) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Color argument missing with threshold mode");
+				php_error_docref(NULL, E_WARNING, "Color argument missing with threshold mode");
 				RETURN_FALSE;
 			}
 			im_crop = gdImageCropThreshold(im, color, (float) threshold);

@@ -19,5 +19,5 @@ curl_close($ch);
 
 ?>
 --EXPECTF--
-%unicode|string%(%d) "%Srotocol%s"
+string(%d) "%Srotocol%s"
 int(1)

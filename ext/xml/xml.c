@@ -1596,7 +1596,7 @@ PHP_FUNCTION(xml_parser_set_option)
 			convert_to_long_ex(val);
 			parser->toffset = Z_LVAL_P(val);
 			if (parser->toffset < 0) {
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "tagstart ignored, because it is out of range");
+				php_error_docref(NULL, E_NOTICE, "tagstart ignored, because it is out of range");
 				parser->toffset = 0;
 			}
 			break;

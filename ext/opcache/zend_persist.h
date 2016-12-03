@@ -23,7 +23,7 @@
 #define ZEND_PERSIST_H
 
 int zend_accel_script_persistable(zend_persistent_script *script);
-uint zend_accel_script_persist_calc(zend_persistent_script *script, char *key, unsigned int key_length);
+uint32_t zend_accel_script_persist_calc(zend_persistent_script *script, char *key, unsigned int key_length);
 zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script, char **key, unsigned int key_length);
 
 #endif /* ZEND_PERSIST_H */

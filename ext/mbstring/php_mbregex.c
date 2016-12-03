@@ -708,8 +708,10 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	string_len,
 	_php_mb_regex_mbctype2name(MBREX(current_mbctype))
 	)) {
-		zval_dtor(array);
-		array_init(array);
+		if (array != NULL) {
+			zval_dtor(array);
+			array_init(array);
+		}
 		RETURN_FALSE;
 	}
 

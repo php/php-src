@@ -75,8 +75,7 @@ $p = [
 	'Below normal'	=> [6, 5], 
 	'Normal'	=> [8, 0], 
 	'Above normal'	=> [10, -5], 
-	'High priority'	=> [13, -10], 
-	'Real time'	=> [24, -16]
+	'High priority'	=> [13, -10]
 	];
 
 foreach ($p as $test => $data) {
@@ -93,4 +92,3 @@ Testing 'Below normal' (5): Passed
 Testing 'Normal' (0): Passed
 Testing 'Above normal' (-5): Passed
 Testing 'High priority' (-10): Passed
-Testing 'Real time' (-16): Passed

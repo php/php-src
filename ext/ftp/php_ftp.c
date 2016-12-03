@@ -25,10 +25,6 @@
 
 #include "php.h"
 
-#if defined(NETWARE) && defined(USE_WINSOCK)
-#include <novsock2.h>
-#endif
-
 #ifdef HAVE_FTP_SSL
 # include <openssl/ssl.h>
 #endif
@@ -444,7 +440,7 @@ PHP_FUNCTION(ftp_login)
 	}
 
 	/* log in */
-	if (!ftp_login(ftp, user, pass)) {
+	if (!ftp_login(ftp, user, user_len, pass, pass_len)) {
 		php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
 		RETURN_FALSE;
 	}
@@ -520,7 +516,7 @@ PHP_FUNCTION(ftp_chdir)
 	}
 
 	/* change directories */
-	if (!ftp_chdir(ftp, dir)) {
+	if (!ftp_chdir(ftp, dir, dir_len)) {
 		php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
 		RETURN_FALSE;
 	}
@@ -547,7 +543,7 @@ PHP_FUNCTION(ftp_exec)
 	}
 
 	/* execute serverside command */
-	if (!ftp_exec(ftp, cmd)) {
+	if (!ftp_exec(ftp, cmd, cmd_len)) {
 		php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
 		RETURN_FALSE;
 	}
@@ -574,7 +570,7 @@ PHP_FUNCTION(ftp_raw)
 	}
 
 	/* execute arbitrary ftp command */
-	ftp_raw(ftp, cmd, return_value);
+	ftp_raw(ftp, cmd, cmd_len, return_value);
 }
 /* }}} */
 
@@ -596,8 +592,8 @@ PHP_FUNCTION(ftp_mkdir)
 		RETURN_FALSE;
 	}
 
-	/* create directorie */
-	if (NULL == (tmp = ftp_mkdir(ftp, dir))) {
+	/* create directory */
+	if (NULL == (tmp = ftp_mkdir(ftp, dir, dir_len))) {
 		php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
 		RETURN_FALSE;
 	}
@@ -624,7 +620,7 @@ PHP_FUNCTION(ftp_rmdir)
 	}
 
 	/* remove directorie */
-	if (!ftp_rmdir(ftp, dir)) {
+	if (!ftp_rmdir(ftp, dir, dir_len)) {
 		php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
 		RETURN_FALSE;
 	}
@@ -709,7 +705,7 @@ PHP_FUNCTION(ftp_nlist)
 	}
 
 	/* get list of files */
-	if (NULL == (nlist = ftp_nlist(ftp, dir))) {
+	if (NULL == (nlist = ftp_nlist(ftp, dir, dir_len))) {
 		RETURN_FALSE;
 	}
 
@@ -740,7 +736,7 @@ PHP_FUNCTION(ftp_rawlist)
 	}
 
 	/* get raw directory listing */
-	if (NULL == (llist = ftp_list(ftp, dir, recursive))) {
+	if (NULL == (llist = ftp_list(ftp, dir, dir_len, recursive))) {
 		RETURN_FALSE;
 	}
 
@@ -814,7 +810,7 @@ PHP_FUNCTION(ftp_fget)
 		}
 	}
 
-	if (!ftp_get(ftp, stream, file, xtype, resumepos)) {
+	if (!ftp_get(ftp, stream, file, file_len, xtype, resumepos)) {
 		php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
 		RETURN_FALSE;
 	}
@@ -864,7 +860,7 @@ PHP_FUNCTION(ftp_nb_fget)
 	ftp->direction = 0;   /* recv */
 	ftp->closestream = 0; /* do not close */
 
-	if ((ret = ftp_nb_get(ftp, stream, file, xtype, resumepos)) == PHP_FTP_FAILED) {
+	if ((ret = ftp_nb_get(ftp, stream, file, file_len, xtype, resumepos)) == PHP_FTP_FAILED) {
 		php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
 		RETURN_LONG(ret);
 	}
@@ -950,7 +946,7 @@ PHP_FUNCTION(ftp_get)
 		RETURN_FALSE;
 	}
 
-	if (!ftp_get(ftp, outstream, remote, xtype, resumepos)) {
+	if (!ftp_get(ftp, outstream, remote, remote_len, xtype, resumepos)) {
 		php_stream_close(outstream);
 		VCWD_UNLINK(local);
 		php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
@@ -1018,7 +1014,7 @@ PHP_FUNCTION(ftp_nb_get)
 	ftp->direction = 0;   /* recv */
 	ftp->closestream = 1; /* do close */
 
-	if ((ret = ftp_nb_get(ftp, outstream, remote, xtype, resumepos)) == PHP_FTP_FAILED) {
+	if ((ret = ftp_nb_get(ftp, outstream, remote, remote_len, xtype, resumepos)) == PHP_FTP_FAILED) {
 		php_stream_close(outstream);
 		ftp->stream = NULL;
 		VCWD_UNLINK(local);
@@ -1105,7 +1101,7 @@ PHP_FUNCTION(ftp_fput)
 	if (ftp->autoseek && startpos) {
 		/* if autoresume is wanted ask for remote size */
 		if (startpos == PHP_FTP_AUTORESUME) {
-			startpos = ftp_size(ftp, remote);
+			startpos = ftp_size(ftp, remote, remote_len);
 			if (startpos < 0) {
 				startpos = 0;
 			}
@@ -1115,7 +1111,7 @@ PHP_FUNCTION(ftp_fput)
 		}
 	}
 
-	if (!ftp_put(ftp, remote, stream, xtype, startpos)) {
+	if (!ftp_put(ftp, remote, remote_len, stream, xtype, startpos)) {
 		php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
 		RETURN_FALSE;
 	}
@@ -1155,7 +1151,7 @@ PHP_FUNCTION(ftp_nb_fput)
 	if (ftp->autoseek && startpos) {
 		/* if autoresume is wanted ask for remote size */
 		if (startpos == PHP_FTP_AUTORESUME) {
-			startpos = ftp_size(ftp, remote);
+			startpos = ftp_size(ftp, remote, remote_len);
 			if (startpos < 0) {
 				startpos = 0;
 			}
@@ -1169,7 +1165,7 @@ PHP_FUNCTION(ftp_nb_fput)
 	ftp->direction = 1;   /* send */
 	ftp->closestream = 0; /* do not close */
 
-	if (((ret = ftp_nb_put(ftp, remote, stream, xtype, startpos)) == PHP_FTP_FAILED)) {
+	if (((ret = ftp_nb_put(ftp, remote, remote_len, stream, xtype, startpos)) == PHP_FTP_FAILED)) {
 		php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
 		RETURN_LONG(ret);
 	}
@@ -1212,7 +1208,7 @@ PHP_FUNCTION(ftp_put)
 	if (ftp->autoseek && startpos) {
 		/* if autoresume is wanted ask for remote size */
 		if (startpos == PHP_FTP_AUTORESUME) {
-			startpos = ftp_size(ftp, remote);
+			startpos = ftp_size(ftp, remote, remote_len);
 			if (startpos < 0) {
 				startpos = 0;
 			}
@@ -1222,7 +1218,7 @@ PHP_FUNCTION(ftp_put)
 		}
 	}
 
-	if (!ftp_put(ftp, remote, instream, xtype, startpos)) {
+	if (!ftp_put(ftp, remote, remote_len, instream, xtype, startpos)) {
 		php_stream_close(instream);
 		php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
 		RETURN_FALSE;
@@ -1267,7 +1263,7 @@ PHP_FUNCTION(ftp_nb_put)
 	if (ftp->autoseek && startpos) {
 		/* if autoresume is wanted ask for remote size */
 		if (startpos == PHP_FTP_AUTORESUME) {
-			startpos = ftp_size(ftp, remote);
+			startpos = ftp_size(ftp, remote, remote_len);
 			if (startpos < 0) {
 				startpos = 0;
 			}
@@ -1281,7 +1277,7 @@ PHP_FUNCTION(ftp_nb_put)
 	ftp->direction = 1;   /* send */
 	ftp->closestream = 1; /* do close */
 
-	ret = ftp_nb_put(ftp, remote, instream, xtype, startpos);
+	ret = ftp_nb_put(ftp, remote, remote_len, instream, xtype, startpos);
 
 	if (ret != PHP_FTP_MOREDATA) {
 		php_stream_close(instream);
@@ -1314,7 +1310,7 @@ PHP_FUNCTION(ftp_size)
 	}
 
 	/* get file size */
-	RETURN_LONG(ftp_size(ftp, file));
+	RETURN_LONG(ftp_size(ftp, file, file_len));
 }
 /* }}} */
 
@@ -1336,7 +1332,7 @@ PHP_FUNCTION(ftp_mdtm)
 	}
 
 	/* get file mod time */
-	RETURN_LONG(ftp_mdtm(ftp, file));
+	RETURN_LONG(ftp_mdtm(ftp, file, file_len));
 }
 /* }}} */
 
@@ -1358,7 +1354,7 @@ PHP_FUNCTION(ftp_rename)
 	}
 
 	/* rename the file */
-	if (!ftp_rename(ftp, src, dest)) {
+	if (!ftp_rename(ftp, src, src_len, dest, dest_len)) {
 		php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
 		RETURN_FALSE;
 	}
@@ -1385,7 +1381,7 @@ PHP_FUNCTION(ftp_delete)
 	}
 
 	/* delete the file */
-	if (!ftp_delete(ftp, file)) {
+	if (!ftp_delete(ftp, file, file_len)) {
 		php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
 		RETURN_FALSE;
 	}
@@ -1412,7 +1408,7 @@ PHP_FUNCTION(ftp_site)
 	}
 
 	/* send the site command */
-	if (!ftp_site(ftp, cmd)) {
+	if (!ftp_site(ftp, cmd, cmd_len)) {
 		php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
 		RETURN_FALSE;
 	}

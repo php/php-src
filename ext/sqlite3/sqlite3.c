@@ -2151,9 +2151,6 @@ static void php_sqlite3_result_object_free_storage(zend_object *object) /* {{{ *
 	}
 
 	if (!Z_ISNULL(intern->stmt_obj_zval)) {
-		if (intern->stmt_obj && intern->stmt_obj->initialised) {
-			sqlite3_reset(intern->stmt_obj->stmt);
-		}
 
 		zval_ptr_dtor(&intern->stmt_obj_zval);
 	}

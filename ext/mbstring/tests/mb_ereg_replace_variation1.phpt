@@ -109,13 +109,17 @@ string(10) "string_val"
 string(10) "string_val"
 
 -- Iteration 4 --
-string(10) "string_val"
+
+Warning: mb_ereg_replace(): mbregex compile err: invalid code point value in %smb_ereg_replace_variation1.php on line %d
+bool(false)
 
 -- Iteration 5 --
 string(10) "string_val"
 
 -- Iteration 6 --
-string(10) "string_val"
+
+Warning: mb_ereg_replace(): mbregex compile err: invalid code point value in %smb_ereg_replace_variation1.php on line %d
+bool(false)
 
 -- Iteration 7 --
 string(10) "string_val"

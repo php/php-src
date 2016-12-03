@@ -25,6 +25,7 @@
 #include "phpdbg_utils.h"
 #include "phpdbg_opcode.h"
 #include "zend_globals.h"
+#include "ext/standard/php_string.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
@@ -135,10 +136,12 @@ PHPDBG_API void phpdbg_export_breakpoints_to_string(char **str) /* {{{ */
 
 					switch (brake->type) {
 						case PHPDBG_BREAK_FILE: {
+							zend_string *filename = php_addcslashes(zend_string_init(((phpdbg_breakfile_t*)brake)->filename, strlen(((phpdbg_breakfile_t*)brake)->filename), 0), 1, "\\\"\n", 3);
 							phpdbg_asprintf(&new_str,
-								"%sbreak %s:%lu\n", *str,
-								((phpdbg_breakfile_t*)brake)->filename,
+								"%sbreak \"%s\":%lu\n", *str,
+								ZSTR_VAL(filename),
 								((phpdbg_breakfile_t*)brake)->line);
+							zend_string_release(filename);
 						} break;
 
 						case PHPDBG_BREAK_SYM: {
@@ -170,10 +173,12 @@ PHPDBG_API void phpdbg_export_breakpoints_to_string(char **str) /* {{{ */
 						} break;
 
 						case PHPDBG_BREAK_FILE_OPLINE: {
+							zend_string *filename = php_addcslashes(zend_string_init(((phpdbg_breakopline_t*)brake)->class_name, strlen(((phpdbg_breakopline_t*)brake)->class_name), 0), 1, "\\\"\n", 3);
 							phpdbg_asprintf(&new_str,
-								"%sbreak %s:#%llu\n", *str,
-								((phpdbg_breakopline_t*)brake)->class_name,
+								"%sbreak \"%s\":#%llu\n", *str,
+								ZSTR_VAL(filename),
 								((phpdbg_breakopline_t*)brake)->opline_num);
+							zend_string_release(filename);
 						} break;
 
 						case PHPDBG_BREAK_OPCODE: {
@@ -199,12 +204,14 @@ PHPDBG_API void phpdbg_export_breakpoints_to_string(char **str) /* {{{ */
 											conditional->code);
 									break;
 
-									case FILE_PARAM:
+									case FILE_PARAM: {
+										zend_string *filename = php_addcslashes(zend_string_init(conditional->param.file.name, strlen(conditional->param.file.name), 0), 1, "\\\"\n", 3);
 										phpdbg_asprintf(&new_str,
-											"%sbreak at %s:%lu if %s\n", *str,
-											conditional->param.file.name, conditional->param.file.line,
+											"%sbreak at \"%s\":%lu if %s\n", *str,
+											ZSTR_VAL(filename), conditional->param.file.line,
 											conditional->code);
-									break;
+										zend_string_release(filename);
+									} break;
 
 									default: { /* do nothing */ } break;
 								}

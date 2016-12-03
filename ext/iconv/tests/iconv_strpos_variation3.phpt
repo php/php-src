@@ -20,8 +20,8 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 echo "*** Testing iconv_strpos() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$needle = b'a';
-$haystack = b'string_val';
+$needle = 'a';
+$haystack = 'string_val';
 $encoding = 'utf-8';
 
 //get an unset variable

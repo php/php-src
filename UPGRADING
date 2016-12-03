@@ -24,6 +24,47 @@ PHP 7.2 UPGRADE NOTES
     closed resources.
   . is_object() will now return true for objects of class
     __PHP_Incomplete_Class.
+  . Support for Netware operating systems have been removed.
+  . Casting arrays to objects (with (object) or settype()) will now covert
+    integer keys to string property names. This fixes the behaviour of previous
+    versions, where integer keys would become inaccessible properties with
+    integer names.
+  . Casting objects to arrays (with (array) or settype()), and retrieving
+    object properties in an array with get_object_vars(), will now convert
+    numeric string property names (that is, property names of the format
+    /^(0|(-?[1-9][0-9]*))$/ where PHP_INT_MIN <= n <= PHP_INT_MAX) to integer
+    keys. This fixes the behaviour of previous versions, where numeric string
+    property names would become inaccessible string keys.
+
+- Session:
+  . Session is made to manage session status corretly and prevents invalid operations.
+    Only inappropriate codes are affected by this change. If you have problems with this,
+    it means you have problem in your code.
+    . Functions are made to set or return correct session status.
+        session_start(), session_status(), session_regenerate_id()
+    . Functions are made to return bool from null. These functions have void parameter
+      and void parameter is checked.
+        session_unset(), session_write_close()/session_commit(), session_abort(),
+        session_reset()
+    . Functions prohibit invalid operations with regard to session status and
+      HTTP header status, returns correct bool return value.
+        session_start(), session_set_cookie_params(), session_name(), session_module_name(),
+        session_set_save_handler(), session_regenerate_id(), session_cache_limiter(),
+        session_cache_expire(), session_unset(), session_destroy(),
+        session_write_close()/session_commit(), session_reset()
+    . INI value change by ini_set() returns update status correctly.　Invalid INI modifications
+      are checked and made to fail.
+        session.name, session.save_path, session.cookie_lifetime, session.cookie_path,
+        session.cookie_domain, session.cookie_httponly, session.cookie_secure,
+        session.use_cookies, session.use_only_cookies, session.use_strict_mode,
+        session.referer_check, session.cache_limiter, session.cache_expire,
+        session.lazy_write, session.save_handler, session.serialize_handler,
+        session.gc_probability, session.gc_divior, session.gc_maxlifetime,
+    . Some E_ERRORs are changed to E_WARNING since session status is managed correctly.
+        session_start()
+    . Session no longer initialize $_SESSION for invalid and useless session.
+        session_start()
+
 
 ========================================
 2. New Features
@@ -45,6 +86,10 @@ PHP 7.2 UPGRADE NOTES
 4. Deprecated Functionality
 ========================================
 
+- GD:
+  . png2wbmp() and jpeg2wbmp() have been deprecated, and will be removed as of
+    PHP 8.0.0.
+
 ========================================
 5. Changed Functions
 ========================================
@@ -63,6 +108,8 @@ PHP 7.2 UPGRADE NOTES
       'Multiple' => ['One header', 'Another header'],
       'Multiline' = "FirstLine\r\n SecondLine",
     ];
+  . count() now raises a warning when an invalid parameter is passed.
+    Only arrays and objects implementing the Countable interface should be passed.
 
 - XML:
   . utf8_encode() and utf8_decode() have been moved to the Standard extension
@@ -129,6 +176,9 @@ PHP 7.2 UPGRADE NOTES
                       x + 1.0 != 1.0
   . PHP_FLOAT_MIN     min representable float number
   . PHP_FLOAT_MAX     max representable float number
+
+- Fileinfo:
+  . FILEINFO_EXTENSION include list of possible file extensions
 
 - GD:
   . IMG_EFFECT_MULTIPLY
