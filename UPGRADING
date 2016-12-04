@@ -112,26 +112,26 @@ PHP 7.1 UPGRADE NOTES
     on save handler you are using.
   . Following INIs are removed
      . session.hash_function
-     . session.hash_bits_per_charactor
+     . session.hash_bits_per_character
      . session.entropy_file
      . session.entropy_length
   . New INIs and defaults
      . session.sid_length (Number of session ID characters - 22 to 256.
-       (php.ini-* default: 26 Compiled default: 32)
-     . session.sid_bits_per_character (Bits used per character. 4 to 6.
+       php.ini-* default: 26 Compiled default: 32)
+     . session.sid_bits_per_character (Bits used per character - 4 to 6.
        php.ini-* default: 5 Compiled default: 4)
-    Length of old session ID string is determined as follows
+  . Length of old session ID string is determined as follows
      . Used hash function's bits.
         . session.hash_function=0 - MD5 128 bits (This was default)
-        . session.hash_function=1 - SHA1 192 bits
+        . session.hash_function=1 - SHA1 160 bits
      . Bits per character. (4, 5 or 6 bits per character)
      . Examples
          MD5 and 4 bits = 32 chars,  ceil(128/4)=32
          MD5 and 5 bits = 26 chars,  ceil(128/5)=26
          MD5 and 6 bits = 22 chars,  ceil(128/6)=22
-         SHA1 and 4 bits = 48 chars, ceil(192/4)=48
-         SHA2 and 5 bits = 39 chars, ceil(192/5)=39
-         SHA1 and 6 bits = 32 chars, ceil(192/6)=32
+         SHA1 and 4 bits = 40 chars, ceil(160/4)=40
+         SHA1 and 5 bits = 32 chars, ceil(160/5)=32
+         SHA1 and 6 bits = 27 chars, ceil(160/6)=27
          and so on.
   . session_start() returns FALSE and no longer initializes $_SESSION when
     it failed to start session.
