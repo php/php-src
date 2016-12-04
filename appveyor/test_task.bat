@@ -1,0 +1,52 @@
+@echo off
+
+set NO_INTERACTION=1
+set REPORT_EXIT_STATUS=1
+
+set DEPS_DIR=%PHP_BUILD_CACHE_BASE_DIR%\deps-%PLATFORM%-%APPVEYOR_REPO_BRANCH%
+
+rem setup MySQL related exts
+set MYSQL_PWD=Password12!
+set MYSQL_TEST_PASSWD=%MYSQL_PWD%
+set MYSQL_TEST_USER=root
+set MYSQL_TEST_HOST=127.0.0.1
+set MYSQL_TEST_PORT=3306
+set PDO_MYSQL_TEST_USER=%MYSQL_TEST_USER%
+set PDO_MYSQL_TEST_PASS=%MYSQL_PWD%
+set PDO_MYSQL_TEST_HOST=%MYSQL_TEST_HOST%
+set PDO_MYSQL_TEST_PORT=%MYSQL_TEST_PORT%
+set PDO_MYSQL_TEST_DSN=mysql:host=%PDO_MYSQL_TEST_HOST% port=%PDO_MYSQL_TEST_PORT% dbname=test user=%PDO_MYSQL_TEST_USER% password=%MYSQL_PW%
+"C:\Program Files\MySql\MySQL Server 5.7\bin\mysql.exe" --user=%MYSQL_TEST_USER% -e "CREATE DATABASE IF NOT EXISTS test"
+
+rem setup PostgreSQL related exts
+set PGUSER=postgres
+set PGPASSWORD=Password12!
+rem set PGSQL_TEST_CONNSTR=host=127.0.0.1 dbname=test port=5432 user=postgres password=Password12!
+echo ^<?php $conn_str = "host=127.0.0.1 dbname=test port=5432 user=%PGUSER% password=%PGPASSWORD%"; ?^> >> "./ext/pgsql/tests/config.inc"
+set PDO_PGSQL_TEST_DSN=pgsql:host=127.0.0.1 port=5432 dbname=test user=%PGUSER% password=%PGPASSWORD%
+"C:\Program Files\PostgreSQL\9.5\bin\createdb.exe" test
+
+rem prepare for ext/openssl
+if "%APPVEYOR%" equ "True" rmdir /s /q C:\OpenSSL-Win32 >NUL 2>NUL
+if "%APPVEYOR%" equ "True" rmdir /s /q C:\OpenSSL-Win64 >NUL 2>NUL
+mkdir c:\usr\local\ssl
+copy %DEPS_DIR%\template\ssl\openssl.cnf c:\usr\local\ssl
+set OPENSSL_CONF=c:\usr\local\ssl\openssl.cnf
+rem set OPENSSL_CONF=
+rem set SSLEAY_CONF=
+
+rem prepare for Opcache
+if "%OPCACHE%" equ "1" set OPCACHE_OPTS=-d opcache.enabled=1 -d opcache.enable_cli=1
+
+rem prepare for enchant
+mkdir c:\enchant_plugins
+copy %DEPS_DIR%\bin\libenchant_ispell.dll c:\enchant_plugins
+copy %DEPS_DIR%\bin\libenchant_myspell.dll c:\enchant_plugins
+reg add HKEY_CURRENT_USER\SOFTWARE\Enchant\Config /v Module_Dir /t REG_SZ /d c:\enchant_plugins
+mkdir %USERPROFILE%\enchant\dict
+copy %APPVEYOR_BUILD_FOLDER%\appveyor\ext\enchant\dict\* %USERPROFILE%\enchant\dict
+
+
+cd "%APPVEYOR_BUILD_FOLDER%"
+nmake test TESTS="%OPCACHE_OPTS% -q --offline --no-io-capture --show-diff --set-timeout 120 -g FAIL,XFAIL,BORK,WARN,LEAK,SKIP"
+
