@@ -43,8 +43,8 @@ mkdir c:\enchant_plugins
 copy %DEPS_DIR%\bin\libenchant_ispell.dll c:\enchant_plugins
 copy %DEPS_DIR%\bin\libenchant_myspell.dll c:\enchant_plugins
 reg add HKEY_CURRENT_USER\SOFTWARE\Enchant\Config /v Module_Dir /t REG_SZ /d c:\enchant_plugins
-mkdir %USERPROFILE%\enchant\dict
-copy %APPVEYOR_BUILD_FOLDER%\appveyor\ext\enchant\dict\* %USERPROFILE%\enchant\dict
+mkdir %USERPROFILE%\enchant\myspell
+copy %APPVEYOR_BUILD_FOLDER%\appveyor\ext\enchant\dict\* %USERPROFILE%\enchant\myspell
 
 
 cd "%APPVEYOR_BUILD_FOLDER%"
