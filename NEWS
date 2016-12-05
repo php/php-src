@@ -2,7 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2017, PHP 7.1.1
 
-
+- Opcache:
+  . Fixed bug #73654 (Segmentation fault in zend_call_function). (Nikita)
 
 01 Dec 2016, PHP 7.1.0
 
