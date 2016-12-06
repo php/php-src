@@ -91,7 +91,7 @@ static int firebird_stmt_execute(pdo_stmt_t *stmt) /* {{{ */
 	zend_ulong affected_rows = 0;
 	static char info_count[] = {isc_info_sql_records};
 	char result[64];
-
+	
 	do {
 		/* named or open cursors should be closed first */
 		if ((*S->name || S->cursor_open) && isc_dsql_free_statement(H->isc_status, &S->stmt, DSQL_close)) {
@@ -101,7 +101,8 @@ static int firebird_stmt_execute(pdo_stmt_t *stmt) /* {{{ */
 
 		/* allocate storage for the output data */
 		if (S->out_sqlda.sqln) {
-			for (unsigned int i = 0; i < S->out_sqlda.sqln; i++) {
+			unsigned int i;
+			for (i = 0; i < S->out_sqlda.sqln; i++) {
 				XSQLVAR *var = &S->out_sqlda.sqlvar[i];
 				var->sqlind = (void*)ecalloc(1, var->sqllen + 2 * sizeof(short));
 				var->sqldata = &((char*)var->sqlind)[sizeof(short)];
