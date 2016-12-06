@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-24 Nov 2016 PHP 7.0.14RC1
+08 Dec 2016 PHP 7.0.14
 
 - Core:
   . Fixed memory leak(null coalescing operator with Spl hash). (Tyson Andre)
