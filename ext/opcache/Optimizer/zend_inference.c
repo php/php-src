@@ -610,6 +610,10 @@ static int zend_inference_calc_binary_op_range(
 				if (op2_min <= 0 && op2_max >= 0) {
 					break;
 				}
+				if (op1_min == ZEND_LONG_MIN && op2_max == -1) {
+					/* Avoid ill-defined division, which may trigger SIGFPE. */
+					break;
+				}
 				t1 = op1_min / op2_min;
 				t2 = op1_min / op2_max;
 				t3 = op1_max / op2_min;
