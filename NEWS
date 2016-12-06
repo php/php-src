@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2016 PHP 7.0.15
 
 - Core:
+  . Fixed bug #73663 ("Invalid opcode 65/16/8" occurs with a variable created
+    with list()). (Laruence)
   . Fixed bug #73585 (Logging of "Internal Zend error - Missing class
     information" missing class name). (Laruence)
 
