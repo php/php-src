@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2017, PHP 7.1.1
 
 - Opcache:
+  . Fixed bug #73663 ("Invalid opcode 65/16/8" occurs with a variable created
+    with list()). (Laruence)
   . Fixed bug #73654 (Segmentation fault in zend_call_function). (Nikita)
 
 01 Dec 2016, PHP 7.1.0
