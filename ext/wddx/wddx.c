@@ -811,6 +811,11 @@ static void php_wddx_push_element(void *user_data, const XML_Char *name, const X
 				php_wddx_process_data(user_data, atts[i+1], strlen(atts[i+1]));
 				break;
 			}
+		} else {
+			ent.type = ST_BOOLEAN;
+			SET_STACK_VARNAME;
+			ZVAL_FALSE(&ent.data);
+			wddx_stack_push((wddx_stack *)stack, &ent, sizeof(st_entry));
 		}
 	} else if (!strcmp(name, EL_NULL)) {
 		ent.type = ST_NULL;
