@@ -3856,7 +3856,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COALESCE_SPEC_CONST_HANDLER(ZE
 				Z_ADDREF_P(result);
 			}
 		}
-		ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
+		ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline, opline->op2));
+		ZEND_VM_CONTINUE();
 	}
 
 	ZEND_VM_NEXT_OPCODE();
@@ -13147,7 +13148,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COALESCE_SPEC_TMP_HANDLER(ZEND
 				Z_ADDREF_P(result);
 			}
 		}
-		ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
+		ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline, opline->op2));
+		ZEND_VM_CONTINUE();
 	}
 
 	zval_ptr_dtor_nogc(free_op1);
@@ -17071,7 +17073,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COALESCE_SPEC_VAR_HANDLER(ZEND
 				Z_ADDREF_P(result);
 			}
 		}
-		ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
+		ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline, opline->op2));
+		ZEND_VM_CONTINUE();
 	}
 
 	zval_ptr_dtor_nogc(free_op1);
@@ -33883,7 +33886,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COALESCE_SPEC_CV_HANDLER(ZEND_
 				Z_ADDREF_P(result);
 			}
 		}
-		ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
+		ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline, opline->op2));
+		ZEND_VM_CONTINUE();
 	}
 
 	ZEND_VM_NEXT_OPCODE();

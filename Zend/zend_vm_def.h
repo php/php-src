@@ -6698,7 +6698,8 @@ ZEND_VM_HANDLER(169, ZEND_COALESCE, CONST|TMP|VAR|CV, JMP_ADDR)
 				Z_ADDREF_P(result);
 			}
 		}
-		ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
+		ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline, opline->op2));
+		ZEND_VM_CONTINUE();
 	}
 
 	FREE_OP1();
