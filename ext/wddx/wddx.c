@@ -907,8 +907,13 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 		}
 
 		if (!strcmp((char *)name, EL_BINARY)) {
-			zend_string *new_str = php_base64_decode(
-				(unsigned char *)Z_STRVAL(ent1->data), Z_STRLEN(ent1->data));
+			zend_string *new_str = NULL;
+			
+			if (ZSTR_EMPTY_ALLOC() != Z_STR(ent1->data)) {
+				new_str = php_base64_decode(
+					(unsigned char *)Z_STRVAL(ent1->data), Z_STRLEN(ent1->data));
+			}
+
 			zval_ptr_dtor(&ent1->data);
 			if (new_str) {
 				ZVAL_STR(&ent1->data, new_str);
