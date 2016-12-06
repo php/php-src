@@ -235,14 +235,15 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 	phpdbg_file_source data, *dataptr;
 	zend_file_handle fake;
 	zend_op_array *ret;
-	char *filename = (char *)(file->opened_path ? ZSTR_VAL(file->opened_path) : file->filename);
+	char *filename;
 	uint line;
 	char *bufptr, *endptr;
-	char resolved_path_buf[MAXPATHLEN];
 
 	if (zend_stream_fixup(file, &bufptr, &data.len) == FAILURE) {
 		return PHPDBG_G(compile_file)(file, type);
 	}
+
+	filename = (char *)(file->opened_path ? ZSTR_VAL(file->opened_path) : file->filename);
 
 	data.buf = emalloc(data.len + ZEND_MMAP_AHEAD + 1);
 	if (data.len > 0) {
@@ -261,9 +262,6 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 	fake.opened_path = file->opened_path;
 
 	*(dataptr = emalloc(sizeof(phpdbg_file_source) + sizeof(uint) * data.len)) = data;
-	if (VCWD_REALPATH(filename, resolved_path_buf)) {
-		filename = resolved_path_buf;
-	}
 
 	for (line = 0, bufptr = data.buf - 1, endptr = data.buf + data.len; ++bufptr < endptr;) {
 		if (*bufptr == '\n') {
@@ -322,6 +320,8 @@ zend_op_array *phpdbg_init_compile_file(zend_file_handle *file, int type) {
 	if (op_array == NULL) {
 		return NULL;
 	}
+
+	filename = (char *)(file->opened_path ? ZSTR_VAL(file->opened_path) : file->filename);
 
 	dataptr = zend_hash_str_find_ptr(&PHPDBG_G(file_sources), filename, strlen(filename));
 	ZEND_ASSERT(dataptr != NULL);

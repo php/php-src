@@ -18,6 +18,7 @@ PHP                                                                        NEWS
 - Phpdbg:
   . Fixed bug #73615 (phpdbg without option never load .phpdbginit at startup).
     (Bob)
+  . Fixed issue getting executable lines from custom wrappers. (Bob)
 
 08 Dec 2016 PHP 7.0.14
 
