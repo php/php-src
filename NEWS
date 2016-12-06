@@ -64,6 +64,9 @@ PHP                                                                        NEWS
 - Postgres:
   . Fixed bug #73498 (Incorrect SQL generated for pg_copy_to()). (Craig Duncan)
 
+- Phar:
+  . Fixed bug #73580 (Phar::isValidPharFilename illegal memory access). (Stas)
+
 - Soap:
   . Fixed bug #73538 (SoapClient::__setSoapHeaders doesn't overwrite SOAP
     headers). (duncan3dc)
@@ -76,8 +79,13 @@ PHP                                                                        NEWS
   . Fixed bug #73530 (Unsetting result set may reset other result set). (cmb)
 
 - Standard:
-   . Fixed bug #73297 (HTTP stream wrapper should ignore HTTP 100 Continue).
-     (rowan dot collins at gmail dot com)
+  . Fixed bug #73297 (HTTP stream wrapper should ignore HTTP 100 Continue).
+    (rowan dot collins at gmail dot com)
+  . Fixed bug #73645 (version_compare illegal write access). (Stas)
+
+- Wddx:
+  . Fixed bug #73631 (Invalid read when wddx decodes empty boolean element).
+  (Stas)
 
 - XML:
   . Fixed bug #72135 (malformed XML causes fault) (edgarsandi)
