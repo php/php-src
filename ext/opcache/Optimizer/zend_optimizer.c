@@ -200,6 +200,11 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 		case ZEND_SEND_VAR_NO_REF_EX:
 			zval_ptr_dtor(val);
 			return 0;
+		case ZEND_VERIFY_RETURN_TYPE:
+			/* This would require a non-local change.
+			 * zend_optimizer_replace_by_const() supports this. */
+			zval_ptr_dtor(val);
+			return 0;
 		case ZEND_CONCAT:
 		case ZEND_FAST_CONCAT:
 		case ZEND_FETCH_R:
