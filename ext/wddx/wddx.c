@@ -1057,7 +1057,7 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 				} else	{
 					zend_hash_next_index_insert(target_hash, &ent1->data, sizeof(zval *), NULL);
 				}
-			} else if (!strcmp(name, EL_BINARY) && STR_EMPTY_ALLOC() == Z_STRVAL_P(ent1->data)) {
+			} else if (!strcmp(name, EL_BINARY) && Z_STRLEN_P(ent1->data) < 1) {
 				zval_ptr_dtor(&ent1->data);
 			}
 			efree(ent1);
