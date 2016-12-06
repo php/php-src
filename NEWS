@@ -14,6 +14,8 @@ PHP                                                                        NEWS
     (Yasuo)
   . Implemented FR #49806 (proc_nice() for Windows). (Kalle)
   . Fix pthreads detection when cross-compiling (ffontaine)
+  . Fixed memory leaks caused by exceptions thrown from destructors. (Bob,
+    Dmitry).
   . Fixed bug #73215 (uniqid() should use better random source). (Yasuo)
   . Fixed bug #73337 (try/catch not working with two exceptions inside a same
     operation). (Dmitry)
