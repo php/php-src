@@ -59,9 +59,9 @@ PHP                                                                        NEWS
   . Fixed bug #73530 (Unsetting result set may reset other result set). (cmb)
 
 - Standard:
-   . Fixed bug #73297 (HTTP stream wrapper should ignore HTTP 100 Continue).
-     (rowan dot collins at gmail dot com)
-   . Fixed bug #73645 (version_compare illegal write access). (Stas)
+  . Fixed bug #73297 (HTTP stream wrapper should ignore HTTP 100 Continue).
+    (rowan dot collins at gmail dot com)
+  . Fixed bug #73645 (version_compare illegal write access). (Stas)
 
 - Wddx:
   . Fixed bug #73631 (Invalid read when wddx decodes empty boolean element).
