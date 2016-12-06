@@ -228,6 +228,7 @@ PHP_METHOD(SoapClient, __doRequest);
 PHP_METHOD(SoapClient, __setCookie);
 PHP_METHOD(SoapClient, __getCookies);
 PHP_METHOD(SoapClient, __setLocation);
+PHP_METHOD(SoapClient, __getLocation);
 PHP_METHOD(SoapClient, __setSoapHeaders);
 
 /* SoapVar Functions */
@@ -381,6 +382,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_soapclient___setlocation, 0, 0, 0)
 	ZEND_ARG_INFO(0, new_location)
 ZEND_END_ARG_INFO()
 
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_soapclient___getlocation, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_soap_use_soap_error_handler, 0, 0, 0)
 	ZEND_ARG_INFO(0, handler)
 ZEND_END_ARG_INFO()
@@ -429,6 +434,7 @@ static const zend_function_entry soap_client_functions[] = {
 	PHP_ME(SoapClient, __setCookie, 				arginfo_soapclient___setcookie, 0)
 	PHP_ME(SoapClient, __getCookies, 				arginfo_soapclient___getcookies, 0)
 	PHP_ME(SoapClient, __setLocation, 				arginfo_soapclient___setlocation, 0)
+	PHP_ME(SoapClient, __getLocation, 				arginfo_soapclient___getlocation, 0)
 	PHP_ME(SoapClient, __setSoapHeaders, 			arginfo_soapclient___setsoapheaders, 0)
 	PHP_FE_END
 };
@@ -3251,6 +3257,22 @@ PHP_METHOD(SoapClient, __setLocation)
 		add_property_stringl(this_ptr, "location", location, location_len);
 	} else {
 		zend_hash_str_del(Z_OBJPROP_P(this_ptr), "location", sizeof("location")-1);
+	}
+}
+/* }}} */
+
+/* {{{ proto string SoapClient::__getLocation()
+   Gets the location option (the endpoint URL that will be touched by the
+   following SOAP requests).
+*/
+PHP_METHOD(SoapClient, __getLocation)
+{
+	zval *location;
+
+	if ((location = zend_hash_str_find(Z_OBJPROP_P(getThis()), "location", sizeof("location")-1)) != NULL && Z_TYPE_P(location) == IS_STRING) {
+		RETVAL_STR_COPY(Z_STR_P(location));
+	} else {
+		RETVAL_NULL();
 	}
 }
 /* }}} */
