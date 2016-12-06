@@ -41,6 +41,9 @@ PHP                                                                        NEWS
   . Fixed bug #73087, #61183, #71494 (Memory corruption in bindParam).
     (Dorin Marcoci)
 
+- Phar:
+  . Fixed bug #73580 (Phar::isValidPharFilename illegal memory access). (Stas)
+
 - Postgres:
   . Fixed bug #73498 (Incorrect SQL generated for pg_copy_to()). (Craig Duncan)
 
