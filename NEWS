@@ -63,6 +63,9 @@ PHP                                                                        NEWS
      (rowan dot collins at gmail dot com)
    . Fixed bug #73645 (version_compare illegal write access). (Stas)
 
+- Wddx:
+  . Fixed bug #73631 (Invalid read when wddx decodes empty boolean element).
+    (Stas)
 - XML:
   . Fixed bug #72135 (malformed XML causes fault) (edgarsandi)
 
