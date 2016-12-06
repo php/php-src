@@ -3184,7 +3184,6 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 			}
 		} else {
 			zend_compile_expr(&arg_node, arg);
-			ZEND_ASSERT(arg_node.op_type != IS_CV);
 			if (arg_node.op_type == IS_VAR) {
 				/* pass ++$a or something similar */
 				if (fbc) {
@@ -3197,6 +3196,16 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 					}
 				} else {
 					opcode = ZEND_SEND_VAR_NO_REF_EX;
+				}
+			} else if (arg_node.op_type == IS_CV) {
+				if (fbc) {
+					if (ARG_SHOULD_BE_SENT_BY_REF(fbc, arg_num)) {
+						opcode = ZEND_SEND_REF;
+					} else {
+						opcode = ZEND_SEND_VAR;
+					}
+				} else {
+					opcode = ZEND_SEND_VAR_EX;
 				}
 			} else {
 				if (fbc) {
