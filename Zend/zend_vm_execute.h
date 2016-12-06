@@ -2750,11 +2750,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMPZNZ_SPEC_CONST_HANDLER(ZEND
 		ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
 		ZEND_VM_CONTINUE();
 	} else if (EXPECTED(Z_TYPE_INFO_P(val) <= IS_TRUE)) {
-		if (IS_CONST == IS_CV) {
-			if (UNEXPECTED(Z_TYPE_INFO_P(val) == IS_UNDEF)) {
-				SAVE_OPLINE();
-				GET_OP1_UNDEF_CV(val, BP_VAR_R);
-			}
+		if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(val) == IS_UNDEF)) {
+			SAVE_OPLINE();
+			GET_OP1_UNDEF_CV(val, BP_VAR_R);
 			ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 		} else {
 			ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline, opline->op2));
@@ -2783,15 +2781,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMPZ_EX_SPEC_CONST_HANDLER(ZEN
 
 	if (Z_TYPE_INFO_P(val) == IS_TRUE) {
 		ZVAL_TRUE(EX_VAR(opline->result.var));
-		ZEND_VM_SET_NEXT_OPCODE(opline + 1);
-		ZEND_VM_CONTINUE();
+		ZEND_VM_NEXT_OPCODE();
 	} else if (EXPECTED(Z_TYPE_INFO_P(val) <= IS_TRUE)) {
 		ZVAL_FALSE(EX_VAR(opline->result.var));
-		if (IS_CONST == IS_CV) {
-			if (UNEXPECTED(Z_TYPE_INFO_P(val) == IS_UNDEF)) {
-				SAVE_OPLINE();
-				GET_OP1_UNDEF_CV(val, BP_VAR_R);
-			}
+		if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(val) == IS_UNDEF)) {
+			SAVE_OPLINE();
+			GET_OP1_UNDEF_CV(val, BP_VAR_R);
 			ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 		} else {
 			ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline, opline->op2));
@@ -34760,11 +34755,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMPZNZ_SPEC_CV_HANDLER(ZEND_OP
 		ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
 		ZEND_VM_CONTINUE();
 	} else if (EXPECTED(Z_TYPE_INFO_P(val) <= IS_TRUE)) {
-		if (IS_CV == IS_CV) {
-			if (UNEXPECTED(Z_TYPE_INFO_P(val) == IS_UNDEF)) {
-				SAVE_OPLINE();
-				GET_OP1_UNDEF_CV(val, BP_VAR_R);
-			}
+		if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(val) == IS_UNDEF)) {
+			SAVE_OPLINE();
+			GET_OP1_UNDEF_CV(val, BP_VAR_R);
 			ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 		} else {
 			ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline, opline->op2));
@@ -34793,15 +34786,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMPZ_EX_SPEC_CV_HANDLER(ZEND_O
 
 	if (Z_TYPE_INFO_P(val) == IS_TRUE) {
 		ZVAL_TRUE(EX_VAR(opline->result.var));
-		ZEND_VM_SET_NEXT_OPCODE(opline + 1);
-		ZEND_VM_CONTINUE();
+		ZEND_VM_NEXT_OPCODE();
 	} else if (EXPECTED(Z_TYPE_INFO_P(val) <= IS_TRUE)) {
 		ZVAL_FALSE(EX_VAR(opline->result.var));
-		if (IS_CV == IS_CV) {
-			if (UNEXPECTED(Z_TYPE_INFO_P(val) == IS_UNDEF)) {
-				SAVE_OPLINE();
-				GET_OP1_UNDEF_CV(val, BP_VAR_R);
-			}
+		if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(val) == IS_UNDEF)) {
+			SAVE_OPLINE();
+			GET_OP1_UNDEF_CV(val, BP_VAR_R);
 			ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 		} else {
 			ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline, opline->op2));
@@ -51346,11 +51336,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMPZNZ_SPEC_TMPVAR_HANDLER(ZEN
 		ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
 		ZEND_VM_CONTINUE();
 	} else if (EXPECTED(Z_TYPE_INFO_P(val) <= IS_TRUE)) {
-		if ((IS_TMP_VAR|IS_VAR) == IS_CV) {
-			if (UNEXPECTED(Z_TYPE_INFO_P(val) == IS_UNDEF)) {
-				SAVE_OPLINE();
-				GET_OP1_UNDEF_CV(val, BP_VAR_R);
-			}
+		if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(val) == IS_UNDEF)) {
+			SAVE_OPLINE();
+			GET_OP1_UNDEF_CV(val, BP_VAR_R);
 			ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 		} else {
 			ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline, opline->op2));
@@ -51379,15 +51367,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMPZ_EX_SPEC_TMPVAR_HANDLER(ZE
 
 	if (Z_TYPE_INFO_P(val) == IS_TRUE) {
 		ZVAL_TRUE(EX_VAR(opline->result.var));
-		ZEND_VM_SET_NEXT_OPCODE(opline + 1);
-		ZEND_VM_CONTINUE();
+		ZEND_VM_NEXT_OPCODE();
 	} else if (EXPECTED(Z_TYPE_INFO_P(val) <= IS_TRUE)) {
 		ZVAL_FALSE(EX_VAR(opline->result.var));
-		if ((IS_TMP_VAR|IS_VAR) == IS_CV) {
-			if (UNEXPECTED(Z_TYPE_INFO_P(val) == IS_UNDEF)) {
-				SAVE_OPLINE();
-				GET_OP1_UNDEF_CV(val, BP_VAR_R);
-			}
+		if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(val) == IS_UNDEF)) {
+			SAVE_OPLINE();
+			GET_OP1_UNDEF_CV(val, BP_VAR_R);
 			ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 		} else {
 			ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline, opline->op2));
