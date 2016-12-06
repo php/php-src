@@ -58,6 +58,7 @@ PHP                                                                        NEWS
 - Standard:
    . Fixed bug #73297 (HTTP stream wrapper should ignore HTTP 100 Continue).
      (rowan dot collins at gmail dot com)
+   . Fixed bug #73645 (version_compare illegal write access). (Stas)
 
 - XML:
   . Fixed bug #72135 (malformed XML causes fault) (edgarsandi)
