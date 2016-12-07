@@ -24,7 +24,7 @@ environment:
                 - THREAD_SAFE: 0
                   OPCACHE: 0
                 - THREAD_SAFE: 1
-                  OPCACHE: 1
+                  OPCACHE: 0
 
 services:
         # the setup scripts have to be touched, once some other db version is used
