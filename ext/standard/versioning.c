@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Stig Sæther Bakken <ssb@php.net>                             |
+   | Author: Stig SÃ¦ther Bakken <ssb@php.net>                             |
    +----------------------------------------------------------------------+
  */
 
@@ -33,7 +33,7 @@
 PHPAPI char *
 php_canonicalize_version(const char *version)
 {
-    int len = strlen(version);
+    size_t len = strlen(version);
     char *buf = safe_emalloc(len, 2, 1), *q, lp, lq;
     const char *p;
 

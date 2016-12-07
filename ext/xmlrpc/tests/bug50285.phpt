@@ -14,11 +14,11 @@ function test2($func, $params) {
 }
 
 function test3($func, $params) {
-    return array('One', 3 => 'Three', b'Five' => 5, 'Six');
+    return array('One', 3 => 'Three', 'Five' => 5, 'Six');
 }
 
 function test4($func, $params) {
-    return array('One', 'Three', 'Five', b'Six' => 6);
+    return array('One', 'Three', 'Five', 'Six' => 6);
 }
 
 $server = xmlrpc_server_create();

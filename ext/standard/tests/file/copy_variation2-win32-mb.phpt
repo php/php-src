@@ -20,7 +20,7 @@ echo "*** Test copy() function: destination file names containing special charac
 $file_path = dirname(__FILE__);
 $src_file_name = $file_path."/copy_variation2私はガラスを食べられます.tmp"; 
 $file_handle = fopen($src_file_name, "w");
-fwrite( $file_handle, str_repeat(b"Hello2World...\n", 100) );
+fwrite( $file_handle, str_repeat("Hello2World...\n", 100) );
 fclose($file_handle);
 
 /* array of destination file names */

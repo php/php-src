@@ -166,7 +166,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 	php_url *resource = NULL;
 	php_stream *fpf;
 	zval *pzoption, *metadata;
-	uint host_len;
+	uint32_t host_len;
 
 	if ((resource = phar_parse_url(wrapper, path, mode, options)) == NULL) {
 		return NULL;
@@ -556,7 +556,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int f
 	char *internal_file, *error;
 	phar_archive_data *phar;
 	phar_entry_info *entry;
-	uint host_len;
+	uint32_t host_len;
 	int internal_file_len;
 
 	if ((resource = phar_parse_url(wrapper, url, "r", flags|PHP_STREAM_URL_STAT_QUIET)) == NULL) {
@@ -665,7 +665,7 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 	int internal_file_len;
 	phar_entry_data *idata;
 	phar_archive_data *pphar;
-	uint host_len;
+	uint32_t host_len;
 
 	if ((resource = phar_parse_url(wrapper, url, "rb", options)) == NULL) {
 		php_stream_wrapper_log_error(wrapper, options, "phar error: unlink failed");
@@ -738,7 +738,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 	char *error;
 	phar_archive_data *phar, *pfrom, *pto;
 	phar_entry_info *entry;
-	uint host_len;
+	uint32_t host_len;
 	int is_dir = 0;
 	int is_modified = 0;
 
@@ -882,8 +882,8 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 		Bucket *b;
 		zend_string *str_key;
 		zend_string *new_str_key;
-		uint from_len = strlen(resource_from->path+1);
-		uint to_len = strlen(resource_to->path+1);
+		uint32_t from_len = strlen(resource_from->path+1);
+		uint32_t to_len = strlen(resource_to->path+1);
 
 		ZEND_HASH_FOREACH_BUCKET(&phar->manifest, b) {
 			str_key = b->key;

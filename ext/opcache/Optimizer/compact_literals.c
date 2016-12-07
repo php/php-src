@@ -292,7 +292,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 				case ZEND_DECLARE_CLASS:
 				case ZEND_DECLARE_INHERITED_CLASS:
 				case ZEND_DECLARE_INHERITED_CLASS_DELAYED:
-					LITERAL_INFO(opline->op1.constant, LITERAL_VALUE, 1, 0, 2);
+					LITERAL_INFO(opline->op1.constant, LITERAL_VALUE, 0, 0, 2);
 					break;
 				case ZEND_RECV:
 				case ZEND_RECV_VARIADIC:

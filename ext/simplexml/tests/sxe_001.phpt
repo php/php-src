@@ -25,7 +25,7 @@ $xml =<<<EOF
 </sxe>
 EOF;
 
-var_dump(simplexml_load_string((binary)$xml, 'SimpleXMLIterator'));
+var_dump(simplexml_load_string($xml, 'SimpleXMLIterator'));
 
 ?>
 ===DONE===

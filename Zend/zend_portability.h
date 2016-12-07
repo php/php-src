@@ -123,6 +123,8 @@
 # define ZEND_IGNORE_VALUE(x) ((void) (x))
 #endif
 
+#define zend_quiet_write(...) ZEND_IGNORE_VALUE(write(__VA_ARGS__))
+
 /* all HAVE_XXX test have to be after the include of zend_config above */
 
 #if defined(HAVE_LIBDL) && !defined(ZEND_WIN32)
@@ -365,9 +367,9 @@ char *alloca();
 #endif
 
 #if ZEND_DEBUG
-# define ZEND_FILE_LINE_D				const char *__zend_filename, const uint __zend_lineno
+# define ZEND_FILE_LINE_D				const char *__zend_filename, const uint32_t __zend_lineno
 # define ZEND_FILE_LINE_DC				, ZEND_FILE_LINE_D
-# define ZEND_FILE_LINE_ORIG_D			const char *__zend_orig_filename, const uint __zend_orig_lineno
+# define ZEND_FILE_LINE_ORIG_D			const char *__zend_orig_filename, const uint32_t __zend_orig_lineno
 # define ZEND_FILE_LINE_ORIG_DC			, ZEND_FILE_LINE_ORIG_D
 # define ZEND_FILE_LINE_RELAY_C			__zend_filename, __zend_lineno
 # define ZEND_FILE_LINE_RELAY_CC		, ZEND_FILE_LINE_RELAY_C

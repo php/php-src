@@ -50,4 +50,4 @@ $c->func('This should work!');
 
 ?>
 --EXPECTF--
-%unicode|string%(26) "A::func: This should work!"
+string(26) "A::func: This should work!"

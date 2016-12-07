@@ -1469,7 +1469,7 @@ session.use_trans_sid = 0
 ; Set session ID character length. This value could be between 22 to 256.
 ; Shorter length than default is supported only for compatibility reason.
 ; Users should use 32 or more chars.
-; http://php.net/session.sid_length
+; http://php.net/session.sid-length
 ; Default Value: 32
 ; Development Value: 26
 ; Production Value: 26
@@ -1893,6 +1893,12 @@ ldap.max_links = -1
 ; Enables or disables copying of PHP code (text segment) into HUGE PAGES.
 ; This should improve performance, but requires appropriate OS configuration.
 ;opcache.huge_code_pages=0
+
+; Validate cached file permissions.
+;opcache.validate_permission=0
+
+; Prevent name collisions in chroot'ed environment.
+;opcache.validate_root=0
 
 [curl]
 ; A default value for the CURLOPT_CAINFO option. This is required to be an

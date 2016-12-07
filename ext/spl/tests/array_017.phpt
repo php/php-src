@@ -139,7 +139,9 @@ array(3) {
   ["Flags"]=>
   int(0)
   ["OVars"]=>
-  array(2) {
+  array(3) {
+    [0]=>
+    int(1)
     ["a"]=>
     int(25)
     ["pub1"]=>
@@ -176,7 +178,9 @@ array(3) {
   ["Flags"]=>
   int(0)
   ["OVars"]=>
-  array(2) {
+  array(3) {
+    [0]=>
+    int(1)
     ["a"]=>
     int(25)
     ["pub1"]=>
@@ -238,7 +242,9 @@ array(3) {
   ["Flags"]=>
   int(0)
   ["OVars"]=>
-  array(2) {
+  array(3) {
+    [0]=>
+    int(1)
     ["a"]=>
     int(25)
     ["pub1"]=>

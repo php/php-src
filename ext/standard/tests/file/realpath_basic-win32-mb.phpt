@@ -34,7 +34,7 @@ $filenames = array (
   "$file_path/realpath_私はガラスを食べられますbasic/home//../././realpath_私はガラスを食べられますbasic.tmp//",
 
    // checking for binary safe
-  b"$file_path/realpath_私はガラスを食べられますbasic/home/realpath_私はガラスを食べられますbasic.tmp",
+  "$file_path/realpath_私はガラスを食べられますbasic/home/realpath_私はガラスを食べられますbasic.tmp",
 
   /* filenames with invalid path */
   "$file_path///realpath_私はガラスを食べられますbasic/home//..//././test//realpath_私はガラスを食べられますbasic.tmp",

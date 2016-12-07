@@ -15,29 +15,29 @@ if (!extension_loaded("mcrypt")) {
  */
 
 $cipher = MCRYPT_TRIPLEDES;
-$data = b"This is the secret message which must be encrypted";
+$data = "This is the secret message which must be encrypted";
 
 // tripledes uses keys with exactly 192 bits (24 bytes)
 $keys = array(
-   b'12345678', 
-   b'12345678901234567890', 
-   b'123456789012345678901234', 
-   b'12345678901234567890123456');
+   '12345678', 
+   '12345678901234567890', 
+   '123456789012345678901234', 
+   '12345678901234567890123456');
 // tripledes is a block cipher of 64 bits (8 bytes)
 $ivs = array(
-   b'1234', 
-   b'12345678', 
-   b'123456789');
+   '1234', 
+   '12345678', 
+   '123456789');
 
 
-$iv = b'12345678';
+$iv = '12345678';
 echo "\n--- testing different key lengths\n";
 foreach ($keys as $key) {
    echo "\nkey length=".strlen($key)."\n";
    var_dump(bin2hex(mcrypt_encrypt($cipher, $key, $data, MCRYPT_MODE_CBC, $iv)));
 }
 
-$key = b'123456789012345678901234';  
+$key = '123456789012345678901234';  
 echo "\n--- testing different iv lengths\n";
 foreach ($ivs as $iv) {
    echo "\niv length=".strlen($iv)."\n";

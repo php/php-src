@@ -632,6 +632,7 @@ ZEND_API zend_generator *zend_generator_update_current(zend_generator *generator
 							generator->execute_fake.prev_execute_data = original_execute_data;
 						}
 
+						root->execute_data->opline--; /* ZEND_YIELD(_FROM) already advance, so decrement opline to throw from correct place */
 						zend_throw_exception(zend_ce_ClosedGeneratorException, "Generator yielded from aborted, no return value available", 0);
 
 						EG(current_execute_data) = original_execute_data;

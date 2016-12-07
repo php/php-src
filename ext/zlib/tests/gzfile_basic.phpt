@@ -6,7 +6,7 @@ if (!extension_loaded('zlib')) die ('skip zlib extension not available in this b
 ?>
 --FILE--
 <?php
-$plaintxt = b<<<EOT
+$plaintxt = <<<EOT
 hello world
 is a very common test
 for all languages
