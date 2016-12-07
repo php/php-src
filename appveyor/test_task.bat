@@ -49,5 +49,5 @@ copy %APPVEYOR_BUILD_FOLDER%\appveyor\ext\enchant\dict\* %USERPROFILE%\enchant\m
 
 
 cd "%APPVEYOR_BUILD_FOLDER%"
-nmake test TESTS="%OPCACHE_OPTS% -q --offline --no-io-capture --show-diff --set-timeout 120 -g FAIL,XFAIL,BORK,WARN,LEAK,SKIP"
+nmake test TESTS="%OPCACHE_OPTS% -q --offline --show-diff --set-timeout 120 -g FAIL,XFAIL,BORK,WARN,LEAK,SKIP"
 
