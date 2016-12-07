@@ -647,9 +647,6 @@ if (isset($argc) && $argc > 1) {
 				case '--offline':
 					$environment['SKIP_ONLINE_TESTS'] = 1;
 					break;
-				case '--no-io-capture':
-					$environment['SKIP_IO_CAPTURE_TESTS'] = 1;
-					break;
 				//case 'w'
 				case '-':
 					// repeat check with full switch
@@ -710,8 +707,6 @@ Options:
     -x          Sets 'SKIP_SLOW_TESTS' environmental variable.
 
     --offline   Sets 'SKIP_ONLINE_TESTS' environmental variable.
-
-    --no-io-capture Sets 'SKIP_IO_CAPTURE_TESTS' environmental variable.
 
     --verbose
     -v          Verbose mode.
