@@ -11,6 +11,10 @@ PHP                                                                        NEWS
 - PCRE:
   . Fixed bug #73612 (preg_*() may leak memory). (cmb)
 
+- PDO_Firebird:
+  . Fixed bug #72931 (PDO_FIREBIRD with Firebird 3.0 not work on returning
+    statement). (Dorin Marcoci)
+
 - Streams:
   . Fixed bug #73586 (php_user_filter::$stream is not set to the stream the
     filter is working on). (Dmitry)
