@@ -269,7 +269,7 @@ static void param_dtor(zval *el) /* {{{ */
 
 	/* tell the driver that it is going away */
 	if (param->stmt->methods->param_hook) {
-			param->stmt->methods->param_hook(param->stmt, param, PDO_PARAM_EVT_FREE);
+		param->stmt->methods->param_hook(param->stmt, param, PDO_PARAM_EVT_FREE);
 	}
 
 	if (param->name) {

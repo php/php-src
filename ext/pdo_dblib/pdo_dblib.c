@@ -233,4 +233,3 @@ PHP_MINFO_FUNCTION(pdo_dblib)
 	php_info_print_table_row(2, "Flavour", PDO_DBLIB_FLAVOUR);
 	php_info_print_table_end();
 }
-
