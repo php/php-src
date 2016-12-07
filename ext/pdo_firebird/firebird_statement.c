@@ -98,9 +98,22 @@ static int firebird_stmt_execute(pdo_stmt_t *stmt) /* {{{ */
 			break;
 		}
 		S->cursor_open = 0;
-		/* assume all params have been bound */
 
-		if (isc_dsql_execute(H->isc_status, &H->tr, &S->stmt, PDO_FB_SQLDA_VERSION, S->in_sqlda)) {
+		/* allocate storage for the output data */
+		if (S->out_sqlda.sqld) {
+			unsigned int i;
+			for (i = 0; i < S->out_sqlda.sqld; i++) {
+				XSQLVAR *var = &S->out_sqlda.sqlvar[i];
+				var->sqlind = (void*)ecalloc(1, var->sqllen + 2 * sizeof(short));
+				var->sqldata = &((char*)var->sqlind)[sizeof(short)];
+			}
+		}
+
+		if (S->statement_type == isc_info_sql_stmt_exec_procedure) {
+			if (isc_dsql_execute2(H->isc_status, &H->tr, &S->stmt, PDO_FB_SQLDA_VERSION, S->in_sqlda, &S->out_sqlda)) {
+				break;
+			}
+		} else if (isc_dsql_execute(H->isc_status, &H->tr, &S->stmt, PDO_FB_SQLDA_VERSION, S->in_sqlda)) {
 			break;
 		}
 
@@ -162,6 +175,11 @@ static int firebird_stmt_fetch(pdo_stmt_t *stmt, /* {{{ */
 		strcpy(stmt->error_code, "HY000");
 		H->last_app_error = "Cannot fetch from a closed cursor";
 	} else if (!S->exhausted) {
+		if (S->statement_type == isc_info_sql_stmt_exec_procedure) {
+			stmt->row_count = 1;
+			S->exhausted = 1;
+			return 1;
+		}
 		if (isc_dsql_fetch(H->isc_status, &S->stmt, PDO_FB_SQLDA_VERSION, &S->out_sqlda)) {
 			if (H->isc_status[0] && H->isc_status[1]) {
 				RECORD_ERROR(stmt);
@@ -169,9 +187,6 @@ static int firebird_stmt_fetch(pdo_stmt_t *stmt, /* {{{ */
 			S->exhausted = 1;
 			return 0;
 		}
- 		if (S->statement_type == isc_info_sql_stmt_exec_procedure) {
- 			S->exhausted = 1;
- 		}
 		stmt->row_count++;
 		return 1;
 	}
@@ -187,10 +202,6 @@ static int firebird_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 	XSQLVAR *var = &S->out_sqlda.sqlvar[colno];
 	int colname_len;
 	char *cp;
-
-	/* allocate storage for the column */
-	var->sqlind = (void*)ecalloc(1, var->sqllen + 2*sizeof(short));
-	var->sqldata = &((char*)var->sqlind)[sizeof(short)];
 
 	colname_len = (S->H->fetch_table_names && var->relname_length)
 					? (var->aliasname_length + var->relname_length + 1)
