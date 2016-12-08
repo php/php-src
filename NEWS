@@ -9,10 +9,6 @@ PHP                                                                        NEWS
   . Fixed bug #68447 (grapheme_extract take an extra trailing character). 
     (SATŌ Kentarō)
 
-- WDDX:
-  . Fixed bug #73631 (Memory leak due to invalid wddx stack processing). 
-    (bughunter at fosec dot vn).
-
 08 Dec 2016, PHP 5.6.29
 
 - Mbstring:
@@ -43,6 +39,10 @@ PHP                                                                        NEWS
 - Standard:
    . Fixed bug #73297 (HTTP stream wrapper should ignore HTTP 100 Continue).
      (rowan dot collins at gmail dot com)
+
+- WDDX:
+  . Fixed bug #73631 (Memory leak due to invalid wddx stack processing). 
+    (bughunter at fosec dot vn).
 
 10 Nov 2016, PHP 5.6.28
 
