@@ -14,5 +14,11 @@ echo $D[0][0];
 unset($S);
 unset($C);
 ?>
+--CLEAN--
+<?php
+require 'testdb.inc';
+$C = new PDO('firebird:dbname='.$test_base, $user, $password) or die;
+$C->exec('DROP table tablea');
+?>
 --EXPECT--
 1
