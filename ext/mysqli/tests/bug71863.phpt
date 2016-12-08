@@ -33,5 +33,4 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS test_bug_71863"))
 mysqli_close($link);
 ?>
 --EXPECTF--
-Warning: mysqli_query(): (42S22/1054): Unknown column 'owner_id' in 'where clause' in %sbug71863.php on line %d
-Unknown column 'owner_id' in 'where clause'
+%AUnknown column 'owner_id' in 'where clause'

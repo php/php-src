@@ -190,7 +190,9 @@ ZEND_API void zend_clear_exception(void) /* {{{ */
 	}
 	OBJ_RELEASE(EG(exception));
 	EG(exception) = NULL;
-	EG(current_execute_data)->opline = EG(opline_before_exception);
+	if (EG(current_execute_data)) {
+		EG(current_execute_data)->opline = EG(opline_before_exception);
+	}
 #if ZEND_DEBUG
 	EG(opline_before_exception) = NULL;
 #endif
