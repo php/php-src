@@ -2230,7 +2230,7 @@ function gen_vm($def, $skel) {
 
 	out($f, "#ifdef ZEND_WIN32\n");
 	// Suppress free_op1 warnings on Windows
-	out($f, "# pragma warning(once : 4101)\n");
+	out($f, "# pragma warning(disable : 4101)\n");
 	if (ZEND_VM_SPEC) {
 		// Suppress (<non-zero constant> || <expression>) warnings on windows
 		out($f, "# pragma warning(once : 6235)\n");
