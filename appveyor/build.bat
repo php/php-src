@@ -22,7 +22,6 @@ if not exist "%PHP_BUILD_CACHE_SDK_DIR%" (
 	echo Checkout SDK repository branch
 	git --git-dir="%PHP_BUILD_CACHE_SDK_DIR%\.git" --work-tree="%PHP_BUILD_CACHE_SDK_DIR%" checkout --force %SDK_BRANCH% 
 )
-popd
 
 set SDK_RUNNER=%PHP_BUILD_CACHE_SDK_DIR%\phpsdk-vc14-%PLATFORM%.bat
 if not exist "%SDK_RUNNER%" (
