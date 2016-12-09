@@ -473,11 +473,6 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 		return;
 	}
 
-	if (UNEXPECTED(Z_ISREF_P(value) &&
-		Z_REFCOUNTED_P(value) == 1)) {
-		ZVAL_UNREF(value);
-	}
-
 	if (Z_REFCOUNTED_P(value)) {
 		Z_ADDREF_P(value);
 	}
