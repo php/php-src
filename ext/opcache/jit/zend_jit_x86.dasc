@@ -1409,7 +1409,7 @@ static int zend_jit_throw_cannot_pass_by_ref_stub(dasm_State **Dst)
 	|	SET_Z_TYPE_INFO RX+r1, IS_UNDEF
 	|	mov RX, r0
 	|.if X64
-	|	mov CARG1, 0
+	|	xor CARG1, CARG1
 	|	LOAD_ADDR CARG2, "Cannot pass parameter %d by reference"
 	|	mov CARG3d, dword OP:r0->op2.num
 	|	EXT_CALL zend_throw_error, r0
@@ -1609,7 +1609,7 @@ static int zend_jit_not_obj_stub(dasm_State **Dst)
 	|->not_obj:
 	|8:
 	|.if X64
-	|	mov CARG1, 0
+	|	xor CARG1, CARG1
 	|	LOAD_ADDR CARG2, "Using $this when not in object context"
 	|	EXT_CALL zend_throw_error, r0
 	|.else
@@ -6455,7 +6455,7 @@ static int zend_jit_defined(dasm_State **Dst, const zend_op *opline, int b, int 
 	|.cold_code
 	|1:
 	|	LOAD_ADDR FCARG1a, zv
-	|	mov FCARG2d, 0
+	|	xor FCARG2d, FCARG2d
 	|	EXT_CALL zend_quick_get_constant, r0
 	|	test r0, r0
 	if (smart_branch) {
