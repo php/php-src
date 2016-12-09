@@ -902,7 +902,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 	}
 
 	/* restrict to the server/db in the .ini if in safe mode */
-	if ((!len[DB] || PG(sql_safe_mode)) && (c = INI_STR("ibase.default_db"))) {
+	if (!len[DB] && (c = INI_STR("ibase.default_db"))) {
 		args[DB] = c;
 		len[DB] = strlen(c);
 	}

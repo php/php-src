@@ -1,7 +1,7 @@
 --TEST--
 Bug #68849 bindValue is not using the right data type
 --SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
+<?php require_once(__DIR__ . '/skipif.inc'); ?>
 --FILE--
 <?php
 

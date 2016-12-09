@@ -4,7 +4,6 @@ Fetching results from tables of different charsets.
 <?php
 require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
-require_once('skipifunicode.inc');
 require_once('skipifemb.inc');
 
 if (!function_exists('mysqli_set_charset')) {

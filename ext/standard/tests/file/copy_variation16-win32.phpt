@@ -27,7 +27,7 @@ mkdir($dirname_with_blank);
 
 $src_file_name = dirname(__FILE__)."/copy_variation16.tmp";
 $file_handle = fopen($src_file_name, "w");
-fwrite($file_handle, str_repeat(b"Hello world, this is 2007 year ...\n", 100));
+fwrite($file_handle, str_repeat("Hello world, this is 2007 year ...\n", 100));
 fclose($file_handle);
 
 echo "- Size of source file => ";

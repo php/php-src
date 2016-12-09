@@ -450,9 +450,8 @@ static void place_essa_pis(
 			if ((pi = add_pi(arena, op_array, dfg, ssa, j, bt, var))) {
 				pi_type_mask(pi, mask_for_type_check(type));
 			}
-			if (type != IS_OBJECT && type != IS_RESOURCE) {
-				/* is_object() and is_resource() may return false, even though the value is
-				 * an object/resource. */
+			if (type != IS_RESOURCE) {
+				/* is_resource() may return false for closed resources */
 				if ((pi = add_pi(arena, op_array, dfg, ssa, j, bf, var))) {
 					pi_not_type_mask(pi, mask_for_type_check(type));
 				}

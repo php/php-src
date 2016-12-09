@@ -391,7 +391,7 @@ void spl_filesystem_info_set_filename(spl_filesystem_object *intern, char *path,
 	}
 
 	p1 = strrchr(intern->file_name, '/');
-#if defined(PHP_WIN32) || defined(NETWARE)
+#if defined(PHP_WIN32)
 	p2 = strrchr(intern->file_name, '\\');
 #else
 	p2 = 0;
@@ -1261,7 +1261,7 @@ SPL_METHOD(SplFileInfo, getLinkTarget)
 }
 /* }}} */
 
-#if (!defined(__BEOS__) && !defined(NETWARE) && HAVE_REALPATH) || defined(ZTS)
+#if (!defined(__BEOS__) && HAVE_REALPATH) || defined(ZTS)
 /* {{{ proto string SplFileInfo::getRealPath()
    Return the resolved path */
 SPL_METHOD(SplFileInfo, getRealPath)
@@ -1929,7 +1929,7 @@ static const zend_function_entry spl_SplFileInfo_functions[] = {
 	SPL_ME(SplFileInfo,       isDir,         arginfo_splfileinfo_void, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       isLink,        arginfo_splfileinfo_void, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       getLinkTarget, arginfo_splfileinfo_void, ZEND_ACC_PUBLIC)
-#if (!defined(__BEOS__) && !defined(NETWARE) && HAVE_REALPATH) || defined(ZTS)
+#if (!defined(__BEOS__) && HAVE_REALPATH) || defined(ZTS)
 	SPL_ME(SplFileInfo,       getRealPath,   arginfo_splfileinfo_void, ZEND_ACC_PUBLIC)
 #endif
 	SPL_ME(SplFileInfo,       getFileInfo,   arginfo_info_optinalFileClass, ZEND_ACC_PUBLIC)
@@ -2197,7 +2197,7 @@ static int spl_filesystem_file_is_empty_line(spl_filesystem_object *intern) /* {
 			case IS_ARRAY:
 				if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_CSV)
 						&& zend_hash_num_elements(Z_ARRVAL(intern->u.file.current_zval)) == 1) {
-					uint idx = 0;
+					uint32_t idx = 0;
 					zval *first;
 
 					while (Z_ISUNDEF(Z_ARRVAL(intern->u.file.current_zval)->arData[idx].val)) {
@@ -2288,7 +2288,7 @@ SPL_METHOD(SplFileObject, __construct)
 		tmp_path = estrndup(intern->u.file.stream->orig_path, tmp_path_len);
 
 		p1 = strrchr(tmp_path, '/');
-#if defined(PHP_WIN32) || defined(NETWARE)
+#if defined(PHP_WIN32)
 		p2 = strrchr(tmp_path, '\\');
 #else
 		p2 = 0;

@@ -23,9 +23,9 @@ if(mb_regex_encoding('utf-8') == true) {
 } else {
 	echo "Could not set regex encoding to utf-8\n";
 }
-$string_ascii = b'This is an English string. 0123456789.';
-$regex_ascii1 = b'(.*is)+.*\.[[:blank:]][0-9]{9}';
-$regex_ascii2 = b'.*is+';
+$string_ascii = 'This is an English string. 0123456789.';
+$regex_ascii1 = '(.*is)+.*\.[[:blank:]][0-9]{9}';
+$regex_ascii2 = '.*is+';
 
 $string_mb = base64_decode('5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII=');
 $regex_mb1 = base64_decode('KOaXpeacrOiqnikuKj8oWzEtOV0rKQ==');

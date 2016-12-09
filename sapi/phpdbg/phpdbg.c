@@ -379,7 +379,7 @@ static PHP_FUNCTION(phpdbg_break_file)
 		return;
 	}
 
-	phpdbg_set_breakpoint_file(file, line);
+	phpdbg_set_breakpoint_file(file, 0, line);
 } /* }}} */
 
 /* {{{ proto void phpdbg_break_method(string class, string method) */
@@ -2095,7 +2095,7 @@ phpdbg_out:
 			php_request_shutdown(NULL);
 		} zend_end_try();
 
-		if (PHPDBG_G(exec) && !memcmp("-", PHPDBG_G(exec), 2)) { /* i.e. execution context has been read from stdin - back it up */
+		if (PHPDBG_G(exec) && strcmp("Standard input code", PHPDBG_G(exec)) == SUCCESS) { /* i.e. execution context has been read from stdin - back it up */
 			phpdbg_file_source *data = zend_hash_str_find_ptr(&PHPDBG_G(file_sources), PHPDBG_G(exec), PHPDBG_G(exec_len));
 			backup_phpdbg_compile = zend_string_alloc(data->len + 2, 1);
 			sprintf(ZSTR_VAL(backup_phpdbg_compile), "?>%.*s", (int) data->len, data->buf);

@@ -368,7 +368,7 @@ static ZEND_COLD ZEND_NORETURN void zend_mm_safe_error(zend_mm_heap *heap,
 	size_t limit,
 #if ZEND_DEBUG
 	const char *filename,
-	uint lineno,
+	uint32_t lineno,
 #endif
 	size_t size)
 {

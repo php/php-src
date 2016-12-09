@@ -551,7 +551,6 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	new_entry.preg_options = poptions;
 	new_entry.compile_options = coptions;
 #if HAVE_SETLOCALE
-	new_entry.locale = NULL;
 	new_entry.tables = tables;
 #endif
 	new_entry.refcount = 0;

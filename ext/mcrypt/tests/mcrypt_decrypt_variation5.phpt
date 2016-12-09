@@ -27,8 +27,8 @@ set_error_handler('test_error_handler');
 
 // Initialise function arguments not being substituted (if any)
 $cipher = MCRYPT_TRIPLEDES;
-$key = b"string_val\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
-$data = b'string_val';
+$key = "string_val\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
+$data = 'string_val';
 $mode = MCRYPT_MODE_CBC;
 
 //get an unset variable
@@ -39,7 +39,7 @@ unset ($unset_var);
 class classWithToString
 {
 	public function __toString() {
-		return b"Class A object";
+		return "Class A object";
 	}
 }
 
@@ -48,7 +48,7 @@ class classWithoutToString
 }
 
 // heredoc string
-$heredoc = b<<<EOT
+$heredoc = <<<EOT
 hello world
 EOT;
 

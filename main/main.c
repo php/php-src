@@ -34,11 +34,6 @@
 #include "win32/php_win32_globals.h"
 #include "win32/winutil.h"
 #include <process.h>
-#elif defined(NETWARE)
-#include <sys/timeval.h>
-#ifdef USE_WINSOCK
-#include <novsock2.h>
-#endif
 #endif
 #if HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -505,8 +500,8 @@ PHP_INI_MH(OnChangeBrowscap);
  * PHP_INCLUDE_PATH
  */
 
- /* Windows and Netware use the internal mail */
-#if defined(PHP_WIN32) || defined(NETWARE)
+ /* Windows use the internal mail */
+#if defined(PHP_WIN32)
 # define DEFAULT_SENDMAIL_PATH NULL
 #elif defined(PHP_PROG_SENDMAIL)
 # define DEFAULT_SENDMAIL_PATH PHP_PROG_SENDMAIL " -t -i "
@@ -546,7 +541,6 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("register_argc_argv",	"1",		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateBool,	register_argc_argv,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("auto_globals_jit",		"1",		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateBool,	auto_globals_jit,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("short_open_tag",	DEFAULT_SHORT_OPEN_TAG,	PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,			short_tags,				zend_compiler_globals,	compiler_globals)
-	STD_PHP_INI_BOOLEAN("sql.safe_mode",		"0",		PHP_INI_SYSTEM,		OnUpdateBool,			sql_safe_mode,			php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("track_errors",			"0",		PHP_INI_ALL,		OnUpdateBool,			track_errors,			php_core_globals,	core_globals)
 
 	STD_PHP_INI_ENTRY("unserialize_callback_func",	NULL,	PHP_INI_ALL,		OnUpdateString,			unserialize_callback_func,	php_core_globals,	core_globals)
@@ -1004,7 +998,7 @@ PHPAPI void php_html_puts(const char *str, size_t size)
 
 /* {{{ php_error_cb
  extended error handling function */
-static ZEND_COLD void php_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args)
+static ZEND_COLD void php_error_cb(int type, const char *error_filename, const uint32_t error_lineno, const char *format, va_list args)
 {
 	char *buffer;
 	int buffer_len, display;
@@ -2048,7 +2042,7 @@ void dummy_invalid_parameter_handler(
 
 /* {{{ php_module_startup
  */
-int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_modules, uint num_additional_modules)
+int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_modules, uint32_t num_additional_modules)
 {
 	zend_utility_functions zuf;
 	zend_utility_values zuv;
@@ -2056,7 +2050,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	char *php_os;
 	zend_module_entry *module;
 
-#if defined(PHP_WIN32) || (defined(NETWARE) && defined(USE_WINSOCK))
+#ifdef PHP_WIN32
 	WORD wVersionRequested = MAKEWORD(2, 0);
 	WSADATA wsaData;
 #endif
@@ -2131,7 +2125,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	tzset();
 #endif
 
-#if defined(PHP_WIN32) || (defined(NETWARE) && defined(USE_WINSOCK))
+#ifdef PHP_WIN32
 	/* start up winsock services */
 	if (WSAStartup(wVersionRequested, &wsaData) != 0) {
 		php_printf("\nwinsock.dll unusable. %d\n", WSAGetLastError());
@@ -2178,6 +2172,10 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	REGISTER_MAIN_LONG_CONSTANT("PHP_INT_MIN", ZEND_LONG_MIN, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("PHP_INT_SIZE", SIZEOF_ZEND_LONG, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("PHP_FD_SETSIZE", FD_SETSIZE, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("PHP_FLOAT_DIG", DBL_DIG, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_DOUBLE_CONSTANT("PHP_FLOAT_EPSILON", DBL_EPSILON, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_DOUBLE_CONSTANT("PHP_FLOAT_MAX", DBL_MAX, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_DOUBLE_CONSTANT("PHP_FLOAT_MIN", DBL_MIN, CONST_PERSISTENT | CONST_CS);
 
 #ifdef PHP_WIN32
 	REGISTER_MAIN_LONG_CONSTANT("PHP_WINDOWS_VERSION_MAJOR",      EG(windows_version_info).dwMajorVersion, CONST_PERSISTENT | CONST_CS);
@@ -2231,7 +2229,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 	zuv.html_errors = 1;
 	zuv.import_use_extension = ".php";
-	zuv.import_use_extension_length = (uint)strlen(zuv.import_use_extension);
+	zuv.import_use_extension_length = (uint32_t)strlen(zuv.import_use_extension);
 	php_startup_auto_globals();
 	zend_set_utility_values(&zuv);
 	php_startup_sapi_content_types();
@@ -2387,11 +2385,6 @@ void php_module_shutdown(void)
 	ts_free_worker_threads();
 #endif
 
-#if defined(PHP_WIN32) || (defined(NETWARE) && defined(USE_WINSOCK))
-	/*close winsock */
-	WSACleanup();
-#endif
-
 #ifdef PHP_WIN32
 	php_win32_free_rng_lock();
 #endif
@@ -2399,6 +2392,11 @@ void php_module_shutdown(void)
 	sapi_flush();
 
 	zend_shutdown();
+
+#ifdef PHP_WIN32
+	/*close winsock */
+	WSACleanup();
+#endif
 
 	/* Destroys filter & transport registries too */
 	php_shutdown_stream_wrappers(module_number);
@@ -2480,7 +2478,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file)
 		 *   otherwise it will get opened and added to the included_files list in zend_execute_scripts
 		 */
  		if (primary_file->filename &&
- 		    (primary_file->filename[0] != '-' || primary_file->filename[1] != 0) &&
+ 		    strcmp("Standard input code", primary_file->filename) &&
  			primary_file->opened_path == NULL &&
  			primary_file->type != ZEND_HANDLE_FILENAME
 		) {

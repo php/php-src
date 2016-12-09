@@ -105,8 +105,6 @@ struct _zend_compiler_globals {
 
 	uint32_t compiler_options; /* set of ZEND_COMPILE_* constants */
 
-	HashTable const_filenames;
-
 	zend_oparray_context context;
 	zend_file_context file_context;
 

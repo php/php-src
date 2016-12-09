@@ -36,8 +36,6 @@ ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_fun
 	int result;
 	zend_fcall_info fci;
 	zval retval;
-	HashTable *function_table;
-
 	zval params[2];
 
 	if (param_count > 0) {
@@ -108,13 +106,6 @@ ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_fun
 		if (!EG(exception)) {
 			zend_error_noreturn(E_CORE_ERROR, "Couldn't execute method %s%s%s", obj_ce ? ZSTR_VAL(obj_ce->name) : "", obj_ce ? "::" : "", function_name);
 		}
-	}
-	/* copy arguments back, they might be changed by references */
-	if (param_count > 0 && Z_ISREF(params[0]) && !Z_ISREF_P(arg1)) {
-		ZVAL_COPY_VALUE(arg1, &params[0]);
-	}
-	if (param_count > 1 && Z_ISREF(params[1]) && !Z_ISREF_P(arg2)) {
-		ZVAL_COPY_VALUE(arg2, &params[1]);
 	}
 	if (!retval_ptr) {
 		zval_ptr_dtor(&retval);
@@ -187,16 +178,6 @@ ZEND_API zval *zend_user_it_get_current_data(zend_object_iterator *_iter)
 	}
 	return &iter->value;
 }
-/* }}} */
-
-/* {{{ zend_user_it_get_current_key_default */
-#if 0
-static int zend_user_it_get_current_key_default(zend_object_iterator *_iter, char **str_key, uint *str_key_len, ulong *int_key)
-{
-	*int_key = _iter->index;
-	return HASH_KEY_IS_LONG;
-}
-#endif
 /* }}} */
 
 /* {{{ zend_user_it_get_current_key */
@@ -392,15 +373,6 @@ static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry
 /* {{{ zend_implement_arrayaccess */
 static int zend_implement_arrayaccess(zend_class_entry *interface, zend_class_entry *class_type)
 {
-#if 0
-	/* get ht from ce */
-	if (ht->read_dimension != zend_std_read_dimension
-	||  ht->write_dimension != zend_std_write_dimension
-	||  ht->has_dimension != zend_std_has_dimension
-	||  ht->unset_dimension != zend_std_unset_dimension) {
-		return FAILURE;
-	}
-#endif
 	return SUCCESS;
 }
 /* }}}*/

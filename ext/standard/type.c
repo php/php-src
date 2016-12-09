@@ -59,17 +59,6 @@ PHP_FUNCTION(gettype)
 
 		case IS_OBJECT:
 			RETVAL_STRING("object");
-		/*
-		   {
-		   char *result;
-		   int res_len;
-
-		   res_len = sizeof("object of type ")-1 + Z_OBJCE_P(arg)->name_length;
-		   spprintf(&result, 0, "object of type %s", Z_OBJCE_P(arg)->name);
-		   RETVAL_STRINGL(result, res_len);
-		   efree(result);
-		   }
-		 */
 			break;
 
 		case IS_RESOURCE:
@@ -78,8 +67,10 @@ PHP_FUNCTION(gettype)
 
 				if (type_name) {
 					RETVAL_STRING("resource");
-					break;
+				} else {
+					RETVAL_STRING("resource (closed)");
 				}
+				break;
 			}
 
 		default:
@@ -207,13 +198,7 @@ static inline void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if (Z_TYPE_P(arg) == type) {
-		if (type == IS_OBJECT) {
-			zend_class_entry *ce = Z_OBJCE_P(arg);
-			if (ZSTR_LEN(ce->name) == sizeof(INCOMPLETE_CLASS) - 1
-					&& !memcmp(ZSTR_VAL(ce->name), INCOMPLETE_CLASS, sizeof(INCOMPLETE_CLASS) - 1)) {
-				RETURN_FALSE;
-			}
-		} else if (type == IS_RESOURCE) {
+		if (type == IS_RESOURCE) {
 			const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(arg));
 			if (!type_name) {
 				RETURN_FALSE;

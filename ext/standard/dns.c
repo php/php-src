@@ -33,7 +33,7 @@
 # include <winsock2.h>
 # include <windows.h>
 # include <Ws2tcpip.h>
-#else	/* This holds good for NetWare too, both for Winsock and Berkeley sockets */
+#else
 #include <netinet/in.h>
 #if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
@@ -55,11 +55,6 @@
 #ifdef HAVE_DNS_H
 #include <dns.h>
 #endif
-#endif
-
-/* Borrowed from SYS/SOCKET.H */
-#if defined(NETWARE) && defined(USE_WINSOCK)
-#define AF_INET 2   /* internetwork: UDP, TCP, etc. */
 #endif
 
 #ifndef MAXHOSTNAMELEN
@@ -305,7 +300,7 @@ static zend_string *php_gethostbyname(char *name)
 #endif /* HAVE_FULL_DNS_FUNCS || defined(PHP_WIN32) */
 
 /* Note: These functions are defined in ext/standard/dns_win32.c for Windows! */
-#if !defined(PHP_WIN32) && (HAVE_DNS_SEARCH_FUNC && !(defined(__BEOS__) || defined(NETWARE)))
+#if !defined(PHP_WIN32) && (HAVE_DNS_SEARCH_FUNC && !defined(__BEOS__))
 
 #ifndef HFIXEDSZ
 #define HFIXEDSZ        12      /* fixed data in header <arpa/nameser.h> */
@@ -473,7 +468,7 @@ static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_t
 
 	if (raw) {
 		add_assoc_long(subarray, "type", type);
-		add_assoc_stringl(subarray, "data", (char*) cp, (uint) dlen);
+		add_assoc_stringl(subarray, "data", (char*) cp, (uint32_t) dlen);
 		cp += dlen;
 		return cp;
 	}
@@ -1085,7 +1080,7 @@ PHP_FUNCTION(dns_get_mx)
 }
 /* }}} */
 #endif /* HAVE_FULL_DNS_FUNCS */
-#endif /* !defined(PHP_WIN32) && (HAVE_DNS_SEARCH_FUNC && !(defined(__BEOS__) || defined(NETWARE))) */
+#endif /* !defined(PHP_WIN32) && (HAVE_DNS_SEARCH_FUNC && !defined(__BEOS__)) */
 
 #if HAVE_FULL_DNS_FUNCS || defined(PHP_WIN32)
 PHP_MINIT_FUNCTION(dns) {

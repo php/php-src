@@ -60,24 +60,12 @@ var headers_install = new Array();
 
 /* Mapping CL version > human readable name */
 var VC_VERSIONS = new Array();
-VC_VERSIONS[1200] = 'MSVC6 (Visual C++ 6.0)';
-VC_VERSIONS[1300] = 'MSVC7 (Visual C++ 2002)';
-VC_VERSIONS[1310] = 'MSVC7.1 (Visual C++ 2003)';
-VC_VERSIONS[1400] = 'MSVC8 (Visual C++ 2005)';
-VC_VERSIONS[1500] = 'MSVC9 (Visual C++ 2008)';
-VC_VERSIONS[1600] = 'MSVC10 (Visual C++ 2010)';
 VC_VERSIONS[1700] = 'MSVC11 (Visual C++ 2012)';
 VC_VERSIONS[1800] = 'MSVC12 (Visual C++ 2013)';
 VC_VERSIONS[1900] = 'MSVC14 (Visual C++ 2015)';
 VC_VERSIONS[1910] = 'MSVC15 (Visual C++ 2017)';
 
 var VC_VERSIONS_SHORT = new Array();
-VC_VERSIONS_SHORT[1200] = 'VC6';
-VC_VERSIONS_SHORT[1300] = 'VC7';
-VC_VERSIONS_SHORT[1310] = 'VC7.1';
-VC_VERSIONS_SHORT[1400] = 'VC8';
-VC_VERSIONS_SHORT[1500] = 'VC9';
-VC_VERSIONS_SHORT[1600] = 'VC10';
 VC_VERSIONS_SHORT[1700] = 'VC11';
 VC_VERSIONS_SHORT[1800] = 'VC12';
 VC_VERSIONS_SHORT[1900] = 'VC14';
@@ -110,7 +98,7 @@ var PHP_VERSION = 7;
 var PHP_MINOR_VERSION = 1;
 var PHP_RELEASE_VERSION = 0;
 var PHP_EXTRA_VERSION = "";
-var PHP_VERSION_STRING = "7.1.0";
+var PHP_VERSION_STRING = "7.2.0";
 
 /* Get version numbers and DEFINE as a string */
 function get_version_numbers()
@@ -344,6 +332,7 @@ function conf_process_args()
 	for (i = 0; i < args.length; i++) {
 		arg = args(i);
 		nice += ' "' + arg + '"';
+
 		if (arg == "--help") {
 			configure_help_mode = true;
 			break;
@@ -444,7 +433,7 @@ can be built that way. \
 		 'pcre-regex', 'fastcgi', 'force-cgi-redirect',
 		 'path-info-check', 'zts', 'ipv6', 'memory-limit',
 		 'zend-multibyte', 'fd-setsize', 'memory-manager',
-		 't1lib', 'pgi', 'pgo', 'all-shared'
+		 'pgi', 'pgo', 'all-shared', 'config-profile'
 		);
 	var force;
 
@@ -525,10 +514,31 @@ can be built that way. \
 
 	MFO = FSO.CreateTextFile("Makefile.objects", true);
 
-	STDOUT.WriteLine("Saving configure options to config.nice.bat");
-	var nicefile = FSO.CreateTextFile("config.nice.bat", true);
-	nicefile.WriteLine(nice +  " %*");
-	nicefile.Close();
+	var profile = false;
+
+	if (PHP_CONFIG_PROFILE != 'no') {
+		if (PHP_CONFIG_PROFILE.toLowerCase() == 'nice') {
+			WARNING('Config profile name cannot be named \'nice\'');
+		} else {
+			var config_profile = FSO.CreateTextFile('config.' + PHP_CONFIG_PROFILE + '.bat', true);
+
+			config_profile.WriteLine('@echo off');
+			config_profile.WriteLine(nice + ' %*');
+			config_profile.Close();
+
+			profile = true;
+		}
+	}
+
+	// Only generate an updated config.nice.bat file if a profile was not used
+	if (!profile) {
+		STDOUT.WriteLine("Saving configure options to config.nice.bat");
+
+		var nicefile = FSO.CreateTextFile("config.nice.bat", true);
+		nicefile.WriteLine('@echo off');
+		nicefile.WriteLine(nice +  " %*");
+		nicefile.Close();
+	}
 
 	AC_DEFINE('CONFIGURE_COMMAND', nice, "Configure line");
 }
@@ -994,7 +1004,7 @@ function CHECK_HEADER_ADD_INCLUDE(header_name, flag_name, path_to_check, use_env
 
 	if (typeof(add_to_flag_only) != "undefined") {
 		ADD_FLAG(flag_name, "/DHAVE_" + sym + "=" + have);
-	} else {
+	} else if (!configure_hdr.Exists('HAVE_' + sym)) {
 		AC_DEFINE("HAVE_" + sym, have, "have the " + header_name + " header file");
 	}
 
@@ -2787,8 +2797,9 @@ function toolset_setup_compiler()
 		// 1600 is vs.net 2010
 		// 1700 is vs.net 2011
 		// 1800 is vs.net 2012
-		// 1900 is vs.net 2014
-		// Which version of the compiler do we have?12
+		// 1900 is vs.net 2015
+		// 1910 is vs.net 2017
+		// Which version of the compiler do we have?
 		VCVERS = COMPILER_NUMERIC_VERSION;
 
 		if (VCVERS < 1700) {
@@ -3121,7 +3132,7 @@ function object_out_dir_option_handle()
 	if (PHP_OBJECT_OUT_DIR.length) {
 		PHP_OBJECT_OUT_DIR = FSO.GetAbsolutePathName(PHP_OBJECT_OUT_DIR);
 		if (!FSO.FolderExists(PHP_OBJECT_OUT_DIR)) {
-			ERROR('you chosen output directory ' + PHP_OBJECT_OUT_DIR + ' does not exist');
+			ERROR('chosen output directory ' + PHP_OBJECT_OUT_DIR + ' does not exist');
 		}
 		PHP_OBJECT_OUT_DIR += '\\';
 	} else {

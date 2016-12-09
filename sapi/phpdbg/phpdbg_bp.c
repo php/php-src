@@ -237,12 +237,7 @@ PHPDBG_API void phpdbg_export_breakpoints_to_string(char **str) /* {{{ */
 	}
 } /* }}} */
 
-PHPDBG_API void phpdbg_set_breakpoint_file(const char *path, long line_num) /* {{{ */
-{
-	phpdbg_set_breakpoint_file_ex(path, 0, line_num);
-} /* }}} */
-
-PHPDBG_API void phpdbg_set_breakpoint_file_ex(const char *path, size_t path_len, long line_num) /* {{{ */
+PHPDBG_API void phpdbg_set_breakpoint_file(const char *path, size_t path_len, long line_num) /* {{{ */
 {
 	php_stream_statbuf ssb;
 	char realpath[MAXPATHLEN];

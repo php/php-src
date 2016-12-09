@@ -34,9 +34,6 @@
 #define ZEND_CLOSURE_PROPERTY_ERROR() \
 	zend_throw_error(NULL, "Closure object cannot have properties")
 
-/* reuse bit to mark "fake" closures (it wasn't used for functions before) */
-#define ZEND_ACC_FAKE_CLOSURE ZEND_ACC_INTERFACE
-
 typedef struct _zend_closure {
 	zend_object       std;
 	zend_function     func;

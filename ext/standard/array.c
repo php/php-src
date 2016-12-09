@@ -790,6 +790,7 @@ PHP_FUNCTION(count)
 
 	switch (Z_TYPE_P(array)) {
 		case IS_NULL:
+			php_error_docref(NULL, E_WARNING, "Parameter must be an array or an object that implements Countable");
 			RETURN_LONG(0);
 			break;
 		case IS_ARRAY:
@@ -820,8 +821,14 @@ PHP_FUNCTION(count)
 				}
 				return;
 			}
+
+			/* If There's no handler and it doesn't implement Countable then add a warning */
+			php_error_docref(NULL, E_WARNING, "Parameter must be an array or an object that implements Countable");
+			RETURN_LONG(1);
+			break;
 		}
 		default:
+			php_error_docref(NULL, E_WARNING, "Parameter must be an array or an object that implements Countable");
 			RETURN_LONG(1);
 			break;
 	}
@@ -1767,12 +1774,6 @@ PHP_FUNCTION(extract)
 	}
 
 	symbol_table = zend_rebuild_symbol_table();
-#if 0
-	if (!symbol_table) {
-		php_error_docref(NULL, E_WARNING, "failed to build symbol table");
-		return;
-	}
-#endif
 
 	/* The array might be stored in a local variable that will be overwritten. To avoid losing the
 	 * reference in that case we work on a copy. */
@@ -3765,7 +3766,7 @@ static void array_bucketindex_swap(void *p, void *q) /* {{{ */
 PHP_FUNCTION(array_unique)
 {
 	zval *array;
-	uint idx;
+	uint32_t idx;
 	Bucket *p;
 	struct bucketindex *arTmp, *cmpdata, *lastkept;
 	unsigned int i;
@@ -3861,7 +3862,7 @@ static int zval_user_compare(zval *a, zval *b) /* {{{ */
 
 static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_type) /* {{{ */
 {
-    uint idx;
+    uint32_t idx;
 	Bucket *p;
 	int argc, i;
 	zval *args;
@@ -3962,7 +3963,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 	zval *args = NULL;
 	HashTable *hash;
 	int arr_argc, i, c = 0;
-	uint idx;
+	uint32_t idx;
 	Bucket **lists, *list, **ptrs, *p;
 	uint32_t req_args;
 	char *param_spec;
@@ -4289,7 +4290,7 @@ PHP_FUNCTION(array_uintersect_uassoc)
 
 static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_type) /* {{{ */
 {
-    uint idx;
+    uint32_t idx;
 	Bucket *p;
 	int argc, i;
 	zval *args;
@@ -4385,7 +4386,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 	zval *args = NULL;
 	HashTable *hash;
 	int arr_argc, i, c;
-	uint idx;
+	uint32_t idx;
 	Bucket **lists, *list, **ptrs, *p;
 	uint32_t req_args;
 	char *param_spec;
@@ -4818,7 +4819,7 @@ PHP_FUNCTION(array_multisort)
 	zval*			args;
 	zval**			arrays;
 	Bucket**		indirect;
-	uint            idx;
+	uint32_t            idx;
 	Bucket*			p;
 	HashTable*		hash;
 	int				argc;

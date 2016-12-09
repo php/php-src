@@ -19,7 +19,7 @@ $db->exec('create table test (id int, name varchar(10) null)');
 $stmt = $db->prepare('insert into test (id, name) values(0, :name)');
 $name = NULL;
 $before_bind = $name;
-$stmt->bindParam(':name', $name);
+$stmt->bindParam(':name', $name, PDO::PARAM_NULL);
 if ($name !== $before_bind) {
 	echo "bind: fail\n";
 } else {

@@ -26,7 +26,7 @@
 #include <dmalloc.h>
 #endif
 
-#define PHP_API_VERSION 20160303
+#define PHP_API_VERSION 20160731
 #define PHP_HAVE_STREAMS
 #define YYDEBUG 0
 #define PHP_DEFAULT_CHARSET "UTF-8"
@@ -64,12 +64,6 @@
 #	define THREAD_LS
 #	define PHP_DIR_SEPARATOR '/'
 #	define PHP_EOL "\n"
-#endif
-
-#ifdef NETWARE
-/* For php_get_uname() function */
-#define PHP_UNAME  "NetWare"
-#define PHP_OS      PHP_UNAME
 #endif
 
 #if HAVE_ASSERT_H

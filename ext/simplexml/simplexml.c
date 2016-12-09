@@ -36,8 +36,6 @@
 #include "zend_interfaces.h"
 #include "sxe.h"
 
-#define SXE_ELEMENT_BY_NAME 0
-
 zend_class_entry *sxe_class_entry = NULL;
 
 PHP_SXE_API zend_class_entry *sxe_get_element_class_entry() /* {{{ */
@@ -347,20 +345,10 @@ long_dim:
 					_node_as_zval(sxe, node, rv, SXE_ITER_NONE, NULL, sxe->iter.nsprefix, sxe->iter.isprefix);
 				}
 			} else {
-#if SXE_ELEMENT_BY_NAME
-				int newtype;
-
-				GET_NODE(sxe, node);
-				node = sxe_get_element_by_name(sxe, node, &name, &newtype);
-				if (node) {
-					_node_as_zval(sxe, node, rv, newtype, name, sxe->iter.nsprefix, sxe->iter.isprefix);
-				}
-#else
 				/* In BP_VAR_IS mode only return a proper node if it actually exists. */
 				if (type != BP_VAR_IS || sxe_find_element_by_name(sxe, node->children, (xmlChar *) name)) {
 					_node_as_zval(sxe, node, rv, SXE_ITER_ELEMENT, name, sxe->iter.nsprefix, sxe->iter.isprefix);
 				}
-#endif
 			}
 		}
 	}
