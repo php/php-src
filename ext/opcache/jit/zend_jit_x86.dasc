@@ -784,11 +784,11 @@ static void* dasm_labels[zend_lb_MAX];
 |.endmacro
 
 |.macro GC_ADDREF, zv
-|	inc	dword [zv]
+|	add	dword [zv], 1
 |.endmacro
 
 |.macro GC_DELREF, zv
-|	dec	dword [zv]
+|	sub	dword [zv], 1
 |.endmacro
 
 |.macro IF_GC_MAY_NOT_LEAK, ptr, tmp_reg, label
@@ -802,12 +802,12 @@ static void* dasm_labels[zend_lb_MAX];
 |.if X64
 ||		if (!IS_SIGNED_32BIT(Z_LVAL_P(zv))) {
 |			mov64 tmp_reg, ((uintptr_t)Z_LVAL_P(zv))
-|			inc dword [tmp_reg]
+|			add dword [tmp_reg], 1
 ||		} else {
-|			inc dword [Z_LVAL_P(zv)]
+|			add dword [Z_LVAL_P(zv)], 1
 ||		}
 |.else
-|		inc dword [Z_LVAL_P(zv)]
+|		add dword [Z_LVAL_P(zv)], 1
 |.endif
 |.endmacro
 
@@ -820,7 +820,7 @@ static void* dasm_labels[zend_lb_MAX];
 |			add dword [Z_LVAL_P(zv)], 2
 ||		}
 |.else
-|		inc dword [Z_LVAL_P(zv)]
+|		add dword [Z_LVAL_P(zv)], 1
 |.endif
 |.endmacro
 
@@ -1913,9 +1913,9 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, zend_op_arr
 	|		ZVAL_COPY_VALUE FP + opline->result.var, FP + opline->op1.var, MAY_BE_LONG, r0, eax, r1
 	||	}
 	if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
-		|	inc aword [FP + opline->op1.var]
+		|	add aword [FP + opline->op1.var], 1
 	} else {
-		|	dec aword [FP + opline->op1.var]
+		|	sub aword [FP + opline->op1.var], 1
 	}
 	op1_def_info = OP1_DEF_INFO();
 
@@ -5240,7 +5240,7 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, int b, 
 				|	test byte [FP + opline->op1.var + 9], IS_TYPE_REFCOUNTED
 				|	jz >3
 				|	mov FCARG1a, aword [FP + opline->op1.var]
-				|	dec dword [FCARG1a]
+				|	sub dword [FCARG1a], 1
 				|	jnz >3
 				|	mov aword [r4], r0 // save
 				|	ZVAL_DTOR_FUNC op1_info, op_array->filename, opline
@@ -7334,7 +7334,7 @@ static int zend_jit_bind_global(dasm_State **Dst, const zend_op *opline, zend_op
 	//idx = (uint32_t)(uintptr_t)CACHED_PTR(Z_CACHE_SLOT_P(varname)) - 1;
 	|	mov	r0, EX->run_time_cache
 	|	mov r0, aword [r0 + Z_CACHE_SLOT_P(varname)]
-	|	dec r0
+	|	sub r0, 1
 	//if (EXPECTED(idx < EG(symbol_table).nNumUsed))
 	|	cmp r0, [&EG(symbol_table).nNumUsed]
 	|	jae >9
