@@ -52,7 +52,7 @@ if not exist "%PHP_BUILD_CACHE_ENCHANT_DICT_DIR%" (
 if not exist "%PHP_BUILD_CACHE_ENCHANT_DICT_DIR%\en_US.aff" (
 	echo Fetching enchant dicts
 	pushd %PHP_BUILD_CACHE_ENCHANT_DICT_DIR%
-	del *
+	del /q *
 	powershell -Command wget http://windows.php.net/downloads/qa/appveyor/ext/enchant/dict.zip -OutFile dict.zip
 	unzip dict.zip
 	popd
