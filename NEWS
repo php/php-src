@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #73663 ("Invalid opcode 65/16/8" occurs with a variable created
     with list()). (Laruence)
 
+- Mbstring:
+  . Fixed bug #73646 (mb_ereg_search_init null pointer dereference).
+    (Laruence)
+
 - Opcache:
   . Fixed bug #73654 (Segmentation fault in zend_call_function). (Nikita)
   . Fixed bug #73668 ("SIGFPE Arithmetic exception" in opcache when divide by
