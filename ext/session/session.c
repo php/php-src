@@ -64,6 +64,9 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 static int (*php_session_rfc1867_orig_callback)(unsigned int event, void *event_data, void **extra);
 static void php_session_track_init(void);
 
+/* SessionSaveHandlerInterface */
+zend_class_entry *php_session_save_handler_iface_entry;
+
 /* SessionHandler class */
 zend_class_entry *php_session_class_entry;
 
@@ -1870,78 +1873,87 @@ static PHP_FUNCTION(session_set_save_handler)
 		zend_function *current_mptr;
 		zend_bool register_shutdown = 1;
 
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &obj, php_session_iface_entry, &register_shutdown) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &obj, &register_shutdown) == FAILURE) {
 			RETURN_FALSE;
 		}
 
-		/* For compatibility reason, implemeted interface is not checked */
-		/* Find implemented methods - SessionHandlerInterface */
-		i = 0;
-		ZEND_HASH_FOREACH_STR_KEY(&php_session_iface_entry->function_table, func_name) {
-			if ((current_mptr = zend_hash_find_ptr(&Z_OBJCE_P(obj)->function_table, func_name))) {
-				if (!Z_ISUNDEF(PS(mod_user_names).names[i])) {
-					zval_ptr_dtor(&PS(mod_user_names).names[i]);
+		if (instanceof_function(Z_OBJCE_P(obj), php_session_save_handler_iface_entry)) {
+			i = 0;
+			ZEND_HASH_FOREACH_STR_KEY(&php_session_save_handler_iface_entry->function_table, func_name) {
+				if ((current_mptr = zend_hash_find_ptr(&Z_OBJCE_P(obj)->function_table, func_name))) {
+					if (!Z_ISUNDEF(PS(mod_user_names).names[i])) {
+						zval_ptr_dtor(&PS(mod_user_names).names[i]);
+					}
+					array_init_size(&PS(mod_user_names).names[i], 2);
+					Z_ADDREF_P(obj);
+					add_next_index_zval(&PS(mod_user_names).names[i], obj);
+					add_next_index_str(&PS(mod_user_names).names[i], zend_string_copy(func_name));
 				}
-
-				array_init_size(&PS(mod_user_names).names[i], 2);
-				Z_ADDREF_P(obj);
-				add_next_index_zval(&PS(mod_user_names).names[i], obj);
-				add_next_index_str(&PS(mod_user_names).names[i], zend_string_copy(func_name));
-			} else {
-				php_error_docref(NULL, E_ERROR, "Session handler's function table is corrupt");
-				RETURN_FALSE;
-			}
-
-			++i;
-		} ZEND_HASH_FOREACH_END();
-
-		/* Find implemented methods - SessionIdInterface (optional) */
-		ZEND_HASH_FOREACH_STR_KEY(&php_session_id_iface_entry->function_table, func_name) {
-			if ((current_mptr = zend_hash_find_ptr(&Z_OBJCE_P(obj)->function_table, func_name))) {
-				if (!Z_ISUNDEF(PS(mod_user_names).names[i])) {
-					zval_ptr_dtor(&PS(mod_user_names).names[i]);
+				++i;
+			} ZEND_HASH_FOREACH_END();
+		} else if (instanceof_function(Z_OBJCE_P(obj), php_session_iface_entry)) {
+			i = 0;
+			ZEND_HASH_FOREACH_STR_KEY(&php_session_iface_entry->function_table, func_name) {
+				if ((current_mptr = zend_hash_find_ptr(&Z_OBJCE_P(obj)->function_table, func_name))) {
+					if (!Z_ISUNDEF(PS(mod_user_names).names[i])) {
+						zval_ptr_dtor(&PS(mod_user_names).names[i]);
+					}
+					array_init_size(&PS(mod_user_names).names[i], 2);
+					Z_ADDREF_P(obj);
+					add_next_index_zval(&PS(mod_user_names).names[i], obj);
+					add_next_index_str(&PS(mod_user_names).names[i], zend_string_copy(func_name));
 				}
-				array_init_size(&PS(mod_user_names).names[i], 2);
-				Z_ADDREF_P(obj);
-				add_next_index_zval(&PS(mod_user_names).names[i], obj);
-				add_next_index_str(&PS(mod_user_names).names[i], zend_string_copy(func_name));
-			} else {
-				if (!Z_ISUNDEF(PS(mod_user_names).names[i])) {
-					zval_ptr_dtor(&PS(mod_user_names).names[i]);
-					ZVAL_UNDEF(&PS(mod_user_names).names[i]);
-				}
-			}
+				++i;
+			} ZEND_HASH_FOREACH_END();
 
-			++i;
-		} ZEND_HASH_FOREACH_END();
+			/* Find implemented methods - SessionIdInterface (optional) */
+			ZEND_HASH_FOREACH_STR_KEY(&php_session_id_iface_entry->function_table, func_name) {
+				if ((current_mptr = zend_hash_find_ptr(&Z_OBJCE_P(obj)->function_table, func_name))) {
+					if (!Z_ISUNDEF(PS(mod_user_names).names[i])) {
+						zval_ptr_dtor(&PS(mod_user_names).names[i]);
+					}
+					array_init_size(&PS(mod_user_names).names[i], 2);
+					Z_ADDREF_P(obj);
+					add_next_index_zval(&PS(mod_user_names).names[i], obj);
+					add_next_index_str(&PS(mod_user_names).names[i], zend_string_copy(func_name));
+				} else {
+					if (!Z_ISUNDEF(PS(mod_user_names).names[i])) {
+						zval_ptr_dtor(&PS(mod_user_names).names[i]);
+						ZVAL_UNDEF(&PS(mod_user_names).names[i]);
+					}
+				}
+				++i;
+			} ZEND_HASH_FOREACH_END();
 
-		/* Find implemented methods - SessionUpdateTimestampInterface (optional) */
-		ZEND_HASH_FOREACH_STR_KEY(&php_session_update_timestamp_iface_entry->function_table, func_name) {
-			if ((current_mptr = zend_hash_find_ptr(&Z_OBJCE_P(obj)->function_table, func_name))) {
-				if (!Z_ISUNDEF(PS(mod_user_names).names[i])) {
-					zval_ptr_dtor(&PS(mod_user_names).names[i]);
+			/* Find implemented methods - SessionUpdateTimestampInterface (optional) */
+			ZEND_HASH_FOREACH_STR_KEY(&php_session_update_timestamp_iface_entry->function_table, func_name) {
+				if ((current_mptr = zend_hash_find_ptr(&Z_OBJCE_P(obj)->function_table, func_name))) {
+					if (!Z_ISUNDEF(PS(mod_user_names).names[i])) {
+						zval_ptr_dtor(&PS(mod_user_names).names[i]);
+					}
+					array_init_size(&PS(mod_user_names).names[i], 2);
+					Z_ADDREF_P(obj);
+					add_next_index_zval(&PS(mod_user_names).names[i], obj);
+					add_next_index_str(&PS(mod_user_names).names[i], zend_string_copy(func_name));
+				} else {
+					if (!Z_ISUNDEF(PS(mod_user_names).names[i])) {
+						zval_ptr_dtor(&PS(mod_user_names).names[i]);
+						ZVAL_UNDEF(&PS(mod_user_names).names[i]);
+					}
 				}
-				array_init_size(&PS(mod_user_names).names[i], 2);
-				Z_ADDREF_P(obj);
-				add_next_index_zval(&PS(mod_user_names).names[i], obj);
-				add_next_index_str(&PS(mod_user_names).names[i], zend_string_copy(func_name));
-			} else {
-				if (!Z_ISUNDEF(PS(mod_user_names).names[i])) {
-					zval_ptr_dtor(&PS(mod_user_names).names[i]);
-					ZVAL_UNDEF(&PS(mod_user_names).names[i]);
-				}
-			}
-			++i;
-		} ZEND_HASH_FOREACH_END();
+				++i;
+			} ZEND_HASH_FOREACH_END();
+		} else {
+			php_error_docref(NULL, E_WARNING, "Session save handler object must implement SessionSaveHandlerInterface or SessionHandlerInter");
+			RETURN_FALSE;
+		}
 
 		if (register_shutdown) {
 			/* create shutdown function */
 			php_shutdown_function_entry shutdown_function_entry;
 			shutdown_function_entry.arg_count = 1;
 			shutdown_function_entry.arguments = (zval *) safe_emalloc(sizeof(zval), 1, 0);
-
 			ZVAL_STRING(&shutdown_function_entry.arguments[0], "session_register_shutdown");
-
 			/* add shutdown function, removing the old one if it exists */
 			if (!register_user_shutdown_function("session_shutdown", sizeof("session_shutdown") - 1, &shutdown_function_entry)) {
 				zval_ptr_dtor(&shutdown_function_entry.arguments[0]);
@@ -2711,6 +2723,22 @@ static const zend_function_entry session_functions[] = {
 
 /* {{{ SessionHandlerInterface functions[]
 */
+static const zend_function_entry php_session_save_handler_iface_functions[] = {
+	PHP_ABSTRACT_ME(SessionSaveHandlerInterface, open, arginfo_session_class_open)
+	PHP_ABSTRACT_ME(SessionSaveHandlerInterface, close, arginfo_session_class_close)
+	PHP_ABSTRACT_ME(SessionSaveHandlerInterface, read, arginfo_session_class_read)
+	PHP_ABSTRACT_ME(SessionSaveHandlerInterface, write, arginfo_session_class_write)
+	PHP_ABSTRACT_ME(SessionSaveHandlerInterface, destroy, arginfo_session_class_destroy)
+	PHP_ABSTRACT_ME(SessionSaveHandlerInterface, gc, arginfo_session_class_gc)
+	PHP_ABSTRACT_ME(SessionSaveHandlerInterface, createId, arginfo_session_class_create_sid)
+	PHP_ABSTRACT_ME(SessionSaveHandlerInterface, validateId, arginfo_session_class_validateId)
+	PHP_ABSTRACT_ME(SessionSaveHandlerInterface, updateTimestamp, arginfo_session_class_updateTimestamp)
+	PHP_FE_END
+};
+/* }}} */
+
+/* {{{ SessionHandlerInterface functions[]
+*/
 static const zend_function_entry php_session_iface_functions[] = {
 	PHP_ABSTRACT_ME(SessionHandlerInterface, open, arginfo_session_class_open)
 	PHP_ABSTRACT_ME(SessionHandlerInterface, close, arginfo_session_class_close)
@@ -2865,6 +2893,10 @@ static PHP_MINIT_FUNCTION(session) /* {{{ */
 	php_rfc1867_callback = php_session_rfc1867_callback;
 
 	/* Register interfaces */
+	INIT_CLASS_ENTRY(ce, PS_SAVE_HANDLER_IFACE_NAME, php_session_save_handler_iface_functions);
+	php_session_save_handler_iface_entry = zend_register_internal_class(&ce);
+	php_session_save_handler_iface_entry->ce_flags |= ZEND_ACC_INTERFACE;
+
 	INIT_CLASS_ENTRY(ce, PS_IFACE_NAME, php_session_iface_functions);
 	php_session_iface_entry = zend_register_internal_class(&ce);
 	php_session_iface_entry->ce_flags |= ZEND_ACC_INTERFACE;
