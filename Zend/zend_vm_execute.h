@@ -19,7 +19,7 @@
 */
 
 #ifdef ZEND_WIN32
-# pragma warning(once : 4101)
+# pragma warning(disable : 4101)
 # pragma warning(once : 6235)
 # pragma warning(once : 6237)
 # pragma warning(once : 6239)
