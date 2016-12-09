@@ -19582,7 +19582,7 @@ try_assign_dim_array:
 		}
 		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_OBJECT)) {
 			dim = EX_CONSTANT(opline->op2);
-			value = _get_zval_ptr_var((opline+1)->op1.var, execute_data, &free_op_data);
+			value = _get_zval_ptr_var_deref((opline+1)->op1.var, execute_data, &free_op_data);
 
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
@@ -19674,7 +19674,7 @@ try_assign_dim_array:
 		}
 		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_OBJECT)) {
 			dim = EX_CONSTANT(opline->op2);
-			value = _get_zval_ptr_cv_BP_VAR_R(execute_data, (opline+1)->op1.var);
+			value = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, (opline+1)->op1.var);
 
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
@@ -21531,7 +21531,7 @@ try_assign_dim_array:
 		}
 		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_OBJECT)) {
 			dim = NULL;
-			value = _get_zval_ptr_var((opline+1)->op1.var, execute_data, &free_op_data);
+			value = _get_zval_ptr_var_deref((opline+1)->op1.var, execute_data, &free_op_data);
 
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
@@ -21623,7 +21623,7 @@ try_assign_dim_array:
 		}
 		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_OBJECT)) {
 			dim = NULL;
-			value = _get_zval_ptr_cv_BP_VAR_R(execute_data, (opline+1)->op1.var);
+			value = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, (opline+1)->op1.var);
 
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
@@ -24371,7 +24371,7 @@ try_assign_dim_array:
 		}
 		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_OBJECT)) {
 			dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
-			value = _get_zval_ptr_var((opline+1)->op1.var, execute_data, &free_op_data);
+			value = _get_zval_ptr_var_deref((opline+1)->op1.var, execute_data, &free_op_data);
 
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
@@ -24463,7 +24463,7 @@ try_assign_dim_array:
 		}
 		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_OBJECT)) {
 			dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
-			value = _get_zval_ptr_cv_BP_VAR_R(execute_data, (opline+1)->op1.var);
+			value = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, (opline+1)->op1.var);
 
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
@@ -27321,7 +27321,7 @@ try_assign_dim_array:
 		}
 		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_OBJECT)) {
 			dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
-			value = _get_zval_ptr_var((opline+1)->op1.var, execute_data, &free_op_data);
+			value = _get_zval_ptr_var_deref((opline+1)->op1.var, execute_data, &free_op_data);
 
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
@@ -27413,7 +27413,7 @@ try_assign_dim_array:
 		}
 		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_OBJECT)) {
 			dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
-			value = _get_zval_ptr_cv_BP_VAR_R(execute_data, (opline+1)->op1.var);
+			value = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, (opline+1)->op1.var);
 
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
@@ -39313,7 +39313,7 @@ try_assign_dim_array:
 		}
 		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_OBJECT)) {
 			dim = EX_CONSTANT(opline->op2);
-			value = _get_zval_ptr_var((opline+1)->op1.var, execute_data, &free_op_data);
+			value = _get_zval_ptr_var_deref((opline+1)->op1.var, execute_data, &free_op_data);
 
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
@@ -39405,7 +39405,7 @@ try_assign_dim_array:
 		}
 		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_OBJECT)) {
 			dim = EX_CONSTANT(opline->op2);
-			value = _get_zval_ptr_cv_BP_VAR_R(execute_data, (opline+1)->op1.var);
+			value = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, (opline+1)->op1.var);
 
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
@@ -42457,7 +42457,7 @@ try_assign_dim_array:
 		}
 		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_OBJECT)) {
 			dim = NULL;
-			value = _get_zval_ptr_var((opline+1)->op1.var, execute_data, &free_op_data);
+			value = _get_zval_ptr_var_deref((opline+1)->op1.var, execute_data, &free_op_data);
 
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
@@ -42549,7 +42549,7 @@ try_assign_dim_array:
 		}
 		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_OBJECT)) {
 			dim = NULL;
-			value = _get_zval_ptr_cv_BP_VAR_R(execute_data, (opline+1)->op1.var);
+			value = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, (opline+1)->op1.var);
 
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
@@ -46237,7 +46237,7 @@ try_assign_dim_array:
 		}
 		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_OBJECT)) {
 			dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
-			value = _get_zval_ptr_var((opline+1)->op1.var, execute_data, &free_op_data);
+			value = _get_zval_ptr_var_deref((opline+1)->op1.var, execute_data, &free_op_data);
 
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
@@ -46329,7 +46329,7 @@ try_assign_dim_array:
 		}
 		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_OBJECT)) {
 			dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
-			value = _get_zval_ptr_cv_BP_VAR_R(execute_data, (opline+1)->op1.var);
+			value = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, (opline+1)->op1.var);
 
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
@@ -50314,7 +50314,7 @@ try_assign_dim_array:
 		}
 		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_OBJECT)) {
 			dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
-			value = _get_zval_ptr_var((opline+1)->op1.var, execute_data, &free_op_data);
+			value = _get_zval_ptr_var_deref((opline+1)->op1.var, execute_data, &free_op_data);
 
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
@@ -50406,7 +50406,7 @@ try_assign_dim_array:
 		}
 		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_OBJECT)) {
 			dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
-			value = _get_zval_ptr_cv_BP_VAR_R(execute_data, (opline+1)->op1.var);
+			value = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, (opline+1)->op1.var);
 
 			zend_assign_to_object_dim(object_ptr, dim, value);
 
