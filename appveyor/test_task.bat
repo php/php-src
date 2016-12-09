@@ -55,6 +55,7 @@ if not exist "%PHP_BUILD_CACHE_ENCHANT_DICT_DIR%\en_US.aff" (
 	del /q *
 	powershell -Command wget http://windows.php.net/downloads/qa/appveyor/ext/enchant/dict.zip -OutFile dict.zip
 	unzip dict.zip
+	del /q dict.zip
 	popd
 )
 mkdir %USERPROFILE%\enchant\myspell
