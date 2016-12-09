@@ -15,6 +15,10 @@ PHP                                                                        NEWS
   . Fixed bug #72931 (PDO_FIREBIRD with Firebird 3.0 not work on returning
     statement). (Dorin Marcoci)
 
+- SPL:
+  . Fixed bug #73686 (Adding settype()ed values to ArrayObject results in
+    references). (Laruence)
+
 01 Dec 2016, PHP 7.1.0
 
 - Core:
