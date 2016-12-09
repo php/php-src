@@ -44,8 +44,22 @@ mkdir c:\enchant_plugins
 copy %DEPS_DIR%\bin\libenchant_ispell.dll c:\enchant_plugins
 copy %DEPS_DIR%\bin\libenchant_myspell.dll c:\enchant_plugins
 reg add HKEY_CURRENT_USER\SOFTWARE\Enchant\Config /v Module_Dir /t REG_SZ /d c:\enchant_plugins
+
+set PHP_BUILD_CACHE_ENCHANT_DICT_DIR=%PHP_BUILD_CACHE_BASE_DIR%\enchant_dict
+if not exist "%PHP_BUILD_CACHE_ENCHANT_DICT_DIR%" (
+	echo Creating %PHP_BUILD_CACHE_ENCHANT_DICT_DIR%
+	mkdir "%PHP_BUILD_CACHE_ENCHANT_DICT_DIR%"
+)
+if not exist "%PHP_BUILD_CACHE_ENCHANT_DICT_DIR%\en_US.aff" (
+	echo Fetching enchant dicts
+	pushd %PHP_BUILD_CACHE_ENCHANT_DICT_DIR%
+	del *
+	powershell -Command wget http://windows.php.net/downloads/qa/appveyor/ext/enchant/dict/en_US.zip -OutFile en_US.zip
+	unzip en_US.zip
+	popd
+)
 mkdir %USERPROFILE%\enchant\myspell
-copy %APPVEYOR_BUILD_FOLDER%\appveyor\ext\enchant\dict\* %USERPROFILE%\enchant\myspell
+copy %PHP_BUILD_CACHE_ENCHANT_DICT_DIR%\* %USERPROFILE%\enchant\myspell
 
 
 cd "%APPVEYOR_BUILD_FOLDER%"
