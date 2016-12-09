@@ -1094,10 +1094,6 @@ static zend_never_inline void zend_assign_to_object_dim(zval *object, zval *dim,
 		return;
 	}
 
-	if (UNEXPECTED(Z_ISREF_P(value))) {
-		value = Z_REFVAL_P(value);
-	}
-
 	Z_OBJ_HT_P(object)->write_dimension(object, dim, value);
 }
 
