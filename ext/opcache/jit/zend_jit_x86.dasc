@@ -6257,7 +6257,6 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, zend_op_ar
 			|	mov CARG1, E_NOTICE
 			|	LOAD_ADDR CARG2, "Only variables should be passed by reference"
 			|	EXT_CALL zend_error, r0
-			|	add r4, 8
 			|.else
 			|	sub r4, 8
 			|	push "Only variables should be passed by reference"
@@ -6305,7 +6304,6 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		|	mov CARG1, E_NOTICE
 		|	LOAD_ADDR CARG2, "Only variables should be passed by reference"
 		|	EXT_CALL zend_error, r0
-		|	add r4, 8
 		|.else
 		|	sub r4, 8
 		|	push "Only variables should be passed by reference"
