@@ -8,6 +8,10 @@ PHP                                                                        NEWS
   . Fixed bug #73663 ("Invalid opcode 65/16/8" occurs with a variable created
     with list()). (Laruence)
 
+- COM:
+  . Fixed bug #73679 (DOTNET read access violation using invalid codepage).
+    (Anatol)
+
 - Mbstring:
   . Fixed bug #73646 (mb_ereg_search_init null pointer dereference).
     (Laruence)
