@@ -8,6 +8,10 @@ PHP                                                                        NEWS
   . Fixed bug #73585 (Logging of "Internal Zend error - Missing class
     information" missing class name). (Laruence)
 
+- COM:
+  . Fixed bug #73679 (DOTNET read access violation using invalid codepage).
+    (Anatol)
+
 - PCRE:
   . Fixed bug #73612 (preg_*() may leak memory). (cmb)
 
