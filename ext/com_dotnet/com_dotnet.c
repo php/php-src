@@ -197,6 +197,7 @@ PHP_FUNCTION(com_dotnet_create_instance)
 	char *where = "";
 	IUnknown *unk = NULL;
 	zend_long cp = CP_ACP;
+	const struct php_win32_cp *cp_it;
 
 	php_com_initialize();
 	stuff = (struct dotnet_runtime_stuff*)COMG(dotnet_runtime_stuff);
@@ -251,11 +252,12 @@ PHP_FUNCTION(com_dotnet_create_instance)
 		return;
 	}
 
-	if (Z_L(0) > cp || ZEND_LONG_INT_OVFL(cp)) {
+	cp_it = php_win32_cp_get_by_id((DWORD)cp);
+	if (!cp_it) {
 		php_com_throw_exception(E_INVALIDARG, "Could not create .Net object - invalid codepage!");
 		return;
 	}
-	obj->code_page = (int)cp;
+	obj->code_page = (int)cp_it->id;
 
 	oletype = php_com_string_to_olestring(datatype_name, datatype_name_len, obj->code_page);
 	oleassembly = php_com_string_to_olestring(assembly_name, assembly_name_len, obj->code_page);
