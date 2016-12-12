@@ -52,7 +52,7 @@ PHP_FUNCTION(com_create_instance)
 		RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE,
 		&authid, EOAC_NONE
 	};
-	zend_long cp = CP_ACP;
+	zend_long cp = GetACP();
 	const struct php_win32_cp *cp_it;
 
 	php_com_initialize();
