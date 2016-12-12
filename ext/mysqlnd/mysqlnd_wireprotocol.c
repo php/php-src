@@ -1460,8 +1460,7 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 						MYSQLND_ERROR_INFO * error_info,
 						MYSQLND_MEMORY_POOL * pool,
 						MYSQLND_MEMORY_POOL_CHUNK ** buffer,
-						size_t * data_size, zend_bool persistent_alloc,
-						unsigned int prealloc_more_bytes)
+						size_t * data_size, zend_bool persistent_alloc)
 {
 	enum_func_status ret = PASS;
 	MYSQLND_PACKET_HEADER header;
@@ -1478,7 +1477,7 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 	  zero-length byte, don't read the body, there is no such.
 	*/
 
-	*data_size = prealloc_more_bytes;
+	*data_size = 0;
 	while (1) {
 		if (FAIL == mysqlnd_read_header(pfc, vio, &header, stats, error_info)) {
 			ret = FAIL;
@@ -1527,7 +1526,6 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 		pool->free_chunk(pool, *buffer);
 		*buffer = NULL;
 	}
-	*data_size -= prealloc_more_bytes;
 	DBG_RETURN(ret);
 }
 /* }}} */
@@ -1634,8 +1632,6 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 	zval *current_field, *end_field, *start_field;
 	zend_uchar * p = row_buffer->ptr;
 	size_t data_size = row_buffer->app;
-	/* we allocate from here. In pre-7.0 it was +1, as there was an additional \0 for the last string in the packet - because of the zval optimizations - using no-copy */
-	zend_uchar * bit_area = (zend_uchar*) row_buffer->ptr + data_size;
 	const zend_uchar * const packet_end = (zend_uchar*) row_buffer->ptr + data_size;
 
 	DBG_ENTER("php_mysqlnd_rowp_read_text_protocol_aux");
@@ -1746,46 +1742,22 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 #endif /* MYSQLND_STRING_TO_INT_CONVERSION */
 			if (fields_metadata[i].type == MYSQL_TYPE_BIT) {
 				/*
-				  BIT fields are specially handled. As they come as bit mask, we have
-				  to convert it to human-readable representation. As the bits take
-				  less space in the protocol than the numbers they represent, we don't
-				  have enough space in the packet buffer to overwrite inside.
-				  Thus, a bit more space is pre-allocated at the end of the buffer,
-				  see php_mysqlnd_rowp_read(). And we add the strings at the end.
-				  Definitely not nice, _hackish_ :(, but works.
+				  BIT fields are specially handled. As they come as bit mask, they have
+				  to be converted to human-readable representation.
 				*/
-				zend_uchar *start = bit_area;
 				ps_fetch_from_1_to_8_bytes(current_field, &(fields_metadata[i]), 0, (const zend_uchar **) &p, len);
 				/*
 				  We have advanced in ps_fetch_from_1_to_8_bytes. We should go back because
 				  later in this function there will be an advancement.
 				*/
 				p -= len;
-				if (Z_TYPE_P(current_field) == IS_LONG) {
-					/*
-					  Andrey : See below. No need of bit_area, as we can use on stack for this.
-					  The bit area should be removed - the `prealloc_more_bytes` in php_mysqlnd_read_row_ex()
-
-					  char tmp[22];
-					  const size_t tmp_len = sprintf((char *)&tmp, MYSQLND_LLU_SPEC, Z_LVAL_P(current_field));
-					  ZVAL_STRINGL(current_field, tmp, tmp_len);
-					*/
-					bit_area += 1 + sprintf((char *)start, ZEND_LONG_FMT, Z_LVAL_P(current_field));
-					ZVAL_STRINGL(current_field, (char *) start, bit_area - start - 1);
+				if (Z_TYPE_P(current_field) == IS_LONG && !as_int_or_float) {
+					/* we are using the text protocol, so convert to string */
+					char tmp[22];
+					const size_t tmp_len = sprintf((char *)&tmp, MYSQLND_LLU_SPEC, Z_LVAL_P(current_field));
+					ZVAL_STRINGL(current_field, tmp, tmp_len);
 				} else if (Z_TYPE_P(current_field) == IS_STRING) {
-					/*
-					   Andrey : This is totally sensless, but I am not gonna remove it in a production version.
-					            This copies the data from the zval to the bit area. The destroys the original value
-								and creates the same one from the bit area. No need. It was making sense in pre-7.0
-								when we used zval IS_STRING with no-copy that referred to the bit area.
-								The bit area has no sense in both the case of IS_LONG and IS_STRING as 7.0 zval
-								IS_STRING always copies.
-					*/
-					memcpy(bit_area, Z_STRVAL_P(current_field), Z_STRLEN_P(current_field));
-					bit_area += Z_STRLEN_P(current_field);
-					*bit_area++ = '\0';
-					zval_dtor(current_field);
-					ZVAL_STRINGL(current_field, (char *) start, bit_area - start - 1);
+					/* nothing to do here, as we want a string and ps_fetch_from_1_to_8_bytes() has given us one */
 				}
 			} else {
 				ZVAL_STRINGL(current_field, (char *)p, len);
@@ -1842,20 +1814,13 @@ php_mysqlnd_rowp_read(void * _packet)
 	MYSQLND_STATS * stats = packet->header.stats;
 	zend_uchar *p;
 	enum_func_status ret = PASS;
-	size_t post_alloc_for_bit_fields = 0;
 	size_t data_size = 0;
 
 	DBG_ENTER("php_mysqlnd_rowp_read");
 
-	if (!packet->binary_protocol && packet->bit_fields_count) {
-		/* For every field we need terminating \0 */
-		post_alloc_for_bit_fields = packet->bit_fields_total_len + packet->bit_fields_count;
-	}
-
 	ret = php_mysqlnd_read_row_ex(pfc, vio, stats, error_info,
 								  packet->result_set_memory_pool, &packet->row_buffer, &data_size,
-								  packet->persistent_alloc, post_alloc_for_bit_fields
-								 );
+								  packet->persistent_alloc);
 	if (FAIL == ret) {
 		goto end;
 	}
