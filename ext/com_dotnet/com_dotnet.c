@@ -196,7 +196,7 @@ PHP_FUNCTION(com_dotnet_create_instance)
 	int ret = FAILURE;
 	char *where = "";
 	IUnknown *unk = NULL;
-	zend_long cp = CP_ACP;
+	zend_long cp = GetACP();
 
 	php_com_initialize();
 	stuff = (struct dotnet_runtime_stuff*)COMG(dotnet_runtime_stuff);
