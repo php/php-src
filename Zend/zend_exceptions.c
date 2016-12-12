@@ -190,7 +190,9 @@ ZEND_API void zend_clear_exception(void) /* {{{ */
 	}
 	OBJ_RELEASE(EG(exception));
 	EG(exception) = NULL;
-	EG(current_execute_data)->opline = EG(opline_before_exception);
+	if (EG(current_execute_data)) {
+		EG(current_execute_data)->opline = EG(opline_before_exception);
+	}
 #if ZEND_DEBUG
 	EG(opline_before_exception) = NULL;
 #endif
@@ -961,7 +963,7 @@ ZEND_API ZEND_COLD zend_object *zend_throw_error_exception(zend_class_entry *exc
 }
 /* }}} */
 
-static void zend_error_va(int type, const char *file, uint lineno, const char *format, ...) /* {{{ */
+static void zend_error_va(int type, const char *file, uint32_t lineno, const char *format, ...) /* {{{ */
 {
 	va_list args;
 
@@ -971,7 +973,7 @@ static void zend_error_va(int type, const char *file, uint lineno, const char *f
 }
 /* }}} */
 
-static void zend_error_helper(int type, const char *filename, const uint lineno, const char *format, ...) /* {{{ */
+static void zend_error_helper(int type, const char *filename, const uint32_t lineno, const char *format, ...) /* {{{ */
 {
 	va_list va;
 

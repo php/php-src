@@ -998,7 +998,7 @@ PHPAPI void php_html_puts(const char *str, size_t size)
 
 /* {{{ php_error_cb
  extended error handling function */
-static ZEND_COLD void php_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args)
+static ZEND_COLD void php_error_cb(int type, const char *error_filename, const uint32_t error_lineno, const char *format, va_list args)
 {
 	char *buffer;
 	int buffer_len, display;
@@ -2042,7 +2042,7 @@ void dummy_invalid_parameter_handler(
 
 /* {{{ php_module_startup
  */
-int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_modules, uint num_additional_modules)
+int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_modules, uint32_t num_additional_modules)
 {
 	zend_utility_functions zuf;
 	zend_utility_values zuv;
@@ -2229,7 +2229,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 	zuv.html_errors = 1;
 	zuv.import_use_extension = ".php";
-	zuv.import_use_extension_length = (uint)strlen(zuv.import_use_extension);
+	zuv.import_use_extension_length = (uint32_t)strlen(zuv.import_use_extension);
 	php_startup_auto_globals();
 	zend_set_utility_values(&zuv);
 	php_startup_sapi_content_types();

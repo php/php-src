@@ -197,27 +197,27 @@ string(12) "ontents read"
 string(%d) "contents read"
 
 --empty string DQ--
-Error: 2 - file_get_contents() expects parameter 4 to be integer, %unicode_string_optional% given, %s(%d)
+Error: 2 - file_get_contents() expects parameter 4 to be integer, string given, %s(%d)
 NULL
 
 --empty string SQ--
-Error: 2 - file_get_contents() expects parameter 4 to be integer, %unicode_string_optional% given, %s(%d)
+Error: 2 - file_get_contents() expects parameter 4 to be integer, string given, %s(%d)
 NULL
 
 --string DQ--
-Error: 2 - file_get_contents() expects parameter 4 to be integer, %unicode_string_optional% given, %s(%d)
+Error: 2 - file_get_contents() expects parameter 4 to be integer, string given, %s(%d)
 NULL
 
 --string SQ--
-Error: 2 - file_get_contents() expects parameter 4 to be integer, %unicode_string_optional% given, %s(%d)
+Error: 2 - file_get_contents() expects parameter 4 to be integer, string given, %s(%d)
 NULL
 
 --mixed case string--
-Error: 2 - file_get_contents() expects parameter 4 to be integer, %unicode_string_optional% given, %s(%d)
+Error: 2 - file_get_contents() expects parameter 4 to be integer, string given, %s(%d)
 NULL
 
 --heredoc--
-Error: 2 - file_get_contents() expects parameter 4 to be integer, %unicode_string_optional% given, %s(%d)
+Error: 2 - file_get_contents() expects parameter 4 to be integer, string given, %s(%d)
 NULL
 
 --instance of classWithToString--

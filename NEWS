@@ -6,6 +6,7 @@ PHP                                                                        NEWS
   . Fix integer overflows (Joshua Rogers)
 
 - Core:
+  . Removed IS_TYPE_IMMUTABLE (it's the same as COPYABLE & !REFCOUNTED). (Dmitry)
   . Removed the sql.safe_mode directive. (Kalle)
   . Removed support for Netware. (Kalle)
   . Fixed bug #54535 (WSA cleanup executes before MSHUTDOWN). (Kalle)
@@ -13,6 +14,8 @@ PHP                                                                        NEWS
     (Yasuo)
   . Implemented FR #49806 (proc_nice() for Windows). (Kalle)
   . Fix pthreads detection when cross-compiling (ffontaine)
+  . Fixed memory leaks caused by exceptions thrown from destructors. (Bob,
+    Dmitry).
   . Fixed bug #73215 (uniqid() should use better random source). (Yasuo)
   . Fixed bug #73337 (try/catch not working with two exceptions inside a same
     operation). (Dmitry)
@@ -66,6 +69,9 @@ PHP                                                                        NEWS
 - SOAP:
   . Fixed bug #69137 (Peer verification fails when using a proxy with SoapClient)
     (Keith Smiley)
+
+- SQLite3:
+  . Update to Sqlite 3.15.2. (cmb)
 
 - XML:
   . Moved utf8_encode() and utf8_decode() to the Standard extension. (Andrea)

@@ -693,7 +693,7 @@ static void php_wddx_add_var(wddx_packet *packet, zval *name_var)
 			return;
 		}
 
-		if (Z_IMMUTABLE_P(name_var)) {
+		if (!Z_REFCOUNTED_P(name_var)) {
 			ZEND_HASH_FOREACH_VAL(target_hash, val) {
 				php_wddx_add_var(packet, val);
 			} ZEND_HASH_FOREACH_END();
@@ -772,6 +772,11 @@ static void php_wddx_push_element(void *user_data, const XML_Char *name, const X
 				php_wddx_process_data(user_data, atts[i+1], strlen((char *)atts[i+1]));
 				break;
 			}
+		} else {
+			ent.type = ST_BOOLEAN;
+			SET_STACK_VARNAME;
+			ZVAL_FALSE(&ent.data);
+			wddx_stack_push((wddx_stack *)stack, &ent, sizeof(st_entry));
 		}
 	} else if (!strcmp((char *)name, EL_NULL)) {
 		ent.type = ST_NULL;
@@ -902,8 +907,13 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 		}
 
 		if (!strcmp((char *)name, EL_BINARY)) {
-			zend_string *new_str = php_base64_decode(
-				(unsigned char *)Z_STRVAL(ent1->data), Z_STRLEN(ent1->data));
+			zend_string *new_str = NULL;
+			
+			if (ZSTR_EMPTY_ALLOC() != Z_STR(ent1->data)) {
+				new_str = php_base64_decode(
+					(unsigned char *)Z_STRVAL(ent1->data), Z_STRLEN(ent1->data));
+			}
+
 			zval_ptr_dtor(&ent1->data);
 			if (new_str) {
 				ZVAL_STR(&ent1->data, new_str);

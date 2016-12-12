@@ -70,5 +70,5 @@ string(0) ""
 array(0) {
 }
 
-Warning: pg_last_notice(): Invalid option specified (99) in %s/09notice.php on line %d
+Warning: pg_last_notice(): Invalid option specified (99) in %s%e09notice.php on line %d
 bool(false)

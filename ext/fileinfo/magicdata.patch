@@ -1,218 +1,336 @@
 Patches applied to file 5.17 sources tree before generating magic.mgc
 and before running create_data_file.php to create data_file.c.
 
-
-
-From 0b478f445b6b7540b58af5d1fe583fa9e48fd745 Mon Sep 17 00:00:00 2001
-From: Christos Zoulas <christos@zoulas.com>
-Date: Wed, 28 May 2014 19:52:36 +0000
-Subject: [PATCH] further optimize awk by not looking for the BEGIN regex until
- we found the BEGIN (Jan Kaluza)
-
----
- magic/Magdir/commands | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
-
-diff --git a/magic/Magdir/commands b/magic/Magdir/commands
-index bfffdef..26b2869 100644
---- a/magic/Magdir/commands
-+++ b/magic/Magdir/commands
-@@ -49,7 +49,8 @@
- !:mime	text/x-awk
- 0	string/wt	#!\ /usr/bin/awk	awk script text executable
- !:mime	text/x-awk
--0	regex		=^\\s{0,100}BEGIN\\s{0,100}[{]	awk script text
-+0       search/16384    BEGIN
-+>0	regex		=^\\s{0,100}BEGIN\\s{0,100}[{]	awk script text
+diff -u magic/Magdir.orig.0/cafebabe magic/Magdir/cafebabe
+--- magic/Magdir.orig.0/cafebabe	2015-10-16 00:54:18.000000000 +0000
++++ magic/Magdir/cafebabe	2016-11-24 15:59:25.553060242 +0000
+@@ -15,22 +15,6 @@
+ # might add another one or two as time goes by...
+ #
+ ### JAVA START ###
+-0	belong		0xcafebabe
+->4	belong		>30		compiled Java class data,
+-!:mime	application/x-java-applet
+->>6	beshort		x	        version %d.
+->>4	beshort		x       	\b%d
+-# Which is which?
+-#>>4	belong		0x032d		(Java 1.0)
+-#>>4	belong		0x032d		(Java 1.1)
+->>4	belong		0x002e		(Java 1.2)
+->>4	belong		0x002f		(Java 1.3)
+->>4	belong		0x0030		(Java 1.4)
+->>4	belong		0x0031		(Java 1.5)
+->>4	belong		0x0032		(Java 1.6)
+->>4	belong		0x0033		(Java 1.7)
+->>4	belong		0x0034		(Java 1.8)
+-
+ 0	belong		0xcafed00d	JAR compressed with pack200,
+ >5	byte		x		version %d.
+ >4	byte		x		\b%d
+@@ -52,15 +36,28 @@
  
- # AT&T Bell Labs' Plan 9 shell
- 0	string/wt	#!\ /bin/rc	Plan 9 rc shell script text executable
--- 
-2.0.3
-
-From 71a8b6c0d758acb0f73e2e51421a711b5e9d6668 Mon Sep 17 00:00:00 2001
-From: Christos Zoulas <christos@zoulas.com>
-Date: Fri, 30 May 2014 16:48:44 +0000
-Subject: [PATCH] Limit regex search for BEGIN to the first 4K of the file.
-
----
- magic/Magdir/commands | 5 ++---
- 1 file changed, 2 insertions(+), 3 deletions(-)
-
-diff --git a/magic/Magdir/commands b/magic/Magdir/commands
-index 26b2869..bcd0f43 100644
---- a/magic/Magdir/commands
-+++ b/magic/Magdir/commands
-@@ -49,8 +49,7 @@
+ 0	belong		0xcafebabe
+ >4	belong		1		Mach-O universal binary with 1 architecture:
+-!:mime application/x-mach-binary
+ >>8	use		mach-o		\b
++0	belong		0xcafebabe
++>4	belong		>30		compiled Java class data,
++!:mime	application/x-java-applet
++>>6	beshort		x	        version %d.
++>>4	beshort		x       	\b%d
++# Which is which?
++#>>4	belong		0x032d		(Java 1.0)
++#>>4	belong		0x032d		(Java 1.1)
++>>4	belong		0x002e		(Java 1.2)
++>>4	belong		0x002f		(Java 1.3)
++>>4	belong		0x0030		(Java 1.4)
++>>4	belong		0x0031		(Java 1.5)
++>>4	belong		0x0032		(Java 1.6)
++>>4	belong		0x0033		(Java 1.7)
++>>4	belong		0x0034		(Java 1.8)
+ >4	belong		>1
+ >>4	belong		<20		Mach-O universal binary with %d architectures:
+-!:mime application/x-mach-binary
+ >>>8	use		mach-o		\b
+->>4	belong		2
++>>4	belong		>2
+ >>>28	use		mach-o		\b
+->>4	belong		3
++>>4	belong		>3
+ >>>48	use		mach-o		\b
+ >>4	belong		4
+ >>>68	use		mach-o		\b
+diff -u magic/Magdir.orig.0/commands magic/Magdir/commands
+--- magic/Magdir.orig.0/commands	2016-07-14 19:01:12.000000000 +0000
++++ magic/Magdir/commands	2016-11-24 15:59:25.557060441 +0000
+@@ -56,7 +56,7 @@
  !:mime	text/x-awk
  0	string/wt	#!\ /usr/bin/awk	awk script text executable
  !:mime	text/x-awk
--0       search/16384    BEGIN
-->0	regex		=^\\s{0,100}BEGIN\\s{0,100}[{]	awk script text
+-0	regex/4096	=^\\s{0,100}BEGIN\\s{0,100}[{]	awk or perl script text
 +0	regex/4096	=^\\s{0,100}BEGIN\\s{0,100}[{]	awk script text
  
  # AT&T Bell Labs' Plan 9 shell
  0	string/wt	#!\ /bin/rc	Plan 9 rc shell script text executable
--- 
-2.0.3
-
-From 71d04468a5777fe43064af02f06d74cb60feafab Mon Sep 17 00:00:00 2001
-From: =?UTF-8?q?Andreas=20K=C3=B6hler?= <andi5.py@gmx.net>
-Date: Sat, 14 Jun 2014 03:04:28 +0200
-Subject: [PATCH] Fix regex in msooxml to avoid matching other archives.
-
----
- magic/Magdir/msooxml | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/magic/Magdir/msooxml b/magic/Magdir/msooxml
-index c908b71..5ff3760 100644
---- a/magic/Magdir/msooxml
-+++ b/magic/Magdir/msooxml
-@@ -16,7 +16,7 @@
- 0		string		PK\003\004
- !:strength +10
- # make sure the first file is correct
-->0x1E		regex		\[Content_Types\]\.xml|_rels/\.rels
-+>0x1E		regex		\\[Content_Types\\]\\.xml|_rels/\\.rels
- # skip to the second local file header
- # since some documents include a 520-byte extra field following the file
- # header, we need to scan for the next header
--- 
-2.0.0
-
-From f2750e17d784dd6b21f7649965d2bd0605bfd471 Mon Sep 17 00:00:00 2001
-From: Christos Zoulas <christos@zoulas.com>
-Date: Tue, 25 Feb 2014 20:28:16 +0000
-Subject: [PATCH] comment out, too weak magic
-
----
- magic/Magdir/filesystems | 81 ++++++++++++++++++++++++------------------------
- 1 file changed, 41 insertions(+), 40 deletions(-)
-
-diff --git a/magic/Magdir/filesystems b/magic/Magdir/filesystems
-index 5624de0..a25e16a 100644
---- a/magic/Magdir/filesystems
-+++ b/magic/Magdir/filesystems
-@@ -1,5 +1,5 @@
- #------------------------------------------------------------------------------
--# $File: filesystems,v 1.84 2013/10/24 15:51:07 christos Exp $
-+# $File: filesystems,v 1.85 2013/11/19 23:54:05 christos Exp $
- # filesystems:  file(1) magic for different filesystems
+diff -u magic/Magdir.orig.0/filesystems magic/Magdir/filesystems
+--- magic/Magdir.orig.0/filesystems	2016-09-05 08:34:25.000000000 +0000
++++ magic/Magdir/filesystems	2016-11-24 15:59:25.553060242 +0000
+@@ -254,7 +254,7 @@
+ 30		search/481	\x55\xAA	
+ # to display DOS/MBR boot sector (40) before old one (strength=50+21),Syslinux bootloader (71),SYSLINUX MBR (37+36),NetBSD mbr (110),AdvanceMAME mbr (111)
+ # DOS BPB information (70) and after DOS floppy (120) like in previous file version
+-!:strength +65
++!:strength +0
+ # for sector sizes < 512 Bytes
+ >11		uleshort	<512		
+ >>(11.s-2)	uleshort	0xAA55		DOS/MBR boot sector
+@@ -266,7 +266,7 @@
+ 0x1FE          leshort         0xAA55         	DOS/MBR boot sector
  #
- 0	name	partid  
-@@ -1870,9 +1870,10 @@
+ # to display information (50) before DOS BPB (strength=70) and after DOS floppy (120) like in old file version
+-!:strength +65
++!:strength +0
+ >2		string		OSBS		OS/BS MBR
+ # added by Joerg Jenderek at Feb 2013 according to http://thestarman.pcministry.com/asm/mbr/
+ # and http://en.wikipedia.org/wiki/Master_Boot_Record
+diff -u magic/Magdir.orig.0/msdos magic/Magdir/msdos
+--- magic/Magdir.orig.0/msdos	2016-09-14 01:26:26.000000000 +0000
++++ magic/Magdir/msdos	2016-11-24 15:58:56.327609010 +0000
+@@ -404,7 +404,7 @@
+ # GRR: line below too general as it catches also 
+ # rt.lib DYADISKS.PIC and many more
+ # start with assembler instruction MOV
+-0	ubyte		0x8c		
++#0	ubyte		0x8c		
+ # skip "AppleWorks word processor data" like ARTICLE.1 ./apple
+ >4	string			!O====	
+ # skip some unknown basic binaries like RocketRnger.SHR
+@@ -428,17 +428,17 @@
+ # updated by Joerg Jenderek at Oct 2008
+ 0	ulelong		0xffff10eb	DR-DOS executable (COM)
+ # byte 0xeb conflicts with "sequent" magic leshort 0xn2eb
+-0	ubeshort&0xeb8d	>0xeb00		
++#0	ubeshort&0xeb8d	>0xeb00		
+ # DR-DOS STACKER.COM SCREATE.SYS missed
  
- # all FAT12 (strength=70) floppies with sectorsize 512 added by Joerg Jenderek at Jun 2013
- # http://en.wikipedia.org/wiki/File_Allocation_Table#Exceptions
--512		ubelong&0xE0ffff00	0xE0ffff00		
-+# Too Weak.
-+#512		ubelong&0xE0ffff00	0xE0ffff00		
- # without valid Media descriptor in place of BPB, cases with are done at other places
-->21		ubyte			<0xE5			floppy with old FAT filesystem
-+#>21		ubyte			<0xE5			floppy with old FAT filesystem
- # but valid Media descriptor at begin of FAT
- #>>512		ubyte			=0xed			720k
- #>>512		ubyte			=0xf0			1440k
-@@ -1880,64 +1881,64 @@
- #>>512		ubyte			=0xf9			1220k
- #>>512		ubyte			=0xfa			320k
- #>>512		ubyte			=0xfb			640k
-->>512		ubyte			=0xfc			180k
-+#>>512		ubyte			=0xfc			180k
- # look like an an old DOS directory entry
-->>>0xA0E	ubequad			0			
-->>>>0xA00	ubequad			!0			
--!:mime application/x-ima
-->>512		ubyte			=0xfd			
-+#>>>0xA0E	ubequad			0			
-+#>>>>0xA00	ubequad			!0			
-+#!:mime application/x-ima
-+#>>512		ubyte			=0xfd			
- # look for 2nd FAT at different location to distinguish between 360k and 500k
-->>>0x600	ubelong&0xE0ffff00	0xE0ffff00		360k
-+#>>>0x600	ubelong&0xE0ffff00	0xE0ffff00		360k
- #>>>0x500	ubelong&0xE0ffff00	0xE0ffff00		500k
-->>>0xA0E	ubequad			0			
--!:mime application/x-ima
-->>512		ubyte			=0xfe			
-->>>0x400	ubelong&0xE0ffff00	0xE0ffff00		160k
-->>>>0x60E	ubequad			0			
-->>>>>0x600	ubequad			!0			
--!:mime application/x-ima
-+#>>>0xA0E	ubequad			0			
-+#!:mime application/x-ima
-+#>>512		ubyte			=0xfe			
-+#>>>0x400	ubelong&0xE0ffff00	0xE0ffff00		160k
-+#>>>>0x60E	ubequad			0			
-+#>>>>>0x600	ubequad			!0			
-+#!:mime application/x-ima
- #>>>0xC00	ubelong&0xE0ffff00	0xE0ffff00		1200k
-->>512		ubyte			=0xff			320k
-->>>0x60E	ubequad			0			
-->>>>0x600	ubequad			!0			
--!:mime application/x-ima
-->>512		ubyte			x			\b, Media descriptor 0x%x
-+#>>512		ubyte			=0xff			320k
-+#>>>0x60E	ubequad			0			
-+#>>>>0x600	ubequad			!0			
-+#!:mime application/x-ima
-+#>>512		ubyte			x			\b, Media descriptor 0x%x
- # without x86 jump instruction
-->>0		ulelong&0x804000E9	!0x000000E9		
-+#>>0		ulelong&0x804000E9	!0x000000E9		
- # assembler instructions: CLI;MOV SP,1E7;MOV AX;07c0;MOV 	
-->>>0	ubequad				0xfabce701b8c0078e	\b, MS-DOS 1.12 bootloader
-+#>>>0	ubequad				0xfabce701b8c0078e	\b, MS-DOS 1.12 bootloader
- # IOSYS.COM+MSDOS.COM
-->>>>0xc4	use			2xDOS-filename
-->>0		ulelong&0x804000E9	=0x000000E9	
-+#>>>>0xc4	use			2xDOS-filename
-+#>>0		ulelong&0x804000E9	=0x000000E9	
- # only x86 short jump instruction found
-->>>0		ubyte			=0xEB
-->>>>1		ubyte			x			\b, code offset 0x%x+2
-+#>>>0		ubyte			=0xEB
-+#>>>>1		ubyte			x			\b, code offset 0x%x+2
- # http://thestarman.pcministry.com/DOS/ibm100/Boot.htm
- # assembler instructions: CLI;MOV AX,CS;MOV DS,AX;MOV DX,0		
-->>>>(1.b+2)	ubequad			0xfa8cc88ed8ba0000	\b, PC-DOS 1.0 bootloader 
-+#>>>>(1.b+2)	ubequad			0xfa8cc88ed8ba0000	\b, PC-DOS 1.0 bootloader 
- # ibmbio.com+ibmdos.com
-->>>>>0x176	use			DOS-filename
-->>>>>0x181	ubyte			x			\b+
-->>>>>0x182	use			DOS-filename
-+#>>>>>0x176	use			DOS-filename
-+#>>>>>0x181	ubyte			x			\b+
-+#>>>>>0x182	use			DOS-filename
- # http://thestarman.pcministry.com/DOS/ibm110/Boot.htm
- # assembler instructions: CLI;MOV AX,CS;MOV DS,AX;XOR DX,DX;MOV		
-->>>>(1.b+2)	ubequad			0xfa8cc88ed833d28e	\b, PC-DOS 1.1 bootloader 
-+#>>>>(1.b+2)	ubequad			0xfa8cc88ed833d28e	\b, PC-DOS 1.1 bootloader 
- # ibmbio.com+ibmdos.com
-->>>>>0x18b	use			DOS-filename
-->>>>>0x196	ubyte			x			\b+
-->>>>>0x197	use			DOS-filename
-+#>>>>>0x18b	use			DOS-filename
-+#>>>>>0x196	ubyte			x			\b+
-+#>>>>>0x197	use			DOS-filename
- # http://en.wikipedia.org/wiki/Zenith_Data_Systems
- # assembler instructions: MOV BX,07c0;MOV SS,BX;MOV SP,01c6		
-->>>>(1.b+2)	ubequad			0xbbc0078ed3bcc601	\b, Zenith Data Systems MS-DOS 1.25 bootloader
-+#>>>>(1.b+2)	ubequad			0xbbc0078ed3bcc601	\b, Zenith Data Systems MS-DOS 1.25 bootloader
- # IO.SYS+MSDOS.SYS
-->>>>>0x20	use			2xDOS-filename
-+#>>>>>0x20	use			2xDOS-filename
- # http://en.wikipedia.org/wiki/Corona_Data_Systems
- # assembler instructions: MOV AX,CS;MOV DS,AX;CLI;MOV SS,AX;		
-->>>>(1.b+2)	ubequad			0x8cc88ed8fa8ed0bc	\b, MS-DOS 1.25 bootloader
-+#>>>>(1.b+2)	ubequad			0x8cc88ed8fa8ed0bc	\b, MS-DOS 1.25 bootloader
- # IO.SYS+MSDOS.SYS
-->>>>>0x69	use			2xDOS-filename
-+#>>>>>0x69	use			2xDOS-filename
- # assembler instructions: CLI;PUSH CS;POP SS;MOV SP,7c00;		
-->>>>(1.b+2)	ubequad			0xfa0e17bc007cb860	\b, MS-DOS 2.11 bootloader
-+#>>>>(1.b+2)	ubequad			0xfa0e17bc007cb860	\b, MS-DOS 2.11 bootloader
- # defect IO.SYS+MSDOS.SYS ?
- #>>>>>0x162	use			2xDOS-filename
+ 0       name    msdos-com
+ >0  byte        x               DOS executable (COM)
+ >6	string		SFX\ of\ LHarc	\b, %s
+->0x1FE leshort	0xAA55		    \b, boot code
+->85	string		UPX		        \b, UPX compressed
+->4	string		\ $ARX		    \b, ARX self-extracting archive
+->4	string		\ $LHarc	    \b, LHarc self-extracting archive
+->0x20e string	SFX\ by\ LARC	\b, LARC self-extracting archive
++#>0x1FE leshort	0xAA55		    \b, boot code
++#>85	string		UPX		        \b, UPX compressed
++#>4	string		\ $ARX		    \b, ARX self-extracting archive
++#>4	string		\ $LHarc	    \b, LHarc self-extracting archive
++#>0x20e string	SFX\ by\ LARC	\b, LARC self-extracting archive
  
+ # JMP 8bit
+ 0	        byte	0xeb
+@@ -508,27 +508,27 @@
+ # GRR search is not working
+ #2	search/28	\xcd\x21	COM executable for MS-DOS
+ #WHICHFAT.cOM
+-2	string	\xcd\x21		COM executable for DOS
++#2	string	\xcd\x21		COM executable for DOS
+ #DELTREE.cOM DELTREE2.cOM
+-4	string	\xcd\x21		COM executable for DOS
++#4	string	\xcd\x21		COM executable for DOS
+ #IFMEMDSK.cOM ASSIGN.cOM COMP.cOM
+-5	string	\xcd\x21		COM executable for DOS
++#5	string	\xcd\x21		COM executable for DOS
+ #DELTMP.COm HASFAT32.cOM
+-7	string	\xcd\x21		
+->0	byte	!0xb8			COM executable for DOS
++#7	string	\xcd\x21		
++#>0	byte	!0xb8			COM executable for DOS
+ #COMP.cOM MORE.COm
+-10	string	\xcd\x21		
+->5	string	!\xcd\x21		COM executable for DOS
++#10	string	\xcd\x21		
++#>5	string	!\xcd\x21		COM executable for DOS
+ #comecho.com
+-13	string	\xcd\x21		COM executable for DOS
++#13	string	\xcd\x21		COM executable for DOS
+ #HELP.COm EDIT.coM
+-18	string	\xcd\x21		COM executable for MS-DOS
++#18	string	\xcd\x21		COM executable for MS-DOS
+ #NWRPLTRM.COm
+-23	string	\xcd\x21		COM executable for MS-DOS
++#23	string	\xcd\x21		COM executable for MS-DOS
+ #LOADFIX.cOm LOADFIX.cOm
+-30	string	\xcd\x21		COM executable for MS-DOS
++#30	string	\xcd\x21		COM executable for MS-DOS
+ #syslinux.com 3.11
+-70	string	\xcd\x21		COM executable for DOS
++#70	string	\xcd\x21		COM executable for DOS
+ # many compressed/converted COMs start with a copy loop instead of a jump
+ 0x6	search/0xa	\xfc\x57\xf3\xa5\xc3	COM executable for MS-DOS
+ 0x6	search/0xa	\xfc\x57\xf3\xa4\xc3	COM executable for DOS
+diff -u magic/Magdir.orig.0/perl magic/Magdir/perl
+--- magic/Magdir.orig.0/perl	2016-06-12 16:50:16.000000000 +0000
++++ magic/Magdir/perl	2016-11-24 15:59:25.553060242 +0000
+@@ -7,40 +7,54 @@
+ # Send additions to <perl5-porters@perl.org>
+ 0	search/1024	eval\ "exec\ perl		Perl script text
+ !:mime	text/x-perl
++!:strength + 30
+ 0	search/1024	eval\ "exec\ /bin/perl		Perl script text
+ !:mime	text/x-perl
++!:strength + 30
+ 0	search/1024	eval\ "exec\ /usr/bin/perl	Perl script text
+ !:mime	text/x-perl
++!:strength + 30
+ 0	search/1024	eval\ "exec\ /usr/local/bin/perl	Perl script text
+ !:mime	text/x-perl
++!:strength + 30
+ 0	search/1024	eval\ 'exec\ perl		Perl script text
+ !:mime	text/x-perl
++!:strength + 30
+ 0	search/1024	eval\ 'exec\ /bin/perl		Perl script text
+ !:mime	text/x-perl
++!:strength + 30
+ 0	search/1024	eval\ 'exec\ /usr/bin/perl	Perl script text
+ !:mime	text/x-perl
++!:strength + 30
+ 0	search/1024	eval\ 'exec\ /usr/local/bin/perl	Perl script text
+ !:mime	text/x-perl
++!:strength + 30
+ 0	search/1024	eval\ '(exit\ $?0)'\ &&\ eval\ 'exec	Perl script text
+ !:mime	text/x-perl
++!:strength + 1
+ 0	string	#!/usr/bin/env\ perl	Perl script text executable
+ !:mime	text/x-perl
++!:strength + 30
+ 0	string	#!\ /usr/bin/env\ perl	Perl script text executable
+ !:mime	text/x-perl
++!:strength + 30
+ 0	string	#!
+ >0	regex	\^#!.*/bin/perl([[:space:]].*)*$	Perl script text executable
+ !:mime	text/x-perl
++!:strength + 30
+ 
+ # by Dmitry V. Levin and Alexey Tourbin
+ # check the first line
+ 0	search/1024	package
+ >0	regex		\^package[\ \t]+[0-9A-Za-z_:]+\ *;	Perl5 module source text
++!:mime  text/x-perl
+ !:strength + 10
+ # not 'p', check other lines
+ 0	search/1024	!p
+ >0	regex		\^package[\ \t]+[0-9A-Za-z_:]+\ *;
+ >>0	regex		\^1\ *;|\^(use|sub|my)\ .*[(;{=]	Perl5 module source text
+-!:strength + 10
++!:mime  text/x-perl
++!:strength + 40
+ 
+ # Perl POD documents
+ # From: Tom Hukins <tom@eborcom.com>
+diff -u magic/Magdir.orig.0/python magic/Magdir/python
+--- magic/Magdir.orig.0/python	2016-09-16 12:06:13.000000000 +0000
++++ magic/Magdir/python	2016-11-24 15:59:25.549060044 +0000
+@@ -43,20 +43,24 @@
+ # from module.submodule import func1, func2
+ 0	regex	\^from\\s+(\\w|\\.)+\\s+import.*$	Python script text executable
+ !:mime text/x-python
++!:strength + 15
+ 
+ # def __init__ (self, ...):
+ 0	search/4096	def\ __init__
+ >&0	search/64 self	Python script text executable
+ !:mime text/x-python
++!:strength + 15
+ 
+ # comments
+-#0	search/4096	'''
+-#>&0	regex	.*'''$	Python script text executable
+-#!:mime text/x-python
++0	search/4096	'''
++>&0	regex	.*'''$	Python script text executable
++!:mime text/x-python
++!:strength + 15
+ 
+-#0	search/4096	"""
+-#>&0	regex	.*"""$	Python script text executable
+-#!:mime text/x-python
++0	search/4096	"""
++>&0	regex	.*"""$	Python script text executable
++!:mime text/x-python
++!:strength + 15
+ 
+ # try:
+ # except: or finally:
+@@ -66,8 +70,10 @@
+ !:mime text/x-python
+ >&0	search/4096	finally:	Python script text executable
+ !:mime text/x-python
++!:strength + 15
+ 
+ # def name(args, args):
+-0	regex	 \^(\ |\\t){0,50}def\ {1,50}[a-zA-Z]{1,100}
+->&0	regex	\ {0,50}\\(([a-zA-Z]|,|\ ){1,255}\\):$ Python script text executable
++0	regex	 \^(\ |\\t)*def\ +[a-zA-Z]+
++>&0	regex	\ *\\(([a-zA-Z]|,|\ )*\\):$ Python script text executable
+ !:mime text/x-python
++!:strength + 15
+diff -u magic/Magdir.orig.0/rpm magic/Magdir/rpm
+--- magic/Magdir.orig.0/rpm	2014-09-11 15:03:07.000000000 +0000
++++ magic/Magdir/rpm	2016-11-24 15:58:28.458225125 +0000
+@@ -29,6 +29,7 @@
+ >>8	beshort		17		SuperH
+ >>8	beshort		18		Xtensa
+ >>8	beshort		255		noarch
++>>10	string		x		%s
+ 
+ #delta RPM    Daniel Novotny (dnovotny@redhat.com)
+ 0	string		drpm		Delta RPM
+diff -u magic/Magdir.orig.0/securitycerts magic/Magdir/securitycerts
+--- magic/Magdir.orig.0/securitycerts	2014-09-11 15:03:07.000000000 +0000
++++ magic/Magdir/securitycerts	2016-11-24 15:59:25.549060044 +0000
+@@ -4,3 +4,5 @@
+ 0	search/1		-----BEGIN\ CERTIFICATE------	RFC1421 Security Certificate text
+ 0	search/1		-----BEGIN\ NEW\ CERTIFICATE	RFC1421 Security Certificate Signing Request text
+ 0	belong	0xedfeedfe	Sun 'jks' Java Keystore File data
++
++0	string \0volume_key	volume_key escrow packet
+diff -u magic/Magdir.orig.0/varied.script magic/Magdir/varied.script
+--- magic/Magdir.orig.0/varied.script	2015-03-27 17:59:39.000000000 +0000
++++ magic/Magdir/varied.script	2016-11-24 15:59:25.557060441 +0000
+@@ -4,27 +4,35 @@
+ 
+ 0	string/t		#!\ /			a
+ >3	string		>\0			%s script text executable
++!:strength / 10
+ 
+ 0	string/b		#!\ /			a
+ >3	string		>\0			%s script executable (binary data)
++!:strength / 10
+ 
+ 0	string/t		#!\t/			a
+ >3	string		>\0			%s script text executable
++!:strength / 10
+ 
+ 0	string/b		#!\t/			a
+ >3	string		>\0			%s script executable (binary data)
++!:strength / 10
+ 
+ 0	string/t		#!/			a
+ >2	string		>\0			%s script text executable
++!:strength / 10
+ 
+ 0	string/b		#!/			a
+ >2	string		>\0			%s script executable (binary data)
++!:strength / 10
+ 
+ 0	string/t		#!\ 			script text executable
+ >3	string		>\0			for %s
++!:strength / 10
+ 
+ 0	string/b		#!\ 			script executable
+ >3	string		>\0			for %s (binary data)
++!:strength / 10
+ 
+ # using env
+ 0	string/t	#!/usr/bin/env		a

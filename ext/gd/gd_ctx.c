@@ -58,6 +58,16 @@ static int _php_image_stream_putbuf(struct gdIOCtx *ctx, const void* buf, int l)
 
 static void _php_image_stream_ctxfree(struct gdIOCtx *ctx) /* {{{ */
 {
+	if(ctx->data) {
+		ctx->data = NULL;
+	}
+	if(ctx) {
+		efree(ctx);
+	}
+} /* }}} */
+
+static void _php_image_stream_ctxfreeandclose(struct gdIOCtx *ctx) /* {{{ */
+{
 
 	if(ctx->data) {
 		php_stream_close((php_stream *) ctx->data);
@@ -82,6 +92,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 	gdIOCtx *ctx = NULL;
 	zval *to_zval = NULL;
 	php_stream *stream;
+	int close_stream = 1;
 
 	/* The third (quality) parameter for Wbmp stands for the threshold when called from image2wbmp().
 	 * The third (quality) parameter for Wbmp and Xbm stands for the foreground color index when called
@@ -120,6 +131,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 			if (stream == NULL) {
 				RETURN_FALSE;
 			}
+			close_stream = 0;
 		} else if (Z_TYPE_P(to_zval) == IS_STRING) {
 			if (CHECK_ZVAL_NULL_PATH(to_zval)) {
 				php_error_docref(NULL, E_WARNING, "Invalid 2nd parameter, filename must not contain null bytes");
@@ -156,7 +168,11 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 		ctx = emalloc(sizeof(gdIOCtx));
 		ctx->putC = _php_image_stream_putc;
 		ctx->putBuf = _php_image_stream_putbuf;
-		ctx->gd_free = _php_image_stream_ctxfree;
+		if (close_stream) {
+			ctx->gd_free = _php_image_stream_ctxfreeandclose;
+		} else {
+			ctx->gd_free = _php_image_stream_ctxfree;
+		}
 		ctx->data = (void *)stream;
 	}
 

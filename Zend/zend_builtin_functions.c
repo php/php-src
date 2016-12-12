@@ -836,7 +836,7 @@ static int validate_constant_array(HashTable *ht) /* {{{ */
 		ZVAL_DEREF(val);
 		if (Z_REFCOUNTED_P(val)) {
 			if (Z_TYPE_P(val) == IS_ARRAY) {
-				if (!Z_IMMUTABLE_P(val)) {
+				if (Z_REFCOUNTED_P(val)) {
 					if (Z_ARRVAL_P(val)->u.v.nApplyCount > 0) {
 						zend_error(E_WARNING, "Constants cannot be recursive arrays");
 						ret = 0;
@@ -874,7 +874,7 @@ static void copy_constant_array(zval *dst, zval *src) /* {{{ */
 			new_val = zend_hash_index_add_new(Z_ARRVAL_P(dst), idx, val);
 		}
 		if (Z_TYPE_P(val) == IS_ARRAY) {
-			if (!Z_IMMUTABLE_P(val)) {
+			if (Z_REFCOUNTED_P(val)) {
 				copy_constant_array(new_val, val);
 			}
 		} else if (Z_REFCOUNTED_P(val)) {
@@ -932,7 +932,7 @@ repeat:
 			val = &val_free;
 			break;
 		case IS_ARRAY:
-			if (!Z_IMMUTABLE_P(val)) {
+			if (Z_REFCOUNTED_P(val)) {
 				if (!validate_constant_array(Z_ARRVAL_P(val))) {
 					RETURN_FALSE;
 				} else {

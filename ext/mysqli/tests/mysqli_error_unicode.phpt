@@ -42,7 +42,7 @@ require_once('skipifconnectfailure.inc');
 	print "done!";
 ?>
 --EXPECTF--
-%unicode|string%(%d) "Table 'няма_такава_таблица' doesn't exist"
+string(%d) "Table 'няма_такава_таблица' doesn't exist"
 
 Warning: mysqli_error(): Couldn't fetch mysqli in %s on line %d
 NULL

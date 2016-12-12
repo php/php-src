@@ -367,9 +367,9 @@ char *alloca();
 #endif
 
 #if ZEND_DEBUG
-# define ZEND_FILE_LINE_D				const char *__zend_filename, const uint __zend_lineno
+# define ZEND_FILE_LINE_D				const char *__zend_filename, const uint32_t __zend_lineno
 # define ZEND_FILE_LINE_DC				, ZEND_FILE_LINE_D
-# define ZEND_FILE_LINE_ORIG_D			const char *__zend_orig_filename, const uint __zend_orig_lineno
+# define ZEND_FILE_LINE_ORIG_D			const char *__zend_orig_filename, const uint32_t __zend_orig_lineno
 # define ZEND_FILE_LINE_ORIG_DC			, ZEND_FILE_LINE_ORIG_D
 # define ZEND_FILE_LINE_RELAY_C			__zend_filename, __zend_lineno
 # define ZEND_FILE_LINE_RELAY_CC		, ZEND_FILE_LINE_RELAY_C
@@ -472,7 +472,7 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 #define ZEND_TRUTH(x)		((x) ? 1 : 0)
 #define ZEND_LOG_XOR(a, b)		(ZEND_TRUTH(a) ^ ZEND_TRUTH(b))
 
-#define ZEND_MAX_RESERVED_RESOURCES	4
+#define ZEND_MAX_RESERVED_RESOURCES	6
 
 /* excpt.h on Digital Unix 4.0 defines function_table */
 #undef function_table

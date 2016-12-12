@@ -500,11 +500,266 @@ static void zend_ssa_range_and(zend_long a, zend_long b, zend_long c, zend_long 
 	}
 }
 
+/* Get the normal op corresponding to a compound assignment op */
+static inline zend_uchar get_compound_assign_op(zend_uchar opcode) {
+	switch (opcode) {
+		case ZEND_ASSIGN_ADD: return ZEND_ADD;
+		case ZEND_ASSIGN_SUB: return ZEND_SUB;
+		case ZEND_ASSIGN_MUL: return ZEND_MUL;
+		case ZEND_ASSIGN_DIV: return ZEND_DIV;
+		case ZEND_ASSIGN_MOD: return ZEND_MOD;
+		case ZEND_ASSIGN_SL: return ZEND_SL;
+		case ZEND_ASSIGN_SR: return ZEND_SR;
+		case ZEND_ASSIGN_CONCAT: return ZEND_CONCAT;
+		case ZEND_ASSIGN_BW_OR: return ZEND_BW_OR;
+		case ZEND_ASSIGN_BW_AND: return ZEND_BW_AND;
+		case ZEND_ASSIGN_BW_XOR: return ZEND_BW_XOR;
+		case ZEND_ASSIGN_POW: return ZEND_POW;
+		EMPTY_SWITCH_DEFAULT_CASE()
+	}
+}
+
+static int zend_inference_calc_binary_op_range(
+		const zend_op_array *op_array, zend_ssa *ssa,
+		zend_op *opline, zend_ssa_op *ssa_op, zend_uchar opcode, zend_ssa_range *tmp) {
+	zend_long op1_min, op2_min, op1_max, op2_max, t1, t2, t3, t4;
+
+	switch (opcode) {
+		case ZEND_ADD:
+			if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
+				op1_min = OP1_MIN_RANGE();
+				op2_min = OP2_MIN_RANGE();
+				op1_max = OP1_MAX_RANGE();
+				op2_max = OP2_MAX_RANGE();
+				tmp->min = op1_min + op2_min;
+				tmp->max = op1_max + op2_max;
+				if (OP1_RANGE_UNDERFLOW() ||
+					OP2_RANGE_UNDERFLOW() ||
+					(op1_min < 0 && op2_min < 0 && tmp->min >= 0)) {
+					tmp->underflow = 1;
+					tmp->min = ZEND_LONG_MIN;
+				}
+				if (OP1_RANGE_OVERFLOW() ||
+					OP2_RANGE_OVERFLOW() ||
+					(op1_max > 0 && op2_max > 0 && tmp->max <= 0)) {
+					tmp->overflow = 1;
+					tmp->max = ZEND_LONG_MAX;
+				}
+				return 1;
+			}
+			break;
+		case ZEND_SUB:
+			if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
+				op1_min = OP1_MIN_RANGE();
+				op2_min = OP2_MIN_RANGE();
+				op1_max = OP1_MAX_RANGE();
+				op2_max = OP2_MAX_RANGE();
+				tmp->min = op1_min - op2_max;
+				tmp->max = op1_max - op2_min;
+				if (OP1_RANGE_UNDERFLOW() ||
+					OP2_RANGE_OVERFLOW() ||
+					(op1_min < 0 && op2_max > 0 && tmp->min >= 0)) {
+					tmp->underflow = 1;
+					tmp->min = ZEND_LONG_MIN;
+				}
+				if (OP1_RANGE_OVERFLOW() ||
+					OP2_RANGE_UNDERFLOW() ||
+					(op1_max > 0 && op2_min < 0 && tmp->max <= 0)) {
+					tmp->overflow = 1;
+					tmp->max = ZEND_LONG_MAX;
+				}
+				return 1;
+			}
+			break;
+		case ZEND_MUL:
+			if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
+				op1_min = OP1_MIN_RANGE();
+				op2_min = OP2_MIN_RANGE();
+				op1_max = OP1_MAX_RANGE();
+				op2_max = OP2_MAX_RANGE();
+				t1 = op1_min * op2_min;
+				t2 = op1_min * op2_max;
+				t3 = op1_max * op2_min;
+				t4 = op1_max * op2_max;
+				// FIXME: more careful overflow checks?
+				if (OP1_RANGE_UNDERFLOW() ||
+					OP2_RANGE_UNDERFLOW() ||
+					OP1_RANGE_OVERFLOW()  ||
+					OP2_RANGE_OVERFLOW()  ||
+					(double)t1 != (double)op1_min * (double)op2_min ||
+					(double)t2 != (double)op1_min * (double)op2_max ||
+					(double)t3 != (double)op1_max * (double)op2_min ||
+					(double)t4 != (double)op1_max * (double)op2_max) {
+					tmp->underflow = 1;
+					tmp->overflow = 1;
+					tmp->min = ZEND_LONG_MIN;
+					tmp->max = ZEND_LONG_MAX;
+				} else {
+					tmp->min = MIN(MIN(t1, t2), MIN(t3, t4));
+					tmp->max = MAX(MAX(t1, t2), MAX(t3, t4));
+				}
+				return 1;
+			}
+			break;
+		case ZEND_DIV:
+			if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
+				op1_min = OP1_MIN_RANGE();
+				op2_min = OP2_MIN_RANGE();
+				op1_max = OP1_MAX_RANGE();
+				op2_max = OP2_MAX_RANGE();
+				if (op2_min <= 0 && op2_max >= 0) {
+					break;
+				}
+				if (op1_min == ZEND_LONG_MIN && op2_max == -1) {
+					/* Avoid ill-defined division, which may trigger SIGFPE. */
+					break;
+				}
+				t1 = op1_min / op2_min;
+				t2 = op1_min / op2_max;
+				t3 = op1_max / op2_min;
+				t4 = op1_max / op2_max;
+				// FIXME: more careful overflow checks?
+				if (OP1_RANGE_UNDERFLOW() ||
+					OP2_RANGE_UNDERFLOW() ||
+					OP1_RANGE_OVERFLOW()  ||
+					OP2_RANGE_OVERFLOW()  ||
+					t1 != (zend_long)((double)op1_min / (double)op2_min) ||
+					t2 != (zend_long)((double)op1_min / (double)op2_max) ||
+					t3 != (zend_long)((double)op1_max / (double)op2_min) ||
+					t4 != (zend_long)((double)op1_max / (double)op2_max)) {
+					tmp->underflow = 1;
+					tmp->overflow = 1;
+					tmp->min = ZEND_LONG_MIN;
+					tmp->max = ZEND_LONG_MAX;
+				} else {
+					tmp->min = MIN(MIN(t1, t2), MIN(t3, t4));
+					tmp->max = MAX(MAX(t1, t2), MAX(t3, t4));
+				}
+				return 1;
+			}
+			break;
+		case ZEND_MOD:
+			if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
+				if (OP1_RANGE_UNDERFLOW() ||
+					OP2_RANGE_UNDERFLOW() ||
+					OP1_RANGE_OVERFLOW()  ||
+					OP2_RANGE_OVERFLOW()) {
+					tmp->min = ZEND_LONG_MIN;
+					tmp->max = ZEND_LONG_MAX;
+				} else {
+					op1_min = OP1_MIN_RANGE();
+					op2_min = OP2_MIN_RANGE();
+					op1_max = OP1_MAX_RANGE();
+					op2_max = OP2_MAX_RANGE();
+					if (op2_min == 0 || op2_max == 0) {
+						/* avoid division by zero */
+						break;
+					}
+					t1 = (op2_min == -1) ? 0 : (op1_min % op2_min);
+					t2 = (op2_max == -1) ? 0 : (op1_min % op2_max);
+					t3 = (op2_min == -1) ? 0 : (op1_max % op2_min);
+					t4 = (op2_max == -1) ? 0 : (op1_max % op2_max);
+					tmp->min = MIN(MIN(t1, t2), MIN(t3, t4));
+					tmp->max = MAX(MAX(t1, t2), MAX(t3, t4));
+				}
+				return 1;
+			}
+			break;
+		case ZEND_SL:
+			if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
+				if (OP1_RANGE_UNDERFLOW() ||
+					OP2_RANGE_UNDERFLOW() ||
+					OP1_RANGE_OVERFLOW() ||
+					OP2_RANGE_OVERFLOW()) {
+					tmp->min = ZEND_LONG_MIN;
+					tmp->max = ZEND_LONG_MAX;
+				} else {
+					op1_min = OP1_MIN_RANGE();
+					op2_min = OP2_MIN_RANGE();
+					op1_max = OP1_MAX_RANGE();
+					op2_max = OP2_MAX_RANGE();
+					t1 = op1_min << op2_min;
+					t2 = op1_min << op2_max;
+					t3 = op1_max << op2_min;
+					t4 = op1_max << op2_max;
+					tmp->min = MIN(MIN(t1, t2), MIN(t3, t4));
+					tmp->max = MAX(MAX(t1, t2), MAX(t3, t4));
+				}
+				return 1;
+			}
+			break;
+		case ZEND_SR:
+			if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
+				if (OP1_RANGE_UNDERFLOW() ||
+					OP2_RANGE_UNDERFLOW() ||
+					OP1_RANGE_OVERFLOW() ||
+					OP2_RANGE_OVERFLOW()) {
+					tmp->min = ZEND_LONG_MIN;
+					tmp->max = ZEND_LONG_MAX;
+				} else {
+					op1_min = OP1_MIN_RANGE();
+					op2_min = OP2_MIN_RANGE();
+					op1_max = OP1_MAX_RANGE();
+					op2_max = OP2_MAX_RANGE();
+					t1 = op1_min >> op2_min;
+					t2 = op1_min >> op2_max;
+					t3 = op1_max >> op2_min;
+					t4 = op1_max >> op2_max;
+					tmp->min = MIN(MIN(t1, t2), MIN(t3, t4));
+					tmp->max = MAX(MAX(t1, t2), MAX(t3, t4));
+				}
+				return 1;
+			}
+			break;
+		case ZEND_BW_OR:
+			if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
+				if (OP1_RANGE_UNDERFLOW() ||
+					OP2_RANGE_UNDERFLOW() ||
+					OP1_RANGE_OVERFLOW() ||
+					OP2_RANGE_OVERFLOW()) {
+					tmp->min = ZEND_LONG_MIN;
+					tmp->max = ZEND_LONG_MAX;
+				} else {
+					op1_min = OP1_MIN_RANGE();
+					op2_min = OP2_MIN_RANGE();
+					op1_max = OP1_MAX_RANGE();
+					op2_max = OP2_MAX_RANGE();
+					zend_ssa_range_or(op1_min, op1_max, op2_min, op2_max, tmp);
+				}
+				return 1;
+			}
+			break;
+		case ZEND_BW_AND:
+			if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
+				if (OP1_RANGE_UNDERFLOW() ||
+					OP2_RANGE_UNDERFLOW() ||
+					OP1_RANGE_OVERFLOW() ||
+					OP2_RANGE_OVERFLOW()) {
+					tmp->min = ZEND_LONG_MIN;
+					tmp->max = ZEND_LONG_MAX;
+				} else {
+					op1_min = OP1_MIN_RANGE();
+					op2_min = OP2_MIN_RANGE();
+					op1_max = OP1_MAX_RANGE();
+					op2_max = OP2_MAX_RANGE();
+					zend_ssa_range_and(op1_min, op1_max, op2_min, op2_max, tmp);
+				}
+				return 1;
+			}
+			break;
+		case ZEND_BW_XOR:
+			// TODO
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE()
+	}
+	return 0;
+}
+
 int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int var, int widening, int narrowing, zend_ssa_range *tmp)
 {
 	uint32_t line;
 	zend_op *opline;
-	zend_long op1_min, op2_min, op1_max, op2_max, t1, t2, t3, t4;
+	zend_long op1_min, op2_min, op1_max, op2_max;
 
 	if (ssa->vars[var].definition_phi) {
 		zend_ssa_phi *p = ssa->vars[var].definition_phi;
@@ -633,241 +888,21 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 	tmp->overflow = 0;
 	switch (opline->opcode) {
 		case ZEND_ADD:
-			if (ssa->ops[line].result_def == var) {
-				if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
-					op1_min = OP1_MIN_RANGE();
-					op2_min = OP2_MIN_RANGE();
-					op1_max = OP1_MAX_RANGE();
-					op2_max = OP2_MAX_RANGE();
-					tmp->min = op1_min + op2_min;
-					tmp->max = op1_max + op2_max;
-					if (OP1_RANGE_UNDERFLOW() ||
-					    OP2_RANGE_UNDERFLOW() ||
-					    (op1_min < 0 && op2_min < 0 && tmp->min >= 0)) {
-						tmp->underflow = 1;
-						tmp->min = ZEND_LONG_MIN;
-					}
-					if (OP1_RANGE_OVERFLOW() ||
-					    OP2_RANGE_OVERFLOW() ||
-						(op1_max > 0 && op2_max > 0 && tmp->max <= 0)) {
-						tmp->overflow = 1;
-						tmp->max = ZEND_LONG_MAX;
-					}
-					return 1;
-				}
-			}
-			break;
 		case ZEND_SUB:
-			if (ssa->ops[line].result_def == var) {
-				if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
-					op1_min = OP1_MIN_RANGE();
-					op2_min = OP2_MIN_RANGE();
-					op1_max = OP1_MAX_RANGE();
-					op2_max = OP2_MAX_RANGE();
-					tmp->min = op1_min - op2_max;
-					tmp->max = op1_max - op2_min;
-					if (OP1_RANGE_UNDERFLOW() ||
-					    OP2_RANGE_OVERFLOW() ||
-					    (op1_min < 0 && op2_max > 0 && tmp->min >= 0)) {
-						tmp->underflow = 1;
-						tmp->min = ZEND_LONG_MIN;
-					}
-					if (OP1_RANGE_OVERFLOW() ||
-					    OP2_RANGE_UNDERFLOW() ||
-						(op1_max > 0 && op2_min < 0 && tmp->max <= 0)) {
-						tmp->overflow = 1;
-						tmp->max = ZEND_LONG_MAX;
-					}
-					return 1;
-				}
-			}
-			break;
 		case ZEND_MUL:
-			if (ssa->ops[line].result_def == var) {
-				if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
-					op1_min = OP1_MIN_RANGE();
-					op2_min = OP2_MIN_RANGE();
-					op1_max = OP1_MAX_RANGE();
-					op2_max = OP2_MAX_RANGE();
-					t1 = op1_min * op2_min;
-					t2 = op1_min * op2_max;
-					t3 = op1_max * op2_min;
-					t4 = op1_max * op2_max;
-					// FIXME: more careful overflow checks?
-					if (OP1_RANGE_UNDERFLOW() ||
-					    OP2_RANGE_UNDERFLOW() ||
-					    OP1_RANGE_OVERFLOW()  ||
-					    OP2_RANGE_OVERFLOW()  ||
-					    (double)t1 != (double)op1_min * (double)op2_min ||
-					    (double)t2 != (double)op1_min * (double)op2_max ||
-					    (double)t3 != (double)op1_max * (double)op2_min ||
-					    (double)t4 != (double)op1_max * (double)op2_max) {
-						tmp->underflow = 1;
-						tmp->overflow = 1;
-						tmp->min = ZEND_LONG_MIN;
-						tmp->max = ZEND_LONG_MAX;
-					} else {
-						tmp->min = MIN(MIN(t1, t2), MIN(t3, t4));
-						tmp->max = MAX(MAX(t1, t2), MAX(t3, t4));
-					}
-					return 1;
-				}
-			}
-			break;
 		case ZEND_DIV:
-			if (ssa->ops[line].result_def == var) {
-				if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
-					op1_min = OP1_MIN_RANGE();
-					op2_min = OP2_MIN_RANGE();
-					op1_max = OP1_MAX_RANGE();
-					op2_max = OP2_MAX_RANGE();
-					if (op2_min <= 0 && op2_max >= 0) {
-						break;
-					}
-					t1 = op1_min / op2_min;
-					t2 = op1_min / op2_max;
-					t3 = op1_max / op2_min;
-					t4 = op1_max / op2_max;
-					// FIXME: more careful overflow checks?
-					if (OP1_RANGE_UNDERFLOW() ||
-					    OP2_RANGE_UNDERFLOW() ||
-					    OP1_RANGE_OVERFLOW()  ||
-					    OP2_RANGE_OVERFLOW()  ||
-					    t1 != (zend_long)((double)op1_min / (double)op2_min) ||
-					    t2 != (zend_long)((double)op1_min / (double)op2_max) ||
-					    t3 != (zend_long)((double)op1_max / (double)op2_min) ||
-					    t4 != (zend_long)((double)op1_max / (double)op2_max)) {
-						tmp->underflow = 1;
-						tmp->overflow = 1;
-						tmp->min = ZEND_LONG_MIN;
-						tmp->max = ZEND_LONG_MAX;
-					} else {
-						tmp->min = MIN(MIN(t1, t2), MIN(t3, t4));
-						tmp->max = MAX(MAX(t1, t2), MAX(t3, t4));
-					}
-					return 1;
-				}
-			}
-			break;
 		case ZEND_MOD:
-			if (ssa->ops[line].result_def == var) {
-				if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
-					if (OP1_RANGE_UNDERFLOW() ||
-					    OP2_RANGE_UNDERFLOW() ||
-					    OP1_RANGE_OVERFLOW()  ||
-					    OP2_RANGE_OVERFLOW()) {
-						tmp->min = ZEND_LONG_MIN;
-						tmp->max = ZEND_LONG_MAX;
-					} else {
-						op1_min = OP1_MIN_RANGE();
-						op2_min = OP2_MIN_RANGE();
-						op1_max = OP1_MAX_RANGE();
-						op2_max = OP2_MAX_RANGE();
-						if (op2_min == 0 || op2_max == 0) {
-							/* avoid division by zero */
-							break;
-						}
-						t1 = (op2_min == -1) ? 0 : (op1_min % op2_min);
-						t2 = (op2_max == -1) ? 0 : (op1_min % op2_max);
-						t3 = (op2_min == -1) ? 0 : (op1_max % op2_min);
-						t4 = (op2_max == -1) ? 0 : (op1_max % op2_max);
-						tmp->min = MIN(MIN(t1, t2), MIN(t3, t4));
-						tmp->max = MAX(MAX(t1, t2), MAX(t3, t4));
-					}
-				}
-			}
-			break;
 		case ZEND_SL:
-			if (ssa->ops[line].result_def == var) {
-				if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
-					if (OP1_RANGE_UNDERFLOW() ||
-					    OP2_RANGE_UNDERFLOW() ||
-					    OP1_RANGE_OVERFLOW() ||
-					    OP2_RANGE_OVERFLOW()) {
-						tmp->min = ZEND_LONG_MIN;
-						tmp->max = ZEND_LONG_MAX;
-					} else {
-						op1_min = OP1_MIN_RANGE();
-						op2_min = OP2_MIN_RANGE();
-						op1_max = OP1_MAX_RANGE();
-						op2_max = OP2_MAX_RANGE();
-						t1 = op1_min << op2_min;
-						t2 = op1_min << op2_max;
-						t3 = op1_max << op2_min;
-						t4 = op1_max << op2_max;
-						tmp->min = MIN(MIN(t1, t2), MIN(t3, t4));
-						tmp->max = MAX(MAX(t1, t2), MAX(t3, t4));
-					}
-					return 1;
-				}
-			}
-			break;
 		case ZEND_SR:
-			if (ssa->ops[line].result_def == var) {
-				if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
-					if (OP1_RANGE_UNDERFLOW() ||
-					    OP2_RANGE_UNDERFLOW() ||
-					    OP1_RANGE_OVERFLOW() ||
-					    OP2_RANGE_OVERFLOW()) {
-						tmp->min = ZEND_LONG_MIN;
-						tmp->max = ZEND_LONG_MAX;
-					} else {
-						op1_min = OP1_MIN_RANGE();
-						op2_min = OP2_MIN_RANGE();
-						op1_max = OP1_MAX_RANGE();
-						op2_max = OP2_MAX_RANGE();
-						t1 = op1_min >> op2_min;
-						t2 = op1_min >> op2_max;
-						t3 = op1_max >> op2_min;
-						t4 = op1_max >> op2_max;
-						tmp->min = MIN(MIN(t1, t2), MIN(t3, t4));
-						tmp->max = MAX(MAX(t1, t2), MAX(t3, t4));
-					}
-					return 1;
-				}
-			}
-			break;
 		case ZEND_BW_OR:
-			if (ssa->ops[line].result_def == var) {
-				if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
-					if (OP1_RANGE_UNDERFLOW() ||
-					    OP2_RANGE_UNDERFLOW() ||
-					    OP1_RANGE_OVERFLOW() ||
-					    OP2_RANGE_OVERFLOW()) {
-						tmp->min = ZEND_LONG_MIN;
-						tmp->max = ZEND_LONG_MAX;
-					} else {
-						op1_min = OP1_MIN_RANGE();
-						op2_min = OP2_MIN_RANGE();
-						op1_max = OP1_MAX_RANGE();
-						op2_max = OP2_MAX_RANGE();
-						zend_ssa_range_or(op1_min, op1_max, op2_min, op2_max, tmp);
-					}
-					return 1;
-				}
-			}
-			break;
 		case ZEND_BW_AND:
+		case ZEND_BW_XOR:
 			if (ssa->ops[line].result_def == var) {
-				if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
-					if (OP1_RANGE_UNDERFLOW() ||
-					    OP2_RANGE_UNDERFLOW() ||
-					    OP1_RANGE_OVERFLOW() ||
-					    OP2_RANGE_OVERFLOW()) {
-						tmp->min = ZEND_LONG_MIN;
-						tmp->max = ZEND_LONG_MAX;
-					} else {
-						op1_min = OP1_MIN_RANGE();
-						op2_min = OP2_MIN_RANGE();
-						op1_max = OP1_MAX_RANGE();
-						op2_max = OP2_MAX_RANGE();
-						zend_ssa_range_and(op1_min, op1_max, op2_min, op2_max, tmp);
-					}
-					return 1;
-				}
+				return zend_inference_calc_binary_op_range(
+					op_array, ssa, opline, &ssa->ops[line], opline->opcode, tmp);
 			}
 			break;
-//		case ZEND_BW_XOR:
+
 		case ZEND_BW_NOT:
 			if (ssa->ops[line].result_def == var) {
 				if (OP1_HAS_RANGE()) {
@@ -1229,67 +1264,20 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 			}
 			break;
 		case ZEND_ASSIGN_ADD:
-			if (opline->extended_value == 0) {
-				if (ssa->ops[line].op1_def == var || ssa->ops[line].result_def == var) {
-					if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
-						op1_min = OP1_MIN_RANGE();
-						op2_min = OP2_MIN_RANGE();
-						op1_max = OP1_MAX_RANGE();
-						op2_max = OP2_MAX_RANGE();
-						tmp->min = op1_min + op2_min;
-						tmp->max = op1_max + op2_max;
-						if (OP1_RANGE_UNDERFLOW() ||
-						    OP2_RANGE_UNDERFLOW() ||
-						    (op1_min < 0 && op2_min < 0 && tmp->min >= 0)) {
-							tmp->underflow = 1;
-							tmp->min = ZEND_LONG_MIN;
-						}
-						if (OP1_RANGE_OVERFLOW() ||
-						    OP2_RANGE_OVERFLOW() ||
-						    (op1_max > 0 && op2_max > 0 && tmp->max <= 0)) {
-							tmp->overflow = 1;
-							tmp->max = ZEND_LONG_MAX;
-						}
-						return 1;
-					}
-				}
-			} else if ((opline+1)->opcode == ZEND_OP_DATA) {
-				if (ssa->ops[line+1].op1_def == var) {
-					opline++;
-					if (OP1_HAS_RANGE()) {
-						tmp->min = OP1_MIN_RANGE();
-						tmp->max = OP1_MAX_RANGE();
-						tmp->underflow = OP1_RANGE_UNDERFLOW();
-						tmp->overflow  = OP1_RANGE_OVERFLOW();
-						return 1;
-					}
-				}
-			}
-			break;
 		case ZEND_ASSIGN_SUB:
+		case ZEND_ASSIGN_MUL:
+		case ZEND_ASSIGN_DIV:
+		case ZEND_ASSIGN_MOD:
+		case ZEND_ASSIGN_SL:
+		case ZEND_ASSIGN_SR:
+		case ZEND_ASSIGN_BW_OR:
+		case ZEND_ASSIGN_BW_AND:
+		case ZEND_ASSIGN_BW_XOR:
 			if (opline->extended_value == 0) {
 				if (ssa->ops[line].op1_def == var || ssa->ops[line].result_def == var) {
-					if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
-						op1_min = OP1_MIN_RANGE();
-						op2_min = OP2_MIN_RANGE();
-						op1_max = OP1_MAX_RANGE();
-						op2_max = OP2_MAX_RANGE();
-						tmp->min = op1_min - op2_max;
-						tmp->max = op1_max - op2_min;
-						if (OP1_RANGE_UNDERFLOW() ||
-						    OP2_RANGE_OVERFLOW()  ||
-						    (op1_min < 0 && op2_max > 0 && tmp->min >= 0)) {
-							tmp->underflow = 1;
-							tmp->min = ZEND_LONG_MIN;
-						}
-						if (OP1_RANGE_OVERFLOW()  ||
-						    OP2_RANGE_UNDERFLOW() ||
-							(op1_max > 0 && op2_min < 0 && tmp->max <= 0)) {
-							tmp->overflow = 1;
-							tmp->max = ZEND_LONG_MAX;
-						}
-						return 1;
-					}
+					return zend_inference_calc_binary_op_range(
+						op_array, ssa, opline, &ssa->ops[line],
+						get_compound_assign_op(opline->opcode), tmp);
 				}
 			} else if ((opline+1)->opcode == ZEND_OP_DATA) {
 				if (ssa->ops[line+1].op1_def == var) {
@@ -1304,284 +1292,6 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 				}
 			}
 			break;
-		case ZEND_ASSIGN_MUL:
-			if (opline->extended_value == 0) {
-				if (ssa->ops[line].op1_def == var || ssa->ops[line].result_def == var) {
-					if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
-						op1_min = OP1_MIN_RANGE();
-						op2_min = OP2_MIN_RANGE();
-						op1_max = OP1_MAX_RANGE();
-						op2_max = OP2_MAX_RANGE();
-						t1 = op1_min * op2_min;
-						t2 = op1_min * op2_max;
-						t3 = op1_max * op2_min;
-						t4 = op1_max * op2_max;
-						// FIXME: more careful overflow checks?
-						if (OP1_RANGE_UNDERFLOW() ||
-						    OP2_RANGE_UNDERFLOW() ||
-						    OP1_RANGE_OVERFLOW()  ||
-						    OP2_RANGE_OVERFLOW()  ||
-						    (double)t1 != (double)op1_min * (double)op2_min ||
-						    (double)t2 != (double)op1_min * (double)op2_min ||
-							(double)t3 != (double)op1_min * (double)op2_min ||
-							(double)t4 != (double)op1_min * (double)op2_min) {
-							tmp->underflow = 1;
-							tmp->overflow = 1;
-							tmp->min = ZEND_LONG_MIN;
-							tmp->max = ZEND_LONG_MAX;
-						} else {
-							tmp->min = MIN(MIN(t1, t2), MIN(t3, t4));
-							tmp->max = MAX(MAX(t1, t2), MAX(t3, t4));
-						}
-						return 1;
-					}
-				}
-			} else if ((opline+1)->opcode == ZEND_OP_DATA) {
-				if (ssa->ops[line+1].op1_def == var) {
-					if (OP1_HAS_RANGE()) {
-						opline++;
-						tmp->min = OP1_MIN_RANGE();
-						tmp->max = OP1_MAX_RANGE();
-						tmp->underflow = OP1_RANGE_UNDERFLOW();
-						tmp->overflow  = OP1_RANGE_OVERFLOW();
-						return 1;
-					}
-				}
-			}
-			break;
-		case ZEND_ASSIGN_DIV:
-			if (opline->extended_value == 0) {
-				if (ssa->ops[line].op1_def == var || ssa->ops[line].result_def == var) {
-					if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
-						op1_min = OP1_MIN_RANGE();
-						op2_min = OP2_MIN_RANGE();
-						op1_max = OP1_MAX_RANGE();
-						op2_max = OP2_MAX_RANGE();
-						if (op2_min <= 0 && op2_max >= 0) {
-							break;
-						}
-						t1 = op1_min / op2_min;
-						t2 = op1_min / op2_max;
-						t3 = op1_max / op2_min;
-						t4 = op1_max / op2_max;
-						// FIXME: more careful overflow checks?
-						if (OP1_RANGE_UNDERFLOW() ||
-						    OP2_RANGE_UNDERFLOW() ||
-						    OP1_RANGE_OVERFLOW()  ||
-						    OP2_RANGE_OVERFLOW()  ||
-						    t1 != (zend_long)((double)op1_min / (double)op2_min) ||
-						    t2 != (zend_long)((double)op1_min / (double)op2_max) ||
-						    t3 != (zend_long)((double)op1_max / (double)op2_min) ||
-						    t4 != (zend_long)((double)op1_max / (double)op2_max)) {
-							tmp->underflow = 1;
-							tmp->overflow = 1;
-							tmp->min = ZEND_LONG_MIN;
-							tmp->max = ZEND_LONG_MAX;
-						} else {
-							tmp->min = MIN(MIN(t1, t2), MIN(t3, t4));
-							tmp->max = MAX(MAX(t1, t2), MAX(t3, t4));
-						}
-						return 1;
-					}
-				}
-			} else if ((opline+1)->opcode == ZEND_OP_DATA) {
-				if (ssa->ops[line+1].op1_def == var) {
-					if (OP1_HAS_RANGE()) {
-						opline++;
-						tmp->min = OP1_MIN_RANGE();
-						tmp->max = OP1_MAX_RANGE();
-						tmp->underflow = OP1_RANGE_UNDERFLOW();
-						tmp->overflow  = OP1_RANGE_OVERFLOW();
-						return 1;
-					}
-				}
-			}
-			break;
-		case ZEND_ASSIGN_MOD:
-			if (opline->extended_value == 0) {
-				if (ssa->ops[line].op1_def == var || ssa->ops[line].result_def == var) {
-					if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
-						if (OP1_RANGE_UNDERFLOW() ||
-						    OP2_RANGE_UNDERFLOW() ||
-						    OP1_RANGE_OVERFLOW()  ||
-						    OP2_RANGE_OVERFLOW()) {
-							tmp->min = ZEND_LONG_MIN;
-							tmp->max = ZEND_LONG_MAX;
-						} else {
-							op1_min = OP1_MIN_RANGE();
-							op2_min = OP2_MIN_RANGE();
-							op1_max = OP1_MAX_RANGE();
-							op2_max = OP2_MAX_RANGE();
-							if (op2_min == 0 || op2_max == 0) {
-								/* avoid division by zero */
-								break;
-							}
-							t1 = op1_min % op2_min;
-							t2 = op1_min % op2_max;
-							t3 = op1_max % op2_min;
-							t4 = op1_max % op2_max;
-							tmp->min = MIN(MIN(t1, t2), MIN(t3, t4));
-							tmp->max = MAX(MAX(t1, t2), MAX(t3, t4));
-						}
-						return 1;
-					}
-				}
-			} else if ((opline+1)->opcode == ZEND_OP_DATA) {
-				if (ssa->ops[line+1].op1_def == var) {
-					if (OP1_HAS_RANGE()) {
-						opline++;
-						tmp->min = OP1_MIN_RANGE();
-						tmp->max = OP1_MAX_RANGE();
-						tmp->underflow = OP1_RANGE_UNDERFLOW();
-						tmp->overflow  = OP1_RANGE_OVERFLOW();
-						return 1;
-					}
-				}
-			}
-			break;
-		case ZEND_ASSIGN_SL:
-			if (opline->extended_value == 0) {
-				if (ssa->ops[line].op1_def == var || ssa->ops[line].result_def == var) {
-					if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
-						if (OP1_RANGE_UNDERFLOW() ||
-						    OP2_RANGE_UNDERFLOW() ||
-						    OP1_RANGE_OVERFLOW() ||
-						    OP2_RANGE_OVERFLOW()) {
-							tmp->min = ZEND_LONG_MIN;
-							tmp->max = ZEND_LONG_MAX;
-						} else {
-							op1_min = OP1_MIN_RANGE();
-							op2_min = OP2_MIN_RANGE();
-							op1_max = OP1_MAX_RANGE();
-							op2_max = OP2_MAX_RANGE();
-							t1 = op1_min << op2_min;
-							t2 = op1_min << op2_max;
-							t3 = op1_max << op2_min;
-							t4 = op1_max << op2_max;
-							tmp->min = MIN(MIN(t1, t2), MIN(t3, t4));
-							tmp->max = MAX(MAX(t1, t2), MAX(t3, t4));
-						}
-						return 1;
-					}
-				}
-			} else if ((opline+1)->opcode == ZEND_OP_DATA) {
-				if (ssa->ops[line+1].op1_def == var) {
-					if (OP1_HAS_RANGE()) {
-						opline++;
-						tmp->min = OP1_MIN_RANGE();
-						tmp->max = OP1_MAX_RANGE();
-						tmp->underflow = OP1_RANGE_UNDERFLOW();
-						tmp->overflow  = OP1_RANGE_OVERFLOW();
-						return 1;
-					}
-				}
-			}
-			break;
-		case ZEND_ASSIGN_SR:
-			if (opline->extended_value == 0) {
-				if (ssa->ops[line].op1_def == var || ssa->ops[line].result_def == var) {
-					if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
-						if (OP1_RANGE_UNDERFLOW() ||
-						    OP2_RANGE_UNDERFLOW() ||
-						    OP1_RANGE_OVERFLOW() ||
-						    OP2_RANGE_OVERFLOW()) {
-							tmp->min = ZEND_LONG_MIN;
-							tmp->max = ZEND_LONG_MAX;
-						} else {
-							op1_min = OP1_MIN_RANGE();
-							op2_min = OP2_MIN_RANGE();
-							op1_max = OP1_MAX_RANGE();
-							op2_max = OP2_MAX_RANGE();
-							t1 = op1_min >> op2_min;
-							t2 = op1_min >> op2_max;
-							t3 = op1_max >> op2_min;
-							t4 = op1_max >> op2_max;
-							tmp->min = MIN(MIN(t1, t2), MIN(t3, t4));
-							tmp->max = MAX(MAX(t1, t2), MAX(t3, t4));
-						}
-						return 1;
-					}
-				}
-			} else if ((opline+1)->opcode == ZEND_OP_DATA) {
-				if (ssa->ops[line+1].op1_def == var) {
-					if (OP1_HAS_RANGE()) {
-						opline++;
-						tmp->min = OP1_MIN_RANGE();
-						tmp->max = OP1_MAX_RANGE();
-						tmp->underflow = OP1_RANGE_UNDERFLOW();
-						tmp->overflow  = OP1_RANGE_OVERFLOW();
-						return 1;
-					}
-				}
-			}
-			break;
-		case ZEND_ASSIGN_BW_OR:
-			if (opline->extended_value == 0) {
-				if (ssa->ops[line].op1_def == var || ssa->ops[line].result_def == var) {
-					if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
-						if (OP1_RANGE_UNDERFLOW() ||
-						    OP2_RANGE_UNDERFLOW() ||
-						    OP1_RANGE_OVERFLOW() ||
-						    OP2_RANGE_OVERFLOW()) {
-							tmp->min = ZEND_LONG_MIN;
-							tmp->max = ZEND_LONG_MAX;
-						} else {
-							op1_min = OP1_MIN_RANGE();
-							op2_min = OP2_MIN_RANGE();
-							op1_max = OP1_MAX_RANGE();
-							op2_max = OP2_MAX_RANGE();
-							zend_ssa_range_or(op1_min, op1_max, op2_min, op2_max, tmp);
-						}
-						return 1;
-					}
-				}
-			} else if ((opline+1)->opcode == ZEND_OP_DATA) {
-				if (ssa->ops[line+1].op1_def == var) {
-					if (OP1_HAS_RANGE()) {
-						opline++;
-						tmp->min = OP1_MIN_RANGE();
-						tmp->max = OP1_MAX_RANGE();
-						tmp->underflow = OP1_RANGE_UNDERFLOW();
-						tmp->overflow  = OP1_RANGE_OVERFLOW();
-						return 1;
-					}
-				}
-			}
-			break;
-		case ZEND_ASSIGN_BW_AND:
-			if (opline->extended_value == 0) {
-				if (ssa->ops[line].op1_def == var || ssa->ops[line].result_def == var) {
-					if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
-						if (OP1_RANGE_UNDERFLOW() ||
-						    OP2_RANGE_UNDERFLOW() ||
-						    OP1_RANGE_OVERFLOW() ||
-						    OP2_RANGE_OVERFLOW()) {
-							tmp->min = ZEND_LONG_MIN;
-							tmp->max = ZEND_LONG_MAX;
-						} else {
-							op1_min = OP1_MIN_RANGE();
-							op2_min = OP2_MIN_RANGE();
-							op1_max = OP1_MAX_RANGE();
-							op2_max = OP2_MAX_RANGE();
-							zend_ssa_range_and(op1_min, op1_max, op2_min, op2_max, tmp);
-						}
-						return 1;
-					}
-				}
-			} else if ((opline+1)->opcode == ZEND_OP_DATA) {
-				if (ssa->ops[line+1].op1_def == var) {
-					if (OP1_HAS_RANGE()) {
-						opline++;
-						tmp->min = OP1_MIN_RANGE();
-						tmp->max = OP1_MAX_RANGE();
-						tmp->underflow = OP1_RANGE_UNDERFLOW();
-						tmp->overflow  = OP1_RANGE_OVERFLOW();
-						return 1;
-					}
-				}
-			}
-			break;
-//		case ZEND_ASSIGN_BW_XOR:
 //		case ZEND_ASSIGN_CONCAT:
 		case ZEND_OP_DATA:
 			if ((opline-1)->opcode == ZEND_ASSIGN_DIM ||
@@ -2356,25 +2066,6 @@ static uint32_t binary_op_result_type(
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 	return tmp;
-}
-
-/* Get the normal op corresponding to a compound assignment op */
-static inline zend_uchar get_compound_assign_op(zend_uchar opcode) {
-	switch (opcode) {
-		case ZEND_ASSIGN_ADD: return ZEND_ADD;
-		case ZEND_ASSIGN_SUB: return ZEND_SUB;
-		case ZEND_ASSIGN_MUL: return ZEND_MUL;
-		case ZEND_ASSIGN_DIV: return ZEND_DIV;
-		case ZEND_ASSIGN_MOD: return ZEND_MOD;
-		case ZEND_ASSIGN_SL: return ZEND_SL;
-		case ZEND_ASSIGN_SR: return ZEND_SR;
-		case ZEND_ASSIGN_CONCAT: return ZEND_CONCAT;
-		case ZEND_ASSIGN_BW_OR: return ZEND_BW_OR;
-		case ZEND_ASSIGN_BW_AND: return ZEND_BW_AND;
-		case ZEND_ASSIGN_BW_XOR: return ZEND_BW_XOR;
-		case ZEND_ASSIGN_POW: return ZEND_POW;
-		EMPTY_SWITCH_DEFAULT_CASE()
-	}
 }
 
 static inline zend_class_entry *get_class_entry(const zend_script *script, zend_string *lcname) {
@@ -3476,6 +3167,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 		case ZEND_VERIFY_RETURN_TYPE:
 			if (t1 & MAY_BE_REF) {
 				tmp = t1;
+				ce = NULL;
 			} else {
 				zend_arg_info *ret_info = op_array->arg_info - 1;
 

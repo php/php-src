@@ -130,8 +130,8 @@ static zend_string *zend_new_interned_string_int(zend_string *str)
 {
 #ifndef ZTS
 	zend_ulong h;
-	uint nIndex;
-	uint idx;
+	uint32_t nIndex;
+	uint32_t idx;
 	Bucket *p;
 
 	if (ZSTR_IS_INTERNED(str)) {
@@ -197,7 +197,7 @@ static zend_string *zend_new_interned_string_int(zend_string *str)
 static void zend_interned_strings_snapshot_int(void)
 {
 #ifndef ZTS
-	uint idx;
+	uint32_t idx;
 	Bucket *p;
 
 	idx = CG(interned_strings).nNumUsed;
@@ -213,8 +213,8 @@ static void zend_interned_strings_snapshot_int(void)
 static void zend_interned_strings_restore_int(void)
 {
 #ifndef ZTS
-	uint nIndex;
-	uint idx;
+	uint32_t nIndex;
+	uint32_t idx;
 	Bucket *p;
 
 	idx = CG(interned_strings).nNumUsed;

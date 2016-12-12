@@ -1,5 +1,5 @@
 --TEST--
-Zend signed multiply 64-bit
+Zend signed multiply 64-bit, variation 1
 --SKIPIF--
 <?php if ((1 << 31) < 0) print "skip Running on 32-bit target"; ?>
 --FILE--

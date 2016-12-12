@@ -18,6 +18,6 @@ var_dump($_POST);
 array(0) {
 }
 array(1) {
-  [%u|b%"foobar"]=>
-  %unicode|string%(1) "1"
+  ["foobar"]=>
+  string(1) "1"
 }

@@ -69,7 +69,7 @@ static void delete_service(void *service);
 static void delete_url(void *handle);
 static void delete_hashtable(void *hashtable);
 
-static void soap_error_handler(int error_num, const char *error_filename, const uint error_lineno, const char *format, va_list args);
+static void soap_error_handler(int error_num, const char *error_filename, const uint32_t error_lineno, const char *format, va_list args);
 
 #define SOAP_SERVER_BEGIN_CODE() \
 	zend_bool _old_handler = SOAP_GLOBAL(use_soap_error_handler);\
@@ -2126,7 +2126,7 @@ static void soap_server_fault(char* code, char* string, char *actor, zval* detai
 	zend_bailout();
 }
 
-static void soap_error_handler(int error_num, const char *error_filename, const uint error_lineno, const char *format, va_list args)
+static void soap_error_handler(int error_num, const char *error_filename, const uint32_t error_lineno, const char *format, va_list args)
 {
 	zend_bool _old_in_compilation;
 	zend_execute_data *_old_current_execute_data;

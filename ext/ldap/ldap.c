@@ -1643,9 +1643,9 @@ PHP_FUNCTION(ldap_delete)
 
 /* {{{ _ldap_str_equal_to_const
  */
-static int _ldap_str_equal_to_const(const char *str, uint str_len, const char *cstr)
+static int _ldap_str_equal_to_const(const char *str, uint32_t str_len, const char *cstr)
 {
-	uint i;
+	uint32_t i;
 
 	if (strlen(cstr) != str_len)
 		return 0;
@@ -1662,9 +1662,9 @@ static int _ldap_str_equal_to_const(const char *str, uint str_len, const char *c
 
 /* {{{ _ldap_strlen_max
  */
-static int _ldap_strlen_max(const char *str, uint max_len)
+static int _ldap_strlen_max(const char *str, uint32_t max_len)
 {
-	uint i;
+	uint32_t i;
 
 	for (i = 0; i < max_len; ++i) {
 		if (str[i] == '\0') {
@@ -1697,7 +1697,7 @@ PHP_FUNCTION(ldap_modify_batch)
 	int i, j, k;
 	int num_mods, num_modprops, num_modvals;
 	LDAPMod **ldap_mods;
-	uint oper;
+	uint32_t oper;
 
 	/*
 	$mods = array(
