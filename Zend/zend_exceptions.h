@@ -72,6 +72,8 @@ ZEND_API ZEND_COLD void zend_exception_error(zend_object *exception, int severit
 size_t zend_spprintf(char **message, size_t max_len, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 3, 4);
 zend_string *zend_strpprintf(size_t max_len, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 
+#include "zend_globals.h"
+
 static zend_always_inline void zend_rethrow_exception(zend_execute_data *execute_data)
 {
 	if (EX(opline)->opcode != ZEND_HANDLE_EXCEPTION) {
