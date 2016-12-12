@@ -88,6 +88,7 @@ ps_fetch_from_1_to_8_bytes(zval * zv, const MYSQLND_FIELD * const field, unsigne
 			} else {
 				DBG_INF("stringify");
 				tmp_len = sprintf((char *)&tmp, MYSQLND_LLU_SPEC, uval);
+				DBG_INF_FMT("value=%s", tmp);
 			}
 		}
 	} else {
