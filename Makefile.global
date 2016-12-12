@@ -53,7 +53,7 @@ install-headers:
 			paths="$$paths $(INSTALL_ROOT)$(phpincludedir)/$$i"; \
 		done; \
 		$(mkinstalldirs) $$paths && \
-		echo "Installing header files:          $(INSTALL_ROOT)$(phpincludedir)/" && \
+		echo "Installing header files:           $(INSTALL_ROOT)$(phpincludedir)/" && \
 		for i in `echo $(INSTALL_HEADERS)`; do \
 			if test "$(PHP_PECL_EXTENSION)"; then \
 				src=`echo $$i | $(SED) -e "s#ext/$(PHP_PECL_EXTENSION)/##g"`; \

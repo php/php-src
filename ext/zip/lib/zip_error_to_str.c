@@ -1,6 +1,6 @@
 /*
   zip_error_to_str.c -- get string representation of zip error code
-  Copyright (C) 1999-2014 Dieter Baron and Thomas Klausner
+  Copyright (C) 1999-2015 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -32,7 +32,6 @@
 */
 
 
-#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

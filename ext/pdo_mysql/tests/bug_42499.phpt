@@ -61,8 +61,8 @@ Emulated Prepared Statements...
 array(1) {
   [0]=>
   array(1) {
-    [%u|b%"_id"]=>
-    %unicode|string%(1) "a"
+    ["_id"]=>
+    string(1) "a"
   }
 }
 
@@ -71,8 +71,8 @@ Native Prepared Statements...
 array(1) {
   [0]=>
   array(1) {
-    [%u|b%"_id"]=>
-    %unicode|string%(1) "a"
+    ["_id"]=>
+    string(1) "a"
   }
 }
 

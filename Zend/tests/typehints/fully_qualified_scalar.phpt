@@ -10,4 +10,4 @@ foo(1);
 
 ?>
 --EXPECTF--
-Fatal error: Cannot use the scalar type 'int' as fully qualified with a leading backslash in %s on line %d
+Fatal error: Scalar type declaration 'int' must be unqualified in %s on line %d

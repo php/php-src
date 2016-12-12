@@ -24,6 +24,11 @@
 #include "../intl_common.h"
 #include "../intl_error.h"
 #include "../intl_data.h"
+
+#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM < 48
+# define MSG_FORMAT_QUOTE_APOS 1
+#endif
+
 #include "msgformat_data.h"
 
 typedef struct {
@@ -53,9 +58,5 @@ extern zend_class_entry *MessageFormatter_ce_ptr;
 	}
 
 #define MSG_FORMAT_OBJECT(mfo)			(mfo)->mf_data.umsgf
-
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM < 48
-# define MSG_FORMAT_QUOTE_APOS 1
-#endif
 
 #endif // #ifndef MSG_FORMAT_CLASS_H

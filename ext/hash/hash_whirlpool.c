@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -41,10 +41,10 @@
 static void WhirlpoolTransform(PHP_WHIRLPOOL_CTX *context)
 {
     int i, r;
-    php_hash_uint64 K[8];        /* the round key */
-    php_hash_uint64 block[8];    /* mu(buffer) */
-    php_hash_uint64 state[8];    /* the cipher state */
-    php_hash_uint64 L[8];
+    uint64_t K[8];        /* the round key */
+    uint64_t block[8];    /* mu(buffer) */
+    uint64_t state[8];    /* the cipher state */
+    uint64_t L[8];
     unsigned char *buffer = context->buffer.data;
 
     /*
@@ -52,14 +52,14 @@ static void WhirlpoolTransform(PHP_WHIRLPOOL_CTX *context)
      */
     for (i = 0; i < 8; i++, buffer += 8) {
         block[i] =
-            (((php_hash_uint64)buffer[0]        ) << 56) ^
-            (((php_hash_uint64)buffer[1] & 0xffL) << 48) ^
-            (((php_hash_uint64)buffer[2] & 0xffL) << 40) ^
-            (((php_hash_uint64)buffer[3] & 0xffL) << 32) ^
-            (((php_hash_uint64)buffer[4] & 0xffL) << 24) ^
-            (((php_hash_uint64)buffer[5] & 0xffL) << 16) ^
-            (((php_hash_uint64)buffer[6] & 0xffL) <<  8) ^
-            (((php_hash_uint64)buffer[7] & 0xffL)      );
+            (((uint64_t)buffer[0]        ) << 56) ^
+            (((uint64_t)buffer[1] & 0xffL) << 48) ^
+            (((uint64_t)buffer[2] & 0xffL) << 40) ^
+            (((uint64_t)buffer[3] & 0xffL) << 32) ^
+            (((uint64_t)buffer[4] & 0xffL) << 24) ^
+            (((uint64_t)buffer[5] & 0xffL) << 16) ^
+            (((uint64_t)buffer[6] & 0xffL) <<  8) ^
+            (((uint64_t)buffer[7] & 0xffL)      );
     }
     /*
      * compute and apply K^0 to the cipher state:
@@ -274,7 +274,7 @@ PHP_HASH_API void PHP_WHIRLPOOLInit(PHP_WHIRLPOOL_CTX *context)
 
 PHP_HASH_API void PHP_WHIRLPOOLUpdate(PHP_WHIRLPOOL_CTX *context, const unsigned char *input, size_t len)
 {
-    php_hash_uint64 sourceBits = len * 8;
+    uint64_t sourceBits = len * 8;
     int sourcePos    = 0; /* index of leftmost source unsigned char containing data (1 to 8 bits). */
     int sourceGap    = (8 - ((int)sourceBits & 7)) & 7; /* space on source[sourcePos]. */
     int bufferRem    = context->buffer.bits & 7; /* occupied bits on buffer[bufferPos]. */
@@ -283,15 +283,15 @@ PHP_HASH_API void PHP_WHIRLPOOLUpdate(PHP_WHIRLPOOL_CTX *context, const unsigned
     unsigned char *bitLength    = context->bitlength;
     int bufferBits   = context->buffer.bits;
     int bufferPos    = context->buffer.pos;
-    php_hash_uint32 b, carry;
+    uint32_t b, carry;
     int i;
 
     /*
      * tally the length of the added data:
      */
-    php_hash_uint64 value = sourceBits;
+    uint64_t value = sourceBits;
     for (i = 31, carry = 0; i >= 0 && (carry != 0 || value != L64(0)); i--) {
-        carry += bitLength[i] + ((php_hash_uint32)value & 0xff);
+        carry += bitLength[i] + ((uint32_t)value & 0xff);
         bitLength[i] = (unsigned char)carry;
         carry >>= 8;
         value >>= 8;

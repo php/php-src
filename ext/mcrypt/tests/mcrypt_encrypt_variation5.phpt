@@ -27,8 +27,8 @@ set_error_handler('test_error_handler');
 
 // Initialise function arguments not being substituted (if any)
 $cipher = MCRYPT_TRIPLEDES;
-$key = b"string_val\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
-$data = b'string_val';
+$key = "string_val\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
+$data = 'string_val';
 //in php, it incorrectly reports problems with iv in ECB mode.
 $mode = MCRYPT_MODE_CBC;
 
@@ -40,7 +40,7 @@ unset ($unset_var);
 class classWithToString
 {
 	public function __toString() {
-		return b"Class A object";
+		return "Class A object";
 	}
 }
 
@@ -49,7 +49,7 @@ class classWithoutToString
 }
 
 // heredoc string
-$heredoc = b<<<EOT
+$heredoc = <<<EOT
 hello world
 EOT;
 
@@ -125,106 +125,132 @@ fclose($fp);
 *** Testing mcrypt_encrypt() : usage variation ***
 
 --int 0--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation5.php(108)
 Error: 2 - mcrypt_encrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --int 1--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation5.php(108)
 Error: 2 - mcrypt_encrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --int 12345--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation5.php(108)
 Error: 2 - mcrypt_encrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --int -12345--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation5.php(108)
 Error: 2 - mcrypt_encrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --float 10.5--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation5.php(108)
 Error: 2 - mcrypt_encrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --float -10.5--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation5.php(108)
 Error: 2 - mcrypt_encrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --float 12.3456789000e10--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation5.php(108)
 Error: 2 - mcrypt_encrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --float -12.3456789000e10--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation5.php(108)
 Error: 2 - mcrypt_encrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --float .5--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation5.php(108)
 Error: 2 - mcrypt_encrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --empty array--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation5.php(108)
 Error: 2 - mcrypt_encrypt() expects parameter 5 to be string, array given, %s(%d)
 string(0) ""
 
 --int indexed array--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation5.php(108)
 Error: 2 - mcrypt_encrypt() expects parameter 5 to be string, array given, %s(%d)
 string(0) ""
 
 --associative array--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation5.php(108)
 Error: 2 - mcrypt_encrypt() expects parameter 5 to be string, array given, %s(%d)
 string(0) ""
 
 --nested arrays--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation5.php(108)
 Error: 2 - mcrypt_encrypt() expects parameter 5 to be string, array given, %s(%d)
 string(0) ""
 
 --uppercase NULL--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation5.php(108)
 Error: 2 - mcrypt_encrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --lowercase null--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation5.php(108)
 Error: 2 - mcrypt_encrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --lowercase true--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation5.php(108)
 Error: 2 - mcrypt_encrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --lowercase false--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation5.php(108)
 Error: 2 - mcrypt_encrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --uppercase TRUE--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation5.php(108)
 Error: 2 - mcrypt_encrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --uppercase FALSE--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation5.php(108)
 Error: 2 - mcrypt_encrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --empty string DQ--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation5.php(108)
 Error: 2 - mcrypt_encrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --empty string SQ--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation5.php(108)
 Error: 2 - mcrypt_encrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --instance of classWithToString--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation5.php(108)
 Error: 2 - mcrypt_encrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --instance of classWithoutToString--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation5.php(108)
 Error: 2 - mcrypt_encrypt() expects parameter 5 to be string, object given, %s(%d)
 string(0) ""
 
 --undefined var--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation5.php(108)
 Error: 2 - mcrypt_encrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --unset var--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation5.php(108)
 Error: 2 - mcrypt_encrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --resource--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation5.php(108)
 Error: 2 - mcrypt_encrypt() expects parameter 5 to be string, resource given, %s(%d)
 string(0) ""
 ===DONE===

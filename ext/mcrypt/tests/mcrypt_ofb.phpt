@@ -18,6 +18,15 @@ echo trim(mcrypt_decrypt($cipher, $key, $enc_data, MCRYPT_MODE_OFB, $iv)) . "\n"
 mcrypt_decrypt($cipher, $key, $enc_data, MCRYPT_MODE_OFB);
 
 --EXPECTF--
+Deprecated: Function mcrypt_get_iv_size() is deprecated in %s%emcrypt_ofb.php on line 6
+
+Deprecated: Function mcrypt_create_iv() is deprecated in %s%emcrypt_ofb.php on line 6
+
+Deprecated: Function mcrypt_decrypt() is deprecated in %s%emcrypt_ofb.php on line 7
+
+Deprecated: Function mcrypt_decrypt() is deprecated in %s%emcrypt_ofb.php on line 10
 PHP Testfest 2008
+
+Deprecated: Function mcrypt_decrypt() is deprecated in %s%emcrypt_ofb.php on line 13
 
 Warning: mcrypt_decrypt(): Encryption mode requires an initialization vector of size 16 in %s on line %d

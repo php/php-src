@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -169,16 +169,16 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
  */
 #if defined(__i386__) || defined(__x86_64__) || defined(__vax__)
 # define SET(n) \
-	(*(php_uint32 *)&ptr[(n) * 4])
+	(*(uint32_t *)&ptr[(n) * 4])
 # define GET(n) \
 	SET(n)
 #else
 # define SET(n) \
 	(ctx->block[(n)] = \
-	(php_uint32)ptr[(n) * 4] | \
-	((php_uint32)ptr[(n) * 4 + 1] << 8) | \
-	((php_uint32)ptr[(n) * 4 + 2] << 16) | \
-	((php_uint32)ptr[(n) * 4 + 3] << 24))
+	(uint32_t)ptr[(n) * 4] | \
+	((uint32_t)ptr[(n) * 4 + 1] << 8) | \
+	((uint32_t)ptr[(n) * 4 + 2] << 16) | \
+	((uint32_t)ptr[(n) * 4 + 3] << 24))
 # define GET(n) \
 	(ctx->block[(n)])
 #endif
@@ -190,8 +190,8 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 static const void *body(PHP_MD5_CTX *ctx, const void *data, size_t size)
 {
 	const unsigned char *ptr;
-	php_uint32 a, b, c, d;
-	php_uint32 saved_a, saved_b, saved_c, saved_d;
+	uint32_t a, b, c, d;
+	uint32_t saved_a, saved_b, saved_c, saved_d;
 
 	ptr = data;
 
@@ -307,8 +307,8 @@ PHPAPI void PHP_MD5Init(PHP_MD5_CTX *ctx)
 
 PHPAPI void PHP_MD5Update(PHP_MD5_CTX *ctx, const void *data, size_t size)
 {
-	php_uint32 saved_lo;
-	php_uint32 used, free;
+	uint32_t saved_lo;
+	uint32_t used, free;
 
 	saved_lo = ctx->lo;
 	if ((ctx->lo = (saved_lo + size) & 0x1fffffff) < saved_lo) {
@@ -342,7 +342,7 @@ PHPAPI void PHP_MD5Update(PHP_MD5_CTX *ctx, const void *data, size_t size)
 
 PHPAPI void PHP_MD5Final(unsigned char *result, PHP_MD5_CTX *ctx)
 {
-	php_uint32 used, free;
+	uint32_t used, free;
 
 	used = ctx->lo & 0x3f;
 

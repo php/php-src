@@ -59,10 +59,10 @@ for($i = 0; $i<count($allDirs); $i++) {
   $j = $i+1;
   $dir = $allDirs[$i];
   echo "\n-- Iteration $j --\n";
-  $res = file_put_contents($dir."\\".$filename, ($data + $i));
+  $res = file_put_contents($dir."\\".$filename, ($data . $i));
   if ($res !== false) {
       $in = file_get_contents($absFile);
-      if ($in == ($data + $i)) {
+      if ($in == ($data . $i)) {
          echo "Data written correctly\n";
       }
       else {

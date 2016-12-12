@@ -12,7 +12,7 @@ var_dump(parse_ini_file($ini_file));
 ?>
 --CLEAN--
 <?php
-unlink(__DIR__ . "bug70748.ini");
+unlink(__DIR__ . "/bug70748.ini");
 ?>
 --EXPECTF--
 Warning: syntax error, unexpected $end, expecting '}' in %sbug70748.ini on line %d

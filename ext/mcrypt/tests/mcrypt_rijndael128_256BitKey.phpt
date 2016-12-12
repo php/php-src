@@ -33,18 +33,18 @@ echo "*** Testing mcrypt : Rijndael128 functionality ***\n";
 
 $cipher = MCRYPT_RIJNDAEL_128;
 $mode = MCRYPT_MODE_CBC;
-$data = b'This is the secret message which must be encrypted';
+$data = 'This is the secret message which must be encrypted';
 
 // keys : 20 bytes, 24 bytes, 30 Bytes, 32 Bytes, 40 Bytes
 $keys = array(
-              b'12345678901234567890', 
-              b'123456789012345678901234', 
-              b'123456789012345678901234567890',
-              b'12345678901234567890123456789012',
-              b'1234567890123456789012345678901234567890'
+              '12345678901234567890', 
+              '123456789012345678901234', 
+              '123456789012345678901234567890',
+              '12345678901234567890123456789012',
+              '1234567890123456789012345678901234567890'
  );
 // rijndael128 is a block cipher of 128 bits (16 bytes)
-$iv = b'1234567890123456';
+$iv = '1234567890123456';
 
 echo "\n--- testing different key lengths\n";
 foreach ($keys as $key) {
@@ -63,32 +63,52 @@ foreach ($keys as $key) {
 
 key length=20
 
+Deprecated: Function mcrypt_encrypt() is deprecated in %s%emcrypt_rijndael128_256BitKey.php on line 43
+
 Warning: mcrypt_encrypt(): Key of size 20 not supported by this algorithm. Only keys of sizes 16, 24 or 32 supported in %s on line %d
 string(0) ""
+
+Deprecated: Function mcrypt_decrypt() is deprecated in %s%emcrypt_rijndael128_256BitKey.php on line 45
 
 Warning: mcrypt_decrypt(): Key of size 20 not supported by this algorithm. Only keys of sizes 16, 24 or 32 supported in %s on line %d
 string(0) ""
 
 key length=24
+
+Deprecated: Function mcrypt_encrypt() is deprecated in %s%emcrypt_rijndael128_256BitKey.php on line 43
 string(128) "8ecdf1ed5742aff16ef34c819c8d22c707c54f4d9ffc18e5f6ab79fe68c25705351e2c001a0b9f29e5def67570ca9da644efb69a8bb97940cb4bec094dae8bb5"
+
+Deprecated: Function mcrypt_decrypt() is deprecated in %s%emcrypt_rijndael128_256BitKey.php on line 45
 string(128) "546869732069732074686520736563726574206d657373616765207768696368206d75737420626520656e637279707465640000000000000000000000000000"
 
 key length=30
 
+Deprecated: Function mcrypt_encrypt() is deprecated in %s%emcrypt_rijndael128_256BitKey.php on line 43
+
 Warning: mcrypt_encrypt(): Key of size 30 not supported by this algorithm. Only keys of sizes 16, 24 or 32 supported in %s on line %d
 string(0) ""
+
+Deprecated: Function mcrypt_decrypt() is deprecated in %s%emcrypt_rijndael128_256BitKey.php on line 45
 
 Warning: mcrypt_decrypt(): Key of size 30 not supported by this algorithm. Only keys of sizes 16, 24 or 32 supported in %s on line %d
 string(0) ""
 
 key length=32
+
+Deprecated: Function mcrypt_encrypt() is deprecated in %s%emcrypt_rijndael128_256BitKey.php on line 43
 string(128) "f23bc103bfd0859a8318acee6d96e5f43dff68f3cdeae817a1e77c33492e32bdb82c5f660fcd1a2bfda70d9de4d5d8028ce179a9e2f7f9ee7dd61c7b4b409e95"
+
+Deprecated: Function mcrypt_decrypt() is deprecated in %s%emcrypt_rijndael128_256BitKey.php on line 45
 string(128) "546869732069732074686520736563726574206d657373616765207768696368206d75737420626520656e637279707465640000000000000000000000000000"
 
 key length=40
 
+Deprecated: Function mcrypt_encrypt() is deprecated in %s%emcrypt_rijndael128_256BitKey.php on line 43
+
 Warning: mcrypt_encrypt(): Key of size 40 not supported by this algorithm. Only keys of sizes 16, 24 or 32 supported in %s on line %d
 string(0) ""
+
+Deprecated: Function mcrypt_decrypt() is deprecated in %s%emcrypt_rijndael128_256BitKey.php on line 45
 
 Warning: mcrypt_decrypt(): Key of size 40 not supported by this algorithm. Only keys of sizes 16, 24 or 32 supported in %s on line %d
 string(0) ""

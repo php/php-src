@@ -59,7 +59,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --EXPECTF--
 array(1) {
-  [%u|b%"label"]=>
-  %unicode|string%(1) "\"
+  ["label"]=>
+  string(1) "\"
 }
 done!

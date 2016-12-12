@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -110,6 +110,8 @@ ZEND_API ts_rsrc_id ini_scanner_globals_id;
 ZEND_API zend_ini_scanner_globals ini_scanner_globals;
 #endif
 
+#define ZEND_SYSTEM_INI CG(ini_parser_unbuffered_errors)
+
 /* Eat leading whitespace */
 #define EAT_LEADING_WHITESPACE()                     \
 	while (yyleng) {                                 \
@@ -137,7 +139,7 @@ ZEND_API zend_ini_scanner_globals ini_scanner_globals;
 #define EAT_TRAILING_WHITESPACE()	EAT_TRAILING_WHITESPACE_EX('X')
 
 #define zend_ini_copy_value(retval, str, len)	\
-	ZVAL_NEW_STR(retval, zend_string_init(str, len, 1))
+	ZVAL_NEW_STR(retval, zend_string_init(str, len, ZEND_SYSTEM_INI))
 
 
 #define RETURN_TOKEN(type, str, len) {                       \

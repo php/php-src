@@ -14,12 +14,8 @@ $white = imagecolorallocate($image, 255,255,255);
 
 $result = imagecharup($image, 1, 5, 5, 'C', $white);
 
-ob_start();
-imagepng($image, null, 9);
-$img = ob_get_contents();
-ob_end_clean();
-
-echo md5(base64_encode($img));
+include_once __DIR__ . '/func.inc';
+test_image_equals_file(__DIR__ . '/imagecharup_basic.png', $image);
 ?>
 --EXPECT--
-79b48d5cef6d489bb68573df0296d775
+The images are equal.

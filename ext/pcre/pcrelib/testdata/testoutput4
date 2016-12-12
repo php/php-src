@@ -1271,4 +1271,10 @@ No match
     #\x{10000}#\x{100}#\x{10ffff}#
  0: #\x{10000}#\x{100}#\x{10ffff}#
 
+"[\S\V\H]"8
+
+/\C(\W?ſ)'?{{/8
+    \\C(\\W?ſ)'?{{
+No match
+
 /-- End of testinput4 --/

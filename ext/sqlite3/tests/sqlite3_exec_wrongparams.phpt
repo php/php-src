@@ -4,7 +4,7 @@ SQLite3::exec test, testing for wrong type parameters
 Michelangelo van Dam
 # Belgian PHP Testfest 2009
 --SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
+<?php require_once(__DIR__ . '/skipif.inc'); ?>
 --FILE--
 <?php
 

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2015 The PHP Group                                |
+  | Copyright (c) 2006-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -12,13 +12,11 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Andrey Hristov <andrey@mysql.com>                           |
-  |          Ulf Wendel <uwendel@mysql.com>                              |
-  |          Georg Richter <georg@mysql.com>                             |
+  | Authors: Andrey Hristov <andrey@php.net>                             |
+  |          Ulf Wendel <uw@php.net>                                     |
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
 #include "php.h"
 #include "mysqlnd.h"
 #include "mysqlnd_wireprotocol.h"
@@ -186,7 +184,7 @@ ps_fetch_float(zval * zv, const MYSQLND_FIELD * const field, const unsigned int 
 # define NOT_FIXED_DEC 31
 #endif
 
-	dval = mysql_float_to_double(fval, (field->decimals >= NOT_FIXED_DEC) ? -1 : field->decimals);
+	dval = mysql_float_to_double(fval, (field->decimals >= NOT_FIXED_DEC) ? -1 : (int)field->decimals);
 
 	ZVAL_DOUBLE(zv, dval);
 	DBG_VOID_RETURN;

@@ -31,7 +31,8 @@ $image_types = array (
 	IMAGETYPE_IFF,     
 	IMAGETYPE_WBMP, 
 	IMAGETYPE_JPEG2000, 
-	IMAGETYPE_XBM      
+	IMAGETYPE_XBM,
+	IMAGETYPE_WEBP
 );
 
 	foreach($image_types as $image_type) {
@@ -59,5 +60,6 @@ string(9) "image/iff"
 string(18) "image/vnd.wap.wbmp"
 string(24) "application/octet-stream"
 string(9) "image/xbm"
+string(10) "image/webp"
 
 Done image_type_to_mime_type() test

@@ -27,9 +27,9 @@ set_error_handler('test_error_handler');
 
 // Initialise function arguments not being substituted (if any)
 $cipher = MCRYPT_TRIPLEDES;
-$key = b'string_val';
-$data = b'string_val';
-$iv = b'01234567';
+$key = 'string_val';
+$data = 'string_val';
+$iv = '01234567';
 
 //get an unset variable
 $unset_var = 10;
@@ -124,106 +124,132 @@ fclose($fp);
 *** Testing mcrypt_decrypt() : usage variation ***
 
 --int 0--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation4.php(107)
 Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
 bool(false)
 
 --int 1--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation4.php(107)
 Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
 bool(false)
 
 --int 12345--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation4.php(107)
 Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
 bool(false)
 
 --int -12345--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation4.php(107)
 Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
 bool(false)
 
 --float 10.5--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation4.php(107)
 Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
 bool(false)
 
 --float -10.5--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation4.php(107)
 Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
 bool(false)
 
 --float 12.3456789000e10--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation4.php(107)
 Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
 bool(false)
 
 --float -12.3456789000e10--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation4.php(107)
 Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
 bool(false)
 
 --float .5--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation4.php(107)
 Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
 bool(false)
 
 --empty array--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation4.php(107)
 Error: 2 - mcrypt_decrypt() expects parameter 4 to be string, array given, %s(%d)
 NULL
 
 --int indexed array--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation4.php(107)
 Error: 2 - mcrypt_decrypt() expects parameter 4 to be string, array given, %s(%d)
 NULL
 
 --associative array--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation4.php(107)
 Error: 2 - mcrypt_decrypt() expects parameter 4 to be string, array given, %s(%d)
 NULL
 
 --nested arrays--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation4.php(107)
 Error: 2 - mcrypt_decrypt() expects parameter 4 to be string, array given, %s(%d)
 NULL
 
 --uppercase NULL--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation4.php(107)
 Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
 bool(false)
 
 --lowercase null--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation4.php(107)
 Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
 bool(false)
 
 --lowercase true--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation4.php(107)
 Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
 bool(false)
 
 --lowercase false--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation4.php(107)
 Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
 bool(false)
 
 --uppercase TRUE--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation4.php(107)
 Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
 bool(false)
 
 --uppercase FALSE--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation4.php(107)
 Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
 bool(false)
 
 --empty string DQ--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation4.php(107)
 Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
 bool(false)
 
 --empty string SQ--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation4.php(107)
 Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
 bool(false)
 
 --instance of classWithToString--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation4.php(107)
 Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
 bool(false)
 
 --instance of classWithoutToString--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation4.php(107)
 Error: 2 - mcrypt_decrypt() expects parameter 4 to be string, object given, %s(%d)
 NULL
 
 --undefined var--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation4.php(107)
 Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
 bool(false)
 
 --unset var--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation4.php(107)
 Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
 bool(false)
 
 --resource--
+Error: 8192 - Function mcrypt_decrypt() is deprecated, %s%emcrypt_decrypt_variation4.php(107)
 Error: 2 - mcrypt_decrypt() expects parameter 4 to be string, resource given, %s(%d)
 NULL
 ===DONE===

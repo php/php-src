@@ -32,6 +32,12 @@ fclose($server);
 ?>
 --EXPECTF--
 array(7) {
+  ["timed_out"]=>
+  bool(false)
+  ["blocked"]=>
+  bool(true)
+  ["eof"]=>
+  bool(false)
   ["stream_type"]=>
   string(%d) "tcp_socke%s"
   ["mode"]=>
@@ -39,12 +45,6 @@ array(7) {
   ["unread_bytes"]=>
   int(0)
   ["seekable"]=>
-  bool(false)
-  ["timed_out"]=>
-  bool(false)
-  ["blocked"]=>
-  bool(true)
-  ["eof"]=>
   bool(false)
 }
 
@@ -52,6 +52,12 @@ array(7) {
 Set blocking to false:
 bool(true)
 array(7) {
+  ["timed_out"]=>
+  bool(false)
+  ["blocked"]=>
+  bool(false)
+  ["eof"]=>
+  bool(false)
   ["stream_type"]=>
   string(%d) "tcp_socke%s"
   ["mode"]=>
@@ -59,12 +65,6 @@ array(7) {
   ["unread_bytes"]=>
   int(0)
   ["seekable"]=>
-  bool(false)
-  ["timed_out"]=>
-  bool(false)
-  ["blocked"]=>
-  bool(false)
-  ["eof"]=>
   bool(false)
 }
 
@@ -72,6 +72,12 @@ array(7) {
 Set blocking to true:
 bool(true)
 array(7) {
+  ["timed_out"]=>
+  bool(false)
+  ["blocked"]=>
+  bool(true)
+  ["eof"]=>
+  bool(false)
   ["stream_type"]=>
   string(%d) "tcp_socke%s"
   ["mode"]=>
@@ -79,11 +85,5 @@ array(7) {
   ["unread_bytes"]=>
   int(0)
   ["seekable"]=>
-  bool(false)
-  ["timed_out"]=>
-  bool(false)
-  ["blocked"]=>
-  bool(true)
-  ["eof"]=>
   bool(false)
 }

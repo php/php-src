@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -587,11 +587,7 @@ PHP_FUNCTION(enchant_broker_request_pwl_dict)
 		RETURN_FALSE;
 	}
 
-#if PHP_API_VERSION < 20100412
-	if ((PG(safe_mode) && (!php_checkuid(pwl, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(pwl)) {
-#else
 	if (php_check_open_basedir(pwl)) {
-#endif
 		RETURN_FALSE;
 	}
 

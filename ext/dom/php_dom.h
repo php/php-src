@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -125,7 +125,7 @@ xmlNodePtr create_notation(const xmlChar *name, const xmlChar *ExternalID, const
 xmlNode *php_dom_libxml_hash_iter(xmlHashTable *ht, int index);
 xmlNode *php_dom_libxml_notation_iter(xmlHashTable *ht, int index);
 zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, int by_ref);
-int dom_set_doc_classmap(php_libxml_ref_obj *document, zend_class_entry *basece, zend_class_entry *ce);
+void dom_set_doc_classmap(php_libxml_ref_obj *document, zend_class_entry *basece, zend_class_entry *ce);
 zval *dom_nodelist_read_dimension(zval *object, zval *offset, int type, zval *rv);
 int dom_nodelist_has_dimension(zval *object, zval *member, int check_empty);
 

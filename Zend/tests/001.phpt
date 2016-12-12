@@ -17,11 +17,20 @@ function test3($a, $b) {
 
 test1();
 test2(1);
-test2();
+try {
+	test2();
+} catch (Throwable $e) {
+	echo "Exception: " . $e->getMessage() . "\n";
+}
+
 test3(1,2);
 
 call_user_func("test1");
-call_user_func("test3", 1);
+try {
+	call_user_func("test3", 1);
+} catch (Throwable $e) {
+	echo "Exception: " . $e->getMessage() . "\n";
+}
 call_user_func("test3", 1, 2);
 
 class test {
@@ -38,14 +47,10 @@ echo "Done\n";
 --EXPECTF--	
 int(0)
 int(1)
-
-Warning: Missing argument 1 for test2(), called in %s on line %d
-int(0)
+Exception: Too few arguments to function test2(), 0 passed in %s001.php on line 18 and exactly 1 expected
 int(2)
 int(0)
-
-Warning: Missing argument 2 for test3()%s
-int(1)
+Exception: Too few arguments to function test3(), 1 passed in %s001.php on line 27 and exactly 2 expected
 int(2)
 int(1)
 

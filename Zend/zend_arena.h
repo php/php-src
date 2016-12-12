@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -103,11 +103,12 @@ static zend_always_inline void zend_arena_release(zend_arena **arena_ptr, void *
 	zend_arena *arena = *arena_ptr;
 
 	while (UNEXPECTED((char*)checkpoint > arena->end) ||
-	       UNEXPECTED((char*)checkpoint < (char*)arena)) {
+	       UNEXPECTED((char*)checkpoint <= (char*)arena)) {
 		zend_arena *prev = arena->prev;
 		efree(arena);
 		*arena_ptr = arena = prev;
 	}
+	ZEND_ASSERT((char*)checkpoint > (char*)arena && (char*)checkpoint <= arena->end);
 	arena->ptr = (char*)checkpoint;
 }
 

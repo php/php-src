@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -665,7 +665,7 @@ PHPAPI int php_output_handler_alias_register(const char *name, size_t name_len, 
 }
 /* }}} */
 
-/* {{{ SUCCESS|FAILURE php_output_handler_hook(php_output_handler_hook_t type, void *arg TSMRLS_DC)
+/* {{{ SUCCESS|FAILURE php_output_handler_hook(php_output_handler_hook_t type, void *arg)
  * Output handler hook for output handler functions to check/modify the current handlers abilities */
 PHPAPI int php_output_handler_hook(php_output_handler_hook_t type, void *arg)
 {
@@ -715,7 +715,7 @@ PHPAPI void php_output_handler_dtor(php_output_handler *handler)
 }
 /* }}} */
 
-/* {{{ void php_output_handler_free(php_output_handler **handler TSMRLS_DC)
+/* {{{ void php_output_handler_free(php_output_handler **handler)
  * Destroy and free an output handler */
 PHPAPI void php_output_handler_free(php_output_handler **h)
 {
@@ -763,7 +763,7 @@ static inline int php_output_lock_error(int op)
 	if (op && OG(active) && OG(running)) {
 		/* fatal error */
 		php_output_deactivate();
-		php_error_docref("ref.outcontrol", E_RECOVERABLE_ERROR, "Cannot use output buffering in output buffering display handlers");
+		php_error_docref("ref.outcontrol", E_ERROR, "Cannot use output buffering in output buffering display handlers");
 		return 1;
 	}
 	return 0;

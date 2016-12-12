@@ -28,6 +28,7 @@ class Bar {
     }
 
     public function __destruct() {
+        if (!isset(self::$instance)) return;
         Foo::getInstance();
     }
 }

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -46,9 +46,46 @@
 #include <fcntl.h>
 #endif
 
-#if HAVE_NICE && HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+
+#if HAVE_LIMITS_H
+#include <limits.h>
+#endif
+
+#ifdef PHP_WIN32
+# include "win32/nice.h"
+#endif
+
+static size_t cmd_max_len;
+
+/* {{{ PHP_MINIT_FUNCTION(exec) */
+PHP_MINIT_FUNCTION(exec)
+{
+#ifdef _SC_ARG_MAX
+	cmd_max_len = sysconf(_SC_ARG_MAX);
+	if ((size_t)-1 == cmd_max_len) {
+#ifdef _POSIX_ARG_MAX
+		cmd_max_len = _POSIX_ARG_MAX;
+#else
+		cmd_max_len = 4096;
+#endif
+	}
+#elif defined(ARG_MAX)
+	cmd_max_len = ARG_MAX;
+#elif defined(PHP_WIN32)
+	/* Executed commands will run through cmd.exe. As long as it's the case,
+		it's just the constant limit.*/
+	cmd_max_len = 8192;
+#else
+	/* This is just an arbitrary value for the fallback case. */
+	cmd_max_len = 4096;
+#endif
+
+	return SUCCESS;
+}
+/* }}} */
 
 /* {{{ php_exec
  * If type==0, only last line of output is returned (exec)
@@ -245,15 +282,21 @@ PHP_FUNCTION(passthru)
 */
 PHPAPI zend_string *php_escape_shell_cmd(char *str)
 {
-	register int x, y, l = (int)strlen(str);
-	size_t estimate = (2 * l) + 1;
+	register size_t x, y;
+	size_t l = strlen(str);
+	uint64_t estimate = (2 * (uint64_t)l) + 1;
 	zend_string *cmd;
 #ifndef PHP_WIN32
 	char *p = NULL;
 #endif
 
+	/* max command line length - two single quotes - \0 byte length */
+	if (l > cmd_max_len - 2 - 1) {
+		php_error_docref(NULL, E_ERROR, "Command exceeds the allowed length of %d bytes", cmd_max_len);
+		return ZSTR_EMPTY_ALLOC();
+	}
 
-	cmd = zend_string_alloc(2 * l, 0);
+	cmd = zend_string_safe_alloc(2, l, 0, 0);
 
 	for (x = 0, y = 0; x < l; x++) {
 		int mb_len = php_mblen(str + x, (l - x));
@@ -282,7 +325,7 @@ PHPAPI zend_string *php_escape_shell_cmd(char *str)
 				ZSTR_VAL(cmd)[y++] = str[x];
 				break;
 #else
-			/* % is Windows specific for environmental variables, ^%PATH% will 
+			/* % is Windows specific for environmental variables, ^%PATH% will
 				output PATH while ^%PATH^% will not. escapeshellcmd->val will escape all % and !.
 			*/
 			case '%':
@@ -324,6 +367,12 @@ PHPAPI zend_string *php_escape_shell_cmd(char *str)
 	}
 	ZSTR_VAL(cmd)[y] = '\0';
 
+	if (y > cmd_max_len + 1) {
+		php_error_docref(NULL, E_ERROR, "Escaped command exceeds the allowed length of %d bytes", cmd_max_len);
+		zend_string_release(cmd);
+		return ZSTR_EMPTY_ALLOC();
+	}
+
 	if ((estimate - y) > 4096) {
 		/* realloc if the estimate was way overill
 		 * Arbitrary cutoff point of 4096 */
@@ -340,12 +389,18 @@ PHPAPI zend_string *php_escape_shell_cmd(char *str)
  */
 PHPAPI zend_string *php_escape_shell_arg(char *str)
 {
-	int x, y = 0, l = (int)strlen(str);
+	size_t x, y = 0;
+	size_t l = strlen(str);
 	zend_string *cmd;
-	size_t estimate = (4 * l) + 3;
+	uint64_t estimate = (4 * (uint64_t)l) + 3;
 
+	/* max command line length - two single quotes - \0 byte length */
+	if (l > cmd_max_len - 2 - 1) {
+		php_error_docref(NULL, E_ERROR, "Argument exceeds the allowed length of %d bytes", cmd_max_len);
+		return ZSTR_EMPTY_ALLOC();
+	}
 
-	cmd = zend_string_alloc(4 * l + 2, 0); /* worst case */
+	cmd = zend_string_safe_alloc(4, l, 2, 0); /* worst case */
 
 #ifdef PHP_WIN32
 	ZSTR_VAL(cmd)[y++] = '"';
@@ -399,6 +454,12 @@ PHPAPI zend_string *php_escape_shell_arg(char *str)
 #endif
 	ZSTR_VAL(cmd)[y] = '\0';
 
+	if (y > cmd_max_len + 1) {
+		php_error_docref(NULL, E_ERROR, "Escaped argument exceeds the allowed length of %d bytes", cmd_max_len);
+		zend_string_release(cmd);
+		return ZSTR_EMPTY_ALLOC();
+	}
+
 	if ((estimate - y) > 4096) {
 		/* realloc if the estimate was way overill
 		 * Arbitrary cutoff point of 4096 */
@@ -421,6 +482,10 @@ PHP_FUNCTION(escapeshellcmd)
 	}
 
 	if (command_len) {
+		if (command_len != strlen(command)) {
+			php_error_docref(NULL, E_ERROR, "Input string contains NULL bytes");
+			return;
+		}
 		RETVAL_STR(php_escape_shell_cmd(command));
 	} else {
 		RETVAL_EMPTY_STRING();
@@ -440,6 +505,10 @@ PHP_FUNCTION(escapeshellarg)
 	}
 
 	if (argument) {
+		if (argument_len != strlen(argument)) {
+			php_error_docref(NULL, E_ERROR, "Input string contains NULL bytes");
+			return;
+		}
 		RETVAL_STR(php_escape_shell_arg(argument));
 	}
 }
@@ -492,7 +561,11 @@ PHP_FUNCTION(proc_nice)
 	errno = 0;
 	php_ignore_value(nice(pri));
 	if (errno) {
+#ifdef PHP_WIN32
+		php_error_docref(NULL, E_WARNING, php_win_err());
+#else
 		php_error_docref(NULL, E_WARNING, "Only a super user may attempt to increase the priority of a process");
+#endif
 		RETURN_FALSE;
 	}
 

@@ -7,7 +7,6 @@ phar.readonly=0
 open_basedir=
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (version_compare(PHP_VERSION, "5.3", "<")) die("skip PHP 5.3+ required"); ?>
 --FILE_EXTERNAL--
 files/write6.phar
 --CLEAN--

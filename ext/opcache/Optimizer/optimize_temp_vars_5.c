@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -39,7 +39,7 @@
 		max = i;							\
 	}
 
-void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *ctx)
+void zend_optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	int T = op_array->T;
 	int offset = op_array->last_var;
@@ -139,13 +139,6 @@ void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *c
 			}
 		}
 
-		/* Skip OP_DATA */
-		if (opline->opcode == ZEND_OP_DATA &&
-		    (opline-1)->opcode == ZEND_ASSIGN_DIM) {
-		    opline--;
-		    continue;
-		}
-
 		if ((ZEND_OP2_TYPE(opline) & (IS_VAR | IS_TMP_VAR))) {
 			currT = VAR_NUM(ZEND_OP2(opline).var) - offset;
 			if (!zend_bitset_in(valid_T, currT)) {
@@ -154,31 +147,6 @@ void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *c
 				zend_bitset_incl(valid_T, currT);
 			}
 			ZEND_OP2(opline).var = NUM_VAR(map_T[currT] + offset);
-		}
-
-		if (opline->opcode == ZEND_DECLARE_INHERITED_CLASS ||
-		    opline->opcode == ZEND_DECLARE_ANON_INHERITED_CLASS ||
-            opline->opcode == ZEND_DECLARE_INHERITED_CLASS_DELAYED) {
-			currT = VAR_NUM(opline->extended_value) - offset;
-			if (!zend_bitset_in(valid_T, currT)) {
-				GET_AVAILABLE_T();
-				map_T[currT] = i;
-				zend_bitset_incl(valid_T, currT);
-			}
-			opline->extended_value = NUM_VAR(map_T[currT] + offset);
-		}
-
-		/* Allocate OP_DATA->op2 after "operands", but before "result" */
-		if (opline->opcode == ZEND_ASSIGN_DIM &&
-		    (opline + 1)->opcode == ZEND_OP_DATA &&
-		    ZEND_OP2_TYPE(opline + 1) & (IS_VAR | IS_TMP_VAR)) {
-			currT = VAR_NUM(ZEND_OP2(opline + 1).var) - offset;
-			GET_AVAILABLE_T();
-			map_T[currT] = i;
-			zend_bitset_incl(valid_T, currT);
-			zend_bitset_excl(taken_T, i);
-			ZEND_OP2(opline + 1).var = NUM_VAR(i + offset);
-			var_to_free = i;
 		}
 
 		if (ZEND_RESULT_TYPE(opline) & (IS_VAR | IS_TMP_VAR)) {
@@ -202,16 +170,11 @@ void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *c
 						}
 					}
 				}
-			} else { /* Au still needs to be assigned a T which is a bit dumb. Should consider changing Zend */
+			} else {
+				/* Code which gets here is using a wrongly built opcode such as RECV() */
 				GET_AVAILABLE_T();
-
-				if (RESULT_UNUSED(opline)) {
-					zend_bitset_excl(taken_T, i);
-				} else {
-					/* Code which gets here is using a wrongly built opcode such as RECV() */
-					map_T[currT] = i;
-					zend_bitset_incl(valid_T, currT);
-				}
+				map_T[currT] = i;
+				zend_bitset_incl(valid_T, currT);
 				ZEND_RESULT(opline).var = NUM_VAR(i + offset);
 			}
 		}

@@ -27,9 +27,9 @@ set_error_handler('test_error_handler');
 
 // Initialise function arguments not being substituted (if any)
 $cipher = MCRYPT_TRIPLEDES;
-$key = b"string_val\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
+$key = "string_val\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
 $mode = MCRYPT_MODE_ECB;
-$iv = b'01234567';
+$iv = '01234567';
 
 //get an unset variable
 $unset_var = 10;
@@ -39,7 +39,7 @@ unset ($unset_var);
 class classWithToString
 {
 	public function __toString() {
-		return b"Class A object";
+		return "Class A object";
 	}
 }
 
@@ -48,7 +48,7 @@ class classWithoutToString
 }
 
 // heredoc string
-$heredoc = b<<<EOT
+$heredoc = <<<EOT
 hello world
 EOT;
 
@@ -124,86 +124,112 @@ fclose($fp);
 *** Testing mcrypt_encrypt() : usage variation ***
 
 --int 0--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation3.php(107)
 string(16) "51dc9cd9179b718b"
 
 --int 1--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation3.php(107)
 string(16) "619c335f8c4f9cbf"
 
 --int 12345--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation3.php(107)
 string(16) "b1258d67ab73de00"
 
 --int -12345--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation3.php(107)
 string(16) "8eecf134443bd6b9"
 
 --float 10.5--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation3.php(107)
 string(16) "34b5750a793baff5"
 
 --float -10.5--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation3.php(107)
 string(16) "7a605f2aacc8a11d"
 
 --float 12.3456789000e10--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation3.php(107)
 string(32) "74a0d7026ae586f476d4b17808851e86"
 
 --float -12.3456789000e10--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation3.php(107)
 string(32) "bfb155997017986c01090afebd62c7ca"
 
 --float .5--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation3.php(107)
 string(16) "cc60ac201164b6c7"
 
 --empty array--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation3.php(107)
 Error: 2 - mcrypt_encrypt() expects parameter 3 to be string, array given, %s(%d)
 string(0) ""
 
 --int indexed array--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation3.php(107)
 Error: 2 - mcrypt_encrypt() expects parameter 3 to be string, array given, %s(%d)
 string(0) ""
 
 --associative array--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation3.php(107)
 Error: 2 - mcrypt_encrypt() expects parameter 3 to be string, array given, %s(%d)
 string(0) ""
 
 --nested arrays--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation3.php(107)
 Error: 2 - mcrypt_encrypt() expects parameter 3 to be string, array given, %s(%d)
 string(0) ""
 
 --uppercase NULL--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation3.php(107)
 string(16) "6ece228c41457539"
 
 --lowercase null--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation3.php(107)
 string(16) "6ece228c41457539"
 
 --lowercase true--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation3.php(107)
 string(16) "619c335f8c4f9cbf"
 
 --lowercase false--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation3.php(107)
 string(16) "6ece228c41457539"
 
 --uppercase TRUE--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation3.php(107)
 string(16) "619c335f8c4f9cbf"
 
 --uppercase FALSE--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation3.php(107)
 string(16) "6ece228c41457539"
 
 --empty string DQ--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation3.php(107)
 string(16) "6ece228c41457539"
 
 --empty string SQ--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation3.php(107)
 string(16) "6ece228c41457539"
 
 --instance of classWithToString--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation3.php(107)
 string(32) "749c3b4d16731d98370128754b7c930f"
 
 --instance of classWithoutToString--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation3.php(107)
 Error: 2 - mcrypt_encrypt() expects parameter 3 to be string, object given, %s(%d)
 string(0) ""
 
 --undefined var--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation3.php(107)
 string(16) "6ece228c41457539"
 
 --unset var--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation3.php(107)
 string(16) "6ece228c41457539"
 
 --resource--
+Error: 8192 - Function mcrypt_encrypt() is deprecated, %s%emcrypt_encrypt_variation3.php(107)
 Error: 2 - mcrypt_encrypt() expects parameter 3 to be string, resource given, %s(%d)
 string(0) ""
 ===DONE===

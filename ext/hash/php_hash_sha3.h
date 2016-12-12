@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,7 +24,7 @@
 
 typedef struct {
 	unsigned char state[200]; // 5 * 5 * sizeof(uint64)
-	php_hash_uint32 pos;
+	uint32_t pos;
 } PHP_SHA3_CTX;
 
 typedef PHP_SHA3_CTX PHP_SHA3_224_CTX;

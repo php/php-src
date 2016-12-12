@@ -17,7 +17,11 @@ echo "END\n";
 ?>
 --EXPECTF--
 ECB
+
+Deprecated: Function mcrypt_encrypt() is deprecated in %s%ebug43143.php on line 5
 CFB
+
+Deprecated: Function mcrypt_encrypt() is deprecated in %s%ebug43143.php on line 9
 
 Warning: mcrypt_encrypt(): Encryption mode requires an initialization vector of size 32 in %sbug43143.php on line 9
 END

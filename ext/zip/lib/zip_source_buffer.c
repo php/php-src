@@ -1,6 +1,6 @@
 /*
   zip_source_buffer.c -- create zip data source from buffer
-  Copyright (C) 1999-2014 Dieter Baron and Thomas Klausner
+  Copyright (C) 1999-2016 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -31,7 +31,6 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -376,6 +375,7 @@ static zip_int64_t
 buffer_write(buffer_t *buffer, const zip_uint8_t *data, zip_uint64_t length, zip_error_t *error)
 {
     zip_uint64_t n, i, fragment_offset;
+    zip_uint8_t **fragments;
 
     if (buffer->offset + length + buffer->fragment_size - 1 < length) {
 	zip_error_set(error, ZIP_ER_INVAL, 0);
@@ -388,7 +388,6 @@ buffer_write(buffer_t *buffer, const zip_uint8_t *data, zip_uint64_t length, zip
 	
 	if (needed_fragments > buffer->fragments_capacity) {
 	    zip_uint64_t new_capacity = buffer->fragments_capacity;
-	    zip_uint8_t **fragments;
 
 	    while (new_capacity < needed_fragments) {
 		new_capacity *= 2;

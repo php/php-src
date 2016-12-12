@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -29,7 +29,7 @@ PHP_HASH_API void PHP_ADLER32Init(PHP_ADLER32_CTX *context)
 
 PHP_HASH_API void PHP_ADLER32Update(PHP_ADLER32_CTX *context, const unsigned char *input, size_t len)
 {
-	php_hash_uint32 i, s[2];
+	uint32_t i, s[2];
 
 	s[0] = context->state & 0xffff;
 	s[1] = (context->state >> 16) & 0xffff;

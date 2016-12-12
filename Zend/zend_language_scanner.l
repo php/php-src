@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -116,7 +116,7 @@ do {																			\
 #define SET_DOUBLE_QUOTES_SCANNED_LENGTH(len) SCNG(scanned_string_len) = (len)
 #define GET_DOUBLE_QUOTES_SCANNED_LENGTH()    SCNG(scanned_string_len)
 
-#define IS_LABEL_START(c) (((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z') || (c) == '_' || (c) >= 0x7F)
+#define IS_LABEL_START(c) (((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z') || (c) == '_' || (c) >= 0x80)
 
 #define ZEND_IS_OCT(c)  ((c)>='0' && (c)<='7')
 #define ZEND_IS_HEX(c)  (((c)>='0' && (c)<='9') || ((c)>='a' && (c)<='f') || ((c)>='A' && (c)<='F'))
@@ -178,6 +178,7 @@ void startup_scanner(void)
 {
 	CG(parse_error) = 0;
 	CG(doc_comment) = NULL;
+	CG(extra_fn_flags) = 0;
 	zend_stack_init(&SCNG(state_stack), sizeof(int));
 	zend_ptr_stack_init(&SCNG(heredoc_label_stack));
 }
@@ -225,6 +226,7 @@ ZEND_API void zend_save_lexical_state(zend_lex_state *lex_state)
 	lex_state->script_encoding = SCNG(script_encoding);
 
 	lex_state->on_event = SCNG(on_event);
+	lex_state->on_event_context = SCNG(on_event_context);
 
 	lex_state->ast = CG(ast);
 	lex_state->ast_arena = CG(ast_arena);
@@ -264,6 +266,7 @@ ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state)
 	SCNG(script_encoding) = lex_state->script_encoding;
 
 	SCNG(on_event) = lex_state->on_event;
+	SCNG(on_event_context) = lex_state->on_event_context;
 
 	CG(ast) = lex_state->ast;
 	CG(ast_arena) = lex_state->ast_arena;
@@ -283,7 +286,9 @@ ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle)
 
 ZEND_API void zend_lex_tstring(zval *zv)
 {
-	if (SCNG(on_event)) SCNG(on_event)(ON_FEEDBACK, T_STRING, 0);
+	if (SCNG(on_event)) {
+		SCNG(on_event)(ON_FEEDBACK, T_STRING, 0, SCNG(on_event_context));
+	}
 
 	ZVAL_STRINGL(zv, (char*)SCNG(yy_text), SCNG(yy_leng));
 }
@@ -383,7 +388,7 @@ static const zend_encoding* zend_multibyte_detect_unicode(void)
 		/* check if the NULL byte is after the __HALT_COMPILER(); */
 		pos2 = LANG_SCNG(script_org);
 
-		while (pos1 - pos2 >= sizeof("__HALT_COMPILER();")-1) {
+		while ((size_t)(pos1 - pos2) >= sizeof("__HALT_COMPILER();")-1) {
 			pos2 = memchr(pos2, '_', pos1 - pos2);
 			if (!pos2) break;
 			pos2++;
@@ -500,7 +505,7 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle)
 
 	/* The shebang line was read, get the current position to obtain the buffer start */
 	if (CG(start_lineno) == 2 && file_handle->type == ZEND_HANDLE_FP && file_handle->handle.fp) {
-		if ((offset = ftell(file_handle->handle.fp)) == -1) {
+		if ((offset = ftell(file_handle->handle.fp)) == (size_t)-1) {
 			offset = 0;
 		}
 	}
@@ -521,7 +526,7 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle)
 	SCNG(yy_in) = file_handle;
 	SCNG(yy_start) = NULL;
 
-	if (size != -1) {
+	if (size != (size_t)-1) {
 		if (CG(multibyte)) {
 			SCNG(script_org) = (unsigned char*)buf;
 			SCNG(script_org_size) = size;
@@ -578,6 +583,7 @@ static zend_op_array *zend_compile(int type)
 	CG(ast_arena) = zend_arena_create(1024 * 32);
 
 	if (!zendparse()) {
+		int last_lineno = CG(zend_lineno);
 		zend_file_context original_file_context;
 		zend_oparray_context original_oparray_context;
 		zend_op_array *original_active_op_array = CG(active_op_array);
@@ -593,9 +599,10 @@ static zend_op_array *zend_compile(int type)
 		zend_file_context_begin(&original_file_context);
 		zend_oparray_context_begin(&original_oparray_context);
 		zend_compile_top_stmt(CG(ast));
+		CG(zend_lineno) = last_lineno;
 		zend_emit_final_return(type == ZEND_USER_FUNCTION);
 		op_array->line_start = 1;
-		op_array->line_end = CG(zend_lineno);
+		op_array->line_end = last_lineno;
 		pass_two(op_array);
 		zend_oparray_context_end(&original_oparray_context);
 		zend_file_context_end(&original_file_context);
@@ -1043,6 +1050,12 @@ static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quot
 								Z_STRLEN_P(zendlval)--;
 							}
 						}
+						if (octal_buf[2] &&
+						    (octal_buf[0] > '3')) {
+							/* 3 octit values must not overflow 0xFF (\377) */
+							zend_error(E_COMPILE_WARNING, "Octal escape sequence overflow \\%s is greater than \\377", octal_buf);
+						}
+
 						*t++ = (char) ZEND_STRTOL(octal_buf, NULL, 8);
 					} else {
 						*t++ = '\\';
@@ -1075,7 +1088,9 @@ static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quot
 
 static zend_always_inline int emit_token(int token, int token_line)
 {
-	if(SCNG(on_event)) SCNG(on_event)(ON_TOKEN, token, token_line);
+	if (SCNG(on_event)) {
+		SCNG(on_event)(ON_TOKEN, token, token_line, SCNG(on_event_context));
+	}
 
 	return token;
 }
@@ -1097,7 +1112,7 @@ DNUM	([0-9]*"."[0-9]+)|([0-9]+"."[0-9]*)
 EXPONENT_DNUM	(({LNUM}|{DNUM})[eE][+-]?{LNUM})
 HNUM	"0x"[0-9a-fA-F]+
 BNUM	"0b"[01]+
-LABEL	[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*
+LABEL	[a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*
 WHITESPACE [ \n\r\t]+
 TABS_AND_SPACES [ \t]*
 TOKENS [;:,.\[\]()|^&+-/*=%!~$<>?@]
@@ -1128,6 +1143,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"yield"{WHITESPACE}"from" {
+	HANDLE_NEWLINES(yytext, yyleng);
 	RETURN_TOKEN(T_YIELD_FROM);
 }
 
@@ -1834,7 +1850,7 @@ inline_char_handler:
 /* Make sure a label character follows "->", otherwise there is no property
  * and "->" will be taken literally
  */
-<ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE>"$"{LABEL}"->"[a-zA-Z_\x7f-\xff] {
+<ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE>"$"{LABEL}"->"[a-zA-Z_\x80-\xff] {
 	yyless(yyleng - 3);
 	yy_push_state(ST_LOOKING_FOR_PROPERTY);
 	zend_copy_value(zendlval, (yytext+1), (yyleng-1));
@@ -1861,7 +1877,7 @@ inline_char_handler:
 }
 
 <ST_VAR_OFFSET>{TOKENS}|[{}"`] {
-	/* Only '[' can be valid, but returning other tokens will allow a more explicit parse error */
+	/* Only '[' or '-' can be valid, but returning other tokens will allow a more explicit parse error */
 	RETURN_TOKEN(yytext[0]);
 }
 

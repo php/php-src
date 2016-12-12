@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2015 The PHP Group                                |
+  | Copyright (c) 2006-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -12,11 +12,11 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Andrey Hristov <andrey@mysql.com>                           |
-  |          Ulf Wendel <uwendel@mysql.com>                              |
-  |          Georg Richter <georg@mysql.com>                             |
+  | Authors: Andrey Hristov <andrey@php.net>                             |
+  |          Ulf Wendel <uw@php.net>                                     |
   +----------------------------------------------------------------------+
 */
+
 #include "php.h"
 #include "mysqlnd.h"
 #include "mysqlnd_connection.h"
@@ -1458,7 +1458,7 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 						MYSQLND_VIO * vio,
 						MYSQLND_STATS * stats,
 						MYSQLND_ERROR_INFO * error_info,
-						MYSQLND_MEMORY_POOL * result_set_memory_pool,
+						MYSQLND_MEMORY_POOL * pool,
 						MYSQLND_MEMORY_POOL_CHUNK ** buffer,
 						size_t * data_size, zend_bool persistent_alloc,
 						unsigned int prealloc_more_bytes)
@@ -1489,7 +1489,7 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 
 		if (first_iteration) {
 			first_iteration = FALSE;
-			*buffer = result_set_memory_pool->get_chunk(result_set_memory_pool, *data_size);
+			*buffer = pool->get_chunk(pool, *data_size);
 			if (!*buffer) {
 				ret = FAIL;
 				break;
@@ -1504,7 +1504,7 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 			/*
 			  We have to realloc the buffer.
 			*/
-			if (FAIL == (*buffer)->resize_chunk((*buffer), *data_size)) {
+			if (FAIL == pool->resize_chunk(pool, *buffer, *data_size)) {
 				SET_OOM_ERROR(error_info);
 				ret = FAIL;
 				break;
@@ -1524,7 +1524,7 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 		}
 	}
 	if (ret == FAIL && *buffer) {
-		(*buffer)->free_chunk((*buffer));
+		pool->free_chunk(pool, *buffer);
 		*buffer = NULL;
 	}
 	*data_size -= prealloc_more_bytes;
@@ -1611,7 +1611,7 @@ php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zv
 		MYSQLND_INC_CONN_STATISTIC_W_VALUE2(stats, statistic, 1,
 										STAT_BYTES_RECEIVED_PURE_DATA_PS,
 										(Z_TYPE_P(current_field) == IS_STRING)?
-											Z_STRLEN_P(current_field) : (p - orig_p));
+											Z_STRLEN_P(current_field) : (size_t)(p - orig_p));
 
 		if (!((bit<<=1) & 255)) {
 			bit = 1;	/* to the following byte */
@@ -1635,6 +1635,7 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 	zend_uchar * p = row_buffer->ptr;
 	size_t data_size = row_buffer->app;
 	zend_uchar * bit_area = (zend_uchar*) row_buffer->ptr + data_size + 1; /* we allocate from here */
+	const zend_uchar * const packet_end = (zend_uchar*) row_buffer->ptr + data_size;
 
 	DBG_ENTER("php_mysqlnd_rowp_read_text_protocol_aux");
 
@@ -1651,6 +1652,10 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 		/* NULL or NOT NULL, this is the question! */
 		if (len == MYSQLND_NULL_LENGTH) {
 			ZVAL_NULL(current_field);
+		} else if ((p + len) > packet_end) {
+			php_error_docref(NULL, E_WARNING, "Malformed server packet. Field length pointing "MYSQLND_SZ_T_SPEC
+											  " bytes after end of packet", (p + len) - packet_end - 1);
+			DBG_RETURN(FAIL);
 		} else {
 #if defined(MYSQLND_STRING_TO_INT_CONVERSION)
 			struct st_mysqlnd_perm_bind perm_bind =
@@ -1915,7 +1920,7 @@ php_mysqlnd_rowp_free_mem(void * _packet, zend_bool stack_allocation)
 	DBG_ENTER("php_mysqlnd_rowp_free_mem");
 	p = (MYSQLND_PACKET_ROW *) _packet;
 	if (p->row_buffer) {
-		p->row_buffer->free_chunk(p->row_buffer);
+		p->result_set_memory_pool->free_chunk(p->result_set_memory_pool, p->row_buffer);
 		p->row_buffer = NULL;
 	}
 	DBG_INF_FMT("stack_allocation=%u persistent=%u", (int)stack_allocation, (int)p->header.persistent);
@@ -2730,11 +2735,12 @@ MYSQLND_METHOD(mysqlnd_protocol, send_command)(
 {
 	enum_func_status ret = PASS;
 	MYSQLND_PACKET_COMMAND * cmd_packet = NULL;
+	enum mysqlnd_connection_state state;
 	DBG_ENTER("mysqlnd_protocol::send_command");
 	DBG_INF_FMT("command=%s silent=%u", mysqlnd_command_to_text[command], silent);
 	DBG_INF_FMT("server_status=%u", UPSERT_STATUS_GET_SERVER_STATUS(upsert_status));
 	DBG_INF_FMT("sending %u bytes", arg_len + 1); /* + 1 is for the command */
-	enum mysqlnd_connection_state state = connection_state->m->get(connection_state);
+	state = connection_state->m->get(connection_state);
 
 	switch (state) {
 		case CONN_READY:

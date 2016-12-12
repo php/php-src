@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -149,7 +149,7 @@ static php_stream_filter_ops php_mcrypt_filter_ops = {
 /* {{{ php_mcrypt_filter_create
  * Instantiate mcrypt filter
  */
-static php_stream_filter *php_mcrypt_filter_create(const char *filtername, zval *filterparams, int persistent)
+static php_stream_filter *php_mcrypt_filter_create(const char *filtername, zval *filterparams, uint8_t persistent)
 {
 	int encrypt = 1, iv_len, key_len, keyl, result;
 	const char *cipher = filtername + sizeof("mcrypt.") - 1;
@@ -160,6 +160,8 @@ static php_stream_filter *php_mcrypt_filter_create(const char *filtername, zval 
 	char *mode_dir = INI_STR("mcrypt.modes_dir");
 	char *mode = "cbc";
 	php_mcrypt_filter_data *data;
+
+	php_error_docref(NULL, E_DEPRECATED, "mcrypt and mdecrypt stream filters have been deprecated");
 
 	if (strncasecmp(filtername, "mdecrypt.", sizeof("mdecrypt.") - 1) == 0) {
 		encrypt = 0;
@@ -226,7 +228,7 @@ static php_stream_filter *php_mcrypt_filter_create(const char *filtername, zval 
 	}
 
 	iv = emalloc(iv_len + 1);
-	if (iv_len <= Z_STRLEN_P(tmpzval)) {
+	if ((size_t)iv_len <= Z_STRLEN_P(tmpzval)) {
 		memcpy(iv, Z_STRVAL_P(tmpzval), iv_len);
 	} else {
 		memcpy(iv, Z_STRVAL_P(tmpzval), Z_STRLEN_P(tmpzval));

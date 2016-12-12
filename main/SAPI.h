@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,7 +31,6 @@
 #include "win32/php_stdint.h"
 #endif
 #include <sys/stat.h>
-#include "php.h"
 
 #define SAPI_OPTION_NO_CHDIR 1
 #define SAPI_POST_BLOCK_SIZE 0x4000
@@ -136,7 +135,6 @@ typedef struct _sapi_globals_struct {
 	HashTable known_post_content_types;
 	zval callback_func;
 	zend_fcall_info_cache fci_cache;
-	zend_bool callback_run;
 } sapi_globals_struct;
 
 
@@ -233,7 +231,7 @@ struct _sapi_module_struct {
 	zend_stat_t *(*get_stat)(void);
 	char *(*getenv)(char *name, size_t name_len);
 
-	void (*sapi_error)(int type, const char *error_msg, ...);
+	void (*sapi_error)(int type, const char *error_msg, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 
 	int (*header_handler)(sapi_header_struct *sapi_header, sapi_header_op_enum op, sapi_headers_struct *sapi_headers);
 	int (*send_headers)(sapi_headers_struct *sapi_headers);
@@ -243,14 +241,11 @@ struct _sapi_module_struct {
 	char *(*read_cookies)(void);
 
 	void (*register_server_variables)(zval *track_vars_array);
-	void (*log_message)(char *message);
+	void (*log_message)(char *message, int syslog_type_int);
 	double (*get_request_time)(void);
 	void (*terminate_process)(void);
 
 	char *php_ini_path_override;
-
-	void (*block_interruptions)(void);
-	void (*unblock_interruptions)(void);
 
 	void (*default_post_reader)(void);
 	void (*treat_data)(int arg, char *str, zval *destArray);
@@ -276,10 +271,9 @@ struct _sapi_module_struct {
 	unsigned int (*input_filter_init)(void);
 };
 
-
 struct _sapi_post_entry {
 	char *content_type;
-	uint content_type_len;
+	uint32_t content_type_len;
 	void (*post_reader)(void);
 	void (*post_handler)(char *content_type_dup, void *arg);
 };
@@ -309,7 +303,23 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data);
 SAPI_API SAPI_INPUT_FILTER_FUNC(php_default_input_filter);
 END_EXTERN_C()
 
-#define STANDARD_SAPI_MODULE_PROPERTIES
+#define STANDARD_SAPI_MODULE_PROPERTIES \
+	NULL, /* php_ini_path_override   */ \
+	NULL, /* default_post_reader     */ \
+	NULL, /* treat_data              */ \
+	NULL, /* executable_location     */ \
+	0,    /* php_ini_ignore          */ \
+	0,    /* php_ini_ignore_cwd      */ \
+	NULL, /* get_fd                  */ \
+	NULL, /* force_http_10           */ \
+	NULL, /* get_target_uid          */ \
+	NULL, /* get_target_gid          */ \
+	NULL, /* input_filter            */ \
+	NULL, /* ini_defaults            */ \
+	0,    /* phpinfo_as_text;        */ \
+	NULL, /* ini_entries;            */ \
+	NULL, /* additional_functions    */ \
+	NULL  /* input_filter_init       */
 
 #endif /* SAPI_H */
 

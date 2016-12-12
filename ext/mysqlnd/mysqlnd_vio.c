@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2015 The PHP Group                                |
+  | Copyright (c) 2006-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -12,10 +12,11 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Andrey Hristov <andrey@mysql.com>                           |
-  |          Ulf Wendel <uwendel@mysql.com>                              |
+  | Authors: Andrey Hristov <andrey@php.net>                             |
+  |          Ulf Wendel <uw@php.net>                                     |
   +----------------------------------------------------------------------+
 */
+
 #include "php.h"
 #include "mysqlnd.h"
 #include "mysqlnd_priv.h"
@@ -74,7 +75,7 @@ mysqlnd_set_sock_keepalive(php_stream * stream)
 /* {{{ mysqlnd_vio::network_read */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_vio, network_read)(MYSQLND_VIO * const vio, zend_uchar * const buffer, const size_t count,
-											 MYSQLND_STATS * const stats, MYSQLND_ERROR_INFO * const error_info)
+										  MYSQLND_STATS * const stats, MYSQLND_ERROR_INFO * const error_info)
 {
 	enum_func_status return_value = PASS;
 	php_stream * net_stream = vio->data->m.get_stream(vio);
@@ -105,7 +106,7 @@ MYSQLND_METHOD(mysqlnd_vio, network_read)(MYSQLND_VIO * const vio, zend_uchar * 
 /* {{{ mysqlnd_vio::network_write */
 static size_t
 MYSQLND_METHOD(mysqlnd_vio, network_write)(MYSQLND_VIO * const vio, const zend_uchar * const buffer, const size_t count,
-											  MYSQLND_STATS * const stats, MYSQLND_ERROR_INFO * const error_info)
+										   MYSQLND_STATS * const stats, MYSQLND_ERROR_INFO * const error_info)
 {
 	size_t ret;
 	DBG_ENTER("mysqlnd_vio::network_write");
@@ -121,11 +122,7 @@ static php_stream *
 MYSQLND_METHOD(mysqlnd_vio, open_pipe)(MYSQLND_VIO * const vio, const MYSQLND_CSTRING scheme, const zend_bool persistent,
 									   MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info)
 {
-#if PHP_API_VERSION < 20100412
-	unsigned int streams_options = ENFORCE_SAFE_MODE;
-#else
 	unsigned int streams_options = 0;
-#endif
 	dtor_func_t origin_dtor;
 	php_stream * net_stream = NULL;
 
@@ -160,11 +157,7 @@ static php_stream *
 MYSQLND_METHOD(mysqlnd_vio, open_tcp_or_unix)(MYSQLND_VIO * const vio, const MYSQLND_CSTRING scheme, const zend_bool persistent,
 											  MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info)
 {
-#if PHP_API_VERSION < 20100412
-	unsigned int streams_options = ENFORCE_SAFE_MODE;
-#else
 	unsigned int streams_options = 0;
-#endif
 	unsigned int streams_flags = STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT;
 	char * hashed_details = NULL;
 	int hashed_details_len = 0;
@@ -318,8 +311,7 @@ MYSQLND_METHOD(mysqlnd_vio, connect)(MYSQLND_VIO * const vio, const MYSQLND_CSTR
 	open_stream = vio->data->m.get_open_stream(vio, scheme, error_info);
 	if (open_stream) {
 		php_stream * net_stream = open_stream(vio, scheme, persistent, conn_stats, error_info);
-		if (net_stream) {
-			(void) vio->data->m.set_stream(vio, net_stream);
+		if (net_stream && PASS == vio->data->m.set_stream(vio, net_stream)) {
 			vio->data->m.post_connect_set_opt(vio, scheme, conn_stats, error_info);
 			ret = PASS;
 		}
@@ -567,11 +559,7 @@ MYSQLND_METHOD(mysqlnd_vio, enable_ssl)(MYSQLND_VIO * const net)
 			php_stream_context_set_option(context, "ssl", "allow_self_signed", &verify_peer_zval);
 		}
 	}
-#if PHP_API_VERSION >= 20131106
 	php_stream_context_set(net_stream, context);
-#else
-	php_stream_context_set(net_stream, context);
-#endif
 	if (php_stream_xport_crypto_setup(net_stream, STREAM_CRYPTO_METHOD_TLS_CLIENT, NULL) < 0 ||
 	    php_stream_xport_crypto_enable(net_stream, 1) < 0)
 	{
@@ -587,11 +575,7 @@ MYSQLND_METHOD(mysqlnd_vio, enable_ssl)(MYSQLND_VIO * const net)
 	  of the context, which means usage of already freed memory, bad. Actually we don't need this
 	  context anymore after we have enabled SSL on the connection. Thus it is very simple, we remove it.
 	*/
-#if PHP_API_VERSION >= 20131106
 	php_stream_context_set(net_stream, NULL);
-#else
-	php_stream_context_set(net_stream, NULL);
-#endif
 
 	if (net->data->options.timeout_read) {
 		struct timeval tv;
@@ -676,7 +660,7 @@ MYSQLND_METHOD(mysqlnd_vio, close_stream)(MYSQLND_VIO * const net, MYSQLND_STATS
 		} else {
 			php_stream_free(net_stream, PHP_STREAM_FREE_CLOSE);
 		}
-		(void) net->data->m.set_stream(net, NULL);
+		net->data->m.set_stream(net, NULL);
 	}
 
 	DBG_VOID_RETURN;
@@ -731,16 +715,26 @@ MYSQLND_METHOD(mysqlnd_vio, get_stream)(const MYSQLND_VIO * const net)
 
 
 /* {{{ mysqlnd_vio::set_stream */
-static php_stream *
-MYSQLND_METHOD(mysqlnd_vio, set_stream)(MYSQLND_VIO * const net, php_stream * net_stream)
+static enum_func_status
+MYSQLND_METHOD(mysqlnd_vio, set_stream)(MYSQLND_VIO * const vio, php_stream * net_stream)
 {
-	php_stream * ret = NULL;
 	DBG_ENTER("mysqlnd_vio::set_stream");
-	if (net) {
-		net->data->stream = net_stream;
-		ret = net->data->stream;
+	if (vio) {
+		vio->data->stream = net_stream;
+		DBG_RETURN(PASS);
 	}
-	DBG_RETURN(ret);
+	DBG_RETURN(FAIL);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_vio::has_valid_stream */
+static zend_bool
+MYSQLND_METHOD(mysqlnd_vio, has_valid_stream)(const MYSQLND_VIO * const vio)
+{
+	DBG_ENTER("mysqlnd_vio::has_valid_stream");
+	DBG_INF_FMT("%p %p", vio, vio? vio->data->stream:NULL);
+	DBG_RETURN((vio && vio->data->stream)? TRUE: FALSE);
 }
 /* }}} */
 
@@ -757,6 +751,7 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_vio)
 
 	MYSQLND_METHOD(mysqlnd_vio, get_stream),
 	MYSQLND_METHOD(mysqlnd_vio, set_stream),
+	MYSQLND_METHOD(mysqlnd_vio, has_valid_stream),
 	MYSQLND_METHOD(mysqlnd_vio, get_open_stream),
 
 	MYSQLND_METHOD(mysqlnd_vio, set_client_option),

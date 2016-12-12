@@ -1,6 +1,6 @@
 /*
  zip_io_util.c -- I/O helper functions
- Copyright (C) 1999-2014 Dieter Baron and Thomas Klausner
+ Copyright (C) 1999-2015 Dieter Baron and Thomas Klausner
  
  This file is part of libzip, a library to manipulate ZIP archives.
  The authors can be contacted at <libzip@nih.at>
@@ -31,7 +31,6 @@
  IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 

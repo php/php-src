@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -54,7 +54,8 @@ static zval *incomplete_class_get_property(zval *object, zval *member, int type,
 	incomplete_class_message(object, E_NOTICE);
 
 	if (type == BP_VAR_W || type == BP_VAR_RW) {
-		return &EG(error_zval);
+		ZVAL_ERROR(rv);
+		return rv;
 	} else {
 		return &EG(uninitialized_zval);
 	}

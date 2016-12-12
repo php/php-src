@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -143,9 +143,9 @@ PHP_HASH_API void PHP_RIPEMD320Init(PHP_RIPEMD320_CTX * context)
 #define F3(x,y,z)		(((x) & (z)) | ((y) & (~(z))))
 #define F4(x,y,z)		((x) ^ ((y) | (~(z))))
 
-static const php_hash_uint32 K_values[5]  = { 0x00000000, 0x5A827999, 0x6ED9EBA1, 0x8F1BBCDC, 0xA953FD4E };    /* 128, 256, 160, 320 */
-static const php_hash_uint32 KK_values[4] = { 0x50A28BE6, 0x5C4DD124, 0x6D703EF3, 0x00000000 };                /* 128 & 256 */
-static const php_hash_uint32 KK160_values[5] = { 0x50A28BE6, 0x5C4DD124, 0x6D703EF3, 0x7A6D76E9, 0x00000000 }; /* 160 & 320 */
+static const uint32_t K_values[5]  = { 0x00000000, 0x5A827999, 0x6ED9EBA1, 0x8F1BBCDC, 0xA953FD4E };    /* 128, 256, 160, 320 */
+static const uint32_t KK_values[4] = { 0x50A28BE6, 0x5C4DD124, 0x6D703EF3, 0x00000000 };                /* 128 & 256 */
+static const uint32_t KK160_values[5] = { 0x50A28BE6, 0x5C4DD124, 0x6D703EF3, 0x7A6D76E9, 0x00000000 }; /* 160 & 320 */
 
 #define K(n)  K_values[ (n) >> 4]
 #define KK(n) KK_values[(n) >> 4]
@@ -184,27 +184,27 @@ static const unsigned char SS[80] = {
 #define ROL(n, x)	(((x) << n) | ((x) >> (32 - n)))
 
 /* {{{ RIPEMDDecode
-   Decodes input (unsigned char) into output (php_hash_uint32). Assumes len is
+   Decodes input (unsigned char) into output (uint32_t). Assumes len is
    a multiple of 4.
  */
-static void RIPEMDDecode(php_hash_uint32 *output, const unsigned char *input, unsigned int len)
+static void RIPEMDDecode(uint32_t *output, const unsigned char *input, unsigned int len)
 {
 	unsigned int i, j;
 
 	for (i = 0, j = 0; j < len; i++, j += 4)
-		output[i] = ((php_hash_uint32) input[j + 0]) | (((php_hash_uint32) input[j + 1]) << 8) |
-			(((php_hash_uint32) input[j + 2]) << 16) | (((php_hash_uint32) input[j + 3]) << 24);
+		output[i] = ((uint32_t) input[j + 0]) | (((uint32_t) input[j + 1]) << 8) |
+			(((uint32_t) input[j + 2]) << 16) | (((uint32_t) input[j + 3]) << 24);
 }
 /* }}} */
 
 /* {{{ RIPEMD128Transform
  * ripemd128 basic transformation. Transforms state based on block.
  */
-static void RIPEMD128Transform(php_hash_uint32 state[4], const unsigned char block[64])
+static void RIPEMD128Transform(uint32_t state[4], const unsigned char block[64])
 {
-	php_hash_uint32 a  = state[0], b  = state[1], c  = state[2], d  = state[3];
-	php_hash_uint32 aa = state[0], bb = state[1], cc = state[2], dd = state[3];
-	php_hash_uint32 tmp, x[16];
+	uint32_t a  = state[0], b  = state[1], c  = state[2], d  = state[3];
+	uint32_t aa = state[0], bb = state[1], cc = state[2], dd = state[3];
+	uint32_t tmp, x[16];
 	int j;
 
 	RIPEMDDecode(x, block, 64);
@@ -261,10 +261,10 @@ PHP_HASH_API void PHP_RIPEMD128Update(PHP_RIPEMD128_CTX * context, const unsigne
 	index = (unsigned int) ((context->count[0] >> 3) & 0x3F);
 
 	/* Update number of bits */
-	if ((context->count[0] += ((php_hash_uint32) inputLen << 3)) < ((php_hash_uint32) inputLen << 3)) {
+	if ((context->count[0] += ((uint32_t) inputLen << 3)) < ((uint32_t) inputLen << 3)) {
 		context->count[1]++;
 	}
-	context->count[1] += ((php_hash_uint32) inputLen >> 29);
+	context->count[1] += ((uint32_t) inputLen >> 29);
 
 	partLen = 64 - index;
 
@@ -291,11 +291,11 @@ PHP_HASH_API void PHP_RIPEMD128Update(PHP_RIPEMD128_CTX * context, const unsigne
 /* {{{ RIPEMD256Transform
  * ripemd256 basic transformation. Transforms state based on block.
  */
-static void RIPEMD256Transform(php_hash_uint32 state[8], const unsigned char block[64])
+static void RIPEMD256Transform(uint32_t state[8], const unsigned char block[64])
 {
-	php_hash_uint32 a  = state[0], b  = state[1], c  = state[2], d  = state[3];
-	php_hash_uint32 aa = state[4], bb = state[5], cc = state[6], dd = state[7];
-	php_hash_uint32 tmp, x[16];
+	uint32_t a  = state[0], b  = state[1], c  = state[2], d  = state[3];
+	uint32_t aa = state[4], bb = state[5], cc = state[6], dd = state[7];
+	uint32_t tmp, x[16];
 	int j;
 
 	RIPEMDDecode(x, block, 64);
@@ -359,10 +359,10 @@ PHP_HASH_API void PHP_RIPEMD256Update(PHP_RIPEMD256_CTX * context, const unsigne
 	index = (unsigned int) ((context->count[0] >> 3) & 0x3F);
 
 	/* Update number of bits */
-	if ((context->count[0] += ((php_hash_uint32) inputLen << 3)) < ((php_hash_uint32) inputLen << 3)) {
+	if ((context->count[0] += ((uint32_t) inputLen << 3)) < ((uint32_t) inputLen << 3)) {
 		context->count[1]++;
 	}
-	context->count[1] += ((php_hash_uint32) inputLen >> 29);
+	context->count[1] += ((uint32_t) inputLen >> 29);
 
 	partLen = 64 - index;
 
@@ -389,11 +389,11 @@ PHP_HASH_API void PHP_RIPEMD256Update(PHP_RIPEMD256_CTX * context, const unsigne
 /* {{{ RIPEMD160Transform
  * ripemd160 basic transformation. Transforms state based on block.
  */
-static void RIPEMD160Transform(php_hash_uint32 state[5], const unsigned char block[64])
+static void RIPEMD160Transform(uint32_t state[5], const unsigned char block[64])
 {
-	php_hash_uint32 a  = state[0], b  = state[1], c  = state[2], d  = state[3], e  = state[4];
-	php_hash_uint32 aa = state[0], bb = state[1], cc = state[2], dd = state[3], ee = state[4];
-	php_hash_uint32 tmp, x[16];
+	uint32_t a  = state[0], b  = state[1], c  = state[2], d  = state[3], e  = state[4];
+	uint32_t aa = state[0], bb = state[1], cc = state[2], dd = state[3], ee = state[4];
+	uint32_t tmp, x[16];
 	int j;
 
 	RIPEMDDecode(x, block, 64);
@@ -458,10 +458,10 @@ PHP_HASH_API void PHP_RIPEMD160Update(PHP_RIPEMD160_CTX * context, const unsigne
 	index = (unsigned int) ((context->count[0] >> 3) & 0x3F);
 
 	/* Update number of bits */
-	if ((context->count[0] += ((php_hash_uint32) inputLen << 3)) < ((php_hash_uint32) inputLen << 3)) {
+	if ((context->count[0] += ((uint32_t) inputLen << 3)) < ((uint32_t) inputLen << 3)) {
 		context->count[1]++;
 	}
-	context->count[1] += ((php_hash_uint32) inputLen >> 29);
+	context->count[1] += ((uint32_t) inputLen >> 29);
 
 	partLen = 64 - index;
 
@@ -488,11 +488,11 @@ PHP_HASH_API void PHP_RIPEMD160Update(PHP_RIPEMD160_CTX * context, const unsigne
 /* {{{ RIPEMD320Transform
  * ripemd320 basic transformation. Transforms state based on block.
  */
-static void RIPEMD320Transform(php_hash_uint32 state[10], const unsigned char block[64])
+static void RIPEMD320Transform(uint32_t state[10], const unsigned char block[64])
 {
-	php_hash_uint32 a  = state[0], b  = state[1], c  = state[2], d  = state[3], e  = state[4];
-	php_hash_uint32 aa = state[5], bb = state[6], cc = state[7], dd = state[8], ee = state[9];
-	php_hash_uint32 tmp, x[16];
+	uint32_t a  = state[0], b  = state[1], c  = state[2], d  = state[3], e  = state[4];
+	uint32_t aa = state[5], bb = state[6], cc = state[7], dd = state[8], ee = state[9];
+	uint32_t tmp, x[16];
 	int j;
 
 	RIPEMDDecode(x, block, 64);
@@ -566,10 +566,10 @@ PHP_HASH_API void PHP_RIPEMD320Update(PHP_RIPEMD320_CTX * context, const unsigne
 	index = (unsigned int) ((context->count[0] >> 3) & 0x3F);
 
 	/* Update number of bits */
-	if ((context->count[0] += ((php_hash_uint32) inputLen << 3)) < ((php_hash_uint32) inputLen << 3)) {
+	if ((context->count[0] += ((uint32_t) inputLen << 3)) < ((uint32_t) inputLen << 3)) {
 		context->count[1]++;
 	}
-	context->count[1] += ((php_hash_uint32) inputLen >> 29);
+	context->count[1] += ((uint32_t) inputLen >> 29);
 
 	partLen = 64 - index;
 
@@ -601,10 +601,10 @@ static const unsigned char PADDING[64] =
 };
 
 /* {{{ RIPEMDEncode
-   Encodes input (php_hash_uint32) into output (unsigned char). Assumes len is
+   Encodes input (uint32_t) into output (unsigned char). Assumes len is
    a multiple of 4.
  */
-static void RIPEMDEncode(unsigned char *output, php_hash_uint32 *input, unsigned int len)
+static void RIPEMDEncode(unsigned char *output, uint32_t *input, unsigned int len)
 {
 	unsigned int i, j;
 

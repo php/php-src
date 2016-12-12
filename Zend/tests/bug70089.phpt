@@ -34,4 +34,4 @@ try {
 string(36) "Cannot use string offset as an array"
 string(27) "Cannot unset string offsets"
 string(41) "Only variables can be passed by reference"
-string(64) "Cannot increment/decrement overloaded objects nor string offsets"
+string(41) "Cannot increment/decrement string offsets"

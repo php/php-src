@@ -1,7 +1,7 @@
 PHP 7.1 INTERNALS UPGRADE NOTES
 
-0. Wiki Examples
 1. Internal API changes
+  a.
 
 2. Build system changes
   a. Unix build system changes
@@ -9,17 +9,11 @@ PHP 7.1 INTERNALS UPGRADE NOTES
 
 3. Module changes
 
-================
-0. Wiki Examples
-================
-
-The wiki contains multiple examples and further explanations of the internal
-changes. See: https://wiki.php.net/phpng-upgrading
-
-
 ========================
 1. Internal API changes
 ========================
+
+  a.
 
 ========================
 2. Build system changes
@@ -29,7 +23,16 @@ changes. See: https://wiki.php.net/phpng-upgrading
 
   b. Windows build system changes
 
+    *  nice() now have a Windows alternative that is implemented in win32/nice.c, using 
+	   SetPriorityClass(). See the implementation for more in-depth details. This also 
+	   defines HAVE_NICE.
+
 ========================
 3. Module changes
 ========================
+
+- Session:
+  . php_session_start()/session_reset_id() return value is changed from void to int.
+    It returns SUCCESS/FAILURE.
+  . Session module manages session status correctly.
 

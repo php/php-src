@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -101,10 +101,9 @@ struct _zend_compiler_globals {
 	zend_bool increment_lineno;
 
 	zend_string *doc_comment;
+	uint32_t extra_fn_flags;
 
 	uint32_t compiler_options; /* set of ZEND_COMPILE_* constants */
-
-	HashTable const_filenames;
 
 	zend_oparray_context context;
 	zend_file_context file_context;
@@ -113,6 +112,8 @@ struct _zend_compiler_globals {
 
 	zend_string *empty_string;
 	zend_string *one_char_string[256];
+	zend_string **known_strings;
+	uint32_t    known_strings_count;
 
 	HashTable interned_strings;
 
@@ -161,7 +162,7 @@ struct _zend_executor_globals {
 	zend_vm_stack  vm_stack;
 
 	struct _zend_execute_data *current_execute_data;
-	zend_class_entry *scope;
+	zend_class_entry *fake_scope; /* used to avoid checks accessing properties */
 
 	zend_long precision;
 
@@ -174,8 +175,11 @@ struct _zend_executor_globals {
 	/* for extended information support */
 	zend_bool no_extensions;
 
-#ifdef ZEND_WIN32
+	zend_bool vm_interrupt;
 	zend_bool timed_out;
+	zend_long hard_timeout;
+
+#ifdef ZEND_WIN32
 	OSVERSIONINFOEX windows_version_info;
 #endif
 
@@ -286,7 +290,8 @@ struct _zend_php_scanner_globals {
 	int scanned_string_len;
 
 	/* hooks */
-	void (* on_event)(zend_php_scanner_event event, int token, int line);
+	void (*on_event)(zend_php_scanner_event event, int token, int line, void *context);
+	void *on_event_context;
 };
 
 #endif /* ZEND_GLOBALS_H */

@@ -2,7 +2,7 @@
 // vim:ft=javascript
 
 ARG_ENABLE("odbc", "ODBC support", "no");
-ARG_WITH("odbcver", "Force support for the passed ODBC version. A hex number is expected, default 0x0300. Use the special value of 0 to prevent an explicit ODBCVER to be defined.", "0x0300");
+ARG_WITH("odbcver", "Force support for the passed ODBC version. A hex number is expected, default 0x0350. Use the special value of 0 to prevent an explicit ODBCVER to be defined.", "0x0350");
 
 if (PHP_ODBC == "yes") {
 	if (CHECK_LIB("odbc32.lib", "odbc") && CHECK_LIB("odbccp32.lib", "odbc")

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -125,7 +125,7 @@ PHPDBG_API HashTable *phpdbg_resolve_pending_file_break_ex(const char *file, uin
 PHPDBG_API void phpdbg_resolve_pending_file_break(const char *file); /* }}} */
 
 /* {{{ Breakpoint Creation API */
-PHPDBG_API void phpdbg_set_breakpoint_file(const char* filename, long lineno);
+PHPDBG_API void phpdbg_set_breakpoint_file(const char* filename, size_t path_len, long lineno);
 PHPDBG_API void phpdbg_set_breakpoint_symbol(const char* func_name, size_t func_name_len);
 PHPDBG_API void phpdbg_set_breakpoint_method(const char* class_name, const char* func_name);
 PHPDBG_API void phpdbg_set_breakpoint_opcode(const char* opname, size_t opname_len);

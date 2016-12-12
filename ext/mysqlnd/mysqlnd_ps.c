@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2015 The PHP Group                                |
+  | Copyright (c) 2006-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -12,11 +12,11 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Andrey Hristov <andrey@mysql.com>                           |
-  |          Ulf Wendel <uwendel@mysql.com>                              |
-  |          Georg Richter <georg@mysql.com>                             |
+  | Authors: Andrey Hristov <andrey@php.net>                             |
+  |          Ulf Wendel <uw@php.net>                                     |
   +----------------------------------------------------------------------+
 */
+
 #include "php.h"
 #include "mysqlnd.h"
 #include "mysqlnd_wireprotocol.h"
@@ -947,7 +947,8 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES * result, void * param, const unsi
 			  the bound variables. Thus we need to do part of what it does or Zend will
 			  report leaks.
 			*/
-			row_packet->row_buffer->free_chunk(row_packet->row_buffer);
+			row_packet->result_set_memory_pool->free_chunk(
+				row_packet->result_set_memory_pool, row_packet->row_buffer);
 			row_packet->row_buffer = NULL;
 		}
 
@@ -1027,7 +1028,7 @@ MYSQLND_METHOD(mysqlnd_stmt, use_result)(MYSQLND_STMT * s)
 
 /* {{{ mysqlnd_fetch_row_cursor */
 enum_func_status
-mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, unsigned int flags, zend_bool * fetched_anything)
+mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, const unsigned int flags, zend_bool * fetched_anything)
 {
 	enum_func_status ret;
 	MYSQLND_STMT * s = (MYSQLND_STMT *) param;
@@ -1128,6 +1129,8 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, unsigned int f
 						ZVAL_COPY_VALUE(result, data);
 						/* copied data, thus also the ownership. Thus null data */
 						ZVAL_NULL(data);
+					} else {
+						ZVAL_NULL(result);
 					}
 				}
 			}
@@ -1139,13 +1142,15 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, unsigned int f
 			  the bound variables. Thus we need to do part of what it does or Zend will
 			  report leaks.
 			*/
-			row_packet->row_buffer->free_chunk(row_packet->row_buffer);
+			row_packet->result_set_memory_pool->free_chunk(
+				row_packet->result_set_memory_pool, row_packet->row_buffer);
 			row_packet->row_buffer = NULL;
 		}
 		/* We asked for one row, the next one should be EOF, eat it */
 		ret = PACKET_READ(row_packet);
 		if (row_packet->row_buffer) {
-			row_packet->row_buffer->free_chunk(row_packet->row_buffer);
+			row_packet->result_set_memory_pool->free_chunk(
+				row_packet->result_set_memory_pool, row_packet->row_buffer);
 			row_packet->row_buffer = NULL;
 		}
 		MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_ROWS_FETCHED_FROM_CLIENT_PS_CURSOR);

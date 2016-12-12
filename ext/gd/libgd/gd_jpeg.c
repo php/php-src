@@ -28,6 +28,7 @@
 #include <string.h>
 
 #include "gd.h"
+#include "gd_errors.h"
 /* TBB: move this up so include files are not brought in */
 /* JCE: arrange HAVE_LIBJPEG so that it can be set in gd.h */
 #ifdef HAVE_LIBJPEG
@@ -66,14 +67,14 @@ static long php_jpeg_emit_message(j_common_ptr jpeg_info, int level)
 		 * unless strace_level >= 3
 		 */
 		if ((jpeg_info->err->num_warnings == 0) || (jpeg_info->err->trace_level >= 3)) {
-			php_gd_error_ex(ignore_warning ? E_NOTICE : E_WARNING, "gd-jpeg, libjpeg: recoverable error: %s\n", message);
+			gd_error_ex(ignore_warning ? GD_NOTICE : GD_WARNING, "gd-jpeg, libjpeg: recoverable error: %s\n", message);
 		}
 
 		jpeg_info->err->num_warnings++;
 	} else {
 		/* strace msg, Show it if trace_level >= level. */
 		if (jpeg_info->err->trace_level >= level) {
-			php_gd_error_ex(E_NOTICE, "gd-jpeg, libjpeg: strace message: %s\n", message);
+			gd_error_ex(GD_NOTICE, "gd-jpeg, libjpeg: strace message: %s\n", message);
 		}
 	}
 	return 1;
@@ -86,7 +87,7 @@ static void fatal_jpeg_error (j_common_ptr cinfo)
 {
 	jmpbuf_wrapper *jmpbufw;
 
-	php_gd_error("gd-jpeg: JPEG library reports unrecoverable error: ");
+	gd_error("gd-jpeg: JPEG library reports unrecoverable error: ");
 	(*cinfo->err->output_message) (cinfo);
 
 	jmpbufw = (jmpbuf_wrapper *) cinfo->client_data;
@@ -94,9 +95,9 @@ static void fatal_jpeg_error (j_common_ptr cinfo)
 
 	if (jmpbufw != 0) {
 		longjmp (jmpbufw->jmpbuf, 1);
-		php_gd_error_ex(E_ERROR, "gd-jpeg: EXTREMELY fatal error: longjmp returned control; terminating");
+		gd_error_ex(GD_ERROR, "gd-jpeg: EXTREMELY fatal error: longjmp returned control; terminating");
 	} else {
-		php_gd_error_ex(E_ERROR, "gd-jpeg: EXTREMELY fatal error: jmpbuf unrecoverable; terminating");
+		gd_error_ex(GD_ERROR, "gd-jpeg: EXTREMELY fatal error: jmpbuf unrecoverable; terminating");
 	}
 
 	exit (99);
@@ -195,6 +196,11 @@ void gdImageJpegCtx (gdImagePtr im, gdIOCtx * outfile, int quality)
 	cinfo.input_components = 3;	/* # of color components per pixel */
 	cinfo.in_color_space = JCS_RGB;	/* colorspace of input image */
 	jpeg_set_defaults (&cinfo);
+
+	cinfo.density_unit = 1;
+	cinfo.X_density = im->res_x;
+	cinfo.Y_density = im->res_y;
+
 	if (quality >= 0) {
 		jpeg_set_quality (&cinfo, quality, TRUE);
 	}
@@ -221,7 +227,7 @@ void gdImageJpegCtx (gdImagePtr im, gdIOCtx * outfile, int quality)
 	if (im->trueColor) {
 
 #if BITS_IN_JSAMPLE == 12
-		php_gd_error("gd-jpeg: error: jpeg library was compiled for 12-bit precision. This is mostly useless, because JPEGs on the web are 8-bit and such versions of the jpeg library won't read or write them. GD doesn't support these unusual images. Edit your jmorecfg.h file to specify the correct precision and completely 'make clean' and 'make install' libjpeg again. Sorry");
+		gd_error("gd-jpeg: error: jpeg library was compiled for 12-bit precision. This is mostly useless, because JPEGs on the web are 8-bit and such versions of the jpeg library won't read or write them. GD doesn't support these unusual images. Edit your jmorecfg.h file to specify the correct precision and completely 'make clean' and 'make install' libjpeg again. Sorry");
 		goto error;
 #endif /* BITS_IN_JSAMPLE == 12 */
 
@@ -236,7 +242,7 @@ void gdImageJpegCtx (gdImagePtr im, gdIOCtx * outfile, int quality)
 
 			nlines = jpeg_write_scanlines (&cinfo, rowptr, 1);
 			if (nlines != 1) {
-				php_gd_error_ex(E_WARNING, "gd_jpeg: warning: jpeg_write_scanlines returns %u -- expected 1", nlines);
+				gd_error_ex(GD_WARNING, "gd_jpeg: warning: jpeg_write_scanlines returns %u -- expected 1", nlines);
 			}
 		}
 	} else {
@@ -263,7 +269,7 @@ void gdImageJpegCtx (gdImagePtr im, gdIOCtx * outfile, int quality)
 
 			nlines = jpeg_write_scanlines (&cinfo, rowptr, 1);
 			if (nlines != 1) {
-				php_gd_error_ex(E_WARNING, "gd_jpeg: warning: jpeg_write_scanlines returns %u -- expected 1", nlines);
+				gd_error_ex(GD_WARNING, "gd_jpeg: warning: jpeg_write_scanlines returns %u -- expected 1", nlines);
 			}
 		}
 	}
@@ -364,21 +370,33 @@ gdImagePtr gdImageCreateFromJpegCtxEx (gdIOCtx * infile, int ignore_warning)
 
 	retval = jpeg_read_header (&cinfo, TRUE);
 	if (retval != JPEG_HEADER_OK) {
-		php_gd_error_ex(E_WARNING, "gd-jpeg: warning: jpeg_read_header returned %d, expected %d", retval, JPEG_HEADER_OK);
+		gd_error_ex(GD_WARNING, "gd-jpeg: warning: jpeg_read_header returned %d, expected %d", retval, JPEG_HEADER_OK);
 	}
 
 	if (cinfo.image_height > INT_MAX) {
-		php_gd_error_ex(E_WARNING, "gd-jpeg: warning: JPEG image height (%u) is greater than INT_MAX (%d) (and thus greater than gd can handle)", cinfo.image_height, INT_MAX);
+		gd_error_ex(GD_WARNING, "gd-jpeg: warning: JPEG image height (%u) is greater than INT_MAX (%d) (and thus greater than gd can handle)", cinfo.image_height, INT_MAX);
 	}
 
 	if (cinfo.image_width > INT_MAX) {
-		php_gd_error_ex(E_WARNING, "gd-jpeg: warning: JPEG image width (%u) is greater than INT_MAX (%d) (and thus greater than gd can handle)", cinfo.image_width, INT_MAX);
+		gd_error_ex(GD_WARNING, "gd-jpeg: warning: JPEG image width (%u) is greater than INT_MAX (%d) (and thus greater than gd can handle)", cinfo.image_width, INT_MAX);
 	}
 
 	im = gdImageCreateTrueColor ((int) cinfo.image_width, (int) cinfo.image_height);
 	if (im == 0) {
-		php_gd_error("gd-jpeg error: cannot allocate gdImage struct");
+		gd_error("gd-jpeg error: cannot allocate gdImage struct");
 		goto error;
+	}
+
+	/* check if the resolution is specified */
+	switch (cinfo.density_unit) {
+	case 1:
+		im->res_x = cinfo.X_density;
+		im->res_y = cinfo.Y_density;
+		break;
+	case 2:
+		im->res_x = DPCM2DPI(cinfo.X_density);
+		im->res_y = DPCM2DPI(cinfo.Y_density);
+		break;
 	}
 
 	/* 2.0.22: very basic support for reading CMYK colorspace files. Nice for
@@ -391,7 +409,7 @@ gdImagePtr gdImageCreateFromJpegCtxEx (gdIOCtx * infile, int ignore_warning)
 	}
 
 	if (jpeg_start_decompress (&cinfo) != TRUE) {
-		php_gd_error("gd-jpeg: warning: jpeg_start_decompress reports suspended data source");
+		gd_error("gd-jpeg: warning: jpeg_start_decompress reports suspended data source");
 	}
 
 	/* REMOVED by TBB 2/12/01. This field of the structure is
@@ -409,14 +427,14 @@ gdImagePtr gdImageCreateFromJpegCtxEx (gdIOCtx * infile, int ignore_warning)
 
 	if (cinfo.out_color_space == JCS_RGB) {
 		if (cinfo.output_components != 3) {
-			php_gd_error_ex(E_WARNING, "gd-jpeg: error: JPEG color quantization request resulted in output_components == %d (expected 3 for RGB)", cinfo.output_components);
+			gd_error_ex(GD_WARNING, "gd-jpeg: error: JPEG color quantization request resulted in output_components == %d (expected 3 for RGB)", cinfo.output_components);
 			goto error;
 		}
 		channels = 3;
 	} else if (cinfo.out_color_space == JCS_CMYK) {
 		jpeg_saved_marker_ptr marker;
 		if (cinfo.output_components != 4)  {
-			php_gd_error_ex(E_WARNING, "gd-jpeg: error: JPEG color quantization request resulted in output_components == %d (expected 4 for CMYK)", cinfo.output_components);
+			gd_error_ex(GD_WARNING, "gd-jpeg: error: JPEG color quantization request resulted in output_components == %d (expected 4 for CMYK)", cinfo.output_components);
 			goto error;
 		}
 		channels = 4;
@@ -429,12 +447,12 @@ gdImagePtr gdImageCreateFromJpegCtxEx (gdIOCtx * infile, int ignore_warning)
 			marker = marker->next;
 		}
 	} else {
-		php_gd_error_ex(E_WARNING, "gd-jpeg: error: unexpected colorspace.");
+		gd_error_ex(GD_WARNING, "gd-jpeg: error: unexpected colorspace.");
 		goto error;
 	}
 
 #if BITS_IN_JSAMPLE == 12
-	php_gd_error("gd-jpeg: error: jpeg library was compiled for 12-bit precision. This is mostly useless, because JPEGs on the web are 8-bit and such versions of the jpeg library won't read or write them. GD doesn't support these unusual images. Edit your jmorecfg.h file to specify the correct precision and completely 'make clean' and 'make install' libjpeg again. Sorry.");
+	gd_error("gd-jpeg: error: jpeg library was compiled for 12-bit precision. This is mostly useless, because JPEGs on the web are 8-bit and such versions of the jpeg library won't read or write them. GD doesn't support these unusual images. Edit your jmorecfg.h file to specify the correct precision and completely 'make clean' and 'make install' libjpeg again. Sorry.");
 	goto error;
 #endif /* BITS_IN_JSAMPLE == 12 */
 
@@ -448,7 +466,7 @@ gdImagePtr gdImageCreateFromJpegCtxEx (gdIOCtx * infile, int ignore_warning)
 			register int *tpix = im->tpixels[i];
 			nrows = jpeg_read_scanlines (&cinfo, rowptr, 1);
 			if (nrows != 1) {
-				php_gd_error_ex(E_WARNING, "gd-jpeg: error: jpeg_read_scanlines returns %u, expected 1", nrows);
+				gd_error_ex(GD_WARNING, "gd-jpeg: error: jpeg_read_scanlines returns %u, expected 1", nrows);
 				goto error;
 			}
 			for (j = 0; j < cinfo.output_width; j++, currow += 4, tpix++) {
@@ -461,7 +479,7 @@ gdImagePtr gdImageCreateFromJpegCtxEx (gdIOCtx * infile, int ignore_warning)
 			register int *tpix = im->tpixels[i];
 			nrows = jpeg_read_scanlines (&cinfo, rowptr, 1);
 			if (nrows != 1) {
-				php_gd_error_ex(E_WARNING, "gd-jpeg: error: jpeg_read_scanlines returns %u, expected 1", nrows);
+				gd_error_ex(GD_WARNING, "gd-jpeg: error: jpeg_read_scanlines returns %u, expected 1", nrows);
 				goto error;
 			}
 			for (j = 0; j < cinfo.output_width; j++, currow += 3, tpix++) {
@@ -471,7 +489,7 @@ gdImagePtr gdImageCreateFromJpegCtxEx (gdIOCtx * infile, int ignore_warning)
 	}
 
 	if (jpeg_finish_decompress (&cinfo) != TRUE) {
-		php_gd_error("gd-jpeg: warning: jpeg_finish_decompress reports suspended data source");
+		gd_error("gd-jpeg: warning: jpeg_finish_decompress reports suspended data source");
 	}
 	if (!ignore_warning) {
 		if (cinfo.err->num_warnings > 0) {

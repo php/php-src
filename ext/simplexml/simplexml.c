@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -35,8 +35,6 @@
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
 #include "sxe.h"
-
-#define SXE_ELEMENT_BY_NAME 0
 
 zend_class_entry *sxe_class_entry = NULL;
 
@@ -244,22 +242,29 @@ static zval *sxe_prop_dim_read(zval *object, zval *member, zend_bool elements, z
 
 	sxe = Z_SXEOBJ_P(object);
 
-	if (!member || Z_TYPE_P(member) == IS_LONG) {
-		if (sxe->iter.type != SXE_ITER_ATTRLIST) {
-			attribs = 0;
-			elements = 1;
-		} else if (!member) {
+	if (!member) {
+		if (sxe->iter.type == SXE_ITER_ATTRLIST) {
 			/* This happens when the user did: $sxe[]->foo = $value */
-			php_error_docref(NULL, E_ERROR, "Cannot create unnamed attribute");
-			return NULL;
+			zend_throw_error(NULL, "Cannot create unnamed attribute");
+			return &EG(uninitialized_zval);
 		}
-		name = NULL;
+		goto long_dim;
 	} else {
-		if (Z_TYPE_P(member) != IS_STRING) {
-			ZVAL_STR(&tmp_zv, zval_get_string(member));
-			member = &tmp_zv;
+		ZVAL_DEREF(member);
+		if (Z_TYPE_P(member) == IS_LONG) {
+			if (sxe->iter.type != SXE_ITER_ATTRLIST) {
+long_dim:
+				attribs = 0;
+				elements = 1;
+			}
+			name = NULL;
+		} else {
+			if (Z_TYPE_P(member) != IS_STRING) {
+				ZVAL_STR(&tmp_zv, zval_get_string(member));
+				member = &tmp_zv;
+			}
+			name = Z_STRVAL_P(member);
 		}
-		name = Z_STRVAL_P(member);
 	}
 
 	GET_NODE(sxe, node);
@@ -277,8 +282,8 @@ static zval *sxe_prop_dim_read(zval *object, zval *member, zend_bool elements, z
 		if (!member && node && node->parent &&
 		    node->parent->type == XML_DOCUMENT_NODE) {
 			/* This happens when the user did: $sxe[]->foo = $value */
-			php_error_docref(NULL, E_ERROR, "Cannot create unnamed attribute");
-			return NULL;
+			zend_throw_error(NULL, "Cannot create unnamed attribute");
+			return &EG(uninitialized_zval);
 		}
 	}
 
@@ -323,7 +328,7 @@ static zval *sxe_prop_dim_read(zval *object, zval *member, zend_bool elements, z
 				}
 				if (sxe->iter.type == SXE_ITER_NONE) {
 					if (member && Z_LVAL_P(member) > 0) {
-						php_error_docref(NULL, E_WARNING, "Cannot add element %s number %pd when only 0 such elements exist", mynode->name, Z_LVAL_P(member));
+						php_error_docref(NULL, E_WARNING, "Cannot add element %s number " ZEND_LONG_FMT " when only 0 such elements exist", mynode->name, Z_LVAL_P(member));
 					}
 				} else if (member) {
 					node = sxe_get_element_by_offset(sxe, Z_LVAL_P(member), node, &cnt);
@@ -334,23 +339,16 @@ static zval *sxe_prop_dim_read(zval *object, zval *member, zend_bool elements, z
 					_node_as_zval(sxe, node, rv, SXE_ITER_NONE, NULL, sxe->iter.nsprefix, sxe->iter.isprefix);
 				} else if (type == BP_VAR_W || type == BP_VAR_RW) {
 					if (member && cnt < Z_LVAL_P(member)) {
-						php_error_docref(NULL, E_WARNING, "Cannot add element %s number %pd when only %pd such elements exist", mynode->name, Z_LVAL_P(member), cnt);
+						php_error_docref(NULL, E_WARNING, "Cannot add element %s number " ZEND_LONG_FMT " when only " ZEND_LONG_FMT " such elements exist", mynode->name, Z_LVAL_P(member), cnt);
 					}
 					node = xmlNewTextChild(mynode->parent, mynode->ns, mynode->name, NULL);
 					_node_as_zval(sxe, node, rv, SXE_ITER_NONE, NULL, sxe->iter.nsprefix, sxe->iter.isprefix);
 				}
 			} else {
-#if SXE_ELEMENT_BY_NAME
-				int newtype;
-
-				GET_NODE(sxe, node);
-				node = sxe_get_element_by_name(sxe, node, &name, &newtype);
-				if (node) {
-					_node_as_zval(sxe, node, rv, newtype, name, sxe->iter.nsprefix, sxe->iter.isprefix);
+				/* In BP_VAR_IS mode only return a proper node if it actually exists. */
+				if (type != BP_VAR_IS || sxe_find_element_by_name(sxe, node->children, (xmlChar *) name)) {
+					_node_as_zval(sxe, node, rv, SXE_ITER_ELEMENT, name, sxe->iter.nsprefix, sxe->iter.isprefix);
 				}
-#else
-				_node_as_zval(sxe, node, rv, SXE_ITER_ELEMENT, name, sxe->iter.nsprefix, sxe->iter.isprefix);
-#endif
 			}
 		}
 	}
@@ -450,32 +448,39 @@ static int sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_bool
 
 	sxe = Z_SXEOBJ_P(object);
 
-	if (!member || Z_TYPE_P(member) == IS_LONG) {
-		if (sxe->iter.type != SXE_ITER_ATTRLIST) {
-			attribs = 0;
-			elements = 1;
-		} else if (!member) {
+	if (!member) {
+		if (sxe->iter.type == SXE_ITER_ATTRLIST) {
 			/* This happens when the user did: $sxe[] = $value
 			 * and could also be E_PARSE, but we use this only during parsing
 			 * and this is during runtime.
 			 */
-			php_error_docref(NULL, E_ERROR, "Cannot create unnamed attribute");
+			zend_throw_error(NULL, "Cannot create unnamed attribute");
 			return FAILURE;
 		}
+		goto long_dim;
 	} else {
-		if (Z_TYPE_P(member) != IS_STRING) {
-			trim_str = zval_get_string(member);
-			ZVAL_STR(&tmp_zv, php_trim(trim_str, NULL, 0, 3));
-			zend_string_release(trim_str);
-			member = &tmp_zv;
-		}
-
-		if (!Z_STRLEN_P(member)) {
-			php_error_docref(NULL, E_WARNING, "Cannot write or create unnamed %s", attribs ? "attribute" : "element");
-			if (member == &tmp_zv) {
-				zval_dtor(&tmp_zv);
+		ZVAL_DEREF(member);
+		if (Z_TYPE_P(member) == IS_LONG) {
+			if (sxe->iter.type != SXE_ITER_ATTRLIST) {
+long_dim:
+				attribs = 0;
+				elements = 1;
 			}
-			return FAILURE;
+		} else {
+			if (Z_TYPE_P(member) != IS_STRING) {
+				trim_str = zval_get_string(member);
+				ZVAL_STR(&tmp_zv, php_trim(trim_str, NULL, 0, 3));
+				zend_string_release(trim_str);
+				member = &tmp_zv;
+			}
+
+			if (!Z_STRLEN_P(member)) {
+				php_error_docref(NULL, E_WARNING, "Cannot write or create unnamed %s", attribs ? "attribute" : "element");
+				if (member == &tmp_zv) {
+					zval_dtor(&tmp_zv);
+				}
+				return FAILURE;
+			}
 		}
 	}
 
@@ -498,7 +503,7 @@ static int sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_bool
 			 * and could also be E_PARSE, but we use this only during parsing
 			 * and this is during runtime.
 			 */
-			php_error_docref(NULL, E_ERROR, "Cannot create unnamed attribute");
+			zend_throw_error(NULL, "Cannot create unnamed attribute");
 			return FAILURE;
 		}
 		if (attribs && !node && sxe->iter.type == SXE_ITER_ELEMENT) {
@@ -571,7 +576,10 @@ static int sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_bool
 		if (elements) {
 			if (!member || Z_TYPE_P(member) == IS_LONG) {
 				if (node->type == XML_ATTRIBUTE_NODE) {
-					php_error_docref(NULL, E_ERROR, "Cannot create duplicate attribute");
+					zend_throw_error(NULL, "Cannot create duplicate attribute");
+					if (new_value) {
+						zval_ptr_dtor(value);
+					}
 					return FAILURE;
 				}
 
@@ -579,7 +587,7 @@ static int sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_bool
 					newnode = node;
 					++counter;
 					if (member && Z_LVAL_P(member) > 0) {
-						php_error_docref(NULL, E_WARNING, "Cannot add element %s number %pd when only 0 such elements exist", mynode->name, Z_LVAL_P(member));
+						php_error_docref(NULL, E_WARNING, "Cannot add element %s number " ZEND_LONG_FMT " when only 0 such elements exist", mynode->name, Z_LVAL_P(member));
 						retval = FAILURE;
 					}
 				} else if (member) {
@@ -593,7 +601,7 @@ static int sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_bool
 				while (node) {
 					SKIP_TEXT(node);
 
-					if (!xmlStrcmp(node->name, (xmlChar *)Z_STRVAL_P(member))) {
+					if (!xmlStrcmp(node->name, (xmlChar *)Z_STRVAL_P(member)) && match_ns(sxe, node, sxe->iter.nsprefix, sxe->iter.isprefix)) {
 						newnode = node;
 						++counter;
 					}
@@ -627,14 +635,14 @@ next_iter:
 				}
 			} else if (!member || Z_TYPE_P(member) == IS_LONG) {
 				if (member && cnt < Z_LVAL_P(member)) {
-					php_error_docref(NULL, E_WARNING, "Cannot add element %s number %pd when only %pd such elements exist", mynode->name, Z_LVAL_P(member), cnt);
+					php_error_docref(NULL, E_WARNING, "Cannot add element %s number " ZEND_LONG_FMT " when only " ZEND_LONG_FMT " such elements exist", mynode->name, Z_LVAL_P(member), cnt);
 					retval = FAILURE;
 				}
 				newnode = xmlNewTextChild(mynode->parent, mynode->ns, mynode->name, value ? (xmlChar *)Z_STRVAL_P(value) : NULL);
 			}
 		} else if (attribs) {
 			if (Z_TYPE_P(member) == IS_LONG) {
-				php_error_docref(NULL, E_WARNING, "Cannot change attribute number %pd when only %d attributes exist", Z_LVAL_P(member), nodendx);
+				php_error_docref(NULL, E_WARNING, "Cannot change attribute number " ZEND_LONG_FMT " when only %d attributes exist", Z_LVAL_P(member), nodendx);
 				retval = FAILURE;
 			} else {
 				newnode = (xmlNodePtr)xmlNewProp(node, (xmlChar *)Z_STRVAL_P(member), value ? (xmlChar *)Z_STRVAL_P(value) : NULL);
@@ -696,7 +704,6 @@ static zval *sxe_property_get_adr(zval *object, zval *member, int fetch_type, vo
 
 	_node_as_zval(sxe, node, &ret, type, name, sxe->iter.nsprefix, sxe->iter.isprefix);
 
-	sxe = Z_SXEOBJ_P(&ret);
 	if (!Z_ISUNDEF(sxe->tmp)) {
 		zval_ptr_dtor(&sxe->tmp);
 	}
@@ -787,17 +794,8 @@ static int sxe_prop_dim_exists(zval *object, zval *member, int check_empty, zend
 					node = php_sxe_get_first_node(sxe, node);
 				}
 				node = sxe_get_element_by_offset(sxe, Z_LVAL_P(member), node, NULL);
-			}
-			else {
-				node = node->children;
-				while (node) {
-					xmlNodePtr nnext;
-					nnext = node->next;
-					if ((node->type == XML_ELEMENT_NODE) && !xmlStrcmp(node->name, (xmlChar *)Z_STRVAL_P(member))) {
-						break;
-					}
-					node = nnext;
-				}
+			} else {
+				node = sxe_find_element_by_name(sxe, node->children, (xmlChar *)Z_STRVAL_P(member));
 			}
 			if (node) {
 				exists = 1;
@@ -923,7 +921,7 @@ static void sxe_prop_dim_delete(zval *object, zval *member, zend_bool elements, 
 
 					SKIP_TEXT(node);
 
-					if (!xmlStrcmp(node->name, (xmlChar *)Z_STRVAL_P(member))) {
+					if (!xmlStrcmp(node->name, (xmlChar *)Z_STRVAL_P(member)) && match_ns(sxe, node, sxe->iter.nsprefix, sxe->iter.isprefix)) {
 						xmlUnlinkNode(node);
 						php_libxml_node_free_resource(node);
 					}
@@ -1183,7 +1181,7 @@ static HashTable *sxe_get_prop_hash(zval *object, int is_debug) /* {{{ */
 			node = NULL;
 		} else if (sxe->iter.type != SXE_ITER_CHILD) {
 
-			if ( sxe->iter.type == SXE_ITER_NONE || !node->children || !node->parent || node->children->next || node->children->children || node->parent->children == node->parent->last ) {
+			if ( sxe->iter.type == SXE_ITER_NONE || !node->children || !node->parent || !node->next || node->children->next || node->children->children || node->parent->children == node->parent->last ) {
 				node = node->children;
 			} else {
 				ZVAL_COPY_VALUE(&iter_data, &sxe->iter.data);
@@ -1464,9 +1462,15 @@ SXE_METHOD(asXML)
 	if (node) {
 		if (node->parent && (XML_DOCUMENT_NODE == node->parent->type)) {
 			xmlDocDumpMemoryEnc((xmlDocPtr) sxe->document->ptr, &strval, &strval_len, (const char *) ((xmlDocPtr) sxe->document->ptr)->encoding);
-			RETVAL_STRINGL((char *)strval, strval_len);
+			if (!strval) {
+				RETVAL_FALSE;
+			} else {
+				RETVAL_STRINGL((char *)strval, strval_len);
+			}
 			xmlFree(strval);
 		} else {
+			char *return_content;
+			size_t return_len;
 			/* Should we be passing encoding information instead of NULL? */
 			outbuf = xmlAllocOutputBuffer(NULL);
 
@@ -1477,10 +1481,17 @@ SXE_METHOD(asXML)
 			xmlNodeDumpOutput(outbuf, (xmlDocPtr) sxe->document->ptr, node, 0, 0, (const char *) ((xmlDocPtr) sxe->document->ptr)->encoding);
 			xmlOutputBufferFlush(outbuf);
 #ifdef LIBXML2_NEW_BUFFER
-			RETVAL_STRINGL((char *)xmlOutputBufferGetContent(outbuf), xmlOutputBufferGetSize(outbuf));
+			return_content = (char *)xmlOutputBufferGetContent(outbuf);
+			return_len = xmlOutputBufferGetSize(outbuf);
 #else
-			RETVAL_STRINGL((char *)outbuf->buffer->content, outbuf->buffer->use);
+			return_content = (char *)outbuf->buffer->content;
+			return_len = outbuf->buffer->use;
 #endif
+			if (!return_content) {
+				RETVAL_FALSE;
+			} else {
+				RETVAL_STRINGL(return_content, return_len);
+			}
 			xmlOutputBufferClose(outbuf);
 		}
 	} else {
@@ -1967,12 +1978,8 @@ static int sxe_count_elements(zval *object, zend_long *count) /* {{{ */
 		zval rv;
 		zend_call_method_with_0_params(object, intern->zo.ce, &intern->fptr_count, "count", &rv);
 		if (!Z_ISUNDEF(rv)) {
-			if (!Z_ISUNDEF(intern->tmp)) {
-				zval_ptr_dtor(&intern->tmp);
-			}
-			ZVAL_LONG(&intern->tmp, zval_get_long(&rv));
+			*count = zval_get_long(&rv);
 			zval_ptr_dtor(&rv);
-			*count = Z_LVAL(intern->tmp);
 			return SUCCESS;
 		}
 		return FAILURE;
@@ -2032,7 +2039,9 @@ static zend_object_handlers sxe_object_handlers = { /* {{{ */
 	sxe_count_elements,
 	sxe_get_debug_info,
 	NULL,
-	sxe_get_gc
+	sxe_get_gc,
+	NULL,
+	NULL
 };
 /* }}} */
 
@@ -2334,6 +2343,7 @@ zend_object_iterator_funcs php_sxe_iterator_funcs = { /* {{{ */
 	php_sxe_iterator_current_key,
 	php_sxe_iterator_move_forward,
 	php_sxe_iterator_rewind,
+	NULL
 };
 /* }}} */
 

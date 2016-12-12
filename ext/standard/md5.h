@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -42,10 +42,10 @@ PHP_NAMED_FUNCTION(php_if_md5_file);
 
 /* MD5 context. */
 typedef struct {
-	php_uint32 lo, hi;
-	php_uint32 a, b, c, d;
+	uint32_t lo, hi;
+	uint32_t a, b, c, d;
 	unsigned char buffer[64];
-	php_uint32 block[16];
+	uint32_t block[16];
 } PHP_MD5_CTX;
 
 PHPAPI void PHP_MD5Init(PHP_MD5_CTX *ctx);

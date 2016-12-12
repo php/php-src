@@ -33,6 +33,12 @@ unlink($filename);
 --EXPECTF--
 Write some data to the file:
 array(9) {
+  ["timed_out"]=>
+  bool(false)
+  ["blocked"]=>
+  bool(true)
+  ["eof"]=>
+  bool(false)
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
@@ -45,17 +51,17 @@ array(9) {
   bool(true)
   ["uri"]=>
   string(%i) "%s"
-  ["timed_out"]=>
-  bool(false)
-  ["blocked"]=>
-  bool(true)
-  ["eof"]=>
-  bool(false)
 }
 
 
 Read entire file:
 array(9) {
+  ["timed_out"]=>
+  bool(false)
+  ["blocked"]=>
+  bool(true)
+  ["eof"]=>
+  bool(true)
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
@@ -68,10 +74,4 @@ array(9) {
   bool(true)
   ["uri"]=>
   string(%i) "%s"
-  ["timed_out"]=>
-  bool(false)
-  ["blocked"]=>
-  bool(true)
-  ["eof"]=>
-  bool(true)
 }

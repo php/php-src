@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -62,7 +62,7 @@ PHP_FUNCTION(get_meta_tags);
 PHP_FUNCTION(flock);
 PHP_FUNCTION(fd_set);
 PHP_FUNCTION(fd_isset);
-#if (!defined(__BEOS__) && !defined(NETWARE) && HAVE_REALPATH) || defined(ZTS)
+#if (!defined(__BEOS__) && HAVE_REALPATH) || defined(ZTS)
 PHP_FUNCTION(realpath);
 #endif
 #ifdef HAVE_FNMATCH
@@ -129,6 +129,11 @@ typedef struct {
 	HashTable *stream_filters;			/* per-request copy of stream_filters_hash */
 	HashTable *wrapper_errors;			/* key: wrapper address; value: linked list of char* */
 	int pclose_wait;
+#if defined(HAVE_GETHOSTBYNAME_R)
+	struct hostent tmp_host_info;
+	char *tmp_host_buf;
+	size_t tmp_host_buf_len;
+#endif
 } php_file_globals;
 
 #ifdef ZTS

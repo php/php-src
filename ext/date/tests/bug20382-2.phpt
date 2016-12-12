@@ -75,8 +75,8 @@ result = Monday 1983-04-18 01:00:00 CEST
 wanted = Monday            00:00:00
 
 Asia/Yerevan
-ts     = Monday 2037-10-19 17:17:17 AMT
-result = Monday 2037-10-26 00:00:00 AMT
+ts     = Monday 2037-10-19 17:17:17 +04
+result = Monday 2037-10-26 00:00:00 +04
 wanted = Monday            00:00:00
 
 America/Curacao
@@ -115,8 +115,8 @@ result = Monday 1971-04-05 00:00:00 AST
 wanted = Monday            00:00:00
 
 Asia/Baku
-ts     = Friday 1971-01-01 17:17:17 BAKT
-result = Monday 1971-01-04 00:00:00 BAKT
+ts     = Friday 1971-01-01 17:17:17 +04
+result = Monday 1971-01-04 00:00:00 +04
 wanted = Monday            00:00:00
 
 Europe/Sarajevo
@@ -165,6 +165,6 @@ result = Monday 1980-04-07 00:00:00 CEST
 wanted = Monday            00:00:00
 
 Asia/Baku
-ts     = Monday 1995-12-25 17:17:17 AZT
-result = Monday 1996-01-01 00:00:00 AZT
+ts     = Monday 1995-12-25 17:17:17 +04
+result = Monday 1996-01-01 00:00:00 +04
 wanted = Monday            00:00:00

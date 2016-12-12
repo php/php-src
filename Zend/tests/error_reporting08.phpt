@@ -11,7 +11,7 @@ function foo1($arg) {
 function foo2($arg) {
 }
 
-function foo3($arg) {
+function foo3() {
 	error_reporting(E_ALL|E_STRICT);
 	echo $undef3;
 	throw new Exception("test");

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -123,9 +123,7 @@ PHP_FUNCTION(imagerotate);
 
 PHP_FUNCTION(imageflip);
 
-#ifdef HAVE_GD_BUNDLED
 PHP_FUNCTION(imageantialias);
-#endif
 
 PHP_FUNCTION(imagecrop);
 PHP_FUNCTION(imagecropauto);
@@ -176,12 +174,15 @@ PHP_FUNCTION(imageinterlace);
 PHP_FUNCTION(imageline);
 PHP_FUNCTION(imageloadfont);
 PHP_FUNCTION(imagepolygon);
+PHP_FUNCTION(imageopenpolygon);
 PHP_FUNCTION(imagerectangle);
 PHP_FUNCTION(imagesetpixel);
 PHP_FUNCTION(imagestring);
 PHP_FUNCTION(imagestringup);
 PHP_FUNCTION(imagesx);
 PHP_FUNCTION(imagesy);
+PHP_FUNCTION(imagesetclip);
+PHP_FUNCTION(imagegetclip);
 PHP_FUNCTION(imagedashedline);
 PHP_FUNCTION(imagettfbbox);
 PHP_FUNCTION(imagettftext);
@@ -197,6 +198,8 @@ PHP_FUNCTION(imagexbm);
 
 PHP_FUNCTION(imagefilter);
 PHP_FUNCTION(imageconvolution);
+
+PHP_FUNCTION(imageresolution);
 
 PHP_GD_API int phpi_get_le_gd(void);
 

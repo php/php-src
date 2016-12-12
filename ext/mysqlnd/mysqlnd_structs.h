@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2015 The PHP Group                                |
+  | Copyright (c) 2006-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -12,9 +12,8 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Andrey Hristov <andrey@mysql.com>                           |
-  |          Ulf Wendel <uwendel@mysql.com>                              |
-  |          Georg Richter <georg@mysql.com>                             |
+  | Authors: Andrey Hristov <andrey@php.net>                             |
+  |          Ulf Wendel <uw@php.net>                                     |
   +----------------------------------------------------------------------+
 */
 
@@ -32,6 +31,9 @@
 #define MYSQLND_CLASS_METHODS_START(class)	MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(class) = {
 #define MYSQLND_CLASS_METHODS_END			}
 
+#define MYSQLND_CLASS_METHODS_INSTANCE_NAME(class)		mysqlnd_##class##_methods_ptr
+#define MYSQLND_CLASS_METHODS_INSTANCE_DECLARE(class)	extern const MYSQLND_CLASS_METHODS_TYPE(class) * MYSQLND_CLASS_METHODS_INSTANCE_NAME(class)
+#define MYSQLND_CLASS_METHODS_INSTANCE_DEFINE(class)	const MYSQLND_CLASS_METHODS_TYPE(class) * MYSQLND_CLASS_METHODS_INSTANCE_NAME(class) = & MYSQLND_CLASS_METHOD_TABLE_NAME(class)
 
 typedef struct st_mysqlnd_string
 {
@@ -56,20 +58,18 @@ typedef struct st_mysqlnd_memory_pool_chunk_llist MYSQLND_MEMORY_POOL_CHUNK_LLIS
 struct st_mysqlnd_memory_pool
 {
 	zend_uchar *arena;
-	unsigned int refcount;
 	unsigned int arena_size;
 	unsigned int free_size;
 
 	MYSQLND_MEMORY_POOL_CHUNK*	(*get_chunk)(MYSQLND_MEMORY_POOL * pool, unsigned int size);
+	enum_func_status	(*resize_chunk)(MYSQLND_MEMORY_POOL * pool, MYSQLND_MEMORY_POOL_CHUNK * chunk, unsigned int size);
+	void				(*free_chunk)(MYSQLND_MEMORY_POOL * pool, MYSQLND_MEMORY_POOL_CHUNK * chunk);
 };
 
 struct st_mysqlnd_memory_pool_chunk
 {
 	size_t				app;
-	MYSQLND_MEMORY_POOL	*pool;
 	zend_uchar			*ptr;
-	enum_func_status	(*resize_chunk)(MYSQLND_MEMORY_POOL_CHUNK * chunk, unsigned int size);
-	void				(*free_chunk)(MYSQLND_MEMORY_POOL_CHUNK * chunk);
 	unsigned int		size;
 	zend_bool			from_pool;
 };
@@ -154,6 +154,7 @@ struct st_mysqlnd_error_info
 	unsigned int error_no;
 	zend_llist * error_list;
 
+	zend_bool persistent;
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_error_info) *m;
 };
 
@@ -318,7 +319,8 @@ typedef enum_func_status	(*func_mysqlnd_vio__connect)(MYSQLND_VIO * const vio, c
 typedef void				(*func_mysqlnd_vio__close_stream)(MYSQLND_VIO * const vio, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info);
 typedef php_stream *		(*func_mysqlnd_vio__open_stream)(MYSQLND_VIO * const vio, const MYSQLND_CSTRING scheme, const zend_bool persistent, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info);
 typedef php_stream *		(*func_mysqlnd_vio__get_stream)(const MYSQLND_VIO * const vio);
-typedef php_stream *		(*func_mysqlnd_vio__set_stream)(MYSQLND_VIO * const vio, php_stream * vio_stream);
+typedef enum_func_status	(*func_mysqlnd_vio__set_stream)(MYSQLND_VIO * const vio, php_stream * vio_stream);
+typedef zend_bool			(*func_mysqlnd_vio__has_valid_stream)(const MYSQLND_VIO * const vio);
 typedef func_mysqlnd_vio__open_stream (*func_mysqlnd_vio__get_open_stream)(MYSQLND_VIO * const vio, const MYSQLND_CSTRING scheme, MYSQLND_ERROR_INFO * const error_info);
 
 typedef enum_func_status	(*func_mysqlnd_vio__set_client_option)(MYSQLND_VIO * const vio, enum_mysqlnd_client_option option, const char * const value);
@@ -346,6 +348,7 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_vio)
 
 	func_mysqlnd_vio__get_stream get_stream;
 	func_mysqlnd_vio__set_stream set_stream;
+	func_mysqlnd_vio__has_valid_stream has_valid_stream;
 	func_mysqlnd_vio__get_open_stream get_open_stream;
 
 	func_mysqlnd_vio__set_client_option set_client_option;
@@ -472,7 +475,7 @@ typedef enum_func_status	(*func_mysqlnd_conn_data__set_client_option_2d)(MYSQLND
 typedef size_t				(*func_mysqlnd_conn_data__negotiate_client_api_capabilities)(MYSQLND_CONN_DATA * const conn, const size_t flags);
 typedef size_t				(*func_mysqlnd_conn_data__get_client_api_capabilities)(const MYSQLND_CONN_DATA * const conn);
 
-typedef MYSQLND_STRING		(*func_mysqlnd_conn_data__get_scheme)(MYSQLND_CONN_DATA * conn, MYSQLND_CSTRING hostname, MYSQLND_CSTRING socket_or_pipe, unsigned int port, zend_bool * unix_socket, zend_bool * named_pipe);
+typedef MYSQLND_STRING		(*func_mysqlnd_conn_data__get_scheme)(MYSQLND_CONN_DATA * conn, MYSQLND_CSTRING hostname, MYSQLND_CSTRING *socket_or_pipe, unsigned int port, zend_bool * unix_socket, zend_bool * named_pipe);
 
 
 

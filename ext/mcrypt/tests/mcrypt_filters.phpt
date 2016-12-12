@@ -37,5 +37,9 @@ echo $data."\n";
 --EXPECTF--
 FOUND
 FOUND
+
+Deprecated: stream_filter_append(): mcrypt and mdecrypt stream filters have been deprecated in %s%emcrypt_filters.php on line 17
 32e14bd3c31f2bd666e4290ebdb166a7
+
+Deprecated: stream_filter_append(): mcrypt and mdecrypt stream filters have been deprecated in %s%emcrypt_filters.php on line 24
 Secret secret secret data

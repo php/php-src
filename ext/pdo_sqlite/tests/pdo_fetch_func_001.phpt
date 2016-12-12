@@ -74,12 +74,12 @@ var_dump($st->fetchAll(PDO::FETCH_FUNC, array('bar', 'inexistent')));
 ?>
 --EXPECTF--
 object(PDOStatement)#%d (1) {
-  [%u|b%"queryString"]=>
+  ["queryString"]=>
   %string|unicode%(21) "SELECT * FROM testing"
 }
 data: 1, php
 object(PDOStatement)#%d (1) {
-  [%u|b%"queryString"]=>
+  ["queryString"]=>
   %string|unicode%(21) "SELECT * FROM testing"
 }
 data: 2, 

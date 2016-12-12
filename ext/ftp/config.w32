@@ -1,11 +1,11 @@
 // $Id$
 // vim:ft=javascript
 
-ARG_ENABLE("ftp", "ftp support", "yes");
+ARG_ENABLE("ftp", "ftp support", "no");
 
-if (PHP_FTP == "yes") {
+if (PHP_FTP != "no") {
 
-	EXTENSION("ftp", "php_ftp.c ftp.c", true);
+	EXTENSION("ftp", "php_ftp.c ftp.c");
 
 	if (CHECK_HEADER_ADD_INCLUDE("openssl/ssl.h", "CFLAGS_FTP") &&
 		CHECK_LIB("ssleay32.lib", "ftp", PHP_FTP) &&

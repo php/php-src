@@ -763,8 +763,8 @@ static int fpm_conf_process_all_pools() /* {{{ */
 			}
 		}
 
-		/* alert if user is not set only if we are not root*/
-		if (!wp->config->user && !geteuid()) {
+		/* alert if user is not set; only if we are root and fpm is not running with --allow-to-run-as-root */
+		if (!wp->config->user && !geteuid() && !fpm_globals.run_as_root) {
 			zlog(ZLOG_ALERT, "[pool %s] user has not been defined", wp->config->name);
 			return -1;
 		}
@@ -857,7 +857,7 @@ static int fpm_conf_process_all_pools() /* {{{ */
 
 		/* status */
 		if (wp->config->pm_status_path && *wp->config->pm_status_path) {
-			int i;
+			size_t i;
 			char *status = wp->config->pm_status_path;
 
 			if (*status != '/') {
@@ -881,7 +881,7 @@ static int fpm_conf_process_all_pools() /* {{{ */
 		/* ping */
 		if (wp->config->ping_path && *wp->config->ping_path) {
 			char *ping = wp->config->ping_path;
-			int i;
+			size_t i;
 
 			if (*ping != '/') {
 				zlog(ZLOG_ERROR, "[pool %s] the ping path '%s' must start with a '/'", wp->config->name, ping);
@@ -1254,7 +1254,7 @@ static void fpm_conf_ini_parser_include(char *inc, void *arg) /* {{{ */
 #ifdef HAVE_GLOB
 	glob_t g;
 #endif
-	int i;
+	size_t i;
 
 	if (!inc || !arg) return;
 	if (*error) return; /* We got already an error. Switch to the end. */
@@ -1271,7 +1271,7 @@ static void fpm_conf_ini_parser_include(char *inc, void *arg) /* {{{ */
 				return;
 			}
 #endif /* GLOB_NOMATCH */
-			zlog(ZLOG_ERROR, "Unable to globalize '%s' (ret=%d) from %s at line %d.", inc, i, filename, ini_lineno);
+			zlog(ZLOG_ERROR, "Unable to globalize '%s' (ret=%zd) from %s at line %d.", inc, i, filename, ini_lineno);
 			*error = 1;
 			efree(filename);
 			return;
@@ -1573,7 +1573,7 @@ static void fpm_conf_dump() /* {{{ */
 	/*
 	 * Please keep the same order as in fpm_conf.h and in php-fpm.conf.in
 	 */
-	zlog(ZLOG_NOTICE, "[General]");
+	zlog(ZLOG_NOTICE, "[global]");
 	zlog(ZLOG_NOTICE, "\tpid = %s",                         STR2STR(fpm_global_config.pid_file));
 	zlog(ZLOG_NOTICE, "\terror_log = %s",                   STR2STR(fpm_global_config.error_log));
 #ifdef HAVE_SYSLOG_H

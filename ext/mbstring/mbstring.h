@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -130,6 +130,10 @@ PHP_FUNCTION(mb_decode_numericentity);
 PHP_FUNCTION(mb_send_mail);
 PHP_FUNCTION(mb_get_info);
 PHP_FUNCTION(mb_check_encoding);
+PHP_FUNCTION(mb_ord);
+PHP_FUNCTION(mb_chr);
+PHP_FUNCTION(mb_scrub);
+
 
 MBSTRING_API char *php_mb_safe_strrchr_ex(const char *s, unsigned int c,
                                     size_t nbytes, const mbfl_encoding *enc);
@@ -152,9 +156,10 @@ MBSTRING_API int php_mb_encoding_detector_ex(const char *arg_string, int arg_len
 MBSTRING_API int php_mb_encoding_converter_ex(char **str, int *len, const char *encoding_to,
 											  const char *encoding_from);
 MBSTRING_API int php_mb_stripos(int mode, const char *old_haystack, unsigned int old_haystack_len, const char *old_needle, unsigned int old_needle_len, long offset, const char *from_encoding);
+MBSTRING_API int php_mb_check_encoding(const char *input, size_t length, const char *enc);
 
 /* internal use only */
-int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, uint new_value_length);
+int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, uint32_t new_value_length);
 
 ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	char *internal_encoding_name;
@@ -205,7 +210,7 @@ struct mb_overload_def {
 #define MBSTRG(v) ZEND_MODULE_GLOBALS_ACCESSOR(mbstring, v)
 
 #if defined(ZTS) && defined(COMPILE_DL_MBSTRING)
-ZEND_TSRMLS_CACHE_EXTERN();
+ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
 #else	/* HAVE_MBSTRING */

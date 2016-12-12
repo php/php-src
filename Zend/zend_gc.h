@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -119,9 +119,6 @@ ZEND_API void gc_reset(void);
 ZEND_API int  zend_gc_collect_cycles(void);
 END_EXTERN_C()
 
-#define GC_ZVAL_CHECK_POSSIBLE_ROOT(z) \
-	gc_check_possible_root((z))
-
 #define GC_REMOVE_FROM_BUFFER(p) do { \
 		zend_refcounted *_p = (zend_refcounted*)(p); \
 		if (GC_ADDRESS(GC_INFO(_p))) { \
@@ -129,11 +126,23 @@ END_EXTERN_C()
 		} \
 	} while (0)
 
-static zend_always_inline void gc_check_possible_root(zval *z)
+#define GC_MAY_LEAK(ref) \
+	((GC_TYPE_INFO(ref) & \
+		(GC_INFO_MASK | (GC_COLLECTABLE << GC_FLAGS_SHIFT))) == \
+	(GC_COLLECTABLE << GC_FLAGS_SHIFT))
+
+static zend_always_inline void gc_check_possible_root(zend_refcounted *ref)
 {
-	ZVAL_DEREF(z);
-	if (Z_COLLECTABLE_P(z) && UNEXPECTED(!Z_GC_INFO_P(z))) {
-		gc_possible_root(Z_COUNTED_P(z));
+	if (GC_TYPE(ref) == IS_REFERENCE) {
+		zval *zv = &((zend_reference*)ref)->val;
+
+		if (!Z_REFCOUNTED_P(zv)) {
+			return;
+		}
+		ref = Z_COUNTED_P(zv);
+	}
+	if (UNEXPECTED(GC_MAY_LEAK(ref))) {
+		gc_possible_root(ref);
 	}
 }
 

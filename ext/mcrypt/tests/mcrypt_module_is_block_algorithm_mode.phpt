@@ -8,8 +8,15 @@ var_dump(mcrypt_module_is_block_algorithm_mode(MCRYPT_MODE_CBC));
 var_dump(mcrypt_module_is_block_algorithm_mode(MCRYPT_MODE_ECB));
 var_dump(mcrypt_module_is_block_algorithm_mode(MCRYPT_MODE_STREAM));
 var_dump(mcrypt_module_is_block_algorithm_mode(MCRYPT_MODE_OFB));
---EXPECT--
+--EXPECTF--
+Deprecated: Function mcrypt_module_is_block_algorithm_mode() is deprecated in %s%emcrypt_module_is_block_algorithm_mode.php on line 2
 bool(true)
+
+Deprecated: Function mcrypt_module_is_block_algorithm_mode() is deprecated in %s%emcrypt_module_is_block_algorithm_mode.php on line 3
 bool(true)
+
+Deprecated: Function mcrypt_module_is_block_algorithm_mode() is deprecated in %s%emcrypt_module_is_block_algorithm_mode.php on line 4
 bool(false)
+
+Deprecated: Function mcrypt_module_is_block_algorithm_mode() is deprecated in %s%emcrypt_module_is_block_algorithm_mode.php on line 5
 bool(true)

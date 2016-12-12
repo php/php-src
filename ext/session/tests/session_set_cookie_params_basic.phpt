@@ -26,10 +26,11 @@ ob_end_flush();
 ?>
 --EXPECTF--
 *** Testing session_set_cookie_params() : basic functionality ***
-NULL
 bool(true)
-NULL
 bool(true)
-NULL
-Done
 
+Warning: session_set_cookie_params(): Cannot change session cookie parameters when session is active in %s on line 15
+bool(false)
+bool(true)
+bool(true)
+Done
