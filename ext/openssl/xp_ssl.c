@@ -52,10 +52,6 @@
 #undef X509_EXTENSIONS
 #endif
 
-#ifdef NETWARE
-#include <sys/select.h>
-#endif
-
 #ifndef OPENSSL_NO_SSL3
 #define HAVE_SSL3 1
 #endif
@@ -91,7 +87,7 @@
 /* Used for peer verification in windows */
 #define PHP_X509_NAME_ENTRY_TO_UTF8(ne, i, out) ASN1_STRING_to_UTF8(&out, X509_NAME_ENTRY_get_data(X509_NAME_get_entry(ne, i)))
 
-#if !defined(OPENSSL_NO_RSA) && OPENSSL_VERSION_NUMBER < 0x10100000L
+#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
 static RSA *tmp_rsa_cb(SSL *s, int is_export, int keylength);
 #endif
 
@@ -1123,7 +1119,7 @@ static void init_server_reneg_limit(php_stream *stream, php_openssl_netstream_da
 }
 /* }}} */
 
-#if !defined(OPENSSL_NO_RSA) && OPENSSL_VERSION_NUMBER < 0x10100000L
+#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
 static RSA *tmp_rsa_cb(SSL *s, int is_export, int keylength)
 {
 	BIGNUM *bn = NULL;
@@ -1147,7 +1143,6 @@ static RSA *tmp_rsa_cb(SSL *s, int is_export, int keylength)
 }
 #endif
 
-#ifndef OPENSSL_NO_DH
 static int set_server_dh_param(php_stream * stream, SSL_CTX *ctx) /* {{{ */
 {
 	DH *dh;
@@ -1192,9 +1187,8 @@ static int set_server_dh_param(php_stream * stream, SSL_CTX *ctx) /* {{{ */
 	return SUCCESS;
 }
 /* }}} */
-#endif
 
-#if defined(HAVE_ECDH) && OPENSSL_VERSION_NUMBER < 0x10100000L
+#if defined(HAVE_ECDH) && (OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER))
 static int set_server_ecdh_curve(php_stream *stream, SSL_CTX *ctx) /* {{{ */
 {
 	zval *zvcurve;
@@ -1237,13 +1231,13 @@ static int set_server_specific_opts(php_stream *stream, SSL_CTX *ctx) /* {{{ */
 	zval *zv;
 	long ssl_ctx_options = SSL_CTX_get_options(ctx);
 
-#if defined(HAVE_ECDH) && OPENSSL_VERSION_NUMBER < 0x10100000L
+#if defined(HAVE_ECDH) && (OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER))
 	if (set_server_ecdh_curve(stream, ctx) == FAILURE) {
 		return FAILURE;
 	}
 #endif
 
-#if !defined(OPENSSL_NO_RSA) && OPENSSL_VERSION_NUMBER < 0x10100000L
+#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
 	SSL_CTX_set_tmp_rsa_callback(ctx, tmp_rsa_cb);
 #endif
 	/* We now use tmp_rsa_cb to generate a key of appropriate size whenever necessary */
@@ -1251,13 +1245,11 @@ static int set_server_specific_opts(php_stream *stream, SSL_CTX *ctx) /* {{{ */
 		php_error_docref(NULL, E_WARNING, "rsa_key_size context option has been removed");
 	}
 
-#ifndef OPENSSL_NO_DH
 	set_server_dh_param(stream, ctx);
 	zv = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", "single_dh_use");
 	if (zv != NULL && zend_is_true(zv)) {
 		ssl_ctx_options |= SSL_OP_SINGLE_DH_USE;
 	}
-#endif
 
 	zv = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", "honor_cipher_order");
 	if (zv != NULL && zend_is_true(zv)) {

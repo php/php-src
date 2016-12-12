@@ -269,7 +269,7 @@ static void param_dtor(zval *el) /* {{{ */
 
 	/* tell the driver that it is going away */
 	if (param->stmt->methods->param_hook) {
-			param->stmt->methods->param_hook(param->stmt, param, PDO_PARAM_EVT_FREE);
+		param->stmt->methods->param_hook(param->stmt, param, PDO_PARAM_EVT_FREE);
 	}
 
 	if (param->name) {
@@ -486,6 +486,12 @@ static PHP_METHOD(PDOStatement, execute)
 		 * quoted.
          */
 
+		/* string is leftover from previous calls so PDOStatement::activeQueryString() can access */
+		if (stmt->active_query_string && stmt->active_query_string != stmt->query_string) {
+			efree(stmt->active_query_string);
+		}
+		stmt->active_query_string = NULL;
+
 		ret = pdo_parse_params(stmt, stmt->query_string, stmt->query_stringlen,
 			&stmt->active_query_string, &stmt->active_query_stringlen);
 
@@ -504,10 +510,6 @@ static PHP_METHOD(PDOStatement, execute)
 		RETURN_FALSE;
 	}
 	if (stmt->methods->executer(stmt)) {
-		if (stmt->active_query_string && stmt->active_query_string != stmt->query_string) {
-			efree(stmt->active_query_string);
-		}
-		stmt->active_query_string = NULL;
 		if (!stmt->executed) {
 			/* this is the first execute */
 
@@ -526,10 +528,6 @@ static PHP_METHOD(PDOStatement, execute)
 
 		RETURN_BOOL(ret);
 	}
-	if (stmt->active_query_string && stmt->active_query_string != stmt->query_string) {
-		efree(stmt->active_query_string);
-	}
-	stmt->active_query_string = NULL;
 	PDO_HANDLE_STMT_ERR();
 	RETURN_FALSE;
 }
@@ -2092,6 +2090,22 @@ static PHP_METHOD(PDOStatement, closeCursor)
 }
 /* }}} */
 
+/* {{{ proto string PDOStatement::activeQueryString()
+   Fetch the last executed query string associated with the statement handle */
+static PHP_METHOD(PDOStatement, activeQueryString)
+{
+	PHP_STMT_GET_OBJ;
+
+	if (stmt->active_query_string) {
+		RETURN_STRING(stmt->active_query_string);
+	} else if (stmt->query_string) {
+		RETURN_STRING(stmt->query_string);
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
 /* {{{ proto void PDOStatement::debugDumpParams()
    A utility for internals hackers to debug parameter internals */
 static PHP_METHOD(PDOStatement, debugDumpParams)
@@ -2170,6 +2184,7 @@ const zend_function_entry pdo_dbstmt_functions[] = {
 	PHP_ME(PDOStatement, setFetchMode,	arginfo_pdostatement_setfetchmode,	ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, nextRowset,	arginfo_pdostatement__void,			ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, closeCursor,	arginfo_pdostatement__void,			ZEND_ACC_PUBLIC)
+	PHP_ME(PDOStatement, activeQueryString, arginfo_pdostatement__void,		ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, debugDumpParams, arginfo_pdostatement__void,		ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, __wakeup,		arginfo_pdostatement__void,			ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	PHP_ME(PDOStatement, __sleep,		arginfo_pdostatement__void,			ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
@@ -2293,6 +2308,7 @@ void pdo_stmt_init(void)
 	pdo_row_ce->ce_flags |= ZEND_ACC_FINAL; /* when removing this a lot of handlers need to be redone */
 	pdo_row_ce->create_object = pdo_row_new;
 	pdo_row_ce->serialize = pdo_row_serialize;
+	pdo_row_ce->unserialize = zend_class_unserialize_deny;
 }
 
 PDO_API void php_pdo_free_statement(pdo_stmt_t *stmt)
@@ -2315,6 +2331,9 @@ PDO_API void php_pdo_free_statement(pdo_stmt_t *stmt)
 
 	if (stmt->methods && stmt->methods->dtor) {
 		stmt->methods->dtor(stmt);
+	}
+	if (stmt->active_query_string && stmt->active_query_string != stmt->query_string) {
+		efree(stmt->active_query_string);
 	}
 	if (stmt->query_string) {
 		efree(stmt->query_string);
@@ -2562,7 +2581,7 @@ static int row_prop_exists(zval *object, zval *member, int check_empty, void **c
 					int res;
 					zval val;
 
-					fetch_value(stmt, &val, colno, NULL TSRMLS_CC);
+					fetch_value(stmt, &val, colno, NULL);
 					res = check_empty ? i_zend_is_true(&val) : Z_TYPE(val) != IS_NULL;
 					zval_dtor(&val);
 

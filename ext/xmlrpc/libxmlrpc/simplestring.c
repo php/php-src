@@ -30,6 +30,7 @@
 
 */
 
+#include <php.h>
 
 static const char rcsid[] = "#(@) $Id$";
 
@@ -80,9 +81,10 @@ static const char rcsid[] = "#(@) $Id$";
 
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 #include "simplestring.h"
 
-#define my_free(thing)  if(thing) {free(thing); thing = 0;}
+#define my_free(thing)  if(thing) {efree(thing); thing = 0;}
 
 /*----------------------**
 * Begin String Functions *
@@ -111,7 +113,7 @@ void simplestring_init(simplestring* string) {
 /******/
 
 static void simplestring_init_str(simplestring* string) {
-   string->str = (char*)malloc(SIMPLESTRING_INCR);
+   string->str = (char*)emalloc(SIMPLESTRING_INCR);
    if(string->str) {
       string->str[0] = 0;
       string->len = 0;
@@ -218,7 +220,7 @@ void simplestring_addn(simplestring* target, const char* source, size_t add_len)
         	 /* some kind of overflow happened */
         	 return;
          }
-         target->str = (char*)realloc(target->str, newsize);
+         target->str = (char*)erealloc(target->str, newsize);
 
          target->size = target->str ? newsize : 0;
       }

@@ -81,7 +81,6 @@ PHP_MSHUTDOWN_FUNCTION(random)
 /* }}} */
 
 /* {{{ */
-
 PHPAPI int php_random_bytes(void *bytes, size_t size, zend_bool should_throw)
 {
 #if PHP_WIN32
@@ -214,37 +213,27 @@ PHP_FUNCTION(random_bytes)
 }
 /* }}} */
 
-/* {{{ proto int random_int(int min, int max)
-Return an arbitrary pseudo-random integer */
-PHP_FUNCTION(random_int)
+/* {{{ */
+PHPAPI int php_random_int(zend_long min, zend_long max, zend_long *result, zend_bool should_throw)
 {
-	zend_long min;
-	zend_long max;
 	zend_ulong umax;
-	zend_ulong result;
-
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "ll", &min, &max) == FAILURE) {
-		return;
-	}
-
-	if (min > max) {
-		zend_throw_exception(zend_ce_error, "Minimum value must be less than or equal to the maximum value", 0);
-		return;
-	}
+	zend_ulong trial;
 
 	if (min == max) {
-		RETURN_LONG(min);
+		*result = min;
+		return SUCCESS;
 	}
 
 	umax = max - min;
 
-	if (php_random_bytes_throw(&result, sizeof(result)) == FAILURE) {
-		return;
+	if (php_random_bytes(&trial, sizeof(trial), should_throw) == FAILURE) {
+		return FAILURE;
 	}
 
 	/* Special case where no modulus is required */
 	if (umax == ZEND_ULONG_MAX) {
-		RETURN_LONG((zend_long)result);
+		*result = (zend_long)trial;
+		return SUCCESS;
 	}
 
 	/* Increment the max so the range is inclusive of max */
@@ -256,14 +245,40 @@ PHP_FUNCTION(random_int)
 		zend_ulong limit = ZEND_ULONG_MAX - (ZEND_ULONG_MAX % umax) - 1;
 
 		/* Discard numbers over the limit to avoid modulo bias */
-		while (result > limit) {
-			if (php_random_bytes_throw(&result, sizeof(result)) == FAILURE) {
-				return;
+		while (trial > limit) {
+			if (php_random_bytes(&trial, sizeof(trial), should_throw) == FAILURE) {
+				return FAILURE;
 			}
 		}
 	}
 
-	RETURN_LONG((zend_long)((result % umax) + min));
+	*result = (zend_long)((trial % umax) + min);
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ proto int random_int(int min, int max)
+Return an arbitrary pseudo-random integer */
+PHP_FUNCTION(random_int)
+{
+	zend_long min;
+	zend_long max;
+	zend_long result;
+
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "ll", &min, &max) == FAILURE) {
+		return;
+	}
+
+	if (min > max) {
+		zend_throw_exception(zend_ce_error, "Minimum value must be less than or equal to the maximum value", 0);
+		return;
+	}
+
+	if (php_random_int_throw(min, max, &result) == FAILURE) {
+		return;
+	}
+
+	RETURN_LONG(result);
 }
 /* }}} */
 

@@ -400,6 +400,7 @@ PHP_WINUTIL_API int php_win32_code_to_errno(unsigned long w32Err)
         /* 1004 */   ,  {   ERROR_INVALID_FLAGS             ,   EINVAL          }
         /* 1113 */   ,  {   ERROR_NO_UNICODE_TRANSLATION    ,   EINVAL          }
         /* 1168 */   ,  {   ERROR_NOT_FOUND                 ,   ENOENT          }
+        /* 1224 */   ,  {   ERROR_USER_MAPPED_FILE          ,   EACCES          }
         /* 1816 */  ,   {   ERROR_NOT_ENOUGH_QUOTA          ,   ENOMEM          }
 					,   {   ERROR_ABANDONED_WAIT_0          ,   EIO }
     };

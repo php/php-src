@@ -20,8 +20,6 @@
 
 /* $Id$ */
 
-/* Synced with php 3.0 revision 1.193 1999-06-16 [ssb] */
-
 #include <stdio.h>
 #include "php.h"
 #include "php_rand.h"
@@ -1191,7 +1189,7 @@ PHP_FUNCTION(explode)
 
 /* {{{ php_implode
  */
-PHPAPI void php_implode(const zend_string *delim, zval *arr, zval *return_value)
+PHPAPI void php_implode(const zend_string *glue, zval *pieces, zval *return_value)
 {
 	zval         *tmp;
 	int           numelems;
@@ -1200,13 +1198,13 @@ PHPAPI void php_implode(const zend_string *delim, zval *arr, zval *return_value)
 	size_t        len = 0;
 	zend_string **strings, **strptr;
 
-	numelems = zend_hash_num_elements(Z_ARRVAL_P(arr));
+	numelems = zend_hash_num_elements(Z_ARRVAL_P(pieces));
 
 	if (numelems == 0) {
 		RETURN_EMPTY_STRING();
 	} else if (numelems == 1) {
 		/* loop to search the first not undefined element... */
-		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(arr), tmp) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pieces), tmp) {
 			RETURN_STR(zval_get_string(tmp));
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -1214,7 +1212,7 @@ PHPAPI void php_implode(const zend_string *delim, zval *arr, zval *return_value)
 	strings = emalloc((sizeof(zend_long) + sizeof(zend_string *)) * numelems);
 	strptr = strings - 1;
 
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(arr), tmp) {
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pieces), tmp) {
 		if (Z_TYPE_P(tmp) == IS_LONG) {
 			zend_long val = Z_LVAL_P(tmp);
 
@@ -1233,7 +1231,7 @@ PHPAPI void php_implode(const zend_string *delim, zval *arr, zval *return_value)
 		}
 	} ZEND_HASH_FOREACH_END();
 	/* numelems can not be 0, we checked above */
-	str = zend_string_safe_alloc(numelems - 1, ZSTR_LEN(delim), len, 0);
+	str = zend_string_safe_alloc(numelems - 1, ZSTR_LEN(glue), len, 0);
 	cptr = ZSTR_VAL(str) + ZSTR_LEN(str);
 	*cptr = 0;
 
@@ -1250,8 +1248,8 @@ PHPAPI void php_implode(const zend_string *delim, zval *arr, zval *return_value)
 			*oldPtr = oldVal;
 		}
 
-		cptr -= ZSTR_LEN(delim);
-		memcpy(cptr, ZSTR_VAL(delim), ZSTR_LEN(delim));
+		cptr -= ZSTR_LEN(glue);
+		memcpy(cptr, ZSTR_VAL(glue), ZSTR_LEN(glue));
 	} while (--strptr > strings);
 
 	if (*strptr) {
@@ -1273,8 +1271,8 @@ PHPAPI void php_implode(const zend_string *delim, zval *arr, zval *return_value)
    Joins array elements placing glue string between items and return one string */
 PHP_FUNCTION(implode)
 {
-	zval *arg1, *arg2 = NULL, *arr;
-	zend_string *delim;
+	zval *arg1, *arg2 = NULL, *pieces;
+	zend_string *glue;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_ZVAL(arg1)
@@ -1288,23 +1286,23 @@ PHP_FUNCTION(implode)
 			return;
 		}
 
-		delim = ZSTR_EMPTY_ALLOC();
-		arr = arg1;
+		glue = ZSTR_EMPTY_ALLOC();
+		pieces = arg1;
 	} else {
 		if (Z_TYPE_P(arg1) == IS_ARRAY) {
-			delim = zval_get_string(arg2);
-			arr = arg1;
+			glue = zval_get_string(arg2);
+			pieces = arg1;
 		} else if (Z_TYPE_P(arg2) == IS_ARRAY) {
-			delim = zval_get_string(arg1);
-			arr = arg2;
+			glue = zval_get_string(arg1);
+			pieces = arg2;
 		} else {
 			php_error_docref(NULL, E_WARNING, "Invalid arguments passed");
 			return;
 		}
 	}
 
-	php_implode(delim, arr, return_value);
-	zend_string_release(delim);
+	php_implode(glue, pieces, return_value);
+	zend_string_release(glue);
 }
 /* }}} */
 
@@ -1537,7 +1535,7 @@ PHPAPI zend_string *php_basename(const char *s, size_t len, char *suffix, size_t
 			case 0:
 				goto quit_loop;
 			case 1:
-#if defined(PHP_WIN32) || defined(NETWARE)
+#if defined(PHP_WIN32)
 				if (*c == '/' || *c == '\\') {
 #else
 				if (*c == '/') {
@@ -1546,7 +1544,7 @@ PHPAPI zend_string *php_basename(const char *s, size_t len, char *suffix, size_t
 						state = 0;
 						cend = c;
 					}
-#if defined(PHP_WIN32) || defined(NETWARE)
+#if defined(PHP_WIN32)
 				/* Catch relative paths in c:file.txt style. They're not to confuse
 				   with the NTFS streams. This part ensures also, that no drive
 				   letter traversing happens. */

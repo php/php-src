@@ -30,42 +30,48 @@
  *  +-----------------------+-----------------------------+
  *  | Expression            | Priority type                |
  *  +-----------------------+-----------------------------+
- *  | priority > 23         | REALTIME_PRIORITY_CLASS      |
+ *  | priority < -9         | HIGH_PRIORITY_CLASS          |
  *  +-----------------------+-----------------------------+
- *  | priority > 12         | HIGH_PRIORITY_CLASS          |
+ *  | priority < -4         | ABOVE_NORMAL_PRIORITY_CLASS  |
  *  +-----------------------+-----------------------------+
- *  | priority > 9          | ABOVE_NORMAL_PRIORITY_CLASS  |
+ *  | priority > 4          | BELOW_NORMAL_PRIORITY_CLASS  |
  *  +-----------------------+-----------------------------+
- *  | priority > 7          | NORMAL_PRIORITY_CLASS        |
- *  +-----------------------+-----------------------------+
- *  | priority > 5          | IDLE_PRIORITY_CLASS          |
- *  +-----------------------+-----------------------------+
- *  | priority > 3          | BELOW_NORMAL_PRIORITY_CLASS  |
+ *  | priority > 9          | IDLE_PRIORITY_CLASS          |
  *  +-----------------------+-----------------------------+
  *
- * Note, these values tries to mimic the outpof of wmic.
+ * If a value is between -4 and 4 (inclusive), then the priority will be set
+ * to NORMAL_PRIORITY_CLASS.
  *
- * If the value is below 4, then the process priority will default to 
- * NORMAL_PRIORITY_CLASS and anything above 23 will always be 
- * REALTIME_PRIORITY_CLASS.
+ * These values tries to mimic that of the UNIX version of nice().
  *
  * This is applied to the main process, not per thread, although this could 
  * be implemented using SetThreadPriority() at one point.
+ *
+ * Note, the following priority classes are left out with intention:
+ *
+ *   . REALTIME_PRIORITY_CLASS
+ *     Realtime priority class requires special system permissions to set, and 
+ *     can be dangerous in certain cases.
+ *
+ *   . PROCESS_MODE_BACKGROUND_BEGIN
+ *   . PROCESS_MODE_BACKGROUND_END
+ *     Process mode is not covered because it can easily forgotten to be changed 
+ *     back and can cause unforseen side effects that is hard to debug. Besides 
+ *     that, these do generally not really fit into making a Windows somewhat
+ *     compatible nice() function.
  */
 
 PHPAPI int nice(zend_long p)
 {
 	DWORD dwFlag = NORMAL_PRIORITY_CLASS;
 
-	if (p > 23) {
-		dwFlag = REALTIME_PRIORITY_CLASS;
-	} else if (p > 12) { 
+	if (p < -9) { 
 		dwFlag = HIGH_PRIORITY_CLASS;
-	} else if (p > 9) {
+	} else if (p < -4) {
 		dwFlag = ABOVE_NORMAL_PRIORITY_CLASS;
-	} else if (p > 5 && p < 7) {
+	} else if (p > 9) {
 		dwFlag = IDLE_PRIORITY_CLASS;
-	} else if (p > 3 && p < 7) {
+	} else if (p > 4) {
 		dwFlag = BELOW_NORMAL_PRIORITY_CLASS;
 	}
 

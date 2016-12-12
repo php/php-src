@@ -35,10 +35,8 @@
 #include <sys/time.h>
 #endif
 
-#include "php_random.h"
+#include "php_lcg.h"
 #include "uniqid.h"
-
-#define PHP_UNIQID_ENTROPY_LEN 10
 
 /* {{{ proto string uniqid([string prefix [, bool more_entropy]])
    Generates a unique ID */
@@ -79,22 +77,7 @@ PHP_FUNCTION(uniqid)
 	 * digits for usecs.
 	 */
 	if (more_entropy) {
-		int i;
-		unsigned char c, entropy[PHP_UNIQID_ENTROPY_LEN+1];
-
-		for(i = 0; i < PHP_UNIQID_ENTROPY_LEN;) {
-			php_random_bytes_throw(&c, sizeof(c));
-			/* Avoid modulo bias */
-			if (c > 249) {
-				continue;
-			}
-			entropy[i] = c % 10 + '0';
-			i++;
-		}
-		/* Set . for compatibility */
-		entropy[1] = '.';
-		entropy[PHP_UNIQID_ENTROPY_LEN] = '\0';
-		uniqid = strpprintf(0, "%s%08x%05x%s", prefix, sec, usec, entropy);
+		uniqid = strpprintf(0, "%s%08x%05x%.8F", prefix, sec, usec, php_combined_lcg() * 10);
 	} else {
 		uniqid = strpprintf(0, "%s%08x%05x", prefix, sec, usec);
 	}

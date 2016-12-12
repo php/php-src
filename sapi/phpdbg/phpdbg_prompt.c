@@ -58,9 +58,6 @@ extern int phpdbg_startup_run;
 #include "win32/param.h"
 #include "win32/winutil.h"
 #define GET_DL_ERROR()  php_win_err()
-#elif defined(NETWARE)
-#include <sys/param.h>
-#define GET_DL_ERROR()  dlerror()
 #else
 #include <sys/param.h>
 #define GET_DL_ERROR()  DL_ERROR()
@@ -348,7 +345,9 @@ void phpdbg_try_file_init(char *init_file, size_t init_file_len, zend_bool free_
 
 void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default) /* {{{ */
 {
-	if (!init_file && use_default) {
+	if (init_file) {
+		phpdbg_try_file_init(init_file, init_file_len, 1);
+	} else if (use_default) {
 		char *scan_dir = getenv("PHP_INI_SCAN_DIR");
 		char *sys_ini;
 		int i;
@@ -381,8 +380,6 @@ void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default) /
 		}
 
 		phpdbg_try_file_init(PHPDBG_STRL(PHPDBG_INIT_FILENAME), 0);
-	} else {
-		phpdbg_try_file_init(init_file, init_file_len, 1);
 	}
 }
 /* }}} */
@@ -528,7 +525,7 @@ int phpdbg_compile_stdin(zend_string *code) {
 
 	ZVAL_STR(&zv, code);
 
-	PHPDBG_G(ops) = zend_compile_string(&zv, "-");
+	PHPDBG_G(ops) = zend_compile_string(&zv, "Standard input code");
 
 	zend_string_release(code);
 
@@ -539,21 +536,21 @@ int phpdbg_compile_stdin(zend_string *code) {
 	if (PHPDBG_G(exec)) {
 		efree(PHPDBG_G(exec));
 	}
-	PHPDBG_G(exec) = estrdup("-");
-	PHPDBG_G(exec_len) = 1;
+	PHPDBG_G(exec) = estrdup("Standard input code");
+	PHPDBG_G(exec_len) = sizeof("Standard input code") - 1;
 	{ /* remove leading ?> from source */
 		int i;
-		zend_string *source_path = strpprintf(0, "-%c%p", 0, PHPDBG_G(ops)->opcodes);
+		zend_string *source_path = strpprintf(0, "Standard input code%c%p", 0, PHPDBG_G(ops)->opcodes);
 		phpdbg_file_source *data = zend_hash_find_ptr(&PHPDBG_G(file_sources), source_path);
 		dtor_func_t dtor = PHPDBG_G(file_sources).pDestructor;
 		PHPDBG_G(file_sources).pDestructor = NULL;
 		zend_hash_del(&PHPDBG_G(file_sources), source_path);
 		PHPDBG_G(file_sources).pDestructor = dtor;
-		zend_hash_str_update_ptr(&PHPDBG_G(file_sources), "-", 1, data);
+		zend_hash_str_update_ptr(&PHPDBG_G(file_sources), "Standard input code", sizeof("Standard input code")-1, data);
 		zend_string_release(source_path);
 
 		efree(data->filename);
-		data->filename = estrdup("-");
+		data->filename = estrdup("Standard input code");
 
 		for (i = 1; i <= data->lines; i++) {
 			data->line[i] -= 2;
@@ -562,7 +559,7 @@ int phpdbg_compile_stdin(zend_string *code) {
 		memmove(data->buf, data->buf + 2, data->len);
 	}
 
-	phpdbg_notice("compile", "context=\"-\"", "Successful compilation of stdin input");
+	phpdbg_notice("compile", "context=\"Standard input code\"", "Successful compilation of stdin input");
 
 	return SUCCESS;
 }

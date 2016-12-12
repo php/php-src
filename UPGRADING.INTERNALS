@@ -31,3 +31,8 @@ PHP 7.1 INTERNALS UPGRADE NOTES
 3. Module changes
 ========================
 
+- Session:
+  . php_session_start()/session_reset_id() return value is changed from void to int.
+    It returns SUCCESS/FAILURE.
+  . Session module manages session status correctly.
+

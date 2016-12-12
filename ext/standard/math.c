@@ -25,6 +25,7 @@
 #include "php_math.h"
 #include "zend_multiply.h"
 #include "zend_exceptions.h"
+#include "zend_portability.h"
 
 #include <math.h>
 #include <float.h>
@@ -239,7 +240,7 @@ static double php_acosh(double x)
 	if (x >= 1) {
 		return log(x + sqrt(x * x - 1));
 	} else {
-		return (DBL_MAX+DBL_MAX)-(DBL_MAX+DBL_MAX);
+		return ZEND_NAN;
 	}
 # else
 	return(log(x + sqrt(x * x - 1)));
@@ -276,7 +277,7 @@ static double php_log1p(double x)
 */
 static double php_expm1(double x)
 {
-#if !defined(PHP_WIN32) && !defined(NETWARE)
+#ifndef PHP_WIN32
 	return(expm1(x));
 #else
 	return(exp(x) - 1);
@@ -707,7 +708,7 @@ PHP_FUNCTION(log)
 	}
 
 	if (base == 1.0) {
-		RETURN_DOUBLE(php_get_nan());
+		RETURN_DOUBLE(ZEND_NAN);
 	}
 
 	if (base <= 0.0) {
@@ -951,7 +952,7 @@ PHPAPI zend_string * _php_math_zvaltobase(zval *arg, int base)
 		char buf[(sizeof(double) << 3) + 1];
 
 		/* Don't try to convert +/- infinity */
-		if (fvalue == HUGE_VAL || fvalue == -HUGE_VAL) {
+		if (fvalue == ZEND_INFINITY || fvalue == -ZEND_INFINITY) {
 			php_error_docref(NULL, E_WARNING, "Number too large");
 			return ZSTR_EMPTY_ALLOC();
 		}
@@ -1139,19 +1140,15 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 
 	/* calculate the length of the return buffer */
 	if (dp) {
-		integral = (int)(dp - ZSTR_VAL(tmpbuf));
+		integral = (dp - ZSTR_VAL(tmpbuf));
 	} else {
 		/* no decimal point was found */
-		integral = (int)ZSTR_LEN(tmpbuf);
+		integral = ZSTR_LEN(tmpbuf);
 	}
 
 	/* allow for thousand separators */
 	if (thousand_sep) {
-		if (integral + thousand_sep_len * ((integral-1) / 3) < integral) {
-			/* overflow */
-			php_error_docref(NULL, E_ERROR, "String overflow");
-		}
-		integral += thousand_sep_len * ((integral-1) / 3);
+		integral = zend_safe_addmult((integral-1)/3, thousand_sep_len, integral, "number formatting");
 	}
 
 	reslen = integral;
@@ -1160,11 +1157,7 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 		reslen += dec;
 
 		if (dec_point) {
-			if (reslen + dec_point_len < dec_point_len) {
-				/* overflow */
-				php_error_docref(NULL, E_ERROR, "String overflow");
-			}
-			reslen += dec_point_len;
+			reslen = zend_safe_addmult(reslen, 1, dec_point_len, "number formatting");
 		}
 	}
 
@@ -1182,8 +1175,8 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 	 * Take care, as the sprintf implementation may return less places than
 	 * we requested due to internal buffer limitations */
 	if (dec) {
-		int declen = (int)(dp ? s - dp : 0);
-		int topad = dec > declen ? dec - declen : 0;
+		size_t declen = (dp ? s - dp : 0);
+		size_t topad = dec > declen ? dec - declen : 0;
 
 		/* pad with '0's */
 		while (topad--) {

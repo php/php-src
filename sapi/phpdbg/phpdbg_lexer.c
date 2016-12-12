@@ -534,7 +534,7 @@ yy39:
 #line 161 "sapi/phpdbg/phpdbg_lexer.l"
 		{
 	phpdbg_init_param(yylval, STR_PARAM);
-	yylval->str = estrndup(yytext + (*yytext == '\'' || *yytext == '\"'), yyleng - unescape_string(yytext));
+	yylval->str = estrndup(yytext, yyleng - unescape_string(yytext));
 	yylval->len = yyleng;
 	return T_ID;
 }

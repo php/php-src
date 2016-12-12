@@ -272,6 +272,11 @@ static int dblib_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 static int dblib_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_value)
 {
 	switch (attr) {
+		case PDO_ATTR_EMULATE_PREPARES:
+			/* this is the only option available, but expose it so common tests and whatever else can introspect */
+			ZVAL_TRUE(return_value);
+			break;
+
 		case PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER:
 			ZVAL_BOOL(return_value, ((pdo_dblib_db_handle *)dbh->driver_data)->stringify_uniqueidentifier);
 			break;
@@ -329,7 +334,7 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		,{"auto",0} /* Only works with FreeTDS. Other drivers will bork */
 
 	};
-	
+
 	struct pdo_data_src_parser vars[] = {
 		{ "charset",	NULL,	0 }
 		,{ "appname",	"PHP " PDO_DBLIB_FLAVOUR,	0 }
@@ -341,7 +346,7 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 
 	nvars = sizeof(vars)/sizeof(vars[0]);
 	nvers = sizeof(tdsver)/sizeof(tdsver[0]);
-	
+
 	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, nvars);
 
 	H = pecalloc(1, sizeof(*H), dbh->is_persistent);
@@ -482,4 +487,3 @@ pdo_driver_t pdo_dblib_driver = {
 #endif
 	pdo_dblib_handle_factory
 };
-

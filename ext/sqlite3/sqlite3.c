@@ -251,7 +251,7 @@ PHP_METHOD(sqlite3, lastInsertRowID)
 		return;
 	}
 
-	RETURN_LONG(sqlite3_last_insert_rowid(db_obj->db));
+	RETURN_LONG((zend_long) sqlite3_last_insert_rowid(db_obj->db));
 }
 /* }}} */
 
@@ -306,7 +306,9 @@ PHP_METHOD(sqlite3, busyTimeout)
 	php_sqlite3_db_object *db_obj;
 	zval *object = getThis();
 	zend_long ms;
+#ifdef SQLITE_ENABLE_API_ARMOR
 	int return_code;
+#endif
 	db_obj = Z_SQLITE3_DB_P(object);
 
 	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
@@ -315,11 +317,15 @@ PHP_METHOD(sqlite3, busyTimeout)
 		return;
 	}
 
+#ifdef SQLITE_ENABLE_API_ARMOR
 	return_code = sqlite3_busy_timeout(db_obj->db, ms);
 	if (return_code != SQLITE_OK) {
 		php_sqlite3_error(db_obj, "Unable to set busy timeout: %d, %s", return_code, sqlite3_errmsg(db_obj->db));
 		RETURN_FALSE;
 	}
+#else
+	php_ignore_value(sqlite3_busy_timeout(db_obj->db, ms));
+#endif
 
 	RETURN_TRUE;
 }
@@ -577,7 +583,7 @@ static void sqlite_value_to_zval(sqlite3_stmt *stmt, int column, zval *data) /* 
 				ZVAL_STRINGL(data, (char *)sqlite3_column_text(stmt, column), sqlite3_column_bytes(stmt, column));
 			} else {
 #endif
-				ZVAL_LONG(data, val);
+				ZVAL_LONG(data, (zend_long) val);
 #if LONG_MAX <= 2147483647
 			}
 #endif
@@ -2145,9 +2151,6 @@ static void php_sqlite3_result_object_free_storage(zend_object *object) /* {{{ *
 	}
 
 	if (!Z_ISNULL(intern->stmt_obj_zval)) {
-		if (intern->stmt_obj && intern->stmt_obj->initialised) {
-			sqlite3_reset(intern->stmt_obj->stmt);
-		}
 
 		zval_ptr_dtor(&intern->stmt_obj_zval);
 	}

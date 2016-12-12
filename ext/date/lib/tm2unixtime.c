@@ -204,7 +204,7 @@ void timelib_do_rel_normalize(timelib_time *base, timelib_rel_time *rt)
 
 void timelib_do_normalize(timelib_time* time)
 {
-	if (time->s != TIMELIB_UNSET) do_range_limit_fraction(&time->f, &time->s);
+	if (time->f != TIMELIB_UNSET) do_range_limit_fraction(&time->f, &time->s);
 	if (time->s != TIMELIB_UNSET) do_range_limit(0, 60, 60, &time->s, &time->i);
 	if (time->s != TIMELIB_UNSET) do_range_limit(0, 60, 60, &time->i, &time->h);
 	if (time->s != TIMELIB_UNSET) do_range_limit(0, 24, 24, &time->h, &time->d);

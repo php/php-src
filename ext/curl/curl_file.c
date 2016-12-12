@@ -70,19 +70,19 @@ PHP_FUNCTION(curl_file_create)
 }
 /* }}} */
 
-static void curlfile_get_property(char *name, INTERNAL_FUNCTION_PARAMETERS)
+static void curlfile_get_property(char *name, size_t name_len, INTERNAL_FUNCTION_PARAMETERS)
 {
 	zval *res, rv;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	res = zend_read_property(curl_CURLFile_class, getThis(), name, strlen(name), 1, &rv);
+	res = zend_read_property(curl_CURLFile_class, getThis(), name, name_len, 1, &rv);
 	ZVAL_DEREF(res);
 	ZVAL_COPY(return_value, res);
 }
 
-static void curlfile_set_property(char *name, INTERNAL_FUNCTION_PARAMETERS)
+static void curlfile_set_property(char *name, size_t name_len, INTERNAL_FUNCTION_PARAMETERS)
 {
 	char *arg = NULL;
 	size_t arg_len;
@@ -90,14 +90,14 @@ static void curlfile_set_property(char *name, INTERNAL_FUNCTION_PARAMETERS)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &arg, &arg_len) == FAILURE) {
 		return;
 	}
-	zend_update_property_string(curl_CURLFile_class, getThis(), name, strlen(name), arg);
+	zend_update_property_string(curl_CURLFile_class, getThis(), name, name_len, arg);
 }
 
 /* {{{ proto string CURLFile::getFilename()
    Get file name */
 ZEND_METHOD(CURLFile, getFilename)
 {
-	curlfile_get_property("name", INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	curlfile_get_property("name", sizeof("name")-1, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
@@ -105,7 +105,7 @@ ZEND_METHOD(CURLFile, getFilename)
    Get MIME type */
 ZEND_METHOD(CURLFile, getMimeType)
 {
-	curlfile_get_property("mime", INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	curlfile_get_property("mime", sizeof("mime")-1, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
@@ -113,7 +113,7 @@ ZEND_METHOD(CURLFile, getMimeType)
    Get file name for POST */
 ZEND_METHOD(CURLFile, getPostFilename)
 {
-	curlfile_get_property("postname", INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	curlfile_get_property("postname", sizeof("postname")-1, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
@@ -121,7 +121,7 @@ ZEND_METHOD(CURLFile, getPostFilename)
    Set MIME type */
 ZEND_METHOD(CURLFile, setMimeType)
 {
-	curlfile_set_property("mime", INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	curlfile_set_property("mime", sizeof("mime")-1, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
@@ -129,7 +129,7 @@ ZEND_METHOD(CURLFile, setMimeType)
    Set file name for POST */
 ZEND_METHOD(CURLFile, setPostFilename)
 {
-	curlfile_set_property("postname", INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	curlfile_set_property("postname", sizeof("postname")-1, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 

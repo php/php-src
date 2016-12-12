@@ -1,5 +1,10 @@
 --TEST--
 Test preg_match() function : error conditions - jit stacklimit exhausted
+--SKIPIF--
+<?php
+if (ini_get("pcre.jit") === FALSE) {
+	die("skip no jit built");
+}
 --FILE--
 <?php
 var_dump(preg_match('/^(foo)+$/', str_repeat('foo', 1024*8192)));

@@ -175,7 +175,7 @@ php_stream_filter_status_t userfilter_filter(
 		return ret;
 	}
 
-	if (!zend_hash_str_exists(Z_OBJPROP_P(obj), "stream", sizeof("stream")-1)) {
+	if (!zend_hash_str_exists_ind(Z_OBJPROP_P(obj), "stream", sizeof("stream")-1)) {
 		zval tmp;
 
 		/* Give the userfilter class a hook back to the stream */
@@ -268,7 +268,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 	zval obj, zfilter;
 	zval func_name;
 	zval retval;
-	int len;
+	size_t len;
 
 	/* some sanity checks */
 	if (persistent) {
@@ -277,7 +277,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 		return NULL;
 	}
 
-	len = (int)strlen(filtername);
+	len = strlen(filtername);
 
 	/* determine the classname/class entry */
 	if (NULL == (fdat = zend_hash_str_find_ptr(BG(user_filter_map), (char*)filtername, len))) {
@@ -289,7 +289,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
            TODO: Allow failed userfilter creations to continue
                  scanning through the list */
 		if ((period = strrchr(filtername, '.'))) {
-			char *wildcard = emalloc(len + 3);
+			char *wildcard = safe_emalloc(len, 1, 3);
 
 			/* Search for wildcard matches instead */
 			memcpy(wildcard, filtername, len + 1); /* copy \0 */

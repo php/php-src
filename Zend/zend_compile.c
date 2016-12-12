@@ -1124,10 +1124,8 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const ze
 		lcname = RT_CONSTANT(op_array, opline->op1);
 		rtd_key = lcname + 1;
 	}
-	if ((ce = zend_hash_find_ptr(class_table, Z_STR_P(rtd_key))) == NULL) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Internal Zend error - Missing class information for %s", Z_STRVAL_P(rtd_key));
-		return NULL;
-	}
+	ce = zend_hash_find_ptr(class_table, Z_STR_P(rtd_key));
+	ZEND_ASSERT(ce);
 	ce->refcount++;
 	if (zend_hash_add_ptr(class_table, Z_STR_P(lcname), ce) == NULL) {
 		ce->refcount--;
@@ -1848,6 +1846,28 @@ zend_ast *zend_ast_append_str(zend_ast *left_ast, zend_ast *right_ast) /* {{{ */
 }
 /* }}} */
 
+zend_ast *zend_negate_num_string(zend_ast *ast) /* {{{ */
+{
+	zval *zv = zend_ast_get_zval(ast);
+	if (Z_TYPE_P(zv) == IS_LONG) {
+		if (Z_LVAL_P(zv) == 0) {
+			ZVAL_NEW_STR(zv, zend_string_init("-0", sizeof("-0")-1, 0));
+		} else {
+			ZEND_ASSERT(Z_LVAL_P(zv) > 0);
+			Z_LVAL_P(zv) *= -1;
+		}
+	} else if (Z_TYPE_P(zv) == IS_STRING) {
+		size_t orig_len = Z_STRLEN_P(zv);
+		zend_string_extend(Z_STR_P(zv), orig_len + 1, 0);
+		memmove(Z_STRVAL_P(zv) + 1, Z_STRVAL_P(zv), orig_len + 1);
+		Z_STRVAL_P(zv)[0] = '-';
+	} else {
+		ZEND_ASSERT(0);
+	}
+	return ast;
+}
+/* }}} */
+
 void zend_verify_namespace(void) /* {{{ */
 {
 	if (FC(has_bracketed_namespaces) && !FC(in_namespace)) {
@@ -1879,22 +1899,6 @@ ZEND_API size_t zend_dirname(char *path, size_t len)
 			return len;
 		}
 	}
-#elif defined(NETWARE)
-	/*
-	 * Find the first occurrence of : from the left
-	 * move the path pointer to the position just after :
-	 * increment the len_adjust to the length of path till colon character(inclusive)
-	 * If there is no character beyond : simple return len
-	 */
-	char *colonpos = NULL;
-	colonpos = strchr(path, ':');
-	if (colonpos != NULL) {
-		len_adjust = ((colonpos - path) + 1);
-		path += len_adjust;
-		if (len_adjust == len) {
-			return len;
-		}
-	}
 #endif
 
 	if (len == 0) {
@@ -1919,20 +1923,9 @@ ZEND_API size_t zend_dirname(char *path, size_t len)
 	}
 	if (end < path) {
 		/* No slash found, therefore return '.' */
-#ifdef NETWARE
-		if (len_adjust == 0) {
-			path[0] = '.';
-			path[1] = '\0';
-			return 1; /* only one character */
-		} else {
-			path[0] = '\0';
-			return len_adjust;
-		}
-#else
 		path[0] = '.';
 		path[1] = '\0';
 		return 1 + len_adjust;
-#endif
 	}
 
 	/* Strip slashes which came before the file name */
@@ -3202,7 +3195,6 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 			}
 		} else {
 			zend_compile_expr(&arg_node, arg);
-			ZEND_ASSERT(arg_node.op_type != IS_CV);
 			if (arg_node.op_type == IS_VAR) {
 				/* pass ++$a or something similar */
 				if (fbc) {
@@ -3215,6 +3207,16 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 					}
 				} else {
 					opcode = ZEND_SEND_VAR_NO_REF_EX;
+				}
+			} else if (arg_node.op_type == IS_CV) {
+				if (fbc) {
+					if (ARG_SHOULD_BE_SENT_BY_REF(fbc, arg_num)) {
+						opcode = ZEND_SEND_REF;
+					} else {
+						opcode = ZEND_SEND_VAR;
+					}
+				} else {
+					opcode = ZEND_SEND_VAR_EX;
 				}
 			} else {
 				if (fbc) {
@@ -5968,6 +5970,7 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 		}
 
 		zend_compile_class_ref(&extends_node, extends_ast, 0);
+		ce->ce_flags |= ZEND_ACC_INHERITED;
 	}
 
 	opline = get_next_op(CG(active_op_array));

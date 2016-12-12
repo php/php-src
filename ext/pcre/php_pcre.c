@@ -114,9 +114,6 @@ static void php_free_pcre_cache(zval *data) /* {{{ */
 	}
 #if HAVE_SETLOCALE
 	if ((void*)pce->tables) pefree((void*)pce->tables, 1);
-	if (pce->locale) {
-		zend_string_release(pce->locale);
-	}
 #endif
 	pefree(pce, 1);
 }
@@ -320,27 +317,30 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	pcre_cache_entry	*pce;
 	pcre_cache_entry	 new_entry;
 	int					 rc;
+	zend_string 		*key;
+
+#if HAVE_SETLOCALE
+	if (BG(locale_string) &&
+		(ZSTR_LEN(BG(locale_string)) != 1 && ZSTR_VAL(BG(locale_string))[0] != 'C')) {
+		key = zend_string_alloc(ZSTR_LEN(regex) + ZSTR_LEN(BG(locale_string)) + 1, 0);
+		memcpy(ZSTR_VAL(key), ZSTR_VAL(BG(locale_string)), ZSTR_LEN(BG(locale_string)) + 1);
+		memcpy(ZSTR_VAL(key) + ZSTR_LEN(BG(locale_string)), ZSTR_VAL(regex), ZSTR_LEN(regex) + 1);
+	} else
+#endif
+	{
+		key = regex;
+	}
 
 	/* Try to lookup the cached regex entry, and if successful, just pass
 	   back the compiled pattern, otherwise go on and compile it. */
-	pce = zend_hash_find_ptr(&PCRE_G(pcre_cache), regex);
+	pce = zend_hash_find_ptr(&PCRE_G(pcre_cache), key);
 	if (pce) {
 #if HAVE_SETLOCALE
-		if (pce->locale == BG(locale_string) ||
-		    (pce->locale && BG(locale_string) &&
-		     ZSTR_LEN(pce->locale) == ZSTR_LEN(BG(locale_string)) &&
-		     !memcmp(ZSTR_VAL(pce->locale), ZSTR_VAL(BG(locale_string)), ZSTR_LEN(pce->locale))) ||
-		    (!pce->locale &&
-		     ZSTR_LEN(BG(locale_string)) == 1 &&
-		     ZSTR_VAL(BG(locale_string))[0] == 'C') ||
-		    (!BG(locale_string) &&
-		     ZSTR_LEN(pce->locale) == 1 &&
-		     ZSTR_VAL(pce->locale)[0] == 'C')) {
-			return pce;
+		if (key != regex) {
+			zend_string_release(key);
 		}
-#else
-		return pce;
 #endif
+		return pce;
 	}
 
 	p = ZSTR_VAL(regex);
@@ -349,6 +349,11 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	   get to the end without encountering a delimiter. */
 	while (isspace((int)*(unsigned char *)p)) p++;
 	if (*p == 0) {
+#if HAVE_SETLOCALE
+		if (key != regex) {
+			zend_string_release(key);
+		}
+#endif
 		php_error_docref(NULL, E_WARNING,
 						 p < ZSTR_VAL(regex) + ZSTR_LEN(regex) ? "Null byte in regex" : "Empty regular expression");
 		return NULL;
@@ -358,6 +363,11 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	   or a backslash. */
 	delimiter = *p++;
 	if (isalnum((int)*(unsigned char *)&delimiter) || delimiter == '\\') {
+#if HAVE_SETLOCALE
+		if (key != regex) {
+			zend_string_release(key);
+		}
+#endif
 		php_error_docref(NULL,E_WARNING, "Delimiter must not be alphanumeric or backslash");
 		return NULL;
 	}
@@ -397,6 +407,11 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	}
 
 	if (*pp == 0) {
+#if HAVE_SETLOCALE
+		if (key != regex) {
+			zend_string_release(key);
+		}
+#endif
 		if (pp < ZSTR_VAL(regex) + ZSTR_LEN(regex)) {
 			php_error_docref(NULL,E_WARNING, "Null byte in regex");
 		} else if (start_delimiter == end_delimiter) {
@@ -453,13 +468,17 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 					php_error_docref(NULL,E_WARNING, "Null byte in regex");
 				}
 				efree(pattern);
+#if HAVE_SETLOCALE
+				if (key != regex) {
+					zend_string_release(key);
+				}
+#endif
 				return NULL;
 		}
 	}
 
 #if HAVE_SETLOCALE
-	if (BG(locale_string) &&
-	    (ZSTR_LEN(BG(locale_string)) != 1 || ZSTR_VAL(BG(locale_string))[0] != 'C')) {
+	if (key != regex) {
 		tables = pcre_maketables();
 	}
 #endif
@@ -472,6 +491,11 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 					  tables);
 
 	if (re == NULL) {
+#if HAVE_SETLOCALE
+		if (key != regex) {
+			zend_string_release(key);
+		}
+#endif
 		php_error_docref(NULL,E_WARNING, "Compilation failed: %s at offset %d", error, erroffset);
 		efree(pattern);
 		if (tables) {
@@ -516,7 +540,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	 * these are supposedly the oldest ones (but not necessarily the least used
 	 * ones).
 	 */
-	if (zend_hash_num_elements(&PCRE_G(pcre_cache)) == PCRE_CACHE_SIZE) {
+	if (!pce && zend_hash_num_elements(&PCRE_G(pcre_cache)) == PCRE_CACHE_SIZE) {
 		int num_clean = PCRE_CACHE_SIZE / 8;
 		zend_hash_apply_with_argument(&PCRE_G(pcre_cache), pcre_clean_cache, &num_clean);
 	}
@@ -527,23 +551,28 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	new_entry.preg_options = poptions;
 	new_entry.compile_options = coptions;
 #if HAVE_SETLOCALE
-	new_entry.locale = BG(locale_string) ?
-		((GC_FLAGS(BG(locale_string)) & IS_STR_PERSISTENT) ?
-			zend_string_copy(BG(locale_string)) :
-			zend_string_init(ZSTR_VAL(BG(locale_string)), ZSTR_LEN(BG(locale_string)), 1)) :
-		NULL;
 	new_entry.tables = tables;
 #endif
 	new_entry.refcount = 0;
 
 	rc = pcre_fullinfo(re, extra, PCRE_INFO_CAPTURECOUNT, &new_entry.capture_count);
 	if (rc < 0) {
+#if HAVE_SETLOCALE
+		if (key != regex) {
+			zend_string_release(key);
+		}
+#endif
 		php_error_docref(NULL, E_WARNING, "Internal pcre_fullinfo() error %d", rc);
 		return NULL;
 	}
 
 	rc = pcre_fullinfo(re, extra, PCRE_INFO_NAMECOUNT, &new_entry.name_count);
 	if (rc < 0) {
+#if HAVE_SETLOCALE
+		if (key != regex) {
+			zend_string_release(key);
+		}
+#endif
 		php_error_docref(NULL, E_WARNING, "Internal pcre_fullinfo() error %d", rc);
 		return NULL;
 	}
@@ -556,14 +585,17 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	 * as hash keys especually for this table.
 	 * See bug #63180
 	 */
-	if (!ZSTR_IS_INTERNED(regex) || !(GC_FLAGS(regex) & IS_STR_PERMANENT)) {
-		zend_string *str = zend_string_init(ZSTR_VAL(regex), ZSTR_LEN(regex), 1);
-		GC_REFCOUNT(str) = 0; /* will be incremented by zend_hash_update_mem() */
-		ZSTR_H(str) = ZSTR_H(regex);
-		regex = str;
+	if (!ZSTR_IS_INTERNED(key) || !(GC_FLAGS(key) & IS_STR_PERMANENT)) {
+		pce = zend_hash_str_update_mem(&PCRE_G(pcre_cache),
+				ZSTR_VAL(key), ZSTR_LEN(key), &new_entry, sizeof(pcre_cache_entry));
+#if HAVE_SETLOCALE
+		if (key != regex) {
+			zend_string_release(key);
+		}
+#endif
+	} else {
+		pce = zend_hash_update_mem(&PCRE_G(pcre_cache), key, &new_entry, sizeof(pcre_cache_entry));
 	}
-
-	pce = zend_hash_update_mem(&PCRE_G(pcre_cache), regex, &new_entry, sizeof(pcre_cache_entry));
 
 	return pce;
 }
@@ -693,7 +725,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 
 	/* Overwrite the passed-in value for subpatterns with an empty array. */
 	if (subpats != NULL) {
-		zval_dtor(subpats);
+		zval_ptr_dtor(subpats);
 		array_init(subpats);
 	}
 
@@ -1523,7 +1555,10 @@ static int preg_replace_impl(zval *return_value, zval *regex, zval *replace, zva
 				RETVAL_STR(result);
 			} else {
 				zend_string_release(result);
+				RETVAL_NULL();
 			}
+		} else {
+			RETVAL_NULL();
 		}
 	}
 
@@ -1556,7 +1591,7 @@ static PHP_FUNCTION(preg_replace)
 
 	replace_count = preg_replace_impl(return_value, regex, replace, subject, limit, 0, 0);
 	if (zcount) {
-		zval_dtor(zcount);
+		zval_ptr_dtor(zcount);
 		ZVAL_LONG(zcount, replace_count);
 	}
 }
@@ -1591,7 +1626,7 @@ static PHP_FUNCTION(preg_replace_callback)
 
 	replace_count = preg_replace_impl(return_value, regex, replace, subject, limit, 1, 0);
 	if (zcount) {
-		zval_dtor(zcount);
+		zval_ptr_dtor(zcount);
 		ZVAL_LONG(zcount, replace_count);
 	}
 }
@@ -1616,7 +1651,6 @@ static PHP_FUNCTION(preg_replace_callback_array)
 		Z_PARAM_ZVAL_EX(zcount, 0, 1)
 	ZEND_PARSE_PARAMETERS_END();
 
-	ZVAL_UNDEF(&zv);
 	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(pattern), str_idx, replace) {
 		if (str_idx) {
 			ZVAL_STR_COPY(&regex, str_idx);
@@ -1645,10 +1679,6 @@ static PHP_FUNCTION(preg_replace_callback_array)
 
 		zval_ptr_dtor(&regex);
 
-		if (Z_ISUNDEF(zv)) {
-			RETURN_NULL();
-		}
-
 		ZVAL_COPY_VALUE(return_value, &zv);
 
 		if (UNEXPECTED(EG(exception))) {
@@ -1658,7 +1688,7 @@ static PHP_FUNCTION(preg_replace_callback_array)
 	} ZEND_HASH_FOREACH_END();
 
 	if (zcount) {
-		zval_dtor(zcount);
+		zval_ptr_dtor(zcount);
 		ZVAL_LONG(zcount, replace_count);
 	}
 }
@@ -1689,7 +1719,7 @@ static PHP_FUNCTION(preg_filter)
 
 	replace_count = preg_replace_impl(return_value, regex, replace, subject, limit, 0, 1);
 	if (zcount) {
-		zval_dtor(zcount);
+		zval_ptr_dtor(zcount);
 		ZVAL_LONG(zcount, replace_count);
 	}
 }

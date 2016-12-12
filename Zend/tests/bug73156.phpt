@@ -1,5 +1,5 @@
 --TEST--
-iBug #73156 (segfault on undefined function)
+Bug #73156 (segfault on undefined function)
 --FILE--
 <?php
 class A {

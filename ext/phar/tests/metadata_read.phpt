@@ -3,7 +3,6 @@ Phar with meta-data (read)
 --SKIPIF--
 <?php
 if (!extension_loaded("phar")) die("skip");
-if (version_compare(PHP_VERSION, "6.0", "==")) die("skip pre-unicode version of PHP required");
 ?>
 --INI--
 phar.require_hash=0

@@ -69,7 +69,7 @@ var_dump($row);
 
 echo "Test 2 Manipulate the data using SimpleXML\n";
 
-$sx = simplexml_load_string((binary)$row[0]->load());
+$sx = simplexml_load_string($row[0]->load());
 $row[0]->free();
 var_dump($sx);
 

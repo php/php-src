@@ -16,8 +16,8 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef HAVE_GETRUSAGE_H
-# define HAVE_GETRUSAGE_H
+#ifndef HAVE_NICE_H
+# define HAVE_NICE_H
 
 PHPAPI int nice(zend_long);
 

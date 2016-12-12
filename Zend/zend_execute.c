@@ -584,7 +584,7 @@ static inline void zend_assign_to_variable_reference(zval *variable_ptr, zval *v
 			zval_dtor_func(garbage);
 			return;
 		} else {
-			GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr);
+			gc_check_possible_root(garbage);
 		}
 	}
 	ZVAL_REF(variable_ptr, ref);
@@ -1369,6 +1369,7 @@ static zend_never_inline void zend_post_incdec_overloaded_property(zval *object,
 		z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, cache_slot, &rv);
 		if (UNEXPECTED(EG(exception))) {
 			OBJ_RELEASE(Z_OBJ(obj));
+			ZVAL_UNDEF(result);
 			return;
 		}
 
@@ -1407,13 +1408,16 @@ static zend_never_inline void zend_pre_incdec_overloaded_property(zval *object, 
 	zval rv;
 
 	if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
-		zval *z, obj;
+		zval *z, *zptr, obj;
 				
 		ZVAL_OBJ(&obj, Z_OBJ_P(object));
 		Z_ADDREF(obj);
-		z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, cache_slot, &rv);
+		zptr = z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, cache_slot, &rv);
 		if (UNEXPECTED(EG(exception))) {
 			OBJ_RELEASE(Z_OBJ(obj));
+			if (result) {
+				ZVAL_UNDEF(result);
+			}
 			return;
 		}
 
@@ -1438,7 +1442,7 @@ static zend_never_inline void zend_pre_incdec_overloaded_property(zval *object, 
 		}
 		Z_OBJ_HT(obj)->write_property(&obj, property, z, cache_slot);
 		OBJ_RELEASE(Z_OBJ(obj));
-		zval_ptr_dtor(z);
+		zval_ptr_dtor(zptr);
 	} else {
 		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
 		if (UNEXPECTED(result)) {
@@ -1459,6 +1463,9 @@ static zend_never_inline void zend_assign_op_overloaded_property(zval *object, z
 		z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, cache_slot, &rv);
 		if (UNEXPECTED(EG(exception))) {
 			OBJ_RELEASE(Z_OBJ(obj));
+			if (result) {
+				ZVAL_UNDEF(result);
+			}
 			return;
 		}
 		if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
@@ -2063,12 +2070,12 @@ static zend_always_inline void i_free_compiled_variables(zend_execute_data *exec
 	zval *end = cv + EX(func)->op_array.last_var;
 	while (EXPECTED(cv != end)) {
 		if (Z_REFCOUNTED_P(cv)) {
-			if (!Z_DELREF_P(cv)) {
-				zend_refcounted *r = Z_COUNTED_P(cv);
+			zend_refcounted *r = Z_COUNTED_P(cv);
+			if (!--GC_REFCOUNT(r)) {
 				ZVAL_NULL(cv);
 				zval_dtor_func(r);
 			} else {
-				GC_ZVAL_CHECK_POSSIBLE_ROOT(cv);
+				gc_check_possible_root(r);
 			}
 		}
 		cv++;
@@ -2861,8 +2868,9 @@ already_compiled:
 }
 /* }}} */
 
-static zend_never_inline int zend_do_fcall_overloaded(zend_function *fbc, zend_execute_data *call, zval *ret) /* {{{ */
+ZEND_API int ZEND_FASTCALL zend_do_fcall_overloaded(zend_execute_data *call, zval *ret) /* {{{ */
 {
+	zend_function *fbc = call->func;
 	zend_object *object;
 
 	/* Not sure what should be done here if it's a static method */
@@ -2940,13 +2948,13 @@ static zend_never_inline int zend_do_fcall_overloaded(zend_function *fbc, zend_e
 #define ZEND_VM_SET_RELATIVE_OPCODE(opline, offset) \
 	ZEND_VM_SET_OPCODE(ZEND_OFFSET_TO_OPLINE(opline, offset))
 
-#define ZEND_VM_JMP(new_op) \
-	if (EXPECTED(!EG(exception))) { \
+#define ZEND_VM_JMP(new_op) do { \
+		if (UNEXPECTED(EG(exception))) { \
+			HANDLE_EXCEPTION(); \
+		} \
 		ZEND_VM_SET_OPCODE(new_op); \
-	} else { \
-		LOAD_OPLINE(); \
-	} \
-	ZEND_VM_CONTINUE()
+		ZEND_VM_CONTINUE(); \
+	} while (0)
 
 #define ZEND_VM_INC_OPCODE() \
 	OPLINE++
@@ -2973,6 +2981,7 @@ static zend_never_inline int zend_do_fcall_overloaded(zend_function *fbc, zend_e
 			break; \
 		} \
 		if ((_check) && UNEXPECTED(EG(exception))) { \
+			ZVAL_UNDEF(EX_VAR(opline->result.var)); \
 			HANDLE_EXCEPTION(); \
 		} \
 		if (__result) { \
@@ -2984,6 +2993,7 @@ static zend_never_inline int zend_do_fcall_overloaded(zend_function *fbc, zend_e
 	} while (0)
 # define ZEND_VM_SMART_BRANCH_JMPZ(_result, _check) do { \
 		if ((_check) && UNEXPECTED(EG(exception))) { \
+			ZVAL_UNDEF(EX_VAR(opline->result.var)); \
 			HANDLE_EXCEPTION(); \
 		} \
 		if (_result) { \
@@ -2995,6 +3005,7 @@ static zend_never_inline int zend_do_fcall_overloaded(zend_function *fbc, zend_e
 	} while (0)
 # define ZEND_VM_SMART_BRANCH_JMPNZ(_result, _check) do { \
 		if ((_check) && UNEXPECTED(EG(exception))) { \
+			ZVAL_UNDEF(EX_VAR(opline->result.var)); \
 			HANDLE_EXCEPTION(); \
 		} \
 		if (!(_result)) { \
@@ -3022,6 +3033,12 @@ static zend_never_inline int zend_do_fcall_overloaded(zend_function *fbc, zend_e
 	_get_zval_cv_lookup_ ## type(ptr, opline->op1.var, execute_data)
 #define GET_OP2_UNDEF_CV(ptr, type) \
 	_get_zval_cv_lookup_ ## type(ptr, opline->op2.var, execute_data)
+
+#define UNDEF_RESULT() do { \
+		if (opline->result_type & (IS_VAR | IS_TMP_VAR)) { \
+			ZVAL_UNDEF(EX_VAR(opline->result.var)); \
+		} \
+	} while (0)
 
 #include "zend_vm_execute.h"
 

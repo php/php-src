@@ -790,6 +790,7 @@ PHP_FUNCTION(count)
 
 	switch (Z_TYPE_P(array)) {
 		case IS_NULL:
+			php_error_docref(NULL, E_WARNING, "Parameter must be an array or an object that implements Countable");
 			RETURN_LONG(0);
 			break;
 		case IS_ARRAY:
@@ -820,8 +821,14 @@ PHP_FUNCTION(count)
 				}
 				return;
 			}
+
+			/* If There's no handler and it doesn't implement Countable then add a warning */
+			php_error_docref(NULL, E_WARNING, "Parameter must be an array or an object that implements Countable");
+			RETURN_LONG(1);
+			break;
 		}
 		default:
+			php_error_docref(NULL, E_WARNING, "Parameter must be an array or an object that implements Countable");
 			RETURN_LONG(1);
 			break;
 	}
@@ -2903,7 +2910,9 @@ PHP_FUNCTION(array_slice)
 
 	/* Start at the beginning and go until we hit offset */
 	pos = 0;
-	if ((Z_ARRVAL_P(input)->u.flags & HASH_FLAG_PACKED) && !preserve_keys) {
+	if (HT_IS_PACKED(Z_ARRVAL_P(input)) &&
+	    (!preserve_keys ||
+	     (offset == 0 && HT_IS_WITHOUT_HOLES(Z_ARRVAL_P(input))))) {
 		zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(input), entry) {
@@ -2969,17 +2978,10 @@ PHPAPI int php_array_merge_recursive(HashTable *dest, HashTable *src) /* {{{ */
 					return 0;
 				}
 
-				if (Z_ISREF_P(dest_entry)) {
-					if (Z_REFCOUNT_P(dest_entry) == 1) {
-						ZVAL_UNREF(dest_entry);
-					} else {
-						Z_DELREF_P(dest_entry);
-						ZVAL_DUP(dest_entry, dest_zval);
-					}
-					dest_zval = dest_entry;
-				} else {
-					SEPARATE_ZVAL(dest_zval);
-				}
+				ZEND_ASSERT(!Z_ISREF_P(dest_entry) || Z_REFCOUNT_P(dest_entry) > 1);
+				SEPARATE_ZVAL(dest_entry);
+				dest_zval = dest_entry;
+
 				if (Z_TYPE_P(dest_zval) == IS_NULL) {
 					convert_to_array_ex(dest_zval);
 					add_next_index_null(dest_zval);
@@ -3102,7 +3104,10 @@ PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src) /* {{{ *
 			php_error_docref(NULL, E_WARNING, "recursion detected");
 			return 0;
 		}
-		SEPARATE_ZVAL(dest_zval);
+
+		ZEND_ASSERT(!Z_ISREF_P(dest_entry) || Z_REFCOUNT_P(dest_entry) > 1);
+		SEPARATE_ZVAL(dest_entry);
+		dest_zval = dest_entry;
 
 		if (ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(dest_zval))) {
 			Z_ARRVAL_P(dest_zval)->u.v.nApplyCount++;
@@ -3761,7 +3766,7 @@ static void array_bucketindex_swap(void *p, void *q) /* {{{ */
 PHP_FUNCTION(array_unique)
 {
 	zval *array;
-	uint idx;
+	uint32_t idx;
 	Bucket *p;
 	struct bucketindex *arTmp, *cmpdata, *lastkept;
 	unsigned int i;
@@ -3857,7 +3862,7 @@ static int zval_user_compare(zval *a, zval *b) /* {{{ */
 
 static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_type) /* {{{ */
 {
-    uint idx;
+    uint32_t idx;
 	Bucket *p;
 	int argc, i;
 	zval *args;
@@ -3958,7 +3963,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 	zval *args = NULL;
 	HashTable *hash;
 	int arr_argc, i, c = 0;
-	uint idx;
+	uint32_t idx;
 	Bucket **lists, *list, **ptrs, *p;
 	uint32_t req_args;
 	char *param_spec;
@@ -4285,7 +4290,7 @@ PHP_FUNCTION(array_uintersect_uassoc)
 
 static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_type) /* {{{ */
 {
-    uint idx;
+    uint32_t idx;
 	Bucket *p;
 	int argc, i;
 	zval *args;
@@ -4381,7 +4386,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 	zval *args = NULL;
 	HashTable *hash;
 	int arr_argc, i, c;
-	uint idx;
+	uint32_t idx;
 	Bucket **lists, *list, **ptrs, *p;
 	uint32_t req_args;
 	char *param_spec;
@@ -4814,7 +4819,7 @@ PHP_FUNCTION(array_multisort)
 	zval*			args;
 	zval**			arrays;
 	Bucket**		indirect;
-	uint            idx;
+	uint32_t            idx;
 	Bucket*			p;
 	HashTable*		hash;
 	int				argc;

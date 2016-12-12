@@ -1982,6 +1982,54 @@ static int implement_date_interface_handler(zend_class_entry *interface, zend_cl
 	return SUCCESS;
 } /* }}} */
 
+static int date_interval_has_property(zval *object, zval *member, int type, void **cache_slot) /* {{{ */
+{
+	php_interval_obj *obj;
+	zval tmp_member;
+	zval rv;
+	zval *prop;
+	int retval = 0;
+
+	if (Z_TYPE_P(member) != IS_STRING) {
+		ZVAL_COPY(&tmp_member, member);
+		convert_to_string(&tmp_member);
+		member = &tmp_member;
+		cache_slot = NULL;
+	}
+
+	obj = Z_PHPINTERVAL_P(object);
+
+	if (!obj->initialized) {
+		retval = (zend_get_std_object_handlers())->has_property(object, member, type, cache_slot);
+		if (member == &tmp_member) {
+			zval_dtor(member);
+		}
+		return retval;
+	}
+
+	prop = date_interval_read_property(object, member, type, cache_slot, &rv);
+
+	if (prop != NULL) {
+		if (type == 2) {
+			retval = 1;
+		} else if (type == 1) {
+			retval = zend_is_true(prop);
+		} else if (type == 0) {
+			retval = (Z_TYPE(*prop) != IS_NULL);
+		}
+	} else {
+		retval = (zend_get_std_object_handlers())->has_property(object, member, type, cache_slot);
+	}
+
+	if (member == &tmp_member) {
+		zval_dtor(member);
+	}
+
+	return retval;
+	
+}
+/* }}} */
+
 static void date_register_classes(void) /* {{{ */
 {
 	zend_class_entry ce_date, ce_immutable, ce_timezone, ce_interval, ce_period, ce_interface;
@@ -2063,6 +2111,7 @@ static void date_register_classes(void) /* {{{ */
 	date_object_handlers_interval.offset = XtOffsetOf(php_interval_obj, std);
 	date_object_handlers_interval.free_obj = date_object_free_storage_interval;
 	date_object_handlers_interval.clone_obj = date_object_clone_interval;
+	date_object_handlers_interval.has_property = date_interval_has_property;
 	date_object_handlers_interval.read_property = date_interval_read_property;
 	date_object_handlers_interval.write_property = date_interval_write_property;
 	date_object_handlers_interval.get_properties = date_object_get_properties_interval;

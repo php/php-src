@@ -46,7 +46,7 @@ PHP_FUNCTION(header)
 				&len, &rep, &ctr.response_code) == FAILURE)
 		return;
 
-	ctr.line_len = (uint)len;
+	ctr.line_len = (uint32_t)len;
 	sapi_header_op(rep ? SAPI_HEADER_REPLACE:SAPI_HEADER_ADD, &ctr);
 }
 /* }}} */
@@ -62,7 +62,7 @@ PHP_FUNCTION(header_remove)
 	                          &len) == FAILURE)
 		return;
 
-	ctr.line_len = (uint)len;
+	ctr.line_len = (uint32_t)len;
 	sapi_header_op(ZEND_NUM_ARGS() == 0 ? SAPI_HEADER_DELETE_ALL : SAPI_HEADER_DELETE, &ctr);
 }
 /* }}} */
@@ -174,7 +174,7 @@ PHPAPI int php_setcookie(zend_string *name, zend_string *value, time_t expires, 
 	}
 
 	ctr.line = cookie;
-	ctr.line_len = (uint)strlen(cookie);
+	ctr.line_len = (uint32_t)strlen(cookie);
 
 	result = sapi_header_op(SAPI_HEADER_ADD, &ctr);
 	efree(cookie);

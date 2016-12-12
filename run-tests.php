@@ -122,16 +122,6 @@ if (getenv('TEST_PHP_EXECUTABLE')) {
 				$php_cgi = null;
 			}
 		}
-
-		if (!getenv('TEST_PHPDBG_EXECUTABLE')) {
-			$phpdbg = $cwd . '/sapi/phpdbg/phpdbg';
-
-			if (file_exists($phpdbg)) {
-				putenv("TEST_PHPDBG_EXECUTABLE=$phpdbg");
-			} else {
-				$phpdbg = null;
-			}
-		}
 	}
 	$environment['TEST_PHP_EXECUTABLE'] = $php;
 }
@@ -145,6 +135,23 @@ if (getenv('TEST_PHP_CGI_EXECUTABLE')) {
 	}
 
 	$environment['TEST_PHP_CGI_EXECUTABLE'] = $php_cgi;
+}
+
+if (!getenv('TEST_PHPDBG_EXECUTABLE')) {
+	if (!strncasecmp(PHP_OS, "win", 3) && file_exists(dirname($php) . "/phpdbg.exe")) {
+		$phpdbg = realpath(dirname($php) . "/phpdbg.exe");
+	} elseif (file_exists(dirname($php) . "/../../sapi/phpdbg/phpdbg")) {
+		$phpdbg = realpath(dirname($php) . "/../../sapi/phpdbg/phpdbg");
+	} elseif (file_exists("./sapi/phpdbg/phpdbg")) {
+		$phpdbg = realpath("./sapi/phpdbg/phpdbg");
+	} elseif (file_exists(dirname($php) . "/phpdbg")) {
+		$phpdbg = realpath(dirname($php) . "/phpdbg");
+	} else {
+		$phpdbg = null;
+	}
+	if ($phpdbg) {
+		putenv("TEST_PHPDBG_EXECUTABLE=$phpdbg");
+	}
 }
 
 if (getenv('TEST_PHPDBG_EXECUTABLE')) {
@@ -1057,7 +1064,7 @@ function error_report($testname, $logname, $tested)
 	}
 }
 
-function system_with_timeout($commandline, $env = null, $stdin = null)
+function system_with_timeout($commandline, $env = null, $stdin = null, $captureStdIn = true, $captureStdOut = true, $captureStdErr = true)
 {
 	global $leak_check, $cwd;
 
@@ -1068,21 +1075,29 @@ function system_with_timeout($commandline, $env = null, $stdin = null)
 		$bin_env[$key] = $value;
 	}
 
-	$proc = proc_open($commandline, array(
-		0 => array('pipe', 'r'),
-		1 => array('pipe', 'w'),
-		2 => array('pipe', 'w')
-		), $pipes, $cwd, $bin_env, array('suppress_errors' => true, 'binary_pipes' => true));
+	$descriptorspec = array();
+	if ($captureStdIn) {
+		$descriptorspec[0] = array('pipe', 'r');
+	}
+	if ($captureStdOut) {
+		$descriptorspec[1] = array('pipe', 'w');
+	}
+	if ($captureStdErr) {
+		$descriptorspec[2] = array('pipe', 'w');
+	}
+	$proc = proc_open($commandline, $descriptorspec, $pipes, $cwd, $bin_env, array('suppress_errors' => true, 'binary_pipes' => true));
 
 	if (!$proc) {
 		return false;
 	}
 
-	if (!is_null($stdin)) {
-		fwrite($pipes[0], $stdin);
+	if ($captureStdIn) {
+		if (!is_null($stdin)) {
+			fwrite($pipes[0], $stdin);
+		}
+		fclose($pipes[0]);
+		unset($pipes[0]);
 	}
-	fclose($pipes[0]);
-	unset($pipes[0]);
 
 	$timeout = $leak_check ? 300 : (isset($env['TEST_TIMEOUT']) ? $env['TEST_TIMEOUT'] : 60);
 
@@ -1102,7 +1117,13 @@ function system_with_timeout($commandline, $env = null, $stdin = null)
 			proc_terminate($proc, 9);
 			return $data;
 		} else if ($n > 0) {
-			$line = fread($pipes[1], 8192);
+			if ($captureStdOut) {
+				$line = fread($pipes[1], 8192);
+			} elseif ($captureStdErr) {
+				$line = fread($pipes[2], 8192);
+			} else {
+				$line = '';
+			}
 			if (strlen($line) == 0) {
 				/* EOF */
 				break;
@@ -1332,6 +1353,21 @@ TEST $file
 		return 'BORKED';
 	}
 
+	if (isset($section_text['CAPTURE_STDIO'])) {
+		$captureStdIn = stripos($section_text['CAPTURE_STDIO'], 'STDIN') !== false;
+		$captureStdOut = stripos($section_text['CAPTURE_STDIO'], 'STDOUT') !== false;
+		$captureStdErr = stripos($section_text['CAPTURE_STDIO'], 'STDERR') !== false;
+	} else {
+		$captureStdIn = true;
+		$captureStdOut = true;
+		$captureStdErr = true;
+	}
+	if ($captureStdOut && $captureStdErr) {
+		$cmdRedirect = ' 2>&1';
+	} else {
+		$cmdRedirect = '';
+	}
+
 	$tested = trim($section_text['TEST']);
 
 	/* For GET/POST/PUT tests, check if cgi sapi is available and if it is, use it. */
@@ -1372,26 +1408,12 @@ TEST $file
 		if (isset($phpdbg)) {
 			$old_php = $php;
 			$php = $phpdbg . ' -qIb';
-		} else if (!strncasecmp(PHP_OS, "win", 3) && file_exists(dirname($php) . "/phpdbg.exe")) {
-			$old_php = $php;
-			$php = realpath(dirname($php) . "/phpdbg.exe") . ' -qIb ';
 		} else {
-			if (file_exists(dirname($php) . "/../../sapi/phpdbg/phpdbg")) {
-				$old_php = $php;
-				$php = realpath(dirname($php) . "/../../sapi/phpdbg/phpdbg") . ' -qIb ';
-			} else if (file_exists("./sapi/phpdbg/phpdbg")) {
-				$old_php = $php;
-				$php = realpath("./sapi/phpdbg/phpdbg") . ' -qIb ';
-			} else if (file_exists(dirname($php) . "/phpdbg")) {
-				$old_php = $php;
-				$php = realpath(dirname($php) . "/phpdbg") . ' -qIb ';
-			} else {
-				show_result('SKIP', $tested, $tested_file, "reason: phpdbg not available");
+			show_result('SKIP', $tested, $tested_file, "reason: phpdbg not available");
 
-				junit_init_suite(junit_get_suitename_for($shortname));
-				junit_mark_test_as('SKIP', $shortname, $tested, 0, 'phpdbg not available');
-				return 'SKIPPED';
-			}
+			junit_init_suite(junit_get_suitename_for($shortname));
+			junit_mark_test_as('SKIP', $shortname, $tested, 0, 'phpdbg not available');
+			return 'SKIPPED';
 		}
 	}
 
@@ -1608,7 +1630,7 @@ TEST $file
 		$IN_REDIRECT['dir'] = realpath(dirname($file));
 		$IN_REDIRECT['prefix'] = trim($section_text['TEST']);
 
-		if (count($IN_REDIRECT['TESTS']) == 1) {
+		if (!empty($IN_REDIRECT['TESTS'])) {
 
 			if (is_array($org_file)) {
 				$test_files[] = $org_file[1];
@@ -1740,7 +1762,7 @@ TEST $file
 		}
 
 		save_text($tmp_post, $request);
-		$cmd = "$php $pass_options $ini_settings -f \"$test_file\" 2>&1 < \"$tmp_post\"";
+		$cmd = "$php $pass_options $ini_settings -f \"$test_file\"$cmdRedirect < \"$tmp_post\"";
 
 	} elseif (array_key_exists('PUT', $section_text) && !empty($section_text['PUT'])) {
 
@@ -1774,7 +1796,7 @@ TEST $file
 		}
 
 		save_text($tmp_post, $request);
-		$cmd = "$php $pass_options $ini_settings -f \"$test_file\" 2>&1 < \"$tmp_post\"";
+		$cmd = "$php $pass_options $ini_settings -f \"$test_file\"$cmdRedirect < \"$tmp_post\"";
 
 	} else if (array_key_exists('POST', $section_text) && !empty($section_text['POST'])) {
 
@@ -1791,7 +1813,7 @@ TEST $file
 			$env['CONTENT_LENGTH'] = $content_length;
 		}
 
-		$cmd = "$php $pass_options $ini_settings -f \"$test_file\" 2>&1 < \"$tmp_post\"";
+		$cmd = "$php $pass_options $ini_settings -f \"$test_file\"$cmdRedirect < \"$tmp_post\"";
 
 	} else if (array_key_exists('GZIP_POST', $section_text) && !empty($section_text['GZIP_POST'])) {
 
@@ -1806,7 +1828,7 @@ TEST $file
 		$env['CONTENT_TYPE']   = 'application/x-www-form-urlencoded';
 		$env['CONTENT_LENGTH'] = $content_length;
 
-		$cmd = "$php $pass_options $ini_settings -f \"$test_file\" 2>&1 < \"$tmp_post\"";
+		$cmd = "$php $pass_options $ini_settings -f \"$test_file\"$cmdRedirect < \"$tmp_post\"";
 
 	} else if (array_key_exists('DEFLATE_POST', $section_text) && !empty($section_text['DEFLATE_POST'])) {
 		$post = trim($section_text['DEFLATE_POST']);
@@ -1819,7 +1841,7 @@ TEST $file
 		$env['CONTENT_TYPE']   = 'application/x-www-form-urlencoded';
 		$env['CONTENT_LENGTH'] = $content_length;
 
-		$cmd = "$php $pass_options $ini_settings -f \"$test_file\" 2>&1 < \"$tmp_post\"";
+		$cmd = "$php $pass_options $ini_settings -f \"$test_file\"$cmdRedirect < \"$tmp_post\"";
 
 	} else {
 
@@ -1827,7 +1849,7 @@ TEST $file
 		$env['CONTENT_TYPE']   = '';
 		$env['CONTENT_LENGTH'] = '';
 
-		$cmd = "$php $pass_options $ini_settings -f \"$test_file\" $args 2>&1";
+		$cmd = "$php $pass_options $ini_settings -f \"$test_file\" $args$cmdRedirect";
 	}
 
 	if ($leak_check) {
@@ -1863,7 +1885,7 @@ COMMAND $cmd
 
 	junit_start_timer($shortname);
 
-	$out = system_with_timeout($cmd, $env, isset($section_text['STDIN']) ? $section_text['STDIN'] : null);
+	$out = system_with_timeout($cmd, $env, isset($section_text['STDIN']) ? $section_text['STDIN'] : null, $captureStdIn, $captureStdOut, $captureStdErr);
 
 	junit_finish_timer($shortname);
 
@@ -2670,6 +2692,7 @@ function junit_init() {
 			'test_fail'     => 0,
 			'test_error'    => 0,
 			'test_skip'     => 0,
+			'test_warn'     => 0,
 			'execution_time'=> 0,
 			'suites'        => array(),
 			'files'         => array()

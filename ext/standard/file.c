@@ -57,13 +57,9 @@
 # if HAVE_SYS_SELECT_H
 #  include <sys/select.h>
 # endif
-# if defined(NETWARE) && defined(USE_WINSOCK)
-#  include <novsock2.h>
-# else
-#  include <sys/socket.h>
-#  include <netinet/in.h>
-#  include <netdb.h>
-# endif
+# include <sys/socket.h>
+# include <netinet/in.h>
+# include <netdb.h>
 # if HAVE_ARPA_INET_H
 #  include <arpa/inet.h>
 # endif
@@ -2293,7 +2289,7 @@ out:
 }
 /* }}} */
 
-#if (!defined(__BEOS__) && !defined(NETWARE) && HAVE_REALPATH) || defined(ZTS)
+#if (!defined(__BEOS__) && HAVE_REALPATH) || defined(ZTS)
 /* {{{ proto string realpath(string path)
    Return the resolved path */
 PHP_FUNCTION(realpath)

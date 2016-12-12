@@ -215,6 +215,7 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_TRAIT						0x80
 #define ZEND_ACC_ANON_CLASS                 0x100
 #define ZEND_ACC_ANON_BOUND                 0x200
+#define ZEND_ACC_INHERITED                  0x400
 
 /* method flags (visibility) */
 /* The order of those must be kept - public < protected < private */
@@ -729,7 +730,10 @@ ZEND_API binary_op_type get_binary_op(int opcode);
 
 void zend_stop_lexing(void);
 void zend_emit_final_return(int return_one);
+
+/* Used during AST construction */
 zend_ast *zend_ast_append_str(zend_ast *left, zend_ast *right);
+zend_ast *zend_negate_num_string(zend_ast *ast);
 uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag);
 uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag);
 void zend_handle_encoding_declaration(zend_ast *ast);

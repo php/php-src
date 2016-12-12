@@ -53,7 +53,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --EXPECTF--
 Using CAST('somestring' AS CHAR)...
-%unicode|string%(3) "one"
-%unicode|string%(5) "three"
-%unicode|string%(3) "two"
+string(3) "one"
+string(5) "three"
+string(3) "two"
 done!

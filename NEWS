@@ -1,14 +1,31 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2016, PHP 7.2.0alpha1
+?? ??? ????, PHP 7.2
+
+- Calendar:
+  . Fix integer overflows (Joshua Rogers)
 
 - Core:
+  . Removed IS_TYPE_IMMUTABLE (it's the same as COPYABLE & !REFCOUNTED). (Dmitry)
   . Removed the sql.safe_mode directive. (Kalle)
+  . Removed support for Netware. (Kalle)
   . Fixed bug #54535 (WSA cleanup executes before MSHUTDOWN). (Kalle)
   . Implemented FR #69791 (Disallow mail header injections by extra headers)
     (Yasuo)
   . Implemented FR #49806 (proc_nice() for Windows). (Kalle)
   . Fix pthreads detection when cross-compiling (ffontaine)
+  . Fixed memory leaks caused by exceptions thrown from destructors. (Bob,
+    Dmitry).
+  . Fixed bug #73215 (uniqid() should use better random source). (Yasuo)
+  . Fixed bug #73337 (try/catch not working with two exceptions inside a same
+    operation). (Dmitry)
+  . Implemented FR #72768 (Add ENABLE_VIRTUAL_TERMINAL_PROCESSING flag for
+    php.exe). (Michele Locati)
+  . Implemented "Convert numeric keys in object/array casts" RFC, fixes
+    bugs #53838, #61655, #66173, #70925, #72254, etc. (Andrea)
+
+- Date:
+  . Fixed bug #69587 (DateInterval properties and isset). (jhdxr)
 
 - EXIF:
   . Added support for vendor specific tags for the following formats:
@@ -24,6 +41,9 @@ PHP                                                                        NEWS
   . Fixed Redhat bug #1362571 (PHP not returning full results for
     exif_read_data function). (Kalle)
 
+- GD:
+  . Implemented imageresolution as getter and setter (Christoph)
+
 - GMP:
   . Fixed bug #70896 (gmp_fact() silently ignores non-integer input). (Sara)
 
@@ -35,12 +55,29 @@ PHP                                                                        NEWS
   . Added array input support to mb_convert_encoding(). (Yasuo)
   . Added array input support to mb_check_encoding(). (Yasuo)
 
+- PDO:
+  . Add PDOStatement::activeQueryString(). (Adam Baratz)
+
 - PDO_DBlib:
   . Fixed bug #73234 (Emulated statements let value dictate parameter type).
     (Adam Baratz)
+  . Fixed bug #73396 (bigint columns are returned as strings). (Adam Baratz)
+
+- Session:
+  . Fixed bug #73461 (Prohibit session save handler recursion) . (yohgaki)
+
+- SOAP:
+  . Fixed bug #69137 (Peer verification fails when using a proxy with SoapClient)
+    (Keith Smiley)
+
+- SQLite3:
+  . Update to Sqlite 3.15.2. (cmb)
 
 - XML:
   . Moved utf8_encode() and utf8_decode() to the Standard extension. (Andrea)
+  . Fixed bug #72135 (malformed XML causes fault) (edgarsandi)
+
+- XMLRPC:
+  . Use Zend MM for allocation in bundled libxmlrpc (Joe)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
-

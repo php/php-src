@@ -7,6 +7,7 @@ session.name=
 <?php if(substr(PHP_OS, 0, 3) == "WIN") die("skip Not for Windows"); ?>
 --FILE--
 <?php
+ob_start();
 
 var_dump(session_name("foo"));
 var_dump(session_name("bar"));

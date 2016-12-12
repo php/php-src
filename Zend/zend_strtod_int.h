@@ -68,6 +68,10 @@ typedef unsigned long int uint32_t;
 #undef USE_LOCALE
 #endif
 
+#ifndef NO_INFNAN_CHECK
+#define NO_INFNAN_CHECK
+#endif
+
 #ifdef WORDS_BIGENDIAN
 #define IEEE_BIG_ENDIAN 1
 #else

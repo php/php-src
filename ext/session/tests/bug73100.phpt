@@ -15,8 +15,6 @@ var_dump(session_destroy());
 --EXPECTF--
 bool(true)
 
-Warning: session_module_name(): A session is active. You cannot change the session module's ini settings at this time in %s on line %d
-
-Warning: session_destroy(): Session object destruction failed in %s on line %d
-bool(false)
+Warning: session_module_name(): Cannot change save handler module when session is active in %s on line 4
+bool(true)
 ===DONE===

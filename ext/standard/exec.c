@@ -54,6 +54,10 @@
 #include <limits.h>
 #endif
 
+#ifdef PHP_WIN32
+# include "win32/nice.h"
+#endif
+
 static size_t cmd_max_len;
 
 /* {{{ PHP_MINIT_FUNCTION(exec) */
@@ -321,7 +325,7 @@ PHPAPI zend_string *php_escape_shell_cmd(char *str)
 				ZSTR_VAL(cmd)[y++] = str[x];
 				break;
 #else
-			/* % is Windows specific for environmental variables, ^%PATH% will 
+			/* % is Windows specific for environmental variables, ^%PATH% will
 				output PATH while ^%PATH^% will not. escapeshellcmd->val will escape all % and !.
 			*/
 			case '%':

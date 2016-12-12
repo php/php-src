@@ -34,9 +34,7 @@
 #define HT_POISONED_PTR ((HashTable *) (intptr_t) -1)
 
 #if ZEND_DEBUG
-/*
-#define HASH_MASK_CONSISTENCY	0xc0
-*/
+
 #define HT_OK					0x00
 #define HT_IS_DESTROYING		0x40
 #define HT_DESTROYED			0x80
@@ -44,10 +42,10 @@
 
 static void _zend_is_inconsistent(const HashTable *ht, const char *file, int line)
 {
-	if ((ht->u.flags & HASH_MASK_CONSISTENCY) == HT_OK) {
+	if (ht->u.v.consistency == HT_OK) {
 		return;
 	}
-	switch ((ht->u.flags & HASH_MASK_CONSISTENCY)) {
+	switch (ht->u.v.consistency) {
 		case HT_IS_DESTROYING:
 			zend_output_debug_string(1, "%s(%d) : ht=%p is being destroyed", file, line, ht);
 			break;
@@ -65,7 +63,7 @@ static void _zend_is_inconsistent(const HashTable *ht, const char *file, int lin
 }
 #define IS_CONSISTENT(a) _zend_is_inconsistent(a, __FILE__, __LINE__);
 #define SET_INCONSISTENT(n) do { \
-		(ht)->u.flags |= n; \
+		(ht)->u.v.consistency = n; \
 	} while (0)
 #else
 #define IS_CONSISTENT(a)
@@ -173,7 +171,7 @@ static const uint32_t uninitialized_bucket[-HT_MIN_MASK] =
 ZEND_API void ZEND_FASTCALL _zend_hash_init(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent ZEND_FILE_LINE_DC)
 {
 	GC_REFCOUNT(ht) = 1;
-	GC_TYPE_INFO(ht) = IS_ARRAY;
+	GC_TYPE_INFO(ht) = IS_ARRAY | (persistent ? 0 : (GC_COLLECTABLE << GC_FLAGS_SHIFT));
 	ht->u.flags = (persistent ? HASH_FLAG_PERSISTENT : 0) | HASH_FLAG_APPLY_PROTECTION | HASH_FLAG_STATIC_KEYS;
 	ht->nTableSize = zend_hash_check_size(nSize);
 	ht->nTableMask = HT_MIN_MASK;
@@ -888,7 +886,7 @@ ZEND_API int ZEND_FASTCALL zend_hash_rehash(HashTable *ht)
 	HT_HASH_RESET(ht);
 	i = 0;
 	p = ht->arData;
-	if (ht->nNumUsed == ht->nNumOfElements) {
+	if (HT_IS_WITHOUT_HOLES(ht)) {
 		do {
 			nIndex = p->h | ht->nTableMask;
 			Z_NEXT(p->val) = HT_HASH(ht, nIndex);
@@ -1229,8 +1227,8 @@ ZEND_API void ZEND_FASTCALL zend_hash_destroy(HashTable *ht)
 		if (ht->pDestructor) {
 			SET_INCONSISTENT(HT_IS_DESTROYING);
 
-			if (ht->u.flags & (HASH_FLAG_PACKED|HASH_FLAG_STATIC_KEYS)) {
-				if (ht->nNumUsed == ht->nNumOfElements) {
+			if (HT_HAS_STATIC_KEYS_ONLY(ht)) {
+				if (HT_IS_WITHOUT_HOLES(ht)) {
 					do {
 						ht->pDestructor(&p->val);
 					} while (++p != end);
@@ -1241,7 +1239,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_destroy(HashTable *ht)
 						}
 					} while (++p != end);
 				}
-			} else if (ht->nNumUsed == ht->nNumOfElements) {
+			} else if (HT_IS_WITHOUT_HOLES(ht)) {
 				do {
 					ht->pDestructor(&p->val);
 					if (EXPECTED(p->key)) {
@@ -1261,7 +1259,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_destroy(HashTable *ht)
 
 			SET_INCONSISTENT(HT_DESTROYED);
 		} else {
-			if (!(ht->u.flags & (HASH_FLAG_PACKED|HASH_FLAG_STATIC_KEYS))) {
+			if (!HT_HAS_STATIC_KEYS_ONLY(ht)) {
 				do {
 					if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
 						if (EXPECTED(p->key)) {
@@ -1300,11 +1298,11 @@ ZEND_API void ZEND_FASTCALL zend_array_destroy(HashTable *ht)
 		end = p + ht->nNumUsed;
 		SET_INCONSISTENT(HT_IS_DESTROYING);
 
-		if (ht->u.flags & (HASH_FLAG_PACKED|HASH_FLAG_STATIC_KEYS)) {
+		if (HT_HAS_STATIC_KEYS_ONLY(ht)) {
 			do {
 				i_zval_ptr_dtor(&p->val ZEND_FILE_LINE_CC);
 			} while (++p != end);
-		} else if (ht->nNumUsed == ht->nNumOfElements) {
+		} else if (HT_IS_WITHOUT_HOLES(ht)) {
 			do {
 				i_zval_ptr_dtor(&p->val ZEND_FILE_LINE_CC);
 				if (EXPECTED(p->key)) {
@@ -1342,8 +1340,8 @@ ZEND_API void ZEND_FASTCALL zend_hash_clean(HashTable *ht)
 		p = ht->arData;
 		end = p + ht->nNumUsed;
 		if (ht->pDestructor) {
-			if (ht->u.flags & (HASH_FLAG_PACKED|HASH_FLAG_STATIC_KEYS)) {
-				if (ht->nNumUsed == ht->nNumOfElements) {
+			if (HT_HAS_STATIC_KEYS_ONLY(ht)) {
+				if (HT_IS_WITHOUT_HOLES(ht)) {
 					do {
 						ht->pDestructor(&p->val);
 					} while (++p != end);
@@ -1354,7 +1352,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_clean(HashTable *ht)
 						}
 					} while (++p != end);
 				}
-			} else if (ht->nNumUsed == ht->nNumOfElements) {
+			} else if (HT_IS_WITHOUT_HOLES(ht)) {
 				do {
 					ht->pDestructor(&p->val);
 					if (EXPECTED(p->key)) {
@@ -1372,8 +1370,8 @@ ZEND_API void ZEND_FASTCALL zend_hash_clean(HashTable *ht)
 				} while (++p != end);
 			}
 		} else {
-			if (!(ht->u.flags & (HASH_FLAG_PACKED|HASH_FLAG_STATIC_KEYS))) {
-				if (ht->nNumUsed == ht->nNumOfElements) {
+			if (!HT_HAS_STATIC_KEYS_ONLY(ht)) {
+				if (HT_IS_WITHOUT_HOLES(ht)) {
 					do {
 						if (EXPECTED(p->key)) {
 							zend_string_release(p->key);
@@ -1410,11 +1408,11 @@ ZEND_API void ZEND_FASTCALL zend_symtable_clean(HashTable *ht)
 	if (ht->nNumUsed) {
 		p = ht->arData;
 		end = p + ht->nNumUsed;
-		if (ht->u.flags & HASH_FLAG_STATIC_KEYS) {
+		if (HT_HAS_STATIC_KEYS_ONLY(ht)) {
 			do {
 				i_zval_ptr_dtor(&p->val ZEND_FILE_LINE_CC);
 			} while (++p != end);
-		} else if (ht->nNumUsed == ht->nNumOfElements) {
+		} else if (HT_IS_WITHOUT_HOLES(ht)) {
 			do {
 				i_zval_ptr_dtor(&p->val ZEND_FILE_LINE_CC);
 				if (EXPECTED(p->key)) {
@@ -1762,7 +1760,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 
 	ALLOC_HASHTABLE(target);
 	GC_REFCOUNT(target) = 1;
-	GC_TYPE_INFO(target) = IS_ARRAY;
+	GC_TYPE_INFO(target) = IS_ARRAY | (GC_COLLECTABLE << GC_FLAGS_SHIFT);
 
 	target->nTableSize = source->nTableSize;
 	target->pDestructor = source->pDestructor;
@@ -1802,7 +1800,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 		target->nInternalPointer = source->nInternalPointer;
 		HT_HASH_RESET_PACKED(target);
 
-		if (target->nNumUsed == target->nNumOfElements) {
+		if (HT_IS_WITHOUT_HOLES(target)) {
 			zend_array_dup_packed_elements(source, target, 0);
 		} else {
 			zend_array_dup_packed_elements(source, target, 1);
@@ -1823,14 +1821,14 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 		HT_SET_DATA_ADDR(target, emalloc(HT_SIZE(target)));
 		HT_HASH_RESET(target);
 
-		if (target->u.flags & HASH_FLAG_STATIC_KEYS) {
-			if (source->nNumUsed == source->nNumOfElements) {
+		if (HT_HAS_STATIC_KEYS_ONLY(target)) {
+			if (HT_IS_WITHOUT_HOLES(source)) {
 				idx = zend_array_dup_elements(source, target, 1, 0);
 			} else {
 				idx = zend_array_dup_elements(source, target, 1, 1);
 			}
 		} else {
-			if (source->nNumUsed == source->nNumOfElements) {
+			if (HT_IS_WITHOUT_HOLES(source)) {
 				idx = zend_array_dup_elements(source, target, 0, 0);
 			} else {
 				idx = zend_array_dup_elements(source, target, 0, 1);
@@ -2253,7 +2251,7 @@ ZEND_API int ZEND_FASTCALL zend_hash_sort_ex(HashTable *ht, sort_func_t sort, co
 		return SUCCESS;
 	}
 
-	if (ht->nNumUsed == ht->nNumOfElements) {
+	if (HT_IS_WITHOUT_HOLES(ht)) {
 		i = ht->nNumUsed;
 	} else {
 		for (j = 0, i = 0; j < ht->nNumUsed; j++) {
@@ -2476,6 +2474,122 @@ ZEND_API int ZEND_FASTCALL _zend_handle_numeric_str_ex(const char *key, size_t l
 		} else {
 			return 0;
 		}
+	}
+}
+
+/* Takes a "symtable" hashtable (contains integer and non-numeric string keys)
+ * and converts it to a "proptable" (contains only string keys).
+ * If the symtable didn't need duplicating, its refcount is incremented.
+ */
+ZEND_API HashTable* ZEND_FASTCALL zend_symtable_to_proptable(HashTable *ht)
+{
+	zend_ulong num_key;
+	zend_string *str_key;
+	zval *zv;
+
+	if (UNEXPECTED(HT_IS_PACKED(ht))) {
+		goto convert;
+	}
+
+	ZEND_HASH_FOREACH_KEY_VAL(ht, num_key, str_key, zv) {
+		if (!str_key) {
+			goto convert;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+		GC_REFCOUNT(ht)++;
+	}
+
+	return ht;
+
+convert:
+	{
+		HashTable *new_ht = emalloc(sizeof(HashTable));
+
+		zend_hash_init(new_ht, zend_hash_num_elements(ht), NULL, ZVAL_PTR_DTOR, 0);
+
+		ZEND_HASH_FOREACH_KEY_VAL(ht, num_key, str_key, zv) {
+			if (!str_key) {
+				str_key = zend_long_to_str(num_key);
+				zend_string_delref(str_key);
+			}
+			do {
+				if (Z_OPT_REFCOUNTED_P(zv)) {
+					if (Z_ISREF_P(zv) && Z_REFCOUNT_P(zv) == 1) {
+						zv = Z_REFVAL_P(zv);
+						if (!Z_OPT_REFCOUNTED_P(zv)) {
+							break;
+						}
+					}
+					Z_ADDREF_P(zv);
+				}
+			} while (0);
+			zend_hash_update(new_ht, str_key, zv);
+		} ZEND_HASH_FOREACH_END();
+
+		return new_ht;
+	}
+}
+
+/* Takes a "proptable" hashtable (contains only string keys) and converts it to
+ * a "symtable" (contains integer and non-numeric string keys).
+ * If the proptable didn't need duplicating, its refcount is incremented.
+ */
+ZEND_API HashTable* ZEND_FASTCALL zend_proptable_to_symtable(HashTable *ht, zend_bool always_duplicate)
+{
+	zend_ulong num_key;
+	zend_string *str_key;
+	zval *zv;
+
+	ZEND_HASH_FOREACH_KEY_VAL(ht, num_key, str_key, zv) {
+		/* The `str_key &&` here might seem redundant: property tables should
+		 * only have string keys. Unfortunately, this isn't true, at the very
+		 * least because of ArrayObject, which stores a symtable where the
+		 * property table should be.
+		 */
+		if (str_key && ZEND_HANDLE_NUMERIC(str_key, num_key)) {
+			goto convert;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	if (always_duplicate) {
+		return zend_array_dup(ht);
+	}
+
+	if (EXPECTED(!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE))) {
+		GC_REFCOUNT(ht)++;
+	}
+
+	return ht;
+
+convert:
+	{
+		HashTable *new_ht = emalloc(sizeof(HashTable));
+
+		zend_hash_init(new_ht, zend_hash_num_elements(ht), NULL, ZVAL_PTR_DTOR, 0);
+
+		ZEND_HASH_FOREACH_KEY_VAL(ht, num_key, str_key, zv) {
+			do {
+				if (Z_OPT_REFCOUNTED_P(zv)) {
+					if (Z_ISREF_P(zv) && Z_REFCOUNT_P(zv) == 1) {
+						zv = Z_REFVAL_P(zv);
+						if (!Z_OPT_REFCOUNTED_P(zv)) {
+							break;
+						}
+					}
+					Z_ADDREF_P(zv);
+				}
+			} while (0);
+			/* Again, thank ArrayObject for `!str_key ||`. */
+			if (!str_key || ZEND_HANDLE_NUMERIC(str_key, num_key)) {
+				zend_hash_index_update(new_ht, num_key, zv);
+			} else {
+				zend_hash_update(new_ht, str_key, zv);
+			}
+		} ZEND_HASH_FOREACH_END();
+
+		return new_ht;
 	}
 }
 

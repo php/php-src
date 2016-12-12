@@ -80,7 +80,7 @@ static int zend_foreach_op_array(zend_call_graph *call_graph, zend_script *scrip
 	return SUCCESS;
 }
 
-static int zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_t build_flags, zend_op_array *op_array, zend_func_info *func_info)
+int zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_t build_flags, zend_op_array *op_array, zend_func_info *func_info)
 {
 	zend_op *opline = op_array->opcodes;
 	zend_op *end = opline + op_array->last;
@@ -110,12 +110,21 @@ static int zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_t 
 					call_info->next_callee = func_info->callee_info;
 					func_info->callee_info = call_info;
 
-					if (func->type == ZEND_INTERNAL_FUNCTION) {
+					if (build_flags & ZEND_CALL_TREE) {
+						call_info->next_caller = NULL;
+					} else if (func->type == ZEND_INTERNAL_FUNCTION) {
 						call_info->next_caller = NULL;
 					} else {
 						zend_func_info *callee_func_info = ZEND_FUNC_INFO(&func->op_array);
-						call_info->next_caller = callee_func_info ? callee_func_info->caller_info : NULL;
+						if (callee_func_info) {
+							call_info->next_caller = callee_func_info->caller_info;
+							callee_func_info->caller_info = call_info;
+						} else {
+							call_info->next_caller = NULL;
+						}
 					}
+				} else {
+					call_info = NULL;
 				}
 				call++;
 				break;

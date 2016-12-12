@@ -199,6 +199,8 @@ PHP_FUNCTION(imagexbm);
 PHP_FUNCTION(imagefilter);
 PHP_FUNCTION(imageconvolution);
 
+PHP_FUNCTION(imageresolution);
+
 PHP_GD_API int phpi_get_le_gd(void);
 
 #else
