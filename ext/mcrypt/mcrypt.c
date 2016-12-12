@@ -510,6 +510,7 @@ PHP_FUNCTION(mcrypt_module_open)
 		&mode,   &mode_len,   &mode_dir,   &mode_dir_len)) {
 		return;
 	}
+	php_error_docref(NULL, E_DEPRECATED, "Support for libmcrypt will be removed in a future version of PHP");
 
 	td = mcrypt_module_open (
 		cipher,
@@ -545,6 +546,7 @@ PHP_FUNCTION(mcrypt_generic_init)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rss", &mcryptind, &key, &key_len, &iv, &iv_len) == FAILURE) {
 		return;
 	}
+	php_error_docref(NULL, E_DEPRECATED, "Support for libmcrypt will be removed in a future version of PHP");
 
 	if ((pm = (php_mcrypt *)zend_fetch_resource(Z_RES_P(mcryptind), "MCrypt", le_mcrypt)) == NULL) {
 		RETURN_FALSE;
@@ -622,6 +624,7 @@ PHP_FUNCTION(mcrypt_generic)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &mcryptind, &data, &data_len) == FAILURE) {
 		return;
 	}
+	php_error_docref(NULL, E_DEPRECATED, "Support for libmcrypt will be removed in a future version of PHP");
 
 	if ((pm = (php_mcrypt *)zend_fetch_resource(Z_RES_P(mcryptind), "MCrypt", le_mcrypt)) == NULL) {
 		RETURN_FALSE;
@@ -676,6 +679,7 @@ PHP_FUNCTION(mdecrypt_generic)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &mcryptind, &data, &data_len) == FAILURE) {
 		return;
 	}
+	php_error_docref(NULL, E_DEPRECATED, "Support for libmcrypt will be removed in a future version of PHP");
 
 	if ((pm = (php_mcrypt *)zend_fetch_resource(Z_RES_P(mcryptind), "MCrypt", le_mcrypt)) == NULL) {
 		RETURN_FALSE;
@@ -723,6 +727,8 @@ PHP_FUNCTION(mcrypt_enc_get_supported_key_sizes)
 	int i, count = 0;
 	int *key_sizes;
 
+	php_error_docref(NULL, E_DEPRECATED, "Support for libmcrypt will be removed in a future version of PHP");
+
 	MCRYPT_GET_TD_ARG
 	array_init(return_value);
 
@@ -761,6 +767,8 @@ PHP_FUNCTION(mcrypt_generic_deinit)
 {
 	MCRYPT_GET_TD_ARG
 
+	php_error_docref(NULL, E_DEPRECATED, "Support for libmcrypt will be removed in a future version of PHP");
+	
 	if (mcrypt_generic_deinit(pm->td) < 0) {
 		php_error_docref(NULL, E_WARNING, "Could not terminate encryption specifier");
 		RETURN_FALSE
@@ -776,6 +784,8 @@ PHP_FUNCTION(mcrypt_enc_is_block_algorithm_mode)
 {
 	MCRYPT_GET_TD_ARG
 
+	php_error_docref(NULL, E_DEPRECATED, "Support for libmcrypt will be removed in a future version of PHP");
+
 	if (mcrypt_enc_is_block_algorithm_mode(pm->td) == 1) {
 		RETURN_TRUE
 	} else {
@@ -789,6 +799,8 @@ PHP_FUNCTION(mcrypt_enc_is_block_algorithm_mode)
 PHP_FUNCTION(mcrypt_enc_is_block_algorithm)
 {
 	MCRYPT_GET_TD_ARG
+
+	php_error_docref(NULL, E_DEPRECATED, "Support for libmcrypt will be removed in a future version of PHP");
 
 	if (mcrypt_enc_is_block_algorithm(pm->td) == 1) {
 		RETURN_TRUE
@@ -804,6 +816,8 @@ PHP_FUNCTION(mcrypt_enc_is_block_mode)
 {
 	MCRYPT_GET_TD_ARG
 
+	php_error_docref(NULL, E_DEPRECATED, "Support for libmcrypt will be removed in a future version of PHP");
+
 	if (mcrypt_enc_is_block_mode(pm->td) == 1) {
 		RETURN_TRUE
 	} else {
@@ -817,6 +831,7 @@ PHP_FUNCTION(mcrypt_enc_is_block_mode)
 PHP_FUNCTION(mcrypt_enc_get_block_size)
 {
 	MCRYPT_GET_TD_ARG
+	php_error_docref(NULL, E_DEPRECATED, "Support for libmcrypt will be removed in a future version of PHP");
 	RETURN_LONG(mcrypt_enc_get_block_size(pm->td));
 }
 /* }}} */
@@ -826,6 +841,7 @@ PHP_FUNCTION(mcrypt_enc_get_block_size)
 PHP_FUNCTION(mcrypt_enc_get_key_size)
 {
 	MCRYPT_GET_TD_ARG
+	php_error_docref(NULL, E_DEPRECATED, "Support for libmcrypt will be removed in a future version of PHP");
 	RETURN_LONG(mcrypt_enc_get_key_size(pm->td));
 }
 /* }}} */
@@ -835,6 +851,7 @@ PHP_FUNCTION(mcrypt_enc_get_key_size)
 PHP_FUNCTION(mcrypt_enc_get_iv_size)
 {
 	MCRYPT_GET_TD_ARG
+	php_error_docref(NULL, E_DEPRECATED, "Support for libmcrypt will be removed in a future version of PHP");
 	RETURN_LONG(mcrypt_enc_get_iv_size(pm->td));
 }
 /* }}} */
@@ -845,6 +862,7 @@ PHP_FUNCTION(mcrypt_enc_get_algorithms_name)
 {
 	char *name;
 	MCRYPT_GET_TD_ARG
+	php_error_docref(NULL, E_DEPRECATED, "Support for libmcrypt will be removed in a future version of PHP");
 
 	name = mcrypt_enc_get_algorithms_name(pm->td);
 	RETVAL_STRING(name);
@@ -858,6 +876,7 @@ PHP_FUNCTION(mcrypt_enc_get_modes_name)
 {
 	char *name;
 	MCRYPT_GET_TD_ARG
+	php_error_docref(NULL, E_DEPRECATED, "Support for libmcrypt will be removed in a future version of PHP");
 
 	name = mcrypt_enc_get_modes_name(pm->td);
 	RETVAL_STRING(name);
@@ -870,6 +889,7 @@ PHP_FUNCTION(mcrypt_enc_get_modes_name)
 PHP_FUNCTION(mcrypt_module_self_test)
 {
 	MCRYPT_GET_MODE_DIR_ARGS(algorithms_dir);
+	php_error_docref(NULL, E_DEPRECATED, "Support for libmcrypt will be removed in a future version of PHP");
 
 	if (mcrypt_module_self_test(module, dir) == 0) {
 		RETURN_TRUE;
@@ -884,6 +904,7 @@ PHP_FUNCTION(mcrypt_module_self_test)
 PHP_FUNCTION(mcrypt_module_is_block_algorithm_mode)
 {
 	MCRYPT_GET_MODE_DIR_ARGS(modes_dir)
+	php_error_docref(NULL, E_DEPRECATED, "Support for libmcrypt will be removed in a future version of PHP");
 
 	if (mcrypt_module_is_block_algorithm_mode(module, dir) == 1) {
 		RETURN_TRUE;
@@ -898,6 +919,7 @@ PHP_FUNCTION(mcrypt_module_is_block_algorithm_mode)
 PHP_FUNCTION(mcrypt_module_is_block_algorithm)
 {
 	MCRYPT_GET_MODE_DIR_ARGS(algorithms_dir)
+	php_error_docref(NULL, E_DEPRECATED, "Support for libmcrypt will be removed in a future version of PHP");
 
 	if (mcrypt_module_is_block_algorithm(module, dir) == 1) {
 		RETURN_TRUE;
@@ -912,6 +934,7 @@ PHP_FUNCTION(mcrypt_module_is_block_algorithm)
 PHP_FUNCTION(mcrypt_module_is_block_mode)
 {
 	MCRYPT_GET_MODE_DIR_ARGS(modes_dir)
+	php_error_docref(NULL, E_DEPRECATED, "Support for libmcrypt will be removed in a future version of PHP");
 
 	if (mcrypt_module_is_block_mode(module, dir) == 1) {
 		RETURN_TRUE;
@@ -927,6 +950,7 @@ PHP_FUNCTION(mcrypt_module_get_algo_block_size)
 {
 	MCRYPT_GET_MODE_DIR_ARGS(algorithms_dir)
 
+	php_error_docref(NULL, E_DEPRECATED, "Support for libmcrypt will be removed in a future version of PHP");
 	RETURN_LONG(mcrypt_module_get_algo_block_size(module, dir));
 }
 /* }}} */
@@ -937,6 +961,7 @@ PHP_FUNCTION(mcrypt_module_get_algo_key_size)
 {
 	MCRYPT_GET_MODE_DIR_ARGS(algorithms_dir);
 
+	php_error_docref(NULL, E_DEPRECATED, "Support for libmcrypt will be removed in a future version of PHP");
 	RETURN_LONG(mcrypt_module_get_algo_key_size(module, dir));
 }
 /* }}} */
@@ -947,6 +972,8 @@ PHP_FUNCTION(mcrypt_module_get_supported_key_sizes)
 {
 	int i, count = 0;
 	int *key_sizes;
+
+	php_error_docref(NULL, E_DEPRECATED, "Support for libmcrypt will be removed in a future version of PHP");
 
 	MCRYPT_GET_MODE_DIR_ARGS(algorithms_dir)
 	array_init(return_value);
@@ -974,6 +1001,8 @@ PHP_FUNCTION(mcrypt_list_algorithms)
 		return;
 	}
 
+	php_error_docref(NULL, E_DEPRECATED, "Support for libmcrypt will be removed in a future version of PHP");
+
 	array_init(return_value);
 	modules = mcrypt_list_algorithms(lib_dir, &count);
 
@@ -1000,6 +1029,8 @@ PHP_FUNCTION(mcrypt_list_modes)
 		&lib_dir, &lib_dir_len) == FAILURE) {
 		return;
 	}
+
+	php_error_docref(NULL, E_DEPRECATED, "Support for libmcrypt will be removed in a future version of PHP");
 
 	array_init(return_value);
 	modules = mcrypt_list_modes(lib_dir, &count);
@@ -1031,6 +1062,8 @@ PHP_FUNCTION(mcrypt_get_key_size)
 		&cipher, &cipher_len, &module, &module_len) == FAILURE) {
 		return;
 	}
+	
+	php_error_docref(NULL, E_DEPRECATED, "Support for libmcrypt will be removed in a future version of PHP");
 
 	td = mcrypt_module_open(cipher, cipher_dir_string, module, module_dir_string);
 	if (td != MCRYPT_FAILED) {
@@ -1060,6 +1093,8 @@ PHP_FUNCTION(mcrypt_get_block_size)
 		&cipher, &cipher_len, &module, &module_len) == FAILURE) {
 		return;
 	}
+	
+	php_error_docref(NULL, E_DEPRECATED, "Support for libmcrypt will be removed in a future version of PHP");
 
 	td = mcrypt_module_open(cipher, cipher_dir_string, module, module_dir_string);
 	if (td != MCRYPT_FAILED) {
@@ -1089,6 +1124,8 @@ PHP_FUNCTION(mcrypt_get_iv_size)
 		&cipher, &cipher_len, &module, &module_len) == FAILURE) {
 		return;
 	}
+	
+	php_error_docref(NULL, E_DEPRECATED, "Support for libmcrypt will be removed in a future version of PHP");
 
 	td = mcrypt_module_open(cipher, cipher_dir_string, module, module_dir_string);
 	if (td != MCRYPT_FAILED) {
@@ -1118,6 +1155,8 @@ PHP_FUNCTION(mcrypt_get_cipher_name)
 		&cipher, &cipher_len) == FAILURE) {
 		return;
 	}
+	
+	php_error_docref(NULL, E_DEPRECATED, "Support for libmcrypt will be removed in a future version of PHP");
 
 	/* The code below is actually not very nice, but I didn't see a better
 	 * method */
@@ -1332,6 +1371,7 @@ PHP_FUNCTION(mcrypt_encrypt)
 		&key, &key_len, &data, &data_len, &mode, &mode_len, &iv, &iv_len) == FAILURE) {
 		return;
 	}
+	php_error_docref(NULL, E_DEPRECATED, "Support for libmcrypt will be removed in a future version of PHP");
 
 	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, mode, iv, iv_len, MCRYPT_ENCRYPT, return_value);
 }
@@ -1348,6 +1388,7 @@ PHP_FUNCTION(mcrypt_decrypt)
 		&key, &key_len, &data, &data_len, &mode, &mode_len, &iv, &iv_len) == FAILURE) {
 		return;
 	}
+	php_error_docref(NULL, E_DEPRECATED, "Support for libmcrypt will be removed in a future version of PHP");
 
 	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, mode, iv, iv_len, MCRYPT_DECRYPT, return_value);
 }
