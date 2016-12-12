@@ -16,6 +16,10 @@ PHP                                                                        NEWS
   . Fixed bug #73646 (mb_ereg_search_init null pointer dereference).
     (Laruence)
 
+- Mysqlnd:
+  . Optimized handling of BIT fields - less memory copies and lower memory
+    usage. (Andrey)
+
 - Opcache:
   . Fixed bug #73654 (Segmentation fault in zend_call_function). (Nikita)
   . Fixed bug #73668 ("SIGFPE Arithmetic exception" in opcache when divide by
