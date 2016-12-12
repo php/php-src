@@ -2936,7 +2936,15 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 		switch (type) {
 			case BP_JIT_IS:
 				if (opline->op2_type != IS_CONST) {
+					|	cmp byte [FCARG2a + offsetof(zend_string, val)], '9'
+					|	jle >1
+					|.cold_code
+					|1:
 					|	EXT_CALL zend_jit_symtable_find, r0
+					|	jmp >1
+					|.code
+					|	EXT_CALL zend_hash_find, r0
+					|1:
 				} else {
 					|	EXT_CALL zend_hash_find, r0
 				}
@@ -2951,7 +2959,15 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 			case BP_VAR_IS:
 			case BP_VAR_UNSET:
 				if (opline->op2_type != IS_CONST) {
+					|	cmp byte [FCARG2a + offsetof(zend_string, val)], '9'
+					|	jle >1
+					|.cold_code
+					|1:
 					|	EXT_CALL zend_jit_symtable_find, r0
+					|	jmp >1
+					|.code
+					|	EXT_CALL zend_hash_find, r0
+					|1:
 				} else {
 					|	EXT_CALL zend_hash_find, r0
 				}
