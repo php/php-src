@@ -472,7 +472,7 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 #define ZEND_TRUTH(x)		((x) ? 1 : 0)
 #define ZEND_LOG_XOR(a, b)		(ZEND_TRUTH(a) ^ ZEND_TRUTH(b))
 
-#define ZEND_MAX_RESERVED_RESOURCES	4
+#define ZEND_MAX_RESERVED_RESOURCES	6
 
 /* excpt.h on Digital Unix 4.0 defines function_table */
 #undef function_table
