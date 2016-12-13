@@ -26,8 +26,6 @@
 
 #define ZEND_ENGINE_3
 
-#define ZEND_MAX_RESERVED_RESOURCES	4
-
 #include "zend_types.h"
 #include "zend_errors.h"
 #include "zend_alloc.h"

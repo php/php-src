@@ -52,6 +52,8 @@ PHP_FUNCTION(com_create_instance)
 		RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE,
 		&authid, EOAC_NONE
 	};
+	zend_long cp = GetACP();
+	const struct php_win32_cp *cp_it;
 
 	php_com_initialize();
 	obj = CDNO_FETCH(object);
@@ -59,15 +61,22 @@ PHP_FUNCTION(com_create_instance)
 	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
 			ZEND_NUM_ARGS(), "s|s!ls",
 			&module_name, &module_name_len, &server_name, &server_name_len,
-			&obj->code_page, &typelib_name, &typelib_name_len) &&
+			&cp, &typelib_name, &typelib_name_len) &&
 		FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
 			ZEND_NUM_ARGS(), "sa|ls",
-			&module_name, &module_name_len, &server_params, &obj->code_page,
+			&module_name, &module_name_len, &server_params, &cp,
 			&typelib_name, &typelib_name_len)) {
 
 		php_com_throw_exception(E_INVALIDARG, "Could not create COM object - invalid arguments!");
 		return;
 	}
+
+	cp_it = php_win32_cp_get_by_id((DWORD)cp);
+	if (!cp_it) {
+		php_com_throw_exception(E_INVALIDARG, "Could not create COM object - invalid codepage!");
+		return;
+	}
+	obj->code_page = (int)cp;
 
 	if (server_name) {
 		ctx = CLSCTX_REMOTE_SERVER;

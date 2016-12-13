@@ -344,11 +344,6 @@ PRIMARY MAINTAINER:  Rui Hirokawa <hirokawa@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
-EXTENSION:           mcrypt
-PRIMARY MAINTAINER:  Derick Rethans <derick@derickrethans.nl>
-MAINTENANCE:         Maintained
-STATUS:              Working
--------------------------------------------------------------------------------
 EXTENSION:           opcache
 PRIMARY MAINTAINER:  Dmitry Stogov <dmitry@zend.com>, Xinchen Hui <laruence@php.net>
 MAINTENANCE:         Maintained
