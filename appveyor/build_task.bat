@@ -34,7 +34,6 @@ call configure.bat ^
 	--enable-snapshot-build ^
 	--enable-debug-pack ^
 	--enable-com-dotnet=shared ^
-	--with-mcrypt=static ^
 	--without-analyzer ^
 	--enable-object-out-dir=%PHP_BUILD_OBJ_DIR% ^
 	--with-php-build=%DEPS_DIR% ^
