@@ -144,6 +144,12 @@ PHP 7.2 UPGRADE NOTES
 8. Removed Extensions and SAPIs
 ========================================
 
+- Mcrypt:
+  . The deprecated mcrypt extension has been moved to PECL.
+  . libmcrypt has not been maintained since 2007 and the continued use of this
+    extension is strongly discouraged.
+  . Users are advised to use alternatives such as OpenSSL or libsodium.
+
 ========================================
 9. Other Changes to Extensions
 ========================================
