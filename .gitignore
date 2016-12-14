@@ -285,3 +285,8 @@ win32/ext
 win32/phpts.def
 win32/wsyslog.h
 config.*.bat
+
+# AppVeyor
+appveyor/temp
+appveyor/out-x86
+appveyor/out-x64
