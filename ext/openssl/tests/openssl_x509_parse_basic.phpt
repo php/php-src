@@ -3,7 +3,7 @@ openssl_x509_parse() tests
 --SKIPIF--
 <?php if (!extension_loaded("openssl")) print "skip"; 
 if (OPENSSL_VERSION_NUMBER < 0x10000000) die("skip Output requires OpenSSL 1.0");
-if(substr(PHP_OS, 0, 3) == 'WIN' ) {
+if(substr(PHP_OS, 0, 3) == 'WIN') {
 	$exp = "W. Europe Standard Time";
 	$cmd = "powershell -command [System.TimeZoneInfo]::Local.Id";
 	$r = trim(shell_exec($cmd));
@@ -15,7 +15,7 @@ if(substr(PHP_OS, 0, 3) == 'WIN' ) {
 --FILE--
 <?php
 $cert = "file://" . dirname(__FILE__) . "/cert.crt";
-
+var_dump(shell_exec("powershell -command [System.TimeZoneInfo]::Local"));
 var_dump(openssl_x509_parse($cert));
 var_dump(openssl_x509_parse($cert, false));
 ?>
