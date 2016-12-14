@@ -8,14 +8,14 @@ if(substr(PHP_OS, 0, 3) == 'WIN') {
 	$cmd = "powershell -command [System.TimeZoneInfo]::Local.Id";
 	$r = trim(shell_exec($cmd));
 	if ($exp !== $r) {
-		die("skip expect '$exp', got '$r');
+		die("skip expect '$exp', got '$r'");
 	}
 }
 ?>
 --FILE--
 <?php
 $cert = "file://" . dirname(__FILE__) . "/cert.crt";
-var_dump(shell_exec("powershell -command [System.TimeZoneInfo]::Local"));
+
 var_dump(openssl_x509_parse($cert));
 var_dump(openssl_x509_parse($cert, false));
 ?>
