@@ -23,7 +23,9 @@ Michele Orselli mo@ideato.it
     // passes for up to .5 milliseconds less, fails for more than .5 milliseconds
     // should be fine since time_sleep_until() on Windows is accurate to the
     // millisecond(.5 rounded up is 1 millisecond)
-    $now = round($now, 3);
+    // In practice, on slower machines even that can fail, so giving yet 50ms or more.
+    $tmp = round($now, 3);
+    $now = $tmp >= (int)$time ? $tmp : $tmp + .05;
   }
   var_dump($now >= (int)$time);
 ?>
