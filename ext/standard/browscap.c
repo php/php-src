@@ -37,6 +37,7 @@ typedef struct {
 	zend_string *regex;
 	uint32_t kv_start;
 	uint32_t kv_end;
+	uint32_t prefix_len;
 } browscap_entry;
 
 typedef struct {
@@ -79,6 +80,7 @@ static void browscap_entry_dtor_persistent(zval *zvalue)
 	pefree(entry, 1);
 }
 
+/* Length of regex, including escapes, anchors, etc. */
 static size_t browscap_compute_regex_len(zend_string *pattern) {
 	size_t i, len = ZSTR_LEN(pattern);
 	for (i = 0; i < ZSTR_LEN(pattern); i++) {
@@ -96,6 +98,19 @@ static size_t browscap_compute_regex_len(zend_string *pattern) {
 	}
 	
 	return len + sizeof("~^$~")-1;
+}
+
+/* Length of prefix not containing any wildcards */
+static size_t browscap_compute_prefix_len(zend_string *pattern) {
+	size_t i;
+	for (i = 0; i < ZSTR_LEN(pattern); i++) {
+		switch (ZSTR_VAL(pattern)[i]) {
+			case '?':
+			case '*':
+				return i;
+		}
+	}
+	return ZSTR_LEN(pattern);
 }
 
 static zend_string *browscap_convert_pattern(zend_string *pattern, int persistent) /* {{{ */
@@ -303,6 +318,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 
 				ctx->current_entry->regex = browscap_convert_pattern(Z_STR_P(arg1), persistent);
 				ctx->current_entry->pattern = zend_string_copy(Z_STR_P(arg1));
+				ctx->current_entry->prefix_len = browscap_compute_prefix_len(Z_STR_P(arg1));
 				ctx->current_entry->kv_end = ctx->current_entry->kv_start = bdata->kv_used;
 			}
 			break;
@@ -473,6 +489,14 @@ static int browser_reg_compare(
 		if (!strcasecmp(ZSTR_VAL(found_entry->pattern), lookup_browser_name)) {
 			return 0;
 		}
+	}
+
+	/* If the placeholder-free prefix doesn't match, we needn't bother with the regex. */
+	if (lookup_browser_length < entry->prefix_len ||
+			zend_binary_strncasecmp(
+				lookup_browser_name, lookup_browser_length,
+				ZSTR_VAL(entry->pattern), ZSTR_LEN(entry->pattern), entry->prefix_len) != 0) {
+		return 0;
 	}
 
 	re = pcre_get_compiled_regex(entry->regex, &re_extra, &re_options);
