@@ -28,9 +28,22 @@
 #include "zend_globals.h"
 
 typedef struct {
+	zend_string *key;
+	zend_string *value;
+} browscap_kv;
+
+typedef struct {
+	zend_string *pattern;
+	zend_string *regex;
+	uint32_t kv_start;
+	uint32_t kv_end;
+} browscap_entry;
+
+typedef struct {
 	HashTable *htab;
-	zval current_section;
-	char *current_section_name;
+	browscap_kv *kv;
+	uint32_t kv_used;
+	uint32_t kv_size;
 	char filename[MAXPATHLEN];
 } browser_data;
 
@@ -50,43 +63,59 @@ ZEND_DECLARE_MODULE_GLOBALS(browscap)
 
 /* OBJECTS_FIXME: This whole extension needs going through. The use of objects looks pretty broken here */
 
-static void browscap_entry_dtor_request(zval *zvalue) /* {{{ */
+static void browscap_entry_dtor(zval *zvalue)
 {
-	if (Z_TYPE_P(zvalue) == IS_ARRAY) {
-		zend_hash_destroy(Z_ARRVAL_P(zvalue));
-		efree(Z_ARR_P(zvalue));
-	} else if (Z_TYPE_P(zvalue) == IS_STRING) {
-		zend_string_release(Z_STR_P(zvalue));
-	}
+	browscap_entry *entry = Z_PTR_P(zvalue);
+	zend_string_release(entry->pattern);
+	zend_string_release(entry->regex);
+	efree(entry);
 }
-/* }}} */
 
-static void browscap_entry_dtor_persistent(zval *zvalue) /* {{{ */ {
-	if (Z_TYPE_P(zvalue) == IS_ARRAY) {
-		zend_hash_destroy(Z_ARRVAL_P(zvalue));
-		free(Z_ARR_P(zvalue));
-	} else if (Z_TYPE_P(zvalue) == IS_STRING) {
-		zend_string_release(Z_STR_P(zvalue));
-	}
+static void browscap_entry_dtor_persistent(zval *zvalue)
+{
+	browscap_entry *entry = Z_PTR_P(zvalue);
+	zend_string_release(entry->pattern);
+	zend_string_release(entry->regex);
+	pefree(entry, 1);
 }
-/* }}} */
 
-static void convert_browscap_pattern(zval *pattern, int persistent) /* {{{ */
+static size_t browscap_compute_regex_len(zend_string *pattern) {
+	size_t i, len = ZSTR_LEN(pattern);
+	for (i = 0; i < ZSTR_LEN(pattern); i++) {
+		switch (ZSTR_VAL(pattern)[i]) {
+			case '*':
+			case '.':
+			case '\\':
+			case '(':
+			case ')':
+			case '~':
+			case '+':
+				len++;
+				break;
+		}
+	}
+	
+	return len + sizeof("~^$~")-1;
+}
+
+static zend_string *browscap_convert_pattern(zend_string *pattern, int persistent) /* {{{ */
 {
 	int i, j=0;
 	char *t;
 	zend_string *res;
 	char *lc_pattern;
+	ALLOCA_FLAG(use_heap);
 
-	res = zend_string_safe_alloc(Z_STRLEN_P(pattern), 2, 4, persistent);
+	res = zend_string_alloc(browscap_compute_regex_len(pattern), persistent);
 	t = ZSTR_VAL(res);
 
-	lc_pattern = zend_str_tolower_dup(Z_STRVAL_P(pattern), Z_STRLEN_P(pattern));
+	lc_pattern = do_alloca(ZSTR_LEN(pattern) + 1, use_heap);
+	zend_str_tolower_copy(lc_pattern, ZSTR_VAL(pattern), ZSTR_LEN(pattern));
 
 	t[j++] = '~';
 	t[j++] = '^';
 
-	for (i=0; i<Z_STRLEN_P(pattern); i++, j++) {
+	for (i = 0; i < ZSTR_LEN(pattern); i++, j++) {
 		switch (lc_pattern[i]) {
 			case '?':
 				t[j] = '.';
@@ -127,17 +156,95 @@ static void convert_browscap_pattern(zval *pattern, int persistent) /* {{{ */
 
 	t[j++] = '$';
 	t[j++] = '~';
-
 	t[j]=0;
+
 	ZSTR_LEN(res) = j;
-	Z_STR_P(pattern) = res;
-	efree(lc_pattern);
+	free_alloca(lc_pattern, use_heap);
+	return res;
 }
 /* }}} */
 
+typedef struct _browscap_parser_ctx {
+	browser_data *bdata;
+	browscap_entry *current_entry;
+	zend_string *current_section_name;
+	zend_string *str_empty;
+	zend_string *str_one;
+	HashTable str_interned;
+} browscap_parser_ctx;
+
+static zend_string *browscap_intern_str(
+		browscap_parser_ctx *ctx, zend_string *str) {
+	zend_string *interned = zend_hash_find_ptr(&ctx->str_interned, str);
+	if (interned) {
+		zend_string_addref(interned);
+	} else {
+		interned = zend_string_copy(str);
+		zend_hash_add_new_ptr(&ctx->str_interned, interned, interned);
+	}
+
+	return interned;
+}
+
+static zend_string *browscap_intern_str_ci(
+		browscap_parser_ctx *ctx, zend_string *str, zend_bool persistent) {
+	zend_string *lcname;
+	zend_string *interned;
+	ALLOCA_FLAG(use_heap);
+
+	ZSTR_ALLOCA_ALLOC(lcname, ZSTR_LEN(str), use_heap);
+	zend_str_tolower_copy(ZSTR_VAL(lcname), ZSTR_VAL(str), ZSTR_LEN(str));
+	interned = zend_hash_find_ptr(&ctx->str_interned, lcname);
+	ZSTR_ALLOCA_FREE(lcname, use_heap);
+
+	if (interned) {
+		zend_string_addref(interned);
+	} else {
+		interned = zend_string_dup(lcname, persistent);
+		zend_hash_add_new_ptr(&ctx->str_interned, interned, interned);
+	}
+
+	return interned;
+}
+
+static void browscap_add_kv(
+		browser_data *bdata, zend_string *key, zend_string *value, zend_bool persistent) {
+	if (bdata->kv_used == bdata->kv_size) {
+		bdata->kv_size *= 2;
+		bdata->kv = safe_perealloc(bdata->kv, sizeof(browscap_kv), bdata->kv_size, 0, persistent);
+	}
+
+	bdata->kv[bdata->kv_used].key = key;
+	bdata->kv[bdata->kv_used].value = value;
+	bdata->kv_used++;
+}
+
+static HashTable *browscap_entry_to_array(browser_data *bdata, browscap_entry *entry) {
+	zval tmp;
+	uint32_t i;
+
+	HashTable *ht;
+	ALLOC_HASHTABLE(ht);
+	zend_hash_init(ht, 8, NULL, ZVAL_PTR_DTOR, 0);
+
+	ZVAL_STR_COPY(&tmp, entry->regex);
+	zend_hash_str_add(ht, "browser_name_regex", sizeof("browser_name_regex")-1, &tmp);
+
+	ZVAL_STR_COPY(&tmp, entry->pattern);
+	zend_hash_str_add(ht, "browser_name_pattern", sizeof("browser_name_pattern")-1, &tmp);
+
+	for (i = entry->kv_start; i < entry->kv_end; i++) {
+		ZVAL_STR_COPY(&tmp, bdata->kv[i].value);
+		zend_hash_add(ht, bdata->kv[i].key, &tmp);
+	}
+
+	return ht;
+}
+
 static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_type, void *arg) /* {{{ */
 {
-	browser_data *bdata = arg;
+	browscap_parser_ctx *ctx = arg;
+	browser_data *bdata = ctx->bdata;
 	int persistent = bdata->htab->u.flags & HASH_FLAG_PERSISTENT;
 
 	if (!arg1) {
@@ -146,18 +253,17 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 
 	switch (callback_type) {
 		case ZEND_INI_PARSER_ENTRY:
-			if (Z_TYPE(bdata->current_section) != IS_UNDEF && arg2) {
-				zval new_property;
-				zend_string *new_key;
+			if (ctx->current_entry != NULL && arg2) {
+				zend_string *new_key, *new_value;
 
 				/* parent entry can not be same as current section -> causes infinite loop! */
 				if (!strcasecmp(Z_STRVAL_P(arg1), "parent") &&
-					bdata->current_section_name != NULL &&
-					!strcasecmp(bdata->current_section_name, Z_STRVAL_P(arg2))
+					ctx->current_section_name != NULL &&
+					!strcasecmp(ZSTR_VAL(ctx->current_section_name), Z_STRVAL_P(arg2))
 				) {
 					zend_error(E_CORE_ERROR, "Invalid browscap ini file: "
 						"'Parent' value cannot be same as the section name: %s "
-						"(in file %s)", bdata->current_section_name, INI_STR("browscap"));
+						"(in file %s)", ZSTR_VAL(ctx->current_section_name), INI_STR("browscap"));
 					return;
 				}
 
@@ -166,52 +272,38 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 					(Z_STRLEN_P(arg2) == 3 && !strncasecmp(Z_STRVAL_P(arg2), "yes", sizeof("yes") - 1)) ||
 					(Z_STRLEN_P(arg2) == 4 && !strncasecmp(Z_STRVAL_P(arg2), "true", sizeof("true") - 1))
 				) {
-					ZVAL_NEW_STR(&new_property, zend_string_init("1", sizeof("1")-1, persistent));
+					new_value = zend_string_copy(ctx->str_one);
 				} else if (
 					(Z_STRLEN_P(arg2) == 2 && !strncasecmp(Z_STRVAL_P(arg2), "no", sizeof("no") - 1)) ||
 					(Z_STRLEN_P(arg2) == 3 && !strncasecmp(Z_STRVAL_P(arg2), "off", sizeof("off") - 1)) ||
 					(Z_STRLEN_P(arg2) == 4 && !strncasecmp(Z_STRVAL_P(arg2), "none", sizeof("none") - 1)) ||
 					(Z_STRLEN_P(arg2) == 5 && !strncasecmp(Z_STRVAL_P(arg2), "false", sizeof("false") - 1))
 				) {
-					// TODO: USE ZSTR_EMPTY_ALLOC()?
-					ZVAL_NEW_STR(&new_property, zend_string_init("", sizeof("")-1, persistent));
+					new_value = zend_string_copy(ctx->str_empty);
 				} else { /* Other than true/false setting */
-					ZVAL_STR(&new_property, zend_string_dup(Z_STR_P(arg2), persistent));
+					new_value = browscap_intern_str(ctx, Z_STR_P(arg2));
 				}
-				new_key = zend_string_dup(Z_STR_P(arg1), persistent);
-				zend_str_tolower(ZSTR_VAL(new_key), ZSTR_LEN(new_key));
-				zend_hash_update(Z_ARRVAL(bdata->current_section), new_key, &new_property);
-				zend_string_release(new_key);
+
+				new_key = browscap_intern_str_ci(ctx, Z_STR_P(arg1), persistent);
+				browscap_add_kv(bdata, new_key, new_value, persistent);
+				ctx->current_entry->kv_end = bdata->kv_used;
 			}
 			break;
 		case ZEND_INI_PARSER_SECTION: {
 				zval processed;
 				zval unprocessed;
 
-				/*printf("'%s' (%d)\n",$1.value.str.val,$1.value.str.len + 1);*/
-				if (persistent) {
-					ZVAL_NEW_PERSISTENT_ARR(&bdata->current_section);
-				} else {
-					ZVAL_NEW_ARR(&bdata->current_section);
+				ctx->current_entry = pemalloc(sizeof(browscap_entry), persistent);
+				zend_hash_update_ptr(bdata->htab, Z_STR_P(arg1), ctx->current_entry);
+
+				if (ctx->current_section_name) {
+					zend_string_release(ctx->current_section_name);
 				}
-				zend_hash_init(Z_ARRVAL(bdata->current_section), 0, NULL,
-						(dtor_func_t) (persistent?browscap_entry_dtor_persistent
-												 :browscap_entry_dtor_request),
-						persistent);
-				if (bdata->current_section_name) {
-					pefree(bdata->current_section_name, persistent);
-				}
-				bdata->current_section_name = pestrndup(Z_STRVAL_P(arg1),
-						Z_STRLEN_P(arg1), persistent);
+				ctx->current_section_name = zend_string_copy(Z_STR_P(arg1));
 
-				zend_hash_update(bdata->htab, Z_STR_P(arg1), &bdata->current_section);
-
-				ZVAL_STR(&processed, Z_STR_P(arg1));
-				ZVAL_STR(&unprocessed, zend_string_dup(Z_STR_P(arg1), persistent));
-
-				convert_browscap_pattern(&processed, persistent);
-				zend_hash_str_update(Z_ARRVAL(bdata->current_section), "browser_name_regex", sizeof("browser_name_regex")-1, &processed);
-				zend_hash_str_update(Z_ARRVAL(bdata->current_section), "browser_name_pattern", sizeof("browser_name_pattern")-1, &unprocessed);
+				ctx->current_entry->regex = browscap_convert_pattern(Z_STR_P(arg1), persistent);
+				ctx->current_entry->pattern = zend_string_copy(Z_STR_P(arg1));
+				ctx->current_entry->kv_end = ctx->current_entry->kv_start = bdata->kv_used;
 			}
 			break;
 	}
@@ -221,40 +313,53 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 static int browscap_read_file(char *filename, browser_data *browdata, int persistent) /* {{{ */
 {
 	zend_file_handle fh = {{0}};
+	browscap_parser_ctx ctx = {0};
 
 	if (filename == NULL || filename[0] == '\0') {
 		return FAILURE;
 	}
+
+	fh.handle.fp = VCWD_FOPEN(filename, "r");
+	fh.opened_path = NULL;
+	fh.free_filename = 0;
+	if (!fh.handle.fp) {
+		zend_error(E_CORE_WARNING, "Cannot open '%s' for reading", filename);
+		return FAILURE;
+	}
+
+	fh.filename = filename;
+	fh.type = ZEND_HANDLE_FP;
 
 	browdata->htab = pemalloc(sizeof *browdata->htab, persistent);
 	if (browdata->htab == NULL) {
 		return FAILURE;
 	}
 
-	zend_hash_init_ex(browdata->htab, 0, NULL,
-			(dtor_func_t) (persistent?browscap_entry_dtor_persistent
-									 :browscap_entry_dtor_request),
-			persistent, 0);
+	zend_hash_init_ex(browdata->htab, 0, NULL, 
+		persistent ? browscap_entry_dtor_persistent : browscap_entry_dtor, persistent, 0);
 
-	fh.handle.fp = VCWD_FOPEN(filename, "r");
-	fh.opened_path = NULL;
-	fh.free_filename = 0;
-	if (!fh.handle.fp) {
-		zend_hash_destroy(browdata->htab);
-		pefree(browdata->htab, persistent);
-		browdata->htab = NULL;
-		zend_error(E_CORE_WARNING, "Cannot open '%s' for reading", filename);
-		return FAILURE;
-	}
-	fh.filename = filename;
-	fh.type = ZEND_HANDLE_FP;
-	browdata->current_section_name = NULL;
+	browdata->kv_size = 16 * 1024;
+	browdata->kv_used = 0;
+	browdata->kv = pemalloc(sizeof(browscap_kv) * browdata->kv_size, persistent);
+
+	/* Create parser context */
+	ctx.bdata = browdata;
+	ctx.current_entry = NULL;
+	ctx.current_section_name = NULL;
+	ctx.str_empty = zend_string_init("", sizeof("")-1, persistent);
+	ctx.str_one = zend_string_init("1", sizeof("1")-1, persistent);
+	zend_hash_init(&ctx.str_interned, 8, NULL, NULL, persistent);
+
 	zend_parse_ini_file(&fh, 1, ZEND_INI_SCANNER_RAW,
-			(zend_ini_parser_cb_t) php_browscap_parser_cb, browdata);
-	if (browdata->current_section_name != NULL) {
-		pefree(browdata->current_section_name, persistent);
-		browdata->current_section_name = NULL;
+			(zend_ini_parser_cb_t) php_browscap_parser_cb, &ctx);
+
+	/* Destroy parser context */
+	if (ctx.current_section_name) {
+		zend_string_release(ctx.current_section_name);
 	}
+	zend_string_release(ctx.str_one);
+	zend_string_release(ctx.str_empty);
+	zend_hash_destroy(&ctx.str_interned);
 
 	return SUCCESS;
 }
@@ -264,8 +369,7 @@ static int browscap_read_file(char *filename, browser_data *browdata, int persis
 static void browscap_globals_ctor(zend_browscap_globals *browscap_globals) /* {{{ */
 {
 	browscap_globals->activation_bdata.htab = NULL;
-	ZVAL_UNDEF(&browscap_globals->activation_bdata.current_section);
-	browscap_globals->activation_bdata.current_section_name = NULL;
+	browscap_globals->activation_bdata.kv = NULL;
 	browscap_globals->activation_bdata.filename[0] = '\0';
 }
 /* }}} */
@@ -274,12 +378,20 @@ static void browscap_globals_ctor(zend_browscap_globals *browscap_globals) /* {{
 static void browscap_bdata_dtor(browser_data *bdata, int persistent) /* {{{ */
 {
 	if (bdata->htab != NULL) {
+		uint32_t i;
+
 		zend_hash_destroy(bdata->htab);
 		pefree(bdata->htab, persistent);
 		bdata->htab = NULL;
+
+		for (i = 0; i < bdata->kv_used; i++) {
+			zend_string_release(bdata->kv[i].key);
+			zend_string_release(bdata->kv[i].value);
+		}
+		pefree(bdata->kv, persistent);
+		bdata->kv = NULL;
 	}
 	bdata->filename[0] = '\0';
-	/* current_section_* are only used during parsing */
 }
 /* }}} */
 
@@ -343,31 +455,27 @@ PHP_MSHUTDOWN_FUNCTION(browscap) /* {{{ */
 }
 /* }}} */
 
-static int browser_reg_compare(zval *browser, int num_args, va_list args, zend_hash_key *key) /* {{{ */
+static int browser_reg_compare(
+		zval *entry_zv, int num_args, va_list args, zend_hash_key *key) /* {{{ */
 {
-	zval *browser_regex, *previous_match;
+	browscap_entry *entry = Z_PTR_P(entry_zv);
+	char *lookup_browser_name = va_arg(args, char *);
+	int lookup_browser_length = va_arg(args, int);
+	browscap_entry **found_entry_ptr = va_arg(args, browscap_entry **);
+	browscap_entry *found_entry = *found_entry_ptr;
+
 	pcre *re;
 	int re_options;
 	pcre_extra *re_extra;
-	char *lookup_browser_name = va_arg(args, char *);
-	int lookup_browser_length = va_arg(args, int);
-	zval *found_browser_entry = va_arg(args, zval *);
 
 	/* See if we have an exact match, if so, we're done... */
-	if (Z_TYPE_P(found_browser_entry) == IS_ARRAY) {
-		if ((previous_match = zend_hash_str_find(Z_ARRVAL_P(found_browser_entry), "browser_name_pattern", sizeof("browser_name_pattern")-1)) == NULL) {
-			return 0;
-		}
-		else if (!strcasecmp(Z_STRVAL_P(previous_match), lookup_browser_name)) {
+	if (found_entry) {
+		if (!strcasecmp(ZSTR_VAL(found_entry->pattern), lookup_browser_name)) {
 			return 0;
 		}
 	}
 
-	if ((browser_regex = zend_hash_str_find(Z_ARRVAL_P(browser), "browser_name_regex", sizeof("browser_name_regex")-1)) == NULL) {
-		return 0;
-	}
-
-	re = pcre_get_compiled_regex(Z_STR_P(browser_regex), &re_extra, &re_options);
+	re = pcre_get_compiled_regex(entry->regex, &re_extra, &re_options);
 	if (re == NULL) {
 		return 0;
 	}
@@ -376,16 +484,13 @@ static int browser_reg_compare(zval *browser, int num_args, va_list args, zend_h
 		/* If we've found a possible browser, we need to do a comparison of the
 		   number of characters changed in the user agent being checked versus
 		   the previous match found and the current match. */
-		if (Z_TYPE_P(found_browser_entry) == IS_ARRAY) {
+		if (found_entry) {
 			size_t i, prev_len = 0, curr_len = 0;
-			zval *current_match = zend_hash_str_find(Z_ARRVAL_P(browser), "browser_name_pattern", sizeof("browser_name_pattern")-1);
+			zend_string *previous_match = found_entry->pattern;
+			zend_string *current_match = entry->pattern;
 
-			if (!current_match) {
-				return 0;
-			}
-
-			for (i = 0; i < Z_STRLEN_P(previous_match); i++) {
-				switch (Z_STRVAL_P(previous_match)[i]) {
+			for (i = 0; i < ZSTR_LEN(previous_match); i++) {
+				switch (ZSTR_VAL(previous_match)[i]) {
 					case '?':
 					case '*':
 						/* do nothing, ignore these characters in the count */
@@ -396,8 +501,8 @@ static int browser_reg_compare(zval *browser, int num_args, va_list args, zend_h
 				}
 			}
 
-			for (i = 0; i < Z_STRLEN_P(current_match); i++) {
-				switch (Z_STRVAL_P(current_match)[i]) {
+			for (i = 0; i < ZSTR_LEN(current_match); i++) {
+				switch (ZSTR_VAL(current_match)[i]) {
 					case '?':
 					case '*':
 						/* do nothing, ignore these characters in the count */
@@ -411,11 +516,10 @@ static int browser_reg_compare(zval *browser, int num_args, va_list args, zend_h
 			/* Pick which browser pattern replaces the least amount of
 			   characters when compared to the original user agent string... */
 			if (prev_len < curr_len) {
-				ZVAL_COPY_VALUE(found_browser_entry, browser);
+				*found_entry_ptr = entry;
 			}
-		}
-		else {
-			ZVAL_COPY_VALUE(found_browser_entry, browser);
+		} else {
+			*found_entry_ptr = entry;
 		}
 	}
 
@@ -436,10 +540,12 @@ PHP_FUNCTION(get_browser)
 	char *agent_name = NULL;
 	size_t agent_name_len = 0;
 	zend_bool return_array = 0;
-	zval *agent, *z_agent_name, *http_user_agent;
-	zval found_browser_entry;
+	zval *agent, *parent_agent_name_zv, *http_user_agent;
+	zend_string *parent_agent_name;
 	char *lookup_browser_name;
 	browser_data *bdata;
+	browscap_entry *found_entry = NULL;
+	HashTable *agent_ht;
 
 	if (BROWSCAP_G(activation_bdata).filename[0] != '\0') {
 		bdata = &BROWSCAP_G(activation_bdata);
@@ -474,37 +580,48 @@ PHP_FUNCTION(get_browser)
 	lookup_browser_name = estrndup(agent_name, agent_name_len);
 	php_strtolower(lookup_browser_name, agent_name_len);
 
-	if ((agent = zend_hash_str_find(bdata->htab, lookup_browser_name, agent_name_len)) == NULL) {
-		ZVAL_UNDEF(&found_browser_entry);
-		zend_hash_apply_with_arguments(bdata->htab, browser_reg_compare, 3, lookup_browser_name, agent_name_len, &found_browser_entry);
+	found_entry = zend_hash_str_find_ptr(bdata->htab, lookup_browser_name, agent_name_len);
+	if (found_entry == NULL) {
+		zend_hash_apply_with_arguments(bdata->htab, browser_reg_compare, 3, lookup_browser_name, agent_name_len, &found_entry);
 
-		if (Z_TYPE(found_browser_entry) != IS_UNDEF) {
-			agent = &found_browser_entry;
-		} else if ((agent = zend_hash_str_find(bdata->htab, DEFAULT_SECTION_NAME, sizeof(DEFAULT_SECTION_NAME)-1)) == NULL) {
-			efree(lookup_browser_name);
-			RETURN_FALSE;
+		if (found_entry == NULL) {
+			found_entry = zend_hash_str_find_ptr(bdata->htab,
+				DEFAULT_SECTION_NAME, sizeof(DEFAULT_SECTION_NAME)-1);
+			if (found_entry == NULL) {
+				efree(lookup_browser_name);
+				RETURN_FALSE;
+			}
 		}
 	}
 
+	agent_ht = browscap_entry_to_array(bdata, found_entry);
+
 	if (return_array) {
-		RETVAL_ARR(zend_array_dup(Z_ARRVAL_P(agent)));
-	}
-	else {
-		object_init(return_value);
-		zend_hash_copy(Z_OBJPROP_P(return_value), Z_ARRVAL_P(agent), (copy_ctor_func_t) browscap_zval_copy_ctor);
+		RETVAL_ARR(agent_ht);
+	} else {
+		object_and_properties_init(return_value, zend_standard_class_def, agent_ht);
 	}
 
-	while ((z_agent_name = zend_hash_str_find(Z_ARRVAL_P(agent), "parent", sizeof("parent")-1)) != NULL) {
-		if ((agent = zend_hash_find(bdata->htab, Z_STR_P(z_agent_name))) == NULL) {
+	parent_agent_name_zv = zend_hash_str_find(agent_ht, "parent", sizeof("parent")-1);
+	parent_agent_name = parent_agent_name_zv ? Z_STR_P(parent_agent_name_zv) : NULL;
+
+	while (parent_agent_name) {
+		if ((found_entry = zend_hash_find_ptr(bdata->htab, parent_agent_name)) == NULL) {
 			break;
 		}
 
+		agent_ht = browscap_entry_to_array(bdata, found_entry);
 		if (return_array) {
-			zend_hash_merge(Z_ARRVAL_P(return_value), Z_ARRVAL_P(agent), (copy_ctor_func_t) browscap_zval_copy_ctor, 0);
+			zend_hash_merge(Z_ARRVAL_P(return_value), agent_ht, (copy_ctor_func_t) browscap_zval_copy_ctor, 0);
+		} else {
+			zend_hash_merge(Z_OBJPROP_P(return_value), agent_ht, (copy_ctor_func_t) browscap_zval_copy_ctor, 0);
 		}
-		else {
-			zend_hash_merge(Z_OBJPROP_P(return_value), Z_ARRVAL_P(agent), (copy_ctor_func_t) browscap_zval_copy_ctor, 0);
-		}
+
+		parent_agent_name_zv = zend_hash_str_find(agent_ht, "parent", sizeof("parent")-1);
+		parent_agent_name = parent_agent_name_zv ? Z_STR_P(parent_agent_name_zv) : NULL;
+
+		zend_hash_destroy(agent_ht);
+		efree(agent_ht);
 	}
 
 	efree(lookup_browser_name);
