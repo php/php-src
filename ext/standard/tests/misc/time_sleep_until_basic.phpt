@@ -26,7 +26,7 @@ Michele Orselli mo@ideato.it
     // In practice, on slower machines even that can fail, giving yet 10ms or more to avoid
     // false positive fails.
     $tmp = round($now, 3);
-    $now = $tmp >= (int)$time ? $tmp : $tmp + .01;
+    $now = $tmp >= (int)$time ? $tmp : $tmp + .05;
   }
   var_dump($now >= (int)$time);
 ?>
