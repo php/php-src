@@ -39,6 +39,8 @@ typedef struct {
 	uint32_t kv_start;
 	uint32_t kv_end;
 	uint32_t prefix_len;
+	uint32_t contains_start;
+	uint32_t contains_len;
 } browscap_entry;
 
 typedef struct {
@@ -87,6 +89,46 @@ static void browscap_entry_dtor_persistent(zval *zvalue)
 	pefree(entry, 1);
 }
 
+static inline zend_bool is_placeholder(char c) {
+	return c == '?' || c == '*';
+}
+
+/* Length of prefix not containing any wildcards */
+static size_t browscap_compute_prefix_len(zend_string *pattern) {
+	size_t i;
+	for (i = 0; i < ZSTR_LEN(pattern); i++) {
+		if (is_placeholder(ZSTR_VAL(pattern)[i])) {
+			break;
+		}
+	}
+	return i;
+}
+
+static void browscap_compute_contains(browscap_entry *entry) {
+	zend_string *pattern = entry->pattern;
+	size_t i = entry->prefix_len;
+	/* Find first non-placeholder character after prefix */
+	for (; i < ZSTR_LEN(pattern); i++) {
+		if (!is_placeholder(ZSTR_VAL(pattern)[i])) {
+			/* Skip the case of a single non-placeholder character.
+			 * Let's try to find something longer instead. */
+			if (i + 1 < ZSTR_LEN(pattern) &&
+					!is_placeholder(ZSTR_VAL(pattern)[i + 1])) {
+				break;
+			}
+		}
+	}
+	entry->contains_start = i;
+
+	/* Find first placeholder character after that */
+	for (; i < ZSTR_LEN(pattern); i++) {
+		if (is_placeholder(ZSTR_VAL(pattern)[i])) {
+			break;
+		}
+	}
+	entry->contains_len = i - entry->contains_start;
+}
+
 /* Length of regex, including escapes, anchors, etc. */
 static size_t browscap_compute_regex_len(zend_string *pattern) {
 	size_t i, len = ZSTR_LEN(pattern);
@@ -105,19 +147,6 @@ static size_t browscap_compute_regex_len(zend_string *pattern) {
 	}
 	
 	return len + sizeof("~^$~")-1;
-}
-
-/* Length of prefix not containing any wildcards */
-static size_t browscap_compute_prefix_len(zend_string *pattern) {
-	size_t i;
-	for (i = 0; i < ZSTR_LEN(pattern); i++) {
-		switch (ZSTR_VAL(pattern)[i]) {
-			case '?':
-			case '*':
-				return i;
-		}
-	}
-	return ZSTR_LEN(pattern);
 }
 
 static zend_string *browscap_convert_pattern(zend_string *pattern, int persistent) /* {{{ */
@@ -323,20 +352,24 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 			}
 			break;
 		case ZEND_INI_PARSER_SECTION:
-			ctx->current_entry = pemalloc(sizeof(browscap_entry), persistent);
-			zend_hash_update_ptr(bdata->htab, Z_STR_P(arg1), ctx->current_entry);
+		{
+			browscap_entry *entry = ctx->current_entry
+				= pemalloc(sizeof(browscap_entry), persistent);
+			zend_hash_update_ptr(bdata->htab, Z_STR_P(arg1), entry);
 
 			if (ctx->current_section_name) {
 				zend_string_release(ctx->current_section_name);
 			}
 			ctx->current_section_name = zend_string_copy(Z_STR_P(arg1));
 
-			ctx->current_entry->regex = browscap_convert_pattern(Z_STR_P(arg1), persistent);
-			ctx->current_entry->pattern = zend_string_copy(Z_STR_P(arg1));
-			ctx->current_entry->parent = NULL;
-			ctx->current_entry->prefix_len = browscap_compute_prefix_len(Z_STR_P(arg1));
-			ctx->current_entry->kv_end = ctx->current_entry->kv_start = bdata->kv_used;
+			entry->regex = browscap_convert_pattern(Z_STR_P(arg1), persistent);
+			entry->pattern = zend_string_copy(Z_STR_P(arg1));
+			entry->kv_end = entry->kv_start = bdata->kv_used;
+			entry->parent = NULL;
+			entry->prefix_len = browscap_compute_prefix_len(Z_STR_P(arg1));
+			browscap_compute_contains(entry);
 			break;
+		}
 	}
 }
 /* }}} */
@@ -493,27 +526,53 @@ static int browser_reg_compare(
 	zend_string *agent_name = va_arg(args, zend_string *);
 	browscap_entry **found_entry_ptr = va_arg(args, browscap_entry **);
 	browscap_entry *found_entry = *found_entry_ptr;
+	ALLOCA_FLAG(use_heap);
+	zend_string *pattern_lc;
 
 	pcre *re;
 	int re_options;
 	pcre_extra *re_extra;
 
+	/* Lowercase the pattern, the agent name is already lowercase */
+	ZSTR_ALLOCA_ALLOC(pattern_lc, ZSTR_LEN(entry->pattern), use_heap);
+	zend_str_tolower_copy(ZSTR_VAL(pattern_lc), ZSTR_VAL(entry->pattern), ZSTR_LEN(entry->pattern));
+
 	/* If the placeholder-free prefix doesn't match, we needn't bother with the regex. */
 	if (ZSTR_LEN(agent_name) < entry->prefix_len ||
-			zend_binary_strncasecmp(
-				ZSTR_VAL(agent_name), ZSTR_LEN(agent_name),
-				ZSTR_VAL(entry->pattern), ZSTR_LEN(entry->pattern), entry->prefix_len) != 0) {
+			memcmp(ZSTR_VAL(agent_name), ZSTR_VAL(pattern_lc), entry->prefix_len) != 0) {
+		ZSTR_ALLOCA_FREE(pattern_lc, use_heap);
 		return 0;
 	}
 
+	/* Check if the agent contains the "contains" portion */
+	if (entry->contains_len != 0) {
+		const char *result;
+		if (ZSTR_LEN(agent_name) < entry->prefix_len + entry->contains_len) {
+			ZSTR_ALLOCA_FREE(pattern_lc, use_heap);
+			return 0;
+		}
+
+		result = zend_memnstr(
+			ZSTR_VAL(agent_name) + entry->prefix_len,
+			ZSTR_VAL(pattern_lc) + entry->contains_start,
+			entry->contains_len,
+			ZSTR_VAL(agent_name) + ZSTR_LEN(agent_name));
+		if (!result) {
+			ZSTR_ALLOCA_FREE(pattern_lc, use_heap);
+			return 0;
+		}
+	}
+
 	/* See if we have an exact match, if so, we're done... */
-	if (zend_string_equals_ci(agent_name, entry->pattern)) {
+	if (zend_string_equals(agent_name, pattern_lc)) {
 		*found_entry_ptr = entry;
+		ZSTR_ALLOCA_FREE(pattern_lc, use_heap);
 		return ZEND_HASH_APPLY_STOP;
 	}
 
 	re = pcre_get_compiled_regex(entry->regex, &re_extra, &re_options);
 	if (re == NULL) {
+		ZSTR_ALLOCA_FREE(pattern_lc, use_heap);
 		return 0;
 	}
 
@@ -560,6 +619,7 @@ static int browser_reg_compare(
 		}
 	}
 
+	ZSTR_ALLOCA_FREE(pattern_lc, use_heap);
 	return 0;
 }
 /* }}} */
