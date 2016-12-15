@@ -16,6 +16,17 @@ if (count($tmp) < 2)
 if (($tmp[1] !== 'localhost') && ($tmp[1] !== '127.0.0.1'))
 	die("skip Test cannot be run against remote database server");
 
+$stmt = $db->query("SHOW VARIABLES LIKE 'secure_file_priv'");
+if (($row = $stmt->fetch(PDO::FETCH_ASSOC)) && ($row['value'] != '')) {
+	if (!is_writable($row['value']))
+		die("skip secure_file_priv directory not writable: {$row['value']}");
+
+	$filename = $row['value'] . DIRECTORY_SEPARATOR  . "pdo_mysql_exec_load_data.csv";
+
+	if (file_exists($filename) && !is_writable($filename))
+		die("skip {$filename} not writable");
+}
+
 ?>
 --FILE--
 <?php
