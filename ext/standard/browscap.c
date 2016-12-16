@@ -34,13 +34,13 @@ typedef struct {
 
 typedef struct {
 	zend_string *pattern;
-	zend_string *regex;
 	zend_string *parent;
 	uint32_t kv_start;
 	uint32_t kv_end;
-	uint32_t prefix_len;
-	uint32_t contains_start;
-	uint32_t contains_len;
+	/* We ensure that the length fits in 16 bits, so this is fine */
+	uint16_t prefix_len;
+	uint16_t contains_start[3];
+	uint16_t contains_len[3];
 } browscap_entry;
 
 typedef struct {
@@ -71,7 +71,6 @@ static void browscap_entry_dtor(zval *zvalue)
 {
 	browscap_entry *entry = Z_PTR_P(zvalue);
 	zend_string_release(entry->pattern);
-	zend_string_release(entry->regex);
 	if (entry->parent) {
 		zend_string_release(entry->parent);
 	}
@@ -82,7 +81,6 @@ static void browscap_entry_dtor_persistent(zval *zvalue)
 {
 	browscap_entry *entry = Z_PTR_P(zvalue);
 	zend_string_release(entry->pattern);
-	zend_string_release(entry->regex);
 	if (entry->parent) {
 		zend_string_release(entry->parent);
 	}
@@ -104,9 +102,10 @@ static size_t browscap_compute_prefix_len(zend_string *pattern) {
 	return i;
 }
 
-static void browscap_compute_contains(browscap_entry *entry) {
-	zend_string *pattern = entry->pattern;
-	size_t i = entry->prefix_len;
+static void browscap_compute_contains(
+		zend_string *pattern, uint16_t start_pos,
+		uint16_t *contains_start, uint16_t *contains_len) {
+	size_t i = start_pos;
 	/* Find first non-placeholder character after prefix */
 	for (; i < ZSTR_LEN(pattern); i++) {
 		if (!is_placeholder(ZSTR_VAL(pattern)[i])) {
@@ -118,7 +117,7 @@ static void browscap_compute_contains(browscap_entry *entry) {
 			}
 		}
 	}
-	entry->contains_start = i;
+	*contains_start = i;
 
 	/* Find first placeholder character after that */
 	for (; i < ZSTR_LEN(pattern); i++) {
@@ -126,7 +125,7 @@ static void browscap_compute_contains(browscap_entry *entry) {
 			break;
 		}
 	}
-	entry->contains_len = i - entry->contains_start;
+	*contains_len = i - *contains_start;
 }
 
 /* Length of regex, including escapes, anchors, etc. */
@@ -278,7 +277,7 @@ static HashTable *browscap_entry_to_array(browser_data *bdata, browscap_entry *e
 	ALLOC_HASHTABLE(ht);
 	zend_hash_init(ht, 8, NULL, ZVAL_PTR_DTOR, 0);
 
-	ZVAL_STR_COPY(&tmp, entry->regex);
+	ZVAL_STR(&tmp, browscap_convert_pattern(entry->pattern, 0));
 	zend_hash_str_add(ht, "browser_name_regex", sizeof("browser_name_regex")-1, &tmp);
 
 	ZVAL_STR_COPY(&tmp, entry->pattern);
@@ -353,21 +352,38 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 			break;
 		case ZEND_INI_PARSER_SECTION:
 		{
-			browscap_entry *entry = ctx->current_entry
+			browscap_entry *entry;
+			zend_string *pattern = Z_STR_P(arg1);
+
+			if (ZSTR_LEN(pattern) > UINT16_MAX) {
+				php_error_docref(NULL, E_WARNING,
+					"Skipping excessively long pattern of length %zd", ZSTR_LEN(pattern));
+				break;
+			}
+			
+			entry = ctx->current_entry
 				= pemalloc(sizeof(browscap_entry), persistent);
-			zend_hash_update_ptr(bdata->htab, Z_STR_P(arg1), entry);
+			zend_hash_update_ptr(bdata->htab, pattern, entry);
 
 			if (ctx->current_section_name) {
 				zend_string_release(ctx->current_section_name);
 			}
-			ctx->current_section_name = zend_string_copy(Z_STR_P(arg1));
+			ctx->current_section_name = zend_string_copy(pattern);
 
-			entry->regex = browscap_convert_pattern(Z_STR_P(arg1), persistent);
-			entry->pattern = zend_string_copy(Z_STR_P(arg1));
+			entry->pattern = zend_string_copy(pattern);
 			entry->kv_end = entry->kv_start = bdata->kv_used;
 			entry->parent = NULL;
-			entry->prefix_len = browscap_compute_prefix_len(Z_STR_P(arg1));
-			browscap_compute_contains(entry);
+
+			entry->prefix_len = browscap_compute_prefix_len(pattern);
+			browscap_compute_contains(
+				pattern, entry->prefix_len,
+				&entry->contains_start[0], &entry->contains_len[0]);
+			browscap_compute_contains(
+				pattern, entry->contains_start[0] + entry->contains_len[0],
+				&entry->contains_start[1], &entry->contains_len[1]);
+			browscap_compute_contains(
+				pattern, entry->contains_start[1] + entry->contains_len[1],
+				&entry->contains_start[2], &entry->contains_len[2]);
 			break;
 		}
 	}
@@ -527,39 +543,42 @@ static int browser_reg_compare(
 	browscap_entry **found_entry_ptr = va_arg(args, browscap_entry **);
 	browscap_entry *found_entry = *found_entry_ptr;
 	ALLOCA_FLAG(use_heap);
-	zend_string *pattern_lc;
+	zend_string *pattern_lc, *regex;
+	const char *cur;
+	int i;
 
 	pcre *re;
 	int re_options;
 	pcre_extra *re_extra;
+
+	/* Agent name too short */
+	if (ZSTR_LEN(agent_name) < entry->prefix_len
+			+ entry->contains_len[0] + entry->contains_len[1] + entry->contains_len[2]) {
+		return 0;
+	}
 
 	/* Lowercase the pattern, the agent name is already lowercase */
 	ZSTR_ALLOCA_ALLOC(pattern_lc, ZSTR_LEN(entry->pattern), use_heap);
 	zend_str_tolower_copy(ZSTR_VAL(pattern_lc), ZSTR_VAL(entry->pattern), ZSTR_LEN(entry->pattern));
 
 	/* If the placeholder-free prefix doesn't match, we needn't bother with the regex. */
-	if (ZSTR_LEN(agent_name) < entry->prefix_len ||
-			memcmp(ZSTR_VAL(agent_name), ZSTR_VAL(pattern_lc), entry->prefix_len) != 0) {
+	if (memcmp(ZSTR_VAL(agent_name), ZSTR_VAL(pattern_lc), entry->prefix_len) != 0) {
 		ZSTR_ALLOCA_FREE(pattern_lc, use_heap);
 		return 0;
 	}
 
-	/* Check if the agent contains the "contains" portion */
-	if (entry->contains_len != 0) {
-		const char *result;
-		if (ZSTR_LEN(agent_name) < entry->prefix_len + entry->contains_len) {
-			ZSTR_ALLOCA_FREE(pattern_lc, use_heap);
-			return 0;
-		}
-
-		result = zend_memnstr(
-			ZSTR_VAL(agent_name) + entry->prefix_len,
-			ZSTR_VAL(pattern_lc) + entry->contains_start,
-			entry->contains_len,
-			ZSTR_VAL(agent_name) + ZSTR_LEN(agent_name));
-		if (!result) {
-			ZSTR_ALLOCA_FREE(pattern_lc, use_heap);
-			return 0;
+	/* Check if the agent contains the "contains" portions */
+	cur = ZSTR_VAL(agent_name) + entry->prefix_len;
+	for (i = 0; i < 3; i++) {
+		if (entry->contains_len[i] != 0) {
+			cur = zend_memnstr(cur,
+				ZSTR_VAL(pattern_lc) + entry->contains_start[i],
+				entry->contains_len[i],
+				ZSTR_VAL(agent_name) + ZSTR_LEN(agent_name));
+			if (!cur) {
+				ZSTR_ALLOCA_FREE(pattern_lc, use_heap);
+				return 0;
+			}
 		}
 	}
 
@@ -570,9 +589,11 @@ static int browser_reg_compare(
 		return ZEND_HASH_APPLY_STOP;
 	}
 
-	re = pcre_get_compiled_regex(entry->regex, &re_extra, &re_options);
+	regex = browscap_convert_pattern(entry->pattern, 0);
+	re = pcre_get_compiled_regex(regex, &re_extra, &re_options);
 	if (re == NULL) {
 		ZSTR_ALLOCA_FREE(pattern_lc, use_heap);
+		zend_string_release(regex);
 		return 0;
 	}
 
@@ -620,6 +641,7 @@ static int browser_reg_compare(
 	}
 
 	ZSTR_ALLOCA_FREE(pattern_lc, use_heap);
+	zend_string_release(regex);
 	return 0;
 }
 /* }}} */
