@@ -514,10 +514,13 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 						return 0;
 					}
 					MAKE_NOP(opline);
+
 					/* zend_handle_loops_and_finally may inserts other oplines */
 					do {
 						++opline;
 					} while (opline->opcode != ZEND_RETURN && opline->opcode != ZEND_RETURN_BY_REF);
+					ZEND_ASSERT(ZEND_OP1(opline).var == var);
+
 					break;
 				  }
 				default:
