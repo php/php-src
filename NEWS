@@ -23,6 +23,8 @@ PHP                                                                        NEWS
     usage. (Andrey)
 
 - Opcache:
+  . Fixed bug #73746 (Method that returns string returns UNKNOWN:0 instead).
+    (Laruence)
   . Fixed bug #73654 (Segmentation fault in zend_call_function). (Nikita)
   . Fixed bug #73668 ("SIGFPE Arithmetic exception" in opcache when divide by
     minus 1). (Nikita)
