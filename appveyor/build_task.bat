@@ -33,6 +33,7 @@ if "%OPCACHE%" equ "0" set EXT_EXCLUDE_FROM_TEST=%EXT_EXCLUDE_FROM_TEST%,opcache
 call configure.bat ^
 	--enable-snapshot-build ^
 	--enable-debug-pack ^
+	--with-mcrypt=shared ^
 	--enable-com-dotnet=shared ^
 	--without-analyzer ^
 	--enable-object-out-dir=%PHP_BUILD_OBJ_DIR% ^
