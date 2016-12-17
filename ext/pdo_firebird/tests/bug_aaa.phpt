@@ -5,7 +5,7 @@ PDO_Firebird: cursor should not be marked as opened on singleton statements
 --FILE--
 <?php
 require 'testdb.inc';
-$C = new PDO('firebird:dbname='.$test_base, $user, $password, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]) or die;
+$C = new PDO('firebird:dbname='.$test_base, $user, $password, [PDO::ATTR_ERRMODE => PDO::ERRMODE_WARNING]) or die;
 @$C->exec('drop table ta_table');
 $C->exec('create table ta_table (id integer)');
 $S = $C->prepare('insert into ta_table (id) values (:id) returning id');
