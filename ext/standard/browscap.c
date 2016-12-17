@@ -27,6 +27,8 @@
 #include "zend_ini_scanner.h"
 #include "zend_globals.h"
 
+#define BROWSCAP_NUM_CONTAINS 3
+
 typedef struct {
 	zend_string *key;
 	zend_string *value;
@@ -39,8 +41,8 @@ typedef struct {
 	uint32_t kv_end;
 	/* We ensure that the length fits in 16 bits, so this is fine */
 	uint16_t prefix_len;
-	uint16_t contains_start[3];
-	uint16_t contains_len[3];
+	uint16_t contains_start[BROWSCAP_NUM_CONTAINS];
+	uint16_t contains_len[BROWSCAP_NUM_CONTAINS];
 } browscap_entry;
 
 typedef struct {
@@ -102,8 +104,8 @@ static size_t browscap_compute_prefix_len(zend_string *pattern) {
 	return i;
 }
 
-static void browscap_compute_contains(
-		zend_string *pattern, uint16_t start_pos,
+static size_t browscap_compute_contains(
+		zend_string *pattern, size_t start_pos,
 		uint16_t *contains_start, uint16_t *contains_len) {
 	size_t i = start_pos;
 	/* Find first non-placeholder character after prefix */
@@ -126,6 +128,7 @@ static void browscap_compute_contains(
 		}
 	}
 	*contains_len = i - *contains_start;
+	return i;
 }
 
 /* Length of regex, including escapes, anchors, etc. */
@@ -354,6 +357,8 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 		{
 			browscap_entry *entry;
 			zend_string *pattern = Z_STR_P(arg1);
+			size_t pos;
+			int i;
 
 			if (ZSTR_LEN(pattern) > UINT16_MAX) {
 				php_error_docref(NULL, E_WARNING,
@@ -374,16 +379,11 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 			entry->kv_end = entry->kv_start = bdata->kv_used;
 			entry->parent = NULL;
 
-			entry->prefix_len = browscap_compute_prefix_len(pattern);
-			browscap_compute_contains(
-				pattern, entry->prefix_len,
-				&entry->contains_start[0], &entry->contains_len[0]);
-			browscap_compute_contains(
-				pattern, entry->contains_start[0] + entry->contains_len[0],
-				&entry->contains_start[1], &entry->contains_len[1]);
-			browscap_compute_contains(
-				pattern, entry->contains_start[1] + entry->contains_len[1],
-				&entry->contains_start[2], &entry->contains_len[2]);
+			pos = entry->prefix_len = browscap_compute_prefix_len(pattern);
+			for (i = 0; i < BROWSCAP_NUM_CONTAINS; i++) {
+				pos = browscap_compute_contains(pattern, pos,
+					&entry->contains_start[i], &entry->contains_len[i]);
+			}
 			break;
 		}
 	}
@@ -535,6 +535,15 @@ PHP_MSHUTDOWN_FUNCTION(browscap) /* {{{ */
 }
 /* }}} */
 
+static inline size_t browscap_get_minimum_length(browscap_entry *entry) {
+	size_t len = entry->prefix_len;
+	int i;
+	for (i = 0; i < BROWSCAP_NUM_CONTAINS; i++) {
+		len += entry->contains_len[i];
+	}
+	return len;
+}
+
 static int browser_reg_compare(
 		zval *entry_zv, int num_args, va_list args, zend_hash_key *key) /* {{{ */
 {
@@ -552,8 +561,7 @@ static int browser_reg_compare(
 	pcre_extra *re_extra;
 
 	/* Agent name too short */
-	if (ZSTR_LEN(agent_name) < entry->prefix_len
-			+ entry->contains_len[0] + entry->contains_len[1] + entry->contains_len[2]) {
+	if (ZSTR_LEN(agent_name) < browscap_get_minimum_length(entry)) {
 		return 0;
 	}
 
@@ -569,7 +577,7 @@ static int browser_reg_compare(
 
 	/* Check if the agent contains the "contains" portions */
 	cur = ZSTR_VAL(agent_name) + entry->prefix_len;
-	for (i = 0; i < 3; i++) {
+	for (i = 0; i < BROWSCAP_NUM_CONTAINS; i++) {
 		if (entry->contains_len[i] != 0) {
 			cur = zend_memnstr(cur,
 				ZSTR_VAL(pattern_lc) + entry->contains_start[i],
@@ -579,6 +587,7 @@ static int browser_reg_compare(
 				ZSTR_ALLOCA_FREE(pattern_lc, use_heap);
 				return 0;
 			}
+			cur += entry->contains_len[i];
 		}
 	}
 
