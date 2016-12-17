@@ -3270,19 +3270,33 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type)
 
 				/* zip or tar-based phar */
 				spprintf(&name, 4096, "phar://%s/%s", file_handle->filename, ".phar/stub.php");
-				if (SUCCESS == phar_orig_zend_open((const char *)name, file_handle)) {
+				if (SUCCESS == phar_orig_zend_open((const char *)name, &f)) {
+
 					efree(name);
 					name = NULL;
-					file_handle->filename = f.filename;
-					if (file_handle->opened_path) {
-						efree(file_handle->opened_path);
+
+					f.filename = file_handle->filename;
+					if (f.opened_path) {
+						efree(f.opened_path);
 					}
-					file_handle->opened_path = f.opened_path;
-					file_handle->free_filename = f.free_filename;
-				} else {
+					f.opened_path = file_handle->opened_path;
+					f.free_filename = file_handle->free_filename;
+
+					switch (file_handle->type) {
+						case ZEND_HANDLE_STREAM:
+						case ZEND_HANDLE_MAPPED:
+							if (file_handle->handle.stream.closer && file_handle->handle.stream.handle) {
+								file_handle->handle.stream.closer(file_handle->handle.stream.handle);
+							}
+							file_handle->handle.stream.handle = NULL;
+							break;
+						default:
+							break;
+					}
 					*file_handle = f;
 				}
 			} else if (phar->flags & PHAR_FILE_COMPRESSION_MASK) {
+				zend_file_handle_dtor(file_handle);
 				/* compressed phar */
 				file_handle->type = ZEND_HANDLE_STREAM;
 				/* we do our own reading directly from the phar, don't change the next line */
