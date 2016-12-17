@@ -666,7 +666,7 @@ zend_first_try {
 	}
 
 	if (SG(request_info).content_length > SG(read_post_bytes)) {
-		ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, "attemp to read POST data error: %d", SG(sapi_headers).http_response_code);
+		ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, "Error while attempting to read POST data: %d", SG(sapi_headers).http_response_code);
 		apr_brigade_cleanup(brigade);
 		PHPAP_INI_OFF;
 		return SG(sapi_headers).http_response_code;
