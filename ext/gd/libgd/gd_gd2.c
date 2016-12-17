@@ -136,6 +136,10 @@ static int _gd2GetHeader(gdIOCtxPtr in, int *sx, int *sy, int *cs, int *vers, in
 	GD2_DBG(php_gd_error("%d Chunks vertically", *ncy));
 
 	if (gd2_compressed(*fmt)) {
+		if (*ncx <= 0 || *ncy <= 0 || *ncx > INT_MAX / *ncy) {
+			GD2_DBG(printf ("Illegal chunk counts: %d * %d\n", *ncx, *ncy));
+			goto fail1;
+		}
 		nc = (*ncx) * (*ncy);
 		GD2_DBG(php_gd_error("Reading %d chunk index entries", nc));
 		if (overflow2(sizeof(t_chunk_info), nc)) {
