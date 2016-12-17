@@ -506,6 +506,7 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 				}
 				case ZEND_VERIFY_RETURN_TYPE: {
 					zend_arg_info *ret_info = op_array->arg_info - 1;
+					ZEND_ASSERT((opline + 1)->opcode == ZEND_RETURN || (opline + 1)->opcode == ZEND_RETURN_BY_REF);
 					if (ret_info->class_name
 						|| ret_info->type_hint == IS_CALLABLE
 						|| !ZEND_SAME_FAKE_TYPE(ret_info->type_hint, Z_TYPE_P(val))
@@ -514,13 +515,7 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 						return 0;
 					}
 					MAKE_NOP(opline);
-
-					/* zend_handle_loops_and_finally may inserts other oplines */
-					do {
-						++opline;
-					} while (opline->opcode != ZEND_RETURN && opline->opcode != ZEND_RETURN_BY_REF);
-					ZEND_ASSERT(ZEND_OP1(opline).var == var);
-
+					++opline;
 					break;
 				  }
 				default:
