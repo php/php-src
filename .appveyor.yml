@@ -26,6 +26,9 @@ environment:
                 - THREAD_SAFE: 1
                   OPCACHE: 1
 
+matrix:
+        fast_finish: true
+
 services:
         # the setup scripts have to be touched, once some other db version is used
         - mysql
