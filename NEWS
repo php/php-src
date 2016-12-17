@@ -32,6 +32,9 @@ PHP                                                                        NEWS
     (Bob)
   . Fixed issue getting executable lines from custom wrappers. (Bob)
 
+- Apache2handler:
+  . Fixed bug #61471 (POST request timeout did not handle correctly). (Zheng SHAO)
+
 08 Dec 2016 PHP 7.0.14
 
 - Core:
