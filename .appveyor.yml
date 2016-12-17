@@ -1,3 +1,6 @@
+
+version: "{branch}.build.{build}"
+
 image: Visual Studio 2015
 
 clone_depth: 64
