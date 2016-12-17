@@ -27,7 +27,7 @@
 #include "zend_ini_scanner.h"
 #include "zend_globals.h"
 
-#define BROWSCAP_NUM_CONTAINS 3
+#define BROWSCAP_NUM_CONTAINS 5
 
 typedef struct {
 	zend_string *key;
@@ -40,9 +40,9 @@ typedef struct {
 	uint32_t kv_start;
 	uint32_t kv_end;
 	/* We ensure that the length fits in 16 bits, so this is fine */
-	uint16_t prefix_len;
 	uint16_t contains_start[BROWSCAP_NUM_CONTAINS];
-	uint16_t contains_len[BROWSCAP_NUM_CONTAINS];
+	uint8_t contains_len[BROWSCAP_NUM_CONTAINS];
+	uint8_t prefix_len;
 } browscap_entry;
 
 typedef struct {
@@ -94,19 +94,19 @@ static inline zend_bool is_placeholder(char c) {
 }
 
 /* Length of prefix not containing any wildcards */
-static size_t browscap_compute_prefix_len(zend_string *pattern) {
+static uint8_t browscap_compute_prefix_len(zend_string *pattern) {
 	size_t i;
 	for (i = 0; i < ZSTR_LEN(pattern); i++) {
 		if (is_placeholder(ZSTR_VAL(pattern)[i])) {
 			break;
 		}
 	}
-	return i;
+	return MIN(i, UINT8_MAX);
 }
 
 static size_t browscap_compute_contains(
 		zend_string *pattern, size_t start_pos,
-		uint16_t *contains_start, uint16_t *contains_len) {
+		uint16_t *contains_start, uint8_t *contains_len) {
 	size_t i = start_pos;
 	/* Find first non-placeholder character after prefix */
 	for (; i < ZSTR_LEN(pattern); i++) {
@@ -127,7 +127,7 @@ static size_t browscap_compute_contains(
 			break;
 		}
 	}
-	*contains_len = i - *contains_start;
+	*contains_len = MIN(i - *contains_start, UINT8_MAX);
 	return i;
 }
 
