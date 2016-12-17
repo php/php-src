@@ -1,14 +1,14 @@
 @echo off
 
 if "%APPVEYOR%" equ "True" rmdir /s /q C:\cygwin >NUL 2>NUL
-if errorlevel 1 exit /b 1
+if %errorlevel% neq 0 exit /b 3
 if "%APPVEYOR%" equ "True" rmdir /s /q C:\mingw >NUL 2>NUL
-if errorlevel 1 exit /b 1
+if %errorlevel% neq 0 exit /b 3
 if "%APPVEYOR%" equ "True" rmdir /s /q C:\mingw-w64 >NUL 2>NUL
-if errorlevel 1 exit /b 1
+if %errorlevel% neq 0 exit /b 3
 
 cd /D %APPVEYOR_BUILD_FOLDER%
-if errorlevel 1 exit /b 1
+if %errorlevel% neq 0 exit /b 3
 
 if /i "%APPVEYOR_REPO_BRANCH:~0,4%" equ "php-" (
 	set BRANCH=%APPVEYOR_REPO_BRANCH:~4%
@@ -21,9 +21,10 @@ set DEPS_DIR=%PHP_BUILD_CACHE_BASE_DIR%\deps-%PHP_SDK_VC%-%PHP_SDK_ARCH%-%APPVEY
 rem SDK is cached, deps info is cached as well
 echo Updating dependencies
 call phpsdk_deps --update --branch %BRANCH% --stability %STABILITY% --deps %DEPS_DIR%
+if %errorlevel% neq 0 exit /b 3
 
 call buildconf.bat --force
-if errorlevel 1 exit /b 1
+if %errorlevel% neq 0 exit /b 3
 
 if "%THREAD_SAFE%" equ "0" set ADD_CONF=--disable-zts
 
@@ -40,10 +41,10 @@ call configure.bat ^
 	--with-php-build=%DEPS_DIR% ^
 	%ADD_CONF% ^
 	--with-test-ini-ext-exclude=%EXT_EXCLUDE_FROM_TEST%
-if errorlevel 1 exit /b 1
+if %errorlevel% neq 0 exit /b 3
 
 nmake /NOLOGO
-if errorlevel 1 exit /b 1
+if %errorlevel% neq 0 exit /b 3
 
 exit /b 0
 
