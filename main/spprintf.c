@@ -138,7 +138,6 @@
 } while (0);
 
 #define PAD_CHAR(xbuf, ch, count, is_char) do { \
-	size_t newlen; \
 	if ((is_char)) { \
 		smart_string_alloc(((smart_string *)(xbuf)), (count), 0); \
 		memset(((smart_string *)(xbuf))->c + ((smart_string *)(xbuf))->len, (ch), (count)); \
