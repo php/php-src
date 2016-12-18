@@ -565,15 +565,16 @@ static int browser_reg_compare(
 		return 0;
 	}
 
+	/* Quickly discard patterns where the prefix doesn't match. */
+	if (zend_binary_strcasecmp(
+			ZSTR_VAL(agent_name), entry->prefix_len,
+			ZSTR_VAL(entry->pattern), entry->prefix_len) != 0) {
+		return 0;
+	}
+
 	/* Lowercase the pattern, the agent name is already lowercase */
 	ZSTR_ALLOCA_ALLOC(pattern_lc, ZSTR_LEN(entry->pattern), use_heap);
 	zend_str_tolower_copy(ZSTR_VAL(pattern_lc), ZSTR_VAL(entry->pattern), ZSTR_LEN(entry->pattern));
-
-	/* If the placeholder-free prefix doesn't match, we needn't bother with the regex. */
-	if (memcmp(ZSTR_VAL(agent_name), ZSTR_VAL(pattern_lc), entry->prefix_len) != 0) {
-		ZSTR_ALLOCA_FREE(pattern_lc, use_heap);
-		return 0;
-	}
 
 	/* Check if the agent contains the "contains" portions */
 	cur = ZSTR_VAL(agent_name) + entry->prefix_len;
