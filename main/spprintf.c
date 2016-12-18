@@ -857,18 +857,6 @@ PHPAPI size_t vspprintf(char **pbuf, size_t max_len, const char *format, va_list
 }
 /* }}} */
 
-PHPAPI size_t spprintf(char **pbuf, size_t max_len, const char *format, ...) /* {{{ */
-{
-	size_t cc;
-	va_list ap;
-
-	va_start(ap, format);
-	cc = vspprintf(pbuf, max_len, format, ap);
-	va_end(ap);
-	return (cc);
-}
-/* }}} */
-
 PHPAPI zend_string *vstrpprintf(size_t max_len, const char *format, va_list ap) /* {{{ */
 {
 	smart_str buf = {0};
@@ -885,18 +873,6 @@ PHPAPI zend_string *vstrpprintf(size_t max_len, const char *format, va_list ap) 
 
 	smart_str_0(&buf);
 	return buf.s;
-}
-/* }}} */
-
-PHPAPI zend_string *strpprintf(size_t max_len, const char *format, ...) /* {{{ */
-{
-	va_list ap;
-	zend_string *str;
-
-	va_start(ap, format);
-	str = vstrpprintf(max_len, format, ap);
-	va_end(ap);
-	return str;
 }
 /* }}} */
 

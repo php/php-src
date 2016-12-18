@@ -159,6 +159,30 @@ static uint32_t zend_version_info_length;
 #define ZEND_CORE_VERSION_INFO	"Zend Engine v" ZEND_VERSION ", Copyright (c) 1998-2016 Zend Technologies\n"
 #define PRINT_ZVAL_INDENT 4
 
+ZEND_API size_t zend_spprintf(char **message, size_t max_len, const char *format, ...) /* {{{ */
+{
+	va_list arg;
+	size_t len;
+
+	va_start(arg, format);
+	len = zend_vspprintf(message, max_len, format, arg);
+	va_end(arg);
+	return len;
+}
+/* }}} */
+
+ZEND_API zend_string *zend_strpprintf(size_t max_len, const char *format, ...) /* {{{ */
+{
+	va_list arg;
+	zend_string *str;
+
+	va_start(arg, format);
+	str = zend_vstrpprintf(max_len, format, arg);
+	va_end(arg);
+	return str;
+}
+/* }}} */
+
 static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent);
 
 static void print_hash(smart_str *buf, HashTable *ht, int indent, zend_bool is_object) /* {{{ */

@@ -37,14 +37,12 @@ There is also snprintf: See difference explained in snprintf.h
 #include "snprintf.h"
 
 BEGIN_EXTERN_C()
-PHPAPI size_t spprintf( char **pbuf, size_t max_len, const char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
-
 PHPAPI size_t vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap) PHP_ATTRIBUTE_FORMAT(printf, 3, 0);
-
 PHPAPI zend_string *vstrpprintf(size_t max_len, const char *format, va_list ap) PHP_ATTRIBUTE_FORMAT(printf, 2, 0);
-
-PHPAPI zend_string *strpprintf(size_t max_len, const char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
 END_EXTERN_C()
+
+#define spprintf zend_spprintf
+#define strpprintf zend_strpprintf
 
 #endif /* SNPRINTF_H */
 
