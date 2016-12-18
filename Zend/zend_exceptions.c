@@ -651,30 +651,6 @@ ZEND_METHOD(exception, getPrevious)
 	ZVAL_COPY(return_value, GET_PROPERTY_SILENT(getThis(), ZEND_STR_PREVIOUS));
 } /* }}} */
 
-size_t zend_spprintf(char **message, size_t max_len, const char *format, ...) /* {{{ */
-{
-	va_list arg;
-	size_t len;
-
-	va_start(arg, format);
-	len = zend_vspprintf(message, max_len, format, arg);
-	va_end(arg);
-	return len;
-}
-/* }}} */
-
-zend_string *zend_strpprintf(size_t max_len, const char *format, ...) /* {{{ */
-{
-	va_list arg;
-	zend_string *str;
-
-	va_start(arg, format);
-	str = zend_vstrpprintf(max_len, format, arg);
-	va_end(arg);
-	return str;
-}
-/* }}} */
-
 /* {{{ proto string Exception|Error::__toString()
    Obtain the string representation of the Exception object */
 ZEND_METHOD(exception, __toString)
