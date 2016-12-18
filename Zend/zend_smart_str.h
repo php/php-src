@@ -46,6 +46,8 @@ BEGIN_EXTERN_C()
 ZEND_API void ZEND_FASTCALL smart_str_erealloc(smart_str *str, size_t len);
 ZEND_API void ZEND_FASTCALL smart_str_realloc(smart_str *str, size_t len);
 ZEND_API void ZEND_FASTCALL smart_str_append_escaped(smart_str *str, const char *s, size_t l);
+ZEND_API void ZEND_FASTCALL smart_str_append_printf(smart_str *dest, const char *format, ...)
+	ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 
 END_EXTERN_C()
 
