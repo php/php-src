@@ -69,23 +69,6 @@ PHPAPI zend_class_entry *reflection_class_constant_ptr;
 PHPAPI zend_class_entry *reflection_extension_ptr;
 PHPAPI zend_class_entry *reflection_zend_extension_ptr;
 
-#if MBO_0
-ZEND_BEGIN_MODULE_GLOBALS(reflection)
-	int dummy;
-ZEND_END_MODULE_GLOBALS(reflection)
-
-#ifdef ZTS
-# define REFLECTION_G(v) \
-	ZEND_TSRMG(reflection_globals_id, zend_reflection_globals*, v)
-extern int reflection_globals_id;
-#else
-# define REFLECTION_G(v) (reflection_globals.v)
-extern zend_reflection_globals reflectionglobals;
-#endif
-
-ZEND_DECLARE_MODULE_GLOBALS(reflection)
-#endif /* MBO_0 */
-
 /* Method macros */
 
 #define METHOD_NOTSTATIC(ce)                                                                                \
