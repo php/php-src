@@ -20,6 +20,7 @@
 #define ZEND_SMART_STR_H
 
 #include <zend.h>
+#include "zend_globals.h"
 #include "zend_smart_str_public.h"
 
 #define smart_str_appends_ex(dest, src, what) \
@@ -79,6 +80,22 @@ static zend_always_inline void smart_str_free(smart_str *str) {
 static zend_always_inline void smart_str_0(smart_str *str) {
 	if (str->s) {
 		ZSTR_VAL(str->s)[ZSTR_LEN(str->s)] = '\0';
+	}
+}
+
+static zend_always_inline size_t smart_str_get_len(smart_str *str) {
+	return str->s ? ZSTR_LEN(str->s) : 0;
+}
+
+static zend_always_inline zend_string *smart_str_extract(smart_str *str) {
+	if (str->s) {
+		zend_string *res;
+		smart_str_0(str);
+		res = str->s;
+		str->s = NULL;
+		return res;
+	} else {
+		return ZSTR_EMPTY_ALLOC();
 	}
 }
 
