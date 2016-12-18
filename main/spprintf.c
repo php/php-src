@@ -827,52 +827,15 @@ skip_output:
 }
 /* }}} */
 
-/*
- * This is the general purpose conversion function.
- */
-PHPAPI size_t vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap) /* {{{ */
+PHPAPI void php_printf_to_smart_string(smart_string *buf, const char *format, va_list ap) /* {{{ */
 {
-	smart_string buf = {0};
-
-	/* since there are places where (v)spprintf called without checking for null,
-	   a bit of defensive coding here */
-	if(!pbuf) {
-		return 0;
-	}
-	xbuf_format_converter(&buf, 1, format, ap);
-
-	if (max_len && buf.len > max_len) {
-		buf.len = max_len;
-	}
-
-	smart_string_0(&buf);
-
-	if (buf.c) {
-		*pbuf = buf.c;
-		return buf.len;
-	} else {
-		*pbuf = estrndup("", 0);
-		return 0;
-	}
+	xbuf_format_converter(buf, 1, format, ap);
 }
 /* }}} */
 
-PHPAPI zend_string *vstrpprintf(size_t max_len, const char *format, va_list ap) /* {{{ */
+PHPAPI void php_printf_to_smart_str(smart_str *buf, const char *format, va_list ap) /* {{{ */
 {
-	smart_str buf = {0};
-
-	xbuf_format_converter(&buf, 0, format, ap);
-
-	if (!buf.s) {
-		return ZSTR_EMPTY_ALLOC();
-	}
-
-	if (max_len && ZSTR_LEN(buf.s) > max_len) {
-		ZSTR_LEN(buf.s) = max_len;
-	}
-
-	smart_str_0(&buf);
-	return buf.s;
+	xbuf_format_converter(buf, 0, format, ap);
 }
 /* }}} */
 

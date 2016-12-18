@@ -32,6 +32,7 @@
 #include "zend_dtrace.h"
 #include "zend_virtual_cwd.h"
 #include "zend_smart_str.h"
+#include "zend_smart_string.h"
 
 #ifdef ZTS
 # define GLOBAL_FUNCTION_TABLE		global_function_table
@@ -54,8 +55,8 @@ ZEND_API int (*zend_stream_open_function)(const char *filename, zend_file_handle
 ZEND_API void (*zend_ticks_function)(int ticks);
 ZEND_API void (*zend_interrupt_function)(zend_execute_data *execute_data);
 ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, const char *format, va_list args);
-size_t (*zend_vspprintf)(char **pbuf, size_t max_len, const char *format, va_list ap);
-zend_string *(*zend_vstrpprintf)(size_t max_len, const char *format, va_list ap);
+void (*zend_printf_to_smart_string)(smart_string *buf, const char *format, va_list ap);
+void (*zend_printf_to_smart_str)(smart_str *buf, const char *format, va_list ap);
 ZEND_API char *(*zend_getenv)(char *name, size_t name_len);
 ZEND_API zend_string *(*zend_resolve_path)(const char *filename, int filename_len);
 
@@ -159,6 +160,34 @@ static uint32_t zend_version_info_length;
 #define ZEND_CORE_VERSION_INFO	"Zend Engine v" ZEND_VERSION ", Copyright (c) 1998-2016 Zend Technologies\n"
 #define PRINT_ZVAL_INDENT 4
 
+ZEND_API size_t zend_vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap) /* {{{ */
+{
+	smart_string buf = {0};
+
+	/* since there are places where (v)spprintf called without checking for null,
+	   a bit of defensive coding here */
+	if (!pbuf) {
+		return 0;
+	}
+
+	zend_printf_to_smart_string(&buf, format, ap);
+
+	if (max_len && buf.len > max_len) {
+		buf.len = max_len;
+	}
+
+	smart_string_0(&buf);
+
+	if (buf.c) {
+		*pbuf = buf.c;
+		return buf.len;
+	} else {
+		*pbuf = estrndup("", 0);
+		return 0;
+	}
+}
+/* }}} */
+
 ZEND_API size_t zend_spprintf(char **message, size_t max_len, const char *format, ...) /* {{{ */
 {
 	va_list arg;
@@ -168,6 +197,25 @@ ZEND_API size_t zend_spprintf(char **message, size_t max_len, const char *format
 	len = zend_vspprintf(message, max_len, format, arg);
 	va_end(arg);
 	return len;
+}
+/* }}} */
+
+ZEND_API zend_string *zend_vstrpprintf(size_t max_len, const char *format, va_list ap) /* {{{ */
+{
+	smart_str buf = {0};
+
+	zend_printf_to_smart_str(&buf, format, ap);
+
+	if (!buf.s) {
+		return ZSTR_EMPTY_ALLOC();
+	}
+
+	if (max_len && ZSTR_LEN(buf.s) > max_len) {
+		ZSTR_LEN(buf.s) = max_len;
+	}
+
+	smart_str_0(&buf);
+	return buf.s;
 }
 /* }}} */
 
@@ -708,8 +756,8 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 	zend_get_configuration_directive_p = utility_functions->get_configuration_directive;
 	zend_ticks_function = utility_functions->ticks_function;
 	zend_on_timeout = utility_functions->on_timeout;
-	zend_vspprintf = utility_functions->vspprintf_function;
-	zend_vstrpprintf = utility_functions->vstrpprintf_function;
+	zend_printf_to_smart_string = utility_functions->printf_to_smart_string_function;
+	zend_printf_to_smart_str = utility_functions->printf_to_smart_str_function;
 	zend_getenv = utility_functions->getenv_function;
 	zend_resolve_path = utility_functions->resolve_path_function;
 
