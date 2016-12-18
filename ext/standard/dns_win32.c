@@ -341,7 +341,7 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 }
 /* }}} */
 
-/* {{{ proto array|false dns_get_record(string hostname [, int type[, array authns, array addtl]])
+/* {{{ proto array|false dns_get_record(string hostname [, int type[, array &authns[, array &addtl[, bool raw]]]])
    Get any Resource Record corresponding to a given Internet host name */
 PHP_FUNCTION(dns_get_record)
 {
