@@ -152,8 +152,8 @@ static int firebird_stmt_execute(pdo_stmt_t *stmt) /* {{{ */
 		}
 
 		*S->name = 0;
-		S->cursor_open = (S->out_sqlda.sqln > 0);	/* A cursor is opened, when more than zero columns returned */
-		S->exhausted = !S->cursor_open;
+		S->cursor_open = S->out_sqlda.sqln && (S->statement_type != isc_info_sql_stmt_exec_procedure);
+		S->exhausted = !S->out_sqlda.sqln; /* There are data to fetch */
 
 		return 1;
 	} while (0);
