@@ -27,7 +27,10 @@
 #define PDO_PARSER_TEXT 1
 #define PDO_PARSER_BIND 2
 #define PDO_PARSER_BIND_POS 3
-#define PDO_PARSER_EOI 4
+#define PDO_PARSER_ESCAPED_QUESTION 4
+#define PDO_PARSER_EOI 5
+
+#define PDO_PARSER_BINDNO_ESCAPED_CHAR -1
 
 #define RET(i) {s->cur = cursor; return i; }
 #define SKIP_ONE(i) {s->cur = s->tok + 1; return i; }
@@ -47,11 +50,11 @@ static int scan(Scanner *s)
 	char *cursor = s->cur;
 
 	s->tok = cursor;
-	#line 55 "ext/pdo/pdo_sql_parser.re"
+	#line 59 "ext/pdo/pdo_sql_parser.re"
 
 
 	
-#line 55 "ext/pdo/pdo_sql_parser.c"
+#line 58 "ext/pdo/pdo_sql_parser.c"
 {
 	YYCTYPE yych;
 
@@ -80,9 +83,9 @@ yy3:
 	yych = *(YYMARKER = ++YYCURSOR);
 	if (yych >= 0x01) goto yy37;
 yy4:
-#line 63 "ext/pdo/pdo_sql_parser.re"
+#line 68 "ext/pdo/pdo_sql_parser.re"
 	{ SKIP_ONE(PDO_PARSER_TEXT); }
-#line 86 "ext/pdo/pdo_sql_parser.c"
+#line 89 "ext/pdo/pdo_sql_parser.c"
 yy5:
 	yych = *(YYMARKER = ++YYCURSOR);
 	if (yych <= 0x00) goto yy4;
@@ -152,8 +155,8 @@ yy6:
 	case 'w':
 	case 'x':
 	case 'y':
-	case 'z':	goto yy26;
-	case ':':	goto yy29;
+	case 'z':	goto yy25;
+	case ':':	goto yy28;
 	default:	goto yy4;
 	}
 yy7:
@@ -163,9 +166,9 @@ yy7:
 	default:	goto yy8;
 	}
 yy8:
-#line 62 "ext/pdo/pdo_sql_parser.re"
+#line 67 "ext/pdo/pdo_sql_parser.re"
 	{ RET(PDO_PARSER_BIND_POS); }
-#line 169 "ext/pdo/pdo_sql_parser.c"
+#line 172 "ext/pdo/pdo_sql_parser.c"
 yy9:
 	yych = *++YYCURSOR;
 	goto yy4;
@@ -202,9 +205,9 @@ yy12:
 	default:	goto yy12;
 	}
 yy14:
-#line 65 "ext/pdo/pdo_sql_parser.re"
+#line 70 "ext/pdo/pdo_sql_parser.re"
 	{ RET(PDO_PARSER_TEXT); }
-#line 208 "ext/pdo/pdo_sql_parser.c"
+#line 211 "ext/pdo/pdo_sql_parser.c"
 yy15:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
@@ -225,9 +228,9 @@ yy17:
 yy19:
 	++YYCURSOR;
 yy20:
-#line 64 "ext/pdo/pdo_sql_parser.re"
+#line 69 "ext/pdo/pdo_sql_parser.re"
 	{ RET(PDO_PARSER_TEXT); }
-#line 231 "ext/pdo/pdo_sql_parser.c"
+#line 234 "ext/pdo/pdo_sql_parser.c"
 yy21:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
@@ -239,17 +242,10 @@ yy21:
 	}
 yy23:
 	++YYCURSOR;
-	if (YYLIMIT <= YYCURSOR) YYFILL(1);
-	yych = *YYCURSOR;
-	switch (yych) {
-	case '?':	goto yy23;
-	default:	goto yy25;
-	}
+#line 65 "ext/pdo/pdo_sql_parser.re"
+	{ RET(PDO_PARSER_ESCAPED_QUESTION); }
+#line 248 "ext/pdo/pdo_sql_parser.c"
 yy25:
-#line 60 "ext/pdo/pdo_sql_parser.re"
-	{ RET(PDO_PARSER_TEXT); }
-#line 252 "ext/pdo/pdo_sql_parser.c"
-yy26:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
 	yych = *YYCURSOR;
@@ -316,21 +312,25 @@ yy26:
 	case 'w':
 	case 'x':
 	case 'y':
-	case 'z':	goto yy26;
-	default:	goto yy28;
+	case 'z':	goto yy25;
+	default:	goto yy27;
 	}
-yy28:
-#line 61 "ext/pdo/pdo_sql_parser.re"
+yy27:
+#line 66 "ext/pdo/pdo_sql_parser.re"
 	{ RET(PDO_PARSER_BIND); }
-#line 326 "ext/pdo/pdo_sql_parser.c"
-yy29:
+#line 322 "ext/pdo/pdo_sql_parser.c"
+yy28:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
 	yych = *YYCURSOR;
 	switch (yych) {
-	case ':':	goto yy29;
-	default:	goto yy25;
+	case ':':	goto yy28;
+	default:	goto yy30;
 	}
+yy30:
+#line 64 "ext/pdo/pdo_sql_parser.re"
+	{ RET(PDO_PARSER_TEXT); }
+#line 334 "ext/pdo/pdo_sql_parser.c"
 yy31:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
@@ -350,7 +350,7 @@ yy33:
 	goto yy31;
 yy34:
 	++YYCURSOR;
-#line 59 "ext/pdo/pdo_sql_parser.re"
+#line 63 "ext/pdo/pdo_sql_parser.re"
 	{ RET(PDO_PARSER_TEXT); }
 #line 356 "ext/pdo/pdo_sql_parser.c"
 yy36:
@@ -372,11 +372,11 @@ yy38:
 	goto yy36;
 yy39:
 	++YYCURSOR;
-#line 58 "ext/pdo/pdo_sql_parser.re"
+#line 62 "ext/pdo/pdo_sql_parser.re"
 	{ RET(PDO_PARSER_TEXT); }
 #line 378 "ext/pdo/pdo_sql_parser.c"
 }
-#line 66 "ext/pdo/pdo_sql_parser.re"
+#line 71 "ext/pdo/pdo_sql_parser.re"
 
 }
 
@@ -401,7 +401,7 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, size_t inquery_len
 	char *ptr, *newbuffer;
 	int t;
 	uint32_t bindno = 0;
-	int ret = 0;
+	int ret = 0, escapes = 0;
 	size_t newbuffer_len;
 	HashTable *params;
 	struct pdo_bound_param_data *param;
@@ -414,14 +414,19 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, size_t inquery_len
 
 	/* phase 1: look for args */
 	while((t = scan(&s)) != PDO_PARSER_EOI) {
-		if (t == PDO_PARSER_BIND || t == PDO_PARSER_BIND_POS) {
+		if (t == PDO_PARSER_BIND || t == PDO_PARSER_BIND_POS || t == PDO_PARSER_ESCAPED_QUESTION) {
+			if (t == PDO_PARSER_ESCAPED_QUESTION && stmt->supports_placeholders == PDO_PLACEHOLDER_POSITIONAL) {
+				/* escaped question marks unsupported, treat as text */
+				continue;
+			}
+
 			if (t == PDO_PARSER_BIND) {
 				int len = s.cur - s.tok;
 				if ((inquery < (s.cur - len)) && isalnum(*(s.cur - len - 1))) {
 					continue;
 				}
 				query_type |= PDO_PLACEHOLDER_NAMED;
-			} else {
+			} else if (t == PDO_PARSER_BIND_POS) {
 				query_type |= PDO_PLACEHOLDER_POSITIONAL;
 			}
 
@@ -430,7 +435,16 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, size_t inquery_len
 			plc->next = NULL;
 			plc->pos = s.tok;
 			plc->len = s.cur - s.tok;
-			plc->bindno = bindno++;
+
+			if (t == PDO_PARSER_ESCAPED_QUESTION) {
+				plc->bindno = PDO_PARSER_BINDNO_ESCAPED_CHAR;
+				plc->quoted = "?";
+				plc->qlen = 1;
+				plc->freeq = 0;
+				escapes++;
+			} else {
+				plc->bindno = bindno++;
+			}
 
 			if (placetail) {
 				placetail->next = plc;
@@ -441,7 +455,7 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, size_t inquery_len
 		}
 	}
 
-	if (bindno == 0) {
+	if (!placeholders) {
 		/* nothing to do; good! */
 		return 0;
 	}
@@ -456,11 +470,11 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, size_t inquery_len
 
 	if (stmt->supports_placeholders == query_type && !stmt->named_rewrite_template) {
 		/* query matches native syntax */
-		ret = 0;
-		goto clean_up;
+		newbuffer_len = inquery_len;
+		goto rewrite;
 	}
 
-	if (stmt->named_rewrite_template) {
+	if (query_type == PDO_PLACEHOLDER_NAMED && stmt->named_rewrite_template) {
 		/* magic/hack.
 		 * We we pretend that the query was positional even if
 		 * it was named so that we fall into the
@@ -471,14 +485,7 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, size_t inquery_len
 
 	params = stmt->bound_params;
 
-	/* Do we have placeholders but no bound params */
-	if (bindno && !params && stmt->supports_placeholders == PDO_PLACEHOLDER_NONE) {
-		pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "no parameters were bound");
-		ret = -1;
-		goto clean_up;
-	}
-
-	if (params && bindno != zend_hash_num_elements(params) && stmt->supports_placeholders == PDO_PLACEHOLDER_NONE) {
+	if (bindno && stmt->supports_placeholders == PDO_PLACEHOLDER_NONE && params && bindno != zend_hash_num_elements(params)) {
 		/* extra bit of validation for instances when same params are bound more than once */
 		if (query_type != PDO_PLACEHOLDER_POSITIONAL && bindno > zend_hash_num_elements(params)) {
 			int ok = 1;
@@ -504,7 +511,16 @@ safe:
 		newbuffer_len = inquery_len;
 
 		/* let's quote all the values */
-		for (plc = placeholders; plc; plc = plc->next) {
+		for (plc = placeholders; plc && params; plc = plc->next) {
+			if (plc->bindno == PDO_PARSER_BINDNO_ESCAPED_CHAR) {
+				/* escaped character */
+				continue;
+			}
+
+			if (query_type == PDO_PLACEHOLDER_NONE) {
+				continue;
+			}
+
 			if (query_type == PDO_PLACEHOLDER_POSITIONAL) {
 				param = zend_hash_index_find_ptr(params, plc->bindno);
 			} else {
@@ -618,7 +634,7 @@ safe:
 
 rewrite:
 		/* allocate output buffer */
-		newbuffer = emalloc(newbuffer_len + 1);
+		newbuffer = emalloc(newbuffer_len - escapes + 1);
 		*outquery = newbuffer;
 
 		/* and build the query */
@@ -631,8 +647,13 @@ rewrite:
 				memcpy(newbuffer, ptr, t);
 				newbuffer += t;
 			}
-			memcpy(newbuffer, plc->quoted, plc->qlen);
-			newbuffer += plc->qlen;
+			if (plc->quoted) {
+				memcpy(newbuffer, plc->quoted, plc->qlen);
+				newbuffer += plc->qlen;
+			} else {
+				memcpy(newbuffer, plc->pos, plc->len);
+				newbuffer += plc->len;
+			}
 			ptr = plc->pos + plc->len;
 
 			plc = plc->next;
@@ -665,6 +686,11 @@ rewrite:
 		for (plc = placeholders; plc; plc = plc->next) {
 			int skip_map = 0;
 			char *p;
+
+			if (plc->bindno == PDO_PARSER_BINDNO_ESCAPED_CHAR) {
+				continue;
+			}
+
 			name = estrndup(plc->pos, plc->len);
 
 			/* check if bound parameter is already available */
@@ -710,6 +736,7 @@ rewrite:
 			efree(name);
 			plc->quoted = "?";
 			plc->qlen = 1;
+			newbuffer_len -= plc->len - 1;
 		}
 
 		goto rewrite;

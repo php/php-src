@@ -266,36 +266,36 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len
 		execute_only = H->disable_prepares;
 	}
 
-	if (!emulate && PQprotocolVersion(H->server) > 2) {
-		stmt->supports_placeholders = PDO_PLACEHOLDER_NAMED;
-		stmt->named_rewrite_template = "$%d";
-		ret = pdo_parse_params(stmt, (char*)sql, sql_len, &nsql, &nsql_len);
-
-		if (ret == 1) {
-			/* query was re-written */
-			sql = nsql;
-		} else if (ret == -1) {
-			/* couldn't grok it */
-			strcpy(dbh->error_code, stmt->error_code);
-			return 0;
-		}
-
-		if (!execute_only) {
-			/* prepared query: set the query name and defer the
-			   actual prepare until the first execute call */
-			spprintf(&S->stmt_name, 0, "pdo_stmt_%08x", ++H->stmt_counter);
-		}
-
-		if (nsql) {
-			S->query = nsql;
-		} else {
-			S->query = estrdup(sql);
-		}
-
-		return 1;
+	if (!emulate && PQprotocolVersion(H->server) <= 2) {
+		emulate = 1;
 	}
 
-	stmt->supports_placeholders = PDO_PLACEHOLDER_NONE;
+	if (emulate) {
+		stmt->supports_placeholders = PDO_PLACEHOLDER_NONE;
+	} else {
+		stmt->supports_placeholders = PDO_PLACEHOLDER_NAMED;
+		stmt->named_rewrite_template = "$%d";
+	}
+
+	ret = pdo_parse_params(stmt, (char*)sql, sql_len, &nsql, &nsql_len);
+
+	if (ret == -1) {
+		/* couldn't grok it */
+		strcpy(dbh->error_code, stmt->error_code);
+		return 0;
+	} else if (ret == 1) {
+		/* query was re-written */
+		S->query = nsql;
+	} else {
+		S->query = estrdup(sql);
+	}
+
+	if (!emulate && !execute_only) {
+		/* prepared query: set the query name and defer the
+		   actual prepare until the first execute call */
+		spprintf(&S->stmt_name, 0, "pdo_stmt_%08x", ++H->stmt_counter);
+	}
+
 	return 1;
 }
 
