@@ -32,6 +32,10 @@ PHP                                                                        NEWS
     (Bob)
   . Fixed issue getting executable lines from custom wrappers. (Bob)
 
+- Reflection:
+  . Fixed bug #46103 (ReflectionObject memory leak). (Nikita)
+
+
 08 Dec 2016 PHP 7.0.14
 
 - Core:

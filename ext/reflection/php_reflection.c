@@ -344,6 +344,15 @@ static void reflection_free_objects_storage(zend_object *object) /* {{{ */
 }
 /* }}} */
 
+static HashTable *reflection_get_gc(zval *obj, zval **gc_data, int *gc_data_count) /* {{{ */
+{
+	reflection_object *intern = Z_REFLECTION_P(obj);
+	*gc_data = &intern->obj;
+	*gc_data_count = 1;
+	return zend_std_get_properties(obj);
+}
+/* }}} */
+
 static zend_object *reflection_objects_new(zend_class_entry *class_type) /* {{{ */
 {
 	reflection_object *intern;
@@ -6524,6 +6533,7 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	reflection_object_handlers.free_obj = reflection_free_objects_storage;
 	reflection_object_handlers.clone_obj = NULL;
 	reflection_object_handlers.write_property = _reflection_write_property;
+	reflection_object_handlers.get_gc = reflection_get_gc;
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionException", reflection_exception_functions);
 	reflection_exception_ptr = zend_register_internal_class_ex(&_reflection_entry, zend_ce_exception);
