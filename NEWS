@@ -35,6 +35,13 @@ PHP                                                                        NEWS
 - Apache2handler:
   . Fixed bug #61471 (POST request timeout did not handle correctly). (Zheng SHAO)
 
+- Reflection:
+  . Fixed bug #46103 (ReflectionObject memory leak). (Nikita)
+
+- Standard:
+  . Fixed bug #73594 (dns_get_record does not populate $additional out parameter).
+    (Bruce Weirdan)
+
 08 Dec 2016 PHP 7.0.14
 
 - Core:
