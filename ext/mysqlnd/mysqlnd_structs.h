@@ -1150,10 +1150,6 @@ struct st_mysqlnd_result_metadata
 
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_res_meta) * m;
 
-	size_t							bit_fields_total_len; /* trailing \0 not counted */
-	/* We need this to make fast allocs in rowp_read */
-	unsigned int					bit_fields_count;
-
 	unsigned int					current_field;
 	unsigned int					field_count;
 

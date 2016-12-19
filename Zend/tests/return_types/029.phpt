@@ -16,13 +16,8 @@ function foo() : array {
 foo();
 ?>
 --EXPECTF--
-Fatal error: Uncaught Exception: xxxx in %s:%d
+Fatal error: Uncaught TypeError: Return value of foo() must be of the type array, null returned in %s029.php:%d
 Stack trace:
-#0 %s(%d): foo()
+#0 %s: foo()
 #1 {main}
-
-Next TypeError: Return value of foo() must be of the type array, null returned in %s29.php:%d
-Stack trace:
-#0 %s(%d): foo()
-#1 {main}
-  thrown in %s029.php on line %d
+  thrown in %s on line %d

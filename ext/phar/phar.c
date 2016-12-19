@@ -3290,6 +3290,8 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type)
 							}
 							file_handle->handle.stream.handle = NULL;
 							break;
+						default:
+							break;
 					}
 					*file_handle = f;
 				}

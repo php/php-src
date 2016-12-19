@@ -288,17 +288,16 @@ ZEND_VM_HANDLER(8, ZEND_CONCAT, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 	zend_free_op free_op1, free_op2;
 	zval *op1, *op2;
 
-	SAVE_OPLINE();
 	op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 	op2 = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
 
-	do {
-		if ((OP1_TYPE == IS_CONST || EXPECTED(Z_TYPE_P(op1) == IS_STRING)) &&
-		    (OP2_TYPE == IS_CONST || EXPECTED(Z_TYPE_P(op2) == IS_STRING))) {
-			zend_string *op1_str = Z_STR_P(op1);
-			zend_string *op2_str = Z_STR_P(op2);
-			zend_string *str;
+	if ((OP1_TYPE == IS_CONST || EXPECTED(Z_TYPE_P(op1) == IS_STRING)) &&
+	    (OP2_TYPE == IS_CONST || EXPECTED(Z_TYPE_P(op2) == IS_STRING))) {
+		zend_string *op1_str = Z_STR_P(op1);
+		zend_string *op2_str = Z_STR_P(op2);
+		zend_string *str;
 
+		do {
 			if (OP1_TYPE != IS_CONST) {
 				if (UNEXPECTED(ZSTR_LEN(op1_str) == 0)) {
 					ZVAL_STR_COPY(EX_VAR(opline->result.var), op2_str);
@@ -327,19 +326,24 @@ ZEND_VM_HANDLER(8, ZEND_CONCAT, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 				memcpy(ZSTR_VAL(str) + ZSTR_LEN(op1_str), ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
 				ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
 			}
-		} else {
-			if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
-				op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
-			}
-			if (OP2_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
-				op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
-			}
-			concat_function(EX_VAR(opline->result.var), op1, op2);
+			FREE_OP1();
+		} while (0);
+		FREE_OP2();
+		ZEND_VM_NEXT_OPCODE();
+	} else {
+		SAVE_OPLINE();
+
+		if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+			op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
 		}
+		if (OP2_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+			op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+		}
+		concat_function(EX_VAR(opline->result.var), op1, op2);
 		FREE_OP1();
-	} while (0);
-	FREE_OP2();
-	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+		FREE_OP2();
+		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+	}
 }
 
 ZEND_VM_HANDLER(15, ZEND_IS_IDENTICAL, CONST|TMP|VAR|CV, CONST|TMP|VAR|CV)
@@ -729,6 +733,13 @@ ZEND_VM_HANDLER(12, ZEND_BW_NOT, CONST|TMPVAR|CV, ANY)
 {
 	USE_OPLINE
 	zend_free_op free_op1;
+	zval *op1;
+
+	op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+	if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)) {
+		ZVAL_LONG(EX_VAR(opline->result.var), ~Z_LVAL_P(op1));
+		ZEND_VM_NEXT_OPCODE();
+	}
 
 	SAVE_OPLINE();
 	bitwise_not_function(EX_VAR(opline->result.var),
@@ -4955,11 +4966,11 @@ ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, UNUSED, CONST, CONST_FETCH)
 	USE_OPLINE
 	zend_constant *c;
 
-	SAVE_OPLINE();
-
 	if (EXPECTED(CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2))))) {
 		c = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)));
 	} else if ((c = zend_quick_get_constant(EX_CONSTANT(opline->op2) + 1, opline->extended_value)) == NULL) {
+		SAVE_OPLINE();
+
 		if ((opline->extended_value & IS_CONSTANT_UNQUALIFIED) != 0) {
 			char *actual = (char *)zend_memrchr(Z_STRVAL_P(EX_CONSTANT(opline->op2)), '\\', Z_STRLEN_P(EX_CONSTANT(opline->op2)));
 			if (!actual) {
@@ -7248,8 +7259,6 @@ ZEND_VM_HANDLER(153, ZEND_DECLARE_LAMBDA_FUNCTION, CONST, UNUSED)
 	zval *object;
 	zend_class_entry *called_scope;
 
-	SAVE_OPLINE();
-
 	zfunc = zend_hash_find(EG(function_table), Z_STR_P(EX_CONSTANT(opline->op1)));
 	ZEND_ASSERT(zfunc != NULL && Z_FUNC_P(zfunc)->type == ZEND_USER_FUNCTION);
 
@@ -7268,7 +7277,7 @@ ZEND_VM_HANDLER(153, ZEND_DECLARE_LAMBDA_FUNCTION, CONST, UNUSED)
 	zend_create_closure(EX_VAR(opline->result.var), Z_FUNC_P(zfunc),
 		EX(func)->op_array.scope, called_scope, object);
 
-	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
 }
 
 ZEND_VM_HANDLER(156, ZEND_SEPARATE, VAR, UNUSED)
@@ -7681,20 +7690,26 @@ ZEND_VM_HANDLER(121, ZEND_STRLEN, CONST|TMPVAR|CV, ANY)
 	zval *value;
 	zend_free_op free_op1;
 
-	SAVE_OPLINE();
 	value = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
-ZEND_VM_C_LABEL(try_strlen):
 	if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
 		ZVAL_LONG(EX_VAR(opline->result.var), Z_STRLEN_P(value));
+		FREE_OP1();
+		ZEND_VM_NEXT_OPCODE();
 	} else {
 		zend_bool strict;
 
-		if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
-			value = GET_OP1_UNDEF_CV(value, BP_VAR_R);
-		}
 		if ((OP1_TYPE & (IS_VAR|IS_CV)) && Z_TYPE_P(value) == IS_REFERENCE) {
 			value = Z_REFVAL_P(value);
-			ZEND_VM_C_GOTO(try_strlen);
+			if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+				ZVAL_LONG(EX_VAR(opline->result.var), Z_STRLEN_P(value));
+				FREE_OP1();
+				ZEND_VM_NEXT_OPCODE();
+			}
+		}
+
+		SAVE_OPLINE();
+		if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+			value = GET_OP1_UNDEF_CV(value, BP_VAR_R);
 		}
 		strict = EX_USES_STRICT_TYPES();
 		do {
@@ -7788,11 +7803,11 @@ ZEND_VM_HANDLER(157, ZEND_FETCH_CLASS_NAME, ANY, ANY, CLASS_FETCH)
 	zend_class_entry *called_scope, *scope;
 	USE_OPLINE
 
-	SAVE_OPLINE();
 	fetch_type = opline->extended_value;
 
 	scope = EX(func)->op_array.scope;
 	if (UNEXPECTED(scope == NULL)) {
+		SAVE_OPLINE();
 		zend_throw_error(NULL, "Cannot use \"%s\" when no class scope is active",
 			fetch_type == ZEND_FETCH_CLASS_SELF ? "self" :
 			fetch_type == ZEND_FETCH_CLASS_PARENT ? "parent" : "static");
@@ -7806,6 +7821,7 @@ ZEND_VM_HANDLER(157, ZEND_FETCH_CLASS_NAME, ANY, ANY, CLASS_FETCH)
 			break;
 		case ZEND_FETCH_CLASS_PARENT:
 			if (UNEXPECTED(scope->parent == NULL)) {
+				SAVE_OPLINE();
 				zend_throw_error(NULL,
 					"Cannot use \"parent\" when current class scope has no parent");
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
@@ -7984,7 +8000,6 @@ ZEND_VM_HANDLER(183, ZEND_BIND_STATIC, CV, CONST, REF)
 	zval *value;
 	zval *variable_ptr;
 
-	SAVE_OPLINE();
 	variable_ptr = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
 	zval_ptr_dtor(variable_ptr);
 
@@ -8002,6 +8017,7 @@ ZEND_VM_HANDLER(183, ZEND_BIND_STATIC, CV, CONST, REF)
 
 	if (opline->extended_value) {
 		if (Z_CONSTANT_P(value)) {
+			SAVE_OPLINE();
 			if (UNEXPECTED(zval_update_constant_ex(value, EX(func)->op_array.scope) != SUCCESS)) {
 				ZVAL_NULL(variable_ptr);
 				HANDLE_EXCEPTION();
@@ -8023,7 +8039,7 @@ ZEND_VM_HANDLER(183, ZEND_BIND_STATIC, CV, CONST, REF)
 		ZVAL_COPY(variable_ptr, value);
 	}
 
-	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
 }
 
 ZEND_VM_HANDLER(184, ZEND_FETCH_THIS, UNUSED, UNUSED)

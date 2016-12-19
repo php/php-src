@@ -5,7 +5,6 @@ icu-57.1
 jpeglib-9b
 libcurl-7.51.0
 libiconv-1.14
-libmcrypt-2.5.8
 libmpir-2.7.2
 libpng-1.6.21
 libpq-9.5.3

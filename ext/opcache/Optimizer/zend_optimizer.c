@@ -515,7 +515,7 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 						return 0;
 					}
 					MAKE_NOP(opline);
-					opline++;
+					++opline;
 					break;
 				  }
 				default:
