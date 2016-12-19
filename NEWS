@@ -11,6 +11,8 @@ PHP                                                                        NEWS
   . Fixed bug #73727 (ZEND_MM_BITSET_LEN is "undefined symbol" in
     zend_bitset.h). (Nikita)
   . Fixed bug #73753 (unserialized array pointer not advancing). (David Walker)
+  . Fixed bug #73783 (SIG_IGN doesn't work when Zend Signals is enabled).
+    (David Walker)
 
 - CLI:
   . Fixed bug #72555 (CLI output(japanese) on Windows). (Anatol)
