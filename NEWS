@@ -35,6 +35,9 @@ PHP                                                                        NEWS
 - Reflection:
   . Fixed bug #46103 (ReflectionObject memory leak). (Nikita)
 
+- Standard:
+  . Fixed bug #73594 (dns_get_record does not populate $additional out parameter).
+    (Bruce Weirdan)
 
 08 Dec 2016 PHP 7.0.14
 
