@@ -1813,6 +1813,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_unpack, 0)
 	ZEND_ARG_INFO(0, format)
 	ZEND_ARG_INFO(0, input)
+	ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ pageinfo.c */
