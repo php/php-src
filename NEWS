@@ -36,6 +36,10 @@ PHP                                                                        NEWS
   . Fixed bug #72931 (PDO_FIREBIRD with Firebird 3.0 not work on returning
     statement). (Dorin Marcoci)
 
+- Standard:
+  . Fixed bug #73594 (dns_get_record does not populate $additional out parameter).
+    (Bruce Weirdan)
+
 01 Dec 2016, PHP 7.1.0
 
 - Core:
