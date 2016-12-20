@@ -58,6 +58,9 @@ PHP                                                                        NEWS
 - Mcrypt:
   . The deprecated mcrypt extension has been moved to PECL. (leigh)
 
+- PDO:
+  . Add "Sent SQL" to debug dump for emulated prepares. (Adam Baratz)
+
 - PDO_DBlib:
   . Fixed bug #73234 (Emulated statements let value dictate parameter type).
     (Adam Baratz)
