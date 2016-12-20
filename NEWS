@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2017, PHP 7.1.1
 
 - Core:
+  . Fixed bug #73792 (invalid foreach loop hangs script). (Dmitry)
   . Fixed bug #73686 (Adding settype()ed values to ArrayObject results in
     references). (Nikita, Laruence)
   . Fixed bug #73663 ("Invalid opcode 65/16/8" occurs with a variable created

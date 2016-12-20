@@ -1269,6 +1269,9 @@ static zend_never_inline ZEND_COLD void zend_wrong_string_offset(void)
 						case ZEND_SEND_VAR_EX:
 							msg = "Only variables can be passed by reference";
 							break;
+						case ZEND_FE_RESET_RW:
+							msg = "Cannot iterate on string offsets by reference";
+							break;
 						EMPTY_SWITCH_DEFAULT_CASE();
 					}
 					break;
