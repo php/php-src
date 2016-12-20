@@ -26,6 +26,8 @@ PHP                                                                        NEWS
     usage. (Andrey)
 
 - Opcache:
+  . Fixed bug #73789 (Strange behavior of class constants in switch/case block).
+    (Laruence)
   . Fixed bug #73746 (Method that returns string returns UNKNOWN:0 instead).
     (Laruence)
   . Fixed bug #73654 (Segmentation fault in zend_call_function). (Nikita)
