@@ -800,10 +800,13 @@ PHPDBG_COMMAND(run) /* {{{ */
 		if (param && param->type != EMPTY_PARAM && param->len != 0) {
 			char **argv = emalloc(5 * sizeof(char *));
 			char *end = param->str + param->len, *p = param->str;
+			char last_byte;
 			int argc = 0;
 			int i;
 
 			while (*end == '\r' || *end == '\n') *(end--) = 0;
+			last_byte = end[1];
+			end[1] = 0;
 
 			while (*p == ' ') p++;
 			while (*p) {
@@ -867,6 +870,7 @@ free_cmd:
 						efree(argv[i]);
 					}
 					efree(argv);
+					end[1] = last_byte;
 					return SUCCESS;
 				}
 
@@ -877,6 +881,8 @@ free_cmd:
 					do p++; while (*p == ' ');
 				}
 			}
+			end[1] = last_byte;
+
 			argv[0] = SG(request_info).argv[0];
 			for (i = SG(request_info).argc; --i;) {
 				efree(SG(request_info).argv[i]);
