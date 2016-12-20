@@ -39,6 +39,10 @@ PHP                                                                        NEWS
   . Fixed bug #72931 (PDO_FIREBIRD with Firebird 3.0 not work on returning
     statement). (Dorin Marcoci)
 
+- phpdbg:
+  . Fixed bug #73794 (Crash (out of memory) when using run and # command
+    separator). (Bob)
+
 - Standard:
   . Fixed bug #73594 (dns_get_record does not populate $additional out parameter).
     (Bruce Weirdan)
