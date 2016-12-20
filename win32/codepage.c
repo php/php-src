@@ -266,6 +266,17 @@ PW32CP const struct php_win32_cp *php_win32_cp_get_by_id(DWORD id)
 {/*{{{*/
 	size_t i;
 
+	if (id < php_win32_cp_map[0].id) {
+		switch (id) {
+			case CP_ACP:
+				id = GetACP();
+				break;
+			case CP_OEMCP:
+				id = GetOEMCP();
+				break;
+		}
+	}
+
 	for (i = 0; i < sizeof(php_win32_cp_map)/sizeof(struct php_win32_cp); i++) {
 		if (php_win32_cp_map[i].id == id) {
 			return &php_win32_cp_map[i];
