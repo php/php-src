@@ -67,7 +67,8 @@ PHP                                                                        NEWS
   . Fixed bug #73396 (bigint columns are returned as strings). (Adam Baratz)
 
 - Session:
-  . Fixed bug #73461 (Prohibit session save handler recursion) . (yohgaki)
+  . Fixed bug #73461 (Prohibit session save handler recursion). (Yasuo)
+  . PR #2233 Removed register_globals related code and "!" can be used as $_SESSION key name. (Yasuo)
 
 - SOAP:
   . Fixed bug #69137 (Peer verification fails when using a proxy with SoapClient)

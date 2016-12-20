@@ -37,6 +37,7 @@ PHP 7.2 UPGRADE NOTES
     property names would become inaccessible string keys.
 
 - Session:
+  . Removed register_globals related code and "!" can be used as $_SESSION key name.
   . Session is made to manage session status corretly and prevents invalid operations.
     Only inappropriate codes are affected by this change. If you have problems with this,
     it means you have problem in your code.
