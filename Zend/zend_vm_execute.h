@@ -3836,6 +3836,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CONST_HANDLER
 
 	if (IS_CONST == IS_VAR || IS_CONST == IS_CV) {
 		array_ref = array_ptr = NULL;
+		if (IS_CONST == IS_VAR && UNEXPECTED(array_ref == NULL)) {
+			zend_throw_error(NULL, "Cannot iterate on string offsets by reference");
+			ZVAL_UNDEF(EX_VAR(opline->result.var));
+			Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
+			HANDLE_EXCEPTION();
+		}
 		if (Z_ISREF_P(array_ref)) {
 			array_ptr = Z_REFVAL_P(array_ref);
 		}
@@ -12331,6 +12337,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_TMP_HANDLER(Z
 
 	if (IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) {
 		array_ref = array_ptr = NULL;
+		if (IS_TMP_VAR == IS_VAR && UNEXPECTED(array_ref == NULL)) {
+			zend_throw_error(NULL, "Cannot iterate on string offsets by reference");
+			ZVAL_UNDEF(EX_VAR(opline->result.var));
+			Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
+			HANDLE_EXCEPTION();
+		}
 		if (Z_ISREF_P(array_ref)) {
 			array_ptr = Z_REFVAL_P(array_ref);
 		}
@@ -15799,6 +15811,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_VAR_HANDLER(Z
 
 	if (IS_VAR == IS_VAR || IS_VAR == IS_CV) {
 		array_ref = array_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
+		if (IS_VAR == IS_VAR && UNEXPECTED(array_ref == NULL)) {
+			zend_throw_error(NULL, "Cannot iterate on string offsets by reference");
+			ZVAL_UNDEF(EX_VAR(opline->result.var));
+			Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
+			HANDLE_EXCEPTION();
+		}
 		if (Z_ISREF_P(array_ref)) {
 			array_ptr = Z_REFVAL_P(array_ref);
 		}
@@ -29641,6 +29659,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CV_HANDLER(ZE
 
 	if (IS_CV == IS_VAR || IS_CV == IS_CV) {
 		array_ref = array_ptr = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
+		if (IS_CV == IS_VAR && UNEXPECTED(array_ref == NULL)) {
+			zend_throw_error(NULL, "Cannot iterate on string offsets by reference");
+			ZVAL_UNDEF(EX_VAR(opline->result.var));
+			Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
+			HANDLE_EXCEPTION();
+		}
 		if (Z_ISREF_P(array_ref)) {
 			array_ptr = Z_REFVAL_P(array_ref);
 		}

@@ -5878,6 +5878,12 @@ ZEND_VM_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, ANY)
 
 	if (OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) {
 		array_ref = array_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_R);
+		if (OP1_TYPE == IS_VAR && UNEXPECTED(array_ref == NULL)) {
+			zend_throw_error(NULL, "Cannot iterate on string offsets by reference");
+			ZVAL_UNDEF(EX_VAR(opline->result.var));
+			Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
+			HANDLE_EXCEPTION();
+		}
 		if (Z_ISREF_P(array_ref)) {
 			array_ptr = Z_REFVAL_P(array_ref);
 		}
