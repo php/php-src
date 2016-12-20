@@ -1757,13 +1757,17 @@ static zend_always_inline void zend_array_dup_packed_elements(HashTable *source,
 
 static zend_always_inline uint32_t zend_array_dup_elements(HashTable *source, HashTable *target, int static_keys, int with_holes)
 {
-    uint32_t idx = 0;
+	uint32_t idx = 0;
 	Bucket *p = source->arData;
 	Bucket *q = target->arData;
 	Bucket *end = p + source->nNumUsed;
 
 	do {
-		if (!zend_array_dup_element(source, target, idx, p, q, 0, static_keys, with_holes)) {
+		if (EXPECTED(zend_array_dup_element(source, target, idx, p, q, 0, static_keys, with_holes))) {
+			if (source->nInternalPointer == idx) {
+				target->nInternalPointer = idx;
+			}
+		} else {
 			uint32_t target_idx = idx;
 
 			idx++; p++;
