@@ -8,6 +8,7 @@ PHP                                                                        NEWS
     with list()). (Laruence)
   . Fixed bug #73585 (Logging of "Internal Zend error - Missing class
     information" missing class name). (Laruence)
+  . Fixed bug #73753 (unserialized array pointer not advancing). (David Walker)
 
 - COM:
   . Fixed bug #73679 (DOTNET read access violation using invalid codepage).

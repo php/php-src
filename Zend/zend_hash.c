@@ -1757,7 +1757,7 @@ static zend_always_inline void zend_array_dup_packed_elements(HashTable *source,
 
 static zend_always_inline uint32_t zend_array_dup_elements(HashTable *source, HashTable *target, int static_keys, int with_holes)
 {
-    uint32_t idx = 0;
+	uint32_t idx = 0;
 	Bucket *p = source->arData;
 	Bucket *q = target->arData;
 	Bucket *end = p + source->nNumUsed;
@@ -1785,7 +1785,7 @@ static zend_always_inline uint32_t zend_array_dup_elements(HashTable *source, Ha
 
 ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 {
-    uint32_t idx;
+	uint32_t idx;
 	HashTable *target;
 
 	IS_CONSISTENT(source);
@@ -1849,7 +1849,8 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 		target->u.flags = (source->u.flags & ~(HASH_FLAG_PERSISTENT|ZEND_HASH_APPLY_COUNT_MASK)) | HASH_FLAG_APPLY_PROTECTION;
 		target->nTableMask = source->nTableMask;
 		target->nNextFreeElement = source->nNextFreeElement;
-		target->nInternalPointer = HT_INVALID_IDX;
+		target->nInternalPointer = source->nInternalPointer;
+
 		HT_SET_DATA_ADDR(target, emalloc(HT_SIZE(target)));
 		HT_HASH_RESET(target);
 
