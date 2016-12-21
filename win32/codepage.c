@@ -498,16 +498,18 @@ PW32CP const struct php_win32_cp *php_win32_cp_cli_do_setup(DWORD id)
 
 PW32CP const struct php_win32_cp *php_win32_cp_cli_do_restore(DWORD id)
 {/*{{{*/
-	if (!id && orig_cp) {
-		id = orig_cp->id;
+	BOOL cli_io_restored = TRUE;
+
+	if (orig_in_cp) {
+		cli_io_restored = cli_io_restored && SetConsoleCP(orig_in_cp->id);
 	}
 
-	if (SetConsoleCP(orig_in_cp->id) && SetConsoleOutputCP(orig_out_cp->id)) {
-		if (orig_cp) {
-			return orig_cp;
-		} else {
-			return php_win32_cp_set_by_id(id);
-		}
+	if (orig_out_cp) {
+		cli_io_restored = cli_io_restored && SetConsoleOutputCP(orig_out_cp->id);
+	}
+
+	if (cli_io_restored && id) {
+		return php_win32_cp_set_by_id(id);
 	}
 
 	return NULL;
