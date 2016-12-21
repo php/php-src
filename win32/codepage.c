@@ -394,7 +394,7 @@ PW32CP wchar_t *php_win32_cp_env_any_to_w(const char* env)
 }/*}}}*/
 
 static BOOL php_win32_cp_cli_io_setup(void)
-{
+{/*{{{*/
 	BOOL ret = TRUE;
 
 	if (PG(input_encoding) && PG(input_encoding)[0]) {
@@ -420,7 +420,7 @@ static BOOL php_win32_cp_cli_io_setup(void)
 	}
 
 	return ret;
-}
+}/*}}}*/
 
 PW32CP const struct php_win32_cp *php_win32_cp_do_setup(const char *enc)
 {/*{{{*/
