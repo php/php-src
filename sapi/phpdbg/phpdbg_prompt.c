@@ -543,6 +543,7 @@ int phpdbg_compile_stdin(zend_string *code) {
 	PHPDBG_G(exec_len) = 1;
 	{ /* remove leading ?> from source */
 		int i;
+		/* remove trailing data after zero byte, used for avoiding conflicts in eval()'ed code snippets */
 		zend_string *source_path = strpprintf(0, "-%c%p", 0, PHPDBG_G(ops)->opcodes);
 		phpdbg_file_source *data = zend_hash_find_ptr(&PHPDBG_G(file_sources), source_path);
 		dtor_func_t dtor = PHPDBG_G(file_sources).pDestructor;
@@ -551,9 +552,6 @@ int phpdbg_compile_stdin(zend_string *code) {
 		PHPDBG_G(file_sources).pDestructor = dtor;
 		zend_hash_str_update_ptr(&PHPDBG_G(file_sources), "-", 1, data);
 		zend_string_release(source_path);
-
-		efree(data->filename);
-		data->filename = estrdup("-");
 
 		for (i = 1; i <= data->lines; i++) {
 			data->line[i] -= 2;
@@ -571,7 +569,10 @@ int phpdbg_compile(void) /* {{{ */
 {
 	zend_file_handle fh;
 	char *buf;
+	char *start_line = NULL;
 	size_t len;
+	size_t start_line_len;
+	int i;
 
 	if (!PHPDBG_G(exec)) {
 		phpdbg_error("inactive", "type=\"nocontext\"", "No execution context");
@@ -590,13 +591,39 @@ int phpdbg_compile(void) /* {{{ */
 						}
 					case '\n':
 						CG(start_lineno) = 2;
-						fh.handle.stream.mmap.len -= fh.handle.stream.mmap.buf - buf;
+						start_line_len = fh.handle.stream.mmap.buf - buf;
+						start_line = emalloc(start_line_len);
+						memcpy(start_line, buf, start_line_len);
+						fh.handle.stream.mmap.len -= start_line_len;
 						end = fh.handle.stream.mmap.buf;
 				}
 			} while (fh.handle.stream.mmap.buf + 1 < end);
 		}
 
 		PHPDBG_G(ops) = zend_compile_file(&fh, ZEND_INCLUDE);
+
+		/* prepend shebang line to file_source */
+		if (start_line) {
+			phpdbg_file_source *data = zend_hash_find_ptr(&PHPDBG_G(file_sources), PHPDBG_G(ops)->filename);
+
+			dtor_func_t dtor = PHPDBG_G(file_sources).pDestructor;
+			PHPDBG_G(file_sources).pDestructor = NULL;
+			zend_hash_del(&PHPDBG_G(file_sources), PHPDBG_G(ops)->filename);
+			PHPDBG_G(file_sources).pDestructor = dtor;
+
+			data = erealloc(data, sizeof(phpdbg_file_source) + sizeof(uint) * ++data->lines);
+			memmove(data->line + 1, data->line, sizeof(uint) * data->lines);
+			data->line[0] = 0;
+			data->buf = erealloc(data->buf, data->len + start_line_len);
+			memmove(data->buf + start_line_len, data->buf, data->len * sizeof(uint));
+			memcpy(data->buf, start_line, start_line_len);
+			efree(start_line);
+			data->len += start_line_len;
+			for (i = 1; i <= data->lines; i++) {
+				data->line[i] += start_line_len;
+			}		
+			zend_hash_update_ptr(&PHPDBG_G(file_sources), PHPDBG_G(ops)->filename, data);
+		}
 
 		fh.handle.stream.mmap.buf = buf;
 		fh.handle.stream.mmap.len = len;

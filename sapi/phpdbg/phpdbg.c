@@ -128,7 +128,6 @@ static void php_phpdbg_destroy_file_source(zval *data) /* {{{ */
 	if (source->buf) {
 		efree(source->buf);
 	}
-	efree(source->filename);
 	efree(source);
 } /* }}} */
 
