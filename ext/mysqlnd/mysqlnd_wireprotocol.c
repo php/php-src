@@ -1477,7 +1477,12 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 	  zero-length byte, don't read the body, there is no such.
 	*/
 
-	*data_size = 0;
+	/*
+	  We're allocating an extra byte, as php_mysqlnd_rowp_read_text_protocol_aux
+	  needs to be able to append a terminating \0 for atoi/atof.
+	*/
+	*data_size = 1;
+	
 	while (1) {
 		if (FAIL == mysqlnd_read_header(pfc, vio, &header, stats, error_info)) {
 			ret = FAIL;
@@ -1526,6 +1531,7 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 		pool->free_chunk(pool, *buffer);
 		*buffer = NULL;
 	}
+	*data_size--;
 	DBG_RETURN(ret);
 }
 /* }}} */
