@@ -1443,7 +1443,13 @@ php_mysqlnd_read_row_ex(MYSQLND_CONN_DATA * conn, MYSQLND_MEMORY_POOL * result_s
 	zend_bool first_iteration = TRUE;
 
 	DBG_ENTER("php_mysqlnd_read_row_ex");
-
+	
+	/*
+	 * We're allocating 1 extra byte, as php_mysqlnd_rowp_read_text_protocol_aux
+	 * needs to be able to add a terminating \0 for atoi/atof.
+	 */
+	prealloc_more_bytes++;
+	
 	/*
 	  To ease the process the server splits everything in packets up to 2^24 - 1.
 	  Even in the case the payload is evenly divisible by this value, the last
@@ -1451,7 +1457,7 @@ php_mysqlnd_read_row_ex(MYSQLND_CONN_DATA * conn, MYSQLND_MEMORY_POOL * result_s
 	  for next one if they have 2^24 - 1 sizes. But just read the header of a
 	  zero-length byte, don't read the body, there is no such.
 	*/
-
+	
 	*data_size = prealloc_more_bytes;
 	while (1) {
 		if (FAIL == mysqlnd_read_header(conn->net, &header, conn->stats, conn->error_info)) {

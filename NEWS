@@ -20,6 +20,8 @@ PHP                                                                        NEWS
 - Mysqlnd:
   . Fixed issue with decoding BIT columns when having more than one rows in the
     result set. 7.0+ problem. (Andrey)
+  . Fixed bug #73800 (sporadic segfault with MYSQLI_OPT_INT_AND_FLOAT_NATIVE). 
+	(vanviegen)
 
 - PCRE:
   . Fixed bug #73612 (preg_*() may leak memory). (cmb)
