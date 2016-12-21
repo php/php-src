@@ -582,7 +582,7 @@ static void accel_use_shm_interned_strings(void)
 
 		for (j = 0; j < ce->constants_table.nNumUsed; j++) {
 			q = ce->constants_table.arData + j;
-			if (!Z_TYPE(q->val) == IS_UNDEF) continue;
+			if (Z_TYPE(q->val) == IS_UNDEF) continue;
 			if (q->key) {
 				q->key = accel_new_interned_string(q->key);
 			}
@@ -592,7 +592,7 @@ static void accel_use_shm_interned_strings(void)
 	/* constant hash keys */
 	for (idx = 0; idx < EG(zend_constants)->nNumUsed; idx++) {
 		p = EG(zend_constants)->arData + idx;
-		if (!Z_TYPE(p->val) == IS_UNDEF) continue;
+		if (Z_TYPE(p->val) == IS_UNDEF) continue;
 		if (p->key) {
 			p->key = accel_new_interned_string(p->key);
 		}
