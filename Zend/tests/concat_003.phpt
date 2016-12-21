@@ -13,8 +13,8 @@ memory_limit=256m
 $time = microtime(TRUE);
 
 /* This might vary on Linux/Windows, so the worst case and also count in slow machines. */
-$t0_max = 0.1;
-$t1_max = 0.4;
+$t0_max = 0.3;
+$t1_max = 1.0;
 
 $datas = [];
 for ($i = 0; $i < 220000; $i++)
@@ -34,7 +34,7 @@ for ($i = 0; $i < 220000; $i++)
 $t0 = microtime(TRUE) - $time;
 var_dump($t0 < $t0_max);
 
-
+$time = microtime(TRUE);
 $texts = '';
 foreach ($datas AS $data)
 {
