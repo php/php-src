@@ -250,7 +250,6 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 		memcpy(data.buf, bufptr, data.len);
 	}
 	memset(data.buf + data.len, 0, ZEND_MMAP_AHEAD + 1);
-	data.filename = filename;
 	data.line[0] = 0;
 
 	memset(&fake, 0, sizeof(fake));
@@ -283,10 +282,9 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 		return NULL;
 	}
 
-	dataptr->filename = estrdup(dataptr->filename);
 	dataptr = erealloc(dataptr, sizeof(phpdbg_file_source) + sizeof(uint) * line);
-	zend_hash_str_add_ptr(&PHPDBG_G(file_sources), filename, strlen(filename), dataptr);
-	phpdbg_resolve_pending_file_break(filename);
+	zend_hash_add_ptr(&PHPDBG_G(file_sources), ret->filename, dataptr);
+	phpdbg_resolve_pending_file_break(ZSTR_VAL(ret->filename));
 
 	fake.opened_path = NULL;
 	zend_file_handle_dtor(&fake);
@@ -321,9 +319,7 @@ zend_op_array *phpdbg_init_compile_file(zend_file_handle *file, int type) {
 		return NULL;
 	}
 
-	filename = (char *)(file->opened_path ? ZSTR_VAL(file->opened_path) : file->filename);
-
-	dataptr = zend_hash_str_find_ptr(&PHPDBG_G(file_sources), filename, strlen(filename));
+	dataptr = zend_hash_find_ptr(&PHPDBG_G(file_sources), op_array->filename);
 	ZEND_ASSERT(dataptr != NULL);
 
 	dataptr->op_array = *op_array;
@@ -370,7 +366,6 @@ zend_op_array *phpdbg_compile_string(zval *source_string, char *filename) {
 	dataptr = erealloc(dataptr, sizeof(phpdbg_file_source) + sizeof(uint) * line);
 	zend_hash_add_ptr(&PHPDBG_G(file_sources), fake_name, dataptr);
 
-	dataptr->filename = estrndup(ZSTR_VAL(fake_name), ZSTR_LEN(fake_name));
 	zend_string_release(fake_name);
 
 	dataptr->op_array = *op_array;
@@ -387,7 +382,6 @@ void phpdbg_free_file_source(zval *zv) {
 	if (data->buf) {
 		efree(data->buf);
 	}
-	efree(data->filename);
 
 	destroy_op_array(&data->op_array);
 

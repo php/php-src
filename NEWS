@@ -33,6 +33,7 @@ PHP                                                                        NEWS
   . Fixed bug #73615 (phpdbg without option never load .phpdbginit at startup).
     (Bob)
   . Fixed issue getting executable lines from custom wrappers. (Bob)
+  . Fixed bug #73704 (phpdbg shows the wrong line in files with shebang). (Bob)
 
 - Reflection:
   . Fixed bug #46103 (ReflectionObject memory leak). (Nikita)
