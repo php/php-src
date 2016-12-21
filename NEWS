@@ -31,6 +31,8 @@ PHP                                                                        NEWS
 - Mysqlnd:
   . Optimized handling of BIT fields - less memory copies and lower memory
     usage. (Andrey)
+  . Fixed bug #73800 (sporadic segfault with MYSQLI_OPT_INT_AND_FLOAT_NATIVE). 
+	(vanviegen)
 
 - Opcache:
   . Fixed bug #73789 (Strange behavior of class constants in switch/case block).
