@@ -44,7 +44,7 @@ var PHP_TEST_INI_PATH = "";
 var PHP_TEST_INI = "";
 var PHP_TEST_INI_EXT_EXCLUDE = "";
 
-var WINVER = "0x0600"; /* Vista */
+var WINVER = "0x0601"; /* 7/2008r2 */
 
 // There's a minimum requirement for re2c..
 var MINRE2C = "0.13.4";
@@ -3027,7 +3027,7 @@ function toolset_setup_common_cflags()
 {
 	// CFLAGS for building the PHP dll
 	DEFINE("CFLAGS_PHP", "/D _USRDLL /D PHP7DLLTS_EXPORTS /D PHP_EXPORTS \
-	/D LIBZEND_EXPORTS /D TSRM_EXPORTS /D SAPI_EXPORTS /D WINVER=" + WINVER);
+	/D LIBZEND_EXPORTS /D TSRM_EXPORTS /D SAPI_EXPORTS /D _WIN32_WINNT=" + WINVER);
 
 	DEFINE('CFLAGS_PHP_OBJ', '$(CFLAGS_PHP) $(STATIC_EXT_CFLAGS)');
 
