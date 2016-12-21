@@ -1842,7 +1842,7 @@ zend_ast *zend_negate_num_string(zend_ast *ast) /* {{{ */
 		}
 	} else if (Z_TYPE_P(zv) == IS_STRING) {
 		size_t orig_len = Z_STRLEN_P(zv);
-		zend_string_extend(Z_STR_P(zv), orig_len + 1, 0);
+		Z_STR_P(zv) = zend_string_extend(Z_STR_P(zv), orig_len + 1, 0);
 		memmove(Z_STRVAL_P(zv) + 1, Z_STRVAL_P(zv), orig_len + 1);
 		Z_STRVAL_P(zv)[0] = '-';
 	} else {
