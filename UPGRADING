@@ -35,6 +35,7 @@ PHP 7.2 UPGRADE NOTES
     /^(0|(-?[1-9][0-9]*))$/ where PHP_INT_MIN <= n <= PHP_INT_MAX) to integer
     keys. This fixes the behaviour of previous versions, where numeric string
     property names would become inaccessible string keys.
+  . Minimum supported Windows versions are Windows 7/Server 2008 R2.
 
 - Session:
   . Removed register_globals related code and "!" can be used as $_SESSION key name.

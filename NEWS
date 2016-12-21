@@ -23,6 +23,8 @@ PHP                                                                        NEWS
     php.exe). (Michele Locati)
   . Implemented "Convert numeric keys in object/array casts" RFC, fixes
     bugs #53838, #61655, #66173, #70925, #72254, etc. (Andrea)
+  . Raised minimum supported Windows versions to Windows 7/Server 2008 R2.
+    (Anatol)
 
 - Date:
   . Fixed bug #69587 (DateInterval properties and isset). (jhdxr)
