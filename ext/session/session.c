@@ -113,6 +113,7 @@ static inline void php_rinit_session_globals(void) /* {{{ */
 	PS(id) = NULL;
 	PS(session_status) = php_session_none;
 	PS(in_save_handler) = 0;
+	PS(set_handler) = 0;
 	PS(mod_data) = NULL;
 	PS(mod_user_is_open) = 0;
 	PS(define_sid) = 1;
@@ -548,6 +549,13 @@ static PHP_INI_MH(OnUpdateSaveHandler) /* {{{ */
 		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
 			php_error_docref(NULL, err_type, "Cannot find save handler '%s'", ZSTR_VAL(new_value));
 		}
+
+		return FAILURE;
+	}
+
+	/* "user" save handler should not be set by user */
+	if (!PS(set_handler) &&  tmp == ps_user_ptr) {
+		php_error_docref(NULL, E_RECOVERABLE_ERROR, "Cannot set 'user' save handler by ini_set() or sesion_module_name()");
 		return FAILURE;
 	}
 
@@ -1929,7 +1937,9 @@ static PHP_FUNCTION(session_set_save_handler)
 		if (PS(mod) && PS(session_status) != php_session_active && PS(mod) != &ps_mod_user) {
 			ini_name = zend_string_init("session.save_handler", sizeof("session.save_handler") - 1, 0);
 			ini_val = zend_string_init("user", sizeof("user") - 1, 0);
+			PS(set_handler) = 1;
 			zend_alter_ini_entry(ini_name, ini_val, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+			PS(set_handler) = 0;
 			zend_string_release(ini_val);
 			zend_string_release(ini_name);
 		}
@@ -1962,7 +1972,9 @@ static PHP_FUNCTION(session_set_save_handler)
 	if (PS(mod) && PS(mod) != &ps_mod_user) {
 		ini_name = zend_string_init("session.save_handler", sizeof("session.save_handler") - 1, 0);
 		ini_val = zend_string_init("user", sizeof("user") - 1, 0);
+		PS(set_handler) = 1;
 		zend_alter_ini_entry(ini_name, ini_val, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		PS(set_handler) = 0;
 		zend_string_release(ini_val);
 		zend_string_release(ini_name);
 	}

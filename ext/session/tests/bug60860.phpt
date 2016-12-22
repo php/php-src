@@ -12,7 +12,8 @@ echo "ok\n";
 
 ?>
 --EXPECTF--
-Warning: session_start(): user session functions not defined in %s on line 3
+PHP Recoverable fatal error:  PHP Startup: Cannot set 'user' save handler by ini_set() or sesion_module_name() in Unknown on line 0
 
-Warning: session_start(): Failed to initialize storage module: user (path: ) in %s on line 3
+Recoverable fatal error: PHP Startup: Cannot set 'user' save handler by ini_set() or sesion_module_name() in Unknown on line 0
 ok
+
