@@ -42,6 +42,10 @@ PHP                                                                        NEWS
   . Fixed bug #73594 (dns_get_record does not populate $additional out parameter).
     (Bruce Weirdan)
 
+- Zlib:
+  . Fixed bug #73373 (deflate_add does not verify that output was not truncated).
+    (Matt Bonneau)
+
 08 Dec 2016 PHP 7.0.14
 
 - Core:
