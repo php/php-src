@@ -608,11 +608,11 @@ int phpdbg_compile(void) /* {{{ */
 			zend_hash_del(&PHPDBG_G(file_sources), PHPDBG_G(ops)->filename);
 			PHPDBG_G(file_sources).pDestructor = dtor;
 
-			data = erealloc(data, sizeof(phpdbg_file_source) + sizeof(uint) * ++data->lines);
-			memmove(data->line + 1, data->line, sizeof(uint) * data->lines);
+			data = erealloc(data, sizeof(phpdbg_file_source) + sizeof(uint32_t) * ++data->lines);
+			memmove(data->line + 1, data->line, sizeof(uint32_t) * data->lines);
 			data->line[0] = 0;
 			data->buf = erealloc(data->buf, data->len + start_line_len);
-			memmove(data->buf + start_line_len, data->buf, data->len * sizeof(uint));
+			memmove(data->buf + start_line_len, data->buf, data->len * sizeof(uint32_t));
 			memcpy(data->buf, start_line, start_line_len);
 			efree(start_line);
 			data->len += start_line_len;

@@ -165,7 +165,7 @@ zend_class_entry* soap_var_class_entry;
 
 ZEND_DECLARE_MODULE_GLOBALS(soap)
 
-static void (*old_error_handler)(int, const char *, const uint, const char*, va_list);
+static void (*old_error_handler)(int, const char *, const uint32_t, const char*, va_list);
 
 #ifdef va_copy
 #define call_old_error_handler(error_num, error_filename, error_lineno, format, args) \

@@ -687,7 +687,7 @@ static void walk_down_the_path(char* path_start,
 
 typedef struct {
     char *path;
-    uint path_len;
+    uint32_t path_len;
     char *doc_root;
     user_config_cache_entry *entry;
 } _lsapi_activate_user_ini_ctx;
@@ -816,7 +816,7 @@ static int lsapi_activate_user_ini_walk_down_the_path(_lsapi_activate_user_ini_c
                                                       void* next)
 {
     time_t request_time = sapi_get_request_time();
-    uint path_len, docroot_len;
+    uint32_t path_len, docroot_len;
     int rc = SUCCESS;
     fn_activate_user_ini_chain_t *fn_next = next;
 

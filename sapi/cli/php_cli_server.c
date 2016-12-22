@@ -410,7 +410,7 @@ static void add_response_header(sapi_header_struct *h, zval *return_value) /* {{
 				do {
 					p++;
 				} while (*p == ' ' || *p == '\t');
-				add_assoc_stringl_ex(return_value, s, (uint)len, p, h->header_len - (p - h->header));
+				add_assoc_stringl_ex(return_value, s, (uint32_t)len, p, h->header_len - (p - h->header));
 				free_alloca(s, use_heap);
 			}
 		}
@@ -604,7 +604,7 @@ static int sapi_cli_server_register_entry_cb(char **entry, int num_args, va_list
 	zval *track_vars_array = va_arg(args, zval *);
 	if (hash_key->key) {
 		char *real_key, *key;
-		uint i;
+		uint32_t i;
 		key = estrndup(ZSTR_VAL(hash_key->key), ZSTR_LEN(hash_key->key));
 		for(i=0; i<ZSTR_LEN(hash_key->key); i++) {
 			if (key[i] == '-') {
@@ -1458,7 +1458,7 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 	}
 #ifdef PHP_WIN32
 	{
-		uint i = 0;
+		uint32_t i = 0;
 		for (;i<request->vpath_len;i++) {
 			if (request->vpath[i] == '\\') {
 				request->vpath[i] = '/';

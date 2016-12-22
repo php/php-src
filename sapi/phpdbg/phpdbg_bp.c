@@ -324,7 +324,7 @@ PHPDBG_API void phpdbg_set_breakpoint_file(const char *path, size_t path_len, lo
 	zend_string_release(path_str);
 } /* }}} */
 
-PHPDBG_API HashTable *phpdbg_resolve_pending_file_break_ex(const char *file, uint filelen, zend_string *cur, HashTable *fileht) /* {{{ */
+PHPDBG_API HashTable *phpdbg_resolve_pending_file_break_ex(const char *file, uint32_t filelen, zend_string *cur, HashTable *fileht) /* {{{ */
 {
 	phpdbg_debug("file: %s, filelen: %u, cur: %s, curlen %u, pos: %c, memcmp: %d\n", file, filelen, ZSTR_VAL(cur), ZSTR_LEN(cur), filelen > ZSTR_LEN(cur) ? file[filelen - ZSTR_LEN(cur) - 1] : '?', filelen > ZSTR_LEN(cur) ? memcmp(file + filelen - ZSTR_LEN(cur), ZSTR_VAL(cur), ZSTR_LEN(cur)) : 0);
 
@@ -373,7 +373,7 @@ PHPDBG_API HashTable *phpdbg_resolve_pending_file_break_ex(const char *file, uin
 PHPDBG_API void phpdbg_resolve_pending_file_break(const char *file) /* {{{ */
 {
 	HashTable *fileht;
-	uint filelen = strlen(file);
+	uint32_t filelen = strlen(file);
 	zend_string *cur;
 
 	phpdbg_debug("was compiled: %s\n", file);

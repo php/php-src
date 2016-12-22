@@ -358,7 +358,7 @@ PHPAPI int php_stream_filter_append_ex(php_stream_filter_chain *chain, php_strea
 		php_stream_bucket_append(brig_inp, bucket);
 		status = filter->fops->filter(stream, filter, brig_inp, brig_outp, &consumed, PSFS_FLAG_NORMAL);
 
-		if (stream->readpos + consumed > (uint)stream->writepos) {
+		if (stream->readpos + consumed > (uint32_t)stream->writepos) {
 			/* No behaving filter should cause this. */
 			status = PSFS_ERR_FATAL;
 		}
