@@ -34,14 +34,6 @@ typedef int uid_t;
 typedef int gid_t;
 typedef char * caddr_t;
 #define lstat(x, y) php_sys_lstat(x, y)
-#define		_IFIFO	0010000	/* fifo */
-#define		_IFBLK	0060000	/* block special */
-#define		_IFLNK	0120000	/* symbolic link */
-#define S_IFIFO		_IFIFO
-#define S_IFBLK		_IFBLK
-#ifndef S_IFLNK
-# define	S_IFLNK		_IFLNK
-#endif
 #define chdir(path) _chdir(path)
 #define mkdir(a, b)	_mkdir(a)
 #define rmdir(a)	_rmdir(a)

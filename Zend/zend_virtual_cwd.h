@@ -342,7 +342,8 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
 #endif
 
 #ifndef S_IFLNK
-# define S_IFLNK 0120000
+#define _IFLNK  0120000	/* symbolic link */
+#define S_IFLNK _IFLNK
 #endif
 
 #ifndef S_ISDIR
@@ -359,6 +360,17 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
 
 #ifndef S_IXROOT
 #define S_IXROOT ( S_IXUSR | S_IXGRP | S_IXOTH )
+#endif
+
+/* XXX should be _S_IFIFO? */
+#ifndef S_IFIFO
+#define	_IFIFO  0010000	/* fifo */
+#define S_IFIFO	_IFIFO
+#endif
+
+#ifndef S_IFBLK
+#define	_IFBLK  0060000	/* block special */
+#define S_IFBLK	_IFBLK
 #endif
 
 #endif /* VIRTUAL_CWD_H */
