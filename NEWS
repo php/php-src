@@ -43,10 +43,15 @@ PHP                                                                        NEWS
 - phpdbg:
   . Fixed bug #73794 (Crash (out of memory) when using run and # command
     separator). (Bob)
+  . Fixed bug #73704 (phpdbg shows the wrong line in files with shebang). (Bob)
 
 - Standard:
   . Fixed bug #73594 (dns_get_record does not populate $additional out parameter).
     (Bruce Weirdan)
+
+- Zlib
+  . Fixed bug #73373 (deflate_add does not verify that output was not truncated).
+    (Matt Bonneau)
 
 01 Dec 2016, PHP 7.1.0
 
