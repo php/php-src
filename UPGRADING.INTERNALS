@@ -13,7 +13,12 @@ PHP 7.1 INTERNALS UPGRADE NOTES
 1. Internal API changes
 ========================
 
-  a.
+  a. Path related functions
+    - CWD_API void realpath_cache_del(const char *path, size_t path_len);
+    - CWD_API realpath_cache_bucket* realpath_cache_lookup(const char *path, size_t path_len, time_t t);
+    - PHPAPI void php_clear_stat_cache(zend_bool clear_realpath_cache, const char *filename, size_t filename_len);
+    - PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zval *return_value);
+
 
 ========================
 2. Build system changes

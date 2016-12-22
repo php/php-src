@@ -1126,7 +1126,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				}
 			case PHP_MODE_REFLECTION_EXT_INFO:
 				{
-					int len = (int)strlen(reflection_what);
+					size_t len = strlen(reflection_what);
 					char *lcname = zend_str_tolower_dup(reflection_what, len);
 					zend_module_entry *module;
 
@@ -1202,7 +1202,7 @@ int main(int argc, char *argv[])
 	int php_optind = 1, use_extended_info = 0;
 	char *ini_path_override = NULL;
 	char *ini_entries = NULL;
-	int ini_entries_len = 0;
+	size_t ini_entries_len = 0;
 	int ini_ignore = 0;
 	sapi_module_struct *sapi_module = &cli_sapi_module;
 
@@ -1276,7 +1276,7 @@ int main(int argc, char *argv[])
 				break;
 			case 'd': {
 				/* define ini entries on command line */
-				int len = (int)strlen(php_optarg);
+				size_t len = strlen(php_optarg);
 				char *val;
 
 				if ((val = strchr(php_optarg, '='))) {
@@ -1284,11 +1284,11 @@ int main(int argc, char *argv[])
 					if (!isalnum(*val) && *val != '"' && *val != '\'' && *val != '\0') {
 						ini_entries = realloc(ini_entries, ini_entries_len + len + sizeof("\"\"\n\0"));
 						memcpy(ini_entries + ini_entries_len, php_optarg, (val - php_optarg));
-						ini_entries_len += (int)(val - php_optarg);
+						ini_entries_len += (val - php_optarg);
 						memcpy(ini_entries + ini_entries_len, "\"", 1);
 						ini_entries_len++;
 						memcpy(ini_entries + ini_entries_len, val, len - (val - php_optarg));
-						ini_entries_len += len - (int)(val - php_optarg);
+						ini_entries_len += len - (val - php_optarg);
 						memcpy(ini_entries + ini_entries_len, "\"\n\0", sizeof("\"\n\0"));
 						ini_entries_len += sizeof("\n\0\"") - 2;
 					} else {

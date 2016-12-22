@@ -232,8 +232,8 @@ extern virtual_cwd_globals cwd_globals;
 #endif
 
 CWD_API void realpath_cache_clean(void);
-CWD_API void realpath_cache_del(const char *path, int path_len);
-CWD_API realpath_cache_bucket* realpath_cache_lookup(const char *path, int path_len, time_t t);
+CWD_API void realpath_cache_del(const char *path, size_t path_len);
+CWD_API realpath_cache_bucket* realpath_cache_lookup(const char *path, size_t path_len, time_t t);
 CWD_API zend_long realpath_cache_size(void);
 CWD_API zend_long realpath_cache_max_buckets(void);
 CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);

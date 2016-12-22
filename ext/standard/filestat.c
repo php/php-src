@@ -705,7 +705,7 @@ PHP_FUNCTION(touch)
 
 /* {{{ php_clear_stat_cache()
 */
-PHPAPI void php_clear_stat_cache(zend_bool clear_realpath_cache, const char *filename, int filename_len)
+PHPAPI void php_clear_stat_cache(zend_bool clear_realpath_cache, const char *filename, size_t filename_len)
 {
 	/* always clear CurrentStatFile and CurrentLStatFile even if filename is not NULL
 	 * as it may contain outdated data (e.g. "nlink" for a directory when deleting a file
@@ -740,7 +740,7 @@ PHP_FUNCTION(clearstatcache)
 		return;
 	}
 
-	php_clear_stat_cache(clear_realpath_cache, filename, (int)filename_len);
+	php_clear_stat_cache(clear_realpath_cache, filename, filename_len);
 }
 /* }}} */
 
@@ -751,7 +751,7 @@ PHP_FUNCTION(clearstatcache)
 
 /* {{{ php_stat
  */
-PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int type, zval *return_value)
+PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zval *return_value)
 {
 	zval stat_dev, stat_ino, stat_mode, stat_nlink, stat_uid, stat_gid, stat_rdev,
 		 stat_size, stat_atime, stat_mtime, stat_ctime, stat_blksize, stat_blocks;
@@ -996,7 +996,7 @@ void name(INTERNAL_FUNCTION_PARAMETERS) { \
 		Z_PARAM_PATH(filename, filename_len) \
 	ZEND_PARSE_PARAMETERS_END(); \
 	\
-	php_stat(filename, (php_stat_len) filename_len, funcnum, return_value); \
+	php_stat(filename, filename_len, funcnum, return_value); \
 }
 /* }}} */
 

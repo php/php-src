@@ -537,7 +537,7 @@ CWD_API char *virtual_getcwd(char *buf, size_t size) /* {{{ */
 /* }}} */
 
 #ifdef ZEND_WIN32
-static inline zend_ulong realpath_cache_key(const char *path, int path_len) /* {{{ */
+static inline zend_ulong realpath_cache_key(const char *path, size_t path_len) /* {{{ */
 {
 	register zend_ulong h;
 	char *bucket_key_start = tsrm_win32_get_path_sid_key(path);
@@ -558,7 +558,7 @@ static inline zend_ulong realpath_cache_key(const char *path, int path_len) /* {
 }
 /* }}} */
 #else
-static inline zend_ulong realpath_cache_key(const char *path, int path_len) /* {{{ */
+static inline zend_ulong realpath_cache_key(const char *path, size_t path_len) /* {{{ */
 {
 	register zend_ulong h;
 	const char *e = path + path_len;
@@ -590,7 +590,7 @@ CWD_API void realpath_cache_clean(void) /* {{{ */
 }
 /* }}} */
 
-CWD_API void realpath_cache_del(const char *path, int path_len) /* {{{ */
+CWD_API void realpath_cache_del(const char *path, size_t path_len) /* {{{ */
 {
 	zend_ulong key = realpath_cache_key(path, path_len);
 	zend_ulong n = key % (sizeof(CWDG(realpath_cache)) / sizeof(CWDG(realpath_cache)[0]));
@@ -618,7 +618,7 @@ CWD_API void realpath_cache_del(const char *path, int path_len) /* {{{ */
 }
 /* }}} */
 
-static inline void realpath_cache_add(const char *path, int path_len, const char *realpath, int realpath_len, int is_dir, time_t t) /* {{{ */
+static inline void realpath_cache_add(const char *path, int path_len, const char *realpath, size_t realpath_len, int is_dir, time_t t) /* {{{ */
 {
 	zend_long size = sizeof(realpath_cache_bucket) + path_len + 1;
 	int same = 1;
@@ -664,7 +664,7 @@ static inline void realpath_cache_add(const char *path, int path_len, const char
 }
 /* }}} */
 
-static inline realpath_cache_bucket* realpath_cache_find(const char *path, int path_len, time_t t) /* {{{ */
+static inline realpath_cache_bucket* realpath_cache_find(const char *path, size_t path_len, time_t t) /* {{{ */
 {
 	zend_ulong key = realpath_cache_key(path, path_len);
 	zend_ulong n = key % (sizeof(CWDG(realpath_cache)) / sizeof(CWDG(realpath_cache)[0]));
@@ -693,7 +693,7 @@ static inline realpath_cache_bucket* realpath_cache_find(const char *path, int p
 }
 /* }}} */
 
-CWD_API realpath_cache_bucket* realpath_cache_lookup(const char *path, int path_len, time_t t) /* {{{ */
+CWD_API realpath_cache_bucket* realpath_cache_lookup(const char *path, size_t path_len, time_t t) /* {{{ */
 {
 	return realpath_cache_find(path, path_len, t);
 }
