@@ -56,7 +56,7 @@ function curl_cli_server_start() {
 
     if ($error) {
         echo $error;
-        proc_close($handle);
+        proc_terminate($handle);
         exit(1);
     }
 
@@ -65,7 +65,7 @@ function curl_cli_server_start() {
             proc_terminate($handle);
         },
         $handle
-		);
+    );
 
     return PHP_CURL_SERVER_ADDRESS;
 }
