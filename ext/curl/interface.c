@@ -1822,9 +1822,10 @@ PHP_FUNCTION(curl_version)
 	curl_version_info_data *d;
 	zend_long uversion = CURLVERSION_NOW;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &uversion) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(uversion)
+	ZEND_PARSE_PARAMETERS_END();
 
 	d = curl_version_info(uversion);
 	if (d == NULL) {
@@ -2941,9 +2942,11 @@ PHP_FUNCTION(curl_setopt)
 	zend_long        options;
 	php_curl   *ch;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rlz", &zid, &options, &zvalue) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_RESOURCE(zid)
+		Z_PARAM_LONG(options)
+		Z_PARAM_ZVAL(zvalue)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if ((ch = (php_curl*)zend_fetch_resource(Z_RES_P(zid), le_curl_name, le_curl)) == NULL) {
 		RETURN_FALSE;
@@ -2971,9 +2974,10 @@ PHP_FUNCTION(curl_setopt_array)
 	zend_ulong	option;
 	zend_string	*string_key;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ra", &zid, &arr) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_RESOURCE(zid)
+		Z_PARAM_ARRAY(arr)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if ((ch = (php_curl*)zend_fetch_resource(Z_RES_P(zid), le_curl_name, le_curl)) == NULL) {
 		RETURN_FALSE;
@@ -3017,9 +3021,9 @@ PHP_FUNCTION(curl_exec)
 	zval		*zid;
 	php_curl	*ch;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zid) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(zid)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if ((ch = (php_curl*)zend_fetch_resource(Z_RES_P(zid), le_curl_name, le_curl)) == NULL) {
 		RETURN_FALSE;
@@ -3074,9 +3078,11 @@ PHP_FUNCTION(curl_getinfo)
 	php_curl	*ch;
 	zend_long	option = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &zid, &option) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_RESOURCE(zid)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(option)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if ((ch = (php_curl*)zend_fetch_resource(Z_RES_P(zid), le_curl_name, le_curl)) == NULL) {
 		RETURN_FALSE;
@@ -3285,9 +3291,9 @@ PHP_FUNCTION(curl_error)
 	zval		*zid;
 	php_curl	*ch;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zid) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(zid)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if ((ch = (php_curl*)zend_fetch_resource(Z_RES_P(zid), le_curl_name, le_curl)) == NULL) {
 		RETURN_FALSE;
@@ -3324,9 +3330,9 @@ PHP_FUNCTION(curl_close)
 	zval		*zid;
 	php_curl	*ch;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zid) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(zid)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if ((ch = (php_curl*)zend_fetch_resource(Z_RES_P(zid), le_curl_name, le_curl)) == NULL) {
 		RETURN_FALSE;
@@ -3433,9 +3439,9 @@ PHP_FUNCTION(curl_strerror)
 	zend_long code;
 	const char *str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &code) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(code)
+	ZEND_PARSE_PARAMETERS_END();
 
 	str = curl_easy_strerror(code);
 	if (str) {
@@ -3503,9 +3509,9 @@ PHP_FUNCTION(curl_reset)
 	zval       *zid;
 	php_curl   *ch;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zid) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(zid)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if ((ch = (php_curl*)zend_fetch_resource(Z_RES_P(zid), le_curl_name, le_curl)) == NULL) {
 		RETURN_FALSE;
