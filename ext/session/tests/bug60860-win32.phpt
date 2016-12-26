@@ -3,8 +3,8 @@ Bug #60860 (session.save_handler=user without defined function core dumps)
 --SKIPIF--
 <?php
 include('skipif.inc');
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip not for Windows');
+if (substr(PHP_OS, 0, 3) != 'WIN') {
+    die('skip only for Windows');
 }
 ?>
 --INI--
@@ -18,6 +18,6 @@ echo "ok\n";
 
 ?>
 --EXPECTF--
-PHP Recoverable fatal error:  PHP Startup: Cannot set 'user' save handler by ini_set() or sesion_module_name() in Unknown on line 0
 ok
+PHP Recoverable fatal error:  PHP Startup: Cannot set 'user' save handler by ini_set() or sesion_module_name() in Unknown on line 0
 

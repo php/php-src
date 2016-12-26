@@ -7,8 +7,8 @@ display_errors=off
 --SKIPIF--
 <?php
 include('skipif.inc');
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip not for Windows');
+if (substr(PHP_OS, 0, 3) != 'WIN') {
+    die('skip only for Windows');
 }
 ?>
 --FILE--
@@ -31,6 +31,6 @@ session_set_save_handler($handler);
 session_start();
 
 --EXPECTF--
-PHP Recoverable fatal error:  PHP Startup: Cannot set 'user' save handler by ini_set() or sesion_module_name() in Unknown on line 0
 *** Testing session_set_save_handler() : calling default handler when save_handler=user ***
+PHP Recoverable fatal error:  PHP Startup: Cannot set 'user' save handler by ini_set() or sesion_module_name() in Unknown on line 0
 
