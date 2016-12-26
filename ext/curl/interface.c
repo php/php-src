@@ -1588,7 +1588,7 @@ static size_t curl_progress(void *clientp, double dltotal, double dlnow, double 
 				php_error_docref(NULL, E_WARNING, "Cannot call the CURLOPT_PROGRESSFUNCTION");
 			} else if (!Z_ISUNDEF(retval)) {
 				_php_curl_verify_handlers(ch, 1);
-				if (0 != zval_get_long(&retval)) {
+				if (zend_is_true(&retval)) {
 					rval = 1;
 				}
 			}
@@ -2114,8 +2114,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 	switch (option) {
 		/* Long options */
 		case CURLOPT_SSL_VERIFYHOST:
-			lval = zval_get_long(zvalue);
-			if (lval == 1) {
+			if (zend_is_true(zvalue)) {
 #if LIBCURL_VERSION_NUM <= 0x071c00 /* 7.28.0 */
 				php_error_docref(NULL, E_NOTICE, "CURLOPT_SSL_VERIFYHOST with value 1 is deprecated and will be removed as of libcurl 7.28.1. It is recommended to use value 2 instead");
 #else
@@ -2315,8 +2314,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 			error = curl_easy_setopt(ch->cp, option, lval);
 			break;
 		case CURLOPT_SAFE_UPLOAD:
-			lval = zval_get_long(zvalue);
-			if (lval == 0) {
+			if (!zend_is_true(zvalue)) {
 				php_error_docref(NULL, E_WARNING, "Disabling safe uploads is no longer supported");
 				return FAILURE;
 			}
@@ -2652,15 +2650,15 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 			break;
 
 		case CURLOPT_FOLLOWLOCATION:
-			lval = zval_get_long(zvalue);
 #if LIBCURL_VERSION_NUM < 0x071304
 			if (PG(open_basedir) && *PG(open_basedir)) {
-				if (lval != 0) {
+				if (zend_is_true(zvalue)) {
 					php_error_docref(NULL, E_WARNING, "CURLOPT_FOLLOWLOCATION cannot be activated when an open_basedir is set");
 					return FAILURE;
 				}
 			}
 #endif
+			lval = zval_get_long(zvalue);
 			error = curl_easy_setopt(ch->cp, option, lval);
 			break;
 
@@ -2814,8 +2812,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 			break;
 
 		case CURLOPT_RETURNTRANSFER:
-			lval = zval_get_long(zvalue);
-			if (lval) {
+			if (zend_is_true(zvalue)) {
 				ch->handlers->write->method = PHP_CURL_RETURN;
 			} else {
 				ch->handlers->write->method = PHP_CURL_STDOUT;
@@ -2891,8 +2888,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 		}
 
 		case CURLINFO_HEADER_OUT:
-			lval = zval_get_long(zvalue);
-			if (lval == 1) {
+			if (zend_is_true(zvalue)) {
 				curl_easy_setopt(ch->cp, CURLOPT_DEBUGFUNCTION, curl_debug);
 				curl_easy_setopt(ch->cp, CURLOPT_DEBUGDATA, (void *)ch);
 				curl_easy_setopt(ch->cp, CURLOPT_VERBOSE, 1);
