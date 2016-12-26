@@ -183,7 +183,7 @@ typedef struct _property_reference {
 /* Struct for parameters */
 typedef struct _parameter_reference {
 	uint32_t offset;
-	uint32_t required;
+	zend_bool required;
 	struct _zend_arg_info *arg_info;
 	zend_function *fptr;
 } parameter_reference;
@@ -670,10 +670,10 @@ static zend_op* _get_recv_op(zend_op_array *op_array, uint32_t offset)
 /* }}} */
 
 /* {{{ _parameter_string */
-static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg_info *arg_info, uint32_t offset, uint32_t required, char* indent)
+static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg_info *arg_info, uint32_t offset, zend_bool required, char* indent)
 {
 	string_printf(str, "Parameter #%d [ ", offset);
-	if (offset >= required) {
+	if (!required) {
 		string_printf(str, "<optional> ");
 	} else {
 		string_printf(str, "<required> ");
@@ -708,7 +708,7 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 	} else {
 		string_printf(str, "$param%d", offset);
 	}
-	if (fptr->type == ZEND_USER_FUNCTION && offset >= required) {
+	if (fptr->type == ZEND_USER_FUNCTION && !required) {
 		zend_op *precv = _get_recv_op((zend_op_array*)fptr, offset);
 		if (precv && precv->opcode == ZEND_RECV_INIT && precv->op2_type != IS_UNUSED) {
 			zval zv;
@@ -747,7 +747,7 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 static void _function_parameter_string(string *str, zend_function *fptr, char* indent)
 {
 	struct _zend_arg_info *arg_info = fptr->common.arg_info;
-	uint32_t i, num_args, required = fptr->common.required_num_args;
+	uint32_t i, num_args, num_required = fptr->common.required_num_args;
 
 	if (!arg_info) {
 		return;
@@ -761,7 +761,7 @@ static void _function_parameter_string(string *str, zend_function *fptr, char* i
 	string_printf(str, "%s- Parameters [%d] {\n", indent, num_args);
 	for (i = 0; i < num_args; i++) {
 		string_printf(str, "%s  ", indent);
-		_parameter_string(str, fptr, arg_info, i, required, indent);
+		_parameter_string(str, fptr, arg_info, i, i < num_required, indent);
 		string_write(str, "\n", sizeof("\n")-1);
 		arg_info++;
 	}
@@ -1229,7 +1229,7 @@ static void reflection_extension_factory(zval *object, const char *name_str)
 /* }}} */
 
 /* {{{ reflection_parameter_factory */
-static void reflection_parameter_factory(zend_function *fptr, zval *closure_object, struct _zend_arg_info *arg_info, uint32_t offset, uint32_t required, zval *object)
+static void reflection_parameter_factory(zend_function *fptr, zval *closure_object, struct _zend_arg_info *arg_info, uint32_t offset, zend_bool required, zval *object)
 {
 	reflection_object *intern;
 	parameter_reference *reference;
@@ -2066,7 +2066,7 @@ ZEND_METHOD(reflection_function, returnsReference)
 /* }}} */
 
 /* {{{ proto public bool ReflectionFunction::getNumberOfParameters()
-   Gets the number of required parameters */
+   Gets the number of parameters */
 ZEND_METHOD(reflection_function, getNumberOfParameters)
 {
 	reflection_object *intern;
@@ -2121,7 +2121,14 @@ ZEND_METHOD(reflection_function, getParameters)
 	for (i = 0; i < num_args; i++) {
 		zval parameter;
 
-		reflection_parameter_factory(_copy_function(fptr), Z_ISUNDEF(intern->obj)? NULL : &intern->obj, arg_info, i, fptr->common.required_num_args, &parameter);
+		reflection_parameter_factory(
+			_copy_function(fptr),
+			Z_ISUNDEF(intern->obj) ? NULL : &intern->obj,
+			arg_info,
+			i,
+			i < fptr->common.required_num_args,
+			&parameter
+		);
 		add_next_index_zval(return_value, &parameter);
 
 		arg_info++;
@@ -2533,7 +2540,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 	ref = (parameter_reference*) emalloc(sizeof(parameter_reference));
 	ref->arg_info = &arg_info[position];
 	ref->offset = (uint32_t)position;
-	ref->required = fptr->common.required_num_args;
+	ref->required = position < fptr->common.required_num_args;
 	ref->fptr = fptr;
 	/* TODO: copy fptr */
 	intern->ptr = ref;
@@ -2838,7 +2845,7 @@ ZEND_METHOD(reflection_parameter, isOptional)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	RETVAL_BOOL(param->offset >= param->required);
+	RETVAL_BOOL(!param->required);
 }
 /* }}} */
 
