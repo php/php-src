@@ -2824,6 +2824,7 @@ static PHP_GINIT_FUNCTION(ps) /* {{{ */
 	ps_globals->mod_user_implemented = 0;
 	ps_globals->mod_user_is_open = 0;
 	ps_globals->session_vars = NULL;
+	ps_globals->set_handler = 0;
 	for (i = 0; i < PS_NUM_APIS; i++) {
 		ZVAL_UNDEF(&ps_globals->mod_user_names.names[i]);
 	}
