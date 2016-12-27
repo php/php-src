@@ -379,6 +379,9 @@ static void sapi_cli_register_variables(zval *track_vars_array) /* {{{ */
 static void sapi_cli_log_message(char *message) /* {{{ */
 {
 	fprintf(stderr, "%s\n", message);
+#ifdef PHP_WIN32
+	fflush(stderr);
+#endif
 }
 /* }}} */
 
