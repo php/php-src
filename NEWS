@@ -75,6 +75,7 @@ PHP                                                                        NEWS
 - hash:
   . Fixed bug #73961 (environmental build dependency in hash sha3 source).
     (krakjoe)
+  . Changed HashContext from resource to object. (Rouven Weßling, Sara)
 
 - Mbstring:
   . Implemented request #66024 (mb_chr() and mb_ord()). (Masakielastic, Yasuo)
