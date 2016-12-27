@@ -555,7 +555,7 @@ static PHP_INI_MH(OnUpdateSaveHandler) /* {{{ */
 
 	/* "user" save handler should not be set by user */
 	if (!PS(set_handler) &&  tmp == ps_user_ptr) {
-		php_error_docref(NULL, E_RECOVERABLE_ERROR, "Cannot set 'user' save handler by ini_set() or sesion_module_name()");
+		php_error_docref(NULL, E_RECOVERABLE_ERROR, "Cannot set 'user' save handler by ini_set() or session_module_name()");
 		return FAILURE;
 	}
 
