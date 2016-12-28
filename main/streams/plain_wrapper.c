@@ -337,14 +337,18 @@ static size_t php_stdiop_write(php_stream *stream, const char *buf, size_t count
 	assert(data != NULL);
 
 	if (data->fd >= 0) {
-#ifdef PHP_WIN32
 		int bytes_written;
+#ifdef PHP_WIN32
 		if (ZEND_SIZE_T_UINT_OVFL(count)) {
 			count = UINT_MAX;
 		}
 		bytes_written = _write(data->fd, buf, (unsigned int)count);
 #else
-		int bytes_written = write(data->fd, buf, count);
+		bytes_written = write(data->fd, buf, count);
+		if (bytes_written < 0 && errno == EINTR) {
+			/* Write was interrupted, retry once */
+			bytes_written = write(data->fd, buf, count);
+		}
 #endif
 		if (bytes_written < 0) return 0;
 		return (size_t) bytes_written;
