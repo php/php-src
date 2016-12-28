@@ -69,6 +69,28 @@ char *apache2_php_ini_path_override = NULL;
 ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 
+int
+php_ap_map_http_request_error(apr_status_t rv, int status)
+{
+    switch (rv) {
+    case AP_FILTER_ERROR: {
+        return AP_FILTER_ERROR;
+    }
+    case APR_ENOSPC: {
+        return HTTP_REQUEST_ENTITY_TOO_LARGE;
+    }
+    case APR_ENOTIMPL: {
+        return HTTP_NOT_IMPLEMENTED;
+    }
+    case APR_ETIMEDOUT: {
+        return HTTP_REQUEST_TIME_OUT;
+    }
+    default: {
+        return status;
+    }
+    }
+}
+
 static size_t
 php_apache_sapi_ub_write(const char *str, size_t str_length)
 {
@@ -207,6 +229,9 @@ php_apache_sapi_read_post(char *buf, size_t count_bytes)
 		len = count_bytes - tlen;
 	}
 
+// Apache 2.2.31 or 2.4.16 above
+#if MODULE_MAGIC_COOKIE == 0x41503232UL && AP_MODULE_MAGIC_AT_LEAST(20051115,40) || \
+	MODULE_MAGIC_COOKIE == 0x41503234UL && AP_MODULE_MAGIC_AT_LEAST(20120211,47)
 	if (ret != APR_SUCCESS) {
 		if (APR_STATUS_IS_TIMEUP(ret)) {
 			SG(sapi_headers).http_response_code = ap_map_http_request_error(ret, HTTP_REQUEST_TIME_OUT);
@@ -214,6 +239,15 @@ php_apache_sapi_read_post(char *buf, size_t count_bytes)
 			SG(sapi_headers).http_response_code = ap_map_http_request_error(ret, HTTP_BAD_REQUEST);
 		}
 	}
+#else
+	if (ret != APR_SUCCESS) {
+		if (APR_STATUS_IS_TIMEUP(ret)) {
+			SG(sapi_headers).http_response_code = php_ap_map_http_request_error(ret, HTTP_REQUEST_TIME_OUT);
+		} else {
+			SG(sapi_headers).http_response_code = php_ap_map_http_request_error(ret, HTTP_BAD_REQUEST);
+		}
+	}
+#endif
 
 	return tlen;
 }
