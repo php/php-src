@@ -134,7 +134,7 @@ static inline void php_intl_bad_args(const char *msg)
 
 #ifdef HAVE_46_API
 static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
-		const char *domain, int32_t domain_len, uint32_t option, int mode, zval *idna_info)
+		const zend_string *domain, uint32_t option, int mode, zval *idna_info)
 {
 	UErrorCode	  status = U_ZERO_ERROR;
 	UIDNA		  *uts46;
@@ -151,10 +151,10 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 	}
 
 	if (mode == INTL_IDN_TO_ASCII) {
-		len = uidna_nameToASCII_UTF8(uts46, domain, domain_len,
+		len = uidna_nameToASCII_UTF8(uts46, ZSTR_VAL(domain), ZSTR_LEN(domain),
 				ZSTR_VAL(buffer), buffer_capac, &info, &status);
 	} else {
-		len = uidna_nameToUnicodeUTF8(uts46, domain, domain_len,
+		len = uidna_nameToUnicodeUTF8(uts46, ZSTR_VAL(domain), ZSTR_LEN(domain),
 				ZSTR_VAL(buffer), buffer_capac, &info, &status);
 	}
 	if (len >= 255 || php_intl_idn_check_status(status, "failed to convert name") == FAILURE) {
@@ -197,7 +197,7 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 #endif
 
 static void php_intl_idn_to(INTERNAL_FUNCTION_PARAMETERS,
-		const char *domain, int32_t domain_len, uint32_t option, int mode)
+		const zend_string *domain, uint32_t option, int mode)
 {
 	UChar* ustring = NULL;
 	int ustring_len = 0;
@@ -208,7 +208,7 @@ static void php_intl_idn_to(INTERNAL_FUNCTION_PARAMETERS,
 
 	/* convert the string to UTF-16. */
 	status = U_ZERO_ERROR;
-	intl_convert_utf8_to_utf16(&ustring, &ustring_len, domain, domain_len, &status);
+	intl_convert_utf8_to_utf16(&ustring, &ustring_len, ZSTR_VAL(domain), ZSTR_LEN(domain), &status);
 
 	if (U_FAILURE(status)) {
 		intl_error_set_code(NULL, status);
@@ -254,16 +254,15 @@ static void php_intl_idn_to(INTERNAL_FUNCTION_PARAMETERS,
 
 static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
-	char *domain;
-	size_t domain_len;
+	zend_string *domain;
 	zend_long option = 0,
 		 variant = INTL_IDN_VARIANT_2003;
 	zval *idna_info = NULL;
 
 	intl_error_reset(NULL);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|llz/",
-			&domain, &domain_len, &option, &variant, &idna_info) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|llz/",
+			&domain, &option, &variant, &idna_info) == FAILURE) {
 		php_intl_bad_args("bad arguments");
 		RETURN_NULL(); /* don't set FALSE because that's not the way it was before... */
 	}
@@ -282,11 +281,11 @@ static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	}
 #endif
 
-	if (domain_len < 1) {
+	if (ZSTR_LEN(domain) < 1) {
 		php_intl_bad_args("empty domain name");
 		RETURN_FALSE;
 	}
-	if (domain_len > INT32_MAX - 1) {
+	if (ZSTR_LEN(domain) > INT32_MAX - 1) {
 		php_intl_bad_args("domain name too large");
 		RETURN_FALSE;
 	}
@@ -304,13 +303,11 @@ static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	}
 
 	if (variant == INTL_IDN_VARIANT_2003) {
-		php_intl_idn_to(INTERNAL_FUNCTION_PARAM_PASSTHRU,
-				domain, (int32_t)domain_len, (uint32_t)option, mode);
+		php_intl_idn_to(INTERNAL_FUNCTION_PARAM_PASSTHRU, domain, (uint32_t)option, mode);
 	}
 #ifdef HAVE_46_API
 	else {
-		php_intl_idn_to_46(INTERNAL_FUNCTION_PARAM_PASSTHRU, domain, (int32_t)domain_len,
-				(uint32_t)option, mode, idna_info);
+		php_intl_idn_to_46(INTERNAL_FUNCTION_PARAM_PASSTHRU, domain, (uint32_t)option, mode, idna_info);
 	}
 #endif
 }
