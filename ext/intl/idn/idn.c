@@ -312,7 +312,7 @@ static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 #endif
 }
 
-/* {{{ proto int idn_to_ascii(string domain[, int options[, int variant[, array &idna_info]]])
+/* {{{ proto string idn_to_ascii(string domain[, int options[, int variant[, array &idna_info]]])
    Converts an Unicode domain to ASCII representation, as defined in the IDNA RFC */
 PHP_FUNCTION(idn_to_ascii)
 {
@@ -321,7 +321,7 @@ PHP_FUNCTION(idn_to_ascii)
 /* }}} */
 
 
-/* {{{ proto int idn_to_utf8(string domain[, int options[, int variant[, array &idna_info]]])
+/* {{{ proto string idn_to_utf8(string domain[, int options[, int variant[, array &idna_info]]])
    Converts an ASCII representation of the domain to Unicode (UTF-8), as defined in the IDNA RFC */
 PHP_FUNCTION(idn_to_utf8)
 {
