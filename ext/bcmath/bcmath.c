@@ -229,13 +229,16 @@ PHP_FUNCTION(bcadd)
 	zend_string *left, *right;
 	zend_long scale_param = 0;
 	bc_num first, second, result;
-	int scale = (int)BCG(bc_precision), argc = ZEND_NUM_ARGS();
+	int scale = (int)BCG(bc_precision);
 
-	if (zend_parse_parameters(argc, "SS|l", &left, &right, &scale_param) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STR(left)
+		Z_PARAM_STR(right)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(scale_param)
+	ZEND_PARSE_PARAMETERS_END();
 
-	if (argc == 3) {
+	if (ZEND_NUM_ARGS() == 3) {
 		scale = (int) (scale_param < 0 ? 0 : scale_param);
 	}
 
@@ -266,13 +269,16 @@ PHP_FUNCTION(bcsub)
 	zend_string *left, *right;
 	zend_long scale_param = 0;
 	bc_num first, second, result;
-	int scale = (int)BCG(bc_precision), argc = ZEND_NUM_ARGS();
+	int scale = (int)BCG(bc_precision);
 
-	if (zend_parse_parameters(argc, "SS|l", &left, &right, &scale_param) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STR(left)
+		Z_PARAM_STR(right)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(scale_param)
+	ZEND_PARSE_PARAMETERS_END();
 
-	if (argc == 3) {
+	if (ZEND_NUM_ARGS() == 3) {
 		scale = (int) ((int)scale_param < 0 ? 0 : scale_param);
 	}
 
@@ -303,13 +309,16 @@ PHP_FUNCTION(bcmul)
 	zend_string *left, *right;
 	zend_long scale_param = 0;
 	bc_num first, second, result;
-	int scale = (int)BCG(bc_precision), argc = ZEND_NUM_ARGS();
+	int scale = (int)BCG(bc_precision);
 
-	if (zend_parse_parameters(argc, "SS|l", &left, &right, &scale_param) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STR(left)
+		Z_PARAM_STR(right)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(scale_param)
+	ZEND_PARSE_PARAMETERS_END();
 
-	if (argc == 3) {
+	if (ZEND_NUM_ARGS() == 3) {
 		scale = (int) ((int)scale_param < 0 ? 0 : scale_param);
 	}
 
@@ -340,13 +349,16 @@ PHP_FUNCTION(bcdiv)
 	zend_string *left, *right;
 	zend_long scale_param = 0;
 	bc_num first, second, result;
-	int scale = (int)BCG(bc_precision), argc = ZEND_NUM_ARGS();
+	int scale = (int)BCG(bc_precision);
 
-	if (zend_parse_parameters(argc, "SS|l", &left, &right, &scale_param) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STR(left)
+		Z_PARAM_STR(right)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(scale_param)
+	ZEND_PARSE_PARAMETERS_END();
 
-	if (argc == 3) {
+	if (ZEND_NUM_ARGS() == 3) {
 		scale = (int) ((int)scale_param < 0 ? 0 : scale_param);
 	}
 
@@ -383,9 +395,10 @@ PHP_FUNCTION(bcmod)
 	zend_string *left, *right;
 	bc_num first, second, result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &left, &right) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STR(left)
+		Z_PARAM_STR(right)
+	ZEND_PARSE_PARAMETERS_END();
 
 	bc_init_num(&first);
 	bc_init_num(&second);
@@ -418,9 +431,13 @@ PHP_FUNCTION(bcpowmod)
 	zend_long scale = BCG(bc_precision);
 	int scale_int;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SSS|l", &left, &right, &modulous, &scale) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(3, 4)
+		Z_PARAM_STR(left)
+		Z_PARAM_STR(right)
+		Z_PARAM_STR(modulous)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(scale)
+	ZEND_PARSE_PARAMETERS_END();
 
 	bc_init_num(&first);
 	bc_init_num(&second);
@@ -457,13 +474,16 @@ PHP_FUNCTION(bcpow)
 	zend_string *left, *right;
 	zend_long scale_param = 0;
 	bc_num first, second, result;
-	int scale = (int)BCG(bc_precision), argc = ZEND_NUM_ARGS();
+	int scale = (int)BCG(bc_precision);
 
-	if (zend_parse_parameters(argc, "SS|l", &left, &right, &scale_param) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STR(left)
+		Z_PARAM_STR(right)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(scale_param)
+	ZEND_PARSE_PARAMETERS_END();
 
-	if (argc == 3) {
+	if (ZEND_NUM_ARGS() == 3) {
 		scale = (int) ((int)scale_param < 0 ? 0 : scale_param);
 	}
 
@@ -494,13 +514,15 @@ PHP_FUNCTION(bcsqrt)
 	zend_string *left;
 	zend_long scale_param = 0;
 	bc_num result;
-	int scale = (int)BCG(bc_precision), argc = ZEND_NUM_ARGS();
+	int scale = (int)BCG(bc_precision);
 
-	if (zend_parse_parameters(argc, "S|l", &left, &scale_param) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STR(left)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(scale_param)
+	ZEND_PARSE_PARAMETERS_END();
 
-	if (argc == 2) {
+	if (ZEND_NUM_ARGS() == 2) {
 		scale = (int) ((int)scale_param < 0 ? 0 : scale_param);
 	}
 
@@ -529,13 +551,16 @@ PHP_FUNCTION(bccomp)
 	zend_string *left, *right;
 	zend_long scale_param = 0;
 	bc_num first, second;
-	int scale = (int)BCG(bc_precision), argc = ZEND_NUM_ARGS();
+	int scale = (int)BCG(bc_precision);
 
-	if (zend_parse_parameters(argc, "SS|l", &left, &right, &scale_param) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STR(left)
+		Z_PARAM_STR(right)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(scale_param)
+	ZEND_PARSE_PARAMETERS_END();
 
-	if (argc == 3) {
+	if (ZEND_NUM_ARGS() == 3) {
 		scale = (int) ((int)scale_param < 0 ? 0 : scale_param);
 	}
 
@@ -558,9 +583,9 @@ PHP_FUNCTION(bcscale)
 {
 	zend_long new_scale;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &new_scale) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(new_scale)
+	ZEND_PARSE_PARAMETERS_END();
 
 	BCG(bc_precision) = ((int)new_scale < 0) ? 0 : new_scale;
 
