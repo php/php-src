@@ -111,13 +111,13 @@ enum {
 };
 
 /* like INTL_CHECK_STATUS, but as a function and varying the name of the func */
-static int php_intl_idn_check_status(UErrorCode err, const char *msg, int mode)
+static int php_intl_idn_check_status(UErrorCode err, const char *msg)
 {
 	intl_error_set_code(NULL, err);
 	if (U_FAILURE(err)) {
 		char *buff;
 		spprintf(&buff, 0, "%s: %s",
-			mode == INTL_IDN_TO_ASCII ? "idn_to_ascii" : "idn_to_utf8",
+			get_active_function_name(),
 			msg);
 		intl_error_set_custom_msg(NULL, buff, 1);
 		efree(buff);
@@ -127,9 +127,9 @@ static int php_intl_idn_check_status(UErrorCode err, const char *msg, int mode)
 	return SUCCESS;
 }
 
-static inline void php_intl_bad_args(const char *msg, int mode)
+static inline void php_intl_bad_args(const char *msg)
 {
-	php_intl_idn_check_status(U_ILLEGAL_ARGUMENT_ERROR, msg, mode);
+	php_intl_idn_check_status(U_ILLEGAL_ARGUMENT_ERROR, msg);
 }
 
 #ifdef HAVE_46_API
@@ -145,8 +145,7 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 	int			  buffer_used = 0;
 
 	uts46 = uidna_openUTS46(option, &status);
-	if (php_intl_idn_check_status(status, "failed to open UIDNA instance",
-			mode) == FAILURE) {
+	if (php_intl_idn_check_status(status, "failed to open UIDNA instance") == FAILURE) {
 		zend_string_free(buffer);
 		RETURN_FALSE;
 	}
@@ -158,8 +157,7 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 		len = uidna_nameToUnicodeUTF8(uts46, domain, domain_len,
 				ZSTR_VAL(buffer), buffer_capac, &info, &status);
 	}
-	if (len >= 255 || php_intl_idn_check_status(status, "failed to convert name",
-			mode) == FAILURE) {
+	if (len >= 255 || php_intl_idn_check_status(status, "failed to convert name") == FAILURE) {
 		uidna_close(uts46);
 		zend_string_free(buffer);
 		RETURN_FALSE;
@@ -266,31 +264,30 @@ static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|llz/",
 			&domain, &domain_len, &option, &variant, &idna_info) == FAILURE) {
-		php_intl_bad_args("bad arguments", mode);
+		php_intl_bad_args("bad arguments");
 		RETURN_NULL(); /* don't set FALSE because that's not the way it was before... */
 	}
 
 #ifdef HAVE_46_API
 	if (variant != INTL_IDN_VARIANT_2003 && variant != INTL_IDN_VARIANT_UTS46) {
 		php_intl_bad_args("invalid variant, must be one of {"
-			"INTL_IDNA_VARIANT_2003, INTL_IDNA_VARIANT_UTS46}", mode);
+			"INTL_IDNA_VARIANT_2003, INTL_IDNA_VARIANT_UTS46}");
 		RETURN_FALSE;
 	}
 #else
 	if (variant != INTL_IDN_VARIANT_2003) {
 		php_intl_bad_args("invalid variant, PHP was compiled against "
-			"an old version of ICU and only supports INTL_IDN_VARIANT_2003",
-			mode);
+			"an old version of ICU and only supports INTL_IDN_VARIANT_2003");
 		RETURN_FALSE;
 	}
 #endif
 
 	if (domain_len < 1) {
-		php_intl_bad_args("empty domain name", mode);
+		php_intl_bad_args("empty domain name");
 		RETURN_FALSE;
 	}
 	if (domain_len > INT32_MAX - 1) {
-		php_intl_bad_args("domain name too large", mode);
+		php_intl_bad_args("domain name too large");
 		RETURN_FALSE;
 	}
 	/* don't check options; it wasn't checked before */
