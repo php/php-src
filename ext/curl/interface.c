@@ -1964,12 +1964,12 @@ PHP_FUNCTION(curl_init)
 {
 	php_curl *ch;
 	CURL 	 *cp;
-	char 	 *url = NULL;
-	size_t		  url_len = 0;
+	zend_string *url = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &url, &url_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(0,1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR(url)
+	ZEND_PARSE_PARAMETERS_END();
 
 	cp = curl_easy_init();
 	if (!cp) {
@@ -1988,7 +1988,7 @@ PHP_FUNCTION(curl_init)
 	_php_curl_set_default_options(ch);
 
 	if (url) {
-		if (php_curl_option_url(ch, url, url_len) == FAILURE) {
+		if (php_curl_option_url(ch, ZSTR_VAL(url), ZSTR_LEN(url)) == FAILURE) {
 			_php_curl_close_ex(ch);
 			RETURN_FALSE;
 		}
@@ -2080,9 +2080,9 @@ PHP_FUNCTION(curl_copy_handle)
 	zval		*zid;
 	php_curl	*ch, *dupch;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zid) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1,1)
+		Z_PARAM_RESOURCE(zid)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if ((ch = (php_curl*)zend_fetch_resource(Z_RES_P(zid), le_curl_name, le_curl)) == NULL) {
 		RETURN_FALSE;
@@ -3311,9 +3311,9 @@ PHP_FUNCTION(curl_errno)
 	zval		*zid;
 	php_curl	*ch;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zid) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1,1)
+		Z_PARAM_RESOURCE(zid)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if ((ch = (php_curl*)zend_fetch_resource(Z_RES_P(zid), le_curl_name, le_curl)) == NULL) {
 		RETURN_FALSE;
@@ -3534,24 +3534,25 @@ PHP_FUNCTION(curl_reset)
    URL encodes the given string */
 PHP_FUNCTION(curl_escape)
 {
-	char       *str = NULL, *res = NULL;
-	size_t     str_len = 0;
-	zval       *zid;
-	php_curl   *ch;
+	zend_string *str;
+	char        *res;
+	zval        *zid;
+	php_curl    *ch;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &zid, &str, &str_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2,2)
+		Z_PARAM_RESOURCE(zid)
+		Z_PARAM_STR(str)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if ((ch = (php_curl*)zend_fetch_resource(Z_RES_P(zid), le_curl_name, le_curl)) == NULL) {
 		RETURN_FALSE;
 	}
 
-	if (ZEND_SIZE_T_INT_OVFL(str_len)) {
+	if (ZEND_SIZE_T_INT_OVFL(ZSTR_LEN(str))) {
 		RETURN_FALSE;
 	}
 
-	if ((res = curl_easy_escape(ch->cp, str, str_len))) {
+	if ((res = curl_easy_escape(ch->cp, ZSTR_VAL(str), ZSTR_LEN(str)))) {
 		RETVAL_STRING(res);
 		curl_free(res);
 	} else {
@@ -3564,25 +3565,26 @@ PHP_FUNCTION(curl_escape)
    URL decodes the given string */
 PHP_FUNCTION(curl_unescape)
 {
-	char       *str = NULL, *out = NULL;
-	size_t     str_len = 0;
-	int        out_len;
-	zval       *zid;
-	php_curl   *ch;
+	char        *out = NULL;
+	int          out_len;
+	zval        *zid;
+	zend_string *str;
+	php_curl    *ch;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &zid, &str, &str_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2,2)
+		Z_PARAM_RESOURCE(zid)
+		Z_PARAM_STR(str)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if ((ch = (php_curl*)zend_fetch_resource(Z_RES_P(zid), le_curl_name, le_curl)) == NULL) {
 		RETURN_FALSE;
 	}
 
-	if (ZEND_SIZE_T_INT_OVFL(str_len)) {
+	if (ZEND_SIZE_T_INT_OVFL(ZSTR_LEN(str))) {
 		RETURN_FALSE;
 	}
 
-	if ((out = curl_easy_unescape(ch->cp, str, str_len, &out_len))) {
+	if ((out = curl_easy_unescape(ch->cp, ZSTR_VAL(str), ZSTR_LEN(str), &out_len))) {
 		RETVAL_STRINGL(out, out_len);
 		curl_free(out);
 	} else {
@@ -3601,9 +3603,10 @@ PHP_FUNCTION(curl_pause)
 	zval       *zid;
 	php_curl   *ch;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &zid, &bitmask) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2,2)
+		Z_PARAM_RESOURCE(zid)
+		Z_PARAM_LONG(bitmask)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if ((ch = (php_curl*)zend_fetch_resource(Z_RES_P(zid), le_curl_name, le_curl)) == NULL) {
 		RETURN_FALSE;
