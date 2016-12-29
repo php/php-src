@@ -38,6 +38,10 @@ PHP                                                                        NEWS
 - Reflection:
   . Fixed bug #46103 (ReflectionObject memory leak). (Nikita)
 
+- SQLite3:
+  . Reverted fix for bug #73530	(Unsetting result set may reset other result
+    set). (cmb)
+
 - Standard:
   . Fixed bug #73594 (dns_get_record does not populate $additional out parameter).
     (Bruce Weirdan)
