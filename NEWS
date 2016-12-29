@@ -9,6 +9,10 @@ PHP                                                                        NEWS
   . Fixed bug #68447 (grapheme_extract take an extra trailing character). 
     (SATŌ Kentarō)
 
+- SQLite3:
+  . Reverted fix for bug #73530	(Unsetting result set may reset other result
+    set). (cmb)
+
 08 Dec 2016, PHP 5.6.29
 
 - Mbstring:

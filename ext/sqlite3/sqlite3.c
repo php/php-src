@@ -2184,6 +2184,10 @@ static void php_sqlite3_result_object_free_storage(void *object TSRMLS_DC) /* {{
 	}
 
 	if (intern->stmt_obj_zval) {
+		if (intern->stmt_obj->initialised) {
+			sqlite3_reset(intern->stmt_obj->stmt);
+		}
+
 		if (intern->is_prepared_statement == 0) {
 			zval_dtor(intern->stmt_obj_zval);
 			FREE_ZVAL(intern->stmt_obj_zval);
