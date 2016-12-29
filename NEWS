@@ -45,6 +45,10 @@ PHP                                                                        NEWS
     separator). (Bob)
   . Fixed bug #73704 (phpdbg shows the wrong line in files with shebang). (Bob)
 
+- SQLite3:
+  . Reverted fix for bug #73530	(Unsetting result set may reset other result
+    set). (cmb)
+
 - Standard:
   . Fixed bug #73594 (dns_get_record does not populate $additional out parameter).
     (Bruce Weirdan)
