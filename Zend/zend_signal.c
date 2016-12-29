@@ -198,7 +198,7 @@ static void zend_signal_handler(int signo, siginfo_t *siginfo, void *context)
 #endif
 			}
 		}
-	} else if (p_sig.handler != SIG_IGN) { /* ignore SIG_IGN */
+	} else {
 		if (p_sig.flags & SA_SIGINFO) {
 			if (p_sig.flags & SA_RESETHAND) {
 				SIGG(handlers)[signo-1].flags   = 0;
@@ -234,9 +234,13 @@ ZEND_API int zend_sigaction(int signo, const struct sigaction *act, struct sigac
 		}
 
 		memset(&sa, 0, sizeof(sa));
-		sa.sa_flags     = SA_SIGINFO | (act->sa_flags & SA_FLAGS_MASK);
-		sa.sa_sigaction = zend_signal_handler_defer;
-		sa.sa_mask      = global_sigmask;
+		if (SIGG(handlers)[signo-1].handler == (void *) SIG_IGN) {
+			sa.sa_sigaction = (void *) SIG_IGN;
+		} else {
+			sa.sa_flags     = SA_SIGINFO | (act->sa_flags & SA_FLAGS_MASK);
+			sa.sa_sigaction = zend_signal_handler_defer;
+			sa.sa_mask      = global_sigmask;
+		}
 
 		if (sigaction(signo, &sa, NULL) < 0) {
 			zend_error_noreturn(E_ERROR, "Error installing signal handler for %d", signo);
