@@ -362,9 +362,12 @@ PHP_FUNCTION(round)
 	zend_long mode = PHP_ROUND_HALF_UP;
 	double return_val;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|ll", &value, &precision, &mode) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_ZVAL_DEREF(value)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(precision)
+		Z_PARAM_LONG(mode)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZEND_NUM_ARGS() >= 2) {
 #if SIZEOF_ZEND_LONG > SIZEOF_INT
@@ -623,9 +626,10 @@ PHP_FUNCTION(pow)
 {
 	zval *zbase, *zexp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z/z/", &zbase, &zexp) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ZVAL_DEREF_EX(zbase, 0, 1)
+		Z_PARAM_ZVAL_DEREF_EX(zexp, 0, 1)
+	ZEND_PARSE_PARAMETERS_END();
 
 	pow_function(return_value, zbase, zexp);
 }
@@ -978,9 +982,10 @@ PHP_FUNCTION(bindec)
 {
 	zval *arg;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &arg) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL_DEREF(arg)
+	ZEND_PARSE_PARAMETERS_END();
+
 	convert_to_string_ex(arg);
 	if (_php_math_basetozval(arg, 2, return_value) == FAILURE) {
 		RETURN_FALSE;
@@ -994,9 +999,10 @@ PHP_FUNCTION(hexdec)
 {
 	zval *arg;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &arg) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL_DEREF(arg)
+	ZEND_PARSE_PARAMETERS_END();
+
 	convert_to_string_ex(arg);
 	if (_php_math_basetozval(arg, 16, return_value) == FAILURE) {
 		RETURN_FALSE;
@@ -1010,9 +1016,10 @@ PHP_FUNCTION(octdec)
 {
 	zval *arg;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &arg) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL_DEREF(arg)
+	ZEND_PARSE_PARAMETERS_END();
+
 	convert_to_string_ex(arg);
 	if (_php_math_basetozval(arg, 8, return_value) == FAILURE) {
 		RETURN_FALSE;
@@ -1027,9 +1034,10 @@ PHP_FUNCTION(decbin)
 	zval *arg;
 	zend_string *result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &arg) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL_DEREF(arg)
+	ZEND_PARSE_PARAMETERS_END();
+
 	convert_to_long_ex(arg);
 	result = _php_math_longtobase(arg, 2);
 	RETURN_STR(result);
@@ -1043,9 +1051,10 @@ PHP_FUNCTION(decoct)
 	zval *arg;
 	zend_string *result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &arg) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL_DEREF(arg)
+	ZEND_PARSE_PARAMETERS_END();
+
 	convert_to_long_ex(arg);
 	result = _php_math_longtobase(arg, 8);
 	RETURN_STR(result);
@@ -1059,9 +1068,10 @@ PHP_FUNCTION(dechex)
 	zval *arg;
 	zend_string *result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &arg) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL_DEREF(arg)
+	ZEND_PARSE_PARAMETERS_END();
+
 	convert_to_long_ex(arg);
 	result = _php_math_longtobase(arg, 16);
 	RETURN_STR(result);
@@ -1076,9 +1086,11 @@ PHP_FUNCTION(base_convert)
 	zend_long frombase, tobase;
 	zend_string *result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zll", &number, &frombase, &tobase) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_ZVAL_DEREF(number)
+		Z_PARAM_LONG(frombase)
+		Z_PARAM_LONG(tobase)
+	ZEND_PARSE_PARAMETERS_END();
 	convert_to_string_ex(number);
 
 	if (frombase < 2 || frombase > 36) {
@@ -1284,9 +1296,10 @@ PHP_FUNCTION(intdiv)
 {
 	zend_long dividend, divisor;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &dividend, &divisor) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_LONG(dividend)
+		Z_PARAM_LONG(divisor)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (divisor == 0) {
 		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Division by zero");
