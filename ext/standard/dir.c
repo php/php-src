@@ -63,15 +63,6 @@ int dir_globals_id;
 php_dir_globals dir_globals;
 #endif
 
-#if 0
-typedef struct {
-	int id;
-	DIR *dir;
-} php_dir;
-
-static int le_dirp;
-#endif
-
 static zend_class_entry *dir_class_entry_ptr;
 
 #define FETCH_DIRP() \
@@ -429,7 +420,7 @@ PHP_NAMED_FUNCTION(php_if_readdir)
    Find pathnames matching a pattern */
 PHP_FUNCTION(glob)
 {
-	int cwd_skip = 0;
+	size_t cwd_skip = 0;
 #ifdef ZTS
 	char cwd[MAXPATHLEN];
 	char work_pattern[MAXPATHLEN];
@@ -468,7 +459,7 @@ PHP_FUNCTION(glob)
 			cwd[2] = '\0';
 		}
 #endif
-		cwd_skip = (int)strlen(cwd)+1;
+		cwd_skip = strlen(cwd)+1;
 
 		snprintf(work_pattern, MAXPATHLEN, "%s%c%s", cwd, DEFAULT_SLASH, pattern);
 		pattern = work_pattern;

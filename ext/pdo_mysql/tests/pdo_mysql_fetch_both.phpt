@@ -62,27 +62,27 @@ $db = MySQLPDOTest::factory();
 [002] Suspicious FETCH_BOTH result, dumping
 array(2) {
   [0]=>
-  %unicode|string%(1) "1"
+  string(1) "1"
   [1]=>
-  %unicode|string%(1) "1"
+  string(1) "1"
 }
 array(2) {
   [1]=>
-  %unicode|string%(1) "1"
+  string(1) "1"
   [2]=>
-  %unicode|string%(1) "1"
+  string(1) "1"
 }
 [002] Expected differes from returned data, dumping
 array(2) {
   [0]=>
-  %unicode|string%(1) "1"
+  string(1) "1"
   [1]=>
-  %unicode|string%(1) "1"
+  string(1) "1"
 }
 array(2) {
   [1]=>
-  %unicode|string%(1) "1"
+  string(1) "1"
   [2]=>
-  %unicode|string%(1) "1"
+  string(1) "1"
 }
 done!

@@ -417,7 +417,7 @@ foundit:
 			php_stream_seek(fp, sizeof(phar_zip_file_header) + entry.header_offset + entry.filename_len + PHAR_GET_16(zipentry.extra_len), SEEK_SET);
 			sig = (char *) emalloc(entry.uncompressed_filesize);
 			read = php_stream_read(fp, sig, entry.uncompressed_filesize);
-			if (read != entry.uncompressed_filesize) {
+			if (read != entry.uncompressed_filesize || read <= 8) {
 				php_stream_close(sigfile);
 				efree(sig);
 				PHAR_ZIP_FAIL("signature cannot be read");
@@ -1170,7 +1170,6 @@ static int phar_zip_applysignature(phar_archive_data *phar, struct _phar_zip_pas
 
 		if (pass->error && *(pass->error)) {
 			/* error is set by writeheaders */
-			php_stream_close(newfile);
 			return FAILURE;
 		}
 	} /* signature */

@@ -788,6 +788,9 @@ SPL_METHOD(SplObjectStorage, unserialize)
 	--p; /* for ';' */
 	count = Z_LVAL_P(pcount);
 
+	ZVAL_UNDEF(&entry);
+	ZVAL_UNDEF(&inf);
+
 	while (count-- > 0) {
 		spl_SplObjectStorageElement *pelement;
 		zend_hash_key key;
@@ -803,18 +806,17 @@ SPL_METHOD(SplObjectStorage, unserialize)
 		if (!php_var_unserialize(&entry, &p, s + buf_len, &var_hash)) {
 			goto outexcept;
 		}
-		if (Z_TYPE(entry) != IS_OBJECT) {
-			zval_ptr_dtor(&entry);
-			goto outexcept;
-		}
 		if (*p == ',') { /* new version has inf */
 			++p;
 			if (!php_var_unserialize(&inf, &p, s + buf_len, &var_hash)) {
 				zval_ptr_dtor(&entry);
 				goto outexcept;
 			}
-		} else {
-			ZVAL_UNDEF(&inf);
+		}
+		if (Z_TYPE(entry) != IS_OBJECT) {
+			zval_ptr_dtor(&entry);
+			zval_ptr_dtor(&inf);
+			goto outexcept;
 		}
 
 		if (spl_object_storage_get_hash(&key, intern, getThis(), &entry) == FAILURE) {

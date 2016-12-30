@@ -328,7 +328,7 @@ static int add_string(zval* list, char* id, char* string) {
 	else   return add_next_index_string(list, string);
 }
 
-static int add_stringl(zval* list, char* id, char* string, uint length) {
+static int add_stringl(zval* list, char* id, char* string, uint32_t length) {
 	if(id) return add_assoc_stringl(list, id, string, length);
 	else   return add_next_index_stringl(list, string, length);
 }
@@ -701,7 +701,7 @@ PHP_FUNCTION(xmlrpc_encode_request)
 			outBuf = XMLRPC_REQUEST_ToXML(xRequest, 0);
 			if (outBuf) {
 				RETVAL_STRING(outBuf);
-				free(outBuf);
+				efree(outBuf);
 			}
 			XMLRPC_RequestFree(xRequest, 1);
 		}
@@ -735,7 +735,7 @@ PHP_FUNCTION(xmlrpc_encode)
 		if (xOut) {
 			if (outBuf) {
 				RETVAL_STRING(outBuf);
-				free(outBuf);
+				efree(outBuf);
 			}
 			/* cleanup */
 			XMLRPC_CleanupValue(xOut);
@@ -1102,7 +1102,7 @@ PHP_FUNCTION(xmlrpc_server_call_method)
 				outBuf = XMLRPC_REQUEST_ToXML(xResponse, &buf_len);
 				if (outBuf) {
 					RETVAL_STRINGL(outBuf, buf_len);
-					free(outBuf);
+					efree(outBuf);
 				}
 				/* cleanup after ourselves.  what a sty! */
 				XMLRPC_RequestFree(xResponse, 0);

@@ -44,7 +44,7 @@ Non-static method A::A_ftk() should not be called statically
 2 %sbug38047.php:36 kalus_error_handler()
 
 
-Fatal error: Uncaught Error: Too few arguments to function A::A_ftk(), 0 passed in %sbug38047.php on line 36 and exactly 1 expected in %sbug38047.php:7
+Fatal error: Uncaught ArgumentCountError: Too few arguments to function A::A_ftk(), 0 passed in %sbug38047.php on line 36 and exactly 1 expected in %sbug38047.php:7
 Stack trace:
 #0 %sbug38047.php(36): A::A_ftk()
 #1 {main}

@@ -24,16 +24,6 @@
 extern "C" {
 #endif
 
-/* typedef DIR - not the same as Unix */
-struct DIR_W32 {
-	HANDLE handle;				/* _findfirst/_findnext handle */
-	int offset;					/* offset into directory */
-	short finished;				/* 1 if there are not more files */
-	WIN32_FIND_DATAW fileinfo;  /* from _findfirst/_findnext */
-	wchar_t *dirw;		/* the dir we are reading */
-	struct dirent dent;			/* the dirent to return */
-};
-
 DIR *opendir(const char *dir)
 {
 	DIR *dp;
@@ -54,12 +44,14 @@ DIR *opendir(const char *dir)
 
 	resolvedw = php_win32_ioutil_conv_any_to_w(resolved_path_buff, PHP_WIN32_CP_IGNORE_LEN, &resolvedw_len);
 	if (!resolvedw) {
+		free(dp);
 		return NULL;
 	}
 
 	filespecw_len = resolvedw_len + 2;
 	filespecw = (wchar_t *)malloc((filespecw_len + 1)*sizeof(wchar_t));
 	if (filespecw == NULL) {
+		free(dp);
 		free(resolvedw);
 		return NULL;
 	}

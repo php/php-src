@@ -5,6 +5,10 @@ Bug #47517 test registry virtualization disabled
 if (substr(PHP_OS, 0, 3) != 'WIN') {
     die('skip only for Windows');
 }
+exec('net session 2>&1', $out, $status);
+if (!$status) {
+	die('skip test runs under an elevated user account');
+}
 ?>
 --FILE--
 <?php

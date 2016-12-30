@@ -43,14 +43,6 @@
 #include <errno.h>
 #include <process.h>
 #include "win32/time.h"
-#elif defined(NETWARE)
-#ifdef USE_WINSOCK
-#include <novsock2.h>
-#else
-#include <sys/socket.h>
-#endif
-#include <errno.h>
-#include <sys/timeval.h>
 #else
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -1008,7 +1000,7 @@ static int php_snmp_parse_oid(zval *object, int st, struct objid_query *objid_qu
 			php_error_docref(NULL, E_WARNING, "Got empty OID array");
 			return FALSE;
 		}
-		objid_query->vars = (snmpobjarg *)emalloc(sizeof(snmpobjarg) * zend_hash_num_elements(Z_ARRVAL_P(oid)));
+		objid_query->vars = (snmpobjarg *)safe_emalloc(sizeof(snmpobjarg), zend_hash_num_elements(Z_ARRVAL_P(oid)), 0);
 		if (objid_query->vars == NULL) {
 			php_error_docref(NULL, E_WARNING, "emalloc() failed while parsing oid array: %s", strerror(errno));
 			efree(objid_query->vars);
@@ -2068,11 +2060,11 @@ static int php_snmp_has_property(zval *object, zval *member, int has_set_exists,
 }
 /* }}} */
 
-static HashTable *php_snmp_get_gc(zval *object, zval ***gc_data, int *gc_data_count TSRMLS_DC) /* {{{ */
+static HashTable *php_snmp_get_gc(zval *object, zval ***gc_data, int *gc_data_count) /* {{{ */
 {
 	*gc_data = NULL;
 	*gc_data_count = 0;
-	return zend_std_get_properties(object TSRMLS_CC);
+	return zend_std_get_properties(object);
 }
 /* }}} */
 

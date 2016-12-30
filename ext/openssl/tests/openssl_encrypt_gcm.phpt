@@ -26,6 +26,9 @@ var_dump(openssl_encrypt('data', $method, 'password', 0, NULL, $tag, ''));
 
 // Failing to retrieve tag (max is 16 bytes)
 var_dump(openssl_encrypt('data', $method, 'password', 0, str_repeat('x', 32), $tag, '', 20));
+
+// Failing when no tag supplied
+var_dump(openssl_encrypt('data', $method, 'password', 0, str_repeat('x', 32)));
 ?>
 --EXPECTF--
 TEST 0
@@ -51,4 +54,7 @@ Warning: openssl_encrypt(): Setting of IV length for AEAD mode failed, the expec
 bool(false)
 
 Warning: openssl_encrypt(): Retrieving verification tag failed in %s on line %d
-string(8) "S6+N0w=="
+bool(false)
+
+Warning: openssl_encrypt(): A tag should be provided when using AEAD mode in %s on line %d
+bool(false)

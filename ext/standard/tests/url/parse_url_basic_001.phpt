@@ -507,6 +507,23 @@ echo "Done";
   string(16) "some_page_ref123"
 }
 
+--> http://secret@hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123: array(7) {
+  ["scheme"]=>
+  string(4) "http"
+  ["host"]=>
+  string(11) "www.php.net"
+  ["port"]=>
+  int(80)
+  ["user"]=>
+  string(14) "secret@hideout"
+  ["path"]=>
+  string(10) "/index.php"
+  ["query"]=>
+  string(31) "test=1&test2=char&test3=mixesCI"
+  ["fragment"]=>
+  string(16) "some_page_ref123"
+}
+
 --> http://secret:hid:out@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123: array(8) {
   ["scheme"]=>
   string(4) "http"
@@ -689,6 +706,23 @@ echo "Done";
   string(7) "9130731"
 }
 
+--> http://user:@pass@host/path?argument?value#etc: array(7) {
+  ["scheme"]=>
+  string(4) "http"
+  ["host"]=>
+  string(4) "host"
+  ["user"]=>
+  string(4) "user"
+  ["pass"]=>
+  string(5) "@pass"
+  ["path"]=>
+  string(5) "/path"
+  ["query"]=>
+  string(14) "argument?value"
+  ["fragment"]=>
+  string(3) "etc"
+}
+
 --> http://10.10.10.10/:80: array(3) {
   ["scheme"]=>
   string(4) "http"
@@ -744,25 +778,9 @@ echo "Done";
   int(6)
 }
 
---> http://?:/: array(3) {
-  ["scheme"]=>
-  string(4) "http"
-  ["host"]=>
-  string(1) "?"
-  ["path"]=>
-  string(1) "/"
-}
+--> http://?:/: bool(false)
 
---> http://@?:/: array(4) {
-  ["scheme"]=>
-  string(4) "http"
-  ["host"]=>
-  string(1) "?"
-  ["user"]=>
-  string(0) ""
-  ["path"]=>
-  string(1) "/"
-}
+--> http://@?:/: bool(false)
 
 --> file:///:: array(2) {
   ["scheme"]=>
@@ -864,10 +882,4 @@ echo "Done";
 --> http://blah.com:123456: bool(false)
 
 --> http://blah.com:abcdef: bool(false)
-
---> http://secret@hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123: bool(false)
-
---> http://user:@pass@host/path?argument?value#etc: bool(false)
-
---> http://foo.com\@bar.com: bool(false)
 Done

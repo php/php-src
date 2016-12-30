@@ -30,12 +30,20 @@ ps_module ps_mod_user = {
 static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval)
 {
 	int i;
+	if (PS(in_save_handler)) {
+		PS(in_save_handler) = 0;
+		ZVAL_UNDEF(retval);
+		php_error_docref(NULL, E_WARNING, "Cannot call session save handler in a recursive manner");
+		return;
+	}
+	PS(in_save_handler) = 1;
 	if (call_user_function(EG(function_table), NULL, func, retval, argc, argv) == FAILURE) {
 		zval_ptr_dtor(retval);
 		ZVAL_UNDEF(retval);
 	} else if (Z_ISUNDEF_P(retval)) {
 		ZVAL_NULL(retval);
 	}
+	PS(in_save_handler) = 0;
 	for (i = 0; i < argc; i++) {
 		zval_ptr_dtor(&argv[i]);
 	}
@@ -176,13 +184,22 @@ PS_DESTROY_FUNC(user)
 PS_GC_FUNC(user)
 {
 	zval args[1];
-	STDVARS;
+	zval retval;
 
 	ZVAL_LONG(&args[0], maxlifetime);
 
 	ps_call_handler(&PSF(gc), 1, args, &retval);
 
-	FINISH;
+	if (Z_TYPE(retval) == IS_LONG) {
+		convert_to_long(&retval);
+		return Z_LVAL(retval);
+	}
+	/* This is for older API compatibility */
+	if (Z_TYPE(retval) == IS_TRUE) {
+		return 1;
+	}
+	/* Anything else is some kind of error */
+	return -1; // Error
 }
 
 PS_CREATE_SID_FUNC(user)

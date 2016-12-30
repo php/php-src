@@ -31,11 +31,7 @@
 #include <fcntl.h>
 
 #include "zend_smart_str.h"
-#ifndef NETWARE
 #include "ext/standard/php_standard.h"
-#else
-#include "ext/standard/basic_functions.h"
-#endif
 
 #include "apr_strings.h"
 #include "ap_config.h"
@@ -53,9 +49,9 @@
 
 #include "php_apache.h"
 
-/* UnixWare and Netware define shutdown to _shutdown, which causes problems later
+/* UnixWare define shutdown to _shutdown, which causes problems later
  * on when using a structure member named shutdown. Since this source
- * file does not use the system call shutdown, it is safe to #undef it.K
+ * file does not use the system call shutdown, it is safe to #undef it.
  */
 #undef shutdown
 
@@ -67,6 +63,33 @@
 char *apache2_php_ini_path_override = NULL;
 #if defined(PHP_WIN32) && defined(ZTS)
 ZEND_TSRMLS_CACHE_DEFINE()
+#endif
+
+/* if apache's version is newer than 2.2.31 or 2.4.16 */
+#if MODULE_MAGIC_COOKIE == 0x41503232UL && AP_MODULE_MAGIC_AT_LEAST(20051115,40) || \
+	MODULE_MAGIC_COOKIE == 0x41503234UL && AP_MODULE_MAGIC_AT_LEAST(20120211,47)
+#define php_ap_map_http_request_error ap_map_http_request_error
+#else
+static int php_ap_map_http_request_error(apr_status_t rv, int status)
+{
+	switch (rv) {
+	case AP_FILTER_ERROR: {
+		return AP_FILTER_ERROR;
+	}
+	case APR_ENOSPC: {
+		return HTTP_REQUEST_ENTITY_TOO_LARGE;
+	}
+	case APR_ENOTIMPL: {
+		return HTTP_NOT_IMPLEMENTED;
+	}
+	case APR_ETIMEDOUT: {
+		return HTTP_REQUEST_TIME_OUT;
+	}
+	default: {
+		return status;
+	}
+	}
+}
 #endif
 
 static size_t
@@ -184,6 +207,7 @@ php_apache_sapi_read_post(char *buf, size_t count_bytes)
 	php_struct *ctx = SG(server_context);
 	request_rec *r;
 	apr_bucket_brigade *brigade;
+	apr_status_t ret;
 
 	r = ctx->r;
 	brigade = ctx->brigade;
@@ -195,7 +219,7 @@ php_apache_sapi_read_post(char *buf, size_t count_bytes)
 	 * need to make sure that if data is available we fill the buffer completely.
 	 */
 
-	while (ap_get_brigade(r->input_filters, brigade, AP_MODE_READBYTES, APR_BLOCK_READ, len) == APR_SUCCESS) {
+	while ((ret=ap_get_brigade(r->input_filters, brigade, AP_MODE_READBYTES, APR_BLOCK_READ, len)) == APR_SUCCESS) {
 		apr_brigade_flatten(brigade, buf, &len);
 		apr_brigade_cleanup(brigade);
 		tlen += len;
@@ -204,6 +228,14 @@ php_apache_sapi_read_post(char *buf, size_t count_bytes)
 		}
 		buf += len;
 		len = count_bytes - tlen;
+	}
+
+	if (ret != APR_SUCCESS) {
+		if (APR_STATUS_IS_TIMEUP(ret)) {
+			SG(sapi_headers).http_response_code = php_ap_map_http_request_error(ret, HTTP_REQUEST_TIME_OUT);
+		} else {
+			SG(sapi_headers).http_response_code = php_ap_map_http_request_error(ret, HTTP_BAD_REQUEST);
+		}
 	}
 
 	return tlen;
@@ -223,16 +255,9 @@ php_apache_sapi_get_stat(void)
 #endif
 	ctx->finfo.st_dev = ctx->r->finfo.device;
 	ctx->finfo.st_ino = ctx->r->finfo.inode;
-#if defined(NETWARE) && defined(CLIB_STAT_PATCH)
-	ctx->finfo.st_atime.tv_sec = apr_time_sec(ctx->r->finfo.atime);
-	ctx->finfo.st_mtime.tv_sec = apr_time_sec(ctx->r->finfo.mtime);
-	ctx->finfo.st_ctime.tv_sec = apr_time_sec(ctx->r->finfo.ctime);
-#else
 	ctx->finfo.st_atime = apr_time_sec(ctx->r->finfo.atime);
 	ctx->finfo.st_mtime = apr_time_sec(ctx->r->finfo.mtime);
 	ctx->finfo.st_ctime = apr_time_sec(ctx->r->finfo.ctime);
-#endif
-
 	ctx->finfo.st_size = ctx->r->finfo.size;
 	ctx->finfo.st_nlink = ctx->r->finfo.nlink;
 
@@ -688,6 +713,13 @@ zend_first_try {
 		}
 		ctx->r = r;
 		brigade = ctx->brigade;
+	}
+
+	if (SG(request_info).content_length > SG(read_post_bytes)) {
+		ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, "Error while attempting to read POST data: %d", SG(sapi_headers).http_response_code);
+		apr_brigade_cleanup(brigade);
+		PHPAP_INI_OFF;
+		return SG(sapi_headers).http_response_code;
 	}
 
 	if (AP2(last_modified)) {

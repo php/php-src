@@ -296,14 +296,14 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 
 		if (CWDG(realpath_cache_size_limit)) {
 			t = time(0);
-			bucket = realpath_cache_lookup(pathname, (int)strlen(pathname), t);
+			bucket = realpath_cache_lookup(pathname, strlen(pathname), t);
 			if(bucket == NULL && real_path == NULL) {
 				/* We used the pathname directly. Call tsrm_realpath */
 				/* so that entry is created in realpath cache */
 				real_path = (char *)malloc(MAXPATHLEN);
 				if(tsrm_realpath(pathname, real_path) != NULL) {
 					pathname = real_path;
-					bucket = realpath_cache_lookup(pathname, (int)strlen(pathname), t);
+					bucket = realpath_cache_lookup(pathname, strlen(pathname), t);
 					PHP_WIN32_IOUTIL_REINIT_W(pathname);
 				}
 			}
@@ -426,7 +426,7 @@ static process_pair *process_get(FILE *stream)
 	return ptr;
 }
 
-static shm_pair *shm_get(int key, void *addr)
+static shm_pair *shm_get(key_t key, void *addr)
 {
 	shm_pair *ptr;
 	shm_pair *newptr;
@@ -639,16 +639,12 @@ TSRM_API int pclose(FILE *stream)
 	return termstat;
 }
 
-TSRM_API int shmget(int key, int size, int flags)
+TSRM_API int shmget(key_t key, size_t size, int flags)
 {
 	shm_pair *shm;
 	char shm_segment[26], shm_info[29];
 	HANDLE shm_handle, info_handle;
 	BOOL created = FALSE;
-
-	if (size < 0) {
-		return -1;
-	}
 
 	snprintf(shm_segment, sizeof(shm_segment), "TSRM_SHM_SEGMENT:%d", key);
 	snprintf(shm_info, sizeof(shm_info), "TSRM_SHM_DESCRIPTOR:%d", key);
@@ -658,7 +654,14 @@ TSRM_API int shmget(int key, int size, int flags)
 
 	if (!shm_handle && !info_handle) {
 		if (flags & IPC_CREAT) {
-			shm_handle	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, size, shm_segment);
+#if SIZEOF_SIZE_T == 8
+			DWORD high = size >> 32;
+			DWORD low = (DWORD)size;
+#else
+			DWORD high = 0;
+			DWORD low = size;
+#endif
+			shm_handle	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, high, low, shm_segment);
 			info_handle	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sizeof(shm->descriptor), shm_info);
 			created		= TRUE;
 		}
@@ -673,6 +676,12 @@ TSRM_API int shmget(int key, int size, int flags)
 		}
 	} else {
 		if (flags & IPC_EXCL) {
+			if (shm_handle) {
+				CloseHandle(shm_handle);
+			}
+			if (info_handle) {
+				CloseHandle(info_handle);
+			}
 			return -1;
 		}
 	}
@@ -716,16 +725,23 @@ TSRM_API int shmget(int key, int size, int flags)
 TSRM_API void *shmat(int key, const void *shmaddr, int flags)
 {
 	shm_pair *shm = shm_get(key, NULL);
+	int err;
 
 	if (!shm->segment) {
+		return (void*)-1;
+	}
+
+	shm->addr = MapViewOfFileEx(shm->segment, FILE_MAP_ALL_ACCESS, 0, 0, 0, NULL);
+
+	err = GetLastError();
+	if (err) {
+		SET_ERRNO_FROM_WIN32_CODE(err);
 		return (void*)-1;
 	}
 
 	shm->descriptor->shm_atime = time(NULL);
 	shm->descriptor->shm_lpid  = getpid();
 	shm->descriptor->shm_nattch++;
-
-	shm->addr = MapViewOfFileEx(shm->segment, FILE_MAP_ALL_ACCESS, 0, 0, 0, NULL);
 
 	return shm->addr;
 }

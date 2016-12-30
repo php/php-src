@@ -8,10 +8,10 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <summary>Extension for Oracle Database</summary>
 
  <description>
-Use the OCI8 extension to access Oracle Database. PHP OCI8 2.1 builds
-with PHP 7.  Use 'pecl install oci8-2.0.12' to install OCI8 for PHP
-5.2 - PHP 5.6.  Use 'pecl install oci8-1.4.10' to install PHP OCI8 1.4
-for PHP 4.3.9 - PHP 5.1.  The OCI8 extension can be linked with Oracle
+Use the OCI8 extension to access Oracle Database.  Use 'pecl install
+oci8' to install for PHP 7.  Use 'pecl install oci8-2.0.12' to install
+for PHP 5.2 - PHP 5.6.  Use 'pecl install oci8-1.4.10' to install for
+PHP 4.3.9 - PHP 5.1.  The OCI8 extension can be linked with Oracle
 client libraries from Oracle Database 12.1, 11, or 10.2.  These
 libraries are found in your database installation, or in the free
 Oracle Instant Client from
@@ -46,12 +46,12 @@ Interoperability Support" (ID 207303.1) for details.
   <active>no</active>
  </lead>
 
- <date>2016-08-07</date>
+ <date>2016-10-17</date>
  <time>12:00:00</time>
 
   <version>
-   <release>2.1.2</release>
-   <api>2.1.2</api>
+   <release>2.1.3</release>
+   <api>2.1.3</api>
   </version>
   <stability>
    <release>stable</release>
@@ -60,8 +60,7 @@ Interoperability Support" (ID 207303.1) for details.
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
 This version is for PHP 7 only.
-Fixed invalid handle error with Implicit Result Sets
-Fixed bug #72524 (Binding null values triggers ORA-24816 error)
+Fixed bug #71148 (Bind reference overwritten on PHP 7)
   </notes>
  <contents>
   <dir name="/">
@@ -468,6 +467,23 @@ Fixed bug #72524 (Binding null values triggers ORA-24816 error)
   <configureoption default="autodetect" name="with-oci8" prompt="Please provide the path to the ORACLE_HOME directory. Use &apos;instantclient,/path/to/instant/client/lib&apos; if you&apos;re compiling with Oracle Instant Client" />
  </extsrcrelease>
  <changelog>
+
+<release>
+  <version>
+   <release>2.1.2</release>
+   <api>2.1.2</api>
+  </version>
+  <stability>
+   <release>stable</release>
+   <api>stable</api>
+  </stability>
+  <license uri="http://www.php.net/license">PHP</license>
+  <notes>
+This version is for PHP 7 only.
+Fixed invalid handle error with Implicit Result Sets
+Fixed bug #72524 (Binding null values triggers ORA-24816 error)
+  </notes>
+</release>
 
 <release>
   <version>

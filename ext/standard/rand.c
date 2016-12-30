@@ -45,6 +45,30 @@ PHPAPI zend_long php_rand(void)
 }
 /* }}} */
 
+/* {{{ proto int mt_rand([int min, int max])
+   Returns a random number from Mersenne Twister */
+PHP_FUNCTION(rand)
+{
+	zend_long min;
+	zend_long max;
+	int argc = ZEND_NUM_ARGS();
+
+	if (argc == 0) {
+		RETURN_LONG(php_mt_rand() >> 1);
+	}
+
+	if (zend_parse_parameters(argc, "ll", &min, &max) == FAILURE) {
+		return;
+	}
+
+	if (max < min) {
+		RETURN_LONG(php_mt_rand_common(max, min));
+	}
+
+	RETURN_LONG(php_mt_rand_common(min, max));
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4

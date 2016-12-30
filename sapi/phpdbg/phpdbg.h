@@ -116,8 +116,6 @@
 #define memcpy(...) memcpy_tmp(__VA_ARGS__)
 #endif
 
-#define quiet_write(...) ZEND_IGNORE_VALUE(write(__VA_ARGS__))
-
 #if !defined(PHPDBG_WEBDATA_TRANSFER_H) && !defined(PHPDBG_WEBHELPER_H)
 
 #ifdef ZTS
@@ -235,6 +233,8 @@ int phpdbg_do_parse(phpdbg_param_t *stack, char *input);
 	}
 
 
+void phpdbg_register_file_handles(void);
+
 /* {{{ structs */
 ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	HashTable bp[PHPDBG_BREAK_TABLES];           /* break points */
@@ -245,6 +245,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	phpdbg_frame_t frame;                        /* frame */
 	uint32_t last_line;                          /* last executed line */
 
+	char *cur_command;                           /* current command */
 	phpdbg_lexer_data lexer;                     /* lexer data */
 	phpdbg_param_t *parser_stack;                /* param stack during lexer / parser phase */
 
@@ -305,6 +306,9 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	const phpdbg_color_t *colors[PHPDBG_COLORS]; /* colors */
 	char *buffer;                                /* buffer */
 	zend_bool last_was_newline;                  /* check if we don't need to output a newline upon next phpdbg_error or phpdbg_notice */
+
+	FILE *stdin_file;                            /* FILE pointer to stdin source file */
+	php_stream *(*orig_url_wrap_php)(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC);
 
 	char input_buffer[PHPDBG_MAX_CMD];           /* stdin input buffer */
 	int input_buflen;                            /* length of stdin input buffer */

@@ -568,7 +568,7 @@ PHPAPI void _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 		/* allocate a buffer for reading chunks */
 		chunk_buf = emalloc(stream->chunk_size);
 
-		while (!stream->eof && !err_flag && (stream->writepos - stream->readpos < (off_t)size)) {
+		while (!stream->eof && !err_flag && (stream->writepos - stream->readpos < (zend_off_t)size)) {
 			size_t justread = 0;
 			int flags;
 			php_stream_bucket *bucket;
@@ -1661,7 +1661,7 @@ int php_init_stream_wrappers(int module_number)
 	return (php_stream_xport_register("tcp", php_stream_generic_socket_factory) == SUCCESS
 			&&
 			php_stream_xport_register("udp", php_stream_generic_socket_factory) == SUCCESS
-#if defined(AF_UNIX) && !(defined(PHP_WIN32) || defined(__riscos__) || defined(NETWARE))
+#if defined(AF_UNIX) && !(defined(PHP_WIN32) || defined(__riscos__))
 			&&
 			php_stream_xport_register("unix", php_stream_generic_socket_factory) == SUCCESS
 			&&

@@ -97,17 +97,13 @@ int(%i)
 int(%i)
 
 -- Iteration 3 --
-
-Warning: rand(): max(100) is smaller than min(12345) in %s on line %d
-bool(false)
+int(%i)
 
 -- Iteration 4 --
 int(%i)
 
 -- Iteration 5 --
-
-Warning: rand(): max(100) is smaller than min(2147483647) in %s on line %d
-bool(false)
+int(%i)
 
 -- Iteration 6 --
 int(%i)

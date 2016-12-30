@@ -1,5 +1,11 @@
 --TEST--
 Test chdir() function : usage variations - different data type as $directory arg
+--SKIPIF--
+<?php
+if (substr(PHP_OS, 0, 3) != 'WIN') {
+  die("skip Valid only on Windows");
+}
+?>
 --FILE--
 <?php
 /* Prototype  : bool chdir(string $directory)

@@ -669,7 +669,7 @@ static void zend_dump_block_info(const zend_cfg *cfg, int n, uint32_t dump_flags
 	if (b->flags & ZEND_BB_EXIT) {
 		fprintf(stderr, " exit");
 	}
-	if (b->flags & ZEND_BB_ENTRY) {
+	if (b->flags & (ZEND_BB_ENTRY|ZEND_BB_RECV_ENTRY)) {
 		fprintf(stderr, " entry");
 	}
 	if (b->flags & ZEND_BB_TRY) {
@@ -735,7 +735,7 @@ static void zend_dump_block_info(const zend_cfg *cfg, int n, uint32_t dump_flags
 		fprintf(stderr, "    ; level=%d\n", b->level);
 	}
 	if (b->loop_header >= 0) {
-		fprintf(stderr, "    ; loop_header=%d\n", b->level);
+		fprintf(stderr, "    ; loop_header=%d\n", b->loop_header);
 	}
 	if (b->children >= 0) {
 		int j = b->children;

@@ -25,11 +25,13 @@ create_verify_file($prefix, "Ελλάδα.txt", "");
 create_verify_file($prefix, "привет", "opened an utf8 filename for reading");
 create_verify_file($prefix, "テストマルチバイト・パス", $content);
 create_verify_file($prefix, "測試多字節路徑", $content);
+create_verify_file($prefix, "żółć.txt", $content);
 create_verify_dir($prefix, "tschüß3");
 create_verify_dir($prefix, "Voláçao3");
 create_verify_dir($prefix, "привет3");
 create_verify_dir($prefix, "テストマルチバイト・パス42");
 create_verify_dir($prefix, "測試多字節路徑5");
+create_verify_dir($prefix, "żółć");
 
 
 $dirw = $prefix . DIRECTORY_SEPARATOR;
@@ -64,6 +66,8 @@ filename: Voláçao : filetype: file
 filename: Voláçao3 : filetype: dir
 filename: českýtestování.inc : filetype: file
 filename: š.txt : filetype: file
+filename: żółć : filetype: dir
+filename: żółć.txt : filetype: file
 filename: Ελλάδα.txt : filetype: file
 filename: привет : filetype: file
 filename: привет3 : filetype: dir

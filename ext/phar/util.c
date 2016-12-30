@@ -1603,6 +1603,13 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type,
 			unsigned char digest[64];
 			PHP_SHA512_CTX context;
 
+			if (sig_len < sizeof(digest)) {
+				if (error) {
+					spprintf(error, 0, "broken signature");
+				}
+				return FAILURE;
+			}
+
 			PHP_SHA512Init(&context);
 			read_len = end_of_phar;
 
@@ -1635,6 +1642,13 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type,
 		case PHAR_SIG_SHA256: {
 			unsigned char digest[32];
 			PHP_SHA256_CTX context;
+
+			if (sig_len < sizeof(digest)) {
+				if (error) {
+					spprintf(error, 0, "broken signature");
+				}
+				return FAILURE;
+			}
 
 			PHP_SHA256Init(&context);
 			read_len = end_of_phar;
@@ -1677,6 +1691,13 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type,
 			unsigned char digest[20];
 			PHP_SHA1_CTX  context;
 
+			if (sig_len < sizeof(digest)) {
+				if (error) {
+					spprintf(error, 0, "broken signature");
+				}
+				return FAILURE;
+			}
+
 			PHP_SHA1Init(&context);
 			read_len = end_of_phar;
 
@@ -1709,6 +1730,13 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type,
 		case PHAR_SIG_MD5: {
 			unsigned char digest[16];
 			PHP_MD5_CTX   context;
+
+			if (sig_len < sizeof(digest)) {
+				if (error) {
+					spprintf(error, 0, "broken signature");
+				}
+				return FAILURE;
+			}
 
 			PHP_MD5Init(&context);
 			read_len = end_of_phar;

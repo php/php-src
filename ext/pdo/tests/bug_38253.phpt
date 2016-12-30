@@ -22,19 +22,8 @@ $stmt = $pdo->prepare ("SELECT * FROM test");
 $stmt->execute();
 var_dump($stmt->fetchAll());
 
-if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) == 'oci') {
-    $type = "clob";
-} else if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) == 'firebird') {
-    $type = 'BLOB SUB_TYPE TEXT';
-} else {
-    $type = "text";
-}
-
-$pdo->exec ("create table test2 (id integer primary key, n $type)");
-$pdo->exec ("INSERT INTO test2 (id, n) VALUES (1,'hi')");
-
 $pdo->setAttribute (PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_FUNC);
-$stmt = $pdo->prepare ("SELECT * FROM test2");
+$stmt = $pdo->prepare ("SELECT * FROM test");
 $stmt->execute();
 var_dump($stmt->fetchAll());
 

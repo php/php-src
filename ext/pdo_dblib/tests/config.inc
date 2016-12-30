@@ -1,5 +1,21 @@
 <?php
 
+function get_tds_version() {
+	global $dsn;
+
+	$dsn_parts = explode(':', $dsn, 2);
+	if ($dsn_parts[0] == 'dblib') { // uri is an option, which we'll ignore
+		foreach (explode(';', $dsn_parts[1]) as $arg) {
+			$arg = explode('=', $arg);
+			if ($arg[0] == 'version') {
+				return $arg[1];
+			}
+		}
+	}
+
+	return null;
+}
+
 if (false !== getenv('PDO_DBLIB_TEST_DSN')) 
 	$dsn = getenv('PDO_DBLIB_TEST_DSN');
 else

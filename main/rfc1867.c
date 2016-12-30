@@ -40,7 +40,9 @@
 # define HAVE_ATOLL 1
 #endif
 
-#define DEBUG_FILE_UPLOAD ZEND_DEBUG
+#ifndef DEBUG_FILE_UPLOAD
+# define DEBUG_FILE_UPLOAD 0
+#endif
 
 static int dummy_encoding_translation(void)
 {

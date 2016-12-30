@@ -26,8 +26,7 @@ New value: aa
 prompt> [Breaking on watchpoint $a]
 Old value: aa
 New value: ab
->00005: $a[1] = "b";
- 00006: 
+>00006: 
 prompt> [$a has been removed, removing watchpoint]
 [Script ended normally]
 prompt> 

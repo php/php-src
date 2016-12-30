@@ -73,19 +73,6 @@ typedef unsigned short mode_t;
 #define IS_ABSOLUTE_PATH(path, len) \
 	(len >= 2 && (/* is local */isalpha(path[0]) && path[1] == ':' || /* is UNC */IS_SLASH(path[0]) && IS_SLASH(path[1])))
 
-#elif defined(NETWARE)
-#ifdef HAVE_DIRENT_H
-#include <dirent.h>
-#endif
-
-#define DEFAULT_SLASH '/'
-#define DEFAULT_DIR_SEPARATOR	';'
-#define IS_SLASH(c)	((c) == '/' || (c) == '\\')
-#define IS_SLASH_P(c)	IS_SLASH(*(c))
-/* Colon indicates volume name, either first character should be forward slash or backward slash */
-#define IS_ABSOLUTE_PATH(path, len) \
-    ((strchr(path, ':') != NULL) || ((len >= 1) && ((path[0] == '/') || (path[0] == '\\'))))
-
 #else
 #ifdef HAVE_DIRENT_H
 #include <dirent.h>
@@ -193,7 +180,7 @@ CWD_API int virtual_access(const char *pathname, int mode);
 CWD_API int virtual_utime(const char *filename, struct utimbuf *buf);
 #endif
 CWD_API int virtual_chmod(const char *filename, mode_t mode);
-#if !defined(ZEND_WIN32) && !defined(NETWARE)
+#if !defined(ZEND_WIN32)
 CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group, int link);
 #endif
 
@@ -217,14 +204,14 @@ typedef struct _realpath_cache_bucket {
 	char                          *realpath;
 	struct _realpath_cache_bucket *next;
 	time_t                         expires;
-	int                            path_len;
-	int                            realpath_len;
-	int                            is_dir;
+	uint16_t                       path_len;
+	uint16_t                       realpath_len;
+	uint8_t                        is_dir:1;
 #ifdef ZEND_WIN32
-	unsigned char                  is_rvalid;
-	unsigned char                  is_readable;
-	unsigned char                  is_wvalid;
-	unsigned char                  is_writable;
+	uint8_t                        is_rvalid:1;
+	uint8_t                        is_readable:1;
+	uint8_t                        is_wvalid:1;
+	uint8_t                        is_writable:1;
 #endif
 } realpath_cache_bucket;
 
@@ -245,8 +232,8 @@ extern virtual_cwd_globals cwd_globals;
 #endif
 
 CWD_API void realpath_cache_clean(void);
-CWD_API void realpath_cache_del(const char *path, int path_len);
-CWD_API realpath_cache_bucket* realpath_cache_lookup(const char *path, int path_len, time_t t);
+CWD_API void realpath_cache_del(const char *path, size_t path_len);
+CWD_API realpath_cache_bucket* realpath_cache_lookup(const char *path, size_t path_len, time_t t);
 CWD_API zend_long realpath_cache_size(void);
 CWD_API zend_long realpath_cache_max_buckets(void);
 CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
@@ -281,7 +268,7 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
 #define VCWD_UTIME(path, time) virtual_utime(path, time)
 #endif
 #define VCWD_CHMOD(path, mode) virtual_chmod(path, mode)
-#if !defined(ZEND_WIN32) && !defined(NETWARE)
+#if !defined(ZEND_WIN32)
 #define VCWD_CHOWN(path, owner, group) virtual_chown(path, owner, group, 0)
 #if HAVE_LCHOWN
 #define VCWD_LCHOWN(path, owner, group) virtual_chown(path, owner, group, 1)
@@ -336,7 +323,7 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
 # endif
 #endif
 
-#if !defined(ZEND_WIN32) && !defined(NETWARE)
+#if !defined(ZEND_WIN32)
 #define VCWD_CHOWN(path, owner, group) chown(path, owner, group)
 #if HAVE_LCHOWN
 #define VCWD_LCHOWN(path, owner, group) lchown(path, owner, group)
@@ -355,7 +342,8 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
 #endif
 
 #ifndef S_IFLNK
-# define S_IFLNK 0120000
+#define _IFLNK  0120000	/* symbolic link */
+#define S_IFLNK _IFLNK
 #endif
 
 #ifndef S_ISDIR
@@ -372,6 +360,17 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
 
 #ifndef S_IXROOT
 #define S_IXROOT ( S_IXUSR | S_IXGRP | S_IXOTH )
+#endif
+
+/* XXX should be _S_IFIFO? */
+#ifndef S_IFIFO
+#define	_IFIFO  0010000	/* fifo */
+#define S_IFIFO	_IFIFO
+#endif
+
+#ifndef S_IFBLK
+#define	_IFBLK  0060000	/* block special */
+#define S_IFBLK	_IFBLK
 #endif
 
 #endif /* VIRTUAL_CWD_H */

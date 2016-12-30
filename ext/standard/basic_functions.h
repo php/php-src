@@ -215,7 +215,10 @@ typedef struct _php_basic_globals {
 	} unserialize;
 
 	/* url_scanner_ex.re */
-	url_adapt_state_ex_t url_adapt_state_ex;
+	url_adapt_state_ex_t url_adapt_session_ex;
+	HashTable url_adapt_session_hosts_ht;
+	url_adapt_state_ex_t url_adapt_output_ex;
+	HashTable url_adapt_output_hosts_ht;
 
 #ifdef HAVE_MMAP
 	void *mmap_file;

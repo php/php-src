@@ -1,4 +1,4 @@
-鬼車 正規表現 Version 5.9.1    2007/09/05
+鬼車 正規表現 Version 6.0.0    2016/05/02
 
 使用文法: ONIG_SYNTAX_RUBY (既定値)
 
@@ -86,19 +86,7 @@
        Hiragana, Katakana
 
      + UTF8, UTF16, UTF32で有効
-       Any, Assigned, C, Cc, Cf, Cn, Co, Cs, L, Ll, Lm, Lo, Lt, Lu,
-       M, Mc, Me, Mn, N, Nd, Nl, No, P, Pc, Pd, Pe, Pf, Pi, Po, Ps,
-       S, Sc, Sk, Sm, So, Z, Zl, Zp, Zs, 
-       Arabic, Armenian, Bengali, Bopomofo, Braille, Buginese,
-       Buhid, Canadian_Aboriginal, Cherokee, Common, Coptic,
-       Cypriot, Cyrillic, Deseret, Devanagari, Ethiopic, Georgian,
-       Glagolitic, Gothic, Greek, Gujarati, Gurmukhi, Han, Hangul,
-       Hanunoo, Hebrew, Hiragana, Inherited, Kannada, Katakana,
-       Kharoshthi, Khmer, Lao, Latin, Limbu, Linear_B, Malayalam,
-       Mongolian, Myanmar, New_Tai_Lue, Ogham, Old_Italic, Old_Persian,
-       Oriya, Osmanya, Runic, Shavian, Sinhala, Syloti_Nagri, Syriac,
-       Tagalog, Tagbanwa, Tai_Le, Tamil, Telugu, Thaana, Thai, Tibetan,
-       Tifinagh, Ugaritic, Yi
+       doc/UNICODE_PROPERTIES参照
 
 
 
@@ -395,7 +383,7 @@
       退避修飾しなければならない)
    + 名前付き捕獲式集合と、部分式呼出し機能追加
    + 多バイト文字コードが指定されているとき、
-     文字集合の中で八進数または十六進数表現の連続は、多バイト符合で表現された
+     文字集合の中で八進数または十六進数表現の連続は、多バイト符号で表現された
      一個の文字と解釈される
      (例. [\xa1\xa2], [\xa1\xa7-\xa4\xa1])
    + 文字集合の中で、一バイト文字と多バイト文字の範囲指定は許される。

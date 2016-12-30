@@ -237,7 +237,7 @@ static int dynamicGetbuf (gdIOCtxPtr ctx, void *buf, int len)
 	if (remain >= len) {
 		rlen = len;
 	} else {
-		if (remain == 0) {
+		if (remain <= 0) {
 			return EOF;
 		}
 		rlen = remain;

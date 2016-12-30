@@ -42,6 +42,7 @@
 #include "config.w32.h"
 #include <windows.h>
 #include <process.h>
+#include "win32/codepage.h"
 #else
 #include "php_config.h"
 extern char** environ;
@@ -109,8 +110,6 @@ extern char** environ;
 static char windows_error_details[64];
 static char ps_buffer[MAX_PATH];
 static const size_t ps_buffer_size = MAX_PATH;
-typedef BOOL (WINAPI *MySetConsoleTitle)(LPCTSTR);
-typedef DWORD (WINAPI *MyGetConsoleTitle)(LPTSTR, DWORD);
 #elif defined(PS_USE_CLOBBER_ARGV)
 static char *ps_buffer;         /* will point to argv area */
 static size_t ps_buffer_size;   /* space determined at run time */
@@ -371,22 +370,13 @@ int set_ps_title(const char* title)
 
 #ifdef PS_USE_WIN32
     {
-    	MySetConsoleTitle set_title = NULL;
-	HMODULE hMod = LoadLibrary("kernel32.dll");
+	wchar_t *ps_buffer_w = php_win32_cp_any_to_w(ps_buffer);
 
-	if (!hMod) {
+        if (!ps_buffer_w || !SetConsoleTitleW(ps_buffer_w)) {
             return PS_TITLE_WINDOWS_ERROR;
 	}
 
-	/* NOTE we don't use _UNICODE*/
-	set_title = (MySetConsoleTitle)GetProcAddress(hMod, "SetConsoleTitleA");
-	if (!set_title) {
-            return PS_TITLE_WINDOWS_ERROR;
-	}
-
-        if (!set_title(ps_buffer)) {
-            return PS_TITLE_WINDOWS_ERROR;
-	}
+	free(ps_buffer_w);
     }
 #endif /* PS_USE_WIN32 */
 
@@ -407,22 +397,23 @@ int get_ps_title(int *displen, const char** string)
 
 #ifdef PS_USE_WIN32
     {
-    	MyGetConsoleTitle get_title = NULL;
-	HMODULE hMod = LoadLibrary("kernel32.dll");
+	wchar_t ps_buffer_w[MAX_PATH];
+	char *tmp;
 
-	if (!hMod) {
+        if (!(ps_buffer_cur_len = GetConsoleTitleW(ps_buffer_w, (DWORD)sizeof(ps_buffer_w)))) {
             return PS_TITLE_WINDOWS_ERROR;
 	}
 
-	/* NOTE we don't use _UNICODE*/
-	get_title = (MyGetConsoleTitle)GetProcAddress(hMod, "GetConsoleTitleA");
-	if (!get_title) {
+	tmp = php_win32_cp_conv_w_to_any(ps_buffer_w, PHP_WIN32_CP_IGNORE_LEN, &ps_buffer_cur_len);
+	if (!tmp) {
             return PS_TITLE_WINDOWS_ERROR;
 	}
 
-        if (!(ps_buffer_cur_len = get_title(ps_buffer, (DWORD)ps_buffer_size))) {
-            return PS_TITLE_WINDOWS_ERROR;
-	}
+	ps_buffer_cur_len = ps_buffer_cur_len > sizeof(ps_buffer)-1 ? sizeof(ps_buffer)-1 : ps_buffer_cur_len;
+
+	memmove(ps_buffer, tmp, ps_buffer_size);
+	ps_buffer[ps_buffer_cur_len] = '\0';
+	free(tmp);
     }
 #endif
     *displen = (int)ps_buffer_cur_len;

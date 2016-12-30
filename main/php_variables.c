@@ -114,7 +114,8 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 
 		while (ex) {
 			if (ex->func && ZEND_USER_CODE(ex->func->common.type)) {
-				if (ex->symbol_table == symtable1) {
+				if ((ZEND_CALL_INFO(ex) & ZEND_CALL_HAS_SYMBOL_TABLE)
+						&& ex->symbol_table == symtable1) {
 					if (memcmp(var, "this", sizeof("this")-1) == 0) {
 						zend_throw_error(NULL, "Cannot re-assign $this");
 						zval_dtor(val);
@@ -535,7 +536,7 @@ void _php_import_environment_variables(zval *array_ptr)
 	}
 }
 
-zend_bool php_std_auto_global_callback(char *name, uint name_len)
+zend_bool php_std_auto_global_callback(char *name, uint32_t name_len)
 {
 	zend_printf("%s\n", name);
 	return 0; /* don't rearm */

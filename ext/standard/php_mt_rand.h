@@ -36,6 +36,7 @@
 PHPAPI void php_mt_srand(uint32_t seed);
 PHPAPI uint32_t php_mt_rand(void);
 PHPAPI zend_long php_mt_rand_range(zend_long min, zend_long max);
+PHPAPI zend_long php_mt_rand_common(zend_long min, zend_long max);
 
 PHP_MINIT_FUNCTION(mt_rand);
 

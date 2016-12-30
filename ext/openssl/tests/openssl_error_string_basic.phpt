@@ -105,7 +105,7 @@ expect_openssl_errors('openssl_private_decrypt', ['04065072']);
 // public encrypt and decrypt with failed padding check and padding
 @openssl_public_encrypt("data", $crypted, $public_key_file, 1000);
 @openssl_public_decrypt("data", $crypted, $public_key_file);
-expect_openssl_errors('openssl_private_(en|de)crypt padding', ['0906D06C', '04068076', '0407006A', '04067072']);
+expect_openssl_errors('openssl_private_(en|de)crypt padding', ['0906D06C', '04068076', '04067072']);
 
 // X509
 echo "X509 errors\n";

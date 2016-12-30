@@ -6,10 +6,6 @@ require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('connect.inc');
 
-if ($IS_MYSQLND && !version_compare(PHP_VERSION, '5.4.12-dev', ">=")) {
-	die("SKIP Available in mysqlnd as of PHP 5.4.12-dev");
-}
-
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 	die(sprintf("SKIP Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 		$host, $user, $db, $port, $socket));
@@ -127,10 +123,10 @@ if (!mysqli_query($link, sprintf("GRANT SELECT ON TABLE %s.test TO expiretest@'%
 ?>
 --EXPECTF--
 
-Warning: mysqli_real_connect(): (HY000/1862): %s in %s on line %d
+Warning: mysqli%sconnect(): (HY000/1862): %s in %s on line %d
 [001] Cannot connect [1862] %s
 
-Warning: mysqli_real_connect(): (HY000/1862): %s in %s on line %d
+Warning: mysqli%sconnect(): (HY000/1862): %s in %s on line %d
 [003] Cannot connect [1862] %s
 [006] Connect allowed, query fail, [1820] %s
 [008] Connect allowed, pw set, [0%A

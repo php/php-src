@@ -143,7 +143,7 @@
 ;   Development Value: 1000
 ;   Production Value: 1000
 
-; session.hash_bits_per_character
+; session.sid_bits_per_character
 ;   Default Value: 4
 ;   Development Value: 5
 ;   Production Value: 5
@@ -157,11 +157,6 @@
 ;   Default Value: Off
 ;   Development Value: On
 ;   Production Value: Off
-
-; url_rewriter.tags
-;   Default Value: "a=href,area=href,frame=src,form=,fieldset="
-;   Development Value: "a=href,area=href,frame=src,input=src,form=fakeentry"
-;   Production Value: "a=href,area=href,frame=src,input=src,form=fakeentry"
 
 ; variables_order
 ;   Default Value: "EGPCS"
@@ -243,6 +238,23 @@ output_buffering = 4096
 ;   Instead you must use zlib.output_handler.
 ; http://php.net/output-handler
 ;output_handler =
+
+; URL rewriter function rewrites URL on the fly by using
+; output buffer. You can set target tags by this configuration.
+; "form" tag is special tag. It will add hidden input tag to pass values.
+; Refer to session.trans_sid_tags for usage.
+; Default Value: "form="
+; Development Value: "form="
+; Production Value: "form="
+;url_rewriter.tags
+
+; URL rewriter will not rewrites absolute URL nor form by default. To enable
+; absolute URL rewrite, allowed hosts must be defined at RUNTIME.
+; Refer to session.trans_sid_hosts for more details.
+; Default Value: ""
+; Development Value: ""
+; Production Value: ""
+;url_rewriter.hosts
 
 ; Transparent output compression using the zlib library
 ; Valid values for this option are 'off', 'on', or a specific buffer size
@@ -762,6 +774,11 @@ enable_dl = Off
 ; http://php.net/cgi.fix-pathinfo
 ;cgi.fix_pathinfo=1
 
+; if cgi.discard_path is enabled, the PHP CGI binary can safely be placed outside
+; of the web tree and people will not be able to circumvent .htaccess security.
+; http://php.net/cgi.dicard-path
+;cgi.discard_path=1
+
 ; FastCGI under IIS (on WINNT based OS) supports the ability to impersonate
 ; security tokens of the calling client.  This allows IIS to define the
 ; security context that the request runs under.  mod_fastcgi under Apache
@@ -781,6 +798,13 @@ enable_dl = Off
 ; Default is zero.
 ; http://php.net/cgi.rfc2616-headers
 ;cgi.rfc2616_headers = 0
+
+; cgi.check_shebang_line controls whether CGI PHP checks for line starting with #!
+; (shebang) at the top of the running script. This line might be needed if the
+; script support running both as stand-alone script and via PHP CGI<. PHP in CGI
+; mode skips this line and ignores its content if this directive is turned on.
+; http://php.net/cgi.check-shebang-line
+;cgi.check_shebang_line=1
 
 ;;;;;;;;;;;;;;;;
 ; File Uploads ;
@@ -846,15 +870,15 @@ default_socket_timeout = 60
 ;
 ; For example, on Windows:
 ;
-;   extension=msql.dll
+;   extension=mysqli.dll
 ;
 ; ... or under UNIX:
 ;
-;   extension=msql.so
+;   extension=mysqli.so
 ;
 ; ... or with a path:
 ;
-;   extension=/path/to/extension/msql.so
+;   extension=/path/to/extension/mysqli.so
 ;
 ; If you only provide the name of the extension, PHP will look for it in its
 ; default extension directory.
@@ -1033,10 +1057,6 @@ mail.add_x_header = On
 ; Log mail to syslog (Event Log on Windows).
 ;mail.log = syslog
 
-[SQL]
-; http://php.net/sql.safe-mode
-sql.safe_mode = Off
-
 [ODBC]
 ; http://php.net/odbc.default-db
 ;odbc.default_db    =  Not yet implemented
@@ -1175,6 +1195,19 @@ mysqlnd.collect_statistics = On
 ; http://php.net/mysqlnd.collect_memory_statistics
 mysqlnd.collect_memory_statistics = On
 
+; Records communication from all extensions using mysqlnd to the specified log
+; file.
+; http://php.net/mysqlnd.debug
+;mysqlnd.debug =
+
+; Defines which queries will be logged.
+; http://php.net/mysqlnd.log_mask
+;mysqlnd.log_mask = 0
+
+; Default size of the mysqlnd memory pool, which is used by result sets.
+; http://php.net/mysqlnd.mempool_default_size
+;mysqlnd.mempool_default_size = 16000
+
 ; Size of a pre-allocated buffer used when sending commands to MySQL in bytes.
 ; http://php.net/mysqlnd.net_cmd_buffer_size
 ;mysqlnd.net_cmd_buffer_size = 2048
@@ -1183,6 +1216,15 @@ mysqlnd.collect_memory_statistics = On
 ; bytes.
 ; http://php.net/mysqlnd.net_read_buffer_size
 ;mysqlnd.net_read_buffer_size = 32768
+
+; Timeout for network requests in seconds.
+; http://php.net/mysqlnd.net_read_timeout
+;mysqlnd.net_read_timeout = 31536000
+
+; SHA-256 Authentication Plugin related. File with the MySQL server public RSA
+; key.
+; http://php.net/mysqlnd.sha256_server_public_key
+;mysqlnd.sha256_server_public_key =
 
 [OCI8]
 
@@ -1403,19 +1445,6 @@ session.gc_maxlifetime = 1440
 ; http://php.net/session.referer-check
 session.referer_check =
 
-; How many bytes to read from the file.
-; http://php.net/session.entropy-length
-;session.entropy_length = 32
-
-; Specified here to create the session id.
-; http://php.net/session.entropy-file
-; Defaults to /dev/urandom
-; On systems that don't have /dev/urandom but do have /dev/arandom, this will default to /dev/arandom
-; If neither are found at compile time, the default is no entropy file.
-; On windows, setting the entropy_length setting will activate the
-; Windows random source (using the CryptoAPI)
-;session.entropy_file = /dev/urandom
-
 ; Set to {nocache,private,public,} to determine HTTP caching aspects
 ; or leave this empty to avoid sending anti-caching headers.
 ; http://php.net/session.cache-limiter
@@ -1437,15 +1466,39 @@ session.cache_expire = 180
 ; http://php.net/session.use-trans-sid
 session.use_trans_sid = 0
 
-; Select a hash function for use in generating session ids.
-; Possible Values
-;   0  (MD5 128 bits)
-;   1  (SHA-1 160 bits)
-; This option may also be set to the name of any hash function supported by
-; the hash extension. A list of available hashes is returned by the hash_algos()
-; function.
-; http://php.net/session.hash-function
-session.hash_function = 0
+; Set session ID character length. This value could be between 22 to 256.
+; Shorter length than default is supported only for compatibility reason.
+; Users should use 32 or more chars.
+; http://php.net/session.sid-length
+; Default Value: 32
+; Development Value: 26
+; Production Value: 26
+session.sid_length = 26
+
+; The URL rewriter will look for URLs in a defined set of HTML tags.
+; <form> is special; if you include them here, the rewriter will
+; add a hidden <input> field with the info which is otherwise appended
+; to URLs. <form> tag's action attribute URL will not be modified
+; unless it is specified.
+; Note that all valid entries require a "=", even if no value follows.
+; Default Value: "a=href,area=href,frame=src,form="
+; Development Value: "a=href,area=href,frame=src,form="
+; Production Value: "a=href,area=href,frame=src,form="
+; http://php.net/url-rewriter.tags
+session.trans_sid_tags = "a=href,area=href,frame=src,form="
+
+; URL rewriter does not rewrite absolute URLs by default.
+; To enable rewrites for absolute pathes, target hosts must be specified
+; at RUNTIME. i.e. use ini_set()
+; <form> tags is special. PHP will check action attribute's URL regardless
+; of session.trans_sid_tags setting.
+; If no host is defined, HTTP_HOST will be used for allowed host.
+; Example value: php.net,www.php.net,wiki.php.net
+; Use "," for multiple hosts. No spaces are allowed.
+; Default Value: ""
+; Development Value: ""
+; Production Value: ""
+;session.trans_sid_hosts=""
 
 ; Define how many bits are stored in each character when converting
 ; the binary hash data to something readable.
@@ -1457,18 +1510,7 @@ session.hash_function = 0
 ; Development Value: 5
 ; Production Value: 5
 ; http://php.net/session.hash-bits-per-character
-session.hash_bits_per_character = 5
-
-; The URL rewriter will look for URLs in a defined set of HTML tags.
-; form/fieldset are special; if you include them here, the rewriter will
-; add a hidden <input> field with the info which is otherwise appended
-; to URLs.  If you want XHTML conformity, remove the form entry.
-; Note that all valid entries require a "=", even if no value follows.
-; Default Value: "a=href,area=href,frame=src,form=,fieldset="
-; Development Value: "a=href,area=href,frame=src,input=src,form=fakeentry"
-; Production Value: "a=href,area=href,frame=src,input=src,form=fakeentry"
-; http://php.net/url-rewriter.tags
-url_rewriter.tags = "a=href,area=href,frame=src,input=src,form=fakeentry"
+session.sid_bits_per_character = 5
 
 ; Enable upload progress tracking in $_SESSION
 ; Default Value: On
@@ -1717,17 +1759,6 @@ soap.wsdl_cache_limit = 5
 ; Sets the maximum number of open links or -1 for unlimited.
 ldap.max_links = -1
 
-[mcrypt]
-; For more information about mcrypt settings see http://php.net/mcrypt-module-open
-
-; Directory where to load mcrypt algorithms
-; Default: Compiled in into libmcrypt (usually /usr/local/lib/libmcrypt)
-;mcrypt.algorithms_dir=
-
-; Directory where to load mcrypt modes
-; Default: Compiled in into libmcrypt (usually /usr/local/lib/libmcrypt)
-;mcrypt.modes_dir=
-
 [dba]
 ;dba.default_handler=
 
@@ -1851,6 +1882,12 @@ ldap.max_links = -1
 ; Enables or disables copying of PHP code (text segment) into HUGE PAGES.
 ; This should improve performance, but requires appropriate OS configuration.
 ;opcache.huge_code_pages=0
+
+; Validate cached file permissions.
+;opcache.validate_permission=0
+
+; Prevent name collisions in chroot'ed environment.
+;opcache.validate_root=0
 
 [curl]
 ; A default value for the CURLOPT_CAINFO option. This is required to be an

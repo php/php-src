@@ -91,35 +91,25 @@ fclose($fp);
 *** Testing rand) : usage variations ***
 
 -- Iteration 1 --
-
-Warning: rand(): max(0) is smaller than min(100) in %s on line %d
-bool(false)
+int(%i)
 
 -- Iteration 2 --
-
-Warning: rand(): max(1) is smaller than min(100) in %s on line %d
-bool(false)
+int(%i)
 
 -- Iteration 3 --
 int(%i)
 
 -- Iteration 4 --
-
-Warning: rand(): max(-2345) is smaller than min(100) in %s on line %d
-bool(false)
+int(%i)
 
 -- Iteration 5 --
 int(%i)
 
 -- Iteration 6 --
-
-Warning: rand(): max(10) is smaller than min(100) in %s on line %d
-bool(false)
+int(%i)
 
 -- Iteration 7 --
-
-Warning: rand(): max(-10) is smaller than min(100) in %s on line %d
-bool(false)
+int(%i)
 
 -- Iteration 8 --
 
@@ -127,44 +117,28 @@ Warning: rand() expects parameter 2 to be integer, float given in %s on line %d
 NULL
 
 -- Iteration 9 --
-
-Warning: rand(): max(0) is smaller than min(100) in %s on line %d
-bool(false)
+int(%i)
 
 -- Iteration 10 --
-
-Warning: rand(): max(0) is smaller than min(100) in %s on line %d
-bool(false)
+int(%i)
 
 -- Iteration 11 --
-
-Warning: rand(): max(0) is smaller than min(100) in %s on line %d
-bool(false)
+int(%i)
 
 -- Iteration 12 --
-
-Warning: rand(): max(0) is smaller than min(100) in %s on line %d
-bool(false)
+int(%i)
 
 -- Iteration 13 --
-
-Warning: rand(): max(1) is smaller than min(100) in %s on line %d
-bool(false)
+int(%i)
 
 -- Iteration 14 --
-
-Warning: rand(): max(0) is smaller than min(100) in %s on line %d
-bool(false)
+int(%i)
 
 -- Iteration 15 --
-
-Warning: rand(): max(1) is smaller than min(100) in %s on line %d
-bool(false)
+int(%i)
 
 -- Iteration 16 --
-
-Warning: rand(): max(0) is smaller than min(100) in %s on line %d
-bool(false)
+int(%i)
 
 -- Iteration 17 --
 
@@ -202,14 +176,10 @@ Warning: rand() expects parameter 2 to be integer, object given in %s on line %d
 NULL
 
 -- Iteration 24 --
-
-Warning: rand(): max(0) is smaller than min(100) in %s on line %d
-bool(false)
+int(%i)
 
 -- Iteration 25 --
-
-Warning: rand(): max(0) is smaller than min(100) in %s on line %d
-bool(false)
+int(%i)
 
 -- Iteration 26 --
 

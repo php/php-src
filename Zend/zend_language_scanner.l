@@ -583,6 +583,7 @@ static zend_op_array *zend_compile(int type)
 	CG(ast_arena) = zend_arena_create(1024 * 32);
 
 	if (!zendparse()) {
+		int last_lineno = CG(zend_lineno);
 		zend_file_context original_file_context;
 		zend_oparray_context original_oparray_context;
 		zend_op_array *original_active_op_array = CG(active_op_array);
@@ -598,9 +599,10 @@ static zend_op_array *zend_compile(int type)
 		zend_file_context_begin(&original_file_context);
 		zend_oparray_context_begin(&original_oparray_context);
 		zend_compile_top_stmt(CG(ast));
+		CG(zend_lineno) = last_lineno;
 		zend_emit_final_return(type == ZEND_USER_FUNCTION);
 		op_array->line_start = 1;
-		op_array->line_end = CG(zend_lineno);
+		op_array->line_end = last_lineno;
 		pass_two(op_array);
 		zend_oparray_context_end(&original_oparray_context);
 		zend_file_context_end(&original_file_context);
@@ -1875,7 +1877,7 @@ inline_char_handler:
 }
 
 <ST_VAR_OFFSET>{TOKENS}|[{}"`] {
-	/* Only '[' can be valid, but returning other tokens will allow a more explicit parse error */
+	/* Only '[' or '-' can be valid, but returning other tokens will allow a more explicit parse error */
 	RETURN_TOKEN(yytext[0]);
 }
 

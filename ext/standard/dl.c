@@ -40,9 +40,6 @@
 #include "win32/param.h"
 #include "win32/winutil.h"
 #define GET_DL_ERROR()	php_win_err()
-#elif defined(NETWARE)
-#include <sys/param.h>
-#define GET_DL_ERROR()	dlerror()
 #else
 #include <sys/param.h>
 #define GET_DL_ERROR()	DL_ERROR()
@@ -78,12 +75,6 @@ PHPAPI PHP_FUNCTION(dl)
 /* }}} */
 
 #if defined(HAVE_LIBDL)
-
-#ifdef ZTS
-#define USING_ZTS 1
-#else
-#define USING_ZTS 0
-#endif
 
 /* {{{ php_load_extension
  */

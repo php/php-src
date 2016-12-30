@@ -1,5 +1,11 @@
 --TEST--
 Test dir() function : usage variations - operate on previously opened directory
+--SKIPIF--
+<?php
+if (substr(PHP_OS, 0, 3) != 'WIN') {
+  die("skip Valid only on Windows");
+}
+?>
 --FILE--
 <?php
 /* 

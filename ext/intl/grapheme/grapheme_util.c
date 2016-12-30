@@ -223,7 +223,7 @@ zend_long grapheme_ascii_check(const unsigned char *day, size_t len)
 {
 	int ret_len = len;
 	while ( len-- ) {
-	if ( *day++ > 0x7f )
+	if ( *day++ > 0x7f || (*day == '\n' && *(day - 1) == '\r') )
 		return -1;
 	}
 

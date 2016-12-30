@@ -30,22 +30,20 @@
 
 void zend_accel_error(int type, const char *format, ...)
 {
-    va_list args;
+	va_list args;
 	time_t timestamp;
 	char *time_string;
 	FILE * fLog = NULL;
 
-	if (type > ZCG(accel_directives).log_verbosity_level) {
-		return;
-	}
+	if (type <= ZCG(accel_directives).log_verbosity_level) {
 
 	timestamp = time(NULL);
 	time_string = asctime(localtime(&timestamp));
 	time_string[24] = 0;
 
 	if (!ZCG(accel_directives).error_log ||
-	    !*ZCG(accel_directives).error_log ||
-	    strcmp(ZCG(accel_directives).error_log, "stderr") == 0) {
+		!*ZCG(accel_directives).error_log ||
+		strcmp(ZCG(accel_directives).error_log, "stderr") == 0) {
 
 		fLog = stderr;
 	} else {
@@ -56,33 +54,40 @@ void zend_accel_error(int type, const char *format, ...)
 	}
 
 #ifdef ZTS
-    fprintf(fLog, "%s (" ZEND_ULONG_FMT "): ", time_string, (zend_ulong)tsrm_thread_id());
+		fprintf(fLog, "%s (" ZEND_ULONG_FMT "): ", time_string, (zend_ulong)tsrm_thread_id());
 #else
-    fprintf(fLog, "%s (%d): ", time_string, getpid());
+		fprintf(fLog, "%s (%d): ", time_string, getpid());
 #endif
 
-	switch (type) {
-		case ACCEL_LOG_FATAL:
-			fprintf(fLog, "Fatal Error ");
-			break;
-		case ACCEL_LOG_ERROR:
-			fprintf(fLog, "Error ");
-			break;
-		case ACCEL_LOG_WARNING:
-			fprintf(fLog, "Warning ");
-			break;
-		case ACCEL_LOG_INFO:
-			fprintf(fLog, "Message ");
-			break;
-		case ACCEL_LOG_DEBUG:
-			fprintf(fLog, "Debug ");
-			break;
-	}
+		switch (type) {
+			case ACCEL_LOG_FATAL:
+				fprintf(fLog, "Fatal Error ");
+				break;
+			case ACCEL_LOG_ERROR:
+				fprintf(fLog, "Error ");
+				break;
+			case ACCEL_LOG_WARNING:
+				fprintf(fLog, "Warning ");
+				break;
+			case ACCEL_LOG_INFO:
+				fprintf(fLog, "Message ");
+				break;
+			case ACCEL_LOG_DEBUG:
+				fprintf(fLog, "Debug ");
+				break;
+		}
 
-    va_start(args, format);
-    vfprintf(fLog, format, args);
-    va_end(args);
-	fprintf(fLog, "\n");
+		va_start(args, format);
+		vfprintf(fLog, format, args);
+		va_end(args);
+		fprintf(fLog, "\n");
+
+		fflush(fLog);
+		if (fLog != stderr) {
+			fclose(fLog);
+		}
+	}
+	/* perform error handling even without logging the error */
 	switch (type) {
 		case ACCEL_LOG_ERROR:
 			zend_bailout();
@@ -91,8 +96,5 @@ void zend_accel_error(int type, const char *format, ...)
 			exit(-2);
 			break;
 	}
-	fflush(fLog);
-	if (fLog != stderr) {
-		fclose(fLog);
-	}
+
 }

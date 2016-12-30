@@ -395,15 +395,9 @@ php_formatted_print(zend_execute_data *execute_data, int use_array, int format_o
 	int always_sign;
 	size_t format_len;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
-		return NULL;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, -1)
 		Z_PARAM_VARIADIC('+', args, argc)
 	ZEND_PARSE_PARAMETERS_END_EX(return NULL);
-#endif
 
 	/* verify the number of args */
 	if ((use_array && argc != (2 + format_offset))

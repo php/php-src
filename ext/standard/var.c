@@ -33,6 +33,11 @@
 #include "php_incomplete_class.h"
 /* }}} */
 
+struct php_serialize_data {
+	HashTable ht;
+	uint32_t n;
+};
+
 #define COMMON (is_ref ? "&" : "")
 
 static void php_array_element_dump(zval *zv, zend_ulong index, zend_string *key, int level) /* {{{ */
@@ -993,6 +998,35 @@ PHPAPI void php_var_serialize(smart_str *buf, zval *struc, php_serialize_data_t 
 }
 /* }}} */
 
+PHPAPI php_serialize_data_t php_var_serialize_init() {
+	struct php_serialize_data *d;
+	/* fprintf(stderr, "SERIALIZE_INIT      == lock: %u, level: %u\n", BG(serialize_lock), BG(serialize).level); */
+	if (BG(serialize_lock) || !BG(serialize).level) {
+		d = emalloc(sizeof(struct php_serialize_data));
+		zend_hash_init(&d->ht, 16, NULL, ZVAL_PTR_DTOR, 0);
+		d->n = 0;
+		if (!BG(serialize_lock)) {
+			BG(serialize).data = d;
+			BG(serialize).level = 1;
+		}
+	} else {
+		d = BG(serialize).data;
+		++BG(serialize).level;
+	}
+	return d;
+}
+
+PHPAPI void php_var_serialize_destroy(php_serialize_data_t d) {
+	/* fprintf(stderr, "SERIALIZE_DESTROY   == lock: %u, level: %u\n", BG(serialize_lock), BG(serialize).level); */
+	if (BG(serialize_lock) || BG(serialize).level == 1) {
+		zend_hash_destroy(&d->ht);
+		efree(d);
+	}
+	if (!BG(serialize_lock) && !--BG(serialize).level) {
+		BG(serialize).data = NULL;
+	}
+}
+
 /* {{{ proto string serialize(mixed variable)
    Returns a string representation of variable (which can later be unserialized) */
 PHP_FUNCTION(serialize)
@@ -1031,7 +1065,8 @@ PHP_FUNCTION(unserialize)
 	const unsigned char *p;
 	php_unserialize_data_t var_hash;
 	zval *options = NULL, *classes = NULL;
-	HashTable *class_hash = NULL;
+	zval *retval;
+	HashTable *class_hash = NULL, *prev_class_hash;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|a", &buf, &buf_len, &options) == FAILURE) {
 		RETURN_FALSE;
@@ -1043,8 +1078,16 @@ PHP_FUNCTION(unserialize)
 
 	p = (const unsigned char*) buf;
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
-	if(options != NULL) {
+
+	prev_class_hash = php_var_unserialize_get_allowed_classes(var_hash);
+	if (options != NULL) {
 		classes = zend_hash_str_find(Z_ARRVAL_P(options), "allowed_classes", sizeof("allowed_classes")-1);
+		if (classes && Z_TYPE_P(classes) != IS_ARRAY && Z_TYPE_P(classes) != IS_TRUE && Z_TYPE_P(classes) != IS_FALSE) {
+			php_error_docref(NULL, E_WARNING, "allowed_classes option should be array or boolean");
+			PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+			RETURN_FALSE;
+		}
+
 		if(classes && (Z_TYPE_P(classes) == IS_ARRAY || !zend_is_true(classes))) {
 			ALLOC_HASHTABLE(class_hash);
 			zend_hash_init(class_hash, (Z_TYPE_P(classes) == IS_ARRAY)?zend_hash_num_elements(Z_ARRVAL_P(classes)):0, NULL, NULL, 0);
@@ -1060,35 +1103,29 @@ PHP_FUNCTION(unserialize)
 		        zend_string_release(lcname);
 			} ZEND_HASH_FOREACH_END();
 		}
+		php_var_unserialize_set_allowed_classes(var_hash, class_hash);
 	}
 
-	if (!php_var_unserialize_ex(return_value, &p, p + buf_len, &var_hash, class_hash)) {
-		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-		if (class_hash) {
-			zend_hash_destroy(class_hash);
-			FREE_HASHTABLE(class_hash);
-		}
-		zval_ptr_dtor(return_value);
+	retval = var_tmp_var(&var_hash);
+	if (!php_var_unserialize(retval, &p, p + buf_len, &var_hash)) {
 		if (!EG(exception)) {
 			php_error_docref(NULL, E_NOTICE, "Error at offset " ZEND_LONG_FMT " of %zd bytes",
 				(zend_long)((char*)p - buf), buf_len);
 		}
-		RETURN_FALSE;
-	}
-	/* We should keep an reference to return_value to prevent it from being dtor
-	   in case nesting calls to unserialize */
-	var_push_dtor(&var_hash, return_value);
-
-	/* Ensure return value is a value */
-	if (Z_ISREF_P(return_value)) {
-		zend_unwrap_reference(return_value);
+		RETVAL_FALSE;
+	} else {
+		ZVAL_DEREF(retval);
+		ZVAL_COPY(return_value, retval);
 	}
 
-	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 	if (class_hash) {
 		zend_hash_destroy(class_hash);
 		FREE_HASHTABLE(class_hash);
 	}
+
+	/* Reset to previous allowed_classes in case this is a nested call */
+	php_var_unserialize_set_allowed_classes(var_hash, prev_class_hash);
+	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 }
 /* }}} */
 

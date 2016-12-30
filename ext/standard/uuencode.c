@@ -71,8 +71,10 @@ PHPAPI zend_string *php_uuencode(char *src, size_t src_len) /* {{{ */
 	char *p, *s, *e, *ee;
 	zend_string *dest;
 
-	/* encoded length is ~ 38% greater than the original */
-	dest = zend_string_alloc((size_t)ceil(src_len * 1.38) + 46, 0);
+	/* encoded length is ~ 38% greater than the original
+       Use 1.5 for easier calculation.
+    */
+	dest = zend_string_safe_alloc(src_len/2, 3, 46, 0);
 	p = ZSTR_VAL(dest);
 	s = src;
 	e = src + src_len;

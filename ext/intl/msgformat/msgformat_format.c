@@ -50,11 +50,10 @@ static void msgfmt_do_format(MessageFormatter_object *mfo, zval *args, zval *ret
 	zend_hash_destroy(args_copy);
 	efree(args_copy);
 
-	if (formatted && U_FAILURE(INTL_DATA_ERROR_CODE(mfo))) {
-			efree(formatted);
-	}
-
 	if (U_FAILURE(INTL_DATA_ERROR_CODE(mfo))) {
+		if (formatted) {
+			efree(formatted);
+		}
 		RETURN_FALSE;
 	} else {
 		INTL_METHOD_RETVAL_UTF8(mfo, formatted, formatted_len, 1);
@@ -116,6 +115,8 @@ PHP_FUNCTION( msgfmt_format_message )
 
 		RETURN_FALSE;
 	}
+
+	INTL_CHECK_LOCALE_LEN(slocale_len);
 
 	memset(mfo, 0, sizeof(*mfo));
 	msgformat_data_init(&mfo->mf_data);

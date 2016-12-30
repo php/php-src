@@ -231,7 +231,7 @@ void timelib_dump_date(timelib_time *d, int options)
 	printf("TS: %lld | %s%04lld-%02lld-%02lld %02lld:%02lld:%02lld",
 		d->sse, d->y < 0 ? "-" : "", TIMELIB_LLABS(d->y), d->m, d->d, d->h, d->i, d->s);
 	if (d->f > +0.0) {
-		printf(" %.5f", d->f);
+		printf(" %.6f", d->f);
 	}
 
 	if (d->is_localtime) {
@@ -260,6 +260,9 @@ void timelib_dump_date(timelib_time *d, int options)
 		if (d->have_relative) {
 			printf("%3lldY %3lldM %3lldD / %3lldH %3lldM %3lldS",
 				d->relative.y, d->relative.m, d->relative.d, d->relative.h, d->relative.i, d->relative.s);
+			if (d->relative.f) {
+				printf(" %6f", d->relative.f);
+			}
 			if (d->relative.first_last_day_of != 0) {
 				switch (d->relative.first_last_day_of) {
 					case 1:

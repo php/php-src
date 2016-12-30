@@ -175,9 +175,12 @@ static void spl_recursive_it_dtor(zend_object_iterator *_iter)
 	zend_object_iterator      *sub_iter;
 
 	while (object->level > 0) {
-		sub_iter = object->iterators[object->level].iterator;
-		zend_iterator_dtor(sub_iter);
-		zval_ptr_dtor(&object->iterators[object->level--].zobject);
+		if (!Z_ISUNDEF(object->iterators[object->level].zobject)) {
+			sub_iter = object->iterators[object->level].iterator;
+			zend_iterator_dtor(sub_iter);
+			zval_ptr_dtor(&object->iterators[object->level].zobject);
+		}
+		object->level--;
 	}
 	object->iterators = erealloc(object->iterators, sizeof(spl_sub_iterator));
 	object->level = 0;
@@ -391,8 +394,11 @@ next_step:
 				}
 			}
 			if (object->level > 0) {
+				zval garbage;
+				ZVAL_COPY_VALUE(&garbage, &object->iterators[object->level].zobject);
+				ZVAL_UNDEF(&object->iterators[object->level].zobject);
+				zval_ptr_dtor(&garbage);
 				zend_iterator_dtor(iterator);
-				zval_ptr_dtor(&object->iterators[object->level].zobject);
 				object->level--;
 			}
 		} else {
@@ -2038,13 +2044,14 @@ SPL_METHOD(RegexIterator, accept)
 
 	if (Z_TYPE(intern->current.data) == IS_UNDEF) {
 		RETURN_FALSE;
-	} else if (Z_TYPE(intern->current.data) == IS_ARRAY) {
-		RETURN_FALSE;
 	}
 
 	if (intern->u.regex.flags & REGIT_USE_KEY) {
 		subject = zval_get_string(&intern->current.key);
 	} else {
+		if (Z_TYPE(intern->current.data) == IS_ARRAY) {
+			RETURN_FALSE;
+		}
 		subject = zval_get_string(&intern->current.data);
 	}
 
@@ -2800,7 +2807,7 @@ SPL_METHOD(CachingIterator, __toString)
 	if (Z_TYPE(intern->u.caching.zstr) == IS_STRING) {
 		RETURN_STR_COPY(Z_STR_P(&intern->u.caching.zstr));
 	} else {
-		RETURN_NULL();
+		RETURN_EMPTY_STRING();
 	}
 } /* }}} */
 

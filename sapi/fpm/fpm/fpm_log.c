@@ -467,7 +467,7 @@ int fpm_log_write(char *log_format) /* {{{ */
 
 	if (!test && strlen(buffer) > 0) {
 		buffer[len] = '\n';
-		write(fpm_log_fd, buffer, len + 1);
+		zend_quiet_write(fpm_log_fd, buffer, len + 1);
 	}
 
 	return 0;

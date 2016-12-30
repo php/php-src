@@ -19,9 +19,9 @@
 
 #if 0 && (defined(__linux__) || defined(sun) || defined(__IRIX__))
 # define _BSD_SOURCE 		/* linux wants this when XOPEN mode is on */
-# define _BSD_COMPAT		/* irix: uint */
+# define _BSD_COMPAT		/* irix: uint32_t */
 # define _XOPEN_SOURCE 500  /* turn on Unix98 */
-# define __EXTENSIONS__	1	/* Solaris: uint */
+# define __EXTENSIONS__	1	/* Solaris: uint32_t */
 #endif
 
 #include "php.h"
@@ -35,11 +35,6 @@
 #include "php_globals.h"
 #include "SAPI.h"
 #include "main/php_network.h"
-
-#ifdef NETWARE
-#include <proc.h>
-#include <library.h>
-#endif
 
 #if HAVE_SYS_WAIT_H
 #include <sys/wait.h>
@@ -151,7 +146,7 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 		zend_string_release(str);
 	} ZEND_HASH_FOREACH_END();
 
-	assert((uint)(p - env.envp) <= sizeenv);
+	assert((uint32_t)(p - env.envp) <= sizeenv);
 
 	zend_hash_destroy(env_hash);
 	FREE_HASHTABLE(env_hash);
@@ -346,11 +341,8 @@ PHP_FUNCTION(proc_get_status)
 		if (WIFSIGNALED(wstatus)) {
 			running = 0;
 			signaled = 1;
-#ifdef NETWARE
-			termsig = WIFTERMSIG(wstatus);
-#else
+
 			termsig = WTERMSIG(wstatus);
-#endif
 		}
 		if (WIFSTOPPED(wstatus)) {
 			stopped = 1;
@@ -437,13 +429,6 @@ PHP_FUNCTION(proc_open)
 	char cur_cwd[MAXPATHLEN];
 	wchar_t *cmdw = NULL, *cwdw = NULL, *envpw = NULL;
 	size_t tmp_len;
-#endif
-#ifdef NETWARE
-	char** child_argv = NULL;
-	char* command_dup = NULL;
-	char* orig_cwd = NULL;
-	int command_num_args = 0;
-	wiring_t channel;
 #endif
 	php_process_id_t child;
 	struct php_process_handle *proc;
@@ -753,9 +738,14 @@ PHP_FUNCTION(proc_open)
 
 		len = (sizeof(COMSPEC_NT) + sizeof(" /c ") + tmp_len + 1);
 		cmdw2 = (wchar_t *)malloc(len * sizeof(wchar_t));
+		if (!cmdw2) {
+			php_error_docref(NULL, E_WARNING, "Command conversion failed");
+			goto exit_fail;
+		}
 		ret = _snwprintf(cmdw2, len, L"%hs /c %s", COMSPEC_NT, cmdw);
 
 		if (-1 == ret) {
+			free(cmdw2);
 			php_error_docref(NULL, E_WARNING, "Command conversion failed");
 			goto exit_fail;
 		}
@@ -792,51 +782,6 @@ PHP_FUNCTION(proc_open)
 	childHandle = pi.hProcess;
 	child       = pi.dwProcessId;
 	CloseHandle(pi.hThread);
-
-#elif defined(NETWARE)
-	if (cwd) {
-		orig_cwd = getcwd(NULL, PATH_MAX);
-		chdir2(cwd);
-	}
-	channel.infd = descriptors[0].childend;
-	channel.outfd = descriptors[1].childend;
-	channel.errfd = -1;
-	/* Duplicate the command as processing downwards will modify it*/
-	command_dup = strdup(command);
-	if (!command_dup) {
-		goto exit_fail;
-	}
-	/* get a number of args */
-	construct_argc_argv(command_dup, NULL, &command_num_args, NULL);
-	child_argv = (char**) malloc((command_num_args + 1) * sizeof(char*));
-	if(!child_argv) {
-		free(command_dup);
-		if (cwd && orig_cwd) {
-			chdir2(orig_cwd);
-			free(orig_cwd);
-		}
-	}
-	/* fill the child arg vector */
-	construct_argc_argv(command_dup, NULL, &command_num_args, child_argv);
-	child_argv[command_num_args] = NULL;
-	child = procve(child_argv[0], PROC_DETACHED|PROC_INHERIT_CWD, NULL, &channel, NULL, NULL, 0, NULL, (const char**)child_argv);
-	free(child_argv);
-	free(command_dup);
-	if (cwd && orig_cwd) {
-		chdir2(orig_cwd);
-		free(orig_cwd);
-	}
-	if (child < 0) {
-		/* failed to fork() */
-		/* clean up all the descriptors */
-		for (i = 0; i < ndesc; i++) {
-			close(descriptors[i].childend);
-			if (descriptors[i].parentend)
-				close(descriptors[i].parentend);
-		}
-		php_error_docref(NULL, E_WARNING, "procve failed - %s", strerror(errno));
-		goto exit_fail;
-	}
 #elif HAVE_FORK
 	/* the unix way */
 	child = fork();

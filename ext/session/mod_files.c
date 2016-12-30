@@ -114,7 +114,7 @@ static char *ps_files_path_create(char *buf, size_t buflen, ps_files *data, cons
 	size_t n;
 
 	key_len = strlen(key);
-	if (key_len <= data->dirdepth ||
+	if (!data || key_len <= data->dirdepth ||
 		buflen < (strlen(data->basedir) + 2 * data->dirdepth + key_len + 5 + sizeof(FILE_PREFIX))) {
 		return NULL;
 	}
@@ -175,6 +175,7 @@ static void ps_files_open(ps_files *data, const char *key)
 		}
 
 		if (!ps_files_path_create(buf, sizeof(buf), data, key)) {
+			php_error_docref(NULL, E_WARNING, "Failed to create session data file path. Too short session ID, invalid save_path or path lentgth exceeds MAXPATHLEN(%d)", MAXPATHLEN);
 			return;
 		}
 
@@ -199,6 +200,7 @@ static void ps_files_open(ps_files *data, const char *key)
 			if (fstat(data->fd, &sbuf) || (sbuf.st_uid != 0 && sbuf.st_uid != getuid() && sbuf.st_uid != geteuid())) {
 				close(data->fd);
 				data->fd = -1;
+				php_error_docref(NULL, E_WARNING, "Session data file is not created by your uid");
 				return;
 			}
 #endif
@@ -296,6 +298,7 @@ static int ps_files_cleanup_dir(const char *dirname, zend_long maxlifetime)
 
 	if (dirname_len >= MAXPATHLEN) {
 		php_error_docref(NULL, E_NOTICE, "ps_files_cleanup_dir: dirname(%s) is too long", dirname);
+		closedir(dir);
 		return (0);
 	}
 
@@ -643,9 +646,11 @@ PS_GC_FUNC(files)
 
 	if (data->dirdepth == 0) {
 		*nrdels = ps_files_cleanup_dir(data->basedir, maxlifetime);
+	} else {
+		*nrdels = -1; // Cannot process multiple depth save dir
 	}
 
-	return SUCCESS;
+	return *nrdels;
 }
 
 

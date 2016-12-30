@@ -80,7 +80,7 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ *
 		long function_name;
 		long file_name;
 		long prev;
-		uint lineno = 0;
+		uint32_t lineno = 0;
 
 		if (0 > fpm_trace_get_long(execute_data + offsetof(zend_execute_data, func), &l)) {
 			return -1;

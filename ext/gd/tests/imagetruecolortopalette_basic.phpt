@@ -5,6 +5,9 @@ Rafael Dohms <rdohms [at] gmail [dot] com>
 --SKIPIF--
 <?php 
 	if (!extension_loaded("gd")) die("skip GD not present");
+	if (!GD_BUNDLED && version_compare(GD_VERSION, '2.2.2', '<')) {
+		die("skip test requires GD 2.2.2 or higher");
+	}
 	if (!function_exists("imagecreatetruecolor")) die("skip GD Version not compatible");
 ?>
 --FILE--
@@ -19,13 +22,9 @@ $half2 =  imagefilledarc ( $image, 75, 55, 80, 70, 0, -180, $b, IMG_ARC_PIE );
 
 var_dump(imagetruecolortopalette($image, true, 2));
 
-ob_start();
-imagepng($image, null, 9);
-$img = ob_get_contents();
-ob_end_clean();
-
-echo md5(base64_encode($img));
+include_once __DIR__ . '/func.inc';
+test_image_equals_file(__DIR__ . '/imagetruecolortopalette_basic.png', $image);
 ?>
 --EXPECT--
 bool(true)
-1d41787ff70aa0c7eea5ee9304afa36b
+The images are equal.

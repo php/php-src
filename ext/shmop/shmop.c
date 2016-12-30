@@ -142,7 +142,7 @@ PHP_MINFO_FUNCTION(shmop)
 }
 /* }}} */
 
-/* {{{ proto int shmop_open (int key, string flags, int mode, int size)
+/* {{{ proto resource shmop_open (int key, string flags, int mode, int size)
    gets and attaches a shared memory segment */
 PHP_FUNCTION(shmop_open)
 {
@@ -223,7 +223,7 @@ err:
 }
 /* }}} */
 
-/* {{{ proto string shmop_read (int shmid, int start, int count)
+/* {{{ proto string shmop_read (resource shmid, int start, int count)
    reads from a shm segment */
 PHP_FUNCTION(shmop_read)
 {
@@ -261,7 +261,7 @@ PHP_FUNCTION(shmop_read)
 }
 /* }}} */
 
-/* {{{ proto void shmop_close (int shmid)
+/* {{{ proto void shmop_close (resource shmid)
    closes a shared memory segment */
 PHP_FUNCTION(shmop_close)
 {
@@ -281,7 +281,7 @@ PHP_FUNCTION(shmop_close)
 }
 /* }}} */
 
-/* {{{ proto int shmop_size (int shmid)
+/* {{{ proto int shmop_size (resource shmid)
    returns the shm size */
 PHP_FUNCTION(shmop_size)
 {
@@ -300,7 +300,7 @@ PHP_FUNCTION(shmop_size)
 }
 /* }}} */
 
-/* {{{ proto int shmop_write (int shmid, string data, int offset)
+/* {{{ proto int shmop_write (resource shmid, string data, int offset)
    writes to a shared memory segment */
 PHP_FUNCTION(shmop_write)
 {
@@ -335,7 +335,7 @@ PHP_FUNCTION(shmop_write)
 }
 /* }}} */
 
-/* {{{ proto bool shmop_delete (int shmid)
+/* {{{ proto bool shmop_delete (resource shmid)
    mark segment for deletion */
 PHP_FUNCTION(shmop_delete)
 {

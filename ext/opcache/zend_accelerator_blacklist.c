@@ -178,7 +178,9 @@ static void zend_accel_blacklist_update_regexp(zend_blacklist *blacklist)
 			it->next = NULL;
 
 			if ((it->re = pcre_compile(regexp, PCRE_NO_AUTO_CAPTURE, &pcre_error, &pcre_error_offset, 0)) == NULL) {
+				free(it);
 				blacklist_report_regexp_error(pcre_error, pcre_error_offset);
+				return;
 			}
 			/* prepare for the next iteration */
 			p = regexp + 2;

@@ -363,8 +363,8 @@ static void accel_interned_strings_restore_for_php(void)
 #ifndef ZTS
 static void accel_interned_strings_restore_state(void)
 {
-    uint idx = ZCSG(interned_strings).nNumUsed;
-    uint nIndex;
+    uint32_t idx = ZCSG(interned_strings).nNumUsed;
+    uint32_t nIndex;
     Bucket *p;
 
 	memset(ZCSG(interned_strings_saved_top),
@@ -401,8 +401,8 @@ static zend_string *accel_find_interned_string(zend_string *str)
 {
 /* for now interned strings are supported only for non-ZTS build */
 	zend_ulong h;
-	uint nIndex;
-	uint idx;
+	uint32_t nIndex;
+	uint32_t idx;
 	Bucket *arData, *p;
 
 	if (IS_ACCEL_INTERNED(str)) {
@@ -441,8 +441,8 @@ zend_string *accel_new_interned_string(zend_string *str)
 /* for now interned strings are supported only for non-ZTS build */
 #ifndef ZTS
 	zend_ulong h;
-	uint nIndex;
-	uint idx;
+	uint32_t nIndex;
+	uint32_t idx;
 	Bucket *p;
 
 #ifdef HAVE_OPCACHE_FILE_CACHE
@@ -512,7 +512,7 @@ zend_string *accel_new_interned_string(zend_string *str)
 /* Copy PHP interned strings from PHP process memory into the shared memory */
 static void accel_use_shm_interned_strings(void)
 {
-	uint idx, j;
+	uint32_t idx, j;
 	Bucket *p, *q;
 
 	/* empty string */
@@ -585,7 +585,7 @@ static void accel_use_shm_interned_strings(void)
 
 		for (j = 0; j < ce->constants_table.nNumUsed; j++) {
 			q = ce->constants_table.arData + j;
-			if (!Z_TYPE(q->val) == IS_UNDEF) continue;
+			if (Z_TYPE(q->val) == IS_UNDEF) continue;
 			if (q->key) {
 				q->key = accel_new_interned_string(q->key);
 			}
@@ -595,7 +595,7 @@ static void accel_use_shm_interned_strings(void)
 	/* constant hash keys */
 	for (idx = 0; idx < EG(zend_constants)->nNumUsed; idx++) {
 		p = EG(zend_constants)->arData + idx;
-		if (!Z_TYPE(p->val) == IS_UNDEF) continue;
+		if (Z_TYPE(p->val) == IS_UNDEF) continue;
 		if (p->key) {
 			p->key = accel_new_interned_string(p->key);
 		}
@@ -622,27 +622,42 @@ static void accel_use_shm_interned_strings(void)
 #ifndef ZEND_WIN32
 static inline void kill_all_lockers(struct flock *mem_usage_check)
 {
-	int tries = 10;
-
+	int success, tries;
 	/* so that other process won't try to force while we are busy cleaning up */
 	ZCSG(force_restart_time) = 0;
 	while (mem_usage_check->l_pid > 0) {
+		/* Clear previous errno, reset success and tries */
+		errno = 0;
+		success = 0;
+		tries = 10;
+
 		while (tries--) {
-			zend_accel_error(ACCEL_LOG_WARNING, "Killed locker %d", mem_usage_check->l_pid);
+			zend_accel_error(ACCEL_LOG_WARNING, "Attempting to kill locker %d", mem_usage_check->l_pid);
 			if (kill(mem_usage_check->l_pid, SIGKILL)) {
+				if (errno == ESRCH) {
+					/* Process died before the signal was sent */
+					success = 1;
+					zend_accel_error(ACCEL_LOG_WARNING, "Process %d died before SIGKILL was sent", mem_usage_check->l_pid);
+				}
 				break;
 			}
 			/* give it a chance to die */
 			usleep(20000);
 			if (kill(mem_usage_check->l_pid, 0)) {
-				/* can't kill it */
+				if (errno == ESRCH) {
+					/* successfully killed locker, process no longer exists  */
+					success = 1;
+					zend_accel_error(ACCEL_LOG_WARNING, "Killed locker %d", mem_usage_check->l_pid);
+				}
 				break;
 			}
 			usleep(10000);
 		}
-		if (!tries) {
-			zend_accel_error(ACCEL_LOG_WARNING, "Can't kill %d after 10 tries!", mem_usage_check->l_pid);
+		if (!success) {
+			/* errno is not ESRCH or we ran out of tries to kill the locker */
 			ZCSG(force_restart_time) = time(NULL); /* restore forced restart request */
+			/* cannot kill the locker, bail out with error */
+			zend_accel_error(ACCEL_LOG_ERROR, "Cannot kill process %d: %s!", mem_usage_check->l_pid, strerror(errno));
 		}
 
 		mem_usage_check->l_type = F_WRLCK;
@@ -1188,7 +1203,7 @@ static void zend_accel_add_key(char *key, unsigned int key_length, zend_accel_ha
 #ifdef HAVE_OPCACHE_FILE_CACHE
 static zend_persistent_script *cache_script_in_file_cache(zend_persistent_script *new_persistent_script, int *from_shared_memory)
 {
-	uint memory_used;
+	uint32_t memory_used;
 
 	/* Check if script may be stored in shared memory */
 	if (!zend_accel_script_persistable(new_persistent_script)) {
@@ -1246,7 +1261,7 @@ static zend_persistent_script *cache_script_in_file_cache(zend_persistent_script
 static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_script *new_persistent_script, char *key, unsigned int key_length, int *from_shared_memory)
 {
 	zend_accel_hash_entry *bucket;
-	uint memory_used;
+	uint32_t memory_used;
 
 	/* Check if script may be stored in shared memory */
 	if (!zend_accel_script_persistable(new_persistent_script)) {
@@ -1756,6 +1771,20 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		ZCG(counted) = 1;
 	}
 
+	/* Revalidate acessibility of cached file */
+	if (EXPECTED(persistent_script != NULL) &&
+	    UNEXPECTED(ZCG(accel_directives).validate_permission) &&
+	    file_handle->type == ZEND_HANDLE_FILENAME &&
+	    UNEXPECTED(access(ZSTR_VAL(persistent_script->script.filename), R_OK) != 0)) {
+		if (type == ZEND_REQUIRE) {
+			zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename);
+			zend_bailout();
+		} else {
+			zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
+		}
+		return NULL;
+	}
+
 	HANDLE_BLOCK_INTERRUPTIONS();
 	SHM_UNPROTECT();
 
@@ -2066,6 +2095,29 @@ static void accel_activate(void)
 #ifdef HAVE_OPCACHE_FILE_CACHE
 	if (ZCG(accel_directives).file_cache_only) {
 		return;
+	}
+#endif
+
+#ifndef ZEND_WIN32
+	if (ZCG(accel_directives).validate_root) {
+		struct stat buf;
+
+		if (stat("/", &buf) != 0) {
+			ZCG(root_hash) = 0;
+		} else {
+			ZCG(root_hash) = buf.st_ino;
+			if (sizeof(buf.st_ino) > sizeof(ZCG(root_hash))) {
+				if (ZCG(root_hash) != buf.st_ino) {
+					zend_string *key = zend_string_init("opcache.enable", sizeof("opcache.enable")-1, 0);
+					zend_alter_ini_entry_chars(key, "0", 1, ZEND_INI_SYSTEM, ZEND_INI_STAGE_RUNTIME);
+					zend_string_release(key);
+					zend_accel_error(ACCEL_LOG_WARNING, "Can't cache files in chroot() directory with too big inode");
+					return;
+				}
+			}
+		}
+	} else {
+		ZCG(root_hash) = 0;
 	}
 #endif
 

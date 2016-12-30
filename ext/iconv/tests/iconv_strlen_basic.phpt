@@ -18,9 +18,9 @@ function_exists('iconv_strlen') or die("skip iconv_strlen() is not available in 
 
 echo "*** Testing iconv_strlen() : basic functionality***\n";
 
-$string_ascii = b'abc def';
+$string_ascii = 'abc def';
 //Japanese string in UTF-8
-$string_mb = base64_decode(b'5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII=');
+$string_mb = base64_decode('5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII=');
 
 echo "\n-- ASCII String --\n";
 var_dump(iconv_strlen($string_ascii));

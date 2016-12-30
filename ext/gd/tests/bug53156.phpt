@@ -3,6 +3,9 @@ Bug #53156 (imagerectangle problem with point ordering)
 --SKIPIF--
 <?php
 if (!extension_loaded('gd')) die('skip gd extension not available');
+if (!GD_BUNDLED && version_compare(GD_VERSION, '2.3', '<')) {
+    die("skip test requires GD 2.3 or newer");
+}
 ?>
 --FILE--
 <?php

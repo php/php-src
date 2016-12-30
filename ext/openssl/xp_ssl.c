@@ -52,10 +52,6 @@
 #undef X509_EXTENSIONS
 #endif
 
-#ifdef NETWARE
-#include <sys/select.h>
-#endif
-
 #ifndef OPENSSL_NO_SSL3
 #define HAVE_SSL3 1
 #endif
@@ -91,7 +87,7 @@
 /* Used for peer verification in windows */
 #define PHP_X509_NAME_ENTRY_TO_UTF8(ne, i, out) ASN1_STRING_to_UTF8(&out, X509_NAME_ENTRY_get_data(X509_NAME_get_entry(ne, i)))
 
-#if !defined(OPENSSL_NO_RSA) && OPENSSL_VERSION_NUMBER < 0x10100000L
+#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
 static RSA *tmp_rsa_cb(SSL *s, int is_export, int keylength);
 #endif
 
@@ -145,7 +141,7 @@ typedef struct _php_openssl_netstream_data_t {
 	php_openssl_sni_cert_t *sni_certs;
 	unsigned sni_cert_count;
 #ifdef HAVE_TLS_ALPN
-	php_openssl_alpn_ctx *alpn_ctx;
+	php_openssl_alpn_ctx alpn_ctx;
 #endif
 	char *url_name;
 	unsigned state_set:1;
@@ -1123,7 +1119,7 @@ static void init_server_reneg_limit(php_stream *stream, php_openssl_netstream_da
 }
 /* }}} */
 
-#if !defined(OPENSSL_NO_RSA) && OPENSSL_VERSION_NUMBER < 0x10100000L
+#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
 static RSA *tmp_rsa_cb(SSL *s, int is_export, int keylength)
 {
 	BIGNUM *bn = NULL;
@@ -1147,7 +1143,6 @@ static RSA *tmp_rsa_cb(SSL *s, int is_export, int keylength)
 }
 #endif
 
-#ifndef OPENSSL_NO_DH
 static int set_server_dh_param(php_stream * stream, SSL_CTX *ctx) /* {{{ */
 {
 	DH *dh;
@@ -1192,9 +1187,8 @@ static int set_server_dh_param(php_stream * stream, SSL_CTX *ctx) /* {{{ */
 	return SUCCESS;
 }
 /* }}} */
-#endif
 
-#if defined(HAVE_ECDH) && OPENSSL_VERSION_NUMBER < 0x10100000L
+#if defined(HAVE_ECDH) && (OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER))
 static int set_server_ecdh_curve(php_stream *stream, SSL_CTX *ctx) /* {{{ */
 {
 	zval *zvcurve;
@@ -1237,13 +1231,13 @@ static int set_server_specific_opts(php_stream *stream, SSL_CTX *ctx) /* {{{ */
 	zval *zv;
 	long ssl_ctx_options = SSL_CTX_get_options(ctx);
 
-#if defined(HAVE_ECDH) && OPENSSL_VERSION_NUMBER < 0x10100000L
+#if defined(HAVE_ECDH) && (OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER))
 	if (set_server_ecdh_curve(stream, ctx) == FAILURE) {
 		return FAILURE;
 	}
 #endif
 
-#if !defined(OPENSSL_NO_RSA) && OPENSSL_VERSION_NUMBER < 0x10100000L
+#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
 	SSL_CTX_set_tmp_rsa_callback(ctx, tmp_rsa_cb);
 #endif
 	/* We now use tmp_rsa_cb to generate a key of appropriate size whenever necessary */
@@ -1251,13 +1245,11 @@ static int set_server_specific_opts(php_stream *stream, SSL_CTX *ctx) /* {{{ */
 		php_error_docref(NULL, E_WARNING, "rsa_key_size context option has been removed");
 	}
 
-#ifndef OPENSSL_NO_DH
 	set_server_dh_param(stream, ctx);
 	zv = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", "single_dh_use");
 	if (zv != NULL && zend_is_true(zv)) {
 		ssl_ctx_options |= SSL_OP_SINGLE_DH_USE;
 	}
-#endif
 
 	zv = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", "honor_cipher_order");
 	if (zv != NULL && zend_is_true(zv)) {
@@ -1340,6 +1332,7 @@ static int enable_server_sni(php_stream *stream, php_openssl_netstream_data_t *s
 	sslsock->sni_certs = (php_openssl_sni_cert_t*)safe_pemalloc(sslsock->sni_cert_count,
 		sizeof(php_openssl_sni_cert_t), 0, php_stream_is_persistent(stream)
 	);
+	memset(sslsock->sni_certs, 0, sslsock->sni_cert_count * sizeof(php_openssl_sni_cert_t));
 
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(val), key_index, key, current) {
 		(void) key_index;
@@ -1460,9 +1453,7 @@ static int server_alpn_callback(SSL *ssl_handle, const unsigned char **out, unsi
 {
 	php_openssl_netstream_data_t *sslsock = arg;
 
-	if (SSL_select_next_proto
-		((unsigned char **)out, outlen, sslsock->alpn_ctx->data, sslsock->alpn_ctx->len, in,
-			inlen) != OPENSSL_NPN_NEGOTIATED) {
+	if (SSL_select_next_proto((unsigned char **)out, outlen, sslsock->alpn_ctx.data, sslsock->alpn_ctx.len, in, inlen) != OPENSSL_NPN_NEGOTIATED) {
 		return SSL_TLSEXT_ERR_NOACK;
 	}
 
@@ -1571,9 +1562,8 @@ int php_openssl_setup_crypto(php_stream *stream,
 			if (sslsock->is_client) {
 				SSL_CTX_set_alpn_protos(sslsock->ctx, alpn, alpn_len);
 			} else {
-				sslsock->alpn_ctx = (php_openssl_alpn_ctx *) emalloc(sizeof(php_openssl_alpn_ctx));
-				sslsock->alpn_ctx->data = (unsigned char*)estrndup((const char*)alpn, alpn_len);
-				sslsock->alpn_ctx->len = alpn_len;
+				sslsock->alpn_ctx.data = (unsigned char *) pestrndup((const char*)alpn, alpn_len, php_stream_is_persistent(stream));
+				sslsock->alpn_ctx.len = alpn_len;
 				SSL_CTX_set_alpn_select_cb(sslsock->ctx, server_alpn_callback, sslsock);
 			}
 
@@ -1604,6 +1594,12 @@ int php_openssl_setup_crypto(php_stream *stream,
 		php_error_docref(NULL, E_WARNING, "SSL handle creation failure");
 		SSL_CTX_free(sslsock->ctx);
 		sslsock->ctx = NULL;
+#ifdef HAVE_TLS_ALPN
+		if (sslsock->alpn_ctx.data) {
+			pefree(sslsock->alpn_ctx.data, php_stream_is_persistent(stream));
+			sslsock->alpn_ctx.data = NULL;
+		}
+#endif
 		return FAILURE;
 	} else {
 		SSL_set_ex_data(sslsock->ssl_handle, php_openssl_get_ssl_stream_data_index(), stream);
@@ -2105,6 +2101,11 @@ static int php_openssl_sockop_close(php_stream *stream, int close_handle) /* {{{
 			SSL_CTX_free(sslsock->ctx);
 			sslsock->ctx = NULL;
 		}
+#ifdef HAVE_TLS_ALPN
+		if (sslsock->alpn_ctx.data) {
+			pefree(sslsock->alpn_ctx.data, php_stream_is_persistent(stream));
+		}
+#endif
 #ifdef PHP_WIN32
 		if (sslsock->s.socket == -1)
 			sslsock->s.socket = SOCK_ERR;
@@ -2130,9 +2131,11 @@ static int php_openssl_sockop_close(php_stream *stream, int close_handle) /* {{{
 	}
 
 	if (sslsock->sni_certs) {
-		for (i=0; i<sslsock->sni_cert_count; i++) {
-			SSL_CTX_free(sslsock->sni_certs[i].ctx);
-			pefree(sslsock->sni_certs[i].name, php_stream_is_persistent(stream));
+		for (i = 0; i < sslsock->sni_cert_count; i++) {
+			if (sslsock->sni_certs[i].ctx) {
+				SSL_CTX_free(sslsock->sni_certs[i].ctx);
+				pefree(sslsock->sni_certs[i].name, php_stream_is_persistent(stream));
+			}
 		}
 		pefree(sslsock->sni_certs, php_stream_is_persistent(stream));
 		sslsock->sni_certs = NULL;

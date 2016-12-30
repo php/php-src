@@ -40,11 +40,19 @@ BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID dummy)
 	switch (reason)
 	{
 		case DLL_PROCESS_ATTACH:
-			ret = ret && php_win32_init_gettimeofday();
-			if (!ret) {
-				fprintf(stderr, "gettimeofday() initialization failed");
-				return ret;
-			}
+			/*
+			 * We do not need to check the return value of php_win32_init_gettimeofday()
+			 * because the symbol bare minimum symbol we need is always available on our 
+			 * lowest supported platform.
+			 *
+			 * On Windows 8 or greater, we use a more precise symbol to obtain the system
+			 * time, which is dynamically. The fallback allows us to proper support 
+			 * Vista/7/Server 2003 R2/Server 2008/Server 2008 R2.
+			 *
+			 * Instead simply initialize the global in win32/time.c for gettimeofday()
+			 * use later on
+			 */
+			php_win32_init_gettimeofday();
 
 			ret = ret && php_win32_ioutil_init();
 			if (!ret) {

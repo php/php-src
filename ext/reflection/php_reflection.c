@@ -60,6 +60,7 @@ PHPAPI zend_class_entry *reflection_function_ptr;
 PHPAPI zend_class_entry *reflection_generator_ptr;
 PHPAPI zend_class_entry *reflection_parameter_ptr;
 PHPAPI zend_class_entry *reflection_type_ptr;
+PHPAPI zend_class_entry *reflection_named_type_ptr;
 PHPAPI zend_class_entry *reflection_class_ptr;
 PHPAPI zend_class_entry *reflection_object_ptr;
 PHPAPI zend_class_entry *reflection_method_ptr;
@@ -67,23 +68,6 @@ PHPAPI zend_class_entry *reflection_property_ptr;
 PHPAPI zend_class_entry *reflection_class_constant_ptr;
 PHPAPI zend_class_entry *reflection_extension_ptr;
 PHPAPI zend_class_entry *reflection_zend_extension_ptr;
-
-#if MBO_0
-ZEND_BEGIN_MODULE_GLOBALS(reflection)
-	int dummy;
-ZEND_END_MODULE_GLOBALS(reflection)
-
-#ifdef ZTS
-# define REFLECTION_G(v) \
-	ZEND_TSRMG(reflection_globals_id, zend_reflection_globals*, v)
-extern int reflection_globals_id;
-#else
-# define REFLECTION_G(v) (reflection_globals.v)
-extern zend_reflection_globals reflectionglobals;
-#endif
-
-ZEND_DECLARE_MODULE_GLOBALS(reflection)
-#endif /* MBO_0 */
 
 /* Method macros */
 
@@ -199,7 +183,7 @@ typedef struct _property_reference {
 /* Struct for parameters */
 typedef struct _parameter_reference {
 	uint32_t offset;
-	uint32_t required;
+	zend_bool required;
 	struct _zend_arg_info *arg_info;
 	zend_function *fptr;
 } parameter_reference;
@@ -344,6 +328,15 @@ static void reflection_free_objects_storage(zend_object *object) /* {{{ */
 	intern->ptr = NULL;
 	zval_ptr_dtor(&intern->obj);
 	zend_object_std_dtor(object);
+}
+/* }}} */
+
+static HashTable *reflection_get_gc(zval *obj, zval **gc_data, int *gc_data_count) /* {{{ */
+{
+	reflection_object *intern = Z_REFLECTION_P(obj);
+	*gc_data = &intern->obj;
+	*gc_data_count = 1;
+	return zend_std_get_properties(obj);
 }
 /* }}} */
 
@@ -677,10 +670,10 @@ static zend_op* _get_recv_op(zend_op_array *op_array, uint32_t offset)
 /* }}} */
 
 /* {{{ _parameter_string */
-static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg_info *arg_info, uint32_t offset, uint32_t required, char* indent)
+static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg_info *arg_info, uint32_t offset, zend_bool required, char* indent)
 {
 	string_printf(str, "Parameter #%d [ ", offset);
-	if (offset >= required) {
+	if (!required) {
 		string_printf(str, "<optional> ");
 	} else {
 		string_printf(str, "<required> ");
@@ -715,7 +708,7 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 	} else {
 		string_printf(str, "$param%d", offset);
 	}
-	if (fptr->type == ZEND_USER_FUNCTION && offset >= required) {
+	if (fptr->type == ZEND_USER_FUNCTION && !required) {
 		zend_op *precv = _get_recv_op((zend_op_array*)fptr, offset);
 		if (precv && precv->opcode == ZEND_RECV_INIT && precv->op2_type != IS_UNUSED) {
 			zval zv;
@@ -754,7 +747,7 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 static void _function_parameter_string(string *str, zend_function *fptr, char* indent)
 {
 	struct _zend_arg_info *arg_info = fptr->common.arg_info;
-	uint32_t i, num_args, required = fptr->common.required_num_args;
+	uint32_t i, num_args, num_required = fptr->common.required_num_args;
 
 	if (!arg_info) {
 		return;
@@ -768,7 +761,7 @@ static void _function_parameter_string(string *str, zend_function *fptr, char* i
 	string_printf(str, "%s- Parameters [%d] {\n", indent, num_args);
 	for (i = 0; i < num_args; i++) {
 		string_printf(str, "%s  ", indent);
-		_parameter_string(str, fptr, arg_info, i, required, indent);
+		_parameter_string(str, fptr, arg_info, i, i < num_required, indent);
 		string_write(str, "\n", sizeof("\n")-1);
 		arg_info++;
 	}
@@ -1236,7 +1229,7 @@ static void reflection_extension_factory(zval *object, const char *name_str)
 /* }}} */
 
 /* {{{ reflection_parameter_factory */
-static void reflection_parameter_factory(zend_function *fptr, zval *closure_object, struct _zend_arg_info *arg_info, uint32_t offset, uint32_t required, zval *object)
+static void reflection_parameter_factory(zend_function *fptr, zval *closure_object, struct _zend_arg_info *arg_info, uint32_t offset, zend_bool required, zval *object)
 {
 	reflection_object *intern;
 	parameter_reference *reference;
@@ -1276,7 +1269,7 @@ static void reflection_type_factory(zend_function *fptr, zval *closure_object, s
 	reflection_object *intern;
 	type_reference *reference;
 
-	reflection_instantiate(reflection_type_ptr, object);
+	reflection_instantiate(reflection_named_type_ptr, object);
 	intern = Z_REFLECTION_P(object);
 	reference = (type_reference*) emalloc(sizeof(type_reference));
 	reference->arg_info = arg_info;
@@ -1554,17 +1547,11 @@ ZEND_METHOD(reflection, export)
 	int result;
 	zend_bool return_output = 0;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &object, reflector_ptr, &return_output) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_OBJECT_OF_CLASS(object, reflector_ptr)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(return_output)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	/* Invoke the __toString() method */
 	ZVAL_STRINGL(&fname, "__tostring", sizeof("__tostring") - 1);
@@ -1990,6 +1977,9 @@ ZEND_METHOD(reflection_function, invoke)
 	}
 
 	if (Z_TYPE(retval) != IS_UNDEF) {
+		if (Z_ISREF(retval)) {
+			zend_unwrap_reference(&retval);
+		}
 		ZVAL_COPY_VALUE(return_value, &retval);
 	}
 }
@@ -2053,6 +2043,9 @@ ZEND_METHOD(reflection_function, invokeArgs)
 	}
 
 	if (Z_TYPE(retval) != IS_UNDEF) {
+		if (Z_ISREF(retval)) {
+			zend_unwrap_reference(&retval);
+		}
 		ZVAL_COPY_VALUE(return_value, &retval);
 	}
 }
@@ -2073,7 +2066,7 @@ ZEND_METHOD(reflection_function, returnsReference)
 /* }}} */
 
 /* {{{ proto public bool ReflectionFunction::getNumberOfParameters()
-   Gets the number of required parameters */
+   Gets the number of parameters */
 ZEND_METHOD(reflection_function, getNumberOfParameters)
 {
 	reflection_object *intern;
@@ -2128,7 +2121,14 @@ ZEND_METHOD(reflection_function, getParameters)
 	for (i = 0; i < num_args; i++) {
 		zval parameter;
 
-		reflection_parameter_factory(_copy_function(fptr), Z_ISUNDEF(intern->obj)? NULL : &intern->obj, arg_info, i, fptr->common.required_num_args, &parameter);
+		reflection_parameter_factory(
+			_copy_function(fptr),
+			Z_ISUNDEF(intern->obj) ? NULL : &intern->obj,
+			arg_info,
+			i,
+			i < fptr->common.required_num_args,
+			&parameter
+		);
 		add_next_index_zval(return_value, &parameter);
 
 		arg_info++;
@@ -2540,7 +2540,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 	ref = (parameter_reference*) emalloc(sizeof(parameter_reference));
 	ref->arg_info = &arg_info[position];
 	ref->offset = (uint32_t)position;
-	ref->required = fptr->common.required_num_args;
+	ref->required = position < fptr->common.required_num_args;
 	ref->fptr = fptr;
 	/* TODO: copy fptr */
 	intern->ptr = ref;
@@ -2845,7 +2845,7 @@ ZEND_METHOD(reflection_parameter, isOptional)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	RETVAL_BOOL(param->offset >= param->required);
+	RETVAL_BOOL(!param->required);
 }
 /* }}} */
 
@@ -2999,6 +2999,28 @@ ZEND_METHOD(reflection_type, isBuiltin)
 }
 /* }}} */
 
+/* {{{ reflection_type_name */
+static zend_string *reflection_type_name(type_reference *param) {
+	switch (param->arg_info->type_hint) {
+		case IS_ARRAY:    return zend_string_init("array", sizeof("array") - 1, 0);
+		case IS_CALLABLE: return zend_string_init("callable", sizeof("callable") - 1, 0);
+		case IS_OBJECT:
+			if (param->fptr->type == ZEND_INTERNAL_FUNCTION &&
+				!(param->fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
+				return zend_string_init(((zend_internal_arg_info*)param->arg_info)->class_name, strlen(((zend_internal_arg_info*)param->arg_info)->class_name), 0);
+			}
+			return zend_string_copy(param->arg_info->class_name);
+		case IS_STRING:   return zend_string_init("string", sizeof("string") - 1, 0);
+		case _IS_BOOL:    return zend_string_init("bool", sizeof("bool") - 1, 0);
+		case IS_LONG:     return zend_string_init("int", sizeof("int") - 1, 0);
+		case IS_DOUBLE:   return zend_string_init("float", sizeof("float") - 1, 0);
+		case IS_VOID:     return zend_string_init("void", sizeof("void") - 1, 0);
+		case IS_ITERABLE: return zend_string_init("iterable", sizeof("iterable") - 1, 0);
+		EMPTY_SWITCH_DEFAULT_CASE()
+	}
+}
+/* }}} */
+
 /* {{{ proto public string ReflectionType::__toString()
    Return the text of the type hint */
 ZEND_METHOD(reflection_type, __toString)
@@ -3010,24 +3032,24 @@ ZEND_METHOD(reflection_type, __toString)
 		return;
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
+	
+	RETURN_STR(reflection_type_name(param));
+}
+/* }}} */
 
-	switch (param->arg_info->type_hint) {
-		case IS_ARRAY:    RETURN_STRINGL("array", sizeof("array") - 1);
-		case IS_CALLABLE: RETURN_STRINGL("callable", sizeof("callable") - 1);
-		case IS_OBJECT:
-			if (param->fptr->type == ZEND_INTERNAL_FUNCTION &&
-			    !(param->fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
-				RETURN_STRING(((zend_internal_arg_info*)param->arg_info)->class_name);
-			}
-			RETURN_STR_COPY(param->arg_info->class_name);
-		case IS_STRING:   RETURN_STRINGL("string", sizeof("string") - 1);
-		case _IS_BOOL:    RETURN_STRINGL("bool", sizeof("bool") - 1);
-		case IS_LONG:     RETURN_STRINGL("int", sizeof("int") - 1);
-		case IS_DOUBLE:   RETURN_STRINGL("float", sizeof("float") - 1);
-		case IS_VOID:     RETURN_STRINGL("void", sizeof("void") - 1);
-		case IS_ITERABLE: RETURN_STRINGL("iterable", sizeof("iterable") - 1);
-		EMPTY_SWITCH_DEFAULT_CASE()
+/* {{{ proto public string ReflectionNamedType::getName()
+ Return the text of the type hint */
+ZEND_METHOD(reflection_named_type, getName)
+{
+	reflection_object *intern;
+	type_reference *param;
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
+	GET_REFLECTION_OBJECT_PTR(param);
+	
+	RETURN_STR(reflection_type_name(param));
 }
 /* }}} */
 
@@ -3306,6 +3328,9 @@ static void reflection_method_invoke(INTERNAL_FUNCTION_PARAMETERS, int variadic)
 	}
 
 	if (Z_TYPE(retval) != IS_UNDEF) {
+		if (Z_ISREF(retval)) {
+			zend_unwrap_reference(&retval);
+		}
 		ZVAL_COPY_VALUE(return_value, &retval);
 	}
 }
@@ -4757,7 +4782,7 @@ ZEND_METHOD(reflection_class, getModifiers)
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	RETURN_LONG(ce->ce_flags & ~(ZEND_ACC_CONSTANTS_UPDATED|ZEND_ACC_USE_GUARDS));
+	RETURN_LONG(ce->ce_flags & ~(ZEND_ACC_CONSTANTS_UPDATED|ZEND_ACC_USE_GUARDS|ZEND_ACC_INHERITED));
 }
 /* }}} */
 
@@ -6684,7 +6709,15 @@ static const zend_function_entry reflection_type_functions[] = {
 	ZEND_ME(reflection, __clone, arginfo_reflection__void, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
 	ZEND_ME(reflection_type, allowsNull, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_type, isBuiltin, arginfo_reflection__void, 0)
+	/* ReflectionType::__toString() is deprecated, but we currently do not mark it as such
+	 * due to bad interaction with the PHPUnit error handler and exceptions in __toString().
+	 * See PR2137. */
 	ZEND_ME(reflection_type, __toString, arginfo_reflection__void, 0)
+	PHP_FE_END
+};
+
+static const zend_function_entry reflection_named_type_functions[] = {
+	ZEND_ME(reflection_named_type, getName, arginfo_reflection__void, 0)
 	PHP_FE_END
 };
 
@@ -6768,6 +6801,7 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	reflection_object_handlers.free_obj = reflection_free_objects_storage;
 	reflection_object_handlers.clone_obj = NULL;
 	reflection_object_handlers.write_property = _reflection_write_property;
+	reflection_object_handlers.get_gc = reflection_get_gc;
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionException", reflection_exception_functions);
 	reflection_exception_ptr = zend_register_internal_class_ex(&_reflection_entry, zend_ce_exception);
@@ -6804,6 +6838,10 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionType", reflection_type_functions);
 	_reflection_entry.create_object = reflection_objects_new;
 	reflection_type_ptr = zend_register_internal_class(&_reflection_entry);
+	
+	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionNamedType", reflection_named_type_functions);
+	_reflection_entry.create_object = reflection_objects_new;
+	reflection_named_type_ptr = zend_register_internal_class_ex(&_reflection_entry, reflection_type_ptr);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionMethod", reflection_method_functions);
 	_reflection_entry.create_object = reflection_objects_new;

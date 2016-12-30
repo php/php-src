@@ -4109,8 +4109,12 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 									fgot = php_stream_read(ImageInfo->infile, ImageInfo->Thumbnail.data, ImageInfo->Thumbnail.size);
 									if (fgot < ImageInfo->Thumbnail.size) {
 										EXIF_ERRLOG_THUMBEOF(ImageInfo)
+										efree(ImageInfo->Thumbnail.data);
+
+										ImageInfo->Thumbnail.data = NULL;
+									} else {
+										exif_thumbnail_build(ImageInfo);
 									}
-									exif_thumbnail_build(ImageInfo);
 								}
 							}
 						}
@@ -4143,8 +4147,11 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 						fgot = php_stream_read(ImageInfo->infile, ImageInfo->Thumbnail.data, ImageInfo->Thumbnail.size);
 						if (fgot < ImageInfo->Thumbnail.size) {
 							EXIF_ERRLOG_THUMBEOF(ImageInfo)
+							efree(ImageInfo->Thumbnail.data);
+							ImageInfo->Thumbnail.data = NULL;
+						} else {
+							exif_thumbnail_build(ImageInfo);
 						}
-						exif_thumbnail_build(ImageInfo);
 					}
 #ifdef EXIF_DEBUG
 					exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Read next IFD (THUMBNAIL) done");

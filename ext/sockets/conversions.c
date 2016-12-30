@@ -1188,13 +1188,13 @@ static void to_zval_read_iov(const char *msghdr_c, zval *zv, res_context *ctx)
 	size_t				iovlen = msghdr->msg_iovlen;
 	ssize_t				*recvmsg_ret,
 						bytes_left;
-	uint				i;
+	uint32_t			i;
 
 	if (iovlen > UINT_MAX) {
 		do_to_zval_err(ctx, "unexpectedly large value for iov_len: %lu",
 				(unsigned long)iovlen);
 	}
-	array_init_size(zv, (uint)iovlen);
+	array_init_size(zv, (uint32_t)iovlen);
 
 	if ((recvmsg_ret = zend_hash_str_find_ptr(&ctx->params, KEY_RECVMSG_RET, sizeof(KEY_RECVMSG_RET) - 1)) == NULL) {
 		do_to_zval_err(ctx, "recvmsg_ret not found in params. This is a bug");
@@ -1202,7 +1202,7 @@ static void to_zval_read_iov(const char *msghdr_c, zval *zv, res_context *ctx)
 	}
 	bytes_left = *recvmsg_ret;
 
-	for (i = 0; bytes_left > 0 && i < (uint)iovlen; i++) {
+	for (i = 0; bytes_left > 0 && i < (uint32_t)iovlen; i++) {
 		zval elem;
 		size_t len = MIN(msghdr->msg_iov[i].iov_len, (size_t)bytes_left);
 		zend_string	*buf = zend_string_alloc(len, 0);
