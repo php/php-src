@@ -186,9 +186,9 @@ PHP_FUNCTION(disk_total_space)
 	char *path;
 	size_t path_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &path, &path_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_PATH(path, path_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (php_check_open_basedir(path)) {
 		RETURN_FALSE;
@@ -279,9 +279,9 @@ PHP_FUNCTION(disk_free_space)
 	char *path;
 	size_t path_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &path, &path_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_PATH(path, path_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (php_check_open_basedir(path)) {
 		RETURN_FALSE;
@@ -337,9 +337,10 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 #endif
 	php_stream_wrapper *wrapper;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pz/", &filename, &filename_len, &group) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_PATH(filename, filename_len)
+		Z_PARAM_ZVAL_DEREF_EX(group, 0, 1)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0);
 	if(wrapper != &php_plain_files_wrapper || strncasecmp("file://", filename, 7) == 0) {
@@ -472,9 +473,10 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 #endif
 	php_stream_wrapper *wrapper;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pz/", &filename, &filename_len, &user) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_PATH(filename, filename_len)
+		Z_PARAM_ZVAL_DEREF_EX(user, 0, 1)
+	ZEND_PARSE_PARAMETERS_END();
 
 	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0);
 	if(wrapper != &php_plain_files_wrapper || strncasecmp("file://", filename, 7) == 0) {
@@ -578,9 +580,10 @@ PHP_FUNCTION(chmod)
 	mode_t imode;
 	php_stream_wrapper *wrapper;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pl", &filename, &filename_len, &mode) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_PATH(filename, filename_len)
+		Z_PARAM_LONG(mode)
+	ZEND_PARSE_PARAMETERS_END();
 
 	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0);
 	if(wrapper != &php_plain_files_wrapper || strncasecmp("file://", filename, 7) == 0) {
@@ -626,9 +629,12 @@ PHP_FUNCTION(touch)
 	struct utimbuf *newtime = &newtimebuf;
 	php_stream_wrapper *wrapper;
 
-	if (zend_parse_parameters(argc, "p|ll", &filename, &filename_len, &filetime, &fileatime) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_PATH(filename, filename_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(filetime)
+		Z_PARAM_LONG(fileatime)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!filename_len) {
 		RETURN_FALSE;
@@ -736,9 +742,11 @@ PHP_FUNCTION(clearstatcache)
 	char      *filename             = NULL;
 	size_t     filename_len         = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|bp", &clear_realpath_cache, &filename, &filename_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(clear_realpath_cache)
+		Z_PARAM_PATH(filename, filename_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	php_clear_stat_cache(clear_realpath_cache, filename, filename_len);
 }
