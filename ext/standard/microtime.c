@@ -53,9 +53,10 @@ static void _php_gettimeofday(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	zend_bool get_as_float = 0;
 	struct timeval tp = {0};
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &get_as_float) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(get_as_float)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (gettimeofday(&tp, NULL)) {
 		RETURN_FALSE;
@@ -112,9 +113,10 @@ PHP_FUNCTION(getrusage)
 	zend_long pwho = 0;
 	int who = RUSAGE_SELF;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &pwho) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(pwho)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (pwho == 1) {
 		who = RUSAGE_CHILDREN;
