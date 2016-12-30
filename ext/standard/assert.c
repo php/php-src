@@ -157,9 +157,11 @@ PHP_FUNCTION(assert)
 		RETURN_TRUE;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|z", &assertion, &description) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ZVAL_DEREF(assertion)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL_DEREF(description)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (Z_TYPE_P(assertion) == IS_STRING) {
 		zval retval;
@@ -290,9 +292,11 @@ PHP_FUNCTION(assert_options)
 	int ac = ZEND_NUM_ARGS();
 	zend_string *key;
 
-	if (zend_parse_parameters(ac, "l|z", &what, &value) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_LONG(what)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL_DEREF(value)
+	ZEND_PARSE_PARAMETERS_END();
 
 	switch (what) {
 	case ASSERT_ACTIVE:

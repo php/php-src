@@ -245,9 +245,11 @@ PHP_FUNCTION(crypt)
 	size_t str_len, salt_in_len = 0;
 	zend_string *result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &str, &str_len, &salt_in, &salt_in_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING(salt_in, salt_in_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	salt[0] = salt[PHP_MAX_SALT_LEN] = '\0';
 
