@@ -1075,7 +1075,19 @@ static dom_object* dom_objects_set_class(zend_class_entry *class_type, zend_bool
 	dom_object *intern = ecalloc(1, sizeof(dom_object) + zend_object_properties_size(class_type));
 
 	zend_class_entry *base_class = class_type;
-	while (base_class->type != ZEND_INTERNAL_CLASS && base_class->parent != NULL) {
+	while (base_class->parent != NULL) {
+		if (base_class->type == ZEND_INTERNAL_CLASS) {
+			if (base_class == dom_node_class_entry) {
+				break;
+			}
+			if (base_class == dom_characterdata_class_entry) {
+				break;
+			}
+			if (base_class == dom_text_class_entry) {
+				break;
+			}
+		}
+
 		base_class = base_class->parent;
 	}
 
