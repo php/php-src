@@ -93,6 +93,8 @@ PHP 7.1 UPGRADE NOTES
   . The allowed_classes element of the $options parameter of unserialize() is
     now strictly typed, i.e. if anything other than an array or a boolean is
     given, unserialize() returns FALSE and issues an E_WARNING.
+  . $this, autoglobals, and variables with the same name as a parameter can no
+    longer be bound to a closure via the use construct.
 
 - JSON:
   . The serialize_precision is used instead of precision when encoding double
