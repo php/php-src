@@ -90,6 +90,9 @@ PHP 7.1 UPGRADE NOTES
   
     now results in the array ["b" => 1, "a" => 1], while for PHP 7.0 the result
     was ["a" => 1, "b" => 1].
+  . The allowed_classes element of the $options parameter of unserialize() is
+    now strictly typed, i.e. if anything other than an array or a boolean is
+    given, unserialize() returns FALSE and issues an E_WARNING.
 
 - JSON:
   . The serialize_precision is used instead of precision when encoding double
