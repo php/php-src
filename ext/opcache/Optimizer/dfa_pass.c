@@ -356,6 +356,12 @@ static zend_bool opline_supports_assign_contraction(
 		return opline->op1_type != IS_CV || opline->op1.var != cv_var;
 	}
 
+	if (opline->opcode == ZEND_INIT_ARRAY) {
+		/* INIT_ARRAY initializes the result array before reading key/value. */
+		return (opline->op1_type != IS_CV || opline->op1.var != cv_var)
+			&& (opline->op2_type != IS_CV || opline->op2.var != cv_var);
+	}
+
 	return 1;
 }
 

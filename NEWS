@@ -37,6 +37,7 @@ PHP                                                                        NEWS
   . Fixed bug #73654 (Segmentation fault in zend_call_function). (Nikita)
   . Fixed bug #73668 ("SIGFPE Arithmetic exception" in opcache when divide by
     minus 1). (Nikita)
+  . Fixed bug #73847 (Recursion when a variable is redefined as array). (Nikita)
 
 - PDO_Firebird:
   . Fixed bug #72931 (PDO_FIREBIRD with Firebird 3.0 not work on returning
