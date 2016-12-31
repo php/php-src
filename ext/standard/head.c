@@ -62,6 +62,7 @@ PHP_FUNCTION(header_remove)
 	size_t len = 0;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING(ctr.line, len)
 	ZEND_PARSE_PARAMETERS_END();
 
