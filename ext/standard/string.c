@@ -4981,7 +4981,7 @@ PHP_FUNCTION(str_repeat)
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_STR(input_str)
-		Z_PARMA_LONG(mult)
+		Z_PARAM_LONG(mult)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (mult < 0) {
@@ -5038,7 +5038,7 @@ PHP_FUNCTION(count_chars)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(input)
 		Z_PARAM_OPTIONAL
-		Z_PARMA_LONG(mymode)
+		Z_PARAM_LONG(mymode)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (mymode < 0 || mymode > 4) {

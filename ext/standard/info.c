@@ -1267,9 +1267,10 @@ PHP_FUNCTION(phpinfo)
 {
 	zend_long flag = PHP_INFO_ALL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &flag) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(flag)
+	ZEND_PARSE_PARAMETERS_END();
 
 	/* Andale!  Andale!  Yee-Hah! */
 	php_output_start_default();
@@ -1288,9 +1289,10 @@ PHP_FUNCTION(phpversion)
 	char *ext_name = NULL;
 	size_t ext_name_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &ext_name, &ext_name_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING(ext_name, ext_name_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!ext_name) {
 		RETURN_STRING(PHP_VERSION);
@@ -1311,9 +1313,10 @@ PHP_FUNCTION(phpcredits)
 {
 	zend_long flag = PHP_CREDITS_ALL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &flag) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(flag)
+	ZEND_PARSE_PARAMETERS_END();
 
 	php_print_credits((int)flag);
 	RETURN_TRUE;
@@ -1344,9 +1347,11 @@ PHP_FUNCTION(php_uname)
 	char *mode = "a";
 	size_t modelen = sizeof("a")-1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &mode, &modelen) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING(mode, modelen)
+	ZEND_PARSE_PARAMETERS_END();
+
 	RETURN_STR(php_get_uname(*mode));
 }
 

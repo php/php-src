@@ -78,9 +78,9 @@ PHP_FUNCTION(ezmlm_hash)
 	unsigned int h = 5381;
 	size_t j, str_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &str, &str_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(str, str_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	for (j = 0; j < str_len; j++) {
 		h = (h + (h << 5)) ^ (zend_ulong) (unsigned char) tolower(str[j]);
@@ -295,9 +295,14 @@ PHP_FUNCTION(mail)
 	char *to_r, *subject_r;
 	char *p, *e;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss|zS", &to, &to_len, &subject, &subject_len, &message, &message_len, &headers, &extra_cmd) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(3, 5)
+		Z_PARAM_STRING(to, to_len)
+		Z_PARAM_STRING(subject, subject_len)
+		Z_PARAM_STRING(message, message_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL_DEREF(headers)
+		Z_PARAM_STR(extra_cmd)
+	ZEND_PARSE_PARAMETERS_END();
 
 	/* ASCIIZ check */
 	MAIL_ASCIIZ_CHECK(to, to_len);
