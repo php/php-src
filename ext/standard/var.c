@@ -202,9 +202,9 @@ PHP_FUNCTION(var_dump)
 	int argc;
 	int	i;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, -1)
+		Z_PARAM_VARIADIC('+', args, argc)
+	ZEND_PARSE_PARAMETERS_END();
 
 	for (i = 0; i < argc; i++) {
 		php_var_dump(&args[i], 1);
@@ -366,9 +366,9 @@ PHP_FUNCTION(debug_zval_dump)
 	int argc;
 	int	i;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, -1)
+		Z_PARAM_VARIADIC('+', args, argc)
+	ZEND_PARSE_PARAMETERS_END();
 
 	for (i = 0; i < argc; i++) {
 		php_debug_zval_dump(&args[i], 1);
@@ -572,9 +572,11 @@ PHP_FUNCTION(var_export)
 	zend_bool return_output = 0;
 	smart_str buf = {0};
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &var, &return_output) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ZVAL_DEREF(var)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(return_output)
+	ZEND_PARSE_PARAMETERS_END();
 
 	php_var_export_ex(var, 1, &buf);
 	smart_str_0 (&buf);
@@ -1035,9 +1037,9 @@ PHP_FUNCTION(serialize)
 	php_serialize_data_t var_hash;
 	smart_str buf = {0};
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &struc) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL_DEREF(struc)
+	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 	php_var_serialize(&buf, struc, &var_hash);
@@ -1068,9 +1070,11 @@ PHP_FUNCTION(unserialize)
 	zval *retval;
 	HashTable *class_hash = NULL, *prev_class_hash;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|a", &buf, &buf_len, &options) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(buf, buf_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY(options)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if (buf_len == 0) {
 		RETURN_FALSE;
@@ -1134,9 +1138,10 @@ PHP_FUNCTION(unserialize)
 PHP_FUNCTION(memory_get_usage) {
 	zend_bool real_usage = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &real_usage) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(real_usage)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	RETURN_LONG(zend_memory_usage(real_usage));
 }
@@ -1147,9 +1152,10 @@ PHP_FUNCTION(memory_get_usage) {
 PHP_FUNCTION(memory_get_peak_usage) {
 	zend_bool real_usage = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &real_usage) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(real_usage)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	RETURN_LONG(zend_memory_peak_usage(real_usage));
 }

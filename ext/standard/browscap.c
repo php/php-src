@@ -457,9 +457,11 @@ PHP_FUNCTION(get_browser)
 		bdata = &global_bdata;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!b", &agent_name, &agent_name_len, &return_array) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING_EX(agent_name, agent_name_len, 1, 0)
+		Z_PARAM_BOOL(return_array)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (agent_name == NULL) {
 		if ((Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY || zend_is_auto_global_str(ZEND_STRL("_SERVER"))) && 

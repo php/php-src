@@ -53,9 +53,9 @@ PHPAPI PHP_FUNCTION(dl)
 	char *filename;
 	size_t filename_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &filename, &filename_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(filename, filename_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!PG(enable_dl)) {
 		php_error_docref(NULL, E_WARNING, "Dynamically loaded extensions aren't enabled");

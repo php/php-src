@@ -151,9 +151,9 @@ PHP_FUNCTION(gethostbyaddr)
 	size_t addr_len;
 	zend_string *hostname;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &addr, &addr_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(addr, addr_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	hostname = php_gethostbyaddr(addr);
 
@@ -212,9 +212,9 @@ PHP_FUNCTION(gethostbyname)
 	char *hostname;
 	size_t hostname_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &hostname, &hostname_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(hostname, hostname_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if(hostname_len > MAXFQDNLEN) {
 		/* name too long, protect from CVE-2015-0235 */
@@ -236,9 +236,9 @@ PHP_FUNCTION(gethostbynamel)
 	struct in_addr in;
 	int i;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &hostname, &hostname_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(hostname, hostname_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if(hostname_len > MAXFQDNLEN) {
 		/* name too long, protect from CVE-2015-0235 */
@@ -363,9 +363,11 @@ PHP_FUNCTION(dns_check_record)
 	struct __res_state *handle = &state;
 #endif
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &hostname, &hostname_len, &rectype, &rectype_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(hostname, hostname_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING(rectype, rectype_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (hostname_len == 0) {
 		php_error_docref(NULL, E_WARNING, "Host cannot be empty");
@@ -780,10 +782,14 @@ PHP_FUNCTION(dns_get_record)
 	int type, first_query = 1, store_results = 1;
 	zend_bool raw = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lz/!z/!b",
-			&hostname, &hostname_len, &type_param, &authns, &addtl, &raw) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 5)
+		Z_PARAM_STRING(hostname, hostname_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(type_param)
+		Z_PARAM_ZVAL_DEREF_EX(authns, 1, 1)
+		Z_PARAM_ZVAL_DEREF_EX(addtl, 1, 1)
+		Z_PARAM_BOOL(raw)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (authns) {
 		zval_dtor(authns);
@@ -1008,9 +1014,12 @@ PHP_FUNCTION(dns_get_mx)
 	struct __res_state *handle = &state;
 #endif
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz/|z/", &hostname, &hostname_len, &mx_list, &weight_list) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STRING(hostname, hostname_len)
+		Z_PARAM_ZVAL_DEREF_EX(mx_list, 0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL_DEREF_EX(weight_list, 0, 1)
+	ZEND_PARSE_PARAMETERS_END();
 
 	zval_dtor(mx_list);
 	array_init(mx_list);
