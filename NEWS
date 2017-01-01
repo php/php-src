@@ -29,9 +29,6 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug #69587 (DateInterval properties and isset). (jhdxr)
 
-- DOM:
-  . Fixed dom class cannot be inherited by internal class. (dreamsxin)
-
 - EXIF:
   . Added support for vendor specific tags for the following formats:
     Samsung, DJI, Panasonic, Sony, Pentax, Minolta & Sigma/Foveon. (Kalle)
