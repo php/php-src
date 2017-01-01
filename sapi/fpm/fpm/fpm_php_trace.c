@@ -42,7 +42,7 @@
 
 static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ */
 {
-	int callers_limit = 20;
+	int callers_limit = child->wp->config->request_slowlog_trace_depth;
 	pid_t pid = child->pid;
 	struct timeval tv;
 	static const int buf_size = 1024;
