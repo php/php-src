@@ -151,7 +151,7 @@ static inline void php_rshutdown_session_globals(void) /* {{{ */
 }
 /* }}} */
 
-static int php_session_destroy(void) /* {{{ */
+PHPAPI int php_session_destroy(void) /* {{{ */
 {
 	int retval = SUCCESS;
 
@@ -1606,7 +1606,7 @@ PHPAPI int php_session_start(void) /* {{{ */
 }
 /* }}} */
 
-static int php_session_flush(int write) /* {{{ */
+PHPAPI int php_session_flush(int write) /* {{{ */
 {
 	if (PS(session_status) == php_session_active) {
 		php_session_save_current_state(write);
@@ -1671,7 +1671,7 @@ static PHP_FUNCTION(session_set_cookie_params)
 		return;
 	}
 
- 
+
 	if (PS(session_status) == php_session_active) {
 		php_error_docref(NULL, E_WARNING, "Cannot change session cookie parameters when session is active");
 		RETURN_FALSE;

@@ -255,6 +255,7 @@ PHPAPI int php_session_update_timestamp(PS_UPDATE_TIMESTAMP_ARGS);
 
 PHPAPI void session_adapt_url(const char *, size_t, char **, size_t *);
 
+PHPAPI int php_session_destroy(void);
 PHPAPI void php_add_session_var(zend_string *name);
 PHPAPI zval *php_set_session_var(zend_string *name, zval *state_val, php_unserialize_data_t *var_hash);
 PHPAPI zval *php_get_session_var(zend_string *name);
@@ -267,6 +268,7 @@ PHPAPI int php_session_register_serializer(const char *name,
 
 PHPAPI void php_session_set_id(char *id);
 PHPAPI int php_session_start(void);
+PHPAPI int php_session_flush(int write);
 
 PHPAPI ps_module *_php_find_ps_module(char *name);
 PHPAPI const ps_serializer *_php_find_ps_serializer(char *name);
