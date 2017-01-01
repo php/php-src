@@ -1054,7 +1054,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 	entry.is_persistent = mydata->is_persistent;
 
 	for (manifest_index = 0; manifest_index < manifest_count; ++manifest_index) {
-		if (buffer + 24 > endbuffer) {
+		if (buffer + 28 > endbuffer) {
 			MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest entry)")
 		}
 
@@ -1068,7 +1068,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 			entry.manifest_pos = manifest_index;
 		}
 
-		if (entry.filename_len > endbuffer - buffer - 20) {
+		if (entry.filename_len > endbuffer - buffer - 24) {
 			MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest entry)");
 		}
 
