@@ -43,8 +43,11 @@ PHP                                                                        NEWS
     set). (cmb)
 
 - Standard:
-  . Fixed bug #73594 (dns_get_record does not populate $additional out parameter).
-    (Bruce Weirdan)
+  . Fixed bug #73594 (dns_get_record does not populate $additional out
+    parameter). (Bruce Weirdan)
+  . Fixed bug #70213 (Unserialize context shared on double class lookup).
+    (Taoguang Chen)
+
 
 - Zlib:
   . Fixed bug #73373 (deflate_add does not verify that output was not truncated).
