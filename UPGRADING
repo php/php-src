@@ -86,6 +86,12 @@ PHP 7.2 UPGRADE NOTES
 2. New Features
 ========================================
 
+- Core:
+  . It is now possible to remove argument type annotations when overriding an
+    inherited method. This complies with contravariance of method argument types
+    under the Liskov Substitution Principle.
+    (https://wiki.php.net/rfc/parameter-no-type-variance)
+
 - PCRE:
   . Added `J` modifier for setting PCRE_DUPNAMES.
 
