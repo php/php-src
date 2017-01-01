@@ -916,11 +916,13 @@ object ":" uiv ":" ["]	{
 		}
 
 		/* The callback function may have defined the class */
+		BG(serialize_lock)++;
 		if ((ce = zend_lookup_class(class_name)) == NULL) {
 			php_error_docref(NULL, E_WARNING, "Function %s() hasn't defined the class it was called for", Z_STRVAL(user_func));
 			incomplete_class = 1;
 			ce = PHP_IC_ENTRY;
 		}
+		BG(serialize_lock)--;
 
 		zval_ptr_dtor(&user_func);
 		zval_ptr_dtor(&args[0]);
