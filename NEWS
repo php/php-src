@@ -13,6 +13,10 @@ PHP                                                                        NEWS
   . Reverted fix for bug #73530	(Unsetting result set may reset other result
     set). (cmb)
 
+- Standard:
+  . Fixed bug #70213 (Unserialize context shared on double class lookup).
+    (Taoguang Chen)
+
 08 Dec 2016, PHP 5.6.29
 
 - Mbstring:

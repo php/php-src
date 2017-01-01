@@ -815,6 +815,7 @@ object ":" uiv ":" ["]	{
 		}
 
 		/* The callback function may have defined the class */
+		BG(serialize_lock)++;
 		if (zend_lookup_class(class_name, len2, &pce TSRMLS_CC) == SUCCESS) {
 			ce = *pce;
 		} else {
@@ -822,6 +823,7 @@ object ":" uiv ":" ["]	{
 			incomplete_class = 1;
 			ce = PHP_IC_ENTRY;
 		}
+		BG(serialize_lock)--;
 
 		zval_ptr_dtor(&user_func);
 		zval_ptr_dtor(&arg_func_name);
