@@ -80,6 +80,9 @@ PHP                                                                        NEWS
 - SQLite3:
   . Update to Sqlite 3.15.2. (cmb)
 
+- Standard:
+  . Add subject to mail log. (tomsommer)
+
 - XML:
   . Moved utf8_encode() and utf8_decode() to the Standard extension. (Andrea)
   . Fixed bug #72135 (malformed XML causes fault) (edgarsandi)
