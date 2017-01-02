@@ -66,6 +66,10 @@ PHP                                                                        NEWS
 - Mcrypt:
   . The deprecated mcrypt extension has been moved to PECL. (leigh)
 
+- mysqlnd:
+  . Fixed bug #73800 (sporadic segfault with MYSQLI_OPT_INT_AND_FLOAT_NATIVE). 
+	(vanviegen)
+
 - PDO:
   . Add "Sent SQL" to debug dump for emulated prepares. (Adam Baratz)
 
