@@ -1159,11 +1159,9 @@ static ZEND_COLD void php_error_cb(int type, const char *error_filename, const u
 					if ((!strcmp(sapi_module.name, "cli") || !strcmp(sapi_module.name, "cgi")) &&
 						PG(display_errors) == PHP_DISPLAY_ERRORS_STDERR
 					) {
+						fprintf(stderr, "%s: %s in %s on line %u\n", error_type_str, buffer, error_filename, error_lineno);
 #ifdef PHP_WIN32
-						fprintf(stderr, "%s: %s in %s on line %u\n", error_type_str, buffer, error_filename, error_lineno);
 						fflush(stderr);
-#else
-						fprintf(stderr, "%s: %s in %s on line %u\n", error_type_str, buffer, error_filename, error_lineno);
 #endif
 					} else {
 						php_printf("%s\n%s: %s in %s on line %d\n%s", STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, STR_PRINT(append_string));
@@ -2116,8 +2114,8 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	zuf.ticks_function = php_run_ticks;
 	zuf.on_timeout = php_on_timeout;
 	zuf.stream_open_function = php_stream_open_for_zend;
-	zuf.vspprintf_function = vspprintf;
-	zuf.vstrpprintf_function = vstrpprintf;
+	zuf.printf_to_smart_string_function = php_printf_to_smart_string;
+	zuf.printf_to_smart_str_function = php_printf_to_smart_str;
 	zuf.getenv_function = sapi_getenv;
 	zuf.resolve_path_function = php_resolve_path_for_zend;
 	zend_startup(&zuf, NULL);

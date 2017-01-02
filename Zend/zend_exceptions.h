@@ -68,10 +68,6 @@ extern ZEND_API void (*zend_throw_exception_hook)(zval *ex);
 /* show an exception using zend_error(severity,...), severity should be E_ERROR */
 ZEND_API ZEND_COLD void zend_exception_error(zend_object *exception, int severity);
 
-/* do not export, in php it's available thru spprintf directly */
-size_t zend_spprintf(char **message, size_t max_len, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 3, 4);
-zend_string *zend_strpprintf(size_t max_len, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
-
 #include "zend_globals.h"
 
 static zend_always_inline void zend_rethrow_exception(zend_execute_data *execute_data)
