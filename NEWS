@@ -14,6 +14,9 @@ PHP                                                                        NEWS
   . Fixed bug #73679 (DOTNET read access violation using invalid codepage).
     (Anatol)
 
+- DOM:
+  . Fixed bug #67474 (getElementsByTagNameNS filter on default ns). (aboks)
+
 - Mysqlnd:
   . Fixed issue with decoding BIT columns when having more than one rows in the
     result set. 7.0+ problem. (Andrey)
