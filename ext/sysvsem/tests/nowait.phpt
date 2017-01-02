@@ -67,12 +67,16 @@ if ($pid) {
 		exit;
 	}
 
+	/* Release the child semahpore before releasing
+	   the releasing the parent semaphore and letting
+	   the child continue execution */
+	sem_release($c_sem_id);
+
 	echo "P: releasing semaphore $p_sem_id.\n";
 	if (!sem_release($p_sem_id)) {
 		echo "P: failed to release semaphore\n";
 	}
 
-	sem_release($c_sem_id);
 	$status = null;
 	pcntl_waitpid($pid, $status);
 
