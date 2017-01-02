@@ -29,6 +29,9 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug #69587 (DateInterval properties and isset). (jhdxr)
 
+- DOM:
+  . Fixed bug #67474 (getElementsByTagNameNS filter on default ns). (aboks)
+
 - EXIF:
   . Added support for vendor specific tags for the following formats:
     Samsung, DJI, Panasonic, Sony, Pentax, Minolta & Sigma/Foveon. (Kalle)
