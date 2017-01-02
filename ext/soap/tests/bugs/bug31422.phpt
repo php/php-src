@@ -2,9 +2,6 @@
 Bug #31422 (No Error-Logging on SoapServer-Side)
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip not valid for windows');
-}
 require_once('skipif.inc');
 ?>
 --INI--

@@ -57,6 +57,7 @@ PHP                                                                        NEWS
     parameter). (Bruce Weirdan)
   . Fixed bug #70213 (Unserialize context shared on double class lookup).
     (Taoguang Chen)
+  . Fixed bug #73154 (serialize object with __sleep function crash). (Nikita)
   . Add subject to mail log. (tomsommer)
 
 - Zlib
