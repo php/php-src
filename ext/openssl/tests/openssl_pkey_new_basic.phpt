@@ -89,7 +89,7 @@ var_dump($dh_details['g']);
 var_dump(strlen($dh_details['pub_key']));
 var_dump(strlen($dh_details['priv_key']));
 ?>
---EXPECT--
+--EXPECTF--
 int(0)
 int(0)
 int(0)
@@ -98,9 +98,9 @@ int(0)
 int(0)
 int(0)
 int(0)
-int(20)
-int(128)
+int(%d)
+int(%d)
 int(0)
 string(1) "2"
-int(128)
-int(128)
+int(%d)
+int(%d)

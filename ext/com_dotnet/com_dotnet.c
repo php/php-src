@@ -196,6 +196,7 @@ PHP_FUNCTION(com_dotnet_create_instance)
 	int ret = FAILURE;
 	char *where = "";
 	IUnknown *unk = NULL;
+	zend_long cp = GetACP();
 
 	php_com_initialize();
 	stuff = (struct dotnet_runtime_stuff*)COMG(dotnet_runtime_stuff);
@@ -245,10 +246,16 @@ PHP_FUNCTION(com_dotnet_create_instance)
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l",
 			&assembly_name, &assembly_name_len,
 			&datatype_name, &datatype_name_len,
-			&obj->code_page)) {
+			&cp)) {
 		php_com_throw_exception(E_INVALIDARG, "Could not create .Net object - invalid arguments!");
 		return;
 	}
+
+	if (Z_L(0) > cp || ZEND_LONG_INT_OVFL(cp)) {
+		php_com_throw_exception(E_INVALIDARG, "Could not create .Net object - invalid codepage!");
+		return;
+	}
+	obj->code_page = (int)cp;
 
 	oletype = php_com_string_to_olestring(datatype_name, datatype_name_len, obj->code_page);
 	oleassembly = php_com_string_to_olestring(assembly_name, assembly_name_len, obj->code_page);

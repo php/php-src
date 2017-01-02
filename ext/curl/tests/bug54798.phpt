@@ -3,6 +3,9 @@ Bug #54798 (Segfault when CURLOPT_STDERR file pointer is closed before calling c
 --SKIPIF--
 <?php 
 include 'skipif.inc';
+if(substr(PHP_OS, 0, 3) == 'WIN' ) {
+    die('skip not for Windows');
+}
 ?>
 --FILE--
 <?php

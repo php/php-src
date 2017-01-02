@@ -1,13 +1,67 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2016 PHP 7.0.14
+?? ??? 2016 PHP 7.0.15
+
+- Core:
+  . Fixed bug #73792 (invalid foreach loop hangs script). (Dmitry)
+  . Fixed bug #73663 ("Invalid opcode 65/16/8" occurs with a variable created
+    with list()). (Laruence)
+  . Fixed bug #73585 (Logging of "Internal Zend error - Missing class
+    information" missing class name). (Laruence)
+  . Fixed bug #73753 (unserialized array pointer not advancing). (David Walker)
+
+- COM:
+  . Fixed bug #73679 (DOTNET read access violation using invalid codepage).
+    (Anatol)
+
+- Mysqlnd:
+  . Fixed issue with decoding BIT columns when having more than one rows in the
+    result set. 7.0+ problem. (Andrey)
+
+- PCRE:
+  . Fixed bug #73612 (preg_*() may leak memory). (cmb)
+
+- PDO_Firebird:
+  . Fixed bug #72931 (PDO_FIREBIRD with Firebird 3.0 not work on returning
+    statement). (Dorin Marcoci)
+
+- Streams:
+  . Fixed bug #73586 (php_user_filter::$stream is not set to the stream the
+    filter is working on). (Dmitry)
+
+- Phpdbg:
+  . Fixed bug #73615 (phpdbg without option never load .phpdbginit at startup).
+    (Bob)
+  . Fixed issue getting executable lines from custom wrappers. (Bob)
+  . Fixed bug #73704 (phpdbg shows the wrong line in files with shebang). (Bob)
+
+- Reflection:
+  . Fixed bug #46103 (ReflectionObject memory leak). (Nikita)
+
+- SQLite3:
+  . Reverted fix for bug #73530	(Unsetting result set may reset other result
+    set). (cmb)
+
+- Standard:
+  . Fixed bug #73594 (dns_get_record does not populate $additional out
+    parameter). (Bruce Weirdan)
+  . Fixed bug #70213 (Unserialize context shared on double class lookup).
+    (Taoguang Chen)
+  . Fixed bug #73154 (serialize object with __sleep function crash). (Nikita)
+
+- Zlib:
+  . Fixed bug #73373 (deflate_add does not verify that output was not truncated).
+    (Matt Bonneau)
+
+08 Dec 2016 PHP 7.0.14
+
+- Core:
+  . Fixed memory leak(null coalescing operator with Spl hash). (Tyson Andre)
+  . Fixded bug #72736 (Slow performance when fetching large dataset with mysqli
+    / PDO). (Dmitry)
 
 - Calendar:
   . Fix integer overflows (Joshua Rogers)
-
-- Core:
-  . Fixded bug #72736 (Slow performance when fetching large dataset with mysqli
-    / PDO). (Dmitry)
 
 - Date:
   . Fixed bug #69587 (DateInterval properties and isset). (jhdxr)
@@ -16,6 +70,9 @@ PHP                                                                        NEWS
   . Disabled PHP call tracing by default (it makes significant overhead).
     This may be enabled again using envirionment variable USE_ZEND_DTRACE=1.
     (Dmitry)
+
+- JSON:
+  . Fixed bug #73526 (php_json_encode depth issue). (Jakub Zelenka)
 
 - Mysqlnd:
   . Fixed bug #64526 (Add missing mysqlnd.* parameters to php.ini-*). (cmb)
@@ -29,12 +86,24 @@ PHP                                                                        NEWS
   . Fixed bug #73546 (Logging for opcache has an empty file name). (mhagstrand)
 
 - PCRE:
+  . Fixed bug #73483 (Segmentation fault on pcre_replace_callback). (Laruence)
   . Fixed bug #73392 (A use-after-free in zend allocator management). 
     (Laruence)
 
 - PDO_Firebird:
   . Fixed bug #73087, #61183, #71494 (Memory corruption in bindParam).
     (Dorin Marcoci)
+
+- Postgres:
+  . Fixed bug #73498 (Incorrect SQL generated for pg_copy_to()). (Craig Duncan)
+
+- Phar:
+  . Fixed bug #73580 (Phar::isValidPharFilename illegal memory access). (Stas)
+
+- Soap:
+  . Fixed bug #73538 (SoapClient::__setSoapHeaders doesn't overwrite SOAP
+    headers). (duncan3dc)
+  . Fixed bug #73452 (Segfault (Regression for #69152)). (Dmitry)
 
 - SPL:
   . Fixed bug #73423 (Reproducible crash with GDB backtrace). (Laruence)
@@ -43,8 +112,13 @@ PHP                                                                        NEWS
   . Fixed bug #73530 (Unsetting result set may reset other result set). (cmb)
 
 - Standard:
-   . Fixed bug #73297 (HTTP stream wrapper should ignore HTTP 100 Continue).
-     (rowan dot collins at gmail dot com)
+  . Fixed bug #73297 (HTTP stream wrapper should ignore HTTP 100 Continue).
+    (rowan dot collins at gmail dot com)
+  . Fixed bug #73645 (version_compare illegal write access). (Stas)
+
+- Wddx:
+  . Fixed bug #73631 (Invalid read when wddx decodes empty boolean element).
+  (Stas)
 
 - XML:
   . Fixed bug #72135 (malformed XML causes fault) (edgarsandi)

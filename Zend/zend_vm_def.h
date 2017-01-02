@@ -2142,6 +2142,7 @@ ZEND_VM_HANDLER(136, ZEND_ASSIGN_OBJ, VAR|UNUSED|CV, CONST|TMPVAR|CV)
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(object) == NULL)) {
 		zend_throw_error(NULL, "Using $this when not in object context");
 		FREE_UNFETCHED_OP2();
+		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
 		HANDLE_EXCEPTION();
 	}
 
@@ -2150,6 +2151,7 @@ ZEND_VM_HANDLER(136, ZEND_ASSIGN_OBJ, VAR|UNUSED|CV, CONST|TMPVAR|CV)
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_throw_error(NULL, "Cannot use string offset as an array");
 		FREE_OP2();
+		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
 		HANDLE_EXCEPTION();
 	}
 	zend_assign_to_object(UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, object, OP1_TYPE, property_name, OP2_TYPE, (opline+1)->op1_type, (opline+1)->op1, execute_data, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property_name)) : NULL));
@@ -5876,6 +5878,12 @@ ZEND_VM_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, ANY)
 
 	if (OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) {
 		array_ref = array_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_R);
+		if (OP1_TYPE == IS_VAR && UNEXPECTED(array_ref == NULL)) {
+			zend_throw_error(NULL, "Cannot iterate on string offsets by reference");
+			ZVAL_UNDEF(EX_VAR(opline->result.var));
+			Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
+			HANDLE_EXCEPTION();
+		}
 		if (Z_ISREF_P(array_ref)) {
 			array_ptr = Z_REFVAL_P(array_ref);
 		}
@@ -7846,7 +7854,8 @@ ZEND_VM_HANDLER(151, ZEND_ASSERT_CHECK, ANY, ANY)
 		if (RETURN_VALUE_USED(result)) {
 			ZVAL_TRUE(EX_VAR(result->result.var));
 		}
-		ZEND_VM_JMP(target);
+		ZEND_VM_SET_OPCODE(target);
+		ZEND_VM_CONTINUE();
 	} else {
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -7928,17 +7937,27 @@ ZEND_VM_HANDLER(158, ZEND_CALL_TRAMPOLINE, ANY, ANY)
 
 	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)) {
 
-		ZEND_ASSERT(!(fbc->common.fn_flags & ZEND_ACC_GENERATOR));
-
-		call->symbol_table = NULL;
-		i_init_func_execute_data(call, &fbc->op_array,
-				ret, (fbc->common.fn_flags & ZEND_ACC_STATIC) == 0);
-
-		if (EXPECTED(zend_execute_ex == execute_ex)) {
-			ZEND_VM_ENTER();
+		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
+			if (ret) {
+				zend_generator_create_zval(call, &fbc->op_array, ret);
+				Z_VAR_FLAGS_P(ret) = 0;
+			} else {
+				if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_CLOSURE)) {
+					OBJ_RELEASE((zend_object*)fbc->op_array.prototype);
+				}
+				zend_vm_stack_free_args(call);
+			}
 		} else {
-			ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
-			zend_execute_ex(call);
+			call->symbol_table = NULL;
+			i_init_func_execute_data(call, &fbc->op_array,
+					ret, (fbc->common.fn_flags & ZEND_ACC_STATIC) == 0);
+
+			if (EXPECTED(zend_execute_ex == execute_ex)) {
+				ZEND_VM_ENTER();
+			} else {
+				ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
+				zend_execute_ex(call);
+			}
 		}
 	} else {
 		zval retval;

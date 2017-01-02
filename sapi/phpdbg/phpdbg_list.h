@@ -42,7 +42,6 @@ void phpdbg_init_list(void);
 void phpdbg_list_update(void);
 
 typedef struct {
-	char *filename;
 	char *buf;
 	size_t len;
 #if HAVE_MMAP

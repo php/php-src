@@ -148,7 +148,7 @@ static PHP_GINIT_FUNCTION(json)
 #endif
 	json_globals->encoder_depth = 0;
 	json_globals->error_code = 0;
-	json_globals->encode_max_depth = 0;
+	json_globals->encode_max_depth = PHP_JSON_PARSER_DEFAULT_DEPTH;
 }
 /* }}} */
 
@@ -261,12 +261,12 @@ static PHP_FUNCTION(json_decode)
 	}
 
 	if (depth <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Depth must be greater than zero");
+		php_error_docref(NULL, E_WARNING, "Depth must be greater than zero");
 		RETURN_NULL();
 	}
 
 	if (depth > INT_MAX) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Depth must be lower than %d", INT_MAX);
+		php_error_docref(NULL, E_WARNING, "Depth must be lower than %d", INT_MAX);
 		RETURN_NULL();
 	}
 

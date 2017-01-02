@@ -582,7 +582,7 @@ static void accel_use_shm_interned_strings(void)
 
 		for (j = 0; j < ce->constants_table.nNumUsed; j++) {
 			q = ce->constants_table.arData + j;
-			if (!Z_TYPE(q->val) == IS_UNDEF) continue;
+			if (Z_TYPE(q->val) == IS_UNDEF) continue;
 			if (q->key) {
 				q->key = accel_new_interned_string(q->key);
 			}
@@ -592,7 +592,7 @@ static void accel_use_shm_interned_strings(void)
 	/* constant hash keys */
 	for (idx = 0; idx < EG(zend_constants)->nNumUsed; idx++) {
 		p = EG(zend_constants)->arData + idx;
-		if (!Z_TYPE(p->val) == IS_UNDEF) continue;
+		if (Z_TYPE(p->val) == IS_UNDEF) continue;
 		if (p->key) {
 			p->key = accel_new_interned_string(p->key);
 		}
@@ -1769,10 +1769,10 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 	    file_handle->type == ZEND_HANDLE_FILENAME &&
 	    UNEXPECTED(access(ZSTR_VAL(persistent_script->full_path), R_OK) != 0)) {
 		if (type == ZEND_REQUIRE) {
-			zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename TSRMLS_CC);
+			zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename);
 			zend_bailout();
 		} else {
-			zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename TSRMLS_CC);
+			zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
 		}
 		return NULL;
 	}

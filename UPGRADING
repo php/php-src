@@ -484,6 +484,7 @@ Other
     is defined in the interface.
   . session.lazy_write(default=On) INI setting enables only write session data when
     session data is updated.
+  . session_regenerate_id() saves current $_SESSION before creating new session ID.
 
 - Opcache
   . Removed opcache.load_comments configuration directive. Now doc comments

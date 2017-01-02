@@ -1607,7 +1607,8 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 	zval *current_field, *end_field, *start_field;
 	zend_uchar * p = row_buffer->ptr;
 	size_t data_size = row_buffer->app;
-	zend_uchar * bit_area = (zend_uchar*) row_buffer->ptr + data_size + 1; /* we allocate from here */
+	/* we allocate from here. In pre-7.0 it was +1, as there was an additional \0 for the last string in the packet - because of the zval optimizations - using no-copy */
+	zend_uchar * bit_area = (zend_uchar*) row_buffer->ptr + data_size;
 	const zend_uchar * const packet_end = (zend_uchar*) row_buffer->ptr + data_size;
 
 	DBG_ENTER("php_mysqlnd_rowp_read_text_protocol_aux");
@@ -1734,9 +1735,25 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 				*/
 				p -= len;
 				if (Z_TYPE_P(current_field) == IS_LONG) {
+					/*
+					  Andrey : See below. No need of bit_area, as we can use on stack for this.
+					  The bit area should be removed - the `prealloc_more_bytes` in php_mysqlnd_read_row_ex()
+
+					  char tmp[22];
+					  const size_t tmp_len = sprintf((char *)&tmp, MYSQLND_LLU_SPEC, Z_LVAL_P(current_field));
+					  ZVAL_STRINGL(current_field, tmp, tmp_len);
+					*/
 					bit_area += 1 + sprintf((char *)start, ZEND_LONG_FMT, Z_LVAL_P(current_field));
 					ZVAL_STRINGL(current_field, (char *) start, bit_area - start - 1);
-				} else if (Z_TYPE_P(current_field) == IS_STRING){
+				} else if (Z_TYPE_P(current_field) == IS_STRING) {
+					/*
+					   Andrey : This is totally sensless, but I am not gonna remove it in a production version.
+					            This copies the data from the zval to the bit area. The destroys the original value
+								and creates the same one from the bit area. No need. It was making sense in pre-7.0
+								when we used zval IS_STRING with no-copy that referred to the bit area.
+								The bit area has no sense in both the case of IS_LONG and IS_STRING as 7.0 zval
+								IS_STRING always copies.
+					*/
 					memcpy(bit_area, Z_STRVAL_P(current_field), Z_STRLEN_P(current_field));
 					bit_area += Z_STRLEN_P(current_field);
 					*bit_area++ = '\0';
@@ -1815,7 +1832,15 @@ php_mysqlnd_rowp_read(void * _packet, MYSQLND_CONN_DATA * conn)
 										packet_type_to_statistic_packet_count[PROT_ROW_PACKET],
 										1);
 
-	/* packet->row_buffer->ptr is of size 'data_size + 1' */
+	/*
+	  packet->row_buffer->ptr is of size 'data_size'
+	  in pre-7.0 it was really 'data_size + 1' although it was counted as 'data_size'
+	  The +1 was for the additional byte needed to \0 terminate the last string in the row.
+	  This was needed as the zvals of pre-7.0 could use external memory (no copy param to ZVAL_STRINGL).
+	  However, in 7.0+ the strings always copy. Thus this +1 byte was removed. Also the optimization or \0
+	  terminating every string, which did overwrite the lengths from the packet. For this reason we needed
+	  to keep (and copy) the lengths externally.
+	*/
 	packet->header.size = data_size;
 	packet->row_buffer->app = data_size;
 

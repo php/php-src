@@ -33,6 +33,7 @@
 #include "zend_alloc.h"
 #include "phpdbg_eol.h"
 #include "phpdbg_print.h"
+#include "phpdbg_help.h"
 
 #include "ext/standard/basic_functions.h"
 
@@ -1299,7 +1300,7 @@ void phpdbg_free_wrapper(void *p ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{
 		 */
 	} else {
 		phpdbg_watch_efree(p);
-		return _zend_mm_free(heap, p ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+		_zend_mm_free(heap, p ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	}
 } /* }}} */
 
@@ -1575,7 +1576,7 @@ phpdbg_main:
 	quit_immediately = phpdbg_startup_run > 1;
 
 	/* set exec if present on command line */
-	if (!read_from_stdin && argc > php_optind && (strcmp(argv[php_optind-1], "--") != SUCCESS)) {
+	if (!read_from_stdin && argc > php_optind) {
 		if (!exec && strlen(argv[php_optind])) {
 			exec = strdup(argv[php_optind]);
 		}
@@ -1873,9 +1874,7 @@ phpdbg_main:
 		/* initialize from file */
 		PHPDBG_G(flags) |= PHPDBG_IS_INITIALIZING;
 		zend_try {
-			if (init_file) {
-				phpdbg_init(init_file, init_file_len, init_file_default);
-			}
+			phpdbg_init(init_file, init_file_len, init_file_default);
 		} zend_end_try();
 		PHPDBG_G(flags) &= ~PHPDBG_IS_INITIALIZING;
 
@@ -1938,7 +1937,7 @@ phpdbg_main:
 			if (PHPDBG_G(ops)) {
 				phpdbg_print_opcodes(print_opline_func);
 			} else {
-				quiet_write(PHPDBG_G(io)[PHPDBG_STDERR].fd, ZEND_STRL("No opcodes could be compiled | No file specified or compilation failed?\n"));
+				zend_quiet_write(PHPDBG_G(io)[PHPDBG_STDERR].fd, ZEND_STRL("No opcodes could be compiled | No file specified or compilation failed?\n"));
 			}
 			goto phpdbg_out;
 		}

@@ -1002,10 +1002,8 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const ze
 		op1 = RT_CONSTANT(op_array, opline->op1);
 		op2 = RT_CONSTANT(op_array, opline->op2);
 	}
-	if ((ce = zend_hash_find_ptr(class_table, Z_STR_P(op1))) == NULL) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Internal Zend error - Missing class information for %s", Z_STRVAL_P(op1));
-		return NULL;
-	}
+	ce = zend_hash_find_ptr(class_table, Z_STR_P(op1));
+	ZEND_ASSERT(ce);
 	ce->refcount++;
 	if (zend_hash_add_ptr(class_table, Z_STR_P(op2), ce) == NULL) {
 		ce->refcount--;
@@ -2783,11 +2781,20 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 			}
 		} else {
 			zend_compile_expr(&arg_node, arg);
-			ZEND_ASSERT(arg_node.op_type != IS_CV);
 			if (arg_node.op_type == IS_VAR) {
 				opcode = ZEND_SEND_VAR_NO_REF;
 				if (fbc && ARG_MUST_BE_SENT_BY_REF(fbc, arg_num)) {
 					flags |= ZEND_ARG_SEND_BY_REF;
+				}
+			} else if (arg_node.op_type == IS_CV) {
+				if (fbc) {
+					if (ARG_SHOULD_BE_SENT_BY_REF(fbc, arg_num)) {
+						opcode = ZEND_SEND_REF;
+					} else {
+						opcode = ZEND_SEND_VAR;
+					}
+				} else {
+					opcode = ZEND_SEND_VAR_EX;
 				}
 			} else {
 				if (fbc) {
