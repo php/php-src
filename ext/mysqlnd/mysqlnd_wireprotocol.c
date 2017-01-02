@@ -1468,7 +1468,7 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 	zend_bool first_iteration = TRUE;
 
 	DBG_ENTER("php_mysqlnd_read_row_ex");
-
+	
 	/*
 	  To ease the process the server splits everything in packets up to 2^24 - 1.
 	  Even in the case the payload is evenly divisible by this value, the last
