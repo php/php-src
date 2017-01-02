@@ -53,6 +53,9 @@ PHP                                                                        NEWS
   . Fixed bug #70213 (Unserialize context shared on double class lookup).
     (Taoguang Chen)
   . Fixed bug #73154 (serialize object with __sleep function crash). (Nikita)
+  . Fixed bug #70490 (get_browser function is very slow). (Nikita)
+  . Fixed bug #73265 (Loading browscap.ini at startup causes high memory usage).
+    (Nikita)
 
 - Zlib:
   . Fixed bug #73373 (deflate_add does not verify that output was not truncated).
