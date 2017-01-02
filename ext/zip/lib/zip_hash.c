@@ -1,6 +1,6 @@
 /*
   zip_hash.c -- hash table string -> uint64
-  Copyright (C) 2015-2016 Dieter Baron and Thomas Klausner
+  Copyright (c) 2015-2017 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
