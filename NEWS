@@ -21,6 +21,9 @@ PHP                                                                        NEWS
   . Fixed bug #73679 (DOTNET read access violation using invalid codepage).
     (Anatol)
 
+- DOM:
+  . Fixed bug #67474 (getElementsByTagNameNS filter on default ns). (aboks)
+
 - Mbstring:
   . Fixed bug #73646 (mb_ereg_search_init null pointer dereference).
     (Laruence)
