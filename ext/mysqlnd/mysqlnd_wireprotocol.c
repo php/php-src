@@ -1531,7 +1531,7 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 		pool->free_chunk(pool, *buffer);
 		*buffer = NULL;
 	}
-	*data_size--;
+	(*data_size)--;
 	DBG_RETURN(ret);
 }
 /* }}} */
