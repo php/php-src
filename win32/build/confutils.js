@@ -3297,7 +3297,7 @@ function ADD_MAKEFILE_FRAGMENT()
 		h_in = FSO.OpenTextFile(fn_in, 1);
 		h_out = FSO.OpenTextFile(PHP_MAKEFILE_FRAGMENTS, open_flags, create_out_fl);
 
-		if (!TF.AtEndOfStream) {
+		if (!h_in.AtEndOfStream) {
 			h_out.Write(h_in.ReadAll());
 			h_out.WriteBlankLines(1);
 		}
