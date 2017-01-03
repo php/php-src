@@ -248,7 +248,6 @@ static zend_string *browscap_intern_str_ci(
 	ZSTR_ALLOCA_ALLOC(lcname, ZSTR_LEN(str), use_heap);
 	zend_str_tolower_copy(ZSTR_VAL(lcname), ZSTR_VAL(str), ZSTR_LEN(str));
 	interned = zend_hash_find_ptr(&ctx->str_interned, lcname);
-	ZSTR_ALLOCA_FREE(lcname, use_heap);
 
 	if (interned) {
 		zend_string_addref(interned);
@@ -257,6 +256,7 @@ static zend_string *browscap_intern_str_ci(
 		zend_hash_add_new_ptr(&ctx->str_interned, interned, interned);
 	}
 
+	ZSTR_ALLOCA_FREE(lcname, use_heap);
 	return interned;
 }
 
