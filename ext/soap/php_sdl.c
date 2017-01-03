@@ -177,7 +177,7 @@ encodePtr get_encoder_ex(sdlPtr sdl, const char *nscat, int len)
 	return NULL;
 }
 
-sdlBindingPtr get_binding_from_type(sdlPtr sdl, int type)
+sdlBindingPtr get_binding_from_type(sdlPtr sdl, sdlBindingType type)
 {
 	sdlBindingPtr binding;
 
@@ -227,7 +227,7 @@ static int is_wsdl_element(xmlNodePtr node)
 void sdl_set_uri_credentials(sdlCtx *ctx, char *uri)
 {
 	char *s;
-	int l1, l2;
+	size_t l1, l2;
 	zval context;
 	zval *header = NULL;
 
@@ -235,11 +235,11 @@ void sdl_set_uri_credentials(sdlCtx *ctx, char *uri)
 	s = strstr(ctx->sdl->source, "://");
 	if (!s) return;
 	s = strchr(s+3, '/');
-	l1 = s ? (s - ctx->sdl->source) : strlen(ctx->sdl->source);
+	l1 = s ? (size_t)(s - ctx->sdl->source) : strlen(ctx->sdl->source);
 	s = strstr((char*)uri, "://");
 	if (!s) return;
 	s = strchr(s+3, '/');
-	l2 = s ? (s - (char*)uri) : strlen((char*)uri);
+	l2 = s ? (size_t)(s - (char*)uri) : strlen((char*)uri);
 	if (l1 != l2) {
 		/* check for http://...:80/ */
 		if (l1 > 11 &&
@@ -3156,7 +3156,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 	char  fn[MAXPATHLEN];
 	sdlPtr sdl = NULL;
 	char* old_error_code = SOAP_GLOBAL(error_code);
-	int uri_len = 0;
+	size_t uri_len = 0;
 	php_stream_context *context=NULL;
 	zval *tmp, *proxy_host, *proxy_port, orig_context, new_context;
 	smart_str headers = {0};
@@ -3329,7 +3329,7 @@ cache_in_memory:
 				SOAP_GLOBAL(mem_cache) = malloc(sizeof(HashTable));
 				zend_hash_init(SOAP_GLOBAL(mem_cache), 0, NULL, delete_psdl, 1);
 			} else if (SOAP_GLOBAL(cache_limit) > 0 &&
-			           SOAP_GLOBAL(cache_limit) <= zend_hash_num_elements(SOAP_GLOBAL(mem_cache))) {
+			           SOAP_GLOBAL(cache_limit) <= (zend_long)zend_hash_num_elements(SOAP_GLOBAL(mem_cache))) {
 				/* in-memory cache overflow */
 				sdl_cache_bucket *q;
 				time_t latest = t;

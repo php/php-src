@@ -40,9 +40,6 @@
 #include "win32/param.h"
 #include "win32/winutil.h"
 #define GET_DL_ERROR()	php_win_err()
-#elif defined(NETWARE)
-#include <sys/param.h>
-#define GET_DL_ERROR()	dlerror()
 #else
 #include <sys/param.h>
 #define GET_DL_ERROR()	DL_ERROR()
@@ -56,9 +53,9 @@ PHPAPI PHP_FUNCTION(dl)
 	char *filename;
 	size_t filename_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &filename, &filename_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(filename, filename_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!PG(enable_dl)) {
 		php_error_docref(NULL, E_WARNING, "Dynamically loaded extensions aren't enabled");
@@ -78,12 +75,6 @@ PHPAPI PHP_FUNCTION(dl)
 /* }}} */
 
 #if defined(HAVE_LIBDL)
-
-#ifdef ZTS
-#define USING_ZTS 1
-#else
-#define USING_ZTS 0
-#endif
 
 /* {{{ php_load_extension
  */

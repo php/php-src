@@ -48,8 +48,12 @@ class ServerClientTestCase
 
     private function spawnWorkerProcess($code)
     {
-        $cmd = sprintf('%s "%s" %s', PHP_BINARY, __FILE__, WORKER_ARGV_VALUE);
-
+        if (defined("PHP_WINDOWS_VERSION_MAJOR")) {
+                $ini = php_ini_loaded_file();
+                $cmd = sprintf('%s %s "%s" %s', PHP_BINARY, $ini ? "-n -c $ini" : "", __FILE__, WORKER_ARGV_VALUE);
+        } else {
+                $cmd = sprintf('%s "%s" %s', PHP_BINARY, __FILE__, WORKER_ARGV_VALUE);
+        }
         $this->workerHandle = proc_open($cmd, [['pipe', 'r'], ['pipe', 'w'], STDERR], $pipes);
         $this->workerStdIn = $pipes[0];
         $this->workerStdOut = $pipes[1];

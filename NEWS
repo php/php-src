@@ -1,96 +1,103 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2016, PHP 7.1.0
+?? ??? ????, PHP 7.2
+
+- Calendar:
+  . Fix integer overflows (Joshua Rogers)
 
 - Core:
-  . Added nullable types. (Levi, Dmitry)
-  . Added DFA optimization framework based on e-SSA form. (Dmitry, Nikita)
-  . Added specialized opcode handlers (e.g. ZEND_ADD_LONG_NO_OVERFLOW).
-    (Dmitry)
-  . Change statement and fcall extension handlers to accept frame. (Joe)
-  . Implemented safe execution timeout handling, that prevents rundom crashes
-    after "Maximum execution time exceeded" error. (Dmitry)
-  . Fixed bug #62210 (Exceptions can leak temporary variables). (Dmitry, Bob)
-  . Fixed bug #62814 (It is possible to stiffen child class members visibility).
-    (Nikita)
-  . Fixed bug #69989 (Generators don't participate in cycle GC). (Nikita)
-  . Fixed bug #71604 (Aborted Generators continue after nested finally).
-    (Nikita)
-  . Fixed bug #71572 (String offset assignment from an empty string inserts
-    null byte). (Francois)
-  . Fixed bug #71897 (ASCII 0x7F Delete control character permitted in
-    identifiers). (Andrea)
-  . Fixed bug #72188 (Nested try/finally blocks losing return value). (Dmitry)
-  . Fixed bug #72213 (Finally leaks on nested exceptions). (Dmitry, Nikita)
-  . Implemented the RFC `Support Class Constant Visibility`. (Sean DuBois,
-    Reeze Xia, Dmitry)
-  . Added void return type. (Andrea)
-  . Added support for negative string offsets in string offset syntax and
-    various string functions. (Francois)
-  . Added a form of the list() construct where keys can be specified. (Andrea)
-  . Number operators taking numeric strings now emit E_NOTICEs or E_WARNINGs
-    when given malformed numeric strings. (Andrea)
-  . (int), intval() where $base is 10 or unspecified, settype(), decbin(),
-    decoct(), dechex(), integer operators and other conversions now always
-    respect scientific notation in numeric strings. (Andrea)
-  . Implemented the RFC `Catching multiple exception types`. (Bronislaw Bialek,
-    Pierrick)
-  . Raise a compile-time warning on octal escape sequence overflow. (Sara)
-  . Added [] = as alternative construct to list() =. (Bob)
+  . Removed IS_TYPE_IMMUTABLE (it's the same as COPYABLE & !REFCOUNTED). (Dmitry)
+  . Removed the sql.safe_mode directive. (Kalle)
+  . Removed support for Netware. (Kalle)
+  . Fixed bug #54535 (WSA cleanup executes before MSHUTDOWN). (Kalle)
+  . Implemented FR #69791 (Disallow mail header injections by extra headers)
+    (Yasuo)
+  . Implemented FR #49806 (proc_nice() for Windows). (Kalle)
+  . Fix pthreads detection when cross-compiling (ffontaine)
+  . Fixed memory leaks caused by exceptions thrown from destructors. (Bob,
+    Dmitry).
+  . Fixed bug #73215 (uniqid() should use better random source). (Yasuo)
+  . Fixed bug #73337 (try/catch not working with two exceptions inside a same
+    operation). (Dmitry)
+  . Implemented FR #72768 (Add ENABLE_VIRTUAL_TERMINAL_PROCESSING flag for
+    php.exe). (Michele Locati)
+  . Implemented "Convert numeric keys in object/array casts" RFC, fixes
+    bugs #53838, #61655, #66173, #70925, #72254, etc. (Andrea)
+  . Raised minimum supported Windows versions to Windows 7/Server 2008 R2.
+    (Anatol)
 
-- FTP:
-  . Implemented FR #55651 (Option to ignore the returned FTP PASV address).
-    (abrender at elitehosts dot com)
+- Date:
+  . Fixed bug #69587 (DateInterval properties and isset). (jhdxr)
 
-- Intl:
-  . Added IntlTimeZone::getWindowsID() and
-    IntlTimeZone::getIDForWindowsID(). (Sara)
+- DOM:
+  . Fixed bug #67474 (getElementsByTagNameNS filter on default ns). (aboks)
 
-- Hash:
-  . Added SHA3 fixed mode algorithms (224, 256, 384, and 512 bit). (Sara)
-  . Added SHA512/256 and SHA512/224 algorithms. (Sara)
+- EXIF:
+  . Added support for vendor specific tags for the following formats:
+    Samsung, DJI, Panasonic, Sony, Pentax, Minolta & Sigma/Foveon. (Kalle)
+  . Fixed bug #72682 (exif_read_data() fails to read all data for some
+    images). (Kalle)
+  . Fixed bug #71534 (Type confusion in exif_read_data() leading to heap
+    overflow in debug mode). (hlt99 at blinkenshell dot org, Kalle)
+  . Fixed bug #68547 (Exif Header component value check error).
+    (sjh21a at gmail dot com, Kalle)
+  . Fixed bug #66443 (Corrupt EXIF header: maximum directory nesting level
+    reached for some cameras). (Kalle)
+  . Fixed Redhat bug #1362571 (PHP not returning full results for
+    exif_read_data function). (Kalle)
 
-- JSON:
-  . Exported JSON parser API including json_parser_method that can be used
-    for implementing custom logic when parsing JSON. (Jakub Zelenka)
-  . Escaped U+2028 and U+2029 when JSON_UNESCAPED_UNICODE is supplied as
-    json_encode options and added JSON_UNESCAPED_LINE_TERMINATORS to restore
-    the previous behaviour. (Eddie Kohler)
+- FPM:
+  . Configuration to limit fpm slow log trace callers. (Sannis)
 
-- PDO_Firebird:
-  . Fixed bug #60052 (Integer returned as a 64bit integer on X86_64). (Mariuz)
+- GD:
+  . Implemented imageresolution as getter and setter (Christoph)
 
-- Pgsql:
-  . Implemented FR #31021 (pg_last_notice() is needed to get all notice
-    messages). (Yasuo)
-  . Implemented FR #48532 (Allow pg_fetch_all() to index numerically). (Yasuo)
+- GMP:
+  . Fixed bug #70896 (gmp_fact() silently ignores non-integer input). (Sara)
 
-- Reflection:
-  . Fix #72209 (ReflectionProperty::getValue() doesn't fail if object doesn't match type). (Joe)
+- Mbstring:
+  . Implemented request #66024 (mb_chr() and mb_ord()). (Masakielastic, Yasuo)
+  . Implemented request #65081 (mb_scrub()). (Masakielastic, Yasuo)
+  . Implemented request #69086 (enhancement for mb_convert_encoding() that
+    handles multibyte replacement char nicely). (Masakielastic, Yasuo)
+  . Added array input support to mb_convert_encoding(). (Yasuo)
+  . Added array input support to mb_check_encoding(). (Yasuo)
+
+- Mcrypt:
+  . The deprecated mcrypt extension has been moved to PECL. (leigh)
+
+- mysqlnd:
+  . Fixed bug #73800 (sporadic segfault with MYSQLI_OPT_INT_AND_FLOAT_NATIVE). 
+	(vanviegen)
+
+- PDO:
+  . Add "Sent SQL" to debug dump for emulated prepares. (Adam Baratz)
+
+- PDO_DBlib:
+  . Fixed bug #73234 (Emulated statements let value dictate parameter type).
+    (Adam Baratz)
+  . Fixed bug #73396 (bigint columns are returned as strings). (Adam Baratz)
 
 - Session:
-  . Improved fix for bug #68063 (Empty session IDs do still start sessions).
-    (Yasuo)
-  . Fixed bug #71038 (session_start() returns TRUE on failure).
-    Session save handlers must return 'string' always for successful read.
-    i.e. Non-existing session read must return empty string. PHP 7.0 is made
-    not to tolerate buggy return value. (Yasuo)
-  . Fixed bug #71394 (session_regenerate_id() must close opened session on
-    errors). (Yasuo)
+  . Fixed bug #73461 (Prohibit session save handler recursion). (Yasuo)
+  . PR #2233 Removed register_globals related code and "!" can be used as $_SESSION key name. (Yasuo)
+  . Improved bug #73100 fix. 'user' save handler can only be set by session_set_save_handler()
+
+- SOAP:
+  . Fixed bug #69137 (Peer verification fails when using a proxy with SoapClient)
+    (Keith Smiley)
 
 - SQLite3:
-  . Implemented FR #71159 (Upgraded bundled SQLite lib to 3.9.2). (Laruence)
+  . Update to Sqlite 3.15.2. (cmb)
 
 - Standard:
-  . Fixed bug #71100 (long2ip() doesn't accept integers in strict mode).
-    (Laruence)
-  . Implemented FR #55716 (Add an option to pass a custom stream context to
-    get_headers()). (Ferenc)
-  . Additional validation for parse_url() for login/pass components).
-    (Ilia) (Julien)
-  . Implemented FR #69359 (Provide a way to fetch the current environment
-    variables). (Ferenc)
-  . unpack() function accepts an additional optional argument $offset. (Dmitry)
-  . Implemented #51879 stream context socket option tcp_nodelay (Joe)
+  . Add subject to mail log. (tomsommer)
+
+- XML:
+  . Moved utf8_encode() and utf8_decode() to the Standard extension. (Andrea)
+  . Fixed bug #72135 (malformed XML causes fault) (edgarsandi)
+
+- XMLRPC:
+  . Use Zend MM for allocation in bundled libxmlrpc (Joe)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

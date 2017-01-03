@@ -16,7 +16,7 @@ foo(0);
 ok
 ok
 
-Fatal error: Uncaught TypeError: Return value of foo() must be of the type array, integer returned in %s030.php:3
+Fatal error: Uncaught TypeError: Return value of foo() must be of the type array or null, integer returned in %s030.php:3
 Stack trace:
 #0 %s030.php(10): foo(0)
 #1 {main}

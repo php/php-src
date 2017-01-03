@@ -13,28 +13,27 @@ if (strtotime(tidy_get_release()) < strtotime('20 january 2007')) die ('skip old
 $contents = '
 <wps:block>
 <wps:var>
-<wps:value/>
+<wps:value></wps:value>
 </wps:var>
 </wps:block>';
 
 $config = array(
+'doctype' => 'omit',
 'new-blocklevel-tags' => 'wps:block,wps:var,wps:value',
 'newline' => 'LF'
 );
 
 $tidy = tidy_parse_string($contents, $config, 'utf8');
 $tidy->cleanRepair();
-
-var_dump($tidy->value);
+echo $tidy;
 
 ?>
 --EXPECTF--
-string(11%d) "<html>
+<html>
 <head>
 <title></title>
 </head>
 <body>
-<wps:block>%w<wps:var>
-<wps:value></wps:var>%w</wps:block>
+<wps:block>%w<wps:var>%w<wps:value></wps:value>%w</wps:var>%w</wps:block>
 </body>
-</html>"
+</html>

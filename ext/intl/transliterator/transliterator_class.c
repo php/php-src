@@ -97,14 +97,6 @@ static void transliterator_object_destroy( Transliterator_object* to )
 }
 /* }}} */
 
-/* {{{ Transliterator_objects_dtor */
-static void Transliterator_objects_dtor(
-	zend_object *object )
-{
-	zend_objects_destroy_object( object );
-}
-/* }}} */
-
 /* {{{ Transliterator_objects_free */
 static void Transliterator_objects_free( zend_object *object )
 {
@@ -183,7 +175,7 @@ err:
 				"Could not clone transliterator", 0 );
 
 			err_msg = intl_error_get_message( TRANSLITERATOR_ERROR_P( to_orig ) );
-			php_error_docref( NULL, E_ERROR, "%s", ZSTR_VAL(err_msg) );
+			zend_throw_error( NULL, "%s", ZSTR_VAL(err_msg) );
 			zend_string_free( err_msg ); /* if it's changed into a warning */
 			/* do not destroy tempz; we need to return something */
 		}
@@ -311,20 +303,11 @@ ZEND_BEGIN_ARG_INFO_EX( ainfo_trans_create_from_rules, 0, 0, 1 )
 	ZEND_ARG_INFO( 0, direction )
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX( ainfo_trans_create_inverse, 0, 0, 1 )
-	ZEND_ARG_OBJ_INFO( 0, orig_trans, Transliterator, 0 )
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX( ainfo_trans_me_transliterate, 0, 0, 1 )
 	ZEND_ARG_INFO( 0, subject )
 	ZEND_ARG_INFO( 0, start )
 	ZEND_ARG_INFO( 0, end )
 ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( ainfo_trans_error, 0, 0, 1 )
-	ZEND_ARG_OBJ_INFO( 0, trans, Transliterator, 0 )
-ZEND_END_ARG_INFO()
-
 /* }}} */
 
 /* {{{ Transliterator_class_functions
@@ -357,7 +340,6 @@ void transliterator_register_Transliterator_class( void )
 	memcpy( &Transliterator_handlers, zend_get_std_object_handlers(),
 		sizeof Transliterator_handlers );
 	Transliterator_handlers.offset = XtOffsetOf(Transliterator_object, zo);
-	Transliterator_handlers.dtor_obj = Transliterator_objects_dtor;
 	Transliterator_handlers.free_obj = Transliterator_objects_free;
 	Transliterator_handlers.clone_obj = Transliterator_clone_obj;
 	Transliterator_handlers.get_property_ptr_ptr = Transliterator_get_property_ptr_ptr;

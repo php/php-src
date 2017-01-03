@@ -17,12 +17,8 @@ $white = imagecolorallocate($image, 0xFF, 0xFF, 0xFF);
 //create an arc with white color    
 imagearc($image, 50, 50, 30, 30, 0, -90, $white);
 
-ob_start();
-imagepng($image);
-$img = ob_get_contents();
-ob_end_clean();
-
-echo md5(base64_encode($img));
+include_once __DIR__ . '/func.inc';
+test_image_equals_file(__DIR__ . '/imagearc_variation1.png', $image);
 ?>
 --EXPECT--
-ed2c8427a9922dfd8a105f10a88a0d20
+The images are equal.

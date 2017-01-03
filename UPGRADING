@@ -1,4 +1,4 @@
-PHP 7.1 UPGRADE NOTES
+PHP 7.2 UPGRADE NOTES
 
 1. Backward Incompatible Changes
 2. New Features
@@ -20,55 +20,65 @@ PHP 7.1 UPGRADE NOTES
 ========================================
 
 - Core:
-  . 'void' can no longer be used as the name of a class, interface, or trait.
-    This applies to declarations, class_alias() and use statements.
-  . (int), intval() where $base is 10 or unspecified, settype(), decbin(),
-    decoct(), dechex(), integer operators and other conversions now always
-    respect scientific notation in numeric strings.
-    (RFC: https://wiki.php.net/rfc/invalid_strings_in_arithmetic)
-  . The ASCII 0x7F Delete control character is no longer permitted in unquoted
-    identifiers in source code.
-  . The following functions may no longer be called dynamically using $func(),
-    call_user_func(), array_map() or similar:
-     . extract()
-     . compact()
-     . get_defined_vars()
-     . func_get_args()
-     . func_get_arg()
-     . func_num_args()
-     . parse_str() with one argument
-     . mb_parse_str() with one argument
-     . assert() with a string argument
-    (RFC: https://wiki.php.net/rfc/forbid_dynamic_scope_introspection)
+  . gettype() will now return "resource (closed)" instead of "unknown type" for
+    closed resources.
+  . is_object() will now return true for objects of class
+    __PHP_Incomplete_Class.
+  . Support for Netware operating systems have been removed.
+  . Casting arrays to objects (with (object) or settype()) will now covert
+    integer keys to string property names. This fixes the behaviour of previous
+    versions, where integer keys would become inaccessible properties with
+    integer names.
+  . Casting objects to arrays (with (array) or settype()), and retrieving
+    object properties in an array with get_object_vars(), will now convert
+    numeric string property names (that is, property names of the format
+    /^(0|(-?[1-9][0-9]*))$/ where PHP_INT_MIN <= n <= PHP_INT_MAX) to integer
+    keys. This fixes the behaviour of previous versions, where numeric string
+    property names would become inaccessible string keys.
+  . Minimum supported Windows versions are Windows 7/Server 2008 R2.
 
-- JSON:
-  . When calling json_encode with JSON_UNESCAPED_UNICODE option, U+2028 and
-    U+2029 are escaped.
+- Session:
+  . Removed register_globals related code and "!" can be used as $_SESSION key name.
+  . Session is made to manage session status corretly and prevents invalid operations.
+    Only inappropriate codes are affected by this change. If you have problems with this,
+    it means you have problem in your code.
+    . Functions are made to set or return correct session status.
+        session_start(), session_status(), session_regenerate_id()
+    . Functions are made to return bool from null. These functions have void parameter
+      and void parameter is checked.
+        session_unset(), session_write_close()/session_commit(), session_abort(),
+        session_reset()
+    . Functions prohibit invalid operations with regard to session status and
+      HTTP header status, returns correct bool return value.
+        session_start(), session_set_cookie_params(), session_name(), session_module_name(),
+        session_set_save_handler(), session_regenerate_id(), session_cache_limiter(),
+        session_cache_expire(), session_unset(), session_destroy(),
+        session_write_close()/session_commit(), session_reset()
+    . INI value change by ini_set() returns update status correctly.　Invalid INI modifications
+      are checked and made to fail.
+        session.name, session.save_path, session.cookie_lifetime, session.cookie_path,
+        session.cookie_domain, session.cookie_httponly, session.cookie_secure,
+        session.use_cookies, session.use_only_cookies, session.use_strict_mode,
+        session.referer_check, session.cache_limiter, session.cache_expire,
+        session.lazy_write, session.save_handler, session.serialize_handler,
+        session.gc_probability, session.gc_divior, session.gc_maxlifetime,
+    . Some E_ERRORs are changed to E_WARNING since session status is managed correctly.
+        session_start()
+    . Session no longer initialize $_SESSION for invalid and useless session.
+        session_start()
+
 
 ========================================
 2. New Features
 ========================================
-- Core
-  . Added void return type, which requires that a function not return a value.
-    (RFC: https://wiki.php.net/rfc/void_return_type)
-  . String offset access now supports negative references, which will be
-    counted from the end of the string.
-    (RFC: https://wiki.php.net/rfc/negative-string-offsets)
-  . Added a form of the list() construct where keys can be specified.
-    (RFC: https://wiki.php.net/rfc/list_keys)
-  . Added [] = as alternative construct to list() =.
-    (RFC: https://wiki.php.net/rfc/short_list_syntax)
-  . Number operators taking numeric strings now emit "A non well formed numeric
-    value encountered" E_NOTICEs for leading-numeric strings, and "A
-    non-numeric value encountered" E_WARNINGs for non-numeric strings.
-    This always applies to the +, -, *, /, **, %, << and >> operators, and
-    their assignment counterparts +=, -=, *=, /=, **=, %=, <<= and >>=.
-    For the bitwise operators |, & and ^, and their assignment counterparts
-    |=, &= and ^=, this only applies where only one operand is a string.
-    Note that this never applies to the bitwise NOT operator, ~, which does not
-    handle numeric strings, nor to the increment and decrement operators
-    ++ and --, which have a unique approach to handling numeric strings.
-    (RFC: https://wiki.php.net/rfc/invalid_strings_in_arithmetic)
+
+- PCRE:
+  . Added `J` modifier for setting PCRE_DUPNAMES.
+
+- Standard:
+  . Simplified password hashing API updated to support Argon2i hashes when PHP is compiled with libargon2
+    (https://wiki.php.net/rfc/argon2_password_hash).
+  . proc_nice() is now supported on Windows platforms.
 
 ========================================
 3. Changes in SAPI modules
@@ -78,41 +88,56 @@ PHP 7.1 UPGRADE NOTES
 4. Deprecated Functionality
 ========================================
 
+- GD:
+  . png2wbmp() and jpeg2wbmp() have been deprecated, and will be removed as of
+    PHP 8.0.0.
+
 ========================================
 5. Changed Functions
 ========================================
-- get_headers() has an extra parameter which allows passing a custom stream
-  context.
-- The first $varname argument for getenv() is no longer mandatory, the
-  current environment variables will be returned as an associative array
-  when omitted.
-- json_encode() accepts new option JSON_UNESCAPED_LINE_TERMINATORS that
-  disables escaping of U+2028 and U+2029 characters when
-  JSON_UNESCAPED_UNICODE is supplied.
-- long2ip() accepts integer as parameter now
-- pg_last_notice() accepts optional long parameter to specify operation.
-  PGSQL_NOTICE_LAST - Get last notice (Default)
-  PGSQL_NOTICE_ALL - Get all stored notices
-  PGSQL_NOTICE_CLEAR - Remove all stored notices
-  It returns empty string or array on successful PGSQL_NOTICE_LAST/ALL calls.
-  It returned FALSE for empty notice previously.
-- pg_fetch_all() accepts 2nd optional result type parameter like
-  pg_fetch_row().
-- pg_select() accepts 4th optional result type parameter like pg_fetch_row().
-- parse_url() is more restrictive now and supports RFC3986.
-- unpack() accepts an additional optional $offset argument. '@' format code
-  (that specifes an absolute position) is applyed to input data after
-  the $offset argument.
-- pack() and unpack() now support float and double in both little and big endian.
-- strpos(), stripos(), substr_count(), grapheme_strpos(), grapheme_stripos(),
-  grapheme_extract(), iconv_strpos(), mb_strimwidth(), mb_ereg_search_setpos(),
-  mb_strpos() and mb_stripos() now accept negative string offsets.
-- substr_count() and mb_strimwidth() additionally also accept negative length.
-- file_get_contents() accepts a negative seek offset if the stream is seekable.
+
+- Standard:
+  . password_hash() can generate Argon2i hashes when the algorithm is set to PASSWORD_ARGON2I. 
+    When using PASSWORD_ARGON2I, the following cost factors may be set: 'memory_cost', 'time_cost', 
+    and 'threads'. These cost factors will default to 'PASSWORD_ARGON2_DEFAULT_MEMORY_COST', 
+    'PASSWORD_ARGON2_DEFAULT_TIME_COST', and 'PASSWORD_ARGON2_DEFAULT_THREADS' respectively if not set.
+  . password_verify() can verify Argon2i hashes.
+  . password_get_info() and password_needs_rehash() can accept Argon2i hashes.
+  . mail()/mb_send_mail() accept array $extra_header. Array paramter is checked against RFC 2822.
+    Array format is 
+    $extra_headers = [
+      'Header-Name' => 'Header value',
+      'Multiple' => ['One header', 'Another header'],
+      'Multiline' = "FirstLine\r\n SecondLine",
+    ];
+  . count() now raises a warning when an invalid parameter is passed.
+    Only arrays and objects implementing the Countable interface should be passed.
+  . pack() and unpack() now support float and double in both little and big endian.
+
+- XML:
+  . utf8_encode() and utf8_decode() have been moved to the Standard extension
+    as string functions.
 
 ========================================
 6. New Functions
 ========================================
+
+- Core:
+  . Added stream_isatty().
+  . Added sapi_windows_vt100_support().
+
+- GD:
+  . Added imagesetclip() and imagegetclip().
+  . Added imageopenpolygon().
+  . Added imageresolution().
+
+- Mbstring:
+  . Added mb_chr() and mb_ord().
+  . Added mb_scurb() that scrub broken multibyte strings.
+
+- Sockets:
+  . Added socket_addrinfo_lookup(), socket_addrinfo_connect(),
+    socket_addrinfo_bind() and socket_addrinfo_explain().
 
 ========================================
 7. New Classes and Interfaces
@@ -122,49 +147,74 @@ PHP 7.1 UPGRADE NOTES
 8. Removed Extensions and SAPIs
 ========================================
 
+- Mcrypt:
+  . The deprecated mcrypt extension has been moved to PECL.
+  . libmcrypt has not been maintained since 2007 and the continued use of this
+    extension is strongly discouraged.
+  . Users are advised to use alternatives such as OpenSSL or libsodium.
+
 ========================================
 9. Other Changes to Extensions
 ========================================
-- SQLite3:
-  . Upgraded bundled SQLite lib to 3.9.2
+
+- EXIF:
+   . Added extended exif tag support for the following formats: 
+     Samsung, DJI, Panasonic, Sony, Pentax, Minolta & Sigma/Foveon.
+
+- GD:
+  . Removed --enable-gd-native-ttf configuration option which was unused as
+    of PHP 5.5.0 anyway.
+  . imagegd() stores truecolor images as real truecolor images. Formerly, they
+    have been converted to palette.
+  . imageantialias() is now also available if compiled with a system libgd.
+
+- Mbstring
+  . mb_check_encoding() accepts array parameter. Both key and value
+    ecodings are checked recursively.
+  . mb_convert_encoding() accepts array parameter. Only value encodings
+    are converted recursively.
 
 ========================================
 10. New Global Constants
 ========================================
 
-- JSON:
-  . JSON_UNESCAPED_LINE_TERMINATORS
+- Core:
+  . PHP_FLOAT_DIG     number of decimal digits, that can be rounded into a
+                      float and back without precision loss
+  . PHP_FLOAT_EPSILON smallest representable positive number x, so then
+                      x + 1.0 != 1.0
+  . PHP_FLOAT_MIN     min representable float number
+  . PHP_FLOAT_MAX     max representable float number
 
-- Pgsql:
-  PGSQL_NOTICE_LAST
-  PGSQL_NOTICE_ALL
-  PGSQL_NOTICE_CLEAR
+- Fileinfo:
+  . FILEINFO_EXTENSION include list of possible file extensions
+
+- GD:
+  . IMG_EFFECT_MULTIPLY
+
+- Standard:
+  . PASSWORD_ARGON2_DEFAULT_MEMORY_COST
+  . PASSWORD_ARGON2_DEFAULT_TIME_COST
+  . PASSWORD_ARGON2_DEFAULT_THREADS
+  . PASSWORD_ARGON2I
 
 ========================================
 11. Changes to INI File Handling
 ========================================
 
+- sql.safe_mode
+  . This INI directive have been removed.
+
 ========================================
 12. Windows Support
 ========================================
 
-- Core:
-  . Support for ftok()
+- Support for VT100 console mode
 
-- FCGI
-  . PHP_FCGI_CHILDREN is respected. If this environment variable is defined,
-    the first php-fcgi.exe process will exec the specified number of children.
-    Those will share the same TCP socket. 
-
-- readline:
-  . The readline extension is supported through the WinEditLine library
-    (http://mingweditline.sourceforge.net/). Thereby, the interactive CLI
-    shell is supported as well (php.exe -a).
-
-    It is well known, but nevertheless is worth mentioning again, that
-    the readline extension is not thread safe and will never be. Thus,
-    the usage of it with any true thread safe SAPI (like Apache mod_winnt) is
-    strongely discouraged.
+  On systems starting with 10.0.10586, cmd.exe supports ANSI escape sequences.
+  The corresponding console mode is enabled by default on CLI on suitable
+  systems. As well, the function sapi_windows_vt100_support() is provided,
+  to control and query the corresponding information in the scripts.
 
 ========================================
 13. Other Changes

@@ -33,10 +33,6 @@
 #include "config.w32.h"
 #endif
 
-#ifdef NETWARE
-#include <netinet/in.h>
-#endif
-
 #ifndef HAVE_FLOCK
 PHPAPI int flock(int fd, int operation)
 {

@@ -20,7 +20,7 @@ prompt> [L0 %s HANDLE_EXCEPTION                                                 
 >00005: 		x();
  00006: 	} finally {
  00007: 		print "ok\n";
-prompt> [L7 %s ECHO                    "ok "                                                          %s]
+prompt> [L7 %s ECHO                    "ok\n"                                                         %s]
 >00007: 		print "ok\n";
  00008: 	}
  00009: } catch (Error $e) {
@@ -30,13 +30,13 @@ prompt> ok
 >00005: 		x();
  00006: 	} finally {
  00007: 		print "ok\n";
-prompt> [L10 %s ECHO                    "caught "                                                      %s]
+prompt> [L10 %s ECHO                    "caught\n"                                                     %s]
 >00010: 	print "caught\n";
  00011: }
  00012: 
 prompt> caught
-[L10 %s RETURN                  1                                                              %s]
-[Script ended normally]
+[L14 %s RETURN                  1                                                              %s]
+>00014: 
 prompt> 
 --FILE--
 <?php

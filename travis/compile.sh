@@ -31,7 +31,6 @@ $TS \
 --enable-zip \
 --with-zlib \
 --with-zlib-dir=/usr \
---with-mcrypt=/usr \
 --enable-soap \
 --enable-xmlreader \
 --with-xsl \

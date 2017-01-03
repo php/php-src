@@ -34,7 +34,7 @@ typedef struct _zend_lex_state {
 	zend_ptr_stack heredoc_label_stack;
 
 	zend_file_handle *in;
-	uint lineno;
+	uint32_t lineno;
 	zend_string *filename;
 
 	/* original (unfiltered) script */
@@ -51,7 +51,8 @@ typedef struct _zend_lex_state {
 	const zend_encoding *script_encoding;
 
 	/* hooks */
-	void (* on_event)(zend_php_scanner_event event, int token, int line);
+	void (*on_event)(zend_php_scanner_event event, int token, int line, void *context);
+	void *on_event_context;
 
 	zend_ast *ast;
 	zend_arena *ast_arena;

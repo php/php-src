@@ -35,7 +35,6 @@
  * returned by zend_get_func_info()
  */
 #define FUNC_MAY_WARN                      (1<<30)
-#define FUNC_MAY_INLINE                    (1<<31)
 
 typedef struct _zend_func_info zend_func_info;
 typedef struct _zend_call_info zend_call_info;

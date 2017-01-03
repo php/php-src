@@ -116,7 +116,9 @@ END_EXTERN_C()
 #define ZEND_JMPZ_EX                          46
 #define ZEND_JMPNZ_EX                         47
 #define ZEND_CASE                             48
+#define ZEND_CHECK_VAR                        49
 #define ZEND_SEND_VAR_NO_REF_EX               50
+#define ZEND_MAKE_REF                         51
 #define ZEND_BOOL                             52
 #define ZEND_FAST_CONCAT                      53
 #define ZEND_ROPE_INIT                        54
@@ -248,7 +250,9 @@ END_EXTERN_C()
 #define ZEND_FETCH_CLASS_CONSTANT            181
 #define ZEND_BIND_LEXICAL                    182
 #define ZEND_BIND_STATIC                     183
+#define ZEND_FETCH_THIS                      184
+#define ZEND_ISSET_ISEMPTY_THIS              186
 
-#define ZEND_VM_LAST_OPCODE                  183
+#define ZEND_VM_LAST_OPCODE                  186
 
 #endif

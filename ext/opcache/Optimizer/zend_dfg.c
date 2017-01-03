@@ -26,7 +26,8 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 	zend_basic_block *blocks = cfg->blocks;
 	int blocks_count = cfg->blocks_count;
 	zend_bitset tmp, def, use, in, out;
-	uint32_t k, var_num;
+	int k;
+	uint32_t var_num;
 	int j;
 
 	set_size = dfg->size;
@@ -73,6 +74,11 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 						}
 						goto op1_use;
 					case ZEND_FE_RESET_R:
+					case ZEND_SEND_VAR:
+					case ZEND_CAST:
+					case ZEND_QM_ASSIGN:
+					case ZEND_JMP_SET:
+					case ZEND_COALESCE:
 						if (build_flags & ZEND_SSA_RC_INFERENCE) {
 							goto op1_def;
 						}

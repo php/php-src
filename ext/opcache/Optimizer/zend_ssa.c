@@ -110,16 +110,17 @@ static void pi_range(
 		zend_ssa_phi *phi, int min_var, int max_var, zend_long min, zend_long max,
 		char underflow, char overflow, char negative) /* {{{ */
 {
-	phi->constraint.min_var = min_var;
-	phi->constraint.max_var = max_var;
-	phi->constraint.min_ssa_var = -1;
-	phi->constraint.max_ssa_var = -1;
-	phi->constraint.range.min = min;
-	phi->constraint.range.max = max;
-	phi->constraint.range.underflow = underflow;
-	phi->constraint.range.overflow = overflow;
-	phi->constraint.negative = negative ? NEG_INIT : NEG_NONE;
-	phi->constraint.type_mask = (uint32_t) -1;
+	zend_ssa_range_constraint *constraint = &phi->constraint.range;
+	constraint->min_var = min_var;
+	constraint->max_var = max_var;
+	constraint->min_ssa_var = -1;
+	constraint->max_ssa_var = -1;
+	constraint->range.min = min;
+	constraint->range.max = max;
+	constraint->range.underflow = underflow;
+	constraint->range.overflow = overflow;
+	constraint->negative = negative ? NEG_INIT : NEG_NONE;
+	phi->has_range_constraint = 1;
 }
 /* }}} */
 
@@ -137,10 +138,12 @@ static inline void pi_range_max(zend_ssa_phi *phi, int var, zend_long val) {
 }
 
 static void pi_type_mask(zend_ssa_phi *phi, uint32_t type_mask) {
-	phi->constraint.type_mask = MAY_BE_REF|MAY_BE_RC1|MAY_BE_RCN;
-	phi->constraint.type_mask |= type_mask;
+	phi->has_range_constraint = 0;
+	phi->constraint.type.ce = NULL;
+	phi->constraint.type.type_mask = MAY_BE_REF|MAY_BE_RC1|MAY_BE_RCN;
+	phi->constraint.type.type_mask |= type_mask;
 	if (type_mask & MAY_BE_NULL) {
-		phi->constraint.type_mask |= MAY_BE_UNDEF;
+		phi->constraint.type.type_mask |= MAY_BE_UNDEF;
 	}
 }
 static inline void pi_not_type_mask(zend_ssa_phi *phi, uint32_t type_mask) {
@@ -162,6 +165,8 @@ static inline uint32_t mask_for_type_check(uint32_t type) {
 static int find_adjusted_tmp_var(const zend_op_array *op_array, uint32_t build_flags, zend_op *opline, uint32_t var_num, zend_long *adjustment) /* {{{ */
 {
 	zend_op *op = opline;
+	zval *zv;
+
 	while (op != op_array->opcodes) {
 		op--;
 		if (op->result_type != IS_TMP_VAR || op->result.var != var_num) {
@@ -179,25 +184,28 @@ static int find_adjusted_tmp_var(const zend_op_array *op_array, uint32_t build_f
 				return EX_VAR_TO_NUM(op->op1.var);
 			}
 		} else if (op->opcode == ZEND_ADD) {
-			if (op->op1_type == IS_CV &&
-				op->op2_type == IS_CONST &&
-				Z_TYPE_P(CRT_CONSTANT(op->op2)) == IS_LONG &&
-				Z_LVAL_P(CRT_CONSTANT(op->op2)) != ZEND_LONG_MIN) {
-				*adjustment = -Z_LVAL_P(CRT_CONSTANT(op->op2));
-				return EX_VAR_TO_NUM(op->op1.var);
-			} else if (op->op2_type == IS_CV &&
-					   op->op1_type == IS_CONST &&
-					   Z_TYPE_P(CRT_CONSTANT(op->op1)) == IS_LONG &&
-					   Z_LVAL_P(CRT_CONSTANT(op->op1)) != ZEND_LONG_MIN) {
-				*adjustment = -Z_LVAL_P(CRT_CONSTANT(op->op1));
-				return EX_VAR_TO_NUM(op->op2.var);
+			if (op->op1_type == IS_CV && op->op2_type == IS_CONST) {
+				zv = CRT_CONSTANT(op->op2);
+				if (Z_TYPE_P(zv) == IS_LONG
+				 && Z_LVAL_P(zv) != ZEND_LONG_MIN) {
+					*adjustment = -Z_LVAL_P(zv);
+					return EX_VAR_TO_NUM(op->op1.var);
+				}
+			} else if (op->op2_type == IS_CV && op->op1_type == IS_CONST) {
+				zv = CRT_CONSTANT(op->op1);
+				if (Z_TYPE_P(zv) == IS_LONG
+				 && Z_LVAL_P(zv) != ZEND_LONG_MIN) {
+					*adjustment = -Z_LVAL_P(zv);
+					return EX_VAR_TO_NUM(op->op2.var);
+				}
 			}
 		} else if (op->opcode == ZEND_SUB) {
-			if (op->op1_type == IS_CV &&
-				op->op2_type == IS_CONST &&
-				Z_TYPE_P(CRT_CONSTANT(op->op2)) == IS_LONG) {
-				*adjustment = Z_LVAL_P(CRT_CONSTANT(op->op2));
-				return EX_VAR_TO_NUM(op->op1.var);
+			if (op->op1_type == IS_CV && op->op2_type == IS_CONST) {
+				zv = CRT_CONSTANT(op->op2);
+				if (Z_TYPE_P(zv) == IS_LONG) {
+					*adjustment = Z_LVAL_P(zv);
+					return EX_VAR_TO_NUM(op->op1.var);
+				}
 			}
 		}
 		break;
@@ -220,8 +228,8 @@ static inline zend_bool sub_will_overflow(zend_long a, zend_long b) {
  * Order of Phis is importent, Pis must be placed before Phis
  */
 static void place_essa_pis(
-		zend_arena **arena, const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa,
-		zend_dfg *dfg) /* {{{ */ {
+		zend_arena **arena, const zend_script *script, const zend_op_array *op_array,
+		uint32_t build_flags, zend_ssa *ssa, zend_dfg *dfg) /* {{{ */ {
 	zend_basic_block *blocks = ssa->cfg.blocks;
 	int j, blocks_count = ssa->cfg.blocks_count;
 	for (j = 0; j < blocks_count; j++) {
@@ -286,15 +294,18 @@ static void place_essa_pis(
 				}
 			} else if (var1 >= 0 && var2 < 0) {
 				zend_long add_val2 = 0;
-				if ((opline-1)->op2_type == IS_CONST &&
-				    Z_TYPE_P(CRT_CONSTANT((opline-1)->op2)) == IS_LONG) {
-					add_val2 = Z_LVAL_P(CRT_CONSTANT((opline-1)->op2));
-				} else if ((opline-1)->op2_type == IS_CONST &&
-				    Z_TYPE_P(CRT_CONSTANT((opline-1)->op2)) == IS_FALSE) {
-					add_val2 = 0;
-				} else if ((opline-1)->op2_type == IS_CONST &&
-				    Z_TYPE_P(CRT_CONSTANT((opline-1)->op2)) == IS_TRUE) {
-					add_val2 = 1;
+				if ((opline-1)->op2_type == IS_CONST) {
+					zval *zv = CRT_CONSTANT((opline-1)->op2);
+
+					if (Z_TYPE_P(zv) == IS_LONG) {
+						add_val2 = Z_LVAL_P(zv);
+					} else if (Z_TYPE_P(zv) == IS_FALSE) {
+						add_val2 = 0;
+					} else if (Z_TYPE_P(zv) == IS_TRUE) {
+						add_val2 = 1;
+					} else {
+						var1 = -1;
+					}
 				} else {
 					var1 = -1;
 				}
@@ -305,15 +316,17 @@ static void place_essa_pis(
 				}
 			} else if (var1 < 0 && var2 >= 0) {
 				zend_long add_val1 = 0;
-				if ((opline-1)->op1_type == IS_CONST &&
-				    Z_TYPE_P(CRT_CONSTANT((opline-1)->op1)) == IS_LONG) {
-					add_val1 = Z_LVAL_P(CRT_CONSTANT((opline-1)->op1));
-				} else if ((opline-1)->op1_type == IS_CONST &&
-				    Z_TYPE_P(CRT_CONSTANT((opline-1)->op1)) == IS_FALSE) {
-					add_val1 = 0;
-				} else if ((opline-1)->op1_type == IS_CONST &&
-				    Z_TYPE_P(CRT_CONSTANT((opline-1)->op1)) == IS_TRUE) {
-					add_val1 = 1;
+				if ((opline-1)->op1_type == IS_CONST) {
+					zval *zv = CRT_CONSTANT((opline-1)->op1);
+					if (Z_TYPE_P(zv) == IS_LONG) {
+						add_val1 = Z_LVAL_P(CRT_CONSTANT((opline-1)->op1));
+					} else if (Z_TYPE_P(zv) == IS_FALSE) {
+						add_val1 = 0;
+					} else if (Z_TYPE_P(zv) == IS_TRUE) {
+						add_val1 = 1;
+					} else {
+						var2 = -1;
+					}
 				} else {
 					var2 = -1;
 				}
@@ -437,9 +450,8 @@ static void place_essa_pis(
 			if ((pi = add_pi(arena, op_array, dfg, ssa, j, bt, var))) {
 				pi_type_mask(pi, mask_for_type_check(type));
 			}
-			if (type != IS_OBJECT && type != IS_RESOURCE) {
-				/* is_object() and is_resource() may return false, even though the value is
-				 * an object/resource. */
+			if (type != IS_RESOURCE) {
+				/* is_resource() may return false for closed resources */
 				if ((pi = add_pi(arena, op_array, dfg, ssa, j, bf, var))) {
 					pi_not_type_mask(pi, mask_for_type_check(type));
 				}
@@ -482,6 +494,23 @@ static void place_essa_pis(
 				if ((pi = add_pi(arena, op_array, dfg, ssa, j, bt, var))) {
 					pi_not_type_mask(pi, type_mask);
 				}
+			}
+		} else if (opline->op1_type == IS_TMP_VAR && (opline-1)->opcode == ZEND_INSTANCEOF &&
+				   opline->op1.var == (opline-1)->result.var && (opline-1)->op1_type == IS_CV &&
+				   (opline-1)->op2_type == IS_CONST) {
+			int var = EX_VAR_TO_NUM((opline-1)->op1.var);
+			zend_string *lcname = Z_STR_P(CRT_CONSTANT((opline-1)->op2) + 1);
+			zend_class_entry *ce = script ? zend_hash_find_ptr(&script->class_table, lcname) : NULL;
+			if (!ce) {
+				ce = zend_hash_find_ptr(CG(class_table), lcname);
+				if (!ce || ce->type != ZEND_INTERNAL_CLASS) {
+					continue;
+				}
+			}
+
+			if ((pi = add_pi(arena, op_array, dfg, ssa, j, bt, var))) {
+				pi_type_mask(pi, MAY_BE_OBJECT);
+				pi->constraint.type.ce = ce;
 			}
 		}
 	}
@@ -560,32 +589,32 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 			}
 			switch (opline->opcode) {
 				case ZEND_ASSIGN:
-					if (opline->op1_type == IS_CV) {
-						ssa_ops[k].op1_def = ssa_vars_count;
-						var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
-						ssa_vars_count++;
-						//NEW_SSA_VAR(opline->op1.var)
-					}
 					if ((build_flags & ZEND_SSA_RC_INFERENCE) && opline->op2_type == IS_CV) {
 						ssa_ops[k].op2_def = ssa_vars_count;
 						var[EX_VAR_TO_NUM(opline->op2.var)] = ssa_vars_count;
 						ssa_vars_count++;
 						//NEW_SSA_VAR(opline->op2.var)
 					}
-					break;
-				case ZEND_ASSIGN_REF:
-//TODO: ???
 					if (opline->op1_type == IS_CV) {
 						ssa_ops[k].op1_def = ssa_vars_count;
 						var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
 						ssa_vars_count++;
 						//NEW_SSA_VAR(opline->op1.var)
 					}
+					break;
+				case ZEND_ASSIGN_REF:
+//TODO: ???
 					if (opline->op2_type == IS_CV) {
 						ssa_ops[k].op2_def = ssa_vars_count;
 						var[EX_VAR_TO_NUM(opline->op2.var)] = ssa_vars_count;
 						ssa_vars_count++;
 						//NEW_SSA_VAR(opline->op2.var)
+					}
+					if (opline->op1_type == IS_CV) {
+						ssa_ops[k].op1_def = ssa_vars_count;
+						var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
+						ssa_vars_count++;
+						//NEW_SSA_VAR(opline->op1.var)
 					}
 					break;
 				case ZEND_BIND_GLOBAL:
@@ -622,6 +651,18 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 						var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
 						ssa_vars_count++;
 						//NEW_SSA_VAR(opline+->op1.var)
+					}
+					break;
+				case ZEND_SEND_VAR:
+				case ZEND_CAST:
+				case ZEND_QM_ASSIGN:
+				case ZEND_JMP_SET:
+				case ZEND_COALESCE:
+					if ((build_flags & ZEND_SSA_RC_INFERENCE) && opline->op1_type == IS_CV) {
+						ssa_ops[k].op1_def = ssa_vars_count;
+						var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
+						ssa_vars_count++;
+						//NEW_SSA_VAR(opline->op1.var)
 					}
 					break;
 				case ZEND_SEND_VAR_NO_REF:
@@ -741,11 +782,13 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 			for (p = ssa_blocks[succ].phis; p; p = p->next) {
 				if (p->pi == n) {
 					/* e-SSA Pi */
-					if (p->constraint.min_var >= 0) {
-						p->constraint.min_ssa_var = var[p->constraint.min_var];
-					}
-					if (p->constraint.max_var >= 0) {
-						p->constraint.max_ssa_var = var[p->constraint.max_var];
+					if (p->has_range_constraint) {
+						if (p->constraint.range.min_var >= 0) {
+							p->constraint.range.min_ssa_var = var[p->constraint.range.min_var];
+						}
+						if (p->constraint.range.max_var >= 0) {
+							p->constraint.range.max_ssa_var = var[p->constraint.range.max_var];
+						}
 					}
 					for (j = 0; j < blocks[succ].predecessors_count; j++) {
 						p->sources[j] = var[p->var];
@@ -802,7 +845,7 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 }
 /* }}} */
 
-int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa, uint32_t *func_flags) /* {{{ */
+int zend_build_ssa(zend_arena **arena, const zend_script *script, const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa, uint32_t *func_flags) /* {{{ */
 {
 	zend_basic_block *blocks = ssa->cfg.blocks;
 	zend_ssa_block *ssa_blocks;
@@ -814,6 +857,11 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 	zend_dfg dfg;
 	ALLOCA_FLAG(dfg_use_heap)
 	ALLOCA_FLAG(var_use_heap)
+
+	if ((blocks_count * (op_array->last_var + op_array->T)) > 4 * 1024 * 1024) {
+	    /* Don't buld SSA for very big functions */
+		return FAILURE;
+	}
 
 	ssa->rt_constants = (build_flags & ZEND_RT_CONSTANTS);
 	ssa_blocks = zend_arena_calloc(arena, blocks_count, sizeof(zend_ssa_block));
@@ -850,7 +898,7 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 
 	/* Place e-SSA pis. This will add additional "def" points, so it must
 	 * happen before def propagation. */
-	place_essa_pis(arena, op_array, build_flags, ssa, &dfg);
+	place_essa_pis(arena, script, op_array, build_flags, ssa, &dfg);
 
 	/* SSA construction, Step 1: Propagate "def" sets in merge points */
 	do {
@@ -1021,13 +1069,16 @@ int zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_array *op_
 						ssa_vars[phi->sources[0]].phi_use_chain = phi;
 					}
 				}
-				/* min and max variables can't be used together */
-				if (phi->constraint.min_ssa_var >= 0) {
-					phi->sym_use_chain = ssa_vars[phi->constraint.min_ssa_var].sym_use_chain;
-					ssa_vars[phi->constraint.min_ssa_var].sym_use_chain = phi;
-				} else if (phi->constraint.max_ssa_var >= 0) {
-					phi->sym_use_chain = ssa_vars[phi->constraint.max_ssa_var].sym_use_chain;
-					ssa_vars[phi->constraint.max_ssa_var].sym_use_chain = phi;
+				if (phi->has_range_constraint) {
+					/* min and max variables can't be used together */
+					zend_ssa_range_constraint *constraint = &phi->constraint.range;
+					if (constraint->min_ssa_var >= 0) {
+						phi->sym_use_chain = ssa_vars[constraint->min_ssa_var].sym_use_chain;
+						ssa_vars[constraint->min_ssa_var].sym_use_chain = phi;
+					} else if (constraint->max_ssa_var >= 0) {
+						phi->sym_use_chain = ssa_vars[constraint->max_ssa_var].sym_use_chain;
+						ssa_vars[constraint->max_ssa_var].sym_use_chain = phi;
+					}
 				}
 			} else {
 				int j;

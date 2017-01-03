@@ -56,14 +56,14 @@ static zend_always_inline int zend_ulong_ntz(zend_ulong num)
 	if (!BitScanForward(&index, num)) {
 #endif
 		/* undefined behavior */
-		return 32;
+		return SIZEOF_ZEND_LONG * 8;
 	}
 
 	return (int) index;
 #else
 	int n;
 
-	if (num == Z_UL(0)) return ZEND_MM_BITSET_LEN;
+	if (num == Z_UL(0)) return SIZEOF_ZEND_LONG * 8;
 
 	n = 1;
 #if SIZEOF_ZEND_LONG == 8
@@ -221,7 +221,7 @@ static inline int zend_bitset_last(zend_bitset set, uint32_t len)
 #define ZEND_BITSET_FOREACH(set, len, bit) do { \
 	zend_bitset _set = (set); \
 	uint32_t _i, _len = (len); \
-	for (_i = 0; _i < len; _i++) { \
+	for (_i = 0; _i < _len; _i++) { \
 		zend_ulong _x = _set[_i]; \
 		if (_x) { \
 			(bit) = ZEND_BITSET_ELM_SIZE * 8 * _i; \

@@ -31,4 +31,4 @@ Warning: openssl_x509_parse() expects at least 1 parameter, 0 given in %sbug3826
 NULL
 bool(false)
 
-Catchable fatal error: Object of class stdClass could not be converted to string in %sbug38261.php on line %d 
+Recoverable fatal error: Object of class stdClass could not be converted to string in %sbug38261.php on line %d 

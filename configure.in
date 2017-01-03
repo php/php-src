@@ -67,13 +67,6 @@ int zend_sprintf(char *buffer, const char *format, ...);
 
 #include <math.h>
 
-/* To enable the is_nan, is_infinite and is_finite PHP functions */
-#ifdef NETWARE
-	#define HAVE_ISNAN 1
-	#define HAVE_ISINF 1
-	#define HAVE_ISFINITE 1
-#endif
-
 #ifndef zend_isnan
 #ifdef HAVE_ISNAN
 #define zend_isnan(a) isnan(a)
@@ -107,18 +100,11 @@ int zend_sprintf(char *buffer, const char *format, ...);
 
 #endif /* ifndef ZEND_ACCONFIG_H_NO_C_PROTOS */
 
-#ifdef NETWARE
-#ifdef USE_WINSOCK
-#/*This detection against winsock is of no use*/ undef HAVE_SOCKLEN_T
-#/*This detection against winsock is of no use*/ undef HAVE_SYS_SOCKET_H
-#endif
-#endif
-
 #undef PTHREADS
 ])
 
 PHP_MAJOR_VERSION=7
-PHP_MINOR_VERSION=1
+PHP_MINOR_VERSION=2
 PHP_RELEASE_VERSION=0
 PHP_EXTRA_VERSION="-dev"
 PHP_VERSION="$PHP_MAJOR_VERSION.$PHP_MINOR_VERSION.$PHP_RELEASE_VERSION$PHP_EXTRA_VERSION"
@@ -330,15 +316,6 @@ case $host_alias in
     if test "$GCC" = "yes"; then
       CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE_EXTENDED"
     fi
-    ;;
-  *netware*)
-    PHP_BUILD_PROGRAM
-    PHP_ADD_SOURCES(/main, internal_functions.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, PHP_GLOBAL_OBJS)
-    PHP_ADD_SOURCES(win32, sendmail.c, -I$CFLAGS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, PHP_GLOBAL_OBJS)
-    PHP7LIB_SHARED_LIBADD=\$\(EXTRA_LIBS\)
-    EXTENSION_DIR=sys:/php$PHP_MAJOR_VERSION/ext
-    PHP_SUBST(PHP7LIB_SHARED_LIBADD)
-    PHP_SHARED_MODULE(php7lib, PHP_GLOBAL_OBJS, netware)
     ;;
 esac
 
@@ -583,6 +560,18 @@ dnl Check __builtin_ctzl
 PHP_CHECK_BUILTIN_CTZL
 dnl Check __builtin_ctzll
 PHP_CHECK_BUILTIN_CTZLL
+dnl Check __builtin_smull_overflow
+PHP_CHECK_BUILTIN_SMULL_OVERFLOW
+dnl Check __builtin_smulll_overflow
+PHP_CHECK_BUILTIN_SMULLL_OVERFLOW
+dnl Check __builtin_saddl_overflow
+PHP_CHECK_BUILTIN_SADDL_OVERFLOW
+dnl Check __builtin_saddll_overflow
+PHP_CHECK_BUILTIN_SADDLL_OVERFLOW
+dnl Check __builtin_ssubl_overflow
+PHP_CHECK_BUILTIN_SSUBL_OVERFLOW
+dnl Check __builtin_ssubll_overflow
+PHP_CHECK_BUILTIN_SSUBLL_OVERFLOW
 
 dnl Check for members of the stat structure
 AC_STRUCT_ST_BLKSIZE
@@ -756,7 +745,7 @@ if test "$ac_cv_func_sync_fetch_and_add" = yes; then
   AC_DEFINE(HAVE_SYNC_FETCH_AND_ADD,1,[Define if you have the __sync_fetch_and_add function])
 fi
 
-AC_REPLACE_FUNCS(strlcat strlcpy getopt)
+AC_REPLACE_FUNCS(strlcat strlcpy explicit_bzero getopt)
 AC_FUNC_UTIME_NULL
 AC_FUNC_ALLOCA
 dnl PHP_AC_BROKEN_SPRINTF
@@ -799,7 +788,7 @@ if test "$PHP_GCOV" = "yes"; then
   dnl min: 1.5 (i.e. 105, major * 100 + minor for easier comparison)
   ltp_version_min="105"
   dnl non-working versions, e.g. "1.8 1.18";
-  dnl remove "none" when introducing the first incompatible LTP version an 
+  dnl remove "none" when introducing the first incompatible LTP version and
   dnl separate any following additions by spaces
   ltp_version_exclude="1.8"
 
@@ -1287,20 +1276,10 @@ EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM $PHP_LDFLAGS"
 PHP_BUILD_DATE=`date '+%Y-%m-%d'`
 AC_DEFINE_UNQUOTED(PHP_BUILD_DATE,"$PHP_BUILD_DATE",[PHP build date])
 
-case $host_alias in
-*netware*)
-  PHP_OS="NetWare"
-  PHP_UNAME="NetWare"
-  AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS",[hardcode for each of the cross compiler host])
-  AC_DEFINE_UNQUOTED(PHP_UNAME,"$PHP_UNAME",[hardcode for each of the cross compiler host])
-  ;;
-*)
-  PHP_UNAME=`uname -a | xargs`
-  AC_DEFINE_UNQUOTED(PHP_UNAME,"$PHP_UNAME",[uname -a output])
-  PHP_OS=`uname | xargs`
-  AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS",[uname output])
-  ;;
-esac
+PHP_UNAME=`uname -a | xargs`
+AC_DEFINE_UNQUOTED(PHP_UNAME,"$PHP_UNAME",[uname -a output])
+PHP_OS=`uname | xargs`
+AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS",[uname output])
 
 PHP_SUBST_OLD(PHP_INSTALLED_SAPIS)
 
@@ -1467,7 +1446,7 @@ PHP_ADD_SOURCES(TSRM, TSRM.c tsrm_strtok_r.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=
 PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c php_sprintf.c \
        fopen_wrappers.c alloca.c  php_scandir.c \
        php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
-       strlcat.c mergesort.c reentrancy.c php_variables.c php_ticks.c \
+       strlcat.c explicit_bzero.c mergesort.c reentrancy.c php_variables.c php_ticks.c \
        network.c php_open_temporary_file.c \
        output.c getopt.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
@@ -1478,16 +1457,7 @@ PHP_ADD_SOURCES(main/streams, streams.c cast.c memory.c filter.c \
        glob_wrapper.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
 PHP_ADD_SOURCES(/main, internal_functions.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, sapi)
-
-case $host_alias in
-  *netware*)
-    PHP_ADD_BUILD_DIR(win32)
-    PHP_ADD_BUILD_DIR(netware)
-    ;;
-  *)
-    PHP_ADD_SOURCES_X(/main, internal_functions_cli.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, PHP_BINARY_OBJS)
-    ;;
-esac
+PHP_ADD_SOURCES_X(/main, internal_functions_cli.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, PHP_BINARY_OBJS)
 
 PHP_ADD_SOURCES(Zend, \
     zend_language_parser.c zend_language_scanner.c \

@@ -53,21 +53,21 @@ static void zend_persist_zval_calc(zval *z);
 
 static void zend_hash_persist_calc(HashTable *ht, void (*pPersistElement)(zval *pElement))
 {
-	uint idx;
+	uint32_t idx;
 	Bucket *p;
 
 	if (!(ht->u.flags & HASH_FLAG_INITIALIZED) || ht->nNumUsed == 0) {
 		return;
 	}
 
-	if (!(ht->u.flags & HASH_FLAG_PACKED) && ht->nNumUsed < -(int32_t)ht->nTableMask / 2) {
+	if (!(ht->u.flags & HASH_FLAG_PACKED) && ht->nNumUsed < (uint32_t)(-(int32_t)ht->nTableMask) / 2) {
 		/* compact table */
-		int32_t hash_size;
+		uint32_t hash_size;
 
 		if (ht->nNumUsed <= HT_MIN_SIZE) {
 			hash_size = HT_MIN_SIZE;
 		} else {
-			hash_size = -(int32_t)ht->nTableMask;
+			hash_size = (uint32_t)(-(int32_t)ht->nTableMask);
 			while (hash_size >> 1 > ht->nNumUsed) {
 				hash_size >>= 1;
 			}
@@ -121,7 +121,7 @@ static void zend_persist_ast_calc(zend_ast *ast)
 static void zend_persist_zval_calc(zval *z)
 {
 	zend_uchar flags;
-	uint size;
+	uint32_t size;
 
 	switch (Z_TYPE_P(z)) {
 		case IS_STRING:
@@ -396,7 +396,7 @@ static void zend_accel_persist_class_table_calc(HashTable *class_table)
 	zend_hash_persist_calc(class_table, zend_persist_class_entry_calc);
 }
 
-uint zend_accel_script_persist_calc(zend_persistent_script *new_persistent_script, char *key, unsigned int key_length)
+uint32_t zend_accel_script_persist_calc(zend_persistent_script *new_persistent_script, char *key, unsigned int key_length)
 {
 	new_persistent_script->mem = NULL;
 	new_persistent_script->size = 0;

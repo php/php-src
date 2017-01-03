@@ -43,7 +43,7 @@ ZEND_END_ARG_INFO();
 
 const zend_function_entry php_dom_comment_class_functions[] = {
 	PHP_ME(domcomment, __construct, arginfo_dom_comment_construct, ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 /* {{{ proto void DOMComment::__construct([string value]); */

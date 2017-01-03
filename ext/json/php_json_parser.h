@@ -55,7 +55,7 @@ typedef struct _php_json_parser_methods {
 struct _php_json_parser {
 	php_json_scanner scanner;
 	zval *return_value;
-	unsigned int depth;
+	int depth;
 	int max_depth;
 	php_json_parser_methods methods;
 };

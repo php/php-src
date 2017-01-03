@@ -2,8 +2,6 @@
 rfc1867 file_upload disabled
 --INI--
 file_uploads=0
-error_reporting=E_ALL&~E_NOTICE
-comment=debug builds show some additional E_NOTICE errors
 --POST_RAW--
 Content-Type: multipart/form-data; boundary=---------------------------20896060251896012921717172737
 -----------------------------20896060251896012921717172737
@@ -29,8 +27,8 @@ var_dump($_POST);
 array(0) {
 }
 array(2) {
-  [%u|b%"foo"]=>
-  %unicode|string%(3) "bar"
-  [%u|b%"bar"]=>
-  %unicode|string%(3) "foo"
+  ["foo"]=>
+  string(3) "bar"
+  ["bar"]=>
+  string(3) "foo"
 }

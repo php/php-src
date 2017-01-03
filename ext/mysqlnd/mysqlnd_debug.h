@@ -82,9 +82,6 @@ PHPAPI MYSQLND_DEBUG * mysqlnd_debug_init(const char * skip_functions[]);
 #if defined(__GNUC__) || defined(PHP_WIN32)
 #ifdef PHP_WIN32
 #include "win32/time.h"
-#elif defined(NETWARE)
-#include <sys/timeval.h>
-#include <sys/time.h>
 #else
 #include <sys/time.h>
 #endif
@@ -130,8 +127,9 @@ PHPAPI MYSQLND_DEBUG * mysqlnd_debug_init(const char * skip_functions[]);
 					if ((dbg_obj2)) { \
 						dbg_skip_trace |= !(dbg_obj2)->m->func_enter((dbg_obj2), __LINE__, __FILE__, func_name, strlen(func_name)); \
 					} \
-					if (dbg_skip_trace) \
+					if (dbg_skip_trace) { \
 						/* EMPTY */ ; /* shut compiler's mouth */	\
+					} \
 					do { \
 						if (((dbg_obj1) && (dbg_obj1)->flags & MYSQLND_DEBUG_PROFILE_CALLS) || \
 							((dbg_obj2) && (dbg_obj2)->flags & MYSQLND_DEBUG_PROFILE_CALLS)) \

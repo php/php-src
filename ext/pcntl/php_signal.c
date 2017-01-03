@@ -28,15 +28,21 @@
 Sigfunc *php_signal4(int signo, Sigfunc *func, int restart, int mask_all)
 {
 	struct sigaction act,oact;
-#ifdef ZEND_SIGNALS
-#endif
+
+#ifdef HAVE_STRUCT_SIGINFO_T
+	act.sa_sigaction = func;
+#else
 	act.sa_handler = func;
+#endif
 	if (mask_all) {
 		sigfillset(&act.sa_mask);
 	} else {
 		sigemptyset(&act.sa_mask);
 	}
 	act.sa_flags = 0;
+#ifdef HAVE_STRUCT_SIGINFO_T
+	act.sa_flags |= SA_SIGINFO;
+#endif
 	if (signo == SIGALRM || (! restart)) {
 #ifdef SA_INTERRUPT
 		act.sa_flags |= SA_INTERRUPT; /* SunOS */
@@ -46,16 +52,15 @@ Sigfunc *php_signal4(int signo, Sigfunc *func, int restart, int mask_all)
 		act.sa_flags |= SA_RESTART; /* SVR4, 4.3+BSD */
 #endif
 	}
-#ifdef ZEND_SIGNALS
-	if (zend_sigaction(signo, &act, &oact) < 0)
-#else
-	if (sigaction(signo, &act, &oact) < 0)
-#endif
-	{
-		return SIG_ERR;
+	if (zend_sigaction(signo, &act, &oact) < 0) {
+		return (Sigfunc*)SIG_ERR;
 	}
 
+#ifdef HAVE_STRUCT_SIGINFO_T
+	return oact.sa_sigaction;
+#else
 	return oact.sa_handler;
+#endif
 }
 
 Sigfunc *php_signal(int signo, Sigfunc *func, int restart)

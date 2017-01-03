@@ -23,7 +23,7 @@ static int phpdbg_is_auto_global(char *name, int len) {
 	int ret;
 	zend_string *str = zend_string_init(name, len, 0);
 	ret = zend_is_auto_global(str);
-	efree(str);
+	zend_string_free(str);
 	return ret;
 }
 

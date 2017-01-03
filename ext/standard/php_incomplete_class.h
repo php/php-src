@@ -43,7 +43,7 @@
 
 #define PHP_CLASS_ATTRIBUTES											\
 	zend_string *class_name;											\
-	zend_bool incomplete_class = 0
+	zend_bool incomplete_class ZEND_ATTRIBUTE_UNUSED = 0
 
 #define INCOMPLETE_CLASS "__PHP_Incomplete_Class"
 #define MAGIC_MEMBER "__PHP_Incomplete_Class_Name"

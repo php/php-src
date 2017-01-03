@@ -9,7 +9,7 @@ function foo() : array {
 	try {
 		throw new Exception("xxxx");
 	} finally {
-		return ;
+		return null;
 	}
 }
 
@@ -21,7 +21,7 @@ Stack trace:
 #0 %s(%d): foo()
 #1 {main}
 
-Next TypeError: Return value of foo() must be of the type array, none returned in %s29.php:%d
+Next TypeError: Return value of foo() must be of the type array, null returned in %s29.php:%d
 Stack trace:
 #0 %s(%d): foo()
 #1 {main}

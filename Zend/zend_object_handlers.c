@@ -163,7 +163,7 @@ ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp) /* {{{ *
 
 	zend_call_method_with_0_params(object, ce, &ce->__debugInfo, ZEND_DEBUGINFO_FUNC_NAME, &retval);
 	if (Z_TYPE(retval) == IS_ARRAY) {
-		if (Z_IMMUTABLE(retval)) {
+		if (!Z_REFCOUNTED(retval)) {
 			*is_temp = 1;
 			return zend_array_dup(Z_ARRVAL(retval));
 		} else if (Z_REFCOUNT(retval) <= 1) {
@@ -200,48 +200,26 @@ static void zend_std_call_getter(zval *object, zval *member, zval *retval) /* {{
 
 	   it should return whether the call was successful or not
 	*/
-	if (Z_REFCOUNTED_P(member)) Z_ADDREF_P(member);
-
 	zend_call_method_with_1_params(object, ce, &ce->__get, ZEND_GET_FUNC_NAME, retval, member);
-
-	zval_ptr_dtor(member);
 
 	EG(fake_scope) = orig_fake_scope;
 }
 /* }}} */
 
-static int zend_std_call_setter(zval *object, zval *member, zval *value) /* {{{ */
+static void zend_std_call_setter(zval *object, zval *member, zval *value) /* {{{ */
 {
-	zval retval;
-	int result;
 	zend_class_entry *ce = Z_OBJCE_P(object);
 	zend_class_entry *orig_fake_scope = EG(fake_scope);
 
 	EG(fake_scope) = NULL;
 
-	if (Z_REFCOUNTED_P(member)) Z_ADDREF_P(member);
-	if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
-
 	/* __set handler is called with two arguments:
 	     property name
 	     value to be set
-
-	   it should return whether the call was successful or not
 	*/
-	zend_call_method_with_2_params(object, ce, &ce->__set, ZEND_SET_FUNC_NAME, &retval, member, value);
+	zend_call_method_with_2_params(object, ce, &ce->__set, ZEND_SET_FUNC_NAME, NULL, member, value);
 
-	zval_ptr_dtor(member);
-	zval_ptr_dtor(value);
-
-	if (Z_TYPE(retval) != IS_UNDEF) {
-		result = i_zend_is_true(&retval) ? SUCCESS : FAILURE;
-		zval_ptr_dtor(&retval);
-		EG(fake_scope) = orig_fake_scope;
-		return result;
-	} else {
-		EG(fake_scope) = orig_fake_scope;
-		return FAILURE;
-	}
+	EG(fake_scope) = orig_fake_scope;
 }
 /* }}} */
 
@@ -742,9 +720,7 @@ found:
 
 			ZVAL_COPY(&tmp_object, object);
 			(*guard) |= IN_SET; /* prevent circular setting */
-			if (zend_std_call_setter(&tmp_object, member, value) != SUCCESS) {
-				/* for now, just ignore it - __set should take care of warnings, etc. */
-			}
+			zend_std_call_setter(&tmp_object, member, value);
 			(*guard) &= ~IN_SET;
 			zval_ptr_dtor(&tmp_object);
 		} else if (EXPECTED(property_offset != ZEND_WRONG_PROPERTY_OFFSET)) {
@@ -802,9 +778,11 @@ zval *zend_std_read_dimension(zval *object, zval *offset, int type, zval *rv) /*
 		if (type == BP_VAR_IS) {
 			zend_call_method_with_1_params(object, ce, NULL, "offsetexists", rv, offset);
 			if (UNEXPECTED(Z_ISUNDEF_P(rv))) {
+				zval_ptr_dtor(offset);
 				return NULL;
 			}
 			if (!i_zend_is_true(rv)) {
+				zval_ptr_dtor(offset);
 				zval_ptr_dtor(rv);
 				return &EG(uninitialized_zval);
 			}
@@ -1141,7 +1119,6 @@ ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend
 	if (is_static) {
 		func->fn_flags |= ZEND_ACC_STATIC;
 	}
-	func->this_var = -1;
 	func->opcodes = &EG(call_trampoline_op);
 
 	func->prototype = fbc;

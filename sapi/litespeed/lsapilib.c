@@ -2639,7 +2639,6 @@ static int lsapi_init_children_status()
         perror( "Anonymous mmap() failed" );
         return -1;
     }
-    memset( pBuf, 0, size );
     g_prefork_server->m_pChildrenStatus = (lsapi_child_status *)pBuf;
     g_prefork_server->m_pChildrenStatusCur = (lsapi_child_status *)pBuf;
     g_prefork_server->m_pChildrenStatusEnd = (lsapi_child_status *)pBuf + size / sizeof( lsapi_child_status );

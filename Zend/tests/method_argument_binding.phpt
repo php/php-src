@@ -41,7 +41,6 @@ class E extends D {
 
 ?>
 --EXPECTF--
-Warning: Declaration of C::method(&$x) should be compatible with A::method($x) in %s on line %d
 int(2)
 
 Notice: Undefined variable: x in %s on line %d

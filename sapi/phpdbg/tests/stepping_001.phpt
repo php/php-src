@@ -48,10 +48,8 @@ prompt>  ... ok
 >00011: } finally {
  00012: 	echo " ... ok";
  00013: }
-prompt> [L12 %s RETURN                  1                                                              %s]
->00012: 	echo " ... ok";
- 00013: }
- 00014: 
+prompt> [L14 %s RETURN                  1                                                              %s]
+>00014: 
 prompt> 
 --FILE--
 <?php

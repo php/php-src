@@ -67,7 +67,7 @@ static php_stream_filter_ops strfilter_rot13_ops = {
 	"string.rot13"
 };
 
-static php_stream_filter *strfilter_rot13_create(const char *filtername, zval *filterparams, int persistent)
+static php_stream_filter *strfilter_rot13_create(const char *filtername, zval *filterparams, uint8_t persistent)
 {
 	return php_stream_filter_alloc(&strfilter_rot13_ops, NULL, persistent);
 }
@@ -149,12 +149,12 @@ static php_stream_filter_ops strfilter_tolower_ops = {
 	"string.tolower"
 };
 
-static php_stream_filter *strfilter_toupper_create(const char *filtername, zval *filterparams, int persistent)
+static php_stream_filter *strfilter_toupper_create(const char *filtername, zval *filterparams, uint8_t persistent)
 {
 	return php_stream_filter_alloc(&strfilter_toupper_ops, NULL, persistent);
 }
 
-static php_stream_filter *strfilter_tolower_create(const char *filtername, zval *filterparams, int persistent)
+static php_stream_filter *strfilter_tolower_create(const char *filtername, zval *filterparams, uint8_t persistent)
 {
 	return php_stream_filter_alloc(&strfilter_tolower_ops, NULL, persistent);
 }
@@ -172,8 +172,8 @@ static php_stream_filter_factory strfilter_tolower_factory = {
 typedef struct _php_strip_tags_filter {
 	const char *allowed_tags;
 	int allowed_tags_len;
-	int state;
-	int persistent;
+	uint8_t state;
+	uint8_t persistent;
 } php_strip_tags_filter;
 
 static int php_strip_tags_filter_ctor(php_strip_tags_filter *inst, const char *allowed_tags, size_t allowed_tags_len, int persistent)
@@ -244,7 +244,7 @@ static php_stream_filter_ops strfilter_strip_tags_ops = {
 	"string.strip_tags"
 };
 
-static php_stream_filter *strfilter_strip_tags_create(const char *filtername, zval *filterparams, int persistent)
+static php_stream_filter *strfilter_strip_tags_create(const char *filtername, zval *filterparams, uint8_t persistent)
 {
 	php_strip_tags_filter *inst;
 	smart_str tags_ss = {0};
@@ -1724,7 +1724,7 @@ static php_stream_filter_ops strfilter_convert_ops = {
 	"convert.*"
 };
 
-static php_stream_filter *strfilter_convert_create(const char *filtername, zval *filterparams, int persistent)
+static php_stream_filter *strfilter_convert_create(const char *filtername, zval *filterparams, uint8_t persistent)
 {
 	php_convert_filter *inst;
 	php_stream_filter *retval = NULL;
@@ -1778,7 +1778,7 @@ static php_stream_filter_factory strfilter_convert_factory = {
 typedef struct _php_consumed_filter_data {
 	size_t consumed;
 	zend_off_t offset;
-	int persistent;
+	uint8_t persistent;
 } php_consumed_filter_data;
 
 static php_stream_filter_status_t consumed_filter_filter(
@@ -1827,7 +1827,7 @@ static php_stream_filter_ops consumed_filter_ops = {
 	"consumed"
 };
 
-static php_stream_filter *consumed_filter_create(const char *filtername, zval *filterparams, int persistent)
+static php_stream_filter *consumed_filter_create(const char *filtername, zval *filterparams, uint8_t persistent)
 {
 	php_stream_filter_ops *fops = NULL;
 	php_consumed_filter_data *data;
@@ -2035,7 +2035,7 @@ static php_stream_filter_ops chunked_filter_ops = {
 	"dechunk"
 };
 
-static php_stream_filter *chunked_filter_create(const char *filtername, zval *filterparams, int persistent)
+static php_stream_filter *chunked_filter_create(const char *filtername, zval *filterparams, uint8_t persistent)
 {
 	php_stream_filter_ops *fops = NULL;
 	php_chunked_filter_data *data;
