@@ -3286,9 +3286,16 @@ function force_all_shared()
 	return !!PHP_ALL_SHARED && "yes" == PHP_ALL_SHARED;
 }
 
-function ADD_MAKEFILE_FRAGMENT()
+function ADD_MAKEFILE_FRAGMENT(src_file)
 {
-	var fn_in = configure_module_dirname + "\\Makefile.frag.w32";
+	var fn_in;
+
+	if ("undefined" == typeof(src_file)) {
+		fn_in = configure_module_dirname + "\\Makefile.frag.w32";
+	} else {
+		fn_in = src_file;
+	}
+
 	if (FSO.FileExists(fn_in)) {
 		var h_in, h_out;
 		var create_out_fl = !FSO.FileExists(PHP_MAKEFILE_FRAGMENTS);
