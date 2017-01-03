@@ -99,7 +99,7 @@ static void php_pack(zval *val, size_t size, int *map, char *output)
 
 /* {{{ php_pack_reverse_int32
  */
-inline uint32_t php_pack_reverse_int32(uint32_t arg)
+static inline uint32_t php_pack_reverse_int32(uint32_t arg)
 {
     uint32_t result;
     result = ((arg & 0xFF) << 24) | ((arg & 0xFF00) << 8) | ((arg >> 8) & 0xFF00) | ((arg >> 24) & 0xFF);
@@ -110,7 +110,7 @@ inline uint32_t php_pack_reverse_int32(uint32_t arg)
 
 /* {{{ php_pack
  */
-inline uint64_t php_pack_reverse_int64(uint64_t arg)
+static inline uint64_t php_pack_reverse_int64(uint64_t arg)
 {
 	union Swap64 {
 		uint64_t i;
