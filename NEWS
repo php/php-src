@@ -28,6 +28,10 @@ PHP                                                                        NEWS
   . Fixed bug #73646 (mb_ereg_search_init null pointer dereference).
     (Laruence)
 
+- Mysqli:
+  . Fixed bug #73462 (Persistent connections don't set $connect_errno).
+    (darkain)
+
 - Mysqlnd:
   . Optimized handling of BIT fields - less memory copies and lower memory
     usage. (Andrey)
