@@ -37,4 +37,6 @@ EXTENSION("standard", "array.c base64.c basic_functions.c browscap.c \
 if (PHP_MBREGEX != "no") {
 	CHECK_HEADER_ADD_INCLUDE("oniguruma.h", "CFLAGS_STANDARD", PHP_MBREGEX + ";ext\\mbstring\\oniguruma")   
 }
+ADD_MAKEFILE_FRAGMENT();
 PHP_INSTALL_HEADERS("", "ext/standard");
+

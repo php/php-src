@@ -1,0 +1,7 @@
+
+ext\standard\var_unserializer.c: ext\standard\var_unserializer.re
+	$(RE2C) --no-generation-date -b -o ext/standard/var_unserializer.c ext/standard/var_unserializer.re
+
+ext\standard\url_scanner_ex.c: ext\standard\url_scanner_ex.re
+	$(RE2C) --no-generation-date -b -o ext/standard/url_scanner_ex.c ext/standard/url_scanner_ex.re
+
