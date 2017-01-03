@@ -129,12 +129,12 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 
 			crypt_res = php_sha512_crypt_r(password, salt, output, PHP_MAX_SALT_LEN);
 			if (!crypt_res) {
-				memset(output, 0, PHP_MAX_SALT_LEN);
+				ZEND_SECURE_ZERO(output, PHP_MAX_SALT_LEN);
 				efree(output);
 				return NULL;
 			} else {
 				result = zend_string_init(output, strlen(output), 0);
-				memset(output, 0, PHP_MAX_SALT_LEN);
+				ZEND_SECURE_ZERO(output, PHP_MAX_SALT_LEN);
 				efree(output);
 				return result;
 			}
@@ -144,12 +144,12 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 
 			crypt_res = php_sha256_crypt_r(password, salt, output, PHP_MAX_SALT_LEN);
 			if (!crypt_res) {
-				memset(output, 0, PHP_MAX_SALT_LEN);
+				ZEND_SECURE_ZERO(output, PHP_MAX_SALT_LEN);
 				efree(output);
 				return NULL;
 			} else {
 				result = zend_string_init(output, strlen(output), 0);
-				memset(output, 0, PHP_MAX_SALT_LEN);
+				ZEND_SECURE_ZERO(output, PHP_MAX_SALT_LEN);
 				efree(output);
 				return result;
 			}

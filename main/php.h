@@ -176,6 +176,14 @@ END_EXTERN_C()
 #define strlcat php_strlcat
 #endif
 
+#ifndef HAVE_EXPLICIT_BZERO
+BEGIN_EXTERN_C()
+PHPAPI void php_explicit_bzero(void *dst, size_t siz);
+END_EXTERN_C()
+#undef explicit_bzero
+#define explicit_bzero php_explicit_bzero
+#endif
+
 #ifndef HAVE_STRTOK_R
 BEGIN_EXTERN_C()
 char *strtok_r(char *s, const char *delim, char **last);
