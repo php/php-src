@@ -32,9 +32,6 @@
 # include "win32/inet.h"
 # define O_RDONLY _O_RDONLY
 # include "win32/param.h"
-#elif defined(NETWARE)
-#include <sys/timeval.h>
-#include <sys/param.h>
 #else
 #include <sys/param.h>
 #endif
@@ -55,17 +52,8 @@
 #include <sys/poll.h>
 #endif
 
-#if defined(NETWARE)
-#ifdef USE_WINSOCK
-#include <novsock2.h>
-#else
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#include <sys/select.h>
-#include <sys/socket.h>
-#endif
-#elif !defined(PHP_WIN32)
+
+#ifndef PHP_WIN32
 #include <netinet/in.h>
 #include <netdb.h>
 #if HAVE_ARPA_INET_H
@@ -79,7 +67,7 @@ int inet_aton(const char *, struct in_addr *);
 
 #include "php_network.h"
 
-#if defined(PHP_WIN32) || defined(__riscos__) || defined(NETWARE)
+#if defined(PHP_WIN32) || defined(__riscos__)
 #undef AF_UNIX
 #endif
 
@@ -253,7 +241,7 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 		}
 		if (host_info == NULL) {
 			if (error_string) {
-				error_string = strpprintf(0, "php_network_getaddresses: gethostbyname failed. errno=%d", errno);
+				*error_string = strpprintf(0, "php_network_getaddresses: gethostbyname failed. errno=%d", errno);
 				php_error_docref(NULL, E_WARNING, "%s", ZSTR_VAL(*error_string));
 			} else {
 				php_error_docref(NULL, E_WARNING, "php_network_getaddresses: gethostbyname failed");
@@ -485,6 +473,11 @@ php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned po
 #ifdef SO_BROADCAST
 			if (sockopts & STREAM_SOCKOP_SO_BROADCAST) {
 				setsockopt(sock, SOL_SOCKET, SO_BROADCAST, (char*)&sockoptval, sizeof(sockoptval));
+			}
+#endif
+#ifdef TCP_NODELAY
+			if (sockopts & STREAM_SOCKOP_TCP_NODELAY) {
+				setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (char*)&sockoptval, sizeof(sockoptval));
 			}
 #endif
 
@@ -726,7 +719,8 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 		socklen_t *addrlen,
 		struct timeval *timeout,
 		zend_string **error_string,
-		int *error_code
+		int *error_code,
+		int tcp_nodelay
 		)
 {
 	php_socket_t clisock = -1;
@@ -750,6 +744,11 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 					textaddr,
 					addr, addrlen
 					);
+			if (tcp_nodelay) {
+#ifdef TCP_NODELAY
+				setsockopt(clisock, IPPROTO_TCP, TCP_NODELAY, (char*)&tcp_nodelay, sizeof(tcp_nodelay));
+#endif
+			}
 		} else {
 			error = php_socket_errno();
 		}
@@ -765,7 +764,6 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 	return clisock;
 }
 /* }}} */
-
 
 
 /* Connect to a remote host using an interruptible connect with optional timeout.
@@ -899,6 +897,15 @@ skip_bind:
 				int val = 1;
 				if (sockopts & STREAM_SOCKOP_SO_BROADCAST) {
 					setsockopt(sock, SOL_SOCKET, SO_BROADCAST, (char*)&val, sizeof(val));
+				}
+			}
+#endif
+
+#ifdef TCP_NODELAY
+			{
+				int val = 1;
+				if (sockopts & STREAM_SOCKOP_TCP_NODELAY) {
+					setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (char*)&val, sizeof(val));
 				}
 			}
 #endif

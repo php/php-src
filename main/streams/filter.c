@@ -68,7 +68,7 @@ PHPAPI int php_stream_filter_register_factory_volatile(const char *filterpattern
 
 /* Buckets */
 
-PHPAPI php_stream_bucket *php_stream_bucket_new(php_stream *stream, char *buf, size_t buflen, int own_buf, int buf_persistent)
+PHPAPI php_stream_bucket *php_stream_bucket_new(php_stream *stream, char *buf, size_t buflen, uint8_t own_buf, uint8_t buf_persistent)
 {
 	int is_persistent = php_stream_is_persistent(stream);
 	php_stream_bucket *bucket;
@@ -247,15 +247,15 @@ PHPAPI void php_stream_bucket_unlink(php_stream_bucket *bucket)
  * match. If that fails, we try "convert.charset.*", then "convert.*"
  * This means that we don't need to clog up the hashtable with a zillion
  * charsets (for example) but still be able to provide them all as filters */
-PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval *filterparams, int persistent)
+PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval *filterparams, uint8_t persistent)
 {
 	HashTable *filter_hash = (FG(stream_filters) ? FG(stream_filters) : &stream_filters_hash);
 	php_stream_filter_factory *factory = NULL;
 	php_stream_filter *filter = NULL;
-	int n;
+	size_t n;
 	char *period;
 
-	n = (int)strlen(filtername);
+	n = strlen(filtername);
 
 	if (NULL != (factory = zend_hash_str_find_ptr(filter_hash, filtername, n))) {
 		filter = factory->create_filter(filtername, filterparams, persistent);
@@ -290,7 +290,7 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 	return filter;
 }
 
-PHPAPI php_stream_filter *_php_stream_filter_alloc(php_stream_filter_ops *fops, void *abstract, int persistent STREAMS_DC)
+PHPAPI php_stream_filter *_php_stream_filter_alloc(php_stream_filter_ops *fops, void *abstract, uint8_t persistent STREAMS_DC)
 {
 	php_stream_filter *filter;
 
@@ -358,7 +358,7 @@ PHPAPI int php_stream_filter_append_ex(php_stream_filter_chain *chain, php_strea
 		php_stream_bucket_append(brig_inp, bucket);
 		status = filter->fops->filter(stream, filter, brig_inp, brig_outp, &consumed, PSFS_FLAG_NORMAL);
 
-		if (stream->readpos + consumed > (uint)stream->writepos) {
+		if (stream->readpos + consumed > (uint32_t)stream->writepos) {
 			/* No behaving filter should cause this. */
 			status = PSFS_ERR_FATAL;
 		}

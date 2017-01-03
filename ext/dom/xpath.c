@@ -171,7 +171,6 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 	}
 
 	fci.size = sizeof(fci);
-	fci.function_table = EG(function_table);
 
 	obj = valuePop(ctxt);
 	if (obj->stringval == NULL) {

@@ -141,7 +141,7 @@ PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt) /* {{{ */
 	}
 
 	if (supp) {
-		message = strpprintf(0, "SQLSTATE[%s]: %s: %ld %s", *pdo_err, msg, native_code, supp);
+		message = strpprintf(0, "SQLSTATE[%s]: %s: " ZEND_LONG_FMT " %s", *pdo_err, msg, native_code, supp);
 	} else {
 		message = strpprintf(0, "SQLSTATE[%s]: %s", *pdo_err, msg);
 	}
@@ -210,11 +210,13 @@ static PHP_METHOD(PDO, dbh_constructor)
 	int call_factory = 1;
 	zend_error_handling zeh;
 
-	if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(),
-				"s|s!s!a!", &data_source, &data_source_len,
-				&username, &usernamelen, &password, &passwordlen, &options)) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START_EX(ZEND_PARSE_PARAMS_THROW, 1, 4)
+		Z_PARAM_STRING(data_source, data_source_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING_EX(username, usernamelen, 1, 0)
+		Z_PARAM_STRING_EX(password, passwordlen, 1, 0)
+		Z_PARAM_ARRAY_EX(options, 1, 0)
+	ZEND_PARSE_PARAMETERS_END();
 
 	/* parse the data source name */
 	colon = strchr(data_source, ':');
@@ -297,7 +299,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 					/* is the connection still alive ? */
 					if (pdbh->methods->check_liveness && FAILURE == (pdbh->methods->check_liveness)(pdbh)) {
 						/* nope... need to kill it */
-						/*??? memory leak */
+						pdbh->refcount--;
 						zend_list_close(le);
 						pdbh = NULL;
 					}
@@ -310,6 +312,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 				/* need a brand new pdbh */
 				pdbh = pecalloc(1, sizeof(*pdbh), 1);
 
+				pdbh->refcount = 1;
 				pdbh->is_persistent = 1;
 				pdbh->persistent_id = pemalloc(plen + 1, 1);
 				memcpy((char *)pdbh->persistent_id, hashkey, plen+1);
@@ -322,6 +325,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 			efree(dbh);
 			/* switch over to the persistent one */
 			Z_PDO_OBJECT_P(object)->inner = pdbh;
+			pdbh->refcount++;
 			dbh = pdbh;
 		}
 
@@ -436,7 +440,6 @@ static void pdo_stmt_construct(zend_execute_data *execute_data, pdo_stmt_t *stmt
 		zval retval;
 
 		fci.size = sizeof(zend_fcall_info);
-		fci.function_table = &dbstmt_ce->function_table;
 		ZVAL_UNDEF(&fci.function_name);
 		fci.object = Z_OBJ_P(object);
 		fci.retval = &retval;
@@ -448,7 +451,7 @@ static void pdo_stmt_construct(zend_execute_data *execute_data, pdo_stmt_t *stmt
 
 		fcc.initialized = 1;
 		fcc.function_handler = dbstmt_ce->constructor;
-		fcc.calling_scope = EG(scope);
+		fcc.calling_scope = zend_get_executed_scope();
 		fcc.called_scope = Z_OBJCE_P(object);
 		fcc.object = Z_OBJ_P(object);
 
@@ -473,10 +476,11 @@ static PHP_METHOD(PDO, prepare)
 	pdo_dbh_object_t *dbh_obj = Z_PDO_OBJECT_P(getThis());
 	pdo_dbh_t *dbh = dbh_obj->inner;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|a", &statement,
-			&statement_len, &options)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(statement, statement_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY(options)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	PDO_DBH_CLEAR_ERR();
 	PDO_CONSTRUCT_CHECK;
@@ -826,9 +830,10 @@ static PHP_METHOD(PDO, setAttribute)
 	zend_long attr;
 	zval *value;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "lz", &attr, &value)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_LONG(attr)
+		Z_PARAM_ZVAL_DEREF(value)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	PDO_DBH_CLEAR_ERR();
 	PDO_CONSTRUCT_CHECK;
@@ -847,9 +852,9 @@ static PHP_METHOD(PDO, getAttribute)
 	pdo_dbh_t *dbh = Z_PDO_DBH_P(getThis());
 	zend_long attr;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "l", &attr)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(attr)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	PDO_DBH_CLEAR_ERR();
 	PDO_CONSTRUCT_CHECK;
@@ -914,9 +919,9 @@ static PHP_METHOD(PDO, exec)
 	size_t statement_len;
 	zend_long ret;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s", &statement, &statement_len)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(statement, statement_len)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if (!statement_len) {
 		pdo_raise_impl_error(dbh, NULL, "HY000",  "trying to execute an empty query");
@@ -942,9 +947,10 @@ static PHP_METHOD(PDO, lastInsertId)
 	char *name = NULL;
 	size_t namelen;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "|s!", &name, &namelen)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING_EX(name, namelen, 1, 0)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	PDO_DBH_CLEAR_ERR();
 	PDO_CONSTRUCT_CHECK;
@@ -1135,9 +1141,11 @@ static PHP_METHOD(PDO, quote)
 	char *qstr;
 	size_t qlen;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &str, &str_len, &paramtype)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(paramtype)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	PDO_DBH_CLEAR_ERR();
 	PDO_CONSTRUCT_CHECK;
@@ -1247,7 +1255,7 @@ const zend_function_entry pdo_dbh_functions[] = /* {{{ */ {
 	PHP_ME(PDO, __wakeup,               arginfo_pdo__void,         ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	PHP_ME(PDO, __sleep,                arginfo_pdo__void,         ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	PHP_ME(PDO, getAvailableDrivers,    arginfo_pdo__void,         ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 
@@ -1310,7 +1318,7 @@ int pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 
 			func.arg_info = (zend_internal_arg_info*)funcs->arg_info + 1;
 			func.num_args = funcs->num_args;
-			if (info->required_num_args == -1) {
+			if (info->required_num_args == (uint32_t)-1) {
 				func.required_num_args = funcs->num_args;
 			} else {
 				func.required_num_args = info->required_num_args;
@@ -1500,13 +1508,18 @@ static void dbh_free(pdo_dbh_t *dbh, zend_bool free_persistent)
 {
 	int i;
 
-	if (dbh->is_persistent && !free_persistent) {
-		return;
-	}
-
 	if (dbh->query_stmt) {
 		zval_ptr_dtor(&dbh->query_stmt_zval);
 		dbh->query_stmt = NULL;
+	}
+
+	if (dbh->is_persistent) {
+#if ZEND_DEBUG
+		ZEND_ASSERT(!free_persistent || (dbh->refcount == 1));
+#endif
+		if (!free_persistent && (--dbh->refcount)) {
+			return;
+		}
 	}
 
 	if (dbh->methods) {

@@ -82,7 +82,7 @@ ID          [^ \r\n\t:#\000]+
 GENERIC_ID  ([^ \r\n\t:#\000"']|":\\")+|["]([^\n\000"\\]|"\\\\"|"\\"["])+["]|[']([^\n\000'\\]|"\\\\"|"\\"['])+[']
 ADDR        [0][x][a-fA-F0-9]+
 OPCODE      (ZEND_|zend_)([A-Za-z])+
-INPUT       ([^\n\000#"']|["]([^\n\000"\\]|"\\\\"|"\\"["])+["]|[']([^\n\000'\\]|"\\\\"|"\\"['])+['])+
+INPUT       ("\\"[#"']|["]("\\\\"|"\\"["]|[^\n\000"])+["]|[']("\\"[']|"\\\\"|[^\n\000'])+[']|[^\n\000#"'])+
 
 <!*> := yyleng = (size_t) YYCURSOR - (size_t) yytext;
 
@@ -167,7 +167,7 @@ INPUT       ([^\n\000#"']|["]([^\n\000"\\]|"\\\\"|"\\"["])+["]|[']([^\n\000'\\]|
 
 <RAW>{INPUT} {
 	phpdbg_init_param(yylval, STR_PARAM);
-	yylval->str = estrndup(yytext, yyleng - unescape_string(yytext));
+	yylval->str = estrdup(yytext);
 	yylval->len = yyleng;
 	return T_INPUT;
 }

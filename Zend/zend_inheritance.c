@@ -167,6 +167,20 @@ char *zend_visibility_string(uint32_t fn_flags) /* {{{ */
 }
 /* }}} */
 
+static zend_always_inline zend_bool zend_iterable_compatibility_check(zend_arg_info *arg_info) /* {{{ */
+{
+	if (arg_info->type_hint == IS_ARRAY) {
+		return 1;
+	}
+	
+	if (arg_info->class_name && zend_string_equals_literal_ci(arg_info->class_name, "Traversable")) {
+		return 1;
+	}
+	
+	return 0;
+}
+/* }}} */
+
 static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_info *fe_arg_info, const zend_function *proto, zend_arg_info *proto_arg_info) /* {{{ */
 {
 	if (ZEND_LOG_XOR(fe_arg_info->class_name, proto_arg_info->class_name)) {
@@ -268,8 +282,8 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 		return 1;
 	}
 
-	/* If both methods are private do not enforce a signature */
-    if ((fe->common.fn_flags & ZEND_ACC_PRIVATE) && (proto->common.fn_flags & ZEND_ACC_PRIVATE)) {
+	/* If the prototype method is private do not enforce a signature */
+	if (proto->common.fn_flags & ZEND_ACC_PRIVATE) {
 		return 1;
 	}
 
@@ -314,11 +328,21 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 		} else {
 			proto_arg_info = &proto->common.arg_info[proto->common.num_args];
 		}
-
+		
 		if (!zend_do_perform_type_hint_check(fe, fe_arg_info, proto, proto_arg_info)) {
-			return 0;
+			switch (fe_arg_info->type_hint) {
+				case IS_ITERABLE:
+					if (!zend_iterable_compatibility_check(proto_arg_info)) {
+						return 0;
+					}
+					break;
+					
+				default:
+					return 0;
+			}
 		}
 
+		// This introduces BC break described at https://bugs.php.net/bug.php?id=72119
 		if (proto_arg_info->type_hint && proto_arg_info->allow_null && !fe_arg_info->allow_null) {
 			/* incompatible nullability */
 			return 0;
@@ -337,8 +361,21 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 		if (!(fe->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
 			return 0;
 		}
-
+		
 		if (!zend_do_perform_type_hint_check(fe, fe->common.arg_info - 1, proto, proto->common.arg_info - 1)) {
+			switch (proto->common.arg_info[-1].type_hint) {
+				case IS_ITERABLE:
+					if (!zend_iterable_compatibility_check(fe->common.arg_info - 1)) {
+						return 0;
+					}
+					break;
+					
+				default:
+					return 0;
+			}
+		}
+
+		if (fe->common.arg_info[-1].allow_null && !proto->common.arg_info[-1].allow_null) {
 			return 0;
 		}
 	}
@@ -348,6 +385,11 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 
 static ZEND_COLD void zend_append_type_hint(smart_str *str, const zend_function *fptr, zend_arg_info *arg_info, int return_hint) /* {{{ */
 {
+
+	if (arg_info->type_hint != IS_UNDEF && arg_info->allow_null) {
+		smart_str_appendc(str, '?');
+	}
+
 	if (arg_info->class_name) {
 		const char *class_name;
 		size_t class_name_len;
@@ -488,8 +530,6 @@ static ZEND_COLD zend_string *zend_get_function_declaration(const zend_function 
 				} else {
 					smart_str_appends(&str, "NULL");
 				}
-			} else if (arg_info->type_hint && arg_info->allow_null) {
-				smart_str_appends(&str, " = NULL");
 			}
 
 			if (++i < num_args) {
@@ -587,7 +627,8 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 			error_verb = "must";
 		} else if ((parent->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) &&
                    (!(child->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-		            !zend_do_perform_type_hint_check(child, child->common.arg_info - 1, parent, parent->common.arg_info - 1))) {
+		            !zend_do_perform_type_hint_check(child, child->common.arg_info - 1, parent, parent->common.arg_info - 1) ||
+		            (child->common.arg_info[-1].allow_null && !parent->common.arg_info[-1].allow_null))) {
 			error_level = E_COMPILE_ERROR;
 			error_verb = "must";
 		} else {
@@ -657,7 +698,7 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 				int parent_num = OBJ_PROP_TO_NUM(parent_info->offset);
 				int child_num = OBJ_PROP_TO_NUM(child_info->offset);
 
-				/* Don't keep default properties in GC (thry may be freed by opcache) */
+				/* Don't keep default properties in GC (they may be freed by opcache) */
 				zval_ptr_dtor_nogc(&(ce->default_properties_table[parent_num]));
 				ce->default_properties_table[parent_num] = ce->default_properties_table[child_num];
 				ZVAL_UNDEF(&ce->default_properties_table[child_num]);
@@ -1186,6 +1227,7 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 	function_add_ref(fn);
 	new_fn = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 	memcpy(new_fn, fn, sizeof(zend_op_array));
+	new_fn->common.fn_flags |= ZEND_ACC_ARENA_ALLOCATED;
 	fn = zend_hash_update_ptr(&ce->function_table, key, new_fn);
 	zend_add_magic_methods(ce, key, fn);
 }

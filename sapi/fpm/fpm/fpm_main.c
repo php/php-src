@@ -258,8 +258,9 @@ static int print_extension_info(zend_extension *ext, void *arg) /* {{{ */
 
 static int extension_name_cmp(const zend_llist_element **f, const zend_llist_element **s) /* {{{ */
 {
-	return strcmp(	((zend_extension *)(*f)->data)->name,
-					((zend_extension *)(*s)->data)->name);
+	zend_extension *fe = (zend_extension*)(*f)->data;
+	zend_extension *se = (zend_extension*)(*s)->data;
+	return strcmp(fe->name, se->name);
 }
 /* }}} */
 
@@ -279,7 +280,7 @@ static void print_extensions(void) /* {{{ */
 #define STDOUT_FILENO 1
 #endif
 
-static inline size_t sapi_cgibin_single_write(const char *str, uint str_length) /* {{{ */
+static inline size_t sapi_cgibin_single_write(const char *str, uint32_t str_length) /* {{{ */
 {
 	ssize_t ret;
 
@@ -309,7 +310,7 @@ static inline size_t sapi_cgibin_single_write(const char *str, uint str_length) 
 static size_t sapi_cgibin_ub_write(const char *str, size_t str_length) /* {{{ */
 {
 	const char *ptr = str;
-	uint remaining = str_length;
+	uint32_t remaining = str_length;
 	size_t ret;
 
 	while (remaining > 0) {
@@ -472,7 +473,7 @@ void fcgi_log(int type, const char *fmt, ...)
 
 static size_t sapi_cgi_read_post(char *buffer, size_t count_bytes) /* {{{ */
 {
-	uint read_bytes = 0;
+	uint32_t read_bytes = 0;
 	int tmp_read_bytes;
 	size_t remaining = SG(request_info).content_length - SG(read_post_bytes);
 
@@ -659,7 +660,7 @@ void sapi_cgi_log_fastcgi(int level, char *message, size_t len)
 
 /* {{{ sapi_cgi_log_message
  */
-static void sapi_cgi_log_message(char *message)
+static void sapi_cgi_log_message(char *message, int syslog_type_int)
 {
 	zlog(ZLOG_NOTICE, "PHP message: %s", message);
 }
@@ -744,7 +745,7 @@ static int sapi_cgi_activate(void) /* {{{ */
 {
 	fcgi_request *request = (fcgi_request*) SG(server_context);
 	char *path, *doc_root, *server_name;
-	uint path_len, doc_root_len, server_name_len;
+	uint32_t path_len, doc_root_len, server_name_len;
 
 	/* PATH_TRANSLATED should be defined at this stage but better safe than sorry :) */
 	if (!SG(request_info).path_translated) {
@@ -1538,7 +1539,7 @@ PHP_FUNCTION(fastcgi_finish_request) /* {{{ */
 		php_header();
 
 		fcgi_flush(request, 1);
-		fcgi_close(request, 0, 1);
+		fcgi_close(request, 0, 0);
 		RETURN_TRUE;
 	}
 
@@ -1549,7 +1550,7 @@ PHP_FUNCTION(fastcgi_finish_request) /* {{{ */
 
 static const zend_function_entry cgi_fcgi_sapi_functions[] = {
 	PHP_FE(fastcgi_finish_request,              NULL)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 static zend_module_entry cgi_module_entry = {
@@ -1612,9 +1613,7 @@ int main(int argc, char *argv[])
 	tsrm_ls = ts_resource(0);
 #endif
 
-#ifdef ZEND_SIGNALS
 	zend_signal_startup();
-#endif
 
 	sapi_startup(&cgi_sapi_module);
 	cgi_sapi_module.php_ini_path_override = NULL;
@@ -1865,7 +1864,7 @@ consult the installation file that came with this distribution, or visit \n\
 		if (fpm_globals.send_config_pipe[1]) {
 			int writeval = 0;
 			zlog(ZLOG_DEBUG, "Sending \"0\" (error) to parent via fd=%d", fpm_globals.send_config_pipe[1]);
-			write(fpm_globals.send_config_pipe[1], &writeval, sizeof(writeval));
+			zend_quiet_write(fpm_globals.send_config_pipe[1], &writeval, sizeof(writeval));
 			close(fpm_globals.send_config_pipe[1]);
 		}
 		return FPM_EXIT_CONFIG;
@@ -1874,7 +1873,7 @@ consult the installation file that came with this distribution, or visit \n\
 	if (fpm_globals.send_config_pipe[1]) {
 		int writeval = 1;
 		zlog(ZLOG_DEBUG, "Sending \"1\" (OK) to parent via fd=%d", fpm_globals.send_config_pipe[1]);
-		write(fpm_globals.send_config_pipe[1], &writeval, sizeof(writeval));
+		zend_quiet_write(fpm_globals.send_config_pipe[1], &writeval, sizeof(writeval));
 		close(fpm_globals.send_config_pipe[1]);
 	}
 	fpm_is_running = 1;

@@ -41,7 +41,7 @@ extern int phpdbg_debug;
 #endif
 /* "%code requires" blocks.  */
 /* Line 2060 of yacc.c  */
-#line 36 "/Users/Bob/php-src-X/sapi/phpdbg/phpdbg_parser.y"
+#line 36 "sapi/phpdbg/phpdbg_parser.y"
 
 #include "phpdbg.h"
 #ifndef YY_TYPEDEF_YY_SCANNER_T

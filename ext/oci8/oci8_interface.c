@@ -25,8 +25,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -112,7 +110,7 @@ PHP_FUNCTION(oci_bind_by_name)
 	zval *bind_var = NULL;
 	php_oci_statement *statement;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsz/|ll", &z_statement, &name, &name_len, &bind_var, &maxlen, &type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsz|ll", &z_statement, &name, &name_len, &bind_var, &maxlen, &type) == FAILURE) {
 		return;
 	}
 

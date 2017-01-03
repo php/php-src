@@ -791,6 +791,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 	if (writev(fd, vec, 3) != (ssize_t)(sizeof(info) + script->size + info.str_size)) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot write to file '%s'\n", filename);
 		zend_string_release((zend_string*)ZCG(mem));
+		close(fd);
 		efree(mem);
 		unlink(filename);
 		efree(filename);
@@ -804,6 +805,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 		) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot write to file '%s'\n", filename);
 		zend_string_release((zend_string*)ZCG(mem));
+		close(fd);
 		efree(mem);
 		unlink(filename);
 		efree(filename);

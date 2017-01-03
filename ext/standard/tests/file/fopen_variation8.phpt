@@ -62,7 +62,7 @@ function test_fopen($mode) {
    
    // create a file in the middle directory
    $h = fopen($secondFile, "w");
-   fwrite($h, (binary) "in dir2");
+   fwrite($h, "in dir2");
    fclose($h);
 
    echo "\n** testing with mode=$mode **\n";
@@ -74,7 +74,7 @@ function test_fopen($mode) {
 
    //create a file in dir1
    $h = fopen($firstFile, "w");
-   fwrite($h, (binary) "in dir1");
+   fwrite($h, "in dir1");
    fclose($h);
    
    //should now read dir1 file
@@ -85,7 +85,7 @@ function test_fopen($mode) {
    
    // create a file in working directory
    $h = fopen($filename, "w");
-   fwrite($h, (binary) "in working dir");
+   fwrite($h, "in working dir");
    fclose($h);
    
    //should read the dir1 file
@@ -105,7 +105,7 @@ function test_fopen($mode) {
    
    // create a file in the script directory
    $h = fopen($scriptFile, "w");
-   fwrite($h, (binary) "in script dir");
+   fwrite($h, "in script dir");
    fclose($h);
    
    //should read the file in script dir

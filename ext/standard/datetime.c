@@ -92,9 +92,10 @@ PHP_FUNCTION(strptime)
 	struct tm  parsed_time;
 	char      *unparsed_part;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &ts, &ts_length, &format, &format_length) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STRING(ts, ts_length)
+		Z_PARAM_STRING(format, format_length)
+	ZEND_PARSE_PARAMETERS_END();
 
 	memset(&parsed_time, 0, sizeof(parsed_time));
 

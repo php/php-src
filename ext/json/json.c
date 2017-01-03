@@ -33,14 +33,6 @@
 #include "php_json_parser.h"
 #include <zend_exceptions.h>
 
-#include <float.h>
-#if defined(DBL_MANT_DIG) && defined(DBL_MIN_EXP)
-#define NUM_BUF_SIZE (3 + DBL_MANT_DIG - DBL_MIN_EXP)
-#else
-#define NUM_BUF_SIZE 1080
-#endif
-
-
 static PHP_MINFO_FUNCTION(json);
 static PHP_FUNCTION(json_encode);
 static PHP_FUNCTION(json_decode);
@@ -149,7 +141,7 @@ static PHP_GINIT_FUNCTION(json)
 #endif
 	json_globals->encoder_depth = 0;
 	json_globals->error_code = 0;
-	json_globals->encode_max_depth = 0;
+	json_globals->encode_max_depth = PHP_JSON_PARSER_DEFAULT_DEPTH;
 }
 /* }}} */
 
@@ -192,13 +184,23 @@ static PHP_MINFO_FUNCTION(json)
 }
 /* }}} */
 
-PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, int options) /* {{{ */
+PHP_JSON_API int php_json_encode(smart_str *buf, zval *val, int options) /* {{{ */
 {
-	php_json_encode_zval(buf, val, options);
+	php_json_encoder encoder;
+	int return_code;
+
+	php_json_encode_init(&encoder);
+	encoder.max_depth = JSON_G(encode_max_depth);
+	encoder.error_code = PHP_JSON_ERROR_NONE;
+
+	return_code = php_json_encode_zval(buf, val, options, &encoder);
+	JSON_G(error_code) = encoder.error_code;
+
+	return return_code;
 }
 /* }}} */
 
-PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, size_t str_len, zend_long options, zend_long depth) /* {{{ */
+PHP_JSON_API int php_json_decode_ex(zval *return_value, char *str, size_t str_len, zend_long options, zend_long depth) /* {{{ */
 {
 	php_json_parser parser;
 
@@ -206,8 +208,11 @@ PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, size_t str_l
 
 	if (php_json_yyparse(&parser)) {
 		JSON_G(error_code) = php_json_parser_error_code(&parser);
-		RETURN_NULL();
+		RETVAL_NULL();
+		return FAILURE;
 	}
+
+	return SUCCESS;
 }
 /* }}} */
 
@@ -216,27 +221,34 @@ PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, size_t str_l
 static PHP_FUNCTION(json_encode)
 {
 	zval *parameter;
+	php_json_encoder encoder;
 	smart_str buf = {0};
 	zend_long options = 0;
 	zend_long depth = PHP_JSON_PARSER_DEFAULT_DEPTH;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|ll", &parameter, &options, &depth) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_ZVAL_DEREF(parameter)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(options)
+		Z_PARAM_LONG(depth)
+	ZEND_PARSE_PARAMETERS_END();
 
-	JSON_G(error_code) = PHP_JSON_ERROR_NONE;
+	php_json_encode_init(&encoder);
+	encoder.max_depth = (int)depth;
+	encoder.error_code = PHP_JSON_ERROR_NONE;
+	php_json_encode_zval(&buf, parameter, (int)options, &encoder);
+	JSON_G(error_code) = encoder.error_code;
 
-	JSON_G(encode_max_depth) = (int)depth;
-
-	php_json_encode(&buf, parameter, (int)options);
-
-	if (JSON_G(error_code) != PHP_JSON_ERROR_NONE && !(options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR)) {
+	if (encoder.error_code != PHP_JSON_ERROR_NONE && !(options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR)) {
 		smart_str_free(&buf);
-		ZVAL_FALSE(return_value);
-	} else {
-		smart_str_0(&buf); /* copy? */
-		ZVAL_NEW_STR(return_value, buf.s);
+		RETURN_FALSE;
 	}
+
+	smart_str_0(&buf); /* copy? */
+	if (buf.s) {
+		RETURN_NEW_STR(buf.s);
+	}
+	RETURN_EMPTY_STRING();
 }
 /* }}} */
 
@@ -250,14 +262,28 @@ static PHP_FUNCTION(json_decode)
 	zend_long depth = PHP_JSON_PARSER_DEFAULT_DEPTH;
 	zend_long options = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|bll", &str, &str_len, &assoc, &depth, &options) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 4)
+		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(assoc)
+		Z_PARAM_LONG(depth)
+		Z_PARAM_LONG(options)
+	ZEND_PARSE_PARAMETERS_END();
 
 	JSON_G(error_code) = PHP_JSON_ERROR_NONE;
 
 	if (!str_len) {
 		JSON_G(error_code) = PHP_JSON_ERROR_SYNTAX;
+		RETURN_NULL();
+	}
+
+	if (depth <= 0) {
+		php_error_docref(NULL, E_WARNING, "Depth must be greater than zero");
+		RETURN_NULL();
+	}
+
+	if (depth > INT_MAX) {
+		php_error_docref(NULL, E_WARNING, "Depth must be lower than %d", INT_MAX);
 		RETURN_NULL();
 	}
 

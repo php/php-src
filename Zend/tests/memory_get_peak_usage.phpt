@@ -2,6 +2,13 @@
 int memory_get_peak_usage ([ bool $real_usage = false ] );
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao paulo - br
+--SKIPIF--
+<?php
+$zend_mm_enabled = getenv("USE_ZEND_ALLOC");
+if ($zend_mm_enabled === "0") {
+    die("skip Zend MM disabled");
+}
+?>
 --INI--
 memory_limit=-1
 --FILE--

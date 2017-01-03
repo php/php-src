@@ -90,40 +90,6 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 			PACKET_FREE(field_packet);
 			DBG_RETURN(FAIL);
 		}
-		if (meta->fields[i].type == MYSQL_TYPE_BIT) {
-			size_t field_len;
-			DBG_INF("BIT");
-			++meta->bit_fields_count;
-			/* .length is in bits */
-			field_len = meta->fields[i].length / 8;
-			/*
-			  If there is rest, add one byte :
-			  8 bits = 1 byte but 9 bits = 2 bytes
-			*/
-			if (meta->fields[i].length % 8) {
-				++field_len;
-			}
-			switch (field_len) {
-				case 8:
-				case 7:
-				case 6:
-				case 5:
-					meta->bit_fields_total_len += 20;/* 21 digis, no sign*/
-					break;
-				case 4:
-					meta->bit_fields_total_len += 10;/* 2 000 000 000*/
-					break;
-				case 3:
-					meta->bit_fields_total_len += 8;/*  12 000 000*/
-					break;
-				case 2:
-					meta->bit_fields_total_len += 5;/* 32 500 */
-					break;
-				case 1:
-					meta->bit_fields_total_len += 3;/* 120 */
-					break;
-			}
-		}
 
 		/* For BC we have to check whether the key is numeric and use it like this */
 		if ((meta->zend_hash_keys[i].is_numeric = ZEND_HANDLE_NUMERIC(field_packet->metadata->sname, idx))) {

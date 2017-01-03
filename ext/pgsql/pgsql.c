@@ -1306,7 +1306,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				smart_str_append_long(&str, Z_LVAL(args[1]) ^ PGSQL_CONNECT_FORCE_NEW);
 			}
 		}
-		convert_to_string_ex(&args[i]);
+		ZVAL_STR(&args[i], zval_get_string(&args[i]));
 		smart_str_appendc(&str, '_');
 		smart_str_appendl(&str, Z_STRVAL(args[i]), Z_STRLEN(args[i]));
 	}
@@ -1333,7 +1333,6 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			break;
 		}
 	}
-	efree(args);
 
 	if (persistent && PGG(allow_persistent)) {
 		zend_resource *le;
@@ -1344,12 +1343,12 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 			if (PGG(max_links) != -1 && PGG(num_links) >= PGG(max_links)) {
 				php_error_docref(NULL, E_WARNING,
-								 "Cannot create new link. Too many open links (%pd)", PGG(num_links));
+								 "Cannot create new link. Too many open links (" ZEND_LONG_FMT ")", PGG(num_links));
 				goto err;
 			}
 			if (PGG(max_persistent) != -1 && PGG(num_persistent) >= PGG(max_persistent)) {
 				php_error_docref(NULL, E_WARNING,
-								 "Cannot create new link. Too many open persistent links (%pd)", PGG(num_persistent));
+								 "Cannot create new link. Too many open persistent links (" ZEND_LONG_FMT ")", PGG(num_persistent));
 				goto err;
 			}
 
@@ -1377,7 +1376,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			PGG(num_persistent)++;
 		} else {  /* we do */
 			if (le->type != le_plink) {
-				RETURN_FALSE;
+				goto err;
 			}
 			/* ensure that the link did not die */
 			if (PGG(auto_reset_persistent) & 1) {
@@ -1428,7 +1427,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			zend_resource *link;
 
 			if (index_ptr->type != le_index_ptr) {
-				RETURN_FALSE;
+				goto err;
 			}
 
 			link = (zend_resource *)index_ptr->ptr;
@@ -1442,7 +1441,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 		}
 		if (PGG(max_links) != -1 && PGG(num_links) >= PGG(max_links)) {
-			php_error_docref(NULL, E_WARNING, "Cannot create new link. Too many open links (%pd)", PGG(num_links));
+			php_error_docref(NULL, E_WARNING, "Cannot create new link. Too many open links (" ZEND_LONG_FMT ")", PGG(num_links));
 			goto err;
 		}
 
@@ -1494,28 +1493,22 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	php_pgsql_set_default_link(Z_RES_P(return_value));
 
 cleanup:
+	for (i = 0; i < ZEND_NUM_ARGS(); i++) {
+		zval_dtor(&args[i]);
+	}
+	efree(args);
 	smart_str_free(&str);
 	return;
 
 err:
+	for (i = 0; i < ZEND_NUM_ARGS(); i++) {
+		zval_dtor(&args[i]);
+	}
+	efree(args);
 	smart_str_free(&str);
 	RETURN_FALSE;
 }
 /* }}} */
-
-#if 0
-/* {{{ php_pgsql_get_default_link
- */
-static int php_pgsql_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
-{
-	if (PGG(default_link)==-1) { /* no link opened yet, implicitly open one */
-		ht = 0;
-		php_pgsql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
-	}
-	return PGG(default_link);
-}
-/* }}} */
-#endif
 
 /* {{{ proto resource pg_connect(string connection_string[, int connect_type] | [string host, string port [, string options [, string tty,]]] string database)
    Open a PostgreSQL connection */
@@ -1536,7 +1529,7 @@ PHP_FUNCTION(pg_connect_poll)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &pgsql_link) == FAILURE) {
 		return;
 	}
-	
+
 	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
 		RETURN_FALSE;
 	}
@@ -2674,7 +2667,7 @@ PHP_FUNCTION(pg_fetch_result)
 		}
 	} else {
 		if (row < 0 || row >= PQntuples(pgsql_result)) {
-			php_error_docref(NULL, E_WARNING, "Unable to jump to row %pd on PostgreSQL result index %pd",
+			php_error_docref(NULL, E_WARNING, "Unable to jump to row " ZEND_LONG_FMT " on PostgreSQL result index " ZEND_LONG_FMT,
 							row, Z_LVAL_P(result));
 			RETURN_FALSE;
 		}
@@ -2765,7 +2758,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 
 	if (use_row) {
 		if (row < 0 || row >= PQntuples(pgsql_result)) {
-			php_error_docref(NULL, E_WARNING, "Unable to jump to row %pd on PostgreSQL result index %pd",
+			php_error_docref(NULL, E_WARNING, "Unable to jump to row " ZEND_LONG_FMT " on PostgreSQL result index " ZEND_LONG_FMT,
 							row, Z_LVAL_P(result));
 			RETURN_FALSE;
 		}
@@ -2812,18 +2805,18 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 		zend_fcall_info fci;
 		zend_fcall_info_cache fcc;
 		zval retval;
-		zend_bool props_handled = 0;
 
 		ZVAL_COPY_VALUE(&dataset, return_value);
 		object_and_properties_init(return_value, ce, NULL);
 		if (!ce->default_properties_count && !ce->__set) {
 			Z_OBJ_P(return_value)->properties = Z_ARR(dataset);
-			props_handled = 1;
+		} else {
+			zend_merge_properties(return_value, Z_ARRVAL(dataset));
+			zval_ptr_dtor(&dataset);
 		}
 
 		if (ce->constructor) {
 			fci.size = sizeof(fci);
-			fci.function_table = &ce->function_table;
 			ZVAL_UNDEF(&fci.function_name);
 			fci.object = Z_OBJ_P(return_value);
 			fci.retval = &retval;
@@ -2840,28 +2833,18 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 					 * argument passed by reference.
 					 */
 					zend_throw_exception(zend_ce_exception, "Parameter ctor_params must be an array", 0);
-					if (!props_handled) {
-						zval_ptr_dtor(&dataset);
-					}
 					return;
 				}
 			}
 
 			fcc.initialized = 1;
 			fcc.function_handler = ce->constructor;
-			fcc.calling_scope = EG(scope);
+			fcc.calling_scope = zend_get_executed_scope();
 			fcc.called_scope = Z_OBJCE_P(return_value);
 			fcc.object = Z_OBJ_P(return_value);
 
 			if (zend_call_function(&fci, &fcc) == FAILURE) {
-				zend_throw_exception_ex(zend_ce_exception, 0, "Could not execute %s::%s()", ce->name, ce->constructor->common.function_name);
-				if (fci.params) {
-					efree(fci.params);
-				}
-				if (!props_handled) {
-					zval_ptr_dtor(&dataset);
-				}
-				return;
+				zend_throw_exception_ex(zend_ce_exception, 0, "Could not execute %s::%s()", ZSTR_VAL(ce->name), ZSTR_VAL(ce->constructor->common.function_name));
 			} else {
 				zval_ptr_dtor(&retval);
 			}
@@ -2869,16 +2852,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 				efree(fci.params);
 			}
 		} else if (ctor_params) {
-			zend_throw_exception_ex(zend_ce_exception, 0, "Class %s does not have a constructor hence you cannot use ctor_params", ce->name);
-			if (!props_handled) {
-				zval_ptr_dtor(&dataset);
-			}
-			return;
-		}
-
-		if (!props_handled) {
-			zend_merge_properties(return_value, Z_ARRVAL(dataset));
-			zval_ptr_dtor(&dataset);
+			zend_throw_exception_ex(zend_ce_exception, 0, "Class %s does not have a constructor hence you cannot use ctor_params", ZSTR_VAL(ce->name));
 		}
 	}
 }
@@ -2976,7 +2950,7 @@ PHP_FUNCTION(pg_fetch_all_columns)
 
 	num_fields = PQnfields(pgsql_result);
 	if (colno >= (zend_long)num_fields || colno < 0) {
-		php_error_docref(NULL, E_WARNING, "Invalid column number '%pd'", colno);
+		php_error_docref(NULL, E_WARNING, "Invalid column number '" ZEND_LONG_FMT "'", colno);
 		RETURN_FALSE;
 	}
 
@@ -3060,7 +3034,7 @@ static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 		}
 	} else {
 		if (row < 0 || row >= PQntuples(pgsql_result)) {
-			php_error_docref(NULL, E_WARNING, "Unable to jump to row %pd on PostgreSQL result index %pd",
+			php_error_docref(NULL, E_WARNING, "Unable to jump to row " ZEND_LONG_FMT " on PostgreSQL result index " ZEND_LONG_FMT,
 							row, Z_LVAL_P(result));
 			RETURN_FALSE;
 		}
@@ -3264,8 +3238,10 @@ PHP_FUNCTION(pg_lo_create)
 	if (pgsql_link == NULL) {
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
-	} else {
+	} else if ((Z_TYPE_P(pgsql_link) == IS_RESOURCE)) {
 		link = Z_RES_P(pgsql_link);
+	} else {
+		link = NULL;
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink)) == NULL) {
@@ -3343,7 +3319,7 @@ PHP_FUNCTION(pg_lo_unlink)
 	}
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
 								 "rl", &pgsql_link, &oid_long) == SUCCESS) {
-		if (oid_long <= InvalidOid) {
+		if (oid_long <= (zend_long)InvalidOid) {
 			php_error_docref(NULL, E_NOTICE, "Invalid OID specified");
 			RETURN_FALSE;
 		}
@@ -3363,7 +3339,7 @@ PHP_FUNCTION(pg_lo_unlink)
 	}
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
 								 "l", &oid_long) == SUCCESS) {
-		if (oid_long <= InvalidOid) {
+		if (oid_long <= (zend_long)InvalidOid) {
 			php_error_docref(NULL, E_NOTICE, "Invalid OID is specified");
 			RETURN_FALSE;
 		}
@@ -3417,7 +3393,7 @@ PHP_FUNCTION(pg_lo_open)
 	}
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
 								 "rls", &pgsql_link, &oid_long, &mode_string, &mode_strlen) == SUCCESS) {
-		if (oid_long <= InvalidOid) {
+		if (oid_long <= (zend_long)InvalidOid) {
 			php_error_docref(NULL, E_NOTICE, "Invalid OID specified");
 			RETURN_FALSE;
 		}
@@ -3437,7 +3413,7 @@ PHP_FUNCTION(pg_lo_open)
 	}
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
 								 "ls", &oid_long, &mode_string, &mode_strlen) == SUCCESS) {
-		if (oid_long <= InvalidOid) {
+		if (oid_long <= (zend_long)InvalidOid) {
 			php_error_docref(NULL, E_NOTICE, "Invalid OID specified");
 			RETURN_FALSE;
 		}
@@ -3592,11 +3568,11 @@ PHP_FUNCTION(pg_lo_write)
 
 	if (argc > 2) {
 		if (z_len > (zend_long)str_len) {
-			php_error_docref(NULL, E_WARNING, "Cannot write more than buffer size %d. Tried to write %pd", str_len, z_len);
+			php_error_docref(NULL, E_WARNING, "Cannot write more than buffer size %d. Tried to write " ZEND_LONG_FMT, str_len, z_len);
 			RETURN_FALSE;
 		}
 		if (z_len < 0) {
-			php_error_docref(NULL, E_WARNING, "Buffer size must be larger than 0, but %pd was specified", z_len);
+			php_error_docref(NULL, E_WARNING, "Buffer size must be larger than 0, but " ZEND_LONG_FMT " was specified", z_len);
 			RETURN_FALSE;
 		}
 		len = z_len;
@@ -3609,7 +3585,7 @@ PHP_FUNCTION(pg_lo_write)
 		RETURN_FALSE;
 	}
 
-	if ((nbytes = lo_write((PGconn *)pgsql->conn, pgsql->lofd, str, len)) == -1) {
+	if ((nbytes = lo_write((PGconn *)pgsql->conn, pgsql->lofd, str, len)) == (size_t)-1) {
 		RETURN_FALSE;
 	}
 
@@ -3748,7 +3724,7 @@ PHP_FUNCTION(pg_lo_export)
 	/* allow string to handle large OID value correctly */
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
 								 "rlp", &pgsql_link, &oid_long, &file_out, &name_len) == SUCCESS) {
-		if (oid_long <= InvalidOid) {
+		if (oid_long <= (zend_long)InvalidOid) {
 			php_error_docref(NULL, E_NOTICE, "Invalid OID specified");
 			RETURN_FALSE;
 		}
@@ -3767,7 +3743,7 @@ PHP_FUNCTION(pg_lo_export)
 	}
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
 									  "lp",  &oid_long, &file_out, &name_len) == SUCCESS) {
-		if (oid_long <= InvalidOid) {
+		if (oid_long <= (zend_long)InvalidOid) {
 			php_error_docref(NULL, E_NOTICE, "Invalid OID specified");
 			RETURN_FALSE;
 		}
@@ -3799,7 +3775,7 @@ PHP_FUNCTION(pg_lo_export)
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
 									  "lpr", &oid_long, &file_out, &name_len, &pgsql_link) == SUCCESS) {
 		php_error_docref(NULL, E_NOTICE, "Old API is used");
-		if (oid_long <= InvalidOid) {
+		if (oid_long <= (zend_long)InvalidOid) {
 			php_error_docref(NULL, E_NOTICE, "Invalid OID specified");
 			RETURN_FALSE;
 		}
@@ -4132,20 +4108,20 @@ PHP_FUNCTION(pg_copy_to)
 							  &pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len) == FAILURE) {
 		return;
 	}
-	if (!pg_delim) {
-		pg_delim = "\t";
-	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
 		RETURN_FALSE;
 	}
 
+	if (!pg_delim) {
+		pg_delim = "\t";
+	}
 	if (!pg_null_as) {
 		pg_null_as = estrdup("\\\\N");
 		free_pg_null = 1;
 	}
 
-	spprintf(&query, 0, "COPY %s TO STDOUT DELIMITERS E'%c' WITH NULL AS E'%s'", table_name, *pg_delim, pg_null_as);
+	spprintf(&query, 0, "COPY %s TO STDOUT DELIMITER E'%c' NULL AS E'%s'", table_name, *pg_delim, pg_null_as);
 
 	while ((pgsql_result = PQgetResult(pgsql))) {
 		PQclear(pgsql_result);
@@ -4265,6 +4241,11 @@ PHP_FUNCTION(pg_copy_from)
 							  &pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len) == FAILURE) {
 		return;
 	}
+
+	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
+		RETURN_FALSE;
+	}
+
 	if (!pg_delim) {
 		pg_delim = "\t";
 	}
@@ -4273,11 +4254,7 @@ PHP_FUNCTION(pg_copy_from)
 		pg_null_as_free = 1;
 	}
 
-	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
-	}
-
-	spprintf(&query, 0, "COPY %s FROM STDIN DELIMITERS E'%c' WITH NULL AS E'%s'", table_name, *pg_delim, pg_null_as);
+	spprintf(&query, 0, "COPY %s FROM STDIN DELIMITER E'%c' NULL AS E'%s'", table_name, *pg_delim, pg_null_as);
 	while ((pgsql_result = PQgetResult(pgsql))) {
 		PQclear(pgsql_result);
 	}
@@ -4404,7 +4381,7 @@ PHP_FUNCTION(pg_escape_string)
 			break;
 	}
 
-	to = zend_string_alloc(ZSTR_LEN(from) * 2, 0);
+	to = zend_string_safe_alloc(ZSTR_LEN(from), 2, 0, 0);
 #ifdef HAVE_PQESCAPE_CONN
 	if (link) {
 		if ((pgsql = (PGconn *)zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink)) == NULL) {
@@ -4456,7 +4433,7 @@ PHP_FUNCTION(pg_escape_bytea)
 			RETURN_FALSE;
 		}
 		to = (char *)PQescapeByteaConn(pgsql, (unsigned char *)from, (size_t)from_len, &to_len);
-	} else 
+	} else
 #endif
 		to = (char *)PQescapeBytea((unsigned char*)from, from_len, &to_len);
 
@@ -6538,7 +6515,7 @@ PHP_FUNCTION(pg_convert)
 }
 /* }}} */
 
-static int do_exec(smart_str *querystr, int expect, PGconn *pg_link, zend_ulong opt) /* {{{ */
+static int do_exec(smart_str *querystr, ExecStatusType expect, PGconn *pg_link, zend_ulong opt) /* {{{ */
 {
 	if (opt & PGSQL_DML_ASYNC) {
 		if (PQsendQuery(pg_link, ZSTR_VAL(querystr->s))) {
@@ -7069,7 +7046,7 @@ PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result, zval *ret_array, l
 	char *field_name;
 	size_t num_fields;
 	int pg_numrows, pg_row;
-	uint i;
+	uint32_t i;
 	assert(Z_TYPE_P(ret_array) == IS_ARRAY);
 
 	if ((pg_numrows = PQntuples(pg_result)) <= 0) {

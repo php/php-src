@@ -14,6 +14,7 @@ var_dump($db->quote(42, PDO::PARAM_INT));
 var_dump($db->quote(null, PDO::PARAM_NULL));
 var_dump($db->quote('\'', PDO::PARAM_STR));
 var_dump($db->quote('foo', PDO::PARAM_STR));
+var_dump($db->quote('über', PDO::PARAM_STR));
 ?>
 --EXPECT--
 string(3) "'1'"
@@ -22,3 +23,4 @@ string(4) "'42'"
 string(2) "''"
 string(4) "''''"
 string(5) "'foo'"
+string(7) "'über'"

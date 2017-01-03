@@ -230,7 +230,7 @@ static void php_pspell_close_config(zend_resource *rsrc)
 #define PSPELL_FETCH_CONFIG  do { \
 	zval *res = zend_hash_index_find(&EG(regular_list), conf); \
 	if (res == NULL || Z_RES_P(res)->type != le_pspell_config) { \
-		php_error_docref(NULL, E_WARNING, "%ld is not a PSPELL config index", conf); \
+		php_error_docref(NULL, E_WARNING, ZEND_LONG_FMT " is not a PSPELL config index", conf); \
 		RETURN_FALSE; \
 	} \
 	config = (PspellConfig *)Z_RES_P(res)->ptr; \
@@ -239,7 +239,7 @@ static void php_pspell_close_config(zend_resource *rsrc)
 #define PSPELL_FETCH_MANAGER do { \
 	zval *res = zend_hash_index_find(&EG(regular_list), scin); \
 	if (res == NULL || Z_RES_P(res)->type != le_pspell) { \
-		php_error_docref(NULL, E_WARNING, "%ld is not a PSPELL result index", scin); \
+		php_error_docref(NULL, E_WARNING, ZEND_LONG_FMT " is not a PSPELL result index", scin); \
 		RETURN_FALSE; \
 	} \
 	manager = (PspellManager *)Z_RES_P(res)->ptr; \
@@ -808,7 +808,7 @@ static PHP_FUNCTION(pspell_config_ignore)
 
 	PSPELL_FETCH_CONFIG;
 
-	snprintf(ignore_str, sizeof(ignore_str), "%ld", ignore);
+	snprintf(ignore_str, sizeof(ignore_str), ZEND_LONG_FMT, ignore);
 
 	pspell_config_replace(config, "ignore", ignore_str);
 	RETURN_TRUE;

@@ -385,7 +385,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 			} else {
 				zend_refcounted *garbage = Z_COUNTED_P(return_value);
 				ZVAL_COPY(return_value, tmp);
-				_zval_dtor_func(garbage ZEND_FILE_LINE_CC);
+				zval_dtor_func(garbage);
 			}
 		}
 	}

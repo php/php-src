@@ -5,7 +5,6 @@ Bug #42434 (ImageLine w/ antialias = 1px shorter)
 if (!extension_loaded('gd')) {
 	die('skip gd extension not available');
 }
-if (!GD_BUNDLED) die("skip requires bundled GD library\n");
 ?>
 --FILE--
 <?php

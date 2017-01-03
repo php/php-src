@@ -82,63 +82,63 @@ require_once('skipifconnectfailure.inc');
 ?>
 --EXPECTF--
 Warning: mysqli_kill(): processid should have positive value in %s on line %d
-%unicode|string%(%d) "%s"
+string(%d) "%s"
 bool(false)
 object(mysqli)#%d (%d) {
-  [%u|b%"affected_rows"]=>
+  ["affected_rows"]=>
   int(-1)
-  [%u|b%"client_info"]=>
-  %unicode|string%(%d) "%s"
-  [%u|b%"client_version"]=>
+  ["client_info"]=>
+  string(%d) "%s"
+  ["client_version"]=>
   int(%d)
-  [%u|b%"connect_errno"]=>
+  ["connect_errno"]=>
   int(0)
-  [%u|b%"connect_error"]=>
+  ["connect_error"]=>
   NULL
-  [%u|b%"errno"]=>
+  ["errno"]=>
   int(2006)
-  [%u|b%"error"]=>
-  %unicode|string%(%d) "%s"
-  [%u|b%"error_list"]=>
+  ["error"]=>
+  string(%d) "%s"
+  ["error_list"]=>
   array(1) {
     [0]=>
     array(3) {
-      [%u|b%"errno"]=>
+      ["errno"]=>
       int(2006)
-      [%u|b%"sqlstate"]=>
-      %unicode|string%(5) "%s"
-      [%u|b%"error"]=>
-      %unicode|string%(%d) "%s"
+      ["sqlstate"]=>
+      string(5) "%s"
+      ["error"]=>
+      string(%d) "%s"
     }
   }
-  [%u|b%"field_count"]=>
+  ["field_count"]=>
   int(0)
-  [%u|b%"host_info"]=>
-  %unicode|string%(%d) "%s"
-  [%u|b%"info"]=>
+  ["host_info"]=>
+  string(%d) "%s"
+  ["info"]=>
   %s
-  [%u|b%"insert_id"]=>
+  ["insert_id"]=>
   int(0)
-  [%u|b%"server_info"]=>
-  %unicode|string%(%d) "%s"
-  [%u|b%"server_version"]=>
+  ["server_info"]=>
+  string(%d) "%s"
+  ["server_version"]=>
   int(%d)
-  [%u|b%"stat"]=>
+  ["stat"]=>
   %s
-  [%u|b%"sqlstate"]=>
-  %unicode|string%(5) "HY000"
-  [%u|b%"protocol_version"]=>
+  ["sqlstate"]=>
+  string(5) "HY000"
+  ["protocol_version"]=>
   int(10)
-  [%u|b%"thread_id"]=>
+  ["thread_id"]=>
   int(%d)
-  [%u|b%"warning_count"]=>
+  ["warning_count"]=>
   int(0)
 }
 
 Warning: mysqli_kill(): processid should have positive value in %s on line %d
 array(1) {
-  [%u|b%"id"]=>
-  %unicode|string%(1) "1"
+  ["id"]=>
+  string(1) "1"
 }
 
 Warning: mysqli_kill(): processid should have positive value in %s on line %d

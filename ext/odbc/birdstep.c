@@ -32,7 +32,6 @@
 
 #if WIN32
 # include "config.w32.h"
-# include "win95nt.h"
 # ifdef PHP_EXPORTS
 #  define PHPAPI __declspec(dllexport)
 # else
@@ -136,7 +135,7 @@ const zend_function_entry birdstep_functions[] = {
 	PHP_FALIAS(velocis_fieldnum,       birdstep_fieldnum,       arginfo_birdstep_fieldnum)
 	PHP_FALIAS(velocis_fieldname,      birdstep_fieldname,      arginfo_birdstep_fieldname)
 /* End temporary aliases */
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 zend_module_entry birdstep_module_entry = {

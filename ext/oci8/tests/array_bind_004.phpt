@@ -63,7 +63,7 @@ echo "Done\n";
 ?>
 --EXPECTF--	
 Warning: oci_execute(): ORA-01403: %s
-ORA-06512: at "SYSTEM.ARRAY_BIND_004_PKG", line %d
+ORA-06512: at "%s.ARRAY_BIND_004_PKG", line %d
 ORA-06512: at line %d in %sarray_bind_004.php on line %d
 array(0) {
 }

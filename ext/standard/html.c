@@ -375,7 +375,7 @@ static inline unsigned int get_next_char(
  * defaults to UTF-8 */
 static enum entity_charset determine_charset(char *charset_hint)
 {
-	int i;
+	size_t i;
 	enum entity_charset charset = cs_utf_8;
 	size_t len = 0;
 	const zend_encoding *zenc;
@@ -1269,11 +1269,7 @@ PHPAPI zend_string *php_escape_html_entities_ex(unsigned char *old, size_t oldle
 	if (oldlen < 64) {
 		maxlen = 128;
 	} else {
-		maxlen = 2 * oldlen;
-		if (maxlen < oldlen) {
-			zend_error_noreturn(E_ERROR, "Input string is too long");
-			return NULL;
-		}
+		maxlen = zend_safe_addmult(oldlen, 2, 0, "html_entities");
 	}
 
 	replaced = zend_string_alloc(maxlen, 0);
@@ -1449,11 +1445,6 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 	zend_string *replaced;
 	zend_bool double_encode = 1;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|lS!b", &str, &flags, &hint_charset, &double_encode) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
@@ -1461,7 +1452,6 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 		Z_PARAM_STR_EX(hint_charset, 1, 0)
 		Z_PARAM_BOOL(double_encode);
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	if (!hint_charset) {
 		default_charset = get_default_charset();
@@ -1510,9 +1500,11 @@ PHP_FUNCTION(htmlspecialchars_decode)
 	zend_long quote_style = ENT_COMPAT;
 	zend_string *replaced;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &str, &str_len, &quote_style) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(quote_style)
+	ZEND_PARSE_PARAMETERS_END();
 
 	replaced = php_unescape_html_entities((unsigned char*)str, str_len, 0 /*!all*/, (int)quote_style, NULL);
 	if (replaced) {
@@ -1531,19 +1523,12 @@ PHP_FUNCTION(html_entity_decode)
 	zend_long quote_style = ENT_COMPAT;
 	zend_string *replaced;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|lS", &str,
-							  &quote_style, &hint_charset) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(quote_style)
 		Z_PARAM_STR(hint_charset)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	if (!hint_charset) {
 		default_charset = get_default_charset();
@@ -1639,10 +1624,12 @@ PHP_FUNCTION(get_html_translation_table)
 	 * getting the translated table from data structures that are optimized for
 	 * random access, not traversal */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|lls",
-			&all, &flags, &charset_hint, &charset_hint_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 3)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(all)
+		Z_PARAM_LONG(flags)
+		Z_PARAM_STRING(charset_hint, charset_hint_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	charset = determine_charset(charset_hint);
 	doctype = flags & ENT_HTML_DOC_TYPE_MASK;

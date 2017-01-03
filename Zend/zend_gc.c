@@ -19,6 +19,56 @@
 
 /* $Id$ */
 
+
+/**
+ * zend_gc_collect_cycles
+ * ======================
+ *
+ * Colors and its meaning
+ * ----------------------
+ *
+ * BLACK  (GC_BLACK)   - In use or free.
+ * GREY   (GC_GREY)    - Possible member of cycle.
+ * WHITE  (GC_WHITE)   - Member of garbage cycle.
+ * PURPLE (GC_PURPLE)  - Possible root of cycle.
+ *
+ * Colors described in the paper but not used
+ * ------------------------------------------
+ *
+ * GREEN - Acyclic
+ * RED   - Candidate cycle underogin
+ * ORANGE - Candidate cycle awaiting epoch boundary.
+ *
+ *
+ * Flow
+ * =====
+ *
+ * The garbage collect cycle starts from 'gc_mark_roots', which traverses the
+ * possible roots, and calls mark_grey for roots are marked purple with
+ * depth-first traverse.
+ *
+ * After all possible roots are traversed and marked,
+ * gc_scan_roots will be called, and each root will be called with
+ * gc_scan(root->ref)
+ *
+ * gc_scan checkes the colors of possible members.
+ *
+ * If the node is marked as grey and the refcount > 0
+ *    gc_scan_black will be called on that node to scan it's subgraph.
+ * otherwise (refcount == 0), it marks the node white.
+ *
+ * A node MAY be added to possbile roots when ZEND_UNSET_VAR happens or
+ * zend_assign_to_variable is called only when possible garbage node is
+ * produced.
+ * gc_possible_root() will be called to add the nodes to possible roots.
+ *
+ *
+ * For objects, we call their get_gc handler (by default 'zend_std_get_gc') to
+ * get the object properties to scan.
+ *
+ *
+ * @see http://researcher.watson.ibm.com/researcher/files/us-bacon/Bacon01Concurrent.pdf
+ */
 #include "zend.h"
 #include "zend_API.h"
 
@@ -243,7 +293,7 @@ ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 		gc_collect_cycles();
 		GC_REFCOUNT(ref)--;
 		if (UNEXPECTED(GC_REFCOUNT(ref)) == 0) {
-			zval_dtor_func_for_ptr(ref);
+			zval_dtor_func(ref);
 			return;
 		}
 		if (UNEXPECTED(GC_INFO(ref))) {
@@ -685,7 +735,6 @@ static void gc_add_garbage(zend_refcounted *ref, gc_additional_buffer **addition
 		GC_TYPE(ref) |= GC_FAKE_BUFFER_FLAG;
 	}
 	if (buf) {
-		GC_REFCOUNT(ref)++;
 		buf->ref = ref;
 		buf->next = GC_G(roots).next;
 		buf->prev = &GC_G(roots);
@@ -848,7 +897,6 @@ static int gc_collect_roots(uint32_t *flags, gc_additional_buffer **additional_b
 
 	current = GC_G(roots).next;
 	while (current != &GC_G(roots)) {
-		GC_REFCOUNT(current->ref)++;
 		if (GC_REF_GET_COLOR(current->ref) == GC_WHITE) {
 			count += gc_collect_white(current->ref, flags, additional_buffer);
 		}
@@ -889,7 +937,6 @@ tail_call:
 	     GC_REF_GET_COLOR(ref) == GC_BLACK &&
 	     GC_ADDRESS(GC_INFO(ref)) != GC_ROOT_BUFFER_MAX_ENTRIES)) {
 		GC_TRACE_REF(ref, "removing from buffer");
-		GC_REFCOUNT(ref)--;
 		if (root) {
 			GC_INFO(ref) = 0;
 			GC_REMOVE_FROM_ROOTS(root);
@@ -1097,6 +1144,7 @@ ZEND_API int zend_gc_collect_cycles(void)
 
 				if (EG(objects_store).object_buckets &&
 				    IS_OBJ_VALID(EG(objects_store).object_buckets[obj->handle])) {
+					EG(objects_store).object_buckets[obj->handle] = SET_OBJ_INVALID(obj);
 					GC_TYPE(obj) = IS_NULL;
 					if (!(GC_FLAGS(obj) & IS_OBJ_FREE_CALLED)) {
 						GC_FLAGS(obj) |= IS_OBJ_FREE_CALLED;
@@ -1156,4 +1204,6 @@ ZEND_API int zend_gc_collect_cycles(void)
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ *
+ * vim:noexpandtab:
  */

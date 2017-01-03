@@ -361,31 +361,31 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, size_t *
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	char *id = NULL;
+	PGresult *res;
+	ExecStatusType status;
 
 	if (name == NULL) {
-		if (H->pgoid == InvalidOid) {
-			return NULL;
-		}
-		*len = spprintf(&id, 0, ZEND_LONG_FMT, (zend_long) H->pgoid);
+		res = PQexec(H->server, "SELECT LASTVAL()");
 	} else {
-		PGresult *res;
-		ExecStatusType status;
 		const char *q[1];
 		q[0] = name;
+
 		res = PQexecParams(H->server, "SELECT CURRVAL($1)", 1, NULL, q, NULL, NULL, 0);
-		status = PQresultStatus(res);
-
-		if (res && (status == PGRES_TUPLES_OK)) {
-			id = estrdup((char *)PQgetvalue(res, 0, 0));
-			*len = PQgetlength(res, 0, 0);
-		} else {
-			pdo_pgsql_error(dbh, status, pdo_pgsql_sqlstate(res));
-		}
-
-		if (res) {
-			PQclear(res);
-		}
 	}
+	status = PQresultStatus(res);
+
+	if (res && (status == PGRES_TUPLES_OK)) {
+		id = estrdup((char *)PQgetvalue(res, 0, 0));
+		*len = PQgetlength(res, 0, 0);
+	} else {
+		pdo_pgsql_error(dbh, status, pdo_pgsql_sqlstate(res));
+		*len = spprintf(&id, 0, ZEND_LONG_FMT, (zend_long) H->pgoid);
+	}
+
+	if (res) {
+		PQclear(res);
+	}
+
 	return id;
 }
 
@@ -813,7 +813,7 @@ static PHP_METHOD(PDO, pgsqlCopyToFile)
 			if (ret == -1) {
 				break; /* done */
 			} else if (ret > 0) {
-				if (php_stream_write(stream, csv, ret) != ret) {
+				if (php_stream_write(stream, csv, ret) != (size_t)ret) {
 					pdo_pgsql_error_msg(dbh, PGRES_FATAL_ERROR, "Unable to write to file");
 					PQfreemem(csv);
 					php_stream_close(stream);
@@ -1218,13 +1218,13 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{
 
 	/* support both full connection string & connection string + login and/or password */
 	if (tmp_user && tmp_pass) {
-		spprintf(&conn_str, 0, "%s user='%s' password='%s' connect_timeout=%pd", (char *) dbh->data_source, ZSTR_VAL(tmp_user), ZSTR_VAL(tmp_pass), connect_timeout);
+		spprintf(&conn_str, 0, "%s user='%s' password='%s' connect_timeout=" ZEND_LONG_FMT, (char *) dbh->data_source, ZSTR_VAL(tmp_user), ZSTR_VAL(tmp_pass), connect_timeout);
 	} else if (tmp_user) {
-		spprintf(&conn_str, 0, "%s user='%s' connect_timeout=%pd", (char *) dbh->data_source, ZSTR_VAL(tmp_user), connect_timeout);
+		spprintf(&conn_str, 0, "%s user='%s' connect_timeout=" ZEND_LONG_FMT, (char *) dbh->data_source, ZSTR_VAL(tmp_user), connect_timeout);
 	} else if (tmp_pass) {
-		spprintf(&conn_str, 0, "%s password='%s' connect_timeout=%pd", (char *) dbh->data_source, ZSTR_VAL(tmp_pass), connect_timeout);
+		spprintf(&conn_str, 0, "%s password='%s' connect_timeout=" ZEND_LONG_FMT, (char *) dbh->data_source, ZSTR_VAL(tmp_pass), connect_timeout);
 	} else {
-		spprintf(&conn_str, 0, "%s connect_timeout=%pd", (char *) dbh->data_source, connect_timeout);
+		spprintf(&conn_str, 0, "%s connect_timeout=" ZEND_LONG_FMT, (char *) dbh->data_source, connect_timeout);
 	}
 
 	H->server = PQconnectdb(conn_str);

@@ -32,7 +32,7 @@ ZEND_API void zend_object_std_init(zend_object *object, zend_class_entry *ce)
 	zval *p, *end;
 
 	GC_REFCOUNT(object) = 1;
-	GC_TYPE_INFO(object) = IS_OBJECT;
+	GC_TYPE_INFO(object) = IS_OBJECT | (GC_COLLECTABLE << GC_FLAGS_SHIFT);
 	object->ce = ce;
 	object->properties = NULL;
 	zend_objects_store_put(object);
@@ -91,51 +91,52 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 	if (destructor) {
 		zend_object *old_exception;
 		zval obj;
+		zend_class_entry *orig_fake_scope;
 
 		if (destructor->op_array.fn_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
 			if (destructor->op_array.fn_flags & ZEND_ACC_PRIVATE) {
 				/* Ensure that if we're calling a private function, we're allowed to do so.
 				 */
-				if (object->ce != EG(scope)) {
-					zend_class_entry *ce = object->ce;
+				if (EG(current_execute_data)) {
+					zend_class_entry *scope = zend_get_executed_scope();
 
-					if (EG(current_execute_data)) {
+					if (object->ce != scope) {
 						zend_throw_error(NULL,
 							"Call to private %s::__destruct() from context '%s'",
-							ZSTR_VAL(ce->name),
-							EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
-					} else {
-						zend_error(E_WARNING,
-							"Call to private %s::__destruct() from context '%s' during shutdown ignored",
-							ZSTR_VAL(ce->name),
-							EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
+							ZSTR_VAL(object->ce->name),
+							scope ? ZSTR_VAL(scope->name) : "");
+						return;
 					}
+				} else {
+					zend_error(E_WARNING,
+						"Call to private %s::__destruct() from context '' during shutdown ignored",
+						ZSTR_VAL(object->ce->name));
 					return;
 				}
 			} else {
 				/* Ensure that if we're calling a protected function, we're allowed to do so.
 				 */
-				if (!zend_check_protected(zend_get_function_root_class(destructor), EG(scope))) {
-					zend_class_entry *ce = object->ce;
+				if (EG(current_execute_data)) {
+					zend_class_entry *scope = zend_get_executed_scope();
 
-					if (EG(current_execute_data)) {
+					if (!zend_check_protected(zend_get_function_root_class(destructor), scope)) {
 						zend_throw_error(NULL,
 							"Call to protected %s::__destruct() from context '%s'",
-							ZSTR_VAL(ce->name),
-							EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
-					} else {
-						zend_error(E_WARNING,
-							"Call to protected %s::__destruct() from context '%s' during shutdown ignored",
-							ZSTR_VAL(ce->name),
-							EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
+							ZSTR_VAL(object->ce->name),
+							scope ? ZSTR_VAL(scope->name) : "");
+						return;
 					}
+				} else {
+					zend_error(E_WARNING,
+						"Call to protected %s::__destruct() from context '' during shutdown ignored",
+						ZSTR_VAL(object->ce->name));
 					return;
 				}
 			}
 		}
 
+		GC_REFCOUNT(object)++;
 		ZVAL_OBJ(&obj, object);
-		Z_ADDREF(obj);
 
 		/* Make sure that destructors are protected from previously thrown exceptions.
 		 * For example, if an exception was thrown in a function and when the function's
@@ -150,6 +151,8 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 				EG(exception) = NULL;
 			}
 		}
+		orig_fake_scope = EG(fake_scope);
+		EG(fake_scope) = NULL;
 		zend_call_method_with_0_params(&obj, object->ce, &destructor, ZEND_DESTRUCTOR_FUNC_NAME, NULL);
 		if (old_exception) {
 			if (EG(exception)) {
@@ -159,6 +162,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 			}
 		}
 		zval_ptr_dtor(&obj);
+		EG(fake_scope) = orig_fake_scope;
 	}
 }
 

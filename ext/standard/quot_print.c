@@ -206,9 +206,9 @@ PHP_FUNCTION(quoted_printable_decode)
 	zend_string *str_out;
 	size_t i = 0, j = 0, k;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &arg1) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(arg1)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(arg1) == 0) {
 		/* shortcut */
@@ -267,15 +267,15 @@ PHP_FUNCTION(quoted_printable_encode)
 	zend_string *str;
 	zend_string *new_str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &str) != SUCCESS) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(str)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!ZSTR_LEN(str)) {
 		RETURN_EMPTY_STRING();
 	}
 
-	new_str = php_quot_print_encode((unsigned char *)ZSTR_VAL(str), (size_t)ZSTR_LEN(str));
+	new_str = php_quot_print_encode((unsigned char *)ZSTR_VAL(str), ZSTR_LEN(str));
 	RETURN_STR(new_str);
 }
 /* }}} */

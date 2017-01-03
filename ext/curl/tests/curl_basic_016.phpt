@@ -19,7 +19,7 @@ if ($curl_version['version_number'] > 0x071201) {
 ===DONE===
 --EXPECTF--
 array(2%d) {
-  [%u|b%"url"]=>
+  ["url"]=>
   string(0) ""
   ["content_type"]=>
   NULL

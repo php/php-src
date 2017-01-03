@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Shane Caraveo             <shane@caraveo.com>               | 
+   | Authors: Shane Caraveo             <shane@caraveo.com>               |
    |          Colin Viebrock            <colin@easydns.com>               |
    |          Hartmut Holzgraefe        <hholzgra@php.net>                |
    |          Wez Furlong               <wez@thebrainroom.com>            |
@@ -24,16 +24,18 @@
 #include "config.h"
 #endif
 
-#ifdef PHP_WIN32
-#define _WINNLS_
-#endif
-
 #include "php.h"
 #include "ext/standard/info.h"
 #include "php_calendar.h"
 #include "sdncal.h"
 
 #include <stdio.h>
+
+#ifdef PHP_WIN32
+/* This conflicts with a define in winnls.h, but that header is needed
+   to have GetACP(). */
+#undef CAL_GREGORIAN
+#endif
 
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_unixtojd, 0, 0, 0)
@@ -311,7 +313,7 @@ PHP_FUNCTION(cal_info)
 
 
 	if (cal != -1 && (cal < 0 || cal >= CAL_NUM_CALS)) {
-		php_error_docref(NULL, E_WARNING, "invalid calendar ID %pd.", cal);
+		php_error_docref(NULL, E_WARNING, "invalid calendar ID " ZEND_LONG_FMT ".", cal);
 		RETURN_FALSE;
 	}
 
@@ -333,7 +335,7 @@ PHP_FUNCTION(cal_days_in_month)
 	}
 
 	if (cal < 0 || cal >= CAL_NUM_CALS) {
-		php_error_docref(NULL, E_WARNING, "invalid calendar ID %pd.", cal);
+		php_error_docref(NULL, E_WARNING, "invalid calendar ID " ZEND_LONG_FMT ".", cal);
 		RETURN_FALSE;
 	}
 
@@ -357,6 +359,10 @@ PHP_FUNCTION(cal_days_in_month)
 		}
 		else {
 			sdn_next = calendar->to_jd(year + 1, 1, 1);
+			if (cal == CAL_FRENCH && sdn_next == 0) {
+				/* The French calendar ends on 0014-13-05. */
+				sdn_next = 2380953;
+			}
 		}
 	}
 
@@ -375,7 +381,7 @@ PHP_FUNCTION(cal_to_jd)
 	}
 
 	if (cal < 0 || cal >= CAL_NUM_CALS) {
-		php_error_docref(NULL, E_WARNING, "invalid calendar ID %pd.", cal);
+		php_error_docref(NULL, E_WARNING, "invalid calendar ID " ZEND_LONG_FMT ".", cal);
 		RETURN_FALSE;
 	}
 
@@ -397,7 +403,7 @@ PHP_FUNCTION(cal_from_jd)
 	}
 
 	if (cal < 0 || cal >= CAL_NUM_CALS) {
-		php_error_docref(NULL, E_WARNING, "invalid calendar ID %pd", cal);
+		php_error_docref(NULL, E_WARNING, "invalid calendar ID " ZEND_LONG_FMT "", cal);
 		RETURN_FALSE;
 	}
 	calendar = &cal_conversion_table[cal];
@@ -414,15 +420,21 @@ PHP_FUNCTION(cal_from_jd)
 	add_assoc_long(return_value, "year", year);
 
 /* day of week */
-	dow = DayOfWeek(jd);
-	add_assoc_long(return_value, "dow", dow);
-	add_assoc_string(return_value, "abbrevdayname", DayNameShort[dow]);
-	add_assoc_string(return_value, "dayname", DayNameLong[dow]);
+	if (cal != CAL_JEWISH || year > 0) {
+		dow = DayOfWeek(jd);
+		add_assoc_long(return_value, "dow", dow);
+		add_assoc_string(return_value, "abbrevdayname", DayNameShort[dow]);
+		add_assoc_string(return_value, "dayname", DayNameLong[dow]);
+	} else {
+		add_assoc_null(return_value, "dow");
+		add_assoc_string(return_value, "abbrevdayname", "");
+		add_assoc_string(return_value, "dayname", "");
+	}
 /* month name */
 	if(cal == CAL_JEWISH) {
 		/* special case for Jewish calendar */
-		add_assoc_string(return_value, "abbrevmonth", JEWISH_MONTH_NAME(year)[month]);
-		add_assoc_string(return_value, "monthname", JEWISH_MONTH_NAME(year)[month]);
+		add_assoc_string(return_value, "abbrevmonth", (year > 0 ? JEWISH_MONTH_NAME(year)[month] : ""));
+		add_assoc_string(return_value, "monthname", (year > 0 ? JEWISH_MONTH_NAME(year)[month] : ""));
 	} else {
 		add_assoc_string(return_value, "abbrevmonth", calendar->month_name_short[month]);
 		add_assoc_string(return_value, "monthname", calendar->month_name_long[month]);
@@ -735,7 +747,7 @@ PHP_FUNCTION(jdmonthname)
 		break;
 	case CAL_MONTH_JEWISH:		/* jewish month */
 		SdnToJewish(julday, &year, &month, &day);
-		monthname = JEWISH_MONTH_NAME(year)[month];
+		monthname = (year > 0 ? JEWISH_MONTH_NAME(year)[month] : "");
 		break;
 	case CAL_MONTH_FRENCH:		/* french month */
 		SdnToFrench(julday, &year, &month, &day);

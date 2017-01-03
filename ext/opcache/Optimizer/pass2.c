@@ -22,7 +22,6 @@
 /* pass 2:
  * - convert non-numeric constants to numeric constants in numeric operators
  * - optimize constant conditional JMPs
- * - optimize static BRKs and CONTs
  */
 
 #include "php.h"

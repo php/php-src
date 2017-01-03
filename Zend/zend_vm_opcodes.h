@@ -54,10 +54,7 @@
 #define ZEND_VM_EXT_CONST_FETCH  0x06000000
 #define ZEND_VM_EXT_TYPE         0x07000000
 #define ZEND_VM_EXT_EVAL         0x08000000
-#define ZEND_VM_EXT_FAST_CALL    0x09000000
-#define ZEND_VM_EXT_FAST_RET     0x0a000000
 #define ZEND_VM_EXT_SRC          0x0b000000
-#define ZEND_VM_EXT_SEND         0x0c000000
 #define ZEND_VM_NO_CONST_CONST   0x40000000
 #define ZEND_VM_COMMUTATIVE      0x80000000
 #define ZEND_VM_OP1_FLAGS(flags) (flags & 0xff)
@@ -111,6 +108,7 @@ END_EXTERN_C()
 #define ZEND_ASSIGN                           38
 #define ZEND_ASSIGN_REF                       39
 #define ZEND_ECHO                             40
+#define ZEND_GENERATOR_CREATE                 41
 #define ZEND_JMP                              42
 #define ZEND_JMPZ                             43
 #define ZEND_JMPNZ                            44
@@ -118,6 +116,9 @@ END_EXTERN_C()
 #define ZEND_JMPZ_EX                          46
 #define ZEND_JMPNZ_EX                         47
 #define ZEND_CASE                             48
+#define ZEND_CHECK_VAR                        49
+#define ZEND_SEND_VAR_NO_REF_EX               50
+#define ZEND_MAKE_REF                         51
 #define ZEND_BOOL                             52
 #define ZEND_FAST_CONCAT                      53
 #define ZEND_ROPE_INIT                        54
@@ -249,7 +250,9 @@ END_EXTERN_C()
 #define ZEND_FETCH_CLASS_CONSTANT            181
 #define ZEND_BIND_LEXICAL                    182
 #define ZEND_BIND_STATIC                     183
+#define ZEND_FETCH_THIS                      184
+#define ZEND_ISSET_ISEMPTY_THIS              186
 
-#define ZEND_VM_LAST_OPCODE                  183
+#define ZEND_VM_LAST_OPCODE                  186
 
 #endif

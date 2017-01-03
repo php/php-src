@@ -328,7 +328,7 @@ static int add_string(zval* list, char* id, char* string) {
 	else   return add_next_index_string(list, string);
 }
 
-static int add_stringl(zval* list, char* id, char* string, uint length) {
+static int add_stringl(zval* list, char* id, char* string, uint32_t length) {
 	if(id) return add_assoc_stringl(list, id, string, length);
 	else   return add_next_index_stringl(list, string, length);
 }
@@ -535,7 +535,7 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 					xReturn = XMLRPC_CreateValueBoolean(key, Z_TYPE(val) == IS_TRUE);
 					break;
 				case xmlrpc_int:
-					convert_to_long(&val);
+					ZVAL_LONG(&val, zval_get_long(&val));
 					xReturn = XMLRPC_CreateValueInt(key, Z_LVAL(val));
 					break;
 				case xmlrpc_double:
@@ -557,7 +557,7 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 
 						ht = HASH_OF(&val);
 						if (ht && ht->u.v.nApplyCount > 1) {
-							php_error_docref(NULL, E_ERROR, "XML-RPC doesn't support circular references");
+							zend_throw_error(NULL, "XML-RPC doesn't support circular references");
 							return NULL;
 						}
 
@@ -568,6 +568,7 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 						xReturn = XMLRPC_CreateVector(key, vtype);
 
 						ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL(val_arr), num_index, my_key, pIter) {
+							ZVAL_DEREF(pIter);
 							ht = HASH_OF(pIter);
 							if (ht) {
 								ht->u.v.nApplyCount++;
@@ -576,7 +577,7 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 								char *num_str = NULL;
 
 								if (vtype != xmlrpc_vector_array) {
-									spprintf(&num_str, 0, "%ld", num_index);
+									spprintf(&num_str, 0, ZEND_LONG_FMT, num_index);
 								}
 
 								XMLRPC_AddValueToVector(xReturn, PHP_to_XMLRPC_worker(num_str, pIter, depth++));
@@ -700,7 +701,7 @@ PHP_FUNCTION(xmlrpc_encode_request)
 			outBuf = XMLRPC_REQUEST_ToXML(xRequest, 0);
 			if (outBuf) {
 				RETVAL_STRING(outBuf);
-				free(outBuf);
+				efree(outBuf);
 			}
 			XMLRPC_RequestFree(xRequest, 1);
 		}
@@ -734,7 +735,7 @@ PHP_FUNCTION(xmlrpc_encode)
 		if (xOut) {
 			if (outBuf) {
 				RETVAL_STRING(outBuf);
-				free(outBuf);
+				efree(outBuf);
 			}
 			/* cleanup */
 			XMLRPC_CleanupValue(xOut);
@@ -1101,7 +1102,7 @@ PHP_FUNCTION(xmlrpc_server_call_method)
 				outBuf = XMLRPC_REQUEST_ToXML(xResponse, &buf_len);
 				if (outBuf) {
 					RETVAL_STRINGL(outBuf, buf_len);
-					free(outBuf);
+					efree(outBuf);
 				}
 				/* cleanup after ourselves.  what a sty! */
 				XMLRPC_RequestFree(xResponse, 0);

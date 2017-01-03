@@ -17,8 +17,11 @@ class foo {
 }
 
 $arr = array('foo', 'abc');
-$arr();
-
+try {
+	$arr();
+} catch (Throwable $e) {
+	echo "Exception: " . $e->getMessage() . "\n";
+}
 $foo = new foo;
 $arr = array($foo, 'abc');
 $arr();
@@ -28,9 +31,7 @@ $arr();
 --EXPECTF--
 From foo::__callStatic:
 string(3) "abc"
-
-Notice: Undefined variable: this in %s on line %d
-NULL
+Exception: Using $this when not in object context
 From foo::__call:
 string(3) "abc"
 object(foo)#%d (0) {

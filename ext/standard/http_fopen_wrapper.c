@@ -52,8 +52,6 @@
 
 #ifdef PHP_WIN32
 #include <winsock2.h>
-#elif defined(NETWARE) && defined(USE_WINSOCK)
-#include <novsock2.h>
 #else
 #include <netinet/in.h>
 #include <netdb.h>
@@ -62,7 +60,7 @@
 #endif
 #endif
 
-#if defined(PHP_WIN32) || defined(__riscos__) || defined(NETWARE)
+#if defined(PHP_WIN32) || defined(__riscos__)
 #undef AF_UNIX
 #endif
 
@@ -117,11 +115,9 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 	php_url *resource = NULL;
 	int use_ssl;
 	int use_proxy = 0;
-	char *scratch = NULL;
 	zend_string *tmp = NULL;
 	char *ua_str = NULL;
 	zval *ua_zval = NULL, *tmpzval = NULL, ssl_proxy_peer_name;
-	size_t scratch_len = 0;
 	int body = 0;
 	char location[HTTP_HEADER_BLOCK_SIZE];
 	zval response_header;
@@ -135,8 +131,6 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 	size_t transport_len;
 	int have_header = 0;
 	zend_bool request_fulluri = 0, ignore_errors = 0;
-	char *protocol_version = NULL;
-	int protocol_version_len = 3; /* Default: "1.0" */
 	struct timeval timeout;
 	char *user_headers = NULL;
 	int header_init = ((flags & HTTP_WRAPPER_HEADER_INIT) != 0);
@@ -145,6 +139,8 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 	php_stream_filter *transfer_encoding = NULL;
 	int response_code;
 	zend_array *symbol_table;
+	smart_str req_buf = {0};
+	zend_bool custom_request_method;
 
 	ZVAL_UNDEF(&response_header);
 	tmp_line[0] = '\0';
@@ -362,6 +358,7 @@ finish:
 		redirect_max = (int)zval_get_long(tmpzval);
 	}
 
+	custom_request_method = 0;
 	if (context && (tmpzval = php_stream_context_get_option(context, "http", "method")) != NULL) {
 		if (Z_TYPE_P(tmpzval) == IS_STRING && Z_STRLEN_P(tmpzval) > 0) {
 			/* As per the RFC, automatically redirected requests MUST NOT use other methods than
@@ -370,22 +367,15 @@ finish:
 				|| (Z_STRLEN_P(tmpzval) == 3 && memcmp("GET", Z_STRVAL_P(tmpzval), 3) == 0)
 				|| (Z_STRLEN_P(tmpzval) == 4 && memcmp("HEAD",Z_STRVAL_P(tmpzval), 4) == 0)
 			) {
-				scratch_len = strlen(path) + 29 + Z_STRLEN_P(tmpzval);
-				scratch = emalloc(scratch_len);
-				strlcpy(scratch, Z_STRVAL_P(tmpzval), Z_STRLEN_P(tmpzval) + 1);
-				strncat(scratch, " ", 1);
+				custom_request_method = 1;
+				smart_str_append(&req_buf, Z_STR_P(tmpzval));
+				smart_str_appendc(&req_buf, ' ');
 			}
 		}
 	}
 
-	if (context && (tmpzval = php_stream_context_get_option(context, "http", "protocol_version")) != NULL) {
-		protocol_version_len = (int)spprintf(&protocol_version, 0, "%.1F", zval_get_double(tmpzval));
-	}
-
-	if (!scratch) {
-		scratch_len = strlen(path) + 29 + protocol_version_len;
-		scratch = emalloc(scratch_len);
-		strncpy(scratch, "GET ", scratch_len);
+	if (!custom_request_method) {
+		smart_str_appends(&req_buf, "GET ");
 	}
 
 	/* Should we send the entire path in the request line, default to no. */
@@ -396,35 +386,36 @@ finish:
 
 	if (request_fulluri) {
 		/* Ask for everything */
-		strcat(scratch, path);
+		smart_str_appends(&req_buf, path);
 	} else {
 		/* Send the traditional /path/to/file?query_string */
 
 		/* file */
 		if (resource->path && *resource->path) {
-			strlcat(scratch, resource->path, scratch_len);
+			smart_str_appends(&req_buf, resource->path);
 		} else {
-			strlcat(scratch, "/", scratch_len);
+			smart_str_appendc(&req_buf, '/');
 		}
 
 		/* query string */
 		if (resource->query) {
-			strlcat(scratch, "?", scratch_len);
-			strlcat(scratch, resource->query, scratch_len);
+			smart_str_appendc(&req_buf, '?');
+			smart_str_appends(&req_buf, resource->query);
 		}
 	}
 
 	/* protocol version we are speaking */
-	if (protocol_version) {
-		strlcat(scratch, " HTTP/", scratch_len);
-		strlcat(scratch, protocol_version, scratch_len);
-		strlcat(scratch, "\r\n", scratch_len);
-	} else {
-		strlcat(scratch, " HTTP/1.0\r\n", scratch_len);
-	}
+	if (context && (tmpzval = php_stream_context_get_option(context, "http", "protocol_version")) != NULL) {
+		char *protocol_version;
+		spprintf(&protocol_version, 0, "%.1F", zval_get_double(tmpzval));
 
-	/* send it */
-	php_stream_write(stream, scratch, strlen(scratch));
+		smart_str_appends(&req_buf, " HTTP/");
+		smart_str_appends(&req_buf, protocol_version);
+		smart_str_appends(&req_buf, "\r\n");
+		efree(protocol_version);
+	} else {
+		smart_str_appends(&req_buf, " HTTP/1.0\r\n");
+	}
 
 	if (context && (tmpzval = php_stream_context_get_option(context, "http", "header")) != NULL) {
 		tmp = NULL;
@@ -537,11 +528,14 @@ finish:
 
 	/* auth header if it was specified */
 	if (((have_header & HTTP_HEADER_AUTH) == 0) && resource->user) {
+		/* make scratch large enough to hold the whole URL (over-estimate) */
+		size_t scratch_len = strlen(path) + 1;
+		char *scratch = emalloc(scratch_len);
 		zend_string *stmp;
+
 		/* decode the strings first */
 		php_url_decode(resource->user, strlen(resource->user));
 
-		/* scratch is large enough, since it was made large enough for the whole URL */
 		strcpy(scratch, resource->user);
 		strcat(scratch, ":");
 
@@ -553,31 +547,33 @@ finish:
 
 		stmp = php_base64_encode((unsigned char*)scratch, strlen(scratch));
 
-		if (snprintf(scratch, scratch_len, "Authorization: Basic %s\r\n", ZSTR_VAL(stmp)) > 0) {
-			php_stream_write(stream, scratch, strlen(scratch));
-			php_stream_notify_info(context, PHP_STREAM_NOTIFY_AUTH_REQUIRED, NULL, 0);
-		}
+		smart_str_appends(&req_buf, "Authorization: Basic ");
+		smart_str_appends(&req_buf, ZSTR_VAL(stmp));
+		smart_str_appends(&req_buf, "\r\n");
+
+		php_stream_notify_info(context, PHP_STREAM_NOTIFY_AUTH_REQUIRED, NULL, 0);
 
 		zend_string_free(stmp);
+		efree(scratch);
 	}
 
 	/* if the user has configured who they are, send a From: line */
-	if (((have_header & HTTP_HEADER_FROM) == 0) && FG(from_address)) {
-		if (snprintf(scratch, scratch_len, "From: %s\r\n", FG(from_address)) > 0)
-			php_stream_write(stream, scratch, strlen(scratch));
+	if (!(have_header & HTTP_HEADER_FROM) && FG(from_address)) {
+		smart_str_appends(&req_buf, "From: ");
+		smart_str_appends(&req_buf, FG(from_address));
+		smart_str_appends(&req_buf, "\r\n");
 	}
 
 	/* Send Host: header so name-based virtual hosts work */
 	if ((have_header & HTTP_HEADER_HOST) == 0) {
+		smart_str_appends(&req_buf, "Host: ");
+		smart_str_appends(&req_buf, resource->host);
 		if ((use_ssl && resource->port != 443 && resource->port != 0) ||
 			(!use_ssl && resource->port != 80 && resource->port != 0)) {
-			if (snprintf(scratch, scratch_len, "Host: %s:%i\r\n", resource->host, resource->port) > 0)
-				php_stream_write(stream, scratch, strlen(scratch));
-		} else {
-			if (snprintf(scratch, scratch_len, "Host: %s\r\n", resource->host) > 0) {
-				php_stream_write(stream, scratch, strlen(scratch));
-			}
+			smart_str_appendc(&req_buf, ':');
+			smart_str_append_unsigned(&req_buf, resource->port);
 		}
+		smart_str_appends(&req_buf, "\r\n");
 	}
 
 	/* Send a Connection: close header to avoid hanging when the server
@@ -587,7 +583,7 @@ finish:
 	 * HTTP/1.0 to avoid issues when the server respond with a HTTP/1.1
 	 * keep-alive response, which is the preferred response type. */
 	if ((have_header & HTTP_HEADER_CONNECTION) == 0) {
-		php_stream_write_string(stream, "Connection: close\r\n");
+		smart_str_appends(&req_buf, "Connection: close\r\n");
 	}
 
 	if (context &&
@@ -610,7 +606,7 @@ finish:
 			ua = emalloc(ua_len + 1);
 			if ((ua_len = slprintf(ua, ua_len, _UA_HEADER, ua_str)) > 0) {
 				ua[ua_len] = 0;
-				php_stream_write(stream, ua, ua_len);
+				smart_str_appendl(&req_buf, ua, ua_len);
 			} else {
 				php_error_docref(NULL, E_WARNING, "Cannot construct User-agent header");
 			}
@@ -629,13 +625,14 @@ finish:
 				(tmpzval = php_stream_context_get_option(context, "http", "content")) != NULL &&
 				Z_TYPE_P(tmpzval) == IS_STRING && Z_STRLEN_P(tmpzval) > 0
 		) {
-			scratch_len = slprintf(scratch, scratch_len, "Content-Length: %d\r\n", Z_STRLEN_P(tmpzval));
-			php_stream_write(stream, scratch, scratch_len);
+			smart_str_appends(&req_buf, "Content-Length: ");
+			smart_str_append_unsigned(&req_buf, Z_STRLEN_P(tmpzval));
+			smart_str_appends(&req_buf, "\r\n");
 			have_header |= HTTP_HEADER_CONTENT_LENGTH;
 		}
 
-		php_stream_write(stream, user_headers, strlen(user_headers));
-		php_stream_write(stream, "\r\n", sizeof("\r\n")-1);
+		smart_str_appends(&req_buf, user_headers);
+		smart_str_appends(&req_buf, "\r\n");
 		efree(user_headers);
 	}
 
@@ -644,19 +641,22 @@ finish:
 		(tmpzval = php_stream_context_get_option(context, "http", "content")) != NULL &&
 		Z_TYPE_P(tmpzval) == IS_STRING && Z_STRLEN_P(tmpzval) > 0) {
 		if (!(have_header & HTTP_HEADER_CONTENT_LENGTH)) {
-			scratch_len = slprintf(scratch, scratch_len, "Content-Length: %d\r\n", Z_STRLEN_P(tmpzval));
-			php_stream_write(stream, scratch, scratch_len);
+			smart_str_appends(&req_buf, "Content-Length: ");
+			smart_str_append_unsigned(&req_buf, Z_STRLEN_P(tmpzval));
+			smart_str_appends(&req_buf, "\r\n");
 		}
 		if (!(have_header & HTTP_HEADER_TYPE)) {
-			php_stream_write(stream, "Content-Type: application/x-www-form-urlencoded\r\n",
-				sizeof("Content-Type: application/x-www-form-urlencoded\r\n") - 1);
+			smart_str_appends(&req_buf, "Content-Type: application/x-www-form-urlencoded\r\n");
 			php_error_docref(NULL, E_NOTICE, "Content-type not specified assuming application/x-www-form-urlencoded");
 		}
-		php_stream_write(stream, "\r\n", sizeof("\r\n")-1);
-		php_stream_write(stream, Z_STRVAL_P(tmpzval), Z_STRLEN_P(tmpzval));
+		smart_str_appends(&req_buf, "\r\n");
+		smart_str_appendl(&req_buf, Z_STRVAL_P(tmpzval), Z_STRLEN_P(tmpzval));
 	} else {
-		php_stream_write(stream, "\r\n", sizeof("\r\n")-1);
+		smart_str_appends(&req_buf, "\r\n");
 	}
+
+	/* send it */
+	php_stream_write(stream, ZSTR_VAL(req_buf.s), ZSTR_LEN(req_buf.s));
 
 	location[0] = '\0';
 
@@ -696,6 +696,24 @@ finish:
 			/* when we request only the header, don't fail even on error codes */
 			if ((options & STREAM_ONLY_GET_HEADERS) || ignore_errors) {
 				reqok = 1;
+			}
+
+			/* status codes of 1xx are "informational", and will be followed by a real response
+			 * e.g "100 Continue". RFC 7231 states that unexpected 1xx status MUST be parsed,
+			 * and MAY be ignored. As such, we need to skip ahead to the "real" status*/
+			if (response_code >= 100 && response_code < 200) {
+				/* consume lines until we find a line starting 'HTTP/1' */
+				while (
+					!php_stream_eof(stream)
+					&& php_stream_get_line(stream, tmp_line, sizeof(tmp_line) - 1, &tmp_line_len) != NULL
+					&& ( tmp_line_len < sizeof("HTTP/1") - 1 || strncasecmp(tmp_line, "HTTP/1", sizeof("HTTP/1") - 1) )
+				);
+
+				if (tmp_line_len > 9) {
+					response_code = atoi(tmp_line + 9);
+				} else {
+					response_code = 0;
+				}
 			}
 			/* all status codes in the 2xx range are defined by the specification as successful;
 			 * all status codes in the 3xx range are for redirection, and so also should never
@@ -893,16 +911,11 @@ finish:
 		}
 	}
 out:
-	if (protocol_version) {
-		efree(protocol_version);
-	}
+
+	smart_str_free(&req_buf);
 
 	if (http_header_line) {
 		efree(http_header_line);
-	}
-
-	if (scratch) {
-		efree(scratch);
 	}
 
 	if (resource) {
@@ -969,7 +982,8 @@ static php_stream_wrapper_ops http_stream_wops = {
 	NULL, /* unlink */
 	NULL, /* rename */
 	NULL, /* mkdir */
-	NULL  /* rmdir */
+	NULL, /* rmdir */
+	NULL
 };
 
 PHPAPI php_stream_wrapper php_stream_http_wrapper = {

@@ -21,8 +21,6 @@ constant('A::protectedConst');
 string(14) "protectedConst"
 string(14) "protectedConst"
 
-Warning: constant(): Couldn't find constant A::protectedConst in %s on line 14
-
 Fatal error: Uncaught Error: Cannot access protected const A::protectedConst in %s:14
 Stack trace:
 #0 %s(14): constant('A::protectedCon...')

@@ -40,11 +40,10 @@ Stack trace:
 #2 %s(%d): Generator->next()
 #3 {main}
 Generator 1
-
-Fatal error: Uncaught ClosedGeneratorException: Generator yielded from aborted, no return value available in %s:%d
+Caught exception!
+ClosedGeneratorException: Generator yielded from aborted, no return value available in %s:%d
 Stack trace:
 #0 [internal function]: gen(Object(Generator))
 #1 %s(%d): Generator->current()
 #2 {main}
-  thrown in %s on line %d
-
+NULL

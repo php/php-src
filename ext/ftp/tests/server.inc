@@ -2,7 +2,7 @@
 
 $socket = null;
 $errno = 0;
-$context = stream_context_create(array('ssl' => array('local_cert' => dirname(__FILE__).'/cert.pem', 'passphrase' => 'pass')));
+$context = stream_context_create(array('ssl' => array('local_cert' => dirname(__FILE__).'/cert.pem')));
 
 for ($i=0; $i<10 && !$socket; ++$i) {
 	$port = rand(50000, 65535);
@@ -139,7 +139,10 @@ if ($pid) {
 			$buf = fread($s, 2048);
 		}
 
-		if (!preg_match('/^USER (\w+)\r\n$/', $buf, $m)) {
+		if ($buf == "AUTH TLS\r\n") {
+		   fputs($s, "500 not supported.\r\n");
+		   return ;
+		} else if (!preg_match('/^USER (\w+)\r\n$/', $buf, $m)) {
 			fputs($s, "500 Syntax error, command unrecognized.\r\n");
 			dump_and_exit($buf);
 		}
@@ -208,6 +211,10 @@ if ($pid) {
 			$ascii = true;
 			fputs($s, "200 OK\r\n");
 
+		} elseif ($buf === "AUTH SSL\r\n") {
+			$ascii = true;
+			fputs($s, "500 not supported\r\n");
+
 		} elseif ($buf === "TYPE I\r\n") {
 			$ascii = false;
 			fputs($s, "200 OK\r\n");
@@ -265,7 +272,7 @@ if ($pid) {
 
 		} elseif (preg_match("~^NLST(?: ([A-Za-z./]+))?\r\n$~", $buf, $m)) {
 
-			if (isset($m[1]) && $m[1] === 'bogusdir') {
+			if (isset($m[1]) && (($m[1] === 'bogusdir') || ($m[1] === '/bogusdir'))) {
 				fputs($s, "250 $m[1]: No such file or directory\r\n");
 				continue;
 			}
@@ -276,11 +283,20 @@ if ($pid) {
 				continue;
 			}
 
-			fputs($s, "150 File status okay; about to open data connection\r\n");
+			if (empty($pasv)) {
+				fputs($s, "150 File status okay; about to open data connection\r\n");
+				if (!$fs = stream_socket_client("tcp://$host:$port")) {
+					fputs($s, "425 Can't open data connection\r\n");
+					continue;
+				}
+			} else {
+				fputs($s, "125 Data connection already open; transfer starting.\r\n");
+				$fs=$pasvs;
+			}
 
-			if (!$fs = stream_socket_client("tcp://$host:$port")) {
-				fputs($s, "425 Can't open data connection\r\n");
-				continue;
+
+			if ((!empty($ssl)) && (!stream_socket_enable_crypto($pasvs, true, STREAM_CRYPTO_METHOD_SSLv23_SERVER))) {
+				die("SSLv23 handshake failed.\n");
 			}
 
 			if (empty($m[1]) || $m[1] !== 'emptydir') {
@@ -368,7 +384,7 @@ if ($pid) {
                                         }
 					fputs($s, "226 Closing data Connection.\r\n");
                                         break;
-                case "mediumfile":
+				case "mediumfile":
 					fputs($s, "150 File status okay; about to open data connection.\r\n");
 					for($i = 0; $i < 150; $i++){
 						fputs($fs, "This is line $i of the test data.\n");
@@ -384,13 +400,22 @@ if ($pid) {
 
 
 		}elseif (preg_match('/^PASV/', $buf, $matches)) {
-			$port = $pasv_port;
-			$p2 = $port % ((int) 1 << 8);
-			$p1 = ($port-$p2)/((int) 1 << 8);
+			$pasv=true;
+			$p2 = $pasv_port % ((int) 1 << 8);
+			$p1 = ($pasv_port-$p2)/((int) 1 << 8);
 			$host = "127.0.0.1";
+			if (!empty($ssl)) {
+				$soc = stream_socket_server("tcp://127.0.0.1:$pasv_port", $errno, $errstr, STREAM_SERVER_BIND|STREAM_SERVER_LISTEN, $context);
+			} else {
+				$soc = stream_socket_server("tcp://127.0.0.1:$pasv_port");
+			}
+
 			fputs($s, "227 Entering Passive Mode. (127,0,0,1,{$p1},{$p2})\r\n");
 
+			$pasvs = stream_socket_accept($soc,10);
 
+		}elseif (preg_match('/^EPSV/', $buf, $matches)) {
+			fputs($s, "550 Extended passsive mode not supported.\r\n");
 		} elseif (preg_match('/^SITE EXEC/', $buf, $matches)) {
 			fputs($s, "200 OK\r\n");
 

@@ -6,8 +6,8 @@
 /* Define the minimum supported version */
 #undef _WIN32_WINNT
 #undef NTDDI_VERSION
-#define _WIN32_WINNT 0x0600
-#define NTDDI_VERSION  0x06000100
+#define _WIN32_WINNT 0x0601
+#define NTDDI_VERSION 0x06010000
 
 /* Default PHP / PEAR directories */
 #define PHP_CONFIG_FILE_PATH (getenv("SystemRoot")?getenv("SystemRoot"):"")
@@ -175,3 +175,5 @@
 #define HAVE_GETRUSAGE
 
 #define HAVE_FTOK 1
+
+#define HAVE_NICE

@@ -9,7 +9,7 @@ $rp = $rm->getParameters()[0];
 $rt = $rp->getType();
 $rrt = $rm->getReturnType();
 unset($rm, $rp);
-var_dump((string) $rt, (string) $rrt);
+var_dump($rt->getName(), $rrt->getName());
 
 --EXPECT--
 string(4) "Test"

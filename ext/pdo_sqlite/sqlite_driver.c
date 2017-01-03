@@ -325,7 +325,6 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 	fake_argc = argc + is_agg;
 
 	fc->fci.size = sizeof(fc->fci);
-	fc->fci.function_table = EG(function_table);
 	ZVAL_COPY_VALUE(&fc->fci.function_name, cb);
 	fc->fci.object = NULL;
 	fc->fci.retval = &retval;
@@ -475,7 +474,6 @@ static int php_sqlite3_collation_callback(void *context,
 	struct pdo_sqlite_collation *collation = (struct pdo_sqlite_collation*) context;
 
 	collation->fc.fci.size = sizeof(collation->fc.fci);
-	collation->fc.fci.function_table = EG(function_table);
 	ZVAL_COPY_VALUE(&collation->fc.fci.function_name, &collation->callback);
 	collation->fc.fci.object = NULL;
 	collation->fc.fci.retval = &retval;
@@ -521,10 +519,12 @@ static PHP_METHOD(SQLite, sqliteCreateFunction)
 	pdo_sqlite_db_handle *H;
 	int ret;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "sz|l",
-			&func_name, &func_name_len, &callback, &argc)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STRING(func_name, func_name_len)
+		Z_PARAM_ZVAL_DEREF(callback)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(argc)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	dbh = Z_PDO_DBH_P(getThis());
 	PDO_CONSTRUCT_CHECK;
@@ -591,10 +591,13 @@ static PHP_METHOD(SQLite, sqliteCreateAggregate)
 	pdo_sqlite_db_handle *H;
 	int ret;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "szz|l",
-			&func_name, &func_name_len, &step_callback, &fini_callback, &argc)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(3, 4)
+		Z_PARAM_STRING(func_name, func_name_len)
+		Z_PARAM_ZVAL_DEREF(step_callback)
+		Z_PARAM_ZVAL_DEREF(fini_callback)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(argc)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	dbh = Z_PDO_DBH_P(getThis());
 	PDO_CONSTRUCT_CHECK;
@@ -651,10 +654,10 @@ static PHP_METHOD(SQLite, sqliteCreateCollation)
 	pdo_sqlite_db_handle *H;
 	int ret;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "sz",
-		&collation_name, &collation_name_len, &callback)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STRING(collation_name, collation_name_len)
+		Z_PARAM_ZVAL_DEREF(callback)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	dbh = Z_PDO_DBH_P(getThis());
 	PDO_CONSTRUCT_CHECK;
@@ -729,7 +732,8 @@ static struct pdo_dbh_methods sqlite_methods = {
 	pdo_sqlite_get_attribute,
 	NULL,	/* check_liveness: not needed */
 	get_driver_methods,
-	pdo_sqlite_request_shutdown
+	pdo_sqlite_request_shutdown,
+	NULL
 };
 
 static char *make_filename_safe(const char *filename)

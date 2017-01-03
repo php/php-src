@@ -35,12 +35,9 @@
 #include <ieeefp.h>
 #endif
 
+#include "zend_portability.h"
 #include "zend_strtod.h"
 #include "zend_multiply.h"
-
-#if 0&&HAVE_BCMATH
-#include "ext/bcmath/libbcmath/src/bcmath.h"
-#endif
 
 #define LONG_SIGN_MASK (((zend_long)1) << (8*sizeof(zend_long)-1))
 
@@ -170,7 +167,7 @@ zend_memnstr(const char *haystack, const char *needle, size_t needle_len, const 
 		return NULL;
 	}
 
-	if (EXPECTED(off_s < 1024 || needle_len < 3)) {
+	if (EXPECTED(off_s < 1024 || needle_len < 9)) {	/* glibc memchr is faster when needle is too short */
 		end -= needle_len;
 
 		while (p <= end) {
@@ -444,7 +441,23 @@ ZEND_API void zend_update_current_locale(void);
 
 static zend_always_inline void fast_long_increment_function(zval *op1)
 {
-#if defined(__GNUC__) && defined(__i386__)
+#if PHP_HAVE_BUILTIN_SADDL_OVERFLOW && SIZEOF_LONG == SIZEOF_ZEND_LONG
+	long lresult;
+	if (UNEXPECTED(__builtin_saddl_overflow(Z_LVAL_P(op1), 1, &lresult))) {
+		/* switch to double */
+		ZVAL_DOUBLE(op1, (double)ZEND_LONG_MAX + 1.0);
+	} else {
+		Z_LVAL_P(op1) = lresult;
+	}
+#elif PHP_HAVE_BUILTIN_SADDLL_OVERFLOW && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
+	long long llresult;
+	if (UNEXPECTED(__builtin_saddll_overflow(Z_LVAL_P(op1), 1, &llresult))) {
+		/* switch to double */
+		ZVAL_DOUBLE(op1, (double)ZEND_LONG_MAX + 1.0);
+	} else {
+		Z_LVAL_P(op1) = llresult;
+	}
+#elif defined(__GNUC__) && defined(__i386__)
 	__asm__(
 		"incl (%0)\n\t"
 		"jno  0f\n\t"
@@ -456,7 +469,7 @@ static zend_always_inline void fast_long_increment_function(zval *op1)
 		: "r"(&op1->value),
 		  "n"(IS_DOUBLE),
 		  "n"(ZVAL_OFFSETOF_TYPE)
-		: "cc");
+		: "cc", "memory");
 #elif defined(__GNUC__) && defined(__x86_64__)
 	__asm__(
 		"incq (%0)\n\t"
@@ -469,7 +482,7 @@ static zend_always_inline void fast_long_increment_function(zval *op1)
 		: "r"(&op1->value),
 		  "n"(IS_DOUBLE),
 		  "n"(ZVAL_OFFSETOF_TYPE)
-		: "cc");
+		: "cc", "memory");
 #else
 	if (UNEXPECTED(Z_LVAL_P(op1) == ZEND_LONG_MAX)) {
 		/* switch to double */
@@ -482,7 +495,23 @@ static zend_always_inline void fast_long_increment_function(zval *op1)
 
 static zend_always_inline void fast_long_decrement_function(zval *op1)
 {
-#if defined(__GNUC__) && defined(__i386__)
+#if PHP_HAVE_BUILTIN_SSUBL_OVERFLOW && SIZEOF_LONG == SIZEOF_ZEND_LONG
+	long lresult;
+	if (UNEXPECTED(__builtin_ssubl_overflow(Z_LVAL_P(op1), 1, &lresult))) {
+		/* switch to double */
+		ZVAL_DOUBLE(op1, (double)ZEND_LONG_MIN - 1.0);
+	} else {
+		Z_LVAL_P(op1) = lresult;
+	}
+#elif PHP_HAVE_BUILTIN_SSUBLL_OVERFLOW && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
+	long long llresult;
+	if (UNEXPECTED(__builtin_ssubll_overflow(Z_LVAL_P(op1), 1, &llresult))) {
+		/* switch to double */
+		ZVAL_DOUBLE(op1, (double)ZEND_LONG_MIN - 1.0);
+	} else {
+		Z_LVAL_P(op1) = llresult;
+	}
+#elif defined(__GNUC__) && defined(__i386__)
 	__asm__(
 		"decl (%0)\n\t"
 		"jno  0f\n\t"
@@ -494,7 +523,7 @@ static zend_always_inline void fast_long_decrement_function(zval *op1)
 		: "r"(&op1->value),
 		  "n"(IS_DOUBLE),
 		  "n"(ZVAL_OFFSETOF_TYPE)
-		: "cc");
+		: "cc", "memory");
 #elif defined(__GNUC__) && defined(__x86_64__)
 	__asm__(
 		"decq (%0)\n\t"
@@ -507,7 +536,7 @@ static zend_always_inline void fast_long_decrement_function(zval *op1)
 		: "r"(&op1->value),
 		  "n"(IS_DOUBLE),
 		  "n"(ZVAL_OFFSETOF_TYPE)
-		: "cc");
+		: "cc", "memory");
 #else
 	if (UNEXPECTED(Z_LVAL_P(op1) == ZEND_LONG_MIN)) {
 		/* switch to double */
@@ -520,7 +549,24 @@ static zend_always_inline void fast_long_decrement_function(zval *op1)
 
 static zend_always_inline void fast_long_add_function(zval *result, zval *op1, zval *op2)
 {
-#if defined(__GNUC__) && defined(__i386__) && !(4 == __GNUC__ && 8 == __GNUC_MINOR__)
+#if PHP_HAVE_BUILTIN_SADDL_OVERFLOW && SIZEOF_LONG == SIZEOF_ZEND_LONG
+	long lresult;
+	if (UNEXPECTED(__builtin_saddl_overflow(Z_LVAL_P(op1), Z_LVAL_P(op2), &lresult))) {
+		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) + (double) Z_LVAL_P(op2));
+	} else {
+		ZVAL_LONG(result, lresult);
+	}
+#elif PHP_HAVE_BUILTIN_SADDLL_OVERFLOW && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
+	long long llresult;
+	if (UNEXPECTED(__builtin_saddll_overflow(Z_LVAL_P(op1), Z_LVAL_P(op2), &llresult))) {
+		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) + (double) Z_LVAL_P(op2));
+	} else {
+		ZVAL_LONG(result, llresult);
+	}
+#elif defined(__GNUC__) && defined(__i386__) \
+	&& !(4 == __GNUC__ && 8 == __GNUC_MINOR__) \
+	&& !(4 == __GNUC__ && 9 == __GNUC_MINOR__ && (defined(__PIC__) || defined(__PIE__)))
+	/* Position-independent builds fail with gcc-4.9.x */
 	__asm__(
 		"movl	(%1), %%eax\n\t"
 		"addl   (%2), %%eax\n\t"
@@ -542,7 +588,7 @@ static zend_always_inline void fast_long_add_function(zval *result, zval *op1, z
 		  "n"(IS_LONG),
 		  "n"(IS_DOUBLE),
 		  "n"(ZVAL_OFFSETOF_TYPE)
-		: "eax","cc");
+		: "eax","cc", "memory");
 #elif defined(__GNUC__) && defined(__x86_64__)
 	__asm__(
 		"movq	(%1), %%rax\n\t"
@@ -565,7 +611,7 @@ static zend_always_inline void fast_long_add_function(zval *result, zval *op1, z
 		  "n"(IS_LONG),
 		  "n"(IS_DOUBLE),
 		  "n"(ZVAL_OFFSETOF_TYPE)
-		: "rax","cc");
+		: "rax","cc", "memory");
 #else
 	/*
 	 * 'result' may alias with op1 or op2, so we need to
@@ -606,7 +652,24 @@ static zend_always_inline int fast_add_function(zval *result, zval *op1, zval *o
 
 static zend_always_inline void fast_long_sub_function(zval *result, zval *op1, zval *op2)
 {
-#if defined(__GNUC__) && defined(__i386__) && !(4 == __GNUC__ && 8 == __GNUC_MINOR__)
+#if PHP_HAVE_BUILTIN_SSUBL_OVERFLOW && SIZEOF_LONG == SIZEOF_ZEND_LONG
+	long lresult;
+	if (UNEXPECTED(__builtin_ssubl_overflow(Z_LVAL_P(op1), Z_LVAL_P(op2), &lresult))) {
+		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) - (double) Z_LVAL_P(op2));
+	} else {
+		ZVAL_LONG(result, lresult);
+	}
+#elif PHP_HAVE_BUILTIN_SSUBLL_OVERFLOW && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
+	long long llresult;
+	if (UNEXPECTED(__builtin_ssubll_overflow(Z_LVAL_P(op1), Z_LVAL_P(op2), &llresult))) {
+		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) - (double) Z_LVAL_P(op2));
+	} else {
+		ZVAL_LONG(result, llresult);
+	}
+#elif defined(__GNUC__) && defined(__i386__) && \
+	!(4 == __GNUC__ && 8 == __GNUC_MINOR__) && \
+	!(4 == __GNUC__ && 9 == __GNUC_MINOR__ && (defined(__PIC__) || defined(__PIE__)))
+	/* Position-independent builds fail with gcc-4.9.x */
 	__asm__(
 		"movl	(%1), %%eax\n\t"
 		"subl   (%2), %%eax\n\t"
@@ -632,7 +695,7 @@ static zend_always_inline void fast_long_sub_function(zval *result, zval *op1, z
 		  "n"(IS_LONG),
 		  "n"(IS_DOUBLE),
 		  "n"(ZVAL_OFFSETOF_TYPE)
-		: "eax","cc");
+		: "eax","cc", "memory");
 #elif defined(__GNUC__) && defined(__x86_64__)
 	__asm__(
 		"movq	(%1), %%rax\n\t"
@@ -659,7 +722,7 @@ static zend_always_inline void fast_long_sub_function(zval *result, zval *op1, z
 		  "n"(IS_LONG),
 		  "n"(IS_DOUBLE),
 		  "n"(ZVAL_OFFSETOF_TYPE)
-		: "rax","cc");
+		: "rax","cc", "memory");
 #else
 	ZVAL_LONG(result, Z_LVAL_P(op1) - Z_LVAL_P(op2));
 

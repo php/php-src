@@ -28,13 +28,13 @@ Warning: preg_replace_callback() expects at least 3 parameters, 2 given in %s on
 NULL
 
 Warning: preg_replace_callback(): Requires argument 2, '2', to be a valid callback in %s on line %d
-int(3)
+string(1) "3"
 
 Warning: preg_replace_callback(): Requires argument 2, '2', to be a valid callback in %s on line %d
-int(3)
+string(1) "3"
 
 Warning: preg_replace_callback(): Requires argument 2, '2', to be a valid callback in %s on line %d
-int(3)
+string(1) "3"
 
 Warning: preg_replace_callback() expects parameter 4 to be integer, string given in %s on line %d
 NULL
