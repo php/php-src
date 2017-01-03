@@ -480,7 +480,7 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 #ifdef ZEND_WIN32
 #define ZEND_SECURE_ZERO(var, size) RtlSecureZeroMemory((var), (size))
 #else
-#define ZEND_SECURE_ZERO(var, size) memset((var), 0, (size))
+#define ZEND_SECURE_ZERO(var, size) explicit_bzero((var), (size))
 #endif
 
 /* This check should only be used on network socket, not file descriptors */
