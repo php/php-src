@@ -3,6 +3,15 @@ version: "{branch}.build.{build}"
 
 image: Visual Studio 2015
 
+branches:
+        except:
+                - PHP-5.6
+                - PHP-7.0
+
+skip_commits:
+        message: /.*(NEWS|UPGRADING).*/
+
+
 clone_depth: 64
 
 cache:
