@@ -1805,7 +1805,7 @@ ldap.max_links = -1
 ;opcache.save_comments=1
 
 ; If enabled, a fast shutdown sequence is used for the accelerated code
-;opcache.fast_shutdown=1
+;opcache.fast_shutdown=0
 
 ; Allow file existence override (file_exists, etc.) performance feature.
 ;opcache.enable_file_override=0
