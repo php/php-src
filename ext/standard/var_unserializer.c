@@ -492,7 +492,7 @@ static inline zend_long object_common1(UNSERIALIZE_PARAMETER, zend_class_entry *
 	} else {
 		/* If this class implements Serializable, it should not land here but in object_custom(). The passed string
 		obviously doesn't descend from the regular serializer. */
-		zend_error(E_WARNING, "Erroneous data format for unserializing '%s'", ce->name);
+		zend_error(E_WARNING, "Erroneous data format for unserializing '%s'", ZSTR_VAL(ce->name));
 		return -1;
 	}
 
@@ -553,7 +553,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 	var_entries *orig_var_entries = (*var_hash)->last;
 	zend_long orig_used_slots = orig_var_entries ? orig_var_entries->used_slots : 0;
 	int result;
-	
+
 	result = php_var_unserialize_internal(UNSERIALIZE_PASSTHRU);
 
 	if (!result) {
