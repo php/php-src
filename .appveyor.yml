@@ -9,8 +9,10 @@ branches:
                 - PHP-7.0
 
 skip_commits:
-        message: /.*(NEWS|UPGRADING).*/
-
+        files:
+                - NEWS
+                - UPGRADING*
+                - README.*
 
 clone_depth: 64
 
