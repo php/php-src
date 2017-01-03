@@ -915,7 +915,7 @@ object ":" uiv ":" ["]	{
 	elements = object_common1(UNSERIALIZE_PASSTHRU, ce);
 
 	if (elements < 0) {
-	   efree(class_name);
+	   zend_string_release(class_name);
 	   return 0;
 	}
 
