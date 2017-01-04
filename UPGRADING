@@ -130,6 +130,7 @@ PHP 7.2 UPGRADE NOTES
   . Added imagesetclip() and imagegetclip().
   . Added imageopenpolygon().
   . Added imageresolution().
+  . Added imagecreatefrombmp() and imagebmp().
 
 - Mbstring:
   . Added mb_chr() and mb_ord().
@@ -191,6 +192,7 @@ PHP 7.2 UPGRADE NOTES
 
 - GD:
   . IMG_EFFECT_MULTIPLY
+  . IMG_BMP
 
 - Standard:
   . PASSWORD_ARGON2_DEFAULT_MEMORY_COST
