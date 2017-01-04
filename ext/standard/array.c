@@ -750,7 +750,7 @@ PHPAPI zend_long php_count_recursive(zval *array, zend_long mode) /* {{{ */
 
 	if (Z_TYPE_P(array) == IS_ARRAY) {
 		if (Z_ARRVAL_P(array)->u.v.nApplyCount > 1) {
-			php_error_docref(NULL, E_WARNING, "recursion detected");
+			php_error_docref_ex(E_WARNING, "recursion detected");
 			return 0;
 		}
 
