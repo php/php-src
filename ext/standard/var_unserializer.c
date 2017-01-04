@@ -143,7 +143,7 @@ PHPAPI zval *var_tmp_var(php_unserialize_data_t *var_hashx)
         (*var_hashx)->last_dtor = var_hash;
     }
     ZVAL_UNDEF(&var_hash->data[var_hash->used_slots]);
-	Z_ACCESS_FLAGS(var_hash->data[var_hash->used_slots]) = 0;
+	Z_EXTRA(var_hash->data[var_hash->used_slots]) = 0;
     return &var_hash->data[var_hash->used_slots++];
 }
 
@@ -213,7 +213,7 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 #endif
 
 			/* Perform delayed __wakeup calls */
-			if (Z_ACCESS_FLAGS_P(zv) == VAR_WAKEUP_FLAG) {
+			if (Z_EXTRA_P(zv) == VAR_WAKEUP_FLAG) {
 				if (!wakeup_failed) {
 					zval retval;
 					if (Z_ISUNDEF(wakeup_name)) {
@@ -563,7 +563,7 @@ static inline int object_common2(UNSERIALIZE_PARAMETER, zend_long elements)
 		/* Delay __wakeup call until end of serialization */
 		zval *wakeup_var = var_tmp_var(var_hash);
 		ZVAL_COPY(wakeup_var, rval);
-		Z_ACCESS_FLAGS_P(wakeup_var) = VAR_WAKEUP_FLAG;
+		Z_EXTRA_P(wakeup_var) = VAR_WAKEUP_FLAG;
 	}
 
 	return finish_nested_data(UNSERIALIZE_PASSTHRU);
