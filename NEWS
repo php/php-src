@@ -60,6 +60,8 @@ PHP                                                                        NEWS
   . Fixed bug #70490 (get_browser function is very slow). (Nikita)
   . Fixed bug #73265 (Loading browscap.ini at startup causes high memory usage).
     (Nikita)
+  . Fixed bug #31875 (get_defined_functions additional param to exclude
+	disabled functions). (willianveiga)
 
 - Zlib:
   . Fixed bug #73373 (deflate_add does not verify that output was not truncated).
