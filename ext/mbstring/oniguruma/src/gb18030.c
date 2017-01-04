@@ -2,7 +2,7 @@
   gb18030.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2005-2016  KUBO Takehiro <kubo AT jiubao DOT org>
+ * Copyright (c) 2005-2017  KUBO Takehiro <kubo AT jiubao DOT org>
  *                          K.Kosako <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
