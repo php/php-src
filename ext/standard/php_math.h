@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Jim Winstead <jimw@php.net>                                 |
-   |          Stig Sæther Bakken <ssb@php.net>                            |
+   |          Stig Sï¿½ther Bakken <ssb@php.net>                            |
    +----------------------------------------------------------------------+
 */
 
@@ -66,6 +66,7 @@ PHP_FUNCTION(fmod);
 PHP_FUNCTION(deg2rad);
 PHP_FUNCTION(rad2deg);
 PHP_FUNCTION(intdiv);
+PHP_FUNCTION(ldexp);
 
    /*
    WARNING: these functions are expermental: they could change their names or 
