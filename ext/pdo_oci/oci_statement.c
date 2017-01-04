@@ -333,11 +333,8 @@ static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *pa
 					case PDO_PARAM_STR:
 					default:
 						P->oci_type = SQLT_CHR;
-						value_sz = (sb4) param->max_value_len;
-						if (param->max_value_len == 0) {
-							value_sz = (sb4) 1332; /* maximum size before value is interpreted as a LONG value */
-						}
-
+						/* we can provide as much data as value_sz can fit */
+						value_sz = SB4MAXVAL;
 				}
 
 				if (param->name) {
