@@ -3299,7 +3299,7 @@ function ADD_MAKEFILE_FRAGMENT(src_file)
 	if (FSO.FileExists(fn_in)) {
 		var h_in, h_out;
 		var create_out_fl = !FSO.FileExists(PHP_MAKEFILE_FRAGMENTS);
-		var open_flags = create_out_fl ? 8 : 2;
+		var open_flags = create_out_fl ? 2 : 8;
 
 		h_in = FSO.OpenTextFile(fn_in, 1);
 		h_out = FSO.OpenTextFile(PHP_MAKEFILE_FRAGMENTS, open_flags, create_out_fl);
