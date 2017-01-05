@@ -11,7 +11,7 @@ cd /D %APPVEYOR_BUILD_FOLDER%
 if %errorlevel% neq 0 exit /b 3
 
 if /i "%APPVEYOR_REPO_BRANCH:~0,4%" equ "php-" (
-	set BRANCH=%APPVEYOR_REPO_BRANCH:~4%
+	set BRANCH=%APPVEYOR_REPO_BRANCH:~4,3%
 	set STABILITY=stable
 ) else (
 	set BRANCH=master
