@@ -284,11 +284,13 @@ int phar_archive_delref(phar_archive_data *phar) /* {{{ */
 		PHAR_G(last_phar) = NULL;
 		PHAR_G(last_phar_name) = PHAR_G(last_alias) = NULL;
 
-		if (phar->fp && !(phar->flags & PHAR_FILE_COMPRESSION_MASK)) {
+		if (phar->fp && (!(phar->flags & PHAR_FILE_COMPRESSION_MASK) || !phar->alias)) {
 			/* close open file handle - allows removal or rename of
 			the file on windows, which has greedy locking
 			only close if the archive was not already compressed.  If it
-			was compressed, then the fp does not refer to the original file */
+			was compressed, then the fp does not refer to the original file.
+			We're also closing compressed files to save resources,
+			but only if the archive isn't aliased. */
 			php_stream_close(phar->fp);
 			phar->fp = NULL;
 		}

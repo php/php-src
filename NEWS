@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2017, PHP 7.1.2
 
+- Phar:
+  . Fixed bug #70417 (PharData::compress() doesn't close temp file). (cmb)
 
 19 Jan 2017, PHP 7.1.1
 
