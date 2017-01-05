@@ -17,8 +17,8 @@ skip_commits:
 clone_depth: 64
 
 cache:
-        #- c:\build-cache
-        #- c:\build-cache\sdk -> .appveyor.yml
+        - c:\build-cache
+        - c:\build-cache\sdk -> .appveyor.yml
 
 environment:
         PHP_BUILD_CACHE_BASE_DIR: c:\build-cache  
