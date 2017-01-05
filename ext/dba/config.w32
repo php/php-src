@@ -4,7 +4,7 @@
 ARG_WITH("dba", "DBA support", "no");
 
 if (PHP_DBA != "no") {
-	if (CHECK_LIB("libdb31s.lib", "dba", PHP_DBA) &&
+	if (CHECK_LIB("libdb31s.lib;libdb61.lib", "dba", PHP_DBA) &&
 		CHECK_HEADER_ADD_INCLUDE("db.h", "CFLAGS_DBA")) {
 		EXTENSION("dba", "dba.c dba_cdb.c dba_db1.c dba_db2.c dba_db3.c dba_dbm.c dba_flatfile.c dba_gdbm.c dba_ndbm.c dba_inifile.c");
 		ADD_SOURCES("ext/dba/libcdb", "cdb.c cdb_make.c uint32.c", "dba");

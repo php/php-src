@@ -1,8 +1,8 @@
-/* 
+/*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,35 +26,47 @@
 extern zend_module_entry sysvshm_module_entry;
 #define sysvshm_module_ptr &sysvshm_module_entry
 
+#include "php_version.h"
+#define PHP_SYSVSHM_VERSION PHP_VERSION
+
 #include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/shm.h>
+
+#ifdef PHP_WIN32
+# include <TSRM/tsrm_win32.h>
+typedef int key_t;
+# ifndef THREAD_LS
+#  define THREAD_LS
+# endif
+#else
+# include <sys/ipc.h>
+# include <sys/shm.h>
+#endif
 
 #define PHP_SHM_RSRC_NAME "sysvshm"
 
 typedef struct {
 	int le_shm;
-	long init_mem;
+	zend_long init_mem;
 } sysvshm_module;
 
 typedef struct {
-	long key;
-	long length;
-	long next;
+	zend_long key;
+	zend_long length;
+	zend_long next;
 	char mem;
 } sysvshm_chunk;
 
 typedef struct {
 	char magic[8];
-	long start;
-	long end;
-	long free;
-	long total;
+	zend_long start;
+	zend_long end;
+	zend_long free;
+	zend_long total;
 } sysvshm_chunk_head;
 
 typedef struct {
 	key_t key;               /* key set by user */
-	long id;                 /* returned by shmget */
+	zend_long id;                 /* returned by shmget */
 	sysvshm_chunk_head *ptr; /* memory address of shared memory */
 } sysvshm_shm;
 

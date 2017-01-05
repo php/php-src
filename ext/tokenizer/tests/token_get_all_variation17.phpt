@@ -22,7 +22,7 @@ $source = '<?php
 function inverse($x)
 {
   if($x == 0) {
-    throw new Exception("Divison by zero");
+    throw new Exception("Division by zero");
   else
     return 1/$x;
 }
@@ -244,7 +244,7 @@ array(81) {
     [0]=>
     int(%d)
     [1]=>
-    string(17) ""Divison by zero""
+    string(18) ""Division by zero""
     [2]=>
     int(5)
   }

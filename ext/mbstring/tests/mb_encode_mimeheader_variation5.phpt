@@ -4,6 +4,7 @@ Test mb_encode_mimeheader() function : usage variations - Pass different data ty
 <?php
 extension_loaded('mbstring') or die('skip');
 function_exists('mb_encode_mimeheader') or die("skip mb_encode_mimeheader() is not available in this build");
+if (PHP_INT_SIZE != 8) die('skip 64-bit only');
 ?>
 --FILE--
 <?php
@@ -172,32 +173,32 @@ string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr
 
 -- Iteration 16 --
 
-Warning: mb_encode_mimeheader() expects parameter 5 to be long, string given in %s on line %d
+Warning: mb_encode_mimeheader() expects parameter 5 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 17 --
 
-Warning: mb_encode_mimeheader() expects parameter 5 to be long, string given in %s on line %d
+Warning: mb_encode_mimeheader() expects parameter 5 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
 
-Warning: mb_encode_mimeheader() expects parameter 5 to be long, string given in %s on line %d
+Warning: mb_encode_mimeheader() expects parameter 5 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 19 --
 
-Warning: mb_encode_mimeheader() expects parameter 5 to be long, string given in %s on line %d
+Warning: mb_encode_mimeheader() expects parameter 5 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: mb_encode_mimeheader() expects parameter 5 to be long, string given in %s on line %d
+Warning: mb_encode_mimeheader() expects parameter 5 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: mb_encode_mimeheader() expects parameter 5 to be long, object given in %s on line %d
+Warning: mb_encode_mimeheader() expects parameter 5 to be integer, object given in %s on line %d
 NULL
 
 -- Iteration 22 --
@@ -210,6 +211,6 @@ string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr
 
 -- Iteration 24 --
 
-Warning: mb_encode_mimeheader() expects parameter 5 to be long, resource given in %s on line %d
+Warning: mb_encode_mimeheader() expects parameter 5 to be integer, resource given in %s on line %d
 NULL
 Done

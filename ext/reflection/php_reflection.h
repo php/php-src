@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,6 +26,8 @@
 extern zend_module_entry reflection_module_entry;
 #define phpext_reflection_ptr &reflection_module_entry
 
+#define PHP_REFLECTION_VERSION PHP_VERSION
+
 BEGIN_EXTERN_C()
 
 /* Class entry pointers */
@@ -35,6 +37,7 @@ extern PHPAPI zend_class_entry *reflection_ptr;
 extern PHPAPI zend_class_entry *reflection_function_abstract_ptr;
 extern PHPAPI zend_class_entry *reflection_function_ptr;
 extern PHPAPI zend_class_entry *reflection_parameter_ptr;
+extern PHPAPI zend_class_entry *reflection_type_ptr;
 extern PHPAPI zend_class_entry *reflection_class_ptr;
 extern PHPAPI zend_class_entry *reflection_object_ptr;
 extern PHPAPI zend_class_entry *reflection_method_ptr;
@@ -42,8 +45,8 @@ extern PHPAPI zend_class_entry *reflection_property_ptr;
 extern PHPAPI zend_class_entry *reflection_extension_ptr;
 extern PHPAPI zend_class_entry *reflection_zend_extension_ptr;
 
-PHPAPI void zend_reflection_class_factory(zend_class_entry *ce, zval *object TSRMLS_DC);
-	
+PHPAPI void zend_reflection_class_factory(zend_class_entry *ce, zval *object);
+
 END_EXTERN_C()
 
 #endif /* PHP_REFLECTION_H */

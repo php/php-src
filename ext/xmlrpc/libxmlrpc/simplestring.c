@@ -201,7 +201,7 @@ void simplestring_addn(simplestring* target, const char* source, size_t add_len)
          simplestring_init_str(target);
       }
 
-      if((INT_MAX - add_len) < target->len || (INT_MAX - add_len - 1) < target->len) {
+      if((SIZE_MAX - add_len) < target->len || (SIZE_MAX - add_len - 1) < target->len) {
     	  /* check for overflows, if there's a potential overflow do nothing */
     	  return;
       }

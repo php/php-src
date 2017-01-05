@@ -26,6 +26,6 @@ unlink($filename);
 bool(false)
 bool(false)
 
-Warning: gzeof(): %d is not a valid stream resource in %s on line %d
+Warning: gzeof(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 ===DONE===

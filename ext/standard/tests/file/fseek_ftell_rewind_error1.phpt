@@ -76,7 +76,7 @@ Warning: fseek() expects parameter 1 to be resource, integer given in %s on line
 bool(false)
 -- Iteration 3 --
 
-Warning: fseek() expects parameter 1 to be resource, double given in %s on line %d
+Warning: fseek() expects parameter 1 to be resource, float given in %s on line %d
 bool(false)
 -- Iteration 4 --
 
@@ -91,7 +91,7 @@ bool(false)
 Warning: fseek() expects parameter 1 to be resource, object given in %s on line %d
 bool(false)
 -- Testing fseek() with closed/unset file handle --
-Warning: fseek(): %d is not a valid stream resource in %s on line %d
+Warning: fseek(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
 Warning: fseek() expects parameter 1 to be resource, null given in %s on line %d

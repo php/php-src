@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar php single-file executable PHP extension                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2016 The PHP Group                                |
+  | Copyright (c) 2005-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -34,7 +34,7 @@ extern zend_module_entry phar_module_entry;
 #define PHP_PHAR_API PHPAPI
 #endif
 
-PHP_PHAR_API int phar_resolve_alias(char *alias, int alias_len, char **filename, int *filename_len TSRMLS_DC);
+PHP_PHAR_API int phar_resolve_alias(char *alias, int alias_len, char **filename, int *filename_len);
 
 #endif /* PHP_PHAR_H */
 

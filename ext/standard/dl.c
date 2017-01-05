@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -54,36 +54,24 @@
 PHPAPI PHP_FUNCTION(dl)
 {
 	char *filename;
-	int filename_len;
+	size_t filename_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &filename, &filename_len) == FAILURE) {
 		return;
 	}
 
 	if (!PG(enable_dl)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Dynamically loaded extensions aren't enabled");
+		php_error_docref(NULL, E_WARNING, "Dynamically loaded extensions aren't enabled");
 		RETURN_FALSE;
 	}
 
 	if (filename_len >= MAXPATHLEN) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "File name exceeds the maximum allowed length of %d characters", MAXPATHLEN);
+		php_error_docref(NULL, E_WARNING, "File name exceeds the maximum allowed length of %d characters", MAXPATHLEN);
 		RETURN_FALSE;
 	}
 
-	if ((strncmp(sapi_module.name, "cgi", 3) != 0) &&
-		(strcmp(sapi_module.name, "cli") != 0) &&
-		(strncmp(sapi_module.name, "embed", 5) != 0)
-	) {
-#ifdef ZTS
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not supported in multithreaded Web servers - use extension=%s in your php.ini", filename);
-		RETURN_FALSE;
-#else
-		php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "dl() is deprecated - use extension=%s in your php.ini", filename);
-#endif
-	}
-
-	php_dl(filename, MODULE_TEMPORARY, return_value, 0 TSRMLS_CC);
-	if (Z_LVAL_P(return_value) == 1) {
+	php_dl(filename, MODULE_TEMPORARY, return_value, 0);
+	if (Z_TYPE_P(return_value) == IS_TRUE) {
 		EG(full_tables_cleanup) = 1;
 	}
 }
@@ -99,7 +87,7 @@ PHPAPI PHP_FUNCTION(dl)
 
 /* {{{ php_load_extension
  */
-PHPAPI int php_load_extension(char *filename, int type, int start_now TSRMLS_DC)
+PHPAPI int php_load_extension(char *filename, int type, int start_now)
 {
 	void *handle;
 	char *libpath;
@@ -124,12 +112,12 @@ PHPAPI int php_load_extension(char *filename, int type, int start_now TSRMLS_DC)
 	if (strchr(filename, '/') != NULL || strchr(filename, DEFAULT_SLASH) != NULL) {
 		/* Passing modules with full path is not supported for dynamically loaded extensions */
 		if (type == MODULE_TEMPORARY) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Temporary module name should contain only filename");
+			php_error_docref(NULL, E_WARNING, "Temporary module name should contain only filename");
 			return FAILURE;
 		}
 		libpath = estrdup(filename);
 	} else if (extension_dir && extension_dir[0]) {
-		int extension_dir_len = strlen(extension_dir);
+		int extension_dir_len = (int)strlen(extension_dir);
 
 		if (IS_SLASH(extension_dir[extension_dir_len-1])) {
 			spprintf(&libpath, 0, "%s%s", extension_dir, filename); /* SAFE */
@@ -145,14 +133,14 @@ PHPAPI int php_load_extension(char *filename, int type, int start_now TSRMLS_DC)
 	if (!handle) {
 #if PHP_WIN32
 		char *err = GET_DL_ERROR();
-		if (err && (*err != "")) {
-			php_error_docref(NULL TSRMLS_CC, error_type, "Unable to load dynamic library '%s' - %s", libpath, err);
+		if (err && (*err != '\0')) {
+			php_error_docref(NULL, error_type, "Unable to load dynamic library '%s' - %s", libpath, err);
 			LocalFree(err);
 		} else {
-			php_error_docref(NULL TSRMLS_CC, error_type, "Unable to load dynamic library '%s' - %s", libpath, "Unknown reason");
+			php_error_docref(NULL, error_type, "Unable to load dynamic library '%s' - %s", libpath, "Unknown reason");
 		}
 #else
-		php_error_docref(NULL TSRMLS_CC, error_type, "Unable to load dynamic library '%s' - %s", libpath, GET_DL_ERROR());
+		php_error_docref(NULL, error_type, "Unable to load dynamic library '%s' - %s", libpath, GET_DL_ERROR());
 		GET_DL_ERROR(); /* free the buffer storing the error */
 #endif
 		efree(libpath);
@@ -173,60 +161,26 @@ PHPAPI int php_load_extension(char *filename, int type, int start_now TSRMLS_DC)
 	if (!get_module) {
 		if (DL_FETCH_SYMBOL(handle, "zend_extension_entry") || DL_FETCH_SYMBOL(handle, "_zend_extension_entry")) {
 			DL_UNLOAD(handle);
-			php_error_docref(NULL TSRMLS_CC, error_type, "Invalid library (appears to be a Zend Extension, try loading using zend_extension=%s from php.ini)", filename);
+			php_error_docref(NULL, error_type, "Invalid library (appears to be a Zend Extension, try loading using zend_extension=%s from php.ini)", filename);
 			return FAILURE;
 		}
 		DL_UNLOAD(handle);
-		php_error_docref(NULL TSRMLS_CC, error_type, "Invalid library (maybe not a PHP library) '%s'", filename);
+		php_error_docref(NULL, error_type, "Invalid library (maybe not a PHP library) '%s'", filename);
 		return FAILURE;
 	}
 	module_entry = get_module();
 	if (module_entry->zend_api != ZEND_MODULE_API_NO) {
-		/* Check for pre-4.1.0 module which has a slightly different module_entry structure :( */
-			struct pre_4_1_0_module_entry {
-				char *name;
-				zend_function_entry *functions;
-				int (*module_startup_func)(INIT_FUNC_ARGS);
-				int (*module_shutdown_func)(SHUTDOWN_FUNC_ARGS);
-				int (*request_startup_func)(INIT_FUNC_ARGS);
-				int (*request_shutdown_func)(SHUTDOWN_FUNC_ARGS);
-				void (*info_func)(ZEND_MODULE_INFO_FUNC_ARGS);
-				int (*global_startup_func)(void);
-				int (*global_shutdown_func)(void);
-				int globals_id;
-				int module_started;
-				unsigned char type;
-				void *handle;
-				int module_number;
-				unsigned char zend_debug;
-				unsigned char zts;
-				unsigned int zend_api;
-			};
-
-			const char *name;
-			int zend_api;
-
-			if ((((struct pre_4_1_0_module_entry *)module_entry)->zend_api > 20000000) &&
-				(((struct pre_4_1_0_module_entry *)module_entry)->zend_api < 20010901)
-			) {
-				name		= ((struct pre_4_1_0_module_entry *)module_entry)->name;
-				zend_api	= ((struct pre_4_1_0_module_entry *)module_entry)->zend_api;
-			} else {
-				name		= module_entry->name;
-				zend_api	= module_entry->zend_api;
-			}
-
-			php_error_docref(NULL TSRMLS_CC, error_type,
+			php_error_docref(NULL, error_type,
 					"%s: Unable to initialize module\n"
 					"Module compiled with module API=%d\n"
 					"PHP    compiled with module API=%d\n"
 					"These options need to match\n",
-					name, zend_api, ZEND_MODULE_API_NO);
+					module_entry->name, module_entry->zend_api, ZEND_MODULE_API_NO);
 			DL_UNLOAD(handle);
 			return FAILURE;
 	}
 	if(strcmp(module_entry->build_id, ZEND_MODULE_BUILD_ID)) {
-		php_error_docref(NULL TSRMLS_CC, error_type,
+		php_error_docref(NULL, error_type,
 				"%s: Unable to initialize module\n"
 				"Module compiled with build ID=%s\n"
 				"PHP    compiled with build ID=%s\n"
@@ -239,19 +193,19 @@ PHPAPI int php_load_extension(char *filename, int type, int start_now TSRMLS_DC)
 	module_entry->module_number = zend_next_free_module();
 	module_entry->handle = handle;
 
-	if ((module_entry = zend_register_module_ex(module_entry TSRMLS_CC)) == NULL) {
+	if ((module_entry = zend_register_module_ex(module_entry)) == NULL) {
 		DL_UNLOAD(handle);
 		return FAILURE;
 	}
 
-	if ((type == MODULE_TEMPORARY || start_now) && zend_startup_module_ex(module_entry TSRMLS_CC) == FAILURE) {
+	if ((type == MODULE_TEMPORARY || start_now) && zend_startup_module_ex(module_entry) == FAILURE) {
 		DL_UNLOAD(handle);
 		return FAILURE;
 	}
 
 	if ((type == MODULE_TEMPORARY || start_now) && module_entry->request_startup_func) {
-		if (module_entry->request_startup_func(type, module_entry->module_number TSRMLS_CC) == FAILURE) {
-			php_error_docref(NULL TSRMLS_CC, error_type, "Unable to initialize module '%s'", module_entry->name);
+		if (module_entry->request_startup_func(type, module_entry->module_number) == FAILURE) {
+			php_error_docref(NULL, error_type, "Unable to initialize module '%s'", module_entry->name);
 			DL_UNLOAD(handle);
 			return FAILURE;
 		}
@@ -262,10 +216,10 @@ PHPAPI int php_load_extension(char *filename, int type, int start_now TSRMLS_DC)
 
 /* {{{ php_dl
  */
-PHPAPI void php_dl(char *file, int type, zval *return_value, int start_now TSRMLS_DC)
+PHPAPI void php_dl(char *file, int type, zval *return_value, int start_now)
 {
 	/* Load extension */
-	if (php_load_extension(file, type, start_now TSRMLS_CC) == FAILURE) {
+	if (php_load_extension(file, type, start_now) == FAILURE) {
 		RETVAL_FALSE;
 	} else {
 		RETVAL_TRUE;
@@ -280,10 +234,10 @@ PHP_MINFO_FUNCTION(dl)
 
 #else
 
-PHPAPI void php_dl(char *file, int type, zval *return_value, int start_now TSRMLS_DC)
+PHPAPI void php_dl(char *file, int type, zval *return_value, int start_now)
 {
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot dynamically load %s - dynamic modules are not supported", file);
-	RETURN_FALSE;
+	php_error_docref(NULL, E_WARNING, "Cannot dynamically load %s - dynamic modules are not supported", file);
+	RETVAL_FALSE;
 }
 
 PHP_MINFO_FUNCTION(dl)

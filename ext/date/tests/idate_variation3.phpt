@@ -1,5 +1,7 @@
 --TEST--
 Test idate() function : usage variation - Passing higher positive and negetive float values to timestamp.
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 4) echo "skip this test is for 32-bit only"; ?>
 --FILE--
 <?php
 /* Prototype  : int idate(string format [, int timestamp])
@@ -24,12 +26,16 @@ var_dump( idate($format, $timestamp) );
       
 ?>
 ===DONE===
---EXPECTREGEX--
-\*\*\* Testing idate\(\) : usage variation \*\*\*
+--EXPECTF--
+*** Testing idate() : usage variation ***
 
--- Testing idate\(\) function with float 12.3456789000e10 to timestamp --
-int\((1935|5882)\)
+-- Testing idate() function with float 12.3456789000e10 to timestamp --
 
--- Testing idate\(\) function with float -12.3456789000e10 to timestamp --
-int\((2004|1901|-1943)\)
+Warning: idate() expects parameter 2 to be integer, float given in %s on line %d
+bool(false)
+
+-- Testing idate() function with float -12.3456789000e10 to timestamp --
+
+Warning: idate() expects parameter 2 to be integer, float given in %s on line %d
+bool(false)
 ===DONE===

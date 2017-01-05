@@ -11,7 +11,7 @@ var_dump(foo);
 
 ?>
 --EXPECTF--
-Warning: Constants may only evaluate to scalar values in %s on line %d
+Warning: Constants may only evaluate to scalar values or arrays in %s on line %d
 
 Notice: Use of undefined constant foo - assumed 'foo' in %s on line %d
 string(%d) "foo"

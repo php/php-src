@@ -1,8 +1,0 @@
-#######################################################
-# name: basic
-# purpose: check basic functionality of phpdbg console
-# expect: TEST::EXACT
-# options: -rr
-#######################################################
-# [Nothing to execute!]
-#######################################################

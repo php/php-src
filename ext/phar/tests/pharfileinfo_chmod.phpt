@@ -29,5 +29,5 @@ $b->chmod(0666);
 --EXPECTF--
 Phar entry "a" is a temporary directory (not an actual entry in the archive), cannot chmod
 
-Warning: PharFileInfo::chmod() expects parameter 1 to be long, array given in %spharfileinfo_chmod.php on line %d
+Warning: PharFileInfo::chmod() expects parameter 1 to be integer, array given in %spharfileinfo_chmod.php on line %d
 ===DONE===

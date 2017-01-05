@@ -37,10 +37,10 @@ echo "Done";
 -- Testing mb_strlen() function with Zero arguments --
 
 Warning: mb_strlen() expects at least 1 parameter, 0 given in %s on line %d
-bool(false)
+NULL
 
 -- Testing mb_strlen() function with more than expected no. of arguments --
 
 Warning: mb_strlen() expects at most 2 parameters, 3 given in %s on line %d
-bool(false)
+NULL
 Done

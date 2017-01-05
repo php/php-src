@@ -130,7 +130,7 @@ Warning: iconv_strpos(): Offset not contained in string. in %s on line %d
 bool(false)
 
 -- Iteration 7 --
-int(8)
+bool(false)
 
 -- Iteration 8 --
 int(8)
@@ -158,32 +158,32 @@ int(8)
 
 -- Iteration 16 --
 
-Warning: iconv_strpos() expects parameter 3 to be long, string given in %s on line %d
+Warning: iconv_strpos() expects parameter 3 to be integer, string given in %s on line %d
 bool(false)
 
 -- Iteration 17 --
 
-Warning: iconv_strpos() expects parameter 3 to be long, string given in %s on line %d
+Warning: iconv_strpos() expects parameter 3 to be integer, string given in %s on line %d
 bool(false)
 
 -- Iteration 18 --
 
-Warning: iconv_strpos() expects parameter 3 to be long, string given in %s on line %d
+Warning: iconv_strpos() expects parameter 3 to be integer, string given in %s on line %d
 bool(false)
 
 -- Iteration 19 --
 
-Warning: iconv_strpos() expects parameter 3 to be long, string given in %s on line %d
+Warning: iconv_strpos() expects parameter 3 to be integer, string given in %s on line %d
 bool(false)
 
 -- Iteration 20 --
 
-Warning: iconv_strpos() expects parameter 3 to be long, string given in %s on line %d
+Warning: iconv_strpos() expects parameter 3 to be integer, string given in %s on line %d
 bool(false)
 
 -- Iteration 21 --
 
-Warning: iconv_strpos() expects parameter 3 to be long, object given in %s on line %d
+Warning: iconv_strpos() expects parameter 3 to be integer, object given in %s on line %d
 bool(false)
 
 -- Iteration 22 --
@@ -194,6 +194,6 @@ int(8)
 
 -- Iteration 24 --
 
-Warning: iconv_strpos() expects parameter 3 to be long, resource given in %s on line %d
+Warning: iconv_strpos() expects parameter 3 to be integer, resource given in %s on line %d
 bool(false)
 Done

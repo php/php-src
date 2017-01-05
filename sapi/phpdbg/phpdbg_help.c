@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,13 +22,14 @@
 #include "phpdbg.h"
 #include "phpdbg_help.h"
 #include "phpdbg_prompt.h"
+#include "phpdbg_eol.h"
 #include "zend.h"
 
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 /* {{{ Commands Table */
 #define PHPDBG_COMMAND_HELP_D(name, tip, alias, action) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, action, NULL, 0}
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, action, &phpdbg_prompt_commands[16], 0}
 
 const phpdbg_command_t phpdbg_help_commands[] = {
 	PHPDBG_COMMAND_HELP_D(aliases,    "show alias list", 'a', phpdbg_do_help_aliases),
@@ -40,11 +41,11 @@ const phpdbg_command_t phpdbg_help_commands[] = {
 };  /* }}} */
 
 /* {{{ pretty_print.  Formatting escapes and wrapping text in a string before printing it. */
-void pretty_print(char *text TSRMLS_DC)
+void pretty_print(char *text)
 {
 	char *new, *p, *q;
 
-	const char  *prompt_escape = phpdbg_get_prompt(TSRMLS_C);
+	const char  *prompt_escape = phpdbg_get_prompt();
 	unsigned int prompt_escape_len = strlen(prompt_escape);
 	unsigned int prompt_len = strlen(PHPDBG_G(prompt)[0]);
 
@@ -52,7 +53,7 @@ void pretty_print(char *text TSRMLS_DC)
 	const char  *bold_off_escape = PHPDBG_G(flags) & PHPDBG_IS_COLOURED ? "\033[0m" : "";
 	unsigned int bold_escape_len = strlen(bold_on_escape);
 
-	unsigned int term_width = phpdbg_get_terminal_width(TSRMLS_C);
+	unsigned int term_width = phpdbg_get_terminal_width();
 	unsigned int size = 0;
 
 	int in_bold = 0;
@@ -60,6 +61,11 @@ void pretty_print(char *text TSRMLS_DC)
 	char *last_new_blank = NULL;          /* position in new buffer of last blank char */
 	unsigned int last_blank_count = 0;    /* printable char offset of last blank char */
 	unsigned int line_count = 0;          /* number printable chars on current line */
+
+	if (PHPDBG_G(flags) & PHPDBG_WRITE_XML) {
+		phpdbg_xml("<help %r msg=\"%s\" />", text);
+		return;
+	}
 
 	/* First pass calculates a safe size for the pretty print version */
 	for (p = text; *p; p++) {
@@ -128,24 +134,24 @@ void pretty_print(char *text TSRMLS_DC)
 	*q++ = '\0';
 
 	if ((q-new)>size) {
-		phpdbg_error("Output overrun of %lu bytes", ((q-new) - size));
+		phpdbg_error("help", "overrun=\"%lu\"", "Output overrun of %lu bytes", ((q - new) - size));
 	}
 
-	phpdbg_write("%s\n", new);
+	phpdbg_out("%s\n", new);
 	efree(new);
 }  /* }}} */
 
 /* {{{ summary_print.  Print a summary line giving, the command, its alias and tip */
-void summary_print(phpdbg_command_t const * const cmd TSRMLS_DC)
+void summary_print(phpdbg_command_t const * const cmd)
 {
 	char *summary;
 	spprintf(&summary, 0, "Command: **%s**  Alias: **%c**  **%s**\n", cmd->name, cmd->alias, cmd->tip);
-	pretty_print(summary TSRMLS_CC);
+	pretty_print(summary);
 	efree(summary);
 }
 
 /* {{{ get_help. Retries and formats text from the phpdbg help text table */
-static char *get_help(const char * const key TSRMLS_DC)
+static char *get_help(const char * const key)
 {
 	phpdbg_help_text_t *p;
 
@@ -174,7 +180,7 @@ static int get_command(
 	const char *key, size_t len,      /* pointer and length of key */
 	phpdbg_command_t const **command, /* address of first matching command  */
 	phpdbg_command_t const * commands /* command table to be scanned */
-	TSRMLS_DC)
+	)
 {
 	const phpdbg_command_t *c;
 	unsigned int num_matches = 0;
@@ -201,7 +207,27 @@ static int get_command(
 
 	return num_matches;
 
-} /* }}} */	
+} /* }}} */
+
+void phpdbg_do_help_cmd(char *type) { /* {{{ */
+	char *help;
+
+	if (!type) {
+		pretty_print(get_help("overview!"));
+		return;
+	}
+
+	help = get_help(type);
+
+	if (!help || memcmp(help, "", sizeof("")) == SUCCESS) {
+		pretty_print(get_help("overview!"));
+		pretty_print(
+			"\nrequested help page could not be found");
+		return;
+	}
+
+	pretty_print(help);
+} /* }}} */
 
 PHPDBG_COMMAND(help) /* {{{ */
 {
@@ -209,40 +235,40 @@ PHPDBG_COMMAND(help) /* {{{ */
 	int n;
 
 	if (!param || param->type == EMPTY_PARAM) {
-		pretty_print(get_help("overview!" TSRMLS_CC) TSRMLS_CC);
+		pretty_print(get_help("overview!"));
 		return SUCCESS;
 	}
 
 	if (param && param->type == STR_PARAM) {
-	    n = get_command(param->str, param->len, &cmd, phpdbg_prompt_commands TSRMLS_CC);
+	    n = get_command(param->str, param->len, &cmd, phpdbg_prompt_commands);
 
 		if (n==1) {
-			summary_print(cmd TSRMLS_CC);
-			pretty_print(get_help(cmd->name TSRMLS_CC) TSRMLS_CC);
+			summary_print(cmd);
+			pretty_print(get_help(cmd->name));
 			return SUCCESS;
 
 		} else if (n>1) {
 			if (param->len > 1) {
 				for (cmd=phpdbg_prompt_commands; cmd->name; cmd++) {
 					if (!strncmp(cmd->name, param->str, param->len)) {
-						summary_print(cmd TSRMLS_CC);
+						summary_print(cmd);
 					}
 				}
-				pretty_print(get_help("duplicate!" TSRMLS_CC) TSRMLS_CC);
+				pretty_print(get_help("duplicate!"));
 				return SUCCESS;
 			} else {
-				phpdbg_error("Internal help error, non-unique alias \"%c\"", param->str[0]);
+				phpdbg_error("help", "type=\"ambiguousalias\" alias=\"%s\"", "Internal help error, non-unique alias \"%c\"", param->str[0]);
 				return FAILURE;
 			}
 
 		} else { /* no prompt command found so try help topic */
-		    n = get_command( param->str, param->len, &cmd, phpdbg_help_commands TSRMLS_CC);
+		    n = get_command( param->str, param->len, &cmd, phpdbg_help_commands);
 
 			if (n>0) {
-				if (cmd->alias == 'a') {   /* help aliases executes a canned routine */ 
-					return cmd->handler(param TSRMLS_CC);
+				if (cmd->alias == 'a') {   /* help aliases executes a canned routine */
+					return cmd->handler(param);
 				} else {
-					pretty_print(get_help(cmd->name TSRMLS_CC) TSRMLS_CC);
+					pretty_print(get_help(cmd->name));
 					return SUCCESS;
 				}
 			}
@@ -259,35 +285,42 @@ PHPDBG_HELP(aliases) /* {{{ */
 	int len;
 
 	/* Print out aliases for all commands except help as this one comes last */
-	phpdbg_writeln("Below are the aliased, short versions of all supported commands");
+	phpdbg_writeln("help", "", "Below are the aliased, short versions of all supported commands");
+	phpdbg_xml("<helpcommands %r>");
 	for(c = phpdbg_prompt_commands; c->name; c++) {
 		if (c->alias && c->alias != 'h') {
-			phpdbg_writeln(" %c     %-20s  %s", c->alias, c->name, c->tip);
+			phpdbg_writeln("command", "alias=\"%c\" name=\"%s\" tip=\"%s\"", " %c     %-20s  %s", c->alias, c->name, c->tip);
 			if (c->subs) {
 				len = 20 - 1 - c->name_len;
 				for(c_sub = c->subs; c_sub->alias; c_sub++) {
 					if (c_sub->alias) {
-						phpdbg_writeln(" %c %c   %s %-*s  %s",
-							c->alias, c_sub->alias, (char *)c->name, len, c_sub->name, c_sub->tip);
+						phpdbg_writeln("subcommand", "parent_alias=\"%c\" alias=\"%c\" parent=\"%s\" name=\"%-*s\" tip=\"%s\"", " %c %c   %s %-*s  %s",
+							c->alias, c_sub->alias, c->name, len, c_sub->name, c_sub->tip);
 					}
 				}
 			}
 		}
 	}
 
+	phpdbg_xml("</helpcommands>");
+
 	/* Print out aliases for help as this one comes last, with the added text on how aliases are used */
-	get_command("h", 1, &c, phpdbg_prompt_commands TSRMLS_CC);
-	phpdbg_writeln(" %c     %-20s  %s\n", c->alias, c->name, c->tip);
+	get_command("h", 1, &c, phpdbg_prompt_commands);
+	phpdbg_writeln("aliasinfo", "alias=\"%c\" name=\"%s\" tip=\"%s\"", " %c     %-20s  %s\n", c->alias, c->name, c->tip);
+
+	phpdbg_xml("<helpaliases>");
 
 	len = 20 - 1 - c->name_len;
 	for(c_sub = c->subs; c_sub->alias; c_sub++) {
 		if (c_sub->alias) {
-			phpdbg_writeln(" %c %c   %s %-*s  %s",
+			phpdbg_writeln("alias", "parent_alias=\"%c\" alias=\"%c\" parent=\"%s\" name=\"%-*s\" tip=\"%s\"", " %c %c   %s %-*s  %s",
 				c->alias, c_sub->alias, c->name, len, c_sub->name, c_sub->tip);
 		}
 	}
 
-	pretty_print(get_help("aliases!" TSRMLS_CC) TSRMLS_CC);
+	phpdbg_xml("</helpaliases>");
+
+	pretty_print(get_help("aliases!"));
 	return SUCCESS;
 } /* }}} */
 
@@ -319,16 +352,18 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **list**     list PHP source" CR
 "  **info**     displays information on the debug session" CR
 "  **print**    show opcodes" CR
-"  **frame**    select a stack frame and print a stack frame summary" CR 
+"  **frame**    select a stack frame and print a stack frame summary" CR
 "  **back**     shows the current backtrace" CR
 "  **help**     provide help on a topic" CR CR
 
 "**Starting and Stopping Execution**" CR
 "  **exec**     set execution context" CR
+"  **stdin**    set executing script from stdin" CR
 "  **run**      attempt execution" CR
 "  **step**     continue execution until other line is reached" CR
 "  **continue** continue execution" CR
 "  **until**    continue execution up to the given location" CR
+"  **next**     continue execution up to the given location and halt on the first line after it" CR
 "  **finish**   continue up to end of the current execution frame" CR
 "  **leave**    continue up to end of the current execution frame and halt after the calling instruction" CR
 "  **break**    set a breakpoint at the specified target" CR
@@ -362,33 +397,51 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **-c**      **-c**/my/php.ini       Set php.ini file to load" CR
 "  **-d**      **-d**memory_limit=4G   Set a php.ini directive" CR
 "  **-n**                          Disable default php.ini" CR
-"  **-q**                          Supress welcome banner" CR
+"  **-q**                          Suppress welcome banner" CR
 "  **-v**                          Enable oplog output" CR
-"  **-s**                          Enable stepping" CR
 "  **-b**                          Disable colour" CR
 "  **-i**      **-i**my.init           Set .phpdbginit file" CR
 "  **-I**                          Ignore default .phpdbginit" CR
 "  **-O**      **-O**my.oplog          Sets oplog output file" CR
 "  **-r**                          Run execution context" CR
-"  **-rr**                         Run execution context and quit after execution" CR
+"  **-rr**                         Run execution context and quit after execution (not respecting breakpoints)" CR
+"  **-e**                          Generate extended information for debugger/profiler" CR
 "  **-E**                          Enable step through eval, careful!" CR
+"  **-s**      **-s=**, **-s**=foo         Read code to execute from stdin with an optional delimiter" CR
 "  **-S**      **-S**cli               Override SAPI name, careful!" CR
 "  **-l**      **-l**4000              Setup remote console ports" CR
 "  **-a**      **-a**192.168.0.3       Setup remote console bind address" CR
+"  **-x**                          Enable xml output (instead of normal text output)" CR
+"  **-p**      **-p**, **-p=func**, **-p* **   Output opcodes and quit" CR
+"  **-h**                          Print the help overview" CR
 "  **-V**                          Print version number" CR
 "  **--**      **--** arg1 arg2        Use to delimit phpdbg arguments and php $argv; append any $argv "
 "argument after it" CR CR
 
+"**Reading from stdin**" CR CR
+
+"The **-s** option allows inputting a script to execute directly from stdin. The given delimiter "
+"(\"foo\" in the example) needs to be specified at the end of the input on its own line, followed by "
+"a line break. If **-rr** has been specified, it is allowed to omit the delimiter (**-s=**) and "
+"it will read until EOF. See also the help entry for the **stdin** command." CR CR
+
 "**Remote Console Mode**" CR CR
 
-"This mode is enabled by specifying the **-a** option.  Phpdbg will bind only to the loopback "
+"This mode is enabled by specifying the **-a** option. Phpdbg will bind only to the loopback "
 "interface by default, and this can only be overridden by explicitly setting the remote console "
 "bind address using the **-a** option. If **-a** is specied without an argument, then phpdbg "
 "will bind to all available interfaces.  You should be aware of the security implications of "
 "doing this, so measures should be taken to secure this service if bound to a publicly accessible "
 "interface/port." CR CR
 
-"Specify both stdin and stdout with -lstdin/stdout; by default stdout is stdin * 2."
+"**Opcode output**" CR CR
+
+"Outputting opcodes requires that a file path is passed as last argument. Modes of execution:" CR
+"**-p** Outputs the main execution context" CR
+"**-p* **Outputs all opcodes in the whole file (including classes and functions)" CR
+"**-p=function_name** Outputs opcodes of a given function in the file" CR
+"**-p=class_name::** Outputs opcodes of all the methods of a given class" CR
+"**-p=class_name::method** Outputs opcodes of a given method"
 },
 
 {"phpdbginit", CR
@@ -400,10 +453,10 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "Debugger scripts can also be executed using the **source** command." CR CR
 
 "A script file can contain a sequence of valid debugger commands, comments and embedded PHP "
-"code. " CR CR 
+"code. " CR CR
 
 "Comment lines are prefixed by the **#** character.  Note that comments are only allowed in script "
-"files and not in interactive sessions." CR CR 
+"files and not in interactive sessions." CR CR
 
 "PHP code is delimited by the start and end escape tags **<:** and **:>**. PHP code can be used "
 "to define application context for a debugging session and also to extend the debugger by defining "
@@ -545,7 +598,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 
 "    $P break ZEND_ADD" CR
 "    $P b ZEND_ADD" CR
-"    Break on any occurence of the opcode ZEND_ADD" CR CR
+"    Break on any occurrence of the opcode ZEND_ADD" CR CR
 
 "    $P break del 2" CR
 "    $P b ~ 2" CR
@@ -596,7 +649,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 },
 
 {"exec",
-"The **exec** command sets the execution context, that is the script to be executed.  The " 
+"The **exec** command sets the execution context, that is the script to be executed.  The "
 "execution context must be defined either by executing the **exec** command or by using the "
 "**-e** command line option." CR CR
 
@@ -608,6 +661,21 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "    $P exec /tmp/script.php" CR
 "    $P e /tmp/script.php" CR
 "    Set the execution context to **/tmp/script.php**"
+},
+
+{"stdin",
+"The **stdin** command takes a string serving as delimiter. It will then read all the input from "
+"stdin until encountering the given delimiter on a standalone line. It can also be passed at "
+"startup using the **-s=** command line option (the delimiter then is optional if **-rr** is "
+"also passed - in that case it will just read until EOF)." CR
+"This input will be then compiled as PHP code and set as execution context." CR CR
+
+"**Example**" CR CR
+
+"    $P stdin foo" CR
+"    <?php" CR
+"    echo \"Hello, world!\\n\";" CR
+"    foo"
 },
 
 //*********** Does F skip any breakpoints lower stack frames or only the current??
@@ -625,8 +693,8 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 
 {"frame",
 "The **frame** takes an optional integer argument. If omitted, then the current frame is displayed "
-"If specified then the current scope is set to the corresponding frame listed in a **back** trace. " "This can be used to allowing access to the variables in a higher stack frame than that currently "
-"being executed." CR CR
+"If specified then the current scope is set to the corresponding frame listed in a **back** trace. "
+"This can be used to allowing access to the variables in a higher stack frame than that currently being executed." CR CR
 
 "**Examples**" CR CR
 "    $P frame 2" CR
@@ -639,17 +707,20 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 
 {"info",
 "**info** commands provide quick access to various types of information about the PHP environment" CR
+"By default general information about environment and PHP build is shown." CR
 "Specific info commands are show below:" CR CR
 
 "  **Target**   **Alias**  **Purpose**" CR
-"  **break**    **b**      show current breakpoints" CR
-"  **files**    **F**      show included files" CR
-"  **classes**  **c**      show loaded classes" CR
-"  **funcs**    **f**      show loaded classes" CR
-"  **error**    **e**      show last error" CR
-"  **vars**     **v**      show active variables" CR
-"  **literal**  **l**      show active literal constants" CR
-"  **memory**   **m**      show memory manager stats"
+"  **break**      **b**      show current breakpoints" CR
+"  **files**      **F**      show included files" CR
+"  **classes**    **c**      show loaded classes" CR
+"  **funcs**      **f**      show loaded functions" CR
+"  **error**      **e**      show last error" CR
+"  **constants**  **d**      show user-defined constants" CR
+"  **vars**       **v**      show active variables" CR
+"  **globals**    **g**      show superglobal variables" CR
+"  **literal**    **l**      show active literal constants" CR
+"  **memory**     **m**      show memory manager stats"
 },
 
 // ******** same issue about breakpoints in called frames
@@ -724,7 +795,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 },
 
 {"print",
-"By default, print will show information about the current execution context." CR
+"By default, print will show the opcodes of the current execution context." CR
 "Other printing commands give access to instruction information." CR
 "Specific printers loaded are show below:" CR CR
 
@@ -735,6 +806,8 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **method**  **m**      print out the instructions in the specified method" CR
 "  **func**    **f**      print out the instructions in the specified function" CR
 "  **stack**   **s**      print out the instructions in the current stack" CR CR
+
+"In case passed argument does not match a specific printing command, it will treat it as function or method name and print its opcodes" CR CR
 
 "**Examples**" CR CR
 "    $P print class \\\\my\\\\class" CR
@@ -781,21 +854,19 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 
 {"run",
 "Enter the vm, starting execution. Execution will then continue until the next breakpoint "
-"or completion of the script. Add parameters you want to use as $argv" CR CR
+"or completion of the script. Add parameters you want to use as $argv. Add a trailing "
+"**< filename** for reading STDIN from a file." CR CR
 
 "**Examples**" CR CR
 
 "    $P run" CR
 "    $P r" CR
 "    Will cause execution of the context, if it is set" CR CR
-"    $P r test" CR
-"    Will execute with $argv[1] == \"test\"" CR CR
+"    $P r test < foo.txt" CR
+"    Will execute with $argv[1] == \"test\" and read from the foo.txt file for STDIN" CR CR
 
 "Note that the execution context must be set. If not previously compiled, then the script will "
-"be compiled before execution." CR CR
-
-"Note that attempting to run a script that is already executing will result in an \"execution "
-"in progress\" error."
+"be compiled before execution."
 },
 
 {"set",
@@ -875,10 +946,22 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "    $P s" CR
 "    Will continue and break again in the next encountered line" CR CR
 },
+{"next",
+"The **next** command causes control to be passed back to the vm, continuing execution. Any "
+"breakpoints that are encountered before the next source line will be skipped. Execution will"
+"be stopped when that line is left." CR CR
 
+"Note when **step**ping is enabled, any opcode steps within the current line are also skipped. "CR CR
+
+"Note that if the next line is **not** executed then **all** subsequent breakpoints will be "
+"skipped. " CR CR
+
+"Note **next** will trigger a \"not executing\" error if not executing."
+
+},
 {"until",
-"The **until** command causes control to be passed back to the vm, continuing execution.  Any "
-"breakpoints that are encountered before the next source line will be skipped.  Execution "
+"The **until** command causes control to be passed back to the vm, continuing execution. Any "
+"breakpoints that are encountered before the next source line will be skipped. Execution "
 "will then continue until the next breakpoint or completion of the script" CR CR
 
 "Note when **step**ping is enabled, any opcode steps within the current line are also skipped. "CR CR

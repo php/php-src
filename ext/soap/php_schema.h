@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -22,19 +22,21 @@
 #ifndef PHP_SCHEMA_H
 #define PHP_SCHEMA_H
 
-int load_schema(sdlCtx *ctx, xmlNodePtr schema TSRMLS_DC);
+int load_schema(sdlCtx *ctx, xmlNodePtr schema);
 void schema_pass2(sdlCtx *ctx);
 
-void delete_model(void *handle);
-void delete_model_persistent(void *handle);
-void delete_type(void *data);
-void delete_type_persistent(void *data);
-void delete_extra_attribute(void *attribute);
-void delete_extra_attribute_persistent(void *attribute);
-void delete_attribute(void *attribute);
-void delete_attribute_persistent(void *attribute);
-void delete_restriction_var_int(void *rvi);
-void delete_restriction_var_int_persistent(void *rvi);
-void delete_restriction_var_char(void *srvc);
-void delete_restriction_var_char_persistent(void *srvc);
+void delete_model(zval *zv);
+void delete_model_persistent(zval *zv);
+void delete_type(zval *zv);
+void delete_type_persistent(zval *zv);
+void delete_extra_attribute(zval *zv);
+void delete_extra_attribute_persistent(zval *zv);
+void delete_attribute(zval *zv);
+void delete_attribute_persistent(zval *zv);
+void delete_restriction_var_int(sdlRestrictionIntPtr ptr);
+void delete_restriction_var_int_persistent(sdlRestrictionIntPtr ptr);
+void delete_restriction_var_char(zval *zv);
+void delete_restriction_var_char_int(sdlRestrictionCharPtr ptr);
+void delete_restriction_var_char_persistent(zval *zv);
+void delete_restriction_var_char_persistent_int(sdlRestrictionCharPtr ptr);
 #endif

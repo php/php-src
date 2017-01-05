@@ -16,6 +16,7 @@
 
 #include "zlog.h"
 #include "fpm.h"
+#include "zend_portability.h"
 
 #define MAX_LINE_LENGTH 1024
 
@@ -98,20 +99,20 @@ int zlog_set_level(int new_value) /* {{{ */
 }
 /* }}} */
 
-void zlog_ex(const char *function, int line, int flags, const char *fmt, ...) /* {{{ */
+void vzlog(const char *function, int line, int flags, const char *fmt, va_list args) /* {{{ */
 {
 	struct timeval tv;
 	char buf[MAX_LINE_LENGTH];
 	const size_t buf_size = MAX_LINE_LENGTH;
-	va_list args;
 	size_t len = 0;
 	int truncated = 0;
 	int saved_errno;
 
 	if (external_logger) {
-		va_start(args, fmt);
-		len = vsnprintf(buf, buf_size, fmt, args);
-		va_end(args);
+		va_list ap;
+		va_copy(ap, args);
+		len = vsnprintf(buf, buf_size, fmt, ap);
+		va_end(ap);
 		if (len >= buf_size) {
 			memcpy(buf + buf_size - sizeof("..."), "...", sizeof("...") - 1);
 			len = buf_size - 1;
@@ -157,9 +158,7 @@ void zlog_ex(const char *function, int line, int flags, const char *fmt, ...) /*
 	}
 
 	if (!truncated) {
-		va_start(args, fmt);
 		len += vsnprintf(buf + len, buf_size - len, fmt, args);
-		va_end(args);
 		if (len >= buf_size) {
 			truncated = 1;
 		}
@@ -184,16 +183,23 @@ void zlog_ex(const char *function, int line, int flags, const char *fmt, ...) /*
 		buf[len] = '\0';
 		php_syslog(syslog_priorities[zlog_level], "%s", buf);
 		buf[len++] = '\n';
-	} else 
+	} else
 #endif
 	{
 		buf[len++] = '\n';
-		write(zlog_fd > -1 ? zlog_fd : STDERR_FILENO, buf, len);
+		zend_quiet_write(zlog_fd > -1 ? zlog_fd : STDERR_FILENO, buf, len);
 	}
 
 	if (zlog_fd != STDERR_FILENO && zlog_fd != -1 && !launched && (flags & ZLOG_LEVEL_MASK) >= ZLOG_NOTICE) {
-		write(STDERR_FILENO, buf, len);
+		zend_quiet_write(STDERR_FILENO, buf, len);
 	}
 }
 /* }}} */
 
+void zlog_ex(const char *function, int line, int flags, const char *fmt, ...) /* {{{ */ {
+	va_list args;
+	va_start(args, fmt);
+	vzlog(function, line, flags, fmt, args);
+	va_end(args);
+}
+/* }}} */

@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2016 The PHP Group                                |
+  | Copyright (c) 2006-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -12,13 +12,12 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Andrey Hristov <andrey@mysql.com>                           |
-  |          Ulf Wendel <uwendel@mysql.com>                              |
-  |          Georg Richter <georg@mysql.com>                             |
+  | Authors: Andrey Hristov <andrey@php.net>                             |
+  |          Ulf Wendel <uw@php.net>                                     |
+  |          Georg Richter <georg@php.net>                               |
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
 #ifndef MYSQLND_ENUM_N_DEF_H
 #define MYSQLND_ENUM_N_DEF_H
 
@@ -159,6 +158,32 @@ typedef enum mysqlnd_res_type
 	MYSQLND_RES_PS_BUF,
 	MYSQLND_RES_PS_UNBUF
 } enum_mysqlnd_res_type;
+
+typedef enum mysqlnd_send_query_type
+{
+	MYSQLND_SEND_QUERY_IMPLICIT = 0,
+	MYSQLND_SEND_QUERY_EXPLICIT
+} enum_mysqlnd_send_query_type;
+
+typedef enum mysqlnd_reap_result_type
+{
+	MYSQLND_REAP_RESULT_IMPLICIT = 0,
+	MYSQLND_REAP_RESULT_EXPLICIT
+} enum_mysqlnd_reap_result_type;
+
+typedef enum mysqlnd_send_execute_type
+{
+	MYSQLND_SEND_EXECUTE_IMPLICIT = 0,
+	MYSQLND_SEND_EXECUTE_EXPLICIT
+} enum_mysqlnd_send_execute_type;
+
+typedef enum mysqlnd_parse_exec_response_type
+{
+	MYSQLND_PARSE_EXEC_RESPONSE_IMPLICIT = 0,
+	MYSQLND_PARSE_EXEC_RESPONSE_IMPLICIT_NEXT_RESULT,
+	MYSQLND_PARSE_EXEC_RESPONSE_IMPLICIT_OUT_VARIABLES,
+	MYSQLND_PARSE_EXEC_RESPONSE_EXPLICIT,
+} enum_mysqlnd_parse_exec_response_type;
 
 typedef enum mysqlnd_option
 {
@@ -613,7 +638,7 @@ enum php_mysqlnd_server_command
 };
 
 
-#define MYSQLND_DEFAULT_PREFETCH_ROWS (ulong) 1
+#define MYSQLND_DEFAULT_PREFETCH_ROWS (zend_ulong) 1
 
 #define MYSQLND_REFRESH_GRANT		1	/* Refresh grant tables */
 #define MYSQLND_REFRESH_LOG			2	/* Start on new log file */

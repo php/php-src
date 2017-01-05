@@ -21,18 +21,23 @@ var_dump(intlcal_is_weekend($c, "jj"));
 var_dump(intlcal_is_weekend(1));
 
 --EXPECTF--
+Warning: IntlCalendar::isWeekend() expects at most 1 parameter, 2 given in %s on line %d
 
 Warning: IntlCalendar::isWeekend(): intlcal_is_weekend: bad arguments in %s on line %d
 bool(false)
 
-Warning: IntlCalendar::isWeekend() expects parameter 1 to be double, string given in %s on line %d
+Warning: IntlCalendar::isWeekend() expects parameter 1 to be float, string given in %s on line %d
 
 Warning: IntlCalendar::isWeekend(): intlcal_is_weekend: bad arguments in %s on line %d
 bool(false)
 
-Warning: intlcal_is_weekend() expects parameter 2 to be double, string given in %s on line %d
+Warning: intlcal_is_weekend() expects parameter 2 to be float, string given in %s on line %d
 
 Warning: intlcal_is_weekend(): intlcal_is_weekend: bad arguments in %s on line %d
 bool(false)
 
-Catchable fatal error: Argument 1 passed to intlcal_is_weekend() must be an instance of IntlCalendar, integer given in %s on line %d
+Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_is_weekend() must be an instance of IntlCalendar, integer given in %s:%d
+Stack trace:
+#0 %s(%d): intlcal_is_weekend(1)
+#1 {main}
+  thrown in %s on line %d

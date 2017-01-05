@@ -403,7 +403,7 @@ library. They are also documented in the pcrebuild man page.
   avoided by linking with libedit (which has a BSD licence) instead.
 
   Enabling libreadline causes the -lreadline option to be added to the pcretest
-  build. In many operating environments with a system-installed readline
+  build. In many operating environments with a sytem-installed readline
   library this is sufficient. However, in some environments (e.g. if an
   unmodified distribution version of readline is in use), it may be necessary
   to specify something like LIBS="-lncurses" as well. This is because, to quote
@@ -442,7 +442,7 @@ The "configure" script also creates config.status, which is an executable
 script that can be run to recreate the configuration, and config.log, which
 contains compiler output from tests that "configure" runs.
 
-Once "configure" has run, you can run "make". This builds the the libraries
+Once "configure" has run, you can run "make". This builds the libraries
 libpcre, libpcre16 and/or libpcre32, and a test program called pcretest. If you
 enabled JIT support with --enable-jit, a test program called pcre_jit_test is
 built as well.

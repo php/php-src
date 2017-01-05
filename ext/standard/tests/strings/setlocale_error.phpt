@@ -1,7 +1,7 @@
 --TEST--
 Test setlocale() function : error condition
 --INI--
-error_reporting=14335
+error_reporting=E_ALL
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {
@@ -35,11 +35,6 @@ echo "\n-- Testing setlocale() function with invalid multiple locales, 'category
 //Invalid array of locales
 var_dump( setlocale(LC_ALL,"en_US.invalid", "en_AU.invalid", "ko_KR.invalid") );
 
-echo "\n-- Testing setlocale() function with invalid category --\n";
-//invalid $category
-$invalid_category = "TEST";
-var_dump( setlocale($invalid_category,"en_US.utf8") );
- 
 echo "\n-- Testing setlocale() function with locale name too long, 'category' = LC_ALL --";
 //Invalid locale - locale name too long
 var_dump(setlocale(LC_ALL,str_pad('',255,'A')));
@@ -61,13 +56,6 @@ NULL
 bool(false)
 
 -- Testing setlocale() function with invalid multiple locales, 'category' = LC_ALL --
-bool(false)
-
--- Testing setlocale() function with invalid category --
-
-Deprecated: setlocale(): Passing locale category name as string is deprecated. Use the LC_* -constants instead in %s on line %d
-
-Warning: setlocale(): Invalid locale category name TEST, must be one of LC_ALL, LC_COLLATE, LC_CTYPE, LC_MONETARY, LC_NUMERIC, or LC_TIME in %s on line %d
 bool(false)
 
 -- Testing setlocale() function with locale name too long, 'category' = LC_ALL --

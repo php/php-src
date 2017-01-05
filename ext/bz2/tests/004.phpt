@@ -97,15 +97,15 @@ array(2) {
 string(10) "DATA_ERROR"
 int(-4)
 
-Warning: bzread(): %d is not a valid stream resource in %s on line %d
+Warning: bzread(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: bzerror(): %d is not a valid stream resource in %s on line %d
+Warning: bzerror(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: bzerrstr(): %d is not a valid stream resource in %s on line %d
+Warning: bzerrstr(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: bzerrno(): %d is not a valid stream resource in %s on line %d
+Warning: bzerrno(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 Done

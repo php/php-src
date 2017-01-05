@@ -35,20 +35,6 @@ foreach($argv as $arg) {
 	}
 }
 
-$fp = fopen("$skel/skeleton.dsp", "rb");
-if ($fp) {
-	$dsp_file = fread($fp, filesize("$skel/skeleton.dsp"));
-	fclose($fp);
-	
-	$dsp_file = str_replace("extname", $extname, $dsp_file);
-	$dsp_file = str_replace("EXTNAME", strtoupper($extname), $dsp_file);
-	$fp = fopen("$extname/$extname.dsp", "wb");
-	if ($fp) {
-		fwrite($fp, $dsp_file);
-		fclose($fp);
-	}
-}
-
 $fp = fopen("$extname/$extname.php", "rb");
 if ($fp) {
 	$php_file = fread($fp, filesize("$extname/$extname.php"));
@@ -63,3 +49,4 @@ if ($fp) {
 }
 
 ?>
+

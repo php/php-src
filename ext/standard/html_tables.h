@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -39,42 +39,42 @@ enum entity_charset { cs_utf_8, cs_8859_1, cs_cp1252, cs_8859_15, cs_cp1251,
 
 static const struct {
 	const char *codeset;
+	uint32_t codeset_len;
 	enum entity_charset charset;
 } charset_map[] = {
-	{ "ISO-8859-1",		cs_8859_1 },
-	{ "ISO8859-1",		cs_8859_1 },
-	{ "ISO-8859-15",	cs_8859_15 },
-	{ "ISO8859-15",		cs_8859_15 },
-	{ "utf-8",			cs_utf_8 },
-	{ "cp1252", 		cs_cp1252 },
-	{ "Windows-1252",	cs_cp1252 },
-	{ "1252",			cs_cp1252 }, 
-	{ "BIG5",			cs_big5 },
-	{ "950",			cs_big5 },
-	{ "GB2312",			cs_gb2312 },
-	{ "936",			cs_gb2312 },
-	{ "BIG5-HKSCS",		cs_big5hkscs },
-	{ "Shift_JIS",		cs_sjis },
-	{ "SJIS",			cs_sjis },
-	{ "932",			cs_sjis },
-	{ "SJIS-win",		cs_sjis },
-	{ "CP932",			cs_sjis },
-	{ "EUCJP",			cs_eucjp },
-	{ "EUC-JP",			cs_eucjp },
-	{ "eucJP-win",		cs_eucjp },
-	{ "KOI8-R",			cs_koi8r },
-	{ "koi8-ru",		cs_koi8r },
-	{ "koi8r",			cs_koi8r },
-	{ "cp1251",			cs_cp1251 },
-	{ "Windows-1251",	cs_cp1251 },
-	{ "win-1251",		cs_cp1251 },
-	{ "iso8859-5",		cs_8859_5 },
-	{ "iso-8859-5",		cs_8859_5 },
-	{ "cp866",			cs_cp866 },
-	{ "866",			cs_cp866 },    
-	{ "ibm866",			cs_cp866 },
-	{ "MacRoman",		cs_macroman },
-	{ NULL }
+	{ "ISO-8859-1",		sizeof("ISO-8859-1")-1,		cs_8859_1 },
+	{ "ISO8859-1",		sizeof("ISO8859-1")-1,		cs_8859_1 },
+	{ "ISO-8859-15",	sizeof("ISO-8859-15")-1,	cs_8859_15 },
+	{ "ISO8859-15",		sizeof("ISO8859-15")-1,		cs_8859_15 },
+	{ "utf-8",			sizeof("utf-8")-1,			cs_utf_8 },
+	{ "cp1252", 		sizeof("cp1252")-1, 		cs_cp1252 },
+	{ "Windows-1252",	sizeof("Windows-1252")-1,	cs_cp1252 },
+	{ "1252",			sizeof("1252")-1,			cs_cp1252 },
+	{ "BIG5",			sizeof("BIG5")-1,			cs_big5 },
+	{ "950",			sizeof("950")-1,			cs_big5 },
+	{ "GB2312",			sizeof("GB2312")-1,			cs_gb2312 },
+	{ "936",			sizeof("936")-1,			cs_gb2312 },
+	{ "BIG5-HKSCS",		sizeof("BIG5-HKSCS")-1,		cs_big5hkscs },
+	{ "Shift_JIS",		sizeof("Shift_JIS")-1,		cs_sjis },
+	{ "SJIS",			sizeof("SJIS")-1,			cs_sjis },
+	{ "932",			sizeof("932")-1,			cs_sjis },
+	{ "SJIS-win",		sizeof("SJIS-win")-1,		cs_sjis },
+	{ "CP932",			sizeof("CP932")-1,			cs_sjis },
+	{ "EUCJP",			sizeof("EUCJP")-1,			cs_eucjp },
+	{ "EUC-JP",			sizeof("EUC-JP")-1,			cs_eucjp },
+	{ "eucJP-win",		sizeof("eucJP-win")-1,		cs_eucjp },
+	{ "KOI8-R",			sizeof("KOI8-R")-1,			cs_koi8r },
+	{ "koi8-ru",		sizeof("koi8-ru")-1,		cs_koi8r },
+	{ "koi8r",			sizeof("koi8r")-1,			cs_koi8r },
+	{ "cp1251",			sizeof("cp1251")-1,			cs_cp1251 },
+	{ "Windows-1251",	sizeof("Windows-1251")-1,	cs_cp1251 },
+	{ "win-1251",		sizeof("win-1251")-1,		cs_cp1251 },
+	{ "iso8859-5",		sizeof("iso8859-5")-1,		cs_8859_5 },
+	{ "iso-8859-5",		sizeof("iso-8859-5")-1,		cs_8859_5 },
+	{ "cp866",			sizeof("cp866")-1,			cs_cp866 },
+	{ "866",			sizeof("866")-1,			cs_cp866 },
+	{ "ibm866",			sizeof("ibm866")-1,			cs_cp866 },
+	{ "MacRoman",		sizeof("MacRoman")-1,		cs_macroman }
 };
 
 /* longest entity name length excluding & and ; */
@@ -1094,18 +1094,17 @@ static const uni_to_enc unimap_macroman[] = {
 #define ENT_STAGE3_INDEX(k) ((k) & 0x3F)
 #define ENT_CODE_POINT_FROM_STAGES(i,j,k) (((i) << 12) | ((j) << 6) | (k))
 
-/* Table should be organized with a leading row telling the size of
- * the table and the default entity (maybe NULL) and the rest being
- * normal rows ordered by code point so that we can do a binary search */
+/* The default entity may be NULL. Binary search is still possible while
+   is senseless as there are just two rows (see also find_entity_for_char()). */
 typedef union {
 	struct {
-		unsigned size; /* number of remaining entries in the table */
 		const char *default_entity;
+		unsigned size; /* number of remaining entries in the table */
 		unsigned short default_entity_len;
 	} leading_entry;
 	struct {
-		unsigned second_cp; /* second code point */
 		const char *entity;
+		unsigned second_cp; /* second code point */
 		unsigned short entity_len;
 	} normal_entry;
 } entity_multicodepoint_row;
@@ -1130,7 +1129,7 @@ typedef const entity_stage3_row *const *entity_stage1_row; /* 64 elements */
 
 /* For stage 1, Calculate k & 0xFFF000 >> 3*4.
  * If larger than 1D, we have no mapping. Otherwise lookup that index */
- 
+
 typedef struct {
 	const entity_stage1_row *ms_table;
 	/* for tables with only basic entities, this member is to be accessed
@@ -1145,258 +1144,258 @@ typedef struct {
 /* {{{ Start of double code point tables for HTML5 */
 
 static const entity_multicodepoint_row multi_cp_html5_0003C[] = {
-	{ {01,		"lt",                 	 2} },
-	{ {0x020D2,	"nvlt",               	 4} },
+	{ {"lt",                 	01,		 2} },
+	{ {"nvlt",               	0x020D2,	 4} },
 };
 static const entity_multicodepoint_row multi_cp_html5_0003D[] = {
-	{ {01,		"equals",             	 6} },
-	{ {0x020E5,	"bne",                	 3} },
+	{ {"equals",             	01,		 6} },
+	{ {"bne",                	0x020E5,	 3} },
 };
 static const entity_multicodepoint_row multi_cp_html5_0003E[] = {
-	{ {01,		"gt",                 	 2} },
-	{ {0x020D2,	"nvgt",               	 4} },
+	{ {"gt",                 	01,		 2} },
+	{ {"nvgt",               	0x020D2,	 4} },
 };
 static const entity_multicodepoint_row multi_cp_html5_00066[] = {
-	{ {01,		NULL                  ,	0} },
-	{ {0x0006A,	"fjlig",              	 5} },
+	{ {NULL,                 	01,		0} },
+	{ {"fjlig",              	0x0006A,	 5} },
 };
 static const entity_multicodepoint_row multi_cp_html5_0205F[] = {
-	{ {01,		"MediumSpace",        	11} },
-	{ {0x0200A,	"ThickSpace",         	10} },
+	{ {"MediumSpace",        	01,		11} },
+	{ {"ThickSpace",         	0x0200A,	10} },
 };
 static const entity_multicodepoint_row multi_cp_html5_0219D[] = {
-	{ {01,		"rarrw",              	 5} },
-	{ {0x00338,	"nrarrw",             	 6} },
+	{ {"rarrw",              	01,		 5} },
+	{ {"nrarrw",             	0x00338,	 6} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02202[] = {
-	{ {01,		"part",               	 4} },
-	{ {0x00338,	"npart",              	 5} },
+	{ {"part",               	01,		 4} },
+	{ {"npart",              	0x00338,	 5} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02220[] = {
-	{ {01,		"angle",              	 5} },
-	{ {0x020D2,	"nang",               	 4} },
+	{ {"angle",              	01,		 5} },
+	{ {"nang",               	0x020D2,	 4} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02229[] = {
-	{ {01,		"cap",                	 3} },
-	{ {0x0FE00,	"caps",               	 4} },
+	{ {"cap",                	01,		 3} },
+	{ {"caps",               	0x0FE00,	 4} },
 };
 static const entity_multicodepoint_row multi_cp_html5_0222A[] = {
-	{ {01,		"cup",                	 3} },
-	{ {0x0FE00,	"cups",               	 4} },
+	{ {"cup",                	01,		 3} },
+	{ {"cups",               	0x0FE00,	 4} },
 };
 static const entity_multicodepoint_row multi_cp_html5_0223C[] = {
-	{ {01,		"sim",                	 3} },
-	{ {0x020D2,	"nvsim",              	 5} },
+	{ {"sim",                	01,		 3} },
+	{ {"nvsim",              	0x020D2,	 5} },
 };
 static const entity_multicodepoint_row multi_cp_html5_0223D[] = {
-	{ {01,		"bsim",               	 4} },
-	{ {0x00331,	"race",               	 4} },
+	{ {"bsim",               	01,		 4} },
+	{ {"race",               	0x00331,	 4} },
 };
 static const entity_multicodepoint_row multi_cp_html5_0223E[] = {
-	{ {01,		"ac",                 	 2} },
-	{ {0x00333,	"acE",                	 3} },
+	{ {"ac",                 	01,		 2} },
+	{ {"acE",                	0x00333,	 3} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02242[] = {
-	{ {01,		"esim",               	 4} },
-	{ {0x00338,	"nesim",              	 5} },
+	{ {"esim",               	01,		 4} },
+	{ {"nesim",              	0x00338,	 5} },
 };
 static const entity_multicodepoint_row multi_cp_html5_0224B[] = {
-	{ {01,		"apid",               	 4} },
-	{ {0x00338,	"napid",              	 5} },
+	{ {"apid",               	01,		 4} },
+	{ {"napid",              	0x00338,	 5} },
 };
 static const entity_multicodepoint_row multi_cp_html5_0224D[] = {
-	{ {01,		"CupCap",             	 6} },
-	{ {0x020D2,	"nvap",               	 4} },
+	{ {"CupCap",             	01,		 6} },
+	{ {"nvap",               	0x020D2,	 4} },
 };
 static const entity_multicodepoint_row multi_cp_html5_0224E[] = {
-	{ {01,		"bump",               	 4} },
-	{ {0x00338,	"nbump",              	 5} },
+	{ {"bump",               	01,		 4} },
+	{ {"nbump",              	0x00338,	 5} },
 };
 static const entity_multicodepoint_row multi_cp_html5_0224F[] = {
-	{ {01,		"HumpEqual",          	 9} },
-	{ {0x00338,	"nbumpe",             	 6} },
+	{ {"HumpEqual",          	01,		 9} },
+	{ {"nbumpe",             	0x00338,	 6} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02250[] = {
-	{ {01,		"esdot",              	 5} },
-	{ {0x00338,	"nedot",              	 5} },
+	{ {"esdot",              	01,		 5} },
+	{ {"nedot",              	0x00338,	 5} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02261[] = {
-	{ {01,		"Congruent",          	 9} },
-	{ {0x020E5,	"bnequiv",            	 7} },
+	{ {"Congruent",          	01,		 9} },
+	{ {"bnequiv",            	0x020E5,	 7} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02264[] = {
-	{ {01,		"leq",                	 3} },
-	{ {0x020D2,	"nvle",               	 4} },
+	{ {"leq",                	01,		 3} },
+	{ {"nvle",               	0x020D2,	 4} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02265[] = {
-	{ {01,		"ge",                 	 2} },
-	{ {0x020D2,	"nvge",               	 4} },
+	{ {"ge",                 	01,		 2} },
+	{ {"nvge",               	0x020D2,	 4} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02266[] = {
-	{ {01,		"lE",                 	 2} },
-	{ {0x00338,	"nlE",                	 3} },
+	{ {"lE",                 	01,		 2} },
+	{ {"nlE",                	0x00338,	 3} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02267[] = {
-	{ {01,		"geqq",               	 4} },
-	{ {0x00338,	"NotGreaterFullEqual",	19} },
+	{ {"geqq",               	01,		 4} },
+	{ {"NotGreaterFullEqual",	0x00338,	19} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02268[] = {
-	{ {01,		"lneqq",              	 5} },
-	{ {0x0FE00,	"lvertneqq",          	 9} },
+	{ {"lneqq",              	01,		 5} },
+	{ {"lvertneqq",          	0x0FE00,	 9} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02269[] = {
-	{ {01,		"gneqq",              	 5} },
-	{ {0x0FE00,	"gvertneqq",          	 9} },
+	{ {"gneqq",              	01,		 5} },
+	{ {"gvertneqq",          	0x0FE00,	 9} },
 };
 static const entity_multicodepoint_row multi_cp_html5_0226A[] = {
-	{ {02,		"ll",                 	 2} },
-	{ {0x00338,	"nLtv",               	 4} },
-	{ {0x020D2,	"nLt",                	 3} },
+	{ {"ll",                 	02,		 2} },
+	{ {"nLtv",               	0x00338,	 4} },
+	{ {"nLt",                	0x020D2,	 3} },
 };
 static const entity_multicodepoint_row multi_cp_html5_0226B[] = {
-	{ {02,		"gg",                 	 2} },
-	{ {0x00338,	"NotGreaterGreater",  	17} },
-	{ {0x020D2,	"nGt",                	 3} },
+	{ {"gg",                 	02,		 2} },
+	{ {"NotGreaterGreater",  	0x00338,	17} },
+	{ {"nGt",                	0x020D2,	 3} },
 };
 static const entity_multicodepoint_row multi_cp_html5_0227F[] = {
-	{ {01,		"SucceedsTilde",      	13} },
-	{ {0x00338,	"NotSucceedsTilde",   	16} },
+	{ {"SucceedsTilde",      	01,		13} },
+	{ {"NotSucceedsTilde",   	0x00338,	16} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02282[] = {
-	{ {01,		"sub",                	 3} },
-	{ {0x020D2,	"vnsub",              	 5} },
+	{ {"sub",                	01,		 3} },
+	{ {"vnsub",              	0x020D2,	 5} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02283[] = {
-	{ {01,		"sup",                	 3} },
-	{ {0x020D2,	"nsupset",            	 7} },
+	{ {"sup",                	01,		 3} },
+	{ {"nsupset",            	0x020D2,	 7} },
 };
 static const entity_multicodepoint_row multi_cp_html5_0228A[] = {
-	{ {01,		"subsetneq",          	 9} },
-	{ {0x0FE00,	"vsubne",             	 6} },
+	{ {"subsetneq",          	01,		 9} },
+	{ {"vsubne",             	0x0FE00,	 6} },
 };
 static const entity_multicodepoint_row multi_cp_html5_0228B[] = {
-	{ {01,		"supsetneq",          	 9} },
-	{ {0x0FE00,	"vsupne",             	 6} },
+	{ {"supsetneq",          	01,		 9} },
+	{ {"vsupne",             	0x0FE00,	 6} },
 };
 static const entity_multicodepoint_row multi_cp_html5_0228F[] = {
-	{ {01,		"sqsub",              	 5} },
-	{ {0x00338,	"NotSquareSubset",    	15} },
+	{ {"sqsub",              	01,		 5} },
+	{ {"NotSquareSubset",    	0x00338,	15} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02290[] = {
-	{ {01,		"sqsupset",           	 8} },
-	{ {0x00338,	"NotSquareSuperset",  	17} },
+	{ {"sqsupset",           	01,		 8} },
+	{ {"NotSquareSuperset",  	0x00338,	17} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02293[] = {
-	{ {01,		"sqcap",              	 5} },
-	{ {0x0FE00,	"sqcaps",             	 6} },
+	{ {"sqcap",              	01,		 5} },
+	{ {"sqcaps",             	0x0FE00,	 6} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02294[] = {
-	{ {01,		"sqcup",              	 5} },
-	{ {0x0FE00,	"sqcups",             	 6} },
+	{ {"sqcup",              	01,		 5} },
+	{ {"sqcups",             	0x0FE00,	 6} },
 };
 static const entity_multicodepoint_row multi_cp_html5_022B4[] = {
-	{ {01,		"LeftTriangleEqual",  	17} },
-	{ {0x020D2,	"nvltrie",            	 7} },
+	{ {"LeftTriangleEqual",  	01,		17} },
+	{ {"nvltrie",            	0x020D2,	 7} },
 };
 static const entity_multicodepoint_row multi_cp_html5_022B5[] = {
-	{ {01,		"RightTriangleEqual", 	18} },
-	{ {0x020D2,	"nvrtrie",            	 7} },
+	{ {"RightTriangleEqual", 	01,		18} },
+	{ {"nvrtrie",            	0x020D2,	 7} },
 };
 static const entity_multicodepoint_row multi_cp_html5_022D8[] = {
-	{ {01,		"Ll",                 	 2} },
-	{ {0x00338,	"nLl",                	 3} },
+	{ {"Ll",                 	01,		 2} },
+	{ {"nLl",                	0x00338,	 3} },
 };
 static const entity_multicodepoint_row multi_cp_html5_022D9[] = {
-	{ {01,		"Gg",                 	 2} },
-	{ {0x00338,	"nGg",                	 3} },
+	{ {"Gg",                 	01,		 2} },
+	{ {"nGg",                	0x00338,	 3} },
 };
 static const entity_multicodepoint_row multi_cp_html5_022DA[] = {
-	{ {01,		"lesseqgtr",          	 9} },
-	{ {0x0FE00,	"lesg",               	 4} },
+	{ {"lesseqgtr",          	01,		 9} },
+	{ {"lesg",               	0x0FE00,	 4} },
 };
 static const entity_multicodepoint_row multi_cp_html5_022DB[] = {
-	{ {01,		"gtreqless",          	 9} },
-	{ {0x0FE00,	"gesl",               	 4} },
+	{ {"gtreqless",          	01,		 9} },
+	{ {"gesl",               	0x0FE00,	 4} },
 };
 static const entity_multicodepoint_row multi_cp_html5_022F5[] = {
-	{ {01,		"isindot",            	 7} },
-	{ {0x00338,	"notindot",           	 8} },
+	{ {"isindot",            	01,		 7} },
+	{ {"notindot",           	0x00338,	 8} },
 };
 static const entity_multicodepoint_row multi_cp_html5_022F9[] = {
-	{ {01,		"isinE",              	 5} },
-	{ {0x00338,	"notinE",             	 6} },
+	{ {"isinE",              	01,		 5} },
+	{ {"notinE",             	0x00338,	 6} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02933[] = {
-	{ {01,		"rarrc",              	 5} },
-	{ {0x00338,	"nrarrc",             	 6} },
+	{ {"rarrc",              	01,		 5} },
+	{ {"nrarrc",             	0x00338,	 6} },
 };
 static const entity_multicodepoint_row multi_cp_html5_029CF[] = {
-	{ {01,		"LeftTriangleBar",    	15} },
-	{ {0x00338,	"NotLeftTriangleBar", 	18} },
+	{ {"LeftTriangleBar",    	01,		15} },
+	{ {"NotLeftTriangleBar", 	0x00338,	18} },
 };
 static const entity_multicodepoint_row multi_cp_html5_029D0[] = {
-	{ {01,		"RightTriangleBar",   	16} },
-	{ {0x00338,	"NotRightTriangleBar",	19} },
+	{ {"RightTriangleBar",   	01,		16} },
+	{ {"NotRightTriangleBar",	0x00338,	19} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02A6D[] = {
-	{ {01,		"congdot",            	 7} },
-	{ {0x00338,	"ncongdot",           	 8} },
+	{ {"congdot",            	01,		 7} },
+	{ {"ncongdot",           	0x00338,	 8} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02A70[] = {
-	{ {01,		"apE",                	 3} },
-	{ {0x00338,	"napE",               	 4} },
+	{ {"apE",                	01,		 3} },
+	{ {"napE",               	0x00338,	 4} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02A7D[] = {
-	{ {01,		"les",                	 3} },
-	{ {0x00338,	"nles",               	 4} },
+	{ {"les",                	01,		 3} },
+	{ {"nles",               	0x00338,	 4} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02A7E[] = {
-	{ {01,		"ges",                	 3} },
-	{ {0x00338,	"nges",               	 4} },
+	{ {"ges",                	01,		 3} },
+	{ {"nges",               	0x00338,	 4} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02AA1[] = {
-	{ {01,		"LessLess",           	 8} },
-	{ {0x00338,	"NotNestedLessLess",  	17} },
+	{ {"LessLess",           	01,		 8} },
+	{ {"NotNestedLessLess",  	0x00338,	17} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02AA2[] = {
-	{ {01,		"GreaterGreater",     	14} },
-	{ {0x00338,	"NotNestedGreaterGreater",	23} },
+	{ {"GreaterGreater",     	01,		14} },
+	{ {"NotNestedGreaterGreater",	0x00338,	23} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02AAC[] = {
-	{ {01,		"smte",               	 4} },
-	{ {0x0FE00,	"smtes",              	 5} },
+	{ {"smte",               	01,		 4} },
+	{ {"smtes",              	0x0FE00,	 5} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02AAD[] = {
-	{ {01,		"late",               	 4} },
-	{ {0x0FE00,	"lates",              	 5} },
+	{ {"late",               	01,		 4} },
+	{ {"lates",              	0x0FE00,	 5} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02AAF[] = {
-	{ {01,		"preceq",             	 6} },
-	{ {0x00338,	"NotPrecedesEqual",   	16} },
+	{ {"preceq",             	01,		 6} },
+	{ {"NotPrecedesEqual",   	0x00338,	16} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02AB0[] = {
-	{ {01,		"SucceedsEqual",      	13} },
-	{ {0x00338,	"NotSucceedsEqual",   	16} },
+	{ {"SucceedsEqual",      	01,		13} },
+	{ {"NotSucceedsEqual",   	0x00338,	16} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02AC5[] = {
-	{ {01,		"subE",               	 4} },
-	{ {0x00338,	"nsubE",              	 5} },
+	{ {"subE",               	01,		 4} },
+	{ {"nsubE",              	0x00338,	 5} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02AC6[] = {
-	{ {01,		"supseteqq",          	 9} },
-	{ {0x00338,	"nsupseteqq",         	10} },
+	{ {"supseteqq",          	01,		 9} },
+	{ {"nsupseteqq",         	0x00338,	10} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02ACB[] = {
-	{ {01,		"subsetneqq",         	10} },
-	{ {0x0FE00,	"vsubnE",             	 6} },
+	{ {"subsetneqq",         	01,		10} },
+	{ {"vsubnE",             	0x0FE00,	 6} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02ACC[] = {
-	{ {01,		"supnE",              	 5} },
-	{ {0x0FE00,	"varsupsetneqq",      	13} },
+	{ {"supnE",              	01,		 5} },
+	{ {"varsupsetneqq",      	0x0FE00,	13} },
 };
 static const entity_multicodepoint_row multi_cp_html5_02AFD[] = {
-	{ {01,		"parsl",              	 5} },
-	{ {0x020E5,	"nparsl",             	 6} },
+	{ {"parsl",              	01,		 5} },
+	{ {"nparsl",             	0x020E5,	 6} },
 };
 
 /* End of double code point tables }}} */

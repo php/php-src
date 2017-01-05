@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -72,7 +72,7 @@
 		*p = ' ';								\
 	}											\
 
-extern long php_getuid(TSRMLS_D);
+extern zend_long php_getuid(void);
 
 /* {{{ proto int ezmlm_hash(string addr)
    Calculate EZMLM list hash value. */
@@ -80,19 +80,19 @@ PHP_FUNCTION(ezmlm_hash)
 {
 	char *str = NULL;
 	unsigned int h = 5381;
-	int j, str_len;
+	size_t j, str_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &str, &str_len) == FAILURE) {
 		return;
 	}
 
 	for (j = 0; j < str_len; j++) {
-		h = (h + (h << 5)) ^ (unsigned long) (unsigned char) tolower(str[j]);
+		h = (h + (h << 5)) ^ (zend_ulong) (unsigned char) tolower(str[j]);
 	}
 
 	h = (h % 53);
 
-	RETURN_LONG((int) h);
+	RETURN_LONG((zend_long) h);
 }
 /* }}} */
 
@@ -100,15 +100,16 @@ PHP_FUNCTION(ezmlm_hash)
    Send an email message */
 PHP_FUNCTION(mail)
 {
-	char *to=NULL, *message=NULL, *headers=NULL, *headers_trimmed=NULL;
-	char *subject=NULL, *extra_cmd=NULL;
-	int to_len, message_len, headers_len = 0;
-	int subject_len, extra_cmd_len = 0, i;
+	char *to=NULL, *message=NULL;
+	char *subject=NULL;
+	zend_string *extra_cmd=NULL, *headers=NULL, *headers_trimmed=NULL;
+	size_t to_len, message_len;
+	size_t subject_len, i;
 	char *force_extra_parameters = INI_STR("mail.force_extra_parameters");
 	char *to_r, *subject_r;
 	char *p, *e;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss|ss",	&to, &to_len, &subject, &subject_len, &message, &message_len, &headers, &headers_len, &extra_cmd, &extra_cmd_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss|SS",	&to, &to_len, &subject, &subject_len, &message, &message_len, &headers, &extra_cmd) == FAILURE) {
 		return;
 	}
 
@@ -117,11 +118,11 @@ PHP_FUNCTION(mail)
 	MAIL_ASCIIZ_CHECK(subject, subject_len);
 	MAIL_ASCIIZ_CHECK(message, message_len);
 	if (headers) {
-		MAIL_ASCIIZ_CHECK(headers, headers_len);
-		headers_trimmed = php_trim(headers, headers_len, NULL, 0, NULL, 2 TSRMLS_CC);
+		MAIL_ASCIIZ_CHECK(ZSTR_VAL(headers), ZSTR_LEN(headers));
+		headers_trimmed = php_trim(headers, NULL, 0, 2);
 	}
 	if (extra_cmd) {
-		MAIL_ASCIIZ_CHECK(extra_cmd, extra_cmd_len);
+		MAIL_ASCIIZ_CHECK(ZSTR_VAL(extra_cmd), ZSTR_LEN(extra_cmd));
 	}
 
 	if (to_len > 0) {
@@ -167,21 +168,21 @@ PHP_FUNCTION(mail)
 	if (force_extra_parameters) {
 		extra_cmd = php_escape_shell_cmd(force_extra_parameters);
 	} else if (extra_cmd) {
-		extra_cmd = php_escape_shell_cmd(extra_cmd);
+		extra_cmd = php_escape_shell_cmd(ZSTR_VAL(extra_cmd));
 	}
 
-	if (php_mail(to_r, subject_r, message, headers_trimmed, extra_cmd TSRMLS_CC)) {
+	if (php_mail(to_r, subject_r, message, headers_trimmed ? ZSTR_VAL(headers_trimmed) : NULL, extra_cmd ? ZSTR_VAL(extra_cmd) : NULL)) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
 	}
 
 	if (headers_trimmed) {
-		efree(headers_trimmed);
+		zend_string_release(headers_trimmed);
 	}
 
 	if (extra_cmd) {
-		efree (extra_cmd);
+		zend_string_release(extra_cmd);
 	}
 	if (to_r != to) {
 		efree(to_r);
@@ -212,7 +213,7 @@ void php_mail_log_to_syslog(char *message) {
 }
 
 
-void php_mail_log_to_file(char *filename, char *message, size_t message_size TSRMLS_DC) {
+void php_mail_log_to_file(char *filename, char *message, size_t message_size) {
 	/* Write 'message' to the given file. */
 	uint flags = IGNORE_URL_WIN | REPORT_ERRORS | STREAM_DISABLE_OPEN_BASEDIR;
 	php_stream *stream = php_stream_open_wrapper(filename, "a", flags, NULL);
@@ -262,7 +263,7 @@ static int php_mail_detect_multiple_crlf(char *hdr) {
 
 /* {{{ php_mail
  */
-PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char *extra_cmd TSRMLS_DC)
+PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char *extra_cmd)
 {
 #if (defined PHP_WIN32 || defined NETWARE)
 	int tsm_err;
@@ -285,16 +286,17 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	return val;	\
 
 	if (mail_log && *mail_log) {
-		char *tmp, *date_str;
+		char *tmp;
 		time_t curtime;
-		int l;
+		size_t l;
+		zend_string *date_str;
 
 		time(&curtime);
-		date_str = php_format_date("d-M-Y H:i:s e", 13, curtime, 1 TSRMLS_CC);
+		date_str = php_format_date("d-M-Y H:i:s e", 13, curtime, 1);
 
-		l = spprintf(&tmp, 0, "[%s] mail() on [%s:%d]: To: %s -- Headers: %s\n", date_str, zend_get_executed_filename(TSRMLS_C), zend_get_executed_lineno(TSRMLS_C), to, hdr ? hdr : "");
+		l = spprintf(&tmp, 0, "[%s] mail() on [%s:%d]: To: %s -- Headers: %s\n", ZSTR_VAL(date_str), zend_get_executed_filename(), zend_get_executed_lineno(), to, hdr ? hdr : "");
 
-		efree(date_str);
+		zend_string_free(date_str);
 
 		if (hdr) {
 			php_mail_log_crlf_to_spaces(tmp);
@@ -308,41 +310,40 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		else {
 			/* Convert the final space to a newline when logging to file. */
 			tmp[l - 1] = '\n';
-			php_mail_log_to_file(mail_log, tmp, l TSRMLS_CC);
+			php_mail_log_to_file(mail_log, tmp, l);
 		}
 
 		efree(tmp);
 	}
 
 	if (PG(mail_x_header)) {
-		const char *tmp = zend_get_executed_filename(TSRMLS_C);
-		char *f;
-		size_t f_len;
+		const char *tmp = zend_get_executed_filename();
+		zend_string *f;
 
-		php_basename(tmp, strlen(tmp), NULL, 0,&f, &f_len TSRMLS_CC);
+		f = php_basename(tmp, strlen(tmp), NULL, 0);
 
 		if (headers != NULL && *headers) {
-			spprintf(&hdr, 0, "X-PHP-Originating-Script: %ld:%s\n%s", php_getuid(TSRMLS_C), f, headers);
+			spprintf(&hdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s\n%s", php_getuid(), ZSTR_VAL(f), headers);
 		} else {
-			spprintf(&hdr, 0, "X-PHP-Originating-Script: %ld:%s", php_getuid(TSRMLS_C), f);
+			spprintf(&hdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s", php_getuid(), ZSTR_VAL(f));
 		}
-		efree(f);
+		zend_string_release(f);
 	}
 
 	if (hdr && php_mail_detect_multiple_crlf(hdr)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Multiple or malformed newlines found in additional_header");
+		php_error_docref(NULL, E_WARNING, "Multiple or malformed newlines found in additional_header");
 		MAIL_RET(0);
 	}
 
 	if (!sendmail_path) {
 #if (defined PHP_WIN32 || defined NETWARE)
 		/* handle old style win smtp sending */
-		if (TSendMail(INI_STR("SMTP"), &tsm_err, &tsm_errmsg, hdr, subject, to, message, NULL, NULL, NULL TSRMLS_CC) == FAILURE) {
+		if (TSendMail(INI_STR("SMTP"), &tsm_err, &tsm_errmsg, hdr, subject, to, message, NULL, NULL, NULL) == FAILURE) {
 			if (tsm_errmsg) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", tsm_errmsg);
+				php_error_docref(NULL, E_WARNING, "%s", tsm_errmsg);
 				efree(tsm_errmsg);
 			} else {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", GetSMErrorText(tsm_err));
+				php_error_docref(NULL, E_WARNING, "%s", GetSMErrorText(tsm_err));
 			}
 			MAIL_RET(0);
 		}
@@ -368,7 +369,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 #endif
 
 #ifdef PHP_WIN32
-	sendmail = popen_ex(sendmail_cmd, "wb", NULL, NULL TSRMLS_CC);
+	sendmail = popen_ex(sendmail_cmd, "wb", NULL, NULL);
 #else
 	/* Since popen() doesn't indicate if the internal fork() doesn't work
 	 * (e.g. the shell can't be executed) we explicitly set it to 0 to be
@@ -383,7 +384,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	if (sendmail) {
 #ifndef PHP_WIN32
 		if (EACCES == errno) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Permission denied: unable to execute shell to run mail delivery binary '%s'", sendmail_path);
+			php_error_docref(NULL, E_WARNING, "Permission denied: unable to execute shell to run mail delivery binary '%s'", sendmail_path);
 			pclose(sendmail);
 #if PHP_SIGCHILD
 			/* Restore handler in case of error on Windows
@@ -426,7 +427,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 			MAIL_RET(1);
 		}
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not execute mail delivery program '%s'", sendmail_path);
+		php_error_docref(NULL, E_WARNING, "Could not execute mail delivery program '%s'", sendmail_path);
 #if PHP_SIGCHILD
 		if (sig_handler) {
 			signal(SIGCHLD, sig_handler);

@@ -1,3 +1,21 @@
+/*
+   +----------------------------------------------------------------------+
+   | PHP Version 7                                                        |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1997-2017 The PHP Group                                |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.01 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+   | Author: Zeev Suraski <zeev@zend.com>                                 |
+   +----------------------------------------------------------------------+
+ */
+
 #include "php.h"
 #include "php_ini.h"
 #include "php_win32_globals.h"
@@ -27,8 +45,8 @@ static int OpenPhpRegistryKey(char* sub_key, HKEY *hKey)
 	const char **key_name = registry_keys;
 
 	if (sub_key) {
-		int main_key_len;
-		int sub_key_len = strlen(sub_key);
+		size_t main_key_len;
+		size_t sub_key_len = strlen(sub_key);
 		char *reg_key;
 
 		while (*key_name) {
@@ -37,10 +55,10 @@ static int OpenPhpRegistryKey(char* sub_key, HKEY *hKey)
 			main_key_len = strlen(*key_name);
 			reg_key = emalloc(main_key_len + sub_key_len + 1);
 			memcpy(reg_key, *key_name, main_key_len);
-			memcpy(reg_key + main_key_len, sub_key, sub_key_len + 1);			
+			memcpy(reg_key + main_key_len, sub_key, sub_key_len + 1);
 			ret = RegOpenKeyEx(HKEY_LOCAL_MACHINE, reg_key, 0, KEY_READ, hKey);
 			efree(reg_key);
-			
+
 			if (ret == ERROR_SUCCESS) {
 				return 1;
 			}
@@ -64,19 +82,24 @@ static int LoadDirectory(HashTable *directories, HKEY key, char *path, int path_
 	HashTable *ht = NULL;
 
 	if (RegQueryInfoKey(key, NULL, NULL, NULL, &keys, &max_key, NULL, &values, &max_name, &max_value, NULL, NULL) == ERROR_SUCCESS) {
-		
+
 		if (values) {
 			DWORD i;
 			char *name = (char*)emalloc(max_name+1);
 			char *value = (char*)emalloc(max_value+1);
 			DWORD name_len, type, value_len;
-			zval *data;
 
 			for (i = 0; i < values; i++) {
 				name_len = max_name+1;
 				value_len = max_value+1;
+
+				memset(name, '\0', max_name+1);
+				memset(value, '\0', max_value+1);
+
 				if (RegEnumValue(key, i, name, &name_len, NULL, &type, value, &value_len) == ERROR_SUCCESS) {
 					if ((type == REG_SZ) || (type == REG_EXPAND_SZ)) {
+						zval data;
+
 						if (!ht) {
 							ht = (HashTable*)malloc(sizeof(HashTable));
 							if (!ht) {
@@ -84,36 +107,22 @@ static int LoadDirectory(HashTable *directories, HKEY key, char *path, int path_
 							}
 							zend_hash_init(ht, 0, NULL, ZVAL_INTERNAL_PTR_DTOR, 1);
 						}
-						data = (zval*)malloc(sizeof(zval));
-						if (!data) {
-							return ret;
-						}
-						INIT_PZVAL(data);
-						Z_STRVAL_P(data) = zend_strndup(value, value_len-1);
-						Z_STRLEN_P(data) = value_len-1;
-						Z_TYPE_P(data) = IS_STRING;
-						zend_hash_update(ht, name, name_len+1, &data, sizeof(zval*), NULL);
+						ZVAL_PSTRINGL(&data, value, value_len-1);
+						zend_hash_str_update(ht, name, name_len, &data);
 					}
 				}
 			}
 			if (ht) {
 				if (parent_ht) {
-					HashPosition pos;
-					char *index;
-					uint index_len;
-					ulong num;
-					zval **tmpdata;
+					zend_string *index;
+					zend_ulong num;
+					zval *tmpdata;
 
-					for (zend_hash_internal_pointer_reset_ex(parent_ht, &pos);
-					     zend_hash_get_current_data_ex(parent_ht, (void**)&tmpdata, &pos) == SUCCESS &&
-					     zend_hash_get_current_key_ex(parent_ht, &index, &index_len, &num, 0, &pos) == HASH_KEY_IS_STRING;
-					     zend_hash_move_forward_ex(parent_ht, &pos)) {
-						if (zend_hash_add(ht, index, index_len, tmpdata, sizeof(zval*), NULL) == SUCCESS) {
-						    Z_ADDREF_PP(tmpdata);
-						}
-					}
+					ZEND_HASH_FOREACH_KEY_VAL(parent_ht, num, index, tmpdata) {
+						zend_hash_add(ht, index, tmpdata);
+					} ZEND_HASH_FOREACH_END();
 				}
-				zend_hash_update(directories, path, path_len+1, &ht, sizeof(HashTable*), NULL);
+				zend_hash_str_update_mem(directories, path, path_len, ht, sizeof(HashTable));
 				ret = 1;
 			}
 
@@ -161,19 +170,19 @@ static int LoadDirectory(HashTable *directories, HKEY key, char *path, int path_
 	return ret;
 }
 
-static void delete_internal_hashtable(void *data)
+static void delete_internal_hashtable(zval *zv)
 {
-	zend_hash_destroy(*(HashTable**)data);
-	free(*(HashTable**)data);
+	HashTable *ht = (HashTable *)Z_PTR_P(zv);
+	zend_hash_destroy(ht);
+	free(ht);
 }
 
 #define RegNotifyFlags (REG_NOTIFY_CHANGE_NAME | REG_NOTIFY_CHANGE_ATTRIBUTES | REG_NOTIFY_CHANGE_LAST_SET)
 
-void UpdateIniFromRegistry(char *path TSRMLS_DC)
+void UpdateIniFromRegistry(char *path)
 {
 	char *p, *orig_path;
 	int path_len;
-	HashTable **pht;
 
 	if(!path) {
 		return;
@@ -248,28 +257,22 @@ void UpdateIniFromRegistry(char *path TSRMLS_DC)
 		path_len++;
 	}
 	zend_str_tolower(path, path_len);
-	while (path_len >= 0) {
-		if (zend_hash_find(PW32G(registry_directories), path, path_len+1, (void**)&pht) == SUCCESS) {
-			HashTable *ht = *pht;
-			HashPosition pos;
-			char *index;
-			uint index_len;
-			ulong num;
-			zval **data;
 
-			for (zend_hash_internal_pointer_reset_ex(ht, &pos);
-			     zend_hash_get_current_data_ex(ht, (void**)&data, &pos) == SUCCESS &&
-			     zend_hash_get_current_key_ex(ht, &index, &index_len, &num, 0, &pos) == HASH_KEY_IS_STRING;
-			     zend_hash_move_forward_ex(ht, &pos)) {
-				zend_alter_ini_entry(index, index_len, Z_STRVAL_PP(data), Z_STRLEN_PP(data), PHP_INI_USER, PHP_INI_STAGE_ACTIVATE);
-			}
-			break;
+	while (path_len > 0) {
+		HashTable *ht = (HashTable *)zend_hash_str_find_ptr(PW32G(registry_directories), path, path_len);
+
+		if (ht != NULL) {
+			zend_string *index;
+			zval *data;
+
+			ZEND_HASH_FOREACH_STR_KEY_VAL(ht, index, data) {
+				zend_alter_ini_entry(index, Z_STR_P(data), PHP_INI_USER, PHP_INI_STAGE_ACTIVATE);
+			} ZEND_HASH_FOREACH_END();
 		}
-		if (--path_len > 0) {
-			while (path_len > 0 && path[path_len] != '/') {
-				path_len--;
-			}
-		}
+
+		do {
+			path_len--;
+		} while (path_len > 0 && path[path_len] != '/');
 		path[path_len] = 0;
 	}
 
@@ -282,11 +285,12 @@ char *GetIniPathFromRegistry()
 {
 	char *reg_location = NULL;
 	HKEY hKey;
-	
+
 	if (OpenPhpRegistryKey(NULL, &hKey)) {
 		DWORD buflen = MAXPATHLEN;
 		reg_location = emalloc(MAXPATHLEN+1);
 		if(RegQueryValueEx(hKey, PHPRC_REGISTRY_NAME, 0, NULL, reg_location, &buflen) != ERROR_SUCCESS) {
+			RegCloseKey(hKey);
 			efree(reg_location);
 			reg_location = NULL;
 			return reg_location;
@@ -295,3 +299,12 @@ char *GetIniPathFromRegistry()
 	}
 	return reg_location;
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

@@ -19,6 +19,6 @@ Warning: imagecreatetruecolor(): Invalid image dimensions in %s on line %d
 
 Warning: imagecreatetruecolor(): Invalid image dimensions in %s on line %d
 
-Warning: imagecreatetruecolor(): Invalid image dimensions in %s on line %d
+Warning: imagecreatetruecolor() expects parameter 1 to be integer, float given in %s on line %d
 
-Warning: imagecreatetruecolor(): Invalid image dimensions in %s on line %d
+Warning: imagecreatetruecolor() expects parameter 2 to be integer, float given in %s on line %d

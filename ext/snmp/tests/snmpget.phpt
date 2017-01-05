@@ -51,10 +51,10 @@ var_dump(snmpget($hostname, $community, array('.1.3.6.1.2.1.1.1.0', '.1.3.6.1.2.
 --EXPECTF--
 Checking error handling
 
-Warning: snmpget() expects parameter 4 to be long,%s given in %s on line %d
+Warning: snmpget() expects parameter 4 to be integer,%s given in %s on line %d
 bool(false)
 
-Warning: snmpget() expects parameter 5 to be long,%s given in %s on line %d
+Warning: snmpget() expects parameter 5 to be integer,%s given in %s on line %d
 bool(false)
 Checking working
 Single OID, default timeout and retries

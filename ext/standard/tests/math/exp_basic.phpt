@@ -13,7 +13,6 @@ $values = array(10,
 				"3950.5",
 				"3.9505e3",
 				"039",
-				"0x5F",
 				true,
 				false,
 				null, 
@@ -58,14 +57,11 @@ float(INF)
 float(8.6593400423994E+16)
 
 -- Iteration 10 --
-float(1.811239082889E+41)
-
--- Iteration 11 --
 float(2.718281828459)
 
--- Iteration 12 --
+-- Iteration 11 --
 float(1)
 
--- Iteration 13 --
+-- Iteration 12 --
 float(1)
 ===Done===

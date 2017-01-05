@@ -45,7 +45,7 @@ class tc
 	public $s1 = '日本語EUC-JPの文字列';
 	public $s2 = 'English Text';
 
-	function tc() 
+	function __construct() 
 	{
 	}
 }

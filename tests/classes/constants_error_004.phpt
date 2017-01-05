@@ -1,5 +1,5 @@
 --TEST--
-Class constant whose initial value refereces a non-existent class
+Class constant whose initial value references a non-existent class
 --FILE--
 <?php
   class C

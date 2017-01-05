@@ -1,5 +1,7 @@
 --TEST--
 Test ob_implicit_flush() function : usage variation 
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 --FILE--
 <?php
 /* Prototype  : void ob_implicit_flush([int flag])
@@ -120,19 +122,19 @@ NULL
 NULL
 
 --empty array--
-Error: 2 - ob_implicit_flush() expects parameter 1 to be long, array given, %s(97)
+Error: 2 - ob_implicit_flush() expects parameter 1 to be integer, array given, %s(97)
 NULL
 
 --int indexed array--
-Error: 2 - ob_implicit_flush() expects parameter 1 to be long, array given, %s(97)
+Error: 2 - ob_implicit_flush() expects parameter 1 to be integer, array given, %s(97)
 NULL
 
 --associative array--
-Error: 2 - ob_implicit_flush() expects parameter 1 to be long, array given, %s(97)
+Error: 2 - ob_implicit_flush() expects parameter 1 to be integer, array given, %s(97)
 NULL
 
 --nested arrays--
-Error: 2 - ob_implicit_flush() expects parameter 1 to be long, array given, %s(97)
+Error: 2 - ob_implicit_flush() expects parameter 1 to be integer, array given, %s(97)
 NULL
 
 --uppercase NULL--
@@ -154,35 +156,35 @@ NULL
 NULL
 
 --empty string DQ--
-Error: 2 - ob_implicit_flush() expects parameter 1 to be long, %unicode_string_optional% given, %s(97)
+Error: 2 - ob_implicit_flush() expects parameter 1 to be integer, %unicode_string_optional% given, %s(97)
 NULL
 
 --empty string SQ--
-Error: 2 - ob_implicit_flush() expects parameter 1 to be long, %unicode_string_optional% given, %s(97)
+Error: 2 - ob_implicit_flush() expects parameter 1 to be integer, %unicode_string_optional% given, %s(97)
 NULL
 
 --string DQ--
-Error: 2 - ob_implicit_flush() expects parameter 1 to be long, %unicode_string_optional% given, %s(97)
+Error: 2 - ob_implicit_flush() expects parameter 1 to be integer, %unicode_string_optional% given, %s(97)
 NULL
 
 --string SQ--
-Error: 2 - ob_implicit_flush() expects parameter 1 to be long, %unicode_string_optional% given, %s(97)
+Error: 2 - ob_implicit_flush() expects parameter 1 to be integer, %unicode_string_optional% given, %s(97)
 NULL
 
 --mixed case string--
-Error: 2 - ob_implicit_flush() expects parameter 1 to be long, %unicode_string_optional% given, %s(97)
+Error: 2 - ob_implicit_flush() expects parameter 1 to be integer, %unicode_string_optional% given, %s(97)
 NULL
 
 --heredoc--
-Error: 2 - ob_implicit_flush() expects parameter 1 to be long, %unicode_string_optional% given, %s(97)
+Error: 2 - ob_implicit_flush() expects parameter 1 to be integer, %unicode_string_optional% given, %s(97)
 NULL
 
 --instance of classWithToString--
-Error: 2 - ob_implicit_flush() expects parameter 1 to be long, object given, %s(97)
+Error: 2 - ob_implicit_flush() expects parameter 1 to be integer, object given, %s(97)
 NULL
 
 --instance of classWithoutToString--
-Error: 2 - ob_implicit_flush() expects parameter 1 to be long, object given, %s(97)
+Error: 2 - ob_implicit_flush() expects parameter 1 to be integer, object given, %s(97)
 NULL
 
 --undefined var--

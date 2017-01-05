@@ -91,6 +91,7 @@ enum php_http_method
   , PHP_HTTP_MKCALENDAR
   , PHP_HTTP_PROPFIND
   , PHP_HTTP_PROPPATCH
+  , PHP_HTTP_SEARCH
   , PHP_HTTP_UNLOCK
   /* subversion */
   , PHP_HTTP_REPORT

@@ -14,4 +14,4 @@ $result = imagechar($image, 1, 'string', 5, 'C', 1);
 
 ?>
 --EXPECTF--
-Warning: imagechar() expects parameter 3 to be long, %s given in %s on line %d
+Warning: imagechar() expects parameter 3 to be integer, %s given in %s on line %d

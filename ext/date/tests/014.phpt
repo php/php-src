@@ -37,6 +37,8 @@ Warning: timezone_offset_get() expects exactly 2 parameters, 0 given in %s on li
 bool(false)
 int(0)
 
-Warning: timezone_offset_get() expects parameter 1 to be DateTimeZone, object given in %s on line %d
-bool(false)
-Done
+Fatal error: Uncaught TypeError: Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, instance of DateTime given in %s:%d
+Stack trace:
+#0 %s(%d): timezone_offset_get(Object(DateTime), Object(DateTimeZone))
+#1 {main}
+  thrown in %s on line %d

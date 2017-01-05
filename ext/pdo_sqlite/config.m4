@@ -22,8 +22,8 @@ if test "$PHP_PDO_SQLITE" != "no"; then
       pdo_cv_inc_path=$abs_srcdir/ext
     elif test -f $abs_srcdir/ext/pdo/php_pdo_driver.h; then
       pdo_cv_inc_path=$abs_srcdir/ext
-    elif test -f $prefix/include/php/ext/pdo/php_pdo_driver.h; then
-      pdo_cv_inc_path=$prefix/include/php/ext
+    elif test -f $phpincludedir/ext/pdo/php_pdo_driver.h; then
+      pdo_cv_inc_path=$phpincludedir/ext
     else
       AC_MSG_ERROR([Cannot find php_pdo_driver.h.])
     fi
@@ -79,7 +79,7 @@ if test "$PHP_PDO_SQLITE" != "no"; then
         threadsafe_flags="-DSQLITE_THREADSAFE=0"
       fi
 
-      other_flags="-DSQLITE_ENABLE_FTS3=1 -DSQLITE_CORE=1 -DSQLITE_ENABLE_COLUMN_METADATA=1"
+      other_flags="-DSQLITE_ENABLE_FTS3=1 -DSQLITE_ENABLE_FTS4=1 -DSQLITE_ENABLE_FTS5=1 -DSQLITE_CORE=1 -DSQLITE_ENABLE_COLUMN_METADATA=1"
 
 	  dnl As long as intl is not shared we can have ICU support
       if test "$PHP_INTL" = "yes" && test "$PHP_INTL_SHARED" != "yes"; then

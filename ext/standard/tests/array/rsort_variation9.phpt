@@ -108,21 +108,21 @@ array(3) {
   }
   [1]=>
   array(3) {
-    [0]=>
-    string(5) "first"
-    [5]=>
-    string(6) "second"
-    [6]=>
-    string(5) "third"
-  }
-  [2]=>
-  array(3) {
     ["a"]=>
     string(6) "orange"
     ["b"]=>
     string(6) "banana"
     ["c"]=>
     string(5) "apple"
+  }
+  [2]=>
+  array(3) {
+    [0]=>
+    string(5) "first"
+    [5]=>
+    string(6) "second"
+    [6]=>
+    string(5) "third"
   }
 }
 -- Sort flag = SORT_REGULAR --
@@ -145,21 +145,21 @@ array(3) {
   }
   [1]=>
   array(3) {
-    [0]=>
-    string(5) "first"
-    [5]=>
-    string(6) "second"
-    [6]=>
-    string(5) "third"
-  }
-  [2]=>
-  array(3) {
     ["a"]=>
     string(6) "orange"
     ["b"]=>
     string(6) "banana"
     ["c"]=>
     string(5) "apple"
+  }
+  [2]=>
+  array(3) {
+    [0]=>
+    string(5) "first"
+    [5]=>
+    string(6) "second"
+    [6]=>
+    string(5) "third"
   }
 }
 

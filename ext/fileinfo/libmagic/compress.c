@@ -36,7 +36,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: compress.c,v 1.73 2014/01/05 15:55:21 christos Exp $")
+FILE_RCSID("@(#)$File: compress.c,v 1.77 2014/12/12 16:33:01 christos Exp $")
 #endif
 
 #include "magic.h"
@@ -46,7 +46,12 @@ FILE_RCSID("@(#)$File: compress.c,v 1.73 2014/01/05 15:55:21 christos Exp $")
 #endif
 #include <string.h>
 #include <errno.h>
-#include <sys/types.h>
+#ifdef HAVE_SIGNAL_H
+#include <signal.h>
+# ifndef HAVE_SIG_T
+typedef void (*sig_t)(int);
+# endif /* HAVE_SIG_T */
+#endif 
 #ifndef PHP_WIN32
 #include <sys/ioctl.h>
 #endif
@@ -107,13 +112,16 @@ file_zmagic(struct magic_set *ms, int fd, const char *name,
 	size_t i, nsz;
 	int rv = 0;
 	int mime = ms->flags & MAGIC_MIME;
-	size_t ncompr;
+#ifdef HAVE_SIGNAL_H
+	sig_t osigpipe;
+#endif
 
 	if ((ms->flags & MAGIC_COMPRESS) == 0)
 		return 0;
 
-	ncompr = sizeof(compr) / sizeof(compr[0]);
-
+#ifdef HAVE_SIGNAL_H
+	osigpipe = signal(SIGPIPE, SIG_IGN);
+#endif
 	for (i = 0; i < ncompr; i++) {
 		if (nbytes < compr[i].maglen)
 			continue;
@@ -140,6 +148,9 @@ file_zmagic(struct magic_set *ms, int fd, const char *name,
 		}
 	}
 error:
+#ifdef HAVE_SIGNAL_H
+	(void)signal(SIGPIPE, osigpipe);
+#endif
 	if (newbuf)
 		efree(newbuf);
 	ms->flags |= MAGIC_COMPRESS;
@@ -300,7 +311,7 @@ file_pipe2file(struct magic_set *ms, int fd, const void *startbuf,
 		return -1;
 	}
 	(void)close(tfd);
-	if (FINFO_LSEEK_FUNC(fd, (off_t)0, SEEK_SET) == (off_t)-1) {
+	if (FINFO_LSEEK_FUNC(fd, (zend_off_t)0, SEEK_SET) == (zend_off_t)-1) {
 		file_badseek(ms);
 		return -1;
 	}
@@ -386,8 +397,8 @@ uncompressbuf(struct magic_set *ms, int fd, size_t method,
     const unsigned char *old, unsigned char **newch, size_t n)
 {
 	int fdin[2], fdout[2];
+	int status;
 	ssize_t r;
-	pid_t pid;
 
 #ifdef BUILTIN_DECOMPRESS
         /* FIXME: This doesn't cope with bzip2 */
@@ -401,12 +412,12 @@ uncompressbuf(struct magic_set *ms, int fd, size_t method,
 		file_error(ms, errno, "cannot create pipe");	
 		return NODATA;
 	}
-	switch (pid = fork()) {
+	switch (fork()) {
 	case 0:	/* child */
 		(void) close(0);
 		if (fd != -1) {
 		    (void) dup(fd);
-		    (void) FINFO_LSEEK_FUNC(0, (off_t)0, SEEK_SET);
+		    (void) FINFO_LSEEK_FUNC(0, (zend_off_t)0, SEEK_SET);
 		} else {
 		    (void) dup(fdin[0]);
 		    (void) close(fdin[0]);
@@ -479,7 +490,7 @@ uncompressbuf(struct magic_set *ms, int fd, size_t method,
 			    strerror(errno));
 #endif
 			efree(*newch);
-			n = 0;
+			n = NODATA-;
 			*newch = NULL;
 			goto err;
 		} else {
@@ -497,6 +508,7 @@ err:
 #else
 		(void)wait(NULL);
 #endif
+
 		(void) close(fdin[0]);
 	    
 		return n;

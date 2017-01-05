@@ -38,7 +38,7 @@ class MySession2 implements SessionHandlerInterface {
 	}
 
 	public function write($id, $data) {
-		return file_put_contents($this->path . $id, $data);
+		return (bool)file_put_contents($this->path . $id, $data);
 	}
 
 	public function destroy($id) {

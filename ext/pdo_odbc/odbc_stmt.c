@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -57,8 +57,8 @@ static int pdo_odbc_sqltype_is_unicode(pdo_odbc_stmt *S, SWORD sqltype)
 	}
 }
 
-static int pdo_odbc_utf82ucs2(pdo_stmt_t *stmt, int is_unicode, const char *buf, 
-	unsigned long buflen, unsigned long *outlen)
+static int pdo_odbc_utf82ucs2(pdo_stmt_t *stmt, int is_unicode, const char *buf,
+	zend_ulong buflen, zend_ulong *outlen)
 {
 #ifdef PHP_WIN32
 	if (is_unicode && buflen) {
@@ -77,7 +77,7 @@ static int pdo_odbc_utf82ucs2(pdo_stmt_t *stmt, int is_unicode, const char *buf,
 			S->convbufsize = ret + sizeof(WCHAR);
 			S->convbuf = erealloc(S->convbuf, S->convbufsize);
 		}
-		
+
 		ret = MultiByteToWideChar(CP_UTF8, 0, buf, buflen, (LPWSTR)S->convbuf, S->convbufsize / sizeof(WCHAR));
 		if (ret == 0) {
 			/*printf("%s:%d %d [%d] %.*s\n", __FILE__, __LINE__, GetLastError(), buflen, buflen, buf);*/
@@ -92,8 +92,8 @@ static int pdo_odbc_utf82ucs2(pdo_stmt_t *stmt, int is_unicode, const char *buf,
 	return PDO_ODBC_CONV_NOT_REQUIRED;
 }
 
-static int pdo_odbc_ucs22utf8(pdo_stmt_t *stmt, int is_unicode, const char *buf, 
-	unsigned long buflen, unsigned long *outlen)
+static int pdo_odbc_ucs22utf8(pdo_stmt_t *stmt, int is_unicode, const char *buf,
+	zend_ulong buflen, zend_ulong *outlen)
 {
 #ifdef PHP_WIN32
 	if (is_unicode && buflen) {
@@ -109,7 +109,7 @@ static int pdo_odbc_ucs22utf8(pdo_stmt_t *stmt, int is_unicode, const char *buf,
 			S->convbufsize = ret + 1;
 			S->convbuf = erealloc(S->convbuf, S->convbufsize);
 		}
-		
+
 		ret = WideCharToMultiByte(CP_UTF8, 0, (LPCWSTR)buf, buflen/sizeof(WCHAR), S->convbuf, S->convbufsize, NULL, NULL);
 		if (ret == 0) {
 			return PDO_ODBC_CONV_FAIL;
@@ -123,7 +123,7 @@ static int pdo_odbc_ucs22utf8(pdo_stmt_t *stmt, int is_unicode, const char *buf,
 	return PDO_ODBC_CONV_NOT_REQUIRED;
 }
 
-static void free_cols(pdo_stmt_t *stmt, pdo_odbc_stmt *S TSRMLS_DC)
+static void free_cols(pdo_stmt_t *stmt, pdo_odbc_stmt *S)
 {
 	if (S->cols) {
 		int i;
@@ -138,7 +138,7 @@ static void free_cols(pdo_stmt_t *stmt, pdo_odbc_stmt *S TSRMLS_DC)
 	}
 }
 
-static int odbc_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
+static int odbc_stmt_dtor(pdo_stmt_t *stmt)
 {
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
 
@@ -150,7 +150,7 @@ static int odbc_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 		S->stmt = SQL_NULL_HANDLE;
 	}
 
-	free_cols(stmt, S TSRMLS_CC);
+	free_cols(stmt, S);
 	if (S->convbuf) {
 		efree(S->convbuf);
 	}
@@ -159,7 +159,7 @@ static int odbc_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 	return 1;
 }
 
-static int odbc_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
+static int odbc_stmt_execute(pdo_stmt_t *stmt)
 {
 	RETCODE rc;
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
@@ -169,8 +169,8 @@ static int odbc_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 	if (stmt->executed) {
 		SQLCloseCursor(S->stmt);
 	}
-	
-	rc = SQLExecute(S->stmt);	
+
+	rc = SQLExecute(S->stmt);
 
 	while (rc == SQL_NEED_DATA) {
 		struct pdo_bound_param_data *param;
@@ -180,20 +180,26 @@ static int odbc_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 			php_stream *stm;
 			int len;
 			pdo_odbc_param *P;
-	
-			P = (pdo_odbc_param*)param->driver_data;
-			if (Z_TYPE_P(param->parameter) != IS_RESOURCE) {
-				/* they passed in a string */
-				unsigned long ulen;
-				convert_to_string(param->parameter);
+			zval *parameter;
 
-				switch (pdo_odbc_utf82ucs2(stmt, P->is_unicode, 
-							Z_STRVAL_P(param->parameter),
-							Z_STRLEN_P(param->parameter),
+			P = (pdo_odbc_param*)param->driver_data;
+			if (Z_ISREF(param->parameter)) {
+				parameter = Z_REFVAL(param->parameter);
+			} else {
+				parameter = &param->parameter;
+			}
+			if (Z_TYPE_P(parameter) != IS_RESOURCE) {
+				/* they passed in a string */
+				zend_ulong ulen;
+				convert_to_string(parameter);
+
+				switch (pdo_odbc_utf82ucs2(stmt, P->is_unicode,
+							Z_STRVAL_P(parameter),
+							Z_STRLEN_P(parameter),
 							&ulen)) {
 					case PDO_ODBC_CONV_NOT_REQUIRED:
-						SQLPutData(S->stmt, Z_STRVAL_P(param->parameter),
-							Z_STRLEN_P(param->parameter));
+						SQLPutData(S->stmt, Z_STRVAL_P(parameter),
+							Z_STRLEN_P(parameter));
 						break;
 					case PDO_ODBC_CONV_OK:
 						SQLPutData(S->stmt, S->convbuf, ulen);
@@ -212,7 +218,7 @@ static int odbc_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 			/* we assume that LOBs are binary and don't need charset
 			 * conversion */
 
-			php_stream_from_zval_no_verify(stm, &param->parameter);
+			php_stream_from_zval_no_verify(stm, parameter);
 			if (!stm) {
 				/* shouldn't happen either */
 				pdo_odbc_stmt_error("input LOB is no longer a stream");
@@ -274,14 +280,15 @@ static int odbc_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 }
 
 static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *param,
-		enum pdo_param_event event_type TSRMLS_DC)
+		enum pdo_param_event event_type)
 {
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
 	RETCODE rc;
 	SWORD sqltype = 0, ctype = 0, scale = 0, nullable = 0;
 	SQLULEN precision = 0;
 	pdo_odbc_param *P;
-	
+	zval *parameter;
+
 	/* we're only interested in parameters for prepared SQL right now */
 	if (param->is_param) {
 
@@ -308,7 +315,7 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 
 					case PDO_PARAM_STMT:
 						return 0;
-					
+
 					default:
 						break;
 				}
@@ -353,7 +360,7 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 				} else {
 					P->paramtype = SQL_PARAM_OUTPUT;
 				}
-				
+
 				if (P->paramtype != SQL_PARAM_INPUT) {
 					if (PDO_PARAM_TYPE(param->param_type) != PDO_PARAM_NULL) {
 						/* need an explicit buffer to hold result */
@@ -364,7 +371,7 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 						P->outbuf = emalloc(P->len + (P->is_unicode ? 2:1));
 					}
 				}
-				
+
 				if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_LOB && P->paramtype != SQL_PARAM_INPUT) {
 					pdo_odbc_stmt_error("Can't bind a lob for output");
 					return 0;
@@ -372,13 +379,13 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 
 				rc = SQLBindParameter(S->stmt, (SQLUSMALLINT) param->paramno+1,
 						P->paramtype, ctype, sqltype, precision, scale,
-						P->paramtype == SQL_PARAM_INPUT ? 
+						P->paramtype == SQL_PARAM_INPUT ?
 							(SQLPOINTER)param :
 							P->outbuf,
 						P->len,
 						&P->len
 						);
-	
+
 				if (rc == SQL_SUCCESS || rc == SQL_SUCCESS_WITH_INFO) {
 					return 1;
 				}
@@ -388,12 +395,18 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 
 			case PDO_PARAM_EVT_EXEC_PRE:
 				P = param->driver_data;
+				if (!Z_ISREF(param->parameter)) {
+					parameter = &param->parameter;
+				} else {
+					parameter = Z_REFVAL(param->parameter);
+				}
+
 				if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_LOB) {
-					if (Z_TYPE_P(param->parameter) == IS_RESOURCE) {
+					if (Z_TYPE_P(parameter) == IS_RESOURCE) {
 						php_stream *stm;
 						php_stream_statbuf sb;
 
-						php_stream_from_zval_no_verify(stm, &param->parameter);
+						php_stream_from_zval_no_verify(stm, parameter);
 
 						if (!stm) {
 							return 0;
@@ -432,28 +445,28 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 							}
 						}
 					} else {
-						convert_to_string(param->parameter);
+						convert_to_string(parameter);
 						if (P->outbuf) {
-							P->len = Z_STRLEN_P(param->parameter);
-							memcpy(P->outbuf, Z_STRVAL_P(param->parameter), P->len);
+							P->len = Z_STRLEN_P(parameter);
+							memcpy(P->outbuf, Z_STRVAL_P(parameter), P->len);
 						} else {
-							P->len = SQL_LEN_DATA_AT_EXEC(Z_STRLEN_P(param->parameter));
+							P->len = SQL_LEN_DATA_AT_EXEC(Z_STRLEN_P(parameter));
 						}
 					}
-				} else if (Z_TYPE_P(param->parameter) == IS_NULL || PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_NULL) {
+				} else if (Z_TYPE_P(parameter) == IS_NULL || PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_NULL) {
 					P->len = SQL_NULL_DATA;
 				} else {
-					convert_to_string(param->parameter);
+					convert_to_string(parameter);
 					if (P->outbuf) {
-						unsigned long ulen;
+						zend_ulong ulen;
 						switch (pdo_odbc_utf82ucs2(stmt, P->is_unicode,
-								Z_STRVAL_P(param->parameter),
-								Z_STRLEN_P(param->parameter),
+								Z_STRVAL_P(parameter),
+								Z_STRLEN_P(parameter),
 								&ulen)) {
 							case PDO_ODBC_CONV_FAIL:
 							case PDO_ODBC_CONV_NOT_REQUIRED:
-								P->len = Z_STRLEN_P(param->parameter);
-								memcpy(P->outbuf, Z_STRVAL_P(param->parameter), P->len);
+								P->len = Z_STRLEN_P(parameter);
+								memcpy(P->outbuf, Z_STRVAL_P(parameter), P->len);
 								break;
 							case PDO_ODBC_CONV_OK:
 								P->len = ulen;
@@ -461,44 +474,47 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 								break;
 						}
 					} else {
-						P->len = SQL_LEN_DATA_AT_EXEC(Z_STRLEN_P(param->parameter));
+						P->len = SQL_LEN_DATA_AT_EXEC(Z_STRLEN_P(parameter));
 					}
 				}
 				return 1;
-			
+
 			case PDO_PARAM_EVT_EXEC_POST:
 				P = param->driver_data;
-				if (P->outbuf) {
-					if (P->outbuf) {
-						unsigned long ulen;
-						char *srcbuf;
-						unsigned long srclen = 0;
 
-						switch (P->len) {
-							case SQL_NULL_DATA:
-								zval_dtor(param->parameter);
-								ZVAL_NULL(param->parameter);
-								break;
-							default:
-								convert_to_string(param->parameter);
-								switch (pdo_odbc_ucs22utf8(stmt, P->is_unicode, P->outbuf, P->len, &ulen)) {
-									case PDO_ODBC_CONV_FAIL:
-										/* something fishy, but allow it to come back as binary */
-									case PDO_ODBC_CONV_NOT_REQUIRED:
-										srcbuf = P->outbuf;
-										srclen = P->len;
-										break;
-									case PDO_ODBC_CONV_OK:
-										srcbuf = S->convbuf;
-										srclen = ulen;
-										break;
-								}
-										
-								Z_STRVAL_P(param->parameter) = erealloc(Z_STRVAL_P(param->parameter), srclen+1);
-								memcpy(Z_STRVAL_P(param->parameter), srcbuf, srclen);
-								Z_STRLEN_P(param->parameter) = srclen;
-								Z_STRVAL_P(param->parameter)[srclen] = '\0';
-						}
+				if (P->outbuf) {
+					zend_ulong ulen;
+					char *srcbuf;
+					zend_ulong srclen = 0;
+
+					if (Z_ISREF(param->parameter)) {
+						parameter = Z_REFVAL(param->parameter);
+					} else {
+						parameter = &param->parameter;
+					}
+					zval_ptr_dtor(parameter);
+					ZVAL_NULL(parameter);
+
+					switch (P->len) {
+						case SQL_NULL_DATA:
+							break;
+						default:
+							switch (pdo_odbc_ucs22utf8(stmt, P->is_unicode, P->outbuf, P->len, &ulen)) {
+								case PDO_ODBC_CONV_FAIL:
+									/* something fishy, but allow it to come back as binary */
+								case PDO_ODBC_CONV_NOT_REQUIRED:
+									srcbuf = P->outbuf;
+									srclen = P->len;
+									break;
+								case PDO_ODBC_CONV_OK:
+									srcbuf = S->convbuf;
+									srclen = ulen;
+									break;
+							}
+
+							ZVAL_NEW_STR(parameter, zend_string_alloc(srclen, 0));
+							memcpy(Z_STRVAL_P(parameter), srcbuf, srclen);
+							Z_STRVAL_P(parameter)[Z_STRLEN_P(parameter)] = '\0';
 					}
 				}
 				return 1;
@@ -508,7 +524,7 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 }
 
 static int odbc_stmt_fetch(pdo_stmt_t *stmt,
-	enum pdo_fetch_orientation ori, long offset TSRMLS_DC)
+	enum pdo_fetch_orientation ori, zend_long offset)
 {
 	RETCODE rc;
 	SQLSMALLINT odbcori;
@@ -521,7 +537,7 @@ static int odbc_stmt_fetch(pdo_stmt_t *stmt,
 		case PDO_FETCH_ORI_LAST:	odbcori = SQL_FETCH_LAST; break;
 		case PDO_FETCH_ORI_ABS:		odbcori = SQL_FETCH_ABSOLUTE; break;
 		case PDO_FETCH_ORI_REL:		odbcori = SQL_FETCH_RELATIVE; break;
-		default: 
+		default:
 			strcpy(stmt->error_code, "HY106");
 			return 0;
 	}
@@ -545,7 +561,7 @@ static int odbc_stmt_fetch(pdo_stmt_t *stmt,
 	return 0;
 }
 
-static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
+static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno)
 {
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
 	struct pdo_column_data *col = &stmt->columns[colno];
@@ -596,8 +612,7 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	colsize = displaysize;
 
 	col->maxlen = S->cols[colno].datalen = colsize;
-	col->namelen = colnamelen;
-	col->name = estrdup(S->cols[colno].colname);
+	col->name = zend_string_init(S->cols[colno].colname, colnamelen, 0);
 	S->cols[colno].is_unicode = pdo_odbc_sqltype_is_unicode(S, S->cols[colno].coltype);
 
 	/* returning data as a string */
@@ -630,15 +645,15 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	return 1;
 }
 
-static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned long *len, int *caller_frees TSRMLS_DC)
+static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, zend_ulong *len, int *caller_frees)
 {
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
 	pdo_odbc_column *C = &S->cols[colno];
-	unsigned long ulen;
+	zend_ulong ulen;
 
 	/* if it is a column containing "long" data, perform late binding now */
 	if (C->is_long) {
-		unsigned long used = 0;
+		zend_ulong used = 0;
 		char *buf;
 		RETCODE rc;
 
@@ -657,10 +672,10 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned l
 
 		if (rc == SQL_SUCCESS_WITH_INFO) {
 			/* this is a 'long column'
-			
+
 			 read the column in 255 byte blocks until the end of the column is reached, reassembling those blocks
 			 in order into the output buffer
-			
+
 			 this loop has to work whether or not SQLGetData() provides the total column length.
 			 calling SQLDescribeCol() or other, specifically to get the column length, then doing a single read
 			 for that size would be slower except maybe for extremely long columns.*/
@@ -669,12 +684,12 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned l
 			buf2 = emalloc(256);
 			buf = estrndup(C->data, 256);
 			used = 255; /* not 256; the driver NUL terminated the buffer */
-			
+
 			do {
 				C->fetched_len = 0;
 				/* read block. 256 bytes => 255 bytes are actually read, the last 1 is NULL */
 				rc = SQLGetData(S->stmt, colno+1, SQL_C_CHAR, buf2, 256, &C->fetched_len);
-				
+
 				/* resize output buffer and reassemble block */
 				if (rc==SQL_SUCCESS_WITH_INFO) {
 					/* point 5, in section "Retrieving Data with SQLGetData" in http://msdn.microsoft.com/en-us/library/windows/desktop/ms715441(v=vs.85).aspx
@@ -691,11 +706,11 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned l
 					/* includes SQL_NO_DATA */
 					break;
 				}
-				
+
 			} while (1);
-			
+
 			efree(buf2);
-			
+
 			/* NULL terminate the buffer once, when finished, for use with the rest of PHP */
 			buf[used] = '\0';
 
@@ -757,7 +772,7 @@ in_data:
 	return 1;
 }
 
-static int odbc_stmt_set_param(pdo_stmt_t *stmt, long attr, zval *val TSRMLS_DC)
+static int odbc_stmt_set_param(pdo_stmt_t *stmt, zend_long attr, zval *val)
 {
 	SQLRETURN rc;
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
@@ -784,7 +799,7 @@ static int odbc_stmt_set_param(pdo_stmt_t *stmt, long attr, zval *val TSRMLS_DC)
 	}
 }
 
-static int odbc_stmt_get_attr(pdo_stmt_t *stmt, long attr, zval *val TSRMLS_DC)
+static int odbc_stmt_get_attr(pdo_stmt_t *stmt, zend_long attr, zval *val)
 {
 	SQLRETURN rc;
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
@@ -797,7 +812,7 @@ static int odbc_stmt_get_attr(pdo_stmt_t *stmt, long attr, zval *val TSRMLS_DC)
 			rc = SQLGetCursorName(S->stmt, buf, sizeof(buf), &len);
 
 			if (rc == SQL_SUCCESS || rc == SQL_SUCCESS_WITH_INFO) {
-				ZVAL_STRINGL(val, buf, len, 1);
+				ZVAL_STRINGL(val, buf, len);
 				return 1;
 			}
 			pdo_odbc_stmt_error("SQLGetCursorName");
@@ -816,7 +831,7 @@ static int odbc_stmt_get_attr(pdo_stmt_t *stmt, long attr, zval *val TSRMLS_DC)
 	}
 }
 
-static int odbc_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
+static int odbc_stmt_next_rowset(pdo_stmt_t *stmt)
 {
 	SQLRETURN rc;
 	SQLSMALLINT colcount;
@@ -831,7 +846,7 @@ static int odbc_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
 		return 0;
 	}
 
-	free_cols(stmt, S TSRMLS_CC);
+	free_cols(stmt, S);
 	/* how many columns do we have ? */
 	SQLNumResultCols(S->stmt, &colcount);
 	stmt->column_count = (int)colcount;

@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2016 The PHP Group                                |
+  | Copyright (c) 2006-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -12,13 +12,12 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Georg Richter <georg@mysql.com>                             |
-  |          Andrey Hristov <andrey@mysql.com>                           |
-  |          Ulf Wendel <uwendel@mysql.com>                              |
+  | Authors: Andrey Hristov <andrey@php.net>                             |
+  |          Ulf Wendel <uw@php.net>                                     |
+  |          Georg Richter <georg@php.net>                               |
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
 #include "php.h"
 #include "mysqlnd.h"
 #include "mysqlnd_priv.h"
@@ -26,32 +25,32 @@
 #include "mysqlnd_debug.h"
 
 
-/* {{{ mysqlnd_stats_values_names 
+/* {{{ mysqlnd_stats_values_names
  */
 
 const MYSQLND_STRING mysqlnd_stats_values_names[STAT_LAST] =
 {
 	{ MYSQLND_STR_W_LEN("bytes_sent") },
-	{ MYSQLND_STR_W_LEN("bytes_received") }, 
+	{ MYSQLND_STR_W_LEN("bytes_received") },
 	{ MYSQLND_STR_W_LEN("packets_sent") },
 	{ MYSQLND_STR_W_LEN("packets_received") },
 	{ MYSQLND_STR_W_LEN("protocol_overhead_in") },
 	{ MYSQLND_STR_W_LEN("protocol_overhead_out") },
-	{ MYSQLND_STR_W_LEN("bytes_received_ok_packet") }, 
-	{ MYSQLND_STR_W_LEN("bytes_received_eof_packet") }, 
-	{ MYSQLND_STR_W_LEN("bytes_received_rset_header_packet") }, 
-	{ MYSQLND_STR_W_LEN("bytes_received_rset_field_meta_packet") }, 
-	{ MYSQLND_STR_W_LEN("bytes_received_rset_row_packet") }, 
-	{ MYSQLND_STR_W_LEN("bytes_received_prepare_response_packet") }, 
-	{ MYSQLND_STR_W_LEN("bytes_received_change_user_packet") }, 
-	{ MYSQLND_STR_W_LEN("packets_sent_command") }, 
-	{ MYSQLND_STR_W_LEN("packets_received_ok") }, 
-	{ MYSQLND_STR_W_LEN("packets_received_eof") }, 
-	{ MYSQLND_STR_W_LEN("packets_received_rset_header") }, 
-	{ MYSQLND_STR_W_LEN("packets_received_rset_field_meta") }, 
-	{ MYSQLND_STR_W_LEN("packets_received_rset_row") }, 
-	{ MYSQLND_STR_W_LEN("packets_received_prepare_response") }, 
-	{ MYSQLND_STR_W_LEN("packets_received_change_user") }, 
+	{ MYSQLND_STR_W_LEN("bytes_received_ok_packet") },
+	{ MYSQLND_STR_W_LEN("bytes_received_eof_packet") },
+	{ MYSQLND_STR_W_LEN("bytes_received_rset_header_packet") },
+	{ MYSQLND_STR_W_LEN("bytes_received_rset_field_meta_packet") },
+	{ MYSQLND_STR_W_LEN("bytes_received_rset_row_packet") },
+	{ MYSQLND_STR_W_LEN("bytes_received_prepare_response_packet") },
+	{ MYSQLND_STR_W_LEN("bytes_received_change_user_packet") },
+	{ MYSQLND_STR_W_LEN("packets_sent_command") },
+	{ MYSQLND_STR_W_LEN("packets_received_ok") },
+	{ MYSQLND_STR_W_LEN("packets_received_eof") },
+	{ MYSQLND_STR_W_LEN("packets_received_rset_header") },
+	{ MYSQLND_STR_W_LEN("packets_received_rset_field_meta") },
+	{ MYSQLND_STR_W_LEN("packets_received_rset_row") },
+	{ MYSQLND_STR_W_LEN("packets_received_prepare_response") },
+	{ MYSQLND_STR_W_LEN("packets_received_change_user") },
 	{ MYSQLND_STR_W_LEN("result_set_queries") },
 	{ MYSQLND_STR_W_LEN("non_result_set_queries") },
 	{ MYSQLND_STR_W_LEN("no_index_used") },
@@ -198,16 +197,16 @@ const MYSQLND_STRING mysqlnd_stats_values_names[STAT_LAST] =
 
 /* {{{ mysqlnd_fill_stats_hash */
 PHPAPI void
-mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, const MYSQLND_STRING * names, zval *return_value TSRMLS_DC ZEND_FILE_LINE_DC)
+mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, const MYSQLND_STRING * names, zval *return_value ZEND_FILE_LINE_DC)
 {
 	unsigned int i;
 
-	mysqlnd_array_init(return_value, stats->count);
+	array_init_size(return_value, stats->count);
 	for (i = 0; i < stats->count; i++) {
 		char tmp[25];
 
 		sprintf((char *)&tmp, MYSQLND_LLU_SPEC, stats->values[i]);
-		add_assoc_string_ex(return_value, names[i].s, names[i].l + 1, tmp, 1);
+		add_assoc_string_ex(return_value, names[i].s, names[i].l, tmp);
 	}
 }
 /* }}} */
@@ -215,7 +214,7 @@ mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, const MYSQLND_STRING 
 
 /* {{{ _mysqlnd_get_client_stats */
 PHPAPI void
-_mysqlnd_get_client_stats(zval *return_value TSRMLS_DC ZEND_FILE_LINE_DC)
+_mysqlnd_get_client_stats(zval *return_value ZEND_FILE_LINE_DC)
 {
 	MYSQLND_STATS stats, *stats_ptr = mysqlnd_global_stats;
 	DBG_ENTER("_mysqlnd_get_client_stats");
@@ -223,7 +222,7 @@ _mysqlnd_get_client_stats(zval *return_value TSRMLS_DC ZEND_FILE_LINE_DC)
 		memset(&stats, 0, sizeof(stats));
 		stats_ptr = &stats;
 	}
-	mysqlnd_fill_stats_hash(stats_ptr, mysqlnd_stats_values_names, return_value TSRMLS_CC ZEND_FILE_LINE_CC);
+	mysqlnd_fill_stats_hash(stats_ptr, mysqlnd_stats_values_names, return_value ZEND_FILE_LINE_CC);
 	DBG_VOID_RETURN;
 }
 /* }}} */
@@ -231,14 +230,14 @@ _mysqlnd_get_client_stats(zval *return_value TSRMLS_DC ZEND_FILE_LINE_DC)
 
 /* {{{ mysqlnd_stats_init */
 PHPAPI void
-mysqlnd_stats_init(MYSQLND_STATS ** stats, size_t statistic_count)
+mysqlnd_stats_init(MYSQLND_STATS ** stats, size_t statistic_count, int persistent)
 {
-	*stats = calloc(1, sizeof(MYSQLND_STATS));
+	*stats = pecalloc(1, sizeof(MYSQLND_STATS), persistent);
 	if (*stats == NULL) {
 		return;
 	}
-	(*stats)->values = calloc(statistic_count, sizeof(uint64_t));
-	(*stats)->triggers = calloc(statistic_count, sizeof(mysqlnd_stat_trigger));
+	(*stats)->values = pecalloc(statistic_count, sizeof(uint64_t), persistent);
+	(*stats)->triggers = pecalloc(statistic_count, sizeof(mysqlnd_stat_trigger), persistent);
 	(*stats)->in_trigger = FALSE;
 	(*stats)->count = statistic_count;
 #ifdef ZTS
@@ -250,22 +249,22 @@ mysqlnd_stats_init(MYSQLND_STATS ** stats, size_t statistic_count)
 
 /* {{{ mysqlnd_stats_end */
 PHPAPI void
-mysqlnd_stats_end(MYSQLND_STATS * stats)
+mysqlnd_stats_end(MYSQLND_STATS * stats, int persistent)
 {
 #ifdef ZTS
 	tsrm_mutex_free(stats->LOCK_access);
 #endif
-	free(stats->triggers);
-	free(stats->values);
+	pefree(stats->triggers, persistent);
+	pefree(stats->values, persistent);
 	/* mnd_free will reference LOCK_access and crash...*/
-	free(stats);
+	pefree(stats, persistent);
 }
 /* }}} */
 
 
 /* {{{ mysqlnd_stats_set_trigger */
 PHPAPI mysqlnd_stat_trigger
-mysqlnd_stats_set_trigger(MYSQLND_STATS * const stats, enum_mysqlnd_collected_stats statistic, mysqlnd_stat_trigger trigger TSRMLS_DC)
+mysqlnd_stats_set_trigger(MYSQLND_STATS * const stats, enum_mysqlnd_collected_stats statistic, mysqlnd_stat_trigger trigger)
 {
 	mysqlnd_stat_trigger ret = NULL;
 	DBG_ENTER("mysqlnd_stats_set_trigger");
@@ -282,7 +281,7 @@ mysqlnd_stats_set_trigger(MYSQLND_STATS * const stats, enum_mysqlnd_collected_st
 
 /* {{{ mysqlnd_stats_set_handler */
 PHPAPI mysqlnd_stat_trigger
-mysqlnd_stats_reset_triggers(MYSQLND_STATS * const stats TSRMLS_DC)
+mysqlnd_stats_reset_triggers(MYSQLND_STATS * const stats)
 {
 	mysqlnd_stat_trigger ret = NULL;
 	DBG_ENTER("mysqlnd_stats_reset_trigger");

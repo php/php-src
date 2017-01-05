@@ -4,8 +4,9 @@ mixed stream_socket_enable_crypto(resource $stream , bool $enable [, int $crypto
 marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao paulo - br
 --SKIPIF--
 <?php
-if (phpversion() < "5.3.0") { die('SKIP php version so lower.'); }
-if (!extension_loaded('openssl')) { die('skip ext/openssl required'); }
+if (!extension_loaded('openssl')) {
+	die('skip ext/openssl required');
+}
 if(substr(PHP_OS, 0, 3) == 'WIN' ) {
 	die('skip not for windows');
 }

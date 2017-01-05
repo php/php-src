@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,6 +21,13 @@
 #ifndef HEAD_H
 #define HEAD_H
 
+#define COOKIE_EXPIRES    "; expires="
+#define COOKIE_MAX_AGE    "; Max-Age="
+#define COOKIE_DOMAIN     "; domain="
+#define COOKIE_PATH       "; path="
+#define COOKIE_SECURE     "; secure"
+#define COOKIE_HTTPONLY   "; HttpOnly"
+
 extern PHP_RINIT_FUNCTION(head);
 PHP_FUNCTION(header);
 PHP_FUNCTION(header_remove);
@@ -30,7 +37,7 @@ PHP_FUNCTION(headers_sent);
 PHP_FUNCTION(headers_list);
 PHP_FUNCTION(http_response_code);
 
-PHPAPI int php_header(TSRMLS_D);
-PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, time_t expires, char *path, int path_len, char *domain, int domain_len, int secure, int url_encode, int httponly TSRMLS_DC);
+PHPAPI int php_header(void);
+PHPAPI int php_setcookie(zend_string *name, zend_string *value, time_t expires, zend_string *path, zend_string *domain, int secure, int url_encode, int httponly);
 
 #endif

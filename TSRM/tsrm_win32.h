@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,6 +23,9 @@
 
 #include "TSRM.h"
 #include <windows.h>
+#if HAVE_UTIME
+# include <sys/utime.h>
+#endif
 
 struct ipc_perm {
 	int			key;
@@ -68,7 +71,8 @@ typedef struct {
 } tsrm_win32_globals;
 
 #ifdef ZTS
-# define TWG(v) TSRMG(win32_globals_id, tsrm_win32_globals *, v)
+# define TWG(v) TSRMG_STATIC(win32_globals_id, tsrm_win32_globals *, v)
+TSRMLS_CACHE_EXTERN()
 #else
 # define TWG(v) (win32_globals.v)
 #endif
@@ -90,15 +94,15 @@ typedef struct {
 #define	SHM_RND		FILE_MAP_WRITE
 #define	SHM_REMAP	FILE_MAP_COPY
 
-char * tsrm_win32_get_path_sid_key(const char *pathname  TSRMLS_DC);
+char * tsrm_win32_get_path_sid_key(const char *pathname );
 
 TSRM_API void tsrm_win32_startup(void);
 TSRM_API void tsrm_win32_shutdown(void);
 
-TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, char *env TSRMLS_DC);
+TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, char *env);
 TSRM_API FILE *popen(const char *command, const char *type);
 TSRM_API int pclose(FILE *stream);
-TSRM_API int tsrm_win32_access(const char *pathname, int mode TSRMLS_DC);
+TSRM_API int tsrm_win32_access(const char *pathname, int mode);
 TSRM_API int win32_utime(const char *filename, struct utimbuf *buf);
 
 TSRM_API int shmget(int key, int size, int flags);

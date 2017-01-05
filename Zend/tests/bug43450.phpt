@@ -18,15 +18,15 @@ class Foo
 
 $num_repeats = 100000;
 
-$start = (memory_get_usage() / 1024) + 16;
+$start = memory_get_usage() / 1024;
 for ($i=1;$i<$num_repeats;$i++) 
 {
 	$foo = new Foo();
 	md5($foo);
 }
-$end = memory_get_peak_usage() / 1024;
+$end = memory_get_usage() / 1024;
 
-if ($start < $end) {
+if ($start + 16 < $end) {
 	echo 'FAIL';
 } else {
 	echo 'PASS';

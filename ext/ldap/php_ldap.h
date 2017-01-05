@@ -1,8 +1,8 @@
-/* 
+/*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -32,14 +32,17 @@
 extern zend_module_entry ldap_module_entry;
 #define ldap_module_ptr &ldap_module_entry
 
+#include "php_version.h"
+#define PHP_LDAP_VERSION PHP_VERSION
+
 /* LDAP functions */
 PHP_MINIT_FUNCTION(ldap);
 PHP_MSHUTDOWN_FUNCTION(ldap);
 PHP_MINFO_FUNCTION(ldap);
 
 ZEND_BEGIN_MODULE_GLOBALS(ldap)
-	long num_links;
-	long max_links;
+	zend_long num_links;
+	zend_long max_links;
 ZEND_END_MODULE_GLOBALS(ldap)
 
 #ifdef ZTS

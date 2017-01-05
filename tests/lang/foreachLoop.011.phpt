@@ -25,10 +25,9 @@ foreach ($a as $v) {
 
 Change from array to non iterable:
 int(1)
-
-Warning: Invalid argument supplied for foreach() in %s on line 5
+int(2)
+int(3)
 
 Change from object to non iterable:
 int(1)
-
-Warning: Invalid argument supplied for foreach() in %s on line 15
+int(2)

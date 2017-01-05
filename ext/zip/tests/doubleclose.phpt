@@ -33,7 +33,7 @@ Done
 Procedural
 NULL
 
-Warning: zip_close(): %i is not a valid Zip Directory resource in %s
+Warning: zip_close(): supplied resource is not a valid Zip Directory resource in %s
 bool(false)
 Object
 bool(true)

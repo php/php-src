@@ -8,7 +8,7 @@ if (!extension_loaded("mcrypt")) {
 ?>
 --FILE--
 <?php
-error_reporting(E_ALL & ~E_DEPRECATED);
+error_reporting(E_ALL);
 
 /* Prototype  : string mcrypt_ecb(int cipher, string key, string data, int mode, string iv)
  * Description: ECB crypt/decrypt data using key key with cipher cipher starting with iv 
@@ -16,12 +16,8 @@ error_reporting(E_ALL & ~E_DEPRECATED);
  * Alias to functions: 
  */
 
-echo "*** Testing mcrypt_ecb() : basic functionality ***\n";
-
-
 $cipher = MCRYPT_TRIPLEDES;
 $data = b"This is the secret message which must be encrypted";
-$mode = MCRYPT_ENCRYPT;
 
 // tripledes uses keys up to 192 bits (24 bytes)
 $keys = array(
@@ -41,30 +37,28 @@ $iv = b'12345678';
 echo "\n--- testing different key lengths\n";
 foreach ($keys as $key) {
    echo "\nkey length=".strlen($key)."\n";
-   var_dump(bin2hex(mcrypt_ecb($cipher, $key, $data, $mode, $iv)));
+   var_dump(bin2hex(mcrypt_encrypt($cipher, $key, $data, MCRYPT_MODE_ECB, $iv)));
 }
 
 $key = b"1234567890123456\0\0\0\0\0\0\0\0";
 echo "\n--- testing different iv lengths\n";
 foreach ($ivs as $iv) {
    echo "\niv length=".strlen($iv)."\n";
-   var_dump(bin2hex(mcrypt_ecb($cipher, $key, $data, $mode, $iv)));
+   var_dump(bin2hex(mcrypt_encrypt($cipher, $key, $data, MCRYPT_MODE_ECB, $iv)));
 }
 ?>
 ===DONE===
 --EXPECTF--
-*** Testing mcrypt_ecb() : basic functionality ***
-
 --- testing different key lengths
 
 key length=8
 
-Warning: mcrypt_ecb(): Key of size 8 not supported by this algorithm. Only keys of size 24 supported in %s on line %d
+Warning: mcrypt_encrypt(): Key of size 8 not supported by this algorithm. Only keys of size 24 supported in %s on line %d
 string(0) ""
 
 key length=20
 
-Warning: mcrypt_ecb(): Key of size 20 not supported by this algorithm. Only keys of size 24 supported in %s on line %d
+Warning: mcrypt_encrypt(): Key of size 20 not supported by this algorithm. Only keys of size 24 supported in %s on line %d
 string(0) ""
 
 key length=24
@@ -72,7 +66,7 @@ string(112) "923eedcb20e18e3efa466a6ca1b842b34e6ac46aa3690ef739d0d68a26eb64e1a6a
 
 key length=26
 
-Warning: mcrypt_ecb(): Key of size 26 not supported by this algorithm. Only keys of size 24 supported in %s on line %d
+Warning: mcrypt_encrypt(): Key of size 26 not supported by this algorithm. Only keys of size 24 supported in %s on line %d
 string(0) ""
 
 --- testing different iv lengths

@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2016 The PHP Group                                |
+  | Copyright (c) 2006-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -12,13 +12,11 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Georg Richter <georg@mysql.com>                             |
-  |          Andrey Hristov <andrey@mysql.com>                           |
-  |          Ulf Wendel <uwendel@mysql.com>                              |
+  | Authors: Andrey Hristov <andrey@php.net>                             |
+  |          Ulf Wendel <uw@php.net>                                     |
+  |          Georg Richter <georg@php.net>                               |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef MYSQLND_DEBUG_H
 #define MYSQLND_DEBUG_H
@@ -45,15 +43,12 @@ struct st_mysqlnd_debug_methods
 struct st_mysqlnd_debug
 {
 	php_stream	*stream;
-#ifdef ZTS
-	TSRMLS_D;
-#endif
 	unsigned int flags;
 	unsigned int nest_level_limit;
 	int pid;
 	char * file_name;
 	zend_stack call_stack;
-	zend_stack call_time_stack;	
+	zend_stack call_time_stack;
 	HashTable not_filtered_functions;
 	HashTable function_profiles;
 	struct st_mysqlnd_debug_methods *m;
@@ -65,18 +60,16 @@ struct st_mysqlnd_plugin_trace_log
 	struct st_mysqlnd_plugin_header plugin_header;
 	struct
 	{
-		MYSQLND_DEBUG * (*trace_instance_init)(const char * skip_functions[] TSRMLS_DC);
-		char * (*get_backtrace)(uint max_levels, size_t * length TSRMLS_DC);
+		MYSQLND_DEBUG * (*trace_instance_init)(const char * skip_functions[]);
 	} methods;
 };
 
-void mysqlnd_debug_trace_plugin_register(TSRMLS_D);
+void mysqlnd_debug_trace_plugin_register(void);
 
-PHPAPI MYSQLND_DEBUG * mysqlnd_debug_init(const char * skip_functions[] TSRMLS_DC);
+PHPAPI MYSQLND_DEBUG * mysqlnd_debug_init(const char * skip_functions[]);
 
-PHPAPI char * mysqlnd_get_backtrace(uint max_levels, size_t * length TSRMLS_DC);
 
-#if defined(__GNUC__) || (defined(_MSC_VER) && (_MSC_VER >= 1400))
+#if defined(__GNUC__) || defined(PHP_WIN32)
 #ifdef PHP_WIN32
 #include "win32/time.h"
 #elif defined(NETWARE)
@@ -111,7 +104,7 @@ PHPAPI char * mysqlnd_get_backtrace(uint max_levels, size_t * length TSRMLS_DC);
 #define DBG_BLOCK_LEAVE_EX2(dbg_obj1, dbg_obj2) \
 			DBG_LEAVE_EX2((dbg_obj1), (dbg_obj2), ;) \
 		} \
-	
+
 
 #define DBG_ENTER_EX(dbg_obj, func_name)	DBG_ENTER_EX2((dbg_obj), (MYSQLND_DEBUG *) NULL, (func_name))
 #define DBG_LEAVE_EX(dbg_obj, leave)		DBG_LEAVE_EX2((dbg_obj), (MYSQLND_DEBUG *) NULL, leave)
@@ -120,20 +113,22 @@ PHPAPI char * mysqlnd_get_backtrace(uint max_levels, size_t * length TSRMLS_DC);
 					struct timeval __dbg_prof_tp = {0}; \
 					uint64_t __dbg_prof_start = 0; /* initialization is needed */ \
 					zend_bool dbg_skip_trace = TRUE; \
+					((void)__dbg_prof_start); \
 					if ((dbg_obj1)) { \
 						dbg_skip_trace = !(dbg_obj1)->m->func_enter((dbg_obj1), __LINE__, __FILE__, func_name, strlen(func_name)); \
 					} \
 					if ((dbg_obj2)) { \
 						dbg_skip_trace |= !(dbg_obj2)->m->func_enter((dbg_obj2), __LINE__, __FILE__, func_name, strlen(func_name)); \
 					} \
-					if (dbg_skip_trace); /* shut compiler's mouth */\
+					if (dbg_skip_trace) \
+						/* EMPTY */ ; /* shut compiler's mouth */	\
 					do { \
 						if (((dbg_obj1) && (dbg_obj1)->flags & MYSQLND_DEBUG_PROFILE_CALLS) || \
 							((dbg_obj2) && (dbg_obj2)->flags & MYSQLND_DEBUG_PROFILE_CALLS)) \
 						{ \
 							DBG_PROFILE_START_TIME(); \
 						} \
-					} while (0); 
+					} while (0);
 
 #define DBG_LEAVE_EX2(dbg_obj1, dbg_obj2, leave)	\
 			do {\
@@ -161,7 +156,7 @@ PHPAPI char * mysqlnd_get_backtrace(uint max_levels, size_t * length TSRMLS_DC);
 
 
 
-#else  /* defined(__GNUC__) || (defined(_MSC_VER) && (_MSC_VER >= 1400)) */
+#else  /* defined(__GNUC__) || defined(PHP_WIN32) */
 static inline void DBG_INF_EX(MYSQLND_DEBUG * dbg_obj, const char * const msg) {}
 static inline void DBG_ERR_EX(MYSQLND_DEBUG * dbg_obj, const char * const msg) {}
 static inline void DBG_INF_FMT_EX(MYSQLND_DEBUG * dbg_obj, ...) {}

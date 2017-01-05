@@ -26,7 +26,7 @@
                 Computer Science Department, 9062
                 Western Washington University
                 Bellingham, WA 98226-9062
-       
+
 *************************************************************************/
 
 #ifndef _BCMATH_H_
@@ -99,7 +99,7 @@ typedef struct bc_struct
 #endif
 #endif
 
-_PROTOTYPE(void bc_init_numbers, (TSRMLS_D));
+_PROTOTYPE(void bc_init_numbers, (void));
 
 _PROTOTYPE(bc_num _bc_new_num_ex, (int length, int scale, int persistent));
 
@@ -107,11 +107,11 @@ _PROTOTYPE(void _bc_free_num_ex, (bc_num *num, int persistent));
 
 _PROTOTYPE(bc_num bc_copy_num, (bc_num num));
 
-_PROTOTYPE(void bc_init_num, (bc_num *num TSRMLS_DC));
+_PROTOTYPE(void bc_init_num, (bc_num *num));
 
-_PROTOTYPE(void bc_str2num, (bc_num *num, char *str, int scale TSRMLS_DC));
+_PROTOTYPE(void bc_str2num, (bc_num *num, char *str, int scale));
 
-_PROTOTYPE(char *bc_num2str, (bc_num num));
+_PROTOTYPE(zend_string *bc_num2str, (bc_num num));
 
 _PROTOTYPE(void bc_int2num, (bc_num *num, int val));
 
@@ -119,7 +119,7 @@ _PROTOTYPE(long bc_num2long, (bc_num num));
 
 _PROTOTYPE(int bc_compare, (bc_num n1, bc_num n2));
 
-_PROTOTYPE(char bc_is_zero, (bc_num num TSRMLS_DC));
+_PROTOTYPE(char bc_is_zero, (bc_num num));
 
 _PROTOTYPE(char bc_is_near_zero, (bc_num num, int scale));
 
@@ -129,26 +129,26 @@ _PROTOTYPE(void bc_add, (bc_num n1, bc_num n2, bc_num *result, int scale_min));
 
 _PROTOTYPE(void bc_sub, (bc_num n1, bc_num n2, bc_num *result, int scale_min));
 
-_PROTOTYPE(void bc_multiply, (bc_num n1, bc_num n2, bc_num *prod, int scale TSRMLS_DC));
+_PROTOTYPE(void bc_multiply, (bc_num n1, bc_num n2, bc_num *prod, int scale));
 
-_PROTOTYPE(int bc_divide, (bc_num n1, bc_num n2, bc_num *quot, int scale TSRMLS_DC));
+_PROTOTYPE(int bc_divide, (bc_num n1, bc_num n2, bc_num *quot, int scale));
 
 _PROTOTYPE(int bc_modulo, (bc_num num1, bc_num num2, bc_num *result,
-			   int scale TSRMLS_DC));
+			   int scale));
 
 _PROTOTYPE(int bc_divmod, (bc_num num1, bc_num num2, bc_num *quot,
-			   bc_num *rem, int scale TSRMLS_DC));
+			   bc_num *rem, int scale));
 
 _PROTOTYPE(int bc_raisemod, (bc_num base, bc_num expo, bc_num mod,
-			     bc_num *result, int scale TSRMLS_DC));
+			     bc_num *result, int scale));
 
 _PROTOTYPE(void bc_raise, (bc_num num1, bc_num num2, bc_num *result,
-			   int scale TSRMLS_DC));
+			   int scale));
 
-_PROTOTYPE(int bc_sqrt, (bc_num *num, int scale TSRMLS_DC));
+_PROTOTYPE(int bc_sqrt, (bc_num *num, int scale));
 
 _PROTOTYPE(void bc_out_num, (bc_num num, int o_base, void (* out_char)(int),
-			     int leading_zero TSRMLS_DC));
+			     int leading_zero));
 
 /* Prototypes needed for external utility routines. */
 

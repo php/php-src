@@ -9,13 +9,13 @@ require dirname(__FILE__) . '/config.inc';
 <?php
 require dirname(__FILE__) . '/config.inc';
 
-$stmt = $db->prepare("select ic1.* from information_schema.columns ic1");
+$stmt = $db->prepare("select top 1 ic1.* from information_schema.columns ic1");
 $stmt->execute();
 var_dump($stmt->getColumnMeta(0));
 $stmt = null;
 ?>
 --EXPECTF--
-array(8) {
+array(10) {
   ["max_length"]=>
   int(%d)
   ["precision"]=>
@@ -26,10 +26,14 @@ array(8) {
   string(13) "TABLE_CATALOG"
   ["native_type"]=>
   string(4) "char"
+  ["native_type_id"]=>
+  int(%d)
+  ["native_usertype_id"]=>
+  int(%d)
+  ["pdo_type"]=>
+  int(2)
   ["name"]=>
   string(13) "TABLE_CATALOG"
   ["len"]=>
   int(%d)
-  ["pdo_type"]=>
-  int(2)
 }

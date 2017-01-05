@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,6 +31,6 @@ PHP_FUNCTION(grapheme_stristr);
 PHP_FUNCTION(grapheme_extract);
 
 void grapheme_register_constants( INIT_FUNC_ARGS );
-void grapheme_close_global_iterator( TSRMLS_D );
+void grapheme_close_global_iterator( void );
 
 #endif // GRAPHEME_GRAPHEME_H

@@ -3,30 +3,30 @@ get_class_methods(): Testing scope
 --FILE--
 <?php
 
-abstract class A { 
+abstract class X { 
 	public function a() { }
 	private function b() { }
 	protected function c() { }	
 }
 
-class B extends A {
+class Y extends X {
 	private function bb() { }
 	
 	static public function test() { 
-		var_dump(get_class_methods('A'));
-		var_dump(get_class_methods('B'));
+		var_dump(get_class_methods('X'));
+		var_dump(get_class_methods('Y'));
 	}
 }
 
 
-var_dump(get_class_methods('A'));
-var_dump(get_class_methods('B'));
+var_dump(get_class_methods('X'));
+var_dump(get_class_methods('Y'));
 
 
-B::test();
+Y::test();
 
 ?>
---EXPECT--
+--EXPECTF--
 array(1) {
   [0]=>
   string(1) "a"

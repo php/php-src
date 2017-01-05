@@ -49,7 +49,7 @@ foreach ( $variation_array as $var ) {
 ?>
 --EXPECTF--
 *** Test substituting argument 1 with object values ***
-Error: 2 - posix_setuid() expects parameter 1 to be long, object given, %s
+Error: 2 - posix_setuid() expects parameter 1 to be integer, object given, %s
 bool(false)
-Error: 2 - posix_setuid() expects parameter 1 to be long, object given, %s
+Error: 2 - posix_setuid() expects parameter 1 to be integer, object given, %s
 bool(false)

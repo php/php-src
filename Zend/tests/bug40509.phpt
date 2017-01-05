@@ -23,4 +23,4 @@ var_dump(key($arr["v"]));
 int(0)
 int(0)
 int(0)
-NULL
+int(0)

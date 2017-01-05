@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -38,7 +38,7 @@
 #include "uint32.h"
 
 /* {{{ cdb_make_write */
-static int cdb_make_write(struct cdb_make *c, char *buf, uint32 sz TSRMLS_DC) {
+static int cdb_make_write(struct cdb_make *c, char *buf, uint32 sz) {
 	return php_stream_write(c->fp, buf, sz) == sz ? 0 : -1;
 }
 
@@ -56,7 +56,7 @@ static int cdb_posplus(struct cdb_make *c, uint32 len)
 /* }}} */
 
 /* {{{ cdb_make_start */
-int cdb_make_start(struct cdb_make *c, php_stream * f TSRMLS_DC)
+int cdb_make_start(struct cdb_make *c, php_stream * f)
 {
 	c->head = 0;
 	c->split = 0;
@@ -65,7 +65,7 @@ int cdb_make_start(struct cdb_make *c, php_stream * f TSRMLS_DC)
 	c->fp = f;
 	c->pos = sizeof(c->final);
 	if (php_stream_seek(f, c->pos, SEEK_SET) == -1) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Fseek failed");
+		php_error_docref(NULL, E_NOTICE, "Fseek failed");
 		return -1;
 	}
 	return php_stream_tell(c->fp);
@@ -73,7 +73,7 @@ int cdb_make_start(struct cdb_make *c, php_stream * f TSRMLS_DC)
 /* }}} */
 
 /* {{{ cdb_make_addend */
-int cdb_make_addend(struct cdb_make *c, unsigned int keylen, unsigned int datalen, uint32 h TSRMLS_DC)
+int cdb_make_addend(struct cdb_make *c, unsigned int keylen, unsigned int datalen, uint32 h)
 {
 	struct cdb_hplist *head;
 
@@ -101,7 +101,7 @@ int cdb_make_addend(struct cdb_make *c, unsigned int keylen, unsigned int datale
 /* }}} */
 
 /* {{{ cdb_make_addbegin */
-int cdb_make_addbegin(struct cdb_make *c, unsigned int keylen, unsigned int datalen TSRMLS_DC)
+int cdb_make_addbegin(struct cdb_make *c, unsigned int keylen, unsigned int datalen)
 {
 	char buf[8];
 
@@ -116,26 +116,26 @@ int cdb_make_addbegin(struct cdb_make *c, unsigned int keylen, unsigned int data
 
 	uint32_pack(buf, keylen);
 	uint32_pack(buf + 4, datalen);
-	if (cdb_make_write(c, buf, 8 TSRMLS_CC) != 0)
+	if (cdb_make_write(c, buf, 8) != 0)
 		return -1;
 	return 0;
 }
 
 /* {{{ cdb_make_add */
-int cdb_make_add(struct cdb_make *c,char *key,unsigned int keylen,char *data,unsigned int datalen TSRMLS_DC)
+int cdb_make_add(struct cdb_make *c,char *key,unsigned int keylen,char *data,unsigned int datalen)
 {
-	if (cdb_make_addbegin(c, keylen, datalen TSRMLS_CC) == -1)
+	if (cdb_make_addbegin(c, keylen, datalen) == -1)
 		return -1;
-	if (cdb_make_write(c, key, keylen TSRMLS_CC) != 0)
+	if (cdb_make_write(c, key, keylen) != 0)
 		return -1;
-	if (cdb_make_write(c, data, datalen TSRMLS_CC) != 0)
+	if (cdb_make_write(c, data, datalen) != 0)
 		return -1;
-	return cdb_make_addend(c, keylen, datalen, cdb_hash(key, keylen) TSRMLS_CC);
+	return cdb_make_addend(c, keylen, datalen, cdb_hash(key, keylen));
 }
 /* }}} */
 
 /* {{{ cdb_make_finish */
-int cdb_make_finish(struct cdb_make *c TSRMLS_DC)
+int cdb_make_finish(struct cdb_make *c)
 {
 	char buf[8];
 	int i;
@@ -211,7 +211,7 @@ int cdb_make_finish(struct cdb_make *c TSRMLS_DC)
 		for (u = 0;u < len;++u) {
 			uint32_pack(buf, c->hash[u].h);
 			uint32_pack(buf + 4, c->hash[u].p);
-			if (cdb_make_write(c, buf, 8 TSRMLS_CC) != 0)
+			if (cdb_make_write(c, buf, 8) != 0)
 				return -1;
 			if (cdb_posplus(c, 8) == -1)
 				return -1;
@@ -231,14 +231,14 @@ int cdb_make_finish(struct cdb_make *c TSRMLS_DC)
 	php_stream_rewind(c->fp);
 	if (php_stream_tell(c->fp) != 0)
 		return -1;
-	if (cdb_make_write(c, c->final, sizeof(c->final) TSRMLS_CC) != 0)
+	if (cdb_make_write(c, c->final, sizeof(c->final)) != 0)
 		return -1;
 	return php_stream_flush(c->fp);
 }
 /* }}} */
 
 /* {{{ cdb_make_version */
-char *cdb_make_version() 
+char *cdb_make_version()
 {
 	return "0.75, $Id$";
 }

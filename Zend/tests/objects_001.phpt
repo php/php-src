@@ -49,10 +49,10 @@ bool(true)
 Notice: Object of class Bar could not be converted to int in %s on line %d
 bool(false)
 
-Notice: Object of class Bar could not be converted to double in %s on line %d
+Notice: Object of class Bar could not be converted to float in %s on line %d
 bool(true)
 
-Notice: Object of class Bar could not be converted to double in %s on line %d
+Notice: Object of class Bar could not be converted to float in %s on line %d
 bool(false)
 
 Notice: Object of class Bar could not be converted to int in %s on line %d

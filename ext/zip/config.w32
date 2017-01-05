@@ -21,14 +21,19 @@ if (PHP_ZIP != "no") {
 			zip_get_archive_comment.c zip_get_archive_flag.c zip_get_compression_implementation.c\
 			zip_get_encryption_implementation.c zip_get_file_comment.c zip_get_name.c zip_get_num_entries.c \
 			zip_get_num_files.c zip_memdup.c zip_name_locate.c zip_new.c zip_open.c zip_rename.c zip_replace.c\
+			zip_hash.c \
 			zip_set_archive_comment.c zip_set_archive_flag.c zip_set_default_password.c zip_set_file_comment.c\
 			zip_set_file_compression.c zip_set_name.c zip_source_buffer.c zip_source_close.c zip_source_crc.c\
-			zip_source_deflate.c zip_source_error.c zip_source_file.c zip_source_filep.c zip_source_free.c\
-			zip_source_function.c zip_source_layered.c zip_source_open.c zip_source_pkware.c zip_source_pop.c\
+			zip_source_deflate.c zip_source_error.c zip_source_filep.c zip_source_free.c\
+			zip_source_function.c zip_source_layered.c zip_source_open.c zip_source_pkware.c \
 			zip_source_read.c zip_source_stat.c zip_source_window.c zip_source_zip.c zip_source_zip_new.c\
 			zip_stat.c zip_stat_index.c zip_stat_init.c zip_strerror.c zip_string.c zip_unchange.c zip_unchange_all.c\
 			zip_unchange_archive.c zip_unchange_data.c zip_utf-8.c mkstemp.c \
-			zip_file_set_external_attributes.c zip_file_get_external_attributes.c", "zip");
+			zip_file_set_external_attributes.c zip_file_get_external_attributes.c zip_source_write.c \
+			zip_source_call.c zip_source_supports.c zip_buffer.c zip_source_seek.c zip_source_tell.c \
+			zip_io_util.c zip_source_remove.c zip_source_rollback_write.c zip_source_commit_write.c \
+			zip_source_tell_write.c zip_source_begin_write.c zip_source_seek_write.c \
+			zip_source_win32a.c zip_source_win32utf8.c zip_source_win32handle.c zip_source_win32w.c", "zip");
 
 		AC_DEFINE('HAVE_ZIP', 1);
 		ADD_FLAG("CFLAGS_ZIP", "/D _WIN32");

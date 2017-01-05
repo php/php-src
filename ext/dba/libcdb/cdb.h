@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -40,14 +40,14 @@ struct cdb {
 
 uint32 cdb_hash(char *, unsigned int);
 
-void cdb_free(struct cdb * TSRMLS_DC);
-void cdb_init(struct cdb *, php_stream *fp TSRMLS_DC);
+void cdb_free(struct cdb *);
+void cdb_init(struct cdb *, php_stream *fp);
 
-int cdb_read(struct cdb *, char *, unsigned int, uint32 TSRMLS_DC);
+int cdb_read(struct cdb *, char *, unsigned int, uint32);
 
-void cdb_findstart(struct cdb * TSRMLS_DC);
-int cdb_findnext(struct cdb *, char *, unsigned int TSRMLS_DC);
-int cdb_find(struct cdb *, char *, unsigned int TSRMLS_DC);
+void cdb_findstart(struct cdb *);
+int cdb_findnext(struct cdb *, char *, unsigned int);
+int cdb_find(struct cdb *, char *, unsigned int);
 
 #define cdb_datapos(c) ((c)->dpos)
 #define cdb_datalen(c) ((c)->dlen)

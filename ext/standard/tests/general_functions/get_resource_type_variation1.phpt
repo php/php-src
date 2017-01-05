@@ -49,7 +49,7 @@ NULL
 
 -- float 10.5 --
 
-Warning: get_resource_type() expects parameter 1 to be resource, double given in %s on line %d
+Warning: get_resource_type() expects parameter 1 to be resource, float given in %s on line %d
 NULL
 
 -- string --

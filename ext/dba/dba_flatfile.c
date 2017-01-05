@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -67,7 +67,7 @@ DBA_FETCH_FUNC(flatfile)
 	FLATFILE_DATA;
 	FLATFILE_GKEY;
 
-	gval = flatfile_fetch(dba, gkey TSRMLS_CC);
+	gval = flatfile_fetch(dba, gkey);
 	if (gval.dptr) {
 		if (newlen) {
 			*newlen = gval.dsize;
@@ -86,17 +86,17 @@ DBA_UPDATE_FUNC(flatfile)
 	FLATFILE_GKEY;
 	gval.dptr = (char *) val;
 	gval.dsize = vallen;
-	
-	switch(flatfile_store(dba, gkey, gval, mode==1 ? FLATFILE_INSERT : FLATFILE_REPLACE TSRMLS_CC)) {
+
+	switch(flatfile_store(dba, gkey, gval, mode==1 ? FLATFILE_INSERT : FLATFILE_REPLACE)) {
 		case 0:
 			return SUCCESS;
 		case 1:
 			return FAILURE;
 		case -1:
-			php_error_docref1(NULL TSRMLS_CC, key, E_WARNING, "Operation not possible");
+			php_error_docref1(NULL, key, E_WARNING, "Operation not possible");
 			return FAILURE;
 		default:
-			php_error_docref2(NULL TSRMLS_CC, key, val, E_WARNING, "Unknown return value");
+			php_error_docref2(NULL, key, val, E_WARNING, "Unknown return value");
 			return FAILURE;
 	}
 }
@@ -106,8 +106,8 @@ DBA_EXISTS_FUNC(flatfile)
 	datum gval;
 	FLATFILE_DATA;
 	FLATFILE_GKEY;
-	
-	gval = flatfile_fetch(dba, gkey TSRMLS_CC);
+
+	gval = flatfile_fetch(dba, gkey);
 	if (gval.dptr) {
 		efree(gval.dptr);
 		return SUCCESS;
@@ -119,7 +119,7 @@ DBA_DELETE_FUNC(flatfile)
 {
 	FLATFILE_DATA;
 	FLATFILE_GKEY;
-	return(flatfile_delete(dba, gkey TSRMLS_CC) == -1 ? FAILURE : SUCCESS);
+	return(flatfile_delete(dba, gkey) == -1 ? FAILURE : SUCCESS);
 }
 
 DBA_FIRSTKEY_FUNC(flatfile)
@@ -129,7 +129,7 @@ DBA_FIRSTKEY_FUNC(flatfile)
 	if (dba->nextkey.dptr) {
 		efree(dba->nextkey.dptr);
 	}
-	dba->nextkey = flatfile_firstkey(dba TSRMLS_CC);
+	dba->nextkey = flatfile_firstkey(dba);
 	if (dba->nextkey.dptr) {
 		if (newlen)  {
 			*newlen = dba->nextkey.dsize;
@@ -142,15 +142,15 @@ DBA_FIRSTKEY_FUNC(flatfile)
 DBA_NEXTKEY_FUNC(flatfile)
 {
 	FLATFILE_DATA;
-	
+
 	if (!dba->nextkey.dptr) {
 		return NULL;
 	}
-	
+
 	if (dba->nextkey.dptr) {
 		efree(dba->nextkey.dptr);
 	}
-	dba->nextkey = flatfile_nextkey(dba TSRMLS_CC);
+	dba->nextkey = flatfile_nextkey(dba);
 	if (dba->nextkey.dptr) {
 		if (newlen) {
 			*newlen = dba->nextkey.dsize;

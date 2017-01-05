@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,32 +24,39 @@
 #include "../intl_common.h"
 #include "../intl_error.h"
 #include "../intl_data.h"
+
+#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM < 48
+# define MSG_FORMAT_QUOTE_APOS 1
+#endif
+
 #include "msgformat_data.h"
 
 typedef struct {
-	zend_object     zo;
 	msgformat_data  mf_data;
+	zend_object     zo;
 } MessageFormatter_object;
 
-void msgformat_register_class( TSRMLS_D );
+
+static inline MessageFormatter_object *php_intl_messageformatter_fetch_object(zend_object *obj) {
+	return (MessageFormatter_object *)((char*)(obj) - XtOffsetOf(MessageFormatter_object, zo));
+}
+#define Z_INTL_MESSAGEFORMATTER_P(zv) php_intl_messageformatter_fetch_object(Z_OBJ_P(zv))
+
+void msgformat_register_class( void );
 extern zend_class_entry *MessageFormatter_ce_ptr;
 
 /* Auxiliary macros */
 
 #define MSG_FORMAT_METHOD_INIT_VARS		INTL_METHOD_INIT_VARS(MessageFormatter, mfo)
-#define MSG_FORMAT_METHOD_FETCH_OBJECT_NO_CHECK	INTL_METHOD_FETCH_OBJECT(MessageFormatter, mfo)
+#define MSG_FORMAT_METHOD_FETCH_OBJECT_NO_CHECK	INTL_METHOD_FETCH_OBJECT(INTL_MESSAGEFORMATTER, mfo)
 #define MSG_FORMAT_METHOD_FETCH_OBJECT									\
 	MSG_FORMAT_METHOD_FETCH_OBJECT_NO_CHECK;							\
 	if (MSG_FORMAT_OBJECT(mfo) == NULL)	{								\
 		intl_errors_set(&mfo->mf_data.error, U_ILLEGAL_ARGUMENT_ERROR,	\
-				"Found unconstructed MessageFormatter", 0 TSRMLS_CC);	\
+				"Found unconstructed MessageFormatter", 0);	\
 		RETURN_FALSE;													\
 	}
 
 #define MSG_FORMAT_OBJECT(mfo)			(mfo)->mf_data.umsgf
-
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM < 48
-# define MSG_FORMAT_QUOTE_APOS 1
-#endif
 
 #endif // #ifndef MSG_FORMAT_CLASS_H

@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,6 +21,8 @@
 
 #include "php.h"
 #include <stdarg.h>
+
+#define PHP_SPL_VERSION PHP_VERSION
 
 #if 0
 #define SPL_DEBUG(x)	x
@@ -58,29 +60,23 @@ PHP_MINFO_FUNCTION(spl);
 
 
 ZEND_BEGIN_MODULE_GLOBALS(spl)
-	char *       autoload_extensions;
-	HashTable *  autoload_functions;
-	int          autoload_running;
-	int          autoload_extensions_len;
+	zend_string *autoload_extensions;
+	HashTable   *autoload_functions;
 	intptr_t     hash_mask_handle;
 	intptr_t     hash_mask_handlers;
 	int          hash_mask_init;
+	int          autoload_running;
 ZEND_END_MODULE_GLOBALS(spl)
 
-#ifdef ZTS
-# define SPL_G(v) TSRMG(spl_globals_id, zend_spl_globals *, v)
-extern int spl_globals_id;
-#else
-# define SPL_G(v) (spl_globals.v)
-extern zend_spl_globals spl_globals;
-#endif
+ZEND_EXTERN_MODULE_GLOBALS(spl)
+#define SPL_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(spl, v)
 
 PHP_FUNCTION(spl_classes);
 PHP_FUNCTION(class_parents);
 PHP_FUNCTION(class_implements);
 PHP_FUNCTION(class_uses);
 
-PHPAPI void php_spl_object_hash(zval *obj, char* md5str TSRMLS_DC);
+PHPAPI zend_string *php_spl_object_hash(zval *obj);
 
 #endif /* PHP_SPL_H */
 

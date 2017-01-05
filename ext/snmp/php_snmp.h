@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -85,7 +85,6 @@ PHP_METHOD(SNMP, getErrno);
 PHP_METHOD(SNMP, getError);
 
 typedef struct _php_snmp_object {
-	zend_object zo;
 	struct snmp_session *session;
 	int max_oids;
 	int valueretrieval;
@@ -96,11 +95,17 @@ typedef struct _php_snmp_object {
 	int oid_increasing_check;
 	int exceptions_enabled;
 	char snmp_errstr[256];
+	zend_object zo;
 } php_snmp_object;
 
+static inline php_snmp_object *php_snmp_fetch_object(zend_object *obj) {
+	return (php_snmp_object *)((char*)(obj) - XtOffsetOf(php_snmp_object, zo));
+}
 
-typedef int (*php_snmp_read_t)(php_snmp_object *snmp_object, zval **retval TSRMLS_DC);
-typedef int (*php_snmp_write_t)(php_snmp_object *snmp_object, zval *newval TSRMLS_DC);
+#define Z_SNMP_P(zv) php_snmp_fetch_object(Z_OBJ_P((zv)))
+
+typedef int (*php_snmp_read_t)(php_snmp_object *snmp_object, zval *retval);
+typedef int (*php_snmp_write_t)(php_snmp_object *snmp_object, zval *newval);
 
 typedef struct _ptp_snmp_prop_handler {
 	const char *name;
@@ -128,7 +133,7 @@ ZEND_END_MODULE_GLOBALS(snmp)
 #endif
 
 #define REGISTER_SNMP_CLASS_CONST_LONG(const_name, value) \
-	zend_declare_class_constant_long(php_snmp_ce, const_name, sizeof(const_name)-1, (long)value TSRMLS_CC);
+	zend_declare_class_constant_long(php_snmp_ce, const_name, sizeof(const_name)-1, (zend_long)value);
 
 #else
 

@@ -58,7 +58,6 @@
       <file role="src">php_xml.c</file>
       <file role="src">php_xml.h</file>
       <file role="src">soap.c</file>
-      <file role="src">php_soap.dsp</file>
     </dir>
   </filelist>
 </package>

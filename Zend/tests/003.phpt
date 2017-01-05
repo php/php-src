@@ -60,7 +60,7 @@ array(2) {
 array(0) {
 }
 
-Warning: Missing argument 2 for test3() in %s on line %d
+Warning: Missing argument 2 for test3()%s
 array(1) {
   [0]=>
   int(1)

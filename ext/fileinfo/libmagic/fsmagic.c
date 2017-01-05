@@ -32,7 +32,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: fsmagic.c,v 1.71 2013/12/01 18:01:07 christos Exp $")
+FILE_RCSID("@(#)$File: fsmagic.c,v 1.74 2014/10/13 20:21:49 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -53,7 +53,11 @@ FILE_RCSID("@(#)$File: fsmagic.c,v 1.71 2013/12/01 18:01:07 christos Exp $")
 #ifdef major			/* Might be defined in sys/types.h.  */
 # define HAVE_MAJOR
 #endif
-  
+#ifdef WIN32
+# define WIN32_LEAN_AND_MEAN
+# include <windows.h>
+#endif
+
 #ifndef HAVE_MAJOR
 # define major(dev)  (((dev) >> 8) & 0xff)
 # define minor(dev)  ((dev) & 0xff)
@@ -90,11 +94,10 @@ handle_mime(struct magic_set *ms, int mime, const char *str)
 }
 
 protected int
-file_fsmagic(struct magic_set *ms, const char *fn, struct stat *sb, php_stream *stream)
+file_fsmagic(struct magic_set *ms, const char *fn, zend_stat_t *sb, php_stream *stream)
 {
 	int ret, did = 0;
 	int mime = ms->flags & MAGIC_MIME;
-	TSRMLS_FETCH();
 
 	if (ms->flags & MAGIC_APPLE)
 		return 0;
@@ -148,7 +151,7 @@ file_fsmagic(struct magic_set *ms, const char *fn, struct stat *sb, php_stream *
 #ifndef PHP_WIN32
 # ifdef S_IFCHR
 		case S_IFCHR:
-			/* 
+			/*
 			 * If -s has been specified, treat character special files
 			 * like ordinary files.  Otherwise, just report that they
 			 * are block special files and go on to the next file.

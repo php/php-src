@@ -34,17 +34,17 @@
 struct fpm_worker_pool_s;
 
 int fpm_php_init_child(struct fpm_worker_pool_s *wp);
-char *fpm_php_script_filename(TSRMLS_D);
-char *fpm_php_request_uri(TSRMLS_D);
-char *fpm_php_request_method(TSRMLS_D);
-char *fpm_php_query_string(TSRMLS_D);
-char *fpm_php_auth_user(TSRMLS_D);
-size_t fpm_php_content_length(TSRMLS_D);
+char *fpm_php_script_filename(void);
+char *fpm_php_request_uri(void);
+char *fpm_php_request_method(void);
+char *fpm_php_query_string(void);
+char *fpm_php_auth_user(void);
+size_t fpm_php_content_length(void);
 void fpm_php_soft_quit();
 int fpm_php_init_main();
 int fpm_php_apply_defines_ex(struct key_value_s *kv, int mode);
 int fpm_php_limit_extensions(char *path);
-char* fpm_php_get_string_from_table(char *table, char *key TSRMLS_DC);
+char* fpm_php_get_string_from_table(zend_string *table, char *key);
 
 #endif
 

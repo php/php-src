@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,7 +17,7 @@
  */
 
 /* $Id$ */
- 
+
 #ifndef _PHP_MBREGEX_H
 #define _PHP_MBREGEX_H
 
@@ -70,12 +70,12 @@ PHP_MINFO_FUNCTION(mb_regex);
 
 typedef struct _zend_mb_regex_globals zend_mb_regex_globals;
 
-zend_mb_regex_globals *php_mb_regex_globals_alloc(TSRMLS_D);
-void php_mb_regex_globals_free(zend_mb_regex_globals *pglobals TSRMLS_DC);
-int php_mb_regex_set_mbctype(const char *enc TSRMLS_DC);
-int php_mb_regex_set_default_mbctype(const char *encname TSRMLS_DC);
-const char *php_mb_regex_get_mbctype(TSRMLS_D);
-const char *php_mb_regex_get_default_mbctype(TSRMLS_D);
+zend_mb_regex_globals *php_mb_regex_globals_alloc(void);
+void php_mb_regex_globals_free(zend_mb_regex_globals *pglobals);
+int php_mb_regex_set_mbctype(const char *enc);
+int php_mb_regex_set_default_mbctype(const char *encname);
+const char *php_mb_regex_get_mbctype(void);
+const char *php_mb_regex_get_default_mbctype(void);
 
 PHP_FUNCTION(mb_regex_encoding);
 PHP_FUNCTION(mb_ereg);

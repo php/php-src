@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,7 +26,7 @@
 typedef struct _php_core_globals php_core_globals;
 
 #ifdef ZTS
-# define PG(v) TSRMG(core_globals_id, php_core_globals *, v)
+# define PG(v) ZEND_TSRMG(core_globals_id, php_core_globals *, v)
 extern PHPAPI int core_globals_id;
 #else
 # define PG(v) (core_globals.v)
@@ -56,7 +56,7 @@ typedef struct _arg_separators {
 struct _php_core_globals {
 	zend_bool implicit_flush;
 
-	long output_buffering;
+	zend_long output_buffering;
 
 	zend_bool sql_safe_mode;
 	zend_bool enable_dl;
@@ -64,16 +64,16 @@ struct _php_core_globals {
 	char *output_handler;
 
 	char *unserialize_callback_func;
-	long serialize_precision;
+	zend_long serialize_precision;
 
-	long memory_limit;
-	long max_input_time;
+	zend_long memory_limit;
+	zend_long max_input_time;
 
 	zend_bool track_errors;
 	zend_bool display_errors;
 	zend_bool display_startup_errors;
 	zend_bool log_errors;
-	long      log_errors_max_len;
+	zend_long      log_errors_max_len;
 	zend_bool ignore_repeated_errors;
 	zend_bool ignore_repeated_source;
 	zend_bool report_memleaks;
@@ -88,8 +88,8 @@ struct _php_core_globals {
 	char *sys_temp_dir;
 
 	char *upload_tmp_dir;
-	long upload_max_filesize;
-	
+	zend_long upload_max_filesize;
+
 	char *error_append_string;
 	char *error_prepend_string;
 
@@ -113,7 +113,7 @@ struct _php_core_globals {
 
 	zend_llist tick_functions;
 
-	zval *http_globals[6];
+	zval http_globals[6];
 
 	zend_bool expose_php;
 
@@ -126,7 +126,7 @@ struct _php_core_globals {
 	zend_bool html_errors;
 	zend_bool xmlrpc_errors;
 
-	long xmlrpc_error_number;
+	zend_long xmlrpc_error_number;
 
 	zend_bool activated_auto_globals[8];
 
@@ -135,13 +135,14 @@ struct _php_core_globals {
 	zend_bool during_request_startup;
 	zend_bool allow_url_fopen;
 	zend_bool enable_post_data_reading;
-	signed char always_populate_raw_post_data;
 	zend_bool report_zend_debug;
 
 	int last_error_type;
 	char *last_error_message;
 	char *last_error_file;
 	int  last_error_lineno;
+
+	char *php_sys_temp_dir;
 
 	char *disable_functions;
 	char *disable_classes;
@@ -150,12 +151,12 @@ struct _php_core_globals {
 #ifdef PHP_WIN32
 	zend_bool com_initialized;
 #endif
-	long max_input_nesting_level;
-	long max_input_vars;
+	zend_long max_input_nesting_level;
+	zend_long max_input_vars;
 	zend_bool in_user_include;
 
 	char *user_ini_filename;
-	long user_ini_cache_ttl;
+	zend_long user_ini_cache_ttl;
 
 	char *request_order;
 

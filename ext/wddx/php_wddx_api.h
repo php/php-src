@@ -1,8 +1,8 @@
-/* 
+/*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,7 +21,7 @@
 #ifndef PHP_WDDX_API_H
 #define PHP_WDDX_API_H
 
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str_public.h"
 
 #define WDDX_ARRAY_S			"<array length='%d'>"
 #define WDDX_ARRAY_E			"</array>"
@@ -57,11 +57,11 @@ typedef smart_str wddx_packet;
 wddx_packet* php_wddx_constructor(void);
 void		 php_wddx_destructor(wddx_packet *packet);
 
-void 		 php_wddx_packet_start(wddx_packet *packet, char *comment, int comment_len);
+void 		 php_wddx_packet_start(wddx_packet *packet, char *comment, size_t comment_len);
 void 		 php_wddx_packet_end(wddx_packet *packet);
 
-void 		 php_wddx_serialize_var(wddx_packet *packet, zval *var, char *name, int name_len TSRMLS_DC);
-int 		 php_wddx_deserialize_ex(char *, int, zval *return_value);
+void 		 php_wddx_serialize_var(wddx_packet *packet, zval *var, zend_string *name);
+int 		 php_wddx_deserialize_ex(const char *, size_t, zval *return_value);
 #define php_wddx_gather(packet) estrndup(packet->c, packet->len)
 
 #endif /* PHP_WDDX_API_H */

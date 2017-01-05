@@ -83,8 +83,8 @@ It has _speci@l ch@r$ 2222 !!!Now \k as escape char to test
 chunk_split():::"
 -- Iteration 7 --
 
-Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
-bool(false)
+Warning: chunk_split() expects parameter 2 to be integer, float given in %s on line %d
+NULL
 -- Iteration 8 --
 
 Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d

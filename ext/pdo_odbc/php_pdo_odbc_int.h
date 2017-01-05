@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -135,7 +135,7 @@ typedef struct {
 
 typedef struct {
 	char *data;
-	unsigned long datalen;
+	zend_ulong datalen;
 	SQLLEN fetched_len;
 	SWORD	coltype;
 	char colname[128];
@@ -150,7 +150,7 @@ typedef struct {
 	pdo_odbc_db_handle *H;
 	pdo_odbc_errinfo einfo;
 	char *convbuf;
-	unsigned long convbufsize;
+	zend_ulong convbufsize;
 	unsigned going_long:1;
 	unsigned assume_utf8:1;
 	unsigned _spare:30;
@@ -163,21 +163,21 @@ typedef struct {
 	unsigned is_unicode:1;
 	unsigned _spare:31;
 } pdo_odbc_param;
-	
+
 extern pdo_driver_t pdo_odbc_driver;
 extern struct pdo_stmt_methods odbc_stmt_methods;
 
-void pdo_odbc_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, PDO_ODBC_HSTMT statement, char *what, const char *file, int line TSRMLS_DC);
-#define pdo_odbc_drv_error(what)	pdo_odbc_error(dbh, NULL, SQL_NULL_HSTMT, what, __FILE__, __LINE__ TSRMLS_CC)
-#define pdo_odbc_stmt_error(what)	pdo_odbc_error(stmt->dbh, stmt, SQL_NULL_HSTMT, what, __FILE__, __LINE__ TSRMLS_CC)
-#define pdo_odbc_doer_error(what)	pdo_odbc_error(dbh, NULL, stmt, what, __FILE__, __LINE__ TSRMLS_CC)
+void pdo_odbc_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, PDO_ODBC_HSTMT statement, char *what, const char *file, int line);
+#define pdo_odbc_drv_error(what)	pdo_odbc_error(dbh, NULL, SQL_NULL_HSTMT, what, __FILE__, __LINE__)
+#define pdo_odbc_stmt_error(what)	pdo_odbc_error(stmt->dbh, stmt, SQL_NULL_HSTMT, what, __FILE__, __LINE__)
+#define pdo_odbc_doer_error(what)	pdo_odbc_error(dbh, NULL, stmt, what, __FILE__, __LINE__)
 
 void pdo_odbc_init_error_table(void);
 void pdo_odbc_fini_error_table(void);
 
 #ifdef SQL_ATTR_CONNECTION_POOLING
-extern SQLUINTEGER pdo_odbc_pool_on;
-extern SQLUINTEGER pdo_odbc_pool_mode;
+extern zend_ulong pdo_odbc_pool_on;
+extern zend_ulong pdo_odbc_pool_mode;
 #endif
 
 enum {

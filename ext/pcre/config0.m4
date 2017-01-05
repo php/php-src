@@ -47,7 +47,7 @@ PHP_ARG_WITH(pcre-regex,,
     
     AC_DEFINE(HAVE_PCRE, 1, [ ])
     PHP_ADD_INCLUDE($PCRE_INCDIR)
-    PHP_NEW_EXTENSION(pcre, php_pcre.c, no)
+    PHP_NEW_EXTENSION(pcre, php_pcre.c, no,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
     PHP_INSTALL_HEADERS([ext/pcre], [php_pcre.h])
   else
     AC_MSG_CHECKING([for PCRE library to use])
@@ -60,9 +60,21 @@ PHP_ARG_WITH(pcre-regex,,
     				 pcrelib/pcre_tables.c pcrelib/pcre_valid_utf8.c \
     				 pcrelib/pcre_version.c pcrelib/pcre_xclass.c \
     				 pcrelib/pcre_jit_compile.c"
-    PHP_PCRE_CFLAGS="-DHAVE_CONFIG_H -I@ext_srcdir@/pcrelib"
+    PHP_PCRE_CFLAGS="-DHAVE_CONFIG_H -I@ext_srcdir@/pcrelib -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
     PHP_NEW_EXTENSION(pcre, $pcrelib_sources php_pcre.c, no,,$PHP_PCRE_CFLAGS)
     PHP_ADD_BUILD_DIR($ext_builddir/pcrelib)
     PHP_INSTALL_HEADERS([ext/pcre], [php_pcre.h pcrelib/])
     AC_DEFINE(HAVE_BUNDLED_PCRE, 1, [ ])
   fi
+
+PHP_ARG_WITH(pcre-jit,,[  --with-pcre-jit         Enable PCRE JIT functionality], yes, no)
+  if test "$PHP_PCRE_REGEX" != "no"; then
+    AC_MSG_CHECKING([whether to enable PCRE JIT functionality])
+    if test "$PHP_PCRE_JIT" != "no"; then
+      AC_DEFINE(HAVE_PCRE_JIT_SUPPORT, 1, [ ])
+      AC_MSG_RESULT([yes])
+    else
+      AC_MSG_RESULT([no])
+    fi
+  fi
+

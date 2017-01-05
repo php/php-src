@@ -22,5 +22,5 @@ switch (1) {
 }
 
 ?>
---EXPECT--
-3
+--EXPECTF--
+Fatal error: Switch statements may only contain one default clause in %s on line 13

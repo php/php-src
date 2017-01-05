@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -35,9 +35,9 @@ PHPDBG_HELP(aliases);
 extern const phpdbg_command_t phpdbg_help_commands[];
 
 #define phpdbg_help_header() \
-	phpdbg_notice("Welcome to phpdbg, the interactive PHP debugger, v%s", PHPDBG_VERSION);
+	phpdbg_notice("version", "version=\"%s\"", "Welcome to phpdbg, the interactive PHP debugger, v%s", PHPDBG_VERSION);
 #define phpdbg_help_footer() \
-	phpdbg_notice("Please report bugs to <%s>", PHPDBG_ISSUES);
+	phpdbg_notice("issues", "url=\"%s\"", "Please report bugs to <%s>", PHPDBG_ISSUES);
 
 typedef struct _phpdbg_help_text_t {
 	char *key;
@@ -45,4 +45,6 @@ typedef struct _phpdbg_help_text_t {
 } phpdbg_help_text_t;
 
 extern phpdbg_help_text_t phpdbg_help_text[];
+
+extern void phpdbg_do_help_cmd(char *type);
 #endif /* PHPDBG_HELP_H */

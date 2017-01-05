@@ -80,11 +80,11 @@ echo "Done";
 ?>
 --EXPECTF--
 *** Testing parse_url() : usage variations ***
-Error: 8 - Undefined variable: undefined_var, %s(61)
-Error: 8 - Undefined variable: unset_var, %s(64)
+Error: 8 - Undefined variable: undefined_var, %s(%d)
+Error: 8 - Undefined variable: unset_var, %s(%d)
 
 Arg value 10.5 
-Error: 2 - parse_url(): Invalid URL component identifier 10, %s(71)
+Error: 2 - parse_url(): Invalid URL component identifier 10, %s(%d)
 bool(false)
 
 Arg value -10.5 
@@ -108,54 +108,38 @@ array(8) {
 }
 
 Arg value 101234567000 
-array(8) {
-  ["scheme"]=>
-  string(4) "http"
-  ["host"]=>
-  string(11) "www.php.net"
-  ["port"]=>
-  int(80)
-  ["user"]=>
-  string(6) "secret"
-  ["pass"]=>
-  string(7) "hideout"
-  ["path"]=>
-  string(10) "/index.php"
-  ["query"]=>
-  string(31) "test=1&test2=char&test3=mixesCI"
-  ["fragment"]=>
-  string(16) "some_page_ref123"
-}
+Error: 2 - parse_url() expects parameter 2 to be integer, float given, %s(%d)
+NULL
 
 Arg value 1.07654321E-9 
 string(4) "http"
 
 Arg value 0.5 
 string(4) "http"
-Error: 8 - Array to string conversion, %sparse_url_variation_002_32bit.php(%d)
+Error: 8 - Array to string conversion, %s(%d)
 
 Arg value Array 
-Error: 2 - parse_url() expects parameter 2 to be long, array given, %s(71)
+Error: 2 - parse_url() expects parameter 2 to be integer, array given, %s(%d)
 NULL
-Error: 8 - Array to string conversion, %sparse_url_variation_002_32bit.php(%d)
+Error: 8 - Array to string conversion, %s(%d)
 
 Arg value Array 
-Error: 2 - parse_url() expects parameter 2 to be long, array given, %s(71)
+Error: 2 - parse_url() expects parameter 2 to be integer, array given, %s(%d)
 NULL
-Error: 8 - Array to string conversion, %sparse_url_variation_002_32bit.php(%d)
+Error: 8 - Array to string conversion, %s(%d)
 
 Arg value Array 
-Error: 2 - parse_url() expects parameter 2 to be long, array given, %s(71)
+Error: 2 - parse_url() expects parameter 2 to be integer, array given, %s(%d)
 NULL
-Error: 8 - Array to string conversion, %sparse_url_variation_002_32bit.php(%d)
+Error: 8 - Array to string conversion, %s(%d)
 
 Arg value Array 
-Error: 2 - parse_url() expects parameter 2 to be long, array given, %s(71)
+Error: 2 - parse_url() expects parameter 2 to be integer, array given, %s(%d)
 NULL
-Error: 8 - Array to string conversion, %sparse_url_variation_002_32bit.php(%d)
+Error: 8 - Array to string conversion, %s(%d)
 
 Arg value Array 
-Error: 2 - parse_url() expects parameter 2 to be long, array given, %s(71)
+Error: 2 - parse_url() expects parameter 2 to be integer, array given, %s(%d)
 NULL
 
 Arg value  
@@ -165,36 +149,36 @@ Arg value
 string(4) "http"
 
 Arg value 1 
-string(11) "www.php.net"
+string(%d) "www.php.net"
 
 Arg value  
 string(4) "http"
 
 Arg value 1 
-string(11) "www.php.net"
+string(%d) "www.php.net"
 
 Arg value  
 string(4) "http"
 
 Arg value  
-Error: 2 - parse_url() expects parameter 2 to be long, string given, %s(71)
+Error: 2 - parse_url() expects parameter 2 to be integer, string given, %s(%d)
 NULL
 
 Arg value  
-Error: 2 - parse_url() expects parameter 2 to be long, string given, %s(71)
+Error: 2 - parse_url() expects parameter 2 to be integer, string given, %s(%d)
 NULL
 
 Arg value string 
-Error: 2 - parse_url() expects parameter 2 to be long, string given, %s(71)
+Error: 2 - parse_url() expects parameter 2 to be integer, string given, %s(%d)
 NULL
 
 Arg value string 
-Error: 2 - parse_url() expects parameter 2 to be long, string given, %s(71)
+Error: 2 - parse_url() expects parameter 2 to be integer, string given, %s(%d)
 NULL
-Error: 4096 - Object of class stdClass could not be converted to string, %s(70)
+Error: 4096 - Object of class stdClass could not be converted to string, %s(%d)
 
 Arg value  
-Error: 2 - parse_url() expects parameter 2 to be long, object given, %s(71)
+Error: 2 - parse_url() expects parameter 2 to be integer, object given, %s(%d)
 NULL
 
 Arg value  

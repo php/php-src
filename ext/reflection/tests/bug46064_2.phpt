@@ -57,14 +57,14 @@ bool(true)
 bool(false)
 array(2) {
   [0]=>
-  &object(ReflectionProperty)#%d (2) {
+  object(ReflectionProperty)#%d (2) {
     ["name"]=>
     string(1) "b"
     ["class"]=>
     string(4) "test"
   }
   [1]=>
-  &object(ReflectionProperty)#%d (2) {
+  object(ReflectionProperty)#%d (2) {
     ["name"]=>
     string(1) "a"
     ["class"]=>

@@ -5,28 +5,28 @@
   Epinions.com may be contacted at feedback@epinions-inc.com
 */
 
-/*  
-  Copyright 2001 Epinions, Inc. 
+/*
+  Copyright 2001 Epinions, Inc.
 
-  Subject to the following 3 conditions, Epinions, Inc.  permits you, free 
-  of charge, to (a) use, copy, distribute, modify, perform and display this 
-  software and associated documentation files (the "Software"), and (b) 
-  permit others to whom the Software is furnished to do so as well.  
+  Subject to the following 3 conditions, Epinions, Inc.  permits you, free
+  of charge, to (a) use, copy, distribute, modify, perform and display this
+  software and associated documentation files (the "Software"), and (b)
+  permit others to whom the Software is furnished to do so as well.
 
-  1) The above copyright notice and this permission notice shall be included 
-  without modification in all copies or substantial portions of the 
-  Software.  
+  1) The above copyright notice and this permission notice shall be included
+  without modification in all copies or substantial portions of the
+  Software.
 
-  2) THE SOFTWARE IS PROVIDED "AS IS", WITHOUT ANY WARRANTY OR CONDITION OF 
-  ANY KIND, EXPRESS, IMPLIED OR STATUTORY, INCLUDING WITHOUT LIMITATION ANY 
-  IMPLIED WARRANTIES OF ACCURACY, MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-  PURPOSE OR NONINFRINGEMENT.  
+  2) THE SOFTWARE IS PROVIDED "AS IS", WITHOUT ANY WARRANTY OR CONDITION OF
+  ANY KIND, EXPRESS, IMPLIED OR STATUTORY, INCLUDING WITHOUT LIMITATION ANY
+  IMPLIED WARRANTIES OF ACCURACY, MERCHANTABILITY, FITNESS FOR A PARTICULAR
+  PURPOSE OR NONINFRINGEMENT.
 
-  3) IN NO EVENT SHALL EPINIONS, INC. BE LIABLE FOR ANY DIRECT, INDIRECT, 
-  SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES OR LOST PROFITS ARISING OUT 
-  OF OR IN CONNECTION WITH THE SOFTWARE (HOWEVER ARISING, INCLUDING 
-  NEGLIGENCE), EVEN IF EPINIONS, INC.  IS AWARE OF THE POSSIBILITY OF SUCH 
-  DAMAGES.    
+  3) IN NO EVENT SHALL EPINIONS, INC. BE LIABLE FOR ANY DIRECT, INDIRECT,
+  SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES OR LOST PROFITS ARISING OUT
+  OF OR IN CONNECTION WITH THE SOFTWARE (HOWEVER ARISING, INCLUDING
+  NEGLIGENCE), EVEN IF EPINIONS, INC.  IS AWARE OF THE POSSIBILITY OF SUCH
+  DAMAGES.
 
 */
 
@@ -165,7 +165,7 @@ static XMLRPC_VALUE xi_system_describe_methods_cb(XMLRPC_SERVER server, XMLRPC_R
          qi = Q_Iter_Next_F(qi);
       }
    }
-   
+
    return xResponse;
 }
 
@@ -184,8 +184,8 @@ static XMLRPC_VALUE xi_system_list_methods_cb(XMLRPC_SERVER server, XMLRPC_REQUE
    return xResponse;
 }
 
-/* this complies with system.methodSignature as defined at 
- * http://xmlrpc.usefulinc.com/doc/sysmethodsig.html 
+/* this complies with system.methodSignature as defined at
+ * http://xmlrpc.usefulinc.com/doc/sysmethodsig.html
  */
 static XMLRPC_VALUE xi_system_method_signature_cb(XMLRPC_SERVER server, XMLRPC_REQUEST input, void* userData) {
    const char* method = XMLRPC_GetValueString(XMLRPC_VectorRewind(XMLRPC_RequestGetData(input)));
@@ -212,11 +212,11 @@ static XMLRPC_VALUE xi_system_method_signature_cb(XMLRPC_SERVER server, XMLRPC_R
          while(xSigIter) {
             /* first type is the return value */
             type = XMLRPC_VectorGetStringWithID(XMLRPC_VectorRewind(
-                                                 XMLRPC_VectorGetValueWithID(xSigIter, xi_token_returns)), 
+                                                 XMLRPC_VectorGetValueWithID(xSigIter, xi_token_returns)),
                                                 xi_token_type);
-            XMLRPC_AddValueToVector(xTypesArray, 
-                                    XMLRPC_CreateValueString(NULL, 
-                                                             type ? type : type_to_str(xmlrpc_none, 0), 
+            XMLRPC_AddValueToVector(xTypesArray,
+                                    XMLRPC_CreateValueString(NULL,
+                                                             type ? type : type_to_str(xmlrpc_none, 0),
                                     0));
 
             /* the rest are parameters */
@@ -226,7 +226,7 @@ static XMLRPC_VALUE xi_system_method_signature_cb(XMLRPC_SERVER server, XMLRPC_R
             /* iter through params, adding to types array */
             while(xIter) {
                XMLRPC_AddValueToVector(xTypesArray,
-                                       XMLRPC_CreateValueString(NULL, 
+                                       XMLRPC_CreateValueString(NULL,
                                                                 XMLRPC_VectorGetStringWithID(xIter, xi_token_type),
                                                                 0));
                xIter = XMLRPC_VectorNext(xParams);
@@ -243,8 +243,8 @@ static XMLRPC_VALUE xi_system_method_signature_cb(XMLRPC_SERVER server, XMLRPC_R
    return xResponse;
 }
 
-/* this complies with system.methodHelp as defined at 
- * http://xmlrpc.usefulinc.com/doc/sysmethhelp.html 
+/* this complies with system.methodHelp as defined at
+ * http://xmlrpc.usefulinc.com/doc/sysmethhelp.html
  */
 static XMLRPC_VALUE xi_system_method_help_cb(XMLRPC_SERVER server, XMLRPC_REQUEST input, void* userData) {
    const char* method = XMLRPC_GetValueString(XMLRPC_VectorRewind(XMLRPC_RequestGetData(input)));
@@ -355,7 +355,7 @@ XMLRPC_VALUE xml_element_to_method_description(xml_element* el, XMLRPC_ERROR err
                if(xSubList) {
                   xml_element* elem_iter = Q_Head(&el->children);
                   while(elem_iter) {
-                     XMLRPC_AddValueToVector(xSubList, 
+                     XMLRPC_AddValueToVector(xSubList,
                                              xml_element_to_method_description(elem_iter, err));
                      elem_iter = Q_Next(&el->children);
                   }
@@ -366,8 +366,8 @@ XMLRPC_VALUE xml_element_to_method_description(xml_element* el, XMLRPC_ERROR err
       }
 
       /* these three kids are about equivalent */
-      else if(!strcmp(el->name, "params") || 
-              !strcmp(el->name, "returns") || 
+      else if(!strcmp(el->name, "params") ||
+              !strcmp(el->name, "returns") ||
               !strcmp(el->name, "signature")) {
          if(Q_Size(&el->children)) {
             xml_element* elem_iter = Q_Head(&el->children);
@@ -375,7 +375,7 @@ XMLRPC_VALUE xml_element_to_method_description(xml_element* el, XMLRPC_ERROR err
 
 
             while(elem_iter) {
-               XMLRPC_AddValueToVector(xReturn, 
+               XMLRPC_AddValueToVector(xReturn,
                                        xml_element_to_method_description(elem_iter, err));
                elem_iter = Q_Next(&el->children);
             }
@@ -390,7 +390,7 @@ XMLRPC_VALUE xml_element_to_method_description(xml_element* el, XMLRPC_ERROR err
          XMLRPC_VectorAppendString(xReturn, xi_token_name, name, 0);
 
          while(elem_iter) {
-            XMLRPC_AddValueToVector(xReturn, 
+            XMLRPC_AddValueToVector(xReturn,
                                     xml_element_to_method_description(elem_iter, err));
             elem_iter = Q_Next(&el->children);
          }
@@ -407,14 +407,14 @@ XMLRPC_VALUE xml_element_to_method_description(xml_element* el, XMLRPC_ERROR err
          xReturn = XMLRPC_CreateVector(el->name, xmlrpc_vector_mixed);
 
          while(elem_iter) {
-            XMLRPC_AddValueToVector(xReturn, 
+            XMLRPC_AddValueToVector(xReturn,
                                     xml_element_to_method_description(elem_iter, err));
             elem_iter = Q_Next(&el->children);
          }
       }
 
-      /* or anything at all really, so long as its got some text. 
-       * no reason being all snotty about a spec, right? 
+      /* or anything at all really, so long as its got some text.
+       * no reason being all snotty about a spec, right?
        */
       else if(el->name && el->text.len) {
          xReturn = XMLRPC_CreateValueString(el->name, el->text.str, el->text.len);
@@ -480,7 +480,7 @@ XMLRPC_VALUE XMLRPC_IntrospectionCreateDescription(const char* xml, XMLRPC_ERROR
  *   updates server with additional introspection data
  * INPUTS
  *   server - target server
- *   desc - introspection data, should be a struct generated by 
+ *   desc - introspection data, should be a struct generated by
  *          XMLRPC_IntrospectionCreateDescription ()
  * RESULT
  *   int - 1 if success, else 0
@@ -579,7 +579,7 @@ int XMLRPC_ServerRegisterIntrospectionCallback(XMLRPC_SERVER server, XMLRPC_Intr
    if(server && cb) {
 
       doc_method* dm = calloc(1, sizeof(doc_method));
-      
+
       if(dm) {
          dm->method = cb;
          dm->b_called = 0;

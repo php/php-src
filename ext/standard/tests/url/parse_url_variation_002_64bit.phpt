@@ -119,27 +119,27 @@ string(4) "http"
 Error: 8 - Array to string conversion, %sparse_url_variation_002_64bit.php(%d)
 
 Arg value Array 
-Error: 2 - parse_url() expects parameter 2 to be long, array given, %s(71)
+Error: 2 - parse_url() expects parameter 2 to be integer, array given, %s(71)
 NULL
 Error: 8 - Array to string conversion, %sparse_url_variation_002_64bit.php(%d)
 
 Arg value Array 
-Error: 2 - parse_url() expects parameter 2 to be long, array given, %s(71)
+Error: 2 - parse_url() expects parameter 2 to be integer, array given, %s(71)
 NULL
 Error: 8 - Array to string conversion, %sparse_url_variation_002_64bit.php(%d)
 
 Arg value Array 
-Error: 2 - parse_url() expects parameter 2 to be long, array given, %s(71)
+Error: 2 - parse_url() expects parameter 2 to be integer, array given, %s(71)
 NULL
 Error: 8 - Array to string conversion, %sparse_url_variation_002_64bit.php(%d)
 
 Arg value Array 
-Error: 2 - parse_url() expects parameter 2 to be long, array given, %s(71)
+Error: 2 - parse_url() expects parameter 2 to be integer, array given, %s(71)
 NULL
 Error: 8 - Array to string conversion, %sparse_url_variation_002_64bit.php(%d)
 
 Arg value Array 
-Error: 2 - parse_url() expects parameter 2 to be long, array given, %s(71)
+Error: 2 - parse_url() expects parameter 2 to be integer, array given, %s(71)
 NULL
 
 Arg value  
@@ -161,24 +161,24 @@ Arg value
 string(4) "http"
 
 Arg value  
-Error: 2 - parse_url() expects parameter 2 to be long, string given, %s(71)
+Error: 2 - parse_url() expects parameter 2 to be integer, string given, %s(71)
 NULL
 
 Arg value  
-Error: 2 - parse_url() expects parameter 2 to be long, string given, %s(71)
+Error: 2 - parse_url() expects parameter 2 to be integer, string given, %s(71)
 NULL
 
 Arg value string 
-Error: 2 - parse_url() expects parameter 2 to be long, string given, %s(71)
+Error: 2 - parse_url() expects parameter 2 to be integer, string given, %s(71)
 NULL
 
 Arg value string 
-Error: 2 - parse_url() expects parameter 2 to be long, string given, %s(71)
+Error: 2 - parse_url() expects parameter 2 to be integer, string given, %s(71)
 NULL
 Error: 4096 - Object of class stdClass could not be converted to string, %s(70)
 
 Arg value  
-Error: 2 - parse_url() expects parameter 2 to be long, object given, %s(71)
+Error: 2 - parse_url() expects parameter 2 to be integer, object given, %s(71)
 NULL
 
 Arg value  

@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -55,6 +55,8 @@
 #define FILTER_FLAG_NO_RES_RANGE            0x400000
 #define FILTER_FLAG_NO_PRIV_RANGE           0x800000
 
+#define FILTER_FLAG_HOSTNAME               0x100000
+
 #define FILTER_VALIDATE_INT           0x0101
 #define FILTER_VALIDATE_BOOLEAN       0x0102
 #define FILTER_VALIDATE_FLOAT         0x0103
@@ -64,7 +66,8 @@
 #define FILTER_VALIDATE_EMAIL         0x0112
 #define FILTER_VALIDATE_IP            0x0113
 #define FILTER_VALIDATE_MAC           0x0114
-#define FILTER_VALIDATE_LAST          0x0114
+#define FILTER_VALIDATE_DOMAIN        0x0115
+#define FILTER_VALIDATE_LAST          0x0115
 
 #define FILTER_VALIDATE_ALL           0x0100
 
@@ -115,17 +118,6 @@
 			len--; \
 		} \
 	} \
-}
-
-#define PHP_FILTER_GET_LONG_OPT(zv, opt) { \
-	if (Z_TYPE_PP(zv) != IS_LONG) {                                                                      \
-		zval ___tmp = **zv;                                                                                 \
-		zval_copy_ctor(&___tmp);                                                                                    \
-		convert_to_long(&___tmp);                                                                                   \
-		opt = Z_LVAL(___tmp);                                                                                  \
-	} else {                                                                                                     \
-		opt = Z_LVAL_PP(zv);                                                                        \
-	}                                                                                                            \
 }
 
 #endif /* FILTER_PRIVATE_H */

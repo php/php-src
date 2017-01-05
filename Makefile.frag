@@ -20,4 +20,4 @@ $(srcdir)/zend_ini_parser.c: $(srcdir)/zend_ini_parser.y
 $(srcdir)/zend_ini_scanner.c: $(srcdir)/zend_ini_scanner.l
 	@(cd $(top_srcdir); $(RE2C) $(RE2C_FLAGS) --no-generation-date --case-inverted -cbdFt Zend/zend_ini_scanner_defs.h -oZend/zend_ini_scanner.c Zend/zend_ini_scanner.l)
 
-$(builddir)/zend_indent.lo $(builddir)/zend_highlight.lo $(builddir)/zend_compile.lo: $(srcdir)/zend_language_parser.h
+$(builddir)/zend_highlight.lo $(builddir)/zend_compile.lo: $(srcdir)/zend_language_parser.h

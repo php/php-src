@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Stig Sæther Bakken <ssb@php.net>                             |
+   | Author: Stig SÃ¦ther Bakken <ssb@php.net>                             |
    +----------------------------------------------------------------------+
  */
 
@@ -33,7 +33,7 @@
 PHPAPI char *
 php_canonicalize_version(const char *version)
 {
-    int len = strlen(version);
+    size_t len = strlen(version);
     char *buf = safe_emalloc(len, 2, 1), *q, lp, lq;
     const char *p;
 
@@ -211,11 +211,11 @@ php_version_compare(const char *orig_ver1, const char *orig_ver2)
 PHP_FUNCTION(version_compare)
 {
 	char *v1, *v2, *op = NULL;
-	int v1_len, v2_len, op_len = 0;
+	size_t v1_len, v2_len, op_len = 0;
 	int compare, argc;
 
 	argc = ZEND_NUM_ARGS();
-	if (zend_parse_parameters(argc TSRMLS_CC, "ss|s", &v1, &v1_len, &v2,
+	if (zend_parse_parameters(argc, "ss|s", &v1, &v1_len, &v2,
 							  &v2_len, &op, &op_len) == FAILURE) {
 		return;
 	}

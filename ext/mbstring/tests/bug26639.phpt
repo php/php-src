@@ -70,54 +70,54 @@ unset($a);
 unset($b);
 unset($c);
 ?>
---EXPECT--
-string(10) "‚ ‚¢‚¤‚¦‚¨" refcount(2)
-string(10) "¤¢¤¤¤¦¤¨¤ª" refcount(2)
-string(10) "¤¢¤¤¤¦¤¨¤ª" refcount(1)
-string(10) "¤¢¤¤¤¦¤¨¤ª" refcount(1)
-array(1) refcount(2){
+--EXPECTF--
+string(10) "‚ ‚¢‚¤‚¦‚¨" refcount(%d)
+string(10) "¤¢¤¤¤¦¤¨¤ª" refcount(%d)
+string(10) "¤¢¤¤¤¦¤¨¤ª" refcount(%d)
+string(10) "¤¢¤¤¤¦¤¨¤ª" refcount(%d)
+array(1) refcount(%d){
   [0]=>
-  string(10) "‚ ‚¢‚¤‚¦‚¨" refcount(2)
+  string(10) "‚ ‚¢‚¤‚¦‚¨" refcount(%d)
 }
-array(1) refcount(2){
+array(1) refcount(%d){
   [0]=>
-  string(10) "¤¢¤¤¤¦¤¨¤ª" refcount(1)
+  string(10) "¤¢¤¤¤¦¤¨¤ª" refcount(%d)
 }
-array(1) refcount(2){
+array(1) refcount(%d){
   [0]=>
-  &string(10) "‚ ‚¢‚¤‚¦‚¨" refcount(2)
+  &string(10) "‚ ‚¢‚¤‚¦‚¨" refcount(%d)
 }
-array(1) refcount(2){
+array(1) refcount(%d){
   [0]=>
-  string(10) "¤¢¤¤¤¦¤¨¤ª" refcount(1)
+  string(10) "¤¢¤¤¤¦¤¨¤ª" refcount(%d)
 }
-array(1) refcount(1){
+array(1) refcount(%d){
   [0]=>
-  string(10) "¤¢¤¤¤¦¤¨¤ª" refcount(2)
+  string(10) "¤¢¤¤¤¦¤¨¤ª" refcount(%d)
 }
-array(1) refcount(1){
+array(1) refcount(%d){
   [0]=>
-  string(10) "¤¢¤¤¤¦¤¨¤ª" refcount(2)
+  string(10) "¤¢¤¤¤¦¤¨¤ª" refcount(%d)
 }
-array(1) refcount(1){
+array(1) refcount(%d){
   [0]=>
-  string(10) "¤¢¤¤¤¦¤¨¤ª" refcount(2)
+  string(10) "¤¢¤¤¤¦¤¨¤ª" refcount(%d)
 }
-array(1) refcount(1){
+array(1) refcount(%d){
   [0]=>
-  string(10) "¤¢¤¤¤¦¤¨¤ª" refcount(2)
+  string(10) "¤¢¤¤¤¦¤¨¤ª" refcount(%d)
 }
-array(1) refcount(3){
+array(1) refcount(%d){
   [0]=>
-  array(1) refcount(1){
+  array(1) refcount(%d){
     [0]=>
-    string(10) "‚ ‚¢‚¤‚¦‚¨" refcount(1)
+    string(10) "‚ ‚¢‚¤‚¦‚¨" refcount(%d)
   }
 }
-array(1) refcount(2){
+array(1) refcount(%d){
   [0]=>
-  array(1) refcount(1){
+  array(1) refcount(%d){
     [0]=>
-    string(10) "¤¢¤¤¤¦¤¨¤ª" refcount(1)
+    string(10) "¤¢¤¤¤¦¤¨¤ª" refcount(%d)
   }
 }

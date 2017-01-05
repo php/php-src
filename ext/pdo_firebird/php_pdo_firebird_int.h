@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -35,7 +35,7 @@
 
 #define SHORT_MAX (1 << (8*sizeof(short)-1))
 
-#if SIZEOF_LONG == 8
+#if SIZEOF_ZEND_LONG == 8 && !defined(PHP_WIN32)
 # define LL_MASK "l"
 # define LL_LIT(lit) lit ## L
 #else
@@ -61,6 +61,12 @@ typedef void (*info_func_t)(char*);
 #define min(a,b) ((a)<(b)?(a):(b))
 #endif
 
+#if defined(_LP64) || defined(__LP64__) || defined(__arch64__) || defined(_WIN64)
+# define PDO_FIREBIRD_HANDLE_INITIALIZER 0U 
+#else
+# define PDO_FIREBIRD_HANDLE_INITIALIZER NULL
+#endif
+
 typedef struct {
 
 	/* the result of the last API call */
@@ -74,34 +80,34 @@ typedef struct {
 
 	/* the last error that didn't come from the API */
 	char const *last_app_error;
-	
+
 	/* date and time format strings, can be set by the set_attribute method */
 	char *date_format;
 	char *time_format;
 	char *timestamp_format;
-	
+
 	/* prepend table names on column names in fetch */
 	unsigned fetch_table_names:1;
-	
+
 	unsigned _reserved:31;
-	
+
 } pdo_firebird_db_handle;
 
 
 typedef struct {
-	
+
 	/* the link that owns this statement */
 	pdo_firebird_db_handle *H;
-	
+
 	/* the statement handle */
 	isc_stmt_handle stmt;
-	
+
 	/* the name of the cursor (if it has one) */
 	char name[32];
-	
+
 	/* the type of statement that was issued */
 	char statement_type:8;
-	
+
 	/* whether EOF was reached for this statement */
 	unsigned exhausted:1;
 
@@ -112,23 +118,23 @@ typedef struct {
 
 	/* the named params that were converted to ?'s by the driver */
 	HashTable *named_params;
-	
+
 	/* allocated space to convert fields values to other types */
 	char **fetch_buf;
-	
+
 	/* the input SQLDA */
 	XSQLDA *in_sqlda;
-	
+
 	/* the output SQLDA */
 	XSQLDA out_sqlda; /* last member */
-	
+
 } pdo_firebird_stmt;
 
 extern pdo_driver_t pdo_firebird_driver;
 
 extern struct pdo_stmt_methods firebird_stmt_methods;
 
-void _firebird_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, char const *file, long line TSRMLS_DC);
+void _firebird_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, char const *file, zend_long line);
 
 enum {
 	PDO_FB_ATTR_DATE_FORMAT = PDO_ATTR_DRIVER_SPECIFIC,

@@ -1,7 +1,7 @@
 --TEST--
 Bug #31402 (unserialize() generates references when it should not)
 --INI--
-error_reporting=E_ALL&~E_STRICT&~E_DEPRECATED
+error_reporting=E_ALL
 --FILE--
 <?php 
 
@@ -19,7 +19,8 @@ class TestY {
 
   function __construct() {
     $this->A[1] = new TestX(1);
-    $this->A[2] = & new TestX(2);
+    $obj = new TestX(2);
+    $this->A[2] = & $obj;
     $this->A[3] = & $this->A[2];
     $this->B = $this->A[1];
   }

@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,10 +23,12 @@
 
 /* misc globals for thread-safety under win32 */
 
+#include "win32/sendmail.h"
+
 typedef struct _php_win32_core_globals php_win32_core_globals;
 
 #ifdef ZTS
-# define PW32G(v)		TSRMG(php_win32_core_globals_id, php_win32_core_globals*, v)
+# define PW32G(v)		ZEND_TSRMG(php_win32_core_globals_id, php_win32_core_globals*, v)
 extern PHPAPI int php_win32_core_globals_id;
 #else
 # define PW32G(v)		(the_php_win32_core_globals.v)
@@ -41,10 +43,15 @@ struct _php_win32_core_globals {
 	HKEY       registry_key;
 	HANDLE     registry_event;
 	HashTable *registry_directories;
+
+	char   mail_buffer[MAIL_BUFFER_SIZE];
+	SOCKET mail_socket;
+	char   mail_host[HOST_NAME_LEN];
+	char   mail_local_host[HOST_NAME_LEN];
 };
 
-void php_win32_core_globals_ctor(void *vg TSRMLS_DC);
-void php_win32_core_globals_dtor(void *vg TSRMLS_DC);
+void php_win32_core_globals_ctor(void *vg);
+void php_win32_core_globals_dtor(void *vg);
 PHP_RSHUTDOWN_FUNCTION(win32_core_globals);
 
 #endif

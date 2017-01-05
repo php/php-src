@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,8 +33,8 @@ PHP_FUNCTION( collator_compare )
 {
 	char*            str1      = NULL;
 	char*            str2      = NULL;
-	int              str1_len  = 0;
-	int              str2_len  = 0;
+	size_t              str1_len  = 0;
+	size_t              str2_len  = 0;
 
 	UChar*           ustr1     = NULL;
 	UChar*           ustr2     = NULL;
@@ -46,11 +46,11 @@ PHP_FUNCTION( collator_compare )
 	COLLATOR_METHOD_INIT_VARS
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oss",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Oss",
 		&object, Collator_ce_ptr, &str1, &str1_len, &str2, &str2_len ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			 "collator_compare: unable to parse input params", 0 TSRMLS_CC );
+			 "collator_compare: unable to parse input params", 0 );
 
 		RETURN_FALSE;
 	}
@@ -59,10 +59,10 @@ PHP_FUNCTION( collator_compare )
 	COLLATOR_METHOD_FETCH_OBJECT;
 
 	if (!co || !co->ucoll) {
-		intl_error_set_code( NULL, COLLATOR_ERROR_CODE( co ) TSRMLS_CC );
+		intl_error_set_code( NULL, COLLATOR_ERROR_CODE( co ) );
 		intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ),
-			"Object not initialized", 0 TSRMLS_CC );
-		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Object not initialized");
+			"Object not initialized", 0 );
+		php_error_docref(NULL, E_RECOVERABLE_ERROR, "Object not initialized");
 
 		RETURN_FALSE;
 	}
@@ -77,11 +77,11 @@ PHP_FUNCTION( collator_compare )
 	if( U_FAILURE( COLLATOR_ERROR_CODE( co ) ) )
 	{
 		/* Set global error code. */
-		intl_error_set_code( NULL, COLLATOR_ERROR_CODE( co ) TSRMLS_CC );
+		intl_error_set_code( NULL, COLLATOR_ERROR_CODE( co ) );
 
 		/* Set error messages. */
 		intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ),
-			"Error converting first argument to UTF-16", 0 TSRMLS_CC );
+			"Error converting first argument to UTF-16", 0 );
 		if (ustr1) {
 			efree( ustr1 );
 		}
@@ -93,11 +93,11 @@ PHP_FUNCTION( collator_compare )
 	if( U_FAILURE( COLLATOR_ERROR_CODE( co ) ) )
 	{
 		/* Set global error code. */
-		intl_error_set_code( NULL, COLLATOR_ERROR_CODE( co ) TSRMLS_CC );
+		intl_error_set_code( NULL, COLLATOR_ERROR_CODE( co ) );
 
 		/* Set error messages. */
 		intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ),
-			"Error converting second argument to UTF-16", 0 TSRMLS_CC );
+			"Error converting second argument to UTF-16", 0 );
 		if (ustr1) {
 			efree( ustr1 );
 		}

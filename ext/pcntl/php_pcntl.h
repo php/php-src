@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,8 +21,15 @@
 #ifndef PHP_PCNTL_H
 #define PHP_PCNTL_H
 
+#if defined(WCONTINUED) && defined(WIFCONTINUED)
+#define HAVE_WCONTINUED 1
+#endif
+
 extern zend_module_entry pcntl_module_entry;
 #define phpext_pcntl_ptr &pcntl_module_entry
+
+#include "php_version.h"
+#define PHP_PCNTL_VERSION PHP_VERSION
 
 PHP_MINIT_FUNCTION(pcntl);
 PHP_MSHUTDOWN_FUNCTION(pcntl);
@@ -37,6 +44,9 @@ PHP_FUNCTION(pcntl_wait);
 PHP_FUNCTION(pcntl_wifexited);
 PHP_FUNCTION(pcntl_wifstopped);
 PHP_FUNCTION(pcntl_wifsignaled);
+#ifdef HAVE_WCONTINUED
+PHP_FUNCTION(pcntl_wifcontinued);
+#endif
 PHP_FUNCTION(pcntl_wexitstatus);
 PHP_FUNCTION(pcntl_wtermsig);
 PHP_FUNCTION(pcntl_wstopsig);
@@ -61,7 +71,7 @@ PHP_FUNCTION(pcntl_setpriority);
 
 struct php_pcntl_pending_signal {
 	struct php_pcntl_pending_signal *next;
-	long signo;
+	zend_long signo;
 };
 
 ZEND_BEGIN_MODULE_GLOBALS(pcntl)

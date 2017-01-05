@@ -3,7 +3,7 @@ InterBase: transactions
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--
-<?php /* $Id$ */
+<?php
 
     require("interbase.inc");
     
@@ -207,7 +207,7 @@ transactions on second link
 
     echo "end of test\n";
 ?>
---EXPECT--
+--EXPECTF--
 default transaction:
 empty table
 --- test5 ---
@@ -264,7 +264,7 @@ three rows in fourth transaction with deadlock
 2	
 3	
 4	
-errmsg [lock conflict on no wait transaction deadlock ]	
+errmsg [lock conflict on no wait transaction deadlock %a]
 ---
 three rows
 --- test5 ---

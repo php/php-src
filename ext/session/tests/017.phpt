@@ -13,7 +13,7 @@ session.save_handler=files
 error_reporting(E_ALL);
 
 class Kill {
-	function Kill() {
+	function __construct() {
 		global $HTTP_SESSION_VARS;
 		session_start();
 	}

@@ -12,7 +12,7 @@ class Class2
 {
 	public $storage = '';
 
-	function Class2()
+	function __construct()
 	{
 		$this->storage = new Class1();
 

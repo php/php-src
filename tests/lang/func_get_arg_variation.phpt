@@ -20,7 +20,7 @@ Warning: func_get_arg() expects exactly 1 parameter, 0 given in %s on line %d
 
 Warning: func_get_arg() expects exactly 1 parameter, 2 given in %s on line %d
 
-Warning: func_get_arg() expects parameter 1 to be long, string given in %s on line %d
+Warning: func_get_arg() expects parameter 1 to be integer, string given in %s on line %d
 
 Warning: func_get_arg():  The argument number should be >= 0 in %s on line %d
 

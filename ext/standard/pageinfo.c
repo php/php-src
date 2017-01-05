@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -57,11 +57,11 @@
 
 /* {{{ php_statpage
  */
-PHPAPI void php_statpage(TSRMLS_D)
+PHPAPI void php_statpage(void)
 {
-	struct stat *pstat;
+	zend_stat_t *pstat;
 
-	pstat = sapi_get_stat(TSRMLS_C);
+	pstat = sapi_get_stat();
 
 	if (BG(page_uid)==-1 || BG(page_gid)==-1) {
 		if(pstat) {
@@ -79,16 +79,16 @@ PHPAPI void php_statpage(TSRMLS_D)
 
 /* {{{ php_getuid
  */
-long php_getuid(TSRMLS_D)
+zend_long php_getuid(void)
 {
-	php_statpage(TSRMLS_C);
+	php_statpage();
 	return (BG(page_uid));
 }
 /* }}} */
 
-long php_getgid(TSRMLS_D)
+zend_long php_getgid(void)
 {
-	php_statpage(TSRMLS_C);
+	php_statpage();
 	return (BG(page_gid));
 }
 
@@ -96,13 +96,13 @@ long php_getgid(TSRMLS_D)
    Get PHP script owner's UID */
 PHP_FUNCTION(getmyuid)
 {
-	long uid;
+	zend_long uid;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	
-	uid = php_getuid(TSRMLS_C);
+
+	uid = php_getuid();
 	if (uid < 0) {
 		RETURN_FALSE;
 	} else {
@@ -115,13 +115,13 @@ PHP_FUNCTION(getmyuid)
    Get PHP script owner's GID */
 PHP_FUNCTION(getmygid)
 {
-	long gid;
+	zend_long gid;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	
-	gid = php_getgid(TSRMLS_C);
+
+	gid = php_getgid();
 	if (gid < 0) {
 		RETURN_FALSE;
 	} else {
@@ -134,17 +134,17 @@ PHP_FUNCTION(getmygid)
    Get current process ID */
 PHP_FUNCTION(getmypid)
 {
-	int pid;
+	zend_long pid;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	
+
 	pid = getpid();
 	if (pid < 0) {
 		RETURN_FALSE;
 	} else {
-		RETURN_LONG((long) pid);
+		RETURN_LONG(pid);
 	}
 }
 /* }}} */
@@ -157,7 +157,7 @@ PHP_FUNCTION(getmyinode)
 		return;
 	}
 
-	php_statpage(TSRMLS_C);
+	php_statpage();
 	if (BG(page_inode) < 0) {
 		RETURN_FALSE;
 	} else {
@@ -166,9 +166,9 @@ PHP_FUNCTION(getmyinode)
 }
 /* }}} */
 
-PHPAPI long php_getlastmod(TSRMLS_D)
+PHPAPI time_t php_getlastmod(void)
 {
-	php_statpage(TSRMLS_C);
+	php_statpage();
 	return BG(page_mtime);
 }
 
@@ -176,13 +176,13 @@ PHPAPI long php_getlastmod(TSRMLS_D)
    Get time of last page modification */
 PHP_FUNCTION(getlastmod)
 {
-	long lm;
+	zend_long lm;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
-	lm = php_getlastmod(TSRMLS_C);
+	lm = php_getlastmod();
 	if (lm < 0) {
 		RETURN_FALSE;
 	} else {

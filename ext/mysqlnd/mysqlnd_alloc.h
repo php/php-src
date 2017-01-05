@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2016 The PHP Group                                |
+  | Copyright (c) 2006-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -12,22 +12,19 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Georg Richter <georg@mysql.com>                             |
-  |          Andrey Hristov <andrey@mysql.com>                           |
-  |          Ulf Wendel <uwendel@mysql.com>                              |
+  | Authors: Andrey Hristov <andrey@php.net>                             |
+  |          Ulf Wendel <uw@php.net>                                     |
+  |          Georg Richter <georg@php.net>                               |
   +----------------------------------------------------------------------+
 */
-
-/* $Id: mysqlnd_debug.h 306938 2011-01-01 02:17:06Z felipe $ */
-/* $Id: mysqlnd_debug.h 306938 2011-01-01 02:17:06Z felipe $ */
 
 #ifndef MYSQLND_ALLOC_H
 #define MYSQLND_ALLOC_H
 
 PHPAPI extern const char * mysqlnd_debug_std_no_trace_funcs[];
 
-#define MYSQLND_MEM_D	TSRMLS_DC ZEND_FILE_LINE_ORIG_DC
-#define MYSQLND_MEM_C	TSRMLS_CC ZEND_FILE_LINE_CC
+#define MYSQLND_MEM_D	ZEND_FILE_LINE_ORIG_DC
+#define MYSQLND_MEM_C	ZEND_FILE_LINE_CC
 
 struct st_mysqlnd_allocator_methods
 {

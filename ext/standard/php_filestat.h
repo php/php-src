@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -61,11 +61,6 @@ PHP_FUNCTION(touch);
 #endif
 PHP_FUNCTION(clearstatcache);
 
-#define MAKE_LONG_ZVAL_INCREF(name, val)\
-	MAKE_STD_ZVAL(name); \
-	ZVAL_LONG(name, val); \
-	Z_ADDREF_P(name); 
-
 #ifdef PHP_WIN32
 #define S_IRUSR S_IREAD
 #define S_IWUSR S_IWRITE
@@ -89,8 +84,8 @@ typedef unsigned int php_stat_len;
 typedef int php_stat_len;
 #endif
 
-PHPAPI void php_clear_stat_cache(zend_bool clear_realpath_cache, const char *filename, int filename_len TSRMLS_DC);
-PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int type, zval *return_value TSRMLS_DC);
+PHPAPI void php_clear_stat_cache(zend_bool clear_realpath_cache, const char *filename, int filename_len);
+PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int type, zval *return_value);
 
 /* Switches for various filestat functions: */
 #define FS_PERMS    0

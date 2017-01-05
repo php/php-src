@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -23,6 +23,9 @@
 
 extern zend_module_entry pdo_mysql_module_entry;
 #define phpext_pdo_mysql_ptr &pdo_mysql_module_entry
+
+#include "php_version.h"
+#define PHP_PDO_MYSQL_VERSION PHP_VERSION
 
 #ifdef PHP_WIN32
 #define PHP_PDO_MYSQL_API __declspec(dllexport)

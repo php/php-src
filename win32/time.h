@@ -28,7 +28,7 @@ struct itimerval {
 	struct timeval it_value;	/* current value */
 };
 
-#ifndef timespec
+#if !defined(timespec) && _MSC_VER < 1900
 struct timespec
 {
 	time_t   tv_sec;   /* seconds */
@@ -51,5 +51,11 @@ PHPAPI extern int setitimer(int which, const struct itimerval *value,
 PHPAPI int nanosleep( const struct timespec * rqtp, struct timespec * rmtp );
 
 PHPAPI int usleep(unsigned int useconds);
+
+#ifdef PHP_EXPORTS
+/* This symbols are needed only for the DllMain, but should not be exported 
+	or be available when used with PHP binaries. */
+BOOL php_win32_init_gettimeofday(void);
+#endif
 
 #endif

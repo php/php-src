@@ -1,6 +1,6 @@
 /*
   zip_fclose.c -- close file in zip archive
-  Copyright (C) 1999-2007 Dieter Baron and Thomas Klausner
+  Copyright (C) 1999-2014 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -31,38 +31,25 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
 
 #include <stdlib.h>
 
 #include "zipint.h"
 
-
 
 ZIP_EXTERN int
-zip_fclose(struct zip_file *zf)
+zip_fclose(zip_file_t *zf)
 {
     int ret;
-    unsigned int i;
     
     if (zf->src)
 	zip_source_free(zf->src);
-
-    if (zf->za) {
-        for (i=0; i<zf->za->nfile; i++) {
-            if (zf->za->file[i] == zf) {
-                zf->za->file[i] = zf->za->file[zf->za->nfile-1];
-                zf->za->nfile--;
-                break;
-            }
-        }
-    }
 
     ret = 0;
     if (zf->error.zip_err)
 	ret = zf->error.zip_err;
 
-    _zip_error_fini(&zf->error);
+    zip_error_fini(&zf->error);
     free(zf);
     return ret;
 }

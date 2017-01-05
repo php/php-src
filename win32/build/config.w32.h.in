@@ -10,7 +10,7 @@
 #define NTDDI_VERSION  0x06000100
 
 /* Default PHP / PEAR directories */
-#define PHP_CONFIG_FILE_PATH (getenv("SystemRoot"))?getenv("SystemRoot"):""
+#define PHP_CONFIG_FILE_PATH (getenv("SystemRoot")?getenv("SystemRoot"):"")
 #define CONFIGURATION_FILE_PATH "php.ini"
 #define PEAR_INSTALLDIR "@PREFIX@\\pear"
 #define PHP_BINDIR "@PREFIX@"
@@ -174,3 +174,12 @@
 # define _USE_32BIT_TIME_T 1
 #endif
 #define HAVE_STDLIB_H 1
+
+#define _REENTRANT 1
+#define HAVE_MBRLEN 1
+#define HAVE_MBSTATE_T 1
+
+#define HAVE_HUGE_VAL_INF 1
+
+#define HAVE_GETRUSAGE
+

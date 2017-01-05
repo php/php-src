@@ -20,7 +20,7 @@ echo "-- Sum of Integer array --\n";
 var_dump( array_sum($int_values) );
 
 // Octal array
-$octal_values = array(056, 023, 090, 015, -045, 01, -078);
+$octal_values = array(056, 023, 00, 015, -045, 01, -07);
 echo "-- Sum of Octal array --\n";
 var_dump( array_sum($octal_values) );
 

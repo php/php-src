@@ -8,7 +8,7 @@ throw new Exception(1);
 ?>
 --EXPECTF--
 
-Fatal error: Uncaught exception 'Exception' with message '1' in %s:%d
+Fatal error: Uncaught Exception: 1 in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

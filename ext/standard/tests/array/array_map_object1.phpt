@@ -127,7 +127,7 @@ test(array('InterClass', 'square'), array(1, 2));
 -- simple class with public variable and method --
 SimpleClass::square
 
-Strict Standards: array_map() expects parameter 1 to be a valid callback, non-static method SimpleClass::square() should not be called statically in %sarray_map_object1.php on line %d
+Deprecated: array_map() expects parameter 1 to be a valid callback, non-static method SimpleClass::square() should not be called statically in %sarray_map_object1.php on line %d
 array(2) {
   [0]=>
   int(1)
@@ -156,7 +156,7 @@ NULL
 -- abstract class --
 ChildClass::emptyFunction
 
-Strict Standards: array_map() expects parameter 1 to be a valid callback, non-static method ChildClass::emptyFunction() should not be called statically in %sarray_map_object1.php on line %d
+Deprecated: array_map() expects parameter 1 to be a valid callback, non-static method ChildClass::emptyFunction() should not be called statically in %sarray_map_object1.php on line %d
 defined in child
 defined in child
 array(2) {
@@ -169,7 +169,7 @@ array(2) {
 -- class with final method --
 FinalClass::finalMethod
 
-Strict Standards: array_map() expects parameter 1 to be a valid callback, non-static method FinalClass::finalMethod() should not be called statically in %sarray_map_object1.php on line %d
+Deprecated: array_map() expects parameter 1 to be a valid callback, non-static method FinalClass::finalMethod() should not be called statically in %sarray_map_object1.php on line %d
 This function can't be overloaded
 This function can't be overloaded
 array(2) {

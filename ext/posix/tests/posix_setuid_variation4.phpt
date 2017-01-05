@@ -2,6 +2,7 @@
 Test function posix_setuid() by substituting argument 1 with float values.
 --SKIPIF--
 <?php 
+        PHP_INT_SIZE == 4 or die("skip - 32-bit only");
         if(!extension_loaded("posix")) print "skip - POSIX extension not loaded"; 
         if(posix_geteuid() == 0) print "skip - Cannot run test as root.";
 ?>
@@ -36,6 +37,10 @@ foreach ( $variation_array as $var ) {
 *** Test substituting argument 1 with float values ***
 bool(false)
 bool(false)
+
+Warning: posix_setuid() expects parameter 1 to be integer, float given in %s on line %d
 bool(false)
+
+Warning: posix_setuid() expects parameter 1 to be integer, float given in %s on line %d
 bool(false)
 bool(false)

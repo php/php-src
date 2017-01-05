@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,7 +24,7 @@
 #include "resourcebundle/resourcebundle_class.h"
 
 /* {{{ ResourceBundle_extract_value */
-void resourcebundle_extract_value( zval *return_value, ResourceBundle_object *source TSRMLS_DC ) 
+void resourcebundle_extract_value( zval *return_value, ResourceBundle_object *source )
 {
 	UResType               restype;
 	const UChar*           ufield;
@@ -32,7 +32,7 @@ void resourcebundle_extract_value( zval *return_value, ResourceBundle_object *so
 	const int32_t*         vfield;
 	int32_t                ilen;
 	int                    i;
-	long                   lfield;
+	zend_long              lfield;
 	ResourceBundle_object* newrb;
 
 	restype = ures_getType( source->child );
@@ -47,7 +47,7 @@ void resourcebundle_extract_value( zval *return_value, ResourceBundle_object *so
 		case URES_BINARY:
 			bfield = ures_getBinary( source->child, &ilen, &INTL_DATA_ERROR_CODE(source) );
 			INTL_METHOD_CHECK_STATUS(source, "Failed to retrieve binary value");
-			ZVAL_STRINGL( return_value, (char *) bfield, ilen, 1 );
+			ZVAL_STRINGL( return_value, (char *) bfield, ilen );
 			break;
 
 		case URES_INT:
@@ -68,14 +68,14 @@ void resourcebundle_extract_value( zval *return_value, ResourceBundle_object *so
 		case URES_ARRAY:
 		case URES_TABLE:
 			object_init_ex( return_value, ResourceBundle_ce_ptr );
-			newrb = (ResourceBundle_object *) zend_object_store_get_object( return_value TSRMLS_CC );
+			newrb = Z_INTL_RESOURCEBUNDLE_P(return_value);
 			newrb->me = source->child;
 			source->child = NULL;
-			intl_errors_reset(INTL_DATA_ERROR_P(source) TSRMLS_CC);
+			intl_errors_reset(INTL_DATA_ERROR_P(source));
 			break;
 
 		default:
-			intl_errors_set(INTL_DATA_ERROR_P(source), U_ILLEGAL_ARGUMENT_ERROR, "Unknown resource type", 0 TSRMLS_CC);
+			intl_errors_set(INTL_DATA_ERROR_P(source), U_ILLEGAL_ARGUMENT_ERROR, "Unknown resource type", 0);
 			RETURN_FALSE;
 			break;
 	}

@@ -20,4 +20,8 @@ Warning: IntlTimeZone::getErrorMessage() expects exactly 0 parameters, 1 given i
 Warning: IntlTimeZone::getErrorMessage(): intltz_get_error_message: bad arguments in %s on line %d
 bool(false)
 
-Catchable fatal error: Argument 1 passed to intltz_get_error_message() must be an instance of IntlTimeZone, null given in %s on line %d
+Fatal error: Uncaught TypeError: Argument 1 passed to intltz_get_error_message() must be an instance of IntlTimeZone, null given in %s:%d
+Stack trace:
+#0 %s(%d): intltz_get_error_message(NULL)
+#1 {main}
+  thrown in %s on line %d

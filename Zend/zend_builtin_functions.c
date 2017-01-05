@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,8 +27,13 @@
 #include "zend_exceptions.h"
 #include "zend_extensions.h"
 #include "zend_closures.h"
+#include "zend_generators.h"
 
 #undef ZEND_TEST_EXCEPTIONS
+
+#if ZEND_DEBUG
+static zend_class_entry *zend_test_trait;
+#endif
 
 static ZEND_FUNCTION(zend_version);
 static ZEND_FUNCTION(func_num_args);
@@ -78,6 +83,7 @@ static ZEND_FUNCTION(get_defined_functions);
 static ZEND_FUNCTION(get_defined_vars);
 static ZEND_FUNCTION(create_function);
 static ZEND_FUNCTION(get_resource_type);
+static ZEND_FUNCTION(get_resources);
 static ZEND_FUNCTION(get_loaded_extensions);
 static ZEND_FUNCTION(extension_loaded);
 static ZEND_FUNCTION(get_extension_funcs);
@@ -86,10 +92,12 @@ static ZEND_FUNCTION(debug_backtrace);
 static ZEND_FUNCTION(debug_print_backtrace);
 #if ZEND_DEBUG
 static ZEND_FUNCTION(zend_test_func);
+static ZEND_FUNCTION(zend_test_func2);
 #ifdef ZTS
 static ZEND_FUNCTION(zend_thread_id);
 #endif
 #endif
+static ZEND_FUNCTION(gc_mem_caches);
 static ZEND_FUNCTION(gc_collect_cycles);
 static ZEND_FUNCTION(gc_enabled);
 static ZEND_FUNCTION(gc_enable);
@@ -126,7 +134,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_error_reporting, 0, 0, 0)
 	ZEND_ARG_INFO(0, new_error_level)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_define, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_define, 0, 0, 2)
 	ZEND_ARG_INFO(0, constant_name)
 	ZEND_ARG_INFO(0, value)
 	ZEND_ARG_INFO(0, case_insensitive)
@@ -218,6 +226,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_get_resource_type, 0, 0, 1)
 	ZEND_ARG_INFO(0, res)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_get_resources, 0, 0, 0)
+	ZEND_ARG_INFO(0, type)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_get_loaded_extensions, 0, 0, 0)
 	ZEND_ARG_INFO(0, zend_extensions)
 ZEND_END_ARG_INFO()
@@ -233,12 +245,33 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_debug_print_backtrace, 0, 0, 0)
 	ZEND_ARG_INFO(0, options)
+	ZEND_ARG_INFO(0, limit)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_extension_loaded, 0, 0, 1)
 	ZEND_ARG_INFO(0, extension_name)
 ZEND_END_ARG_INFO()
+
+#if ZEND_DEBUG
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_zend_test_func, IS_ARRAY, NULL, 0)
+ZEND_END_ARG_INFO()
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_zend_test_func2, IS_ARRAY, NULL, 1)
+ZEND_END_ARG_INFO()
+#endif
+
 /* }}} */
+
+#if ZEND_DEBUG
+static ZEND_METHOD(_ZendTestTrait, testMethod) /* {{{ */ {
+	RETURN_TRUE;
+}
+/* }}} */
+
+static zend_function_entry zend_test_trait_methods[] = {
+    ZEND_ME(_ZendTestTrait, testMethod, arginfo_zend__void, ZEND_ACC_PUBLIC)
+    ZEND_FE_END
+};
+#endif
 
 static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(zend_version,		arginfo_zend__void)
@@ -291,6 +324,7 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(get_defined_vars,		arginfo_zend__void)
 	ZEND_FE(create_function,		arginfo_create_function)
 	ZEND_FE(get_resource_type,		arginfo_get_resource_type)
+	ZEND_FE(get_resources,			arginfo_get_resources)
 	ZEND_FE(get_loaded_extensions,		arginfo_get_loaded_extensions)
 	ZEND_FE(extension_loaded,		arginfo_extension_loaded)
 	ZEND_FE(get_extension_funcs,		arginfo_extension_loaded)
@@ -298,11 +332,13 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(debug_backtrace, 		arginfo_debug_backtrace)
 	ZEND_FE(debug_print_backtrace, 		arginfo_debug_print_backtrace)
 #if ZEND_DEBUG
-	ZEND_FE(zend_test_func,		NULL)
+	ZEND_FE(zend_test_func,		arginfo_zend_test_func)
+	ZEND_FE(zend_test_func2,	arginfo_zend_test_func2)
 #ifdef ZTS
 	ZEND_FE(zend_thread_id,		NULL)
 #endif
 #endif
+	ZEND_FE(gc_mem_caches,      arginfo_zend__void)
 	ZEND_FE(gc_collect_cycles, 	arginfo_zend__void)
 	ZEND_FE(gc_enabled, 		arginfo_zend__void)
 	ZEND_FE(gc_enable, 		arginfo_zend__void)
@@ -315,9 +351,16 @@ ZEND_MINIT_FUNCTION(core) { /* {{{ */
 	zend_class_entry class_entry;
 
 	INIT_CLASS_ENTRY(class_entry, "stdClass", NULL);
-	zend_standard_class_def = zend_register_internal_class(&class_entry TSRMLS_CC);
+	zend_standard_class_def = zend_register_internal_class(&class_entry);
 
-	zend_register_default_classes(TSRMLS_C);
+	zend_register_default_classes();
+
+#if ZEND_DEBUG
+	INIT_CLASS_ENTRY(class_entry, "_ZendTestTrait", zend_test_trait_methods);
+	zend_test_trait = zend_register_internal_class(&class_entry);
+	zend_test_trait->ce_flags |= ZEND_ACC_TRAIT;
+	zend_declare_property_null(zend_test_trait, "testProp", sizeof("testProp")-1, ZEND_ACC_PUBLIC);
+#endif
 
 	return SUCCESS;
 }
@@ -337,11 +380,11 @@ zend_module_entry zend_builtin_module = { /* {{{ */
 };
 /* }}} */
 
-int zend_startup_builtin_functions(TSRMLS_D) /* {{{ */
+int zend_startup_builtin_functions(void) /* {{{ */
 {
 	zend_builtin_module.module_number = 0;
 	zend_builtin_module.type = MODULE_PERSISTENT;
-	return (EG(current_module) = zend_register_module_ex(&zend_builtin_module TSRMLS_CC)) == NULL ? FAILURE : SUCCESS;
+	return (EG(current_module) = zend_register_module_ex(&zend_builtin_module)) == NULL ? FAILURE : SUCCESS;
 }
 /* }}} */
 
@@ -349,7 +392,16 @@ int zend_startup_builtin_functions(TSRMLS_D) /* {{{ */
    Get the version of the Zend Engine */
 ZEND_FUNCTION(zend_version)
 {
-	RETURN_STRINGL(ZEND_VERSION, sizeof(ZEND_VERSION)-1, 1);
+	RETURN_STRINGL(ZEND_VERSION, sizeof(ZEND_VERSION)-1);
+}
+/* }}} */
+
+/* {{{ proto int gc_mem_caches(void)
+   Reclaims memory used by MM caches.
+   Returns number of freed bytes */
+ZEND_FUNCTION(gc_mem_caches)
+{
+	RETURN_LONG(zend_mm_gc(zend_mm_get_heap()));
 }
 /* }}} */
 
@@ -358,7 +410,7 @@ ZEND_FUNCTION(zend_version)
    Returns number of freed zvals */
 ZEND_FUNCTION(gc_collect_cycles)
 {
-	RETURN_LONG(gc_collect_cycles(TSRMLS_C));
+	RETURN_LONG(gc_collect_cycles());
 }
 /* }}} */
 
@@ -374,7 +426,9 @@ ZEND_FUNCTION(gc_enabled)
    Activates the circular reference collector */
 ZEND_FUNCTION(gc_enable)
 {
-	zend_alter_ini_entry("zend.enable_gc", sizeof("zend.enable_gc"), "1", sizeof("1")-1, ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
+	zend_string *key = zend_string_init("zend.enable_gc", sizeof("zend.enable_gc")-1, 0);
+	zend_alter_ini_entry_chars(key, "1", sizeof("1")-1, ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
+	zend_string_release(key);
 }
 /* }}} */
 
@@ -382,7 +436,9 @@ ZEND_FUNCTION(gc_enable)
    Deactivates the circular reference collector */
 ZEND_FUNCTION(gc_disable)
 {
-	zend_alter_ini_entry("zend.enable_gc", sizeof("zend.enable_gc"), "0", sizeof("0")-1, ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
+	zend_string *key = zend_string_init("zend.enable_gc", sizeof("zend.enable_gc")-1, 0);
+	zend_alter_ini_entry_chars(key, "0", sizeof("0")-1, ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
+	zend_string_release(key);
 }
 /* }}} */
 
@@ -390,10 +446,10 @@ ZEND_FUNCTION(gc_disable)
    Get the number of arguments that were passed to the function */
 ZEND_FUNCTION(func_num_args)
 {
-	zend_execute_data *ex = EG(current_execute_data)->prev_execute_data;
+	zend_execute_data *ex = EX(prev_execute_data);
 
-	if (ex && ex->function_state.arguments) {
-		RETURN_LONG((long)(zend_uintptr_t)*(ex->function_state.arguments));
+	if (!(ZEND_CALL_INFO(ex) & ZEND_CALL_CODE)) {
+		RETURN_LONG(ZEND_CALL_NUM_ARGS(ex));
 	} else {
 		zend_error(E_WARNING, "func_num_args():  Called from the global scope - no function context");
 		RETURN_LONG(-1);
@@ -401,18 +457,16 @@ ZEND_FUNCTION(func_num_args)
 }
 /* }}} */
 
-
 /* {{{ proto mixed func_get_arg(int arg_num)
    Get the $arg_num'th argument that was passed to the function */
 ZEND_FUNCTION(func_get_arg)
 {
-	void **p;
-	int arg_count;
+	uint32_t arg_count, first_extra_arg;
 	zval *arg;
-	long requested_offset;
-	zend_execute_data *ex = EG(current_execute_data)->prev_execute_data;
+	zend_long requested_offset;
+	zend_execute_data *ex;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &requested_offset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &requested_offset) == FAILURE) {
 		return;
 	}
 
@@ -421,102 +475,128 @@ ZEND_FUNCTION(func_get_arg)
 		RETURN_FALSE;
 	}
 
-	if (!ex || !ex->function_state.arguments) {
+	ex = EX(prev_execute_data);
+	if (ZEND_CALL_INFO(ex) & ZEND_CALL_CODE) {
 		zend_error(E_WARNING, "func_get_arg():  Called from the global scope - no function context");
 		RETURN_FALSE;
 	}
 
-	p = ex->function_state.arguments;
-	arg_count = (int)(zend_uintptr_t) *p;		/* this is the amount of arguments passed to func_get_arg(); */
+	arg_count = ZEND_CALL_NUM_ARGS(ex);
 
 	if (requested_offset >= arg_count) {
-		zend_error(E_WARNING, "func_get_arg():  Argument %ld not passed to function", requested_offset);
+		zend_error(E_WARNING, "func_get_arg():  Argument " ZEND_LONG_FMT " not passed to function", requested_offset);
 		RETURN_FALSE;
 	}
 
-	arg = *(p-(arg_count-requested_offset));
-	RETURN_ZVAL_FAST(arg);
+	first_extra_arg = ex->func->op_array.num_args;
+	if (requested_offset >= first_extra_arg && (ZEND_CALL_NUM_ARGS(ex) > first_extra_arg)) {
+		arg = ZEND_CALL_VAR_NUM(ex, ex->func->op_array.last_var + ex->func->op_array.T) + (requested_offset - first_extra_arg);
+	} else {
+		arg = ZEND_CALL_ARG(ex, requested_offset + 1);
+	}
+	if (EXPECTED(!Z_ISUNDEF_P(arg))) {
+		ZVAL_DEREF(arg);
+		ZVAL_COPY(return_value, arg);
+	}
 }
 /* }}} */
-
 
 /* {{{ proto array func_get_args()
    Get an array of the arguments that were passed to the function */
 ZEND_FUNCTION(func_get_args)
 {
-	void **p;
-	int arg_count;
-	int i;
-	zend_execute_data *ex = EG(current_execute_data)->prev_execute_data;
+	zval *p, *q;
+	uint32_t arg_count, first_extra_arg;
+	uint32_t i, n;
+	zend_execute_data *ex = EX(prev_execute_data);
 
-	if (!ex || !ex->function_state.arguments) {
+	if (ZEND_CALL_INFO(ex) & ZEND_CALL_CODE) {
 		zend_error(E_WARNING, "func_get_args():  Called from the global scope - no function context");
 		RETURN_FALSE;
 	}
 
-	p = ex->function_state.arguments;
-	arg_count = (int)(zend_uintptr_t) *p;		/* this is the amount of arguments passed to func_get_args(); */
+	arg_count = ZEND_CALL_NUM_ARGS(ex);
 
 	array_init_size(return_value, arg_count);
-	for (i=0; i<arg_count; i++) {
-		zval *element, *arg;
-
-		arg = *((zval **) (p-(arg_count-i)));
-		if (!Z_ISREF_P(arg)) {
-			element = arg;
-			Z_ADDREF_P(element);
-		} else {
-			ALLOC_ZVAL(element);
-			INIT_PZVAL_COPY(element, arg);
-			zval_copy_ctor(element);
-	    }
-		zend_hash_next_index_insert(return_value->value.ht, &element, sizeof(zval *), NULL);
+	if (arg_count) {
+		first_extra_arg = ex->func->op_array.num_args;
+		zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
+		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+			i = 0;
+			n = 0;
+			p = ZEND_CALL_ARG(ex, 1);
+			if (arg_count > first_extra_arg) {
+				while (i < first_extra_arg) {
+					q = p;
+					if (EXPECTED(Z_TYPE_INFO_P(q) != IS_UNDEF)) {
+						ZVAL_DEREF(q);
+						if (Z_OPT_REFCOUNTED_P(q)) { 
+							Z_ADDREF_P(q);
+						}
+						n++;
+					}
+					ZEND_HASH_FILL_ADD(q);
+					p++;
+					i++;
+				}
+				p = ZEND_CALL_VAR_NUM(ex, ex->func->op_array.last_var + ex->func->op_array.T);
+			}
+			while (i < arg_count) {
+				q = p;
+				if (EXPECTED(Z_TYPE_INFO_P(q) != IS_UNDEF)) {
+					ZVAL_DEREF(q);
+					if (Z_OPT_REFCOUNTED_P(q)) { 
+						Z_ADDREF_P(q);
+					}
+					n++;
+				}
+				ZEND_HASH_FILL_ADD(q);
+				p++;
+				i++;
+			}
+		} ZEND_HASH_FILL_END();
+		Z_ARRVAL_P(return_value)->nNumOfElements = n;
 	}
 }
 /* }}} */
-
 
 /* {{{ proto int strlen(string str)
-   Get string length */
+   Get string length
+   Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 ZEND_FUNCTION(strlen)
 {
-	char *s1;
-	int s1_len;
+	zend_string *s;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &s1, &s1_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(s)
+	ZEND_PARSE_PARAMETERS_END();
 
-	RETVAL_LONG(s1_len);
+	RETVAL_LONG(ZSTR_LEN(s));
 }
 /* }}} */
-
 
 /* {{{ proto int strcmp(string str1, string str2)
    Binary safe string comparison */
 ZEND_FUNCTION(strcmp)
 {
-	char *s1, *s2;
-	int s1_len, s2_len;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &s1, &s1_len, &s2, &s2_len) == FAILURE) {
+	zend_string *s1, *s2;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &s1, &s2) == FAILURE) {
 		return;
 	}
 
-	RETURN_LONG(zend_binary_strcmp(s1, s1_len, s2, s2_len));
+	RETURN_LONG(zend_binary_strcmp(ZSTR_VAL(s1), ZSTR_LEN(s1), ZSTR_VAL(s2), ZSTR_LEN(s2)));
 }
 /* }}} */
-
 
 /* {{{ proto int strncmp(string str1, string str2, int len)
    Binary safe string comparison */
 ZEND_FUNCTION(strncmp)
 {
-	char *s1, *s2;
-	int s1_len, s2_len;
-	long len;
+	zend_string *s1, *s2;
+	zend_long len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssl", &s1, &s1_len, &s2, &s2_len, &len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SSl", &s1, &s2, &len) == FAILURE) {
 		return;
 	}
 
@@ -525,36 +605,32 @@ ZEND_FUNCTION(strncmp)
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG(zend_binary_strncmp(s1, s1_len, s2, s2_len, len));
+	RETURN_LONG(zend_binary_strncmp(ZSTR_VAL(s1), ZSTR_LEN(s1), ZSTR_VAL(s2), ZSTR_LEN(s2), len));
 }
 /* }}} */
-
 
 /* {{{ proto int strcasecmp(string str1, string str2)
    Binary safe case-insensitive string comparison */
 ZEND_FUNCTION(strcasecmp)
 {
-	char *s1, *s2;
-	int s1_len, s2_len;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &s1, &s1_len, &s2, &s2_len) == FAILURE) {
+	zend_string *s1, *s2;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &s1, &s2) == FAILURE) {
 		return;
 	}
 
-	RETURN_LONG(zend_binary_strcasecmp(s1, s1_len, s2, s2_len));
+	RETURN_LONG(zend_binary_strcasecmp(ZSTR_VAL(s1), ZSTR_LEN(s1), ZSTR_VAL(s2), ZSTR_LEN(s2)));
 }
 /* }}} */
-
 
 /* {{{ proto int strncasecmp(string str1, string str2, int len)
    Binary safe string comparison */
 ZEND_FUNCTION(strncasecmp)
 {
-	char *s1, *s2;
-	int s1_len, s2_len;
-	long len;
+	zend_string *s1, *s2;
+	zend_long len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssl", &s1, &s1_len, &s2, &s2_len, &len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SSl", &s1, &s2, &len) == FAILURE) {
 		return;
 	}
 
@@ -563,23 +639,20 @@ ZEND_FUNCTION(strncasecmp)
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG(zend_binary_strncasecmp(s1, s1_len, s2, s2_len, len));
+	RETURN_LONG(zend_binary_strncasecmp(ZSTR_VAL(s1), ZSTR_LEN(s1), ZSTR_VAL(s2), ZSTR_LEN(s2), len));
 }
 /* }}} */
 
-
-/* {{{ proto array each(array arr)
-   Return the currently pointed key..value pair in the passed array, and advance the pointer to the next element */
+/* {{{ proto mixed each(array &arr)
+   Return the currently pointed key..value pair in the passed array, and advance the pointer to the next element, or false if there is no element at this place */
 ZEND_FUNCTION(each)
 {
-	zval *array, *entry, **entry_ptr, *tmp;
-	char *string_key;
-	uint string_key_len;
-	ulong num_key;
-	zval **inserted_pointer;
+	zval *array, *entry, tmp;
+	zend_ulong num_key;
 	HashTable *target_hash;
+	zend_string *key;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z/", &array) == FAILURE) {
 		return;
 	}
 
@@ -588,203 +661,305 @@ ZEND_FUNCTION(each)
 		zend_error(E_WARNING,"Variable passed to each() is not an array or object");
 		return;
 	}
-	if (zend_hash_get_current_data(target_hash, (void **) &entry_ptr)==FAILURE) {
-		RETURN_FALSE;
+	while (1) {
+		entry = zend_hash_get_current_data(target_hash);
+		if (!entry) {
+			RETURN_FALSE;
+		} else if (Z_TYPE_P(entry) == IS_INDIRECT) {
+			entry = Z_INDIRECT_P(entry);
+			if (Z_TYPE_P(entry) == IS_UNDEF) {
+				zend_hash_move_forward(target_hash);
+				continue;
+			}
+		}
+		break;
 	}
-	array_init(return_value);
-	entry = *entry_ptr;
+	array_init_size(return_value, 4);
+	zend_hash_real_init(Z_ARRVAL_P(return_value), 0);
 
 	/* add value elements */
 	if (Z_ISREF_P(entry)) {
-		ALLOC_ZVAL(tmp);
-		*tmp = *entry;
-		zval_copy_ctor(tmp);
-		Z_UNSET_ISREF_P(tmp);
-		Z_SET_REFCOUNT_P(tmp, 0);
-		entry=tmp;
+		ZVAL_DUP(&tmp, Z_REFVAL_P(entry));
+		entry = &tmp;
+		if (Z_REFCOUNTED_P(entry)) Z_ADDREF_P(entry);
+	} else {
+		if (Z_REFCOUNTED_P(entry)) Z_ADDREF_P(entry);
+		if (Z_REFCOUNTED_P(entry)) Z_ADDREF_P(entry);
 	}
-	zend_hash_index_update(return_value->value.ht, 1, &entry, sizeof(zval *), NULL);
-	Z_ADDREF_P(entry);
-	zend_hash_update(return_value->value.ht, "value", sizeof("value"), &entry, sizeof(zval *), NULL);
-	Z_ADDREF_P(entry);
+	zend_hash_index_add_new(Z_ARRVAL_P(return_value), 1, entry);
+	zend_hash_str_add_new(Z_ARRVAL_P(return_value), "value", sizeof("value")-1, entry);
 
 	/* add the key elements */
-	switch (zend_hash_get_current_key_ex(target_hash, &string_key, &string_key_len, &num_key, 0, NULL)) {
-		case HASH_KEY_IS_STRING:
-			add_get_index_stringl(return_value, 0, string_key, string_key_len-1, (void **) &inserted_pointer, !IS_INTERNED(string_key));
-			break;
-		case HASH_KEY_IS_LONG:
-			add_get_index_long(return_value, 0, num_key, (void **) &inserted_pointer);
-			break;
+	if (zend_hash_get_current_key(target_hash, &key, &num_key) == HASH_KEY_IS_STRING) {
+		ZVAL_STR_COPY(&tmp, key);
+		if (Z_REFCOUNTED(tmp)) Z_ADDREF(tmp);
+	} else {
+		ZVAL_LONG(&tmp, num_key);
 	}
-	zend_hash_update(return_value->value.ht, "key", sizeof("key"), inserted_pointer, sizeof(zval *), NULL);
-	Z_ADDREF_PP(inserted_pointer);
+	zend_hash_index_add_new(Z_ARRVAL_P(return_value), 0, &tmp);
+	zend_hash_str_add_new(Z_ARRVAL_P(return_value), "key", sizeof("key")-1, &tmp);
 	zend_hash_move_forward(target_hash);
 }
 /* }}} */
-
 
 /* {{{ proto int error_reporting([int new_error_level])
    Return the current error_reporting level, and if an argument was passed - change to the new level */
 ZEND_FUNCTION(error_reporting)
 {
-	char *err;
-	int err_len;
+	zval *err;
 	int old_error_reporting;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &err, &err_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL(err)
+	ZEND_PARSE_PARAMETERS_END();
 
 	old_error_reporting = EG(error_reporting);
-	if(ZEND_NUM_ARGS() != 0) {
-		zend_alter_ini_entry("error_reporting", sizeof("error_reporting"), err, err_len, ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
+	if (ZEND_NUM_ARGS() != 0) {
+		zend_string *new_val = zval_get_string(err);
+		do {
+			zend_ini_entry *p = EG(error_reporting_ini_entry);
+
+			if (!p) {
+				p = zend_hash_str_find_ptr(EG(ini_directives), "error_reporting", sizeof("error_reporting")-1);
+				if (p) {
+					EG(error_reporting_ini_entry) = p;
+				} else {
+					break;
+				}
+			}
+			if (!p->modified) {
+				if (!EG(modified_ini_directives)) {
+					ALLOC_HASHTABLE(EG(modified_ini_directives));
+					zend_hash_init(EG(modified_ini_directives), 8, NULL, NULL, 0);
+				}
+				if (EXPECTED(zend_hash_str_add_ptr(EG(modified_ini_directives), "error_reporting", sizeof("error_reporting")-1, p) != NULL)) {
+					p->orig_value = p->value;
+					p->orig_modifiable = p->modifiable;
+					p->modified = 1;
+				}
+			} else if (p->orig_value != p->value) {
+				zend_string_release(p->value);
+			}
+
+			p->value = new_val;
+			if (Z_TYPE_P(err) == IS_LONG) {
+				EG(error_reporting) = Z_LVAL_P(err);
+			} else {
+				EG(error_reporting) = atoi(ZSTR_VAL(p->value));
+			}
+		} while (0);
 	}
 
 	RETVAL_LONG(old_error_reporting);
 }
 /* }}} */
 
+static int validate_constant_array(HashTable *ht) /* {{{ */
+{
+	int ret = 1;
+	zval *val;
 
-/* {{{ proto bool define(string constant_name, mixed value, boolean case_insensitive=false)
+	ht->u.v.nApplyCount++;
+	ZEND_HASH_FOREACH_VAL_IND(ht, val) {
+		ZVAL_DEREF(val);
+		if (Z_REFCOUNTED_P(val)) {
+			if (Z_TYPE_P(val) == IS_ARRAY) {
+				if (!Z_IMMUTABLE_P(val)) {
+					if (Z_ARRVAL_P(val)->u.v.nApplyCount > 0) {
+						zend_error(E_WARNING, "Constants cannot be recursive arrays");
+						ret = 0;
+						break;
+					} else if (!validate_constant_array(Z_ARRVAL_P(val))) {
+						ret = 0;
+						break;
+					}
+				}
+			} else if (Z_TYPE_P(val) != IS_STRING && Z_TYPE_P(val) != IS_RESOURCE) {
+				zend_error(E_WARNING, "Constants may only evaluate to scalar values or arrays");
+				ret = 0;
+				break;
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+	ht->u.v.nApplyCount--;
+	return ret;
+}
+/* }}} */
+
+static void copy_constant_array(zval *dst, zval *src) /* {{{ */
+{
+	zend_string *key;
+	zend_ulong idx;
+	zval *new_val, *val;
+
+	array_init_size(dst, zend_hash_num_elements(Z_ARRVAL_P(src)));
+	ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL_P(src), idx, key, val) {
+		/* constant arrays can't contain references */
+		ZVAL_DEREF(val);
+		if (key) {
+			new_val = zend_hash_add_new(Z_ARRVAL_P(dst), key, val);
+		} else {
+			new_val = zend_hash_index_add_new(Z_ARRVAL_P(dst), idx, val);
+		}
+		if (Z_TYPE_P(val) == IS_ARRAY) {
+			if (!Z_IMMUTABLE_P(val)) {
+				copy_constant_array(new_val, val);
+			}
+		} else if (Z_REFCOUNTED_P(val)) {
+			Z_ADDREF_P(val);
+			if (UNEXPECTED(Z_TYPE_INFO_P(val) == IS_RESOURCE_EX)) {
+				Z_TYPE_INFO_P(new_val) &= ~(IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT);
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+}
+/* }}} */
+
+/* {{{ proto bool define(string constant_name, mixed value[, boolean case_insensitive])
    Define a new constant */
 ZEND_FUNCTION(define)
 {
-	char *name;
-	int name_len;
-	zval *val;
-	zval *val_free = NULL;
+	zend_string *name;
+	zval *val, val_free;
 	zend_bool non_cs = 0;
 	int case_sensitive = CONST_CS;
 	zend_constant c;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|b", &name, &name_len, &val, &non_cs) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STR(name)
+		Z_PARAM_ZVAL(val)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(non_cs)
+	ZEND_PARSE_PARAMETERS_END();
 
-	if(non_cs) {
+	if (non_cs) {
 		case_sensitive = 0;
 	}
 
 	/* class constant, check if there is name and make sure class is valid & exists */
-	if (zend_memnstr(name, "::", sizeof("::") - 1, name + name_len)) {
+	if (zend_memnstr(ZSTR_VAL(name), "::", sizeof("::") - 1, ZSTR_VAL(name) + ZSTR_LEN(name))) {
 		zend_error(E_WARNING, "Class constants cannot be defined or redefined");
 		RETURN_FALSE;
 	}
+
+	ZVAL_UNDEF(&val_free);
 
 repeat:
 	switch (Z_TYPE_P(val)) {
 		case IS_LONG:
 		case IS_DOUBLE:
 		case IS_STRING:
-		case IS_BOOL:
-		case IS_RESOURCE:
+		case IS_FALSE:
+		case IS_TRUE:
 		case IS_NULL:
 			break;
+		case IS_RESOURCE:
+			ZVAL_COPY(&val_free, val);
+			/* TODO: better solution than this tricky disable dtor on resource? */
+			Z_TYPE_INFO(val_free) &= ~(IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT);
+			val = &val_free;
+			break;
+		case IS_ARRAY:
+			if (!Z_IMMUTABLE_P(val)) {
+				if (!validate_constant_array(Z_ARRVAL_P(val))) {
+					RETURN_FALSE;
+				} else {
+					copy_constant_array(&c.value, val);
+					goto register_constant;
+				}
+			}
+			break;
 		case IS_OBJECT:
-			if (!val_free) {
+			if (Z_TYPE(val_free) == IS_UNDEF) {
 				if (Z_OBJ_HT_P(val)->get) {
-					val_free = val = Z_OBJ_HT_P(val)->get(val TSRMLS_CC);
+					zval rv;
+					val = Z_OBJ_HT_P(val)->get(val, &rv);
+					ZVAL_COPY_VALUE(&val_free, val);
 					goto repeat;
 				} else if (Z_OBJ_HT_P(val)->cast_object) {
-					ALLOC_INIT_ZVAL(val_free);
-					if (Z_OBJ_HT_P(val)->cast_object(val, val_free, IS_STRING TSRMLS_CC) == SUCCESS) {
-						val = val_free;
+					if (Z_OBJ_HT_P(val)->cast_object(val, &val_free, IS_STRING) == SUCCESS) {
+						val = &val_free;
 						break;
 					}
 				}
 			}
 			/* no break */
 		default:
-			zend_error(E_WARNING,"Constants may only evaluate to scalar values");
-			if (val_free) {
-				zval_ptr_dtor(&val_free);
-			}
+			zend_error(E_WARNING, "Constants may only evaluate to scalar values or arrays");
+			zval_ptr_dtor(&val_free);
 			RETURN_FALSE;
 	}
-	
-	c.value = *val;
-	zval_copy_ctor(&c.value);
-	if (val_free) {
-		zval_ptr_dtor(&val_free);
-	}
+
+	ZVAL_DUP(&c.value, val);
+	zval_ptr_dtor(&val_free);
+register_constant:
 	c.flags = case_sensitive; /* non persistent */
-	c.name = str_strndup(name, name_len);
-	if(c.name == NULL) {
-		RETURN_FALSE;
-	}
-	c.name_len = name_len+1;
+	c.name = zend_string_copy(name);
 	c.module_number = PHP_USER_CONSTANT;
-	if (zend_register_constant(&c TSRMLS_CC) == SUCCESS) {
+	if (zend_register_constant(&c) == SUCCESS) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
 	}
 }
 /* }}} */
-
 
 /* {{{ proto bool defined(string constant_name)
-   Check whether a constant exists */
+   Check whether a constant exists
+   Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 ZEND_FUNCTION(defined)
 {
-	char *name;
-	int name_len;
-	zval c;
+	zend_string *name;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
-		return;
-	}
-	
-	if (zend_get_constant_ex(name, name_len, &c, NULL, ZEND_FETCH_CLASS_SILENT TSRMLS_CC)) {
-		zval_dtor(&c);
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(name)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (zend_get_constant_ex(name, NULL, ZEND_FETCH_CLASS_SILENT)) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
 	}
 }
 /* }}} */
-
 
 /* {{{ proto string get_class([object object])
    Retrieves the class name */
 ZEND_FUNCTION(get_class)
 {
 	zval *obj = NULL;
-	const char *name = "";
-	zend_uint name_len = 0;
-	int dup;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|o!", &obj) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|o!", &obj) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	if (!obj) {
 		if (EG(scope)) {
-			RETURN_STRINGL(EG(scope)->name, EG(scope)->name_length, 1);
+			RETURN_STR_COPY(EG(scope)->name);
 		} else {
 			zend_error(E_WARNING, "get_class() called without object from outside a class");
 			RETURN_FALSE;
 		}
 	}
 
-	dup = zend_get_object_classname(obj, &name, &name_len TSRMLS_CC);
-
-	RETURN_STRINGL(name, name_len, dup);
+	RETURN_STR_COPY(Z_OBJCE_P(obj)->name);
 }
 /* }}} */
-
 
 /* {{{ proto string get_called_class()
    Retrieves the "Late Static Binding" class name */
 ZEND_FUNCTION(get_called_class)
 {
+	zend_class_entry *called_scope;
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
-	if (EG(called_scope)) {
-		RETURN_STRINGL(EG(called_scope)->name, EG(called_scope)->name_length, 1);
+	called_scope = zend_get_called_scope(execute_data);
+	if (called_scope) {
+		RETURN_STR_COPY(called_scope->name);
 	} else if (!EG(scope))  {
 		zend_error(E_WARNING, "get_called_class() called from outside a class");
 	}
@@ -792,100 +967,93 @@ ZEND_FUNCTION(get_called_class)
 }
 /* }}} */
 
-
-/* {{{ proto string get_parent_class([mixed object])
-   Retrieves the parent class name for object or class or current scope. */
+/* {{{ proto mixed get_parent_class([mixed object])
+   Retrieves the parent class name for object or class or current scope or false if not in a scope. */
 ZEND_FUNCTION(get_parent_class)
 {
 	zval *arg;
 	zend_class_entry *ce = NULL;
-	const char *name;
-	zend_uint name_length;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|z", &arg) == FAILURE) {
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|z", &arg) == FAILURE) {
 		return;
 	}
 
 	if (!ZEND_NUM_ARGS()) {
 		ce = EG(scope);
 		if (ce && ce->parent) {
-			RETURN_STRINGL(ce->parent->name, ce->parent->name_length, 1);
+			RETURN_STR_COPY(ce->parent->name);
 		} else {
 			RETURN_FALSE;
 		}
 	}
 
 	if (Z_TYPE_P(arg) == IS_OBJECT) {
-		if (Z_OBJ_HT_P(arg)->get_class_name
-			&& Z_OBJ_HT_P(arg)->get_class_name(arg, &name, &name_length, 1 TSRMLS_CC) == SUCCESS) {
-			RETURN_STRINGL(name, name_length, 0);
-		} else {
-			ce = zend_get_class_entry(arg TSRMLS_CC);
-		}
+		ce = Z_OBJ_P(arg)->ce;
 	} else if (Z_TYPE_P(arg) == IS_STRING) {
-		zend_class_entry **pce;
-		
-		if (zend_lookup_class(Z_STRVAL_P(arg), Z_STRLEN_P(arg), &pce TSRMLS_CC) == SUCCESS) {
-			ce = *pce;
-		}
+	    ce = zend_lookup_class(Z_STR_P(arg));
 	}
 
 	if (ce && ce->parent) {
-		RETURN_STRINGL(ce->parent->name, ce->parent->name_length, 1);
+		RETURN_STR_COPY(ce->parent->name);
 	} else {
 		RETURN_FALSE;
 	}
 }
 /* }}} */
 
-
-static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass)
+static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass) /* {{{ */
 {
 	zval *obj;
-	char *class_name;
-	int class_name_len;
+	zend_string *class_name;
 	zend_class_entry *instance_ce;
-	zend_class_entry **ce;
+	zend_class_entry *ce;
 	zend_bool allow_string = only_subclass;
 	zend_bool retval;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs|b", &obj, &class_name, &class_name_len, &allow_string) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_ZVAL(obj)
+		Z_PARAM_STR(class_name)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(allow_string)
+	ZEND_PARSE_PARAMETERS_END();
 	/*
-	 * allow_string - is_a default is no, is_subclass_of is yes. 
+	 * allow_string - is_a default is no, is_subclass_of is yes.
 	 *   if it's allowed, then the autoloader will be called if the class does not exist.
 	 *   default behaviour is different, as 'is_a' used to be used to test mixed return values
 	 *   and there is no easy way to deprecate this.
 	 */
 
 	if (allow_string && Z_TYPE_P(obj) == IS_STRING) {
-		zend_class_entry **the_ce;
-		if (zend_lookup_class(Z_STRVAL_P(obj), Z_STRLEN_P(obj), &the_ce TSRMLS_CC) == FAILURE) {
+		instance_ce = zend_lookup_class(Z_STR_P(obj));
+		if (!instance_ce) {
 			RETURN_FALSE;
 		}
-		instance_ce = *the_ce;
-	} else if (Z_TYPE_P(obj) == IS_OBJECT && HAS_CLASS_ENTRY(*obj)) {
+	} else if (Z_TYPE_P(obj) == IS_OBJECT) {
 		instance_ce = Z_OBJCE_P(obj);
 	} else {
 		RETURN_FALSE;
 	}
 
-	if (zend_lookup_class_ex(class_name, class_name_len, NULL, 0, &ce TSRMLS_CC) == FAILURE) {
-		retval = 0;
+	if (!only_subclass && EXPECTED(zend_string_equals(instance_ce->name, class_name))) {
+		retval = 1;
 	} else {
-		if (only_subclass && instance_ce == *ce) {
+		ce = zend_lookup_class_ex(class_name, NULL, 0);
+		if (!ce) {
 			retval = 0;
- 		} else {
-			retval = instanceof_function(instance_ce, *ce TSRMLS_CC);
+		} else {
+			if (only_subclass && instance_ce == ce) {
+				retval = 0;
+			} else {
+				retval = instanceof_function(instance_ce, ce);
+			}
 		}
 	}
 
 	RETURN_BOOL(retval);
 }
+/* }}} */
 
-
-/* {{{ proto bool is_subclass_of(mixed object_or_string, string class_name [, bool allow_string=true])
+/* {{{ proto bool is_subclass_of(mixed object_or_string, string class_name [, bool allow_string])
    Returns true if the object has this class as one of its parents */
 ZEND_FUNCTION(is_subclass_of)
 {
@@ -893,8 +1061,7 @@ ZEND_FUNCTION(is_subclass_of)
 }
 /* }}} */
 
-
-/* {{{ proto bool is_a(mixed object_or_string, string class_name [, bool allow_string=false])
+/* {{{ proto bool is_a(mixed object_or_string, string class_name [, bool allow_string])
    Returns true if the first argument is an object and is this class or has this class as one of its parents, */
 ZEND_FUNCTION(is_a)
 {
@@ -902,21 +1069,14 @@ ZEND_FUNCTION(is_a)
 }
 /* }}} */
 
-
 /* {{{ add_class_vars */
-static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value TSRMLS_DC)
+static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value)
 {
-	HashPosition pos;
 	zend_property_info *prop_info;
-	zval *prop, *prop_copy;
-	char *key;
-	uint key_len;
-	ulong num_index;
+	zval *prop, prop_copy;
+	zend_string *key;
 
-	zend_hash_internal_pointer_reset_ex(&ce->properties_info, &pos);
-	while (zend_hash_get_current_data_ex(&ce->properties_info, (void **) &prop_info, &pos) == SUCCESS) {
-		zend_hash_get_current_key_ex(&ce->properties_info, &key, &key_len, &num_index, 0, &pos);
-		zend_hash_move_forward_ex(&ce->properties_info, &pos);
+	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->properties_info, key, prop_info) {
 		if (((prop_info->flags & ZEND_ACC_SHADOW) &&
 		     prop_info->ce != EG(scope)) ||
 		    ((prop_info->flags & ZEND_ACC_PROTECTED) &&
@@ -927,146 +1087,162 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 			continue;
 		}
 		prop = NULL;
-		if (prop_info->offset >= 0) {
-			if (statics && (prop_info->flags & ZEND_ACC_STATIC) != 0) {
-				prop = ce->default_static_members_table[prop_info->offset];
-			} else if (!statics && (prop_info->flags & ZEND_ACC_STATIC) == 0) {
-				prop = ce->default_properties_table[prop_info->offset];
- 			}
+		if (statics && (prop_info->flags & ZEND_ACC_STATIC) != 0) {
+			prop = &ce->default_static_members_table[prop_info->offset];
+		} else if (!statics && (prop_info->flags & ZEND_ACC_STATIC) == 0) {
+			prop = &ce->default_properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
 		}
-		if (!prop) {
+		if (!prop || Z_TYPE_P(prop) == IS_UNDEF) {
 			continue;
 		}
 
 		/* copy: enforce read only access */
-		ALLOC_ZVAL(prop_copy);
-		*prop_copy = *prop;
-		zval_copy_ctor(prop_copy);
-		INIT_PZVAL(prop_copy);
+		ZVAL_DEREF(prop);
+		if (UNEXPECTED(Z_COPYABLE_P(prop))) {
+			ZVAL_DUP(&prop_copy, prop);
+			prop = &prop_copy;
+		} else {
+			Z_TRY_ADDREF_P(prop);
+		}
 
 		/* this is necessary to make it able to work with default array
 		 * properties, returned to user */
-		if (IS_CONSTANT_TYPE(Z_TYPE_P(prop_copy))) {
-			zval_update_constant(&prop_copy, 0 TSRMLS_CC);
+		if (Z_OPT_CONSTANT_P(prop)) {
+			if (UNEXPECTED(zval_update_constant_ex(prop, 0, NULL) != SUCCESS)) {
+				return;
+			}
 		}
 
-		zend_hash_update(Z_ARRVAL_P(return_value), key, key_len, &prop_copy, sizeof(zval*), NULL);
-	}
+		zend_hash_add_new(Z_ARRVAL_P(return_value), key, prop);
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
-
 
 /* {{{ proto array get_class_vars(string class_name)
    Returns an array of default properties of the class. */
 ZEND_FUNCTION(get_class_vars)
 {
-	char *class_name;
-	int class_name_len;
-	zend_class_entry **pce;
+	zend_string *class_name;
+	zend_class_entry *ce;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &class_name, &class_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &class_name) == FAILURE) {
 		return;
 	}
 
-	if (zend_lookup_class(class_name, class_name_len, &pce TSRMLS_CC) == FAILURE) {
+	ce = zend_lookup_class(class_name);
+	if (!ce) {
 		RETURN_FALSE;
 	} else {
 		array_init(return_value);
-		zend_update_class_constants(*pce TSRMLS_CC);
-		add_class_vars(*pce, 0, return_value TSRMLS_CC);
-		add_class_vars(*pce, 1, return_value TSRMLS_CC);
+		if (UNEXPECTED(!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED))) {
+			if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
+				return;
+			}
+		}
+		add_class_vars(ce, 0, return_value);
+		add_class_vars(ce, 1, return_value);
 	}
 }
 /* }}} */
-
 
 /* {{{ proto array get_object_vars(object obj)
    Returns an array of object properties */
 ZEND_FUNCTION(get_object_vars)
 {
 	zval *obj;
-	zval **value;
+	zval *value;
 	HashTable *properties;
-	HashPosition pos;
-	char *key;
-	const char *prop_name, *class_name;
-	uint key_len, prop_len;
-	ulong num_index;
+	zend_string *key;
 	zend_object *zobj;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &obj) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT(obj)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (Z_OBJ_HT_P(obj)->get_properties == NULL) {
 		RETURN_FALSE;
 	}
 
-	properties = Z_OBJ_HT_P(obj)->get_properties(obj TSRMLS_CC);
+	properties = Z_OBJ_HT_P(obj)->get_properties(obj);
 
 	if (properties == NULL) {
 		RETURN_FALSE;
 	}
 
-	zobj = zend_objects_get_address(obj TSRMLS_CC);
+	zobj = Z_OBJ_P(obj);
 
-	array_init(return_value);
+	if (!zobj->ce->default_properties_count && properties == zobj->properties && !ZEND_HASH_GET_APPLY_COUNT(properties)) {
+		/* fast copy */
+		if (EXPECTED(zobj->handlers == &std_object_handlers)) {
+			if (EXPECTED(!(GC_FLAGS(properties) & IS_ARRAY_IMMUTABLE))) {
+				GC_REFCOUNT(properties)++;
+			}
+			RETURN_ARR(properties);
+		}
+		RETURN_ARR(zend_array_dup(properties));
+	} else {
+		array_init_size(return_value, zend_hash_num_elements(properties));
 
-	zend_hash_internal_pointer_reset_ex(properties, &pos);
-
-	while (zend_hash_get_current_data_ex(properties, (void **) &value, &pos) == SUCCESS) {
-		if (zend_hash_get_current_key_ex(properties, &key, &key_len, &num_index, 0, &pos) == HASH_KEY_IS_STRING) {
-			if (zend_check_property_access(zobj, key, key_len-1 TSRMLS_CC) == SUCCESS) {
-				zend_unmangle_property_name_ex(key, key_len - 1, &class_name, &prop_name, (int*) &prop_len);
-				/* Not separating references */
-				Z_ADDREF_PP(value);
-				if (IS_INTERNED(key) && prop_name != key) {
-					/* we can't use substring of interned string as a new key */
-					char *tmp = estrndup(prop_name, prop_len);
-					add_assoc_zval_ex(return_value, tmp, prop_len + 1, *value);
-					efree(tmp);
-				} else {
-					add_assoc_zval_ex(return_value, prop_name, prop_len + 1, *value);
+		ZEND_HASH_FOREACH_STR_KEY_VAL_IND(properties, key, value) {
+			if (key) {
+				if (zend_check_property_access(zobj, key) == SUCCESS) {
+					if (Z_ISREF_P(value) && Z_REFCOUNT_P(value) == 1) {
+						value = Z_REFVAL_P(value);
+					}
+					if (Z_REFCOUNTED_P(value)) {
+						Z_ADDREF_P(value);
+					}
+					if (ZSTR_VAL(key)[0] == 0) {
+						const char *prop_name, *class_name;
+						size_t prop_len;
+						zend_unmangle_property_name_ex(key, &class_name, &prop_name, &prop_len);
+						zend_hash_str_add_new(Z_ARRVAL_P(return_value), prop_name, prop_len, value);
+					} else {
+						zend_hash_add_new(Z_ARRVAL_P(return_value), key, value);
+					}
 				}
 			}
-		}
-		zend_hash_move_forward_ex(properties, &pos);
+		} ZEND_HASH_FOREACH_END();
 	}
 }
 /* }}} */
 
-static int same_name(const char *key, const char *name, zend_uint name_len)
+static int same_name(zend_string *key, zend_string *name) /* {{{ */
 {
-	char *lcname = zend_str_tolower_dup(name, name_len);
-	int ret = memcmp(lcname, key, name_len) == 0;
-	efree(lcname);
+	zend_string *lcname;
+	int ret;
+
+	if (key == name) {
+		return 1;
+	}
+	if (ZSTR_LEN(key) != ZSTR_LEN(name)) {
+		return 0;
+	}
+	lcname = zend_string_tolower(name);
+	ret = memcmp(ZSTR_VAL(lcname), ZSTR_VAL(key), ZSTR_LEN(key)) == 0;
+	zend_string_release(lcname);
 	return ret;
 }
+/* }}} */
 
 /* {{{ proto array get_class_methods(mixed class)
    Returns an array of method names for class or class instance. */
 ZEND_FUNCTION(get_class_methods)
 {
 	zval *klass;
-	zval *method_name;
-	zend_class_entry *ce = NULL, **pce;
-	HashPosition pos;
+	zval method_name;
+	zend_class_entry *ce = NULL;
 	zend_function *mptr;
+	zend_string *key;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &klass) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &klass) == FAILURE) {
 		return;
 	}
 
 	if (Z_TYPE_P(klass) == IS_OBJECT) {
-		/* TBI!! new object handlers */
-		if (!HAS_CLASS_ENTRY(*klass)) {
-			RETURN_FALSE;
-		}
 		ce = Z_OBJCE_P(klass);
 	} else if (Z_TYPE_P(klass) == IS_STRING) {
-		if (zend_lookup_class(Z_STRVAL_P(klass), Z_STRLEN_P(klass), &pce TSRMLS_CC) == SUCCESS) {
-			ce = *pce;
-		}
+	    ce = zend_lookup_class(Z_STR_P(klass));
 	}
 
 	if (!ce) {
@@ -1074,102 +1250,90 @@ ZEND_FUNCTION(get_class_methods)
 	}
 
 	array_init(return_value);
-	zend_hash_internal_pointer_reset_ex(&ce->function_table, &pos);
 
-	while (zend_hash_get_current_data_ex(&ce->function_table, (void **) &mptr, &pos) == SUCCESS) {
-		if ((mptr->common.fn_flags & ZEND_ACC_PUBLIC) 
+	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->function_table, key, mptr) {
+
+		if ((mptr->common.fn_flags & ZEND_ACC_PUBLIC)
 		 || (EG(scope) &&
 		     (((mptr->common.fn_flags & ZEND_ACC_PROTECTED) &&
 		       zend_check_protected(mptr->common.scope, EG(scope)))
 		   || ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) &&
 		       EG(scope) == mptr->common.scope)))) {
-			char *key;
-			uint key_len;
-			ulong num_index;
-			uint len = strlen(mptr->common.function_name);
+			size_t len = ZSTR_LEN(mptr->common.function_name);
 
 			/* Do not display old-style inherited constructors */
-			if (zend_hash_get_current_key_ex(&ce->function_table, &key, &key_len, &num_index, 0, &pos) != HASH_KEY_IS_STRING) {
-				MAKE_STD_ZVAL(method_name);
-				ZVAL_STRINGL(method_name, mptr->common.function_name, len, 1);
-				zend_hash_next_index_insert(return_value->value.ht, &method_name, sizeof(zval *), NULL);
+			if (!key) {
+				ZVAL_STR_COPY(&method_name, mptr->common.function_name);
+				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &method_name);
 			} else if ((mptr->common.fn_flags & ZEND_ACC_CTOR) == 0 ||
 			    mptr->common.scope == ce ||
-			    zend_binary_strcasecmp(key, key_len-1, mptr->common.function_name, len) == 0) {
+			    zend_binary_strcasecmp(ZSTR_VAL(key), ZSTR_LEN(key), ZSTR_VAL(mptr->common.function_name), len) == 0) {
 
 				if (mptr->type == ZEND_USER_FUNCTION &&
-				    *mptr->op_array.refcount > 1 &&
-			    	(len != key_len - 1 ||
-			    	 !same_name(key, mptr->common.function_name, len))) {
-					MAKE_STD_ZVAL(method_name);
-					ZVAL_STRINGL(method_name, zend_find_alias_name(mptr->common.scope, key, key_len - 1), key_len - 1, 1);
-					zend_hash_next_index_insert(return_value->value.ht, &method_name, sizeof(zval *), NULL);
+				    (!mptr->op_array.refcount || *mptr->op_array.refcount > 1) &&
+			    	 !same_name(key, mptr->common.function_name)) {
+					ZVAL_STR_COPY(&method_name, zend_find_alias_name(mptr->common.scope, key));
+					zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &method_name);
 				} else {
-					MAKE_STD_ZVAL(method_name);
-					ZVAL_STRINGL(method_name, mptr->common.function_name, len, 1);
-					zend_hash_next_index_insert(return_value->value.ht, &method_name, sizeof(zval *), NULL);
+					ZVAL_STR_COPY(&method_name, mptr->common.function_name);
+					zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &method_name);
 				}
 			}
 		}
-		zend_hash_move_forward_ex(&ce->function_table, &pos);
-	}
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
-
 
 /* {{{ proto bool method_exists(object object, string method)
    Checks if the class method exists */
 ZEND_FUNCTION(method_exists)
 {
-	zval *klass; 
-	char *method_name;
-	int method_len;
-	char *lcname;
-	zend_class_entry * ce, **pce;
+	zval *klass;
+	zend_string *method_name;
+	zend_string *lcname;
+	zend_class_entry * ce;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &klass, &method_name, &method_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ZVAL(klass)
+		Z_PARAM_STR(method_name)
+	ZEND_PARSE_PARAMETERS_END();
+	
 	if (Z_TYPE_P(klass) == IS_OBJECT) {
 		ce = Z_OBJCE_P(klass);
 	} else if (Z_TYPE_P(klass) == IS_STRING) {
-		if (zend_lookup_class(Z_STRVAL_P(klass), Z_STRLEN_P(klass), &pce TSRMLS_CC) == FAILURE) {
+		if ((ce = zend_lookup_class(Z_STR_P(klass))) == NULL) {
 			RETURN_FALSE;
 		}
-		ce = *pce;
 	} else {
 		RETURN_FALSE;
 	}
 
-	lcname = zend_str_tolower_dup(method_name, method_len);
-	if (zend_hash_exists(&ce->function_table, lcname, method_len+1)) {
-		efree(lcname);
+	lcname = zend_string_tolower(method_name);
+	if (zend_hash_exists(&ce->function_table, lcname)) {
+		zend_string_release(lcname);
 		RETURN_TRUE;
 	} else {
 		union _zend_function *func = NULL;
 
-		if (Z_TYPE_P(klass) == IS_OBJECT 
+		if (Z_TYPE_P(klass) == IS_OBJECT
 		&& Z_OBJ_HT_P(klass)->get_method != NULL
-		&& (func = Z_OBJ_HT_P(klass)->get_method(&klass, method_name, method_len, NULL TSRMLS_CC)) != NULL
+		&& (func = Z_OBJ_HT_P(klass)->get_method(&Z_OBJ_P(klass), method_name, NULL)) != NULL
 		) {
-			if (func->type == ZEND_INTERNAL_FUNCTION 
-			&& (func->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) != 0
-			) {
+			if (func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
 				/* Returns true to the fake Closure's __invoke */
-				RETVAL_BOOL((func->common.scope == zend_ce_closure
-					&& (method_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
-					&& memcmp(lcname, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0) ? 1 : 0);
-					
-				efree(lcname);
-				efree((char*)((zend_internal_function*)func)->function_name);
-				efree(func);
+				RETVAL_BOOL(func->common.scope == zend_ce_closure
+					&& zend_string_equals_literal(method_name, ZEND_INVOKE_FUNC_NAME));
+
+				zend_string_release(lcname);
+				zend_string_release(func->common.function_name);
+				zend_free_trampoline(func);
 				return;
 			}
-			efree(lcname);
+			zend_string_release(lcname);
 			RETURN_TRUE;
 		}
 	}
-	efree(lcname);
+	zend_string_release(lcname);
 	RETURN_FALSE;
 }
 /* }}} */
@@ -1179,26 +1343,24 @@ ZEND_FUNCTION(method_exists)
 ZEND_FUNCTION(property_exists)
 {
 	zval *object;
-	char *property;
-	int property_len;
-	zend_class_entry *ce, **pce;
+	zend_string *property;
+	zend_class_entry *ce;
 	zend_property_info *property_info;
 	zval property_z;
-	ulong h;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &object, &property, &property_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zS", &object, &property) == FAILURE) {
 		return;
 	}
 
-	if (property_len == 0) {
+	if (property == NULL) {
 		RETURN_FALSE;
 	}
 
 	if (Z_TYPE_P(object) == IS_STRING) {
-		if (zend_lookup_class(Z_STRVAL_P(object), Z_STRLEN_P(object), &pce TSRMLS_CC) == FAILURE) {
+		ce = zend_lookup_class(Z_STR_P(object));
+		if (!ce) {
 			RETURN_FALSE;
 		}
-		ce = *pce;
 	} else if (Z_TYPE_P(object) == IS_OBJECT) {
 		ce = Z_OBJCE_P(object);
 	} else {
@@ -1206,61 +1368,54 @@ ZEND_FUNCTION(property_exists)
 		RETURN_NULL();
 	}
 
-	h = zend_get_hash_value(property, property_len+1);
-	if (zend_hash_quick_find(&ce->properties_info, property, property_len+1, h, (void **) &property_info) == SUCCESS
+	if ((property_info = zend_hash_find_ptr(&ce->properties_info, property)) != NULL
 		&& (property_info->flags & ZEND_ACC_SHADOW) == 0) {
 		RETURN_TRUE;
 	}
 
-	ZVAL_STRINGL(&property_z, property, property_len, 0);
+	ZVAL_STR(&property_z, property);
 
 	if (Z_TYPE_P(object) ==  IS_OBJECT &&
-		Z_OBJ_HANDLER_P(object, has_property) && 
-		Z_OBJ_HANDLER_P(object, has_property)(object, &property_z, 2, 0 TSRMLS_CC)) {
+		Z_OBJ_HANDLER_P(object, has_property) &&
+		Z_OBJ_HANDLER_P(object, has_property)(object, &property_z, 2, NULL)) {
 		RETURN_TRUE;
 	}
 	RETURN_FALSE;
 }
 /* }}} */
 
-
 /* {{{ proto bool class_exists(string classname [, bool autoload])
    Checks if the class exists */
 ZEND_FUNCTION(class_exists)
 {
-	char *class_name, *lc_name;
-	zend_class_entry **ce;
-	int class_name_len;
-	int found;
+	zend_string *class_name;
+	zend_string *lc_name;
+	zend_class_entry *ce;
 	zend_bool autoload = 1;
-	ALLOCA_FLAG(use_heap)
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &class_name, &class_name_len, &autoload) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STR(class_name)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(autoload)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!autoload) {
-		char *name;
-		int len;
-
-		lc_name = do_alloca(class_name_len + 1, use_heap);
-		zend_str_tolower_copy(lc_name, class_name, class_name_len);
-
-		/* Ignore leading "\" */
-		name = lc_name;
-		len = class_name_len;
-		if (lc_name[0] == '\\') {
-			name = &lc_name[1];
-			len--;
+		if (ZSTR_VAL(class_name)[0] == '\\') {
+			/* Ignore leading "\" */
+			lc_name = zend_string_alloc(ZSTR_LEN(class_name) - 1, 0);
+			zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(class_name) + 1, ZSTR_LEN(class_name) - 1);
+		} else {
+			lc_name = zend_string_tolower(class_name);
 		}
-	
-		found = zend_hash_find(EG(class_table), name, len+1, (void **) &ce);
-		free_alloca(lc_name, use_heap);
-		RETURN_BOOL(found == SUCCESS && !(((*ce)->ce_flags & (ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT)) > ZEND_ACC_EXPLICIT_ABSTRACT_CLASS));
+
+		ce = zend_hash_find_ptr(EG(class_table), lc_name);
+		zend_string_release(lc_name);
+	} else {
+		ce = zend_lookup_class(class_name);
 	}
 
- 	if (zend_lookup_class(class_name, class_name_len, &ce TSRMLS_CC) == SUCCESS) {
- 		RETURN_BOOL(((*ce)->ce_flags & (ZEND_ACC_INTERFACE | (ZEND_ACC_TRAIT - ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))) == 0);
+ 	if (ce) {
+ 		RETURN_BOOL((ce->ce_flags & (ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT)) == 0);
 	} else {
 		RETURN_FALSE;
 	}
@@ -1271,39 +1426,32 @@ ZEND_FUNCTION(class_exists)
    Checks if the class exists */
 ZEND_FUNCTION(interface_exists)
 {
-	char *iface_name, *lc_name;
-	zend_class_entry **ce;
-	int iface_name_len;
-	int found;
+	zend_string *iface_name, *lc_name;
+	zend_class_entry *ce;
 	zend_bool autoload = 1;
-	ALLOCA_FLAG(use_heap)
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &iface_name, &iface_name_len, &autoload) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STR(iface_name)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(autoload)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!autoload) {
-		char *name;
-		int len;
-		
-		lc_name = do_alloca(iface_name_len + 1, use_heap);
-		zend_str_tolower_copy(lc_name, iface_name, iface_name_len);
-	
-		/* Ignore leading "\" */
-		name = lc_name;
-		len = iface_name_len;
-		if (lc_name[0] == '\\') {
-			name = &lc_name[1];
-			len--;
+		if (ZSTR_VAL(iface_name)[0] == '\\') {
+			/* Ignore leading "\" */
+			lc_name = zend_string_alloc(ZSTR_LEN(iface_name) - 1, 0);
+			zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(iface_name) + 1, ZSTR_LEN(iface_name) - 1);
+		} else {
+			lc_name = zend_string_tolower(iface_name);
 		}
-
-		found = zend_hash_find(EG(class_table), name, len+1, (void **) &ce);
-		free_alloca(lc_name, use_heap);
-		RETURN_BOOL(found == SUCCESS && (*ce)->ce_flags & ZEND_ACC_INTERFACE);
+		ce = zend_hash_find_ptr(EG(class_table), lc_name);
+		zend_string_release(lc_name);
+		RETURN_BOOL(ce && ce->ce_flags & ZEND_ACC_INTERFACE);
 	}
 
- 	if (zend_lookup_class(iface_name, iface_name_len, &ce TSRMLS_CC) == SUCCESS) {
- 		RETURN_BOOL(((*ce)->ce_flags & ZEND_ACC_INTERFACE) > 0);
+	ce = zend_lookup_class(iface_name);
+	if (ce) {
+ 		RETURN_BOOL((ce->ce_flags & ZEND_ACC_INTERFACE) > 0);
 	} else {
 		RETURN_FALSE;
 	}
@@ -1314,83 +1462,68 @@ ZEND_FUNCTION(interface_exists)
  Checks if the trait exists */
 ZEND_FUNCTION(trait_exists)
 {
-	char *trait_name, *lc_name;
-	zend_class_entry **ce;
-	int trait_name_len;
-	int found;
+	zend_string *trait_name, *lc_name;
+	zend_class_entry *ce;
 	zend_bool autoload = 1;
-	ALLOCA_FLAG(use_heap)
-  
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &trait_name, &trait_name_len, &autoload) == FAILURE) {
-		return;
-	}
-  
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STR(trait_name)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(autoload)
+	ZEND_PARSE_PARAMETERS_END();
+
 	if (!autoload) {
-		char *name;
-		int len;
-		
-		lc_name = do_alloca(trait_name_len + 1, use_heap);
-		zend_str_tolower_copy(lc_name, trait_name, trait_name_len);
-    
-		/* Ignore leading "\" */
-		name = lc_name;
-		len = trait_name_len;
-		if (lc_name[0] == '\\') {
-			name = &lc_name[1];
-			len--;
+		if (ZSTR_VAL(trait_name)[0] == '\\') {
+			/* Ignore leading "\" */
+			lc_name = zend_string_alloc(ZSTR_LEN(trait_name) - 1, 0);
+			zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(trait_name) + 1, ZSTR_LEN(trait_name) - 1);
+		} else {
+			lc_name = zend_string_tolower(trait_name);
 		}
-    
-		found = zend_hash_find(EG(class_table), name, len+1, (void **) &ce);
-		free_alloca(lc_name, use_heap);
-		RETURN_BOOL(found == SUCCESS && (((*ce)->ce_flags & ZEND_ACC_TRAIT) > ZEND_ACC_EXPLICIT_ABSTRACT_CLASS));
+
+		ce = zend_hash_find_ptr(EG(class_table), lc_name);
+		zend_string_release(lc_name);
+	} else {
+		ce = zend_lookup_class(trait_name);
 	}
-  
- 	if (zend_lookup_class(trait_name, trait_name_len, &ce TSRMLS_CC) == SUCCESS) {
- 		RETURN_BOOL(((*ce)->ce_flags & ZEND_ACC_TRAIT) > ZEND_ACC_EXPLICIT_ABSTRACT_CLASS);
+
+	if (ce) {
+ 		RETURN_BOOL((ce->ce_flags & ZEND_ACC_TRAIT) != 0);
 	} else {
 		RETURN_FALSE;
 	}
 }
 /* }}} */
 
-
-/* {{{ proto bool function_exists(string function_name) 
+/* {{{ proto bool function_exists(string function_name)
    Checks if the function exists */
 ZEND_FUNCTION(function_exists)
 {
-	char *name;
-	int name_len;
+	zend_string *name;
 	zend_function *func;
-	char *lcname;
-	zend_bool retval;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
-		return;
+	zend_string *lcname;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(name)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (ZSTR_VAL(name)[0] == '\\') {
+		/* Ignore leading "\" */
+		lcname = zend_string_alloc(ZSTR_LEN(name) - 1, 0);
+		zend_str_tolower_copy(ZSTR_VAL(lcname), ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1);
+	} else {
+		lcname = zend_string_tolower(name);
 	}
 
-	lcname = zend_str_tolower_dup(name, name_len);
-	
-	/* Ignore leading "\" */
-	name = lcname;
-	if (lcname[0] == '\\') {
-		name = &lcname[1];
-		name_len--;
-	}
-
-	retval = (zend_hash_find(EG(function_table), name, name_len+1, (void **)&func) == SUCCESS);
-	
-	efree(lcname);
+	func = zend_hash_find_ptr(EG(function_table), lcname);
+	zend_string_release(lcname);
 
 	/*
 	 * A bit of a hack, but not a bad one: we see if the handler of the function
 	 * is actually one that displays "function is disabled" message.
 	 */
-	if (retval && func->type == ZEND_INTERNAL_FUNCTION &&
-		func->internal_function.handler == zif_display_disabled_function) {
-		retval = 0;
-	}
-
-	RETURN_BOOL(retval);
+	RETURN_BOOL(func && (func->type != ZEND_INTERNAL_FUNCTION ||
+		func->internal_function.handler != zif_display_disabled_function));
 }
 /* }}} */
 
@@ -1398,24 +1531,24 @@ ZEND_FUNCTION(function_exists)
    Creates an alias for user defined class */
 ZEND_FUNCTION(class_alias)
 {
-	char *class_name, *alias_name;
-	zend_class_entry **ce;
-	int class_name_len, alias_name_len;
-	int found;
+	zend_string *class_name;
+	char *alias_name;
+	zend_class_entry *ce;
+	size_t alias_name_len;
 	zend_bool autoload = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|b", &class_name, &class_name_len, &alias_name, &alias_name_len, &autoload) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ss|b", &class_name, &alias_name, &alias_name_len, &autoload) == FAILURE) {
 		return;
 	}
 
-	found = zend_lookup_class_ex(class_name, class_name_len, NULL, autoload, &ce TSRMLS_CC);
-	
-	if (found == SUCCESS) {
-		if ((*ce)->type == ZEND_USER_CLASS) { 
-			if (zend_register_class_alias_ex(alias_name, alias_name_len, *ce TSRMLS_CC) == SUCCESS) {
+	ce = zend_lookup_class_ex(class_name, NULL, autoload);
+
+	if (ce) {
+		if (ce->type == ZEND_USER_CLASS) {
+			if (zend_register_class_alias_ex(alias_name, alias_name_len, ce) == SUCCESS) {
 				RETURN_TRUE;
 			} else {
-				zend_error(E_WARNING, "Cannot redeclare class %s", alias_name);
+				zend_error(E_WARNING, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), alias_name);
 				RETURN_FALSE;
 			}
 		} else {
@@ -1423,20 +1556,20 @@ ZEND_FUNCTION(class_alias)
 			RETURN_FALSE;
 		}
 	} else {
-		zend_error(E_WARNING, "Class '%s' not found", class_name);
+		zend_error(E_WARNING, "Class '%s' not found", ZSTR_VAL(class_name));
 		RETURN_FALSE;
 	}
 }
 /* }}} */
 
 #if ZEND_DEBUG
-/* {{{ proto void leak(int num_bytes=3)
+/* {{{ proto void leak([int num_bytes])
    Cause an intentional memory leak, for testing/debugging purposes */
 ZEND_FUNCTION(leak)
 {
-	long leakbytes=3;
+	zend_long leakbytes = 3;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &leakbytes) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &leakbytes) == FAILURE) {
 		return;
 	}
 
@@ -1444,22 +1577,23 @@ ZEND_FUNCTION(leak)
 }
 /* }}} */
 
-/* {{{ proto leak_variable(mixed variable [, bool leak_data]) */
+/* {{{ proto void leak_variable(mixed variable [, bool leak_data])
+   Leak a variable that is a resource or an object */
 ZEND_FUNCTION(leak_variable)
 {
 	zval *zv;
 	zend_bool leak_data = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|b", &zv, &leak_data) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &zv, &leak_data) == FAILURE) {
 		return;
 	}
 
 	if (!leak_data) {
-		zval_add_ref(&zv);
+		Z_ADDREF_P(zv);
 	} else if (Z_TYPE_P(zv) == IS_RESOURCE) {
-		zend_list_addref(Z_RESVAL_P(zv));
+		Z_ADDREF_P(zv);
 	} else if (Z_TYPE_P(zv) == IS_OBJECT) {
-		Z_OBJ_HANDLER_P(zv, add_ref)(zv TSRMLS_CC);
+		Z_ADDREF_P(zv);
 	} else {
 		zend_error(E_WARNING, "Leaking non-zval data is only applicable to resources and objects");
 	}
@@ -1468,12 +1602,19 @@ ZEND_FUNCTION(leak_variable)
 
 
 #ifdef ZEND_TEST_EXCEPTIONS
+/* {{{ proto void crash(void)
+   Crash the script */
 ZEND_FUNCTION(crash)
 {
-	char *nowhere=NULL;
+	char *nowhere = NULL;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	memcpy(nowhere, "something", sizeof("something"));
 }
+/* }}} */
 #endif
 
 #endif /* ZEND_DEBUG */
@@ -1482,32 +1623,30 @@ ZEND_FUNCTION(crash)
    Returns an array with the file names that were include_once()'d */
 ZEND_FUNCTION(get_included_files)
 {
-	char *entry;
-	uint entry_len;
+	zend_string *entry;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
 	array_init(return_value);
-	zend_hash_internal_pointer_reset(&EG(included_files));
-	while (zend_hash_get_current_key_ex(&EG(included_files), &entry, &entry_len, NULL, 0, NULL) == HASH_KEY_IS_STRING) {
-		add_next_index_stringl(return_value, entry, entry_len-1, !IS_INTERNED(entry));
-		zend_hash_move_forward(&EG(included_files));
-	}
+	ZEND_HASH_FOREACH_STR_KEY(&EG(included_files), entry) {
+		if (entry) {
+			add_next_index_str(return_value, zend_string_copy(entry));
+		}
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
-
 
 /* {{{ proto void trigger_error(string message [, int error_type])
    Generates a user-level error/warning/notice message */
 ZEND_FUNCTION(trigger_error)
 {
-	long error_type = E_USER_NOTICE;
+	zend_long error_type = E_USER_NOTICE;
 	char *message;
-	int message_len;
+	size_t message_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &message, &message_len, &error_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &message, &message_len, &error_type) == FAILURE) {
 		return;
 	}
 
@@ -1528,176 +1667,183 @@ ZEND_FUNCTION(trigger_error)
 }
 /* }}} */
 
-
-/* {{{ proto string set_error_handler(string error_handler [, int error_types])
+/* {{{ proto string set_error_handler(callable error_handler [, int error_types])
    Sets a user-defined error handler function.  Returns the previously defined error handler, or false on error */
 ZEND_FUNCTION(set_error_handler)
 {
 	zval *error_handler;
-	char *error_handler_name = NULL;
-	long error_type = E_ALL;
+	zend_string *error_handler_name = NULL;
+	zend_long error_type = E_ALL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &error_handler, &error_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|l", &error_handler, &error_type) == FAILURE) {
 		return;
 	}
 
 	if (Z_TYPE_P(error_handler) != IS_NULL) { /* NULL == unset */
-		if (!zend_is_callable(error_handler, 0, &error_handler_name TSRMLS_CC)) {
+		if (!zend_is_callable(error_handler, 0, &error_handler_name)) {
 			zend_error(E_WARNING, "%s() expects the argument (%s) to be a valid callback",
-					   get_active_function_name(TSRMLS_C), error_handler_name?error_handler_name:"unknown");
-			efree(error_handler_name);
+					   get_active_function_name(), error_handler_name?ZSTR_VAL(error_handler_name):"unknown");
+			zend_string_release(error_handler_name);
 			return;
 		}
-		efree(error_handler_name);
+		zend_string_release(error_handler_name);
 	}
 
-	if (EG(user_error_handler)) {
-		RETVAL_ZVAL(EG(user_error_handler), 1, 0);
+	if (Z_TYPE(EG(user_error_handler)) != IS_UNDEF) {
+		ZVAL_COPY(return_value, &EG(user_error_handler));
 
-		zend_stack_push(&EG(user_error_handlers_error_reporting), &EG(user_error_handler_error_reporting), sizeof(EG(user_error_handler_error_reporting)));
-		zend_ptr_stack_push(&EG(user_error_handlers), EG(user_error_handler));
+		zend_stack_push(&EG(user_error_handlers_error_reporting), &EG(user_error_handler_error_reporting));
+		zend_stack_push(&EG(user_error_handlers), &EG(user_error_handler));
 	}
 
 	if (Z_TYPE_P(error_handler) == IS_NULL) { /* unset user-defined handler */
-		EG(user_error_handler) = NULL;
+		ZVAL_UNDEF(&EG(user_error_handler));
 		return;
 	}
 
-	ALLOC_ZVAL(EG(user_error_handler));
-	MAKE_COPY_ZVAL(&error_handler, EG(user_error_handler));
+	ZVAL_COPY(&EG(user_error_handler), error_handler);
 	EG(user_error_handler_error_reporting) = (int)error_type;
 }
 /* }}} */
-
 
 /* {{{ proto void restore_error_handler(void)
    Restores the previously defined error handler function */
 ZEND_FUNCTION(restore_error_handler)
 {
-	if (EG(user_error_handler)) {
-		zval *zeh = EG(user_error_handler);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
-		EG(user_error_handler) = NULL;
+	if (Z_TYPE(EG(user_error_handler)) != IS_UNDEF) {
+		zval zeh;
+
+		ZVAL_COPY_VALUE(&zeh, &EG(user_error_handler));
+		ZVAL_UNDEF(&EG(user_error_handler));
 		zval_ptr_dtor(&zeh);
 	}
 
-	if (zend_ptr_stack_num_elements(&EG(user_error_handlers))==0) {
-		EG(user_error_handler) = NULL;
+	if (zend_stack_is_empty(&EG(user_error_handlers))) {
+		ZVAL_UNDEF(&EG(user_error_handler));
 	} else {
+		zval *tmp;
 		EG(user_error_handler_error_reporting) = zend_stack_int_top(&EG(user_error_handlers_error_reporting));
 		zend_stack_del_top(&EG(user_error_handlers_error_reporting));
-		EG(user_error_handler) = zend_ptr_stack_pop(&EG(user_error_handlers));
+		tmp = zend_stack_top(&EG(user_error_handlers));
+		ZVAL_COPY_VALUE(&EG(user_error_handler), tmp);
+		zend_stack_del_top(&EG(user_error_handlers));
 	}
 	RETURN_TRUE;
 }
 /* }}} */
 
-
-/* {{{ proto string set_exception_handler(callable exception_handler)
-   Sets a user-defined exception handler function.  Returns the previously defined exception handler, or false on error */
+/* {{{ proto mixed set_exception_handler(callable exception_handler)
+   Sets a user-defined exception handler function. Returns the previously defined exception handler, or false on error */
 ZEND_FUNCTION(set_exception_handler)
 {
 	zval *exception_handler;
-	char *exception_handler_name = NULL;
+	zend_string *exception_handler_name = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &exception_handler) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &exception_handler) == FAILURE) {
 		return;
 	}
 
 	if (Z_TYPE_P(exception_handler) != IS_NULL) { /* NULL == unset */
-		if (!zend_is_callable(exception_handler, 0, &exception_handler_name TSRMLS_CC)) {
+		if (!zend_is_callable(exception_handler, 0, &exception_handler_name)) {
 			zend_error(E_WARNING, "%s() expects the argument (%s) to be a valid callback",
-					   get_active_function_name(TSRMLS_C), exception_handler_name?exception_handler_name:"unknown");
-			efree(exception_handler_name);
+					   get_active_function_name(), exception_handler_name?ZSTR_VAL(exception_handler_name):"unknown");
+			zend_string_release(exception_handler_name);
 			return;
 		}
-		efree(exception_handler_name);
+		zend_string_release(exception_handler_name);
 	}
 
-	if (EG(user_exception_handler)) {
-		RETVAL_ZVAL(EG(user_exception_handler), 1, 0);
+	if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
+		ZVAL_COPY(return_value, &EG(user_exception_handler));
 
-		zend_ptr_stack_push(&EG(user_exception_handlers), EG(user_exception_handler));
+		zend_stack_push(&EG(user_exception_handlers), &EG(user_exception_handler));
 	}
 
 	if (Z_TYPE_P(exception_handler) == IS_NULL) { /* unset user-defined handler */
-		EG(user_exception_handler) = NULL;
+		ZVAL_UNDEF(&EG(user_exception_handler));
 		return;
 	}
 
-	ALLOC_ZVAL(EG(user_exception_handler));
-	MAKE_COPY_ZVAL(&exception_handler, EG(user_exception_handler))
+	ZVAL_COPY(&EG(user_exception_handler), exception_handler);
 }
 /* }}} */
-
 
 /* {{{ proto void restore_exception_handler(void)
    Restores the previously defined exception handler function */
 ZEND_FUNCTION(restore_exception_handler)
 {
-	if (EG(user_exception_handler)) {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
 		zval_ptr_dtor(&EG(user_exception_handler));
 	}
-	if (zend_ptr_stack_num_elements(&EG(user_exception_handlers))==0) {
-		EG(user_exception_handler) = NULL;
+	if (zend_stack_is_empty(&EG(user_exception_handlers))) {
+		ZVAL_UNDEF(&EG(user_exception_handler));
 	} else {
-		EG(user_exception_handler) = zend_ptr_stack_pop(&EG(user_exception_handlers));
+		zval *tmp = zend_stack_top(&EG(user_exception_handlers));
+		ZVAL_COPY_VALUE(&EG(user_exception_handler), tmp);
+		zend_stack_del_top(&EG(user_exception_handlers));
 	}
 	RETURN_TRUE;
 }
 /* }}} */
 
-static int copy_class_or_interface_name(zend_class_entry **pce TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+static int copy_class_or_interface_name(zval *el, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
+	zend_class_entry *ce = (zend_class_entry *)Z_PTR_P(el);
 	zval *array = va_arg(args, zval *);
-	zend_uint mask = va_arg(args, zend_uint);
-	zend_uint comply = va_arg(args, zend_uint);
-	zend_uint comply_mask = (comply)? mask:0;
-	zend_class_entry *ce  = *pce;
+	uint32_t mask = va_arg(args, uint32_t);
+	uint32_t comply = va_arg(args, uint32_t);
+	uint32_t comply_mask = (comply)? mask:0;
 
-	if ((hash_key->nKeyLength==0 || hash_key->arKey[0]!=0)
+	if ((hash_key->key && ZSTR_VAL(hash_key->key)[0] != 0)
 		&& (comply_mask == (ce->ce_flags & mask))) {
-		if (ce->refcount > 1 && 
-		    (ce->name_length != hash_key->nKeyLength - 1 || 
-		     !same_name(hash_key->arKey, ce->name, ce->name_length))) {
-			add_next_index_stringl(array, hash_key->arKey, hash_key->nKeyLength - 1, 1);
+		if (ce->refcount > 1 &&
+		    !same_name(hash_key->key, ce->name)) {
+			add_next_index_str(array, zend_string_copy(hash_key->key));
 		} else {
-			add_next_index_stringl(array, ce->name, ce->name_length, 1);
+			add_next_index_str(array, zend_string_copy(ce->name));
 		}
 	}
 	return ZEND_HASH_APPLY_KEEP;
 }
+/* }}} */
 
 /* {{{ proto array get_declared_traits()
    Returns an array of all declared traits. */
 ZEND_FUNCTION(get_declared_traits)
 {
-	zend_uint mask = ZEND_ACC_TRAIT;
-	zend_uint comply = 1;
+	uint32_t mask = ZEND_ACC_TRAIT;
+	uint32_t comply = 1;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(EG(class_table) TSRMLS_CC, (apply_func_args_t) copy_class_or_interface_name, 3, return_value, mask, comply);
+	zend_hash_apply_with_arguments(EG(class_table), copy_class_or_interface_name, 3, return_value, mask, comply);
 }
 /* }}} */
-
 
 /* {{{ proto array get_declared_classes()
    Returns an array of all declared classes. */
 ZEND_FUNCTION(get_declared_classes)
 {
-	zend_uint mask = ZEND_ACC_INTERFACE | (ZEND_ACC_TRAIT & ~ZEND_ACC_EXPLICIT_ABSTRACT_CLASS);
-	zend_uint comply = 0;
+	uint32_t mask = ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT;
+	uint32_t comply = 0;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(EG(class_table) TSRMLS_CC, (apply_func_args_t) copy_class_or_interface_name, 3, return_value, mask, comply);
+	zend_hash_apply_with_arguments(EG(class_table), copy_class_or_interface_name, 3, return_value, mask, comply);
 }
 /* }}} */
 
@@ -1705,103 +1851,95 @@ ZEND_FUNCTION(get_declared_classes)
    Returns an array of all declared interfaces. */
 ZEND_FUNCTION(get_declared_interfaces)
 {
-	zend_uint mask = ZEND_ACC_INTERFACE;
-	zend_uint comply = 1;
+	uint32_t mask = ZEND_ACC_INTERFACE;
+	uint32_t comply = 1;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(EG(class_table) TSRMLS_CC, (apply_func_args_t) copy_class_or_interface_name, 3, return_value, mask, comply);
+	zend_hash_apply_with_arguments(EG(class_table), copy_class_or_interface_name, 3, return_value, mask, comply);
 }
 /* }}} */
 
-
-static int copy_function_name(zend_function *func TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+static int copy_function_name(zval *zv, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
+	zend_function *func = Z_PTR_P(zv);
 	zval *internal_ar = va_arg(args, zval *),
 	     *user_ar     = va_arg(args, zval *);
+	zend_bool *exclude_disabled = va_arg(args, zend_bool *);
 
-	if (hash_key->nKeyLength == 0 || hash_key->arKey[0] == 0) {
+	if (hash_key->key == NULL || ZSTR_VAL(hash_key->key)[0] == 0) {
 		return 0;
 	}
 
 	if (func->type == ZEND_INTERNAL_FUNCTION) {
-		add_next_index_stringl(internal_ar, hash_key->arKey, hash_key->nKeyLength-1, 1);
+		char *disable_functions = INI_STR("disable_functions");
+
+		if ((*exclude_disabled == 1) && (disable_functions != NULL)) {
+			if (strstr(disable_functions, func->common.function_name->val) == NULL) {
+				add_next_index_str(internal_ar, zend_string_copy(hash_key->key));
+			}
+		} else {
+			add_next_index_str(internal_ar, zend_string_copy(hash_key->key));
+		}
 	} else if (func->type == ZEND_USER_FUNCTION) {
-		add_next_index_stringl(user_ar, hash_key->arKey, hash_key->nKeyLength-1, 1);
+		add_next_index_str(user_ar, zend_string_copy(hash_key->key));
 	}
 
 	return 0;
 }
-
+/* }}} */
 
 /* {{{ proto array get_defined_functions(void)
    Returns an array of all defined functions */
 ZEND_FUNCTION(get_defined_functions)
 {
-	zval *internal;
-	zval *user;
+	zval internal, user;
+	zend_bool exclude_disabled = 0;
 
-	if (zend_parse_parameters_none() == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &exclude_disabled) == FAILURE) {
 		return;
 	}
 
-	MAKE_STD_ZVAL(internal);
-	MAKE_STD_ZVAL(user);
-
-	array_init(internal);
-	array_init(user);
+	array_init(&internal);
+	array_init(&user);
 	array_init(return_value);
 
-	zend_hash_apply_with_arguments(EG(function_table) TSRMLS_CC, (apply_func_args_t) copy_function_name, 2, internal, user);
+	zend_hash_apply_with_arguments(EG(function_table), copy_function_name, 3, &internal, &user, &exclude_disabled);
 
-	if (zend_hash_add(Z_ARRVAL_P(return_value), "internal", sizeof("internal"), (void **)&internal, sizeof(zval *), NULL) == FAILURE) {
-		zval_ptr_dtor(&internal);
-		zval_ptr_dtor(&user);
-		zval_dtor(return_value);
-		zend_error(E_WARNING, "Cannot add internal functions to return value from get_defined_functions()");
-		RETURN_FALSE;
-	}
-
-	if (zend_hash_add(Z_ARRVAL_P(return_value), "user", sizeof("user"), (void **)&user, sizeof(zval *), NULL) == FAILURE) {
-		zval_ptr_dtor(&user);
-		zval_dtor(return_value);
-		zend_error(E_WARNING, "Cannot add user functions to return value from get_defined_functions()");
-		RETURN_FALSE;
-	}
+	zend_hash_str_add_new(Z_ARRVAL_P(return_value), "internal", sizeof("internal")-1, &internal);
+	zend_hash_str_add_new(Z_ARRVAL_P(return_value), "user", sizeof("user")-1, &user);
 }
 /* }}} */
-
 
 /* {{{ proto array get_defined_vars(void)
    Returns an associative array of names and values of all currently defined variable names (variables in the current scope) */
 ZEND_FUNCTION(get_defined_vars)
 {
-	if (!EG(active_symbol_table)) {
-		zend_rebuild_symbol_table(TSRMLS_C);
+	zend_array *symbol_table = zend_rebuild_symbol_table();
+
+	if (UNEXPECTED(symbol_table == NULL)) {
+		return;
 	}
 
-	array_init_size(return_value, zend_hash_num_elements(EG(active_symbol_table)));
-
-	zend_hash_copy(Z_ARRVAL_P(return_value), EG(active_symbol_table),
-					(copy_ctor_func_t)zval_add_ref, NULL, sizeof(zval *));
+	RETURN_ARR(zend_array_dup(symbol_table));
 }
 /* }}} */
-
 
 #define LAMBDA_TEMP_FUNCNAME	"__lambda_func"
 /* {{{ proto string create_function(string args, string code)
    Creates an anonymous function, and returns its name (funny, eh?) */
 ZEND_FUNCTION(create_function)
 {
-	char *eval_code, *function_name, *function_args, *function_code;
-	int eval_code_length, function_name_length, function_args_len, function_code_len;
+    zend_string *function_name;
+	char *eval_code, *function_args, *function_code;
+	size_t eval_code_length, function_args_len, function_code_len;
 	int retval;
 	char *eval_name;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &function_args, &function_args_len, &function_code, &function_code_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &function_args, &function_args_len, &function_code, &function_code_len) == FAILURE) {
 		return;
 	}
 
@@ -1826,50 +1964,62 @@ ZEND_FUNCTION(create_function)
 	eval_code[eval_code_length++] = '}';
 	eval_code[eval_code_length] = '\0';
 
-	eval_name = zend_make_compiled_string_description("runtime-created function" TSRMLS_CC);
-	retval = zend_eval_stringl(eval_code, eval_code_length, NULL, eval_name TSRMLS_CC);
+	eval_name = zend_make_compiled_string_description("runtime-created function");
+	retval = zend_eval_stringl(eval_code, eval_code_length, NULL, eval_name);
 	efree(eval_code);
 	efree(eval_name);
 
 	if (retval==SUCCESS) {
-		zend_function new_function, *func;
+		zend_op_array *func;
+		HashTable *static_variables;
 
-		if (zend_hash_find(EG(function_table), LAMBDA_TEMP_FUNCNAME, sizeof(LAMBDA_TEMP_FUNCNAME), (void **) &func)==FAILURE) {
-			zend_error(E_ERROR, "Unexpected inconsistency in create_function()");
+		func = zend_hash_str_find_ptr(EG(function_table), LAMBDA_TEMP_FUNCNAME, sizeof(LAMBDA_TEMP_FUNCNAME)-1);
+		if (!func) {
+			zend_error_noreturn(E_CORE_ERROR, "Unexpected inconsistency in create_function()");
 			RETURN_FALSE;
 		}
-		new_function = *func;
-		function_add_ref(&new_function);
+		if (func->refcount) {
+			(*func->refcount)++;
+		}
+		static_variables = func->static_variables;
+		func->static_variables = NULL;
+		zend_hash_str_del(EG(function_table), LAMBDA_TEMP_FUNCNAME, sizeof(LAMBDA_TEMP_FUNCNAME)-1);
+		func->static_variables = static_variables;
 
-		function_name = (char *) emalloc(sizeof("0lambda_")+MAX_LENGTH_OF_LONG);
-		function_name[0] = '\0';
+		function_name = zend_string_alloc(sizeof("0lambda_")+MAX_LENGTH_OF_LONG, 0);
+		ZSTR_VAL(function_name)[0] = '\0';
 
 		do {
-			function_name_length = 1 + snprintf(function_name + 1, sizeof("lambda_")+MAX_LENGTH_OF_LONG, "lambda_%d", ++EG(lambda_count));
-		} while (zend_hash_add(EG(function_table), function_name, function_name_length+1, &new_function, sizeof(zend_function), NULL)==FAILURE);
-		zend_hash_del(EG(function_table), LAMBDA_TEMP_FUNCNAME, sizeof(LAMBDA_TEMP_FUNCNAME));
-		RETURN_STRINGL(function_name, function_name_length, 0);
+			ZSTR_LEN(function_name) = snprintf(ZSTR_VAL(function_name) + 1, sizeof("lambda_")+MAX_LENGTH_OF_LONG, "lambda_%d", ++EG(lambda_count)) + 1;
+		} while (zend_hash_add_ptr(EG(function_table), function_name, func) == NULL);
+		RETURN_NEW_STR(function_name);
 	} else {
-		zend_hash_del(EG(function_table), LAMBDA_TEMP_FUNCNAME, sizeof(LAMBDA_TEMP_FUNCNAME));
+		zend_hash_str_del(EG(function_table), LAMBDA_TEMP_FUNCNAME, sizeof(LAMBDA_TEMP_FUNCNAME)-1);
 		RETURN_FALSE;
 	}
 }
 /* }}} */
-
 
 #if ZEND_DEBUG
 ZEND_FUNCTION(zend_test_func)
 {
 	zval *arg1, *arg2;
 
-	zend_get_parameters(ht, 2, &arg1, &arg2);
+	zend_get_parameters(ZEND_NUM_ARGS(), 2, &arg1, &arg2);
+}
+
+ZEND_FUNCTION(zend_test_func2)
+{
+	zval *arg1, *arg2;
+
+	zend_get_parameters(ZEND_NUM_ARGS(), 2, &arg1, &arg2);
 }
 
 
 #ifdef ZTS
 ZEND_FUNCTION(zend_thread_id)
 {
-	RETURN_LONG((long)tsrm_thread_id());
+	RETURN_LONG((zend_long)tsrm_thread_id());
 }
 #endif
 #endif
@@ -1881,282 +2031,379 @@ ZEND_FUNCTION(get_resource_type)
 	const char *resource_type;
 	zval *z_resource_type;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &z_resource_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &z_resource_type) == FAILURE) {
 		return;
 	}
 
-	resource_type = zend_rsrc_list_get_rsrc_type(Z_LVAL_P(z_resource_type) TSRMLS_CC);
+	resource_type = zend_rsrc_list_get_rsrc_type(Z_RES_P(z_resource_type));
 	if (resource_type) {
-		RETURN_STRING(resource_type, 1);
+		RETURN_STRING(resource_type);
 	} else {
-		RETURN_STRING("Unknown", 1);
+		RETURN_STRING("Unknown");
 	}
 }
 /* }}} */
 
+/* {{{ proto array get_resources([string resouce_type])
+   Get an array with all active resources */
+ZEND_FUNCTION(get_resources)
+{
+	zend_string *type = NULL;
+	zend_string *key;
+	zend_ulong index;
+	zval *val;
 
-static int add_extension_info(zend_module_entry *module, void *arg TSRMLS_DC)
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S", &type) == FAILURE) {
+		return;
+	}
+
+	if (!type) {
+		array_init(return_value);
+		ZEND_HASH_FOREACH_KEY_VAL(&EG(regular_list), index, key, val) {
+			if (!key) {
+				Z_ADDREF_P(val);
+				zend_hash_index_add_new(Z_ARRVAL_P(return_value), index, val);
+			}
+		} ZEND_HASH_FOREACH_END();
+	} else if (zend_string_equals_literal(type, "Unknown")) {
+		array_init(return_value);
+		ZEND_HASH_FOREACH_KEY_VAL(&EG(regular_list), index, key, val) {
+			if (!key && Z_RES_TYPE_P(val) <= 0) {
+				Z_ADDREF_P(val);
+				zend_hash_index_add_new(Z_ARRVAL_P(return_value), index, val);
+			}
+		} ZEND_HASH_FOREACH_END();
+	} else {
+		int id = zend_fetch_list_dtor_id(ZSTR_VAL(type));
+
+		if (id <= 0) {
+			zend_error(E_WARNING, "get_resources():  Unknown resource type '%s'", ZSTR_VAL(type));
+			RETURN_FALSE;
+		}
+
+		array_init(return_value);
+		ZEND_HASH_FOREACH_KEY_VAL(&EG(regular_list), index, key, val) {
+			if (!key && Z_RES_TYPE_P(val) == id) {
+				Z_ADDREF_P(val);
+				zend_hash_index_add_new(Z_ARRVAL_P(return_value), index, val);
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+}
+/* }}} */
+
+static int add_extension_info(zval *item, void *arg) /* {{{ */
 {
 	zval *name_array = (zval *)arg;
-	add_next_index_string(name_array, module->name, 1);
+	zend_module_entry *module = (zend_module_entry*)Z_PTR_P(item);
+	add_next_index_string(name_array, module->name);
 	return 0;
 }
+/* }}} */
 
-static int add_zendext_info(zend_extension *ext, void *arg TSRMLS_DC)
+static int add_zendext_info(zend_extension *ext, void *arg) /* {{{ */
 {
 	zval *name_array = (zval *)arg;
-	add_next_index_string(name_array, ext->name, 1);
+	add_next_index_string(name_array, ext->name);
 	return 0;
 }
+/* }}} */
 
-static int add_constant_info(zend_constant *constant, void *arg TSRMLS_DC)
+static int add_constant_info(zval *item, void *arg) /* {{{ */
 {
 	zval *name_array = (zval *)arg;
-	zval *const_val;
+	zend_constant *constant = (zend_constant*)Z_PTR_P(item);
+	zval const_val;
 
 	if (!constant->name) {
 		/* skip special constants */
 		return 0;
 	}
 
-	MAKE_STD_ZVAL(const_val);
-	*const_val = constant->value;
-	zval_copy_ctor(const_val);
-	INIT_PZVAL(const_val);
-	add_assoc_zval_ex(name_array, constant->name, constant->name_len, const_val);
+	ZVAL_DUP(&const_val, &constant->value);
+	zend_hash_add_new(Z_ARRVAL_P(name_array), constant->name, &const_val);
 	return 0;
 }
+/* }}} */
 
-
-/* {{{ proto array get_loaded_extensions([bool zend_extensions]) U
+/* {{{ proto array get_loaded_extensions([bool zend_extensions])
    Return an array containing names of loaded extensions */
 ZEND_FUNCTION(get_loaded_extensions)
 {
 	zend_bool zendext = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &zendext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &zendext) == FAILURE) {
 		return;
 	}
 
 	array_init(return_value);
 
 	if (zendext) {
-		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) add_zendext_info, return_value TSRMLS_CC);
+		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t)add_zendext_info, return_value);
 	} else {
-		zend_hash_apply_with_argument(&module_registry, (apply_func_arg_t) add_extension_info, return_value TSRMLS_CC);
+		zend_hash_apply_with_argument(&module_registry, add_extension_info, return_value);
 	}
 }
 /* }}} */
-
 
 /* {{{ proto array get_defined_constants([bool categorize])
    Return an array containing the names and values of all defined constants */
 ZEND_FUNCTION(get_defined_constants)
 {
 	zend_bool categorize = 0;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &categorize) == FAILURE) {
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &categorize) == FAILURE) {
 		return;
 	}
 
 	array_init(return_value);
 
 	if (categorize) {
-		HashPosition pos;
 		zend_constant *val;
 		int module_number;
-		zval **modules;
+		zval *modules, const_val;
 		char **module_names;
 		zend_module_entry *module;
 		int i = 1;
 
-		modules = ecalloc(zend_hash_num_elements(&module_registry) + 2, sizeof(zval *));
+		modules = ecalloc(zend_hash_num_elements(&module_registry) + 2, sizeof(zval));
 		module_names = emalloc((zend_hash_num_elements(&module_registry) + 2) * sizeof(char *));
 
 		module_names[0] = "internal";
-		zend_hash_internal_pointer_reset_ex(&module_registry, &pos);
-		while (zend_hash_get_current_data_ex(&module_registry, (void *) &module, &pos) != FAILURE) {
+		ZEND_HASH_FOREACH_PTR(&module_registry, module) {
 			module_names[module->module_number] = (char *)module->name;
 			i++;
-			zend_hash_move_forward_ex(&module_registry, &pos);
-		}
+		} ZEND_HASH_FOREACH_END();
 		module_names[i] = "user";
 
-		zend_hash_internal_pointer_reset_ex(EG(zend_constants), &pos);
-		while (zend_hash_get_current_data_ex(EG(zend_constants), (void **) &val, &pos) != FAILURE) {
-			zval *const_val;
-
+		ZEND_HASH_FOREACH_PTR(EG(zend_constants), val) {
 			if (!val->name) {
 				/* skip special constants */
-				goto next_constant;
+				continue;
 			}
 
 			if (val->module_number == PHP_USER_CONSTANT) {
 				module_number = i;
 			} else if (val->module_number > i || val->module_number < 0) {
 				/* should not happen */
-				goto next_constant;
+				continue;
 			} else {
 				module_number = val->module_number;
 			}
 
-			if (!modules[module_number]) {
-				MAKE_STD_ZVAL(modules[module_number]);
-				array_init(modules[module_number]);
-				add_assoc_zval(return_value, module_names[module_number], modules[module_number]);
+			if (Z_TYPE(modules[module_number]) == IS_UNDEF) {
+				array_init(&modules[module_number]);
+				add_assoc_zval(return_value, module_names[module_number], &modules[module_number]);
 			}
 
-			MAKE_STD_ZVAL(const_val);
-			*const_val = val->value;
-			zval_copy_ctor(const_val);
-			INIT_PZVAL(const_val);
+			ZVAL_DUP(&const_val, &val->value);
+			zend_hash_add_new(Z_ARRVAL(modules[module_number]), val->name, &const_val);
+		} ZEND_HASH_FOREACH_END();
 
-			add_assoc_zval_ex(modules[module_number], val->name, val->name_len, const_val);
-next_constant:
-			zend_hash_move_forward_ex(EG(zend_constants), &pos);
-		}
 		efree(module_names);
 		efree(modules);
 	} else {
-		zend_hash_apply_with_argument(EG(zend_constants), (apply_func_arg_t) add_constant_info, return_value TSRMLS_CC);
+		zend_hash_apply_with_argument(EG(zend_constants), add_constant_info, return_value);
 	}
 }
 /* }}} */
 
-
-static zval *debug_backtrace_get_args(void **curpos TSRMLS_DC)
+static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /* {{{ */
 {
-	void **p = curpos;
-	zval *arg_array, **arg;
-	int arg_count = (int)(zend_uintptr_t) *p;
+	uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
 
-	MAKE_STD_ZVAL(arg_array);
-	array_init_size(arg_array, arg_count);
-	p -= arg_count;
+	array_init_size(arg_array, num_args);
+	if (num_args) {
+		uint32_t i = 0;
+		uint32_t n = 0;
+		zval *p = ZEND_CALL_ARG(call, 1);
 
-	while (--arg_count >= 0) {
-		arg = (zval **) p++;
-		if (*arg) {
-			if (Z_TYPE_PP(arg) != IS_OBJECT) {
-				SEPARATE_ZVAL_TO_MAKE_IS_REF(arg);
+		zend_hash_real_init(Z_ARRVAL_P(arg_array), 1);
+		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(arg_array)) {
+			if (call->func->type == ZEND_USER_FUNCTION) {
+				uint32_t first_extra_arg = MIN(num_args, call->func->op_array.num_args);
+
+				if (UNEXPECTED(call->symbol_table)) {
+					/* In case of attached symbol_table, values on stack may be invalid
+					 * and we have to access them through symbol_table
+					 * See: https://bugs.php.net/bug.php?id=73156
+					 */
+					zend_string *arg_name;
+					zval *arg;
+
+					while (i < first_extra_arg) {
+						arg_name = call->func->op_array.vars[i];
+						arg = zend_hash_find_ind(call->symbol_table, arg_name);
+						if (arg) {
+							if (Z_OPT_REFCOUNTED_P(arg)) {
+								Z_ADDREF_P(arg);
+							}
+							n++;
+							ZEND_HASH_FILL_ADD(arg);
+						} else {
+							zval tmp;
+							ZVAL_UNDEF(&tmp);
+							ZEND_HASH_FILL_ADD(&tmp);
+						}
+						i++;
+					}
+				} else {
+					while (i < first_extra_arg) {
+						if (EXPECTED(Z_TYPE_INFO_P(p) != IS_UNDEF)) {
+							if (Z_OPT_REFCOUNTED_P(p)) {
+								Z_ADDREF_P(p);
+							}
+							n++;
+						}
+						ZEND_HASH_FILL_ADD(p);
+						p++;
+						i++;
+					}
+				}
+				p = ZEND_CALL_VAR_NUM(call, call->func->op_array.last_var + call->func->op_array.T);
 			}
-			Z_ADDREF_PP(arg);
-			add_next_index_zval(arg_array, *arg);
-		} else {
-			add_next_index_null(arg_array);
-		}
+
+			while (i < num_args) {
+				if (EXPECTED(Z_TYPE_INFO_P(p) != IS_UNDEF)) {
+					if (Z_OPT_REFCOUNTED_P(p)) {
+						Z_ADDREF_P(p);
+					}
+					n++;
+				}
+				ZEND_HASH_FILL_ADD(p);
+				p++;
+				i++;
+			}
+		} ZEND_HASH_FILL_END();
+		Z_ARRVAL_P(arg_array)->nNumOfElements = n;
 	}
-
-	return arg_array;
 }
+/* }}} */
 
-void debug_print_backtrace_args(zval *arg_array TSRMLS_DC)
+void debug_print_backtrace_args(zval *arg_array) /* {{{ */
 {
-	zval **tmp;
-	HashPosition iterator;
+	zval *tmp;
 	int i = 0;
 
-	zend_hash_internal_pointer_reset_ex(arg_array->value.ht, &iterator);
-	while (zend_hash_get_current_data_ex(arg_array->value.ht, (void **) &tmp, &iterator) == SUCCESS) {
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(arg_array), tmp) {
 		if (i++) {
 			ZEND_PUTS(", ");
 		}
-		zend_print_flat_zval_r(*tmp TSRMLS_CC);
-		zend_hash_move_forward_ex(arg_array->value.ht, &iterator);
-	}
+		zend_print_flat_zval_r(tmp);
+	} ZEND_HASH_FOREACH_END();
 }
+/* }}} */
 
 /* {{{ proto void debug_print_backtrace([int options[, int limit]]) */
 ZEND_FUNCTION(debug_print_backtrace)
 {
-	zend_execute_data *ptr, *skip;
+	zend_execute_data *call, *ptr, *skip;
+	zend_object *object;
 	int lineno, frameno = 0;
+	zend_function *func;
 	const char *function_name;
 	const char *filename;
-	const char *class_name = NULL;
+	zend_string *class_name = NULL;
 	char *call_type;
 	const char *include_filename = NULL;
-	zval *arg_array = NULL;
+	zval arg_array;
 	int indent = 0;
-	long options = 0;
-	long limit = 0;
+	zend_long options = 0;
+	zend_long limit = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ll", &options, &limit) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ll", &options, &limit) == FAILURE) {
 		return;
 	}
 
-	ptr = EG(current_execute_data);
+	ZVAL_UNDEF(&arg_array);
+	ptr = EX(prev_execute_data);
 
 	/* skip debug_backtrace() */
+	call = ptr;
 	ptr = ptr->prev_execute_data;
 
 	while (ptr && (limit == 0 || frameno < limit)) {
-		const char *free_class_name = NULL;
-
 		frameno++;
-		class_name = call_type = NULL;   
-		arg_array = NULL;
+		class_name = NULL;
+		call_type = NULL;
+		ZVAL_UNDEF(&arg_array);
+
+		ptr = zend_generator_check_placeholder_frame(ptr);
 
 		skip = ptr;
 		/* skip internal handler */
-		if (!skip->op_array &&
+		if ((!skip->func || !ZEND_USER_CODE(skip->func->common.type)) &&
 		    skip->prev_execute_data &&
-		    skip->prev_execute_data->opline &&
+		    skip->prev_execute_data->func &&
+		    ZEND_USER_CODE(skip->prev_execute_data->func->common.type) &&
 		    skip->prev_execute_data->opline->opcode != ZEND_DO_FCALL &&
+		    skip->prev_execute_data->opline->opcode != ZEND_DO_ICALL &&
+		    skip->prev_execute_data->opline->opcode != ZEND_DO_UCALL &&
 		    skip->prev_execute_data->opline->opcode != ZEND_DO_FCALL_BY_NAME &&
 		    skip->prev_execute_data->opline->opcode != ZEND_INCLUDE_OR_EVAL) {
 			skip = skip->prev_execute_data;
 		}
 
-		if (skip->op_array) {
-			filename = skip->op_array->filename;
-			lineno = skip->opline->lineno;
+		if (skip->func && ZEND_USER_CODE(skip->func->common.type)) {
+			filename = ZSTR_VAL(skip->func->op_array.filename);
+			if (skip->opline->opcode == ZEND_HANDLE_EXCEPTION) {
+				if (EG(opline_before_exception)) {
+					lineno = EG(opline_before_exception)->lineno;
+				} else {
+					lineno = skip->func->op_array.line_end;
+				}
+			} else {
+				lineno = skip->opline->lineno;
+			}
 		} else {
 			filename = NULL;
 			lineno = 0;
 		}
 
-		function_name = (ptr->function_state.function->common.scope &&
-			ptr->function_state.function->common.scope->trait_aliases) ?
-				zend_resolve_method_name(
-					ptr->object ?
-						Z_OBJCE_P(ptr->object) : 
-						ptr->function_state.function->common.scope,
-					ptr->function_state.function) :
-				ptr->function_state.function->common.function_name;
+		/* $this may be passed into regular internal functions */
+		object = Z_OBJ(call->This);
+
+		if (call->func) {
+			func = call->func;
+			function_name = (func->common.scope &&
+			                 func->common.scope->trait_aliases) ?
+				ZSTR_VAL(zend_resolve_method_name(
+					(object ? object->ce : func->common.scope), func)) :
+				(func->common.function_name ?
+					ZSTR_VAL(func->common.function_name) : NULL);
+		} else {
+			func = NULL;
+			function_name = NULL;
+		}
 
 		if (function_name) {
-			if (ptr->object) {
-				if (ptr->function_state.function->common.scope) {
-					class_name = ptr->function_state.function->common.scope->name;
+			if (object) {
+				if (func->common.scope) {
+					class_name = func->common.scope->name;
+				} else if (object->handlers->get_class_name == std_object_handlers.get_class_name) {
+					class_name = object->ce->name;
 				} else {
-					zend_uint class_name_len;
-					int dup;
-
-					dup = zend_get_object_classname(ptr->object, &class_name, &class_name_len TSRMLS_CC);
-					if(!dup) {
-						free_class_name = class_name;
-					}
+					class_name = object->handlers->get_class_name(object);
 				}
 
 				call_type = "->";
-			} else if (ptr->function_state.function->common.scope) {
-				class_name = ptr->function_state.function->common.scope->name;
+			} else if (func->common.scope) {
+				class_name = func->common.scope->name;
 				call_type = "::";
 			} else {
 				class_name = NULL;
 				call_type = NULL;
 			}
-			if ((! ptr->opline) || ((ptr->opline->opcode == ZEND_DO_FCALL_BY_NAME) || (ptr->opline->opcode == ZEND_DO_FCALL))) {
-				if (ptr->function_state.arguments && (options & DEBUG_BACKTRACE_IGNORE_ARGS) == 0) {
-					arg_array = debug_backtrace_get_args(ptr->function_state.arguments TSRMLS_CC);
+			if (func->type != ZEND_EVAL_CODE) {
+				if ((options & DEBUG_BACKTRACE_IGNORE_ARGS) == 0) {
+					debug_backtrace_get_args(call, &arg_array);
 				}
 			}
 		} else {
 			/* i know this is kinda ugly, but i'm trying to avoid extra cycles in the main execution loop */
 			zend_bool build_filename_arg = 1;
 
-			if (!ptr->opline || ptr->opline->opcode != ZEND_INCLUDE_OR_EVAL) {
+			if (!ptr->func || !ZEND_USER_CODE(ptr->func->common.type) || ptr->opline->opcode != ZEND_INCLUDE_OR_EVAL) {
 				/* can happen when calling eval from a custom sapi */
 				function_name = "unknown";
 				build_filename_arg = 0;
@@ -2179,45 +2426,52 @@ ZEND_FUNCTION(debug_print_backtrace)
 					function_name = "require_once";
 					break;
 				default:
-					/* this can actually happen if you use debug_backtrace() in your error_handler and 
+					/* this can actually happen if you use debug_backtrace() in your error_handler and
 					 * you're in the top-scope */
-					function_name = "unknown"; 
+					function_name = "unknown";
 					build_filename_arg = 0;
 					break;
 			}
 
 			if (build_filename_arg && include_filename) {
-				MAKE_STD_ZVAL(arg_array);
-				array_init(arg_array);
-				add_next_index_string(arg_array, (char*)include_filename, 1);
+				array_init(&arg_array);
+				add_next_index_string(&arg_array, (char*)include_filename);
 			}
 			call_type = NULL;
 		}
 		zend_printf("#%-2d ", indent);
 		if (class_name) {
-			ZEND_PUTS(class_name);
+			ZEND_PUTS(ZSTR_VAL(class_name));
 			ZEND_PUTS(call_type);
+			if (object
+			  && !func->common.scope
+			  && object->handlers->get_class_name != std_object_handlers.get_class_name) {
+				zend_string_release(class_name);
+			}
 		}
 		zend_printf("%s(", function_name);
-		if (arg_array) {
-			debug_print_backtrace_args(arg_array TSRMLS_CC);
+		if (Z_TYPE(arg_array) != IS_UNDEF) {
+			debug_print_backtrace_args(&arg_array);
 			zval_ptr_dtor(&arg_array);
 		}
 		if (filename) {
 			zend_printf(") called at [%s:%d]\n", filename, lineno);
 		} else {
+			zend_execute_data *prev_call = skip;
 			zend_execute_data *prev = skip->prev_execute_data;
 
 			while (prev) {
-				if (prev->function_state.function &&
-					prev->function_state.function->common.type != ZEND_USER_FUNCTION) {
+				if (prev_call &&
+				    prev_call->func &&
+					!ZEND_USER_CODE(prev_call->func->common.type)) {
 					prev = NULL;
 					break;
-				}				    
-				if (prev->op_array) {
-					zend_printf(") called at [%s:%d]\n", prev->op_array->filename, prev->opline->lineno);
+				}
+				if (prev->func && ZEND_USER_CODE(prev->func->common.type)) {
+					zend_printf(") called at [%s:%d]\n", ZSTR_VAL(prev->func->op_array.filename), prev->opline->lineno);
 					break;
 				}
+				prev_call = prev;
 				prev = prev->prev_execute_data;
 			}
 			if (!prev) {
@@ -2225,198 +2479,233 @@ ZEND_FUNCTION(debug_print_backtrace)
 			}
 		}
 		include_filename = filename;
+		call = skip;
 		ptr = skip->prev_execute_data;
 		++indent;
-		if (free_class_name) {
-			efree((char*)free_class_name);
-		}
 	}
 }
 
 /* }}} */
 
-ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int options, int limit TSRMLS_DC)
+ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int options, int limit) /* {{{ */
 {
-	zend_execute_data *ptr, *skip;
+	zend_execute_data *ptr, *skip, *call = NULL;
+	zend_object *object;
 	int lineno, frameno = 0;
-	const char *function_name;
-	const char *filename;
-	const char *class_name;
-	const char *include_filename = NULL;
-	zval *stack_frame;
-
-	ptr = EG(current_execute_data);
-
-	/* skip "new Exception()" */
-	if (ptr && (skip_last == 0) && ptr->opline && (ptr->opline->opcode == ZEND_NEW)) {
-		ptr = ptr->prev_execute_data;
-	}
-
-	/* skip debug_backtrace() */
-	if (skip_last-- && ptr) {
-		ptr = ptr->prev_execute_data;
-	}
+	zend_function *func;
+	zend_string *function_name;
+	zend_string *filename;
+	zend_string *include_filename = NULL;
+	zval stack_frame;
 
 	array_init(return_value);
 
+	if (!(ptr = EG(current_execute_data))) {
+		return;
+	}
+
+	if (!ptr->func || !ZEND_USER_CODE(ptr->func->common.type)) {
+		call = ptr;
+		ptr = ptr->prev_execute_data;
+	}
+
+	if (ptr) {
+		if (skip_last) {
+			/* skip debug_backtrace() */
+			call = ptr;
+			ptr = ptr->prev_execute_data;
+		} else {
+			/* skip "new Exception()" */
+			if (ptr->func && ZEND_USER_CODE(ptr->func->common.type) && (ptr->opline->opcode == ZEND_NEW)) {
+				call = ptr;
+				ptr = ptr->prev_execute_data;
+			}
+		}
+		if (!call) {
+			call = ptr;
+			ptr = ptr->prev_execute_data;
+		}
+	}
+
 	while (ptr && (limit == 0 || frameno < limit)) {
 		frameno++;
-		MAKE_STD_ZVAL(stack_frame);
-		array_init(stack_frame);
+		array_init(&stack_frame);
+
+		ptr = zend_generator_check_placeholder_frame(ptr);
 
 		skip = ptr;
 		/* skip internal handler */
-		if (!skip->op_array &&
+		if ((!skip->func || !ZEND_USER_CODE(skip->func->common.type)) &&
 		    skip->prev_execute_data &&
-		    skip->prev_execute_data->opline &&
+		    skip->prev_execute_data->func &&
+		    ZEND_USER_CODE(skip->prev_execute_data->func->common.type) &&
 		    skip->prev_execute_data->opline->opcode != ZEND_DO_FCALL &&
+		    skip->prev_execute_data->opline->opcode != ZEND_DO_ICALL &&
+		    skip->prev_execute_data->opline->opcode != ZEND_DO_UCALL &&
 		    skip->prev_execute_data->opline->opcode != ZEND_DO_FCALL_BY_NAME &&
 		    skip->prev_execute_data->opline->opcode != ZEND_INCLUDE_OR_EVAL) {
 			skip = skip->prev_execute_data;
 		}
 
-		if (skip->op_array) {
-			filename = skip->op_array->filename;
-			lineno = skip->opline->lineno;
-			add_assoc_string_ex(stack_frame, "file", sizeof("file"), (char*)filename, 1);
-			add_assoc_long_ex(stack_frame, "line", sizeof("line"), lineno);
+		if (skip->func && ZEND_USER_CODE(skip->func->common.type)) {
+			filename = skip->func->op_array.filename;
+			if (skip->opline->opcode == ZEND_HANDLE_EXCEPTION) {
+				if (EG(opline_before_exception)) {
+					lineno = EG(opline_before_exception)->lineno;
+				} else {
+					lineno = skip->func->op_array.line_end;
+				}
+			} else {
+				lineno = skip->opline->lineno;
+			}
+			add_assoc_str_ex(&stack_frame, "file", sizeof("file")-1, zend_string_copy(filename));
+			add_assoc_long_ex(&stack_frame, "line", sizeof("line")-1, lineno);
 
 			/* try to fetch args only if an FCALL was just made - elsewise we're in the middle of a function
-			 * and debug_baktrace() might have been called by the error_handler. in this case we don't 
+			 * and debug_baktrace() might have been called by the error_handler. in this case we don't
 			 * want to pop anything of the argument-stack */
 		} else {
+			zend_execute_data *prev_call = skip;
 			zend_execute_data *prev = skip->prev_execute_data;
 
 			while (prev) {
-				if (prev->function_state.function &&
-					prev->function_state.function->common.type != ZEND_USER_FUNCTION &&
-					!(prev->function_state.function->common.type == ZEND_INTERNAL_FUNCTION &&
-						(prev->function_state.function->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER))) {
-					break;
-				}				    
-				if (prev->op_array) {
-					add_assoc_string_ex(stack_frame, "file", sizeof("file"), (char*)prev->op_array->filename, 1);
-					add_assoc_long_ex(stack_frame, "line", sizeof("line"), prev->opline->lineno);
+				if (prev_call &&
+				    prev_call->func &&
+					!ZEND_USER_CODE(prev_call->func->common.type) &&
+					!(prev_call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
 					break;
 				}
+				if (prev->func && ZEND_USER_CODE(prev->func->common.type)) {
+					add_assoc_str_ex(&stack_frame, "file", sizeof("file")-1, zend_string_copy(prev->func->op_array.filename));
+					add_assoc_long_ex(&stack_frame, "line", sizeof("line")-1, prev->opline->lineno);
+					break;
+				}
+				prev_call = prev;
 				prev = prev->prev_execute_data;
 			}
 			filename = NULL;
 		}
 
-		function_name = (ptr->function_state.function->common.scope &&
-			ptr->function_state.function->common.scope->trait_aliases) ?
+		/* $this may be passed into regular internal functions */
+		object = call ? Z_OBJ(call->This) : NULL;
+
+		if (call && call->func) {
+			func = call->func;
+			function_name = (func->common.scope &&
+			                 func->common.scope->trait_aliases) ?
 				zend_resolve_method_name(
-					ptr->object ?
-						Z_OBJCE_P(ptr->object) : 
-						ptr->function_state.function->common.scope,
-					ptr->function_state.function) :
-				ptr->function_state.function->common.function_name;
+					(object ? object->ce : func->common.scope), func) :
+				func->common.function_name;
+		} else {
+			func = NULL;
+			function_name = NULL;
+		}
 
 		if (function_name) {
-			add_assoc_string_ex(stack_frame, "function", sizeof("function"), (char*)function_name, 1);
+			add_assoc_str_ex(&stack_frame, "function", sizeof("function")-1, zend_string_copy(function_name));
 
-			if (ptr->object && Z_TYPE_P(ptr->object) == IS_OBJECT) {
-				if (ptr->function_state.function->common.scope) {
-					add_assoc_string_ex(stack_frame, "class", sizeof("class"), (char*)ptr->function_state.function->common.scope->name, 1);
+			if (object) {
+				if (func->common.scope) {
+					add_assoc_str_ex(&stack_frame, "class", sizeof("class")-1, zend_string_copy(func->common.scope->name));
+				} else if (object->handlers->get_class_name == std_object_handlers.get_class_name) {
+					add_assoc_str_ex(&stack_frame, "class", sizeof("class")-1, zend_string_copy(object->ce->name));
 				} else {
-					zend_uint class_name_len;
-					int dup;
-
-					dup = zend_get_object_classname(ptr->object, &class_name, &class_name_len TSRMLS_CC);
-					add_assoc_string_ex(stack_frame, "class", sizeof("class"), (char*)class_name, dup);
-					
+					zend_string *class_name = object->handlers->get_class_name(object);
+					add_assoc_str_ex(&stack_frame, "class", sizeof("class")-1, class_name);
 				}
 				if ((options & DEBUG_BACKTRACE_PROVIDE_OBJECT) != 0) {
-					add_assoc_zval_ex(stack_frame, "object", sizeof("object"), ptr->object);
-					Z_ADDREF_P(ptr->object);
+					zval zv;
+					ZVAL_OBJ(&zv, object);
+					add_assoc_zval_ex(&stack_frame, "object", sizeof("object")-1, &zv);
+					Z_ADDREF(zv);
 				}
 
-				add_assoc_string_ex(stack_frame, "type", sizeof("type"), "->", 1);
-			} else if (ptr->function_state.function->common.scope) {
-				add_assoc_string_ex(stack_frame, "class", sizeof("class"), (char*)ptr->function_state.function->common.scope->name, 1);
-				add_assoc_string_ex(stack_frame, "type", sizeof("type"), "::", 1);
+				add_assoc_string_ex(&stack_frame, "type", sizeof("type")-1, "->");
+			} else if (func->common.scope) {
+				add_assoc_str_ex(&stack_frame, "class", sizeof("class")-1, zend_string_copy(func->common.scope->name));
+				add_assoc_string_ex(&stack_frame, "type", sizeof("type")-1, "::");
 			}
 
-			if ((options & DEBUG_BACKTRACE_IGNORE_ARGS) == 0 && 
-				((! ptr->opline) || ((ptr->opline->opcode == ZEND_DO_FCALL_BY_NAME) || (ptr->opline->opcode == ZEND_DO_FCALL)))) {
-				if (ptr->function_state.arguments) {
-					add_assoc_zval_ex(stack_frame, "args", sizeof("args"), debug_backtrace_get_args(ptr->function_state.arguments TSRMLS_CC));
-				}
+			if ((options & DEBUG_BACKTRACE_IGNORE_ARGS) == 0 &&
+				func->type != ZEND_EVAL_CODE) {
+				zval args;
+
+				debug_backtrace_get_args(call, &args);
+				add_assoc_zval_ex(&stack_frame, "args", sizeof("args")-1, &args);
 			}
 		} else {
 			/* i know this is kinda ugly, but i'm trying to avoid extra cycles in the main execution loop */
 			zend_bool build_filename_arg = 1;
+			const char *pseudo_function_name;
 
-			if (!ptr->opline || ptr->opline->opcode != ZEND_INCLUDE_OR_EVAL) {
+			if (!ptr->func || !ZEND_USER_CODE(ptr->func->common.type) || ptr->opline->opcode != ZEND_INCLUDE_OR_EVAL) {
 				/* can happen when calling eval from a custom sapi */
-				function_name = "unknown";
+				pseudo_function_name = "unknown";
 				build_filename_arg = 0;
 			} else
 			switch (ptr->opline->extended_value) {
 				case ZEND_EVAL:
-					function_name = "eval";
+					pseudo_function_name = "eval";
 					build_filename_arg = 0;
 					break;
 				case ZEND_INCLUDE:
-					function_name = "include";
+					pseudo_function_name = "include";
 					break;
 				case ZEND_REQUIRE:
-					function_name = "require";
+					pseudo_function_name = "require";
 					break;
 				case ZEND_INCLUDE_ONCE:
-					function_name = "include_once";
+					pseudo_function_name = "include_once";
 					break;
 				case ZEND_REQUIRE_ONCE:
-					function_name = "require_once";
+					pseudo_function_name = "require_once";
 					break;
 				default:
-					/* this can actually happen if you use debug_backtrace() in your error_handler and 
+					/* this can actually happen if you use debug_backtrace() in your error_handler and
 					 * you're in the top-scope */
-					function_name = "unknown"; 
+					pseudo_function_name = "unknown";
 					build_filename_arg = 0;
 					break;
 			}
 
 			if (build_filename_arg && include_filename) {
-				zval *arg_array;
+				zval arg_array;
 
-				MAKE_STD_ZVAL(arg_array);
-				array_init(arg_array);
+				array_init(&arg_array);
 
 				/* include_filename always points to the last filename of the last last called-function.
 				   if we have called include in the frame above - this is the file we have included.
 				 */
 
-				add_next_index_string(arg_array, (char*)include_filename, 1);
-				add_assoc_zval_ex(stack_frame, "args", sizeof("args"), arg_array);
+				add_next_index_str(&arg_array, zend_string_copy(include_filename));
+				add_assoc_zval_ex(&stack_frame, "args", sizeof("args")-1, &arg_array);
 			}
 
-			add_assoc_string_ex(stack_frame, "function", sizeof("function"), (char*)function_name, 1);
+			add_assoc_string_ex(&stack_frame, "function", sizeof("function")-1, (char *) pseudo_function_name);
 		}
 
-		add_next_index_zval(return_value, stack_frame);
+		zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &stack_frame);
 
-		include_filename = filename; 
+		include_filename = filename;
 
+		call = skip;
 		ptr = skip->prev_execute_data;
 	}
 }
 /* }}} */
 
-
 /* {{{ proto array debug_backtrace([int options[, int limit]])
    Return backtrace as array */
 ZEND_FUNCTION(debug_backtrace)
 {
-	long options = DEBUG_BACKTRACE_PROVIDE_OBJECT;
-	long limit = 0;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ll", &options, &limit) == FAILURE) {
+	zend_long options = DEBUG_BACKTRACE_PROVIDE_OBJECT;
+	zend_long limit = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ll", &options, &limit) == FAILURE) {
 		return;
 	}
 
-	zend_fetch_debug_backtrace(return_value, 1, options, limit TSRMLS_CC);
+	zend_fetch_debug_backtrace(return_value, 1, options, limit);
 }
 /* }}} */
 
@@ -2424,49 +2713,48 @@ ZEND_FUNCTION(debug_backtrace)
    Returns true if the named extension is loaded */
 ZEND_FUNCTION(extension_loaded)
 {
-	char *extension_name;
-	int extension_name_len;
-	char *lcname;
+	zend_string *extension_name;
+	zend_string *lcname;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &extension_name, &extension_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &extension_name) == FAILURE) {
 		return;
 	}
 
-	lcname = zend_str_tolower_dup(extension_name, extension_name_len);
-	if (zend_hash_exists(&module_registry, lcname, extension_name_len+1)) {
+	lcname = zend_string_tolower(extension_name);
+	if (zend_hash_exists(&module_registry, lcname)) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
 	}
-	efree(lcname);
+	zend_string_release(lcname);
 }
 /* }}} */
-
 
 /* {{{ proto array get_extension_funcs(string extension_name)
    Returns an array with the names of functions belonging to the named extension */
 ZEND_FUNCTION(get_extension_funcs)
 {
-	char *extension_name, *lcname;
-	int extension_name_len, array;
+	zend_string *extension_name;
+	zend_string *lcname;
+	int array;
 	zend_module_entry *module;
-	HashPosition iterator;
 	zend_function *zif;
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &extension_name, &extension_name_len) == FAILURE) {
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &extension_name) == FAILURE) {
 		return;
 	}
-	if (strncasecmp(extension_name, "zend", sizeof("zend"))) {
-		lcname = zend_str_tolower_dup(extension_name, extension_name_len);
+	if (strncasecmp(ZSTR_VAL(extension_name), "zend", sizeof("zend"))) {
+		lcname = zend_string_tolower(extension_name);
+		module = zend_hash_find_ptr(&module_registry, lcname);
+		zend_string_release(lcname);
 	} else {
-		lcname = estrdup("core");
+		module = zend_hash_str_find_ptr(&module_registry, "core", sizeof("core") - 1);
 	}
-	if (zend_hash_find(&module_registry, lcname,
-		extension_name_len+1, (void**)&module) == FAILURE) {
-		efree(lcname);
+
+	if (!module) {
 		RETURN_FALSE;
 	}
 
-	zend_hash_internal_pointer_reset_ex(CG(function_table), &iterator);
 	if (module->functions) {
 		/* avoid BC break, if functions list is empty, will return an empty array */
 		array_init(return_value);
@@ -2474,19 +2762,17 @@ ZEND_FUNCTION(get_extension_funcs)
 	} else {
 		array = 0;
 	}
-	while (zend_hash_get_current_data_ex(CG(function_table), (void **) &zif, &iterator) == SUCCESS) {
-		if (zif->common.type==ZEND_INTERNAL_FUNCTION
+
+	ZEND_HASH_FOREACH_PTR(CG(function_table), zif) {
+		if (zif->common.type == ZEND_INTERNAL_FUNCTION
 			&& zif->internal_function.module == module) {
 			if (!array) {
 				array_init(return_value);
 				array = 1;
 			}
-			add_next_index_string(return_value, zif->common.function_name, 1);
+			add_next_index_str(return_value, zend_string_copy(zif->common.function_name));
 		}
-		zend_hash_move_forward_ex(CG(function_table), &iterator);
-	}
-
-	efree(lcname);
+	} ZEND_HASH_FOREACH_END();
 
 	if (!array) {
 		RETURN_FALSE;

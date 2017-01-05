@@ -43,7 +43,7 @@ var_dump($foo["errors"]==IDNA_ERROR_CONTEXTJ);
 => PHP level errors
 bad args:
 
-Warning: idn_to_ascii() expects parameter 3 to be long, array given in %s on line %d
+Warning: idn_to_ascii() expects parameter 3 to be integer, array given in %s on line %d
 
 Warning: idn_to_ascii(): idn_to_ascii: bad arguments in %s on line %d
 NULL

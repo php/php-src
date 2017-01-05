@@ -26,7 +26,7 @@ $g1 = array(10,10);
 $g2 = array(20,20);
 $g3 = array(30,30);
 $g = array($g1,$g2,$g3);
-list($e[$f++],$e[$f++]) = $g[$f];
+list($e[$f++],$e[$f++]) = $g[2];
 // expect 30,30
 var_dump($e); 
 
@@ -39,7 +39,7 @@ $i = array($i1,$i2,$i3,$i4);
 $j = array(0,0,0);
 $h = 0;
 // a list of lists 
-list(list($j[$h++],$j[$h++]),$j[$h++]) = $i[$h];
+list(list($j[$h++],$j[$h++]),$j[$h++]) = $i[3];
 var_dump($j);
 
 
@@ -116,9 +116,9 @@ L=100 M=200 N=300
 O= and P=
 10 20 40 50 60 70 80
 
-Notice: Undefined offset: 1 in %s on line %d
-
 Notice: Undefined offset: 0 in %s on line %d
+
+Notice: Undefined offset: 1 in %s on line %d
 Y=,Z=
 
 Notice: Undefined offset: 1 in %s on line %d

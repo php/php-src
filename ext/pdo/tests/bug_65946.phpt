@@ -16,7 +16,24 @@ $db = PDOTest::factory();
 $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
 $db->exec('CREATE TABLE test(id int)');
 $db->exec('INSERT INTO test VALUES(1)');
-$stmt = $db->prepare('SELECT * FROM test LIMIT :limit');
+switch ($db->getAttribute(PDO::ATTR_DRIVER_NAME)) {
+	case 'dblib':
+		// if :limit is used, the value will be quoted as '1', which is invalid syntax
+		// this is a bug, to be addressed separately from adding these tests to pdo_dblib
+		$sql = 'SELECT TOP 1 * FROM test';
+		break;
+	case 'firebird':
+		$sql = 'SELECT FIRST :limit * FROM test';
+		break;
+	case 'oci':
+		//$sql = 'SELECT * FROM test FETCH FIRST :limit ROWS ONLY';  // Oracle 12c syntax
+		$sql = "select id from (select a.*, rownum rnum from (SELECT * FROM test) a where rownum <= :limit)";
+		break;
+	default:
+		$sql = 'SELECT * FROM test LIMIT :limit';
+		break;
+}
+$stmt = $db->prepare($sql);
 $stmt->bindValue('limit', 1, PDO::PARAM_INT);
 if(!($res = $stmt->execute())) var_dump($stmt->errorInfo());
 if(!($res = $stmt->execute())) var_dump($stmt->errorInfo());

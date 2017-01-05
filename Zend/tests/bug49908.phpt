@@ -20,7 +20,7 @@ new Foo;
 %unicode|string%(3) "Foo"
 %unicode|string%(3) "Bar"
 
-Fatal error: Uncaught exception 'Exception' with message 'Bar' in %s:%d
+Fatal error: Uncaught Exception: Bar in %s:%d
 Stack trace:
 #0 %s(7): __autoload('Bar')
 #1 %s(13): __autoload('Foo')

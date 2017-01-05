@@ -34,7 +34,7 @@ for(; $loop_counter < count($file_modes); $loop_counter++) {
   var_dump( feof($file_handle) );  // expected false
   var_dump( ftell($file_handle) );  // ensure that file pointer is at eof
   var_dump( fgetc($file_handle) ); // try n read a char, none expected 
-  var_dump( feof($file_handle) ); // ensure thta file pointer is at eof
+  var_dump( feof($file_handle) ); // ensure that file pointer is at eof
   var_dump( ftell($file_handle) ); // file pointer position
 
   // close the file handle 

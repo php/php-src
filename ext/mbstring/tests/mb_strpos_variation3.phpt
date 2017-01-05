@@ -4,6 +4,7 @@ Test mb_strpos() function : usage variations - pass different data types as $off
 <?php
 extension_loaded('mbstring') or die('skip');
 function_exists('mb_strpos') or die("skip mb_strpos() is not available in this build");
+if (PHP_INT_SIZE != 8) die('skip 64-bit only');
 ?>
 --FILE--
 <?php
@@ -161,33 +162,33 @@ int(8)
 
 -- Iteration 16 --
 
-Warning: mb_strpos() expects parameter 3 to be long, string given in %s on line %d
-bool(false)
+Warning: mb_strpos() expects parameter 3 to be integer, string given in %s on line %d
+NULL
 
 -- Iteration 17 --
 
-Warning: mb_strpos() expects parameter 3 to be long, string given in %s on line %d
-bool(false)
+Warning: mb_strpos() expects parameter 3 to be integer, string given in %s on line %d
+NULL
 
 -- Iteration 18 --
 
-Warning: mb_strpos() expects parameter 3 to be long, string given in %s on line %d
-bool(false)
+Warning: mb_strpos() expects parameter 3 to be integer, string given in %s on line %d
+NULL
 
 -- Iteration 19 --
 
-Warning: mb_strpos() expects parameter 3 to be long, string given in %s on line %d
-bool(false)
+Warning: mb_strpos() expects parameter 3 to be integer, string given in %s on line %d
+NULL
 
 -- Iteration 20 --
 
-Warning: mb_strpos() expects parameter 3 to be long, string given in %s on line %d
-bool(false)
+Warning: mb_strpos() expects parameter 3 to be integer, string given in %s on line %d
+NULL
 
 -- Iteration 21 --
 
-Warning: mb_strpos() expects parameter 3 to be long, object given in %s on line %d
-bool(false)
+Warning: mb_strpos() expects parameter 3 to be integer, object given in %s on line %d
+NULL
 
 -- Iteration 22 --
 int(8)
@@ -197,6 +198,6 @@ int(8)
 
 -- Iteration 24 --
 
-Warning: mb_strpos() expects parameter 3 to be long, resource given in %s on line %d
-bool(false)
+Warning: mb_strpos() expects parameter 3 to be integer, resource given in %s on line %d
+NULL
 Done

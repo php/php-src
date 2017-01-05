@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -317,7 +317,7 @@ PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, c
  */
 /* char * ap_php_conv_10() {{{ */
 PHPAPI char * ap_php_conv_10(register wide_int num, register bool_int is_unsigned,
-	   register bool_int * is_negative, char *buf_end, register int *len)
+	   register bool_int * is_negative, char *buf_end, register size_t *len)
 {
 	register char *p = buf_end;
 	register u_wide_int magnitude;
@@ -375,7 +375,7 @@ PHPAPI char * ap_php_conv_10(register wide_int num, register bool_int is_unsigne
  */
 /* PHPAPI char * php_conv_fp() {{{ */
 PHPAPI char * php_conv_fp(register char format, register double num,
-		 boolean_e add_dp, int precision, char dec_point, bool_int * is_negative, char *buf, int *len)
+		 boolean_e add_dp, int precision, char dec_point, bool_int * is_negative, char *buf, size_t *len)
 {
 	register char *s = buf;
 	register char *p, *p_orig;
@@ -443,7 +443,7 @@ PHPAPI char * php_conv_fp(register char format, register double num,
 
 	if (format != 'F') {
 		char temp[EXPONENT_LENGTH];		/* for exponent conversion */
-		int t_len;
+		size_t t_len;
 		bool_int exponent_is_negative;
 
 		*s++ = format;			/* either e or E */
@@ -479,7 +479,7 @@ PHPAPI char * php_conv_fp(register char format, register double num,
  * which is a pointer to the END of the buffer + 1 (i.e. if the buffer
  * is declared as buf[ 100 ], buf_end should be &buf[ 100 ])
  */
-PHPAPI char * ap_php_conv_p2(register u_wide_int num, register int nbits, char format, char *buf_end, register int *len) /* {{{ */
+PHPAPI char * ap_php_conv_p2(register u_wide_int num, register int nbits, char format, char *buf_end, register size_t *len) /* {{{ */
 {
 	register int mask = (1 << nbits) - 1;
 	register char *p = buf_end;
@@ -589,10 +589,11 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 	char *sp;
 	char *bep;
 	int cc = 0;
-	int i;
+	size_t i;
 
 	char *s = NULL;
-	int s_len, free_zcopy;
+	size_t s_len;
+	int free_zcopy;
 	zval *zvp, zcopy;
 
 	int min_width = 0;
@@ -701,7 +702,7 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 							precision = 0;
 					} else
 						precision = 0;
-					
+
 					if (precision > FORMAT_CONV_MAX_PRECISION) {
 						precision = FORMAT_CONV_MAX_PRECISION;
 					}
@@ -767,6 +768,10 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 					modifier = LM_SIZE_T;
 #endif
 					break;
+				case 'p':
+					fmt++;
+					modifier = LM_PHP_INT_T;
+					break;
 				case 'h':
 					fmt++;
 					if (*fmt == 'h') {
@@ -790,9 +795,9 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 			 *   It is reset to ' ' by non-numeric formats
 			 */
 			switch (*fmt) {
-				case 'Z':
-					zvp = (zval*) va_arg(ap, zval*);
-					zend_make_printable_zval(zvp, &zcopy, &free_zcopy);
+				case 'Z': {
+				    				    zvp = (zval*) va_arg(ap, zval*);
+					free_zcopy = zend_make_printable_zval(zvp, &zcopy);
 					if (free_zcopy) {
 						zvp = &zcopy;
 					}
@@ -802,6 +807,7 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 						s_len = precision;
 					}
 					break;
+				}
 				case 'u':
 					switch(modifier) {
 						default:
@@ -830,6 +836,9 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 							i_num = (wide_int) va_arg(ap, ptrdiff_t);
 							break;
 #endif
+						case LM_PHP_INT_T:
+							i_num = (wide_int) va_arg(ap, zend_ulong);
+							break;
 					}
 					/*
 					 * The rest also applies to other integer formats, so fall
@@ -872,6 +881,9 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 								i_num = (wide_int) va_arg(ap, ptrdiff_t);
 								break;
 #endif
+							case LM_PHP_INT_T:
+								i_num = (wide_int) va_arg(ap, zend_long);
+								break;
 						}
 					}
 					s = ap_php_conv_10(i_num, (*fmt) == 'u', &is_negative,
@@ -918,6 +930,9 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 							ui_num = (u_wide_int) va_arg(ap, ptrdiff_t);
 							break;
 #endif
+						case LM_PHP_INT_T:
+							ui_num = (u_wide_int) va_arg(ap, zend_ulong);
+							break;
 					}
 					s = ap_php_conv_p2(ui_num, 3, *fmt, &num_buf[NUM_BUF_SIZE], &s_len);
 					FIX_PRECISION(adjust_precision, precision, s, s_len);
@@ -957,6 +972,9 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 							ui_num = (u_wide_int) va_arg(ap, ptrdiff_t);
 							break;
 #endif
+						case LM_PHP_INT_T:
+							ui_num = (u_wide_int) va_arg(ap, zend_ulong);
+							break;
 					}
 					s = ap_php_conv_p2(ui_num, 4, *fmt, &num_buf[NUM_BUF_SIZE], &s_len);
 					FIX_PRECISION(adjust_precision, precision, s, s_len);
@@ -1239,14 +1257,14 @@ static void strx_printv(int *ccp, char *buf, size_t len, const char *format, va_
 
 PHPAPI int ap_php_slprintf(char *buf, size_t len, const char *format,...) /* {{{ */
 {
-	unsigned int cc;
+	int cc;
 	va_list ap;
 
 	va_start(ap, format);
 	strx_printv(&cc, buf, len, format, ap);
 	va_end(ap);
 	if (cc >= len) {
-		cc = len -1;
+		cc = (int)len -1;
 		buf[cc] = '\0';
 	}
 	return cc;
@@ -1255,11 +1273,11 @@ PHPAPI int ap_php_slprintf(char *buf, size_t len, const char *format,...) /* {{{
 
 PHPAPI int ap_php_vslprintf(char *buf, size_t len, const char *format, va_list ap) /* {{{ */
 {
-	unsigned int cc;
+	int cc;
 
 	strx_printv(&cc, buf, len, format, ap);
 	if (cc >= len) {
-		cc = len -1;
+		cc = (int)len -1;
 		buf[cc] = '\0';
 	}
 	return cc;

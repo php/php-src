@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,7 +15,7 @@
   | Author: Sara Golemon <pollita@php.net>                               |
   +----------------------------------------------------------------------+
 
-  $Id$ 
+  $Id$
 */
 
 #include "php.h"
@@ -39,19 +39,19 @@ static php_stream_filter_status_t php_mcrypt_filter(
 	php_stream_bucket_brigade *buckets_in,
 	php_stream_bucket_brigade *buckets_out,
 	size_t *bytes_consumed,
-	int flags TSRMLS_DC)
+	int flags)
 {
 	php_mcrypt_filter_data *data;
 	php_stream_bucket *bucket;
 	size_t consumed = 0;
 	php_stream_filter_status_t exit_status = PSFS_FEED_ME;
 
-	if (!thisfilter || !thisfilter->abstract) {
+	if (!thisfilter || !Z_PTR(thisfilter->abstract)) {
 		/* Should never happen */
 		return PSFS_ERR_FATAL;
 	}
 
-	data = (php_mcrypt_filter_data *)(thisfilter->abstract);
+	data = (php_mcrypt_filter_data *)(Z_PTR(thisfilter->abstract));
 	while(buckets_in->head) {
 		bucket = buckets_in->head;
 
@@ -60,7 +60,7 @@ static php_stream_filter_status_t php_mcrypt_filter(
 		if (data->blocksize) {
 			/* Blockmode cipher */
 			char *outchunk;
-			int chunklen = bucket->buflen + data->block_used, n;
+			int chunklen = (int)(bucket->buflen + data->block_used), n;
 			php_stream_bucket *newbucket;
 
 			outchunk = pemalloc(chunklen, data->persistent);
@@ -80,22 +80,22 @@ static php_stream_filter_status_t php_mcrypt_filter(
 			data->block_used = chunklen - n;
 			memcpy(data->block_buffer, outchunk + n, data->block_used);
 
-			newbucket = php_stream_bucket_new(stream, outchunk, n, 1, data->persistent TSRMLS_CC);
-			php_stream_bucket_append(buckets_out, newbucket TSRMLS_CC);
+			newbucket = php_stream_bucket_new(stream, outchunk, n, 1, data->persistent);
+			php_stream_bucket_append(buckets_out, newbucket);
 
 			exit_status = PSFS_PASS_ON;
 
-			php_stream_bucket_unlink(bucket TSRMLS_CC);
-			php_stream_bucket_delref(bucket TSRMLS_CC);
+			php_stream_bucket_unlink(bucket);
+			php_stream_bucket_delref(bucket);
 		} else {
 			/* Stream cipher */
-			php_stream_bucket_make_writeable(bucket TSRMLS_CC);
+			php_stream_bucket_make_writeable(bucket);
 			if (data->encrypt) {
-				mcrypt_generic(data->module, bucket->buf, bucket->buflen);
+				mcrypt_generic(data->module, bucket->buf, (int)bucket->buflen);
 			} else {
-				mdecrypt_generic(data->module, bucket->buf, bucket->buflen);
+				mdecrypt_generic(data->module, bucket->buf, (int)bucket->buflen);
 			}
-			php_stream_bucket_append(buckets_out, bucket TSRMLS_CC);
+			php_stream_bucket_append(buckets_out, bucket);
 
 			exit_status = PSFS_PASS_ON;
 		}
@@ -111,8 +111,8 @@ static php_stream_filter_status_t php_mcrypt_filter(
 			mdecrypt_generic(data->module, data->block_buffer, data->blocksize);
 		}
 
-		newbucket = php_stream_bucket_new(stream, data->block_buffer, data->blocksize, 0, data->persistent TSRMLS_CC);
-		php_stream_bucket_append(buckets_out, newbucket TSRMLS_CC);
+		newbucket = php_stream_bucket_new(stream, data->block_buffer, data->blocksize, 0, data->persistent);
+		php_stream_bucket_append(buckets_out, newbucket);
 
 		exit_status = PSFS_PASS_ON;
 	}
@@ -124,10 +124,10 @@ static php_stream_filter_status_t php_mcrypt_filter(
 	return exit_status;
 }
 
-static void php_mcrypt_filter_dtor(php_stream_filter *thisfilter TSRMLS_DC)
+static void php_mcrypt_filter_dtor(php_stream_filter *thisfilter)
 {
-	if (thisfilter && thisfilter->abstract) {
-		php_mcrypt_filter_data *data = (php_mcrypt_filter_data*)thisfilter->abstract;
+	if (thisfilter && Z_PTR(thisfilter->abstract)) {
+		php_mcrypt_filter_data *data = (php_mcrypt_filter_data*) Z_PTR(thisfilter->abstract);
 
 		if (data->block_buffer) {
 			pefree(data->block_buffer, data->persistent);
@@ -149,11 +149,11 @@ static php_stream_filter_ops php_mcrypt_filter_ops = {
 /* {{{ php_mcrypt_filter_create
  * Instantiate mcrypt filter
  */
-static php_stream_filter *php_mcrypt_filter_create(const char *filtername, zval *filterparams, int persistent TSRMLS_DC)
+static php_stream_filter *php_mcrypt_filter_create(const char *filtername, zval *filterparams, int persistent)
 {
 	int encrypt = 1, iv_len, key_len, keyl, result;
 	const char *cipher = filtername + sizeof("mcrypt.") - 1;
-	zval **tmpzval;
+	zval *tmpzval;
 	MCRYPT mcrypt_module;
 	char *iv = NULL, *key = NULL;
 	char *algo_dir = INI_STR("mcrypt.algorithms_dir");
@@ -170,46 +170,46 @@ static php_stream_filter *php_mcrypt_filter_create(const char *filtername, zval 
 	}
 
 	if (!filterparams || Z_TYPE_P(filterparams) != IS_ARRAY) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Filter parameters for %s must be an array", filtername);
+		php_error_docref(NULL, E_WARNING, "Filter parameters for %s must be an array", filtername);
 		return NULL;
 	}
 
-	if (zend_hash_find(HASH_OF(filterparams), "mode", sizeof("mode"), (void**)&tmpzval) == SUCCESS) {
-		if (Z_TYPE_PP(tmpzval) == IS_STRING) {
-			mode = Z_STRVAL_PP(tmpzval);
+	if ((tmpzval = zend_hash_str_find(Z_ARRVAL_P(filterparams), ZEND_STRL("mode")))) {
+		if (Z_TYPE_P(tmpzval) == IS_STRING) {
+			mode = Z_STRVAL_P(tmpzval);
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "mode is not a string, ignoring");
+			php_error_docref(NULL, E_WARNING, "mode is not a string, ignoring");
 		}
 	}
 
-	if (zend_hash_find(HASH_OF(filterparams), "algorithms_dir", sizeof("algorithms_dir"), (void**)&tmpzval) == SUCCESS) {
-		if (Z_TYPE_PP(tmpzval) == IS_STRING) {
-			algo_dir = Z_STRVAL_PP(tmpzval);
+	if ((tmpzval=zend_hash_str_find(Z_ARRVAL_P(filterparams), ZEND_STRL("algorithms_dir")))) {
+		if (Z_TYPE_P(tmpzval) == IS_STRING) {
+			algo_dir = Z_STRVAL_P(tmpzval);
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "algorithms_dir is not a string, ignoring");
+			php_error_docref(NULL, E_WARNING, "algorithms_dir is not a string, ignoring");
 		}
 	}
 
-	if (zend_hash_find(HASH_OF(filterparams), "modes_dir", sizeof("modes_dir"), (void**)&tmpzval) == SUCCESS) {
-		if (Z_TYPE_PP(tmpzval) == IS_STRING) {
-			mode_dir = Z_STRVAL_PP(tmpzval);
+	if ((tmpzval=zend_hash_str_find(Z_ARRVAL_P(filterparams), ZEND_STRL("modes_dir")))) {
+		if (Z_TYPE_P(tmpzval) == IS_STRING) {
+			mode_dir = Z_STRVAL_P(tmpzval);
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "modes_dir is not a string, ignoring");
+			php_error_docref(NULL, E_WARNING, "modes_dir is not a string, ignoring");
 		}
 	}
 
-	if (zend_hash_find(HASH_OF(filterparams), "key", sizeof("key"), (void**)&tmpzval) == SUCCESS &&
-		Z_TYPE_PP(tmpzval) == IS_STRING) {
-		key = Z_STRVAL_PP(tmpzval);
-		key_len = Z_STRLEN_PP(tmpzval);
+	if ((tmpzval = zend_hash_str_find(Z_ARRVAL_P(filterparams), ZEND_STRL("key"))) &&
+		Z_TYPE_P(tmpzval) == IS_STRING) {
+		key = Z_STRVAL_P(tmpzval);
+		key_len = (int)Z_STRLEN_P(tmpzval);
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "key not specified or is not a string");
+		php_error_docref(NULL, E_WARNING, "key not specified or is not a string");
 		return NULL;
 	}
 
-	mcrypt_module = mcrypt_module_open(cipher, algo_dir, mode, mode_dir);
+	mcrypt_module = mcrypt_module_open((char *)cipher, algo_dir, mode, mode_dir);
 	if (mcrypt_module == MCRYPT_FAILED) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not open encryption module");
+		php_error_docref(NULL, E_WARNING, "Could not open encryption module");
 		return NULL;
 	}
 	iv_len = mcrypt_enc_get_iv_size(mcrypt_module);
@@ -218,19 +218,19 @@ static php_stream_filter *php_mcrypt_filter_create(const char *filtername, zval 
 		key_len = keyl;
 	}
 
-	if (zend_hash_find(HASH_OF(filterparams), "iv", sizeof("iv"), (void**) &tmpzval) == FAILURE ||
-		Z_TYPE_PP(tmpzval) != IS_STRING) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Filter parameter[iv] not provided or not of type: string");
+	if (!(tmpzval = zend_hash_str_find(Z_ARRVAL_P(filterparams), ZEND_STRL("iv"))) ||
+		Z_TYPE_P(tmpzval) != IS_STRING) {
+		php_error_docref(NULL, E_WARNING, "Filter parameter[iv] not provided or not of type: string");
 		mcrypt_module_close(mcrypt_module);
 		return NULL;
 	}
 
 	iv = emalloc(iv_len + 1);
-	if (iv_len <= Z_STRLEN_PP(tmpzval)) {
-		memcpy(iv, Z_STRVAL_PP(tmpzval), iv_len);
+	if (iv_len <= Z_STRLEN_P(tmpzval)) {
+		memcpy(iv, Z_STRVAL_P(tmpzval), iv_len);
 	} else {
-		memcpy(iv, Z_STRVAL_PP(tmpzval), Z_STRLEN_PP(tmpzval));
-		memset(iv + Z_STRLEN_PP(tmpzval), 0, iv_len - Z_STRLEN_PP(tmpzval));
+		memcpy(iv, Z_STRVAL_P(tmpzval), Z_STRLEN_P(tmpzval));
+		memset(iv + Z_STRLEN_P(tmpzval), 0, iv_len - Z_STRLEN_P(tmpzval));
 	}
 
 	result = mcrypt_generic_init(mcrypt_module, key, key_len, iv);
@@ -238,14 +238,14 @@ static php_stream_filter *php_mcrypt_filter_create(const char *filtername, zval 
 	if (result < 0) {
 		switch (result) {
 			case -3:
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Key length incorrect");
+				php_error_docref(NULL, E_WARNING, "Key length incorrect");
 				break;
 			case -4:
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Memory allocation error");
+				php_error_docref(NULL, E_WARNING, "Memory allocation error");
 				break;
 			case -1:
 			default:
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown error");
+				php_error_docref(NULL, E_WARNING, "Unknown error");
 				break;
 		}
 		mcrypt_module_close(mcrypt_module);

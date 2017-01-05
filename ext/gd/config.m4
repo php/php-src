@@ -9,9 +9,9 @@ dnl
 PHP_ARG_WITH(gd, for GD support,
 [  --with-gd[=DIR]           Include GD support.  DIR is the GD library base
                           install directory [BUNDLED]])
-if test -z "$PHP_VPX_DIR"; then
-  PHP_ARG_WITH(vpx-dir, for the location of libvpx,
-  [  --with-vpx-dir[=DIR]      GD: Set the path to libvpx install prefix], no, no)
+if test -z "$PHP_WEBP_DIR"; then
+  PHP_ARG_WITH(webp-dir, for the location of libwebp,
+  [  --with-webp-dir[=DIR]      GD: Set the path to libwebp install prefix], no, no)
 fi
 
 if test -z "$PHP_JPEG_DIR"; then
@@ -34,9 +34,6 @@ PHP_ARG_WITH(xpm-dir, for the location of libXpm,
 
 PHP_ARG_WITH(freetype-dir, for FreeType 2,
 [  --with-freetype-dir[=DIR] GD: Set the path to FreeType 2 install prefix], no, no)
-
-PHP_ARG_WITH(t1lib, for T1lib support,
-[  --with-t1lib[=DIR]        GD: Include T1lib support. T1lib version >= 5.0.0 required], no, no)
 
 PHP_ARG_ENABLE(gd-native-ttf, whether to enable truetype string function in GD,
 [  --enable-gd-native-ttf  GD: Enable TrueType string function], no, no)
@@ -72,29 +69,37 @@ AC_DEFUN([PHP_GD_ZLIB],[
 	fi
 ])
 
-AC_DEFUN([PHP_GD_VPX],[
-  if test "$PHP_VPX_DIR" != "no"; then
+AC_DEFUN([PHP_GD_WEBP],[
+  if test "$PHP_WEBP_DIR" != "no"; then
 
-    for i in $PHP_VPX_DIR /usr/local /usr; do
-      test -f $i/include/vpx_codec.h || test -f $i/include/vpx/vpx_codec.h && GD_VPX_DIR=$i && break
+    for i in $PHP_WEBP_DIR /usr/local /usr; do
+      test -f $i/include/webp/decode.h && GD_WEBP_DIR=$i && break
     done
 
-    if test -z "$GD_VPX_DIR"; then
-      AC_MSG_ERROR([vpx_codec.h not found.])
+    if test -z "$GD_WEBP_DIR"; then
+      AC_MSG_ERROR([webp/decode.h not found.])
     fi
 
-    PHP_CHECK_LIBRARY(vpx,vpx_codec_destroy,
+    for i in $PHP_WEBP_DIR /usr/local /usr; do
+      test -f $i/include/webp/encode.h && GD_WEBP_DIR=$i && break
+    done
+
+    if test -z "$GD_WEBP_DIR"; then
+      AC_MSG_ERROR([webp/encode.h not found.])
+    fi
+
+    PHP_CHECK_LIBRARY(webp,WebPGetInfo,
     [
-      PHP_ADD_INCLUDE($GD_VPX_DIR/include)
+      PHP_ADD_INCLUDE($GD_WEBP_DIR/include)
       PHP_ADD_LIBRARY(pthread)
-      PHP_ADD_LIBRARY_WITH_PATH(vpx, $GD_VPX_DIR/$PHP_LIBDIR, GD_SHARED_LIBADD)
+      PHP_ADD_LIBRARY_WITH_PATH(webp, $GD_WEBP_DIR/$PHP_LIBDIR, GD_SHARED_LIBADD)
     ],[
-      AC_MSG_ERROR([Problem with libvpx.(a|so). Please check config.log for more information.])
+      AC_MSG_ERROR([Problem with libwebp.(a|so). Please check config.log for more information.])
     ],[
-      -L$GD_VPX_DIR/$PHP_LIBDIR
+      -L$GD_WEBP_DIR/$PHP_LIBDIR
     ])
   else
-    AC_MSG_RESULT([If configure fails try --with-vpx-dir=<DIR>])
+    AC_MSG_RESULT([If configure fails try --with-webp-dir=<DIR>])
   fi
 ])
 
@@ -209,30 +214,6 @@ AC_DEFUN([PHP_GD_FREETYPE2],[
   fi
 ])
 
-AC_DEFUN([PHP_GD_T1LIB],[
-  if test "$PHP_T1LIB" != "no"; then
-
-    for i in $PHP_T1LIB /usr/local /usr; do
-      test -f "$i/include/t1lib.h" && GD_T1_DIR=$i && break
-    done
-
-    if test -z "$GD_T1_DIR"; then
-      AC_MSG_ERROR([Your t1lib distribution is not installed correctly. Please reinstall it.])
-    fi
-
-    PHP_CHECK_LIBRARY(t1, T1_StrError,
-    [
-      AC_DEFINE(HAVE_LIBT1,1,[ ])
-      PHP_ADD_INCLUDE($GD_T1_DIR/include)
-      PHP_ADD_LIBRARY_WITH_PATH(t1, $GD_T1_DIR/$PHP_LIBDIR, GD_SHARED_LIBADD)
-    ],[
-      AC_MSG_ERROR([Problem with libt1.(a|so). Please check config.log for more information.])
-    ],[
-      -L$GD_T1_DIR/$PHP_LIBDIR
-    ])
-  fi
-])
-
 AC_DEFUN([PHP_GD_TTSTR],[
   if test "$PHP_GD_NATIVE_TTF" = "yes"; then
     AC_DEFINE(USE_GD_IMGSTRTTF, 1, [ ])
@@ -269,19 +250,18 @@ dnl PNG is required by GD library
 dnl Various checks for GD features
   PHP_GD_ZLIB
   PHP_GD_TTSTR
-  PHP_GD_VPX
+  PHP_GD_WEBP
   PHP_GD_JPEG
   PHP_GD_PNG
   PHP_GD_XPM
   PHP_GD_FREETYPE2
-  PHP_GD_T1LIB
   PHP_GD_JISX0208
 fi
 
 if test "$PHP_GD" = "yes"; then
   GD_MODULE_TYPE=builtin
   extra_sources="libgd/gd.c libgd/gd_gd.c libgd/gd_gd2.c libgd/gd_io.c libgd/gd_io_dp.c \
-                 libgd/gd_io_file.c libgd/gd_ss.c libgd/gd_io_ss.c libgd/webpimg.c libgd/gd_webp.c \
+                 libgd/gd_io_file.c libgd/gd_ss.c libgd/gd_io_ss.c libgd/gd_webp.c \
                  libgd/gd_png.c libgd/gd_jpeg.c libgd/gdxpm.c libgd/gdfontt.c libgd/gdfonts.c \
                  libgd/gdfontmb.c libgd/gdfontl.c libgd/gdfontg.c libgd/gdtables.c libgd/gdft.c \
                  libgd/gdcache.c libgd/gdkanji.c libgd/wbmp.c libgd/gd_wbmp.c libgd/gdhelpers.c \
@@ -303,9 +283,9 @@ dnl Make sure the libgd/ is first in the include path
 dnl Depending which libraries were included to PHP configure,
 dnl enable the support in bundled GD library
 
-  if test -n "$GD_VPX_DIR"; then
+  if test -n "$GD_WEBP_DIR"; then
     AC_DEFINE(HAVE_GD_WEBP, 1, [ ])
-    GDLIB_CFLAGS="$GDLIB_CFLAGS -DHAVE_LIBVPX"
+    GDLIB_CFLAGS="$GDLIB_CFLAGS -DHAVE_LIBWEBP"
   fi
 
   if test -n "$GD_JPEG_DIR"; then
@@ -338,12 +318,11 @@ else
 dnl Various checks for GD features
   PHP_GD_ZLIB
   PHP_GD_TTSTR
-  PHP_GD_VPX
+  PHP_GD_WEBP
   PHP_GD_JPEG
   PHP_GD_PNG
   PHP_GD_XPM
   PHP_GD_FREETYPE2
-  PHP_GD_T1LIB
 
 dnl Header path
   for i in include/gd include gd ""; do

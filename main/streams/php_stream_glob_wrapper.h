@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,14 +23,14 @@ PHPAPI extern php_stream_ops      php_glob_stream_ops;
 
 BEGIN_EXTERN_C()
 
-PHPAPI char* _php_glob_stream_get_path(php_stream *stream, int copy, int *plen STREAMS_DC TSRMLS_DC);
-#define php_glob_stream_get_path(stream, copy, plen)	_php_glob_stream_get_path((stream), (copy), (plen) STREAMS_CC TSRMLS_CC)
+PHPAPI char* _php_glob_stream_get_path(php_stream *stream, int copy, size_t *plen STREAMS_DC);
+#define php_glob_stream_get_path(stream, copy, plen)	_php_glob_stream_get_path((stream), (copy), (plen) STREAMS_CC)
 
-PHPAPI char* _php_glob_stream_get_pattern(php_stream *stream, int copy, int *plen STREAMS_DC TSRMLS_DC);
-#define php_glob_stream_get_pattern(stream, copy, plen)	_php_glob_stream_get_pattern((stream), (copy), (plen) STREAMS_CC TSRMLS_CC)
+PHPAPI char* _php_glob_stream_get_pattern(php_stream *stream, int copy, size_t *plen STREAMS_DC);
+#define php_glob_stream_get_pattern(stream, copy, plen)	_php_glob_stream_get_pattern((stream), (copy), (plen) STREAMS_CC)
 
-PHPAPI int   _php_glob_stream_get_count(php_stream *stream, int *pflags STREAMS_DC TSRMLS_DC);
-#define php_glob_stream_get_count(stream, pflags)	_php_glob_stream_get_count((stream), (pflags) STREAMS_CC TSRMLS_CC)
+PHPAPI int   _php_glob_stream_get_count(php_stream *stream, int *pflags STREAMS_DC);
+#define php_glob_stream_get_count(stream, pflags)	_php_glob_stream_get_count((stream), (pflags) STREAMS_CC)
 
 END_EXTERN_C()
 

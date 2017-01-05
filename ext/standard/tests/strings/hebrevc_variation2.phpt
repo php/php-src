@@ -254,15 +254,15 @@ string(241) ".The hebrevcc function converts logical Hebrew text to visual text<
 "
 -- Iteration 10 --
 
-Warning: hebrevc() expects parameter 2 to be long, array given in %s on line %d
+Warning: hebrevc() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: hebrevc() expects parameter 2 to be long, array given in %s on line %d
+Warning: hebrevc() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: hebrevc() expects parameter 2 to be long, array given in %s on line %d
+Warning: hebrevc() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 -- Iteration 13 --
 string(331) "xttel uaisv<br />
@@ -338,11 +338,11 @@ string(241) ".The hebrevcc function converts logical Hebrew text to visual text<
 "
 -- Iteration 19 --
 
-Warning: hebrevc() expects parameter 2 to be long, string given in %s on line %d
+Warning: hebrevc() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 -- Iteration 20 --
 
-Warning: hebrevc() expects parameter 2 to be long, string given in %s on line %d
+Warning: hebrevc() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 -- Iteration 21 --
 
@@ -381,37 +381,21 @@ string(241) ".The hebrevcc function converts logical Hebrew text to visual text<
 .The function tries to avoid breaking words<br />
 "
 -- Iteration 23 --
-string(349) "textual vis<br />
-to<br />
-textrew Heb<br />
-icallog<br />
-ertsconvion unctf<br />
-evcchebrThe .<br />
-inesnewlrts onvec<br />
-it<br />
-thatnce feredif<br />
-the<br />
-withc() brevhe<br />
-to<br />
-ilarsim<br />
-is<br />
-tionfunchis ) T<br />
-(<br />
-'<br<to .'<br />
-<br />
-ordsw<br />
-kingbreaoid av<br />
-to<br />
-riest<br />
-tionfuncThe .<br />
+
+Notice: A non well formed numeric value encountered in %s on line %d
+string(241) ".The hebrevcc function converts logical Hebrew text to visual text<br />
+) This function is similar to hebrevc() with the difference that it converts newlines<br />
+<to '<br (<br />
+.'<br />
+.The function tries to avoid breaking words<br />
 "
 -- Iteration 24 --
 
-Warning: hebrevc() expects parameter 2 to be long, object given in %s on line %d
+Warning: hebrevc() expects parameter 2 to be integer, object given in %s on line %d
 NULL
 -- Iteration 25 --
 
-Warning: hebrevc() expects parameter 2 to be long, resource given in %s on line %d
+Warning: hebrevc() expects parameter 2 to be integer, resource given in %s on line %d
 NULL
 -- Iteration 26 --
 string(241) ".The hebrevcc function converts logical Hebrew text to visual text<br />

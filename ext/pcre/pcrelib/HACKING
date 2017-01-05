@@ -360,7 +360,7 @@ reference number if the reference is to a unique capturing group (either by
 number or by name). When named groups are used, there may be more than one
 group with the same name. In this case, a reference by name generates OP_DNREF
 or OP_DNREFI. These are followed by two counts: the index (not the byte offset) 
-in the group name table of the first entry for the required name, followed by
+in the group name table of the first entry for the requred name, followed by
 the number of groups with the same name.
 
 

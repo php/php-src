@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -40,11 +40,11 @@
  */
 
 /* {{{ inifile_version */
-char *inifile_version() 
+char *inifile_version()
 {
 	return "1.0, $Id$";
 }
-/* }}} */ 
+/* }}} */
 
 /* {{{ inifile_free_key */
 void inifile_key_free(key_type *key)
@@ -79,17 +79,17 @@ void inifile_line_free(line_type *ln)
 /* }}} */
 
 /* {{{ inifile_alloc */
-inifile * inifile_alloc(php_stream *fp, int readonly, int persistent TSRMLS_DC)
+inifile * inifile_alloc(php_stream *fp, int readonly, int persistent)
 {
 	inifile *dba;
 
 	if (!readonly) {
 		if (!php_stream_truncate_supported(fp)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't truncate this stream");
+			php_error_docref(NULL, E_WARNING, "Can't truncate this stream");
 			return NULL;
 		}
 	}
- 
+
 	dba = pemalloc(sizeof(inifile), persistent);
 	memset(dba, 0, sizeof(inifile));
 	dba->fp = fp;
@@ -114,7 +114,7 @@ key_type inifile_key_split(const char *group_name)
 {
 	key_type key;
 	char *name;
-	
+
 	if (group_name[0] == '[' && (name = strchr(group_name, ']')) != NULL) {
 		key.group = estrndup(group_name+1, name - (group_name + 1));
 		key.name = estrdup(name+1);
@@ -146,7 +146,7 @@ static char *etrim(const char *str)
 {
 	char *val;
 	size_t l;
-	
+
 	if (!str) {
 		return NULL;
 	}
@@ -164,7 +164,7 @@ static char *etrim(const char *str)
 
 /* {{{ inifile_findkey
  */
-static int inifile_read(inifile *dba, line_type *ln TSRMLS_DC) {
+static int inifile_read(inifile *dba, line_type *ln) {
 	char *fline;
 	char *pos;
 
@@ -224,10 +224,10 @@ static int inifile_read(inifile *dba, line_type *ln TSRMLS_DC) {
  * 1 = GROUP-EQUAL,NAME-DIFFERENT
  * 2 = DIFFERENT
  */
-static int inifile_key_cmp(const key_type *k1, const key_type *k2 TSRMLS_DC)
+static int inifile_key_cmp(const key_type *k1, const key_type *k2)
 {
 	assert(k1->group && k1->name && k2->group && k2->name);
-	
+
 	if (!strcasecmp(k1->group, k2->group)) {
 		if (!strcasecmp(k1->name, k2->name)) {
 			return 0;
@@ -242,12 +242,12 @@ static int inifile_key_cmp(const key_type *k1, const key_type *k2 TSRMLS_DC)
 
 /* {{{ inifile_fetch
  */
-val_type inifile_fetch(inifile *dba, const key_type *key, int skip TSRMLS_DC) {
+val_type inifile_fetch(inifile *dba, const key_type *key, int skip) {
 	line_type ln = {{NULL,NULL},{NULL}};
 	val_type val;
 	int res, grp_eq = 0;
 
-	if (skip == -1 && dba->next.key.group && dba->next.key.name && !inifile_key_cmp(&dba->next.key, key TSRMLS_CC)) {
+	if (skip == -1 && dba->next.key.group && dba->next.key.name && !inifile_key_cmp(&dba->next.key, key)) {
 		/* we got position already from last fetch */
 		php_stream_seek(dba->fp, dba->next.pos, SEEK_SET);
 		ln.key.group = estrdup(dba->next.key.group);
@@ -260,8 +260,8 @@ val_type inifile_fetch(inifile *dba, const key_type *key, int skip TSRMLS_DC) {
 	if (skip == -1) {
 		skip = 0;
 	}
-	while(inifile_read(dba, &ln TSRMLS_CC)) {
-		if (!(res=inifile_key_cmp(&ln.key, key TSRMLS_CC))) {
+	while(inifile_read(dba, &ln)) {
+		if (!(res=inifile_key_cmp(&ln.key, key))) {
 			if (!skip) {
 				val.value = estrdup(ln.val.value ? ln.val.value : "");
 				/* allow faster access by updating key read into next */
@@ -286,36 +286,36 @@ val_type inifile_fetch(inifile *dba, const key_type *key, int skip TSRMLS_DC) {
 
 /* {{{ inifile_firstkey
  */
-int inifile_firstkey(inifile *dba TSRMLS_DC) {
+int inifile_firstkey(inifile *dba) {
 	inifile_line_free(&dba->curr);
 	dba->curr.pos = 0;
-	return inifile_nextkey(dba TSRMLS_CC);
+	return inifile_nextkey(dba);
 }
 /* }}} */
 
 /* {{{ inifile_nextkey
  */
-int inifile_nextkey(inifile *dba TSRMLS_DC) {
+int inifile_nextkey(inifile *dba) {
 	line_type ln = {{NULL,NULL},{NULL}};
 
 	/*inifile_line_free(&dba->next); ??? */
 	php_stream_seek(dba->fp, dba->curr.pos, SEEK_SET);
 	ln.key.group = estrdup(dba->curr.key.group ? dba->curr.key.group : "");
-	inifile_read(dba, &ln TSRMLS_CC);
+	inifile_read(dba, &ln);
 	inifile_line_free(&dba->curr);
 	dba->curr = ln;
 	return ln.key.group || ln.key.name;
-}	
+}
 /* }}} */
 
 /* {{{ inifile_truncate
  */
-static int inifile_truncate(inifile *dba, size_t size TSRMLS_DC)
+static int inifile_truncate(inifile *dba, size_t size)
 {
 	int res;
 
 	if ((res=php_stream_truncate_set_size(dba->fp, size)) != 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error in ftruncate: %d", res);
+		php_error_docref(NULL, E_WARNING, "Error in ftruncate: %d", res);
 		return FAILURE;
 	}
 	php_stream_seek(dba->fp, size, SEEK_SET);
@@ -326,7 +326,7 @@ static int inifile_truncate(inifile *dba, size_t size TSRMLS_DC)
 /* {{{ inifile_find_group
  * if found pos_grp_start points to "[group_name]"
  */
-static int inifile_find_group(inifile *dba, const key_type *key, size_t *pos_grp_start TSRMLS_DC) 
+static int inifile_find_group(inifile *dba, const key_type *key, size_t *pos_grp_start)
 {
 	int ret = FAILURE;
 
@@ -340,8 +340,8 @@ static int inifile_find_group(inifile *dba, const key_type *key, size_t *pos_grp
 		line_type ln = {{NULL,NULL},{NULL}};
 
 		res = 1;
-		while(inifile_read(dba, &ln TSRMLS_CC)) {
-			if ((res=inifile_key_cmp(&ln.key, key TSRMLS_CC)) < 2) {
+		while(inifile_read(dba, &ln)) {
+			if ((res=inifile_key_cmp(&ln.key, key)) < 2) {
 				ret = SUCCESS;
 				break;
 			}
@@ -363,15 +363,15 @@ static int inifile_find_group(inifile *dba, const key_type *key, size_t *pos_grp
  * only valid after a call to inifile_find_group
  * if any next group is found pos_grp_start points to "[group_name]" or whitespace before that
  */
-static int inifile_next_group(inifile *dba, const key_type *key, size_t *pos_grp_start TSRMLS_DC) 
+static int inifile_next_group(inifile *dba, const key_type *key, size_t *pos_grp_start)
 {
 	int ret = FAILURE;
 	line_type ln = {{NULL,NULL},{NULL}};
 
 	*pos_grp_start = php_stream_tell(dba->fp);
 	ln.key.group = estrdup(key->group);
-	while(inifile_read(dba, &ln TSRMLS_CC)) {
-		if (inifile_key_cmp(&ln.key, key TSRMLS_CC) == 2) {
+	while(inifile_read(dba, &ln)) {
+		if (inifile_key_cmp(&ln.key, key) == 2) {
 			ret = SUCCESS;
 			break;
 		}
@@ -384,29 +384,29 @@ static int inifile_next_group(inifile *dba, const key_type *key, size_t *pos_grp
 
 /* {{{ inifile_copy_to
  */
-static int inifile_copy_to(inifile *dba, size_t pos_start, size_t pos_end, inifile **ini_copy TSRMLS_DC)
+static int inifile_copy_to(inifile *dba, size_t pos_start, size_t pos_end, inifile **ini_copy)
 {
 	php_stream *fp;
-	
+
 	if (pos_start == pos_end) {
 		*ini_copy = NULL;
 		return SUCCESS;
 	}
 	if ((fp = php_stream_temp_create(0, 64 * 1024)) == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not create temporary stream");
+		php_error_docref(NULL, E_WARNING, "Could not create temporary stream");
 		*ini_copy = NULL;
 		return FAILURE;
 	}
 
-	if ((*ini_copy = inifile_alloc(fp, 1, 0 TSRMLS_CC)) == NULL) {
+	if ((*ini_copy = inifile_alloc(fp, 1, 0)) == NULL) {
 		/* writes error */
 		return FAILURE;
 	}
 	php_stream_seek(dba->fp, pos_start, SEEK_SET);
 	if (SUCCESS != php_stream_copy_to_stream_ex(dba->fp, fp, pos_end - pos_start, NULL)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not copy group [%zu - %zu] to temporary stream", pos_start, pos_end);
+		php_error_docref(NULL, E_WARNING, "Could not copy group [%zu - %zu] to temporary stream", pos_start, pos_end);
 		return FAILURE;
-	} 
+	}
 	return SUCCESS;
 }
 /* }}} */
@@ -414,7 +414,7 @@ static int inifile_copy_to(inifile *dba, size_t pos_start, size_t pos_end, inifi
 /* {{{ inifile_filter
  * copy from to dba while ignoring key name (group must equal)
  */
-static int inifile_filter(inifile *dba, inifile *from, const key_type *key TSRMLS_DC) 
+static int inifile_filter(inifile *dba, inifile *from, const key_type *key, zend_bool *found)
 {
 	size_t pos_start = 0, pos_next = 0, pos_curr;
 	int ret = SUCCESS;
@@ -422,14 +422,17 @@ static int inifile_filter(inifile *dba, inifile *from, const key_type *key TSRML
 
 	php_stream_seek(from->fp, 0, SEEK_SET);
 	php_stream_seek(dba->fp, 0, SEEK_END);
-	while(inifile_read(from, &ln TSRMLS_CC)) {
-		switch(inifile_key_cmp(&ln.key, key TSRMLS_CC)) {
+	while(inifile_read(from, &ln)) {
+		switch(inifile_key_cmp(&ln.key, key)) {
 		case 0:
+			if (found) {
+				*found = (zend_bool) 1;
+			}
 			pos_curr = php_stream_tell(from->fp);
 			if (pos_start != pos_next) {
 				php_stream_seek(from->fp, pos_start, SEEK_SET);
 				if (SUCCESS != php_stream_copy_to_stream_ex(from->fp, dba->fp, pos_next - pos_start, NULL)) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not copy [%zu - %zu] from temporary stream", pos_next, pos_start);
+					php_error_docref(NULL, E_WARNING, "Could not copy [%zu - %zu] from temporary stream", pos_next, pos_start);
 					ret = FAILURE;
 				}
 				php_stream_seek(from->fp, pos_curr, SEEK_SET);
@@ -448,7 +451,7 @@ static int inifile_filter(inifile *dba, inifile *from, const key_type *key TSRML
 	if (pos_start != pos_next) {
 		php_stream_seek(from->fp, pos_start, SEEK_SET);
 		if (SUCCESS != php_stream_copy_to_stream_ex(from->fp, dba->fp, pos_next - pos_start, NULL)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not copy [%zu - %zu] from temporary stream", pos_next, pos_start);
+			php_error_docref(NULL, E_WARNING, "Could not copy [%zu - %zu] from temporary stream", pos_next, pos_start);
 			ret = FAILURE;
 		}
 	}
@@ -459,7 +462,7 @@ static int inifile_filter(inifile *dba, inifile *from, const key_type *key TSRML
 
 /* {{{ inifile_delete_replace_append
  */
-static int inifile_delete_replace_append(inifile *dba, const key_type *key, const val_type *value, int append TSRMLS_DC) 
+static int inifile_delete_replace_append(inifile *dba, const key_type *key, const val_type *value, int append, zend_bool *found)
 {
 	size_t pos_grp_start=0, pos_grp_next;
 	inifile *ini_tmp = NULL;
@@ -471,7 +474,7 @@ static int inifile_delete_replace_append(inifile *dba, const key_type *key, cons
 	 * 3) If not append: Copy group to ini_tmp
 	 * 4) Open temp_stream and copy remainder
 	 * 5) Truncate stream
-	 * 6) If not append AND key.name given: Filtered copy back from ini_tmp 
+	 * 6) If not append AND key.name given: Filtered copy back from ini_tmp
 	 *    to stream. Otherwise the user wanted to delete the group.
 	 * 7) Append value if given
 	 * 8) Append temporary stream
@@ -480,36 +483,36 @@ static int inifile_delete_replace_append(inifile *dba, const key_type *key, cons
 	assert(!append || (key->name && value)); /* missuse */
 
 	/* 1 - 3 */
-	inifile_find_group(dba, key, &pos_grp_start TSRMLS_CC);
-	inifile_next_group(dba, key, &pos_grp_next TSRMLS_CC);
+	inifile_find_group(dba, key, &pos_grp_start);
+	inifile_next_group(dba, key, &pos_grp_next);
 	if (append) {
 		ret = SUCCESS;
 	} else {
-		ret = inifile_copy_to(dba, pos_grp_start, pos_grp_next, &ini_tmp TSRMLS_CC);
+		ret = inifile_copy_to(dba, pos_grp_start, pos_grp_next, &ini_tmp);
 	}
 
 	/* 4 */
 	if (ret == SUCCESS) {
 		fp_tmp = php_stream_temp_create(0, 64 * 1024);
 		if (!fp_tmp) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not create temporary stream");
+			php_error_docref(NULL, E_WARNING, "Could not create temporary stream");
 			ret = FAILURE;
 		} else {
 			php_stream_seek(dba->fp, 0, SEEK_END);
 			if (pos_grp_next != (size_t)php_stream_tell(dba->fp)) {
 				php_stream_seek(dba->fp, pos_grp_next, SEEK_SET);
 				if (SUCCESS != php_stream_copy_to_stream_ex(dba->fp, fp_tmp, PHP_STREAM_COPY_ALL, NULL)) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not copy remainder to temporary stream");
+					php_error_docref(NULL, E_WARNING, "Could not copy remainder to temporary stream");
 					ret = FAILURE;
 				}
 			}
 		}
 	}
-	
+
 	/* 5 */
 	if (ret == SUCCESS) {
 		if (!value || (key->name && strlen(key->name))) {
-			ret = inifile_truncate(dba, append ? pos_grp_next : pos_grp_start TSRMLS_CC); /* writes error on fail */
+			ret = inifile_truncate(dba, append ? pos_grp_next : pos_grp_start); /* writes error on fail */
 		}
 	}
 
@@ -517,7 +520,7 @@ static int inifile_delete_replace_append(inifile *dba, const key_type *key, cons
 		if (key->name && strlen(key->name)) {
 			/* 6 */
 			if (!append && ini_tmp) {
-				ret = inifile_filter(dba, ini_tmp, key TSRMLS_CC);
+				ret = inifile_filter(dba, ini_tmp, key, found);
 			}
 
 			/* 7 */
@@ -526,13 +529,13 @@ static int inifile_delete_replace_append(inifile *dba, const key_type *key, cons
 			 */
 			if (value) {
 				if (pos_grp_start == pos_grp_next && key->group && strlen(key->group)) {
-					php_stream_printf(dba->fp TSRMLS_CC, "[%s]\n", key->group);
+					php_stream_printf(dba->fp, "[%s]\n", key->group);
 				}
-				php_stream_printf(dba->fp TSRMLS_CC, "%s=%s\n", key->name, value->value ? value->value : "");
+				php_stream_printf(dba->fp, "%s=%s\n", key->name, value->value ? value->value : "");
 			}
 		}
-		
-		/* 8 */ 
+
+		/* 8 */
 		/* important: do not query ret==SUCCESS again: inifile_filter might fail but
 		 * however next operation must be done.
 		 */
@@ -540,7 +543,7 @@ static int inifile_delete_replace_append(inifile *dba, const key_type *key, cons
 			php_stream_seek(fp_tmp, 0, SEEK_SET);
 			php_stream_seek(dba->fp, 0, SEEK_END);
 			if (SUCCESS != php_stream_copy_to_stream_ex(fp_tmp, dba->fp, PHP_STREAM_COPY_ALL, NULL)) {
-				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Could not copy from temporary stream - ini file truncated");
+				php_error_docref(NULL, E_RECOVERABLE_ERROR, "Could not copy from temporary stream - ini file truncated");
 				ret = FAILURE;
 			}
 		}
@@ -562,25 +565,41 @@ static int inifile_delete_replace_append(inifile *dba, const key_type *key, cons
 
 /* {{{ inifile_delete
  */
-int inifile_delete(inifile *dba, const key_type *key TSRMLS_DC) 
+int inifile_delete(inifile *dba, const key_type *key)
 {
-	return inifile_delete_replace_append(dba, key, NULL, 0 TSRMLS_CC);
-}	
+	return inifile_delete_replace_append(dba, key, NULL, 0, NULL);
+}
+/* }}} */
+
+/* {{{ inifile_delete_ex
+ */
+int inifile_delete_ex(inifile *dba, const key_type *key, zend_bool *found)
+{
+	return inifile_delete_replace_append(dba, key, NULL, 0, found);
+}
 /* }}} */
 
 /* {{{ inifile_relace
  */
-int inifile_replace(inifile *dba, const key_type *key, const val_type *value TSRMLS_DC) 
+int inifile_replace(inifile *dba, const key_type *key, const val_type *value)
 {
-	return inifile_delete_replace_append(dba, key, value, 0 TSRMLS_CC);
+	return inifile_delete_replace_append(dba, key, value, 0, NULL);
+}
+/* }}} */
+
+/* {{{ inifile_replace_ex
+ */
+int inifile_replace_ex(inifile *dba, const key_type *key, const val_type *value, zend_bool *found)
+{
+	return inifile_delete_replace_append(dba, key, value, 0, found);
 }
 /* }}} */
 
 /* {{{ inifile_append
  */
-int inifile_append(inifile *dba, const key_type *key, const val_type *value TSRMLS_DC) 
+int inifile_append(inifile *dba, const key_type *key, const val_type *value)
 {
-	return inifile_delete_replace_append(dba, key, value, 1 TSRMLS_CC);
+	return inifile_delete_replace_append(dba, key, value, 1, NULL);
 }
 /* }}} */
 

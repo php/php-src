@@ -19,7 +19,7 @@ var_dump(phpcredits(CREDITS_GROUP));
 <!DOCTYPE %a>%s</html>
 bool(true)
 
-Warning: phpcredits() expects parameter 1 to be long, array given in %sphpcredits2.php on line 4
+Warning: phpcredits() expects parameter 1 to be integer, array given in %sphpcredits2.php on line 4
 NULL
 --
 <h1>PHP Credits</h1>

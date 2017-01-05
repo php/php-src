@@ -22,7 +22,7 @@ extern char *gd_strtok_r(char *s, char *sep, char **state);
 #define gdPEstrdup(ptr)		pestrdup(ptr, 1)
 
 /* Returns nonzero if multiplying the two quantities will
-	result in integer overflow. Also returns nonzero if 
+	result in integer overflow. Also returns nonzero if
 	either quantity is negative. By Phil Knirsch based on
 	netpbm fixes by Alan Cox. */
 

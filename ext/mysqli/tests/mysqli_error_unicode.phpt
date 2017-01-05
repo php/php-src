@@ -24,7 +24,7 @@ require_once('skipifconnectfailure.inc');
 			$host, $user, $db, $port, $socket);
 	}
 
-	if (!(version_compare(PHP_VERSION, '5.9.9', '>') == 1)) {
+	if (!(version_compare(PHP_VERSION, '6.0', '==') == 1)) {
 		mysqli_query($link, "set names utf8");
 	}
 

@@ -22,4 +22,4 @@ echo "If this is printed BAIL hasn't worked";
 int(0)
 f1 called
 
-Warning: assert(): Assertion "0 != 0" failed in %s on line 10
+Warning: assert(): assert($sa): "0 != 0" failed in %s on line 10

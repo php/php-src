@@ -13,7 +13,7 @@ Notes:
 If you use a debian based distribution, prefer the use of dpkg-reconfigure.
 Otherwise you may alter these configuration files:
 
-(/etc/openldap/)slapd.conf:
+	(/etc/openldap/)slapd.conf:
 -----------------------------------------------------------
 TLSCACertificateFile /etc/openldap/ssl/server.pem
 TLSCertificateFile /etc/openldap/ssl/server.pem

@@ -8,7 +8,7 @@ Bug #21961 (get_parent_class() segfault)
 class man
 {
 	public $name, $bars;
-	function man()
+	function __construct()
 	{
 		$this->name = 'Mr. X';
 		$this->bars = array();
@@ -29,7 +29,7 @@ class bar extends man
 {
 	public $name;
 
-	function bar($w)
+	function __construct($w)
 	{
 		$this->name = $w;
 	}

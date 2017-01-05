@@ -8,6 +8,7 @@ if(!extension_loaded('gd')) {
 if(!function_exists('imagecreatetruecolor')) {
     die('skip imagecreatetruecolor function is not available');
 }
+if (PHP_INT_SIZE != 8) die('skip 64-bit only');
 ?> 
 --FILE--
 <?php
@@ -125,22 +126,22 @@ int(2570)
 
 --empty array--
 
-Warning: imagecolorallocate() expects parameter 2 to be long, array given in %s on line %d
+Warning: imagecolorallocate() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 
 --int indexed array--
 
-Warning: imagecolorallocate() expects parameter 2 to be long, array given in %s on line %d
+Warning: imagecolorallocate() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 
 --associative array--
 
-Warning: imagecolorallocate() expects parameter 2 to be long, array given in %s on line %d
+Warning: imagecolorallocate() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 
 --nested arrays--
 
-Warning: imagecolorallocate() expects parameter 2 to be long, array given in %s on line %d
+Warning: imagecolorallocate() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 
 --uppercase NULL--
@@ -163,42 +164,42 @@ int(2570)
 
 --empty string DQ--
 
-Warning: imagecolorallocate() expects parameter 2 to be long, string given in %s on line %d
+Warning: imagecolorallocate() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 --empty string SQ--
 
-Warning: imagecolorallocate() expects parameter 2 to be long, string given in %s on line %d
+Warning: imagecolorallocate() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 --string DQ--
 
-Warning: imagecolorallocate() expects parameter 2 to be long, string given in %s on line %d
+Warning: imagecolorallocate() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 --string SQ--
 
-Warning: imagecolorallocate() expects parameter 2 to be long, string given in %s on line %d
+Warning: imagecolorallocate() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 --mixed case string--
 
-Warning: imagecolorallocate() expects parameter 2 to be long, string given in %s on line %d
+Warning: imagecolorallocate() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 --heredoc--
 
-Warning: imagecolorallocate() expects parameter 2 to be long, string given in %s on line %d
+Warning: imagecolorallocate() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 --instance of classWithToString--
 
-Warning: imagecolorallocate() expects parameter 2 to be long, object given in %s on line %d
+Warning: imagecolorallocate() expects parameter 2 to be integer, object given in %s on line %d
 NULL
 
 --instance of classWithoutToString--
 
-Warning: imagecolorallocate() expects parameter 2 to be long, object given in %s on line %d
+Warning: imagecolorallocate() expects parameter 2 to be integer, object given in %s on line %d
 NULL
 
 --undefined var--
@@ -209,6 +210,6 @@ int(2570)
 
 --file resource--
 
-Warning: imagecolorallocate() expects parameter 2 to be long, resource given in %s on line %d
+Warning: imagecolorallocate() expects parameter 2 to be integer, resource given in %s on line %d
 NULL
 ===DONE===

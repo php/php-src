@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -63,10 +63,10 @@ TODO:
 PHP_FUNCTION(readlink)
 {
 	char *link;
-	int link_len;
+	size_t link_len;
 	char target[MAXPATHLEN];
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &link, &link_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &link, &link_len) == FAILURE) {
 		return;
 	}
 
@@ -75,10 +75,10 @@ PHP_FUNCTION(readlink)
 	}
 
 	if (php_sys_readlink(link, target, MAXPATHLEN) == -1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "readlink failed to read the symbolic link (%s), error %d)", link, GetLastError());
+		php_error_docref(NULL, E_WARNING, "readlink failed to read the symbolic link (%s), error %d)", link, GetLastError());
 		RETURN_FALSE;
 	}
-	RETURN_STRING(target, 1);
+	RETURN_STRING(target);
 }
 /* }}} */
 
@@ -87,21 +87,21 @@ PHP_FUNCTION(readlink)
 PHP_FUNCTION(linkinfo)
 {
 	char *link;
-	int link_len;
-	struct stat sb;
+	size_t link_len;
+	zend_stat_t sb;
 	int ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &link, &link_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &link, &link_len) == FAILURE) {
 		return;
 	}
 
 	ret = VCWD_STAT(link, &sb);
 	if (ret == -1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
-		RETURN_LONG(-1L);
+		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
+		RETURN_LONG(Z_L(-1));
 	}
 
-	RETURN_LONG((long) sb.st_dev);
+	RETURN_LONG((zend_long) sb.st_dev);
 }
 /* }}} */
 
@@ -110,7 +110,7 @@ PHP_FUNCTION(linkinfo)
 PHP_FUNCTION(symlink)
 {
 	char *topath, *frompath;
-	int topath_len, frompath_len;
+	size_t topath_len, frompath_len;
 	BOOLEAN ret;
 	char source_p[MAXPATHLEN];
 	char dest_p[MAXPATHLEN];
@@ -126,35 +126,35 @@ PHP_FUNCTION(symlink)
 	if (kernel32) {
 		pCreateSymbolicLinkA = (csla_func)GetProcAddress(kernel32, "CreateSymbolicLinkA");
 		if (pCreateSymbolicLinkA == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't call CreateSymbolicLinkA");
+			php_error_docref(NULL, E_WARNING, "Can't call CreateSymbolicLinkA");
 			RETURN_FALSE;
 		}
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't call get a handle on kernel32.dll");
+		php_error_docref(NULL, E_WARNING, "Can't call get a handle on kernel32.dll");
 		RETURN_FALSE;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pp", &topath, &topath_len, &frompath, &frompath_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pp", &topath, &topath_len, &frompath, &frompath_len) == FAILURE) {
 		return;
 	}
-	
-	if (!expand_filepath(frompath, source_p TSRMLS_CC)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such file or directory");
+
+	if (!expand_filepath(frompath, source_p)) {
+		php_error_docref(NULL, E_WARNING, "No such file or directory");
 		RETURN_FALSE;
 	}
 
 	memcpy(dirname, source_p, sizeof(source_p));
 	len = php_dirname(dirname, strlen(dirname));
 
-	if (!expand_filepath_ex(topath, dest_p, dirname, len TSRMLS_CC)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such file or directory");
+	if (!expand_filepath_ex(topath, dest_p, dirname, len)) {
+		php_error_docref(NULL, E_WARNING, "No such file or directory");
 		RETURN_FALSE;
 	}
 
-	if (php_stream_locate_url_wrapper(source_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC) ||
-		php_stream_locate_url_wrapper(dest_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC) ) 
+	if (php_stream_locate_url_wrapper(source_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY) ||
+		php_stream_locate_url_wrapper(dest_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY) )
 	{
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to symlink to a URL");
+		php_error_docref(NULL, E_WARNING, "Unable to symlink to a URL");
 		RETURN_FALSE;
 	}
 
@@ -167,7 +167,7 @@ PHP_FUNCTION(symlink)
 	}
 
 	if ((attr = GetFileAttributes(topath)) == INVALID_FILE_ATTRIBUTES) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not fetch file information(error %d)", GetLastError());
+			php_error_docref(NULL, E_WARNING, "Could not fetch file information(error %d)", GetLastError());
 			RETURN_FALSE;
 	}
 
@@ -177,7 +177,7 @@ PHP_FUNCTION(symlink)
 	ret = pCreateSymbolicLinkA(source_p, topath, (attr & FILE_ATTRIBUTE_DIRECTORY ? 1 : 0));
 
 	if (!ret) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create symlink, error code(%d)", GetLastError());
+		php_error_docref(NULL, E_WARNING, "Cannot create symlink, error code(%d)", GetLastError());
 		RETURN_FALSE;
 	}
 
@@ -190,26 +190,26 @@ PHP_FUNCTION(symlink)
 PHP_FUNCTION(link)
 {
 	char *topath, *frompath;
-	int topath_len, frompath_len;
+	size_t topath_len, frompath_len;
 	int ret;
 	char source_p[MAXPATHLEN];
 	char dest_p[MAXPATHLEN];
 
 	/*First argument to link function is the target and hence should go to frompath
 	  Second argument to link function is the link itself and hence should go to topath */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &frompath, &frompath_len, &topath, &topath_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &frompath, &frompath_len, &topath, &topath_len) == FAILURE) {
 		return;
 	}
 
-	if (!expand_filepath(frompath, source_p TSRMLS_CC) || !expand_filepath(topath, dest_p TSRMLS_CC)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such file or directory");
+	if (!expand_filepath(frompath, source_p) || !expand_filepath(topath, dest_p)) {
+		php_error_docref(NULL, E_WARNING, "No such file or directory");
 		RETURN_FALSE;
 	}
 
-	if (php_stream_locate_url_wrapper(source_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC) ||
-		php_stream_locate_url_wrapper(dest_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC) ) 
+	if (php_stream_locate_url_wrapper(source_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY) ||
+		php_stream_locate_url_wrapper(dest_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY) )
 	{
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to link to a URL");
+		php_error_docref(NULL, E_WARNING, "Unable to link to a URL");
 		RETURN_FALSE;
 	}
 
@@ -223,12 +223,12 @@ PHP_FUNCTION(link)
 
 #ifndef ZTS
 	ret = CreateHardLinkA(topath, frompath, NULL);
-#else 
-	ret = CreateHardLinkA(dest_p, source_p, NULL);	
-#endif	
+#else
+	ret = CreateHardLinkA(dest_p, source_p, NULL);
+#endif
 
 	if (ret == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
+		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
 	}
 

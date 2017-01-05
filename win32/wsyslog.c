@@ -61,13 +61,12 @@
 
 void closelog(void)
 {
-	TSRMLS_FETCH();
-	if (PW32G(log_source)) {
+	if (INVALID_HANDLE_VALUE != PW32G(log_source)) {
 		DeregisterEventSource(PW32G(log_source));
-		PW32G(log_source) = NULL;
+		PW32G(log_source) = INVALID_HANDLE_VALUE;
 	}
 	if (PW32G(log_header)) {
-		STR_FREE(PW32G(log_header));
+		efree(PW32G(log_header));
 		PW32G(log_header) = NULL;
 	}
 }
@@ -85,10 +84,9 @@ void syslog(int priority, const char *message, ...)
 	unsigned short etype;
 	char *tmp = NULL;
 	DWORD evid;
-	TSRMLS_FETCH();
 
 	/* default event source */
-	if (!PW32G(log_source))
+	if (INVALID_HANDLE_VALUE == PW32G(log_source))
 		openlog("php", LOG_PID, LOG_SYSLOG);
 
 	switch (priority) {			/* translate UNIX type into NT type */
@@ -123,14 +121,18 @@ void syslog(int priority, const char *message, ...)
 
 void openlog(const char *ident, int logopt, int facility)
 {
-	TSRMLS_FETCH();
 
-	if (PW32G(log_source)) {
-		closelog();
-	}
-
-	STR_FREE(PW32G(log_header));
+	closelog();
 
 	PW32G(log_source) = RegisterEventSource(NULL, "PHP-" PHP_VERSION);
 	spprintf(&PW32G(log_header), 0, (logopt & LOG_PID) ? "%s[%d]" : "%s", ident, getpid());
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

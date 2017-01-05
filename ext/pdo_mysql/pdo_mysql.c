@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -32,6 +32,9 @@
 #include "php_pdo_mysql_int.h"
 
 #ifdef COMPILE_DL_PDO_MYSQL
+#ifdef ZTS
+ZEND_TSRMLS_CACHE_DEFINE()
+#endif
 ZEND_GET_MODULE(pdo_mysql)
 #endif
 
@@ -42,7 +45,7 @@ ZEND_DECLARE_MODULE_GLOBALS(pdo_mysql)
  With libmysql `mysql_config --socket` will fill PDO_MYSQL_UNIX_ADDR
  and the user can use --with-mysql-sock=SOCKET which will fill
  PDO_MYSQL_UNIX_ADDR. If both aren't set we're using mysqlnd and use
- /tmp/mysql.sock as default on *nix and NULL for Windows (default 
+ /tmp/mysql.sock as default on *nix and NULL for Windows (default
  named pipe name is set in mysqlnd).
 */
 #ifndef PDO_MYSQL_UNIX_ADDR
@@ -59,18 +62,18 @@ ZEND_DECLARE_MODULE_GLOBALS(pdo_mysql)
 
 #ifdef PDO_USE_MYSQLND
 #include "ext/mysqlnd/mysqlnd_reverse_api.h"
-static MYSQLND * pdo_mysql_convert_zv_to_mysqlnd(zval * zv TSRMLS_DC)
+static MYSQLND * pdo_mysql_convert_zv_to_mysqlnd(zval * zv)
 {
-	if (Z_TYPE_P(zv) == IS_OBJECT && instanceof_function(Z_OBJCE_P(zv), php_pdo_get_dbh_ce() TSRMLS_CC)) {
-		pdo_dbh_t * dbh = zend_object_store_get_object(zv TSRMLS_CC);
+	if (Z_TYPE_P(zv) == IS_OBJECT && instanceof_function(Z_OBJCE_P(zv), php_pdo_get_dbh_ce())) {
+		pdo_dbh_t * dbh = Z_PDO_DBH_P(zv);
 
 		if (!dbh) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to retrieve handle from object store");
+			php_error_docref(NULL, E_WARNING, "Failed to retrieve handle from object store");
 			return NULL;
 		}
 
 		if (dbh->driver != &pdo_mysql_driver) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Provided PDO instance is not using MySQL but %s", dbh->driver->driver_name);
+			php_error_docref(NULL, E_WARNING, "Provided PDO instance is not using MySQL but %s", dbh->driver->driver_name);
 			return NULL;
 		}
 
@@ -98,38 +101,38 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 /* }}} */
 
-/* true global environment */		
-		
+/* true global environment */
+
 /* {{{ PHP_MINIT_FUNCTION
  */
 static PHP_MINIT_FUNCTION(pdo_mysql)
 {
 	REGISTER_INI_ENTRIES();
 
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_USE_BUFFERED_QUERY", (long)PDO_MYSQL_ATTR_USE_BUFFERED_QUERY);
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_LOCAL_INFILE", (long)PDO_MYSQL_ATTR_LOCAL_INFILE);	
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_INIT_COMMAND", (long)PDO_MYSQL_ATTR_INIT_COMMAND);
+	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_USE_BUFFERED_QUERY", (zend_long)PDO_MYSQL_ATTR_USE_BUFFERED_QUERY);
+	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_LOCAL_INFILE", (zend_long)PDO_MYSQL_ATTR_LOCAL_INFILE);
+	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_INIT_COMMAND", (zend_long)PDO_MYSQL_ATTR_INIT_COMMAND);
 #ifndef PDO_USE_MYSQLND
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_MAX_BUFFER_SIZE", (long)PDO_MYSQL_ATTR_MAX_BUFFER_SIZE);
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_READ_DEFAULT_FILE", (long)PDO_MYSQL_ATTR_READ_DEFAULT_FILE);
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_READ_DEFAULT_GROUP", (long)PDO_MYSQL_ATTR_READ_DEFAULT_GROUP);
+	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_MAX_BUFFER_SIZE", (zend_long)PDO_MYSQL_ATTR_MAX_BUFFER_SIZE);
+	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_READ_DEFAULT_FILE", (zend_long)PDO_MYSQL_ATTR_READ_DEFAULT_FILE);
+	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_READ_DEFAULT_GROUP", (zend_long)PDO_MYSQL_ATTR_READ_DEFAULT_GROUP);
 #endif
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_COMPRESS", (long)PDO_MYSQL_ATTR_COMPRESS);
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_DIRECT_QUERY", (long)PDO_MYSQL_ATTR_DIRECT_QUERY);
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_FOUND_ROWS", (long)PDO_MYSQL_ATTR_FOUND_ROWS);
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_IGNORE_SPACE", (long)PDO_MYSQL_ATTR_IGNORE_SPACE);
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SSL_KEY", (long)PDO_MYSQL_ATTR_SSL_KEY);
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SSL_CERT", (long)PDO_MYSQL_ATTR_SSL_CERT);
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SSL_CA", (long)PDO_MYSQL_ATTR_SSL_CA);
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SSL_CAPATH", (long)PDO_MYSQL_ATTR_SSL_CAPATH);
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SSL_CIPHER", (long)PDO_MYSQL_ATTR_SSL_CIPHER);
+	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_COMPRESS", (zend_long)PDO_MYSQL_ATTR_COMPRESS);
+	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_DIRECT_QUERY", (zend_long)PDO_MYSQL_ATTR_DIRECT_QUERY);
+	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_FOUND_ROWS", (zend_long)PDO_MYSQL_ATTR_FOUND_ROWS);
+	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_IGNORE_SPACE", (zend_long)PDO_MYSQL_ATTR_IGNORE_SPACE);
+	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SSL_KEY", (zend_long)PDO_MYSQL_ATTR_SSL_KEY);
+	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SSL_CERT", (zend_long)PDO_MYSQL_ATTR_SSL_CERT);
+	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SSL_CA", (zend_long)PDO_MYSQL_ATTR_SSL_CA);
+	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SSL_CAPATH", (zend_long)PDO_MYSQL_ATTR_SSL_CAPATH);
+	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SSL_CIPHER", (zend_long)PDO_MYSQL_ATTR_SSL_CIPHER);
 #if MYSQL_VERSION_ID > 50605 || defined(PDO_USE_MYSQLND)
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SERVER_PUBLIC_KEY", (long)PDO_MYSQL_ATTR_SERVER_PUBLIC_KEY);
+	 REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SERVER_PUBLIC_KEY", (zend_long)PDO_MYSQL_ATTR_SERVER_PUBLIC_KEY);
 #endif
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_MULTI_STATEMENTS", (long)PDO_MYSQL_ATTR_MULTI_STATEMENTS);
+	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_MULTI_STATEMENTS", (zend_long)PDO_MYSQL_ATTR_MULTI_STATEMENTS);
 
 #ifdef PDO_USE_MYSQLND
-	mysqlnd_reverse_api_register_api(&pdo_mysql_reverse_api TSRMLS_CC);
+	mysqlnd_reverse_api_register_api(&pdo_mysql_reverse_api);
 #endif
 
 	return php_pdo_register_driver(&pdo_mysql_driver);
@@ -171,16 +174,16 @@ static PHP_MINFO_FUNCTION(pdo_mysql)
 /* {{{ PHP_RINIT_FUNCTION
  */
 static PHP_RINIT_FUNCTION(pdo_mysql)
-{	
+{
 	if (PDO_MYSQL_G(debug)) {
-		MYSQLND_DEBUG *dbg = mysqlnd_debug_init(mysqlnd_debug_std_no_trace_funcs TSRMLS_CC);
+		MYSQLND_DEBUG *dbg = mysqlnd_debug_init(mysqlnd_debug_std_no_trace_funcs);
 		if (!dbg) {
 			return FAILURE;
 		}
 		dbg->m->set_mode(dbg, PDO_MYSQL_G(debug));
 		PDO_MYSQL_G(dbg) = dbg;
 	}
-	
+
 	return SUCCESS;
 }
 /* }}} */
@@ -206,6 +209,9 @@ static PHP_RSHUTDOWN_FUNCTION(pdo_mysql)
  */
 static PHP_GINIT_FUNCTION(pdo_mysql)
 {
+#if defined(COMPILE_DL_PDO_MYSQL) && defined(ZTS)
+ZEND_TSRMLS_CACHE_UPDATE();
+#endif
 #ifndef PHP_WIN32
 	pdo_mysql_globals->default_socket = NULL;
 #endif
@@ -250,7 +256,7 @@ zend_module_entry pdo_mysql_module_entry = {
 	NULL,
 #endif
 	PHP_MINFO(pdo_mysql),
-	"1.0.2",
+	PHP_PDO_MYSQL_VERSION,
 	PHP_MODULE_GLOBALS(pdo_mysql),
 	PHP_GINIT(pdo_mysql),
 	NULL,

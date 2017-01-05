@@ -5,7 +5,7 @@
  * Freely redistributable and modifiable.  Use at your own risk.             *
  *                                                                           *
  * Copyright 1994 The Downhill Project                                       *
- * 
+ *
  * Modified by Shane Caraveo for use with PHP
  *
  *****************************************************************************/
@@ -27,10 +27,13 @@
 
 typedef VOID (WINAPI *MyGetSystemTimeAsFileTime)(LPFILETIME lpSystemTimeAsFileTime);
 
-static MyGetSystemTimeAsFileTime get_time_func(void)
+static MyGetSystemTimeAsFileTime timefunc = NULL;
+
+#ifdef PHP_EXPORTS
+static zend_always_inline MyGetSystemTimeAsFileTime get_time_func(void)
 {
 	MyGetSystemTimeAsFileTime timefunc = NULL;
-	HMODULE hMod = LoadLibrary("kernel32.dll");
+	HMODULE hMod = GetModuleHandle("kernel32.dll");
 
 	if (hMod) {
 		/* Max possible resolution <1us, win8/server2012 */
@@ -45,22 +48,24 @@ static MyGetSystemTimeAsFileTime get_time_func(void)
 	return timefunc;
 }
 
-int getfilesystemtime(struct timeval *tv)
+BOOL php_win32_init_gettimeofday(void)
+{
+	timefunc = get_time_func();
+
+	return (NULL != timefunc);
+}
+#endif
+
+static zend_always_inline int getfilesystemtime(struct timeval *tv)
 {
 	FILETIME ft;
 	unsigned __int64 ff = 0;
-	MyGetSystemTimeAsFileTime timefunc;
 	ULARGE_INTEGER fft;
 
-	timefunc = get_time_func();
-	if (timefunc) {
-		timefunc(&ft);
-	} else {
-		GetSystemTimeAsFileTime(&ft);
-	}
+	timefunc(&ft);
 
         /*
-	 * Do not cast a pointer to a FILETIME structure to either a 
+	 * Do not cast a pointer to a FILETIME structure to either a
 	 * ULARGE_INTEGER* or __int64* value because it can cause alignment faults on 64-bit Windows.
 	 * via  http://technet.microsoft.com/en-us/library/ms724284(v=vs.85).aspx
 	 */
@@ -117,87 +122,11 @@ PHPAPI int nanosleep( const struct timespec * rqtp, struct timespec * rmtp )
 	return usleep( rqtp->tv_sec * 1000000 + rqtp->tv_nsec / 1000  );
 }
 
-#if 0 /* looks pretty ropey in here */
-#ifdef HAVE_SETITIMER
-
-
-#ifndef THREAD_SAFE
-unsigned int proftimer, virttimer, realtimer;
-extern LPMSG phpmsg;
-#endif
-
-struct timer_msg {
-	int signal;
-	unsigned int threadid;
-};
-
-
-LPTIMECALLBACK setitimer_timeout(UINT uTimerID, UINT info, DWORD dwUser, DWORD dw1, DWORD dw2)
-{
-	struct timer_msg *msg = (struct timer_msg *) info;
-
-	if (msg) {
-		raise((int) msg->signal);
-		PostThreadMessage(msg->threadid,
-						  WM_NOTIFY, msg->signal, 0);
-		free(msg);
-	}
-	return 0;
-}
-
-PHPAPI int setitimer(int which, const struct itimerval *value, struct itimerval *ovalue)
-{
-	int timeout = value->it_value.tv_sec * 1000 + value->it_value.tv_usec;
-	int repeat = TIME_ONESHOT;
-
-	/*make sure the message queue is initialized */
-	PeekMessage(phpmsg, NULL, WM_USER, WM_USER, PM_NOREMOVE);
-	if (timeout > 0) {
-		struct timer_msg *msg = malloc(sizeof(struct timer_msg));
-		msg->threadid = GetCurrentThreadId();
-		if (!ovalue) {
-			repeat = TIME_PERIODIC;
-		}
-		switch (which) {
-			case ITIMER_REAL:
-				msg->signal = SIGALRM;
-				realtimer = timeSetEvent(timeout, 100, (LPTIMECALLBACK) setitimer_timeout, (UINT) msg, repeat);
-				break;
-			case ITIMER_VIRT:
-				msg->signal = SIGVTALRM;
-				virttimer = timeSetEvent(timeout, 100, (LPTIMECALLBACK) setitimer_timeout, (UINT) msg, repeat);
-				break;
-			case ITIMER_PROF:
-				msg->signal = SIGPROF;
-				proftimer = timeSetEvent(timeout, 100, (LPTIMECALLBACK) setitimer_timeout, (UINT) msg, repeat);
-				break;
-			default:
-				errno = EINVAL;
-				return -1;
-				break;
-		}
-	} else {
-		switch (which) {
-			case ITIMER_REAL:
-				timeKillEvent(realtimer);
-				break;
-			case ITIMER_VIRT:
-				timeKillEvent(virttimer);
-				break;
-			case ITIMER_PROF:
-				timeKillEvent(proftimer);
-				break;
-			default:
-				errno = EINVAL;
-				return -1;
-				break;
-		}
-	}
-
-
-	return 0;
-}
-
-#endif
-#endif
-
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

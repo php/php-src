@@ -30,7 +30,7 @@ $asso_arrays = array(
 /*3*/  array(0xabc => 2748, 0x12f => '303', 0xff => "255", -0xff => "-255"),
 
        // array with octal values as keys 
-       array(0123 => 83, 0129 => 10, 010 => "8", -0348 => "-28", 0012 => '10'),
+       array(0123 => 83, 012 => 10, 010 => "8", -034 => "-28", 0012 => '10'),
 
        // array with bool values as keys
        array(TRUE => '1', true => true, TrUe => "TRUE",

@@ -49,17 +49,7 @@ DONE
 Notice: unserialize(): Error at offset 0 of 3 bytes in %sbug70436.php on line %d
 
 Notice: unserialize(): Error at offset 17 of 17 bytes in %sbug70436.php on line %d
-array(4) {
-  [0]=>
-  int(1)
-  [1]=>
-  object(obj)#%d (1) {
-    ["data"]=>
-    bool(false)
-  }
-  [2]=>
-  string(24) "%s"
-  [3]=>
-  bool(false)
-}
+
+Notice: unserialize(): Error at offset 93 of 94 bytes in %sbug70436.php on line %d
+bool(false)
 DONE

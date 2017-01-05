@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -23,12 +23,11 @@
 
 #include "zend.h"
 
-#if PHP_MAJOR_VERSION > 5 || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1)
-#define can_handle_soft_dependency_on_SPL 1
-#endif
-
 extern zend_module_entry pdo_module_entry;
 #define phpext_pdo_ptr &pdo_module_entry
+
+#include "php_version.h"
+#define PHP_PDO_VERSION PHP_VERSION
 
 #ifdef PHP_WIN32
 #	if defined(PDO_EXPORTS) || (!defined(COMPILE_DL_PDO))
@@ -53,7 +52,7 @@ PHP_MSHUTDOWN_FUNCTION(pdo);
 PHP_MINFO_FUNCTION(pdo);
 
 ZEND_BEGIN_MODULE_GLOBALS(pdo)
-	long  global_value;
+	zend_long  global_value;
 ZEND_END_MODULE_GLOBALS(pdo)
 
 #ifdef ZTS
@@ -63,20 +62,14 @@ ZEND_END_MODULE_GLOBALS(pdo)
 #endif
 
 #define REGISTER_PDO_CLASS_CONST_LONG(const_name, value) \
-	zend_declare_class_constant_long(php_pdo_get_dbh_ce(), const_name, sizeof(const_name)-1, (long)value TSRMLS_CC);
-
-#define REGISTER_PDO_CONST_LONG(const_name, value) { \
-	zend_class_entry **pce;	\
-	if (zend_hash_find(CG(class_table), "pdo", sizeof("pdo"), (void **) &pce) != FAILURE)	\
-		zend_declare_class_constant_long(*pce, const_name, sizeof(const_name)-1, (long)value TSRMLS_CC);	\
-}	\
+	zend_declare_class_constant_long(php_pdo_get_dbh_ce(), const_name, sizeof(const_name)-1, (zend_long)value);
 
 #define REGISTER_PDO_CLASS_CONST_STRING(const_name, value) \
-	zend_declare_class_constant_stringl(php_pdo_get_dbh_ce(), const_name, sizeof(const_name)-1, value, sizeof(value)-1 TSRMLS_CC);
+	zend_declare_class_constant_stringl(php_pdo_get_dbh_ce(), const_name, sizeof(const_name)-1, value, sizeof(value)-1);
 
 #define PDO_CONSTRUCT_CHECK	\
 	if (!dbh->driver) {	\
-		pdo_raise_impl_error(dbh, NULL, "00000", "PDO constructor was not called" TSRMLS_CC);	\
+		pdo_raise_impl_error(dbh, NULL, "00000", "PDO constructor was not called");	\
 		return;	\
 	}	\
 

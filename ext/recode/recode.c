@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -85,7 +85,7 @@ static const zend_function_entry php_recode_functions[] = {
 	PHP_FE(recode_file, 	arginfo_recode_file)
 	PHP_FALIAS(recode, recode_string, arginfo_recode_string)
 	PHP_FE_END
-};
+}; /* }}} */
 
 zend_module_entry recode_module_entry = {
 	STANDARD_MODULE_HEADER,
@@ -96,7 +96,7 @@ zend_module_entry recode_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(recode),
-	NO_VERSION_YET,
+	PHP_RECODE_VERSION,
 	PHP_MODULE_GLOBALS(recode),
 	PHP_GINIT(recode),
 	NULL,
@@ -146,32 +146,32 @@ PHP_FUNCTION(recode_string)
 	RECODE_REQUEST request = NULL;
 	char *r = NULL;
 	size_t r_len = 0, r_alen = 0;
-	int req_len, str_len;
+	size_t req_len, str_len;
 	char *req, *str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &req, &req_len, &str, &str_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &req, &req_len, &str, &str_len) == FAILURE) {
 		return;
 	}
 
 	request = recode_new_request(ReSG(outer));
 
 	if (request == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot allocate request structure");
+		php_error_docref(NULL, E_WARNING, "Cannot allocate request structure");
 		RETURN_FALSE;
 	}
 
 	if (!recode_scan_request(request, req)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal recode request '%s'", req);
+		php_error_docref(NULL, E_WARNING, "Illegal recode request '%s'", req);
 		goto error_exit;
 	}
 
 	recode_buffer_to_buffer(request, str, str_len, &r, &r_len, &r_alen);
 	if (!r) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Recoding failed.");
+		php_error_docref(NULL, E_WARNING, "Recoding failed.");
 error_exit:
 		RETVAL_FALSE;
 	} else {
-		RETVAL_STRINGL_CHECK(r, r_len, 1);
+		RETVAL_STRINGL(r, r_len);
 		free(r);
 	}
 
@@ -187,17 +187,17 @@ PHP_FUNCTION(recode_file)
 {
 	RECODE_REQUEST request = NULL;
 	char *req;
-	int req_len;
+	size_t req_len;
 	zval *input, *output;
 	php_stream *instream, *outstream;
 	FILE  *in_fp,  *out_fp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "srr", &req, &req_len, &input, &output) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "srr", &req, &req_len, &input, &output) == FAILURE) {
 	 	return;
 	}
 
-	php_stream_from_zval(instream, &input);
-	php_stream_from_zval(outstream, &output);
+	php_stream_from_zval(instream, input);
+	php_stream_from_zval(outstream, output);
 
 	if (FAILURE == php_stream_cast(instream, PHP_STREAM_AS_STDIO, (void**)&in_fp, REPORT_ERRORS))	{
 		RETURN_FALSE;
@@ -209,17 +209,17 @@ PHP_FUNCTION(recode_file)
 
 	request = recode_new_request(ReSG(outer));
 	if (request == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot allocate request structure");
+		php_error_docref(NULL, E_WARNING, "Cannot allocate request structure");
 		RETURN_FALSE;
 	}
 
 	if (!recode_scan_request(request, req)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal recode request '%s'", req);
+		php_error_docref(NULL, E_WARNING, "Illegal recode request '%s'", req);
 		goto error_exit;
 	}
 
 	if (!recode_file_to_file(request, in_fp, out_fp)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Recoding failed.");
+		php_error_docref(NULL, E_WARNING, "Recoding failed.");
 		goto error_exit;
 	}
 

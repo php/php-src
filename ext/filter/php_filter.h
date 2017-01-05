@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -38,6 +38,8 @@ extern zend_module_entry filter_module_entry;
 #include "TSRM.h"
 #endif
 
+#define PHP_FILTER_VERSION PHP_VERSION
+
 PHP_MINIT_FUNCTION(filter);
 PHP_MSHUTDOWN_FUNCTION(filter);
 PHP_RINIT_FUNCTION(filter);
@@ -53,28 +55,28 @@ PHP_FUNCTION(filter_has_var);
 PHP_FUNCTION(filter_id);
 
 ZEND_BEGIN_MODULE_GLOBALS(filter)
-	zval *post_array;
-	zval *get_array;
-	zval *cookie_array;
-	zval *env_array;
-	zval *server_array;
-	zval *session_array;
-	long  default_filter;
-	long  default_filter_flags;
+	zval post_array;
+	zval get_array;
+	zval cookie_array;
+	zval env_array;
+	zval server_array;
+	zval session_array;
+	zend_long default_filter;
+	zend_long default_filter_flags;
 ZEND_END_MODULE_GLOBALS(filter)
 
-#ifdef ZTS
-#define IF_G(v) TSRMG(filter_globals_id, zend_filter_globals *, v)
-#else
-#define IF_G(v) (filter_globals.v)
+#if defined(COMPILE_DL_FILTER) && defined(ZTS)
+ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
+#define IF_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(filter, v)
 
-#define PHP_INPUT_FILTER_PARAM_DECL zval *value, long flags, zval *option_array, char *charset TSRMLS_DC
+#define PHP_INPUT_FILTER_PARAM_DECL zval *value, zend_long flags, zval *option_array, char *charset
 void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL);
 void php_filter_boolean(PHP_INPUT_FILTER_PARAM_DECL);
 void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL);
 void php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL);
+void php_filter_validate_domain(PHP_INPUT_FILTER_PARAM_DECL);
 void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL);
 void php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL);
 void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL);

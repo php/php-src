@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -55,18 +55,18 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 {
 	char *res = NULL, *separator=NULL;
 	const char *c_var;
-	zval *array_ptr;
+	zval v_array;
 	int free_buffer=0;
 	const mbfl_encoding *detected;
 	php_mb_encoding_handler_info_t info;
 
 	if (arg != PARSE_STRING) {
 		char *value = MBSTRG(internal_encoding_name);
-		_php_mb_ini_mbstring_internal_encoding_set(value, value ? strlen(value): 0 TSRMLS_CC);
+		_php_mb_ini_mbstring_internal_encoding_set(value, value ? strlen(value): 0);
 	}
 
 	if (!MBSTRG(encoding_translation)) {
-		php_default_treat_data(arg, str, destArray TSRMLS_CC);
+		php_default_treat_data(arg, str, destArray);
 		return;
 	}
 
@@ -74,28 +74,26 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 		case PARSE_POST:
 		case PARSE_GET:
 		case PARSE_COOKIE:
-			ALLOC_ZVAL(array_ptr);
-			array_init(array_ptr);
-			INIT_PZVAL(array_ptr);
+			array_init(&v_array);
 			switch (arg) {
 				case PARSE_POST:
-					PG(http_globals)[TRACK_VARS_POST] = array_ptr;
+					ZVAL_COPY_VALUE(&PG(http_globals)[TRACK_VARS_POST], &v_array);
 					break;
 				case PARSE_GET:
-					PG(http_globals)[TRACK_VARS_GET] = array_ptr;
+					ZVAL_COPY_VALUE(&PG(http_globals)[TRACK_VARS_GET], &v_array);
 					break;
 				case PARSE_COOKIE:
-					PG(http_globals)[TRACK_VARS_COOKIE] = array_ptr;
+					ZVAL_COPY_VALUE(&PG(http_globals)[TRACK_VARS_COOKIE], &v_array);
 					break;
 			}
 			break;
 		default:
-			array_ptr=destArray;
+			ZVAL_COPY_VALUE(&v_array, destArray);
 			break;
 	}
 
-	if (arg==PARSE_POST) { 
-		sapi_handle_post(array_ptr TSRMLS_CC);
+	if (arg == PARSE_POST) {
+		sapi_handle_post(&v_array);
 		return;
 	}
 
@@ -125,43 +123,43 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 	}
 
 	switch (arg) {
-	case PARSE_POST:
-	case PARSE_GET:
-	case PARSE_STRING:
-		separator = (char *) estrdup(PG(arg_separator).input);
-		break;
-	case PARSE_COOKIE:
-		separator = ";\0";
-		break;
+		case PARSE_POST:
+		case PARSE_GET:
+		case PARSE_STRING:
+			separator = (char *) estrdup(PG(arg_separator).input);
+			break;
+		case PARSE_COOKIE:
+			separator = ";\0";
+			break;
 	}
-	
-	switch(arg) {
-	case PARSE_POST:
-		MBSTRG(http_input_identify_post) = NULL;
-		break;
-	case PARSE_GET:
-		MBSTRG(http_input_identify_get) = NULL;
-		break;
-	case PARSE_COOKIE:
-		MBSTRG(http_input_identify_cookie) = NULL;
-		break;
-	case PARSE_STRING:
-		MBSTRG(http_input_identify_string) = NULL;
-		break;
+
+	switch (arg) {
+		case PARSE_POST:
+			MBSTRG(http_input_identify_post) = NULL;
+			break;
+		case PARSE_GET:
+			MBSTRG(http_input_identify_get) = NULL;
+			break;
+		case PARSE_COOKIE:
+			MBSTRG(http_input_identify_cookie) = NULL;
+			break;
+		case PARSE_STRING:
+			MBSTRG(http_input_identify_string) = NULL;
+			break;
 	}
 
 	info.data_type              = arg;
-	info.separator              = separator; 
+	info.separator              = separator;
 	info.report_errors          = 0;
 	info.to_encoding            = MBSTRG(internal_encoding);
 	info.to_language            = MBSTRG(language);
 	info.from_encodings         = MBSTRG(http_input_list);
-	info.num_from_encodings     = MBSTRG(http_input_list_size); 
+	info.num_from_encodings     = MBSTRG(http_input_list_size);
 	info.from_language          = MBSTRG(language);
 
 	MBSTRG(illegalchars) = 0;
 
-	detected = _php_mb_encoding_handler_ex(&info, array_ptr, res TSRMLS_CC);
+	detected = _php_mb_encoding_handler_ex(&info, &v_array, res);
 	MBSTRG(http_input_identify) = detected;
 
 	if (detected) {
@@ -192,17 +190,17 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 /* }}} */
 
 /* {{{ mbfl_no_encoding _php_mb_encoding_handler_ex() */
-const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_info_t *info, zval *arg, char *res TSRMLS_DC)
+const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_info_t *info, zval *arg, char *res)
 {
 	char *var, *val;
 	const char *s1, *s2;
 	char *strtok_buf = NULL, **val_list = NULL;
 	zval *array_ptr = (zval *) arg;
 	int n, num, *len_list = NULL;
-	unsigned int val_len, new_val_len;
+	size_t val_len, new_val_len;
 	mbfl_string string, resvar, resval;
 	const mbfl_encoding *from_encoding = NULL;
-	mbfl_encoding_detector *identd = NULL; 
+	mbfl_encoding_detector *identd = NULL;
 	mbfl_buffer_converter *convd = NULL;
 
 	mbfl_string_init_set(&string, info->to_language, info->to_encoding->no_encoding);
@@ -212,7 +210,7 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 	if (!res || *res == '\0') {
 		goto out;
 	}
-	
+
 	/* count the variables(separators) contained in the "res".
 	 * separator may contain multiple separator chars.
 	 */
@@ -221,11 +219,11 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 		for (s2=info->separator; *s2 != '\0'; s2++) {
 			if (*s1 == *s2) {
 				num++;
-			}	
+			}
 		}
 	}
 	num *= 2; /* need space for variable name and value */
-	
+
 	val_list = (char **)ecalloc(num, sizeof(char *));
 	len_list = (int *)ecalloc(num, sizeof(int));
 
@@ -239,7 +237,7 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 			len_list[n] = php_url_decode(var, val-var);
 			val_list[n] = var;
 			n++;
-			
+
 			*val++ = '\0';
 			val_list[n] = val;
 			len_list[n] = php_url_decode(val, strlen(val));
@@ -247,21 +245,21 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 			len_list[n] = php_url_decode(var, strlen(var));
 			val_list[n] = var;
 			n++;
-			
+
 			val_list[n] = "";
 			len_list[n] = 0;
 		}
 		n++;
 		var = php_strtok_r(NULL, info->separator, &strtok_buf);
-	} 
+	}
 
 	if (n > (PG(max_input_vars) * 2)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input variables exceeded %ld. To increase the limit change max_input_vars in php.ini.", PG(max_input_vars));
+		php_error_docref(NULL, E_WARNING, "Input variables exceeded %pd. To increase the limit change max_input_vars in php.ini.", PG(max_input_vars));
 		goto out;
 	}
 
 	num = n; /* make sure to process initialized vars only */
-	
+
 	/* initialize converter */
 	if (info->num_from_encodings <= 0) {
 		from_encoding = &mbfl_encoding_pass;
@@ -286,7 +284,7 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 		}
 		if (!from_encoding) {
 			if (info->report_errors) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to detect encoding");
+				php_error_docref(NULL, E_WARNING, "Unable to detect encoding");
 			}
 			from_encoding = &mbfl_encoding_pass;
 		}
@@ -300,7 +298,7 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 			mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));
 		} else {
 			if (info->report_errors) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create converter");
+				php_error_docref(NULL, E_WARNING, "Unable to create converter");
 			}
 			goto out;
 		}
@@ -331,12 +329,12 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 		n++;
 		/* we need val to be emalloc()ed */
 		val = estrndup(val, val_len);
-		if (sapi_module.input_filter(info->data_type, var, &val, val_len, &new_val_len TSRMLS_CC)) {
+		if (sapi_module.input_filter(info->data_type, var, &val, val_len, &new_val_len)) {
 			/* add variable to symbol table */
-			php_register_variable_safe(var, val, new_val_len, array_ptr TSRMLS_CC);
+			php_register_variable_safe(var, val, new_val_len, array_ptr);
 		}
 		efree(val);
-		
+
 		if (convd != NULL){
 			mbfl_string_clear(&resvar);
 			mbfl_string_clear(&resval);
@@ -364,7 +362,7 @@ SAPI_POST_HANDLER_FUNC(php_mb_post_handler)
 {
 	const mbfl_encoding *detected;
 	php_mb_encoding_handler_info_t info;
-	char *post_data_str = NULL;
+	zend_string *post_data_str = NULL;
 
 	MBSTRG(http_input_identify_post) = NULL;
 
@@ -374,13 +372,15 @@ SAPI_POST_HANDLER_FUNC(php_mb_post_handler)
 	info.to_encoding            = MBSTRG(internal_encoding);
 	info.to_language            = MBSTRG(language);
 	info.from_encodings         = MBSTRG(http_input_list);
-	info.num_from_encodings     = MBSTRG(http_input_list_size); 
+	info.num_from_encodings     = MBSTRG(http_input_list_size);
 	info.from_language          = MBSTRG(language);
 
 	php_stream_rewind(SG(request_info).request_body);
-	php_stream_copy_to_mem(SG(request_info).request_body, &post_data_str, PHP_STREAM_COPY_ALL, 0);
-	detected = _php_mb_encoding_handler_ex(&info, arg, post_data_str TSRMLS_CC);
-	STR_FREE(post_data_str);
+	post_data_str = php_stream_copy_to_mem(SG(request_info).request_body, PHP_STREAM_COPY_ALL, 0);
+	detected = _php_mb_encoding_handler_ex(&info, arg, post_data_str ? ZSTR_VAL(post_data_str) : NULL);
+	if (post_data_str) {
+		zend_string_release(post_data_str);
+	}
 
 	MBSTRG(http_input_identify) = detected;
 	if (detected) {

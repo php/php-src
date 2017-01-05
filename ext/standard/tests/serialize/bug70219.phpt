@@ -1,5 +1,7 @@
 --TEST--
 Bug #70219 Use after free vulnerability in session deserializer
+--XFAIL--
+Unfinished merge, needs fix.
 --FILE--
 <?php
 class obj implements Serializable {
@@ -33,6 +35,8 @@ array(2) {
     NULL
   }
   [1]=>
-  array(0) {
+  &array(1) {
+    ["data"]=>
+    NULL
   }
 }

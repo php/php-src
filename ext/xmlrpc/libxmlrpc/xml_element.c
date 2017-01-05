@@ -5,28 +5,28 @@
   Epinions.com may be contacted at feedback@epinions-inc.com
 */
 
-/*  
-  Copyright 2000 Epinions, Inc. 
+/*
+  Copyright 2000 Epinions, Inc.
 
-  Subject to the following 3 conditions, Epinions, Inc.  permits you, free 
-  of charge, to (a) use, copy, distribute, modify, perform and display this 
-  software and associated documentation files (the "Software"), and (b) 
-  permit others to whom the Software is furnished to do so as well.  
+  Subject to the following 3 conditions, Epinions, Inc.  permits you, free
+  of charge, to (a) use, copy, distribute, modify, perform and display this
+  software and associated documentation files (the "Software"), and (b)
+  permit others to whom the Software is furnished to do so as well.
 
-  1) The above copyright notice and this permission notice shall be included 
-  without modification in all copies or substantial portions of the 
-  Software.  
+  1) The above copyright notice and this permission notice shall be included
+  without modification in all copies or substantial portions of the
+  Software.
 
-  2) THE SOFTWARE IS PROVIDED "AS IS", WITHOUT ANY WARRANTY OR CONDITION OF 
-  ANY KIND, EXPRESS, IMPLIED OR STATUTORY, INCLUDING WITHOUT LIMITATION ANY 
-  IMPLIED WARRANTIES OF ACCURACY, MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-  PURPOSE OR NONINFRINGEMENT.  
+  2) THE SOFTWARE IS PROVIDED "AS IS", WITHOUT ANY WARRANTY OR CONDITION OF
+  ANY KIND, EXPRESS, IMPLIED OR STATUTORY, INCLUDING WITHOUT LIMITATION ANY
+  IMPLIED WARRANTIES OF ACCURACY, MERCHANTABILITY, FITNESS FOR A PARTICULAR
+  PURPOSE OR NONINFRINGEMENT.
 
-  3) IN NO EVENT SHALL EPINIONS, INC. BE LIABLE FOR ANY DIRECT, INDIRECT, 
-  SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES OR LOST PROFITS ARISING OUT 
-  OF OR IN CONNECTION WITH THE SOFTWARE (HOWEVER ARISING, INCLUDING 
-  NEGLIGENCE), EVEN IF EPINIONS, INC.  IS AWARE OF THE POSSIBILITY OF SUCH 
-  DAMAGES.    
+  3) IN NO EVENT SHALL EPINIONS, INC. BE LIABLE FOR ANY DIRECT, INDIRECT,
+  SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES OR LOST PROFITS ARISING OUT
+  OF OR IN CONNECTION WITH THE SOFTWARE (HOWEVER ARISING, INCLUDING
+  NEGLIGENCE), EVEN IF EPINIONS, INC.  IS AWARE OF THE POSSIBILITY OF SUCH
+  DAMAGES.
 
 */
 
@@ -98,7 +98,7 @@ static const char rcsid[] = "#(@) $Id$";
  *   about anything with minor mods.
  * NOTES
  *   This code incorporates ideas from expat-ensor from http://xml.ensor.org.
- *  
+ *
  *   It was coded primarily to act as a go-between for expat and xmlrpc. To this
  *   end, it stores xml elements, their sub-elements, and their attributes in an
  *   in-memory tree.  When expat is done parsing, the tree can be walked, thus
@@ -112,12 +112,12 @@ static const char rcsid[] = "#(@) $Id$";
  *     - output option for xml escaping data.  Choices include no escaping, entity escaping,
  *       or CDATA sections.
  *     - output option for character encoding.  Defaults to (none) utf-8.
- *     - output option for verbosity/readability.  ultra-compact, newlines, pretty/level indented. 
+ *     - output option for verbosity/readability.  ultra-compact, newlines, pretty/level indented.
  *
  * BUGS
  *   there must be some.
  ******/
- 
+
 #include "ext/xml/expat_compat.h"
 #ifdef _WIN32
 #include "xmlrpc_win32.h"
@@ -284,7 +284,7 @@ static int xml_elem_writefunc(int (*fptr)(void *data, const char *text, int size
 
 
 static int create_xml_escape(char *pString, unsigned char c)
-{ 
+{
   int counter = 0;
 
   pString[counter++] = '&';
@@ -298,7 +298,7 @@ static int create_xml_escape(char *pString, unsigned char c)
 
   pString[counter++] = c + '0';
   pString[counter++] = ';';
-  return counter; 
+  return counter;
 }
 
 #define non_ascii(c) (c > 127)
@@ -724,7 +724,7 @@ xml_element* xml_elem_parse_buf(const char* in_buf, int len, XML_ELEM_INPUT_OPTI
 /*         int byte_total = XML_GetCurrentByteCount(parser); */
          const char * error_str = XML_ErrorString(err_code);
          if(byte_idx >= 0) {
-             snprintf(buf, 
+             snprintf(buf,
                       sizeof(buf),
                       "\n\tdata beginning %ld before byte index: %s\n",
                       byte_idx > 10  ? 10 : byte_idx,
@@ -737,7 +737,7 @@ xml_element* xml_elem_parse_buf(const char* in_buf, int len, XML_ELEM_INPUT_OPTI
                 "\tcolumn: %i\n"
                 "\tbyte index: %ld\n"
                 "\ttotal bytes: %i\n%s ",
-                err_code, error_str, line_num, 
+                err_code, error_str, line_num,
                 col_num, byte_idx, byte_total, buf);
 */
 

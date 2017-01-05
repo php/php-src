@@ -14,4 +14,4 @@ $result = imagecharup($image, 1, 5, 'string', 'C', 1);
 
 ?>
 --EXPECTF--
-Warning: imagecharup() expects parameter 4 to be long, %s given in %s on line %d
+Warning: imagecharup() expects parameter 4 to be integer, %s given in %s on line %d

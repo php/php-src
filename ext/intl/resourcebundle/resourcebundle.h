@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,6 +23,6 @@
 
 #include "resourcebundle/resourcebundle_class.h"
 
-void resourcebundle_extract_value( zval *target, ResourceBundle_object *source TSRMLS_DC);
+void resourcebundle_extract_value( zval *target, ResourceBundle_object *source);
 
 #endif // #ifndef RESOURCEBUNDLE_CLASS_H

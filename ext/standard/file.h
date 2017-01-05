@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,6 +22,8 @@
 
 #ifndef FILE_H
 #define FILE_H
+
+#include "php_network.h"
 
 PHP_MINIT_FUNCTION(file);
 PHP_MSHUTDOWN_FUNCTION(file);
@@ -72,15 +74,15 @@ PHP_FUNCTION(sys_get_temp_dir);
 
 PHP_MINIT_FUNCTION(user_streams);
 
-PHPAPI int php_le_stream_context(TSRMLS_D);
-PHPAPI int php_set_sock_blocking(int socketd, int block TSRMLS_DC);
-PHPAPI int php_copy_file(const char *src, const char *dest TSRMLS_DC);
-PHPAPI int php_copy_file_ex(const char *src, const char *dest, int src_chk TSRMLS_DC);
-PHPAPI int php_copy_file_ctx(const char *src, const char *dest, int src_chk, php_stream_context *ctx TSRMLS_DC);
-PHPAPI int php_mkdir_ex(const char *dir, long mode, int options TSRMLS_DC);
-PHPAPI int php_mkdir(const char *dir, long mode TSRMLS_DC);
-PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char escape_char, size_t buf_len, char *buf, zval *return_value TSRMLS_DC);
-PHPAPI int php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, char escape_char TSRMLS_DC);
+PHPAPI int php_le_stream_context(void);
+PHPAPI int php_set_sock_blocking(php_socket_t socketd, int block);
+PHPAPI int php_copy_file(const char *src, const char *dest);
+PHPAPI int php_copy_file_ex(const char *src, const char *dest, int src_chk);
+PHPAPI int php_copy_file_ctx(const char *src, const char *dest, int src_chk, php_stream_context *ctx);
+PHPAPI int php_mkdir_ex(const char *dir, zend_long mode, int options);
+PHPAPI int php_mkdir(const char *dir, zend_long mode);
+PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char escape_char, size_t buf_len, char *buf, zval *return_value);
+PHPAPI size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, char escape_char);
 
 #define META_DEF_BUFSIZE 8192
 
@@ -112,13 +114,13 @@ typedef struct _php_meta_tags_data {
 	int in_meta;
 } php_meta_tags_data;
 
-php_meta_tags_token php_next_meta_token(php_meta_tags_data * TSRMLS_DC);
+php_meta_tags_token php_next_meta_token(php_meta_tags_data *);
 
 typedef struct {
 	int pclose_ret;
 	size_t def_chunk_size;
-	long auto_detect_line_endings;
-	long default_socket_timeout;
+	zend_long auto_detect_line_endings;
+	zend_long default_socket_timeout;
 	char *user_agent; /* for the http wrapper */
 	char *from_address; /* for the ftp and http wrappers */
 	const char *user_stream_current_filename; /* for simple recursion protection */
@@ -127,10 +129,15 @@ typedef struct {
 	HashTable *stream_filters;			/* per-request copy of stream_filters_hash */
 	HashTable *wrapper_errors;			/* key: wrapper address; value: linked list of char* */
 	int pclose_wait;
+#if defined(HAVE_GETHOSTBYNAME_R)
+	struct hostent tmp_host_info;
+	char *tmp_host_buf;
+	size_t tmp_host_buf_len;
+#endif
 } php_file_globals;
 
 #ifdef ZTS
-#define FG(v) TSRMG(file_globals_id, php_file_globals *, v)
+#define FG(v) ZEND_TSRMG(file_globals_id, php_file_globals *, v)
 extern PHPAPI int file_globals_id;
 #else
 #define FG(v) (file_globals.v)

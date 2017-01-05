@@ -168,18 +168,18 @@ array(3) {
 }
 -- Iteration 9 --
 string(3) "c:."
-string(11) "c:afile.txt"
+string(9) "afile.txt"
 string(3) "txt"
-string(7) "c:afile"
+string(5) "afile"
 array(4) {
   ["dirname"]=>
   string(3) "c:."
   ["basename"]=>
-  string(11) "c:afile.txt"
+  string(9) "afile.txt"
   ["extension"]=>
   string(3) "txt"
   ["filename"]=>
-  string(7) "c:afile"
+  string(5) "afile"
 }
 -- Iteration 10 --
 string(12) "..\.\..\test"

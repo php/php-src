@@ -148,7 +148,7 @@ class object_class
   protected $protected_var1 = "string_1";
   protected $protected_var2;
 
-  function object_class ( ) {
+  function __construct ( ) {
     $this->value = 50;
     $this->public_var2 = 11;
     $this->private_var2 = 21;
@@ -184,7 +184,7 @@ class contains_object_class
      echo "func() is called \n";
    }
 
-   function contains_object_class () {
+   function __construct () {
      $this->class_object1 = new object_class();
      $this->class_object2 = new object_class();
      $this->class_object3 = $this->class_object1;
@@ -368,7 +368,7 @@ int(-2147483648)
 
 *** Testing var_dump() on float variables ***
 -- Iteration 1 --
-float(0)
+float(-0)
 -- Iteration 2 --
 float(0)
 -- Iteration 3 --
@@ -893,7 +893,7 @@ array(4) {
 -- Iteration 4 --
 array(6) {
   [0]=>
-  float(0)
+  float(-0)
   [1]=>
   string(11) "Where am I?"
   [2]=>
@@ -1022,7 +1022,7 @@ array(15) {
 }
 array(32) {
   [0]=>
-  float(0)
+  float(-0)
   [1]=>
   float(0)
   [2]=>
@@ -1519,7 +1519,7 @@ array(6) {
   [3]=>
   array(6) {
     [0]=>
-    float(0)
+    float(-0)
     [1]=>
     string(11) "Where am I?"
     [2]=>

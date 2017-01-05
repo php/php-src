@@ -2,4 +2,4 @@ REGEDIT4
 
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Eventlog\Application\PHP-5.3.99-dev]
 "TypesSupported"=dword:00000007
-"EventMessageFile"="g:\\test\\srctrunkinstall\\php5ts.dll"
+"EventMessageFile"="g:\\test\\srctrunkinstall\\php7ts.dll"

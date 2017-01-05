@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,9 +24,9 @@
 PHP_FUNCTION(base64_decode);
 PHP_FUNCTION(base64_encode);
 
-PHPAPI extern unsigned char *php_base64_encode(const unsigned char *, int, int *);
-PHPAPI extern unsigned char *php_base64_decode_ex(const unsigned char *, int, int *, zend_bool);
-PHPAPI extern unsigned char *php_base64_decode(const unsigned char *, int, int *);
+PHPAPI extern zend_string *php_base64_encode(const unsigned char *, size_t);
+PHPAPI extern zend_string *php_base64_decode_ex(const unsigned char *, size_t, zend_bool);
+PHPAPI extern zend_string *php_base64_decode(const unsigned char *, size_t);
 
 #endif /* BASE64_H */
 

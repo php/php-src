@@ -14,7 +14,7 @@ static inline int in_character_class(char ch, const char *delim)
 	return 0;
 }
 
-char *tsrm_strtok_r(char *s, const char *delim, char **last)
+TSRM_API char *tsrm_strtok_r(char *s, const char *delim, char **last)
 {
 	char *token;
 
@@ -56,7 +56,7 @@ main()
 		printf ("Token = '%s'\n", token);
 		token = tsrm_strtok_r(NULL, "/\\", &last);
 	}
-	
+
 	return 0;
 }
 

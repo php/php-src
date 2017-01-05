@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -36,6 +36,9 @@ extern zend_module_entry com_dotnet_module_entry;
 # define PHP_COM_DOTNET_API
 #endif
 
+#include "php_version.h"
+#define PHP_COM_DOTNET_VERSION PHP_VERSION
+
 PHP_MINIT_FUNCTION(com_dotnet);
 PHP_MSHUTDOWN_FUNCTION(com_dotnet);
 PHP_RINIT_FUNCTION(com_dotnet);
@@ -52,13 +55,12 @@ ZEND_BEGIN_MODULE_GLOBALS(com_dotnet)
 	zend_bool rshutdown_started;
 ZEND_END_MODULE_GLOBALS(com_dotnet)
 
-#ifdef ZTS
-# define COMG(v) TSRMG(com_dotnet_globals_id, zend_com_dotnet_globals *, v)
-#else
-# define COMG(v) (com_dotnet_globals.v)
+#if defined(ZTS) && defined(COMPILE_DL_COM_DOTNET)
+ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
 extern ZEND_DECLARE_MODULE_GLOBALS(com_dotnet);
+#define COMG(v) ZEND_MODULE_GLOBALS_ACCESSOR(com_dotnet, v)
 
 #endif	/* PHP_COM_DOTNET_H */
 

@@ -2,10 +2,10 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -35,7 +35,7 @@ typedef struct _zend_lex_state {
 
 	zend_file_handle *in;
 	uint lineno;
-	char *filename;
+	zend_string *filename;
 
 	/* original (unfiltered) script */
 	unsigned char *script_org;
@@ -49,6 +49,12 @@ typedef struct _zend_lex_state {
 	zend_encoding_filter input_filter;
 	zend_encoding_filter output_filter;
 	const zend_encoding *script_encoding;
+
+	/* hooks */
+	void (* on_event)(zend_php_scanner_event event, int token, int line);
+
+	zend_ast *ast;
+	zend_arena *ast_arena;
 } zend_lex_state;
 
 typedef struct _zend_heredoc_label {
@@ -57,12 +63,12 @@ typedef struct _zend_heredoc_label {
 } zend_heredoc_label;
 
 BEGIN_EXTERN_C()
-int zend_compare_file_handles(zend_file_handle *fh1, zend_file_handle *fh2);
-ZEND_API void zend_save_lexical_state(zend_lex_state *lex_state TSRMLS_DC);
-ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state TSRMLS_DC);
-ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename TSRMLS_DC);
-ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter, const zend_encoding *old_encoding TSRMLS_DC);
-ZEND_API int zend_multibyte_set_filter(const zend_encoding *onetime_encoding TSRMLS_DC);
+ZEND_API void zend_save_lexical_state(zend_lex_state *lex_state);
+ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state);
+ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename);
+ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter, const zend_encoding *old_encoding);
+ZEND_API int zend_multibyte_set_filter(const zend_encoding *onetime_encoding);
+ZEND_API void zend_lex_tstring(zval *zv);
 
 END_EXTERN_C()
 

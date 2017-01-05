@@ -11,7 +11,7 @@ if (!(isset($matches[0]) && $matches[1] < 12)) {
 }
 ?>
 --ENV--
-NLS_LANG=
+NLS_LANG=.AL32UTF8
 --FILE--
 <?php
 

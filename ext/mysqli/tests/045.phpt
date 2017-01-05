@@ -31,7 +31,7 @@ mysqli_stmt_bind_result (SHOW)
 	mysqli_stmt_bind_result($stmt, $c1, $c2);
 	mysqli_stmt_fetch($stmt);
 	mysqli_stmt_close($stmt);
-	if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) && mysqli_get_server_version($link) < 50000) {
+	if ((version_compare(PHP_VERSION, '6.0', '==') == 1) && mysqli_get_server_version($link) < 50000) {
 		/* variables are binary */
 		settype($c1, "unicode");
 		settype($c2, "unicode");

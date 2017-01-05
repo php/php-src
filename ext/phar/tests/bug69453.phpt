@@ -14,7 +14,7 @@ $r = new Phar($fname, 0);
 
 ==DONE==
 --EXPECTF--
-exception 'UnexpectedValueException' with message 'phar error: "%s%ebug69453.tar.phar" is a corrupted tar file (checksum mismatch of file "")' in %s:%d
+UnexpectedValueException: phar error: "%s%ebug69453.tar.phar" is a corrupted tar file (checksum mismatch of file "") in %s:%d
 Stack trace:
 #0 %s%ebug69453.php(%d): Phar->__construct('%s', 0)
 #1 {main}

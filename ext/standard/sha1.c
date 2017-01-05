@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,7 +20,7 @@
 
 #include "php.h"
 
-/* This code is heavily based on the PHP md5 implementation */ 
+/* This code is heavily based on the PHP md5 implementation */
 
 #include "sha1.h"
 #include "md5.h"
@@ -34,26 +34,25 @@ PHPAPI void make_sha1_digest(char *sha1str, unsigned char *digest)
    Calculate the sha1 hash of a string */
 PHP_FUNCTION(sha1)
 {
-	char *arg;
-	int arg_len;
+	zend_string *arg;
 	zend_bool raw_output = 0;
 	char sha1str[41];
 	PHP_SHA1_CTX context;
 	unsigned char digest[20];
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &arg, &arg_len, &raw_output) == FAILURE) {
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|b", &arg, &raw_output) == FAILURE) {
 		return;
 	}
 
 	sha1str[0] = '\0';
 	PHP_SHA1Init(&context);
-	PHP_SHA1Update(&context, arg, arg_len);
+	PHP_SHA1Update(&context, (unsigned char *) ZSTR_VAL(arg), ZSTR_LEN(arg));
 	PHP_SHA1Final(digest, &context);
 	if (raw_output) {
-		RETURN_STRINGL(digest, 20, 1);
+		RETURN_STRINGL((char *) digest, 20);
 	} else {
 		make_digest_ex(sha1str, digest, 20);
-		RETVAL_STRING(sha1str, 1);
+		RETVAL_STRING(sha1str);
 	}
 
 }
@@ -66,19 +65,19 @@ PHP_FUNCTION(sha1)
 PHP_FUNCTION(sha1_file)
 {
 	char          *arg;
-	int           arg_len;
+	size_t           arg_len;
 	zend_bool raw_output = 0;
 	char          sha1str[41];
 	unsigned char buf[1024];
 	unsigned char digest[20];
 	PHP_SHA1_CTX   context;
-	int           n;
+	size_t         n;
 	php_stream    *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|b", &arg, &arg_len, &raw_output) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|b", &arg, &arg_len, &raw_output) == FAILURE) {
 		return;
 	}
-	
+
 	stream = php_stream_open_wrapper(arg, "rb", REPORT_ERRORS, NULL);
 	if (!stream) {
 		RETURN_FALSE;
@@ -86,7 +85,7 @@ PHP_FUNCTION(sha1_file)
 
 	PHP_SHA1Init(&context);
 
-	while ((n = php_stream_read(stream, buf, sizeof(buf))) > 0) {
+	while ((n = php_stream_read(stream, (char *) buf, sizeof(buf))) > 0) {
 		PHP_SHA1Update(&context, buf, n);
 	}
 
@@ -94,15 +93,11 @@ PHP_FUNCTION(sha1_file)
 
 	php_stream_close(stream);
 
-	if (n<0) {
-		RETURN_FALSE;
-	}
-
 	if (raw_output) {
-		RETURN_STRINGL(digest, 20, 1);
+		RETURN_STRINGL((char *) digest, 20);
 	} else {
 		make_digest_ex(sha1str, digest, 20);
-		RETVAL_STRING(sha1str, 1);
+		RETVAL_STRING(sha1str);
 	}
 }
 /* }}} */
@@ -133,7 +128,7 @@ static unsigned char PADDING[64] =
 /* W[i]
  */
 #define W(i) ( tmp=x[(i-3)&15]^x[(i-8)&15]^x[(i-14)&15]^x[i&15], \
-	(x[i&15]=ROTATE_LEFT(tmp, 1)) )  
+	(x[i&15]=ROTATE_LEFT(tmp, 1)) )
 
 /* FF, GG, HH, and II transformations for rounds 1, 2, 3, and 4.
  */
@@ -157,7 +152,7 @@ static unsigned char PADDING[64] =
  (e) += ROTATE_LEFT ((a), 5); \
  (b) = ROTATE_LEFT((b), 30); \
   }
-			                    
+
 
 /* {{{ PHP_SHA1Init
  * SHA1 initialization. Begins an SHA1 operation, writing a new context.
@@ -181,7 +176,7 @@ PHPAPI void PHP_SHA1Init(PHP_SHA1_CTX * context)
    context.
  */
 PHPAPI void PHP_SHA1Update(PHP_SHA1_CTX * context, const unsigned char *input,
-			   unsigned int inputLen)
+			   size_t inputLen)
 {
 	unsigned int i, index, partLen;
 
@@ -235,7 +230,7 @@ PHPAPI void PHP_SHA1Final(unsigned char digest[20], PHP_SHA1_CTX * context)
 	bits[2] = (context->count[1] >> 8) & 0xFF;
 	bits[1] = (context->count[1] >> 16) & 0xFF;
 	bits[0] = (context->count[1] >> 24) & 0xFF;
-	
+
 	/* Pad out to 56 mod 64.
 	 */
 	index = (unsigned int) ((context->count[0] >> 3) & 0x3f);

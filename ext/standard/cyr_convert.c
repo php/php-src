@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -32,7 +32,7 @@
 #include <stdio.h>
 
 /*****************************************************************************
-* This is codetables for different Cyrillic charsets (relative to koi8-r). 
+* This is codetables for different Cyrillic charsets (relative to koi8-r).
 * Each table contains data for 128-255 symbols from ASCII table.
 * First 256 symbols are for conversion from koi8-r to corresponding charset,
 * second 256 symbols are for reverse conversion, from charset to koi8-r.
@@ -83,7 +83,7 @@ static const _cyr_charset_table _cyr_win1251 = {
 222,192,193,214,196,197,212,195,213,200,201,202,203,204,205,206,
 207,223,208,209,210,211,198,194,220,219,199,216,221,217,215,218,
 },
-_cyr_cp866 = { 
+_cyr_cp866 = {
 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
 16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,
 32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,
@@ -187,9 +187,9 @@ _cyr_mac = {
 };
 /* }}} */
 
-/* {{{ static char * php_convert_cyr_string(unsigned char *str, int length, char from, char to TSRMLS_DC)
-* This is the function that performs real in-place conversion of the string 
-* between charsets. 
+/* {{{ static char * php_convert_cyr_string(unsigned char *str, int length, char from, char to)
+* This is the function that performs real in-place conversion of the string
+* between charsets.
 * Parameters:
 *    str - string to be converted
 *    from,to - one-symbol label of source and destination charset
@@ -201,15 +201,15 @@ _cyr_mac = {
 *    d - x-cp866
 *    m - x-mac-cyrillic
 *****************************************************************************/
-static char * php_convert_cyr_string(unsigned char *str, int length, char from, char to TSRMLS_DC)
+static char * php_convert_cyr_string(unsigned char *str, size_t length, char from, char to)
 {
 	const unsigned char *from_table, *to_table;
 	unsigned char tmp;
-	int i;
+	size_t i;
 
 	from_table = NULL;
 	to_table   = NULL;
-	
+
 	switch (toupper((int)(unsigned char)from))
 	{
 		case 'W':
@@ -228,7 +228,7 @@ static char * php_convert_cyr_string(unsigned char *str, int length, char from, 
 		case 'K':
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown source charset: %c", from);
+			php_error_docref(NULL, E_WARNING, "Unknown source charset: %c", from);
 			break;
 	}
 
@@ -250,16 +250,15 @@ static char * php_convert_cyr_string(unsigned char *str, int length, char from, 
 		case 'K':
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown destination charset: %c", to);
+			php_error_docref(NULL, E_WARNING, "Unknown destination charset: %c", to);
 			break;
 	}
 
 
 	if (!str)
 		return (char *)str;
-	
-	for( i = 0; i<length; i++)
-	{
+
+	for (i = 0; i < length; i++) {
 		tmp = (from_table == NULL)? str[i] : from_table[ str[i] ];
 		str[i] = (to_table == NULL) ? tmp : to_table[tmp + 256];
 	}
@@ -272,17 +271,17 @@ static char * php_convert_cyr_string(unsigned char *str, int length, char from, 
 PHP_FUNCTION(convert_cyr_string)
 {
 	char *input, *fr_cs, *to_cs;
-	int input_len, fr_cs_len, to_cs_len;
-	unsigned char *str;
+	size_t input_len, fr_cs_len, to_cs_len;
+	zend_string *str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss", &input, &input_len, &fr_cs, &fr_cs_len, &to_cs, &to_cs_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss", &input, &input_len, &fr_cs, &fr_cs_len, &to_cs, &to_cs_len) == FAILURE) {
 		return;
 	}
 
-	str = (unsigned char*) estrndup(input, input_len);
+	str = zend_string_init(input, input_len, 0);
 
-	php_convert_cyr_string(str, input_len, fr_cs[0], to_cs[0] TSRMLS_CC);
-	RETVAL_STRING((char *)str, 0);
+	php_convert_cyr_string((unsigned char *) ZSTR_VAL(str), ZSTR_LEN(str), fr_cs[0], to_cs[0]);
+	RETVAL_NEW_STR(str);
 }
 /* }}} */
 

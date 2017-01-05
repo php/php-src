@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2016 The PHP Group                                |
+  | Copyright (c) 2006-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -12,13 +12,11 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Georg Richter <georg@mysql.com>                             |
-  |          Andrey Hristov <andrey@mysql.com>                           |
-  |          Ulf Wendel <uwendel@mysql.com>                              |
+  | Authors: Andrey Hristov <andrey@php.net>                             |
+  |          Ulf Wendel <uw@php.net>                                     |
+  |          Georg Richter <georg@php.net>                               |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef MYSQLND_STATISTICS_H
 #define MYSQLND_STATISTICS_H
@@ -42,11 +40,11 @@ extern const MYSQLND_STRING mysqlnd_stats_values_names[];
 				(s_array)->in_trigger = TRUE; \
 				MYSQLND_STATS_UNLOCK((s_array)); \
 																						\
-				(s_array)->triggers[(statistic)]((s_array), (statistic), (val) TSRMLS_CC); \
+				(s_array)->triggers[(statistic)]((s_array), (statistic), (val)); \
 																						\
 				MYSQLND_STATS_LOCK((s_array)); \
 				(s_array)->in_trigger = FALSE; \
-			} 
+			}
 #else
 #define MYSQLND_STAT_CALL_TRIGGER(s_array, statistic, val)
 #endif /* MYSQLND_CORE_STATISTICS_TRIGGERS_DISABLED */
@@ -147,7 +145,7 @@ extern const MYSQLND_STRING mysqlnd_stats_values_names[];
 
 #else
 
-#define MYSQLND_INC_GLOBAL_STATISTIC(statistic) 
+#define MYSQLND_INC_GLOBAL_STATISTIC(statistic)
 #define MYSQLND_DEC_CONN_STATISTIC(conn_stats, statistic)
 #define MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(statistic1, value1, statistic2, value2)
 #define MYSQLND_INC_CONN_STATISTIC(conn_stats, statistic)
@@ -157,13 +155,13 @@ extern const MYSQLND_STRING mysqlnd_stats_values_names[];
 
 #endif /* MYSQLND_CORE_STATISTICS_DISABLED */
 
-PHPAPI void mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, const MYSQLND_STRING * names, zval *return_value TSRMLS_DC ZEND_FILE_LINE_DC);
+PHPAPI void mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, const MYSQLND_STRING * names, zval *return_value ZEND_FILE_LINE_DC);
 
-PHPAPI void mysqlnd_stats_init(MYSQLND_STATS ** stats, size_t statistic_count);
-PHPAPI void mysqlnd_stats_end(MYSQLND_STATS * stats);
+PHPAPI void mysqlnd_stats_init(MYSQLND_STATS ** stats, size_t statistic_count, int persistent);
+PHPAPI void mysqlnd_stats_end(MYSQLND_STATS * stats, int persistent);
 
-PHPAPI mysqlnd_stat_trigger mysqlnd_stats_set_trigger(MYSQLND_STATS * const stats, enum_mysqlnd_collected_stats stat, mysqlnd_stat_trigger trigger TSRMLS_DC);
-PHPAPI mysqlnd_stat_trigger mysqlnd_stats_reset_triggers(MYSQLND_STATS * const stats TSRMLS_DC);
+PHPAPI mysqlnd_stat_trigger mysqlnd_stats_set_trigger(MYSQLND_STATS * const stats, enum_mysqlnd_collected_stats stat, mysqlnd_stat_trigger trigger);
+PHPAPI mysqlnd_stat_trigger mysqlnd_stats_reset_triggers(MYSQLND_STATS * const stats);
 
 #endif	/* MYSQLND_STATISTICS_H */
 

@@ -1253,7 +1253,7 @@ PCRETEST OPTION FOR LIBREADLINE SUPPORT
        pcretest linked in this way, there may be licensing issues.
 
        Setting  this  option  causes  the -lreadline option to be added to the
-       pcretest build. In many operating environments with  a system-installed
+       pcretest build. In many operating environments with  a  sytem-installed
        libreadline this is sufficient. However, in some environments (e.g.  if
        an unmodified distribution version of readline is in use),  some  extra
        configuration  may  be necessary. The INSTALL file for libreadline says

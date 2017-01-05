@@ -1,9 +1,9 @@
 <?php
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -472,7 +472,6 @@ class testHarness {
 			'error_append_string'=>'',
 			'auto_prepend_file'=>'',
 			'auto_append_file'=>'',
-			'magic_quotes_runtime'=>'0',
 		);	
 	public $env = array();
 	public $info_params = array();

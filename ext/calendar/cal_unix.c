@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Shane Caraveo             <shane@caraveo.com>               | 
+   | Authors: Shane Caraveo             <shane@caraveo.com>               |
    |          Colin Viebrock            <colin@easydns.com>               |
    |          Hartmut Holzgraefe        <hholzgra@php.net>                |
    +----------------------------------------------------------------------+
@@ -31,9 +31,9 @@ PHP_FUNCTION(unixtojd)
 	time_t ts = 0;
 	struct tm *ta, tmbuf;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &ts) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &ts) == FAILURE) {
 		return;
-	}	
+	}
 
 	if (!ts) {
 		ts = time(NULL);
@@ -53,14 +53,14 @@ PHP_FUNCTION(unixtojd)
    Convert Julian Day to UNIX timestamp */
 PHP_FUNCTION(jdtounix)
 {
-	long uday;
+	zend_long uday;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &uday) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &uday) == FAILURE) {
 		return;
-	}	
+	}
 	uday -= 2440588 /* J.D. of 1.1.1970 */;
 
-	if (uday < 0 || uday > 24755) { /* before beginning of unix epoch or behind end of unix epoch */ 
+	if (uday < 0 || uday > 24755) { /* before beginning of unix epoch or behind end of unix epoch */
 		RETURN_FALSE;
 	}
 

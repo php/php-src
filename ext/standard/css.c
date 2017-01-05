@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,7 +21,7 @@
 #include "php.h"
 #include "info.h"
 
-PHPAPI void php_info_print_css(TSRMLS_D) /* {{{ */
+PHPAPI void php_info_print_css(void) /* {{{ */
 {
 	PUTS("body {background-color: #fff; color: #222; font-family: sans-serif;}\n");
 	PUTS("pre {margin: 0; font-family: monospace;}\n");
@@ -37,7 +37,7 @@ PHPAPI void php_info_print_css(TSRMLS_D) /* {{{ */
 	PUTS(".p {text-align: left;}\n");
 	PUTS(".e {background-color: #ccf; width: 300px; font-weight: bold;}\n");
 	PUTS(".h {background-color: #99c; font-weight: bold;}\n");
-	PUTS(".v {background-color: #ddd; max-width: 300px; overflow-x: auto;}\n");
+	PUTS(".v {background-color: #ddd; max-width: 300px; overflow-x: auto; word-wrap: break-word;}\n");
 	PUTS(".v i {color: #999;}\n");
 	PUTS("img {float: right; border: 0;}\n");
 	PUTS("hr {width: 934px; background-color: #ccc; border: 0; height: 1px;}\n");

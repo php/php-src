@@ -1,10 +1,7 @@
 --TEST--
 Test getrusage() function: basic test
 --SKIPIF--
-<?php
-if( substr(PHP_OS, 0, 3) == "WIN" )
-  die("skip.. Do not run on Windows");
-?>
+<?php if (!function_exists("getrusage")) print "skip"; ?>
 --FILE--
 <?php
 /* Prototype  :  array getrusage  ([ int $who  ] )
@@ -18,7 +15,7 @@ echo "Simple testcase for getrusage() function\n";
 $dat = getrusage();
 
 if (!is_array($dat)) {
-	echo "TEST FAILED : getrusage shoudl return an array\n";
+	echo "TEST FAILED : getrusage should return an array\n";
 } 	
 
 // echo the fields which are common to all platforms 

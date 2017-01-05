@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -95,48 +95,42 @@ typedef struct _php_output_buffer {
 	size_t size;
 	size_t used;
 	uint free:1;
-	uint _res:31;
+	uint _reserved:31;
 } php_output_buffer;
 
 typedef struct _php_output_context {
 	int op;
 	php_output_buffer in;
 	php_output_buffer out;
-#ifdef ZTS
-	void ***tsrm_ls;
-#endif
 } php_output_context;
 
-#define PHP_OUTPUT_TSRMLS(ctx) TSRMLS_FETCH_FROM_CTX((ctx)->tsrm_ls)
-
 /* old-style, stateless callback */
-typedef void (*php_output_handler_func_t)(char *output, uint output_len, char **handled_output, uint *handled_output_len, int mode TSRMLS_DC);
+typedef void (*php_output_handler_func_t)(char *output, size_t output_len, char **handled_output, size_t *handled_output_len, int mode);
 /* new-style, opaque context callback */
 typedef int (*php_output_handler_context_func_t)(void **handler_context, php_output_context *output_context);
 /* output handler context dtor */
-typedef void (*php_output_handler_context_dtor_t)(void *opaq TSRMLS_DC);
+typedef void (*php_output_handler_context_dtor_t)(void *opaq);
 /* conflict check callback */
-typedef int (*php_output_handler_conflict_check_t)(const char *handler_name, size_t handler_name_len TSRMLS_DC);
+typedef int (*php_output_handler_conflict_check_t)(const char *handler_name, size_t handler_name_len);
 /* ctor for aliases */
-typedef struct _php_output_handler *(*php_output_handler_alias_ctor_t)(const char *handler_name, size_t handler_name_len, size_t chunk_size, int flags TSRMLS_DC);
+typedef struct _php_output_handler *(*php_output_handler_alias_ctor_t)(const char *handler_name, size_t handler_name_len, size_t chunk_size, int flags);
 
 typedef struct _php_output_handler_user_func_t {
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
-	zval *zoh;
+	zval zoh;
 } php_output_handler_user_func_t;
 
 typedef struct _php_output_handler {
-	char *name;
-	size_t name_len;
+	zend_string *name;
 	int flags;
 	int level;
 	size_t size;
 	php_output_buffer buffer;
-	
+
 	void *opaq;
-	void (*dtor)(void *opaq TSRMLS_DC);
-	
+	void (*dtor)(void *opaq);
+
 	union {
 		php_output_handler_user_func_t *user;
 		php_output_handler_context_func_t internal;
@@ -144,37 +138,37 @@ typedef struct _php_output_handler {
 } php_output_handler;
 
 ZEND_BEGIN_MODULE_GLOBALS(output)
-	int flags;
 	zend_stack handlers;
 	php_output_handler *active;
 	php_output_handler *running;
 	const char *output_start_filename;
 	int output_start_lineno;
+	int flags;
 ZEND_END_MODULE_GLOBALS(output)
 
-PHPAPI ZEND_EXTERN_MODULE_GLOBALS(output);
+PHPAPI ZEND_EXTERN_MODULE_GLOBALS(output)
 
 /* there should not be a need to use OG() from outside of output.c */
 #ifdef ZTS
-# define OG(v) TSRMG(output_globals_id, zend_output_globals *, v)
+# define OG(v) ZEND_TSRMG(output_globals_id, zend_output_globals *, v)
 #else
 # define OG(v) (output_globals.v)
 #endif
 
 /* convenience macros */
-#define PHPWRITE(str, str_len)		php_output_write((str), (str_len) TSRMLS_CC)
-#define PHPWRITE_H(str, str_len)	php_output_write_unbuffered((str), (str_len) TSRMLS_CC)
+#define PHPWRITE(str, str_len)		php_output_write((str), (str_len))
+#define PHPWRITE_H(str, str_len)	php_output_write_unbuffered((str), (str_len))
 
-#define PUTC(c)						(php_output_write(&(c), 1 TSRMLS_CC), (c))
-#define PUTC_H(c)					(php_output_write_unbuffered(&(c), 1 TSRMLS_CC), (c))
+#define PUTC(c)						(php_output_write((const char *) &(c), 1), (c))
+#define PUTC_H(c)					(php_output_write_unbuffered((const char *) &(c), 1), (c))
 
 #define PUTS(str)					do {				\
 	const char *__str = (str);							\
-	php_output_write(__str, strlen(__str) TSRMLS_CC);	\
+	php_output_write(__str, strlen(__str));	\
 } while (0)
 #define PUTS_H(str)					do {							\
 	const char *__str = (str);										\
-	php_output_write_unbuffered(__str, strlen(__str) TSRMLS_CC);	\
+	php_output_write_unbuffered(__str, strlen(__str));	\
 } while (0)
 
 
@@ -185,10 +179,10 @@ extern const char php_output_devnull_handler_name[sizeof("null output handler")]
 
 #define php_output_tearup() \
 	php_output_startup(); \
-	php_output_activate(TSRMLS_C)
+	php_output_activate()
 #define php_output_teardown() \
-	php_output_end_all(TSRMLS_C); \
-	php_output_deactivate(TSRMLS_C); \
+	php_output_end_all(); \
+	php_output_deactivate(); \
 	php_output_shutdown()
 
 /* MINIT */
@@ -196,58 +190,58 @@ PHPAPI void php_output_startup(void);
 /* MSHUTDOWN */
 PHPAPI void php_output_shutdown(void);
 
-PHPAPI void php_output_register_constants(TSRMLS_D);
+PHPAPI void php_output_register_constants(void);
 
 /* RINIT */
-PHPAPI int php_output_activate(TSRMLS_D);
+PHPAPI int php_output_activate(void);
 /* RSHUTDOWN */
-PHPAPI void php_output_deactivate(TSRMLS_D);
+PHPAPI void php_output_deactivate(void);
 
-PHPAPI void php_output_set_status(int status TSRMLS_DC);
-PHPAPI int php_output_get_status(TSRMLS_D);
-PHPAPI void php_output_set_implicit_flush(int flush TSRMLS_DC);
-PHPAPI const char *php_output_get_start_filename(TSRMLS_D);
-PHPAPI int php_output_get_start_lineno(TSRMLS_D);
+PHPAPI void php_output_set_status(int status);
+PHPAPI int php_output_get_status(void);
+PHPAPI void php_output_set_implicit_flush(int flush);
+PHPAPI const char *php_output_get_start_filename(void);
+PHPAPI int php_output_get_start_lineno(void);
 
-PHPAPI int php_output_write_unbuffered(const char *str, size_t len TSRMLS_DC);
-PHPAPI int php_output_write(const char *str, size_t len TSRMLS_DC);
+PHPAPI size_t php_output_write_unbuffered(const char *str, size_t len);
+PHPAPI size_t php_output_write(const char *str, size_t len);
 
-PHPAPI int php_output_flush(TSRMLS_D);
-PHPAPI void php_output_flush_all(TSRMLS_D);
-PHPAPI int php_output_clean(TSRMLS_D);
-PHPAPI void php_output_clean_all(TSRMLS_D);
-PHPAPI int php_output_end(TSRMLS_D);
-PHPAPI void php_output_end_all(TSRMLS_D);
-PHPAPI int php_output_discard(TSRMLS_D);
-PHPAPI void php_output_discard_all(TSRMLS_D);
+PHPAPI int php_output_flush(void);
+PHPAPI void php_output_flush_all(void);
+PHPAPI int php_output_clean(void);
+PHPAPI void php_output_clean_all(void);
+PHPAPI int php_output_end(void);
+PHPAPI void php_output_end_all(void);
+PHPAPI int php_output_discard(void);
+PHPAPI void php_output_discard_all(void);
 
-PHPAPI int php_output_get_contents(zval *p TSRMLS_DC);
-PHPAPI int php_output_get_length(zval *p TSRMLS_DC);
-PHPAPI int php_output_get_level(TSRMLS_D);
-PHPAPI php_output_handler* php_output_get_active_handler(TSRMLS_D);
+PHPAPI int php_output_get_contents(zval *p);
+PHPAPI int php_output_get_length(zval *p);
+PHPAPI int php_output_get_level(void);
+PHPAPI php_output_handler* php_output_get_active_handler(void);
 
-PHPAPI int php_output_start_default(TSRMLS_D);
-PHPAPI int php_output_start_devnull(TSRMLS_D);
+PHPAPI int php_output_start_default(void);
+PHPAPI int php_output_start_devnull(void);
 
-PHPAPI int php_output_start_user(zval *output_handler, size_t chunk_size, int flags TSRMLS_DC);
-PHPAPI int php_output_start_internal(const char *name, size_t name_len, php_output_handler_func_t output_handler, size_t chunk_size, int flags TSRMLS_DC);
+PHPAPI int php_output_start_user(zval *output_handler, size_t chunk_size, int flags);
+PHPAPI int php_output_start_internal(const char *name, size_t name_len, php_output_handler_func_t output_handler, size_t chunk_size, int flags);
 
-PHPAPI php_output_handler *php_output_handler_create_user(zval *handler, size_t chunk_size, int flags TSRMLS_DC);
-PHPAPI php_output_handler *php_output_handler_create_internal(const char *name, size_t name_len, php_output_handler_context_func_t handler, size_t chunk_size, int flags TSRMLS_DC);
+PHPAPI php_output_handler *php_output_handler_create_user(zval *handler, size_t chunk_size, int flags);
+PHPAPI php_output_handler *php_output_handler_create_internal(const char *name, size_t name_len, php_output_handler_context_func_t handler, size_t chunk_size, int flags);
 
-PHPAPI void php_output_handler_set_context(php_output_handler *handler, void *opaq, void (*dtor)(void* TSRMLS_DC) TSRMLS_DC);
-PHPAPI int php_output_handler_start(php_output_handler *handler TSRMLS_DC);
-PHPAPI int php_output_handler_started(const char *name, size_t name_len TSRMLS_DC);
-PHPAPI int php_output_handler_hook(php_output_handler_hook_t type, void *arg TSRMLS_DC);
-PHPAPI void php_output_handler_dtor(php_output_handler *handler TSRMLS_DC);
-PHPAPI void php_output_handler_free(php_output_handler **handler TSRMLS_DC);
+PHPAPI void php_output_handler_set_context(php_output_handler *handler, void *opaq, void (*dtor)(void*));
+PHPAPI int php_output_handler_start(php_output_handler *handler);
+PHPAPI int php_output_handler_started(const char *name, size_t name_len);
+PHPAPI int php_output_handler_hook(php_output_handler_hook_t type, void *arg);
+PHPAPI void php_output_handler_dtor(php_output_handler *handler);
+PHPAPI void php_output_handler_free(php_output_handler **handler);
 
-PHPAPI int php_output_handler_conflict(const char *handler_new, size_t handler_new_len, const char *handler_set, size_t handler_set_len TSRMLS_DC);
-PHPAPI int php_output_handler_conflict_register(const char *handler_name, size_t handler_name_len, php_output_handler_conflict_check_t check_func TSRMLS_DC);
-PHPAPI int php_output_handler_reverse_conflict_register(const char *handler_name, size_t handler_name_len, php_output_handler_conflict_check_t check_func TSRMLS_DC);
+PHPAPI int php_output_handler_conflict(const char *handler_new, size_t handler_new_len, const char *handler_set, size_t handler_set_len);
+PHPAPI int php_output_handler_conflict_register(const char *handler_name, size_t handler_name_len, php_output_handler_conflict_check_t check_func);
+PHPAPI int php_output_handler_reverse_conflict_register(const char *handler_name, size_t handler_name_len, php_output_handler_conflict_check_t check_func);
 
-PHPAPI php_output_handler_alias_ctor_t *php_output_handler_alias(const char *handler_name, size_t handler_name_len TSRMLS_DC);
-PHPAPI int php_output_handler_alias_register(const char *handler_name, size_t handler_name_len, php_output_handler_alias_ctor_t func TSRMLS_DC);
+PHPAPI php_output_handler_alias_ctor_t php_output_handler_alias(const char *handler_name, size_t handler_name_len);
+PHPAPI int php_output_handler_alias_register(const char *handler_name, size_t handler_name_len, php_output_handler_alias_ctor_t func);
 
 END_EXTERN_C()
 

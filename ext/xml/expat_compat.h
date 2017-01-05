@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,6 +25,14 @@
 #include "config.w32.h"
 #else
 #include <php_config.h>
+#endif
+
+#ifdef PHP_WIN32
+# define PHP_XML_API __declspec(dllexport)
+#elif defined(__GNUC__) && __GNUC__ >= 4
+# define PHP_XML_API __attribute__ ((visibility("default")))
+#else
+# define PHP_XML_API
 #endif
 
 #if !defined(HAVE_LIBEXPAT) && defined(HAVE_LIBXML)
@@ -121,29 +129,29 @@ enum XML_Content_Type {
 	XML_CTYPE_SEQ
 };
 
-PHPAPI XML_Parser XML_ParserCreate(const XML_Char *);
-PHPAPI XML_Parser XML_ParserCreateNS(const XML_Char *, const XML_Char);
-PHPAPI XML_Parser XML_ParserCreate_MM(const XML_Char *, const XML_Memory_Handling_Suite *, const XML_Char *);
-PHPAPI void XML_SetUserData(XML_Parser, void *);
-PHPAPI void *XML_GetUserData(XML_Parser);
-PHPAPI void XML_SetElementHandler(XML_Parser, XML_StartElementHandler, XML_EndElementHandler);
-PHPAPI void XML_SetCharacterDataHandler(XML_Parser, XML_CharacterDataHandler);
-PHPAPI void XML_SetProcessingInstructionHandler(XML_Parser, XML_ProcessingInstructionHandler);
-PHPAPI void XML_SetDefaultHandler(XML_Parser, XML_DefaultHandler);
-PHPAPI void XML_SetUnparsedEntityDeclHandler(XML_Parser, XML_UnparsedEntityDeclHandler);
-PHPAPI void XML_SetNotationDeclHandler(XML_Parser, XML_NotationDeclHandler);
-PHPAPI void XML_SetExternalEntityRefHandler(XML_Parser, XML_ExternalEntityRefHandler);
-PHPAPI void XML_SetStartNamespaceDeclHandler(XML_Parser, XML_StartNamespaceDeclHandler);
-PHPAPI void XML_SetEndNamespaceDeclHandler(XML_Parser, XML_EndNamespaceDeclHandler);
-PHPAPI int  XML_Parse(XML_Parser, const XML_Char *, int data_len, int is_final);
-PHPAPI int  XML_GetErrorCode(XML_Parser);
-PHPAPI const XML_Char *XML_ErrorString(int);
-PHPAPI int  XML_GetCurrentLineNumber(XML_Parser);
-PHPAPI int  XML_GetCurrentColumnNumber(XML_Parser);
-PHPAPI int  XML_GetCurrentByteIndex(XML_Parser);
-PHPAPI int  XML_GetCurrentByteCount(XML_Parser);
-PHPAPI const XML_Char *XML_ExpatVersion(void);
-PHPAPI void XML_ParserFree(XML_Parser);
+PHP_XML_API XML_Parser XML_ParserCreate(const XML_Char *);
+PHP_XML_API XML_Parser XML_ParserCreateNS(const XML_Char *, const XML_Char);
+PHP_XML_API XML_Parser XML_ParserCreate_MM(const XML_Char *, const XML_Memory_Handling_Suite *, const XML_Char *);
+PHP_XML_API void XML_SetUserData(XML_Parser, void *);
+PHP_XML_API void *XML_GetUserData(XML_Parser);
+PHP_XML_API void XML_SetElementHandler(XML_Parser, XML_StartElementHandler, XML_EndElementHandler);
+PHP_XML_API void XML_SetCharacterDataHandler(XML_Parser, XML_CharacterDataHandler);
+PHP_XML_API void XML_SetProcessingInstructionHandler(XML_Parser, XML_ProcessingInstructionHandler);
+PHP_XML_API void XML_SetDefaultHandler(XML_Parser, XML_DefaultHandler);
+PHP_XML_API void XML_SetUnparsedEntityDeclHandler(XML_Parser, XML_UnparsedEntityDeclHandler);
+PHP_XML_API void XML_SetNotationDeclHandler(XML_Parser, XML_NotationDeclHandler);
+PHP_XML_API void XML_SetExternalEntityRefHandler(XML_Parser, XML_ExternalEntityRefHandler);
+PHP_XML_API void XML_SetStartNamespaceDeclHandler(XML_Parser, XML_StartNamespaceDeclHandler);
+PHP_XML_API void XML_SetEndNamespaceDeclHandler(XML_Parser, XML_EndNamespaceDeclHandler);
+PHP_XML_API int  XML_Parse(XML_Parser, const XML_Char *, int data_len, int is_final);
+PHP_XML_API int  XML_GetErrorCode(XML_Parser);
+PHP_XML_API const XML_Char *XML_ErrorString(int);
+PHP_XML_API int  XML_GetCurrentLineNumber(XML_Parser);
+PHP_XML_API int  XML_GetCurrentColumnNumber(XML_Parser);
+PHP_XML_API int  XML_GetCurrentByteIndex(XML_Parser);
+PHP_XML_API int  XML_GetCurrentByteCount(XML_Parser);
+PHP_XML_API const XML_Char *XML_ExpatVersion(void);
+PHP_XML_API void XML_ParserFree(XML_Parser);
 
 #elif defined(HAVE_LIBEXPAT)
 #include <expat.h>

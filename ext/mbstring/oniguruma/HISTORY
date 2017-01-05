@@ -1,5 +1,10 @@
 History
 
+2014/12/12: Version 5.9.6
+
+2013/11/27: [impl] add onigenc_end_unicode().  (thanks Takenori Imoto)
+2013/11/27: [impl] add onig_add_end_call().    (thanks Takenori Imoto)
+
 2013/10/21: Version 5.9.5
 
 2013/10/21: [impl] escape warnings for -Wall. (regparse.c)

@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -25,6 +25,9 @@
 
 #define phpext_mysqli_ptr &mysqli_module_entry
 extern zend_module_entry mysqli_module_entry;
+
+#include "php_version.h"
+#define PHP_MYSQLI_VERSION PHP_VERSION
 
 #endif	/* PHP_MYSQLI.H */
 

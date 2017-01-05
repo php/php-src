@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -35,10 +35,10 @@ ZEND_END_ARG_INFO();
 /* }}} */
 
 /*
-* class DOMCdataSection extends DOMText 
+* class DOMCdataSection extends DOMText
 *
 * URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-667469212
-* Since: 
+* Since:
 */
 
 const zend_function_entry php_dom_cdatasection_class_functions[] = {
@@ -50,35 +50,29 @@ const zend_function_entry php_dom_cdatasection_class_functions[] = {
 PHP_METHOD(domcdatasection, __construct)
 {
 
-	zval *id;
+	zval *id = getThis();
 	xmlNodePtr nodep = NULL, oldnode = NULL;
 	dom_object *intern;
 	char *value = NULL;
-	int value_len;
-	zend_error_handling error_handling;
+	size_t value_len;
 
-	zend_replace_error_handling(EH_THROW, dom_domexception_class_entry, &error_handling TSRMLS_CC);
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_cdatasection_class_entry, &value, &value_len) == FAILURE) {
-		zend_restore_error_handling(&error_handling TSRMLS_CC);
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &value, &value_len) == FAILURE) {
 		return;
 	}
 
-	zend_restore_error_handling(&error_handling TSRMLS_CC);
 	nodep = xmlNewCDataBlock(NULL, (xmlChar *) value, value_len);
 
 	if (!nodep) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1 TSRMLS_CC);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		RETURN_FALSE;
 	}
 
-	intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
-	if (intern != NULL) {
-		oldnode = dom_object_get_node(intern);
-		if (oldnode != NULL) {
-			php_libxml_node_free_resource(oldnode  TSRMLS_CC);
-		}
-		php_libxml_increment_node_ptr((php_libxml_node_object *)intern, nodep, (void *)intern TSRMLS_CC);
+	intern = Z_DOMOBJ_P(id);
+	oldnode = dom_object_get_node(intern);
+	if (oldnode != NULL) {
+		php_libxml_node_free_resource(oldnode );
 	}
+	php_libxml_increment_node_ptr((php_libxml_node_object *)intern, nodep, (void *)intern);
 }
 /* }}} end DOMCdataSection::__construct */
 

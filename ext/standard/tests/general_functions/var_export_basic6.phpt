@@ -61,7 +61,7 @@ class myClass
   private $private_var;
   protected $protected_var;
 
-  function myClass ( ) {
+  function __construct ( ) {
     $this->foo_object = new foo();
     $this->public_var = 10;
     $this->public_var1 = new foo();

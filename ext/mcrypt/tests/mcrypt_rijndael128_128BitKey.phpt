@@ -53,16 +53,12 @@ foreach ($keys as $key) {
    echo "\nkey length=".strlen($key)."\n";
    $res = mcrypt_encrypt($cipher, $key, $data, MCRYPT_MODE_CBC, $iv);
    var_dump(bin2hex($res));
-   $res = mcrypt_cbc($cipher, $key, $res, MCRYPT_DECRYPT, $iv);
-   var_dump(bin2hex($res));   
 }
 
 $key = b'1234567890123456';  
 echo "\n--- testing different iv lengths\n";
 foreach ($ivs as $iv) {
    echo "\niv length=".strlen($iv)."\n";
-   $res = mcrypt_cbc($cipher, $key, $data, $mode, $iv);
-   var_dump(bin2hex($res));
    $res = mcrypt_decrypt($cipher, $key, $res, MCRYPT_MODE_CBC, $iv);
    var_dump(bin2hex($res));   
 }
@@ -79,19 +75,9 @@ key length=0
 Warning: mcrypt_encrypt(): Key of size 0 not supported by this algorithm. Only keys of sizes 16, 24 or 32 supported in %s on line %d
 string(0) ""
 
-Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
-
-Warning: mcrypt_cbc(): Key of size 0 not supported by this algorithm. Only keys of sizes 16, 24 or 32 supported in %s on line %d
-string(0) ""
-
 key length=0
 
 Warning: mcrypt_encrypt(): Key of size 0 not supported by this algorithm. Only keys of sizes 16, 24 or 32 supported in %s on line %d
-string(0) ""
-
-Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
-
-Warning: mcrypt_cbc(): Key of size 0 not supported by this algorithm. Only keys of sizes 16, 24 or 32 supported in %s on line %d
 string(0) ""
 
 key length=8
@@ -99,61 +85,30 @@ key length=8
 Warning: mcrypt_encrypt(): Key of size 8 not supported by this algorithm. Only keys of sizes 16, 24 or 32 supported in %s on line %d
 string(0) ""
 
-Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
-
-Warning: mcrypt_cbc(): Key of size 8 not supported by this algorithm. Only keys of sizes 16, 24 or 32 supported in %s on line %d
-string(0) ""
-
 key length=16
 string(128) "dc8f957ec530acf10cd95ba7da7b6405380fe19a2941e9a8de54680512f18491bc374e5464885ae6c2ae2aa7a6cdd2fbe12a06bbc4bd59dbbfaa15f09044f101"
-
-Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
-string(128) "546869732069732074686520736563726574206d657373616765207768696368206d75737420626520656e637279707465640000000000000000000000000000"
 
 --- testing different iv lengths
 
 iv length=0
 
-Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
-
-Warning: mcrypt_cbc(): Received initialization vector of size 0, but size 16 is required for this encryption mode in %s on line %d
-string(0) ""
-
 Warning: mcrypt_decrypt(): Received initialization vector of size 0, but size 16 is required for this encryption mode in %s on line %d
 string(0) ""
 
 iv length=0
-
-Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
-
-Warning: mcrypt_cbc(): Received initialization vector of size 0, but size 16 is required for this encryption mode in %s on line %d
-string(0) ""
 
 Warning: mcrypt_decrypt(): Received initialization vector of size 0, but size 16 is required for this encryption mode in %s on line %d
 string(0) ""
 
 iv length=8
 
-Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
-
-Warning: mcrypt_cbc(): Received initialization vector of size 8, but size 16 is required for this encryption mode in %s on line %d
-string(0) ""
-
 Warning: mcrypt_decrypt(): Received initialization vector of size 8, but size 16 is required for this encryption mode in %s on line %d
 string(0) ""
 
 iv length=16
-
-Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
-string(128) "dc8f957ec530acf10cd95ba7da7b6405380fe19a2941e9a8de54680512f18491bc374e5464885ae6c2ae2aa7a6cdd2fbe12a06bbc4bd59dbbfaa15f09044f101"
-string(128) "546869732069732074686520736563726574206d657373616765207768696368206d75737420626520656e637279707465640000000000000000000000000000"
+string(32) "42adc8c0db19473f2c684ff2d6e828a5"
 
 iv length=17
-
-Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
-
-Warning: mcrypt_cbc(): Received initialization vector of size 17, but size 16 is required for this encryption mode in %s on line %d
-string(0) ""
 
 Warning: mcrypt_decrypt(): Received initialization vector of size 17, but size 16 is required for this encryption mode in %s on line %d
 string(0) ""

@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -121,55 +121,61 @@ typedef enum {
 typedef struct _spl_cbfilter_it_intern {
 	zend_fcall_info       fci;
 	zend_fcall_info_cache fcc;
+	zend_object           *object;
 } _spl_cbfilter_it_intern;
 
 typedef struct _spl_dual_it_object {
-	zend_object              std;
 	struct {
-		zval                 *zobject;
+		zval                 zobject;
 		zend_class_entry     *ce;
 		zend_object          *object;
 		zend_object_iterator *iterator;
 	} inner;
 	struct {
-		zval                 *data;
-		zval                 *key;
-		int                  pos;
+		zval                 data;
+		zval                 key;
+		zend_long            pos;
 	} current;
 	dual_it_type             dit_type;
 	union {
 		struct {
-			long             offset;
-			long             count;
+			zend_long             offset;
+			zend_long             count;
 		} limit;
 		struct {
-			long             flags; /* CIT_* */
-			zval             *zstr;
-			zval             *zchildren;
-			zval             *zcache;
+			zend_long             flags; /* CIT_* */
+			zval             zstr;
+			zval             zchildren;
+			zval             zcache;
 		} caching;
 		struct {
-			zval                 *zarrayit;
+			zval                  zarrayit;
 			zend_object_iterator *iterator;
 		} append;
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
 		struct {
-			int              use_flags;
-			long             flags;
-			regex_mode       mode;
-			long             preg_flags;
+			zend_long        flags;
+			zend_long        preg_flags;
 			pcre_cache_entry *pce;
-			char             *regex;
-			uint             regex_len;
+			zend_string      *regex;
+			regex_mode       mode;
+			int              use_flags;
 		} regex;
 #endif
 		_spl_cbfilter_it_intern *cbfilter;
 	} u;
+	zend_object              std;
 } spl_dual_it_object;
 
-typedef int (*spl_iterator_apply_func_t)(zend_object_iterator *iter, void *puser TSRMLS_DC);
+static inline spl_dual_it_object *spl_dual_it_from_obj(zend_object *obj) /* {{{ */ {
+	return (spl_dual_it_object*)((char*)(obj) - XtOffsetOf(spl_dual_it_object, std));
+} /* }}} */
 
-PHPAPI int spl_iterator_apply(zval *obj, spl_iterator_apply_func_t apply_func, void *puser TSRMLS_DC);
+#define Z_SPLDUAL_IT_P(zv)  spl_dual_it_from_obj(Z_OBJ_P((zv)))
+
+typedef int (*spl_iterator_apply_func_t)(zend_object_iterator *iter, void *puser);
+
+PHPAPI int spl_iterator_apply(zval *obj, spl_iterator_apply_func_t apply_func, void *puser);
 
 #endif /* SPL_ITERATORS_H */
 

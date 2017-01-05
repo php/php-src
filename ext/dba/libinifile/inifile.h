@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -45,12 +45,14 @@ typedef struct {
 	line_type next;
 } inifile;
 
-val_type inifile_fetch(inifile *dba, const key_type *key, int skip TSRMLS_DC);
-int inifile_firstkey(inifile *dba TSRMLS_DC);
-int inifile_nextkey(inifile *dba TSRMLS_DC);
-int inifile_delete(inifile *dba, const key_type *key TSRMLS_DC);
-int inifile_replace(inifile *dba, const key_type *key, const val_type *val TSRMLS_DC);
-int inifile_append(inifile *dba, const key_type *key, const val_type *val TSRMLS_DC);
+val_type inifile_fetch(inifile *dba, const key_type *key, int skip);
+int inifile_firstkey(inifile *dba);
+int inifile_nextkey(inifile *dba);
+int inifile_delete(inifile *dba, const key_type *key);
+int inifile_delete_ex(inifile *dba, const key_type *key, zend_bool *found);
+int inifile_replace(inifile *dba, const key_type *key, const val_type *val);
+int inifile_replace_ex(inifile *dba, const key_type *key, const val_type *val, zend_bool *found);
+int inifile_append(inifile *dba, const key_type *key, const val_type *val);
 char *inifile_version();
 
 key_type inifile_key_split(const char *group_name);
@@ -60,7 +62,7 @@ void inifile_key_free(key_type *key);
 void inifile_val_free(val_type *val);
 void inifile_line_free(line_type *ln);
 
-inifile * inifile_alloc(php_stream *fp, int readonly, int persistent TSRMLS_DC);
+inifile * inifile_alloc(php_stream *fp, int readonly, int persistent);
 void inifile_free(inifile *dba, int persistent);
 
 #endif

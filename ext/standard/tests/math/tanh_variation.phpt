@@ -45,7 +45,7 @@ float(1)
 float(1)
 float(1)
 
-Warning: tanh() expects parameter 1 to be double, string given in %s on line %d
+Warning: tanh() expects parameter 1 to be float, string given in %s on line %d
 NULL
 float(1)
 

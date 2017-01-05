@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,10 +28,10 @@
 #include "php_dom.h"
 
 /*
-* class DOMException 
+* class DOMException
 *
 * URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-17189187
-* Since: 
+* Since:
 */
 
 extern zend_class_entry *dom_domexception_class_entry;
@@ -40,18 +40,18 @@ const zend_function_entry php_dom_domexception_class_functions[] = {
 	PHP_FE_END
 };
 
-void php_dom_throw_error_with_message(int error_code, char *error_message, int strict_error TSRMLS_DC) /* {{{ */
+void php_dom_throw_error_with_message(int error_code, char *error_message, int strict_error) /* {{{ */
 {
 	if (strict_error == 1) {
-		zend_throw_exception(dom_domexception_class_entry, error_message, error_code TSRMLS_CC);
+		zend_throw_exception(dom_domexception_class_entry, error_message, error_code);
 	} else {
-		php_libxml_issue_error(E_WARNING, error_message TSRMLS_CC);
+		php_libxml_issue_error(E_WARNING, error_message);
 	}
 }
 /* }}} */
 
 /* {{{ php_dom_throw_error */
-void php_dom_throw_error(int error_code, int strict_error TSRMLS_DC)
+void php_dom_throw_error(int error_code, int strict_error)
 {
 	char *error_message;
 
@@ -109,7 +109,7 @@ void php_dom_throw_error(int error_code, int strict_error TSRMLS_DC)
 			error_message = "Unhandled Error";
 	}
 
-	php_dom_throw_error_with_message(error_code, error_message, strict_error TSRMLS_CC);
+	php_dom_throw_error_with_message(error_code, error_message, strict_error);
 }
 /* }}} end php_dom_throw_error */
 

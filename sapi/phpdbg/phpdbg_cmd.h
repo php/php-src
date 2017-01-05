@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -86,7 +86,9 @@ struct _phpdbg_param {
 #define YYSTYPE phpdbg_param_t
 #endif
 
-typedef int (*phpdbg_command_handler_t)(const phpdbg_param_t* TSRMLS_DC);
+#define PHPDBG_ASYNC_SAFE 1
+
+typedef int (*phpdbg_command_handler_t)(const phpdbg_param_t*);
 
 typedef struct _phpdbg_command_t phpdbg_command_t;
 struct _phpdbg_command_t {
@@ -97,8 +99,9 @@ struct _phpdbg_command_t {
 	char alias;                         /* Alias */
 	phpdbg_command_handler_t handler;   /* Command handler */
 	const phpdbg_command_t *subs;       /* Sub Commands */
-	char *args;							/* Argument Spec */
-	const phpdbg_command_t *parent;		/* Parent Command */							
+	char *args;                         /* Argument Spec */
+	const phpdbg_command_t *parent;     /* Parent Command */
+	zend_bool flags;                    /* General flags */
 };
 /* }}} */
 
@@ -106,7 +109,7 @@ struct _phpdbg_command_t {
 #define PHPDBG_STRL(s) s, sizeof(s)-1
 #define PHPDBG_MAX_CMD 500
 #define PHPDBG_FRAME(v) (PHPDBG_G(frame).v)
-#define PHPDBG_EX(v) (EG(current_execute_data)->v) 
+#define PHPDBG_EX(v) (EG(current_execute_data)->v)
 
 typedef struct {
 	int num;
@@ -126,27 +129,29 @@ typedef struct {
 /*
 * Input Management
 */
-PHPDBG_API char* phpdbg_read_input(char *buffered TSRMLS_DC);
-PHPDBG_API void phpdbg_destroy_input(char** TSRMLS_DC);
+PHPDBG_API char* phpdbg_read_input(char *buffered);
+PHPDBG_API void phpdbg_destroy_input(char**);
+PHPDBG_API int phpdbg_ask_user_permission(const char *question);
 
 /**
  * Stack Management
  */
 PHPDBG_API void phpdbg_stack_push(phpdbg_param_t *stack, phpdbg_param_t *param);
-PHPDBG_API const phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *commands, const phpdbg_command_t *parent, phpdbg_param_t **top, char **why);
-PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param_t **stack, char **why TSRMLS_DC);
-PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, char **why TSRMLS_DC);
+PHPDBG_API void phpdbg_stack_separate(phpdbg_param_t *param);
+PHPDBG_API const phpdbg_command_t *phpdbg_stack_resolve(const phpdbg_command_t *commands, const phpdbg_command_t *parent, phpdbg_param_t **top);
+PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param_t **stack);
+PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, zend_bool allow_async_unsafe);
 PHPDBG_API void phpdbg_stack_free(phpdbg_param_t *stack);
 
 /*
 * Parameter Management
 */
-PHPDBG_API void phpdbg_clear_param(phpdbg_param_t* TSRMLS_DC);
-PHPDBG_API void phpdbg_copy_param(const phpdbg_param_t*, phpdbg_param_t* TSRMLS_DC);
-PHPDBG_API zend_bool phpdbg_match_param(const phpdbg_param_t *, const phpdbg_param_t * TSRMLS_DC);
-PHPDBG_API zend_ulong phpdbg_hash_param(const phpdbg_param_t * TSRMLS_DC);
-PHPDBG_API const char* phpdbg_get_param_type(const phpdbg_param_t* TSRMLS_DC);
-PHPDBG_API char* phpdbg_param_tostring(const phpdbg_param_t *param, char **pointer TSRMLS_DC);
+PHPDBG_API void phpdbg_clear_param(phpdbg_param_t*);
+PHPDBG_API void phpdbg_copy_param(const phpdbg_param_t*, phpdbg_param_t*);
+PHPDBG_API zend_bool phpdbg_match_param(const phpdbg_param_t *, const phpdbg_param_t *);
+PHPDBG_API zend_ulong phpdbg_hash_param(const phpdbg_param_t *);
+PHPDBG_API const char* phpdbg_get_param_type(const phpdbg_param_t*);
+PHPDBG_API char* phpdbg_param_tostring(const phpdbg_param_t *param, char **pointer);
 PHPDBG_API void phpdbg_param_debug(const phpdbg_param_t *param, const char *msg);
 
 /**
@@ -154,27 +159,27 @@ PHPDBG_API void phpdbg_param_debug(const phpdbg_param_t *param, const char *msg)
  */
 #define PHPDBG_COMMAND_HANDLER(name) phpdbg_do_##name
 
-#define PHPDBG_COMMAND_D_EXP(name, tip, alias, handler, children, args, parent) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##handler, children, args, parent}
+#define PHPDBG_COMMAND_D_EXP(name, tip, alias, handler, children, args, parent, flags) \
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##handler, children, args, parent, flags}
 
-#define PHPDBG_COMMAND_D_EX(name, tip, alias, handler, children, args) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##handler, children, args, NULL}
+#define PHPDBG_COMMAND_D_EX(name, tip, alias, handler, children, args, flags) \
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##handler, children, args, NULL, flags}
 
-#define PHPDBG_COMMAND_D(name, tip, alias, children, args) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##name, children, args, NULL}
+#define PHPDBG_COMMAND_D(name, tip, alias, children, args, flags) \
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##name, children, args, NULL, flags}
 
-#define PHPDBG_COMMAND(name) int phpdbg_do_##name(const phpdbg_param_t *param TSRMLS_DC)
+#define PHPDBG_COMMAND(name) int phpdbg_do_##name(const phpdbg_param_t *param)
 
-#define PHPDBG_COMMAND_ARGS param TSRMLS_CC
+#define PHPDBG_COMMAND_ARGS param
 
-#define PHPDBG_END_COMMAND {NULL, 0, NULL, 0, '\0', NULL, NULL, '\0', NULL}
+#define PHPDBG_END_COMMAND {NULL, 0, NULL, 0, '\0', NULL, NULL, NULL, NULL, 0}
 
 /*
 * Default Switch Case
 */
 #define phpdbg_default_switch_case() \
 	default: \
-		phpdbg_error("Unsupported parameter type (%s) for command", phpdbg_get_param_type(param TSRMLS_CC)); \
+		phpdbg_error("command", "type=\"wrongarg\" got=\"%s\"", "Unsupported parameter type (%s) for command", phpdbg_get_param_type(param)); \
 	break
 
 #endif /* PHPDBG_CMD_H */

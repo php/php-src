@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -50,15 +50,15 @@ static php_lcg_globals lcg_globals;
 
 #define MODMULT(a, b, c, m, s) q = s/a;s=b*(s-a*q)-c*q;if(s<0)s+=m
 
-static void lcg_seed(TSRMLS_D);
+static void lcg_seed(void);
 
-PHPAPI double php_combined_lcg(TSRMLS_D) /* {{{ */
+PHPAPI double php_combined_lcg(void) /* {{{ */
 {
 	php_int32 q;
 	php_int32 z;
 
 	if (!LCG(seeded)) {
-		lcg_seed(TSRMLS_C);
+		lcg_seed();
 	}
 
 	MODMULT(53668, 40014, 12211, 2147483563L, LCG(s1));
@@ -73,7 +73,7 @@ PHPAPI double php_combined_lcg(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-static void lcg_seed(TSRMLS_D) /* {{{ */
+static void lcg_seed(void) /* {{{ */
 {
 	struct timeval tv;
 
@@ -83,9 +83,9 @@ static void lcg_seed(TSRMLS_D) /* {{{ */
 		LCG(s1) = 1;
 	}
 #ifdef ZTS
-	LCG(s2) = (long) tsrm_thread_id();
+	LCG(s2) = (zend_long) tsrm_thread_id();
 #else
-	LCG(s2) = (long) getpid();
+	LCG(s2) = (zend_long) getpid();
 #endif
 
 	/* Add entropy to s2 by calling gettimeofday() again */
@@ -97,7 +97,7 @@ static void lcg_seed(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-static void lcg_init_globals(php_lcg_globals *lcg_globals_p TSRMLS_DC) /* {{{ */
+static void lcg_init_globals(php_lcg_globals *lcg_globals_p) /* {{{ */
 {
 	LCG(seeded) = 0;
 }
@@ -118,7 +118,7 @@ PHP_MINIT_FUNCTION(lcg) /* {{{ */
    Returns a value from the combined linear congruential generator */
 PHP_FUNCTION(lcg_value)
 {
-	RETURN_DOUBLE(php_combined_lcg(TSRMLS_C));
+	RETURN_DOUBLE(php_combined_lcg());
 }
 /* }}} */
 

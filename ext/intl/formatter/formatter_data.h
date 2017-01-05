@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,8 +31,8 @@ typedef struct {
 	UNumberFormat*  unum;
 } formatter_data;
 
-formatter_data* formatter_data_create( TSRMLS_D );
-void formatter_data_init( formatter_data* nf_data TSRMLS_DC );
-void formatter_data_free( formatter_data* nf_data TSRMLS_DC );
+formatter_data* formatter_data_create( void );
+void formatter_data_init( formatter_data* nf_data );
+void formatter_data_free( formatter_data* nf_data );
 
 #endif // FORMATTER_DATA_H

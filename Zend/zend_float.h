@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,9 +26,9 @@ BEGIN_EXTERN_C()
 /*
   Define functions for FP initialization and de-initialization.
 */
-extern ZEND_API void zend_init_fpu(TSRMLS_D);
-extern ZEND_API void zend_shutdown_fpu(TSRMLS_D);
-extern ZEND_API void zend_ensure_fpu_mode(TSRMLS_D);
+extern ZEND_API void zend_init_fpu(void);
+extern ZEND_API void zend_shutdown_fpu(void);
+extern ZEND_API void zend_ensure_fpu_mode(void);
 
 END_EXTERN_C()
 
@@ -57,7 +57,7 @@ END_EXTERN_C()
  Implementation notes:
 
  x86_64:
-  - Since all x86_64 compilers use SSE by default, it is probably unecessary
+  - Since all x86_64 compilers use SSE by default, it is probably unnecessary
     to use these macros there. We define them anyway since we are too lazy
     to differentiate the architecture. Also, the compiler option -mfpmath=i387
     justifies this decision.
@@ -76,17 +76,7 @@ END_EXTERN_C()
 
 /* MSVC detection (MSVC people usually don't use autoconf) */
 #if defined(_MSC_VER) && !defined(_WIN64)
-# if _MSC_VER >= 1500
-   /* Visual C++ 2008 or higher, supports _controlfp_s */
 #  define HAVE__CONTROLFP_S
-# else
-   /* Visual C++ (up to 2005), supports _controlfp */
-#  define HAVE__CONTROLFP
-# endif /* MSC_VER >= 1500 */
-  /* Tell MSVC optimizer that we access FP environment */
-# if _MSC_VER >= 1500
-#  pragma fenv_access (on)
-# endif
 #endif /* _MSC_VER */
 
 #ifdef HAVE__CONTROLFP_S

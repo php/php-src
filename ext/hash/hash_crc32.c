@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -31,7 +31,7 @@ PHP_HASH_API void PHP_CRC32Init(PHP_CRC32_CTX *context)
 PHP_HASH_API void PHP_CRC32Update(PHP_CRC32_CTX *context, const unsigned char *input, size_t len)
 {
 	size_t i;
-	
+
 	for (i = 0; i < len; ++i) {
 		context->state = (context->state << 8) ^ crc32_table[(context->state >> 24) ^ (input[i] & 0xff)];
 	}
@@ -40,7 +40,7 @@ PHP_HASH_API void PHP_CRC32Update(PHP_CRC32_CTX *context, const unsigned char *i
 PHP_HASH_API void PHP_CRC32BUpdate(PHP_CRC32_CTX *context, const unsigned char *input, size_t len)
 {
 	size_t i;
-	
+
 	for (i = 0; i < len; ++i) {
 		context->state = (context->state >> 8) ^ crc32b_table[(context->state ^ input[i]) & 0xff];
 	}

@@ -1,8 +1,7 @@
 --TEST--
-short_open_tag: Off, asp_tags: Off
+short_open_tag: Off
 --INI--
 short_open_tag=off
-asp_tags=off
 --FILE--
 <%= 'so should this' %>
 

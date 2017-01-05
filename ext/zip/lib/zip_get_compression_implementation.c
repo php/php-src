@@ -1,6 +1,6 @@
 /*
   zip_get_compression_implementation.c -- get compression implementation
-  Copyright (C) 2009 Dieter Baron and Thomas Klausner
+  Copyright (C) 2009-2014 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -31,11 +31,9 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
 
 #include "zipint.h"
 
-
 
 zip_compression_implementation
 _zip_get_compression_implementation(zip_int32_t cm)

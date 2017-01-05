@@ -16,6 +16,6 @@ imagetruecolortopalette($image, true, -1);
 
 ?>
 --EXPECTF--
-Warning: imagetruecolortopalette(): Number of colors has to be greater than zero and no more than %d in %s on line %d
+Warning: imagetruecolortopalette(): Number of colors has to be greater than zero and no more than %d in %s line %d
 
-Warning: imagetruecolortopalette(): Number of colors has to be greater than zero and no more than %d in %s on line %d
+Warning: imagetruecolortopalette(): Number of colors has to be greater than zero and no more than %d in %s line %d

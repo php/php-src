@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,7 +29,7 @@
 
 
 /*
-* class domuserdatahandler 
+* class domuserdatahandler
 *
 * URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#UserDataHandler
 * Since: DOM Level 3
@@ -44,7 +44,7 @@ const zend_function_entry php_dom_userdatahandler_class_functions[] = {
 
 /* {{{ proto dom_void dom_userdatahandler_handle(short operation, string key, domobject data, node src, node dst);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-handleUserDataEvent
-Since: 
+Since:
 */
 PHP_FUNCTION(dom_userdatahandler_handle)
 {

@@ -150,23 +150,23 @@ Error: 2 - readfile() expects parameter 3 to be resource, integer given, %s(%d)
 file not read
 
 --float 10.5--
-Error: 2 - readfile() expects parameter 3 to be resource, double given, %s(%d)
+Error: 2 - readfile() expects parameter 3 to be resource, float given, %s(%d)
 file not read
 
 --float -10.5--
-Error: 2 - readfile() expects parameter 3 to be resource, double given, %s(%d)
+Error: 2 - readfile() expects parameter 3 to be resource, float given, %s(%d)
 file not read
 
 --float 12.3456789000e10--
-Error: 2 - readfile() expects parameter 3 to be resource, double given, %s(%d)
+Error: 2 - readfile() expects parameter 3 to be resource, float given, %s(%d)
 file not read
 
 --float -12.3456789000e10--
-Error: 2 - readfile() expects parameter 3 to be resource, double given, %s(%d)
+Error: 2 - readfile() expects parameter 3 to be resource, float given, %s(%d)
 file not read
 
 --float .5--
-Error: 2 - readfile() expects parameter 3 to be resource, double given, %s(%d)
+Error: 2 - readfile() expects parameter 3 to be resource, float given, %s(%d)
 file not read
 
 --empty array--

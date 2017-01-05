@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,11 +33,12 @@ typedef struct php_url {
 
 PHPAPI void php_url_free(php_url *theurl);
 PHPAPI php_url *php_url_parse(char const *str);
-PHPAPI php_url *php_url_parse_ex(char const *str, int length);
-PHPAPI int php_url_decode(char *str, int len); /* return value: length of decoded string */
-PHPAPI int php_raw_url_decode(char *str, int len); /* return value: length of decoded string */
-PHPAPI char *php_url_encode(char const *s, int len, int *new_length);
-PHPAPI char *php_raw_url_encode(char const *s, int len, int *new_length);
+PHPAPI php_url *php_url_parse_ex(char const *str, size_t length);
+PHPAPI size_t php_url_decode(char *str, size_t len); /* return value: length of decoded string */
+PHPAPI size_t php_raw_url_decode(char *str, size_t len); /* return value: length of decoded string */
+PHPAPI zend_string *php_url_encode(char const *s, size_t len);
+PHPAPI zend_string *php_raw_url_encode(char const *s, size_t len);
+PHPAPI char *php_replace_controlchars_ex(char *str, size_t len);
 
 PHP_FUNCTION(parse_url);
 PHP_FUNCTION(urlencode);

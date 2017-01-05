@@ -22,11 +22,8 @@ error_log = $logfile
 [unconfined]
 listen = 127.0.0.1:$port
 pm.status_path = /status
-pm = dynamic
-pm.max_children = 5
-pm.start_servers = 2
-pm.min_spare_servers = 1
-pm.max_spare_servers = 3
+pm = static 
+pm.max_children = 1
 EOT;
 
 $fpm = run_fpm($cfg, $tail);
@@ -65,16 +62,16 @@ Cache-Control: %s
 Content-type: text/plain%s
 
 pool:                 unconfined
-process manager:      dynamic
+process manager:      static
 start time:           %s
 start since:          %d
 accepted conn:        1
 listen queue:         0
 max listen queue:     0
 listen queue len:     %d
-idle processes:       1
+idle processes:       0
 active processes:     1
-total processes:      2
+total processes:      1
 max active processes: 1
 max children reached: 0
 slow requests:        0

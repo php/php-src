@@ -10,7 +10,7 @@ gmp_setbit($n, 10, -1);
 var_dump(gmp_strval($n));
 
 $n = gmp_init(5);
-gmp_setbit($n, -20, 0);
+var_dump(gmp_setbit($n, -20, 0));
 var_dump(gmp_strval($n));
 
 $n = gmp_init(5);
@@ -41,10 +41,11 @@ gmp_setbit($a,array());
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(2) "-1"
 
 Warning: gmp_setbit(): Index must be greater than or equal to zero in %s on line %d
+bool(false)
 string(1) "5"
 string(1) "1"
 string(1) "7"

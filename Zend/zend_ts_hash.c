@@ -2,10 +2,10 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -59,24 +59,24 @@ static void end_write(TsHashTable *ht)
 }
 
 /* delegates */
-ZEND_API int _zend_ts_hash_init(TsHashTable *ht, uint nSize, dtor_func_t pDestructor, zend_bool persistent ZEND_FILE_LINE_DC)
+ZEND_API void _zend_ts_hash_init(TsHashTable *ht, uint nSize, dtor_func_t pDestructor, zend_bool persistent ZEND_FILE_LINE_DC)
 {
 #ifdef ZTS
 	ht->mx_reader = tsrm_mutex_alloc();
 	ht->mx_writer = tsrm_mutex_alloc();
 	ht->reader = 0;
 #endif
-	return _zend_hash_init(TS_HASH(ht), nSize, pDestructor, persistent ZEND_FILE_LINE_RELAY_CC);
+	_zend_hash_init(TS_HASH(ht), nSize, pDestructor, persistent ZEND_FILE_LINE_RELAY_CC);
 }
 
-ZEND_API int _zend_ts_hash_init_ex(TsHashTable *ht, uint nSize, dtor_func_t pDestructor, zend_bool persistent, zend_bool bApplyProtection ZEND_FILE_LINE_DC)
+ZEND_API void _zend_ts_hash_init_ex(TsHashTable *ht, uint nSize, dtor_func_t pDestructor, zend_bool persistent, zend_bool bApplyProtection ZEND_FILE_LINE_DC)
 {
 #ifdef ZTS
 	ht->mx_reader = tsrm_mutex_alloc();
 	ht->mx_writer = tsrm_mutex_alloc();
 	ht->reader = 0;
 #endif
-	return _zend_hash_init_ex(TS_HASH(ht), nSize, pDestructor, persistent, bApplyProtection ZEND_FILE_LINE_RELAY_CC);
+	_zend_hash_init_ex(TS_HASH(ht), nSize, pDestructor, persistent, bApplyProtection ZEND_FILE_LINE_RELAY_CC);
 }
 
 ZEND_API void zend_ts_hash_destroy(TsHashTable *ht)
@@ -99,45 +99,34 @@ ZEND_API void zend_ts_hash_clean(TsHashTable *ht)
 	end_write(ht);
 }
 
-ZEND_API int _zend_ts_hash_add_or_update(TsHashTable *ht, char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC)
+ZEND_API zval *_zend_ts_hash_add_or_update(TsHashTable *ht, zend_string *key, zval *pData, int flag ZEND_FILE_LINE_DC)
 {
-	int retval;
+	zval *retval;
 
 	begin_write(ht);
-	retval = _zend_hash_add_or_update(TS_HASH(ht), arKey, nKeyLength, pData, nDataSize, pDest, flag ZEND_FILE_LINE_RELAY_CC);
+	retval = _zend_hash_add_or_update(TS_HASH(ht), key, pData, flag ZEND_FILE_LINE_RELAY_CC);
 	end_write(ht);
 
 	return retval;
 }
 
-ZEND_API int _zend_ts_hash_quick_add_or_update(TsHashTable *ht, char *arKey, uint nKeyLength, ulong h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC)
+ZEND_API zval *_zend_ts_hash_index_add_or_update(TsHashTable *ht, zend_ulong h, zval *pData, int flag ZEND_FILE_LINE_DC)
 {
-	int retval;
+	zval *retval;
 
 	begin_write(ht);
-	retval = _zend_hash_quick_add_or_update(TS_HASH(ht), arKey, nKeyLength, h, pData, nDataSize, pDest, flag ZEND_FILE_LINE_RELAY_CC);
+	retval = _zend_hash_index_add_or_update(TS_HASH(ht), h, pData, flag ZEND_FILE_LINE_RELAY_CC);
 	end_write(ht);
 
 	return retval;
 }
 
-ZEND_API int _zend_ts_hash_index_update_or_next_insert(TsHashTable *ht, ulong h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC)
+ZEND_API zval *zend_ts_hash_add_empty_element(TsHashTable *ht, zend_string *key)
 {
-	int retval;
+	zval *retval;
 
 	begin_write(ht);
-	retval = _zend_hash_index_update_or_next_insert(TS_HASH(ht), h, pData, nDataSize, pDest, flag ZEND_FILE_LINE_RELAY_CC);
-	end_write(ht);
-
-	return retval;
-}
-
-ZEND_API int zend_ts_hash_add_empty_element(TsHashTable *ht, char *arKey, uint nKeyLength)
-{
-	int retval;
-
-	begin_write(ht);
-	retval = zend_hash_add_empty_element(TS_HASH(ht), arKey, nKeyLength);
+	retval = zend_hash_add_empty_element(TS_HASH(ht), key);
 	end_write(ht);
 
 	return retval;
@@ -155,105 +144,94 @@ ZEND_API void zend_ts_hash_graceful_destroy(TsHashTable *ht)
 #endif
 }
 
-ZEND_API void zend_ts_hash_apply(TsHashTable *ht, apply_func_t apply_func TSRMLS_DC)
+ZEND_API void zend_ts_hash_apply(TsHashTable *ht, apply_func_t apply_func)
 {
 	begin_write(ht);
-	zend_hash_apply(TS_HASH(ht), apply_func TSRMLS_CC);
+	zend_hash_apply(TS_HASH(ht), apply_func);
 	end_write(ht);
 }
 
-ZEND_API void zend_ts_hash_apply_with_argument(TsHashTable *ht, apply_func_arg_t apply_func, void *argument TSRMLS_DC)
+ZEND_API void zend_ts_hash_apply_with_argument(TsHashTable *ht, apply_func_arg_t apply_func, void *argument)
 {
 	begin_write(ht);
-	zend_hash_apply_with_argument(TS_HASH(ht), apply_func, argument TSRMLS_CC);
+	zend_hash_apply_with_argument(TS_HASH(ht), apply_func, argument);
 	end_write(ht);
 }
 
-ZEND_API void zend_ts_hash_apply_with_arguments(TsHashTable *ht TSRMLS_DC, apply_func_args_t apply_func, int num_args, ...)
+ZEND_API void zend_ts_hash_apply_with_arguments(TsHashTable *ht, apply_func_args_t apply_func, int num_args, ...)
 {
 	va_list args;
 
 	va_start(args, num_args);
 	begin_write(ht);
-	zend_hash_apply_with_arguments(TS_HASH(ht) TSRMLS_CC, apply_func, num_args, args);
+	zend_hash_apply_with_arguments(TS_HASH(ht), apply_func, num_args, args);
 	end_write(ht);
 	va_end(args);
 }
 
-ZEND_API void zend_ts_hash_reverse_apply(TsHashTable *ht, apply_func_t apply_func TSRMLS_DC)
+ZEND_API void zend_ts_hash_reverse_apply(TsHashTable *ht, apply_func_t apply_func)
 {
 	begin_write(ht);
-	zend_hash_reverse_apply(TS_HASH(ht), apply_func TSRMLS_CC);
+	zend_hash_reverse_apply(TS_HASH(ht), apply_func);
 	end_write(ht);
 }
 
-ZEND_API int zend_ts_hash_del_key_or_index(TsHashTable *ht, char *arKey, uint nKeyLength, ulong h, int flag)
+ZEND_API int zend_ts_hash_del(TsHashTable *ht, zend_string *key)
 {
 	int retval;
 
 	begin_write(ht);
-	retval = zend_hash_del_key_or_index(TS_HASH(ht), arKey, nKeyLength, h, flag);
+	retval = zend_hash_del(TS_HASH(ht), key);
 	end_write(ht);
 
 	return retval;
 }
 
-ZEND_API ulong zend_ts_get_hash_value(TsHashTable *ht, char *arKey, uint nKeyLength)
+ZEND_API int zend_ts_hash_index_del(TsHashTable *ht, zend_ulong h)
 {
-	ulong retval;
+	int retval;
+
+	begin_write(ht);
+	retval = zend_hash_index_del(TS_HASH(ht), h);
+	end_write(ht);
+
+	return retval;
+}
+
+ZEND_API zval *zend_ts_hash_find(TsHashTable *ht, zend_string *key)
+{
+	zval *retval;
 
 	begin_read(ht);
-	retval = zend_get_hash_value(arKey, nKeyLength);
+	retval = zend_hash_find(TS_HASH(ht), key);
 	end_read(ht);
 
 	return retval;
 }
 
-ZEND_API int zend_ts_hash_find(TsHashTable *ht, char *arKey, uint nKeyLength, void **pData)
+ZEND_API zval *zend_ts_hash_index_find(TsHashTable *ht, zend_ulong h)
+{
+	zval *retval;
+
+	begin_read(ht);
+	retval = zend_hash_index_find(TS_HASH(ht), h);
+	end_read(ht);
+
+	return retval;
+}
+
+ZEND_API int zend_ts_hash_exists(TsHashTable *ht, zend_string *key)
 {
 	int retval;
 
 	begin_read(ht);
-	retval = zend_hash_find(TS_HASH(ht), arKey, nKeyLength, pData);
+	retval = zend_hash_exists(TS_HASH(ht), key);
 	end_read(ht);
 
 	return retval;
 }
 
-ZEND_API int zend_ts_hash_quick_find(TsHashTable *ht, char *arKey, uint nKeyLength, ulong h, void **pData)
-{
-	int retval;
-
-	begin_read(ht);
-	retval = zend_hash_quick_find(TS_HASH(ht), arKey, nKeyLength, h, pData);
-	end_read(ht);
-
-	return retval;
-}
-
-ZEND_API int zend_ts_hash_index_find(TsHashTable *ht, ulong h, void **pData)
-{
-	int retval;
-
-	begin_read(ht);
-	retval = zend_hash_index_find(TS_HASH(ht), h, pData);
-	end_read(ht);
-
-	return retval;
-}
-
-ZEND_API int zend_ts_hash_exists(TsHashTable *ht, char *arKey, uint nKeyLength)
-{
-	int retval;
-
-	begin_read(ht);
-	retval = zend_hash_exists(TS_HASH(ht), arKey, nKeyLength);
-	end_read(ht);
-
-	return retval;
-}
-
-ZEND_API int zend_ts_hash_index_exists(TsHashTable *ht, ulong h)
+ZEND_API int zend_ts_hash_index_exists(TsHashTable *ht, zend_ulong h)
 {
 	int retval;
 
@@ -264,70 +242,70 @@ ZEND_API int zend_ts_hash_index_exists(TsHashTable *ht, ulong h)
 	return retval;
 }
 
-ZEND_API void zend_ts_hash_copy(TsHashTable *target, TsHashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size)
+ZEND_API void zend_ts_hash_copy(TsHashTable *target, TsHashTable *source, copy_ctor_func_t pCopyConstructor)
 {
 	begin_read(source);
 	begin_write(target);
-	zend_hash_copy(TS_HASH(target), TS_HASH(source), pCopyConstructor, tmp, size);
+	zend_hash_copy(TS_HASH(target), TS_HASH(source), pCopyConstructor);
 	end_write(target);
 	end_read(source);
 }
 
-ZEND_API void zend_ts_hash_copy_to_hash(HashTable *target, TsHashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size)
+ZEND_API void zend_ts_hash_copy_to_hash(HashTable *target, TsHashTable *source, copy_ctor_func_t pCopyConstructor)
 {
 	begin_read(source);
-	zend_hash_copy(target, TS_HASH(source), pCopyConstructor, tmp, size);
+	zend_hash_copy(target, TS_HASH(source), pCopyConstructor);
 	end_read(source);
 }
 
-ZEND_API void zend_ts_hash_merge(TsHashTable *target, TsHashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size, int overwrite)
+ZEND_API void zend_ts_hash_merge(TsHashTable *target, TsHashTable *source, copy_ctor_func_t pCopyConstructor, int overwrite)
 {
 	begin_read(source);
 	begin_write(target);
-	zend_hash_merge(TS_HASH(target), TS_HASH(source), pCopyConstructor, tmp, size, overwrite);
+	zend_hash_merge(TS_HASH(target), TS_HASH(source), pCopyConstructor, overwrite);
 	end_write(target);
 	end_read(source);
 }
 
-ZEND_API void zend_ts_hash_merge_ex(TsHashTable *target, TsHashTable *source, copy_ctor_func_t pCopyConstructor, uint size, merge_checker_func_t pMergeSource, void *pParam)
+ZEND_API void zend_ts_hash_merge_ex(TsHashTable *target, TsHashTable *source, copy_ctor_func_t pCopyConstructor, merge_checker_func_t pMergeSource, void *pParam)
 {
 	begin_read(source);
 	begin_write(target);
-	zend_hash_merge_ex(TS_HASH(target), TS_HASH(source), pCopyConstructor, size, pMergeSource, pParam);
+	zend_hash_merge_ex(TS_HASH(target), TS_HASH(source), pCopyConstructor, pMergeSource, pParam);
 	end_write(target);
 	end_read(source);
 }
 
-ZEND_API int zend_ts_hash_sort(TsHashTable *ht, sort_func_t sort_func, compare_func_t compare_func, int renumber TSRMLS_DC)
+ZEND_API int zend_ts_hash_sort(TsHashTable *ht, sort_func_t sort_func, compare_func_t compare_func, int renumber)
 {
 	int retval;
 
 	begin_write(ht);
-	retval = zend_hash_sort(TS_HASH(ht), sort_func, compare_func, renumber TSRMLS_CC);
+	retval = zend_hash_sort_ex(TS_HASH(ht), sort_func, compare_func, renumber);
 	end_write(ht);
 
 	return retval;
 }
 
-ZEND_API int zend_ts_hash_compare(TsHashTable *ht1, TsHashTable *ht2, compare_func_t compar, zend_bool ordered TSRMLS_DC)
+ZEND_API int zend_ts_hash_compare(TsHashTable *ht1, TsHashTable *ht2, compare_func_t compar, zend_bool ordered)
 {
 	int retval;
 
 	begin_read(ht1);
 	begin_read(ht2);
-	retval = zend_hash_compare(TS_HASH(ht1), TS_HASH(ht2), compar, ordered TSRMLS_CC);
+	retval = zend_hash_compare(TS_HASH(ht1), TS_HASH(ht2), compar, ordered);
 	end_read(ht2);
 	end_read(ht1);
 
 	return retval;
 }
 
-ZEND_API int zend_ts_hash_minmax(TsHashTable *ht, compare_func_t compar, int flag, void **pData TSRMLS_DC)
+ZEND_API zval *zend_ts_hash_minmax(TsHashTable *ht, compare_func_t compar, int flag)
 {
-	int retval;
+	zval *retval;
 
 	begin_read(ht);
-	retval = zend_hash_minmax(TS_HASH(ht), compar, flag, pData TSRMLS_CC);
+	retval = zend_hash_minmax(TS_HASH(ht), compar, flag);
 	end_read(ht);
 
 	return retval;
@@ -355,21 +333,38 @@ ZEND_API int zend_ts_hash_rehash(TsHashTable *ht)
 	return retval;
 }
 
-#if ZEND_DEBUG
-void zend_ts_hash_display_pListTail(TsHashTable *ht)
+ZEND_API zval *zend_ts_hash_str_find(TsHashTable *ht, const char *key, size_t len)
 {
+	zval *retval;
+
 	begin_read(ht);
-	zend_hash_display_pListTail(TS_HASH(ht));
+	retval = zend_hash_str_find(TS_HASH(ht), key, len);
 	end_read(ht);
+
+	return retval;
 }
 
-void zend_ts_hash_display(TsHashTable *ht)
+ZEND_API zval *_zend_ts_hash_str_update(TsHashTable *ht, const char *key, size_t len, zval *pData ZEND_FILE_LINE_DC)
 {
-	begin_read(ht);
-	zend_hash_display(TS_HASH(ht));
-	end_read(ht);
+	zval *retval;
+
+	begin_write(ht);
+	retval = zend_hash_str_update(TS_HASH(ht), key, len, pData);
+	end_write(ht);
+
+	return retval;
 }
-#endif
+
+ZEND_API zval *_zend_ts_hash_str_add(TsHashTable *ht, const char *key, size_t len, zval *pData ZEND_FILE_LINE_DC)
+{
+	zval *retval;
+
+	begin_write(ht);
+	retval = zend_hash_str_add(TS_HASH(ht), key, len, pData);
+	end_write(ht);
+
+	return retval;
+}
 
 /*
  * Local variables:

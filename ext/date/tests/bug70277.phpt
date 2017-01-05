@@ -10,7 +10,7 @@ var_dump(new DateTimeZone($timezone));
 Warning: timezone_open(): Timezone must not contain null bytes in %sbug70277.php on line %d
 bool(false)
 
-Fatal error: Uncaught exception 'Exception' with message 'DateTimeZone::__construct(): Timezone must not contain null bytes' in %sbug70277.php:%d
+Fatal error: Uncaught Exception: DateTimeZone::__construct(): Timezone must not contain null bytes in %sbug70277.php:%d
 Stack trace:
 #0 %sbug70277.php(%d): DateTimeZone->__construct('Europe/Zurich\x00F...')
 #1 {main}

@@ -1,4 +1,4 @@
-/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB
 This file is public domain and comes with NO WARRANTY of any kind */
 
 /* Defines for Win32 to make it compatible for MySQL */

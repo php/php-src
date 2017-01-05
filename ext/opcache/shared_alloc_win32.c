@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,9 +25,6 @@
 #include <winbase.h>
 #include <process.h>
 #include <LMCONS.H>
-
-#include "main/php.h"
-#include "ext/standard/md5.h"
 
 #define ACCEL_FILEMAP_NAME "ZendOPcache.SharedMemoryArea"
 #define ACCEL_MUTEX_NAME "ZendOPcache.SharedMemoryMutex"
@@ -77,45 +74,6 @@ static void zend_win_error_message(int type, char *msg, int err)
 	zend_accel_error(type, msg);
 }
 
-/* Backported from 7.0, the way no globals are touched which means win32
-   only where it's essentially needed. */
-#define ZEND_BIN_ID "BIN_" ZEND_TOSTR(SIZEOF_CHAR) ZEND_TOSTR(SIZEOF_INT) ZEND_TOSTR(SIZEOF_LONG) ZEND_TOSTR(SIZEOF_SIZE_T) ZEND_TOSTR(SIZEOF_ZEND_LONG) ZEND_TOSTR(ZEND_MM_ALIGNMENT)
-static char *accel_gen_system_id(void)
-{
-	PHP_MD5_CTX context;
-	unsigned char digest[16], c;
-	int i;
-	static char md5str[32];
-	static zend_bool done = 0;
-
-	if (done) {
-		return md5str;
-	}
-
-	PHP_MD5Init(&context);
-	PHP_MD5Update(&context, PHP_VERSION, sizeof(PHP_VERSION)-1);
-	PHP_MD5Update(&context, ZEND_EXTENSION_BUILD_ID, sizeof(ZEND_EXTENSION_BUILD_ID)-1);
-	PHP_MD5Update(&context, ZEND_BIN_ID, sizeof(ZEND_BIN_ID)-1);
-	if (strstr(PHP_VERSION, "-dev") != 0) {
-		/* Development versions may be changed from build to build */
-		PHP_MD5Update(&context, __DATE__, sizeof(__DATE__)-1);
-		PHP_MD5Update(&context, __TIME__, sizeof(__TIME__)-1);
-	}
-	PHP_MD5Final(digest, &context);
-	for (i = 0; i < 16; i++) {
-		c = digest[i] >> 4;
-		c = (c <= 9) ? c + '0' : c - 10 + 'a';
-		md5str[i * 2] = c;
-		c = digest[i] &  0x0f;
-		c = (c <= 9) ? c + '0' : c - 10 + 'a';
-		md5str[(i * 2) + 1] = c;
-	}
-
-	done = 1;
-
-	return md5str;
-}
-
 static char *create_name_with_username(char *name)
 {
 	static char newname[MAXPATHLEN + UNLEN + 4 + 1 + 32];
@@ -123,7 +81,7 @@ static char *create_name_with_username(char *name)
 	DWORD unsize = UNLEN;
 
 	GetUserName(uname, &unsize);
-	snprintf(newname, sizeof(newname) - 1, "%s@%s@%.32s", name, uname, accel_gen_system_id());
+	snprintf(newname, sizeof(newname) - 1, "%s@%s@%.32s", name, uname, ZCG(system_id));
 	return newname;
 }
 
@@ -137,7 +95,7 @@ static char *get_mmap_base_file(void)
 	GetTempPath(MAXPATHLEN, windir);
 	GetUserName(uname, &unsize);
 	l = strlen(windir);
-	snprintf(windir + l, sizeof(windir) - l - 1, "\\%s@%s@%.32s", ACCEL_FILEMAP_BASE, uname, accel_gen_system_id());
+	snprintf(windir + l, sizeof(windir) - l - 1, "\\%s@%s@%.32s", ACCEL_FILEMAP_BASE, uname, ZCG(system_id));
 	return windir;
 }
 
@@ -188,13 +146,37 @@ static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
 		return ALLOC_FAILURE;
 	}
 	fclose(fp);
-
 	/* Check if the requested address space is free */
 	if (VirtualQuery(wanted_mapping_base, &info, sizeof(info)) == 0 ||
 	    info.State != MEM_FREE ||
 	    info.RegionSize < requested_size) {
+#if ENABLE_FILE_CACHE_FALLBACK
+		if (ZCG(accel_directives).file_cache && ZCG(accel_directives).file_cache_fallback) {
+			size_t pre_size, wanted_mb_save;
+
+			wanted_mb_save = (size_t)wanted_mapping_base;
+
+			err = ERROR_INVALID_ADDRESS;
+			zend_win_error_message(ACCEL_LOG_WARNING, "Base address marks unusable memory region (fall-back to file cache)", err);
+
+			pre_size = ZEND_ALIGNED_SIZE(sizeof(zend_smm_shared_globals)) + ZEND_ALIGNED_SIZE(sizeof(zend_shared_segment)) + ZEND_ALIGNED_SIZE(sizeof(void *)) + ZEND_ALIGNED_SIZE(sizeof(int));
+			/* Map only part of SHM to have access opcache shared globals */
+			mapping_base = MapViewOfFileEx(memfile, FILE_MAP_ALL_ACCESS, 0, 0, pre_size + ZEND_ALIGNED_SIZE(sizeof(zend_accel_shared_globals)), NULL);
+			if (mapping_base == NULL) {
+				err = GetLastError();
+				zend_win_error_message(ACCEL_LOG_FATAL, "Unable to reattach to opcache shared globals", err);
+				return ALLOC_FAILURE;
+			}
+			accel_shared_globals = (zend_accel_shared_globals *)((char *)((zend_smm_shared_globals *)mapping_base)->app_shared_globals + ((char *)mapping_base - (char *)wanted_mb_save));
+
+			/* Make this process to use file-cache only */
+			ZCG(accel_directives).file_cache_only = 1;
+
+			return ALLOC_FALLBACK;
+		}
+#endif
 	    err = ERROR_INVALID_ADDRESS;
-		zend_win_error_message(ACCEL_LOG_FATAL, "Unable to reattach to base address", err);
+		zend_win_error_message(ACCEL_LOG_FATAL, "Base address marks unusable memory region. Please setup opcache.file_cache and opcache.file_cache_fallback directives for more convenient Opcache usage", err);
 		return ALLOC_FAILURE;
    	}
 
@@ -219,8 +201,8 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	zend_shared_segment *shared_segment;
 	int map_retries = 0;
 	void *default_mapping_base_set[] = { 0, 0 };
-	/* TODO: 
-	  improve fixed addresses on x64. It still makes no sense to do it as Windows addresses are virtual per se and can or should be randomized anyway 
+	/* TODO:
+	  improve fixed addresses on x64. It still makes no sense to do it as Windows addresses are virtual per se and can or should be randomized anyway
 	  through Address Space Layout Radomization (ASLR). We can still let the OS do its job and be sure that each process gets the same address if
 	  desired. Not done yet, @zend refused but did not remember the exact reason, pls add info here if one of you know why :)
 	*/
@@ -230,7 +212,6 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	void *vista_mapping_base_set[] = { (void *) 0x20000000, (void *) 0x21000000, (void *) 0x30000000, (void *) 0x31000000, (void *) 0x50000000, 0 };
 #endif
 	void **wanted_mapping_base = default_mapping_base_set;
-	TSRMLS_FETCH();
 
 	zend_shared_alloc_lock_win32();
 	/* Mapping retries: When Apache2 restarts, the parent process startup routine
@@ -294,29 +275,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	   be taken (fail to map). So under Vista, we try to map into a hard coded predefined addresses
 	   in high memory. */
 	if (!ZCG(accel_directives).mmap_base || !*ZCG(accel_directives).mmap_base) {
-		do {
-			OSVERSIONINFOEX osvi;
-			SYSTEM_INFO si;
-
-			ZeroMemory(&si, sizeof(SYSTEM_INFO));
-			ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
-
-			osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-
-			if (! GetVersionEx ((OSVERSIONINFO *) &osvi)) {
-				osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-				if (!GetVersionEx((OSVERSIONINFO *)&osvi)) {
-					break;
-				}
-			}
-
-			GetSystemInfo(&si);
-
-			/* Are we running Vista ? */
-			if (osvi.dwPlatformId == VER_PLATFORM_WIN32_NT && osvi.dwMajorVersion >= 6) {
-				wanted_mapping_base = vista_mapping_base_set;
-			}
-		} while (0);
+		wanted_mapping_base = vista_mapping_base_set;
 	} else {
 		char *s = ZCG(accel_directives).mmap_base;
 
@@ -372,10 +331,13 @@ static int detach_segment(zend_shared_segment *shared_segment)
 	zend_shared_alloc_lock_win32();
 	if (mapping_base) {
 		UnmapViewOfFile(mapping_base);
+		mapping_base = NULL;
 	}
 	CloseHandle(memfile);
+	memfile = NULL;
 	zend_shared_alloc_unlock_win32();
 	CloseHandle(memory_mutex);
+	memory_mutex = NULL;
 	return 0;
 }
 

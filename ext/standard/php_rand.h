@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -42,20 +42,20 @@
 #endif
 
 #define RAND_RANGE(__n, __min, __max, __tmax) \
-    (__n) = (__min) + (long) ((double) ( (double) (__max) - (__min) + 1.0) * ((__n) / ((__tmax) + 1.0)))
+    (__n) = (__min) + (zend_long) ((double) ( (double) (__max) - (__min) + 1.0) * ((__n) / ((__tmax) + 1.0)))
 
 /* MT Rand */
-#define PHP_MT_RAND_MAX ((long) (0x7FFFFFFF)) /* (1<<31) - 1 */ 
+#define PHP_MT_RAND_MAX ((zend_long) (0x7FFFFFFF)) /* (1<<31) - 1 */
 
 #ifdef PHP_WIN32
-#define GENERATE_SEED() (((long) (time(0) * GetCurrentProcessId())) ^ ((long) (1000000.0 * php_combined_lcg(TSRMLS_C))))
+#define GENERATE_SEED() (((zend_long) (time(0) * GetCurrentProcessId())) ^ ((zend_long) (1000000.0 * php_combined_lcg())))
 #else
-#define GENERATE_SEED() (((long) (time(0) * getpid())) ^ ((long) (1000000.0 * php_combined_lcg(TSRMLS_C))))
+#define GENERATE_SEED() (((zend_long) (time(0) * getpid())) ^ ((zend_long) (1000000.0 * php_combined_lcg())))
 #endif
 
-PHPAPI void php_srand(long seed TSRMLS_DC);
-PHPAPI long php_rand(TSRMLS_D);
-PHPAPI void php_mt_srand(php_uint32 seed TSRMLS_DC);
-PHPAPI php_uint32 php_mt_rand(TSRMLS_D);
+PHPAPI void php_srand(zend_long seed);
+PHPAPI zend_long php_rand(void);
+PHPAPI void php_mt_srand(php_uint32 seed);
+PHPAPI php_uint32 php_mt_rand(void);
 
 #endif	/* PHP_RAND_H */

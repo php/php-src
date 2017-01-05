@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -46,20 +46,20 @@ DBA_OPEN_FUNC(gdbm)
 	int filemode = 0644;
 
 	gmode = info->mode == DBA_READER ? GDBM_READER :
-		info->mode == DBA_WRITER ? GDBM_WRITER : 
-		info->mode == DBA_CREAT  ? GDBM_WRCREAT : 
+		info->mode == DBA_WRITER ? GDBM_WRITER :
+		info->mode == DBA_CREAT  ? GDBM_WRCREAT :
 		info->mode == DBA_TRUNC ? GDBM_NEWDB : -1;
-		
-	if(gmode == -1) 
+
+	if(gmode == -1)
 		return FAILURE; /* not possible */
 
 	if(info->argc > 0) {
-		convert_to_long_ex(info->argv[0]);
-		filemode = Z_LVAL_PP(info->argv[0]);
+		convert_to_long_ex(&info->argv[0]);
+		filemode = Z_LVAL(info->argv[0]);
 	}
 
 	dbf = gdbm_open(info->path, 0, gmode, filemode, NULL);
-	
+
 	if(dbf) {
 		info->dbf = pemalloc(sizeof(dba_gdbm_data), info->flags&DBA_PERSISTENT);
 		memset(info->dbf, 0, sizeof(dba_gdbm_data));
@@ -73,7 +73,7 @@ DBA_OPEN_FUNC(gdbm)
 DBA_CLOSE_FUNC(gdbm)
 {
 	GDBM_DATA;
-	
+
 	if(dba->nextkey.dptr) free(dba->nextkey.dptr);
 	gdbm_close(dba->dbf);
 	pefree(dba, info->flags&DBA_PERSISTENT);
@@ -110,10 +110,10 @@ DBA_UPDATE_FUNC(gdbm)
 		case 1:
 			return FAILURE;
 		case -1:
-			php_error_docref2(NULL TSRMLS_CC, key, val, E_WARNING, "%s", gdbm_strerror(gdbm_errno));
+			php_error_docref2(NULL, key, val, E_WARNING, "%s", gdbm_strerror(gdbm_errno));
 			return FAILURE;
 		default:
-			php_error_docref2(NULL TSRMLS_CC, key, val, E_WARNING, "Unknown return value");
+			php_error_docref2(NULL, key, val, E_WARNING, "Unknown return value");
 			return FAILURE;
 	}
 }
@@ -130,7 +130,7 @@ DBA_DELETE_FUNC(gdbm)
 {
 	GDBM_DATA;
 	GDBM_GKEY;
-	
+
 	return gdbm_delete(dba->dbf, gkey) == -1 ? FAILURE : SUCCESS;
 }
 
@@ -143,7 +143,7 @@ DBA_FIRSTKEY_FUNC(gdbm)
 	if(dba->nextkey.dptr) {
 		free(dba->nextkey.dptr);
 	}
-	
+
 	gkey = gdbm_firstkey(dba->dbf);
 	if(gkey.dptr) {
 		key = estrndup(gkey.dptr, gkey.dsize);
@@ -162,7 +162,7 @@ DBA_NEXTKEY_FUNC(gdbm)
 	datum gkey;
 
 	if(!dba->nextkey.dptr) return NULL;
-	
+
 	gkey = gdbm_nextkey(dba->dbf, dba->nextkey);
 	free(dba->nextkey.dptr);
 	if(gkey.dptr) {
@@ -182,7 +182,7 @@ DBA_OPTIMIZE_FUNC(gdbm)
 	return SUCCESS;
 }
 
-DBA_SYNC_FUNC(gdbm) 
+DBA_SYNC_FUNC(gdbm)
 {
 	GDBM_DATA;
 

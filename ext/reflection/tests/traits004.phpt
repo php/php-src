@@ -30,7 +30,7 @@ array(1) {
 }
 array(1) {
   ["T1"]=>
-  &object(ReflectionClass)#1 (1) {
+  object(ReflectionClass)#1 (1) {
     ["name"]=>
     string(2) "T1"
   }
@@ -45,12 +45,12 @@ array(2) {
 }
 array(2) {
   ["T1"]=>
-  &object(ReflectionClass)#2 (1) {
+  object(ReflectionClass)#2 (1) {
     ["name"]=>
     string(2) "T1"
   }
   ["T2"]=>
-  &object(ReflectionClass)#3 (1) {
+  object(ReflectionClass)#3 (1) {
     ["name"]=>
     string(2) "T2"
   }

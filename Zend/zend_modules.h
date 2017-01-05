@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,14 +26,14 @@
 #include "zend_compile.h"
 #include "zend_build.h"
 
-#define INIT_FUNC_ARGS		int type, int module_number TSRMLS_DC
-#define INIT_FUNC_ARGS_PASSTHRU	type, module_number TSRMLS_CC
-#define SHUTDOWN_FUNC_ARGS	int type, int module_number TSRMLS_DC
-#define SHUTDOWN_FUNC_ARGS_PASSTHRU type, module_number TSRMLS_CC
-#define ZEND_MODULE_INFO_FUNC_ARGS zend_module_entry *zend_module TSRMLS_DC
-#define ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU zend_module TSRMLS_CC
+#define INIT_FUNC_ARGS		int type, int module_number
+#define INIT_FUNC_ARGS_PASSTHRU	type, module_number
+#define SHUTDOWN_FUNC_ARGS	int type, int module_number
+#define SHUTDOWN_FUNC_ARGS_PASSTHRU type, module_number
+#define ZEND_MODULE_INFO_FUNC_ARGS zend_module_entry *zend_module
+#define ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU zend_module
 
-#define ZEND_MODULE_API_NO 20131226
+#define ZEND_MODULE_API_NO 20151012
 #ifdef ZTS
 #define USING_ZTS 1
 #else
@@ -91,8 +91,8 @@ struct _zend_module_entry {
 #else
 	void* globals_ptr;
 #endif
-	void (*globals_ctor)(void *global TSRMLS_DC);
-	void (*globals_dtor)(void *global TSRMLS_DC);
+	void (*globals_ctor)(void *global);
+	void (*globals_dtor)(void *global);
 	int (*post_deactivate_func)(void);
 	int module_started;
 	unsigned char type;
@@ -125,11 +125,9 @@ struct _zend_module_dep {
 extern ZEND_API HashTable module_registry;
 
 void module_destructor(zend_module_entry *module);
-int module_registry_cleanup(zend_module_entry *module TSRMLS_DC);
-int module_registry_request_startup(zend_module_entry *module TSRMLS_DC);
-int module_registry_unload_temp(const zend_module_entry *module TSRMLS_DC);
+int module_registry_request_startup(zend_module_entry *module);
+int module_registry_unload_temp(const zend_module_entry *module);
 
-#define ZEND_MODULE_DTOR (void (*)(void *)) module_destructor
 #endif
 
 /*

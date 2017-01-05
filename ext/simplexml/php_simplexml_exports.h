@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -35,19 +35,18 @@
 		__n = (__s)->node->node; \
 	} else { \
 		__n = NULL; \
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Node no longer exists"); \
+		php_error_docref(NULL, E_WARNING, "Node no longer exists"); \
 	} \
 }
 
-PHP_SXE_API zend_object_value sxe_object_new(zend_class_entry *ce TSRMLS_DC);
-/* {{{ php_sxe_fetch_object()
- */
-static inline php_sxe_object *
-php_sxe_fetch_object(zval *object TSRMLS_DC)
-{
-	return (php_sxe_object *) zend_object_store_get_object(object TSRMLS_CC);
+PHP_SXE_API zend_object *sxe_object_new(zend_class_entry *ce);
+
+static inline php_sxe_object *php_sxe_fetch_object(zend_object *obj) /* {{{ */ {
+	return (php_sxe_object *)((char*)(obj) - XtOffsetOf(php_sxe_object, zo));
 }
 /* }}} */
+
+#define Z_SXEOBJ_P(zv) php_sxe_fetch_object(Z_OBJ_P((zv)))
 
 typedef struct {
 	zend_object_iterator  intern;

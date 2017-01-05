@@ -5,7 +5,7 @@
  * LICENSE NOTICES
  *
  * This file is part of "streamable kanji code filter and converter",
- * which is distributed under the terms of GNU Lesser General Public 
+ * which is distributed under the terms of GNU Lesser General Public
  * License (version 2) as published by the Free Software Foundation.
  *
  * This software is distributed in the hope that it will be useful,
@@ -124,25 +124,25 @@ mbfl_filt_conv_cp936_wchar(int c, mbfl_convert_filter *filter)
 		c1 = filter->cache;
 
 		if (((c1 >= 0xaa && c1 <= 0xaf) || (c1 >= 0xf8 && c1 <= 0xfe)) &&
-			(c >= 0xa1 && c <= 0xfe)) { 
+			(c >= 0xa1 && c <= 0xfe)) {
 			/* UDA part1,2: U+E000-U+E4C5 */
 			w = 94*(c1 >= 0xf8 ? c1 - 0xf2 : c1 - 0xaa) + (c - 0xa1) + 0xe000;
 			CK((*filter->output_function)(w, filter->data));
-		} else if (c1 >= 0xa1 && c1 <= 0xa7 && c >= 0x40 && c < 0xa1 && c != 0x7f) { 
+		} else if (c1 >= 0xa1 && c1 <= 0xa7 && c >= 0x40 && c < 0xa1 && c != 0x7f) {
 			/* UDA part3 : U+E4C6-U+E765*/
 			w = 96*(c1 - 0xa1) + c - (c >= 0x80 ? 0x41 : 0x40) + 0xe4c6;
 			CK((*filter->output_function)(w, filter->data));
-		} 
+		}
 
 		c2 = (c1 << 8) | c;
 
-		if (w <= 0 && 
+		if (w <= 0 &&
 			((c2 >= 0xa2ab && c2 <= 0xa9f0 + (0xe80f-0xe801)) ||
 			 (c2 >= 0xd7fa && c2 <= 0xd7fa + (0xe814-0xe810)) ||
 			 (c2 >= 0xfe50 && c2 <= 0xfe80 + (0xe864-0xe844)))) {
 			for (k = 0; k < mbfl_cp936_pua_tbl_max; k++) {
-				if (c2 >= mbfl_cp936_pua_tbl[k][2] && 
-					c2 <= mbfl_cp936_pua_tbl[k][2] +  
+				if (c2 >= mbfl_cp936_pua_tbl[k][2] &&
+					c2 <= mbfl_cp936_pua_tbl[k][2] +
 					mbfl_cp936_pua_tbl[k][1] -  mbfl_cp936_pua_tbl[k][0]) {
 					w = c2 -  mbfl_cp936_pua_tbl[k][2] + mbfl_cp936_pua_tbl[k][0];
 					CK((*filter->output_function)(w, filter->data));
@@ -222,7 +222,7 @@ mbfl_filt_conv_wchar_cp936(int c, mbfl_convert_filter *filter)
 			} else {
 				c1 = c - 0xe4c6;
 				s = ((c1 / 96) + 0xa1) << 8; c1 %= 96;
-				s |= c1 + (c1 >= 0x3f ? 0x41 : 0x40);			
+				s |= c1 + (c1 >= 0x3f ? 0x41 : 0x40);
 			}
 		} else {
 			/* U+E766..U+E864 */
@@ -248,12 +248,12 @@ mbfl_filt_conv_wchar_cp936(int c, mbfl_convert_filter *filter)
 		s = ucs_cf_cp936_table[c - ucs_cf_cp936_table_min];
 	} else if (c >= ucs_sfv_cp936_table_min && c < ucs_sfv_cp936_table_max) {
 		s = ucs_sfv_cp936_table[c - ucs_sfv_cp936_table_min]; /* U+FE50-FE6F Small Form Variants */
-	} else if (c >= ucs_hff_cp936_table_min && c < ucs_hff_cp936_table_max) { 
-		/* U+FF00-FFFF HW/FW Forms */	
+	} else if (c >= ucs_hff_cp936_table_min && c < ucs_hff_cp936_table_max) {
+		/* U+FF00-FFFF HW/FW Forms */
 		if (c == 0xff04) {
 			s = 0xa1e7;
 		} else if (c == 0xff5e) {
-			s = 0xa1ab; 
+			s = 0xa1ab;
 		} else if (c >= 0xff01 && c <= 0xff5d) {
 			s = c - 0xff01 + 0xa3a1;
 		} else if (c >= 0xffe0 && c <= 0xffe5) {

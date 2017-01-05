@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,19 +33,6 @@ static sapi_post_entry php_post_entries[] = {
 };
 /* }}} */
 
-static zend_bool populate_raw_post_data(TSRMLS_D)
-{
-	if (!SG(request_info).request_body) {
-		return (zend_bool) 0;
-	}
-
-	if (!PG(always_populate_raw_post_data)) {
-		return (zend_bool) !SG(request_info).post_entry;
-	}
-
-	return (zend_bool) (PG(always_populate_raw_post_data) > 0);
-}
-
 /* {{{ SAPI_POST_READER_FUNC
  */
 SAPI_API SAPI_POST_READER_FUNC(php_default_post_reader)
@@ -53,33 +40,7 @@ SAPI_API SAPI_POST_READER_FUNC(php_default_post_reader)
 	if (!strcmp(SG(request_info).request_method, "POST")) {
 		if (NULL == SG(request_info).post_entry) {
 			/* no post handler registered, so we just swallow the data */
-			sapi_read_standard_form_data(TSRMLS_C);
-		}
-
-		if (populate_raw_post_data(TSRMLS_C)) {
-			size_t length;
-			char *data = NULL;
-
-			php_stream_rewind(SG(request_info).request_body);
-			length = php_stream_copy_to_mem(SG(request_info).request_body, &data, PHP_STREAM_COPY_ALL, 0);
-			php_stream_rewind(SG(request_info).request_body);
-
-			if (length > INT_MAX) {
-				sapi_module.sapi_error(E_WARNING,
-					"HTTP_RAW_POST_DATA truncated from %lu to %d bytes",
-					(unsigned long) length, INT_MAX);
-				length = INT_MAX;
-			}
-			if (!data) {
-				data = STR_EMPTY_ALLOC();
-			}
-			SET_VAR_STRINGL("HTTP_RAW_POST_DATA", data, length);
-
-			sapi_module.sapi_error(E_DEPRECATED,
-				"Automatically populating $HTTP_RAW_POST_DATA is deprecated and "
-				"will be removed in a future version. To avoid this warning set "
-				"'always_populate_raw_post_data' to '-1' in php.ini and use the "
-				"php://input stream instead.");
+			sapi_read_standard_form_data();
 		}
 	}
 }
@@ -87,20 +48,20 @@ SAPI_API SAPI_POST_READER_FUNC(php_default_post_reader)
 
 /* {{{ php_startup_sapi_content_types
  */
-int php_startup_sapi_content_types(TSRMLS_D)
+int php_startup_sapi_content_types(void)
 {
-	sapi_register_default_post_reader(php_default_post_reader TSRMLS_CC);
-	sapi_register_treat_data(php_default_treat_data TSRMLS_CC);
-	sapi_register_input_filter(php_default_input_filter, NULL TSRMLS_CC);
+	sapi_register_default_post_reader(php_default_post_reader);
+	sapi_register_treat_data(php_default_treat_data);
+	sapi_register_input_filter(php_default_input_filter, NULL);
 	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ php_setup_sapi_content_types
  */
-int php_setup_sapi_content_types(TSRMLS_D)
+int php_setup_sapi_content_types(void)
 {
-	sapi_register_post_entries(php_post_entries TSRMLS_CC);
+	sapi_register_post_entries(php_post_entries);
 
 	return SUCCESS;
 }

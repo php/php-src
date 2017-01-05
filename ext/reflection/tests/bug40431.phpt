@@ -80,7 +80,7 @@ echo "Done\n";
 === 1st test ===
 array(1) {
   [0]=>
-  &object(ReflectionProperty)#%d (2) {
+  object(ReflectionProperty)#%d (2) {
     ["name"]=>
     string(5) "value"
     ["class"]=>
@@ -94,7 +94,7 @@ bool(false)
 === 2nd test ===
 array(1) {
   [0]=>
-  &object(ReflectionProperty)#%d (2) {
+  object(ReflectionProperty)#%d (2) {
     ["name"]=>
     string(5) "value"
     ["class"]=>
@@ -108,7 +108,7 @@ bool(false)
 === 3rd test ===
 array(1) {
   [0]=>
-  &object(ReflectionProperty)#%d (2) {
+  object(ReflectionProperty)#%d (2) {
     ["name"]=>
     string(5) "value"
     ["class"]=>
@@ -122,7 +122,7 @@ bool(false)
 === 4th test ===
 array(1) {
   [0]=>
-  &object(ReflectionProperty)#%d (2) {
+  object(ReflectionProperty)#%d (2) {
     ["name"]=>
     string(5) "value"
     ["class"]=>

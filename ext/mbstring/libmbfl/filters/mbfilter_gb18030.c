@@ -5,7 +5,7 @@
  * LICENSE NOTICES
  *
  * This file is part of "streamable kanji code filter and converter",
- * which is distributed under the terms of GNU Lesser General Public 
+ * which is distributed under the terms of GNU Lesser General Public
  * License (version 2) as published by the Free Software Foundation.
  *
  * This software is distributed in the hope that it will be useful,
@@ -82,7 +82,7 @@ int
 mbfl_bisec_srch(int w, const unsigned short *tbl, int n)
 {
 	int k, k1 = 0, k2 = n-1;
-	
+
 	while (k1 < k2) {
 		k = (k1+k2) >> 1;
 		if (w <= tbl[2*k+1]) {
@@ -100,7 +100,7 @@ int
 mbfl_bisec_srch2(int w, const unsigned short tbl[], int n)
 {
 	int k, k1 = 0, k2 = n;
-	
+
 	if (w == tbl[0]) {
 		return 0;
 	}
@@ -153,7 +153,7 @@ mbfl_filt_conv_gb18030_wchar(int c, mbfl_convert_filter *filter)
 			filter->status = 2;
 			filter->cache = (c1 << 8) | c;
 			return c;
-		} else if (c1 >= 0x90 && c1 <= 0xe3 && c >= 0x30 && c <= 0x39) { 
+		} else if (c1 >= 0x90 && c1 <= 0xe3 && c >= 0x30 && c <= 0x39) {
 			/* 4 byte range: Unicode 16 planes */
 			filter->status = 2;
 			filter->cache = (c1 << 8) | c;
@@ -162,21 +162,21 @@ mbfl_filt_conv_gb18030_wchar(int c, mbfl_convert_filter *filter)
 				   (c >= 0xa1 && c <= 0xfe)) { /* UDA part1,2: U+E000-U+E4C5 */
 			w = 94*(c1 >= 0xf8 ? c1 - 0xf2 : c1 - 0xaa) + (c - 0xa1) + 0xe000;
 			CK((*filter->output_function)(w, filter->data));
-		} else if (c1 >= 0xa1 && c1 <= 0xa7 && c >= 0x40 && c < 0xa1 && c != 0x7f) { 
+		} else if (c1 >= 0xa1 && c1 <= 0xa7 && c >= 0x40 && c < 0xa1 && c != 0x7f) {
 			/* UDA part3 : U+E4C6-U+E765*/
 			w = 96*(c1 - 0xa1) + c - (c >= 0x80 ? 0x41 : 0x40) + 0xe4c6;
 			CK((*filter->output_function)(w, filter->data));
-		} 
+		}
 
 		c2 = (c1 << 8) | c;
 
-		if (w <= 0 && 
+		if (w <= 0 &&
 			((c2 >= 0xa2ab && c2 <= 0xa9f0 + (0xe80f-0xe801)) ||
 			 (c2 >= 0xd7fa && c2 <= 0xd7fa + (0xe814-0xe810)) ||
 			 (c2 >= 0xfe50 && c2 <= 0xfe80 + (0xe864-0xe844)))) {
 			for (k = 0; k < mbfl_gb18030_pua_tbl_max; k++) {
-				if (c2 >= mbfl_gb18030_pua_tbl[k][2] && 
-					c2 <= mbfl_gb18030_pua_tbl[k][2] +  mbfl_gb18030_pua_tbl[k][1] 
+				if (c2 >= mbfl_gb18030_pua_tbl[k][2] &&
+					c2 <= mbfl_gb18030_pua_tbl[k][2] +  mbfl_gb18030_pua_tbl[k][1]
 					-  mbfl_gb18030_pua_tbl[k][0]) {
 					w = c2 -  mbfl_gb18030_pua_tbl[k][2] + mbfl_gb18030_pua_tbl[k][0];
 					CK((*filter->output_function)(w, filter->data));
@@ -226,7 +226,7 @@ mbfl_filt_conv_gb18030_wchar(int c, mbfl_convert_filter *filter)
 			w = (c1 << 16) | (c2 << 8) | c;
 			w &= MBFL_WCSGROUP_MASK;
 			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));			
+			CK((*filter->output_function)(w, filter->data));
 		}
  		break;
 
@@ -249,7 +249,7 @@ mbfl_filt_conv_gb18030_wchar(int c, mbfl_convert_filter *filter)
 						w = (c1 << 24) | (c2 << 16) | (c3 << 8) | c;
 						w &= MBFL_WCSGROUP_MASK;
 						w |= MBFL_WCSGROUP_THROUGH;
-						CK((*filter->output_function)(w, filter->data));			
+						CK((*filter->output_function)(w, filter->data));
 						return c;
 					}
 					w += mbfl_gb_uni_ofst[k];
@@ -257,7 +257,7 @@ mbfl_filt_conv_gb18030_wchar(int c, mbfl_convert_filter *filter)
 					w = (c1 << 24) | (c2 << 16) | (c3 << 8) | c;
 					w &= MBFL_WCSGROUP_MASK;
 					w |= MBFL_WCSGROUP_THROUGH;
-					CK((*filter->output_function)(w, filter->data));			
+					CK((*filter->output_function)(w, filter->data));
 					return c;
 				}
 			}
@@ -266,7 +266,7 @@ mbfl_filt_conv_gb18030_wchar(int c, mbfl_convert_filter *filter)
 			w = (c1 << 24) | (c2 << 16) | (c3 << 8) | c;
 			w &= MBFL_WCSGROUP_MASK;
 			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));			
+			CK((*filter->output_function)(w, filter->data));
 		}
  		break;
 
@@ -321,7 +321,7 @@ mbfl_filt_conv_wchar_gb18030(int c, mbfl_convert_filter *filter)
 		if (c == 0xff04) {
 			s = 0xa1e7;
 		} else if (c == 0xff5e) {
-			s = 0xa1ab; 
+			s = 0xa1ab;
 		} else if (c >= 0xff01 && c <= 0xff5d) {
 			s = c - 0xff01 + 0xa3a1;
 		} else if (c >= 0xffe0 && c <= 0xffe5) {
@@ -333,7 +333,7 @@ mbfl_filt_conv_wchar_gb18030(int c, mbfl_convert_filter *filter)
 		s = 0xa2e3;
 	}
 
-	if (s <= 0 && c >= mbfl_gb18030_c_tbl_key[0] && 
+	if (s <= 0 && c >= mbfl_gb18030_c_tbl_key[0] &&
 		c <= mbfl_gb18030_c_tbl_key[mbfl_gb18030_c_tbl_max-1]) {
 		k1 = mbfl_bisec_srch2(c, mbfl_gb18030_c_tbl_key, mbfl_gb18030_c_tbl_max);
 		if (k1 >= 0) {
@@ -350,7 +350,7 @@ mbfl_filt_conv_wchar_gb18030(int c, mbfl_convert_filter *filter)
 			} else {
 				c1 = c - 0xe4c6;
 				s = ((c1 / 96) + 0xa1) << 8; c1 %= 96;
-				s |= c1 + (c1 >= 0x3f ? 0x41 : 0x40);			
+				s |= c1 + (c1 >= 0x3f ? 0x41 : 0x40);
 			}
 		} else {
 			/* U+E766..U+E864 */
@@ -367,7 +367,7 @@ mbfl_filt_conv_wchar_gb18030(int c, mbfl_convert_filter *filter)
 				}
 			}
 		}
-	} 
+	}
 
 	if (s <= 0 && c >= 0x0080 && c <= 0xffff) { /* BMP */
 		s = mbfl_bisec_srch(c, mbfl_uni2gb_tbl, mbfl_gb_uni_max);
@@ -421,7 +421,7 @@ mbfl_filt_conv_wchar_gb18030(int c, mbfl_convert_filter *filter)
 static int mbfl_filt_ident_gb18030(int c, mbfl_identify_filter *filter)
 {
 	int c1;
-	
+
 	c1 = (filter->status >> 8) & 0xff;
 	filter->status &= 0xff;
 
@@ -447,7 +447,7 @@ static int mbfl_filt_ident_gb18030(int c, mbfl_identify_filter *filter)
 			filter->status = 0; /* DBCS */
 		} else {
 			filter->flag = 1; /* bad */
-			filter->status = 0;			
+			filter->status = 0;
 		}
 	} else if (filter->status == 2) { /* qbcs 3rd byte */
 		if (c > 0x80 && c < 0xff) {
@@ -462,7 +462,7 @@ static int mbfl_filt_ident_gb18030(int c, mbfl_identify_filter *filter)
 		} else {
 			filter->flag = 1; /* bad */
 			filter->status = 0;
-		}		
+		}
 	} else {							/* bad */
 		filter->flag = 1;
 	}

@@ -13,11 +13,15 @@ var_dump(json_last_error());
 json_decode("invalid json");
 var_dump(json_last_error());
 
+json_decode("\"\001 invalid json\"");
+var_dump(json_last_error());
+
 json_decode("");
 var_dump(json_last_error());
 ?>
 --EXPECT--
 int(0)
-int(0)
 int(4)
-int(0)
+int(4)
+int(3)
+int(4)

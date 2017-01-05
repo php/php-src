@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,45 +27,30 @@
 #include <main/php_ini.h>
 #include <zend_ini.h>
 
-#ifdef ZTS
-#define PTSRMLS_D        void ****ptsrm_ls
-#define PTSRMLS_DC       , PTSRMLS_D
-#define PTSRMLS_C        &tsrm_ls
-#define PTSRMLS_CC       , PTSRMLS_C
-
-#define PHP_EMBED_START_BLOCK(x,y) { \
-    void ***tsrm_ls; \
-    php_embed_init(x, y PTSRMLS_CC); \
-    zend_first_try {
-
-#else
-#define PTSRMLS_D
-#define PTSRMLS_DC
-#define PTSRMLS_C
-#define PTSRMLS_CC
-
 #define PHP_EMBED_START_BLOCK(x,y) { \
     php_embed_init(x, y); \
     zend_first_try {
-
-#endif
 
 #define PHP_EMBED_END_BLOCK() \
   } zend_catch { \
     /* int exit_status = EG(exit_status); */ \
   } zend_end_try(); \
-  php_embed_shutdown(TSRMLS_C); \
+  php_embed_shutdown(); \
 }
 
 #ifndef PHP_WIN32
     #define EMBED_SAPI_API SAPI_API
 #else
-    #define EMBED_SAPI_API 
-#endif 
+    #define EMBED_SAPI_API
+#endif
 
-BEGIN_EXTERN_C() 
-EMBED_SAPI_API int php_embed_init(int argc, char **argv PTSRMLS_DC);
-EMBED_SAPI_API void php_embed_shutdown(TSRMLS_D);
+#ifdef ZTS
+ZEND_TSRMLS_CACHE_EXTERN()
+#endif
+
+BEGIN_EXTERN_C()
+EMBED_SAPI_API int php_embed_init(int argc, char **argv);
+EMBED_SAPI_API void php_embed_shutdown(void);
 extern EMBED_SAPI_API sapi_module_struct php_embed_module;
 END_EXTERN_C()
 

@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -38,7 +38,7 @@ ZEND_END_ARG_INFO();
 /* }}} */
 
 /*
-* class DOMNameList 
+* class DOMNameList
 *
 * URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#NameList
 * Since: DOM Level 3
@@ -50,15 +50,14 @@ const zend_function_entry php_dom_namelist_class_functions[] = {
 	PHP_FE_END
 };
 
-/* {{{ length	int	
-readonly=yes 
+/* {{{ length	int
+readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#NameList-length
-Since: 
+Since:
 */
-int dom_namelist_length_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_namelist_length_read(dom_object *obj, zval *retval)
 {
-	ALLOC_ZVAL(*retval);
-	ZVAL_STRING(*retval, "TEST", 1);
+	ZVAL_STRING(retval, "TEST");
 	return SUCCESS;
 }
 
@@ -66,7 +65,7 @@ int dom_namelist_length_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 /* {{{ proto string dom_namelist_get_name(int index);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#NameList-getName
-Since: 
+Since:
 */
 PHP_FUNCTION(dom_namelist_get_name)
 {
@@ -76,7 +75,7 @@ PHP_FUNCTION(dom_namelist_get_name)
 
 /* {{{ proto string dom_namelist_get_namespace_uri(int index);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#NameList-getNamespaceURI
-Since: 
+Since:
 */
 PHP_FUNCTION(dom_namelist_get_namespace_uri)
 {

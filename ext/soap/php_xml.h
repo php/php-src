@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -30,7 +30,7 @@
 #define node_is_equal(node, name) node_is_equal_ex(node, name, NULL)
 #define attr_is_equal(node, name) attr_is_equal_ex(node, name, NULL)
 
-xmlDocPtr soap_xmlParseFile(const char *filename TSRMLS_DC);
+xmlDocPtr soap_xmlParseFile(const char *filename);
 xmlDocPtr soap_xmlParseMemory(const void *buf, size_t size);
 
 xmlNsPtr attr_find_ns(xmlAttrPtr node);

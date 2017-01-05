@@ -45,7 +45,7 @@ float(1317.802929)
 float(1343.58603)
 float(1343.58603)
 
-Warning: rad2deg() expects parameter 1 to be double, string given in %s on line %d
+Warning: rad2deg() expects parameter 1 to be float, string given in %s on line %d
 NULL
 float(57295.77951)
 

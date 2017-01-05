@@ -102,10 +102,9 @@ void php_gd_error_ex(int type, const char *format, ...)
 {
 	va_list args;
 
-	TSRMLS_FETCH();
 
 	va_start(args, format);
-	php_verror(NULL, "", type, format, args TSRMLS_CC);
+	php_verror(NULL, "", type, format, args);
 	va_end(args);
 }
 
@@ -113,10 +112,9 @@ void php_gd_error(const char *format, ...)
 {
 	va_list args;
 
-	TSRMLS_FETCH();
 
 	va_start(args, format);
-	php_verror(NULL, "", E_WARNING, format, args TSRMLS_CC);
+	php_verror(NULL, "", E_WARNING, format, args);
 	va_end(args);
 }
 
@@ -3111,13 +3109,11 @@ int gdImagePaletteToTrueColor(gdImagePtr src)
 	return 1;
 
 clean_on_error:
-	if (y > 0) {
-
-		for (yy = y; yy >= yy - 1; y--) {
-			gdFree(src->tpixels[y]);
-		}
-		gdFree(src->tpixels);
+	/* free new true color buffer (y is not allocated, have failed) */
+	for (yy = 0; yy < y; yy++) {
+		gdFree(src->tpixels[yy]);
 	}
+	gdFree(src->tpixels);
 	return 0;
 }
 

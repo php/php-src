@@ -37,16 +37,16 @@ check($a);
 
 echo "\n\n--- 0 refs 1:\n";
 $a = array();
-$a[0] = &$a[1];
 $a[1] = 1;
+$a[0] = &$a[1];
 $a[2] = 1;
 check($a);
 
 echo "\n\n--- 0 refs 2:\n";
 $a = array();
+$a[2] = 1;
 $a[0] = &$a[2];
 $a[1] = 1;
-$a[2] = 1;
 check($a);
 
 echo "\n\n--- 1 refs 0:\n";
@@ -59,8 +59,8 @@ check($a);
 echo "\n\n--- 1 refs 2:\n";
 $a = array();
 $a[0] = 1;
-$a[1] = &$a[2];
 $a[2] = 1;
+$a[1] = &$a[2];
 check($a);
 
 echo "\n\n--- 2 refs 0:\n";
@@ -79,15 +79,15 @@ check($a);
 
 echo "\n\n--- 0,1 ref 2:\n";
 $a = array();
+$a[2] = 1;
 $a[0] = &$a[2];
 $a[1] = &$a[2];
-$a[2] = 1;
 check($a);
 
 echo "\n\n--- 0,2 ref 1:\n";
 $a = array();
-$a[0] = &$a[1];
 $a[1] = 1;
+$a[0] = &$a[1];
 $a[2] = &$a[1];
 check($a);
 

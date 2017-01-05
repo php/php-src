@@ -1,5 +1,7 @@
 --TEST--
 Test stripos() function : usage variations - unexpected inputs for 'offset' argument
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 --FILE--
 <?php
 /* Prototype  : int stripos ( string $haystack, string $needle [, int $offset] );
@@ -102,23 +104,23 @@ int(6)
 int(6)
 -- Iteration 6 --
 
-Warning: stripos() expects parameter 3 to be long, array given in %s on line %d
+Warning: stripos() expects parameter 3 to be integer, array given in %s on line %d
 NULL
 -- Iteration 7 --
 
-Warning: stripos() expects parameter 3 to be long, array given in %s on line %d
+Warning: stripos() expects parameter 3 to be integer, array given in %s on line %d
 NULL
 -- Iteration 8 --
 
-Warning: stripos() expects parameter 3 to be long, array given in %s on line %d
+Warning: stripos() expects parameter 3 to be integer, array given in %s on line %d
 NULL
 -- Iteration 9 --
 
-Warning: stripos() expects parameter 3 to be long, array given in %s on line %d
+Warning: stripos() expects parameter 3 to be integer, array given in %s on line %d
 NULL
 -- Iteration 10 --
 
-Warning: stripos() expects parameter 3 to be long, array given in %s on line %d
+Warning: stripos() expects parameter 3 to be integer, array given in %s on line %d
 NULL
 -- Iteration 11 --
 int(6)
@@ -130,15 +132,15 @@ int(6)
 int(6)
 -- Iteration 15 --
 
-Warning: stripos() expects parameter 3 to be long, object given in %s on line %d
+Warning: stripos() expects parameter 3 to be integer, object given in %s on line %d
 NULL
 -- Iteration 16 --
 
-Warning: stripos() expects parameter 3 to be long, string given in %s on line %d
+Warning: stripos() expects parameter 3 to be integer, string given in %s on line %d
 NULL
 -- Iteration 17 --
 
-Warning: stripos() expects parameter 3 to be long, string given in %s on line %d
+Warning: stripos() expects parameter 3 to be integer, string given in %s on line %d
 NULL
 -- Iteration 18 --
 int(6)
@@ -146,7 +148,7 @@ int(6)
 int(6)
 -- Iteration 20 --
 
-Warning: stripos() expects parameter 3 to be long, resource given in %s on line %d
+Warning: stripos() expects parameter 3 to be integer, resource given in %s on line %d
 NULL
 -- Iteration 21 --
 int(6)

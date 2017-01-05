@@ -3,7 +3,7 @@ InterBase: BLOB test
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--
-<?php /* $Id$ */
+<?php
 
     require("interbase.inc");
     
@@ -109,7 +109,7 @@ InterBase: BLOB test
 	ibase_commit();
 	ibase_close();
 	    
-    ibase_connect($test_base);
+    $link = ibase_connect($test_base);
     ibase_blob_echo($link, $row->V_BLOB);
     ibase_free_result($q);
 

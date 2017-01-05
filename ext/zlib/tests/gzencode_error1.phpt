@@ -84,15 +84,15 @@ bool(false)
 Warning: gzencode() expects parameter 1 to be string, object given in %s on line %d
 NULL
 
-Warning: gzencode() expects parameter 2 to be long, object given in %s on line %d
+Warning: gzencode() expects parameter 2 to be integer, object given in %s on line %d
 NULL
 
 Warning: gzencode(): encoding mode must be either ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP or ZLIB_ENCODING_DEFLATE in %s on line %d
 bool(false)
 
-Warning: gzencode() expects parameter 3 to be long, object given in %s on line %d
+Warning: gzencode() expects parameter 3 to be integer, object given in %s on line %d
 NULL
 
-Warning: gzencode() expects parameter 2 to be long, string given in %s on line %d
+Warning: gzencode() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 ===Done===

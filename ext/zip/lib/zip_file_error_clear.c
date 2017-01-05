@@ -1,6 +1,6 @@
 /*
   zip_file_error_clear.c -- clear zip file error
-  Copyright (C) 1999-2007 Dieter Baron and Thomas Klausner
+  Copyright (C) 1999-2014 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -31,14 +31,12 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
 
 #include "zipint.h"
 
-
 
 ZIP_EXTERN void
-zip_file_error_clear(struct zip_file *zf)
+zip_file_error_clear(zip_file_t *zf)
 {
     if (zf == NULL)
 	return;

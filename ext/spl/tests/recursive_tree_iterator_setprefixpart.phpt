@@ -26,7 +26,7 @@ $it->setPrefixPart(1, $a); // Should throw a warning as setPrefixPart expects ar
 --EXPECTF--
 Warning: RecursiveTreeIterator::setPrefixPart() expects exactly 2 parameters, 1 given in %s on line %d
 
-Warning: RecursiveTreeIterator::setPrefixPart() expects parameter 1 to be long, object given in %s on line %d
+Warning: RecursiveTreeIterator::setPrefixPart() expects parameter 1 to be integer, object given in %s on line %d
 
 Warning: RecursiveTreeIterator::setPrefixPart() expects parameter 2 to be %binary_string_optional%, object given in %s on line %d
 ===DONE===

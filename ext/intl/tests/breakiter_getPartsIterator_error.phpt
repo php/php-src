@@ -18,7 +18,7 @@ var_dump($it->getPartsIterator(-1));
 ==DONE==
 --EXPECTF--
 
-Warning: IntlBreakIterator::getPartsIterator() expects parameter 1 to be long, array given in %s on line %d
+Warning: IntlBreakIterator::getPartsIterator() expects parameter 1 to be integer, array given in %s on line %d
 
 Warning: IntlBreakIterator::getPartsIterator(): breakiter_get_parts_iterator: bad arguments in %s on line %d
 bool(false)

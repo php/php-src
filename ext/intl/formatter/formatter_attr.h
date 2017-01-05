@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,7 +19,7 @@
 
 #include <php.h>
 
-PHP_FUNCTION( numfmt_set_attribute ); 
+PHP_FUNCTION( numfmt_set_attribute );
 PHP_FUNCTION( numfmt_get_attribute );
 PHP_FUNCTION( numfmt_set_text_attribute );
 PHP_FUNCTION( numfmt_get_text_attribute );

@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -72,7 +72,7 @@ DBA_OPEN_FUNC(cdb)
 	dba_info *pinfo = (dba_info *) info;
 
 	switch (info->mode) {
-		case DBA_READER: 
+		case DBA_READER:
 #if DBA_CDB_BUILTIN
 			make = 0;
 			file = info->fp;
@@ -94,7 +94,7 @@ DBA_OPEN_FUNC(cdb)
 			*error = "Update operations are not supported";
 			return FAILURE; /* not supported */
 #endif
-		default: 
+		default:
 			*error = "Currently not supported";
 			return FAILURE;
 	}
@@ -104,16 +104,16 @@ DBA_OPEN_FUNC(cdb)
 
 #if DBA_CDB_BUILTIN
 	if (make) {
-		cdb_make_start(&cdb->m, file TSRMLS_CC);
+		cdb_make_start(&cdb->m, file);
 	} else {
-		cdb_init(&cdb->c, file TSRMLS_CC);
+		cdb_init(&cdb->c, file);
 	}
 	cdb->make = make;
 #else
 	cdb_init(&cdb->c, file);
 #endif
 	cdb->file = file;
-	
+
 	pinfo->dbf = cdb;
 	return SUCCESS;
 }
@@ -125,9 +125,9 @@ DBA_CLOSE_FUNC(cdb)
 	/* cdb_free does not close associated file */
 #if DBA_CDB_BUILTIN
 	if (cdb->make) {
-		cdb_make_finish(&cdb->m TSRMLS_CC);
+		cdb_make_finish(&cdb->m);
 	} else {
-		cdb_free(&cdb->c TSRMLS_CC);
+		cdb_free(&cdb->c);
 	}
 #else
 	cdb_free(&cdb->c);
@@ -137,9 +137,9 @@ DBA_CLOSE_FUNC(cdb)
 }
 
 #if DBA_CDB_BUILTIN
-# define php_cdb_read(cdb, buf, len, pos) cdb_read(cdb, buf, len, pos TSRMLS_CC)
-# define php_cdb_findnext(cdb, key, len) cdb_findnext(cdb, key, len TSRMLS_CC)
-# define php_cdb_find(cdb, key, len) cdb_find(cdb, key, len TSRMLS_CC)
+# define php_cdb_read(cdb, buf, len, pos) cdb_read(cdb, buf, len, pos)
+# define php_cdb_findnext(cdb, key, len) cdb_findnext(cdb, key, len)
+# define php_cdb_find(cdb, key, len) cdb_find(cdb, key, len)
 #else
 # define php_cdb_read(cdb, buf, len, pos) cdb_read(cdb, buf, len, pos)
 # define php_cdb_findnext(cdb, key, len) cdb_findnext(cdb, key, len)
@@ -151,7 +151,7 @@ DBA_FETCH_FUNC(cdb)
 	CDB_INFO;
 	unsigned int len;
 	char *new_entry = NULL;
-	
+
 #if DBA_CDB_BUILTIN
 	if (cdb->make)
 		return NULL; /* database was opened writeonly */
@@ -164,16 +164,16 @@ DBA_FETCH_FUNC(cdb)
 		}
 		len = cdb_datalen(&cdb->c);
 		new_entry = safe_emalloc(len, 1, 1);
-		
+
 		if (php_cdb_read(&cdb->c, new_entry, len, cdb_datapos(&cdb->c)) == -1) {
 			efree(new_entry);
 			return NULL;
 		}
 		new_entry[len] = 0;
-		if (newlen) 
+		if (newlen)
 			*newlen = len;
 	}
-	
+
 	return new_entry;
 }
 
@@ -186,7 +186,7 @@ DBA_UPDATE_FUNC(cdb)
 		return FAILURE; /* database was opened readonly */
 	if (!mode)
 		return FAILURE; /* cdb_make dosn't know replace */
-	if (cdb_make_add(&cdb->m, key, keylen, val, vallen TSRMLS_CC) != -1)
+	if (cdb_make_add(&cdb->m, key, keylen, val, vallen) != -1)
 		return SUCCESS;
 #endif
 	return FAILURE;
@@ -222,15 +222,15 @@ DBA_DELETE_FUNC(cdb)
 	if (cdb_file_read(cdb->file, buf, n) < n) return NULL; \
 } while (0)
 
-/* {{{ cdb_file_lseek 
+/* {{{ cdb_file_lseek
  php_stream_seek does not return actual position */
 #if DBA_CDB_BUILTIN
-int cdb_file_lseek(php_stream *fp, off_t offset, int whence TSRMLS_DC) {
+int cdb_file_lseek(php_stream *fp, off_t offset, int whence) {
 	php_stream_seek(fp, offset, whence);
 	return php_stream_tell(fp);
 }
 #else
-int cdb_file_lseek(int fd, off_t offset, int whence TSRMLS_DC) {
+int cdb_file_lseek(int fd, off_t offset, int whence) {
 	return lseek(fd, offset, whence);
 }
 #endif
@@ -238,7 +238,7 @@ int cdb_file_lseek(int fd, off_t offset, int whence TSRMLS_DC) {
 
 #define CSEEK(n) do { \
 	if (n >= cdb->eod) return NULL; \
-	if (cdb_file_lseek(cdb->file, (off_t)n, SEEK_SET TSRMLS_CC) != (off_t) n) return NULL; \
+	if (cdb_file_lseek(cdb->file, (off_t)n, SEEK_SET) != (off_t) n) return NULL; \
 } while (0)
 
 
@@ -257,13 +257,13 @@ DBA_FIRSTKEY_FUNC(cdb)
 	cdb->eod = -1;
 	CSEEK(0);
 	CREAD(4);
-	
+
 	/* Total length of file in bytes */
 	uint32_unpack(buf, &cdb->eod);
-	
+
 	CSEEK(2048);
 	CREAD(8);
-	
+
 	/* The first four bytes contain the length of the key */
 	uint32_unpack(buf, &klen);
 	uint32_unpack(buf + 4, &dlen);
@@ -279,7 +279,7 @@ DBA_FIRSTKEY_FUNC(cdb)
 
 	/*       header + klenlen + dlenlen + klen + dlen */
 	cdb->pos = 2048 + 4       + 4       + klen + dlen;
-		
+
 	return key;
 }
 
@@ -299,7 +299,7 @@ DBA_NEXTKEY_FUNC(cdb)
 	CREAD(8);
 	uint32_unpack(buf, &klen);
 	uint32_unpack(buf + 4, &dlen);
-	
+
 	key = safe_emalloc(klen, 1, 1);
 	if (cdb_file_read(cdb->file, key, klen) < klen) {
 		efree(key);
@@ -308,9 +308,9 @@ DBA_NEXTKEY_FUNC(cdb)
 		key[klen] = '\0';
 		if (newlen) *newlen = klen;
 	}
-	
+
 	cdb->pos += 8 + klen + dlen;
-	
+
 	return key;
 }
 

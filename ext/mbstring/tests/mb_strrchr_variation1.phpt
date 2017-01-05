@@ -150,19 +150,19 @@ bool(false)
 
 --empty array--
 Error: 2 - mb_strrchr() expects parameter 1 to be string, array given, %s(%d)
-bool(false)
+NULL
 
 --int indexed array--
 Error: 2 - mb_strrchr() expects parameter 1 to be string, array given, %s(%d)
-bool(false)
+NULL
 
 --associative array--
 Error: 2 - mb_strrchr() expects parameter 1 to be string, array given, %s(%d)
-bool(false)
+NULL
 
 --nested arrays--
 Error: 2 - mb_strrchr() expects parameter 1 to be string, array given, %s(%d)
-bool(false)
+NULL
 
 --uppercase NULL--
 bool(false)
@@ -193,7 +193,7 @@ bool(false)
 
 --instance of classWithoutToString--
 Error: 2 - mb_strrchr() expects parameter 1 to be string, object given, %s(%d)
-bool(false)
+NULL
 
 --undefined var--
 bool(false)
@@ -203,5 +203,5 @@ bool(false)
 
 --resource--
 Error: 2 - mb_strrchr() expects parameter 1 to be string, resource given, %s(%d)
-bool(false)
+NULL
 ===DONE===

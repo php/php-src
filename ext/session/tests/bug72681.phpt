@@ -6,7 +6,8 @@ Bug #72681: PHP Session Data Injection Vulnerability
 <?php
 ini_set('session.serialize_handler', 'php');
 session_start();
-$_SESSION['_SESSION'] = 'ryat|O:8:"stdClass":0:{}';
+$GLOBALS['ryat'] = $GLOBALS;
+$_SESSION['ryat'] = 'ryat|O:8:"stdClass":0:{}';
 session_write_close();
 session_start();
 var_dump($_SESSION);

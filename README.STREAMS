@@ -28,7 +28,7 @@ The main functions are:
 PHPAPI size_t php_stream_read(php_stream * stream, char * buf, size_t count);
 PHPAPI size_t php_stream_write(php_stream * stream, const char * buf, size_t
         count);
-PHPAPI size_t php_stream_printf(php_stream * stream TSRMLS_DC, 
+PHPAPI size_t php_stream_printf(php_stream * stream, 
         const char * fmt, ...);
 PHPAPI int php_stream_eof(php_stream * stream);
 PHPAPI int php_stream_getc(php_stream * stream);
@@ -47,7 +47,7 @@ Opening Streams
 In most cases, you should use this API:
 
 PHPAPI php_stream *php_stream_open_wrapper(const char *path, const char *mode,
-    int options, char **opened_path TSRMLS_DC);
+    int options, char **opened_path);
 
 Where:
     path is the file or resource to open.
@@ -80,7 +80,7 @@ PHPAPI php_stream *php_stream_fopen_tmpfile(void);
     Open a FILE * with tmpfile() and convert into a stream.
 
 PHPAPI php_stream *php_stream_fopen_temporary_file(const char *dir,
-    const char *pfx, char **opened_path TSRMLS_DC);
+    const char *pfx, char **opened_path);
     Generate a temporary file name and open it.
 
 There are some network enabled relatives in php_network.h:

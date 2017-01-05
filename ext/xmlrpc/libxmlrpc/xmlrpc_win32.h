@@ -6,7 +6,7 @@
 #ifndef inline
 # define inline __inline
 #endif
-#ifndef snprintf
+#if !defined(snprintf) && _MSC_VER < 1900
 # define snprintf _snprintf
 #endif
 #ifndef strcasecmp

@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -25,6 +25,9 @@
 
 extern zend_module_entry sysvmsg_module_entry;
 #define phpext_sysvmsg_ptr &sysvmsg_module_entry
+
+#include "php_version.h"
+#define PHP_SYSVMSG_VERSION PHP_VERSION
 
 #ifndef __USE_GNU
 /* we want to use mtype instead of __mtype */
@@ -52,11 +55,11 @@ PHP_FUNCTION(msg_queue_exists);
 
 typedef struct {
 	key_t key;
-	long id;
+	zend_long id;
 } sysvmsg_queue_t;
 
 struct php_msgbuf {
-	long mtype;
+	zend_long mtype;
 	char mtext[1];
 };
 

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,7 +22,7 @@
 #include <php.h>
 
 void locale_register_constants( INIT_FUNC_ARGS );
- 
+
 #define OPTION_DEFAULT NULL
 #define LOC_LANG_TAG "language"
 #define LOC_SCRIPT_TAG "script"

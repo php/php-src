@@ -26,7 +26,7 @@
                 Computer Science Department, 9062
                 Western Washington University
                 Bellingham, WA 98226-9062
-       
+
 *************************************************************************/
 
 #include <config.h>
@@ -122,7 +122,7 @@ _bc_shift_addsub (bc_num accum, bc_num val, int shift, int sub)
   if (val->n_value[0] == 0)
     count--;
   assert (accum->n_len+accum->n_scale >= shift+count);
-  
+
   /* Set up pointers and others */
   accp = (signed char *)(accum->n_value +
 			 accum->n_len + accum->n_scale - shift - 1);
@@ -170,8 +170,8 @@ _bc_shift_addsub (bc_num accum, bc_num val, int shift, int sub)
   }
 }
 
-/* Recursive divide and conquer multiply algorithm.  
-   Based on 
+/* Recursive divide and conquer multiply algorithm.
+   Based on
    Let u = u0 + u1*(b^n)
    Let v = v0 + v1*(b^n)
    Then uv = (B^2n+B^n)*u1*v1 + B^n*(u1-u0)*(v0-v1) + (B^n+1)*u0*v0
@@ -180,8 +180,8 @@ _bc_shift_addsub (bc_num accum, bc_num val, int shift, int sub)
 */
 static void
 _bc_rec_mul (bc_num u, int ulen, bc_num v, int vlen, bc_num *prod,
-	     int full_scale TSRMLS_DC)
-{ 
+	     int full_scale)
+{
   bc_num u0, u1, v0, v1;
   bc_num m1, m2, m3, d1, d2;
   int n, prodlen, m1zero;
@@ -218,12 +218,12 @@ _bc_rec_mul (bc_num u, int ulen, bc_num v, int vlen, bc_num *prod,
   _bc_rm_leading_zeros (v1);
   _bc_rm_leading_zeros (v0);
 
-  m1zero = bc_is_zero(u1 TSRMLS_CC) || bc_is_zero(v1 TSRMLS_CC);
+  m1zero = bc_is_zero(u1) || bc_is_zero(v1);
 
   /* Calculate sub results ... */
 
-  bc_init_num(&d1 TSRMLS_CC);
-  bc_init_num(&d2 TSRMLS_CC);
+  bc_init_num(&d1);
+  bc_init_num(&d2);
   bc_sub (u1, u0, &d1, 0);
   d1len = d1->n_len;
   bc_sub (v0, v1, &d2, 0);
@@ -234,17 +234,17 @@ _bc_rec_mul (bc_num u, int ulen, bc_num v, int vlen, bc_num *prod,
   if (m1zero)
     m1 = bc_copy_num (BCG(_zero_));
   else
-    _bc_rec_mul (u1, u1->n_len, v1, v1->n_len, &m1, 0 TSRMLS_CC);
+    _bc_rec_mul (u1, u1->n_len, v1, v1->n_len, &m1, 0);
 
-  if (bc_is_zero(d1 TSRMLS_CC) || bc_is_zero(d2 TSRMLS_CC))
+  if (bc_is_zero(d1) || bc_is_zero(d2))
     m2 = bc_copy_num (BCG(_zero_));
   else
-    _bc_rec_mul (d1, d1len, d2, d2len, &m2, 0 TSRMLS_CC);
+    _bc_rec_mul (d1, d1len, d2, d2len, &m2, 0);
 
-  if (bc_is_zero(u0 TSRMLS_CC) || bc_is_zero(v0 TSRMLS_CC))
+  if (bc_is_zero(u0) || bc_is_zero(v0))
     m3 = bc_copy_num (BCG(_zero_));
   else
-    _bc_rec_mul (u0, u0->n_len, v0, v0->n_len, &m3, 0 TSRMLS_CC);
+    _bc_rec_mul (u0, u0->n_len, v0, v0->n_len, &m3, 0);
 
   /* Initialize product */
   prodlen = ulen+vlen+1;
@@ -275,9 +275,9 @@ _bc_rec_mul (bc_num u, int ulen, bc_num v, int vlen, bc_num *prod,
    */
 
 void
-bc_multiply (bc_num n1, bc_num n2, bc_num *prod, int scale TSRMLS_DC)
+bc_multiply (bc_num n1, bc_num n2, bc_num *prod, int scale)
 {
-  bc_num pval; 
+  bc_num pval;
   int len1, len2;
   int full_scale, prod_scale;
 
@@ -288,7 +288,7 @@ bc_multiply (bc_num n1, bc_num n2, bc_num *prod, int scale TSRMLS_DC)
   prod_scale = MIN(full_scale,MAX(scale,MAX(n1->n_scale,n2->n_scale)));
 
   /* Do the multiply */
-  _bc_rec_mul (n1, len1, n2, len2, &pval, full_scale TSRMLS_CC);
+  _bc_rec_mul (n1, len1, n2, len2, &pval, full_scale);
 
   /* Assign to prod and clean up the number. */
   pval->n_sign = ( n1->n_sign == n2->n_sign ? PLUS : MINUS );
@@ -296,7 +296,7 @@ bc_multiply (bc_num n1, bc_num n2, bc_num *prod, int scale TSRMLS_DC)
   pval->n_len = len2 + len1 + 1 - full_scale;
   pval->n_scale = prod_scale;
   _bc_rm_leading_zeros (pval);
-  if (bc_is_zero (pval TSRMLS_CC))
+  if (bc_is_zero (pval))
     pval->n_sign = PLUS;
   bc_free_num (prod);
   *prod = pval;

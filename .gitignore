@@ -9,6 +9,7 @@
 *.gcno
 *.la
 *.lo
+*.loT
 *.o
 *.a
 *.ncb
@@ -85,7 +86,7 @@ mkinstalldirs
 modules
 php
 php-*.tar.gz
-php5.spec
+php7.spec
 php_lcov.info
 php_test_results_*.txt
 php_version.h
@@ -121,6 +122,12 @@ tests/*/*.php
 tests/*/*.exp
 tests/*/*.log
 tests/*/*.sh
+tests/*/*/*.diff
+tests/*/*/*.out
+tests/*/*/*.php
+tests/*/*/*.exp
+tests/*/*/*.log
+tests/*/*/*.sh
 */tests/*.diff
 */tests/*.out
 */tests/*.php
@@ -133,6 +140,12 @@ tests/*/*.sh
 */tests/*/*.exp
 */tests/*/*.log
 */tests/*/*.sh
+*/tests/*/*/*.diff
+*/tests/*/*/*.out
+*/tests/*/*/*.php
+*/tests/*/*/*.exp
+*/tests/*/*/*.log
+*/tests/*/*/*.sh
 */*/tests/*.diff
 */*/tests/*.out
 */*/tests/*.out.png
@@ -146,6 +159,18 @@ tests/*/*.sh
 */*/tests/*/*.exp
 */*/tests/*/*.log
 */*/tests/*/*.sh
+*/*/tests/*/*/*.diff
+*/*/tests/*/*/*.out
+*/*/tests/*/*/*.php
+*/*/tests/*/*/*.exp
+*/*/tests/*/*/*.log
+*/*/tests/*/*/*.sh
+*/*/tests/*/*/*/*.diff
+*/*/tests/*/*/*/*.out
+*/*/tests/*/*/*/*.php
+*/*/tests/*/*/*/*.exp
+*/*/tests/*/*/*/*.log
+*/*/tests/*/*/*/*.sh
 
 # Extension specifc ignores
 ext/*/configure.in
@@ -167,6 +192,7 @@ ext/iconv/php_have_glibc_iconv.h
 ext/iconv/php_php_iconv_impl.h
 ext/iconv/php_have_iconv.h
 ext/iconv/php_iconv_supports_errno.h
+ext/iconv/php_iconv_broken_ignore.h
 ext/mbstring/libmbfl/Makefile.in
 ext/mbstring/libmbfl/autoscan.log
 ext/mbstring/libmbfl/config.sub
@@ -231,14 +257,14 @@ main/config.w32.h
 main/stamp-h1
 main/streams/build-defs.h
 main/streams/stamp-h1
-pear/install-pear-nozlib.phar
+#pear/install-pear-nozlib.phar
 pear/phpize
 pear/run-tests
 pear/php-config
 pear/scripts
-sapi/apache/libphp5.module
-sapi/apache2handler/libphp5.module
-sapi/apache_hooks/libphp5.module
+sapi/apache/libphp7.module
+sapi/apache2handler/libphp7.module
+sapi/apache_hooks/libphp7.module
 sapi/cgi/php-cgi
 sapi/cgi/php-cgi.1
 sapi/cli/php.1
@@ -259,5 +285,3 @@ win32/*.positions
 win32/ext
 win32/phpts.def
 win32/wsyslog.h
-win32/win32.dsp
-win32/php.dsw

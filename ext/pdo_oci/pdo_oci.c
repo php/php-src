@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -46,12 +46,8 @@ static const zend_module_dep pdo_oci_deps[] = {
 #endif
 
 zend_module_entry pdo_oci_module_entry = {
-#if ZEND_MODULE_API_NO >= 20050922
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_oci_deps,
-#else
-	STANDARD_MODULE_HEADER,
-#endif
 	"PDO_OCI",
 	pdo_oci_functions,
 	PHP_MINIT(pdo_oci),
@@ -59,7 +55,7 @@ zend_module_entry pdo_oci_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(pdo_oci),
-	"1.0.1",
+	PHP_PDO_OCI_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
@@ -68,7 +64,7 @@ zend_module_entry pdo_oci_module_entry = {
 ZEND_GET_MODULE(pdo_oci)
 #endif
 
-const ub4 PDO_OCI_INIT_MODE = 
+const ub4 PDO_OCI_INIT_MODE =
 #if 0 && defined(OCI_SHARED)
 			/* shared mode is known to be bad for PHP */
 			OCI_SHARED

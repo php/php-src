@@ -19,7 +19,7 @@
  * Suite 330, Boston, MA  02111-1307  USA
  *
  * The author of this file: Hayk Chamyan <hamshen@gmail.com>
- *  
+ *
  */
 
 #ifndef MBFL_MBFILTER_ARMSCII8_H

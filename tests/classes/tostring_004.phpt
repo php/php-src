@@ -38,7 +38,6 @@ printf($obj . "\n");
 Object with no __toString():
 Try 1:
 Error: 4096 - Object of class stdClass could not be converted to string
-Error: 8 - Object of class stdClass to string conversion
 Object
 
 Try 2:

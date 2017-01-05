@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -84,9 +84,9 @@ static zend_module_entry *php_builtin_extensions[] = {
 
 #define EXTCOUNT (sizeof(php_builtin_extensions)/sizeof(zend_module_entry *))
 
-PHPAPI int php_register_internal_extensions(TSRMLS_D)
+PHPAPI int php_register_internal_extensions(void)
 {
-	return php_register_extensions(php_builtin_extensions, EXTCOUNT TSRMLS_CC);
+	return php_register_extensions(php_builtin_extensions, EXTCOUNT);
 }
 
 

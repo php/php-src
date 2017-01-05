@@ -36,7 +36,7 @@ NULL
 Warning: file() expects at most 3 parameters, 4 given in %s on line %d
 NULL
 
-Warning: file() expects parameter 2 to be long, string given in %s on line %d
+Warning: file() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 array(0) {
 }

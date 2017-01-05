@@ -10,4 +10,8 @@ function foo($a = array(0 => \unknown))
 
 foo();
 --EXPECTF--
-Fatal error: Undefined constant 'unknown' in %sns_077_%d.php on line %d
+Fatal error: Uncaught Error: Undefined constant 'unknown' in %sns_077_%d.php:%d
+Stack trace:
+#0 %s(%d): foo\foo()
+#1 {main}
+  thrown in %sns_077_%d.php on line %d

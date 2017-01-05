@@ -135,7 +135,7 @@
 #define DAYS_PER_400_YEARS 146097
 
 void SdnToGregorian(
-					   long int sdn,
+					   zend_long sdn,
 					   int *pYear,
 					   int *pMonth,
 					   int *pDay)
@@ -144,7 +144,7 @@ void SdnToGregorian(
 	int year;
 	int month;
 	int day;
-	long int temp;
+	zend_long temp;
 	int dayOfYear;
 
 	if (sdn <= 0 ||
@@ -190,12 +190,12 @@ fail:
 	*pDay = 0;
 }
 
-long int GregorianToSdn(
+zend_long GregorianToSdn(
 						   int inputYear,
 						   int inputMonth,
 						   int inputDay)
 {
-	int year;
+	zend_long year;
 	int month;
 
 	/* check for invalid dates */

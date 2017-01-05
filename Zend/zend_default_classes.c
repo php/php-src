@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,13 +28,13 @@
 #include "zend_generators.h"
 
 
-ZEND_API void zend_register_default_classes(TSRMLS_D)
+ZEND_API void zend_register_default_classes(void)
 {
-	zend_register_interfaces(TSRMLS_C);
-	zend_register_default_exception(TSRMLS_C);
-	zend_register_iterator_wrapper(TSRMLS_C);
-	zend_register_closure_ce(TSRMLS_C);
-	zend_register_generator_ce(TSRMLS_C);
+	zend_register_interfaces();
+	zend_register_default_exception();
+	zend_register_iterator_wrapper();
+	zend_register_closure_ce();
+	zend_register_generator_ce();
 }
 
 /*

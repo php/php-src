@@ -16,7 +16,6 @@ $pdo->setAttribute (\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
 $attrs = array(
     // Extensive test: default value and set+get values
-	PDO::PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT => array(null, true, false),
 	PDO::ATTR_EMULATE_PREPARES			=> array(null, true, false),
 	PDO::PGSQL_ATTR_DISABLE_PREPARES	=> array(null, true, false),
 
@@ -68,18 +67,6 @@ foreach ($attrs as $a => $vals) {
 
 ?>
 --EXPECTF--
-Deprecated: PDO::getAttribute(): %s
-bool(false)
-
-Deprecated: PDO::setAttribute(): %s
-
-Deprecated: PDO::getAttribute(): %s
-OK
-
-Deprecated: PDO::setAttribute(): %s
-
-Deprecated: PDO::getAttribute(): %s
-OK
 bool(false)
 OK
 OK

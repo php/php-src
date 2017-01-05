@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,16 +16,16 @@
    +----------------------------------------------------------------------+
 
 	Based on code from ucdata-2.5, which has the following Copyright:
-   
+
 	Copyright 2001 Computing Research Labs, New Mexico State University
- 
+
 	Permission is hereby granted, free of charge, to any person obtaining a
 	copy of this software and associated documentation files (the "Software"),
 	to deal in the Software without restriction, including without limitation
 	the rights to use, copy, modify, merge, publish, distribute, sublicense,
 	and/or sell copies of the Software, and to permit persons to whom the
 	Software is furnished to do so, subject to the following conditions:
- 
+
 	The above copyright notice and this permission notice shall be included in
 	all copies or substantial portions of the Software.
 */
@@ -104,7 +104,7 @@
 MBSTRING_API int php_unicode_is_prop(unsigned long code, unsigned long mask1,
 		unsigned long mask2);
 MBSTRING_API char *php_unicode_convert_case(int case_mode, const char *srcstr, size_t srclen, size_t *retlen,
-		const char *src_encoding TSRMLS_DC);
+		const char *src_encoding);
 
 #define PHP_UNICODE_CASE_UPPER	0
 #define PHP_UNICODE_CASE_LOWER	1

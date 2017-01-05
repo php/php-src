@@ -1,5 +1,7 @@
 --TEST--
 Bug #63055 (Segfault in zend_gc with SF2 testsuite)
+--INI--
+zend.enable_gc=1
 --FILE--
 <?php
 /* the default gc root size is 10,000 */

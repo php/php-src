@@ -14,9 +14,9 @@ fi
 
 echo '/*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -45,7 +45,10 @@ echo '/*
 
 
 echo 'void tokenizer_register_constants(INIT_FUNC_ARGS) {' >> $OUTFILE
-$AWK '/^#define T_/  { print "	REGISTER_LONG_CONSTANT(\"" $2 "\", " $2 ", CONST_CS | CONST_PERSISTENT);" }' < $INFILE >> $OUTFILE
+$AWK '
+	/^#define T_(NOELSE|ERROR)/ { next }
+	/^#define T_/  { print "	REGISTER_LONG_CONSTANT(\"" $2 "\", " $2 ", CONST_CS | CONST_PERSISTENT);" }
+' < $INFILE >> $OUTFILE
 echo '	REGISTER_LONG_CONSTANT("T_DOUBLE_COLON", T_PAAMAYIM_NEKUDOTAYIM, CONST_CS | CONST_PERSISTENT);' >> $OUTFILE
 echo '}' >> $OUTFILE
 
@@ -61,6 +64,7 @@ $AWK '
 		print "		case T_PAAMAYIM_NEKUDOTAYIM: return \"T_DOUBLE_COLON\";"
 		next
 	}
+	/^#define T_(NOELSE|ERROR)/ { next }
 	/^#define T_/ {
 		print "		case " $2 ": return \"" $2 "\";"
 	}

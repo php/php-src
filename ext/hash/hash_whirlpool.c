@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -23,7 +23,7 @@
 
 /*
  * TODO: simplify Update and Final, those look ridiculously complex
- * Mike, 2005-11-23 
+ * Mike, 2005-11-23
  */
 
 #include "php_hash_whirlpool.h"
@@ -263,8 +263,8 @@ static void WhirlpoolTransform(PHP_WHIRLPOOL_CTX *context)
     context->state[5] ^= state[5] ^ block[5];
     context->state[6] ^= state[6] ^ block[6];
     context->state[7] ^= state[7] ^ block[7];
-    
-    memset(state, 0, sizeof(state));
+
+	ZEND_SECURE_ZERO(state, sizeof(state));
 }
 
 PHP_HASH_API void PHP_WHIRLPOOLInit(PHP_WHIRLPOOL_CTX *context)
@@ -429,8 +429,8 @@ PHP_HASH_API void PHP_WHIRLPOOLFinal(unsigned char digest[64], PHP_WHIRLPOOL_CTX
         digest[7] = (unsigned char)(context->state[i]      );
         digest += 8;
     }
-    
-    memset(context, 0, sizeof(*context));
+
+    ZEND_SECURE_ZERO(context, sizeof(*context));
 }
 
 const php_hash_ops php_hash_whirlpool_ops = {

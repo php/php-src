@@ -75,6 +75,6 @@ bool(false)
 Warning: gzuncompress() expects parameter 1 to be string, object given in %s on line %d
 NULL
 
-Warning: gzuncompress() expects parameter 2 to be long, string given in %s on line %d
+Warning: gzuncompress() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 ===DONE===

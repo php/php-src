@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -25,6 +25,9 @@
 extern zend_module_entry xmlwriter_module_entry;
 #define phpext_xmlwriter_ptr &xmlwriter_module_entry
 
+#include "php_version.h"
+#define PHP_XMLWRITER_VERSION PHP_VERSION
+
 #ifdef ZTS
 #include "TSRM.h"
 #endif
@@ -37,17 +40,20 @@ extern zend_module_entry xmlwriter_module_entry;
 typedef struct _xmlwriter_object {
 	xmlTextWriterPtr ptr;
 	xmlBufferPtr output;
-#ifndef ZEND_ENGINE_2
-	xmlOutputBufferPtr uri_output;
-#endif
 } xmlwriter_object;
 
 
 /* Extends zend object */
 typedef struct _ze_xmlwriter_object {
-	zend_object zo;
 	xmlwriter_object *xmlwriter_ptr;
+	zend_object std;
 } ze_xmlwriter_object;
+
+static inline ze_xmlwriter_object *php_xmlwriter_fetch_object(zend_object *obj) {
+	return (ze_xmlwriter_object *)((char*)(obj) - XtOffsetOf(ze_xmlwriter_object, std));
+}
+
+#define Z_XMLWRITER_P(zv) php_xmlwriter_fetch_object(Z_OBJ_P((zv)))
 
 #endif	/* PHP_XMLWRITER_H */
 

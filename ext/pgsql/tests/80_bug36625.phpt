@@ -42,7 +42,13 @@ var_dump(file_exists($tracefile));
 ?>
 ===DONE===
 --CLEAN--
-<?php unlink($tracefile); ?>
+<?php
+
+$tracefile = dirname(__FILE__) . '/trace.tmp';
+
+unlink($tracefile);
+
+?>
 --EXPECTF--
 bool(false)
 resource(%d) of type (pgsql result)

@@ -137,11 +137,6 @@ opcache.save_comments (default "1")
 	size of the optimized code. Disabling "Doc Comments" may break some
 	existing applications and frameworks (e.g. Doctrine, ZF2, PHPUnit)
 
-opcache.load_comments (default "1")
-	If disabled, PHPDoc comments are not loaded from SHM, so "Doc Comments"
-	may be always stored (save_comments=1), but not loaded by applications
-	that don't need them anyway.
-
 opcache.fast_shutdown (default "0")
 	If enabled, a fast shutdown sequence is used for the accelerated code
 	The fast shutdown sequence doesn't free each allocated block, but lets
@@ -155,7 +150,7 @@ opcache.optimization_level (default "0xffffffff")
 	passes
 
 opcache.inherited_hack (default "1")
-	Enable this hack as a workaround for "can't redeclare class" errors.
+	Enable this hack as a workaround for "Cannot redeclare class" errors.
 	The OPcache stores the places where DECLARE_CLASS opcodes use
 	inheritance (These are the only opcodes that can be executed by PHP,
 	but which may not be executed because the parent class is missing due to
@@ -228,3 +223,6 @@ opcache.mmap_base
 	processes have to map shared memory into the same address space. This
 	directive allows to manually fix the "Unable to reattach to base address"
 	errors.
+
+opcache.lockfile_path (default "/tmp")
+	Absolute path used to store shared lockfiles (for *nix only)

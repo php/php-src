@@ -12,7 +12,7 @@ if (PHP_PDO_MYSQL != "no") {
 	} else {
 		if (CHECK_LIB("libmysql.lib", "pdo_mysql", PHP_PDO_MYSQL) &&
 				CHECK_HEADER_ADD_INCLUDE("mysql.h", "CFLAGS_PDO_MYSQL", PHP_PHP_BUILD + "\\include\\mysql;" + PHP_PDO_MYSQL)) {
-			EXTENSION("pdo_mysql", "pdo_mysql.c mysql_driver.c mysql_statement.c");
+			EXTENSION("pdo_mysql", "pdo_mysql.c mysql_driver.c mysql_statement.c", null, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 		} else {
 			WARNING("pdo_mysql not enabled; libraries and headers not found");
 		}

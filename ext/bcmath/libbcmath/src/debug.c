@@ -26,7 +26,7 @@
                 Computer Science Department, 9062
                 Western Washington University
                 Bellingham, WA 98226-9062
-       
+
 *************************************************************************/
 
 #include <config.h>
@@ -48,9 +48,9 @@ out_char (int c)
 
 
 void
-pn (bc_num num TSRMLS_DC)
+pn (bc_num num)
 {
-  bc_out_num (num, 10, out_char, 0 TSRMLS_CC);
+  bc_out_num (num, 10, out_char, 0);
   out_char ('\n');
 }
 

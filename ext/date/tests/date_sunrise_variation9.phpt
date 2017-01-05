@@ -1,5 +1,7 @@
 --TEST--
 Test date_sunrise() function : usage variation -  Passing high positive and negative float values to time argument.
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 4) echo "skip this test is for 32-bit only"; ?>
 --FILE--
 <?php
 /* Prototype  : mixed date_sunrise(mixed time [, int format [, float latitude [, float longitude [, float zenith [, float gmt_offset]]]]])
@@ -32,16 +34,28 @@ var_dump( date_sunrise($time, SUNFUNCS_RET_TIMESTAMP, $latitude, $longitude, $ze
 
 ?>
 ===DONE===
---EXPECTREGEX--
-\*\*\* Testing date_sunrise\(\) : usage variation \*\*\*
+--EXPECTF--
+*** Testing date_sunrise() : usage variation ***
 
--- Testing date_sunrise\(\) function by passing float 12.3456789000e10 value to time --
-string\(5\) "(07:34|07:49)"
-float\((7.566[0-9]*|7.821[0-9]*)\)
-int\((-1097256359|123456811756)\)
+-- Testing date_sunrise() function by passing float 12.3456789000e10 value to time --
 
--- Testing date_sunrise\(\) function by passing float -12.3456789000e10 value to time --
-string\(5\) "(07:42|08:48|08:04)"
-float\((7.713[0-9]*|8.810[0-9]*|8.074[0-9]*)\)
-int\((1097304168|-2147443882|-123456761731)\)
+Warning: date_sunrise() expects parameter 1 to be integer, float given in %s on line %d
+bool(false)
+
+Warning: date_sunrise() expects parameter 1 to be integer, float given in %s on line %d
+bool(false)
+
+Warning: date_sunrise() expects parameter 1 to be integer, float given in %s on line %d
+bool(false)
+
+-- Testing date_sunrise() function by passing float -12.3456789000e10 value to time --
+
+Warning: date_sunrise() expects parameter 1 to be integer, float given in %s on line %d
+bool(false)
+
+Warning: date_sunrise() expects parameter 1 to be integer, float given in %s on line %d
+bool(false)
+
+Warning: date_sunrise() expects parameter 1 to be integer, float given in %s on line %d
+bool(false)
 ===DONE===

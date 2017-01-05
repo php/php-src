@@ -338,7 +338,7 @@ static int fontTest (void *element, void *key)
 {
 	font_t *a = (font_t *) element;
 	fontkey_t *b = (fontkey_t *) key;
-	
+
 	if (strcmp (a->fontlist, b->fontlist) == 0) {
 		switch (b->preferred_map) {
 			case gdFTEX_Unicode:
@@ -412,8 +412,7 @@ static void *fontFetch (char **error, void *key)
 		for (dir = gd_strtok_r (path, PATHSEPARATOR, &strtok_ptr_path); dir;
 		     dir = gd_strtok_r (0, PATHSEPARATOR, &strtok_ptr_path)) {
 			if (!strcmp(dir, ".")) {
-				TSRMLS_FETCH();
-#if HAVE_GETCWD
+			#if HAVE_GETCWD
 				dir = VCWD_GETCWD(cur_dir, MAXPATHLEN);
 #elif HAVE_GETWD
 				dir = VCWD_GETWD(cur_dir);

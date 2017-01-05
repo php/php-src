@@ -37,6 +37,6 @@ Warning: ldap_unbind() expects parameter 1 to be resource, %unicode_string_optio
 bool(false)
 bool(true)
 
-Warning: ldap_unbind(): %d is not a valid ldap link resource in %s on line %d
+Warning: ldap_unbind(): supplied resource is not a valid ldap link resource in %s on line %d
 bool(false)
 ===DONE===

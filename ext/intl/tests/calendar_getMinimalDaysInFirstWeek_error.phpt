@@ -29,4 +29,8 @@ Warning: intlcal_get_minimal_days_in_first_week() expects exactly 1 parameter, 2
 Warning: intlcal_get_minimal_days_in_first_week(): intlcal_get_minimal_days_in_first_week: bad arguments in %s on line %d
 bool(false)
 
-Catchable fatal error: Argument 1 passed to intlcal_get_minimal_days_in_first_week() must be an instance of IntlCalendar, integer given in %s on line %d
+Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_get_minimal_days_in_first_week() must be an instance of IntlCalendar, integer given in %s:%d
+Stack trace:
+#0 %s(%d): intlcal_get_minimal_days_in_first_week(1)
+#1 {main}
+  thrown in %s on line %d

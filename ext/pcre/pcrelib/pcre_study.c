@@ -42,9 +42,7 @@ POSSIBILITY OF SUCH DAMAGE.
 supporting functions. */
 
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #include "pcre_internal.h"
 
@@ -1056,7 +1054,7 @@ do
       tcode = set_table_bit(start_bits, tcode + 1, TRUE, cd, utf);
       break;
 
-      /* Single-char up to sets the bit and tries the next */
+      /* Single-char upto sets the bit and tries the next */
 
       case OP_UPTO:
       case OP_MINUPTO:

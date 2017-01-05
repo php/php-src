@@ -2,10 +2,10 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -24,14 +24,15 @@
 
 BEGIN_EXTERN_C()
 
-void zend_register_closure_ce(TSRMLS_D);
+void zend_register_closure_ce(void);
 
 extern ZEND_API zend_class_entry *zend_ce_closure;
 
-ZEND_API void zend_create_closure(zval *res, zend_function *op_array, zend_class_entry *scope, zval *this_ptr TSRMLS_DC);
-ZEND_API zend_function *zend_get_closure_invoke_method(zval *obj TSRMLS_DC);
-ZEND_API const zend_function *zend_get_closure_method_def(zval *obj TSRMLS_DC);
-ZEND_API zval* zend_get_closure_this_ptr(zval *obj TSRMLS_DC);
+ZEND_API void zend_create_closure(zval *res, zend_function *op_array, zend_class_entry *scope, zend_class_entry *called_scope, zval *this_ptr);
+ZEND_API void zend_create_fake_closure(zval *res, zend_function *op_array, zend_class_entry *scope, zend_class_entry *called_scope, zval *this_ptr);
+ZEND_API zend_function *zend_get_closure_invoke_method(zend_object *obj);
+ZEND_API const zend_function *zend_get_closure_method_def(zval *obj);
+ZEND_API zval* zend_get_closure_this_ptr(zval *obj);
 
 END_EXTERN_C()
 

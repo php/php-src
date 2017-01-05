@@ -1,8 +1,8 @@
-/* 
+/*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -103,11 +103,11 @@ PHP_FUNCTION(array_key_exists);
 PHP_FUNCTION(array_chunk);
 PHP_FUNCTION(array_combine);
 
-PHPAPI void php_splice(HashTable *ht, zend_uint offset, zend_uint length, zval ***list, zend_uint list_count, HashTable *removed TSRMLS_DC);
-PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS_DC);
-PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src TSRMLS_DC);
-PHPAPI int php_multisort_compare(const void *a, const void *b TSRMLS_DC);
-PHPAPI int php_count_recursive(zval *array, long mode TSRMLS_DC);
+PHPAPI int php_array_merge(HashTable *dest, HashTable *src);
+PHPAPI int php_array_merge_recursive(HashTable *dest, HashTable *src);
+PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src);
+PHPAPI int php_multisort_compare(const void *a, const void *b);
+PHPAPI zend_long php_count_recursive(zval *array, zend_long mode);
 
 #define PHP_SORT_REGULAR            0
 #define PHP_SORT_NUMERIC            1
@@ -124,15 +124,10 @@ PHPAPI int php_count_recursive(zval *array, long mode TSRMLS_DC);
 #define ARRAY_FILTER_USE_BOTH	1
 #define ARRAY_FILTER_USE_KEY	2
 
-ZEND_BEGIN_MODULE_GLOBALS(array) 
-	int *multisort_flags[2];
-	int (*compare_func)(zval *result, zval *op1, zval *op2 TSRMLS_DC);
-ZEND_END_MODULE_GLOBALS(array) 
+ZEND_BEGIN_MODULE_GLOBALS(array)
+	compare_func_t *multisort_func;
+ZEND_END_MODULE_GLOBALS(array)
 
-#ifdef ZTS
-#define ARRAYG(v) TSRMG(array_globals_id, zend_array_globals *, v)
-#else
-#define ARRAYG(v) (array_globals.v)
-#endif
+#define ARRAYG(v) ZEND_MODULE_GLOBALS_ACCESSOR(array, v)
 
 #endif /* PHP_ARRAY_H */

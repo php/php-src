@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -50,6 +50,9 @@
 #undef HAVE_MBSTRING
 #define HAVE_MBSTRING 1
 #endif
+
+#include "php_version.h"
+#define PHP_MBSTRING_VERSION PHP_VERSION
 
 #ifdef PHP_WIN32
 #	undef MBSTRING_API
@@ -131,27 +134,27 @@ PHP_FUNCTION(mb_check_encoding);
 MBSTRING_API char *php_mb_safe_strrchr_ex(const char *s, unsigned int c,
                                     size_t nbytes, const mbfl_encoding *enc);
 MBSTRING_API char *php_mb_safe_strrchr(const char *s, unsigned int c,
-                                 size_t nbytes TSRMLS_DC);
+                                 size_t nbytes);
 
 MBSTRING_API char * php_mb_convert_encoding(const char *input, size_t length,
                                       const char *_to_encoding,
                                       const char *_from_encodings,
-                                      size_t *output_len TSRMLS_DC);
+                                      size_t *output_len);
 
-MBSTRING_API int php_mb_check_encoding_list(const char *encoding_list TSRMLS_DC);
+MBSTRING_API int php_mb_check_encoding_list(const char *encoding_list);
 
 MBSTRING_API size_t php_mb_mbchar_bytes_ex(const char *s, const mbfl_encoding *enc);
-MBSTRING_API size_t php_mb_mbchar_bytes(const char *s TSRMLS_DC);
+MBSTRING_API size_t php_mb_mbchar_bytes(const char *s);
 
-MBSTRING_API int php_mb_encoding_detector_ex(const char *arg_string, int arg_length, 
-											 char *arg_list TSRMLS_DC);
+MBSTRING_API int php_mb_encoding_detector_ex(const char *arg_string, int arg_length,
+											 char *arg_list);
 
-MBSTRING_API int php_mb_encoding_converter_ex(char **str, int *len, const char *encoding_to, 
-											  const char *encoding_from TSRMLS_DC);
-MBSTRING_API int php_mb_stripos(int mode, const char *old_haystack, unsigned int old_haystack_len, const char *old_needle, unsigned int old_needle_len, long offset, const char *from_encoding TSRMLS_DC);
+MBSTRING_API int php_mb_encoding_converter_ex(char **str, int *len, const char *encoding_to,
+											  const char *encoding_from);
+MBSTRING_API int php_mb_stripos(int mode, const char *old_haystack, unsigned int old_haystack_len, const char *old_needle, unsigned int old_needle_len, long offset, const char *from_encoding);
 
 /* internal use only */
-int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, uint new_value_length TSRMLS_DC);
+int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, uint new_value_length);
 
 ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	char *internal_encoding_name;
@@ -199,10 +202,10 @@ struct mb_overload_def {
 	char *save_func;
 };
 
-#ifdef ZTS
-#define MBSTRG(v) TSRMG(mbstring_globals_id, zend_mbstring_globals *, v)
-#else
-#define MBSTRG(v) (mbstring_globals.v)
+#define MBSTRG(v) ZEND_MODULE_GLOBALS_ACCESSOR(mbstring, v)
+
+#if defined(ZTS) && defined(COMPILE_DL_MBSTRING)
+ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
 #else	/* HAVE_MBSTRING */

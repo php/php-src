@@ -44,10 +44,10 @@ bool(false)
 
 - Arg 2 wrong type
 
-Warning: ob_start() expects parameter 2 to be long, string given in %s on line 23
+Warning: ob_start() expects parameter 2 to be integer, string given in %s on line 23
 NULL
 
 - Arg 3 wrong type
 
-Warning: ob_start() expects parameter 3 to be long, string given in %s on line 26
+Warning: ob_start() expects parameter 3 to be integer, string given in %s on line 26
 NULL

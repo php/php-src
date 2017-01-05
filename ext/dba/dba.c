@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,12 +28,12 @@
 #if HAVE_DBA
 
 #include "php_ini.h"
-#include <stdio.h> 
+#include <stdio.h>
 #include <fcntl.h>
 #ifdef HAVE_SYS_FILE_H
 #include <sys/file.h>
 #endif
- 
+
 #include "php_dba.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_string.h"
@@ -157,7 +157,7 @@ PHP_MINFO_FUNCTION(dba);
 ZEND_BEGIN_MODULE_GLOBALS(dba)
 	char *default_handler;
 	dba_handler *default_hptr;
-ZEND_END_MODULE_GLOBALS(dba) 
+ZEND_END_MODULE_GLOBALS(dba)
 
 ZEND_DECLARE_MODULE_GLOBALS(dba)
 
@@ -165,20 +165,20 @@ ZEND_DECLARE_MODULE_GLOBALS(dba)
 #define DBA_G(v) TSRMG(dba_globals_id, zend_dba_globals *, v)
 #else
 #define DBA_G(v) (dba_globals.v)
-#endif 
+#endif
 
 static PHP_GINIT_FUNCTION(dba);
 
 zend_module_entry dba_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"dba",
-	dba_functions, 
-	PHP_MINIT(dba), 
+	dba_functions,
+	PHP_MINIT(dba),
 	PHP_MSHUTDOWN(dba),
 	NULL,
 	NULL,
 	PHP_MINFO(dba),
-	NO_VERSION_YET,
+	PHP_DBA_VERSION,
 	PHP_MODULE_GLOBALS(dba),
 	PHP_GINIT(dba),
 	NULL,
@@ -200,42 +200,43 @@ ZEND_GET_MODULE(dba)
 /* these are used to get the standard arguments */
 
 /* {{{ php_dba_myke_key */
-static size_t php_dba_make_key(zval *key, char **key_str, char **key_free TSRMLS_DC)
+static size_t php_dba_make_key(zval *key, char **key_str, char **key_free)
 {
 	if (Z_TYPE_P(key) == IS_ARRAY) {
-		zval **group, **name;
+		zval *group, *name;
 		HashPosition pos;
 		size_t len;
-	
+
 		if (zend_hash_num_elements(Z_ARRVAL_P(key)) != 2) {
-			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Key does not have exactly two elements: (key, name)");
-			return -1;
+			php_error_docref(NULL, E_RECOVERABLE_ERROR, "Key does not have exactly two elements: (key, name)");
+			return 0;
 		}
 		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(key), &pos);
-		zend_hash_get_current_data_ex(Z_ARRVAL_P(key), (void **) &group, &pos);
+		group = zend_hash_get_current_data_ex(Z_ARRVAL_P(key), &pos);
 		zend_hash_move_forward_ex(Z_ARRVAL_P(key), &pos);
-		zend_hash_get_current_data_ex(Z_ARRVAL_P(key), (void **) &name, &pos);
+		name = zend_hash_get_current_data_ex(Z_ARRVAL_P(key), &pos);
 		convert_to_string_ex(group);
 		convert_to_string_ex(name);
-		if (Z_STRLEN_PP(group) == 0) {
-			*key_str = Z_STRVAL_PP(name);
+		if (Z_STRLEN_P(group) == 0) {
+			*key_str = Z_STRVAL_P(name);
 			*key_free = NULL;
-			return Z_STRLEN_PP(name);
+			return Z_STRLEN_P(name);
 		}
-		len = spprintf(key_str, 0, "[%s]%s", Z_STRVAL_PP(group), Z_STRVAL_PP(name));
+		len = spprintf(key_str, 0, "[%s]%s", Z_STRVAL_P(group), Z_STRVAL_P(name));
 		*key_free = *key_str;
 		return len;
 	} else {
-		zval tmp = *key;
+		zval tmp;
 		int len;
 
-		zval_copy_ctor(&tmp);
+		ZVAL_COPY(&tmp, key);
 		convert_to_string(&tmp);
 
-		*key_free = *key_str = estrndup(Z_STRVAL(tmp), Z_STRLEN(tmp));
 		len = Z_STRLEN(tmp);
-
-		zval_dtor(&tmp);
+		if (len) {
+			*key_free = *key_str = estrndup(Z_STRVAL(tmp), Z_STRLEN(tmp));
+		}
+		zval_ptr_dtor(&tmp);
 		return len;
 	}
 }
@@ -245,10 +246,10 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free TSRMLS
 	zval *key;													\
 	char *key_str, *key_free;									\
 	size_t key_len; 											\
-	if (zend_parse_parameters(ac TSRMLS_CC, "zr", &key, &id) == FAILURE) { 	\
+	if (zend_parse_parameters(ac, "zr", &key, &id) == FAILURE) { 	\
 		return; 												\
 	} 															\
-	if ((key_len = php_dba_make_key(key, &key_str, &key_free TSRMLS_CC)) == 0) {\
+	if ((key_len = php_dba_make_key(key, &key_str, &key_free)) == 0) {\
 		RETURN_FALSE;											\
 	}
 
@@ -256,31 +257,39 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free TSRMLS
 	zval *key;													\
 	char *key_str, *key_free;									\
 	size_t key_len; 											\
-	long skip = 0;  											\
+	zend_long skip = 0;  											\
 	switch(ac) {												\
 	case 2: 													\
-		if (zend_parse_parameters(ac TSRMLS_CC, "zr", &key, &id) == FAILURE) { \
+		if (zend_parse_parameters(ac, "zr", &key, &id) == FAILURE) { \
 			return;												\
 		} 														\
 		break;  												\
 	case 3: 													\
-		if (zend_parse_parameters(ac TSRMLS_CC, "zlr", &key, &skip, &id) == FAILURE) { \
+		if (zend_parse_parameters(ac, "zlr", &key, &skip, &id) == FAILURE) { \
 			return;												\
 		} 														\
 		break;  												\
 	default:													\
 		WRONG_PARAM_COUNT; 										\
 	} 															\
-	if ((key_len = php_dba_make_key(key, &key_str, &key_free TSRMLS_CC)) == 0) {\
+	if ((key_len = php_dba_make_key(key, &key_str, &key_free)) == 0) {\
 		RETURN_FALSE;											\
 	}
 
 
 #define DBA_FETCH_RESOURCE(info, id)	\
-	ZEND_FETCH_RESOURCE2(info, dba_info *, id, -1, "DBA identifier", le_db, le_pdb);
+	if ((info = (dba_info *)zend_fetch_resource2(Z_RES_P(id), "DBA identifier", le_db, le_pdb)) == NULL) { \
+		RETURN_FALSE; \
+	}
 
-#define DBA_ID_GET2   DBA_ID_PARS; DBA_GET2;   DBA_FETCH_RESOURCE(info, &id)
-#define DBA_ID_GET2_3 DBA_ID_PARS; DBA_GET2_3; DBA_FETCH_RESOURCE(info, &id)
+#define DBA_FETCH_RESOURCE_WITH_ID(info, id)	\
+	if ((info = (dba_info *)zend_fetch_resource2(Z_RES_P(id), "DBA identifier", le_db, le_pdb)) == NULL) { \
+		DBA_ID_DONE; \
+		RETURN_FALSE; \
+	}
+
+#define DBA_ID_GET2   DBA_ID_PARS; DBA_GET2;   DBA_FETCH_RESOURCE_WITH_ID(info, id)
+#define DBA_ID_GET2_3 DBA_ID_PARS; DBA_GET2_3; DBA_FETCH_RESOURCE_WITH_ID(info, id)
 
 #define DBA_ID_DONE												\
 	if (key_free) efree(key_free)
@@ -298,14 +307,14 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free TSRMLS
 /* check whether the user has write access */
 #define DBA_WRITE_CHECK \
 	if(info->mode != DBA_WRITER && info->mode != DBA_TRUNC && info->mode != DBA_CREAT) { \
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "You cannot perform a modification to a database without proper access"); \
+		php_error_docref(NULL, E_WARNING, "You cannot perform a modification to a database without proper access"); \
 		RETURN_FALSE; \
 	}
 
 /* the same check, but with a call to DBA_ID_DONE before returning */
 #define DBA_WRITE_CHECK_WITH_ID \
 	if(info->mode != DBA_WRITER && info->mode != DBA_TRUNC && info->mode != DBA_CREAT) { \
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "You cannot perform a modification to a database without proper access"); \
+		php_error_docref(NULL, E_WARNING, "You cannot perform a modification to a database without proper access"); \
 		DBA_ID_DONE; \
 		RETURN_FALSE; \
 	}
@@ -387,7 +396,7 @@ static int le_pdb;
 /* }}} */
 
 /* {{{ dba_fetch_resource
-PHPAPI void dba_fetch_resource(dba_info **pinfo, zval **id TSRMLS_DC)
+PHPAPI void dba_fetch_resource(dba_info **pinfo, zval **id)
 {
 	dba_info *info;
 	DBA_ID_FETCH
@@ -406,25 +415,25 @@ PHPAPI dba_handler *dba_get_handler(const char* handler_name)
 */
 /* }}} */
 
-/* {{{ dba_close 
- */ 
-static void dba_close(dba_info *info TSRMLS_DC)
+/* {{{ dba_close
+ */
+static void dba_close(dba_info *info)
 {
 	if (info->hnd) {
-		info->hnd->close(info TSRMLS_CC);
+		info->hnd->close(info);
 	}
 	if (info->path) {
 		pefree(info->path, info->flags&DBA_PERSISTENT);
 	}
-	if (info->fp && info->fp!=info->lock.fp) {
-		if(info->flags&DBA_PERSISTENT) {
+	if (info->fp && info->fp != info->lock.fp) {
+		if (info->flags & DBA_PERSISTENT) {
 			php_stream_pclose(info->fp);
 		} else {
 			php_stream_close(info->fp);
 		}
 	}
 	if (info->lock.fp) {
-		if(info->flags&DBA_PERSISTENT) {
+		if (info->flags & DBA_PERSISTENT) {
 			php_stream_pclose(info->lock.fp);
 		} else {
 			php_stream_close(info->lock.fp);
@@ -439,28 +448,36 @@ static void dba_close(dba_info *info TSRMLS_DC)
 
 /* {{{ dba_close_rsrc
  */
-static void dba_close_rsrc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+static void dba_close_rsrc(zend_resource *rsrc)
 {
-	dba_info *info = (dba_info *)rsrc->ptr; 
+	dba_info *info = (dba_info *)rsrc->ptr;
 
-	dba_close(info TSRMLS_CC);
+	dba_close(info);
 }
 /* }}} */
 
 /* {{{ dba_close_pe_rsrc_deleter */
-int dba_close_pe_rsrc_deleter(zend_rsrc_list_entry *le, void *pDba TSRMLS_DC)
+int dba_close_pe_rsrc_deleter(zval *el, void *pDba)
 {
-	return le->ptr == pDba;
+	if (Z_RES_P(el)->ptr == pDba) {
+		if (Z_DELREF_P(el) == 0) {
+			return ZEND_HASH_APPLY_REMOVE;
+		} else {
+			return ZEND_HASH_APPLY_KEEP | ZEND_HASH_APPLY_STOP;
+		}
+	} else {
+		return ZEND_HASH_APPLY_KEEP;
+	}
 }
 /* }}} */
 
 /* {{{ dba_close_pe_rsrc */
-static void dba_close_pe_rsrc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+static void dba_close_pe_rsrc(zend_resource *rsrc)
 {
-	dba_info *info = (dba_info *)rsrc->ptr; 
+	dba_info *info = (dba_info *)rsrc->ptr;
 
 	/* closes the resource by calling dba_close_rsrc() */
-	zend_hash_apply_with_argument(&EG(persistent_list), (apply_func_arg_t) dba_close_pe_rsrc_deleter, info TSRMLS_CC);
+	zend_hash_apply_with_argument(&EG(persistent_list), dba_close_pe_rsrc_deleter, info);
 }
 /* }}} */
 
@@ -470,26 +487,26 @@ ZEND_INI_MH(OnUpdateDefaultHandler)
 {
 	dba_handler *hptr;
 
-	if (!strlen(new_value)) {
+	if (!ZSTR_LEN(new_value)) {
 		DBA_G(default_hptr) = NULL;
-		return OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+		return OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 	}
 
-	for (hptr = handler; hptr->name && strcasecmp(hptr->name, new_value); hptr++);
+	for (hptr = handler; hptr->name && strcasecmp(hptr->name, ZSTR_VAL(new_value)); hptr++);
 
 	if (!hptr->name) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such handler: %s", new_value);
+		php_error_docref(NULL, E_WARNING, "No such handler: %s", ZSTR_VAL(new_value));
 		return FAILURE;
 	}
 	DBA_G(default_hptr) = hptr;
-	return OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	return OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
 
 PHP_INI_BEGIN()
     STD_PHP_INI_ENTRY("dba.default_handler", DBA_DEFAULT, PHP_INI_ALL, OnUpdateDefaultHandler, default_handler,    zend_dba_globals, dba_globals)
 PHP_INI_END()
 /* }}} */
- 
+
 /* {{{ PHP_GINIT_FUNCTION
  */
 static PHP_GINIT_FUNCTION(dba)
@@ -519,7 +536,7 @@ PHP_MSHUTDOWN_FUNCTION(dba)
 }
 /* }}} */
 
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 
 /* {{{ PHP_MINFO_FUNCTION
  */
@@ -535,9 +552,9 @@ PHP_MINFO_FUNCTION(dba)
 
 	php_info_print_table_start();
  	php_info_print_table_row(2, "DBA support", "enabled");
-	if (handlers.c) {
+	if (handlers.s) {
 		smart_str_0(&handlers);
-		php_info_print_table_row(2, "Supported handlers", handlers.c);
+		php_info_print_table_row(2, "Supported handlers", ZSTR_VAL(handlers.s));
 		smart_str_free(&handlers);
 	} else {
 		php_info_print_table_row(2, "Supported handlers", "none");
@@ -551,7 +568,7 @@ PHP_MINFO_FUNCTION(dba)
  */
 static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
-	int val_len;
+	size_t val_len;
 	zval *id;
 	dba_info *info = NULL;
 	int ac = ZEND_NUM_ARGS();
@@ -560,19 +577,19 @@ static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	char *key_str, *key_free;
 	size_t key_len;
 
-	if (zend_parse_parameters(ac TSRMLS_CC, "zsr", &key, &val, &val_len, &id) == FAILURE) {
+	if (zend_parse_parameters(ac, "zsr", &key, &val, &val_len, &id) == FAILURE) {
 		return;
 	}
 
-	if ((key_len = php_dba_make_key(key, &key_str, &key_free TSRMLS_CC)) == 0) {
+	if ((key_len = php_dba_make_key(key, &key_str, &key_free)) == 0) {
 		RETURN_FALSE;
 	}
 
-	DBA_FETCH_RESOURCE(info, &id);
+	DBA_FETCH_RESOURCE_WITH_ID(info, id);
 
 	DBA_WRITE_CHECK_WITH_ID;
 
-	if (info->hnd->update(info, key_str, key_len, val, val_len, mode TSRMLS_CC) == SUCCESS) {
+	if (info->hnd->update(info, key_str, key_len, val, val_len, mode) == SUCCESS) {
 		DBA_ID_DONE;
 		RETURN_TRUE;
 	}
@@ -582,22 +599,22 @@ static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 }
 /* }}} */
 
-#define FREENOW if(args) efree(args); if(key) efree(key)
+#define FREENOW if(args) {int i; for (i=0; i<ac; i++) { zval_ptr_dtor(&args[i]); } efree(args);} if(key) efree(key)
 
 /* {{{ php_find_dbm
  */
-dba_info *php_dba_find(const char* path TSRMLS_DC)
+dba_info *php_dba_find(const char* path)
 {
-	zend_rsrc_list_entry *le;
+	zend_resource *le;
 	dba_info *info;
 	int numitems, i;
 
 	numitems = zend_hash_next_free_element(&EG(regular_list));
 	for (i=1; i<numitems; i++) {
-		if (zend_hash_index_find(&EG(regular_list), i, (void **) &le)==FAILURE) {
+		if ((le = zend_hash_index_find_ptr(&EG(regular_list), i)) == NULL) {
 			continue;
 		}
-		if (Z_TYPE_P(le) == le_db || Z_TYPE_P(le) == le_pdb) {
+		if (le->type == le_db || le->type == le_pdb) {
 			info = (dba_info *)(le->ptr);
 			if (!strcmp(info->path, path)) {
 				return (dba_info *)(le->ptr);
@@ -613,7 +630,7 @@ dba_info *php_dba_find(const char* path TSRMLS_DC)
  */
 static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
-	zval ***args = (zval ***) NULL;
+	zval *args = NULL;
 	int ac = ZEND_NUM_ARGS();
 	dba_mode_t modenr;
 	dba_info *info, *other;
@@ -625,67 +642,68 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	char *file_mode;
 	char mode[4], *pmode, *lock_file_mode = NULL;
 	int persistent_flag = persistent ? STREAM_OPEN_PERSISTENT : 0;
-	char *opened_path = NULL;
+	zend_string *opened_path = NULL;
 	char *lock_name;
-	
-	if(ac < 2) {
+
+	if (ac < 2) {
 		WRONG_PARAM_COUNT;
 	}
-	
+
 	/* we pass additional args to the respective handler */
-	args = safe_emalloc(ac, sizeof(zval *), 0);
+	args = safe_emalloc(ac, sizeof(zval), 0);
 	if (zend_get_parameters_array_ex(ac, args) != SUCCESS) {
-		FREENOW;
+		efree(args);
 		WRONG_PARAM_COUNT;
 	}
-		
+
 	/* we only take string arguments */
 	for (i = 0; i < ac; i++) {
-		convert_to_string_ex(args[i]);
-		keylen += Z_STRLEN_PP(args[i]);
+		ZVAL_STR(&args[i], zval_get_string(&args[i]));
+		keylen += Z_STRLEN(args[i]);
 	}
 
 	if (persistent) {
-		zend_rsrc_list_entry *le;
-		
+		zend_resource *le;
+
 		/* calculate hash */
 		key = safe_emalloc(keylen, 1, 1);
 		key[keylen] = '\0';
 		keylen = 0;
-		
+
 		for(i = 0; i < ac; i++) {
-			memcpy(key+keylen, Z_STRVAL_PP(args[i]), Z_STRLEN_PP(args[i]));
-			keylen += Z_STRLEN_PP(args[i]);
+			memcpy(key+keylen, Z_STRVAL(args[i]), Z_STRLEN(args[i]));
+			keylen += Z_STRLEN(args[i]);
 		}
 
 		/* try to find if we already have this link in our persistent list */
-		if (zend_hash_find(&EG(persistent_list), key, keylen+1, (void **) &le) == SUCCESS) {
+		if ((le = zend_hash_str_find_ptr(&EG(persistent_list), key, keylen)) != NULL) {
 			FREENOW;
-			
-			if (Z_TYPE_P(le) != le_pdb) {
+
+			if (le->type != le_pdb) {
 				RETURN_FALSE;
 			}
-		
+
 			info = (dba_info *)le->ptr;
 
-			ZEND_REGISTER_RESOURCE(return_value, info, le_pdb);
+			GC_REFCOUNT(le)++;
+			RETURN_RES(zend_register_resource(info, le_pdb));
 			return;
 		}
 	}
-	
+
 	if (ac==2) {
 		hptr = DBA_G(default_hptr);
 		if (!hptr) {
-			php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_WARNING, "No default handler selected");
+			php_error_docref2(NULL, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "No default handler selected");
 			FREENOW;
 			RETURN_FALSE;
 		}
 	} else {
-		for (hptr = handler; hptr->name && strcasecmp(hptr->name, Z_STRVAL_PP(args[2])); hptr++);
+		for (hptr = handler; hptr->name && strcasecmp(hptr->name, Z_STRVAL(args[2])); hptr++);
 	}
 
 	if (!hptr->name) {
-		php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_WARNING, "No such handler: %s", Z_STRVAL_PP(args[2]));
+		php_error_docref2(NULL, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "No such handler: %s", Z_STRVAL(args[2]));
 		FREENOW;
 		RETURN_FALSE;
 	}
@@ -702,7 +720,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	 *
 	 * t: test open database, warning if locked
 	 */
-	strlcpy(mode, Z_STRVAL_PP(args[1]), sizeof(mode));
+	strlcpy(mode, Z_STRVAL(args[1]), sizeof(mode));
 	pmode = &mode[0];
 	if (pmode[0] && (pmode[1]=='d' || pmode[1]=='l' || pmode[1]=='-')) { /* force lock on db file or lck file or disable locking */
 		switch (pmode[1]) {
@@ -716,13 +734,13 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		case 'l':
 			lock_flag = DBA_LOCK_ALL;
 			if ((hptr->flags & DBA_LOCK_ALL) == 0) {
-				php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_NOTICE, "Handler %s does locking internally", hptr->name);
+				php_error_docref2(NULL, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_NOTICE, "Handler %s does locking internally", hptr->name);
 			}
 			break;
 		default:
 		case '-':
 			if ((hptr->flags & DBA_LOCK_ALL) == 0) {
-				php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_WARNING, "Locking cannot be disabled for handler %s", hptr->name);
+				php_error_docref2(NULL, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "Locking cannot be disabled for handler %s", hptr->name);
 				FREENOW;
 				RETURN_FALSE;
 			}
@@ -734,18 +752,18 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		lock_dbf = 1;
 	}
 	switch (*pmode++) {
-		case 'r': 
-			modenr = DBA_READER; 
+		case 'r':
+			modenr = DBA_READER;
 			lock_mode = (lock_flag & DBA_LOCK_READER) ? LOCK_SH : 0;
 			file_mode = "r";
 			break;
-		case 'w': 
-			modenr = DBA_WRITER; 
+		case 'w':
+			modenr = DBA_WRITER;
 			lock_mode = (lock_flag & DBA_LOCK_WRITER) ? LOCK_EX : 0;
 			file_mode = "r+b";
 			break;
-		case 'c': 
-			modenr = DBA_CREAT; 
+		case 'c':
+			modenr = DBA_CREAT;
 			lock_mode = (lock_flag & DBA_LOCK_CREAT) ? LOCK_EX : 0;
 			if (lock_mode) {
 				if (lock_dbf) {
@@ -761,7 +779,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			} else {
 				file_mode = "a+b";
 			}
-			/* In case of the 'a+b' append mode, the handler is responsible 
+			/* In case of the 'a+b' append mode, the handler is responsible
 			 * to handle any rewind problems (see flatfile handler).
 			 */
 			break;
@@ -771,7 +789,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			file_mode = "w+b";
 			break;
 		default:
-			php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_WARNING, "Illegal DBA mode");
+			php_error_docref2(NULL, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "Illegal DBA mode");
 			FREENOW;
 			RETURN_FALSE;
 	}
@@ -784,17 +802,17 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	if (*pmode=='t') {
 		pmode++;
 		if (!lock_flag) {
-			php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_WARNING, "You cannot combine modifiers - (no lock) and t (test lock)");
+			php_error_docref2(NULL, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "You cannot combine modifiers - (no lock) and t (test lock)");
 			FREENOW;
 			RETURN_FALSE;
 		}
 		if (!lock_mode) {
 			if ((hptr->flags & DBA_LOCK_ALL) == 0) {
-				php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_WARNING, "Handler %s uses its own locking which doesn't support mode modifier t (test lock)", hptr->name);
+				php_error_docref2(NULL, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "Handler %s uses its own locking which doesn't support mode modifier t (test lock)", hptr->name);
 				FREENOW;
 				RETURN_FALSE;
 			} else {
-				php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_WARNING, "Handler %s doesn't uses locking for this mode which makes modifier t (test lock) obsolete", hptr->name);
+				php_error_docref2(NULL, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "Handler %s doesn't uses locking for this mode which makes modifier t (test lock) obsolete", hptr->name);
 				FREENOW;
 				RETURN_FALSE;
 			}
@@ -803,14 +821,14 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 	}
 	if (*pmode) {
-		php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_WARNING, "Illegal DBA mode");
+		php_error_docref2(NULL, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "Illegal DBA mode");
 		FREENOW;
 		RETURN_FALSE;
 	}
-			
+
 	info = pemalloc(sizeof(dba_info), persistent);
 	memset(info, 0, sizeof(dba_info));
-	info->path = pestrdup(Z_STRVAL_PP(args[0]), persistent);
+	info->path = pestrdup(Z_STRVAL(args[0]), persistent);
 	info->mode = modenr;
 	info->argc = ac - 3;
 	info->argv = args + 3;
@@ -822,7 +840,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	 * the problem is some systems would allow read during write
 	 */
 	if (hptr->flags & DBA_LOCK_ALL) {
-		if ((other = php_dba_find(info->path TSRMLS_CC)) != NULL) {
+		if ((other = php_dba_find(info->path)) != NULL) {
 			if (   ( (lock_mode&LOCK_EX)        && (other->lock.mode&(LOCK_EX|LOCK_SH)) )
 			    || ( (other->lock.mode&LOCK_EX) && (lock_mode&(LOCK_EX|LOCK_SH))        )
 			   ) {
@@ -833,7 +851,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 	if (!error && lock_mode) {
 		if (lock_dbf) {
-			lock_name = Z_STRVAL_PP(args[0]);
+			lock_name = Z_STRVAL(args[0]);
 		} else {
 			spprintf(&lock_name, 0, "%s.lck", info->path);
 			if (!strcmp(file_mode, "r")) {
@@ -846,13 +864,9 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				/* when not in read mode or failed to open .lck file read only. now try again in create(write) mode and log errors */
 				lock_file_mode = "a+b";
 			} else {
-				if (!persistent) {
-					info->lock.name = opened_path;
-				} else {
-					if (opened_path) {
-						info->lock.name = pestrdup(opened_path, persistent);
-						efree(opened_path);
-					}
+				if (opened_path) {
+					info->lock.name = pestrndup(ZSTR_VAL(opened_path), ZSTR_LEN(opened_path), persistent);
+					zend_string_release(opened_path);
 				}
 			}
 		}
@@ -862,22 +876,18 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				if (lock_dbf) {
 					/* replace the path info with the real path of the opened file */
 					pefree(info->path, persistent);
-					info->path = pestrdup(opened_path, persistent);
+					info->path = pestrndup(ZSTR_VAL(opened_path), ZSTR_LEN(opened_path), persistent);
 				}
 				/* now store the name of the lock */
-				if (!persistent) {
-					info->lock.name = opened_path;
-				} else {
-					info->lock.name = pestrdup(opened_path, persistent);
-					efree(opened_path);
-				}
+				info->lock.name = pestrndup(ZSTR_VAL(opened_path), ZSTR_LEN(opened_path), persistent);
+				zend_string_release(opened_path);
 			}
 		}
 		if (!lock_dbf) {
 			efree(lock_name);
 		}
 		if (!info->lock.fp) {
-			dba_close(info TSRMLS_CC);
+			dba_close(info);
 			/* stream operation already wrote an error message */
 			FREENOW;
 			RETURN_FALSE;
@@ -898,18 +908,18 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			info->fp = php_stream_open_wrapper(info->path, file_mode, STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH|persistent_flag, NULL);
 		}
 		if (!info->fp) {
-			dba_close(info TSRMLS_CC);
+			dba_close(info);
 			/* stream operation already wrote an error message */
 			FREENOW;
 			RETURN_FALSE;
 		}
 		if (hptr->flags & (DBA_NO_APPEND|DBA_CAST_AS_FD)) {
-			/* Needed because some systems do not allow to write to the original 
+			/* Needed because some systems do not allow to write to the original
 			 * file contents with O_APPEND being set.
 			 */
 			if (SUCCESS != php_stream_cast(info->fp, PHP_STREAM_AS_FD, (void*)&info->fd, 1)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not cast stream");
-				dba_close(info TSRMLS_CC);
+				php_error_docref(NULL, E_WARNING, "Could not cast stream");
+				dba_close(info);
 				FREENOW;
 				RETURN_FALSE;
 #ifdef F_SETFL
@@ -918,13 +928,13 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				fcntl(info->fd, F_SETFL, flags & ~O_APPEND);
 #endif
 			}
-				
+
 		}
 	}
 
-	if (error || hptr->open(info, &error TSRMLS_CC) != SUCCESS) {
-		dba_close(info TSRMLS_CC);
-		php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_WARNING, "Driver initialization failed for handler: %s%s%s", hptr->name, error?": ":"", error?error:"");
+	if (error || hptr->open(info, &error) != SUCCESS) {
+		dba_close(info);
+		php_error_docref2(NULL, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "Driver initialization failed for handler: %s%s%s", hptr->name, error?": ":"", error?error:"");
 		FREENOW;
 		RETURN_FALSE;
 	}
@@ -934,19 +944,18 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	info->argv = NULL;
 
 	if (persistent) {
-		zend_rsrc_list_entry new_le;
+		zval new_le;
 
-		Z_TYPE(new_le) = le_pdb;
-		new_le.ptr = info;
-		if (zend_hash_update(&EG(persistent_list), key, keylen+1, &new_le, sizeof(zend_rsrc_list_entry), NULL) == FAILURE) {
-			dba_close(info TSRMLS_CC);
-			php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_WARNING, "Could not register persistent resource");
+		ZVAL_NEW_PERSISTENT_RES(&new_le, -1, info, le_pdb);
+		if (zend_hash_str_update(&EG(persistent_list), key, keylen, &new_le) == NULL) {
+			dba_close(info);
+			php_error_docref2(NULL, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "Could not register persistent resource");
 			FREENOW;
 			RETURN_FALSE;
 		}
 	}
 
-	ZEND_REGISTER_RESOURCE(return_value, info, (persistent ? le_pdb : le_db));
+	RETVAL_RES(zend_register_resource(info, (persistent ? le_pdb : le_db)));
 	FREENOW;
 }
 /* }}} */
@@ -975,13 +984,13 @@ PHP_FUNCTION(dba_close)
 	zval *id;
 	dba_info *info = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &id) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &id) == FAILURE) {
 		return;
 	}
 
-	DBA_FETCH_RESOURCE(info, &id);
+	DBA_FETCH_RESOURCE(info, id);
 
-	zend_list_delete(Z_RESVAL_P(id));
+	zend_list_close(Z_RES_P(id));
 }
 /* }}} */
 
@@ -991,7 +1000,7 @@ PHP_FUNCTION(dba_exists)
 {
 	DBA_ID_GET2;
 
-	if(info->hnd->exists(info, key_str, key_len TSRMLS_CC) == SUCCESS) {
+	if(info->hnd->exists(info, key_str, key_len) == SUCCESS) {
 		DBA_ID_DONE;
 		RETURN_TRUE;
 	}
@@ -1011,31 +1020,33 @@ PHP_FUNCTION(dba_fetch)
 	if (ac==3) {
 		if (!strcmp(info->hnd->name, "cdb")) {
 			if (skip < 0) {
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Handler %s accepts only skip values greater than or equal to zero, using skip=0", info->hnd->name);
+				php_error_docref(NULL, E_NOTICE, "Handler %s accepts only skip values greater than or equal to zero, using skip=0", info->hnd->name);
 				skip = 0;
 			}
 		} else if (!strcmp(info->hnd->name, "inifile")) {
-			/* "-1" is compareable to 0 but allows a non restrictive 
+			/* "-1" is compareable to 0 but allows a non restrictive
 			 * access which is fater. For example 'inifile' uses this
 			 * to allow faster access when the key was already found
 			 * using firstkey/nextkey. However explicitly setting the
-			 * value to 0 ensures the first value. 
+			 * value to 0 ensures the first value.
 			 */
 			if (skip < -1) {
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Handler %s accepts only skip value -1 and greater, using skip=0", info->hnd->name);
+				php_error_docref(NULL, E_NOTICE, "Handler %s accepts only skip value -1 and greater, using skip=0", info->hnd->name);
 				skip = 0;
 			}
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Handler %s does not support optional skip parameter, the value will be ignored", info->hnd->name);
-			skip = 0;			
+			php_error_docref(NULL, E_NOTICE, "Handler %s does not support optional skip parameter, the value will be ignored", info->hnd->name);
+			skip = 0;
 		}
 	} else {
-		skip = 0; 
+		skip = 0;
 	}
-	if((val = info->hnd->fetch(info, key_str, key_len, skip, &len TSRMLS_CC)) != NULL) {
+	if((val = info->hnd->fetch(info, key_str, key_len, skip, &len)) != NULL) {
 		DBA_ID_DONE;
-		RETURN_STRINGL(val, len, 0);
-	} 
+		RETVAL_STRINGL(val, len);
+		efree(val);
+		return;
+	}
 	DBA_ID_DONE;
 	RETURN_FALSE;
 }
@@ -1047,26 +1058,26 @@ PHP_FUNCTION(dba_key_split)
 {
 	zval *zkey;
 	char *key, *name;
-	int key_len;
+	size_t key_len;
 
 	if (ZEND_NUM_ARGS() != 1) {
 		WRONG_PARAM_COUNT;
 	}
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "z", &zkey) == SUCCESS) {
-		if (Z_TYPE_P(zkey) == IS_NULL || (Z_TYPE_P(zkey) == IS_BOOL && !Z_LVAL_P(zkey))) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "z", &zkey) == SUCCESS) {
+		if (Z_TYPE_P(zkey) == IS_NULL || (Z_TYPE_P(zkey) == IS_FALSE)) {
 			RETURN_BOOL(0);
 		}
 	}
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &key, &key_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &key, &key_len) == FAILURE) {
 		RETURN_BOOL(0);
 	}
 	array_init(return_value);
 	if (key[0] == '[' && (name = strchr(key, ']')) != NULL) {
-		add_next_index_stringl(return_value, key+1, name - (key + 1), 1);
-		add_next_index_stringl(return_value, name+1, key_len - (name - key + 1), 1);
+		add_next_index_stringl(return_value, key+1, name - (key + 1));
+		add_next_index_stringl(return_value, name+1, key_len - (name - key + 1));
 	} else {
-		add_next_index_stringl(return_value, "", 0, 1);
-		add_next_index_stringl(return_value, key, key_len, 1);
+		add_next_index_stringl(return_value, "", 0);
+		add_next_index_stringl(return_value, key, key_len);
 	}
 }
 /* }}} */
@@ -1080,16 +1091,19 @@ PHP_FUNCTION(dba_firstkey)
 	zval *id;
 	dba_info *info = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &id) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &id) == FAILURE) {
 		return;
 	}
 
-	DBA_FETCH_RESOURCE(info, &id);
+	DBA_FETCH_RESOURCE(info, id);
 
-	fkey = info->hnd->firstkey(info, &len TSRMLS_CC);
+	fkey = info->hnd->firstkey(info, &len);
 
-	if (fkey)
-		RETURN_STRINGL(fkey, len, 0);
+	if (fkey) {
+		RETVAL_STRINGL(fkey, len);
+		efree(fkey);
+		return;
+	}
 
 	RETURN_FALSE;
 }
@@ -1104,16 +1118,19 @@ PHP_FUNCTION(dba_nextkey)
 	zval *id;
 	dba_info *info = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &id) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &id) == FAILURE) {
 		return;
 	}
 
-	DBA_FETCH_RESOURCE(info, &id);
+	DBA_FETCH_RESOURCE(info, id);
 
-	nkey = info->hnd->nextkey(info, &len TSRMLS_CC);
+	nkey = info->hnd->nextkey(info, &len);
 
-	if (nkey)
-		RETURN_STRINGL(nkey, len, 0);
+	if (nkey) {
+		RETVAL_STRINGL(nkey, len);
+		efree(nkey);
+		return;
+	}
 
 	RETURN_FALSE;
 }
@@ -1125,10 +1142,10 @@ PHP_FUNCTION(dba_nextkey)
 PHP_FUNCTION(dba_delete)
 {
 	DBA_ID_GET2;
-	
+
 	DBA_WRITE_CHECK_WITH_ID;
-	
-	if(info->hnd->delete(info, key_str, key_len TSRMLS_CC) == SUCCESS)
+
+	if(info->hnd->delete(info, key_str, key_len) == SUCCESS)
 	{
 		DBA_ID_DONE;
 		RETURN_TRUE;
@@ -1139,7 +1156,7 @@ PHP_FUNCTION(dba_delete)
 /* }}} */
 
 /* {{{ proto bool dba_insert(string key, string value, resource handle)
-   If not inifile: Insert value as key, return false, if key exists already 
+   If not inifile: Insert value as key, return false, if key exists already
    If inifile: Add vakue as key (next instance of key) */
 PHP_FUNCTION(dba_insert)
 {
@@ -1163,15 +1180,15 @@ PHP_FUNCTION(dba_optimize)
 	zval *id;
 	dba_info *info = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &id) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &id) == FAILURE) {
 		return;
 	}
 
-	DBA_FETCH_RESOURCE(info, &id);
+	DBA_FETCH_RESOURCE(info, id);
 
 	DBA_WRITE_CHECK;
 
-	if (info->hnd->optimize(info TSRMLS_CC) == SUCCESS) {
+	if (info->hnd->optimize(info) == SUCCESS) {
 		RETURN_TRUE;
 	}
 
@@ -1186,13 +1203,13 @@ PHP_FUNCTION(dba_sync)
 	zval *id;
 	dba_info *info = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &id) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &id) == FAILURE) {
 		return;
 	}
 
-	DBA_FETCH_RESOURCE(info, &id);
+	DBA_FETCH_RESOURCE(info, id);
 
-	if (info->hnd->sync(info TSRMLS_CC) == SUCCESS) {
+	if (info->hnd->sync(info) == SUCCESS) {
 		RETURN_TRUE;
 	}
 
@@ -1207,7 +1224,7 @@ PHP_FUNCTION(dba_handlers)
 	dba_handler *hptr;
 	zend_bool full_info = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &full_info) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &full_info) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1215,9 +1232,12 @@ PHP_FUNCTION(dba_handlers)
 
 	for(hptr = handler; hptr->name; hptr++) {
 		if (full_info) {
-			add_assoc_string(return_value, hptr->name, hptr->info(hptr, NULL TSRMLS_CC), 0);
+			// TODO: avoid reallocation ???
+			char *str = hptr->info(hptr, NULL);
+			add_assoc_string(return_value, hptr->name, str);
+			efree(str);
 		} else {
-			add_next_index_string(return_value, hptr->name, 1);
+			add_next_index_string(return_value, hptr->name);
 		}
  	}
 }
@@ -1227,8 +1247,8 @@ PHP_FUNCTION(dba_handlers)
    List opened databases */
 PHP_FUNCTION(dba_list)
 {
-	ulong numitems, i;
-	zend_rsrc_list_entry *le;
+	zend_ulong numitems, i;
+	zend_resource *le;
 	dba_info *info;
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1239,12 +1259,12 @@ PHP_FUNCTION(dba_list)
 
 	numitems = zend_hash_next_free_element(&EG(regular_list));
 	for (i=1; i<numitems; i++) {
-		if (zend_hash_index_find(&EG(regular_list), i, (void **) &le)==FAILURE) {
+		if ((le = zend_hash_index_find_ptr(&EG(regular_list), i)) == NULL) {
 			continue;
 		}
-		if (Z_TYPE_P(le) == le_db || Z_TYPE_P(le) == le_pdb) {
+		if (le->type == le_db || le->type == le_pdb) {
 			info = (dba_info *)(le->ptr);
-			add_index_string(return_value, i, info->path, 1);
+			add_index_string(return_value, i, info->path);
 		}
 	}
 }

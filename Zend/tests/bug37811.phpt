@@ -21,7 +21,7 @@ var_dump(Baz);
 --EXPECTF--
 string(3) "Foo"
 
-Warning: Constants may only evaluate to scalar values in %sbug37811.php on line %d
+Warning: Constants may only evaluate to scalar values or arrays in %sbug37811.php on line %d
 
 Notice: Use of undefined constant Baz - assumed 'Baz' in %sbug37811.php on line %d
 string(3) "Baz"

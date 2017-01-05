@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -34,7 +34,7 @@
 #define TCADB_DATA dba_tcadb_data *dba = info->dbf
 
 typedef struct {
-	TCADB *tcadb;	
+	TCADB *tcadb;
 } dba_tcadb_data;
 
 DBA_OPEN_FUNC(tcadb)
@@ -115,14 +115,14 @@ DBA_UPDATE_FUNC(tcadb)
 			return FAILURE;
 		}
 	}
-	
+
 	result = tcadbput(dba->tcadb, key, keylen, val, vallen);
 
 	if (result) {
 		return SUCCESS;
 	}
 
-	php_error_docref2(NULL TSRMLS_CC, key, val, E_WARNING, "Error updating data");
+	php_error_docref2(NULL, key, val, E_WARNING, "Error updating data");
 	return FAILURE;
 }
 

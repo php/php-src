@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,16 +27,16 @@
 PHP_NAMED_FUNCTION(php_if_crc32)
 {
 	char *p;
-	int len, nr;
+	size_t nr;
 	php_uint32 crcinit = 0;
 	register php_uint32 crc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &p, &nr) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &p, &nr) == FAILURE) {
 		return;
 	}
 	crc = crcinit^0xFFFFFFFF;
 
-	for (len =+nr; nr--; ++p) {
+	for (; nr--; ++p) {
 		crc = ((crc >> 8) & 0x00FFFFFF) ^ crc32tab[(crc ^ (*p)) & 0xFF ];
 	}
 	RETVAL_LONG(crc^0xFFFFFFFF);

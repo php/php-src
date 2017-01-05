@@ -42,7 +42,7 @@ array(2) {
     [0]=>
     array(1) {
       [0]=>
-      NULL
+      string(1) "1"
     }
     ["num"]=>
     string(1) "1"

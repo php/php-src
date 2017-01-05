@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,13 +28,17 @@ PHPAPI int php_win32_core_globals_id;
 php_win32_core_globals the_php_win32_core_globals;
 #endif
 
-void php_win32_core_globals_ctor(void *vg TSRMLS_DC)
+void php_win32_core_globals_ctor(void *vg)
 {
 	php_win32_core_globals *wg = (php_win32_core_globals*)vg;
 	memset(wg, 0, sizeof(*wg));
+
+	wg->mail_socket = INVALID_SOCKET;
+
+	wg->log_source = INVALID_HANDLE_VALUE;
 }
 
-void php_win32_core_globals_dtor(void *vg TSRMLS_DC)
+void php_win32_core_globals_dtor(void *vg)
 {
 	php_win32_core_globals *wg = (php_win32_core_globals*)vg;
 
@@ -50,6 +54,11 @@ void php_win32_core_globals_dtor(void *vg TSRMLS_DC)
 		zend_hash_destroy(wg->registry_directories);
 		free(wg->registry_directories);
 		wg->registry_directories = NULL;
+	}
+
+	if (INVALID_SOCKET != wg->mail_socket) {
+		closesocket(wg->mail_socket);
+		wg->mail_socket = INVALID_SOCKET;
 	}
 }
 
@@ -69,3 +78,11 @@ PHP_RSHUTDOWN_FUNCTION(win32_core_globals)
 	return SUCCESS;
 }
 
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

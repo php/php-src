@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -50,10 +50,10 @@ ZEND_END_ARG_INFO();
 /* }}} */
 
 /*
-* class DOMImplementation 
+* class DOMImplementation
 *
 * URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-102161490
-* Since: 
+* Since:
 */
 
 const zend_function_entry php_dom_domimplementation_class_functions[] = {
@@ -66,14 +66,14 @@ const zend_function_entry php_dom_domimplementation_class_functions[] = {
 
 /* {{{ proto boolean dom_domimplementation_has_feature(string feature, string version);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-5CED94D7
-Since: 
+Since:
 */
 PHP_METHOD(domimplementation, hasFeature)
 {
-	int feature_len, version_len;
+	size_t feature_len, version_len;
 	char *feature, *version;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &feature, &feature_len, &version, &version_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &feature, &feature_len, &version, &version_len) == FAILURE) {
 		return;
 	}
 
@@ -92,40 +92,43 @@ Since: DOM Level 2
 PHP_METHOD(domimplementation, createDocumentType)
 {
 	xmlDtd *doctype;
-	int ret, name_len = 0, publicid_len = 0, systemid_len = 0;
+	int ret;
+	size_t name_len = 0, publicid_len = 0, systemid_len = 0;
 	char *name = NULL, *publicid = NULL, *systemid = NULL;
 	xmlChar *pch1 = NULL, *pch2 = NULL, *localname = NULL;
 	xmlURIPtr uri;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sss", &name, &name_len, &publicid, &publicid_len, &systemid, &systemid_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|sss", &name, &name_len, &publicid, &publicid_len, &systemid, &systemid_len) == FAILURE) {
 		return;
 	}
 
 	if (name_len == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "qualifiedName is required");
+		php_error_docref(NULL, E_WARNING, "qualifiedName is required");
 		RETURN_FALSE;
 	}
 
-	if (publicid_len > 0)
-		pch1 = publicid;
-	if (systemid_len > 0)
-		pch2 = systemid;
+	if (publicid_len > 0) {
+		pch1 = (xmlChar *) publicid;
+	}
+	if (systemid_len > 0) {
+		pch2 = (xmlChar *) systemid;
+	}
 
 	uri = xmlParseURI(name);
 	if (uri != NULL && uri->opaque != NULL) {
-		localname = xmlStrdup(uri->opaque);
+		localname = xmlStrdup((xmlChar *) uri->opaque);
 		if (xmlStrchr(localname, (xmlChar) ':') != NULL) {
-			php_dom_throw_error(NAMESPACE_ERR, 1 TSRMLS_CC);
+			php_dom_throw_error(NAMESPACE_ERR, 1);
 			xmlFreeURI(uri);
 			xmlFree(localname);
 			RETURN_FALSE;
 		}
 	} else {
-		localname = xmlStrdup(name);
+		localname = xmlStrdup((xmlChar *) name);
 	}
 
-	/* TODO: Test that localname has no invalid chars 
-	php_dom_throw_error(INVALID_CHARACTER_ERR, TSRMLS_CC);
+	/* TODO: Test that localname has no invalid chars
+	php_dom_throw_error(INVALID_CHARACTER_ERR,);
 	*/
 
 	if (uri) {
@@ -136,7 +139,7 @@ PHP_METHOD(domimplementation, createDocumentType)
 	xmlFree(localname);
 
 	if (doctype == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create DocumentType");
+		php_error_docref(NULL, E_WARNING, "Unable to create DocumentType");
 		RETURN_FALSE;
 	}
 
@@ -155,23 +158,24 @@ PHP_METHOD(domimplementation, createDocument)
 	xmlNode *nodep;
 	xmlDtdPtr doctype = NULL;
 	xmlNsPtr nsptr = NULL;
-	int ret, uri_len = 0, name_len = 0, errorcode = 0;
+	int ret, errorcode = 0;
+	size_t uri_len = 0, name_len = 0;
 	char *uri = NULL, *name = NULL;
 	char *prefix = NULL, *localname = NULL;
 	dom_object *doctobj;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ssO", &uri, &uri_len, &name, &name_len, &node, dom_documenttype_class_entry) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ssO", &uri, &uri_len, &name, &name_len, &node, dom_documenttype_class_entry) == FAILURE) {
 		return;
 	}
 
 	if (node != NULL) {
 		DOM_GET_OBJ(doctype, node, xmlDtdPtr, doctobj);
 		if (doctype->type == XML_DOCUMENT_TYPE_NODE) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid DocumentType object");
+			php_error_docref(NULL, E_WARNING, "Invalid DocumentType object");
 			RETURN_FALSE;
 		}
 		if (doctype->doc != NULL) {
-			php_dom_throw_error(WRONG_DOCUMENT_ERR, 1 TSRMLS_CC);
+			php_dom_throw_error(WRONG_DOCUMENT_ERR, 1);
 			RETURN_FALSE;
 		}
 	} else {
@@ -180,7 +184,9 @@ PHP_METHOD(domimplementation, createDocument)
 
 	if (name_len > 0) {
 		errorcode = dom_check_qname(name, &localname, &prefix, 1, name_len);
-		if (errorcode == 0 && uri_len > 0 && ((nsptr = xmlNewNs(NULL, uri, prefix)) == NULL)) {
+		if (errorcode == 0 && uri_len > 0
+			&& ((nsptr = xmlNewNs(NULL, (xmlChar *) uri, (xmlChar *) prefix)) == NULL)
+		) {
 			errorcode = NAMESPACE_ERR;
 		}
 	}
@@ -193,7 +199,7 @@ PHP_METHOD(domimplementation, createDocument)
 		if (localname != NULL) {
 			xmlFree(localname);
 		}
-		php_dom_throw_error(errorcode, 1 TSRMLS_CC);
+		php_dom_throw_error(errorcode, 1);
 		RETURN_FALSE;
 	}
 
@@ -215,7 +221,7 @@ PHP_METHOD(domimplementation, createDocument)
 	}
 
 	if (localname != NULL) {
-		nodep = xmlNewDocNode (docp, nsptr, localname, NULL);
+		nodep = xmlNewDocNode(docp, nsptr, (xmlChar *) localname, NULL);
 		if (!nodep) {
 			if (doctype != NULL) {
 				docp->intSubset = NULL;
@@ -227,7 +233,7 @@ PHP_METHOD(domimplementation, createDocument)
 			xmlFreeDoc(docp);
 			xmlFree(localname);
 			/* Need some type of error here */
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unexpected Error");
+			php_error_docref(NULL, E_WARNING, "Unexpected Error");
 			RETURN_FALSE;
 		}
 
@@ -241,7 +247,7 @@ PHP_METHOD(domimplementation, createDocument)
 
 	if (doctobj != NULL) {
 		doctobj->document = ((dom_object *)((php_libxml_node_ptr *)docp->_private)->_private)->document;
-		php_libxml_increment_doc_ref((php_libxml_node_object *)doctobj, docp TSRMLS_CC);
+		php_libxml_increment_doc_ref((php_libxml_node_object *)doctobj, docp);
 	}
 }
 /* }}} end dom_domimplementation_create_document */

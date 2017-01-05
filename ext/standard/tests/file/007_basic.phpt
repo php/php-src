@@ -98,10 +98,10 @@ bool(false)
 bool(true)
 resource(%d) of type (Unknown)
 
-Warning: ftell(): %d is not a valid stream resource in %s on line %d
+Warning: ftell(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: feof(): %d is not a valid stream resource in %s on line %d
+Warning: feof(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
 -- Iteration with mode 'wb' --
@@ -111,10 +111,10 @@ bool(false)
 bool(true)
 resource(%d) of type (Unknown)
 
-Warning: ftell(): %d is not a valid stream resource in %s on line %d
+Warning: ftell(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: feof(): %d is not a valid stream resource in %s on line %d
+Warning: feof(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
 -- Iteration with mode 'wt' --
@@ -124,10 +124,10 @@ bool(false)
 bool(true)
 resource(%d) of type (Unknown)
 
-Warning: ftell(): %d is not a valid stream resource in %s on line %d
+Warning: ftell(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: feof(): %d is not a valid stream resource in %s on line %d
+Warning: feof(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
 -- Iteration with mode 'w+' --
@@ -137,10 +137,10 @@ bool(false)
 bool(true)
 resource(%d) of type (Unknown)
 
-Warning: ftell(): %d is not a valid stream resource in %s on line %d
+Warning: ftell(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: feof(): %d is not a valid stream resource in %s on line %d
+Warning: feof(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
 -- Iteration with mode 'w+b' --
@@ -150,10 +150,10 @@ bool(false)
 bool(true)
 resource(%d) of type (Unknown)
 
-Warning: ftell(): %d is not a valid stream resource in %s on line %d
+Warning: ftell(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: feof(): %d is not a valid stream resource in %s on line %d
+Warning: feof(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
 -- Iteration with mode 'w+t' --
@@ -163,10 +163,10 @@ bool(false)
 bool(true)
 resource(%d) of type (Unknown)
 
-Warning: ftell(): %d is not a valid stream resource in %s on line %d
+Warning: ftell(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: feof(): %d is not a valid stream resource in %s on line %d
+Warning: feof(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
 -- Iteration with mode 'r' --
@@ -176,10 +176,10 @@ bool(false)
 bool(true)
 resource(%d) of type (Unknown)
 
-Warning: ftell(): %d is not a valid stream resource in %s on line %d
+Warning: ftell(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: feof(): %d is not a valid stream resource in %s on line %d
+Warning: feof(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
 -- Iteration with mode 'rb' --
@@ -189,10 +189,10 @@ bool(false)
 bool(true)
 resource(%d) of type (Unknown)
 
-Warning: ftell(): %d is not a valid stream resource in %s on line %d
+Warning: ftell(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: feof(): %d is not a valid stream resource in %s on line %d
+Warning: feof(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
 -- Iteration with mode 'rt' --
@@ -202,10 +202,10 @@ bool(false)
 bool(true)
 resource(%d) of type (Unknown)
 
-Warning: ftell(): %d is not a valid stream resource in %s on line %d
+Warning: ftell(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: feof(): %d is not a valid stream resource in %s on line %d
+Warning: feof(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
 -- Iteration with mode 'r+' --
@@ -215,10 +215,10 @@ bool(false)
 bool(true)
 resource(%d) of type (Unknown)
 
-Warning: ftell(): %d is not a valid stream resource in %s on line %d
+Warning: ftell(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: feof(): %d is not a valid stream resource in %s on line %d
+Warning: feof(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
 -- Iteration with mode 'r+b' --
@@ -228,10 +228,10 @@ bool(false)
 bool(true)
 resource(%d) of type (Unknown)
 
-Warning: ftell(): %d is not a valid stream resource in %s on line %d
+Warning: ftell(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: feof(): %d is not a valid stream resource in %s on line %d
+Warning: feof(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
 -- Iteration with mode 'r+t' --
@@ -241,10 +241,10 @@ bool(false)
 bool(true)
 resource(%d) of type (Unknown)
 
-Warning: ftell(): %d is not a valid stream resource in %s on line %d
+Warning: ftell(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: feof(): %d is not a valid stream resource in %s on line %d
+Warning: feof(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
 -- Iteration with mode 'a' --
@@ -254,10 +254,10 @@ bool(false)
 bool(true)
 resource(%d) of type (Unknown)
 
-Warning: ftell(): %d is not a valid stream resource in %s on line %d
+Warning: ftell(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: feof(): %d is not a valid stream resource in %s on line %d
+Warning: feof(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
 -- Iteration with mode 'ab' --
@@ -267,10 +267,10 @@ bool(false)
 bool(true)
 resource(%d) of type (Unknown)
 
-Warning: ftell(): %d is not a valid stream resource in %s on line %d
+Warning: ftell(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: feof(): %d is not a valid stream resource in %s on line %d
+Warning: feof(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
 -- Iteration with mode 'at' --
@@ -280,10 +280,10 @@ bool(false)
 bool(true)
 resource(%d) of type (Unknown)
 
-Warning: ftell(): %d is not a valid stream resource in %s on line %d
+Warning: ftell(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: feof(): %d is not a valid stream resource in %s on line %d
+Warning: feof(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
 -- Iteration with mode 'a+' --
@@ -293,10 +293,10 @@ bool(false)
 bool(true)
 resource(%d) of type (Unknown)
 
-Warning: ftell(): %d is not a valid stream resource in %s on line %d
+Warning: ftell(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: feof(): %d is not a valid stream resource in %s on line %d
+Warning: feof(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
 -- Iteration with mode 'a+t' --
@@ -306,10 +306,10 @@ bool(false)
 bool(true)
 resource(%d) of type (Unknown)
 
-Warning: ftell(): %d is not a valid stream resource in %s on line %d
+Warning: ftell(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: feof(): %d is not a valid stream resource in %s on line %d
+Warning: feof(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
 -- Iteration with mode 'a+b' --
@@ -319,10 +319,10 @@ bool(false)
 bool(true)
 resource(%d) of type (Unknown)
 
-Warning: ftell(): %d is not a valid stream resource in %s on line %d
+Warning: ftell(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: feof(): %d is not a valid stream resource in %s on line %d
+Warning: feof(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
 -- Iteration with mode 'x' --
@@ -332,10 +332,10 @@ bool(false)
 bool(true)
 resource(%d) of type (Unknown)
 
-Warning: ftell(): %d is not a valid stream resource in %s on line %d
+Warning: ftell(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: feof(): %d is not a valid stream resource in %s on line %d
+Warning: feof(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 resource(%d) of type (Unknown)
 
@@ -346,10 +346,10 @@ bool(false)
 bool(true)
 resource(%d) of type (Unknown)
 
-Warning: ftell(): %d is not a valid stream resource in %s on line %d
+Warning: ftell(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: feof(): %d is not a valid stream resource in %s on line %d
+Warning: feof(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 resource(%d) of type (Unknown)
 
@@ -360,10 +360,10 @@ bool(false)
 bool(true)
 resource(%d) of type (Unknown)
 
-Warning: ftell(): %d is not a valid stream resource in %s on line %d
+Warning: ftell(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: feof(): %d is not a valid stream resource in %s on line %d
+Warning: feof(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 resource(%d) of type (Unknown)
 
@@ -374,10 +374,10 @@ bool(false)
 bool(true)
 resource(%d) of type (Unknown)
 
-Warning: ftell(): %d is not a valid stream resource in %s on line %d
+Warning: ftell(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: feof(): %d is not a valid stream resource in %s on line %d
+Warning: feof(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 resource(%d) of type (Unknown)
 
@@ -388,10 +388,10 @@ bool(false)
 bool(true)
 resource(%d) of type (Unknown)
 
-Warning: ftell(): %d is not a valid stream resource in %s on line %d
+Warning: ftell(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: feof(): %d is not a valid stream resource in %s on line %d
+Warning: feof(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 resource(%d) of type (Unknown)
 
@@ -402,10 +402,10 @@ bool(false)
 bool(true)
 resource(%d) of type (Unknown)
 
-Warning: ftell(): %d is not a valid stream resource in %s on line %d
+Warning: ftell(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: feof(): %d is not a valid stream resource in %s on line %d
+Warning: feof(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 resource(%d) of type (Unknown)
 

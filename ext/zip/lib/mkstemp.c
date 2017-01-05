@@ -48,7 +48,6 @@
 #define O_BINARY 0
 #endif
 
-
 
 int
 _zip_mkstemp(char *path)

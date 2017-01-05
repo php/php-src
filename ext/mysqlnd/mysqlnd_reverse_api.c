@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2016 The PHP Group                                |
+  | Copyright (c) 2006-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -12,13 +12,12 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Andrey Hristov <andrey@mysql.com>                           |
-  |          Ulf Wendel <uwendel@mysql.com>                              |
-  |          Georg Richter <georg@mysql.com>                             |
+  | Authors: Andrey Hristov <andrey@php.net>                             |
+  |          Ulf Wendel <uw@php.net>                                     |
+  |          Georg Richter <georg@php.net>                               |
   +----------------------------------------------------------------------+
 */
 
-/* $Id: mysqlnd.c 317989 2011-10-10 20:49:28Z andrey $ */
 #include "php.h"
 #include "mysqlnd.h"
 #include "mysqlnd_priv.h"
@@ -31,7 +30,7 @@ static HashTable mysqlnd_api_ext_ht;
 
 /* {{{ mysqlnd_reverse_api_init */
 PHPAPI void
-mysqlnd_reverse_api_init(TSRMLS_D)
+mysqlnd_reverse_api_init(void)
 {
 	zend_hash_init(&mysqlnd_api_ext_ht, 3, NULL, NULL, 1);
 }
@@ -40,7 +39,7 @@ mysqlnd_reverse_api_init(TSRMLS_D)
 
 /* {{{ mysqlnd_reverse_api_end */
 PHPAPI void
-mysqlnd_reverse_api_end(TSRMLS_D)
+mysqlnd_reverse_api_end(void)
 {
 	zend_hash_destroy(&mysqlnd_api_ext_ht);
 }
@@ -49,7 +48,7 @@ mysqlnd_reverse_api_end(TSRMLS_D)
 
 /* {{{ myslqnd_get_api_extensions */
 PHPAPI HashTable *
-mysqlnd_reverse_api_get_api_list(TSRMLS_D)
+mysqlnd_reverse_api_get_api_list(void)
 {
 	return &mysqlnd_api_ext_ht;
 }
@@ -58,36 +57,45 @@ mysqlnd_reverse_api_get_api_list(TSRMLS_D)
 
 /* {{{ mysqlnd_reverse_api_register_api */
 PHPAPI void
-mysqlnd_reverse_api_register_api(MYSQLND_REVERSE_API * apiext TSRMLS_DC)
+mysqlnd_reverse_api_register_api(MYSQLND_REVERSE_API * apiext)
 {
-	zend_hash_add(&mysqlnd_api_ext_ht, apiext->module->name, strlen(apiext->module->name) + 1, &apiext,
-				  sizeof(MYSQLND_REVERSE_API *), NULL);
+	zend_hash_str_add_ptr(&mysqlnd_api_ext_ht, apiext->module->name, strlen(apiext->module->name), apiext);
 }
 /* }}} */
 
 
 /* {{{ zval_to_mysqlnd */
 PHPAPI MYSQLND *
-zval_to_mysqlnd(zval * zv, const unsigned int client_api_capabilities, unsigned int * save_client_api_capabilities TSRMLS_DC)
+zval_to_mysqlnd(zval * zv, const unsigned int client_api_capabilities, unsigned int * save_client_api_capabilities)
 {
 	MYSQLND * retval;
-	MYSQLND_REVERSE_API ** elem;
-
-	for (zend_hash_internal_pointer_reset(&mysqlnd_api_ext_ht);
-		 zend_hash_get_current_data(&mysqlnd_api_ext_ht, (void **)&elem) == SUCCESS;
-		 zend_hash_move_forward(&mysqlnd_api_ext_ht))
-	{
-		if ((*elem)->conversion_cb) {
-			retval = (*elem)->conversion_cb(zv TSRMLS_CC);
+#ifdef OLD_CODE
+	MYSQLND_REVERSE_API * elem;
+	ZEND_HASH_FOREACH_PTR(&mysqlnd_api_ext_ht, elem) {
+		if (elem->conversion_cb) {
+			retval = elem->conversion_cb(zv);
 			if (retval) {
 				if (retval->data) {
-					*save_client_api_capabilities = retval->data->m->negotiate_client_api_capabilities(retval->data, client_api_capabilities TSRMLS_CC);
+					*save_client_api_capabilities = retval->data->m->negotiate_client_api_capabilities(retval->data, client_api_capabilities);
 				}
 				return retval;
 			}
 		}
-	}
-
+	} ZEND_HASH_FOREACH_END();
+#else
+	MYSQLND_REVERSE_API * api;
+	ZEND_HASH_FOREACH_PTR(&mysqlnd_api_ext_ht, api) {
+		if (api && api->conversion_cb) {
+			retval = api->conversion_cb(zv);
+			if (retval) {
+				if (retval->data) {
+					*save_client_api_capabilities = retval->data->m->negotiate_client_api_capabilities(retval->data, client_api_capabilities);
+				}
+				return retval;
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+#endif
 	return NULL;
 }
 /* }}} */

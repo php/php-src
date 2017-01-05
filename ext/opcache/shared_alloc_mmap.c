@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -45,6 +45,22 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	}
 	shared_segment = (zend_shared_segment *)((char *)(*shared_segments_p) + sizeof(void *));
 	(*shared_segments_p)[0] = shared_segment;
+
+#ifdef MAP_HUGETLB
+	/* Try to allocate huge pages first to reduce dTLB misses.
+	 * OS has to be configured properly
+	 * (e.g. https://wiki.debian.org/Hugepages#Enabling_HugeTlbPage)
+	 * You may verify huge page usage with the following command:
+	 * `grep "Huge" /proc/meminfo`
+	 */
+	shared_segment->p = mmap(0, requested_size, PROT_READ | PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS|MAP_HUGETLB, -1, 0);
+	if (shared_segment->p != MAP_FAILED) {
+		shared_segment->pos = 0;
+		shared_segment->size = requested_size;
+
+		return ALLOC_SUCCESS;
+	}
+#endif
 
 	shared_segment->p = mmap(0, requested_size, PROT_READ | PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
 	if (shared_segment->p == MAP_FAILED) {

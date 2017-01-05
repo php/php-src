@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -38,39 +38,37 @@ PHPAPI HashTable *php_get_stream_filters_hash_global(void)
 }
 
 /* Normal hash selection/retrieval call */
-PHPAPI HashTable *_php_get_stream_filters_hash(TSRMLS_D)
+PHPAPI HashTable *_php_get_stream_filters_hash(void)
 {
 	return (FG(stream_filters) ? FG(stream_filters) : &stream_filters_hash);
 }
 
 /* API for registering GLOBAL filters */
-PHPAPI int php_stream_filter_register_factory(const char *filterpattern, php_stream_filter_factory *factory TSRMLS_DC)
+PHPAPI int php_stream_filter_register_factory(const char *filterpattern, php_stream_filter_factory *factory)
 {
-	return zend_hash_add(&stream_filters_hash, (char*)filterpattern, strlen(filterpattern) + 1, factory, sizeof(*factory), NULL);
+	return zend_hash_str_add_ptr(&stream_filters_hash, filterpattern, strlen(filterpattern), factory) ? SUCCESS : FAILURE;
 }
 
-PHPAPI int php_stream_filter_unregister_factory(const char *filterpattern TSRMLS_DC)
+PHPAPI int php_stream_filter_unregister_factory(const char *filterpattern)
 {
-	return zend_hash_del(&stream_filters_hash, (char*)filterpattern, strlen(filterpattern) + 1);
+	return zend_hash_str_del(&stream_filters_hash, filterpattern, strlen(filterpattern));
 }
 
 /* API for registering VOLATILE wrappers */
-PHPAPI int php_stream_filter_register_factory_volatile(const char *filterpattern, php_stream_filter_factory *factory TSRMLS_DC)
+PHPAPI int php_stream_filter_register_factory_volatile(const char *filterpattern, php_stream_filter_factory *factory)
 {
 	if (!FG(stream_filters)) {
-		php_stream_filter_factory tmpfactory;
-
 		ALLOC_HASHTABLE(FG(stream_filters));
 		zend_hash_init(FG(stream_filters), zend_hash_num_elements(&stream_filters_hash), NULL, NULL, 1);
-		zend_hash_copy(FG(stream_filters), &stream_filters_hash, NULL, &tmpfactory, sizeof(php_stream_filter_factory));
+		zend_hash_copy(FG(stream_filters), &stream_filters_hash, NULL);
 	}
 
-	return zend_hash_add(FG(stream_filters), (char*)filterpattern, strlen(filterpattern) + 1, factory, sizeof(*factory), NULL);
+	return zend_hash_str_add_ptr(FG(stream_filters), (char*)filterpattern, strlen(filterpattern), factory) ? SUCCESS : FAILURE;
 }
 
 /* Buckets */
 
-PHPAPI php_stream_bucket *php_stream_bucket_new(php_stream *stream, char *buf, size_t buflen, int own_buf, int buf_persistent TSRMLS_DC)
+PHPAPI php_stream_bucket *php_stream_bucket_new(php_stream *stream, char *buf, size_t buflen, int own_buf, int buf_persistent)
 {
 	int is_persistent = php_stream_is_persistent(stream);
 	php_stream_bucket *bucket;
@@ -80,18 +78,18 @@ PHPAPI php_stream_bucket *php_stream_bucket_new(php_stream *stream, char *buf, s
 	if (bucket == NULL) {
 		return NULL;
 	}
-	
+
 	bucket->next = bucket->prev = NULL;
 
 	if (is_persistent && !buf_persistent) {
 		/* all data in a persistent bucket must also be persistent */
 		bucket->buf = pemalloc(buflen, 1);
-		
+
 		if (bucket->buf == NULL) {
 			pefree(bucket, 1);
 			return NULL;
 		}
-		
+
 		memcpy(bucket->buf, buf, buflen);
 		bucket->buflen = buflen;
 		bucket->own_buf = 1;
@@ -114,12 +112,12 @@ PHPAPI php_stream_bucket *php_stream_bucket_new(php_stream *stream, char *buf, s
  * In both cases, the original bucket is unlinked from its brigade.
  * If a copy is made, the original bucket is delref'd.
  * */
-PHPAPI php_stream_bucket *php_stream_bucket_make_writeable(php_stream_bucket *bucket TSRMLS_DC)
+PHPAPI php_stream_bucket *php_stream_bucket_make_writeable(php_stream_bucket *bucket)
 {
 	php_stream_bucket *retval;
 
-	php_stream_bucket_unlink(bucket TSRMLS_CC);
-	
+	php_stream_bucket_unlink(bucket);
+
 	if (bucket->refcount == 1 && bucket->own_buf) {
 		return bucket;
 	}
@@ -133,12 +131,12 @@ PHPAPI php_stream_bucket *php_stream_bucket_make_writeable(php_stream_bucket *bu
 	retval->refcount = 1;
 	retval->own_buf = 1;
 
-	php_stream_bucket_delref(bucket TSRMLS_CC);
-	
+	php_stream_bucket_delref(bucket);
+
 	return retval;
 }
 
-PHPAPI int php_stream_bucket_split(php_stream_bucket *in, php_stream_bucket **left, php_stream_bucket **right, size_t length TSRMLS_DC)
+PHPAPI int php_stream_bucket_split(php_stream_bucket *in, php_stream_bucket **left, php_stream_bucket **right, size_t length)
 {
 	*left = (php_stream_bucket*)pecalloc(1, sizeof(php_stream_bucket), in->is_persistent);
 	*right = (php_stream_bucket*)pecalloc(1, sizeof(php_stream_bucket), in->is_persistent);
@@ -153,16 +151,16 @@ PHPAPI int php_stream_bucket_split(php_stream_bucket *in, php_stream_bucket **le
 	(*left)->refcount = 1;
 	(*left)->own_buf = 1;
 	(*left)->is_persistent = in->is_persistent;
-	
+
 	(*right)->buflen = in->buflen - length;
 	(*right)->buf = pemalloc((*right)->buflen, in->is_persistent);
 	memcpy((*right)->buf, in->buf + length, (*right)->buflen);
 	(*right)->refcount = 1;
 	(*right)->own_buf = 1;
 	(*right)->is_persistent = in->is_persistent;
-	
+
 	return SUCCESS;
-	
+
 exit_fail:
 	if (*right) {
 		if ((*right)->buf) {
@@ -179,7 +177,7 @@ exit_fail:
 	return FAILURE;
 }
 
-PHPAPI void php_stream_bucket_delref(php_stream_bucket *bucket TSRMLS_DC)
+PHPAPI void php_stream_bucket_delref(php_stream_bucket *bucket)
 {
 	if (--bucket->refcount == 0) {
 		if (bucket->own_buf) {
@@ -189,7 +187,7 @@ PHPAPI void php_stream_bucket_delref(php_stream_bucket *bucket TSRMLS_DC)
 	}
 }
 
-PHPAPI void php_stream_bucket_prepend(php_stream_bucket_brigade *brigade, php_stream_bucket *bucket TSRMLS_DC)
+PHPAPI void php_stream_bucket_prepend(php_stream_bucket_brigade *brigade, php_stream_bucket *bucket)
 {
 	bucket->next = brigade->head;
 	bucket->prev = NULL;
@@ -203,7 +201,7 @@ PHPAPI void php_stream_bucket_prepend(php_stream_bucket_brigade *brigade, php_st
 	bucket->brigade = brigade;
 }
 
-PHPAPI void php_stream_bucket_append(php_stream_bucket_brigade *brigade, php_stream_bucket *bucket TSRMLS_DC)
+PHPAPI void php_stream_bucket_append(php_stream_bucket_brigade *brigade, php_stream_bucket *bucket)
 {
 	if (brigade->tail == bucket) {
 		return;
@@ -221,7 +219,7 @@ PHPAPI void php_stream_bucket_append(php_stream_bucket_brigade *brigade, php_str
 	bucket->brigade = brigade;
 }
 
-PHPAPI void php_stream_bucket_unlink(php_stream_bucket *bucket TSRMLS_DC)
+PHPAPI void php_stream_bucket_unlink(php_stream_bucket *bucket)
 {
 	if (bucket->prev) {
 		bucket->prev->next = bucket->next;
@@ -236,7 +234,7 @@ PHPAPI void php_stream_bucket_unlink(php_stream_bucket *bucket TSRMLS_DC)
 	bucket->brigade = NULL;
 	bucket->next = bucket->prev = NULL;
 }
-	
+
 
 
 
@@ -249,7 +247,7 @@ PHPAPI void php_stream_bucket_unlink(php_stream_bucket *bucket TSRMLS_DC)
  * match. If that fails, we try "convert.charset.*", then "convert.*"
  * This means that we don't need to clog up the hashtable with a zillion
  * charsets (for example) but still be able to provide them all as filters */
-PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval *filterparams, int persistent TSRMLS_DC)
+PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval *filterparams, int persistent)
 {
 	HashTable *filter_hash = (FG(stream_filters) ? FG(stream_filters) : &stream_filters_hash);
 	php_stream_filter_factory *factory = NULL;
@@ -257,10 +255,10 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 	int n;
 	char *period;
 
-	n = strlen(filtername);
-	
-	if (SUCCESS == zend_hash_find(filter_hash, (char*)filtername, n + 1, (void**)&factory)) {
-		filter = factory->create_filter(filtername, filterparams, persistent TSRMLS_CC);
+	n = (int)strlen(filtername);
+
+	if (NULL != (factory = zend_hash_str_find_ptr(filter_hash, filtername, n))) {
+		filter = factory->create_filter(filtername, filterparams, persistent);
 	} else if ((period = strrchr(filtername, '.'))) {
 		/* try a wildcard */
 		char *wildname;
@@ -271,8 +269,8 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 		while (period && !filter) {
 			*period = '\0';
 			strncat(wildname, ".*", 2);
-			if (SUCCESS == zend_hash_find(filter_hash, wildname, strlen(wildname) + 1, (void**)&factory)) {
-				filter = factory->create_filter(filtername, filterparams, persistent TSRMLS_CC);
+			if (NULL != (factory = zend_hash_str_find_ptr(filter_hash, wildname, strlen(wildname)))) {
+				filter = factory->create_filter(filtername, filterparams, persistent);
 			}
 
 			*period = '\0';
@@ -284,15 +282,15 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 	if (filter == NULL) {
 		/* TODO: these need correct docrefs */
 		if (factory == NULL)
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to locate filter \"%s\"", filtername);
+			php_error_docref(NULL, E_WARNING, "unable to locate filter \"%s\"", filtername);
 		else
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to create or locate filter \"%s\"", filtername);
+			php_error_docref(NULL, E_WARNING, "unable to create or locate filter \"%s\"", filtername);
 	}
-	
+
 	return filter;
 }
 
-PHPAPI php_stream_filter *_php_stream_filter_alloc(php_stream_filter_ops *fops, void *abstract, int persistent STREAMS_DC TSRMLS_DC)
+PHPAPI php_stream_filter *_php_stream_filter_alloc(php_stream_filter_ops *fops, void *abstract, int persistent STREAMS_DC)
 {
 	php_stream_filter *filter;
 
@@ -300,20 +298,20 @@ PHPAPI php_stream_filter *_php_stream_filter_alloc(php_stream_filter_ops *fops, 
 	memset(filter, 0, sizeof(php_stream_filter));
 
 	filter->fops = fops;
-	filter->abstract = abstract;
+	Z_PTR(filter->abstract) = abstract;
 	filter->is_persistent = persistent;
-	
+
 	return filter;
 }
 
-PHPAPI void php_stream_filter_free(php_stream_filter *filter TSRMLS_DC)
+PHPAPI void php_stream_filter_free(php_stream_filter *filter)
 {
 	if (filter->fops->dtor)
-		filter->fops->dtor(filter TSRMLS_CC);
+		filter->fops->dtor(filter);
 	pefree(filter, filter->is_persistent);
 }
 
-PHPAPI int php_stream_filter_prepend_ex(php_stream_filter_chain *chain, php_stream_filter *filter TSRMLS_DC)
+PHPAPI int php_stream_filter_prepend_ex(php_stream_filter_chain *chain, php_stream_filter *filter)
 {
 	filter->next = chain->head;
 	filter->prev = NULL;
@@ -329,12 +327,12 @@ PHPAPI int php_stream_filter_prepend_ex(php_stream_filter_chain *chain, php_stre
 	return SUCCESS;
 }
 
-PHPAPI void _php_stream_filter_prepend(php_stream_filter_chain *chain, php_stream_filter *filter TSRMLS_DC)
+PHPAPI void _php_stream_filter_prepend(php_stream_filter_chain *chain, php_stream_filter *filter)
 {
-	php_stream_filter_prepend_ex(chain, filter TSRMLS_CC);
+	php_stream_filter_prepend_ex(chain, filter);
 }
 
-PHPAPI int php_stream_filter_append_ex(php_stream_filter_chain *chain, php_stream_filter *filter TSRMLS_DC)
+PHPAPI int php_stream_filter_append_ex(php_stream_filter_chain *chain, php_stream_filter *filter)
 {
 	php_stream *stream = chain->stream;
 
@@ -356,9 +354,9 @@ PHPAPI int php_stream_filter_append_ex(php_stream_filter_chain *chain, php_strea
 		php_stream_bucket *bucket;
 		size_t consumed = 0;
 
-		bucket = php_stream_bucket_new(stream, (char*) stream->readbuf + stream->readpos, stream->writepos - stream->readpos, 0, 0 TSRMLS_CC);
-		php_stream_bucket_append(brig_inp, bucket TSRMLS_CC);
-		status = filter->fops->filter(stream, filter, brig_inp, brig_outp, &consumed, PSFS_FLAG_NORMAL TSRMLS_CC);
+		bucket = php_stream_bucket_new(stream, (char*) stream->readbuf + stream->readpos, stream->writepos - stream->readpos, 0, 0);
+		php_stream_bucket_append(brig_inp, bucket);
+		status = filter->fops->filter(stream, filter, brig_inp, brig_outp, &consumed, PSFS_FLAG_NORMAL);
 
 		if (stream->readpos + consumed > (uint)stream->writepos) {
 			/* No behaving filter should cause this. */
@@ -369,19 +367,19 @@ PHPAPI int php_stream_filter_append_ex(php_stream_filter_chain *chain, php_strea
 			case PSFS_ERR_FATAL:
 				while (brig_in.head) {
 					bucket = brig_in.head;
-					php_stream_bucket_unlink(bucket TSRMLS_CC);
-					php_stream_bucket_delref(bucket TSRMLS_CC);
+					php_stream_bucket_unlink(bucket);
+					php_stream_bucket_delref(bucket);
 				}
 				while (brig_out.head) {
 					bucket = brig_out.head;
-					php_stream_bucket_unlink(bucket TSRMLS_CC);
-					php_stream_bucket_delref(bucket TSRMLS_CC);
+					php_stream_bucket_unlink(bucket);
+					php_stream_bucket_delref(bucket);
 				}
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Filter failed to process pre-buffered data");
+				php_error_docref(NULL, E_WARNING, "Filter failed to process pre-buffered data");
 				return FAILURE;
 			case PSFS_FEED_ME:
 				/* We don't actually need data yet,
-				   leave this filter in a feed me state until data is needed. 
+				   leave this filter in a feed me state until data is needed.
 				   Reset stream's internal read buffer since the filter is "holding" it. */
 				stream->readpos = 0;
 				stream->writepos = 0;
@@ -405,8 +403,8 @@ PHPAPI int php_stream_filter_append_ex(php_stream_filter_chain *chain, php_strea
 					memcpy(stream->readbuf + stream->writepos, bucket->buf, bucket->buflen);
 					stream->writepos += bucket->buflen;
 
-					php_stream_bucket_unlink(bucket TSRMLS_CC);
-					php_stream_bucket_delref(bucket TSRMLS_CC);
+					php_stream_bucket_unlink(bucket);
+					php_stream_bucket_delref(bucket);
 				}
 				break;
 		}
@@ -415,9 +413,9 @@ PHPAPI int php_stream_filter_append_ex(php_stream_filter_chain *chain, php_strea
 	return SUCCESS;
 }
 
-PHPAPI void _php_stream_filter_append(php_stream_filter_chain *chain, php_stream_filter *filter TSRMLS_DC)
+PHPAPI void _php_stream_filter_append(php_stream_filter_chain *chain, php_stream_filter *filter)
 {
-	if (php_stream_filter_append_ex(chain, filter TSRMLS_CC) != SUCCESS) {
+	if (php_stream_filter_append_ex(chain, filter) != SUCCESS) {
 		if (chain->head == filter) {
 			chain->head = NULL;
 			chain->tail = NULL;
@@ -428,7 +426,7 @@ PHPAPI void _php_stream_filter_append(php_stream_filter_chain *chain, php_stream
 	}
 }
 
-PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, int finish TSRMLS_DC)
+PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, int finish)
 {
 	php_stream_bucket_brigade brig_a = { NULL, NULL }, brig_b = { NULL, NULL }, *inp = &brig_a, *outp = &brig_b, *brig_temp;
 	php_stream_bucket *bucket;
@@ -449,7 +447,7 @@ PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, int finish TSRMLS
 	for(current = filter; current; current = current->next) {
 		php_stream_filter_status_t status;
 
-		status = filter->fops->filter(stream, current, inp, outp, NULL, flags TSRMLS_CC);
+		status = filter->fops->filter(stream, current, inp, outp, NULL, flags);
 		if (status == PSFS_FEED_ME) {
 			/* We've flushed the data far enough */
 			return SUCCESS;
@@ -495,22 +493,22 @@ PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, int finish TSRMLS
 		while ((bucket = inp->head)) {
 			memcpy(stream->readbuf + stream->writepos, bucket->buf, bucket->buflen);
 			stream->writepos += bucket->buflen;
-			php_stream_bucket_unlink(bucket TSRMLS_CC);
-			php_stream_bucket_delref(bucket TSRMLS_CC);
+			php_stream_bucket_unlink(bucket);
+			php_stream_bucket_delref(bucket);
 		}
 	} else if (chain == &(stream->writefilters)) {
 		/* Send flushed data to the stream */
 		while ((bucket = inp->head)) {
-			stream->ops->write(stream, bucket->buf, bucket->buflen TSRMLS_CC);
-			php_stream_bucket_unlink(bucket TSRMLS_CC);
-			php_stream_bucket_delref(bucket TSRMLS_CC);
+			stream->ops->write(stream, bucket->buf, bucket->buflen);
+			php_stream_bucket_unlink(bucket);
+			php_stream_bucket_delref(bucket);
 		}
 	}
 
 	return SUCCESS;
 }
 
-PHPAPI php_stream_filter *php_stream_filter_remove(php_stream_filter *filter, int call_dtor TSRMLS_DC)
+PHPAPI php_stream_filter *php_stream_filter_remove(php_stream_filter *filter, int call_dtor)
 {
 	if (filter->prev) {
 		filter->prev->next = filter->next;
@@ -523,12 +521,12 @@ PHPAPI php_stream_filter *php_stream_filter_remove(php_stream_filter *filter, in
 		filter->chain->tail = filter->prev;
 	}
 
-	if (filter->rsrc_id > 0) {
-		zend_list_delete(filter->rsrc_id);
+	if (filter->res) {
+		zend_list_delete(filter->res);
 	}
 
 	if (call_dtor) {
-		php_stream_filter_free(filter TSRMLS_CC);
+		php_stream_filter_free(filter);
 		return NULL;
 	}
 	return filter;

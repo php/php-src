@@ -11,7 +11,7 @@
  *
  *     void
  *     SdnToJulian(
- *         long int  sdn,
+ *         zend_long  sdn,
  *         int      *pYear,
  *         int      *pMonth,
  *         int      *pDay);
@@ -21,7 +21,7 @@
  * will be >= -4713 and != 0; *pMonth will be in the range 1 to 12
  * inclusive; *pDay will be in the range 1 to 31 inclusive.
  *
- *     long int
+ *     zend_long
  *     JulianToSdn(
  *         int inputYear,
  *         int inputMonth,
@@ -153,7 +153,7 @@
 #define DAYS_PER_4_YEARS   1461
 
 void SdnToJulian(
-					long int sdn,
+					zend_long sdn,
 					int *pYear,
 					int *pMonth,
 					int *pDay)
@@ -161,7 +161,7 @@ void SdnToJulian(
 	int year;
 	int month;
 	int day;
-	long int temp;
+	zend_long temp;
 	int dayOfYear;
 
 	if (sdn <= 0) {
@@ -212,12 +212,12 @@ fail:
 	*pDay = 0;
 }
 
-long int JulianToSdn(
+zend_long JulianToSdn(
 						int inputYear,
 						int inputMonth,
 						int inputDay)
 {
-	int year;
+	zend_long year;
 	int month;
 
 	/* check for invalid dates */

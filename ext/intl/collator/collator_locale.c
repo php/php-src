@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,17 +33,17 @@
  */
 PHP_FUNCTION( collator_get_locale )
 {
-	long   type        = 0;
+	zend_long   type        = 0;
 	char*  locale_name = NULL;
 
 	COLLATOR_METHOD_INIT_VARS
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Ol",
 		&object, Collator_ce_ptr, &type ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"collator_get_locale: unable to parse input params", 0 TSRMLS_CC );
+			"collator_get_locale: unable to parse input params", 0 );
 
 		RETURN_FALSE;
 	}
@@ -52,10 +52,10 @@ PHP_FUNCTION( collator_get_locale )
 	COLLATOR_METHOD_FETCH_OBJECT;
 
 	if (!co || !co->ucoll) {
-		intl_error_set_code( NULL, COLLATOR_ERROR_CODE( co ) TSRMLS_CC );
+		intl_error_set_code( NULL, COLLATOR_ERROR_CODE( co ) );
 		intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ),
-			"Object not initialized", 0 TSRMLS_CC );
-		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Object not initialized");
+			"Object not initialized", 0 );
+		php_error_docref(NULL, E_RECOVERABLE_ERROR, "Object not initialized");
 
 		RETURN_FALSE;
 	}
@@ -66,7 +66,7 @@ PHP_FUNCTION( collator_get_locale )
 	COLLATOR_CHECK_STATUS( co, "Error getting locale by type" );
 
 	/* Return it. */
-	RETVAL_STRINGL( locale_name, strlen(locale_name), TRUE );
+	RETVAL_STRINGL( locale_name, strlen(locale_name) );
 }
 /* }}} */
 

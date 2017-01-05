@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,6 +25,7 @@
 #endif
 #ifdef PHP_WIN32
 #include "win32/time.h"
+#include "win32/getrusage.h"
 #elif defined(NETWARE)
 #include <sys/timeval.h>
 #include <sys/time.h>
@@ -55,7 +56,7 @@ static void _php_gettimeofday(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	zend_bool get_as_float = 0;
 	struct timeval tp = {0};
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &get_as_float) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &get_as_float) == FAILURE) {
 		return;
 	}
 
@@ -70,8 +71,8 @@ static void _php_gettimeofday(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	if (mode) {
 		timelib_time_offset *offset;
 
-		offset = timelib_get_time_zone_info(tp.tv_sec, get_timezone_info(TSRMLS_C));
-				
+		offset = timelib_get_time_zone_info(tp.tv_sec, get_timezone_info());
+
 		array_init(return_value);
 		add_assoc_long(return_value, "sec", tp.tv_sec);
 		add_assoc_long(return_value, "usec", tp.tv_usec);
@@ -84,7 +85,7 @@ static void _php_gettimeofday(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		char ret[100];
 
 		snprintf(ret, 100, "%.8F %ld", tp.tv_usec / MICRO_IN_SEC, tp.tv_sec);
-		RETURN_STRING(ret, 1);
+		RETURN_STRING(ret);
 	}
 }
 
@@ -111,13 +112,13 @@ PHP_FUNCTION(gettimeofday)
 PHP_FUNCTION(getrusage)
 {
 	struct rusage usg;
-	long pwho = 0;
+	zend_long pwho = 0;
 	int who = RUSAGE_SELF;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &pwho) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &pwho) == FAILURE) {
 		return;
 	}
-	
+
 	if (pwho == 1) {
 		who = RUSAGE_CHILDREN;
 	}
@@ -129,9 +130,14 @@ PHP_FUNCTION(getrusage)
 	}
 
 	array_init(return_value);
+
 #define PHP_RUSAGE_PARA(a) \
 		add_assoc_long(return_value, #a, usg.a)
-#if !defined( _OSD_POSIX) && !defined(__BEOS__) /* BS2000 has only a few fields in the rusage struct */
+
+#ifdef PHP_WIN32 /* Windows only implements a limited amount of fields from the rusage struct */
+	PHP_RUSAGE_PARA(ru_majflt);
+	PHP_RUSAGE_PARA(ru_maxrss);
+#elif !defined( _OSD_POSIX) && !defined(__BEOS__) /* BS2000 has only a few fields in the rusage struct*/
 	PHP_RUSAGE_PARA(ru_oublock);
 	PHP_RUSAGE_PARA(ru_inblock);
 	PHP_RUSAGE_PARA(ru_msgsnd);
@@ -150,6 +156,7 @@ PHP_FUNCTION(getrusage)
 	PHP_RUSAGE_PARA(ru_utime.tv_sec);
 	PHP_RUSAGE_PARA(ru_stime.tv_usec);
 	PHP_RUSAGE_PARA(ru_stime.tv_sec);
+
 #undef PHP_RUSAGE_PARA
 }
 #endif /* HAVE_GETRUSAGE */

@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -36,6 +36,8 @@ PHPDBG_SET(breaks);
 PHPDBG_SET(quiet);
 PHPDBG_SET(stepping);
 PHPDBG_SET(refcount);
+PHPDBG_SET(pagination);
+PHPDBG_SET(lines);
 
 extern const phpdbg_command_t phpdbg_set_commands[];
 

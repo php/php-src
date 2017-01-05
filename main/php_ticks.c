@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,59 +21,56 @@
 #include "php.h"
 #include "php_ticks.h"
 
-int php_startup_ticks(TSRMLS_D)
+struct st_tick_function
 {
-	zend_llist_init(&PG(tick_functions), sizeof(void(*)(int)), NULL, 1);
+	void (*func)(int, void *);
+	void *arg;
+};
+
+int php_startup_ticks(void)
+{
+	zend_llist_init(&PG(tick_functions), sizeof(struct st_tick_function), NULL, 1);
 	return SUCCESS;
 }
 
-void php_deactivate_ticks(TSRMLS_D)
+void php_deactivate_ticks(void)
 {
 	zend_llist_clean(&PG(tick_functions));
 }
 
-void php_shutdown_ticks(TSRMLS_D)
+void php_shutdown_ticks(void)
 {
 	zend_llist_destroy(&PG(tick_functions));
 }
 
 static int php_compare_tick_functions(void *elem1, void *elem2)
 {
-	void(*func1)(int);
-	void(*func2)(int);
-	memcpy(&func1, elem1, sizeof(void(*)(int)));
-	memcpy(&func2, elem2, sizeof(void(*)(int)));
-	return (func1 == func2);
+  struct st_tick_function *e1 = (struct st_tick_function *)elem1;
+  struct st_tick_function *e2 = (struct st_tick_function *)elem2;
+  return e1->func == e2->func && e1->arg == e2->arg;
 }
 
-PHPAPI void php_add_tick_function(void (*func)(int))
+PHPAPI void php_add_tick_function(void (*func)(int, void*), void * arg)
 {
-	TSRMLS_FETCH();
-
-	zend_llist_add_element(&PG(tick_functions), (void *)&func);
+	struct st_tick_function tmp = {func, arg};
+	zend_llist_add_element(&PG(tick_functions), (void *)&tmp);
 }
 
-PHPAPI void php_remove_tick_function(void (*func)(int))
+PHPAPI void php_remove_tick_function(void (*func)(int, void *), void * arg)
 {
-	TSRMLS_FETCH();
-
-	zend_llist_del_element(&PG(tick_functions), (void *)func,
-						   (int(*)(void*, void*))php_compare_tick_functions);
+	struct st_tick_function tmp = {func, arg};
+	zend_llist_del_element(&PG(tick_functions), (void *)&tmp, (int(*)(void*, void*))php_compare_tick_functions);
 }
 
-static void php_tick_iterator(void *data, void *arg TSRMLS_DC)
+static void php_tick_iterator(void *d, void *arg)
 {
-	void (*func)(int);
-
-	memcpy(&func, data, sizeof(void(*)(int)));
-	func(*((int *)arg));
+	struct st_tick_function *data = (struct st_tick_function *)d;
+	data->func(*((int *)arg), data->arg);
 }
 
 void php_run_ticks(int count)
 {
-	TSRMLS_FETCH();
-
-	zend_llist_apply_with_argument(&PG(tick_functions), (llist_apply_with_arg_func_t) php_tick_iterator, &count TSRMLS_CC);
+	zend_llist_apply_with_argument(&PG(tick_functions), (llist_apply_with_arg_func_t) php_tick_iterator, &count);
 }
 
 /*

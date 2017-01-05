@@ -26,5 +26,5 @@ NULL
 Warning: imagecolorclosesthwb() expects parameter 1 to be resource, null given in %s on line %d
 NULL
 
-Warning: imagecolorclosesthwb() expects parameter 2 to be long, string given in %s on line %d
+Warning: imagecolorclosesthwb() expects parameter 2 to be integer, string given in %s on line %d
 NULL

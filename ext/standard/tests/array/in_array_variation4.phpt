@@ -1,5 +1,5 @@
 --TEST--
-Test in_array() function : usage variations - haystack as resource/multi dimentional array
+Test in_array() function : usage variations - haystack as resource/multi dimensional array
 --FILE--
 <?php
 /*

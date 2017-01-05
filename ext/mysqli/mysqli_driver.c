@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -30,97 +30,90 @@
 #include "mysqli_fe.h"
 
 #define MAP_PROPERTY_MYG_BOOL_READ(name, value) \
-static int name(mysqli_object *obj, zval **retval TSRMLS_DC) \
+static zval *name(mysqli_object *obj, zval *retval) \
 { \
-	MAKE_STD_ZVAL(*retval); \
-	ZVAL_BOOL(*retval, MyG(value)); \
-	return SUCCESS; \
+	ZVAL_BOOL(retval, MyG(value)); \
+	return retval; \
 } \
 
 #define MAP_PROPERTY_MYG_BOOL_WRITE(name, value) \
-static int name(mysqli_object *obj, zval *value TSRMLS_DC) \
+static int name(mysqli_object *obj, zval *value) \
 { \
 	MyG(value) = Z_LVAL_P(value) > 0; \
 	return SUCCESS; \
 } \
 
 #define MAP_PROPERTY_MYG_LONG_READ(name, value) \
-static int name(mysqli_object *obj, zval **retval TSRMLS_DC) \
+static zval *name(mysqli_object *obj, zval *retval) \
 { \
-	MAKE_STD_ZVAL(*retval); \
-	ZVAL_LONG(*retval, MyG(value)); \
-	return SUCCESS; \
+	ZVAL_LONG(retval, MyG(value)); \
+	return retval; \
 } \
 
 #define MAP_PROPERTY_MYG_LONG_WRITE(name, value) \
-static int name(mysqli_object *obj, zval *value TSRMLS_DC) \
+static int name(mysqli_object *obj, zval *value) \
 { \
 	MyG(value) = Z_LVAL_P(value); \
 	return SUCCESS; \
 } \
 
 #define MAP_PROPERTY_MYG_STRING_READ(name, value) \
-static int name(mysqli_object *obj, zval **retval TSRMLS_DC) \
+static zval *name(mysqli_object *obj, zval *retval) \
 { \
-	MAKE_STD_ZVAL(*retval); \
-	ZVAL_STRING(*retval, MyG(value), 1); \
-	return SUCCESS; \
+	ZVAL_STRING(retval, MyG(value)); \
+	return retval; \
 } \
 
 #define MAP_PROPERTY_MYG_STRING_WRITE(name, value) \
-static int name(mysqli_object *obj, zval *value TSRMLS_DC) \
+static int name(mysqli_object *obj, zval *value) \
 { \
 	MyG(value) = Z_STRVAL_P(value); \
 	return SUCCESS; \
 } \
 
 /* {{{ property driver_report_write */
-static int driver_report_write(mysqli_object *obj, zval *value TSRMLS_DC)
+static int driver_report_write(mysqli_object *obj, zval *value)
 {
 	MyG(report_mode) = Z_LVAL_P(value);
 	/*FIXME*/
-	/* zend_replace_error_handling(MyG(report_mode) & MYSQLI_REPORT_STRICT ? EH_THROW : EH_NORMAL, NULL, NULL TSRMLS_CC); */
+	/* zend_replace_error_handling(MyG(report_mode) & MYSQLI_REPORT_STRICT ? EH_THROW : EH_NORMAL, NULL, NULL); */
 	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ property driver_embedded_read */
-static int driver_embedded_read(mysqli_object *obj, zval **retval TSRMLS_DC)
+static zval *driver_embedded_read(mysqli_object *obj, zval *retval)
 {
-	MAKE_STD_ZVAL(*retval);
 #ifdef HAVE_EMBEDDED_MYSQLI
-	ZVAL_BOOL(*retval, 1);
+	ZVAL_TRUE(retval);
 #else
-	ZVAL_BOOL(*retval, 0);
+	ZVAL_FALSE(retval);
 #endif
-	return SUCCESS;
+	return retval;
 }
 /* }}} */
 
 /* {{{ property driver_client_version_read */
-static int driver_client_version_read(mysqli_object *obj, zval **retval TSRMLS_DC)
+static zval *driver_client_version_read(mysqli_object *obj, zval *retval)
 {
-	MAKE_STD_ZVAL(*retval);
-	ZVAL_LONG(*retval, MYSQL_VERSION_ID);
-	return SUCCESS;
+	ZVAL_LONG(retval, MYSQL_VERSION_ID);
+	return retval;
 }
 /* }}} */
 
 /* {{{ property driver_client_info_read */
-static int driver_client_info_read(mysqli_object *obj, zval **retval TSRMLS_DC)
+static zval *driver_client_info_read(mysqli_object *obj, zval *retval)
 {
-	MAKE_STD_ZVAL(*retval);
-	ZVAL_STRING(*retval, (char *)mysql_get_client_info(), 1);
-	return SUCCESS;
+	ZVAL_STRING(retval, (char *)mysql_get_client_info());
+	return retval;
 }
 /* }}} */
 
 /* {{{ property driver_driver_version_read */
-static int driver_driver_version_read(mysqli_object *obj, zval **retval TSRMLS_DC)
+static zval *driver_driver_version_read(mysqli_object *obj, zval *retval)
 {
-	MAKE_STD_ZVAL(*retval);
-	ZVAL_LONG(*retval, MYSQLI_VERSION_ID);
-	return SUCCESS;
+	ZVAL_LONG(retval, MYSQLI_VERSION_ID);
+	return retval;
 }
 /* }}} */
 
@@ -136,7 +129,7 @@ ZEND_FUNCTION(mysqli_driver_construct)
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = 1;
 	mysqli_resource->status = (ZEND_NUM_ARGS() == 1) ? MYSQLI_STATUS_INITIALIZED : MYSQLI_STATUS_VALID;
-	((mysqli_object *) zend_object_store_get_object(getThis() TSRMLS_CC))->ptr = mysqli_resource;
+	(Z_MYSQLI_P(getThis()))->ptr = mysqli_resource;
 #endif
 }
 
@@ -149,19 +142,6 @@ const mysqli_property_entry mysqli_driver_property_entries[] = {
 	{"report_mode", sizeof("report_mode") - 1, driver_report_read, driver_report_write},
 	{NULL, 0, NULL, NULL}
 };
-
-/* {{{ mysqli_warning_property_info_entries */
-const zend_property_info mysqli_driver_property_info_entries[] = {
-	{ZEND_ACC_PUBLIC, "client_info",	sizeof("client_info") - 1,		-1, 0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "client_version",	sizeof("client_version") - 1,	-1, 0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "driver_version",	sizeof("driver_version") - 1,	-1, 0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "embedded",		sizeof("embedded") - 1,			-1, 0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "reconnect",		sizeof("reconnect") - 1,		-1, 0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "report_mode",	sizeof("report_mode") - 1,		-1, 0, NULL, 0, NULL},
-	{0,					NULL, 			0,								-1, 0, NULL, 0, NULL},
-};
-/* }}} */
-
 
 /* {{{ mysqli_driver_methods[]
  */

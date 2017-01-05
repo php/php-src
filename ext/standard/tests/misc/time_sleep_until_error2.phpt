@@ -10,5 +10,5 @@ Filippo De Santis fd@ideato.it
   var_dump(time_sleep_until('goofy'));
 ?>
 --EXPECTF--
-Warning: time_sleep_until() expects parameter 1 to be double, string given in %s on line 2
+Warning: time_sleep_until() expects parameter 1 to be float, string given in %s on line 2
 NULL

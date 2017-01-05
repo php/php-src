@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Shane Caraveo             <shane@caraveo.com>               | 
+   | Authors: Shane Caraveo             <shane@caraveo.com>               |
    |          Colin Viebrock            <colin@easydns.com>               |
    |          Hartmut Holzgraefe        <hholzgra@php.net>                |
    +----------------------------------------------------------------------+
@@ -24,14 +24,14 @@
 #include "sdncal.h"
 #include <time.h>
 
-static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, int gm)
+static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, zend_long gm)
 {
 
 	/* based on code by Simon Kershaw, <webmaster@ely.anglican.org> */
 
 	struct tm te;
-	long year, golden, solar, lunar, pfm, dom, tmp, easter;
-	long method = CAL_EASTER_DEFAULT;
+	zend_long year, golden, solar, lunar, pfm, dom, tmp, easter, result;
+	zend_long method = CAL_EASTER_DEFAULT;
 
 	/* Default to the current year if year parameter is not given */
 	{
@@ -46,13 +46,13 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, int gm)
 		}
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(),
 		"|ll", &year, &method) == FAILURE) {
 			return;
 	}
- 
+
 	if (gm && (year<1970 || year>2037)) {				/* out of range for timestamps */
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This function is only valid for years between 1970 and 2037 inclusive");
+		php_error_docref(NULL, E_WARNING, "This function is only valid for years between 1970 and 2037 inclusive");
 		RETURN_FALSE;
 	}
 
@@ -61,7 +61,7 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	if ((year <= 1582 && method != CAL_EASTER_ALWAYS_GREGORIAN) ||
 	    (year >= 1583 && year <= 1752 && method != CAL_EASTER_ROMAN && method != CAL_EASTER_ALWAYS_GREGORIAN) ||
 	     method == CAL_EASTER_ALWAYS_JULIAN) {		/* JULIAN CALENDAR */
-	     
+
 		dom = (year + (year/4) + 5) % 7;			/* the "Dominical number" - finding a Sunday */
 		if (dom < 0) {
 			dom += 7;
@@ -111,14 +111,11 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, int gm)
 			te.tm_mon = 3;			/* April */
 			te.tm_mday = easter-10;
 		}
-
-	        Z_LVAL_P(return_value) = mktime(&te);
-	} else {							/* return the days after March 21 */	
-	        Z_LVAL_P(return_value) = easter;
+	    result = mktime(&te);
+	} else {							/* return the days after March 21 */
+	    result = easter;
 	}
-
-        Z_TYPE_P(return_value) = IS_LONG;
-
+    ZVAL_LONG(return_value, result);
 }
 
 /* {{{ proto int easter_date([int year])

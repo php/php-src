@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,8 +23,8 @@
 
 #include "TSRM.h"
 
-void phpdbg_restore_frame(TSRMLS_D);
-void phpdbg_switch_frame(int TSRMLS_DC);
-void phpdbg_dump_backtrace(size_t TSRMLS_DC);
+void phpdbg_restore_frame(void);
+void phpdbg_switch_frame(int);
+void phpdbg_dump_backtrace(size_t);
 
 #endif /* PHPDBG_FRAME_H */

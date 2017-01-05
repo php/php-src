@@ -13,10 +13,10 @@ trait T {
     }
 }
 
-class Bar extends Foo
+class B extends Foo
 {
     use T;
 }
 ?>
 --EXPECTF--
-Strict Standards: Declaration of T::bar() should be compatible with Foo::bar($a = 'Foo') in %sbug70957.php on line %d
+Warning: Declaration of T::bar() should be compatible with Foo::bar($a = 'Foo') in %sbug70957.php on line %d

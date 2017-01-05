@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -47,11 +47,14 @@ extern zend_module_entry bz2_module_entry;
 #	define PHP_BZ2_API
 #endif
 
-PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
-PHP_BZ2_API php_stream *_php_stream_bz2open_from_BZFILE(BZFILE *bz, const char *mode, php_stream *innerstream STREAMS_DC TSRMLS_DC);
+#include "php_version.h"
+#define PHP_BZ2_VERSION PHP_VERSION
 
-#define php_stream_bz2open_from_BZFILE(bz, mode, innerstream)	_php_stream_bz2open_from_BZFILE((bz), (mode), (innerstream) STREAMS_CC TSRMLS_CC)
-#define php_stream_bz2open(wrapper, path, mode, options, opened_path)	_php_stream_bz2open((wrapper), (path), (mode), (options), (opened_path), NULL STREAMS_CC TSRMLS_CC)
+PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC);
+PHP_BZ2_API php_stream *_php_stream_bz2open_from_BZFILE(BZFILE *bz, const char *mode, php_stream *innerstream STREAMS_DC);
+
+#define php_stream_bz2open_from_BZFILE(bz, mode, innerstream)	_php_stream_bz2open_from_BZFILE((bz), (mode), (innerstream) STREAMS_CC)
+#define php_stream_bz2open(wrapper, path, mode, options, opened_path)	_php_stream_bz2open((wrapper), (path), (mode), (options), (opened_path), NULL STREAMS_CC)
 
 extern php_stream_filter_factory php_bz2_filter_factory;
 extern php_stream_ops php_stream_bz2io_ops;

@@ -50,7 +50,6 @@ package.xml added to support installation using pear installer
    <file role="src" name="php_sockets_win.c"/>
    <file role="src" name="php_sockets_win.h"/>
    <file role="src" name="sockets.c"/>
-   <file role="src" name="sockets.dsp"/>
    <file role="src" name="unix_socket_constants.h"/>
    <file role="src" name="win32_socket_constants.h"/>
    <file role="test" name="tests/ipv4loop.phpt"/>

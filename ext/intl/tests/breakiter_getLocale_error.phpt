@@ -22,7 +22,7 @@ Warning: IntlBreakIterator::getLocale() expects exactly 1 parameter, 2 given in 
 Warning: IntlBreakIterator::getLocale(): breakiter_get_locale: bad arguments in %s on line %d
 bool(false)
 
-Warning: IntlBreakIterator::getLocale() expects parameter 1 to be long, array given in %s on line %d
+Warning: IntlBreakIterator::getLocale() expects parameter 1 to be integer, array given in %s on line %d
 
 Warning: IntlBreakIterator::getLocale(): breakiter_get_locale: bad arguments in %s on line %d
 bool(false)

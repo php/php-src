@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,6 +26,10 @@
 #ifdef HAVE_XML
 extern zend_module_entry xml_module_entry;
 #define xml_module_ptr &xml_module_entry
+
+#include "php_version.h"
+#define PHP_XML_VERSION PHP_VERSION
+
 #else
 #define xml_module_ptr NULL
 #endif
@@ -33,7 +37,6 @@ extern zend_module_entry xml_module_entry;
 #ifdef HAVE_XML 
 
 #include "ext/xml/expat_compat.h"
-
 
 #ifdef XML_UNICODE
 #error "UTF-16 Unicode support not implemented!"
@@ -44,22 +47,22 @@ ZEND_BEGIN_MODULE_GLOBALS(xml)
 ZEND_END_MODULE_GLOBALS(xml)
 
 typedef struct {
-	int index;
 	int case_folding;
 	XML_Parser parser;
 	XML_Char *target_encoding;
 
-	zval *startElementHandler;
-	zval *endElementHandler;
-	zval *characterDataHandler;
-	zval *processingInstructionHandler;
-	zval *defaultHandler;
-	zval *unparsedEntityDeclHandler;
-	zval *notationDeclHandler;
-	zval *externalEntityRefHandler;
-	zval *unknownEncodingHandler;	
-	zval *startNamespaceDeclHandler;
-	zval *endNamespaceDeclHandler;
+	zval index;
+	zval startElementHandler;
+	zval endElementHandler;
+	zval characterDataHandler;
+	zval processingInstructionHandler;
+	zval defaultHandler;
+	zval unparsedEntityDeclHandler;
+	zval notationDeclHandler;
+	zval externalEntityRefHandler;
+	zval unknownEncodingHandler;	
+	zval startNamespaceDeclHandler;
+	zval endNamespaceDeclHandler;
 
 	zend_function *startElementPtr;
 	zend_function *endElementPtr;
@@ -73,14 +76,14 @@ typedef struct {
 	zend_function *startNamespaceDeclPtr;
 	zend_function *endNamespaceDeclPtr;
 
-	zval *object;
+	zval object;
 
-	zval *data;
-	zval *info;
+	zval data;
+	zval info;
 	int level;
 	int toffset;
 	int curtag;
-	zval **ctag;
+	zval *ctag;
 	char **ltags;
 	int lastwasopen;
 	int skipwhite;
@@ -133,18 +136,18 @@ PHP_FUNCTION(utf8_encode);
 PHP_FUNCTION(utf8_decode);
 PHP_FUNCTION(xml_parse_into_struct);
 
-PHPAPI char *_xml_zval_strdup(zval *val);
-PHPAPI char *xml_utf8_decode(const XML_Char *, int, int *, const XML_Char *);
-PHPAPI char *xml_utf8_encode(const char *s, int len, int *newlen, const XML_Char *encoding);
+PHP_XML_API char *_xml_zval_strdup(zval *);
+PHP_XML_API zend_string *xml_utf8_decode(const XML_Char *, size_t, const XML_Char *);
+PHP_XML_API zend_string *xml_utf8_encode(const char *, size_t, const XML_Char *);
 
 #endif /* HAVE_LIBEXPAT */
 
 #define phpext_xml_ptr xml_module_ptr
 
-#ifdef ZTS
-#define XML(v) TSRMG(xml_globals_id, zend_xml_globals *, v)
-#else
-#define XML(v) (xml_globals.v)
+#define XML(v) ZEND_MODULE_GLOBALS_ACCESSOR(xml, v)
+
+#if defined(ZTS) && defined(COMPILE_DL_XML)
+ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
 #endif /* PHP_XML_H */

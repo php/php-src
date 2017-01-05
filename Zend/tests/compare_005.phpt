@@ -118,13 +118,13 @@ float(2.5) >= NULL
 float(2.5) >= bool(true)
 float(2.5) >= bool(false)
 float(2.5)
-Notice: Object of class stdClass could not be converted to double in %s on line %d
+Notice: Object of class stdClass could not be converted to float in %s on line %d
  >= object(stdClass)#1 (0) {}
 float(2.5)
-Notice: Object of class stdClass could not be converted to double in %s on line %d
+Notice: Object of class stdClass could not be converted to float in %s on line %d
  >= object(stdClass)#2 (0) {}
 float(2.5)
-Notice: Object of class test could not be converted to double in %s on line %d
+Notice: Object of class test could not be converted to float in %s on line %d
  >= object(test)#3 (0) {}
 float(2.5) < array(0) {}
 float(2.5) >= int(-2147483648)
@@ -260,7 +260,7 @@ object(stdClass)#1 (0) {}
 Notice: Object of class stdClass could not be converted to int in %s on line %d
  >= int(1)
 object(stdClass)#1 (0) {}
-Notice: Object of class stdClass could not be converted to double in %s on line %d
+Notice: Object of class stdClass could not be converted to float in %s on line %d
  < float(2.5)
 object(stdClass)#1 (0) {}
 Notice: Object of class stdClass could not be converted to int in %s on line %d
@@ -285,7 +285,7 @@ object(stdClass)#2 (0) {}
 Notice: Object of class stdClass could not be converted to int in %s on line %d
  >= int(1)
 object(stdClass)#2 (0) {}
-Notice: Object of class stdClass could not be converted to double in %s on line %d
+Notice: Object of class stdClass could not be converted to float in %s on line %d
  < float(2.5)
 object(stdClass)#2 (0) {}
 Notice: Object of class stdClass could not be converted to int in %s on line %d
@@ -310,7 +310,7 @@ object(test)#3 (0) {}
 Notice: Object of class test could not be converted to int in %s on line %d
  >= int(1)
 object(test)#3 (0) {}
-Notice: Object of class test could not be converted to double in %s on line %d
+Notice: Object of class test could not be converted to float in %s on line %d
  < float(2.5)
 object(test)#3 (0) {}
 Notice: Object of class test could not be converted to int in %s on line %d

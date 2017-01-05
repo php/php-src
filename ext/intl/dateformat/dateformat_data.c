@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,20 +22,20 @@
 /* {{{ void dateformat_data_init( dateformat_data* datef_data )
  * Initialize internals of dateformat_data.
  */
-void dateformat_data_init( dateformat_data* datef_data TSRMLS_DC )
+void dateformat_data_init( dateformat_data* datef_data )
 {
 	if( !datef_data )
 		return;
 
 	datef_data->udatf = NULL;
-	intl_error_reset( &datef_data->error TSRMLS_CC );
+	intl_error_reset( &datef_data->error );
 }
 /* }}} */
 
 /* {{{ void dateformat_data_free( dateformat_data* datef_data )
  * Clean up memory allocated for dateformat_data
  */
-void dateformat_data_free( dateformat_data* datef_data TSRMLS_DC )
+void dateformat_data_free( dateformat_data* datef_data )
 {
 	if( !datef_data )
 		return;
@@ -44,18 +44,18 @@ void dateformat_data_free( dateformat_data* datef_data TSRMLS_DC )
 		udat_close( datef_data->udatf );
 
 	datef_data->udatf = NULL;
-	intl_error_reset( &datef_data->error TSRMLS_CC );
+	intl_error_reset( &datef_data->error );
 }
 /* }}} */
 
 /* {{{ dateformat_data* dateformat_data_create()
  * Allocate memory for dateformat_data and initialize it with default values.
  */
-dateformat_data* dateformat_data_create( TSRMLS_D )
+dateformat_data* dateformat_data_create( void )
 {
 	dateformat_data* datef_data = ecalloc( 1, sizeof(dateformat_data) );
 
-	dateformat_data_init( datef_data TSRMLS_CC );
+	dateformat_data_init( datef_data );
 
 	return datef_data;
 }

@@ -34,14 +34,14 @@ int fpm_log_open(int reopen) /* {{{ */
 {
 	struct fpm_worker_pool_s *wp;
 	int ret = 1;
-	
+
 	int fd;
 	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
 		if (!wp->config->access_log) {
 			continue;
 		}
 		ret = 0;
-		
+
 		fd = open(wp->config->access_log, O_WRONLY | O_APPEND | O_CREAT, S_IRUSR | S_IWUSR);
 		if (0 > fd) {
 			zlog(ZLOG_SYSERROR, "failed to open access log (%s)", wp->config->access_log);
@@ -97,7 +97,7 @@ int fpm_log_init_child(struct fpm_worker_pool_s *wp)  /* {{{ */
 }
 /* }}} */
 
-int fpm_log_write(char *log_format TSRMLS_DC) /* {{{ */
+int fpm_log_write(char *log_format) /* {{{ */
 {
 	char *s, *b;
 	char buffer[FPM_LOG_BUFFER+1];
@@ -410,7 +410,7 @@ int fpm_log_write(char *log_format TSRMLS_DC) /* {{{ */
 					{
 						char *start;
 						size_t l;
-						
+
 						start = ++s;
 
 						while (*s != '\0') {
@@ -467,7 +467,7 @@ int fpm_log_write(char *log_format TSRMLS_DC) /* {{{ */
 
 	if (!test && strlen(buffer) > 0) {
 		buffer[len] = '\n';
-		write(fpm_log_fd, buffer, len + 1);
+		zend_quiet_write(fpm_log_fd, buffer, len + 1);
 	}
 
 	return 0;

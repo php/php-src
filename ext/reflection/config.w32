@@ -1,6 +1,6 @@
 // $Id$
 // vim:ft=javascript
 
-EXTENSION("reflection", "php_reflection.c", false /* never shared */);
+EXTENSION("reflection", "php_reflection.c", false /* never shared */, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 AC_DEFINE('HAVE_REFLECTION', 1, 'Reflection support enabled');
 PHP_REFLECTION="yes";

@@ -265,23 +265,13 @@ static int fpm_socket_af_inet_listening_socket(struct fpm_worker_pool_s *wp) /* 
 	} else if (strlen(dup_address) == strspn(dup_address, "0123456789")) { /* this is port */
 		port = atoi(dup_address);
 		port_str = dup_address;
+		/* IPv6 catch-all + IPv4-mapped */
+		addr = "::";
 	}
 
 	if (port == 0) {
 		zlog(ZLOG_ERROR, "invalid port value '%s'", port_str);
 		return -1;
-	}
-
-	if (!addr) {
-		/* no address: default documented behavior, all IPv4 addresses */
-		struct sockaddr_in sa_in;
-
-		memset(&sa_in, 0, sizeof(sa_in));
-		sa_in.sin_family = AF_INET;
-		sa_in.sin_port = htons(port);
-		sa_in.sin_addr.s_addr = htonl(INADDR_ANY);
-		free(dup_address);
-		return fpm_sockets_get_listening_socket(wp, (struct sockaddr *) &sa_in, sizeof(struct sockaddr_in));
 	}
 
 	/* strip brackets from address for getaddrinfo */
@@ -305,10 +295,10 @@ static int fpm_socket_af_inet_listening_socket(struct fpm_worker_pool_s *wp) /* 
 		inet_ntop(p->ai_family, fpm_get_in_addr(p->ai_addr), tmpbuf, INET6_ADDRSTRLEN);
 		if (sock < 0) {
 			if ((sock = fpm_sockets_get_listening_socket(wp, p->ai_addr, p->ai_addrlen)) != -1) {
-				zlog(ZLOG_DEBUG, "Found address for %s, socket opened on %s", dup_address, tmpbuf);
+				zlog(ZLOG_DEBUG, "Found address for %s, socket opened on %s", addr, tmpbuf);
 			}
 		} else {
-			zlog(ZLOG_WARNING, "Found multiple addresses for %s, %s ignored", dup_address, tmpbuf);
+			zlog(ZLOG_WARNING, "Found multiple addresses for %s, %s ignored", addr, tmpbuf);
 		}
 	}
 
@@ -430,7 +420,7 @@ int fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq)
 		zlog(ZLOG_SYSERROR, "failed to retrieve TCP_INFO for socket");
 		return -1;
 	}
-#if defined(__FreeBSD__)
+#if defined(__FreeBSD__) || defined(__NetBSD__)
 	if (info.__tcpi_sacked == 0) {
 		return -1;
 	}

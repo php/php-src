@@ -3,6 +3,7 @@ mb_split()
 --SKIPIF--
 <?php
 extension_loaded('mbstring') or die('skip mbstring not available');
+extension_loaded('pcre') or die('skip pcre not available');
 function_exists('mb_split') or die("skip mb_split() is not available in this build");
 ?>
 --INI--
@@ -15,7 +16,7 @@ mbstring.func_overload=0
 	function verify_split( $spliton, $str, $count = 0 )
 	{
 		$result1 = mb_split( $spliton, $str, $count );
-		$result2 = split( $spliton, $str, $count );
+		$result2 = preg_split( "/$spliton/", $str, $count );
 		if ( $result1 == $result2 ) {
 			print "ok\n";
 		} else {
@@ -26,7 +27,7 @@ mbstring.func_overload=0
 	var_dump( mb_split( b" ", b"a b c d e f g" )
 	          == mb_split( b"[[:space:]]", b"a\nb\tc\nd e f g" ) );
 
-	for ( $i = 0; $i < 5; ++$i ) {
+	for ( $i = 1; $i < 5; ++$i ) {
 		verify_split( b" ", b"a\tb\tc\td   e\tf g", $i );
 	}
 
@@ -37,31 +38,12 @@ mbstring.func_overload=0
 
 --EXPECTF--
 bool(true)
-
-Deprecated: Function split() is deprecated in %s on line %d
 ok
-
-Deprecated: Function split() is deprecated in %s on line %d
 ok
-
-Deprecated: Function split() is deprecated in %s on line %d
 ok
-
-Deprecated: Function split() is deprecated in %s on line %d
 ok
-
-Deprecated: Function split() is deprecated in %s on line %d
 ok
-
-Deprecated: Function split() is deprecated in %s on line %d
-ok
-
-Deprecated: Function split() is deprecated in %s on line %d
 2-2
-
-Deprecated: Function split() is deprecated in %s on line %d
 3-3
-
-Deprecated: Function split() is deprecated in %s on line %d
 4-4
 

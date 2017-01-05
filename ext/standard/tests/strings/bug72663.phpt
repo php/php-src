@@ -23,4 +23,6 @@ DONE
 Notice: unserialize(): Unexpected end of serialized data in %sbug72663.php on line %d
 
 Notice: unserialize(): Error at offset 46 of 47 bytes in %sbug72663.php on line %d
+
+Notice: unserialize(): Error at offset 79 of 80 bytes in %sbug72663.php on line %d
 DONE

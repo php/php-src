@@ -1,8 +1,8 @@
 --TEST--
-Error message handling (without ZendOptimizer)
+Error message handling (with ZendOpcache)
 --SKIPIF--
 <?php
-if (extension_loaded("Zend Optimizer")) die("skip Zend Optimizer is loaded");
+if (!extension_loaded("Zend Opcache")) die("skip Zend Opcache is not loaded");
 ?>
 --FILE--
 <?php
@@ -19,7 +19,8 @@ var_dump(ini_get('track_errors'));
 ini_set('display_errors', 0);
 var_dump(ini_get('display_errors'));
 var_dump($php_errormsg);
-$error = 1 / 0;
+$zero = 0;
+$error = 1 / $zero;
 var_dump($php_errormsg);
 ?>
 --EXPECTF--

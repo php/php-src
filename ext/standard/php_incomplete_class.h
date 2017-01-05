@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,26 +28,21 @@
 
 #define PHP_SET_CLASS_ATTRIBUTES(struc) \
 	/* OBJECTS_FIXME: Fix for new object model */	\
-	if (Z_OBJ_HT_P(struc)->get_class_entry && \
-            Z_OBJCE_P(struc) == BG(incomplete_class)) {	\
-		class_name = php_lookup_class_name(struc, &name_len); \
+	if (Z_OBJCE_P(struc) == BG(incomplete_class)) {	\
+		class_name = php_lookup_class_name(struc); \
 		if (!class_name) { \
-			name_len = sizeof(INCOMPLETE_CLASS) - 1; \
-			class_name = estrndup(INCOMPLETE_CLASS, name_len); \
+			class_name = zend_string_init(INCOMPLETE_CLASS, sizeof(INCOMPLETE_CLASS) - 1, 0); \
 		} \
-		free_class_name = 1; \
 		incomplete_class = 1; \
 	} else { \
-		free_class_name = !zend_get_object_classname(struc, (const char **)&class_name, &name_len TSRMLS_CC);\
+		class_name = zend_string_copy(Z_OBJCE_P(struc)->name); \
 	}
 
 #define PHP_CLEANUP_CLASS_ATTRIBUTES()	\
-	if (free_class_name) efree(class_name)
+	zend_string_release(class_name)
 
 #define PHP_CLASS_ATTRIBUTES											\
-	char *class_name;													\
-	zend_uint name_len;													\
-	zend_bool free_class_name = 0;										\
+	zend_string *class_name;											\
 	zend_bool incomplete_class = 0
 
 #define INCOMPLETE_CLASS "__PHP_Incomplete_Class"
@@ -57,9 +52,9 @@
 extern "C" {
 #endif
 
-PHPAPI zend_class_entry *php_create_incomplete_class(TSRMLS_D);
-PHPAPI char *php_lookup_class_name(zval *object, zend_uint *nlen);
-PHPAPI void  php_store_class_name(zval *object, const char *name, zend_uint len);
+PHPAPI zend_class_entry *php_create_incomplete_class(void);
+PHPAPI zend_string *php_lookup_class_name(zval *object);
+PHPAPI void  php_store_class_name(zval *object, const char *name, size_t len);
 
 #ifdef __cplusplus
 };

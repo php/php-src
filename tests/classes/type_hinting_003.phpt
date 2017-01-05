@@ -57,4 +57,8 @@ array(1) {
   int(25)
 }
 
-Catchable fatal error: Argument 1 passed to Test::f1() must be of the type array, integer given, called in %s on line %d and defined in %s on line %d
+Fatal error: Uncaught TypeError: Argument 1 passed to Test::f1() must be of the type array, integer given, called in %s on line %d and defined in %s:%d
+Stack trace:
+#0 %s(%d): Test::f1(1)
+#1 {main}
+  thrown in %s on line %d

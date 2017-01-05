@@ -32,16 +32,16 @@ function check(&$obj) {
 
 echo "\n\n--- a refs b:\n";
 $obj = new stdClass;
-$obj->a = &$obj->b;
 $obj->b = 1;
+$obj->a = &$obj->b;
 $obj->c = 1;
 check($obj);
 
 echo "\n\n--- a refs c:\n";
 $obj = new stdClass;
+$obj->c = 1;
 $obj->a = &$obj->c;
 $obj->b = 1;
-$obj->c = 1;
 check($obj);
 
 echo "\n\n--- b refs a:\n";
@@ -54,8 +54,8 @@ check($obj);
 echo "\n\n--- b refs c:\n";
 $obj = new stdClass;
 $obj->a = 1;
-$obj->b = &$obj->c;
 $obj->c = 1;
+$obj->b = &$obj->c;
 check($obj);
 
 echo "\n\n--- c refs a:\n";
@@ -74,15 +74,15 @@ check($obj);
 
 echo "\n\n--- a,b refs c:\n";
 $obj = new stdClass;
+$obj->c = 1;
 $obj->a = &$obj->c;
 $obj->b = &$obj->c;
-$obj->c = 1;
 check($obj);
 
 echo "\n\n--- a,c refs b:\n";
 $obj = new stdClass;
-$obj->a = &$obj->b;
 $obj->b = 1;
+$obj->a = &$obj->b;
 $obj->c = &$obj->b;
 check($obj);
 

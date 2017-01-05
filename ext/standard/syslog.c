@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -135,10 +135,10 @@ PHP_MSHUTDOWN_FUNCTION(syslog)
 PHP_FUNCTION(openlog)
 {
 	char *ident;
-	long option, facility;
-	int ident_len;
+	zend_long option, facility;
+	size_t ident_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sll", &ident,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sll", &ident,
 							  &ident_len, &option, &facility) == FAILURE) {
 		return;
 	}
@@ -175,11 +175,11 @@ PHP_FUNCTION(closelog)
    Generate a system log message */
 PHP_FUNCTION(syslog)
 {
-	long priority;
+	zend_long priority;
 	char *message;
-	int message_len;
+	size_t message_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &priority,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls", &priority,
 							  &message, &message_len) == FAILURE) {
 		return;
 	}

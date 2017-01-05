@@ -1,5 +1,5 @@
 --TEST--
-Test session_start() function : variation
+Test session_commit() function : variation
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--

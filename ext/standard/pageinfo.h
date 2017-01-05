@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,9 +27,9 @@ PHP_FUNCTION(getmypid);
 PHP_FUNCTION(getmyinode);
 PHP_FUNCTION(getlastmod);
 
-PHPAPI void php_statpage(TSRMLS_D);
-PHPAPI long php_getlastmod(TSRMLS_D);
-extern long php_getuid(TSRMLS_D);
-extern long php_getgid(TSRMLS_D);
+PHPAPI void php_statpage(void);
+PHPAPI time_t php_getlastmod(void);
+extern zend_long php_getuid(void);
+extern zend_long php_getgid(void);
 
 #endif

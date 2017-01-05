@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,7 +22,7 @@
 #include "php.h"
 #include <wincrypt.h>
 
-PHPAPI char *php_win32_error_to_msg(int error)
+PHPAPI char *php_win32_error_to_msg(HRESULT error)
 {
 	char *buf = NULL;
 
@@ -79,10 +79,7 @@ void php_win32_free_rng_lock()
 
 PHPAPI int php_win32_get_random_bytes(unsigned char *buf, size_t size) {  /* {{{ */
 
-	unsigned int has_contextg = 0;
-
 	BOOL ret;
-	size_t i = 0;
 
 #ifdef ZTS
 	tsrm_mutex_lock(php_lock_win32_cryptoctx);
@@ -91,8 +88,8 @@ PHPAPI int php_win32_get_random_bytes(unsigned char *buf, size_t size) {  /* {{{
 	if (has_crypto_ctx == 0) {
 		/* CRYPT_VERIFYCONTEXT > only hashing&co-like use, no need to acces prv keys */
 		if (!CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_MACHINE_KEYSET|CRYPT_VERIFYCONTEXT )) {
-			/* Could mean that the key container does not exist, let try 
-			   again by asking for a new one. If it fails here, it surely means that the user running 
+			/* Could mean that the key container does not exist, let try
+			   again by asking for a new one. If it fails here, it surely means that the user running
                this process does not have the permission(s) to use this container.
              */
 			if (GetLastError() == NTE_BAD_KEYSET) {
@@ -115,7 +112,8 @@ PHPAPI int php_win32_get_random_bytes(unsigned char *buf, size_t size) {  /* {{{
 		return FAILURE;
 	}
 
-	ret = CryptGenRandom(hCryptProv, size, buf);
+	/* XXX should go in the loop if size exceeds UINT_MAX */
+	ret = CryptGenRandom(hCryptProv, (DWORD)size, buf);
 
 	if (ret) {
 		return SUCCESS;
@@ -125,3 +123,11 @@ PHPAPI int php_win32_get_random_bytes(unsigned char *buf, size_t size) {  /* {{{
 }
 /* }}} */
 
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

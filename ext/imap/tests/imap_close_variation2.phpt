@@ -189,19 +189,19 @@ CL_EXPUNGE was not set, 3 msgs in mailbox
 
 -- Iteration 16 --
 
-Warning: imap_close() expects parameter 2 to be long, %unicode_string_optional% given in %s on line %d
+Warning: imap_close() expects parameter 2 to be integer, %unicode_string_optional% given in %s on line %d
 NULL
 CL_EXPUNGE was not set, 3 msgs in mailbox
 
 -- Iteration 17 --
 
-Warning: imap_close() expects parameter 2 to be long, %unicode_string_optional% given in %s on line %d
+Warning: imap_close() expects parameter 2 to be integer, %unicode_string_optional% given in %s on line %d
 NULL
 CL_EXPUNGE was not set, 3 msgs in mailbox
 
 -- Iteration 18 --
 
-Warning: imap_close() expects parameter 2 to be long, array given in %s on line %d
+Warning: imap_close() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 CL_EXPUNGE was not set, 3 msgs in mailbox
 

@@ -19,6 +19,6 @@ $b = new b();
 $b->test();
 
 --EXPECTF--
-Strict Standards: Declaration of b::test() should be compatible with a::test($arg = c::TESTCONSTANT) in %s%ebug67436%eb.php on line %d
+Warning: Declaration of b::test() should be compatible with a::test($arg = c::TESTCONSTANT) in %s%ebug67436%eb.php on line %d
 b::test()
 a::test(c::TESTCONSTANT)

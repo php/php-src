@@ -19,6 +19,6 @@ Done
 entry_open:  bool(true)
 entry_close: bool(true)
 entry_close: 
-Warning: zip_entry_close(): %d is not a valid Zip Entry resource in %s
+Warning: zip_entry_close(): supplied resource is not a valid Zip Entry resource in %s
 bool(false)
 Done

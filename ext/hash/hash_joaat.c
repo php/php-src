@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -75,7 +75,7 @@ joaat_buf(void *buf, size_t len, php_hash_uint32 hval)
 {
     size_t i;
     unsigned char *input = (unsigned char *)buf;
- 
+
     for (i = 0; i < len; i++) {
         hval += input[i];
         hval += (hval << 10);

@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,6 +19,25 @@
 #ifndef PHP_STDINT_H
 #define PHP_STDINT_H
 
+/* C99 requires these for C++ to get the definitions
+ * of INT64_MAX and other macros used by Zend/zend_long.h
+ * C11 drops this requirement, so these effectively
+ * just backport that piece of behavior.
+ *
+ * These defines are placed here instead of
+ * with the include below, because sys/types
+ * and inttypes may include stdint themselves.
+ * And these definitions MUST come first.
+ */
+#ifdef __cplusplus
+# ifndef __STDC_LIMIT_MACROS
+#  define __STDC_LIMIT_MACROS
+# endif
+# ifndef __STDC_CONSTANT_MACROS
+#  define __STDC_CONSTANT_MACROS
+# endif
+#endif
+
 #if defined(_MSC_VER)
 /* Make sure the regular stdint.h wasn't included already and prevent it to be
    included afterwards. Though if some other library needs some stuff from
@@ -28,6 +47,7 @@
 # if !defined(_STDINT)
 #  define _STDINT
 #  include "win32/php_stdint.h"
+#  include "win32/php_inttypes.h"
 # endif
 # define HAVE_INT8_T   1
 # define HAVE_UINT8_T  1

@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -314,15 +314,12 @@ int pdo_sqlstate_init_error_table(void)
 	int i;
 	const struct pdo_sqlstate_info *info;
 
-	if (FAILURE == zend_hash_init(&err_hash,
-			sizeof(err_initializer)/sizeof(err_initializer[0]), NULL, NULL, 1)) {
-		return FAILURE;
-	}
+	zend_hash_init(&err_hash, sizeof(err_initializer)/sizeof(err_initializer[0]), NULL, NULL, 1);
 
 	for (i = 0; i < sizeof(err_initializer)/sizeof(err_initializer[0]); i++) {
 		info = &err_initializer[i];
 
-		zend_hash_add(&err_hash, info->state, sizeof(info->state), &info, sizeof(info), NULL);
+		zend_hash_str_add_ptr(&err_hash, info->state, sizeof(info->state), (void *)info);
 	}
 
 	return SUCCESS;
@@ -330,10 +327,9 @@ int pdo_sqlstate_init_error_table(void)
 
 const char *pdo_sqlstate_state_to_description(char *state)
 {
-	const struct pdo_sqlstate_info **info;
-	if (SUCCESS == zend_hash_find(&err_hash, state, sizeof(err_initializer[0].state),
-			(void**)&info)) {
-		return (*info)->desc;
+	const struct pdo_sqlstate_info *info;
+	if ((info = zend_hash_str_find_ptr(&err_hash, state, sizeof(err_initializer[0].state))) != NULL) {
+		return info->desc;
 	}
 	return NULL;
 }

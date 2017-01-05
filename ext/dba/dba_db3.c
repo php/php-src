@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -35,11 +35,14 @@
 #include <db.h>
 #endif
 
-static void php_dba_db3_errcall_fcn(const char *errpfx, char *msg)
+static void php_dba_db3_errcall_fcn(
+#if (DB_VERSION_MAJOR > 4 || (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR >= 3))
+	const DB_ENV *dbenv,
+#endif
+	const char *errpfx, const char *msg)
 {
-	TSRMLS_FETCH();
-	
-	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%s%s", errpfx?errpfx:"", msg);
+
+	php_error_docref(NULL, E_NOTICE, "%s%s", errpfx?errpfx:"", msg);
 }
 
 #define DB3_DATA dba_db3_data *dba = info->dbf
@@ -69,11 +72,11 @@ DBA_OPEN_FUNC(db3)
 	type = info->mode == DBA_READER ? DB_UNKNOWN :
 		info->mode == DBA_TRUNC ? DB_BTREE :
 		s ? DB_BTREE : DB_UNKNOWN;
-	  
+
 	gmode = info->mode == DBA_READER ? DB_RDONLY :
-		(info->mode == DBA_CREAT && s) ? DB_CREATE : 
+		(info->mode == DBA_CREAT && s) ? DB_CREATE :
 		(info->mode == DBA_CREAT && !s) ? 0 :
-		info->mode == DBA_WRITER ? 0         : 
+		info->mode == DBA_WRITER ? 0         :
 		info->mode == DBA_TRUNC ? DB_CREATE | DB_TRUNCATE : -1;
 
 	if (gmode == -1) {
@@ -81,8 +84,8 @@ DBA_OPEN_FUNC(db3)
 	}
 
 	if (info->argc > 0) {
-		convert_to_long_ex(info->argv[0]);
-		filemode = Z_LVAL_PP(info->argv[0]);
+		convert_to_long_ex(&info->argv[0]);
+		filemode = Z_LVAL(info->argv[0]);
 	}
 
 #ifdef DB_FCNTL_LOCKING
@@ -91,14 +94,19 @@ DBA_OPEN_FUNC(db3)
 
 	if ((err=db_create(&dbp, NULL, 0)) == 0) {
 	    dbp->set_errcall(dbp, php_dba_db3_errcall_fcn);
-	    if ((err=dbp->open(dbp, info->path, NULL, type, gmode, filemode)) == 0) {
+		if(
+#if (DB_VERSION_MAJOR > 4 || (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR >= 1))
+			(err=dbp->open(dbp, 0, info->path, NULL, type, gmode, filemode)) == 0) {
+#else
+			(err=dbp->open(dbp, info->path, NULL, type, gmode, filemode)) == 0) {
+#endif
 			dba_db3_data *data;
 
 			data = pemalloc(sizeof(*data), info->flags&DBA_PERSISTENT);
 			data->dbp = dbp;
 			data->cursor = NULL;
 			info->dbf = data;
-		
+
 			return SUCCESS;
 		} else {
 			dbp->close(dbp, 0);
@@ -114,7 +122,7 @@ DBA_OPEN_FUNC(db3)
 DBA_CLOSE_FUNC(db3)
 {
 	DB3_DATA;
-	
+
 	if (dba->cursor) dba->cursor->c_close(dba->cursor);
 	dba->dbp->close(dba->dbp, 0);
 	pefree(dba, info->flags&DBA_PERSISTENT);
@@ -126,7 +134,7 @@ DBA_FETCH_FUNC(db3)
 	char *new = NULL;
 	DB3_DATA;
 	DB3_GKEY;
-	
+
 	memset(&gval, 0, sizeof(gval));
 	if (!dba->dbp->get(dba->dbp, NULL, &gkey, &gval, 0)) {
 		if (newlen) *newlen = gval.size;
@@ -140,12 +148,12 @@ DBA_UPDATE_FUNC(db3)
 	DBT gval;
 	DB3_DATA;
 	DB3_GKEY;
-	
+
 	memset(&gval, 0, sizeof(gval));
 	gval.data = (char *) val;
 	gval.size = vallen;
 
-	if (!dba->dbp->put(dba->dbp, NULL, &gkey, &gval, 
+	if (!dba->dbp->put(dba->dbp, NULL, &gkey, &gval,
 				mode == 1 ? DB_NOOVERWRITE : 0)) {
 		return SUCCESS;
 	}
@@ -157,7 +165,7 @@ DBA_EXISTS_FUNC(db3)
 	DBT gval;
 	DB3_DATA;
 	DB3_GKEY;
-	
+
 	memset(&gval, 0, sizeof(gval));
 	if (!dba->dbp->get(dba->dbp, NULL, &gkey, &gval, 0)) {
 		return SUCCESS;
@@ -187,7 +195,7 @@ DBA_FIRSTKEY_FUNC(db3)
 	}
 
 	/* we should introduce something like PARAM_PASSTHRU... */
-	return dba_nextkey_db3(info, newlen TSRMLS_CC);
+	return dba_nextkey_db3(info, newlen);
 }
 
 DBA_NEXTKEY_FUNC(db3)
@@ -195,7 +203,7 @@ DBA_NEXTKEY_FUNC(db3)
 	DB3_DATA;
 	DBT gkey, gval;
 	char *nkey = NULL;
-	
+
 	memset(&gkey, 0, sizeof(gkey));
 	memset(&gval, 0, sizeof(gval));
 

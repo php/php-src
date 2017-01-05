@@ -8,10 +8,11 @@ function a() {
 			unregister_tick_function('a');
 }
 
-declare (ticks=1);
-register_tick_function('a');
+declare (ticks=1) {
+    register_tick_function('a');
 
-echo "Done\n";
+    echo "Done\n";
+}
 ?>
 --EXPECTF--	
 hello

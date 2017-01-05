@@ -1,6 +1,6 @@
 /*
   zip_error_get_sys_type.c -- return type of system error code
-  Copyright (C) 1999-2007 Dieter Baron and Thomas Klausner
+  Copyright (C) 1999-2014 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -31,11 +31,9 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
-
+#define _ZIP_COMPILING_DEPRECATED
 #include "zipint.h"
 
-
 
 ZIP_EXTERN int
 zip_error_get_sys_type(int ze)

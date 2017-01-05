@@ -4,7 +4,7 @@ PROJECT_ROOT = ..\..
 
 # Module details
 MODULE_NAME = php_ossl
-MODULE_DESC = "PHP 5 - OpenSSL Extension"
+MODULE_DESC = "PHP 7 - OpenSSL Extension"
 VMAJ = 1
 VMIN = 0
 VREV = 0

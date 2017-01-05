@@ -38,7 +38,7 @@ $args_array = array(
   array(65, 66, 67),
   array(2e1, 2e-1, -2e1),
   array(-11, +22, 33),
-  array(012, -02394, +02389),
+  array(012, -023, +023),
   array(0x11, -0x22, +0x33),
   array(0x11, -0x22, +0x33),
   array(2e1, 2e-1, -2e1)

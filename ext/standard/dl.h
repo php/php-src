@@ -1,8 +1,8 @@
-/* 
+/*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,8 +23,8 @@
 #ifndef DL_H
 #define DL_H
 
-PHPAPI int php_load_extension(char *filename, int type, int start_now TSRMLS_DC);
-PHPAPI void php_dl(char *file, int type, zval *return_value, int start_now TSRMLS_DC);
+PHPAPI int php_load_extension(char *filename, int type, int start_now);
+PHPAPI void php_dl(char *file, int type, zval *return_value, int start_now);
 
 /* dynamic loading functions */
 PHPAPI PHP_FUNCTION(dl);

@@ -20,7 +20,6 @@ $sec = 45;
 $month = 7;
 $day = 2;
 $year = 1963;
-$is_dst = 0; 
 
 var_dump( mktime($hour) );
 var_dump( mktime($hour, $minute) );
@@ -28,7 +27,6 @@ var_dump( mktime($hour, $minute, $sec) );
 var_dump( mktime($hour, $minute, $sec, $month) );
 var_dump( mktime($hour, $minute, $sec, $month, $day) );
 var_dump( mktime($hour, $minute, $sec, $month, $day, $year) );
-var_dump( mktime($hour, $minute, $sec, $month, $day, $year, $is_dst) );
 
 ?>
 ===DONE===
@@ -39,9 +37,6 @@ int(%i)
 int(%i)
 int(%i)
 int(%i)
-int(%i)
-
-Deprecated: mktime(): The is_dst parameter is deprecated in %s on line %d
 int(%i)
 ===DONE===
 

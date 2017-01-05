@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2016 The PHP Group                                |
+  | Copyright (c) 2006-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -12,29 +12,28 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Andrey Hristov <andrey@mysql.com>                           |
-  |          Ulf Wendel <uwendel@mysql.com>                              |
-  |          Georg Richter <georg@mysql.com>                             |
+  | Authors: Andrey Hristov <andrey@php.net>                             |
+  |          Ulf Wendel <uw@php.net>                                     |
+  |          Georg Richter <georg@php.net>                               |
   +----------------------------------------------------------------------+
 */
-/* $Id: mysqlnd.h 318051 2011-10-12 16:18:02Z andrey $ */
 
 #ifndef MYSQLND_REVERSE_API_H
 #define MYSQLND_REVERSE_API_H
 typedef struct st_mysqlnd_reverse_api
 {
 	zend_module_entry * module;
-	MYSQLND *(*conversion_cb)(zval * zv TSRMLS_DC);
+	MYSQLND *(*conversion_cb)(zval * zv);
 } MYSQLND_REVERSE_API;
 
 
-PHPAPI void mysqlnd_reverse_api_init(TSRMLS_D);
-PHPAPI void mysqlnd_reverse_api_end(TSRMLS_D);
+PHPAPI void mysqlnd_reverse_api_init(void);
+PHPAPI void mysqlnd_reverse_api_end(void);
 
-PHPAPI HashTable * mysqlnd_reverse_api_get_api_list(TSRMLS_D);
+PHPAPI HashTable * mysqlnd_reverse_api_get_api_list(void);
 
-PHPAPI void mysqlnd_reverse_api_register_api(MYSQLND_REVERSE_API * apiext TSRMLS_DC);
-PHPAPI MYSQLND * zval_to_mysqlnd(zval * zv, const unsigned int client_api_capabilities, unsigned int * save_client_api_capabilities TSRMLS_DC);
+PHPAPI void mysqlnd_reverse_api_register_api(MYSQLND_REVERSE_API * apiext);
+PHPAPI MYSQLND * zval_to_mysqlnd(zval * zv, const unsigned int client_api_capabilities, unsigned int * save_client_api_capabilities);
 
 #endif	/* MYSQLND_REVERSE_API_H */
 

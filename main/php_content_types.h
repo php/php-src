@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -25,7 +25,7 @@
 
 SAPI_API SAPI_POST_READER_FUNC(php_default_post_reader);
 SAPI_API SAPI_POST_HANDLER_FUNC(php_std_post_handler);
-int php_startup_sapi_content_types(TSRMLS_D);
-int php_setup_sapi_content_types(TSRMLS_D);
+int php_startup_sapi_content_types(void);
+int php_setup_sapi_content_types(void);
 
 #endif /* PHP_CONTENT_TYPES_H */

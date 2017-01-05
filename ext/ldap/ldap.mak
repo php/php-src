@@ -4,7 +4,7 @@ PROJECT_ROOT = ..\..
 
 # Module details
 MODULE_NAME = php_ldap
-MODULE_DESC = "PHP 5 - LDAP Extension"
+MODULE_DESC = "PHP 7 - LDAP Extension"
 VMAJ = 3
 VMIN = 0
 VREV = 0

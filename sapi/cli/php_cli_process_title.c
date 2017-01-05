@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -31,10 +31,10 @@
 PHP_FUNCTION(cli_set_process_title)
 {
     char *title = NULL;
-    int title_len;
+    size_t title_len;
     int rc;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &title, &title_len) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &title, &title_len) == FAILURE) {
         return;
     }
 
@@ -43,7 +43,7 @@ PHP_FUNCTION(cli_set_process_title)
         RETURN_TRUE;
     }
 
-    php_error_docref(NULL TSRMLS_CC, E_WARNING, "cli_set_process_title had an error: %s", ps_title_errno(rc));
+    php_error_docref(NULL, E_WARNING, "cli_set_process_title had an error: %s", ps_title_errno(rc));
     RETURN_FALSE;
 }
 /* }}} */
@@ -62,11 +62,11 @@ PHP_FUNCTION(cli_get_process_title)
 
         rc = get_ps_title(&length, &title);
         if (rc != PS_TITLE_SUCCESS) {
-                php_error_docref(NULL TSRMLS_CC, E_WARNING, "cli_get_process_title had an error: %s", ps_title_errno(rc));
+                php_error_docref(NULL, E_WARNING, "cli_get_process_title had an error: %s", ps_title_errno(rc));
                 RETURN_NULL();
         }
 
-        RETURN_STRINGL(title, length, 1);
+        RETURN_STRINGL(title, length);
 }
 /* }}} */
 

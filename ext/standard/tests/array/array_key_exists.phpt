@@ -270,7 +270,7 @@ NULL
 Warning: array_key_exists() expects parameter 2 to be array, boolean given in %s on line %d
 NULL
 
-Warning: array_key_exists() expects parameter 2 to be array, double given in %s on line %d
+Warning: array_key_exists() expects parameter 2 to be array, float given in %s on line %d
 NULL
 
 Warning: array_key_exists() expects exactly 2 parameters, 3 given in %s on line %d

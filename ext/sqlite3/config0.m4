@@ -8,7 +8,7 @@ PHP_ARG_WITH(sqlite3, whether to enable the SQLite3 extension,
 
 if test $PHP_SQLITE3 != "no"; then
   sqlite3_extra_sources=""
-  PHP_SQLITE3_CFLAGS=""
+  PHP_SQLITE3_CFLAGS=" -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 "
 
   dnl when running phpize enable_maintainer_zts is not available
   if test -z "$enable_maintainer_zts"; then
@@ -75,7 +75,7 @@ if test $PHP_SQLITE3 != "no"; then
       debug_flags="-DSQLITE_DEBUG=1"
     fi
 
-    other_flags="-DSQLITE_ENABLE_FTS3=1 -DSQLITE_CORE=1 -DSQLITE_ENABLE_COLUMN_METADATA=1"
+    other_flags="-DSQLITE_ENABLE_FTS3=1 -DSQLITE_ENABLE_FTS4=1 -DSQLITE_ENABLE_FTS5=1 -DSQLITE_CORE=1 -DSQLITE_ENABLE_COLUMN_METADATA=1"
 
 	dnl As long as intl is not shared we can have ICU support
     if test "$PHP_INTL" = "yes" && test "$PHP_INTL_SHARED" != "yes"; then
