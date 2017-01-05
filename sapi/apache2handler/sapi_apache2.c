@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -63,33 +63,6 @@
 char *apache2_php_ini_path_override = NULL;
 #if defined(PHP_WIN32) && defined(ZTS)
 ZEND_TSRMLS_CACHE_DEFINE()
-#endif
-
-/* if apache's version is newer than 2.2.31 or 2.4.16 */
-#if MODULE_MAGIC_COOKIE == 0x41503232UL && AP_MODULE_MAGIC_AT_LEAST(20051115,40) || \
-	MODULE_MAGIC_COOKIE == 0x41503234UL && AP_MODULE_MAGIC_AT_LEAST(20120211,47)
-#define php_ap_map_http_request_error ap_map_http_request_error
-#else
-static int php_ap_map_http_request_error(apr_status_t rv, int status)
-{
-	switch (rv) {
-	case AP_FILTER_ERROR: {
-		return AP_FILTER_ERROR;
-	}
-	case APR_ENOSPC: {
-		return HTTP_REQUEST_ENTITY_TOO_LARGE;
-	}
-	case APR_ENOTIMPL: {
-		return HTTP_NOT_IMPLEMENTED;
-	}
-	case APR_ETIMEDOUT: {
-		return HTTP_REQUEST_TIME_OUT;
-	}
-	default: {
-		return status;
-	}
-	}
-}
 #endif
 
 static size_t
@@ -207,7 +180,6 @@ php_apache_sapi_read_post(char *buf, size_t count_bytes)
 	php_struct *ctx = SG(server_context);
 	request_rec *r;
 	apr_bucket_brigade *brigade;
-	apr_status_t ret;
 
 	r = ctx->r;
 	brigade = ctx->brigade;
@@ -219,7 +191,7 @@ php_apache_sapi_read_post(char *buf, size_t count_bytes)
 	 * need to make sure that if data is available we fill the buffer completely.
 	 */
 
-	while ((ret=ap_get_brigade(r->input_filters, brigade, AP_MODE_READBYTES, APR_BLOCK_READ, len)) == APR_SUCCESS) {
+	while (ap_get_brigade(r->input_filters, brigade, AP_MODE_READBYTES, APR_BLOCK_READ, len) == APR_SUCCESS) {
 		apr_brigade_flatten(brigade, buf, &len);
 		apr_brigade_cleanup(brigade);
 		tlen += len;
@@ -228,14 +200,6 @@ php_apache_sapi_read_post(char *buf, size_t count_bytes)
 		}
 		buf += len;
 		len = count_bytes - tlen;
-	}
-
-	if (ret != APR_SUCCESS) {
-		if (APR_STATUS_IS_TIMEUP(ret)) {
-			SG(sapi_headers).http_response_code = php_ap_map_http_request_error(ret, HTTP_REQUEST_TIME_OUT);
-		} else {
-			SG(sapi_headers).http_response_code = php_ap_map_http_request_error(ret, HTTP_BAD_REQUEST);
-		}
 	}
 
 	return tlen;
@@ -713,13 +677,6 @@ zend_first_try {
 		}
 		ctx->r = r;
 		brigade = ctx->brigade;
-	}
-
-	if (SG(request_info).content_length > SG(read_post_bytes)) {
-		ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, "Error while attempting to read POST data: %d", SG(sapi_headers).http_response_code);
-		apr_brigade_cleanup(brigade);
-		PHPAP_INI_OFF;
-		return SG(sapi_headers).http_response_code;
 	}
 
 	if (AP2(last_modified)) {

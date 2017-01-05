@@ -17,6 +17,8 @@ if (PHP_JSON != "no") {
 
 	ADD_SOURCES(configure_module_dirname, "json_encoder.c json_parser.tab.c json_scanner.c", "json");
 
+	ADD_MAKEFILE_FRAGMENT();
+
 	PHP_INSTALL_HEADERS("ext/json/", "php_json.h");
 }
 

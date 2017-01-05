@@ -62,6 +62,7 @@ PHP                                                                        NEWS
     handles multibyte replacement char nicely). (Masakielastic, Yasuo)
   . Added array input support to mb_convert_encoding(). (Yasuo)
   . Added array input support to mb_check_encoding(). (Yasuo)
+  . Fixed bug #69079 (enhancement for mb_substitute_character). (masakielastic)
 
 - Mcrypt:
   . The deprecated mcrypt extension has been moved to PECL. (leigh)
@@ -92,6 +93,8 @@ PHP                                                                        NEWS
 
 - Standard:
   . Add subject to mail log. (tomsommer)
+  . Fixed bug #31875 (get_defined_functions additional param to exclude
+	disabled functions). (willianveiga)
 
 - XML:
   . Moved utf8_encode() and utf8_decode() to the Standard extension. (Andrea)
