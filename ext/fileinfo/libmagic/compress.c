@@ -60,7 +60,7 @@ typedef void (*sig_t)(int);
 #if defined(HAVE_SYS_TIME_H)
 #include <sys/time.h>
 #endif
-#if defined(HAVE_ZLIB_H)
+#if defined(HAVE_ZLIB_H) && defined(PHP_FILEINFO_UNCOMPRESS)
 #define BUILTIN_DECOMPRESS
 #include <zlib.h>
 #endif
