@@ -391,18 +391,18 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 				case SQL_SHORT:
 					*len = sizeof(zend_long);
 					*ptr = FETCH_BUF(S->fetch_buf[colno], zend_long, 1, NULL);
-					*((zend_long*)*ptr) = *(short*)var->sqldata;
+					*(zend_long *)*ptr = *(short*)var->sqldata;
 					break;
 				case SQL_LONG:
 					*len = sizeof(zend_long);
 					*ptr = FETCH_BUF(S->fetch_buf[colno], zend_long, 1, NULL);
-					*((zend_long*)*ptr) = *(ISC_LONG*)var->sqldata;
+					*(zend_long *)*ptr = *(ISC_LONG*)var->sqldata;
 					break;
 				case SQL_INT64:
 					#if SIZEOF_ZEND_LONG >= 8 
 					*len = sizeof(zend_long);
 					*ptr = FETCH_BUF(S->fetch_buf[colno], zend_long, 1, NULL);
-					*((zend_long*)*ptr) = *(ISC_INT64*)var->sqldata;
+					*(zend_long *)*ptr = *(ISC_INT64*)var->sqldata;
 					#else
 					*ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);
 					*len = slprintf(*ptr, CHAR_BUF_LEN, "%" LL_MASK "d", *(ISC_INT64*)var->sqldata);
