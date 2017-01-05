@@ -3,7 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2017, PHP 7.1.2
 
 
-07 Jan 2017, PHP 7.1.1
+19 Jan 2017, PHP 7.1.1
 
 - Core:
   . Fixed bug #73792 (invalid foreach loop hangs script). (Dmitry)
