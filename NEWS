@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Phar:
   . Fixed bug #70417 (PharData::compress() doesn't close temp file). (cmb)
 
+- ZIP:
+  . Fixed bug #70103 (ZipArchive::addGlob ignores remove_all_path option). (cmb)
+
 19 Jan 2017, PHP 7.1.1
 
 - Core:
