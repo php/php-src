@@ -71,6 +71,9 @@ PHP                                                                        NEWS
   . Fixed bug #73800 (sporadic segfault with MYSQLI_OPT_INT_AND_FLOAT_NATIVE). 
 	(vanviegen)
 
+- OpenSSL:
+  . Fixed bug #71519 (add serial hex to return value array). (xrobau)
+
 - PCRE:
   . Fixed bug #61780 (Inconsistent PCRE captures in match results). (cmb)
 
