@@ -1,5 +1,7 @@
 --TEST--
 __wakeup should be able to modify dynamic properties without affecting copies of those properties
+--SKIPIF--
+<?php if (!extension_loaded("json")) print "skip json_encode needed"; ?>
 --FILE--
 <?php
 
