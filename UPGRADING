@@ -788,6 +788,7 @@ out, that the corresponding SDK isn't available anymore.
   . Removed asp_tags ini directive. Trying to enable it will result in a fatal
     error.
   . Removed always_populate_raw_post_data ini directive.
+  . realpath_cache_size set to 4096k by default
 
 ========================================
 12. Windows Support
