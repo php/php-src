@@ -3220,4 +3220,4 @@ AC_DEFUN([PHP_CHECK_BUILTIN_SSUBLL_OVERFLOW], [
 ])
 
 dnl Load the AX_CHECK_COMPILE_FLAG macro from the autoconf archive.
-m4_include([m4/ax_check_compile_flag.m4])
+m4_include([build/ax_check_compile_flag.m4])
