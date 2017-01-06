@@ -3218,3 +3218,6 @@ AC_DEFUN([PHP_CHECK_BUILTIN_SSUBLL_OVERFLOW], [
    [$have_builtin_ssubll_overflow], [Whether the compiler supports __builtin_ssubll_overflow])
 
 ])
+
+dnl Load the AX_CHECK_COMPILE_FLAG macro from the autoconf archive.
+m4_include([m4/ax_check_compile_flag.m4])
