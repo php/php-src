@@ -99,6 +99,7 @@ PHP                                                                        NEWS
   . Add subject to mail log. (tomsommer)
   . Fixed bug #31875 (get_defined_functions additional param to exclude
 	disabled functions). (willianveiga)
+  . Fixed bug #69442 (closing of fd incorrect when PTS enabled). (jaytaph)
 
 - XML:
   . Moved utf8_encode() and utf8_decode() to the Standard extension. (Andrea)
