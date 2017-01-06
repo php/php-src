@@ -667,9 +667,9 @@ static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int s
 	}
 
 	for (i = 0; i < X509_NAME_entry_count(name); i++) {
-		unsigned char *to_add;
+		unsigned char *to_add = NULL;
 		int to_add_len = 0;
-
+		int needs_free = 0;
 
 		ne = X509_NAME_get_entry(name, i);
 		obj = X509_NAME_ENTRY_get_object(ne);
@@ -684,6 +684,7 @@ static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int s
 		str = X509_NAME_ENTRY_get_data(ne);
 		if (ASN1_STRING_type(str) != V_ASN1_UTF8STRING) {
 			to_add_len = ASN1_STRING_to_UTF8(&to_add, str);
+			needs_free = 1;
 		} else {
 			to_add = ASN1_STRING_data(str);
 			to_add_len = ASN1_STRING_length(str);
@@ -704,8 +705,13 @@ static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int s
 			}
 		}
 
-		OPENSSL_free(to_add);
+		if (needs_free) {
+			OPENSSL_free(to_add);
+			to_add = NULL;
+			needs_free = 0;
+		}
 	}
+
 	if (key != NULL) {
 		zend_hash_str_update(Z_ARRVAL_P(val), key, strlen(key), &subitem);
 	}
