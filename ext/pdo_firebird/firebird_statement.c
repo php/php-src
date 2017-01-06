@@ -220,19 +220,19 @@ static int firebird_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 
 	if (var->sqlscale < 0) {
 		col->param_type = PDO_PARAM_STR;
-		return 1;
-	}
-	switch (var->sqltype & ~1) {
-		case SQL_SHORT:
-		case SQL_LONG:
-		#if SIZEOF_ZEND_LONG >= 8 
-		case SQL_INT64:
-		#endif
-			col->param_type = PDO_PARAM_INT;
-			break;
-		default:
-			col->param_type = PDO_PARAM_STR;
-			break;
+	} else {
+		switch (var->sqltype & ~1) {
+			case SQL_SHORT:
+			case SQL_LONG:
+#if SIZEOF_ZEND_LONG >= 8 
+			case SQL_INT64:
+#endif
+				col->param_type = PDO_PARAM_INT;
+				break;
+			default:
+				col->param_type = PDO_PARAM_STR;
+				break;
+		}
 	}
 
 	return 1;
@@ -399,14 +399,14 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 					*(zend_long *)*ptr = *(ISC_LONG*)var->sqldata;
 					break;
 				case SQL_INT64:
-					#if SIZEOF_ZEND_LONG >= 8 
+#if SIZEOF_ZEND_LONG >= 8 
 					*len = sizeof(zend_long);
 					*ptr = FETCH_BUF(S->fetch_buf[colno], zend_long, 1, NULL);
 					*(zend_long *)*ptr = *(ISC_INT64*)var->sqldata;
-					#else
+#else
 					*ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);
 					*len = slprintf(*ptr, CHAR_BUF_LEN, "%" LL_MASK "d", *(ISC_INT64*)var->sqldata);
-					#endif
+#endif
 					break;
 				case SQL_FLOAT:
 					*ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);
