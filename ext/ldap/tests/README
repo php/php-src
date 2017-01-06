@@ -10,8 +10,45 @@ Usage:
 
 To use it follow these steps:
 
-* Download the Vagrantfile from https://gist.githubusercontent.com/heiglandreas/5b87a19b78c630b62537/raw/Vagrantfile to any directory you like.
+* Create a Vagrant-file with the following content.
 * Go to that directory and run "vagrant up"
+
+```
+$setup = <<<SETUP
+apt-get update
+
+DEBIAN_FRONTEND=noninteractive aptitude install -q -y slapd ldap-utils
+
+export SLAPPASS=`slappasswd -s password`
+
+echo "dn: olcDatabase={1}hdb,cn=config
+changetype: modify
+replace: olcSuffix
+olcSuffix: dc=nodomain
+-
+replace: olcRootDN
+olcRootDN: dc=admin,dc=nodomain
+-
+replace: olcRootPW
+olcRootPW: ${SLAPPASS}" | ldapmodify -Y EXTERNAL -H ldapi:///
+
+echo "dn: dc=nodomain
+objectClass: dcObject
+objectClass: organization
+o: Example
+dc: example
+
+dn: ou=extldap,dc=nodomain
+objectClass: organizationalUnit
+ou: extldap" | ldapadd -c -x -H ldap://localhost:389 -D "dc=admin,dc=nodomain" -w password
+SETUP
+
+Vagrant.configure(2) do |config|
+  config.vm.box = "ubuntu/trusty64"
+  config.vm.network "private_network", ip: "192.168.33.10"
+  config.vm.provision "shell", inline: $setup
+end
+```
 
 Now you will have a virtual machine up and running on IP-Address 192.168.10.33 listening on port 369 for incomming LDAP-connections. The machine is already configured to execute the LDAP-Tests
 
