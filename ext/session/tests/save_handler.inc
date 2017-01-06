@@ -106,13 +106,15 @@ function gc($maxlifetime) {
     // long $maxlifetime - GC TTL in seconds. Default: session.gc_maxlifetime
 
     global $session_save_path, $name;
+    $gc_cnt = 0;
     $directory = opendir($session_save_path."/");
     $length = strlen(SESSION_FILE_PREFIX);
     while (($file = readdir($directory)) !== FALSE) {
         $qualified = ($session_save_path."/".$file); 
         if (is_file($qualified) === TRUE) {
-            if (substr($file, 0, $length) === SESSION_FILE_PREFIX) {
+            if (substr($file, 0, $length) === SESSION_FILE_PREFIX && (filemtime($qualified) + $maxlifetime <= time() )) {
                 unlink($qualified);
+                $gc_cnt++;
             }
         }
     }
@@ -121,7 +123,7 @@ function gc($maxlifetime) {
     // SHOULD return long (number of deleted sessions).
     // Returning TRUE works also, but it will not report correct number of deleted sessions.
     // Return negative value for error. FALSE does not work because it's the same as 0.
-    return 1;
+    return $gc_cnt;
 }
 
 /* Create new secure session ID */
