@@ -683,9 +683,11 @@ static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int s
 
 		str = X509_NAME_ENTRY_get_data(ne);
 		if (ASN1_STRING_type(str) != V_ASN1_UTF8STRING) {
+			/* ASN1_STRING_to_UTF8(3): The converted data is copied into a newly allocated buffer */
 			to_add_len = ASN1_STRING_to_UTF8(&to_add, str);
 			needs_free = 1;
 		} else {
+			/* ASN1_STRING_data(3): Since this is an internal pointer it should not be freed or modified in any way */
 			to_add = ASN1_STRING_data(str);
 			to_add_len = ASN1_STRING_length(str);
 		}
@@ -706,8 +708,8 @@ static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int s
 		}
 
 		if (needs_free) {
-			OPENSSL_free(to_add);
-			to_add = NULL;
+			/* ASN1_STRING_to_UTF8(3): The buffer out should be freed using free(3) */
+			free(to_add);
 			needs_free = 0;
 		}
 	}
