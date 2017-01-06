@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fixed bug #71519 (add serial hex to return value array). (xrobau)
 
+- PDO_Firebird:
+  . Implemented FR #72583 (All data are fetched as strings). (Dorin Marcoci)
+
 - Phar:
   . Fixed bug #70417 (PharData::compress() doesn't close temp file). (cmb)
 

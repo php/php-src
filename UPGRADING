@@ -722,6 +722,13 @@ out, that the corresponding SDK isn't available anymore.
   Mhash is not an extension anymore, use function_exists("mhash") to check whether
   it is avaliable.
 
+- PDO_Firebird
+  As of PHP 7.0.17, the fetched data for integer fields is aware of the Firebird
+  datatypes. Previously all integers was fetched as strings, starting with the
+  aforementioned PHP version intger fields are translated to the PHP integer
+  datatype. The 64-bit integers are still fetched as strings in 32-bit PHP
+  builds.
+
 - GD
   The bundled libgd requires libwebp instead of libvpx for the WebP functionality.
 
