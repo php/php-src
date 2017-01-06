@@ -342,7 +342,7 @@ PHP 7.1 UPGRADE NOTES
 - PDO_Firebird
   As of PHP 7.1.3, the fetched data for integer fields is aware of the Firebird
   datatypes. Previously all integers was fetched as strings, starting with
-  aforementioned PHP version intger fields are translated to the PHP integer
+  aforementioned PHP version integer fields are translated to the PHP integer
   datatype. The 64-bit integers are still fetched as strings in 32-bit PHP
   builds.
 
