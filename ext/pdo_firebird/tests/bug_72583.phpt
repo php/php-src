@@ -12,7 +12,7 @@ $C->exec('insert into atable values (1, -1)');
 $S = $C->prepare('select aint, asmi from atable');
 $S->execute();
 $D = $S->fetch(PDO::FETCH_NUM);
-echo gettype($D[0]).PHP_EOL.gettype($D[1]);
+echo gettype($D[0])."\n".gettype($D[1]);
 unset($S);
 unset($C);
 ?>
