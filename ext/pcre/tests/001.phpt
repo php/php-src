@@ -52,7 +52,7 @@ array(10) {
   [2]=>
   string(2) "06"
   [3]=>
-  string(0) ""
+  NULL
   ["month"]=>
   string(2) "12"
   [4]=>
@@ -75,7 +75,7 @@ array(10) {
   [2]=>
   string(2) "12"
   [3]=>
-  string(0) ""
+  NULL
   ["month"]=>
   string(3) "Aug"
   [4]=>
