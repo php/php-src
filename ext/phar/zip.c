@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | ZIP archive support for Phar                                         |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2007-2015 The PHP Group                                |
+  | Copyright (c) 2007-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -18,28 +18,28 @@
 
 #include "phar_internal.h"
 
-#define PHAR_GET_16(var) ((php_uint16)((((php_uint16)var[0]) & 0xff) | \
-	(((php_uint16)var[1]) & 0xff) << 8))
-#define PHAR_GET_32(var) ((php_uint32)((((php_uint32)var[0]) & 0xff) | \
-	(((php_uint32)var[1]) & 0xff) << 8 | \
-	(((php_uint32)var[2]) & 0xff) << 16 | \
-	(((php_uint32)var[3]) & 0xff) << 24))
-static inline void phar_write_32(char buffer[4], php_uint32 value)
+#define PHAR_GET_16(var) ((uint16_t)((((uint16_t)var[0]) & 0xff) | \
+	(((uint16_t)var[1]) & 0xff) << 8))
+#define PHAR_GET_32(var) ((uint32_t)((((uint32_t)var[0]) & 0xff) | \
+	(((uint32_t)var[1]) & 0xff) << 8 | \
+	(((uint32_t)var[2]) & 0xff) << 16 | \
+	(((uint32_t)var[3]) & 0xff) << 24))
+static inline void phar_write_32(char buffer[4], uint32_t value)
 {
 	buffer[3] = (unsigned char) ((value & 0xff000000) >> 24);
 	buffer[2] = (unsigned char) ((value & 0xff0000) >> 16);
 	buffer[1] = (unsigned char) ((value & 0xff00) >> 8);
 	buffer[0] = (unsigned char) (value & 0xff);
 }
-static inline void phar_write_16(char buffer[2], php_uint32 value)
+static inline void phar_write_16(char buffer[2], uint32_t value)
 {
 	buffer[1] = (unsigned char) ((value & 0xff00) >> 8);
 	buffer[0] = (unsigned char) (value & 0xff);
 }
-# define PHAR_SET_32(var, value) phar_write_32(var, (php_uint32) (value));
-# define PHAR_SET_16(var, value) phar_write_16(var, (php_uint16) (value));
+# define PHAR_SET_32(var, value) phar_write_32(var, (uint32_t) (value));
+# define PHAR_SET_16(var, value) phar_write_16(var, (uint16_t) (value));
 
-static int phar_zip_process_extra(php_stream *fp, phar_entry_info *entry, php_uint16 len) /* {{{ */
+static int phar_zip_process_extra(php_stream *fp, phar_entry_info *entry, uint16_t len) /* {{{ */
 {
 	union {
 		phar_zip_extra_field_header header;
@@ -143,7 +143,7 @@ static time_t phar_zip_d2u_time(char *cdtime, char *cddate) /* {{{ */
 
 static void phar_zip_u2d_time(time_t time, char *dtime, char *ddate) /* {{{ */
 {
-	php_uint16 ctime, cdate;
+	uint16_t ctime, cdate;
 	struct tm *tm, tmbuf;
 
 	tm = php_localtime_r(&time, &tmbuf);
@@ -167,8 +167,8 @@ int phar_parse_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, 
 {
 	phar_zip_dir_end locator;
 	char buf[sizeof(locator) + 65536];
-	zend_long size;
-	php_uint16 i;
+	size_t size;
+	uint16_t i;
 	phar_archive_data *mydata = NULL;
 	phar_entry_info entry = {0};
 	char *p = buf, *ext, *actual_alias = NULL;
@@ -199,7 +199,7 @@ int phar_parse_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, 
 	}
 
 	while ((p=(char *) memchr(p + 1, 'P', (size_t) (size - (p + 1 - buf)))) != NULL) {
-		if (!memcmp(p + 1, "K\5\6", 3)) {
+		if ((p - buf) + sizeof(locator) <= size && !memcmp(p + 1, "K\5\6", 3)) {
 			memcpy((void *)&locator, (void *) p, sizeof(locator));
 			if (PHAR_GET_16(locator.centraldisk) != 0 || PHAR_GET_16(locator.disknumber) != 0) {
 				/* split archives not handled */
@@ -395,10 +395,9 @@ foundit:
 		if (entry.filename_len == sizeof(".phar/signature.bin")-1 && !strncmp(entry.filename, ".phar/signature.bin", sizeof(".phar/signature.bin")-1)) {
 			size_t read;
 			php_stream *sigfile;
-			zend_off_t now;
 			char *sig;
 
-			now = php_stream_tell(fp);
+			php_stream_tell(fp);
 			pefree(entry.filename, entry.is_persistent);
 			sigfile = php_stream_fopen_tmpfile();
 			if (!sigfile) {
@@ -418,7 +417,7 @@ foundit:
 			php_stream_seek(fp, sizeof(phar_zip_file_header) + entry.header_offset + entry.filename_len + PHAR_GET_16(zipentry.extra_len), SEEK_SET);
 			sig = (char *) emalloc(entry.uncompressed_filesize);
 			read = php_stream_read(fp, sig, entry.uncompressed_filesize);
-			if (read != entry.uncompressed_filesize) {
+			if (read != entry.uncompressed_filesize || read <= 8) {
 				php_stream_close(sigfile);
 				efree(sig);
 				PHAR_ZIP_FAIL("signature cannot be read");
@@ -791,7 +790,7 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 	phar_zip_unix3 perms;
 	phar_zip_central_dir_file central;
 	struct _phar_zip_pass *p;
-	php_uint32 newcrc32;
+	uint32_t newcrc32;
 	zend_off_t offset;
 	int not_really_modified = 0;
 	p = (struct _phar_zip_pass*) arg;
@@ -822,7 +821,7 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 	PHAR_SET_16(perms.size, sizeof(perms) - 4);
 	PHAR_SET_16(perms.perms, entry->flags & PHAR_ENT_PERM_MASK);
 	{
-		php_uint32 crc = (php_uint32) ~0;
+		uint32_t crc = (uint32_t) ~0;
 		CRC32(crc, perms.perms[0]);
 		CRC32(crc, perms.perms[1]);
 		PHAR_SET_32(perms.crc32, ~crc);
@@ -848,7 +847,7 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 
 	/* do extra field for perms later */
 	if (entry->is_modified) {
-		php_uint32 loc;
+		uint32_t loc;
 		php_stream_filter *filter;
 		php_stream *efp;
 
@@ -936,7 +935,7 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 		php_stream_flush(entry->cfp);
 		php_stream_filter_remove(filter, 1);
 		php_stream_seek(entry->cfp, 0, SEEK_END);
-		entry->compressed_filesize = (php_uint32) php_stream_tell(entry->cfp);
+		entry->compressed_filesize = (uint32_t) php_stream_tell(entry->cfp);
 		PHAR_SET_32(central.compsize, entry->compressed_filesize);
 		PHAR_SET_32(local.compsize, entry->compressed_filesize);
 		/* generate crc on compressed file */
@@ -1110,14 +1109,14 @@ static int phar_zip_applysignature(phar_archive_data *phar, struct _phar_zip_pas
 		char *signature, sigbuf[8];
 		phar_entry_info entry = {0};
 		php_stream *newfile;
-		zend_off_t tell, st;
+		zend_off_t tell;
 
 		newfile = php_stream_fopen_tmpfile();
 		if (newfile == NULL) {
 			spprintf(pass->error, 0, "phar error: unable to create temporary file for the signature file");
 			return FAILURE;
 		}
-		st = tell = php_stream_tell(pass->filefp);
+		tell = php_stream_tell(pass->filefp);
 		/* copy the local files, central directory, and the zip comment to generate the hash */
 		php_stream_seek(pass->filefp, 0, SEEK_SET);
 		php_stream_copy_to_stream_ex(pass->filefp, newfile, tell, NULL);
@@ -1171,7 +1170,6 @@ static int phar_zip_applysignature(phar_archive_data *phar, struct _phar_zip_pas
 
 		if (pass->error && *(pass->error)) {
 			/* error is set by writeheaders */
-			php_stream_close(newfile);
 			return FAILURE;
 		}
 	} /* signature */
@@ -1194,7 +1192,7 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 	char *temperr = NULL;
 	struct _phar_zip_pass pass;
 	phar_zip_dir_end eocd;
-	php_uint32 cdir_size, cdir_offset;
+	uint32_t cdir_size, cdir_offset;
 
 	pass.error = &temperr;
 	entry.flags = PHAR_ENT_PERM_DEF_FILE;

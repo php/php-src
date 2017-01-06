@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -38,9 +38,6 @@
 #ifdef ZEND_WIN32
 # include "zend_config.w32.h"
 # define ZEND_PATHS_SEPARATOR		';'
-#elif defined(NETWARE)
-# include <zend_config.h>
-# define ZEND_PATHS_SEPARATOR		';'
 #elif defined(__riscos__)
 # include <zend_config.h>
 # define ZEND_PATHS_SEPARATOR		';'
@@ -53,6 +50,7 @@
 
 #include <stdio.h>
 #include <assert.h>
+#include <math.h>
 
 #ifdef HAVE_UNIX_H
 # include <unix.h>
@@ -124,6 +122,8 @@
 #else
 # define ZEND_IGNORE_VALUE(x) ((void) (x))
 #endif
+
+#define zend_quiet_write(...) ZEND_IGNORE_VALUE(write(__VA_ARGS__))
 
 /* all HAVE_XXX test have to be after the include of zend_config above */
 
@@ -284,7 +284,7 @@ char *alloca();
 #  endif
 # elif defined(_MSC_VER)
 #  define zend_always_inline __forceinline
-#  define zend_never_inline
+#  define zend_never_inline __declspec(noinline)
 # else
 #  if __has_attribute(always_inline)
 #   define zend_always_inline inline __attribute__((always_inline))
@@ -337,7 +337,7 @@ char *alloca();
 
 #endif
 
-#if (HAVE_ALLOCA || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && defined(NETWARE)) && !(defined(ZTS) && defined(HPUX)) && !defined(DARWIN)
+#if (HAVE_ALLOCA || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS)) && !(defined(ZTS) && defined(HPUX)) && !defined(DARWIN)
 # define ZEND_ALLOCA_MAX_SIZE (32 * 1024)
 # define ALLOCA_FLAG(name) \
 	zend_bool name;
@@ -367,9 +367,9 @@ char *alloca();
 #endif
 
 #if ZEND_DEBUG
-# define ZEND_FILE_LINE_D				const char *__zend_filename, const uint __zend_lineno
+# define ZEND_FILE_LINE_D				const char *__zend_filename, const uint32_t __zend_lineno
 # define ZEND_FILE_LINE_DC				, ZEND_FILE_LINE_D
-# define ZEND_FILE_LINE_ORIG_D			const char *__zend_orig_filename, const uint __zend_orig_lineno
+# define ZEND_FILE_LINE_ORIG_D			const char *__zend_orig_filename, const uint32_t __zend_orig_lineno
 # define ZEND_FILE_LINE_ORIG_DC			, ZEND_FILE_LINE_ORIG_D
 # define ZEND_FILE_LINE_RELAY_C			__zend_filename, __zend_lineno
 # define ZEND_FILE_LINE_RELAY_CC		, ZEND_FILE_LINE_RELAY_C
@@ -420,6 +420,51 @@ char *alloca();
 #undef MAX
 #define MAX(a, b)  (((a)>(b))?(a):(b))
 #define MIN(a, b)  (((a)<(b))?(a):(b))
+
+/* We always define a function, even if there's a macro or expression we could
+ * alias, so that using it in contexts where we can't make function calls
+ * won't fail to compile on some machines and not others.
+ */
+static zend_always_inline double _zend_get_inf(void) /* {{{ */
+{
+#ifdef INFINITY
+	return INFINITY;
+#elif HAVE_HUGE_VAL_INF
+	return HUGE_VAL;
+#elif defined(__i386__) || defined(_X86_) || defined(ALPHA) || defined(_ALPHA) || defined(__alpha)
+# define _zend_DOUBLE_INFINITY_HIGH       0x7ff00000
+	double val = 0.0;
+	((uint32_t*)&val)[1] = _zend_DOUBLE_INFINITY_HIGH;
+	((uint32_t*)&val)[0] = 0;
+	return val;
+#elif HAVE_ATOF_ACCEPTS_INF
+	return atof("INF");
+#else
+	return 1.0/0.0;
+#endif
+} /* }}} */
+#define ZEND_INFINITY (_zend_get_inf())
+
+static zend_always_inline double _zend_get_nan(void) /* {{{ */
+{
+#ifdef NAN
+	return NAN;
+#elif HAVE_HUGE_VAL_NAN
+	return HUGE_VAL + -HUGE_VAL;
+#elif defined(__i386__) || defined(_X86_) || defined(ALPHA) || defined(_ALPHA) || defined(__alpha)
+# define _zend_DOUBLE_QUIET_NAN_HIGH      0xfff80000
+	double val = 0.0;
+	((uint32_t*)&val)[1] = _zend_DOUBLE_QUIET_NAN_HIGH;
+	((uint32_t*)&val)[0] = 0;
+	return val;
+#elif HAVE_ATOF_ACCEPTS_NAN
+	return atof("NAN");
+#else
+	return 0.0/0.0;
+#endif
+} /* }}} */
+#define ZEND_NAN (_zend_get_nan())
+
 #define ZEND_STRL(str)		(str), (sizeof(str)-1)
 #define ZEND_STRS(str)		(str), (sizeof(str))
 #define ZEND_NORMALIZE_BOOL(n)			\
@@ -427,7 +472,7 @@ char *alloca();
 #define ZEND_TRUTH(x)		((x) ? 1 : 0)
 #define ZEND_LOG_XOR(a, b)		(ZEND_TRUTH(a) ^ ZEND_TRUTH(b))
 
-#define ZEND_MAX_RESERVED_RESOURCES	4
+#define ZEND_MAX_RESERVED_RESOURCES	6
 
 /* excpt.h on Digital Unix 4.0 defines function_table */
 #undef function_table
@@ -435,7 +480,7 @@ char *alloca();
 #ifdef ZEND_WIN32
 #define ZEND_SECURE_ZERO(var, size) RtlSecureZeroMemory((var), (size))
 #else
-#define ZEND_SECURE_ZERO(var, size) memset((var), 0, (size))
+#define ZEND_SECURE_ZERO(var, size) explicit_bzero((var), (size))
 #endif
 
 /* This check should only be used on network socket, not file descriptors */

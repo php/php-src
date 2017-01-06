@@ -27,12 +27,24 @@ array_walk($types, function ($line) use (&$extensions) {
 	}
 });
 
+$additional_mime_maps = [
+	"map" => "application/json",	// from commit: a0d62f08ae8cbebc88e5c92e08fca8d0cdc7309d
+];
+
+foreach($additional_mime_maps as $ext => $mime) {
+	if (!isset($extensions[$ext])) {
+		$extensions[$ext] = $mime;
+	} else {
+		printf(STDERR, "Ignored exist mime type: $ext => $mime\n");
+	}
+}
+
 ?>
 /*
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |

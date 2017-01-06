@@ -146,6 +146,7 @@ static struct ini_value_parser_s ini_fpm_pool_options[] = {
 	{ "access.format",             &fpm_conf_set_string,      WPO(access_format) },
 	{ "slowlog",                   &fpm_conf_set_string,      WPO(slowlog) },
 	{ "request_slowlog_timeout",   &fpm_conf_set_time,        WPO(request_slowlog_timeout) },
+	{ "request_slowlog_trace_depth", &fpm_conf_set_integer,     WPO(request_slowlog_trace_depth) },
 	{ "request_terminate_timeout", &fpm_conf_set_time,        WPO(request_terminate_timeout) },
 	{ "rlimit_files",              &fpm_conf_set_integer,     WPO(rlimit_files) },
 	{ "rlimit_core",               &fpm_conf_set_rlimit_core, WPO(rlimit_core) },
@@ -763,8 +764,8 @@ static int fpm_conf_process_all_pools() /* {{{ */
 			}
 		}
 
-		/* alert if user is not set only if we are not root*/
-		if (!wp->config->user && !geteuid()) {
+		/* alert if user is not set; only if we are root and fpm is not running with --allow-to-run-as-root */
+		if (!wp->config->user && !geteuid() && !fpm_globals.run_as_root) {
 			zlog(ZLOG_ALERT, "[pool %s] user has not been defined", wp->config->name);
 			return -1;
 		}
@@ -857,7 +858,7 @@ static int fpm_conf_process_all_pools() /* {{{ */
 
 		/* status */
 		if (wp->config->pm_status_path && *wp->config->pm_status_path) {
-			int i;
+			size_t i;
 			char *status = wp->config->pm_status_path;
 
 			if (*status != '/') {
@@ -881,7 +882,7 @@ static int fpm_conf_process_all_pools() /* {{{ */
 		/* ping */
 		if (wp->config->ping_path && *wp->config->ping_path) {
 			char *ping = wp->config->ping_path;
-			int i;
+			size_t i;
 
 			if (*ping != '/') {
 				zlog(ZLOG_ERROR, "[pool %s] the ping path '%s' must start with a '/'", wp->config->name, ping);
@@ -968,6 +969,30 @@ static int fpm_conf_process_all_pools() /* {{{ */
 				zlog(ZLOG_ERROR, "[pool %s] 'request_slowlog_timeout' (%d) can't be greater than 'request_terminate_timeout' (%d)", wp->config->name, wp->config->request_slowlog_timeout, wp->config->request_terminate_timeout);
 				return -1;
 			}
+		}
+
+		/* request_slowlog_trace_depth */
+		if (wp->config->request_slowlog_trace_depth) {
+#if HAVE_FPM_TRACE
+			if (! (wp->config->slowlog && *wp->config->slowlog)) {
+				zlog(ZLOG_ERROR, "[pool %s] 'slowlog' must be specified for use with 'request_slowlog_trace_depth'", wp->config->name);
+				return -1;
+			}
+#else
+			static int warned = 0;
+
+			if (!warned) {
+				zlog(ZLOG_WARNING, "[pool %s] 'request_slowlog_trace_depth' is not supported on your system", wp->config->name);
+				warned = 1;
+			}
+#endif
+
+			if (wp->config->request_slowlog_trace_depth <= 0) {
+				zlog(ZLOG_ERROR, "[pool %s] 'request_slowlog_trace_depth' (%d) must be a positive value", wp->config->name, wp->config->request_slowlog_trace_depth);
+				return -1;
+			}
+		} else {
+			wp->config->request_slowlog_trace_depth = 20;
 		}
 
 		/* chroot */
@@ -1254,7 +1279,7 @@ static void fpm_conf_ini_parser_include(char *inc, void *arg) /* {{{ */
 #ifdef HAVE_GLOB
 	glob_t g;
 #endif
-	int i;
+	size_t i;
 
 	if (!inc || !arg) return;
 	if (*error) return; /* We got already an error. Switch to the end. */
@@ -1271,7 +1296,7 @@ static void fpm_conf_ini_parser_include(char *inc, void *arg) /* {{{ */
 				return;
 			}
 #endif /* GLOB_NOMATCH */
-			zlog(ZLOG_ERROR, "Unable to globalize '%s' (ret=%d) from %s at line %d.", inc, i, filename, ini_lineno);
+			zlog(ZLOG_ERROR, "Unable to globalize '%s' (ret=%zd) from %s at line %d.", inc, i, filename, ini_lineno);
 			*error = 1;
 			efree(filename);
 			return;
@@ -1573,7 +1598,7 @@ static void fpm_conf_dump() /* {{{ */
 	/*
 	 * Please keep the same order as in fpm_conf.h and in php-fpm.conf.in
 	 */
-	zlog(ZLOG_NOTICE, "[General]");
+	zlog(ZLOG_NOTICE, "[global]");
 	zlog(ZLOG_NOTICE, "\tpid = %s",                         STR2STR(fpm_global_config.pid_file));
 	zlog(ZLOG_NOTICE, "\terror_log = %s",                   STR2STR(fpm_global_config.error_log));
 #ifdef HAVE_SYSLOG_H
@@ -1635,6 +1660,7 @@ static void fpm_conf_dump() /* {{{ */
 		zlog(ZLOG_NOTICE, "\taccess.format = %s",              STR2STR(wp->config->access_format));
 		zlog(ZLOG_NOTICE, "\tslowlog = %s",                    STR2STR(wp->config->slowlog));
 		zlog(ZLOG_NOTICE, "\trequest_slowlog_timeout = %ds",   wp->config->request_slowlog_timeout);
+		zlog(ZLOG_NOTICE, "\trequest_slowlog_trace_depth = %d", wp->config->request_slowlog_trace_depth);
 		zlog(ZLOG_NOTICE, "\trequest_terminate_timeout = %ds", wp->config->request_terminate_timeout);
 		zlog(ZLOG_NOTICE, "\trlimit_files = %d",               wp->config->rlimit_files);
 		zlog(ZLOG_NOTICE, "\trlimit_core = %d",                wp->config->rlimit_core);

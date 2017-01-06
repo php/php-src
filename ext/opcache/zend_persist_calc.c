@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -34,7 +34,9 @@
 # define ADD_STRING(str) ADD_DUP_SIZE((str), _ZSTR_STRUCT_SIZE(ZSTR_LEN(str)))
 
 # define ADD_INTERNED_STRING(str, do_free) do { \
-		if (!IS_ACCEL_INTERNED(str)) { \
+		if (ZCG(current_persistent_script)->corrupted) { \
+			ADD_STRING(str); \
+		} else if (!IS_ACCEL_INTERNED(str)) { \
 			zend_string *tmp = accel_new_interned_string(str); \
 			if (tmp != (str)) { \
 				if (do_free) { \
@@ -51,21 +53,21 @@ static void zend_persist_zval_calc(zval *z);
 
 static void zend_hash_persist_calc(HashTable *ht, void (*pPersistElement)(zval *pElement))
 {
-	uint idx;
+	uint32_t idx;
 	Bucket *p;
 
 	if (!(ht->u.flags & HASH_FLAG_INITIALIZED) || ht->nNumUsed == 0) {
 		return;
 	}
 
-	if (!(ht->u.flags & HASH_FLAG_PACKED) && ht->nNumUsed < -(int32_t)ht->nTableMask / 2) {
+	if (!(ht->u.flags & HASH_FLAG_PACKED) && ht->nNumUsed < (uint32_t)(-(int32_t)ht->nTableMask) / 2) {
 		/* compact table */
-		int32_t hash_size;
+		uint32_t hash_size;
 
 		if (ht->nNumUsed <= HT_MIN_SIZE) {
 			hash_size = HT_MIN_SIZE;
 		} else {
-			hash_size = -(int32_t)ht->nTableMask;
+			hash_size = (uint32_t)(-(int32_t)ht->nTableMask);
 			while (hash_size >> 1 > ht->nNumUsed) {
 				hash_size >>= 1;
 			}
@@ -119,14 +121,14 @@ static void zend_persist_ast_calc(zend_ast *ast)
 static void zend_persist_zval_calc(zval *z)
 {
 	zend_uchar flags;
-	uint size;
+	uint32_t size;
 
 	switch (Z_TYPE_P(z)) {
 		case IS_STRING:
 		case IS_CONSTANT:
 			flags = Z_GC_FLAGS_P(z) & ~ (IS_STR_PERSISTENT | IS_STR_INTERNED | IS_STR_PERMANENT);
 			ADD_INTERNED_STRING(Z_STR_P(z), 0);
-			if (!Z_REFCOUNTED_P(z)) {
+			if (ZSTR_IS_INTERNED(Z_STR_P(z))) {
 				Z_TYPE_FLAGS_P(z) &= ~ (IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
 			}
 			Z_GC_FLAGS_P(z) |= flags;
@@ -234,8 +236,8 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 		}
 	}
 
-	if (op_array->brk_cont_array) {
-		ADD_DUP_SIZE(op_array->brk_cont_array, sizeof(zend_brk_cont_element) * op_array->last_brk_cont);
+	if (op_array->live_range) {
+		ADD_DUP_SIZE(op_array->live_range, sizeof(zend_live_range) * op_array->last_live_range);
 	}
 
 	if (ZCG(accel_directives).save_comments && op_array->doc_comment) {
@@ -292,6 +294,21 @@ static void zend_persist_property_info_calc(zval *zv)
 	}
 }
 
+static void zend_persist_class_constant_calc(zval *zv)
+{
+	zend_class_constant *c = Z_PTR_P(zv);
+
+	if (!zend_shared_alloc_get_xlat_entry(c)) {
+		zend_shared_alloc_register_xlat_entry(c, c);
+		ADD_ARENA_SIZE(sizeof(zend_class_constant));
+		zend_persist_zval_calc(&c->value);
+		if (ZCG(accel_directives).save_comments && c->doc_comment) {
+			ADD_STRING(c->doc_comment);
+		}
+	}
+}
+
+
 static void zend_persist_class_entry_calc(zval *zv)
 {
 	zend_class_entry *ce = Z_PTR_P(zv);
@@ -316,13 +333,13 @@ static void zend_persist_class_entry_calc(zval *zv)
 				zend_persist_zval_calc(&ce->default_static_members_table[i]);
 			}
 		}
-		zend_hash_persist_calc(&ce->constants_table, zend_persist_zval_calc);
+		zend_hash_persist_calc(&ce->constants_table, zend_persist_class_constant_calc);
 
-		if (ZEND_CE_FILENAME(ce)) {
-			ADD_STRING(ZEND_CE_FILENAME(ce));
+		if (ce->info.user.filename) {
+			ADD_STRING(ce->info.user.filename);
 		}
-		if (ZCG(accel_directives).save_comments && ZEND_CE_DOC_COMMENT(ce)) {
-			ADD_STRING(ZEND_CE_DOC_COMMENT(ce));
+		if (ZCG(accel_directives).save_comments && ce->info.user.doc_comment) {
+			ADD_STRING(ce->info.user.doc_comment);
 		}
 
 		zend_hash_persist_calc(&ce->properties_info, zend_persist_property_info_calc);
@@ -379,28 +396,32 @@ static void zend_accel_persist_class_table_calc(HashTable *class_table)
 	zend_hash_persist_calc(class_table, zend_persist_class_entry_calc);
 }
 
-uint zend_accel_script_persist_calc(zend_persistent_script *new_persistent_script, char *key, unsigned int key_length)
+uint32_t zend_accel_script_persist_calc(zend_persistent_script *new_persistent_script, char *key, unsigned int key_length)
 {
 	new_persistent_script->mem = NULL;
 	new_persistent_script->size = 0;
 	new_persistent_script->arena_mem = NULL;
 	new_persistent_script->arena_size = 0;
+	new_persistent_script->corrupted = 0;
 	ZCG(current_persistent_script) = new_persistent_script;
 
 	ADD_DUP_SIZE(new_persistent_script, sizeof(zend_persistent_script));
 	if (key) {
 		ADD_DUP_SIZE(key, key_length + 1);
+	} else {
+		/* script is not going to be saved in SHM */
+		new_persistent_script->corrupted = 1;
 	}
-	ADD_STRING(new_persistent_script->full_path);
+	ADD_STRING(new_persistent_script->script.filename);
 
 #ifdef __SSE2__
 	/* Align size to 64-byte boundary */
 	new_persistent_script->size = (new_persistent_script->size + 63) & ~63;
 #endif
 
-	zend_accel_persist_class_table_calc(&new_persistent_script->class_table);
-	zend_hash_persist_calc(&new_persistent_script->function_table, zend_persist_op_array_calc);
-	zend_persist_op_array_calc_ex(&new_persistent_script->main_op_array);
+	zend_accel_persist_class_table_calc(&new_persistent_script->script.class_table);
+	zend_hash_persist_calc(&new_persistent_script->script.function_table, zend_persist_op_array_calc);
+	zend_persist_op_array_calc_ex(&new_persistent_script->script.main_op_array);
 
 #ifdef __SSE2__
 	/* Align size to 64-byte boundary */
@@ -408,6 +429,7 @@ uint zend_accel_script_persist_calc(zend_persistent_script *new_persistent_scrip
 #endif
 
 	new_persistent_script->size += new_persistent_script->arena_size;
+	new_persistent_script->corrupted = 0;
 
 	ZCG(current_persistent_script) = NULL;
 

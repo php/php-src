@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -142,14 +142,14 @@ PHP_FUNCTION(header_register_callback)
 }
 /* }}} */
 
-static void sapi_run_header_callback(void)
+static void sapi_run_header_callback(zval *callback)
 {
 	int   error;
 	zend_fcall_info fci;
 	char *callback_error = NULL;
 	zval retval;
 
-	if (zend_fcall_info_init(&SG(callback_func), 0, &fci, &SG(fci_cache), NULL, &callback_error) == SUCCESS) {
+	if (zend_fcall_info_init(callback, 0, &fci, &SG(fci_cache), NULL, &callback_error) == SUCCESS) {
 		fci.retval = &retval;
 
 		error = zend_call_function(&fci, &SG(fci_cache));
@@ -180,7 +180,7 @@ SAPI_API void sapi_handle_post(void *arg)
 static void sapi_read_post_data(void)
 {
 	sapi_post_entry *post_entry;
-	uint content_type_length = (uint)strlen(SG(request_info).content_type);
+	uint32_t content_type_length = (uint32_t)strlen(SG(request_info).content_type);
 	char *content_type = estrndup(SG(request_info).content_type, content_type_length);
 	char *p;
 	char oldchar=0;
@@ -262,7 +262,7 @@ SAPI_API size_t sapi_read_post_block(char *buffer, size_t buflen)
 SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 {
 	if ((SG(post_max_size) > 0) && (SG(request_info).content_length > SG(post_max_size))) {
-		php_error_docref(NULL, E_WARNING, "POST Content-Length of %pd bytes exceeds the limit of %pd bytes",
+		php_error_docref(NULL, E_WARNING, "POST Content-Length of " ZEND_LONG_FMT " bytes exceeds the limit of " ZEND_LONG_FMT " bytes",
 					SG(request_info).content_length, SG(post_max_size));
 		return;
 	}
@@ -302,21 +302,21 @@ SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 }
 
 
-static inline char *get_default_content_type(uint prefix_len, uint *len)
+static inline char *get_default_content_type(uint32_t prefix_len, uint32_t *len)
 {
 	char *mimetype, *charset, *content_type;
-	uint mimetype_len, charset_len;
+	uint32_t mimetype_len, charset_len;
 
 	if (SG(default_mimetype)) {
 		mimetype = SG(default_mimetype);
-		mimetype_len = (uint)strlen(SG(default_mimetype));
+		mimetype_len = (uint32_t)strlen(SG(default_mimetype));
 	} else {
 		mimetype = SAPI_DEFAULT_MIMETYPE;
 		mimetype_len = sizeof(SAPI_DEFAULT_MIMETYPE) - 1;
 	}
 	if (SG(default_charset)) {
 		charset = SG(default_charset);
-		charset_len = (uint)strlen(SG(default_charset));
+		charset_len = (uint32_t)strlen(SG(default_charset));
 	} else {
 		charset = SAPI_DEFAULT_CHARSET;
 		charset_len = sizeof(SAPI_DEFAULT_CHARSET) - 1;
@@ -344,7 +344,7 @@ static inline char *get_default_content_type(uint prefix_len, uint *len)
 
 SAPI_API char *sapi_get_default_content_type(void)
 {
-	uint len;
+	uint32_t len;
 
 	return get_default_content_type(0, &len);
 }
@@ -352,7 +352,7 @@ SAPI_API char *sapi_get_default_content_type(void)
 
 SAPI_API void sapi_get_default_content_type_header(sapi_header_struct *default_header)
 {
-    uint len;
+    uint32_t len;
 
 	default_header->header = get_default_content_type(sizeof("Content-type: ")-1, &len);
 	default_header->header_len = len;
@@ -446,7 +446,6 @@ SAPI_API void sapi_activate(void)
 	SG(sapi_headers).http_status_line = NULL;
 	SG(sapi_headers).mimetype = NULL;
 	SG(headers_sent) = 0;
-	SG(callback_run) = 0;
 	ZVAL_UNDEF(&SG(callback_func));
 	SG(read_post_bytes) = 0;
 	SG(request_info).request_body = NULL;
@@ -480,10 +479,9 @@ SAPI_API void sapi_activate(void)
 
 		/* Cookies */
 		SG(request_info).cookie_data = sapi_module.read_cookies();
-
-		if (sapi_module.activate) {
-			sapi_module.activate();
-		}
+	}
+	if (sapi_module.activate) {
+		sapi_module.activate();
 	}
 	if (sapi_module.input_filter_init) {
 		sapi_module.input_filter_init();
@@ -543,8 +541,6 @@ SAPI_API void sapi_deactivate(void)
 	sapi_send_headers_free();
 	SG(sapi_started) = 0;
 	SG(headers_sent) = 0;
-	SG(callback_run) = 0;
-	zval_ptr_dtor(&SG(callback_func));
 	SG(request_info).headers_read = 0;
 	SG(global_request_time) = 0;
 }
@@ -737,7 +733,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 		return SUCCESS;
 	} else {
 		/* new line/NUL character safety check */
-		uint i;
+		uint32_t i;
 		for (i = 0; i < header_line_len; i++) {
 			/* RFC 7230 ch. 3.2.4 deprecates folding support */
 			if (header_line[i] == '\n' || header_line[i] == '\r') {
@@ -799,7 +795,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 					PHP_STRLCPY(newheader, "Content-type: ", newlen, sizeof("Content-type: ")-1);
 					strlcat(newheader, mimetype, newlen);
 					sapi_header.header = newheader;
-					sapi_header.header_len = (uint)(newlen - 1);
+					sapi_header.header_len = (uint32_t)(newlen - 1);
 					efree(header_line);
 				}
 				efree(mimetype);
@@ -851,7 +847,7 @@ SAPI_API int sapi_send_headers(void)
 	int retval;
 	int ret = FAILURE;
 
-	if (SG(headers_sent) || SG(request_info).no_headers || SG(callback_run)) {
+	if (SG(headers_sent) || SG(request_info).no_headers) {
 		return SUCCESS;
 	}
 
@@ -859,21 +855,33 @@ SAPI_API int sapi_send_headers(void)
 	 * in case of an error situation.
 	 */
 	if (SG(sapi_headers).send_default_content_type && sapi_module.send_headers) {
-		sapi_header_struct default_header;
-	    uint len;
+	    uint32_t len = 0;
+		char *default_mimetype = get_default_content_type(0, &len);
 
-		SG(sapi_headers).mimetype = get_default_content_type(0, &len);
-		default_header.header_len = sizeof("Content-type: ") - 1 + len;
-		default_header.header = emalloc(default_header.header_len + 1);
-		memcpy(default_header.header, "Content-type: ", sizeof("Content-type: ") - 1);
-		memcpy(default_header.header + sizeof("Content-type: ") - 1, SG(sapi_headers).mimetype, len + 1);
-		sapi_header_add_op(SAPI_HEADER_ADD, &default_header);
+		if (default_mimetype && len) {
+			sapi_header_struct default_header;
+
+			SG(sapi_headers).mimetype = default_mimetype;
+
+			default_header.header_len = sizeof("Content-type: ") - 1 + len;
+			default_header.header = emalloc(default_header.header_len + 1);
+
+			memcpy(default_header.header, "Content-type: ", sizeof("Content-type: ") - 1);
+			memcpy(default_header.header + sizeof("Content-type: ") - 1, SG(sapi_headers).mimetype, len + 1);
+			
+			sapi_header_add_op(SAPI_HEADER_ADD, &default_header);
+		} else {
+			efree(default_mimetype);
+		}
 		SG(sapi_headers).send_default_content_type = 0;
 	}
 
-	if (Z_TYPE(SG(callback_func)) != IS_UNDEF && !SG(callback_run)) {
-		SG(callback_run) = 1;
-		sapi_run_header_callback();
+	if (Z_TYPE(SG(callback_func)) != IS_UNDEF) {
+		zval cb;
+		ZVAL_COPY_VALUE(&cb, &SG(callback_func));
+		ZVAL_UNDEF(&SG(callback_func));
+		sapi_run_header_callback(&cb);
+		zval_ptr_dtor(&cb);
 	}
 
 	SG(headers_sent) = 1;
@@ -894,7 +902,7 @@ SAPI_API int sapi_send_headers(void)
 
 				if (SG(sapi_headers).http_status_line) {
 					http_status_line.header = SG(sapi_headers).http_status_line;
-					http_status_line.header_len = (uint)strlen(SG(sapi_headers).http_status_line);
+					http_status_line.header_len = (uint32_t)strlen(SG(sapi_headers).http_status_line);
 				} else {
 					http_status_line.header = buf;
 					http_status_line.header_len = slprintf(buf, sizeof(buf), "HTTP/1.0 %d X", SG(sapi_headers).http_response_code);
@@ -1011,6 +1019,10 @@ SAPI_API zend_stat_t *sapi_get_stat(void)
 
 SAPI_API char *sapi_getenv(char *name, size_t name_len)
 {
+	if (!strncasecmp(name, "HTTP_PROXY", name_len)) {
+		/* Ugly fix for HTTP_PROXY issue, see bug #72573 */
+		return NULL;
+	}
 	if (sapi_module.getenv) {
 		char *value, *tmp = sapi_module.getenv(name, name_len);
 		if (tmp) {

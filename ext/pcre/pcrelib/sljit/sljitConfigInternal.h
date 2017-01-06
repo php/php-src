@@ -468,7 +468,12 @@ typedef double sljit_d;
 
 #ifndef SLJIT_CALL
 
-#if (defined SLJIT_CONFIG_X86_32 && SLJIT_CONFIG_X86_32)
+#if (defined SLJIT_USE_CDECL_CALLING_CONVENTION && SLJIT_USE_CDECL_CALLING_CONVENTION)
+
+/* Force cdecl. */
+#define SLJIT_CALL
+
+#elif (defined SLJIT_CONFIG_X86_32 && SLJIT_CONFIG_X86_32)
 
 #if defined(__GNUC__) && !defined(__APPLE__)
 
@@ -607,6 +612,12 @@ SLJIT_API_FUNC_ATTRIBUTE void sljit_free_unused_memory_exec(void);
 /* Add +1 for double alignment. */
 #define SLJIT_LOCALS_OFFSET_BASE ((23 + 1) * sizeof(sljit_sw))
 #endif
+
+#elif (defined SLJIT_CONFIG_TILEGX && SLJIT_CONFIG_TILEGX)
+
+#define SLJIT_NUMBER_OF_REGISTERS 10
+#define SLJIT_NUMBER_OF_SAVED_REGISTERS 5
+#define SLJIT_LOCALS_OFFSET_BASE 0
 
 #elif (defined SLJIT_CONFIG_UNSUPPORTED && SLJIT_CONFIG_UNSUPPORTED)
 

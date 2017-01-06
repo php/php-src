@@ -1,5 +1,5 @@
 --TEST--
-Bug #44159 (Crash: $pdo->setAttribute(PDO::STATEMENT_ATTR_CLASS, NULL))
+PDO Common: Bug #44159 (Crash: $pdo->setAttribute(PDO::STATEMENT_ATTR_CLASS, NULL))
 --SKIPIF--
 <?php # vim:ft=php
 if (!extension_loaded('pdo')) die('skip PDO not available');

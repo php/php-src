@@ -12,9 +12,9 @@ echo $rc;
 Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
 
   - Constants [3] {
-    Constant [ integer IS_IMPLICIT_ABSTRACT ] { 16 }
-    Constant [ integer IS_EXPLICIT_ABSTRACT ] { 32 }
-    Constant [ integer IS_FINAL ] { 4 }
+    Constant [ public integer IS_IMPLICIT_ABSTRACT ] { 16 }
+    Constant [ public integer IS_EXPLICIT_ABSTRACT ] { 32 }
+    Constant [ public integer IS_FINAL ] { 4 }
   }
 
   - Static properties [0] {
@@ -34,7 +34,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
     Property [ <default> public $name ]
   }
 
-  - Methods [50] {
+  - Methods [52] {
     Method [ <internal:Reflection> final private method __clone ] {
 
       - Parameters [0] {
@@ -175,7 +175,20 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
       }
     }
 
+    Method [ <internal:Reflection> public method getReflectionConstants ] {
+
+      - Parameters [0] {
+      }
+    }
+
     Method [ <internal:Reflection> public method getConstant ] {
+
+      - Parameters [1] {
+        Parameter #0 [ <required> $name ]
+      }
+    }
+
+    Method [ <internal:Reflection> public method getReflectionConstant ] {
 
       - Parameters [1] {
         Parameter #0 [ <required> $name ]

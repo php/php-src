@@ -90,7 +90,7 @@ class Soap12test {
 		return count($input);
 	}
 
-	function isNil($input) {
+	function isNil($input=NULL) {
 		return is_null($input);
 	}
 

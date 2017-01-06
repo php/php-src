@@ -2,7 +2,7 @@
 Error message handling (with ZendOpcache)
 --SKIPIF--
 <?php
-if (!extension_loaded("Zend Opcache")) die("skip Zend Opcache is loaded");
+if (!extension_loaded("Zend Opcache")) die("skip Zend Opcache is not loaded");
 ?>
 --FILE--
 <?php

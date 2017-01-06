@@ -4,7 +4,7 @@ SQLite3:: reset
 Ward Hus & James Cauwelier
 #@ PHP TESTFEST 2009 (BELGIUM)
 --SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
+<?php require_once(__DIR__ . '/skipif.inc'); ?>
 --FILE--
 <?php
 

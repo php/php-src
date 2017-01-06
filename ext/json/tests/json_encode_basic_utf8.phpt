@@ -1,18 +1,9 @@
 --TEST--
 Test json_encode() function : basic functionality with UTF8 string input
 --SKIPIF--
-<?php 
-if (!extension_loaded("json")) {
- 	die('skip JSON extension not available in this build');
-}	 
-?> 
+<?php if (!extension_loaded("json")) print "skip"; ?>
 --FILE--
 <?php
-/* Prototype  : string json_encode  ( mixed $value  )
- * Description: Returns the JSON representation of a value
- * Source code: ext/json/php_json.c
- * Alias to functions: 
- */
 echo "*** Testing json_encode() : basic functionality with UTF-8 input***\n";
 
 $utf8_string = base64_decode('5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII=');

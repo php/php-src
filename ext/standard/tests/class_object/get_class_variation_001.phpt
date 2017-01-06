@@ -152,12 +152,12 @@ bool(false)
 
 Arg value:  (type: NULL)
 
-Warning: get_class() called without object from outside a class in %sget_class_variation_001.php on line %d
+Warning: get_class() expects parameter 1 to be object, null given in %s on line %d
 bool(false)
 
 Arg value:  (type: NULL)
 
-Warning: get_class() called without object from outside a class in %sget_class_variation_001.php on line %d
+Warning: get_class() expects parameter 1 to be object, null given in %s on line %d
 bool(false)
 
 Arg value: 1 (type: boolean)
@@ -202,11 +202,11 @@ bool(false)
 
 Arg value:  (type: NULL)
 
-Warning: get_class() called without object from outside a class in %sget_class_variation_001.php on line %d
+Warning: get_class() expects parameter 1 to be object, null given in %s on line %d
 bool(false)
 
 Arg value:  (type: NULL)
 
-Warning: get_class() called without object from outside a class in %sget_class_variation_001.php on line %d
+Warning: get_class() expects parameter 1 to be object, null given in %s on line %d
 bool(false)
 Done

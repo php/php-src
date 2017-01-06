@@ -145,9 +145,6 @@ static const char rcsid[] = "#(@) $Id$";
 
 #include "ext/xml/expat_compat.h"
 #include "main/php_reentrancy.h"
-#ifdef _WIN32
-#include "xmlrpc_win32.h"
-#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -308,7 +305,7 @@ static int date_to_ISO8601 (time_t value, char *buf, int length) {
  * SOURCE
  */
 XMLRPC_REQUEST XMLRPC_RequestNew() {
-   XMLRPC_REQUEST xRequest = calloc(1, sizeof(STRUCT_XMLRPC_REQUEST));
+   XMLRPC_REQUEST xRequest = ecalloc(1, sizeof(STRUCT_XMLRPC_REQUEST));
    if(xRequest) {
       simplestring_init(&xRequest->methodName);
    }
@@ -861,7 +858,7 @@ XMLRPC_REQUEST XMLRPC_REQUEST_FromXML (const char *in_buf, int len,
  * SOURCE
  */
 XMLRPC_VALUE XMLRPC_CreateValueEmpty() {
-   XMLRPC_VALUE v = calloc(1, sizeof(STRUCT_XMLRPC_VALUE));
+   XMLRPC_VALUE v = ecalloc(1, sizeof(STRUCT_XMLRPC_VALUE));
    if(v) {
 #ifdef XMLRPC_DEBUG_REFCOUNT
 		printf ("calloc'd 0x%x\n", v);
@@ -1053,9 +1050,9 @@ int XMLRPC_SetIsVector(XMLRPC_VALUE value, XMLRPC_VECTOR_TYPE type) {
 			}
 		}
 		else {
-      value->v = calloc(1, sizeof(STRUCT_XMLRPC_VECTOR));
+      value->v = ecalloc(1, sizeof(STRUCT_XMLRPC_VECTOR));
       if(value->v) {
-         value->v->q = (queue*)malloc(sizeof(queue));
+         value->v->q = (queue*)emalloc(sizeof(queue));
          if(value->v->q) {
             Q_Init(value->v->q);
             value->v->type = type;
@@ -2322,7 +2319,7 @@ XMLRPC_VALUE_TYPE_EASY XMLRPC_GetValueTypeEasy (XMLRPC_VALUE value) {
  * SOURCE
  */
 XMLRPC_SERVER XMLRPC_ServerCreate() {
-   XMLRPC_SERVER server = calloc(1, sizeof(STRUCT_XMLRPC_SERVER));
+   XMLRPC_SERVER server = ecalloc(1, sizeof(STRUCT_XMLRPC_SERVER));
    if(server) {
       Q_Init(&server->methodlist);
       Q_Init(&server->docslist);
@@ -2392,9 +2389,7 @@ void XMLRPC_ServerDestroy(XMLRPC_SERVER server) {
          dm = Q_Next(&server->docslist);
       }
       while( sm ) {
-         if(sm->name) {
-            my_free(sm->name);
-         }
+         my_free(sm->name);
          if(sm->desc) {
             XMLRPC_CleanupValue(sm->desc);
          }
@@ -2439,10 +2434,10 @@ void XMLRPC_ServerDestroy(XMLRPC_SERVER server) {
 int XMLRPC_ServerRegisterMethod(XMLRPC_SERVER server, const char *name, XMLRPC_Callback cb) {
    if(server && name && cb) {
 
-      server_method* sm = malloc(sizeof(server_method));
+      server_method* sm = emalloc(sizeof(server_method));
 
       if(sm) {
-         sm->name = strdup(name);
+         sm->name = estrdup(name);
          sm->method = cb;
          sm->desc = NULL;
 

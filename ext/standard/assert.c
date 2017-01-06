@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -157,14 +157,19 @@ PHP_FUNCTION(assert)
 		RETURN_TRUE;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|z", &assertion, &description) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ZVAL_DEREF(assertion)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL_DEREF(description)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (Z_TYPE_P(assertion) == IS_STRING) {
 		zval retval;
 		int old_error_reporting = 0; /* shut up gcc! */
-		zend_class_entry *orig_scope = EG(scope);
+
+		if (zend_forbid_dynamic_call("assert() with string argument") == FAILURE) {
+			RETURN_FALSE;
+		}
 
 		myeval = Z_STRVAL_P(assertion);
 
@@ -177,10 +182,10 @@ PHP_FUNCTION(assert)
 		if (zend_eval_stringl(myeval, Z_STRLEN_P(assertion), &retval, compiled_string_description) == FAILURE) {
 			efree(compiled_string_description);
 			if (!description) {
-				php_error_docref(NULL, E_RECOVERABLE_ERROR, "Failure evaluating code: %s%s", PHP_EOL, myeval);
+				zend_throw_error(NULL, "Failure evaluating code: %s%s", PHP_EOL, myeval);
 			} else {
 				zend_string *str = zval_get_string(description);
-				php_error_docref(NULL, E_RECOVERABLE_ERROR, "Failure evaluating code: %s%s:\"%s\"", PHP_EOL, ZSTR_VAL(str), myeval);
+				zend_throw_error(NULL, "Failure evaluating code: %s%s:\"%s\"", PHP_EOL, ZSTR_VAL(str), myeval);
 				zend_string_release(str);
 			}
 			if (ASSERTG(bail)) {
@@ -193,8 +198,6 @@ PHP_FUNCTION(assert)
 		if (ASSERTG(quiet_eval)) {
 			EG(error_reporting) = old_error_reporting;
 		}
-
-		EG(scope) = orig_scope;
 
 		convert_to_boolean(&retval);
 		val = Z_TYPE(retval) == IS_TRUE;
@@ -214,7 +217,7 @@ PHP_FUNCTION(assert)
 		zval *args = safe_emalloc(!description ? 3 : 4, sizeof(zval), 0);
 		zval retval;
 		int i;
-		uint lineno = zend_get_executed_lineno();
+		uint32_t lineno = zend_get_executed_lineno();
 		const char *filename = zend_get_executed_filename();
 
 		ZVAL_STRING(&args[0], SAFE_STRING(filename));
@@ -245,7 +248,7 @@ PHP_FUNCTION(assert)
 		if (!description) {
 			zend_throw_exception(assertion_error_ce, NULL, E_ERROR);
 		} else if (Z_TYPE_P(description) == IS_OBJECT &&
-			instanceof_function(Z_OBJCE_P(description), assertion_error_ce)) {
+			instanceof_function(Z_OBJCE_P(description), zend_ce_throwable)) {
 			Z_ADDREF_P(description);
 			zend_throw_exception_object(description);
 		} else {
@@ -274,6 +277,8 @@ PHP_FUNCTION(assert)
 	if (ASSERTG(bail)) {
 		zend_bailout();
 	}
+	
+	RETURN_FALSE;
 }
 /* }}} */
 
@@ -287,9 +292,11 @@ PHP_FUNCTION(assert_options)
 	int ac = ZEND_NUM_ARGS();
 	zend_string *key;
 
-	if (zend_parse_parameters(ac, "l|z", &what, &value) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_LONG(what)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL_DEREF(value)
+	ZEND_PARSE_PARAMETERS_END();
 
 	switch (what) {
 	case ASSERT_ACTIVE:
@@ -367,7 +374,7 @@ PHP_FUNCTION(assert_options)
 		break;
 
 	default:
-		php_error_docref(NULL, E_WARNING, "Unknown value %pd", what);
+		php_error_docref(NULL, E_WARNING, "Unknown value " ZEND_LONG_FMT, what);
 		break;
 	}
 

@@ -60,6 +60,7 @@ $urls = array(
 '/foo.php?a=b&c=d',
 'foo.php?a=b&c=d',
 'http://user:passwd@www.example.com:8080?bar=1&boom=0',
+'http://user_me-you:my_pas-word@www.example.com:8080?bar=1&boom=0',
 'file:///path/to/file',
 'file://path/to/file',
 'file:/path/to/file',

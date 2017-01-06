@@ -4,9 +4,16 @@ FPM: Test Unix Domain Socket with Posix ACL
 <?php
 include "skipif.inc";
 if (!(file_exists('/usr/bin/getfacl') && file_exists('/etc/passwd') && file_exists('/etc/group'))) die ("skip missing getfacl command");
+$cfg = <<<EOT
+[global]
+[unconfined]
+listen = 127.0.0.1:9999
+listen.acl_users = nobody
+listen.acl_groups = nobody
+listen.mode = 0600
+EOT;
+if (test_fpm_conf($cfg, $msg) == false) { die("skip " .  $msg); }
 ?>
---XFAIL--
-Mark as XFAIL because --with-fpm-acl is not enabled in default build
 --FILE--
 <?php
 

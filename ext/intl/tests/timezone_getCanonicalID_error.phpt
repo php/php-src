@@ -11,7 +11,6 @@ ini_set("intl.error_level", E_WARNING);
 var_dump(IntlTimeZone::getCanonicalID());
 var_dump(IntlTimeZone::getCanonicalID(array()));
 var_dump(IntlTimeZone::getCanonicalID("foo\x81"));
-var_dump(IntlTimeZone::getCanonicalID('foobar', null));
 
 
 --EXPECTF--
@@ -28,8 +27,3 @@ bool(false)
 
 Warning: IntlTimeZone::getCanonicalID(): intltz_get_canonical_id: could not convert time zone id to UTF-16 in %s on line %d
 bool(false)
-
-Fatal error: Uncaught Error: Cannot pass parameter 2 by reference in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d

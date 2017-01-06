@@ -153,7 +153,7 @@ zend_module_entry extname_module_entry = {
 
 #ifdef COMPILE_DL_EXTNAME
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(extname)
 #endif

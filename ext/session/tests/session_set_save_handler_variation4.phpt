@@ -65,7 +65,7 @@ array(3) {
 }
 Write [%s,%s,Blah|s:12:"Hello World!";Foo|b:0;Guff|i:1234567890;]
 Close [%s,PHPSESSID]
-NULL
+bool(true)
 Open [%s,PHPSESSID]
 Read [%s,%s]
 GC [0]
@@ -80,7 +80,7 @@ array(3) {
 }
 Destroy [%s,%s]
 
-Warning: unlink(%s): No such file or directory in %s on line %d
+Warning: unlink(%s): No such file or directory in %s on line %s
 Close [%s,PHPSESSID]
 bool(true)
 

@@ -30,12 +30,12 @@ $valid_ints = array(
                 '0x12ab',
                 '0Xfff',
                 '0XFA',
-                -0x80000000, // max negative integer as hexadecimal
+                -0x7fffffff - 1, // max negative integer as hexadecimal
                 '0x7fffffff',  // max positive integer as hexadecimal
                 0x7FFFFFFF,  // max positive integer as hexadecimal
                 '0123',        // integer as octal
                 01,       // should be quivalent to octal 1
-                -020000000000, // max negative integer as octal
+                -017777777777 - 1, // max negative integer as octal
                 017777777777,  // max positive integer as octal
                );
 $counter = 1;
@@ -79,12 +79,12 @@ $counter++;
 echo "*** Testing var_export() with valid float values ***\n";
 // different valid  float vlaues 
 $valid_floats = array(
-  -2147483649, // float value
-  2147483648,  // float value
-  -0x80000001, // float value, beyond max negative int
-  0x800000001, // float value, beyond max positive int
-  020000000001, // float value, beyond max positive int
-  -020000000001, // float value, beyond max negative int
+  (float)-2147483649, // float value
+  (float)2147483648,  // float value
+  (float)-0x80000001, // float value, beyond max negative int
+  (float)0x800000001, // float value, beyond max positive int
+  (float)020000000001, // float value, beyond max positive int
+  (float)-020000000001, // float value, beyond max negative int
   0.0,
   -0.1,
   10.0000000000000000005,
@@ -103,7 +103,7 @@ $valid_floats = array(
 $counter = 1;
 /* Loop to check for above float values with var_export() */
 echo "\n*** Output for float values ***\n";
-foreach($valid_bool as $float_value) {
+foreach($valid_floats as $float_value) {
 echo "\nIteration ".$counter."\n";
 var_export( $float_value );
 echo "\n";
@@ -467,39 +467,123 @@ string(5) "false"
 *** Output for float values ***
 
 Iteration 1
-1
-1
-string(1) "1"
+-2147483649.0
+-2147483649.0
+string(13) "-2147483649.0"
 
 
 Iteration 2
-true
-true
-string(4) "true"
+2147483648.0
+2147483648.0
+string(12) "2147483648.0"
 
 
 Iteration 3
-true
-true
-string(4) "true"
+-2147483649.0
+-2147483649.0
+string(13) "-2147483649.0"
 
 
 Iteration 4
-0
-0
-string(1) "0"
+34359738369.0
+34359738369.0
+string(13) "34359738369.0"
 
 
 Iteration 5
-false
-false
-string(5) "false"
+2147483649.0
+2147483649.0
+string(12) "2147483649.0"
 
 
 Iteration 6
-false
-false
-string(5) "false"
+-2147483649.0
+-2147483649.0
+string(13) "-2147483649.0"
+
+
+Iteration 7
+0.0
+0.0
+string(3) "0.0"
+
+
+Iteration 8
+-0.10000000000000001
+-0.10000000000000001
+string(20) "-0.10000000000000001"
+
+
+Iteration 9
+10.0
+10.0
+string(4) "10.0"
+
+
+Iteration 10
+1050000.0
+1050000.0
+string(9) "1050000.0"
+
+
+Iteration 11
+100000.0
+100000.0
+string(8) "100000.0"
+
+
+Iteration 12
+1.0000000000000001E-5
+1.0000000000000001E-5
+string(21) "1.0000000000000001E-5"
+
+
+Iteration 13
+100000.0
+100000.0
+string(8) "100000.0"
+
+
+Iteration 14
+100000.0
+100000.0
+string(8) "100000.0"
+
+
+Iteration 15
+100000.0
+100000.0
+string(8) "100000.0"
+
+
+Iteration 16
+1.0000000000000001E-5
+1.0000000000000001E-5
+string(21) "1.0000000000000001E-5"
+
+
+Iteration 17
+5000000.0
+5000000.0
+string(9) "5000000.0"
+
+
+Iteration 18
+6.0000000000000006E-20
+6.0000000000000006E-20
+string(22) "6.0000000000000006E-20"
+
+
+Iteration 19
+5.0000000000000001E+42
+5.0000000000000001E+42
+string(22) "5.0000000000000001E+42"
+
+
+Iteration 20
+3.4000000000000001E-33
+3.4000000000000001E-33
+string(22) "3.4000000000000001E-33"
 
 *** Testing var_export() with valid strings ***
 

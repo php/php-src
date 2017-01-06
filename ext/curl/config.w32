@@ -13,7 +13,7 @@ if (PHP_CURL != "no") {
 		&& (((PHP_ZLIB=="no") && (CHECK_LIB("zlib_a.lib;zlib.lib", "curl", PHP_CURL))) || 
 			(PHP_ZLIB_SHARED && CHECK_LIB("zlib.lib", "curl", PHP_CURL)) || (PHP_ZLIB == "yes" && (!PHP_ZLIB_SHARED)))
 		) {
-		EXTENSION("curl", "interface.c multi.c share.c curl_file.c", true);
+		EXTENSION("curl", "interface.c multi.c share.c curl_file.c");
 		AC_DEFINE('HAVE_CURL', 1, 'Have cURL library');
 		AC_DEFINE('HAVE_CURL_SSL', 1, 'Have SSL suppurt in cURL');
 		AC_DEFINE('HAVE_CURL_EASY_STRERROR', 1, 'Have curl_easy_strerror in cURL');

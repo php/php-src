@@ -229,7 +229,7 @@ C.Write(file_get_contents(PHP_DIR + "/script/config.phpize.js"));
 // Pull in code for the base detection
 modules = file_get_contents(PHP_DIR + "/script/config.w32.phpize.in");
 
-C.WriteLine("ARG_ENABLE('debug', 'Compile with debugging symbols', \"no\");");
+C.WriteLine("ARG_ENABLE('debug', 'Compile with debugging symbols', PHP_DEBUG);");
 find_config_w32(".");
 
 // Now generate contents of module based on MODULES, chasing dependencies
@@ -262,3 +262,5 @@ C.Write(file_get_contents(PHP_DIR + "\\script\\configure.tail"));
 
 B.WriteLine("@echo off");
 B.WriteLine("cscript /nologo configure.js %*");
+
+FSO.CopyFile(PHP_DIR + "\\script\\run-tests.php", "run-tests.php", true);
