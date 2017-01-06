@@ -207,6 +207,9 @@ PHP 7.2 UPGRADE NOTES
 - sql.safe_mode
   . This INI directive have been removed.
 
+- realpath_cache_size
+  . Set to 4096k by default
+
 ========================================
 12. Windows Support
 ========================================
