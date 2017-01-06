@@ -37,6 +37,11 @@ PHP 7.2 UPGRADE NOTES
     property names would become inaccessible string keys.
   . Minimum supported Windows versions are Windows 7/Server 2008 R2.
 
+- PCRE:
+  . preg_match() and other PCRE functions now distinguish between unmatched
+    subpatterns and empty matches by reporting NULL and "" (empty string),
+    respectively. Formerly, either was reported as empty string.
+
 - Session:
   . Removed register_globals related code and "!" can be used as $_SESSION key name.
   . Session is made to manage session status corretly and prevents invalid operations.
