@@ -11,6 +11,9 @@ PHP                                                                        NEWS
 - Session:
   . Fixed bug #69582 (session not readable by root in CLI). (EvgeniySpinov)
 
+- Standard:
+  . Fixed bug #69442 (closing of fd incorrect when PTS enabled). (jaytaph)
+
 19 Jan 2017, PHP 7.1.1
 
 - Core:
