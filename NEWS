@@ -8,6 +8,9 @@ PHP                                                                        NEWS
 - ZIP:
   . Fixed bug #70103 (ZipArchive::addGlob ignores remove_all_path option). (cmb)
 
+- Session:
+  . Fixed bug #69582 (session not readable by root in CLI). (EvgeniySpinov)
+
 19 Jan 2017, PHP 7.1.1
 
 - Core:
