@@ -183,12 +183,12 @@ static zend_always_inline zend_bool zend_iterable_compatibility_check(zend_arg_i
 
 static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_info *fe_arg_info, const zend_function *proto, zend_arg_info *proto_arg_info) /* {{{ */
 {
-	if (ZEND_LOG_XOR(fe_arg_info->class_name, proto_arg_info->class_name)) {
+	if (ZEND_TRUTH(fe_arg_info->class_name) == 0 && ZEND_TRUTH(proto_arg_info->class_name)) {
 		/* Only one has a type declaration and the other one doesn't */
 		return 0;
 	}
 
-	if (fe_arg_info->class_name) {
+	if (fe_arg_info->class_name && proto_arg_info->class_name) {
 		zend_string *fe_class_name, *proto_class_name;
 		const char *class_name;
 

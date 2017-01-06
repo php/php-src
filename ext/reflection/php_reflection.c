@@ -2917,7 +2917,7 @@ ZEND_METHOD(reflection_type, isBuiltin)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	RETVAL_BOOL(param->arg_info->type_hint != IS_OBJECT);
+	RETVAL_BOOL(param->arg_info->class_name == NULL);
 }
 /* }}} */
 
@@ -2927,6 +2927,9 @@ static zend_string *reflection_type_name(type_reference *param) {
 		case IS_ARRAY:    return zend_string_init("array", sizeof("array") - 1, 0);
 		case IS_CALLABLE: return zend_string_init("callable", sizeof("callable") - 1, 0);
 		case IS_OBJECT:
+			if (((zend_internal_arg_info*)param->arg_info)->class_name == NULL) {
+				return zend_string_init("object", sizeof("object") - 1, 0);
+			}
 			if (param->fptr->type == ZEND_INTERNAL_FUNCTION &&
 				!(param->fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
 				return zend_string_init(((zend_internal_arg_info*)param->arg_info)->class_name, strlen(((zend_internal_arg_info*)param->arg_info)->class_name), 0);
