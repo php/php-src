@@ -1533,11 +1533,10 @@ PHP_FUNCTION(fastcgi_finish_request) /* {{{ */
 	fcgi_request *request = (fcgi_request*) SG(server_context);
 
 	if (!fcgi_is_closed(request)) {
-
 		php_output_end_all();
 		php_header();
 
-		fcgi_flush(request, 1);
+		fcgi_end(request);
 		fcgi_close(request, 0, 0);
 		RETURN_TRUE;
 	}

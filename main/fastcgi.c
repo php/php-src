@@ -1645,15 +1645,21 @@ int fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int l
 	return len;
 }
 
+int fcgi_end(fcgi_request *req) {
+	int ret = 1;
+	if (!req->ended) {
+		ret = fcgi_flush(req, 1);
+		req->ended = 1;
+	}
+	return ret;
+}
+
 int fcgi_finish_request(fcgi_request *req, int force_close)
 {
 	int ret = 1;
 
 	if (req->fd >= 0) {
-		if (!req->ended) {
-			ret = fcgi_flush(req, 1);
-			req->ended = 1;
-		}
+		ret = fcgi_end(req);
 		fcgi_close(req, force_close, 1);
 	}
 	return ret;
