@@ -239,6 +239,10 @@ PHP 7.1 UPGRADE NOTES
 - output_reset_rewrite_vars() no longer reset session URL rewrite vars.
 - the lasinsertid() in pdo_pgsql extension triggers an error, when no nextval()
   were called in in the current session.
+- fopen()
+  Since 7.1.2, mode 'e' was added, which sets the close-on-exec flag
+  on the opened file descriptor. This mode is only available in PHP compiled on
+  POSIX.1-2008 conform systems.
 
 
 ========================================
@@ -340,7 +344,7 @@ PHP 7.1 UPGRADE NOTES
     an instance of Error instead of resulting in a fatal error.
 
 - PDO_Firebird
-  As of PHP 7.1.3, the fetched data for integer fields is aware of the Firebird
+  As of PHP 7.1.2, the fetched data for integer fields is aware of the Firebird
   datatypes. Previously all integers was fetched as strings, starting with
   aforementioned PHP version integer fields are translated to the PHP integer
   datatype. The 64-bit integers are still fetched as strings in 32-bit PHP
