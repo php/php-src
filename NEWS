@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2017, PHP 7.1.2
 
+- Core:
+  . Fixed bug #73877 (readlink() returns garbage for UTF-8 paths). (Anatol)
+
 - OpenSSL:
   . Fixed bug #71519 (add serial hex to return value array). (xrobau)
 
