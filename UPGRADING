@@ -652,6 +652,11 @@ Other
   Since 7.0.9, getenv() has optional second parameter, making it only
   consider local environment and not SAPI environment if true.
 
+- fopen()
+  Since 7.0.16, mode 'e' was added, which sets the close-on-exec flag
+  on the opened file descriptor. This mode is only available in PHP compiled on
+  POSIX.1-2008 conform systems.
+
 ========================================
 6. New Functions
 ========================================
