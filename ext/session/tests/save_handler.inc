@@ -53,7 +53,7 @@ function gc($maxlifetime) {
     while (($file = readdir($directory)) !== FALSE) {
         $qualified = ($session_save_path."/".$file); 
         if (is_file($qualified) === TRUE) {
-            if (substr($file, 0, $length) === SESSION_FILE_PREFIX) {
+            if (substr($file, 0, $length) === SESSION_FILE_PREFIX && (filemtime($qualified) + $maxlifetime <= time() )) {
                 unlink($qualified);
             }
         }

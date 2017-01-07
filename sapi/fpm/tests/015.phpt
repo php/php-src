@@ -42,8 +42,8 @@ EOT;
 $fpm = run_fpm($cfg, $tail);
 if (is_resource($fpm)) {
     $i = 0;
-	while (($i++ < 30) && !($fp = @fsockopen('127.0.0.1', $port1))) {
-		usleep(10000);
+	while (($i++ < 60) && !($fp = @fsockopen('127.0.0.1', $port1))) {
+		usleep(25000);
 	}
 	if ($fp) {
 		echo "Started\n";
