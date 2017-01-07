@@ -2856,7 +2856,9 @@ function toolset_setup_common_cflags()
 			ADD_FLAG('CFLAGS', ' /RTC1 ');
 		} else {
 			if (VCVERS >= 1900) {
-				ADD_FLAG('CFLAGS', "/guard:cf");
+				if (PHP_SECURITY_FLAGS == "yes") {
+					ADD_FLAG('CFLAGS', "/guard:cf");
+				}
 			}
 		}
 
@@ -2888,7 +2890,9 @@ function toolset_setup_common_ldlags()
 
 	if (VS_TOOLSET) {
 		if (VCVERS >= 1900) {
-			ADD_FLAG('LDFLAGS', "/GUARD:CF");
+			if (PHP_SECURITY_FLAGS == "yes") {
+				ADD_FLAG('LDFLAGS', "/GUARD:CF");
+			}
 		}
 	}
 }
