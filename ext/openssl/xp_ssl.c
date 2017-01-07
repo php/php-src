@@ -585,6 +585,11 @@ static int win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, void *arg) /
 {
 	PCCERT_CONTEXT cert_ctx = NULL;
 	PCCERT_CHAIN_CONTEXT cert_chain_ctx = NULL;
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+	X509 *cert = x509_store_ctx->cert;
+#else
+	X509 *cert = X509_STORE_CTX_get0_cert(x509_store_ctx);
+#endif
 
 	php_stream *stream;
 	php_openssl_netstream_data_t *sslsock;
@@ -599,7 +604,7 @@ static int win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, void *arg) /
 		unsigned char *der_buf = NULL;
 		int der_len;
 
-		der_len = i2d_X509(x509_store_ctx->cert, &der_buf);
+		der_len = i2d_X509(cert, &der_buf);
 		if (der_len < 0) {
 			unsigned long err_code, e;
 			char err_buf[512];
@@ -676,7 +681,7 @@ static int win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, void *arg) /
 			int index, cert_name_utf8_len;
 			DWORD num_wchars;
 
-			cert_name = X509_get_subject_name(x509_store_ctx->cert);
+			cert_name = X509_get_subject_name(cert);
 			index = X509_NAME_get_index_by_NID(cert_name, NID_commonName, -1);
 			if (index < 0) {
 				php_error_docref(NULL, E_WARNING, "Unable to locate certificate CN");
