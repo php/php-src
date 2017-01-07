@@ -19,10 +19,12 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug #69442 (closing of fd incorrect when PTS enabled). (jaytaph)
+  . Fixed bug #47021 (SoapClient stumbles over WSDL delivered with
+    "Transfer-Encoding: chunked"). (Rowan Collins)
 
 - ZIP:
-	. Fixed bug #70103 (ZipArchive::addGlob ignores remove_all_path option). (cmb,
-	  Mitch Hagstrand)
+  . Fixed bug #70103 (ZipArchive::addGlob ignores remove_all_path option). (cmb,
+    Mitch Hagstrand)
 
 19 Jan 2017, PHP 7.1.1
 
