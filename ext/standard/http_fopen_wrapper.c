@@ -122,7 +122,6 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 	char *ua_str = NULL;
 	zval *ua_zval = NULL, *tmpzval = NULL, ssl_proxy_peer_name;
 	size_t scratch_len = 0;
-	int body = 0;
 	char location[HTTP_HEADER_BLOCK_SIZE];
 	zval response_header;
 	int reqok = 0;
@@ -753,7 +752,7 @@ finish:
 
 	http_header_line = emalloc(HTTP_HEADER_BLOCK_SIZE);
 
-	while (!body && !php_stream_eof(stream)) {
+	while (!php_stream_eof(stream)) {
 		size_t http_header_line_length;
 		
 		if (php_stream_get_line(stream, http_header_line, HTTP_HEADER_BLOCK_SIZE, &http_header_line_length) && *http_header_line != '\n' && *http_header_line != '\r') {
@@ -769,7 +768,7 @@ finish:
 				} while (*e != '\n');
 				continue;
 			}
-			while (*e == '\n' || *e == '\r') {
+			while (e >= http_header_line && (*e == '\n' || *e == '\r')) {
 				e--;
 			}
 
@@ -779,7 +778,7 @@ finish:
 			 * > optional trailing whitespace. */
 
 			/* Strip trailing whitespace */
-			while (*e == ' ' || *e == '\t') {
+			while (e >= http_header_line && (*e == ' ' || *e == '\t')) {
 				e--;
 			}
 
