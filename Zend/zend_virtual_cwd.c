@@ -165,10 +165,9 @@ static inline time_t FileTimeToUnixTime(const FILETIME *FileTime)
 
 CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len){ /* {{{ */
 	HANDLE hFile;
-	DWORD dwRet;
 	wchar_t *linkw = php_win32_ioutil_any_to_w(link), targetw[MAXPATHLEN];
-	size_t _tmp_len;
-	char *_tmp;
+	size_t ret_len, targetw_len, offset = 0;
+	char *ret;
 
 	if (!linkw) {
 		return -1;
@@ -197,46 +196,40 @@ CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len){
 		with VS2012 and earlier, and seems not to be fixed till
 		now. Thus, correcting target_len so it's suddenly don't
 		overflown. */
-	dwRet = GetFinalPathNameByHandleW(hFile, targetw, MAXPATHLEN, VOLUME_NAME_DOS);
-	if(dwRet >= target_len || dwRet >= MAXPATHLEN || dwRet == 0) {
+	targetw_len = GetFinalPathNameByHandleW(hFile, targetw, MAXPATHLEN, VOLUME_NAME_DOS);
+	if(targetw_len >= target_len || targetw_len >= MAXPATHLEN || targetw_len == 0) {
 		free(linkw);
 		CloseHandle(hFile);
 		return -1;
 	}
 
-	_tmp = php_win32_ioutil_conv_w_to_any(targetw, dwRet, &_tmp_len);
-	if (!_tmp || _tmp_len >= MAXPATHLEN) {
-		CloseHandle(hFile);
-		free(linkw);
-		return -1;
-	}
-	memcpy(target, _tmp, _tmp_len);
-	free(_tmp);
+	if(targetw_len > 4) {
+		/* Skip first 4 characters if they are "\\?\" */
+		if(targetw[0] == L'\\' && targetw[1] == L'\\' && targetw[2] == L'?' && targetw[3] ==  L'\\') {
+			offset = 4;
 
-	CloseHandle(hFile);
-	free(linkw);
-
-	if(dwRet > 4) {
-		/* Skip first 4 characters if they are "\??\" */
-		if(target[0] == '\\' && target[1] == '\\' && target[2] == '?' && target[3] ==  '\\') {
-			char tmp[MAXPATHLEN];
-			unsigned int offset = 4;
-			dwRet -= 4;
-
-			/* \??\UNC\ */
-			if (dwRet > 7 && target[4] == 'U' && target[5] == 'N' && target[6] == 'C') {
+			/* \\?\UNC\ */
+			if (targetw_len > 7 && targetw[4] == L'U' && targetw[5] == L'N' && targetw[6] == L'C') {
 				offset += 2;
-				dwRet -= 2;
-				target[offset] = '\\';
+				targetw[offset] = L'\\';
 			}
-
-			memcpy(tmp, target + offset, dwRet);
-			memcpy(target, tmp, dwRet);
 		}
 	}
 
-	target[dwRet] = '\0';
-	return dwRet;
+	ret = php_win32_ioutil_conv_w_to_any(targetw + offset, targetw_len - offset, &ret_len);
+	if (!ret || ret_len >= MAXPATHLEN) {
+		CloseHandle(hFile);
+		free(linkw);
+		free(ret);
+		return -1;
+	}
+	memcpy(target, ret, ret_len + 1);
+
+	free(ret);
+	CloseHandle(hFile);
+	free(linkw);
+
+	return ret_len;
 }
 /* }}} */
 

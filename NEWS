@@ -71,6 +71,12 @@ PHP                                                                        NEWS
   . Fixed bug #73800 (sporadic segfault with MYSQLI_OPT_INT_AND_FLOAT_NATIVE). 
 	(vanviegen)
 
+- OpenSSL:
+  . Fixed bug #71519 (add serial hex to return value array). (xrobau)
+
+- PCRE:
+  . Fixed bug #61780 (Inconsistent PCRE captures in match results). (cmb)
+
 - PDO:
   . Add "Sent SQL" to debug dump for emulated prepares. (Adam Baratz)
 
@@ -83,6 +89,7 @@ PHP                                                                        NEWS
   . Fixed bug #73461 (Prohibit session save handler recursion). (Yasuo)
   . PR #2233 Removed register_globals related code and "!" can be used as $_SESSION key name. (Yasuo)
   . Improved bug #73100 fix. 'user' save handler can only be set by session_set_save_handler()
+  . Fixed bug #69582 (session not readable by root in CLI). (EvgeniySpinov)
 
 - SOAP:
   . Fixed bug #69137 (Peer verification fails when using a proxy with SoapClient)
@@ -95,6 +102,7 @@ PHP                                                                        NEWS
   . Add subject to mail log. (tomsommer)
   . Fixed bug #31875 (get_defined_functions additional param to exclude
 	disabled functions). (willianveiga)
+  . Fixed bug #69442 (closing of fd incorrect when PTS enabled). (jaytaph)
 
 - XML:
   . Moved utf8_encode() and utf8_decode() to the Standard extension. (Andrea)
@@ -102,5 +110,8 @@ PHP                                                                        NEWS
 
 - XMLRPC:
   . Use Zend MM for allocation in bundled libxmlrpc (Joe)
+
+- ZIP:
+  . Fixed bug #70103 (ZipArchive::addGlob ignores remove_all_path option). (cmb)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

@@ -50,9 +50,9 @@ bool(true)
 int(1)
 array(6) {
   ["ID"]=>
-  string(1) "1"
+  int(1)
   [0]=>
-  string(1) "1"
+  int(1)
   ["TEXT"]=>
   string(3) "bla"
   [1]=>

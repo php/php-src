@@ -1699,18 +1699,18 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 						zval_ptr_dtor(return_value);
 						RETURN_FALSE;
 					}
-
 					snprintf(entry_name_buf, MAXPATHLEN, "%s%s", add_path, file_stripped);
-					entry_name = entry_name_buf;
-					entry_name_len = strlen(entry_name);
 				} else {
-					entry_name = Z_STRVAL_P(zval_file);
-					entry_name_len = Z_STRLEN_P(zval_file);
+					snprintf(entry_name_buf, MAXPATHLEN, "%s", file_stripped);
 				}
+
+				entry_name = entry_name_buf;
+				entry_name_len = strlen(entry_name);
 				if (basename) {
 					zend_string_release(basename);
 					basename = NULL;
 				}
+
 				if (php_zip_add_file(intern, Z_STRVAL_P(zval_file), Z_STRLEN_P(zval_file),
 					entry_name, entry_name_len, 0, 0) < 0) {
 					zval_dtor(return_value);
