@@ -216,7 +216,7 @@ struct _fcgi_request {
 #ifdef TCP_NODELAY
 	int            nodelay;
 #endif
-	int            closed;
+	int            ended;
 	int            in_len;
 	int            in_pad;
 
@@ -1045,7 +1045,7 @@ static int fcgi_read_request(fcgi_request *req)
 	unsigned char buf[FCGI_MAX_LENGTH+8];
 
 	req->keep = 0;
-	req->closed = 0;
+	req->ended = 0;
 	req->in_len = 0;
 	req->out_hdr = NULL;
 	req->out_pos = req->out_buf;
@@ -1503,7 +1503,7 @@ static inline void close_packet(fcgi_request *req)
 	}
 }
 
-int fcgi_flush(fcgi_request *req, int close)
+int fcgi_flush(fcgi_request *req, int end)
 {
 	int len;
 
@@ -1511,7 +1511,7 @@ int fcgi_flush(fcgi_request *req, int close)
 
 	len = (int)(req->out_pos - req->out_buf);
 
-	if (close) {
+	if (end) {
 		fcgi_end_request_rec *rec = (fcgi_end_request_rec*)(req->out_pos);
 
 		fcgi_make_header(&rec->hdr, FCGI_END_REQUEST, req->id, sizeof(fcgi_end_request));
@@ -1650,9 +1650,9 @@ int fcgi_finish_request(fcgi_request *req, int force_close)
 	int ret = 1;
 
 	if (req->fd >= 0) {
-		if (!req->closed) {
+		if (!req->ended) {
 			ret = fcgi_flush(req, 1);
-			req->closed = 1;
+			req->ended = 1;
 		}
 		fcgi_close(req, force_close, 1);
 	}
