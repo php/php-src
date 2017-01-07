@@ -274,11 +274,12 @@ CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len){
 	if (!ret || ret_len >= MAXPATHLEN) {
 		CloseHandle(hFile);
 		free(linkw);
+		free(ret);
 		return -1;
 	}
 	memcpy(target, ret, ret_len + 1);
-	free(ret);
 
+	free(ret);
 	CloseHandle(hFile);
 	free(linkw);
 
