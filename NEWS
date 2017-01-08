@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #73877 (readlink() returns garbage for UTF-8 paths). (Anatol)
+  . Fixed bug #73876 (Crash when exporting **= in expansion of assign op).
+    (Sara)
 
 - OpenSSL:
   . Fixed bug #71519 (add serial hex to return value array). (xrobau)
