@@ -62,9 +62,7 @@ if (is_resource($fpm)) {
 		echo "Error 2\n";
 	}
 	proc_terminate($fpm);
-	if (!feof($tail)) {
-		echo stream_get_contents($tail);
-	}
+	fpm_display_log($tail, -1);
 	fclose($tail);
 	proc_close($fpm);
 }
@@ -79,7 +77,7 @@ Error 2
 [%s] NOTICE: fpm is running, pid %d
 [%s] NOTICE: ready to handle connections
 [%s] WARNING: [pool pool2] child %d said into stderr: "ERROR: Wrong IP address 'xxx' in listen.allowed_clients"
-[%s] WARNING: [pool pool2] child %d said into stderr: "ERROR: There are no allowed addresses for this pool"
+[%s] WARNING: [pool pool2] child %d said into stderr: "ERROR: There are no allowed %s"
 [%s] WARNING: [pool pool2] child %d said into stderr: "ERROR: Connection disallowed: IP address '127.0.0.1' has been dropped."
 [%s] NOTICE: Terminating ...
 [%s] NOTICE: exiting, bye-bye!
