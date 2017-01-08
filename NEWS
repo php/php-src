@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2017 PHP 7.0.16
 
+- Core:
+  . Fixed bug #73876 (Crash when exporting **= in expansion of assign op).
+  (Sara)
+
 - FPM:
   . Fixed bug #67583 (double fastcgi_end_request on max_children limit).
     (Dmitry Saprykin)
