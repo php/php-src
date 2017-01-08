@@ -78,7 +78,7 @@ Using LiteSpeed PHP with LiteSpeed Web Server
 Detailed information about how to configure LiteSpeed web server with
 PHP support is available from our website, at: 
 
-http://www.litespeedtech.com/docs/HowTo_QA.html
+https://www.litespeedtech.com/docs/webserver
 
 Usually, PHP support has been configured out of box, you don't need to
 change it unless you want to change PHP interface from FastCGI to
@@ -216,7 +216,7 @@ Contact
 
 For support questions, please post to our free support forum, at:
 
-http://www.litespeedtech.com/forum/
+https://www.litespeedtech.com/support/forum/
 
 For bug report, please send bug report to bug [at] litespeedtech.com.
 
