@@ -148,23 +148,33 @@ PHP_FUNCTION(intval)
 		return;
 	}
 	
+	strval = Z_STRVAL_P(num);
 	strlen = Z_STRLEN_P(num);
+
+	while (isspace(*strval) && strlen) {
+		strval++;
+		strlen--;
+	}
+
 	/* Length of 3+ covers "0b#" and "-0b" (which results in 0) */
 	if (strlen > 2) {
-		strval = Z_STRVAL_P(num);
-		tmpval = strval + (strval[0] == '-');
+		tmpval = strval;
+		if (tmpval[0] == '-' || tmpval[0] == '+') {
+			tmpval++;
+		}
 
 		if (tmpval[0] == '0' && tmpval[1] == 'b') {
 			/* This effectively causes the string to have two leading zeros */
 			tmpval[1] = '0';
-			/* Deliberate use of strval here to include the unary minus if present */
+			/* Deliberate use of strval here to include the unary symbol if present */
 			RETVAL_LONG(ZEND_STRTOL(strval, NULL, 2));
+			/* The zval str was modified. Restore it */
 			tmpval[1] = 'b';
 			return;
 		}
 	}
 
-	RETVAL_LONG(ZEND_STRTOL(Z_STRVAL_P(num), NULL, base));
+	RETVAL_LONG(ZEND_STRTOL(strval, NULL, base));
 }
 /* }}} */
 
