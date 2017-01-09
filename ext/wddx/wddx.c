@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -908,7 +908,7 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 
 		if (!strcmp((char *)name, EL_BINARY)) {
 			zend_string *new_str = NULL;
-			
+
 			if (ZSTR_EMPTY_ALLOC() != Z_STR(ent1->data)) {
 				new_str = php_base64_decode(
 					(unsigned char *)Z_STRVAL(ent1->data), Z_STRLEN(ent1->data));
@@ -967,22 +967,26 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 							php_error_docref(NULL, E_WARNING, "Class %s can not be unserialized", Z_STRVAL(ent1->data));
 						} else {
 							/* Initialize target object */
-							object_init_ex(&obj, pce);
+							if (object_init_ex(&obj, pce) != SUCCESS || EG(exception)) {
+								zval_ptr_dtor(&ent2->data);
+								ZVAL_UNDEF(&ent2->data);
+								php_error_docref(NULL, E_WARNING, "Class %s can not be instantiated", Z_STRVAL(ent1->data));
+							} else {
+								/* Merge current hashtable with object's default properties */
+								zend_hash_merge(Z_OBJPROP(obj),
+												Z_ARRVAL(ent2->data),
+												zval_add_ref, 0);
 
-							/* Merge current hashtable with object's default properties */
-							zend_hash_merge(Z_OBJPROP(obj),
-											Z_ARRVAL(ent2->data),
-											zval_add_ref, 0);
+								if (incomplete_class) {
+									php_store_class_name(&obj, Z_STRVAL(ent1->data), Z_STRLEN(ent1->data));
+								}
 
-							if (incomplete_class) {
-								php_store_class_name(&obj, Z_STRVAL(ent1->data), Z_STRLEN(ent1->data));
+								/* Clean up old array entry */
+								zval_ptr_dtor(&ent2->data);
+
+								/* Set stack entry to point to the newly created object */
+								ZVAL_COPY_VALUE(&ent2->data, &obj);
 							}
-
-							/* Clean up old array entry */
-							zval_ptr_dtor(&ent2->data);
-
-							/* Set stack entry to point to the newly created object */
-							ZVAL_COPY_VALUE(&ent2->data, &obj);
 						}
 
 						/* Clean up class name var entry */

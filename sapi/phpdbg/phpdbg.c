@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -72,7 +72,7 @@ PHP_INI_END()
 
 static zend_bool phpdbg_booted = 0;
 static zend_bool phpdbg_fully_started = 0;
-zend_bool use_mm_wrappers = 0;
+zend_bool use_mm_wrappers = 1;
 
 static void php_phpdbg_destroy_bp_file(zval *brake) /* {{{ */
 {
@@ -128,7 +128,6 @@ static void php_phpdbg_destroy_file_source(zval *data) /* {{{ */
 	if (source->buf) {
 		efree(source->buf);
 	}
-	efree(source->filename);
 	efree(source);
 } /* }}} */
 
@@ -1605,7 +1604,7 @@ phpdbg_main:
 	quit_immediately = phpdbg_startup_run > 1;
 
 	/* set exec if present on command line */
-	if (!read_from_stdin && argc > php_optind && (strcmp(argv[php_optind-1], "--") != SUCCESS)) {
+	if (!read_from_stdin && argc > php_optind) {
 		if (!exec && strlen(argv[php_optind])) {
 			exec = strdup(argv[php_optind]);
 		}
@@ -1699,7 +1698,7 @@ phpdbg_main:
 				phpdbg_do_help_cmd(exec);
 			} else if (show_version) {
 				phpdbg_out(
-					"phpdbg %s (built: %s %s)\nPHP %s, Copyright (c) 1997-2016 The PHP Group\n%s",
+					"phpdbg %s (built: %s %s)\nPHP %s, Copyright (c) 1997-2017 The PHP Group\n%s",
 					PHPDBG_VERSION,
 					__DATE__,
 					__TIME__,

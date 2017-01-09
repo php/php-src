@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -78,9 +78,9 @@ PHP_FUNCTION(ezmlm_hash)
 	unsigned int h = 5381;
 	size_t j, str_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &str, &str_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(str, str_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	for (j = 0; j < str_len; j++) {
 		h = (h + (h << 5)) ^ (zend_ulong) (unsigned char) tolower(str[j]);
@@ -295,9 +295,14 @@ PHP_FUNCTION(mail)
 	char *to_r, *subject_r;
 	char *p, *e;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss|zS", &to, &to_len, &subject, &subject_len, &message, &message_len, &headers, &extra_cmd) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(3, 5)
+		Z_PARAM_STRING(to, to_len)
+		Z_PARAM_STRING(subject, subject_len)
+		Z_PARAM_STRING(message, message_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL_DEREF(headers)
+		Z_PARAM_STR(extra_cmd)
+	ZEND_PARSE_PARAMETERS_END();
 
 	/* ASCIIZ check */
 	MAIL_ASCIIZ_CHECK(to, to_len);
@@ -492,7 +497,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		time(&curtime);
 		date_str = php_format_date("d-M-Y H:i:s e", 13, curtime, 1);
 
-		l = spprintf(&tmp, 0, "[%s] mail() on [%s:%d]: To: %s -- Headers: %s\n", ZSTR_VAL(date_str), zend_get_executed_filename(), zend_get_executed_lineno(), to, hdr ? hdr : "");
+		l = spprintf(&tmp, 0, "[%s] mail() on [%s:%d]: To: %s -- Headers: %s -- Subject: %s\n", ZSTR_VAL(date_str), zend_get_executed_filename(), zend_get_executed_lineno(), to, hdr ? hdr : "", subject);
 
 		zend_string_free(date_str);
 

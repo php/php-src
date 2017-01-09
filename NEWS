@@ -2,9 +2,6 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.2
 
-- Calendar:
-  . Fix integer overflows (Joshua Rogers)
-
 - Core:
   . Removed IS_TYPE_IMMUTABLE (it's the same as COPYABLE & !REFCOUNTED). (Dmitry)
   . Removed the sql.safe_mode directive. (Kalle)
@@ -23,9 +20,20 @@ PHP                                                                        NEWS
     php.exe). (Michele Locati)
   . Implemented "Convert numeric keys in object/array casts" RFC, fixes
     bugs #53838, #61655, #66173, #70925, #72254, etc. (Andrea)
+  . Raised minimum supported Windows versions to Windows 7/Server 2008 R2.
+    (Anatol)
+
+- BCMath:
+  . Fixed bug #46564 (bcmod truncates fractionals). (liborm85)
+
+- Calendar:
+  . Fix integer overflows (Joshua Rogers)
 
 - Date:
   . Fixed bug #69587 (DateInterval properties and isset). (jhdxr)
+
+- DOM:
+  . Fixed bug #67474 (getElementsByTagNameNS filter on default ns). (aboks)
 
 - EXIF:
   . Added support for vendor specific tags for the following formats:
@@ -41,6 +49,9 @@ PHP                                                                        NEWS
   . Fixed Redhat bug #1362571 (PHP not returning full results for
     exif_read_data function). (Kalle)
 
+- FPM:
+  . Configuration to limit fpm slow log trace callers. (Sannis)
+
 - GD:
   . Implemented imageresolution as getter and setter (Christoph)
 
@@ -54,12 +65,23 @@ PHP                                                                        NEWS
     handles multibyte replacement char nicely). (Masakielastic, Yasuo)
   . Added array input support to mb_convert_encoding(). (Yasuo)
   . Added array input support to mb_check_encoding(). (Yasuo)
+  . Fixed bug #69079 (enhancement for mb_substitute_character). (masakielastic)
 
 - Mcrypt:
   . The deprecated mcrypt extension has been moved to PECL. (leigh)
 
+- mysqlnd:
+  . Fixed bug #73800 (sporadic segfault with MYSQLI_OPT_INT_AND_FLOAT_NATIVE). 
+	(vanviegen)
+
+- OpenSSL:
+  . Fixed bug #71519 (add serial hex to return value array). (xrobau)
+
+- PCRE:
+  . Fixed bug #61780 (Inconsistent PCRE captures in match results). (cmb)
+
 - PDO:
-  . Add PDOStatement::activeQueryString(). (Adam Baratz)
+  . Add "Sent SQL" to debug dump for emulated prepares. (Adam Baratz)
 
 - PDO_DBlib:
   . Fixed bug #73234 (Emulated statements let value dictate parameter type).
@@ -67,7 +89,10 @@ PHP                                                                        NEWS
   . Fixed bug #73396 (bigint columns are returned as strings). (Adam Baratz)
 
 - Session:
-  . Fixed bug #73461 (Prohibit session save handler recursion) . (yohgaki)
+  . Fixed bug #73461 (Prohibit session save handler recursion). (Yasuo)
+  . PR #2233 Removed register_globals related code and "!" can be used as $_SESSION key name. (Yasuo)
+  . Improved bug #73100 fix. 'user' save handler can only be set by session_set_save_handler()
+  . Fixed bug #69582 (session not readable by root in CLI). (EvgeniySpinov)
 
 - SOAP:
   . Fixed bug #69137 (Peer verification fails when using a proxy with SoapClient)
@@ -76,11 +101,22 @@ PHP                                                                        NEWS
 - SQLite3:
   . Update to Sqlite 3.15.2. (cmb)
 
+- Standard:
+  . Add subject to mail log. (tomsommer)
+  . Fixed bug #31875 (get_defined_functions additional param to exclude
+	disabled functions). (willianveiga)
+  . Fixed bug #69442 (closing of fd incorrect when PTS enabled). (jaytaph)
+  . Fixed bug #72974 (imap is undefined service on AIX). (matthieu.sarter)
+  . Fixed bug #72979 (money_format stores wrong length AIX). (matthieu.sarter)
+
 - XML:
   . Moved utf8_encode() and utf8_decode() to the Standard extension. (Andrea)
   . Fixed bug #72135 (malformed XML causes fault) (edgarsandi)
 
 - XMLRPC:
   . Use Zend MM for allocation in bundled libxmlrpc (Joe)
+
+- ZIP:
+  . Fixed bug #70103 (ZipArchive::addGlob ignores remove_all_path option). (cmb)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

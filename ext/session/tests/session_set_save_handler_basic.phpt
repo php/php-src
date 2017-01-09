@@ -3,6 +3,7 @@ Test session_set_save_handler() function : basic functionality
 --INI--
 session.save_path=
 session.name=PHPSESSID
+session.gc_probability=0
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--

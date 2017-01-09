@@ -2,8 +2,6 @@
 Test: setAttributeNode()
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
---INI--
-error_reporting = E_ALL & ~E_WARNING
 --FILE--
 <?php
 
@@ -63,7 +61,9 @@ object(DOMException)#%d (7) {
       ["args"]=>
       array(1) {
         [0]=>
-        DOMAttr
+        
+Warning: var_dump(): %s
+DOMAttr
       }
     }
   }

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -173,7 +173,6 @@ ZEND_API void ZEND_FASTCALL _zend_hash_init(HashTable *ht, uint32_t nSize, dtor_
 	GC_REFCOUNT(ht) = 1;
 	GC_TYPE_INFO(ht) = IS_ARRAY | (persistent ? 0 : (GC_COLLECTABLE << GC_FLAGS_SHIFT));
 	ht->u.flags = (persistent ? HASH_FLAG_PERSISTENT : 0) | HASH_FLAG_APPLY_PROTECTION | HASH_FLAG_STATIC_KEYS;
-	ht->nTableSize = zend_hash_check_size(nSize);
 	ht->nTableMask = HT_MIN_MASK;
 	HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
 	ht->nNumUsed = 0;
@@ -181,6 +180,7 @@ ZEND_API void ZEND_FASTCALL _zend_hash_init(HashTable *ht, uint32_t nSize, dtor_
 	ht->nInternalPointer = HT_INVALID_IDX;
 	ht->nNextFreeElement = 0;
 	ht->pDestructor = pDestructor;
+	ht->nTableSize = zend_hash_check_size(nSize);
 }
 
 static void ZEND_FASTCALL zend_hash_packed_grow(HashTable *ht)
@@ -1725,7 +1725,7 @@ static zend_always_inline void zend_array_dup_packed_elements(HashTable *source,
 
 static zend_always_inline uint32_t zend_array_dup_elements(HashTable *source, HashTable *target, int static_keys, int with_holes)
 {
-    uint32_t idx = 0;
+	uint32_t idx = 0;
 	Bucket *p = source->arData;
 	Bucket *q = target->arData;
 	Bucket *end = p + source->nNumUsed;
@@ -1753,7 +1753,7 @@ static zend_always_inline uint32_t zend_array_dup_elements(HashTable *source, Ha
 
 ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 {
-    uint32_t idx;
+	uint32_t idx;
 	HashTable *target;
 
 	IS_CONSISTENT(source);
@@ -1817,7 +1817,8 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 		target->u.flags = (source->u.flags & ~(HASH_FLAG_PERSISTENT|ZEND_HASH_APPLY_COUNT_MASK)) | HASH_FLAG_APPLY_PROTECTION;
 		target->nTableMask = source->nTableMask;
 		target->nNextFreeElement = source->nNextFreeElement;
-		target->nInternalPointer = HT_INVALID_IDX;
+		target->nInternalPointer = source->nInternalPointer;
+
 		HT_SET_DATA_ADDR(target, emalloc(HT_SIZE(target)));
 		HT_HASH_RESET(target);
 

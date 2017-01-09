@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -226,9 +226,12 @@ static PHP_FUNCTION(json_encode)
 	zend_long options = 0;
 	zend_long depth = PHP_JSON_PARSER_DEFAULT_DEPTH;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|ll", &parameter, &options, &depth) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_ZVAL_DEREF(parameter)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(options)
+		Z_PARAM_LONG(depth)
+	ZEND_PARSE_PARAMETERS_END();
 
 	php_json_encode_init(&encoder);
 	encoder.max_depth = (int)depth;
@@ -259,9 +262,13 @@ static PHP_FUNCTION(json_decode)
 	zend_long depth = PHP_JSON_PARSER_DEFAULT_DEPTH;
 	zend_long options = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|bll", &str, &str_len, &assoc, &depth, &options) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 4)
+		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(assoc)
+		Z_PARAM_LONG(depth)
+		Z_PARAM_LONG(options)
+	ZEND_PARSE_PARAMETERS_END();
 
 	JSON_G(error_code) = PHP_JSON_ERROR_NONE;
 

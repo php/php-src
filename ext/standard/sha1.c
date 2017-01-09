@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -40,9 +40,11 @@ PHP_FUNCTION(sha1)
 	PHP_SHA1_CTX context;
 	unsigned char digest[20];
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|b", &arg, &raw_output) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STR(arg)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(raw_output)
+	ZEND_PARSE_PARAMETERS_END();
 
 	sha1str[0] = '\0';
 	PHP_SHA1Init(&context);
@@ -74,9 +76,11 @@ PHP_FUNCTION(sha1_file)
 	size_t         n;
 	php_stream    *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|b", &arg, &arg_len, &raw_output) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_PATH(arg, arg_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(raw_output)
+	ZEND_PARSE_PARAMETERS_END();
 
 	stream = php_stream_open_wrapper(arg, "rb", REPORT_ERRORS, NULL);
 	if (!stream) {

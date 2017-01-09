@@ -3,7 +3,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,7 +24,7 @@ const HEADER_TEXT = <<< DATA
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -663,6 +663,19 @@ function opcode_name($name, $spec, $op1, $op2) {
 		}
 	}
 	return $name.($spec?"_SPEC":"").$prefix[$op1].$prefix[$op2];
+}
+
+// Formats condition, protecting it by parentheses when needed.
+function format_condition($condition) {
+	if ($condition === "") {
+		throw new InvalidArgumentException("A non empty string condition was expected.");
+	}
+
+	if ($condition[0] === "(" && substr($condition, -1) === ")") {
+		return $condition;
+	}
+
+	return "(".$condition.")";
 }
 
 // Generates code for opcode handler or helper
@@ -2357,11 +2370,12 @@ function gen_vm($def, $skel) {
 					out($f, "\t\tcase $orig_op:\n");
 					$first = true;
 					foreach($dsc['type_spec'] as $code => $condition) {
+						$condition = format_condition($condition);
 						if ($first) {
-							out($f, "\t\t\tif ($condition) {\n");
+							out($f, "\t\t\tif $condition {\n");
 							$first = false;
 						} else {
-							out($f, "\t\t\t} else if ($condition) {\n");
+							out($f, "\t\t\t} else if $condition {\n");
 						}
 						$spec_dsc = $opcodes[$code];
 						if (isset($spec_dsc["spec"]["NO_CONST_CONST"])) {

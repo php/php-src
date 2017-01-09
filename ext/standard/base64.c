@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -213,9 +213,10 @@ PHP_FUNCTION(base64_encode)
 	size_t str_len;
 	zend_string *result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &str, &str_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(str, str_len)
+	ZEND_PARSE_PARAMETERS_END();
+
 	result = php_base64_encode((unsigned char*)str, str_len);
 	if (result != NULL) {
 		RETURN_STR(result);
@@ -234,9 +235,12 @@ PHP_FUNCTION(base64_decode)
 	size_t str_len;
 	zend_string *result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|b", &str, &str_len, &strict) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(strict)
+	ZEND_PARSE_PARAMETERS_END();
+
 	result = php_base64_decode_ex((unsigned char*)str, str_len, strict);
 	if (result != NULL) {
 		RETURN_STR(result);

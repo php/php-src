@@ -271,20 +271,10 @@ case $host_cpu in
     ;;
 esac
 
-dnl activate some gcc specific optimizations for gcc >= 4
-if test "$GCC" = "yes"; then
-  case $host_alias in
-  *darwin*)
-    GCC_MAJOR_VERSION=`$CC -dumpversion | /usr/bin/sed -nE '1s/([[0-9]]+)\.[[0-9]]+\..*/\1/;1p'`
-    ;;
-  *)
-    GCC_MAJOR_VERSION=`$CC --version | $SED -n '1s/[[^0-9]]*//;1s/\..*//;1p'`
-    ;;
-  esac
-  if test $GCC_MAJOR_VERSION -ge 4; then
-    CFLAGS="$CFLAGS -fvisibility=hidden"
-  fi
-fi
+dnl Mark symbols hidden by default if the compiler (for example, gcc >= 4)
+dnl supports it. This can help reduce the binary size and startup time.
+AX_CHECK_COMPILE_FLAG([-fvisibility=hidden],
+                       [CFLAGS="$CFLAGS -fvisibility=hidden"])
 
 case $host_alias in
   *solaris*)
@@ -745,7 +735,7 @@ if test "$ac_cv_func_sync_fetch_and_add" = yes; then
   AC_DEFINE(HAVE_SYNC_FETCH_AND_ADD,1,[Define if you have the __sync_fetch_and_add function])
 fi
 
-AC_REPLACE_FUNCS(strlcat strlcpy getopt)
+AC_REPLACE_FUNCS(strlcat strlcpy explicit_bzero getopt)
 AC_FUNC_UTIME_NULL
 AC_FUNC_ALLOCA
 dnl PHP_AC_BROKEN_SPRINTF
@@ -1446,7 +1436,7 @@ PHP_ADD_SOURCES(TSRM, TSRM.c tsrm_strtok_r.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=
 PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c php_sprintf.c \
        fopen_wrappers.c alloca.c  php_scandir.c \
        php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
-       strlcat.c mergesort.c reentrancy.c php_variables.c php_ticks.c \
+       strlcat.c explicit_bzero.c mergesort.c reentrancy.c php_variables.c php_ticks.c \
        network.c php_open_temporary_file.c \
        output.c getopt.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 

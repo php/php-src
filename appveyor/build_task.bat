@@ -11,15 +11,15 @@ cd /D %APPVEYOR_BUILD_FOLDER%
 if %errorlevel% neq 0 exit /b 3
 
 if /i "%APPVEYOR_REPO_BRANCH:~0,4%" equ "php-" (
-	set BRANCH=%APPVEYOR_REPO_BRANCH:~4%
+	set BRANCH=%APPVEYOR_REPO_BRANCH:~4,3%
 	set STABILITY=stable
 ) else (
 	set BRANCH=master
 	set STABILITY=staging
 )
-set DEPS_DIR=%PHP_BUILD_CACHE_BASE_DIR%\deps-%PHP_SDK_VC%-%PHP_SDK_ARCH%-%APPVEYOR_REPO_BRANCH%
+set DEPS_DIR=%PHP_BUILD_CACHE_BASE_DIR%\deps-%PHP_SDK_VC%-%PHP_SDK_ARCH%-%BRANCH%
 rem SDK is cached, deps info is cached as well
-echo Updating dependencies
+echo Updating dependencies in %DEPS_DIR%
 call phpsdk_deps --update --branch %BRANCH% --stability %STABILITY% --deps %DEPS_DIR%
 if %errorlevel% neq 0 exit /b 3
 
@@ -33,7 +33,7 @@ if "%OPCACHE%" equ "0" set EXT_EXCLUDE_FROM_TEST=%EXT_EXCLUDE_FROM_TEST%,opcache
 
 call configure.bat ^
 	--enable-snapshot-build ^
-	--enable-debug-pack ^
+	--disable-debug-pack ^
 	--enable-com-dotnet=shared ^
 	--without-analyzer ^
 	--enable-object-out-dir=%PHP_BUILD_OBJ_DIR% ^

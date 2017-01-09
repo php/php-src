@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar php single-file executable PHP extension                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2016 The PHP Group                                |
+  | Copyright (c) 2005-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -1423,7 +1423,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 	uint32_t str_key_len, base_len = p_obj->l;
 	phar_entry_data *data;
 	php_stream *fp;
-	php_stat_len fname_len;
+	size_t fname_len;
 	size_t contents_len;
 	char *fname, *error = NULL, *base = p_obj->b, *save = NULL, *temp = NULL;
 	zend_string *opened;
@@ -1501,7 +1501,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 				switch (intern->type) {
 					case SPL_FS_DIR:
 						test = spl_filesystem_object_get_path(intern, NULL);
-						fname_len = (php_stat_len)spprintf(&fname, 0, "%s%c%s", test, DEFAULT_SLASH, intern->u.dir.entry.d_name);
+						fname_len = spprintf(&fname, 0, "%s%c%s", test, DEFAULT_SLASH, intern->u.dir.entry.d_name);
 						php_stat(fname, fname_len, FS_IS_DIR, &dummy);
 
 						if (Z_TYPE(dummy) == IS_TRUE) {
@@ -1515,7 +1515,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 
 						if (test) {
 							fname = test;
-							fname_len = (php_stat_len)strlen(fname);
+							fname_len = strlen(fname);
 						} else {
 							zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Could not resolve file path");
 							return ZEND_HASH_APPLY_STOP;
@@ -1531,7 +1531,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 							return ZEND_HASH_APPLY_STOP;
 						}
 
-						fname_len = (php_stat_len)strlen(fname);
+						fname_len = strlen(fname);
 						save = fname;
 						goto phar_spl_fileinfo;
 				}
@@ -1543,7 +1543,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 	}
 
 	fname = Z_STRVAL_P(value);
-	fname_len = (php_stat_len)Z_STRLEN_P(value);
+	fname_len = Z_STRLEN_P(value);
 
 phar_spl_fileinfo:
 	if (base_len) {

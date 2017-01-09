@@ -4,12 +4,12 @@ Bug #73426 (createFromFormat with 'z' format char results in incorrect time)
 date.timezone=UTC
 --FILE--
 <?php
-$date = '12:00:00 15';
-$format = 'H:i:s z';
+$date = '2016 12:00:00 15';
+$format = 'Y H:i:s z';
 var_dump(DateTime::createFromFormat($format, $date));
 
-$date = '16 12:00:00';
-$format = 'z H:i:s';
+$date = '16 12:00:00 2016';
+$format = 'z H:i:s Y';
 var_dump(DateTime::createFromFormat($format, $date));
 
 ?>
