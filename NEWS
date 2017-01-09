@@ -26,6 +26,7 @@ PHP                                                                        NEWS
   . Fixed bug #69442 (closing of fd incorrect when PTS enabled). (jaytaph)
   . Fixed bug #47021 (SoapClient stumbles over WSDL delivered with
     "Transfer-Encoding: chunked"). (Rowan Collins)
+  . Fixed bug #72974 (imap is undefined service on AIX). (matthieu.sarter)
 
 - ZIP:
   . Fixed bug #70103 (ZipArchive::addGlob ignores remove_all_path option). (cmb,
