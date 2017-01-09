@@ -554,6 +554,18 @@ document printzops
 	dump operands of the current opline
 end
 
+define print_zstr
+	set $zstr = (zend_string *)$arg0
+	printf "string(%d) ", $zstr->len
+	____print_str $zstr->val $zstr->len
+	printf "\n"
+end
+
+document print_zstr
+	print the length and contents of a zend string
+	usage: print_zstr [ptr]
+end
+
 define zbacktrace
 	____executor_globals
 	dump_bt $eg.current_execute_data
