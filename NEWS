@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2017, PHP 7.1.2
 
 - Core:
+  . Improved GENERATOR_CREATE opcode handler. (Bob, Dmitry)
   . Fixed bug #73877 (readlink() returns garbage for UTF-8 paths). (Anatol)
   . Fixed bug #73876 (Crash when exporting **= in expansion of assign op).
     (Sara)
