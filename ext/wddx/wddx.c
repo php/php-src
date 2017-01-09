@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -453,6 +453,16 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 	zend_ulong idx;
 	char tmp_buf[WDDX_BUF_LEN];
 	HashTable *objhash, *sleephash;
+	zend_class_entry *ce;
+	PHP_CLASS_ATTRIBUTES;
+
+	PHP_SET_CLASS_ATTRIBUTES(obj);
+	ce = Z_OBJCE_P(obj);
+	if (!ce || ce->serialize || ce->unserialize) {
+		php_error_docref(NULL, E_WARNING, "Class %s can not be serialized", ZSTR_VAL(class_name));
+		PHP_CLEANUP_CLASS_ATTRIBUTES();
+		return;
+	}
 
 	ZVAL_STRING(&fname, "__sleep");
 	/*
@@ -473,8 +483,6 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 			php_wddx_add_chunk_static(packet, WDDX_STRING_E);
 			php_wddx_add_chunk_static(packet, WDDX_VAR_E);
 
-			PHP_CLEANUP_CLASS_ATTRIBUTES();
-
 			objhash = Z_OBJPROP_P(obj);
 
 			ZEND_HASH_FOREACH_VAL(sleephash, varname) {
@@ -491,10 +499,6 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 			php_wddx_add_chunk_static(packet, WDDX_STRUCT_E);
 		}
 	} else {
-		PHP_CLASS_ATTRIBUTES;
-
-		PHP_SET_CLASS_ATTRIBUTES(obj);
-
 		php_wddx_add_chunk_static(packet, WDDX_STRUCT_S);
 		snprintf(tmp_buf, WDDX_BUF_LEN, WDDX_VAR_S, PHP_CLASS_NAME_VAR);
 		php_wddx_add_chunk(packet, tmp_buf);
@@ -502,8 +506,6 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 		php_wddx_add_chunk_ex(packet, ZSTR_VAL(class_name), ZSTR_LEN(class_name));
 		php_wddx_add_chunk_static(packet, WDDX_STRING_E);
 		php_wddx_add_chunk_static(packet, WDDX_VAR_E);
-
-		PHP_CLEANUP_CLASS_ATTRIBUTES();
 
 		objhash = Z_OBJPROP_P(obj);
 		ZEND_HASH_FOREACH_KEY_VAL(objhash, idx, key, ent) {
@@ -527,6 +529,8 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 		} ZEND_HASH_FOREACH_END();
 		php_wddx_add_chunk_static(packet, WDDX_STRUCT_E);
 	}
+
+	PHP_CLEANUP_CLASS_ATTRIBUTES();
 
 	zval_ptr_dtor(&fname);
 	zval_ptr_dtor(&retval);
@@ -689,7 +693,7 @@ static void php_wddx_add_var(wddx_packet *packet, zval *name_var)
 			return;
 		}
 
-		if (Z_IMMUTABLE_P(name_var)) {
+		if (!Z_REFCOUNTED_P(name_var)) {
 			ZEND_HASH_FOREACH_VAL(target_hash, val) {
 				php_wddx_add_var(packet, val);
 			} ZEND_HASH_FOREACH_END();
@@ -768,6 +772,11 @@ static void php_wddx_push_element(void *user_data, const XML_Char *name, const X
 				php_wddx_process_data(user_data, atts[i+1], strlen((char *)atts[i+1]));
 				break;
 			}
+		} else {
+			ent.type = ST_BOOLEAN;
+			SET_STACK_VARNAME;
+			ZVAL_FALSE(&ent.data);
+			wddx_stack_push((wddx_stack *)stack, &ent, sizeof(st_entry));
 		}
 	} else if (!strcmp((char *)name, EL_NULL)) {
 		ent.type = ST_NULL;
@@ -898,8 +907,13 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 		}
 
 		if (!strcmp((char *)name, EL_BINARY)) {
-			zend_string *new_str = php_base64_decode(
-				(unsigned char *)Z_STRVAL(ent1->data), Z_STRLEN(ent1->data));
+			zend_string *new_str = NULL;
+
+			if (ZSTR_EMPTY_ALLOC() != Z_STR(ent1->data)) {
+				new_str = php_base64_decode(
+					(unsigned char *)Z_STRVAL(ent1->data), Z_STRLEN(ent1->data));
+			}
+
 			zval_ptr_dtor(&ent1->data);
 			if (new_str) {
 				ZVAL_STR(&ent1->data, new_str);
@@ -947,23 +961,33 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 							pce = PHP_IC_ENTRY;
 						}
 
-						/* Initialize target object */
-						object_init_ex(&obj, pce);
+						if (pce != PHP_IC_ENTRY && (pce->serialize || pce->unserialize)) {
+							zval_ptr_dtor(&ent2->data);
+							ZVAL_UNDEF(&ent2->data);
+							php_error_docref(NULL, E_WARNING, "Class %s can not be unserialized", Z_STRVAL(ent1->data));
+						} else {
+							/* Initialize target object */
+							if (object_init_ex(&obj, pce) != SUCCESS || EG(exception)) {
+								zval_ptr_dtor(&ent2->data);
+								ZVAL_UNDEF(&ent2->data);
+								php_error_docref(NULL, E_WARNING, "Class %s can not be instantiated", Z_STRVAL(ent1->data));
+							} else {
+								/* Merge current hashtable with object's default properties */
+								zend_hash_merge(Z_OBJPROP(obj),
+												Z_ARRVAL(ent2->data),
+												zval_add_ref, 0);
 
-						/* Merge current hashtable with object's default properties */
-						zend_hash_merge(Z_OBJPROP(obj),
-										Z_ARRVAL(ent2->data),
-										zval_add_ref, 0);
+								if (incomplete_class) {
+									php_store_class_name(&obj, Z_STRVAL(ent1->data), Z_STRLEN(ent1->data));
+								}
 
-						if (incomplete_class) {
-							php_store_class_name(&obj, Z_STRVAL(ent1->data), Z_STRLEN(ent1->data));
+								/* Clean up old array entry */
+								zval_ptr_dtor(&ent2->data);
+
+								/* Set stack entry to point to the newly created object */
+								ZVAL_COPY_VALUE(&ent2->data, &obj);
+							}
 						}
-
-						/* Clean up old array entry */
-						zval_ptr_dtor(&ent2->data);
-
-						/* Set stack entry to point to the newly created object */
-						ZVAL_COPY_VALUE(&ent2->data, &obj);
 
 						/* Clean up class name var entry */
 						zval_ptr_dtor(&ent1->data);

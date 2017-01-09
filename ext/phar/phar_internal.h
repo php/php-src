@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar php single-file executable PHP extension                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2016 The PHP Group                                |
+  | Copyright (c) 2006-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -250,7 +250,7 @@ typedef struct _phar_entry_info {
 	char                     *link; /* symbolic link to another file */
 	char                     tar_type;
 	/* position in the manifest */
-	uint                     manifest_pos;
+	uint32_t                     manifest_pos;
 	/* for stat */
 	unsigned short           inode;
 
@@ -300,7 +300,7 @@ struct _phar_archive_data {
 	char                     *signature;
 	zval                     metadata;
 	int                      metadata_len; /* only used for cached manifests */
-	uint                     phar_pos;
+	uint32_t                     phar_pos;
 	/* if 1, then this alias was manually specified by the user and is not a permanent alias */
 	unsigned int             is_temporary_alias:1;
 	unsigned int             is_modified:1;

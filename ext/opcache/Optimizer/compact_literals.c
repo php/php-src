@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -292,7 +292,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 				case ZEND_DECLARE_CLASS:
 				case ZEND_DECLARE_INHERITED_CLASS:
 				case ZEND_DECLARE_INHERITED_CLASS_DELAYED:
-					LITERAL_INFO(opline->op1.constant, LITERAL_VALUE, 1, 0, 2);
+					LITERAL_INFO(opline->op1.constant, LITERAL_VALUE, 0, 0, 2);
 					break;
 				case ZEND_RECV:
 				case ZEND_RECV_VARIADIC:

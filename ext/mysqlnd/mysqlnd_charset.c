@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2016 The PHP Group                                |
+  | Copyright (c) 2006-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -410,7 +410,7 @@ static unsigned int check_mb_utf16(const char *start, const char *end)
 }
 
 
-static uint mysqlnd_mbcharlen_utf16(unsigned int utf16)
+static uint32_t mysqlnd_mbcharlen_utf16(unsigned int utf16)
 {
   return UTF16_HIGH_HEAD(utf16) ? 4 : 2;
 }

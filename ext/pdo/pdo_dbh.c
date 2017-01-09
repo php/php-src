@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -210,11 +210,13 @@ static PHP_METHOD(PDO, dbh_constructor)
 	int call_factory = 1;
 	zend_error_handling zeh;
 
-	if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(),
-				"s|s!s!a!", &data_source, &data_source_len,
-				&username, &usernamelen, &password, &passwordlen, &options)) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START_EX(ZEND_PARSE_PARAMS_THROW, 1, 4)
+		Z_PARAM_STRING(data_source, data_source_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING_EX(username, usernamelen, 1, 0)
+		Z_PARAM_STRING_EX(password, passwordlen, 1, 0)
+		Z_PARAM_ARRAY_EX(options, 1, 0)
+	ZEND_PARSE_PARAMETERS_END();
 
 	/* parse the data source name */
 	colon = strchr(data_source, ':');
@@ -474,10 +476,11 @@ static PHP_METHOD(PDO, prepare)
 	pdo_dbh_object_t *dbh_obj = Z_PDO_OBJECT_P(getThis());
 	pdo_dbh_t *dbh = dbh_obj->inner;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|a", &statement,
-			&statement_len, &options)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(statement, statement_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY(options)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	PDO_DBH_CLEAR_ERR();
 	PDO_CONSTRUCT_CHECK;
@@ -827,9 +830,10 @@ static PHP_METHOD(PDO, setAttribute)
 	zend_long attr;
 	zval *value;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "lz", &attr, &value)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_LONG(attr)
+		Z_PARAM_ZVAL_DEREF(value)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	PDO_DBH_CLEAR_ERR();
 	PDO_CONSTRUCT_CHECK;
@@ -848,9 +852,9 @@ static PHP_METHOD(PDO, getAttribute)
 	pdo_dbh_t *dbh = Z_PDO_DBH_P(getThis());
 	zend_long attr;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "l", &attr)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(attr)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	PDO_DBH_CLEAR_ERR();
 	PDO_CONSTRUCT_CHECK;
@@ -915,9 +919,9 @@ static PHP_METHOD(PDO, exec)
 	size_t statement_len;
 	zend_long ret;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s", &statement, &statement_len)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(statement, statement_len)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if (!statement_len) {
 		pdo_raise_impl_error(dbh, NULL, "HY000",  "trying to execute an empty query");
@@ -943,9 +947,10 @@ static PHP_METHOD(PDO, lastInsertId)
 	char *name = NULL;
 	size_t namelen;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "|s!", &name, &namelen)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING_EX(name, namelen, 1, 0)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	PDO_DBH_CLEAR_ERR();
 	PDO_CONSTRUCT_CHECK;
@@ -1136,9 +1141,11 @@ static PHP_METHOD(PDO, quote)
 	char *qstr;
 	size_t qlen;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &str, &str_len, &paramtype)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(paramtype)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	PDO_DBH_CLEAR_ERR();
 	PDO_CONSTRUCT_CHECK;

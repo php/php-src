@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -74,7 +74,7 @@ PHP_COM_DOTNET_API OLECHAR *php_com_string_to_olestring(char *string, size_t str
 PHP_COM_DOTNET_API char *php_com_olestring_to_string(OLECHAR *olestring, size_t *string_len, int codepage)
 {
 	char *string;
-	uint length = 0;
+	uint32_t length = 0;
 	BOOL ok;
 
 	length = WideCharToMultiByte(codepage, 0, olestring, -1, NULL, 0, NULL, NULL);

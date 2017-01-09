@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,6 +29,7 @@
 #include "zend_alloc.h"
 #include "phpdbg_eol.h"
 #include "phpdbg_print.h"
+#include "phpdbg_help.h"
 
 #include "ext/standard/basic_functions.h"
 
@@ -71,7 +72,7 @@ PHP_INI_END()
 
 static zend_bool phpdbg_booted = 0;
 static zend_bool phpdbg_fully_started = 0;
-zend_bool use_mm_wrappers = 0;
+zend_bool use_mm_wrappers = 1;
 
 static void php_phpdbg_destroy_bp_file(zval *brake) /* {{{ */
 {
@@ -127,7 +128,6 @@ static void php_phpdbg_destroy_file_source(zval *data) /* {{{ */
 	if (source->buf) {
 		efree(source->buf);
 	}
-	efree(source->filename);
 	efree(source);
 } /* }}} */
 
@@ -1330,7 +1330,7 @@ void phpdbg_free_wrapper(void *p ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{
 		 */
 	} else {
 		phpdbg_watch_efree(p);
-		return _zend_mm_free(heap, p ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+		_zend_mm_free(heap, p ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	}
 } /* }}} */
 
@@ -1397,6 +1397,10 @@ int main(int argc, char **argv) /* {{{ */
 	char *read_from_stdin = NULL;
 	zend_string *backup_phpdbg_compile = NULL;
 	zend_bool show_help = 0, show_version = 0;
+	void* (*_malloc)(size_t);
+	void (*_free)(void*);
+	void* (*_realloc)(void*, size_t);
+
 
 #ifndef _WIN32
 	struct sigaction sigio_struct;
@@ -1600,7 +1604,7 @@ phpdbg_main:
 	quit_immediately = phpdbg_startup_run > 1;
 
 	/* set exec if present on command line */
-	if (!read_from_stdin && argc > php_optind && (strcmp(argv[php_optind-1], "--") != SUCCESS)) {
+	if (!read_from_stdin && argc > php_optind) {
 		if (!exec && strlen(argv[php_optind])) {
 			exec = strdup(argv[php_optind]);
 		}
@@ -1684,9 +1688,6 @@ phpdbg_main:
     EXCEPTION_POINTERS *xp;
     __try {
 #endif
-		void* (*_malloc)(size_t);
-		void (*_free)(void*);
-		void* (*_realloc)(void*, size_t);
 
 		if (show_version || show_help) {
 			/* It ain't gonna proceed to real execution anyway,
@@ -1694,10 +1695,10 @@ phpdbg_main:
 			PHPDBG_G(io)[PHPDBG_STDOUT].ptr = stdout;
 			PHPDBG_G(io)[PHPDBG_STDOUT].fd = fileno(stdout);
 			if (show_help) {
-				phpdbg_do_help(NULL);
+				phpdbg_do_help_cmd(exec);
 			} else if (show_version) {
 				phpdbg_out(
-					"phpdbg %s (built: %s %s)\nPHP %s, Copyright (c) 1997-2016 The PHP Group\n%s",
+					"phpdbg %s (built: %s %s)\nPHP %s, Copyright (c) 1997-2017 The PHP Group\n%s",
 					PHPDBG_VERSION,
 					__DATE__,
 					__TIME__,
@@ -1766,6 +1767,8 @@ phpdbg_main:
 		} else {
 			zend_mm_set_custom_handlers(mm_heap, _malloc, _free, _realloc);
 		}
+
+		_free = PHPDBG_G(original_free_function);
 
 
 		phpdbg_init_list();
@@ -1889,9 +1892,7 @@ phpdbg_main:
 		/* initialize from file */
 		PHPDBG_G(flags) |= PHPDBG_IS_INITIALIZING;
 		zend_try {
-			if (init_file) {
-				phpdbg_init(init_file, init_file_len, init_file_default);
-			}
+			phpdbg_init(init_file, init_file_len, init_file_default);
 		} zend_end_try();
 		PHPDBG_G(flags) &= ~PHPDBG_IS_INITIALIZING;
 
@@ -1954,7 +1955,7 @@ phpdbg_main:
 			if (PHPDBG_G(ops)) {
 				phpdbg_print_opcodes(print_opline_func);
 			} else {
-				quiet_write(PHPDBG_G(io)[PHPDBG_STDERR].fd, ZEND_STRL("No opcodes could be compiled | No file specified or compilation failed?\n"));
+				zend_quiet_write(PHPDBG_G(io)[PHPDBG_STDERR].fd, ZEND_STRL("No opcodes could be compiled | No file specified or compilation failed?\n"));
 			}
 			goto phpdbg_out;
 		}
@@ -2093,7 +2094,7 @@ phpdbg_out:
 			php_request_shutdown(NULL);
 		} zend_end_try();
 
-		if (PHPDBG_G(exec) && !memcmp("-", PHPDBG_G(exec), 2)) { /* i.e. execution context has been read from stdin - back it up */
+		if (PHPDBG_G(exec) && strcmp("Standard input code", PHPDBG_G(exec)) == SUCCESS) { /* i.e. execution context has been read from stdin - back it up */
 			phpdbg_file_source *data = zend_hash_str_find_ptr(&PHPDBG_G(file_sources), PHPDBG_G(exec), PHPDBG_G(exec_len));
 			backup_phpdbg_compile = zend_string_alloc(data->len + 2, 1);
 			sprintf(ZSTR_VAL(backup_phpdbg_compile), "?>%.*s", (int) data->len, data->buf);
@@ -2167,10 +2168,6 @@ phpdbg_out:
 
 	sapi_shutdown();
 
-#ifdef ZTS
-	ts_free_id(phpdbg_globals_id);
-#endif
-
 	if (sapi_name) {
 		free(sapi_name);
 	}
@@ -2182,6 +2179,13 @@ free_and_return:
 	}
 
 #ifdef ZTS
+	/* reset to original handlers - otherwise PHPDBG_G() in phpdbg_watch_efree will be segfaulty (with e.g. USE_ZEND_ALLOC=0) */
+	if (!use_mm_wrappers) {
+		zend_mm_set_custom_handlers(zend_mm_get_heap(), _malloc, _free, _realloc);
+	}
+
+	ts_free_id(phpdbg_globals_id);
+
 	tsrm_shutdown();
 #endif
 

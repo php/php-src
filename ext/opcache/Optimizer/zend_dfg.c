@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, DFG - Data Flow Graph                                   |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -76,6 +76,9 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 					case ZEND_FE_RESET_R:
 					case ZEND_SEND_VAR:
 					case ZEND_CAST:
+					case ZEND_QM_ASSIGN:
+					case ZEND_JMP_SET:
+					case ZEND_COALESCE:
 						if (build_flags & ZEND_SSA_RC_INFERENCE) {
 							goto op1_def;
 						}

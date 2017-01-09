@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -400,6 +400,7 @@ PHP_WINUTIL_API int php_win32_code_to_errno(unsigned long w32Err)
         /* 1004 */   ,  {   ERROR_INVALID_FLAGS             ,   EINVAL          }
         /* 1113 */   ,  {   ERROR_NO_UNICODE_TRANSLATION    ,   EINVAL          }
         /* 1168 */   ,  {   ERROR_NOT_FOUND                 ,   ENOENT          }
+        /* 1224 */   ,  {   ERROR_USER_MAPPED_FILE          ,   EACCES          }
         /* 1816 */  ,   {   ERROR_NOT_ENOUGH_QUOTA          ,   ENOMEM          }
 					,   {   ERROR_ABANDONED_WAIT_0          ,   EIO }
     };

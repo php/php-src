@@ -67,13 +67,6 @@ int zend_sprintf(char *buffer, const char *format, ...);
 
 #include <math.h>
 
-/* To enable the is_nan, is_infinite and is_finite PHP functions */
-#ifdef NETWARE
-	#define HAVE_ISNAN 1
-	#define HAVE_ISINF 1
-	#define HAVE_ISFINITE 1
-#endif
-
 #ifndef zend_isnan
 #ifdef HAVE_ISNAN
 #define zend_isnan(a) isnan(a)
@@ -106,13 +99,6 @@ int zend_sprintf(char *buffer, const char *format, ...);
 #endif
 
 #endif /* ifndef ZEND_ACCONFIG_H_NO_C_PROTOS */
-
-#ifdef NETWARE
-#ifdef USE_WINSOCK
-#/*This detection against winsock is of no use*/ undef HAVE_SOCKLEN_T
-#/*This detection against winsock is of no use*/ undef HAVE_SYS_SOCKET_H
-#endif
-#endif
 
 #undef PTHREADS
 ])
@@ -285,20 +271,10 @@ case $host_cpu in
     ;;
 esac
 
-dnl activate some gcc specific optimizations for gcc >= 4
-if test "$GCC" = "yes"; then
-  case $host_alias in
-  *darwin*)
-    GCC_MAJOR_VERSION=`$CC -dumpversion | /usr/bin/sed -nE '1s/([[0-9]]+)\.[[0-9]]+\..*/\1/;1p'`
-    ;;
-  *)
-    GCC_MAJOR_VERSION=`$CC --version | $SED -n '1s/[[^0-9]]*//;1s/\..*//;1p'`
-    ;;
-  esac
-  if test $GCC_MAJOR_VERSION -ge 4; then
-    CFLAGS="$CFLAGS -fvisibility=hidden"
-  fi
-fi
+dnl Mark symbols hidden by default if the compiler (for example, gcc >= 4)
+dnl supports it. This can help reduce the binary size and startup time.
+AX_CHECK_COMPILE_FLAG([-fvisibility=hidden],
+                       [CFLAGS="$CFLAGS -fvisibility=hidden"])
 
 case $host_alias in
   *solaris*)
@@ -330,15 +306,6 @@ case $host_alias in
     if test "$GCC" = "yes"; then
       CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE_EXTENDED"
     fi
-    ;;
-  *netware*)
-    PHP_BUILD_PROGRAM
-    PHP_ADD_SOURCES(/main, internal_functions.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, PHP_GLOBAL_OBJS)
-    PHP_ADD_SOURCES(win32, sendmail.c, -I$CFLAGS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, PHP_GLOBAL_OBJS)
-    PHP7LIB_SHARED_LIBADD=\$\(EXTRA_LIBS\)
-    EXTENSION_DIR=sys:/php$PHP_MAJOR_VERSION/ext
-    PHP_SUBST(PHP7LIB_SHARED_LIBADD)
-    PHP_SHARED_MODULE(php7lib, PHP_GLOBAL_OBJS, netware)
     ;;
 esac
 
@@ -768,7 +735,7 @@ if test "$ac_cv_func_sync_fetch_and_add" = yes; then
   AC_DEFINE(HAVE_SYNC_FETCH_AND_ADD,1,[Define if you have the __sync_fetch_and_add function])
 fi
 
-AC_REPLACE_FUNCS(strlcat strlcpy getopt)
+AC_REPLACE_FUNCS(strlcat strlcpy explicit_bzero getopt)
 AC_FUNC_UTIME_NULL
 AC_FUNC_ALLOCA
 dnl PHP_AC_BROKEN_SPRINTF
@@ -1299,20 +1266,10 @@ EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM $PHP_LDFLAGS"
 PHP_BUILD_DATE=`date '+%Y-%m-%d'`
 AC_DEFINE_UNQUOTED(PHP_BUILD_DATE,"$PHP_BUILD_DATE",[PHP build date])
 
-case $host_alias in
-*netware*)
-  PHP_OS="NetWare"
-  PHP_UNAME="NetWare"
-  AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS",[hardcode for each of the cross compiler host])
-  AC_DEFINE_UNQUOTED(PHP_UNAME,"$PHP_UNAME",[hardcode for each of the cross compiler host])
-  ;;
-*)
-  PHP_UNAME=`uname -a | xargs`
-  AC_DEFINE_UNQUOTED(PHP_UNAME,"$PHP_UNAME",[uname -a output])
-  PHP_OS=`uname | xargs`
-  AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS",[uname output])
-  ;;
-esac
+PHP_UNAME=`uname -a | xargs`
+AC_DEFINE_UNQUOTED(PHP_UNAME,"$PHP_UNAME",[uname -a output])
+PHP_OS=`uname | xargs`
+AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS",[uname output])
 
 PHP_SUBST_OLD(PHP_INSTALLED_SAPIS)
 
@@ -1479,7 +1436,7 @@ PHP_ADD_SOURCES(TSRM, TSRM.c tsrm_strtok_r.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=
 PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c php_sprintf.c \
        fopen_wrappers.c alloca.c  php_scandir.c \
        php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
-       strlcat.c mergesort.c reentrancy.c php_variables.c php_ticks.c \
+       strlcat.c explicit_bzero.c mergesort.c reentrancy.c php_variables.c php_ticks.c \
        network.c php_open_temporary_file.c \
        output.c getopt.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
@@ -1490,16 +1447,7 @@ PHP_ADD_SOURCES(main/streams, streams.c cast.c memory.c filter.c \
        glob_wrapper.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
 PHP_ADD_SOURCES(/main, internal_functions.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, sapi)
-
-case $host_alias in
-  *netware*)
-    PHP_ADD_BUILD_DIR(win32)
-    PHP_ADD_BUILD_DIR(netware)
-    ;;
-  *)
-    PHP_ADD_SOURCES_X(/main, internal_functions_cli.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, PHP_BINARY_OBJS)
-    ;;
-esac
+PHP_ADD_SOURCES_X(/main, internal_functions_cli.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, PHP_BINARY_OBJS)
 
 PHP_ADD_SOURCES(Zend, \
     zend_language_parser.c zend_language_scanner.c \

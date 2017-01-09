@@ -51,7 +51,7 @@ array(3) {
   ["Guff"]=>
   int(1234567890)
 }
-NULL
+bool(true)
 array(3) {
   ["Blah"]=>
   string(12) "Hello World!"

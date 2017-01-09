@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -43,14 +43,6 @@
 #include <errno.h>
 #include <process.h>
 #include "win32/time.h"
-#elif defined(NETWARE)
-#ifdef USE_WINSOCK
-#include <novsock2.h>
-#else
-#include <sys/socket.h>
-#endif
-#include <errno.h>
-#include <sys/timeval.h>
 #else
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -2068,11 +2060,11 @@ static int php_snmp_has_property(zval *object, zval *member, int has_set_exists,
 }
 /* }}} */
 
-static HashTable *php_snmp_get_gc(zval *object, zval ***gc_data, int *gc_data_count TSRMLS_DC) /* {{{ */
+static HashTable *php_snmp_get_gc(zval *object, zval ***gc_data, int *gc_data_count) /* {{{ */
 {
 	*gc_data = NULL;
 	*gc_data_count = 0;
-	return zend_std_get_properties(object TSRMLS_CC);
+	return zend_std_get_properties(object);
 }
 /* }}} */
 

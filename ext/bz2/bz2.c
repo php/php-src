@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -589,8 +589,8 @@ static PHP_FUNCTION(bzdecompress)
 	bzs.avail_in = source_len;
 
 	/* in most cases bz2 offers at least 2:1 compression, so we use that as our base */
+	dest = zend_string_safe_alloc(source_len, 2, 1, 0);
 	bzs.avail_out = source_len * 2;
-	dest = zend_string_alloc(bzs.avail_out + 1, 0);
 	bzs.next_out = ZSTR_VAL(dest);
 
 	while ((error = BZ2_bzDecompress(&bzs)) == BZ_OK && bzs.avail_in > 0) {

@@ -221,6 +221,7 @@ AC_DEFUN([PHP_GD_CHECK_VERSION],[
   PHP_CHECK_LIBRARY(gd, gdImageCreateFromWebp,  [AC_DEFINE(HAVE_GD_WEBP,             1, [ ])], [], [ $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageCreateFromJpeg,  [AC_DEFINE(HAVE_GD_JPG,              1, [ ])], [], [ $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageCreateFromXpm,   [AC_DEFINE(HAVE_GD_XPM,              1, [ ])], [], [ $GD_SHARED_LIBADD ])
+  PHP_CHECK_LIBRARY(gd, gdImageCreateFromBmp,   [AC_DEFINE(HAVE_GD_BMP,              1, [ ])], [], [ $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageStringFT,        [AC_DEFINE(HAVE_GD_FREETYPE,         1, [ ])], [], [ $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdVersionString,        [AC_DEFINE(HAVE_GD_LIBVERSION,       1, [ ])], [], [ $GD_SHARED_LIBADD ])
 ])
@@ -257,7 +258,8 @@ if test "$PHP_GD" = "yes"; then
                  libgd/gdcache.c libgd/gdkanji.c libgd/wbmp.c libgd/gd_wbmp.c libgd/gdhelpers.c \
                  libgd/gd_topal.c libgd/gd_gif_in.c libgd/gd_xbm.c libgd/gd_gif_out.c libgd/gd_security.c \
                  libgd/gd_filter.c libgd/gd_pixelate.c libgd/gd_rotate.c libgd/gd_color_match.c \
-                 libgd/gd_transform.c libgd/gd_crop.c libgd/gd_interpolation.c libgd/gd_matrix.c"
+                 libgd/gd_transform.c libgd/gd_crop.c libgd/gd_interpolation.c libgd/gd_matrix.c \
+                 libgd/gd_bmp.c"
 
 dnl check for fabsf and floorf which are available since C99
   AC_CHECK_FUNCS(fabsf floorf)
@@ -265,6 +267,7 @@ dnl check for fabsf and floorf which are available since C99
 dnl These are always available with bundled library
   AC_DEFINE(HAVE_GD_BUNDLED,          1, [ ])
   AC_DEFINE(HAVE_GD_PNG,              1, [ ])
+  AC_DEFINE(HAVE_GD_BMP,              1, [ ])
   AC_DEFINE(HAVE_GD_CACHE_CREATE,     1, [ ])
 
 dnl Make sure the libgd/ is first in the include path

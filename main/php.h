@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -47,7 +47,6 @@
 
 #ifdef PHP_WIN32
 #	include "tsrm_win32.h"
-#	include "win95nt.h"
 #	ifdef PHP_EXPORTS
 #		define PHPAPI __declspec(dllexport)
 #	else
@@ -66,10 +65,51 @@
 #	define PHP_EOL "\n"
 #endif
 
-#ifdef NETWARE
-/* For php_get_uname() function */
-#define PHP_UNAME  "NetWare"
-#define PHP_OS      PHP_UNAME
+/* Windows specific defines */
+#ifdef PHP_WIN32
+# define PHP_PROG_SENDMAIL		"Built in mailer"
+# define HAVE_DECLARED_TIMEZONE
+# define WIN32_LEAN_AND_MEAN
+# define NOOPENFILE
+
+# include <io.h>
+# include <malloc.h>
+# include <direct.h>
+# include <stdlib.h>
+# include <stdio.h>
+# include <stdarg.h>
+# include <sys/types.h>
+# include <process.h>
+
+typedef int uid_t;
+typedef int gid_t;
+typedef char * caddr_t;
+typedef unsigned int uint;
+typedef unsigned long ulong;
+# if !NSAPI
+typedef int pid_t;
+# endif
+
+# ifndef PHP_DEBUG
+#  ifdef inline
+#   undef inline
+#  endif
+#  define inline		__inline
+# endif
+
+# define M_TWOPI        (M_PI * 2.0)
+# define off_t			_off_t
+
+# define lstat(x, y)	php_sys_lstat(x, y)
+# define chdir(path)	_chdir(path)
+# define mkdir(a, b)	_mkdir(a)
+# define rmdir(a)		_rmdir(a)
+# define getpid			_getpid
+# define php_sleep(t)	SleepEx(t*1000, TRUE)
+
+# ifndef getcwd
+#  define getcwd(a, b)	_getcwd(a, b)
+# endif
 #endif
 
 #if HAVE_ASSERT_H
@@ -134,6 +174,14 @@ PHPAPI size_t php_strlcat(char *dst, const char *src, size_t siz);
 END_EXTERN_C()
 #undef strlcat
 #define strlcat php_strlcat
+#endif
+
+#ifndef HAVE_EXPLICIT_BZERO
+BEGIN_EXTERN_C()
+PHPAPI void php_explicit_bzero(void *dst, size_t siz);
+END_EXTERN_C()
+#undef explicit_bzero
+#define explicit_bzero php_explicit_bzero
 #endif
 
 #ifndef HAVE_STRTOK_R

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, Func Info                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -347,7 +347,7 @@ static const func_info_t func_infos[] = {
 	F1("ucfirst",                      MAY_BE_NULL | MAY_BE_STRING),
 	F1("lcfirst",                      MAY_BE_NULL | MAY_BE_STRING),
 	F1("ucwords",                      MAY_BE_NULL | MAY_BE_STRING),
-	F1("strtr",                        MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
+	FN("strtr",                        MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	FN("addslashes",                   MAY_BE_NULL | MAY_BE_STRING),
 	F1("addcslashes",                  MAY_BE_NULL | MAY_BE_STRING),
 	FN("rtrim",                        MAY_BE_NULL | MAY_BE_STRING),
@@ -575,7 +575,7 @@ static const func_info_t func_infos[] = {
 #ifdef HAVE_GETHOSTNAME
 	F1("gethostname",                  MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 #endif
-#if defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !(defined(__BEOS__) || defined(NETWARE)))
+#if defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !(defined(__BEOS__)))
 	F0("dns_check_record",             MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("checkdnsrr",                   MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 # if defined(PHP_WIN32) || HAVE_FULL_DNS_FUNCS
@@ -689,7 +689,7 @@ static const func_info_t func_infos[] = {
 	F0("socket_set_timeout",           MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 #endif
 	F1("socket_get_status",            MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ANY),
-#if (!defined(__BEOS__) && !defined(NETWARE) && HAVE_REALPATH) || defined(ZTS)
+#if (!defined(__BEOS__) && HAVE_REALPATH) || defined(ZTS)
 	F1("realpath",                     MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 #endif
 #ifdef HAVE_FNMATCH
@@ -734,10 +734,8 @@ static const func_info_t func_infos[] = {
 	F0("is_link",                      MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F1("stat",                         MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_FALSE | MAY_BE_ARRAY_OF_TRUE | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING),
 	F1("lstat",                        MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_FALSE | MAY_BE_ARRAY_OF_TRUE | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING),
-#ifndef NETWARE
 	F0("chown",                        MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("chgrp",                        MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-#endif
 #if HAVE_LCHOWN
 	F0("lchown",                       MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 #endif
@@ -823,11 +821,11 @@ static const func_info_t func_infos[] = {
 	F1("array_column",                 MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
 	F1("array_reverse",                MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
 	F1("array_reduce",                 UNKNOWN_INFO),
-	F1("array_pad",                    MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
+	FN("array_pad",                    MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
 	F1("array_flip",                   MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING),
 	F1("array_change_key_case",        MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
 	F1("array_rand",                   UNKNOWN_INFO),
-	F1("array_unique",                 MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
+	FN("array_unique",                 MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
 	F1("array_intersect",              MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
 	F1("array_intersect_key",          MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
 	F1("array_intersect_ukey",         MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
@@ -836,7 +834,7 @@ static const func_info_t func_infos[] = {
 	F1("array_uintersect_assoc",       MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
 	F1("array_intersect_uassoc",       MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
 	F1("array_uintersect_uassoc",      MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
-	F1("array_diff",                   MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
+	FN("array_diff",                   MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
 	F1("array_diff_key",               MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
 	F1("array_diff_ukey",              MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
 	F1("array_udiff",                  MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
@@ -1145,13 +1143,13 @@ static const func_info_t func_infos[] = {
 	F0("xml_set_external_entity_ref_handler",   MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("xml_set_start_namespace_decl_handler",  MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("xml_set_end_namespace_decl_handler",    MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("xml_parse",                             MAY_BE_NULL | MAY_BE_LONG),
-	F0("xml_parse_into_struct",                 MAY_BE_NULL | MAY_BE_LONG),
-	F0("xml_get_error_code",                    MAY_BE_NULL | MAY_BE_LONG),
+	F0("xml_parse",                             MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
+	F0("xml_parse_into_struct",                 MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
+	F0("xml_get_error_code",                    MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
 	F1("xml_error_string",                      MAY_BE_NULL | MAY_BE_STRING),
-	F0("xml_get_current_line_number",           MAY_BE_NULL | MAY_BE_LONG),
-	F0("xml_get_current_column_number",         MAY_BE_NULL | MAY_BE_LONG),
-	F0("xml_get_current_byte_index",            MAY_BE_NULL | MAY_BE_LONG),
+	F0("xml_get_current_line_number",           MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
+	F0("xml_get_current_column_number",         MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
+	F0("xml_get_current_byte_index",            MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
 	F0("xml_parser_free",                       MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("xml_parser_set_option",                 MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F1("xml_parser_get_option",                 MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG | MAY_BE_STRING),

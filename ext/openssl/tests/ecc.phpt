@@ -99,7 +99,7 @@ resource(%d) of type (OpenSSL X.509 CSR)
 bool(false)
 array(1) {
   ["d"]=>
-  string(48) "%a"
+  string(%d) "%a"
 }
 resource(%d) of type (OpenSSL X.509)
 Testing openssl_x509_check_private_key

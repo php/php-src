@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -3934,7 +3934,7 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 	char *tsm_errmsg = NULL;
 	ADDRESS *addr;
 	char *bufferTo = NULL, *bufferCc = NULL, *bufferBcc = NULL, *bufferHeader = NULL;
-	int offset, bufferLen = 0;
+	size_t offset, bufferLen = 0;
 	size_t bt_len;
 
 	if (headers) {
@@ -3950,7 +3950,7 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 #define PHP_IMAP_CLEAN	if (bufferTo) efree(bufferTo); if (bufferCc) efree(bufferCc); if (bufferBcc) efree(bufferBcc); if (bufferHeader) efree(bufferHeader);
 #define PHP_IMAP_BAD_DEST PHP_IMAP_CLEAN; efree(tempMailTo); return (BAD_MSG_DESTINATION);
 
-	bufferHeader = (char *)emalloc(bufferLen + 1);
+	bufferHeader = (char *)safe_emalloc(bufferLen, 1, 1);
 	memset(bufferHeader, 0, bufferLen);
 	if (to && *to) {
 		strlcat(bufferHeader, "To: ", bufferLen + 1);

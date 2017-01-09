@@ -61,177 +61,177 @@ mysqli_close($link);
 array(2) {
   [0]=>
   object(stdClass)#5 (13) {
-    [%u|b%"name"]=>
-    %unicode|string%(3) "foo"
-    [%u|b%"orgname"]=>
-    %unicode|string%(3) "foo"
-    [%u|b%"table"]=>
-    %unicode|string%(13) "test_affected"
-    [%u|b%"orgtable"]=>
-    %unicode|string%(13) "test_affected"
-    [%u|b%"def"]=>
-    %unicode|string%(0) ""
-    [%u|b%"db"]=>
-    %unicode|string%(%d) "%s"
-    [%u|b%"catalog"]=>
-    %unicode|string%(%d) "%s"
-    [%u|b%"max_length"]=>
+    ["name"]=>
+    string(3) "foo"
+    ["orgname"]=>
+    string(3) "foo"
+    ["table"]=>
+    string(13) "test_affected"
+    ["orgtable"]=>
+    string(13) "test_affected"
+    ["def"]=>
+    string(0) ""
+    ["db"]=>
+    string(%d) "%s"
+    ["catalog"]=>
+    string(%d) "%s"
+    ["max_length"]=>
     int(0)
-    [%u|b%"length"]=>
+    ["length"]=>
     int(%d)
-    [%u|b%"charsetnr"]=>
+    ["charsetnr"]=>
     int(%d)
-    [%u|b%"flags"]=>
+    ["flags"]=>
     int(32768)
-    [%u|b%"type"]=>
+    ["type"]=>
     int(3)
-    [%u|b%"decimals"]=>
+    ["decimals"]=>
     int(0)
   }
   [1]=>
   object(stdClass)#6 (13) {
-    [%u|b%"name"]=>
-    %unicode|string%(3) "bar"
-    [%u|b%"orgname"]=>
-    %unicode|string%(3) "bar"
-    [%u|b%"table"]=>
-    %unicode|string%(13) "test_affected"
-    [%u|b%"orgtable"]=>
-    %unicode|string%(13) "test_affected"
-    [%u|b%"def"]=>
-    %unicode|string%(0) ""
-    [%u|b%"db"]=>
-    %unicode|string%(%d) "%s"
-    [%u|b%"catalog"]=>
-    %unicode|string%(%d) "%s"
-    [%u|b%"max_length"]=>
+    ["name"]=>
+    string(3) "bar"
+    ["orgname"]=>
+    string(3) "bar"
+    ["table"]=>
+    string(13) "test_affected"
+    ["orgtable"]=>
+    string(13) "test_affected"
+    ["def"]=>
+    string(0) ""
+    ["db"]=>
+    string(%d) "%s"
+    ["catalog"]=>
+    string(%d) "%s"
+    ["max_length"]=>
     int(0)
-    [%u|b%"length"]=>
+    ["length"]=>
     int(%d)
-    [%u|b%"charsetnr"]=>
+    ["charsetnr"]=>
     int(%d)
-    [%u|b%"flags"]=>
+    ["flags"]=>
     int(0)
-    [%u|b%"type"]=>
+    ["type"]=>
     int(253)
-    [%u|b%"decimals"]=>
+    ["decimals"]=>
     int(0)
   }
 }
 
 === fetch_field_direct ===
 object(stdClass)#6 (13) {
-  [%u|b%"name"]=>
-  %unicode|string%(3) "foo"
-  [%u|b%"orgname"]=>
-  %unicode|string%(3) "foo"
-  [%u|b%"table"]=>
-  %unicode|string%(13) "test_affected"
-  [%u|b%"orgtable"]=>
-  %unicode|string%(13) "test_affected"
-  [%u|b%"def"]=>
-  %unicode|string%(0) ""
-  [%u|b%"db"]=>
-  %unicode|string%(%d) "%s"
-  [%u|b%"catalog"]=>
-  %unicode|string%(%d) "%s"
-  [%u|b%"max_length"]=>
+  ["name"]=>
+  string(3) "foo"
+  ["orgname"]=>
+  string(3) "foo"
+  ["table"]=>
+  string(13) "test_affected"
+  ["orgtable"]=>
+  string(13) "test_affected"
+  ["def"]=>
+  string(0) ""
+  ["db"]=>
+  string(%d) "%s"
+  ["catalog"]=>
+  string(%d) "%s"
+  ["max_length"]=>
   int(0)
-  [%u|b%"length"]=>
+  ["length"]=>
   int(%d)
-  [%u|b%"charsetnr"]=>
+  ["charsetnr"]=>
   int(%d)
-  [%u|b%"flags"]=>
+  ["flags"]=>
   int(32768)
-  [%u|b%"type"]=>
+  ["type"]=>
   int(3)
-  [%u|b%"decimals"]=>
+  ["decimals"]=>
   int(0)
 }
 object(stdClass)#6 (13) {
-  [%u|b%"name"]=>
-  %unicode|string%(3) "bar"
-  [%u|b%"orgname"]=>
-  %unicode|string%(3) "bar"
-  [%u|b%"table"]=>
-  %unicode|string%(13) "test_affected"
-  [%u|b%"orgtable"]=>
-  %unicode|string%(13) "test_affected"
-  [%u|b%"def"]=>
-  %unicode|string%(0) ""
-  [%u|b%"db"]=>
-  %unicode|string%(%d) "%s"
-  [%u|b%"catalog"]=>
-  %unicode|string%(%d) "%s"
-  [%u|b%"max_length"]=>
+  ["name"]=>
+  string(3) "bar"
+  ["orgname"]=>
+  string(3) "bar"
+  ["table"]=>
+  string(13) "test_affected"
+  ["orgtable"]=>
+  string(13) "test_affected"
+  ["def"]=>
+  string(0) ""
+  ["db"]=>
+  string(%d) "%s"
+  ["catalog"]=>
+  string(%d) "%s"
+  ["max_length"]=>
   int(0)
-  [%u|b%"length"]=>
+  ["length"]=>
   int(%d)
-  [%u|b%"charsetnr"]=>
+  ["charsetnr"]=>
   int(%d)
-  [%u|b%"flags"]=>
+  ["flags"]=>
   int(0)
-  [%u|b%"type"]=>
+  ["type"]=>
   int(253)
-  [%u|b%"decimals"]=>
+  ["decimals"]=>
   int(0)
 }
 
 === fetch_field ===
 object(stdClass)#6 (13) {
-  [%u|b%"name"]=>
-  %unicode|string%(3) "foo"
-  [%u|b%"orgname"]=>
-  %unicode|string%(3) "foo"
-  [%u|b%"table"]=>
-  %unicode|string%(13) "test_affected"
-  [%u|b%"orgtable"]=>
-  %unicode|string%(13) "test_affected"
-  [%u|b%"def"]=>
-  %unicode|string%(0) ""
-  [%u|b%"db"]=>
-  %unicode|string%(%d) "%s"
-  [%u|b%"catalog"]=>
-  %unicode|string%(%d) "%s"
-  [%u|b%"max_length"]=>
+  ["name"]=>
+  string(3) "foo"
+  ["orgname"]=>
+  string(3) "foo"
+  ["table"]=>
+  string(13) "test_affected"
+  ["orgtable"]=>
+  string(13) "test_affected"
+  ["def"]=>
+  string(0) ""
+  ["db"]=>
+  string(%d) "%s"
+  ["catalog"]=>
+  string(%d) "%s"
+  ["max_length"]=>
   int(0)
-  [%u|b%"length"]=>
+  ["length"]=>
   int(%d)
-  [%u|b%"charsetnr"]=>
+  ["charsetnr"]=>
   int(%d)
-  [%u|b%"flags"]=>
+  ["flags"]=>
   int(32768)
-  [%u|b%"type"]=>
+  ["type"]=>
   int(3)
-  [%u|b%"decimals"]=>
+  ["decimals"]=>
   int(0)
 }
 object(stdClass)#5 (13) {
-  [%u|b%"name"]=>
-  %unicode|string%(3) "bar"
-  [%u|b%"orgname"]=>
-  %unicode|string%(3) "bar"
-  [%u|b%"table"]=>
-  %unicode|string%(13) "test_affected"
-  [%u|b%"orgtable"]=>
-  %unicode|string%(13) "test_affected"
-  [%u|b%"def"]=>
-  %unicode|string%(0) ""
-  [%u|b%"db"]=>
-  %unicode|string%(%d) "%s"
-  [%u|b%"catalog"]=>
-  %unicode|string%(%d) "%s"
-  [%u|b%"max_length"]=>
+  ["name"]=>
+  string(3) "bar"
+  ["orgname"]=>
+  string(3) "bar"
+  ["table"]=>
+  string(13) "test_affected"
+  ["orgtable"]=>
+  string(13) "test_affected"
+  ["def"]=>
+  string(0) ""
+  ["db"]=>
+  string(%d) "%s"
+  ["catalog"]=>
+  string(%d) "%s"
+  ["max_length"]=>
   int(0)
-  [%u|b%"length"]=>
+  ["length"]=>
   int(%d)
-  [%u|b%"charsetnr"]=>
+  ["charsetnr"]=>
   int(%d)
-  [%u|b%"flags"]=>
+  ["flags"]=>
   int(0)
-  [%u|b%"type"]=>
+  ["type"]=>
   int(253)
-  [%u|b%"decimals"]=>
+  ["decimals"]=>
   int(0)
 }
 done!

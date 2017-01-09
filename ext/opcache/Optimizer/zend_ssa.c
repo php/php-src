@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, SSA - Static Single Assignment Form                     |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -192,7 +192,7 @@ static int find_adjusted_tmp_var(const zend_op_array *op_array, uint32_t build_f
 					return EX_VAR_TO_NUM(op->op1.var);
 				}
 			} else if (op->op2_type == IS_CV && op->op1_type == IS_CONST) {
-				zv = CRT_CONSTANT(op->op2);
+				zv = CRT_CONSTANT(op->op1);
 				if (Z_TYPE_P(zv) == IS_LONG
 				 && Z_LVAL_P(zv) != ZEND_LONG_MIN) {
 					*adjustment = -Z_LVAL_P(zv);
@@ -655,6 +655,9 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 					break;
 				case ZEND_SEND_VAR:
 				case ZEND_CAST:
+				case ZEND_QM_ASSIGN:
+				case ZEND_JMP_SET:
+				case ZEND_COALESCE:
 					if ((build_flags & ZEND_SSA_RC_INFERENCE) && opline->op1_type == IS_CV) {
 						ssa_ops[k].op1_def = ssa_vars_count;
 						var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;

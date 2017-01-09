@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -68,9 +68,15 @@ extern ZEND_API void (*zend_throw_exception_hook)(zval *ex);
 /* show an exception using zend_error(severity,...), severity should be E_ERROR */
 ZEND_API ZEND_COLD void zend_exception_error(zend_object *exception, int severity);
 
-/* do not export, in php it's available thru spprintf directly */
-size_t zend_spprintf(char **message, size_t max_len, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 3, 4);
-zend_string *zend_strpprintf(size_t max_len, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
+#include "zend_globals.h"
+
+static zend_always_inline void zend_rethrow_exception(zend_execute_data *execute_data)
+{
+	if (EX(opline)->opcode != ZEND_HANDLE_EXCEPTION) {
+		EG(opline_before_exception) = EX(opline);
+		EX(opline) = EG(exception_op);
+	}
+}
 
 END_EXTERN_C()
 

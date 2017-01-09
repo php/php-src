@@ -268,6 +268,9 @@ static zend_string* get_icu_value_internal( const char* loc_name , char* tag_nam
 	int32_t      buflen         = 512;
 	UErrorCode   status         = U_ZERO_ERROR;
 
+	if (strlen(loc_name) > INTL_MAX_LOCALE_LEN) {
+		return NULL;
+	}
 
 	if( strcmp(tag_name, LOC_CANONICALIZE_TAG) != 0 ){
 		/* Handle  grandfathered languages */
@@ -713,6 +716,8 @@ PHP_FUNCTION( locale_get_keywords )
         RETURN_FALSE;
     }
 
+	INTL_CHECK_LOCALE_LEN(strlen(loc_name));
+
     if(loc_name_len == 0) {
         loc_name = intl_locale_get_default();
     }
@@ -1115,6 +1120,8 @@ PHP_FUNCTION(locale_parse)
 
         RETURN_FALSE;
     }
+
+    INTL_CHECK_LOCALE_LEN(strlen(loc_name));
 
     if(loc_name_len == 0) {
         loc_name = intl_locale_get_default();
@@ -1617,7 +1624,7 @@ PHP_FUNCTION(locale_accept_from_http)
 			len = end ? end-start : http_accept_len-(start-http_accept);
 			if(len > ULOC_FULLNAME_CAPACITY) {
 				intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-						"locale_accept_from_http: locale string too long", 0 TSRMLS_CC );
+						"locale_accept_from_http: locale string too long", 0 );
 				RETURN_FALSE;
 			}
 			if(end) {

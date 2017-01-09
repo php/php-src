@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -727,9 +727,10 @@ PHP_FUNCTION(fprintf)
 		WRONG_PARAM_COUNT;
 	}
 
-	if (zend_parse_parameters(1, "r", &arg1) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, -1)
+		Z_PARAM_RESOURCE(arg1)
+		/* php_formatted_print does its own zpp for extra args */
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	php_stream_from_zval(stream, arg1);
 
@@ -756,9 +757,10 @@ PHP_FUNCTION(vfprintf)
 		WRONG_PARAM_COUNT;
 	}
 
-	if (zend_parse_parameters(1, "r", &arg1) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, -1)
+		Z_PARAM_RESOURCE(arg1)
+		/* php_formatted_print does its own zpp for extra args */
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	php_stream_from_zval(stream, arg1);
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -505,7 +505,7 @@ ZEND_API zend_string *zend_get_executed_filename_ex(void) /* {{{ */
 }
 /* }}} */
 
-ZEND_API uint zend_get_executed_lineno(void) /* {{{ */
+ZEND_API uint32_t zend_get_executed_lineno(void) /* {{{ */
 {
 	zend_execute_data *ex = EG(current_execute_data);
 
@@ -573,7 +573,7 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_class_entry *scope) /* {{{ */
 			zend_throw_error(NULL, "Cannot declare self-referencing constant '%s'", Z_STRVAL_P(p));
 			return FAILURE;
 		}
-		inline_change = (Z_TYPE_FLAGS_P(p) & IS_TYPE_IMMUTABLE) == 0;
+		inline_change = (Z_TYPE_FLAGS_P(p) & IS_TYPE_REFCOUNTED) != 0;
 		SEPARATE_ZVAL_NOREF(p);
 		MARK_CONSTANT_VISITED(p);
 		if (Z_CONST_FLAGS_P(p) & IS_CONSTANT_CLASS) {
@@ -638,7 +638,7 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_class_entry *scope) /* {{{ */
 	} else if (Z_TYPE_P(p) == IS_CONSTANT_AST) {
 		zval tmp;
 
-		inline_change = (Z_TYPE_FLAGS_P(p) & IS_TYPE_IMMUTABLE) == 0;
+		inline_change = (Z_TYPE_FLAGS_P(p) & IS_TYPE_REFCOUNTED) != 0;
 		if (UNEXPECTED(zend_ast_evaluate(&tmp, Z_ASTVAL_P(p), scope) != SUCCESS)) {
 			return FAILURE;
 		}
@@ -899,9 +899,15 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 		EG(current_execute_data) = dummy_execute_data.prev_execute_data;
 	}
 
-	if (EG(exception)) {
-		zend_throw_exception_internal(NULL);
+	if (UNEXPECTED(EG(exception))) {
+		if (UNEXPECTED(!EG(current_execute_data))) {
+			zend_throw_exception_internal(NULL);
+		} else if (EG(current_execute_data)->func &&
+		           ZEND_USER_CODE(EG(current_execute_data)->func->common.type)) {
+			zend_rethrow_exception(EG(current_execute_data));
+		}
 	}
+
 	return SUCCESS;
 }
 /* }}} */
@@ -1092,6 +1098,8 @@ ZEND_API int zend_eval_stringl(char *str, size_t str_len, zval *retval_ptr, char
 
 		EG(no_extensions)=1;
 
+		new_op_array->scope = zend_get_executed_scope();
+
 		zend_try {
 			ZVAL_UNDEF(&local_retval);
 			zend_execute(new_op_array, &local_retval);
@@ -1183,7 +1191,7 @@ static void zend_timeout_handler(int dummy) /* {{{ */
     if (EG(timed_out)) {
 		/* Die on hard timeout */
 		const char *error_filename = NULL;
-		uint error_lineno = 0;
+		uint32_t error_lineno = 0;
 		char log_buffer[2048];
 		int output_len = 0;
 

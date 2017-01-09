@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -836,7 +836,7 @@ static int validate_constant_array(HashTable *ht) /* {{{ */
 		ZVAL_DEREF(val);
 		if (Z_REFCOUNTED_P(val)) {
 			if (Z_TYPE_P(val) == IS_ARRAY) {
-				if (!Z_IMMUTABLE_P(val)) {
+				if (Z_REFCOUNTED_P(val)) {
 					if (Z_ARRVAL_P(val)->u.v.nApplyCount > 0) {
 						zend_error(E_WARNING, "Constants cannot be recursive arrays");
 						ret = 0;
@@ -874,7 +874,7 @@ static void copy_constant_array(zval *dst, zval *src) /* {{{ */
 			new_val = zend_hash_index_add_new(Z_ARRVAL_P(dst), idx, val);
 		}
 		if (Z_TYPE_P(val) == IS_ARRAY) {
-			if (!Z_IMMUTABLE_P(val)) {
+			if (Z_REFCOUNTED_P(val)) {
 				copy_constant_array(new_val, val);
 			}
 		} else if (Z_REFCOUNTED_P(val)) {
@@ -932,7 +932,7 @@ repeat:
 			val = &val_free;
 			break;
 		case IS_ARRAY:
-			if (!Z_IMMUTABLE_P(val)) {
+			if (Z_REFCOUNTED_P(val)) {
 				if (!validate_constant_array(Z_ARRVAL_P(val))) {
 					RETURN_FALSE;
 				} else {
@@ -1231,6 +1231,7 @@ ZEND_FUNCTION(get_object_vars)
 	HashTable *properties;
 	zend_string *key;
 	zend_object *zobj;
+	zend_ulong num_key;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_OBJECT(obj)
@@ -1251,32 +1252,50 @@ ZEND_FUNCTION(get_object_vars)
 	if (!zobj->ce->default_properties_count && properties == zobj->properties && !ZEND_HASH_GET_APPLY_COUNT(properties)) {
 		/* fast copy */
 		if (EXPECTED(zobj->handlers == &std_object_handlers)) {
-			if (EXPECTED(!(GC_FLAGS(properties) & IS_ARRAY_IMMUTABLE))) {
-				GC_REFCOUNT(properties)++;
-			}
-			RETURN_ARR(properties);
+			RETURN_ARR(zend_proptable_to_symtable(properties, 0));
 		}
-		RETURN_ARR(zend_array_dup(properties));
+		RETURN_ARR(zend_proptable_to_symtable(properties, 1));
 	} else {
 		array_init_size(return_value, zend_hash_num_elements(properties));
 
-		ZEND_HASH_FOREACH_STR_KEY_VAL_IND(properties, key, value) {
-			if (key) {
-				if (zend_check_property_access(zobj, key) == SUCCESS) {
-					if (Z_ISREF_P(value) && Z_REFCOUNT_P(value) == 1) {
-						value = Z_REFVAL_P(value);
-					}
-					if (Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
-					}
-					if (ZSTR_VAL(key)[0] == 0) {
-						const char *prop_name, *class_name;
-						size_t prop_len;
-						zend_unmangle_property_name_ex(key, &class_name, &prop_name, &prop_len);
-						zend_hash_str_add_new(Z_ARRVAL_P(return_value), prop_name, prop_len, value);
-					} else {
-						zend_hash_add_new(Z_ARRVAL_P(return_value), key, value);
-					}
+		ZEND_HASH_FOREACH_KEY_VAL(properties, num_key, key, value) {
+			zend_bool unmangle = 0;
+			if (Z_TYPE_P(value) == IS_INDIRECT) {
+				value = Z_INDIRECT_P(value);
+				if (UNEXPECTED(Z_ISUNDEF_P(value))) {
+					continue;
+				}
+
+				ZEND_ASSERT(key);
+				if (zend_check_property_access(zobj, key) == FAILURE) {
+					continue;
+				}
+				unmangle = 1;
+			}
+
+			if (Z_ISREF_P(value) && Z_REFCOUNT_P(value) == 1) {
+				value = Z_REFVAL_P(value);
+			}
+			Z_TRY_ADDREF_P(value);
+
+			if (UNEXPECTED(!key)) {
+				/* This case is only possible due to loopholes, e.g. ArrayObject */
+				zend_hash_index_add(Z_ARRVAL_P(return_value), num_key, value);
+			} else if (unmangle && ZSTR_VAL(key)[0] == 0) {
+				const char *prop_name, *class_name;
+				size_t prop_len;
+				zend_unmangle_property_name_ex(key, &class_name, &prop_name, &prop_len);
+				/* We assume here that a mangled property name is never
+				 * numeric. This is probably a safe assumption, but
+				 * theoretically someone might write an extension with
+				 * private, numeric properties. Well, too bad.
+				 */
+				zend_hash_str_add_new(Z_ARRVAL_P(return_value), prop_name, prop_len, value);
+			} else {
+				if (ZEND_HANDLE_NUMERIC(key, num_key)) {
+					zend_hash_index_add(Z_ARRVAL_P(return_value), num_key, value);
+				} else {
+					zend_hash_add_new(Z_ARRVAL_P(return_value), key, value);
 				}
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -1947,13 +1966,22 @@ static int copy_function_name(zval *zv, int num_args, va_list args, zend_hash_ke
 	zend_function *func = Z_PTR_P(zv);
 	zval *internal_ar = va_arg(args, zval *),
 	     *user_ar     = va_arg(args, zval *);
+	zend_bool *exclude_disabled = va_arg(args, zend_bool *);
 
 	if (hash_key->key == NULL || ZSTR_VAL(hash_key->key)[0] == 0) {
 		return 0;
 	}
 
 	if (func->type == ZEND_INTERNAL_FUNCTION) {
-		add_next_index_str(internal_ar, zend_string_copy(hash_key->key));
+		char *disable_functions = INI_STR("disable_functions");
+
+		if ((*exclude_disabled == 1) && (disable_functions != NULL)) {
+			if (strstr(disable_functions, func->common.function_name->val) == NULL) {
+				add_next_index_str(internal_ar, zend_string_copy(hash_key->key));
+			}
+		} else {
+			add_next_index_str(internal_ar, zend_string_copy(hash_key->key));
+		}
 	} else if (func->type == ZEND_USER_FUNCTION) {
 		add_next_index_str(user_ar, zend_string_copy(hash_key->key));
 	}
@@ -1967,8 +1995,9 @@ static int copy_function_name(zval *zv, int num_args, va_list args, zend_hash_ke
 ZEND_FUNCTION(get_defined_functions)
 {
 	zval internal, user;
+	zend_bool exclude_disabled = 0;
 
-	if (zend_parse_parameters_none() == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &exclude_disabled) == FAILURE) {
 		return;
 	}
 
@@ -1976,7 +2005,7 @@ ZEND_FUNCTION(get_defined_functions)
 	array_init(&user);
 	array_init(return_value);
 
-	zend_hash_apply_with_arguments(EG(function_table), copy_function_name, 2, &internal, &user);
+	zend_hash_apply_with_arguments(EG(function_table), copy_function_name, 3, &internal, &user, &exclude_disabled);
 
 	zend_hash_str_add_new(Z_ARRVAL_P(return_value), "internal", sizeof("internal")-1, &internal);
 	zend_hash_str_add_new(Z_ARRVAL_P(return_value), "user", sizeof("user")-1, &user);

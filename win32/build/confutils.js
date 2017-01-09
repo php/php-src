@@ -44,7 +44,10 @@ var PHP_TEST_INI_PATH = "";
 var PHP_TEST_INI = "";
 var PHP_TEST_INI_EXT_EXCLUDE = "";
 
-var WINVER = "0x0600"; /* Vista */
+var PHP_MAKEFILE_FRAGMENTS = PHP_SRC_DIR + "\\Makefile.fragments.w32";
+
+/* Care also about NTDDI_VERSION and _WIN32_WINNT in config.w32.h.in */
+var WINVER = "0x0601"; /* 7/2008r2 */
 
 // There's a minimum requirement for re2c..
 var MINRE2C = "0.13.4";
@@ -60,26 +63,16 @@ var headers_install = new Array();
 
 /* Mapping CL version > human readable name */
 var VC_VERSIONS = new Array();
-VC_VERSIONS[1200] = 'MSVC6 (Visual C++ 6.0)';
-VC_VERSIONS[1300] = 'MSVC7 (Visual C++ 2002)';
-VC_VERSIONS[1310] = 'MSVC7.1 (Visual C++ 2003)';
-VC_VERSIONS[1400] = 'MSVC8 (Visual C++ 2005)';
-VC_VERSIONS[1500] = 'MSVC9 (Visual C++ 2008)';
-VC_VERSIONS[1600] = 'MSVC10 (Visual C++ 2010)';
 VC_VERSIONS[1700] = 'MSVC11 (Visual C++ 2012)';
 VC_VERSIONS[1800] = 'MSVC12 (Visual C++ 2013)';
 VC_VERSIONS[1900] = 'MSVC14 (Visual C++ 2015)';
+VC_VERSIONS[1910] = 'MSVC15 (Visual C++ 2017)';
 
 var VC_VERSIONS_SHORT = new Array();
-VC_VERSIONS_SHORT[1200] = 'VC6';
-VC_VERSIONS_SHORT[1300] = 'VC7';
-VC_VERSIONS_SHORT[1310] = 'VC7.1';
-VC_VERSIONS_SHORT[1400] = 'VC8';
-VC_VERSIONS_SHORT[1500] = 'VC9';
-VC_VERSIONS_SHORT[1600] = 'VC10';
 VC_VERSIONS_SHORT[1700] = 'VC11';
 VC_VERSIONS_SHORT[1800] = 'VC12';
 VC_VERSIONS_SHORT[1900] = 'VC14';
+VC_VERSIONS_SHORT[1910] = 'VC15';
 
 if (PROGRAM_FILES == null) {
 	PROGRAM_FILES = "C:\\Program Files";
@@ -1906,7 +1899,7 @@ function generate_tmp_php_ini()
 	}
 
 	var ini_dir = PHP_OBJECT_OUT_DIR + ("yes" == PHP_DEBUG ? "Debug" : "Release") + ("yes" == PHP_ZTS ? "_TS" : "");
-	PHP_TEST_INI_PATH = ini_dir + "\\test.ini";
+	PHP_TEST_INI_PATH = ini_dir + "\\tmp-php.ini";
 
 	if (FSO.FileExists(PHP_TEST_INI_PATH)) {
 		STDOUT.WriteLine("Generating " + PHP_TEST_INI_PATH + " ...");
@@ -2483,6 +2476,17 @@ function generate_makefile()
 		MF.Write(TF.ReadAll());
 	}
 	TF.Close();
+	MF.WriteBlankLines(2);
+
+	if (FSO.FileExists(PHP_MAKEFILE_FRAGMENTS)) {
+		TF = FSO.OpenTextFile(PHP_MAKEFILE_FRAGMENTS, 1);
+		if (!TF.AtEndOfStream) {
+			MF.Write(TF.ReadAll());
+		}
+		TF.Close();
+		MF.WriteBlankLines(2);
+		FSO.DeleteFile(PHP_MAKEFILE_FRAGMENTS, true);
+	}
 
 	MF.Close();	
 }
@@ -2807,17 +2811,29 @@ function toolset_setup_compiler()
 		// 1600 is vs.net 2010
 		// 1700 is vs.net 2011
 		// 1800 is vs.net 2012
-		// 1900 is vs.net 2014
-		// Which version of the compiler do we have?12
+		// 1900 is vs.net 2015
+		// 1910 is vs.net 2017
+		// Which version of the compiler do we have?
 		VCVERS = COMPILER_NUMERIC_VERSION;
 
 		if (VCVERS < 1700) {
 			ERROR("Unsupported MS C++ Compiler, VC11 (2011) minimum is required");
 		}
 
-		AC_DEFINE('COMPILER', COMPILER_NAME, "Detected compiler version");
-		DEFINE("PHP_COMPILER_SHORT", VC_VERSIONS_SHORT[VCVERS]);
-		AC_DEFINE('PHP_COMPILER_ID', VC_VERSIONS_SHORT[VCVERS], "Compiler compatibility ID");
+		if (undefined == COMPILER_NAME) {
+			var tmp = probe_binary(PHP_CL);
+			COMPILER_NAME = "MSVC " + tmp + ", untested";
+
+			WARNING("Using unknown MSVC version " + tmp);
+
+			AC_DEFINE('COMPILER', COMPILER_NAME, "Detected compiler version");
+			DEFINE("PHP_COMPILER_SHORT", tmp);
+			AC_DEFINE('PHP_COMPILER_ID', tmp, "Compiler compatibility ID");
+		} else {
+			AC_DEFINE('COMPILER', COMPILER_NAME, "Detected compiler version");
+			DEFINE("PHP_COMPILER_SHORT", VC_VERSIONS_SHORT[VCVERS]);
+			AC_DEFINE('PHP_COMPILER_ID', VC_VERSIONS_SHORT[VCVERS], "Compiler compatibility ID");
+		}
 	} else if (CLANG_TOOLSET) {
 		CLANGVERS = COMPILER_NUMERIC_VERSION;
 
@@ -2937,8 +2953,15 @@ function toolset_get_compiler_name()
 	var version;
 
 	if (VS_TOOLSET) {
+		var name = undefined;
+
 		version = probe_binary(PHP_CL).substr(0, 5).replace('.', '');
-		return VC_VERSIONS[version];
+
+		if (undefined != VC_VERSIONS[version]) {
+			name = VC_VERSIONS[version];
+		}
+
+		return name;
 	} else if (CLANG_TOOLSET || ICC_TOOLSET) {
 		var command = 'cmd /c ""' + PHP_CL + '" -v"';
 		var full = execute(command + '" 2>&1"');
@@ -3021,10 +3044,11 @@ function toolset_setup_common_cflags()
 	/D LIBZEND_EXPORTS /D TSRM_EXPORTS /D SAPI_EXPORTS /D WINVER=" + WINVER);
 
 	DEFINE('CFLAGS_PHP_OBJ', '$(CFLAGS_PHP) $(STATIC_EXT_CFLAGS)');
-1
+
 	// General CFLAGS for building objects
-	DEFINE("CFLAGS", "/nologo $(BASE_INCLUDES) /D _WINDOWS \
-		/D ZEND_WIN32=1 /D PHP_WIN32=1 /D WIN32 /D _MBCS /W3");
+	DEFINE("CFLAGS", "/nologo $(BASE_INCLUDES) /D _WINDOWS /D WINDOWS=1 \
+		/D ZEND_WIN32=1 /D PHP_WIN32=1 /D WIN32 /D _MBCS /W3 \
+		/D _USE_MATH_DEFINES");
 
 	if (VS_TOOLSET) {
 		ADD_FLAG("CFLAGS", " /FD ");
@@ -3043,7 +3067,9 @@ function toolset_setup_common_cflags()
 			ADD_FLAG('CFLAGS', ' /RTC1 ');
 		} else {
 			if (VCVERS >= 1900) {
-				ADD_FLAG('CFLAGS', "/guard:cf");
+				if (PHP_SECURITY_FLAGS == "yes") {
+					ADD_FLAG('CFLAGS', "/guard:cf");
+				}
 			}
 			if (VCVERS >= 1800) {
 				if (PHP_PGI != "yes" && PHP_PGO != "yes") {
@@ -3084,7 +3110,9 @@ function toolset_setup_common_ldlags()
 
 	if (VS_TOOLSET) {
 		if (VCVERS >= 1900) {
-			ADD_FLAG('LDFLAGS', "/GUARD:CF");
+			if (PHP_SECURITY_FLAGS == "yes") {
+				ADD_FLAG('LDFLAGS', "/GUARD:CF");
+			}
 		}
 	}
 }
@@ -3123,7 +3151,7 @@ function object_out_dir_option_handle()
 	if (PHP_OBJECT_OUT_DIR.length) {
 		PHP_OBJECT_OUT_DIR = FSO.GetAbsolutePathName(PHP_OBJECT_OUT_DIR);
 		if (!FSO.FolderExists(PHP_OBJECT_OUT_DIR)) {
-			ERROR('you chosen output directory ' + PHP_OBJECT_OUT_DIR + ' does not exist');
+			ERROR('chosen output directory ' + PHP_OBJECT_OUT_DIR + ' does not exist');
 		}
 		PHP_OBJECT_OUT_DIR += '\\';
 	} else {
@@ -3260,5 +3288,55 @@ function trim(s)
 function force_all_shared()
 {
 	return !!PHP_ALL_SHARED && "yes" == PHP_ALL_SHARED;
+}
+
+function ADD_MAKEFILE_FRAGMENT(src_file)
+{
+	var fn_in;
+
+	if ("undefined" == typeof(src_file)) {
+		fn_in = configure_module_dirname + "\\Makefile.frag.w32";
+	} else {
+		fn_in = src_file;
+	}
+
+	if (FSO.FileExists(fn_in)) {
+		var h_in, h_out;
+		var create_out_fl = !FSO.FileExists(PHP_MAKEFILE_FRAGMENTS);
+		var open_flags = create_out_fl ? 2 : 8;
+
+		h_in = FSO.OpenTextFile(fn_in, 1);
+		h_out = FSO.OpenTextFile(PHP_MAKEFILE_FRAGMENTS, open_flags, create_out_fl);
+
+		if (!h_in.AtEndOfStream) {
+			h_out.Write(h_in.ReadAll());
+			h_out.WriteBlankLines(1);
+		}
+
+		h_in.Close();
+		h_out.Close();
+	}
+}
+
+function SETUP_OPENSSL(target, path_to_check, common_name, use_env, add_dir_part, add_to_flag_only)
+{
+	var ret = 0;
+	var cflags_var = "CFLAGS_" + target.toUpperCase();
+
+	if (CHECK_LIB("ssleay32.lib", target, path_to_check, common_name) &&
+			CHECK_LIB("libeay32.lib", target, path_to_check, common_name) &&
+			CHECK_LIB("crypt32.lib", target, path_to_check, common_name) &&
+			CHECK_HEADER_ADD_INCLUDE("openssl/ssl.h", cflags_var, path_to_check, use_env, add_dir_part, add_to_flag_only)) {
+		/* Openssl 1.0.x and lower */
+		return 1;
+	} else if (CHECK_LIB("libcrypto.lib", target, path_to_check) &&
+			CHECK_LIB("libssl.lib", target, path_to_check) &&
+			CHECK_LIB("crypt32.lib", target, path_to_check, common_name) &&
+			CHECK_HEADER_ADD_INCLUDE("openssl/ssl.h", cflags_var, path_to_check, use_env, add_dir_part, add_to_flag_only)) {
+		/* Openssl 1.1.x */
+		return 2;
+	}
+
+	return ret;
 }
 

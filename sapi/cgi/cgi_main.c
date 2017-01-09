@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1774,16 +1774,6 @@ int main(int argc, char *argv[])
 	char *decoded_query_string;
 	int skip_getopt = 0;
 
-#if 0 && defined(PHP_DEBUG)
-	/* IIS is always making things more difficult.  This allows
-	 * us to stop PHP and attach a debugger before much gets started */
-	{
-		char szMessage [256];
-		wsprintf (szMessage, "Please attach a debugger to the process 0x%X [%d] (%s) and click OK", GetCurrentProcessId(), GetCurrentProcessId(), argv[0]);
-		MessageBox(NULL, szMessage, "CGI Debug Time!", MB_OK|MB_SERVICE_NOTIFICATION);
-	}
-#endif
-
 #ifdef HAVE_SIGNAL_H
 #if defined(SIGPIPE) && defined(SIG_IGN)
 	signal(SIGPIPE, SIG_IGN); /* ignore SIGPIPE in standalone mode so
@@ -2342,9 +2332,9 @@ consult the installation file that came with this distribution, or visit \n\
 								SG(request_info).no_headers = 1;
 							}
 #if ZEND_DEBUG
-							php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) 1997-2016 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
+							php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) 1997-2017 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
 #else
-							php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2016 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
+							php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2017 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
 #endif
 							php_request_shutdown((void *) 0);
 							fcgi_shutdown();
@@ -2431,7 +2421,7 @@ consult the installation file that came with this distribution, or visit \n\
 				file_handle.filename = SG(request_info).path_translated;
 				file_handle.handle.fp = NULL;
 			} else {
-				file_handle.filename = "-";
+				file_handle.filename = "Standard input code";
 				file_handle.type = ZEND_HANDLE_FP;
 				file_handle.handle.fp = stdin;
 			}

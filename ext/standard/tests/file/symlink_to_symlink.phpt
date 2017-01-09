@@ -43,8 +43,8 @@ unlink($prefix . "_file");
 
 ?>
 --EXPECTF--
-%unicode|string%(%d) "symlink_to_symlink.php_file"
-%unicode|string%(%d) "symlink_to_symlink.php_link1"
-%unicode|string%(%d) "symlink_to_symlink.php_nonexistent"
-%unicode|string%(%d) "%s/symlink_to_symlink.php_file"
-%unicode|string%(%d) "%s/symlink_to_symlink.php_link4"
+string(%d) "symlink_to_symlink.php_file"
+string(%d) "symlink_to_symlink.php_link1"
+string(%d) "symlink_to_symlink.php_nonexistent"
+string(%d) "%s/symlink_to_symlink.php_file"
+string(%d) "%s/symlink_to_symlink.php_link4"

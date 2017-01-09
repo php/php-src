@@ -2,12 +2,12 @@
 updateTimestamp never called when session data is empty
 --INI--
 session.use_strict_mode=0
+session.save_handler=files
 --XFAIL--
-Current session module is designed to write empty session always. In addition,
-current session module only supports SessionHandlerInterface only from PHP 7.0.
+Current session module is designed to write empty session always. In addition, current session module only supports SessionHandlerInterface only from PHP 7.0.
 --FILE--
 <?php
-class MySessionHandler implements SessionUpdateTimestampHandlerInterface
+class MySessionHandler extends SessionHandler implements SessionUpdateTimestampHandlerInterface
 {
     public function open($path, $sessname) {
         return TRUE;

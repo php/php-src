@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -269,7 +269,7 @@ static void param_dtor(zval *el) /* {{{ */
 
 	/* tell the driver that it is going away */
 	if (param->stmt->methods->param_hook) {
-			param->stmt->methods->param_hook(param->stmt, param, PDO_PARAM_EVT_FREE);
+		param->stmt->methods->param_hook(param->stmt, param, PDO_PARAM_EVT_FREE);
 	}
 
 	if (param->name) {
@@ -432,9 +432,10 @@ static PHP_METHOD(PDOStatement, execute)
 	int ret = 1;
 	PHP_STMT_GET_OBJ;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "|a!", &input_params)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY_EX(input_params, 1, 0)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	PDO_STMT_CLEAR_ERR();
 
@@ -486,6 +487,12 @@ static PHP_METHOD(PDOStatement, execute)
 		 * quoted.
          */
 
+		/* string is leftover from previous calls so PDOStatement::debugDumpParams() can access */
+		if (stmt->active_query_string && stmt->active_query_string != stmt->query_string) {
+			efree(stmt->active_query_string);
+		}
+		stmt->active_query_string = NULL;
+
 		ret = pdo_parse_params(stmt, stmt->query_string, stmt->query_stringlen,
 			&stmt->active_query_string, &stmt->active_query_stringlen);
 
@@ -504,10 +511,6 @@ static PHP_METHOD(PDOStatement, execute)
 		RETURN_FALSE;
 	}
 	if (stmt->methods->executer(stmt)) {
-		if (stmt->active_query_string && stmt->active_query_string != stmt->query_string) {
-			efree(stmt->active_query_string);
-		}
-		stmt->active_query_string = NULL;
 		if (!stmt->executed) {
 			/* this is the first execute */
 
@@ -526,10 +529,6 @@ static PHP_METHOD(PDOStatement, execute)
 
 		RETURN_BOOL(ret);
 	}
-	if (stmt->active_query_string && stmt->active_query_string != stmt->query_string) {
-		efree(stmt->active_query_string);
-	}
-	stmt->active_query_string = NULL;
 	PDO_HANDLE_STMT_ERR();
 	RETURN_FALSE;
 }
@@ -1263,10 +1262,12 @@ static PHP_METHOD(PDOStatement, fetch)
 	zend_long off = 0;
     PHP_STMT_GET_OBJ;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "|lll", &how,
-			&ori, &off)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 3)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(how)
+		Z_PARAM_LONG(ori)
+		Z_PARAM_LONG(off)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	PDO_STMT_CLEAR_ERR();
 
@@ -1295,9 +1296,11 @@ static PHP_METHOD(PDOStatement, fetchObject)
 
 	PHP_STMT_GET_OBJ;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "|S!a", &class_name, &ctor_args)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_EX(class_name, 1, 0)
+		Z_PARAM_ARRAY(ctor_args)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	PDO_STMT_CLEAR_ERR();
 
@@ -1353,9 +1356,10 @@ static PHP_METHOD(PDOStatement, fetchColumn)
 	zend_long col_n = 0;
 	PHP_STMT_GET_OBJ;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &col_n)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(col_n)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	PDO_STMT_CLEAR_ERR();
 
@@ -1380,9 +1384,12 @@ static PHP_METHOD(PDOStatement, fetchAll)
 	int error = 0, flags, old_arg_count;
 	PHP_STMT_GET_OBJ;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "|lzz", &how, &arg2, &ctor_args)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 3)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(how)
+		Z_PARAM_ZVAL_DEREF(arg2)
+		Z_PARAM_ZVAL_DEREF(ctor_args)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if (!pdo_stmt_verify_mode(stmt, how, 1)) {
 		RETURN_FALSE;
@@ -1700,9 +1707,10 @@ static PHP_METHOD(PDOStatement, setAttribute)
 	zval *value = NULL;
 	PHP_STMT_GET_OBJ;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "lz!", &attr, &value)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_LONG(attr)
+		Z_PARAM_ZVAL_DEREF_EX(value, 1, 0)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if (!stmt->methods->set_attribute) {
 		goto fail;
@@ -1741,9 +1749,9 @@ static PHP_METHOD(PDOStatement, getAttribute)
 	zend_long attr;
 	PHP_STMT_GET_OBJ;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "l", &attr)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(attr)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if (!stmt->methods->get_attribute) {
 		if (!generic_stmt_attr_get(stmt, return_value, attr)) {
@@ -1795,9 +1803,10 @@ static PHP_METHOD(PDOStatement, getColumnMeta)
 	struct pdo_column_data *col;
 	PHP_STMT_GET_OBJ;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "l", &colno)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(colno)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+
 	if(colno < 0) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "42P10", "column number must be non-negative");
 		RETURN_FALSE;
@@ -2108,6 +2117,14 @@ static PHP_METHOD(PDOStatement, debugDumpParams)
 		stmt->query_stringlen,
 		(int) stmt->query_stringlen, stmt->query_string);
 
+	/* show parsed SQL if emulated prepares enabled */
+	/* pointers will be equal if PDO::query() was invoked */
+	if (stmt->active_query_string != NULL && stmt->active_query_string != stmt->query_string) {
+		php_stream_printf(out, "Sent SQL: [%zd] %.*s\n",
+			stmt->active_query_stringlen,
+			(int) stmt->active_query_stringlen, stmt->active_query_string);
+	}
+
 	php_stream_printf(out, "Params:  %d\n",
 		stmt->bound_params ? zend_hash_num_elements(stmt->bound_params) : 0);
 
@@ -2293,6 +2310,7 @@ void pdo_stmt_init(void)
 	pdo_row_ce->ce_flags |= ZEND_ACC_FINAL; /* when removing this a lot of handlers need to be redone */
 	pdo_row_ce->create_object = pdo_row_new;
 	pdo_row_ce->serialize = pdo_row_serialize;
+	pdo_row_ce->unserialize = zend_class_unserialize_deny;
 }
 
 PDO_API void php_pdo_free_statement(pdo_stmt_t *stmt)
@@ -2315,6 +2333,9 @@ PDO_API void php_pdo_free_statement(pdo_stmt_t *stmt)
 
 	if (stmt->methods && stmt->methods->dtor) {
 		stmt->methods->dtor(stmt);
+	}
+	if (stmt->active_query_string && stmt->active_query_string != stmt->query_string) {
+		efree(stmt->active_query_string);
 	}
 	if (stmt->query_string) {
 		efree(stmt->query_string);
@@ -2562,7 +2583,7 @@ static int row_prop_exists(zval *object, zval *member, int check_empty, void **c
 					int res;
 					zval val;
 
-					fetch_value(stmt, &val, colno, NULL TSRMLS_CC);
+					fetch_value(stmt, &val, colno, NULL);
 					res = check_empty ? i_zend_is_true(&val) : Z_TYPE(val) != IS_NULL;
 					zval_dtor(&val);
 

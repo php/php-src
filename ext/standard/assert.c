@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -157,9 +157,11 @@ PHP_FUNCTION(assert)
 		RETURN_TRUE;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|z", &assertion, &description) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ZVAL_DEREF(assertion)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL_DEREF(description)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (Z_TYPE_P(assertion) == IS_STRING) {
 		zval retval;
@@ -215,7 +217,7 @@ PHP_FUNCTION(assert)
 		zval *args = safe_emalloc(!description ? 3 : 4, sizeof(zval), 0);
 		zval retval;
 		int i;
-		uint lineno = zend_get_executed_lineno();
+		uint32_t lineno = zend_get_executed_lineno();
 		const char *filename = zend_get_executed_filename();
 
 		ZVAL_STRING(&args[0], SAFE_STRING(filename));
@@ -290,9 +292,11 @@ PHP_FUNCTION(assert_options)
 	int ac = ZEND_NUM_ARGS();
 	zend_string *key;
 
-	if (zend_parse_parameters(ac, "l|z", &what, &value) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_LONG(what)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL_DEREF(value)
+	ZEND_PARSE_PARAMETERS_END();
 
 	switch (what) {
 	case ASSERT_ACTIVE:

@@ -48,121 +48,121 @@ foreach($classes as $class) {
 --EXPECTF--
 Reflecting on class pubf: 
   --> Check for f(): object(ReflectionMethod)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(1) "f"
-  [%u|b%"class"]=>
-  %unicode|string%(4) "pubf"
+  ["name"]=>
+  string(1) "f"
+  ["class"]=>
+  string(4) "pubf"
 }
   --> Check for s(): object(ReflectionMethod)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(1) "s"
-  [%u|b%"class"]=>
-  %unicode|string%(4) "pubf"
+  ["name"]=>
+  string(1) "s"
+  ["class"]=>
+  string(4) "pubf"
 }
   --> Check for F(): object(ReflectionMethod)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(1) "f"
-  [%u|b%"class"]=>
-  %unicode|string%(4) "pubf"
+  ["name"]=>
+  string(1) "f"
+  ["class"]=>
+  string(4) "pubf"
 }
   --> Check for doesntExist(): Method doesntExist does not exist
 Reflecting on class subpubf: 
   --> Check for f(): object(ReflectionMethod)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(1) "f"
-  [%u|b%"class"]=>
-  %unicode|string%(4) "pubf"
+  ["name"]=>
+  string(1) "f"
+  ["class"]=>
+  string(4) "pubf"
 }
   --> Check for s(): object(ReflectionMethod)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(1) "s"
-  [%u|b%"class"]=>
-  %unicode|string%(4) "pubf"
+  ["name"]=>
+  string(1) "s"
+  ["class"]=>
+  string(4) "pubf"
 }
   --> Check for F(): object(ReflectionMethod)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(1) "f"
-  [%u|b%"class"]=>
-  %unicode|string%(4) "pubf"
+  ["name"]=>
+  string(1) "f"
+  ["class"]=>
+  string(4) "pubf"
 }
   --> Check for doesntExist(): Method doesntExist does not exist
 Reflecting on class protf: 
   --> Check for f(): object(ReflectionMethod)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(1) "f"
-  [%u|b%"class"]=>
-  %unicode|string%(5) "protf"
+  ["name"]=>
+  string(1) "f"
+  ["class"]=>
+  string(5) "protf"
 }
   --> Check for s(): object(ReflectionMethod)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(1) "s"
-  [%u|b%"class"]=>
-  %unicode|string%(5) "protf"
+  ["name"]=>
+  string(1) "s"
+  ["class"]=>
+  string(5) "protf"
 }
   --> Check for F(): object(ReflectionMethod)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(1) "f"
-  [%u|b%"class"]=>
-  %unicode|string%(5) "protf"
+  ["name"]=>
+  string(1) "f"
+  ["class"]=>
+  string(5) "protf"
 }
   --> Check for doesntExist(): Method doesntExist does not exist
 Reflecting on class subprotf: 
   --> Check for f(): object(ReflectionMethod)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(1) "f"
-  [%u|b%"class"]=>
-  %unicode|string%(5) "protf"
+  ["name"]=>
+  string(1) "f"
+  ["class"]=>
+  string(5) "protf"
 }
   --> Check for s(): object(ReflectionMethod)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(1) "s"
-  [%u|b%"class"]=>
-  %unicode|string%(5) "protf"
+  ["name"]=>
+  string(1) "s"
+  ["class"]=>
+  string(5) "protf"
 }
   --> Check for F(): object(ReflectionMethod)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(1) "f"
-  [%u|b%"class"]=>
-  %unicode|string%(5) "protf"
+  ["name"]=>
+  string(1) "f"
+  ["class"]=>
+  string(5) "protf"
 }
   --> Check for doesntExist(): Method doesntExist does not exist
 Reflecting on class privf: 
   --> Check for f(): object(ReflectionMethod)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(1) "f"
-  [%u|b%"class"]=>
-  %unicode|string%(5) "privf"
+  ["name"]=>
+  string(1) "f"
+  ["class"]=>
+  string(5) "privf"
 }
   --> Check for s(): object(ReflectionMethod)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(1) "s"
-  [%u|b%"class"]=>
-  %unicode|string%(5) "privf"
+  ["name"]=>
+  string(1) "s"
+  ["class"]=>
+  string(5) "privf"
 }
   --> Check for F(): object(ReflectionMethod)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(1) "f"
-  [%u|b%"class"]=>
-  %unicode|string%(5) "privf"
+  ["name"]=>
+  string(1) "f"
+  ["class"]=>
+  string(5) "privf"
 }
   --> Check for doesntExist(): Method doesntExist does not exist
 Reflecting on class subprivf: 
   --> Check for f(): object(ReflectionMethod)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(1) "f"
-  [%u|b%"class"]=>
-  %unicode|string%(5) "privf"
+  ["name"]=>
+  string(1) "f"
+  ["class"]=>
+  string(5) "privf"
 }
   --> Check for s(): object(ReflectionMethod)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(1) "s"
-  [%u|b%"class"]=>
-  %unicode|string%(5) "privf"
+  ["name"]=>
+  string(1) "s"
+  ["class"]=>
+  string(5) "privf"
 }
   --> Check for F(): object(ReflectionMethod)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(1) "f"
-  [%u|b%"class"]=>
-  %unicode|string%(5) "privf"
+  ["name"]=>
+  string(1) "f"
+  ["class"]=>
+  string(5) "privf"
 }
   --> Check for doesntExist(): Method doesntExist does not exist

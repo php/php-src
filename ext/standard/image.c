@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1217,9 +1217,9 @@ PHP_FUNCTION(image_type_to_mime_type)
 {
 	zend_long p_image_type;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &p_image_type) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(p_image_type)
+	ZEND_PARSE_PARAMETERS_END();
 
 	ZVAL_STRING(return_value, (char*)php_image_type_to_mime_type(p_image_type));
 }
@@ -1232,9 +1232,11 @@ PHP_FUNCTION(image_type_to_extension)
 	zend_long image_type;
 	zend_bool inc_dot=1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|b", &image_type, &inc_dot) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_LONG(image_type)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(inc_dot)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	switch (image_type) {
 		case IMAGE_FILETYPE_GIF:
@@ -1470,9 +1472,11 @@ static void php_getimagesize_from_any(INTERNAL_FUNCTION_PARAMETERS, int mode) { 
 	size_t input_len;
 	const int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc, "s|z/", &input, &input_len, &info) == FAILURE) {
-			return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(input, input_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL_DEREF_EX(info, 0, 1)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (argc == 2) {
 		zval_dtor(info);

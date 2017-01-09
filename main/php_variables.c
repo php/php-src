@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -536,7 +536,7 @@ void _php_import_environment_variables(zval *array_ptr)
 	}
 }
 
-zend_bool php_std_auto_global_callback(char *name, uint name_len)
+zend_bool php_std_auto_global_callback(char *name, uint32_t name_len)
 {
 	zend_printf("%s\n", name);
 	return 0; /* don't rearm */

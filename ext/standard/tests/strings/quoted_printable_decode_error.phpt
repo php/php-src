@@ -13,7 +13,7 @@ echo "\n-- Testing quoted_printable_decode() function with no arguments --\n";
 var_dump( quoted_printable_decode() );
 
 echo "\n-- Testing quoted_printable_decode() function with more than expected no. of arguments --\n";
-$str = b"=FAwow-factor=C1=d0=D5=DD=C5=CE=CE=D9=C5=0A= 	 
+$str = "=FAwow-factor=C1=d0=D5=DD=C5=CE=CE=D9=C5=0A= 	 
 =20=D4=cf=D2=C7=CF=D7=D9=C5=  	    
 =20=	 	
 =D0=

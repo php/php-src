@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -368,7 +368,7 @@ static ZEND_COLD ZEND_NORETURN void zend_mm_safe_error(zend_mm_heap *heap,
 	size_t limit,
 #if ZEND_DEBUG
 	const char *filename,
-	uint lineno,
+	uint32_t lineno,
 #endif
 	size_t size)
 {
@@ -2299,7 +2299,7 @@ ZEND_API int is_zend_mm(void)
 #endif
 }
 
-#if !ZEND_DEBUG && (!defined(_WIN32) || defined(__clang__))
+#if !ZEND_DEBUG && defined(HAVE_BUILTIN_CONSTANT_P)
 #undef _emalloc
 
 #if ZEND_MM_CUSTOM

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1075,7 +1075,7 @@ static dom_object* dom_objects_set_class(zend_class_entry *class_type, zend_bool
 	dom_object *intern = ecalloc(1, sizeof(dom_object) + zend_object_properties_size(class_type));
 
 	zend_class_entry *base_class = class_type;
-	while (base_class->type != ZEND_INTERNAL_CLASS && base_class->parent != NULL) {
+	while ((base_class->type != ZEND_INTERNAL_CLASS || base_class->info.internal.module->module_number != dom_module_entry.module_number) && base_class->parent != NULL) {
 		base_class = base_class->parent;
 	}
 
@@ -1345,7 +1345,7 @@ xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *l
 	while (nodep != NULL && (*cur <= index || index == -1)) {
 		if (nodep->type == XML_ELEMENT_NODE) {
 			if (xmlStrEqual(nodep->name, (xmlChar *)local) || xmlStrEqual((xmlChar *)"*", (xmlChar *)local)) {
-				if (ns == NULL || (nodep->ns != NULL && (xmlStrEqual(nodep->ns->href, (xmlChar *)ns) || xmlStrEqual((xmlChar *)"*", (xmlChar *)ns)))) {
+				if (ns == NULL || (!strcmp(ns, "") && nodep->ns == NULL) || (nodep->ns != NULL && (xmlStrEqual(nodep->ns->href, (xmlChar *)ns) || xmlStrEqual((xmlChar *)"*", (xmlChar *)ns)))) {
 					if (*cur == index) {
 						ret = nodep;
 						break;

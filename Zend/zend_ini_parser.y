@@ -3,7 +3,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -46,6 +46,8 @@ int ini_parse(void);
 #define YYFREE free
 #endif
 
+#define ZEND_SYSTEM_INI CG(ini_parser_unbuffered_errors)
+
 /* {{{ zend_ini_do_op()
 */
 static void zend_ini_do_op(char type, zval *result, zval *op1, zval *op2)
@@ -86,7 +88,7 @@ static void zend_ini_do_op(char type, zval *result, zval *op1, zval *op2)
 	}
 
 	str_len = zend_sprintf(str_result, "%d", i_result);
-	ZVAL_PSTRINGL(result, str_result, str_len);
+	ZVAL_NEW_STR(result, zend_string_init(str_result, str_len, ZEND_SYSTEM_INI));
 }
 /* }}} */
 
@@ -94,7 +96,11 @@ static void zend_ini_do_op(char type, zval *result, zval *op1, zval *op2)
 */
 static void zend_ini_init_string(zval *result)
 {
-	ZVAL_EMPTY_PSTRING(result);
+	if (ZEND_SYSTEM_INI) {
+		ZVAL_EMPTY_PSTRING(result);
+	} else {
+		ZVAL_EMPTY_STRING(result);
+	}
 }
 /* }}} */
 
@@ -107,8 +113,12 @@ static void zend_ini_add_string(zval *result, zval *op1, zval *op2)
 	if (Z_TYPE_P(op1) != IS_STRING) {
 		zend_string *str = zval_get_string(op1);
 		/* ZEND_ASSERT(!Z_REFCOUNTED_P(op1)); */
-		ZVAL_PSTRINGL(op1, ZSTR_VAL(str), ZSTR_LEN(str));
-		zend_string_release(str);
+		if (ZEND_SYSTEM_INI) {
+			ZVAL_PSTRINGL(op1, ZSTR_VAL(str), ZSTR_LEN(str));
+			zend_string_release(str);
+		} else {
+			ZVAL_STR(op1, str);
+		}
 	}
 	op1_len = (int)Z_STRLEN_P(op1);
 	
@@ -117,7 +127,7 @@ static void zend_ini_add_string(zval *result, zval *op1, zval *op2)
 	}
 	length = op1_len + (int)Z_STRLEN_P(op2);
 
-	ZVAL_NEW_STR(result, zend_string_extend(Z_STR_P(op1), length, 1));
+	ZVAL_NEW_STR(result, zend_string_extend(Z_STR_P(op1), length, ZEND_SYSTEM_INI));
 	memcpy(Z_STRVAL_P(result) + op1_len, Z_STRVAL_P(op2), Z_STRLEN_P(op2) + 1);
 }
 /* }}} */
@@ -139,7 +149,7 @@ static void zend_ini_get_constant(zval *result, zval *name)
 			convert_to_string(&tmp);
 			c = &tmp;
 		}
-		ZVAL_PSTRINGL(result, Z_STRVAL_P(c), Z_STRLEN_P(c));
+		ZVAL_NEW_STR(result, zend_string_init(Z_STRVAL_P(c), Z_STRLEN_P(c), ZEND_SYSTEM_INI));
 		if (c == &tmp) {
 			zend_string_release(Z_STR(tmp));
 		}
@@ -159,11 +169,11 @@ static void zend_ini_get_var(zval *result, zval *name)
 
 	/* Fetch configuration option value */
 	if ((curval = zend_get_configuration_directive(Z_STR_P(name))) != NULL) {
-		ZVAL_PSTRINGL(result, Z_STRVAL_P(curval), Z_STRLEN_P(curval));
+		ZVAL_NEW_STR(result, zend_string_init(Z_STRVAL_P(curval), Z_STRLEN_P(curval), ZEND_SYSTEM_INI));
 	/* ..or if not found, try ENV */
 	} else if ((envvar = zend_getenv(Z_STRVAL_P(name), Z_STRLEN_P(name))) != NULL ||
 			   (envvar = getenv(Z_STRVAL_P(name))) != NULL) {
-		ZVAL_PSTRING(result, envvar);
+		ZVAL_NEW_STR(result, zend_string_init(envvar, strlen(envvar), ZEND_SYSTEM_INI));
 	} else {
 		zend_ini_init_string(result);
 	}
@@ -280,6 +290,8 @@ ZEND_API int zend_parse_ini_string(char *str, zend_bool unbuffered_errors, int s
 %token '=' ':' ',' '.' '"' '\'' '^' '+' '-' '/' '*' '%' '$' '~' '<' '>' '?' '@' '{' '}'
 %left '|' '&' '^'
 %right '~' '!'
+
+%destructor { zval_ptr_dtor(&$$); } TC_RAW TC_CONSTANT TC_NUMBER TC_STRING TC_WHITESPACE TC_LABEL TC_OFFSET TC_VARNAME BOOL_TRUE BOOL_FALSE NULL_NULL
 
 %%
 

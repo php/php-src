@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -116,4 +116,11 @@ ZEND_API void ZEND_FASTCALL smart_str_append_escaped(smart_str *str, const char 
 			*res++ = c;
 		}
 	}
+}
+
+ZEND_API void ZEND_FASTCALL smart_str_append_printf(smart_str *dest, const char *format, ...) {
+	va_list arg;
+	va_start(arg, format);
+	zend_printf_to_smart_str(dest, format, arg);
+	va_end(arg);
 }

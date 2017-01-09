@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -149,7 +149,7 @@ recv_once:
 #endif
 
 		if (got_now == -1) {
-			quiet_write(PHPDBG_G(io)[PHPDBG_STDERR].fd, ZEND_STRL("Read operation timed out!\n"));
+			zend_quiet_write(PHPDBG_G(io)[PHPDBG_STDERR].fd, ZEND_STRL("Read operation timed out!\n"));
 			return -1;
 		}
 		i -= got_now;
@@ -203,7 +203,7 @@ static int phpdbg_output_pager(int sock, const char *ptr, int len) {
 			
 			if (memchr(p, '\n', endp - p)) {
 				char buf[PHPDBG_MAX_CMD];
-				write(sock, ZEND_STRL("\r---Type <return> to continue or q <return> to quit---"));
+				zend_quiet_write(sock, ZEND_STRL("\r---Type <return> to continue or q <return> to quit---"));
 				phpdbg_consume_stdin_line(buf);
 				if (*buf == 'q') {
 					break;
@@ -305,7 +305,7 @@ PHPDBG_API int phpdbg_create_listenable_socket(const char *addr, unsigned short 
 
 				wrote = snprintf(buf, 128, "Could not translate address '%s'", addr);
 				buf[wrote] = '\0';
-				quiet_write(PHPDBG_G(io)[PHPDBG_STDERR].fd, buf, strlen(buf));
+				zend_quiet_write(PHPDBG_G(io)[PHPDBG_STDERR].fd, buf, strlen(buf));
 
 				return sock;
 			} else {
@@ -315,7 +315,7 @@ PHPDBG_API int phpdbg_create_listenable_socket(const char *addr, unsigned short 
 
 				wrote = snprintf(buf, 256, "Host '%s' not found. %s", addr, estrdup(gai_strerror(rc)));
 				buf[wrote] = '\0';
-				quiet_write(PHPDBG_G(io)[PHPDBG_STDERR].fd, buf, strlen(buf));
+				zend_quiet_write(PHPDBG_G(io)[PHPDBG_STDERR].fd, buf, strlen(buf));
 
 				return sock;
 #ifndef PHP_WIN32
@@ -330,7 +330,7 @@ PHPDBG_API int phpdbg_create_listenable_socket(const char *addr, unsigned short 
 
 			wrote = sprintf(buf, "Unable to create socket");
 			buf[wrote] = '\0';
-			quiet_write(PHPDBG_G(io)[PHPDBG_STDERR].fd, buf, strlen(buf));
+			zend_quiet_write(PHPDBG_G(io)[PHPDBG_STDERR].fd, buf, strlen(buf));
 
 			return sock;
 		}

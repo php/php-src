@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -173,7 +173,6 @@ ZEND_API void ZEND_FASTCALL _zend_hash_init(HashTable *ht, uint32_t nSize, dtor_
 	GC_REFCOUNT(ht) = 1;
 	GC_TYPE_INFO(ht) = IS_ARRAY | (persistent ? 0 : (GC_COLLECTABLE << GC_FLAGS_SHIFT));
 	ht->u.flags = (persistent ? HASH_FLAG_PERSISTENT : 0) | HASH_FLAG_APPLY_PROTECTION | HASH_FLAG_STATIC_KEYS;
-	ht->nTableSize = zend_hash_check_size(nSize);
 	ht->nTableMask = HT_MIN_MASK;
 	HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
 	ht->nNumUsed = 0;
@@ -181,6 +180,7 @@ ZEND_API void ZEND_FASTCALL _zend_hash_init(HashTable *ht, uint32_t nSize, dtor_
 	ht->nInternalPointer = HT_INVALID_IDX;
 	ht->nNextFreeElement = 0;
 	ht->pDestructor = pDestructor;
+	ht->nTableSize = zend_hash_check_size(nSize);
 }
 
 static void ZEND_FASTCALL zend_hash_packed_grow(HashTable *ht)
@@ -1725,7 +1725,7 @@ static zend_always_inline void zend_array_dup_packed_elements(HashTable *source,
 
 static zend_always_inline uint32_t zend_array_dup_elements(HashTable *source, HashTable *target, int static_keys, int with_holes)
 {
-    uint32_t idx = 0;
+	uint32_t idx = 0;
 	Bucket *p = source->arData;
 	Bucket *q = target->arData;
 	Bucket *end = p + source->nNumUsed;
@@ -1753,7 +1753,7 @@ static zend_always_inline uint32_t zend_array_dup_elements(HashTable *source, Ha
 
 ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 {
-    uint32_t idx;
+	uint32_t idx;
 	HashTable *target;
 
 	IS_CONSISTENT(source);
@@ -1817,7 +1817,8 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 		target->u.flags = (source->u.flags & ~(HASH_FLAG_PERSISTENT|ZEND_HASH_APPLY_COUNT_MASK)) | HASH_FLAG_APPLY_PROTECTION;
 		target->nTableMask = source->nTableMask;
 		target->nNextFreeElement = source->nNextFreeElement;
-		target->nInternalPointer = HT_INVALID_IDX;
+		target->nInternalPointer = source->nInternalPointer;
+
 		HT_SET_DATA_ADDR(target, emalloc(HT_SIZE(target)));
 		HT_HASH_RESET(target);
 
@@ -2474,6 +2475,122 @@ ZEND_API int ZEND_FASTCALL _zend_handle_numeric_str_ex(const char *key, size_t l
 		} else {
 			return 0;
 		}
+	}
+}
+
+/* Takes a "symtable" hashtable (contains integer and non-numeric string keys)
+ * and converts it to a "proptable" (contains only string keys).
+ * If the symtable didn't need duplicating, its refcount is incremented.
+ */
+ZEND_API HashTable* ZEND_FASTCALL zend_symtable_to_proptable(HashTable *ht)
+{
+	zend_ulong num_key;
+	zend_string *str_key;
+	zval *zv;
+
+	if (UNEXPECTED(HT_IS_PACKED(ht))) {
+		goto convert;
+	}
+
+	ZEND_HASH_FOREACH_KEY_VAL(ht, num_key, str_key, zv) {
+		if (!str_key) {
+			goto convert;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+		GC_REFCOUNT(ht)++;
+	}
+
+	return ht;
+
+convert:
+	{
+		HashTable *new_ht = emalloc(sizeof(HashTable));
+
+		zend_hash_init(new_ht, zend_hash_num_elements(ht), NULL, ZVAL_PTR_DTOR, 0);
+
+		ZEND_HASH_FOREACH_KEY_VAL(ht, num_key, str_key, zv) {
+			if (!str_key) {
+				str_key = zend_long_to_str(num_key);
+				zend_string_delref(str_key);
+			}
+			do {
+				if (Z_OPT_REFCOUNTED_P(zv)) {
+					if (Z_ISREF_P(zv) && Z_REFCOUNT_P(zv) == 1) {
+						zv = Z_REFVAL_P(zv);
+						if (!Z_OPT_REFCOUNTED_P(zv)) {
+							break;
+						}
+					}
+					Z_ADDREF_P(zv);
+				}
+			} while (0);
+			zend_hash_update(new_ht, str_key, zv);
+		} ZEND_HASH_FOREACH_END();
+
+		return new_ht;
+	}
+}
+
+/* Takes a "proptable" hashtable (contains only string keys) and converts it to
+ * a "symtable" (contains integer and non-numeric string keys).
+ * If the proptable didn't need duplicating, its refcount is incremented.
+ */
+ZEND_API HashTable* ZEND_FASTCALL zend_proptable_to_symtable(HashTable *ht, zend_bool always_duplicate)
+{
+	zend_ulong num_key;
+	zend_string *str_key;
+	zval *zv;
+
+	ZEND_HASH_FOREACH_KEY_VAL(ht, num_key, str_key, zv) {
+		/* The `str_key &&` here might seem redundant: property tables should
+		 * only have string keys. Unfortunately, this isn't true, at the very
+		 * least because of ArrayObject, which stores a symtable where the
+		 * property table should be.
+		 */
+		if (str_key && ZEND_HANDLE_NUMERIC(str_key, num_key)) {
+			goto convert;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	if (always_duplicate) {
+		return zend_array_dup(ht);
+	}
+
+	if (EXPECTED(!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE))) {
+		GC_REFCOUNT(ht)++;
+	}
+
+	return ht;
+
+convert:
+	{
+		HashTable *new_ht = emalloc(sizeof(HashTable));
+
+		zend_hash_init(new_ht, zend_hash_num_elements(ht), NULL, ZVAL_PTR_DTOR, 0);
+
+		ZEND_HASH_FOREACH_KEY_VAL(ht, num_key, str_key, zv) {
+			do {
+				if (Z_OPT_REFCOUNTED_P(zv)) {
+					if (Z_ISREF_P(zv) && Z_REFCOUNT_P(zv) == 1) {
+						zv = Z_REFVAL_P(zv);
+						if (!Z_OPT_REFCOUNTED_P(zv)) {
+							break;
+						}
+					}
+					Z_ADDREF_P(zv);
+				}
+			} while (0);
+			/* Again, thank ArrayObject for `!str_key ||`. */
+			if (!str_key || ZEND_HANDLE_NUMERIC(str_key, num_key)) {
+				zend_hash_index_update(new_ht, num_key, zv);
+			} else {
+				zend_hash_update(new_ht, str_key, zv);
+			}
+		} ZEND_HASH_FOREACH_END();
+
+		return new_ht;
 	}
 }
 

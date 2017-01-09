@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -266,7 +266,7 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 			zval *zv = zend_ast_get_zval(ast);
 
 			if (Z_OPT_CONSTANT_P(zv)) {
-				if (!(Z_TYPE_FLAGS_P(zv) & IS_TYPE_IMMUTABLE)) {
+				if (Z_TYPE_FLAGS_P(zv) & IS_TYPE_REFCOUNTED) {
 					if (UNEXPECTED(zval_update_constant_ex(zv, scope) != SUCCESS)) {
 						ret = FAILURE;
 						break;

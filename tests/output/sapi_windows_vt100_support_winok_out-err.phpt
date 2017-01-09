@@ -2,6 +2,9 @@
 Test sapi_windows_vt100_support on newer Windows versions with redirected STDOUT/STDERR
 --SKIPIF--
 <?php
+if (getenv("SKIP_IO_CAPTURE_TESTS")) {
+	die("skip I/O capture test");
+}
 if (stripos(PHP_OS, 'WIN') !== 0) {
     echo "skip Only for Windows systems";
 } elseif (version_compare(

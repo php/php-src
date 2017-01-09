@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -596,7 +596,7 @@ PHP_FUNCTION(mysqli_stmt_bind_result)
 
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
 
-	if ((uint)argc != mysql_stmt_field_count(stmt->stmt)) {
+	if ((uint32_t)argc != mysql_stmt_field_count(stmt->stmt)) {
 		php_error_docref(NULL, E_WARNING, "Number of bind variables doesn't match number of fields in prepared statement");
 		RETURN_FALSE;
 	}
@@ -1330,7 +1330,7 @@ PHP_FUNCTION(mysqli_field_seek)
 	}
 	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
 
-	if (fieldnr < 0 || (uint)fieldnr >= mysql_num_fields(result)) {
+	if (fieldnr < 0 || (uint32_t)fieldnr >= mysql_num_fields(result)) {
 		php_error_docref(NULL, E_WARNING, "Invalid field offset");
 		RETURN_FALSE;
 	}
@@ -2538,7 +2538,7 @@ PHP_FUNCTION(mysqli_stmt_store_result)
 #if MYSQL_VERSION_ID >= 50107
 				my_bool	tmp=1;
 #else
-				uint tmp=1;
+				uint32_t tmp=1;
 #endif
 				mysql_stmt_attr_set(stmt->stmt, STMT_ATTR_UPDATE_MAX_LENGTH, &tmp);
 				break;
