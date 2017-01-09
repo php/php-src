@@ -143,21 +143,31 @@ int(1)
 int(0)
 
 -- Iteration 17 --
+
+Warning: A non-numeric value encountered in %s on line %d
 int(0)
 
 -- Iteration 18 --
+
+Warning: A non-numeric value encountered in %s on line %d
 int(0)
 
 -- Iteration 19 --
 int(0)
 
 -- Iteration 20 --
+
+Warning: A non-numeric value encountered in %s on line %d
 int(0)
 
 -- Iteration 21 --
+
+Warning: A non-numeric value encountered in %s on line %d
 int(0)
 
 -- Iteration 22 --
+
+Warning: A non-numeric value encountered in %s on line %d
 int(0)
 
 -- Iteration 23 --

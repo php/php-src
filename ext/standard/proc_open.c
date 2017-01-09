@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,9 +19,9 @@
 
 #if 0 && (defined(__linux__) || defined(sun) || defined(__IRIX__))
 # define _BSD_SOURCE 		/* linux wants this when XOPEN mode is on */
-# define _BSD_COMPAT		/* irix: uint */
+# define _BSD_COMPAT		/* irix: uint32_t */
 # define _XOPEN_SOURCE 500  /* turn on Unix98 */
-# define __EXTENSIONS__	1	/* Solaris: uint */
+# define __EXTENSIONS__	1	/* Solaris: uint32_t */
 #endif
 
 #include "php.h"
@@ -35,11 +35,6 @@
 #include "php_globals.h"
 #include "SAPI.h"
 #include "main/php_network.h"
-
-#ifdef NETWARE
-#include <proc.h>
-#include <library.h>
-#endif
 
 #if HAVE_SYS_WAIT_H
 #include <sys/wait.h>
@@ -77,13 +72,13 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 {
 	zval *element;
 	php_process_env_t env;
-	zend_string *string_key;
+	zend_string *key, *str;
 #ifndef PHP_WIN32
 	char **ep;
 #endif
 	char *p;
-	size_t cnt, l, sizeenv=0;
-	HashTable *target_hash;
+	size_t cnt, l, sizeenv = 0;
+	HashTable *env_hash;
 
 	memset(&env, 0, sizeof(env));
 
@@ -101,28 +96,25 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 		return env;
 	}
 
-	target_hash = Z_ARRVAL_P(environment);
-	if (!target_hash) {
-		return env;
-	}
+	ALLOC_HASHTABLE(env_hash);
+	zend_hash_init(env_hash, cnt, NULL, NULL, 0);
 
 	/* first, we have to get the size of all the elements in the hash */
-	ZEND_HASH_FOREACH_STR_KEY_VAL(target_hash, string_key, element) {
-		zend_string *str = zval_get_string(element);
-		size_t el_len = ZSTR_LEN(str);
-		zend_string_release(str);
+	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(environment), key, element) {
+		str = zval_get_string(element);
 
-		if (el_len == 0) {
+		if (ZSTR_LEN(str) == 0) {
+			zend_string_release(str);
 			continue;
 		}
 
-		sizeenv += el_len + 1;
+		sizeenv += ZSTR_LEN(str) + 1;
 
-		if (string_key) {
-			if (ZSTR_LEN(string_key) == 0) {
-				continue;
-			}
-			sizeenv += ZSTR_LEN(string_key) + 1;
+		if (key && ZSTR_LEN(key)) {
+			sizeenv += ZSTR_LEN(key) + 1;
+			zend_hash_add_ptr(env_hash, key, str);
+		} else {
+			zend_hash_next_index_insert_ptr(env_hash, str);
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -131,20 +123,10 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 #endif
 	p = env.envp = (char *) pecalloc(sizeenv + 4, 1, is_persistent);
 
-	ZEND_HASH_FOREACH_STR_KEY_VAL(target_hash, string_key, element) {
-		zend_string *str = zval_get_string(element);
-
-		if (ZSTR_LEN(str) == 0) {
-			goto next_element;
-		}
-
-		if (string_key) {
-			if (ZSTR_LEN(string_key) == 0) {
-				goto next_element;
-			}
-
-			l = ZSTR_LEN(string_key) + ZSTR_LEN(str) + 2;
-			memcpy(p, ZSTR_VAL(string_key), ZSTR_LEN(string_key));
+	ZEND_HASH_FOREACH_STR_KEY_PTR(env_hash, key, str) {
+		if (key) {
+			l = ZSTR_LEN(key) + ZSTR_LEN(str) + 2;
+			memcpy(p, ZSTR_VAL(key), ZSTR_LEN(key));
 			strncat(p, "=", 1);
 			strncat(p, ZSTR_VAL(str), ZSTR_LEN(str));
 
@@ -161,11 +143,13 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 #endif
 			p += ZSTR_LEN(str) + 1;
 		}
-next_element:
 		zend_string_release(str);
 	} ZEND_HASH_FOREACH_END();
 
-	assert((uint)(p - env.envp) <= sizeenv);
+	assert((uint32_t)(p - env.envp) <= sizeenv);
+
+	zend_hash_destroy(env_hash);
+	FREE_HASHTABLE(env_hash);
 
 	return env;
 }
@@ -263,9 +247,11 @@ PHP_FUNCTION(proc_terminate)
 	struct php_process_handle *proc;
 	zend_long sig_no = SIGTERM;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &zproc, &sig_no) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_RESOURCE(zproc)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(sig_no)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if ((proc = (struct php_process_handle *)zend_fetch_resource(Z_RES_P(zproc), "process", le_proc_open)) == NULL) {
 		RETURN_FALSE;
@@ -294,9 +280,9 @@ PHP_FUNCTION(proc_close)
 	zval *zproc;
 	struct php_process_handle *proc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zproc) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(zproc)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if ((proc = (struct php_process_handle *)zend_fetch_resource(Z_RES_P(zproc), "process", le_proc_open)) == NULL) {
 		RETURN_FALSE;
@@ -324,9 +310,9 @@ PHP_FUNCTION(proc_get_status)
 	int running = 1, signaled = 0, stopped = 0;
 	int exitcode = -1, termsig = 0, stopsig = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zproc) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(zproc)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if ((proc = (struct php_process_handle *)zend_fetch_resource(Z_RES_P(zproc), "process", le_proc_open)) == NULL) {
 		RETURN_FALSE;
@@ -357,11 +343,8 @@ PHP_FUNCTION(proc_get_status)
 		if (WIFSIGNALED(wstatus)) {
 			running = 0;
 			signaled = 1;
-#ifdef NETWARE
-			termsig = WIFTERMSIG(wstatus);
-#else
+
 			termsig = WTERMSIG(wstatus);
-#endif
 		}
 		if (WIFSTOPPED(wstatus)) {
 			stopped = 1;
@@ -440,20 +423,14 @@ PHP_FUNCTION(proc_open)
 #ifdef PHP_WIN32
 	PROCESS_INFORMATION pi;
 	HANDLE childHandle;
-	STARTUPINFO si;
+	STARTUPINFOW si;
 	BOOL newprocok;
 	SECURITY_ATTRIBUTES security;
 	DWORD dwCreateFlags = 0;
-	char *command_with_cmd;
 	UINT old_error_mode;
 	char cur_cwd[MAXPATHLEN];
-#endif
-#ifdef NETWARE
-	char** child_argv = NULL;
-	char* command_dup = NULL;
-	char* orig_cwd = NULL;
-	int command_num_args = 0;
-	wiring_t channel;
+	wchar_t *cmdw = NULL, *cwdw = NULL, *envpw = NULL;
+	size_t tmp_len;
 #endif
 	php_process_id_t child;
 	struct php_process_handle *proc;
@@ -468,11 +445,15 @@ PHP_FUNCTION(proc_open)
 	php_file_descriptor_t slave_pty = -1;
 #endif
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "saz/|s!a!a!", &command,
-				&command_len, &descriptorspec, &pipes, &cwd, &cwd_len, &environment,
-				&other_options) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(3, 6)
+		Z_PARAM_STRING(command, command_len)
+		Z_PARAM_ARRAY(descriptorspec)
+		Z_PARAM_ZVAL_DEREF_EX(pipes, 0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING_EX(cwd, cwd_len, 1, 0)
+		Z_PARAM_ARRAY_EX(environment, 1, 0)
+		Z_PARAM_ARRAY_EX(other_options, 1, 0)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	command = pestrdup(command, is_persistent);
 
@@ -554,7 +535,7 @@ PHP_FUNCTION(proc_open)
 #else
 			descriptors[ndesc].childend = dup(fd);
 			if (descriptors[ndesc].childend < 0) {
-				php_error_docref(NULL, E_WARNING, "unable to dup File-Handle for descriptor %pd - %s", nindex, strerror(errno));
+				php_error_docref(NULL, E_WARNING, "unable to dup File-Handle for descriptor " ZEND_ULONG_FMT " - %s", nindex, strerror(errno));
 				goto exit_fail;
 			}
 #endif
@@ -696,6 +677,11 @@ PHP_FUNCTION(proc_open)
 		}
 		cwd = cur_cwd;
 	}
+	cwdw = php_win32_cp_any_to_w(cwd);
+	if (!cwdw) {
+		php_error_docref(NULL, E_WARNING, "CWD conversion failed");
+		goto exit_fail;
+	}
 
 	memset(&si, 0, sizeof(si));
 	si.cb = sizeof(si);
@@ -732,15 +718,54 @@ PHP_FUNCTION(proc_open)
 		dwCreateFlags |= CREATE_NO_WINDOW;
 	}
 
-	if (bypass_shell) {
-		newprocok = CreateProcess(NULL, command, &security, &security, TRUE, dwCreateFlags, env.envp, cwd, &si, &pi);
-	} else {
-		spprintf(&command_with_cmd, 0, "%s /c %s", COMSPEC_NT, command);
-
-		newprocok = CreateProcess(NULL, command_with_cmd, &security, &security, TRUE, dwCreateFlags, env.envp, cwd, &si, &pi);
-
-		efree(command_with_cmd);
+	envpw = php_win32_cp_env_any_to_w(env.envp);
+	if (envpw) {
+		dwCreateFlags |= CREATE_UNICODE_ENVIRONMENT;
+	} else  {
+		if (env.envp) {
+			php_error_docref(NULL, E_WARNING, "ENV conversion failed");
+			goto exit_fail;
+		}
 	}
+
+	cmdw = php_win32_cp_conv_any_to_w(command, command_len, &tmp_len);
+	if (!cmdw) {
+		php_error_docref(NULL, E_WARNING, "Command conversion failed");
+		goto exit_fail;
+	}
+
+	if (bypass_shell) {
+		newprocok = CreateProcessW(NULL, cmdw, &security, &security, TRUE, dwCreateFlags, envpw, cwdw, &si, &pi);
+	} else {
+		int ret;
+		size_t len;
+		wchar_t *cmdw2;
+
+
+		len = (sizeof(COMSPEC_NT) + sizeof(" /c ") + tmp_len + 1);
+		cmdw2 = (wchar_t *)malloc(len * sizeof(wchar_t));
+		if (!cmdw2) {
+			php_error_docref(NULL, E_WARNING, "Command conversion failed");
+			goto exit_fail;
+		}
+		ret = _snwprintf(cmdw2, len, L"%hs /c %s", COMSPEC_NT, cmdw);
+
+		if (-1 == ret) {
+			free(cmdw2);
+			php_error_docref(NULL, E_WARNING, "Command conversion failed");
+			goto exit_fail;
+		}
+
+		newprocok = CreateProcessW(NULL, cmdw2, &security, &security, TRUE, dwCreateFlags, envpw, cwdw, &si, &pi);
+		free(cmdw2);
+	}
+
+	free(cwdw);
+	cwdw = NULL;
+	free(cmdw);
+	cmdw = NULL;
+	free(envpw);
+	envpw = NULL;
 
 	if (suppress_errors) {
 		SetErrorMode(old_error_mode);
@@ -763,51 +788,6 @@ PHP_FUNCTION(proc_open)
 	childHandle = pi.hProcess;
 	child       = pi.dwProcessId;
 	CloseHandle(pi.hThread);
-
-#elif defined(NETWARE)
-	if (cwd) {
-		orig_cwd = getcwd(NULL, PATH_MAX);
-		chdir2(cwd);
-	}
-	channel.infd = descriptors[0].childend;
-	channel.outfd = descriptors[1].childend;
-	channel.errfd = -1;
-	/* Duplicate the command as processing downwards will modify it*/
-	command_dup = strdup(command);
-	if (!command_dup) {
-		goto exit_fail;
-	}
-	/* get a number of args */
-	construct_argc_argv(command_dup, NULL, &command_num_args, NULL);
-	child_argv = (char**) malloc((command_num_args + 1) * sizeof(char*));
-	if(!child_argv) {
-		free(command_dup);
-		if (cwd && orig_cwd) {
-			chdir2(orig_cwd);
-			free(orig_cwd);
-		}
-	}
-	/* fill the child arg vector */
-	construct_argc_argv(command_dup, NULL, &command_num_args, child_argv);
-	child_argv[command_num_args] = NULL;
-	child = procve(child_argv[0], PROC_DETACHED|PROC_INHERIT_CWD, NULL, &channel, NULL, NULL, 0, NULL, (const char**)child_argv);
-	free(child_argv);
-	free(command_dup);
-	if (cwd && orig_cwd) {
-		chdir2(orig_cwd);
-		free(orig_cwd);
-	}
-	if (child < 0) {
-		/* failed to fork() */
-		/* clean up all the descriptors */
-		for (i = 0; i < ndesc; i++) {
-			close(descriptors[i].childend);
-			if (descriptors[i].parentend)
-				close(descriptors[i].parentend);
-		}
-		php_error_docref(NULL, E_WARNING, "procve failed - %s", strerror(errno));
-		goto exit_fail;
-	}
 #elif HAVE_FORK
 	/* the unix way */
 	child = fork();
@@ -831,6 +811,12 @@ PHP_FUNCTION(proc_open)
 		}
 #endif
 
+#if PHP_CAN_DO_PTS
+		if (dev_ptmx >= 0) {
+			close(dev_ptmx);
+			close(slave_pty);
+		}
+#endif
 		/* close those descriptors that we just opened for the parent stuff,
 		 * dup new descriptors into required descriptors and close the original
 		 * cruft */
@@ -845,13 +831,6 @@ PHP_FUNCTION(proc_open)
 			if (descriptors[i].childend != descriptors[i].index)
 				close(descriptors[i].childend);
 		}
-
-#if PHP_CAN_DO_PTS
-		if (dev_ptmx >= 0) {
-			close(dev_ptmx);
-			close(slave_pty);
-		}
-#endif
 
 		if (cwd) {
 			php_ignore_value(chdir(cwd));
@@ -974,6 +953,11 @@ exit_fail:
 	efree(descriptors);
 	_php_free_envp(env, is_persistent);
 	pefree(command, is_persistent);
+#ifdef PHP_WIN32
+	free(cwdw);
+	free(cmdw);
+	free(envpw);
+#endif
 #if PHP_CAN_DO_PTS
 	if (dev_ptmx >= 0) {
 		close(dev_ptmx);

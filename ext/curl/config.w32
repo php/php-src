@@ -5,15 +5,14 @@ ARG_WITH("curl", "cURL support", "no");
 
 if (PHP_CURL != "no") {
 	if (CHECK_LIB("libcurl_a.lib;libcurl.lib", "curl", PHP_CURL) &&
-			CHECK_HEADER_ADD_INCLUDE("curl/easy.h", "CFLAGS_CURL") &&
-			CHECK_LIB("ssleay32.lib", "curl", PHP_CURL) &&
-			CHECK_LIB("libeay32.lib", "curl", PHP_CURL) 
-		&& CHECK_LIB("winmm.lib", "curl", PHP_CURL)
-		&& CHECK_LIB("wldap32.lib", "curl", PHP_CURL)
-		&& (((PHP_ZLIB=="no") && (CHECK_LIB("zlib_a.lib;zlib.lib", "curl", PHP_CURL))) || 
+		CHECK_HEADER_ADD_INCLUDE("curl/easy.h", "CFLAGS_CURL") &&
+		SETUP_OPENSSL("curl", PHP_CURL) > 0 &&
+		CHECK_LIB("winmm.lib", "curl", PHP_CURL) &&
+		CHECK_LIB("wldap32.lib", "curl", PHP_CURL) &&
+		(((PHP_ZLIB=="no") && (CHECK_LIB("zlib_a.lib;zlib.lib", "curl", PHP_CURL))) || 
 			(PHP_ZLIB_SHARED && CHECK_LIB("zlib.lib", "curl", PHP_CURL)) || (PHP_ZLIB == "yes" && (!PHP_ZLIB_SHARED)))
 		) {
-		EXTENSION("curl", "interface.c multi.c share.c curl_file.c", true);
+		EXTENSION("curl", "interface.c multi.c share.c curl_file.c");
 		AC_DEFINE('HAVE_CURL', 1, 'Have cURL library');
 		AC_DEFINE('HAVE_CURL_SSL', 1, 'Have SSL suppurt in cURL');
 		AC_DEFINE('HAVE_CURL_EASY_STRERROR', 1, 'Have curl_easy_strerror in cURL');

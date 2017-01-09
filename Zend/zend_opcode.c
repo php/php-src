@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -84,8 +84,6 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 
 	op_array->static_variables = NULL;
 	op_array->last_try_catch = 0;
-
-	op_array->this_var = -1;
 
 	op_array->fn_flags = 0;
 
@@ -291,9 +289,11 @@ ZEND_API void destroy_zend_class(zval *zv)
 				zend_class_constant *c;
 
 				ZEND_HASH_FOREACH_PTR(&ce->constants_table, c) {
-					zval_ptr_dtor(&c->value);
-					if (c->doc_comment && c->ce == ce) {
-						zend_string_release(c->doc_comment);
+					if (c->ce == ce) {
+						zval_ptr_dtor(&c->value);
+						if (c->doc_comment) {
+							zend_string_release(c->doc_comment);
+						}
 					}
 				} ZEND_HASH_FOREACH_END();
 				zend_hash_destroy(&ce->constants_table);
@@ -419,9 +419,8 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 		}
 	}
 	if (op_array->arg_info) {
-		int32_t num_args = op_array->num_args;
+		uint32_t num_args = op_array->num_args;
 		zend_arg_info *arg_info = op_array->arg_info;
-		int32_t i;
 
 		if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 			arg_info--;
@@ -466,7 +465,7 @@ zend_op *get_next_op(zend_op_array *op_array)
 	return next_op;
 }
 
-int get_next_op_number(zend_op_array *op_array)
+uint32_t get_next_op_number(zend_op_array *op_array)
 {
 	return op_array->last;
 }
@@ -533,58 +532,6 @@ static void zend_check_finally_breakout(zend_op_array *op_array, uint32_t op_num
 	}
 }
 
-static void zend_resolve_fast_call(zend_op_array *op_array, uint32_t op_num)
-{
-	int i;
-	uint32_t finally_num = (uint32_t)-1;
-
-	for (i = 0; i < op_array->last_try_catch; i++) {
-		if (op_num >= op_array->try_catch_array[i].finally_op
-				&& op_num < op_array->try_catch_array[i].finally_end) {
-			finally_num = i;
-		}
-	}
-
-	if (finally_num != (uint32_t)-1) {
-		/* Must be ZEND_FAST_CALL */
-		ZEND_ASSERT(op_array->opcodes[op_array->try_catch_array[finally_num].finally_op - 2].opcode == ZEND_FAST_CALL);
-		op_array->opcodes[op_num].extended_value = ZEND_FAST_CALL_FROM_FINALLY;
-		op_array->opcodes[op_num].op2.num = finally_num;
-	}
-}
-
-static void zend_resolve_finally_ret(zend_op_array *op_array, uint32_t op_num)
-{
-	int i;
-	uint32_t finally_num = (uint32_t)-1;
-	uint32_t catch_num = (uint32_t)-1;
-
-	for (i = 0; i < op_array->last_try_catch; i++) {
-		if (op_array->try_catch_array[i].try_op > op_num) {
-			break;
-		}
-		if (op_num < op_array->try_catch_array[i].finally_op) {
-			finally_num = i;
-		}
-		if (op_num < op_array->try_catch_array[i].catch_op) {
-			catch_num = i;
-		}
-	}
-
-	if (finally_num != (uint32_t)-1 &&
-	    (catch_num == (uint32_t)-1 ||
-	     op_array->try_catch_array[catch_num].catch_op >=
-	     op_array->try_catch_array[finally_num].finally_op)) {
-		/* in case of unhandled exception return to upward finally block */
-		op_array->opcodes[op_num].extended_value = ZEND_FAST_RET_TO_FINALLY;
-		op_array->opcodes[op_num].op2.num = finally_num;
-	} else if (catch_num != (uint32_t)-1) {
-		/* in case of unhandled exception return to upward catch block */
-		op_array->opcodes[op_num].extended_value = ZEND_FAST_RET_TO_CATCH;
-		op_array->opcodes[op_num].op2.num = catch_num;
-	}
-}
-
 static uint32_t zend_get_brk_cont_target(const zend_op_array *op_array, const zend_op *opline) {
 	int nest_levels = opline->op2.num;
 	int array_offset = opline->op1.num;
@@ -610,7 +557,7 @@ ZEND_API int pass_two(zend_op_array *op_array)
 		zend_update_extended_info(op_array);
 	}
 	if (CG(compiler_options) & ZEND_COMPILE_HANDLE_OP_ARRAY) {
-		if (zend_extension_flags & ZEND_EXTENSIONS_HAVE_OP_ARRAY_PERSIST) {
+		if (zend_extension_flags & ZEND_EXTENSIONS_HAVE_OP_ARRAY_HANDLER) {
 			zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_op_array_handler, op_array);
 		}
 	}
@@ -633,11 +580,7 @@ ZEND_API int pass_two(zend_op_array *op_array)
 		switch (opline->opcode) {
 			case ZEND_FAST_CALL:
 				opline->op1.opline_num = op_array->try_catch_array[opline->op1.num].finally_op;
-				zend_resolve_fast_call(op_array, opline - op_array->opcodes);
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op1);
-				break;
-			case ZEND_FAST_RET:
-				zend_resolve_finally_ret(op_array, opline - op_array->opcodes);
 				break;
 			case ZEND_BRK:
 			case ZEND_CONT:
@@ -672,18 +615,23 @@ ZEND_API int pass_two(zend_op_array *op_array)
 			case ZEND_JMPNZ_EX:
 			case ZEND_JMP_SET:
 			case ZEND_COALESCE:
-			case ZEND_NEW:
 			case ZEND_FE_RESET_R:
 			case ZEND_FE_RESET_RW:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op2);
 				break;
 			case ZEND_ASSERT_CHECK:
+			{
 				/* If result of assert is unused, result of check is unused as well */
-				if (op_array->opcodes[opline->op2.opline_num - 1].result_type & EXT_TYPE_UNUSED) {
-					opline->result_type |= EXT_TYPE_UNUSED;
+				zend_op *call = &op_array->opcodes[opline->op2.opline_num - 1];
+				if (call->opcode == ZEND_EXT_FCALL_END) {
+					call--;
+				}
+				if (call->result_type == IS_UNUSED) {
+					opline->result_type = IS_UNUSED;
 				}
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op2);
 				break;
+			}
 			case ZEND_DECLARE_ANON_CLASS:
 			case ZEND_DECLARE_ANON_INHERITED_CLASS:
 			case ZEND_CATCH:
@@ -691,15 +639,6 @@ ZEND_API int pass_two(zend_op_array *op_array)
 			case ZEND_FE_FETCH_RW:
 				/* absolute index to relative offset */
 				opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, opline->extended_value);
-				break;
-			case ZEND_VERIFY_RETURN_TYPE:
-				if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
-					if (opline->op1_type != IS_UNUSED) {
-						(opline + 1)->op1 = opline->op1;
-						(opline + 1)->op1_type = opline->op1_type;
-					}
-					MAKE_NOP(opline);
-				}
 				break;
 			case ZEND_RETURN:
 			case ZEND_RETURN_BY_REF:
@@ -726,7 +665,7 @@ ZEND_API int pass_two(zend_op_array *op_array)
 	}
 
 	if (op_array->live_range) {
-		uint32_t i;
+		int i;
 
 		for (i = 0; i < op_array->last_live_range; i++) {
 			op_array->live_range[i].var =

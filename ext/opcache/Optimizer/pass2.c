@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,7 +22,6 @@
 /* pass 2:
  * - convert non-numeric constants to numeric constants in numeric operators
  * - optimize constant conditional JMPs
- * - optimize static BRKs and CONTs
  */
 
 #include "php.h"
@@ -48,7 +47,10 @@ void zend_optimizer_pass2(zend_op_array *op_array)
 			case ZEND_POW:
 				if (ZEND_OP1_TYPE(opline) == IS_CONST) {
 					if (Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_STRING) {
-						convert_scalar_to_number(&ZEND_OP1_LITERAL(opline));
+						/* don't optimise if it should produce a runtime numeric string error */
+						if (is_numeric_string(Z_STRVAL(ZEND_OP1_LITERAL(opline)), Z_STRLEN(ZEND_OP1_LITERAL(opline)), NULL, NULL, 0)) {
+							convert_scalar_to_number(&ZEND_OP1_LITERAL(opline));
+						}
 					}
 				}
 				/* break missing *intentionally* - the assign_op's may only optimize op2 */
@@ -63,7 +65,10 @@ void zend_optimizer_pass2(zend_op_array *op_array)
 				}
 				if (ZEND_OP2_TYPE(opline) == IS_CONST) {
 					if (Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING) {
-						convert_scalar_to_number(&ZEND_OP2_LITERAL(opline));
+						/* don't optimise if it should produce a runtime numeric string error */
+						if (is_numeric_string(Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRLEN(ZEND_OP2_LITERAL(opline)), NULL, NULL, 0)) {
+							convert_scalar_to_number(&ZEND_OP2_LITERAL(opline));
+						}
 					}
 				}
 				break;
@@ -73,7 +78,11 @@ void zend_optimizer_pass2(zend_op_array *op_array)
 			case ZEND_SR:
 				if (ZEND_OP1_TYPE(opline) == IS_CONST) {
 					if (Z_TYPE(ZEND_OP1_LITERAL(opline)) != IS_LONG) {
-						convert_to_long(&ZEND_OP1_LITERAL(opline));
+						/* don't optimise if it should produce a runtime numeric string error */
+						if (!(Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_STRING
+							&& !is_numeric_string(Z_STRVAL(ZEND_OP1_LITERAL(opline)), Z_STRLEN(ZEND_OP1_LITERAL(opline)), NULL, NULL, 0))) {
+							convert_to_long(&ZEND_OP1_LITERAL(opline));
+						}
 					}
 				}
 				/* break missing *intentionally - the assign_op's may only optimize op2 */
@@ -86,7 +95,11 @@ void zend_optimizer_pass2(zend_op_array *op_array)
 				}
 				if (ZEND_OP2_TYPE(opline) == IS_CONST) {
 					if (Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_LONG) {
-						convert_to_long(&ZEND_OP2_LITERAL(opline));
+						/* don't optimise if it should produce a runtime numeric string error */
+						if (!(Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING
+							&& !is_numeric_string(Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRLEN(ZEND_OP2_LITERAL(opline)), NULL, NULL, 0))) {
+							convert_to_long(&ZEND_OP2_LITERAL(opline));
+						}
 					}
 				}
 				break;

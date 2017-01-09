@@ -6,6 +6,7 @@ include "skipif.inc";
 
 $cfg = <<<EOT
 [global]
+error_log = /dev/null
 [poold_ondemand]
 listen=127.0.0.1:9000
 pm = ondemand
@@ -65,9 +66,7 @@ if (is_resource($fpm)) {
 		}
 	}
 	proc_terminate($fpm);
-	if (!feof($tail)) {
-		echo stream_get_contents($tail);
-	}
+	fpm_display_log($tail, -1);
 	fclose($tail);
 	proc_close($fpm);
 }

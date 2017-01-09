@@ -2,6 +2,7 @@
 Bug #64267 (CURLOPT_INFILE doesn't allow reset)
 --SKIPIF--
 <?php
+if (getenv("SKIP_ONLINE_TESTS")) die("skip online test");
 extension_loaded("curl") or die("skip need ext/curl");
 ?>
 --FILE--

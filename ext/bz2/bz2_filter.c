@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -307,7 +307,7 @@ static php_stream_filter_ops php_bz2_compress_ops = {
 
 /* {{{ bzip2.* common factory */
 
-static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *filterparams, int persistent)
+static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *filterparams, uint8_t persistent)
 {
 	php_stream_filter_ops *fops = NULL;
 	php_bz2_filter_data *data;
@@ -379,7 +379,7 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 					/* How much memory to allocate (1 - 9) x 100kb */
 					zend_long blocks = zval_get_long(tmpzval);
 					if (blocks < 1 || blocks > 9) {
-						php_error_docref(NULL, E_WARNING, "Invalid parameter given for number of blocks to allocate. (%pd)", blocks);
+						php_error_docref(NULL, E_WARNING, "Invalid parameter given for number of blocks to allocate. (" ZEND_LONG_FMT ")", blocks);
 					} else {
 						blockSize100k = (int) blocks;
 					}
@@ -389,7 +389,7 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 					/* Work Factor (0 - 250) */
 					zend_long work = zval_get_long(tmpzval);
 					if (work < 0 || work > 250) {
-						php_error_docref(NULL, E_WARNING, "Invalid parameter given for work factor. (%pd)", work);
+						php_error_docref(NULL, E_WARNING, "Invalid parameter given for work factor. (" ZEND_LONG_FMT ")", work);
 					} else {
 						workFactor = (int) work;
 					}

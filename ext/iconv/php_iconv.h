@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -78,7 +78,7 @@ ZEND_END_MODULE_GLOBALS(iconv)
 #define ICONVG(v) ZEND_MODULE_GLOBALS_ACCESSOR(iconv, v)
 
 #if defined(ZTS) && defined(COMPILE_DL_ICONV)
-ZEND_TSRMLS_CACHE_EXTERN();
+ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
 #ifdef HAVE_IBM_ICONV

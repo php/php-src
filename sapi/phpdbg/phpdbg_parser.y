@@ -21,7 +21,7 @@
 #undef yyerror
 static int yyerror(const char *msg);
 
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 #ifdef _MSC_VER
 #define YYMALLOC malloc
@@ -193,6 +193,11 @@ int phpdbg_do_parse(phpdbg_param_t *stack, char *input) {
 	if (!*input) {
 		return 0;
 	}
+
+	if (PHPDBG_G(cur_command)) {
+		free(PHPDBG_G(cur_command));
+	}
+	PHPDBG_G(cur_command) = strdup(input);
 
 	phpdbg_init_lexer(stack, input);
 

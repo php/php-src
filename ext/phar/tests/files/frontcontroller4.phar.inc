@@ -7,7 +7,7 @@ $a['a.phps'] = '<?php function hio(){}';
 $a->setStub('<?php
 function s($a)
 {
-    static $b = array(b"/hi" => false);
+    static $b = array("/hi" => false);
     if (isset($b[$a])) return $b[$a];
     return $a;
 }

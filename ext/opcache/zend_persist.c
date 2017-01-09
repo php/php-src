@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -65,7 +65,6 @@
 typedef void (*zend_persist_func_t)(zval*);
 
 static void zend_persist_zval(zval *z);
-static void zend_persist_zval_const(zval *z);
 
 static const uint32_t uninitialized_bucket[-HT_MIN_MASK] =
 	{HT_INVALID_IDX, HT_INVALID_IDX};
@@ -90,21 +89,21 @@ static void zend_hash_persist(HashTable *ht, zend_persist_func_t pPersistElement
 		void *data = HT_GET_DATA_ADDR(ht);
 		zend_accel_store(data, HT_USED_SIZE(ht));
 		HT_SET_DATA_ADDR(ht, data);
-	} else if (ht->nNumUsed < -(int32_t)ht->nTableMask / 2) {
+	} else if (ht->nNumUsed < (uint32_t)(-(int32_t)ht->nTableMask) / 2) {
 		/* compact table */
 		void *old_data = HT_GET_DATA_ADDR(ht);
 		Bucket *old_buckets = ht->arData;
-		int32_t hash_size;
+		uint32_t hash_size;
 
 		if (ht->nNumUsed <= HT_MIN_SIZE) {
 			hash_size = HT_MIN_SIZE;
 		} else {
-			hash_size = -(int32_t)ht->nTableMask;
+			hash_size = (uint32_t)(-(int32_t)ht->nTableMask);
 			while (hash_size >> 1 > ht->nNumUsed) {
 				hash_size >>= 1;
 			}
 		}
-		ht->nTableMask = -hash_size;
+		ht->nTableMask = (uint32_t)(-(int32_t)hash_size);
 		ZEND_ASSERT(((zend_uintptr_t)ZCG(mem) & 0x7) == 0); /* should be 8 byte aligned */
 		HT_SET_DATA_ADDR(ht, ZCG(mem));
 		ZCG(mem) = (void*)((char*)ZCG(mem) + ZEND_ALIGNED_SIZE((hash_size * sizeof(uint32_t)) + (ht->nNumUsed * sizeof(Bucket))));
@@ -134,7 +133,7 @@ static void zend_hash_persist(HashTable *ht, zend_persist_func_t pPersistElement
 		void *old_data = HT_GET_DATA_ADDR(ht);
 
 		ZEND_ASSERT(((zend_uintptr_t)ZCG(mem) & 0x7) == 0); /* should be 8 byte aligned */
-		ZCG(mem) = (void*)((char*)data + HT_USED_SIZE(ht));
+		ZCG(mem) = (void*)((char*)data + ZEND_ALIGNED_SIZE(HT_USED_SIZE(ht)));
 		memcpy(data, old_data, HT_USED_SIZE(ht));
 		efree(old_data);
 		HT_SET_DATA_ADDR(ht, data);
@@ -172,21 +171,21 @@ static void zend_hash_persist_immutable(HashTable *ht)
 	}
 	if (ht->u.flags & HASH_FLAG_PACKED) {
 		HT_SET_DATA_ADDR(ht, zend_accel_memdup(HT_GET_DATA_ADDR(ht), HT_USED_SIZE(ht)));
-	} else if (ht->nNumUsed < -(int32_t)ht->nTableMask / 2) {
+	} else if (ht->nNumUsed < (uint32_t)(-(int32_t)ht->nTableMask) / 2) {
 		/* compact table */
 		void *old_data = HT_GET_DATA_ADDR(ht);
 		Bucket *old_buckets = ht->arData;
-		int32_t hash_size;
+		uint32_t hash_size;
 
 		if (ht->nNumUsed <= HT_MIN_SIZE) {
 			hash_size = HT_MIN_SIZE;
 		} else {
-			hash_size = -(int32_t)ht->nTableMask;
+			hash_size = (uint32_t)(-(int32_t)ht->nTableMask);
 			while (hash_size >> 1 > ht->nNumUsed) {
 				hash_size >>= 1;
 			}
 		}
-		ht->nTableMask = -hash_size;
+		ht->nTableMask = (uint32_t)(-(int32_t)hash_size);
 		ZEND_ASSERT(((zend_uintptr_t)ZCG(mem) & 0x7) == 0); /* should be 8 byte aligned */
 		HT_SET_DATA_ADDR(ht, ZCG(mem));
 		ZCG(mem) = (void*)((char*)ZCG(mem) + (hash_size * sizeof(uint32_t)) + (ht->nNumUsed * sizeof(Bucket)));
@@ -204,7 +203,7 @@ static void zend_hash_persist_immutable(HashTable *ht)
 			}
 
 			/* persist the data itself */
-			zend_persist_zval_const(&p->val);
+			zend_persist_zval(&p->val);
 
 			nIndex = p->h | ht->nTableMask;
 			Z_NEXT(p->val) = HT_HASH(ht, nIndex);
@@ -215,7 +214,7 @@ static void zend_hash_persist_immutable(HashTable *ht)
 		void *data = ZCG(mem);
 
 		ZEND_ASSERT(((zend_uintptr_t)ZCG(mem) & 0x7) == 0); /* should be 8 byte aligned */
-		ZCG(mem) = (void*)((char*)data + HT_USED_SIZE(ht));
+		ZCG(mem) = (void*)((char*)data + ZEND_ALIGNED_SIZE(HT_USED_SIZE(ht)));
 		memcpy(data, HT_GET_DATA_ADDR(ht), HT_USED_SIZE(ht));
 		HT_SET_DATA_ADDR(ht, data);
 	}
@@ -229,7 +228,7 @@ static void zend_hash_persist_immutable(HashTable *ht)
 		}
 
 		/* persist the data itself */
-		zend_persist_zval_const(&p->val);
+		zend_persist_zval(&p->val);
 	}
 }
 
@@ -277,15 +276,15 @@ static void zend_persist_zval(zval *z)
 			flags = Z_GC_FLAGS_P(z) & ~ (IS_STR_PERSISTENT | IS_STR_INTERNED | IS_STR_PERMANENT);
 			zend_accel_store_interned_string(Z_STR_P(z));
 			Z_GC_FLAGS_P(z) |= flags;
-			Z_TYPE_FLAGS_P(z) &= ~(IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
+			Z_TYPE_FLAGS_P(z) &= ~IS_TYPE_REFCOUNTED;
 			break;
 		case IS_ARRAY:
 			new_ptr = zend_shared_alloc_get_xlat_entry(Z_ARR_P(z));
 			if (new_ptr) {
 				Z_ARR_P(z) = new_ptr;
-				Z_TYPE_FLAGS_P(z) = IS_TYPE_IMMUTABLE;
+				Z_TYPE_FLAGS_P(z) = IS_TYPE_COPYABLE;
 			} else {
-				if (Z_IMMUTABLE_P(z)) {
+				if (!Z_REFCOUNTED_P(z)) {
 					Z_ARR_P(z) = zend_accel_memdup(Z_ARR_P(z), sizeof(zend_array));
 					zend_hash_persist_immutable(Z_ARRVAL_P(z));
 				} else {
@@ -293,7 +292,7 @@ static void zend_persist_zval(zval *z)
 					zend_accel_store(Z_ARR_P(z), sizeof(zend_array));
 					zend_hash_persist(Z_ARRVAL_P(z), zend_persist_zval);
 					/* make immutable array */
-					Z_TYPE_FLAGS_P(z) = IS_TYPE_IMMUTABLE;
+					Z_TYPE_FLAGS_P(z) = IS_TYPE_COPYABLE;
 					GC_REFCOUNT(Z_COUNTED_P(z)) = 2;
 					GC_FLAGS(Z_COUNTED_P(z)) |= IS_ARRAY_IMMUTABLE;
 					Z_ARRVAL_P(z)->u.flags |= HASH_FLAG_STATIC_KEYS;
@@ -314,124 +313,12 @@ static void zend_persist_zval(zval *z)
 			new_ptr = zend_shared_alloc_get_xlat_entry(Z_AST_P(z));
 			if (new_ptr) {
 				Z_AST_P(z) = new_ptr;
+				Z_TYPE_FLAGS_P(z) = IS_TYPE_CONSTANT | IS_TYPE_COPYABLE;
 			} else {
 				zend_accel_store(Z_AST_P(z), sizeof(zend_ast_ref));
 				Z_ASTVAL_P(z) = zend_persist_ast(Z_ASTVAL_P(z));
-			}
-			break;
-	}
-}
-
-static void zend_persist_zval_static(zval *z)
-{
-	zend_uchar flags;
-	void *new_ptr;
-
-	switch (Z_TYPE_P(z)) {
-		case IS_STRING:
-		case IS_CONSTANT:
-			flags = Z_GC_FLAGS_P(z) & ~ (IS_STR_PERSISTENT | IS_STR_INTERNED | IS_STR_PERMANENT);
-			zend_accel_store_interned_string(Z_STR_P(z));
-			Z_GC_FLAGS_P(z) |= flags;
-			Z_TYPE_FLAGS_P(z) &= ~(IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
-			break;
-		case IS_ARRAY:
-			new_ptr = zend_shared_alloc_get_xlat_entry(Z_ARR_P(z));
-			if (new_ptr) {
-				Z_ARR_P(z) = new_ptr;
-				Z_TYPE_FLAGS_P(z) = IS_TYPE_IMMUTABLE;
-			} else {
-				if (Z_IMMUTABLE_P(z)) {
-					Z_ARR_P(z) = zend_accel_memdup(Z_ARR_P(z), sizeof(zend_array));
-					zend_hash_persist_immutable(Z_ARRVAL_P(z));
-				} else {
-					GC_REMOVE_FROM_BUFFER(Z_ARR_P(z));
-					zend_accel_store(Z_ARR_P(z), sizeof(zend_array));
-					zend_hash_persist(Z_ARRVAL_P(z), zend_persist_zval);
-					/* make immutable array */
-					Z_TYPE_FLAGS_P(z) = IS_TYPE_IMMUTABLE;
-					GC_REFCOUNT(Z_COUNTED_P(z)) = 2;
-					GC_FLAGS(Z_COUNTED_P(z)) |= IS_ARRAY_IMMUTABLE;
-					Z_ARRVAL_P(z)->u.flags |= HASH_FLAG_STATIC_KEYS;
-					Z_ARRVAL_P(z)->u.flags &= ~HASH_FLAG_APPLY_PROTECTION;
-				}
-			}
-			break;
-		case IS_REFERENCE:
-			new_ptr = zend_shared_alloc_get_xlat_entry(Z_REF_P(z));
-			if (new_ptr) {
-				Z_REF_P(z) = new_ptr;
-			} else {
-				zend_accel_store(Z_REF_P(z), sizeof(zend_reference));
-				zend_persist_zval(Z_REFVAL_P(z));
-			}
-			break;
-		case IS_CONSTANT_AST:
-			new_ptr = zend_shared_alloc_get_xlat_entry(Z_AST_P(z));
-			if (new_ptr) {
-				Z_AST_P(z) = new_ptr;
-				Z_TYPE_FLAGS_P(z) = IS_TYPE_CONSTANT | IS_TYPE_IMMUTABLE;
-			} else {
-				zend_accel_store(Z_AST_P(z), sizeof(zend_ast_ref));
-				Z_ASTVAL_P(z) = zend_persist_ast(Z_ASTVAL_P(z));
-				Z_TYPE_FLAGS_P(z) = IS_TYPE_CONSTANT | IS_TYPE_IMMUTABLE;
+				Z_TYPE_FLAGS_P(z) = IS_TYPE_CONSTANT | IS_TYPE_COPYABLE;
 				GC_REFCOUNT(Z_COUNTED_P(z)) = 2;
-			}
-			break;
-	}
-}
-
-static void zend_persist_zval_const(zval *z)
-{
-	zend_uchar flags;
-	void *new_ptr;
-
-	switch (Z_TYPE_P(z)) {
-		case IS_STRING:
-		case IS_CONSTANT:
-			flags = Z_GC_FLAGS_P(z) & ~ (IS_STR_PERSISTENT | IS_STR_INTERNED | IS_STR_PERMANENT);
-			zend_accel_memdup_interned_string(Z_STR_P(z));
-			Z_GC_FLAGS_P(z) |= flags;
-			Z_TYPE_FLAGS_P(z) &= ~(IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
-			break;
-		case IS_ARRAY:
-			new_ptr = zend_shared_alloc_get_xlat_entry(Z_ARR_P(z));
-			if (new_ptr) {
-				Z_ARR_P(z) = new_ptr;
-				Z_TYPE_FLAGS_P(z) = IS_TYPE_IMMUTABLE;
-			} else {
-				if (Z_IMMUTABLE_P(z)) {
-					Z_ARR_P(z) = zend_accel_memdup(Z_ARR_P(z), sizeof(zend_array));
-					zend_hash_persist_immutable(Z_ARRVAL_P(z));
-				} else {
-					GC_REMOVE_FROM_BUFFER(Z_ARR_P(z));
-					zend_accel_store(Z_ARR_P(z), sizeof(zend_array));
-					zend_hash_persist(Z_ARRVAL_P(z), zend_persist_zval);
-					/* make immutable array */
-					Z_TYPE_FLAGS_P(z) = IS_TYPE_IMMUTABLE;
-					GC_REFCOUNT(Z_COUNTED_P(z)) = 2;
-					GC_FLAGS(Z_COUNTED_P(z)) |= IS_ARRAY_IMMUTABLE;
-					Z_ARRVAL_P(z)->u.flags |= HASH_FLAG_STATIC_KEYS;
-					Z_ARRVAL_P(z)->u.flags &= ~HASH_FLAG_APPLY_PROTECTION;
-				}
-			}
-			break;
-		case IS_REFERENCE:
-			new_ptr = zend_shared_alloc_get_xlat_entry(Z_REF_P(z));
-			if (new_ptr) {
-				Z_REF_P(z) = new_ptr;
-			} else {
-				zend_accel_store(Z_REF_P(z), sizeof(zend_reference));
-				zend_persist_zval(Z_REFVAL_P(z));
-			}
-			break;
-		case IS_CONSTANT_AST:
-			new_ptr = zend_shared_alloc_get_xlat_entry(Z_AST_P(z));
-			if (new_ptr) {
-				Z_AST_P(z) = new_ptr;
-			} else {
-				zend_accel_store(Z_AST_P(z), sizeof(zend_ast_ref));
-				Z_ASTVAL_P(z) = zend_persist_ast(Z_ASTVAL_P(z));
 			}
 			break;
 	}
@@ -472,7 +359,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		if (stored) {
 			op_array->static_variables = stored;
 		} else {
-			zend_hash_persist(op_array->static_variables, zend_persist_zval_static);
+			zend_hash_persist(op_array->static_variables, zend_persist_zval);
 			zend_accel_store(op_array->static_variables, sizeof(HashTable));
 			/* make immutable array */
 			GC_REFCOUNT(op_array->static_variables) = 2;
@@ -541,7 +428,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 					case ZEND_JMPNZ_EX:
 					case ZEND_JMP_SET:
 					case ZEND_COALESCE:
-					case ZEND_NEW:
 					case ZEND_FE_RESET_R:
 					case ZEND_FE_RESET_RW:
 					case ZEND_ASSERT_CHECK:

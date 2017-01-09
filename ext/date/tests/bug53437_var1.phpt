@@ -10,4 +10,9 @@ var_dump($dp);
 ?>
 ==DONE==
 --EXPECTF--
-Fatal error: Invalid serialization data for DatePeriod object in %sbug53437_var1.php on line %d
+Fatal error: Uncaught Error: Invalid serialization data for DatePeriod object in %sbug53437_var1.php:%d
+Stack trace:
+#0 [internal function]: DatePeriod->__wakeup()
+#1 %sbug53437_var1.php(%d): unserialize('O:10:"DatePerio...')
+#2 {main}
+  thrown in %sbug53437_var1.php on line %d

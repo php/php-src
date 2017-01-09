@@ -174,7 +174,7 @@ static void sig_handler(int signo) /* {{{ */
 
 	saved_errno = errno;
 	s = sig_chars[signo];
-	write(sp[1], &s, sizeof(s));
+	zend_quiet_write(sp[1], &s, sizeof(s));
 	errno = saved_errno;
 }
 /* }}} */
@@ -241,6 +241,8 @@ int fpm_signals_init_child() /* {{{ */
 		zlog(ZLOG_SYSERROR, "failed to init child signals: sigaction()");
 		return -1;
 	}
+
+	zend_signal_init();
 	return 0;
 }
 /* }}} */

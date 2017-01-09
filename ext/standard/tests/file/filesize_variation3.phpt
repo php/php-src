@@ -65,6 +65,8 @@ bool(true)
 int(1200)
 bool(true)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 *** Done ***

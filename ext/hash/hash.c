@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -30,12 +30,6 @@
 
 static int php_hash_le_hash;
 HashTable php_hash_hashtable;
-
-#if (PHP_MAJOR_VERSION >= 5)
-# define DEFAULT_CONTEXT FG(default_context)
-#else
-# define DEFAULT_CONTEXT NULL
-#endif
 
 #ifdef PHP_MHASH_BC
 struct mhash_bc_entry {
@@ -140,7 +134,7 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_
 			php_error_docref(NULL, E_WARNING, "Invalid path");
 			RETURN_FALSE;
 		}
-		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS, NULL, DEFAULT_CONTEXT);
+		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS, NULL, FG(default_context));
 		if (!stream) {
 			/* Stream will report errors opening file */
 			RETURN_FALSE;
@@ -214,7 +208,7 @@ static inline void php_hash_string_xor(unsigned char *out, const unsigned char *
 
 static inline void php_hash_hmac_prep_key(unsigned char *K, const php_hash_ops *ops, void *context, const unsigned char *key, const size_t key_len) {
 	memset(K, 0, ops->block_size);
-	if (key_len > ops->block_size) {
+	if (key_len > (size_t)ops->block_size) {
 		/* Reduce the key first */
 		ops->hash_init(context);
 		ops->hash_update(context, key, key_len);
@@ -259,7 +253,7 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, 
 			php_error_docref(NULL, E_WARNING, "Invalid path");
 			RETURN_FALSE;
 		}
-		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS, NULL, DEFAULT_CONTEXT);
+		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS, NULL, FG(default_context));
 		if (!stream) {
 			/* Stream will report errors opening file */
 			RETURN_FALSE;
@@ -373,7 +367,7 @@ PHP_FUNCTION(hash_init)
 
 		memset(K, 0, ops->block_size);
 
-		if (key_len > ops->block_size) {
+		if (key_len > (size_t)ops->block_size) {
 			/* Reduce the key first */
 			ops->hash_update(context, (unsigned char *) key, key_len);
 			ops->hash_final((unsigned char *) K, context);
@@ -735,7 +729,8 @@ PHP_FUNCTION(hash_equals)
 {
 	zval *known_zval, *user_zval;
 	char *known_str, *user_str;
-	int result = 0, j;
+	int result = 0;
+	size_t j;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &known_zval, &user_zval) == FAILURE) {
 		return;
@@ -1013,6 +1008,8 @@ PHP_MINIT_FUNCTION(hash)
 	php_hash_register_algo("sha224",		&php_hash_sha224_ops);
 	php_hash_register_algo("sha256",		&php_hash_sha256_ops);
 	php_hash_register_algo("sha384",		&php_hash_sha384_ops);
+	php_hash_register_algo("sha512/224",            &php_hash_sha512_224_ops);
+	php_hash_register_algo("sha512/256",            &php_hash_sha512_256_ops);
 	php_hash_register_algo("sha512",		&php_hash_sha512_ops);
 	php_hash_register_algo("sha3-224",		&php_hash_sha3_224_ops);
 	php_hash_register_algo("sha3-256",		&php_hash_sha3_256_ops);

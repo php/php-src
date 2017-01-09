@@ -9,7 +9,7 @@ Test htmlentities() function
 /* retrieving htmlentities from the ANSI character table */
 echo "*** Retrieving htmlentities for 256 characters ***\n";
 for($i=0; $i<256; $i++)
-  var_dump( bin2hex( htmlentities(b"chr($i)")) );
+  var_dump( bin2hex( htmlentities("chr($i)")) );
 
 /* giving arguments as NULL */
 echo "\n*** Testing htmlentities() with NULL as first,second and third argument ***\n";

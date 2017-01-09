@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -224,15 +224,16 @@ static void *zend_file_cache_unserialize_interned(zend_string *str, int in_shm)
 	zend_string *ret;
 
 	str = (zend_string*)((char*)ZCG(mem) + ((size_t)(str) & ~Z_UL(1)));
-	ret = accel_new_interned_string(str);
-	if (ret == str) {
-		/* String wasn't interned but we will use it as interned anyway */
-		if (in_shm) {
+	if (in_shm) {
+		ret = accel_new_interned_string(str);
+		if (ret == str) {
+			/* String wasn't interned but we will use it as interned anyway */
 			GC_FLAGS(ret) |= IS_STR_INTERNED | IS_STR_PERMANENT;
-		} else {
-			GC_FLAGS(ret) |= IS_STR_INTERNED;
-			GC_FLAGS(ret) &= ~IS_STR_PERMANENT;
 		}
+	} else {
+		ret = str;
+		GC_FLAGS(ret) |= IS_STR_INTERNED;
+		GC_FLAGS(ret) &= ~IS_STR_PERMANENT;
 	}
 	return ret;
 }
@@ -372,7 +373,6 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 	}
 
 	if (!IS_SERIALIZED(op_array->opcodes)) {
-#if ZEND_USE_ABS_CONST_ADDR || ZEND_USE_ABS_JMP_ADDR
 		zend_op *opline, *end;
 
 		SERIALIZE_PTR(op_array->opcodes);
@@ -380,15 +380,15 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 		UNSERIALIZE_PTR(opline);
 		end = opline + op_array->last;
 		while (opline < end) {
-# if ZEND_USE_ABS_CONST_ADDR
+#if ZEND_USE_ABS_CONST_ADDR
 			if (opline->op1_type == IS_CONST) {
 				SERIALIZE_PTR(opline->op1.zv);
 			}
 			if (opline->op2_type == IS_CONST) {
 				SERIALIZE_PTR(opline->op2.zv);
 			}
-# endif
-# if ZEND_USE_ABS_JMP_ADDR
+#endif
+#if ZEND_USE_ABS_JMP_ADDR
 			switch (opline->opcode) {
 				case ZEND_JMP:
 				case ZEND_FAST_CALL:
@@ -403,7 +403,6 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 				case ZEND_JMPNZ_EX:
 				case ZEND_JMP_SET:
 				case ZEND_COALESCE:
-				case ZEND_NEW:
 				case ZEND_FE_RESET_R:
 				case ZEND_FE_RESET_RW:
 				case ZEND_ASSERT_CHECK:
@@ -416,12 +415,10 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 					/* relative extended_value don't have to be changed */
 					break;
 			}
-# endif
+#endif
+			zend_serialize_opcode_handler(opline);
 			opline++;
 		}
-#else
-		SERIALIZE_PTR(op_array->opcodes);
-#endif
 
 		if (op_array->arg_info) {
 			zend_arg_info *p, *end;
@@ -794,6 +791,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 	if (writev(fd, vec, 3) != (ssize_t)(sizeof(info) + script->size + info.str_size)) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot write to file '%s'\n", filename);
 		zend_string_release((zend_string*)ZCG(mem));
+		close(fd);
 		efree(mem);
 		unlink(filename);
 		efree(filename);
@@ -807,6 +805,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 		) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot write to file '%s'\n", filename);
 		zend_string_release((zend_string*)ZCG(mem));
+		close(fd);
 		efree(mem);
 		unlink(filename);
 		efree(filename);
@@ -980,7 +979,6 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 				case ZEND_JMPNZ_EX:
 				case ZEND_JMP_SET:
 				case ZEND_COALESCE:
-				case ZEND_NEW:
 				case ZEND_FE_RESET_R:
 				case ZEND_FE_RESET_RW:
 				case ZEND_ASSERT_CHECK:
@@ -994,7 +992,7 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 					break;
 			}
 # endif
-			ZEND_VM_SET_OPCODE_HANDLER(opline);
+			zend_deserialize_opcode_handler(opline);
 			opline++;
 		}
 
@@ -1087,7 +1085,7 @@ static void zend_file_cache_unserialize_class_constant(zval                    *
 		UNSERIALIZE_PTR(Z_PTR_P(zv));
 		c = Z_PTR_P(zv);
 
-		zend_file_cache_unserialize_class_constant(&c->value, script, buf);
+		zend_file_cache_unserialize_zval(&c->value, script, buf);
 		if (c->ce && !IS_UNSERIALIZED(c->ce)) {
 			UNSERIALIZE_PTR(c->ce);
 		}
@@ -1345,7 +1343,9 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 		return NULL;
 	}
 
-	if (!ZCG(accel_directives).file_cache_only) {
+	if (!ZCG(accel_directives).file_cache_only &&
+	    !ZCSG(restart_in_progress) &&
+	    accelerator_shm_read_lock() == SUCCESS) {
 		/* exclusive lock */
 		zend_shared_alloc_lock();
 
@@ -1399,6 +1399,7 @@ use_process_mem:
 
 	if (cache_it) {
 		script->dynamic_members.checksum = zend_accel_script_checksum(script);
+		script->dynamic_members.last_used = ZCG(request_time);
 
 		zend_accel_hash_update(&ZCSG(hash), ZSTR_VAL(script->script.filename), ZSTR_LEN(script->script.filename), 0, script);
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -84,6 +84,9 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					zval_get_long(&ZEND_OP2_LITERAL(opline)) < 0) {
 					/* shift by negative number */
 					break;
+				} else if (zend_binary_op_produces_numeric_string_error(opline->opcode, &ZEND_OP1_LITERAL(opline), &ZEND_OP2_LITERAL(opline))) {
+					/* produces numeric string E_NOTICE/E_WARNING */
+					break;
 				}
 				er = EG(error_reporting);
 				EG(error_reporting) = 0;
@@ -106,7 +109,9 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			if (ZEND_OP1_TYPE(opline) == IS_CONST &&
 				opline->extended_value != IS_ARRAY &&
 				opline->extended_value != IS_OBJECT &&
-				opline->extended_value != IS_RESOURCE) {
+				opline->extended_value != IS_RESOURCE &&
+				(opline->extended_value != IS_STRING
+					|| Z_TYPE(ZEND_OP1_LITERAL(opline)) != IS_ARRAY)) {
 				/* cast of constant operand */
 				zend_uchar type = opline->result_type;
 				uint32_t tv = ZEND_RESULT(opline).var;		/* temporary variable */
@@ -431,7 +436,6 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			}
 
 			/* pre-evaluate constant functions:
-			   defined(x)
 			   constant(x)
 			   function_exists(x)
 			   is_callable(x)
@@ -513,24 +517,6 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						MAKE_NOP(opline);
 						break;
 					}
-				} else if (Z_STRLEN(ZEND_OP2_LITERAL(init_opline)) == sizeof("defined")-1 &&
-					!memcmp(Z_STRVAL(ZEND_OP2_LITERAL(init_opline)),
-						"defined", sizeof("defined")-1) &&
-					!zend_optimizer_is_disabled_func("defined", sizeof("defined") - 1)) {
-					zval t;
-
-					if (zend_optimizer_get_persistent_constant(Z_STR(ZEND_OP1_LITERAL(send1_opline)), &t, 0)) {
-
-						ZVAL_TRUE(&t);
-						if (zend_optimizer_replace_by_const(op_array, opline + 1, IS_VAR, ZEND_RESULT(opline).var, &t)) {
-							literal_dtor(&ZEND_OP2_LITERAL(init_opline));
-							MAKE_NOP(init_opline);
-							literal_dtor(&ZEND_OP1_LITERAL(send1_opline));
-							MAKE_NOP(send1_opline);
-							MAKE_NOP(opline);
-							break;
-						}
-					}
 				} else if (Z_STRLEN(ZEND_OP2_LITERAL(init_opline)) == sizeof("constant")-1 &&
 					!memcmp(Z_STRVAL(ZEND_OP2_LITERAL(init_opline)),
 						"constant", sizeof("constant")-1) &&
@@ -546,21 +532,6 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 							MAKE_NOP(opline);
 							break;
 						}
-					}
-				} else if ((CG(compiler_options) & ZEND_COMPILE_NO_BUILTIN_STRLEN) == 0 &&
-					Z_STRLEN(ZEND_OP2_LITERAL(init_opline)) == sizeof("strlen") - 1 &&
-					!memcmp(Z_STRVAL(ZEND_OP2_LITERAL(init_opline)), "strlen", sizeof("strlen") - 1) &&
-					!zend_optimizer_is_disabled_func("strlen", sizeof("strlen") - 1)) {
-					zval t;
-
-					ZVAL_LONG(&t, Z_STRLEN(ZEND_OP1_LITERAL(send1_opline)));
-					if (zend_optimizer_replace_by_const(op_array, opline + 1, IS_VAR, ZEND_RESULT(opline).var, &t)) {
-						literal_dtor(&ZEND_OP2_LITERAL(init_opline));
-						MAKE_NOP(init_opline);
-						literal_dtor(&ZEND_OP1_LITERAL(send1_opline));
-						MAKE_NOP(send1_opline);
-						MAKE_NOP(opline);
-						break;
 					}
 				/* dirname(IS_CONST/IS_STRING) -> IS_CONST/IS_STRING */
 				} else if (Z_STRLEN(ZEND_OP2_LITERAL(init_opline)) == sizeof("dirname")-1 &&
@@ -643,7 +614,6 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		case ZEND_FE_RESET_RW:
 		case ZEND_FE_FETCH_R:
 		case ZEND_FE_FETCH_RW:
-		case ZEND_NEW:
 		case ZEND_JMP_SET:
 		case ZEND_COALESCE:
 		case ZEND_ASSERT_CHECK:

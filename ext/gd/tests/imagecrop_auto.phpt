@@ -3,6 +3,7 @@ Testing imagecropauto()
 --SKIPIF-- 
 <?php  
 if ( ! extension_loaded('gd') || !function_exists('imagecrop')) die( 'skip GD imagecropauto not present; skipping test' ); 
+if (!GD_BUNDLED) die('skip requires bundled libgd');
 ?> 
 --FILE--
 <?php

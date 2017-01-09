@@ -30,6 +30,7 @@
 
 */
 
+#include <php.h>
 
 static const char rcsid[] = "#(@) $Id$";
 
@@ -80,9 +81,10 @@ static const char rcsid[] = "#(@) $Id$";
 
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 #include "simplestring.h"
 
-#define my_free(thing)  if(thing) {free(thing); thing = 0;}
+#define my_free(thing)  if(thing) {efree(thing); thing = 0;}
 
 /*----------------------**
 * Begin String Functions *
@@ -111,7 +113,7 @@ void simplestring_init(simplestring* string) {
 /******/
 
 static void simplestring_init_str(simplestring* string) {
-   string->str = (char*)malloc(SIMPLESTRING_INCR);
+   string->str = (char*)emalloc(SIMPLESTRING_INCR);
    if(string->str) {
       string->str[0] = 0;
       string->len = 0;
@@ -172,6 +174,9 @@ void simplestring_free(simplestring* string) {
 }
 /******/
 
+#ifndef SIZE_MAX
+#define SIZE_MAX ((size_t)-1)
+#endif
 /****f* FUNC/simplestring_addn
  * NAME
  *   simplestring_addn
@@ -190,19 +195,32 @@ void simplestring_free(simplestring* string) {
  *   simplestring_add ()
  * SOURCE
  */
-void simplestring_addn(simplestring* target, const char* source, int add_len) {
+void simplestring_addn(simplestring* target, const char* source, size_t add_len) {
+   size_t newsize = target->size, incr = 0;
    if(target && source) {
       if(!target->str) {
          simplestring_init_str(target);
       }
+
+      if((SIZE_MAX - add_len) < target->len || (SIZE_MAX - add_len - 1) < target->len) {
+    	  /* check for overflows, if there's a potential overflow do nothing */
+    	  return;
+      }
+
       if(target->len + add_len + 1 > target->size) {
          /* newsize is current length + new length */
-         int newsize = target->len + add_len + 1;
-         int incr = target->size * 2;
+         newsize = target->len + add_len + 1;
+         incr = target->size * 2;
 
          /* align to SIMPLESTRING_INCR increments */
-         newsize = newsize - (newsize % incr) + incr;
-         target->str = (char*)realloc(target->str, newsize);
+         if (incr) {
+            newsize = newsize - (newsize % incr) + incr;
+         }
+         if(newsize < (target->len + add_len + 1)) {
+        	 /* some kind of overflow happened */
+        	 return;
+         }
+         target->str = (char*)erealloc(target->str, newsize);
 
          target->size = target->str ? newsize : 0;
       }

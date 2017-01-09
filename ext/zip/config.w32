@@ -21,6 +21,7 @@ if (PHP_ZIP != "no") {
 			zip_get_archive_comment.c zip_get_archive_flag.c zip_get_compression_implementation.c\
 			zip_get_encryption_implementation.c zip_get_file_comment.c zip_get_name.c zip_get_num_entries.c \
 			zip_get_num_files.c zip_memdup.c zip_name_locate.c zip_new.c zip_open.c zip_rename.c zip_replace.c\
+			zip_hash.c \
 			zip_set_archive_comment.c zip_set_archive_flag.c zip_set_default_password.c zip_set_file_comment.c\
 			zip_set_file_compression.c zip_set_name.c zip_source_buffer.c zip_source_close.c zip_source_crc.c\
 			zip_source_deflate.c zip_source_error.c zip_source_filep.c zip_source_free.c\

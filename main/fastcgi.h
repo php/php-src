@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,7 +31,7 @@
  */
 
 #define FCGI_HASH_FUNC(var, var_len) \
-	(UNEXPECTED(var_len < 3) ? var_len : \
+	(UNEXPECTED(var_len < 3) ? (unsigned int)var_len : \
 		(((unsigned int)var[3]) << 2) + \
 		(((unsigned int)var[var_len-2]) << 4) + \
 		(((unsigned int)var[var_len-1]) << 2) + \
@@ -104,7 +104,7 @@ const char *fcgi_get_last_client_ip();
 void fcgi_set_in_shutdown(int new_value);
 
 #ifndef HAVE_ATTRIBUTE_WEAK
-typedef void (*fcgi_logger)(int type, const char *fmt, ...);
+typedef void (*fcgi_logger)(int type, const char *fmt, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 void fcgi_set_logger(fcgi_logger lg);
 #endif
 
@@ -118,7 +118,8 @@ void  fcgi_loadenv(fcgi_request *req, fcgi_apply_func load_func, zval *array);
 int fcgi_read(fcgi_request *req, char *str, int len);
 
 int fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int len);
-int fcgi_flush(fcgi_request *req, int close);
+int fcgi_flush(fcgi_request *req, int end);
+int fcgi_end(fcgi_request *req);
 
 #ifdef PHP_WIN32
 void fcgi_impersonate(void);

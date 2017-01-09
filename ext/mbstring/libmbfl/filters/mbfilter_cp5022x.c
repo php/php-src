@@ -278,7 +278,7 @@ retry:
 					w = cp932ext1_ucs_table[s - cp932ext1_ucs_table_min];
 				} else if (s >= cp932ext2_ucs_table_min && s < cp932ext2_ucs_table_max) {
 					w = cp932ext2_ucs_table[s - cp932ext2_ucs_table_min];
-				} else if (s >= cp932ext3_ucs_table_min && s < cp932ext2_ucs_table_max) {
+				} else if (s >= cp932ext3_ucs_table_min && s < cp932ext3_ucs_table_max) {
 					w = cp932ext3_ucs_table[s - cp932ext3_ucs_table_min];
 				} else if (s >= 94 * 94 && s < 114 * 94) {
 					/* user-defined => PUA (Microsoft extended) */

@@ -17,8 +17,8 @@ new Foo;
 
 ?>
 --EXPECTF--
-%unicode|string%(3) "Foo"
-%unicode|string%(3) "Bar"
+string(3) "Foo"
+string(3) "Bar"
 
 Fatal error: Uncaught Exception: Bar in %s:%d
 Stack trace:

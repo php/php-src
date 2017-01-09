@@ -1,4 +1,4 @@
-static const php_hash_uint32 tables_test[4][256] = {
+static const uint32_t tables_test[4][256] = {
 	{ /* table 1 */
 		0x00072000LU, 0x00075000LU, 0x00074800LU, 0x00071000LU, 0x00076800LU, 0x00074000LU, 0x00070000LU, 0x00077000LU,
 		0x00073000LU, 0x00075800LU, 0x00070800LU, 0x00076000LU, 0x00073800LU, 0x00077800LU, 0x00072800LU, 0x00071800LU,
@@ -137,7 +137,7 @@ static const php_hash_uint32 tables_test[4][256] = {
 	},
 };
 
-static const php_hash_uint32 tables_crypto[4][256] = {
+static const uint32_t tables_crypto[4][256] = {
 	{ /* table 1 */
 		0x0002d000LU, 0x0002a000LU, 0x0002a800LU, 0x0002b000LU, 0x0002c000LU, 0x00028800LU, 0x00029800LU, 0x0002b800LU,
 		0x0002e800LU, 0x0002e000LU, 0x0002f000LU, 0x00028000LU, 0x0002c800LU, 0x00029000LU, 0x0002d800LU, 0x0002f800LU,

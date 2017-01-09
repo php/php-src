@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2015 The PHP Group                                |
+  | Copyright (c) 2006-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -12,10 +12,11 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Andrey Hristov <andrey@mysql.com>                           |
-  |          Ulf Wendel <uwendel@mysql.com>                              |
+  | Authors: Andrey Hristov <andrey@php.net>                             |
+  |          Ulf Wendel <uw@php.net>                                     |
   +----------------------------------------------------------------------+
 */
+
 #ifndef MYSQLND_DEBUG_H
 #define MYSQLND_DEBUG_H
 
@@ -81,9 +82,6 @@ PHPAPI MYSQLND_DEBUG * mysqlnd_debug_init(const char * skip_functions[]);
 #if defined(__GNUC__) || defined(PHP_WIN32)
 #ifdef PHP_WIN32
 #include "win32/time.h"
-#elif defined(NETWARE)
-#include <sys/timeval.h>
-#include <sys/time.h>
 #else
 #include <sys/time.h>
 #endif
@@ -129,8 +127,9 @@ PHPAPI MYSQLND_DEBUG * mysqlnd_debug_init(const char * skip_functions[]);
 					if ((dbg_obj2)) { \
 						dbg_skip_trace |= !(dbg_obj2)->m->func_enter((dbg_obj2), __LINE__, __FILE__, func_name, strlen(func_name)); \
 					} \
-					if (dbg_skip_trace) \
+					if (dbg_skip_trace) { \
 						/* EMPTY */ ; /* shut compiler's mouth */	\
+					} \
 					do { \
 						if (((dbg_obj1) && (dbg_obj1)->flags & MYSQLND_DEBUG_PROFILE_CALLS) || \
 							((dbg_obj2) && (dbg_obj2)->flags & MYSQLND_DEBUG_PROFILE_CALLS)) \

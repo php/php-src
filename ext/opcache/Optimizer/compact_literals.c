@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -72,9 +72,9 @@ typedef struct _literal_info {
 		info[n].u.num = (_num); \
 	} while (0)
 
-#define LITERAL_INFO_OBJ(n, kind, merge, slots, related, _num) do { \
+#define LITERAL_INFO_OBJ(n, kind, merge, slots, related) do { \
 		info[n].flags = (LITERAL_EX_OBJ | ((merge) ? LITERAL_MAY_MERGE : 0) | LITERAL_FLAGS(kind, slots, related)); \
-		info[n].u.num = (_num); \
+		info[n].u.num = (uint32_t)-1; \
 	} while (0)
 
 static void optimizer_literal_obj_info(literal_info   *info,
@@ -92,7 +92,7 @@ static void optimizer_literal_obj_info(literal_info   *info,
 	 */
 	if (Z_TYPE(op_array->literals[constant]) == IS_STRING &&
 	    op_type == IS_UNUSED) {
-		LITERAL_INFO_OBJ(constant, kind, 1, slots, related, op_array->this_var);
+		LITERAL_INFO_OBJ(constant, kind, 1, slots, related);
 	} else {
 		LITERAL_INFO(constant, kind, 0, slots, related);
 	}
@@ -283,7 +283,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					break;
 				case ZEND_RECV_INIT:
 					LITERAL_INFO(opline->op2.constant, LITERAL_VALUE, 0, 0, 1);
-					if (Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) != -1) {
+					if (Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) != (uint32_t)-1) {
 						Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = cache_size;
 						cache_size += sizeof(void *);
 					}
@@ -292,12 +292,12 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 				case ZEND_DECLARE_CLASS:
 				case ZEND_DECLARE_INHERITED_CLASS:
 				case ZEND_DECLARE_INHERITED_CLASS_DELAYED:
-					LITERAL_INFO(opline->op1.constant, LITERAL_VALUE, 1, 0, 2);
+					LITERAL_INFO(opline->op1.constant, LITERAL_VALUE, 0, 0, 2);
 					break;
 				case ZEND_RECV:
 				case ZEND_RECV_VARIADIC:
 				case ZEND_VERIFY_RETURN_TYPE:
-					if (opline->op2.num != -1) {
+					if (opline->op2.num != (uint32_t)-1) {
 						opline->op2.num = cache_size;
 						cache_size += sizeof(void *);
 					}
@@ -421,9 +421,11 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 				case IS_CONSTANT:
 					if (info[i].flags & LITERAL_MAY_MERGE) {
 						if (info[i].flags & LITERAL_EX_OBJ) {
-							int key_len = MAX_LENGTH_OF_LONG + sizeof("->") - 1 + Z_STRLEN(op_array->literals[i]);
+							int key_len = sizeof("$this->") - 1 + Z_STRLEN(op_array->literals[i]);
 							key = zend_string_alloc(key_len, 0);
-							ZSTR_LEN(key) = snprintf(ZSTR_VAL(key), ZSTR_LEN(key)-1, "%d->%s", info[i].u.num, Z_STRVAL(op_array->literals[i]));
+							memcpy(ZSTR_VAL(key), "$this->", sizeof("$this->") - 1);
+							memcpy(ZSTR_VAL(key) + sizeof("$this->") - 1, Z_STRVAL(op_array->literals[i]), Z_STRLEN(op_array->literals[i]) + 1);
+							ZSTR_LEN(key) = key_len;
 						} else if (info[i].flags & LITERAL_EX_CLASS) {
 							int key_len;
 							zval *class_name = &op_array->literals[(info[i].u.num < i) ? map[info[i].u.num] : info[i].u.num];

@@ -73,6 +73,6 @@ bool(true)
 Warning: lchown() expects parameter 1 to be a valid path, array given in %s on line %d
 bool(true)
 
-Warning: lchown(): Operation not permitted in %s on line %d
+Warning: lchown(): %r(Operation not permitted|Invalid argument)%r in %s on line %d
 bool(false)
 ===DONE===

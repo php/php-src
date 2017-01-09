@@ -14,7 +14,7 @@ object(ArrayObject)#1 (2) {
   [0]=>
   int(0)
   ["storage":"ArrayObject":private]=>
-  object(DateInterval)#2 (15) {
+  object(DateInterval)#2 (16) {
     ["y"]=>
     int(3)
     ["m"]=>
@@ -27,6 +27,8 @@ object(ArrayObject)#1 (2) {
     int(-1)
     ["s"]=>
     int(-1)
+    ["f"]=>
+    float(-1)
     ["weekday"]=>
     int(-1)
     ["weekday_behavior"]=>

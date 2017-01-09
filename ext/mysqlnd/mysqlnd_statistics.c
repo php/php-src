@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2015 The PHP Group                                |
+  | Copyright (c) 2006-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -12,10 +12,12 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Andrey Hristov <andrey@mysql.com>                           |
-  |          Ulf Wendel <uwendel@mysql.com>                              |
+  | Authors: Andrey Hristov <andrey@php.net>                             |
+  |          Ulf Wendel <uw@php.net>                                     |
+  |          Georg Richter <georg@php.net>                               |
   +----------------------------------------------------------------------+
 */
+
 #include "php.h"
 #include "mysqlnd.h"
 #include "mysqlnd_priv.h"
@@ -109,8 +111,10 @@ const MYSQLND_STRING mysqlnd_stats_values_names[STAT_LAST] =
 	{ MYSQLND_STR_W_LEN("mem_free_amount") },
 	{ MYSQLND_STR_W_LEN("mem_estrndup_count") },
 	{ MYSQLND_STR_W_LEN("mem_strndup_count") },
-	{ MYSQLND_STR_W_LEN("mem_estndup_count") },
+	{ MYSQLND_STR_W_LEN("mem_estrdup_count") },
 	{ MYSQLND_STR_W_LEN("mem_strdup_count") },
+	{ MYSQLND_STR_W_LEN("mem_edupl_count") },
+	{ MYSQLND_STR_W_LEN("mem_dupl_count") },
 	{ MYSQLND_STR_W_LEN("proto_text_fetched_null") },
 	{ MYSQLND_STR_W_LEN("proto_text_fetched_bit") },
 	{ MYSQLND_STR_W_LEN("proto_text_fetched_tinyint") },

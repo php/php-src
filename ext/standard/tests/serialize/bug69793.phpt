@@ -7,9 +7,9 @@ $e = unserialize('O:9:"Exception":7:{s:17:"'."\0".'Exception'."\0".'string";s:1:
 var_dump($e."");
 ?>
 --EXPECTF--
-Notice: Undefined property: Exception::$message in %s%ebug69793.php on line %d
-
 Notice: Undefined property: Exception::$file in %s%ebug69793.php on line %d
+
+Notice: Undefined property: Exception::$previous in %s%ebug69793.php on line %d
 
 Notice: Undefined property: Exception::$previous in %s%ebug69793.php on line %d
 string(41) "Exception in :1337

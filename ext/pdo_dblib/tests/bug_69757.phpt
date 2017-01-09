@@ -11,8 +11,8 @@ require __DIR__ . '/config.inc';
 
 $sql = "
     exec dbo.sp_executesql N'
-        SELECT * FROM sysobjects
-        SELECT * FROM syscolumns
+        SELECT TOP 1 * FROM sysobjects
+        SELECT TOP 1 * FROM syscolumns
     '
 ";
 $stmt = $db->query($sql);

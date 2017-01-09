@@ -62,36 +62,38 @@ string(0) ""
 bool(true)
 Open [%s,PHPSESSID]
 CreateID [PHPT-%d]
+Read [%s,PHPT-%d]
 GC [0]
 1 deleted
-Read [%s,PHPT-%d]
 bool(true)
 string(%d) "PHPT-%d"
 Write [%s,PHPT-%d,]
 Close [%s,PHPSESSID]
-NULL
+bool(true)
 string(%d) "PHPT-%d"
 *** With lazy_write ***
 string(%d) "PHPT-%d"
 bool(true)
 Open [%s,PHPSESSID]
 ValidateID [%s,PHPT-%d]
+Read [%s,PHPT-%d]
 GC [0]
 1 deleted
-Read [%s,PHPT-%d]
 bool(true)
 Write [%s,PHPT-%d,]
 Close [%s,PHPSESSID]
-NULL
+bool(true)
 string(%d) "PHPT-%d"
 *** Cleanup ***
 string(%d) "PHPT-%d"
 Open [%s,PHPSESSID]
 ValidateID [%s,PHPT-%d]
+Read [%s,PHPT-%d]
 GC [0]
 1 deleted
-Read [%s,PHPT-%d]
 bool(true)
 Destroy [%s,PHPT-%d]
+
+Warning: unlink(%s): No such file or directory in %s on line %d
 Close [%s,PHPSESSID]
 bool(true)

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -90,8 +90,8 @@ ZEND_API void zend_iterator_dtor(zend_object_iterator *iter)
 
 ZEND_API zend_object_iterator* zend_iterator_unwrap(zval *array_ptr)
 {
-	if (Z_TYPE_P(array_ptr) &&
-	    Z_OBJ_HT_P(array_ptr) == &iterator_object_handlers) {
+	ZEND_ASSERT(Z_TYPE_P(array_ptr) == IS_OBJECT);
+	if (Z_OBJ_HT_P(array_ptr) == &iterator_object_handlers) {
 		return (zend_object_iterator *)Z_OBJ_P(array_ptr);
 	}
 	return NULL;

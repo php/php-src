@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, SSA - Static Single Assignment Form                     |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,6 +19,7 @@
 #ifndef ZEND_SSA_H
 #define ZEND_SSA_H
 
+#include "zend_optimizer.h"
 #include "zend_cfg.h"
 
 typedef struct _zend_ssa_range {
@@ -38,25 +39,36 @@ typedef enum _zend_ssa_negative_lat {
 } zend_ssa_negative_lat;
 
 /* Special kind of SSA Phi function used in eSSA */
-typedef struct _zend_ssa_pi_range {
+typedef struct _zend_ssa_range_constraint {
 	zend_ssa_range         range;       /* simple range constraint */
 	int                    min_var;
 	int                    max_var;
 	int                    min_ssa_var; /* ((min_var>0) ? MIN(ssa_var) : 0) + range.min */
-	int                    max_ssa_var; /* ((man_var>0) ? MAX(ssa_var) : 0) + range.man */
+	int                    max_ssa_var; /* ((max_var>0) ? MAX(ssa_var) : 0) + range.max */
 	zend_ssa_negative_lat  negative;
-} zend_ssa_pi_range;
+} zend_ssa_range_constraint;
+
+typedef struct _zend_ssa_type_constraint {
+	uint32_t               type_mask;   /* Type mask to intersect with */
+	zend_class_entry      *ce;          /* Class entry for instanceof constraints */
+} zend_ssa_type_constraint;
+
+typedef union _zend_ssa_pi_constraint {
+	zend_ssa_range_constraint range;
+	zend_ssa_type_constraint type;
+} zend_ssa_pi_constraint;
 
 /* SSA Phi - ssa_var = Phi(source0, source1, ...sourceN) */
 typedef struct _zend_ssa_phi zend_ssa_phi;
 struct _zend_ssa_phi {
 	zend_ssa_phi          *next;          /* next Phi in the same BB */
 	int                    pi;            /* if >= 0 this is actually a e-SSA Pi */
-	zend_ssa_pi_range      constraint;    /* e-SSA Pi constraint */
+	zend_ssa_pi_constraint constraint;    /* e-SSA Pi constraint */
 	int                    var;           /* Original CV, VAR or TMP variable index */
 	int                    ssa_var;       /* SSA variable index */
 	int                    block;         /* current BB index */
-	int                    visited;       /* flag to avoid recursive processing */
+	int                    visited : 1;   /* flag to avoid recursive processing */
+	int                    has_range_constraint : 1;
 	zend_ssa_phi         **use_chains;
 	zend_ssa_phi          *sym_use_chain;
 	int                   *sources;       /* Array of SSA IDs that produce this var.
@@ -115,13 +127,13 @@ typedef struct _zend_ssa {
 
 BEGIN_EXTERN_C()
 
-int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa, uint32_t *func_flags);
+int zend_build_ssa(zend_arena **arena, const zend_script *script, const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa, uint32_t *func_flags);
 int zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_array *op_array, zend_ssa *ssa);
 int zend_ssa_unlink_use_chain(zend_ssa *ssa, int op, int var);
 
 END_EXTERN_C()
 
-static zend_always_inline int zend_ssa_next_use(zend_ssa_op *ssa_op, int var, int use)
+static zend_always_inline int zend_ssa_next_use(const zend_ssa_op *ssa_op, int var, int use)
 {
 	ssa_op += use;
 	if (ssa_op->result_use == var) {
@@ -130,7 +142,7 @@ static zend_always_inline int zend_ssa_next_use(zend_ssa_op *ssa_op, int var, in
 	return (ssa_op->op1_use == var) ? ssa_op->op1_use_chain : ssa_op->op2_use_chain;
 }
 
-static zend_always_inline zend_ssa_phi* zend_ssa_next_use_phi(zend_ssa *ssa, int var, zend_ssa_phi *p)
+static zend_always_inline zend_ssa_phi* zend_ssa_next_use_phi(const zend_ssa *ssa, int var, const zend_ssa_phi *p)
 {
 	if (p->pi >= 0) {
 		return p->use_chains[0];

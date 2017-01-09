@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -39,8 +39,6 @@
 
 typedef int (*id_function_t)(void *, void *);
 typedef void (*unique_copy_ctor_func_t)(void *pElement);
-
-static zend_ast *zend_ast_clone(zend_ast *ast);
 
 static void zend_accel_destroy_zend_function(zval *zv)
 {
@@ -168,61 +166,6 @@ static inline void zend_clone_zval(zval *src)
 			accel_xlat_set(old, Z_REF_P(src));
 			src = Z_REFVAL_P(src);
 		}
-	}
-	if (Z_TYPE_P(src) == IS_CONSTANT_AST) {
-		if (Z_REFCOUNT_P(src) > 1 && (ptr = accel_xlat_get(Z_AST_P(src))) != NULL) {
-			Z_AST_P(src) = ptr;
-		} else {
-			zend_ast_ref *old = Z_AST_P(src);
-
-			ZVAL_NEW_AST(src, old->ast);
-			Z_AST_P(src)->gc = old->gc;
-			if (Z_REFCOUNT_P(src) > 1) {
-				accel_xlat_set(old, Z_AST_P(src));
-			}
-			Z_ASTVAL_P(src) = zend_ast_clone(Z_ASTVAL_P(src));
-		}
-	}
-}
-
-static zend_ast *zend_ast_clone(zend_ast *ast)
-{
-	uint32_t i;
-
-	if (ast->kind == ZEND_AST_ZVAL) {
-		zend_ast_zval *copy = emalloc(sizeof(zend_ast_zval));
-		copy->kind = ZEND_AST_ZVAL;
-		copy->attr = ast->attr;
-		ZVAL_COPY_VALUE(&copy->val, zend_ast_get_zval(ast));
-		return (zend_ast *) copy;
-	} else if (zend_ast_is_list(ast)) {
-		zend_ast_list *list = zend_ast_get_list(ast);
-		zend_ast_list *copy = emalloc(
-			sizeof(zend_ast_list) - sizeof(zend_ast *) + sizeof(zend_ast *) * list->children);
-		copy->kind = list->kind;
-		copy->attr = list->attr;
-		copy->children = list->children;
-		for (i = 0; i < list->children; i++) {
-			if (list->child[i]) {
-				copy->child[i] = zend_ast_clone(list->child[i]);
-			} else {
-				copy->child[i] = NULL;
-			}
-		}
-		return (zend_ast *) copy;
-	} else {
-		uint32_t children = zend_ast_get_num_children(ast);
-		zend_ast *copy = emalloc(sizeof(zend_ast) - sizeof(zend_ast *) + sizeof(zend_ast *) * children);
-		copy->kind = ast->kind;
-		copy->attr = ast->attr;
-		for (i = 0; i < children; i++) {
-			if (ast->child[i]) {
-				copy->child[i] = zend_ast_clone(ast->child[i]);
-			} else {
-				copy->child[i] = NULL;
-			}
-		}
-		return copy;
 	}
 }
 
@@ -617,7 +560,6 @@ failure:
 
 static void zend_accel_class_hash_copy(HashTable *target, HashTable *source, unique_copy_ctor_func_t pCopyConstructor)
 {
-	zend_class_entry *ce1;
 	Bucket *p, *end;
 	zval *t;
 
@@ -633,7 +575,17 @@ static void zend_accel_class_hash_copy(HashTable *target, HashTable *source, uni
 				/* Mangled key - ignore and wait for runtime */
 				continue;
 			} else if (UNEXPECTED(!ZCG(accel_directives).ignore_dups)) {
-				goto failure;
+				zend_class_entry *ce1 = Z_PTR(p->val);
+				if (!(ce1->ce_flags & ZEND_ACC_ANON_CLASS)) {
+					CG(in_compilation) = 1;
+					zend_set_compiled_filename(ce1->info.user.filename);
+					CG(zend_lineno) = ce1->info.user.line_start;
+					zend_error(E_ERROR,
+							"Cannot declare %s %s, because the name is already in use",
+							zend_get_object_type(ce1), ZSTR_VAL(ce1->name));
+					return;
+				}
+				continue;
 			}
 		} else {
 			t = _zend_hash_append_ptr(target, p->key, Z_PTR(p->val));
@@ -644,13 +596,6 @@ static void zend_accel_class_hash_copy(HashTable *target, HashTable *source, uni
 	}
 	target->nInternalPointer = target->nNumOfElements ? 0 : HT_INVALID_IDX;
 	return;
-
-failure:
-	ce1 = Z_PTR(p->val);
-	CG(in_compilation) = 1;
-	zend_set_compiled_filename(ce1->info.user.filename);
-	CG(zend_lineno) = ce1->info.user.line_start;
-	zend_error(E_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce1), ZSTR_VAL(ce1->name));
 }
 
 #ifdef __SSE2__
@@ -790,7 +735,7 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 #define ADLER32_DO8(buf, i)     ADLER32_DO4(buf, i); ADLER32_DO4(buf, i + 4);
 #define ADLER32_DO16(buf)       ADLER32_DO8(buf, 0); ADLER32_DO8(buf, 8);
 
-unsigned int zend_adler32(unsigned int checksum, signed char *buf, uint len)
+unsigned int zend_adler32(unsigned int checksum, signed char *buf, uint32_t len)
 {
 	unsigned int s1 = checksum & 0xffff;
 	unsigned int s2 = (checksum >> 16) & 0xffff;

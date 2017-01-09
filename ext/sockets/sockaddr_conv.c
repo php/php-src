@@ -66,7 +66,7 @@ int php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_socket *php_
 		unsigned scope_id = 0;
 
 		if (IS_LONG == is_numeric_string(scope, strlen(scope), &lval, &dval, 0)) {
-			if (lval > 0 && lval <= UINT_MAX) {
+			if (lval > 0 && (zend_ulong)lval <= UINT_MAX) {
 				scope_id = lval;
 			}
 		} else {
@@ -90,7 +90,7 @@ int php_set_inet_addr(struct sockaddr_in *sin, char *string, php_socket *php_soc
 	if (inet_aton(string, &tmp)) {
 		sin->sin_addr.s_addr = tmp.s_addr;
 	} else {
-		if (strlen(string) > MAXFQDNLEN || ! (host_entry = gethostbyname(string))) {
+		if (strlen(string) > MAXFQDNLEN || ! (host_entry = php_network_gethostbyname(string))) {
 			/* Note: < -10000 indicates a host lookup error */
 #ifdef PHP_WIN32
 			PHP_SOCKET_ERROR(php_sock, "Host lookup failed", WSAGetLastError());

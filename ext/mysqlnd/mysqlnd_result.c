@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2015 The PHP Group                                |
+  | Copyright (c) 2006-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -12,11 +12,11 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Andrey Hristov <andrey@mysql.com>                           |
-  |          Ulf Wendel <uwendel@mysql.com>                              |
-  |          Georg Richter <georg@mysql.com>                             |
+  | Authors: Andrey Hristov <andrey@php.net>                             |
+  |          Ulf Wendel <uw@php.net>                                     |
   +----------------------------------------------------------------------+
 */
+
 #include "php.h"
 #include "mysqlnd.h"
 #include "mysqlnd_wireprotocol.h"
@@ -166,7 +166,8 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, free_last_data)(MYSQLND_RES_UNBUFFERED
 	if (unbuf->last_row_buffer) {
 		DBG_INF("Freeing last row buffer");
 		/* Nothing points to this buffer now, free it */
-		unbuf->last_row_buffer->free_chunk(unbuf->last_row_buffer);
+		unbuf->result_set_memory_pool->free_chunk(
+			unbuf->result_set_memory_pool, unbuf->last_row_buffer);
 		unbuf->last_row_buffer = NULL;
 	}
 
@@ -253,9 +254,12 @@ static void
 MYSQLND_METHOD(mysqlnd_result_buffered, free_result)(MYSQLND_RES_BUFFERED * const set)
 {
 	int64_t row;
+	MYSQLND_MEMORY_POOL * pool;
 
 	DBG_ENTER("mysqlnd_result_buffered::free_result");
 	DBG_INF_FMT("Freeing "MYSQLND_LLU_SPEC" row(s)", set->row_count);
+
+	mysqlnd_error_info_free_contents(&set->error_info);
 
 	if (set->type == MYSQLND_BUFFERED_TYPE_ZVAL) {
 		MYSQLND_METHOD(mysqlnd_result_buffered_zval, free_result)((MYSQLND_RES_BUFFERED_ZVAL *) set);
@@ -263,9 +267,10 @@ MYSQLND_METHOD(mysqlnd_result_buffered, free_result)(MYSQLND_RES_BUFFERED * cons
 		MYSQLND_METHOD(mysqlnd_result_buffered_c, free_result)((MYSQLND_RES_BUFFERED_C *) set);
 	}
 
+	pool = set->result_set_memory_pool;
 	for (row = set->row_count - 1; row >= 0; row--) {
 		MYSQLND_MEMORY_POOL_CHUNK *current_buffer = set->row_buffers[row];
-		current_buffer->free_chunk(current_buffer);
+		pool->free_chunk(pool, current_buffer);
 	}
 
 	if (set->lengths) {
@@ -963,8 +968,6 @@ MYSQLND_METHOD(mysqlnd_res, use_result)(MYSQLND_RES * const result, const zend_b
 		row_packet->field_count = result->field_count;
 		row_packet->binary_protocol = ps;
 		row_packet->fields_metadata = result->meta->fields;
-		row_packet->bit_fields_count = result->meta->bit_fields_count;
-		row_packet->bit_fields_total_len = result->meta->bit_fields_total_len;
 
 		result->unbuf->row_packet = row_packet;
 	}
@@ -1317,8 +1320,6 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 	row_packet->field_count = meta->field_count;
 	row_packet->binary_protocol = binary_protocol;
 	row_packet->fields_metadata = meta->fields;
-	row_packet->bit_fields_count	= meta->bit_fields_count;
-	row_packet->bit_fields_total_len = meta->bit_fields_total_len;
 
 	row_packet->skip_extraction = TRUE; /* let php_mysqlnd_rowp_read() not allocate row_packet->fields, we will do it */
 
@@ -1395,7 +1396,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 	}
 	DBG_INF_FMT("ret=%s row_count=%u warnings=%u server_status=%u",
 				ret == PASS? "PASS":"FAIL",
-				(uint) set->row_count,
+				(uint32_t) set->row_count,
 				UPSERT_STATUS_GET_WARNINGS(conn->upsert_status),
 				UPSERT_STATUS_GET_SERVER_STATUS(conn->upsert_status));
 end:
@@ -1472,7 +1473,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 		} else if (flags & MYSQLND_STORE_COPY) {
 			MYSQLND_RES_BUFFERED_C * set = (MYSQLND_RES_BUFFERED_C *) result->stored_data;
 			set->current_row = 0;
-			set->initialized = mnd_pecalloc((set->row_count / 8) + 1, sizeof(zend_uchar), set->persistent); /* +1 for safety */
+			set->initialized = mnd_pecalloc((unsigned int) ((set->row_count / 8) + 1), sizeof(zend_uchar), set->persistent); /* +1 for safety */
 		}
 	}
 
@@ -1951,7 +1952,6 @@ mysqlnd_result_unbuffered_init(const unsigned int field_count, const zend_bool p
 	if (!ret) {
 		DBG_RETURN(NULL);
 	}
-
 	if (!(ret->lengths = mnd_pecalloc(field_count, sizeof(size_t), persistent))) {
 		mnd_pefree(ret, persistent);
 		DBG_RETURN(NULL);
@@ -1990,6 +1990,10 @@ mysqlnd_result_buffered_zval_init(const unsigned int field_count, const zend_boo
 	DBG_ENTER("mysqlnd_result_buffered_zval_init");
 
 	if (!ret) {
+		DBG_RETURN(NULL);
+	}
+	if (FAIL == mysqlnd_error_info_init(&ret->error_info, persistent)) {
+		mnd_pefree(ret, persistent);
 		DBG_RETURN(NULL);
 	}
 	if (!(ret->lengths = mnd_pecalloc(field_count, sizeof(size_t), persistent))) {
@@ -2033,6 +2037,10 @@ mysqlnd_result_buffered_c_init(const unsigned int field_count, const zend_bool p
 	DBG_ENTER("mysqlnd_result_buffered_c_init");
 
 	if (!ret) {
+		DBG_RETURN(NULL);
+	}
+	if (FAIL == mysqlnd_error_info_init(&ret->error_info, persistent)) {
+		mnd_pefree(ret, persistent);
 		DBG_RETURN(NULL);
 	}
 	if (!(ret->lengths = mnd_pecalloc(field_count, sizeof(size_t), persistent))) {

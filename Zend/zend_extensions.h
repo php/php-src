@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -46,7 +46,7 @@ You can use the following macro to check the extension API version for compatibi
 
 /* The first number is the engine version and the rest is the date (YYYYMMDD).
  * This way engine 2/3 API no. is always greater than engine 1 API no..  */
-#define ZEND_EXTENSION_API_NO	320151012
+#define ZEND_EXTENSION_API_NO	320160731
 
 typedef struct _zend_extension_version_info {
 	int zend_extension_api_no;
@@ -67,9 +67,9 @@ typedef void (*message_handler_func_t)(int message, void *arg);
 
 typedef void (*op_array_handler_func_t)(zend_op_array *op_array);
 
-typedef void (*statement_handler_func_t)(zend_op_array *op_array);
-typedef void (*fcall_begin_handler_func_t)(zend_op_array *op_array);
-typedef void (*fcall_end_handler_func_t)(zend_op_array *op_array);
+typedef void (*statement_handler_func_t)(zend_execute_data *frame);
+typedef void (*fcall_begin_handler_func_t)(zend_execute_data *frame);
+typedef void (*fcall_end_handler_func_t)(zend_execute_data *frame);
 
 typedef void (*op_array_ctor_func_t)(zend_op_array *op_array);
 typedef void (*op_array_dtor_func_t)(zend_op_array *op_array);
