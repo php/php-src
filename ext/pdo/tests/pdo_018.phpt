@@ -20,7 +20,7 @@ class TestBase implements Serializable
 	public    $BasePub = 'Public';
 	protected $BasePro = 'Protected';
 	private   $BasePri = 'Private';
-	
+
 	function serialize()
 	{
 		$serialized = array();
@@ -31,7 +31,7 @@ class TestBase implements Serializable
 		echo __METHOD__ . "() = '$serialized'\n";
 		return $serialized;
 	}
-	
+
 	function unserialize($serialized)
 	{
 		echo __METHOD__ . "($serialized)\n";
@@ -55,7 +55,7 @@ class TestDerived extends TestBase
 		echo __METHOD__ . "()\n";
 		return TestBase::serialize();
 	}
-	
+
 	function unserialize($serialized)
 	{
 		echo __METHOD__ . "()\n";
@@ -68,9 +68,9 @@ class TestLeaf extends TestDerived
 }
 
 $db->exec('CREATE TABLE classtypes(id int NOT NULL PRIMARY KEY, name VARCHAR(20) NOT NULL UNIQUE)');
-$db->exec('INSERT INTO classtypes VALUES(0, \'stdClass\')'); 
-$db->exec('INSERT INTO classtypes VALUES(1, \'TestBase\')'); 
-$db->exec('INSERT INTO classtypes VALUES(2, \'TestDerived\')'); 
+$db->exec('INSERT INTO classtypes VALUES(0, \'stdClass\')');
+$db->exec('INSERT INTO classtypes VALUES(1, \'TestBase\')');
+$db->exec('INSERT INTO classtypes VALUES(2, \'TestDerived\')');
 
 switch ($db->getAttribute(PDO::ATTR_DRIVER_NAME)) {
   case 'dblib':
@@ -132,7 +132,7 @@ foreach($objs as $idx => $obj)
 	{
 		$val = '';
 	}
-	$stmt->execute();	
+	$stmt->execute();
 }
 
 unset($stmt);
