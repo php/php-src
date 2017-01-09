@@ -7,6 +7,8 @@ Test intval() function with "0b" string prefix
 $goodInputs = [
     '0b11111111111111111111111111111111',
     '0b',
+    '0B',
+    '0B1',
     '0b000',
     '0b001',
     '0b00100',
@@ -61,6 +63,18 @@ int(-4294967295)
 int(4294967295)
 int(4294967295)
 int(-4294967295)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
 int(0)
 int(0)
 int(0)

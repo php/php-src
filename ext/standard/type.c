@@ -163,7 +163,7 @@ PHP_FUNCTION(intval)
 			tmpval++;
 		}
 
-		if (tmpval[0] == '0' && tmpval[1] == 'b') {
+		if (tmpval[0] == '0' && (tmpval[1] == 'b' || tmpval[1] == 'B')) {
 			/* This effectively causes the string to have two leading zeros */
 			tmpval[1] = '0';
 			/* Deliberate use of strval here to include the unary symbol if present */
