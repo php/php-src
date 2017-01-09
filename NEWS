@@ -107,6 +107,7 @@ PHP                                                                        NEWS
 	disabled functions). (willianveiga)
   . Fixed bug #69442 (closing of fd incorrect when PTS enabled). (jaytaph)
   . Fixed bug #72974 (imap is undefined service on AIX). (matthieu.sarter)
+  . Fixed bug #72979 (money_format stores wrong length AIX). (matthieu.sarter)
 
 - XML:
   . Moved utf8_encode() and utf8_decode() to the Standard extension. (Andrea)
