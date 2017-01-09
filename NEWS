@@ -22,6 +22,9 @@ PHP                                                                        NEWS
 - Session:
   . Fixed bug #69582 (session not readable by root in CLI). (EvgeniySpinov)
 
+- SPL:
+  . Fixed bug #73896 (spl_autoload() crashes when calls magic _call()). (Dmitry)
+
 - Standard:
   . Fixed bug #69442 (closing of fd incorrect when PTS enabled). (jaytaph)
   . Fixed bug #47021 (SoapClient stumbles over WSDL delivered with
