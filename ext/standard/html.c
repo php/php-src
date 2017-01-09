@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1500,9 +1500,11 @@ PHP_FUNCTION(htmlspecialchars_decode)
 	zend_long quote_style = ENT_COMPAT;
 	zend_string *replaced;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &str, &str_len, &quote_style) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(quote_style)
+	ZEND_PARSE_PARAMETERS_END();
 
 	replaced = php_unescape_html_entities((unsigned char*)str, str_len, 0 /*!all*/, (int)quote_style, NULL);
 	if (replaced) {
@@ -1622,10 +1624,12 @@ PHP_FUNCTION(get_html_translation_table)
 	 * getting the translated table from data structures that are optimized for
 	 * random access, not traversal */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|lls",
-			&all, &flags, &charset_hint, &charset_hint_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 3)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(all)
+		Z_PARAM_LONG(flags)
+		Z_PARAM_STRING(charset_hint, charset_hint_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	charset = determine_charset(charset_hint);
 	doctype = flags & ENT_HTML_DOC_TYPE_MASK;

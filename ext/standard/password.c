@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -173,9 +173,9 @@ PHP_FUNCTION(password_get_info)
 	char *hash, *algo_name;
 	zval options;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &hash, &hash_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(hash, hash_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	array_init(&options);
 
@@ -229,9 +229,12 @@ PHP_FUNCTION(password_needs_rehash)
 	HashTable *options = 0;
 	zval *option_buffer;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|H", &hash, &hash_len, &new_algo, &options) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STRING(hash, hash_len)
+		Z_PARAM_LONG(new_algo)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY_OR_OBJECT_HT(options)
+	ZEND_PARSE_PARAMETERS_END();
 
 	algo = php_password_determine_algo(hash, (size_t) hash_len);
 
@@ -300,9 +303,10 @@ PHP_FUNCTION(password_verify)
 	zend_string *ret;
 	php_password_algo algo;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &password, &password_len, &hash, &hash_len) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STRING(password, password_len)
+		Z_PARAM_STRING(hash, hash_len)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	algo = php_password_determine_algo(hash, (size_t) hash_len);
 
@@ -372,9 +376,12 @@ PHP_FUNCTION(password_hash)
 	argon2_type type = Argon2_i;
 #endif
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|H", &password, &password_len, &algo, &options) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STRING(password, password_len)
+		Z_PARAM_LONG(algo)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY_OR_OBJECT_HT(options)
+	ZEND_PARSE_PARAMETERS_END();
 
 	switch (algo) {
 		case PHP_PASSWORD_BCRYPT:

@@ -89,7 +89,8 @@ function run_fpm_till($needle, $config, $max = 10) /* {{{ */
 /* }}} */
 
 function fpm_display_log($tail, $n=1, $ignore='systemd') { /* {{{ */
-	while ($n) {
+	/* Read $n lines or until EOF */
+	while ($n>0 || ($n<0 && !feof($tail))) {
 		$a = fgets($tail);
 		if (empty($ignore) || !strpos($a, $ignore)) {
 			echo $a;

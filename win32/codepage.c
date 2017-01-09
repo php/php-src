@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -252,6 +252,11 @@ __forceinline static char *php_win32_cp_get_enc(void)
 	return enc;
 }/*}}}*/
 
+__forceinline static BOOL php_win32_cp_is_cli_sapi()
+{/*{{{*/
+	return strlen(sapi_module.name) >= sizeof("cli") - 1 && !strncmp(sapi_module.name, "cli", sizeof("cli") - 1);
+}/*}}}*/
+
 PW32CP const struct php_win32_cp *php_win32_cp_get_current(void)
 {/*{{{*/
 	return cur_cp;
@@ -265,6 +270,17 @@ PW32CP const struct php_win32_cp *php_win32_cp_get_orig(void)
 PW32CP const struct php_win32_cp *php_win32_cp_get_by_id(DWORD id)
 {/*{{{*/
 	size_t i;
+
+	if (id < php_win32_cp_map[0].id) {
+		switch (id) {
+			case CP_ACP:
+				id = GetACP();
+				break;
+			case CP_OEMCP:
+				id = GetOEMCP();
+				break;
+		}
+	}
 
 	for (i = 0; i < sizeof(php_win32_cp_map)/sizeof(struct php_win32_cp); i++) {
 		if (php_win32_cp_map[i].id == id) {
@@ -383,7 +399,7 @@ PW32CP wchar_t *php_win32_cp_env_any_to_w(const char* env)
 }/*}}}*/
 
 static BOOL php_win32_cp_cli_io_setup(void)
-{
+{/*{{{*/
 	BOOL ret = TRUE;
 
 	if (PG(input_encoding) && PG(input_encoding)[0]) {
@@ -409,7 +425,7 @@ static BOOL php_win32_cp_cli_io_setup(void)
 	}
 
 	return ret;
-}
+}/*}}}*/
 
 PW32CP const struct php_win32_cp *php_win32_cp_do_setup(const char *enc)
 {/*{{{*/
@@ -421,7 +437,7 @@ PW32CP const struct php_win32_cp *php_win32_cp_do_setup(const char *enc)
 	if (!orig_cp) {
 		orig_cp = php_win32_cp_get_by_id(GetACP());
 	}
-	if (!strcmp(sapi_module.name, "cli")) {
+	if (php_win32_cp_is_cli_sapi()) {
 		if (!orig_in_cp) {
 			orig_in_cp = php_win32_cp_get_by_id(GetConsoleCP());
 			if (!orig_in_cp) {
@@ -447,7 +463,7 @@ PW32CP const struct php_win32_cp *php_win32_cp_do_update(const char *enc)
 	}
 	cur_cp = php_win32_cp_get_by_enc(enc);
 
-	if (!strcmp(sapi_module.name, "cli")) {
+	if (php_win32_cp_is_cli_sapi()) {
 		php_win32_cp_cli_do_setup(cur_cp->id);
 	}
 
@@ -487,16 +503,18 @@ PW32CP const struct php_win32_cp *php_win32_cp_cli_do_setup(DWORD id)
 
 PW32CP const struct php_win32_cp *php_win32_cp_cli_do_restore(DWORD id)
 {/*{{{*/
-	if (!id && orig_cp) {
-		id = orig_cp->id;
+	BOOL cli_io_restored = TRUE;
+
+	if (orig_in_cp) {
+		cli_io_restored = cli_io_restored && SetConsoleCP(orig_in_cp->id);
 	}
 
-	if (SetConsoleCP(orig_in_cp->id) && SetConsoleOutputCP(orig_out_cp->id)) {
-		if (orig_cp) {
-			return orig_cp;
-		} else {
-			return php_win32_cp_set_by_id(id);
-		}
+	if (orig_out_cp) {
+		cli_io_restored = cli_io_restored && SetConsoleOutputCP(orig_out_cp->id);
+	}
+
+	if (cli_io_restored && id) {
+		return php_win32_cp_set_by_id(id);
 	}
 
 	return NULL;
@@ -520,7 +538,7 @@ PHP_FUNCTION(sapi_windows_cp_set)
 		RETURN_FALSE;
 	}
 
-	if (!strcmp(sapi_module.name, "cli")) {
+	if (php_win32_cp_is_cli_sapi()) {
 		cp = php_win32_cp_cli_do_setup((DWORD)id);
 	} else {
 		cp = php_win32_cp_set_by_id((DWORD)id);

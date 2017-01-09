@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -59679,7 +59679,7 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 	uint32_t spec = zend_spec_handlers[opcode];
 	switch (opcode) {
 		case ZEND_ADD:
-			if ((res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG)) {
+			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
@@ -59687,7 +59687,7 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 				if (op->op1_type > op->op2_type) {
 					zend_swap_operands(op);
 				}
-			} else if ((op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG)) {
+			} else if (op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
@@ -59695,7 +59695,7 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 				if (op->op1_type > op->op2_type) {
 					zend_swap_operands(op);
 				}
-			} else if ((op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE)) {
+			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
@@ -59706,17 +59706,17 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 			}
 			break;
 		case ZEND_SUB:
-			if ((res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG)) {
+			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
 				spec = 3706 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
-			} else if ((op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG)) {
+			} else if (op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
 				spec = 3731 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
-			} else if ((op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE)) {
+			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
@@ -59724,7 +59724,7 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 			}
 			break;
 		case ZEND_MUL:
-			if ((res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG)) {
+			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
@@ -59732,7 +59732,7 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 				if (op->op1_type > op->op2_type) {
 					zend_swap_operands(op);
 				}
-			} else if ((op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG)) {
+			} else if (op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
@@ -59740,7 +59740,7 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 				if (op->op1_type > op->op2_type) {
 					zend_swap_operands(op);
 				}
-			} else if ((op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE)) {
+			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
@@ -59751,7 +59751,7 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 			}
 			break;
 		case ZEND_IS_EQUAL:
-			if ((op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG)) {
+			if (op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
@@ -59759,7 +59759,7 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 				if (op->op1_type > op->op2_type) {
 					zend_swap_operands(op);
 				}
-			} else if ((op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE)) {
+			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
@@ -59770,7 +59770,7 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 			}
 			break;
 		case ZEND_IS_NOT_EQUAL:
-			if ((op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG)) {
+			if (op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
@@ -59778,7 +59778,7 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 				if (op->op1_type > op->op2_type) {
 					zend_swap_operands(op);
 				}
-			} else if ((op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE)) {
+			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
@@ -59789,12 +59789,12 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 			}
 			break;
 		case ZEND_IS_SMALLER:
-			if ((op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG)) {
+			if (op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
 				spec = 4156 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
-			} else if ((op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE)) {
+			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
@@ -59802,12 +59802,12 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 			}
 			break;
 		case ZEND_IS_SMALLER_OR_EQUAL:
-			if ((op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG)) {
+			if (op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
 				spec = 4306 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
-			} else if ((op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE)) {
+			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
@@ -59815,45 +59815,45 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 			}
 			break;
 		case ZEND_QM_ASSIGN:
-			if ((op1_info == MAY_BE_DOUBLE)) {
+			if (op1_info == MAY_BE_DOUBLE) {
 				spec = 4546 | SPEC_RULE_OP1;
-			} else if ((!(op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE))))) {
+			} else if (!(op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE)))) {
 				spec = 4551 | SPEC_RULE_OP1;
 			}
 			break;
 		case ZEND_PRE_INC:
-			if ((res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG)) {
+			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG) {
 				spec = 4456 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL;
-			} else if ((op1_info == MAY_BE_LONG)) {
+			} else if (op1_info == MAY_BE_LONG) {
 				spec = 4466 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL;
-			} else if ((op1_info == (MAY_BE_LONG|MAY_BE_DOUBLE))) {
+			} else if (op1_info == (MAY_BE_LONG|MAY_BE_DOUBLE)) {
 				spec = 4476 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL;
 			}
 			break;
 		case ZEND_PRE_DEC:
-			if ((res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG)) {
+			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG) {
 				spec = 4486 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL;
-			} else if ((op1_info == MAY_BE_LONG)) {
+			} else if (op1_info == MAY_BE_LONG) {
 				spec = 4496 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL;
-			} else if ((op1_info == (MAY_BE_LONG|MAY_BE_DOUBLE))) {
+			} else if (op1_info == (MAY_BE_LONG|MAY_BE_DOUBLE)) {
 				spec = 4506 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL;
 			}
 			break;
 		case ZEND_POST_INC:
-			if ((res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG)) {
+			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG) {
 				spec = 4516 | SPEC_RULE_OP1;
-			} else if ((op1_info == MAY_BE_LONG)) {
+			} else if (op1_info == MAY_BE_LONG) {
 				spec = 4521 | SPEC_RULE_OP1;
-			} else if ((op1_info == (MAY_BE_LONG|MAY_BE_DOUBLE))) {
+			} else if (op1_info == (MAY_BE_LONG|MAY_BE_DOUBLE)) {
 				spec = 4526 | SPEC_RULE_OP1;
 			}
 			break;
 		case ZEND_POST_DEC:
-			if ((res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG)) {
+			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG) {
 				spec = 4531 | SPEC_RULE_OP1;
-			} else if ((op1_info == MAY_BE_LONG)) {
+			} else if (op1_info == MAY_BE_LONG) {
 				spec = 4536 | SPEC_RULE_OP1;
-			} else if ((op1_info == (MAY_BE_LONG|MAY_BE_DOUBLE))) {
+			} else if (op1_info == (MAY_BE_LONG|MAY_BE_DOUBLE)) {
 				spec = 4541 | SPEC_RULE_OP1;
 			}
 			break;
@@ -59863,7 +59863,7 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 			}
 			break;
 		case ZEND_FETCH_DIM_R:
-			if ((!(op2_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)))) {
+			if (!(op2_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
 				spec = 4556 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 			}
 			break;

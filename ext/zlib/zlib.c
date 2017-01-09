@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1115,7 +1115,7 @@ PHP_FUNCTION(deflate_add)
 {
 	zend_string *out;
 	char *in_buf;
-	size_t in_len, out_size;
+	size_t in_len, out_size, buffer_used;
 	zval *res;
 	z_stream *ctx;
 	zend_long flush_type = Z_SYNC_FLUSH;
@@ -1157,6 +1157,7 @@ PHP_FUNCTION(deflate_add)
 	out_size = PHP_ZLIB_BUFFER_SIZE_GUESS(ctx->total_in + in_len);
 	out_size = (ctx->total_out >= out_size) ? 16 : (out_size - ctx->total_out);
 	out_size = (out_size < 16) ? 16 : out_size;
+	out_size += 64;
 	out = zend_string_alloc(out_size, 0);
 
 	ctx->next_in = (Bytef *) in_buf;
@@ -1164,7 +1165,20 @@ PHP_FUNCTION(deflate_add)
 	ctx->avail_in = in_len;
 	ctx->avail_out = ZSTR_LEN(out);
 
-	status = deflate(ctx, flush_type);
+	buffer_used = 0;
+
+	do {
+		if (ctx->avail_out == 0) {
+			/* more output buffer space needed; realloc and try again */
+			/* adding 64 more bytes solved every issue I have seen    */
+			out = zend_string_realloc(out, ZSTR_LEN(out) + 64, 0);
+			ctx->avail_out = 64;
+			ctx->next_out = (Bytef *) ZSTR_VAL(out) + buffer_used;
+		}
+		status = deflate(ctx, flush_type);
+		buffer_used = ZSTR_LEN(out) - ctx->avail_out;
+	} while (status == Z_OK && ctx->avail_out == 0);
+
 	switch (status) {
 		case Z_OK:
 			ZSTR_LEN(out) = (char *) ctx->next_out - ZSTR_VAL(out);

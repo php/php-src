@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1858,7 +1858,7 @@ zend_ast *zend_negate_num_string(zend_ast *ast) /* {{{ */
 		}
 	} else if (Z_TYPE_P(zv) == IS_STRING) {
 		size_t orig_len = Z_STRLEN_P(zv);
-		zend_string_extend(Z_STR_P(zv), orig_len + 1, 0);
+		Z_STR_P(zv) = zend_string_extend(Z_STR_P(zv), orig_len + 1, 0);
 		memmove(Z_STRVAL_P(zv) + 1, Z_STRVAL_P(zv), orig_len + 1);
 		Z_STRVAL_P(zv)[0] = '-';
 	} else {
@@ -4198,13 +4198,13 @@ void zend_compile_return(zend_ast *ast) /* {{{ */
 		}
 	}
 
-	zend_handle_loops_and_finally((expr_node.op_type & (IS_TMP_VAR | IS_VAR)) ? &expr_node : NULL);
-
 	/* Generator return types are handled separately */
 	if (!is_generator && CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 		zend_emit_return_type_check(
 			expr_ast ? &expr_node : NULL, CG(active_op_array)->arg_info - 1, 0);
 	}
+
+	zend_handle_loops_and_finally((expr_node.op_type & (IS_TMP_VAR | IS_VAR)) ? &expr_node : NULL);
 
 	opline = zend_emit_op(NULL, by_ref ? ZEND_RETURN_BY_REF : ZEND_RETURN,
 		&expr_node, NULL);

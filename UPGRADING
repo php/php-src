@@ -35,8 +35,20 @@ PHP 7.2 UPGRADE NOTES
     /^(0|(-?[1-9][0-9]*))$/ where PHP_INT_MIN <= n <= PHP_INT_MAX) to integer
     keys. This fixes the behaviour of previous versions, where numeric string
     property names would become inaccessible string keys.
+  . Minimum supported Windows versions are Windows 7/Server 2008 R2.
+
+- BCMath:
+  . The bcmod() function no longer truncates fractional numbers to integers. As
+    such, its behavior now follows fmod() rather than the `%` operator. For
+    example `bcmod('4', '3.5')` now returns '0.5' instead of '1'.
+
+- PCRE:
+  . preg_match() and other PCRE functions now distinguish between unmatched
+    subpatterns and empty matches by reporting NULL and "" (empty string),
+    respectively. Formerly, either was reported as empty string.
 
 - Session:
+  . Removed register_globals related code and "!" can be used as $_SESSION key name.
   . Session is made to manage session status corretly and prevents invalid operations.
     Only inappropriate codes are affected by this change. If you have problems with this,
     it means you have problem in your code.
@@ -110,6 +122,7 @@ PHP 7.2 UPGRADE NOTES
     ];
   . count() now raises a warning when an invalid parameter is passed.
     Only arrays and objects implementing the Countable interface should be passed.
+  . pack() and unpack() now support float and double in both little and big endian.
 
 - XML:
   . utf8_encode() and utf8_decode() have been moved to the Standard extension
@@ -127,6 +140,7 @@ PHP 7.2 UPGRADE NOTES
   . Added imagesetclip() and imagegetclip().
   . Added imageopenpolygon().
   . Added imageresolution().
+  . Added imagecreatefrombmp() and imagebmp().
 
 - Mbstring:
   . Added mb_chr() and mb_ord().
@@ -188,6 +202,7 @@ PHP 7.2 UPGRADE NOTES
 
 - GD:
   . IMG_EFFECT_MULTIPLY
+  . IMG_BMP
 
 - Standard:
   . PASSWORD_ARGON2_DEFAULT_MEMORY_COST
@@ -201,6 +216,9 @@ PHP 7.2 UPGRADE NOTES
 
 - sql.safe_mode
   . This INI directive have been removed.
+
+- realpath_cache_size
+  . Set to 4096k by default
 
 ========================================
 12. Windows Support

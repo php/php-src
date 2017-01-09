@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -165,10 +165,9 @@ static inline time_t FileTimeToUnixTime(const FILETIME *FileTime)
 
 CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len){ /* {{{ */
 	HANDLE hFile;
-	DWORD dwRet;
 	wchar_t *linkw = php_win32_ioutil_any_to_w(link), targetw[MAXPATHLEN];
-	size_t _tmp_len;
-	char *_tmp;
+	size_t ret_len, targetw_len, offset = 0;
+	char *ret;
 
 	if (!linkw) {
 		return -1;
@@ -197,46 +196,40 @@ CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len){
 		with VS2012 and earlier, and seems not to be fixed till
 		now. Thus, correcting target_len so it's suddenly don't
 		overflown. */
-	dwRet = GetFinalPathNameByHandleW(hFile, targetw, MAXPATHLEN, VOLUME_NAME_DOS);
-	if(dwRet >= target_len || dwRet >= MAXPATHLEN || dwRet == 0) {
+	targetw_len = GetFinalPathNameByHandleW(hFile, targetw, MAXPATHLEN, VOLUME_NAME_DOS);
+	if(targetw_len >= target_len || targetw_len >= MAXPATHLEN || targetw_len == 0) {
 		free(linkw);
 		CloseHandle(hFile);
 		return -1;
 	}
 
-	_tmp = php_win32_ioutil_conv_w_to_any(targetw, dwRet, &_tmp_len);
-	if (!_tmp || _tmp_len >= MAXPATHLEN) {
-		CloseHandle(hFile);
-		free(linkw);
-		return -1;
-	}
-	memcpy(target, _tmp, _tmp_len);
-	free(_tmp);
+	if(targetw_len > 4) {
+		/* Skip first 4 characters if they are "\\?\" */
+		if(targetw[0] == L'\\' && targetw[1] == L'\\' && targetw[2] == L'?' && targetw[3] ==  L'\\') {
+			offset = 4;
 
-	CloseHandle(hFile);
-	free(linkw);
-
-	if(dwRet > 4) {
-		/* Skip first 4 characters if they are "\??\" */
-		if(target[0] == '\\' && target[1] == '\\' && target[2] == '?' && target[3] ==  '\\') {
-			char tmp[MAXPATHLEN];
-			unsigned int offset = 4;
-			dwRet -= 4;
-
-			/* \??\UNC\ */
-			if (dwRet > 7 && target[4] == 'U' && target[5] == 'N' && target[6] == 'C') {
+			/* \\?\UNC\ */
+			if (targetw_len > 7 && targetw[4] == L'U' && targetw[5] == L'N' && targetw[6] == L'C') {
 				offset += 2;
-				dwRet -= 2;
-				target[offset] = '\\';
+				targetw[offset] = L'\\';
 			}
-
-			memcpy(tmp, target + offset, dwRet);
-			memcpy(target, tmp, dwRet);
 		}
 	}
 
-	target[dwRet] = '\0';
-	return dwRet;
+	ret = php_win32_ioutil_conv_w_to_any(targetw + offset, targetw_len - offset, &ret_len);
+	if (!ret || ret_len >= MAXPATHLEN) {
+		CloseHandle(hFile);
+		free(linkw);
+		free(ret);
+		return -1;
+	}
+	memcpy(target, ret, ret_len + 1);
+
+	free(ret);
+	CloseHandle(hFile);
+	free(linkw);
+
+	return ret_len;
 }
 /* }}} */
 
@@ -537,7 +530,7 @@ CWD_API char *virtual_getcwd(char *buf, size_t size) /* {{{ */
 /* }}} */
 
 #ifdef ZEND_WIN32
-static inline zend_ulong realpath_cache_key(const char *path, int path_len) /* {{{ */
+static inline zend_ulong realpath_cache_key(const char *path, size_t path_len) /* {{{ */
 {
 	register zend_ulong h;
 	char *bucket_key_start = tsrm_win32_get_path_sid_key(path);
@@ -558,7 +551,7 @@ static inline zend_ulong realpath_cache_key(const char *path, int path_len) /* {
 }
 /* }}} */
 #else
-static inline zend_ulong realpath_cache_key(const char *path, int path_len) /* {{{ */
+static inline zend_ulong realpath_cache_key(const char *path, size_t path_len) /* {{{ */
 {
 	register zend_ulong h;
 	const char *e = path + path_len;
@@ -590,7 +583,7 @@ CWD_API void realpath_cache_clean(void) /* {{{ */
 }
 /* }}} */
 
-CWD_API void realpath_cache_del(const char *path, int path_len) /* {{{ */
+CWD_API void realpath_cache_del(const char *path, size_t path_len) /* {{{ */
 {
 	zend_ulong key = realpath_cache_key(path, path_len);
 	zend_ulong n = key % (sizeof(CWDG(realpath_cache)) / sizeof(CWDG(realpath_cache)[0]));
@@ -618,7 +611,7 @@ CWD_API void realpath_cache_del(const char *path, int path_len) /* {{{ */
 }
 /* }}} */
 
-static inline void realpath_cache_add(const char *path, int path_len, const char *realpath, int realpath_len, int is_dir, time_t t) /* {{{ */
+static inline void realpath_cache_add(const char *path, int path_len, const char *realpath, size_t realpath_len, int is_dir, time_t t) /* {{{ */
 {
 	zend_long size = sizeof(realpath_cache_bucket) + path_len + 1;
 	int same = 1;
@@ -664,7 +657,7 @@ static inline void realpath_cache_add(const char *path, int path_len, const char
 }
 /* }}} */
 
-static inline realpath_cache_bucket* realpath_cache_find(const char *path, int path_len, time_t t) /* {{{ */
+static inline realpath_cache_bucket* realpath_cache_find(const char *path, size_t path_len, time_t t) /* {{{ */
 {
 	zend_ulong key = realpath_cache_key(path, path_len);
 	zend_ulong n = key % (sizeof(CWDG(realpath_cache)) / sizeof(CWDG(realpath_cache)[0]));
@@ -693,7 +686,7 @@ static inline realpath_cache_bucket* realpath_cache_find(const char *path, int p
 }
 /* }}} */
 
-CWD_API realpath_cache_bucket* realpath_cache_lookup(const char *path, int path_len, time_t t) /* {{{ */
+CWD_API realpath_cache_bucket* realpath_cache_lookup(const char *path, size_t path_len, time_t t) /* {{{ */
 {
 	return realpath_cache_find(path, path_len, t);
 }

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -275,9 +275,11 @@ PHP_FUNCTION(token_get_all)
 	zend_long flags = 0;
 	zend_bool success;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|l", &source, &flags) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STR(source)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(flags)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (flags & TOKEN_PARSE) {
 		success = tokenize_parse(return_value, source);
@@ -297,9 +299,9 @@ PHP_FUNCTION(token_name)
 {
 	zend_long type;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &type) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(type)
+	ZEND_PARSE_PARAMETERS_END();
 
 	RETVAL_STRING(get_token_type_name(type));
 }
