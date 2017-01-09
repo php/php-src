@@ -1913,7 +1913,7 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 		}
 
 		/* never use a timeout with non-blocking sockets */
-		if (began_blocked && &sslsock->s.timeout) {
+		if (began_blocked) {
 			timeout = &sslsock->s.timeout;
 		}
 
