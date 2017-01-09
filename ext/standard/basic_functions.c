@@ -5629,6 +5629,15 @@ PHP_FUNCTION(getservbyname)
 
 	serv = getservbyname(name, proto);
 
+#if defined(_AIX)
+	/*
+        On AIX, imap is only known as imap2 in /etc/services, while on Linux imap is an alias for imap2.
+        If a request for imap gives no result, we try again with imap2.
+        */
+	if (serv == NULL && strcmp(name,  "imap") == 0) {
+		serv = getservbyname("imap2", proto);
+	}
+#endif
 	if (serv == NULL) {
 		RETURN_FALSE;
 	}
