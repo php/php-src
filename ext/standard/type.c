@@ -130,7 +130,7 @@ PHP_FUNCTION(intval)
 	zval *num;
 	zend_long base = 10;
 
-	zend_long strlen;
+	size_t strlen;
 	char *strval;
 	char *tmpval;
 
