@@ -25,6 +25,7 @@ PHP                                                                        NEWS
   . Fixed bug #47021 (SoapClient stumbles over WSDL delivered with
     "Transfer-Encoding: chunked"). (Rowan Collins)
   . Fixed bug #72974 (imap is undefined service on AIX). (matthieu.sarter)
+  . Fixed bug #72979 (money_format stores wrong length AIX). (matthieu.sarter)
 
 - ZIP:
   . Fixed bug #70103 (ZipArchive::addGlob ignores remove_all_path option). (cmb,
