@@ -16,6 +16,10 @@ $goodInputs = [
 $badInputs = [
     'b101',
     '0b00200',
+    '--0b123',
+    '++0b123',
+    '0bb123',
+    '0 b123',
 ];
 
 $isspaceChars = " \t\n\r\f\v";
@@ -88,6 +92,30 @@ int(1)
 int(1)
 int(-1)
 --- Bad Inputs ---
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
 int(0)
 int(0)
 int(0)
