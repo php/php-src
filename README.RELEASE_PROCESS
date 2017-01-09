@@ -93,24 +93,27 @@ Commit the changes to the main branch.
 12. run: ``PHPROOT=. ./makedist 5.4.2RC2``, this will export the tree, create configure
 and build three tarballs (gz, bz2 and xz).
 
-13. Copy those tarballs (scp, rsync) to downloads.php.net, in your homedir there should be a
+13. run ``scripts/dev/gen_verify_stub <version> [identity]``, this will sign the tarballs
+and output verification information to be included in announcement email
+
+14. Copy those tarballs (scp, rsync) to downloads.php.net, in your homedir there should be a
 directory "downloads/". Copy them into there, so that the system can generate
 MD5 sums. If you do not have this directory, talk to Derick or Dan.
 
-14. Now the RC can be found on http://downloads.php.net/yourname,
+15. Now the RC can be found on http://downloads.php.net/yourname,
 f.e. http://downloads.php.net/derick/
 
-15. Once the release has been tagged, contact the PHP Windows development team
+16. Once the release has been tagged, contact the PHP Windows development team
 (internals-win@lists.php.net) so that Windows binaries can be created. Once
 those are made, they should be placed into the same directory as the source snapshots.
 
 Getting the non stable release (alpha/beta/RC) announced
 --------------------------------------------------------
 
-1. Send an email (see example here: http://news.php.net/php.internals/19486)
-**To** ``internals@lists.php.net`` and ``php-general@lists.php.net`` lists
-pointing out "the location of the release" and "the possible release date of
-either the next RC, or the final release".
+1. Send an email **To** ``internals@lists.php.net`` and ``php-general@lists.php.net`` 
+lists pointing out "the location of the release" and "the possible release date of
+either the next RC, or the final release". Include in this information the verification
+information output by ``gen_verify_stub``.
 
 2. Send an email (see example here http://news.php.net/php.pear.qa/5201) **To**
 ``php-qa@lists.php.net`` and ``primary-qa-tester@lists.php.net``.
