@@ -3,7 +3,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -364,7 +364,7 @@ char * php_md5_crypt_r(const char *pw, const char *salt, char *out)
 		PHP_MD5Update(&ctx, final, (unsigned int)(pl > 16 ? 16 : pl));
 
 	/* Don't leave anything around in vm they could use. */
-	memset(final, 0, sizeof(final));
+	ZEND_SECURE_ZERO(final, sizeof(final));
 
 	/* Then something really weird... */
 	for (i = pwl; i != 0; i >>= 1)

@@ -1,6 +1,6 @@
 diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
 --- libmagic.orig/apprentice.c	2016-11-23 17:08:22.955687700 +0100
-+++ libmagic/apprentice.c	2016-11-24 13:42:04.122242100 +0100
++++ libmagic/apprentice.c	2016-11-24 16:55:16.299587400 +0100
 @@ -29,6 +29,8 @@
   * apprentice - make one pass through /etc/magic, learning its secrets.
   */
@@ -1022,8 +1022,8 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  		(void)fprintf(stderr, "Usage: %s <filename>\n", getprogname());
  		return -1;
 diff -u libmagic.orig/cdf.h libmagic/cdf.h
---- libmagic.orig/cdf.h	2016-11-23 17:08:24.651177800 +0100
-+++ libmagic/cdf.h	2016-11-24 13:41:34.182417000 +0100
+--- libmagic.orig/cdf.h	2016-11-26 14:20:33.240401300 +0100
++++ libmagic/cdf.h	2016-11-26 14:20:33.781858400 +0100
 @@ -35,10 +35,12 @@
  #ifndef _H_CDF_
  #define _H_CDF_
@@ -1104,7 +1104,7 @@ diff -u libmagic.orig/cdf_time.c libmagic/cdf_time.c
  	static const char *ref = "Sat Apr 23 01:30:00 1977";
 diff -u libmagic.orig/compress.c libmagic/compress.c
 --- libmagic.orig/compress.c	2016-11-23 17:08:25.345167600 +0100
-+++ libmagic/compress.c	2016-11-24 13:42:04.146247600 +0100
++++ libmagic/compress.c	2017-01-05 23:15:53.219543000 +0100
 @@ -45,15 +45,13 @@
  #endif
  #include <string.h>
@@ -1122,7 +1122,12 @@ diff -u libmagic.orig/compress.c libmagic/compress.c
  #include <sys/ioctl.h>
  #endif
  #ifdef HAVE_SYS_WAIT_H
-@@ -66,46 +64,8 @@
+@@ -62,50 +60,12 @@
+ #if defined(HAVE_SYS_TIME_H)
+ #include <sys/time.h>
+ #endif
+-#if defined(HAVE_ZLIB_H)
++#if defined(HAVE_ZLIB_H) && defined(PHP_FILEINFO_UNCOMPRESS)
  #define BUILTIN_DECOMPRESS
  #include <zlib.h>
  #endif
@@ -1265,7 +1270,7 @@ diff -u libmagic.orig/compress.c libmagic/compress.c
 +#endif /* if PHP_FILEINFO_UNCOMPRESS */
 diff -u libmagic.orig/der.c libmagic/der.c
 --- libmagic.orig/der.c	2016-11-23 17:08:25.601237900 +0100
-+++ libmagic/der.c	2016-11-24 13:41:34.200418900 +0100
++++ libmagic/der.c	2017-01-05 23:25:59.696458300 +0100
 @@ -51,7 +51,9 @@
  #include "magic.h"
  #include "der.h"
@@ -1324,8 +1329,8 @@ diff -u libmagic.orig/elfclass.h libmagic/elfclass.h
  		    fsize, elf_getu16(swap, elfhdr.e_machine),
  		    (int)elf_getu16(swap, elfhdr.e_shstrndx),
 diff -u libmagic.orig/file.h libmagic/file.h
---- libmagic.orig/file.h	2016-11-23 17:08:26.334387400 +0100
-+++ libmagic/file.h	2016-11-24 13:41:34.210416500 +0100
+--- libmagic.orig/file.h	2016-11-26 14:20:33.428933800 +0100
++++ libmagic/file.h	2016-11-26 14:20:33.993908600 +0100
 @@ -33,11 +33,9 @@
  #ifndef __file_h__
  #define __file_h__
@@ -2752,26 +2757,6 @@ diff -u libmagic.orig/magic.h libmagic/magic.h
  int magic_list(magic_t, const char *);
  int magic_errno(magic_t);
  
-diff -u libmagic.orig/patchlevel.h libmagic/patchlevel.h
---- libmagic.orig/patchlevel.h	2016-11-24 14:55:09.402121100 +0100
-+++ libmagic/patchlevel.h	2016-11-24 14:56:16.720869700 +0100
-@@ -1,11 +1,15 @@
- #define	FILE_VERSION_MAJOR	5
--#define	patchlevel		28
-+#define	patchlevel		29
- 
- /*
-  * Patchlevel file for Ian Darwin's MAGIC command.
-  * $File: patchlevel.h,v 1.68 2008/03/22 21:39:43 christos Exp $
-  *
-  * $Log$
-+ * Revision 1.9  2016/11/24 22:27:12 ab
-+ * Update libmagic to 5.28
-+ *
-+ * $Log$
-  * Revision 1.9  2016/10/11 22:27:12 ab
-  * Update libmagic to 5.28
-  * 
 diff -u libmagic.orig/print.c libmagic/print.c
 --- libmagic.orig/print.c	2016-11-23 17:08:28.349281600 +0100
 +++ libmagic/print.c	2016-11-24 13:42:04.178244800 +0100

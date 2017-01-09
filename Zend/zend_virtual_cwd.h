@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -232,8 +232,8 @@ extern virtual_cwd_globals cwd_globals;
 #endif
 
 CWD_API void realpath_cache_clean(void);
-CWD_API void realpath_cache_del(const char *path, int path_len);
-CWD_API realpath_cache_bucket* realpath_cache_lookup(const char *path, int path_len, time_t t);
+CWD_API void realpath_cache_del(const char *path, size_t path_len);
+CWD_API realpath_cache_bucket* realpath_cache_lookup(const char *path, size_t path_len, time_t t);
 CWD_API zend_long realpath_cache_size(void);
 CWD_API zend_long realpath_cache_max_buckets(void);
 CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
@@ -342,7 +342,8 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
 #endif
 
 #ifndef S_IFLNK
-# define S_IFLNK 0120000
+#define _IFLNK  0120000	/* symbolic link */
+#define S_IFLNK _IFLNK
 #endif
 
 #ifndef S_ISDIR
@@ -359,6 +360,17 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
 
 #ifndef S_IXROOT
 #define S_IXROOT ( S_IXUSR | S_IXGRP | S_IXOTH )
+#endif
+
+/* XXX should be _S_IFIFO? */
+#ifndef S_IFIFO
+#define	_IFIFO  0010000	/* fifo */
+#define S_IFIFO	_IFIFO
+#endif
+
+#ifndef S_IFBLK
+#define	_IFBLK  0060000	/* block special */
+#define S_IFBLK	_IFBLK
 #endif
 
 #endif /* VIRTUAL_CWD_H */

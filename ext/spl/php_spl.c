@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -380,6 +380,11 @@ static void autoload_func_info_dtor(zval *element)
 	if (!Z_ISUNDEF(alfi->closure)) {
 		zval_ptr_dtor(&alfi->closure);
 	}
+	if (alfi->func_ptr &&
+		UNEXPECTED(alfi->func_ptr->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
+		zend_string_release(alfi->func_ptr->common.function_name);
+		zend_free_trampoline(alfi->func_ptr);
+	}
 	efree(alfi);
 }
 
@@ -405,7 +410,15 @@ PHP_FUNCTION(spl_autoload_call)
 		zend_hash_internal_pointer_reset_ex(SPL_G(autoload_functions), &pos);
 		while (zend_hash_get_current_key_ex(SPL_G(autoload_functions), &func_name, &num_idx, &pos) == HASH_KEY_IS_STRING) {
 			alfi = zend_hash_get_current_data_ptr_ex(SPL_G(autoload_functions), &pos);
-			zend_call_method(Z_ISUNDEF(alfi->obj)? NULL : &alfi->obj, alfi->ce, &alfi->func_ptr, ZSTR_VAL(func_name), ZSTR_LEN(func_name), retval, 1, class_name, NULL);
+			if (UNEXPECTED(alfi->func_ptr->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
+				zend_function *copy = emalloc(sizeof(zend_op_array));
+
+				memcpy(copy, alfi->func_ptr, sizeof(zend_op_array));
+				copy->op_array.function_name = zend_string_copy(alfi->func_ptr->op_array.function_name);
+				zend_call_method(Z_ISUNDEF(alfi->obj)? NULL : &alfi->obj, alfi->ce, &copy, ZSTR_VAL(func_name), ZSTR_LEN(func_name), retval, 1, class_name, NULL);
+			} else {
+				zend_call_method(Z_ISUNDEF(alfi->obj)? NULL : &alfi->obj, alfi->ce, &alfi->func_ptr, ZSTR_VAL(func_name), ZSTR_LEN(func_name), retval, 1, class_name, NULL);
+			}
 			zend_exception_save();
 			if (retval) {
 				zval_ptr_dtor(retval);
@@ -567,12 +580,23 @@ PHP_FUNCTION(spl_autoload_register)
 			}
 		}
 
+		if (UNEXPECTED(alfi.func_ptr == &EG(trampoline))) {
+			zend_function *copy = emalloc(sizeof(zend_op_array));
+
+			memcpy(copy, alfi.func_ptr, sizeof(zend_op_array));
+			alfi.func_ptr->common.function_name = NULL;
+			alfi.func_ptr = copy;
+		}
 		if (zend_hash_add_mem(SPL_G(autoload_functions), lc_name, &alfi, sizeof(autoload_func_info)) == NULL) {
 			if (obj_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
 				Z_DELREF(alfi.obj);
 			}
 			if (!Z_ISUNDEF(alfi.closure)) {
 				Z_DELREF(alfi.closure);
+			}
+			if (UNEXPECTED(alfi.func_ptr->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
+				zend_string_release(alfi.func_ptr->common.function_name);
+				zend_free_trampoline(alfi.func_ptr);
 			}
 		}
 		if (prepend && SPL_G(autoload_functions)->nNumOfElements > 1) {

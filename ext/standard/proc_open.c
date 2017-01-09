@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -247,9 +247,11 @@ PHP_FUNCTION(proc_terminate)
 	struct php_process_handle *proc;
 	zend_long sig_no = SIGTERM;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &zproc, &sig_no) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_RESOURCE(zproc)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(sig_no)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if ((proc = (struct php_process_handle *)zend_fetch_resource(Z_RES_P(zproc), "process", le_proc_open)) == NULL) {
 		RETURN_FALSE;
@@ -278,9 +280,9 @@ PHP_FUNCTION(proc_close)
 	zval *zproc;
 	struct php_process_handle *proc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zproc) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(zproc)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if ((proc = (struct php_process_handle *)zend_fetch_resource(Z_RES_P(zproc), "process", le_proc_open)) == NULL) {
 		RETURN_FALSE;
@@ -308,9 +310,9 @@ PHP_FUNCTION(proc_get_status)
 	int running = 1, signaled = 0, stopped = 0;
 	int exitcode = -1, termsig = 0, stopsig = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zproc) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(zproc)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if ((proc = (struct php_process_handle *)zend_fetch_resource(Z_RES_P(zproc), "process", le_proc_open)) == NULL) {
 		RETURN_FALSE;
@@ -443,11 +445,15 @@ PHP_FUNCTION(proc_open)
 	php_file_descriptor_t slave_pty = -1;
 #endif
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sat|s!a!a!", &command,
-				&command_len, &descriptorspec, &pipes, &cwd, &cwd_len, &environment,
-				&other_options) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(3, 6)
+		Z_PARAM_STRING(command, command_len)
+		Z_PARAM_ARRAY(descriptorspec)
+		Z_PARAM_ARRAY_ASSIGNABLE(pipes)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING_EX(cwd, cwd_len, 1, 0)
+		Z_PARAM_ARRAY_EX(environment, 1, 0)
+		Z_PARAM_ARRAY_EX(other_options, 1, 0)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	command = pestrdup(command, is_persistent);
 
@@ -805,6 +811,12 @@ PHP_FUNCTION(proc_open)
 		}
 #endif
 
+#if PHP_CAN_DO_PTS
+		if (dev_ptmx >= 0) {
+			close(dev_ptmx);
+			close(slave_pty);
+		}
+#endif
 		/* close those descriptors that we just opened for the parent stuff,
 		 * dup new descriptors into required descriptors and close the original
 		 * cruft */
@@ -819,13 +831,6 @@ PHP_FUNCTION(proc_open)
 			if (descriptors[i].childend != descriptors[i].index)
 				close(descriptors[i].childend);
 		}
-
-#if PHP_CAN_DO_PTS
-		if (dev_ptmx >= 0) {
-			close(dev_ptmx);
-			close(slave_pty);
-		}
-#endif
 
 		if (cwd) {
 			php_ignore_value(chdir(cwd));

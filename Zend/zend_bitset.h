@@ -56,14 +56,14 @@ static zend_always_inline int zend_ulong_ntz(zend_ulong num)
 	if (!BitScanForward(&index, num)) {
 #endif
 		/* undefined behavior */
-		return 32;
+		return SIZEOF_ZEND_LONG * 8;
 	}
 
 	return (int) index;
 #else
 	int n;
 
-	if (num == Z_UL(0)) return ZEND_MM_BITSET_LEN;
+	if (num == Z_UL(0)) return SIZEOF_ZEND_LONG * 8;
 
 	n = 1;
 #if SIZEOF_ZEND_LONG == 8

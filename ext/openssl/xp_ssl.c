@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -141,7 +141,7 @@ typedef struct _php_openssl_netstream_data_t {
 	php_openssl_sni_cert_t *sni_certs;
 	unsigned sni_cert_count;
 #ifdef HAVE_TLS_ALPN
-	php_openssl_alpn_ctx *alpn_ctx;
+	php_openssl_alpn_ctx alpn_ctx;
 #endif
 	char *url_name;
 	unsigned state_set:1;
@@ -581,6 +581,11 @@ static int win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, void *arg) /
 {
 	PCCERT_CONTEXT cert_ctx = NULL;
 	PCCERT_CHAIN_CONTEXT cert_chain_ctx = NULL;
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+	X509 *cert = x509_store_ctx->cert;
+#else
+	X509 *cert = X509_STORE_CTX_get0_cert(x509_store_ctx);
+#endif
 
 	php_stream *stream;
 	php_openssl_netstream_data_t *sslsock;
@@ -595,7 +600,7 @@ static int win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, void *arg) /
 		unsigned char *der_buf = NULL;
 		int der_len;
 
-		der_len = i2d_X509(x509_store_ctx->cert, &der_buf);
+		der_len = i2d_X509(cert, &der_buf);
 		if (der_len < 0) {
 			unsigned long err_code, e;
 			char err_buf[512];
@@ -672,7 +677,7 @@ static int win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, void *arg) /
 			int index, cert_name_utf8_len;
 			DWORD num_wchars;
 
-			cert_name = X509_get_subject_name(x509_store_ctx->cert);
+			cert_name = X509_get_subject_name(cert);
 			index = X509_NAME_get_index_by_NID(cert_name, NID_commonName, -1);
 			if (index < 0) {
 				php_error_docref(NULL, E_WARNING, "Unable to locate certificate CN");
@@ -1453,9 +1458,7 @@ static int server_alpn_callback(SSL *ssl_handle, const unsigned char **out, unsi
 {
 	php_openssl_netstream_data_t *sslsock = arg;
 
-	if (SSL_select_next_proto
-		((unsigned char **)out, outlen, sslsock->alpn_ctx->data, sslsock->alpn_ctx->len, in,
-			inlen) != OPENSSL_NPN_NEGOTIATED) {
+	if (SSL_select_next_proto((unsigned char **)out, outlen, sslsock->alpn_ctx.data, sslsock->alpn_ctx.len, in, inlen) != OPENSSL_NPN_NEGOTIATED) {
 		return SSL_TLSEXT_ERR_NOACK;
 	}
 
@@ -1564,9 +1567,8 @@ int php_openssl_setup_crypto(php_stream *stream,
 			if (sslsock->is_client) {
 				SSL_CTX_set_alpn_protos(sslsock->ctx, alpn, alpn_len);
 			} else {
-				sslsock->alpn_ctx = (php_openssl_alpn_ctx *) emalloc(sizeof(php_openssl_alpn_ctx));
-				sslsock->alpn_ctx->data = (unsigned char*)estrndup((const char*)alpn, alpn_len);
-				sslsock->alpn_ctx->len = alpn_len;
+				sslsock->alpn_ctx.data = (unsigned char *) pestrndup((const char*)alpn, alpn_len, php_stream_is_persistent(stream));
+				sslsock->alpn_ctx.len = alpn_len;
 				SSL_CTX_set_alpn_select_cb(sslsock->ctx, server_alpn_callback, sslsock);
 			}
 
@@ -1597,6 +1599,12 @@ int php_openssl_setup_crypto(php_stream *stream,
 		php_error_docref(NULL, E_WARNING, "SSL handle creation failure");
 		SSL_CTX_free(sslsock->ctx);
 		sslsock->ctx = NULL;
+#ifdef HAVE_TLS_ALPN
+		if (sslsock->alpn_ctx.data) {
+			pefree(sslsock->alpn_ctx.data, php_stream_is_persistent(stream));
+			sslsock->alpn_ctx.data = NULL;
+		}
+#endif
 		return FAILURE;
 	} else {
 		SSL_set_ex_data(sslsock->ssl_handle, php_openssl_get_ssl_stream_data_index(), stream);
@@ -1905,7 +1913,7 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 		}
 
 		/* never use a timeout with non-blocking sockets */
-		if (began_blocked && &sslsock->s.timeout) {
+		if (began_blocked) {
 			timeout = &sslsock->s.timeout;
 		}
 
@@ -2098,6 +2106,11 @@ static int php_openssl_sockop_close(php_stream *stream, int close_handle) /* {{{
 			SSL_CTX_free(sslsock->ctx);
 			sslsock->ctx = NULL;
 		}
+#ifdef HAVE_TLS_ALPN
+		if (sslsock->alpn_ctx.data) {
+			pefree(sslsock->alpn_ctx.data, php_stream_is_persistent(stream));
+		}
+#endif
 #ifdef PHP_WIN32
 		if (sslsock->s.socket == -1)
 			sslsock->s.socket = SOCK_ERR;

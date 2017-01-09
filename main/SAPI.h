@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,7 +27,6 @@
 #include "zend_llist.h"
 #include "zend_operators.h"
 #ifdef PHP_WIN32
-#include "win95nt.h"
 #include "win32/php_stdint.h"
 #endif
 #include <sys/stat.h>

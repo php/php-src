@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,8 +21,12 @@
 #include "php.h"
 #include "SAPI.h"
 
-ZEND_TLS const struct php_win32_cp *cur_cp  = NULL;
+ZEND_TLS const struct php_win32_cp *cur_cp = NULL;
 ZEND_TLS const struct php_win32_cp *orig_cp = NULL;
+ZEND_TLS const struct php_win32_cp *cur_out_cp = NULL;
+ZEND_TLS const struct php_win32_cp *orig_out_cp = NULL;
+ZEND_TLS const struct php_win32_cp *cur_in_cp = NULL;
+ZEND_TLS const struct php_win32_cp *orig_in_cp = NULL;
 
 #include "cp_enc_map.c"
 
@@ -248,6 +252,11 @@ __forceinline static char *php_win32_cp_get_enc(void)
 	return enc;
 }/*}}}*/
 
+__forceinline static BOOL php_win32_cp_is_cli_sapi()
+{/*{{{*/
+	return strlen(sapi_module.name) >= sizeof("cli") - 1 && !strncmp(sapi_module.name, "cli", sizeof("cli") - 1);
+}/*}}}*/
+
 PW32CP const struct php_win32_cp *php_win32_cp_get_current(void)
 {/*{{{*/
 	return cur_cp;
@@ -261,6 +270,17 @@ PW32CP const struct php_win32_cp *php_win32_cp_get_orig(void)
 PW32CP const struct php_win32_cp *php_win32_cp_get_by_id(DWORD id)
 {/*{{{*/
 	size_t i;
+
+	if (id < php_win32_cp_map[0].id) {
+		switch (id) {
+			case CP_ACP:
+				id = GetACP();
+				break;
+			case CP_OEMCP:
+				id = GetOEMCP();
+				break;
+		}
+	}
 
 	for (i = 0; i < sizeof(php_win32_cp_map)/sizeof(struct php_win32_cp); i++) {
 		if (php_win32_cp_map[i].id == id) {
@@ -291,7 +311,6 @@ PW32CP const struct php_win32_cp *php_win32_cp_get_by_enc(const char *enc)
 		}
 
 		if (0 == zend_binary_strcasecmp(enc, enc_len, cp->name, strlen(cp->name))) {
-			cur_cp = cp;
 			return cp;
 		}
 
@@ -302,7 +321,6 @@ PW32CP const struct php_win32_cp *php_win32_cp_get_by_enc(const char *enc)
 
 			while (NULL != idx) {
 				if (0 == zend_binary_strcasecmp(enc, enc_len, start, idx - start)) {
-					cur_cp = cp;
 					return cp;
 				}
 				start = idx + 1;
@@ -310,7 +328,6 @@ PW32CP const struct php_win32_cp *php_win32_cp_get_by_enc(const char *enc)
 			}
 			/* Last in the list, or single charset specified. */
 			if (0 == zend_binary_strcasecmp(enc, enc_len, start, strlen(start))) {
-				cur_cp = cp;
 				return cp;
 			}
 		}
@@ -381,18 +398,60 @@ PW32CP wchar_t *php_win32_cp_env_any_to_w(const char* env)
 	return envw;
 }/*}}}*/
 
+static BOOL php_win32_cp_cli_io_setup(void)
+{/*{{{*/
+	BOOL ret = TRUE;
+
+	if (PG(input_encoding) && PG(input_encoding)[0]) {
+		cur_in_cp = php_win32_cp_get_by_enc(PG(input_encoding));
+		if (!cur_in_cp) {
+			cur_in_cp = cur_cp;
+		}
+	} else {
+		cur_in_cp = cur_cp;
+	}
+
+	if (PG(output_encoding) && PG(output_encoding)[0]) {
+		cur_out_cp = php_win32_cp_get_by_enc(PG(output_encoding));
+		if (!cur_out_cp) {
+			cur_out_cp = cur_cp;
+		}
+	} else {
+		cur_out_cp = cur_cp;
+	}
+
+	if(php_get_module_initialized()) {
+		ret = SetConsoleCP(cur_in_cp->id) && SetConsoleOutputCP(cur_out_cp->id);
+	}
+
+	return ret;
+}/*}}}*/
+
 PW32CP const struct php_win32_cp *php_win32_cp_do_setup(const char *enc)
 {/*{{{*/
 	if (!enc) {
 		enc = php_win32_cp_get_enc();
 	}
 
-	if (!strcmp(sapi_module.name, "cli")) {
-		orig_cp = php_win32_cp_get_by_id(GetConsoleCP());
-	} else {
+	cur_cp = php_win32_cp_get_by_enc(enc);
+	if (!orig_cp) {
 		orig_cp = php_win32_cp_get_by_id(GetACP());
 	}
-	cur_cp = php_win32_cp_get_by_enc(enc);
+	if (php_win32_cp_is_cli_sapi()) {
+		if (!orig_in_cp) {
+			orig_in_cp = php_win32_cp_get_by_id(GetConsoleCP());
+			if (!orig_in_cp) {
+				orig_in_cp = orig_cp;
+			}
+		}
+		if (!orig_out_cp) {
+			orig_out_cp = php_win32_cp_get_by_id(GetConsoleOutputCP());
+			if (!orig_out_cp) {
+				orig_out_cp = orig_cp;
+			}
+		}
+		php_win32_cp_cli_io_setup();
+	}
 
 	return cur_cp;
 }/*}}}*/
@@ -404,7 +463,7 @@ PW32CP const struct php_win32_cp *php_win32_cp_do_update(const char *enc)
 	}
 	cur_cp = php_win32_cp_get_by_enc(enc);
 
-	if (!strcmp(sapi_module.name, "cli")) {
+	if (php_win32_cp_is_cli_sapi()) {
 		php_win32_cp_cli_do_setup(cur_cp->id);
 	}
 
@@ -435,7 +494,7 @@ PW32CP const struct php_win32_cp *php_win32_cp_cli_do_setup(DWORD id)
 		return NULL;
 	}
 
-	if (SetConsoleOutputCP(cp->id) && SetConsoleCP(cp->id)) {
+	if (php_win32_cp_cli_io_setup()) {
 		return cp;
 	}
 
@@ -444,16 +503,18 @@ PW32CP const struct php_win32_cp *php_win32_cp_cli_do_setup(DWORD id)
 
 PW32CP const struct php_win32_cp *php_win32_cp_cli_do_restore(DWORD id)
 {/*{{{*/
-	if (!id && orig_cp) {
-		id = orig_cp->id;
+	BOOL cli_io_restored = TRUE;
+
+	if (orig_in_cp) {
+		cli_io_restored = cli_io_restored && SetConsoleCP(orig_in_cp->id);
 	}
 
-	if (SetConsoleOutputCP(id) && SetConsoleCP(id)) {
-		if (orig_cp) {
-			return orig_cp;
-		} else {
-			return php_win32_cp_set_by_id(id);
-		}
+	if (orig_out_cp) {
+		cli_io_restored = cli_io_restored && SetConsoleOutputCP(orig_out_cp->id);
+	}
+
+	if (cli_io_restored && id) {
+		return php_win32_cp_set_by_id(id);
 	}
 
 	return NULL;
@@ -477,7 +538,7 @@ PHP_FUNCTION(sapi_windows_cp_set)
 		RETURN_FALSE;
 	}
 
-	if (!strcmp(sapi_module.name, "cli")) {
+	if (php_win32_cp_is_cli_sapi()) {
 		cp = php_win32_cp_cli_do_setup((DWORD)id);
 	} else {
 		cp = php_win32_cp_set_by_id((DWORD)id);

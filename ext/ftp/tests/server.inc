@@ -7,7 +7,7 @@ $context = stream_context_create(array('ssl' => array('local_cert' => dirname(__
 for ($i=0; $i<10 && !$socket; ++$i) {
 	$port = rand(50000, 65535);
 	
-	$socket = stream_socket_server("tcp://127.0.0.1:$port", $errno, $errstr, STREAM_SERVER_BIND|STREAM_SERVER_LISTEN, $context);
+	@$socket = stream_socket_server("tcp://127.0.0.1:$port", $errno, $errstr, STREAM_SERVER_BIND|STREAM_SERVER_LISTEN, $context);
 }
 //set anther random port that is not the same as $port
 do{
@@ -15,6 +15,7 @@ do{
 }while($pasv_port == $port);
 
 if (!$socket) {
+	echo "$errstr ($errno)\n";
 	die("could not start/bind the ftp server\n");
 }
 

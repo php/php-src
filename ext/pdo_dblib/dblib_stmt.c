@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -444,12 +444,6 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 	return 1;
 }
 
-static int pdo_dblib_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *param,
-		enum pdo_param_event event_type)
-{
-	return 1;
-}
-
 static int pdo_dblib_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_value)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
@@ -499,7 +493,7 @@ struct pdo_stmt_methods dblib_stmt_methods = {
 	pdo_dblib_stmt_fetch,
 	pdo_dblib_stmt_describe,
 	pdo_dblib_stmt_get_col,
-	pdo_dblib_stmt_param_hook,
+	NULL, /* param hook */
 	NULL, /* set attr */
 	NULL, /* get attr */
 	pdo_dblib_stmt_get_column_meta, /* meta */

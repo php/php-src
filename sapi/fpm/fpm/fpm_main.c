@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -280,7 +280,7 @@ static void print_extensions(void) /* {{{ */
 #define STDOUT_FILENO 1
 #endif
 
-static inline size_t sapi_cgibin_single_write(const char *str, uint str_length) /* {{{ */
+static inline size_t sapi_cgibin_single_write(const char *str, uint32_t str_length) /* {{{ */
 {
 	ssize_t ret;
 
@@ -310,7 +310,7 @@ static inline size_t sapi_cgibin_single_write(const char *str, uint str_length) 
 static size_t sapi_cgibin_ub_write(const char *str, size_t str_length) /* {{{ */
 {
 	const char *ptr = str;
-	uint remaining = str_length;
+	uint32_t remaining = str_length;
 	size_t ret;
 
 	while (remaining > 0) {
@@ -473,7 +473,7 @@ void fcgi_log(int type, const char *fmt, ...)
 
 static size_t sapi_cgi_read_post(char *buffer, size_t count_bytes) /* {{{ */
 {
-	uint read_bytes = 0;
+	uint32_t read_bytes = 0;
 	int tmp_read_bytes;
 	size_t remaining = SG(request_info).content_length - SG(read_post_bytes);
 
@@ -745,7 +745,7 @@ static int sapi_cgi_activate(void) /* {{{ */
 {
 	fcgi_request *request = (fcgi_request*) SG(server_context);
 	char *path, *doc_root, *server_name;
-	uint path_len, doc_root_len, server_name_len;
+	uint32_t path_len, doc_root_len, server_name_len;
 
 	/* PATH_TRANSLATED should be defined at this stage but better safe than sorry :) */
 	if (!SG(request_info).path_translated) {
@@ -1534,11 +1534,10 @@ PHP_FUNCTION(fastcgi_finish_request) /* {{{ */
 	fcgi_request *request = (fcgi_request*) SG(server_context);
 
 	if (!fcgi_is_closed(request)) {
-
 		php_output_end_all();
 		php_header();
 
-		fcgi_flush(request, 1);
+		fcgi_end(request);
 		fcgi_close(request, 0, 0);
 		RETURN_TRUE;
 	}
@@ -1756,9 +1755,9 @@ int main(int argc, char *argv[])
 				SG(request_info).no_headers = 1;
 
 #if ZEND_DEBUG
-				php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) 1997-2016 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__,        __TIME__, get_zend_version());
+				php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) 1997-2017 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__,        __TIME__, get_zend_version());
 #else
-				php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2016 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__,      get_zend_version());
+				php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2017 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__,      get_zend_version());
 #endif
 				php_request_shutdown((void *) 0);
 				fcgi_shutdown();

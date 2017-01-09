@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -157,17 +157,23 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 			src = VAR_SOURCE(opline->op1);
 			if (src &&
 			    src->opcode == ZEND_QM_ASSIGN &&
-			    src->op1_type == IS_CONST) {
-
+			    src->op1_type == IS_CONST
+			) {
 				znode_op op1 = opline->op1;
-				zval c = ZEND_OP1_LITERAL(src);
-
-				zval_copy_ctor(&c);
-				if (zend_optimizer_update_op1_const(op_array, opline, &c)) {
-					zend_optimizer_remove_live_range(op_array, op1.var);
+				if (opline->opcode == ZEND_VERIFY_RETURN_TYPE) {
+					COPY_NODE(opline->result, opline->op1);
+					COPY_NODE(opline->op1, src->op1);
 					VAR_SOURCE(op1) = NULL;
-					literal_dtor(&ZEND_OP1_LITERAL(src));
 					MAKE_NOP(src);
+				} else {
+					zval c = ZEND_OP1_LITERAL(src);
+					zval_copy_ctor(&c);
+					if (zend_optimizer_update_op1_const(op_array, opline, &c)) {
+						zend_optimizer_remove_live_range(op_array, op1.var);
+						VAR_SOURCE(op1) = NULL;
+						literal_dtor(&ZEND_OP1_LITERAL(src));
+						MAKE_NOP(src);
+					}
 				}
 			}
 		}

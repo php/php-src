@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -399,9 +399,9 @@ PHP_FUNCTION(stream_bucket_make_writeable)
 	php_stream_bucket_brigade *brigade;
 	php_stream_bucket *bucket;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zbrigade) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(zbrigade)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if ((brigade = (php_stream_bucket_brigade*)zend_fetch_resource(
 					Z_RES_P(zbrigade), PHP_STREAM_BRIGADE_RES_NAME, le_bucket_brigade)) == NULL) {
@@ -430,9 +430,10 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 	php_stream_bucket_brigade *brigade;
 	php_stream_bucket *bucket;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ro", &zbrigade, &zobject) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_RESOURCE(zbrigade)
+		Z_PARAM_OBJECT(zobject)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if (NULL == (pzbucket = zend_hash_str_find(Z_OBJPROP_P(zobject), "bucket", sizeof("bucket")-1))) {
 		php_error_docref(NULL, E_WARNING, "Object has no bucket property");
@@ -500,9 +501,10 @@ PHP_FUNCTION(stream_bucket_new)
 	size_t buffer_len;
 	php_stream_bucket *bucket;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zs", &zstream, &buffer, &buffer_len) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ZVAL_DEREF(zstream)
+		Z_PARAM_STRING(buffer, buffer_len)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	php_stream_from_zval(stream, zstream);
 
@@ -561,9 +563,10 @@ PHP_FUNCTION(stream_filter_register)
 	zend_string *filtername, *classname;
 	struct php_user_filter_data *fdat;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &filtername, &classname) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STR(filtername)
+		Z_PARAM_STR(classname)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	RETVAL_FALSE;
 
