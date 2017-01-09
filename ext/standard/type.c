@@ -133,6 +133,7 @@ PHP_FUNCTION(intval)
 	size_t strlen;
 	char *strval;
 	char *tmpval;
+	int offset = 0;
 
 	if (ZEND_NUM_ARGS() != 1 && ZEND_NUM_ARGS() != 2) {
 		WRONG_PARAM_COUNT;
@@ -158,18 +159,22 @@ PHP_FUNCTION(intval)
 
 	/* Length of 3+ covers "0b#" and "-0b" (which results in 0) */
 	if (strlen > 2) {
-		tmpval = strval;
-		if (tmpval[0] == '-' || tmpval[0] == '+') {
-			tmpval++;
+		if (strval[0] == '-' || strval[0] == '+') {
+			offset = 1;
 		}
 
-		if (tmpval[0] == '0' && (tmpval[1] == 'b' || tmpval[1] == 'B')) {
-			/* This effectively causes the string to have two leading zeros */
-			tmpval[1] = '0';
-			/* Deliberate use of strval here to include the unary symbol if present */
-			RETVAL_LONG(ZEND_STRTOL(strval, NULL, 2));
-			/* The zval str was modified. Restore it */
-			tmpval[1] = 'b';
+		if (strval[offset] == '0' && (strval[offset + 1] == 'b' || strval[offset + 1] == 'B')) {
+			tmpval = emalloc(strlen - 2); /* Minus "0b" */
+
+			/* Place the unary symbol at pos 0 if there was one */
+			if (offset) {
+				tmpval[0] = strval[0];
+			}
+
+			/* Copy the data from after "0b" to the end of the buffer */
+			memcpy(tmpval + offset, strval + offset + 2, strlen - 2);
+			RETVAL_LONG(ZEND_STRTOL(tmpval, NULL, 2));
+			efree(tmpval);
 			return;
 		}
 	}
