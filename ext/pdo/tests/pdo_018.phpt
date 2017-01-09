@@ -71,7 +71,18 @@ $db->exec('CREATE TABLE classtypes(id int NOT NULL PRIMARY KEY, name VARCHAR(20)
 $db->exec('INSERT INTO classtypes VALUES(0, \'stdClass\')'); 
 $db->exec('INSERT INTO classtypes VALUES(1, \'TestBase\')'); 
 $db->exec('INSERT INTO classtypes VALUES(2, \'TestDerived\')'); 
-$db->exec('CREATE TABLE test(id int NOT NULL PRIMARY KEY, classtype int, val VARCHAR(255))');
+
+switch ($db->getAttribute(PDO::ATTR_DRIVER_NAME)) {
+  case 'dblib':
+    // environment settings can influence how the table is created if specifics are missing
+    // https://msdn.microsoft.com/en-us/library/ms174979.aspx#Nullability Rules Within a Table Definition
+    $sql = 'CREATE TABLE test(id int NOT NULL PRIMARY KEY, classtype int NULL, val VARCHAR(255) NULL)';
+    break;
+  default:
+    $sql = 'CREATE TABLE test(id int NOT NULL PRIMARY KEY, classtype int, val VARCHAR(255))';
+    break;
+}
+$db->exec($sql);
 
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
