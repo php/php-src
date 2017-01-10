@@ -1376,8 +1376,11 @@ main() {
   dir = opendir("/");
   if (!dir) 
     exit(1);
-  if (readdir_r(dir, (struct dirent *) entry, &pentry) == 0)
+  if (readdir_r(dir, (struct dirent *) entry, &pentry) == 0) {
+    close(dir);
     exit(0);
+  }
+  close(dir);
   exit(1);
 }
     ],[
