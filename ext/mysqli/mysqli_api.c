@@ -2254,7 +2254,11 @@ PHP_FUNCTION(mysqli_ssl_set)
 		}
 	}
 
+#if defined(MYSQLI_USE_MYSQLND)
 	mysql_ssl_set(mysql->mysql, ssl_parm[0], ssl_parm[1], ssl_parm[2], ssl_parm[3], ssl_parm[4], NULL);
+#else
+	mysql_ssl_set(mysql->mysql, ssl_parm[0], ssl_parm[1], ssl_parm[2], ssl_parm[3], ssl_parm[4]);
+#endif
 
 	RETURN_TRUE;
 }
