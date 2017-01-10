@@ -8,6 +8,8 @@ PHP                                                                        NEWS
 
 - Dom:
   . Fixed bug #61858 (DOMAttr debug info generates E_WARNING). (Arnout Boks)
+  . Fixed bug #73907 (nextSibling property not included in var_dump of DOMNode).
+    (Arnout Boks)
 
 - GD:
   . Fixed bug #73893 (A hidden danger of death cycle in a function of gd). (cmb)
