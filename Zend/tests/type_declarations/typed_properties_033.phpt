@@ -34,5 +34,5 @@ object(class@anonymous)#1 (4) {
   ["baz"]=>
   int(6)
   ["qux"]=>
-  &int(9223372036854775807)
+  &int(%d)
 }

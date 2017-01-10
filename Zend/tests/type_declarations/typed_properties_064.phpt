@@ -31,13 +31,14 @@ $a->foo = PHP_INT_MAX;
 try {
 	$_[0]++;
 } catch (Error $e) { echo $e->getMessage(), "\n"; }
-var_dump($a->foo);
+echo gettype($a->foo),"\n";
 
 try {
 	++$_[0];
 } catch (Error $e) { echo $e->getMessage(), "\n"; }
-var_dump($a->foo);
+echo gettype($a->foo),"\n";
 
+$_[0] = 0;
 try {
 	$_[0] = [];
 } catch (Error $e) { echo $e->getMessage(), "\n"; }
@@ -55,9 +56,9 @@ int(21)
 int(20)
 int(19)
 Cannot assign float to reference of type integer
-int(9223372036854775807)
+integer
 Cannot assign float to reference of type integer
-int(9223372036854775807)
+integer
 Cannot assign array to reference of type integer
-int(9223372036854775807)
+int(0)
 int(1)

@@ -37,12 +37,12 @@ $a->foo = PHP_INT_MAX;
 try {
 	$a->_++;
 } catch (Error $e) { echo $e->getMessage(), "\n"; }
-var_dump($a->foo);
+echo gettype($a->foo),"\n";
 
 try {
 	++$a->_;
 } catch (Error $e) { echo $e->getMessage(), "\n"; }
-var_dump($a->foo);
+echo gettype($a->foo),"\n";
 
 ?>
 --EXPECT--
@@ -53,6 +53,6 @@ int(21)
 int(20)
 int(19)
 Cannot assign float to reference of type integer
-int(9223372036854775807)
+integer
 Cannot assign float to reference of type integer
-int(9223372036854775807)
+integer
