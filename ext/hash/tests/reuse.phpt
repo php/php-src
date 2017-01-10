@@ -6,7 +6,9 @@ Attempt to reuse a closed hash context
 <?php
 
 $h = hash_init('md5');
-hash_final($h);
+echo hash_final($h), "\n";
 hash_update($h, 'foo');
+echo hash_final($h), "\n";
 --EXPECTF--
-Warning: hash_update(): supplied resource is not a valid Hash Context resource in %s/ext/hash/tests/reuse.php on line 5
+d41d8cd98f00b204e9800998ecf8427e
+acbd18db4cc2f85cedef654fccc4a4d8

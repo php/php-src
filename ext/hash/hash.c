@@ -407,13 +407,6 @@ PHP_FUNCTION(hash_init)
 }
 /* }}} */
 
-#define PHP_HASHCONTEXT_VERIFY(func, hash) { \
-	if (!hash->context) { \
-		php_error(E_WARNING, "%s(): supplied resource is not a valid Hash Context resource", func); \
-		RETURN_NULL(); \
-	} \
-}
-
 /* {{{ proto bool hash_update(HashContext context, string data)
 Pump data into the hashing algorithm */
 PHP_FUNCTION(hash_update)
@@ -427,7 +420,6 @@ PHP_FUNCTION(hash_update)
 	}
 
 	hash = php_hashcontext_from_object(Z_OBJ_P(zhash));
-	PHP_HASHCONTEXT_VERIFY("hash_update", hash);
 	hash->ops->hash_update(hash->context, (unsigned char *) ZSTR_VAL(data), ZSTR_LEN(data));
 
 	RETURN_TRUE;
@@ -448,7 +440,6 @@ PHP_FUNCTION(hash_update_stream)
 	}
 
 	hash = php_hashcontext_from_object(Z_OBJ_P(zhash));
-	PHP_HASHCONTEXT_VERIFY("hash_update_stream", hash);
 	php_stream_from_zval(stream, zstream);
 
 	while (length) {
@@ -489,7 +480,6 @@ PHP_FUNCTION(hash_update_file)
 	}
 
 	hash = php_hashcontext_from_object(Z_OBJ_P(zhash));
-	PHP_HASHCONTEXT_VERIFY("hash_update_file", hash);
 	context = php_stream_context_from_zval(zcontext, 0);
 
 	stream = php_stream_open_wrapper_ex(ZSTR_VAL(filename), "rb", REPORT_ERRORS, NULL, context);
@@ -516,13 +506,23 @@ PHP_FUNCTION(hash_final)
 	zend_bool raw_output = 0;
 	zend_string *digest;
 	int digest_len;
+	void *saved_context;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &zhash, php_hashcontext_ce, &raw_output) == FAILURE) {
 		return;
 	}
 
 	hash = php_hashcontext_from_object(Z_OBJ_P(zhash));
-	PHP_HASHCONTEXT_VERIFY("hash_final", hash);
+
+	/* Preserve hash context state so that we can restore it later */
+	saved_context = emalloc(hash->ops->context_size);
+	hash->ops->hash_init(saved_context);
+	if (FAILURE == hash->ops->hash_copy(hash->ops, hash->context, saved_context)) {
+		ZEND_SECURE_ZERO(saved_context, hash->ops->context_size);
+		efree(saved_context);
+		php_error(E_WARNING, "Failed saving intermediate context state");
+		RETURN_NULL();
+	}
 
 	digest_len = hash->ops->digest_size;
 	digest = zend_string_alloc(digest_len, 0);
@@ -548,9 +548,10 @@ PHP_FUNCTION(hash_final)
 	}
 	ZSTR_VAL(digest)[digest_len] = 0;
 
-	/* Invalidate the object from further use */
+	/* Restore the hash context to it's pre-finalization state */
+	ZEND_SECURE_ZERO(hash->context, hash->ops->context_size);
 	efree(hash->context);
-	hash->context = NULL;
+	hash->context = saved_context;
 
 	if (raw_output) {
 		RETURN_NEW_STR(digest);
