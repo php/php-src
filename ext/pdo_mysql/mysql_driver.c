@@ -701,7 +701,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 					ssl_cert? ZSTR_VAL(ssl_cert) : NULL,
 					ssl_ca? ZSTR_VAL(ssl_ca) : NULL,
 					ssl_capath? ZSTR_VAL(ssl_capath) : NULL,
-#if defined(PDO_USE_MYSQLND)
+#ifdef PDO_USE_MYSQLND
 					ssl_cipher? ZSTR_VAL(ssl_cipher) : NULL,
 					ssl_server_cn? ZSTR_VAL(ssl_server_cn) : NULL);
 #else
