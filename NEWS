@@ -16,6 +16,10 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #73893 (A hidden danger of death cycle in a function of gd). (cmb)
 
+- MCrypt:
+  . Fixed bug #67707 (IV not needed for ECB encryption mode, but it returns a
+    warning). (Robrecht Plaisier)
+
 - OpenSSL:
   . Fixed bug #71519 (add serial hex to return value array). (xrobau)
   . Fixed bug #73692 (Compile ext/openssl with openssl 1.1.0 on Win). (Anatol)
