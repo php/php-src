@@ -8,7 +8,7 @@ if (getenv("SKIP_ONLINE_TESTS")) { die('skip: online test'); }
 ?>
 --FILE--
 <?php
-$hostname = "yahoo.com";
+$hostname = "php.net";
 
 var_dump(is_array(dns_get_record($hostname)));
 var_dump(is_array(dns_get_record($hostname, DNS_A)));
@@ -55,8 +55,6 @@ var_dump(is_array($authns_DNS_NAPTR));
 var_dump(is_array($authns_DNS_A6));
 var_dump(is_array($authns_DNS_ALL));
 var_dump(is_array($authns_DNS_ANY));
-
-
 
 dns_get_record($hostname, DNS_A, $authns_DNS_A, $addtl_DNS_A);
 dns_get_record($hostname, DNS_CNAME, $authns_DNS_CNAME, $addtl_DNS_CNAME);
@@ -117,89 +115,88 @@ var_dump(is_array(dns_get_record($hostname, DNS_NAPTR, $authns_DNS_NAPTR, $addtl
 var_dump(is_array(dns_get_record($hostname, DNS_A6, $authns_DNS_A6, $addtl_DNS_A6, true)));
 var_dump(is_array(dns_get_record($hostname, DNS_ALL, $authns_DNS_ALL, $addtl_DNS_ALL, true)));
 var_dump(is_array(dns_get_record($hostname, DNS_ANY, $authns_DNS_ANY, $addtl_DNS_ANY, true)));
-
 ?>
 --EXPECTF--
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
-bool(%s)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
 
 Warning: dns_get_record(): Numeric DNS record type must be between %d and %d, '%s' given in %s on line %d
-bool(%s)
+bool(false)
 
 Warning: dns_get_record(): Numeric DNS record type must be between %d and %d, '%s' given in %s on line %d
-bool(%s)
+bool(false)
 
 Warning: dns_get_record(): Numeric DNS record type must be between %d and %d, '%s' given in %s on line %d
-bool(%s)
+bool(false)
 
 Warning: dns_get_record(): Numeric DNS record type must be between %d and %d, '%s' given in %s on line %d
-bool(%s)
+bool(false)
 
 Warning: dns_get_record(): Numeric DNS record type must be between %d and %d, '%s' given in %s on line %d
-bool(%s)
+bool(false)
 
 Warning: dns_get_record(): Numeric DNS record type must be between %d and %d, '%s' given in %s on line %d
-bool(%s)
+bool(false)
