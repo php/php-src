@@ -79,7 +79,7 @@ Stack trace:
 #0 %s(%d): session_start()
 #1 {main}
 
-Next Error: Failed to create session ID: user (path: ) in %s:%d
+Next Error: Failed to create session ID: user (path: %s) in %s:%d
 Stack trace:
 #0 %s(%d): session_start()
 #1 {main}
