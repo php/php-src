@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #73876 (Crash when exporting **= in expansion of assign op).
   (Sara)
 
+- Dom:
+  . Fixed bug #61858 (DOMAttr debug info generates E_WARNING). (Arnout Boks)
+
 - GD:
   . Fixed bug #73893 (A hidden danger of death cycle in a function of gd). (cmb)
 
