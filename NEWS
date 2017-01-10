@@ -8,6 +8,9 @@ PHP                                                                        NEWS
   . Fixed bug #73876 (Crash when exporting **= in expansion of assign op).
     (Sara)
 
+- GD:
+  . Fixed bug #73893 (A hidden danger of death cycle in a function of gd). (cmb)
+
 - OpenSSL:
   . Fixed bug #71519 (add serial hex to return value array). (xrobau)
   . Fixed bug #73692 (Compile ext/openssl with openssl 1.1.0 on Win). (Anatol)
