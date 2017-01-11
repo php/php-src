@@ -213,7 +213,7 @@ Since: DOM Level 3
 */
 int dom_attr_schema_type_info_read(dom_object *obj, zval *retval)
 {
-	php_error_docref(NULL, E_WARNING, "Not yet implemented");
+	/* TODO */
 	ZVAL_NULL(retval);
 	return SUCCESS;
 }

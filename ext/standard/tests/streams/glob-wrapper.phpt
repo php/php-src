@@ -23,13 +23,13 @@ foreach ( [ __DIR__, "glob://".__DIR__ ] as $spec) {
 --EXPECTF--
 ** Opening %s
 
-Warning: opendir(): open_basedir restriction in effect. File(/%s) is not within the allowed path(s): (/does_not_exist) in %s/glob-wrapper.php on line 5
+Warning: opendir(): open_basedir restriction in effect. File(%s) is not within the allowed path(s): (/does_not_exist) in %s%eglob-wrapper.php on line 5
 
-Warning: opendir(/%s): failed to open dir: Operation not permitted in %s/glob-wrapper.php on line 5
-Failed to open /%s
+Warning: opendir(%s): failed to open dir: Operation not permitted in %s%eglob-wrapper.php on line 5
+Failed to open %s
 ** Opening glob://%s
 
-Warning: opendir(): open_basedir restriction in effect. File(/%s) is not within the allowed path(s): (/does_not_exist) in %s/glob-wrapper.php on line 5
+Warning: opendir(): open_basedir restriction in effect. File(%s) is not within the allowed path(s): (/does_not_exist) in %s%eglob-wrapper.php on line 5
 
-Warning: opendir(glob://%s): failed to open dir: operation failed in %s/glob-wrapper.php on line 5
+Warning: opendir(glob://%s): failed to open dir: operation failed in %s%eglob-wrapper.php on line 5
 Failed to open glob://%s
