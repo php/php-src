@@ -603,7 +603,7 @@ PHP_FUNCTION(hash_hkdf)
 {
 	zend_string *returnval, *ikm, *algo, *info = NULL, *salt = NULL;
 	zend_long length = 0;
-	char *prk, *computed_salt;
+	char *prk;
 	unsigned char *digest, *K;
 	int i, rounds;
 	const php_hash_ops *ops;
@@ -615,7 +615,7 @@ PHP_FUNCTION(hash_hkdf)
 
 	ops = php_hash_fetch_ops(ZSTR_VAL(algo), ZSTR_LEN(algo));
 	if (!ops) {
-		php_error_docref(NULL, E_WARNING, "Unknown hashing algorithm: %s", ZSTR_VAL(algo), ZSTR_LEN(algo));
+		php_error_docref(NULL, E_WARNING, "Unknown hashing algorithm: %s", ZSTR_VAL(algo));
 		RETURN_FALSE;
 	}
 
@@ -636,27 +636,23 @@ PHP_FUNCTION(hash_hkdf)
 		RETURN_FALSE;
 	}
 
-	if (salt != NULL && ZSTR_LEN(salt) > 0) {
-		computed_salt = emalloc(ZSTR_LEN(salt));
-		memcpy(computed_salt, ZSTR_VAL(salt), ZSTR_LEN(salt));
-	}
-	else {
-		computed_salt = emalloc(ops->digest_size);
-		memset(computed_salt, 0x00, ops->digest_size);
-	}
-
 	context = emalloc(ops->context_size);
 
 	// Extract
 	ops->hash_init(context);
 	K = emalloc(ops->block_size);
-	php_hash_hmac_prep_key(K, ops, context, computed_salt, (salt != NULL && ZSTR_LEN(salt) ? ZSTR_LEN(salt) : ops->digest_size));
-	prk = safe_emalloc(ops->block_size, 1, 0);
+	if (salt != NULL && ZSTR_LEN(salt) > 0) {
+		php_hash_hmac_prep_key(K, ops, context, ZSTR_VAL(salt), ZSTR_LEN(salt));
+	}
+	else {
+		memset(K, 0x36, ops->block_size);
+	}
+
+	prk = emalloc(ops->block_size);
 	php_hash_hmac_round(prk, ops, context, K, ZSTR_VAL(ikm), ZSTR_LEN(ikm));
 	php_hash_string_xor_char(K, K, 0x6A, ops->block_size);
 	php_hash_hmac_round(prk, ops, context, K, prk, ops->digest_size);
 	ZEND_SECURE_ZERO(K, ops->block_size);
-	efree(computed_salt);
 
 	// Expand
 	returnval = zend_string_alloc(length, 0);
@@ -683,20 +679,20 @@ PHP_FUNCTION(hash_hkdf)
 		php_hash_string_xor_char(K, K, 0x6A, ops->block_size);
 		php_hash_hmac_round(digest, ops, context, K, digest, ops->digest_size);
 		memcpy(
-			returnval->val + ((i - 1) * ops->digest_size),
+			ZSTR_VAL(returnval) + ((i - 1) * ops->digest_size),
 			digest,
 			(i == rounds ? length - ((i - 1) * ops->digest_size) : ops->digest_size)
 		);
 	}
 
 	ZEND_SECURE_ZERO(K, ops->block_size);
-	ZEND_SECURE_ZERO(digest, ops->block_size);
+	ZEND_SECURE_ZERO(digest, ops->digest_size);
 	ZEND_SECURE_ZERO(prk, ops->block_size);
 	efree(K);
 	efree(context);
 	efree(prk);
 	efree(digest);
-	returnval->val[length] = 0;
+	ZSTR_VAL(returnval)[length] = 0;
 	RETURN_STR(returnval);
 }
 
