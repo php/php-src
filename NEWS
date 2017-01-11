@@ -88,6 +88,9 @@ PHP                                                                        NEWS
     (Adam Baratz)
   . Fixed bug #73396 (bigint columns are returned as strings). (Adam Baratz)
 
+- posix:
+  . Fixed bug #71219 (configure script incorrectly checks for ttyname_r). (atoh)
+
 - Session:
   . Fixed bug #73461 (Prohibit session save handler recursion). (Yasuo)
   . PR #2233 Removed register_globals related code and "!" can be used as $_SESSION key name. (Yasuo)
