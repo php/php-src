@@ -648,7 +648,7 @@ PHP_FUNCTION(hash_hkdf)
 		memset(K, 0x36, ops->block_size);
 	}
 
-	prk = emalloc(ops->block_size);
+	prk = emalloc(ops->digest_size);
 	php_hash_hmac_round(prk, ops, context, K, ZSTR_VAL(ikm), ZSTR_LEN(ikm));
 	php_hash_string_xor_char(K, K, 0x6A, ops->block_size);
 	php_hash_hmac_round(prk, ops, context, K, prk, ops->digest_size);
@@ -687,7 +687,7 @@ PHP_FUNCTION(hash_hkdf)
 
 	ZEND_SECURE_ZERO(K, ops->block_size);
 	ZEND_SECURE_ZERO(digest, ops->digest_size);
-	ZEND_SECURE_ZERO(prk, ops->block_size);
+	ZEND_SECURE_ZERO(prk, ops->digest_size);
 	efree(K);
 	efree(context);
 	efree(prk);
