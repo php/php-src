@@ -18,6 +18,9 @@ PHP                                                                        NEWS
 - Phar:
   . Fixed bug #70417 (PharData::compress() doesn't close temp file). (cmb)
 
+- posix:
+  . Fixed bug #71219 (configure script incorrectly checks for ttyname_r). (atoh)
+
 - Session:
   . Fixed bug #69582 (session not readable by root in CLI). (EvgeniySpinov)
 
