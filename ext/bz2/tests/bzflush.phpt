@@ -51,17 +51,17 @@ bool(false)
 Warning: bzflush() expects parameter %d to be resource, null given in %s on line %d
 bool(false)
 
-Warning: bzflush() expects parameter %d to be resource, double given in %s on line %d
+Warning: bzflush() expects parameter %d to be resource, float given in %s on line %d
 bool(false)
 
-Warning: bzerror(): %d is not a valid stream resource in %s on line %d
+Warning: bzerror(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: bzerror(): %d is not a valid stream resource in %s on line %d
+Warning: bzerror(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: bzerror(): %d is not a valid stream resource in %s on line %d
+Warning: bzerror(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: bzerror(): %d is not a valid stream resource in %s on line %d
+Warning: bzerror(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
