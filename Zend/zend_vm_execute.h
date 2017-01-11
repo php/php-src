@@ -18289,7 +18289,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 						}
 					}
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 				}
 			}
@@ -18412,6 +18412,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 								zend_verify_property_type_error(prop_info, Z_STR_P(property), &z_copy);
 							}
 							zval_ptr_dtor(&z_copy);
+							Z_TRY_ADDREF_P(zptr); /* we copied by value into result.var */
 						}
 					} else {
 						zval_opt_copy_ctor(zptr);
@@ -23057,7 +23058,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 						}
 					}
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 				}
 			}
@@ -23180,6 +23181,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 								zend_verify_property_type_error(prop_info, Z_STR_P(property), &z_copy);
 							}
 							zval_ptr_dtor(&z_copy);
+							Z_TRY_ADDREF_P(zptr); /* we copied by value into result.var */
 						}
 					} else {
 						zval_opt_copy_ctor(zptr);
@@ -26099,7 +26101,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 						}
 					}
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 				}
 			}
@@ -26223,6 +26225,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 								zend_verify_property_type_error(prop_info, Z_STR_P(property), &z_copy);
 							}
 							zval_ptr_dtor(&z_copy);
+							Z_TRY_ADDREF_P(zptr); /* we copied by value into result.var */
 						}
 					} else {
 						zval_opt_copy_ctor(zptr);
@@ -28753,7 +28756,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 						}
 					}
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 				}
 			}
@@ -28876,6 +28879,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 								zend_verify_property_type_error(prop_info, Z_STR_P(property), &z_copy);
 							}
 							zval_ptr_dtor(&z_copy);
+							Z_TRY_ADDREF_P(zptr); /* we copied by value into result.var */
 						}
 					} else {
 						zval_opt_copy_ctor(zptr);
@@ -31788,7 +31792,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 						}
 					}
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 				}
 			}
@@ -31911,6 +31915,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 								zend_verify_property_type_error(prop_info, Z_STR_P(property), &z_copy);
 							}
 							zval_ptr_dtor(&z_copy);
+							Z_TRY_ADDREF_P(zptr); /* we copied by value into result.var */
 						}
 					} else {
 						zval_opt_copy_ctor(zptr);
@@ -34021,7 +34026,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 						}
 					}
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 				}
 			}
@@ -34145,6 +34150,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 								zend_verify_property_type_error(prop_info, Z_STR_P(property), &z_copy);
 							}
 							zval_ptr_dtor(&z_copy);
+							Z_TRY_ADDREF_P(zptr); /* we copied by value into result.var */
 						}
 					} else {
 						zval_opt_copy_ctor(zptr);
@@ -39087,7 +39093,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 						}
 					}
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 				}
 			}
@@ -39210,6 +39216,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 								zend_verify_property_type_error(prop_info, Z_STR_P(property), &z_copy);
 							}
 							zval_ptr_dtor(&z_copy);
+							Z_TRY_ADDREF_P(zptr); /* we copied by value into result.var */
 						}
 					} else {
 						zval_opt_copy_ctor(zptr);
@@ -46150,7 +46157,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 						}
 					}
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 				}
 			}
@@ -46273,6 +46280,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 								zend_verify_property_type_error(prop_info, Z_STR_P(property), &z_copy);
 							}
 							zval_ptr_dtor(&z_copy);
+							Z_TRY_ADDREF_P(zptr); /* we copied by value into result.var */
 						}
 					} else {
 						zval_opt_copy_ctor(zptr);
@@ -50323,7 +50331,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 						}
 					}
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline)) && EXPECTED(!EG(exception))) {
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 				}
 			}
@@ -50447,6 +50455,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 								zend_verify_property_type_error(prop_info, Z_STR_P(property), &z_copy);
 							}
 							zval_ptr_dtor(&z_copy);
+							Z_TRY_ADDREF_P(zptr); /* we copied by value into result.var */
 						}
 					} else {
 						zval_opt_copy_ctor(zptr);
