@@ -150,32 +150,35 @@ PHP_FUNCTION(intval)
 	}
 	
 	strval = Z_STRVAL_P(num);
-	strlen = Z_STRLEN_P(num);
 
-	while (isspace(*strval) && strlen) {
-		strval++;
-		strlen--;
-	}
+	if (base == 0 || base == 2) {
+		strlen = Z_STRLEN_P(num);
 
-	/* Length of 3+ covers "0b#" and "-0b" (which results in 0) */
-	if (strlen > 2) {
-		if (strval[0] == '-' || strval[0] == '+') {
-			offset = 1;
+		while (isspace(*strval) && strlen) {
+			strval++;
+			strlen--;
 		}
 
-		if (strval[offset] == '0' && (strval[offset + 1] == 'b' || strval[offset + 1] == 'B')) {
-			tmpval = emalloc(strlen - 2); /* Minus "0b" */
-
-			/* Place the unary symbol at pos 0 if there was one */
-			if (offset) {
-				tmpval[0] = strval[0];
+		/* Length of 3+ covers "0b#" and "-0b" (which results in 0) */
+		if (strlen > 2) {
+			if (strval[0] == '-' || strval[0] == '+') {
+				offset = 1;
 			}
-
-			/* Copy the data from after "0b" to the end of the buffer */
-			memcpy(tmpval + offset, strval + offset + 2, strlen - 2);
-			RETVAL_LONG(ZEND_STRTOL(tmpval, NULL, 2));
-			efree(tmpval);
-			return;
+	
+			if (strval[offset] == '0' && (strval[offset + 1] == 'b' || strval[offset + 1] == 'B')) {
+				tmpval = emalloc(strlen - 2); /* Minus "0b" */
+	
+				/* Place the unary symbol at pos 0 if there was one */
+				if (offset) {
+					tmpval[0] = strval[0];
+				}
+	
+				/* Copy the data from after "0b" to the end of the buffer */
+				memcpy(tmpval + offset, strval + offset + 2, strlen - 2);
+				RETVAL_LONG(ZEND_STRTOL(tmpval, NULL, 2));
+				efree(tmpval);
+				return;
+			}
 		}
 	}
 
