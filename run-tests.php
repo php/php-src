@@ -1609,6 +1609,11 @@ TEST $file
 					$info = " (warn: $m[1])";
 				}
 			}
+
+			if (!strncasecmp('xfail', ltrim($output), 5)) {
+				// Pretend we have an XFAIL section
+				$section_text['XFAIL'] = trim(substr(ltrim($output), 5));
+			}
 		}
 	}
 
