@@ -258,6 +258,11 @@ PHP 7.1 UPGRADE NOTES
   . Added curl_share_strerror() to convert error code to error message text
     describing the error.
 
+- Hash:
+  . In PHP 7.1.2: Added hash_hkdf() function, which implements the HMAC-based
+    Key Derivation Function (HKDF) algorithm according to RFC 5869. The
+    implementation combines the Extract and Expand steps.
+
 - pcntl:
   . Added pcntl_signal_get_handler() that returns the current signal handler
     for a particular signal.
