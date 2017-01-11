@@ -166,15 +166,18 @@ PHP_FUNCTION(intval)
 			}
 	
 			if (strval[offset] == '0' && (strval[offset + 1] == 'b' || strval[offset + 1] == 'B')) {
-				tmpval = emalloc(strlen - 2); /* Minus "0b" */
-	
+				strlen -= 2; /* Removing "0b" */
+				tmpval = emalloc(strlen + 1);
+
 				/* Place the unary symbol at pos 0 if there was one */
 				if (offset) {
 					tmpval[0] = strval[0];
 				}
 	
 				/* Copy the data from after "0b" to the end of the buffer */
-				memcpy(tmpval + offset, strval + offset + 2, strlen - 2);
+				memcpy(tmpval + offset, strval + offset + 2, strlen - offset);
+				tmpval[strlen] = 0;
+
 				RETVAL_LONG(ZEND_STRTOL(tmpval, NULL, 2));
 				efree(tmpval);
 				return;

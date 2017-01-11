@@ -4,8 +4,15 @@ Test intval() function with "0b" string prefix
 --FILE--
 <?php
 
+$isspaceChars = " \t\n\r\f\v";
+
 $goodInputs = [
-    '0b11111111111111111111111111111111',
+    '0b1111111111111111111111111111111',
+    '+0b1111111111111111111111111111111',
+    '-0b1111111111111111111111111111111',
+    $isspaceChars . '0b1111111111111111111111111111111',
+    $isspaceChars . '+0b1111111111111111111111111111111',
+    $isspaceChars . '-0b1111111111111111111111111111111',
     '0b',
     '0B',
     '0B1',
@@ -24,33 +31,35 @@ $badInputs = [
     '0 b123',
 ];
 
-$isspaceChars = " \t\n\r\f\v";
-
-print "--- Good Inputs ---\n";
+print "--- Good Inputs - Base = 0 ---\n";
 
 foreach ($goodInputs as $input) {
     var_dump(
-        $input,
-        intval($input, 0),
-        intval('+' . $input, 0),
-        intval('-' . $input, 0),
-        intval($isspaceChars . $input, 0),
-        intval($isspaceChars . '+' . $input, 0),
-        intval($isspaceChars . '-' . $input, 0)
+        intval($input, 0)
     );
 }
 
-print "--- Bad Inputs ---\n";
+print "--- Good Inputs - Base = 2 ---\n";
+
+foreach ($goodInputs as $input) {
+    var_dump(
+        intval($input, 2)
+    );
+}
+
+print "--- Good Inputs - Base = default ---\n";
+
+foreach ($goodInputs as $input) {
+    var_dump(
+        intval($input)
+    );
+}
+
+print "--- Bad Inputs - Base = 0 ---\n";
 
 foreach ($badInputs as $input) {
     var_dump(
-        $input,
-        intval($input, 0),
-        intval('+' . $input, 0),
-        intval('-' . $input, 0),
-        intval($isspaceChars . $input, 0),
-        intval($isspaceChars . '+' . $input, 0),
-        intval($isspaceChars . '-' . $input, 0)
+        intval($input, 0)
     );
 }
 
@@ -58,100 +67,49 @@ print '--- Done ---';
 
 ?>
 --EXPECTF--
---- Good Inputs ---
-string(34) "0b11111111111111111111111111111111"
-int(4294967295)
-int(4294967295)
-int(-4294967295)
-int(4294967295)
-int(4294967295)
-int(-4294967295)
-string(2) "0b"
+--- Good Inputs - Base = 0 ---
+int(2147483647)
+int(2147483647)
+int(-2147483647)
+int(2147483647)
+int(2147483647)
+int(-2147483647)
 int(0)
 int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-string(2) "0B"
-int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-string(3) "0B1"
 int(1)
-int(1)
-int(-1)
-int(1)
-int(1)
-int(-1)
-string(5) "0b000"
 int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-string(5) "0b001"
 int(1)
-int(1)
-int(-1)
-int(1)
-int(1)
-int(-1)
-string(7) "0b00100"
 int(4)
+int(1)
+--- Good Inputs - Base = 2 ---
+int(2147483647)
+int(2147483647)
+int(-2147483647)
+int(2147483647)
+int(2147483647)
+int(-2147483647)
+int(0)
+int(0)
+int(1)
+int(0)
+int(1)
 int(4)
-int(-4)
-int(4)
-int(4)
-int(-4)
-string(5) "0b1 1"
 int(1)
-int(1)
-int(-1)
-int(1)
-int(1)
-int(-1)
---- Bad Inputs ---
-string(4) "b101"
+--- Good Inputs - Base = default ---
 int(0)
 int(0)
 int(0)
 int(0)
 int(0)
 int(0)
-string(7) "0b00200"
 int(0)
 int(0)
 int(0)
 int(0)
 int(0)
 int(0)
-string(7) "--0b123"
 int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-string(7) "++0b123"
-int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-string(6) "0bb123"
-int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-string(6) "0 b123"
+--- Bad Inputs - Base = 0 ---
 int(0)
 int(0)
 int(0)
