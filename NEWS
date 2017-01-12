@@ -11,6 +11,10 @@ PHP                                                                        NEWS
 - FCGI:
   . Fixed bug #73904 (php-cgi fails to load -c specified php.ini file). (Anatol)
 
+- Mysqlnd:
+  . Fixed bug #69899 (segfault on close() after free_result() with mysqlnd).
+    (Richard Fussenegger)
+
 - OpenSSL:
   . Fixed bug #71519 (add serial hex to return value array). (xrobau)
   . Fixed bug #73692 (Compile ext/openssl with openssl 1.1.0 on Win). (Anatol)
