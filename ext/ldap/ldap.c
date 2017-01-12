@@ -3289,7 +3289,7 @@ ZEND_END_ARG_INFO()
 #if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_set_rebind_proc, 0, 0, 2)
 	ZEND_ARG_INFO(0, link)
-	ZEND_ARG_INFO(0, callback)
+	ZEND_ARG_CALLABLE_INFO(0, callback, 0)
 ZEND_END_ARG_INFO()
 #endif
 

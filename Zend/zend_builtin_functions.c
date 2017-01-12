@@ -209,12 +209,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_trigger_error, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_set_error_handler, 0, 0, 1)
-	ZEND_ARG_INFO(0, error_handler)
+	ZEND_ARG_CALLABLE_INFO(0, error_handler, 0)
 	ZEND_ARG_INFO(0, error_types)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_set_exception_handler, 0, 0, 1)
-	ZEND_ARG_INFO(0, exception_handler)
+	ZEND_ARG_CALLABLE_INFO(0, exception_handler, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_create_function, 0, 0, 2)

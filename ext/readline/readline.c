@@ -110,7 +110,7 @@ ZEND_END_ARG_INFO()
 #if HAVE_RL_CALLBACK_READ_CHAR
 ZEND_BEGIN_ARG_INFO_EX(arginfo_readline_callback_handler_install, 0, 0, 2)
 	ZEND_ARG_INFO(0, prompt)
-	ZEND_ARG_INFO(0, callback)
+	ZEND_ARG_CALLABLE_INFO(0, callback, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_readline_callback_read_char, 0)

@@ -1863,7 +1863,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_array_setIteratorClass, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_array_uXsort, 0)
-	ZEND_ARG_INFO(0, cmp_function)
+	ZEND_ARG_CALLABLE_INFO(0, cmp_function, 0)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_array_unserialize, 0)

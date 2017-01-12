@@ -461,7 +461,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_ereg_replace_callback, 0, 0, 3)
 	ZEND_ARG_INFO(0, pattern)
-	ZEND_ARG_INFO(0, callback)
+	ZEND_ARG_CALLABLE_INFO(0, callback, 0)
 	ZEND_ARG_INFO(0, string)
 	ZEND_ARG_INFO(0, option)
 ZEND_END_ARG_INFO()
