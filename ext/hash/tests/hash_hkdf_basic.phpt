@@ -51,12 +51,6 @@ echo 'haval256,5: ', bin2hex(hash_hkdf('haval256,5', $ikm)), "\n";
 echo 'snefru: ', bin2hex(hash_hkdf('snefru', $ikm)), "\n";
 echo 'snefru256: ', bin2hex(hash_hkdf('snefru256', $ikm)), "\n";
 echo 'gost: ', bin2hex(hash_hkdf('gost', $ikm)), "\n";
-echo 'adler32: ', bin2hex(hash_hkdf('adler32', $ikm)), "\n";
-echo 'crc32: ', bin2hex(hash_hkdf('crc32', $ikm)), "\n";
-echo 'crc32b: ', bin2hex(hash_hkdf('crc32b', $ikm)), "\n";
-echo 'fnv132: ', bin2hex(hash_hkdf('fnv132', $ikm)), "\n";
-echo 'fnv164: ', bin2hex(hash_hkdf('fnv164', $ikm)), "\n";
-echo 'joaat: ', bin2hex(hash_hkdf('joaat', $ikm)), "\n";
 
 ?>
 --EXPECTF--
@@ -98,9 +92,3 @@ haval256,5: 9dbab73d13f1fd3a1b41398fe90ba1f298329681d861b023373c33f1051bd4d3
 snefru: 798eac954e5ece38e9acb63b50c1c2ecb799d34356358cec5a80eeeea91c8de9
 snefru256: 798eac954e5ece38e9acb63b50c1c2ecb799d34356358cec5a80eeeea91c8de9
 gost: 64edd584b87a2dfdd1f2b44ed2db8bd27af8386aafe751c2aebaed32dfa3852e
-adler32: 111203fb
-crc32: d402e91f
-crc32b: 63a85b24
-fnv132: 353e847c
-fnv164: 9e8849af1a6d29ac
-joaat: 1bde5739

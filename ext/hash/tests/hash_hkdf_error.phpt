@@ -24,6 +24,16 @@ var_dump(hash_hkdf('sha1', $ikm, 20, '', '', 'extra parameter'));
 echo "\n-- Testing hash_hkdf() function with invalid hash algorithm --\n";
 var_dump(hash_hkdf('foo', $ikm));
 
+echo "\n-- Testing hash_hkdf() function with non-cryptographic hash algorithm --\n";
+var_dump(hash_hkdf('adler32', $ikm));
+var_dump(hash_hkdf('crc32', $ikm));
+var_dump(hash_hkdf('crc32b', $ikm));
+var_dump(hash_hkdf('fnv132', $ikm));
+var_dump(hash_hkdf('fnv1a32', $ikm));
+var_dump(hash_hkdf('fnv164', $ikm));
+var_dump(hash_hkdf('fnv1a64', $ikm));
+var_dump(hash_hkdf('joaat', $ikm));
+
 echo "\n-- Testing hash_hkdf() function with invalid parameters --\n";
 var_dump(hash_hkdf('sha1', ''));
 var_dump(hash_hkdf('sha1', $ikm, -1));
@@ -49,6 +59,32 @@ NULL
 -- Testing hash_hkdf() function with invalid hash algorithm --
 
 Warning: hash_hkdf(): Unknown hashing algorithm: foo in %s on line %d
+bool(false)
+
+-- Testing hash_hkdf() function with non-cryptographic hash algorithm --
+
+Warning: hash_hkdf(): Non-cryptographic hashing algorithm: adler32 in %s on line %d
+bool(false)
+
+Warning: hash_hkdf(): Non-cryptographic hashing algorithm: crc32 in %s on line %d
+bool(false)
+
+Warning: hash_hkdf(): Non-cryptographic hashing algorithm: crc32b in %s on line %d
+bool(false)
+
+Warning: hash_hkdf(): Non-cryptographic hashing algorithm: fnv132 in %s on line %d
+bool(false)
+
+Warning: hash_hkdf(): Non-cryptographic hashing algorithm: fnv1a32 in %s on line %d
+bool(false)
+
+Warning: hash_hkdf(): Non-cryptographic hashing algorithm: fnv164 in %s on line %d
+bool(false)
+
+Warning: hash_hkdf(): Non-cryptographic hashing algorithm: fnv1a64 in %s on line %d
+bool(false)
+
+Warning: hash_hkdf(): Non-cryptographic hashing algorithm: joaat in %s on line %d
 bool(false)
 
 -- Testing hash_hkdf() function with invalid parameters --

@@ -597,6 +597,25 @@ PHP_FUNCTION(hash_algos)
 }
 /* }}} */
 
+static inline int php_hash_is_crypto(const char *algo, size_t algo_len) {
+
+	char *blacklist[] = { "adler32", "crc32", "crc32b", "fnv132", "fnv1a32", "fnv164", "fnv1a64", "joaat", 0 };
+	char *lower       = zend_str_tolower_dup(algo, algo_len);
+	int i = 0;
+
+	while (blacklist[i]) {
+		if (strcmp(lower, blacklist[i]) == 0) {
+			i = -1;
+			break;
+		}
+
+		i++;
+	}
+
+	efree(lower);
+	return i;
+}
+
 /* {{{ proto string hash_hkdf(string algo, string ikm [, int length = 0, string info = '', string salt = ''])
 RFC5869 HMAC-based key derivation function */
 PHP_FUNCTION(hash_hkdf)
@@ -616,6 +635,10 @@ PHP_FUNCTION(hash_hkdf)
 	ops = php_hash_fetch_ops(ZSTR_VAL(algo), ZSTR_LEN(algo));
 	if (!ops) {
 		php_error_docref(NULL, E_WARNING, "Unknown hashing algorithm: %s", ZSTR_VAL(algo));
+		RETURN_FALSE;
+	}
+	else if (php_hash_is_crypto(ZSTR_VAL(algo), ZSTR_LEN(algo)) == -1) {
+		php_error_docref(NULL, E_WARNING, "Non-cryptographic hashing algorithm: %s", ZSTR_VAL(algo));
 		RETURN_FALSE;
 	}
 
