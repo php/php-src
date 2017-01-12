@@ -8,6 +8,9 @@ PHP                                                                        NEWS
   . Fixed bug #73876 (Crash when exporting **= in expansion of assign op).
     (Sara)
 
+- FCGI:
+  . Fixed bug #73904 (php-cgi fails to load -c specified php.ini file). (Anatol)
+
 - OpenSSL:
   . Fixed bug #71519 (add serial hex to return value array). (xrobau)
   . Fixed bug #73692 (Compile ext/openssl with openssl 1.1.0 on Win). (Anatol)
