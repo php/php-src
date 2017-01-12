@@ -2078,11 +2078,7 @@ PHP_FUNCTION(strrpos)
 			RETURN_FALSE;
 		}
 		p = ZSTR_VAL(haystack);
-		if ((size_t)-offset < needle_len) {
-			e = ZSTR_VAL(haystack) + ZSTR_LEN(haystack);
-		} else {
-			e = ZSTR_VAL(haystack) + ZSTR_LEN(haystack) + offset + needle_len;
-		}
+		e = ZSTR_VAL(haystack) + ZSTR_LEN(haystack) + offset;
 	}
 
 	if ((found = (char *)zend_memnrstr(p, needle, needle_len, e))) {
@@ -2146,7 +2142,7 @@ PHP_FUNCTION(strripos)
 				php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
 				RETURN_FALSE;
 			}
-			e = ZSTR_VAL(haystack) + ZSTR_LEN(haystack) + (size_t)offset;
+			e = ZSTR_VAL(haystack) + ZSTR_LEN(haystack) + (size_t)offset - 1;
 		}
 		/* Borrow that ord_needle buffer to avoid repeatedly tolower()ing needle */
 		*ZSTR_VAL(ord_needle) = tolower(*ZSTR_VAL(needle));
@@ -2179,11 +2175,7 @@ PHP_FUNCTION(strripos)
 			RETURN_FALSE;
 		}
 		p = ZSTR_VAL(haystack_dup);
-		if ((size_t)-offset < ZSTR_LEN(needle)) {
-			e = ZSTR_VAL(haystack_dup) + ZSTR_LEN(haystack);
-		} else {
-			e = ZSTR_VAL(haystack_dup) + ZSTR_LEN(haystack) + offset + ZSTR_LEN(needle);
-		}
+        e = ZSTR_VAL(haystack_dup) + ZSTR_LEN(haystack_dup) + offset;
 	}
 
 	needle_dup = php_string_tolower(needle);
