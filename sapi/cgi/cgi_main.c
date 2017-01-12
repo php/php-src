@@ -2018,6 +2018,22 @@ consult the installation file that came with this distribution, or visit \n\
 			/* This is the number of concurrent requests, equals FCGI_MAX_CONNS */
 			fcgi_set_mgmt_var("FCGI_MAX_REQS",  sizeof("FCGI_MAX_REQS")-1,  children_str, strlen(children_str));
 		} else {
+#ifdef PHP_WIN32
+			/* If this env var is set, the process was invoked as a child. Let
+				it show the original PHP_FCGI_CHILDREN value, while don't care
+				otherwise. */
+			char * children_str = getenv("PHP_FCGI_CHILDREN_FOR_KID");
+			if (children_str) {
+				char putenv_buf[sizeof("PHP_FCGI_CHILDREN")+5];
+
+				snprintf(putenv_buf, sizeof(putenv_buf), "%s=%s", "PHP_FCGI_CHILDREN", children_str);
+				putenv(putenv_buf);
+				putenv("PHP_FCGI_CHILDREN_FOR_KID=");
+
+				SetEnvironmentVariable("PHP_FCGI_CHILDREN", children_str);
+				SetEnvironmentVariable("PHP_FCGI_CHILDREN_FOR_KID", NULL);
+			}
+#endif
 			fcgi_set_mgmt_var("FCGI_MAX_CONNS", sizeof("FCGI_MAX_CONNS")-1, "1", sizeof("1")-1);
 			fcgi_set_mgmt_var("FCGI_MAX_REQS",  sizeof("FCGI_MAX_REQS")-1,  "1", sizeof("1")-1);
 		}
@@ -2124,6 +2140,10 @@ consult the installation file that came with this distribution, or visit \n\
 
 			/* kids will inherit the env, don't let them spawn */
 			SetEnvironmentVariable("PHP_FCGI_CHILDREN", NULL);
+			/* instead, set a temporary env var, so then the child can read and
+				show the actual setting correctly. */
+			snprintf(kid_buf, 16, "%d", children);
+			SetEnvironmentVariable("PHP_FCGI_CHILDREN_FOR_KID", kid_buf);
 
 			/* The current command line is used as is. This should normally be no issue,
 				even if there were some I/O redirection. If some issues turn out, an
@@ -2216,7 +2236,6 @@ consult the installation file that came with this distribution, or visit \n\
 				WaitForMultipleObjects(kids, kid_cgi_ps, FALSE, INFINITE);
 			}
 			
-			snprintf(kid_buf, 16, "%d", children);
 			/* restore my env */
 			SetEnvironmentVariable("PHP_FCGI_CHILDREN", kid_buf);
 
