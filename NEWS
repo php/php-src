@@ -10,6 +10,7 @@ PHP                                                                        NEWS
 
 - FCGI:
   . Fixed bug #73904 (php-cgi fails to load -c specified php.ini file). (Anatol)
+  . Fixed bug #72898 (PHP_FCGI_CHILDREN is not included in phpinfo()). (Anatol)
 
 - Mysqlnd:
   . Fixed bug #69899 (segfault on close() after free_result() with mysqlnd).
