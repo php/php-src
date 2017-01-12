@@ -29,22 +29,33 @@ document ____executor_globals
 end
 
 define print_cvs
-	____executor_globals
-	set $p = $eg.current_execute_data.CVs
-	set $c = $eg.current_execute_data.op_array.last_var
-	set $v = $eg.current_execute_data.op_array.vars
-	set $i = 0
-
-	printf "Compiled variables count: %d\n", $c
-	while $i < $c
-		printf "%d = %s\n", $i, $v[$i].name
-		if $p[$i] != 0
-			printzv *$p[$i]
-		else
-			printf "*uninitialized*\n"
-		end
-		set $i = $i + 1
+	if $argc == 0
+		____executor_globals
+		set $cv_ex_ptr = $eg.current_execute_data
+	else
+		set $cv_ex_ptr = (zend_execute_data *)$arg0
 	end
+	set $cv_count = $cv_ex_ptr.func.op_array.last_var
+	set $cv = $cv_ex_ptr.func.op_array.vars
+	set $cv_idx = 0
+	set $callFrameSize = (sizeof(zend_execute_data) + sizeof(zval) - 1) / sizeof(zval)
+
+	printf "Compiled variables count: %d\n\n", $cv_count
+	while $cv_idx < $cv_count
+		printf "[%d] '%s'\n", $cv_idx, $cv[$cv_idx].val
+		set $zvalue = ((zval *) $cv_ex_ptr) + $callFrameSize + $cv_idx
+		printzv $zvalue
+		set $cv_idx = $cv_idx + 1
+	end
+end
+
+document print_cvs
+	Prints the compiled variables and their values.
+	If a zend_execute_data pointer is set this will print the compiled
+	variables of that scope. If no parameter is used it will use
+	current_execute_data for scope.
+
+	usage: print_cvs [zend_execute_data *]
 end
 
 define dump_bt
@@ -563,7 +574,7 @@ end
 
 document print_zstr
 	print the length and contents of a zend string
-	usage: print_zstr [ptr]
+	usage: print_zstr <ptr>
 end
 
 define zbacktrace
