@@ -102,7 +102,7 @@ PHP                                                                        NEWS
     (Keith Smiley)
 
 - SQLite3:
-  . Update to Sqlite 3.15.2. (cmb)
+  . Update to Sqlite 3.16.2. (cmb)
 
 - Standard:
   . Add subject to mail log. (tomsommer)
