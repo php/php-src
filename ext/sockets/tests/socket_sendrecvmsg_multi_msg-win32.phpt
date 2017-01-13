@@ -60,10 +60,10 @@ print_r($data);
 
 --EXPECTF--
 creating send socket
-resource(5) of type (Socket)
+resource(%d) of type (Socket)
 bool(true)
 creating receive socket
-resource(6) of type (Socket)
+resource(%d) of type (Socket)
 bool(true)
 int(11)
 Array
