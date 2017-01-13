@@ -77,9 +77,9 @@ bool(false)
 
 -- Offset is -12 --
 Multibyte String:
-int(9)
+bool(false)
 ASCII String:
 mb_strrpos:
-int(9)
+bool(false)
 strrpos:
-int(9)
+bool(false)

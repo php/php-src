@@ -1115,20 +1115,17 @@ mbfl_strpos(
 		p = e + haystack_u8->len;
 		qe = needle_u8_val + needle_u8_len;
 		if (offset < 0) {
-			if (-offset > needle_len) {
-				offset += needle_len;
-				while (offset < 0) {
-					unsigned char c;
-					if (p <= e) {
-						result = -16;
-						goto out;
-					}
-					c = *(--p);
-					if (c < 0x80) {
-						++offset;
-					} else if ((c & 0xc0) != 0x80) {
-						++offset;
-					}
+			while (offset < 0) {
+				unsigned char c;
+				if (p <= e) {
+					result = -16;
+					goto out;
+				}
+				c = *(--p);
+				if (c < 0x80) {
+					++offset;
+				} else if ((c & 0xc0) != 0x80) {
+					++offset;
 				}
 			}
 		} else {

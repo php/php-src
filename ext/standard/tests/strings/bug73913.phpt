@@ -9,11 +9,25 @@ var_dump(strrpos("/documents/show/5474", '/', -20)); //ER: false, AR: 0
 var_dump(strrpos("works_like_a_charm", 'charm', -3)); //ER: false, AR: 13
 var_dump(strrpos("works_like_a_charm", 'charm', -4)); //ER: false, AR: 13
 
+var_dump(strrpos('9876543210', '2', -1));
+var_dump(strrpos('9876543210', '2', -2));
+var_dump(strrpos('9876543210', '2', -3));
+var_dump(strrpos('9876543210', '21', -1));
+var_dump(strrpos('9876543210', '21', -2));
+var_dump(strrpos('9876543210', '21', -3));
+
 var_dump(strripos("AAAA", 'aa', -2)); //ER: 0, AR: 2
 var_dump(strripos("AAAA", 'a', -1)); //ER: 2, AR: 3
 var_dump(strripos("/documents/show/5474", '/', -20)); //ER: false, AR: 0
 var_dump(strripos("WORKS_LIKE_A_CHARM", 'charm', -3)); //ER: false, AR: 13
 var_dump(strripos("WORKS_LIKE_A_CHARM", 'charm', -4)); //ER: false, AR: 13
+
+var_dump(strripos('9876543210', '2', -1));
+var_dump(strripos('9876543210', '2', -2));
+var_dump(strripos('9876543210', '2', -3));
+var_dump(strripos('9876543210', '21', -1));
+var_dump(strripos('9876543210', '21', -2));
+var_dump(strripos('9876543210', '21', -3));
 
 echo "Done\n";
 ?>
@@ -23,9 +37,21 @@ int(2)
 bool(false)
 bool(false)
 bool(false)
+int(7)
+int(7)
+bool(false)
+int(7)
+bool(false)
+bool(false)
 int(0)
 int(2)
 bool(false)
+bool(false)
+bool(false)
+int(7)
+int(7)
+bool(false)
+int(7)
 bool(false)
 bool(false)
 Done
