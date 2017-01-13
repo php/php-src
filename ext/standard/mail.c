@@ -491,7 +491,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	if (mail_log && *mail_log) {
 		char *logline;
 
-		spprintf(&logline, 0, "mail() on [%s:%d]: To: %s -- Headers: %s -- Subject: %s\n", zend_get_executed_filename(), zend_get_executed_lineno(), to, hdr ? hdr : "", subject);
+		spprintf(&logline, 0, "mail() on [%s:%d]: To: %s -- Headers: %s -- Subject: %s", zend_get_executed_filename(), zend_get_executed_lineno(), to, hdr ? hdr : "", subject);
 
 		if (hdr) {
 			php_mail_log_crlf_to_spaces(logline);
