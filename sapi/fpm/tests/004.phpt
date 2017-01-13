@@ -30,14 +30,14 @@ if (is_resource($fpm)) {
     fpm_display_log($tail, 2);
     $i = 0;
     while (($i++ < 60) && !($fp = @fsockopen('127.0.0.1', $port))) {
-        usleep(25000);
+        usleep(50000);
     }
     if ($fp) {
         echo "Done IPv4\n";
         fclose($fp);
     }
     while (($i++ < 60) && !($fp = @fsockopen('[::1]', $port))) {
-        usleep(25000);
+        usleep(50000);
     }
     if ($fp) {
         echo "Done IPv6\n";
