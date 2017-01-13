@@ -661,7 +661,7 @@ static int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_s
 				} else {
 					return 0;
 				}
-				return (cur_arg_info->type_hint != 0);
+				return ZEND_TYPE_IS_SET(cur_arg_info->type);
 			} else {
 				return 0;
 			}

@@ -1474,46 +1474,45 @@ static ZEND_COLD void zend_verify_type_error_common(
 		*fclass = "";
 	}
 
-	switch (arg_info->type_hint) {
-		case IS_OBJECT:
-			if (ce) {
-				if (ce->ce_flags & ZEND_ACC_INTERFACE) {
-					*need_msg = "implement interface ";
-					is_interface = 1;
-				} else {
-					*need_msg = "be an instance of ";
-				}
-				*need_kind = ZSTR_VAL(ce->name);
+	if (ZEND_TYPE_IS_CLASS(arg_info->type)) {
+		if (ce) {
+			if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+				*need_msg = "implement interface ";
+				is_interface = 1;
 			} else {
-				/* We don't know whether it's a class or interface, assume it's a class */
 				*need_msg = "be an instance of ";
-				*need_kind = zf->common.type == ZEND_INTERNAL_FUNCTION
-					? ((zend_internal_arg_info *) arg_info)->class_name
-					: ZSTR_VAL(arg_info->class_name);
 			}
-			break;
-		case IS_CALLABLE:
-			*need_msg = "be callable";
-			*need_kind = "";
-			break;
-		case IS_ITERABLE:
-			*need_msg = "be iterable";
-			*need_kind = "";
-			break;
-		default:
-			*need_msg = "be of the type ";
-			*need_kind = zend_get_type_by_const(arg_info->type_hint);
-			break;
+			*need_kind = ZSTR_VAL(ce->name);
+		} else {
+			/* We don't know whether it's a class or interface, assume it's a class */
+			*need_msg = "be an instance of ";
+			*need_kind = ZSTR_VAL(ZEND_TYPE_NAME(arg_info->type));
+		}
+	} else {
+		switch (ZEND_TYPE_CODE(arg_info->type)) {
+			case IS_CALLABLE:
+				*need_msg = "be callable";
+				*need_kind = "";
+				break;
+			case IS_ITERABLE:
+				*need_msg = "be iterable";
+				*need_kind = "";
+				break;
+			default:
+				*need_msg = "be of the type ";
+				*need_kind = zend_get_type_by_const(ZEND_TYPE_CODE(arg_info->type));
+				break;
+		}
 	}
 
-	if (arg_info->allow_null) {
+	if (ZEND_TYPE_ALLOW_NULL(arg_info->type)) {
 		*need_or_null = is_interface ? " or be null" : " or null";
 	} else {
 		*need_or_null = "";
 	}
 
 	if (value) {
-		if (arg_info->type_hint == IS_OBJECT && Z_TYPE_P(value) == IS_OBJECT) {
+		if (ZEND_TYPE_IS_CLASS(arg_info->type) && Z_TYPE_P(value) == IS_OBJECT) {
 			*given_msg = "instance of ";
 			*given_kind = ZSTR_VAL(Z_OBJCE_P(value)->name);
 		} else {
@@ -1561,7 +1560,7 @@ static void ZEND_FASTCALL zend_jit_verify_arg_object(zval *arg, zend_op_array *o
 	if (EXPECTED(*cache_slot)) {
 		ce = (zend_class_entry *)*cache_slot;
 	} else {
-		ce = zend_fetch_class(arg_info->class_name, (ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD));
+		ce = zend_fetch_class(ZEND_TYPE_NAME(arg_info->type), (ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD));
 		if (UNEXPECTED(!ce)) {
 			zend_verify_arg_error((zend_function*)op_array, arg_info, arg_num, NULL, arg);
 			return;
@@ -1578,35 +1577,35 @@ static void ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, zend_op_array *op_
 	zend_class_entry *ce = NULL;
 
 	if (Z_TYPE_P(arg) == IS_NULL &&
-		(arg_info->allow_null || (default_value && is_null_constant(op_array->scope, default_value)))) {
+		(ZEND_TYPE_ALLOW_NULL(arg_info->type) || (default_value && is_null_constant(op_array->scope, default_value)))) {
 		/* Null passed to nullable type */
 		return;
 	}
 
-	if (UNEXPECTED(arg_info->class_name)) {
+	if (UNEXPECTED(ZEND_TYPE_IS_CLASS(arg_info->type))) {
 		/* This is always an error - we fetch the class name for the error message here */
 		if (EXPECTED(*cache_slot)) {
 			ce = (zend_class_entry *) *cache_slot;
 		} else {
-			ce = zend_fetch_class(arg_info->class_name, (ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD));
+			ce = zend_fetch_class(ZEND_TYPE_NAME(arg_info->type), (ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD));
 			if (ce) {
 				*cache_slot = (void *)ce;
 			}
 		}
 		goto err;
-	} else if (arg_info->type_hint == IS_CALLABLE) {
+	} else if (ZEND_TYPE_CODE(arg_info->type) == IS_CALLABLE) {
 		if (zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL) == 0) {
 			goto err;
 		}
-	} else if (arg_info->type_hint == IS_ITERABLE) {
+	} else if (ZEND_TYPE_CODE(arg_info->type) == IS_ITERABLE) {
 		if (zend_is_iterable(arg) == 0) {
 			goto err;
 		}
-	} else if (arg_info->type_hint == _IS_BOOL &&
+	} else if (ZEND_TYPE_CODE(arg_info->type) == _IS_BOOL &&
 			EXPECTED(Z_TYPE_P(arg) == IS_FALSE || Z_TYPE_P(arg) == IS_TRUE)) {
 		return;
 	} else {
-		if (zend_verify_scalar_type_hint(arg_info->type_hint, arg, ZEND_RET_USES_STRICT_TYPES()) == 0) {
+		if (zend_verify_scalar_type_hint(ZEND_TYPE_CODE(arg_info->type), arg, ZEND_RET_USES_STRICT_TYPES()) == 0) {
 			goto err;
 		}
 	}

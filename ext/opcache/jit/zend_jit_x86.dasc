@@ -7537,15 +7537,18 @@ static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, zend_op_a
 			} else {
 				break;
 			}
-			if (!arg_info->type_hint) {
+			if (!ZEND_TYPE_IS_SET(arg_info->type)) {
 				break;
 			}
 			has_slow += 2;
 			|	lea r0, aword [FP + opline->result.var]
 			|	ZVAL_DEREF r0, MAY_BE_REF
-			|	cmp byte [r0 + 8], arg_info->type_hint
+			if (!ZEND_TYPE_IS_CLASS(arg_info->type)) {
+			|	cmp byte [r0 + 8], ZEND_TYPE_CODE(arg_info->type)
 			|	jne >8
-			if (arg_info->class_name) {
+			} else {
+			|	cmp byte [r0 + 8], IS_OBJECT
+			|	jne >8
 			|	mov FCARG1a, r0
 			|	mov r0,	EX->run_time_cache
 			|	lea r0, [r0 + Z_CACHE_SLOT_P(zv)]

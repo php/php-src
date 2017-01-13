@@ -98,6 +98,64 @@ typedef void (*sort_func_t)(void *, size_t, size_t, compare_func_t, swap_func_t)
 typedef void (*dtor_func_t)(zval *pDest);
 typedef void (*copy_ctor_func_t)(zval *pElement);
 
+/*
+ * zend_type - is an abstraction layer to represent information about type hint.
+ * It shouldn't be used directly. Only through ZEND_TYPE_* macros.
+ *
+ * ZEND_TYPE_IS_SET()     - checks if type-hint exists
+ * ZEND_TYPE_IS_CODE()    - checks if type-hint refer to standard type
+ * ZEND_TYPE_IS_CLASS()   - checks if type-hint refer to some class
+ *
+ * ZEND_TYPE_NAME()       - returns referenced class name
+ * ZEND_TYPE_CE()         - returns referenced class entry
+ * ZEND_TYPE_CODE()       - returns standard type code (e.g. IS_LONG, _IS_BOOL)
+ *
+ * ZEND_TYPE_ALLOW_NULL() - checks if NULL is allowed
+ *
+ * ZEND_TYPE_ENCODE() and ZEND_TYPE_ENCODE_CLASS() should be used for
+ * construction.
+ */
+
+typedef uintptr_t zend_type;
+
+#define ZEND_TYPE_IS_SET(t) \
+	((t) > Z_L(1))
+
+#define ZEND_TYPE_IS_CODE(t) \
+	(((t) > Z_L(1)) && ((t) <= Z_L(0x1ff)))
+
+#define ZEND_TYPE_IS_CLASS(t) \
+	((t) > Z_L(0x1ff))
+
+#define ZEND_TYPE_NAME(t) \
+	((zend_string*)((t) & ~Z_L(0x3)))
+
+#define ZEND_TYPE_CE(t) \
+	((zend_class_entry*)((t) & ~Z_L(0x3)))
+
+#define ZEND_TYPE_CODE(t) \
+	((t) >> Z_L(1))
+
+#define ZEND_TYPE_ALLOW_NULL(t) \
+	(((t) & Z_L(0x1)) != 0)
+
+#define ZEND_TYPE_ENCODE(code, allow_null) \
+	(((code) << Z_L(1)) | ((allow_null) ? Z_L(0x1) : Z_L(0x0)))
+
+#define ZEND_TYPE_ENCODE_CLASS(class_name, allow_null) \
+	(((uintptr_t)(class_name)) | ((allow_null) ? Z_L(0x1) : Z_L(0)))
+
+#define ZEND_TYPE_ENCODE_CLASS_CONST_0(class_name) \
+	((zend_type) class_name)
+#define ZEND_TYPE_ENCODE_CLASS_CONST_1(class_name) \
+	((zend_type) "?" class_name)
+#define ZEND_TYPE_ENCODE_CLASS_CONST_Q2(macro, class_name) \
+	macro(class_name)
+#define ZEND_TYPE_ENCODE_CLASS_CONST_Q1(allow_null, class_name) \
+	ZEND_TYPE_ENCODE_CLASS_CONST_Q2(ZEND_TYPE_ENCODE_CLASS_CONST_ ##allow_null, class_name)
+#define ZEND_TYPE_ENCODE_CLASS_CONST(class_name, allow_null) \
+	ZEND_TYPE_ENCODE_CLASS_CONST_Q1(allow_null, class_name)
+
 typedef union _zend_value {
 	zend_long         lval;				/* long value */
 	double            dval;				/* double value */
