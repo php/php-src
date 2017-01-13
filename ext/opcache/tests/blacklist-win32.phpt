@@ -18,6 +18,7 @@ $conf[4] = preg_replace("!^\\Q".dirname(__FILE__)."\\E!", "__DIR__", $conf[4]);
 print_r($conf);
 include("blacklist.inc");
 $status = opcache_get_status();
+/* Probably should only test for > 0 here.*/
 print_r(count($status['scripts']));
 ?>
 --EXPECTF--
@@ -32,4 +33,4 @@ Array
     [6] => %scurrent.php
 )
 ok
-1
+5
