@@ -273,6 +273,9 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
 		$phpdbg_info = '';
 	}
 
+	if (function_exists('opcache_invalidate')) {
+		opcache_invalidate($info_file, true);
+	}
 	@unlink($info_file);
 
 	// load list of enabled extensions
@@ -293,6 +296,9 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
 		}
 	}
 
+	if (function_exists('opcache_invalidate')) {
+		opcache_invalidate($info_file, true);
+	}
 	@unlink($info_file);
 
 	// Write test context information.
