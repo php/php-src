@@ -4363,8 +4363,14 @@ ZEND_VM_HANDLER(41, ZEND_GENERATOR_CREATE, ANY, ANY)
 		 * is allocated on heap.
 		 */
 		num_args = EX_NUM_ARGS();
-		used_stack = (ZEND_CALL_FRAME_SLOT + num_args + EX(func)->op_array.last_var + EX(func)->op_array.T - MIN(EX(func)->op_array.num_args, num_args)) * sizeof(zval);
-		gen_execute_data = (zend_execute_data*)emalloc(used_stack);
+		if (EXPECTED(num_args <= EX(func)->op_array.last_var)) {
+			used_stack = (ZEND_CALL_FRAME_SLOT + EX(func)->op_array.last_var + EX(func)->op_array.T) * sizeof(zval);
+			gen_execute_data = (zend_execute_data*)emalloc(used_stack);
+			used_stack = (ZEND_CALL_FRAME_SLOT + EX(func)->op_array.last_var) * sizeof(zval);
+		} else {
+			used_stack = (ZEND_CALL_FRAME_SLOT + num_args + EX(func)->op_array.last_var + EX(func)->op_array.T - EX(func)->op_array.num_args) * sizeof(zval);
+			gen_execute_data = (zend_execute_data*)emalloc(used_stack);
+		}
 		memcpy(gen_execute_data, execute_data, used_stack);
 
 		/* Save execution context in generator object. */

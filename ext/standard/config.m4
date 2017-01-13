@@ -410,11 +410,6 @@ dnl
 AC_CHECK_DECLS([arc4random_buf])
 
 dnl
-dnl Check for getrandom on newer Linux kernels
-dnl
-AC_CHECK_DECLS([getrandom])
-
-dnl
 dnl Check for argon2
 dnl
 PHP_ARG_WITH(password-argon2, for Argon2 support,

@@ -1,7 +1,5 @@
 --TEST--
 Bug #72663: Create an Unexpected Object and Don't Invoke __wakeup() in Deserialization
---XFAIL--
-Memory leak, TBF later.
 --FILE--
 <?php
 class obj {
