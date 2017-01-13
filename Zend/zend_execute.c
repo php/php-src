@@ -2984,7 +2984,9 @@ ZEND_API zval *zend_get_zval_ptr(int op_type, const znode_op *node, const zend_e
 
 ZEND_API void ZEND_FASTCALL zend_check_internal_arg_type(zend_function *zf, uint32_t arg_num, zval *arg)
 {
-	zend_verify_arg_type(zf, arg_num, arg, NULL, NULL);
+	void *dummy_cache_slot = NULL;
+
+	zend_verify_arg_type(zf, arg_num, arg, NULL, &dummy_cache_slot);
 }
 
 ZEND_API int ZEND_FASTCALL zend_check_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot)
