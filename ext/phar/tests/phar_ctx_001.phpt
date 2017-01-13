@@ -28,12 +28,12 @@ var_dump($phar['b']->isCompressed());
 var_dump(file_get_contents($pname . '/c'));
 var_dump($phar['c']->isCompressed());
 
-$context = stream_context_create(array('phar'=> array('compress'=>Phar::GZ, 'metadata' => array(2, b'hi' => 3))));
+$context = stream_context_create(array('phar'=> array('compress'=>Phar::GZ, 'metadata' => array(2, 'hi' => 3))));
 $context2 = stream_context_create(array('phar' => array('metadata' => array(4))));
 
-file_put_contents($pname . '/a', b'new a', 0); // no compression
-file_put_contents($pname . '/b', b'new b', 0, $context);
-file_put_contents($pname . '/d', b'new d', 0, $context2);
+file_put_contents($pname . '/a', 'new a', 0); // no compression
+file_put_contents($pname . '/b', 'new b', 0, $context);
+file_put_contents($pname . '/d', 'new d', 0, $context2);
 
 $phar = new Phar($fname);
 var_dump(file_get_contents($pname . '/a'));

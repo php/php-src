@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -124,7 +124,6 @@ static int php_zlib_output_encoding(void)
 static int php_zlib_output_handler_ex(php_zlib_context *ctx, php_output_context *output_context)
 {
 	int flags = Z_SYNC_FLUSH;
-	PHP_OUTPUT_TSRMLS(output_context);
 
 	if (output_context->op & PHP_OUTPUT_HANDLER_START) {
 		/* start up */
@@ -210,7 +209,6 @@ static int php_zlib_output_handler_ex(php_zlib_context *ctx, php_output_context 
 static int php_zlib_output_handler(void **handler_context, php_output_context *output_context)
 {
 	php_zlib_context *ctx = *(php_zlib_context **) handler_context;
-	PHP_OUTPUT_TSRMLS(output_context);
 
 	if (!php_zlib_output_encoding()) {
 		/* "Vary: Accept-Encoding" header sent along uncompressed content breaks caching in MSIE,
@@ -675,7 +673,7 @@ static PHP_FUNCTION(name) \
 		} \
 	} \
 	if (level < -1 || level > 9) { \
-		php_error_docref(NULL, E_WARNING, "compression level (%pd) must be within -1..9", level); \
+		php_error_docref(NULL, E_WARNING, "compression level (" ZEND_LONG_FMT ") must be within -1..9", level); \
 		RETURN_FALSE; \
 	} \
 	switch (encoding) { \
@@ -704,7 +702,7 @@ static PHP_FUNCTION(name) \
 		return; \
 	} \
 	if (max_len < 0) { \
-		php_error_docref(NULL, E_WARNING, "length (%pd) must be greater or equal zero", max_len); \
+		php_error_docref(NULL, E_WARNING, "length (" ZEND_LONG_FMT ") must be greater or equal zero", max_len); \
 		RETURN_FALSE; \
 	} \
 	if (SUCCESS != php_zlib_decode(in_buf, in_len, &out_buf, &out_len, encoding, max_len)) { \
@@ -763,7 +761,7 @@ static zend_bool zlib_create_dictionary_string(HashTable *options, char **dict, 
 		switch (Z_TYPE_P(option_buffer)) {
 			case IS_STRING: {
 				zend_string *str = Z_STR_P(option_buffer);
-				int i;
+				size_t i;
 				zend_bool last_null = 1;
 
 				for (i = 0; i < ZSTR_LEN(str); i++) {
@@ -796,7 +794,7 @@ static zend_bool zlib_create_dictionary_string(HashTable *options, char **dict, 
 					zend_string **end, **ptr = strings - 1;
 
 					ZEND_HASH_FOREACH_VAL(dictionary, cur) {
-						int i;
+						size_t i;
 
 						*++ptr = zval_get_string(cur);
 						if (!*ptr || ZSTR_LEN(*ptr) == 0) {
@@ -865,7 +863,7 @@ PHP_FUNCTION(inflate_init)
 		window = zval_get_long(option_buffer);
 	}
 	if (window < 8 || window > 15) {
-		php_error_docref(NULL, E_WARNING, "zlib window size (lograithm) (%pd) must be within 8..15", window);
+		php_error_docref(NULL, E_WARNING, "zlib window size (lograithm) (" ZEND_LONG_FMT ") must be within 8..15", window);
 		RETURN_FALSE;
 	}
 
@@ -1035,7 +1033,7 @@ PHP_FUNCTION(deflate_init)
 		level = zval_get_long(option_buffer);
 	}
 	if (level < -1 || level > 9) {
-		php_error_docref(NULL, E_WARNING, "compression level (%pd) must be within -1..9", level);
+		php_error_docref(NULL, E_WARNING, "compression level (" ZEND_LONG_FMT ") must be within -1..9", level);
 		RETURN_FALSE;
 	}
 
@@ -1043,7 +1041,7 @@ PHP_FUNCTION(deflate_init)
 		memory = zval_get_long(option_buffer);
 	}
 	if (memory < 1 || memory > 9) {
-		php_error_docref(NULL, E_WARNING, "compression memory level (%pd) must be within 1..9", memory);
+		php_error_docref(NULL, E_WARNING, "compression memory level (" ZEND_LONG_FMT ") must be within 1..9", memory);
 		RETURN_FALSE;
 	}
 
@@ -1051,7 +1049,7 @@ PHP_FUNCTION(deflate_init)
 		window = zval_get_long(option_buffer);
 	}
 	if (window < 8 || window > 15) {
-		php_error_docref(NULL, E_WARNING, "zlib window size (logarithm) (%pd) must be within 8..15", window);
+		php_error_docref(NULL, E_WARNING, "zlib window size (logarithm) (" ZEND_LONG_FMT ") must be within 8..15", window);
 		RETURN_FALSE;
 	}
 
@@ -1066,7 +1064,7 @@ PHP_FUNCTION(deflate_init)
 		case Z_DEFAULT_STRATEGY:
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "strategy must be one of ZLIB_FILTERED, ZLIB_HUFFMAN_ONLY, ZLIB_RLE, ZLIB_FIXED or ZLIB_DEFAULT_STRATEGY", strategy);
+			php_error_docref(NULL, E_WARNING, "strategy must be one of ZLIB_FILTERED, ZLIB_HUFFMAN_ONLY, ZLIB_RLE, ZLIB_FIXED or ZLIB_DEFAULT_STRATEGY");
 			RETURN_FALSE;
 	}
 
@@ -1117,7 +1115,7 @@ PHP_FUNCTION(deflate_add)
 {
 	zend_string *out;
 	char *in_buf;
-	size_t in_len, out_size;
+	size_t in_len, out_size, buffer_used;
 	zval *res;
 	z_stream *ctx;
 	zend_long flush_type = Z_SYNC_FLUSH;
@@ -1159,6 +1157,7 @@ PHP_FUNCTION(deflate_add)
 	out_size = PHP_ZLIB_BUFFER_SIZE_GUESS(ctx->total_in + in_len);
 	out_size = (ctx->total_out >= out_size) ? 16 : (out_size - ctx->total_out);
 	out_size = (out_size < 16) ? 16 : out_size;
+	out_size += 64;
 	out = zend_string_alloc(out_size, 0);
 
 	ctx->next_in = (Bytef *) in_buf;
@@ -1166,7 +1165,20 @@ PHP_FUNCTION(deflate_add)
 	ctx->avail_in = in_len;
 	ctx->avail_out = ZSTR_LEN(out);
 
-	status = deflate(ctx, flush_type);
+	buffer_used = 0;
+
+	do {
+		if (ctx->avail_out == 0) {
+			/* more output buffer space needed; realloc and try again */
+			/* adding 64 more bytes solved every issue I have seen    */
+			out = zend_string_realloc(out, ZSTR_LEN(out) + 64, 0);
+			ctx->avail_out = 64;
+			ctx->next_out = (Bytef *) ZSTR_VAL(out) + buffer_used;
+		}
+		status = deflate(ctx, flush_type);
+		buffer_used = ZSTR_LEN(out) - ctx->avail_out;
+	} while (status == Z_OK && ctx->avail_out == 0);
+
 	switch (status) {
 		case Z_OK:
 			ZSTR_LEN(out) = (char *) ctx->next_out - ZSTR_VAL(out);
@@ -1189,7 +1201,7 @@ PHP_FUNCTION(deflate_add)
 
 #ifdef COMPILE_DL_ZLIB
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(php_zlib)
 #endif

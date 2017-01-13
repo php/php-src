@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -156,7 +156,7 @@ static void spl_ptr_llist_destroy(spl_ptr_llist *llist) /* {{{ */
 
 	while (current) {
 		next = current->next;
-		if(current && dtor) {
+		if (dtor) {
 			dtor(current);
 		}
 		SPL_LLIST_DELREF(current);
@@ -830,7 +830,6 @@ SPL_METHOD(SplDoublyLinkedList, offsetSet)
 		index = spl_offset_convert_to_long(zindex);
 
 		if (index < 0 || index >= intern->llist->count) {
-			zval_ptr_dtor(value);
 			zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid or out of range", 0);
 			return;
 		}
@@ -1178,7 +1177,7 @@ SPL_METHOD(SplDoublyLinkedList, serialize)
 SPL_METHOD(SplDoublyLinkedList, unserialize)
 {
 	spl_dllist_object *intern = Z_SPLDLLIST_P(getThis());
-	zval flags, elem;
+	zval *flags, *elem;
 	char *buf;
 	size_t buf_len;
 	const unsigned char *p, *s;
@@ -1196,27 +1195,23 @@ SPL_METHOD(SplDoublyLinkedList, unserialize)
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 
 	/* flags */
-	if (!php_var_unserialize(&flags, &p, s + buf_len, &var_hash)) {
+	flags = var_tmp_var(&var_hash);
+	if (!php_var_unserialize(flags, &p, s + buf_len, &var_hash) || Z_TYPE_P(flags) != IS_LONG) {
 		goto error;
 	}
 
-	if (Z_TYPE(flags) != IS_LONG) {
-		zval_ptr_dtor(&flags);
-		goto error;
-	}
-
-	intern->flags = (int)Z_LVAL(flags);
-	zval_ptr_dtor(&flags);
+	intern->flags = (int)Z_LVAL_P(flags);
 
 	/* elements */
 	while(*p == ':') {
 		++p;
-		if (!php_var_unserialize(&elem, &p, s + buf_len, &var_hash)) {
+		elem = var_tmp_var(&var_hash);
+		if (!php_var_unserialize(elem, &p, s + buf_len, &var_hash)) {
 			goto error;
 		}
+		var_push_dtor(&var_hash, elem);
 
-		spl_ptr_llist_push(intern->llist, &elem);
-		zval_ptr_dtor(&elem);
+		spl_ptr_llist_push(intern->llist, elem);
 	}
 
 	if (*p != '\0') {
@@ -1228,7 +1223,7 @@ SPL_METHOD(SplDoublyLinkedList, unserialize)
 
 error:
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-	zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Error at offset %pd of %d bytes", (zend_long)((char*)p - buf), buf_len);
+	zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Error at offset %zd of %zd bytes", ((char*)p - buf), buf_len);
 	return;
 
 } /* }}} */
@@ -1296,7 +1291,8 @@ zend_object_iterator_funcs spl_dllist_it_funcs = {
 	spl_dllist_it_get_current_data,
 	spl_dllist_it_get_current_key,
 	spl_dllist_it_move_forward,
-	spl_dllist_it_rewind
+	spl_dllist_it_rewind,
+	NULL
 }; /* }}} */
 
 zend_object_iterator *spl_dllist_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */

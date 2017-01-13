@@ -282,7 +282,7 @@ string(7) "integer"
 -- Iteration 18 --
 string(6) "string"
 bool(true)
-int(1)
+int(100)
 string(7) "integer"
 -- Iteration 19 --
 string(6) "string"
@@ -297,7 +297,7 @@ string(7) "integer"
 -- Iteration 21 --
 string(6) "string"
 bool(true)
-int(-1)
+int(0)
 string(7) "integer"
 -- Iteration 22 --
 string(6) "string"
@@ -312,7 +312,7 @@ string(7) "integer"
 -- Iteration 24 --
 string(6) "string"
 bool(true)
-int(1)
+int(100)
 string(7) "integer"
 -- Iteration 25 --
 string(6) "string"
@@ -327,7 +327,7 @@ string(7) "integer"
 -- Iteration 27 --
 string(6) "string"
 bool(true)
-int(-1)
+int(0)
 string(7) "integer"
 -- Iteration 28 --
 string(6) "string"
@@ -687,7 +687,7 @@ string(7) "integer"
 -- Iteration 18 --
 string(6) "string"
 bool(true)
-int(1)
+int(100)
 string(7) "integer"
 -- Iteration 19 --
 string(6) "string"
@@ -702,7 +702,7 @@ string(7) "integer"
 -- Iteration 21 --
 string(6) "string"
 bool(true)
-int(-1)
+int(0)
 string(7) "integer"
 -- Iteration 22 --
 string(6) "string"
@@ -717,7 +717,7 @@ string(7) "integer"
 -- Iteration 24 --
 string(6) "string"
 bool(true)
-int(1)
+int(100)
 string(7) "integer"
 -- Iteration 25 --
 string(6) "string"
@@ -732,7 +732,7 @@ string(7) "integer"
 -- Iteration 27 --
 string(6) "string"
 bool(true)
-int(-1)
+int(0)
 string(7) "integer"
 -- Iteration 28 --
 string(6) "string"

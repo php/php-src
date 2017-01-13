@@ -35,7 +35,7 @@ bool(false)
 int(6)
 string(%d) "Recursion detected"
 
-string(8) "[[null]]"
+string(6) "[null]"
 int(6)
 string(%d) "Recursion detected"
 Done

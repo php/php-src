@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1167,7 +1167,7 @@ static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	if (params) {
 		zval *disabled_auth_method;
 
-		if ((disabled_auth_method = zend_hash_str_find(HASH_OF(params), "DISABLE_AUTHENTICATOR", sizeof("DISABLE_AUTHENTICATOR") - 1)) != NULL) {
+		if ((disabled_auth_method = zend_hash_str_find(Z_ARRVAL_P(params), "DISABLE_AUTHENTICATOR", sizeof("DISABLE_AUTHENTICATOR") - 1)) != NULL) {
 			switch (Z_TYPE_P(disabled_auth_method)) {
 				case IS_STRING:
 					if (Z_STRLEN_P(disabled_auth_method) > 1) {
@@ -1315,8 +1315,6 @@ PHP_FUNCTION(imap_append)
 	zend_string* regex;
 	pcre_cache_entry *pce;				/* Compiled regex */
 	zval *subpats = NULL;				/* Parts (not used) */
-	long regex_flags = 0;				/* Flags (not used) */
-	long start_offset = 0;				/* Start offset (not used) */
 	int global = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rSS|SS", &streamind, &folder, &message, &flags, &internal_date) == FAILURE) {
@@ -1334,7 +1332,7 @@ PHP_FUNCTION(imap_append)
 
 		zend_string_free(regex);
 		php_pcre_match_impl(pce, ZSTR_VAL(internal_date), ZSTR_LEN(internal_date), return_value, subpats, global,
-			0, regex_flags, start_offset);
+			0, Z_L(0), Z_L(0));
 
 		if (!Z_LVAL_P(return_value)) {
 			php_error_docref(NULL, E_WARNING, "internal date not correctly formatted");
@@ -2914,7 +2912,7 @@ PHP_FUNCTION(imap_utf7_decode)
 #if PHP_DEBUG
 	/* warn if we computed outlen incorrectly */
 	if (outp - out != outlen) {
-		php_error_docref(NULL, E_WARNING, "outp - out [%ld] != outlen [%d]", outp - out, outlen);
+		php_error_docref(NULL, E_WARNING, "outp - out [%zd] != outlen [%d]", outp - out, outlen);
 	}
 #endif
 
@@ -2979,7 +2977,7 @@ PHP_FUNCTION(imap_utf7_encode)
 	}
 
 	/* allocate output buffer */
-	out = zend_string_alloc(outlen, 0);
+	out = zend_string_safe_alloc(1, outlen, 0, 0);
 
 	/* encode input string */
 	outp = (unsigned char*)ZSTR_VAL(out);
@@ -3936,7 +3934,7 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 	char *tsm_errmsg = NULL;
 	ADDRESS *addr;
 	char *bufferTo = NULL, *bufferCc = NULL, *bufferBcc = NULL, *bufferHeader = NULL;
-	int offset, bufferLen = 0;
+	size_t offset, bufferLen = 0;
 	size_t bt_len;
 
 	if (headers) {
@@ -3952,7 +3950,7 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 #define PHP_IMAP_CLEAN	if (bufferTo) efree(bufferTo); if (bufferCc) efree(bufferCc); if (bufferBcc) efree(bufferBcc); if (bufferHeader) efree(bufferHeader);
 #define PHP_IMAP_BAD_DEST PHP_IMAP_CLEAN; efree(tempMailTo); return (BAD_MSG_DESTINATION);
 
-	bufferHeader = (char *)emalloc(bufferLen + 1);
+	bufferHeader = (char *)safe_emalloc(bufferLen, 1, 1);
 	memset(bufferHeader, 0, bufferLen);
 	if (to && *to) {
 		strlcat(bufferHeader, "To: ", bufferLen + 1);
@@ -3964,7 +3962,7 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 		bt_len++;
 		offset = 0;
 		addr = NULL;
-		rfc822_parse_adrlist(&addr, tempMailTo, NULL);
+		rfc822_parse_adrlist(&addr, tempMailTo, "NO HOST");
 		while (addr) {
 			if (addr->host == NULL || strcmp(addr->host, ERRHOST) == 0) {
 				PHP_IMAP_BAD_DEST;
@@ -3993,7 +3991,7 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 		bt_len++;
 		offset = 0;
 		addr = NULL;
-		rfc822_parse_adrlist(&addr, tempMailTo, NULL);
+		rfc822_parse_adrlist(&addr, tempMailTo, "NO HOST");
 		while (addr) {
 			if (addr->host == NULL || strcmp(addr->host, ERRHOST) == 0) {
 				PHP_IMAP_BAD_DEST;
@@ -4019,7 +4017,7 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 		bt_len++;
 		offset = 0;
 		addr = NULL;
-		rfc822_parse_adrlist(&addr, tempMailTo, NULL);
+		rfc822_parse_adrlist(&addr, tempMailTo, "NO HOST");
 		while (addr) {
 			if (addr->host == NULL || strcmp(addr->host, ERRHOST) == 0) {
 				PHP_IMAP_BAD_DEST;
@@ -4259,7 +4257,7 @@ PHP_FUNCTION(imap_mime_header_decode)
 	zval myobject;
 	zend_string *str;
 	char *string, *charset, encoding, *text, *decode;
-	long charset_token, encoding_token, end_token, end, offset=0, i;
+	zend_long charset_token, encoding_token, end_token, end, offset=0, i;
 	unsigned long newlength;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &str) == FAILURE) {
@@ -4274,8 +4272,8 @@ PHP_FUNCTION(imap_mime_header_decode)
 	charset = (char *) safe_emalloc((end + 1), 2, 0);
 	text = &charset[end + 1];
 	while (offset < end) {	/* Reached end of the string? */
-		if ((charset_token = (long)php_memnstr(&string[offset], "=?", 2, string + end))) {	/* Is there anything encoded in the string? */
-			charset_token -= (long)string;
+		if ((charset_token = (zend_long)php_memnstr(&string[offset], "=?", 2, string + end))) {	/* Is there anything encoded in the string? */
+			charset_token -= (zend_long)string;
 			if (offset != charset_token) {	/* Is there anything before the encoded data? */
 				/* Retrieve unencoded data that is found before encoded data */
 				memcpy(text, &string[offset], charset_token-offset);
@@ -4285,10 +4283,10 @@ PHP_FUNCTION(imap_mime_header_decode)
 				add_property_string(&myobject, "text", text);
 				zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &myobject);
 			}
-			if ((encoding_token = (long)php_memnstr(&string[charset_token+2], "?", 1, string+end))) {		/* Find token for encoding */
-				encoding_token -= (long)string;
-				if ((end_token = (long)php_memnstr(&string[encoding_token+3], "?=", 2, string+end))) {	/* Find token for end of encoded data */
-					end_token -= (long)string;
+			if ((encoding_token = (zend_long)php_memnstr(&string[charset_token+2], "?", 1, string+end))) {		/* Find token for encoding */
+				encoding_token -= (zend_long)string;
+				if ((end_token = (zend_long)php_memnstr(&string[encoding_token+3], "?=", 2, string+end))) {	/* Find token for end of encoded data */
+					end_token -= (zend_long)string;
 					memcpy(charset, &string[charset_token + 2], encoding_token - (charset_token + 2));	/* Extract charset encoding */
 					charset[encoding_token-(charset_token + 2)] = 0x00;
 					encoding=string[encoding_token + 1];	/* Extract encoding from string */
@@ -4448,7 +4446,7 @@ static zend_string* _php_rfc822_write_address(ADDRESS *addresslist)
 	char address[SENDBUFLEN];
 
 	if (_php_imap_address_size(addresslist) >= SENDBUFLEN) {
-		php_error_docref(NULL, E_ERROR, "Address buffer overflow");
+		zend_throw_error(NULL, "Address buffer overflow");
 		return NULL;
 	}
 	address[0] = 0;
@@ -4797,7 +4795,7 @@ PHP_FUNCTION(imap_timeout)
 				break;
 		}
 
-		timeout = (long) mail_parameters(NIL, timeout_type, NIL);
+		timeout = (zend_long) mail_parameters(NIL, timeout_type, NIL);
 		RETURN_LONG(timeout);
 	} else if (timeout >= 0) {
 		switch (ttype) {
@@ -4818,7 +4816,7 @@ PHP_FUNCTION(imap_timeout)
 				break;
 		}
 
-		timeout = (long) mail_parameters(NIL, timeout_type, (void *) timeout);
+		timeout = (zend_long) mail_parameters(NIL, timeout_type, (void *) timeout);
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;

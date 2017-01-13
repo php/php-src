@@ -262,8 +262,9 @@ void fpm_request_check_timed_out(struct fpm_child_s *child, struct timeval *now,
 
 			fpm_trace_signal(child->pid);
 
-			zlog(ZLOG_WARNING, "[pool %s] child %d, script '%s' (request: \"%s %s\") executing too slow (%d.%06d sec), logging",
+			zlog(ZLOG_WARNING, "[pool %s] child %d, script '%s' (request: \"%s %s%s%s\") executing too slow (%d.%06d sec), logging",
 				child->wp->config->name, (int) child->pid, purified_script_filename, proc.request_method, proc.request_uri,
+				(proc.query_string[0] ? "?" : ""), proc.query_string,
 				(int) tv.tv_sec, (int) tv.tv_usec);
 		}
 		else
@@ -272,8 +273,9 @@ void fpm_request_check_timed_out(struct fpm_child_s *child, struct timeval *now,
 			str_purify_filename(purified_script_filename, proc.script_filename, sizeof(proc.script_filename));
 			fpm_pctl_kill(child->pid, FPM_PCTL_TERM);
 
-			zlog(ZLOG_WARNING, "[pool %s] child %d, script '%s' (request: \"%s %s\") execution timed out (%d.%06d sec), terminating",
+			zlog(ZLOG_WARNING, "[pool %s] child %d, script '%s' (request: \"%s %s%s%s\") execution timed out (%d.%06d sec), terminating",
 				child->wp->config->name, (int) child->pid, purified_script_filename, proc.request_method, proc.request_uri,
+				(proc.query_string[0] ? "?" : ""), proc.query_string,
 				(int) tv.tv_sec, (int) tv.tv_usec);
 		}
 	}

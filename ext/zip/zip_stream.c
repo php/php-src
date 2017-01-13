@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -16,13 +16,11 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
 #ifdef HAVE_CONFIG_H
 #   include "config.h"
 #endif
 #include "php.h"
 #if HAVE_ZIP
-#if defined(ZEND_ENGINE_2) || defined(ZEND_ENGINE_3)
 
 #include "php_streams.h"
 #include "ext/standard/file.h"
@@ -61,7 +59,7 @@ static size_t php_zip_ops_read(php_stream *stream, char *buf, size_t count)
 			zip_error_t *err;
 			err = zip_file_get_error(self->zf);
 			stream->eof = 1;
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Zip stream error: %s", zip_error_strerror(err));
+			php_error_docref(NULL, E_WARNING, "Zip stream error: %s", zip_error_strerror(err));
 			zip_error_fini(err);
 #endif
 			return 0;
@@ -125,11 +123,11 @@ static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb) /* {{{ 
 {
 	struct zip_stat sb;
 	const char *path = stream->orig_path;
-	int path_len = strlen(stream->orig_path);
+	size_t path_len = strlen(stream->orig_path);
 	char file_dirname[MAXPATHLEN];
 	struct zip *za;
 	char *fragment;
-	int fragment_len;
+	size_t fragment_len;
 	int err;
 	zend_string *file_basename;
 
@@ -265,7 +263,7 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 											zend_string **opened_path,
 											php_stream_context *context STREAMS_DC)
 {
-	int path_len;
+	size_t path_len;
 
 	zend_string *file_basename;
 	char file_dirname[MAXPATHLEN];
@@ -273,7 +271,7 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 	struct zip *za;
 	struct zip_file *zf = NULL;
 	char *fragment;
-	int fragment_len;
+	size_t fragment_len;
 	int err;
 
 	php_stream *stream = NULL;
@@ -349,7 +347,8 @@ static php_stream_wrapper_ops zip_stream_wops = {
 	NULL,	/* unlink */
 	NULL,	/* rename */
 	NULL,	/* mkdir */
-	NULL	/* rmdir */
+	NULL,	/* rmdir */
+	NULL
 };
 
 php_stream_wrapper php_stream_zip_wrapper = {
@@ -357,5 +356,4 @@ php_stream_wrapper php_stream_zip_wrapper = {
 	NULL,
 	0 /* is_url */
 };
-#endif /* defined(ZEND_ENGINE_2) || defined(ZEND_ENGINE_3) */
 #endif /* HAVE_ZIP */

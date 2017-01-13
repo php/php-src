@@ -332,7 +332,6 @@ PHP_FUNCTION( transliterator_transliterate )
 			int res;
 			if(Z_TYPE_P( arg1 ) != IS_STRING )
 			{
-				SEPARATE_ZVAL( arg1 );
 				convert_to_string( arg1 );
 			}
 			object = &tmp_object;

@@ -13,15 +13,11 @@ Rafael Dohms <rdohms [at] gmail [dot] com>
 $image = imagecreatetruecolor(180, 30);
 
 $layer = imagelayereffect($image, IMG_EFFECT_REPLACE);
+var_dump((bool) $layer);
 
-if ($layer){
-	ob_start();
-	imagepng($image, null, 9);
-	$img = ob_get_contents();
-	ob_end_clean();
-}
-
-echo md5(base64_encode($img));
+include_once __DIR__ . '/func.inc';
+test_image_equals_file(__DIR__ . '/imagelayereffect_basic.png', $image);
 ?>
 --EXPECT--
-5a8fe9864cbd20e5dbe730c77f30db95
+bool(true)
+The images are equal.

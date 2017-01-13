@@ -134,25 +134,25 @@ Warning: Attempt to assign property of non-object in %s on line 26
 
 
  --> Resulting object:object(C)#%d (6) {
-  [%u|b%"boolFalse"]=>
+  ["boolFalse"]=>
   object(stdClass)#%d (1) {
-    [%u|b%"prop"]=>
-    %unicode|string%(24) " Implicit instantiation!"
+    ["prop"]=>
+    string(24) " Implicit instantiation!"
   }
-  [%u|b%"emptyString"]=>
+  ["emptyString"]=>
   object(stdClass)#%d (1) {
-    [%u|b%"prop"]=>
-    %unicode|string%(24) " Implicit instantiation!"
+    ["prop"]=>
+    string(24) " Implicit instantiation!"
   }
-  [%u|b%"null"]=>
+  ["null"]=>
   object(stdClass)#%d (1) {
-    [%u|b%"prop"]=>
-    %unicode|string%(24) " Implicit instantiation!"
+    ["prop"]=>
+    string(24) " Implicit instantiation!"
   }
-  [%u|b%"boolTrue"]=>
+  ["boolTrue"]=>
   bool(true)
-  [%u|b%"nonEmptyString"]=>
-  %unicode|string%(5) "hello"
-  [%u|b%"intZero"]=>
+  ["nonEmptyString"]=>
+  string(5) "hello"
+  ["intZero"]=>
   int(0)
 }

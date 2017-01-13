@@ -41,17 +41,18 @@ ini_set('from', 'junk@junk.com');
 do_test();
 
 ?>
---EXPECT--
+--EXPECTF--
 -- Test: leave default --
-string(63) "GET / HTTP/1.0
+string(%d) "GET / HTTP/1.0
 From: teste@teste.pt
 Host: 127.0.0.1:12342
+Connection: close
 
 "
 -- Test: after ini_set --
-string(62) "GET / HTTP/1.0
+string(%d) "GET / HTTP/1.0
 From: junk@junk.com
 Host: 127.0.0.1:12342
+Connection: close
 
 "
-

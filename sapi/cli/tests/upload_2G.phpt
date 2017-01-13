@@ -21,6 +21,10 @@ if ($f = fopen("/proc/meminfo","r")) {
 if (empty($enough_free_ram)) {
 	die("skip need +3G free RAM");
 }
+
+if (getenv('TRAVIS')) {
+    die("skip Fails intermittently on travis");
+}
 ?>
 --FILE--
 <?php
@@ -77,6 +81,7 @@ Test
 
 HTTP/1.1 200 OK
 Host: %s
+Date: %s
 Connection: close
 X-Powered-By: PHP/%s
 Content-type: text/html; charset=UTF-8

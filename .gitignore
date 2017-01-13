@@ -21,6 +21,9 @@
 *.tar.gz
 *.tar.bz2
 *.tar.xz
+*.tar.gz.asc
+*.tar.bz2.asc
+*.tar.xz.asc
 .FBCIndex
 .FBCLockFolder
 .deps
@@ -53,7 +56,6 @@ config.cache
 config.h.in
 config.log
 config.nice
-config.nice.bat
 config.status
 config.sub
 config_vars.mk
@@ -145,6 +147,7 @@ tests/*/*/*.sh
 */tests/*/*/*.sh
 */*/tests/*.diff
 */*/tests/*.out
+*/*/tests/*.out.png
 */*/tests/*.php
 */*/tests/*.exp
 */*/tests/*.log
@@ -242,10 +245,6 @@ ext/reflection/spl.chm
 ext/simplexml/examples/security.new.xml
 ext/spl/examples/.htaccess
 ext/spl/examples/*.phps
-ext/sqlite/weztest.sqlite
-ext/sqlite/libsqlite/src/sqlite.h
-ext/sqlite/libsqlite/src/parse.out
-ext/sqlite/libsqlite/src/libsqlite.dsw
 ext/sqlite3/tests/phpsql*
 ext/sqlite3/tests/*.db
 ext/sqlite3/tests/*.tmp
@@ -285,3 +284,4 @@ win32/*.positions
 win32/ext
 win32/phpts.def
 win32/wsyslog.h
+config.*.bat

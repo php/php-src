@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
   | Author: Georg Richter <georg@php.net>                                |
   |         Andrey Hristov <andrey@php.net>                              |
   +----------------------------------------------------------------------+
-
-  $Id$
 */
 
 #ifdef HAVE_CONFIG_H
@@ -289,8 +287,12 @@ static zval *result_type_read(mysqli_object *obj, zval *retval)
 static zval *result_lengths_read(mysqli_object *obj, zval *retval)
 {
 	MYSQL_RES *p;
-	zend_ulong *ret;
-	uint field_count;
+#if defined(MYSQLI_USE_MYSQLND)
+	const size_t *ret;
+#else
+	const zend_ulong *ret;
+#endif
+	uint32_t field_count;
 
 	CHECK_STATUS(MYSQLI_STATUS_VALID);
 	p = (MYSQL_RES *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;

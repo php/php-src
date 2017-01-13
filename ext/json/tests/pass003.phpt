@@ -1,9 +1,7 @@
 --TEST--
 JSON (http://www.crockford.com/JSON/JSON_checker/test/pass3.json)
 --SKIPIF--
-<?php
-  if (!extension_loaded('json')) die('skip: json extension not available');
-?>
+<?php if (!extension_loaded("json")) print "skip"; ?>
 --FILE--
 <?php
     

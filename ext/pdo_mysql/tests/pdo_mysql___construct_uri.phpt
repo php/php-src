@@ -2,6 +2,9 @@
 MySQL PDO->__construct() - URI
 --SKIPIF--
 <?php
+if (substr(PHP_OS, 0, 3) == 'WIN') {
+    die('skip not for Windows');
+}
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();

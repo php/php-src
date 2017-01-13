@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -46,7 +46,7 @@ PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64);
 # define FALSE 0
 #endif
 
-#define PDO_DRIVER_API	20150127
+#define PDO_DRIVER_API	20161020
 
 enum pdo_param_type {
 	PDO_PARAM_NULL,
@@ -199,20 +199,18 @@ static inline zend_long pdo_attr_lval(zval *options, enum pdo_attribute_type opt
 	zval *v;
 
 	if (options && (v = zend_hash_index_find(Z_ARRVAL_P(options), option_name))) {
-		convert_to_long_ex(v);
-		return Z_LVAL_P(v);
+		return zval_get_long(v);
 	}
 	return defval;
 }
-static inline char *pdo_attr_strval(zval *options, enum pdo_attribute_type option_name, char *defval)
+static inline zend_string *pdo_attr_strval(zval *options, enum pdo_attribute_type option_name, zend_string *defval)
 {
 	zval *v;
 
 	if (options && (v = zend_hash_index_find(Z_ARRVAL_P(options), option_name))) {
-		convert_to_string_ex(v);
-		return estrndup(Z_STRVAL_P(v), Z_STRLEN_P(v));
+		return zval_get_string(v);
 	}
-	return defval ? estrdup(defval) : NULL;
+	return defval ? zend_string_copy(defval) : NULL;
 }
 /* }}} */
 
@@ -531,9 +529,6 @@ struct pdo_column_data {
 	size_t maxlen;
 	zend_ulong precision;
 	enum pdo_param_type param_type;
-
-	/* don't touch this unless your name is dbdo */
-	void *dbdo_data;
 };
 
 /* describes a bound parameter */

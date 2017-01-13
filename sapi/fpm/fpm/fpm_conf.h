@@ -78,6 +78,7 @@ struct fpm_worker_pool_config_s {
 	char *access_format;
 	char *slowlog;
 	int request_slowlog_timeout;
+	int request_slowlog_trace_depth;
 	int request_terminate_timeout;
 	int rlimit_files;
 	int rlimit_core;

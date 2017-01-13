@@ -52,6 +52,11 @@ foreach ($not_float_types as $key => $type ) {
 ?>
 ===DONE===
 --EXPECTF--
+
+Notice: A non well formed numeric value encountered in %s on line %d
+
+Notice: A non well formed numeric value encountered in %s on line %d
+
 *** Testing floatval() on non floating types ***
 
 -- Iteration : -2147483648 --

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,7 +24,7 @@
 #include "phpdbg_opcode.h"
 #include "phpdbg_prompt.h"
 
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 #define PHPDBG_PRINT_COMMAND_D(f, h, a, m, l, s, flags) \
 	PHPDBG_COMMAND_D_EXP(f, h, a, m, l, s, &phpdbg_prompt_commands[8], flags)
@@ -42,7 +42,7 @@ const phpdbg_command_t phpdbg_print_commands[] = {
 PHPDBG_PRINT(opline) /* {{{ */
 {
 	if (PHPDBG_G(in_execution) && EG(current_execute_data)) {
-		phpdbg_print_opline(EG(current_execute_data), 1);
+		phpdbg_print_opline(phpdbg_user_execute_data(EG(current_execute_data)), 1);
 	} else {
 		phpdbg_error("inactive", "type=\"execution\"", "Not Executing!");
 	}
@@ -82,15 +82,11 @@ static inline void phpdbg_print_function_helper(zend_function *method) /* {{{ */
 
 				do {
 					char *decode = phpdbg_decode_opline(op_array, opline);
-					if (decode != NULL) {
-						phpdbg_writeln("print", "line=\"%u\" opnum=\"%u\" op=\"%s\"", " L%-4u #%-5u %s",
-							opline->lineno,
-							opcode,
-							decode);
-						free(decode);
-					} else {
-						phpdbg_error("print", "type=\"decodefailure\" opline=\"%16p\"", "Failed to decode opline %16p", opline);
-					}
+					phpdbg_writeln("print", "line=\"%u\" opnum=\"%u\" op=\"%s\"", " L%-4u #%-5u %s",
+						opline->lineno,
+						opcode,
+						decode);
+					efree(decode);
 					opline++;
 				} while (opcode++ < end);
 			}
@@ -128,7 +124,7 @@ return SUCCESS;
 PHPDBG_PRINT(stack) /* {{{ */
 {
 	if (PHPDBG_G(in_execution) && EG(current_execute_data)) {
-		zend_op_array *ops = &EG(current_execute_data)->func->op_array;
+		zend_op_array *ops = &phpdbg_user_execute_data(EG(current_execute_data))->func->op_array;
 		if (ops->function_name) {
 			if (ops->scope) {
 				phpdbg_notice("printinfo", "method=\"%s::%s\" num=\"%d\"", "Stack in %s::%s() (%d ops)", ZSTR_VAL(ops->scope->name), ZSTR_VAL(ops->function_name), ops->last);
@@ -221,11 +217,13 @@ PHPDBG_PRINT(func) /* {{{ */
 	zend_string *lcname;
 	/* search active scope if begins with period */
 	if (func_name[0] == '.') {
-		if (EG(scope)) {
+		zend_class_entry *scope = zend_get_executed_scope();
+
+		if (scope) {
 			func_name++;
 			func_name_len--;
 
-			func_table = &EG(scope)->function_table;
+			func_table = &scope->function_table;
 		} else {
 			phpdbg_error("inactive", "type=\"noclasses\"", "No active class");
 			return SUCCESS;
@@ -282,7 +280,7 @@ void phpdbg_print_opcodes_function(const char *function, size_t len) {
 		return;
 	}
 
-	phpdbg_out("function name: %.*s\n", ZSTR_LEN(func->op_array.function_name), ZSTR_VAL(func->op_array.function_name));
+	phpdbg_out("function name: %.*s\n", (int) ZSTR_LEN(func->op_array.function_name), ZSTR_VAL(func->op_array.function_name));
 	phpdbg_print_function_helper(func);
 }
 
@@ -355,7 +353,7 @@ static void phpdbg_print_opcodes_ce(zend_class_entry *ce) {
 	phpdbg_out("\n");
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->function_table, method_name, method) {
-		phpdbg_out("\nfunction name: %s\n", method_name);
+		phpdbg_out("\nfunction name: %s\n", ZSTR_VAL(method_name));
 		phpdbg_print_function_helper(method);
 	} ZEND_HASH_FOREACH_END();
 }
@@ -381,8 +379,6 @@ void phpdbg_print_opcodes_class(const char *class) {
 
 PHPDBG_API void phpdbg_print_opcodes(char *function)
 {
-	char *method_name = strtok(function, ":");
-
 	if (function == NULL) {
 		phpdbg_print_opcodes_main();
 	} else if (function[0] == '*' && function[1] == 0) {
@@ -406,11 +402,20 @@ PHPDBG_API void phpdbg_print_opcodes(char *function)
 				phpdbg_print_opcodes_ce(ce);
 			}
 		} ZEND_HASH_FOREACH_END();
-	} else if (method_name == NULL) {
-		phpdbg_print_opcodes_function(function, strlen(function));
-	} else if ((method_name = strtok(NULL, ":")) == NULL) {
-		phpdbg_print_opcodes_class(function);
 	} else {
-		phpdbg_print_opcodes_method(function, method_name);
+		function = zend_str_tolower_dup(function, strlen(function));
+
+		if (strstr(function, "::") == NULL) {
+			phpdbg_print_opcodes_function(function, strlen(function));
+		} else {
+			char *method_name, *class_name = strtok(function, "::");
+			if ((method_name = strtok(NULL, "::")) == NULL) {
+				phpdbg_print_opcodes_class(class_name);
+			} else {
+				phpdbg_print_opcodes_method(class_name, method_name);
+			}
+		}
+
+		efree(function);
 	}
 }

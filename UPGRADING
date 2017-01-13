@@ -1,6 +1,4 @@
-﻿$Id$
-
-PHP X.Y UPGRADE NOTES
+PHP 7.2 UPGRADE NOTES
 
 1. Backward Incompatible Changes
 2. New Features
@@ -21,751 +19,219 @@ PHP X.Y UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
-Language changes
-================
-
-Changes to variable handling
-----------------------------
-
-* Indirect variable, property and method references are now interpreted with
-  left-to-right semantics. Some examples:
-
-      $$foo['bar']['baz'] // interpreted as ($$foo)['bar']['baz']
-      $foo->$bar['baz']   // interpreted as ($foo->$bar)['baz']
-      $foo->$bar['baz']() // interpreted as ($foo->$bar)['baz']()
-      Foo::$bar['baz']()  // interpreted as (Foo::$bar)['baz']()
-
-  To restore the previous behavior add explicit curly braces:
-
-      ${$foo['bar']['baz']}
-      $foo->{$bar['baz']}
-      $foo->{$bar['baz']}()
-      Foo::{$bar['baz']}()
-      
-* The global keyword now only accepts simple variables. Instead of
-
-      global $$foo->bar;
-
-  it is now required to write the following:
-
-      global ${$foo->bar};
-
-* Parentheses around variables or function calls no longer have any influence
-  on behavior. For example the following code, where the result of a function
-  call is passed to a by-reference function
-
-      function getArray() { return [1, 2, 3]; }
-
-      $last = array_pop(getArray());
-      // Strict Standards: Only variables should be passed by reference
-      $last = array_pop((getArray()));
-      // Strict Standards: Only variables should be passed by reference
-
-  will now throw a strict standards error regardless of whether parentheses
-  are used. Previously no notice was generated in the second case.
-
-* Array elements or object properties that are automatically created during
-  by-reference assignments will now result in a different order. For example
-
-      $array = [];
-      $array["a"] =& $array["b"];
-      $array["b"] = 1;
-      var_dump($array);
-
-  now results in the array ["a" => 1, "b" => 1], while previously the result
-  was ["b" => 1, "a" => 1];
-
-Relevant RFCs:
-* https://wiki.php.net/rfc/uniform_variable_syntax
-* https://wiki.php.net/rfc/abstract_syntax_tree
-
-Changes to list()
------------------
-
-* list() will no longer assign variables in reverse order. For example
-
-      list($array[], $array[], $array[]) = [1, 2, 3];
-      var_dump($array);
-
-  will now result in $array == [1, 2, 3] rather than [3, 2, 1]. Note that only
-  the **order** of the assignments changed, but the assigned values stay the
-  same. E.g. a normal usage like
-
-      list($a, $b, $c) = [1, 2, 3];
-      // $a = 1; $b = 2; $c = 3;
-  
-  will retain its current behavior.
-
-* Empty list() assignments are no longer allowed. As such all of the following
-  are invalid:
-
-      list() = $a;
-      list(,,) = $a;
-      list($x, list(), $y) = $a;
-
-* list() no longer supports unpacking strings (while previously this was only
-  supported in some cases). The code
-
-      $string = "xy";
-      list($x, $y) = $string;
-
-  will now result in $x == null and $y == null (without notices) instead of
-  $x == "x" and $y == "y". Furthermore list() is now always guaranteed to
-  work with objects implementing ArrayAccess, e.g.
-
-      list($a, $b) = (object) new ArrayObject([0, 1]);
-
-  will now result in $a == 0 and $b == 1. Previously both $a and $b were null.
-
-Relevant RFCs:
-* https://wiki.php.net/rfc/abstract_syntax_tree#changes_to_list
-* https://wiki.php.net/rfc/fix_list_behavior_inconsistency
-
-Changes to foreach
-------------------
-
-* Iteration with foreach() no longer has any effect on the internal array
-  pointer, which can be accessed through the current()/next()/etc family of
-  functions. For example
-
-      $array = [0, 1, 2];
-      foreach ($array as &$val) {
-          var_dump(current($array));
-      }
-
-  will now print the value int(0) three times. Previously the output was int(1),
-  int(2) and bool(false).
-
-* When iterating arrays by-value, foreach will now always operate on a copy of
-  the array, as such changes to the array during iteration will not influence
-  iteration behavior. For example
-
-      $array = [0, 1, 2];
-      $ref =& $array; // Necessary to trigger the old behavior
-      foreach ($array as $val) {
-          var_dump($val);
-          unset($array[1]);
-      }
-
-  will now print all three elements (0 1 2), while previously the second element
-  1 was skipped (0 2).
-
-* When iterating arrays by-reference, modifications to the array will continue
-  to influence the iteration. However PHP will now do a better job of
-  maintaining a correct position in a number of cases. E.g. appending to an
-  array during by-reference iteration
-
-      $array = [0];
-      foreach ($array as &$val) {
-          var_dump($val);
-          $array[1] = 1;
-      }
-
-  will now iterate over the appended element as well. As such the output of this
-  example will now be "int(0) int(1)", while previously it was only "int(0)".
-
-* Iteration of plain (non-Traversable) objects by-value or by-reference will
-  behave like by-reference iteration of arrays. This matches the previous
-  behavior apart from the more accurate position management mentioned in the
-  previous point.
-
-* Iteration of Traversable objects remains unchanged.
-
-Relevant RFC: https://wiki.php.net/rfc/php7_foreach
-
-Changes to parameter handling
------------------------------
-
-* It is no longer possible to define two function parameters with the same name.
-  For example, the following method will trigger a compile-time error:
-
-      public function foo($a, $b, $unused, $unused) {
-          // ...
-      }
-
-  Code like this should be changed to use distinct parameter names, for example:
-
-      public function foo($a, $b, $unused1, $unused2) {
-          // ...
-      }
-
-* The func_get_arg() and func_get_args() functions will no longer return the
-  original value that was passed to a parameter and will instead provide the
-  current value (which might have been modified). For example
-
-      function foo($x) {
-          $x++;
-          var_dump(func_get_arg(0));
-      }
-      foo(1);
-
-  will now print "2" instead of "1". This code should be changed to either
-  perform modifications only after calling func_get_arg(s)
-
-      function foo($x) {
-          var_dump(func_get_arg(0));
-          $x++;
-      }
-
-  or avoid modifying the parameters altogether:
-
-      function foo($x) {
-          $newX = $x + 1;
-          var_dump(func_get_arg(0));
-      }
-
-* Similarly exception backtraces will no longer display the original value that
-  was passed to a function and show the modified value instead. For example
-
-      function foo($x) {
-          $x = 42;
-          throw new Exception;
-      }
-      foo("string");
-
-  will now result in the stack trace
-
-      Stack trace:
-      #0 file.php(4): foo(42)
-      #1 {main}
-
-  while previously it was:
-
-      Stack trace:
-      #0 file.php(4): foo('string')
-      #1 {main}
-
-  While this should not impact runtime behavior of your code, it is worthwhile
-  to be aware of this difference for debugging purposes.
-
-  The same limitation also applies to debug_backtrace() and other functions
-  inspecting function arguments.
-
-Relevant RFC: https://wiki.php.net/phpng
-
-Changes to integer handling
----------------------------
-
-* Invalid octal literals (containing digits larger than 7) now produce compile
-  errors. For example, the following is no longer valid:
-  
-      $i = 0781; // 8 is not a valid octal digit!
-
-  Previously the invalid digits (and any following valid digits) were simply
-  ignored. As such $i previously held the value 7, because the last two digits
-  were silently discarded.
-
-* Bitwise shifts by negative numbers will now throw an ArithmeticError:
-
-      var_dump(1 >> -1);
-      // ArithmeticError: Bit shift by negative number
-
-* Left bitwise shifts by a number of bits beyond the bit width of an integer
-  will always result in 0:
-
-      var_dump(1 << 64); // int(0)
-
-  Previously the behavior of this code was dependent on the used CPU
-  architecture. For example on x86 (including x86-64) the result was int(1),
-  because the shift operand was wrapped.
-
-* Similarly right bitwise shifts by a number of bits beyond the bit width of an
-  integer will always result in 0 or -1 (depending on sign):
-
-      var_dump(1 >> 64);  // int(0)
-      var_dump(-1 >> 64); // int(-1)
-
-Relevant RFC: https://wiki.php.net/rfc/integer_semantics
-
-Changes to string handling
---------------------------
-
-* Strings that contain hexadecimal numbers are no longer considered to be
-  numeric and don't receive special treatment anymore. Some examples of the
-  new behavior:
-
-      var_dump("0x123" == "291");     // bool(false)     (previously true)
-      var_dump(is_numeric("0x123"));  // bool(false)     (previously true)
-      var_dump("0xe" + "0x1");        // int(0)          (previously 16)
-
-      var_dump(substr("foo", "0x1")); // string(3) "foo" (previously "oo")
-      // Notice: A non well formed numeric value encountered
-
-  filter_var() can be used to check if a string contains a hexadecimal number
-  or convert such a string into an integer:
-
-    $str = "0xffff";
-    $int = filter_var($str, FILTER_VALIDATE_INT, FILTER_FLAG_ALLOW_HEX);
-    if (false === $int) {
-        throw new Exception("Invalid integer!");
-    }
-    var_dump($int); // int(65535)
-
-* Due to the addition of the Unicode Codepoint Escape Syntax for double-quoted
-  strings and heredocs, "\u{" followed by an invalid sequence will now result in
-  an error:
-
-      $str = "\u{xyz}"; // Fatal error: Invalid UTF-8 codepoint escape sequence
-
-  To avoid this the leading backslash should be escaped:
-
-      $str = "\\u{xyz}"; // Works fine
-
-  However, "\u" without a following { is unaffected. As such the following code
-  won't error and will work the same as before:
-
-      $str = "\u202e"; // Works fine
-
-Relevant RFCs:
-* https://wiki.php.net/rfc/remove_hex_support_in_numeric_strings
-* https://wiki.php.net/rfc/unicode_escape
-
-Changes to error handling
--------------------------
-
-* There are now two exception classes: Exception and Error. Both classes
-  implement a new interface Throwable. Type hints in exception handling code
-  may need to be changed to account for this.
-
-* Some fatal errors and recoverable fatal errors now throw an Error instead.
-  As Error is a separate class from Exception, these exceptions will not be
-  caught by existing try/catch blocks.
-
-  For the recoverable fatal errors which have been converted into an exception,
-  it is no longer possible to silently ignore the error from an error handler.
-  In particular, it is no longer possible to ignore type hint failures.
-
-* Parser errors now generate a ParseError that extends Error. Error
-  handling for eval()s on potentially invalid code should be changed to catch
-  ParseError in addition to the previous return value / error_get_last()
-  based handling.
-
-* Constructors of internal classes will now always throw an exception on
-  failure. Previously some constructors returned NULL or an unusable object.
-
-* The error level of some E_STRICT notices has been changed.
-
-Relevant RFCs:
-* https://wiki.php.net/rfc/engine_exceptions_for_php7
-* https://wiki.php.net/rfc/throwable-interface
-* https://wiki.php.net/rfc/internal_constructor_behaviour
-* https://wiki.php.net/rfc/reclassify_e_strict
-
-Other language changes
-----------------------
-
-* Removed support for static calls to non-static calls form an incompatible
-  $this context. In this case $this will not be defined, but the call will be
-  allowed with a deprecation notice. An example:
-
-      class A {
-          public function test() { var_dump($this); }
-      }
-
-      // Note: Does NOT extend A
-      class B {
-          public function callNonStaticMethodOfA() { A::test(); }
-      }
-      
-      (new B)->callNonStaticMethodOfA();
-
-      // Deprecated: Non-static method A::test() should not be called statically
-      // Notice: Undefined variable $this
-      NULL
-
-  Note that this only applies to calls from an incompatible context. If class B
-  extended from A the call would be allowed without any notices.
-
-* It is no longer possible to use the following class, interface and trait names
-  (case-insensitive):
-
-      bool
-      int
-      float
-      string
-      null
-      false
-      true
-
-  This applies to class/interface/trait declarations, class_alias() and use
-  statements.
-
-  Furthermore the following class, interface and trait names are now reserved
-  for future use, but do not yet throw an error when used:
-
-      resource
-      object
-      mixed
-      numeric
-
-* The yield language construct no longer requires parentheses when used in an
-  expression context. It is now a right-associative operator with precedence
-  between the "print" and "=>" operators. This can result in different behavior
-  in some cases, for example:
-
-      echo yield -1;
-      // Was previously interpreted as
-      echo (yield) - 1;
-      // And is now interpreted as
-      echo yield (-1);
-
-      yield $foo or die;
-      // Was previously interpreted as
-      yield ($foo or die);
-      // And is now interpreted as
-      (yield $foo) or die;
-
-  Such cases can always be resolved by adding additional parentheses.
-
-  . Removed ASP (<%) and script (<script language=php>) tags.
-    (RFC: https://wiki.php.net/rfc/remove_alternative_php_tags)
-  . Removed support for assigning the result of new by reference.
-  . Removed support for scoped calls to non-static methods from an incompatible
-    $this context. See details in https://wiki.php.net/rfc/incompat_ctx.
-  . Removed support for #-style comments in ini files. Use ;-style comments
-    instead.
-  . $HTTP_RAW_POST_DATA is no longer available. Use the php://input stream instead.
-
-Standard library changes
-========================
-
-  . call_user_method() and call_user_method_array() no longer exists.
-  . ob_start() no longer issues an E_ERROR, but instead an E_RECOVERABLE_ERROR in case an 
-    output buffer is created in an output buffer handler.
-  . Improved zend_qsort(using hybrid sorting algo) for better performance,
-    and also renamed zend_qsort to zend_sort.
-  . Added stable sorting algo zend_insert_sort.
-  . Removed dl() function on fpm-fcgi.
-  . setcookie() with an empty cookie name now issues a WARNING and doesn't send an empty set-cookie header line anymore.
-
-Other
-=====
-
-- Curl:
-  . Removed support for disabling the CURLOPT_SAFE_UPLOAD option. All curl file
-    uploads must use the curl_file / CURLFile APIs.
-
-- Date:
-  . Removed $is_dst parameter from mktime() and gmmktime().
-
-- DBA
-  . dba_delete() now returns false if the key was not found for the inifile
-    handler, too.
-
-- GMP
-  . Requires libgmp version 4.2 or newer now.
-  . gmp_setbit() and gmp_clrbit() now return FALSE for negative indices, making
-    them consistent with other GMP functions.
-
-- Intl:
-  . Removed deprecated aliases datefmt_set_timezone_id() and
-    IntlDateFormatter::setTimeZoneID(). Use datefmt_set_timezone() and
-    IntlDateFormatter::setTimeZone() instead.
-
-- libxml:
-  . Added LIBXML_BIGLINES parser option. It's available starting with libxml 2.9.0
-    and adds suppport for line numbers >16-bit in the error reporting.
-
-- Mcrypt
-  . Removed deprecated mcrypt_generic_end() alias in favor of
-    mcrypt_generic_deinit().
-  . Removed deprecated mcrypt_ecb(), mcrypt_cbc(), mcrypt_cfb() and mcrypt_ofb()
-    functions in favor of mcrypt_encrypt() and mcrypt_decrypt() with an
-    MCRYPT_MODE_* flag.
-
-- Session
-  . session_start() accepts all INI settings as array. e.g. ['cache_limiter'=>'private']
-    sets session.cache_limiter=private. It also supports 'read_and_close' which closes
-    session data immediately after read data.
-  . Save handler accepts validate_sid(), update_timestamp() which validates session
-    ID existence, updates timestamp of session data. Compatibility of old user defined
-    save handler is retained.
-  . SessionUpdateTimestampHandlerInterface is added. validateSid(), updateTimestamp()
-    is defined in the interface.
-  . session.lazy_write(default=On) INI setting enables only write session data when
-    session data is updated.
-
-- Opcache
-  . Removed opcache.load_comments configuration directive. Now doc comments
-    loading costs nothing and always enabled.
-
-- OpenSSL:
-  . Removed the "rsa_key_size" SSL context option in favor of automatically
-    setting the appropriate size given the negotiated crypto algorithm.
-  . Removed "CN_match" and "SNI_server_name" SSL context options. Use automatic
-    detection or the "peer_name" option instead.
+- Core:
+  . gettype() will now return "resource (closed)" instead of "unknown type" for
+    closed resources.
+  . is_object() will now return true for objects of class
+    __PHP_Incomplete_Class.
+  . Support for Netware operating systems have been removed.
+  . Casting arrays to objects (with (object) or settype()) will now covert
+    integer keys to string property names. This fixes the behaviour of previous
+    versions, where integer keys would become inaccessible properties with
+    integer names.
+  . Casting objects to arrays (with (array) or settype()), and retrieving
+    object properties in an array with get_object_vars(), will now convert
+    numeric string property names (that is, property names of the format
+    /^(0|(-?[1-9][0-9]*))$/ where PHP_INT_MIN <= n <= PHP_INT_MAX) to integer
+    keys. This fixes the behaviour of previous versions, where numeric string
+    property names would become inaccessible string keys.
+  . Minimum supported Windows versions are Windows 7/Server 2008 R2.
+
+- BCMath:
+  . The bcmod() function no longer truncates fractional numbers to integers. As
+    such, its behavior now follows fmod() rather than the `%` operator. For
+    example `bcmod('4', '3.5')` now returns '0.5' instead of '1'.
 
 - PCRE:
-  . Removed support for /e (PREG_REPLACE_EVAL) modifier. Use
-    preg_replace_callback() instead.
+  . preg_match() and other PCRE functions now distinguish between unmatched
+    subpatterns and empty matches by reporting NULL and "" (empty string),
+    respectively. Formerly, either was reported as empty string.
 
-- PDO_pgsql:
-  . Removed PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT attribute in favor of
-    ATTR_EMULATE_PREPARES.
+- Session:
+  . Removed register_globals related code and "!" can be used as $_SESSION key name.
+  . Session is made to manage session status corretly and prevents invalid operations.
+    Only inappropriate codes are affected by this change. If you have problems with this,
+    it means you have problem in your code.
+    . Functions are made to set or return correct session status.
+        session_start(), session_status(), session_regenerate_id()
+    . Functions are made to return bool from null. These functions have void parameter
+      and void parameter is checked.
+        session_unset(), session_write_close()/session_commit(), session_abort(),
+        session_reset()
+    . Functions prohibit invalid operations with regard to session status and
+      HTTP header status, returns correct bool return value.
+        session_start(), session_set_cookie_params(), session_name(), session_module_name(),
+        session_set_save_handler(), session_regenerate_id(), session_cache_limiter(),
+        session_cache_expire(), session_unset(), session_destroy(),
+        session_write_close()/session_commit(), session_reset()
+    . INI value change by ini_set() returns update status correctly.　Invalid INI modifications
+      are checked and made to fail.
+        session.name, session.save_path, session.cookie_lifetime, session.cookie_path,
+        session.cookie_domain, session.cookie_httponly, session.cookie_secure,
+        session.use_cookies, session.use_only_cookies, session.use_strict_mode,
+        session.referer_check, session.cache_limiter, session.cache_expire,
+        session.lazy_write, session.save_handler, session.serialize_handler,
+        session.gc_probability, session.gc_divior, session.gc_maxlifetime,
+    . Some E_ERRORs are changed to E_WARNING since session status is managed correctly.
+        session_start()
+    . Session no longer initialize $_SESSION for invalid and useless session.
+        session_start()
+
+
+========================================
+2. New Features
+========================================
+
+- PCRE:
+  . Added `J` modifier for setting PCRE_DUPNAMES.
 
 - Standard:
-  . Removed string category support in setlocale(). Use the LC_* constants
-    instead.
-  . Removed set_magic_quotes_runtime() and its alias magic_quotes_runtime().
-
-- JSON:
-  . Rejected RFC 7159 incompatible number formats in json_decode string -
-        top level (07, 0xff, .1, -.1) and all levels ([1.], [1.e1])
-  . Calling json_decode with 1st argument equal to empty PHP string or value that 
-    after casting to string is empty string (NULL, FALSE) results in JSON syntax error.
-
-- Stream:
-  . Removed set_socket_blocking() in favor of its alias stream_set_blocking().
-
-- XSL:
-  . Removed xsl.security_prefs ini option. Use XsltProcessor::setSecurityPrefs()
-    instead.
-
-========================================
-2. New Features
-========================================
-
-- Core
-  . Added group use declarations.
-    (RFC: https://wiki.php.net/rfc/group_use_declarations)
-  . Added null coalesce operator (??).
-    (RFC: https://wiki.php.net/rfc/isset_ternary)
-  . Support for strings with length >= 2^31 bytes in 64 bit builds.
-  . Closure::call() method added (works only with userland classes).
-  . Added \u{xxxxxx} Unicode Codepoint Escape Syntax for double-quoted strings
-    and heredocs.
-  . define() now supports arrays as constant values, fixing an oversight where define() did not support arrays yet const syntax did.
-  . Added the comparison operator (<=>), aka the spaceship operator.
-    (RFC: https://wiki.php.net/rfc/combined-comparison-operator)
-  . Added the yield from operator for delegating Generators like coroutines.
-    (RFC: https://wiki.php.net/rfc/generator-delegation)
-  . Reserved keywords can now be used in various new contexts.
-    (RFC: https://wiki.php.net/rfc/context_sensitive_lexer)
-  . Added support for scalar type declarations and strict mode using
-    declare(strict_types=1) (RFC: https://wiki.php.net/rfc/scalar_type_hints_v5)
-  . Added support for cryptographically secure user land RNG
-    (RFC: https://wiki.php.net/rfc/easy_userland_csprng)
-
-- Opcache
-  . Added second level file based opcode cache (experimental - disabled by
-    default). To enable it, PHP should be configured and built with 
-    --enable-opcache-file, then opcache.file_cache=<DIR> configuration directive
-    should be set in php.ini. The second level cache may improve performance
-    at server restart or SHM reset. In addition, it's possibe to use file cache
-    without SHM at all, using opcache.file_cache_only=1 (this may be useful for
-    sharing hosting), and disable file cache consistency check, to speedup
-    loading at the cost of safety, using opcache.file_cache_consistency_checks=0.
-
-- OpenSSL
-  . Added "alpn_protocols" SSL context option allowing encrypted client/server
-    streams to negotiate alternative protocols using the ALPN TLS extension when
-    built against OpenSSL 1.0.2 or newer. Negotiated protocol information is
-    accessible through stream_get_meta_data() output.
-
-- Reflection
-  . Added a ReflectionGenerator class (yield from Traces, current file/line,
-    etc.)
-  . Added a ReflectionType class to better support the new return type and
-    scalar type declarations features. The new ReflectionParameter::getType()
-    and ReflectionFunctionAbstract::getReturnType() methods both return an
-    instance of ReflectionType.
-
-- Stream:
-  . New Windows only stream context options was added to allow blocking reads
-    on pipes. To enable it, pass array("pipe" => array("blocking" => true))
-    when creating the stream context. Be aware, that this option can under
-    circumstances cause dead locks on the pipe buffer. However it can be useful
-    in several CLI use case scenarios.
+  . Simplified password hashing API updated to support Argon2i hashes when PHP is compiled with libargon2
+    (https://wiki.php.net/rfc/argon2_password_hash).
+  . proc_nice() is now supported on Windows platforms.
 
 ========================================
 3. Changes in SAPI modules
 ========================================
 
-- FPM
-  . Fixed bug #65933 (Cannot specify config lines longer than 1024 bytes).
-  . Listen = port now listen on all addresses (IPv6 and IPv4-mapped).
-
 ========================================
 4. Deprecated Functionality
 ========================================
 
-- Core
-  . PHP 4 style constructors, where the constructor name is the same as the
-    class name, are now deprecated.
-  . Static calls to non-static methods are now deprecated.
-
-- OpenSSL
-  . The "capture_session_meta" SSL context option is now deprecated. Meta
-    data concerning active crypto on a stream resource is now accessible
-    through the return result from stream_get_meta_data().
+- GD:
+  . png2wbmp() and jpeg2wbmp() have been deprecated, and will be removed as of
+    PHP 8.0.0.
 
 ========================================
 5. Changed Functions
 ========================================
 
-- parse_ini_file():
-- parse_ini_string():
-  . Added scanner mode INI_SCANNER_TYPED to yield typed .ini values.
-- unserialize():
-  . Added second parameter for unserialize function 
-    (RFC: https://wiki.php.net/rfc/secure_unserialize) allowing to specify
-    acceptable classes: 
-    unserialize($foo, ["allowed_classes" => ["MyClass", "MyClass2"]]);
+- Standard:
+  . password_hash() can generate Argon2i hashes when the algorithm is set to PASSWORD_ARGON2I. 
+    When using PASSWORD_ARGON2I, the following cost factors may be set: 'memory_cost', 'time_cost', 
+    and 'threads'. These cost factors will default to 'PASSWORD_ARGON2_DEFAULT_MEMORY_COST', 
+    'PASSWORD_ARGON2_DEFAULT_TIME_COST', and 'PASSWORD_ARGON2_DEFAULT_THREADS' respectively if not set.
+  . password_verify() can verify Argon2i hashes.
+  . password_get_info() and password_needs_rehash() can accept Argon2i hashes.
+  . mail()/mb_send_mail() accept array $extra_header. Array paramter is checked against RFC 2822.
+    Array format is 
+    $extra_headers = [
+      'Header-Name' => 'Header value',
+      'Multiple' => ['One header', 'Another header'],
+      'Multiline' = "FirstLine\r\n SecondLine",
+    ];
+  . count() now raises a warning when an invalid parameter is passed.
+    Only arrays and objects implementing the Countable interface should be passed.
+  . pack() and unpack() now support float and double in both little and big endian.
 
-- proc_open():
-  . The maximum number of pipes used by proc_open() was previously limited by
-  hardcoded value of 16. This limit is now removed and the number of pipes is
-  effectively limited by the amount of memory available to PHP.
-  . New Windows only configuration option "blocking_pipes" can be used to
-  force blocking reads on child process pipes. This covers several
-  edge cases in CLI usage however can lead to dead locks. Also, this
-  correlates with the new stream context options for pipes.
-
-- array_column():
-  The function now supports an array of objects as well as two-dimensional
-  arrays. Only public properties are considered, and objects that make use of
-  __get() for dynamic properties must also implement __isset().
-
-- stream_context_create()
-  It accepts now a Windows only configuration 
-  array("pipe" => array("blocking" => <boolean>))  which forces blocking reads
-  on pipes. This option should be used carefully because due to the
-  platform restrictions dead locks on pipe buffers are possible.
+- XML:
+  . utf8_encode() and utf8_decode() have been moved to the Standard extension
+    as string functions.
 
 ========================================
 6. New Functions
 ========================================
-- GMP
-  . Added gmp_random_seed().
 
-- PCRE:
-  . Added preg_replace_callback_array function
-    (RFC: https://wiki.php.net/rfc/preg_replace_callback_array)
+- Core:
+  . Added stream_isatty().
+  . Added sapi_windows_vt100_support().
 
-- Standard
-  . Added intdiv() function for integer division.
-  . Added error_clear_last() function to reset error state.
+- GD:
+  . Added imagesetclip() and imagegetclip().
+  . Added imageopenpolygon().
+  . Added imageresolution().
+  . Added imagecreatefrombmp() and imagebmp().
 
-- Zlib:
-  . Added deflate_init(), deflate_add(), inflate_init(), inflate_add()
-    functions allowing incremental/streaming compression/decompression.
+- Mbstring:
+  . Added mb_chr() and mb_ord().
+  . Added mb_scurb() that scrub broken multibyte strings.
+
+- Sockets:
+  . Added socket_addrinfo_lookup(), socket_addrinfo_connect(),
+    socket_addrinfo_bind() and socket_addrinfo_explain().
 
 ========================================
 7. New Classes and Interfaces
 ========================================
 
-
 ========================================
 8. Removed Extensions and SAPIs
 ========================================
 
-- sapi/aolserver
-- sapi/apache
-- sapi/apache_hooks
-- sapi/apache2filter
-- sapi/caudium
-- sapi/continuity
-- sapi/isapi
-- sapi/milter
-- sapi/nsapi
-- sapi/phttpd
-- sapi/pi3web
-- sapi/roxen
-- sapi/thttpd
-- sapi/tux
-- sapi/webjames
-- ext/mssql
-- ext/mysql
-- ext/sybase_ct
-- ext/ereg
-
-For more details see 
-
-https://wiki.php.net/rfc/removal_of_dead_sapis_and_exts
-https://wiki.php.net/rfc/remove_deprecated_functionality_in_php7
-
-NOTE: NSAPI was not voted in the RFC, however it was removed afterwards. It turned
-out, that the corresponding SDK isn't available anymore.
+- Mcrypt:
+  . The deprecated mcrypt extension has been moved to PECL.
+  . libmcrypt has not been maintained since 2007 and the continued use of this
+    extension is strongly discouraged.
+  . Users are advised to use alternatives such as OpenSSL or libsodium.
 
 ========================================
 9. Other Changes to Extensions
 ========================================
 
-- Mhash
-  Mhash is not an extension anymore, use function_exists("mhash") to check whether
-  it is avaliable.
+- EXIF:
+   . Added extended exif tag support for the following formats: 
+     Samsung, DJI, Panasonic, Sony, Pentax, Minolta & Sigma/Foveon.
+
+- GD:
+  . Removed --enable-gd-native-ttf configuration option which was unused as
+    of PHP 5.5.0 anyway.
+  . imagegd() stores truecolor images as real truecolor images. Formerly, they
+    have been converted to palette.
+  . imageantialias() is now also available if compiled with a system libgd.
+
+- Mbstring
+  . mb_check_encoding() accepts array parameter. Both key and value
+    ecodings are checked recursively.
+  . mb_convert_encoding() accepts array parameter. Only value encodings
+    are converted recursively.
 
 ========================================
 10. New Global Constants
 ========================================
 
-- Core
-  . PHP_INT_MIN added.
+- Core:
+  . PHP_FLOAT_DIG     number of decimal digits, that can be rounded into a
+                      float and back without precision loss
+  . PHP_FLOAT_EPSILON smallest representable positive number x, so then
+                      x + 1.0 != 1.0
+  . PHP_FLOAT_MIN     min representable float number
+  . PHP_FLOAT_MAX     max representable float number
 
-- Zlib
-  . These constants are added to control flush behavior with the new
-    incremental deflate_add() and inflate_add() functions:
-  . ZLIB_NO_FLUSH
-  . ZLIB_PARTIAL_FLUSH
-  . ZLIB_SYNC_FLUSH
-  . ZLIB_FULL_FLUSH
-  . ZLIB_BLOCK
-  . ZLIB_FINISH
+- Fileinfo:
+  . FILEINFO_EXTENSION include list of possible file extensions
 
-- GD
-  . T1Lib support removed, thus lifting the optional dependency on T1Lib, the
-    following is therefore not available anymore:
+- GD:
+  . IMG_EFFECT_MULTIPLY
+  . IMG_BMP
 
-    Functions:
-      - imagepsbbox()
-      - imagepsencodefont()
-      - imagepsextendedfont()
-      - imagepsfreefont()
-      - imagepsloadfont()
-      - imagepsslantfont()
-      - imagepstext()
-
-    Resources:
-      - 'gd PS font'
-      - 'gd PS encoding'
+- Standard:
+  . PASSWORD_ARGON2_DEFAULT_MEMORY_COST
+  . PASSWORD_ARGON2_DEFAULT_TIME_COST
+  . PASSWORD_ARGON2_DEFAULT_THREADS
+  . PASSWORD_ARGON2I
 
 ========================================
 11. Changes to INI File Handling
 ========================================
 
-- Core
-  . Removed asp_tags ini directive. Trying to enable it will result in a fatal
-    error.
-  . Removed always_populate_raw_post_data ini directive.
+- sql.safe_mode
+  . This INI directive have been removed.
+
+- realpath_cache_size
+  . Set to 4096k by default
 
 ========================================
 12. Windows Support
 ========================================
 
-- Core
-  . Support for native 64 bit integers in 64 bit builds.
-  . Support for large files in 64 bit builds.
-  . Support for getrusage()
+- Support for VT100 console mode
 
-- ftp
-  . The ftp extension is always shipped shared
-  . For SSL support, the dependency on the openssl extension was abolished. Instead
-    it depends alone on the openssl library. If it's present at the compile time,
-    ftp_ssl_connect() is enabled automatically.
-
-- odbc
-  . The odbc extension is always shipped shared
+  On systems starting with 10.0.10586, cmd.exe supports ANSI escape sequences.
+  The corresponding console mode is enabled by default on CLI on suitable
+  systems. As well, the function sapi_windows_vt100_support() is provided,
+  to control and query the corresponding information in the scripts.
 
 ========================================
 13. Other Changes
 ========================================
 
-- Core
-  . Instead of being undefined and platform-dependent, NaN and Infinity will
-    always be zero when cast to integer.
-  . Calling a method on a non-object now raises a catchable error instead of a
-    fatal error; see: https://wiki.php.net/rfc/catchable-call-to-member-of-non-object
-  . Error messages for zend_parse_parameters, type hints and conversions now
-    always say "integer" and "float" instead of "long" and "double".
-  . Output buffering now continues to work for an aborted connection if
-    ignore_user_abort is set to true.

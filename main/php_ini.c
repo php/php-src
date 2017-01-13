@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -421,7 +421,7 @@ int php_init_config(void)
 
 			SetLastError(0);
 
-			/*If the given bugger is not large enough to hold the data, the return value is
+			/*If the given buffer is not large enough to hold the data, the return value is
 			the buffer size,  in characters, required to hold the string and its terminating
 			null character. We use this return value to alloc the final buffer. */
 			size = GetEnvironmentVariableA("PHPRC", &dummybuf, 0);
@@ -553,7 +553,6 @@ int php_init_config(void)
 					fh.handle.fp = VCWD_FOPEN(php_ini_file_name, "r");
 					if (fh.handle.fp) {
 						fh.filename = expand_filepath(php_ini_file_name, NULL);
-						opened_path = zend_string_init(fh.filename, strlen(fh.filename), 0);
 					}
 				}
 			}
@@ -599,6 +598,8 @@ int php_init_config(void)
 			zend_hash_str_update(&configuration_hash, "cfg_file_path", sizeof("cfg_file_path")-1, &tmp);
 			if (opened_path) {
 				zend_string_release(opened_path);
+			} else {
+				efree((char *)fh.filename);
 			}
 			php_ini_opened_path = zend_strndup(Z_STRVAL(tmp), Z_STRLEN(tmp));
 		}
@@ -637,7 +638,7 @@ int php_init_config(void)
 			}
 			if (!debpath[0]) {
 				/* empty string means default builtin value
-				   to allow "/foo/phd.d:" or ":/foo/php.d" */
+				   to allow "/foo/php.d:" or ":/foo/php.d" */
 				debpath = PHP_CONFIG_FILE_SCAN_DIR;
 			}
 			lenpath = (int)strlen(debpath);

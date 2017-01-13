@@ -1,5 +1,5 @@
 --TEST--
-Variadic arguments enforce typehints
+Variadic arguments enforce types
 --FILE--
 <?php
 

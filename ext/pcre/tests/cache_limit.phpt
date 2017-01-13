@@ -1,5 +1,9 @@
 --TEST--
 Compiled regex cache limit
+--SKIPIF--
+<?php
+if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+?>
 --FILE--
 <?php
 define('PREG_CACHE_SIZE', 4096+1);

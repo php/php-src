@@ -5,7 +5,7 @@ Stefan Koopmanschap <stefan@phpgg.nl>
 TestFest PHP|Tek
 --SKIPIF--
 <?php
-if (!extension_loaded('reflection)) print 'skip';
+if (!extension_loaded('reflection')) print 'skip';
 ?>
 --FILE-- 
 <?php

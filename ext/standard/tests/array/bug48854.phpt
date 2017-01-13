@@ -24,20 +24,20 @@ var_dump($array1, $array2);
 ?>
 --EXPECTF--
 array(2) {
-  [%u|b%"friends"]=>
+  ["friends"]=>
   int(5)
-  [%u|b%"children"]=>
+  ["children"]=>
   array(1) {
-    [%u|b%"dogs"]=>
+    ["dogs"]=>
     int(0)
   }
 }
 array(2) {
-  [%u|b%"friends"]=>
+  ["friends"]=>
   int(10)
-  [%u|b%"children"]=>
+  ["children"]=>
   array(1) {
-    [%u|b%"cats"]=>
+    ["cats"]=>
     int(5)
   }
 }

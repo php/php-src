@@ -18,4 +18,4 @@ $test = new Foo();
 var_dump($test instanceof Baz);
 ?>
 --EXPECTF--
-Fatal error: Access level to Bar::bad() must be public (as in class Baz) in %sbug69467.php on line %d
+Fatal error: Access level to Foo::bad() must be public (as in class Baz) in %sbug69467.php on line %d

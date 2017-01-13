@@ -243,6 +243,10 @@ gdImagePtr gdImageCropThreshold(gdImagePtr im, const unsigned int color, const f
 		return NULL;
 	}
 
+	if (!gdImageTrueColor(im) && color >= gdImageColorsTotal(im)) {
+		return NULL;
+	}
+
 	/* TODO: Add gdImageGetRowPtr and works with ptr at the row level
 	 * for the true color and palette images
 	 * new formats will simply work with ptr

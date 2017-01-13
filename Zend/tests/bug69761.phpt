@@ -11,5 +11,6 @@ var_dump(serialize($instance));
 --EXPECTF--
 Fatal error: Uncaught Exception: Serialization of 'class@%s' is not allowed in %sbug69761.php:%d
 Stack trace:
-#0 %sbug69761.php(%d): serialize(Object(class@%s
+#0 %sbug69761.php(%d): serialize(Object(class@anonymous))
+#1 {main}
   thrown in %sbug69761.php on line %d

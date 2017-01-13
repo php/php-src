@@ -217,7 +217,7 @@ zend_long JulianToSdn(
 						int inputMonth,
 						int inputDay)
 {
-	int year;
+	zend_long year;
 	int month;
 
 	/* check for invalid dates */

@@ -8,12 +8,21 @@
 
 static inline int convert_cp(UChar32* pcp, zval *zcp) {
 	zend_long cp = -1;
+
 	if (Z_TYPE_P(zcp) == IS_LONG) {
 		cp = Z_LVAL_P(zcp);
 	} else if (Z_TYPE_P(zcp) == IS_STRING) {
-		int i = 0;
-		U8_NEXT(Z_STRVAL_P(zcp), i, Z_STRLEN_P(zcp), cp);
-		if (i != Z_STRLEN_P(zcp)) {
+		int32_t i = 0;
+		size_t zcp_len = Z_STRLEN_P(zcp);
+
+		if (ZEND_SIZE_T_INT_OVFL(zcp_len)) {
+			intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
+			intl_error_set_custom_msg(NULL, "Input string is too long.", 0);
+			return FAILURE;
+		}
+
+		U8_NEXT(Z_STRVAL_P(zcp), i, zcp_len, cp);
+		if ((size_t)i != zcp_len) {
 			intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
 			intl_error_set_custom_msg(NULL, "Passing a UTF-8 character for codepoint requires a string which is exactly one UTF-8 codepoint long.", 0);
 			return FAILURE;
@@ -32,7 +41,7 @@ static inline int convert_cp(UChar32* pcp, zval *zcp) {
 	return SUCCESS;
 }
 
-/* {{{ proto string IntlChar::chr(int|string $char)
+/* {{{ proto string IntlChar::chr(int|string $codepoint)
  * Converts a numeric codepoint to UTF-8
  * Acts as an identify function when given a valid UTF-8 encoded codepoint
  */
@@ -59,7 +68,7 @@ IC_METHOD(chr) {
 }
 /* }}} */
 
-/* {{{ proto int IntlChar::ord(int|string $codepoint)
+/* {{{ proto int IntlChar::ord(int|string $character)
  * Converts a UTf-8 encoded codepoint to its integer U32 value
  * Acts as an identity function when passed a valid integer codepoint
  */
@@ -79,7 +88,7 @@ IC_METHOD(ord) {
 }
 /* }}} */
 
-/* {{{ proto bool IntlChar::hasBinaryProperty(int|string $char, int $property) */
+/* {{{ proto bool IntlChar::hasBinaryProperty(int|string $codepoint, int $property) */
 ZEND_BEGIN_ARG_INFO_EX(hasBinaryProperty_arginfo, 0, ZEND_RETURN_VALUE, 2)
 	ZEND_ARG_INFO(0, codepoint)
 	ZEND_ARG_INFO(0, property)
@@ -98,7 +107,7 @@ IC_METHOD(hasBinaryProperty) {
 }
 /* }}} */
 
-/* {{{ proto int IntlChar::getIntPropertyValue(int|string $char, int $property) */
+/* {{{ proto int IntlChar::getIntPropertyValue(int|string $codepoint, int $property) */
 ZEND_BEGIN_ARG_INFO_EX(getIntPropertyValue_arginfo, 0, ZEND_RETURN_VALUE, 2)
 	ZEND_ARG_INFO(0, codepoint)
 	ZEND_ARG_INFO(0, property)
@@ -147,7 +156,7 @@ IC_METHOD(getIntPropertyMaxValue) {
 }
 /* }}} */
 
-/* {{{ proto float IntlChar::getNumericValue(int|string $char) */
+/* {{{ proto float IntlChar::getNumericValue(int|string $codepoint) */
 ZEND_BEGIN_ARG_INFO_EX(getNumericValue_arginfo, 0, ZEND_RETURN_VALUE, 1)
 	ZEND_ARG_INFO(0, codepoint)
 ZEND_END_ARG_INFO();
@@ -164,7 +173,7 @@ IC_METHOD(getNumericValue) {
 }
 /* }}} */
 
-/* {{{ proto void IntlChar::enumCharTypes(callable $cb) */
+/* {{{ proto void IntlChar::enumCharTypes(callable $callback) */
 ZEND_BEGIN_ARG_INFO_EX(enumCharTypes_arginfo, 0, ZEND_RETURN_VALUE, 0)
 	ZEND_ARG_INFO(0, callback)
 ZEND_END_ARG_INFO();
@@ -209,7 +218,7 @@ IC_METHOD(enumCharTypes) {
 }
 /* }}} */
 
-/* {{{ proto int IntlChar::getBlockCode(int|string $char) */
+/* {{{ proto int IntlChar::getBlockCode(int|string $codepoint) */
 ZEND_BEGIN_ARG_INFO_EX(getBlockCode_arginfo, 0, ZEND_RETURN_VALUE, 1)
 	ZEND_ARG_INFO(0, codepoint)
 ZEND_END_ARG_INFO()
@@ -226,7 +235,7 @@ IC_METHOD(getBlockCode) {
 }
 /* }}} */
 
-/* {{{ proto string IntlChar::charName(int|string $char, int $nameChoice = IntlChar::UNICODE_CHAR_NAME) */
+/* {{{ proto string IntlChar::charName(int|string $codepoint, int $nameChoice = IntlChar::UNICODE_CHAR_NAME) */
 ZEND_BEGIN_ARG_INFO_EX(charName_arginfo, 0, ZEND_RETURN_VALUE, 1)
 	ZEND_ARG_INFO(0, codepoint)
 	ZEND_ARG_INFO(0, nameChoice)
@@ -241,7 +250,7 @@ IC_METHOD(charName) {
 
 	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "z|l", &zcp, &nameChoice) == FAILURE) ||
 	    (convert_cp(&cp, zcp) == FAILURE)) {
-		return;
+		RETURN_NULL();
 	}
 
 	buffer_len = u_charName(cp, (UCharNameChoice)nameChoice, NULL, 0, &error);
@@ -250,13 +259,13 @@ IC_METHOD(charName) {
 	buffer_len = u_charName(cp, (UCharNameChoice)nameChoice, ZSTR_VAL(buffer), ZSTR_LEN(buffer) + 1, &error);
 	if (U_FAILURE(error)) {
 		zend_string_free(buffer);
-		INTL_CHECK_STATUS(error, "Failure getting character name");
+		INTL_CHECK_STATUS_OR_NULL(error, "Failure getting character name");
 	}
 	RETURN_NEW_STR(buffer);
 }
 /* }}} */
 
-/* {{{ proto int IntlChar::charFromName(string $name, int $nameChoice = IntlChar::UNICODE_CHAR_NAME) */
+/* {{{ proto int IntlChar::charFromName(string $characterName, int $nameChoice = IntlChar::UNICODE_CHAR_NAME) */
 ZEND_BEGIN_ARG_INFO_EX(charFromName_arginfo, 0, ZEND_RETURN_VALUE, 1)
 	ZEND_ARG_INFO(0, characterName)
 	ZEND_ARG_INFO(0, nameChoice)
@@ -269,11 +278,11 @@ IC_METHOD(charFromName) {
 	UErrorCode error = U_ZERO_ERROR;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &name, &name_len, &nameChoice) == FAILURE) {
-		return;
+		RETURN_NULL();
 	}
 
 	ret = u_charFromName((UCharNameChoice)nameChoice, name, &error);
-	INTL_CHECK_STATUS(error, NULL);
+	INTL_CHECK_STATUS_OR_NULL(error, NULL);
 	RETURN_LONG(ret);
 }
 /* }}} */
@@ -374,7 +383,7 @@ IC_METHOD(getPropertyEnum) {
 }
 /* }}} */
 
-/* {{{ proto string IntlChar::getPropertyValueName(int $prop, int $val[, int $nameChoice = IntlChar::LONG_PROPERTY_NAME) */
+/* {{{ proto string IntlChar::getPropertyValueName(int $property, int $value[, int $nameChoice = IntlChar::LONG_PROPERTY_NAME) */
 ZEND_BEGIN_ARG_INFO_EX(getPropertyValueName_arginfo, 0, ZEND_RETURN_VALUE, 2)
 	ZEND_ARG_INFO(0, property)
 	ZEND_ARG_INFO(0, value)
@@ -417,9 +426,10 @@ IC_METHOD(getPropertyValueEnum) {
 }
 /* }}} */
 
-/* {{{ proto int|string IntlChar::foldCase(int|string $char, int $options = IntlChar::FOLD_CASE_DEFAULT) */
+/* {{{ proto int|string IntlChar::foldCase(int|string $codepoint, int $options = IntlChar::FOLD_CASE_DEFAULT) */
 ZEND_BEGIN_ARG_INFO_EX(foldCase_arginfo, 0, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, foldCase)
+	ZEND_ARG_INFO(0, codepoint)
+	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO();
 IC_METHOD(foldCase) {
 	UChar32 cp, ret;
@@ -444,7 +454,7 @@ IC_METHOD(foldCase) {
 }
 /* }}} */
 
-/* {{{ proto int IntlChar::digit(int|string $char[, int $radix = 10]) */
+/* {{{ proto int IntlChar::digit(int|string $codepoint[, int $radix = 10]) */
 ZEND_BEGIN_ARG_INFO_EX(digit_arginfo, 0, ZEND_RETURN_VALUE, 1)
 	ZEND_ARG_INFO(0, codepoint)
 	ZEND_ARG_INFO(0, radix)
@@ -478,7 +488,7 @@ ZEND_END_ARG_INFO();
 IC_METHOD(forDigit) {
 	zend_long digit, radix = 10;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &digit, &radix) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l", &digit, &radix) == FAILURE) {
 		return;
 	}
 
@@ -486,7 +496,7 @@ IC_METHOD(forDigit) {
 }
 /* }}} */
 
-/* {{{ proto array IntlChar::charAge(int|string $char) */
+/* {{{ proto array IntlChar::charAge(int|string $codepoint) */
 ZEND_BEGIN_ARG_INFO_EX(charAge_arginfo, 0, ZEND_RETURN_VALUE, 1)
 	ZEND_ARG_INFO(0, codepoint)
 ZEND_END_ARG_INFO();
@@ -525,7 +535,7 @@ IC_METHOD(getUnicodeVersion) {
 }
 /* }}} */
 
-/* {{{ proto string IntlChar::getFC_NFKC_Closure(int|string $char) */
+/* {{{ proto string IntlChar::getFC_NFKC_Closure(int|string $codepoint) */
 ZEND_BEGIN_ARG_INFO_EX(getFC_NFKC_Closure_arginfo, 0, ZEND_RETURN_VALUE, 1)
 	ZEND_ARG_INFO(0, codepoint)
 ZEND_END_ARG_INFO();
@@ -556,13 +566,13 @@ IC_METHOD(getFC_NFKC_Closure) {
 
 	error = U_ZERO_ERROR;
 	u8str = intl_convert_utf16_to_utf8(closure, closure_len, &error);
-	efree(closure);
 	INTL_CHECK_STATUS(error, "Failed converting output to UTF8");
+	efree(closure);
 	RETVAL_NEW_STR(u8str);
 }
 /* }}} */
 
-/* {{{ proto bool IntlChar::<name>(int|string $char) */
+/* {{{ proto bool IntlChar::<name>(int|string $codepoint) */
 #define IC_BOOL_METHOD_CHAR(name) \
 ZEND_BEGIN_ARG_INFO_EX(name##_arginfo, 0, ZEND_RETURN_VALUE, 1) \
 	ZEND_ARG_INFO(0, codepoint) \
@@ -604,7 +614,7 @@ IC_BOOL_METHOD_CHAR(isJavaIDPart)
 #undef IC_BOOL_METHOD_CHAR
 /* }}} */
 
-/* {{{ proto int IntlChar::<name>(int|string $char) */
+/* {{{ proto int IntlChar::<name>(int|string $codepoint) */
 #define IC_INT_METHOD_CHAR(name) \
 ZEND_BEGIN_ARG_INFO_EX(name##_arginfo, 0, ZEND_RETURN_VALUE, 1) \
 	ZEND_ARG_INFO(0, codepoint) \
@@ -622,7 +632,7 @@ IC_INT_METHOD_CHAR(charDigitValue)
 #undef IC_INT_METHOD_CHAR
 /* }}} */
 
-/* {{{ proto int|string IntlChar::<name>(int|string $char)
+/* {{{ proto int|string IntlChar::<name>(int|string $codepoint)
  * Returns a utf-8 character if codepoint was passed as a utf-8 sequence
  * Returns an int otherwise
  */
@@ -734,6 +744,9 @@ int php_uchar_minit(INIT_FUNC_ARGS) {
 	zend_declare_class_constant_string(ce, "UNICODE_VERSION", sizeof("UNICODE_VERISON")-1, U_UNICODE_VERSION);
 	IC_CONSTL("CODEPOINT_MIN", UCHAR_MIN_VALUE)
 	IC_CONSTL("CODEPOINT_MAX", UCHAR_MAX_VALUE)
+	IC_CONSTL("FOLD_CASE_DEFAULT", U_FOLD_CASE_DEFAULT)
+	IC_CONSTL("FOLD_CASE_EXCLUDE_SPECIAL_I", U_FOLD_CASE_EXCLUDE_SPECIAL_I)
+	zend_declare_class_constant_double(ce, "NO_NUMERIC_VALUE", sizeof("NO_NUMERIC_VALUE")-1, U_NO_NUMERIC_VALUE);
 
 	/* All enums used by the uchar APIs.  There are a LOT of them,
 	 * so they're separated out into include files,

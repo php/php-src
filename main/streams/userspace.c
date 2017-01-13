@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -299,9 +299,7 @@ static void user_stream_create_object(struct php_user_stream_wrapper *uwrap, php
 		zval retval;
 
 		fci.size = sizeof(fci);
-		fci.function_table = &uwrap->ce->function_table;
 		ZVAL_UNDEF(&fci.function_name);
-		fci.symbol_table = NULL;
 		fci.object = Z_OBJ_P(object);
 		fci.retval = &retval;
 		fci.param_count = 0;
@@ -310,7 +308,7 @@ static void user_stream_create_object(struct php_user_stream_wrapper *uwrap, php
 
 		fcc.initialized = 1;
 		fcc.function_handler = uwrap->ce->constructor;
-		fcc.calling_scope = EG(scope);
+		fcc.calling_scope = zend_get_executed_scope();
 		fcc.called_scope = Z_OBJCE_P(object);
 		fcc.object = Z_OBJ_P(object);
 
@@ -372,12 +370,17 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 
 	ZVAL_STRING(&zfuncname, USERSTREAM_OPEN);
 
-	call_result = call_user_function_ex(NULL,
-			Z_ISUNDEF(us->object)? NULL : &us->object,
-			&zfuncname,
-			&zretval,
-			4, args,
-			0, NULL	);
+	zend_try {
+		call_result = call_user_function_ex(NULL,
+				Z_ISUNDEF(us->object)? NULL : &us->object,
+				&zfuncname,
+				&zretval,
+				4, args,
+				0, NULL	);
+	} zend_catch {
+		FG(user_stream_current_filename) = NULL;
+		zend_bailout();
+	} zend_end_try();
 
 	if (call_result == SUCCESS && Z_TYPE(zretval) != IS_UNDEF && zval_is_true(&zretval)) {
 		/* the stream is now open! */
@@ -840,9 +843,7 @@ static int statbuf_from_array(zval *array, php_stream_statbuf *ssb)
 
 #define STAT_PROP_ENTRY_EX(name, name2)                        \
 	if (NULL != (elem = zend_hash_str_find(Z_ARRVAL_P(array), #name, sizeof(#name)-1))) {     \
-		SEPARATE_ZVAL(elem);																	 \
-		convert_to_long(elem);                                                                   \
-		ssb->sb.st_##name2 = Z_LVAL_P(elem);                                                      \
+		ssb->sb.st_##name2 = zval_get_long(elem);                                                      \
 	}
 
 #define STAT_PROP_ENTRY(name) STAT_PROP_ENTRY_EX(name,name)
@@ -858,15 +859,9 @@ static int statbuf_from_array(zval *array, php_stream_statbuf *ssb)
 	STAT_PROP_ENTRY(rdev);
 #endif
 	STAT_PROP_ENTRY(size);
-#ifdef NETWARE
-	STAT_PROP_ENTRY_EX(atime, atime.tv_sec);
-	STAT_PROP_ENTRY_EX(mtime, mtime.tv_sec);
-	STAT_PROP_ENTRY_EX(ctime, ctime.tv_sec);
-#else
 	STAT_PROP_ENTRY(atime);
 	STAT_PROP_ENTRY(mtime);
 	STAT_PROP_ENTRY(ctime);
-#endif
 #ifdef HAVE_ST_BLKSIZE
 	STAT_PROP_ENTRY(blksize);
 #endif

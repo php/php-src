@@ -45,7 +45,7 @@ echo "sha256(raw): " . bin2hex(hash_hmac('sha256', $content, $key, TRUE)) . "\n"
 adler32: 12c803f7
 crc32: 96859101
 gost: a4a3c80bdf3f8665bf07376a34dc9c1b11af7c813f4928f62e39f0c0dc564dad
-haval128,3: 82cd0f4bd36729b5c80c33efa8c13ac5
+haval128,3: 4d1318607f0406bd1b7bd50907772672
 md2: 6d111dab563025e4cb5f4425c991fa12
 md4: 10cdbfe843000c623f8b8da0d5d20b0b
 md5: 2a632783e2812cf23de100d7d6a463ae

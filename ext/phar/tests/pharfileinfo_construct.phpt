@@ -50,7 +50,7 @@ echo $e->getMessage() . "\n";
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar'); ?>
 --EXPECTF--
 Cannot open phar file 'phar://%spharfileinfo_construct.phar/oops': internal corruption of phar "%spharfileinfo_construct.phar" (truncated entry)
-PharFileInfo::__construct() expects parameter 1 to be string, array given
+PharFileInfo::__construct() expects parameter 1 to be a valid path, array given
 Cannot access phar file entry '%s' in archive '%s'
 Cannot call constructor twice
 '%s' is not a valid phar archive URL (must have at least phar://filename.phar)

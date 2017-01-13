@@ -13,7 +13,7 @@ var_dump( stristr("test stRIng", "striNG") );
 var_dump( stristr("teST StrinG", "stRIn") );
 var_dump( stristr("tesT string", "t S") );
 var_dump( stristr("test strinG", "g") );
-var_dump( bin2hex(stristr(b"te".chr(0).b"St", chr(0))) );
+var_dump( bin2hex(stristr("te".chr(0)."St", chr(0))) );
 var_dump( stristr("tEst", "test") );
 var_dump( stristr("teSt", "test") );
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Stig Sæther Bakken <ssb@php.net>                            |
+   | Authors: Stig SÃ¦ther Bakken <ssb@php.net>                            |
    |          Thies C. Arntzen <thies@thieso.net>                         |
    |                                                                      |
    | Collection support by Andy Sautins <asautins@veripost.net>           |
@@ -24,8 +24,6 @@
    |                Wez Furlong <wez@omniti.com>                          |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #if HAVE_OCI8
 # ifndef PHP_OCI8_INT_H
@@ -95,6 +93,13 @@ extern zend_class_entry *oci_coll_class_entry_ptr;
 #define PHP_OCI_LOB_BUFFER_ENABLED  1
 #define PHP_OCI_LOB_BUFFER_USED     2
 
+#ifdef OCI_ERROR_MAXMSG_SIZE2
+/* Bigger size is defined from 11.2.0.3 onwards */
+#define PHP_OCI_ERRBUF_LEN OCI_ERROR_MAXMSG_SIZE2
+#else
+#define PHP_OCI_ERRBUF_LEN OCI_ERROR_MAXMSG_SIZE
+#endif 
+
 /* The mode parameter for oci_connect() is overloaded and accepts both
  * privilege and external authentication flags OR'd together.
  * PHP_OCI_CRED_EXT must be distinct from the OCI_xxx privilege
@@ -114,7 +119,7 @@ extern zend_class_entry *oci_coll_class_entry_ptr;
  * Name passed to Oracle for tracing.  Note some DB views only show
  * the first nine characters of the driver name.
  */
-#define PHP_OCI8_DRIVER_NAME "PHP OCI8 " PHP_OCI8_VERSION
+#define PHP_OCI8_DRIVER_NAME     "PHP OCI8 : " PHP_OCI8_VERSION
 
 /* }}} */
 
@@ -144,7 +149,7 @@ typedef struct {
 	sb4				errcode;					/* last ORA- error number */
 
 	HashTable	   *descriptors;				/* descriptors hash, used to flush all the LOBs using this connection on commit */
-	zend_ulong			descriptor_count;			/* used to index the descriptors hash table.  Not an accurate count */
+	zend_ulong		descriptor_count;			/* used to index the descriptors hash table.  Not an accurate count */
 	unsigned		is_open:1;					/* hels to determine if the connection is dead or not */
 	unsigned		is_attached:1;				/* hels to determine if we should detach from the server when closing/freeing the connection */
 	unsigned		is_persistent:1;			/* self-descriptive */
@@ -169,7 +174,7 @@ typedef struct {
 	php_oci_connection	*connection;			/* parent connection handle */
 	dvoid				*descriptor;			/* OCI descriptor handle */
 	ub4					 type;					/* descriptor type (FILE/LOB) */
-	int					 lob_current_position;	/* LOB internal pointer */
+	ub4					 lob_current_position;	/* LOB internal pointer */
 	int					 lob_size;				/* cached LOB size. -1 = Lob wasn't initialized yet */
 	int					 buffering;				/* cached buffering flag. 0 - off, 1 - on, 2 - on and buffer was used */
 	ub4					 chunk_size;			/* chunk size of the LOB. 0 - unknown */
@@ -202,7 +207,7 @@ typedef struct {
 
 /* {{{ php_oci_define */
 typedef struct { 
-	zval		 zval;			/* zval used in define */
+	zval		*zval;			/* zval used in define */
 	text		*name;			/* placeholder's name */
 	ub4			 name_len;		/* placeholder's name length */
 	ub4			 type;			/* define type */
@@ -221,7 +226,7 @@ typedef struct {
 	OCIStmt				*stmt;					/* statement handle */
 	char				*last_query;			/* last query issued. also used to determine if this is a statement or a refcursor received from Oracle */
 	char                 impres_flag;           /* PHP_OCI_IMPRES_*_ */
-	zend_long				 last_query_len;		/* last query length */
+	zend_long			 last_query_len;		/* last query length */
 	HashTable			*columns;				/* hash containing all the result columns */
 	HashTable			*binds;					/* binds hash */
 	HashTable			*defines;				/* defines hash */
@@ -237,7 +242,8 @@ typedef struct {
 /* {{{ php_oci_bind */
 typedef struct { 
 	OCIBind				*bind;					/* bind handle */
-	zval				 zval;					/* value */
+	zval				*zval;					/* value */
+	zval				parameter;				/* a copy of bound variable used for oci_bind_by_name */
 	dvoid				*descriptor;			/* used for binding of LOBS etc */
 	OCIStmt				*statement;				/* used for binding REFCURSORs */
 	php_oci_statement	*parent_statement;		/* pointer to the parent statement */
@@ -412,7 +418,7 @@ void php_oci_bind_hash_dtor(zval *data);
 void php_oci_descriptor_flush_hash_dtor(zval *data);
 void php_oci_connection_descriptors_free(php_oci_connection *connection);
 sb4 php_oci_error(OCIError *err_p, sword status);
-sb4 php_oci_fetch_errmsg(OCIError *error_handle, text **error_buf);
+sb4 php_oci_fetch_errmsg(OCIError *error_handle, text *error_buf, size_t error_buf_size);
 int php_oci_fetch_sqltext_offset(php_oci_statement *statement, text **sqltext, ub2 *error_offset);
 void php_oci_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent, int exclusive);
 php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char *password, int password_len, char *new_password, int new_password_len, char *dbname, int dbname_len, char *charset, zend_long session_mode, int persistent, int exclusive);
@@ -420,8 +426,8 @@ int php_oci_connection_rollback(php_oci_connection *connection);
 int php_oci_connection_commit(php_oci_connection *connection);
 int php_oci_connection_release(php_oci_connection *connection);
 int php_oci_password_change(php_oci_connection *connection, char *user, int user_len, char *pass_old, int pass_old_len, char *pass_new, int pass_new_len);
-void php_oci_client_get_version(char **version);
-int php_oci_server_get_version(php_oci_connection *connection, char **version);
+void php_oci_client_get_version(char *version, size_t version_size);
+int php_oci_server_get_version(php_oci_connection *connection, char *version, size_t version_size);
 void php_oci_fetch_row(INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_args);
 int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode);
 void php_oci_dtrace_check_connection(php_oci_connection *connection, sb4 errcode, ub4 serverStatus);
@@ -485,14 +491,14 @@ int php_oci_statement_cancel(php_oci_statement *statement);
 void php_oci_statement_free(php_oci_statement *statement);
 int php_oci_bind_pre_exec(zval *data, void *result);
 int php_oci_bind_post_exec(zval *data);
-int php_oci_bind_by_name(php_oci_statement *statement, char *name, int name_len, zval *var, zend_long maxlength, ub2 type);
+int php_oci_bind_by_name(php_oci_statement *statement, char *name, size_t name_len, zval *var, zend_long maxlength, ub2 type);
 sb4 php_oci_bind_in_callback(dvoid *ictxp, OCIBind *bindp, ub4 iter, ub4 index, dvoid **bufpp, ub4 *alenp, ub1 *piecep, dvoid **indpp);
 sb4 php_oci_bind_out_callback(dvoid *octxp, OCIBind *bindp, ub4 iter, ub4 index, dvoid **bufpp, ub4 **alenpp, ub1 *piecep, dvoid **indpp, ub2 **rcodepp);
 php_oci_out_column *php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAMETERS, int need_data);
 int php_oci_cleanup_pre_fetch(zval *data);
 int php_oci_statement_get_type(php_oci_statement *statement, ub2 *type);
 int php_oci_statement_get_numrows(php_oci_statement *statement, ub4 *numrows);
-int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, int name_len, zval *var, zend_long max_table_length, zend_long maxlength, zend_long type);
+int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, size_t name_len, zval *var, zend_long max_table_length, zend_long maxlength, zend_long type);
 php_oci_bind *php_oci_bind_array_helper_number(zval *var, zend_long max_table_length);
 php_oci_bind *php_oci_bind_array_helper_double(zval *var, zend_long max_table_length);
 php_oci_bind *php_oci_bind_array_helper_string(zval *var, zend_long max_table_length, zend_long maxlength);
@@ -545,4 +551,6 @@ ZEND_EXTERN_MODULE_GLOBALS(oci)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
  */

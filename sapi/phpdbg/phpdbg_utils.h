@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -73,8 +73,9 @@ PHPDBG_API int phpdbg_get_element(const char *name, size_t len); /* }}} */
 PHPDBG_API void phpdbg_set_prompt(const char*);
 PHPDBG_API const char *phpdbg_get_prompt(void); /* }}} */
 
-/* {{{ Console Width */
-PHPDBG_API int phpdbg_get_terminal_width(void); /* }}} */
+/* {{{ Console size */
+PHPDBG_API int phpdbg_get_terminal_width(void);
+PHPDBG_API int phpdbg_get_terminal_height(void); /* }}} */
 
 PHPDBG_API void phpdbg_set_async_io(int fd);
 
@@ -97,6 +98,14 @@ PHPDBG_API void phpdbg_xml_var_dump(zval *zv);
 char *phpdbg_short_zval_print(zval *zv, int maxlen);
 
 PHPDBG_API zend_bool phpdbg_check_caught_ex(zend_execute_data *ex, zend_object *exception);
+
+static zend_always_inline zend_execute_data *phpdbg_user_execute_data(zend_execute_data *ex) {
+	while (!ex->func || !ZEND_USER_CODE(ex->func->common.type)) {
+		ex = ex->prev_execute_data;
+		ZEND_ASSERT(ex);
+	}
+	return ex;
+}
 
 #ifdef ZTS
 #define PHPDBG_OUTPUT_BACKUP_DEFINES() \

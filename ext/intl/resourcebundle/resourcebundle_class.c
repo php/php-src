@@ -49,8 +49,6 @@ static void ResourceBundle_object_destroy( zend_object *object )
 	if (rb->child) {
 		ures_close( rb->child );
 	}
-
-	//???zend_object_std_dtor( object );
 }
 /* }}} */
 
@@ -101,6 +99,13 @@ static int resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constr
 
 	if (locale == NULL) {
 		locale = intl_locale_get_default();
+	}
+
+	if (bundlename_len >= MAXPATHLEN) {
+		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"Bundle name too long", 0 );
+		zval_dtor(return_value);
+		ZVAL_NULL(return_value);
+		return FAILURE;
 	}
 
 	if (fallback) {
@@ -330,6 +335,11 @@ PHP_FUNCTION( resourcebundle_locales )
 	{
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"resourcebundle_locales: unable to parse input params", 0);
+		RETURN_FALSE;
+	}
+
+	if (bundlename_len >= MAXPATHLEN) {
+		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"resourcebundle_locales: bundle name too long", 0 );
 		RETURN_FALSE;
 	}
 

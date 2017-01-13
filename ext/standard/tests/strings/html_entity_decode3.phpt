@@ -14,6 +14,7 @@ $tests = array(
     "&#x0E;",
     "&#x1F;",
     "&#x20;", //allowed always
+    "&#x27;", //single quote, depends on flags
     "&#x7F;", //DEL
     "&#x80;", //C1
     "&#x9F;",
@@ -76,6 +77,17 @@ foreach ($tests as $t) {
     }
 }
 
+echo "\n*** Default options ***\n";
+
+foreach ($tests as $t) {
+    $dec = html_entity_decode($t);
+    if ($t == $dec) {
+        echo "$t\tNOT DECODED\n";
+    } else {
+        echo "$t\tDECODED\n";
+    }
+}
+
 echo "\nDone.\n";
 --EXPECT--
 *** HTML 4.01  ***
@@ -89,6 +101,7 @@ echo "\nDone.\n";
 &#x0E;	NOT DECODED
 &#x1F;	NOT DECODED
 &#x20;	DECODED
+&#x27;	DECODED
 &#x7F;	NOT DECODED
 &#x80;	NOT DECODED
 &#x9F;	NOT DECODED
@@ -117,6 +130,7 @@ echo "\nDone.\n";
 &#x0E;	NOT DECODED
 &#x1F;	NOT DECODED
 &#x20;	DECODED
+&#x27;	DECODED
 &#x7F;	DECODED
 &#x80;	DECODED
 &#x9F;	DECODED
@@ -145,6 +159,7 @@ echo "\nDone.\n";
 &#x0E;	NOT DECODED
 &#x1F;	NOT DECODED
 &#x20;	DECODED
+&#x27;	DECODED
 &#x7F;	NOT DECODED
 &#x80;	NOT DECODED
 &#x9F;	NOT DECODED
@@ -173,6 +188,7 @@ echo "\nDone.\n";
 &#x0E;	NOT DECODED
 &#x1F;	NOT DECODED
 &#x20;	DECODED
+&#x27;	DECODED
 &#x7F;	DECODED
 &#x80;	DECODED
 &#x9F;	DECODED
@@ -183,6 +199,35 @@ echo "\nDone.\n";
 &#xE000;	DECODED
 &#xFFFE;	NOT DECODED
 &#xFFFF;	NOT DECODED
+&#xFDCF;	DECODED
+&#xFDD0;	DECODED
+&#xFDEF;	DECODED
+&#xFDF0;	DECODED
+&#x2FFFE;	DECODED
+&#x2FFFF;	DECODED
+
+*** Default options ***
+&#0;	NOT DECODED
+&#1;	NOT DECODED
+&#x09;	DECODED
+&#x0A;	DECODED
+&#x0B;	NOT DECODED
+&#x0C;	NOT DECODED
+&#x0D;	DECODED
+&#x0E;	NOT DECODED
+&#x1F;	NOT DECODED
+&#x20;	DECODED
+&#x27;	NOT DECODED
+&#x7F;	NOT DECODED
+&#x80;	NOT DECODED
+&#x9F;	NOT DECODED
+&#xA0;	DECODED
+&#xD7FF;	DECODED
+&#xD800;	NOT DECODED
+&#xDFFF;	NOT DECODED
+&#xE000;	DECODED
+&#xFFFE;	DECODED
+&#xFFFF;	DECODED
 &#xFDCF;	DECODED
 &#xFDD0;	DECODED
 &#xFDEF;	DECODED

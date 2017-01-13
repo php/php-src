@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,12 +28,6 @@
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
-
-/* Additional headers for NetWare */
-#if defined(NETWARE) && (NEW_LIBC)
-#include <sys/select.h>
-#include <sys/timeval.h>
 #endif
 
 #include "php.h"
@@ -70,17 +64,24 @@
 #define PHP_LDAP_ESCAPE_FILTER 0x01
 #define PHP_LDAP_ESCAPE_DN     0x02
 
-#ifndef HAVE_LDAP_CONTROL_FIND
+#if defined(LDAP_CONTROL_PAGEDRESULTS) && !defined(HAVE_LDAP_CONTROL_FIND)
 LDAPControl *ldap_control_find( const char *oid, LDAPControl **ctrls, LDAPControl ***nextctrlp)
 {
-  assert(nextctrlp == NULL);
-  return ldap_find_control(oid, ctrls);
+	assert(nextctrlp == NULL);
+	return ldap_find_control(oid, ctrls);
+}
+#endif
+
+#if !defined(LDAP_API_FEATURE_X_OPENLDAP)
+void ldap_memvfree(void **v)
+{
+	ldap_value_free((char **)v);
 }
 #endif
 
 typedef struct {
 	LDAP *link;
-#if defined(HAVE_3ARG_SETREBINDPROC)
+#if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
 	zval rebindproc;
 #endif
 } ldap_linkdata;
@@ -104,10 +105,8 @@ static void _close_ldap_link(zend_resource *rsrc) /* {{{ */
 {
 	ldap_linkdata *ld = (ldap_linkdata *)rsrc->ptr;
 
-	/* ldap_unbind_s() is deprecated;
-	 * the distinction between ldap_unbind() and ldap_unbind_s() is moot */
 	ldap_unbind_ext(ld->link, NULL, NULL);
-#ifdef HAVE_3ARG_SETREBINDPROC
+#if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
 	zval_ptr_dtor(&ld->rebindproc);
 #endif
 
@@ -182,6 +181,9 @@ PHP_MINIT_FUNCTION(ldap)
 #elif defined (LDAP_X_OPT_CONNECT_TIMEOUT)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_NETWORK_TIMEOUT", LDAP_X_OPT_CONNECT_TIMEOUT, CONST_PERSISTENT | CONST_CS);
 #endif
+#ifdef LDAP_OPT_TIMEOUT
+	REGISTER_LONG_CONSTANT("LDAP_OPT_TIMEOUT", LDAP_OPT_TIMEOUT, CONST_PERSISTENT | CONST_CS);
+#endif
 	REGISTER_LONG_CONSTANT("LDAP_OPT_PROTOCOL_VERSION", LDAP_OPT_PROTOCOL_VERSION, CONST_PERSISTENT | CONST_CS);
 	REGISTER_LONG_CONSTANT("LDAP_OPT_ERROR_NUMBER", LDAP_OPT_ERROR_NUMBER, CONST_PERSISTENT | CONST_CS);
 	REGISTER_LONG_CONSTANT("LDAP_OPT_REFERRALS", LDAP_OPT_REFERRALS, CONST_PERSISTENT | CONST_CS);
@@ -212,11 +214,70 @@ PHP_MINIT_FUNCTION(ldap)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_SASL_AUTHCID", LDAP_OPT_X_SASL_AUTHCID, CONST_PERSISTENT | CONST_CS);
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_SASL_AUTHZID", LDAP_OPT_X_SASL_AUTHZID, CONST_PERSISTENT | CONST_CS);
 #endif
+#ifdef LDAP_OPT_X_SASL_NOCANON
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_SASL_NOCANON", LDAP_OPT_X_SASL_NOCANON, CONST_PERSISTENT | CONST_CS);
+#endif
+#ifdef LDAP_OPT_X_SASL_USERNAME
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_SASL_USERNAME", LDAP_OPT_X_SASL_USERNAME, CONST_PERSISTENT | CONST_CS);
+#endif
 
 #ifdef ORALDAP
 	REGISTER_LONG_CONSTANT("GSLC_SSL_NO_AUTH", GSLC_SSL_NO_AUTH, CONST_PERSISTENT | CONST_CS);
 	REGISTER_LONG_CONSTANT("GSLC_SSL_ONEWAY_AUTH", GSLC_SSL_ONEWAY_AUTH, CONST_PERSISTENT | CONST_CS);
 	REGISTER_LONG_CONSTANT("GSLC_SSL_TWOWAY_AUTH", GSLC_SSL_TWOWAY_AUTH, CONST_PERSISTENT | CONST_CS);
+#endif
+
+#if (LDAP_API_VERSION > 2000)
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_REQUIRE_CERT", LDAP_OPT_X_TLS_REQUIRE_CERT, CONST_PERSISTENT | CONST_CS);
+
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_NEVER", LDAP_OPT_X_TLS_NEVER, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_HARD", LDAP_OPT_X_TLS_HARD, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_DEMAND", LDAP_OPT_X_TLS_DEMAND, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_ALLOW", LDAP_OPT_X_TLS_ALLOW, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_TRY", LDAP_OPT_X_TLS_TRY, CONST_PERSISTENT | CONST_CS);
+
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_CACERTDIR", LDAP_OPT_X_TLS_CACERTDIR, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_CACERTFILE", LDAP_OPT_X_TLS_CACERTFILE, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_CERTFILE", LDAP_OPT_X_TLS_CERTFILE, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_CIPHER_SUITE", LDAP_OPT_X_TLS_CIPHER_SUITE, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_KEYFILE", LDAP_OPT_X_TLS_KEYFILE, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_RANDOM_FILE", LDAP_OPT_X_TLS_RANDOM_FILE, CONST_PERSISTENT | CONST_CS);
+#endif
+
+#ifdef LDAP_OPT_X_TLS_CRLCHECK
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_CRLCHECK", LDAP_OPT_X_TLS_CRLCHECK, CONST_PERSISTENT | CONST_CS);
+
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_CRL_NONE", LDAP_OPT_X_TLS_CRL_NONE, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_CRL_PEER", LDAP_OPT_X_TLS_CRL_PEER, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_CRL_ALL", LDAP_OPT_X_TLS_CRL_ALL, CONST_PERSISTENT | CONST_CS);
+#endif
+
+#ifdef LDAP_OPT_X_TLS_DHFILE
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_DHFILE", LDAP_OPT_X_TLS_DHFILE, CONST_PERSISTENT | CONST_CS);
+#endif
+
+#ifdef LDAP_OPT_X_TLS_CRLFILE
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_CRLFILE", LDAP_OPT_X_TLS_CRLFILE, CONST_PERSISTENT | CONST_CS);
+#endif
+
+#ifdef LDAP_OPT_X_TLS_PROTOCOL_MIN
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_PROTOCOL_MIN", LDAP_OPT_X_TLS_PROTOCOL_MIN, CONST_PERSISTENT | CONST_CS);
+
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_PROTOCOL_SSL2", LDAP_OPT_X_TLS_PROTOCOL_SSL2, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_PROTOCOL_SSL3", LDAP_OPT_X_TLS_PROTOCOL_SSL3, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_PROTOCOL_TLS1_0", LDAP_OPT_X_TLS_PROTOCOL_TLS1_0, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_PROTOCOL_TLS1_1", LDAP_OPT_X_TLS_PROTOCOL_TLS1_1, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_PROTOCOL_TLS1_2", LDAP_OPT_X_TLS_PROTOCOL_TLS1_2, CONST_PERSISTENT | CONST_CS);
+#endif
+
+#ifdef LDAP_OPT_X_TLS_PACKAGE
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_PACKAGE", LDAP_OPT_X_TLS_PACKAGE, CONST_PERSISTENT | CONST_CS);
+#endif
+
+#ifdef LDAP_OPT_X_KEEPALIVE_IDLE
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_KEEPALIVE_IDLE", LDAP_OPT_X_KEEPALIVE_IDLE, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_KEEPALIVE_PROBES", LDAP_OPT_X_KEEPALIVE_PROBES, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_KEEPALIVE_INTERVAL", LDAP_OPT_X_KEEPALIVE_INTERVAL, CONST_PERSISTENT | CONST_CS);
 #endif
 
 	REGISTER_LONG_CONSTANT("LDAP_ESCAPE_FILTER", PHP_LDAP_ESCAPE_FILTER, CONST_PERSISTENT | CONST_CS);
@@ -339,31 +400,43 @@ PHP_FUNCTION(ldap_connect)
 #endif
 
 	if (LDAPG(max_links) != -1 && LDAPG(num_links) >= LDAPG(max_links)) {
-		php_error_docref(NULL, E_WARNING, "Too many open links (%pd)", LDAPG(num_links));
+		php_error_docref(NULL, E_WARNING, "Too many open links (" ZEND_LONG_FMT ")", LDAPG(num_links));
 		RETURN_FALSE;
 	}
 
 	ld = ecalloc(1, sizeof(ldap_linkdata));
 
-	/* OpenLDAP provides a specific call to detect valid LDAP URIs;
-	 * ldap_init()/ldap_open() is deprecated, use ldap_initialize() instead.
-	 */
 	{
-		int rc;
+		int rc = LDAP_SUCCESS;
 		char	*url = host;
 		if (!ldap_is_ldap_url(url)) {
 			int	urllen = hostlen + sizeof( "ldap://:65535" );
 
 			if (port <= 0 || port > 65535) {
-				php_error_docref(NULL, E_WARNING, "invalid port number: %ld", port);
+				efree(ld);
+				php_error_docref(NULL, E_WARNING, "invalid port number: " ZEND_LONG_FMT, port);
 				RETURN_FALSE;
 			}
 
 			url = emalloc(urllen);
-			snprintf( url, urllen, "ldap://%s:%ld", host ? host : "", port );
+			snprintf( url, urllen, "ldap://%s:" ZEND_LONG_FMT, host ? host : "", port );
 		}
 
+#ifdef LDAP_API_FEATURE_X_OPENLDAP
+		/* ldap_init() is deprecated, use ldap_initialize() instead.
+		 */
 		rc = ldap_initialize(&ldap, url);
+#else /* ! LDAP_API_FEATURE_X_OPENLDAP */
+		/* ldap_init does not support URLs.
+		 * We must try the original host and port information.
+		 */
+		ldap = ldap_init(host, port);
+		if (ldap == NULL) {
+			efree(ld);
+			php_error_docref(NULL, E_WARNING, "Could not create session handle");
+			RETURN_FALSE;
+		}
+#endif /* ! LDAP_API_FEATURE_X_OPENLDAP */
 		if (url != host) {
 			efree(url);
 		}
@@ -463,14 +536,19 @@ PHP_FUNCTION(ldap_bind)
 	}
 
 	{
+#ifdef LDAP_API_FEATURE_X_OPENLDAP
+		/* ldap_simple_bind_s() is deprecated, use ldap_sasl_bind_s() instead.
+		 */
 		struct berval   cred;
 
-		/* ldap_bind_s() is deprecated; use ldap_sasl_bind_s() instead */
 		cred.bv_val = ldap_bind_pw;
 		cred.bv_len = ldap_bind_pw ? ldap_bind_pwlen : 0;
 		rc = ldap_sasl_bind_s(ld->link, ldap_bind_dn, LDAP_SASL_SIMPLE, &cred,
 				NULL, NULL,     /* no controls right now */
 				NULL);	  /* we don't care about the server's credentials */
+#else /* ! LDAP_API_FEATURE_X_OPENLDAP */
+		rc = ldap_simple_bind_s(ld->link, ldap_bind_dn, ldap_bind_pw);
+#endif /* ! LDAP_API_FEATURE_X_OPENLDAP */
 	}
 	if ( rc != LDAP_SUCCESS) {
 		php_error_docref(NULL, E_WARNING, "Unable to bind to server: %s", ldap_err2string(rc));
@@ -646,7 +724,7 @@ static void php_set_opts(LDAP *ldap, int sizelimit, int timelimit, int deref, in
 	/* timelimit */
 	if (timelimit > -1) {
 #if (LDAP_API_VERSION >= 2004) || HAVE_NSLDAP || HAVE_ORALDAP
-		ldap_get_option(ldap, LDAP_OPT_SIZELIMIT, old_timelimit);
+		ldap_get_option(ldap, LDAP_OPT_TIMELIMIT, old_timelimit);
 		ldap_set_option(ldap, LDAP_OPT_TIMELIMIT, &timelimit);
 #else
 		*old_timelimit = ldap->ld_timelimit;
@@ -657,7 +735,7 @@ static void php_set_opts(LDAP *ldap, int sizelimit, int timelimit, int deref, in
 	/* deref */
 	if (deref > -1) {
 #if (LDAP_API_VERSION >= 2004) || HAVE_NSLDAP || HAVE_ORALDAP
-		ldap_get_option(ldap, LDAP_OPT_SIZELIMIT, old_deref);
+		ldap_get_option(ldap, LDAP_OPT_DEREF, old_deref);
 		ldap_set_option(ldap, LDAP_OPT_DEREF, &deref);
 #else
 		*old_deref = ldap->ld_deref;
@@ -706,7 +784,6 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 					goto cleanup;
 				}
 
-				SEPARATE_ZVAL(attr);
 				convert_to_string_ex(attr);
 				ldap_attrs[i] = Z_STRVAL_P(attr);
 			}
@@ -1347,7 +1424,6 @@ PHP_FUNCTION(ldap_explode_dn)
 		add_index_string(return_value, i, ldap_value[i]);
 	}
 
-	/* ldap_value_free() is deprecated */
 	ldap_memvfree((void **)ldap_value);
 }
 /* }}} */
@@ -1438,6 +1514,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 
 		value = zend_hash_get_current_data(Z_ARRVAL_P(entry));
 
+		ZVAL_DEREF(value);
 		if (Z_TYPE_P(value) != IS_ARRAY) {
 			num_values = 1;
 		} else {
@@ -1566,9 +1643,9 @@ PHP_FUNCTION(ldap_delete)
 
 /* {{{ _ldap_str_equal_to_const
  */
-static int _ldap_str_equal_to_const(const char *str, uint str_len, const char *cstr)
+static int _ldap_str_equal_to_const(const char *str, uint32_t str_len, const char *cstr)
 {
-	int i;
+	uint32_t i;
 
 	if (strlen(cstr) != str_len)
 		return 0;
@@ -1585,9 +1662,9 @@ static int _ldap_str_equal_to_const(const char *str, uint str_len, const char *c
 
 /* {{{ _ldap_strlen_max
  */
-static int _ldap_strlen_max(const char *str, uint max_len)
+static int _ldap_strlen_max(const char *str, uint32_t max_len)
 {
-	int i;
+	uint32_t i;
 
 	for (i = 0; i < max_len; ++i) {
 		if (str[i] == '\0') {
@@ -1620,7 +1697,7 @@ PHP_FUNCTION(ldap_modify_batch)
 	int i, j, k;
 	int num_mods, num_modprops, num_modvals;
 	LDAPMod **ldap_mods;
-	uint oper;
+	uint32_t oper;
 
 	/*
 	$mods = array(
@@ -1663,7 +1740,7 @@ PHP_FUNCTION(ldap_modify_batch)
 		zend_ulong tmpUlong;
 
 		/* make sure the DN contains no NUL bytes */
-		if (_ldap_strlen_max(dn, dn_len) != dn_len) {
+		if ((size_t)_ldap_strlen_max(dn, dn_len) != dn_len) {
 			php_error_docref(NULL, E_WARNING, "DN must not contain NUL bytes");
 			RETURN_FALSE;
 		}
@@ -1722,7 +1799,7 @@ PHP_FUNCTION(ldap_modify_batch)
 						RETURN_FALSE;
 					}
 
-					if (Z_STRLEN_P(modinfo) != _ldap_strlen_max(Z_STRVAL_P(modinfo), Z_STRLEN_P(modinfo))) {
+					if (Z_STRLEN_P(modinfo) != (size_t)_ldap_strlen_max(Z_STRVAL_P(modinfo), Z_STRLEN_P(modinfo))) {
 						php_error_docref(NULL, E_WARNING, "A '" LDAP_MODIFY_BATCH_ATTRIB "' value must not contain NUL bytes");
 						RETURN_FALSE;
 					}
@@ -1830,8 +1907,11 @@ PHP_FUNCTION(ldap_modify_batch)
 				oper = LDAP_MOD_REPLACE;
 				break;
 			default:
-				php_error_docref(NULL, E_ERROR, "Unknown and uncaught modification type.");
-				RETURN_FALSE;
+				zend_throw_error(NULL, "Unknown and uncaught modification type.");
+				RETVAL_FALSE;
+				efree(ldap_mods[i]);
+				num_mods = i;
+				goto cleanup;
 		}
 
 		/* fill in the basic info */
@@ -1876,7 +1956,7 @@ PHP_FUNCTION(ldap_modify_batch)
 	} else RETVAL_TRUE;
 
 	/* clean up */
-	{
+	cleanup: {
 		for (i = 0; i < num_mods; i++) {
 			/* attribute */
 			efree(ldap_mods[i]->mod_type);
@@ -2060,6 +2140,23 @@ PHP_FUNCTION(ldap_get_option)
 #ifdef LDAP_OPT_RESTART
 	case LDAP_OPT_RESTART:
 #endif
+#ifdef LDAP_OPT_X_SASL_NOCANON
+	case LDAP_OPT_X_SASL_NOCANON:
+#endif
+#ifdef LDAP_OPT_X_TLS_REQUIRE_CERT
+	case LDAP_OPT_X_TLS_REQUIRE_CERT:
+#endif
+#ifdef LDAP_OPT_X_TLS_CRLCHECK
+	case LDAP_OPT_X_TLS_CRLCHECK:
+#endif
+#ifdef LDAP_OPT_X_TLS_PROTOCOL_MIN
+	case LDAP_OPT_X_TLS_PROTOCOL_MIN:
+#endif
+#ifdef LDAP_OPT_X_KEEPALIVE_IDLE
+	case LDAP_OPT_X_KEEPALIVE_IDLE:
+	case LDAP_OPT_X_KEEPALIVE_PROBES:
+	case LDAP_OPT_X_KEEPALIVE_INTERVAL:
+#endif
 		{
 			int val;
 
@@ -2099,6 +2196,25 @@ PHP_FUNCTION(ldap_get_option)
 			ZVAL_LONG(retval, (timeout / 1000));
 		} break;
 #endif
+#ifdef LDAP_OPT_TIMEOUT
+	case LDAP_OPT_TIMEOUT:
+		{
+			struct timeval *timeout = NULL;
+
+			if (ldap_get_option(ld->link, LDAP_OPT_TIMEOUT, (void *) &timeout)) {
+				if (timeout) {
+					ldap_memfree(timeout);
+				}
+				RETURN_FALSE;
+			}
+			if (!timeout) {
+				RETURN_FALSE;
+			}
+			zval_dtor(retval);
+			ZVAL_LONG(retval, timeout->tv_sec);
+			ldap_memfree(timeout);
+		} break;
+#endif
 	/* options with string value */
 	case LDAP_OPT_ERROR_STRING:
 #ifdef LDAP_OPT_HOST_NAME
@@ -2109,6 +2225,26 @@ PHP_FUNCTION(ldap_get_option)
 	case LDAP_OPT_X_SASL_REALM:
 	case LDAP_OPT_X_SASL_AUTHCID:
 	case LDAP_OPT_X_SASL_AUTHZID:
+#endif
+#ifdef LDAP_OPT_X_SASL_USERNAME
+	case LDAP_OPT_X_SASL_USERNAME:
+#endif
+#if (LDAP_API_VERSION > 2000)
+	case LDAP_OPT_X_TLS_CACERTDIR:
+	case LDAP_OPT_X_TLS_CACERTFILE:
+	case LDAP_OPT_X_TLS_CERTFILE:
+	case LDAP_OPT_X_TLS_CIPHER_SUITE:
+	case LDAP_OPT_X_TLS_KEYFILE:
+	case LDAP_OPT_X_TLS_RANDOM_FILE:
+#endif
+#ifdef LDAP_OPT_X_TLS_PACKAGE
+	case LDAP_OPT_X_TLS_PACKAGE:
+#endif
+#ifdef LDAP_OPT_X_TLS_CRLFILE
+	case LDAP_OPT_X_TLS_CRLFILE:
+#endif
+#ifdef LDAP_OPT_X_TLS_DHFILE
+	case LDAP_OPT_X_TLS_DHFILE:
 #endif
 #ifdef LDAP_OPT_MATCHED_DN
 	case LDAP_OPT_MATCHED_DN:
@@ -2171,6 +2307,20 @@ PHP_FUNCTION(ldap_set_option)
 #ifdef LDAP_OPT_DEBUG_LEVEL
 	case LDAP_OPT_DEBUG_LEVEL:
 #endif
+#ifdef LDAP_OPT_X_TLS_REQUIRE_CERT
+	case LDAP_OPT_X_TLS_REQUIRE_CERT:
+#endif
+#ifdef LDAP_OPT_X_TLS_CRLCHECK
+	case LDAP_OPT_X_TLS_CRLCHECK:
+#endif
+#ifdef LDAP_OPT_X_TLS_PROTOCOL_MIN
+	case LDAP_OPT_X_TLS_PROTOCOL_MIN:
+#endif
+#ifdef LDAP_OPT_X_KEEPALIVE_IDLE
+	case LDAP_OPT_X_KEEPALIVE_IDLE:
+	case LDAP_OPT_X_KEEPALIVE_PROBES:
+	case LDAP_OPT_X_KEEPALIVE_INTERVAL:
+#endif
 		{
 			int val;
 
@@ -2204,6 +2354,19 @@ PHP_FUNCTION(ldap_set_option)
 			}
 		} break;
 #endif
+#ifdef LDAP_OPT_TIMEOUT
+	case LDAP_OPT_TIMEOUT:
+		{
+			struct timeval timeout;
+
+			convert_to_long_ex(newval);
+			timeout.tv_sec = Z_LVAL_P(newval);
+			timeout.tv_usec = 0;
+			if (ldap_set_option(ldap, LDAP_OPT_TIMEOUT, (void *) &timeout)) {
+				RETURN_FALSE;
+			}
+		} break;
+#endif
 		/* options with string value */
 	case LDAP_OPT_ERROR_STRING:
 #ifdef LDAP_OPT_HOST_NAME
@@ -2214,6 +2377,20 @@ PHP_FUNCTION(ldap_set_option)
 	case LDAP_OPT_X_SASL_REALM:
 	case LDAP_OPT_X_SASL_AUTHCID:
 	case LDAP_OPT_X_SASL_AUTHZID:
+#endif
+#if (LDAP_API_VERSION > 2000)
+	case LDAP_OPT_X_TLS_CACERTDIR:
+	case LDAP_OPT_X_TLS_CACERTFILE:
+	case LDAP_OPT_X_TLS_CERTFILE:
+	case LDAP_OPT_X_TLS_CIPHER_SUITE:
+	case LDAP_OPT_X_TLS_KEYFILE:
+	case LDAP_OPT_X_TLS_RANDOM_FILE:
+#endif
+#ifdef LDAP_OPT_X_TLS_CRLFILE
+	case LDAP_OPT_X_TLS_CRLFILE:
+#endif
+#ifdef LDAP_OPT_X_TLS_DHFILE
+	case LDAP_OPT_X_TLS_DHFILE:
 #endif
 #ifdef LDAP_OPT_MATCHED_DN
 	case LDAP_OPT_MATCHED_DN:
@@ -2230,6 +2407,9 @@ PHP_FUNCTION(ldap_set_option)
 	case LDAP_OPT_REFERRALS:
 #ifdef LDAP_OPT_RESTART
 	case LDAP_OPT_RESTART:
+#endif
+#ifdef LDAP_OPT_X_SASL_NOCANON
+	case LDAP_OPT_X_SASL_NOCANON:
 #endif
 		{
 			void *val;
@@ -2559,7 +2739,7 @@ PHP_FUNCTION(ldap_start_tls)
 #endif
 #endif /* (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || HAVE_ORALDAP */
 
-#if defined(HAVE_3ARG_SETREBINDPROC)
+#if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
 /* {{{ _ldap_rebind_proc()
 */
 int _ldap_rebind_proc(LDAP *ldap, const char *url, ber_tag_t req, ber_int_t msgid, void *params)
@@ -2641,15 +2821,22 @@ PHP_FUNCTION(ldap_set_rebind_proc)
 /* }}} */
 #endif
 
-static zend_string* php_ldap_do_escape(const zend_bool *map, const char *value, size_t valuelen)
+static zend_string* php_ldap_do_escape(const zend_bool *map, const char *value, size_t valuelen, zend_long flags)
 {
 	char hex[] = "0123456789abcdef";
-	int i, p = 0;
+	size_t i, p = 0;
 	size_t len = 0;
 	zend_string *ret;
 
 	for (i = 0; i < valuelen; i++) {
 		len += (map[(unsigned char) value[i]]) ? 3 : 1;
+	}
+	/* Per RFC 4514, a leading and trailing space must be escaped */
+	if ((flags & PHP_LDAP_ESCAPE_DN) && (value[0] == ' ')) {
+		len += 2;
+	}
+	if ((flags & PHP_LDAP_ESCAPE_DN) && ((valuelen > 1) && (value[valuelen - 1] == ' '))) {
+		len += 2;
 	}
 
 	ret =  zend_string_alloc(len, 0);
@@ -2657,7 +2844,7 @@ static zend_string* php_ldap_do_escape(const zend_bool *map, const char *value, 
 	for (i = 0; i < valuelen; i++) {
 		unsigned char v = (unsigned char) value[i];
 
-		if (map[v]) {
+		if (map[v] || ((flags & PHP_LDAP_ESCAPE_DN) && ((i == 0) || (i + 1 == valuelen)) && (v == ' '))) {
 			ZSTR_VAL(ret)[p++] = '\\';
 			ZSTR_VAL(ret)[p++] = hex[v >> 4];
 			ZSTR_VAL(ret)[p++] = hex[v & 0x0f];
@@ -2702,7 +2889,7 @@ PHP_FUNCTION(ldap_escape)
 
 	if (flags & PHP_LDAP_ESCAPE_DN) {
 		havecharlist = 1;
-		php_ldap_escape_map_set_chars(map, "\\,=+<>;\"#", sizeof("\\,=+<>;\"#") - 1, 1);
+		php_ldap_escape_map_set_chars(map, "\\,=+<>;\"#\r", sizeof("\\,=+<>;\"#\r") - 1, 1);
 	}
 
 	if (!havecharlist) {
@@ -2715,7 +2902,7 @@ PHP_FUNCTION(ldap_escape)
 		php_ldap_escape_map_set_chars(map, ignores, ignoreslen, 0);
 	}
 
-	RETURN_NEW_STR(php_ldap_do_escape(map, value, valuelen));
+	RETURN_NEW_STR(php_ldap_do_escape(map, value, valuelen, flags));
 }
 
 #ifdef STR_TRANSLATION
@@ -3214,7 +3401,7 @@ ZEND_END_ARG_INFO()
 #endif
 #endif
 
-#if defined(HAVE_3ARG_SETREBINDPROC)
+#if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_set_rebind_proc, 0, 0, 2)
 	ZEND_ARG_INFO(0, link)
 	ZEND_ARG_INFO(0, callback)
@@ -3302,7 +3489,7 @@ const zend_function_entry ldap_functions[] = {
 #endif
 #endif
 
-#if defined(HAVE_3ARG_SETREBINDPROC)
+#if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
 	PHP_FE(ldap_set_rebind_proc,						arginfo_ldap_set_rebind_proc)
 #endif
 

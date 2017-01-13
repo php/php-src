@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,6 +26,10 @@
 #include <sys/ipc.h>
 #endif
 
+#ifdef PHP_WIN32
+#include "win32/ipc.h"
+#endif
+
 #if HAVE_FTOK
 /* {{{ proto int ftok(string pathname, string proj)
    Convert a pathname and a project identifier to a System V IPC key */
@@ -35,9 +39,10 @@ PHP_FUNCTION(ftok)
 	size_t pathname_len, proj_len;
 	key_t k;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ps", &pathname, &pathname_len, &proj, &proj_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_PATH(pathname, pathname_len)
+		Z_PARAM_STRING(proj, proj_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (pathname_len == 0){
 		php_error_docref(NULL, E_WARNING, "Pathname is invalid");

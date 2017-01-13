@@ -18,10 +18,11 @@
 #include "config.h"
 #endif
 
+#include "php_intl.h"
+
 #include <unicode/ustring.h>
 #include <locale.h>
 
-#include "php_intl.h"
 #include "formatter_class.h"
 #include "formatter_format.h"
 #include "formatter_parse.h"
@@ -97,7 +98,7 @@ PHP_FUNCTION( numfmt_parse )
 			RETVAL_DOUBLE(val_double);
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "Unsupported format type %pd", type);
+			php_error_docref(NULL, E_WARNING, "Unsupported format type " ZEND_LONG_FMT, type);
 			RETVAL_FALSE;
 			break;
 	}

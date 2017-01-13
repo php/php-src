@@ -13,4 +13,4 @@ $ci->__toString() // if conversion to string is done by echo, for example, an ex
 );
 ?>
 --EXPECTF--
-NULL
+string(0) ""

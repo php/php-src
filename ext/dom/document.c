@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -382,7 +382,7 @@ int dom_document_standalone_read(dom_object *obj, zval *retval)
 int dom_document_standalone_write(dom_object *obj, zval *newval)
 {
 	xmlDoc *docp = (xmlDocPtr) dom_object_get_node(obj);
-	int standalone;
+	zend_long standalone;
 
 	if (docp == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 0);
@@ -978,9 +978,9 @@ PHP_FUNCTION(dom_document_import_node)
 	xmlNodePtr nodep, retnodep;
 	dom_object *intern, *nodeobj;
 	int ret;
-	zend_long recursive = 0;
+	zend_bool recursive = 0;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "OO|l", &id, dom_document_class_entry, &node, dom_node_class_entry, &recursive) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "OO|b", &id, dom_document_class_entry, &node, dom_node_class_entry, &recursive) == FAILURE) {
 		return;
 	}
 
@@ -1493,6 +1493,14 @@ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 		php_error_docref(NULL, E_WARNING, "Empty string supplied as input");
 		RETURN_FALSE;
 	}
+	if (ZEND_SIZE_T_INT_OVFL(source_len)) {
+		php_error_docref(NULL, E_WARNING, "Input string is too long");
+		RETURN_FALSE;
+	}
+	if (ZEND_LONG_EXCEEDS_INT(options)) {
+		php_error_docref(NULL, E_WARNING, "Invalid options");
+		RETURN_FALSE;
+	}
 
 	newdoc = dom_document_parser(id, mode, source, source_len, options);
 
@@ -1655,7 +1663,7 @@ PHP_FUNCTION(dom_document_savexml)
 		if (options & LIBXML_SAVE_NOEMPTYTAG) {
 			xmlSaveNoEmptyTags = saveempty;
 		}
-		if (!size) {
+		if (!size || !mem) {
 			RETURN_FALSE;
 		}
 		RETVAL_STRINGL((char *) mem, size);
@@ -1720,9 +1728,14 @@ PHP_FUNCTION(dom_document_xinclude)
 		return;
 	}
 
+	if (ZEND_LONG_EXCEEDS_INT(flags)) {
+		php_error_docref(NULL, E_WARNING, "Invalid flags");
+		RETURN_FALSE;
+	}
+
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
-	err = xmlXIncludeProcessFlags(docp, flags);
+	err = xmlXIncludeProcessFlags(docp, (int)flags);
 
 	/* XML_XINCLUDE_START and XML_XINCLUDE_END nodes need to be removed as these
 	are added via xmlXIncludeProcess to mark beginning and ending of xincluded document
@@ -1811,7 +1824,7 @@ static void _dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type
 			php_error_docref(NULL, E_WARNING, "Invalid Schema file source");
 			RETURN_FALSE;
 		}
-		valid_file = _dom_get_valid_file_path(source, resolved_path, MAXPATHLEN  TSRMLS_CC);
+		valid_file = _dom_get_valid_file_path(source, resolved_path, MAXPATHLEN);
 		if (!valid_file) {
 			php_error_docref(NULL, E_WARNING, "Invalid Schema file source");
 			RETURN_FALSE;
@@ -1843,7 +1856,7 @@ static void _dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type
 	vptr = xmlSchemaNewValidCtxt(sptr);
 	if (!vptr) {
 		xmlSchemaFree(sptr);
-		php_error(E_ERROR, "Invalid Schema Validation Context");
+		zend_throw_error(NULL, "Invalid Schema Validation Context");
 		RETURN_FALSE;
 	}
 
@@ -1911,7 +1924,7 @@ static void _dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAMETERS, int typ
 			php_error_docref(NULL, E_WARNING, "Invalid RelaxNG file source");
 			RETURN_FALSE;
 		}
-		valid_file = _dom_get_valid_file_path(source, resolved_path, MAXPATHLEN  TSRMLS_CC);
+		valid_file = _dom_get_valid_file_path(source, resolved_path, MAXPATHLEN);
 		if (!valid_file) {
 			php_error_docref(NULL, E_WARNING, "Invalid RelaxNG file source");
 			RETURN_FALSE;
@@ -1943,7 +1956,7 @@ static void _dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAMETERS, int typ
 	vptr = xmlRelaxNGNewValidCtxt(sptr);
 	if (!vptr) {
 		xmlRelaxNGFree(sptr);
-		php_error(E_ERROR, "Invalid RelaxNG Validation Context");
+		zend_throw_error(NULL, "Invalid RelaxNG Validation Context");
 		RETURN_FALSE;
 	}
 
@@ -2001,6 +2014,11 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		RETURN_FALSE;
 	}
 
+	if (ZEND_LONG_EXCEEDS_INT(options)) {
+		php_error_docref(NULL, E_WARNING, "Invalid options");
+		RETURN_FALSE;
+	}
+
 	if (mode == DOM_LOAD_FILE) {
 		if (CHECK_NULL_PATH(source, source_len)) {
 			php_error_docref(NULL, E_WARNING, "Invalid file source");
@@ -2009,7 +2027,11 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		ctxt = htmlCreateFileParserCtxt(source, NULL);
 	} else {
 		source_len = xmlStrlen((xmlChar *) source);
-		ctxt = htmlCreateMemoryParserCtxt(source, source_len);
+		if (ZEND_SIZE_T_INT_OVFL(source_len)) {
+			php_error_docref(NULL, E_WARNING, "Input string is too long");
+			RETURN_FALSE;
+		}
+		ctxt = htmlCreateMemoryParserCtxt(source, (int)source_len);
 	}
 
 	if (!ctxt) {
@@ -2017,7 +2039,7 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 	}
 
 	if (options) {
-		htmlCtxtUseOptions(ctxt, options);
+		htmlCtxtUseOptions(ctxt, (int)options);
 	}
 
 	ctxt->vctxt.error = php_libxml_ctx_error;
@@ -2193,7 +2215,7 @@ PHP_FUNCTION(dom_document_save_html)
 #else
 		htmlDocDumpMemory(docp, &mem, &size);
 #endif
-		if (!size) {
+		if (!size || !mem) {
 			RETVAL_FALSE;
 		} else {
 			RETVAL_STRINGL((const char*) mem, size);
@@ -2222,15 +2244,11 @@ PHP_METHOD(domdocument, registerNodeClass)
 
 	if (ce == NULL || instanceof_function(ce, basece)) {
 		DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
-
-		if (dom_set_doc_classmap(intern->document, basece, ce) == FAILURE) {
-			php_error_docref(NULL, E_ERROR, "Class %s could not be registered.", ZSTR_VAL(ce->name));
-		}
+		dom_set_doc_classmap(intern->document, basece, ce);
 		RETURN_TRUE;
-	} else {
-		php_error_docref(NULL, E_ERROR, "Class %s is not derived from %s.", ZSTR_VAL(ce->name), ZSTR_VAL(basece->name));
 	}
-
+	
+	zend_throw_error(NULL, "Class %s is not derived from %s.", ZSTR_VAL(ce->name), ZSTR_VAL(basece->name));
 	RETURN_FALSE;
 }
 /* }}} */

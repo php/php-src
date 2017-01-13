@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -378,13 +378,7 @@ static zend_object *spl_heap_object_new_ex(zend_class_entry *class_type, zval *o
 		intern->ce_get_iterator = other->ce_get_iterator;
 
 		if (clone_orig) {
-			int i;
 			intern->heap = spl_ptr_heap_clone(other->heap);
-			for (i = 0; i < intern->heap->count; ++i) {
-				if (Z_REFCOUNTED(intern->heap->elements[i])) {
-					Z_ADDREF(intern->heap->elements[i]);
-				}
-			}
 		} else {
 			intern->heap = other->heap;
 		}
@@ -1075,7 +1069,8 @@ zend_object_iterator_funcs spl_heap_it_funcs = {
 	spl_heap_it_get_current_data,
 	spl_heap_it_get_current_key,
 	spl_heap_it_move_forward,
-	spl_heap_it_rewind
+	spl_heap_it_rewind,
+	NULL
 };
 
 zend_object_iterator_funcs spl_pqueue_it_funcs = {
@@ -1084,7 +1079,8 @@ zend_object_iterator_funcs spl_pqueue_it_funcs = {
 	spl_pqueue_it_get_current_data,
 	spl_heap_it_get_current_key,
 	spl_heap_it_move_forward,
-	spl_heap_it_rewind
+	spl_heap_it_rewind,
+	NULL
 };
 
 zend_object_iterator *spl_heap_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
@@ -1159,11 +1155,11 @@ ZEND_END_ARG_INFO()
 
 static const zend_function_entry spl_funcs_SplMinHeap[] = {
 	SPL_ME(SplMinHeap, compare, arginfo_heap_compare, ZEND_ACC_PROTECTED)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 static const zend_function_entry spl_funcs_SplMaxHeap[] = {
 	SPL_ME(SplMaxHeap, compare, arginfo_heap_compare, ZEND_ACC_PROTECTED)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 static const zend_function_entry spl_funcs_SplPriorityQueue[] = {
@@ -1182,7 +1178,7 @@ static const zend_function_entry spl_funcs_SplPriorityQueue[] = {
 	SPL_ME(SplHeap,          valid,                 arginfo_splheap_void,    ZEND_ACC_PUBLIC)
 	SPL_ME(SplHeap,          recoverFromCorruption, arginfo_splheap_void,    ZEND_ACC_PUBLIC)
 	SPL_ME(SplHeap,          isCorrupted,           arginfo_splheap_void,    ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 static const zend_function_entry spl_funcs_SplHeap[] = {
@@ -1199,7 +1195,7 @@ static const zend_function_entry spl_funcs_SplHeap[] = {
 	SPL_ME(SplHeap, recoverFromCorruption, arginfo_splheap_void, ZEND_ACC_PUBLIC)
 	SPL_ME(SplHeap, isCorrupted,           arginfo_splheap_void, ZEND_ACC_PUBLIC)
 	ZEND_FENTRY(compare, NULL, NULL, ZEND_ACC_PROTECTED|ZEND_ACC_ABSTRACT)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

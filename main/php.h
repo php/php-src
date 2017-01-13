@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,7 +26,7 @@
 #include <dmalloc.h>
 #endif
 
-#define PHP_API_VERSION 20131218
+#define PHP_API_VERSION 20160731
 #define PHP_HAVE_STREAMS
 #define YYDEBUG 0
 #define PHP_DEFAULT_CHARSET "UTF-8"
@@ -47,7 +47,6 @@
 
 #ifdef PHP_WIN32
 #	include "tsrm_win32.h"
-#	include "win95nt.h"
 #	ifdef PHP_EXPORTS
 #		define PHPAPI __declspec(dllexport)
 #	else
@@ -66,10 +65,51 @@
 #	define PHP_EOL "\n"
 #endif
 
-#ifdef NETWARE
-/* For php_get_uname() function */
-#define PHP_UNAME  "NetWare"
-#define PHP_OS      PHP_UNAME
+/* Windows specific defines */
+#ifdef PHP_WIN32
+# define PHP_PROG_SENDMAIL		"Built in mailer"
+# define HAVE_DECLARED_TIMEZONE
+# define WIN32_LEAN_AND_MEAN
+# define NOOPENFILE
+
+# include <io.h>
+# include <malloc.h>
+# include <direct.h>
+# include <stdlib.h>
+# include <stdio.h>
+# include <stdarg.h>
+# include <sys/types.h>
+# include <process.h>
+
+typedef int uid_t;
+typedef int gid_t;
+typedef char * caddr_t;
+typedef unsigned int uint;
+typedef unsigned long ulong;
+# if !NSAPI
+typedef int pid_t;
+# endif
+
+# ifndef PHP_DEBUG
+#  ifdef inline
+#   undef inline
+#  endif
+#  define inline		__inline
+# endif
+
+# define M_TWOPI        (M_PI * 2.0)
+# define off_t			_off_t
+
+# define lstat(x, y)	php_sys_lstat(x, y)
+# define chdir(path)	_chdir(path)
+# define mkdir(a, b)	_mkdir(a)
+# define rmdir(a)		_rmdir(a)
+# define getpid			_getpid
+# define php_sleep(t)	SleepEx(t*1000, TRUE)
+
+# ifndef getcwd
+#  define getcwd(a, b)	_getcwd(a, b)
+# endif
 #endif
 
 #if HAVE_ASSERT_H
@@ -134,6 +174,14 @@ PHPAPI size_t php_strlcat(char *dst, const char *src, size_t siz);
 END_EXTERN_C()
 #undef strlcat
 #define strlcat php_strlcat
+#endif
+
+#ifndef HAVE_EXPLICIT_BZERO
+BEGIN_EXTERN_C()
+PHPAPI void php_explicit_bzero(void *dst, size_t siz);
+END_EXTERN_C()
+#undef explicit_bzero
+#define explicit_bzero php_explicit_bzero
 #endif
 
 #ifndef HAVE_STRTOK_R
@@ -231,6 +279,14 @@ char *strerror(int);
 #define INT_MIN (- INT_MAX - 1)
 #endif
 
+/* double limits */
+#include <float.h>
+#if defined(DBL_MANT_DIG) && defined(DBL_MIN_EXP)
+#define PHP_DOUBLE_MAX_LENGTH (3 + DBL_MANT_DIG - DBL_MIN_EXP)
+#else
+#define PHP_DOUBLE_MAX_LENGTH 1080
+#endif
+
 #define PHP_GCC_VERSION ZEND_GCC_VERSION
 #define PHP_ATTRIBUTE_MALLOC ZEND_ATTRIBUTE_MALLOC
 #define PHP_ATTRIBUTE_FORMAT ZEND_ATTRIBUTE_FORMAT
@@ -248,7 +304,10 @@ END_EXTERN_C()
 #define STR_PRINT(str)	((str)?(str):"")
 
 #ifndef MAXPATHLEN
-# ifdef PATH_MAX
+# if PHP_WIN32
+#  include "win32/ioutil.h"
+#  define MAXPATHLEN PHP_WIN32_IOUTIL_MAXPATHLEN
+# elif PATH_MAX
 #  define MAXPATHLEN PATH_MAX
 # elif defined(MAX_PATH)
 #  define MAXPATHLEN MAX_PATH
@@ -257,11 +316,7 @@ END_EXTERN_C()
 # endif
 #endif
 
-#if defined(__GNUC__) && __GNUC__ >= 4
-# define php_ignore_value(x) (({ __typeof__ (x) __x = (x); (void) __x; }))
-#else
-# define php_ignore_value(x) ((void) (x))
-#endif
+#define php_ignore_value(x) ZEND_IGNORE_VALUE(x)
 
 /* global variables */
 #if !defined(PHP_WIN32)
@@ -284,7 +339,13 @@ PHPAPI size_t php_write(void *buf, size_t size);
 PHPAPI size_t php_printf(const char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 1,
 		2);
 PHPAPI int php_get_module_initialized(void);
-PHPAPI void php_log_err(char *log_message);
+#ifdef HAVE_SYSLOG_H
+#include "php_syslog.h"
+#define php_log_err(msg) php_log_err_with_severity(msg, LOG_NOTICE)
+#else
+#define php_log_err(msg) php_log_err_with_severity(msg, 5)
+#endif
+PHPAPI ZEND_COLD void php_log_err_with_severity(char *log_message, int syslog_type_int);
 int Debug(char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 1, 2);
 int cfgparse(void);
 END_EXTERN_C()
@@ -299,23 +360,17 @@ static inline ZEND_ATTRIBUTE_DEPRECATED void php_set_error_handling(error_handli
 }
 static inline ZEND_ATTRIBUTE_DEPRECATED void php_std_error_handling() {}
 
-PHPAPI void php_verror(const char *docref, const char *params, int type, const char *format, va_list args) PHP_ATTRIBUTE_FORMAT(printf, 4, 0);
-
-#ifdef ZTS
-#define PHP_ATTR_FMT_OFFSET 1
-#else
-#define PHP_ATTR_FMT_OFFSET 0
-#endif
+PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int type, const char *format, va_list args) PHP_ATTRIBUTE_FORMAT(printf, 4, 0);
 
 /* PHPAPI void php_error(int type, const char *format, ...); */
-PHPAPI void php_error_docref0(const char *docref, int type, const char *format, ...)
-	PHP_ATTRIBUTE_FORMAT(printf, PHP_ATTR_FMT_OFFSET + 3, PHP_ATTR_FMT_OFFSET + 4);
-PHPAPI void php_error_docref1(const char *docref, const char *param1, int type, const char *format, ...)
-	PHP_ATTRIBUTE_FORMAT(printf, PHP_ATTR_FMT_OFFSET + 4, PHP_ATTR_FMT_OFFSET + 5);
-PHPAPI void php_error_docref2(const char *docref, const char *param1, const char *param2, int type, const char *format, ...)
-	PHP_ATTRIBUTE_FORMAT(printf, PHP_ATTR_FMT_OFFSET + 5, PHP_ATTR_FMT_OFFSET + 6);
+PHPAPI ZEND_COLD void php_error_docref0(const char *docref, int type, const char *format, ...)
+	PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
+PHPAPI ZEND_COLD void php_error_docref1(const char *docref, const char *param1, int type, const char *format, ...)
+	PHP_ATTRIBUTE_FORMAT(printf, 4, 5);
+PHPAPI ZEND_COLD void php_error_docref2(const char *docref, const char *param1, const char *param2, int type, const char *format, ...)
+	PHP_ATTRIBUTE_FORMAT(printf, 5, 6);
 #ifdef PHP_WIN32
-PHPAPI void php_win32_docref2_from_error(DWORD error, const char *param1, const char *param2);
+PHPAPI ZEND_COLD void php_win32_docref2_from_error(DWORD error, const char *param1, const char *param2);
 #endif
 END_EXTERN_C()
 
@@ -334,7 +389,7 @@ END_EXTERN_C()
 BEGIN_EXTERN_C()
 PHPAPI extern int (*php_register_internal_extensions_func)(void);
 PHPAPI int php_register_internal_extensions(void);
-PHPAPI int php_mergesort(void *base, size_t nmemb, register size_t size, int (*cmp)(const void *, const void *));
+PHPAPI int php_mergesort(void *base, size_t nmemb, size_t size, int (*cmp)(const void *, const void *));
 PHPAPI void php_register_pre_request_shutdown(void (*func)(void *), void *userdata);
 PHPAPI void php_com_initialize(void);
 PHPAPI char *php_get_current_user(void);

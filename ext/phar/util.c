@@ -3,7 +3,7 @@
   | phar php single-file executable PHP extension                        |
   | utility functions                                                    |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2015 The PHP Group                                |
+  | Copyright (c) 2005-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -178,7 +178,7 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 		return FAILURE;
 	}
 
-	if (path_len >= sizeof(".phar")-1 && !memcmp(path, ".phar", sizeof(".phar")-1)) {
+	if (path_len >= (int)sizeof(".phar")-1 && !memcmp(path, ".phar", sizeof(".phar")-1)) {
 		/* no creating magic phar files by mounting them */
 		return FAILURE;
 	}
@@ -199,13 +199,6 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 			entry.tmp = estrndup(filename, filename_len);
 		}
 	}
-#if PHP_API_VERSION < 20100412
-	if (PG(safe_mode) && !is_phar && (!php_checkuid(entry.tmp, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		efree(entry.tmp);
-		efree(entry.filename);
-		return FAILURE;
-	}
-#endif
 	filename = entry.tmp;
 
 	/* only check openbasedir for files, not for phar streams */
@@ -493,7 +486,12 @@ really_get_entry:
 	(*ret)->is_tar = entry->is_tar;
 	(*ret)->fp = phar_get_efp(entry, 1);
 	if (entry->link) {
-		(*ret)->zero = phar_get_fp_offset(phar_get_link_source(entry));
+		phar_entry_info *link = phar_get_link_source(entry);
+		if(!link) {
+			efree(*ret);
+			return FAILURE;
+		}
+		(*ret)->zero = phar_get_fp_offset(link);
 	} else {
 		(*ret)->zero = phar_get_fp_offset(entry);
 	}
@@ -1179,7 +1177,7 @@ char * phar_compress_filter(phar_entry_info * entry, int return_unknown) /* {{{ 
  */
 char * phar_decompress_filter(phar_entry_info * entry, int return_unknown) /* {{{ */
 {
-	php_uint32 flags;
+	uint32_t flags;
 
 	if (entry->is_modified) {
 		flags = entry->old_flags;
@@ -1227,7 +1225,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 		*error = NULL;
 	}
 
-	if (security && path_len >= sizeof(".phar")-1 && !memcmp(path, ".phar", sizeof(".phar")-1)) {
+	if (security && path_len >= (int)sizeof(".phar")-1 && !memcmp(path, ".phar", sizeof(".phar")-1)) {
 		if (error) {
 			spprintf(error, 4096, "phar error: cannot directly access magic \".phar\" directory or files within it");
 		}
@@ -1405,7 +1403,7 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, zend_off_t 
 		ZVAL_EMPTY_STRING(&zp[0]);
 	}
 
-	if (end != Z_STRLEN(zp[0])) {
+	if ((size_t)end != Z_STRLEN(zp[0])) {
 		zval_dtor(&zp[0]);
 		zval_dtor(&zp[1]);
 		zval_dtor(&zp[2]);
@@ -1475,7 +1473,7 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, zend_off_t 
 /* }}} */
 #endif /* #ifndef PHAR_HAVE_OPENSSL */
 
-int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_type, char *sig, int sig_len, char *fname, char **signature, int *signature_len, char **error) /* {{{ */
+int phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type, char *sig, int sig_len, char *fname, char **signature, int *signature_len, char **error) /* {{{ */
 {
 	int read_size, len;
 	zend_off_t read_len;
@@ -1489,7 +1487,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_typ
 			BIO *in;
 			EVP_PKEY *key;
 			EVP_MD *mdtype = (EVP_MD *) EVP_sha1();
-			EVP_MD_CTX md_ctx;
+			EVP_MD_CTX *md_ctx;
 #else
 			int tempsig;
 #endif
@@ -1562,10 +1560,11 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_typ
 				return FAILURE;
 			}
 
-			EVP_VerifyInit(&md_ctx, mdtype);
+			md_ctx = EVP_MD_CTX_create();
+			EVP_VerifyInit(md_ctx, mdtype);
 			read_len = end_of_phar;
 
-			if (read_len > sizeof(buf)) {
+			if ((size_t)read_len > sizeof(buf)) {
 				read_size = sizeof(buf);
 			} else {
 				read_size = (int)read_len;
@@ -1574,7 +1573,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_typ
 			php_stream_seek(fp, 0, SEEK_SET);
 
 			while (read_size && (len = php_stream_read(fp, (char*)buf, read_size)) > 0) {
-				EVP_VerifyUpdate (&md_ctx, buf, len);
+				EVP_VerifyUpdate (md_ctx, buf, len);
 				read_len -= (zend_off_t)len;
 
 				if (read_len < read_size) {
@@ -1582,9 +1581,9 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_typ
 				}
 			}
 
-			if (EVP_VerifyFinal(&md_ctx, (unsigned char *)sig, sig_len, key) != 1) {
+			if (EVP_VerifyFinal(md_ctx, (unsigned char *)sig, sig_len, key) != 1) {
 				/* 1: signature verified, 0: signature does not match, -1: failed signature operation */
-				EVP_MD_CTX_cleanup(&md_ctx);
+				EVP_MD_CTX_destroy(md_ctx);
 
 				if (error) {
 					spprintf(error, 0, "broken openssl signature");
@@ -1593,7 +1592,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_typ
 				return FAILURE;
 			}
 
-			EVP_MD_CTX_cleanup(&md_ctx);
+			EVP_MD_CTX_destroy(md_ctx);
 #endif
 
 			*signature_len = phar_hex_str((const char*)sig, sig_len, signature);
@@ -1604,10 +1603,17 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_typ
 			unsigned char digest[64];
 			PHP_SHA512_CTX context;
 
+			if (sig_len < sizeof(digest)) {
+				if (error) {
+					spprintf(error, 0, "broken signature");
+				}
+				return FAILURE;
+			}
+
 			PHP_SHA512Init(&context);
 			read_len = end_of_phar;
 
-			if (read_len > sizeof(buf)) {
+			if ((size_t)read_len > sizeof(buf)) {
 				read_size = sizeof(buf);
 			} else {
 				read_size = (int)read_len;
@@ -1637,10 +1643,17 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_typ
 			unsigned char digest[32];
 			PHP_SHA256_CTX context;
 
+			if (sig_len < sizeof(digest)) {
+				if (error) {
+					spprintf(error, 0, "broken signature");
+				}
+				return FAILURE;
+			}
+
 			PHP_SHA256Init(&context);
 			read_len = end_of_phar;
 
-			if (read_len > sizeof(buf)) {
+			if ((size_t)read_len > sizeof(buf)) {
 				read_size = sizeof(buf);
 			} else {
 				read_size = (int)read_len;
@@ -1678,10 +1691,17 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_typ
 			unsigned char digest[20];
 			PHP_SHA1_CTX  context;
 
+			if (sig_len < sizeof(digest)) {
+				if (error) {
+					spprintf(error, 0, "broken signature");
+				}
+				return FAILURE;
+			}
+
 			PHP_SHA1Init(&context);
 			read_len = end_of_phar;
 
-			if (read_len > sizeof(buf)) {
+			if ((size_t)read_len > sizeof(buf)) {
 				read_size = sizeof(buf);
 			} else {
 				read_size = (int)read_len;
@@ -1711,10 +1731,17 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_typ
 			unsigned char digest[16];
 			PHP_MD5_CTX   context;
 
+			if (sig_len < sizeof(digest)) {
+				if (error) {
+					spprintf(error, 0, "broken signature");
+				}
+				return FAILURE;
+			}
+
 			PHP_MD5Init(&context);
 			read_len = end_of_phar;
 
-			if (read_len > sizeof(buf)) {
+			if ((size_t)read_len > sizeof(buf)) {
 				read_size = sizeof(buf);
 			} else {
 				read_size = (int)read_len;
@@ -1924,7 +1951,7 @@ void phar_add_virtual_dirs(phar_archive_data *phar, char *filename, int filename
 
 	while ((s = zend_memrchr(filename, '/', filename_len))) {
 		filename_len = s - filename;
-		if (NULL == zend_hash_str_add_empty_element(&phar->virtual_dirs, filename, filename_len)) {
+		if (!filename_len || NULL == zend_hash_str_add_empty_element(&phar->virtual_dirs, filename, filename_len)) {
 			break;
 		}
 	}

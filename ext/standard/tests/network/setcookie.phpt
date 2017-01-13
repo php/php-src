@@ -6,6 +6,7 @@ date.timezone=UTC
 --FILE--
 <?php
 setcookie('name');
+setcookie('name', '');
 setcookie('name', 'value');
 setcookie('name', 'space value');
 setcookie('name', 'value', 0);
@@ -19,7 +20,8 @@ setcookie('name', 'value', 0, '', '', FALSE, TRUE);
 
 
 $expected = array(
-	'Set-Cookie: name=',
+	'Set-Cookie: name=deleted; expires='.date('D, d-M-Y H:i:s', 1).' GMT; Max-Age=0',
+	'Set-Cookie: name=deleted; expires='.date('D, d-M-Y H:i:s', 1).' GMT; Max-Age=0',
 	'Set-Cookie: name=value',
 	'Set-Cookie: name=space+value',
 	'Set-Cookie: name=value',
@@ -64,6 +66,7 @@ while (next($headers) !== FALSE);
 echo ($i === 0)
 	? 'OK'
 	: 'A total of '.$i.' errors found.';
+?>
 --EXPECTHEADERS--
 
 --EXPECT--

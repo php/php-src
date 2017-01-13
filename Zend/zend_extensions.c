@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,6 +22,7 @@
 #include "zend_extensions.h"
 
 ZEND_API zend_llist zend_extensions;
+ZEND_API uint32_t zend_extension_flags = 0;
 static int last_resource_number;
 
 int zend_load_extension(const char *path)
@@ -111,6 +112,14 @@ int zend_load_extension(const char *path)
 #endif
 		DL_UNLOAD(handle);
 		return FAILURE;
+	} else if (zend_get_extension(new_extension->name)) {
+		fprintf(stderr, "Cannot load %s - extension already loaded\n", new_extension->name);
+/* See http://support.microsoft.com/kb/190351 */
+#ifdef PHP_WIN32
+		fflush(stderr);
+#endif
+		DL_UNLOAD(handle);
+		return FAILURE;
 	}
 
 	return zend_register_extension(new_extension, handle);
@@ -137,6 +146,21 @@ int zend_register_extension(zend_extension *new_extension, DL_HANDLE handle)
 
 	zend_llist_add_element(&zend_extensions, &extension);
 
+	if (extension.op_array_ctor) {
+		zend_extension_flags |= ZEND_EXTENSIONS_HAVE_OP_ARRAY_CTOR;
+	}
+	if (extension.op_array_dtor) {
+		zend_extension_flags |= ZEND_EXTENSIONS_HAVE_OP_ARRAY_DTOR;
+	}
+	if (extension.op_array_handler) {
+		zend_extension_flags |= ZEND_EXTENSIONS_HAVE_OP_ARRAY_HANDLER;
+	}
+	if (extension.op_array_persist_calc) {
+		zend_extension_flags |= ZEND_EXTENSIONS_HAVE_OP_ARRAY_PERSIST_CALC;
+	}
+	if (extension.op_array_persist) {
+		zend_extension_flags |= ZEND_EXTENSIONS_HAVE_OP_ARRAY_PERSIST;
+	}
 	/*fprintf(stderr, "Loaded %s, version %s\n", extension.name, extension.version);*/
 #endif
 
@@ -243,6 +267,58 @@ ZEND_API zend_extension *zend_get_extension(const char *extension_name)
 		}
 	}
 	return NULL;
+}
+
+typedef struct _zend_extension_persist_data {
+	zend_op_array *op_array;
+	size_t         size;
+	char          *mem;
+} zend_extension_persist_data;
+
+static void zend_extension_op_array_persist_calc_handler(zend_extension *extension, zend_extension_persist_data *data)
+{
+	if (extension->op_array_persist_calc) {
+		data->size += extension->op_array_persist_calc(data->op_array);
+	}
+}
+
+static void zend_extension_op_array_persist_handler(zend_extension *extension, zend_extension_persist_data *data)
+{
+	if (extension->op_array_persist) {
+		size_t size = extension->op_array_persist(data->op_array, data->mem);
+		if (size) {
+			data->mem = (void*)((char*)data->mem + size);
+			data->size += size;
+		}
+	}
+}
+
+ZEND_API size_t zend_extensions_op_array_persist_calc(zend_op_array *op_array)
+{
+	if (zend_extension_flags & ZEND_EXTENSIONS_HAVE_OP_ARRAY_PERSIST_CALC) {
+		zend_extension_persist_data data;
+
+		data.op_array = op_array;
+		data.size = 0;
+		data.mem  = NULL;
+		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_op_array_persist_calc_handler, &data);
+		return data.size;
+	}
+	return 0;
+}
+
+ZEND_API size_t zend_extensions_op_array_persist(zend_op_array *op_array, void *mem)
+{
+	if (zend_extension_flags & ZEND_EXTENSIONS_HAVE_OP_ARRAY_PERSIST) {
+		zend_extension_persist_data data;
+
+		data.op_array = op_array;
+		data.size = 0;
+		data.mem  = mem;
+		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_op_array_persist_handler, &data);
+		return data.size;
+	}
+	return 0;
 }
 
 /*

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -215,7 +215,7 @@ zend_module_entry gmp_module_entry = {
 
 #ifdef COMPILE_DL_GMP
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(gmp)
 #endif
@@ -585,44 +585,47 @@ static int gmp_unserialize(zval *object, zend_class_entry *ce, const unsigned ch
 {
 	mpz_ptr gmpnum;
 	const unsigned char *p, *max;
-	zval zv;
+	zval *zv;
 	int retval = FAILURE;
 	php_unserialize_data_t unserialize_data = (php_unserialize_data_t) data;
+	zval object_copy;
 
-	ZVAL_UNDEF(&zv);
 	PHP_VAR_UNSERIALIZE_INIT(unserialize_data);
 	gmp_create(object, &gmpnum);
+
+	/* The "object" variable may be modified during the execution of this unserialize handler
+	 * (it may turn into a reference). Keep the original object around for futher operations. */
+	ZVAL_COPY_VALUE(&object_copy, object);
 
 	p = buf;
 	max = buf + buf_len;
 
-	if (!php_var_unserialize(&zv, &p, max, &unserialize_data)
-		|| Z_TYPE(zv) != IS_STRING
-		|| convert_to_gmp(gmpnum, &zv, 10) == FAILURE
+	zv = var_tmp_var(&unserialize_data);
+	if (!php_var_unserialize(zv, &p, max, &unserialize_data)
+		|| Z_TYPE_P(zv) != IS_STRING
+		|| convert_to_gmp(gmpnum, zv, 10) == FAILURE
 	) {
 		zend_throw_exception(NULL, "Could not unserialize number", 0);
 		goto exit;
 	}
-	zval_dtor(&zv);
-	ZVAL_UNDEF(&zv);
 
-	if (!php_var_unserialize(&zv, &p, max, &unserialize_data)
-		|| Z_TYPE(zv) != IS_ARRAY
+	zv = var_tmp_var(&unserialize_data);
+	if (!php_var_unserialize(zv, &p, max, &unserialize_data)
+		|| Z_TYPE_P(zv) != IS_ARRAY
 	) {
 		zend_throw_exception(NULL, "Could not unserialize properties", 0);
 		goto exit;
 	}
 
-	if (zend_hash_num_elements(Z_ARRVAL(zv)) != 0) {
+	if (zend_hash_num_elements(Z_ARRVAL_P(zv)) != 0) {
 		zend_hash_copy(
-			zend_std_get_properties(object), Z_ARRVAL(zv),
+			zend_std_get_properties(&object_copy), Z_ARRVAL_P(zv),
 			(copy_ctor_func_t) zval_add_ref
 		);
 	}
 
 	retval = SUCCESS;
 exit:
-	zval_dtor(&zv);
 	PHP_VAR_UNSERIALIZE_DESTROY(unserialize_data);
 	return retval;
 }
@@ -1035,7 +1038,7 @@ ZEND_FUNCTION(gmp_init)
 	}
 
 	if (base && (base < 2 || base > GMP_MAX_BASE)) {
-		php_error_docref(NULL, E_WARNING, "Bad base for conversion: %pd (should be between 2 and %d)", base, GMP_MAX_BASE);
+		php_error_docref(NULL, E_WARNING, "Bad base for conversion: " ZEND_LONG_FMT " (should be between 2 and %d)", base, GMP_MAX_BASE);
 		RETURN_FALSE;
 	}
 
@@ -1051,7 +1054,7 @@ int gmp_import_export_validate(zend_long size, zend_long options, int *order, in
 {
 	if (size < 1) {
 		php_error_docref(NULL, E_WARNING,
-			"Word size must be positive, %pd given", size);
+			"Word size must be positive, " ZEND_LONG_FMT " given", size);
 		return FAILURE;
 	}
 
@@ -1146,11 +1149,10 @@ ZEND_FUNCTION(gmp_export)
 	} else {
 		size_t bits_per_word = size * 8;
 		size_t count = (mpz_sizeinbase(gmpnumber, 2) + bits_per_word - 1) / bits_per_word;
-		size_t out_len = count * size;
 
-		zend_string *out_string = zend_string_alloc(out_len, 0);
+		zend_string *out_string = zend_string_safe_alloc(count, size, 0, 0);
 		mpz_export(ZSTR_VAL(out_string), NULL, order, size, endian, 0, gmpnumber);
-		ZSTR_VAL(out_string)[out_len] = '\0';
+		ZSTR_VAL(out_string)[ZSTR_LEN(out_string)] = '\0';
 
 		RETURN_NEW_STR(out_string);
 	}
@@ -1193,7 +1195,7 @@ ZEND_FUNCTION(gmp_strval)
 	/* Although the maximum base in general in GMP is 62, mpz_get_str()
 	 * is explicitly limited to -36 when dealing with negative bases. */
 	if ((base < 2 && base > -2) || base > GMP_MAX_BASE || base < -36) {
-		php_error_docref(NULL, E_WARNING, "Bad base for conversion: %pd (should be between 2 and %d or -2 and -36)", base, GMP_MAX_BASE);
+		php_error_docref(NULL, E_WARNING, "Bad base for conversion: " ZEND_LONG_FMT " (should be between 2 and %d or -2 and -36)", base, GMP_MAX_BASE);
 		RETURN_FALSE;
 	}
 
@@ -1363,7 +1365,16 @@ ZEND_FUNCTION(gmp_fact)
 			RETURN_FALSE;
 		}
 	} else {
-		if (zval_get_long(a_arg) < 0) {
+		/* Use convert_to_number first to detect getting non-integer */
+		convert_scalar_to_number(a_arg);
+		if (Z_TYPE_P(a_arg) != IS_LONG) {
+			convert_to_long(a_arg);
+			if (Z_LVAL_P(a_arg) >= 0) {
+				/* Only warn if we'll make it past the non-negative check */
+				php_error_docref(NULL, E_WARNING, "Number has to be an integer");
+			}
+		}
+		if (Z_LVAL_P(a_arg) < 0) {
 			php_error_docref(NULL, E_WARNING, "Number has to be greater than or equal to 0");
 			RETURN_FALSE;
 		}

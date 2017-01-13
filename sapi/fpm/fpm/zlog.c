@@ -16,6 +16,7 @@
 
 #include "zlog.h"
 #include "fpm.h"
+#include "zend_portability.h"
 
 #define MAX_LINE_LENGTH 1024
 
@@ -186,11 +187,11 @@ void vzlog(const char *function, int line, int flags, const char *fmt, va_list a
 #endif
 	{
 		buf[len++] = '\n';
-		write(zlog_fd > -1 ? zlog_fd : STDERR_FILENO, buf, len);
+		zend_quiet_write(zlog_fd > -1 ? zlog_fd : STDERR_FILENO, buf, len);
 	}
 
 	if (zlog_fd != STDERR_FILENO && zlog_fd != -1 && !launched && (flags & ZLOG_LEVEL_MASK) >= ZLOG_NOTICE) {
-		write(STDERR_FILENO, buf, len);
+		zend_quiet_write(STDERR_FILENO, buf, len);
 	}
 }
 /* }}} */

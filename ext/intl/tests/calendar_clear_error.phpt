@@ -18,8 +18,9 @@ var_dump($c->clear(-1));
 var_dump(intlcal_clear($c, -1));
 var_dump(intlcal_clear(1, 2));
 --EXPECTF--
+Warning: IntlCalendar::clear() expects at most 1 parameter, 2 given in %s on line %d
 
-Warning: IntlCalendar::clear(): intlcal_clear: too many arguments in %s on line %d
+Warning: IntlCalendar::clear(): intlcal_clear: bad arguments in %s on line %d
 bool(false)
 
 Warning: IntlCalendar::clear(): intlcal_clear: invalid field in %s on line %d

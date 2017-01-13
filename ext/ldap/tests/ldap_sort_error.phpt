@@ -35,7 +35,7 @@ bool(false)
 
 Deprecated: Function ldap_sort() is deprecated in %s.php on line %d
 
-Warning: ldap_sort() expects parameter 3 to be %binary_string_optional%, resource given in %s on line %d
+Warning: ldap_sort() expects parameter 3 to be string, resource given in %s on line %d
 bool(false)
 
 Deprecated: Function ldap_sort() is deprecated in %s.php on line %d

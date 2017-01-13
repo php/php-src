@@ -29,22 +29,33 @@ document ____executor_globals
 end
 
 define print_cvs
-	____executor_globals
-	set $p = $eg.current_execute_data.CVs
-	set $c = $eg.current_execute_data.op_array.last_var
-	set $v = $eg.current_execute_data.op_array.vars
-	set $i = 0
-
-	printf "Compiled variables count: %d\n", $c
-	while $i < $c
-		printf "%d = %s\n", $i, $v[$i].name
-		if $p[$i] != 0
-			printzv *$p[$i]
-		else
-			printf "*uninitialized*\n"
-		end
-		set $i = $i + 1
+	if $argc == 0
+		____executor_globals
+		set $cv_ex_ptr = $eg.current_execute_data
+	else
+		set $cv_ex_ptr = (zend_execute_data *)$arg0
 	end
+	set $cv_count = $cv_ex_ptr.func.op_array.last_var
+	set $cv = $cv_ex_ptr.func.op_array.vars
+	set $cv_idx = 0
+	set $callFrameSize = (sizeof(zend_execute_data) + sizeof(zval) - 1) / sizeof(zval)
+
+	printf "Compiled variables count: %d\n\n", $cv_count
+	while $cv_idx < $cv_count
+		printf "[%d] '%s'\n", $cv_idx, $cv[$cv_idx].val
+		set $zvalue = ((zval *) $cv_ex_ptr) + $callFrameSize + $cv_idx
+		printzv $zvalue
+		set $cv_idx = $cv_idx + 1
+	end
+end
+
+document print_cvs
+	Prints the compiled variables and their values.
+	If a zend_execute_data pointer is set this will print the compiled
+	variables of that scope. If no parameter is used it will use
+	current_execute_data for scope.
+
+	usage: print_cvs [zend_execute_data *]
 end
 
 define dump_bt
@@ -101,7 +112,7 @@ define dump_bt
 					____print_str $zvalue->value.str->val $zvalue->value.str->len
 				end
 				if $type == 7
-					printf "array(%d)[%p]", $zvalue->value.arr->ht->nNumOfElements, $zvalue
+					printf "array(%d)[%p]", $zvalue->value.arr->nNumOfElements, $zvalue
 				end
 				if $type == 8
 					printf "object[%p]", $zvalue
@@ -152,8 +163,8 @@ define ____printzv_contents
 	set $type = $zvalue->u1.v.type
 
 	# 15 == IS_INDIRECT
-	if $type >= 5 && $type != 15
-		printf "(refcount=%d) ", $zvalue->value.counted->refcount
+	if $type > 5 && $type != 15
+		printf "(refcount=%d) ", $zvalue->value.counted->gc.refcount
 	end
 
 	if $type == 0
@@ -181,7 +192,7 @@ define ____printzv_contents
 		printf "array: "
 		if ! $arg1
 			set $ind = $ind + 1
-			____print_ht $zvalue->value.arr
+			____print_ht $zvalue->value.arr 1
 			set $ind = $ind - 1
 			set $i = $ind
 			while $i > 0
@@ -552,6 +563,18 @@ end
 
 document printzops
 	dump operands of the current opline
+end
+
+define print_zstr
+	set $zstr = (zend_string *)$arg0
+	printf "string(%d) ", $zstr->len
+	____print_str $zstr->val $zstr->len
+	printf "\n"
+end
+
+document print_zstr
+	print the length and contents of a zend string
+	usage: print_zstr <ptr>
 end
 
 define zbacktrace

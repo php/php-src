@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -13,6 +13,7 @@
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
   | Author: Omar Kilani <omar@php.net>                                   |
+  |         Jakub Zelenka <bukka@php.net>                                |
   +----------------------------------------------------------------------+
 */
 
@@ -32,14 +33,6 @@
 #include "php_json_parser.h"
 #include <zend_exceptions.h>
 
-#include <float.h>
-#if defined(DBL_MANT_DIG) && defined(DBL_MIN_EXP)
-#define NUM_BUF_SIZE (3 + DBL_MANT_DIG - DBL_MIN_EXP)
-#else
-#define NUM_BUF_SIZE 1080
-#endif
-
-
 static PHP_MINFO_FUNCTION(json);
 static PHP_FUNCTION(json_encode);
 static PHP_FUNCTION(json_decode);
@@ -48,7 +41,7 @@ static PHP_FUNCTION(json_last_error_msg);
 
 PHP_JSON_API zend_class_entry *php_json_serializable_ce;
 
-ZEND_DECLARE_MODULE_GLOBALS(json)
+PHP_JSON_API ZEND_DECLARE_MODULE_GLOBALS(json)
 
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_json_encode, 0, 0, 1)
@@ -92,6 +85,10 @@ static const zend_function_entry json_serializable_interface[] = {
 };
 /* }}} */
 
+/* Register constant for options and errors */
+#define PHP_JSON_REGISTER_CONSTANT(_name, _value) \
+	REGISTER_LONG_CONSTANT(_name,  _value, CONST_CS | CONST_PERSISTENT);
+
 /* {{{ MINIT */
 static PHP_MINIT_FUNCTION(json)
 {
@@ -100,32 +97,36 @@ static PHP_MINIT_FUNCTION(json)
 	INIT_CLASS_ENTRY(ce, "JsonSerializable", json_serializable_interface);
 	php_json_serializable_ce = zend_register_internal_interface(&ce);
 
-	REGISTER_LONG_CONSTANT("JSON_HEX_TAG",  PHP_JSON_HEX_TAG,  CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_HEX_AMP",  PHP_JSON_HEX_AMP,  CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_HEX_APOS", PHP_JSON_HEX_APOS, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_HEX_QUOT", PHP_JSON_HEX_QUOT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_FORCE_OBJECT", PHP_JSON_FORCE_OBJECT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_NUMERIC_CHECK", PHP_JSON_NUMERIC_CHECK, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_UNESCAPED_SLASHES", PHP_JSON_UNESCAPED_SLASHES, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_PRETTY_PRINT", PHP_JSON_PRETTY_PRINT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_UNESCAPED_UNICODE", PHP_JSON_UNESCAPED_UNICODE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_PARTIAL_OUTPUT_ON_ERROR", PHP_JSON_PARTIAL_OUTPUT_ON_ERROR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_PRESERVE_ZERO_FRACTION", PHP_JSON_PRESERVE_ZERO_FRACTION, CONST_CS | CONST_PERSISTENT);
+	/* options for json_encode */
+	PHP_JSON_REGISTER_CONSTANT("JSON_HEX_TAG",  PHP_JSON_HEX_TAG);
+	PHP_JSON_REGISTER_CONSTANT("JSON_HEX_AMP",  PHP_JSON_HEX_AMP);
+	PHP_JSON_REGISTER_CONSTANT("JSON_HEX_APOS", PHP_JSON_HEX_APOS);
+	PHP_JSON_REGISTER_CONSTANT("JSON_HEX_QUOT", PHP_JSON_HEX_QUOT);
+	PHP_JSON_REGISTER_CONSTANT("JSON_FORCE_OBJECT", PHP_JSON_FORCE_OBJECT);
+	PHP_JSON_REGISTER_CONSTANT("JSON_NUMERIC_CHECK", PHP_JSON_NUMERIC_CHECK);
+	PHP_JSON_REGISTER_CONSTANT("JSON_UNESCAPED_SLASHES", PHP_JSON_UNESCAPED_SLASHES);
+	PHP_JSON_REGISTER_CONSTANT("JSON_PRETTY_PRINT", PHP_JSON_PRETTY_PRINT);
+	PHP_JSON_REGISTER_CONSTANT("JSON_UNESCAPED_UNICODE", PHP_JSON_UNESCAPED_UNICODE);
+	PHP_JSON_REGISTER_CONSTANT("JSON_PARTIAL_OUTPUT_ON_ERROR", PHP_JSON_PARTIAL_OUTPUT_ON_ERROR);
+	PHP_JSON_REGISTER_CONSTANT("JSON_PRESERVE_ZERO_FRACTION", PHP_JSON_PRESERVE_ZERO_FRACTION);
+	PHP_JSON_REGISTER_CONSTANT("JSON_UNESCAPED_LINE_TERMINATORS", PHP_JSON_UNESCAPED_LINE_TERMINATORS);
 
-	REGISTER_LONG_CONSTANT("JSON_ERROR_NONE", PHP_JSON_ERROR_NONE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_ERROR_DEPTH", PHP_JSON_ERROR_DEPTH, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_ERROR_STATE_MISMATCH", PHP_JSON_ERROR_STATE_MISMATCH, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_ERROR_CTRL_CHAR", PHP_JSON_ERROR_CTRL_CHAR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_ERROR_SYNTAX", PHP_JSON_ERROR_SYNTAX, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_ERROR_UTF8", PHP_JSON_ERROR_UTF8, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_ERROR_RECURSION", PHP_JSON_ERROR_RECURSION, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_ERROR_INF_OR_NAN", PHP_JSON_ERROR_INF_OR_NAN, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_ERROR_UNSUPPORTED_TYPE", PHP_JSON_ERROR_UNSUPPORTED_TYPE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_ERROR_INVALID_PROPERTY_NAME", PHP_JSON_ERROR_INVALID_PROPERTY_NAME, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_ERROR_UTF16", PHP_JSON_ERROR_UTF16, CONST_CS | CONST_PERSISTENT);
+	/* options for json_decode */
+	PHP_JSON_REGISTER_CONSTANT("JSON_OBJECT_AS_ARRAY", PHP_JSON_OBJECT_AS_ARRAY);
+	PHP_JSON_REGISTER_CONSTANT("JSON_BIGINT_AS_STRING", PHP_JSON_BIGINT_AS_STRING);
 
-	REGISTER_LONG_CONSTANT("JSON_OBJECT_AS_ARRAY",		PHP_JSON_OBJECT_AS_ARRAY,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_BIGINT_AS_STRING",		PHP_JSON_BIGINT_AS_STRING,		CONST_CS | CONST_PERSISTENT);
+	/* json error constants */
+	PHP_JSON_REGISTER_CONSTANT("JSON_ERROR_NONE", PHP_JSON_ERROR_NONE);
+	PHP_JSON_REGISTER_CONSTANT("JSON_ERROR_DEPTH", PHP_JSON_ERROR_DEPTH);
+	PHP_JSON_REGISTER_CONSTANT("JSON_ERROR_STATE_MISMATCH", PHP_JSON_ERROR_STATE_MISMATCH);
+	PHP_JSON_REGISTER_CONSTANT("JSON_ERROR_CTRL_CHAR", PHP_JSON_ERROR_CTRL_CHAR);
+	PHP_JSON_REGISTER_CONSTANT("JSON_ERROR_SYNTAX", PHP_JSON_ERROR_SYNTAX);
+	PHP_JSON_REGISTER_CONSTANT("JSON_ERROR_UTF8", PHP_JSON_ERROR_UTF8);
+	PHP_JSON_REGISTER_CONSTANT("JSON_ERROR_RECURSION", PHP_JSON_ERROR_RECURSION);
+	PHP_JSON_REGISTER_CONSTANT("JSON_ERROR_INF_OR_NAN", PHP_JSON_ERROR_INF_OR_NAN);
+	PHP_JSON_REGISTER_CONSTANT("JSON_ERROR_UNSUPPORTED_TYPE", PHP_JSON_ERROR_UNSUPPORTED_TYPE);
+	PHP_JSON_REGISTER_CONSTANT("JSON_ERROR_INVALID_PROPERTY_NAME", PHP_JSON_ERROR_INVALID_PROPERTY_NAME);
+	PHP_JSON_REGISTER_CONSTANT("JSON_ERROR_UTF16", PHP_JSON_ERROR_UTF16);
 
 	return SUCCESS;
 }
@@ -140,7 +141,7 @@ static PHP_GINIT_FUNCTION(json)
 #endif
 	json_globals->encoder_depth = 0;
 	json_globals->error_code = 0;
-	json_globals->encode_max_depth = 0;
+	json_globals->encode_max_depth = PHP_JSON_PARSER_DEFAULT_DEPTH;
 }
 /* }}} */
 
@@ -167,7 +168,7 @@ zend_module_entry json_module_entry = {
 
 #ifdef COMPILE_DL_JSON
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(json)
 #endif
@@ -183,13 +184,23 @@ static PHP_MINFO_FUNCTION(json)
 }
 /* }}} */
 
-PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, int options) /* {{{ */
+PHP_JSON_API int php_json_encode(smart_str *buf, zval *val, int options) /* {{{ */
 {
-	php_json_encode_zval(buf, val, options);
+	php_json_encoder encoder;
+	int return_code;
+
+	php_json_encode_init(&encoder);
+	encoder.max_depth = JSON_G(encode_max_depth);
+	encoder.error_code = PHP_JSON_ERROR_NONE;
+
+	return_code = php_json_encode_zval(buf, val, options, &encoder);
+	JSON_G(error_code) = encoder.error_code;
+
+	return return_code;
 }
 /* }}} */
 
-PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, size_t str_len, zend_long options, zend_long depth) /* {{{ */
+PHP_JSON_API int php_json_decode_ex(zval *return_value, char *str, size_t str_len, zend_long options, zend_long depth) /* {{{ */
 {
 	php_json_parser parser;
 
@@ -197,8 +208,11 @@ PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, size_t str_l
 
 	if (php_json_yyparse(&parser)) {
 		JSON_G(error_code) = php_json_parser_error_code(&parser);
-		RETURN_NULL();
+		RETVAL_NULL();
+		return FAILURE;
 	}
+
+	return SUCCESS;
 }
 /* }}} */
 
@@ -207,27 +221,34 @@ PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, size_t str_l
 static PHP_FUNCTION(json_encode)
 {
 	zval *parameter;
+	php_json_encoder encoder;
 	smart_str buf = {0};
 	zend_long options = 0;
 	zend_long depth = PHP_JSON_PARSER_DEFAULT_DEPTH;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|ll", &parameter, &options, &depth) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_ZVAL_DEREF(parameter)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(options)
+		Z_PARAM_LONG(depth)
+	ZEND_PARSE_PARAMETERS_END();
 
-	JSON_G(error_code) = PHP_JSON_ERROR_NONE;
+	php_json_encode_init(&encoder);
+	encoder.max_depth = (int)depth;
+	encoder.error_code = PHP_JSON_ERROR_NONE;
+	php_json_encode_zval(&buf, parameter, (int)options, &encoder);
+	JSON_G(error_code) = encoder.error_code;
 
-	JSON_G(encode_max_depth) = (int)depth;
-
-	php_json_encode(&buf, parameter, (int)options);
-
-	if (JSON_G(error_code) != PHP_JSON_ERROR_NONE && !(options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR)) {
+	if (encoder.error_code != PHP_JSON_ERROR_NONE && !(options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR)) {
 		smart_str_free(&buf);
-		ZVAL_FALSE(return_value);
-	} else {
-		smart_str_0(&buf); /* copy? */
-		ZVAL_NEW_STR(return_value, buf.s);
+		RETURN_FALSE;
 	}
+
+	smart_str_0(&buf); /* copy? */
+	if (buf.s) {
+		RETURN_NEW_STR(buf.s);
+	}
+	RETURN_EMPTY_STRING();
 }
 /* }}} */
 
@@ -241,14 +262,28 @@ static PHP_FUNCTION(json_decode)
 	zend_long depth = PHP_JSON_PARSER_DEFAULT_DEPTH;
 	zend_long options = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|bll", &str, &str_len, &assoc, &depth, &options) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 4)
+		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(assoc)
+		Z_PARAM_LONG(depth)
+		Z_PARAM_LONG(options)
+	ZEND_PARSE_PARAMETERS_END();
 
-	JSON_G(error_code) = 0;
+	JSON_G(error_code) = PHP_JSON_ERROR_NONE;
 
 	if (!str_len) {
 		JSON_G(error_code) = PHP_JSON_ERROR_SYNTAX;
+		RETURN_NULL();
+	}
+
+	if (depth <= 0) {
+		php_error_docref(NULL, E_WARNING, "Depth must be greater than zero");
+		RETURN_NULL();
+	}
+
+	if (depth > INT_MAX) {
+		php_error_docref(NULL, E_WARNING, "Depth must be lower than %d", INT_MAX);
 		RETURN_NULL();
 	}
 

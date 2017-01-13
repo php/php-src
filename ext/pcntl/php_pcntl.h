@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,7 +21,9 @@
 #ifndef PHP_PCNTL_H
 #define PHP_PCNTL_H
 
-#define HAVE_WCONTINUED defined(WCONTINUED) && defined (WIFCONTINUED)
+#if defined(WCONTINUED) && defined(WIFCONTINUED)
+#define HAVE_WCONTINUED 1
+#endif
 
 extern zend_module_entry pcntl_module_entry;
 #define phpext_pcntl_ptr &pcntl_module_entry
@@ -49,15 +51,18 @@ PHP_FUNCTION(pcntl_wexitstatus);
 PHP_FUNCTION(pcntl_wtermsig);
 PHP_FUNCTION(pcntl_wstopsig);
 PHP_FUNCTION(pcntl_signal);
+PHP_FUNCTION(pcntl_signal_get_handler);
 PHP_FUNCTION(pcntl_signal_dispatch);
 PHP_FUNCTION(pcntl_get_last_error);
 PHP_FUNCTION(pcntl_strerror);
 #ifdef HAVE_SIGPROCMASK
 PHP_FUNCTION(pcntl_sigprocmask);
 #endif
-#if HAVE_SIGWAITINFO && HAVE_SIGTIMEDWAIT
+#ifdef HAVE_STRUCT_SIGINFO_T
+# if HAVE_SIGWAITINFO && HAVE_SIGTIMEDWAIT
 PHP_FUNCTION(pcntl_sigwaitinfo);
 PHP_FUNCTION(pcntl_sigtimedwait);
+# endif
 #endif
 PHP_FUNCTION(pcntl_exec);
 #ifdef HAVE_GETPRIORITY
@@ -66,10 +71,14 @@ PHP_FUNCTION(pcntl_getpriority);
 #ifdef HAVE_SETPRIORITY
 PHP_FUNCTION(pcntl_setpriority);
 #endif
+PHP_FUNCTION(pcntl_async_signals);
 
 struct php_pcntl_pending_signal {
 	struct php_pcntl_pending_signal *next;
 	zend_long signo;
+#ifdef HAVE_STRUCT_SIGINFO_T
+	zend_array *siginfo;
+#endif
 };
 
 ZEND_BEGIN_MODULE_GLOBALS(pcntl)
@@ -78,6 +87,7 @@ ZEND_BEGIN_MODULE_GLOBALS(pcntl)
 	struct php_pcntl_pending_signal *head, *tail, *spares;
 	int last_error;
 	volatile char pending_signals;
+	zend_bool async_signals;
 ZEND_END_MODULE_GLOBALS(pcntl)
 
 #ifdef ZTS

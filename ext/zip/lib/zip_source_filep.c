@@ -31,14 +31,16 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
-#include "zipint.h"
-
 #include <sys/stat.h>
-#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "zipint.h"
+
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #ifdef _WIN32
 /* WIN32 needs <fcntl.h> for _O_BINARY */
@@ -49,11 +51,12 @@
 #ifndef S_ISREG
 #define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
 #endif
-#ifndef S_IRWXG
-#define S_IRWXG (S_IRWXU >> 3)
-#endif
-#ifndef S_IRWXO
-#define S_IRWXO (S_IRWXG >> 3)
+#if defined(S_IXUSR) && defined(S_IRWXG) && defined(S_IRWXO)
+#define _SAFE_MASK (S_IXUSR | S_IRWXG | S_IRWXO)
+#elif defined(_S_IWRITE)
+#define _SAFE_MASK (_S_IWRITE)
+#else
+#error do not know safe values for umask, please report this
 #endif
 
 #ifdef _MSC_VER
@@ -183,13 +186,7 @@ create_temp_output(struct read_file *ctx)
     }
     sprintf(temp, "%s.XXXXXX", ctx->fname);
 
-#ifdef _WIN32
-    /* This might work under VS2015, however there's no good documentation
-    	about it. So let it be for now. */
-    mask = 0;
-#else
-    mask = umask(S_IXUSR | S_IRWXG | S_IRWXO);
-#endif
+    mask = umask(_SAFE_MASK);
     if ((tfd=mkstemp(temp)) == -1) {
         zip_error_set(&ctx->error, ZIP_ER_TMPOPEN, errno);
 	umask(mask);

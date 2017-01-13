@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Stig Sæther Bakken <ssb@php.net>                            |
+   | Authors: Stig SÃ¦ther Bakken <ssb@php.net>                            |
    |          Thies C. Arntzen <thies@thieso.net>                         |
    |          Sterling Hughes <sterling@php.net>                          |
    +----------------------------------------------------------------------+
@@ -63,11 +63,15 @@ ZEND_DECLARE_MODULE_GLOBALS(xml)
 /* {{{ dynamically loadable module stuff */
 #ifdef COMPILE_DL_XML
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(xml)
 #endif /* COMPILE_DL_XML */
 /* }}} */
+
+
+#define SKIP_TAGSTART(str) ((str) + (parser->toffset > strlen(str) ? strlen(str) : parser->toffset))
+
 
 /* {{{ function prototypes */
 PHP_MINIT_FUNCTION(xml);
@@ -111,7 +115,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xml_set_object, 0, 0, 2)
 	ZEND_ARG_INFO(0, parser)
-	ZEND_ARG_INFO(1, obj)
+	ZEND_ARG_INFO(0, obj)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xml_set_element_handler, 0, 0, 3)
@@ -208,14 +212,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_xml_parser_get_option, 0, 0, 2)
 	ZEND_ARG_INFO(0, option)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_utf8_encode, 0, 0, 1)
-	ZEND_ARG_INFO(0, data)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_utf8_decode, 0, 0, 1)
-	ZEND_ARG_INFO(0, data)
-ZEND_END_ARG_INFO()
-
 const zend_function_entry xml_functions[] = {
 	PHP_FE(xml_parser_create,					arginfo_xml_parser_create)
 	PHP_FE(xml_parser_create_ns,				arginfo_xml_parser_create_ns)
@@ -239,8 +235,6 @@ const zend_function_entry xml_functions[] = {
 	PHP_FE(xml_parser_free, 					arginfo_xml_parser_free)
 	PHP_FE(xml_parser_set_option, 				arginfo_xml_parser_set_option)
 	PHP_FE(xml_parser_get_option,				arginfo_xml_parser_get_option)
-	PHP_FE(utf8_encode, 						arginfo_utf8_encode)
-	PHP_FE(utf8_decode, 						arginfo_utf8_decode)
 	PHP_FE_END
 };
 
@@ -483,9 +477,7 @@ static void xml_call_handler(xml_parser *parser, zval *handler, zend_function *f
 		zend_fcall_info fci;
 
 		fci.size = sizeof(fci);
-		fci.function_table = EG(function_table);
 		ZVAL_COPY_VALUE(&fci.function_name, handler);
-		fci.symbol_table = NULL;
 		fci.object = Z_OBJ(parser->object);
 		fci.retval = retval;
 		fci.param_count = argc;
@@ -500,7 +492,8 @@ static void xml_call_handler(xml_parser *parser, zval *handler, zend_function *f
 
 			if (Z_TYPE_P(handler) == IS_STRING) {
 				php_error_docref(NULL, E_WARNING, "Unable to call handler %s()", Z_STRVAL_P(handler));
-			} else if ((obj = zend_hash_index_find(Z_ARRVAL_P(handler), 0)) != NULL &&
+			} else if (Z_TYPE_P(handler) == IS_ARRAY &&
+					   (obj = zend_hash_index_find(Z_ARRVAL_P(handler), 0)) != NULL &&
 					   (method = zend_hash_index_find(Z_ARRVAL_P(handler), 1)) != NULL &&
 					   Z_TYPE_P(obj) == IS_OBJECT &&
 					   Z_TYPE_P(method) == IS_STRING) {
@@ -581,7 +574,7 @@ PHP_XML_API zend_string *xml_utf8_encode(const char *s, size_t len, const XML_Ch
 	}
 	/* This is the theoretical max (will never get beyond len * 2 as long
 	 * as we are converting from single-byte characters, though) */
-	str = zend_string_alloc(len * 4, 0);
+	str = zend_string_safe_alloc(len, 4, 0, 0);
 	ZSTR_LEN(str) = 0;
 	while (pos > 0) {
 		c = encoder ? encoder((unsigned char)(*s)) : (unsigned short)(*s);
@@ -640,7 +633,7 @@ PHP_XML_API zend_string *xml_utf8_decode(const XML_Char *s, size_t len, const XM
 			c = '?';
 		}
 
-		ZSTR_VAL(str)[ZSTR_LEN(str)++] = decoder ? decoder(c) : c;
+		ZSTR_VAL(str)[ZSTR_LEN(str)++] = decoder ? (unsigned int)decoder(c) : c;
 	}
 	ZSTR_VAL(str)[ZSTR_LEN(str)] = '\0';
 	if (ZSTR_LEN(str) < len) {
@@ -728,7 +721,7 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 
 		if (!Z_ISUNDEF(parser->startElementHandler)) {
 			ZVAL_COPY(&args[0], &parser->index);
-			ZVAL_STRING(&args[1], ZSTR_VAL(tag_name) + parser->toffset);
+			ZVAL_STRING(&args[1], SKIP_TAGSTART(ZSTR_VAL(tag_name)));
 			array_init(&args[2]);
 
 			while (attributes && *attributes) {
@@ -759,7 +752,7 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 
 				_xml_add_to_info(parser, ZSTR_VAL(tag_name) + parser->toffset);
 
-				add_assoc_string(&tag, "tag", ZSTR_VAL(tag_name) + parser->toffset); /* cast to avoid gcc-warning */
+				add_assoc_string(&tag, "tag", SKIP_TAGSTART(ZSTR_VAL(tag_name))); /* cast to avoid gcc-warning */
 				add_assoc_string(&tag, "type", "open");
 				add_assoc_long(&tag, "level", parser->level);
 
@@ -813,7 +806,7 @@ void _xml_endElementHandler(void *userData, const XML_Char *name)
 
 		if (!Z_ISUNDEF(parser->endElementHandler)) {
 			ZVAL_COPY(&args[0], &parser->index);
-			ZVAL_STRING(&args[1], ZSTR_VAL(tag_name) + parser->toffset);
+			ZVAL_STRING(&args[1], SKIP_TAGSTART(ZSTR_VAL(tag_name)));
 
 			xml_call_handler(parser, &parser->endElementHandler, parser->endElementPtr, 2, args, &retval);
 			zval_ptr_dtor(&retval);
@@ -829,7 +822,7 @@ void _xml_endElementHandler(void *userData, const XML_Char *name)
 				  
 				_xml_add_to_info(parser, ZSTR_VAL(tag_name) + parser->toffset);
 
-				add_assoc_string(&tag, "tag", ZSTR_VAL(tag_name) + parser->toffset); /* cast to avoid gcc-warning */
+				add_assoc_string(&tag, "tag", SKIP_TAGSTART(ZSTR_VAL(tag_name))); /* cast to avoid gcc-warning */
 				add_assoc_string(&tag, "type", "close");
 				add_assoc_long(&tag, "level", parser->level);
 				  
@@ -866,7 +859,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 		} 
 
 		if (!Z_ISUNDEF(parser->data)) {
-			int i;
+			size_t i;
 			int doprint = 0;
 			zend_string *decoded_value;
 
@@ -920,12 +913,12 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 						break;
 					} ZEND_HASH_FOREACH_END();
 
-					if (parser->level <= XML_MAXLEVEL) {
+					if (parser->level <= XML_MAXLEVEL && parser->level > 0) {
 						array_init(&tag);
 
-						_xml_add_to_info(parser,parser->ltags[parser->level-1] + parser->toffset);
+						_xml_add_to_info(parser,SKIP_TAGSTART(parser->ltags[parser->level-1]));
 
-						add_assoc_string(&tag, "tag", parser->ltags[parser->level-1] + parser->toffset);
+						add_assoc_string(&tag, "tag", SKIP_TAGSTART(parser->ltags[parser->level-1]));
 						add_assoc_str(&tag, "value", decoded_value);
 						add_assoc_string(&tag, "type", "cdata");
 						add_assoc_long(&tag, "level", parser->level);
@@ -1169,7 +1162,7 @@ PHP_FUNCTION(xml_set_object)
 	xml_parser *parser;
 	zval *pind, *mythis;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ro/", &pind, &mythis) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ro", &pind, &mythis) == FAILURE) {
 		return;
 	}
 
@@ -1183,9 +1176,7 @@ PHP_FUNCTION(xml_set_object)
 	}
 
 	/* please leave this commented - or ask thies@thieso.net before doing it (again) */
-/* #ifdef ZEND_ENGINE_2
-	zval_add_ref(&parser->object); 
-#endif */
+	/* zval_add_ref(&parser->object); */
 
 	ZVAL_COPY(&parser->object, mythis);
 
@@ -1383,7 +1374,7 @@ PHP_FUNCTION(xml_set_end_namespace_decl_handler)
 }
 /* }}} */
 
-/* {{{ proto int xml_parse(resource parser, string data [, int isFinal]) 
+/* {{{ proto int xml_parse(resource parser, string data [, bool isFinal])
    Start parsing an XML document */
 PHP_FUNCTION(xml_parse)
 {
@@ -1392,9 +1383,9 @@ PHP_FUNCTION(xml_parse)
 	char *data;
 	size_t data_len;
 	int ret;
-	zend_long isFinal = 0;
+	zend_bool isFinal = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|l", &pind, &data, &data_len, &isFinal) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|b", &pind, &data, &data_len, &isFinal) == FAILURE) {
 		return;
 	}
 
@@ -1558,7 +1549,6 @@ PHP_FUNCTION(xml_parser_free)
 {
 	zval *pind;
 	xml_parser *parser;
-	zend_resource *res;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &pind) == FAILURE) {
 		return;
@@ -1573,9 +1563,10 @@ PHP_FUNCTION(xml_parser_free)
 		RETURN_FALSE;
 	}
 
-	res = Z_RES(parser->index);
-	ZVAL_UNDEF(&parser->index);
-	zend_list_close(res);
+	if (zend_list_delete(Z_RES(parser->index)) == FAILURE) {
+		RETURN_FALSE;
+	}
+
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1604,6 +1595,10 @@ PHP_FUNCTION(xml_parser_set_option)
 		case PHP_XML_OPTION_SKIP_TAGSTART:
 			convert_to_long_ex(val);
 			parser->toffset = Z_LVAL_P(val);
+			if (parser->toffset < 0) {
+				php_error_docref(NULL, E_NOTICE, "tagstart ignored, because it is out of range");
+				parser->toffset = 0;
+			}
 			break;
 		case PHP_XML_OPTION_SKIP_WHITE:
 			convert_to_long_ex(val);
@@ -1659,46 +1654,6 @@ PHP_FUNCTION(xml_parser_get_option)
 	}
 
 	RETVAL_FALSE;	/* never reached */
-}
-/* }}} */
-
-/* {{{ proto string utf8_encode(string data) 
-   Encodes an ISO-8859-1 string to UTF-8 */
-PHP_FUNCTION(utf8_encode)
-{
-	char *arg;
-	size_t arg_len;
-	zend_string *encoded;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &arg, &arg_len) == FAILURE) {
-		return;
-	}
-
-	encoded = xml_utf8_encode(arg, arg_len, (XML_Char*)"ISO-8859-1");
-	if (encoded == NULL) {
-		RETURN_FALSE;
-	}
-	RETURN_STR(encoded);
-}
-/* }}} */
-
-/* {{{ proto string utf8_decode(string data) 
-   Converts a UTF-8 encoded string to ISO-8859-1 */
-PHP_FUNCTION(utf8_decode)
-{
-	char *arg;
-	size_t arg_len;
-	zend_string *decoded;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &arg, &arg_len) == FAILURE) {
-		return;
-	}
-
-	decoded = xml_utf8_decode((XML_Char*)arg, arg_len, (XML_Char*)"ISO-8859-1");
-	if (decoded == NULL) {
-		RETURN_FALSE;
-	}
-	RETURN_STR(decoded);
 }
 /* }}} */
 
