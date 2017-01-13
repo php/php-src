@@ -312,6 +312,9 @@ ZEND_API void zend_print_flat_zval_r(zval *expr) /* {{{ */
 			ZEND_PUTS(")");
 			break;
 		}
+		case IS_REFERENCE:
+			zend_print_flat_zval_r(Z_REFVAL_P(expr));
+			break;
 		default:
 			zend_print_variable(expr);
 			break;
