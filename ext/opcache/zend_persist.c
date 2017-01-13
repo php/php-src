@@ -492,8 +492,12 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 				if (arg_info[i].name) {
 					zend_accel_store_interned_string(arg_info[i].name);
 				}
-				if (arg_info[i].class_name) {
-					zend_accel_store_interned_string(arg_info[i].class_name);
+				if (ZEND_TYPE_IS_CLASS(arg_info[i].type)) {
+					zend_string *type_name = ZEND_TYPE_NAME(arg_info[i].type);
+					zend_bool allow_null = ZEND_TYPE_ALLOW_NULL(arg_info[i].type);
+
+					zend_accel_store_interned_string(type_name);
+					arg_info[i].type = ZEND_TYPE_ENCODE_CLASS(type_name, allow_null);
 				}
 			}
 		}
