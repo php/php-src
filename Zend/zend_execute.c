@@ -801,7 +801,7 @@ static zend_always_inline zend_bool zend_check_type(
 		} else {
 			*ce = zend_fetch_class(ZEND_TYPE_NAME(type), (ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD));
 			if (UNEXPECTED(!*ce)) {
-				return 0;
+				return Z_TYPE_P(arg) == IS_NULL && (ZEND_TYPE_ALLOW_NULL(type) || (default_value && is_null_constant(scope, default_value)));
 			}
 			*cache_slot = (void *) *ce;
 		}
