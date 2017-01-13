@@ -141,9 +141,48 @@ PHP_FUNCTION(intval)
 
 	if (Z_TYPE_P(num) != IS_STRING || base == 10) {
 		RETVAL_LONG(zval_get_long(num));
-	} else {
-		RETVAL_LONG(ZEND_STRTOL(Z_STRVAL_P(num), NULL, base));
+		return;
 	}
+	
+
+	if (base == 0 || base == 2) {
+		char *strval = Z_STRVAL_P(num);
+		size_t strlen = Z_STRLEN_P(num);
+
+		while (isspace(*strval) && strlen) {
+			strval++;
+			strlen--;
+		}
+
+		/* Length of 3+ covers "0b#" and "-0b" (which results in 0) */
+		if (strlen > 2) {
+			int offset = 0;
+			if (strval[0] == '-' || strval[0] == '+') {
+				offset = 1;
+			}
+	
+			if (strval[offset] == '0' && (strval[offset + 1] == 'b' || strval[offset + 1] == 'B')) {
+				char *tmpval;
+				strlen -= 2; /* Removing "0b" */
+				tmpval = emalloc(strlen + 1);
+
+				/* Place the unary symbol at pos 0 if there was one */
+				if (offset) {
+					tmpval[0] = strval[0];
+				}
+	
+				/* Copy the data from after "0b" to the end of the buffer */
+				memcpy(tmpval + offset, strval + offset + 2, strlen - offset);
+				tmpval[strlen] = 0;
+
+				RETVAL_LONG(ZEND_STRTOL(tmpval, NULL, 2));
+				efree(tmpval);
+				return;
+			}
+		}
+	}
+
+	RETVAL_LONG(ZEND_STRTOL(Z_STRVAL_P(num), NULL, base));
 }
 /* }}} */
 

@@ -2008,6 +2008,22 @@ consult the installation file that came with this distribution, or visit \n\
 			/* This is the number of concurrent requests, equals FCGI_MAX_CONNS */
 			fcgi_set_mgmt_var("FCGI_MAX_REQS",  sizeof("FCGI_MAX_REQS")-1,  children_str, strlen(children_str));
 		} else {
+#ifdef PHP_WIN32
+			/* If this env var is set, the process was invoked as a child. Let
+				it show the original PHP_FCGI_CHILDREN value, while don't care
+				otherwise. */
+			char * children_str = getenv("PHP_FCGI_CHILDREN_FOR_KID");
+			if (children_str) {
+				char putenv_buf[sizeof("PHP_FCGI_CHILDREN")+5];
+
+				snprintf(putenv_buf, sizeof(putenv_buf), "%s=%s", "PHP_FCGI_CHILDREN", children_str);
+				putenv(putenv_buf);
+				putenv("PHP_FCGI_CHILDREN_FOR_KID=");
+
+				SetEnvironmentVariable("PHP_FCGI_CHILDREN", children_str);
+				SetEnvironmentVariable("PHP_FCGI_CHILDREN_FOR_KID", NULL);
+			}
+#endif
 			fcgi_set_mgmt_var("FCGI_MAX_CONNS", sizeof("FCGI_MAX_CONNS")-1, "1", sizeof("1")-1);
 			fcgi_set_mgmt_var("FCGI_MAX_REQS",  sizeof("FCGI_MAX_REQS")-1,  "1", sizeof("1")-1);
 		}
@@ -2102,9 +2118,9 @@ consult the installation file that came with this distribution, or visit \n\
 
 #else
 		if (children) {
-			char *cmd_line;
+			wchar_t *cmd_line_tmp, cmd_line[PHP_WIN32_IOUTIL_MAXPATHLEN];
+			size_t cmd_line_len;
 			char kid_buf[16];
-			char my_name[MAX_PATH] = {0};
 			int i;
 
 			ZeroMemory(&kid_cgi_ps, sizeof(kid_cgi_ps));
@@ -2114,9 +2130,30 @@ consult the installation file that came with this distribution, or visit \n\
 
 			/* kids will inherit the env, don't let them spawn */
 			SetEnvironmentVariable("PHP_FCGI_CHILDREN", NULL);
+			/* instead, set a temporary env var, so then the child can read and
+				show the actual setting correctly. */
+			snprintf(kid_buf, 16, "%d", children);
+			SetEnvironmentVariable("PHP_FCGI_CHILDREN_FOR_KID", kid_buf);
 
-			GetModuleFileName(NULL, my_name, MAX_PATH);
-			cmd_line = my_name;
+			/* The current command line is used as is. This should normally be no issue,
+				even if there were some I/O redirection. If some issues turn out, an
+				extra parsing might be needed here. */
+			cmd_line_tmp = GetCommandLineW();
+			if (!cmd_line_tmp) {
+				DWORD err = GetLastError();
+				char *err_text = php_win32_error_to_msg(err);
+
+				fprintf(stderr, "unable to get current command line: [0x%08lx]: %s\n", err, err_text);
+
+				goto parent_out;
+			}
+
+			cmd_line_len = wcslen(cmd_line_tmp);
+			if (cmd_line_len > sizeof(cmd_line) - 1) {
+				fprintf(stderr, "command line is too long\n");
+				goto parent_out;
+			}
+			memmove(cmd_line, cmd_line_tmp, (cmd_line_len + 1)*sizeof(wchar_t));
 
 			job = CreateJobObject(NULL, NULL);
 			if (!job) {
@@ -2152,7 +2189,7 @@ consult the installation file that came with this distribution, or visit \n\
 				i = kids;
 				while (0 < i--) {
 					PROCESS_INFORMATION pi;
-					STARTUPINFO si;
+					STARTUPINFOW si;
 
 					if (NULL != kid_cgi_ps[i]) {
 						continue;
@@ -2167,7 +2204,7 @@ consult the installation file that came with this distribution, or visit \n\
 					si.hStdInput  = (HANDLE)_get_osfhandle(fcgi_fd);
 					si.hStdError  = INVALID_HANDLE_VALUE;
 
-					if (CreateProcess(NULL, cmd_line, NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
+					if (CreateProcessW(NULL, cmd_line, NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
 						kid_cgi_ps[i] = pi.hProcess;
 						if (!AssignProcessToJobObject(job, pi.hProcess)) {
 							DWORD err = GetLastError();
@@ -2189,7 +2226,6 @@ consult the installation file that came with this distribution, or visit \n\
 				WaitForMultipleObjects(kids, kid_cgi_ps, FALSE, INFINITE);
 			}
 			
-			snprintf(kid_buf, 16, "%d", children);
 			/* restore my env */
 			SetEnvironmentVariable("PHP_FCGI_CHILDREN", kid_buf);
 

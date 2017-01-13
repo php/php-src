@@ -305,10 +305,7 @@ static void _zend_extension_string(smart_str *str, zend_extension *extension, ch
 static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char *indent)
 {
 	int count, count_static_props = 0, count_static_funcs = 0, count_shadow_props = 0;
-
-	smart_str sub_indent = {0};
-	smart_str_append_printf(&sub_indent, "%s    ", indent);
-	smart_str_0(&sub_indent);
+	zend_string *sub_indent = strpprintf(0, "%s    ", indent);
 
 	/* TBD: Repair indenting of doc comment (or is this to be done in the parser?) */
 	if (ce->type == ZEND_USER_CLASS && ce->info.user.doc_comment) {
@@ -382,7 +379,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 		zend_class_constant *c;
 
 		ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->constants_table, key, c) {
-			_class_const_string(str, ZSTR_VAL(key), c, ZSTR_VAL(sub_indent.s));
+			_class_const_string(str, ZSTR_VAL(key), c, ZSTR_VAL(sub_indent));
 		} ZEND_HASH_FOREACH_END();
 	}
 	smart_str_append_printf(str, "%s  }\n", indent);
@@ -409,7 +406,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 
 		ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
 			if ((prop->flags & ZEND_ACC_STATIC) && !(prop->flags & ZEND_ACC_SHADOW)) {
-				_property_string(str, prop, NULL, ZSTR_VAL(sub_indent.s));
+				_property_string(str, prop, NULL, ZSTR_VAL(sub_indent));
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -440,7 +437,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 				&& ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) == 0 || mptr->common.scope == ce))
 			{
 				smart_str_append_printf(str, "\n");
-				_function_string(str, mptr, ce, ZSTR_VAL(sub_indent.s));
+				_function_string(str, mptr, ce, ZSTR_VAL(sub_indent));
 			}
 		} ZEND_HASH_FOREACH_END();
 	} else {
@@ -456,7 +453,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 
 		ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
 			if (!(prop->flags & (ZEND_ACC_STATIC|ZEND_ACC_SHADOW))) {
-				_property_string(str, prop, NULL, ZSTR_VAL(sub_indent.s));
+				_property_string(str, prop, NULL, ZSTR_VAL(sub_indent));
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -473,7 +470,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 				if (prop_name && ZSTR_LEN(prop_name) && ZSTR_VAL(prop_name)[0]) { /* skip all private and protected properties */
 					if (!zend_hash_exists(&ce->properties_info, prop_name)) {
 						count++;
-						_property_string(&prop_str, NULL, ZSTR_VAL(prop_name), ZSTR_VAL(sub_indent.s));
+						_property_string(&prop_str, NULL, ZSTR_VAL(prop_name), ZSTR_VAL(sub_indent));
 					}
 				}
 			} ZEND_HASH_FOREACH_END();
@@ -516,7 +513,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 						closure = NULL;
 					}
 					smart_str_appendc(&method_str, '\n');
-					_function_string(&method_str, mptr, ce, ZSTR_VAL(sub_indent.s));
+					_function_string(&method_str, mptr, ce, ZSTR_VAL(sub_indent));
 					count++;
 					_free_function(closure);
 				}
@@ -534,7 +531,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 	smart_str_append_printf(str, "%s  }\n", indent);
 
 	smart_str_append_printf(str, "%s}\n", indent);
-	smart_str_free(&sub_indent);
+	zend_string_release(sub_indent);
 }
 /* }}} */
 
@@ -1055,19 +1052,18 @@ static void _extension_string(smart_str *str, zend_module_entry *module, char *i
 	}
 
 	{
+		zend_string *sub_indent = strpprintf(0, "%s    ", indent);
 		smart_str str_classes = {0};
-		smart_str sub_indent = {0};
 		int num_classes = 0;
 
-		smart_str_append_printf(&sub_indent, "%s    ", indent);
-		zend_hash_apply_with_arguments(EG(class_table), (apply_func_args_t) _extension_class_string, 4, &str_classes, ZSTR_VAL(sub_indent.s), module, &num_classes);
+		zend_hash_apply_with_arguments(EG(class_table), (apply_func_args_t) _extension_class_string, 4, &str_classes, ZSTR_VAL(sub_indent), module, &num_classes);
 		if (num_classes) {
 			smart_str_append_printf(str, "\n  - Classes [%d] {", num_classes);
 			smart_str_append_smart_str(str, &str_classes);
 			smart_str_append_printf(str, "%s  }\n", indent);
 		}
 		smart_str_free(&str_classes);
-		smart_str_free(&sub_indent);
+		zend_string_release(sub_indent);
 	}
 
 	smart_str_append_printf(str, "%s}\n", indent);

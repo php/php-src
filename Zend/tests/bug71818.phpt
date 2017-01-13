@@ -1,5 +1,7 @@
 --TEST--
 Bug #71818 (Memory leak when array altered in destructor)
+--INI--
+zend.enable_gc = 1
 --FILE--
 <?php
 class MemoryLeak
