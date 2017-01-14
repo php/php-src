@@ -130,6 +130,7 @@ extern zend_module_entry hash_module_entry;
 
 PHP_FUNCTION(hash);
 PHP_FUNCTION(hash_file);
+PHP_FUNCTION(hash_hkdf);
 PHP_FUNCTION(hash_hmac);
 PHP_FUNCTION(hash_hmac_file);
 PHP_FUNCTION(hash_init);
