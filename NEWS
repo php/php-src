@@ -12,6 +12,10 @@ PHP                                                                        NEWS
   . Fixed bug #73904 (php-cgi fails to load -c specified php.ini file). (Anatol)
   . Fixed bug #72898 (PHP_FCGI_CHILDREN is not included in phpinfo()). (Anatol)
 
+- GMP:
+  . Fixed bug #69993 (test for gmp.h needs to test machine includes).
+    (Jordan Gigov) 
+
 - Hash:
   . Added hash_hkdf() function. (Andrey Andreev)
 
