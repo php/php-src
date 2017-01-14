@@ -286,34 +286,35 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	return val;	\
 
 	if (mail_log && *mail_log) {
-		char *tmp;
-		time_t curtime;
-		size_t l;
-		zend_string *date_str;
+		char *logline;
 
-		time(&curtime);
-		date_str = php_format_date("d-M-Y H:i:s e", 13, curtime, 1);
-
-		l = spprintf(&tmp, 0, "[%s] mail() on [%s:%d]: To: %s -- Headers: %s -- Subject: %s\n", ZSTR_VAL(date_str), zend_get_executed_filename(), zend_get_executed_lineno(), to, hdr ? hdr : "", subject);
-
-		zend_string_free(date_str);
+		spprintf(&logline, 0, "mail() on [%s:%d]: To: %s -- Headers: %s -- Subject: %s", zend_get_executed_filename(), zend_get_executed_lineno(), to, hdr ? hdr : "", subject);
 
 		if (hdr) {
-			php_mail_log_crlf_to_spaces(tmp);
+			php_mail_log_crlf_to_spaces(logline);
 		}
 
 		if (!strcmp(mail_log, "syslog")) {
-			/* Drop the final space when logging to syslog. */
-			tmp[l - 1] = 0;
-			php_mail_log_to_syslog(tmp);
-		}
-		else {
-			/* Convert the final space to a newline when logging to file. */
-			tmp[l - 1] = '\n';
-			php_mail_log_to_file(mail_log, tmp, l);
+			php_mail_log_to_syslog(logline);
+		} else {
+			/* Add date when logging to file */
+			char *tmp;
+			time_t curtime;
+			zend_string *date_str;
+			size_t len;
+			
+			
+			time(&curtime);
+			date_str = php_format_date("d-M-Y H:i:s e", 13, curtime, 1);
+			len = spprintf(&tmp, 0, "[%s] %s%s", date_str->val, logline, PHP_EOL);
+			
+			php_mail_log_to_file(mail_log, tmp, len);
+			
+			zend_string_free(date_str);
+			efree(tmp);
 		}
 
-		efree(tmp);
+		efree(logline);
 	}
 
 	if (PG(mail_x_header)) {

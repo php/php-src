@@ -45,6 +45,8 @@ PHP                                                                        NEWS
   . Fixed bug #72974 (imap is undefined service on AIX). (matthieu.sarter)
   . Fixed bug #72979 (money_format stores wrong length AIX). (matthieu.sarter)
   . Fixed bug #73374 (intval() with base 0 should detect binary). (Leigh)
+  . Fixed bug #69061 (mail.log = syslog contains double information).
+    (Tom Sommer)
 
 - ZIP:
   . Fixed bug #70103 (ZipArchive::addGlob ignores remove_all_path option). (cmb,
