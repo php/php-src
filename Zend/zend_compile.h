@@ -302,10 +302,7 @@ typedef struct _zend_property_info {
 	zend_string *name;
 	zend_string *doc_comment;
 	zend_class_entry *ce;
-	zend_uchar type;
-	zend_bool allow_null;
-	zend_string *type_name;
-	zend_class_entry *type_ce;
+	zend_type type;
 } zend_property_info;
 
 #define OBJ_PROP(obj, offset) \
@@ -326,20 +323,16 @@ typedef struct _zend_class_constant {
 /* arg_info for internal functions */
 typedef struct _zend_internal_arg_info {
 	const char *name;
-	const char *class_name;
-	zend_uchar type_hint;
+	zend_type type;
 	zend_uchar pass_by_reference;
-	zend_bool allow_null;
 	zend_bool is_variadic;
 } zend_internal_arg_info;
 
 /* arg_info for user functions */
 typedef struct _zend_arg_info {
 	zend_string *name;
-	zend_string *class_name;
-	zend_uchar type_hint;
+	zend_type type;
 	zend_uchar pass_by_reference;
-	zend_bool allow_null;
 	zend_bool is_variadic;
 } zend_arg_info;
 
@@ -350,10 +343,8 @@ typedef struct _zend_arg_info {
  */
 typedef struct _zend_internal_function_info {
 	zend_uintptr_t required_num_args;
-	const char *class_name;
-	zend_uchar type_hint;
+	zend_type type;
 	zend_bool return_reference;
-	zend_bool allow_null;
 	zend_bool _is_variadic;
 } zend_internal_function_info;
 

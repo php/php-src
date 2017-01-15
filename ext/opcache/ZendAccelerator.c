@@ -537,6 +537,22 @@ static void accel_use_shm_interned_strings(void)
 		if (Z_FUNC(p->val)->common.function_name) {
 			Z_FUNC(p->val)->common.function_name = accel_new_interned_string(Z_FUNC(p->val)->common.function_name);
 		}
+		if (Z_FUNC(p->val)->common.arg_info &&
+		    (Z_FUNC(p->val)->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))) { 
+			uint32_t i;
+			uint32_t num_args = Z_FUNC(p->val)->common.num_args + 1;
+			zend_arg_info *arg_info = Z_FUNC(p->val)->common.arg_info - 1;
+
+			if (Z_FUNC(p->val)->common.fn_flags & ZEND_ACC_VARIADIC) {
+				num_args++;
+			}
+			for (i = 0 ; i < num_args; i++) {
+				if (ZEND_TYPE_IS_CLASS(arg_info[i].type)) {
+					zend_bool allow_null = ZEND_TYPE_ALLOW_NULL(arg_info[i].type);
+					arg_info[i].type = ZEND_TYPE_ENCODE_CLASS(accel_new_interned_string(ZEND_TYPE_NAME(arg_info[i].type)), allow_null);
+				}
+			}
+		}
 	}
 
 	/* class table hash keys, class names, properties, methods, constants, etc */
@@ -2941,11 +2957,18 @@ void accel_shutdown(void)
 
 void zend_accel_schedule_restart(zend_accel_restart_reason reason)
 {
+	const char *zend_accel_restart_reason_text[ACCEL_RESTART_USER + 1] = {
+		"out of memory",
+		"hash overflow",
+		"user",
+	};
+
 	if (ZCSG(restart_pending)) {
 		/* don't schedule twice */
 		return;
 	}
-	zend_accel_error(ACCEL_LOG_DEBUG, "Restart Scheduled!");
+	zend_accel_error(ACCEL_LOG_DEBUG, "Restart Scheduled! Reason: %s",
+			zend_accel_restart_reason_text[reason]);
 
 	HANDLE_BLOCK_INTERRUPTIONS();
 	SHM_UNPROTECT();

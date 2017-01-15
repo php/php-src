@@ -617,18 +617,15 @@ static void _parameter_string(smart_str *str, zend_function *fptr, struct _zend_
 	} else {
 		smart_str_append_printf(str, "<required> ");
 	}
-	if (arg_info->class_name) {
+	if (ZEND_TYPE_IS_CLASS(arg_info->type)) {
 		smart_str_append_printf(str, "%s ",
-			(fptr->type == ZEND_INTERNAL_FUNCTION &&
-			 !(fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) ?
-			((zend_internal_arg_info*)arg_info)->class_name :
-			ZSTR_VAL(arg_info->class_name));
-		if (arg_info->allow_null) {
+			ZSTR_VAL(ZEND_TYPE_NAME(arg_info->type)));
+		if (ZEND_TYPE_ALLOW_NULL(arg_info->type)) {
 			smart_str_append_printf(str, "or NULL ");
 		}
-	} else if (arg_info->type_hint) {
-		smart_str_append_printf(str, "%s ", zend_get_type_by_const(arg_info->type_hint));
-		if (arg_info->allow_null) {
+	} else if (ZEND_TYPE_IS_CODE(arg_info->type)) {
+		smart_str_append_printf(str, "%s ", zend_get_type_by_const(ZEND_TYPE_CODE(arg_info->type)));
+		if (ZEND_TYPE_ALLOW_NULL(arg_info->type)) {
 			smart_str_append_printf(str, "or NULL ");
 		}
 	}
@@ -839,18 +836,15 @@ static void _function_string(smart_str *str, zend_function *fptr, zend_class_ent
 	smart_str_free(&param_indent);
 	if (fptr->op_array.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 		smart_str_append_printf(str, "  %s- Return [ ", indent);
-		if (fptr->common.arg_info[-1].class_name) {
+		if (ZEND_TYPE_IS_CLASS(fptr->common.arg_info[-1].type)) {
 			smart_str_append_printf(str, "%s ",
-				(fptr->type == ZEND_INTERNAL_FUNCTION &&
-				 !(fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) ?
-					((zend_internal_arg_info*)(fptr->common.arg_info - 1))->class_name :
-					ZSTR_VAL(fptr->common.arg_info[-1].class_name));
-			if (fptr->common.arg_info[-1].allow_null) {
+				ZSTR_VAL(ZEND_TYPE_NAME(fptr->common.arg_info[-1].type)));
+			if (ZEND_TYPE_ALLOW_NULL(fptr->common.arg_info[-1].type)) {
 				smart_str_appends(str, "or NULL ");
 			}
-		} else if (fptr->common.arg_info[-1].type_hint) {
-			smart_str_append_printf(str, "%s ", zend_get_type_by_const(fptr->common.arg_info[-1].type_hint));
-			if (fptr->common.arg_info[-1].allow_null) {
+		} else if (ZEND_TYPE_IS_CODE(fptr->common.arg_info[-1].type)) {
+			smart_str_append_printf(str, "%s ", zend_get_type_by_const(ZEND_TYPE_CODE(fptr->common.arg_info[-1].type)));
+			if (ZEND_TYPE_ALLOW_NULL(fptr->common.arg_info[-1].type)) {
 				smart_str_appends(str, "or NULL ");
 			}
 		}
@@ -2590,7 +2584,7 @@ ZEND_METHOD(reflection_parameter, getClass)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	if (param->arg_info->class_name) {
+	if (ZEND_TYPE_IS_CLASS(param->arg_info->type)) {
 		/* Class name is stored as a string, we might also get "self" or "parent"
 		 * - For "self", simply use the function scope. If scope is NULL then
 		 *   the function is global and thus self does not make any sense
@@ -2603,25 +2597,17 @@ ZEND_METHOD(reflection_parameter, getClass)
 		 * TODO: Think about moving these checks to the compiler or some sort of
 		 * lint-mode.
 		 */
-		const char *class_name;
-		size_t class_name_len;
+		zend_string *class_name;
 
-		if (param->fptr->type == ZEND_INTERNAL_FUNCTION &&
-		    !(param->fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
-			class_name = ((zend_internal_arg_info*)param->arg_info)->class_name;
-			class_name_len = strlen(class_name);
-		} else {
-			class_name = ZSTR_VAL(param->arg_info->class_name);
-			class_name_len = ZSTR_LEN(param->arg_info->class_name);
-		}
-		if (0 == zend_binary_strcasecmp(class_name, class_name_len, "self", sizeof("self")- 1)) {
+		class_name = ZEND_TYPE_NAME(param->arg_info->type);
+		if (0 == zend_binary_strcasecmp(ZSTR_VAL(class_name), ZSTR_LEN(class_name), "self", sizeof("self")- 1)) {
 			ce = param->fptr->common.scope;
 			if (!ce) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0,
 					"Parameter uses 'self' as type hint but function is not a class member!");
 				return;
 			}
-		} else if (0 == zend_binary_strcasecmp(class_name, class_name_len, "parent", sizeof("parent")- 1)) {
+		} else if (0 == zend_binary_strcasecmp(ZSTR_VAL(class_name), ZSTR_LEN(class_name), "parent", sizeof("parent")- 1)) {
 			ce = param->fptr->common.scope;
 			if (!ce) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0,
@@ -2635,17 +2621,10 @@ ZEND_METHOD(reflection_parameter, getClass)
 			}
 			ce = ce->parent;
 		} else {
-			if (param->fptr->type == ZEND_INTERNAL_FUNCTION &&
-			    !(param->fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
-				zend_string *name = zend_string_init(class_name, class_name_len, 0);
-				ce = zend_lookup_class(name);
-				zend_string_release(name);
-			} else {
-				ce = zend_lookup_class(param->arg_info->class_name);
-			}
+			ce = zend_lookup_class(class_name);
 			if (!ce) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0,
-					"Class %s does not exist", class_name);
+					"Class %s does not exist", ZSTR_VAL(class_name));
 				return;
 			}
 		}
@@ -2666,7 +2645,7 @@ ZEND_METHOD(reflection_parameter, hasType)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	RETVAL_BOOL(param->arg_info->type_hint != 0);
+	RETVAL_BOOL(ZEND_TYPE_IS_SET(param->arg_info->type));
 }
 /* }}} */
 
@@ -2682,11 +2661,7 @@ ZEND_METHOD(reflection_parameter, getType)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	if (((param->fptr->type == ZEND_INTERNAL_FUNCTION &&
-	      !(param->fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) ?
-		((zend_internal_arg_info*)param->arg_info)->type_hint :
-		param->arg_info->type_hint) == 0)
-	{
+	if (!ZEND_TYPE_IS_SET(param->arg_info->type)) {
 		RETURN_NULL();
 	}
 	reflection_arg_type_factory(_copy_function(param->fptr), Z_ISUNDEF(intern->obj)? NULL : &intern->obj, param->arg_info, return_value);
@@ -2705,7 +2680,7 @@ ZEND_METHOD(reflection_parameter, isArray)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	RETVAL_BOOL(param->arg_info->type_hint == IS_ARRAY);
+	RETVAL_BOOL(ZEND_TYPE_CODE(param->arg_info->type) == IS_ARRAY);
 }
 /* }}} */
 
@@ -2721,7 +2696,7 @@ ZEND_METHOD(reflection_parameter, isCallable)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	RETVAL_BOOL(param->arg_info->type_hint == IS_CALLABLE);
+	RETVAL_BOOL(ZEND_TYPE_CODE(param->arg_info->type) == IS_CALLABLE);
 }
 /* }}} */
 
@@ -2737,7 +2712,7 @@ ZEND_METHOD(reflection_parameter, allowsNull)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	RETVAL_BOOL(param->arg_info->allow_null);
+	RETVAL_BOOL(ZEND_TYPE_ALLOW_NULL(param->arg_info->type));
 }
 /* }}} */
 
@@ -2938,10 +2913,10 @@ ZEND_METHOD(reflection_type, allowsNull)
 
 	switch (param->type) {
 		case REF_INFO_ARG:
-			RETVAL_BOOL(param->info.arg->allow_null);
+			RETVAL_BOOL(ZEND_TYPE_ALLOW_NULL(param->info.arg->type));
 			break;
 		case REF_INFO_PROP:
-			RETVAL_BOOL(param->info.prop->allow_null);
+			RETVAL_BOOL(ZEND_TYPE_ALLOW_NULL(param->info.prop->type));
 			break;
 	}
 }
@@ -2961,10 +2936,10 @@ ZEND_METHOD(reflection_type, isBuiltin)
 
 	switch (param->type) {
 		case REF_INFO_ARG:
-			RETVAL_BOOL(param->info.arg->type_hint != IS_OBJECT);
+			RETVAL_BOOL(ZEND_TYPE_IS_CODE(param->info.arg->type));
 			break;
 		case REF_INFO_PROP:
-			RETVAL_BOOL(param->info.prop->type != IS_OBJECT);
+			RETVAL_BOOL(ZEND_TYPE_IS_CODE(param->info.prop->type));
 			break;
 	}
 }
@@ -2972,32 +2947,22 @@ ZEND_METHOD(reflection_type, isBuiltin)
 
 /* {{{ reflection_type_name */
 static zend_string *reflection_type_name(type_reference *param) {
-	zend_uchar type = IS_UNDEF;
+	zend_type type = 0;
 
 	switch (param->type) {
 		case REF_INFO_ARG:
-			type = param->info.arg->type_hint;
-			if (type == IS_OBJECT) {
-				zend_function *fptr = param->scope.fptr;
-
-				if (fptr->type == ZEND_INTERNAL_FUNCTION &&
-					!(fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
-					return zend_string_init(((zend_internal_arg_info*)param->info.arg)->class_name, strlen(((zend_internal_arg_info*)param->info.arg)->class_name), 0);
-				} else {
-					return zend_string_copy(param->info.arg->class_name);
-				}
-			}
+			type = param->info.arg->type;
 			break;
 
 		case REF_INFO_PROP:
 			type = param->info.prop->type;
-			if (type == IS_OBJECT) {
-				return zend_string_copy(param->info.prop->type_name);
-			}
 			break;
 	}
 
-	switch (type) {
+	if (ZEND_TYPE_IS_CLASS(type)) {
+		return zend_string_copy(ZEND_TYPE_NAME(type));
+	}
+	switch (ZEND_TYPE_CODE(type)) {
 		case IS_ARRAY:    return zend_string_init("array", sizeof("array") - 1, 0);
 		case IS_CALLABLE: return zend_string_init("callable", sizeof("callable") - 1, 0);
 		case IS_STRING:   return zend_string_init("string", sizeof("string") - 1, 0);
@@ -5768,7 +5733,7 @@ ZEND_METHOD(reflection_property, getType)
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	if (!ref->prop.type) {
+	if (!ZEND_TYPE_IS_SET(ref->prop.type)) {
 		RETURN_NULL();
 	}
 
@@ -5789,7 +5754,7 @@ ZEND_METHOD(reflection_property, hasType)
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	RETVAL_BOOL(ref->prop.type != 0);
+	RETVAL_BOOL(ZEND_TYPE_IS_SET(ref->prop.type));
 }
 /* }}} */
 

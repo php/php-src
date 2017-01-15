@@ -57,4 +57,4 @@ NULL
 int(5)
 NULL
 Typed property Foo::$foo must not be accessed before initialization
-Typed property Foo::$foo must be integer, string used
+Typed property Foo::$foo must be integer or null, string used

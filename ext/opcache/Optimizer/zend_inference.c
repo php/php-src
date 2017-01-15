@@ -1323,13 +1323,13 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 					return 1;
 				} else if (op_array->arg_info &&
 				    opline->op1.num <= op_array->num_args) {
-					if (op_array->arg_info[opline->op1.num-1].type_hint == IS_LONG) {
+					if (ZEND_TYPE_CODE(op_array->arg_info[opline->op1.num-1].type) == IS_LONG) {
 						tmp->underflow = 0;
 						tmp->min = ZEND_LONG_MIN;
 						tmp->max = ZEND_LONG_MAX;
 						tmp->overflow = 0;
 						return 1;
-					} else if (op_array->arg_info[opline->op1.num-1].type_hint == _IS_BOOL) {
+					} else if (ZEND_TYPE_CODE(op_array->arg_info[opline->op1.num-1].type) == _IS_BOOL) {
 						tmp->underflow = 0;
 						tmp->min = 0;
 						tmp->max = 1;
@@ -2091,31 +2091,33 @@ static uint32_t zend_fetch_arg_info(const zend_script *script, zend_arg_info *ar
 	uint32_t tmp = 0;
 
 	*pce = NULL;
-	if (arg_info->class_name) {
+	if (ZEND_TYPE_IS_CLASS(arg_info->type)) {
 		// class type hinting...
-		zend_string *lcname = zend_string_tolower(arg_info->class_name);
+		zend_string *lcname = zend_string_tolower(ZEND_TYPE_NAME(arg_info->type));
 		tmp |= MAY_BE_OBJECT;
 		*pce = get_class_entry(script, lcname);
 		zend_string_release(lcname);
-	} else if (arg_info->type_hint != IS_UNDEF) {
-		if (arg_info->type_hint == IS_VOID) {
+	} else if (ZEND_TYPE_IS_CODE(arg_info->type)) {
+		zend_uchar type_hint = ZEND_TYPE_CODE(arg_info->type);
+
+		if (type_hint == IS_VOID) {
 			tmp |= MAY_BE_NULL;
-		} else if (arg_info->type_hint == IS_CALLABLE) {
+		} else if (type_hint == IS_CALLABLE) {
 			tmp |= MAY_BE_STRING|MAY_BE_OBJECT|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
-		} else if (arg_info->type_hint == IS_ITERABLE) {
+		} else if (type_hint == IS_ITERABLE) {
 			tmp |= MAY_BE_OBJECT|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
-		} else if (arg_info->type_hint == IS_ARRAY) {
+		} else if (type_hint == IS_ARRAY) {
 			tmp |= MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
-		} else if (arg_info->type_hint == _IS_BOOL) {
+		} else if (type_hint == _IS_BOOL) {
 			tmp |= MAY_BE_TRUE|MAY_BE_FALSE;
 		} else {
-			ZEND_ASSERT(arg_info->type_hint < IS_REFERENCE);
-			tmp |= 1 << arg_info->type_hint;
+			ZEND_ASSERT(type_hint < IS_REFERENCE);
+			tmp |= 1 << type_hint;
 		}
 	} else {
 		tmp |= MAY_BE_ANY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
 	}
-	if (arg_info->allow_null) {
+	if (ZEND_TYPE_ALLOW_NULL(arg_info->type)) {
 		tmp |= MAY_BE_NULL;
 	}
 	return tmp;
@@ -2138,17 +2140,17 @@ static uint32_t zend_fetch_prop_info(const zend_op_array *op_array, zend_ssa *ss
 		}
 	}
 
-	if (prop_info && prop_info->type) {
-		uint32_t type = MAY_BE_UNDEF | MAY_BE_REF | (1 << prop_info->type);
+	if (prop_info && ZEND_TYPE_IS_SET(prop_info->type)) {
+		uint32_t type = MAY_BE_UNDEF | MAY_BE_REF | (1 << (ZEND_TYPE_IS_CLASS(prop_info->type) ? IS_OBJECT : ZEND_TYPE_CODE(prop_info->type)));
 
-		if (prop_info->allow_null) {
+		if (ZEND_TYPE_ALLOW_NULL(prop_info->type)) {
 			type |= MAY_BE_NULL;
 		}
 		if (type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
 			type |= MAY_BE_RC1 | MAY_BE_RCN;
 		}
 		if (pce) {
-			*pce = prop_info->type_ce;
+			*pce = ZEND_TYPE_IS_CE(prop_info->type) ? ZEND_TYPE_CE(prop_info->type) : NULL;
 		}
 		return type;
 	}

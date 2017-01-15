@@ -2222,11 +2222,15 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 				/* Don't count the variadic argument */
 				internal_function->num_args--;
 			}
-			if (info->type_hint) {
-				if (info->class_name) {
-					ZEND_ASSERT(info->type_hint == IS_OBJECT);
-					if (!scope && (!strcasecmp(info->class_name, "self") || !strcasecmp(info->class_name, "parent"))) {
-						zend_error_noreturn(E_CORE_ERROR, "Cannot declare a return type of %s outside of a class scope", info->class_name);
+			if (ZEND_TYPE_IS_SET(info->type)) {
+				if (ZEND_TYPE_IS_CLASS(info->type)) {
+					const char *type_name = (const char*)info->type;
+
+					if (type_name[0] == '?') {
+						type_name++;
+					}
+					if (!scope && (!strcasecmp(type_name, "self") || !strcasecmp(type_name, "parent"))) {
+						zend_error_noreturn(E_CORE_ERROR, "Cannot declare a return type of %s outside of a class scope", type_name);
 					}
 				}
 
@@ -2283,10 +2287,39 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 		if (reg_function->common.arg_info && reg_function->common.num_args) {
 			uint32_t i;
 			for (i = 0; i < reg_function->common.num_args; i++) {
-				if (reg_function->common.arg_info[i].class_name ||
-				    reg_function->common.arg_info[i].type_hint) {
+				if (ZEND_TYPE_IS_SET(reg_function->common.arg_info[i].type)) {
 				    reg_function->common.fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
 					break;
+				}
+			}
+		}
+
+		if (reg_function->common.arg_info &&
+		    (reg_function->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))) { 
+			/* convert "const char*" class type names into "zend_string*" */
+			uint32_t i;
+			uint32_t num_args = reg_function->common.num_args + 1;
+			zend_arg_info *arg_info = reg_function->common.arg_info - 1;
+			zend_arg_info *new_arg_info;
+
+			if (reg_function->common.fn_flags & ZEND_ACC_VARIADIC) {
+				num_args++;
+			}
+			new_arg_info = malloc(sizeof(zend_arg_info) * num_args);
+			memcpy(new_arg_info, arg_info, sizeof(zend_arg_info) * num_args);
+			reg_function->common.arg_info = new_arg_info + 1;
+			for (i = 0; i < num_args; i++) {
+				if (ZEND_TYPE_IS_CLASS(new_arg_info[i].type)) {
+					const char *class_name = (const char*)new_arg_info[i].type;
+					zend_bool allow_null = 0;
+					zend_string *str;
+
+					if (class_name[0] == '?') {
+						class_name++;
+						allow_null = 1;
+					}
+					str = zend_new_interned_string(zend_string_init(class_name, strlen(class_name), 1));
+					new_arg_info[i].type = ZEND_TYPE_ENCODE_CLASS(str, allow_null);
 				}
 			}
 		}
@@ -3719,11 +3752,13 @@ ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name
 	property_info->flags = access_type;
 	property_info->doc_comment = doc_comment;
 	property_info->ce = ce;
-	property_info->type = optional_type;
-	property_info->allow_null = allow_null;
-	property_info->type_name = optional_type_name ?
-		zend_new_interned_string(optional_type_name) : NULL;
-	property_info->type_ce = NULL;
+	if (optional_type_name) {
+		property_info->type = ZEND_TYPE_ENCODE_CLASS(zend_new_interned_string(optional_type_name), allow_null);
+	} else if (optional_type) {
+		property_info->type = ZEND_TYPE_ENCODE(optional_type, allow_null);
+	} else {
+		property_info->type = 0;
+	}
 
 	zend_hash_update_ptr(&ce->properties_info, name, property_info);
 

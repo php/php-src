@@ -876,20 +876,17 @@ static void zend_resolve_property_types(void) /* {{{ */
 	zend_property_info *prop_info;
 
 	ZEND_HASH_FOREACH_PTR(CG(class_table), ce) {
-		if (UNEXPECTED(ce->type == ZEND_INTERNAL_CLASS)
-		 && UNEXPECTED(ZEND_CLASS_HAS_TYPE_HINTS(ce))) {
-
+		if (UNEXPECTED(ce->type == ZEND_INTERNAL_CLASS && ZEND_CLASS_HAS_TYPE_HINTS(ce))) {
 			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
-				if (prop_info->type == IS_OBJECT && prop_info->type_name) {
-					zend_string *type_name = zend_string_tolower(prop_info->type_name);
-					zend_class_entry *prop_ce =
-						(zend_class_entry*)zend_hash_find_ptr(CG(class_table), type_name);
+				if (ZEND_TYPE_IS_NAME(prop_info->type)) {
+					zend_string *type_name = zend_string_tolower(ZEND_TYPE_NAME(prop_info->type));
+					zend_class_entry *prop_ce = (zend_class_entry*) zend_hash_find_ptr(CG(class_table), type_name);
 
 					assert(prop_ce && prop_ce->type == ZEND_INTERNAL_CLASS);
-					prop_info->type_ce = prop_ce;
+					prop_info->type = ZEND_TYPE_ENCODE_CE(prop_ce, ZEND_TYPE_ALLOW_NULL(prop_info->type));
 					zend_string_release(type_name);
 				}
-			}ZEND_HASH_FOREACH_END();
+			} ZEND_HASH_FOREACH_END();
 		}
 	} ZEND_HASH_FOREACH_END();
 } /* }}} */

@@ -102,6 +102,9 @@ static char *get_mmap_base_file(void)
 	}
 	GetTempPath(MAXPATHLEN, windir);
 	l = strlen(windir);
+	if ('\\' == windir[l-1]) {
+		l--;
+	}
 	snprintf(windir + l, sizeof(windir) - l - 1, "\\%s@%s@%.32s", ACCEL_FILEMAP_BASE, uname, ZCG(system_id));
 
 	free(uname);

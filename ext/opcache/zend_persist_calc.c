@@ -230,8 +230,12 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 			if (arg_info[i].name) {
 				ADD_INTERNED_STRING(arg_info[i].name, 1);
 			}
-			if (arg_info[i].class_name) {
-				ADD_INTERNED_STRING(arg_info[i].class_name, 1);
+			if (ZEND_TYPE_IS_CLASS(arg_info[i].type)) {
+				zend_string *type_name = ZEND_TYPE_NAME(arg_info[i].type);
+				zend_bool allow_null = ZEND_TYPE_ALLOW_NULL(arg_info[i].type);
+
+				ADD_INTERNED_STRING(type_name, 1);
+				arg_info[i].type = ZEND_TYPE_ENCODE_CLASS(type_name, allow_null);
 			}
 		}
 	}
@@ -288,8 +292,15 @@ static void zend_persist_property_info_calc(zval *zv)
 		zend_shared_alloc_register_xlat_entry(prop, prop);
 		ADD_ARENA_SIZE(sizeof(zend_property_info));
 		ADD_INTERNED_STRING(prop->name, 0);
-		if (prop->type_name) {
-			ADD_INTERNED_STRING(prop->type_name, 0);
+		if (ZEND_TYPE_IS_CLASS(prop->type)) {
+			zend_string *class_name;
+			if (ZEND_TYPE_IS_CE(prop->type)) {
+				class_name = zend_string_copy(ZEND_TYPE_CE(prop->type)->name);
+			} else {
+				class_name = ZEND_TYPE_NAME(prop->type);
+			}
+			ADD_INTERNED_STRING(class_name, 0);
+			prop->type = ZEND_TYPE_ENCODE_CLASS(class_name, ZEND_TYPE_ALLOW_NULL(prop->type));
 		}
 		if (ZCG(accel_directives).save_comments && prop->doc_comment) {
 			ADD_STRING(prop->doc_comment);

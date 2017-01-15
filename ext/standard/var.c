@@ -78,13 +78,13 @@ static void php_object_property_dump(zend_property_info *prop_info, zval *zv, ze
 	}
 
 	if (Z_TYPE_P(zv) == IS_UNDEF) {
-		if (prop_info->type) {
+		if (ZEND_TYPE_IS_SET(prop_info->type)) {
 			php_printf("%*cuninitialized(%s%s)\n",
 				level + 1, ' ',
-				prop_info->allow_null ? "?" : "",
-				(prop_info->type == IS_OBJECT) ?
-					ZSTR_VAL(prop_info->type_name) :
-					zend_get_type_by_const(prop_info->type));
+				ZEND_TYPE_ALLOW_NULL(prop_info->type) ? "?" : "",
+				ZEND_TYPE_IS_CLASS(prop_info->type) ?
+					ZSTR_VAL(ZEND_TYPE_IS_CE(prop_info->type) ? ZEND_TYPE_CE(prop_info->type)->name : ZEND_TYPE_NAME(prop_info->type)) :
+					zend_get_type_by_const(ZEND_TYPE_CODE(prop_info->type)));
 		} else {
 			php_printf("%*cuninitialized\n",
 				level + 1, ' ');
@@ -277,10 +277,10 @@ static void zval_object_property_dump(zend_property_info *prop_info, zval *zv, z
 		if (prop_info->type) {
 			php_printf("%*cuninitialized(%s%s)\n",
 				level + 1, ' ',
-				prop_info->allow_null ? "?" : "",
-				(prop_info->type == IS_OBJECT) ?
-					ZSTR_VAL(prop_info->type_name) :
-					zend_get_type_by_const(prop_info->type));
+				ZEND_TYPE_ALLOW_NULL(prop_info->type) ? "?" : "",
+				ZEND_TYPE_IS_CLASS(prop_info->type) ?
+					ZSTR_VAL(ZEND_TYPE_IS_CE(prop_info->type) ? ZEND_TYPE_CE(prop_info->type)->name : ZEND_TYPE_NAME(prop_info->type)) :
+					zend_get_type_by_const(ZEND_TYPE_CODE(prop_info->type)));
 		} else {
 			php_printf("%*cuninitialized\n",
 				level + 1, ' ');
