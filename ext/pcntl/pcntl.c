@@ -711,12 +711,8 @@ PHP_FUNCTION(pcntl_wait)
 	status = zval_get_long(z_status);
 #ifdef HAVE_WAIT3
 	if (z_rusage) {
-		if (Z_TYPE_P(z_rusage) != IS_ARRAY) {
-			zval_dtor(z_rusage);
-			array_init(z_rusage);
-		} else {
-			zend_hash_clean(Z_ARRVAL_P(z_rusage));
-		}
+		zval_dtor(z_rusage);
+		array_init(z_rusage);
 
 		memset(&rusage, 0, sizeof(struct rusage));
 		child_id = wait3(&status, options, &rusage);
