@@ -1159,7 +1159,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GENERATOR_CREATE_SPEC_HANDLER(
 		 * is allocated on heap.
 		 */
 		num_args = EX_NUM_ARGS();
-		if (EXPECTED(num_args <= EX(func)->op_array.last_var)) {
+		if (EXPECTED(num_args <= EX(func)->op_array.num_args)) {
 			used_stack = (ZEND_CALL_FRAME_SLOT + EX(func)->op_array.last_var + EX(func)->op_array.T) * sizeof(zval);
 			gen_execute_data = (zend_execute_data*)emalloc(used_stack);
 			used_stack = (ZEND_CALL_FRAME_SLOT + EX(func)->op_array.last_var) * sizeof(zval);

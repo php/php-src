@@ -35,6 +35,14 @@
 #include "zend_smart_string.h"
 
 #ifdef ZTS
+ZEND_API int compiler_globals_id;
+ZEND_API int executor_globals_id;
+static HashTable *global_function_table = NULL;
+static HashTable *global_class_table = NULL;
+static HashTable *global_constants_table = NULL;
+static HashTable *global_auto_globals_table = NULL;
+static HashTable *global_persistent_list = NULL;
+ZEND_TSRMLS_CACHE_DEFINE()
 # define GLOBAL_FUNCTION_TABLE		global_function_table
 # define GLOBAL_CLASS_TABLE			global_class_table
 # define GLOBAL_CONSTANTS_TABLE		global_constants_table
@@ -45,6 +53,14 @@
 # define GLOBAL_AUTO_GLOBALS_TABLE	CG(auto_globals)
 # define GLOBAL_CONSTANTS_TABLE		EG(zend_constants)
 #endif
+
+ZEND_API zend_utility_values zend_uv;
+
+/* version information */
+static char *zend_version_info;
+static uint32_t zend_version_info_length;
+#define ZEND_CORE_VERSION_INFO	"Zend Engine v" ZEND_VERSION ", Copyright (c) 1998-2017 Zend Technologies\n"
+#define PRINT_ZVAL_INDENT 4
 
 /* true multithread-shared globals */
 ZEND_API zend_class_entry *zend_standard_class_def = NULL;
@@ -139,26 +155,6 @@ ZEND_INI_BEGIN()
 	STD_ZEND_INI_BOOLEAN("zend.signal_check", "0", ZEND_INI_SYSTEM, OnUpdateBool, check, zend_signal_globals_t, zend_signal_globals)
 #endif
 ZEND_INI_END()
-
-
-#ifdef ZTS
-ZEND_API int compiler_globals_id;
-ZEND_API int executor_globals_id;
-static HashTable *global_function_table = NULL;
-static HashTable *global_class_table = NULL;
-static HashTable *global_constants_table = NULL;
-static HashTable *global_auto_globals_table = NULL;
-static HashTable *global_persistent_list = NULL;
-ZEND_TSRMLS_CACHE_DEFINE()
-#endif
-
-ZEND_API zend_utility_values zend_uv;
-
-/* version information */
-static char *zend_version_info;
-static uint32_t zend_version_info_length;
-#define ZEND_CORE_VERSION_INFO	"Zend Engine v" ZEND_VERSION ", Copyright (c) 1998-2017 Zend Technologies\n"
-#define PRINT_ZVAL_INDENT 4
 
 ZEND_API size_t zend_vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap) /* {{{ */
 {
