@@ -35,7 +35,7 @@ static void curlfile_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	zval *cf = return_value;
 
 	ZEND_PARSE_PARAMETERS_START(1,3)
-		Z_PARAM_STR(fname)
+		Z_PARAM_PATH_STR(fname)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR(mime)
 		Z_PARAM_STR(postname)
