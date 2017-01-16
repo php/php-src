@@ -35,7 +35,7 @@ static void curlfile_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	size_t fname_len, mime_len, postname_len;
 	zval *cf = return_value;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|ss", &fname, &fname_len, &mime, &mime_len, &postname, &postname_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|ss", &fname, &fname_len, &mime, &mime_len, &postname, &postname_len) == FAILURE) {
 		return;
 	}
 
