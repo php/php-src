@@ -110,7 +110,8 @@ PHP_FUNCTION(grapheme_strpos)
 	size_t haystack_len, needle_len;
 	const char *found;
 	zend_long loffset = 0;
-	int32_t offset = 0, noffset = 0;
+	int32_t offset = 0;
+	size_t noffset = 0;
 	zend_long ret_pos;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l", &haystack, &haystack_len, &needle, &needle_len, &loffset) == FAILURE) {
