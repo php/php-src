@@ -165,7 +165,7 @@ static zend_string *php_hex2bin(const unsigned char *old, const size_t oldlen)
 		int is_letter = ((unsigned int) ((l - 'A') ^ (l - 'F' - 1))) >> (8 * sizeof(unsigned int) - 1);
 		unsigned char d;
 
-		/* basically (c >= '0' && c <= '9') || (l >= 'A' && l <= 'F') */ 
+		/* basically (c >= '0' && c <= '9') || (l >= 'A' && l <= 'F') */
 		if (EXPECTED((((c ^ '0') - 10) >> (8 * sizeof(unsigned int) - 1)) | is_letter)) {
 			d = (l - 0x10 - 0x27 * is_letter) << 4;
 		} else {
@@ -2371,7 +2371,7 @@ PHP_FUNCTION(substr)
 		RETURN_FALSE;
 	}
 
-	if ((f + l) > (zend_long)ZSTR_LEN(str)) {
+	if ((size_t)l > ZSTR_LEN(str) - (size_t)f) {
 		l = ZSTR_LEN(str) - f;
 	}
 
@@ -2842,7 +2842,7 @@ PHPAPI char *php_strtr(char *str, size_t len, char *str_from, char *str_to, size
 		for (i = 0; i < trlen; i++) {
 			xlat[(size_t)(unsigned char) str_from[i]] = str_to[i];
 		}
-		
+
 		for (i = 0; i < len; i++) {
 			str[i] = xlat[(size_t)(unsigned char) str[i]];
 		}
@@ -3235,7 +3235,7 @@ static zend_string *php_str_to_str_i_ex(zend_string *haystack, char *lc_haystack
 				zend_string_release(lc_needle);
 				goto nothing_todo;
 			}
-			
+
 			if (str_len > ZSTR_LEN(lc_needle)) {
 				new_str = zend_string_safe_alloc(count, str_len - ZSTR_LEN(lc_needle), ZSTR_LEN(haystack), 0);
 			} else {
@@ -3398,7 +3398,7 @@ PHP_FUNCTION(strtr)
 					ZVAL_LONG(&tmp, num_key);
 					convert_to_string(&tmp);
 					str_key = Z_STR(tmp);
-				}		
+				}
 				replace = zval_get_string(entry);
 				if (ZSTR_LEN(str_key) < 1) {
 					RETVAL_STR_COPY(str);
@@ -3961,7 +3961,7 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 						zend_string_release(lc_subject_str);
 						lc_subject_str = NULL;
 					}
-				}				
+				}
 			}
 
 			zend_string_release(search_str);
