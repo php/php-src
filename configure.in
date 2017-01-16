@@ -1027,7 +1027,6 @@ enable_static=yes
 
 case $php_sapi_module in
   shared[)]
-    enable_static=no
     case $with_pic in
       yes)
         standard_libtool_flag='-prefer-pic'
