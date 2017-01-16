@@ -8,6 +8,7 @@ var_dump(new class(1, 2.2, true, ["four"], new stdClass) {
 	public bool $bool;
 	public array $array;
 	public stdClass $std;
+	public iterable $it;
 
 	public function __construct(int $int, float $float, bool $bool, array $array, stdClass $std) {
 		$this->int = $int;
@@ -15,11 +16,12 @@ var_dump(new class(1, 2.2, true, ["four"], new stdClass) {
 		$this->bool = $bool;
 		$this->array = $array;
 		$this->std = $std;
+		$this->it = $array;
 	}
 });
 ?>
 --EXPECTF--
-object(class@anonymous)#%d (5) {
+object(class@anonymous)#%d (6) {
   ["int"]=>
   int(1)
   ["float"]=>
@@ -33,6 +35,11 @@ object(class@anonymous)#%d (5) {
   }
   ["std"]=>
   object(stdClass)#%d (0) {
+  }
+  ["it"]=>
+  array(1) {
+    [0]=>
+    string(4) "four"
   }
 }
 

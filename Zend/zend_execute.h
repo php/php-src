@@ -74,7 +74,8 @@ static zend_always_inline zend_bool zend_verify_ref_type_assignable(zend_type ty
 	zend_uchar cur_type = ZEND_TYPE_CODE(type);
 	return new_type == cur_type
 	    || (ZEND_TYPE_ALLOW_NULL(type) && new_type == IS_NULL)
-	    || (new_type == _IS_BOOL && (cur_type == IS_FALSE || cur_type == IS_TRUE));
+	    || (cur_type == _IS_BOOL && (new_type == IS_FALSE || new_type == IS_TRUE))
+	    || (cur_type == IS_ITERABLE && new_type == IS_ARRAY);
 }
 
 ZEND_API zend_bool zend_verify_ref_type_assignable_zval(zend_type type, zval *zv, zend_bool strict);

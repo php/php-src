@@ -882,6 +882,8 @@ static zend_always_inline zval* i_zend_verify_property_type(zend_property_info *
 		}
 	} else if (ZEND_TYPE_CODE(info->type) == _IS_BOOL && EXPECTED(Z_TYPE_P(property) == IS_FALSE || Z_TYPE_P(property) == IS_TRUE)) {
 		return property;
+	} else if (ZEND_TYPE_CODE(info->type) == IS_ITERABLE) {
+		return zend_is_iterable(property) ? property : NULL;
 	} else {
 		return zend_verify_scalar_type_hint(ZEND_TYPE_CODE(info->type), property, tmp, strict) ?
 			tmp : NULL;
@@ -901,17 +903,20 @@ static zend_always_inline zend_bool i_zend_verify_ref_type_assignable_zval(zend_
 	}
 	ZVAL_DEREF(zv);
 
-	if (Z_TYPE_P(zv) == IS_OBJECT) {
-		return ZEND_TYPE_IS_CLASS(type) && instanceof_function(Z_OBJCE_P(zv), ZEND_TYPE_CE(type));
-	}
-
 	if (zend_verify_ref_type_assignable(type, Z_TYPE_P(zv))) {
 		return 1;
+	}
+
+	if (ZEND_TYPE_IS_CLASS(type)) {
+		return Z_TYPE_P(zv) == IS_OBJECT && instanceof_function(Z_OBJCE_P(zv), ZEND_TYPE_CE(type));
 	}
 
 	cur_type = ZEND_TYPE_CODE(type);
 	if (cur_type == IS_CALLABLE) {
 		return zend_is_callable(zv, IS_CALLABLE_CHECK_SILENT, NULL);
+	}
+	if (cur_type == IS_ITERABLE) {
+		return zend_is_iterable(zv);
 	}
 
 	return zend_verify_scalar_type_hint(cur_type, zv, zv, strict);
