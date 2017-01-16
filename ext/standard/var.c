@@ -1122,7 +1122,6 @@ PHP_FUNCTION(unserialize)
 		}
 		RETVAL_FALSE;
 	} else {
-		ZVAL_DEREF(retval);
 		ZVAL_COPY(return_value, retval);
 	}
 
@@ -1134,6 +1133,13 @@ PHP_FUNCTION(unserialize)
 	/* Reset to previous allowed_classes in case this is a nested call */
 	php_var_unserialize_set_allowed_classes(var_hash, prev_class_hash);
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+
+	/* Per calling convention we must not return a reference here, so unwrap. We're doing this at
+	 * the very end, because __wakeup() calls performed during UNSERIALIZE_DESTROY might affect
+	 * the value we unwrap here. This is compatible with behavior in PHP <=7.0. */
+	if (Z_ISREF_P(return_value)) {
+		zend_unwrap_reference(return_value);
+	}
 }
 /* }}} */
 
