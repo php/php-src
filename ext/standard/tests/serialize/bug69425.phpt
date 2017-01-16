@@ -26,7 +26,7 @@ var_dump($data);
 int(1)
 array(2) {
   [0]=>
-  object(DateInterval)#1 (15) {
+  object(DateInterval)#1 (16) {
     ["y"]=>
     int(-1)
     ["m"]=>
@@ -39,6 +39,8 @@ array(2) {
     int(-1)
     ["s"]=>
     int(-1)
+    ["f"]=>
+    float(-1)
     ["weekday"]=>
     int(-1)
     ["weekday_behavior"]=>
