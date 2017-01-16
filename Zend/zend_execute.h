@@ -83,6 +83,7 @@ ZEND_API ZEND_COLD void zend_throw_ref_type_error(zend_type type, zval *zv);
 static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value, zend_uchar value_type, zend_bool strict)
 {
 	zend_refcounted *ref = NULL;
+	zval tmp;
 
 	if (ZEND_CONST_COND(value_type & (IS_VAR|IS_CV), 1) && Z_ISREF_P(value)) {
 		ref = Z_COUNTED_P(value);
@@ -94,6 +95,10 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 			zend_refcounted *garbage;
 
 			if (Z_ISREF_P(variable_ptr)) {
+				if (ZEND_CONST_COND(value_type == IS_CONST, 1)) {
+					ZVAL_COPY_VALUE(&tmp, value);
+					value = &tmp;
+				}
 				if (!zend_verify_ref_type_assignable_zval(Z_REFTYPE_P(variable_ptr), value, strict)) {
 					zend_throw_ref_type_error(Z_REFTYPE_P(variable_ptr), value);
 					return Z_REFVAL_P(variable_ptr);
