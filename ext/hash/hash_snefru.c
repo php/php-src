@@ -200,7 +200,8 @@ const php_hash_ops php_hash_snefru_ops = {
 	(php_hash_copy_func_t) php_hash_copy,
 	32,
 	32,
-	sizeof(PHP_SNEFRU_CTX)
+	sizeof(PHP_SNEFRU_CTX),
+	1
 };
 
 /*

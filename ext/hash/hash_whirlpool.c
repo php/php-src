@@ -440,7 +440,8 @@ const php_hash_ops php_hash_whirlpool_ops = {
 	(php_hash_copy_func_t) php_hash_copy,
 	64,
 	64,
-	sizeof(PHP_WHIRLPOOL_CTX)
+	sizeof(PHP_WHIRLPOOL_CTX),
+	1
 };
 
 /*
