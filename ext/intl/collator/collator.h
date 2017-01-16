@@ -16,7 +16,7 @@
  */
 
 #ifndef COLLATOR_COLLATOR_H
-#define CCOLLATOR_COLLATOR_H
+#define COLLATOR_COLLATOR_H
 
 #include <php.h>
 
