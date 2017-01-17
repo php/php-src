@@ -837,6 +837,42 @@ ZEND_VM_HELPER(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV,
 	ZEND_VM_NEXT_OPCODE_EX(1, 2);
 }
 
+ZEND_VM_HELPER(zend_binary_assign_op_static_prop_helper, CONST|TMP|VAR|CV, UNUSED|CONST|TMPVAR, binary_op_type binary_op)
+{
+	/* This helper actually never will receive IS_VAR as second op, and has the same handling for VAR and TMP in the first op, but for interoperability with the other binary_assign_op helpers, it is necessary to "include" it */
+
+	USE_OPLINE
+	zend_free_op free_op1, free_op_data1;
+	zval *varname;
+	zval *retval, *value;
+
+	SAVE_OPLINE();
+	varname = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+
+	retval = zend_fetch_static_property_address(execute_data, varname, OP1_TYPE, opline->op2, OP2_TYPE);
+	if (UNEXPECTED(retval == NULL)) {
+		ZEND_ASSERT(EG(exception));
+		FREE_OP1();
+		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
+		HANDLE_EXCEPTION();
+	}
+
+	ZVAL_DEREF(retval);
+	SEPARATE_ZVAL_NOREF(retval);
+
+	value = get_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1);
+	binary_op(retval, retval, value);
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), retval);
+	}
+
+	FREE_OP(free_op_data1);
+	FREE_OP1();
+	/* assign_obj has two opcodes! */
+	ZEND_VM_NEXT_OPCODE_EX(1, 2);
+}
+
 ZEND_VM_HELPER(zend_binary_assign_op_dim_helper, VAR|CV, CONST|TMPVAR|UNUSED|CV, binary_op_type binary_op)
 {
 	USE_OPLINE
@@ -959,10 +995,18 @@ ZEND_VM_HELPER(zend_binary_assign_op_simple_helper, VAR|CV, CONST|TMPVAR|CV, bin
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_INLINE_HELPER(zend_binary_assign_op_helper, VAR|UNUSED|THIS|CV, CONST|TMPVAR|UNUSED|NEXT|CV, SPEC(DIM_OBJ), binary_op_type binary_op)
+ZEND_VM_INLINE_HELPER(zend_binary_assign_op_helper, CONST|TMP|VAR|UNUSED|THIS|CV, CONST|TMPVAR|UNUSED|NEXT|CV, SPEC(DIM_OBJ), binary_op_type binary_op)
 {
-#if defined(ZEND_VM_SPEC) && OP2_TYPE == IS_UNUSED
-	ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_dim_helper, binary_op, binary_op);
+#if defined(ZEND_VM_SPEC) && (OP1_TYPE == IS_CONST || OP1_TYPE == IS_TMP_VAR)
+	ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_static_prop_helper, binary_op, binary_op);
+#elif defined(ZEND_VM_SPEC) && (OP2_TYPE == IS_UNUSED)
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_dim_helper, binary_op, binary_op);
+	}
+
+	ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_static_prop_helper, binary_op, binary_op);
 #else
 # if !defined(ZEND_VM_SPEC) || OP1_TYPE != IS_UNUSED
 	USE_OPLINE
@@ -973,68 +1017,73 @@ ZEND_VM_INLINE_HELPER(zend_binary_assign_op_helper, VAR|UNUSED|THIS|CV, CONST|TM
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_dim_helper, binary_op, binary_op);
 	}
+#  if !defined(ZEND_VM_SPEC) || OP2_TYPE == IS_CONST || OP2_TYPE == (IS_TMP_VAR|IS_VAR)
+	if (UNEXPECTED(opline->extended_value == ZEND_ASSIGN_STATIC_PROP)) {
+		ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_static_prop_helper, binary_op, binary_op);
+	}
+#  endif
 # endif
 	
 	ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_obj_helper, binary_op, binary_op);
 #endif
 }
 
-ZEND_VM_HANDLER(23, ZEND_ASSIGN_ADD, VAR|UNUSED|THIS|CV, CONST|TMPVAR|UNUSED|NEXT|CV, DIM_OBJ, SPEC(DIM_OBJ))
+ZEND_VM_HANDLER(23, ZEND_ASSIGN_ADD, CONST|TMP|VAR|UNUSED|THIS|CV, CONST|TMPVAR|UNUSED|NEXT|CV, DIM_OBJ, SPEC(DIM_OBJ))
 {
 	ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_helper, binary_op, add_function);
 }
 
-ZEND_VM_HANDLER(24, ZEND_ASSIGN_SUB, VAR|UNUSED|THIS|CV, CONST|TMPVAR|UNUSED|NEXT|CV, DIM_OBJ, SPEC(DIM_OBJ))
+ZEND_VM_HANDLER(24, ZEND_ASSIGN_SUB, CONST|TMP|VAR|UNUSED|THIS|CV, CONST|TMPVAR|UNUSED|NEXT|CV, DIM_OBJ, SPEC(DIM_OBJ))
 {
 	ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_helper, binary_op, sub_function);
 }
 
-ZEND_VM_HANDLER(25, ZEND_ASSIGN_MUL, VAR|UNUSED|THIS|CV, CONST|TMPVAR|UNUSED|NEXT|CV, DIM_OBJ, SPEC(DIM_OBJ))
+ZEND_VM_HANDLER(25, ZEND_ASSIGN_MUL, CONST|TMP|VAR|UNUSED|THIS|CV, CONST|TMPVAR|UNUSED|NEXT|CV, DIM_OBJ, SPEC(DIM_OBJ))
 {
 	ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_helper, binary_op, mul_function);
 }
 
-ZEND_VM_HANDLER(26, ZEND_ASSIGN_DIV, VAR|UNUSED|THIS|CV, CONST|TMPVAR|UNUSED|NEXT|CV, DIM_OBJ, SPEC(DIM_OBJ))
+ZEND_VM_HANDLER(26, ZEND_ASSIGN_DIV, CONST|TMP|VAR|UNUSED|THIS|CV, CONST|TMPVAR|UNUSED|NEXT|CV, DIM_OBJ, SPEC(DIM_OBJ))
 {
 	ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_helper, binary_op, div_function);
 }
 
-ZEND_VM_HANDLER(27, ZEND_ASSIGN_MOD, VAR|UNUSED|THIS|CV, CONST|TMPVAR|UNUSED|NEXT|CV, DIM_OBJ, SPEC(DIM_OBJ))
+ZEND_VM_HANDLER(27, ZEND_ASSIGN_MOD, CONST|TMP|VAR|UNUSED|THIS|CV, CONST|TMPVAR|UNUSED|NEXT|CV, DIM_OBJ, SPEC(DIM_OBJ))
 {
 	ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_helper, binary_op, mod_function);
 }
 
-ZEND_VM_HANDLER(28, ZEND_ASSIGN_SL, VAR|UNUSED|THIS|CV, CONST|TMPVAR|UNUSED|NEXT|CV, DIM_OBJ, SPEC(DIM_OBJ))
+ZEND_VM_HANDLER(28, ZEND_ASSIGN_SL, CONST|TMP|VAR|UNUSED|THIS|CV, CONST|TMPVAR|UNUSED|NEXT|CV, DIM_OBJ, SPEC(DIM_OBJ))
 {
 	ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_helper, binary_op, shift_left_function);
 }
 
-ZEND_VM_HANDLER(29, ZEND_ASSIGN_SR, VAR|UNUSED|THIS|CV, CONST|TMPVAR|UNUSED|NEXT|CV, DIM_OBJ, SPEC(DIM_OBJ))
+ZEND_VM_HANDLER(29, ZEND_ASSIGN_SR, CONST|TMP|VAR|UNUSED|THIS|CV, CONST|TMPVAR|UNUSED|NEXT|CV, DIM_OBJ, SPEC(DIM_OBJ))
 {
 	ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_helper, binary_op, shift_right_function);
 }
 
-ZEND_VM_HANDLER(30, ZEND_ASSIGN_CONCAT, VAR|UNUSED|THIS|CV, CONST|TMPVAR|UNUSED|NEXT|CV, DIM_OBJ, SPEC(DIM_OBJ))
+ZEND_VM_HANDLER(30, ZEND_ASSIGN_CONCAT, CONST|TMP|VAR|UNUSED|THIS|CV, CONST|TMPVAR|UNUSED|NEXT|CV, DIM_OBJ, SPEC(DIM_OBJ))
 {
 	ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_helper, binary_op, concat_function);
 }
 
-ZEND_VM_HANDLER(31, ZEND_ASSIGN_BW_OR, VAR|UNUSED|THIS|CV, CONST|TMPVAR|UNUSED|NEXT|CV, DIM_OBJ, SPEC(DIM_OBJ))
+ZEND_VM_HANDLER(31, ZEND_ASSIGN_BW_OR, CONST|TMP|VAR|UNUSED|THIS|CV, CONST|TMPVAR|UNUSED|NEXT|CV, DIM_OBJ, SPEC(DIM_OBJ))
 {
 	ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_helper, binary_op, bitwise_or_function);
 }
 
-ZEND_VM_HANDLER(32, ZEND_ASSIGN_BW_AND, VAR|UNUSED|THIS|CV, CONST|TMPVAR|UNUSED|NEXT|CV, DIM_OBJ, SPEC(DIM_OBJ))
+ZEND_VM_HANDLER(32, ZEND_ASSIGN_BW_AND, CONST|TMP|VAR|UNUSED|THIS|CV, CONST|TMPVAR|UNUSED|NEXT|CV, DIM_OBJ, SPEC(DIM_OBJ))
 {
 	ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_helper, binary_op, bitwise_and_function);
 }
 
-ZEND_VM_HANDLER(33, ZEND_ASSIGN_BW_XOR, VAR|UNUSED|THIS|CV, CONST|TMPVAR|UNUSED|NEXT|CV, DIM_OBJ, SPEC(DIM_OBJ))
+ZEND_VM_HANDLER(33, ZEND_ASSIGN_BW_XOR, CONST|TMP|VAR|UNUSED|THIS|CV, CONST|TMPVAR|UNUSED|NEXT|CV, DIM_OBJ, SPEC(DIM_OBJ))
 {
 	ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_helper, binary_op, bitwise_xor_function);
 }
 
-ZEND_VM_HANDLER(167, ZEND_ASSIGN_POW, VAR|UNUSED|THIS|CV, CONST|TMPVAR|UNUSED|NEXT|CV, DIM_OBJ, SPEC(DIM_OBJ))
+ZEND_VM_HANDLER(167, ZEND_ASSIGN_POW, CONST|TMP|VAR|UNUSED|THIS|CV, CONST|TMPVAR|UNUSED|NEXT|CV, DIM_OBJ, SPEC(DIM_OBJ))
 {
 	ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_helper, binary_op, pow_function);
 }
@@ -2178,6 +2227,36 @@ ZEND_VM_C_LABEL(exit_assign_obj):
 	ZEND_VM_NEXT_OPCODE_EX(1, 2);
 }
 
+ZEND_VM_HANDLER(185, ZEND_ASSIGN_STATIC_PROP, CONST|TMPVAR|CV, UNUSED|CONST|VAR, SPEC(OP_DATA=CONST|TMP|VAR|CV))
+{
+	USE_OPLINE
+	zend_free_op free_op1, free_op_data;
+	zval *varname;
+	zval *retval, *value;
+
+	SAVE_OPLINE();
+	varname = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+
+	retval = zend_fetch_static_property_address(execute_data, varname, OP1_TYPE, opline->op2, OP2_TYPE);
+	if (UNEXPECTED(retval == NULL)) {
+		ZEND_ASSERT(EG(exception));
+		FREE_OP1();
+		FREE_UNFETCHED_OP_DATA();
+		HANDLE_EXCEPTION();
+	}
+
+	value = GET_OP_DATA_ZVAL_PTR(BP_VAR_R);
+	value = zend_assign_to_variable(retval, value, OP_DATA_TYPE);
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
+
+	FREE_OP1();
+	/* assign_static_prop has two opcodes! */
+	ZEND_VM_NEXT_OPCODE_EX(1, 2);
+}
+
 ZEND_VM_HANDLER(147, ZEND_ASSIGN_DIM, VAR|CV, CONST|TMPVAR|UNUSED|NEXT|CV, SPEC(OP_DATA=CONST|TMP|VAR|CV))
 {
 	USE_OPLINE
@@ -2232,7 +2311,6 @@ ZEND_VM_C_LABEL(try_assign_dim_array):
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
-
 			FREE_OP_DATA();
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (OP2_TYPE == IS_UNUSED) {
