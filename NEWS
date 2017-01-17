@@ -19,6 +19,10 @@ PHP                                                                        NEWS
 - Hash:
   . Added hash_hkdf() function. (Andrey Andreev)
 
+- LDAP:
+  . Fixed bug #73933 (error/segfault with ldap_mod_replace and opcache).
+    (Laruence)
+
 - Mysqlnd:
   . Fixed bug #69899 (segfault on close() after free_result() with mysqlnd).
     (Richard Fussenegger)
