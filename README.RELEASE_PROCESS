@@ -193,8 +193,8 @@ Check if the pear files are updated (phar).
 This is to fetch the last commit id from php-distributions.git and commit this
 last commit id to web/php.git, then, mirrors will now sync
 
-12. Once the release has been tagged, contact the PHP Windows development team
-(internals-win@lists.php.net) so that Windows binaries can be created.
+12. Once the release has been tagged, contact release managers, windows builders, and package maintainers
+so that they can build releases. Do not send this announcement to any public lists.
 
 Getting the stable release announced
 ------------------------------------
