@@ -13,6 +13,11 @@ PHP                                                                        NEWS
   . Fixed bug #73753 (unserialized array pointer not advancing). (David Walker)
   . Fixed bug #73783 (SIG_IGN doesn't work when Zend Signals is enabled).
     (David Walker)
+  . Fixed bug #73825 (Heap out of bounds read on unserialize in
+    finish_nested_data()). (Stas)
+  . Fixed bug #73831 (NULL Pointer Dereference while unserialize php object).
+    (Stas)
+  . Fixed bug #73832 (Use of uninitialized memory in unserialize()). (Stas)
 
 - CLI:
   . Fixed bug #72555 (CLI output(japanese) on Windows). (Anatol)
@@ -23,6 +28,13 @@ PHP                                                                        NEWS
 
 - DOM:
   . Fixed bug #67474 (getElementsByTagNameNS filter on default ns). (aboks)
+
+- EXIF:
+  . Bug bug #73737 (FPE when parsing a tag format). (Stas)
+
+- GD:
+  . Fixed bug #73869 (Signed Integer Overflow gd_io.c). (cmb)
+  . Fixed bug #73868 (DOS vulnerability in gdImageCreateFromGd2Ctx()). (cmb)
 
 - Mbstring:
   . Fixed bug #73646 (mb_ereg_search_init null pointer dereference).
@@ -51,6 +63,11 @@ PHP                                                                        NEWS
 - PDO_Firebird:
   . Fixed bug #72931 (PDO_FIREBIRD with Firebird 3.0 not work on returning
     statement). (Dorin Marcoci)
+
+- Phar:
+  . Fixed bug #73773 (Seg fault when loading hostile phar). (Stas)
+  . Fixed bug #73768 (Memory corruption when loading hostile phar). (Stas)
+  . Fixed bug #73764 (Crash while loading hostile phar archive). (Stas)
 
 - phpdbg:
   . Fixed bug #73794 (Crash (out of memory) when using run and # command
