@@ -16,6 +16,10 @@ PHP                                                                        NEWS
   . Fixed bug #69993 (test for gmp.h needs to test machine includes).
     (Jordan Gigov) 
 
+- LDAP:
+  . Fixed bug #73933 (error/segfault with ldap_mod_replace and opcache).
+    (Laruence)
+
 - Mysqlnd:
   . Fixed bug #69899 (segfault on close() after free_result() with mysqlnd).
     (Richard Fussenegger)
