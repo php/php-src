@@ -2525,7 +2525,7 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 
 	memset(&hints, 0, sizeof(hints));
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|sa", &hostname, &service, &service_len, &zhints) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|sa", &hostname, &service, &service_len, &zhints) == FAILURE) {
 		RETURN_NULL();
 	}
 
