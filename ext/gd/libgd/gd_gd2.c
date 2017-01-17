@@ -136,6 +136,10 @@ static int _gd2GetHeader(gdIOCtxPtr in, int *sx, int *sy, int *cs, int *vers, in
 	GD2_DBG(php_gd_error("%d Chunks vertically", *ncy));
 
 	if (gd2_compressed(*fmt)) {
+		if (*ncx <= 0 || *ncy <= 0 || *ncx > INT_MAX / *ncy) {
+			GD2_DBG(printf ("Illegal chunk counts: %d * %d\n", *ncx, *ncy));
+			goto fail1;
+		}
 		nc = (*ncx) * (*ncy);
 		GD2_DBG(php_gd_error("Reading %d chunk index entries", nc));
 		if (overflow2(sizeof(t_chunk_info), nc)) {
@@ -340,12 +344,16 @@ gdImagePtr gdImageCreateFromGd2Ctx (gdIOCtxPtr in)
 					for (x = xlo; x < xhi; x++) {
 						if (im->trueColor) {
 							if (!gdGetInt(&im->tpixels[y][x], in)) {
-								im->tpixels[y][x] = 0;
+								php_gd_error("gd2: EOF while reading\n");
+								gdImageDestroy(im);
+								return NULL;
 							}
 						} else {
 							int ch;
 							if (!gdGetByte(&ch, in)) {
-								ch = 0;
+								php_gd_error("gd2: EOF while reading\n");
+								gdImageDestroy(im);
+								return NULL;
 							}
 							im->pixels[y][x] = ch;
 						}
