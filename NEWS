@@ -62,6 +62,15 @@ PHP                                                                        NEWS
   . Fixed bug #73585 (Logging of "Internal Zend error - Missing class
     information" missing class name). (Laruence)
   . Fixed bug #73753 (unserialized array pointer not advancing). (David Walker)
+  . Fixed bug #73825 (Heap out of bounds read on unserialize in
+    finish_nested_data()). (Stas)
+  . Fixed bug #73831 (NULL Pointer Dereference while unserialize php object).
+    (Stas)
+  . Fixed bug #73832 (Use of uninitialized memory in unserialize()). (Stas)
+  . Fixed bug #73092 (Unserialize use-after-free when resizing object's
+    properties hash table). (Nikita)
+  . Fixed bug #69425 (Use After Free in unserialize()). (Nikita)
+  . Fixed bug #72731 (Type Confusion in Object Deserialization). (Nikita)
 
 - COM:
   . Fixed bug #73679 (DOTNET read access violation using invalid codepage).
@@ -69,6 +78,17 @@ PHP                                                                        NEWS
 
 - DOM:
   . Fixed bug #67474 (getElementsByTagNameNS filter on default ns). (aboks)
+
+- EXIF:
+  . Bug bug #73737 (FPE when parsing a tag format). (Stas)
+
+- GD:
+  . Fixed bug #73869 (Signed Integer Overflow gd_io.c). (cmb)
+  . Fixed bug #73868 (DOS vulnerability in gdImageCreateFromGd2Ctx()). (cmb)
+
+- GMP:
+  . Fixed bug #70513 (GMP Deserialization Type Confusion Vulnerability).
+    (Nikita)
 
 - Mysqli:
   . Fixed bug #73462 (Persistent connections don't set $connect_errno).
@@ -87,9 +107,10 @@ PHP                                                                        NEWS
   . Fixed bug #72931 (PDO_FIREBIRD with Firebird 3.0 not work on returning
     statement). (Dorin Marcoci)
 
-- Streams:
-  . Fixed bug #73586 (php_user_filter::$stream is not set to the stream the
-    filter is working on). (Dmitry)
+- Phar:
+  . Fixed bug #73773 (Seg fault when loading hostile phar). (Stas)
+  . Fixed bug #73768 (Memory corruption when loading hostile phar). (Stas)
+  . Fixed bug #73764 (Crash while loading hostile phar archive). (Stas)
 
 - Phpdbg:
   . Fixed bug #73615 (phpdbg without option never load .phpdbginit at startup).
@@ -99,6 +120,10 @@ PHP                                                                        NEWS
 
 - Reflection:
   . Fixed bug #46103 (ReflectionObject memory leak). (Nikita)
+
+- Streams:
+  . Fixed bug #73586 (php_user_filter::$stream is not set to the stream the
+    filter is working on). (Dmitry)
 
 - SQLite3:
   . Reverted fix for bug #73530	(Unsetting result set may reset other result
