@@ -207,12 +207,17 @@ define ____printzv_contents
 		____executor_globals
 		set $handle = $zvalue->value.obj.handle
 		set $handlers = $zvalue->value.obj.handlers
-        set $zobj = $zvalue->value.obj
-        set $cname = $zobj->ce->name->val
+		set $zobj = $zvalue->value.obj
+		set $cname = $zobj->ce->name->val
 		printf "(%s) #%d", $cname, $handle
 		if ! $arg1
 			if $handlers->get_properties == &zend_std_get_properties
-				set $ht = $zobj->properties
+				if $zobj->properties
+					set $ht = $zobj->properties
+				else
+					set $ht = &$zobj->ce->properties_info
+				end
+				printf "\nProperties "
 				if $ht
 					set $ind = $ind + 1
 					____print_ht $ht 1
@@ -223,7 +228,7 @@ define ____printzv_contents
 						set $i = $i - 1
 					end
 				else
-					echo "no properties found"
+					echo "not found"
 				end
 			end
 		end
@@ -466,9 +471,9 @@ define print_inh
 end
 
 define print_pi
-	set $pi = $arg0
+	set $pi = (zend_property_info *)$arg0
 	printf "[%p] {\n", $pi
-	printf "    h     = %lu\n", $pi->h
+	printf "    ce = [%p] %s\n", $pi->ce, $pi->ce->name->val
 	printf "    flags = %d (", $pi->flags
 	if $pi->flags & 0x100
 		printf "ZEND_ACC_PUBLIC"
@@ -487,16 +492,27 @@ define print_pi
 	end
 	printf ")\n"
 	printf "    name  = "
-	____print_str $pi->name $pi->name_length
-	printf "\n}\n"
+	print_zstr $pi->name
+	printf "}\n"
+end
+
+document print_pi
+	Takes a pointer to an object's property and prints the property information
+	usage: print_pi <ptr>
 end
 
 define ____print_str
 	set $tmp = 0
 	set $str = $arg0
+	if $argc > 2
+		set $maxlen = $arg2
+	else
+		set $maxlen = 256
+	end
+
 	printf "\""
-	while $tmp < $arg1 && $tmp < 256
-		if $str[$tmp] > 32 && $str[$tmp] < 127
+	while $tmp < $arg1 && $tmp < $maxlen
+		if $str[$tmp] > 31 && $str[$tmp] < 127
 			printf "%c", $str[$tmp]
 		else
 			printf "\\%o", $str[$tmp]
@@ -567,14 +583,19 @@ end
 
 define print_zstr
 	set $zstr = (zend_string *)$arg0
+	if $argc == 2
+		set $maxlen = $arg1
+	else
+		set $maxlen = $zstr->len
+	end
 	printf "string(%d) ", $zstr->len
-	____print_str $zstr->val $zstr->len
+	____print_str $zstr->val $zstr->len $maxlen
 	printf "\n"
 end
 
 document print_zstr
 	print the length and contents of a zend string
-	usage: print_zstr <ptr>
+	usage: print_zstr <ptr> [max length]
 end
 
 define zbacktrace
