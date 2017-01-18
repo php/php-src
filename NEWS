@@ -70,6 +70,9 @@ PHP                                                                        NEWS
 - Mcrypt:
   . The deprecated mcrypt extension has been moved to PECL. (leigh)
 
+- MySQLi:
+  . Fixed bug #73949 (leak in mysqli_fetch_object). (krakjoe)
+
 - mysqlnd:
   . Fixed bug #73800 (sporadic segfault with MYSQLI_OPT_INT_AND_FLOAT_NATIVE). 
 	(vanviegen)
