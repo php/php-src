@@ -709,7 +709,7 @@ static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int s
 
 		if (needs_free) {
 			/* ASN1_STRING_to_UTF8(3): The buffer out should be freed using free(3) */
-			free(to_add);
+			OPENSSL_free(to_add);
 		}
 	}
 
