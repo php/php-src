@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #73954 (NAN check fails on Alpine Linux with musl). (Andrea)
   . Fixed bug #74039 (is_infinite(-INF) returns false). (Christian Schmidt)
 
+- Apache:
+  . Fixed bug #61471 (Incomplete POST does not timeout but is passed to PHP).
+    (Zheng Shao)
+
 - GD:
   . Fixed bug #74031 (ReflectionFunction for imagepng is missing last two
     parameters). (finwe)
