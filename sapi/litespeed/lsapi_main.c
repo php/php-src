@@ -872,7 +872,7 @@ static int lsapi_activate_user_ini_finally(_lsapi_activate_user_ini_ctx *ctx,
     return rc;
 }
 
-static int lsapi_activate_user_ini(TSRMLS_D)
+static int lsapi_activate_user_ini( void )
 {
     _lsapi_activate_user_ini_ctx ctx;
     /**
