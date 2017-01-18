@@ -1180,7 +1180,7 @@ static int php_openssl_parse_config(struct php_x509_request * req, zval * option
 		&& Z_TYPE_P(item) == IS_STRING) {
 		req->curve_name = OBJ_sn2nid(Z_STRVAL_P(item));
 		if (req->curve_name == NID_undef) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown elliptic curve (short) name %s", Z_STRVAL_P(item));
+			php_error_docref(NULL, E_WARNING, "Unknown elliptic curve (short) name %s", Z_STRVAL_P(item));
 			return FAILURE;
 		}
 	}
@@ -3917,7 +3917,7 @@ static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req
 			case OPENSSL_KEYTYPE_EC:
 				{
 					if (req->curve_name == NID_undef) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing configuration value: 'curve_name' not set");
+						php_error_docref(NULL, E_WARNING, "Missing configuration value: 'curve_name' not set");
 						return NULL;
 					}
 					EC_KEY *eckey = EC_KEY_new_by_curve_name(req->curve_name);
