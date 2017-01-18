@@ -404,6 +404,7 @@ SAPI_API void sapi_activate_headers_only(void)
 	SG(sapi_headers).http_status_line = NULL;
 	SG(sapi_headers).mimetype = NULL;
 	SG(read_post_bytes) = 0;
+	SG(post_read_error) = 0;
 	SG(request_info).request_body = NULL;
 	SG(request_info).current_user = NULL;
 	SG(request_info).current_user_length = 0;
@@ -448,6 +449,7 @@ SAPI_API void sapi_activate(void)
 	SG(headers_sent) = 0;
 	ZVAL_UNDEF(&SG(callback_func));
 	SG(read_post_bytes) = 0;
+	SG(post_read_error) = 0;
 	SG(request_info).request_body = NULL;
 	SG(request_info).current_user = NULL;
 	SG(request_info).current_user_length = 0;
