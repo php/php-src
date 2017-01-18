@@ -19,6 +19,9 @@ PHP                                                                        NEWS
 - Hash:
   . Added hash_hkdf() function. (Andrey Andreev)
 
+- Intl:
+  . Fix bug #73956 (Link use CC instead of CXX). (Remi)
+
 - LDAP:
   . Fixed bug #73933 (error/segfault with ldap_mod_replace and opcache).
     (Laruence)
