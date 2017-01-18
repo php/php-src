@@ -2982,11 +2982,18 @@ void accel_shutdown(void)
 
 void zend_accel_schedule_restart(zend_accel_restart_reason reason)
 {
+	const char *zend_accel_restart_reason_text[ACCEL_RESTART_USER + 1] = {
+		"out of memory",
+		"hash overflow",
+		"user",
+	};
+
 	if (ZCSG(restart_pending)) {
 		/* don't schedule twice */
 		return;
 	}
-	zend_accel_error(ACCEL_LOG_DEBUG, "Restart Scheduled!");
+	zend_accel_error(ACCEL_LOG_DEBUG, "Restart Scheduled! Reason: %s",
+			zend_accel_restart_reason_text[reason]);
 
 	HANDLE_BLOCK_INTERRUPTIONS();
 	SHM_UNPROTECT();

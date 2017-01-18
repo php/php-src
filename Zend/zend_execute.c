@@ -801,7 +801,7 @@ static zend_always_inline zend_bool zend_check_type(
 		} else {
 			*ce = zend_fetch_class(ZEND_TYPE_NAME(type), (ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD));
 			if (UNEXPECTED(!*ce)) {
-				return 0;
+				return Z_TYPE_P(arg) == IS_NULL && (ZEND_TYPE_ALLOW_NULL(type) || (default_value && is_null_constant(scope, default_value)));
 			}
 			*cache_slot = (void *) *ce;
 		}
@@ -1925,6 +1925,91 @@ use_read_property:
 		zend_error(E_WARNING, "This object doesn't support property references");
 		ZVAL_ERROR(result);
 	}
+}
+
+static zend_always_inline zval* zend_fetch_static_property_address(zend_execute_data *execute_data, zval *varname, zend_uchar varname_type, znode_op op2, zend_uchar op2_type)
+{
+	zval *retval;
+	zend_string *name;
+	zend_class_entry *ce;
+
+	if (varname_type == IS_CONST) {
+		name = Z_STR_P(varname);
+	} else if (EXPECTED(Z_TYPE_P(varname) == IS_STRING)) {
+		name = Z_STR_P(varname);
+		zend_string_addref(name);
+	} else {
+		if (varname_type == IS_CV && UNEXPECTED(Z_TYPE_P(varname) == IS_UNDEF)) {
+			zval_undefined_cv(EX(opline)->op1.var, execute_data);
+		}
+		name = zval_get_string(varname);
+	}
+
+	if (op2_type == IS_CONST) {
+		if (varname_type == IS_CONST && EXPECTED((ce = CACHED_PTR(Z_CACHE_SLOT_P(varname))) != NULL)) {
+			retval = CACHED_PTR(Z_CACHE_SLOT_P(varname) + sizeof(void*));
+
+			/* check if static properties were destoyed */
+			if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
+				zend_throw_error(NULL, "Access to undeclared static property: %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+				return NULL;
+			}
+
+			return retval;
+		} else {
+			zval *class_name = EX_CONSTANT(op2);
+
+			if (UNEXPECTED((ce = CACHED_PTR(Z_CACHE_SLOT_P(class_name))) == NULL)) {
+				ce = zend_fetch_class_by_name(Z_STR_P(class_name), class_name + 1, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
+				if (UNEXPECTED(ce == NULL)) {
+					if (varname_type != IS_CONST) {
+						zend_string_release(name);
+					}
+					return NULL;
+				}
+				CACHE_PTR(Z_CACHE_SLOT_P(class_name), ce);
+			}
+		}
+	} else {
+		if (op2_type == IS_UNUSED) {
+			ce = zend_fetch_class(NULL, op2.num);
+			if (UNEXPECTED(ce == NULL)) {
+				if (varname_type != IS_CONST) {
+					zend_string_release(name);
+				}
+				return NULL;
+			}
+		} else {
+			ce = Z_CE_P(EX_VAR(op2.var));
+		}
+		if (varname_type == IS_CONST &&
+		    (retval = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(varname), ce)) != NULL) {
+
+			/* check if static properties were destoyed */
+			if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
+				zend_throw_error(NULL, "Access to undeclared static property: %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+				return NULL;
+			}
+
+			return retval;
+		}
+	}
+
+	retval = zend_std_get_static_property(ce, name, 0);
+
+	if (varname_type != IS_CONST) {
+		zend_string_release(name);
+	}
+
+	if (UNEXPECTED(retval == NULL)) {
+		return NULL;
+	}
+
+	if (varname_type == IS_CONST) {
+		CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(varname), ce, retval);
+	}
+
+	return retval;
 }
 
 #if ZEND_INTENSIVE_DEBUGGING
