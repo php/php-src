@@ -23,6 +23,9 @@ PHP                                                                        NEWS
   . Fixed bug #73933 (error/segfault with ldap_mod_replace and opcache).
     (Laruence)
 
+- MySQLi:
+  . Fixed bug #73949 (leak in mysqli_fetch_object). (krakjoe)
+
 - Mysqlnd:
   . Fixed bug #69899 (segfault on close() after free_result() with mysqlnd).
     (Richard Fussenegger)
