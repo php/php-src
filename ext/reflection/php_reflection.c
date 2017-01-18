@@ -4034,7 +4034,7 @@ ZEND_METHOD(reflection_class, getStartLine)
 		return;
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
-	if (ce->type == ZEND_USER_FUNCTION) {
+	if (ce->type == ZEND_USER_CLASS) {
 		RETURN_LONG(ce->info.user.line_start);
 	}
 	RETURN_FALSE;
