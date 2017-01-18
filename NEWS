@@ -16,6 +16,9 @@ PHP                                                                        NEWS
   . Fixed bug #69993 (test for gmp.h needs to test machine includes).
     (Jordan Gigov) 
 
+- Intl:
+  . Fix bug #73956 (Link use CC instead of CXX). (Remi)
+
 - LDAP:
   . Fixed bug #73933 (error/segfault with ldap_mod_replace and opcache).
     (Laruence)
