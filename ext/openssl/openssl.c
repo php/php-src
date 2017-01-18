@@ -2310,6 +2310,7 @@ PHP_FUNCTION(openssl_x509_parse)
 	bn_serial = ASN1_INTEGER_to_BN(asn1_serial, NULL);
 	/* Can return NULL on error or memory allocation failure */
 	if (!bn_serial) {
+		php_openssl_store_errors();
 		RETURN_FALSE;
 	}
 
@@ -2317,6 +2318,7 @@ PHP_FUNCTION(openssl_x509_parse)
 	BN_free(bn_serial);
 	/* Can return NULL on error or memory allocation failure */
 	if (!hex_serial) {
+		php_openssl_store_errors();
 		RETURN_FALSE;
 	}
 
