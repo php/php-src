@@ -4210,7 +4210,7 @@ PHP_FUNCTION(exif_imagetype)
 	php_stream * stream;
  	int itype = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &imagefile, &imagefile_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &imagefile, &imagefile_len) == FAILURE) {
 		return;
 	}
 

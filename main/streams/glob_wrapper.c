@@ -213,15 +213,15 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, const cha
 	int ret;
 	const char *tmp, *pos;
 
-	if (((options & STREAM_DISABLE_OPEN_BASEDIR) == 0) && php_check_open_basedir(path TSRMLS_CC)) {
-		return NULL;
-	}
-
 	if (!strncmp(path, "glob://", sizeof("glob://")-1)) {
 		path += sizeof("glob://")-1;
 		if (opened_path) {
 			*opened_path = estrdup(path);
 		}
+	}
+
+	if (((options & STREAM_DISABLE_OPEN_BASEDIR) == 0) && php_check_open_basedir(path TSRMLS_CC)) {
+		return NULL;
 	}
 
 	pglob = ecalloc(sizeof(*pglob), 1);
