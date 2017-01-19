@@ -350,6 +350,11 @@ PHP_FUNCTION(hash_init)
 		RETURN_FALSE;
 	}
 
+	if (options & PHP_HASH_HMAC && !ops->is_crypto) {
+		php_error_docref(NULL, E_WARNING, "HMAC requested with a non-cryptographic hashing algorithm: %s", algo);
+		RETURN_FALSE;
+	}
+
 	if (options & PHP_HASH_HMAC &&
 		key_len <= 0) {
 		/* Note: a zero length key is no key at all */
