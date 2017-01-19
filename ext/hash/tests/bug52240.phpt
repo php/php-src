@@ -5,7 +5,7 @@ Bug #52240 (hash_copy() does not copy the HMAC key, causes wrong results and PHP
 --FILE--
 <?php
 
-$h = hash_init('crc32b', HASH_HMAC, '123456' );
+$h = hash_init('md5', HASH_HMAC, '123456');
 $h2 = hash_copy($h);
 var_dump(hash_final($h));
 $h3 = hash_copy($h2);
@@ -14,6 +14,6 @@ var_dump(hash_final($h3));
 
 ?>
 --EXPECT--
-string(8) "278af264"
-string(8) "278af264"
-string(8) "278af264"
+string(32) "cab1380ea86d8acc9aa62390a58406aa"
+string(32) "cab1380ea86d8acc9aa62390a58406aa"
+string(32) "cab1380ea86d8acc9aa62390a58406aa"
