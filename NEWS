@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 
 - GD:
   . Fixed bug #73549 (Use after free when stream is passed to imagepng). (cmb)
+  . Fixed bug #73868 (DOS vulnerability in gdImageCreateFromGd2Ctx()). (cmb)
+  . Fixed bug #73869 (Signed Integer Overflow gd_io.c). (cmb)
 
 - Intl:
   . Fixed bug #68447 (grapheme_extract take an extra trailing character). 
