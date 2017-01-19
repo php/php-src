@@ -1,12 +1,14 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-05 Jan 2017, PHP 5.6.30RC1
+19 Jan 2017, PHP 5.6.30
 
 - EXIF:
   . Fixed bug #73737 (FPE when parsing a tag format). (Stas)
 
 - GD:
   . Fixed bug #73549 (Use after free when stream is passed to imagepng). (cmb)
+  . Fixed bug #73868 (DOS vulnerability in gdImageCreateFromGd2Ctx()). (cmb)
+  . Fixed bug #73869 (Signed Integer Overflow gd_io.c). (cmb)
 
 - Intl:
   . Fixed bug #68447 (grapheme_extract take an extra trailing character). 
