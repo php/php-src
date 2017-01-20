@@ -91,6 +91,10 @@ PHP                                                                        NEWS
     (Adam Baratz)
   . Fixed bug #73396 (bigint columns are returned as strings). (Adam Baratz)
 
+- PDO_PgSQL:
+  . Fixed bug #73959 (lastInsertId fails to throw an exception for wrong 
+    sequence name). (andrewnester)
+
 - posix:
   . Fixed bug #71219 (configure script incorrectly checks for ttyname_r). (atoh)
 
