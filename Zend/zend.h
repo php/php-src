@@ -281,6 +281,8 @@ extern ZEND_API zend_class_entry *zend_standard_class_def;
 extern ZEND_API zend_utility_values zend_uv;
 extern ZEND_API zval zval_used_for_init;
 
+/* If DTrace is available and enabled */
+extern ZEND_API zend_bool zend_dtrace_enabled;
 END_EXTERN_C()
 
 #define ZEND_UV(name) (zend_uv.name)

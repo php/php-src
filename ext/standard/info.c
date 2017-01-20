@@ -942,7 +942,7 @@ PHPAPI void php_print_info(int flag)
 #endif
 
 #if HAVE_DTRACE
-		php_info_print_table_row(2, "DTrace Support", "enabled" );
+		php_info_print_table_row(2, "DTrace Support", (zend_dtrace_enabled ? "enabled" : "available, disabled"));
 #else
 		php_info_print_table_row(2, "DTrace Support", "disabled" );
 #endif
