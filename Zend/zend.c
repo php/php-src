@@ -55,6 +55,7 @@ ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 
 ZEND_API zend_utility_values zend_uv;
+ZEND_API zend_bool zend_dtrace_enabled;
 
 /* version information */
 static char *zend_version_info;
@@ -764,6 +765,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 		char *tmp = getenv("USE_ZEND_DTRACE");
 
 		if (tmp && zend_atoi(tmp, 0)) {
+			zend_dtrace_enabled = 1;
 			zend_compile_file = dtrace_compile_file;
 			zend_execute_ex = dtrace_execute_ex;
 			zend_execute_internal = dtrace_execute_internal;
