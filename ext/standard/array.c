@@ -1772,7 +1772,7 @@ static zend_long php_extract_ref_if_exists(zend_array *arr, zend_array *symbol_t
 			Z_ADDREF_P(entry);
 			zval_ptr_dtor(orig_var);
 			ZVAL_COPY_VALUE(orig_var, entry);
-			count++;			
+			count++;
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -1817,7 +1817,7 @@ static zend_long php_extract_if_exists(zend_array *arr, zend_array *symbol_table
 			ZVAL_DEREF(orig_var);
 			zval_ptr_dtor(orig_var);
 			ZVAL_COPY_VALUE(orig_var, entry);
-			count++;			
+			count++;
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -3462,7 +3462,7 @@ PHP_FUNCTION(array_unshift)
 	Z_ARRVAL_P(stack)->nNextFreeElement  = new_hash.nNextFreeElement;
 	Z_ARRVAL_P(stack)->arData            = new_hash.arData;
 	Z_ARRVAL_P(stack)->pDestructor       = new_hash.pDestructor;
-	
+
 	zend_hash_internal_pointer_reset(Z_ARRVAL_P(stack));
 
 	/* Clean up and return the number of elements in the stack */
