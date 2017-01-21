@@ -916,6 +916,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			char *printname = NULL, *substitutename = NULL;
 			size_t substitutename_len;
 			int substitutename_off = 0;
+			wchar_t tmpsubstname[MAXPATHLEN];
 
 			if(++(*ll) > LINK_MAX) {
 				free_alloca(tmp, use_heap);
@@ -959,8 +960,15 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				}
 
 				substitutename_len = pbuffer->MountPointReparseBuffer.SubstituteNameLength / sizeof(WCHAR);
-				substitutename = php_win32_cp_conv_w_to_any(reparsetarget + pbuffer->MountPointReparseBuffer.SubstituteNameOffset / sizeof(WCHAR),
-										substitutename_len, &substitutename_len);
+				if (substitutename_len > MAXPATHLEN) {
+					free_alloca(pbuffer, use_heap_large);
+					free_alloca(tmp, use_heap);
+					FREE_PATHW()
+					return -1;
+				}
+				memmove(tmpsubstname, reparsetarget + pbuffer->MountPointReparseBuffer.SubstituteNameOffset / sizeof(WCHAR), pbuffer->MountPointReparseBuffer.SubstituteNameLength);
+				tmpsubstname[substitutename_len] = L'\0';
+				substitutename = php_win32_cp_conv_w_to_any(tmpsubstname, substitutename_len, &substitutename_len);
 				if (!substitutename) {
 					free_alloca(pbuffer, use_heap_large);
 					free_alloca(tmp, use_heap);
@@ -982,8 +990,15 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 
 
 				substitutename_len = pbuffer->MountPointReparseBuffer.SubstituteNameLength / sizeof(WCHAR);
-				substitutename = php_win32_cp_conv_w_to_any(reparsetarget + pbuffer->MountPointReparseBuffer.SubstituteNameOffset / sizeof(WCHAR),
-										substitutename_len, &substitutename_len);
+				if (substitutename_len > MAXPATHLEN) {
+					free_alloca(pbuffer, use_heap_large);
+					free_alloca(tmp, use_heap);
+					FREE_PATHW()
+					return -1;
+				}
+				memmove(tmpsubstname, reparsetarget + pbuffer->MountPointReparseBuffer.SubstituteNameOffset / sizeof(WCHAR), pbuffer->MountPointReparseBuffer.SubstituteNameLength);
+				tmpsubstname[substitutename_len] = L'\0';
+				substitutename = php_win32_cp_conv_w_to_any(tmpsubstname, substitutename_len, &substitutename_len);
 				if (!substitutename) {
 					free_alloca(pbuffer, use_heap_large);
 					free_alloca(tmp, use_heap);
