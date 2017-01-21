@@ -16,6 +16,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "php_hash.h"
 #include "php_hash_sha3.h"
 
 #if (defined(__APPLE__) || defined(__APPLE_CC__)) && \

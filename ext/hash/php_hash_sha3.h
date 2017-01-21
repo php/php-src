@@ -20,7 +20,6 @@
 #define PHP_HASH_SHA3_H
 
 #include "php.h"
-#include "ext/hash/php_hash.h"
 
 typedef struct {
 	unsigned char state[200]; // 5 * 5 * sizeof(uint64)

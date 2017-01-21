@@ -58,6 +58,10 @@ PHP                                                                        NEWS
 - GMP:
   . Fixed bug #70896 (gmp_fact() silently ignores non-integer input). (Sara)
 
+- hash:
+  . Fixed bug #73961 (environmental build dependency in hash sha3 source).
+    (krakjoe)
+
 - Mbstring:
   . Implemented request #66024 (mb_chr() and mb_ord()). (Masakielastic, Yasuo)
   . Implemented request #65081 (mb_scrub()). (Masakielastic, Yasuo)
