@@ -152,7 +152,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 			RETURN_FALSE;
 		}
 	} else {
-		ctx = emalloc(sizeof(gdIOCtx));
+		ctx = ecalloc(1, sizeof(gdIOCtx));
 		ctx->putC = _php_image_output_putc;
 		ctx->putBuf = _php_image_output_putbuf;
 		ctx->gd_free = _php_image_output_ctxfree;
@@ -165,7 +165,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 	}
 
 	if (!ctx)	{
-		ctx = emalloc(sizeof(gdIOCtx));
+		ctx = ecalloc(1, sizeof(gdIOCtx));
 		ctx->putC = _php_image_stream_putc;
 		ctx->putBuf = _php_image_stream_putbuf;
 		if (close_stream) {
