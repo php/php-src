@@ -292,7 +292,7 @@ MAINTENANCE:         Odd fixes
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           gd
-PRIMARY MAINTAINER:  Pierre-Alain Joye <pajoye@php.net>
+PRIMARY MAINTAINER:  Pierre-Alain Joye <pajoye@php.net>, Christoph M. Becker <cmb@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
