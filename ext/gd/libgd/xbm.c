@@ -77,7 +77,7 @@ gdImagePtr gdImageCreateFromXbm(FILE * fd)
 				max_bit = 32768;
 			}
 			if (max_bit) {
-				bytes = (width * height / 8) + 1;
+				bytes = (width + 7) / 8 * height;
 				if (!bytes) {
 					return 0;
 				}
