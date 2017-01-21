@@ -22,6 +22,8 @@ PHP                                                                        NEWS
 
 - Hash:
   . Added hash_hkdf() function. (Andrey Andreev)
+  . Fixed bug #73961 (environmental build dependency in hash sha3 source).
+    (krakjoe)
 
 - Intl:
   . Fix bug #73956 (Link use CC instead of CXX). (Remi)
