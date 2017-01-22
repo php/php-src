@@ -1814,6 +1814,14 @@ static int php_openssl_enable_crypto(php_stream *stream,
 
 		if (SUCCESS == php_set_sock_blocking(sslsock->s.socket, 0)) {
 			sslsock->s.is_blocked = 0;
+			SSL_set_mode(
+				sslsock->ssl_handle,
+				(
+					SSL_get_mode(sslsock->ssl_handle) |
+					SSL_MODE_ENABLE_PARTIAL_WRITE |
+					SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER
+				)
+			);
 		}
 
 		timeout = sslsock->is_client ? &sslsock->connect_timeout : &sslsock->s.timeout;
