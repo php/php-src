@@ -31,17 +31,19 @@ const php_hash_ops php_hash_fnv132_ops = {
 	(php_hash_copy_func_t) php_hash_copy,
 	4,
 	4,
-	sizeof(PHP_FNV132_CTX)
+	sizeof(PHP_FNV132_CTX),
+	0
 };
 
-	const php_hash_ops php_hash_fnv1a32_ops = {
+const php_hash_ops php_hash_fnv1a32_ops = {
 	(php_hash_init_func_t) PHP_FNV132Init,
 	(php_hash_update_func_t) PHP_FNV1a32Update,
  	(php_hash_final_func_t) PHP_FNV132Final,
 	(php_hash_copy_func_t) php_hash_copy,
 	4,
 	4,
-	sizeof(PHP_FNV132_CTX)
+	sizeof(PHP_FNV132_CTX),
+	0
 };
 
 const php_hash_ops php_hash_fnv164_ops = {
@@ -51,7 +53,8 @@ const php_hash_ops php_hash_fnv164_ops = {
 	(php_hash_copy_func_t) php_hash_copy,
 	8,
 	4,
-	sizeof(PHP_FNV164_CTX)
+	sizeof(PHP_FNV164_CTX),
+	0
 };
 
 const php_hash_ops php_hash_fnv1a64_ops = {
@@ -61,7 +64,8 @@ const php_hash_ops php_hash_fnv1a64_ops = {
 	(php_hash_copy_func_t) php_hash_copy,
 	8,
 	4,
-	sizeof(PHP_FNV164_CTX)
+	sizeof(PHP_FNV164_CTX),
+	0
 };
 
 /* {{{ PHP_FNV132Init

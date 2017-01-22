@@ -16,6 +16,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "php_hash.h"
 #include "php_hash_sha3.h"
 
 #if (defined(__APPLE__) || defined(__APPLE_CC__)) && \
@@ -218,7 +219,8 @@ const php_hash_ops php_hash_sha3_##bits##_ops = { \
 	php_hash_copy, \
 	bits >> 3, \
 	(1600 - (2 * bits)) >> 3, \
-	sizeof(PHP_SHA3_##bits##_CTX) \
+	sizeof(PHP_SHA3_##bits##_CTX), \
+	1 \
 }
 
 DECLARE_SHA3_OPS(224);

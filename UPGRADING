@@ -42,6 +42,10 @@ PHP 7.2 UPGRADE NOTES
     such, its behavior now follows fmod() rather than the `%` operator. For
     example `bcmod('4', '3.5')` now returns '0.5' instead of '1'.
 
+- Hash:
+  . The hash_hmac(), hash_hmac_file() and hash_pbkdf2() functions no longer
+    accept non-cryptographic hashes.
+
 - PCRE:
   . preg_match() and other PCRE functions now distinguish between unmatched
     subpatterns and empty matches by reporting NULL and "" (empty string),
@@ -186,6 +190,10 @@ PHP 7.2 UPGRADE NOTES
     ecodings are checked recursively.
   . mb_convert_encoding() accepts array parameter. Only value encodings
     are converted recursively.
+
+- pdo_sqlite
+  . Use sqlite3_prepare_v2() and sqlite3_close_v2() functions instead of their
+    legacy counterparts.
 
 ========================================
 10. New Global Constants

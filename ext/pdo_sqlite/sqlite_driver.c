@@ -161,7 +161,7 @@ static int sqlite_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 
 		pdo_sqlite_cleanup_callbacks(H);
 		if (H->db) {
-			sqlite3_close(H->db);
+			sqlite3_close_v2(H->db);
 			H->db = NULL;
 		}
 		if (einfo->errmsg) {
@@ -193,7 +193,7 @@ static int sqlite_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_le
 		return 0;
 	}
 
-	i = sqlite3_prepare(H->db, sql, sql_len, &S->stmt, &tail);
+	i = sqlite3_prepare_v2(H->db, sql, sql_len, &S->stmt, &tail);
 	if (i == SQLITE_OK) {
 		return 1;
 	}

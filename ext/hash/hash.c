@@ -248,6 +248,11 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, 
 		php_error_docref(NULL, E_WARNING, "Unknown hashing algorithm: %s", algo);
 		RETURN_FALSE;
 	}
+	else if (!ops->is_crypto) {
+		php_error_docref(NULL, E_WARNING, "Non-cryptographic hashing algorithm: %s", algo);
+		RETURN_FALSE;
+	}
+
 	if (isfilename) {
 		if (CHECK_NULL_PATH(data, data_len)) {
 			php_error_docref(NULL, E_WARNING, "Invalid path");
@@ -342,6 +347,11 @@ PHP_FUNCTION(hash_init)
 	ops = php_hash_fetch_ops(algo, algo_len);
 	if (!ops) {
 		php_error_docref(NULL, E_WARNING, "Unknown hashing algorithm: %s", algo);
+		RETURN_FALSE;
+	}
+
+	if (options & PHP_HASH_HMAC && !ops->is_crypto) {
+		php_error_docref(NULL, E_WARNING, "HMAC requested with a non-cryptographic hashing algorithm: %s", algo);
 		RETURN_FALSE;
 	}
 
@@ -597,25 +607,6 @@ PHP_FUNCTION(hash_algos)
 }
 /* }}} */
 
-static inline zend_bool php_hash_is_crypto(const char *algo, size_t algo_len) {
-
-	char *blacklist[] = { "adler32", "crc32", "crc32b", "fnv132", "fnv1a32", "fnv164", "fnv1a64", "joaat", NULL };
-	char *lower = zend_str_tolower_dup(algo, algo_len);
-	int i = 0;
-
-	while (blacklist[i]) {
-		if (strcmp(lower, blacklist[i]) == 0) {
-			efree(lower);
-			return 0;
-		}
-
-		i++;
-	}
-
-	efree(lower);
-	return 1;
-}
-
 /* {{{ proto string hash_hkdf(string algo, string ikm [, int length = 0, string info = '', string salt = ''])
 RFC5869 HMAC-based key derivation function */
 PHP_FUNCTION(hash_hkdf)
@@ -636,8 +627,8 @@ PHP_FUNCTION(hash_hkdf)
 		php_error_docref(NULL, E_WARNING, "Unknown hashing algorithm: %s", ZSTR_VAL(algo));
 		RETURN_FALSE;
 	}
-	
-	if (!php_hash_is_crypto(ZSTR_VAL(algo), ZSTR_LEN(algo))) {
+
+	if (!ops->is_crypto) {
 		php_error_docref(NULL, E_WARNING, "Non-cryptographic hashing algorithm: %s", ZSTR_VAL(algo));
 		RETURN_FALSE;
 	}
@@ -734,6 +725,10 @@ PHP_FUNCTION(hash_pbkdf2)
 	ops = php_hash_fetch_ops(algo, algo_len);
 	if (!ops) {
 		php_error_docref(NULL, E_WARNING, "Unknown hashing algorithm: %s", algo);
+		RETURN_FALSE;
+	}
+	else if (!ops->is_crypto) {
+		php_error_docref(NULL, E_WARNING, "Non-cryptographic hashing algorithm: %s", algo);
 		RETURN_FALSE;
 	}
 

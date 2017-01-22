@@ -46,6 +46,7 @@ typedef struct _php_hash_ops {
 	int digest_size;
 	int block_size;
 	int context_size;
+	unsigned is_crypto: 1;
 } php_hash_ops;
 
 typedef struct _php_hash_data {
