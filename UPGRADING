@@ -189,6 +189,10 @@ PHP 7.2 UPGRADE NOTES
   . mb_convert_encoding() accepts array parameter. Only value encodings
     are converted recursively.
 
+- pdo_sqlite
+  . Use sqlite3_prepare_v2() and sqlite3_close_v2() functions instead of their
+    legacy counterparts.
+
 ========================================
 10. New Global Constants
 ========================================

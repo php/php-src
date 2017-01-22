@@ -99,6 +99,9 @@ PHP                                                                        NEWS
   . Fixed bug #73959 (lastInsertId fails to throw an exception for wrong 
     sequence name). (andrewnester)
 
+- PDO_Sqlite
+  . Switch to sqlite3_prepare_v2() and sqlite3_close_v2() functions (rasmus)
+
 - posix:
   . Fixed bug #71219 (configure script incorrectly checks for ttyname_r). (atoh)
 
