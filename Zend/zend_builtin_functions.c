@@ -2365,12 +2365,17 @@ ZEND_FUNCTION(debug_print_backtrace)
 
 		if (call->func) {
 			func = call->func;
-			function_name = (func->common.scope &&
-			                 func->common.scope->trait_aliases) ?
-				ZSTR_VAL(zend_resolve_method_name(
-					(object ? object->ce : func->common.scope), func)) :
-				(func->common.function_name ?
-					ZSTR_VAL(func->common.function_name) : NULL);
+			zend_string *zend_function_name;
+            if (func->common.scope && func->common.scope->trait_aliases) {
+                zend_function_name = zend_resolve_method_name(object ? object->ce : func->common.scope, func);
+            } else {
+                zend_function_name = func->common.function_name;
+            }
+            if (zend_function_name != NULL) {
+                function_name = ZSTR_VAL(zend_function_name);
+            } else {
+                function_name = NULL;
+            }
 		} else {
 			func = NULL;
 			function_name = NULL;

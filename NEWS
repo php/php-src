@@ -7,6 +7,7 @@ PHP                                                                        NEWS
     (Laruence)
   . Fixed bug #73876 (Crash when exporting **= in expansion of assign op).
     (Sara)
+  . Fixed bug #73969 (segfault in debug_print_backtrace). (andrewnester)
 
 - DTrace:
   . Fixed bug #73965 (DTrace reported as enabled when disabled). (Remi)
