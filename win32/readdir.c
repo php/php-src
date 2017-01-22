@@ -103,7 +103,7 @@ struct dirent *readdir(DIR *dp)
 		/* wide to utf8 failed, should never happen. */
 		return NULL;
 	}
-	strlcpy(dp->dent.d_name, _tmp, _MAX_FNAME+1);
+	strlcpy(dp->dent.d_name, _tmp, _MAX_FNAME*4+1);
 	dp->dent.d_reclen = (unsigned short)strlen(dp->dent.d_name);
 	free(_tmp);
 	
@@ -138,7 +138,7 @@ int readdir_r(DIR *dp, struct dirent *entry, struct dirent **result)
 		result = NULL;
 		return 0;
 	}
-	strlcpy(dp->dent.d_name, _tmp, _MAX_FNAME+1);
+	strlcpy(dp->dent.d_name, _tmp, _MAX_FNAME*4+1);
 	dp->dent.d_reclen = (unsigned short)strlen(dp->dent.d_name);
 	free(_tmp);
 
