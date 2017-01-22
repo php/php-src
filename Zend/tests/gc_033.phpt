@@ -1,7 +1,7 @@
 --TEST--
 GC 033: Crash in GC while run with phpspec
---XFAIL--
-Full GC root buffer not handled correctly yet
+--INI--
+zend.enable_gc = 1
 --FILE--
 <?php
 $a = new stdClass();

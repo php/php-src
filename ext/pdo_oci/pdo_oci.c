@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -38,20 +38,14 @@ const zend_function_entry pdo_oci_functions[] = {
 
 /* {{{ pdo_oci_module_entry */
 
-#if ZEND_MODULE_API_NO >= 20050922
 static const zend_module_dep pdo_oci_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
 	ZEND_MOD_END
 };
-#endif
 
 zend_module_entry pdo_oci_module_entry = {
-#if ZEND_MODULE_API_NO >= 20050922
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_oci_deps,
-#else
-	STANDARD_MODULE_HEADER,
-#endif
 	"PDO_OCI",
 	pdo_oci_functions,
 	PHP_MINIT(pdo_oci),
@@ -59,7 +53,7 @@ zend_module_entry pdo_oci_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(pdo_oci),
-	"1.0.1",
+	PHP_PDO_OCI_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

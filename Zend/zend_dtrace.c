@@ -23,6 +23,11 @@
 #include "zend_dtrace.h"
 
 #ifdef HAVE_DTRACE
+
+ZEND_API zend_op_array *(*zend_dtrace_compile_file)(zend_file_handle *file_handle, int type);
+ZEND_API void (*zend_dtrace_execute)(zend_op_array *op_array);
+ZEND_API void (*zend_dtrace_execute_internal)(zend_execute_data *execute_data, zval *return_value);
+
 /* PHP DTrace probes {{{ */
 static inline const char *dtrace_get_executed_filename(void)
 {
@@ -32,7 +37,7 @@ static inline const char *dtrace_get_executed_filename(void)
 		ex = ex->prev_execute_data;
 	}
 	if (ex) {
-		return ex->func->op_array.filename->val;
+		return ZSTR_VAL(ex->func->op_array.filename);
 	} else {
 		return zend_get_executed_filename();
 	}
@@ -41,9 +46,9 @@ static inline const char *dtrace_get_executed_filename(void)
 ZEND_API zend_op_array *dtrace_compile_file(zend_file_handle *file_handle, int type)
 {
 	zend_op_array *res;
-	DTRACE_COMPILE_FILE_ENTRY(file_handle->opened_path, (char *)file_handle->filename);
+	DTRACE_COMPILE_FILE_ENTRY(ZSTR_VAL(file_handle->opened_path), (char *)file_handle->filename);
 	res = compile_file(file_handle, type);
-	DTRACE_COMPILE_FILE_RETURN(file_handle->opened_path, (char *)file_handle->filename);
+	DTRACE_COMPILE_FILE_RETURN(ZSTR_VAL(file_handle->opened_path), (char *)file_handle->filename);
 
 	return res;
 }
@@ -107,5 +112,6 @@ ZEND_API void dtrace_execute_internal(zend_execute_data *execute_data, zval *ret
 }
 
 /* }}} */
+
 #endif /* HAVE_DTRACE */
 

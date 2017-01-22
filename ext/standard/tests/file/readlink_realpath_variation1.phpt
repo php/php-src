@@ -28,7 +28,7 @@ fclose($file_handle);
 // creating object with members as linkname
 class object_temp {
   public $linkname;
-  function object_temp($link) {
+  function __construct($link) {
     $this->linkname = $link;
   }
 }

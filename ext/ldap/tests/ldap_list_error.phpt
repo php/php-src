@@ -17,7 +17,7 @@ var_dump(ldap_list($link));
 var_dump(ldap_list($link, $link));
 
 // Too many parameters
-var_dump(ldap_list($link, "dc=my-domain,dc=com", "(objectClass=*)", array(), 0, 0, 0, 0 , "Additional data"));
+var_dump(ldap_list($link, "$base", "(objectClass=*)", array(), 0, 0, 0, 0 , "Additional data"));
 ?>
 ===DONE===
 --EXPECTF--

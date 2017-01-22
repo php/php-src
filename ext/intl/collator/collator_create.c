@@ -25,26 +25,26 @@
 #include "intl_data.h"
 
 /* {{{ */
-static void collator_ctor(INTERNAL_FUNCTION_PARAMETERS)
+static int collator_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 {
 	const char*      locale;
 	size_t           locale_len = 0;
 	zval*            object;
 	Collator_object* co;
+	int zpp_flags = is_constructor ? ZEND_PARSE_PARAMS_THROW : 0;
 
 	intl_error_reset( NULL );
 	object = return_value;
 	/* Parse parameters. */
-	if( zend_parse_parameters( ZEND_NUM_ARGS(), "s",
+	if( zend_parse_parameters_ex( zpp_flags, ZEND_NUM_ARGS(), "s",
 		&locale, &locale_len ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"collator_create: unable to parse input params", 0 );
-		zval_dtor(return_value);
-		RETURN_NULL();
+		return FAILURE;
 	}
 
-	INTL_CHECK_LOCALE_LEN_OBJ(locale_len, return_value);
+	INTL_CHECK_LOCALE_LEN_OR_FAILURE(locale_len);
 	COLLATOR_METHOD_FETCH_OBJECT;
 
 	if(locale_len == 0) {
@@ -54,6 +54,7 @@ static void collator_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	/* Open ICU collator. */
 	co->ucoll = ucol_open( locale, COLLATOR_ERROR_CODE_P( co ) );
 	INTL_CTOR_CHECK_STATUS(co, "collator_create: unable to open ICU collator");
+	return SUCCESS;
 }
 /* }}} */
 
@@ -63,7 +64,10 @@ static void collator_ctor(INTERNAL_FUNCTION_PARAMETERS)
 PHP_FUNCTION( collator_create )
 {
 	object_init_ex( return_value, Collator_ce_ptr );
-	collator_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	if (collator_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0) == FAILURE) {
+		zval_ptr_dtor(return_value);
+		RETURN_NULL();
+	}
 }
 /* }}} */
 
@@ -72,15 +76,16 @@ PHP_FUNCTION( collator_create )
  */
 PHP_METHOD( Collator, __construct )
 {
-	zval orig_this = *getThis();
+	zend_error_handling error_handling;
 
+	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
 	return_value = getThis();
-	collator_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-
-	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
-		zend_object_store_ctor_failed(Z_OBJ(orig_this));
-		ZEND_CTOR_MAKE_NULL();
+	if (collator_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1) == FAILURE) {
+		if (!EG(exception)) {
+			zend_throw_exception(IntlException_ce_ptr, "Constructor failed", 0);
+		}
 	}
+	zend_restore_error_handling(&error_handling);
 }
 /* }}} */
 

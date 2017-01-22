@@ -1,5 +1,5 @@
 --TEST--
-Bug #43201 (Crash on using unitialized vals and __get/__set)
+Bug #43201 (Crash on using uninitialized vals and __get/__set)
 --FILE--
 <?php
 class Foo {

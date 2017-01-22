@@ -7,4 +7,4 @@ Return type of self is not allowed in function
 function test(): self {}
 
 --EXPECTF--
-Fatal error: Cannot declare a return type of self outside of a class scope in %s on line 3
+Fatal error: Cannot use "self" when no class scope is active in %s on line 3

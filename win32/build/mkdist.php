@@ -322,13 +322,40 @@ foreach (glob($ICU_DLLS) as $filename) {
 	copy($filename, "$dist_dir/" . basename($filename));
 }
 $ENCHANT_DLLS = array(
-	'glib-2.dll',
-	'gmodule-2.dll',
-	'libenchant_myspell.dll',
-	'libenchant_ispell.dll',
+	array('', 'glib-2.dll'),
+	array('', 'gmodule-2.dll'),
+	array('lib/enchant', 'libenchant_myspell.dll'),
+	array('lib/enchant', 'libenchant_ispell.dll'),
 );
-foreach ($ENCHANT_DLLS as $filename) {
-	copy($php_build_dir . '/bin/' . $filename, "$dist_dir/" . basename($filename));
+foreach ($ENCHANT_DLLS as $dll) {
+	$dest  = "$dist_dir/$dll[0]";
+	$filename = $dll[1];
+
+	if (!file_exists("$dest") || !is_dir("$dest")) {
+		if (!mkdir("$dest", 0777, true)) {
+			echo "WARNING: couldn't create '$dest' for enchant plugins ";
+		}
+	}
+
+	if (!copy($php_build_dir . '/bin/' . $filename, "$dest/" . basename($filename))) {
+			echo "WARNING: couldn't copy $filename into the dist dir";
+	}
+}
+
+$SASL_DLLS = $php_build_dir . "/bin/sasl2/sasl*.dll";
+$fls = glob($SASL_DLLS);
+if (!empty($fls)) {
+	$sasl_dest_dir = "$dist_dir/sasl2";
+	if (!file_exists($sasl_dest_dir) || !is_dir($sasl_dest_dir)) {
+		if (!mkdir("$sasl_dest_dir", 0777, true)) {
+			echo "WARNING: couldn't create '$sasl_dest_dir' for SASL2 auth plugins ";
+		}
+	}
+	foreach ($fls as $fl) {
+		if (!copy($fl, "$sasl_dest_dir/" . basename($fl))) {
+			echo "WARNING: couldn't copy $fl into the $sasl_dest_dir";
+		}
+	}
 }
 
 /* and those for pecl */
@@ -471,7 +498,7 @@ if (!$use_pear_template) {
 
 	/* grab the bootstrap script */
 	echo "Downloading go-pear\n";
-	copy("http://pear.php.net/go-pear", "$dist_dir/PEAR/go-pear.php");
+	copy("https://pear.php.net/go-pear.phar", "$dist_dir/PEAR/go-pear.php");
 
 	/* import the package list -- sets $packages variable */
 	include "pear/go-pear-list.php";

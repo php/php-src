@@ -71,12 +71,6 @@
 #  define ARG_MAX 14500
 # endif
 #endif
-#ifndef S_ISDIR
-#define S_ISDIR(m) (((m) & _S_IFDIR) == _S_IFDIR)
-#endif
-#ifndef S_ISLNK
-#define S_ISLNK(m) (0)
-#endif
 #endif
 
 #include "php.h"
@@ -293,17 +287,19 @@ globexp2(ptr, pattern, pglob, rv)
 	}
 
 	for (i = 0, pl = pm = ptr; pm <= pe; pm++) {
+		const Char *pb;
+
 		switch (*pm) {
 		case LBRACKET:
 			/* Ignore everything between [] */
-			for (pl = pm++; *pm != RBRACKET && *pm != EOS; pm++)
+			for (pb = pm++; *pm != RBRACKET && *pm != EOS; pm++)
 				;
 			if (*pm == EOS) {
 				/*
 				 * We could not find a matching RBRACKET.
 				 * Ignore and just look for RBRACE
 				 */
-				pm = pl;
+				pm = pb;
 			}
 			break;
 
@@ -929,3 +925,12 @@ qprintf(str, s)
 	(void)printf("\n");
 }
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

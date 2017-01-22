@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -88,8 +88,9 @@ static int pdo_mysql_stmt_dtor(pdo_stmt_t *stmt) /* {{{ */
 	}
 #endif
 
-
-	if (S->H->server) {
+	if (!Z_ISUNDEF(stmt->database_object_handle)
+		&& IS_OBJ_VALID(EG(objects_store).object_buckets[Z_OBJ_HANDLE(stmt->database_object_handle)])
+		&& (!(GC_FLAGS(Z_OBJ(stmt->database_object_handle)) & IS_OBJ_FREE_CALLED))) {
 		while (mysql_more_results(S->H->server)) {
 			MYSQL_RES *res;
 			if (mysql_next_result(S->H->server) != 0) {
@@ -523,10 +524,12 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 							parameter = Z_REFVAL(param->parameter);
 						}
 						if (Z_TYPE_P(parameter) == IS_RESOURCE) {
-							php_stream *stm;
+							php_stream *stm = NULL;
 							php_stream_from_zval_no_verify(stm, parameter);
 							if (stm) {
-								ZVAL_STR(parameter, php_stream_copy_to_mem(stm, PHP_STREAM_COPY_ALL, 0));
+								zend_string *mem = php_stream_copy_to_mem(stm, PHP_STREAM_COPY_ALL, 0);
+								zval_ptr_dtor(parameter);
+								ZVAL_STR(parameter, mem ? mem : ZSTR_EMPTY_ALLOC());
 							} else {
 								pdo_raise_impl_error(stmt->dbh, stmt, "HY105", "Expected a stream resource");
 								return 0;
@@ -696,14 +699,11 @@ static int pdo_mysql_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 		PDO_DBG_RETURN(1);
 	}
 	for (i = 0; i < stmt->column_count; i++) {
-		int namelen;
 
 		if (S->H->fetch_table_names) {
-			namelen = spprintf(&cols[i].name, 0, "%s.%s", S->fields[i].table, S->fields[i].name);
-			cols[i].namelen = namelen;
+			cols[i].name = strpprintf(0, "%s.%s", S->fields[i].table, S->fields[i].name);
 		} else {
-			cols[i].namelen = S->fields[i].name_length;
-			cols[i].name = estrndup(S->fields[i].name, S->fields[i].name_length);
+			cols[i].name = zend_string_init(S->fields[i].name, S->fields[i].name_length, 0);
 		}
 
 		cols[i].precision = S->fields[i].decimals;

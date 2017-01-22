@@ -1,7 +1,7 @@
 #  +----------------------------------------------------------------------+
 #  | PHP Version 7                                                        |
 #  +----------------------------------------------------------------------+
-#  | Copyright (c) 1997-2008 The PHP Group                                |
+#  | Copyright (c) 1997-2017 The PHP Group                                |
 #  +----------------------------------------------------------------------+
 #  | This source file is subject to version 3.01 of the PHP license,      |
 #  | that is bundled with this package in the file LICENSE, and is        |
@@ -36,11 +36,13 @@ build_dirs: $(BUILD_DIR) $(BUILD_DIRS_SUB) $(BUILD_DIR_DEV)
 !if $(RE2C) == ""
 generated_files: build_dirs Zend\zend_ini_parser.c \
 	Zend\zend_language_parser.c \
+	sapi\phpdbg\phpdbg_parser.c \
 	$(PHPDEF) $(MCFILE)
 !else
 generated_files: build_dirs Zend\zend_ini_parser.c \
 	Zend\zend_language_parser.c Zend\zend_ini_scanner.c \
 	Zend\zend_language_scanner.c \
+	sapi\phpdbg\phpdbg_parser.c sapi\phpdbg\phpdbg_lexer.c \
 	$(PHPDEF) $(MCFILE)
 !endif
 
@@ -52,13 +54,22 @@ Zend\zend_ini_parser.c Zend\zend_ini_parser.h: Zend\zend_ini_parser.y
 
 Zend\zend_language_parser.c Zend\zend_language_parser.h: Zend\zend_language_parser.y
 	$(BISON) --output=Zend/zend_language_parser.c -v -d -p zend Zend/zend_language_parser.y
+	@if "$(SED)" neq "" $(SED) -i "s,^int zendparse\(.*\),ZEND_API int zendparse\1,g" Zend/zend_language_parser.c
+	@if "$(SED)" neq "" $(SED) -i "s,^int zendparse\(.*\),ZEND_API int zendparse\1,g" Zend/zend_language_parser.h
+	@if "$(SED)" neq "" $(SED) -i "s,^#ifndef YYTOKENTYPE,#include \"zend.h\"\n#ifndef YYTOKENTYPE,g" Zend/zend_language_parser.h
 
+sapi\phpdbg\phpdbg_parser.c sapi\phpdbg\phpdbg_parser.h: sapi\phpdbg\phpdbg_parser.y
+	$(BISON) --output=sapi/phpdbg/phpdbg_parser.c -v -d -p phpdbg_ sapi/phpdbg/phpdbg_parser.y
+	
 !if $(RE2C) != ""
 Zend\zend_ini_scanner.c: Zend\zend_ini_scanner.l
 	$(RE2C) $(RE2C_FLAGS) --no-generation-date --case-inverted -cbdFt Zend/zend_ini_scanner_defs.h -oZend/zend_ini_scanner.c Zend/zend_ini_scanner.l
 
 Zend\zend_language_scanner.c: Zend\zend_language_scanner.l
 	$(RE2C) $(RE2C_FLAGS) --no-generation-date --case-inverted -cbdFt Zend/zend_language_scanner_defs.h -oZend/zend_language_scanner.c Zend/zend_language_scanner.l
+	
+sapi\phpdbg\phpdbg_lexer.c: sapi\phpdbg\phpdbg_lexer.l
+	$(RE2C) $(RE2C_FLAGS) --no-generation-date -cbdFo sapi/phpdbg/phpdbg_lexer.c sapi/phpdbg/phpdbg_lexer.l
 !endif
 
 !if $(PGOMGR) != ""
@@ -89,6 +100,7 @@ $(PHPDLL_RES): win32\build\template.rc
 		win32\build\template.rc
 
 $(BUILD_DIR)\$(PHPDLL): generated_files $(PHPDEF) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(PHPDLL_RES) $(MCFILE)
+	@copy win32\build\default.manifest $(BUILD_DIR)\$(PHPDLL).manifest >nul
 #	@$(CC) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(STATIC_EXT_LIBS) $(LIBS) $(PHPDLL_RES) /link /out:$(BUILD_DIR)\$(PHPDLL) $(PHP7_PGD_OPTION) $(PHP_LDFLAGS) $(LDFLAGS) $(STATIC_EXT_LDFLAGS)
 	@"$(LINK)" $(PHP_GLOBAL_OBJS_RESP) $(STATIC_EXT_OBJS_RESP) $(STATIC_EXT_LIBS) $(LIBS) $(PHPDLL_RES) /out:$(BUILD_DIR)\$(PHPDLL) $(PHP7_PGD_OPTION) $(PHP_LDFLAGS) $(LDFLAGS) $(STATIC_EXT_LDFLAGS)
 	-@$(_VC_MANIFEST_EMBED_DLL)
@@ -116,7 +128,7 @@ clean: clean-sapi
 	@cd $(BUILD_DIR)
 	@for %D in (_x $(BUILD_DIRS_SUB)) do @if exist %D @del /F /Q %D\*.* > NUL
 	@cd "$(PHP_SRC_DIR)"
-	-@del /F /Q $(BUILD_DIR)\*.res $(BUILD_DIR)\*.lib $(BUILD_DIR)\*.ilk $(BUILD_DIR)\*.pdb $(BUILD_DIR)\*.exp $(PHPDEF) $(BUILD_DIR)\php-$(PHP_VERSION_STRING)-Win32.zip $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)-Win32.zip > NUL
+	-@del /F /Q $(BUILD_DIR)\*.res $(BUILD_DIR)\*.manifest $(BUILD_DIR)\*.lib $(BUILD_DIR)\*.ilk $(BUILD_DIR)\*.pdb $(BUILD_DIR)\*.exp $(PHPDEF) $(BUILD_DIR)\php-$(PHP_VERSION_STRING)-Win32.zip $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)-Win32.zip > NUL
 	-rd /s /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING)
 
 clean-pecl:
@@ -139,11 +151,21 @@ clean-pgo: clean-all
 	-del /f /q $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)$(PHP_ZTS_ARCHIVE_POSTFIX)-Win32-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE).zip
 	-del /f /q $(BUILD_DIR)\php-test-pack-$(PHP_VERSION_STRING).zip
 
-test:
+!if $(PHP_TEST_INI_PATH) == ""
+test: set-tmp-env
 	"$(BUILD_DIR)\php.exe" -d open_basedir= -d output_buffering=0 run-tests.php $(TESTS) -p "$(BUILD_DIR)\php.exe"
 
-build-snap: generated_files
-	SET PATH=$(PATH);$(PHP_BUILD)\bin
+run: set-tmp-env
+	"$(BUILD_DIR)\php.exe" $(ARGS)
+!else
+test: set-tmp-env
+	"$(BUILD_DIR)\php.exe" -n -c $(PHP_TEST_INI_PATH) -d open_basedir= -d output_buffering=0 -d memory_limit=-1 run-tests.php -p "$(BUILD_DIR)\php.exe" -n -c $(PHP_TEST_INI_PATH) $(TESTS)
+
+run: set-tmp-env
+	"$(BUILD_DIR)\php.exe" -n -c $(PHP_TEST_INI_PATH) $(ARGS)
+!endif
+
+build-snap: set-tmp-env generated_files
 	@$(MAKE) "$(BUILD_DIR)\$(PHPDLL)"
 	-for %T in ($(SAPI_TARGETS)) do $(MAKE) /I /nologo "%T"
 	-for %T in ($(EXT_TARGETS)) do $(MAKE) /I /nologo "%T"
@@ -171,7 +193,7 @@ dist: all build-dist
 snap: build-snap build-devel build-dist
 
 $(BUILD_DIR)\deplister.exe:	win32\build\deplister.c
-	$(PHP_CL) /Fo$(BUILD_DIR)\ /Fd$(BUILD_DIR)\ /Fp$(BUILD_DIR)\ /FR$(BUILD_DIR) /Fe$(BUILD_DIR)\deplister.exe win32\build\deplister.c imagehlp.lib
+	$(CC) /Fo$(BUILD_DIR)\ /Fd$(BUILD_DIR)\ /Fp$(BUILD_DIR)\ /FR$(BUILD_DIR) /Fe$(BUILD_DIR)\deplister.exe win32\build\deplister.c imagehlp.lib
 
 msi-installer: dist
 	$(BUILD_DIR)\php.exe ..\php-installer\build-installer.php "$(BUILD_DIR)" "$(PHPDLL)" "$(SAPI_TARGETS)" "$(EXT_TARGETS)" "$(PECL_TARGETS)"
@@ -186,12 +208,14 @@ build-lib: build-ext-libs
 build-devel: build-headers build-lib
 	@if not exist $(BUILD_DIR_DEV)\script mkdir $(BUILD_DIR_DEV)\script >nul
 	@if not exist $(BUILD_DIR_DEV)\build mkdir $(BUILD_DIR_DEV)\build >nul
+	@copy run-tests.php $(BUILD_DIR_DEV)\script\ /y >nul
 	@copy win32\build\confutils.js $(BUILD_DIR_DEV)\script\ /y >nul
 	@copy win32\build\configure.tail $(BUILD_DIR_DEV)\script\ /y >nul
 	@copy win32\build\config.w32.phpize.in $(BUILD_DIR_DEV)\script\ /y >nul
 	@copy win32\build\Makefile.phpize $(BUILD_DIR_DEV)\script\ /y >nul
 	@copy win32\build\phpize.bat $(BUILD_DIR_DEV)\ /y >nul
 	@copy win32\build\template.rc $(BUILD_DIR_DEV)\build\ /y >nul
+	@copy win32\build\default.manifest $(BUILD_DIR_DEV)\build\ /y >nul
 	@copy $(BUILD_DIR)\devel\config.phpize.js $(BUILD_DIR_DEV)\script\ /y >nul
 	@copy $(BUILD_DIR)\devel\phpize.js $(BUILD_DIR_DEV)\script\ /y >nul
 	@copy $(BUILD_DIR)\devel\ext_deps.js $(BUILD_DIR_DEV)\script\ /y >nul
@@ -201,9 +225,12 @@ install-sdk: build-devel
 
 really-install:
 	@if not exist $(PHP_PREFIX) mkdir $(PHP_PREFIX)
+	@if not exist $(PHP_PREFIX)\ext mkdir $(PHP_PREFIX)\ext
 	@echo Installing files under $(PHP_PREFIX)
 	@copy $(BUILD_DIR)\*.exe $(PHP_PREFIX) /y >nul
-	@copy $(BUILD_DIR)\*.dll $(PHP_PREFIX) /y >nul
+	@copy $(BUILD_DIR)\php_*.dll $(PHP_PREFIX)\ext /y >nul
+	dir /b $(BUILD_DIR)\php_*.dll > $(BUILD_DIR)\extension_dlls.txt
+	@xcopy $(BUILD_DIR)\*.dll /exclude:$(BUILD_DIR)\extension_dlls.txt $(PHP_PREFIX) /y >nul
 	@echo Registering event source with syslog (requires admin rights)
 	@echo It's okay for this step to fail:
 	-$(PHP_PREFIX)\php.exe -n -dextension_dir=$(PHP_PREFIX) win32/build/registersyslog.php $(PHP_PREFIX)\$(PHPDLL)

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Stig Sæther Bakken <ssb@php.net>                            |
+   | Authors: Stig SÃ¦ther Bakken <ssb@php.net>                            |
    |          Andreas Karajannis <Andreas.Karajannis@gmd.de>              |
    |	      Kevin N. Shallow <kshallow@tampabay.rr.com> (Birdstep)      |
    +----------------------------------------------------------------------+
@@ -31,6 +31,9 @@
 
 extern zend_module_entry odbc_module_entry;
 #define odbc_module_ptr &odbc_module_entry
+
+#include "php_version.h"
+#define PHP_ODBC_VERSION PHP_VERSION
 
 #if defined(HAVE_DBMAKER) || defined(PHP_WIN32) || defined(HAVE_IBMDB2) || defined(HAVE_UNIXODBC) || defined(HAVE_BIRDSTEP) || defined(HAVE_IODBC)
 # define PHP_ODBC_HAVE_FETCH_HASH 1
@@ -97,6 +100,14 @@ PHP_FUNCTION(odbc_gettypeinfo);
 PHP_FUNCTION(odbc_primarykeys);
 PHP_FUNCTION(odbc_specialcolumns);
 PHP_FUNCTION(odbc_statistics);
+
+#ifdef PHP_WIN32
+# define PHP_ODBC_API __declspec(dllexport)
+#elif defined(__GNUC__) && __GNUC__ >= 4
+# define PHP_ODBC_API __attribute__ ((visibility("default")))
+#else
+# define PHP_ODBC_API
+#endif
 
 #else
 

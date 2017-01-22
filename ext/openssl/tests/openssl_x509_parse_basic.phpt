@@ -1,8 +1,16 @@
 --TEST--
-openssl_x509_parse() basic test
+openssl_x509_parse() tests
 --SKIPIF--
 <?php if (!extension_loaded("openssl")) print "skip"; 
 if (OPENSSL_VERSION_NUMBER < 0x10000000) die("skip Output requires OpenSSL 1.0");
+if(substr(PHP_OS, 0, 3) == 'WIN') {
+	$exp = "W. Europe Standard Time";
+	$cmd = "powershell -command [System.TimeZoneInfo]::Local.Id";
+	$r = trim(shell_exec($cmd));
+	if ($exp !== $r) {
+		die("skip expect '$exp', got '$r'");
+	}
+}
 ?>
 --FILE--
 <?php
@@ -12,7 +20,7 @@ var_dump(openssl_x509_parse($cert));
 var_dump(openssl_x509_parse($cert, false));
 ?>
 --EXPECTF--
-array(12) {
+array(16) {
   ["name"]=>
   string(96) "/C=BR/ST=Rio Grande do Sul/L=Porto Alegre/CN=Henrique do N. Angelo/emailAddress=hnangelo@php.net"
   ["subject"]=>
@@ -47,6 +55,8 @@ array(12) {
   int(2)
   ["serialNumber"]=>
   string(20) "12593567369101004962"
+  ["serialNumberHex"]=>
+  string(16) "AEC556CC723750A2"
   ["validFrom"]=>
   string(13) "080630102843Z"
   ["validTo"]=>
@@ -55,6 +65,12 @@ array(12) {
   int(1214821723)
   ["validTo_time_t"]=>
   int(1217413723)
+  ["signatureTypeSN"]=>
+  string(8) "RSA-SHA1"
+  ["signatureTypeLN"]=>
+  string(21) "sha1WithRSAEncryption"
+  ["signatureTypeNID"]=>
+  int(65)
   ["purposes"]=>
   array(9) {
     [1]=>
@@ -152,7 +168,7 @@ serial:AE:C5:56:CC:72:37:50:A2
     string(7) "CA:TRUE"
   }
 }
-array(12) {
+array(16) {
   ["name"]=>
   string(96) "/C=BR/ST=Rio Grande do Sul/L=Porto Alegre/CN=Henrique do N. Angelo/emailAddress=hnangelo@php.net"
   ["subject"]=>
@@ -187,6 +203,8 @@ array(12) {
   int(2)
   ["serialNumber"]=>
   string(20) "12593567369101004962"
+  ["serialNumberHex"]=>
+  string(16) "AEC556CC723750A2"
   ["validFrom"]=>
   string(13) "080630102843Z"
   ["validTo"]=>
@@ -195,6 +213,12 @@ array(12) {
   int(1214821723)
   ["validTo_time_t"]=>
   int(1217413723)
+  ["signatureTypeSN"]=>
+  string(8) "RSA-SHA1"
+  ["signatureTypeLN"]=>
+  string(21) "sha1WithRSAEncryption"
+  ["signatureTypeNID"]=>
+  int(65)
   ["purposes"]=>
   array(9) {
     [1]=>

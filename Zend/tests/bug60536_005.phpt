@@ -30,9 +30,5 @@ echo "POST-CLASS-GUARD2\n";
 ?>
 --EXPECTF--	
 PRE-CLASS-GUARD
-
-Strict Standards: Base and THello1 define the same property ($hello) in the composition of SameNameInSubClassProducesNotice. This might be incompatible, to improve maintainability consider using accessor methods in traits instead. Class was composed in %s on line %d
 POST-CLASS-GUARD
-
-Strict Standards: Notice and THello1 define the same property ($hello) in the composition of Notice. This might be incompatible, to improve maintainability consider using accessor methods in traits instead. Class was composed in %s on line %d
 POST-CLASS-GUARD2

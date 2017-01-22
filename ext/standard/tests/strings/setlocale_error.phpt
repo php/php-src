@@ -35,6 +35,10 @@ echo "\n-- Testing setlocale() function with invalid multiple locales, 'category
 //Invalid array of locales
 var_dump( setlocale(LC_ALL,"en_US.invalid", "en_AU.invalid", "ko_KR.invalid") );
 
+echo "\n-- Testing setlocale() function with locale name too long, 'category' = LC_ALL --";
+//Invalid locale - locale name too long
+var_dump(setlocale(LC_ALL,str_pad('',255,'A')));
+
 echo "\nDone";
 ?>
 --EXPECTF--
@@ -52,6 +56,10 @@ NULL
 bool(false)
 
 -- Testing setlocale() function with invalid multiple locales, 'category' = LC_ALL --
+bool(false)
+
+-- Testing setlocale() function with locale name too long, 'category' = LC_ALL --
+Warning: setlocale(): Specified locale name is too long in %s on line %d
 bool(false)
 
 Done

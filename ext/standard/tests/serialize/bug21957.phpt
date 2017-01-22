@@ -6,7 +6,7 @@ class test
 {
 	public $a, $b;
 
-	function test()
+	function __construct()
 	{
 		$this->a = 7;
 		$this->b = 2;

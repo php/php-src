@@ -1,6 +1,15 @@
 #! /bin/sh
 
-STD='make -f Makefile.frag RE2C="re2c" RE2C_FLAGS="-i" YACC="bison -y -l" srcdir=Zend builddir=Zend top_srcdir=.'
+if [ -z $YACC ]; then
+  YACC="bison"
+fi
+YACC="$YACC -y -l"
+
+if [ -z $RE2C ]; then
+  RE2C="re2c"
+fi
+
+STD="make -f Makefile.frag RE2C='$RE2C' RE2C_FLAGS='-i' YACC='$YACC' srcdir=Zend builddir=Zend top_srcdir=."
 
 (eval "$STD Zend/zend_language_parser.c Zend/zend_language_scanner.c Zend/zend_ini_parser.c Zend/zend_ini_scanner.c")
 

@@ -36,7 +36,9 @@ int gdGetC(gdIOCtx *ctx);
 int gdGetBuf(void *, int, gdIOCtx*);
 int gdGetByte(int *result, gdIOCtx *ctx);
 int gdGetWord(int *result, gdIOCtx *ctx);
+int gdGetWordLSB(signed short int *result, gdIOCtx *ctx);
 int gdGetInt(int *result, gdIOCtx *ctx);
+int gdGetIntLSB(signed int *result, gdIOCtx *ctx);
 
 int gdSeek(gdIOCtx *ctx, const int);
 long gdTell(gdIOCtx *ctx);

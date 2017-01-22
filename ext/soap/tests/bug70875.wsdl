@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions name="BookingService" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/08/addressing/policy"
+                  xmlns:wsa10="http://www.w3.org/2005/08/addressing"
+                  xmlns:msc="http://schemas.microsoft.com/ws/2005/12/wsdl/contract"
+                  xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
+                  xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex"
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+                  xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata"
+                  xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing"
+                  xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"
+                  xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl"
+                  xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/"
+                  xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+                  xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <wsdl:types>
+        <xs:schema elementFormDefault="unqualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+            <xs:element name="TestService">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" maxOccurs="1" name="TestServiceRQ" type="TestServiceRQ"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:complexType name="TestServiceRQ">
+                <xs:complexContent mixed="false">
+                    <xs:extension base="BaseRequest"/>
+                </xs:complexContent>
+            </xs:complexType>
+            <xs:complexType name="BaseRequest">
+                <xs:sequence>
+                    <xs:element minOccurs="0" maxOccurs="1" name="RqHeader" type="RequestHeader"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="RequestHeader">
+                <xs:sequence>
+                    <xs:element minOccurs="0" maxOccurs="1" name="AvesAutoLogin" type="AutoLogin"/>
+                </xs:sequence>
+                <xs:attribute name="HostID" type="xs:string"/>
+                <xs:attribute name="Xtoken" type="xs:string"/>
+                <xs:attribute name="Interface" type="xs:string"/>
+                <xs:attribute name="UserName" type="xs:string"/>
+            </xs:complexType>
+            <xs:complexType name="AutoLogin">
+                <xs:attribute name="VatCode" type="xs:string"/>
+                <xs:attribute name="ZipCode" type="xs:string"/>
+                <xs:attribute name="HashCode" type="xs:string"/>
+            </xs:complexType>
+            <xs:element name="TestServiceResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" maxOccurs="1" name="TestServiceRS" type="TestServiceRS"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:complexType name="TestServiceRS">
+                <xs:complexContent mixed="false">
+                    <xs:extension base="BaseResponse"/>
+                </xs:complexContent>
+            </xs:complexType>
+            <xs:complexType name="BaseResponse">
+                <xs:sequence>
+                    <xs:element minOccurs="0" maxOccurs="1" name="RsStatus" type="ResponseStatus"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="ResponseStatus">
+                <xs:sequence>
+                    <xs:element minOccurs="0" maxOccurs="1" name="ErrorCode" type="xs:string"/>
+                    <xs:element minOccurs="0" maxOccurs="1" name="ErrorDescription" type="xs:string"/>
+                    <xs:element minOccurs="0" maxOccurs="unbounded" name="Warnings" type="ResponseWarning"/>
+                    <xs:element minOccurs="0" maxOccurs="1" name="InternalLog" type="xs:string"/>
+                    <xs:element minOccurs="0" maxOccurs="1" name="ProviderLogs" type="ArrayOfProviderLog"/>
+                </xs:sequence>
+                <xs:attribute name="Status" type="ResponseStatusType" use="required"/>
+            </xs:complexType>
+            <xs:complexType name="ResponseWarning">
+                <xs:attribute name="WarnType" type="ResponseWarningTypes" use="required"/>
+                <xs:attribute name="Description" type="xs:string"/>
+            </xs:complexType>
+            <xs:simpleType name="ResponseWarningTypes">
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="Unknown"/>
+                    <xs:enumeration value="DataNotFound"/>
+                    <xs:enumeration value="InactiveAgency"/>
+                </xs:restriction>
+            </xs:simpleType>
+            <xs:complexType name="ArrayOfProviderLog">
+                <xs:sequence>
+                    <xs:element minOccurs="0" maxOccurs="unbounded" name="ProviderLog" nillable="true"
+                                type="ProviderLog"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="ProviderLog">
+                <xs:sequence>
+                    <xs:element minOccurs="0" maxOccurs="1" name="OtaReqContent">
+                        <xs:complexType mixed="true">
+                            <xs:sequence>
+                                <xs:any/>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element minOccurs="0" maxOccurs="1" name="OtaResContent">
+                        <xs:complexType mixed="true">
+                            <xs:sequence>
+                                <xs:any/>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                </xs:sequence>
+                <xs:attribute name="ProviderCode" type="xs:string"/>
+                <xs:attribute name="RequestTime" type="xs:string"/>
+                <xs:attribute name="PostRequestTime" type="xs:string"/>
+                <xs:attribute name="ResponseCount" type="xs:string"/>
+                <xs:attribute name="ResponseMessage" type="xs:string"/>
+            </xs:complexType>
+            <xs:simpleType name="ResponseStatusType">
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="OK"/>
+                    <xs:enumeration value="ERROR"/>
+                    <xs:enumeration value="WARNING"/>
+                    <xs:enumeration value="TIMEOUT"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:schema>
+    </wsdl:types>
+    <wsdl:message name="IBookingService_TestService_InputMessage">
+        <wsdl:part name="parameters" element="TestService"/>
+    </wsdl:message>
+    <wsdl:message name="IBookingService_TestService_OutputMessage">
+        <wsdl:part name="parameters" element="TestServiceResponse"/>
+    </wsdl:message>
+    <wsdl:portType name="IBookingService">
+        <wsdl:operation name="TestService">
+            <wsdl:input wsaw:Action="urn:IBookingService/TestService"
+                        message="IBookingService_TestService_InputMessage"/>
+            <wsdl:output wsaw:Action="urn:IBookingService/TestServiceResponse"
+                         message="IBookingService_TestService_OutputMessage"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="interop_booking_v2" type="IBookingService">
+        <wsdl:operation name="TestService">
+            <soap:operation soapAction="urn:IBookingService/TestService" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="BookingService">
+        <wsdl:port name="interop_booking_v2" binding="interop_booking_v2">
+            <soap:address location="http://localhost/foobar/soap"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>

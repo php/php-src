@@ -15,22 +15,22 @@ snmp_set_quick_print(false);
 snmp_set_valueretrieval(SNMP_VALUE_PLAIN);
 
 try {
-var_dump(new SNMP(SNMP::VERSION_1, $hostname));
-} catch (Exception $e) {
+	var_dump(new SNMP(SNMP::VERSION_1, $hostname));
+} catch (TypeError $e) {
 	print $e->getMessage() . "\n";
 }
 try {
-var_dump(new SNMP(SNMP::VERSION_1, $hostname, $community, ''));
-} catch (Exception $e) {
+	var_dump(new SNMP(SNMP::VERSION_1, $hostname, $community, ''));
+} catch (TypeError $e) {
 	print $e->getMessage() . "\n";
 }
 try {
-var_dump(new SNMP(SNMP::VERSION_1, $hostname, $community, $timeout, ''));
-} catch (Exception $e) {
+	var_dump(new SNMP(SNMP::VERSION_1, $hostname, $community, $timeout, ''));
+} catch (TypeError $e) {
 	print $e->getMessage() . "\n";
 }
 try {
-var_dump(new SNMP(7, $hostname, $community));
+	var_dump(new SNMP(7, $hostname, $community));
 } catch (Exception $e) {
 	print $e->getMessage() . "\n";
 }

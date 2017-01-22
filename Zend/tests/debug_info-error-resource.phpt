@@ -1,5 +1,7 @@
 --TEST--
 Testing __debugInfo() magic method with bad returns RESOURCE
+--INI--
+allow_url_fopen=1
 --FILE--
 <?php
 

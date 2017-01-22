@@ -2,6 +2,9 @@
 MySQL PDO->__construct() - URI
 --SKIPIF--
 <?php
+if (substr(PHP_OS, 0, 3) == 'WIN') {
+    die('skip not for Windows');
+}
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
@@ -68,9 +71,9 @@ MySQLPDOTest::skip();
 	print "done!";
 ?>
 --EXPECTF--
-Warning: PDO::__construct(%s
+Warning: PDO::__construct(file:/tmp/pdomuri.tst): failed to open stream: No such file or directory in %s on line %d
 [002] URI=uri:file:%spdomuri.tst, DSN=mysql%sdbname=%s, File=%spdomuri.tst (%d bytes, 'mysql%sdbname=%s'), invalid data source URI
 
-Warning: PDO::__construct(%s
+Warning: PDO::__construct(file:/tmp/pdomuri.tst): failed to open stream: No such file or directory in %s on line %d
 [003] URI=uri:file:%spdomuri.tst, DSN=mysql%sdbname=%s, File=%spdomuri.tst (%d bytes, 'mysql%sdbname=letshopeinvalid%s'), chr(0) test, invalid data source URI
 done!

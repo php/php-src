@@ -86,18 +86,16 @@ U_CFUNC zval *timezone_convert_to_datetimezone(const TimeZone *timeZone,
 		//convert offset from milliseconds to minutes
 		tzobj->tzi.utc_offset = -1 * timeZone->getRawOffset() / (60 * 1000);
 	} else {
-		char *str;
-		size_t str_len;
+		zend_string *u8str;
 		/* Call the constructor! */
-		if (intl_charFromString(id, &str, &str_len, &INTL_ERROR_CODE(*outside_error)) == FAILURE) {
+		u8str = intl_charFromString(id, &INTL_ERROR_CODE(*outside_error));
+		if (!u8str) {
 			spprintf(&message, 0, "%s: could not convert id to UTF-8", func);
 			intl_errors_set(outside_error, INTL_ERROR_CODE(*outside_error),
 				message, 1);
 			goto error;
 		}
-		ZVAL_STRINGL(&arg, str, str_len);
-		//???
-		efree(str);
+		ZVAL_STR(&arg, u8str);
 		zend_call_method_with_1_params(ret, NULL, NULL, "__construct", NULL, &arg);
 		if (EG(exception)) {
 			spprintf(&message, 0,
@@ -248,7 +246,7 @@ static zend_object *TimeZone_clone_obj(zval *object)
 			intl_errors_set_custom_msg(TIMEZONE_ERROR_P(to_orig),
 				"Could not clone IntlTimeZone", 0);
 			err_msg = intl_error_get_message(TIMEZONE_ERROR_P(to_orig));
-			zend_throw_exception(NULL, err_msg->val, 0);
+			zend_throw_exception(NULL, ZSTR_VAL(err_msg), 0);
 			zend_string_free(err_msg);
 		} else {
 			to_new->utimezone = newTimeZone;
@@ -291,8 +289,7 @@ static HashTable *TimeZone_get_debug_info(zval *object, int *is_temp)
 	TimeZone_object	*to;
 	const TimeZone	*tz;
 	UnicodeString	ustr;
-	char			*str;
-	size_t			str_len;
+	zend_string     *u8str;
 	HashTable 		*debug_info;
 	UErrorCode		uec = U_ZERO_ERROR;
 
@@ -314,15 +311,13 @@ static HashTable *TimeZone_get_debug_info(zval *object, int *is_temp)
 	zend_hash_str_update(debug_info, "valid", sizeof("valid") - 1, &zv);
 
 	tz->getID(ustr);
-	intl_convert_utf16_to_utf8(&str, &str_len,
+	u8str = intl_convert_utf16_to_utf8(
 		ustr.getBuffer(), ustr.length(), &uec);
-	if (U_FAILURE(uec)) {
+	if (!u8str) {
 		return debug_info;
 	}
-	ZVAL_STRINGL(&zv, str, str_len);
+	ZVAL_NEW_STR(&zv, u8str);
 	zend_hash_str_update(debug_info, "id", sizeof("id") - 1, &zv);
-	// TODO: avoid reallocation ???
-	efree(str);
 
 	int32_t rawOffset, dstOffset;
 	UDate now = Calendar::getNow();
@@ -444,6 +439,17 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(ainfo_tz_void, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
+#if U_ICU_VERSION_MAJOR_NUM >= 52
+ZEND_BEGIN_ARG_INFO_EX(ainfo_tz_getWindowsID, 0, ZEND_RETURN_VALUE, 1)
+	ZEND_ARG_INFO(0, timezone)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(ainfo_tz_getIDForWindowsID, 0, ZEND_RETURN_VALUE, 1)
+	ZEND_ARG_INFO(0, timezone)
+	ZEND_ARG_INFO(0, region)
+ZEND_END_ARG_INFO()
+#endif
+
 /* }}} */
 
 /* {{{ TimeZone_class_functions
@@ -480,6 +486,10 @@ static zend_function_entry TimeZone_class_functions[] = {
 	PHP_ME_MAPPING(toDateTimeZone,		intltz_to_date_time_zone,		ainfo_tz_void,				ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(getErrorCode,		intltz_get_error_code,			ainfo_tz_void,				ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(getErrorMessage,		intltz_get_error_message,		ainfo_tz_void,				ZEND_ACC_PUBLIC)
+#if U_ICU_VERSION_MAJOR_NUM >= 52
+	PHP_ME_MAPPING(getWindowsID,		intltz_get_windows_id,			ainfo_tz_getWindowsID,		ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	PHP_ME_MAPPING(getIDForWindowsID,	intltz_get_id_for_windows_id,		ainfo_tz_getIDForWindowsID,	ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+#endif
 	PHP_FE_END
 };
 /* }}} */

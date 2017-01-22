@@ -167,7 +167,6 @@ static zend_function_entry IntlDateFormatter_class_functions[] = {
 	PHP_NAMED_FE( getCalendarObject, ZEND_FN( datefmt_get_calendar_object ), arginfo_intldateformatter_getdatetype )
 	PHP_NAMED_FE( setCalendar, ZEND_FN( datefmt_set_calendar ), arginfo_intldateformatter_setcalendar )
 	PHP_NAMED_FE( getTimeZoneId, ZEND_FN( datefmt_get_timezone_id ), arginfo_intldateformatter_getdatetype )
-	PHP_NAMED_FE( setTimeZoneId, ZEND_FN( datefmt_set_timezone_id ), arginfo_intldateformatter_settimezoneid )
 	PHP_NAMED_FE( getTimeZone, ZEND_FN( datefmt_get_timezone ), arginfo_intldateformatter_getdatetype )
 	PHP_NAMED_FE( setTimeZone, ZEND_FN( datefmt_set_timezone ), arginfo_intldateformatter_settimezoneid )
 	PHP_NAMED_FE( setPattern, ZEND_FN( datefmt_set_pattern ), arginfo_intldateformatter_setpattern )

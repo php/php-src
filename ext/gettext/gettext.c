@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -127,7 +127,7 @@ zend_module_entry php_gettext_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(php_gettext),
-	NO_VERSION_YET,
+	PHP_GETTEXT_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 
@@ -139,13 +139,13 @@ ZEND_GET_MODULE(php_gettext)
 #define PHP_GETTEXT_MAX_MSGID_LENGTH 4096
 
 #define PHP_GETTEXT_DOMAIN_LENGTH_CHECK \
-	if (domain_len > PHP_GETTEXT_MAX_DOMAIN_LENGTH) { \
+	if (UNEXPECTED(domain_len > PHP_GETTEXT_MAX_DOMAIN_LENGTH)) { \
 		php_error_docref(NULL, E_WARNING, "domain passed too long"); \
 		RETURN_FALSE; \
 	}
 
 #define PHP_GETTEXT_LENGTH_CHECK(check_name, check_len) \
-	if (check_len > PHP_GETTEXT_MAX_MSGID_LENGTH) { \
+	if (UNEXPECTED(check_len > PHP_GETTEXT_MAX_MSGID_LENGTH)) { \
 		php_error_docref(NULL, E_WARNING, "%s passed too long", check_name); \
 		RETURN_FALSE; \
 	}
@@ -186,15 +186,15 @@ PHP_NAMED_FUNCTION(zif_textdomain)
    Return the translation of msgid for the current domain, or msgid unaltered if a translation does not exist */
 PHP_NAMED_FUNCTION(zif_gettext)
 {
-	char *msgid, *msgstr;
-	size_t msgid_len;
+	char *msgstr;
+	zend_string *msgid;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &msgid, &msgid_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(msgid)
+	ZEND_PARSE_PARAMETERS_END();
 
-	PHP_GETTEXT_LENGTH_CHECK("msgid", msgid_len)
-	msgstr = gettext(msgid);
+	PHP_GETTEXT_LENGTH_CHECK("msgid", ZSTR_LEN(msgid))
+	msgstr = gettext(ZSTR_VAL(msgid));
 
 	RETURN_STRING(msgstr);
 }

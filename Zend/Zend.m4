@@ -153,14 +153,6 @@ AC_ARG_ENABLE(debug,
 
 AC_DEFUN([LIBZEND_OTHER_CHECKS],[
 
-AC_ARG_WITH(zend-vm,
-[  --with-zend-vm=TYPE     Set virtual machine dispatch method. Type is
-                          one of "CALL", "SWITCH" or "GOTO" [TYPE=CALL]],[
-  PHP_ZEND_VM=$withval
-],[
-  PHP_ZEND_VM=CALL
-])
-
 AC_ARG_ENABLE(maintainer-zts,
 [  --enable-maintainer-zts Enable thread safety - for code maintainers only!!],[
   ZEND_MAINTAINER_ZTS=$enableval
@@ -176,9 +168,6 @@ AC_ARG_ENABLE(inline-optimization,
   ZEND_INLINE_OPTIMIZATION=yes
 ])
 
-AC_MSG_CHECKING([virtual machine dispatch method])
-AC_MSG_RESULT($PHP_ZEND_VM)
-
 AC_MSG_CHECKING(whether to enable thread-safety)
 AC_MSG_RESULT($ZEND_MAINTAINER_ZTS)
 
@@ -187,19 +176,6 @@ AC_MSG_RESULT($ZEND_INLINE_OPTIMIZATION)
 
 AC_MSG_CHECKING(whether to enable Zend debugging)
 AC_MSG_RESULT($ZEND_DEBUG)
-
-case $PHP_ZEND_VM in
-  SWITCH)
-    AC_DEFINE(ZEND_VM_KIND,ZEND_VM_KIND_SWITCH,[virtual machine dispatch method])
-    ;;
-  GOTO)
-    AC_DEFINE(ZEND_VM_KIND,ZEND_VM_KIND_GOTO,[virtual machine dispatch method])
-    ;;
-  *)
-    PHP_ZEND_VM=CALL
-    AC_DEFINE(ZEND_VM_KIND,ZEND_VM_KIND_CALL,[virtual machine dispatch method])
-    ;;
-esac
 
 if test "$ZEND_DEBUG" = "yes"; then
   AC_DEFINE(ZEND_DEBUG,1,[ ])
@@ -394,10 +370,10 @@ AC_CHECK_FUNCS(mremap)
 
 
 AC_ARG_ENABLE(zend-signals,
-[  --enable-zend-signals   Use zend signal handling],[
+[  --disable-zend-signals  whether to enable zend signal handling],[
   ZEND_SIGNALS=$enableval
 ],[
-  ZEND_SIGNALS=no
+  ZEND_SIGNALS=yes
 ])  
 
 AC_CHECK_FUNC(sigaction, [
@@ -425,11 +401,205 @@ if test -r "/dev/urandom" && test -c "/dev/urandom"; then
   AC_MSG_RESULT(yes) 
 else 
   AC_MSG_RESULT(no) 
-  AC_MSG_CHECKING(whether /dev/arandom exists) 
-  if test -r "/dev/arandom" && test -c "/dev/arandom"; then 
-    AC_DEFINE([HAVE_DEV_ARANDOM], 1, [Define if the target system has /dev/arandom device])
-    AC_MSG_RESULT(yes) 
-  else 
-    AC_MSG_RESULT(no) 
-  fi 
+fi
+
+AC_MSG_CHECKING(whether /dev/arandom exists) 
+if test -r "/dev/arandom" && test -c "/dev/arandom"; then 
+  AC_DEFINE([HAVE_DEV_ARANDOM], 1, [Define if the target system has /dev/arandom device])
+  AC_MSG_RESULT(yes) 
+else 
+  AC_MSG_RESULT(no) 
 fi 
+
+AC_ARG_ENABLE(gcc-global-regs,
+[  --disable-gcc-global-regs 
+                          whether to enable GCC global register variables],[
+  ZEND_GCC_GLOBAL_REGS=$enableval
+],[
+  ZEND_GCC_GLOBAL_REGS=yes
+])
+AC_MSG_CHECKING(for global register variables support)
+if test "$ZEND_GCC_GLOBAL_REGS" != "no"; then
+  AC_TRY_COMPILE([
+#if defined(__GNUC__)
+# define ZEND_GCC_VERSION (__GNUC__ * 1000 + __GNUC_MINOR__)
+#else
+# define ZEND_GCC_VERSION 0
+#endif
+#if defined(__GNUC__) && ZEND_GCC_VERSION >= 4008 && defined(i386)
+# define ZEND_VM_FP_GLOBAL_REG "%esi"
+# define ZEND_VM_IP_GLOBAL_REG "%edi"
+#elif defined(__GNUC__) && ZEND_GCC_VERSION >= 4008 && defined(__x86_64__)
+# define ZEND_VM_FP_GLOBAL_REG "%r14"
+# define ZEND_VM_IP_GLOBAL_REG "%r15"
+#elif defined(__GNUC__) && ZEND_GCC_VERSION >= 4008 && defined(__powerpc64__)
+# define ZEND_VM_FP_GLOBAL_REG "r28"
+# define ZEND_VM_IP_GLOBAL_REG "r29"
+#elif defined(__IBMC__) && ZEND_GCC_VERSION >= 4002 && defined(__powerpc64__)
+# define ZEND_VM_FP_GLOBAL_REG "r28"
+# define ZEND_VM_IP_GLOBAL_REG "r29"
+#else
+# error "global register variables are not supported"
+#endif
+typedef int (*opcode_handler_t)(void);
+register void *FP  __asm__(ZEND_VM_FP_GLOBAL_REG);
+register const opcode_handler_t *IP __asm__(ZEND_VM_IP_GLOBAL_REG);
+int emu(const opcode_handler_t *ip, void *fp) {
+	const opcode_handler_t *orig_ip = IP;
+	void *orig_fp = FP;
+	IP = ip;
+	FP = fp;
+	while ((*ip)());
+	FP = orig_fp;
+	IP = orig_ip;
+}
+  ], [
+  ], [
+    ZEND_GCC_GLOBAL_REGS=yes
+  ], [
+    ZEND_GCC_GLOBAL_REGS=no
+  ])
+fi
+if test "$ZEND_GCC_GLOBAL_REGS" = "yes"; then
+  AC_DEFINE([HAVE_GCC_GLOBAL_REGS], 1, [Define if the target system has support for global register variables])
+else
+  HAVE_GCC_GLOBAL_REGS=no
+fi
+AC_MSG_RESULT($ZEND_GCC_GLOBAL_REGS)
+
+dnl
+dnl Check if atof() accepts NAN
+dnl
+AC_CACHE_CHECK(whether atof() accepts NAN, ac_cv_atof_accept_nan,[
+AC_TRY_RUN([
+#include <math.h>
+#include <stdlib.h>
+
+#ifdef HAVE_ISNAN
+#define zend_isnan(a) isnan(a)
+#elif defined(HAVE_FPCLASS)
+#define zend_isnan(a) ((fpclass(a) == FP_SNAN) || (fpclass(a) == FP_QNAN))
+#else
+#define zend_isnan(a) 0
+#endif
+
+int main(int argc, char** argv)
+{
+	return zend_isnan(atof("NAN")) ? 0 : 1;
+}
+],[
+  ac_cv_atof_accept_nan=yes
+],[
+  ac_cv_atof_accept_nan=no
+],[
+  ac_cv_atof_accept_nan=no
+])])
+if test "$ac_cv_atof_accept_nan" = "yes"; then
+  AC_DEFINE([HAVE_ATOF_ACCEPTS_NAN], 1, [whether atof() accepts NAN])
+fi
+
+dnl
+dnl Check if atof() accepts INF
+dnl
+AC_CACHE_CHECK(whether atof() accepts INF, ac_cv_atof_accept_inf,[
+AC_TRY_RUN([
+#include <math.h>
+#include <stdlib.h>
+
+#ifdef HAVE_ISINF
+#define zend_isinf(a) isinf(a)
+#elif defined(INFINITY)
+/* Might not work, but is required by ISO C99 */
+#define zend_isinf(a) (((a)==INFINITY)?1:0)
+#elif defined(HAVE_FPCLASS)
+#define zend_isinf(a) ((fpclass(a) == FP_PINF) || (fpclass(a) == FP_NINF))
+#else
+#define zend_isinf(a) 0
+#endif
+
+int main(int argc, char** argv)
+{
+	return zend_isinf(atof("INF")) && zend_isinf(atof("-INF")) ? 0 : 1;
+}
+],[
+  ac_cv_atof_accept_inf=yes
+],[
+  ac_cv_atof_accept_inf=no
+],[
+  ac_cv_atof_accept_inf=no
+])])
+if test "$ac_cv_atof_accept_inf" = "yes"; then
+  AC_DEFINE([HAVE_ATOF_ACCEPTS_INF], 1, [whether atof() accepts INF])
+fi
+
+dnl
+dnl Check if HUGE_VAL == INF
+dnl
+AC_CACHE_CHECK(whether HUGE_VAL == INF, ac_cv_huge_val_inf,[
+AC_TRY_RUN([
+#include <math.h>
+#include <stdlib.h>
+
+#ifdef HAVE_ISINF
+#define zend_isinf(a) isinf(a)
+#elif defined(INFINITY)
+/* Might not work, but is required by ISO C99 */
+#define zend_isinf(a) (((a)==INFINITY)?1:0)
+#elif defined(HAVE_FPCLASS)
+#define zend_isinf(a) ((fpclass(a) == FP_PINF) || (fpclass(a) == FP_NINF))
+#else
+#define zend_isinf(a) 0
+#endif
+
+int main(int argc, char** argv)
+{
+	return zend_isinf(HUGE_VAL) ? 0 : 1;
+}
+],[
+  ac_cv_huge_val_inf=yes
+],[
+  ac_cv_huge_val_inf=no
+],[
+  ac_cv_huge_val_inf=yes
+])])
+dnl This is the most probable fallback so we assume yes in case of cross compile.
+if test "$ac_cv_huge_val_inf" = "yes"; then
+  AC_DEFINE([HAVE_HUGE_VAL_INF], 1, [whether HUGE_VAL == INF])
+fi
+
+dnl
+dnl Check if HUGE_VAL + -HUGEVAL == NAN
+dnl
+AC_CACHE_CHECK(whether HUGE_VAL + -HUGEVAL == NAN, ac_cv_huge_val_nan,[
+AC_TRY_RUN([
+#include <math.h>
+#include <stdlib.h>
+
+#ifdef HAVE_ISNAN
+#define zend_isnan(a) isnan(a)
+#elif defined(HAVE_FPCLASS)
+#define zend_isnan(a) ((fpclass(a) == FP_SNAN) || (fpclass(a) == FP_QNAN))
+#else
+#define zend_isnan(a) 0
+#endif
+
+int main(int argc, char** argv)
+{
+#if defined(__sparc__) && !(__GNUC__ >= 3)
+	/* prevent bug #27830 */
+	return 1;
+#else
+	return zend_isnan(HUGE_VAL + -HUGE_VAL) ? 0 : 1;
+#endif
+}
+],[
+  ac_cv_huge_val_nan=yes
+],[
+  ac_cv_huge_val_nan=no
+],[
+  ac_cv_huge_val_nan=yes
+])])
+dnl This is the most probable fallback so we assume yes in case of cross compile.
+if test "$ac_cv_huge_val_nan" = "yes"; then
+  AC_DEFINE([HAVE_HUGE_VAL_NAN], 1, [whether HUGE_VAL + -HUGEVAL == NAN])
+fi

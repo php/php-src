@@ -20,7 +20,7 @@ function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
 				512 => "User Warning",		// E_USER_WARMING
 				1024=> "User Notice",		// E_USER_NOTICE
 				2048=> "Strict Notice",      // E_STRICT
-				4096=> "Catchable fatal error",      // E_RECOVERABLE_ERROR
+				4096=> "Recoverable fatal error",      // E_RECOVERABLE_ERROR
 				);
 	
 	if (!empty($debug)) {
@@ -45,7 +45,7 @@ class tc
 	public $s1 = '日本語EUC-JPの文字列';
 	public $s2 = 'English Text';
 
-	function tc() 
+	function __construct() 
 	{
 	}
 }

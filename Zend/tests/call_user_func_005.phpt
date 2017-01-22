@@ -18,7 +18,7 @@ var_dump(call_user_func(array('foo', 'teste')));
 
 ?>
 --EXPECTF--
-Strict Standards: %son-static method foo::teste() should not be called statically in %s on line %d
+Deprecated: %son-static method foo::teste() should not be called statically in %s on line %d
 %string|unicode%(1) "x"
 array(1) {
   [0]=>

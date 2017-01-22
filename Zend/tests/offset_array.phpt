@@ -36,7 +36,7 @@ NULL
 int(2)
 int(1)
 
-Strict Standards: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
+Notice: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 int(%d)
 
 Warning: Illegal offset type in %s on line %d

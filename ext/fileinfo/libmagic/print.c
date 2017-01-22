@@ -2,7 +2,7 @@
  * Copyright (c) Ian F. Darwin 1986-1995.
  * Software written by Ian F. Darwin and others;
  * maintained 1995-present by Christos Zoulas and others.
- *
+ * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -12,7 +12,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- *
+ *  
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -32,13 +32,11 @@
 #include "php.h"
 
 #include "file.h"
-#include "cdf.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: print.c,v 1.76 2013/02/26 18:25:00 christos Exp $")
+FILE_RCSID("@(#)$File: print.c,v 1.81 2016/01/19 15:09:03 christos Exp $")
 #endif  /* lint */
 
-#include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -53,6 +51,8 @@ FILE_RCSID("@(#)$File: print.c,v 1.76 2013/02/26 18:25:00 christos Exp $")
 #endif
 
 #define SZOF(a)	(sizeof(a) / sizeof(a[0]))
+
+#include "cdf.h"
 
 /*VARARGS*/
 protected void
@@ -78,12 +78,16 @@ file_fmttime(uint64_t v, int flags, char *buf)
 {
 	char *pp;
 	time_t t = (time_t)v;
-	struct tm *tm;
+	struct tm *tm = NULL;
 
 	if (flags & FILE_T_WINDOWS) {
 		struct timeval ts;
 		cdf_timestamp_to_timespec(&ts, t);
 		t = ts.tv_sec;
+	} else {
+		// XXX: perhaps detect and print something if overflow
+		// on 32 bit time_t?
+		t = (time_t)v;
 	}
 
 	if (flags & FILE_T_LOCAL) {
@@ -111,6 +115,9 @@ file_fmttime(uint64_t v, int flags, char *buf)
 			goto out;
 		pp = asctime_r(tm, buf);
 	}
+	if (tm == NULL)
+		goto out;
+	pp = asctime_r(tm, buf);
 
 	if (pp == NULL)
 		goto out;

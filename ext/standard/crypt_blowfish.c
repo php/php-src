@@ -405,6 +405,10 @@ static int BF_decode(BF_word *dst, const char *src, int size)
 		*dptr++ = ((c3 & 0x03) << 6) | c4;
 	} while (dptr < end);
 
+	if (end - dptr == size) {
+		return -1;
+	}
+
 	while (dptr < end) /* PHP hack */
 		*dptr++ = 0;
 

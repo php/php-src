@@ -85,7 +85,7 @@ var_dump($methodInfo->isConstructor());
 
 ?>
 --EXPECTF--
-Strict Standards: Redefining already defined constructor for class OldAndNewCtor in %s on line %d
+Deprecated: Methods with the same name as their class will not be constructors in a future version of PHP; OldCtor has a deprecated constructor in %s on line %d
 New-style constructor:
 bool(true)
 

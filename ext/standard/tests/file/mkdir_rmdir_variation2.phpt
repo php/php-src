@@ -68,7 +68,7 @@ bool(false)
 Warning: mkdir() expects parameter 1 to be a valid path, string given in %s on line %d
 bool(false)
 
-Warning: rmdir(%s): No such file or directory in %s on line %d
+Warning: rmdir() expects parameter 1 to be a valid path, string given in %s on line %d
 bool(false)
 
 *** Testing mkdir() with miscelleneous input ***

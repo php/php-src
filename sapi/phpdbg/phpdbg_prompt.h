@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,14 +25,15 @@
 void phpdbg_string_init(char *buffer);
 void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default);
 void phpdbg_try_file_init(char *init_file, size_t init_file_len, zend_bool free_init);
-int phpdbg_interactive(zend_bool allow_async_unsafe);
+int phpdbg_interactive(zend_bool allow_async_unsafe, char *input);
 int phpdbg_compile(void);
-void phpdbg_clean(zend_bool full);
+int phpdbg_compile_stdin(zend_string *code);
 void phpdbg_force_interruption(void);
 /* }}} */
 
 /* {{{ phpdbg command handlers */
 PHPDBG_COMMAND(exec);
+PHPDBG_COMMAND(stdin);
 PHPDBG_COMMAND(step);
 PHPDBG_COMMAND(continue);
 PHPDBG_COMMAND(run);
@@ -51,23 +52,20 @@ PHPDBG_COMMAND(clear);
 PHPDBG_COMMAND(help);
 PHPDBG_COMMAND(sh);
 PHPDBG_COMMAND(dl);
+PHPDBG_COMMAND(generator);
 PHPDBG_COMMAND(set);
 PHPDBG_COMMAND(source);
 PHPDBG_COMMAND(export);
 PHPDBG_COMMAND(register);
 PHPDBG_COMMAND(quit);
 PHPDBG_COMMAND(watch);
+PHPDBG_COMMAND(next);
 PHPDBG_COMMAND(eol);
 PHPDBG_COMMAND(wait); /* }}} */
 
 /* {{{ prompt commands */
 extern const phpdbg_command_t phpdbg_prompt_commands[]; /* }}} */
 
-/* {{{ */
-#if PHP_VERSION_ID >= 50500
 void phpdbg_execute_ex(zend_execute_data *execute_data);
-#else
-void phpdbg_execute_ex(zend_op_array *op_array);
-#endif /* }}} */
 
 #endif /* PHPDBG_PROMPT_H */

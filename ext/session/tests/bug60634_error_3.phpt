@@ -43,5 +43,10 @@ session_start();
 --EXPECTF--
 write: goodbye cruel world
 
-Fatal error: Call to undefined function undefined_function() in %s on line %d
-close: goodbye cruel world
+Fatal error: Uncaught Error: Call to undefined function undefined_function() in %s:%d
+Stack trace:
+#0 [internal function]: write(%s, '')
+#1 {main}
+  thrown in %s on line %d
+
+Warning: Unknown: Cannot call session save handler in a recursive manner in Unknown on line 0

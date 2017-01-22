@@ -12,6 +12,12 @@ fclose($fp);
 ?>
 --EXPECTF--
 array(9) {
+  ["timed_out"]=>
+  bool(false)
+  ["blocked"]=>
+  bool(true)
+  ["eof"]=>
+  bool(false)
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
@@ -24,10 +30,4 @@ array(9) {
   bool(true)
   ["uri"]=>
   string(%i) "%sstream_get_meta_data_file_basic.php"
-  ["timed_out"]=>
-  bool(false)
-  ["blocked"]=>
-  bool(true)
-  ["eof"]=>
-  bool(false)
 }

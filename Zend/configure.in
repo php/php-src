@@ -62,13 +62,6 @@ int zend_sprintf(char *buffer, const char *format, ...);
 
 #include <math.h>
 
-/* To enable the is_nan, is_infinite and is_finite PHP functions */
-#ifdef NETWARE
-	#define HAVE_ISNAN 1
-	#define HAVE_ISINF 1
-	#define HAVE_ISFINITE 1
-#endif
-
 #ifndef zend_isnan
 #ifdef HAVE_ISNAN
 #define zend_isnan(a) isnan(a)
@@ -90,10 +83,10 @@ int zend_sprintf(char *buffer, const char *format, ...);
 #define zend_isinf(a) 0
 #endif
 
-#ifdef HAVE_FINITE
-#define zend_finite(a) finite(a)
-#elif defined(HAVE_ISFINITE) || defined(isfinite)
+#if defined(HAVE_ISFINITE) || defined(isfinite)
 #define zend_finite(a) isfinite(a)
+#elif defined(HAVE_FINITE)
+#define zend_finite(a) finite(a)
 #elif defined(fpclassify)
 #define zend_finite(a) ((fpclassify((a))!=FP_INFINITE&&fpclassify((a))!=FP_NAN)?1:0)
 #else
@@ -102,12 +95,6 @@ int zend_sprintf(char *buffer, const char *format, ...);
 
 #endif /* ifndef ZEND_ACCONFIG_H_NO_C_PROTOS */
 
-#ifdef NETWARE
-#ifdef USE_WINSOCK
-#/*This detection against winsock is of no use*/ undef HAVE_SOCKLEN_T
-#/*This detection against winsock is of no use*/ undef HAVE_SYS_SOCKET_H
-#endif
-#endif
 ])
 
 dnl We want this one before the checks, so the checks can modify CFLAGS.

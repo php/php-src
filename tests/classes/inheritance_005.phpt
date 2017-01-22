@@ -41,6 +41,7 @@ Check for inherited old-style constructor.
   var_dump(is_callable(array($c, "C")));
 ?>
 --EXPECTF--
+Deprecated: Methods with the same name as their class will not be constructors in a future version of PHP; A has a deprecated constructor in %s on line %d
 About to construct new B: 
 In A::A
 Is B::B() callable?

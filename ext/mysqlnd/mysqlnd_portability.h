@@ -5,7 +5,7 @@ This file is public domain and comes with NO WARRANTY of any kind */
   Parts of the original, which are not applicable to mysqlnd have been removed.
 
   With small modifications, mostly casting but adding few more macros by
-  Andrey Hristov <andrey@mysql.com> . The additions are in the public domain and
+  Andrey Hristov <andrey@php.net> . The additions are in the public domain and
   were added to improve the header file, to get it more consistent.
 */
 

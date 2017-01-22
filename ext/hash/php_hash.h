@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -24,16 +24,13 @@
 #include "php.h"
 
 #define PHP_HASH_EXTNAME	"hash"
-#define PHP_HASH_EXTVER		"1.0"
+#define PHP_HASH_VERSION	"1.0"
+#define PHP_MHASH_VERSION	"1.0"
 #define PHP_HASH_RESNAME	"Hash Context"
 
 #define PHP_HASH_HMAC		0x0001
 
 #define L64 INT64_C
-#define php_hash_int32  int32_t
-#define php_hash_uint32 uint32_t
-#define php_hash_int64  int64_t
-#define php_hash_uint64 uint64_t
 
 typedef void (*php_hash_init_func_t)(void *context);
 typedef void (*php_hash_update_func_t)(void *context, const unsigned char *buf, unsigned int count);
@@ -67,6 +64,12 @@ extern const php_hash_ops php_hash_sha224_ops;
 extern const php_hash_ops php_hash_sha256_ops;
 extern const php_hash_ops php_hash_sha384_ops;
 extern const php_hash_ops php_hash_sha512_ops;
+extern const php_hash_ops php_hash_sha512_256_ops;
+extern const php_hash_ops php_hash_sha512_224_ops;
+extern const php_hash_ops php_hash_sha3_224_ops;
+extern const php_hash_ops php_hash_sha3_256_ops;
+extern const php_hash_ops php_hash_sha3_384_ops;
+extern const php_hash_ops php_hash_sha3_512_ops;
 extern const php_hash_ops php_hash_ripemd128_ops;
 extern const php_hash_ops php_hash_ripemd160_ops;
 extern const php_hash_ops php_hash_ripemd256_ops;
@@ -127,6 +130,7 @@ extern zend_module_entry hash_module_entry;
 
 PHP_FUNCTION(hash);
 PHP_FUNCTION(hash_file);
+PHP_FUNCTION(hash_hkdf);
 PHP_FUNCTION(hash_hmac);
 PHP_FUNCTION(hash_hmac_file);
 PHP_FUNCTION(hash_init);

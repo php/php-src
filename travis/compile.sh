@@ -10,13 +10,14 @@ else
 	DEBUG="";
 fi
 ./buildconf --force
-./configure --quiet \
+./configure \
+--prefix=$HOME"/php-install" \
+--quiet \
 $DEBUG \
 $TS \
 --enable-phpdbg \
 --enable-fpm \
 --with-pdo-mysql=mysqlnd \
---with-mysql=mysqlnd \
 --with-mysqli=mysqlnd \
 --with-pgsql \
 --with-pdo-pgsql \
@@ -30,7 +31,6 @@ $TS \
 --enable-zip \
 --with-zlib \
 --with-zlib-dir=/usr \
---with-mcrypt=/usr \
 --enable-soap \
 --enable-xmlreader \
 --with-xsl \
@@ -55,12 +55,9 @@ $TS \
 --with-pspell=/usr \
 --with-enchant=/usr \
 --enable-wddx \
---with-imap \
---with-imap-ssl \
 --with-freetype-dir=/usr \
---with-t1lib=/usr \
 --with-xpm-dir=/usr \
 --with-kerberos \
 --enable-sysvmsg 
 make -j2 --quiet
-sudo make install
+make install

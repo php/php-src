@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -52,24 +52,20 @@ const zend_function_entry php_dom_attr_class_functions[] = {
 	PHP_FE_END
 };
 
-/* {{{ proto void DOMAttr::__construct(string name, [string value]); */
+/* {{{ proto void DOMAttr::__construct(string name, [string value]) */
 PHP_METHOD(domattr, __construct)
 {
-	zval *id;
+	zval *id = getThis();
 	xmlAttrPtr nodep = NULL;
 	xmlNodePtr oldnode = NULL;
 	dom_object *intern;
 	char *name, *value = NULL;
 	size_t name_len, value_len, name_valid;
-	zend_error_handling error_handling;
 
-	zend_replace_error_handling(EH_THROW, dom_domexception_class_entry, &error_handling);
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os|s", &id, dom_attr_class_entry, &name, &name_len, &value, &value_len) == FAILURE) {
-		zend_restore_error_handling(&error_handling);
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s|s", &name, &name_len, &value, &value_len) == FAILURE) {
 		return;
 	}
 
-	zend_restore_error_handling(&error_handling);
 	intern = Z_DOMOBJ_P(id);
 
 	name_valid = xmlValidateName((xmlChar *) name, 0);
@@ -173,7 +169,7 @@ int dom_attr_value_write(dom_object *obj, zval *newval)
 
 	str = zval_get_string(newval);
 
-	xmlNodeSetContentLen((xmlNodePtr) attrp, (xmlChar *) str->val, str->len + 1);
+	xmlNodeSetContentLen((xmlNodePtr) attrp, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str) + 1);
 
 	zend_string_release(str);
 	return SUCCESS;
@@ -217,14 +213,14 @@ Since: DOM Level 3
 */
 int dom_attr_schema_type_info_read(dom_object *obj, zval *retval)
 {
-	php_error_docref(NULL, E_WARNING, "Not yet implemented");
+	/* TODO */
 	ZVAL_NULL(retval);
 	return SUCCESS;
 }
 
 /* }}} */
 
-/* {{{ proto boolean dom_attr_is_id();
+/* {{{ proto boolean dom_attr_is_id()
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Attr-isId
 Since: DOM Level 3
 */

@@ -106,7 +106,10 @@ mysqli_close($link);
 	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
-	if (mysqli_get_server_version($link) > 50600) {
+	$is_maria_db = strpos(mysqli_get_server_info($link), "MariaDB") !== false;
+	if ($is_maria_db) {
+		$columns['TIMESTAMP NOT NULL'] = 'ON_UPDATE_NOW TIMESTAMP BINARY UNSIGNED NOT_NULL';
+	} else if (mysqli_get_server_version($link) > 50600) {
 		$columns['TIMESTAMP NOT NULL'] = 'ON_UPDATE_NOW TIMESTAMP BINARY NOT_NULL';
 	}
 
@@ -199,7 +202,6 @@ mysqli_close($link);
 	if (!mysqli_query($link, 'DROP TABLE IF EXISTS test')) {
 		printf("[008] %s [%d] %s\n", $column_def,
 			mysqli_errno($link), mysqli_error($link));
-		continue;
 	}
 
 	$column_def = array('col1 CHAR(1)', 'col2 CHAR(2)','INDEX idx_col1_col2(col1, col2)');
@@ -220,7 +222,6 @@ mysqli_close($link);
 		while ($field = mysqli_fetch_field($res)) {
 			if (!isset($expected_flags[$field->name])) {
 				printf("[010] Found unexpected field '%s'\n", $field->name);
-				continue;
 			}
 			list($missing_flags, $unexpected_flags, $flags_found) = checkFlags($field->flags, $expected_flags[$field->name], $flags);
 			if ($unexpected_flags)

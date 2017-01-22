@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -82,7 +82,7 @@ static size_t php_stream_input_read(php_stream *stream, char *buf, size_t count)
 
 	if (!SG(post_read) && SG(read_post_bytes) < (int64_t)(input->position + count)) {
 		/* read requested data from SAPI */
-		int read_bytes = sapi_read_post_block(buf, count);
+		size_t read_bytes = sapi_read_post_block(buf, count);
 
 		if (read_bytes > 0) {
 			php_stream_seek(input->body, 0, SEEK_END);
@@ -90,7 +90,11 @@ static size_t php_stream_input_read(php_stream *stream, char *buf, size_t count)
 		}
 	}
 
-	php_stream_seek(input->body, input->position, SEEK_SET);
+	if (!input->body->readfilters.head) {
+		/* If the input stream contains filters, it's not really seekable. The
+			input->position is likely to be wrong for unfiltered data. */
+		php_stream_seek(input->body, input->position, SEEK_SET);
+	}
 	read = php_stream_read(input->body, buf, count);
 
 	if (!read || read == (size_t) -1) {
@@ -172,7 +176,7 @@ static void php_stream_apply_filter_list(php_stream *stream, char *filterlist, i
 /* }}} */
 
 php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *path, const char *mode, int options,
-									 char **opened_path, php_stream_context *context STREAMS_DC) /* {{{ */
+									 zend_string **opened_path, php_stream_context *context STREAMS_DC) /* {{{ */
 {
 	int fd = -1;
 	int mode_rw = 0;
@@ -180,6 +184,9 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 	char *p, *token, *pathdup;
 	zend_long max_memory;
 	FILE *file = NULL;
+#ifdef PHP_WIN32
+	int pipe_requested = 0;
+#endif
 
 	if (!strncasecmp(path, "php://", 6)) {
 		path += 6;
@@ -192,7 +199,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 			path += 11;
 			max_memory = ZEND_STRTOL(path, NULL, 10);
 			if (max_memory < 0) {
-				php_error_docref(NULL, E_RECOVERABLE_ERROR, "Max memory must be >= 0");
+				zend_throw_error(NULL, "Max memory must be >= 0");
 				return NULL;
 			}
 		}
@@ -257,6 +264,9 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 		} else {
 			fd = dup(STDIN_FILENO);
 		}
+#ifdef PHP_WIN32
+		pipe_requested = 1;
+#endif
 	} else if (!strcasecmp(path, "stdout")) {
 		if (!strcmp(sapi_module.name, "cli")) {
 			static int cli_out = 0;
@@ -270,6 +280,9 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 		} else {
 			fd = dup(STDOUT_FILENO);
 		}
+#ifdef PHP_WIN32
+		pipe_requested = 1;
+#endif
 	} else if (!strcasecmp(path, "stderr")) {
 		if (!strcmp(sapi_module.name, "cli")) {
 			static int cli_err = 0;
@@ -283,6 +296,9 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 		} else {
 			fd = dup(STDERR_FILENO);
 		}
+#ifdef PHP_WIN32
+		pipe_requested = 1;
+#endif
 	} else if (!strncasecmp(path, "fd/", 3)) {
 		const char *start;
 		char       *end;
@@ -341,10 +357,11 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 		pathdup = estrndup(path + 6, strlen(path + 6));
 		p = strstr(pathdup, "/resource=");
 		if (!p) {
-			php_error_docref(NULL, E_RECOVERABLE_ERROR, "No URL resource specified");
+			zend_throw_error(NULL, "No URL resource specified");
 			efree(pathdup);
 			return NULL;
 		}
+
 		if (!(stream = php_stream_open_wrapper(p + 10, mode, options, opened_path))) {
 			efree(pathdup);
 			return NULL;
@@ -401,6 +418,15 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 		}
 	}
 
+#ifdef PHP_WIN32
+	if (pipe_requested && stream && context) {
+		zval *blocking_pipes = php_stream_context_get_option(context, "pipe", "blocking");
+		if (blocking_pipes) {
+			convert_to_long(blocking_pipes);
+			php_stream_set_option(stream, PHP_STREAM_OPTION_PIPE_BLOCKING, Z_LVAL_P(blocking_pipes), NULL);
+		}
+	}
+#endif
 	return stream;
 }
 /* }}} */
@@ -415,7 +441,8 @@ static php_stream_wrapper_ops php_stdio_wops = {
 	NULL, /* unlink */
 	NULL, /* rename */
 	NULL, /* mkdir */
-	NULL  /* rmdir */
+	NULL, /* rmdir */
+	NULL
 };
 
 PHPAPI php_stream_wrapper php_stream_php_wrapper =	{

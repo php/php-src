@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -100,7 +100,7 @@ zend_module_entry sysvsem_module_entry = {
 	NULL,
 	NULL,
 	NULL,
-	NO_VERSION_YET,
+	PHP_SYSVSEM_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
@@ -206,7 +206,7 @@ PHP_FUNCTION(sem_get)
 
 	semid = semget(key, 3, perm|IPC_CREAT);
 	if (semid == -1) {
-		php_error_docref(NULL, E_WARNING, "failed for key 0x%lx: %s", key, strerror(errno));
+		php_error_docref(NULL, E_WARNING, "failed for key 0x" ZEND_XLONG_FMT ": %s", key, strerror(errno));
 		RETURN_FALSE;
 	}
 
@@ -238,7 +238,7 @@ PHP_FUNCTION(sem_get)
 	sop[2].sem_flg = SEM_UNDO;
 	while (semop(semid, sop, 3) == -1) {
 		if (errno != EINTR) {
-			php_error_docref(NULL, E_WARNING, "failed acquiring SYSVSEM_SETVAL for key 0x%lx: %s", key, strerror(errno));
+			php_error_docref(NULL, E_WARNING, "failed acquiring SYSVSEM_SETVAL for key 0x" ZEND_XLONG_FMT ": %s", key, strerror(errno));
 			break;
 		}
 	}
@@ -246,7 +246,7 @@ PHP_FUNCTION(sem_get)
 	/* Get the usage count. */
 	count = semctl(semid, SYSVSEM_USAGE, GETVAL, NULL);
 	if (count == -1) {
-		php_error_docref(NULL, E_WARNING, "failed for key 0x%lx: %s", key, strerror(errno));
+		php_error_docref(NULL, E_WARNING, "failed for key 0x" ZEND_XLONG_FMT ": %s", key, strerror(errno));
 	}
 
 	/* If we are the only user, then take this opportunity to set the max. */
@@ -257,7 +257,7 @@ PHP_FUNCTION(sem_get)
 		union semun semarg;
 		semarg.val = max_acquire;
 		if (semctl(semid, SYSVSEM_SEM, SETVAL, semarg) == -1) {
-			php_error_docref(NULL, E_WARNING, "failed for key 0x%lx: %s", key, strerror(errno));
+			php_error_docref(NULL, E_WARNING, "failed for key 0x" ZEND_XLONG_FMT ": %s", key, strerror(errno));
 		}
 #elif defined(SETVAL_WANTS_PTR)
 		/* This is correct for Solaris 2.6 which does not have union semun. */
@@ -279,7 +279,7 @@ PHP_FUNCTION(sem_get)
 	sop[0].sem_flg = SEM_UNDO;
 	while (semop(semid, sop, 1) == -1) {
 		if (errno != EINTR) {
-			php_error_docref(NULL, E_WARNING, "failed releasing SYSVSEM_SETVAL for key 0x%lx: %s", key, strerror(errno));
+			php_error_docref(NULL, E_WARNING, "failed releasing SYSVSEM_SETVAL for key 0x" ZEND_XLONG_FMT ": %s", key, strerror(errno));
 			break;
 		}
 	}
@@ -319,7 +319,7 @@ static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 	}
 
 	if (!acquire && sem_ptr->count == 0) {
-		php_error_docref(NULL, E_WARNING, "SysV semaphore %ld (key 0x%x) is not currently acquired", Z_LVAL_P(arg_id), sem_ptr->key);
+		php_error_docref(NULL, E_WARNING, "SysV semaphore " ZEND_LONG_FMT " (key 0x%x) is not currently acquired", Z_LVAL_P(arg_id), sem_ptr->key);
 		RETURN_FALSE;
 	}
 
@@ -388,7 +388,7 @@ PHP_FUNCTION(sem_remove)
 #else
 	if (semctl(sem_ptr->semid, 0, IPC_STAT, NULL) < 0) {
 #endif
-		php_error_docref(NULL, E_WARNING, "SysV semaphore %ld does not (any longer) exist", Z_LVAL_P(arg_id));
+		php_error_docref(NULL, E_WARNING, "SysV semaphore " ZEND_LONG_FMT " does not (any longer) exist", Z_LVAL_P(arg_id));
 		RETURN_FALSE;
 	}
 
@@ -397,7 +397,7 @@ PHP_FUNCTION(sem_remove)
 #else
 	if (semctl(sem_ptr->semid, 0, IPC_RMID, NULL) < 0) {
 #endif
-		php_error_docref(NULL, E_WARNING, "failed for SysV sempphore %ld: %s", Z_LVAL_P(arg_id), strerror(errno));
+		php_error_docref(NULL, E_WARNING, "failed for SysV sempphore " ZEND_LONG_FMT ": %s", Z_LVAL_P(arg_id), strerror(errno));
 		RETURN_FALSE;
 	}
 

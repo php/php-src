@@ -7,12 +7,15 @@ set_error_handler(function($code, $message) {
 });
 
 $x= null;
-var_dump($x->method());
+try {
+	var_dump($x->method());
+} catch (Error $e) {
+  var_dump($e->getCode(), $e->getMessage());
+}
 echo "Alive\n";
 ?>
 --EXPECTF--
 
-int(4096)
+int(0)
 string(%d) "Call to a member function method() on null"
-NULL
 Alive

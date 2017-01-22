@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,	  |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,7 +21,6 @@
 #ifndef PHPDBG_WATCH_H
 #define PHPDBG_WATCH_H
 
-#include "TSRM.h"
 #include "phpdbg_cmd.h"
 
 #ifdef _WIN32
@@ -41,46 +40,85 @@ extern const phpdbg_command_t phpdbg_watch_commands[];
 
 /* Watchpoint functions/typedefs */
 
+/* References are managed through their parent zval *, being a simple WATCH_ON_ZVAL and eventually WATCH_ON_REFCOUNTED */
 typedef enum {
 	WATCH_ON_ZVAL,
 	WATCH_ON_HASHTABLE,
 	WATCH_ON_REFCOUNTED,
+	WATCH_ON_STR,
+	WATCH_ON_HASHDATA,
+	WATCH_ON_BUCKET,
 } phpdbg_watchtype;
 
 
-#define PHPDBG_WATCH_SIMPLE     0x0
-#define PHPDBG_WATCH_RECURSIVE  0x1
-#define PHPDBG_WATCH_ARRAY      0x2
-#define PHPDBG_WATCH_OBJECT     0x4
+#define PHPDBG_WATCH_SIMPLE     0x01
+#define PHPDBG_WATCH_RECURSIVE  0x02
+#define PHPDBG_WATCH_ARRAY      0x04
+#define PHPDBG_WATCH_OBJECT     0x08
+#define PHPDBG_WATCH_NORMAL     (PHPDBG_WATCH_SIMPLE | PHPDBG_WATCH_RECURSIVE)
+#define PHPDBG_WATCH_IMPLICIT   0x10
+#define PHPDBG_WATCH_RECURSIVE_ROOT 0x20
 
-typedef struct _phpdbg_watchpoint_t phpdbg_watchpoint_t;
+typedef struct _phpdbg_watch_collision phpdbg_watch_collision;
 
-struct _phpdbg_watchpoint_t {
+typedef struct _phpdbg_watchpoint_t {
 	union {
 		zval *zv;
-		HashTable *ht;
 		zend_refcounted *ref;
+		Bucket *bucket;
 		void *ptr;
 	} addr;
 	size_t size;
 	phpdbg_watchtype type;
-	char flags;
-	phpdbg_watchpoint_t *parent;
-	HashTable *parent_container;
-	char *name_in_parent;
-	size_t name_in_parent_len;
-	char *str;
-	size_t str_len;
+	zend_refcounted *ref; /* key to fetch the collision on parents */
+	HashTable elements;
+	phpdbg_watch_collision *coll; /* only present on *children* */
+	union {
+		zval zv;
+		Bucket bucket;
+		zend_refcounted ref;
+		HashTable ht;
+		zend_string *str;
+	} backup;
+} phpdbg_watchpoint_t;
+
+struct _phpdbg_watch_collision {
+	phpdbg_watchpoint_t ref;
+	phpdbg_watchpoint_t reference;
+	HashTable parents;
 };
 
+typedef struct _phpdbg_watch_element {
+	uint32_t id;
+	phpdbg_watchpoint_t *watch;
+	char flags;
+	struct _phpdbg_watch_element *child; /* always set for implicit watches */
+	struct _phpdbg_watch_element *parent;
+	HashTable child_container; /* children of this watch element for recursive array elements */
+	HashTable *parent_container; /* container of the value */
+	zend_string *name_in_parent;
+	zend_string *str;
+	union {
+		zval zv;
+		zend_refcounted ref;
+		HashTable ht;
+	} backup; /* backup for when watchpoint gets dissociated */
+} phpdbg_watch_element;
+
 typedef struct {
-	phpdbg_watchpoint_t watch;
-	unsigned int num;
-	unsigned int refs;
-	HashTable watches;
-} phpdbg_watch_collision;
+	/* to watch rehashes (yes, this is not *perfect*, but good enough for everything in PHP...) */
+	phpdbg_watchpoint_t hash_watch; /* must be first element */
+	Bucket *last;
+	zend_string *last_str;
+	zend_ulong last_idx;
+
+	HashTable *ht;
+	size_t data_size;
+	HashTable watches; /* contains phpdbg_watch_element */
+} phpdbg_watch_ht_info;
 
 void phpdbg_setup_watchpoints(void);
+void phpdbg_destroy_watchpoints(void);
 
 #ifndef _WIN32
 int phpdbg_watchpoint_segfault_handler(siginfo_t *info, void *context);

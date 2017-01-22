@@ -93,7 +93,7 @@ php_zts_is_enabled
   PHP_THREAD_SAFETY=no
 ])
 CPPFLAGS=$old_CPPFLAGS
-AC_MSG_RESULT([$PHP_DEBUG])
+AC_MSG_RESULT([$PHP_THREAD_SAFETY])
 
 dnl Support for building and testing Zend extensions
 ZEND_EXT_TYPE="zend_extension"

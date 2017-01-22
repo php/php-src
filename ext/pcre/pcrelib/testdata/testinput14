@@ -340,4 +340,6 @@ not matter. --/
 
 /[^\s]*\s* [^\W]+\W+ [^\d]*?\d0 [^\d\w]{4,6}?\w*A/BZ
 
+/(?'ABC'[bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar]([bar](*THEN:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))/
+
 /-- End of testinput14 --/

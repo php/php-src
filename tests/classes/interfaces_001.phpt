@@ -5,11 +5,11 @@ ZE2 interfaces
 --FILE--
 <?php
 
-interface Throwable {
+interface ThrowableInterface {
 	public function getMessage();
 }
 
-class Exception_foo implements Throwable {
+class Exception_foo implements ThrowableInterface {
 	public $foo = "foo";
 
 	public function getMessage() {

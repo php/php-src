@@ -11,7 +11,7 @@ Ondřej Hošek <ondra.hosek@gmail.com>
 require "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
-insert_dummy_data($link);
+insert_dummy_data($link, $base);
 
 $mods = array(
 	array(
@@ -33,8 +33,8 @@ $mods = array(
 );
 
 var_dump(
-	ldap_modify_batch($link, "cn=userA,dc=my-domain,dc=com", $mods),
-	ldap_get_entries($link, ldap_search($link, "dc=my-domain,dc=com", "(sn=Brown-Smith)"))
+	ldap_modify_batch($link, "cn=userA,$base", $mods),
+	ldap_get_entries($link, ldap_search($link, "$base", "(sn=Brown-Smith)"))
 );
 ?>
 ===DONE===
@@ -44,9 +44,9 @@ require "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 
-remove_dummy_data($link);
+remove_dummy_data($link, $base);
 ?>
---EXPECT--
+--EXPECTF--
 bool(true)
 array(2) {
   ["count"]=>
@@ -103,7 +103,7 @@ array(2) {
     ["count"]=>
     int(5)
     ["dn"]=>
-    string(28) "cn=userA,dc=my-domain,dc=com"
+    string(%d) "cn=userA,%s"
   }
 }
 ===DONE===

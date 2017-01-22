@@ -20,7 +20,7 @@ $file_path = dirname(__FILE__);
 echo "*** Testing copy() with symlink and hardlink ***\n";
 $file = $file_path."/copy_variation7.tmp";
 $file_handle = fopen($file, "w");
-fwrite( $file_handle, str_repeat(b"Hello World, this is 2007 year ....\n", 100) );
+fwrite( $file_handle, str_repeat("Hello World, this is 2007 year ....\n", 100) );
 fclose($file_handle);
 
 $symlink = $file_path."/copy_variation7_symlink.tmp";

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -35,11 +35,13 @@ PHP_FUNCTION(metaphone)
 	zend_string *result = NULL;
 	zend_long phones = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|l", &str, &phones) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STR(str)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(phones)
+	ZEND_PARSE_PARAMETERS_END();
 
-	if (metaphone((unsigned char *)str->val, str->len, phones, &result, 1) == 0) {
+	if (metaphone((unsigned char *)ZSTR_VAL(str), ZSTR_LEN(str), phones, &result, 1) == 0) {
 		RETVAL_STR(result);
 	} else {
 		if (result) {
@@ -142,20 +144,20 @@ static char Lookahead(char *word, int how_far)
  * could be one though; or more too). */
 #define Phonize(c)	{ \
 						if (p_idx >= max_buffer_len) { \
-							*phoned_word = zend_string_realloc(*phoned_word, 2 * sizeof(char) + max_buffer_len, 0); \
+							*phoned_word = zend_string_extend(*phoned_word, 2 * sizeof(char) + max_buffer_len, 0); \
 							max_buffer_len += 2; \
 						} \
-						(*phoned_word)->val[p_idx++] = c; \
-						(*phoned_word)->len = p_idx; \
+						ZSTR_VAL(*phoned_word)[p_idx++] = c; \
+						ZSTR_LEN(*phoned_word) = p_idx; \
 					}
 /* Slap a null character on the end of the phoned word */
 #define End_Phoned_Word	{ \
 							if (p_idx == max_buffer_len) { \
-								*phoned_word = zend_string_realloc(*phoned_word, 1 * sizeof(char) + max_buffer_len, 0); \
+								*phoned_word = zend_string_extend(*phoned_word, 1 * sizeof(char) + max_buffer_len, 0); \
 								max_buffer_len += 1; \
 							} \
-							(*phoned_word)->val[p_idx] = '\0'; \
-							(*phoned_word)->len = p_idx; \
+							ZSTR_VAL(*phoned_word)[p_idx] = '\0'; \
+							ZSTR_LEN(*phoned_word) = p_idx; \
 						}
 /* How long is the phoned word? */
 #define Phone_Len	(p_idx)
@@ -168,7 +170,7 @@ static char Lookahead(char *word, int how_far)
 static int metaphone(unsigned char *word, size_t word_len, zend_long max_phonemes, zend_string **phoned_word, int traditional)
 {
 	int w_idx = 0;				/* point in the phonization we're at. */
-	int p_idx = 0;				/* end of the phoned phrase */
+	size_t p_idx = 0;				/* end of the phoned phrase */
 	size_t max_buffer_len = 0;		/* maximum length of the destination buffer */
 
 /*-- Parameter checks --*/
@@ -265,7 +267,7 @@ static int metaphone(unsigned char *word, size_t word_len, zend_long max_phoneme
 
 	/* On to the metaphoning */
 	for (; Curr_Letter != '\0' &&
-		 (max_phonemes == 0 || Phone_Len < max_phonemes);
+		 (max_phonemes == 0 || Phone_Len < (size_t)max_phonemes);
 		 w_idx++) {
 		/* How many letters to skip because an eariler encoding handled
 		 * multiple letters */

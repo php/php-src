@@ -1,3 +1,21 @@
+/*
+   +----------------------------------------------------------------------+
+   | PHP Version 7                                                        |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1997-2017 The PHP Group                                |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.01 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+   | Author: Zeev Suraski <zeev@zend.com>                                 |
+   +----------------------------------------------------------------------+
+ */
+
 #include "php.h"
 #include "php_ini.h"
 #include "php_win32_globals.h"
@@ -70,13 +88,18 @@ static int LoadDirectory(HashTable *directories, HKEY key, char *path, int path_
 			char *name = (char*)emalloc(max_name+1);
 			char *value = (char*)emalloc(max_value+1);
 			DWORD name_len, type, value_len;
-			zval data;
 
 			for (i = 0; i < values; i++) {
 				name_len = max_name+1;
 				value_len = max_value+1;
+
+				memset(name, '\0', max_name+1);
+				memset(value, '\0', max_value+1);
+
 				if (RegEnumValue(key, i, name, &name_len, NULL, &type, value, &value_len) == ERROR_SUCCESS) {
 					if ((type == REG_SZ) || (type == REG_EXPAND_SZ)) {
+						zval data;
+
 						if (!ht) {
 							ht = (HashTable*)malloc(sizeof(HashTable));
 							if (!ht) {
@@ -84,6 +107,7 @@ static int LoadDirectory(HashTable *directories, HKEY key, char *path, int path_
 							}
 							zend_hash_init(ht, 0, NULL, ZVAL_INTERNAL_PTR_DTOR, 1);
 						}
+						ZVAL_PSTRINGL(&data, value, value_len-1);
 						zend_hash_str_update(ht, name, name_len, &data);
 					}
 				}
@@ -91,14 +115,14 @@ static int LoadDirectory(HashTable *directories, HKEY key, char *path, int path_
 			if (ht) {
 				if (parent_ht) {
 					zend_string *index;
-					ulong num;
+					zend_ulong num;
 					zval *tmpdata;
 
 					ZEND_HASH_FOREACH_KEY_VAL(parent_ht, num, index, tmpdata) {
 						zend_hash_add(ht, index, tmpdata);
 					} ZEND_HASH_FOREACH_END();
 				}
-				zend_hash_str_update_mem(directories, path, path_len + 1, &ht, sizeof(HashTable*));
+				zend_hash_str_update_mem(directories, path, path_len, ht, sizeof(HashTable));
 				ret = 1;
 			}
 
@@ -148,9 +172,9 @@ static int LoadDirectory(HashTable *directories, HKEY key, char *path, int path_
 
 static void delete_internal_hashtable(zval *zv)
 {
-	void *data = Z_PTR_P(zv);
-	zend_hash_destroy(*(HashTable**)data);
-	free(*(HashTable**)data);
+	HashTable *ht = (HashTable *)Z_PTR_P(zv);
+	zend_hash_destroy(ht);
+	free(ht);
 }
 
 #define RegNotifyFlags (REG_NOTIFY_CHANGE_NAME | REG_NOTIFY_CHANGE_ATTRIBUTES | REG_NOTIFY_CHANGE_LAST_SET)
@@ -159,7 +183,6 @@ void UpdateIniFromRegistry(char *path)
 {
 	char *p, *orig_path;
 	int path_len;
-	HashTable *pht;
 
 	if(!path) {
 		return;
@@ -234,23 +257,22 @@ void UpdateIniFromRegistry(char *path)
 		path_len++;
 	}
 	zend_str_tolower(path, path_len);
-	while (path_len >= 0) {
-		pht = (HashTable *)zend_hash_str_find_ptr(PW32G(registry_directories), path, path_len+1);
-		if (pht != NULL) {
-			HashTable *ht = pht;
+
+	while (path_len > 0) {
+		HashTable *ht = (HashTable *)zend_hash_str_find_ptr(PW32G(registry_directories), path, path_len);
+
+		if (ht != NULL) {
 			zend_string *index;
 			zval *data;
 
 			ZEND_HASH_FOREACH_STR_KEY_VAL(ht, index, data) {
-				zend_alter_ini_entry(index, Z_STR_P(data), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
+				zend_alter_ini_entry(index, Z_STR_P(data), PHP_INI_USER, PHP_INI_STAGE_ACTIVATE);
 			} ZEND_HASH_FOREACH_END();
 		}
 
-		if (--path_len > 0) {
-			while (path_len > 0 && path[path_len] != '/') {
-				path_len--;
-			}
-		}
+		do {
+			path_len--;
+		} while (path_len > 0 && path[path_len] != '/');
 		path[path_len] = 0;
 	}
 
@@ -268,6 +290,7 @@ char *GetIniPathFromRegistry()
 		DWORD buflen = MAXPATHLEN;
 		reg_location = emalloc(MAXPATHLEN+1);
 		if(RegQueryValueEx(hKey, PHPRC_REGISTRY_NAME, 0, NULL, reg_location, &buflen) != ERROR_SUCCESS) {
+			RegCloseKey(hKey);
 			efree(reg_location);
 			reg_location = NULL;
 			return reg_location;
@@ -276,3 +299,12 @@ char *GetIniPathFromRegistry()
 	}
 	return reg_location;
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -196,6 +196,8 @@ PHP_FUNCTION(com_dotnet_create_instance)
 	int ret = FAILURE;
 	char *where = "";
 	IUnknown *unk = NULL;
+	zend_long cp = GetACP();
+	const struct php_win32_cp *cp_it;
 
 	php_com_initialize();
 	stuff = (struct dotnet_runtime_stuff*)COMG(dotnet_runtime_stuff);
@@ -208,7 +210,6 @@ PHP_FUNCTION(com_dotnet_create_instance)
 			if (err)
 				LocalFree(err);
 			php_com_throw_exception(hr, buf);
-			ZEND_CTOR_MAKE_NULL();
 			return;
 		}
 		stuff = (struct dotnet_runtime_stuff*)COMG(dotnet_runtime_stuff);
@@ -246,11 +247,17 @@ PHP_FUNCTION(com_dotnet_create_instance)
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l",
 			&assembly_name, &assembly_name_len,
 			&datatype_name, &datatype_name_len,
-			&obj->code_page)) {
+			&cp)) {
 		php_com_throw_exception(E_INVALIDARG, "Could not create .Net object - invalid arguments!");
-		ZEND_CTOR_MAKE_NULL();
 		return;
 	}
+
+	cp_it = php_win32_cp_get_by_id((DWORD)cp);
+	if (!cp_it) {
+		php_com_throw_exception(E_INVALIDARG, "Could not create .Net object - invalid codepage!");
+		return;
+	}
+	obj->code_page = (int)cp_it->id;
 
 	oletype = php_com_string_to_olestring(datatype_name, datatype_name_len, obj->code_page);
 	oleassembly = php_com_string_to_olestring(assembly_name, assembly_name_len, obj->code_page);
@@ -314,7 +321,6 @@ PHP_FUNCTION(com_dotnet_create_instance)
 			LocalFree(err);
 		}
 		php_com_throw_exception(hr, buf);
-		ZEND_CTOR_MAKE_NULL();
 		return;
 	}
 }

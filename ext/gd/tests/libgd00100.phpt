@@ -106,14 +106,10 @@ $points = array(
 );
 imagefilledpolygon($im, $points, 5, $black);
 
-ob_start();
-imagepng($im);
-$png = ob_get_contents();
-ob_end_clean();
-
-echo md5($png);
+include_once __DIR__ . '/func.inc';
+test_image_equals_file(__DIR__ . '/libgd00100.png', $im);
 
 imagedestroy($im);
 ?>
 --EXPECTF--
-2e6cf558bb4dadf60c8b608d5f8cda4e
+The images are equal.

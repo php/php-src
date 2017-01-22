@@ -420,7 +420,7 @@ int fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq)
 		zlog(ZLOG_SYSERROR, "failed to retrieve TCP_INFO for socket");
 		return -1;
 	}
-#if defined(__FreeBSD__)
+#if defined(__FreeBSD__) || defined(__NetBSD__)
 	if (info.__tcpi_sacked == 0) {
 		return -1;
 	}

@@ -29,4 +29,8 @@ Warning: intlcal_in_daylight_time() expects exactly 1 parameter, 2 given in %s o
 Warning: intlcal_in_daylight_time(): intlcal_in_daylight_time: bad arguments in %s on line %d
 bool(false)
 
-Catchable fatal error: Argument 1 passed to intlcal_in_daylight_time() must be an instance of IntlCalendar, integer given in %s on line %d
+Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_in_daylight_time() must be an instance of IntlCalendar, integer given in %s:%d
+Stack trace:
+#0 %s(%d): intlcal_in_daylight_time(1)
+#1 {main}
+  thrown in %s on line %d

@@ -13,7 +13,7 @@ var_dump($di0, $di1);
 ?>
 ==DONE==
 --EXPECT--
-object(DateInterval)#1 (15) {
+object(DateInterval)#1 (16) {
   ["y"]=>
   int(2)
   ["m"]=>
@@ -26,6 +26,8 @@ object(DateInterval)#1 (15) {
   int(8)
   ["s"]=>
   int(0)
+  ["f"]=>
+  float(0)
   ["weekday"]=>
   int(0)
   ["weekday_behavior"]=>
@@ -45,7 +47,7 @@ object(DateInterval)#1 (15) {
   ["have_special_relative"]=>
   int(0)
 }
-object(DateInterval)#2 (15) {
+object(DateInterval)#2 (16) {
   ["y"]=>
   int(2)
   ["m"]=>
@@ -58,6 +60,8 @@ object(DateInterval)#2 (15) {
   int(8)
   ["s"]=>
   int(0)
+  ["f"]=>
+  float(0)
   ["weekday"]=>
   int(0)
   ["weekday_behavior"]=>

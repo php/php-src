@@ -38,16 +38,19 @@ var_dump($d);
 --EXPECTF--
 Unset and recreate a protected property from property's declaring class scope:
 object(D)#%d (1) {
-  [%u|b%"p":protected]=>
-  %unicode|string%(7) "changed"
+  ["p":protected]=>
+  string(7) "changed"
 }
 
 Unset and recreate a protected property from subclass:
 object(D)#%d (1) {
-  [%u|b%"p":protected]=>
-  %unicode|string%(12) "changed in D"
+  ["p":protected]=>
+  string(12) "changed in D"
 }
 
 Unset a protected property, and attempt to recreate it outside of scope (expected failure):
 
-Fatal error: Cannot access protected property %s::$p in %s on line 32
+Fatal error: Uncaught Error: Cannot access protected property %s::$p in %s:32
+Stack trace:
+#0 {main}
+  thrown in %s on line 32

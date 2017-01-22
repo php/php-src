@@ -13,13 +13,15 @@ var_dump(get_declared_traits());
 
 ?>
 --EXPECTF--
-%astring(1) "a"
+array(%d) {%A
+  [%d]=>
+  string(1) "a"
   [%d]=>
   string(1) "d"
   [%d]=>
   string(1) "e"
 }
-array(1) {
-  [0]=>
+array(%d) {%A
+  [%d]=>
   string(1) "c"
 }

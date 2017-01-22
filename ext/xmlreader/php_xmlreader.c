@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -29,6 +29,7 @@
 #include "php_xmlreader.h"
 #ifdef HAVE_DOM
 #include "ext/dom/xml_common.h"
+#include "ext/dom/dom_ce.h"
 #endif
 #include <libxml/xmlreader.h>
 #include <libxml/uri.h>
@@ -331,7 +332,7 @@ zend_module_entry xmlreader_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(xmlreader),
-	"0.1", /* Replace with version number for your extension */
+	PHP_XMLREADER_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

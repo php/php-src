@@ -1,7 +1,23 @@
 --TEST--
 FPM: Test splited configuration and load order #68391
 --SKIPIF--
-<?php include "skipif.inc"; ?>
+<?php
+include "skipif.inc";
+
+$cfg = <<<EOT
+[global]
+error_log = /dev/null
+[poold_ondemand]
+listen=127.0.0.1:9000
+pm = ondemand
+pm.max_children = 2
+pm.process_idle_timeout = 10
+EOT;
+
+if (test_fpm_conf($cfg, $msg) == false) {
+	die("skip " .  $msg);
+}
+?>
 --FILE--
 <?php
 
@@ -50,9 +66,7 @@ if (is_resource($fpm)) {
 		}
 	}
 	proc_terminate($fpm);
-	if (!feof($tail)) {
-		echo stream_get_contents($tail);
-	}
+	fpm_display_log($tail, -1);
 	fclose($tail);
 	proc_close($fpm);
 }

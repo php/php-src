@@ -4,7 +4,7 @@ show information about class
 <?php 
 include "skipif.inc"; 
 if (!extension_loaded("reflection")) {
-	die("skip reflection extension required");
+    die("skip reflection extension required");
 }
 ?>
 --FILE--
@@ -18,7 +18,7 @@ var_dump(`"$php" -n --rc exception`);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF-- 
 string(40) "Exception: Class unknown does not exist
 "
 string(183) "Class [ <internal:Core> class stdClass ] {
@@ -40,7 +40,7 @@ string(183) "Class [ <internal:Core> class stdClass ] {
 }
 
 "
-string(1355) "Class [ <internal:Core> class Exception ] {
+string(1607) "Class [ <internal:Core> class Exception implements Throwable ] {
 
   - Constants [0] {
   }
@@ -61,7 +61,7 @@ string(1355) "Class [ <internal:Core> class Exception ] {
     Property [ <default> private $previous ]
   }
 
-  - Methods [10] {
+  - Methods [11] {
     Method [ <internal:Core> final private method __clone ] {
     }
 
@@ -74,28 +74,31 @@ string(1355) "Class [ <internal:Core> class Exception ] {
       }
     }
 
-    Method [ <internal:Core> final public method getMessage ] {
+    Method [ <internal:Core> public method __wakeup ] {
     }
 
-    Method [ <internal:Core> final public method getCode ] {
+    Method [ <internal:Core, prototype Throwable> final public method getMessage ] {
     }
 
-    Method [ <internal:Core> final public method getFile ] {
+    Method [ <internal:Core, prototype Throwable> final public method getCode ] {
     }
 
-    Method [ <internal:Core> final public method getLine ] {
+    Method [ <internal:Core, prototype Throwable> final public method getFile ] {
     }
 
-    Method [ <internal:Core> final public method getTrace ] {
+    Method [ <internal:Core, prototype Throwable> final public method getLine ] {
     }
 
-    Method [ <internal:Core> final public method getPrevious ] {
+    Method [ <internal:Core, prototype Throwable> final public method getTrace ] {
     }
 
-    Method [ <internal:Core> final public method getTraceAsString ] {
+    Method [ <internal:Core, prototype Throwable> final public method getPrevious ] {
     }
 
-    Method [ <internal:Core> public method __toString ] {
+    Method [ <internal:Core, prototype Throwable> final public method getTraceAsString ] {
+    }
+
+    Method [ <internal:Core, prototype Throwable> public method __toString ] {
     }
   }
 }

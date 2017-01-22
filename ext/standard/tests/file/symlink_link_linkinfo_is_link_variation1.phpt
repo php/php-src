@@ -36,7 +36,7 @@ fclose($fp);
 echo "*** Testing symlink(), link(), linkinfo() and is_link() with linknames stored as members in an object ***\n";
 class object_temp {
   var $linkname;
-  function object_temp($link) {
+  function __construct($link) {
     $this->linkname = $link;
   }
 }

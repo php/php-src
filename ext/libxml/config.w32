@@ -6,7 +6,8 @@ ARG_WITH("libxml", "LibXML support", "yes");
 if (PHP_LIBXML == "yes") {
 	if (CHECK_LIB("libxml2_a_dll.lib;libxml2_a.lib", "libxml") &&
 			CHECK_LIB("libiconv_a.lib;iconv_a.lib;libiconv.lib;iconv.lib", "libxml") &&
-			CHECK_HEADER_ADD_INCLUDE("libxml/parser.h", "CFLAGS_LIBXML") &&
+			CHECK_HEADER_ADD_INCLUDE("libxml/parser.h", "CFLAGS_LIBXML", PHP_PHP_BUILD + "\\include\\libxml2") &&
+			CHECK_HEADER_ADD_INCLUDE("libxml/tree.h", "CFLAGS_LIBXML", PHP_PHP_BUILD + "\\include\\libxml2") &&
 			ADD_EXTENSION_DEP('libxml', 'iconv')) {
 
 		EXTENSION("libxml", "libxml.c", false /* never shared */, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");

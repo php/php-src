@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -178,9 +178,12 @@ static void spl_recursive_it_dtor(zend_object_iterator *_iter)
 	zend_object_iterator      *sub_iter;
 
 	while (object->level > 0) {
-		sub_iter = object->iterators[object->level].iterator;
-		zend_iterator_dtor(sub_iter);
-		zval_ptr_dtor(&object->iterators[object->level--].zobject);
+		if (!Z_ISUNDEF(object->iterators[object->level].zobject)) {
+			sub_iter = object->iterators[object->level].iterator;
+			zend_iterator_dtor(sub_iter);
+			zval_ptr_dtor(&object->iterators[object->level].zobject);
+		}
+		object->level--;
 	}
 	object->iterators = erealloc(object->iterators, sizeof(spl_sub_iterator));
 	object->level = 0;
@@ -393,9 +396,14 @@ next_step:
 					}
 				}
 			}
-			zend_iterator_dtor(iterator);
-			zval_ptr_dtor(&object->iterators[object->level].zobject);
-			object->level--;
+			if (object->level > 0) {
+				zval garbage;
+				ZVAL_COPY_VALUE(&garbage, &object->iterators[object->level].zobject);
+				ZVAL_UNDEF(&object->iterators[object->level].zobject);
+				zval_ptr_dtor(&garbage);
+				zend_iterator_dtor(iterator);
+				object->level--;
+			}
 		} else {
 			return; /* done completeley */
 		}
@@ -467,7 +475,8 @@ zend_object_iterator_funcs spl_recursive_it_iterator_funcs = {
 	spl_recursive_it_get_current_data,
 	spl_recursive_it_get_current_key,
 	spl_recursive_it_move_forward,
-	spl_recursive_it_rewind
+	spl_recursive_it_rewind,
+	NULL
 };
 
 static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce_base, zend_class_entry *ce_inner, recursive_it_it_type rit_type)
@@ -477,38 +486,35 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 	zval *iterator;
 	zend_class_entry *ce_iterator;
 	zend_long mode, flags;
-	int inc_refcount = 1;
 	zend_error_handling error_handling;
-	zval caching_it;
+	zval caching_it, aggregate_retval;
 
 	zend_replace_error_handling(EH_THROW, spl_ce_InvalidArgumentException, &error_handling);
 
 	switch (rit_type) {
 		case RIT_RecursiveTreeIterator: {
-
 			zval caching_it_flags, *user_caching_it_flags = NULL;
 			mode = RIT_SELF_FIRST;
 			flags = RTIT_BYPASS_KEY;
 
 			if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "o|lzl", &iterator, &flags, &user_caching_it_flags, &mode) == SUCCESS) {
 				if (instanceof_function(Z_OBJCE_P(iterator), zend_ce_aggregate)) {
-					zval *aggregate = iterator;
-					zend_call_method_with_0_params(aggregate, Z_OBJCE_P(aggregate), &Z_OBJCE_P(aggregate)->iterator_funcs.zf_new_iterator, "getiterator", iterator);
-//???					inc_refcount = 0;
+					zend_call_method_with_0_params(iterator, Z_OBJCE_P(iterator), &Z_OBJCE_P(iterator)->iterator_funcs.zf_new_iterator, "getiterator", &aggregate_retval);
+					iterator = &aggregate_retval;
+				} else {
+					Z_ADDREF_P(iterator);
 				}
 
 				if (user_caching_it_flags) {
-					ZVAL_ZVAL(&caching_it_flags, user_caching_it_flags, 1, 0);
+					ZVAL_COPY(&caching_it_flags, user_caching_it_flags);
 				} else {
 					ZVAL_LONG(&caching_it_flags, CIT_CATCH_GET_CHILD);
 				}
 				spl_instantiate_arg_ex2(spl_ce_RecursiveCachingIterator, &caching_it, iterator, &caching_it_flags);
 				zval_ptr_dtor(&caching_it_flags);
-				if (inc_refcount == 0 && iterator) {
-					zval_ptr_dtor(iterator);
-				}
+
+				zval_ptr_dtor(iterator);
 				iterator = &caching_it;
-//???				inc_refcount = 0;
 			} else {
 				iterator = NULL;
 			}
@@ -521,9 +527,10 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 
 			if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "o|ll", &iterator, &mode, &flags) == SUCCESS) {
 				if (instanceof_function(Z_OBJCE_P(iterator), zend_ce_aggregate)) {
-					zval *aggregate = iterator;
-					zend_call_method_with_0_params(aggregate, Z_OBJCE_P(aggregate), &Z_OBJCE_P(aggregate)->iterator_funcs.zf_new_iterator, "getiterator", iterator);
-//???					inc_refcount = 0;
+					zend_call_method_with_0_params(iterator, Z_OBJCE_P(iterator), &Z_OBJCE_P(iterator)->iterator_funcs.zf_new_iterator, "getiterator", &aggregate_retval);
+					iterator = &aggregate_retval;
+				} else {
+					Z_ADDREF_P(iterator);
 				}
 			} else {
 				iterator = NULL;
@@ -532,7 +539,7 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 		}
 	}
 	if (!iterator || !instanceof_function(Z_OBJCE_P(iterator), spl_ce_RecursiveIterator)) {
-		if (iterator && !inc_refcount) {
+		if (iterator) {
 			zval_ptr_dtor(iterator);
 		}
 		zend_throw_exception(spl_ce_InvalidArgumentException, "An instance of RecursiveIterator or IteratorAggregate creating it is required", 0);
@@ -580,11 +587,7 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 
 	ce_iterator = Z_OBJCE_P(iterator); /* respect inheritance, don't use spl_ce_RecursiveIterator */
 	intern->iterators[0].iterator = ce_iterator->get_iterator(ce_iterator, iterator, 0);
-//???	if (inc_refcount) {
-		ZVAL_COPY(&intern->iterators[0].zobject, iterator);
-//???	} else {
-//???		ZVAL_COPY_VALUE(&intern->iterators[0].zobject, iterator);
-//???	}
+	ZVAL_COPY_VALUE(&intern->iterators[0].zobject, iterator);
 	intern->iterators[0].ce = ce_iterator;
 	intern->iterators[0].state = RS_START;
 
@@ -672,7 +675,8 @@ SPL_METHOD(RecursiveIteratorIterator, current)
 
 	data = iterator->funcs->get_current_data(iterator);
 	if (data) {
-		RETURN_ZVAL(data, 1, 0);
+		ZVAL_DEREF(data);
+		ZVAL_COPY(return_value, data);
 	}
 } /* }}} */
 
@@ -708,6 +712,7 @@ SPL_METHOD(RecursiveIteratorIterator, getSubIterator)
 {
 	spl_recursive_it_object   *object = Z_SPLRECURSIVE_IT_P(getThis());
 	zend_long  level = object->level;
+	zval *value;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &level) == FAILURE) {
 		return;
@@ -722,7 +727,9 @@ SPL_METHOD(RecursiveIteratorIterator, getSubIterator)
 		return;
 	}
 
-	RETURN_ZVAL(&object->iterators[level].zobject, 1, 0);
+	value = &object->iterators[level].zobject;
+	ZVAL_DEREF(value);
+	ZVAL_COPY(return_value, value);
 } /* }}} */
 
 /* {{{ proto RecursiveIterator RecursiveIteratorIterator::getInnerIterator()
@@ -738,7 +745,8 @@ SPL_METHOD(RecursiveIteratorIterator, getInnerIterator)
 
 	SPL_FETCH_SUB_ELEMENT_ADDR(zobject, object, zobject);
 
-	RETURN_ZVAL(zobject, 1, 0);
+	ZVAL_DEREF(zobject);
+	ZVAL_COPY(return_value, zobject);
 } /* }}} */
 
 /* {{{ proto RecursiveIterator RecursiveIteratorIterator::beginIteration()
@@ -890,7 +898,7 @@ static union _zend_function *spl_recursive_it_get_method(zend_object **zobject, 
 	zval                    *zobj;
 
 	if (!object->iterators) {
-		php_error_docref(NULL, E_ERROR, "The %s instance wasn't initialized properly", (*zobject)->ce->name->val);
+		php_error_docref(NULL, E_ERROR, "The %s instance wasn't initialized properly", ZSTR_VAL((*zobject)->ce->name));
 	}
 	zobj = &object->iterators[level].zobject;
 
@@ -933,6 +941,11 @@ static void spl_RecursiveIteratorIterator_dtor(zend_object *_object)
 static void spl_RecursiveIteratorIterator_free_storage(zend_object *_object)
 {
 	spl_recursive_it_object *object = spl_recursive_it_from_obj(_object);
+
+	if (object->iterators) {
+		efree(object->iterators);
+		object->iterators = NULL;
+	}
 
 	zend_object_std_dtor(&object->std);
 	smart_str_free(&object->prefix[0]);
@@ -1028,15 +1041,15 @@ static void spl_recursive_tree_iterator_get_prefix(spl_recursive_it_object *obje
 	zval       has_next;
 	int        level;
 
-	smart_str_appendl(&str, object->prefix[0].s->val, object->prefix[0].s->len);
+	smart_str_appendl(&str, ZSTR_VAL(object->prefix[0].s), ZSTR_LEN(object->prefix[0].s));
 
 	for (level = 0; level < object->level; ++level) {
 		zend_call_method_with_0_params(&object->iterators[level].zobject, object->iterators[level].ce, NULL, "hasnext", &has_next);
 		if (Z_TYPE(has_next) != IS_UNDEF) {
 			if (Z_TYPE(has_next) == IS_TRUE) {
-				smart_str_appendl(&str, object->prefix[1].s->val, object->prefix[1].s->len);
+				smart_str_appendl(&str, ZSTR_VAL(object->prefix[1].s), ZSTR_LEN(object->prefix[1].s));
 			} else {
-				smart_str_appendl(&str, object->prefix[2].s->val, object->prefix[2].s->len);
+				smart_str_appendl(&str, ZSTR_VAL(object->prefix[2].s), ZSTR_LEN(object->prefix[2].s));
 			}
 			zval_ptr_dtor(&has_next);
 		}
@@ -1044,17 +1057,17 @@ static void spl_recursive_tree_iterator_get_prefix(spl_recursive_it_object *obje
 	zend_call_method_with_0_params(&object->iterators[level].zobject, object->iterators[level].ce, NULL, "hasnext", &has_next);
 	if (Z_TYPE(has_next) != IS_UNDEF) {
 		if (Z_TYPE(has_next) == IS_TRUE) {
-			smart_str_appendl(&str, object->prefix[3].s->val, object->prefix[3].s->len);
+			smart_str_appendl(&str, ZSTR_VAL(object->prefix[3].s), ZSTR_LEN(object->prefix[3].s));
 		} else {
-			smart_str_appendl(&str, object->prefix[4].s->val, object->prefix[4].s->len);
+			smart_str_appendl(&str, ZSTR_VAL(object->prefix[4].s), ZSTR_LEN(object->prefix[4].s));
 		}
 		zval_ptr_dtor(&has_next);
 	}
 
-	smart_str_appendl(&str, object->prefix[5].s->val, object->prefix[5].s->len);
+	smart_str_appendl(&str, ZSTR_VAL(object->prefix[5].s), ZSTR_LEN(object->prefix[5].s));
 	smart_str_0(&str);
 
-	RETURN_STR(str.s);
+	RETURN_NEW_STR(str.s);
 }
 
 static void spl_recursive_tree_iterator_get_entry(spl_recursive_it_object *object, zval *return_value)
@@ -1065,13 +1078,15 @@ static void spl_recursive_tree_iterator_get_entry(spl_recursive_it_object *objec
 
 	data = iterator->funcs->get_current_data(iterator);
 
+	/* Replace exception handling so the catchable fatal error that is thrown when a class
+	 * without __toString is converted to string is converted into an exception. */
 	zend_replace_error_handling(EH_THROW, spl_ce_UnexpectedValueException, &error_handling);
 	if (data) {
-		RETVAL_ZVAL(data, 1, 0);
-		if (Z_TYPE_P(return_value) == IS_ARRAY) {
-			zval_dtor(return_value);
+		ZVAL_DEREF(data);
+		if (Z_TYPE_P(data) == IS_ARRAY) {
 			ZVAL_STRINGL(return_value, "Array", sizeof("Array")-1);
 		} else {
+			ZVAL_COPY(return_value, data);
 			convert_to_string(return_value);
 		}
 	}
@@ -1212,7 +1227,9 @@ SPL_METHOD(RecursiveTreeIterator, current)
         SPL_FETCH_SUB_ITERATOR(iterator, object);
 		data = iterator->funcs->get_current_data(iterator);
 		if (data) {
-			RETURN_ZVAL(data, 1, 0);
+			ZVAL_DEREF(data);
+			ZVAL_COPY(return_value, data);
+			return;
 		} else {
 			RETURN_NULL();
 		}
@@ -1230,7 +1247,7 @@ SPL_METHOD(RecursiveTreeIterator, current)
 	spl_recursive_tree_iterator_get_postfix(object, &postfix);
 
 	str = zend_string_alloc(Z_STRLEN(prefix) + Z_STRLEN(entry) + Z_STRLEN(postfix), 0);
-	ptr = str->val;
+	ptr = ZSTR_VAL(str);
 
 	memcpy(ptr, Z_STRVAL(prefix), Z_STRLEN(prefix));
 	ptr += Z_STRLEN(prefix);
@@ -1270,9 +1287,7 @@ SPL_METHOD(RecursiveTreeIterator, key)
 	}
 
 	if (object->flags & RTIT_BYPASS_KEY) {
-		zval *key_ptr = &key;
-		RETVAL_ZVAL(key_ptr, 1, 0);
-		zval_dtor(&key);
+		RETVAL_ZVAL(&key, 1, 1);
 		return;
 	}
 
@@ -1286,7 +1301,7 @@ SPL_METHOD(RecursiveTreeIterator, key)
 	spl_recursive_tree_iterator_get_postfix(object, &postfix);
 
 	str = zend_string_alloc(Z_STRLEN(prefix) + Z_STRLEN(key) + Z_STRLEN(postfix), 0);
-	ptr = str->val;
+	ptr = ZSTR_VAL(str);
 
 	memcpy(ptr, Z_STRVAL(prefix), Z_STRLEN(prefix));
 	ptr += Z_STRLEN(prefix);
@@ -1388,10 +1403,6 @@ int spl_dual_it_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 	intern = Z_SPLDUAL_IT_P(getThis());
 
 	ZVAL_STRING(&func, method, 0);
-	if (!zend_is_callable(&func, 0, &method)) {
-		php_error_docref(NULL, E_ERROR, "Method %s::%s() does not exist", intern->inner.ce->name, method);
-		return FAILURE;
-	}
 
 	p = EG(argument_stack).top_element-2;
 	arg_count = (zend_ulong) *p;
@@ -1410,7 +1421,7 @@ int spl_dual_it_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 
 		success = SUCCESS;
 	} else {
-		php_error_docref(NULL, E_ERROR, "Unable to call %s::%s()", intern->inner.ce->name, method);
+		zend_throw_error(NULL, "Unable to call %s::%s()", intern->inner.ce->name, method);
 		success = FAILURE;
 	}
 
@@ -1422,7 +1433,7 @@ int spl_dual_it_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 #define SPL_CHECK_CTOR(intern, classname) \
 	if (intern->dit_type == DIT_Unknown) { \
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Classes derived from %s must call %s::__construct()", \
-				(spl_ce_##classname)->name->val, (spl_ce_##classname)->name->val); \
+				ZSTR_VAL((spl_ce_##classname)->name), ZSTR_VAL((spl_ce_##classname)->name)); \
 		return; \
 	}
 
@@ -1453,29 +1464,24 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 	intern = Z_SPLDUAL_IT_P(getThis());
 
 	if (intern->dit_type != DIT_Unknown) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "%s::getIterator() must be called exactly once per instance", ce_base->name->val);
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "%s::getIterator() must be called exactly once per instance", ZSTR_VAL(ce_base->name));
 		return NULL;
 	}
-
-	zend_replace_error_handling(EH_THROW, spl_ce_InvalidArgumentException, &error_handling);
 
 	intern->dit_type = dit_type;
 	switch (dit_type) {
 		case DIT_LimitIterator: {
 			intern->u.limit.offset = 0; /* start at beginning */
 			intern->u.limit.count = -1; /* get all */
-			if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|ll", &zobject, ce_inner, &intern->u.limit.offset, &intern->u.limit.count) == FAILURE) {
-				zend_restore_error_handling(&error_handling);
+			if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "O|ll", &zobject, ce_inner, &intern->u.limit.offset, &intern->u.limit.count) == FAILURE) {
 				return NULL;
 			}
 			if (intern->u.limit.offset < 0) {
 				zend_throw_exception(spl_ce_OutOfRangeException, "Parameter offset must be >= 0", 0);
-				zend_restore_error_handling(&error_handling);
 				return NULL;
 			}
 			if (intern->u.limit.count < 0 && intern->u.limit.count != -1) {
 				zend_throw_exception(spl_ce_OutOfRangeException, "Parameter count must either be -1 or a value greater than or equal 0", 0);
-				zend_restore_error_handling(&error_handling);
 				return NULL;
 			}
 			break;
@@ -1483,13 +1489,11 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 		case DIT_CachingIterator:
 		case DIT_RecursiveCachingIterator: {
 			zend_long flags = CIT_CALL_TOSTRING;
-			if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|l", &zobject, ce_inner, &flags) == FAILURE) {
-				zend_restore_error_handling(&error_handling);
+			if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "O|l", &zobject, ce_inner, &flags) == FAILURE) {
 				return NULL;
 			}
 			if (spl_cit_check_flags(flags) != SUCCESS) {
 				zend_throw_exception(spl_ce_InvalidArgumentException, "Flags must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_INNER", 0);
-				zend_restore_error_handling(&error_handling);
 				return NULL;
 			}
 			intern->u.caching.flags |= flags & CIT_PUBLIC;
@@ -1500,8 +1504,7 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 			zend_class_entry *ce_cast;
 			zend_string *class_name;
 
-			if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|S", &zobject, ce_inner, &class_name) == FAILURE) {
-				zend_restore_error_handling(&error_handling);
+			if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "O|S", &zobject, ce_inner, &class_name) == FAILURE) {
 				return NULL;
 			}
 			ce = Z_OBJCE_P(zobject);
@@ -1512,7 +1515,6 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 					|| !ce_cast->get_iterator
 					) {
 						zend_throw_exception(spl_ce_LogicException, "Class to downcast to not found or not base class or does not implement Traversable", 0);
-						zend_restore_error_handling(&error_handling);
 						return NULL;
 					}
 					ce = ce_cast;
@@ -1521,12 +1523,10 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 					zend_call_method_with_0_params(zobject, ce, &ce->iterator_funcs.zf_new_iterator, "getiterator", &retval);
 					if (EG(exception)) {
 						zval_ptr_dtor(&retval);
-						zend_restore_error_handling(&error_handling);
 						return NULL;
 					}
 					if (Z_TYPE(retval) != IS_OBJECT || !instanceof_function(Z_OBJCE(retval), zend_ce_traversable)) {
-						zend_throw_exception_ex(spl_ce_LogicException, 0, "%s::getIterator() must return an object that implements Traversable", ce->name->val);
-						zend_restore_error_handling(&error_handling);
+						zend_throw_exception_ex(spl_ce_LogicException, 0, "%s::getIterator() must return an object that implements Traversable", ZSTR_VAL(ce->name));
 						return NULL;
 					}
 					zobject = &retval;
@@ -1537,6 +1537,7 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 			break;
 		}
 		case DIT_AppendIterator:
+			zend_replace_error_handling(EH_THROW, spl_ce_InvalidArgumentException, &error_handling);
 			spl_instantiate(spl_ce_ArrayIterator, &intern->u.append.zarrayit);
 			zend_call_method_with_0_params(&intern->u.append.zarrayit, spl_ce_ArrayIterator, &spl_ce_ArrayIterator->constructor, "__construct", NULL);
 			intern->u.append.iterator = spl_ce_ArrayIterator->get_iterator(spl_ce_ArrayIterator, &intern->u.append.zarrayit, 0);
@@ -1551,21 +1552,22 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 			intern->u.regex.use_flags = ZEND_NUM_ARGS() >= 5;
 			intern->u.regex.flags = 0;
 			intern->u.regex.preg_flags = 0;
-			if (zend_parse_parameters(ZEND_NUM_ARGS(), "OS|lll", &zobject, ce_inner, &regex, &mode, &intern->u.regex.flags, &intern->u.regex.preg_flags) == FAILURE) {
-				zend_restore_error_handling(&error_handling);
+			if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "OS|lll", &zobject, ce_inner, &regex, &mode, &intern->u.regex.flags, &intern->u.regex.preg_flags) == FAILURE) {
 				return NULL;
 			}
 			if (mode < 0 || mode >= REGIT_MODE_MAX) {
-				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Illegal mode %pd", mode);
-				zend_restore_error_handling(&error_handling);
+				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Illegal mode " ZEND_LONG_FMT, mode);
 				return NULL;
 			}
 			intern->u.regex.mode = mode;
 			intern->u.regex.regex = zend_string_copy(regex);
+
+			zend_replace_error_handling(EH_THROW, spl_ce_InvalidArgumentException, &error_handling);
 			intern->u.regex.pce = pcre_get_compiled_regex_cache(regex);
+			zend_restore_error_handling(&error_handling);
+
 			if (intern->u.regex.pce == NULL) {
 				/* pcre_get_compiled_regex_cache has already sent error */
-				zend_restore_error_handling(&error_handling);
 				return NULL;
 			}
 			intern->u.regex.pce->refcount++;
@@ -1576,8 +1578,7 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 		case DIT_RecursiveCallbackFilterIterator: {
 			_spl_cbfilter_it_intern *cfi = emalloc(sizeof(*cfi));
 			cfi->fci.object = NULL;
-			if (zend_parse_parameters(ZEND_NUM_ARGS(), "Of", &zobject, ce_inner, &cfi->fci, &cfi->fcc) == FAILURE) {
-				zend_restore_error_handling(&error_handling);
+			if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "Of", &zobject, ce_inner, &cfi->fci, &cfi->fcc) == FAILURE) {
 				efree(cfi);
 				return NULL;
 			}
@@ -1590,14 +1591,11 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 			break;
 		}
 		default:
-			if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &zobject, ce_inner) == FAILURE) {
-				zend_restore_error_handling(&error_handling);
+			if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "O", &zobject, ce_inner) == FAILURE) {
 				return NULL;
 			}
 			break;
 	}
-
-	zend_restore_error_handling(&error_handling);
 
 	if (inc_refcount) {
 		ZVAL_COPY(&intern->inner.zobject, zobject);
@@ -1619,7 +1617,7 @@ SPL_METHOD(FilterIterator, __construct)
 	spl_dual_it_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, spl_ce_FilterIterator, zend_ce_iterator, DIT_FilterIterator);
 } /* }}} */
 
-/* {{{ proto void CallbackFilterIterator::__construct(Iterator it, callback)
+/* {{{ proto void CallbackFilterIterator::__construct(Iterator it, callback func)
    Create an Iterator from another iterator */
 SPL_METHOD(CallbackFilterIterator, __construct)
 {
@@ -1642,18 +1640,14 @@ SPL_METHOD(dual_it, getInnerIterator)
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
 	if (!Z_ISUNDEF(intern->inner.zobject)) {
-		RETVAL_ZVAL(&intern->inner.zobject, 1, 0);
+		zval *value = &intern->inner.zobject;
+
+		ZVAL_DEREF(value);
+		ZVAL_COPY(return_value, value);
 	} else {
 		RETURN_NULL();
 	}
 } /* }}} */
-
-static inline void spl_dual_it_require(spl_dual_it_object *intern)
-{
-	if (!intern->inner.iterator) {
-		php_error_docref(NULL, E_ERROR, "The inner constructor wasn't initialized with an iterator instance");
-	}
-}
 
 static inline void spl_dual_it_free(spl_dual_it_object *intern)
 {
@@ -1684,7 +1678,7 @@ static inline void spl_dual_it_rewind(spl_dual_it_object *intern)
 {
 	spl_dual_it_free(intern);
 	intern->current.pos = 0;
-	if (intern->inner.iterator->funcs->rewind) {
+	if (intern->inner.iterator && intern->inner.iterator->funcs->rewind) {
 		intern->inner.iterator->funcs->rewind(intern->inner.iterator);
 	}
 }
@@ -1727,8 +1721,9 @@ static inline void spl_dual_it_next(spl_dual_it_object *intern, int do_free)
 {
 	if (do_free) {
 		spl_dual_it_free(intern);
-	} else {
-		spl_dual_it_require(intern);
+	} else if (!intern->inner.iterator) {
+		zend_throw_error(NULL, "The inner constructor wasn't initialized with an iterator instance");
+		return;
 	}
 	intern->inner.iterator->funcs->move_forward(intern->inner.iterator);
 	intern->current.pos++;
@@ -1789,9 +1784,13 @@ SPL_METHOD(dual_it, key)
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
 	if (Z_TYPE(intern->current.key) != IS_UNDEF) {
-		RETURN_ZVAL(&intern->current.key, 1, 0);
+		zval *value = &intern->current.key;
+
+		ZVAL_DEREF(value);
+		ZVAL_COPY(return_value, value);
+	} else {
+		RETURN_NULL();
 	}
-	RETURN_NULL();
 } /* }}} */
 
 /* {{{ proto mixed FilterIterator::current()
@@ -1813,7 +1812,10 @@ SPL_METHOD(dual_it, current)
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
 	if (Z_TYPE(intern->current.data) != IS_UNDEF) {
-		RETVAL_ZVAL(&intern->current.data, 1, 0);
+		zval *value = &intern->current.data;
+
+		ZVAL_DEREF(value);
+		ZVAL_COPY(return_value, value);
 	} else {
 		RETURN_NULL();
 	}
@@ -1898,7 +1900,7 @@ SPL_METHOD(FilterIterator, next)
 	spl_filter_it_next(getThis(), intern);
 } /* }}} */
 
-/* {{{ proto void RecursiveCallbackFilterIterator::__construct(RecursiveIterator it, callback)
+/* {{{ proto void RecursiveCallbackFilterIterator::__construct(RecursiveIterator it, callback func)
    Create a RecursiveCallbackFilterIterator from a RecursiveIterator */
 SPL_METHOD(RecursiveCallbackFilterIterator, __construct)
 {
@@ -1996,7 +1998,6 @@ SPL_METHOD(CallbackFilterIterator, accept)
 	zend_fcall_info        *fci = &intern->u.cbfilter->fci;
 	zend_fcall_info_cache  *fcc = &intern->u.cbfilter->fcc;
 	zval                    params[3];
-	zval                    result;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -2010,19 +2011,22 @@ SPL_METHOD(CallbackFilterIterator, accept)
 	ZVAL_COPY_VALUE(&params[1], &intern->current.key);
 	ZVAL_COPY_VALUE(&params[2], &intern->inner.zobject);
 
-	fci->retval = &result;
+	fci->retval = return_value;
 	fci->param_count = 3;
 	fci->params = params;
 	fci->no_separation = 0;
 
-	if (zend_call_function(fci, fcc) != SUCCESS || Z_TYPE(result) == IS_UNDEF) {
+	if (zend_call_function(fci, fcc) != SUCCESS || Z_ISUNDEF_P(return_value)) {
 		RETURN_FALSE;
 	}
+
 	if (EG(exception)) {
-		return;
+		RETURN_NULL();
 	}
 
-	RETURN_ZVAL(&result, 1, 1);
+	/* zend_call_function may change args to IS_REF */
+	ZVAL_COPY_VALUE(&intern->current.data, &params[0]);
+	ZVAL_COPY_VALUE(&intern->current.key, &params[1]);
 }
 /* }}} */
 
@@ -2043,13 +2047,14 @@ SPL_METHOD(RegexIterator, accept)
 
 	if (Z_TYPE(intern->current.data) == IS_UNDEF) {
 		RETURN_FALSE;
-	} else if (Z_TYPE(intern->current.data) == IS_ARRAY) {
-		RETURN_FALSE;
 	}
 
 	if (intern->u.regex.flags & REGIT_USE_KEY) {
 		subject = zval_get_string(&intern->current.key);
 	} else {
+		if (Z_TYPE(intern->current.data) == IS_ARRAY) {
+			RETURN_FALSE;
+		}
 		subject = zval_get_string(&intern->current.data);
 	}
 
@@ -2057,31 +2062,28 @@ SPL_METHOD(RegexIterator, accept)
 	{
 		case REGIT_MODE_MAX: /* won't happen but makes compiler happy */
 		case REGIT_MODE_MATCH:
-			count = pcre_exec(intern->u.regex.pce->re, intern->u.regex.pce->extra, subject->val, subject->len, 0, 0, NULL, 0);
+#ifdef PCRE_EXTRA_MARK
+			if (intern->u.regex.pce->extra) {
+				intern->u.regex.pce->extra->flags &= ~PCRE_EXTRA_MARK;
+			}
+#endif
+			count = pcre_exec(intern->u.regex.pce->re, intern->u.regex.pce->extra, ZSTR_VAL(subject), ZSTR_LEN(subject), 0, 0, NULL, 0);
 			RETVAL_BOOL(count >= 0);
 			break;
 
 		case REGIT_MODE_ALL_MATCHES:
 		case REGIT_MODE_GET_MATCH:
-//???			if (!use_copy) {
-//???				subject = estrndup(subject, subject_len);
-//???				use_copy = 1;
-//???			}
 			zval_ptr_dtor(&intern->current.data);
 			ZVAL_UNDEF(&intern->current.data);
-			php_pcre_match_impl(intern->u.regex.pce, subject->val, subject->len, &zcount,
+			php_pcre_match_impl(intern->u.regex.pce, ZSTR_VAL(subject), ZSTR_LEN(subject), &zcount,
 				&intern->current.data, intern->u.regex.mode == REGIT_MODE_ALL_MATCHES, intern->u.regex.use_flags, intern->u.regex.preg_flags, 0);
 			RETVAL_BOOL(Z_LVAL(zcount) > 0);
 			break;
 
 		case REGIT_MODE_SPLIT:
-//???			if (!use_copy) {
-//???				subject = estrndup(subject, subject_len);
-//???				use_copy = 1;
-//???			}
 			zval_ptr_dtor(&intern->current.data);
 			ZVAL_UNDEF(&intern->current.data);
-			php_pcre_split_impl(intern->u.regex.pce, subject->val, subject->len, &intern->current.data, -1, intern->u.regex.preg_flags);
+			php_pcre_split_impl(intern->u.regex.pce, ZSTR_VAL(subject), ZSTR_LEN(subject), &intern->current.data, -1, intern->u.regex.preg_flags);
 			count = zend_hash_num_elements(Z_ARRVAL(intern->current.data));
 			RETVAL_BOOL(count > 1);
 			break;
@@ -2089,12 +2091,11 @@ SPL_METHOD(RegexIterator, accept)
 		case REGIT_MODE_REPLACE:
 			replacement = zend_read_property(intern->std.ce, getThis(), "replacement", sizeof("replacement")-1, 1, &rv);
 			if (Z_TYPE_P(replacement) != IS_STRING) {
-				tmp_replacement = *replacement;
-				zval_copy_ctor(&tmp_replacement);
+				ZVAL_COPY(&tmp_replacement, replacement);
 				convert_to_string(&tmp_replacement);
 				replacement = &tmp_replacement;
 			}
-			result = php_pcre_replace_impl(intern->u.regex.pce, subject, subject->val, subject->len, replacement, 0, -1, &count);
+			result = php_pcre_replace_impl(intern->u.regex.pce, subject, ZSTR_VAL(subject), ZSTR_LEN(subject), replacement, 0, -1, &count);
 
 			if (intern->u.regex.flags & REGIT_USE_KEY) {
 				zval_ptr_dtor(&intern->current.key);
@@ -2105,7 +2106,7 @@ SPL_METHOD(RegexIterator, accept)
 			}
 
 			if (replacement == &tmp_replacement) {
-				zval_dtor(replacement);
+				zval_ptr_dtor(replacement);
 			}
 			RETVAL_BOOL(count > 0);
 	}
@@ -2126,7 +2127,7 @@ SPL_METHOD(RegexIterator, getRegex)
 		return;
 	}
 
-	RETURN_STR(zend_string_copy(intern->u.regex.regex));
+	RETURN_STR_COPY(intern->u.regex.regex);
 } /* }}} */
 
 /* {{{ proto bool RegexIterator::getMode()
@@ -2156,7 +2157,7 @@ SPL_METHOD(RegexIterator, setMode)
 	}
 
 	if (mode < 0 || mode >= REGIT_MODE_MAX) {
-		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Illegal mode %pd", mode);
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Illegal mode " ZEND_LONG_FMT, mode);
 		return;/* NULL */
 	}
 
@@ -2264,6 +2265,7 @@ SPL_METHOD(RecursiveRegexIterator, getChildren)
 
 		spl_instantiate_arg_n(Z_OBJCE_P(getThis()), return_value, 5, args);
 
+		zval_ptr_dtor(&args[0]);
 		zval_ptr_dtor(&args[1]);
 	}
 	zval_ptr_dtor(&retval);
@@ -2324,10 +2326,7 @@ static void spl_dual_it_free_storage(zend_object *_object)
 	}
 
 	if (object->dit_type == DIT_CachingIterator || object->dit_type == DIT_RecursiveCachingIterator) {
-		if (Z_TYPE(object->u.caching.zcache) != IS_UNDEF) {
-			zval_ptr_dtor(&object->u.caching.zcache);
-			//ZVAL_UNDEF(&object->u.caching.zcache);
-		}
+		zval_ptr_dtor(&object->u.caching.zcache);
 	}
 
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
@@ -2496,11 +2495,11 @@ static inline void spl_limit_it_seek(spl_dual_it_object *intern, zend_long pos)
 
 	spl_dual_it_free(intern);
 	if (pos < intern->u.limit.offset) {
-		zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0, "Cannot seek to %pd which is below the offset %pd", pos, intern->u.limit.offset);
+		zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0, "Cannot seek to " ZEND_LONG_FMT " which is below the offset " ZEND_LONG_FMT, pos, intern->u.limit.offset);
 		return;
 	}
 	if (pos >= intern->u.limit.offset + intern->u.limit.count && intern->u.limit.count != -1) {
-		zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0, "Cannot seek to %pd which is behind offset %pd plus count %pd", pos, intern->u.limit.offset, intern->u.limit.count);
+		zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0, "Cannot seek to " ZEND_LONG_FMT " which is behind offset " ZEND_LONG_FMT " plus count " ZEND_LONG_FMT, pos, intern->u.limit.offset, intern->u.limit.count);
 		return;
 	}
 	if (pos != intern->current.pos && instanceof_function(intern->inner.ce, spl_ce_SeekableIterator)) {
@@ -2646,14 +2645,13 @@ static inline void spl_caching_it_next(spl_dual_it_object *intern)
 		intern->u.caching.flags |= CIT_VALID;
 		/* Full cache ? */
 		if (intern->u.caching.flags & CIT_FULL_CACHE) {
-			zval zcacheval;
 			zval *key = &intern->current.key;
+			zval *data = &intern->current.data;
 
-			ZVAL_ZVAL(&zcacheval, &intern->current.data, 1, 0);
-
-			array_set_zval_key(HASH_OF(&intern->u.caching.zcache), key, &zcacheval);
-
-			zval_ptr_dtor(&zcacheval);
+			ZVAL_DEREF(data);
+			Z_TRY_ADDREF_P(data);
+			array_set_zval_key(Z_ARRVAL(intern->u.caching.zcache), key, data);
+			zval_ptr_dtor(data);
 		}
 		/* Recursion ? */
 		if (intern->dit_type == DIT_RecursiveCachingIterator) {
@@ -2717,7 +2715,7 @@ static inline void spl_caching_it_next(spl_dual_it_object *intern)
 static inline void spl_caching_it_rewind(spl_dual_it_object *intern)
 {
 	spl_dual_it_rewind(intern);
-	zend_hash_clean(HASH_OF(&intern->u.caching.zcache));
+	zend_hash_clean(Z_ARRVAL(intern->u.caching.zcache));
 	spl_caching_it_next(intern);
 }
 
@@ -2797,22 +2795,22 @@ SPL_METHOD(CachingIterator, __toString)
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
 	if (!(intern->u.caching.flags & (CIT_CALL_TOSTRING|CIT_TOSTRING_USE_KEY|CIT_TOSTRING_USE_CURRENT|CIT_TOSTRING_USE_INNER)))	{
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "%s does not fetch string value (see CachingIterator::__construct)", Z_OBJCE_P(getThis())->name->val);
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "%s does not fetch string value (see CachingIterator::__construct)", ZSTR_VAL(Z_OBJCE_P(getThis())->name));
 		return;
 	}
 	if (intern->u.caching.flags & CIT_TOSTRING_USE_KEY) {
-		ZVAL_DUP(return_value, &intern->current.key);
+		ZVAL_COPY(return_value, &intern->current.key);
 		convert_to_string(return_value);
 		return;
 	} else if (intern->u.caching.flags & CIT_TOSTRING_USE_CURRENT) {
-		ZVAL_DUP(return_value, &intern->current.data);
+		ZVAL_COPY(return_value, &intern->current.data);
 		convert_to_string(return_value);
 		return;
 	}
 	if (Z_TYPE(intern->u.caching.zstr) == IS_STRING) {
-		RETURN_STR(zend_string_copy(Z_STR_P(&intern->u.caching.zstr)));
+		RETURN_STR_COPY(Z_STR_P(&intern->u.caching.zstr));
 	} else {
-		RETURN_NULL();
+		RETURN_EMPTY_STRING();
 	}
 } /* }}} */
 
@@ -2827,7 +2825,7 @@ SPL_METHOD(CachingIterator, offsetSet)
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
 	if (!(intern->u.caching.flags & CIT_FULL_CACHE))	{
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "%s does not use a full cache (see CachingIterator::__construct)", Z_OBJCE_P(getThis())->name->val);
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "%s does not use a full cache (see CachingIterator::__construct)", ZSTR_VAL(Z_OBJCE_P(getThis())->name));
 		return;
 	}
 
@@ -2838,7 +2836,7 @@ SPL_METHOD(CachingIterator, offsetSet)
 	if (Z_REFCOUNTED_P(value)) {
 		Z_ADDREF_P(value);
 	}
-	zend_symtable_update(HASH_OF(&intern->u.caching.zcache), key, value);
+	zend_symtable_update(Z_ARRVAL(intern->u.caching.zcache), key, value);
 }
 /* }}} */
 
@@ -2853,7 +2851,7 @@ SPL_METHOD(CachingIterator, offsetGet)
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
 	if (!(intern->u.caching.flags & CIT_FULL_CACHE))	{
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "%s does not use a full cache (see CachingIterator::__construct)", Z_OBJCE_P(getThis())->name->val);
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "%s does not use a full cache (see CachingIterator::__construct)", ZSTR_VAL(Z_OBJCE_P(getThis())->name));
 		return;
 	}
 
@@ -2861,12 +2859,13 @@ SPL_METHOD(CachingIterator, offsetGet)
 		return;
 	}
 
-	if ((value = zend_symtable_find(HASH_OF(&intern->u.caching.zcache), key)) == NULL) {
-		zend_error(E_NOTICE, "Undefined index: %s", key->val);
+	if ((value = zend_symtable_find(Z_ARRVAL(intern->u.caching.zcache), key)) == NULL) {
+		zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(key));
 		return;
 	}
 
-	RETURN_ZVAL(value, 1, 0);
+	ZVAL_DEREF(value);
+	ZVAL_COPY(return_value, value);
 }
 /* }}} */
 
@@ -2880,7 +2879,7 @@ SPL_METHOD(CachingIterator, offsetUnset)
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
 	if (!(intern->u.caching.flags & CIT_FULL_CACHE))	{
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "%s does not use a full cache (see CachingIterator::__construct)", Z_OBJCE_P(getThis())->name->val);
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "%s does not use a full cache (see CachingIterator::__construct)", ZSTR_VAL(Z_OBJCE_P(getThis())->name));
 		return;
 	}
 
@@ -2888,7 +2887,7 @@ SPL_METHOD(CachingIterator, offsetUnset)
 		return;
 	}
 
-	zend_symtable_del(HASH_OF(&intern->u.caching.zcache), key);
+	zend_symtable_del(Z_ARRVAL(intern->u.caching.zcache), key);
 }
 /* }}} */
 
@@ -2902,7 +2901,7 @@ SPL_METHOD(CachingIterator, offsetExists)
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
 	if (!(intern->u.caching.flags & CIT_FULL_CACHE))	{
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "%s does not use a full cache (see CachingIterator::__construct)", Z_OBJCE_P(getThis())->name->val);
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "%s does not use a full cache (see CachingIterator::__construct)", ZSTR_VAL(Z_OBJCE_P(getThis())->name));
 		return;
 	}
 
@@ -2910,7 +2909,7 @@ SPL_METHOD(CachingIterator, offsetExists)
 		return;
 	}
 
-	RETURN_BOOL(zend_symtable_exists(HASH_OF(&intern->u.caching.zcache), key));
+	RETURN_BOOL(zend_symtable_exists(Z_ARRVAL(intern->u.caching.zcache), key));
 }
 /* }}} */
 
@@ -2927,11 +2926,11 @@ SPL_METHOD(CachingIterator, getCache)
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
 	if (!(intern->u.caching.flags & CIT_FULL_CACHE))	{
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "%v does not use a full cache (see CachingIterator::__construct)", Z_OBJCE_P(getThis())->name->val);
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "%s does not use a full cache (see CachingIterator::__construct)", ZSTR_VAL(Z_OBJCE_P(getThis())->name));
 		return;
 	}
 
-	RETURN_ZVAL(&intern->u.caching.zcache, 1, 0);
+	ZVAL_COPY(return_value, &intern->u.caching.zcache);
 }
 /* }}} */
 
@@ -2978,7 +2977,7 @@ SPL_METHOD(CachingIterator, setFlags)
 	}
 	if ((flags & CIT_FULL_CACHE) != 0 && (intern->u.caching.flags & CIT_FULL_CACHE) == 0) {
 		/* clear on (re)enable */
-		zend_hash_clean(HASH_OF(&intern->u.caching.zcache));
+		zend_hash_clean(Z_ARRVAL(intern->u.caching.zcache));
 	}
 	intern->u.caching.flags = (intern->u.caching.flags & ~CIT_PUBLIC) | (flags & CIT_PUBLIC);
 }
@@ -2997,11 +2996,11 @@ SPL_METHOD(CachingIterator, count)
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
 	if (!(intern->u.caching.flags & CIT_FULL_CACHE))	{
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "%v does not use a full cache (see CachingIterator::__construct)", Z_OBJCE_P(getThis())->name->val);
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "%s does not use a full cache (see CachingIterator::__construct)", ZSTR_VAL(Z_OBJCE_P(getThis())->name));
 		return;
 	}
 
-	RETURN_LONG(zend_hash_num_elements(HASH_OF(&intern->u.caching.zcache)));
+	RETURN_LONG(zend_hash_num_elements(Z_ARRVAL(intern->u.caching.zcache)));
 }
 /* }}} */
 
@@ -3079,7 +3078,10 @@ SPL_METHOD(RecursiveCachingIterator, getChildren)
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
 	if (Z_TYPE(intern->u.caching.zchildren) != IS_UNDEF) {
-		RETURN_ZVAL(&intern->u.caching.zchildren, 1, 0);
+		zval *value = &intern->u.caching.zchildren;
+
+		ZVAL_DEREF(value);
+		ZVAL_COPY(return_value, value);
 	} else {
 		RETURN_NULL();
 	}
@@ -3183,7 +3185,8 @@ SPL_METHOD(NoRewindIterator, current)
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 	data = intern->inner.iterator->funcs->get_current_data(intern->inner.iterator);
 	if (data) {
-		RETURN_ZVAL(data, 1, 0);
+		ZVAL_DEREF(data);
+		ZVAL_COPY(return_value, data);
 	}
 } /* }}} */
 
@@ -3456,6 +3459,7 @@ SPL_METHOD(AppendIterator, getIteratorIndex)
 SPL_METHOD(AppendIterator, getArrayIterator)
 {
 	spl_dual_it_object   *intern;
+	zval *value;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -3463,7 +3467,9 @@ SPL_METHOD(AppendIterator, getArrayIterator)
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
-	RETURN_ZVAL(&intern->u.append.zarrayit, 1, 0);
+	value = &intern->u.append.zarrayit;
+	ZVAL_DEREF(value);
+	ZVAL_COPY(return_value, value);
 } /* }}} */
 
 ZEND_BEGIN_ARG_INFO(arginfo_append_it_append, 0)
@@ -3543,7 +3549,7 @@ static int spl_iterator_to_array_apply(zend_object_iterator *iter, void *puser) 
 			return ZEND_HASH_APPLY_STOP;
 		}
 		array_set_zval_key(Z_ARRVAL_P(return_value), &key, data);
-		zval_dtor(&key);
+		zval_ptr_dtor(&key);
 	} else {
 		Z_TRY_ADDREF_P(data);
 		add_next_index_zval(return_value, data);
@@ -3585,7 +3591,7 @@ PHP_FUNCTION(iterator_to_array)
 	array_init(return_value);
 
 	if (spl_iterator_apply(obj, use_keys ? spl_iterator_to_array_apply : spl_iterator_to_values_apply, (void*)return_value) != SUCCESS) {
-		zval_dtor(return_value);
+		zval_ptr_dtor(return_value);
 		RETURN_NULL();
 	}
 } /* }}} */

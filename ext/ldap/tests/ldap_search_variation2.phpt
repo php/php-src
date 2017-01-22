@@ -14,10 +14,10 @@ require_once('skipifbindfailure.inc');
 include "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
-insert_dummy_data($link);
+insert_dummy_data($link, $base);
 
 var_dump(
-	$result = ldap_search($link, "dc=my-domain,dc=com", "(objectclass=person)", array('sn'), 1),
+	$result = ldap_search($link, "$base", "(objectclass=person)", array('sn'), 1),
 	ldap_get_entries($link, $result)
 );
 ?>
@@ -27,7 +27,7 @@ var_dump(
 include "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
-remove_dummy_data($link);
+remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
 resource(%d) of type (ldap result)
@@ -46,7 +46,7 @@ array(4) {
     ["count"]=>
     int(1)
     ["dn"]=>
-    string(28) "cn=userA,dc=my-domain,dc=com"
+    string(%d) "cn=userA,%s"
   }
   [1]=>
   array(4) {
@@ -60,7 +60,7 @@ array(4) {
     ["count"]=>
     int(1)
     ["dn"]=>
-    string(28) "cn=userB,dc=my-domain,dc=com"
+    string(%d) "cn=userB,%s"
   }
   [2]=>
   array(4) {
@@ -74,7 +74,7 @@ array(4) {
     ["count"]=>
     int(1)
     ["dn"]=>
-    string(37) "cn=userC,cn=userB,dc=my-domain,dc=com"
+    string(%d) "cn=userC,cn=userB,%s"
   }
 }
 ===DONE===

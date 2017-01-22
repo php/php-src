@@ -42,7 +42,7 @@ var_dump( get_browser( null, 'foobar' ) );
 *** Testing get_browser() : error functionality ***
 array(34) {
   ["browser_name_regex"]=>
-  string(6) "§^.*$§"
+  string(6) "~^.*$~"
   ["browser_name_pattern"]=>
   string(1) "*"
   ["browser"]=>

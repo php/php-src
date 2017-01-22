@@ -5,4 +5,4 @@ Invalid octal
 
 $x = 08;
 --EXPECTF--
-Fatal error: Invalid numeric literal in %s on line 3
+Parse error: Invalid numeric literal in %s on line 3

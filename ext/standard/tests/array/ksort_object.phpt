@@ -15,7 +15,7 @@ Test ksort() function : object functionality - sort objects
 echo "*** Testing ksort() : object functionality ***\n";
 
 // class declaration for integer objects
-class Integer
+class IntegerObject
 {
   public $class_value;
   // initializing object member value
@@ -26,7 +26,7 @@ class Integer
 }
 
 // class declaration for string objects
-class String
+class StringObject
 {
   public $class_value;
   // initializing object member value
@@ -43,17 +43,17 @@ class String
 
 // array of integer objects
 $unsorted_int_obj = array ( 
-  11 => new Integer(11), 66 =>  new Integer(66),
-  23 => new Integer(23), -5 => new Integer(-5),
-  1 => new Integer(0.001), 0 => new Integer(0)
+  11 => new IntegerObject(11), 66 =>  new IntegerObject(66),
+  23 => new IntegerObject(23), -5 => new IntegerObject(-5),
+  1 => new IntegerObject(0.001), 0 => new IntegerObject(0)
 );
 
 // array of string objects
 $unsorted_str_obj = array ( 
-  "axx" => new String("axx"), "t" => new String("t"),
-  "w" => new String("w"), "py" => new String("py"),
-  "apple" => new String("apple"), "Orange" => new String("Orange"),
-  "Lemon" => new String("Lemon"), "aPPle" => new String("aPPle")
+  "axx" => new StringObject("axx"), "t" => new StringObject("t"),
+  "w" => new StringObject("w"), "py" => new StringObject("py"),
+  "apple" => new StringObject("apple"), "Orange" => new StringObject("Orange"),
+  "Lemon" => new StringObject("Lemon"), "aPPle" => new StringObject("aPPle")
 );
 echo "\n-- Testing ksort() by supplying various object arrays, 'flag' value is defualt --\n";
 
@@ -87,32 +87,32 @@ echo "Done\n";
 bool(true)
 array(6) {
   [-5]=>
-  object(Integer)#%d (1) {
+  object(IntegerObject)#%d (1) {
     ["class_value"]=>
     int(-5)
   }
   [0]=>
-  object(Integer)#%d (1) {
+  object(IntegerObject)#%d (1) {
     ["class_value"]=>
     int(0)
   }
   [1]=>
-  object(Integer)#%d (1) {
+  object(IntegerObject)#%d (1) {
     ["class_value"]=>
     float(0.001)
   }
   [11]=>
-  object(Integer)#%d (1) {
+  object(IntegerObject)#%d (1) {
     ["class_value"]=>
     int(11)
   }
   [23]=>
-  object(Integer)#%d (1) {
+  object(IntegerObject)#%d (1) {
     ["class_value"]=>
     int(23)
   }
   [66]=>
-  object(Integer)#%d (1) {
+  object(IntegerObject)#%d (1) {
     ["class_value"]=>
     int(66)
   }
@@ -120,42 +120,42 @@ array(6) {
 bool(true)
 array(8) {
   ["Lemon"]=>
-  object(String)#%d (1) {
+  object(StringObject)#%d (1) {
     ["class_value"]=>
     string(5) "Lemon"
   }
   ["Orange"]=>
-  object(String)#%d (1) {
+  object(StringObject)#%d (1) {
     ["class_value"]=>
     string(6) "Orange"
   }
   ["aPPle"]=>
-  object(String)#%d (1) {
+  object(StringObject)#%d (1) {
     ["class_value"]=>
     string(5) "aPPle"
   }
   ["apple"]=>
-  object(String)#%d (1) {
+  object(StringObject)#%d (1) {
     ["class_value"]=>
     string(5) "apple"
   }
   ["axx"]=>
-  object(String)#%d (1) {
+  object(StringObject)#%d (1) {
     ["class_value"]=>
     string(3) "axx"
   }
   ["py"]=>
-  object(String)#%d (1) {
+  object(StringObject)#%d (1) {
     ["class_value"]=>
     string(2) "py"
   }
   ["t"]=>
-  object(String)#%d (1) {
+  object(StringObject)#%d (1) {
     ["class_value"]=>
     string(1) "t"
   }
   ["w"]=>
-  object(String)#%d (1) {
+  object(StringObject)#%d (1) {
     ["class_value"]=>
     string(1) "w"
   }
@@ -165,32 +165,32 @@ array(8) {
 bool(true)
 array(6) {
   [-5]=>
-  object(Integer)#%d (1) {
+  object(IntegerObject)#%d (1) {
     ["class_value"]=>
     int(-5)
   }
   [0]=>
-  object(Integer)#%d (1) {
+  object(IntegerObject)#%d (1) {
     ["class_value"]=>
     int(0)
   }
   [1]=>
-  object(Integer)#%d (1) {
+  object(IntegerObject)#%d (1) {
     ["class_value"]=>
     float(0.001)
   }
   [11]=>
-  object(Integer)#%d (1) {
+  object(IntegerObject)#%d (1) {
     ["class_value"]=>
     int(11)
   }
   [23]=>
-  object(Integer)#%d (1) {
+  object(IntegerObject)#%d (1) {
     ["class_value"]=>
     int(23)
   }
   [66]=>
-  object(Integer)#%d (1) {
+  object(IntegerObject)#%d (1) {
     ["class_value"]=>
     int(66)
   }
@@ -198,42 +198,42 @@ array(6) {
 bool(true)
 array(8) {
   ["Lemon"]=>
-  object(String)#%d (1) {
+  object(StringObject)#%d (1) {
     ["class_value"]=>
     string(5) "Lemon"
   }
   ["Orange"]=>
-  object(String)#%d (1) {
+  object(StringObject)#%d (1) {
     ["class_value"]=>
     string(6) "Orange"
   }
   ["aPPle"]=>
-  object(String)#%d (1) {
+  object(StringObject)#%d (1) {
     ["class_value"]=>
     string(5) "aPPle"
   }
   ["apple"]=>
-  object(String)#%d (1) {
+  object(StringObject)#%d (1) {
     ["class_value"]=>
     string(5) "apple"
   }
   ["axx"]=>
-  object(String)#%d (1) {
+  object(StringObject)#%d (1) {
     ["class_value"]=>
     string(3) "axx"
   }
   ["py"]=>
-  object(String)#%d (1) {
+  object(StringObject)#%d (1) {
     ["class_value"]=>
     string(2) "py"
   }
   ["t"]=>
-  object(String)#%d (1) {
+  object(StringObject)#%d (1) {
     ["class_value"]=>
     string(1) "t"
   }
   ["w"]=>
-  object(String)#%d (1) {
+  object(StringObject)#%d (1) {
     ["class_value"]=>
     string(1) "w"
   }

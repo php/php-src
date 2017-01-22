@@ -459,8 +459,12 @@ array(5) {
 
 -- Testing variation: when array is unset --
 
+Notice: Undefined variable: unset_array in %s on line %d
+
 Warning: current() expects parameter 1 to be array, null given in %s on line %d
 NULL
+
+Notice: Undefined variable: unset_array in %s on line %d
 
 Warning: key() expects parameter 1 to be array, null given in %s on line %d
 NULL

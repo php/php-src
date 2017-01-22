@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -50,21 +50,16 @@ const zend_function_entry php_dom_processinginstruction_class_functions[] = {
 /* {{{ proto void DOMProcessingInstruction::__construct(string name, [string value]); */
 PHP_METHOD(domprocessinginstruction, __construct)
 {
-	zval *id;
+	zval *id = getThis();
 	xmlNodePtr nodep = NULL, oldnode = NULL;
 	dom_object *intern;
 	char *name, *value = NULL;
 	size_t name_len, value_len;
 	int name_valid;
-	zend_error_handling error_handling;
 
-	zend_replace_error_handling(EH_THROW, dom_domexception_class_entry, &error_handling);
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os|s", &id, dom_processinginstruction_class_entry, &name, &name_len, &value, &value_len) == FAILURE) {
-		zend_restore_error_handling(&error_handling);
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s|s", &name, &name_len, &value, &value_len) == FAILURE) {
 		return;
 	}
-
-	zend_restore_error_handling(&error_handling);
 
 	name_valid = xmlValidateName((xmlChar *) name, 0);
 	if (name_valid != 0) {
@@ -148,7 +143,7 @@ int dom_processinginstruction_data_write(dom_object *obj, zval *newval)
 
 	str = zval_get_string(newval);
 
-	xmlNodeSetContentLen(nodep, (xmlChar *) str->val, str->len + 1);
+	xmlNodeSetContentLen(nodep, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str) + 1);
 
 	zend_string_release(str);
 	return SUCCESS;

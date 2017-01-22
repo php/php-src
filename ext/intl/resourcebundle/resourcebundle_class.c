@@ -25,6 +25,7 @@
 
 #include "php_intl.h"
 #include "intl_data.h"
+#include "intl_common.h"
 
 #include "resourcebundle/resourcebundle.h"
 #include "resourcebundle/resourcebundle_iterator.h"
@@ -48,8 +49,6 @@ static void ResourceBundle_object_destroy( zend_object *object )
 	if (rb->child) {
 		ures_close( rb->child );
 	}
-
-	//???zend_object_std_dtor( object );
 }
 /* }}} */
 
@@ -74,32 +73,39 @@ static zend_object *ResourceBundle_object_create( zend_class_entry *ce )
 /* }}} */
 
 /* {{{ ResourceBundle_ctor */
-static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS)
+static int resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 {
 	const char *bundlename;
 	size_t		bundlename_len = 0;
 	const char *locale;
 	size_t		locale_len = 0;
 	zend_bool	fallback = 1;
+	int         zpp_flags = is_constructor ? ZEND_PARSE_PARAMS_THROW : 0;
 
 	zval                  *object = return_value;
 	ResourceBundle_object *rb = Z_INTL_RESOURCEBUNDLE_P( object );
 
 	intl_error_reset( NULL );
 
-	if( zend_parse_parameters( ZEND_NUM_ARGS(), "s!s!|b",
+	if( zend_parse_parameters_ex( zpp_flags, ZEND_NUM_ARGS(), "s!s!|b",
 		&locale, &locale_len, &bundlename, &bundlename_len, &fallback ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"resourcebundle_ctor: unable to parse input parameters", 0 );
-		Z_OBJ_P(return_value) = NULL;
-		return;
+		return FAILURE;
 	}
 
-	INTL_CHECK_LOCALE_LEN_OBJ(locale_len, return_value);
+	INTL_CHECK_LOCALE_LEN_OR_FAILURE(locale_len);
 
 	if (locale == NULL) {
 		locale = intl_locale_get_default();
+	}
+
+	if (bundlename_len >= MAXPATHLEN) {
+		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"Bundle name too long", 0 );
+		zval_dtor(return_value);
+		ZVAL_NULL(return_value);
+		return FAILURE;
 	}
 
 	if (fallback) {
@@ -121,8 +127,10 @@ static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS)
 					rb->me, ULOC_ACTUAL_LOCALE, &INTL_DATA_ERROR_CODE(rb)));
 		intl_errors_set_custom_msg(INTL_DATA_ERROR_P(rb), pbuf, 1);
 		efree(pbuf);
-		Z_OBJ_P(return_value) = NULL;
+		return FAILURE;
 	}
+
+	return SUCCESS;
 }
 /* }}} */
 
@@ -139,15 +147,16 @@ ZEND_END_ARG_INFO()
  */
 PHP_METHOD( ResourceBundle, __construct )
 {
-	zval orig_this = *getThis();
+	zend_error_handling error_handling;
 
+	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
 	return_value = getThis();
-	resourcebundle_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-
-	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
-		zend_object_store_ctor_failed(Z_OBJ(orig_this));
-		ZEND_CTOR_MAKE_NULL();
+	if (resourcebundle_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1) == FAILURE) {
+		if (!EG(exception)) {
+			zend_throw_exception(IntlException_ce_ptr, "Constructor failed", 0);
+		}
 	}
+	zend_restore_error_handling(&error_handling);
 }
 /* }}} */
 
@@ -157,8 +166,8 @@ proto ResourceBundle resourcebundle_create( string $locale [, string $bundlename
 PHP_FUNCTION( resourcebundle_create )
 {
 	object_init_ex( return_value, ResourceBundle_ce_ptr );
-	resourcebundle_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
+	if (resourcebundle_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0) == FAILURE) {
+		zval_ptr_dtor(return_value);
 		RETURN_NULL();
 	}
 }
@@ -326,6 +335,11 @@ PHP_FUNCTION( resourcebundle_locales )
 	{
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"resourcebundle_locales: unable to parse input params", 0);
+		RETURN_FALSE;
+	}
+
+	if (bundlename_len >= MAXPATHLEN) {
+		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"resourcebundle_locales: bundle name too long", 0 );
 		RETURN_FALSE;
 	}
 

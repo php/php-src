@@ -35,7 +35,7 @@ if test "$PHP_ICONV" != "no"; then
       PHP_ICONV_H_PATH="$PHP_ICONV_PREFIX/include/giconv.h"
     else
       PHP_ICONV_H_PATH="$PHP_ICONV_PREFIX/include/iconv.h"
-    fi 
+	fi
 
     AC_MSG_CHECKING([if iconv is glibc's])
     AC_TRY_LINK([#include <gnu/libc-version.h>],[gnu_get_libc_version();],
@@ -53,8 +53,8 @@ if test "$PHP_ICONV" != "no"; then
       AC_TRY_RUN([
 #include <$PHP_ICONV_H_PATH>
 int main() {
-	printf("%d", _libiconv_version);
-	return 0;
+  printf("%d", _libiconv_version);
+  return 0;
 }
       ],[
         AC_MSG_RESULT(yes)
@@ -138,7 +138,7 @@ int main() {
   if (cd == (iconv_t)(-1)) {
     if (errno == EINVAL) {
       return 0;
-	} else {
+  } else {
       return 1;
     }
   }
@@ -157,6 +157,37 @@ int main() {
       AC_MSG_RESULT(no, cross-compiling)
       PHP_DEFINE([ICONV_SUPPORTS_ERRNO],0,[ext/iconv])
       AC_DEFINE([ICONV_SUPPORTS_ERRNO],0,[Whether iconv supports error no or not])
+    ])
+
+    AC_MSG_CHECKING([if iconv supports //IGNORE])
+    AC_TRY_RUN([
+#include <$PHP_ICONV_H_PATH>
+#include <stdlib.h>
+
+int main() {
+  iconv_t cd = iconv_open( "UTF-8//IGNORE", "UTF-8" );
+  char *in_p = "\xC3\xC3\xC3\xB8";
+  size_t in_left = 4, out_left = 4096;
+  char *out = malloc(out_left);
+  char *out_p = out;
+  size_t result = iconv(cd, (char **) &in_p, &in_left, (char **) &out_p, &out_left);
+  if(result == (size_t)-1) {
+    return 1;
+  }
+  return 0;
+}
+   ],[
+      AC_MSG_RESULT(yes)
+      PHP_DEFINE([ICONV_BROKEN_IGNORE],0,[ext/iconv])
+      AC_DEFINE([ICONV_BROKEN_IGNORE],0,[Whether iconv supports IGNORE])
+    ],[
+      AC_MSG_RESULT(no)
+      PHP_DEFINE([ICONV_BROKEN_IGNORE],1,[ext/iconv])
+      AC_DEFINE([ICONV_BROKEN_IGNORE],1,[Whether iconv supports IGNORE])
+    ],[
+      AC_MSG_RESULT(no, cross-compiling)
+      PHP_DEFINE([ICONV_BROKEN_IGNORE],0,[ext/iconv])
+      AC_DEFINE([ICONV_BROKEN_IGNORE],0,[Whether iconv supports IGNORE])
     ])
 
     AC_MSG_CHECKING([if your cpp allows macro usage in include lines])

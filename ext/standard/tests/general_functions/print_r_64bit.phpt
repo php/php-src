@@ -155,7 +155,7 @@ class object_class
   protected $protected_var1 = "string_1";
   protected $protected_var2;
 
-  function object_class ( ) {
+  function __construct ( ) {
     $this->value = 50;
     $this->public_var2 = 11;
     $this->private_var2 = 21;
@@ -191,7 +191,7 @@ class contains_object_class
      echo "func() is called \n";
    }
 
-   function contains_object_class () {
+   function __construct () {
      $this->class_object1 = new object_class();
      $this->class_object2 = new object_class();
      $this->class_object3 = $this->class_object1;
@@ -443,9 +443,9 @@ Array
 *** Testing print_r() on float variables ***
 
 -- Iteration 1 --
-0
-0
-0
+-0
+-0
+-0
 -- Iteration 2 --
 0
 0
@@ -1606,7 +1606,7 @@ Array
 -- Iteration 4 --
 Array
 (
-    [0] => 0
+    [0] => -0
     [1] => Where am I?
     [2] => Array
         (
@@ -1622,7 +1622,7 @@ Array
 
 Array
 (
-    [0] => 0
+    [0] => -0
     [1] => Where am I?
     [2] => Array
         (
@@ -1638,7 +1638,7 @@ Array
 
 Array
 (
-    [0] => 0
+    [0] => -0
     [1] => Where am I?
     [2] => Array
         (

@@ -62,7 +62,7 @@ object(DOMException)#%d (%d) {
 }
 --- Don't catch exception with try/catch
 
-Fatal error: Uncaught exception 'DOMException' with message 'Hierarchy Request Error' in %sdom003.php:%d
+Fatal error: Uncaught DOMException: Hierarchy Request Error in %sdom003.php:%d
 Stack trace:
 #0 %sdom003.php(%d): DOMNode->appendChild(Object(DOMElement))
 #1 {main}

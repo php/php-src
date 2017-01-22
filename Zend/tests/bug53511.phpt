@@ -20,12 +20,12 @@ function test() {
 test();
 echo "bug\n";
 --EXPECTF--
-Fatal error: Uncaught exception 'Exception' with message 'ops 2' in %sbug53511.php:11
+Fatal error: Uncaught Exception: ops 2 in %sbug53511.php:11
 Stack trace:
 #0 %sbug53511.php(17): test()
 #1 {main}
 
-Next exception 'Exception' with message 'ops 1' in %sbug53511.php:4
+Next Exception: ops 1 in %sbug53511.php:4
 Stack trace:
 #0 %sbug53511.php(12): Foo->__destruct()
 #1 %sbug53511.php(17): test()

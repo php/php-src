@@ -1,12 +1,14 @@
 --TEST--
 SQLite3 open_basedir checks
 --SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
+<?php require_once(__DIR__ . '/skipif.inc'); ?>
 --INI--
 open_basedir=.
 --FILE--
 <?php
-$directory = dirname(__FILE__) . '/';
+chdir(__DIR__);
+
+$directory = __DIR__ . '/';
 $file = uniqid() . '.db';
 
 echo "Within test directory\n";
@@ -32,7 +34,7 @@ bool(true)
 Above test directory
 
 Warning: SQLite3::__construct(): open_basedir restriction in effect. File(%s) is not within the allowed path(s): (.) in %ssqlite3_21_security.php on line %d
-exception 'Exception' with message 'open_basedir prohibits opening %s' in %ssqlite3_21_security.php:%d
+Exception: open_basedir prohibits opening %s in %ssqlite3_21_security.php:%d
 Stack trace:
 #0 %ssqlite3_21_security.php(%d): SQLite3->__construct('%s')
 #1 {main}

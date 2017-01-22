@@ -11,6 +11,7 @@ session.save_handler=files
 --FILE--
 <?php
 error_reporting(E_ALL);
+ob_start();
 
 session_id("abtest");
 session_start();
@@ -21,7 +22,7 @@ class a {
  
 class b {
     public $a;
-    function b(&$a) {
+    function __construct(&$a) {
         $this->a = &$a;
     }
 }

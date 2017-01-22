@@ -71,8 +71,8 @@ string(%d) "curl_testdata1.txt|text/plain"
 string(%d) "foo.txt"
 string(%d) "foo.txt|application/octet-stream"
 
-Deprecated: curl_setopt(): The usage of the @filename API for file uploading is deprecated. Please use the CURLFile class instead in %s on line %d
-string(%d) "curl_testdata1.txt|application/octet-stream"
+Warning: curl_setopt(): Disabling safe uploads is no longer supported in %s on line %d
+string(0) ""
 string(0) ""
 string(%d) "array(1) {
   ["file"]=>

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2008-2009 The PHP Group                                |
+   | Copyright (c) 2008-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -50,7 +50,7 @@ PHP_FUNCTION(dns_get_mx) /* {{{ */
 	DNS_STATUS      status;                 /* Return value of DnsQuery_A() function */
 	PDNS_RECORD     pResult, pRec;          /* Pointer to DNS_RECORD structure */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz|z", &hostname, &hostname_len, &mx_list, &weight_list) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz/|z/", &hostname, &hostname_len, &mx_list, &weight_list) == FAILURE) {
 		return;
 	}
 
@@ -146,6 +146,8 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 	type = pRec->wType;
 	ttl = pRec->dwTtl;
 
+	ZVAL_UNDEF(subarray);
+
 	if (type_to_fetch != DNS_TYPE_ANY && type != type_to_fetch) {
 		return;
 	}
@@ -162,7 +164,7 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 
 	if (raw) {
 		add_assoc_long(subarray, "type", type);
-		add_assoc_stringl(subarray, "data", (char*) &pRec->Data, (uint) pRec->wDataLength);
+		add_assoc_stringl(subarray, "data", (char*) &pRec->Data, (uint32_t) pRec->wDataLength);
 		return;
 	}
 
@@ -316,7 +318,6 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 			}
 			break;
 
-#if _MSC_VER >= 1500
 		case DNS_TYPE_NAPTR:
 			{
 				DNS_NAPTR_DATA * data_naptr = &pRec->Data.Naptr;
@@ -330,7 +331,6 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 				add_assoc_string(subarray, "replacement", data_naptr->pReplacement);
 			}
 			break;
-#endif
 
 		default:
 			/* unknown type */
@@ -341,18 +341,18 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 }
 /* }}} */
 
-/* {{{ proto array|false dns_get_record(string hostname [, int type[, array authns, array addtl]])
+/* {{{ proto array|false dns_get_record(string hostname [, int type[, array &authns[, array &addtl[, bool raw]]]])
    Get any Resource Record corresponding to a given Internet host name */
 PHP_FUNCTION(dns_get_record)
 {
 	char *hostname;
 	size_t hostname_len;
-	long type_param = PHP_DNS_ANY;
+	zend_long type_param = PHP_DNS_ANY;
 	zval *authns = NULL, *addtl = NULL;
 	int type, type_to_fetch, first_query = 1, store_results = 1;
 	zend_bool raw = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lz!z!b",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lz/!z/!b",
 			&hostname, &hostname_len, &type_param, &authns, &addtl, &raw) == FAILURE) {
 		return;
 	}

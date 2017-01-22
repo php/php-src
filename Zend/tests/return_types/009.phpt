@@ -16,4 +16,4 @@ class qux implements foo {
 }
 
 --EXPECTF--
-Fatal error: Declaration of qux::bar() must be compatible with foo::bar(): foo in %s on line %d
+Fatal error: Declaration of qux::bar(): biz must be compatible with foo::bar(): foo in %s on line %d

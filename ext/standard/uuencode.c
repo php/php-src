@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -71,9 +71,11 @@ PHPAPI zend_string *php_uuencode(char *src, size_t src_len) /* {{{ */
 	char *p, *s, *e, *ee;
 	zend_string *dest;
 
-	/* encoded length is ~ 38% greater than the original */
-	dest = zend_string_alloc((size_t)ceil(src_len * 1.38) + 46, 0);
-	p = dest->val;
+	/* encoded length is ~ 38% greater than the original
+       Use 1.5 for easier calculation.
+    */
+	dest = zend_string_safe_alloc(src_len/2, 3, 46, 0);
+	p = ZSTR_VAL(dest);
 	s = src;
 	e = src + src_len;
 
@@ -122,7 +124,7 @@ PHPAPI zend_string *php_uuencode(char *src, size_t src_len) /* {{{ */
 	*p++ = '\n';
 	*p = '\0';
 
-	dest = zend_string_realloc(dest, p - dest->val, 0);
+	dest = zend_string_truncate(dest, p - ZSTR_VAL(dest), 0);
 	return dest;
 }
 /* }}} */
@@ -134,7 +136,7 @@ PHPAPI zend_string *php_uudecode(char *src, size_t src_len) /* {{{ */
 	zend_string *dest;
 
 	dest = zend_string_alloc((size_t) ceil(src_len * 0.75), 0);
-	p = dest->val;
+	p = ZSTR_VAL(dest);
 	s = src;
 	e = src + src_len;
 
@@ -173,8 +175,8 @@ PHPAPI zend_string *php_uudecode(char *src, size_t src_len) /* {{{ */
 		s++;
 	}
 
-	assert(p >= dest->val);
-	if ((len = total_len > (size_t)(p - dest->val))) {
+	assert(p >= ZSTR_VAL(dest));
+	if ((len = total_len) > (size_t)(p - ZSTR_VAL(dest))) {
 		*p++ = PHP_UU_DEC(*s) << 2 | PHP_UU_DEC(*(s + 1)) >> 4;
 		if (len > 1) {
 			*p++ = PHP_UU_DEC(*(s + 1)) << 4 | PHP_UU_DEC(*(s + 2)) >> 2;
@@ -184,8 +186,8 @@ PHPAPI zend_string *php_uudecode(char *src, size_t src_len) /* {{{ */
 		}
 	}
 
-	dest->len = total_len;
-	dest->val[dest->len] = '\0';
+	ZSTR_LEN(dest) = total_len;
+	ZSTR_VAL(dest)[ZSTR_LEN(dest)] = '\0';
 
 	return dest;
 
@@ -202,11 +204,12 @@ PHP_FUNCTION(convert_uuencode)
 {
 	zend_string *src;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &src) == FAILURE || src->len < 1) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(src)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	if (ZSTR_LEN(src) < 1) { RETURN_FALSE; }
 
-	RETURN_STR(php_uuencode(src->val, src->len));
+	RETURN_STR(php_uuencode(ZSTR_VAL(src), ZSTR_LEN(src)));
 }
 /* }}} */
 
@@ -217,11 +220,12 @@ PHP_FUNCTION(convert_uudecode)
 	zend_string *src;
 	zend_string *dest;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &src) == FAILURE || src->len < 1) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(src)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	if (ZSTR_LEN(src) < 1) { RETURN_FALSE; }
 
-	if ((dest = php_uudecode(src->val, src->len)) == NULL) {
+	if ((dest = php_uudecode(ZSTR_VAL(src), ZSTR_LEN(src))) == NULL) {
 		php_error_docref(NULL, E_WARNING, "The given parameter is not a valid uuencoded string");
 		RETURN_FALSE;
 	}

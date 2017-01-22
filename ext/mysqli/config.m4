@@ -2,6 +2,33 @@ dnl
 dnl $Id$
 dnl config.m4 for extension mysqli
 
+dnl ext/pdo_mysql/config.m4 also depends on this macro.
+AC_DEFUN([PHP_MYSQL_SOCKET_SEARCH], [
+  for i in  \
+    /var/run/mysqld/mysqld.sock \
+    /var/tmp/mysql.sock \
+    /var/run/mysql/mysql.sock \
+    /var/lib/mysql/mysql.sock \
+    /var/mysql/mysql.sock \
+    /usr/local/mysql/var/mysql.sock \
+    /Private/tmp/mysql.sock \
+    /private/tmp/mysql.sock \
+    /tmp/mysql.sock \
+  ; do
+    if test -r $i; then
+      MYSQL_SOCK=$i
+      break 2
+    fi
+  done
+
+  if test -n "$MYSQL_SOCK"; then
+    AC_DEFINE_UNQUOTED(PHP_MYSQL_UNIX_SOCK_ADDR, "$MYSQL_SOCK", [ ])
+    AC_MSG_RESULT([$MYSQL_SOCK])
+  else
+    AC_MSG_RESULT([no])
+  fi
+])
+
 PHP_ARG_WITH(mysqli, for MySQLi support,
 [  --with-mysqli[=FILE]      Include MySQLi support.  FILE is the path
                           to mysql_config.  If no value or mysqlnd is passed 
@@ -11,6 +38,12 @@ PHP_ARG_ENABLE(embedded_mysqli, whether to enable embedded MySQLi support,
 [  --enable-embedded-mysqli  
                           MYSQLi: Enable embedded support
                           Note: Does not work with MySQL native driver!], no, no)
+
+dnl ext/pdo_mysql/config.m4 also depends on this configure option.
+PHP_ARG_WITH(mysql-sock, for specified location of the MySQL UNIX socket,
+[  --with-mysql-sock[=SOCKPATH]
+                          MySQLi/PDO_MYSQL: Location of the MySQL unix socket pointer.
+                          If unspecified, the default locations are searched], no, no)
 
 if test "$PHP_MYSQLI" = "yes" || test "$PHP_MYSQLI" = "mysqlnd"; then
   dnl This needs to be set in any extension which wishes to use mysqlnd
@@ -72,6 +105,17 @@ fi
 
 dnl Build extension
 if test "$PHP_MYSQLI" != "no"; then
+  AC_MSG_CHECKING([for MySQL UNIX socket location])
+  if test "$PHP_MYSQL_SOCK" != "no" && test "$PHP_MYSQL_SOCK" != "yes"; then
+    MYSQL_SOCK=$PHP_MYSQL_SOCK
+    AC_DEFINE_UNQUOTED(PHP_MYSQL_UNIX_SOCK_ADDR, "$MYSQL_SOCK", [ ])
+    AC_MSG_RESULT([$MYSQL_SOCK])
+  elif test "$PHP_MYSQL_SOCK" = "yes"; then
+    PHP_MYSQL_SOCKET_SEARCH
+  else
+    AC_MSG_RESULT([no])
+  fi
+
   mysqli_sources="mysqli.c mysqli_api.c mysqli_prop.c mysqli_nonapi.c \
                   mysqli_fe.c mysqli_report.c mysqli_driver.c mysqli_warning.c \
                   mysqli_exception.c mysqli_result_iterator.c $mysqli_extra_sources"

@@ -4,6 +4,8 @@ Bug #32001 (xml_parse*() goes into infinite loop when autodetection in effect), 
 <?php
 require_once("skipif.inc");
 if (!extension_loaded('iconv')) die ("skip iconv extension not available");
+if (ICONV_IMPL == 'glibc' && version_compare(ICONV_VERSION, '2.12', '<='))
+	die("skip iconv of glibc <= 2.12 is buggy");
 ?>
 --FILE--
 <?php
@@ -14,7 +16,7 @@ class testcase {
 	private $tags;
 	private $chunk_size;
 
-	function testcase($enc, $chunk_size = 0, $bom = 0, $omit_prologue = 0) {
+	function __construct($enc, $chunk_size = 0, $bom = 0, $omit_prologue = 0) {
 		$this->encoding = $enc;
 		$this->chunk_size = $chunk_size;
 		$this->bom = $bom;

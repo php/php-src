@@ -21,4 +21,8 @@ test($obj);
 echo "Done\n";
 ?>
 --EXPECTF--	
-Catchable fatal error: Argument 1 passed to test() must be an instance of OtherClassName, instance of ClassName given, called in %s on line %d and defined in %s on line %d
+Fatal error: Uncaught TypeError: Argument 1 passed to test() must be an instance of OtherClassName, instance of ClassName given, called in %s on line %d and defined in %s:%d
+Stack trace:
+#0 %s(%d): test(Object(ClassName))
+#1 {main}
+  thrown in %s on line %d

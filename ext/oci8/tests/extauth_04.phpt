@@ -42,14 +42,17 @@ var_dump($c);
 <?php exit(0); ?>
 --EXPECTF--
 Test 1
+
 Warning: oci_connect(): External Authentication is not supported on Windows in %s on line %d
 bool(false)
 bool(false)
 Test 2
+
 Warning: oci_new_connect(): External Authentication is not supported on Windows in %s on line %d
 bool(false)
 bool(false)
 Test 3
+
 Warning: oci_pconnect(): External Authentication is not supported on Windows in %s on line %d
 bool(false)
 bool(false)

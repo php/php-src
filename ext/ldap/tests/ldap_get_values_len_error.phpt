@@ -11,8 +11,8 @@ Patrick Allaert <patrickallaert@php.net>
 require "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
-insert_dummy_data($link);
-$result = ldap_search($link, "dc=my-domain,dc=com", "(objectclass=organization)");
+insert_dummy_data($link, $base);
+$result = ldap_search($link, "$base", "(objectclass=organization)");
 $entry = ldap_first_entry($link, $result);
 
 // Too few parameters
@@ -28,7 +28,7 @@ var_dump(ldap_get_values_len($link, $entry, "inexistentAttribute"));
 include "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
-remove_dummy_data($link);
+remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
 Warning: ldap_get_values_len() expects exactly 3 parameters, 1 given in %s on line %d

@@ -37,7 +37,7 @@ for( $x = 0; $x < 20; $x++) {
 *** Testing get_browser() : basic functionality ***
 array(35) {
   ["browser_name_regex"]=>
-  string(41) "§^opera/7\.1.* \(windows nt 5\.1; .\).*$§"
+  string(41) "~^opera/7\.1.* \(windows nt 5\.1; .\).*$~"
   ["browser_name_pattern"]=>
   string(31) "Opera/7.1* (Windows NT 5.1; ?)*"
   ["parent"]=>
@@ -109,7 +109,7 @@ array(35) {
 }
 array(35) {
   ["browser_name_regex"]=>
-  string(83) "§^mozilla/4\.0 \(compatible; msie 6\.0; msie 5\.5; windows nt 5\.0\) opera 7\.0.*$§"
+  string(83) "~^mozilla/4\.0 \(compatible; msie 6\.0; msie 5\.5; windows nt 5\.0\) opera 7\.0.*$~"
   ["browser_name_pattern"]=>
   string(71) "Mozilla/4.0 (compatible; MSIE 6.0; MSIE 5.5; Windows NT 5.0) Opera 7.0*"
   ["parent"]=>
@@ -181,7 +181,7 @@ array(35) {
 }
 array(35) {
   ["browser_name_regex"]=>
-  string(83) "§^mozilla/4\.0 \(compatible; msie 6\.0; msie 5\.5; windows nt 4\.0\) opera 7\.0.*$§"
+  string(83) "~^mozilla/4\.0 \(compatible; msie 6\.0; msie 5\.5; windows nt 4\.0\) opera 7\.0.*$~"
   ["browser_name_pattern"]=>
   string(71) "Mozilla/4.0 (compatible; MSIE 6.0; MSIE 5.5; Windows NT 4.0) Opera 7.0*"
   ["parent"]=>
@@ -253,7 +253,7 @@ array(35) {
 }
 array(35) {
   ["browser_name_regex"]=>
-  string(69) "§^mozilla/4\.0 \(compatible; msie 5\.0; windows 2000\) opera 6\.0.*$§"
+  string(69) "~^mozilla/4\.0 \(compatible; msie 5\.0; windows 2000\) opera 6\.0.*$~"
   ["browser_name_pattern"]=>
   string(59) "Mozilla/4.0 (compatible; MSIE 5.0; Windows 2000) Opera 6.0*"
   ["parent"]=>
@@ -325,7 +325,7 @@ array(35) {
 }
 array(35) {
   ["browser_name_regex"]=>
-  string(68) "§^mozilla/4\.0 \(compatible; msie 5\.0; mac_powerpc\) opera 5\.0.*$§"
+  string(68) "~^mozilla/4\.0 \(compatible; msie 5\.0; mac_powerpc\) opera 5\.0.*$~"
   ["browser_name_pattern"]=>
   string(58) "Mozilla/4.0 (compatible; MSIE 5.0; Mac_PowerPC) Opera 5.0*"
   ["parent"]=>
@@ -397,7 +397,7 @@ array(35) {
 }
 array(35) {
   ["browser_name_regex"]=>
-  string(65) "§^mozilla/4\.0 \(compatible; msie 6\.0; .*windows nt 5\.1.*\).*$§"
+  string(65) "~^mozilla/4\.0 \(compatible; msie 6\.0; .*windows nt 5\.1.*\).*$~"
   ["browser_name_pattern"]=>
   string(53) "Mozilla/4.0 (compatible; MSIE 6.0; *Windows NT 5.1*)*"
   ["parent"]=>
@@ -469,7 +469,7 @@ array(35) {
 }
 array(35) {
   ["browser_name_regex"]=>
-  string(40) "§^opera/9\.0.* \(windows nt 5\.1.*\).*$§"
+  string(40) "~^opera/9\.0.* \(windows nt 5\.1.*\).*$~"
   ["browser_name_pattern"]=>
   string(29) "Opera/9.0* (Windows NT 5.1*)*"
   ["parent"]=>
@@ -541,7 +541,7 @@ array(35) {
 }
 array(35) {
   ["browser_name_regex"]=>
-  string(47) "§^opera/9\.2.* \(macintosh; .*mac os x;.*\).*$§"
+  string(47) "~^opera/9\.2.* \(macintosh; .*mac os x;.*\).*$~"
   ["browser_name_pattern"]=>
   string(36) "Opera/9.2* (Macintosh; *Mac OS X;*)*"
   ["parent"]=>
@@ -613,7 +613,7 @@ array(35) {
 }
 array(35) {
   ["browser_name_regex"]=>
-  string(65) "§^mozilla/4\.0 \(compatible; msie 6\.0; .*windows nt 5\.1.*\).*$§"
+  string(65) "~^mozilla/4\.0 \(compatible; msie 6\.0; .*windows nt 5\.1.*\).*$~"
   ["browser_name_pattern"]=>
   string(53) "Mozilla/4.0 (compatible; MSIE 6.0; *Windows NT 5.1*)*"
   ["parent"]=>
@@ -685,7 +685,7 @@ array(35) {
 }
 array(35) {
   ["browser_name_regex"]=>
-  string(65) "§^mozilla/4\.0 \(compatible; msie 6\.0; .*windows nt 5\.1.*\).*$§"
+  string(65) "~^mozilla/4\.0 \(compatible; msie 6\.0; .*windows nt 5\.1.*\).*$~"
   ["browser_name_pattern"]=>
   string(53) "Mozilla/4.0 (compatible; MSIE 6.0; *Windows NT 5.1*)*"
   ["parent"]=>
@@ -757,7 +757,7 @@ array(35) {
 }
 array(35) {
   ["browser_name_regex"]=>
-  string(59) "§^mozilla/.\.. \(compatible; msie 5\.2.*; .*mac_powerpc.*$§"
+  string(59) "~^mozilla/.\.. \(compatible; msie 5\.2.*; .*mac_powerpc.*$~"
   ["browser_name_pattern"]=>
   string(49) "Mozilla/?.? (compatible; MSIE 5.2*; *Mac_PowerPC*"
   ["parent"]=>
@@ -829,7 +829,7 @@ array(35) {
 }
 array(35) {
   ["browser_name_regex"]=>
-  string(59) "§^mozilla/.\.. \(compatible; msie 5\.0.*; .*mac_powerpc.*$§"
+  string(59) "~^mozilla/.\.. \(compatible; msie 5\.0.*; .*mac_powerpc.*$~"
   ["browser_name_pattern"]=>
   string(49) "Mozilla/?.? (compatible; MSIE 5.0*; *Mac_PowerPC*"
   ["parent"]=>
@@ -901,7 +901,7 @@ array(35) {
 }
 array(34) {
   ["browser_name_regex"]=>
-  string(6) "§^.*$§"
+  string(6) "~^.*$~"
   ["browser_name_pattern"]=>
   string(1) "*"
   ["browser"]=>
@@ -971,7 +971,7 @@ array(34) {
 }
 array(34) {
   ["browser_name_regex"]=>
-  string(6) "§^.*$§"
+  string(6) "~^.*$~"
   ["browser_name_pattern"]=>
   string(1) "*"
   ["browser"]=>
@@ -1041,7 +1041,7 @@ array(34) {
 }
 array(34) {
   ["browser_name_regex"]=>
-  string(6) "§^.*$§"
+  string(6) "~^.*$~"
   ["browser_name_pattern"]=>
   string(1) "*"
   ["browser"]=>
@@ -1111,7 +1111,7 @@ array(34) {
 }
 array(34) {
   ["browser_name_regex"]=>
-  string(6) "§^.*$§"
+  string(6) "~^.*$~"
   ["browser_name_pattern"]=>
   string(1) "*"
   ["browser"]=>
@@ -1181,7 +1181,7 @@ array(34) {
 }
 array(34) {
   ["browser_name_regex"]=>
-  string(6) "§^.*$§"
+  string(6) "~^.*$~"
   ["browser_name_pattern"]=>
   string(1) "*"
   ["browser"]=>
@@ -1251,7 +1251,7 @@ array(34) {
 }
 array(35) {
   ["browser_name_regex"]=>
-  string(99) "§^mozilla/5\.0 \(windows; .; windows nt 6\.0; .*\) applewebkit/.* \(.*\) version/3\.0.* safari/.*$§"
+  string(99) "~^mozilla/5\.0 \(windows; .; windows nt 6\.0; .*\) applewebkit/.* \(.*\) version/3\.0.* safari/.*$~"
   ["browser_name_pattern"]=>
   string(83) "Mozilla/5.0 (Windows; ?; Windows NT 6.0; *) AppleWebKit/* (*) Version/3.0* Safari/*"
   ["parent"]=>
@@ -1323,7 +1323,7 @@ array(35) {
 }
 array(35) {
   ["browser_name_regex"]=>
-  string(99) "§^mozilla/.* \(iphone; .; .*mac os x.*\) applewebkit/.* \(.*\) version/.*\..* mobile/.* safari/.*$§"
+  string(99) "~^mozilla/.* \(iphone; .; .*mac os x.*\) applewebkit/.* \(.*\) version/.*\..* mobile/.* safari/.*$~"
   ["browser_name_pattern"]=>
   string(81) "Mozilla/* (iPhone; ?; *Mac OS X*) AppleWebKit/* (*) Version/*.* Mobile/* Safari/*"
   ["parent"]=>
@@ -1395,7 +1395,7 @@ array(35) {
 }
 array(35) {
   ["browser_name_regex"]=>
-  string(99) "§^mozilla/5\.0 \(ipod; u; .*mac os x; en\) applewebkit/.* \(.*\) version/3\.0 mobile/.* safari/.*$§"
+  string(99) "~^mozilla/5\.0 \(ipod; u; .*mac os x; en\) applewebkit/.* \(.*\) version/3\.0 mobile/.* safari/.*$~"
   ["browser_name_pattern"]=>
   string(84) "Mozilla/5.0 (iPod; U; *Mac OS X; en) AppleWebKit/* (*) Version/3.0 Mobile/* Safari/*"
   ["parent"]=>

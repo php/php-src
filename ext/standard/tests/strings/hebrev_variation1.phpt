@@ -65,7 +65,31 @@ $texts =  array (
 /*21*/	  @$undefined_var,
 		
 		  // unset variable
-/*22*/	  @$unset_var
+/*22*/	  @$unset_var,
+
+          // text with parentheses
+          'text with parentheses (',
+          'text with parentheses )',
+
+          // text with brackets
+          'text with bracket [',
+          'text with bracket ]',
+
+          // text with curly brackets
+          'text with curly bracket {',
+          'text with curly bracket }',
+
+          // text with backslash escape
+          'text with backslash escape \\',
+
+          // text with a slash char
+          'text with a slash char /',
+
+          // text with a greater than char
+          'text with a greater than char >',
+
+          // text with a less than char
+          'text with a less than char <'
 );
 
 // loop through with each element of the $texts array to test hebrev() function
@@ -135,4 +159,24 @@ NULL
 bool(false)
 -- Iteration 22 --
 bool(false)
+-- Iteration 23 --
+string(23) ") text with parentheses"
+-- Iteration 24 --
+string(23) "( text with parentheses"
+-- Iteration 25 --
+string(19) "] text with bracket"
+-- Iteration 26 --
+string(19) "[ text with bracket"
+-- Iteration 27 --
+string(25) "} text with curly bracket"
+-- Iteration 28 --
+string(25) "{ text with curly bracket"
+-- Iteration 29 --
+string(28) "/ text with backslash escape"
+-- Iteration 30 --
+string(24) "text with a slash char /"
+-- Iteration 31 --
+string(31) "< text with a greater than char"
+-- Iteration 32 --
+string(28) "> text with a less than char"
 ===DONE===

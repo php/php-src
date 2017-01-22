@@ -42,6 +42,7 @@
 #include "config.w32.h"
 #include <windows.h>
 #include <process.h>
+#include "win32/codepage.h"
 #else
 #include "php_config.h"
 extern char** environ;
@@ -222,8 +223,10 @@ char** save_ps_args(int argc, char** argv)
         for (i = 0; i < argc; i++)
         {
             new_argv[i] = strdup(argv[i]);
-            if (!new_argv[i])
+            if (!new_argv[i]) {
+                free(new_argv);
                 goto clobber_error;
+            }
         }
         new_argv[argc] = NULL;
 
@@ -367,8 +370,13 @@ int set_ps_title(const char* title)
 
 #ifdef PS_USE_WIN32
     {
-        if (!SetConsoleTitle(ps_buffer))
+	wchar_t *ps_buffer_w = php_win32_cp_any_to_w(ps_buffer);
+
+        if (!ps_buffer_w || !SetConsoleTitleW(ps_buffer_w)) {
             return PS_TITLE_WINDOWS_ERROR;
+	}
+
+	free(ps_buffer_w);
     }
 #endif /* PS_USE_WIN32 */
 
@@ -388,8 +396,25 @@ int get_ps_title(int *displen, const char** string)
         return rc;
 
 #ifdef PS_USE_WIN32
-    if (!(ps_buffer_cur_len = GetConsoleTitle(ps_buffer, (DWORD)ps_buffer_size)))
-        return PS_TITLE_WINDOWS_ERROR;
+    {
+	wchar_t ps_buffer_w[MAX_PATH];
+	char *tmp;
+
+        if (!(ps_buffer_cur_len = GetConsoleTitleW(ps_buffer_w, (DWORD)sizeof(ps_buffer_w)))) {
+            return PS_TITLE_WINDOWS_ERROR;
+	}
+
+	tmp = php_win32_cp_conv_w_to_any(ps_buffer_w, PHP_WIN32_CP_IGNORE_LEN, &ps_buffer_cur_len);
+	if (!tmp) {
+            return PS_TITLE_WINDOWS_ERROR;
+	}
+
+	ps_buffer_cur_len = ps_buffer_cur_len > sizeof(ps_buffer)-1 ? sizeof(ps_buffer)-1 : ps_buffer_cur_len;
+
+	memmove(ps_buffer, tmp, ps_buffer_size);
+	ps_buffer[ps_buffer_cur_len] = '\0';
+	free(tmp);
+    }
 #endif
     *displen = (int)ps_buffer_cur_len;
     *string = ps_buffer;

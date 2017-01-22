@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -574,6 +574,24 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno)
 			sizeof(S->cols[colno].colname)-1, &colnamelen,
 			&S->cols[colno].coltype, &colsize, NULL, NULL);
 
+	/* This fixes a known issue with SQL Server and (max) lengths,
+	may affect others as well.  If we are SQL_VARCHAR,
+	SQL_VARBINARY, or SQL_WVARCHAR (or any of the long variations)
+	and zero is returned from colsize then consider it long */
+	if (0 == colsize && 
+		(S->cols[colno].coltype == SQL_VARCHAR ||
+		 S->cols[colno].coltype == SQL_LONGVARCHAR ||
+#ifdef SQL_WVARCHAR
+		 S->cols[colno].coltype == SQL_WVARCHAR ||
+#endif
+#ifdef SQL_WLONGVARCHAR
+		 S->cols[colno].coltype == SQL_WLONGVARCHAR ||
+#endif
+		 S->cols[colno].coltype == SQL_VARBINARY ||
+		 S->cols[colno].coltype == SQL_LONGVARBINARY)) {
+			 S->going_long = 1;
+	}
+
 	if (rc != SQL_SUCCESS) {
 		pdo_odbc_stmt_error("SQLDescribeCol");
 		if (rc != SQL_SUCCESS_WITH_INFO) {
@@ -594,8 +612,7 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno)
 	colsize = displaysize;
 
 	col->maxlen = S->cols[colno].datalen = colsize;
-	col->namelen = colnamelen;
-	col->name = estrdup(S->cols[colno].colname);
+	col->name = zend_string_init(S->cols[colno].colname, colnamelen, 0);
 	S->cols[colno].is_unicode = pdo_odbc_sqltype_is_unicode(S, S->cols[colno].coltype);
 
 	/* returning data as a string */

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -51,7 +51,7 @@ zend_module_entry pdo_firebird_module_entry = { /* {{{ */
 	NULL,
 	NULL,
 	PHP_MINFO(pdo_firebird),
-	"0.3",
+	PHP_PDO_FIREBIRD_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

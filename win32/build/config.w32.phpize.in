@@ -14,9 +14,6 @@ toolset_setup_compiler();
 
 // do we use x64 or 80x86 version of compiler?
 X64 = toolset_is_64();
-if (!X64) {
-	ERROR("64-bit compiler required");
-}
 toolset_setup_arch();
 
 toolset_setup_linker();
@@ -26,7 +23,7 @@ toolset_setup_project_tools();
 ARG_ENABLE('object-out-dir', 'Alternate location for binary objects during build', '');
 object_out_dir_option_handle();
 
-ARG_ENABLE('debug', 'Compile with debugging symbols', "no");
+ARG_ENABLE('debug', 'Compile with debugging symbols', PHP_DEBUG);
 ARG_ENABLE('debug-pack', 'Release binaries with external debug symbols (--enable-debug must not be specified)', 'no');
 if (PHP_DEBUG == "yes" && PHP_DEBUG_PACK == "yes") {
 	ERROR("Use of both --enable-debug and --enable-debug-pack not allowed.");
@@ -43,10 +40,10 @@ DEFINE("BASE_INCLUDES", "/I " + PHP_DIR + "/include /I " + PHP_DIR + "/include/m
 
 toolset_setup_common_cflags();
 
-ARG_WITH('prefix', 'PHP installation prefix', '');
+ARG_WITH('prefix', 'PHP installation prefix', PHP_PREFIX);
 ARG_WITH('mp', 'Tell Visual Studio use up to [n,auto,disable] processes for compilation', 'auto');
 var PHP_MP_DISABLED = true;
-if (VS_TOOLSET && VCVERS >= 1500 && PHP_MP != 'disable') {
+if (VS_TOOLSET && PHP_MP != 'disable') {
 		// no from disable-all 
 		if(PHP_MP == 'auto' || PHP_MP == 'no') {
 			 ADD_FLAG('CFLAGS', ' /MP ');
@@ -106,13 +103,9 @@ STDOUT.WriteLine("Build dir: " + get_define('BUILD_DIR'));
 STDOUT.WriteLine("PHP Core:  " + get_define('PHPDLL') + " and " + get_define('PHPLIB'));
 
 /* XXX inspect this for other toolsets */
-if (VS_TOOLSET && VCVERS == 1200) {
-	AC_DEFINE('ZEND_DVAL_TO_LVAL_CAST_OK', 1);
-}
+//AC_DEFINE('ZEND_DVAL_TO_LVAL_CAST_OK', 1);
 
-if (!VS_TOOLSET || VS_TOOLSET && VCVERS >= 1400) {
-	AC_DEFINE('HAVE_STRNLEN', 1);
-}
+AC_DEFINE('HAVE_STRNLEN', 1);
 
 STDOUT.WriteBlankLines(1);
 

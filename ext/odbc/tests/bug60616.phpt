@@ -2,6 +2,11 @@
 odbc_exec(): Getting accurate unicode data from query
 --SKIPIF--
 <?php include 'skipif.inc'; ?>
+<?php 
+	if ("unixODBC" != ODBC_TYPE) {
+		die("skip ODBC_TYPE != unixODBC");
+	}
+?>
 --FILE--
 <?php
 

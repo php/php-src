@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar php single-file executable PHP extension                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2015 The PHP Group                                |
+  | Copyright (c) 2006-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -33,7 +33,7 @@ static int    phar_dir_close(php_stream *stream, int close_handle);
 static int    phar_dir_flush(php_stream *stream);
 static int    phar_dir_seek( php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffset);
 #else
-php_stream* phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC);
+php_stream* phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC);
 #endif
 END_EXTERN_C()
 

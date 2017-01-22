@@ -1,22 +1,26 @@
 /*
-   +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
-   +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
-   +----------------------------------------------------------------------+
-   | Authors: Derick Rethans <derick@derickrethans.nl>                    |
-   +----------------------------------------------------------------------+
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2015 Derick Rethans
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
-
-/* $Id$ */
 
 #include "timelib.h"
 #include <math.h>
@@ -61,12 +65,13 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 	rt->h = two->h - one->h;
 	rt->i = two->i - one->i;
 	rt->s = two->s - one->s;
+	rt->f = two->f - one->f;
 	if (one_backup.dst == 0 && two_backup.dst == 1 && two->sse >= one->sse + 86400 - dst_corr) {
 		rt->h += dst_h_corr;
 		rt->i += dst_m_corr;
 	}
 
-	rt->days = abs(floor((one->sse - two->sse - (dst_h_corr * 3600) - (dst_m_corr * 60)) / 86400));
+	rt->days = fabs(floor((one->sse - two->sse - (dst_h_corr * 3600) - (dst_m_corr * 60)) / 86400));
 
 	timelib_do_rel_normalize(rt->invert ? one : two, rt);
 
@@ -106,6 +111,7 @@ timelib_time *timelib_add(timelib_time *old_time, timelib_rel_time *interval)
 		t->relative.h = interval->h * bias;
 		t->relative.i = interval->i * bias;
 		t->relative.s = interval->s * bias;
+		t->relative.f = interval->f * bias;
 	}
 	t->have_relative = 1;
 	t->sse_uptodate = 0;
@@ -141,6 +147,7 @@ timelib_time *timelib_sub(timelib_time *old_time, timelib_rel_time *interval)
 	t->relative.h = 0 - (interval->h * bias);
 	t->relative.i = 0 - (interval->i * bias);
 	t->relative.s = 0 - (interval->s * bias);
+	t->relative.f = 0 - (interval->f * bias);
 	t->have_relative = 1;
 	t->sse_uptodate = 0;
 

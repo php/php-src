@@ -24,7 +24,7 @@ array(2) {
     [1]=>
     string(12) "unsigned int"
     [2]=>
-    string(0) ""
+    NULL
     [3]=>
     string(0) ""
     [4]=>
@@ -41,13 +41,13 @@ array(2) {
     [1]=>
     string(5) "short"
     [2]=>
-    string(0) ""
+    NULL
     [3]=>
     string(0) ""
     [4]=>
     string(1) "a"
     [5]=>
-    string(0) ""
+    NULL
     [6]=>
     string(3) ", b"
   }

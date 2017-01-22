@@ -41,6 +41,5 @@
 
 void bc_out_of_memory (void)
 {
-  (void) fprintf (stderr, "bcmath: out of memory!\n");
-  exit (1);
+  zend_error(E_ERROR, "bcmath: out of memory!");
 }

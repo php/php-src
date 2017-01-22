@@ -4,7 +4,10 @@
 ARG_WITH("dom", "DOM support", "yes");
 
 if (PHP_DOM == "yes") {
-	if (PHP_LIBXML == "yes" && ADD_EXTENSION_DEP('dom', 'libxml')) {
+	if (PHP_LIBXML == "yes" &&
+		ADD_EXTENSION_DEP('dom', 'libxml') &&
+		CHECK_HEADER_ADD_INCLUDE("libxml/parser.h", "CFLAGS_DOM", PHP_PHP_BUILD + "\\include\\libxml2")
+	) {
 		EXTENSION("dom", "php_dom.c attr.c document.c domerrorhandler.c \
 			domstringlist.c domexception.c namelist.c processinginstruction.c \
 			cdatasection.c documentfragment.c domimplementation.c element.c \
@@ -18,6 +21,10 @@ if (PHP_DOM == "yes") {
 
 		if (!PHP_DOM_SHARED) {
 			ADD_FLAG("CFLAGS_DOM", "/D LIBXML_STATIC ");
+		} else {
+			if (!CHECK_LIB("libxml2.lib", "dom")) {
+				WARNING("dom support can't be enabled, libxml is not found")
+			}
 		}
 		PHP_INSTALL_HEADERS("ext/dom", "xml_common.h");
 	} else {

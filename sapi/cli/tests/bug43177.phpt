@@ -11,7 +11,10 @@ php_cli_server_start(<<<'SCRIPT'
 	ini_set('display_errors', 0);
 	switch($_SERVER["REQUEST_URI"]) {
 	        case "/parse":
-	                eval("this is a parse error");
+	                try {
+                        eval("this is a parse error");
+                    } catch (ParseError $e) {
+                    }
 					echo "OK\n";
 	                break;
 	        case "/fatal":
@@ -58,6 +61,7 @@ HEADER
 --EXPECTF--
 HTTP/1.1 200 OK
 Host: localhost
+Date: %s
 Connection: close
 X-Powered-By: %s
 Content-type: text/html; charset=UTF-8
@@ -65,18 +69,21 @@ Content-type: text/html; charset=UTF-8
 OK
 HTTP/1.0 500 Internal Server Error
 Host: localhost
+Date: %s
 Connection: close
 X-Powered-By: %s
 Content-type: text/html; charset=UTF-8
 
 HTTP/1.0 500 Internal Server Error
 Host: localhost
+Date: %s
 Connection: close
 X-Powered-By: %s
 Content-type: text/html; charset=UTF-8
 
 HTTP/1.0 500 Internal Server Error
 Host: localhost
+Date: %s
 Connection: close
 X-Powered-By: %s
 Content-type: text/html; charset=UTF-8

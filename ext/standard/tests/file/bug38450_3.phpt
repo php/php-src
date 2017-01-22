@@ -102,4 +102,11 @@ var_dump($myvar);
 echo "Done\n";
 ?>
 --EXPECTF--	
-Catchable fatal error: Argument 1 passed to VariableStream::__construct() must be of the type array, none given in %s on line %d
+Warning: fopen(var://myvar): failed to open stream: "VariableStream::stream_open" call failed in %sbug38450_3.php on line %d
+
+Fatal error: Uncaught ArgumentCountError: Too few arguments to function VariableStream::__construct(), 0 passed and exactly 1 expected in %sbug38450_3.php:7
+Stack trace:
+#0 [internal function]: VariableStream->__construct()
+#1 %s(%d): fopen('var://myvar', 'r+')
+#2 {main}
+  thrown in %s on line %d
