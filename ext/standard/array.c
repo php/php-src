@@ -721,7 +721,7 @@ static void php_sort(INTERNAL_FUNCTION_PARAMETERS, int extra_flags) /* {{{ */
 
 	switch (Z_TYPE_P(array)) {
 		case IS_ARRAY:
-			cmp = php_get_data_compare_func(sort_type & ~PHP_SORT_FLAG_REVERSE | extra_flags);
+			cmp = php_get_data_compare_func(sort_type | extra_flags);
 
 			if (zend_hash_sort(Z_ARRVAL_P(array), cmp, 1) == FAILURE) {
 				RETURN_FALSE;
@@ -764,7 +764,7 @@ static void php_ksort(INTERNAL_FUNCTION_PARAMETERS, int extra_flags) /* {{{ */
 
 	switch (Z_TYPE_P(array)) {
 		case IS_ARRAY:
-			cmp = php_get_key_compare_func(sort_type & ~PHP_SORT_FLAG_REVERSE | extra_flags);
+			cmp = php_get_key_compare_func(sort_type | extra_flags);
 
 			if (zend_hash_sort(Z_ARRVAL_P(array), cmp, 0) == FAILURE) {
 				RETURN_FALSE;
@@ -807,7 +807,7 @@ static void php_asort(INTERNAL_FUNCTION_PARAMETERS, int extra_flags) /* {{{ */
 
 	switch (Z_TYPE_P(array)) {
 		case IS_ARRAY:
-			cmp = php_get_data_compare_func(sort_type & ~PHP_SORT_FLAG_REVERSE | extra_flags);
+			cmp = php_get_data_compare_func(sort_type | extra_flags);
 
 			if (zend_hash_sort(Z_ARRVAL_P(array), cmp, 0) == FAILURE) {
 				RETURN_FALSE;
