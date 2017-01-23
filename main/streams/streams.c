@@ -1767,7 +1767,7 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 		n++;
 	}
 
-	if ((*p == ':') && (n > 1) && (!strncmp("//", p+1, 2) || (n == 4 && !memcmp("data:", path, 5)))) {
+	if ((*p == ':') && (n > 1)) {
 		protocol = path;
 	}
 
@@ -1791,6 +1791,11 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 		}
 		efree(tmp);
 	}
+
+	if (wrapper && wrapper->is_uri == 0 && path[n+1] != '/' && path[n+2] != '/') {
+		wrapper = NULL;
+	}
+
 	/* TODO: curl based streams probably support file:// properly */
 	if (!protocol || !strncasecmp(protocol, "file", n))	{
 		/* fall back on regular file access */

@@ -164,6 +164,7 @@ struct _php_stream_wrapper	{
 	php_stream_wrapper_ops *wops;	/* operations the wrapper can perform */
 	void *abstract;					/* context for the wrapper */
 	int is_url;						/* so that PG(allow_url_fopen) can be respected */
+	int is_uri;						/* so that scheme complies with RFC 2396 and opaque_part (without leading "//"" after ":") can be respected */
 };
 
 #define PHP_STREAM_FLAG_NO_SEEK						0x1
@@ -599,6 +600,7 @@ END_EXTERN_C()
 
 /* Definitions for user streams */
 #define PHP_STREAM_IS_URL		1
+#define PHP_STREAM_IS_URI		2
 
 /* Stream metadata definitions */
 /* Create if referred resource does not exist */
