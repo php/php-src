@@ -17,6 +17,10 @@ PHP                                                                        NEWS
   . Fixed bug #73904 (php-cgi fails to load -c specified php.ini file). (Anatol)
   . Fixed bug #72898 (PHP_FCGI_CHILDREN is not included in phpinfo()). (Anatol)
 
+- FPM:
+  . Fixed bug #69865 (php-fpm does not close stderr when using syslog). 
+    (m6w6)
+
 - GD:
   . Fixed bug #73968 (Premature failing of XBM reading). (cmb)
 
