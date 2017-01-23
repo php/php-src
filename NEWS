@@ -52,6 +52,8 @@ PHP                                                                        NEWS
 
 - FPM:
   . Configuration to limit fpm slow log trace callers. (Sannis)
+  . Fixed bug #69865 (php-fpm does not close stderr when using syslog). 
+    (m6w6)
 
 - GD:
   . Implemented imageresolution as getter and setter (Christoph)
