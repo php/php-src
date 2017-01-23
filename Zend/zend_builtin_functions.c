@@ -2364,8 +2364,9 @@ ZEND_FUNCTION(debug_print_backtrace)
 		object = Z_OBJ(call->This);
 
 		if (call->func) {
-			func = call->func;
 			zend_string *zend_function_name;
+
+			func = call->func;
             if (func->common.scope && func->common.scope->trait_aliases) {
                 zend_function_name = zend_resolve_method_name(object ? object->ce : func->common.scope, func);
             } else {
