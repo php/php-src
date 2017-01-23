@@ -1019,7 +1019,7 @@ static void php_usort(INTERNAL_FUNCTION_PARAMETERS, compare_func_t compare_func,
 			if (instanceof_function(Z_OBJCE_P(array), spl_ce_Sortable)) {
 				PHP_ARRAY_CMP_FUNC_RESTORE();
 				zend_parse_parameters(ZEND_NUM_ARGS(), "A/z", &array, &cmp_function);
-				zend_call_method_with_1_params(array, NULL, NULL, function_name, &retval, cmp_function);
+				zend_call_method(array, NULL, NULL, function_name, strlen(function_name), &retval, 1, cmp_function, NULL);
 				if (Z_TYPE(retval) != IS_UNDEF) {
 					RETURN_ZVAL(&retval, 1, 0);
 				}
