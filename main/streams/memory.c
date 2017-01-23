@@ -770,6 +770,7 @@ PHPAPI php_stream_wrapper php_stream_rfc2397_wrapper =	{
 	&php_stream_rfc2397_wops,
 	NULL,
 	1, /* is_url */
+	1, /* is_uri */
 };
 
 /*
