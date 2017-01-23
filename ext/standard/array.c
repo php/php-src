@@ -732,7 +732,7 @@ static void php_sort(INTERNAL_FUNCTION_PARAMETERS, int extra_flags) /* {{{ */
 
 		case IS_OBJECT:
 			ZVAL_LONG(&arg, sort_type | extra_flags);
-			if (instanceof_function(Z_OBJCE_P(array), spl_ce_SortableKeys)) {
+			if (instanceof_function(Z_OBJCE_P(array), spl_ce_Sortable)) {
 				zend_call_method_with_1_params(array, NULL, NULL, "sort", &retval, &arg);
 				if (Z_TYPE(retval) != IS_UNDEF) {
 					RETURN_ZVAL(&retval, 1, 0);
