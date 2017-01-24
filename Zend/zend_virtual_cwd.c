@@ -900,7 +900,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 #endif
 
 				substitutename_len = pbuffer->MountPointReparseBuffer.SubstituteNameLength / sizeof(WCHAR);
-				if (substitutename_len > MAXPATHLEN) {
+				if (substitutename_len >= MAXPATHLEN) {
 					free_alloca(pbuffer, use_heap_large);
 					free_alloca(tmp, use_heap);
 					FREE_PATHW()
@@ -909,9 +909,10 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				memmove(tmpsubstname, reparsetarget + pbuffer->MountPointReparseBuffer.SubstituteNameOffset / sizeof(WCHAR), pbuffer->MountPointReparseBuffer.SubstituteNameLength);
 				tmpsubstname[substitutename_len] = L'\0';
 				substitutename = php_win32_cp_conv_w_to_any(tmpsubstname, substitutename_len, &substitutename_len);
-				if (!substitutename) {
+				if (!substitutename || substitutename_len >= MAXPATHLEN) {
 					free_alloca(pbuffer, use_heap_large);
 					free_alloca(tmp, use_heap);
+					free(substitutename);
 #if VIRTUAL_CWD_DEBUG
 					free(printname);
 #endif
@@ -934,7 +935,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 
 
 				substitutename_len = pbuffer->MountPointReparseBuffer.SubstituteNameLength / sizeof(WCHAR);
-				if (substitutename_len > MAXPATHLEN) {
+				if (substitutename_len >= MAXPATHLEN) {
 					free_alloca(pbuffer, use_heap_large);
 					free_alloca(tmp, use_heap);
 					FREE_PATHW()
@@ -943,9 +944,10 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				memmove(tmpsubstname, reparsetarget + pbuffer->MountPointReparseBuffer.SubstituteNameOffset / sizeof(WCHAR), pbuffer->MountPointReparseBuffer.SubstituteNameLength);
 				tmpsubstname[substitutename_len] = L'\0';
 				substitutename = php_win32_cp_conv_w_to_any(tmpsubstname, substitutename_len, &substitutename_len);
-				if (!substitutename) {
+				if (!substitutename || substitutename_len >= MAXPATHLEN) {
 					free_alloca(pbuffer, use_heap_large);
 					free_alloca(tmp, use_heap);
+					free(substitutename);
 #if VIRTUAL_CWD_DEBUG
 					free(printname);
 #endif
