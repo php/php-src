@@ -151,7 +151,14 @@ ZEND_API void zend_function_dtor(zval *zv)
 ZEND_API void zend_cleanup_op_array_data(zend_op_array *op_array)
 {
 	if (op_array->static_variables &&
-	    !(GC_FLAGS(op_array->static_variables) & IS_ARRAY_IMMUTABLE)) {
+	    !(GC_FLAGS(op_array->static_variables) & IS_ARRAY_IMMUTABLE)
+	) {
+		/* The static variables are initially shared when inheriting methods and will
+		 * be separated on first use. If they are never used, they stay shared. Cleaning
+		 * a shared static variables table is safe, as the intention is to clean all
+		 * such tables. */
+		HT_ALLOW_COW_VIOLATION(op_array->static_variables);
+
 		zend_hash_clean(op_array->static_variables);
 	}
 }
