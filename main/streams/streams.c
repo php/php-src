@@ -1795,8 +1795,9 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 		efree(tmp);
 	}
 
-	if (wrapper && wrapper->is_uri == 0 && slashes == 1) {
+	if (wrapper && wrapper->is_uri == 0 && slashes == 0) {
 		wrapper = NULL;
+		protocol = NULL;
 	}
 
 	/* TODO: curl based streams probably support file:// properly */
