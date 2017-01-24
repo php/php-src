@@ -1781,10 +1781,11 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 				if (n >= sizeof(wrapper_name)) {
 					n = sizeof(wrapper_name) - 1;
 				}
-				PHP_STRLCPY(wrapper_name, protocol, sizeof(wrapper_name), n);
+				if (path[n+1] == '/' && path[n+2] == '/') {
+					PHP_STRLCPY(wrapper_name, protocol, sizeof(wrapper_name), n);
 
-				php_error_docref(NULL, E_WARNING, "Unable to find the wrapper \"%s\" - did you forget to enable it when you configured PHP?", wrapper_name);
-
+					php_error_docref(NULL, E_WARNING, "Unable to find the wrapper \"%s\" - did you forget to enable it when you configured PHP?", wrapper_name);
+				}
 				wrapper = NULL;
 				protocol = NULL;
 			}
