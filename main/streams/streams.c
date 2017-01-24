@@ -1753,7 +1753,7 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 	HashTable *wrapper_hash = (FG(stream_wrappers) ? FG(stream_wrappers) : &url_stream_wrappers_hash);
 	php_stream_wrapper *wrapper = NULL;
 	const char *p, *protocol = NULL;
-	size_t n = 0;
+	size_t n = 0, slashes = 0;
 
 	if (path_for_open) {
 		*path_for_open = (char*)path;
@@ -1769,6 +1769,7 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 
 	if ((*p == ':') && (n > 1)) {
 		protocol = path;
+		slashes = !strncmp("//", p+1, 2);
 	}
 
 	if (protocol) {
@@ -1781,7 +1782,8 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 				if (n >= sizeof(wrapper_name)) {
 					n = sizeof(wrapper_name) - 1;
 				}
-				if (path[n+1] == '/' && path[n+2] == '/') {
+				/* Raising for <protocol>:// so <protocol>:<path> can be handled with php_plain_files_wrapper if no <protocol> wrapper registered */
+				if (slashes == 1) {
 					PHP_STRLCPY(wrapper_name, protocol, sizeof(wrapper_name), n);
 
 					php_error_docref(NULL, E_WARNING, "Unable to find the wrapper \"%s\" - did you forget to enable it when you configured PHP?", wrapper_name);
@@ -1793,7 +1795,7 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 		efree(tmp);
 	}
 
-	if (wrapper && wrapper->is_uri == 0 && path[n+1] != '/' && path[n+2] != '/') {
+	if (wrapper && wrapper->is_uri == 0 && slashes == 1) {
 		wrapper = NULL;
 	}
 
