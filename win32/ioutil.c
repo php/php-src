@@ -445,7 +445,8 @@ PW32IO size_t php_win32_ioutil_dirname(char *path, size_t len)
 	
 	start = path;
 
-	startw = pathw = php_win32_ioutil_conv_any_to_w(path, len, &pathw_len);
+	/* Don't really care about the path normalization, pure parsing here. */
+	startw = pathw = php_win32_cp_conv_any_to_w(path, len, &pathw_len);
 	if (!pathw) {
 		return 0;
 	}
