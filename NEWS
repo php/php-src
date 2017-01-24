@@ -8,6 +8,7 @@ PHP                                                                        NEWS
   . Fixed bug #73876 (Crash when exporting **= in expansion of assign op).
     (Sara)
   . Fixed bug #73969 (segfault in debug_print_backtrace). (andrewnester)
+  . Fixed bug #73973 (assertion error in debug_zval_dump). (andrewnester)
 
 - DOM:
   . Fixed bug #54382 (getAttributeNodeNS doesn't get xmlns* attributes).
