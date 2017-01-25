@@ -921,7 +921,7 @@ Since: DOM Level 2
 PHP_FUNCTION(dom_element_get_attribute_node_ns)
 {
 	zval *id;
-	xmlNodePtr elemp;
+	xmlNodePtr elemp, fakeAttrp;
 	xmlAttrPtr attrp;
 	dom_object *intern;
 	size_t uri_len, name_len;
@@ -937,10 +937,34 @@ PHP_FUNCTION(dom_element_get_attribute_node_ns)
 	attrp = xmlHasNsProp(elemp, (xmlChar *)name, (xmlChar *)uri);
 
 	if (attrp == NULL) {
-		RETURN_NULL();
-	}
+		if (xmlStrEqual((xmlChar *) uri, (xmlChar *)DOM_XMLNS_NAMESPACE)) {
+			xmlNsPtr nsptr;
+			nsptr = dom_get_nsdecl(elemp, (xmlChar *)name);
+			if (nsptr != NULL) {
+				xmlNsPtr curns;
+				curns = xmlNewNs(NULL, nsptr->href, NULL);
+				if (nsptr->prefix) {
+					curns->prefix = xmlStrdup((xmlChar *) nsptr->prefix);
+				}
+				if (nsptr->prefix) {
+					fakeAttrp = xmlNewDocNode(elemp->doc, NULL, (xmlChar *) nsptr->prefix, nsptr->href);
+				} else {
+					fakeAttrp = xmlNewDocNode(elemp->doc, NULL, (xmlChar *)"xmlns", nsptr->href);
+				}
+				fakeAttrp->type = XML_NAMESPACE_DECL;
+				fakeAttrp->parent = elemp;
+				fakeAttrp->ns = curns;
 
-	DOM_RET_OBJ((xmlNodePtr) attrp, &ret, intern);
+				DOM_RET_OBJ(fakeAttrp, &ret, intern);
+			} else {
+				RETURN_NULL();
+			}
+		} else {
+		   RETURN_NULL();
+		}
+	} else {
+		DOM_RET_OBJ((xmlNodePtr) attrp, &ret, intern);
+	}
 
 }
 /* }}} end dom_element_get_attribute_node_ns */
