@@ -886,6 +886,7 @@ PHP_FUNCTION(inflate_init)
 	ctx->zfree = php_zlib_free;
 	((php_zlib_context *) ctx)->inflateDict = dict;
 	((php_zlib_context *) ctx)->inflateDictlen = dictlen;
+	((php_zlib_context *) ctx)->status = Z_OK;
 
 	if (encoding < 0) {
 		encoding += 15 - window;
@@ -938,6 +939,13 @@ PHP_FUNCTION(inflate_add)
 				"flush mode must be ZLIB_NO_FLUSH, ZLIB_PARTIAL_FLUSH, ZLIB_SYNC_FLUSH, ZLIB_FULL_FLUSH, ZLIB_BLOCK or ZLIB_FINISH");
 			RETURN_FALSE;
 	}
+	
+	// Lazy-resetting the zlib stream so user can check whether the stream end has been reached with inflate.
+	if (((php_zlib_context *) ctx)->status == Z_STREAM_END)
+	{
+		((php_zlib_context *) ctx)->status = Z_OK;
+		inflateReset(ctx);
+	}
 
 	if (in_len <= 0 && flush_type != Z_FINISH) {
 		RETURN_EMPTY_STRING();
@@ -953,6 +961,8 @@ PHP_FUNCTION(inflate_add)
 		status = inflate(ctx, flush_type);
 		buffer_used = ZSTR_LEN(out) - ctx->avail_out;
 
+		((php_zlib_context *) ctx)->status = status; // Save status for exposing to userspace
+
 		switch (status) {
 			case Z_OK:
 				if (ctx->avail_out == 0) {
@@ -965,7 +975,6 @@ PHP_FUNCTION(inflate_add)
 					goto complete;
 				}
 			case Z_STREAM_END:
-				inflateReset(ctx);
 				goto complete;
 			case Z_BUF_ERROR:
 				if (flush_type == Z_FINISH && ctx->avail_out == 0) {
@@ -1011,6 +1020,48 @@ PHP_FUNCTION(inflate_add)
 		ZSTR_VAL(out)[buffer_used] = 0;
 		RETURN_STR(out);
 	}
+}
+/* }}} */
+
+/* {{{ proto bool inflate_get_status(resource context)
+   Get decompression status, usually returns either ZLIB_OK, ZLIB_STREAM_END, or ZLIB_NEED_DICT. */
+PHP_FUNCTION(inflate_get_status)
+{
+	zval *res;
+	z_stream *ctx;
+
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "r", &res))
+	{
+		RETURN_NULL();
+	}
+
+	if (!(ctx = zend_fetch_resource_ex(res, NULL, le_inflate))) {
+		php_error_docref(NULL, E_WARNING, "Invalid zlib.inflate resource");
+		RETURN_FALSE;
+	}
+	
+	RETURN_LONG(((php_zlib_context *) ctx)->status);
+}
+/* }}} */
+
+/* {{{ proto bool inflate_get_read_len(resource context)
+   Get number of bytes read so far. */
+PHP_FUNCTION(inflate_get_read_len)
+{
+	zval *res;
+	z_stream *ctx;
+
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "r", &res))
+	{
+		RETURN_NULL();
+	}
+
+	if (!(ctx = zend_fetch_resource_ex(res, NULL, le_inflate))) {
+		php_error_docref(NULL, E_WARNING, "Invalid zlib.inflate resource");
+		RETURN_FALSE;
+	}
+
+	RETURN_LONG(ctx->total_in);
 }
 /* }}} */
 
@@ -1327,6 +1378,14 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_inflate_add, 0, 0, 2)
 	ZEND_ARG_INFO(0, flush_behavior)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_inflate_get_status, 0, 0, 1)
+	ZEND_ARG_INFO(0, resource)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_inflate_get_read_len, 0, 0, 1)
+	ZEND_ARG_INFO(0, resource)
+ZEND_END_ARG_INFO()
+
 /* }}} */
 
 /* {{{ php_zlib_functions[] */
@@ -1359,6 +1418,8 @@ static const zend_function_entry php_zlib_functions[] = {
 	PHP_FE(deflate_add,						arginfo_deflate_add)
 	PHP_FE(inflate_init,					arginfo_inflate_init)
 	PHP_FE(inflate_add,						arginfo_inflate_add)
+	PHP_FE(inflate_get_status,				arginfo_inflate_get_status)
+	PHP_FE(inflate_get_read_len,			arginfo_inflate_get_read_len)
 	PHP_FE(ob_gzhandler,					arginfo_ob_gzhandler)
 	PHP_FE_END
 };
@@ -1473,6 +1534,10 @@ static PHP_MINIT_FUNCTION(zlib)
 
 	REGISTER_STRING_CONSTANT("ZLIB_VERSION", ZLIB_VERSION, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ZLIB_VERNUM", ZLIB_VERNUM, CONST_CS|CONST_PERSISTENT);
+
+	REGISTER_LONG_CONSTANT("ZLIB_OK", Z_OK, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ZLIB_STREAM_END", Z_STREAM_END, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ZLIB_NEED_DICT", Z_NEED_DICT, CONST_CS|CONST_PERSISTENT);
 
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;
