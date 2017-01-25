@@ -940,7 +940,7 @@ PHP_FUNCTION(inflate_add)
 			RETURN_FALSE;
 	}
 	
-	// Lazy-resetting the zlib stream so user can check whether the stream end has been reached with inflate.
+	// Lazy-resetting the zlib stream so ctx->total_in remains available until the next inflate_add() call.
 	if (((php_zlib_context *) ctx)->status == Z_STREAM_END)
 	{
 		((php_zlib_context *) ctx)->status = Z_OK;
@@ -1024,7 +1024,7 @@ PHP_FUNCTION(inflate_add)
 /* }}} */
 
 /* {{{ proto bool inflate_get_status(resource context)
-   Get decompression status, usually returns either ZLIB_OK, ZLIB_STREAM_END, or ZLIB_NEED_DICT. */
+   Get decompression status, usually returns either ZLIB_OK or ZLIB_STREAM_END. */
 PHP_FUNCTION(inflate_get_status)
 {
 	zval *res;
@@ -1538,6 +1538,12 @@ static PHP_MINIT_FUNCTION(zlib)
 	REGISTER_LONG_CONSTANT("ZLIB_OK", Z_OK, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ZLIB_STREAM_END", Z_STREAM_END, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ZLIB_NEED_DICT", Z_NEED_DICT, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ZLIB_ERRNO", Z_ERRNO, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ZLIB_STREAM_ERROR", Z_STREAM_ERROR, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ZLIB_DATA_ERROR", Z_DATA_ERROR, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ZLIB_MEM_ERROR", Z_MEM_ERROR, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ZLIB_BUF_ERROR", Z_BUF_ERROR, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ZLIB_VERSION_ERROR", Z_VERSION_ERROR, CONST_CS|CONST_PERSISTENT);
 
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;
