@@ -21,7 +21,7 @@ MySQLPDOTest::skip();
 			$dsn = MySQLPDOTest::getDSN();
 			$user = PDO_MYSQL_TEST_USER;
 			$pass = PDO_MYSQL_TEST_PASS;
-			$uri = sprintf('uri:file://%s', $file);
+			$uri = sprintf('uri:file:%s', $file);
 
 			if ($fp = @fopen($file, 'w')) {
 				// ok, great we can create a file with a DSN in it
