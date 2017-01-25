@@ -12,6 +12,8 @@ PDOTest::skip();
 <?php
 require 'ext/pdo/tests/pdo_test.inc';
 $dbh = PDOTest::factory();
+$dbh->setAttribute(PDO::ATTR_CASE, PDO::CASE_NATURAL);
+$dbh->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 
 @$dbh->exec('DROP TABLE pdo_oci_bug60994');
 $dbh->exec('CREATE TABLE pdo_oci_bug60994 (id NUMBER, data CLOB)');
