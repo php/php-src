@@ -615,7 +615,7 @@ int phpdbg_compile(void) /* {{{ */
 			memmove(data->line + 1, data->line, sizeof(uint) * data->lines);
 			data->line[0] = 0;
 			data->buf = erealloc(data->buf, data->len + start_line_len);
-			memmove(data->buf + start_line_len, data->buf, data->len * sizeof(uint));
+			memmove(data->buf + start_line_len, data->buf, data->len);
 			memcpy(data->buf, start_line, start_line_len);
 			efree(start_line);
 			data->len += start_line_len;
