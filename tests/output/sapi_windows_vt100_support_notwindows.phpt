@@ -2,7 +2,7 @@
 Test that sapi_windows_vt100_support exists only on Windows
 --SKIPIF--
 <?php
-if (stripos(PHP_OS, 'WIN') === 0) {
+if(PHP_OS_FAMILY === "WIN") {
     echo "skip Only for not Windows systems";
 }
 ?>

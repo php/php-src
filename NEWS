@@ -23,6 +23,7 @@ PHP                                                                        NEWS
   . Raised minimum supported Windows versions to Windows 7/Server 2008 R2.
     (Anatol)
   . Fixed bug #73969 (segfault in debug_print_backtrace). (andrewnester)
+  . Added PHP_OS_FAMILY constant to determine on which OS we are. (Jan Altensen)
 
 - BCMath:
   . Fixed bug #46564 (bcmod truncates fractionals). (liborm85)
