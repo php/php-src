@@ -3,7 +3,7 @@ Bug #72660 (NULL Pointer dereference in zend_virtual_cwd)
 --SKIPIF--
 <?php
 if(!extension_loaded('zip')) die('skip');
-if(PHP_ZTS == 0) { die('skip ZTS required'); }
+if(!PHP_ZTS) { die('skip ZTS required'); }
 ?>
 --FILE--
 <?php
