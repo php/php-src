@@ -1,5 +1,8 @@
 --TEST--
 PDO OCI Bug #60994 (Reading a multibyte CLOB caps at 8192 characters)
+--CREDITS--
+Chuck Burgess
+ashnazg@php.net
 --SKIPIF--
 <?php
 /* $Id$ */
