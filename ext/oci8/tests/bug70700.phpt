@@ -41,8 +41,8 @@ $row = oci_fetch_array($select, OCI_ASSOC);
 $lob = $row['DATA'];
 $fh = fopen('php://temp', 'rw');
 while (! $lob->eof()) {
-    $data = $lob->read(8192);
-    fwrite($fh, $data, 8192);
+    $data = $lob->read(8192);             // read($characters), not read($bytes)
+    fwrite($fh, $data, strlen($data));    // fwrite(a, b, $bytes)
 }
 $lob->free();
 rewind($fh);
@@ -72,8 +72,8 @@ $row = oci_fetch_array($select, OCI_ASSOC);
 $lob = $row['DATA'];
 $fh = fopen('php://temp', 'rw');
 while (! $lob->eof()) {
-    $data = $lob->read(8192);
-    fwrite($fh, $data, 8192);
+    $data = $lob->read(8192);             // read($characters), not read($bytes)
+    fwrite($fh, $data, strlen($data));    // fwrite(a, b, $bytes)
 }
 $lob->free();
 rewind($fh);
@@ -103,8 +103,8 @@ $row = oci_fetch_array($select, OCI_ASSOC);
 $lob = $row['DATA'];
 $fh = fopen('php://temp', 'rw');
 while (! $lob->eof()) {
-    $data = $lob->read(8192);
-    fwrite($fh, $data, 8192);
+    $data = $lob->read(8192);             // read($characters), not read($bytes)
+    fwrite($fh, $data, strlen($data));    // fwrite(a, b, $bytes)
 }
 $lob->free();
 rewind($fh);
@@ -134,8 +134,8 @@ $row = oci_fetch_array($select, OCI_ASSOC);
 $lob = $row['DATA'];
 $fh = fopen('php://temp', 'rw');
 while (! $lob->eof()) {
-    $data = $lob->read(8192);
-    fwrite($fh, $data, 8192);
+    $data = $lob->read(8192);             // read($characters), not read($bytes)
+    fwrite($fh, $data, strlen($data));    // fwrite(a, b, $bytes)
 }
 $lob->free();
 rewind($fh);
