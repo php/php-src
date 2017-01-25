@@ -1,5 +1,8 @@
 --TEST--
 Bug #70700 (LOB read loop ends early for multibyte strings)
+--CREDITS--
+Chuck Burgess
+ashnazg@php.net
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
