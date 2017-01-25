@@ -50,6 +50,7 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fixed bug #71519 (add serial hex to return value array). (xrobau)
   . Fixed bug #73692 (Compile ext/openssl with openssl 1.1.0 on Win). (Anatol)
+  . Fixed bug #73978 (openssl_decrypt triggers bug in PDO). (Jakub Zelenka)
 
 - PDO_Firebird:
   . Implemented FR #72583 (All data are fetched as strings). (Dorin Marcoci)
