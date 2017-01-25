@@ -26,7 +26,7 @@ oci_bind_by_name($select, ':id', $id);
 
 
 echo PHP_EOL, 'Test 1: j', PHP_EOL;
-$string1 = 'abc' . str_repeat('j', 10000) . 'xyz'; // big single-byte works fine...  even 10 million works fine, subject to memory_limit
+$string1 = 'abc' . str_repeat('j', 10000) . 'xyz';
 $id = 1;
 $desc = oci_new_descriptor($c, OCI_D_LOB);
 oci_bind_by_name($insert, ':data', $desc, -1, OCI_B_CLOB);
@@ -57,7 +57,7 @@ echo 'end of stream1a is ', $ending1a, PHP_EOL;
 
 
 echo PHP_EOL, 'Test 2: £', PHP_EOL;
-$string2 = 'abc' . str_repeat('£', 4094) . 'xyz'; // 4099 is the longest char string that will work correctly
+$string2 = 'abc' . str_repeat('£', 4094) . 'xyz';
 $id = 2;
 $desc = oci_new_descriptor($c, OCI_D_LOB);
 oci_bind_by_name($insert, ':data', $desc, -1, OCI_B_CLOB);
@@ -88,7 +88,7 @@ echo 'end of stream2a is ', $ending2a, PHP_EOL;
 
 
 echo PHP_EOL, 'Test 3: Җ', PHP_EOL;
-$string3 = 'abc' . str_repeat('Җ', 4094) . 'xyz'; // 4099 is the longest char string that will work correctly
+$string3 = 'abc' . str_repeat('Җ', 4094) . 'xyz';
 $id = 3;
 $desc = oci_new_descriptor($c, OCI_D_LOB);
 oci_bind_by_name($insert, ':data', $desc, -1, OCI_B_CLOB);
@@ -119,7 +119,7 @@ echo 'end of stream3a is ', $ending3a, PHP_EOL;
 
 
 echo PHP_EOL, 'Test 4: の', PHP_EOL;
-$string4 = 'abc' . str_repeat('の', 2729) . 'xyz'; // 2734 is the longest char string that will work correctly
+$string4 = 'abc' . str_repeat('の', 2729) . 'xyz';
 $id = 4;
 $desc = oci_new_descriptor($c, OCI_D_LOB);
 oci_bind_by_name($insert, ':data', $desc, -1, OCI_B_CLOB);
