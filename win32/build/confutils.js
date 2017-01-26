@@ -106,7 +106,7 @@ var PHP_VERSION_STRING = "7.2.0";
 /* Get version numbers and DEFINE as a string */
 function get_version_numbers()
 {
-	var cin = file_get_contents("configure.in");
+	var cin = file_get_contents("configure.ac");
 	
 	if (cin.match(new RegExp("PHP_MAJOR_VERSION=(\\d+)"))) {
 		PHP_VERSION = RegExp.$1;
