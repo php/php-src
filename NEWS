@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #73962 (bug with symlink related to cyrillic directory). (Anatol)
   . Fixed bug #73969 (segfault in debug_print_backtrace). (andrewnester)
 
+- DOM:
+  . Fixed bug #54382 (getAttributeNodeNS doesn't get xmlns* attributes).
+    (aboks)
+
 - DTrace:
   . Fixed bug #73965 (DTrace reported as enabled when disabled). (Remi)
 
