@@ -4,7 +4,7 @@ Test open_basedir configuration
 open_basedir=.
 --SKIPIF--
 <?php
-if(PHP_OS_FAMILY !== "WIN") {
+if(PHP_OS_FAMILY !== "Windows") {
     die('skip Windows only variation');
 }
 ?>
