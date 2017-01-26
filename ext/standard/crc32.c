@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,9 +31,10 @@ PHP_NAMED_FUNCTION(php_if_crc32)
 	uint32_t crcinit = 0;
 	register uint32_t crc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &p, &nr) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(p, nr)
+	ZEND_PARSE_PARAMETERS_END();
+
 	crc = crcinit^0xFFFFFFFF;
 
 	for (; nr--; ++p) {

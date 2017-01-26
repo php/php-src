@@ -23,7 +23,7 @@ echo "\n";
 $timeMillis = $cal->getTime();
 $time = time();
 
-var_dump(abs($timeMillis - $time * 1000) < 1000);
+var_dump(abs($timeMillis - $time * 1000) < 2000);
 
 ?>
 ==DONE==

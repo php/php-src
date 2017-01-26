@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -46,6 +46,7 @@ typedef struct _php_hash_ops {
 	int digest_size;
 	int block_size;
 	int context_size;
+	unsigned is_crypto: 1;
 } php_hash_ops;
 
 typedef struct _php_hash_data {
@@ -64,6 +65,8 @@ extern const php_hash_ops php_hash_sha224_ops;
 extern const php_hash_ops php_hash_sha256_ops;
 extern const php_hash_ops php_hash_sha384_ops;
 extern const php_hash_ops php_hash_sha512_ops;
+extern const php_hash_ops php_hash_sha512_256_ops;
+extern const php_hash_ops php_hash_sha512_224_ops;
 extern const php_hash_ops php_hash_sha3_224_ops;
 extern const php_hash_ops php_hash_sha3_256_ops;
 extern const php_hash_ops php_hash_sha3_384_ops;
@@ -128,6 +131,7 @@ extern zend_module_entry hash_module_entry;
 
 PHP_FUNCTION(hash);
 PHP_FUNCTION(hash_file);
+PHP_FUNCTION(hash_hkdf);
 PHP_FUNCTION(hash_hmac);
 PHP_FUNCTION(hash_hmac_file);
 PHP_FUNCTION(hash_init);

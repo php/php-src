@@ -36,8 +36,6 @@ fclose($fp);
 $key = 'secret';
 
 
-echo "adler32: " . hash_hmac_file('adler32', $file, $key) . "\n";
-echo "crc32: " . hash_hmac_file('crc32', $file, $key) . "\n";
 echo "gost: " . hash_hmac_file('gost', $file, $key) . "\n";
 echo "haval128,3: " . hash_hmac_file('haval128,3', $file, $key) . "\n";
 echo "md2: " . hash_hmac_file('md2', $file, $key) . "\n";
@@ -55,7 +53,6 @@ echo "snefru: " . hash_hmac_file('snefru', $file, $key) . "\n";
 echo "tiger192,3: " . hash_hmac_file('tiger192,3', $file, $key) . "\n";
 echo "whirlpool: " . hash_hmac_file('whirlpool', $file, $key) . "\n";
 
-echo "adler32(raw): " . bin2hex(hash_hmac_file('adler32', $file, $key, TRUE)) . "\n";
 echo "md5(raw): " . bin2hex(hash_hmac_file('md5', $file, $key, TRUE)). "\n";
 echo "sha256(raw): " . bin2hex(hash_hmac_file('sha256', $file, $key, TRUE)). "\n";
 
@@ -70,8 +67,6 @@ unlink($file);
 ===Done===
 --EXPECTF--
 *** Testing hash_hmac_file() : basic functionality ***
-adler32: 0f8c02f9
-crc32: f2a60b9c
 gost: 94c39a40d5db852a8dc3d24e37eebf2d53e3d711457c59cd02b614f792a9d918
 haval128,3: f1cea637451097d790354a86de3f54a3
 md2: a685475e600314bb549ab4f33c3b27cb
@@ -88,7 +83,6 @@ sha512: d460aabdf0353655059ed0d408efa91f19c4cda46acc2a4e0adf4764b06951c899fbb2ed
 snefru: 7b79787e1c1d926b6cc98327f05c5d04ba6227ab51c1398661861196016ef34c
 tiger192,3: ca89badf843ba68e3fae5832635aa848a72a4bc11676edd4
 whirlpool: 37a0fbb90547690d5e5e11c046f6654ffdb7bab15e16d9d79c7d85765cc4bdcbfd9df8db7a3ce9558f3f244fead00ca29cf05297f75596555195a0683f15d69f
-adler32(raw): 0f8c02f9
 md5(raw): 8bddf39dd1c566c27acc7fa85ec36acf
 sha256(raw): 9135286ca4c84dec711e4b831f6cd39e672e5ff93d011321274eb76733cc1e40
 Error cases:

@@ -45,16 +45,16 @@ string(1) "0"
 string(0) ""
 bool(true)
 string(4) "test"
-NULL
+bool(true)
 string(4) "test"
 bool(true)
 string(1) "0"
 string(4) "test"
-NULL
+bool(true)
 string(4) "test"
 bool(true)
 string(4) "test"
-NULL
+bool(true)
 string(4) "test"
 bool(true)
 bool(true)

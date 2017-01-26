@@ -8,12 +8,21 @@
 
 static inline int convert_cp(UChar32* pcp, zval *zcp) {
 	zend_long cp = -1;
+
 	if (Z_TYPE_P(zcp) == IS_LONG) {
 		cp = Z_LVAL_P(zcp);
 	} else if (Z_TYPE_P(zcp) == IS_STRING) {
-		int i = 0;
-		U8_NEXT(Z_STRVAL_P(zcp), i, Z_STRLEN_P(zcp), cp);
-		if (i != Z_STRLEN_P(zcp)) {
+		int32_t i = 0;
+		size_t zcp_len = Z_STRLEN_P(zcp);
+
+		if (ZEND_SIZE_T_INT_OVFL(zcp_len)) {
+			intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
+			intl_error_set_custom_msg(NULL, "Input string is too long.", 0);
+			return FAILURE;
+		}
+
+		U8_NEXT(Z_STRVAL_P(zcp), i, zcp_len, cp);
+		if ((size_t)i != zcp_len) {
 			intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
 			intl_error_set_custom_msg(NULL, "Passing a UTF-8 character for codepoint requires a string which is exactly one UTF-8 codepoint long.", 0);
 			return FAILURE;
@@ -241,7 +250,7 @@ IC_METHOD(charName) {
 
 	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "z|l", &zcp, &nameChoice) == FAILURE) ||
 	    (convert_cp(&cp, zcp) == FAILURE)) {
-		return;
+		RETURN_NULL();
 	}
 
 	buffer_len = u_charName(cp, (UCharNameChoice)nameChoice, NULL, 0, &error);
@@ -250,7 +259,7 @@ IC_METHOD(charName) {
 	buffer_len = u_charName(cp, (UCharNameChoice)nameChoice, ZSTR_VAL(buffer), ZSTR_LEN(buffer) + 1, &error);
 	if (U_FAILURE(error)) {
 		zend_string_free(buffer);
-		INTL_CHECK_STATUS(error, "Failure getting character name");
+		INTL_CHECK_STATUS_OR_NULL(error, "Failure getting character name");
 	}
 	RETURN_NEW_STR(buffer);
 }
@@ -269,11 +278,11 @@ IC_METHOD(charFromName) {
 	UErrorCode error = U_ZERO_ERROR;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &name, &name_len, &nameChoice) == FAILURE) {
-		return;
+		RETURN_NULL();
 	}
 
 	ret = u_charFromName((UCharNameChoice)nameChoice, name, &error);
-	INTL_CHECK_STATUS(error, NULL);
+	INTL_CHECK_STATUS_OR_NULL(error, NULL);
 	RETURN_LONG(ret);
 }
 /* }}} */
@@ -557,8 +566,8 @@ IC_METHOD(getFC_NFKC_Closure) {
 
 	error = U_ZERO_ERROR;
 	u8str = intl_convert_utf16_to_utf8(closure, closure_len, &error);
-	efree(closure);
 	INTL_CHECK_STATUS(error, "Failed converting output to UTF8");
+	efree(closure);
 	RETVAL_NEW_STR(u8str);
 }
 /* }}} */
@@ -737,6 +746,7 @@ int php_uchar_minit(INIT_FUNC_ARGS) {
 	IC_CONSTL("CODEPOINT_MAX", UCHAR_MAX_VALUE)
 	IC_CONSTL("FOLD_CASE_DEFAULT", U_FOLD_CASE_DEFAULT)
 	IC_CONSTL("FOLD_CASE_EXCLUDE_SPECIAL_I", U_FOLD_CASE_EXCLUDE_SPECIAL_I)
+	zend_declare_class_constant_double(ce, "NO_NUMERIC_VALUE", sizeof("NO_NUMERIC_VALUE")-1, U_NO_NUMERIC_VALUE);
 
 	/* All enums used by the uchar APIs.  There are a LOT of them,
 	 * so they're separated out into include files,

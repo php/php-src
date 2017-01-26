@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -189,15 +189,9 @@ PHP_NAMED_FUNCTION(zif_gettext)
 	char *msgstr;
 	zend_string *msgid;
 
-#ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &msgid) == FAILURE) {
-		return;
-	}
-#else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STR(msgid)
 	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	PHP_GETTEXT_LENGTH_CHECK("msgid", ZSTR_LEN(msgid))
 	msgstr = gettext(ZSTR_VAL(msgid));

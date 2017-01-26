@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -85,8 +85,6 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->static_variables = NULL;
 	op_array->last_try_catch = 0;
 
-	op_array->this_var = -1;
-
 	op_array->fn_flags = 0;
 
 	op_array->early_binding = -1;
@@ -112,6 +110,23 @@ ZEND_API void destroy_zend_function(zend_function *function)
 		ZEND_ASSERT(function->type == ZEND_INTERNAL_FUNCTION);
 		ZEND_ASSERT(function->common.function_name);
 		zend_string_release(function->common.function_name);
+
+		if (function->common.arg_info &&
+		    (function->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))) { 
+			uint32_t i;
+			uint32_t num_args = function->common.num_args + 1;
+			zend_arg_info *arg_info = function->common.arg_info - 1;
+
+			if (function->common.fn_flags & ZEND_ACC_VARIADIC) {
+				num_args++;
+			}
+			for (i = 0 ; i < num_args; i++) {
+				if (ZEND_TYPE_IS_CLASS(arg_info[i].type)) {
+					zend_string_release(ZEND_TYPE_NAME(arg_info[i].type));
+				}
+			}
+			free(arg_info);
+		}
 	}
 }
 
@@ -136,7 +151,14 @@ ZEND_API void zend_function_dtor(zval *zv)
 ZEND_API void zend_cleanup_op_array_data(zend_op_array *op_array)
 {
 	if (op_array->static_variables &&
-	    !(GC_FLAGS(op_array->static_variables) & IS_ARRAY_IMMUTABLE)) {
+	    !(GC_FLAGS(op_array->static_variables) & IS_ARRAY_IMMUTABLE)
+	) {
+		/* The static variables are initially shared when inheriting methods and will
+		 * be separated on first use. If they are never used, they stay shared. Cleaning
+		 * a shared static variables table is safe, as the intention is to clean all
+		 * such tables. */
+		HT_ALLOW_COW_VIOLATION(op_array->static_variables);
+
 		zend_hash_clean(op_array->static_variables);
 	}
 }
@@ -435,8 +457,8 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 			if (arg_info[i].name) {
 				zend_string_release(arg_info[i].name);
 			}
-			if (arg_info[i].class_name) {
-				zend_string_release(arg_info[i].class_name);
+			if (ZEND_TYPE_IS_CLASS(arg_info[i].type)) {
+				zend_string_release(ZEND_TYPE_NAME(arg_info[i].type));
 			}
 		}
 		efree(arg_info);
@@ -467,7 +489,7 @@ zend_op *get_next_op(zend_op_array *op_array)
 	return next_op;
 }
 
-int get_next_op_number(zend_op_array *op_array)
+uint32_t get_next_op_number(zend_op_array *op_array)
 {
 	return op_array->last;
 }
@@ -534,58 +556,6 @@ static void zend_check_finally_breakout(zend_op_array *op_array, uint32_t op_num
 	}
 }
 
-static void zend_resolve_fast_call(zend_op_array *op_array, uint32_t op_num)
-{
-	int i;
-	uint32_t finally_num = (uint32_t)-1;
-
-	for (i = 0; i < op_array->last_try_catch; i++) {
-		if (op_num >= op_array->try_catch_array[i].finally_op
-				&& op_num < op_array->try_catch_array[i].finally_end) {
-			finally_num = i;
-		}
-	}
-
-	if (finally_num != (uint32_t)-1) {
-		/* Must be ZEND_FAST_CALL */
-		ZEND_ASSERT(op_array->opcodes[op_array->try_catch_array[finally_num].finally_op - 2].opcode == ZEND_FAST_CALL);
-		op_array->opcodes[op_num].extended_value = ZEND_FAST_CALL_FROM_FINALLY;
-		op_array->opcodes[op_num].op2.num = finally_num;
-	}
-}
-
-static void zend_resolve_finally_ret(zend_op_array *op_array, uint32_t op_num)
-{
-	int i;
-	uint32_t finally_num = (uint32_t)-1;
-	uint32_t catch_num = (uint32_t)-1;
-
-	for (i = 0; i < op_array->last_try_catch; i++) {
-		if (op_array->try_catch_array[i].try_op > op_num) {
-			break;
-		}
-		if (op_num < op_array->try_catch_array[i].finally_op) {
-			finally_num = i;
-		}
-		if (op_num < op_array->try_catch_array[i].catch_op) {
-			catch_num = i;
-		}
-	}
-
-	if (finally_num != (uint32_t)-1 &&
-	    (catch_num == (uint32_t)-1 ||
-	     op_array->try_catch_array[catch_num].catch_op >=
-	     op_array->try_catch_array[finally_num].finally_op)) {
-		/* in case of unhandled exception return to upward finally block */
-		op_array->opcodes[op_num].extended_value = ZEND_FAST_RET_TO_FINALLY;
-		op_array->opcodes[op_num].op2.num = finally_num;
-	} else if (catch_num != (uint32_t)-1) {
-		/* in case of unhandled exception return to upward catch block */
-		op_array->opcodes[op_num].extended_value = ZEND_FAST_RET_TO_CATCH;
-		op_array->opcodes[op_num].op2.num = catch_num;
-	}
-}
-
 static uint32_t zend_get_brk_cont_target(const zend_op_array *op_array, const zend_op *opline) {
 	int nest_levels = opline->op2.num;
 	int array_offset = opline->op1.num;
@@ -634,11 +604,7 @@ ZEND_API int pass_two(zend_op_array *op_array)
 		switch (opline->opcode) {
 			case ZEND_FAST_CALL:
 				opline->op1.opline_num = op_array->try_catch_array[opline->op1.num].finally_op;
-				zend_resolve_fast_call(op_array, opline - op_array->opcodes);
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op1);
-				break;
-			case ZEND_FAST_RET:
-				zend_resolve_finally_ret(op_array, opline - op_array->opcodes);
 				break;
 			case ZEND_BRK:
 			case ZEND_CONT:
@@ -673,18 +639,23 @@ ZEND_API int pass_two(zend_op_array *op_array)
 			case ZEND_JMPNZ_EX:
 			case ZEND_JMP_SET:
 			case ZEND_COALESCE:
-			case ZEND_NEW:
 			case ZEND_FE_RESET_R:
 			case ZEND_FE_RESET_RW:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op2);
 				break;
 			case ZEND_ASSERT_CHECK:
+			{
 				/* If result of assert is unused, result of check is unused as well */
-				if (op_array->opcodes[opline->op2.opline_num - 1].result_type == IS_UNUSED) {
+				zend_op *call = &op_array->opcodes[opline->op2.opline_num - 1];
+				if (call->opcode == ZEND_EXT_FCALL_END) {
+					call--;
+				}
+				if (call->result_type == IS_UNUSED) {
 					opline->result_type = IS_UNUSED;
 				}
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op2);
 				break;
+			}
 			case ZEND_DECLARE_ANON_CLASS:
 			case ZEND_DECLARE_ANON_INHERITED_CLASS:
 			case ZEND_CATCH:
@@ -692,19 +663,6 @@ ZEND_API int pass_two(zend_op_array *op_array)
 			case ZEND_FE_FETCH_RW:
 				/* absolute index to relative offset */
 				opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, opline->extended_value);
-				break;
-			case ZEND_VERIFY_RETURN_TYPE:
-				if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
-					if (opline->op1_type != IS_UNUSED) {
-						zend_op *ret = opline;
-						do ret++; while (ret->opcode != ZEND_RETURN);
-
-						ret->op1 = opline->op1;
-						ret->op1_type = opline->op1_type;
-					}
-
-					MAKE_NOP(opline);
-				}
 				break;
 			case ZEND_RETURN:
 			case ZEND_RETURN_BY_REF:
@@ -731,7 +689,7 @@ ZEND_API int pass_two(zend_op_array *op_array)
 	}
 
 	if (op_array->live_range) {
-		uint32_t i;
+		int i;
 
 		for (i = 0; i < op_array->last_live_range; i++) {
 			op_array->live_range[i].var =

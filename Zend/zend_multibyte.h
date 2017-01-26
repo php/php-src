@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -60,6 +60,7 @@ ZEND_API extern const zend_encoding *zend_multibyte_encoding_utf8;
 
 /* multibyte utility functions */
 ZEND_API int zend_multibyte_set_functions(const zend_multibyte_functions *functions);
+ZEND_API void zend_multibyte_restore_functions(void);
 ZEND_API const zend_multibyte_functions *zend_multibyte_get_functions(void);
 
 ZEND_API const zend_encoding *zend_multibyte_fetch_encoding(const char *name);

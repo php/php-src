@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -122,8 +122,10 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_readline_redisplay, 0)
 ZEND_END_ARG_INFO()
 
+#if HAVE_RL_ON_NEW_LINE
 ZEND_BEGIN_ARG_INFO(arginfo_readline_on_new_line, 0)
 ZEND_END_ARG_INFO()
+#endif
 #endif
 /* }}} */
 
@@ -624,6 +626,11 @@ PHP_FUNCTION(readline_callback_handler_remove)
    Ask readline to redraw the display */
 PHP_FUNCTION(readline_redisplay)
 {
+#if HAVE_LIBEDIT
+	/* seems libedit doesn't take care of rl_initialize in rl_redisplay
+	 * see bug #72538 */
+	using_history();
+#endif
 	rl_redisplay();
 }
 /* }}} */

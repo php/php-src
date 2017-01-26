@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Stig Sæther Bakken <ssb@php.net>                            |
+   | Authors: Stig SÃ¦ther Bakken <ssb@php.net>                            |
    |          Thies C. Arntzen <thies@thieso.net>                         |
    |                                                                      |
    | Collection support by Andy Sautins <asautins@veripost.net>           |
@@ -24,10 +24,6 @@
    |                Wez Furlong <wez@omniti.com>                          |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
-
-
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -63,7 +59,7 @@ php_oci_descriptor *php_oci_lob_create (php_oci_connection *connection, zend_lon
 			/* these three are allowed */
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "Unknown descriptor type %pd", type);
+			php_error_docref(NULL, E_WARNING, "Unknown descriptor type " ZEND_LONG_FMT, type);
 			return NULL;
 			break;
 	}
@@ -630,7 +626,7 @@ int php_oci_lob_flush(php_oci_descriptor *descriptor, zend_long flush_flag)
 			/* only these two are allowed */
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "Invalid flag value: %pd", flush_flag);
+			php_error_docref(NULL, E_WARNING, "Invalid flag value: " ZEND_LONG_FMT, flush_flag);
 			return 1;
 			break;
 	}
@@ -909,7 +905,7 @@ int php_oci_lob_write_tmp (php_oci_descriptor *descriptor, zend_long type, char 
 			/* only these two are allowed */
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "Invalid temporary lob type: %pd", type);
+			php_error_docref(NULL, E_WARNING, "Invalid temporary lob type: " ZEND_LONG_FMT, type);
 			return 1;
 			break;
 	}

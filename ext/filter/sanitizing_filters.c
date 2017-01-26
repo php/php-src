@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -111,7 +111,8 @@ static void php_filter_encode_url(zval *value, const unsigned char* chars, const
 static void php_filter_strip(zval *value, zend_long flags)
 {
 	unsigned char *str;
-	int   i, c;
+	size_t i;
+	int c;
 	zend_string *buf;
 
 	/* Optimization for if no strip flags are set */
@@ -158,7 +159,8 @@ static void filter_map_update(filter_map *map, int flag, const unsigned char *al
 static void filter_map_apply(zval *value, filter_map *map)
 {
 	unsigned char *str;
-	int   i, c;
+	size_t i;
+	int c;
 	zend_string *buf;
 
 	str = (unsigned char *)Z_STRVAL_P(value);

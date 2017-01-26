@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -46,7 +46,7 @@ PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64);
 # define FALSE 0
 #endif
 
-#define PDO_DRIVER_API	20150127
+#define PDO_DRIVER_API	20161020
 
 enum pdo_param_type {
 	PDO_PARAM_NULL,
@@ -529,9 +529,6 @@ struct pdo_column_data {
 	size_t maxlen;
 	zend_ulong precision;
 	enum pdo_param_type param_type;
-
-	/* don't touch this unless your name is dbdo */
-	void *dbdo_data;
 };
 
 /* describes a bound parameter */

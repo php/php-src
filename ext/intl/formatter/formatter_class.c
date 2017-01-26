@@ -33,13 +33,6 @@ static zend_object_handlers NumberFormatter_handlers;
  * Auxiliary functions needed by objects of 'NumberFormatter' class
  */
 
-/* {{{ NumberFormatter_objects_dtor */
-static void NumberFormatter_object_dtor(zend_object *object)
-{
-	zend_objects_destroy_object( object );
-}
-/* }}} */
-
 /* {{{ NumberFormatter_objects_free */
 void NumberFormatter_object_free( zend_object *object )
 {
@@ -195,7 +188,6 @@ void formatter_register_class( void )
 		sizeof(NumberFormatter_handlers));
 	NumberFormatter_handlers.offset = XtOffsetOf(NumberFormatter_object, zo);
 	NumberFormatter_handlers.clone_obj = NumberFormatter_object_clone;
-	NumberFormatter_handlers.dtor_obj = NumberFormatter_object_dtor;
 	NumberFormatter_handlers.free_obj = NumberFormatter_object_free;
 
 	/* Declare 'NumberFormatter' class properties. */

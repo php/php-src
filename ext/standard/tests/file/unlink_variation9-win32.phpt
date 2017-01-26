@@ -104,10 +104,10 @@ file removed
 Warning: unlink(%s\BADDIR\file.tmp): No such file or directory in %s on line %d
 -- removing unlinkVar9.tmp\file.tmp\ --
 
-Warning: unlink(unlinkVar9.tmp\file.tmp\): Invalid argument in %s on line %d
+Warning: unlink(unlinkVar9.tmp\file.tmp\): No such file or directory in %s on line %d
 -- removing %s\unlinkVar9.tmp\file.tmp\ --
 
-Warning: unlink(%s\unlinkVar9.tmp\file.tmp\): Invalid argument in %s on line %d
+Warning: unlink(%s\unlinkVar9.tmp\file.tmp\): No such file or directory in %s on line %d
 -- removing unlinkVar9.tmp\\file.tmp --
 file removed
 -- removing %s\\unlinkVar9.tmp\\file.tmp --

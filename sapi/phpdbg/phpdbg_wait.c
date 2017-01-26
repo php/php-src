@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -248,8 +248,10 @@ void phpdbg_webdata_decompress(char *msg, int len) {
 		extension = (zend_extension *) zend_llist_get_first_ex(&zend_extensions, &pos);
 		while (extension) {
 			extension = (zend_extension *) zend_llist_get_next_ex(&zend_extensions, &pos);
+			if (extension == NULL){
+				break;
+			}
 
-			/* php_serach_array() body should be in some ZEND_API function... */
 			ZEND_HASH_FOREACH_STR_KEY_PTR(Z_ARRVAL_P(zvp), strkey, name) {
 				if (Z_TYPE_P(name) == IS_STRING && !zend_binary_strcmp(extension->name, strlen(extension->name), Z_STRVAL_P(name), Z_STRLEN_P(name))) {
 					break;
@@ -344,9 +346,16 @@ PHPDBG_COMMAND(wait) /* {{{ */
 	if (PHPDBG_G(socket_server_fd) == -1) {
 		int len;
 		PHPDBG_G(socket_server_fd) = sl = socket(AF_UNIX, SOCK_STREAM, 0);
+		if (sl == -1) {
+			phpdbg_error("wait", "type=\"nosocket\" import=\"fail\"", "Unable to open a socket to UNIX domain socket at %s defined by phpdbg.path ini setting", PHPDBG_G(socket_path));
+			return FAILURE;
+		}
 
 		local.sun_family = AF_UNIX;
-		strcpy(local.sun_path, PHPDBG_G(socket_path));
+		if (strlcpy(local.sun_path, PHPDBG_G(socket_path), sizeof(local.sun_path)) > sizeof(local.sun_path)) {
+			phpdbg_error("wait", "type=\"nosocket\" import=\"fail\"", "Socket at %s defined by phpdbg.path ini setting is too long", PHPDBG_G(socket_path));
+			return FAILURE;
+		}
 		len = strlen(local.sun_path) + sizeof(local.sun_family);
 		if (bind(sl, (struct sockaddr *)&local, len) == -1) {
 			phpdbg_error("wait", "type=\"nosocket\" import=\"fail\"", "Unable to connect to UNIX domain socket at %s defined by phpdbg.path ini setting", PHPDBG_G(socket_path));
@@ -362,6 +371,11 @@ PHPDBG_COMMAND(wait) /* {{{ */
 
 	rlen = sizeof(remote);
 	sr = accept(sl, (struct sockaddr *) &remote, (socklen_t *) &rlen);
+	if (sr == -1) {
+		phpdbg_error("wait", "type=\"nosocket\" import=\"fail\"", "Unable to create a connection to UNIX domain socket at %s defined by phpdbg.path ini setting", PHPDBG_G(socket_path));
+		close(PHPDBG_G(socket_server_fd));
+		return FAILURE;
+	}
 
 	char msglen[5];
 	int recvd = 4;

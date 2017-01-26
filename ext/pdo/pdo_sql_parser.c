@@ -4,7 +4,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -54,7 +54,6 @@ static int scan(Scanner *s)
 #line 55 "ext/pdo/pdo_sql_parser.c"
 {
 	YYCTYPE yych;
-	unsigned int yyaccept = 0;
 
 	if ((YYLIMIT - YYCURSOR) < 2) YYFILL(2);
 	yych = *YYCURSOR;
@@ -62,31 +61,32 @@ static int scan(Scanner *s)
 	case 0x00:	goto yy2;
 	case '"':	goto yy3;
 	case '\'':	goto yy5;
-	case '-':	goto yy11;
-	case '/':	goto yy9;
+	case '(':
+	case ')':
+	case '*':
+	case '+':
+	case ',':
+	case '.':	goto yy9;
+	case '-':	goto yy10;
+	case '/':	goto yy11;
 	case ':':	goto yy6;
 	case '?':	goto yy7;
 	default:	goto yy12;
 	}
 yy2:
 	YYCURSOR = YYMARKER;
-	switch (yyaccept) {
-	case 0: 	goto yy4;
-	case 1: 	goto yy10;
-	}
+	goto yy4;
 yy3:
-	yyaccept = 0;
 	yych = *(YYMARKER = ++YYCURSOR);
-	if (yych >= 0x01) goto yy43;
+	if (yych >= 0x01) goto yy37;
 yy4:
 #line 63 "ext/pdo/pdo_sql_parser.re"
 	{ SKIP_ONE(PDO_PARSER_TEXT); }
-#line 85 "ext/pdo/pdo_sql_parser.c"
+#line 86 "ext/pdo/pdo_sql_parser.c"
 yy5:
-	yyaccept = 0;
 	yych = *(YYMARKER = ++YYCURSOR);
 	if (yych <= 0x00) goto yy4;
-	goto yy38;
+	goto yy32;
 yy6:
 	yych = *++YYCURSOR;
 	switch (yych) {
@@ -152,14 +152,14 @@ yy6:
 	case 'w':
 	case 'x':
 	case 'y':
-	case 'z':	goto yy32;
-	case ':':	goto yy35;
+	case 'z':	goto yy26;
+	case ':':	goto yy29;
 	default:	goto yy4;
 	}
 yy7:
 	++YYCURSOR;
 	switch ((yych = *YYCURSOR)) {
-	case '?':	goto yy29;
+	case '?':	goto yy23;
 	default:	goto yy8;
 	}
 yy8:
@@ -167,133 +167,89 @@ yy8:
 	{ RET(PDO_PARSER_BIND_POS); }
 #line 169 "ext/pdo/pdo_sql_parser.c"
 yy9:
-	++YYCURSOR;
-	switch ((yych = *YYCURSOR)) {
-	case '*':	goto yy19;
-	default:	goto yy13;
-	}
+	yych = *++YYCURSOR;
+	goto yy4;
 yy10:
-#line 65 "ext/pdo/pdo_sql_parser.re"
-	{ RET(PDO_PARSER_TEXT); }
-#line 179 "ext/pdo/pdo_sql_parser.c"
-yy11:
 	yych = *++YYCURSOR;
 	switch (yych) {
-	case '-':	goto yy14;
-	default:	goto yy13;
+	case '-':	goto yy21;
+	default:	goto yy4;
+	}
+yy11:
+	yych = *(YYMARKER = ++YYCURSOR);
+	switch (yych) {
+	case '*':	goto yy15;
+	default:	goto yy4;
 	}
 yy12:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
 	yych = *YYCURSOR;
-yy13:
 	switch (yych) {
 	case 0x00:
 	case '"':
 	case '\'':
+	case '(':
+	case ')':
+	case '*':
+	case '+':
+	case ',':
+	case '-':
+	case '.':
+	case '/':
 	case ':':
-	case '?':	goto yy10;
+	case '?':	goto yy14;
 	default:	goto yy12;
 	}
 yy14:
+#line 65 "ext/pdo/pdo_sql_parser.re"
+	{ RET(PDO_PARSER_TEXT); }
+#line 208 "ext/pdo/pdo_sql_parser.c"
+yy15:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
 	yych = *YYCURSOR;
 	switch (yych) {
-	case 0x00:
-	case '"':
-	case '\'':
-	case ':':
-	case '?':	goto yy17;
-	case '\n':
-	case '\r':	goto yy12;
-	default:	goto yy14;
+	case '*':	goto yy17;
+	default:	goto yy15;
 	}
-yy16:
-#line 64 "ext/pdo/pdo_sql_parser.re"
-	{ RET(PDO_PARSER_TEXT); }
-#line 216 "ext/pdo/pdo_sql_parser.c"
 yy17:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
 	yych = *YYCURSOR;
 	switch (yych) {
-	case '\n':
-	case '\r':	goto yy16;
-	default:	goto yy17;
+	case '*':	goto yy17;
+	case '/':	goto yy19;
+	default:	goto yy15;
 	}
 yy19:
-	yyaccept = 1;
-	YYMARKER = ++YYCURSOR;
-	if (YYLIMIT <= YYCURSOR) YYFILL(1);
-	yych = *YYCURSOR;
-	switch (yych) {
-	case 0x00:
-	case '"':
-	case '\'':
-	case ':':
-	case '?':	goto yy21;
-	case '*':	goto yy23;
-	default:	goto yy19;
-	}
+	++YYCURSOR;
+yy20:
+#line 64 "ext/pdo/pdo_sql_parser.re"
+	{ RET(PDO_PARSER_TEXT); }
+#line 231 "ext/pdo/pdo_sql_parser.c"
 yy21:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
 	yych = *YYCURSOR;
 	switch (yych) {
-	case '*':	goto yy26;
+	case '\n':
+	case '\r':	goto yy20;
 	default:	goto yy21;
 	}
 yy23:
-	yyaccept = 1;
-	YYMARKER = ++YYCURSOR;
-	if ((YYLIMIT - YYCURSOR) < 2) YYFILL(2);
+	++YYCURSOR;
+	if (YYLIMIT <= YYCURSOR) YYFILL(1);
 	yych = *YYCURSOR;
 	switch (yych) {
-	case 0x00:
-	case '"':
-	case '\'':
-	case ':':
-	case '?':	goto yy21;
-	case '*':	goto yy23;
-	case '/':	goto yy25;
-	default:	goto yy19;
+	case '?':	goto yy23;
+	default:	goto yy25;
 	}
 yy25:
-	yych = *++YYCURSOR;
-	switch (yych) {
-	case 0x00:
-	case '"':
-	case '\'':
-	case ':':
-	case '?':	goto yy16;
-	default:	goto yy12;
-	}
-yy26:
-	++YYCURSOR;
-	if (YYLIMIT <= YYCURSOR) YYFILL(1);
-	yych = *YYCURSOR;
-	switch (yych) {
-	case '*':	goto yy26;
-	case '/':	goto yy28;
-	default:	goto yy21;
-	}
-yy28:
-	yych = *++YYCURSOR;
-	goto yy16;
-yy29:
-	++YYCURSOR;
-	if (YYLIMIT <= YYCURSOR) YYFILL(1);
-	yych = *YYCURSOR;
-	switch (yych) {
-	case '?':	goto yy29;
-	default:	goto yy31;
-	}
-yy31:
 #line 60 "ext/pdo/pdo_sql_parser.re"
 	{ RET(PDO_PARSER_TEXT); }
-#line 296 "ext/pdo/pdo_sql_parser.c"
-yy32:
+#line 252 "ext/pdo/pdo_sql_parser.c"
+yy26:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
 	yych = *YYCURSOR;
@@ -360,65 +316,65 @@ yy32:
 	case 'w':
 	case 'x':
 	case 'y':
-	case 'z':	goto yy32;
-	default:	goto yy34;
+	case 'z':	goto yy26;
+	default:	goto yy28;
 	}
-yy34:
+yy28:
 #line 61 "ext/pdo/pdo_sql_parser.re"
 	{ RET(PDO_PARSER_BIND); }
-#line 370 "ext/pdo/pdo_sql_parser.c"
-yy35:
+#line 326 "ext/pdo/pdo_sql_parser.c"
+yy29:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
 	yych = *YYCURSOR;
 	switch (yych) {
-	case ':':	goto yy35;
-	default:	goto yy31;
+	case ':':	goto yy29;
+	default:	goto yy25;
 	}
-yy37:
+yy31:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
 	yych = *YYCURSOR;
-yy38:
+yy32:
 	switch (yych) {
 	case 0x00:	goto yy2;
-	case '\'':	goto yy40;
-	case '\\':	goto yy39;
-	default:	goto yy37;
+	case '\'':	goto yy34;
+	case '\\':	goto yy33;
+	default:	goto yy31;
 	}
-yy39:
+yy33:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
 	yych = *YYCURSOR;
 	if (yych <= 0x00) goto yy2;
-	goto yy37;
-yy40:
+	goto yy31;
+yy34:
 	++YYCURSOR;
 #line 59 "ext/pdo/pdo_sql_parser.re"
 	{ RET(PDO_PARSER_TEXT); }
-#line 400 "ext/pdo/pdo_sql_parser.c"
-yy42:
+#line 356 "ext/pdo/pdo_sql_parser.c"
+yy36:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
 	yych = *YYCURSOR;
-yy43:
+yy37:
 	switch (yych) {
 	case 0x00:	goto yy2;
-	case '"':	goto yy45;
-	case '\\':	goto yy44;
-	default:	goto yy42;
+	case '"':	goto yy39;
+	case '\\':	goto yy38;
+	default:	goto yy36;
 	}
-yy44:
+yy38:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
 	yych = *YYCURSOR;
 	if (yych <= 0x00) goto yy2;
-	goto yy42;
-yy45:
+	goto yy36;
+yy39:
 	++YYCURSOR;
 #line 58 "ext/pdo/pdo_sql_parser.re"
 	{ RET(PDO_PARSER_TEXT); }
-#line 422 "ext/pdo/pdo_sql_parser.c"
+#line 378 "ext/pdo/pdo_sql_parser.c"
 }
 #line 66 "ext/pdo/pdo_sql_parser.re"
 
@@ -444,7 +400,7 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, size_t inquery_len
 	Scanner s;
 	char *ptr, *newbuffer;
 	int t;
-	int bindno = 0;
+	uint32_t bindno = 0;
 	int ret = 0;
 	size_t newbuffer_len;
 	HashTable *params;
@@ -598,40 +554,54 @@ safe:
 					}
 					plc->freeq = 1;
 				} else {
-					zval tmp_param;
-				   	ZVAL_DUP(&tmp_param, parameter);
-					switch (Z_TYPE(tmp_param)) {
-						case IS_NULL:
+					enum pdo_param_type param_type = param->param_type;
+					zend_string *buf = NULL;
+
+					/* assume all types are nullable */
+					if (Z_TYPE_P(parameter) == IS_NULL) {
+						param_type = PDO_PARAM_NULL;
+					}
+
+					switch (param_type) {
+						case PDO_PARAM_BOOL:
+							plc->quoted = zend_is_true(parameter) ? "1" : "0";
+							plc->qlen = sizeof("1")-1;
+							plc->freeq = 0;
+							break;
+
+						case PDO_PARAM_INT:
+							buf = zend_long_to_str(zval_get_long(parameter));
+
+							plc->qlen = ZSTR_LEN(buf);
+							plc->quoted = estrdup(ZSTR_VAL(buf));
+							plc->freeq = 1;
+							break;
+
+						case PDO_PARAM_NULL:
 							plc->quoted = "NULL";
 							plc->qlen = sizeof("NULL")-1;
 							plc->freeq = 0;
 							break;
 
-						case IS_FALSE:
-						case IS_TRUE:
-							convert_to_long(&tmp_param);
-							/* fall through */
-						case IS_LONG:
-						case IS_DOUBLE:
-							convert_to_string(&tmp_param);
-							plc->qlen = Z_STRLEN(tmp_param);
-							plc->quoted = estrdup(Z_STRVAL(tmp_param));
-							plc->freeq = 1;
-							break;
-
 						default:
-							convert_to_string(&tmp_param);
-							if (!stmt->dbh->methods->quoter(stmt->dbh, Z_STRVAL(tmp_param),
-									Z_STRLEN(tmp_param), &plc->quoted, &plc->qlen,
-									param->param_type)) {
+							buf = zval_get_string(parameter);
+							if (!stmt->dbh->methods->quoter(stmt->dbh, ZSTR_VAL(buf),
+									ZSTR_LEN(buf), &plc->quoted, &plc->qlen,
+									param_type)) {
 								/* bork */
 								ret = -1;
 								strncpy(stmt->error_code, stmt->dbh->error_code, 6);
+								if (buf) {
+									zend_string_release(buf);
+								}
 								goto clean_up;
 							}
 							plc->freeq = 1;
 					}
-					zval_dtor(&tmp_param);
+
+					if (buf) {
+						zend_string_release(buf);
+					}
 				}
 			} else {
 				zval *parameter;
@@ -760,132 +730,6 @@ clean_up:
 
 	return ret;
 }
-
-#if 0
-int old_pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char **outquery,
-		int *outquery_len)
-{
-	Scanner s;
-	char *ptr;
-	int t;
-	int bindno = 0;
-	int newbuffer_len;
-	int padding;
-	HashTable *params = stmt->bound_params;
-	struct pdo_bound_param_data *param;
-	/* allocate buffer for query with expanded binds, ptr is our writing pointer */
-	newbuffer_len = inquery_len;
-
-	/* calculate the possible padding factor due to quoting */
-	if(stmt->dbh->max_escaped_char_length) {
-		padding = stmt->dbh->max_escaped_char_length;
-	} else {
-		padding = 3;
-	}
-	if(params) {
-		ZEND_HASH_FOREACH_PTR(params, param) {
-			if(param->parameter) {
-				convert_to_string(param->parameter);
-				/* accommodate a string that needs to be fully quoted
-                   bind placeholders are at least 2 characters, so
-                   the accommodate their own "'s
-                */
-				newbuffer_len += padding * Z_STRLEN_P(param->parameter);
-			}
-		} ZEND_HASH_FOREACH_END();
-	}
-	*outquery = (char *) emalloc(newbuffer_len + 1);
-	*outquery_len = 0;
-
-	ptr = *outquery;
-	s.cur = inquery;
-	while((t = scan(&s)) != PDO_PARSER_EOI) {
-		if(t == PDO_PARSER_TEXT) {
-			memcpy(ptr, s.tok, s.cur - s.tok);
-			ptr += (s.cur - s.tok);
-			*outquery_len += (s.cur - s.tok);
-		}
-		else if(t == PDO_PARSER_BIND) {
-			if(!params) {
-				/* error */
-				efree(*outquery);
-				*outquery = NULL;
-				return (int) (s.cur - inquery);
-			}
-			/* lookup bind first via hash and then index */
-			/* stupid keys need to be null-terminated, even though we know their length */
-			if((NULL != (param = zend_hash_str_find_ptr(params, s.tok, s.cur-s.tok))
-			    ||
-			   NULL != (params = zend_hash_index_find_ptr(params, bindno)))
-			{
-				char *quotedstr;
-				int quotedstrlen;
-				/* restore the in-string key, doesn't need null-termination here */
-				/* currently everything is a string here */
-
-				/* quote the bind value if necessary */
-				if(stmt->dbh->methods->quoter(stmt->dbh, Z_STRVAL_P(param->parameter),
-					Z_STRLEN_P(param->parameter), &quotedstr, &quotedstrlen))
-				{
-					memcpy(ptr, quotedstr, quotedstrlen);
-					ptr += quotedstrlen;
-					*outquery_len += quotedstrlen;
-					efree(quotedstr);
-				} else {
-					memcpy(ptr, Z_STRVAL_P(param->parameter), Z_STRLEN_P(param->parameter));
-					ptr += Z_STRLEN_P(param->parameter);
-					*outquery_len += (Z_STRLEN_P(param->parameter));
-				}
-			}
-			else {
-				/* error and cleanup */
-				efree(*outquery);
-				*outquery = NULL;
-				return (int) (s.cur - inquery);
-			}
-			bindno++;
-		}
-		else if(t == PDO_PARSER_BIND_POS) {
-			if(!params) {
-				/* error */
-				efree(*outquery);
-				*outquery = NULL;
-				return (int) (s.cur - inquery);
-			}
-			/* lookup bind by index */
-			if(NULL != (params = zend_hash_index_find_ptr(params, bindno)))
-			{
-				char *quotedstr;
-				int quotedstrlen;
-				/* currently everything is a string here */
-
-				/* quote the bind value if necessary */
-				if(stmt->dbh->methods->quoter(stmt->dbh, Z_STRVAL_P(param->parameter),
-					Z_STRLEN_P(param->parameter), &quotedstr, &quotedstrlen))
-				{
-					memcpy(ptr, quotedstr, quotedstrlen);
-					ptr += quotedstrlen;
-					*outquery_len += quotedstrlen;
-					efree(quotedstr);
-				} else {
-					memcpy(ptr, Z_STRVAL_P(param->parameter), Z_STRLEN_P(param->parameter));
-					ptr += Z_STRLEN_P(param->parameter);
-					*outquery_len += (Z_STRLEN_P(param->parameter));
-				}
-			}
-			else {
-				/* error and cleanup */
-				efree(*outquery);
-				*outquery = NULL;
-				return (int) (s.cur - inquery);
-			}
-			bindno++;
-		}
-	}
-	*ptr = '\0';
-	return 0;
-}
-#endif
 
 /*
  * Local variables:

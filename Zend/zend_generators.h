@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -62,8 +62,8 @@ struct _zend_generator {
 	/* The suspended execution context. */
 	zend_execute_data *execute_data;
 
-	/* The separate stack used by generator */
-	zend_vm_stack stack;
+	/* Frozen call stack for "yield" used in context of other calls */
+	zend_execute_data *frozen_call_stack;
 
 	/* Current value */
 	zval value;
@@ -102,9 +102,11 @@ static const zend_uchar ZEND_GENERATOR_AT_FIRST_YIELD    = 0x4;
 static const zend_uchar ZEND_GENERATOR_DO_INIT           = 0x8;
 
 void zend_register_generator_ce(void);
-ZEND_API void zend_generator_create_zval(zend_execute_data *call, zend_op_array *op_array, zval *return_value);
 ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished_execution);
 ZEND_API void zend_generator_resume(zend_generator *generator);
+
+ZEND_API void zend_generator_restore_call_stack(zend_generator *generator);
+ZEND_API zend_execute_data* zend_generator_freeze_call_stack(zend_execute_data *execute_data);
 
 void zend_generator_yield_from(zend_generator *generator, zend_generator *from);
 ZEND_API zend_execute_data *zend_generator_check_placeholder_frame(zend_execute_data *ptr);

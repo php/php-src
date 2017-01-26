@@ -6,8 +6,8 @@
 /* Define the minimum supported version */
 #undef _WIN32_WINNT
 #undef NTDDI_VERSION
-#define _WIN32_WINNT 0x0600
-#define NTDDI_VERSION  0x06000100
+#define _WIN32_WINNT 0x0601
+#define NTDDI_VERSION 0x06010000
 
 /* Default PHP / PEAR directories */
 #define PHP_CONFIG_FILE_PATH (getenv("SystemRoot")?getenv("SystemRoot"):"")
@@ -21,15 +21,6 @@
 #define PHP_LOCALSTATEDIR "@PREFIX@"
 #define PHP_PREFIX "@PREFIX@"
 #define PHP_SYSCONFDIR "@PREFIX@"
-
-/* Enable / Disable crypt() function (default: enabled) */
-#define HAVE_CRYPT 1
-#define PHP_STD_DES_CRYPT 1
-#define PHP_EXT_DES_CRYPT 1
-#define PHP_MD5_CRYPT 1
-#define PHP_BLOWFISH_CRYPT 1
-#define PHP_SHA512_CRYPT 1
-#define PHP_SHA256_CRYPT 1
 
 /* PHP Runtime Configuration */
 #define PHP_URL_FOPEN 1
@@ -184,3 +175,5 @@
 #define HAVE_GETRUSAGE
 
 #define HAVE_FTOK 1
+
+#define HAVE_NICE

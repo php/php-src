@@ -165,7 +165,7 @@ User Functions/Methods Naming Conventions
     'foobar'
     'foo_bar'
 
-Internal Function Naming Convensions
+Internal Function Naming Conventions
 ----------------------
 
 1.  Functions that are part of the external API should be named

@@ -32,11 +32,10 @@
  *	uncompress(method, old, n, newch) - uncompress old into new, 
  *					    using method, return sizeof new
  */
-#include "config.h"
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: compress.c,v 1.77 2014/12/12 16:33:01 christos Exp $")
+FILE_RCSID("@(#)$File: compress.c,v 1.100 2016/10/24 18:02:17 christos Exp $")
 #endif
 
 #include "magic.h"
@@ -61,48 +60,86 @@ typedef void (*sig_t)(int);
 #if defined(HAVE_SYS_TIME_H)
 #include <sys/time.h>
 #endif
-#if defined(HAVE_ZLIB_H) && defined(HAVE_LIBZ)
+#if defined(HAVE_ZLIB_H) && defined(PHP_FILEINFO_UNCOMPRESS)
 #define BUILTIN_DECOMPRESS
 #include <zlib.h>
 #endif
 
 #undef FIONREAD
 
+#define gzip_flags "-cd"
+#define lrzip_flags "-do"
+#define lzip_flags gzip_flags
 
-private const struct {
-	const char magic[8];
-	size_t maglen;
-	const char *argv[3];
-	int silent;
-} compr[] = {
-	{ "\037\235", 2, { "gzip", "-cdq", NULL }, 1 },		/* compressed */
-	/* Uncompress can get stuck; so use gzip first if we have it
-	 * Idea from Damien Clark, thanks! */
-	{ "\037\235", 2, { "uncompress", "-c", NULL }, 1 },	/* compressed */
-	{ "\037\213", 2, { "gzip", "-cdq", NULL }, 1 },		/* gzipped */
-	{ "\037\236", 2, { "gzip", "-cdq", NULL }, 1 },		/* frozen */
-	{ "\037\240", 2, { "gzip", "-cdq", NULL }, 1 },		/* SCO LZH */
-	/* the standard pack utilities do not accept standard input */
-	{ "\037\036", 2, { "gzip", "-cdq", NULL }, 0 },		/* packed */
-	{ "PK\3\4",   4, { "gzip", "-cdq", NULL }, 1 },		/* pkzipped, */
-					    /* ...only first file examined */
-	{ "BZh",      3, { "bzip2", "-cd", NULL }, 1 },		/* bzip2-ed */
-	{ "LZIP",     4, { "lzip", "-cdq", NULL }, 1 },
- 	{ "\3757zXZ\0",6,{ "xz", "-cd", NULL }, 1 },		/* XZ Utils */
- 	{ "LRZI",     4, { "lrzip", "-dqo-", NULL }, 1 },	/* LRZIP */
- 	{ "\004\"M\030", 4, { "lz4", "-cd", NULL }, 1 },	/* LZ4 */
+static const char *gzip_args[] = {
+	"gzip", gzip_flags, NULL
+};
+static const char *uncompress_args[] = {
+	"uncompress", "-c", NULL
+};
+static const char *bzip2_args[] = {
+	"bzip2", "-cd", NULL
+};
+static const char *lzip_args[] = {
+	"lzip", lzip_flags, NULL
+};
+static const char *xz_args[] = {
+	"xz", "-cd", NULL
+};
+static const char *lrzip_args[] = {
+	"lrzip", lrzip_flags, NULL
+};
+static const char *lz4_args[] = {
+	"lz4", "-cd", NULL
+};
+static const char *zstd_args[] = {
+	"zstd", "-cd", NULL
 };
 
-#define NODATA ((size_t)~0)
+private const struct {
+	const void *magic;
+	size_t maglen;
+	const char **argv;
+} compr[] = {
+	{ "\037\235",	2, gzip_args },		/* compressed */
+	/* Uncompress can get stuck; so use gzip first if we have it
+	 * Idea from Damien Clark, thanks! */
+	{ "\037\235",	2, uncompress_args },	/* compressed */
+	{ "\037\213",	2, gzip_args },		/* gzipped */
+	{ "\037\236",	2, gzip_args },		/* frozen */
+	{ "\037\240",	2, gzip_args },		/* SCO LZH */
+	/* the standard pack utilities do not accept standard input */
+	{ "\037\036",	2, gzip_args },		/* packed */
+	{ "PK\3\4",	4, gzip_args },		/* pkzipped, */
+	/* ...only first file examined */
+	{ "BZh",	3, bzip2_args },	/* bzip2-ed */
+	{ "LZIP",	4, lzip_args },		/* lzip-ed */
+ 	{ "\3757zXZ\0",	6, xz_args },		/* XZ Utils */
+ 	{ "LRZI",	4, lrzip_args },	/* LRZIP */
+ 	{ "\004\"M\030",4, lz4_args },		/* LZ4 */
+ 	{ "\x28\xB5\x2F\xFD", 4, zstd_args },	/* zstd */
+#ifdef ZLIBSUPPORT
+	{ RCAST(const void *, zlibcmp),	0, zlib_args },		/* zlib */
+#endif
+};
+
+#define OKDATA 	0
+#define NODATA	1
+#define ERRDATA	2
 
 private ssize_t swrite(int, const void *, size_t);
 #ifdef PHP_FILEINFO_UNCOMPRESS
-private size_t uncompressbuf(struct magic_set *, int, size_t,
-    const unsigned char *, unsigned char **, size_t);
+private size_t ncompr = sizeof(compr) / sizeof(compr[0]);
+private int uncompressbuf(int, size_t, size_t, const unsigned char *,
+    unsigned char **, size_t *);
 #ifdef BUILTIN_DECOMPRESS
-private size_t uncompressgzipped(struct magic_set *, const unsigned char *,
-    unsigned char **, size_t);
+private int uncompresszlib(const unsigned char *, unsigned char **, size_t,
+    size_t *, int);
+private int uncompressgzipped(const unsigned char *, unsigned char **, size_t,
+    size_t *);
 #endif
+static int makeerror(unsigned char **, size_t *, const char *, ...);
+private const char *methodname(size_t);
 
 protected int
 file_zmagic(struct magic_set *ms, int fd, const char *name,
@@ -110,7 +147,9 @@ file_zmagic(struct magic_set *ms, int fd, const char *name,
 {
 	unsigned char *newbuf = NULL;
 	size_t i, nsz;
-	int rv = 0;
+	char *rbuf;
+	file_pushbuf_t *pb;
+	int urv, prv, rv = 0;
 	int mime = ms->flags & MAGIC_MIME;
 #ifdef HAVE_SIGNAL_H
 	sig_t osigpipe;
@@ -123,37 +162,81 @@ file_zmagic(struct magic_set *ms, int fd, const char *name,
 	osigpipe = signal(SIGPIPE, SIG_IGN);
 #endif
 	for (i = 0; i < ncompr; i++) {
+		int zm;
 		if (nbytes < compr[i].maglen)
 			continue;
-		if (memcmp(buf, compr[i].magic, compr[i].maglen) == 0 &&
-		    (nsz = uncompressbuf(ms, fd, i, buf, &newbuf,
-		    nbytes)) != NODATA) {
+#ifdef ZLIBSUPPORT
+		if (compr[i].maglen == 0)
+			zm = (RCAST(int (*)(const unsigned char *),
+			    CCAST(void *, compr[i].magic)))(buf);
+		else
+#endif
+			zm = memcmp(buf, compr[i].magic, compr[i].maglen) == 0;
+
+		if (!zm)
+			continue;
+		nsz = nbytes;
+		urv = uncompressbuf(fd, ms->bytes_max, i, buf, &newbuf, &nsz);
+		DPRINTF("uncompressbuf = %d, %s, %zu\n", urv, (char *)newbuf,
+		    nsz);
+		switch (urv) {
+		case OKDATA:
+		case ERRDATA:
+			
 			ms->flags &= ~MAGIC_COMPRESS;
-			rv = -1;
-			if (file_buffer(ms, -1, name, newbuf, nsz) == -1)
+			if (urv == ERRDATA)
+				prv = file_printf(ms, "%s ERROR: %s",
+				    methodname(i), newbuf);
+			else
+				prv = file_buffer(ms, -1, name, newbuf, nsz);
+			if (prv == -1)
 				goto error;
-
-			if (mime == MAGIC_MIME || mime == 0) {
-				if (file_printf(ms, mime ?
-				    " compressed-encoding=" : " (") == -1)
-					goto error;
-				if (file_buffer(ms, -1, NULL, buf, nbytes) == -1)
-					goto error;
-				if (!mime && file_printf(ms, ")") == -1)
-					goto error;
-			}
-
 			rv = 1;
+			if ((ms->flags & MAGIC_COMPRESS_TRANSP) != 0)
+				goto out;
+			if (mime != MAGIC_MIME && mime != 0)
+				goto out;
+			if ((file_printf(ms,
+			    mime ? " compressed-encoding=" : " (")) == -1)
+				goto error;
+			if ((pb = file_push_buffer(ms)) == NULL)
+				goto error;
+			/*
+			 * XXX: If file_buffer fails here, we overwrite
+			 * the compressed text. FIXME.
+			 */
+			if (file_buffer(ms, -1, NULL, buf, nbytes) == -1)
+				goto error;
+			if ((rbuf = file_pop_buffer(ms, pb)) != NULL) {
+				if (file_printf(ms, "%s", rbuf) == -1) {
+					free(rbuf);
+					goto error;
+				}
+				free(rbuf);
+			}
+			if (!mime && file_printf(ms, ")") == -1)
+				goto error;
+			/*FALLTHROUGH*/
+		case NODATA:
+			break;
+		default:
+			abort();
+			/*NOTREACHED*/
+		error:
+			rv = -1;
 			break;
 		}
 	}
-error:
+out:
+	DPRINTF("rv = %d\n", rv);
+
 #ifdef HAVE_SIGNAL_H
 	(void)signal(SIGPIPE, osigpipe);
 #endif
 	if (newbuf)
 		efree(newbuf);
 	ms->flags |= MAGIC_COMPRESS;
+	DPRINTF("Zmagic returns %d\n", rv);
 	return rv;
 }
 #endif
@@ -243,7 +326,7 @@ nocheck:
 			return rn - n;
 		default:
 			n -= rv;
-			buf = ((char *)buf) + rv;
+			buf = CAST(char *, CCAST(void *, buf)) + rv;
 			break;
 		}
 	while (n > 0);
@@ -326,192 +409,292 @@ file_pipe2file(struct magic_set *ms, int fd, const void *startbuf,
 #define FNAME		(1 << 3)
 #define FCOMMENT	(1 << 4)
 
-private size_t
-uncompressgzipped(struct magic_set *ms, const unsigned char *old,
-    unsigned char **newch, size_t n)
+
+private int
+uncompressgzipped(const unsigned char *old, unsigned char **newch,
+    size_t bytes_max, size_t *n)
 {
 	unsigned char flg = old[3];
 	size_t data_start = 10;
-	z_stream z;
-	int rc;
 
 	if (flg & FEXTRA) {
-		if (data_start+1 >= n)
-			return 0;
+		if (data_start + 1 >= *n)
+			goto err;
 		data_start += 2 + old[data_start] + old[data_start + 1] * 256;
 	}
 	if (flg & FNAME) {
-		while(data_start < n && old[data_start])
+		while(data_start < *n && old[data_start])
 			data_start++;
 		data_start++;
 	}
-	if(flg & FCOMMENT) {
-		while(data_start < n && old[data_start])
+	if (flg & FCOMMENT) {
+		while(data_start < *n && old[data_start])
 			data_start++;
 		data_start++;
 	}
-	if(flg & FHCRC)
+	if (flg & FHCRC)
 		data_start += 2;
 
-	if (data_start >= n)
-		return 0;
-	if ((*newch = CAST(unsigned char *, emalloc(HOWMANY + 1))) == NULL) {
-		return 0;
-	}
-	
-	/* XXX: const castaway, via strchr */
-	z.next_in = (Bytef *)strchr((const char *)old + data_start,
-	    old[data_start]);
-	z.avail_in = CAST(uint32_t, (n - data_start));
+	if (data_start >= *n)
+		goto err;
+
+	*n -= data_start;
+	old += data_start;
+	return uncompresszlib(old, newch, bytes_max, n, 0);
+err:
+	return makeerror(newch, n, "File too short");
+}
+
+private int
+uncompresszlib(const unsigned char *old, unsigned char **newch,
+    size_t bytes_max, size_t *n, int zlib)
+{
+	int rc;
+	z_stream z;
+
+	if ((*newch = CAST(unsigned char *, malloc(bytes_max + 1))) == NULL) 
+		return makeerror(newch, n, "No buffer, %s", strerror(errno));
+
+	z.next_in = CCAST(Bytef *, old);
+	z.avail_in = CAST(uint32_t, *n);
 	z.next_out = *newch;
-	z.avail_out = HOWMANY;
+	z.avail_out = bytes_max;
 	z.zalloc = Z_NULL;
 	z.zfree = Z_NULL;
 	z.opaque = Z_NULL;
 
 	/* LINTED bug in header macro */
-	rc = inflateInit2(&z, -15);
-	if (rc != Z_OK) {
-		file_error(ms, 0, "zlib: %s", z.msg);
-		return 0;
-	}
+	rc = zlib ? inflateInit(&z) : inflateInit2(&z, -15);
+	if (rc != Z_OK)
+		goto err;
 
 	rc = inflate(&z, Z_SYNC_FLUSH);
-	if (rc != Z_OK && rc != Z_STREAM_END) {
-		file_error(ms, 0, "zlib: %s", z.msg);
-		return 0;
-	}
+	if (rc != Z_OK && rc != Z_STREAM_END)
+		goto err;
 
-	n = (size_t)z.total_out;
-	(void)inflateEnd(&z);
+	*n = (size_t)z.total_out;
+	rc = inflateEnd(&z);
+	if (rc != Z_OK)
+		goto err;
 	
 	/* let's keep the nul-terminate tradition */
-	(*newch)[n] = '\0';
+	(*newch)[*n] = '\0';
 
-	return n;
+	return OKDATA;
+err:
+	strlcpy((char *)*newch, z.msg ? z.msg : zError(rc), bytes_max);
+	*n = strlen((char *)*newch);
+	return ERRDATA;
 }
 #endif
 
-private size_t
-uncompressbuf(struct magic_set *ms, int fd, size_t method,
-    const unsigned char *old, unsigned char **newch, size_t n)
+static int
+makeerror(unsigned char **buf, size_t *len, const char *fmt, ...)
 {
-	int fdin[2], fdout[2];
+	char *msg;
+	va_list ap;
+	int rv;
+
+	va_start(ap, fmt);
+	rv = vasprintf(&msg, fmt, ap);
+	va_end(ap);
+	if (rv < 0) {
+		*buf = NULL;
+		*len = 0;
+		return NODATA;
+	}
+	*buf = (unsigned char *)msg;
+	*len = strlen(msg);
+	return ERRDATA;
+}
+
+static void
+closefd(int *fd, size_t i)
+{
+	if (fd[i] == -1)
+		return;
+	(void) close(fd[i]);
+	fd[i] = -1;
+}
+
+static void
+closep(int *fd)
+{
+	size_t i;
+	for (i = 0; i < 2; i++)
+		closefd(fd, i);
+}
+
+static void
+copydesc(int i, int *fd)
+{
+	int j = fd[i == STDIN_FILENO ? 0 : 1];
+	if (j == i)
+		return;
+	if (dup2(j, i) == -1) {
+		DPRINTF("dup(%d, %d) failed (%s)\n", j, i, strerror(errno));
+		exit(1);
+	}
+	closep(fd);
+}
+
+static void
+writechild(int fdp[3][2], const void *old, size_t n)
+{
 	int status;
+
+	closefd(fdp[STDIN_FILENO], 0);
+	/* 
+	 * fork again, to avoid blocking because both
+	 * pipes filled
+	 */
+	switch (fork()) {
+	case 0: /* child */
+		closefd(fdp[STDOUT_FILENO], 0);
+		if (swrite(fdp[STDIN_FILENO][1], old, n) != (ssize_t)n) {
+			DPRINTF("Write failed (%s)\n", strerror(errno));
+			exit(1);
+		}
+		exit(0);
+		/*NOTREACHED*/
+
+	case -1:
+		DPRINTF("Fork failed (%s)\n", strerror(errno));
+		exit(1);
+		/*NOTREACHED*/
+
+	default:  /* parent */
+		if (wait(&status) == -1) {
+			DPRINTF("Wait failed (%s)\n", strerror(errno));
+			exit(1);
+		}
+		DPRINTF("Grandchild wait return %#x\n", status);
+	}
+	closefd(fdp[STDIN_FILENO], 1);
+}
+
+static ssize_t
+filter_error(unsigned char *ubuf, ssize_t n)
+{
+	char *p;
+	char *buf;
+
+	ubuf[n] = '\0';
+	buf = (char *)ubuf;
+	while (isspace((unsigned char)*buf))
+		buf++;
+	DPRINTF("Filter error[[[%s]]]\n", buf);
+	if ((p = strchr((char *)buf, '\n')) != NULL)
+		*p = '\0';
+	if ((p = strchr((char *)buf, ';')) != NULL)
+		*p = '\0';
+	if ((p = strrchr((char *)buf, ':')) != NULL) {
+		++p;
+		while (isspace((unsigned char)*p))
+			p++;
+		n = strlen(p);
+		memmove(ubuf, p, n + 1);
+	}
+	DPRINTF("Filter error after[[[%s]]]\n", (char *)ubuf);
+	if (islower(*ubuf))
+		*ubuf = toupper(*ubuf);
+	return n;
+}
+
+private const char *
+methodname(size_t method)
+{
+#ifdef BUILTIN_DECOMPRESS
+        /* FIXME: This doesn't cope with bzip2 */
+	if (method == 2 || compr[method].maglen == 0)
+	    return "zlib";
+#endif
+	return compr[method].argv[0];
+}
+
+private int
+uncompressbuf(int fd, size_t bytes_max, size_t method, const unsigned char *old,
+    unsigned char **newch, size_t* n)
+{
+	int fdp[3][2];
+	int status, rv;
+	size_t i;
 	ssize_t r;
 
 #ifdef BUILTIN_DECOMPRESS
         /* FIXME: This doesn't cope with bzip2 */
 	if (method == 2)
-		return uncompressgzipped(ms, old, newch, n);
+		return uncompressgzipped(old, newch, bytes_max, n);
+	if (compr[method].maglen == 0)
+		return uncompresszlib(old, newch, bytes_max, n, 1);
 #endif
 	(void)fflush(stdout);
 	(void)fflush(stderr);
 
-	if ((fd != -1 && pipe(fdin) == -1) || pipe(fdout) == -1) {
-		file_error(ms, errno, "cannot create pipe");	
-		return NODATA;
+	for (i = 0; i < __arraycount(fdp); i++)
+		fdp[i][0] = fdp[i][1] = -1;
+
+	if ((fd == -1 && pipe(fdp[STDIN_FILENO]) == -1) ||
+	    pipe(fdp[STDOUT_FILENO]) == -1 || pipe(fdp[STDERR_FILENO]) == -1) {
+		closep(fdp[STDIN_FILENO]);
+		closep(fdp[STDOUT_FILENO]);
+		return makeerror(newch, n, "Cannot create pipe, %s",
+		    strerror(errno));
 	}
 	switch (fork()) {
 	case 0:	/* child */
-		(void) close(0);
 		if (fd != -1) {
-		    (void) dup(fd);
-		    (void) FINFO_LSEEK_FUNC(0, (zend_off_t)0, SEEK_SET);
-		} else {
-		    (void) dup(fdin[0]);
-		    (void) close(fdin[0]);
-		    (void) close(fdin[1]);
+			fdp[STDIN_FILENO][0] = fd;
+			(void) lseek(fd, (off_t)0, SEEK_SET);
 		}
-
-		(void) close(1);
-		(void) dup(fdout[1]);
-		(void) close(fdout[0]);
-		(void) close(fdout[1]);
-#ifndef DEBUG
-		if (compr[method].silent)
-			(void)close(2);
-#endif
+		
+		for (i = 0; i < __arraycount(fdp); i++)
+			copydesc(i, fdp[i]);
 
 		(void)execvp(compr[method].argv[0],
 		    (char *const *)(intptr_t)compr[method].argv);
-#ifdef DEBUG
-		(void)fprintf(stderr, "exec `%s' failed (%s)\n",
+		dprintf(STDERR_FILENO, "exec `%s' failed, %s", 
 		    compr[method].argv[0], strerror(errno));
-#endif
 		exit(1);
 		/*NOTREACHED*/
 	case -1:
-		file_error(ms, errno, "could not fork");
-		return NODATA;
+		return makeerror(newch, n, "Cannot fork, %s",
+		    strerror(errno));
 
 	default: /* parent */
-		(void) close(fdout[1]);
-		if (fd == -1) {
-			(void) close(fdin[0]);
-			/* 
-			 * fork again, to avoid blocking because both
-			 * pipes filled
-			 */
-			switch (fork()) {
-			case 0: /* child */
-				(void)close(fdout[0]);
-				if (swrite(fdin[1], old, n) != (ssize_t)n) {
-#ifdef DEBUG
-					(void)fprintf(stderr,
-					    "Write failed (%s)\n",
-					    strerror(errno));
-#endif
-					exit(1);
-				}
-				exit(0);
-				/*NOTREACHED*/
+		for (i = 1; i < __arraycount(fdp); i++)
+			closefd(fdp[i], 1);
 
-			case -1:
-#ifdef DEBUG
-				(void)fprintf(stderr, "Fork failed (%s)\n",
-				    strerror(errno));
-#endif
-				exit(1);
-				/*NOTREACHED*/
+		/* Write the buffer data to the child, if we don't have fd */
+		if (fd == -1)
+			writechild(fdp, old, *n);
 
-			default:  /* parent */
-				break;
-			}
-			(void) close(fdin[1]);
-			fdin[1] = -1;
-		}
-
-		*newch = (unsigned char *) emalloc(HOWMANY + 1);
-
-		if ((r = sread(fdout[0], *newch, HOWMANY, 0)) <= 0) {
-#ifdef DEBUG
-			(void)fprintf(stderr, "Read failed (%s)\n",
+		*newch = CAST(unsigned char *, malloc(bytes_max + 1));
+		if (*newch == NULL) {
+			rv = makeerror(newch, n, "No buffer, %s",
 			    strerror(errno));
-#endif
-			efree(*newch);
-			n = NODATA-;
-			*newch = NULL;
 			goto err;
-		} else {
-			n = r;
 		}
- 		/* NUL terminate, as every buffer is handled here. */
- 		(*newch)[n] = '\0';
-err:
-		if (fdin[1] != -1)
-			(void) close(fdin[1]);
-		(void) close(fdout[0]);
-#ifdef WNOHANG
-		while (waitpid(pid, NULL, WNOHANG) != -1)
-			continue;
-#else
-		(void)wait(NULL);
-#endif
+		rv = OKDATA;
+		if ((r = sread(fdp[STDOUT_FILENO][0], *newch, bytes_max, 0)) > 0)
+			break;
+		DPRINTF("Read stdout failed %d (%s)\n", fdp[STDOUT_FILENO][0],
+		    r != -1 ? strerror(errno) : "no data");
 
-		(void) close(fdin[0]);
-	    
-		return n;
+		rv = ERRDATA;
+		if (r == 0 &&
+		    (r = sread(fdp[STDERR_FILENO][0], *newch, bytes_max, 0)) > 0)
+		{
+			r = filter_error(*newch, r);
+			break;
+		}
+		free(*newch);
+		if  (r == 0)
+			rv = makeerror(newch, n, "Read failed, %s",
+			    strerror(errno));
+		else
+			rv = makeerror(newch, n, "No data");
+		goto err;
 	}
 }
 #endif /* if PHP_FILEINFO_UNCOMPRESS */

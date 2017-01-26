@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -549,7 +549,8 @@ int dom_node_next_sibling_read(dom_object *obj, zval *retval)
 
 	nextsib = nodep->next;
 	if (!nextsib) {
-		return FAILURE;
+		ZVAL_NULL(retval);
+		return SUCCESS;
 	}
 
 	php_dom_create_object(nextsib, retval, obj);
@@ -856,7 +857,7 @@ int dom_node_text_content_write(dom_object *obj, zval *newval)
 	str = zval_get_string(newval);
 	/* we have to use xmlNodeAddContent() to get the same behavior as with xmlNewText() */
 	xmlNodeSetContent(nodep, (xmlChar *) "");
-	xmlNodeAddContent(nodep, ZSTR_VAL(str));
+	xmlNodeAddContent(nodep, (xmlChar *) ZSTR_VAL(str));
 	zend_string_release(str);
 
 	return SUCCESS;

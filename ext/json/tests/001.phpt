@@ -53,16 +53,16 @@ object(stdClass)#%d (1) {
   }
 }
 object(stdClass)#%d (1) {
-  ["_empty_"]=>
+  [""]=>
   object(stdClass)#%d (1) {
     ["foo"]=>
     string(0) ""
   }
 }
 object(stdClass)#%d (1) {
-  ["_empty_"]=>
+  [""]=>
   object(stdClass)#%d (1) {
-    ["_empty_"]=>
+    [""]=>
     string(0) ""
   }
 }

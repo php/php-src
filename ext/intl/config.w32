@@ -120,7 +120,16 @@ if (PHP_INTL != "no") {
 				codepointiterator_methods.cpp ",
 				"intl");
 		
-		ADD_FLAG("LIBS_INTL", "icudt.lib icuin.lib icuio.lib icule.lib iculx.lib");
+		ADD_FLAG("LIBS_INTL", "icudt.lib icuin.lib icuio.lib");
+
+		/* Compat for ICU before 58.1.*/
+		if (CHECK_LIB("icule.lib", "intl", PHP_INTL)) {
+			ADD_FLAG("LIBS_INTL", "icule.lib");
+		}
+		if (CHECK_LIB("iculx.lib", "intl", PHP_INTL)) {
+			ADD_FLAG("LIBS_INTL", "iculx.lib");
+		}
+
 		ADD_FLAG("CFLAGS_INTL", "/EHsc");
 		AC_DEFINE("HAVE_INTL", 1, "Internationalization support enabled");
 	} else {

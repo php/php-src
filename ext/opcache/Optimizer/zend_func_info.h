@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, Func Info                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -35,7 +35,6 @@
  * returned by zend_get_func_info()
  */
 #define FUNC_MAY_WARN                      (1<<30)
-#define FUNC_MAY_INLINE                    (1<<31)
 
 typedef struct _zend_func_info zend_func_info;
 typedef struct _zend_call_info zend_call_info;

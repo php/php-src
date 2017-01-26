@@ -6,9 +6,9 @@ var_dump(unserialize('a:2:{i:0;O:9:"exception":1:{s:16:"'."\0".'Exception'."\0".
 var_dump(unserialize('a:2:{i:0;O:9:"exception":1:{s:16:"'."\0".'Exception'."\0".'trace";s:4:"test";}i:1;r:3;}'));
 ?>
 --EXPECTF--
-array(1) {
+array(2) {
   [0]=>
-  object(Exception)#%d (5) {
+  object(Exception)#%d (6) {
     ["message":protected]=>
     string(0) ""
     ["string":"Exception":private]=>
@@ -18,12 +18,16 @@ array(1) {
     ["file":protected]=>
     string(%d) "%s"
     ["line":protected]=>
-    int(%d)
+    int(2)
+    ["previous":"Exception":private]=>
+    NULL
   }
+  [1]=>
+  string(4) "test"
 }
-array(1) {
+array(2) {
   [0]=>
-  object(Exception)#%d (5) {
+  object(Exception)#%d (6) {
     ["message":protected]=>
     string(0) ""
     ["string":"Exception":private]=>
@@ -33,6 +37,10 @@ array(1) {
     ["file":protected]=>
     string(%d) "%s"
     ["line":protected]=>
-    int(%d)
+    int(3)
+    ["previous":"Exception":private]=>
+    NULL
   }
+  [1]=>
+  string(4) "test"
 }

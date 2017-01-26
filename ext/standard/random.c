@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -81,7 +81,6 @@ PHP_MSHUTDOWN_FUNCTION(random)
 /* }}} */
 
 /* {{{ */
-
 PHPAPI int php_random_bytes(void *bytes, size_t size, zend_bool should_throw)
 {
 #if PHP_WIN32
@@ -94,7 +93,7 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, zend_bool should_throw)
 	}
 #elif HAVE_DECL_ARC4RANDOM_BUF && ((defined(__OpenBSD__) && OpenBSD >= 201405) || (defined(__NetBSD__) && __NetBSD_Version__ >= 700000001))
 	arc4random_buf(bytes, size);
-#elif HAVE_DECL_GETRANDOM
+#elif defined(__linux__) && defined(SYS_getrandom)
 	/* Linux getrandom(2) syscall */
 	size_t read_bytes = 0;
 	size_t amount_to_read = 0;
@@ -192,9 +191,9 @@ PHP_FUNCTION(random_bytes)
 	zend_long size;
 	zend_string *bytes;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "l", &size) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START_EX(ZEND_PARSE_PARAMS_THROW, 1, 1)
+		Z_PARAM_LONG(size)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (size < 1) {
 		zend_throw_exception(zend_ce_error, "Length must be greater than 0", 0);
@@ -214,37 +213,27 @@ PHP_FUNCTION(random_bytes)
 }
 /* }}} */
 
-/* {{{ proto int random_int(int min, int max)
-Return an arbitrary pseudo-random integer */
-PHP_FUNCTION(random_int)
+/* {{{ */
+PHPAPI int php_random_int(zend_long min, zend_long max, zend_long *result, zend_bool should_throw)
 {
-	zend_long min;
-	zend_long max;
 	zend_ulong umax;
-	zend_ulong result;
-
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "ll", &min, &max) == FAILURE) {
-		return;
-	}
-
-	if (min > max) {
-		zend_throw_exception(zend_ce_error, "Minimum value must be less than or equal to the maximum value", 0);
-		return;
-	}
+	zend_ulong trial;
 
 	if (min == max) {
-		RETURN_LONG(min);
+		*result = min;
+		return SUCCESS;
 	}
 
 	umax = max - min;
 
-	if (php_random_bytes_throw(&result, sizeof(result)) == FAILURE) {
-		return;
+	if (php_random_bytes(&trial, sizeof(trial), should_throw) == FAILURE) {
+		return FAILURE;
 	}
 
 	/* Special case where no modulus is required */
 	if (umax == ZEND_ULONG_MAX) {
-		RETURN_LONG((zend_long)result);
+		*result = (zend_long)trial;
+		return SUCCESS;
 	}
 
 	/* Increment the max so the range is inclusive of max */
@@ -256,14 +245,41 @@ PHP_FUNCTION(random_int)
 		zend_ulong limit = ZEND_ULONG_MAX - (ZEND_ULONG_MAX % umax) - 1;
 
 		/* Discard numbers over the limit to avoid modulo bias */
-		while (result > limit) {
-			if (php_random_bytes_throw(&result, sizeof(result)) == FAILURE) {
-				return;
+		while (trial > limit) {
+			if (php_random_bytes(&trial, sizeof(trial), should_throw) == FAILURE) {
+				return FAILURE;
 			}
 		}
 	}
 
-	RETURN_LONG((zend_long)((result % umax) + min));
+	*result = (zend_long)((trial % umax) + min);
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ proto int random_int(int min, int max)
+Return an arbitrary pseudo-random integer */
+PHP_FUNCTION(random_int)
+{
+	zend_long min;
+	zend_long max;
+	zend_long result;
+
+	ZEND_PARSE_PARAMETERS_START_EX(ZEND_PARSE_PARAMS_THROW, 2, 2)
+		Z_PARAM_LONG(min)
+		Z_PARAM_LONG(max)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (min > max) {
+		zend_throw_exception(zend_ce_error, "Minimum value must be less than or equal to the maximum value", 0);
+		return;
+	}
+
+	if (php_random_int_throw(min, max, &result) == FAILURE) {
+		return;
+	}
+
+	RETURN_LONG(result);
 }
 /* }}} */
 

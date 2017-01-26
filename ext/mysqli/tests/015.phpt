@@ -81,14 +81,14 @@ mysqli autocommit/commit/rollback with innodb
 --EXPECTF--
 array(2) {
   [0]=>
-  %unicode|string%(1) "1"
+  string(1) "1"
   [1]=>
-  %unicode|string%(6) "foobar"
+  string(6) "foobar"
 }
 array(2) {
   [0]=>
-  %unicode|string%(1) "2"
+  string(1) "2"
   [1]=>
-  %unicode|string%(4) "egon"
+  string(4) "egon"
 }
 done!

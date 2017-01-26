@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -2639,7 +2639,6 @@ static int lsapi_init_children_status()
         perror( "Anonymous mmap() failed" );
         return -1;
     }
-    memset( pBuf, 0, size );
     g_prefork_server->m_pChildrenStatus = (lsapi_child_status *)pBuf;
     g_prefork_server->m_pChildrenStatusCur = (lsapi_child_status *)pBuf;
     g_prefork_server->m_pChildrenStatusEnd = (lsapi_child_status *)pBuf + size / sizeof( lsapi_child_status );

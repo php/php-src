@@ -34,7 +34,7 @@ prompt> [L10 %s ECHO                    "ok"                                    
  00011: } finally {
  00012: 	echo " ... ok";
 prompt> ok
-[L11 %s FAST_CALL               J8                   try-catch(0)         ~%d                   %s]
+[L11 %s FAST_CALL               J8                                        ~%d                   %s]
 >00011: } finally {
  00012: 	echo " ... ok";
  00013: }
@@ -48,10 +48,8 @@ prompt>  ... ok
 >00011: } finally {
  00012: 	echo " ... ok";
  00013: }
-prompt> [L12 %s RETURN                  1                                                              %s]
->00012: 	echo " ... ok";
- 00013: }
- 00014: 
+prompt> [L14 %s RETURN                  1                                                              %s]
+>00014: 
 prompt> 
 --FILE--
 <?php

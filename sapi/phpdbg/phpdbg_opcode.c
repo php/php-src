@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -74,7 +74,7 @@ char *phpdbg_decode_input_op(
 	} else if (ZEND_VM_OP_NUM == (flags & ZEND_VM_OP_MASK)) {
 		spprintf(&result, 0, "%" PRIu32, op.num);
 	} else if (ZEND_VM_OP_TRY_CATCH == (flags & ZEND_VM_OP_MASK)) {
-		if (opline->opcode != ZEND_FAST_RET || opline->extended_value) {
+		if (op.num != (uint32_t)-1) {
 			spprintf(&result, 0, "try-catch(%" PRIu32 ")", op.num);
 		}
 	} else if (ZEND_VM_OP_LIVE_RANGE == (flags & ZEND_VM_OP_MASK)) {
@@ -98,21 +98,6 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *opline) /*{{{ */
 	const char *opcode_name = phpdbg_decode_opcode(opline->opcode);
 	uint32_t flags = zend_get_opcode_flags(opline->opcode);
 	char *result, *decode[4] = {NULL, NULL, NULL, NULL};
-
-	/* EX */
-	switch (opline->opcode) {
-	case ZEND_FAST_CALL:
-		if (opline->extended_value == ZEND_FAST_CALL_FROM_FINALLY) {
-			decode[0] = estrdup("FAST_CALL<FROM_FINALLY>");
-		}
-		break;
-	case ZEND_FAST_RET:
-		if (opline->extended_value != 0) {
-			spprintf(&decode[0], 0, "FAST_RET<%s>",
-				opline->extended_value == ZEND_FAST_RET_TO_CATCH ? "TO_CATCH" : "TO_FINALLY");
-		}
-		break;
-	}
 
 	/* OP1 */
 	decode[1] = phpdbg_decode_input_op(

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -50,8 +50,8 @@ typedef struct _zend_leak_info {
 	size_t size;
 	const char *filename;
 	const char *orig_filename;
-	uint lineno;
-	uint orig_lineno;
+	uint32_t lineno;
+	uint32_t orig_lineno;
 } zend_leak_info;
 
 #if ZEND_DEBUG
@@ -59,8 +59,8 @@ typedef struct _zend_mm_debug_info {
 	size_t             size;
 	const char        *filename;
 	const char        *orig_filename;
-	uint               lineno;
-	uint               orig_lineno;
+	uint32_t               lineno;
+	uint32_t               orig_lineno;
 } zend_mm_debug_info;
 
 # define ZEND_MM_OVERHEAD ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info))

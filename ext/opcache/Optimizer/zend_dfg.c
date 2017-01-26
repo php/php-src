@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, DFG - Data Flow Graph                                   |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,43 +25,46 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 	int set_size;
 	zend_basic_block *blocks = cfg->blocks;
 	int blocks_count = cfg->blocks_count;
-	zend_bitset tmp, gen, def, use, in, out;
-	zend_op *opline;
-	uint32_t k;
+	zend_bitset tmp, def, use, in, out;
+	int k;
+	uint32_t var_num;
 	int j;
 
-	/* FIXME: can we use "gen" instead of "def" for flow analyzing? */
 	set_size = dfg->size;
 	tmp = dfg->tmp;
-	gen = dfg->gen;
 	def = dfg->def;
 	use = dfg->use;
 	in  = dfg->in;
 	out = dfg->out;
 
-	/* Collect "gen", "def" and "use" sets */
+	/* Collect "def" and "use" sets */
 	for (j = 0; j < blocks_count; j++) {
+		zend_op *opline, *end;
 		if ((blocks[j].flags & ZEND_BB_REACHABLE) == 0) {
 			continue;
 		}
-		for (k = blocks[j].start; k <= blocks[j].end; k++) {
-			opline = op_array->opcodes + k;
+
+		opline = op_array->opcodes + blocks[j].start;
+		end = opline + blocks[j].len;
+		for (; opline < end; opline++) {
 			if (opline->opcode != ZEND_OP_DATA) {
 				zend_op *next = opline + 1;
-				if (k < blocks[j].end &&
-					next->opcode == ZEND_OP_DATA) {
+				if (next < end && next->opcode == ZEND_OP_DATA) {
 					if (next->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
-						if (!DFG_ISSET(def, set_size, j, EX_VAR_TO_NUM(next->op1.var))) {
-							DFG_SET(use, set_size, j, EX_VAR_TO_NUM(next->op1.var));
+						var_num = EX_VAR_TO_NUM(next->op1.var);
+						if (!DFG_ISSET(def, set_size, j, var_num)) {
+							DFG_SET(use, set_size, j, var_num);
 						}
 					}
 					if (next->op2_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
-						if (!DFG_ISSET(def, set_size, j,EX_VAR_TO_NUM(next->op2.var))) {
-							DFG_SET(use, set_size, j, EX_VAR_TO_NUM(next->op2.var));
+						var_num = EX_VAR_TO_NUM(next->op2.var);
+						if (!DFG_ISSET(def, set_size, j, var_num)) {
+							DFG_SET(use, set_size, j, var_num);
 						}
 					}
 				}
 				if (opline->op1_type == IS_CV) {
+					var_num = EX_VAR_TO_NUM(opline->op1.var);
 					switch (opline->opcode) {
 					case ZEND_ADD_ARRAY_ELEMENT:
 					case ZEND_INIT_ARRAY:
@@ -71,6 +74,11 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 						}
 						goto op1_use;
 					case ZEND_FE_RESET_R:
+					case ZEND_SEND_VAR:
+					case ZEND_CAST:
+					case ZEND_QM_ASSIGN:
+					case ZEND_JMP_SET:
+					case ZEND_COALESCE:
 						if (build_flags & ZEND_SSA_RC_INFERENCE) {
 							goto op1_def;
 						}
@@ -81,6 +89,9 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 							goto op1_def;
 						}
 						goto op1_use;
+					case ZEND_UNSET_VAR:
+						ZEND_ASSERT(opline->extended_value & ZEND_QUICK_SET);
+						/* break missing intentionally */
 					case ZEND_ASSIGN:
 					case ZEND_ASSIGN_REF:
 					case ZEND_BIND_GLOBAL:
@@ -88,18 +99,8 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 					case ZEND_SEND_VAR_EX:
 					case ZEND_SEND_REF:
 					case ZEND_SEND_VAR_NO_REF:
+					case ZEND_SEND_VAR_NO_REF_EX:
 					case ZEND_FE_RESET_RW:
-op1_def:
-						if (!DFG_ISSET(use, set_size, j, EX_VAR_TO_NUM(opline->op1.var))) {
-							// FIXME: include into "use" to ...?
-							DFG_SET(use, set_size, j, EX_VAR_TO_NUM(opline->op1.var));
-							DFG_SET(def, set_size, j, EX_VAR_TO_NUM(opline->op1.var));
-						}
-						DFG_SET(gen, set_size, j, EX_VAR_TO_NUM(opline->op1.var));
-						break;
-					case ZEND_UNSET_VAR:
-						ZEND_ASSERT(opline->extended_value & ZEND_QUICK_SET);
-						/* break missing intentionally */
 					case ZEND_ASSIGN_ADD:
 					case ZEND_ASSIGN_SUB:
 					case ZEND_ASSIGN_MUL:
@@ -128,19 +129,30 @@ op1_def:
 					case ZEND_FETCH_OBJ_RW:
 					case ZEND_FETCH_OBJ_FUNC_ARG:
 					case ZEND_FETCH_OBJ_UNSET:
-						DFG_SET(gen, set_size, j, EX_VAR_TO_NUM(opline->op1.var));
+					case ZEND_VERIFY_RETURN_TYPE:
+op1_def:
+						/* `def` always come along with dtor or separation,
+						 * thus the origin var info might be also `use`d in the feature(CG) */
+						DFG_SET(use, set_size, j, var_num);
+						DFG_SET(def, set_size, j, var_num);
+						break;
 					default:
 op1_use:
-						if (!DFG_ISSET(def, set_size, j, EX_VAR_TO_NUM(opline->op1.var))) {
-							DFG_SET(use, set_size, j, EX_VAR_TO_NUM(opline->op1.var));
+						if (!DFG_ISSET(def, set_size, j, var_num)) {
+							DFG_SET(use, set_size, j, var_num);
 						}
 					}
 				} else if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
-					if (!DFG_ISSET(def, set_size, j, EX_VAR_TO_NUM(opline->op1.var))) {
-						DFG_SET(use, set_size, j, EX_VAR_TO_NUM(opline->op1.var));
+					var_num = EX_VAR_TO_NUM(opline->op1.var);
+					if (opline->opcode == ZEND_VERIFY_RETURN_TYPE) {
+						DFG_SET(use, set_size, j, var_num);
+						DFG_SET(def, set_size, j, var_num);
+					} else if (!DFG_ISSET(def, set_size, j, var_num)) {
+						DFG_SET(use, set_size, j, var_num);
 					}
 				}
 				if (opline->op2_type == IS_CV) {
+					var_num = EX_VAR_TO_NUM(opline->op2.var);
 					switch (opline->opcode) {
 						case ZEND_ASSIGN:
 							if (build_flags & ZEND_SSA_RC_INFERENCE) {
@@ -156,42 +168,30 @@ op1_use:
 						case ZEND_FE_FETCH_R:
 						case ZEND_FE_FETCH_RW:
 op2_def:
-							if (!DFG_ISSET(use, set_size, j, EX_VAR_TO_NUM(opline->op2.var))) {
-								// FIXME: include into "use" to ...?
-								DFG_SET(use, set_size, j, EX_VAR_TO_NUM(opline->op2.var));
-								DFG_SET(def, set_size, j, EX_VAR_TO_NUM(opline->op2.var));
-							}
-							DFG_SET(gen, set_size, j, EX_VAR_TO_NUM(opline->op2.var));
+							// FIXME: include into "use" too ...?
+							DFG_SET(use, set_size, j, var_num);
+							DFG_SET(def, set_size, j, var_num);
 							break;
 						default:
 op2_use:
-							if (!DFG_ISSET(def, set_size, j, EX_VAR_TO_NUM(opline->op2.var))) {
-								DFG_SET(use, set_size, j, EX_VAR_TO_NUM(opline->op2.var));
+							if (!DFG_ISSET(def, set_size, j, var_num)) {
+								DFG_SET(use, set_size, j, var_num);
 							}
 							break;
 					}
 				} else if (opline->op2_type & (IS_VAR|IS_TMP_VAR)) {
+					var_num = EX_VAR_TO_NUM(opline->op2.var);
 					if (opline->opcode == ZEND_FE_FETCH_R || opline->opcode == ZEND_FE_FETCH_RW) {
-						if (!DFG_ISSET(use, set_size, j, EX_VAR_TO_NUM(opline->op2.var))) {
-							DFG_SET(def, set_size, j, EX_VAR_TO_NUM(opline->op2.var));
-						}
-						DFG_SET(gen, set_size, j, EX_VAR_TO_NUM(opline->op2.var));
+						DFG_SET(def, set_size, j, var_num);
 					} else {
-						if (!DFG_ISSET(def, set_size, j, EX_VAR_TO_NUM(opline->op2.var))) {
-							DFG_SET(use, set_size, j, EX_VAR_TO_NUM(opline->op2.var));
+						if (!DFG_ISSET(def, set_size, j, var_num)) {
+							DFG_SET(use, set_size, j, var_num);
 						}
 					}
 				}
-				if (opline->result_type == IS_CV) {
-					if (!DFG_ISSET(use, set_size, j, EX_VAR_TO_NUM(opline->result.var))) {
-						DFG_SET(def, set_size, j, EX_VAR_TO_NUM(opline->result.var));
-					}
-					DFG_SET(gen, set_size, j, EX_VAR_TO_NUM(opline->result.var));
-				} else if (opline->result_type & (IS_VAR|IS_TMP_VAR)) {
-					if (!DFG_ISSET(use, set_size, j, EX_VAR_TO_NUM(opline->result.var))) {
-						DFG_SET(def, set_size, j, EX_VAR_TO_NUM(opline->result.var));
-					}
-					DFG_SET(gen, set_size, j, EX_VAR_TO_NUM(opline->result.var));
+				if (opline->result_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
+					var_num = EX_VAR_TO_NUM(opline->result.var);
+					DFG_SET(def, set_size, j, var_num);
 				}
 			}
 		}
@@ -200,8 +200,9 @@ op2_use:
 	/* Calculate "in" and "out" sets */
 	{
 		uint32_t worklist_len = zend_bitset_len(blocks_count);
+		zend_bitset worklist;
 		ALLOCA_FLAG(use_heap);
-		zend_bitset worklist = ZEND_BITSET_ALLOCA(worklist_len, use_heap);
+		worklist = ZEND_BITSET_ALLOCA(worklist_len, use_heap);
 		memset(worklist, 0, worklist_len * ZEND_BITSET_ELM_SIZE);
 		for (j = 0; j < blocks_count; j++) {
 			zend_bitset_incl(worklist, j);

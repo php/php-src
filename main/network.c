@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -32,9 +32,6 @@
 # include "win32/inet.h"
 # define O_RDONLY _O_RDONLY
 # include "win32/param.h"
-#elif defined(NETWARE)
-#include <sys/timeval.h>
-#include <sys/param.h>
 #else
 #include <sys/param.h>
 #endif
@@ -55,17 +52,8 @@
 #include <sys/poll.h>
 #endif
 
-#if defined(NETWARE)
-#ifdef USE_WINSOCK
-#include <novsock2.h>
-#else
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#include <sys/select.h>
-#include <sys/socket.h>
-#endif
-#elif !defined(PHP_WIN32)
+
+#ifndef PHP_WIN32
 #include <netinet/in.h>
 #include <netdb.h>
 #if HAVE_ARPA_INET_H
@@ -79,7 +67,7 @@ int inet_aton(const char *, struct in_addr *);
 
 #include "php_network.h"
 
-#if defined(PHP_WIN32) || defined(__riscos__) || defined(NETWARE)
+#if defined(PHP_WIN32) || defined(__riscos__)
 #undef AF_UNIX
 #endif
 
@@ -245,16 +233,15 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 	freeaddrinfo(res);
 #else
 	if (!inet_aton(host, &in)) {
-		/* XXX NOT THREAD SAFE (is safe under win32) */
 		if(strlen(host) > MAXFQDNLEN) {
 			host_info = NULL;
 			errno = E2BIG;
 		} else {
-			host_info = gethostbyname(host);
+			host_info = php_network_gethostbyname(host);
 		}
 		if (host_info == NULL) {
 			if (error_string) {
-				error_string = strpprintf(0, "php_network_getaddresses: gethostbyname failed. errno=%d", errno);
+				*error_string = strpprintf(0, "php_network_getaddresses: gethostbyname failed. errno=%d", errno);
 				php_error_docref(NULL, E_WARNING, "%s", ZSTR_VAL(*error_string));
 			} else {
 				php_error_docref(NULL, E_WARNING, "php_network_getaddresses: gethostbyname failed");
@@ -486,6 +473,11 @@ php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned po
 #ifdef SO_BROADCAST
 			if (sockopts & STREAM_SOCKOP_SO_BROADCAST) {
 				setsockopt(sock, SOL_SOCKET, SO_BROADCAST, (char*)&sockoptval, sizeof(sockoptval));
+			}
+#endif
+#ifdef TCP_NODELAY
+			if (sockopts & STREAM_SOCKOP_TCP_NODELAY) {
+				setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (char*)&sockoptval, sizeof(sockoptval));
 			}
 #endif
 
@@ -727,7 +719,8 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 		socklen_t *addrlen,
 		struct timeval *timeout,
 		zend_string **error_string,
-		int *error_code
+		int *error_code,
+		int tcp_nodelay
 		)
 {
 	php_socket_t clisock = -1;
@@ -751,6 +744,11 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 					textaddr,
 					addr, addrlen
 					);
+			if (tcp_nodelay) {
+#ifdef TCP_NODELAY
+				setsockopt(clisock, IPPROTO_TCP, TCP_NODELAY, (char*)&tcp_nodelay, sizeof(tcp_nodelay));
+#endif
+			}
 		} else {
 			error = php_socket_errno();
 		}
@@ -766,7 +764,6 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 	return clisock;
 }
 /* }}} */
-
 
 
 /* Connect to a remote host using an interruptible connect with optional timeout.
@@ -900,6 +897,15 @@ skip_bind:
 				int val = 1;
 				if (sockopts & STREAM_SOCKOP_SO_BROADCAST) {
 					setsockopt(sock, SOL_SOCKET, SO_BROADCAST, (char*)&val, sizeof(val));
+				}
+			}
+#endif
+
+#ifdef TCP_NODELAY
+			{
+				int val = 1;
+				if (sockopts & STREAM_SOCKOP_TCP_NODELAY) {
+					setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (char*)&val, sizeof(val));
 				}
 			}
 #endif
@@ -1257,9 +1263,95 @@ PHPAPI int php_poll2(php_pollfd *ufds, unsigned int nfds, int timeout)
 	}
 	return n;
 }
-
 #endif
 
+#if defined(HAVE_GETHOSTBYNAME_R)
+#ifdef HAVE_FUNC_GETHOSTBYNAME_R_6
+struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char **tmphstbuf,size_t *hstbuflen)
+{
+	struct hostent *hp;
+	int herr,res;
+
+	if (*hstbuflen == 0) {
+		*hstbuflen = 1024; 
+		*tmphstbuf = (char *)malloc (*hstbuflen);
+	}
+
+	while (( res = 
+		gethostbyname_r(host,hostbuf,*tmphstbuf,*hstbuflen,&hp,&herr))
+		&& (errno == ERANGE)) {
+		/* Enlarge the buffer. */
+		*hstbuflen *= 2;
+		*tmphstbuf = (char *)realloc (*tmphstbuf,*hstbuflen);
+	}
+
+	if (res != SUCCESS) {
+		return NULL;
+	}
+		
+	return hp;
+}
+#endif
+#ifdef HAVE_FUNC_GETHOSTBYNAME_R_5
+struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char **tmphstbuf,size_t *hstbuflen)
+{
+	struct hostent *hp;
+	int herr;
+
+	if (*hstbuflen == 0) {
+		*hstbuflen = 1024;
+		*tmphstbuf = (char *)malloc (*hstbuflen);
+	}
+
+	while ((NULL == ( hp = 
+		gethostbyname_r(host,hostbuf,*tmphstbuf,*hstbuflen,&herr)))
+		&& (errno == ERANGE)) {
+		/* Enlarge the buffer. */
+		*hstbuflen *= 2;
+		*tmphstbuf = (char *)realloc (*tmphstbuf,*hstbuflen);
+	}
+	return hp;
+}
+#endif
+#ifdef HAVE_FUNC_GETHOSTBYNAME_R_3
+struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char **tmphstbuf,size_t *hstbuflen)
+{
+	if (*hstbuflen == 0) {
+		*hstbuflen = sizeof(struct hostent_data);
+		*tmphstbuf = (char *)malloc (*hstbuflen);
+	} else {
+		if (*hstbuflen < sizeof(struct hostent_data)) {
+			*hstbuflen = sizeof(struct hostent_data);
+			*tmphstbuf = (char *)realloc(*tmphstbuf, *hstbuflen);
+		}
+	}
+	memset((void *)(*tmphstbuf),0,*hstbuflen);
+
+	if (SUCCESS != gethostbyname_r(host,hostbuf,(struct hostent_data *)*tmphstbuf)) {
+		return NULL;
+	}
+
+	return hostbuf;
+}
+#endif
+#endif
+
+PHPAPI struct hostent*	php_network_gethostbyname(char *name) {
+#if !defined(HAVE_GETHOSTBYNAME_R)
+	return gethostbyname(name);
+#else
+	if (FG(tmp_host_buf)) {
+		free(FG(tmp_host_buf));
+	}
+
+	FG(tmp_host_buf) = NULL;
+	FG(tmp_host_buf_len) = 0;
+
+	memset(&FG(tmp_host_info), 0, sizeof(struct hostent));
+
+	return gethostname_re(name, &FG(tmp_host_info), &FG(tmp_host_buf), &FG(tmp_host_buf_len));
+#endif
+}
 
 /*
  * Local variables:

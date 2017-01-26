@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -178,7 +178,9 @@ static void zend_accel_blacklist_update_regexp(zend_blacklist *blacklist)
 			it->next = NULL;
 
 			if ((it->re = pcre_compile(regexp, PCRE_NO_AUTO_CAPTURE, &pcre_error, &pcre_error_offset, 0)) == NULL) {
+				free(it);
 				blacklist_report_regexp_error(pcre_error, pcre_error_offset);
+				return;
 			}
 			/* prepare for the next iteration */
 			p = regexp + 2;

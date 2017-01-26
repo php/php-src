@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -106,7 +106,8 @@ static size_t readline_shell_ub_write(const char *str, size_t str_length) /* {{{
 	   caller (sapi_cli_single_write in sapi/cli) which will actually
 	   write due to -1 return code */
 	php_last_char = str[str_length-1];
-	return -1;
+
+	return (size_t) -1;
 }
 /* }}} */
 
@@ -591,8 +592,9 @@ static int readline_shell_run(void) /* {{{ */
 
 	if (PG(auto_prepend_file) && PG(auto_prepend_file)[0]) {
 		zend_file_handle *prepend_file_p;
-		zend_file_handle prepend_file = {{0}};
+		zend_file_handle prepend_file;
 
+		memset(&prepend_file, 0, sizeof(prepend_file));
 		prepend_file.filename = PG(auto_prepend_file);
 		prepend_file.opened_path = NULL;
 		prepend_file.free_filename = 0;

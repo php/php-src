@@ -1,8 +1,6 @@
 #if !defined(sendmail_h)		/* Sentry, use file only if it's not already included. */
 #define sendmail_h
-#ifndef NETWARE
 #include <windows.h>
-#endif
 
 #define HOST_NAME_LEN	256
 #define MAX_APPNAME_LENGTH 100

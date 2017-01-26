@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -62,7 +62,6 @@ static inline void spl_instantiate_arg_n(zend_class_entry *pce, zval *retval, in
 	spl_instantiate(pce, retval);
 
 	fci.size = sizeof(zend_fcall_info);
-	fci.function_table = &pce->function_table;
 	ZVAL_STR(&fci.function_name, func->common.function_name);
 	fci.object = Z_OBJ_P(retval);
 	fci.retval = &dummy;
@@ -72,7 +71,7 @@ static inline void spl_instantiate_arg_n(zend_class_entry *pce, zval *retval, in
 
 	fcc.initialized = 1;
 	fcc.function_handler = func;
-	fcc.calling_scope = EG(scope);
+	fcc.calling_scope = zend_get_executed_scope();
 	fcc.called_scope = pce;
 	fcc.object = Z_OBJ_P(retval);
 

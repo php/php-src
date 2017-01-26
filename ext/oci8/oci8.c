@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -48,20 +48,6 @@
 #include "php_oci8.h"
 #include "php_oci8_int.h"
 #include "zend_hash.h"
-
-#if defined(__PTRDIFF_TYPE__)
-# define OCI8_INT_TO_PTR(I)  ((void*)(__PTRDIFF_TYPE__)(I))
-# define OCI8_PTR_TO_INT(P)  ((int)(__PTRDIFF_TYPE__)(P))
-#elif !defined(__GNUC__)
-#define OCI8_INT_TO_PTR(I)  ((void*)&((char*)0)[I])
-#define OCI8_PTR_TO_INT(P)  ((int)(((char*)P)-(char*)0))
-#elif defined(HAVE_STDINT_H)
-#define OCI8_INT_TO_PTR(I)  ((void*)(intptr_t)(I))
-#define OCI8_PTR_TO_INT(P)  ((int)(intptr_t)(P))
-#else
-#define OCI8_INT_TO_PTR(I)  ((void*)(I))
-#define OCI8_PTR_TO_INT(P)  ((int)(P))
-#endif
 
 ZEND_DECLARE_MODULE_GLOBALS(oci)
 static PHP_GINIT_FUNCTION(oci);
@@ -1231,9 +1217,9 @@ PHP_MINFO_FUNCTION(oci)
 
 	php_info_print_table_start();
 	php_info_print_table_header(2, "Statistics", "");
-	snprintf(buf, sizeof(buf), "%pd", OCI_G(num_persistent));
+	snprintf(buf, sizeof(buf), ZEND_LONG_FMT, OCI_G(num_persistent));
 	php_info_print_table_row(2, "Active Persistent Connections", buf);
-	snprintf(buf, sizeof(buf), "%pd", OCI_G(num_links));
+	snprintf(buf, sizeof(buf), ZEND_LONG_FMT, OCI_G(num_links));
 	php_info_print_table_row(2, "Active Connections", buf);
 	php_info_print_table_end();
 }
@@ -1400,6 +1386,11 @@ void php_oci_define_hash_dtor(zval *data)
 void php_oci_bind_hash_dtor(zval *data)
 {
 	php_oci_bind *bind = (php_oci_bind *) Z_PTR_P(data);
+
+	if (!Z_ISUNDEF(bind->parameter)) {
+		zval_ptr_dtor(&bind->parameter);
+		ZVAL_UNDEF(&bind->parameter);
+	}
 
 	if (bind->array.elements) {
 		efree(bind->array.elements);
@@ -1662,7 +1653,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 	ub2 charsetid_nls_lang = 0;
 
 	if (session_mode & ~(OCI_SYSOPER | OCI_SYSDBA | PHP_OCI_CRED_EXT)) {
-		php_error_docref(NULL, E_WARNING, "Invalid session mode specified (%pd)", session_mode);
+		php_error_docref(NULL, E_WARNING, "Invalid session mode specified (" ZEND_LONG_FMT ")", session_mode);
 		return NULL;
 	}
 	if (session_mode & (OCI_SYSOPER | OCI_SYSDBA | PHP_OCI_CRED_EXT)) {
@@ -1930,7 +1921,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 
 			if (OCI_G(max_persistent) != -1 && OCI_G(num_persistent) >= OCI_G(max_persistent)) {
 				/* all persistent connactions are in use, fallback to non-persistent connection creation */
-				php_error_docref(NULL, E_NOTICE, "Too many open persistent connections (%pd)", OCI_G(num_persistent));
+				php_error_docref(NULL, E_NOTICE, "Too many open persistent connections (" ZEND_LONG_FMT ")", OCI_G(num_persistent));
 				alloc_non_persistent = 1;
 			}
 		}
@@ -2559,7 +2550,8 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 #else /* OCI_MAJOR_VERSION */
 	PHP_OCI_ZVAL_TO_STATEMENT(z_statement, invokedstatement);
 
-	if (invokedstatement->impres_flag == PHP_OCI_IMPRES_NO_CHILDREN) {
+	if (invokedstatement->impres_flag == PHP_OCI_IMPRES_NO_CHILDREN ||
+        invokedstatement->impres_flag == PHP_OCI_IMPRES_IS_CHILD) {
 		/* Already know there are no Implicit Result Sets */
 	    statement = invokedstatement;
 	} else if (invokedstatement->impres_flag == PHP_OCI_IMPRES_HAS_CHILDREN) {

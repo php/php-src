@@ -55,7 +55,7 @@ Warning: SessionHandler::close(): Parent session handler is not open in %s on li
 
 Warning: session_start(): Failed to read session data: user (%s) in %s on line %d
 bool(false)
-string(%d) "%s"
+string(0) ""
 string(5) "files"
 string(4) "user"
 int(2)

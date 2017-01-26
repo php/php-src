@@ -3,6 +3,7 @@ Bug #71540 (NULL pointer dereference in xsl_ext_function_php())
 --SKIPIF--
 <?php
 if (!extension_loaded('xsl')) die("skip Extension XSL is required\n");
+if (LIBXML_VERSION >= 20903) die('skip this test is for PHP linked with libxml2 < 2.9.3 only')
 ?>
 --FILE--
 <?php

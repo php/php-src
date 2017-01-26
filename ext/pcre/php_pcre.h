@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -50,7 +50,6 @@ typedef struct {
 	int capture_count;
 	int name_count;
 #if HAVE_SETLOCALE
-	zend_string *locale;
 	unsigned const char *tables;
 #endif
 	int compile_options;
@@ -75,7 +74,7 @@ ZEND_BEGIN_MODULE_GLOBALS(pcre)
 	HashTable pcre_cache;
 	zend_long backtrack_limit;
 	zend_long recursion_limit;
-#ifdef PCRE_STUDY_JIT_COMPILE
+#ifdef HAVE_PCRE_JIT_SUPPORT
 	zend_bool jit;
 #endif
 	int  error_code;

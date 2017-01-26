@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -73,7 +73,8 @@ const php_hash_ops php_hash_sha1_ops = {
 	(php_hash_copy_func_t) php_hash_copy,
 	20,
 	64,
-	sizeof(PHP_SHA1_CTX)
+	sizeof(PHP_SHA1_CTX),
+	1
 };
 
 #ifdef PHP_HASH_SHA1_NOT_IN_CORE
@@ -415,7 +416,8 @@ const php_hash_ops php_hash_sha256_ops = {
 	(php_hash_copy_func_t) php_hash_copy,
 	32,
 	64,
-	sizeof(PHP_SHA256_CTX)
+	sizeof(PHP_SHA256_CTX),
+	1
 };
 
 const php_hash_ops php_hash_sha224_ops = {
@@ -425,7 +427,8 @@ const php_hash_ops php_hash_sha224_ops = {
 	(php_hash_copy_func_t) php_hash_copy,
 	28,
 	64,
-	sizeof(PHP_SHA224_CTX)
+	sizeof(PHP_SHA224_CTX),
+	1
 };
 
 #define ROTR32(b,x)		((x >> b) | (x << (32 - b)))
@@ -917,7 +920,8 @@ const php_hash_ops php_hash_sha384_ops = {
 	(php_hash_copy_func_t) php_hash_copy,
 	48,
 	128,
-	sizeof(PHP_SHA384_CTX)
+	sizeof(PHP_SHA384_CTX),
+	1
 };
 
 /* {{{ PHP_SHA512Init
@@ -936,6 +940,42 @@ PHP_HASH_API void PHP_SHA512Init(PHP_SHA512_CTX * context)
 	context->state[5] = L64(0x9b05688c2b3e6c1f);
 	context->state[6] = L64(0x1f83d9abfb41bd6b);
 	context->state[7] = L64(0x5be0cd19137e2179);
+}
+/* }}} */
+
+/* {{{ PHP_SHA512_256Init
+ * SHA512/245 initialization. Identical algorithm to SHA512, using alternate initval and truncation
+ */
+PHP_HASH_API void PHP_SHA512_256Init(PHP_SHA512_CTX * context)
+{
+	context->count[0] = context->count[1] = 0;
+
+	context->state[0] = L64(0x22312194FC2BF72C);
+	context->state[1] = L64(0x9F555FA3C84C64C2);
+	context->state[2] = L64(0x2393B86B6F53B151);
+	context->state[3] = L64(0x963877195940EABD);
+	context->state[4] = L64(0x96283EE2A88EFFE3);
+	context->state[5] = L64(0xBE5E1E2553863992);
+	context->state[6] = L64(0x2B0199FC2C85B8AA);
+	context->state[7] = L64(0x0EB72DDC81C52CA2);
+}
+/* }}} */
+
+/* {{{ PHP_SHA512_224Init
+ * SHA512/224 initialization. Identical algorithm to SHA512, using alternate initval and truncation
+ */
+PHP_HASH_API void PHP_SHA512_224Init(PHP_SHA512_CTX * context)
+{
+        context->count[0] = context->count[1] = 0;
+
+	context->state[0] = L64(0x8C3D37C819544DA2);
+	context->state[1] = L64(0x73E1996689DCD4D6);
+	context->state[2] = L64(0x1DFAB7AE32FF9C82);
+	context->state[3] = L64(0x679DD514582F9FCF);
+	context->state[4] = L64(0x0F6D2B697BD44DA8);
+	context->state[5] = L64(0x77E36F7304C48942);
+	context->state[6] = L64(0x3F9D85A86A1D36C8);
+	context->state[7] = L64(0x1112E6AD91D692A1);
 }
 /* }}} */
 
@@ -1024,6 +1064,28 @@ PHP_HASH_API void PHP_SHA512Final(unsigned char digest[64], PHP_SHA512_CTX * con
 }
 /* }}} */
 
+/* {{{ PHP_SHA512_256Final
+   SHA512/256 finalization. Identical to SHA512Final, but with truncation
+ */
+PHP_HASH_API void PHP_SHA512_256Final(unsigned char digest[32], PHP_SHA512_CTX * context)
+{
+	unsigned char full_digest[64];
+	PHP_SHA512Final(full_digest, context);
+	memcpy(digest, full_digest, 32);
+}
+/* }}} */
+
+/* {{{ PHP_SHA512_224Final
+   SHA512/224 finalization. Identical to SHA512Final, but with truncation
+ */
+PHP_HASH_API void PHP_SHA512_224Final(unsigned char digest[28], PHP_SHA512_CTX * context)
+{
+	unsigned char full_digest[64];
+	PHP_SHA512Final(full_digest, context);
+	memcpy(digest, full_digest, 28);
+}
+/* }}} */
+
 const php_hash_ops php_hash_sha512_ops = {
 	(php_hash_init_func_t) PHP_SHA512Init,
 	(php_hash_update_func_t) PHP_SHA512Update,
@@ -1031,7 +1093,30 @@ const php_hash_ops php_hash_sha512_ops = {
 	(php_hash_copy_func_t) php_hash_copy,
 	64,
 	128,
-	sizeof(PHP_SHA512_CTX)
+	sizeof(PHP_SHA512_CTX),
+	1
+};
+
+const php_hash_ops php_hash_sha512_256_ops = {
+	(php_hash_init_func_t) PHP_SHA512_256Init,
+	(php_hash_update_func_t) PHP_SHA512_256Update,
+	(php_hash_final_func_t) PHP_SHA512_256Final,
+	(php_hash_copy_func_t) php_hash_copy,
+	32,
+	128,
+	sizeof(PHP_SHA512_CTX),
+	1
+};
+
+const php_hash_ops php_hash_sha512_224_ops = {
+	(php_hash_init_func_t) PHP_SHA512_224Init,
+	(php_hash_update_func_t) PHP_SHA512_224Update,
+	(php_hash_final_func_t) PHP_SHA512_224Final,
+	(php_hash_copy_func_t) php_hash_copy,
+	28,
+	128,
+	sizeof(PHP_SHA512_CTX),
+	1
 };
 
 /*

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -373,7 +373,6 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 	}
 
 	if (!IS_SERIALIZED(op_array->opcodes)) {
-#if ZEND_USE_ABS_CONST_ADDR || ZEND_USE_ABS_JMP_ADDR
 		zend_op *opline, *end;
 
 		SERIALIZE_PTR(op_array->opcodes);
@@ -381,15 +380,15 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 		UNSERIALIZE_PTR(opline);
 		end = opline + op_array->last;
 		while (opline < end) {
-# if ZEND_USE_ABS_CONST_ADDR
+#if ZEND_USE_ABS_CONST_ADDR
 			if (opline->op1_type == IS_CONST) {
 				SERIALIZE_PTR(opline->op1.zv);
 			}
 			if (opline->op2_type == IS_CONST) {
 				SERIALIZE_PTR(opline->op2.zv);
 			}
-# endif
-# if ZEND_USE_ABS_JMP_ADDR
+#endif
+#if ZEND_USE_ABS_JMP_ADDR
 			switch (opline->opcode) {
 				case ZEND_JMP:
 				case ZEND_FAST_CALL:
@@ -404,7 +403,6 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 				case ZEND_JMPNZ_EX:
 				case ZEND_JMP_SET:
 				case ZEND_COALESCE:
-				case ZEND_NEW:
 				case ZEND_FE_RESET_R:
 				case ZEND_FE_RESET_RW:
 				case ZEND_ASSERT_CHECK:
@@ -417,12 +415,10 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 					/* relative extended_value don't have to be changed */
 					break;
 			}
-# endif
+#endif
+			zend_serialize_opcode_handler(opline);
 			opline++;
 		}
-#else
-		SERIALIZE_PTR(op_array->opcodes);
-#endif
 
 		if (op_array->arg_info) {
 			zend_arg_info *p, *end;
@@ -440,8 +436,15 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 				if (!IS_SERIALIZED(p->name)) {
 					SERIALIZE_STR(p->name);
 				}
-				if (!IS_SERIALIZED(p->class_name)) {
-					SERIALIZE_STR(p->class_name);
+				if (ZEND_TYPE_IS_CLASS(p->type)) {
+					zend_string *type_name = ZEND_TYPE_NAME(p->type);
+
+					if (!IS_SERIALIZED(type_name)) {
+						zend_bool allow_null = ZEND_TYPE_ALLOW_NULL(p->type);
+
+						SERIALIZE_STR(type_name);
+						p->type = ZEND_TYPE_ENCODE_CLASS(type_name, allow_null);
+					}
 				}
 				p++;
 			}
@@ -795,6 +798,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 	if (writev(fd, vec, 3) != (ssize_t)(sizeof(info) + script->size + info.str_size)) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot write to file '%s'\n", filename);
 		zend_string_release((zend_string*)ZCG(mem));
+		close(fd);
 		efree(mem);
 		unlink(filename);
 		efree(filename);
@@ -808,6 +812,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 		) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot write to file '%s'\n", filename);
 		zend_string_release((zend_string*)ZCG(mem));
+		close(fd);
 		efree(mem);
 		unlink(filename);
 		efree(filename);
@@ -981,7 +986,6 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 				case ZEND_JMPNZ_EX:
 				case ZEND_JMP_SET:
 				case ZEND_COALESCE:
-				case ZEND_NEW:
 				case ZEND_FE_RESET_R:
 				case ZEND_FE_RESET_RW:
 				case ZEND_ASSERT_CHECK:
@@ -995,7 +999,7 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 					break;
 			}
 # endif
-			ZEND_VM_SET_OPCODE_HANDLER(opline);
+			zend_deserialize_opcode_handler(opline);
 			opline++;
 		}
 
@@ -1014,8 +1018,15 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 				if (!IS_UNSERIALIZED(p->name)) {
 					UNSERIALIZE_STR(p->name);
 				}
-				if (!IS_UNSERIALIZED(p->class_name)) {
-					UNSERIALIZE_STR(p->class_name);
+				if (ZEND_TYPE_IS_CLASS(p->type)) {
+					zend_string *type_name = ZEND_TYPE_NAME(p->type);
+
+					if (!IS_UNSERIALIZED(type_name)) {
+						zend_bool allow_null = ZEND_TYPE_ALLOW_NULL(p->type);
+
+						UNSERIALIZE_STR(type_name);
+						p->type = ZEND_TYPE_ENCODE_CLASS(type_name, allow_null);
+					}
 				}
 				p++;
 			}

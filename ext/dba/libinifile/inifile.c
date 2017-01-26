@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -250,6 +250,7 @@ val_type inifile_fetch(inifile *dba, const key_type *key, int skip) {
 	if (skip == -1 && dba->next.key.group && dba->next.key.name && !inifile_key_cmp(&dba->next.key, key)) {
 		/* we got position already from last fetch */
 		php_stream_seek(dba->fp, dba->next.pos, SEEK_SET);
+		ln.key.group = estrdup(dba->next.key.group);
 	} else {
 		/* specific instance or not same key -> restart search */
 		/* the slow way: restart and seacrch */
@@ -542,7 +543,7 @@ static int inifile_delete_replace_append(inifile *dba, const key_type *key, cons
 			php_stream_seek(fp_tmp, 0, SEEK_SET);
 			php_stream_seek(dba->fp, 0, SEEK_END);
 			if (SUCCESS != php_stream_copy_to_stream_ex(fp_tmp, dba->fp, PHP_STREAM_COPY_ALL, NULL)) {
-				php_error_docref(NULL, E_RECOVERABLE_ERROR, "Could not copy from temporary stream - ini file truncated");
+				zend_throw_error(NULL, "Could not copy from temporary stream - ini file truncated");
 				ret = FAILURE;
 			}
 		}

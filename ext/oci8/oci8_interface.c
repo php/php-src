@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Stig Sæther Bakken <ssb@php.net>                            |
+   | Authors: Stig SÃ¦ther Bakken <ssb@php.net>                            |
    |          Thies C. Arntzen <thies@thieso.net>                         |
    |                                                                      |
    | Collection support by Andy Sautins <asautins@veripost.net>           |
@@ -24,8 +24,6 @@
    |                Wez Furlong <wez@omniti.com>                          |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -112,7 +110,7 @@ PHP_FUNCTION(oci_bind_by_name)
 	zval *bind_var = NULL;
 	php_oci_statement *statement;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsz/|ll", &z_statement, &name, &name_len, &bind_var, &maxlen, &type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsz|ll", &z_statement, &name, &name_len, &bind_var, &maxlen, &type) == FAILURE) {
 		return;
 	}
 
@@ -1380,15 +1378,17 @@ PHP_FUNCTION(oci_fetch_all)
 	PHP_OCI_ZVAL_TO_STATEMENT(z_statement, statement);
 
 	zval_dtor(array);
-	array_init(array);
 
 	while (skip--) {
 		if (php_oci_statement_fetch(statement, nrows)) {
+			array_init(array);
 			RETURN_LONG(0);
 		}
 	}
 
 	if (flags & PHP_OCI_FETCHSTATEMENT_BY_ROW) {
+		/* Fetch by Row: array will contain one sub-array per query row */
+		array_init(array);
 		columns = safe_emalloc(statement->ncolumns, sizeof(php_oci_out_column *), 0);
 
 		for (i = 0; i < statement->ncolumns; i++) {
@@ -1398,7 +1398,7 @@ PHP_FUNCTION(oci_fetch_all)
 		while (!php_oci_statement_fetch(statement, nrows)) {
 			zval row;
 			
-			array_init(&row);
+			array_init_size(&row, statement->ncolumns);
 
 			for (i = 0; i < statement->ncolumns; i++) {
 				php_oci_column_to_zval(columns[ i ], &element, PHP_OCI_RETURN_LOBS);
@@ -1409,7 +1409,7 @@ PHP_FUNCTION(oci_fetch_all)
 					zend_string *zvtmp;
 					zvtmp = zend_string_init(columns[ i ]->name, columns[ i ]->name_len, 0);
 					zend_symtable_update(Z_ARRVAL(row), zvtmp, &element);
-                   zend_string_release(zvtmp);
+					zend_string_release(zvtmp);
 				}
 			}
 
@@ -1424,6 +1424,8 @@ PHP_FUNCTION(oci_fetch_all)
 		efree(columns);
 
 	} else { /* default to BY_COLUMN */
+		/* Fetch by columns: array will contain one sub-array per query column */
+		array_init_size(array, statement->ncolumns);
 		columns = safe_emalloc(statement->ncolumns, sizeof(php_oci_out_column *), 0);
 		outarrs = safe_emalloc(statement->ncolumns, sizeof(zval*), 0);
 		
@@ -1440,9 +1442,9 @@ PHP_FUNCTION(oci_fetch_all)
 				columns[ i ] = php_oci_statement_get_column(statement, i + 1, NULL, 0);
 				
 				array_init(&tmp);
-                zvtmp = zend_string_init(columns[ i ]->name, columns[ i ]->name_len, 0);
+				zvtmp = zend_string_init(columns[ i ]->name, columns[ i ]->name_len, 0);
 				outarrs[ i ] = zend_symtable_update(Z_ARRVAL_P(array), zvtmp, &tmp);
-               zend_string_release(zvtmp);
+				zend_string_release(zvtmp);
 			}
 		}
 

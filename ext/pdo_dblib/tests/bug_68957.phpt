@@ -21,7 +21,7 @@ Array
 (
     [0] => Array
         (
-            [computed0] => 1
+            [computed] => 1
             [0] => 1
         )
 

@@ -231,7 +231,7 @@ void timelib_dump_date(timelib_time *d, int options)
 	printf("TS: %lld | %s%04lld-%02lld-%02lld %02lld:%02lld:%02lld",
 		d->sse, d->y < 0 ? "-" : "", TIMELIB_LLABS(d->y), d->m, d->d, d->h, d->i, d->s);
 	if (d->f > +0.0) {
-		printf(" %.5f", d->f);
+		printf(" %.6f", d->f);
 	}
 
 	if (d->is_localtime) {
@@ -260,6 +260,9 @@ void timelib_dump_date(timelib_time *d, int options)
 		if (d->have_relative) {
 			printf("%3lldY %3lldM %3lldD / %3lldH %3lldM %3lldS",
 				d->relative.y, d->relative.m, d->relative.d, d->relative.h, d->relative.i, d->relative.s);
+			if (d->relative.f) {
+				printf(" %6f", d->relative.f);
+			}
 			if (d->relative.first_last_day_of != 0) {
 				switch (d->relative.first_last_day_of) {
 					case 1:
@@ -310,33 +313,33 @@ void timelib_dump_rel_time(timelib_rel_time *d)
 
 timelib_long timelib_parse_tz_cor(char **ptr)
 {
-        char *begin = *ptr, *end;
-        timelib_long  tmp;
+	char *begin = *ptr, *end;
+	timelib_long  tmp;
 
-        while (isdigit(**ptr) || **ptr == ':') {
-                ++*ptr;
-        }
-        end = *ptr;
-        switch (end - begin) {
-                case 1:
-                case 2:
-                        return HOUR(strtol(begin, NULL, 10));
-                        break;
-                case 3:
-                case 4:
-                        if (begin[1] == ':') {
-                                tmp = HOUR(strtol(begin, NULL, 10)) + strtol(begin + 2, NULL, 10);
-                                return tmp;
-                        } else if (begin[2] == ':') {
-                                tmp = HOUR(strtol(begin, NULL, 10)) + strtol(begin + 3, NULL, 10);
-                                return tmp;
-                        } else {
-                                tmp = strtol(begin, NULL, 10);
-                                return HOUR(tmp / 100) + tmp % 100;
-                        }
-                case 5:
-                        tmp = HOUR(strtol(begin, NULL, 10)) + strtol(begin + 3, NULL, 10);
-                        return tmp;
-        }
-        return 0;
+	while (isdigit(**ptr) || **ptr == ':') {
+		++*ptr;
+	}
+	end = *ptr;
+	switch (end - begin) {
+		case 1: /* H */
+		case 2: /* HH */
+			return HOUR(strtol(begin, NULL, 10));
+			break;
+		case 3: /* H:M */
+		case 4: /* H:MM, HH:M, HHMM */
+			if (begin[1] == ':') {
+				tmp = HOUR(strtol(begin, NULL, 10)) + strtol(begin + 2, NULL, 10);
+				return tmp;
+			} else if (begin[2] == ':') {
+				tmp = HOUR(strtol(begin, NULL, 10)) + strtol(begin + 3, NULL, 10);
+				return tmp;
+			} else {
+				tmp = strtol(begin, NULL, 10);
+				return HOUR(tmp / 100) + tmp % 100;
+			}
+		case 5: /* HH:MM */
+			tmp = HOUR(strtol(begin, NULL, 10)) + strtol(begin + 3, NULL, 10);
+			return tmp;
+	}
+	return 0;
 }

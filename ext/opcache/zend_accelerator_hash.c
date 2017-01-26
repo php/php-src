@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,9 +25,9 @@
 #include "zend_shared_alloc.h"
 
 /* Generated on an Octa-ALPHA 300MHz CPU & 2.5GB RAM monster */
-static uint prime_numbers[] =
+static uint32_t prime_numbers[] =
 	{5, 11, 19, 53, 107, 223, 463, 983, 1979, 3907, 7963, 16229, 32531, 65407, 130987, 262237, 524521, 1048793 };
-static uint num_prime_numbers = sizeof(prime_numbers) / sizeof(uint);
+static uint32_t num_prime_numbers = sizeof(prime_numbers) / sizeof(uint32_t);
 
 void zend_accel_hash_clean(zend_accel_hash *accel_hash)
 {
@@ -38,7 +38,7 @@ void zend_accel_hash_clean(zend_accel_hash *accel_hash)
 
 void zend_accel_hash_init(zend_accel_hash *accel_hash, uint32_t hash_size)
 {
-	uint i;
+	uint32_t i;
 
 	for (i=0; i<num_prime_numbers; i++) {
 		if (hash_size <= prime_numbers[i]) {
@@ -86,6 +86,9 @@ zend_accel_hash_entry* zend_accel_hash_update(zend_accel_hash *accel_hash, char 
 	}
 
 	hash_value = zend_inline_hash_func(key, key_length);
+#ifndef ZEND_WIN32
+	hash_value ^= ZCG(root_hash);
+#endif
 	index = hash_value % accel_hash->max_num_entries;
 
 	/* try to see if the element already exists in the hash */
@@ -139,9 +142,15 @@ zend_accel_hash_entry* zend_accel_hash_update(zend_accel_hash *accel_hash, char 
 
 static zend_always_inline void* zend_accel_hash_find_ex(zend_accel_hash *accel_hash, char *key, uint32_t key_length, zend_ulong hash_value, int data)
 {
-	zend_ulong index = hash_value % accel_hash->max_num_entries;
-	zend_accel_hash_entry *entry = accel_hash->hash_table[index];
+	zend_ulong index;
+	zend_accel_hash_entry *entry;
 
+#ifndef ZEND_WIN32
+	hash_value ^= ZCG(root_hash);
+#endif
+	index = hash_value % accel_hash->max_num_entries;
+
+	entry = accel_hash->hash_table[index];
 	while (entry) {
 		if (entry->hash_value == hash_value
 			&& entry->key_length == key_length
@@ -224,6 +233,9 @@ int zend_accel_hash_unlink(zend_accel_hash *accel_hash, char *key, uint32_t key_
     zend_accel_hash_entry *entry, *last_entry=NULL;
 
 	hash_value = zend_inline_hash_func(key, key_length);
+#ifndef ZEND_WIN32
+	hash_value ^= ZCG(root_hash);
+#endif
 	index = hash_value % accel_hash->max_num_entries;
 
 	entry = accel_hash->hash_table[index];

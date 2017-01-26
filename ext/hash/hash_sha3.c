@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,6 +16,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "php_hash.h"
 #include "php_hash_sha3.h"
 
 #if (defined(__APPLE__) || defined(__APPLE_CC__)) && \
@@ -38,7 +39,7 @@ static inline unsigned char idx(unsigned char x, unsigned char y) {
 
 #ifdef WORDS_BIGENDIAN
 static inline uint64_t load64(const unsigned char* x) {
-	unsigned char i;
+	char i;
 	uint64_t ret = 0;
 	for (i = 7; i >= 0; --i) {
 		ret <<= 8;
@@ -47,14 +48,14 @@ static inline uint64_t load64(const unsigned char* x) {
 	return ret;
 }
 static inline void store64(unsigned char* x, uint64_t val) {
-	unsigned char i;
+	char i;
 	for (i = 0; i < 8; ++i) {
 		x[i] = val & 0xFF;
 		val >>= 8;
 	}
 }
 static inline void xor64(unsigned char* x, uint64_t val) {
-	unsigned char i;
+	char i;
 	for (i = 0; i < 8; ++i) {
 		x[i] ^= val & 0xFF;
 		val >>= 8;
@@ -153,9 +154,9 @@ static void PHP_SHA3_Init(PHP_SHA3_CTX* ctx,
 static void PHP_SHA3_Update(PHP_SHA3_CTX* ctx,
                             const unsigned char* buf,
                             unsigned int count,
-                            int block_size) {
+                            size_t block_size) {
 	while (count > 0) {
-		int len = block_size - ctx->pos;
+		unsigned int len = block_size - ctx->pos;
 		if (len > count) len = count;
 		count -= len;
 		while (len-- > 0) {
@@ -218,7 +219,8 @@ const php_hash_ops php_hash_sha3_##bits##_ops = { \
 	php_hash_copy, \
 	bits >> 3, \
 	(1600 - (2 * bits)) >> 3, \
-	sizeof(PHP_SHA3_##bits##_CTX) \
+	sizeof(PHP_SHA3_##bits##_CTX), \
+	1 \
 }
 
 DECLARE_SHA3_OPS(224);

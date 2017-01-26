@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -133,6 +133,13 @@ PHP_FUNCTION(parse_ini_string);
 PHP_FUNCTION(config_get_hash);
 #endif
 
+#if defined(PHP_WIN32)
+PHP_FUNCTION(sapi_windows_cp_set);
+PHP_FUNCTION(sapi_windows_cp_get);
+PHP_FUNCTION(sapi_windows_cp_is_utf8);
+PHP_FUNCTION(sapi_windows_cp_conv);
+#endif
+
 PHP_FUNCTION(str_rot13);
 PHP_FUNCTION(stream_get_filters);
 PHP_FUNCTION(stream_filter_register);
@@ -184,15 +191,13 @@ typedef struct _php_basic_globals {
 	char *CurrentStatFile, *CurrentLStatFile;
 	php_stream_statbuf ssb, lssb;
 
-	/* rand.c */
+	/* mt_rand.c */
 	uint32_t state[MT_N+1];  /* state vector + 1 extra to not violate ANSI C */
 	uint32_t *next;       /* next random value is computed from here */
 	int      left;        /* can *next++ this many times before reloading */
 
-	unsigned int rand_seed; /* Seed for rand(), in ts version */
-
-	zend_bool rand_is_seeded; /* Whether rand() has been seeded */
 	zend_bool mt_rand_is_seeded; /* Whether mt_rand() has been seeded */
+	zend_long mt_rand_mode;
 
 	/* syslog.c */
 	char *syslog_device;
@@ -210,7 +215,10 @@ typedef struct _php_basic_globals {
 	} unserialize;
 
 	/* url_scanner_ex.re */
-	url_adapt_state_ex_t url_adapt_state_ex;
+	url_adapt_state_ex_t url_adapt_session_ex;
+	HashTable url_adapt_session_hosts_ht;
+	url_adapt_state_ex_t url_adapt_output_ex;
+	HashTable url_adapt_output_hosts_ht;
 
 #ifdef HAVE_MMAP
 	void *mmap_file;

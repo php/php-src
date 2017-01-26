@@ -246,8 +246,9 @@ echo "Done\n";
 --EXPECTF--
 Test 1.1 In Length: default.  In Type: default.  Out Length: default.          Out Type: default
   Executing:
+    Oci_execute error ORA-6502
 string(3) "abc"
-string(3) "abc"
+NULL
 Test 1.2 In Length: default.  In Type: default.  Out Length: 10.               Out Type: default
   Executing:
 string(3) "abc"

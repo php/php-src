@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Jim Winstead <jimw@php.net>                                 |
-   |          Stig Sæther Bakken <ssb@php.net>                            |
+   |          Stig SÃ¦ther Bakken <ssb@php.net>                            |
    +----------------------------------------------------------------------+
 */
 
@@ -22,6 +22,7 @@
 #ifndef PHP_MATH_H
 #define PHP_MATH_H
 
+PHPAPI double _php_math_round(double, int, int);
 PHPAPI zend_string *_php_math_number_format(double, int, char, char);
 PHPAPI zend_string *_php_math_number_format_ex(double, int, char *, size_t, char *, size_t);
 PHPAPI zend_string * _php_math_longtobase(zval *arg, int base);
@@ -45,9 +46,7 @@ PHP_FUNCTION(is_infinite);
 PHP_FUNCTION(is_nan);
 PHP_FUNCTION(pow);
 PHP_FUNCTION(sqrt);
-PHP_FUNCTION(srand);
 PHP_FUNCTION(rand);
-PHP_FUNCTION(getrandmax);
 PHP_FUNCTION(mt_srand);
 PHP_FUNCTION(mt_rand);
 PHP_FUNCTION(mt_getrandmax);

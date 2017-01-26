@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -64,8 +64,12 @@ typedef unsigned long int uint32_t;
 # endif
 #endif
 
-#ifdef HAVE_LOCALE_H
-#define USE_LOCALE 1
+#ifdef USE_LOCALE
+#undef USE_LOCALE
+#endif
+
+#ifndef NO_INFNAN_CHECK
+#define NO_INFNAN_CHECK
 #endif
 
 #ifdef WORDS_BIGENDIAN

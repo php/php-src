@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -38,6 +38,7 @@ extern PHPAPI zend_class_entry *reflection_function_abstract_ptr;
 extern PHPAPI zend_class_entry *reflection_function_ptr;
 extern PHPAPI zend_class_entry *reflection_parameter_ptr;
 extern PHPAPI zend_class_entry *reflection_type_ptr;
+extern PHPAPI zend_class_entry *reflection_named_type_ptr;
 extern PHPAPI zend_class_entry *reflection_class_ptr;
 extern PHPAPI zend_class_entry *reflection_object_ptr;
 extern PHPAPI zend_class_entry *reflection_method_ptr;

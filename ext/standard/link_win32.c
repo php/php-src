@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -117,22 +117,7 @@ PHP_FUNCTION(symlink)
 	char dirname[MAXPATHLEN];
 	size_t len;
 	DWORD attr;
-	HINSTANCE kernel32;
-	typedef BOOLEAN (WINAPI *csla_func)(LPCSTR, LPCSTR, DWORD);
-	csla_func pCreateSymbolicLinkA;
-
-	kernel32 = LoadLibrary("kernel32.dll");
-
-	if (kernel32) {
-		pCreateSymbolicLinkA = (csla_func)GetProcAddress(kernel32, "CreateSymbolicLinkA");
-		if (pCreateSymbolicLinkA == NULL) {
-			php_error_docref(NULL, E_WARNING, "Can't call CreateSymbolicLinkA");
-			RETURN_FALSE;
-		}
-	} else {
-		php_error_docref(NULL, E_WARNING, "Can't call get a handle on kernel32.dll");
-		RETURN_FALSE;
-	}
+	wchar_t *dstw, *srcw;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pp", &topath, &topath_len, &frompath, &frompath_len) == FAILURE) {
 		return;
@@ -166,20 +151,37 @@ PHP_FUNCTION(symlink)
 		RETURN_FALSE;
 	}
 
-	if ((attr = GetFileAttributes(topath)) == INVALID_FILE_ATTRIBUTES) {
-			php_error_docref(NULL, E_WARNING, "Could not fetch file information(error %d)", GetLastError());
-			RETURN_FALSE;
+	dstw = php_win32_ioutil_any_to_w(topath);
+	if (!dstw) {
+		php_error_docref(NULL, E_WARNING, "UTF-16 conversion failed (error %d)", GetLastError());
+		RETURN_FALSE;
+	}
+	if ((attr = GetFileAttributesW(dstw)) == INVALID_FILE_ATTRIBUTES) {
+		free(dstw);
+		php_error_docref(NULL, E_WARNING, "Could not fetch file information(error %d)", GetLastError());
+		RETURN_FALSE;
 	}
 
+	srcw = php_win32_ioutil_any_to_w(source_p);
+	if (!srcw) {
+		free(dstw);
+		php_error_docref(NULL, E_WARNING, "UTF-16 conversion failed (error %d)", GetLastError());
+		RETURN_FALSE;
+	}
 	/* For the source, an expanded path must be used (in ZTS an other thread could have changed the CWD).
 	 * For the target the exact string given by the user must be used, relative or not, existing or not.
 	 * The target is relative to the link itself, not to the CWD. */
-	ret = pCreateSymbolicLinkA(source_p, topath, (attr & FILE_ATTRIBUTE_DIRECTORY ? 1 : 0));
+	ret = CreateSymbolicLinkW(srcw, dstw, (attr & FILE_ATTRIBUTE_DIRECTORY ? 1 : 0));
 
 	if (!ret) {
+		free(dstw);
+		free(srcw);
 		php_error_docref(NULL, E_WARNING, "Cannot create symlink, error code(%d)", GetLastError());
 		RETURN_FALSE;
 	}
+
+	free(dstw);
+	free(srcw);
 
 	RETURN_TRUE;
 }

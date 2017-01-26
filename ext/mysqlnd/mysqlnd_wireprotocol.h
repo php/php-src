@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2016 The PHP Group                                |
+  | Copyright (c) 2006-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -12,11 +12,11 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Andrey Hristov <andrey@mysql.com>                           |
-  |          Ulf Wendel <uwendel@mysql.com>                              |
-  |          Georg Richter <georg@mysql.com>                             |
+  | Authors: Andrey Hristov <andrey@php.net>                             |
+  |          Ulf Wendel <uw@php.net>                                     |
   +----------------------------------------------------------------------+
 */
+
 #ifndef MYSQLND_WIREPROTOCOL_H
 #define MYSQLND_WIREPROTOCOL_H
 
@@ -235,9 +235,6 @@ typedef struct st_mysqlnd_packet_row {
 	zend_bool		binary_protocol;
 	zend_bool		persistent_alloc;
 	MYSQLND_FIELD	*fields_metadata;
-	/* We need this to alloc bigger bufs in non-PS mode */
-	unsigned int	bit_fields_count;
-	size_t			bit_fields_total_len; /* trailing \0 not counted */
 
 	/* If error packet, we use these */
 	MYSQLND_ERROR_INFO	error_info;
@@ -297,10 +294,10 @@ typedef struct  st_mysqlnd_packet_sha256_pk_request_response {
 
 
 zend_ulong		php_mysqlnd_net_field_length(const zend_uchar **packet);
-zend_uchar *	php_mysqlnd_net_store_length(zend_uchar *packet, uint64_t length);
+zend_uchar *	php_mysqlnd_net_store_length(zend_uchar *packet, const uint64_t length);
 size_t			php_mysqlnd_net_store_length_size(uint64_t length);
 
-PHPAPI const extern char * const mysqlnd_empty_string;
+PHPAPI extern const char * const mysqlnd_empty_string;
 
 enum_func_status php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval * fields,
 										 unsigned int field_count, const MYSQLND_FIELD * fields_metadata,

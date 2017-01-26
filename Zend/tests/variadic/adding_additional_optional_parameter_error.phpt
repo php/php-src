@@ -13,4 +13,4 @@ class MySQL implements DB {
 
 ?>
 --EXPECTF--
-Fatal error: Declaration of MySQL::query($query, int $extraParam = NULL, string ...$params) must be compatible with DB::query($query, string ...$params) in %s on line %d
+Fatal error: Declaration of MySQL::query($query, ?int $extraParam = NULL, string ...$params) must be compatible with DB::query($query, string ...$params) in %s on line %d

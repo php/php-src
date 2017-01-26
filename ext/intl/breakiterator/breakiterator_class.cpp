@@ -184,13 +184,6 @@ static void breakiterator_object_init(BreakIterator_object *bio)
 }
 /* }}} */
 
-/* {{{ BreakIterator_objects_dtor */
-static void BreakIterator_objects_dtor(zend_object *object)
-{
-	zend_objects_destroy_object(object);
-}
-/* }}} */
-
 /* {{{ BreakIterator_objects_free */
 static void BreakIterator_objects_free(zend_object *object)
 {
@@ -332,7 +325,6 @@ U_CFUNC void breakiterator_register_BreakIterator_class(void)
 	BreakIterator_handlers.compare_objects = BreakIterator_compare_objects;
 	BreakIterator_handlers.clone_obj = BreakIterator_clone_obj;
 	BreakIterator_handlers.get_debug_info = BreakIterator_get_debug_info;
-	BreakIterator_handlers.dtor_obj = BreakIterator_objects_dtor;
 	BreakIterator_handlers.free_obj = BreakIterator_objects_free;
 
 	zend_class_implements(BreakIterator_ce_ptr, 1,

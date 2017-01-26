@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,8 +27,6 @@
 #endif
 
 #define ACCELERATOR_PRODUCT_NAME	"Zend OPcache"
-#define PHP_ZENDOPCACHE_VERSION 	"7.0.6-dev"
-#define ACCELERATOR_VERSION PHP_ZENDOPCACHE_VERSION
 /* 2 - added Profiler support, on 20010712 */
 /* 3 - added support for Optimizer's encoded-only-files mode */
 /* 4 - works with the new Optimizer, that supports the file format with licenses */
@@ -77,7 +75,8 @@
 
 #ifdef ZEND_WIN32
 # ifndef MAXPATHLEN
-#  define MAXPATHLEN     _MAX_PATH
+#  include "win32/ioutil.h"
+#  define MAXPATHLEN PHP_WIN32_IOUTIL_MAXPATHLEN
 # endif
 # include <direct.h>
 #else
@@ -181,8 +180,12 @@ typedef struct _zend_accel_directives {
 	zend_bool      file_override_enabled;
 	zend_bool      inherited_hack;
 	zend_bool      enable_cli;
-	zend_ulong  revalidate_freq;
-	zend_ulong  file_update_protection;
+	zend_bool      validate_permission;
+#ifndef ZEND_WIN32
+	zend_bool      validate_root;
+#endif
+	zend_ulong     revalidate_freq;
+	zend_ulong     file_update_protection;
 	char          *error_log;
 #ifdef ZEND_WIN32
 	char          *mmap_base;
@@ -195,6 +198,9 @@ typedef struct _zend_accel_directives {
 	zend_long           max_file_size;
 	zend_long           interned_strings_buffer;
 	char          *restrict_api;
+#ifndef ZEND_WIN32
+	char          *lockfile_path;
+#endif
 #ifdef HAVE_OPCACHE_FILE_CACHE
 	char          *file_cache;
 	zend_bool      file_cache_only;
@@ -231,6 +237,9 @@ typedef struct _zend_accel_globals {
 	time_t                  last_restart_time; /* used to synchronize SHM and in-process caches */
 	char                    system_id[32];
 	HashTable               xlat_table;
+#ifndef ZEND_WIN32
+	zend_ulong              root_hash;
+#endif
 	/* preallocated shared-memory block to save current script */
 	void                   *mem;
 	void                   *arena_mem;

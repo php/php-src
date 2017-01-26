@@ -20,8 +20,8 @@ if (PHP_INT_SIZE != 8) die('skip 64-bit only');
 echo "*** Testing mb_strpos() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$needle = b'a';
-$haystack = b'string_val';
+$needle = 'a';
+$haystack = 'string_val';
 $encoding = 'utf-8';
 
 //get an unset variable

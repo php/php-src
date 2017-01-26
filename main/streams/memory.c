@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -214,17 +214,9 @@ static int php_stream_memory_stat(php_stream *stream, php_stream_statbuf *ssb) /
 
 	ssb->sb.st_size = ms->fsize;
 	ssb->sb.st_mode |= S_IFREG; /* regular file */
-
-#ifdef NETWARE
-	ssb->sb.st_mtime.tv_sec = timestamp;
-	ssb->sb.st_atime.tv_sec = timestamp;
-	ssb->sb.st_ctime.tv_sec = timestamp;
-#else
 	ssb->sb.st_mtime = timestamp;
 	ssb->sb.st_atime = timestamp;
 	ssb->sb.st_ctime = timestamp;
-#endif
-
 	ssb->sb.st_nlink = 1;
 	ssb->sb.st_rdev = -1;
 	/* this is only for APC, so use /dev/null device - no chance of conflict there! */
@@ -695,7 +687,7 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 			}
 			/* found parameter ... the heart of cs ppl lies in +1/-1 or was it +2 this time? */
 			plen = sep - path;
-			vlen = (semi ? semi - sep : mlen - plen) - 1 /* '=' */;
+			vlen = (semi ? (size_t)(semi - sep) : (mlen - plen)) - 1 /* '=' */;
 			key = estrndup(path, plen);
 			if (plen != sizeof("mediatype")-1 || memcmp(key, "mediatype", sizeof("mediatype")-1)) {
 				add_assoc_stringl_ex(&meta, key, plen, sep + 1, vlen);
@@ -720,7 +712,7 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 	dlen--;
 
 	if (base64) {
-		base64_comma = php_base64_decode((const unsigned char *)comma, dlen);
+		base64_comma = php_base64_decode_ex((const unsigned char *)comma, dlen, 1);
 		if (!base64_comma) {
 			zval_ptr_dtor(&meta);
 			php_stream_wrapper_log_error(wrapper, options, "rfc2397: unable to decode");
@@ -770,7 +762,8 @@ PHPAPI php_stream_wrapper_ops php_stream_rfc2397_wops = {
 	NULL, /* unlink */
 	NULL, /* rename */
 	NULL, /* mkdir */
-	NULL  /* rmdir */
+	NULL, /* rmdir */
+	NULL, /* stream_metadata */
 };
 
 PHPAPI php_stream_wrapper php_stream_rfc2397_wrapper =	{

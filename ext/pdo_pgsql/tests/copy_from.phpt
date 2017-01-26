@@ -124,7 +124,7 @@ foreach (array($filename, $filenameWithDifferentNullValues, $filenameWithDiffere
 	@unlink($f);
 }
 ?>
---EXPECT--
+--EXPECTF--
 Preparing test file and array for CopyFrom tests
 Testing pgsqlCopyFromArray() with default parameters
 bool(true)
@@ -259,7 +259,7 @@ array(6) {
   NULL
 }
 Testing pgsqlCopyFromArray() with error
-Exception: SQLSTATE[42P01]: Undefined table: 7 ERROR:  relation "test_error" does not exist
+Exception: SQLSTATE[42P01]: Undefined table: 7 %s:  %s "test_error" %s
 Testing pgsqlCopyFromFile() with default parameters
 bool(true)
 array(6) {
@@ -393,7 +393,7 @@ array(6) {
   NULL
 }
 Testing pgsqlCopyFromFile() with error
-Exception: SQLSTATE[42P01]: Undefined table: 7 ERROR:  relation "test_error" does not exist
+Exception: SQLSTATE[42P01]: Undefined table: 7 %s:  %s "test_error" %s
 Testing pgsqlCopyFromFile() with non existing file
 Exception: SQLSTATE[HY000]: General error: 7 Unable to open the file
 

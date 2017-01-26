@@ -242,7 +242,7 @@ int main() {
 dnl
 dnl If one of them is missing, use our own implementation, portable code is then possible
 dnl
-if test "$ac_cv_crypt_blowfish" = "no" || test "$ac_cv_crypt_des" = "no" || test "$ac_cv_crypt_ext_des" = "no" || test "x$php_crypt_r" = "x0"; then
+if test "$ac_cv_crypt_blowfish" = "no" || test "$ac_cv_crypt_des" = "no" || test "$ac_cv_crypt_ext_des" = "no" || test "$ac_cv_crypt_md5" = "no" || test "$ac_cv_crypt_sha512" = "no" || test "$ac_cv_crypt_sha256" = "no" || test "x$php_crypt_r" = "x0"; then
 
   dnl
   dnl Check for __alignof__ support in the compiler
@@ -260,88 +260,27 @@ if test "$ac_cv_crypt_blowfish" = "no" || test "$ac_cv_crypt_des" = "no" || test
     AC_DEFINE([HAVE_ALIGNOF], 1, [whether the compiler supports __alignof__])
   fi
 
-  dnl 
-  dnl Check for __attribute__ ((__aligned__)) support in the compiler
-  dnl
-  AC_CACHE_CHECK(whether the compiler supports aligned attribute, ac_cv_attribute_aligned,[
-  AC_TRY_COMPILE([
-  ],[
-    unsigned char test[32] __attribute__ ((__aligned__ (__alignof__ (int))));
-  ],[
-    ac_cv_attribute_aligned=yes
-  ],[
-    ac_cv_attribute_aligned=no
-  ])])
-  if test "$ac_cv_attribute_aligned" = "yes"; then
-    AC_DEFINE([HAVE_ATTRIBUTE_ALIGNED], 1, [whether the compiler supports __attribute__ ((__aligned__))])
-  fi
-    
-
   AC_DEFINE_UNQUOTED(PHP_USE_PHP_CRYPT_R, 1, [Whether PHP has to use its own crypt_r for blowfish, des, ext des and md5])
-  AC_DEFINE_UNQUOTED(PHP_STD_DES_CRYPT, 1, [Whether the system supports standard DES salt])
-  AC_DEFINE_UNQUOTED(PHP_BLOWFISH_CRYPT, 1, [Whether the system supports BlowFish salt])
-  AC_DEFINE_UNQUOTED(PHP_EXT_DES_CRYPT, 1, [Whether the system supports extended DES salt])
-  AC_DEFINE_UNQUOTED(PHP_MD5_CRYPT, 1, [Whether the system supports MD5 salt])
-  AC_DEFINE_UNQUOTED(PHP_SHA512_CRYPT, 1, [Whether the system supports SHA512 salt])
-  AC_DEFINE_UNQUOTED(PHP_SHA256_CRYPT, 1, [Whether the system supports SHA256 salt])
 
   PHP_ADD_SOURCES(PHP_EXT_DIR(standard), crypt_freesec.c crypt_blowfish.c crypt_sha512.c crypt_sha256.c php_crypt_r.c)
 else
-  if test "$ac_cv_crypt_des" = "yes"; then
-    ac_result=1
-    ac_crypt_des=1
-  else
-    ac_result=0
-    ac_crypt_des=0
-  fi
-  AC_DEFINE_UNQUOTED(PHP_STD_DES_CRYPT, $ac_result, [Whether the system supports standard DES salt])
-
-  if test "$ac_cv_crypt_blowfish" = "yes"; then
-    ac_result=1
-    ac_crypt_blowfish=1
-  else
-    ac_result=0
-    ac_crypt_blowfish=0
-  fi
-  AC_DEFINE_UNQUOTED(PHP_BLOWFISH_CRYPT, $ac_result, [Whether the system supports BlowFish salt])
-
-  if test "$ac_cv_crypt_ext_des" = "yes"; then
-    ac_result=1
-    ac_crypt_edes=1
-  else
-    ac_result=0
-    ac_crypt_edes=0
-  fi
-  AC_DEFINE_UNQUOTED(PHP_EXT_DES_CRYPT, $ac_result, [Whether the system supports extended DES salt])
-
-  if test "$ac_cv_crypt_md5" = "yes"; then
-    ac_result=1
-    ac_crypt_md5=1
-  else
-    ac_result=0
-    ac_crypt_md5=0
-  fi
-  AC_DEFINE_UNQUOTED(PHP_MD5_CRYPT, $ac_result, [Whether the system supports MD5 salt])  
-  
-  if test "$ac_cv_crypt_sha512" = "yes"; then
-    ac_result=1
-    ac_crypt_sha512=1
-  else
-    ac_result=0
-    ac_crypt_sha512=0
-  fi
-  AC_DEFINE_UNQUOTED(PHP_SHA512_CRYPT, $ac_result, [Whether the system supports SHA512 salt])
-
-  if test "$ac_cv_crypt_sha256" = "yes"; then
-    ac_result=1
-    ac_crypt_sha256=1
-  else
-    ac_result=0
-    ac_crypt_sha256=0
-  fi
-  AC_DEFINE_UNQUOTED(PHP_SHA256_CRYPT, $ac_result, [Whether the system supports SHA256 salt])
-
   AC_DEFINE_UNQUOTED(PHP_USE_PHP_CRYPT_R, 0, [Whether PHP has to use its own crypt_r for blowfish, des and ext des])
+fi
+
+dnl 
+dnl Check for __attribute__ ((__aligned__)) support in the compiler
+dnl
+AC_CACHE_CHECK(whether the compiler supports aligned attribute, ac_cv_attribute_aligned,[
+AC_TRY_COMPILE([
+],[
+  unsigned char test[32] __attribute__ ((__aligned__ (__alignof__ (int))));
+],[
+  ac_cv_attribute_aligned=yes
+],[
+  ac_cv_attribute_aligned=no
+])])
+if test "$ac_cv_attribute_aligned" = "yes"; then
+  AC_DEFINE([HAVE_ATTRIBUTE_ALIGNED], 1, [whether the compiler supports __attribute__ ((__aligned__))])
 fi
 
 dnl
@@ -401,6 +340,7 @@ dnl Detect library functions needed by php dns_xxx functions
 dnl ext/standard/php_dns.h will collect these in a single define: HAVE_FULL_DNS_FUNCS
 dnl
 PHP_CHECK_FUNC(res_nsearch, resolv, bind, socket)
+PHP_CHECK_FUNC(res_ndestroy, resolv, bind, socket)
 PHP_CHECK_FUNC(dns_search, resolv, bind, socket)
 PHP_CHECK_FUNC(dn_expand, resolv, bind, socket)
 PHP_CHECK_FUNC(dn_skipname, resolv, bind, socket)
@@ -410,143 +350,6 @@ dnl These are old deprecated functions
 dnl
 
 PHP_CHECK_FUNC(res_search, resolv, bind, socket)
-
-dnl
-dnl Check if atof() accepts NAN
-dnl
-AC_CACHE_CHECK(whether atof() accepts NAN, ac_cv_atof_accept_nan,[
-AC_TRY_RUN([
-#include <math.h>
-#include <stdlib.h>
-
-#ifdef HAVE_ISNAN
-#define zend_isnan(a) isnan(a)
-#elif defined(HAVE_FPCLASS)
-#define zend_isnan(a) ((fpclass(a) == FP_SNAN) || (fpclass(a) == FP_QNAN))
-#else
-#define zend_isnan(a) 0
-#endif
-
-int main(int argc, char** argv)
-{
-	return zend_isnan(atof("NAN")) ? 0 : 1;
-}
-],[
-  ac_cv_atof_accept_nan=yes
-],[
-  ac_cv_atof_accept_nan=no
-],[
-  ac_cv_atof_accept_nan=no
-])])
-if test "$ac_cv_atof_accept_nan" = "yes"; then
-  AC_DEFINE([HAVE_ATOF_ACCEPTS_NAN], 1, [whether atof() accepts NAN])
-fi
-
-dnl
-dnl Check if atof() accepts INF
-dnl
-AC_CACHE_CHECK(whether atof() accepts INF, ac_cv_atof_accept_inf,[
-AC_TRY_RUN([
-#include <math.h>
-#include <stdlib.h>
-
-#ifdef HAVE_ISINF
-#define zend_isinf(a) isinf(a)
-#elif defined(INFINITY)
-/* Might not work, but is required by ISO C99 */
-#define zend_isinf(a) (((a)==INFINITY)?1:0)
-#elif defined(HAVE_FPCLASS)
-#define zend_isinf(a) ((fpclass(a) == FP_PINF) || (fpclass(a) == FP_NINF))
-#else
-#define zend_isinf(a) 0
-#endif
-
-int main(int argc, char** argv)
-{
-	return zend_isinf(atof("INF")) && zend_isinf(atof("-INF")) ? 0 : 1;
-}
-],[
-  ac_cv_atof_accept_inf=yes
-],[
-  ac_cv_atof_accept_inf=no
-],[
-  ac_cv_atof_accept_inf=no
-])])
-if test "$ac_cv_atof_accept_inf" = "yes"; then
-  AC_DEFINE([HAVE_ATOF_ACCEPTS_INF], 1, [whether atof() accepts INF])
-fi
-
-dnl
-dnl Check if HUGE_VAL == INF
-dnl
-AC_CACHE_CHECK(whether HUGE_VAL == INF, ac_cv_huge_val_inf,[
-AC_TRY_RUN([
-#include <math.h>
-#include <stdlib.h>
-
-#ifdef HAVE_ISINF
-#define zend_isinf(a) isinf(a)
-#elif defined(INFINITY)
-/* Might not work, but is required by ISO C99 */
-#define zend_isinf(a) (((a)==INFINITY)?1:0)
-#elif defined(HAVE_FPCLASS)
-#define zend_isinf(a) ((fpclass(a) == FP_PINF) || (fpclass(a) == FP_NINF))
-#else
-#define zend_isinf(a) 0
-#endif
-
-int main(int argc, char** argv)
-{
-	return zend_isinf(HUGE_VAL) ? 0 : 1;
-}
-],[
-  ac_cv_huge_val_inf=yes
-],[
-  ac_cv_huge_val_inf=no
-],[
-  ac_cv_huge_val_inf=yes
-])])
-dnl This is the most probable fallback so we assume yes in case of cross compile.
-if test "$ac_cv_huge_val_inf" = "yes"; then
-  AC_DEFINE([HAVE_HUGE_VAL_INF], 1, [whether HUGE_VAL == INF])
-fi
-
-dnl
-dnl Check if HUGE_VAL + -HUGEVAL == NAN
-dnl
-AC_CACHE_CHECK(whether HUGE_VAL + -HUGEVAL == NAN, ac_cv_huge_val_nan,[
-AC_TRY_RUN([
-#include <math.h>
-#include <stdlib.h>
-
-#ifdef HAVE_ISNAN
-#define zend_isnan(a) isnan(a)
-#elif defined(HAVE_FPCLASS)
-#define zend_isnan(a) ((fpclass(a) == FP_SNAN) || (fpclass(a) == FP_QNAN))
-#else
-#define zend_isnan(a) 0
-#endif
-
-int main(int argc, char** argv)
-{
-#if defined(__sparc__) && !(__GNUC__ >= 3)
-	/* prevent bug #27830 */
-	return 1;
-#else
-	return zend_isnan(HUGE_VAL + -HUGE_VAL) ? 0 : 1;
-#endif
-}
-],[
-  ac_cv_huge_val_nan=yes
-],[
-  ac_cv_huge_val_nan=no
-],[
-  ac_cv_huge_val_nan=yes
-])])
-dnl This is the most probable fallback so we assume yes in case of cross compile.
-if test "$ac_cv_huge_val_nan" = "yes"; then
-  AC_DEFINE([HAVE_HUGE_VAL_NAN], 1, [whether HUGE_VAL + -HUGEVAL == NAN])
-fi
 
 dnl
 dnl Check for strptime()
@@ -607,9 +410,36 @@ dnl
 AC_CHECK_DECLS([arc4random_buf])
 
 dnl
-dnl Check for getrandom on newer Linux kernels
+dnl Check for argon2
 dnl
-AC_CHECK_DECLS([getrandom])
+PHP_ARG_WITH(password-argon2, for Argon2 support,
+[  --with-password-argon2[=DIR]           Include Argon2 support in password_*. DIR is the Argon2 shared library path]])
+
+if test "$PHP_PASSWORD_ARGON2" != "no"; then
+  AC_MSG_CHECKING([for Argon2 library])
+  for i in $PHP_PASSWORD_ARGON2 /usr /usr/local ; do
+    if test -r $i/include/argon2.h; then
+      ARGON2_DIR=$i;
+      AC_MSG_RESULT(found in $i)
+      break
+    fi
+  done
+
+  if test -z "$ARGON2_DIR"; then
+    AC_MSG_RESULT([not found])
+    AC_MSG_ERROR([Please ensure the argon2 header and library are installed])
+  fi
+
+  PHP_ADD_LIBRARY_WITH_PATH(argon2, $ARGON2_DIR/$PHP_LIBDIR)
+  PHP_ADD_INCLUDE($ARGON2_DIR/include)
+
+  AC_CHECK_LIB(argon2, argon2_hash, [
+    LIBS="$LIBS -largon2"
+    AC_DEFINE(HAVE_ARGON2LIB, 1, [ Define to 1 if you have the <argon2.h> header file ])
+  ], [
+    AC_MSG_ERROR([Problem with libargon2.(a|so). Please verify that Argon2 header and libaries are installed])
+  ])
+fi
 
 dnl
 dnl Setup extension sources
@@ -618,7 +448,7 @@ PHP_NEW_EXTENSION(standard, array.c base64.c basic_functions.c browscap.c crc32.
                             cyr_convert.c datetime.c dir.c dl.c dns.c exec.c file.c filestat.c \
                             flock_compat.c formatted_print.c fsock.c head.c html.c image.c \
                             info.c iptc.c lcg.c link.c mail.c math.c md5.c metaphone.c \
-                            microtime.c pack.c pageinfo.c quot_print.c rand.c \
+                            microtime.c pack.c pageinfo.c quot_print.c rand.c mt_rand.c \
                             soundex.c string.c scanf.c syslog.c type.c uniqid.c url.c \
                             var.c versioning.c assert.c strnatcmp.c levenshtein.c \
                             incomplete_class.c url_scanner_ex.c ftp_fopen_wrapper.c \

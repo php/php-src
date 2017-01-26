@@ -1,0 +1,57 @@
+
+version: "{branch}.build.{build}"
+
+image: Visual Studio 2015
+
+branches:
+        except:
+                - PHP-5.6
+                - PHP-7.0
+
+skip_commits:
+        files:
+                - NEWS
+                - UPGRADING*
+                - README.*
+
+clone_depth: 64
+
+cache:
+        - c:\build-cache
+        - c:\build-cache\sdk -> .appveyor.yml
+
+environment:
+        PHP_BUILD_CACHE_BASE_DIR: c:\build-cache  
+        PHP_BUILD_OBJ_DIR: c:\obj
+        PHP_BUILD_CACHE_SDK_DIR: c:\build-cache\sdk
+        PHP_BUILD_SDK_BRANCH: php-sdk-2.0.0beta1
+        # ext and env setup for tests
+        #MYSQL_TEST_PASSWD: Password12!
+        #MYSQL_TEST_USER: root
+        #PDO_MYSQL_TEST_DSN: "pgsql:host=127.0.0.1 port=5432 dbname=test user=root password=Password12!"
+        #PDO_MYSQL_TEST_USER: root
+        #PDO_MYSQL_TEST_PASS: Password12!
+        #PGSQL_TEST_CONNSTR: "host=127.0.0.1 dbname=test port=5432 user=postgres password=Password12!"
+        #PDO_PGSQL_TEST_DSN: "pgsql:host=127.0.0.1 port=5432 dbname=test user=postgres password=Password12!"
+        #build permutations
+        matrix:
+                - THREAD_SAFE: 0
+                  OPCACHE: 0
+                - THREAD_SAFE: 1
+                  OPCACHE: 1
+
+services:
+        # the setup scripts have to be touched, once some other db version is used
+        - mysql
+        - postgresql95
+
+platform:
+        - x64
+          #        - x86
+
+build_script:
+        - appveyor\build.bat
+
+test_script:
+        - appveyor\test.bat
+

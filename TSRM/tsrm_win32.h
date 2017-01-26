@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,9 +26,10 @@
 #if HAVE_UTIME
 # include <sys/utime.h>
 #endif
+#include "win32/ipc.h"
 
 struct ipc_perm {
-	int			key;
+	key_t		key;
 	unsigned short	uid;
 	unsigned short	gid;
 	unsigned short	cuid;
@@ -39,7 +40,7 @@ struct ipc_perm {
 
 struct shmid_ds {
 	struct	ipc_perm	shm_perm;
-	int				shm_segsz;
+	size_t			shm_segsz;
 	time_t			shm_atime;
 	time_t			shm_dtime;
 	time_t			shm_ctime;
@@ -105,7 +106,7 @@ TSRM_API int pclose(FILE *stream);
 TSRM_API int tsrm_win32_access(const char *pathname, int mode);
 TSRM_API int win32_utime(const char *filename, struct utimbuf *buf);
 
-TSRM_API int shmget(int key, int size, int flags);
+TSRM_API int shmget(key_t key, size_t size, int flags);
 TSRM_API void *shmat(int key, const void *shmaddr, int flags);
 TSRM_API int shmdt(const void *shmaddr);
 TSRM_API int shmctl(int key, int cmd, struct shmid_ds *buf);

@@ -89,7 +89,8 @@ function run_fpm_till($needle, $config, $max = 10) /* {{{ */
 /* }}} */
 
 function fpm_display_log($tail, $n=1, $ignore='systemd') { /* {{{ */
-	while ($n) {
+	/* Read $n lines or until EOF */
+	while ($n>0 || ($n<0 && !feof($tail))) {
 		$a = fgets($tail);
 		if (empty($ignore) || !strpos($a, $ignore)) {
 			echo $a;
@@ -98,10 +99,10 @@ function fpm_display_log($tail, $n=1, $ignore='systemd') { /* {{{ */
 	}
 } /* }}} */
 
-function run_request($host, $port, $uri='/ping', $query='') { /* {{{ */
+function run_request($host, $port, $uri='/ping', $query='', $headers=array()) {  /* {{{ */
 	require_once 'fcgi.inc';
 	$client = new Adoy\FastCGI\Client($host, $port);
-	$params = array(
+	$params = array_merge(array(
 		'GATEWAY_INTERFACE' => 'FastCGI/1.0',
 		'REQUEST_METHOD'    => 'GET',
 		'SCRIPT_FILENAME'   => $uri,
@@ -118,7 +119,7 @@ function run_request($host, $port, $uri='/ping', $query='') { /* {{{ */
 		'SERVER_PROTOCOL'   => 'HTTP/1.1',
 		'CONTENT_TYPE'      => '',
 		'CONTENT_LENGTH'    => 0
-	);
+	), $headers);
 	return $client->request($params, false)."\n";
 }
 /* }}} */

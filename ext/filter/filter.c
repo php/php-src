@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -286,6 +286,8 @@ PHP_MINIT_FUNCTION(filter)
 
 	REGISTER_LONG_CONSTANT("FILTER_FLAG_HOSTNAME", FILTER_FLAG_HOSTNAME, CONST_CS | CONST_PERSISTENT);
 
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_EMAIL_UNICODE", FILTER_FLAG_EMAIL_UNICODE, CONST_CS | CONST_PERSISTENT);
+
 	sapi_register_input_filter(php_sapi_filter, php_sapi_filter_init);
 
 	return SUCCESS;
@@ -395,7 +397,7 @@ static void php_zval_filter(zval *value, zend_long filter, zend_long flags, zval
 			} else {
 				ZVAL_FALSE(value);
 			}
-			return;
+			goto handle_default;
 		}
 	}
 
@@ -404,6 +406,7 @@ static void php_zval_filter(zval *value, zend_long filter, zend_long flags, zval
 
 	filter_func.function(value, flags, options, charset);
 
+handle_default:
 	if (options && (Z_TYPE_P(options) == IS_ARRAY || Z_TYPE_P(options) == IS_OBJECT) &&
 		((flags & FILTER_NULL_ON_FAILURE && Z_TYPE_P(value) == IS_NULL) ||
 		(!(flags & FILTER_NULL_ON_FAILURE) && Z_TYPE_P(value) == IS_FALSE)) &&

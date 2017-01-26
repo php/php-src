@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -279,7 +279,6 @@ static union _zend_function *com_method_get(zend_object **object_ptr, zend_strin
 		f.fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
 		f.function_name = zend_string_copy(name);
 		f.handler = PHP_FN(com_method_handler);
-		zend_set_function_arg_flags((zend_function*)&f);
 
 		fptr = &f;
 
@@ -303,9 +302,9 @@ static union _zend_function *com_method_get(zend_object **object_ptr, zend_strin
 							f.arg_info = ecalloc(bindptr.lpfuncdesc->cParams, sizeof(zend_arg_info));
 
 							for (i = 0; i < bindptr.lpfuncdesc->cParams; i++) {
-								f.arg_info[i].allow_null = 1;
+								f.arg_info[i].type = ZEND_TYPE_ENCODE(0,1);;
 								if (bindptr.lpfuncdesc->lprgelemdescParam[i].paramdesc.wParamFlags & PARAMFLAG_FOUT) {
-									f.arg_info[i].pass_by_reference = 1;
+									f.arg_info[i].pass_by_reference = ZEND_SEND_BY_REF;
 								}
 							}
 
@@ -335,15 +334,14 @@ static union _zend_function *com_method_get(zend_object **object_ptr, zend_strin
 			}
 		}
 
-		if (fptr) {
-			/* save this method in the cache */
-			if (!obj->method_cache) {
-				ALLOC_HASHTABLE(obj->method_cache);
-				zend_hash_init(obj->method_cache, 2, NULL, function_dtor, 0);
-			}
-
-			zend_hash_update_mem(obj->method_cache, name, &f, sizeof(f));
+		zend_set_function_arg_flags((zend_function*)&f);
+		/* save this method in the cache */
+		if (!obj->method_cache) {
+			ALLOC_HASHTABLE(obj->method_cache);
+			zend_hash_init(obj->method_cache, 2, NULL, function_dtor, 0);
 		}
+
+		zend_hash_update_mem(obj->method_cache, name, &f, sizeof(f));
 	}
 
 	if (fptr) {
@@ -657,6 +655,8 @@ zend_object* php_com_object_new(zend_class_entry *ce)
 
 	zend_object_std_init(&obj->zo, ce);
 	obj->zo.handlers = &php_com_object_handlers;
+
+	obj->typeinfo = NULL;
 
 	return (zend_object*)obj;
 }

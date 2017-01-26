@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -60,7 +60,8 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 	php_stream *stream = NULL;
 	php_stream_transport_factory factory = NULL;
 	const char *p, *protocol = NULL;
-	int n = 0, failed = 0;
+	size_t n = 0;
+	int failed = 0;
 	zend_string *error_text = NULL;
 	struct timeval default_timeout = { 0, 0 };
 

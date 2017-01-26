@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -99,7 +99,7 @@ int _php_ibase_blob_get(zval *return_value, ibase_blob *ib_blob, zend_ulong max_
 		zend_ulong cur_len;
 		unsigned short seg_len;
 
-		bl_data = zend_string_alloc(max_len, 0);
+		bl_data = zend_string_safe_alloc(1, max_len, 0, 0);
 
 		for (cur_len = stat = 0; (stat == 0 || stat == isc_segment) && cur_len < max_len; cur_len += seg_len) {
 

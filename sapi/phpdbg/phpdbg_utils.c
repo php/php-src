@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -532,7 +532,7 @@ PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable
 			last_index[index_len] = 0;
 			if (!(zv = zend_symtable_str_find(parent, last_index, index_len))) {
 				if (!silent) {
-					phpdbg_error("variable", "type=\"undefined\" variable=\"%.*s\"", "%.*s is undefined", (int) i, input);
+					phpdbg_error("variable", "type=\"undefined\" variable=\"%.*s\"", "%.*s is undefined", (int) input[i] == ']' ? i + 1 : i, input);
 				}
 				return FAILURE;
 			}
@@ -772,7 +772,7 @@ PHPDBG_API zend_bool phpdbg_check_caught_ex(zend_execute_data *execute_data, zen
 					return 1;
 				}
 
-				catch = cur->extended_value;
+				catch += cur->extended_value / sizeof(zend_op);
 			} while (!cur->result.num);
 
 			return 0;
@@ -804,10 +804,22 @@ char *phpdbg_short_zval_print(zval *zv, int maxlen) /* {{{ */
 			break;
 		case IS_DOUBLE:
 			spprintf(&decode, 0, "%.*G", 14, Z_DVAL_P(zv));
+
+			/* Make sure it looks like a float */
+			if (zend_finite(Z_DVAL_P(zv)) && !strchr(decode, '.')) {
+				size_t len = strlen(decode);
+				char *decode2 = emalloc(len + strlen(".0") + 1);
+				memcpy(decode2, decode, len);
+				decode2[len] = '.';
+				decode2[len+1] = '0';
+				decode2[len+2] = '\0';
+				efree(decode);
+				decode = decode2;
+			}
 			break;
 		case IS_STRING: {
 			int i;
-			zend_string *str = php_addcslashes(Z_STR_P(zv), 0, "\\\"", 2);
+			zend_string *str = php_addcslashes(Z_STR_P(zv), 0, "\\\"\n\t\0", 5);
 			for (i = 0; i < ZSTR_LEN(str); i++) {
 				if (ZSTR_VAL(str)[i] < 32) {
 					ZSTR_VAL(str)[i] = ' ';
