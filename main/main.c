@@ -2074,15 +2074,15 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 #endif
 
 #if defined(PHP_WIN32)
-	php_os_family = "WIN";
+	php_os_family = "Windows";
 #elif defined(BSD) || defined(__DragonFly__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
 	php_os_family = "BSD";
 #elif defined(__APPLE__) || defined(__MACH__)
 	php_os_family = "OSX";
 #elif defined(__sun__)
-	php_os_family = "SOLARIS";
+	php_os_family = "Solaris";
 #elif defined(__linux__)
-	php_os_family = "LINUX";
+	php_os_family = "Linux";
 #else
 	php_os_family = "unknown";
 #endif
