@@ -879,9 +879,6 @@ static void copy_constant_array(zval *dst, zval *src) /* {{{ */
 			}
 		} else if (Z_REFCOUNTED_P(val)) {
 			Z_ADDREF_P(val);
-			if (UNEXPECTED(Z_TYPE_INFO_P(val) == IS_RESOURCE_EX)) {
-				Z_TYPE_INFO_P(new_val) &= ~(IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT);
-			}
 		}
 	} ZEND_HASH_FOREACH_END();
 }
@@ -924,12 +921,7 @@ repeat:
 		case IS_FALSE:
 		case IS_TRUE:
 		case IS_NULL:
-			break;
 		case IS_RESOURCE:
-			ZVAL_COPY(&val_free, val);
-			/* TODO: better solution than this tricky disable dtor on resource? */
-			Z_TYPE_INFO(val_free) &= ~(IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT);
-			val = &val_free;
 			break;
 		case IS_ARRAY:
 			if (!Z_IMMUTABLE_P(val)) {
