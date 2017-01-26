@@ -25,6 +25,7 @@ PHP                                                                        NEWS
   . Fixed bug #73969 (segfault in debug_print_backtrace). (andrewnester)
   . Added PHP_OS_FAMILY constant to determine on which OS we are. (Jan Altensen)
   . Fixed bug #73994 (arginfo incorrect for unpack). (krakjoe)
+  . Fixed bug #73973 (assertion error in debug_zval_dump). (andrewnester)
 
 - BCMath:
   . Fixed bug #46564 (bcmod truncates fractionals). (liborm85)
