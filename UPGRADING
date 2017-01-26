@@ -204,6 +204,7 @@ PHP 7.2 UPGRADE NOTES
                       x + 1.0 != 1.0
   . PHP_FLOAT_MIN     min representable float number
   . PHP_FLOAT_MAX     max representable float number
+  . PHP_OS_FAMILY     current operating system family
 
 - Fileinfo:
   . FILEINFO_EXTENSION include list of possible file extensions
