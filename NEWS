@@ -36,6 +36,8 @@ PHP                                                                        NEWS
 
 - DOM:
   . Fixed bug #67474 (getElementsByTagNameNS filter on default ns). (aboks)
+  . Fixed bug #54382 (getAttributeNodeNS doesn't get xmlns* attributes).
+    (aboks)
 
 - EXIF:
   . Added support for vendor specific tags for the following formats:
