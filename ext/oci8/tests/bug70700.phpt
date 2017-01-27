@@ -1,5 +1,5 @@
 --TEST--
-Tests for LOBs with multibyte strings
+Tests for LOBs with multibyte strings, reading them out in chunks
 (Doc Bug #70700)
 --CREDITS--
 Chuck Burgess
