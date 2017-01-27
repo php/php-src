@@ -9,6 +9,8 @@ ashnazg@php.net
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
 ?> 
+--ENV--
+NLS_LANG=AL32UTF8
 --FILE--
 <?php
 require(dirname(__FILE__).'/connect.inc');
