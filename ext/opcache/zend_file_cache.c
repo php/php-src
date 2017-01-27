@@ -409,7 +409,6 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 					SERIALIZE_PTR(opline->op2.jmp_addr);
 					break;
 				case ZEND_DECLARE_ANON_CLASS:
-				case ZEND_DECLARE_ANON_INHERITED_CLASS:
 				case ZEND_FE_FETCH_R:
 				case ZEND_FE_FETCH_RW:
 					/* relative extended_value don't have to be changed */
@@ -653,7 +652,14 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 		}
 	}
 
-	SERIALIZE_PTR(ce->parent);
+	if (ZEND_IS_UNBOUND_CLASS(ce->parent)) {
+		zend_string *parent_name = ZEND_GET_UNBOUND_CLASS(ce->parent);
+		SERIALIZE_STR(parent_name);
+		ce->parent = ZEND_MAKE_UNBOUND_CLASS(parent_name);
+	} else {
+		SERIALIZE_PTR(ce->parent);
+	}
+
 	SERIALIZE_PTR(ce->constructor);
 	SERIALIZE_PTR(ce->destructor);
 	SERIALIZE_PTR(ce->clone);
@@ -992,7 +998,6 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 					UNSERIALIZE_PTR(opline->op2.jmp_addr);
 					break;
 				case ZEND_DECLARE_ANON_CLASS:
-				case ZEND_DECLARE_ANON_INHERITED_CLASS:
 				case ZEND_FE_FETCH_R:
 				case ZEND_FE_FETCH_RW:
 					/* relative extended_value don't have to be changed */
@@ -1220,7 +1225,14 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 		}
 	}
 
-	UNSERIALIZE_PTR(ce->parent);
+	if (ZEND_IS_UNBOUND_CLASS(ce->parent)) {
+		zend_string *parent_name = ZEND_GET_UNBOUND_CLASS(ce->parent);
+		UNSERIALIZE_STR(parent_name);
+		ce->parent = ZEND_MAKE_UNBOUND_CLASS(parent_name);
+	} else {
+		UNSERIALIZE_PTR(ce->parent);
+	}
+
 	UNSERIALIZE_PTR(ce->constructor);
 	UNSERIALIZE_PTR(ce->destructor);
 	UNSERIALIZE_PTR(ce->clone);

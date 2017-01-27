@@ -91,7 +91,6 @@ void zend_optimizer_nop_removal(zend_op_array *op_array)
 						}
 						break;
 					case ZEND_DECLARE_ANON_CLASS:
-					case ZEND_DECLARE_ANON_INHERITED_CLASS:
 					case ZEND_FE_FETCH_R:
 					case ZEND_FE_FETCH_RW:
 						new_opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, new_opline, ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
@@ -128,7 +127,6 @@ void zend_optimizer_nop_removal(zend_op_array *op_array)
 					ZEND_SET_OP_JMP_ADDR(opline, opline->op2, ZEND_OP2_JMP_ADDR(opline) - shiftlist[ZEND_OP2_JMP_ADDR(opline) - op_array->opcodes]);
 					break;
 				case ZEND_DECLARE_ANON_CLASS:
-				case ZEND_DECLARE_ANON_INHERITED_CLASS:
 				case ZEND_FE_FETCH_R:
 				case ZEND_FE_FETCH_RW:
 				case ZEND_CATCH:
@@ -159,7 +157,7 @@ void zend_optimizer_nop_removal(zend_op_array *op_array)
 
 			do {
 				*opline_num -= shiftlist[*opline_num];
-				opline_num = &ZEND_RESULT(&op_array->opcodes[*opline_num]).opline_num;
+				opline_num = &ZEND_OP2(&op_array->opcodes[*opline_num]).opline_num;
 			} while (*opline_num != (uint32_t)-1);
 		}
 	}

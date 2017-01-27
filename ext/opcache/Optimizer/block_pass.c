@@ -881,7 +881,6 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 				}
 				break;
 			case ZEND_DECLARE_ANON_CLASS:
-			case ZEND_DECLARE_ANON_INHERITED_CLASS:
 			case ZEND_FE_FETCH_R:
 			case ZEND_FE_FETCH_RW:
 				opline->extended_value = ZEND_OPLINE_TO_OFFSET(opline, new_opcodes + blocks[b->successors[0]].start);
@@ -997,9 +996,9 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 		opline = op_array->opcodes;
 		end = opline + op_array->last;
 		while (opline < end) {
-			if (opline->opcode == ZEND_DECLARE_INHERITED_CLASS_DELAYED) {
+			if (opline->opcode == ZEND_DECLARE_CLASS_DELAYED) {
 				*opline_num = opline - op_array->opcodes;
-				opline_num = &ZEND_RESULT(opline).opline_num;
+				opline_num = &ZEND_OP2(opline).opline_num;
 			}
 			++opline;
 		}

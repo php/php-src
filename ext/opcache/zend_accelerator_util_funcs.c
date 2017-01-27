@@ -388,7 +388,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 		ce->interfaces = NULL;
 	}
 
-	if (ce->parent) {
+	if (ce->parent && ZEND_IS_BOUND_CLASS(ce->parent)) {
 		ce->parent = ARENA_REALLOC(ce->parent);
 	}
 

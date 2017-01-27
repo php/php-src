@@ -434,7 +434,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 						opline->op2.jmp_addr = &new_opcodes[opline->op2.jmp_addr - op_array->opcodes];
 						break;
 					case ZEND_DECLARE_ANON_CLASS:
-					case ZEND_DECLARE_ANON_INHERITED_CLASS:
 					case ZEND_FE_FETCH_R:
 					case ZEND_FE_FETCH_RW:
 						/* relative extended_value don't have to be changed */
@@ -696,6 +695,12 @@ static void zend_persist_class_entry(zval *zv)
 		}
 		ce->traits = NULL;
 
+		if (ZEND_IS_UNBOUND_CLASS(ce->parent)) {
+			zend_string *parent_name = ZEND_GET_UNBOUND_CLASS(ce->parent);
+			zend_accel_store_interned_string(parent_name);
+			ce->parent = ZEND_MAKE_UNBOUND_CLASS(parent_name);
+		}
+
 		if (ce->trait_aliases) {
 			int i = 0;
 			while (ce->trait_aliases[i]) {
@@ -764,7 +769,7 @@ static int zend_update_parent_ce(zval *zv)
 {
 	zend_class_entry *ce = Z_PTR_P(zv);
 
-	if (ce->parent) {
+	if (ce->parent && ZEND_IS_BOUND_CLASS(ce->parent)) {
 		ce->parent = zend_shared_alloc_get_xlat_entry(ce->parent);
 	}
 

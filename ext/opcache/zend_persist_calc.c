@@ -348,6 +348,12 @@ static void zend_persist_class_entry_calc(zval *zv)
 
 		zend_hash_persist_calc(&ce->properties_info, zend_persist_property_info_calc);
 
+		if (ZEND_IS_UNBOUND_CLASS(ce->parent)) {
+			zend_string *parent_name = ZEND_GET_UNBOUND_CLASS(ce->parent);
+			ADD_INTERNED_STRING(parent_name, 0);
+			ce->parent = ZEND_MAKE_UNBOUND_CLASS(parent_name);
+		}
+
 		if (ce->trait_aliases) {
 			int i = 0;
 			while (ce->trait_aliases[i]) {
