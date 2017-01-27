@@ -40,10 +40,10 @@ $counter=0;
 foreach ($obj as $v) {
 	$newPropName = "new$counter";
 	$obj->$newPropName = "Added property $counter";
-    if ($counter++>10) {
-    	echo "Loop detected\n";
-    	break;
-    }
+	if ($counter++>10) {
+		echo "Loop detected\n";
+		break;
+	}
 	var_dump($v);    
 }
 var_dump($obj);
@@ -54,10 +54,10 @@ $counter=0;
 foreach ($obj as &$v) {
 	$newPropName = "new$counter";
 	$obj->$newPropName = "Added property $counter";
-    if ($counter++>10) {
-    	echo "Loop detected\n";
-    	break;    	
-    }
+	if ($counter++>10) {
+		echo "Loop detected\n";
+		break;
+	}
 	var_dump($v);    
 }
 var_dump($obj);

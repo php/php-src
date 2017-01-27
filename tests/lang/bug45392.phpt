@@ -5,7 +5,7 @@ display_errors=stderr
 --SKIPIF--
 <?php
 if (getenv("USE_ZEND_ALLOC") === "0") {
-    die("skip Zend MM disabled");
+	die("skip Zend MM disabled");
 } 
 --FILE--
 <?php
@@ -14,7 +14,7 @@ ini_set('memory_limit', 100);
 ob_start();
 $i = 0;
 while($i++ < 5000)  {
-  echo str_repeat("may not be displayed ", 42);
+	echo str_repeat("may not be displayed ", 42);
 }
 ob_end_clean();
 ?>

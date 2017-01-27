@@ -23,5 +23,5 @@ class c1
 c1::go();
 ?>
 --EXPECTF--
-#0  require() called at [%s:19]
-#1  c1::go() called at [%s:23]
+#0  require() called at [%s:16]
+#1  c1::go() called at [%s:20]

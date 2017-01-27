@@ -4,18 +4,18 @@ Evaluation order during assignments.
 <?php
 
 function i1() {
-        echo "i1\n";
-        return 1;
+	echo "i1\n";
+	return 1;
 }
 
 function i2() {
-        echo "i2\n";
-        return 1;
+	echo "i2\n";
+	return 1;
 }
 
 function i3() {
-        echo "i3\n";
-        return 3;
+	echo "i3\n";
+	return 3;
 }
 
 $a = array(10, 11, 12, 13);

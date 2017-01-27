@@ -4,33 +4,33 @@ Evaluation order during assignments.
 <?php
 
 function i1() {
-        echo "i1\n";
-        return 0;
+	echo "i1\n";
+	return 0;
 }
 
 function i2() {
-        echo "i2\n";
-        return 0;
+	echo "i2\n";
+	return 0;
 }
 
 function i3() {
-        echo "i3\n";
-        return 0;
+	echo "i3\n";
+	return 0;
 }
 
 function i4() {
-        echo "i4\n";
-        return 0;
+	echo "i4\n";
+	return 0;
 }
 
 function i5() {
-        echo "i5\n";
-        return 0;
+	echo "i5\n";
+	return 0;
 }
 
 function i6() {
-        echo "i6\n";
-        return 0;
+	echo "i6\n";
+	return 0;
 }
 
 $a = array(array(0));
