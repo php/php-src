@@ -16,6 +16,29 @@ function get_tds_version() {
 	return null;
 }
 
+// bug #72969 reflects a bug with FreeTDS, not with pdo_dblib
+// this function will version detect so the relevant tests can XFAILIF
+function driver_supports_batch_statements_without_select($db) {
+	$version = $db->getAttribute(PDO::DBLIB_ATTR_VERSION);
+
+	// assume driver doesn't have this bug if not using FreeTDS
+	if (!strstartswith($version, 'freetds ')) {
+		return true;
+	}
+
+	// hasn't made it to numbered release yet
+	if (!strstartswith($version, 'freetds v1.1.dev.')) {
+		return false;
+	}
+
+	// fc820490336c50d5c175d2a15327383256add4c9 was committed on the 5th
+	return intval(substr($version, -8)) >= 20161206;
+}
+
+function strstartswith($haystack, $needle) {
+	return $needle === "" || strrpos($haystack, $needle, -strlen($haystack)) !== false;
+}
+
 if (false !== getenv('PDO_DBLIB_TEST_DSN')) {
 	$dsn = getenv('PDO_DBLIB_TEST_DSN');
 } else {
