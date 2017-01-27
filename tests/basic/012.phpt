@@ -1,7 +1,7 @@
 --TEST--
 Testing $argc and $argv handling (cli)
 --SKIPIF--
-<?php if(php_sapi_name()!='cli') echo 'skip'; ?>
+<?php if (php_sapi_name()!='cli') die('skip'); ?>
 --INI--
 register_argc_argv=1
 variables_order=GPS

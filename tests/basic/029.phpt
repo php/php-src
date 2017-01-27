@@ -1,11 +1,7 @@
 --TEST--
 Shift_JIS request
 --SKIPIF--
-<?php
-if (!extension_loaded("mbstring")) {
-  die("skip Requires mbstring extension");
-}
-?>
+<?php if (!extension_loaded("mbstring")) die("skip Requires mbstring extension"); ?>
 --INI--
 file_uploads=1
 mbstring.encoding_translation=1

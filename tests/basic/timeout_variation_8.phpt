@@ -1,9 +1,7 @@
 --TEST--
 Timeout within foreach loop
 --SKIPIF--
-<?php 
-	if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
-?>
+<?php if (getenv("SKIP_SLOW_TESTS")) die("skip slow test"); ?>
 --FILE--
 <?php
 
@@ -14,7 +12,6 @@ set_time_limit($t);
 foreach (range(0, 42) as $i) { 
 	busy_wait(1);
 }
-
 ?>
 never reached here
 --EXPECTF--

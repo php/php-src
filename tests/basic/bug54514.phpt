@@ -2,11 +2,13 @@
 Req #54514 (Get php binary path during script execution)
 --FILE--
 <?php
-if(realpath(getenv('TEST_PHP_EXECUTABLE')) === realpath(PHP_BINARY)) {
+if (realpath(getenv('TEST_PHP_EXECUTABLE')) === realpath(PHP_BINARY)) {
 	echo "done";
-} else {
+}
+else {
 	var_dump(getenv('TEST_PHP_EXECUTABLE'));
 	var_dump(PHP_BINARY);
 }
+?>
 --EXPECT--
 done
