@@ -1,5 +1,6 @@
 --TEST--
-Bug #70700 (LOB read loop ends early for multibyte strings)
+Tests for LOBs with multibyte strings
+(Doc Bug #70700)
 --CREDITS--
 Chuck Burgess
 ashnazg@php.net
