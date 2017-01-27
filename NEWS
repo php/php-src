@@ -102,6 +102,9 @@ PHP                                                                        NEWS
   . Fixed bug #73234 (Emulated statements let value dictate parameter type).
     (Adam Baratz)
   . Fixed bug #73396 (bigint columns are returned as strings). (Adam Baratz)
+  . Expose DB-Library version as \PDO::DBLIB_ATTR_VERSION attribute on \PDO
+    instance. (Adam Baratz)
+  . Add test coverage for bug #72969. (Jeff Farr)
 
 - PDO_PgSQL:
   . Fixed bug #73959 (lastInsertId fails to throw an exception for wrong 
