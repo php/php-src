@@ -32,7 +32,7 @@ oci_bind_by_name($select, ':id', $id);
 
 
 echo PHP_EOL, 'Test 1: j', PHP_EOL;
-$string1 = 'abc' . str_repeat('j', 10000) . 'xyz';
+$string1 = 'abc' . str_repeat('j', 1000000) . 'xyz';
 $id = 1;
 $desc = oci_new_descriptor($c, OCI_D_LOB);
 oci_bind_by_name($insert, ':data', $desc, -1, OCI_B_CLOB);
