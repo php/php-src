@@ -3,21 +3,21 @@ ZE2 object cloning, 4
 --FILE--
 <?php
 abstract class base {
-  public $a = 'base';
+	public $a = 'base';
 
-  // disallow cloning
-  private function __clone() {}
+	// disallow cloning
+	private function __clone() {}
 }
 
 class test extends base {
-  public $b = 'test';
+	public $b = 'test';
 
-  // reenable cloning
-  public function __clone() {}
+	// reenable cloning
+	public function __clone() {}
 
-  public function show() {
-	var_dump($this);
-  }
+	public function show() {
+		var_dump($this);
+	}
 }
 
 echo "Original\n";

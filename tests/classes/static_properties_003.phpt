@@ -3,8 +3,8 @@ Attempting to access static properties using instance property syntax
 --FILE--
 <?php
 class C {
-    public static $x = 'C::$x';
-    protected static $y = 'C::$y';
+	public static $x = 'C::$x';
+	protected static $y = 'C::$y';
 }
 
 $c = new C;

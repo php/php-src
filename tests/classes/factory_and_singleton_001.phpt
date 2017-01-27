@@ -5,48 +5,48 @@ ZE2 factory and singleton, test 1
 --FILE--
 <?php
 class test {
-  protected $x;
+	protected $x;
 
-  static private $test = NULL;
-  static private $cnt = 0;
+	static private $test = NULL;
+	static private $cnt = 0;
 
-  static function factory($x) {
-    if (test::$test) {
-      return test::$test;
-    } else {
-      test::$test = new test($x);
-      return test::$test;
-    }
-  }
+	static function factory($x) {
+		if (test::$test) {
+			return test::$test;
+		} else {
+			test::$test = new test($x);
+			return test::$test;
+		}
+	}
 
-  protected function __construct($x) {
-    test::$cnt++;
-    $this->x = $x;
-  }
+	protected function __construct($x) {
+		test::$cnt++;
+		$this->x = $x;
+	}
 
-  static function destroy() {
-    test::$test = NULL;
-  }
+	static function destroy() {
+		test::$test = NULL;
+	}
 
-  protected function __destruct() {
-  	test::$cnt--;
-  }
+	protected function __destruct() {
+		test::$cnt--;
+	}
 
-  public function get() {
-    return $this->x;
-  }
+	public function get() {
+		return $this->x;
+	}
 
-  static public function getX() {
-    if (test::$test) {
-      return test::$test->x;
-    } else {
-      return NULL;
-    }
-  }
-  
-  static public function count() {
-    return test::$cnt;
-  }
+	static public function getX() {
+		if (test::$test) {
+			return test::$test->x;
+		} else {
+			return NULL;
+		}
+	}
+
+	static public function count() {
+		return test::$cnt;
+	}
 }
 
 echo "Access static members\n";

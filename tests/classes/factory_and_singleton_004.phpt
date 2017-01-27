@@ -5,9 +5,8 @@ ZE2 factory and singleton, test 4
 --FILE--
 <?php
 class test {
-
-  private function __construct($x) {
-  }
+	private function __construct($x) {
+	}
 }
 
 $obj = new test;

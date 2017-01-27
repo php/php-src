@@ -15,20 +15,20 @@ class test1
 
 class test2
 {
-    function __toString()
-    {
-    	echo __METHOD__ . "()\n";
-        return "Converted\n";
-    }
+	function __toString()
+	{
+		echo __METHOD__ . "()\n";
+		return "Converted\n";
+	}
 }
 
 class test3
 {
-    function __toString()
-    {
-    	echo __METHOD__ . "()\n";
-        return 42;
-    }
+	function __toString()
+	{
+		echo __METHOD__ . "()\n";
+		return 42;
+	}
 }
 echo "====test1====\n";
 $o = new test1;

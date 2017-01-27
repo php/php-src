@@ -4,46 +4,45 @@ ZE2 A private member is
 <?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
 --FILE--
 <?php
-
 class base
 {
-  private $member;
+	private $member;
 
-  function __construct()
-  {
-  	echo __METHOD__ . "(begin)\n";
-    $this->member = 'base::member';
-    $this->test();
-  	echo __METHOD__ . "(end)\n";
-  }
+	function __construct()
+	{
+		echo __METHOD__ . "(begin)\n";
+		$this->member = 'base::member';
+		$this->test();
+		echo __METHOD__ . "(end)\n";
+	}
 
-  function test()
-  {
-  	echo __METHOD__ . "\n";
-    print_r($this);
-  }
+	function test()
+	{
+		echo __METHOD__ . "\n";
+		print_r($this);
+	}
 }
 
 class derived extends base
 {
-  public $member = 'derived::member (default)';
+	public $member = 'derived::member (default)';
 
-  function __construct()
-  {
-  	echo __METHOD__ . "(begin)\n";
-  	parent::__construct();
-  	parent::test();
-  	$this->test();
-    $this->member = 'derived::member';
-  	echo __METHOD__ . "(end)\n";
-  }
+	function __construct()
+	{
+		echo __METHOD__ . "(begin)\n";
+		parent::__construct();
+		parent::test();
+		$this->test();
+		$this->member = 'derived::member';
+		echo __METHOD__ . "(end)\n";
+	}
 
-  function test()
-  {
-  	parent::test();
-  	echo __METHOD__ . "\n";
-    print_r($this);
-  }
+	function test()
+	{
+		parent::test();
+		echo __METHOD__ . "\n";
+		print_r($this);
+	}
 }
 
 $t = new derived;

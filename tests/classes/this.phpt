@@ -10,28 +10,28 @@ ZE2 $this cannot be exchanged
  */
 class Foo
 {
-    function replace($other)
-    {
-    	echo __METHOD__ . "\n";
-        $this = $other;
-        print $this->prop;
-        print $other->prop;
-    }
+	function replace($other)
+	{
+		echo __METHOD__ . "\n";
+		$this = $other;
+		print $this->prop;
+		print $other->prop;
+	}
 
-    function indirect($other)
-    {
-    	echo __METHOD__ . "\n";
-        $this = $other;
-        $result = $this = $other;
-        print $result->prop;
-        print $this->prop;
-    }
+	function indirect($other)
+	{
+		echo __METHOD__ . "\n";
+		$this = $other;
+		$result = $this = $other;
+		print $result->prop;
+		print $this->prop;
+	}
 
-    function retrieve(&$other)
-    {
-    	echo __METHOD__ . "\n";
-    	$other = $this;
-    }
+	function retrieve(&$other)
+	{
+		echo __METHOD__ . "\n";
+		$other = $this;
+	}
 }
 
 $object = new Foo;

@@ -5,43 +5,43 @@ ZE2 Constructor precedence
 --FILE--
 <?php
 class Base_php4 {
-  function Base_php4() {
-    var_dump('Base constructor');
-  }
+	function Base_php4() {
+		var_dump('Base constructor');
+	}
 }
 
 class Child_php4 extends Base_php4 {
-  function Child_php4() {
-    var_dump('Child constructor');
-    parent::Base_php4();
-  }
+	function Child_php4() {
+		var_dump('Child constructor');
+		parent::Base_php4();
+	}
 }
 
 class Base_php5 {
-  function __construct() {
-    var_dump('Base constructor');
-  }
-  }
+	function __construct() {
+		var_dump('Base constructor');
+	}
+}
 
 class Child_php5 extends Base_php5 {
-  function __construct() {
-    var_dump('Child constructor');
-    parent::__construct();
-  }
-  }
+	function __construct() {
+		var_dump('Child constructor');
+		parent::__construct();
+	}
+}
 
 class Child_mx1 extends Base_php4 {
-  function __construct() {
-    var_dump('Child constructor');
-    parent::Base_php4();
-  }
+	function __construct() {
+		var_dump('Child constructor');
+		parent::Base_php4();
+	}
 }
 
 class Child_mx2 extends Base_php5 {
-  function Child_mx2() {
-    var_dump('Child constructor');
-    parent::__construct();
-  }
+	function Child_mx2() {
+		var_dump('Child constructor');
+		parent::__construct();
+	}
 }
 
 echo "### PHP 4 style\n";

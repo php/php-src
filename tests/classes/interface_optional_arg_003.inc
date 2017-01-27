@@ -1,4 +1,4 @@
 <?php 
 interface I {
-  function f($a = null);
+	function f($a = null);
 }

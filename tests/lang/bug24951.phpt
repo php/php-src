@@ -10,24 +10,24 @@ function t1()
 {
 	ob_start("test");
 	echo "Hello from t1 1 ";
-        echo "Hello from t1 2 ";
-        ob_end_flush();
+	echo "Hello from t1 2 ";
+	ob_end_flush();
 }
 function t2()
 {
 	ob_start("test");
 	echo "Hello from t2 1 ";
-        ob_flush();
-        echo "Hello from t2 2 ";
-        ob_end_flush();
+	ob_flush();
+	echo "Hello from t2 2 ";
+	ob_end_flush();
 }
 function t3()
 {
 	ob_start("test");
-        echo "Hello from t3 1 ";
-        ob_clean();
-        echo "Hello from t3 2 ";
-        ob_end_flush();
+	echo "Hello from t3 1 ";
+	ob_clean();
+	echo "Hello from t3 2 ";
+	ob_end_flush();
 }
 
 t1(); echo "\n";

@@ -10,11 +10,11 @@ function F()
 
 function G()
 {
-  static $myvar = 4;
-  
-  echo "$myvar ";
-  echo F();
-  echo "$myvar";
+	static $myvar = 4;
+
+	echo "$myvar ";
+	echo F();
+	echo "$myvar";
 }
 
 G();

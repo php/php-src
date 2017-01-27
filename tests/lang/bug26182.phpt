@@ -6,12 +6,12 @@ error_reporting=4095
 <?php
 
 class A {
-    function NotAConstructor ()
-    {
-        if (isset($this->x)) {
-            //just for demo
-        }
-    }
+	function NotAConstructor ()
+	{
+		if (isset($this->x)) {
+			//just for demo
+		}
+	}
 }
 
 $t = new A ();

@@ -24,11 +24,11 @@ FL;
 $postdata = "PASS";
 
 $opts = array('http' =>
-    array(
-        'method'  => 'POST',
-        'header'  => 'Content-type: application/x-www-form-urlencoded',
-        'content' => $postdata
-    )
+	array(
+		'method'  => 'POST',
+		'header'  => 'Content-type: application/x-www-form-urlencoded',
+		'content' => $postdata
+	)
 );
 
 $context  = stream_context_create($opts);
@@ -37,6 +37,7 @@ php_cli_server_start("exit(file_get_contents('php://input'));", false, "-d enabl
 
 var_dump(file_get_contents("http://" . PHP_CLI_SERVER_ADDRESS, false, $context));
 var_dump(file_get_contents("http://" . PHP_CLI_SERVER_ADDRESS, false, $context));
+?>
 --EXPECT--
 string(4) "PASS"
 string(4) "PASS"

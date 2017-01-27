@@ -3,12 +3,12 @@ Dynamic call for static methods dynamically named
 --FILE--
 <?php
 class A {
-    static function foo() { return 'foo'; }
+	static function foo() { return 'foo'; }
 }
-$classname        =  'A';
-$wrongClassname   =  'B';
+$classname		=  'A';
+$wrongClassname	=  'B';
 
-$methodname       =  'foo';
+$methodname		=  'foo';
 
 echo $classname::$methodname()."\n";
 

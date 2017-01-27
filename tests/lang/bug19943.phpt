@@ -4,8 +4,8 @@ Bug #19943 (memleaks)
 <?php
 	$ar = array();
 	for ($count = 0; $count < 10; $count++) {
-		$ar[$count]        = "$count";
-		@$ar[$count]['idx'] = "$count";
+		$ar[$count]			= "$count";
+		@$ar[$count]['idx']	= "$count";
 	}
 
 	for ($count = 0; $count < 10; $count++) {

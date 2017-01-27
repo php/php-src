@@ -3,7 +3,7 @@ Object to string conversion: error cases and behaviour variations.
 --FILE--
 <?php
 function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
-        echo "Error: $err_no - $err_msg\n";
+	echo "Error: $err_no - $err_msg\n";
 }
 set_error_handler('test_error_handler');
 error_reporting(8191);

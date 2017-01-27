@@ -1,9 +1,7 @@
 --TEST--
 Timeout within function
 --SKIPIF--
-<?php 
-	if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
-?>
+<?php if (getenv("SKIP_SLOW_TESTS")) die("skip slow test"); ?>
 --FILE--
 <?php
 
@@ -17,8 +15,6 @@ function hello ($t) {
 }
 
 hello($t);
-
-
 ?>
 never reached here
 --EXPECTF--

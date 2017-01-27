@@ -15,7 +15,6 @@ $argv = $_SERVER['argv'];
 for ($i=1; $i<$argc; $i++) {
 	echo ($i-1).": ".$argv[$i]."\n";
 }
-
 ?>
 --EXPECT--
 0: ab
