@@ -4,70 +4,69 @@ Pass uninitialised variables by reference and by value to test implicit initiali
 <?php
 
 function v($val) {
-  $val = "Val changed";
+	$val = "Val changed";
 }
 
 function r(&$ref) {
-  $ref = "Ref changed";
+	$ref = "Ref changed";
 }
 
 
 function vv($val1, $val2) {
-  $val1 = "Val1 changed";
-  $val2 = "Val2 changed";
+	$val1 = "Val1 changed";
+	$val2 = "Val2 changed";
 }
 
 function vr($val, &$ref) {
-  $val = "Val changed";
-  $ref = "Ref changed";
+	$val = "Val changed";
+	$ref = "Ref changed";
 }
 
 function rv(&$ref, $val) {
-  $val = "Val changed";
-  $ref = "Ref changed";
+	$val = "Val changed";
+	$ref = "Ref changed";
 }
 
 function rr(&$ref1, &$ref2) {
-  $ref1 = "Ref1 changed";
-  $ref2 = "Ref2 changed";
+	$ref1 = "Ref1 changed";
+	$ref2 = "Ref2 changed";
 }
 
 
 class C {
 
 	function __construct($val, &$ref) {
-	  $val = "Val changed";
-	  $ref = "Ref changed";
+		$val = "Val changed";
+		$ref = "Ref changed";
 	}
 
 	function v($val) {
-	  $val = "Val changed";
+		$val = "Val changed";
 	}
 	
 	function r(&$ref) {
-	  $ref = "Ref changed";
+		$ref = "Ref changed";
 	}
 	
 	function vv($val1, $val2) {
-	  $val1 = "Val1 changed";
-	  $val2 = "Val2 changed";
+		$val1 = "Val1 changed";
+		$val2 = "Val2 changed";
 	}
 	
 	function vr($val, &$ref) {
-	  $val = "Val changed";
-	  $ref = "Ref changed";
+		$val = "Val changed";
+		$ref = "Ref changed";
 	}
 	
 	function rv(&$ref, $val) {
-	  $val = "Val changed";
-	  $ref = "Ref changed";
+		$val = "Val changed";
+		$ref = "Ref changed";
 	}
 	
 	function rr(&$ref1, &$ref2) {
-	  $ref1 = "Ref1 changed";
-	  $ref2 = "Ref2 changed";
+		$ref1 = "Ref1 changed";
+		$ref2 = "Ref2 changed";
 	}
-
 } 
 
 echo "\n ---- Pass by ref / pass by val: functions ----\n";

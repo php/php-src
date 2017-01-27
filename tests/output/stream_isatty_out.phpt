@@ -1,11 +1,7 @@
 --TEST--
 Test stream_isatty with redirected STDOUT
 --SKIPIF--
-<?php
-if (getenv("SKIP_IO_CAPTURE_TESTS")) {
-	die("skip I/O capture test");
-}
-?>
+<?phpif (getenv("SKIP_IO_CAPTURE_TESTS")) die("skip I/O capture test"); ?>
 --CAPTURE_STDIO--
 STDOUT
 --FILE--

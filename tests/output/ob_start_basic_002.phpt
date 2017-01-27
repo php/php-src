@@ -27,11 +27,11 @@ $functions = get_defined_functions();
 $callbacks = $functions['user'];
 sort($callbacks);
 foreach ($callbacks as $callback) {
-  echo "--> Use callback '$callback':\n";
-  ob_start($callback);
-  echo 'My output.';
-  ob_end_flush();
-  echo "\n\n";
+	echo "--> Use callback '$callback':\n";
+	ob_start($callback);
+	echo 'My output.';
+	ob_end_flush();
+	echo "\n\n";
 }
 
 ?>

@@ -5,7 +5,7 @@ Returning a references returned by another function
 
 
 function &returnVarByRef () {
-    $b=1;
+	$b=1;
 	return $b; 
 }
 
@@ -14,7 +14,7 @@ function &testReturnVarByRef() {
 }
 
 function returnVal () {
-return 1; 
+	return 1; 
 }
 
 function &testReturnValByRef() {

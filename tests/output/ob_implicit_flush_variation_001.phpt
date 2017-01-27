@@ -50,56 +50,55 @@ $assoc_array = array ('one' => 1, 'two' => 2);
 
 //array of values to iterate over
 $inputs = array(
+	// float data
+	'float 10.5' => 10.5,
+	'float -10.5' => -10.5,
+	'float 12.3456789000e10' => 12.3456789000e10,
+	'float -12.3456789000e10' => -12.3456789000e10,
+	'float .5' => .5,
 
-      // float data
-      'float 10.5' => 10.5,
-      'float -10.5' => -10.5,
-      'float 12.3456789000e10' => 12.3456789000e10,
-      'float -12.3456789000e10' => -12.3456789000e10,
-      'float .5' => .5,
+	// array data
+	'empty array' => array(),
+	'int indexed array' => $index_array,
+	'associative array' => $assoc_array,
+	'nested arrays' => array('foo', $index_array, $assoc_array),
 
-      // array data
-      'empty array' => array(),
-      'int indexed array' => $index_array,
-      'associative array' => $assoc_array,
-      'nested arrays' => array('foo', $index_array, $assoc_array),
+	// null data
+	'uppercase NULL' => NULL,
+	'lowercase null' => null,
 
-      // null data
-      'uppercase NULL' => NULL,
-      'lowercase null' => null,
+	// boolean data
+	'lowercase true' => true,
+	'lowercase false' =>false,
+	'uppercase TRUE' =>TRUE,
+	'uppercase FALSE' =>FALSE,
 
-      // boolean data
-      'lowercase true' => true,
-      'lowercase false' =>false,
-      'uppercase TRUE' =>TRUE,
-      'uppercase FALSE' =>FALSE,
+	// empty data
+	'empty string DQ' => "",
+	'empty string SQ' => '',
 
-      // empty data
-      'empty string DQ' => "",
-      'empty string SQ' => '',
+	// string data
+	'string DQ' => "string",
+	'string SQ' => 'string',
+	'mixed case string' => "sTrInG",
+	'heredoc' => $heredoc,
 
-      // string data
-      'string DQ' => "string",
-      'string SQ' => 'string',
-      'mixed case string' => "sTrInG",
-      'heredoc' => $heredoc,
+	// object data
+	'instance of classWithToString' => new classWithToString(),
+	'instance of classWithoutToString' => new classWithoutToString(),
 
-      // object data
-      'instance of classWithToString' => new classWithToString(),
-      'instance of classWithoutToString' => new classWithoutToString(),
+	// undefined data
+	'undefined var' => @$undefined_var,
 
-      // undefined data
-      'undefined var' => @$undefined_var,
-
-      // unset data
-      'unset var' => @$unset_var,
+	// unset data
+	'unset var' => @$unset_var,
 );
 
 // loop through each element of the array for flag
 
 foreach($inputs as $key =>$value) {
-      echo "\n--$key--\n";
-      var_dump( ob_implicit_flush($value) );
+	echo "\n--$key--\n";
+	var_dump( ob_implicit_flush($value) );
 };
 
 ?>

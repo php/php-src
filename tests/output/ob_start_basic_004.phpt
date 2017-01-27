@@ -17,19 +17,19 @@ function callback($string) {
 }
 
 for ($cs=-1; $cs<10; $cs++) {
-  echo "\n----( chunk_size: $cs, output append size: 1 )----\n";
-  $callback_invocations=0;
-  ob_start('callback', $cs);
-  echo '1'; echo '2'; echo '3'; echo '4'; echo '5'; echo '6'; echo '7'; echo '8';
-  ob_end_flush();
+	echo "\n----( chunk_size: $cs, output append size: 1 )----\n";
+	$callback_invocations=0;
+	ob_start('callback', $cs);
+	echo '1'; echo '2'; echo '3'; echo '4'; echo '5'; echo '6'; echo '7'; echo '8';
+	ob_end_flush();
 }
 
 for ($cs=-1; $cs<10; $cs++) {
-  echo "\n----( chunk_size: $cs, output append size: 4 )----\n";
-  $callback_invocations=0;
-  ob_start('callback', $cs);
-  echo '1234'; echo '5678';
-  ob_end_flush();
+	echo "\n----( chunk_size: $cs, output append size: 4 )----\n";
+	$callback_invocations=0;
+	ob_start('callback', $cs);
+	echo '1234'; echo '5678';
+	ob_end_flush();
 }
 
 ?>

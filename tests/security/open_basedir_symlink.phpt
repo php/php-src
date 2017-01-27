@@ -3,7 +3,7 @@ Test open_basedir configuration
 --SKIPIF--
 <?php
 if(PHP_OS_FAMILY === "WIN") {
-    die('skip no symlinks on Windows');
+	die('skip no symlinks on Windows');
 }
 ?>
 --INI--

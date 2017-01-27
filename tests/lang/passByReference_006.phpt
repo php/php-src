@@ -4,33 +4,33 @@ Pass uninitialised objects and arrays by reference to test implicit initialisati
 <?php
 
 function refs(&$ref1, &$ref2, &$ref3, &$ref4, &$ref5) {
-  $ref1 = "Ref1 changed";
-  $ref2 = "Ref2 changed";
-  $ref3 = "Ref3 changed";
-  $ref4 = "Ref4 changed";
-  $ref5 = "Ref5 changed";
+	$ref1 = "Ref1 changed";
+	$ref2 = "Ref2 changed";
+	$ref3 = "Ref3 changed";
+	$ref4 = "Ref4 changed";
+	$ref5 = "Ref5 changed";
 }
 
 
 class C {
 
 	function __construct(&$ref1, &$ref2, &$ref3, &$ref4, &$ref5) {
-	  $ref1 = "Ref1 changed";
-	  $ref2 = "Ref2 changed";
-	  $ref3 = "Ref3 changed";
-	  $ref4 = "Ref4 changed";
-	  $ref5 = "Ref5 changed";
+		$ref1 = "Ref1 changed";
+		$ref2 = "Ref2 changed";
+		$ref3 = "Ref3 changed";
+		$ref4 = "Ref4 changed";
+		$ref5 = "Ref5 changed";
 	}
 
 	function refs(&$ref1, &$ref2, &$ref3, &$ref4, &$ref5) {
-	  $ref1 = "Ref1 changed";
-	  $ref2 = "Ref2 changed";
-	  $ref3 = "Ref3 changed";
-	  $ref4 = "Ref4 changed";
-	  $ref5 = "Ref5 changed";
+		$ref1 = "Ref1 changed";
+		$ref2 = "Ref2 changed";
+		$ref3 = "Ref3 changed";
+		$ref4 = "Ref4 changed";
+		$ref5 = "Ref5 changed";
 	}
 
-} 
+}
 
 echo "\n ---- Pass uninitialised array & object by ref: function call ---\n";
 unset($u1, $u2, $u3, $u4, $u5);

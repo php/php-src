@@ -3,7 +3,7 @@ Test open_basedir configuration
 --SKIPIF--
 <?php
 if(PHP_OS_FAMILY !== "WIN") {
-    die('skip only run on Windows');
+	die('skip only run on Windows');
 }
 ?>
 --INI--

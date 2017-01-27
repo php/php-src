@@ -3,9 +3,9 @@ Bug #46897: ob_flush() should fail to flush unerasable buffers
 --FILE--
 <?php
 function callback($string) {
-    static $callback_invocations;
-    $callback_invocations++;
-    return "[callback:$callback_invocations]$string\n";
+	static $callback_invocations;
+	$callback_invocations++;
+	return "[callback:$callback_invocations]$string\n";
 }
 
 ob_start('callback', 0, false);
