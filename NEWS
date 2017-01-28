@@ -26,6 +26,8 @@ PHP                                                                        NEWS
   . Added PHP_OS_FAMILY constant to determine on which OS we are. (Jan Altensen)
   . Fixed bug #73994 (arginfo incorrect for unpack). (krakjoe)
   . Fixed bug #73973 (assertion error in debug_zval_dump). (andrewnester)
+  . Fixed bug #73987 (Method compatibility check looks to original 
+    definition and not parent). (pmmaga)
 
 - BCMath:
   . Fixed bug #46564 (bcmod truncates fractionals). (liborm85)
