@@ -13,6 +13,7 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug #54382 (getAttributeNodeNS doesn't get xmlns* attributes).
     (aboks)
+  . Fixed bug #50989 (support for LIBXML_NOXMLDECL). (jhdxr)
 
 - DTrace:
   . Fixed bug #73965 (DTrace reported as enabled when disabled). (Remi)

@@ -26,6 +26,7 @@
 #include "php.h"
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
+#include <libxml/xmlsave.h>
 #include <libxml/SAX.h>
 #ifdef LIBXML_SCHEMAS_ENABLED
 #include <libxml/relaxng.h>
@@ -1616,59 +1617,51 @@ PHP_FUNCTION(dom_document_savexml)
 	dom_doc_propsptr doc_props;
 	int size, format, saveempty = 0;
 	zend_long options = 0;
+	xmlSaveCtxtPtr xscp;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|O!l", &id, dom_document_class_entry, &nodep, dom_node_class_entry, &options) == FAILURE) {
 		return;
 	}
+	options = options | XML_SAVE_AS_XML;
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
 	doc_props = dom_get_doc_props(intern->document);
 	format = doc_props->formatoutput;
 
+	buf = xmlBufferCreate();
+	if (!buf) {
+		php_error_docref(NULL, E_WARNING, "Could not fetch buffer");
+		RETURN_FALSE;
+	}
+	xscp = xmlSaveToBuffer(buf, docp->encoding, options);
+	
 	if (nodep != NULL) {
 		/* Dump contents of Node */
 		DOM_GET_OBJ(node, nodep, xmlNodePtr, nodeobj);
 		if (node->doc != docp) {
 			php_dom_throw_error(WRONG_DOCUMENT_ERR, dom_get_strict_error(intern->document));
-			RETURN_FALSE;
-		}
-		buf = xmlBufferCreate();
-		if (!buf) {
-			php_error_docref(NULL, E_WARNING, "Could not fetch buffer");
-			RETURN_FALSE;
-		}
-		if (options & LIBXML_SAVE_NOEMPTYTAG) {
-			saveempty = xmlSaveNoEmptyTags;
-			xmlSaveNoEmptyTags = 1;
-		}
-		xmlNodeDump(buf, docp, node, 0, format);
-		if (options & LIBXML_SAVE_NOEMPTYTAG) {
-			xmlSaveNoEmptyTags = saveempty;
-		}
-		mem = (xmlChar*) xmlBufferContent(buf);
-		if (!mem) {
 			xmlBufferFree(buf);
 			RETURN_FALSE;
 		}
-		RETVAL_STRING((char *) mem);
-		xmlBufferFree(buf);
-	} else {
-		if (options & LIBXML_SAVE_NOEMPTYTAG) {
-			saveempty = xmlSaveNoEmptyTags;
-			xmlSaveNoEmptyTags = 1;
-		}
-		/* Encoding is handled from the encoding property set on the document */
-		xmlDocDumpFormatMemory(docp, &mem, &size, format);
-		if (options & LIBXML_SAVE_NOEMPTYTAG) {
-			xmlSaveNoEmptyTags = saveempty;
-		}
-		if (!size || !mem) {
+		if(xmlSaveTree(xscp, node) < 0) {
+			xmlBufferFree(buf);
 			RETURN_FALSE;
 		}
-		RETVAL_STRINGL((char *) mem, size);
-		xmlFree(mem);
+	} else {
+		if(xmlSaveDoc(xscp, docp) < 0) {
+			xmlBufferFree(buf);
+			RETURN_FALSE;
+		}
 	}
+	xmlSaveClose(xscp);
+	mem = (xmlChar*) xmlBufferContent(buf);
+	if (!mem) {
+		xmlBufferFree(buf);
+		RETURN_FALSE;
+	}
+	RETVAL_STRING((char *) mem);
+	xmlBufferFree(buf);
 }
 /* }}} end dom_document_savexml */
 
