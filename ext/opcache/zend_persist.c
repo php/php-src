@@ -638,6 +638,12 @@ static void zend_persist_class_constant(zval *zv)
 	}
 }
 
+static inline zend_class_entry *zend_persist_unbound_class(zend_class_entry *ce) {
+	zend_string *name = ZEND_GET_UNBOUND_CLASS(ce);
+	zend_accel_store_interned_string(name);
+	return ZEND_MAKE_UNBOUND_CLASS(name);
+}
+
 static void zend_persist_class_entry(zval *zv)
 {
 	zend_class_entry *ce = Z_PTR_P(zv);
@@ -685,20 +691,25 @@ static void zend_persist_class_entry(zval *zv)
 			}
 		}
 		zend_hash_persist(&ce->properties_info, zend_persist_property_info);
-		if (ce->num_interfaces && ce->interfaces) {
-			efree(ce->interfaces);
-		}
-		ce->interfaces = NULL; /* will be filled in on fetch */
-
-		if (ce->num_traits && ce->traits) {
-			efree(ce->traits);
-		}
-		ce->traits = NULL;
 
 		if (ZEND_IS_UNBOUND_CLASS(ce->parent)) {
-			zend_string *parent_name = ZEND_GET_UNBOUND_CLASS(ce->parent);
-			zend_accel_store_interned_string(parent_name);
-			ce->parent = ZEND_MAKE_UNBOUND_CLASS(parent_name);
+			ce->parent = zend_persist_unbound_class(ce->parent);
+		}
+
+		if (ce->interfaces) {
+			int i;
+			for (i = 0; i < ce->num_interfaces; i++) {
+				ce->interfaces[i] = zend_persist_unbound_class(ce->interfaces[i]);
+			}
+			zend_accel_store(ce->interfaces, sizeof(zend_class_entry *) * ce->num_interfaces);
+		}
+
+		if (ce->traits) {
+			int i;
+			for (i = 0; i < ce->num_traits; i++) {
+				ce->traits[i] = zend_persist_unbound_class(ce->traits[i]);
+			}
+			zend_accel_store(ce->traits, sizeof(zend_class_entry *) * ce->num_traits);
 		}
 
 		if (ce->trait_aliases) {
