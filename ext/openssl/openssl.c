@@ -835,9 +835,9 @@ static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int s
 	}
 
 	for (i = 0; i < X509_NAME_entry_count(name); i++) {
-		unsigned char *to_add;
+		unsigned char *to_add = NULL;
 		int to_add_len = 0;
-
+		int needs_free = 0;
 
 		ne = X509_NAME_get_entry(name, i);
 		obj = X509_NAME_ENTRY_get_object(ne);
@@ -851,8 +851,11 @@ static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int s
 
 		str = X509_NAME_ENTRY_get_data(ne);
 		if (ASN1_STRING_type(str) != V_ASN1_UTF8STRING) {
+			/* ASN1_STRING_to_UTF8(3): The converted data is copied into a newly allocated buffer */
 			to_add_len = ASN1_STRING_to_UTF8(&to_add, str);
+			needs_free = 1;
 		} else {
+			/* ASN1_STRING_data(3): Since this is an internal pointer it should not be freed or modified in any way */
 			to_add = ASN1_STRING_data(str);
 			to_add_len = ASN1_STRING_length(str);
 		}
@@ -873,7 +876,13 @@ static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int s
 		} else {
 			php_openssl_store_errors();
 		}
+
+		if (needs_free) {
+			/* ASN1_STRING_to_UTF8(3): The buffer out should be freed using free(3) */
+			OPENSSL_free(to_add);
+		}
 	}
+
 	if (key != NULL) {
 		zend_hash_str_update(Z_ARRVAL_P(val), key, strlen(key), &subitem);
 	}
@@ -1170,7 +1179,7 @@ static int php_openssl_parse_config(struct php_x509_request * req, zval * option
 		&& Z_TYPE_P(item) == IS_STRING) {
 		req->curve_name = OBJ_sn2nid(Z_STRVAL_P(item));
 		if (req->curve_name == NID_undef) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown elliptic curve (short) name %s", Z_STRVAL_P(item));
+			php_error_docref(NULL, E_WARNING, "Unknown elliptic curve (short) name %s", Z_STRVAL_P(item));
 			return FAILURE;
 		}
 	}
@@ -2265,7 +2274,10 @@ PHP_FUNCTION(openssl_x509_parse)
 	char *extname;
 	BIO *bio_out;
 	BUF_MEM *bio_buf;
-	char * hexserial;
+	ASN1_INTEGER *asn1_serial;
+	BIGNUM *bn_serial;
+	char *str_serial;
+	char *hex_serial;
 	char buf[256];
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &zcert, &useshortnames) == FAILURE) {
@@ -2293,19 +2305,30 @@ PHP_FUNCTION(openssl_x509_parse)
 	add_assoc_name_entry(return_value, "issuer", 		X509_get_issuer_name(cert), useshortnames);
 	add_assoc_long(return_value, "version", 			X509_get_version(cert));
 
-	add_assoc_string(return_value, "serialNumber", i2s_ASN1_INTEGER(NULL, X509_get_serialNumber(cert)));
+	asn1_serial = X509_get_serialNumber(cert);
 
-	/* Return the hex representation of the serial number, as defined by OpenSSL */
-	hexserial = BN_bn2hex(ASN1_INTEGER_to_BN(X509_get_serialNumber(cert), NULL));
-
-	/* If we received null back from BN_bn2hex, there was a critical error in openssl,
-	 * and we should not continue.
-	 */
-	if (!hexserial) {
+	bn_serial = ASN1_INTEGER_to_BN(asn1_serial, NULL);
+	/* Can return NULL on error or memory allocation failure */
+	if (!bn_serial) {
+		php_openssl_store_errors();
 		RETURN_FALSE;
 	}
-	add_assoc_string(return_value, "serialNumberHex", hexserial); 
-	OPENSSL_free(hexserial);
+
+	hex_serial = BN_bn2hex(bn_serial);
+	BN_free(bn_serial);
+	/* Can return NULL on error or memory allocation failure */
+	if (!hex_serial) {
+		php_openssl_store_errors();
+		RETURN_FALSE;
+	}
+
+	str_serial = i2s_ASN1_INTEGER(NULL, asn1_serial);
+	add_assoc_string(return_value, "serialNumber", str_serial);
+	OPENSSL_free(str_serial);
+
+	/* Return the hex representation of the serial number, as defined by OpenSSL */
+	add_assoc_string(return_value, "serialNumberHex", hex_serial);
+	OPENSSL_free(hex_serial);
 
 	add_assoc_asn1_string(return_value, "validFrom", 	X509_get_notBefore(cert));
 	add_assoc_asn1_string(return_value, "validTo", 		X509_get_notAfter(cert));
@@ -3896,7 +3919,7 @@ static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req
 				{
 					EC_KEY *eckey;
 					if (req->curve_name == NID_undef) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing configuration value: 'curve_name' not set");
+						php_error_docref(NULL, E_WARNING, "Missing configuration value: 'curve_name' not set");
 						return NULL;
 					}
 					eckey = EC_KEY_new_by_curve_name(req->curve_name);
@@ -6233,6 +6256,7 @@ static int php_openssl_cipher_init(const EVP_CIPHER *cipher_type,
 	}
 
 	if (!EVP_CipherInit_ex(cipher_ctx, cipher_type, NULL, NULL, NULL, enc)) {
+		php_openssl_store_errors();
 		return FAILURE;
 	}
 	if (php_openssl_validate_iv(piv, piv_len, max_iv_len, free_iv, cipher_ctx, mode) == FAILURE) {
@@ -6248,10 +6272,11 @@ static int php_openssl_cipher_init(const EVP_CIPHER *cipher_type,
 			return FAILURE;
 		}
 	}
-	if (password_len > key_len) {
-		EVP_CIPHER_CTX_set_key_length(cipher_ctx, password_len);
+	if (password_len > key_len && !EVP_CIPHER_CTX_set_key_length(cipher_ctx, password_len)) {
+		php_openssl_store_errors();
 	}
 	if (!EVP_CipherInit_ex(cipher_ctx, NULL, NULL, key, (unsigned char *)*piv, enc)) {
+		php_openssl_store_errors();
 		return FAILURE;
 	}
 	if (options & OPENSSL_ZERO_PADDING) {
@@ -6270,11 +6295,13 @@ static int php_openssl_cipher_update(const EVP_CIPHER *cipher_type,
 	int i = 0;
 
 	if (mode->is_single_run_aead && !EVP_EncryptUpdate(cipher_ctx, NULL, &i, NULL, (int)data_len)) {
+		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Setting of data length failed");
 		return FAILURE;
 	}
 
 	if (mode->is_aead && !EVP_CipherUpdate(cipher_ctx, NULL, &i, (unsigned char *)aad, (int)aad_len)) {
+		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Setting of additional application data failed");
 		return FAILURE;
 	}
@@ -6291,6 +6318,7 @@ static int php_openssl_cipher_update(const EVP_CIPHER *cipher_type,
 			php_error_docref(NULL, E_WARNING, enc ? "Encryption failed" : "Decryption failed");
 		}
 		*/
+		php_openssl_store_errors();
 		zend_string_release(*poutbuf);
 		return FAILURE;
 	}
@@ -6339,7 +6367,6 @@ PHP_FUNCTION(openssl_encrypt)
 	}
 
 	php_openssl_load_cipher_mode(&mode, cipher_type);
-
 
 	if (php_openssl_cipher_init(cipher_type, cipher_ctx, &mode,
 				&password, &password_len, &free_password,

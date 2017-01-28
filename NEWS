@@ -2,9 +2,6 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.2
 
-- Calendar:
-  . Fix integer overflows (Joshua Rogers)
-
 - Core:
   . Removed IS_TYPE_IMMUTABLE (it's the same as COPYABLE & !REFCOUNTED). (Dmitry)
   . Removed the sql.safe_mode directive. (Kalle)
@@ -25,12 +22,24 @@ PHP                                                                        NEWS
     bugs #53838, #61655, #66173, #70925, #72254, etc. (Andrea)
   . Raised minimum supported Windows versions to Windows 7/Server 2008 R2.
     (Anatol)
+  . Fixed bug #73969 (segfault in debug_print_backtrace). (andrewnester)
+  . Added PHP_OS_FAMILY constant to determine on which OS we are. (Jan Altensen)
+  . Fixed bug #73994 (arginfo incorrect for unpack). (krakjoe)
+  . Fixed bug #73973 (assertion error in debug_zval_dump). (andrewnester)
+
+- BCMath:
+  . Fixed bug #46564 (bcmod truncates fractionals). (liborm85)
+
+- Calendar:
+  . Fix integer overflows (Joshua Rogers)
 
 - Date:
   . Fixed bug #69587 (DateInterval properties and isset). (jhdxr)
 
 - DOM:
   . Fixed bug #67474 (getElementsByTagNameNS filter on default ns). (aboks)
+  . Fixed bug #54382 (getAttributeNodeNS doesn't get xmlns* attributes).
+    (aboks)
 
 - EXIF:
   . Added support for vendor specific tags for the following formats:
@@ -48,12 +57,18 @@ PHP                                                                        NEWS
 
 - FPM:
   . Configuration to limit fpm slow log trace callers. (Sannis)
+  . Fixed bug #69865 (php-fpm does not close stderr when using syslog). 
+    (Mike)
 
 - GD:
   . Implemented imageresolution as getter and setter (Christoph)
 
 - GMP:
   . Fixed bug #70896 (gmp_fact() silently ignores non-integer input). (Sara)
+
+- hash:
+  . Fixed bug #73961 (environmental build dependency in hash sha3 source).
+    (krakjoe)
 
 - Mbstring:
   . Implemented request #66024 (mb_chr() and mb_ord()). (Masakielastic, Yasuo)
@@ -66,6 +81,9 @@ PHP                                                                        NEWS
 
 - Mcrypt:
   . The deprecated mcrypt extension has been moved to PECL. (leigh)
+
+- MySQLi:
+  . Fixed bug #73949 (leak in mysqli_fetch_object). (krakjoe)
 
 - mysqlnd:
   . Fixed bug #73800 (sporadic segfault with MYSQLI_OPT_INT_AND_FLOAT_NATIVE). 
@@ -84,6 +102,19 @@ PHP                                                                        NEWS
   . Fixed bug #73234 (Emulated statements let value dictate parameter type).
     (Adam Baratz)
   . Fixed bug #73396 (bigint columns are returned as strings). (Adam Baratz)
+  . Expose DB-Library version as \PDO::DBLIB_ATTR_VERSION attribute on \PDO
+    instance. (Adam Baratz)
+  . Add test coverage for bug #72969. (Jeff Farr)
+
+- PDO_PgSQL:
+  . Fixed bug #73959 (lastInsertId fails to throw an exception for wrong 
+    sequence name). (andrewnester)
+
+- PDO_Sqlite
+  . Switch to sqlite3_prepare_v2() and sqlite3_close_v2() functions (rasmus)
+
+- posix:
+  . Fixed bug #71219 (configure script incorrectly checks for ttyname_r). (atoh)
 
 - Session:
   . Fixed bug #73461 (Prohibit session save handler recursion). (Yasuo)
@@ -96,13 +127,15 @@ PHP                                                                        NEWS
     (Keith Smiley)
 
 - SQLite3:
-  . Update to Sqlite 3.15.2. (cmb)
+  . Update to Sqlite 3.16.2. (cmb)
 
 - Standard:
   . Add subject to mail log. (tomsommer)
   . Fixed bug #31875 (get_defined_functions additional param to exclude
 	disabled functions). (willianveiga)
   . Fixed bug #69442 (closing of fd incorrect when PTS enabled). (jaytaph)
+  . Fixed bug #72974 (imap is undefined service on AIX). (matthieu.sarter)
+  . Fixed bug #72979 (money_format stores wrong length AIX). (matthieu.sarter)
 
 - XML:
   . Moved utf8_encode() and utf8_decode() to the Standard extension. (Andrea)

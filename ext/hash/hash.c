@@ -248,6 +248,11 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, 
 		php_error_docref(NULL, E_WARNING, "Unknown hashing algorithm: %s", algo);
 		RETURN_FALSE;
 	}
+	else if (!ops->is_crypto) {
+		php_error_docref(NULL, E_WARNING, "Non-cryptographic hashing algorithm: %s", algo);
+		RETURN_FALSE;
+	}
+
 	if (isfilename) {
 		if (CHECK_NULL_PATH(data, data_len)) {
 			php_error_docref(NULL, E_WARNING, "Invalid path");
@@ -342,6 +347,11 @@ PHP_FUNCTION(hash_init)
 	ops = php_hash_fetch_ops(algo, algo_len);
 	if (!ops) {
 		php_error_docref(NULL, E_WARNING, "Unknown hashing algorithm: %s", algo);
+		RETURN_FALSE;
+	}
+
+	if (options & PHP_HASH_HMAC && !ops->is_crypto) {
+		php_error_docref(NULL, E_WARNING, "HMAC requested with a non-cryptographic hashing algorithm: %s", algo);
 		RETURN_FALSE;
 	}
 
@@ -597,6 +607,103 @@ PHP_FUNCTION(hash_algos)
 }
 /* }}} */
 
+/* {{{ proto string hash_hkdf(string algo, string ikm [, int length = 0, string info = '', string salt = ''])
+RFC5869 HMAC-based key derivation function */
+PHP_FUNCTION(hash_hkdf)
+{
+	zend_string *returnval, *ikm, *algo, *info = NULL, *salt = NULL;
+	zend_long length = 0;
+	unsigned char *prk, *digest, *K;
+	int i, rounds;
+	const php_hash_ops *ops;
+	void *context;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS|lSS", &algo, &ikm, &length, &info, &salt) == FAILURE) {
+		return;
+	}
+
+	ops = php_hash_fetch_ops(ZSTR_VAL(algo), ZSTR_LEN(algo));
+	if (!ops) {
+		php_error_docref(NULL, E_WARNING, "Unknown hashing algorithm: %s", ZSTR_VAL(algo));
+		RETURN_FALSE;
+	}
+
+	if (!ops->is_crypto) {
+		php_error_docref(NULL, E_WARNING, "Non-cryptographic hashing algorithm: %s", ZSTR_VAL(algo));
+		RETURN_FALSE;
+	}
+
+	if (ZSTR_LEN(ikm) == 0) {
+		php_error_docref(NULL, E_WARNING, "Input keying material cannot be empty");
+		RETURN_FALSE;
+	}
+
+	if (length < 0) {
+		php_error_docref(NULL, E_WARNING, "Length must be greater than or equal to 0: " ZEND_LONG_FMT, length);
+		RETURN_FALSE;
+	} else if (length == 0) {
+		length = ops->digest_size;
+	} else if (length > ops->digest_size * 255) {
+		php_error_docref(NULL, E_WARNING, "Length must be less than or equal to %d: " ZEND_LONG_FMT, ops->digest_size * 255, length);
+		RETURN_FALSE;
+	}
+
+	context = emalloc(ops->context_size);
+
+	// Extract
+	ops->hash_init(context);
+	K = emalloc(ops->block_size);
+	php_hash_hmac_prep_key(K, ops, context,
+		(unsigned char *) (salt ? ZSTR_VAL(salt) : ""), salt ? ZSTR_LEN(salt) : 0);
+
+	prk = emalloc(ops->digest_size);
+	php_hash_hmac_round(prk, ops, context, K, (unsigned char *) ZSTR_VAL(ikm), ZSTR_LEN(ikm));
+	php_hash_string_xor_char(K, K, 0x6A, ops->block_size);
+	php_hash_hmac_round(prk, ops, context, K, prk, ops->digest_size);
+	ZEND_SECURE_ZERO(K, ops->block_size);
+
+	// Expand
+	returnval = zend_string_alloc(length, 0);
+	digest = emalloc(ops->digest_size);
+	for (i = 1, rounds = (length - 1) / ops->digest_size + 1; i <= rounds; i++) {
+		// chr(i)
+		unsigned char c[1];
+		c[0] = (i & 0xFF);
+
+		php_hash_hmac_prep_key(K, ops, context, prk, ops->digest_size);
+		ops->hash_init(context);
+		ops->hash_update(context, K, ops->block_size);
+
+		if (i > 1) {
+			ops->hash_update(context, digest, ops->digest_size);
+		}
+
+		if (info != NULL && ZSTR_LEN(info) > 0) {
+			ops->hash_update(context, (unsigned char *) ZSTR_VAL(info), ZSTR_LEN(info));
+		}
+
+		ops->hash_update(context, c, 1);
+		ops->hash_final(digest, context);
+		php_hash_string_xor_char(K, K, 0x6A, ops->block_size);
+		php_hash_hmac_round(digest, ops, context, K, digest, ops->digest_size);
+		memcpy(
+			ZSTR_VAL(returnval) + ((i - 1) * ops->digest_size),
+			digest,
+			(i == rounds ? length - ((i - 1) * ops->digest_size) : ops->digest_size)
+		);
+	}
+
+	ZEND_SECURE_ZERO(K, ops->block_size);
+	ZEND_SECURE_ZERO(digest, ops->digest_size);
+	ZEND_SECURE_ZERO(prk, ops->digest_size);
+	efree(K);
+	efree(context);
+	efree(prk);
+	efree(digest);
+	ZSTR_VAL(returnval)[length] = 0;
+	RETURN_STR(returnval);
+}
+
 /* {{{ proto string hash_pbkdf2(string algo, string password, string salt, int iterations [, int length = 0, bool raw_output = false])
 Generate a PBKDF2 hash of the given password and salt
 Returns lowercase hexits by default */
@@ -618,6 +725,10 @@ PHP_FUNCTION(hash_pbkdf2)
 	ops = php_hash_fetch_ops(algo, algo_len);
 	if (!ops) {
 		php_error_docref(NULL, E_WARNING, "Unknown hashing algorithm: %s", algo);
+		RETURN_FALSE;
+	}
+	else if (!ops->is_crypto) {
+		php_error_docref(NULL, E_WARNING, "Non-cryptographic hashing algorithm: %s", algo);
 		RETURN_FALSE;
 	}
 
@@ -1205,6 +1316,14 @@ ZEND_BEGIN_ARG_INFO(arginfo_hash_equals, 0)
 	ZEND_ARG_INFO(0, user_string)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_hkdf, 0, 0, 2)
+	ZEND_ARG_INFO(0, ikm)
+	ZEND_ARG_INFO(0, algo)
+	ZEND_ARG_INFO(0, length)
+	ZEND_ARG_INFO(0, string)
+	ZEND_ARG_INFO(0, salt)
+ZEND_END_ARG_INFO()
+
 /* BC Land */
 #ifdef PHP_MHASH_BC
 ZEND_BEGIN_ARG_INFO(arginfo_mhash_get_block_size, 0)
@@ -1253,6 +1372,7 @@ const zend_function_entry hash_functions[] = {
 	PHP_FE(hash_algos,								arginfo_hash_algos)
 	PHP_FE(hash_pbkdf2,								arginfo_hash_pbkdf2)
 	PHP_FE(hash_equals,								arginfo_hash_equals)
+	PHP_FE(hash_hkdf,								arginfo_hash_hkdf)
 
 	/* BC Land */
 #ifdef PHP_HASH_MD5_NOT_IN_CORE

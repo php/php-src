@@ -302,7 +302,7 @@ static union _zend_function *com_method_get(zend_object **object_ptr, zend_strin
 							f.arg_info = ecalloc(bindptr.lpfuncdesc->cParams, sizeof(zend_arg_info));
 
 							for (i = 0; i < bindptr.lpfuncdesc->cParams; i++) {
-								f.arg_info[i].allow_null = 1;
+								f.arg_info[i].type = ZEND_TYPE_ENCODE(0,1);;
 								if (bindptr.lpfuncdesc->lprgelemdescParam[i].paramdesc.wParamFlags & PARAMFLAG_FOUT) {
 									f.arg_info[i].pass_by_reference = ZEND_SEND_BY_REF;
 								}

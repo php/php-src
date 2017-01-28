@@ -1806,7 +1806,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pack, 0, 0, 2)
 	ZEND_ARG_VARIADIC_INFO(0, args)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_unpack, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_unpack, 0, 0, 2)
 	ZEND_ARG_INFO(0, format)
 	ZEND_ARG_INFO(0, input)
 	ZEND_ARG_INFO(0, offset)
@@ -5629,6 +5629,15 @@ PHP_FUNCTION(getservbyname)
 
 	serv = getservbyname(name, proto);
 
+#if defined(_AIX)
+	/*
+        On AIX, imap is only known as imap2 in /etc/services, while on Linux imap is an alias for imap2.
+        If a request for imap gives no result, we try again with imap2.
+        */
+	if (serv == NULL && strcmp(name,  "imap") == 0) {
+		serv = getservbyname("imap2", proto);
+	}
+#endif
 	if (serv == NULL) {
 		RETURN_FALSE;
 	}

@@ -73,7 +73,8 @@ const php_hash_ops php_hash_sha1_ops = {
 	(php_hash_copy_func_t) php_hash_copy,
 	20,
 	64,
-	sizeof(PHP_SHA1_CTX)
+	sizeof(PHP_SHA1_CTX),
+	1
 };
 
 #ifdef PHP_HASH_SHA1_NOT_IN_CORE
@@ -415,7 +416,8 @@ const php_hash_ops php_hash_sha256_ops = {
 	(php_hash_copy_func_t) php_hash_copy,
 	32,
 	64,
-	sizeof(PHP_SHA256_CTX)
+	sizeof(PHP_SHA256_CTX),
+	1
 };
 
 const php_hash_ops php_hash_sha224_ops = {
@@ -425,7 +427,8 @@ const php_hash_ops php_hash_sha224_ops = {
 	(php_hash_copy_func_t) php_hash_copy,
 	28,
 	64,
-	sizeof(PHP_SHA224_CTX)
+	sizeof(PHP_SHA224_CTX),
+	1
 };
 
 #define ROTR32(b,x)		((x >> b) | (x << (32 - b)))
@@ -917,7 +920,8 @@ const php_hash_ops php_hash_sha384_ops = {
 	(php_hash_copy_func_t) php_hash_copy,
 	48,
 	128,
-	sizeof(PHP_SHA384_CTX)
+	sizeof(PHP_SHA384_CTX),
+	1
 };
 
 /* {{{ PHP_SHA512Init
@@ -1089,7 +1093,8 @@ const php_hash_ops php_hash_sha512_ops = {
 	(php_hash_copy_func_t) php_hash_copy,
 	64,
 	128,
-	sizeof(PHP_SHA512_CTX)
+	sizeof(PHP_SHA512_CTX),
+	1
 };
 
 const php_hash_ops php_hash_sha512_256_ops = {
@@ -1099,7 +1104,8 @@ const php_hash_ops php_hash_sha512_256_ops = {
 	(php_hash_copy_func_t) php_hash_copy,
 	32,
 	128,
-	sizeof(PHP_SHA512_CTX)
+	sizeof(PHP_SHA512_CTX),
+	1
 };
 
 const php_hash_ops php_hash_sha512_224_ops = {
@@ -1109,7 +1115,8 @@ const php_hash_ops php_hash_sha512_224_ops = {
 	(php_hash_copy_func_t) php_hash_copy,
 	28,
 	128,
-	sizeof(PHP_SHA512_CTX)
+	sizeof(PHP_SHA512_CTX),
+	1
 };
 
 /*

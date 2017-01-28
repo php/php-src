@@ -17,19 +17,23 @@ $salt = 'salt';
 echo "\n-- Testing hash_pbkdf2() function with less than expected no. of arguments --\n";
 var_dump(@hash_pbkdf2());
 echo $php_errormsg . "\n";
-var_dump(@hash_pbkdf2('crc32'));
+var_dump(@hash_pbkdf2('md5'));
 echo $php_errormsg . "\n";
-var_dump(@hash_pbkdf2('crc32', $password));
+var_dump(@hash_pbkdf2('md5', $password));
 echo $php_errormsg . "\n";
-var_dump(@hash_pbkdf2('crc32', $password, $salt));
+var_dump(@hash_pbkdf2('md5', $password, $salt));
 echo $php_errormsg . "\n";
 
 echo "\n-- Testing hash_pbkdf2() function with more than expected no. of arguments --\n";
-var_dump(@hash_pbkdf2('crc32', $password, $salt, 10, 10, true, 'extra arg'));
+var_dump(@hash_pbkdf2('md5', $password, $salt, 10, 10, true, 'extra arg'));
 echo $php_errormsg . "\n";
 
 echo "\n-- Testing hash_pbkdf2() function with invalid hash algorithm --\n";
 var_dump(@hash_pbkdf2('foo', $password, $salt, 1));
+echo $php_errormsg . "\n";
+
+echo "\n-- Testing hash_pbkdf2() function with non-cryptographic hash algorithm --\n";
+var_dump(@hash_pbkdf2('crc32', $password, $salt, 1));
 echo $php_errormsg . "\n";
 
 echo "\n-- Testing hash_pbkdf2() function with invalid iterations --\n";
@@ -64,6 +68,10 @@ hash_pbkdf2() expects at most 6 parameters, 7 given
 -- Testing hash_pbkdf2() function with invalid hash algorithm --
 bool(false)
 hash_pbkdf2(): Unknown hashing algorithm: foo
+
+-- Testing hash_pbkdf2() function with non-cryptographic hash algorithm --
+bool(false)
+hash_pbkdf2(): Non-cryptographic hashing algorithm: crc32
 
 -- Testing hash_pbkdf2() function with invalid iterations --
 bool(false)
