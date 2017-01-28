@@ -244,9 +244,6 @@ typedef struct _zend_oparray_context {
 /* deprecation flag */
 #define ZEND_ACC_DEPRECATED 0x40000
 
-/* class implement trait(s) flag */
-#define ZEND_ACC_IMPLEMENT_TRAITS	  0x400000
-
 /* class constants updated */
 #define ZEND_ACC_CONSTANTS_UPDATED	  0x100000
 

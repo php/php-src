@@ -1117,7 +1117,9 @@ ZEND_API int zend_bind_inheritance(zend_class_entry *ce, zend_class_entry *paren
 {
 	zend_bool do_inheritance = 0;
 	zend_class_entry **interfaces = ce->interfaces;
+	zend_class_entry **traits = ce->traits;
 	uint32_t num_interfaces = ce->num_interfaces;
+	uint32_t num_traits = ce->num_traits;
 	uint32_t i;
 
 	/* Resolve parent to class entry */
@@ -1153,13 +1155,42 @@ ZEND_API int zend_bind_inheritance(zend_class_entry *ce, zend_class_entry *paren
 		zend_string_release(interface_name);
 	}
 
-	/* Emulate the previous approach of implementing interfaces, where one interface is
-	 * added at a time. We may want to change this to something else lateron.  */
+	/* Resolve trait names to class entries */
+	for (i = 0; i < num_traits; i++) {
+		zend_string *trait_name = ZEND_GET_UNBOUND_CLASS(traits[i]);
+		zend_class_entry *trait = zend_fetch_class_by_name(
+			trait_name, NULL, ZEND_FETCH_CLASS_TRAIT);
+		if (!trait) {
+			return FAILURE;
+		}
+
+		if (!(trait->ce_flags & ZEND_ACC_TRAIT)) {
+			zend_error_noreturn(E_ERROR, "%s cannot use %s - it is not a trait",
+				ZSTR_VAL(ce->name), ZSTR_VAL(trait->name));
+		}
+
+		traits[i] = trait;
+		zend_string_release(trait_name);
+	}
+
+	/* Emulate the previous approach of implementing interfaces/traits, where one
+	 * interface/trait is added at a time. We may want to change this to something
+	 * else lateron.  */
 	ce->interfaces = NULL;
 	ce->num_interfaces = 0;
+	ce->traits = NULL;
+	ce->num_traits = 0;
 
 	if (do_inheritance) {
 		zend_do_inheritance(ce, ce->parent);
+	}
+
+	if (traits) {
+		for (i = 0; i < num_traits; i++) {
+			zend_do_implement_trait(ce, traits[i]);
+		}
+		zend_do_bind_traits(ce);
+		efree(traits);
 	}
 
 	if (interfaces) {
@@ -1167,7 +1198,7 @@ ZEND_API int zend_bind_inheritance(zend_class_entry *ce, zend_class_entry *paren
 		efree(interfaces);
 	}
 	
-	if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_IMPLEMENT_TRAITS))) {
+	if (!(ce->ce_flags & ZEND_ACC_INTERFACE)) {
 		zend_verify_abstract_class(ce);
 	}
 
@@ -1227,8 +1258,8 @@ void zend_do_early_binding(void) /* {{{ */
 			zval *lcname = CT_CONSTANT(opline->op1);
 			zval *rtd_key = lcname + 1;
 			zend_class_entry *ce = zend_hash_find_ptr(CG(class_table), Z_STR_P(rtd_key));
-			if (ce->num_interfaces) {
-				/* Don't early-bind class implementing interfaces */
+			if (ce->num_interfaces || ce->num_traits) {
+				/* Don't early-bind class implementing interfaces or using traits */
 				return;
 			}
 
@@ -1263,11 +1294,6 @@ void zend_do_early_binding(void) /* {{{ */
 			table = CG(class_table);
 			break;
 		}
-		case ZEND_ADD_TRAIT:
-		case ZEND_BIND_TRAITS:
-			/* We currently don't early-bind classes that implement interfaces */
-			/* Classes with traits are handled exactly the same, no early-bind here */
-			return;
 		default:
 			zend_error_noreturn(E_COMPILE_ERROR, "Invalid binding type");
 			return;
@@ -2091,9 +2117,7 @@ static void zend_check_live_ranges(zend_op *opline) /* {{{ */
 			}
 		} else if (opline->opcode == ZEND_INIT_STATIC_METHOD_CALL ||
 		           opline->opcode == ZEND_NEW ||
-		           opline->opcode == ZEND_FETCH_CLASS_CONSTANT ||
-		           opline->opcode == ZEND_ADD_TRAIT ||
-		           opline->opcode == ZEND_BIND_TRAITS) {
+		           opline->opcode == ZEND_FETCH_CLASS_CONSTANT) {
 			/* classes don't have to be destroyed */
 		} else if (opline->opcode == ZEND_FAST_RET) {
 			/* fast_calls don't have to be destroyed */
@@ -5788,12 +5812,15 @@ void zend_compile_use_trait(zend_ast *ast) /* {{{ */
 	zend_ast_list *traits = zend_ast_get_list(ast->child[0]);
 	zend_ast_list *adaptations = ast->child[1] ? zend_ast_get_list(ast->child[1]) : NULL;
 	zend_class_entry *ce = CG(active_class_entry);
-	zend_op *opline;
-	uint32_t i;
+	uint32_t i, trait_idx = ce->num_traits;
+
+	ce->num_traits += traits->children;
+	ce->traits = erealloc(ce->traits, sizeof(zend_class_entry *) * ce->num_traits);
 
 	for (i = 0; i < traits->children; ++i) {
 		zend_ast *trait_ast = traits->child[i];
 		zend_string *name = zend_ast_get_str(trait_ast);
+		zend_string *resolved_name = zend_resolve_class_name_ast(trait_ast);
 
 		if (ce->ce_flags & ZEND_ACC_INTERFACE) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use traits inside of interfaces. "
@@ -5809,14 +5836,8 @@ void zend_compile_use_trait(zend_ast *ast) /* {{{ */
 				break;
 		}
 
-		opline = get_next_op(CG(active_op_array));
-		opline->opcode = ZEND_ADD_TRAIT;
-		SET_NODE(opline->op1, &FC(implementing_class));
-		opline->op2_type = IS_CONST;
-		opline->op2.constant = zend_add_class_name_literal(CG(active_op_array),
-			zend_resolve_class_name_ast(trait_ast));
-
-		ce->num_traits++;
+		resolved_name = zend_new_interned_string(resolved_name);
+		ce->traits[trait_idx++] = ZEND_MAKE_UNBOUND_CLASS(resolved_name);
 	}
 
 	if (!adaptations) {
@@ -6029,17 +6050,6 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 				"%s::%s() cannot declare a return type",
 				ZSTR_VAL(ce->name), ZSTR_VAL(ce->clone->common.function_name));
 		}
-	}
-
-	/* Check for traits and proceed like with interfaces.
-	 * The only difference will be a combined handling of them in the end.
-	 * Thus, we need another opcode here. */
-	if (ce->num_traits > 0) {
-		ce->traits = NULL;
-		ce->num_traits = 0;
-		ce->ce_flags |= ZEND_ACC_IMPLEMENT_TRAITS;
-
-		zend_emit_op(NULL, ZEND_BIND_TRAITS, &declare_node, NULL);
 	}
 
 	if (implements_ast) {

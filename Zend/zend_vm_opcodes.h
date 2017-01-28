@@ -217,8 +217,6 @@ END_EXTERN_C()
 #define ZEND_ASSERT_CHECK               151
 #define ZEND_JMP_SET                    152
 #define ZEND_DECLARE_LAMBDA_FUNCTION    153
-#define ZEND_ADD_TRAIT                  154
-#define ZEND_BIND_TRAITS                155
 #define ZEND_SEPARATE                   156
 #define ZEND_FETCH_CLASS_NAME           157
 #define ZEND_CALL_TRAMPOLINE            158

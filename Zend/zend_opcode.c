@@ -216,12 +216,18 @@ ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce)
 
 void _destroy_zend_class_traits_info(zend_class_entry *ce)
 {
+	uint32_t i;
 	if (ce->num_traits > 0 && ce->traits) {
+		for (i = 0; i < ce->num_traits; i++) {
+			if (ZEND_IS_UNBOUND_CLASS(ce->traits[i])) {
+				zend_string_release(ZEND_GET_UNBOUND_CLASS(ce->traits[i]));
+			}
+		}
 		efree(ce->traits);
 	}
 
 	if (ce->trait_aliases) {
-		size_t i = 0;
+		i = 0;
 		while (ce->trait_aliases[i]) {
 			if (ce->trait_aliases[i]->trait_method) {
 				if (ce->trait_aliases[i]->trait_method->method_name) {
@@ -245,8 +251,7 @@ void _destroy_zend_class_traits_info(zend_class_entry *ce)
 	}
 
 	if (ce->trait_precedences) {
-		size_t i = 0;
-
+		i = 0;
 		while (ce->trait_precedences[i]) {
 			zend_string_release(ce->trait_precedences[i]->trait_method->method_name);
 			zend_string_release(ce->trait_precedences[i]->trait_method->class_name);
@@ -322,7 +327,16 @@ ZEND_API void destroy_zend_class(zval *zv)
 				} ZEND_HASH_FOREACH_END();
 				zend_hash_destroy(&ce->constants_table);
 			}
+			if (ZEND_IS_UNBOUND_CLASS(ce->parent)) {
+				zend_string_release(ZEND_GET_UNBOUND_CLASS(ce->parent));
+			}
 			if (ce->num_interfaces > 0 && ce->interfaces) {
+				uint32_t i;
+				for (i = 0; i < ce->num_interfaces; i++) {
+					if (ZEND_IS_UNBOUND_CLASS(ce->interfaces[i])) {
+						zend_string_release(ZEND_GET_UNBOUND_CLASS(ce->interfaces[i]));
+					}
+				}
 				efree(ce->interfaces);
 			}
 			if (ce->info.user.doc_comment) {
