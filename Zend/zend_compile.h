@@ -244,8 +244,7 @@ typedef struct _zend_oparray_context {
 /* deprecation flag */
 #define ZEND_ACC_DEPRECATED 0x40000
 
-/* class implement interface(s) flag */
-#define ZEND_ACC_IMPLEMENT_INTERFACES 0x80000
+/* class implement trait(s) flag */
 #define ZEND_ACC_IMPLEMENT_TRAITS	  0x400000
 
 /* class constants updated */
@@ -738,6 +737,7 @@ void zend_do_free(znode *op1);
 ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opline, HashTable *function_table, zend_bool compile_time);
 ZEND_API zend_class_entry *do_bind_class(zend_class_entry *ce, zend_string *lcname, zend_class_entry *parent_ce, HashTable *class_table, zend_bool compile_time);
 ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array);
+ZEND_API int zend_bind_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce);
 
 void zend_do_extended_info(void);
 void zend_do_extended_fcall_begin(void);

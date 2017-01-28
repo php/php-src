@@ -210,8 +210,6 @@ END_EXTERN_C()
 #define ZEND_DECLARE_FUNCTION           141
 #define ZEND_YIELD_FROM                 142
 #define ZEND_DECLARE_CONST              143
-#define ZEND_ADD_INTERFACE              144
-#define ZEND_VERIFY_ABSTRACT_CLASS      146
 #define ZEND_ASSIGN_DIM                 147
 #define ZEND_ISSET_ISEMPTY_PROP_OBJ     148
 #define ZEND_HANDLE_EXCEPTION           149

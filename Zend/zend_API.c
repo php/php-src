@@ -2712,13 +2712,12 @@ ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *cla
 
 ZEND_API void zend_class_implements(zend_class_entry *class_entry, int num_interfaces, ...) /* {{{ */
 {
-	zend_class_entry *interface_entry;
 	va_list interface_list;
 	va_start(interface_list, num_interfaces);
 
 	while (num_interfaces--) {
-		interface_entry = va_arg(interface_list, zend_class_entry *);
-		zend_do_implement_interface(class_entry, interface_entry);
+		zend_class_entry *iface = va_arg(interface_list, zend_class_entry *);
+		zend_do_implement_interface(class_entry, iface);
 	}
 
 	va_end(interface_list);

@@ -1113,6 +1113,68 @@ ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opli
 /* }}} */
 
 /* parent_ce can be used to provide the parent CE if already known, to avoid a double-lookup */
+ZEND_API int zend_bind_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce) /* {{{ */
+{
+	zend_bool do_inheritance = 0;
+	zend_class_entry **interfaces = ce->interfaces;
+	uint32_t num_interfaces = ce->num_interfaces;
+	uint32_t i;
+
+	/* Resolve parent to class entry */
+	if (ZEND_IS_UNBOUND_CLASS(ce->parent)) {
+		zend_string *parent_name = ZEND_GET_UNBOUND_CLASS(ce->parent);
+		if (!parent_ce) {
+			parent_ce = zend_fetch_class_by_name(parent_name, NULL, 0);
+			if (!parent_ce) {
+				return FAILURE;
+			}
+		}
+
+		ce->parent = parent_ce;
+		zend_string_release(parent_name);
+		do_inheritance = 1;
+	}
+
+	/* Resolve interface names to class entries */
+	for (i = 0; i < num_interfaces; i++) {
+		zend_string *interface_name = ZEND_GET_UNBOUND_CLASS(interfaces[i]);
+		zend_class_entry *iface = zend_fetch_class_by_name(
+			interface_name, NULL, ZEND_FETCH_CLASS_INTERFACE);
+		if (!iface) {
+			return FAILURE;
+		}
+
+		if ((iface->ce_flags & ZEND_ACC_INTERFACE) == 0) {
+			zend_error_noreturn(E_ERROR, "%s cannot implement %s - it is not an interface",
+				ZSTR_VAL(ce->name), ZSTR_VAL(iface->name));
+		}
+
+		interfaces[i] = iface;
+		zend_string_release(interface_name);
+	}
+
+	/* Emulate the previous approach of implementing interfaces, where one interface is
+	 * added at a time. We may want to change this to something else lateron.  */
+	ce->interfaces = NULL;
+	ce->num_interfaces = 0;
+
+	if (do_inheritance) {
+		zend_do_inheritance(ce, ce->parent);
+	}
+
+	if (interfaces) {
+		zend_do_implement_interfaces(ce, interfaces, num_interfaces);
+		efree(interfaces);
+	}
+	
+	if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_IMPLEMENT_TRAITS))) {
+		zend_verify_abstract_class(ce);
+	}
+
+	return SUCCESS;
+}
+
+/* parent_ce can be used to provide the parent CE if already known, to avoid a double-lookup */
 ZEND_API zend_class_entry *do_bind_class(
 		zend_class_entry *ce, zend_string *lcname, zend_class_entry *parent_ce,
 		HashTable *class_table, zend_bool compile_time) /* {{{ */
@@ -1129,13 +1191,8 @@ ZEND_API zend_class_entry *do_bind_class(
 		return NULL;
 	}
 
-	if (ZEND_IS_UNBOUND_CLASS(ce->parent)) {
-		zend_string *parent_name = ZEND_GET_UNBOUND_CLASS(ce->parent);
-		ce->parent = parent_ce ? parent_ce : zend_fetch_class_by_name(parent_name, NULL, 0);
-		zend_do_inheritance(ce, ce->parent);
-		zend_string_release(parent_name);
-	} else if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_IMPLEMENT_INTERFACES|ZEND_ACC_IMPLEMENT_TRAITS))) {
-		zend_verify_abstract_class(ce);
+	if (zend_bind_inheritance(ce, parent_ce) == FAILURE) {
+		return NULL;
 	}
 
 	ce->refcount++;
@@ -1170,6 +1227,11 @@ void zend_do_early_binding(void) /* {{{ */
 			zval *lcname = CT_CONSTANT(opline->op1);
 			zval *rtd_key = lcname + 1;
 			zend_class_entry *ce = zend_hash_find_ptr(CG(class_table), Z_STR_P(rtd_key));
+			if (ce->num_interfaces) {
+				/* Don't early-bind class implementing interfaces */
+				return;
+			}
+
 			if (!ce->parent) {
 				if (do_bind_class(ce, Z_STR_P(lcname), NULL, CG(class_table), 1) == NULL) {
 					return;
@@ -1201,8 +1263,6 @@ void zend_do_early_binding(void) /* {{{ */
 			table = CG(class_table);
 			break;
 		}
-		case ZEND_VERIFY_ABSTRACT_CLASS:
-		case ZEND_ADD_INTERFACE:
 		case ZEND_ADD_TRAIT:
 		case ZEND_BIND_TRAITS:
 			/* We currently don't early-bind classes that implement interfaces */
@@ -2032,10 +2092,8 @@ static void zend_check_live_ranges(zend_op *opline) /* {{{ */
 		} else if (opline->opcode == ZEND_INIT_STATIC_METHOD_CALL ||
 		           opline->opcode == ZEND_NEW ||
 		           opline->opcode == ZEND_FETCH_CLASS_CONSTANT ||
-		           opline->opcode == ZEND_ADD_INTERFACE ||
 		           opline->opcode == ZEND_ADD_TRAIT ||
-		           opline->opcode == ZEND_BIND_TRAITS ||
-		           opline->opcode == ZEND_VERIFY_ABSTRACT_CLASS) {
+		           opline->opcode == ZEND_BIND_TRAITS) {
 			/* classes don't have to be destroyed */
 		} else if (opline->opcode == ZEND_FAST_RET) {
 			/* fast_calls don't have to be destroyed */
@@ -5784,23 +5842,22 @@ void zend_compile_implements(znode *class_node, zend_ast *ast) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	uint32_t i;
+
+	CG(active_class_entry)->num_interfaces = list->children;
+	CG(active_class_entry)->interfaces = emalloc(sizeof(zend_class_entry *) * list->children);
+
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *class_ast = list->child[i];
 		zend_string *name = zend_ast_get_str(class_ast);
-
-		zend_op *opline;
+		zend_string *resolved_name = zend_resolve_class_name_ast(class_ast);
 
 		if (!zend_is_const_default_class_ref(class_ast)) {
 			zend_error_noreturn(E_COMPILE_ERROR,
 				"Cannot use '%s' as interface name as it is reserved", ZSTR_VAL(name));
 		}
 
-		opline = zend_emit_op(NULL, ZEND_ADD_INTERFACE, class_node, NULL);
-		opline->op2_type = IS_CONST;
-		opline->op2.constant = zend_add_class_name_literal(CG(active_op_array),
-			zend_resolve_class_name_ast(class_ast));
-
-		CG(active_class_entry)->num_interfaces++;
+		resolved_name = zend_new_interned_string(resolved_name);
+		CG(active_class_entry)->interfaces[i] = ZEND_MAKE_UNBOUND_CLASS(resolved_name);
 	}
 }
 /* }}} */
@@ -5987,25 +6044,6 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 
 	if (implements_ast) {
 		zend_compile_implements(&declare_node, implements_ast);
-	}
-
-	if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))
-		&& (extends_ast || implements_ast)
-	) {
-		zend_verify_abstract_class(ce);
-		if (implements_ast) {
-			zend_emit_op(NULL, ZEND_VERIFY_ABSTRACT_CLASS, &declare_node, NULL);
-		}
-	}
-
-	/* Inherit interfaces; reset number to zero, we need it for above check and
-	 * will restore it during actual implementation.
-	 * The ZEND_ACC_IMPLEMENT_INTERFACES flag disables double call to
-	 * zend_verify_abstract_class() */
-	if (ce->num_interfaces > 0) {
-		ce->interfaces = NULL;
-		ce->num_interfaces = 0;
-		ce->ce_flags |= ZEND_ACC_IMPLEMENT_INTERFACES;
 	}
 
 	FC(implementing_class) = original_implementing_class;

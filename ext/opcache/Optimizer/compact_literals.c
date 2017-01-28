@@ -218,7 +218,6 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					}
 					break;
 				case ZEND_FETCH_CLASS:
-				case ZEND_ADD_INTERFACE:
 				case ZEND_ADD_TRAIT:
 				case ZEND_INSTANCEOF:
 					if (ZEND_OP2_TYPE(opline) == IS_CONST) {
