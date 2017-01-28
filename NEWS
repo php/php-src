@@ -42,6 +42,7 @@ PHP                                                                        NEWS
   . Fixed bug #67474 (getElementsByTagNameNS filter on default ns). (aboks)
   . Fixed bug #54382 (getAttributeNodeNS doesn't get xmlns* attributes).
     (aboks)
+  . Fixed bug #50989 (support for LIBXML_NOXMLDECL). (jhdxr)
 
 - EXIF:
   . Added support for vendor specific tags for the following formats:
