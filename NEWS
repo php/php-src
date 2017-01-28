@@ -11,6 +11,8 @@ PHP                                                                        NEWS
   . Fixed bug #73969 (segfault in debug_print_backtrace). (andrewnester)
   . Fixed bug #73994 (arginfo incorrect for unpack). (krakjoe)
   . Fixed bug #73973 (assertion error in debug_zval_dump). (andrewnester)
+  . Fixed bug #73987 (Method compatibility check looks to original 
+    definition and not parent). (pmmaga)
 
 - DOM:
   . Fixed bug #54382 (getAttributeNodeNS doesn't get xmlns* attributes).
