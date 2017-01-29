@@ -63,6 +63,9 @@ PHP                                                                        NEWS
   . Fixed bug #69865 (php-fpm does not close stderr when using syslog). 
     (Mike)
 
+- FTP:
+  . Implement MLSD for structured listing of directories. (blar)
+
 - GD:
   . Implemented imageresolution as getter and setter (Christoph)
 
