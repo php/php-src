@@ -118,6 +118,8 @@ static zend_string *(*accelerator_orig_zend_resolve_path)(const char *filename, 
 static void (*orig_chdir)(INTERNAL_FUNCTION_PARAMETERS) = NULL;
 static ZEND_INI_MH((*orig_include_path_on_modify)) = NULL;
 
+static void accel_gen_system_id(void);
+
 #ifdef ZEND_WIN32
 # define INCREMENT(v) InterlockedIncrement64(&ZCSG(v))
 # define DECREMENT(v) InterlockedDecrement64(&ZCSG(v))
@@ -2091,6 +2093,11 @@ static void accel_activate(void)
 	ZCG(cwd) = NULL;
 	ZCG(cwd_key_len) = 0;
 	ZCG(cwd_check) = 1;
+
+#ifdef ZTS
+	/* TODO refactor to init this just once. */
+	accel_gen_system_id();
+#endif
 
 #ifdef HAVE_OPCACHE_FILE_CACHE
 	if (ZCG(accel_directives).file_cache_only) {
