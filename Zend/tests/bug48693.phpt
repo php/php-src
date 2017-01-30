@@ -31,15 +31,22 @@ var_dump(
 
 ?>
 --EXPECTF--
+Deprecated: Function create_function() is deprecated in %s on line %d
 ParseError: syntax error, unexpected '}', expecting end of file in %sbug48693.php(4) : runtime-created function:1
 Stack trace:
 #0 %sbug48693.php(4): create_function('', 'return 1; }')
 #1 {main}
 
+
+Deprecated: Function create_function() is deprecated in %s on line %d
+
+Deprecated: Function create_function() is deprecated in %s on line %d
 ParseError: syntax error, unexpected end of file in %sbug48693.php(14) : runtime-created function:1
 Stack trace:
 #0 %sbug48693.php(14): create_function('', '{')
 #1 {main}
 
+
+Deprecated: Function create_function() is deprecated in %s on line %d
 int(2)
 int(3)
