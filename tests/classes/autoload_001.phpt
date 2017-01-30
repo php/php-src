@@ -7,17 +7,16 @@ ZE2 Autoload and class_exists
 --FILE--
 <?php
 
-function __autoload($class_name)
-{
+spl_autoload_register(function ($class_name) {
 	require_once(dirname(__FILE__) . '/' . $class_name . '.p5c');
-	echo __FUNCTION__ . '(' . $class_name . ")\n";
-}
+	echo 'autoload(' . $class_name . ")\n";
+});
 
 var_dump(class_exists('autoload_root'));
 
 ?>
 ===DONE===
 --EXPECT--
-__autoload(autoload_root)
+autoload(autoload_root)
 bool(true)
 ===DONE===

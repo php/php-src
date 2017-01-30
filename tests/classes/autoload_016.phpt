@@ -4,19 +4,18 @@ Ensure ReflectionClass::getProperty() triggers autoload
 <?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
-  function __autoload($name)
-  {
-      echo "In autoload: ";
-      var_dump($name);
-  }
+spl_autoload_register(function ($name) {
+  echo "In autoload: ";
+  var_dump($name);
+});
 
-  $rc = new ReflectionClass("stdClass");
-  
-  try {
-    $rc->getProperty("UndefC::p");
-  } catch (ReflectionException $e) {
-      echo $e->getMessage();
-  }
+$rc = new ReflectionClass("stdClass");
+
+try {
+$rc->getProperty("UndefC::p");
+} catch (ReflectionException $e) {
+  echo $e->getMessage();
+}
 ?>
 --EXPECTF--
 In autoload: string(6) "undefc"

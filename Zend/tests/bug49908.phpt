@@ -3,7 +3,7 @@ Bug #49908 (throwing exception in __autoload crashes when interface is not defin
 --FILE--
 <?php
 
-function __autoload($className) {
+spl_autoload_register(function ($className) {
 	var_dump($className);
 	
 	if ($className == 'Foo') {
@@ -11,7 +11,7 @@ function __autoload($className) {
 	} else {
 		throw new Exception($className);
 	}
-}
+});
 
 new Foo;
 
@@ -22,7 +22,9 @@ string(3) "Bar"
 
 Fatal error: Uncaught Exception: Bar in %s:%d
 Stack trace:
-#0 %s(7): __autoload('Bar')
-#1 %s(13): __autoload('Foo')
-#2 {main}
+#0 [internal function]: {closure}('Bar')
+#1 %s(%d): spl_autoload_call('Bar')
+#2 [internal function]: {closure}('Foo')
+#3 %s(%d): spl_autoload_call('Foo')
+#4 {main}
   thrown in %s on line %d

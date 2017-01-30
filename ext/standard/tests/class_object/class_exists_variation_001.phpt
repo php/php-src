@@ -8,9 +8,9 @@ Test class_exists() function : usage variations - unexpected types for argument 
  * Alias to functions: 
  */
 
-function __autoload($className) {
-	echo "In __autoload($className)\n";
-}
+spl_autoload_register(function ($className) {
+	echo "In autoload($className)\n";
+});
 
 function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
 	echo "Error: $err_no - $err_msg, $filename($linenum)\n";
@@ -88,15 +88,15 @@ Error: 8 - Undefined variable: undefined_var, %s(67)
 Error: 8 - Undefined variable: unset_var, %s(70)
 
 Arg value 0 
-In __autoload(0)
+In autoload(0)
 bool(false)
 
 Arg value 1 
-In __autoload(1)
+In autoload(1)
 bool(false)
 
 Arg value 12345 
-In __autoload(12345)
+In autoload(12345)
 bool(false)
 
 Arg value -2345 
@@ -109,7 +109,7 @@ Arg value -10.5
 bool(false)
 
 Arg value 101234567000 
-In __autoload(101234567000)
+In autoload(101234567000)
 bool(false)
 
 Arg value 1.07654321E-9 
@@ -150,14 +150,14 @@ Arg value
 bool(false)
 
 Arg value 1 
-In __autoload(1)
+In autoload(1)
 bool(false)
 
 Arg value  
 bool(false)
 
 Arg value 1 
-In __autoload(1)
+In autoload(1)
 bool(false)
 
 Arg value  
