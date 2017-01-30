@@ -33,6 +33,18 @@
 #define zend_accel_memdup(p, size) \
 	    _zend_shared_memdup((void*)p, size, 0)
 
+#ifdef HAVE_OPCACHE_FILE_CACHE
+#define zend_set_str_gc_flags(str) do { \
+	if (ZCG(accel_directives).file_cache_only) { \
+		GC_FLAGS(str) = IS_STR_INTERNED; \
+	} else { \
+		GC_FLAGS(str) = IS_STR_INTERNED | IS_STR_PERMANENT; \
+	} \
+} while (0)
+#else
+#define zend_set_str_gc_flags(str) GC_FLAGS(str) = IS_STR_INTERNED | IS_STR_PERMANENT
+#endif
+
 #define zend_accel_store_string(str) do { \
 		zend_string *new_str = zend_shared_alloc_get_xlat_entry(str); \
 		if (new_str) { \
@@ -43,13 +55,13 @@
 			zend_string_release(str); \
 	    	str = new_str; \
 	    	zend_string_hash_val(str); \
-	    	GC_FLAGS(str) = IS_STR_INTERNED | IS_STR_PERMANENT; \
+		zend_set_str_gc_flags(str); \
 		} \
     } while (0)
 #define zend_accel_memdup_string(str) do { \
 		str = zend_accel_memdup(str, _ZSTR_STRUCT_SIZE(ZSTR_LEN(str))); \
     	zend_string_hash_val(str); \
-		GC_FLAGS(str) = IS_STR_INTERNED | IS_STR_PERMANENT; \
+		zend_set_str_gc_flags(str); \
 	} while (0)
 #define zend_accel_store_interned_string(str) do { \
 		if (!IS_ACCEL_INTERNED(str)) { \
