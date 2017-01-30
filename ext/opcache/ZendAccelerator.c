@@ -2110,11 +2110,6 @@ static void accel_activate(void)
 	ZCG(cwd_key_len) = 0;
 	ZCG(cwd_check) = 1;
 
-#ifdef ZTS
-	/* TODO refactor to init this just once. */
-	accel_gen_system_id();
-#endif
-
 #ifdef HAVE_OPCACHE_FILE_CACHE
 	if (ZCG(accel_directives).file_cache_only) {
 		return;
@@ -2580,6 +2575,9 @@ static void accel_globals_ctor(zend_accel_globals *accel_globals)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	memset(accel_globals, 0, sizeof(zend_accel_globals));
+
+	/* TODO refactor to init this just once. */
+	accel_gen_system_id();
 }
 
 static void accel_globals_internal_func_dtor(zval *zv)
