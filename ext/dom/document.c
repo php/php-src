@@ -1628,6 +1628,9 @@ PHP_FUNCTION(dom_document_savexml)
 
 	doc_props = dom_get_doc_props(intern->document);
 	format = doc_props->formatoutput;
+	if (format) {
+		options = options | XML_SAVE_FORMAT;
+	}
 
 	buf = xmlBufferCreate();
 	if (!buf) {
