@@ -2,18 +2,18 @@
 Basic class support - attempting to pass a class constant by reference.
 --FILE--
 <?php
-  class aclass
-  {
-      const myConst = "hello";
-  }
-  
-  function f(&$a)
-  {
-      $a = "changed";
-  }
-  
-  f(aclass::myConst);
-  var_dump(aclass::myConst);
+class aclass
+{
+	const myConst = "hello";
+}
+
+function f(&$a)
+{
+	$a = "changed";
+}
+
+f(aclass::myConst);
+var_dump(aclass::myConst);
 ?>
 --EXPECTF--
 

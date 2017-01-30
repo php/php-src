@@ -24,9 +24,9 @@ var_dump($o);
 $y=ob_get_contents();
 ob_end_clean();
 if ($x == $y) {
-    print "success";
+	print "success";
 } else {
-    print "failure
+	print "failure
 x=$x
 y=$y
 ";

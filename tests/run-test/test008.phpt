@@ -1,9 +1,7 @@
 --TEST--
 Error message handling (without ZendOpcache)
 --SKIPIF--
-<?php
-!extension_loaded("Zend Opcache") or die("skip Zend Opcache is loaded");
-?>
+<?php !extension_loaded("Zend Opcache") or die("skip Zend Opcache is loaded"); ?>
 --FILE--
 <?php
 // If this test fails ask the developers of run-test.php

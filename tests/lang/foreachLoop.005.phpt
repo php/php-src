@@ -4,8 +4,8 @@ Foreach loop tests - modifying the array during the loop: special case. Behaviou
 <?php
 $a = array("original.0","original.1","original.2");
 foreach ($a as $k=>&$v){
-  $a[$k] = "changed.$k";
-  echo "After changing \$a directly, \$v@$k is: $v\n";
+	$a[$k] = "changed.$k";
+	echo "After changing \$a directly, \$v@$k is: $v\n";
 }
 //--- Expected output:
 //After changing $a directly, $v@0 is: changed.0

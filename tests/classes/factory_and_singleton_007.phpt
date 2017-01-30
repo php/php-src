@@ -5,9 +5,8 @@ ZE2 factory and singleton, test 7
 --FILE--
 <?php
 class test {
-
-  protected function __clone() {
-  }
+	protected function __clone() {
+	}
 }
 
 $obj = new test;

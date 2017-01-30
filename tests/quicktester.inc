@@ -18,10 +18,10 @@ TESTS;
 error_reporting(E_ALL);  
 $tests = explode("\n",$tests);
 $success = TRUE;
-foreach ($tests as $n=>$test)
-{
+foreach ($tests as $n=>$test) {
 	// ignore empty lines
-	if (!$test) continue;
+	if (!$test)
+		continue;
 
 	// warn for trailing ;
 	if (substr(trim($test), -1, 1) === ';') {
@@ -39,6 +39,7 @@ foreach ($tests as $n=>$test)
 			break;
 		}
 	}
+	
 	if (!$operator) {
 		echo "WARNING: unknown operator in '$test' (1)\n";
 		exit;
@@ -50,14 +51,16 @@ foreach ($tests as $n=>$test)
 		case '===': // exact match
 			$result = $left === $right;
 			break;
+			
 		case '~==': // may differ after 12th significant number
-			if (   !is_float($left ) && !is_int($left )
+			if (!is_float($left ) && !is_int($left )
 				|| !is_float($right) && !is_int($right)) {
 				$result = FALSE;
 				break;
 			}
 			$result = abs(($left-$right) / $left) < 1e-12;
 			break;
+			
 		default:
 			echo "WARNING: unknown operator in '$test' (2)\n";
 			exit;
@@ -71,5 +74,5 @@ foreach ($tests as $n=>$test)
 		echo "Right: ";var_dump($right);
 	}
 }
-if ($success) echo "OK";
-		 
+if ($success)
+	echo "OK";

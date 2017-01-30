@@ -7,12 +7,12 @@ $a = "aa";
 
 function foo() 
 {
-echo "Bad call\n";
+	echo "Bad call\n";
 }
 
 function baa()
 {
-echo "Good call\n";
+	echo "Good call\n";
 }
 
 $bb = "baa";
@@ -31,12 +31,12 @@ $a = array($a1,$a2,$a3);
 
 function live()
 {
-echo "Good call\n";
+	echo "Good call\n";
 }
 
 function dead()
 {
-echo "Bad call\n";
+	echo "Bad call\n";
 }
 
 $i = 0;
@@ -47,8 +47,8 @@ $a = -1;
 
 function foo1()
 {
-  global $a;
-  return ++$a;
+	global $a;
+	return ++$a;
 }
 
 $arr = array(array(0,0),0);
@@ -56,8 +56,8 @@ $arr = array(array(0,0),0);
 $brr = array(0,0,array(0,0,0,5),0);
 $crr = array(0,0,0,0,array(0,0,0,0,0,10),0,0);
 
-$arr[foo1()][foo1()] = $brr[foo1()][foo1()] +
-                     $crr[foo1()][foo1()];
+$arr[foo1()][foo1()] =	$brr[foo1()][foo1()] +
+						$crr[foo1()][foo1()];
 
 $val = $arr[0][1];
 echo "Expect 15 and get...$val\n";
@@ -65,9 +65,9 @@ echo "Expect 15 and get...$val\n";
 $x = array(array(0),0);
 function mod($b)
 {
-global $x;
-$x = $b;
-return 0;
+	global $x;
+	$x = $b;
+	return 0;
 }
 
 $x1 = array(array(1),1);

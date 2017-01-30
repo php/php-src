@@ -4,12 +4,12 @@ Bug #24573 (debug_backtrace() crashes if $this is set to null)
 <?php
 
 class Foo {
-  function Bar() {
-    $__this = $this;
-    $this = null;
-    debug_backtrace();
-    $this = $__this;
-  }
+	function Bar() {
+		$__this = $this;
+		$this = null;
+		debug_backtrace();
+		$this = $__this;
+	}
 }
 
 $f = new Foo;

@@ -6,8 +6,8 @@ Execution order of variables
 /* strings and concat */
 
 class strclass {
-   var $str = "bad";
-   static $statstr = "bad";
+	var $str = "bad";
+	static $statstr = "bad";
 }
 
 $a = "bad";
@@ -52,9 +52,9 @@ echo "\r\n";
 
 
 function foo() {
-   global $a;
-   $a = "good";
-   return $a;
+	global $a;
+	$a = "good";
+	return $a;
 }
 
 
@@ -148,8 +148,8 @@ echo "\r\n";
 
 
 class c {
-   var $val = 10;
-   static $stat = 20;
+	var $val = 10;
+	static $stat = 20;
 }
 
 echo "21)";

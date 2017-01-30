@@ -6,7 +6,7 @@ Test basic functionality of flush()
  * proto void flush(void)
  * Function is implemented in ext/standard/basic_functions.c.
  */
-  
+
 // Verify return type
 var_dump(flush());
 

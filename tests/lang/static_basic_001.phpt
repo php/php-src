@@ -39,10 +39,10 @@ manyInits();
 
 echo "\nUsing static keyword at global scope\n";
 for ($i=0; $i<3; $i++) {
-   static $s, $k=10;
-   echo "$s $k\n";
-   $s++;
-   $k++;
+	static $s, $k=10;
+	echo "$s $k\n";
+	$s++;
+	$k++;
 }
 ?>
 --EXPECT--

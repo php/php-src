@@ -4,8 +4,8 @@ Passing assignments by reference
 <?php
 
 function f(&$a) {
-  var_dump($a);
-  $a = "a.changed";
+	var_dump($a);
+	$a = "a.changed";
 } 
 
 echo "\n\n---> Pass constant assignment by reference:\n";

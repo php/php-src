@@ -17,12 +17,12 @@ $tmp['foo'] = &fubar($tmp['foo']);
 var_dump($tmp);
 
 function bar($text){
-  return $text;
+	return $text;
 }
 
 function fubar($text){
-  $text = &$text;
-  return $text;
+	$text = &$text;
+	return $text;
 }
 ?>
 --EXPECTF--

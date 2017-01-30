@@ -11,11 +11,11 @@
 
 *** Testing assignments and variable aliasing: ***<br>
 <?php 
-  /* This test tests assignments to variables using other variables as variable-names */
-  $a = "b"; 
-  $$a = "test"; 
-  $$$a = "blah"; 
-  ${$$$a}["associative arrays work too"] = "this is nifty";
+/* This test tests assignments to variables using other variables as variable-names */
+$a = "b"; 
+$$a = "test"; 
+$$$a = "blah"; 
+${$$$a}["associative arrays work too"] = "this is nifty";
 ?>
 This should read "blah": <?php echo "$test<br>\n"; ?>
 This should read "this is nifty": <?php echo $blah[$test="associative arrays work too"]."<br>\n"; ?>
@@ -23,9 +23,9 @@ This should read "this is nifty": <?php echo $blah[$test="associative arrays wor
 
 *** Testing integer operators ***<br>
 <?php 
-  /* test just about any operator possible on $i and $j (ints) */
-  $i = 5;
-  $j = 3;
+/* test just about any operator possible on $i and $j (ints) */
+$i = 5;
+$j = 3;
 ?>
 Correct result - 8:  <?php echo $i+$j; ?><br>
 Correct result - 8:  <?php echo $i+$j; ?><br>
@@ -68,20 +68,20 @@ if ($a == "4") {
 	} elseif (1) {
 		echo "should_not_print<br>\n";
 	} else {
-    		echo "should_not_print<br>\n";
-  	}
-        if (44 == 43) {
+		echo "should_not_print<br>\n";
+	}
+	if (44 == 43) {
 		echo "should_not_print<br>\n";
 	} else {
 		echo "should_print<br>\n";
 	}
 } elseif ($a == 6) {
-  	echo "this "."broken<br>\n";
-  	if (0) {
+	echo "this "."broken<br>\n";
+	if (0) {
 		echo "this_should_not_print<br>\n";
-  	} else {
+	} else {
 		echo "TestingDanglingElse_This_Should_not_print<br>\n";
-  	}
+	}
 } else {
 	echo "This "."does "." not"." work<br>\n";
 }
@@ -95,106 +95,104 @@ if ($a == "4") {
 $i=$j=0;
 echo "Only two lines of text should follow:<br>\n";
 if (0) { /* this code is not supposed to be executed */
-  echo "hmm, this shouldn't be displayed #1<br>\n";
-  $j++;
-  if (1) {
-    $i 
-+=
- $j;
-    if (0) {
-      $j = ++$i;
-      if (1) {
-        $j *= $i;
-        echo "damn, this shouldn't be displayed<br>\n";
-      } else {
-        $j /= $i;
-        ++$j;
-        echo "this shouldn't be displayed either<br>\n";
-      }
-    } elseif (1) {
-      $i++; $j++;
-      echo "this isn't supposed to be displayed<br>\n";
-    }
-  } elseif (0) {
-    $i++;
-    echo "this definitely shouldn't be displayed<br>\n";
-  } else {
-    --$j;
-    echo "and this too shouldn't be displayed<br>\n";
-    while ($j>0) {
-      $j--;
-    }
-  }
+	echo "hmm, this shouldn't be displayed #1<br>\n";
+	$j++;
+	if (1) {
+		$i += $j;
+		if (0) {
+			$j = ++$i;
+			if (1) {
+				$j *= $i;
+				echo "damn, this shouldn't be displayed<br>\n";
+			} else {
+				$j /= $i;
+				++$j;
+				echo "this shouldn't be displayed either<br>\n";
+			}
+		} elseif (1) {
+			$i++; $j++;
+			echo "this isn't supposed to be displayed<br>\n";
+		}
+	} elseif (0) {
+		$i++;
+		echo "this definitely shouldn't be displayed<br>\n";
+	} else {
+		--$j;
+		echo "and this too shouldn't be displayed<br>\n";
+		while ($j>0) {
+			$j--;
+		}
+	}
 } elseif (2-2) {  /* as long as 2-2==0, this isn't supposed to be executed either */
-  $i = ++$j;
-  echo "hmm, this shouldn't be displayed #2<br>\n";
-  if (1) { 
-    $j = ++$i;
-    if (0) {
-      $j = $i*2+$j*($i++);
-      if (1) {
-        $i++;
-        echo "damn, this shouldn't be displayed<br>\n";
-      } else {
-        $j++;
-        echo "this shouldn't be displayed either<br>\n";
-      }
-    } else if (1) {
-      ++$j;
-      echo "this isn't supposed to be displayed<br>\n";
-    }
-  } elseif (0) {
-    $j++;
-    echo "this definitely shouldn't be displayed<br>\n";
-  } else {
-    $i++;
-    echo "and this too shouldn't be displayed<br>\n";
-  }
+	$i = ++$j;
+	echo "hmm, this shouldn't be displayed #2<br>\n";
+	if (1) { 
+		$j = ++$i;
+		if (0) {
+			$j = $i*2+$j*($i++);
+			if (1) {
+				$i++;
+				echo "damn, this shouldn't be displayed<br>\n";
+			} else {
+				$j++;
+				echo "this shouldn't be displayed either<br>\n";
+			}
+		} else if (1) {
+			++$j;
+			echo "this isn't supposed to be displayed<br>\n";
+		}
+	} elseif (0) {
+		$j++;
+		echo "this definitely shouldn't be displayed<br>\n";
+	} else {
+		$i++;
+		echo "and this too shouldn't be displayed<br>\n";
+	}
 } else {
-  $j=$i++;  /* this should set $i to 1, but shouldn't change $j (it's assigned $i's previous values, zero) */
-  echo "this should be displayed. should be:  \$i=1, \$j=0.  is:  \$i=$i, \$j=$j<br>\n";
-  if (1) {
-    $j += ++$i;  /* ++$i --> $i==2,  $j += 2 --> $j==2 */
-    if (0) {
-      $j += 40;
-      if (1) {
-        $i += 50;
-        echo "damn, this shouldn't be displayed<br>\n";
-      } else {
-        $j += 20;
-        echo "this shouldn't be displayed either<br>\n";
-      }
-    } else if (1) {
-      $j *= $i;  /* $j *= 2  --> $j == 4 */
-      echo "this is supposed to be displayed. should be:  \$i=2, \$j=4.  is:  \$i=$i, \$j=$j<br>\n";
-      echo "3 loop iterations should follow:<br>\n";
-      while ($i<=$j) {
-        echo $i++." $j<br>\n";
-      }
-    }
-  } elseif (0) {
-    echo "this definitely shouldn't be displayed<br>\n";
-  } else {
-    echo "and this too shouldn't be displayed<br>\n";
-  }
-  echo "**********************************<br>\n";
+	$j=$i++;  /* this should set $i to 1, but shouldn't change $j (it's assigned $i's previous values, zero) */
+	echo "this should be displayed. should be:  \$i=1, \$j=0.  is:  \$i=$i, \$j=$j<br>\n";
+	if (1) {
+		$j += ++$i;  /* ++$i --> $i==2,  $j += 2 --> $j==2 */
+		if (0) {
+			$j += 40;
+			if (1) {
+				$i += 50;
+				echo "damn, this shouldn't be displayed<br>\n";
+			} else {
+				$j += 20;
+				echo "this shouldn't be displayed either<br>\n";
+			}
+		} else if (1) {
+			$j *= $i;  /* $j *= 2  --> $j == 4 */
+			echo "this is supposed to be displayed. should be:  \$i=2, \$j=4.  is:  \$i=$i, \$j=$j<br>\n";
+			echo "3 loop iterations should follow:<br>\n";
+			while ($i<=$j) {
+				echo $i++." $j<br>\n";
+			}
+		}
+	} elseif (0) {
+		echo "this definitely shouldn't be displayed<br>\n";
+	} else {
+		echo "and this too shouldn't be displayed<br>\n";
+	}
+	echo "**********************************<br>\n";
 }
 ?>
 
 *** C-style else-if's ***<br>
 <?php 
-  /* looks like without we even tried, C-style else-if structure works fine! */
-  if ($a=0) {
-    echo "This shouldn't be displayed<br>\n";
-  } else if ($a++) {
-    echo "This shouldn't be displayed either<br>\n";
-  } else if (--$a) {
-    echo "No, this neither<br>\n";
-  } else if (++$a) {
-    echo "This should be displayed<br>\n";
-  } else {
-    echo "This shouldn't be displayed at all<br>\n";
-  }
+/* looks like without we even tried, C-style else-if structure works fine! */
+if ($a=0) {
+	echo "This shouldn't be displayed<br>\n";
+} else if ($a++) {
+	echo "This shouldn't be displayed either<br>\n";
+} else if (--$a) {
+	echo "No, this neither<br>\n";
+} else if (++$a) {
+	echo "This should be displayed<br>\n";
+} else {
+	echo "This shouldn't be displayed at all<br>\n";
+}
 ?>
 *************************<br>
 
@@ -203,14 +201,14 @@ if (0) { /* this code is not supposed to be executed */
 $i=0;
 $j=20;
 while ($i<(2*$j)) {
-  if ($i>$j) {
-    echo "$i is greater than $j<br>\n";
-  } else if ($i==$j) {
-    echo "$i equals $j<br>\n";
-  } else {
-    echo "$i is smaller than $j<br>\n";
-  }
-  $i++;
+	if ($i>$j) {
+		echo "$i is greater than $j<br>\n";
+	} else if ($i==$j) {
+		echo "$i equals $j<br>\n";
+	} else {
+		echo "$i is smaller than $j<br>\n";
+	}
+	$i++;
 }
 ?>
 *******************<br>
@@ -222,32 +220,32 @@ $arr_len=3;
 
 $i=0;
 while ($i<$arr_len) {
-  $j=0;
-  while ($j<$arr_len) {
-    $k=0;
-    while ($k<$arr_len) {
-      ${"test$i$j"}[$k] = $i+$j+$k;
-      $k++;
-    }
-    $j++;
-  }
-  $i++;
+	$j=0;
+	while ($j<$arr_len) {
+		$k=0;
+		while ($k<$arr_len) {
+			${"test$i$j"}[$k] = $i+$j+$k;
+			$k++;
+		}
+		$j++;
+	}
+	$i++;
 }
 
 echo "Each array variable should be equal to the sum of its indices:<br>\n";
 
 $i=0;
 while ($i<$arr_len) {
-  $j=0;
-  while ($j<$arr_len) {
-    $k=0;
-    while ($k<$arr_len) {
-      echo "\${test$i$j}[$k] = ".${"test$i$j"}[$k]."<br>\n";
-      $k++;
-    }
-    $j++;
-  }
-  $i++;
+	$j=0;
+	while ($j<$arr_len) {
+		$k=0;
+		while ($k<$arr_len) {
+			echo "\${test$i$j}[$k] = ".${"test$i$j"}[$k]."<br>\n";
+			$k++;
+		}
+		$j++;
+	}
+	$i++;
 }
 ?>
 *********************<br>
@@ -258,13 +256,13 @@ while ($i<$arr_len) {
 $i=0;
 
 while ($i<10000) {
-  $arr[$i]=$i;
-  $i++;
+	$arr[$i]=$i;
+	$i++;
 }
 
 $i=0;
 while ($i<10000) {
-  echo $arr[$i++]."<br>\n";
+	echo $arr[$i++]."<br>\n";
 }
 */
 echo "commented out...";
@@ -300,47 +298,48 @@ $i=0;
 
 echo "\$i should go from 0 to 2<br>\n";
 while ($i<5) {
-  if ($i>2) {
-    break;
-  }
-  $j=0;
-  echo "\$j should go from 3 to 4, and \$q should go from 3 to 4<br>\n";
-  while ($j<5) {
-    if ($j<=2) {
-      $j++;
-      continue;
-    }
-    echo "  \$j=$j<br>\n";
-    for ($q=0; $q<=10; $q++) {
-      if ($q<3) {
-        continue;
-      }
-      if ($q>4) {
-        break;
-      }
-      echo "    \$q=$q<br>\n";
-    }
-    $j++;
-  }
-  $j=0;
-  echo "\$j should go from 0 to 2<br>\n";
-  while ($j<5) {
-    if ($j>2) {
-      $k=0;
-      echo "\$k should go from 0 to 2<br>\n";
-      while ($k<5) {
-        if ($k>2) {
-          break 2;
-        }
-        echo "    \$k=$k<br>\n";
-        $k++;
-      }
-    }
-    echo "  \$j=$j<br>\n";
-    $j++;
-  }
-  echo "\$i=$i<br>\n";
-  $i++;
+	if ($i>2) {
+		break;
+	}
+	$j=0;
+	echo "\$j should go from 3 to 4, and \$q should go from 3 to 4<br>\n";
+	while ($j<5) {
+		if ($j<=2) {
+			$j++;
+			continue;
+		}
+		echo "  \$j=$j<br>\n";
+		for ($q=0; $q<=10; $q++) {
+			if ($q<3) {
+				continue;
+			}
+			if ($q>4) {
+				break;
+			}
+			echo "    \$q=$q<br>\n";
+		}
+		$j++;
+	}
+	$j=0;
+	echo "\$j should go from 0 to 2<br>\n";
+	while ($j<5) {
+		if ($j>2) {
+			$k=0;
+			echo "\$k should go from 0 to 2<br>\n";
+			while ($k<5) {
+				if ($k>2) {
+					break 2;
+				}
+				echo "    \$k=$k<br>\n";
+				$k++;
+			}
+		}
+		
+		echo "  \$j=$j<br>\n";
+		$j++;
+	}
+	echo "\$i=$i<br>\n";
+	$i++;
 }
 ?>
 ***********************<br>

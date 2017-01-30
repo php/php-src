@@ -6,32 +6,32 @@ $test_cnt = 0;
 $test_num = 0;
 
 function Show() {
-  global $test_cnt;
-  echo "Count: $test_cnt\n";
+	global $test_cnt;
+	echo "Count: $test_cnt\n";
 }
 
 class counter {
-  protected $id;
+	protected $id;
 
-  public function __construct() {
-    global $test_cnt, $test_num;
-    $test_cnt++;
-    $this->id = $test_num++;
-  }
+	public function __construct() {
+		global $test_cnt, $test_num;
+		$test_cnt++;
+		$this->id = $test_num++;
+	}
 
-  public function Show() {
-    echo 'Id: '.$this->id."\n";
-  }
+	public function Show() {
+		echo 'Id: '.$this->id."\n";
+	}
 
-  // try protected here
-  public function __destruct() {
-    global $test_cnt;
-    $test_cnt--;
-  }
-  
-  static public function destroy(&$obj) {
-  	$obj = NULL;
-  	}
+	// try protected here
+	public function __destruct() {
+		global $test_cnt;
+		$test_cnt--;
+	}
+
+	static public function destroy(&$obj) {
+		$obj = NULL;
+	}
 }
 Show();
 $obj1 = new counter;

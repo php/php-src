@@ -5,17 +5,17 @@ ZE2 A private constructor cannot be called
 
 class Test
 {
-    function __construct()
-    {
-        echo __METHOD__ . "()\n";
-    }
+	function __construct()
+	{
+		echo __METHOD__ . "()\n";
+	}
 }
 
 class Derived extends Test
 {
 	function __construct()
 	{
-        echo __METHOD__ . "()\n";
+		echo __METHOD__ . "()\n";
 		parent::__construct();
 	}
 	
@@ -29,10 +29,10 @@ Derived::f();
 
 class TestPriv
 {
-    private function __construct()
-    {
-        echo __METHOD__ . "()\n";
-    }
+	private function __construct()
+	{
+		echo __METHOD__ . "()\n";
+	}
 
 	static function f()
 	{
@@ -46,7 +46,7 @@ class DerivedPriv extends TestPriv
 {
 	function __construct()
 	{
-        echo __METHOD__ . "()\n";
+		echo __METHOD__ . "()\n";
 		parent::__construct();
 	}
 	

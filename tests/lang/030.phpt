@@ -4,13 +4,13 @@ $this in constructor test
 <?php
 class foo {
 	function __construct($name) {
-     	$GLOBALS['List']= &$this;
-     	$this->Name = $name;
+		$GLOBALS['List']= &$this;
+		$this->Name = $name;
 		$GLOBALS['List']->echoName();
 	}
 
 	function echoName() {
-     	$GLOBALS['names'][]=$this->Name;
+		$GLOBALS['names'][]=$this->Name;
 	}
 }
 

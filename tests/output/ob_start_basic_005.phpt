@@ -14,10 +14,10 @@ Class C {
 }
 
 function checkAndClean() {
-  print_r(ob_list_handlers());
-  while (ob_get_level()>0) {
-    ob_end_flush();
-  }
+	print_r(ob_list_handlers());
+	while (ob_get_level()>0) {
+		ob_end_flush();
+	}
 }
 
 var_dump(ob_start('C::h'));

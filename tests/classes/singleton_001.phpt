@@ -11,7 +11,7 @@ class Counter {
 	function increment_and_print() {
 		echo ++$this->counter;
 		echo "\n";
-    }
+	}
 }
 
 

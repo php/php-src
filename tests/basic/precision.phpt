@@ -17,7 +17,6 @@ echo join($v, ' ').PHP_EOL;
 var_dump(serialize($v));
 var_export($v);echo PHP_EOL;
 
-
 echo "INI".PHP_EOL;
 ini_set('precision', 0);
 ini_set('serialize_precision', 0);
@@ -77,6 +76,7 @@ echo "OUTPUTS".PHP_EOL;
 echo join($v, ' ').PHP_EOL;
 var_dump(serialize($v));
 var_export($v);echo PHP_EOL;
+?>
 --EXPECT--
 INI
 -1

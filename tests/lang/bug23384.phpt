@@ -4,15 +4,15 @@ Bug #23384 (use of class constants in statics)
 <?php
 define('TEN', 10);
 class Foo {
-    const HUN = 100;
-    function test($x = Foo::HUN) {
-        static $arr2 = array(TEN => 'ten');
-        static $arr = array(Foo::HUN => 'ten');
+	const HUN = 100;
+	function test($x = Foo::HUN) {
+		static $arr2 = array(TEN => 'ten');
+		static $arr = array(Foo::HUN => 'ten');
 
-        print_r($arr);
-        print_r($arr2);
-        print_r($x);
-    }
+		print_r($arr);
+		print_r($arr2);
+		print_r($x);
+	}
 }
 
 Foo::test();   

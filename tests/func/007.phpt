@@ -10,10 +10,10 @@ ini_restore('include_path');
 $ini2 =  ini_get('include_path'); 
 
 if ($ini1 !== $ini2) {
-        echo "ini_restore() does not work.\n";
+	echo "ini_restore() does not work.\n";
 }
 else {
-        echo "ini_restore_works\n";
+	echo "ini_restore_works\n";
 }
 
 ?>

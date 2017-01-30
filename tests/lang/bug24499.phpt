@@ -3,12 +3,12 @@ Bug #24499 (bogus handling of a public property as a private one)
 --FILE--
 <?php
 class Id {
-        private $id="priv";
+	private $id="priv";
 
-        public function tester($obj)
-        {
-	        	$obj->id = "bar";
-        }
+	public function tester($obj)
+	{
+		$obj->id = "bar";
+	}
 }
 
 $id = new Id();

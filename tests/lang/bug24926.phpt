@@ -6,18 +6,16 @@ Bug #24926 (lambda function (create_function()) cannot be stored in a class prop
 error_reporting (E_ALL);
 
 class foo {
+	public $functions = array();
 
-    public $functions = array();
-    
-    function __construct()
-    {
-        $function = create_function('', 'return "FOO\n";');
-        print($function());
-        
-        $this->functions['test'] = $function;
-        print($this->functions['test']());    // werkt al niet meer
-    
-    }
+	function __construct()
+	{
+		$function = create_function('', 'return "FOO\n";');
+		print($function());
+
+		$this->functions['test'] = $function;
+		print($this->functions['test']());    // werkt al niet meer
+	}
 }
 
 $a = new foo ();

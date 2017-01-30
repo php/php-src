@@ -25,13 +25,13 @@ class C {
 }
 
 function returnVal() {
-		global $a;
-		return $a;
+	global $a;
+	return $a;
 }
 
 function &returnReference() {
-		global $a;
-		return $a;
+	global $a;
+	return $a;
 }
 
 

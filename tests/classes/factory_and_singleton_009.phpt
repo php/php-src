@@ -5,10 +5,9 @@ ZE2 factory and singleton, test 9
 --FILE--
 <?php
 class test {
-
-  protected function __destruct() {
-  	echo __METHOD__ . "\n";
-  }
+	protected function __destruct() {
+		echo __METHOD__ . "\n";
+	}
 }
 
 $obj = new test;

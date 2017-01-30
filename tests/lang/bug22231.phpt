@@ -9,9 +9,9 @@ class foo {
 }
 
 function &foo(){
-    $obj = new foo();
-    $GLOBALS['foo'] = &$obj;
-    return $GLOBALS['foo'];
+	$obj = new foo();
+	$GLOBALS['foo'] = &$obj;
+	return $GLOBALS['foo'];
 }
 $bar = &foo();
 var_dump($bar);

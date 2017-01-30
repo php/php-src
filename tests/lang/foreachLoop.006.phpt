@@ -4,7 +4,7 @@ Foreach loop tests - error case: key is a reference.
 <?php
 $a = array("a","b","c");
 foreach ($a as &$k=>$v) {
-  var_dump($v);
+	var_dump($v);
 }
 ?>
 --EXPECTF--

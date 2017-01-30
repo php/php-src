@@ -8,8 +8,8 @@ echo "Hello World\n";
 throw new Exception;
 
 function redirect_on_error($e) {
-    ob_end_clean();
-    echo "Goodbye Cruel World\n";
+	ob_end_clean();
+	echo "Goodbye Cruel World\n";
 }
 ?>
 --EXPECT--

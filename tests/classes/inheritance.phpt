@@ -6,28 +6,30 @@ Classes inheritance test
 /* Inheritance test.  Pretty nifty if I do say so myself! */
 
 class foo {
-  public $a;
-  public $b;
-  function display() {
-  	echo "This is class foo\n";
-    echo "a = ".$this->a."\n";
-    echo "b = ".$this->b."\n";
-  }
-  function mul() {
-    return $this->a*$this->b;
-  }
-};
+	public $a;
+	public $b;
+	
+	function display() {
+		echo "This is class foo\n";
+		echo "a = ".$this->a."\n";
+		echo "b = ".$this->b."\n";
+	}
+	
+	function mul() {
+		return $this->a*$this->b;
+	}
+}
 
 class bar extends foo {
-  public $c;
-  function display() {  /* alternative display function for class bar */
-    echo "This is class bar\n";
-    echo "a = ".$this->a."\n";
-    echo "b = ".$this->b."\n";
-    echo "c = ".$this->c."\n";
-  }
-};
-
+	public $c;
+	
+	function display() {  /* alternative display function for class bar */
+		echo "This is class bar\n";
+		echo "a = ".$this->a."\n";
+		echo "b = ".$this->b."\n";
+		echo "c = ".$this->c."\n";
+	}
+}
 
 $foo1 = new foo;
 $foo1->a = 2;

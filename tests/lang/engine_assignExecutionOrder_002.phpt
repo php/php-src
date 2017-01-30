@@ -80,9 +80,9 @@ echo "CC=$cc DD=$dd\n";
 // expect the inner array to be defined 
 $ee = array("original array");
 function f() {
-  global $ee;
-  $ee = array("array created in f()");
-  return 1;
+	global $ee;
+	$ee = array("array created in f()");
+	return 1;
 }
 $ee["array entry created after f()"][f()] = "hello";
 print_r($ee);

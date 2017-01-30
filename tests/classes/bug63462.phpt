@@ -5,9 +5,9 @@ Marco Pivetta <ocramius@gmail.com>
 --FILE--
 <?php
 class Test {
-	public    $publicProperty;
-	protected $protectedProperty;
-	private   $privateProperty;
+	public		$publicProperty;
+	protected	$protectedProperty;
+	private		$privateProperty;
 
 	public function __construct() {
 		unset(
@@ -43,10 +43,10 @@ isset($test->nonExisting);
 isset($test->publicProperty);
 isset($test->protectedProperty);
 isset($test->privateProperty);
-$test->nonExisting       = 'value';
-$test->publicProperty	 = 'value';
-$test->protectedProperty = 'value';
-$test->privateProperty   = 'value';
+$test->nonExisting			= 'value';
+$test->publicProperty		= 'value';
+$test->protectedProperty	= 'value';
+$test->privateProperty		= 'value';
 
 ?>
 

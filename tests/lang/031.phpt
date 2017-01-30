@@ -11,7 +11,7 @@ print "Correct - with inner loop reset.\n";
 while(list(,$o) = each($arrayOuter)){
 	reset($arrayInner);
 	while(list(,$i) = each($arrayInner)){
-	    	print "inloop $i for $o\n";
+		print "inloop $i for $o\n";
 	}
 }
 reset($arrayOuter);

@@ -7,7 +7,7 @@ ZE2 Ensuring destructor visibility
 
 class Base {
 	private function __destruct() {
-    	echo __METHOD__ . "\n";
+		echo __METHOD__ . "\n";
 	}
 }
 
