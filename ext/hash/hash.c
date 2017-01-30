@@ -889,7 +889,7 @@ static void php_hash_dtor(zend_resource *rsrc) /* {{{ */
 	}
 
 	if (hash->key) {
-		memset(hash->key, 0, hash->ops->block_size);
+		ZEND_SECURE_ZERO(hash->key, hash->ops->block_size);
 		efree(hash->key);
 	}
 	efree(hash);
