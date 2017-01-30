@@ -190,6 +190,21 @@ void timelib_do_rel_normalize(timelib_time *base, timelib_rel_time *rt)
 	do_range_limit(0, 12, 12, &rt->m, &rt->y);
 }
 
+static void normalize_month_day_overflow(timelib_time* time)
+{
+	timelib_sll leapyear, days;
+
+	do_range_limit(1, 13, 12, &time->m, &time->y);
+
+	if ((time->relative.m != 0 || time->relative.y != 0)) {
+        leapyear = timelib_is_leap(time->y);
+        days = leapyear ? days_in_month_leap[time->m] : days_in_month[time->m];
+        if (time->d > days) {
+            time->d = days;
+        }
+    }
+}
+
 void timelib_do_normalize(timelib_time* time)
 {
 	if (time->s != TIMELIB_UNSET) do_range_limit(0, 60, 60, &time->s, &time->i);
@@ -213,9 +228,11 @@ static void do_adjust_relative(timelib_time* time)
 		time->i += time->relative.i;
 		time->h += time->relative.h;
 
-		time->d += time->relative.d;
 		time->m += time->relative.m;
 		time->y += time->relative.y;
+		normalize_month_day_overflow(time);
+
+		time->d += time->relative.d;
 	}
 
 	switch (time->relative.first_last_day_of) {
