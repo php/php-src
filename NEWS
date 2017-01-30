@@ -56,6 +56,10 @@ PHP                                                                        NEWS
   . Fixed bug #69899 (segfault on close() after free_result() with mysqlnd).
     (Richard Fussenegger)
 
+- Opcache:
+  . Fixed bug #73983 (crash on finish work with phar in cli + opcache).
+    (Anatol)
+
 - OpenSSL:
   . Fixed bug #71519 (add serial hex to return value array). (xrobau)
   . Fixed bug #73692 (Compile ext/openssl with openssl 1.1.0 on Win). (Anatol)
