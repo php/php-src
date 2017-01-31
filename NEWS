@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2017, PHP 7.1.2
+02 Feb 2017, PHP 7.1.2RC1
 
 - Core:
   . Improved GENERATOR_CREATE opcode handler. (Bob, Dmitry)
