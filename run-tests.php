@@ -570,7 +570,7 @@ if (isset($argc) && $argc > 1) {
 					$ini_overwrites[] = $argv[++$i];
 					break;
 				case 'g':
-					$SHOW_ONLY_GROUPS = explode(",", $argv[++$i]);;
+					$SHOW_ONLY_GROUPS = explode(",", $argv[++$i]);
 					break;
 				//case 'h'
 				case '--keep-all':
