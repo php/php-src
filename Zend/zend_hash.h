@@ -310,6 +310,16 @@ static zend_always_inline int zend_hash_str_exists_ind(const HashTable *ht, cons
 			Z_TYPE_P(Z_INDIRECT_P(zv)) != IS_UNDEF);
 }
 
+static zend_always_inline zval *zend_symbtable_add_new(HashTable *ht, zend_string *key, zval *pData)
+{
+	zend_ulong idx;
+
+	if (ZEND_HANDLE_NUMERIC(key, idx)) {
+		return zend_hash_index_add_new(ht, idx, pData);
+	} else {
+		return zend_hash_add_new(ht, key, pData);
+	}
+}
 
 static zend_always_inline zval *zend_symtable_update(HashTable *ht, zend_string *key, zval *pData)
 {
