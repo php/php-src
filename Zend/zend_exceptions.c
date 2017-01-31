@@ -819,6 +819,8 @@ void zend_register_default_exception(void) /* {{{ */
 	INIT_CLASS_ENTRY(ce, "Exception", default_exception_functions);
 	zend_ce_exception = zend_register_internal_class_ex(&ce, NULL);
 	zend_ce_exception->create_object = zend_default_exception_new;
+	zend_ce_exception->serialize = zend_class_serialize_deny;
+	zend_ce_exception->unserialize = zend_class_unserialize_deny;
 	zend_class_implements(zend_ce_exception, 1, zend_ce_throwable);
 
 	zend_declare_property_string(zend_ce_exception, "message", sizeof("message")-1, "", ZEND_ACC_PROTECTED);
@@ -837,6 +839,8 @@ void zend_register_default_exception(void) /* {{{ */
 	INIT_CLASS_ENTRY(ce, "Error", default_exception_functions);
 	zend_ce_error = zend_register_internal_class_ex(&ce, NULL);
 	zend_ce_error->create_object = zend_default_exception_new;
+	zend_ce_error->serialize = zend_class_serialize_deny;
+	zend_ce_error->unserialize = zend_class_unserialize_deny;
 	zend_class_implements(zend_ce_error, 1, zend_ce_throwable);
 
 	zend_declare_property_string(zend_ce_error, "message", sizeof("message")-1, "", ZEND_ACC_PROTECTED);
