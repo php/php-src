@@ -899,12 +899,9 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			int bufindex = 0, isabsolute = 0;
 			wchar_t * reparsetarget;
 			BOOL isVolume = FALSE;
-#if VIRTUAL_CWD_DEBUG
 			char printname[MAX_PATH];
-			int printname_len;
-#endif
 			char substitutename[MAX_PATH];
-			int substitutename_len;
+			int printname_len, substitutename_len;
 			int substitutename_off = 0;
 
 			if(++(*ll) > LINK_MAX) {
@@ -931,7 +928,6 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 
 			if(pbuffer->ReparseTag == IO_REPARSE_TAG_SYMLINK) {
 				reparsetarget = pbuffer->SymbolicLinkReparseBuffer.ReparseTarget;
-#if VIRTUAL_CWD_DEBUG
 				printname_len = pbuffer->MountPointReparseBuffer.PrintNameLength / sizeof(WCHAR);
 				isabsolute = (pbuffer->SymbolicLinkReparseBuffer.Flags == 0) ? 1 : 0;
 				if (!WideCharToMultiByte(CP_THREAD_ACP, 0,
@@ -944,7 +940,6 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				};
 				printname_len = pbuffer->MountPointReparseBuffer.PrintNameLength / sizeof(WCHAR);
 				printname[printname_len] = 0;
-#endif
 
 				substitutename_len = pbuffer->MountPointReparseBuffer.SubstituteNameLength / sizeof(WCHAR);
 				if (!WideCharToMultiByte(CP_THREAD_ACP, 0,
@@ -960,7 +955,6 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			else if(pbuffer->ReparseTag == IO_REPARSE_TAG_MOUNT_POINT) {
 				isabsolute = 1;
 				reparsetarget = pbuffer->MountPointReparseBuffer.ReparseTarget;
-#if VIRTUAL_CWD_DEBUG
 				printname_len = pbuffer->MountPointReparseBuffer.PrintNameLength / sizeof(WCHAR);
 				if (!WideCharToMultiByte(CP_THREAD_ACP, 0,
 					reparsetarget + pbuffer->MountPointReparseBuffer.PrintNameOffset  / sizeof(WCHAR),
@@ -971,7 +965,6 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 					return -1;
 				};
 				printname[pbuffer->MountPointReparseBuffer.PrintNameLength / sizeof(WCHAR)] = 0;
-#endif
 
 				substitutename_len = pbuffer->MountPointReparseBuffer.SubstituteNameLength / sizeof(WCHAR);
 				if (!WideCharToMultiByte(CP_THREAD_ACP, 0,
