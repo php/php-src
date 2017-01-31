@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2017 PHP 7.0.16
+02 Feb 2017 PHP 7.0.16RC1
 
 - Core:
   . Fixed bug #73916 (zend_print_flat_zval_r doesn't consider reference).
