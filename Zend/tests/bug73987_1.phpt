@@ -1,5 +1,5 @@
 --TEST--
-Bug #73987 (Method compatibility check looks to original definition and not parent - return types interface)
+Bug #73987 (Method compatibility check looks to original definition and not parent)
 --FILE--
 <?php
 
