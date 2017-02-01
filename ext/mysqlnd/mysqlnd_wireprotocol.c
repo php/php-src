@@ -1458,7 +1458,7 @@ php_mysqlnd_read_row_ex(MYSQLND_CONN_DATA * conn, MYSQLND_MEMORY_POOL * result_s
 	  zero-length byte, don't read the body, there is no such.
 	*/
 	
-	*data_size = prealloc_more_bytes;
+	*data_size = 0;
 	while (1) {
 		if (FAIL == mysqlnd_read_header(conn->net, &header, conn->stats, conn->error_info)) {
 			ret = FAIL;
@@ -1469,7 +1469,8 @@ php_mysqlnd_read_row_ex(MYSQLND_CONN_DATA * conn, MYSQLND_MEMORY_POOL * result_s
 
 		if (first_iteration) {
 			first_iteration = FALSE;
-			*buffer = result_set_memory_pool->get_chunk(result_set_memory_pool, *data_size);
+			*buffer = result_set_memory_pool->get_chunk(
+				result_set_memory_pool, *data_size + prealloc_more_bytes);
 			if (!*buffer) {
 				ret = FAIL;
 				break;
@@ -1484,7 +1485,7 @@ php_mysqlnd_read_row_ex(MYSQLND_CONN_DATA * conn, MYSQLND_MEMORY_POOL * result_s
 			/*
 			  We have to realloc the buffer.
 			*/
-			if (FAIL == (*buffer)->resize_chunk((*buffer), *data_size)) {
+			if (FAIL == (*buffer)->resize_chunk((*buffer), *data_size + prealloc_more_bytes)) {
 				SET_OOM_ERROR(*conn->error_info);
 				ret = FAIL;
 				break;
@@ -1507,7 +1508,6 @@ php_mysqlnd_read_row_ex(MYSQLND_CONN_DATA * conn, MYSQLND_MEMORY_POOL * result_s
 		(*buffer)->free_chunk((*buffer));
 		*buffer = NULL;
 	}
-	*data_size -= prealloc_more_bytes;
 	DBG_RETURN(ret);
 }
 /* }}} */
