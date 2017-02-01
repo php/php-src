@@ -2,7 +2,6 @@
 Bug #21478 (Zend/zend_alloc.c :: shutdown_memory_manager produces segfault) 
 --SKIPIF--
 <?php 
-	if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 is needed'); 
 	if (!function_exists('stream_filter_register')) die('skip stream_filter_register() not available');
 ?>
 --FILE--

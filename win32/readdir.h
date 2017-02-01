@@ -22,7 +22,7 @@ struct dirent {
 	long d_ino;					/* inode (always 1 in WIN32) */
 	off_t d_off;					/* offset to this dirent */
 	unsigned short d_reclen;			/* length of d_name */
-	char d_name[PHP_WIN32_IOUTIL_MAXPATHLEN + 1];	/* filename (null terminated) */
+	char d_name[_MAX_FNAME*4+1];	/* filename with care about UTF-8 (null terminated) */
 };
 
 /* typedef DIR - not the same as Unix */

@@ -103,7 +103,9 @@ typedef struct _zend_fcall_info_cache {
 #define ZEND_ARG_ARRAY_INFO(pass_by_ref, name, allow_null)           { #name, ZEND_TYPE_ENCODE(IS_ARRAY, allow_null), pass_by_ref, 0 },
 #define ZEND_ARG_CALLABLE_INFO(pass_by_ref, name, allow_null)        { #name, ZEND_TYPE_ENCODE(IS_CALLABLE, allow_null), pass_by_ref, 0 },
 #define ZEND_ARG_TYPE_INFO(pass_by_ref, name, type_hint, allow_null) { #name, ZEND_TYPE_ENCODE(type_hint, allow_null), pass_by_ref, 0 },
-#define ZEND_ARG_VARIADIC_INFO(pass_by_ref, name)                    { #name, 0, pass_by_ref, 1 },
+#define ZEND_ARG_VARIADIC_INFO(pass_by_ref, name)                             { #name, 0, pass_by_ref, 1 },
+#define ZEND_ARG_VARIADIC_TYPE_INFO(pass_by_ref, name, type_hint, allow_null) { #name, ZEND_TYPE_ENCODE(type_hint, allow_null), pass_by_ref, 1 },
+#define ZEND_ARG_VARIADIC_OBJ_INFO(pass_by_ref, name, classname, allow_null)  { #name, ZEND_TYPE_ENCODE_CLASS_CONST(#classname, allow_null), pass_by_ref, 1 },
 
 
 #define ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(name, return_reference, required_num_args, classname, allow_null) \

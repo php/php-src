@@ -1257,21 +1257,19 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 		lc_function_name = zend_string_tolower(function_name);
 	}
 
-	if (ZSTR_LEN(function_name) == ZSTR_LEN(ce->name) && ce->constructor) {
-		lc_class_name = zend_str_tolower_dup(ZSTR_VAL(ce->name), ZSTR_LEN(ce->name));
-		/* Only change the method to the constructor if the constructor isn't called __construct
-		 * we check for __ so we can be binary safe for lowering, we should use ZEND_CONSTRUCTOR_FUNC_NAME
-		 */
-		if (!memcmp(lc_class_name, ZSTR_VAL(lc_function_name), ZSTR_LEN(function_name)) && memcmp(ZSTR_VAL(ce->constructor->common.function_name), "__", sizeof("__") - 1)) {
-			fbc = ce->constructor;
-		}
-		efree(lc_class_name);
-	}
-
-	if (EXPECTED(!fbc)) {
+	do {
 		zval *func = zend_hash_find(&ce->function_table, lc_function_name);
 		if (EXPECTED(func != NULL)) {
 			fbc = Z_FUNC_P(func);
+		} else if (ce->constructor
+			&& ZSTR_LEN(lc_function_name) == ZSTR_LEN(ce->name)
+			&& zend_binary_strncasecmp(ZSTR_VAL(lc_function_name), ZSTR_LEN(lc_function_name), ZSTR_VAL(ce->name), ZSTR_LEN(lc_function_name), ZSTR_LEN(lc_function_name)) == 0
+			/* Only change the method to the constructor if the constructor isn't called __construct
+			 * we check for __ so we can be binary safe for lowering, we should use ZEND_CONSTRUCTOR_FUNC_NAME
+			 */
+			&& (ZSTR_VAL(ce->constructor->common.function_name)[0] != '_'
+				|| ZSTR_VAL(ce->constructor->common.function_name)[1] != '_')) {
+			fbc = ce->constructor;
 		} else {
 			if (UNEXPECTED(!key)) {
 				zend_string_release(lc_function_name);
@@ -1294,7 +1292,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 	   			return NULL;
 			}
 		}
-	}
+	} while (0);
 
 #if MBO_0
 	/* right now this function is used for non static method lookup too */

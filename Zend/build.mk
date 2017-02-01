@@ -30,14 +30,14 @@ $(LT_TARGETS):
 $(makefile_in_files): $(makefile_am_files)
 	automake -a -i $(AMFLAGS) $(makefile_files)
 
-aclocal.m4: configure.in acinclude.m4
+aclocal.m4: configure.ac acinclude.m4
 	aclocal
 
-$(config_h_in): configure.in
+$(config_h_in): configure.ac
 # explicitly remove target since autoheader does not seem to work 
 # correctly otherwise (timestamps are not updated)
 	@rm -f $@
 	autoheader
 
-configure: aclocal.m4 configure.in
+configure: aclocal.m4 configure.ac
 	autoconf

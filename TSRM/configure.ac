@@ -1,6 +1,6 @@
 dnl $Id$
 dnl
-dnl Minimalistic configure.in for TSRM.
+dnl Minimalistic configure.ac for TSRM.
 dnl
 
 AC_INIT(TSRM.c)

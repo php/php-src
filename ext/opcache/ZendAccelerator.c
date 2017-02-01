@@ -122,6 +122,8 @@ static zend_string *(*accelerator_orig_zend_resolve_path)(const char *filename, 
 static void (*orig_chdir)(INTERNAL_FUNCTION_PARAMETERS) = NULL;
 static ZEND_INI_MH((*orig_include_path_on_modify)) = NULL;
 
+static void accel_gen_system_id(void);
+
 #ifdef ZEND_WIN32
 # define INCREMENT(v) InterlockedIncrement64(&ZCSG(v))
 # define DECREMENT(v) InterlockedDecrement64(&ZCSG(v))
@@ -2585,6 +2587,9 @@ static void accel_globals_ctor(zend_accel_globals *accel_globals)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	memset(accel_globals, 0, sizeof(zend_accel_globals));
+
+	/* TODO refactor to init this just once. */
+	accel_gen_system_id();
 }
 
 static void accel_globals_internal_func_dtor(zval *zv)

@@ -435,8 +435,7 @@ static int php_session_initialize(void) /* {{{ */
 	php_session_track_init();
 	if (PS(mod)->s_read(&PS(mod_data), PS(id), &val, PS(gc_maxlifetime)) == FAILURE) {
 		php_session_abort();
-		/* Some broken save handler implementation returns FAILURE for non-existent session ID */
-		/* It's better to raise error for this, but disabled error for better compatibility */
+		/* FYI: Some broken save handlers return FAILURE for non-existent session ID, this is incorrect */
 		php_error_docref(NULL, E_WARNING, "Failed to read session data: %s (path: %s)", PS(mod)->s_name, PS(save_path));
 		return FAILURE;
 	}
@@ -3211,6 +3210,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 				if (PS(rfc1867_cleanup)) {
 					php_session_rfc1867_cleanup(progress);
 				} else {
+					SEPARATE_ARRAY(&progress->data);
 					add_assoc_bool_ex(&progress->data, "done", sizeof("done") - 1, 1);
 					Z_LVAL_P(progress->post_bytes_processed) = data->post_bytes_processed;
 					php_session_rfc1867_update(progress, 1);

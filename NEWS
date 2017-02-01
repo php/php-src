@@ -22,6 +22,12 @@ PHP                                                                        NEWS
     bugs #53838, #61655, #66173, #70925, #72254, etc. (Andrea)
   . Raised minimum supported Windows versions to Windows 7/Server 2008 R2.
     (Anatol)
+  . Fixed bug #73969 (segfault in debug_print_backtrace). (andrewnester)
+  . Added PHP_OS_FAMILY constant to determine on which OS we are. (Jan Altensen)
+  . Fixed bug #73994 (arginfo incorrect for unpack). (krakjoe)
+  . Fixed bug #73973 (assertion error in debug_zval_dump). (andrewnester)
+  . Fixed bug #73987 (Method compatibility check looks to original 
+    definition and not parent). (pmmaga)
 
 - BCMath:
   . Fixed bug #46564 (bcmod truncates fractionals). (liborm85)
@@ -34,6 +40,9 @@ PHP                                                                        NEWS
 
 - DOM:
   . Fixed bug #67474 (getElementsByTagNameNS filter on default ns). (aboks)
+  . Fixed bug #54382 (getAttributeNodeNS doesn't get xmlns* attributes).
+    (aboks)
+  . Fixed bug #50989 (support for LIBXML_NOXMLDECL). (jhdxr)
 
 - EXIF:
   . Added support for vendor specific tags for the following formats:
@@ -51,12 +60,21 @@ PHP                                                                        NEWS
 
 - FPM:
   . Configuration to limit fpm slow log trace callers. (Sannis)
+  . Fixed bug #69865 (php-fpm does not close stderr when using syslog). 
+    (Mike)
+
+- FTP:
+  . Implement MLSD for structured listing of directories. (blar)
 
 - GD:
   . Implemented imageresolution as getter and setter (Christoph)
 
 - GMP:
   . Fixed bug #70896 (gmp_fact() silently ignores non-integer input). (Sara)
+
+- hash:
+  . Fixed bug #73961 (environmental build dependency in hash sha3 source).
+    (krakjoe)
 
 - Mbstring:
   . Implemented request #66024 (mb_chr() and mb_ord()). (Masakielastic, Yasuo)
@@ -69,6 +87,9 @@ PHP                                                                        NEWS
 
 - Mcrypt:
   . The deprecated mcrypt extension has been moved to PECL. (leigh)
+
+- MySQLi:
+  . Fixed bug #73949 (leak in mysqli_fetch_object). (krakjoe)
 
 - mysqlnd:
   . Fixed bug #73800 (sporadic segfault with MYSQLI_OPT_INT_AND_FLOAT_NATIVE). 
@@ -87,6 +108,16 @@ PHP                                                                        NEWS
   . Fixed bug #73234 (Emulated statements let value dictate parameter type).
     (Adam Baratz)
   . Fixed bug #73396 (bigint columns are returned as strings). (Adam Baratz)
+  . Expose DB-Library version as \PDO::DBLIB_ATTR_VERSION attribute on \PDO
+    instance. (Adam Baratz)
+  . Add test coverage for bug #72969. (Jeff Farr)
+
+- PDO_PgSQL:
+  . Fixed bug #73959 (lastInsertId fails to throw an exception for wrong 
+    sequence name). (andrewnester)
+
+- PDO_Sqlite
+  . Switch to sqlite3_prepare_v2() and sqlite3_close_v2() functions (rasmus)
 
 - posix:
   . Fixed bug #71219 (configure script incorrectly checks for ttyname_r). (atoh)

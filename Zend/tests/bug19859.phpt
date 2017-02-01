@@ -1,7 +1,5 @@
 --TEST--
 Bug #19859 (__call() does not catch call_user_func_array() calls)
---SKIPIF--
-<?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 is needed'); ?>
 --FILE--
 <?php
 class test
