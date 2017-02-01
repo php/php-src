@@ -292,7 +292,7 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 			PW32G(mail_host), !INI_INT("smtp_port") ? 25 : INI_INT("smtp_port"));
 		return FAILURE;
 	} else {
-		ret = SendText(RPath, Subject, mailTo, mailCc, mailBcc, data, ZSTR_VAL(headers_trim), ZSTR_VAL(headers_lc), error_message);
+		ret = SendText(RPath, Subject, mailTo, mailCc, mailBcc, data, headers ? ZSTR_VAL(headers_trim) : NULL, headers ? ZSTR_VAL(headers_lc) : NULL, error_message);
 		TSMClose();
 		if (RPath) {
 			efree(RPath);
