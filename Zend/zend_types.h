@@ -993,9 +993,10 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 
 #define SEPARATE_STRING(zv) do {						\
 		zval *_zv = (zv);								\
-		if (Z_REFCOUNTED_P(_zv) &&						\
-		    Z_REFCOUNT_P(_zv) > 1) {					\
-			Z_DELREF_P(_zv);							\
+		if (Z_REFCOUNT_P(_zv) > 1) {					\
+			if (Z_REFCOUNTED_P(_zv));					\
+				Z_DELREF_P(_zv);						\
+			}											\
 			zval_copy_ctor_func(_zv);					\
 		}												\
 	} while (0)
