@@ -222,7 +222,7 @@ static void *dasm_link_and_encode(dasm_State    **dasm_state,
 
 #if defined(HAVE_DISASM) || defined(HAVE_GDB) || defined(HAVE_OPROFILE) || defined(HAVE_PERFTOOLS) || defined(HAVE_VTUNE)
     if (!name) {
-		if (ZCG(accel_directives).jit_debug & (ZEND_JIT_DEBUG_ASM|ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_OPROFILE|ZEND_JIT_DEBUG_PERF|ZEND_JIT_DEBUG_VTUNE)) {
+		if (ZCG(accel_directives).jit_debug & (ZEND_JIT_DEBUG_ASM|ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_OPROFILE|ZEND_JIT_DEBUG_PERF|ZEND_JIT_DEBUG_VTUNE|ZEND_JIT_DEBUG_PERF_DUMP)) {
 			str = zend_jit_func_name(op_array);
 			if (str) {
 				name = ZSTR_VAL(str);
@@ -266,12 +266,18 @@ static void *dasm_link_and_encode(dasm_State    **dasm_state,
 #endif
 
 #ifdef HAVE_PERFTOOLS
-	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_PERF) {
+	if (ZCG(accel_directives).jit_debug & (ZEND_JIT_DEBUG_PERF|ZEND_JIT_DEBUG_PERF_DUMP)) {
 		if (name) {
-			zend_jit_perf_dump(
+			zend_jit_perf_map_register(
 				name,
 				entry,
 				size);
+			if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_PERF_DUMP) {
+				zend_jit_perf_jitdump_register(
+					name,
+					entry,
+					size);
+			}
 		}
 	}
 #endif
@@ -319,7 +325,7 @@ static void *jit_alloc(size_t size, int shared)
 # endif
 
 # ifdef HAVE_MPROTECT
-	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_GDB) {
+	if (ZCG(accel_directives).jit_debug & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP)) {
 		prot = PROT_EXEC | PROT_READ | PROT_WRITE;
 	} else {
 		prot = PROT_NONE;
@@ -1815,7 +1821,7 @@ jit_failure:
 ZEND_API void zend_jit_unprotect(void)
 {
 #ifdef HAVE_MPROTECT
-	if (!(ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_GDB)) {
+	if (!(ZCG(accel_directives).jit_debug & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
 		if (mprotect(dasm_buf, ((char*)dasm_end) - ((char*)dasm_buf), PROT_READ | PROT_WRITE) != 0) {
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
 		}
@@ -1826,7 +1832,7 @@ ZEND_API void zend_jit_unprotect(void)
 ZEND_API void zend_jit_protect(void)
 {
 #ifdef HAVE_MPROTECT
-	if (!(ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_GDB)) {
+	if (!(ZCG(accel_directives).jit_debug & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
 		if (mprotect(dasm_buf, ((char*)dasm_end) - ((char*)dasm_buf), PROT_READ | PROT_EXEC) != 0) {
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
 		}
@@ -1913,6 +1919,12 @@ ZEND_API int zend_jit_startup(zend_long jit, size_t size)
 	}
 #endif
 
+#ifdef HAVE_PERFTOOLS
+	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_PERF_DUMP) {
+		zend_jit_perf_jitdump_open();
+	}
+#endif
+
 	zend_jit_unprotect();
 	ret = zend_jit_make_stubs();
 	zend_jit_protect();
@@ -1942,6 +1954,12 @@ ZEND_API void zend_jit_shutdown(void)
 #ifdef HAVE_DISASM
 	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_ASM) {
 		zend_jit_disasm_shutdown();
+	}
+#endif
+
+#ifdef HAVE_PERFTOOLS
+	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_PERF_DUMP) {
+		zend_jit_perf_jitdump_close();
 	}
 #endif
 
