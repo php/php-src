@@ -1,5 +1,7 @@
 --TEST--
 Timeout within shutdown function, variation
+--CREDITS--
+Rodrigo Prado de Jesus <royopa [at] gmail [dot] com>
 --SKIPIF--
 <?php 
 	if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
@@ -14,7 +16,7 @@ set_time_limit($t);
 function f()
 {
 	echo "call";
-	busy_wait(4);
+	busy_wait(5);
 }
 
 register_shutdown_function("f");
