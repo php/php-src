@@ -15,8 +15,10 @@ var_dump(mb_parse_str("test=moo"));
 var_dump($test);
 ?>
 --EXPECT--
+ERR: Deprecated
 bool(true)
 string(0) ""
+ERR: Deprecated
 bool(true)
 string(3) "moo"
 

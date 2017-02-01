@@ -2195,6 +2195,8 @@ PHP_FUNCTION(mb_parse_str)
 			return;
 		}
 
+		php_error_docref(NULL, E_DEPRECATED, "Calling mb_parse_str() without the result argument is deprecated");
+
 		symbol_table = zend_rebuild_symbol_table();
 		ZVAL_ARR(&tmp, symbol_table);
 		detected = _php_mb_encoding_handler_ex(&info, &tmp, encstr);
