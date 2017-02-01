@@ -208,7 +208,7 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 {
 	int ret;
 	char *RPath = NULL;
-	zend_string *headers_lc = NULL; /* headers_lc is only created if we've a header at all */
+	zend_string *headers_lc = NULL, *headers_trim = NULL; /* headers_lc is only created if we've a header at all */
 	char *pos1 = NULL, *pos2 = NULL;
 
 	if (host == NULL) {
@@ -226,16 +226,14 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 		size_t i;
 
 		/* Use PCRE to trim the header into the right format */
-		if (NULL == (headers_lc = php_win32_mail_trim_header(headers))) {
+		if (NULL == (headers_trim = php_win32_mail_trim_header(headers))) {
 			*error = W32_SM_PCRE_ERROR;
 			return FAILURE;
 		}
 
 		/* Create a lowercased header for all the searches so we're finally case
 		 * insensitive when searching for a pattern. */
-		for (i = 0; i < headers_lc->len; i++) {
-			headers_lc->val[i] = tolower(headers_lc->val[i]);
-		}
+		headers_lc = zend_string_tolower(headers_trim);
 	}
 
 	/* Fall back to sendmail_from php.ini setting */
@@ -292,6 +290,7 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 			efree(RPath);
 		}
 		if (headers) {
+			zend_string_free(headers_trim);
 			zend_string_free(headers_lc);
 		}
 		/* 128 is safe here, the specifier in snprintf isn't longer than that */
@@ -304,12 +303,13 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 			PW32G(mail_host), !INI_INT("smtp_port") ? 25 : INI_INT("smtp_port"));
 		return FAILURE;
 	} else {
-		ret = SendText(RPath, Subject, mailTo, mailCc, mailBcc, data, headers, headers_lc->val, error_message);
+		ret = SendText(RPath, Subject, mailTo, mailCc, mailBcc, data, headers_trim->val, headers_lc->val, error_message);
 		TSMClose();
 		if (RPath) {
 			efree(RPath);
 		}
 		if (headers) {
+			zend_string_free(headers_trim);
 			zend_string_free(headers_lc);
 		}
 		if (ret != SUCCESS) {
