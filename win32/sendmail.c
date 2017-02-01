@@ -173,7 +173,7 @@ static zend_string *php_win32_mail_trim_header(char *header)
 	regex = zend_string_init(PHP_WIN32_MAIL_RMVDBL_PATTERN, sizeof(PHP_WIN32_MAIL_RMVDBL_PATTERN)-1, 0);
 
 	result2 = php_pcre_replace(regex,
-				   result, result->val, (int)result->len,
+				   result, ZSTR_VAL(result), (int)ZSTR_LEN(result),
 				   &replace,
 				  0,
 				  -1,
@@ -243,14 +243,14 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 		RPath = estrdup(INI_STR("sendmail_from"));
 	} else if (headers_lc) {
 		int found = 0;
-		char *lookup = headers_lc->val;
+		char *lookup = ZSTR_VAL(headers_lc);
 
 		while (lookup) {
 			pos1 = strstr(lookup, "from:");
 
 			if (!pos1) {
 				break;
-			} else if (pos1 != headers_lc->val && *(pos1-1) != '\n') {
+			} else if (pos1 != ZSTR_VAL(headers_lc) && *(pos1-1) != '\n') {
 				if (strlen(pos1) >= sizeof("from:")) {
 					lookup = pos1 + sizeof("from:");
 					continue;
@@ -303,7 +303,7 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 			PW32G(mail_host), !INI_INT("smtp_port") ? 25 : INI_INT("smtp_port"));
 		return FAILURE;
 	} else {
-		ret = SendText(RPath, Subject, mailTo, mailCc, mailBcc, data, headers_trim->val, headers_lc->val, error_message);
+		ret = SendText(RPath, Subject, mailTo, mailCc, mailBcc, data, ZSTR_VAL(headers_trim), ZSTR_VAL(headers_lc), error_message);
 		TSMClose();
 		if (RPath) {
 			efree(RPath);
@@ -635,8 +635,8 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 
 	/* send message contents in 1024 chunks */
 	{
-		char c, *e2, *e = data_cln->val + data_cln->len;
-		p = data_cln->val;
+		char c, *e2, *e = ZSTR_VAL(data_cln) + ZSTR_LEN(data_cln);
+		p = ZSTR_VAL(data_cln);
 
 		while (e - p > 1024) {
 			e2 = p + 1024;
@@ -713,7 +713,7 @@ static int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders)
 		time_t tNow = time(NULL);
 		zend_string *dt = php_format_date("r", 1, tNow, 1);
 
-		snprintf(header_buffer, MAIL_BUFFER_SIZE, "Date: %s\r\n", dt->val);
+		snprintf(header_buffer, MAIL_BUFFER_SIZE, "Date: %s\r\n", ZSTR_VAL(dt));
 		zend_string_free(dt);
 	}
 
