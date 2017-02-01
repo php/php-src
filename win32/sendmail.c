@@ -43,6 +43,8 @@
 #include "ext/standard/php_string.h"
 #include "ext/date/php_date.h"
 
+#define SENDMAIL_DEBUG 0
+
 /*enum
    {
    DO_CONNECT = WM_USER +1
@@ -770,6 +772,10 @@ static int MailConnect()
 #endif
 	SOCKADDR_IN sock_in;
 
+#if SENDMAIL_DEBUG
+return 0;
+#endif
+
 	/* Create Socket */
 	if ((PW32G(mail_socket) = socket(PF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET) {
 		return (FAILED_TO_OBTAIN_SOCKET_HANDLE);
@@ -856,6 +862,12 @@ static int Post(LPCSTR msg)
 	int slen;
 	int index = 0;
 
+#if SENDMAIL_DEBUG
+	if (msg)
+		printf("POST: '%s'\n", msg);
+	return (SUCCESS);
+#endif
+
 	while (len > 0) {
 		if ((slen = send(PW32G(mail_socket), msg + index, len, 0)) < 1)
 			return (FAILED_TO_SEND);
@@ -883,6 +895,10 @@ static int Ack(char **server_response)
 	int rlen;
 	int Index = 0;
 	int Received = 0;
+
+#if SENDMAIL_DEBUG
+	return (SUCCESS);
+#endif
 
 again:
 
