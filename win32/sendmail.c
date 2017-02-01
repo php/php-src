@@ -223,7 +223,6 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 
 	if (headers) {
 		char *pos = NULL;
-		size_t i;
 
 		/* Use PCRE to trim the header into the right format */
 		if (NULL == (headers_trim = php_win32_mail_trim_header(headers))) {
