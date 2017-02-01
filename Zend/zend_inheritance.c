@@ -619,9 +619,7 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 		zend_string *method_prototype = zend_get_function_declaration(parent);
 		zend_string *child_prototype = zend_get_function_declaration(child);
 
-		if (child->common.prototype && (
-			child->common.prototype->common.fn_flags & ZEND_ACC_ABSTRACT
-		)) {
+		if (parent->common.fn_flags & ZEND_ACC_ABSTRACT) {
 			error_level = E_COMPILE_ERROR;
 			error_verb = "must";
 		} else if ((parent->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) &&
