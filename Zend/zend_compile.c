@@ -6871,6 +6871,10 @@ void zend_compile_cast(znode *result, zend_ast *ast) /* {{{ */
 
 	opline = zend_emit_op_tmp(result, ZEND_CAST, &expr_node, NULL);
 	opline->extended_value = ast->attr;
+
+	if (ast->attr == IS_NULL) {
+		zend_error(E_DEPRECATED, "The (unset) cast is deprecated");
+	}
 }
 /* }}} */
 
