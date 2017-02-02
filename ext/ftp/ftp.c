@@ -698,10 +698,10 @@ ftp_list(ftpbuf_t *ftp, const char *path, const size_t path_len, int recursive)
 }
 /* }}} */
 
-/* {{{ ftp_mlsd
+/* {{{ ftp_mlsd_raw
  */
 char**
-ftp_mlsd(ftpbuf_t *ftp, const char *path, const size_t path_len)
+ftp_mlsd_raw(ftpbuf_t *ftp, const char *path, const size_t path_len)
 {
 	return ftp_genlist(ftp, "MLSD", sizeof("MLSD")-1, path, path_len);
 }

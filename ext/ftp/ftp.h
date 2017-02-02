@@ -168,7 +168,7 @@ char**		ftp_list(ftpbuf_t *ftp, const char *path, const size_t path_len, int rec
  * array must be freed (but don't
  * free the array elements)
  */
-char**		ftp_mlsd(ftpbuf_t *ftp, const char *path, const size_t path_len);
+char**		ftp_mlsd_raw(ftpbuf_t *ftp, const char *path, const size_t path_len);
 
 /* switches passive mode on or off
  * returns true on success, false on error

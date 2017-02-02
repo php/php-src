@@ -13,9 +13,9 @@ if (!$ftp) die("Couldn't connect to the server");
 
 var_dump(ftp_login($ftp, 'user', 'pass'));
 
-var_dump(ftp_mlsd($ftp, ''));
-var_dump(ftp_mlsd($ftp, 'emptydir'));
-var_dump(ftp_mlsd($ftp, 'bogusdir'));
+var_dump(ftp_mlsd_raw($ftp, ''));
+var_dump(ftp_mlsd_raw($ftp, 'emptydir'));
+var_dump(ftp_mlsd_raw($ftp, 'bogusdir'));
 
 ftp_close($ftp);
 ?>
