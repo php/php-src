@@ -15,5 +15,7 @@ f();
 
 ?>
 --EXPECTF--
+Deprecated: Directive 'track_errors' is deprecated in Unknown on line 0
+
 Notice: Undefined variable: var in %s on line %d
 string(23) "Undefined variable: var"

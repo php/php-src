@@ -2311,8 +2311,9 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 		} directives[2] = {
 			{
 				E_DEPRECATED,
-				"Directive '%s' is deprecated in PHP 5.3 and greater",
+				"Directive '%s' is deprecated",
 				{
+					"track_errors",
 					NULL
 				}
 			},
