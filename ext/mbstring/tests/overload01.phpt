@@ -8,6 +8,7 @@ Function overloading test 1
 	}
 ?>
 --INI--
+error_reporting=E_ALL ^ E_DEPRECATED
 output_handler=
 mbstring.func_overload=7
 mbstring.internal_encoding=EUC-JP

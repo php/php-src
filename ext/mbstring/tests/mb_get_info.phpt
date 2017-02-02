@@ -3,6 +3,7 @@ Test mb_get_info() function
 --SKIPIF--
 <?php extension_loaded('mbstring') or die('skip'); ?>
 --INI--
+error_reporting=E_ALL ^ E_DEPRECATED
 mbstring.encoding_translation=1
 mbstring.language=Korean
 mbstring.internal_encoding=UTF-8
