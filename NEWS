@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #73807 (Performance problem with processing large post request).
     (Nikita)
 
+- GD:
+  . Fixed bug #74031 (ReflectionFunction for imagepng is missing last two
+    parameters). (finwe)
+
 - OpenSSL:
   . Fixed bug #74022 (PHP Fast CGI crashes when reading from a pfx file).
     (Anatol)
