@@ -586,13 +586,12 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 	} else if (!(parent->common.fn_flags & ZEND_ACC_CTOR) || (parent->common.prototype && (parent->common.prototype->common.scope->ce_flags & ZEND_ACC_INTERFACE))) {
 		/* ctors only have a prototype if it comes from an interface */
 		child->common.prototype = parent->common.prototype ? parent->common.prototype : parent;
+		/* and if that is the case, we want to check inheritance against it */
+		if (parent->common.fn_flags & ZEND_ACC_CTOR) {
+			parent = child->common.prototype;
+		}
 	}
 
-	if (child->common.prototype && (
-		child->common.prototype->common.fn_flags & ZEND_ACC_ABSTRACT
-	)) {
-		parent = child->common.prototype;
-	}
 	if (UNEXPECTED(!zend_do_perform_implementation_check(child, parent))) {
 		int error_level;
 		const char *error_verb;

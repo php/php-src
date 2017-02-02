@@ -26,6 +26,8 @@ PHP                                                                        NEWS
   . Added PHP_OS_FAMILY constant to determine on which OS we are. (Jan Altensen)
   . Fixed bug #73994 (arginfo incorrect for unpack). (krakjoe)
   . Fixed bug #73973 (assertion error in debug_zval_dump). (andrewnester)
+  . Fixed bug #73987 (Method compatibility check looks to original 
+    definition and not parent). (pmmaga)
 
 - BCMath:
   . Fixed bug #46564 (bcmod truncates fractionals). (liborm85)
@@ -40,6 +42,7 @@ PHP                                                                        NEWS
   . Fixed bug #67474 (getElementsByTagNameNS filter on default ns). (aboks)
   . Fixed bug #54382 (getAttributeNodeNS doesn't get xmlns* attributes).
     (aboks)
+  . Fixed bug #50989 (support for LIBXML_NOXMLDECL). (jhdxr)
 
 - EXIF:
   . Added support for vendor specific tags for the following formats:
@@ -60,6 +63,9 @@ PHP                                                                        NEWS
   . Fixed bug #69865 (php-fpm does not close stderr when using syslog). 
     (Mike)
 
+- FTP:
+  . Implement MLSD for structured listing of directories. (blar)
+
 - GD:
   . Implemented imageresolution as getter and setter (Christoph)
 
@@ -69,6 +75,7 @@ PHP                                                                        NEWS
 - hash:
   . Fixed bug #73961 (environmental build dependency in hash sha3 source).
     (krakjoe)
+  . Changed HashContext from resource to object. (Rouven Weßling, Sara)
 
 - Mbstring:
   . Implemented request #66024 (mb_chr() and mb_ord()). (Masakielastic, Yasuo)
