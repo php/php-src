@@ -2934,52 +2934,53 @@ PHP_FUNCTION(openssl_pkcs12_read)
 		zval_dtor(zout);
 		array_init(zout);
 
-		bio_out = BIO_new(BIO_s_mem());
-		if (PEM_write_bio_X509(bio_out, cert)) {
-			BUF_MEM *bio_buf;
-			BIO_get_mem_ptr(bio_out, &bio_buf);
-			ZVAL_STRINGL(&zcert, bio_buf->data, bio_buf->length);
-			add_assoc_zval(zout, "cert", &zcert);
-		} else {
-			php_openssl_store_errors();
-		}
-		BIO_free(bio_out);
-
-		bio_out = BIO_new(BIO_s_mem());
-		if (PEM_write_bio_PrivateKey(bio_out, pkey, NULL, NULL, 0, 0, NULL)) {
-			BUF_MEM *bio_buf;
-			BIO_get_mem_ptr(bio_out, &bio_buf);
-			ZVAL_STRINGL(&zpkey, bio_buf->data, bio_buf->length);
-			add_assoc_zval(zout, "pkey", &zpkey);
-		} else {
-			php_openssl_store_errors();
-		}
-		BIO_free(bio_out);
-
-		array_init(&zextracerts);
-
-		for (i=0;;i++) {
-			zval zextracert;
-			X509* aCA = sk_X509_pop(ca);
-			if (!aCA) break;
-
+		if (cert) {
 			bio_out = BIO_new(BIO_s_mem());
-			if (PEM_write_bio_X509(bio_out, aCA)) {
+			if (PEM_write_bio_X509(bio_out, cert)) {
 				BUF_MEM *bio_buf;
 				BIO_get_mem_ptr(bio_out, &bio_buf);
-				ZVAL_STRINGL(&zextracert, bio_buf->data, bio_buf->length);
-				add_index_zval(&zextracerts, i, &zextracert);
-
+				ZVAL_STRINGL(&zcert, bio_buf->data, bio_buf->length);
+				add_assoc_zval(zout, "cert", &zcert);
+			} else {
+				php_openssl_store_errors();
 			}
 			BIO_free(bio_out);
-
-			X509_free(aCA);
 		}
-		if(ca) {
+
+		if (pkey) {
+			bio_out = BIO_new(BIO_s_mem());
+			if (PEM_write_bio_PrivateKey(bio_out, pkey, NULL, NULL, 0, 0, NULL)) {
+				BUF_MEM *bio_buf;
+				BIO_get_mem_ptr(bio_out, &bio_buf);
+				ZVAL_STRINGL(&zpkey, bio_buf->data, bio_buf->length);
+				add_assoc_zval(zout, "pkey", &zpkey);
+			} else {
+				php_openssl_store_errors();
+			}
+			BIO_free(bio_out);
+		}
+
+		if (ca && sk_X509_num(ca)) {
+			array_init(&zextracerts);
+
+			for (i = 0; i < sk_X509_num(ca); i++) {
+				zval zextracert;
+				X509* aCA = sk_X509_pop(ca);
+				if (!aCA) break;
+
+				bio_out = BIO_new(BIO_s_mem());
+				if (PEM_write_bio_X509(bio_out, aCA)) {
+					BUF_MEM *bio_buf;
+					BIO_get_mem_ptr(bio_out, &bio_buf);
+					ZVAL_STRINGL(&zextracert, bio_buf->data, bio_buf->length);
+					add_index_zval(&zextracerts, i, &zextracert);
+				}
+
+				X509_free(aCA);
+			}
+
 			sk_X509_free(ca);
 			add_assoc_zval(zout, "extracerts", &zextracerts);
-		} else {
-			zval_dtor(&zextracerts);
 		}
 
 		RETVAL_TRUE;
