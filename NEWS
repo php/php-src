@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2017 PHP 7.0.17
 
+- OpenSSL:
+  . Fixed bug #74022 (PHP Fast CGI crashes when reading from a pfx file).
+    (Anatol)
+
 - Standard:
   . Fixed bug #74005 (mail.add_x_header causes RFC-breaking lone line feed).
     (Anatol)
