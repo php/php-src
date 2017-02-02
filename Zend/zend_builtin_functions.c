@@ -1223,6 +1223,8 @@ ZEND_FUNCTION(get_object_vars)
 	HashTable *properties;
 	zend_string *key;
 	zend_object *zobj;
+	zend_ulong index;
+	zend_bool fast_copy = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_OBJECT(obj)
@@ -1241,7 +1243,17 @@ ZEND_FUNCTION(get_object_vars)
 	zobj = Z_OBJ_P(obj);
 
 	if (!zobj->ce->default_properties_count && properties == zobj->properties && !ZEND_HASH_GET_APPLY_COUNT(properties)) {
-		/* fast copy */
+		fast_copy = 1;
+		/* Check if the object has a numeric property, See Bug 73998 */
+		ZEND_HASH_FOREACH_STR_KEY(properties, key) {
+			if (key && ZEND_HANDLE_NUMERIC(key, index)) {
+				fast_copy = 0;
+				break;
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+
+	if (fast_copy) {
 		if (EXPECTED(zobj->handlers == &std_object_handlers)) {
 			if (EXPECTED(!(GC_FLAGS(properties) & IS_ARRAY_IMMUTABLE))) {
 				GC_REFCOUNT(properties)++;
@@ -1267,7 +1279,7 @@ ZEND_FUNCTION(get_object_vars)
 						zend_unmangle_property_name_ex(key, &class_name, &prop_name, &prop_len);
 						zend_hash_str_add_new(Z_ARRVAL_P(return_value), prop_name, prop_len, value);
 					} else {
-						zend_hash_add_new(Z_ARRVAL_P(return_value), key, value);
+						zend_symbtable_add_new(Z_ARRVAL_P(return_value), key, value);
 					}
 				}
 			}
