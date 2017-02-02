@@ -230,6 +230,8 @@ struct _zend_executor_globals {
 	zend_function trampoline;
 	zend_op       call_trampoline_op;
 
+	zend_bool each_deprecation_thrown;
+
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
 

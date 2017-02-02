@@ -2415,7 +2415,7 @@ function compute_summary()
 	$sum_results['SKIPPED'] += $ignored_by_ext;
 	$percent_results = array();
 
-	while (list($v, $n) = each($sum_results)) {
+	foreach ($sum_results as $v => $n) {
 		$percent_results[$v] = (100.0 * $n) / $n_total;
 	}
 }

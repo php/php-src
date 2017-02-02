@@ -727,6 +727,11 @@ ZEND_FUNCTION(each)
 		return;
 	}
 
+	if (!EG(each_deprecation_thrown)) {
+		zend_error(E_DEPRECATED, "The each() function is deprecated. This message will be suppressed on further calls");
+		EG(each_deprecation_thrown) = 1;
+	}
+
 	target_hash = HASH_OF(array);
 	if (!target_hash) {
 		zend_error(E_WARNING,"Variable passed to each() is not an array or object");
