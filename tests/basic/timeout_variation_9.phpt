@@ -1,7 +1,5 @@
 --TEST--
 Timeout within shutdown function
---CREDITS--
-Rodrigo Prado de Jesus <royopa [at] gmail [dot] com>
 --SKIPIF--
 <?php 
 	if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
