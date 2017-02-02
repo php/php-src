@@ -237,11 +237,14 @@ typedef struct post_var_data {
 	char *ptr;
 	char *end;
 	uint64_t cnt;
+
+	/* Bytes in ptr that have already been scanned for '&' */
+	size_t already_scanned;
 } post_var_data_t;
 
 static zend_bool add_post_var(zval *arr, post_var_data_t *var, zend_bool eof TSRMLS_DC)
 {
-	char *ksep, *vsep, *val;
+	char *start, *ksep, *vsep, *val;
 	size_t klen, vlen;
 	/* FIXME: string-size_t */
 	unsigned int new_vlen;
@@ -250,9 +253,11 @@ static zend_bool add_post_var(zval *arr, post_var_data_t *var, zend_bool eof TSR
 		return 0;
 	}
 
-	vsep = memchr(var->ptr, '&', var->end - var->ptr);
+	start = var->ptr + var->already_scanned;
+	vsep = memchr(start, '&', var->end - start);
 	if (!vsep) {
 		if (!eof) {
+			var->already_scanned = var->end - var->ptr;
 			return 0;
 		} else {
 			vsep = var->end;
@@ -285,6 +290,7 @@ static zend_bool add_post_var(zval *arr, post_var_data_t *var, zend_bool eof TSR
 	efree(val);
 
 	var->ptr = vsep + (vsep != var->end);
+	var->already_scanned = 0;
 	return 1;
 }
 
@@ -304,7 +310,7 @@ static inline int add_post_vars(zval *arr, post_var_data_t *vars, zend_bool eof 
 		}
 	}
 
-	if (!eof) {
+	if (!eof && vars->str.c != vars->ptr) {
 		memmove(vars->str.c, vars->ptr, vars->str.len = vars->end - vars->ptr);
 	}
 	return SUCCESS;
