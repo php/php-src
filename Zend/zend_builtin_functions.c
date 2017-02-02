@@ -1284,11 +1284,7 @@ ZEND_FUNCTION(get_object_vars)
 				 */
 				zend_hash_str_add_new(Z_ARRVAL_P(return_value), prop_name, prop_len, value);
 			} else {
-				if (ZEND_HANDLE_NUMERIC(key, num_key)) {
-					zend_hash_index_add(Z_ARRVAL_P(return_value), num_key, value);
-				} else {
-					zend_hash_add_new(Z_ARRVAL_P(return_value), key, value);
-				}
+				zend_symbtable_add_new(Z_ARRVAL_P(return_value), key, value);
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
