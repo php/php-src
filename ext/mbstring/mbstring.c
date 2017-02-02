@@ -1644,8 +1644,9 @@ PHP_RINIT_FUNCTION(mbstring)
 
  	/* override original function. */
 	if (MBSTRG(func_overload)){
-		p = &(mb_ovld[0]);
+		zend_error(E_DEPRECATED, "The mbstring.func_overload directive is deprecated");
 
+		p = &(mb_ovld[0]);
 		CG(compiler_options) |= ZEND_COMPILE_NO_BUILTIN_STRLEN;
 		while (p->type > 0) {
 			if ((MBSTRG(func_overload) & p->type) == p->type &&
