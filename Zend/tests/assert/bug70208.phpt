@@ -19,5 +19,6 @@ class test {
 new test;
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: assert(): Calling assert() with a string argument is deprecated in %s on line %d
 int(1)

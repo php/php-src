@@ -171,6 +171,8 @@ PHP_FUNCTION(assert)
 			RETURN_FALSE;
 		}
 
+		php_error_docref(NULL, E_DEPRECATED, "Calling assert() with a string argument is deprecated");
+
 		myeval = Z_STRVAL_P(assertion);
 
 		if (ASSERTG(quiet_eval)) {
