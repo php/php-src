@@ -372,6 +372,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagepng, 0, 0, 1)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, to)
+	ZEND_ARG_INFO(0, quality)
+	ZEND_ARG_INFO(0, filters)
 ZEND_END_ARG_INFO()
 #endif
 
