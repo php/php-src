@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2017 PHP 7.0.17
 
+- Standard:
+  . Fixed bug #74005 (mail.add_x_header causes RFC-breaking lone line feed).
+    (Anatol)
 
 
 16 Feb 2017 PHP 7.0.16
