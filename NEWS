@@ -8,6 +8,10 @@ PHP                                                                        NEWS
   . Fixed bug #73998 (array_key_exists fails on arrays created by
     get_object_vars). (mhagstrand)
 
+- DOM:
+  . Fixed bug #74004 (LIBXML_NOWARNING (etc) ignored by DOMDocument::loadHTML).
+    (somedaysummer)
+
 - GD:
   . Fixed bug #74031 (ReflectionFunction for imagepng is missing last two
     parameters). (finwe)
