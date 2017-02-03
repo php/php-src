@@ -610,7 +610,7 @@ PHPAPI void php_build_argv(char *s, zval *track_vars_array)
 		zend_hash_str_update(Z_ARRVAL_P(track_vars_array), "argv", sizeof("argv")-1, &arr);
 		zend_hash_str_update(Z_ARRVAL_P(track_vars_array), "argc", sizeof("argc")-1, &argc);
 	}
-	zval_ptr_dtor(&arr);
+	zval_ptr_dtor_nogc(&arr);
 }
 /* }}} */
 
