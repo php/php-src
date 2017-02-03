@@ -1246,7 +1246,6 @@ static zend_always_inline zend_function *zend_get_user_callstatic_function(zend_
 ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_string *function_name, const zval *key) /* {{{ */
 {
 	zend_function *fbc = NULL;
-	char *lc_class_name;
 	zend_string *lc_function_name;
 	zend_object *object;
 	zend_class_entry *scope;
