@@ -102,9 +102,35 @@ PHP 7.2 UPGRADE NOTES
 4. Deprecated Functionality
 ========================================
 
+All the deprecated functionality listed in the following will be removed in
+PHP 8.0.
+
+- Core:
+  . The trace_errors ini directive has been deprecated.
+  . The __autoload() mechanism has been deprecated, use spl_autoload_register()
+    instead.
+  . The (unset) cast has been deprecated. This does not affect the unset($var)
+    language construct.
+  . The create_function() function has been deprecated, use anonymous functions
+    instead.
+  . The each() function has been deprecated, use a foreach loop instead.
+
 - GD:
-  . png2wbmp() and jpeg2wbmp() have been deprecated, and will be removed as of
-    PHP 8.0.0.
+  . png2wbmp() and jpeg2wbmp() have been deprecated.
+
+- GMP:
+  . The gmp_random() function has been deprecated, use gmp_random_bits() or
+    gmp_random_range() instead.
+
+- Mbstring:
+  . The mbstring.func_overload ini directive has been deprecated.
+
+- Standard:
+  . Calling parse_str() without the result argument has been deprecated.
+  . Calling assert() with a string argument has been deprecated, use an ordinary
+    expression instead.
+
+See also: https://wiki.php.net/rfc/deprecations_php_7_2
 
 ========================================
 5. Changed Functions
