@@ -420,7 +420,7 @@ AC_TRY_RUN([
 #include <math.h>
 #include <stdlib.h>
 
-#ifdef HAVE_ISNAN
+#ifdef HAVE_DECL_ISNAN
 #define zend_isnan(a) isnan(a)
 #elif defined(HAVE_FPCLASS)
 #define zend_isnan(a) ((fpclass(a) == FP_SNAN) || (fpclass(a) == FP_QNAN))
@@ -451,7 +451,7 @@ AC_TRY_RUN([
 #include <math.h>
 #include <stdlib.h>
 
-#ifdef HAVE_ISINF
+#ifdef HAVE_DECL_ISINF
 #define zend_isinf(a) isinf(a)
 #elif defined(INFINITY)
 /* Might not work, but is required by ISO C99 */
@@ -485,7 +485,7 @@ AC_TRY_RUN([
 #include <math.h>
 #include <stdlib.h>
 
-#ifdef HAVE_ISINF
+#ifdef HAVE_DECL_ISINF
 #define zend_isinf(a) isinf(a)
 #elif defined(INFINITY)
 /* Might not work, but is required by ISO C99 */
@@ -520,7 +520,7 @@ AC_TRY_RUN([
 #include <math.h>
 #include <stdlib.h>
 
-#ifdef HAVE_ISNAN
+#ifdef HAVE_DECL_ISNAN
 #define zend_isnan(a) isnan(a)
 #elif defined(HAVE_FPCLASS)
 #define zend_isnan(a) ((fpclass(a) == FP_SNAN) || (fpclass(a) == FP_QNAN))
