@@ -1466,6 +1466,27 @@ static PHP_INI_MH(OnUpdate_mbstring_http_output_conv_mimetypes)
 	return SUCCESS;
 }
 /* }}} */
+
+#if HAVE_MBREGEX
+/* {{{ static PHP_INI_MH(OnUpdate_regex_stack_limit */
+static PHP_INI_MH(OnUpdate_regex_stack_limit)
+{
+	long stack_limit;
+
+	stack_limit = atol(new_value);
+	if (stack_limit > 0 && stack_limit <= UINT_MAX) {
+		onig_set_match_stack_limit_size(stack_limit);
+	} else if (stack_limit <= 0) {
+		onig_set_match_stack_limit_size(UINT_MAX);
+	} else {
+		php_error_docref("ref.mbstring" TSRMLS_CC, E_WARNING, "mbstring.regex_stack_limit exceeds UNIT_MAX");
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
+#endif
+/* }}} */
 /* }}} */
 
 /* {{{ php.ini directive registration */
@@ -1492,6 +1513,9 @@ PHP_INI_BEGIN()
 		PHP_INI_ALL,
 		OnUpdateLong,
 		strict_detection, zend_mbstring_globals, mbstring_globals)
+#if HAVE_MBREGEX
+	PHP_INI_ENTRY("mbstring.regex_stack_limit", "100000", PHP_INI_ALL, OnUpdate_regex_stack_limit)
+#endif
 PHP_INI_END()
 /* }}} */
 
