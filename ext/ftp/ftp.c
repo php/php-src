@@ -743,7 +743,7 @@ ftp_mlsd_parse_line(zval entry, const char *line) {
 		if(strncmp(input, " ", 1) == 0) {
 			// Skip the space in the output.
 			input++;
-			ZVAL_STRINGL(&zstr, input, chunklength - 1);
+			ZVAL_STRING(&zstr, input);
 			zend_hash_str_update(Z_ARRVAL_P(&entry), "name", strlen("name"), &zstr);
 		}
 		else if(mode == FTP_MLSD_MODE_VALUE) {
