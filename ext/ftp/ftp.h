@@ -39,6 +39,11 @@
 /* XXX this should be configurable at runtime XXX */
 #define	FTP_BUFSIZE	4096
 
+#define FTP_MLSD_LINE_LENGTH_MAX 4096
+#define FTP_MLSD_CHUNK_LENGTH_MAX 256
+#define FTP_MLSD_MODE_NAME 1
+#define FTP_MLSD_MODE_VALUE 2
+
 typedef enum ftptype {
 	FTPTYPE_ASCII=1,
 	FTPTYPE_IMAGE
@@ -163,12 +168,19 @@ char**		ftp_nlist(ftpbuf_t *ftp, const char *path, const size_t path_len);
  */
 char**		ftp_list(ftpbuf_t *ftp, const char *path, const size_t path_len, int recursive);
 
+/* returns a array of the parsed line returned by the ftp
+ * MLSD command for the given path or NULL on error.  the return
+ * array must be freed (but don't
+ * free the array elements)
+ */
+int			ftp_mlsd_parse_line(zval entry, const char *line);
+
 /* returns a NULL-terminated array of lines returned by the ftp
  * MLSD command for the given path or NULL on error.  the return
  * array must be freed (but don't
  * free the array elements)
  */
-char**		ftp_mlsd_raw(ftpbuf_t *ftp, const char *path, const size_t path_len);
+char**		ftp_mlsd(ftpbuf_t *ftp, const char *path, const size_t path_len);
 
 /* switches passive mode on or off
  * returns true on success, false on error

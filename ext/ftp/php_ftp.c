@@ -117,7 +117,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_rawlist, 0, 0, 2)
 	ZEND_ARG_INFO(0, recursive)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_ftp_mlsd_raw, 0)
+ZEND_BEGIN_ARG_INFO(arginfo_ftp_mlsd, 0)
 	ZEND_ARG_INFO(0, ftp)
 	ZEND_ARG_INFO(0, directory)
 ZEND_END_ARG_INFO()
@@ -259,7 +259,7 @@ const zend_function_entry php_ftp_functions[] = {
 	PHP_FE(ftp_alloc,			arginfo_ftp_alloc)
 	PHP_FE(ftp_nlist,			arginfo_ftp_nlist)
 	PHP_FE(ftp_rawlist,			arginfo_ftp_rawlist)
-	PHP_FE(ftp_mlsd_raw,			arginfo_ftp_mlsd_raw)
+	PHP_FE(ftp_mlsd,			arginfo_ftp_mlsd)
 	PHP_FE(ftp_systype,			arginfo_ftp_systype)
 	PHP_FE(ftp_pasv,			arginfo_ftp_pasv)
 	PHP_FE(ftp_get,				arginfo_ftp_get)
@@ -754,14 +754,15 @@ PHP_FUNCTION(ftp_rawlist)
 }
 /* }}} */
 
-/* {{{ proto array ftp_mlsd_raw(resource stream, string directory)
-   Returns a detailed listing of a directory as an array of output lines */
-PHP_FUNCTION(ftp_mlsd_raw)
+/* {{{ proto array ftp_mlsd(resource stream, string directory)
+   Returns a detailed listing of a directory as an array of parsed output lines */
+PHP_FUNCTION(ftp_mlsd)
 {
 	zval		*z_ftp;
 	ftpbuf_t	*ftp;
 	char		**llist, **ptr, *dir;
 	size_t		dir_len;
+	zval		entry;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &z_ftp, &dir, &dir_len) == FAILURE) {
 		return;
@@ -772,14 +773,19 @@ PHP_FUNCTION(ftp_mlsd_raw)
 	}
 
 	/* get raw directory listing */
-	if (NULL == (llist = ftp_mlsd_raw(ftp, dir, dir_len))) {
+	if (NULL == (llist = ftp_mlsd(ftp, dir, dir_len))) {
 		RETURN_FALSE;
 	}
 
 	array_init(return_value);
 	for (ptr = llist; *ptr; ptr++) {
-		add_next_index_string(return_value, *ptr);
+		array_init(&entry);
+		// Skip invalid entry that cannot be parsed.
+		if(ftp_mlsd_parse_line(entry, *ptr) == 0) {
+			zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &entry);
+		}
 	}
+
 	efree(llist);
 }
 /* }}} */
