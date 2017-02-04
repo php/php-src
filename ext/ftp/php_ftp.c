@@ -259,7 +259,7 @@ const zend_function_entry php_ftp_functions[] = {
 	PHP_FE(ftp_alloc,			arginfo_ftp_alloc)
 	PHP_FE(ftp_nlist,			arginfo_ftp_nlist)
 	PHP_FE(ftp_rawlist,			arginfo_ftp_rawlist)
-	PHP_FE(ftp_mlsd_raw,			arginfo_ftp_mlsd_raw)
+	PHP_FE(ftp_mlsd_raw,		arginfo_ftp_mlsd_raw)
 	PHP_FE(ftp_systype,			arginfo_ftp_systype)
 	PHP_FE(ftp_pasv,			arginfo_ftp_pasv)
 	PHP_FE(ftp_get,				arginfo_ftp_get)
