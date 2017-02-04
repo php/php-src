@@ -6,10 +6,8 @@ Bug #74004 (DOMDocument->loadHTML and ->loadHTMLFile do not heed LIBXML_NOWARNIN
 <?php
 
 $doc=new DOMDocument();
-libxml_use_internal_errors(true);
-$doc->loadHTML("<tag-throw-warning></tag-throw-warning>",LIBXML_NOWARNING|LIBXML_NOERROR);
-print count(libxml_get_errors());
+$doc->loadHTML("<tag-throw></tag-throw>",LIBXML_NOERROR);
 
 ?>
 --EXPECT--
-0
+No warnings output
