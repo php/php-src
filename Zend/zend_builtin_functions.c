@@ -368,7 +368,7 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(get_declared_interfaces, 	arginfo_zend__void)
 	ZEND_FE(get_defined_functions, 		arginfo_zend__void)
 	ZEND_FE(get_defined_vars,		arginfo_zend__void)
-	ZEND_FE(create_function,		arginfo_create_function)
+	ZEND_DEP_FE(create_function,		arginfo_create_function)
 	ZEND_FE(get_resource_type,		arginfo_get_resource_type)
 	ZEND_FE(get_resources,			arginfo_get_resources)
 	ZEND_FE(get_loaded_extensions,		arginfo_get_loaded_extensions)
@@ -725,6 +725,11 @@ ZEND_FUNCTION(each)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z/", &array) == FAILURE) {
 		return;
+	}
+
+	if (!EG(each_deprecation_thrown)) {
+		zend_error(E_DEPRECATED, "The each() function is deprecated. This message will be suppressed on further calls");
+		EG(each_deprecation_thrown) = 1;
 	}
 
 	target_hash = HASH_OF(array);
@@ -1284,11 +1289,7 @@ ZEND_FUNCTION(get_object_vars)
 				 */
 				zend_hash_str_add_new(Z_ARRVAL_P(return_value), prop_name, prop_len, value);
 			} else {
-				if (ZEND_HANDLE_NUMERIC(key, num_key)) {
-					zend_hash_index_add(Z_ARRVAL_P(return_value), num_key, value);
-				} else {
-					zend_hash_add_new(Z_ARRVAL_P(return_value), key, value);
-				}
+				zend_symbtable_add_new(Z_ARRVAL_P(return_value), key, value);
 			}
 		} ZEND_HASH_FOREACH_END();
 	}

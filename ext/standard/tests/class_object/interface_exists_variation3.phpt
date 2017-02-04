@@ -10,9 +10,9 @@ Test interface_exists() function : autoloaded interface
 
 echo "*** Testing interface_exists() : autoloaded interface ***\n";
 
-function __autoload($class_name) {
+spl_autoload_register(function ($class_name) {
     require_once $class_name . '.inc';
-}
+});
 
 echo "\n-- no autoloading --\n";
 var_dump(interface_exists("AutoInterface", false));

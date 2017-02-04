@@ -11,5 +11,6 @@ try {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function create_function() is deprecated in %s on line %d
 bool(true)

@@ -5523,11 +5523,13 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 		}
 	}
 
-	if (zend_string_equals_literal(lcname, ZEND_AUTOLOAD_FUNC_NAME)
-		&& zend_ast_get_list(params_ast)->children != 1
-	) {
-		zend_error_noreturn(E_COMPILE_ERROR, "%s() must take exactly 1 argument",
-			ZEND_AUTOLOAD_FUNC_NAME);
+	if (zend_string_equals_literal(lcname, ZEND_AUTOLOAD_FUNC_NAME)) {
+		if (zend_ast_get_list(params_ast)->children != 1) {
+			zend_error_noreturn(E_COMPILE_ERROR, "%s() must take exactly 1 argument",
+				ZEND_AUTOLOAD_FUNC_NAME);
+		}
+
+		zend_error(E_DEPRECATED, "__autoload() is deprecated, use spl_autoload_register() instead");
 	}
 
 	key = zend_build_runtime_definition_key(lcname, decl->lex_pos);
@@ -6869,6 +6871,10 @@ void zend_compile_cast(znode *result, zend_ast *ast) /* {{{ */
 
 	opline = zend_emit_op_tmp(result, ZEND_CAST, &expr_node, NULL);
 	opline->extended_value = ast->attr;
+
+	if (ast->attr == IS_NULL) {
+		zend_error(E_DEPRECATED, "The (unset) cast is deprecated");
+	}
 }
 /* }}} */
 

@@ -2,11 +2,11 @@
 catch shouldn't call __autoload
 --FILE--
 <?php
-function __autoload($name) {
+
+spl_autoload_register(function ($name) {
 	echo("AUTOLOAD '$name'\n");
 	eval("class $name {}");
-}
-
+});
 
 try {
 } catch (A $e) {

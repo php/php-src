@@ -4563,6 +4563,8 @@ PHP_FUNCTION(parse_str)
 			return;
 		}
 
+		php_error_docref(NULL, E_DEPRECATED, "Calling parse_str() without the result argument is deprecated");
+
 		symbol_table = zend_rebuild_symbol_table();
 		ZVAL_ARR(&tmp, symbol_table);
 		sapi_module.treat_data(PARSE_STRING, res, &tmp);
@@ -5276,10 +5278,10 @@ PHP_FUNCTION(substr_count)
 
 	if (ac == 4) {
 
-		if (length <= 0) {
+		if (length < 0) {
 			length += (haystack_len - offset);
 		}
-		if ((length <= 0) || ((size_t)length > (haystack_len - offset))) {
+		if (length < 0 || ((size_t)length > (haystack_len - offset))) {
 			php_error_docref(NULL, E_WARNING, "Invalid length value");
 			RETURN_FALSE;
 		}
