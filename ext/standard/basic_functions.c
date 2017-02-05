@@ -1453,6 +1453,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_http_response_code, 0, 0, 0)
 	ZEND_ARG_INFO(0, response_code)
 ZEND_END_ARG_INFO()
 /* }}} */
+/* {{{ hrtime.c */
+#if HRTIME_AVAILABLE
+ZEND_BEGIN_ARG_INFO(arginfo_hrtime, 0)
+ZEND_END_ARG_INFO()
+#endif
+/* }}} */
 /* {{{ html.c */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_htmlspecialchars, 0, 0, 1)
 	ZEND_ARG_INFO(0, string)
@@ -2986,6 +2992,10 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(getrusage,														arginfo_getrusage)
 #endif
 
+#if HRTIME_AVAILABLE
+	PHP_FE(hrtime,															arginfo_hrtime)
+#endif
+
 #ifdef HAVE_GETTIMEOFDAY
 	PHP_FE(uniqid,															arginfo_uniqid)
 #endif
@@ -3715,6 +3725,10 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 #endif
 
 	BASIC_MINIT_SUBMODULE(random)
+
+#if HRTIME_AVAILABLE
+	BASIC_MINIT_SUBMODULE(hrtime)
+#endif
 
 	return SUCCESS;
 }
