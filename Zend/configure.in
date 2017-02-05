@@ -75,7 +75,7 @@ int zend_sprintf(char *buffer, const char *format, ...);
 #elif defined(HAVE_FPCLASS)
 #define zend_isnan(a) ((fpclass(a) == FP_SNAN) || (fpclass(a) == FP_QNAN))
 #else
-#define zend_isnan(a) 0
+#define zend_isnan(a) ((a) != (a))
 #endif
 #endif
 
