@@ -1167,6 +1167,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN(T_THROW);
 }
 
+<ST_IN_SCRIPTING>"throws" {
+	RETURN_TOKEN(T_THROWS);
+}
+
 <ST_IN_SCRIPTING>"if" {
 	RETURN_TOKEN(T_IF);
 }

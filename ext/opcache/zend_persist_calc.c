@@ -225,6 +225,10 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 			arg_info--;
 			num_args++;
 		}
+		if (op_array->fn_flags & ZEND_ACC_HAS_THROWS_TYPE) {
+			arg_info--;
+			num_args++;
+		}
 		ADD_DUP_SIZE(arg_info, sizeof(zend_arg_info) * num_args);
 		for (i = 0; i < num_args; i++) {
 			if (arg_info[i].name) {

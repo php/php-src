@@ -913,6 +913,21 @@ static ZEND_COLD void zend_verify_return_error(
 		fclass, fsep, fname, need_msg, need_kind, need_or_null, given_msg, given_kind);
 }
 
+static ZEND_COLD void zend_verify_throw_error(
+		const zend_function *zf, const zend_class_entry *ce, zval *value)
+{
+	const zend_arg_info *arg_info = ZEND_THROWS_INFO(zf);
+	const char *fname, *fsep, *fclass;
+	const char *need_msg, *need_kind, *need_or_null, *given_msg, *given_kind;
+
+	zend_verify_type_error_common(
+		zf, arg_info, ce, value,
+		&fname, &fsep, &fclass, &need_msg, &need_kind, &need_or_null, &given_msg, &given_kind); 
+
+	zend_type_error("Exception thrown by %s%s%s() expected to %s%s%s, %s%s thrown",
+		fclass, fsep, fname, need_msg, need_kind, need_or_null, given_msg, given_kind);
+}
+
 #if ZEND_DEBUG
 static ZEND_COLD void zend_verify_internal_return_error(
 		const zend_function *zf, const zend_class_entry *ce, zval *value)
@@ -974,6 +989,16 @@ static zend_always_inline void zend_verify_return_type(zend_function *zf, zval *
 	
 	if (UNEXPECTED(!zend_check_type(ret_info->type, ret, &ce, cache_slot, NULL, NULL, 1))) {
 		zend_verify_return_error(zf, ce, ret);
+	}
+}
+
+static zend_always_inline void zend_verify_throw_type(zend_function *zf, zval *ex, void **cache_slot)
+{
+	zend_arg_info *ex_info = ZEND_THROWS_INFO(zf);
+	zend_class_entry *ce = NULL;
+
+	if (UNEXPECTED(!zend_check_type(ex_info->type, ex, &ce, cache_slot, NULL, NULL, 1))) {
+		zend_verify_throw_error(zf, ce, ex);
 	}
 }
 

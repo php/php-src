@@ -363,6 +363,19 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 			return 0;
 		}
 	}
+
+	/* Check throws type compatibility, but only if the prototype already specifies */
+	/* a throws type. Adding a new throws type is always valid */
+	if (proto->common.fn_flags & ZEND_ACC_HAS_THROWS_TYPE) {
+		if (!(fe->common.fn_flags & ZEND_ACC_HAS_THROWS_TYPE)) {
+			return 0;
+		}
+
+		if (!zend_do_perform_type_hint_check(fe, ZEND_THROWS_INFO(fe), proto, ZEND_THROWS_INFO(proto))) {
+			return 0;
+		}
+	}
+
 	return 1;
 }
 /* }}} */
@@ -524,6 +537,11 @@ static ZEND_COLD zend_string *zend_get_function_declaration(const zend_function 
 		smart_str_appends(&str, ": ");
 		zend_append_type_hint(&str, fptr, fptr->common.arg_info - 1, 1);
 	}
+
+	if (fptr->common.fn_flags & ZEND_ACC_HAS_THROWS_TYPE) {
+		smart_str_appends(&str, " throws ");
+		zend_append_type_hint(&str, fptr, ZEND_THROWS_INFO(fptr), 1);
+	}
 	smart_str_0(&str);
 
 	return str.s;
@@ -606,7 +624,10 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 		} else if ((parent->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) &&
                    (!(child->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
 		            !zend_do_perform_type_hint_check(child, child->common.arg_info - 1, parent, parent->common.arg_info - 1) ||
-		            (ZEND_TYPE_ALLOW_NULL(child->common.arg_info[-1].type) && !ZEND_TYPE_ALLOW_NULL(parent->common.arg_info[-1].type)))) {
+		            (ZEND_TYPE_ALLOW_NULL(child->common.arg_info[-1].type) && !ZEND_TYPE_ALLOW_NULL(parent->common.arg_info[-1].type))) ||
+					(parent->common.fn_flags & ZEND_ACC_HAS_THROWS_TYPE) &&
+					(!(child->common.fn_flags & ZEND_ACC_HAS_THROWS_TYPE) ||
+					!zend_do_perform_type_hint_check(child, ZEND_THROWS_INFO(child), parent, ZEND_THROWS_INFO(parent)))) {
 			error_level = E_COMPILE_ERROR;
 			error_verb = "must";
 		} else {

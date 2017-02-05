@@ -70,7 +70,7 @@ ZEND_API zend_ast *zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr) {
 
 ZEND_API zend_ast *zend_ast_create_decl(
 	zend_ast_kind kind, uint32_t flags, uint32_t start_lineno, zend_string *doc_comment,
-	zend_string *name, zend_ast *child0, zend_ast *child1, zend_ast *child2, zend_ast *child3
+	zend_string *name, zend_ast *child0, zend_ast *child1, zend_ast *child2, zend_ast *child3, zend_ast *child4
 ) {
 	zend_ast_decl *ast;
 
@@ -87,6 +87,7 @@ ZEND_API zend_ast *zend_ast_create_decl(
 	ast->child[1] = child1;
 	ast->child[2] = child2;
 	ast->child[3] = child3;
+	ast->child[4] = child4;
 
 	return (zend_ast *) ast;
 }
@@ -505,6 +506,7 @@ static void zend_ast_destroy_ex(zend_ast *ast, zend_bool free) {
 			zend_ast_destroy_ex(decl->child[1], free);
 			zend_ast_destroy_ex(decl->child[2], free);
 			zend_ast_destroy_ex(decl->child[3], free);
+			zend_ast_destroy_ex(decl->child[4], free);
 			break;
 		}
 		default:
@@ -1070,6 +1072,10 @@ tail_call:
 			if (decl->child[3]) {
 				smart_str_appends(str, ": ");
 				zend_ast_export_ns_name(str, decl->child[3], 0, indent);
+			}
+			if (decl->child[4]) {
+				smart_str_appends(str, "throws ");
+				zend_ast_export_ns_name(str, decl->child[4], 0, indent);
 			}
 			if (decl->child[2]) {
 				smart_str_appends(str, " {\n");

@@ -450,6 +450,10 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 			arg_info--;
 			num_args++;
 		}
+		if (op_array->fn_flags & ZEND_ACC_HAS_THROWS_TYPE) {
+			arg_info--;
+			num_args++;
+		}
 		if (op_array->fn_flags & ZEND_ACC_VARIADIC) {
 			num_args++;
 		}

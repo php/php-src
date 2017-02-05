@@ -290,8 +290,15 @@ typedef struct _zend_oparray_context {
 /* Function has a return type (or class has such non-private function) */
 #define ZEND_ACC_HAS_RETURN_TYPE		0x40000000
 
+/* Function has a throws type */
+#define ZEND_ACC_HAS_THROWS_TYPE		0x80000000
+
 /* op_array uses strict mode types */
-#define ZEND_ACC_STRICT_TYPES			0x80000000
+#define ZEND_ACC_STRICT_TYPES			0x10
+
+#define ZEND_THROWS_INFO(func) (func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ? \
+								func->common.arg_info - 2 : \
+								func->common.arg_info - 1
 
 char *zend_visibility_string(uint32_t fn_flags);
 

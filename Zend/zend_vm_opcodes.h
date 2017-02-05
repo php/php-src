@@ -252,7 +252,8 @@ END_EXTERN_C()
 #define ZEND_BIND_STATIC                     183
 #define ZEND_FETCH_THIS                      184
 #define ZEND_ISSET_ISEMPTY_THIS              186
+#define ZEND_VERIFY_THROW_TYPE               187
 
-#define ZEND_VM_LAST_OPCODE                  186
+#define ZEND_VM_LAST_OPCODE                  187
 
 #endif

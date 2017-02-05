@@ -4239,6 +4239,12 @@ void zend_compile_throw(zend_ast *ast) /* {{{ */
 	znode expr_node;
 	zend_compile_expr(&expr_node, expr_ast);
 
+	if (CG(active_op_array)->fn_flags & ZEND_ACC_HAS_THROWS_TYPE) {
+		zend_op *opline = zend_emit_op(NULL, 
+			ZEND_VERIFY_THROW_TYPE, &expr_node, NULL);
+		zend_alloc_cache_slot(opline->op2.constant);
+	}
+
 	zend_emit_op(NULL, ZEND_THROW, &expr_node, NULL);
 }
 /* }}} */
@@ -5069,18 +5075,44 @@ static void zend_compile_typename(zend_ast *ast, zend_arg_info *arg_info, zend_b
 }
 /* }}} */
 
-void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
+void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, zend_ast *throws_type_ast) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	uint32_t i;
 	zend_op_array *op_array = CG(active_op_array);
 	zend_arg_info *arg_infos;
-	
+	uint32_t narg_infos = list->children;
+
+	if (return_type_ast) {
+		narg_infos++;
+	}
+
+	if (throws_type_ast) {
+		narg_infos++;
+	}
+
+	if (!narg_infos) {
+		return;	
+	}
+
+	arg_infos = safe_emalloc(sizeof(zend_arg_info), narg_infos, 0);
+
+	if (throws_type_ast) {
+		memset(arg_infos, 0, sizeof(zend_arg_info));
+
+		zend_compile_typename(throws_type_ast, arg_infos, 0);
+
+		if (!ZEND_TYPE_IS_CLASS(arg_infos->type)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Throws type must be an object");
+		}
+
+		arg_infos++;
+		op_array->fn_flags |= ZEND_ACC_HAS_THROWS_TYPE;		
+	}
+
 	if (return_type_ast) {
 		zend_bool allow_null = 0;
-
-		/* Use op_array->arg_info[-1] for return type */
-		arg_infos = safe_emalloc(sizeof(zend_arg_info), list->children + 1, 0);
+		
 		arg_infos->name = NULL;
 		arg_infos->pass_by_reference = (op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0;
 		arg_infos->is_variadic = 0;
@@ -5098,12 +5130,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 		}
 
 		arg_infos++;
-		op_array->fn_flags |= ZEND_ACC_HAS_RETURN_TYPE;
-	} else {
-		if (list->children == 0) {
-			return;
-		}
-		arg_infos = safe_emalloc(sizeof(zend_arg_info), list->children, 0);
+		op_array->fn_flags |= ZEND_ACC_HAS_RETURN_TYPE;	
 	}
 
 	for (i = 0; i < list->children; ++i) {
@@ -5561,6 +5588,8 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 	zend_ast *uses_ast = decl->child[1];
 	zend_ast *stmt_ast = decl->child[2];
 	zend_ast *return_type_ast = decl->child[3];
+	zend_ast *throws_type_ast = decl->child[4];
+
 	zend_bool is_method = decl->kind == ZEND_AST_METHOD;
 
 	zend_op_array *orig_op_array = CG(active_op_array);
@@ -5607,7 +5636,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 		zend_stack_push(&CG(loop_var_stack), (void *) &dummy_var);
 	}
 
-	zend_compile_params(params_ast, return_type_ast);
+	zend_compile_params(params_ast, return_type_ast, throws_type_ast);
 	if (CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) {
 		zend_mark_function_as_generator();
 		zend_emit_op(NULL, ZEND_GENERATOR_CREATE, NULL, NULL);

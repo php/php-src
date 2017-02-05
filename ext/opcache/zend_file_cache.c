@@ -429,6 +429,9 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 			if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 				p--;
 			}
+			if (op_array->fn_flags & ZEND_ACC_HAS_THROWS_TYPE) {
+				p--;
+			}
 			if (op_array->fn_flags & ZEND_ACC_VARIADIC) {
 				end++;
 			}
@@ -1009,6 +1012,9 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 			p = op_array->arg_info;
 			end = p + op_array->num_args;
 			if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+				p--;
+			}
+			if (op_array->fn_flags & ZEND_ACC_HAS_THROWS_TYPE) {
 				p--;
 			}
 			if (op_array->fn_flags & ZEND_ACC_VARIADIC) {

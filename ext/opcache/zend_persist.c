@@ -490,6 +490,10 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 			arg_info--;
 			num_args++;
 		}
+		if (op_array->fn_flags & ZEND_ACC_HAS_THROWS_TYPE) {
+			arg_info--;
+			num_args++;
+		}
 		if (already_stored) {
 			arg_info = zend_shared_alloc_get_xlat_entry(arg_info);
 			ZEND_ASSERT(arg_info != NULL);
@@ -514,6 +518,9 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 			}
 		}
 		if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+			arg_info++;
+		}
+		if (op_array->fn_flags & ZEND_ACC_HAS_THROWS_TYPE) {
 			arg_info++;
 		}
 		op_array->arg_info = arg_info;

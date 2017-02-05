@@ -3983,6 +3983,30 @@ ZEND_VM_HANDLER(161, ZEND_GENERATOR_RETURN, CONST|TMP|VAR|CV, ANY)
 	ZEND_VM_RETURN();
 }
 
+ZEND_VM_HANDLER(187, ZEND_VERIFY_THROW_TYPE, TMP|VAR|CV, UNUSED)
+{
+	USE_OPLINE
+	zval *ex_ptr;
+	zend_free_op free_op1;
+
+	ex_ptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
+
+	SAVE_OPLINE();
+
+	if (OP1_TYPE == IS_VAR) {
+		if (UNEXPECTED(Z_TYPE_P(ex_ptr) == IS_INDIRECT)) {
+			ex_ptr = Z_INDIRECT_P(ex_ptr);
+		}
+		ZVAL_DEREF(ex_ptr);
+	} else if (OP1_TYPE == IS_CV) {
+		ZVAL_DEREF(ex_ptr);
+	}
+
+	zend_verify_throw_type(EX(func), ex_ptr, CACHE_ADDR(opline->op2.num));
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 ZEND_VM_HANDLER(108, ZEND_THROW, CONST|TMP|VAR|CV, ANY)
 {
 	USE_OPLINE
