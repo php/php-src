@@ -710,9 +710,9 @@ ftp_mlsd(ftpbuf_t *ftp, const char *path, const size_t path_len)
 /* {{{ ftp_mlsd_parse_line
  */
 int
-ftp_mlsd_parse_line(zval entry, const char *line) {
+ftp_mlsd_parse_line(zval entry, const char *input) {
 
-	int linelength = strlen(line);
+	int linelength = strlen(input);
 	int chunklength = 0;
 	int mode = FTP_MLSD_MODE_NAME;
 
@@ -721,29 +721,24 @@ ftp_mlsd_parse_line(zval entry, const char *line) {
 	zval zstr;
 
 	if(linelength > FTP_MLSD_LINE_LENGTH_MAX) {
-		php_error_docref(NULL, E_WARNING, "Line of entry '%s' exceed the limit of %u bytes. Skip entry.", line, FTP_MLSD_LINE_LENGTH_MAX);
+		php_error_docref(NULL, E_WARNING, "Line of entry '%s' exceed the limit of %u bytes. Skip entry.", input, FTP_MLSD_LINE_LENGTH_MAX);
 		return 1;
 	}
 
-	// Copy the line to input to not modify the original.
-	char *input = malloc(linelength);
-	strncpy(input, line, linelength);
-
-	while(strlen(input)) {
+	while(*input != '\0') {
 		// get the length of the next (name or value) chunk.
 		chunklength = strcspn(input, "=;");
-		if(chunklength < 1) {
-			break;
-		}
 		if(chunklength > FTP_MLSD_CHUNK_LENGTH_MAX) {
 			php_error_docref(NULL, E_WARNING, "Chunk of entry '%s' exceed the limit of %u bytes. Skip entry.", input, FTP_MLSD_CHUNK_LENGTH_MAX);
 			return 1;
 		}
 		// Filename begins with a space.
-		if(strncmp(input, " ", 1) == 0) {
+		if(*input == ' ') {
 			// Skip the space in the output.
-			input++;
-			ZVAL_STRING(&zstr, input);
+			++input;
+			// The chunk is 1 byte shorter
+			--chunklength;
+			ZVAL_STRINGL(&zstr, input, chunklength);
 			zend_hash_str_update(Z_ARRVAL_P(&entry), "name", strlen("name"), &zstr);
 		}
 		else if(mode == FTP_MLSD_MODE_VALUE) {
@@ -751,13 +746,17 @@ ftp_mlsd_parse_line(zval entry, const char *line) {
 			zend_hash_str_update(Z_ARRVAL_P(&entry), name, strlen(name), &zstr);
 			memset(&name, 0, FTP_MLSD_CHUNK_LENGTH_MAX);
 			mode = FTP_MLSD_MODE_NAME;
+			// Skip the separator
+			++input;
 		}
 		else if(mode == FTP_MLSD_MODE_NAME) {
 			strncpy(name, input, chunklength);
 			mode = FTP_MLSD_MODE_VALUE;
+			// Skip the separator
+			++input;
 		}
-		// Move the pointer to the end of the chunk + the separator used in strcspn().
-		input = input + chunklength + 1;
+		// Move the pointer to the end of the chunk used in strcspn().
+		input += chunklength;
 	}
 	return 0;
 }

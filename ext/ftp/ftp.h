@@ -173,7 +173,7 @@ char**		ftp_list(ftpbuf_t *ftp, const char *path, const size_t path_len, int rec
  * array must be freed (but don't
  * free the array elements)
  */
-int			ftp_mlsd_parse_line(zval entry, const char *line);
+int			ftp_mlsd_parse_line(zval entry, const char *input);
 
 /* returns a NULL-terminated array of lines returned by the ftp
  * MLSD command for the given path or NULL on error.  the return
