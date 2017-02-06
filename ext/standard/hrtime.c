@@ -162,7 +162,7 @@ PHP_FUNCTION(hrtime)
 
 	uint64_t current_time = _timer_current();
 
-	if (current_time == -1) {
+	if (UNEXPECTED(current_time == -1)) {
 		zend_throw_exception(zend_ce_error, "Failed to get current system time", 0);
 		return;
 	}
