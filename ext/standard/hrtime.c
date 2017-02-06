@@ -28,9 +28,10 @@
 /* The following code is based on:
    timer.h - Cross-platform timer library - Public Domain - 2011 Mattias Jansson / Rampant Pixels */
 
+#define TIMER_PLATFORM_POSIX   0
 #define TIMER_PLATFORM_WINDOWS 0
 #define TIMER_PLATFORM_APPLE   0
-#define TIMER_PLATFORM_POSIX   0
+#define TIMER_PLATFORM_HPUX    0
 
 #if defined(_POSIX_TIMERS) && (_POSIX_TIMERS > 0) && defined(CLOCK_MONOTONIC)
 
@@ -55,6 +56,12 @@
 #  include <string.h>
 static mach_timebase_info_data_t _timerlib_info;
 static void absolutetime_to_nanoseconds (uint64_t mach_time, uint64_t* clock ) { *clock = mach_time * _timerlib_info.numer / _timerlib_info.denom; }
+
+#elif #elif (defined(__hpux) || defined(hpux)) || ((defined(__sun__) || defined(__sun) || defined(sun)) && (defined(__SVR4) || defined(__svr4__)))
+
+#  undef  TIMER_PLATFORM_HPUX
+#  define TIMER_PLATFORM_HPUX 1
+#  include <sys/time.h>
 
 #endif
 
@@ -85,6 +92,10 @@ static int _timer_init()
 	}
 	_timer_freq = 1000000000ULL;
 
+#elif TIMER_PLATFORM_HPUX
+
+	_timer_freq = 1000000000ULL;
+
 #endif
 
 	return 0;
@@ -111,6 +122,10 @@ static uint64_t _timer_current()
 		return -1;
 	}
 	return ((uint64_t) ts.tv_sec * 1000000000ULL) + ts.tv_nsec;
+
+#elif TIMER_PLATFORM_HPUX
+
+	return (uint64_t) gethrtime();
 
 #endif
 }

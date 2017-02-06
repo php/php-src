@@ -27,6 +27,8 @@
 #define HRTIME_AVAILABLE 1
 #elif defined(__APPLE__)
 #define HRTIME_AVAILABLE 1
+#elif #elif (defined(__hpux) || defined(hpux)) || ((defined(__sun__) || defined(__sun) || defined(sun)) && (defined(__SVR4) || defined(__svr4__)))
+#define HRTIME_AVAILABLE 1
 #else
 #define HRTIME_AVAILABLE 0
 #endif
