@@ -7,12 +7,11 @@ ZE2 Autoload from destructor
 --FILE--
 <?php
 
-function __autoload($class_name)
-{
+spl_autoload_register(function ($class_name) {
 	var_dump(class_exists($class_name, false));
 	require_once(dirname(__FILE__) . '/' . $class_name . '.p5c');
-	echo __FUNCTION__ . '(' . $class_name . ")\n";
-}
+	echo 'autoload(' . $class_name . ")\n";
+});
 
 var_dump(class_exists('autoload_derived', false));
 var_dump(class_exists('autoload_derived', false));
@@ -37,8 +36,8 @@ bool(false)
 Test::__destruct
 bool(false)
 bool(false)
-__autoload(autoload_root)
-__autoload(autoload_derived)
+autoload(autoload_root)
+autoload(autoload_derived)
 object(autoload_derived)#%d (0) {
 }
 ===DONE===

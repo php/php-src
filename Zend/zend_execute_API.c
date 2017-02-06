@@ -185,6 +185,8 @@ void init_executor(void) /* {{{ */
 	EG(ht_iterators) = EG(ht_iterators_slots);
 	memset(EG(ht_iterators), 0, sizeof(EG(ht_iterators_slots)));
 
+	EG(each_deprecation_thrown) = 0;
+
 	EG(active) = 1;
 }
 /* }}} */

@@ -11,6 +11,9 @@ var_dump($arr[$test(1)]);
 var_dump($arr[$test(0)]() == $arr);
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function create_function() is deprecated in %s on line %d
+
+Deprecated: Function create_function() is deprecated in %s on line %d
 int(2)
 bool(true)

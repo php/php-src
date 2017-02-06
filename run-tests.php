@@ -217,7 +217,7 @@ $ini_overwrites = array(
 		'display_startup_errors=1',
 		'log_errors=0',
 		'html_errors=0',
-		'track_errors=1',
+		'track_errors=0',
 		'report_memleaks=1',
 		'report_zend_debug=0',
 		'docref_root=',
@@ -2415,7 +2415,7 @@ function compute_summary()
 	$sum_results['SKIPPED'] += $ignored_by_ext;
 	$percent_results = array();
 
-	while (list($v, $n) = each($sum_results)) {
+	foreach ($sum_results as $v => $n) {
 		$percent_results[$v] = (100.0 * $n) / $n_total;
 	}
 }

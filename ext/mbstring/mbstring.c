@@ -1644,8 +1644,9 @@ PHP_RINIT_FUNCTION(mbstring)
 
  	/* override original function. */
 	if (MBSTRG(func_overload)){
-		p = &(mb_ovld[0]);
+		zend_error(E_DEPRECATED, "The mbstring.func_overload directive is deprecated");
 
+		p = &(mb_ovld[0]);
 		CG(compiler_options) |= ZEND_COMPILE_NO_BUILTIN_STRLEN;
 		while (p->type > 0) {
 			if ((MBSTRG(func_overload) & p->type) == p->type &&
@@ -2194,6 +2195,8 @@ PHP_FUNCTION(mb_parse_str)
 			efree(encstr);
 			return;
 		}
+
+		php_error_docref(NULL, E_DEPRECATED, "Calling mb_parse_str() without the result argument is deprecated");
 
 		symbol_table = zend_rebuild_symbol_table();
 		ZVAL_ARR(&tmp, symbol_table);
