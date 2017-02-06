@@ -21,9 +21,21 @@
 #ifndef HRTIME_H
 #define HRTIME_H
 
-PHP_MINIT_FUNCTION(hrtime);
-PHP_MSHUTDOWN_FUNCTION(hrtime);
+#if defined(_POSIX_TIMERS) && (_POSIX_TIMERS > 0) && defined(CLOCK_MONOTONIC)
+#define HRTIME_AVAILABLE 1
+#elif defined(_WIN32) || defined(_WIN64)
+#define HRTIME_AVAILABLE 1
+#elif defined(__APPLE__)
+#define HRTIME_AVAILABLE 1
+#else
+#define HRTIME_AVAILABLE 0
+#endif
 
-PHP_FUNCTION(hrtime);
+#if HRTIME_AVAILABLE
+	PHP_MINIT_FUNCTION(hrtime);
+	PHP_MSHUTDOWN_FUNCTION(hrtime);
+
+	PHP_FUNCTION(hrtime);
+#endif /* HRTIME_AVAILABLE */
 
 #endif /* HRTIME_H */

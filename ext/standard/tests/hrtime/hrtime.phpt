@@ -1,15 +1,17 @@
 --TEST--
-Test hrtime() returns nanoseconds
+Test hrtime() aligns with microtime()
 --FILE--
 <?php
 
-$time = hrtime();
-usleep(500000);
-$diff = hrtime() - $time;
+$hrtime = hrtime();
+$microtime = microtime(1);
 
-if ($diff < 500000000) {
-    print "fail";
-} else if ($diff > 1000000000) {
+usleep(500000);
+
+$hrdiff = hrtime() - $hrtime;
+$microdiff = microtime(1) - $microtime;
+
+if (abs($hrdiff - $microdiff) > 0.0001) {
     print "fail";
 } else {
     print "OK";
