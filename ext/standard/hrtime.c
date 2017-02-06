@@ -44,7 +44,7 @@ PHP_MSHUTDOWN_FUNCTION(hrtime)
 }
 /* }}} */
 
-/* {{{ proto mixed hrtime()
+/* {{{ proto int hrtime()
    Returns an integer containing the current high-resolution time in nanoseconds
    counted from an arbitrary point in time */
 PHP_FUNCTION(hrtime)
