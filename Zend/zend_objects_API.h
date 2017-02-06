@@ -45,6 +45,7 @@ typedef struct _zend_objects_store {
 	uint32_t top;
 	uint32_t size;
 	int free_list_head;
+	char no_reuse; /* to be set to true when shutting down, to avoid missing dtor call on objects spawned by another dtor */
 } zend_objects_store;
 
 /* Global store handling functions */
