@@ -8,7 +8,6 @@ PHP                                                                        NEWS
   . Fixed bug #73998 (array_key_exists fails on arrays created by
     get_object_vars). (mhagstrand)
   . Fixed bug #73954 (NAN check fails on Alpine Linux with musl). (Andrea)
-  . Fixed bug #74039 (is_infinite(-INF) returns false). (Christian Schmidt)
 
 - GD:
   . Fixed bug #74031 (ReflectionFunction for imagepng is missing last two
