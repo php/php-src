@@ -22,5 +22,8 @@ switch (1) {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Switch statements may only contain one default clause in %s on line %d
+
+Deprecated: Switch statements may only contain one default clause in %s on line %d
 3
