@@ -5830,12 +5830,22 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 			/* recursive call */
 #ifdef CONTEXT_THREADED_JIT
 			|	call =>(call_info->num_args+ssa->cfg.blocks_count)
+			|	cmp aword [&EG(exception)], 0
+			|	jne ->exception_handler
+			if (!func) {
+				|	jmp >9
+			}
 #else
 			|	jmp =>call_info->num_args
 #endif
 		} else {
 #ifdef CONTEXT_THREADED_JIT
 			|	call aword [IP]
+			|	cmp aword [&EG(exception)], 0
+			|	jne ->exception_handler
+			if (!func) {
+				|	jmp >9
+			}
 #else
 			|	add r4, SPAD // stack alignment
 			|	jmp aword [IP]
