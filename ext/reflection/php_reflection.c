@@ -2113,7 +2113,7 @@ ZEND_METHOD(reflection_generator, __construct)
 
 	ex = ((zend_generator *) Z_OBJ_P(generator))->execute_data;
 	if (!ex) {
-		zend_throw_exception(NULL, "Cannot create ReflectionGenerator based on a terminated Generator", 0);
+		_DO_THROW("Cannot create ReflectionGenerator based on a terminated Generator");
 		return;
 	}
 
@@ -2125,7 +2125,7 @@ ZEND_METHOD(reflection_generator, __construct)
 
 #define REFLECTION_CHECK_VALID_GENERATOR(ex) \
 	if (!ex) { \
-		zend_throw_exception(NULL, "Cannot fetch information from a terminated Generator", 0); \
+		_DO_THROW("Cannot fetch information from a terminated Generator"); \
 		return; \
 	}
 
