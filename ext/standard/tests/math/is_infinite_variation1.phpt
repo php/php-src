@@ -41,38 +41,41 @@ $inputs = array(
        12.3456789000e10,
        12.3456789000E-10,
        .5,
+       NAN,
+       INF,
+       -INF,
 
        // null data
-/*11*/ NULL,
+/*14*/ NULL,
        null,
 
        // boolean data
-/*13*/ true,
+/*16*/ true,
        false,
        TRUE,
        FALSE,
        
        // empty data
-/*17*/ "",
+/*20*/ "",
        '',
        array(),
 
        // string data
-/*20*/ "abcxyz",
+/*23*/ "abcxyz",
        'abcxyz',
        $heredoc,
        
        // object data
-/*23*/ new classA(),       
+/*26*/ new classA(),       
        
        // undefined data
-/*24*/ @$undefined_var,
+/*27*/ @$undefined_var,
 
        // unset data
-/*25*/ @$unset_var,
+/*28*/ @$unset_var,
 
        // resource variable
-/*26*/ $fp
+/*29*/ $fp
 );
 
 // loop through each element of $inputs to check the behaviour of is_infinite()
@@ -122,10 +125,10 @@ bool(false)
 bool(false)
 
 -- Iteration 12 --
-bool(false)
+bool(true)
 
 -- Iteration 13 --
-bool(false)
+bool(true)
 
 -- Iteration 14 --
 bool(false)
@@ -137,19 +140,13 @@ bool(false)
 bool(false)
 
 -- Iteration 17 --
-
-Warning: is_infinite() expects parameter 1 to be float, string given in %s on line %d
-NULL
+bool(false)
 
 -- Iteration 18 --
-
-Warning: is_infinite() expects parameter 1 to be float, string given in %s on line %d
-NULL
+bool(false)
 
 -- Iteration 19 --
-
-Warning: is_infinite() expects parameter 1 to be float, array given in %s on line %d
-NULL
+bool(false)
 
 -- Iteration 20 --
 
@@ -163,21 +160,36 @@ NULL
 
 -- Iteration 22 --
 
-Warning: is_infinite() expects parameter 1 to be float, string given in %s on line %d
+Warning: is_infinite() expects parameter 1 to be float, array given in %s on line %d
 NULL
 
 -- Iteration 23 --
 
-Warning: is_infinite() expects parameter 1 to be float, object given in %s on line %d
+Warning: is_infinite() expects parameter 1 to be float, string given in %s on line %d
 NULL
 
 -- Iteration 24 --
-bool(false)
+
+Warning: is_infinite() expects parameter 1 to be float, string given in %s on line %d
+NULL
 
 -- Iteration 25 --
-bool(false)
+
+Warning: is_infinite() expects parameter 1 to be float, string given in %s on line %d
+NULL
 
 -- Iteration 26 --
+
+Warning: is_infinite() expects parameter 1 to be float, object given in %s on line %d
+NULL
+
+-- Iteration 27 --
+bool(false)
+
+-- Iteration 28 --
+bool(false)
+
+-- Iteration 29 --
 
 Warning: is_infinite() expects parameter 1 to be float, resource given in %s on line %d
 NULL
