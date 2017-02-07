@@ -235,7 +235,7 @@ php_apache_sapi_read_post(char *buf, size_t count_bytes)
 	}
 
 	if (ret != APR_SUCCESS) {
-		SG(post_read_error) = 1;
+		AP2(post_read_error) = 1;
 		if (APR_STATUS_IS_TIMEUP(ret)) {
 			SG(sapi_headers).http_response_code = php_ap_map_http_request_error(ret, HTTP_REQUEST_TIME_OUT);
 		} else {
@@ -524,6 +524,7 @@ static int php_apache_request_ctor(request_rec *r, php_struct *ctx)
 	SG(request_info).proto_num = r->proto_num;
 	SG(request_info).request_uri = apr_pstrdup(r->pool, r->uri);
 	SG(request_info).path_translated = apr_pstrdup(r->pool, r->filename);
+	AP2(post_read_error) = 0;
 	r->no_local_copy = 1;
 
 	content_length = (char *) apr_table_get(r->headers_in, "Content-Length");
@@ -693,7 +694,7 @@ zend_first_try {
 		brigade = ctx->brigade;
 	}
 
-	if (SG(post_read_error)) {
+	if (AP2(post_read_error)) {
 		ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, "Error while attempting to read POST data: %d", SG(sapi_headers).http_response_code);
 		apr_brigade_cleanup(brigade);
 		PHPAP_INI_OFF;
