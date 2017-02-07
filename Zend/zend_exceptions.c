@@ -556,8 +556,8 @@ static void _build_trace_args(zval *arg, smart_str *str) /* {{{ */
 			break;
 		case IS_DOUBLE: {
 			double dval = Z_DVAL_P(arg);
-			char *s_tmp = emalloc(MAX_LENGTH_OF_DOUBLE + EG(precision) + 1);
-			int l_tmp = zend_sprintf(s_tmp, "%.*G", (int) EG(precision), dval);  /* SAFE */
+			char *s_tmp;
+			size_t l_tmp = zend_spprintf(&s_tmp, MAX_LENGTH_OF_DOUBLE + EG(precision) + 1, "%.*G", (int) EG(precision), dval);  /* SAFE */
 			smart_str_appendl(str, s_tmp, l_tmp);
 			smart_str_appends(str, ", ");
 			efree(s_tmp);
