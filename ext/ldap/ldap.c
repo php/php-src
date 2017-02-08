@@ -1470,7 +1470,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 	zend_ulong index;
 	int is_full_add=0; /* flag for full add operation so ldap_mod_add can be put back into oper, gerrit THomson */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsa", &link, &dn, &dn_len, &entry) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsa/", &link, &dn, &dn_len, &entry) != SUCCESS) {
 		return;
 	}
 
@@ -1518,6 +1518,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 		if (Z_TYPE_P(value) != IS_ARRAY) {
 			num_values = 1;
 		} else {
+			SEPARATE_ARRAY(value);
 			num_values = zend_hash_num_elements(Z_ARRVAL_P(value));
 		}
 
@@ -1723,7 +1724,7 @@ PHP_FUNCTION(ldap_modify_batch)
 	);
 	*/
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsa", &link, &dn, &dn_len, &mods) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsa/", &link, &dn, &dn_len, &mods) != SUCCESS) {
 		return;
 	}
 
@@ -1768,6 +1769,7 @@ PHP_FUNCTION(ldap_modify_batch)
 				RETURN_FALSE;
 			}
 
+			SEPARATE_ARRAY(mod);
 			/* for the modification hashtable... */
 			zend_hash_internal_pointer_reset(Z_ARRVAL_P(mod));
 			num_modprops = zend_hash_num_elements(Z_ARRVAL_P(mod));
@@ -1842,6 +1844,7 @@ PHP_FUNCTION(ldap_modify_batch)
 						RETURN_FALSE;
 					}
 
+					SEPARATE_ARRAY(modinfo);
 					/* is the array not empty? */
 					zend_hash_internal_pointer_reset(Z_ARRVAL_P(modinfo));
 					num_modvals = zend_hash_num_elements(Z_ARRVAL_P(modinfo));

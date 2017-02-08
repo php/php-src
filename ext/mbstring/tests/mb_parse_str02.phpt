@@ -31,7 +31,7 @@ foreach ($queries as $query) {
 	test($query);
 }
 ?>
---EXPECT--
+--EXPECTF--
 array(3) {
   ["foo"]=>
   string(3) "abc"
@@ -43,6 +43,8 @@ array(3) {
 string(0) ""
 string(0) ""
 string(0) ""
+
+Deprecated: mb_parse_str(): Calling mb_parse_str() without the result argument is deprecated in %s on line %d
 string(3) "abc"
 string(3) "def"
 string(3) "ghi"
@@ -57,6 +59,8 @@ array(3) {
 string(0) ""
 string(0) ""
 string(0) ""
+
+Deprecated: mb_parse_str(): Calling mb_parse_str() without the result argument is deprecated in %s on line %d
 string(0) ""
 string(0) ""
 string(0) ""
@@ -86,6 +90,8 @@ array(3) {
 string(0) ""
 string(0) ""
 string(0) ""
+
+Deprecated: mb_parse_str(): Calling mb_parse_str() without the result argument is deprecated in %s on line %d
 array(4) {
   [0]=>
   string(3) "abc"

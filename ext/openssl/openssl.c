@@ -879,7 +879,7 @@ static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int s
 
 		if (needs_free) {
 			/* ASN1_STRING_to_UTF8(3): The buffer out should be freed using free(3) */
-			free(to_add);
+			OPENSSL_free(to_add);
 		}
 	}
 
@@ -1179,7 +1179,7 @@ static int php_openssl_parse_config(struct php_x509_request * req, zval * option
 		&& Z_TYPE_P(item) == IS_STRING) {
 		req->curve_name = OBJ_sn2nid(Z_STRVAL_P(item));
 		if (req->curve_name == NID_undef) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown elliptic curve (short) name %s", Z_STRVAL_P(item));
+			php_error_docref(NULL, E_WARNING, "Unknown elliptic curve (short) name %s", Z_STRVAL_P(item));
 			return FAILURE;
 		}
 	}
@@ -2310,6 +2310,7 @@ PHP_FUNCTION(openssl_x509_parse)
 	bn_serial = ASN1_INTEGER_to_BN(asn1_serial, NULL);
 	/* Can return NULL on error or memory allocation failure */
 	if (!bn_serial) {
+		php_openssl_store_errors();
 		RETURN_FALSE;
 	}
 
@@ -2317,6 +2318,7 @@ PHP_FUNCTION(openssl_x509_parse)
 	BN_free(bn_serial);
 	/* Can return NULL on error or memory allocation failure */
 	if (!hex_serial) {
+		php_openssl_store_errors();
 		RETURN_FALSE;
 	}
 
@@ -2932,52 +2934,53 @@ PHP_FUNCTION(openssl_pkcs12_read)
 		zval_dtor(zout);
 		array_init(zout);
 
-		bio_out = BIO_new(BIO_s_mem());
-		if (PEM_write_bio_X509(bio_out, cert)) {
-			BUF_MEM *bio_buf;
-			BIO_get_mem_ptr(bio_out, &bio_buf);
-			ZVAL_STRINGL(&zcert, bio_buf->data, bio_buf->length);
-			add_assoc_zval(zout, "cert", &zcert);
-		} else {
-			php_openssl_store_errors();
-		}
-		BIO_free(bio_out);
-
-		bio_out = BIO_new(BIO_s_mem());
-		if (PEM_write_bio_PrivateKey(bio_out, pkey, NULL, NULL, 0, 0, NULL)) {
-			BUF_MEM *bio_buf;
-			BIO_get_mem_ptr(bio_out, &bio_buf);
-			ZVAL_STRINGL(&zpkey, bio_buf->data, bio_buf->length);
-			add_assoc_zval(zout, "pkey", &zpkey);
-		} else {
-			php_openssl_store_errors();
-		}
-		BIO_free(bio_out);
-
-		array_init(&zextracerts);
-
-		for (i=0;;i++) {
-			zval zextracert;
-			X509* aCA = sk_X509_pop(ca);
-			if (!aCA) break;
-
+		if (cert) {
 			bio_out = BIO_new(BIO_s_mem());
-			if (PEM_write_bio_X509(bio_out, aCA)) {
+			if (PEM_write_bio_X509(bio_out, cert)) {
 				BUF_MEM *bio_buf;
 				BIO_get_mem_ptr(bio_out, &bio_buf);
-				ZVAL_STRINGL(&zextracert, bio_buf->data, bio_buf->length);
-				add_index_zval(&zextracerts, i, &zextracert);
-
+				ZVAL_STRINGL(&zcert, bio_buf->data, bio_buf->length);
+				add_assoc_zval(zout, "cert", &zcert);
+			} else {
+				php_openssl_store_errors();
 			}
 			BIO_free(bio_out);
-
-			X509_free(aCA);
 		}
-		if(ca) {
+
+		if (pkey) {
+			bio_out = BIO_new(BIO_s_mem());
+			if (PEM_write_bio_PrivateKey(bio_out, pkey, NULL, NULL, 0, 0, NULL)) {
+				BUF_MEM *bio_buf;
+				BIO_get_mem_ptr(bio_out, &bio_buf);
+				ZVAL_STRINGL(&zpkey, bio_buf->data, bio_buf->length);
+				add_assoc_zval(zout, "pkey", &zpkey);
+			} else {
+				php_openssl_store_errors();
+			}
+			BIO_free(bio_out);
+		}
+
+		if (ca && sk_X509_num(ca)) {
+			array_init(&zextracerts);
+
+			for (i = 0; i < sk_X509_num(ca); i++) {
+				zval zextracert;
+				X509* aCA = sk_X509_pop(ca);
+				if (!aCA) break;
+
+				bio_out = BIO_new(BIO_s_mem());
+				if (PEM_write_bio_X509(bio_out, aCA)) {
+					BUF_MEM *bio_buf;
+					BIO_get_mem_ptr(bio_out, &bio_buf);
+					ZVAL_STRINGL(&zextracert, bio_buf->data, bio_buf->length);
+					add_index_zval(&zextracerts, i, &zextracert);
+				}
+
+				X509_free(aCA);
+			}
+
 			sk_X509_free(ca);
 			add_assoc_zval(zout, "extracerts", &zextracerts);
-		} else {
-			zval_dtor(&zextracerts);
 		}
 
 		RETVAL_TRUE;
@@ -3917,7 +3920,7 @@ static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req
 				{
 					EC_KEY *eckey;
 					if (req->curve_name == NID_undef) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing configuration value: 'curve_name' not set");
+						php_error_docref(NULL, E_WARNING, "Missing configuration value: 'curve_name' not set");
 						return NULL;
 					}
 					eckey = EC_KEY_new_by_curve_name(req->curve_name);
@@ -6254,6 +6257,7 @@ static int php_openssl_cipher_init(const EVP_CIPHER *cipher_type,
 	}
 
 	if (!EVP_CipherInit_ex(cipher_ctx, cipher_type, NULL, NULL, NULL, enc)) {
+		php_openssl_store_errors();
 		return FAILURE;
 	}
 	if (php_openssl_validate_iv(piv, piv_len, max_iv_len, free_iv, cipher_ctx, mode) == FAILURE) {
@@ -6269,10 +6273,11 @@ static int php_openssl_cipher_init(const EVP_CIPHER *cipher_type,
 			return FAILURE;
 		}
 	}
-	if (password_len > key_len) {
-		EVP_CIPHER_CTX_set_key_length(cipher_ctx, password_len);
+	if (password_len > key_len && !EVP_CIPHER_CTX_set_key_length(cipher_ctx, password_len)) {
+		php_openssl_store_errors();
 	}
 	if (!EVP_CipherInit_ex(cipher_ctx, NULL, NULL, key, (unsigned char *)*piv, enc)) {
+		php_openssl_store_errors();
 		return FAILURE;
 	}
 	if (options & OPENSSL_ZERO_PADDING) {
@@ -6291,11 +6296,13 @@ static int php_openssl_cipher_update(const EVP_CIPHER *cipher_type,
 	int i = 0;
 
 	if (mode->is_single_run_aead && !EVP_EncryptUpdate(cipher_ctx, NULL, &i, NULL, (int)data_len)) {
+		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Setting of data length failed");
 		return FAILURE;
 	}
 
 	if (mode->is_aead && !EVP_CipherUpdate(cipher_ctx, NULL, &i, (unsigned char *)aad, (int)aad_len)) {
+		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Setting of additional application data failed");
 		return FAILURE;
 	}
@@ -6312,6 +6319,7 @@ static int php_openssl_cipher_update(const EVP_CIPHER *cipher_type,
 			php_error_docref(NULL, E_WARNING, enc ? "Encryption failed" : "Decryption failed");
 		}
 		*/
+		php_openssl_store_errors();
 		zend_string_release(*poutbuf);
 		return FAILURE;
 	}
@@ -6360,7 +6368,6 @@ PHP_FUNCTION(openssl_encrypt)
 	}
 
 	php_openssl_load_cipher_mode(&mode, cipher_type);
-
 
 	if (php_openssl_cipher_init(cipher_type, cipher_ctx, &mode,
 				&password, &password_len, &free_password,

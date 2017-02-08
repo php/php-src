@@ -368,7 +368,7 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(get_declared_interfaces, 	arginfo_zend__void)
 	ZEND_FE(get_defined_functions, 		arginfo_zend__void)
 	ZEND_FE(get_defined_vars,		arginfo_zend__void)
-	ZEND_FE(create_function,		arginfo_create_function)
+	ZEND_DEP_FE(create_function,		arginfo_create_function)
 	ZEND_FE(get_resource_type,		arginfo_get_resource_type)
 	ZEND_FE(get_resources,			arginfo_get_resources)
 	ZEND_FE(get_loaded_extensions,		arginfo_get_loaded_extensions)
@@ -727,6 +727,11 @@ ZEND_FUNCTION(each)
 		return;
 	}
 
+	if (!EG(each_deprecation_thrown)) {
+		zend_error(E_DEPRECATED, "The each() function is deprecated. This message will be suppressed on further calls");
+		EG(each_deprecation_thrown) = 1;
+	}
+
 	target_hash = HASH_OF(array);
 	if (!target_hash) {
 		zend_error(E_WARNING,"Variable passed to each() is not an array or object");
@@ -879,9 +884,6 @@ static void copy_constant_array(zval *dst, zval *src) /* {{{ */
 			}
 		} else if (Z_REFCOUNTED_P(val)) {
 			Z_ADDREF_P(val);
-			if (UNEXPECTED(Z_TYPE_INFO_P(val) == IS_RESOURCE_EX)) {
-				Z_TYPE_INFO_P(new_val) &= ~(IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT);
-			}
 		}
 	} ZEND_HASH_FOREACH_END();
 }
@@ -924,12 +926,7 @@ repeat:
 		case IS_FALSE:
 		case IS_TRUE:
 		case IS_NULL:
-			break;
 		case IS_RESOURCE:
-			ZVAL_COPY(&val_free, val);
-			/* TODO: better solution than this tricky disable dtor on resource? */
-			Z_TYPE_INFO(val_free) &= ~(IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT);
-			val = &val_free;
 			break;
 		case IS_ARRAY:
 			if (Z_REFCOUNTED_P(val)) {
@@ -1292,11 +1289,7 @@ ZEND_FUNCTION(get_object_vars)
 				 */
 				zend_hash_str_add_new(Z_ARRVAL_P(return_value), prop_name, prop_len, value);
 			} else {
-				if (ZEND_HANDLE_NUMERIC(key, num_key)) {
-					zend_hash_index_add(Z_ARRVAL_P(return_value), num_key, value);
-				} else {
-					zend_hash_add_new(Z_ARRVAL_P(return_value), key, value);
-				}
+				zend_symbtable_add_new(Z_ARRVAL_P(return_value), key, value);
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -2465,13 +2458,19 @@ ZEND_FUNCTION(debug_print_backtrace)
 		object = (Z_TYPE(call->This) == IS_OBJECT) ? Z_OBJ(call->This) : NULL;
 
 		if (call->func) {
+			zend_string *zend_function_name;
+
 			func = call->func;
-			function_name = (func->common.scope &&
-			                 func->common.scope->trait_aliases) ?
-				ZSTR_VAL(zend_resolve_method_name(
-					(object ? object->ce : func->common.scope), func)) :
-				(func->common.function_name ?
-					ZSTR_VAL(func->common.function_name) : NULL);
+            if (func->common.scope && func->common.scope->trait_aliases) {
+                zend_function_name = zend_resolve_method_name(object ? object->ce : func->common.scope, func);
+            } else {
+                zend_function_name = func->common.function_name;
+            }
+            if (zend_function_name != NULL) {
+                function_name = ZSTR_VAL(zend_function_name);
+            } else {
+                function_name = NULL;
+            }
 		} else {
 			func = NULL;
 			function_name = NULL;

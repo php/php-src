@@ -281,6 +281,10 @@ static int dblib_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_valu
 			ZVAL_BOOL(return_value, ((pdo_dblib_db_handle *)dbh->driver_data)->stringify_uniqueidentifier);
 			break;
 
+		case PDO_DBLIB_ATTR_VERSION:
+			ZVAL_STRING(return_value, dbversion());
+			break;
+
 		default:
 			return 0;
 	}

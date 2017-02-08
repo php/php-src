@@ -172,23 +172,20 @@ static zend_always_inline zend_bool zend_iterable_compatibility_check(zend_arg_i
 	if (ZEND_TYPE_CODE(arg_info->type) == IS_ARRAY) {
 		return 1;
 	}
-	
+
 	if (ZEND_TYPE_IS_CLASS(arg_info->type) && zend_string_equals_literal_ci(ZEND_TYPE_NAME(arg_info->type), "Traversable")) {
 		return 1;
 	}
-	
+
 	return 0;
 }
 /* }}} */
 
 static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_info *fe_arg_info, const zend_function *proto, zend_arg_info *proto_arg_info) /* {{{ */
 {
-	if (ZEND_LOG_XOR(ZEND_TYPE_IS_CLASS(fe_arg_info->type), ZEND_TYPE_IS_CLASS(proto_arg_info->type))) {
-		/* Only one has a type declaration and the other one doesn't */
-		return 0;
-	}
+	ZEND_ASSERT(ZEND_TYPE_IS_SET(fe_arg_info->type) && ZEND_TYPE_IS_SET(proto_arg_info->type));
 
-	if (ZEND_TYPE_IS_CLASS(fe_arg_info->type)) {
+	if (ZEND_TYPE_IS_CLASS(fe_arg_info->type) && ZEND_TYPE_IS_CLASS(proto_arg_info->type)) {
 		zend_string *fe_class_name, *proto_class_name;
 		const char *class_name;
 
@@ -237,11 +234,27 @@ static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_inf
 		zend_string_release(proto_class_name);
 		zend_string_release(fe_class_name);
 	} else if (ZEND_TYPE_CODE(fe_arg_info->type) != ZEND_TYPE_CODE(proto_arg_info->type)) {
-		/* Incompatible type */
+		/* Incompatible built-in types */
 		return 0;
 	}
 
 	return 1;
+}
+/* }}} */
+
+static int zend_do_perform_arg_type_hint_check(const zend_function *fe, zend_arg_info *fe_arg_info, const zend_function *proto, zend_arg_info *proto_arg_info) /* {{{ */
+{
+	if (!ZEND_TYPE_IS_SET(fe_arg_info->type)) {
+		/* Child with no type is always compatible */
+		return 1;
+	}
+
+	if (!ZEND_TYPE_IS_SET(proto_arg_info->type)) {
+		/* Child defines a type, but parent doesn't, violates LSP */
+		return 0;
+	}
+
+	return zend_do_perform_type_hint_check(fe, fe_arg_info, proto, proto_arg_info);
 }
 /* }}} */
 
@@ -312,15 +325,15 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 		} else {
 			proto_arg_info = &proto->common.arg_info[proto->common.num_args];
 		}
-		
-		if (!zend_do_perform_type_hint_check(fe, fe_arg_info, proto, proto_arg_info)) {
+
+		if (!zend_do_perform_arg_type_hint_check(fe, fe_arg_info, proto, proto_arg_info)) {
 			switch (ZEND_TYPE_CODE(fe_arg_info->type)) {
 				case IS_ITERABLE:
 					if (!zend_iterable_compatibility_check(proto_arg_info)) {
 						return 0;
 					}
 					break;
-					
+
 				default:
 					return 0;
 			}
@@ -345,7 +358,7 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 		if (!(fe->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
 			return 0;
 		}
-		
+
 		if (!zend_do_perform_type_hint_check(fe, fe->common.arg_info - 1, proto, proto->common.arg_info - 1)) {
 			switch (ZEND_TYPE_CODE(proto->common.arg_info[-1].type)) {
 				case IS_ITERABLE:
@@ -353,7 +366,7 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 						return 0;
 					}
 					break;
-					
+
 				default:
 					return 0;
 			}
@@ -586,13 +599,12 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 	} else if (!(parent->common.fn_flags & ZEND_ACC_CTOR) || (parent->common.prototype && (parent->common.prototype->common.scope->ce_flags & ZEND_ACC_INTERFACE))) {
 		/* ctors only have a prototype if it comes from an interface */
 		child->common.prototype = parent->common.prototype ? parent->common.prototype : parent;
+		/* and if that is the case, we want to check inheritance against it */
+		if (parent->common.fn_flags & ZEND_ACC_CTOR) {
+			parent = child->common.prototype;
+		}
 	}
 
-	if (child->common.prototype && (
-		child->common.prototype->common.fn_flags & ZEND_ACC_ABSTRACT
-	)) {
-		parent = child->common.prototype;
-	}
 	if (UNEXPECTED(!zend_do_perform_implementation_check(child, parent))) {
 		int error_level;
 		const char *error_verb;

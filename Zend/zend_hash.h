@@ -41,6 +41,7 @@
 #define HASH_FLAG_INITIALIZED      (1<<3)
 #define HASH_FLAG_STATIC_KEYS      (1<<4) /* long and interned strings */
 #define HASH_FLAG_HAS_EMPTY_IND    (1<<5)
+#define HASH_FLAG_ALLOW_COW_VIOLATION (1<<6)
 
 #define HT_IS_PACKED(ht) \
 	(((ht)->u.flags & HASH_FLAG_PACKED) != 0)
@@ -50,6 +51,12 @@
 
 #define HT_HAS_STATIC_KEYS_ONLY(ht) \
 	(((ht)->u.flags & (HASH_FLAG_PACKED|HASH_FLAG_STATIC_KEYS)) != 0)
+
+#if ZEND_DEBUG
+# define HT_ALLOW_COW_VIOLATION(ht) (ht)->u.flags |= HASH_FLAG_ALLOW_COW_VIOLATION
+#else
+# define HT_ALLOW_COW_VIOLATION(ht)
+#endif
 
 typedef struct _zend_hash_key {
 	zend_ulong h;
@@ -339,6 +346,16 @@ static zend_always_inline int zend_hash_str_exists_ind(const HashTable *ht, cons
 			Z_TYPE_P(Z_INDIRECT_P(zv)) != IS_UNDEF);
 }
 
+static zend_always_inline zval *zend_symbtable_add_new(HashTable *ht, zend_string *key, zval *pData)
+{
+	zend_ulong idx;
+
+	if (ZEND_HANDLE_NUMERIC(key, idx)) {
+		return zend_hash_index_add_new(ht, idx, pData);
+	} else {
+		return zend_hash_add_new(ht, key, pData);
+	}
+}
 
 static zend_always_inline zval *zend_symtable_update(HashTable *ht, zend_string *key, zval *pData)
 {

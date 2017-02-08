@@ -173,7 +173,7 @@ const zend_function_entry gmp_functions[] = {
 	ZEND_FE(gmp_legendre,	arginfo_gmp_binary)
 	ZEND_FE(gmp_cmp,		arginfo_gmp_binary)
 	ZEND_FE(gmp_sign,		arginfo_gmp_unary)
-	ZEND_FE(gmp_random,		arginfo_gmp_random)
+	ZEND_DEP_FE(gmp_random,		arginfo_gmp_random)
 	ZEND_FE(gmp_random_seed,	arginfo_gmp_random_seed)
 	ZEND_FE(gmp_random_bits,  arginfo_gmp_random_bits)
 	ZEND_FE(gmp_random_range, arginfo_gmp_random_range)

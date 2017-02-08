@@ -2113,7 +2113,7 @@ ZEND_METHOD(reflection_generator, __construct)
 
 	ex = ((zend_generator *) Z_OBJ_P(generator))->execute_data;
 	if (!ex) {
-		zend_throw_exception(NULL, "Cannot create ReflectionGenerator based on a terminated Generator", 0);
+		_DO_THROW("Cannot create ReflectionGenerator based on a terminated Generator");
 		return;
 	}
 
@@ -2125,7 +2125,7 @@ ZEND_METHOD(reflection_generator, __construct)
 
 #define REFLECTION_CHECK_VALID_GENERATOR(ex) \
 	if (!ex) { \
-		zend_throw_exception(NULL, "Cannot fetch information from a terminated Generator", 0); \
+		_DO_THROW("Cannot fetch information from a terminated Generator"); \
 		return; \
 	}
 
@@ -4034,7 +4034,7 @@ ZEND_METHOD(reflection_class, getStartLine)
 		return;
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
-	if (ce->type == ZEND_USER_FUNCTION) {
+	if (ce->type == ZEND_USER_CLASS) {
 		RETURN_LONG(ce->info.user.line_start);
 	}
 	RETURN_FALSE;
@@ -4690,7 +4690,7 @@ ZEND_METHOD(reflection_class, isInstance)
 }
 /* }}} */
 
-/* {{{ proto public stdclass ReflectionClass::newInstance(mixed* args, ...)
+/* {{{ proto public stdclass ReflectionClass::newInstance([mixed* args], ...)
    Returns an instance of this class */
 ZEND_METHOD(reflection_class, newInstance)
 {
@@ -6388,8 +6388,8 @@ ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_isInstance, 0)
 	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_newInstance, 0)
-	ZEND_ARG_INFO(0, args)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_class_newInstance, 0, 0, 0)
+	ZEND_ARG_VARIADIC_INFO(0, args)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_newInstanceWithoutConstructor, 0)

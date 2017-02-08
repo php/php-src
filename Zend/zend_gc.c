@@ -358,11 +358,13 @@ tail_call:
 	ht = NULL;
 	GC_REF_SET_BLACK(ref);
 
-	if (GC_TYPE(ref) == IS_OBJECT && !(GC_FLAGS(ref) & IS_OBJ_FREE_CALLED)) {
+	if (GC_TYPE(ref) == IS_OBJECT) {
 		zend_object_get_gc_t get_gc;
 		zend_object *obj = (zend_object*)ref;
 
-		if (EXPECTED(IS_OBJ_VALID(EG(objects_store).object_buckets[obj->handle]) &&
+		ZEND_ASSERT(EG(objects_store).object_buckets != NULL);
+		if (EXPECTED(!(GC_FLAGS(ref) & IS_OBJ_FREE_CALLED) &&
+		             IS_OBJ_VALID(EG(objects_store).object_buckets[obj->handle]) &&
 		             (get_gc = obj->handlers->get_gc) != NULL)) {
 			int n;
 			zval *zv, *end;
@@ -468,12 +470,14 @@ tail_call:
 		GC_BENCH_INC(zval_marked_grey);
 		GC_REF_SET_COLOR(ref, GC_GREY);
 
-		if (GC_TYPE(ref) == IS_OBJECT && !(GC_FLAGS(ref) & IS_OBJ_FREE_CALLED)) {
+		if (GC_TYPE(ref) == IS_OBJECT) {
 			zend_object_get_gc_t get_gc;
 			zend_object *obj = (zend_object*)ref;
 
-			if (EXPECTED(IS_OBJ_VALID(EG(objects_store).object_buckets[obj->handle]) &&
-		             (get_gc = obj->handlers->get_gc) != NULL)) {
+			ZEND_ASSERT(EG(objects_store).object_buckets != NULL);
+			if (EXPECTED(!(GC_FLAGS(ref) & IS_OBJ_FREE_CALLED) &&
+			             IS_OBJ_VALID(EG(objects_store).object_buckets[obj->handle]) &&
+		                 (get_gc = obj->handlers->get_gc) != NULL)) {
 				int n;
 				zval *zv, *end;
 				zval tmp;
@@ -512,11 +516,6 @@ tail_call:
 			}
 		} else if (GC_TYPE(ref) == IS_REFERENCE) {
 			if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
-				if (UNEXPECTED(!EG(objects_store).object_buckets) &&
-					Z_TYPE(((zend_reference*)ref)->val) == IS_OBJECT) {
-					Z_TYPE_INFO(((zend_reference*)ref)->val) = IS_NULL;
-					return;
-				}
 				ref = Z_COUNTED(((zend_reference*)ref)->val);
 				GC_REFCOUNT(ref)--;
 				goto tail_call;
@@ -546,14 +545,9 @@ tail_call:
 				zv = Z_INDIRECT_P(zv);
 			}
 			if (Z_REFCOUNTED_P(zv)) {
-				if (Z_TYPE_P(zv) == IS_OBJECT &&
-				    UNEXPECTED(!EG(objects_store).object_buckets)) {
-					Z_TYPE_INFO_P(zv) = IS_NULL;
-				} else {
-					ref = Z_COUNTED_P(zv);
-					GC_REFCOUNT(ref)--;
-					gc_mark_grey(ref);
-				}
+				ref = Z_COUNTED_P(zv);
+				GC_REFCOUNT(ref)--;
+				gc_mark_grey(ref);
 			}
 			p++;
 		}
@@ -561,14 +555,9 @@ tail_call:
 		if (Z_TYPE_P(zv) == IS_INDIRECT) {
 			zv = Z_INDIRECT_P(zv);
 		}
-		if (Z_TYPE_P(zv) == IS_OBJECT &&
-		    UNEXPECTED(!EG(objects_store).object_buckets)) {
-			Z_TYPE_INFO_P(zv) = IS_NULL;
-		} else {
-			ref = Z_COUNTED_P(zv);
-			GC_REFCOUNT(ref)--;
-			goto tail_call;
-		}
+		ref = Z_COUNTED_P(zv);
+		GC_REFCOUNT(ref)--;
+		goto tail_call;
 	}
 }
 
@@ -596,11 +585,13 @@ tail_call:
 			gc_scan_black(ref);
 		} else {
 			GC_REF_SET_COLOR(ref, GC_WHITE);
-			if (GC_TYPE(ref) == IS_OBJECT && !(GC_FLAGS(ref) & IS_OBJ_FREE_CALLED)) {
+			if (GC_TYPE(ref) == IS_OBJECT) {
 				zend_object_get_gc_t get_gc;
 				zend_object *obj = (zend_object*)ref;
 
-				if (EXPECTED(IS_OBJ_VALID(EG(objects_store).object_buckets[obj->handle]) &&
+				ZEND_ASSERT(EG(objects_store).object_buckets != NULL);
+				if (EXPECTED(!(GC_FLAGS(ref) & IS_OBJ_FREE_CALLED) &&
+				             IS_OBJ_VALID(EG(objects_store).object_buckets[obj->handle]) &&
 				             (get_gc = obj->handlers->get_gc) != NULL)) {
 					int n;
 					zval *zv, *end;
@@ -760,11 +751,13 @@ tail_call:
 			count++;
 		}
 
-		if (GC_TYPE(ref) == IS_OBJECT && !(GC_FLAGS(ref) & IS_OBJ_FREE_CALLED)) {
+		if (GC_TYPE(ref) == IS_OBJECT) {
 			zend_object_get_gc_t get_gc;
 			zend_object *obj = (zend_object*)ref;
 
-			if (EXPECTED(IS_OBJ_VALID(EG(objects_store).object_buckets[obj->handle]) &&
+			ZEND_ASSERT(EG(objects_store).object_buckets != NULL);
+			if (EXPECTED(!(GC_FLAGS(ref) & IS_OBJ_FREE_CALLED) &&
+			             IS_OBJ_VALID(EG(objects_store).object_buckets[obj->handle]) &&
 			             (get_gc = obj->handlers->get_gc) != NULL)) {
 				int n;
 				zval *zv, *end;
@@ -945,12 +938,14 @@ tail_call:
 			GC_REMOVE_FROM_BUFFER(ref);
 		}
 
-		if (GC_TYPE(ref) == IS_OBJECT && !(GC_FLAGS(ref) & IS_OBJ_FREE_CALLED)) {
+		if (GC_TYPE(ref) == IS_OBJECT) {
 			zend_object_get_gc_t get_gc;
 			zend_object *obj = (zend_object*)ref;
 
-			if (EXPECTED(IS_OBJ_VALID(EG(objects_store).object_buckets[obj->handle]) &&
-		             (get_gc = obj->handlers->get_gc) != NULL)) {
+			ZEND_ASSERT(EG(objects_store).object_buckets != NULL);
+			if (EXPECTED(!(GC_FLAGS(ref) & IS_OBJ_FREE_CALLED) &&
+			             IS_OBJ_VALID(EG(objects_store).object_buckets[obj->handle]) &&
+		                 (get_gc = obj->handlers->get_gc) != NULL)) {
 				int n;
 				zval *zv, *end;
 				zval tmp;
@@ -1089,45 +1084,44 @@ ZEND_API int zend_gc_collect_cycles(void)
 
 		if (gc_flags & GC_HAS_DESTRUCTORS) {
 			GC_TRACE("Calling destructors");
-			if (EG(objects_store).object_buckets) {
-				/* Remember reference counters before calling destructors */
-				current = to_free.next;
-				while (current != &to_free) {
-					current->refcount = GC_REFCOUNT(current->ref);
-					current = current->next;
-				}
 
-				/* Call destructors */
-				current = to_free.next;
-				while (current != &to_free) {
-					p = current->ref;
-					GC_G(next_to_free) = current->next;
-					if ((GC_TYPE(p) & GC_TYPE_MASK) == IS_OBJECT) {
-						zend_object *obj = (zend_object*)p;
+			/* Remember reference counters before calling destructors */
+			current = to_free.next;
+			while (current != &to_free) {
+				current->refcount = GC_REFCOUNT(current->ref);
+				current = current->next;
+			}
 
-						if (IS_OBJ_VALID(EG(objects_store).object_buckets[obj->handle]) &&
-							!(GC_FLAGS(obj) & IS_OBJ_DESTRUCTOR_CALLED)) {
-							GC_TRACE_REF(obj, "calling destructor");
-							GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
-							if (obj->handlers->dtor_obj) {
-								GC_REFCOUNT(obj)++;
-								obj->handlers->dtor_obj(obj);
-								GC_REFCOUNT(obj)--;
-							}
+			/* Call destructors */
+			current = to_free.next;
+			while (current != &to_free) {
+				p = current->ref;
+				GC_G(next_to_free) = current->next;
+				if ((GC_TYPE(p) & GC_TYPE_MASK) == IS_OBJECT) {
+					zend_object *obj = (zend_object*)p;
+
+					if (IS_OBJ_VALID(EG(objects_store).object_buckets[obj->handle]) &&
+						!(GC_FLAGS(obj) & IS_OBJ_DESTRUCTOR_CALLED)) {
+						GC_TRACE_REF(obj, "calling destructor");
+						GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
+						if (obj->handlers->dtor_obj) {
+							GC_REFCOUNT(obj)++;
+							obj->handlers->dtor_obj(obj);
+							GC_REFCOUNT(obj)--;
 						}
 					}
-					current = GC_G(next_to_free);
 				}
+				current = GC_G(next_to_free);
+			}
 
-				/* Remove values captured in destructors */
-				current = to_free.next;
-				while (current != &to_free) {
-					GC_G(next_to_free) = current->next;
-					if (GC_REFCOUNT(current->ref) > current->refcount) {
-						gc_remove_nested_data_from_buffer(current->ref, current);
-					}
-					current = GC_G(next_to_free);
+			/* Remove values captured in destructors */
+			current = to_free.next;
+			while (current != &to_free) {
+				GC_G(next_to_free) = current->next;
+				if (GC_REFCOUNT(current->ref) > current->refcount) {
+					gc_remove_nested_data_from_buffer(current->ref, current);
 				}
+				current = GC_G(next_to_free);
 			}
 		}
 
@@ -1142,8 +1136,7 @@ ZEND_API int zend_gc_collect_cycles(void)
 			if ((GC_TYPE(p) & GC_TYPE_MASK) == IS_OBJECT) {
 				zend_object *obj = (zend_object*)p;
 
-				if (EG(objects_store).object_buckets &&
-				    IS_OBJ_VALID(EG(objects_store).object_buckets[obj->handle])) {
+				if (IS_OBJ_VALID(EG(objects_store).object_buckets[obj->handle])) {
 					EG(objects_store).object_buckets[obj->handle] = SET_OBJ_INVALID(obj);
 					GC_TYPE(obj) = IS_NULL;
 					if (!(GC_FLAGS(obj) & IS_OBJ_FREE_CALLED)) {
@@ -1162,6 +1155,10 @@ ZEND_API int zend_gc_collect_cycles(void)
 				zend_array *arr = (zend_array*)p;
 
 				GC_TYPE(arr) = IS_NULL;
+
+				/* GC may destroy arrays with rc>1. This is valid and safe. */
+				HT_ALLOW_COW_VIOLATION(arr);
+
 				zend_hash_destroy(arr);
 			}
 			current = GC_G(next_to_free);

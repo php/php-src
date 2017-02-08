@@ -122,6 +122,8 @@ echo "Done";
 *** Testing each() : usage variations ***
 
 -- Iteration 1: int data --
+
+Deprecated: The each() function is deprecated. This message will be suppressed on further calls in %s on line %d
 array(4) {
   [1]=>
   int(0)

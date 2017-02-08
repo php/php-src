@@ -96,7 +96,7 @@ if (typeof(CWD) == "undefined") {
 	CWD = FSO.GetParentFolderName(FSO.GetAbsolutePathName("README.GIT-RULES"));
 }
 
-/* defaults; we pick up the precise versions from configure.in */
+/* defaults; we pick up the precise versions from configure.ac */
 var PHP_VERSION = 7;
 var PHP_MINOR_VERSION = 1;
 var PHP_RELEASE_VERSION = 0;
@@ -106,7 +106,7 @@ var PHP_VERSION_STRING = "7.2.0";
 /* Get version numbers and DEFINE as a string */
 function get_version_numbers()
 {
-	var cin = file_get_contents("configure.in");
+	var cin = file_get_contents("configure.ac");
 	
 	if (cin.match(new RegExp("PHP_MAJOR_VERSION=(\\d+)"))) {
 		PHP_VERSION = RegExp.$1;

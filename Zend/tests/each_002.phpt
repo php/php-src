@@ -16,6 +16,7 @@ var_dump(each($a));
 
 ?>
 --EXPECTF--
+Deprecated: The each() function is deprecated. This message will be suppressed on further calls in %s on line %d
 bool(false)
 bool(false)
 array(4) {

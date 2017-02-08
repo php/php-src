@@ -185,6 +185,8 @@ void init_executor(void) /* {{{ */
 	EG(ht_iterators) = EG(ht_iterators_slots);
 	memset(EG(ht_iterators), 0, sizeof(EG(ht_iterators_slots)));
 
+	EG(each_deprecation_thrown) = 0;
+
 	EG(active) = 1;
 }
 /* }}} */
@@ -346,6 +348,10 @@ void shutdown_executor(void) /* {{{ */
 	} zend_end_try();
 
 	zend_try {
+		clean_non_persistent_constants();
+    } zend_end_try();
+
+	zend_try {
 		zend_close_rsrc_list(&EG(regular_list));
 	} zend_end_try();
 
@@ -374,10 +380,6 @@ void shutdown_executor(void) /* {{{ */
 			FREE_HASHTABLE(*EG(symtable_cache_ptr));
 			EG(symtable_cache_ptr)--;
 		}
-	} zend_end_try();
-
-	zend_try {
-		clean_non_persistent_constants();
 	} zend_end_try();
 
 	zend_try {

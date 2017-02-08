@@ -676,7 +676,7 @@ static int php_var_unserialize_internal(UNSERIALIZE_PARAMETER)
 yy2:
 	++YYCURSOR;
 yy3:
-#line 999 "ext/standard/var_unserializer.re"
+#line 1005 "ext/standard/var_unserializer.re"
 	{ return 0; }
 #line 682 "ext/standard/var_unserializer.c"
 yy4:
@@ -725,7 +725,7 @@ yy14:
 	goto yy3;
 yy15:
 	++YYCURSOR;
-#line 993 "ext/standard/var_unserializer.re"
+#line 999 "ext/standard/var_unserializer.re"
 	{
 	/* this is the case where we have less data than planned */
 	php_error_docref(NULL, E_NOTICE, "Unexpected end of serialized data");
@@ -1158,7 +1158,7 @@ yy81:
 	goto yy18;
 yy82:
 	++YYCURSOR;
-#line 841 "ext/standard/var_unserializer.re"
+#line 847 "ext/standard/var_unserializer.re"
 	{
 	size_t len, len2, len3, maxlen;
 	zend_long elements;
@@ -1368,13 +1368,19 @@ yy86:
 		zend_hash_real_init(Z_ARRVAL_P(rval), 0);
 	}
 
+	/* The array may contain references to itself, in which case we'll be modifying an
+	 * rc>1 array. This is okay, since the array is, ostensibly, only visible to
+	 * unserialize (in practice unserialization handlers also see it). Ideally we should
+	 * prohibit "r:" references to non-objects, as we only generate them for objects. */
+	HT_ALLOW_COW_VIOLATION(Z_ARRVAL_P(rval));
+
 	if (!process_nested_data(UNSERIALIZE_PASSTHRU, Z_ARRVAL_P(rval), elements, 0)) {
 		return 0;
 	}
 
 	return finish_nested_data(UNSERIALIZE_PASSTHRU);
 }
-#line 1378 "ext/standard/var_unserializer.c"
+#line 1384 "ext/standard/var_unserializer.c"
 yy88:
 	yych = *++YYCURSOR;
 	if (yych <= ',') {
@@ -1399,7 +1405,7 @@ yy91:
 	goto yy18;
 yy92:
 	++YYCURSOR;
-#line 830 "ext/standard/var_unserializer.re"
+#line 836 "ext/standard/var_unserializer.re"
 	{
 	long elements;
     if (!var_hash) return 0;
@@ -1410,7 +1416,7 @@ yy92:
 	}
 	return object_common2(UNSERIALIZE_PASSTHRU, elements);
 }
-#line 1414 "ext/standard/var_unserializer.c"
+#line 1420 "ext/standard/var_unserializer.c"
 yy94:
 	++YYCURSOR;
 #line 740 "ext/standard/var_unserializer.re"
@@ -1445,7 +1451,7 @@ yy94:
 	ZVAL_STRINGL(rval, str, len);
 	return 1;
 }
-#line 1449 "ext/standard/var_unserializer.c"
+#line 1455 "ext/standard/var_unserializer.c"
 yy96:
 	yych = *++YYCURSOR;
 	if (yych <= '/') goto yy18;
@@ -1469,9 +1475,9 @@ yy97:
 
 	return 1;
 }
-#line 1473 "ext/standard/var_unserializer.c"
+#line 1479 "ext/standard/var_unserializer.c"
 }
-#line 1001 "ext/standard/var_unserializer.re"
+#line 1007 "ext/standard/var_unserializer.re"
 
 
 	return 0;

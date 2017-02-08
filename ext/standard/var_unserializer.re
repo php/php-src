@@ -820,6 +820,12 @@ use_double:
 		zend_hash_real_init(Z_ARRVAL_P(rval), 0);
 	}
 
+	/* The array may contain references to itself, in which case we'll be modifying an
+	 * rc>1 array. This is okay, since the array is, ostensibly, only visible to
+	 * unserialize (in practice unserialization handlers also see it). Ideally we should
+	 * prohibit "r:" references to non-objects, as we only generate them for objects. */
+	HT_ALLOW_COW_VIOLATION(Z_ARRVAL_P(rval));
+
 	if (!process_nested_data(UNSERIALIZE_PASSTHRU, Z_ARRVAL_P(rval), elements, 0)) {
 		return 0;
 	}

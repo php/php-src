@@ -1318,9 +1318,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 			} else {
 				zval_ptr_dtor(&retval);
 			}
-			if (fci.params) {
-				efree(fci.params);
-			}
+			zend_fcall_info_args_clear(&fci, 1);
 		} else if (ctor_params) {
 			zend_throw_exception_ex(zend_ce_exception, 0, "Class %s does not have a constructor hence you cannot use ctor_params", ZSTR_VAL(ce->name));
 		}
