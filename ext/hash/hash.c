@@ -735,12 +735,13 @@ PHP_FUNCTION(hash_pbkdf2)
 
 /* {{{ proto bool hash_equals(string known_string, string user_string)
    Compares two strings using the same time whether they're equal or not.
-   A difference in length will leak */
+   Even with the implemented mitigation, a difference in length will leak.
+   Inspired by CPython's algorithm: https://github.com/python/cpython/blob/c7688b44387d116522ff53c0927169db45969f0e/Modules/_operator.c#L175 */
 PHP_FUNCTION(hash_equals)
 {
 	zval *known_zval, *user_zval;
-	char *known_str, *user_str;
-	int result = 0, j;
+	volatile const char *known_str, *user_str;
+	volatile int known_len, user_len, result, j;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &known_zval, &user_zval) == FAILURE) {
 		return;
@@ -757,16 +758,24 @@ PHP_FUNCTION(hash_equals)
 		RETURN_FALSE;
 	}
 
-	if (Z_STRLEN_P(known_zval) != Z_STRLEN_P(user_zval)) {
-		RETURN_FALSE;
-	}
+	known_len = Z_STRLEN_P(known_zval);
+	user_len = Z_STRLEN_P(user_zval);
 
-	known_str = Z_STRVAL_P(known_zval);
 	user_str = Z_STRVAL_P(user_zval);
 
-	/* This is security sensitive code. Do not optimize this for speed. */
-	for (j = 0; j < Z_STRLEN_P(known_zval); j++) {
-		result |= known_str[j] ^ user_str[j];
+	/* This is security sensitive code. Do not optimize this for speed nor use else. */
+	if (known_len == user_len) {
+		known_str = *((volatile const char **) &Z_STRVAL_P(known_zval));
+		result = 0;
+	}
+
+	if (known_len != user_len) {
+		known_str = Z_STRVAL_P(user_zval);
+		result = 1;
+	}
+
+	for (j = 0; j < user_len; j++) {
+		result |= *known_str++ ^ *user_str++;
 	}
 
 	RETURN_BOOL(0 == result);
