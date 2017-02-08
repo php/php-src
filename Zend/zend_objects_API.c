@@ -26,13 +26,15 @@
 #include "zend_API.h"
 #include "zend_objects_API.h"
 
+ZEND_TLS zend_objects_store_no_reuse; /* Would make more sense to make it a member of zend_objects_store, defining as a global to not break alignments */
+
 ZEND_API void zend_objects_store_init(zend_objects_store *objects, uint32_t init_size)
 {
 	objects->object_buckets = (zend_object **) emalloc(init_size * sizeof(zend_object*));
 	objects->top = 1; /* Skip 0 so that handles are true */
 	objects->size = init_size;
 	objects->free_list_head = -1;
-	objects->no_reuse = 0;
+	zend_objects_store_no_reuse = 0;
 	memset(&objects->object_buckets[0], 0, sizeof(zend_object*));
 }
 
@@ -44,7 +46,7 @@ ZEND_API void zend_objects_store_destroy(zend_objects_store *objects)
 
 ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects)
 {
-	objects->no_reuse = 1; /* new objects spawned by dtors will never reuse unused slots, so their own dtors will be called further down the loop */
+	zend_objects_store_no_reuse = 1; /* new objects spawned by dtors will never reuse unused slots, so their own dtors will be called further down the loop */
 	if (objects->top > 1) {
 		uint32_t i;
 		for (i = 1; i < objects->top; i++) {
@@ -113,7 +115,7 @@ ZEND_API void zend_objects_store_put(zend_object *object)
 {
 	int handle;
 
-	if (!EG(objects_store).no_reuse && EG(objects_store).free_list_head != -1) {
+	if (!zend_objects_store_no_reuse && EG(objects_store).free_list_head != -1) {
 		handle = EG(objects_store).free_list_head;
 		EG(objects_store).free_list_head = GET_OBJ_BUCKET_NUMBER(EG(objects_store).object_buckets[handle]);
 	} else {
