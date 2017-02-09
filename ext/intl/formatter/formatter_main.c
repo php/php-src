@@ -116,9 +116,9 @@ PHP_METHOD( NumberFormatter, __construct )
 PHP_METHOD( NumberFormatter, __wakeup )
 {
 		const char* locale = intl_locale_get_default();
-		size_t      locale_len = 0, pattern_len = 0;
+		size_t      pattern_len = 0;
     	char*       pattern = NULL;
-    	zend_long   style;
+    	zend_long   style = 0;
     	UChar*      spattern     = NULL;
     	int32_t     spattern_len = 0;
 		zval        rv;
@@ -132,7 +132,6 @@ PHP_METHOD( NumberFormatter, __wakeup )
 			if (z_locale && Z_TYPE_P(z_locale) == IS_STRING) {
 				str = zval_get_string(z_locale);
 				locale = ZSTR_VAL(str);
-				locale_len = ZSTR_LEN(str);
 				zend_string_release(str);
             }
 		}
@@ -158,10 +157,6 @@ PHP_METHOD( NumberFormatter, __wakeup )
 		/* Convert pattern (if specified) to UTF-16. */
         if(pattern && pattern_len) {
             intl_convert_utf8_to_utf16(&spattern, &spattern_len, pattern, pattern_len, &INTL_DATA_ERROR_CODE(nfo));
-        }
-
-        if(locale_len == 0) {
-            locale = intl_locale_get_default();
         }
 
 		/* Create an ICU number formatter. */
