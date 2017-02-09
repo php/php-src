@@ -1798,6 +1798,8 @@ void php_request_shutdown_for_hook(void *dummy)
 void php_request_shutdown(void *dummy)
 {
 	zend_bool report_memleaks;
+	
+	EG(flags) |= EG_FLAGS_IN_SHUTDOWN;
 
 	report_memleaks = PG(report_memleaks);
 
