@@ -446,6 +446,8 @@ int fpm_unix_init_main() /* {{{ */
 	struct fpm_worker_pool_s *wp;
 	int is_root = !geteuid();
 
+	zlog_set_level(fpm_globals.log_level);
+
 	if (fpm_global_config.rlimit_files) {
 		struct rlimit r;
 
