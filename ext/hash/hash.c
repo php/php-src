@@ -860,7 +860,7 @@ PHP_FUNCTION(hash_equals)
 		result |= known_str[j] ^ user_str[j];
 	}
 
-	RETURN_BOOL(1 & ((result - 1) >> 8));
+	RETURN_BOOL(1 & ((result - 1) >> CHAR_BIT);
 }
 /* }}} */
 
