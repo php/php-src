@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug #61471 (Incomplete POST does not timeout but is passed to PHP).
     (Zheng Shao)
 
+- FPM:
+  . Fixed bug #69860 (php-fpm process accounting is broken with keepalive).
+    (Denis Yeldandi)
+
 - GD:
   . Fixed bug #74031 (ReflectionFunction for imagepng is missing last two
     parameters). (finwe)
