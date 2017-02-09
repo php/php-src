@@ -159,6 +159,7 @@ ZEND_END_ARG_INFO()
  */
 static zend_function_entry NumberFormatter_class_functions[] = {
 	PHP_ME( NumberFormatter, __construct, arginfo_numberformatter___construct, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR )
+	PHP_ME( NumberFormatter, __wakeup, NULL, ZEND_ACC_PUBLIC )
 	ZEND_FENTRY( create, ZEND_FN( numfmt_create ), arginfo_numberformatter___construct, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
 	PHP_NAMED_FE( format, ZEND_FN( numfmt_format ), arginfo_numberformatter_format )
 	PHP_NAMED_FE( parse, ZEND_FN( numfmt_parse ), number_parse_arginfo )
@@ -198,12 +199,15 @@ void formatter_register_class( void )
 	NumberFormatter_handlers.dtor_obj = NumberFormatter_object_dtor;
 	NumberFormatter_handlers.free_obj = NumberFormatter_object_free;
 
-	/* Declare 'NumberFormatter' class properties. */
 	if( !NumberFormatter_ce_ptr )
 	{
 		zend_error(E_ERROR, "Failed to register NumberFormatter class");
 		return;
 	}
+	/* Declare 'NumberFormatter' class properties. */
+	zend_declare_property_string(NumberFormatter_ce_ptr, "locale", sizeof( "locale" ) - 1, "", ZEND_ACC_PRIVATE );
+	zend_declare_property_long(NumberFormatter_ce_ptr, "style", sizeof( "style" ) - 1, 0, ZEND_ACC_PRIVATE );
+	zend_declare_property_string(NumberFormatter_ce_ptr, "pattern", sizeof( "pattern" ) - 1, "", ZEND_ACC_PRIVATE );
 }
 /* }}} */
 
