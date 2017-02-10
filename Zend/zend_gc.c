@@ -37,9 +37,9 @@
 #define GC_NUM_ADDITIONAL_ENTRIES \
 	((4096 - ZEND_MM_OVERHEAD - sizeof(void*) * 2) / sizeof(gc_root_buffer))
 
-typedef struct _gc_addtional_bufer gc_additional_buffer;
+typedef struct _gc_additional_bufer gc_additional_buffer;
 
-struct _gc_addtional_bufer {
+struct _gc_additional_bufer {
 	uint32_t              used;
 	gc_additional_buffer *next;
 	gc_root_buffer        buf[GC_NUM_ADDITIONAL_ENTRIES];
