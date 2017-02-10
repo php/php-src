@@ -1431,8 +1431,6 @@ int fcgi_accept_request(fcgi_request *req)
 					struct pollfd fds;
 					int ret;
 
-					req->hook.on_read();
-
 					fds.fd = req->fd;
 					fds.events = POLLIN;
 					fds.revents = 0;
@@ -1445,8 +1443,6 @@ int fcgi_accept_request(fcgi_request *req)
 					}
 					fcgi_close(req, 1, 0);
 #else
-					req->hook.on_read();
-
 					if (req->fd < FD_SETSIZE) {
 						struct timeval tv = {5,0};
 						fd_set set;
@@ -1473,8 +1469,8 @@ int fcgi_accept_request(fcgi_request *req)
 		} else if (in_shutdown) {
 			return -1;
 		}
+		req->hook.on_read();
 		if (fcgi_read_request(req)) {
-			req->hook.on_read();
 #ifdef _WIN32
 			if (is_impersonate && !req->tcp) {
 				pipe = (HANDLE)_get_osfhandle(req->fd);
