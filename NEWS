@@ -17,6 +17,10 @@ PHP                                                                        NEWS
   . Fixed bug #73837 ("new DateTime()" sometimes returns 1 second ago value).
     (Derick)
 
+- FPM:
+  . Fixed bug #69860 (php-fpm process accounting is broken with keepalive).
+    (Denis Yeldandi)
+
 - GD:
   . Fixed bug #74031 (ReflectionFunction for imagepng is missing last two
     parameters). (finwe)
