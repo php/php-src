@@ -409,8 +409,11 @@ PHP_FUNCTION(is_callable)
 	if (ZEND_NUM_ARGS() > 2) {
 		retval = zend_is_callable_ex(var, NULL, check_flags, &name, NULL, &error);
 		zval_dtor(callable_name);
-		//??? is it necessary to be consistent with old PHP ("\0" support)
-		if (UNEXPECTED(ZSTR_LEN(name) != strlen(ZSTR_VAL(name)))) {
+		if (retval && check_flags == 0) {
+			// `var` is callable and actually exists. Return `name` as-is (including
+			// any null-chars) so that `call_user_func($callable_name)` works.
+			ZVAL_STR(callable_name, name);
+		} else if (UNEXPECTED(ZSTR_LEN(name) != strlen(ZSTR_VAL(name)))) {
 			ZVAL_STRINGL(callable_name, ZSTR_VAL(name), strlen(ZSTR_VAL(name)));
 			zend_string_release(name);
 		} else {
