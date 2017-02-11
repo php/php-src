@@ -36,6 +36,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #74005 (mail.add_x_header causes RFC-breaking lone line feed).
     (Anatol)
+  . Fixed bug #73118 (is_callable callable name reports misleading value for
+    anonymous classes). (Adam Saponara)
 
 
 16 Feb 2017 PHP 7.0.16
