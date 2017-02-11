@@ -156,7 +156,8 @@ PHPAPI unsigned char *php_base64_decode_ex(const unsigned char *str, int length,
 	result = (unsigned char *)safe_emalloc(length, 1, 1);
 
 	/* run through the whole string, converting as we go */
-	while ((ch = *current++) != '\0' && length-- > 0) {
+	while (length-- > 0) {
+		ch = *current++;
 		if (ch == base64_pad) {
 			if (*current != '=' && ((i % 4) == 1 || (strict && length > 0))) {
 				if ((i % 4) != 1) {
