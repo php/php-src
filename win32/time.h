@@ -41,6 +41,8 @@ struct timespec
 #define ITIMER_VIRT    1		/*generates sigvtalrm */
 #define ITIMER_PROF    2		/*generates sigprof */
 
+typedef long suseconds_t;
+
 /* Prototype stuff ********************************************************** */
 PHPAPI extern int gettimeofday(struct timeval *time_Info, struct timezone *timezone_Info);
 
