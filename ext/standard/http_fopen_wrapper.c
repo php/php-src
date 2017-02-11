@@ -758,8 +758,11 @@ finish:
 
 	while (!body && !php_stream_eof(stream)) {
 		size_t http_header_line_length;
+		
 		if (php_stream_get_line(stream, http_header_line, HTTP_HEADER_BLOCK_SIZE, &http_header_line_length) && *http_header_line != '\n' && *http_header_line != '\r') {
 			char *e = http_header_line + http_header_line_length - 1;
+			char* http_header_value;
+			size_t http_header_value_length;
 			if (*e != '\n') {
 				do { /* partial header */
 					if (php_stream_get_line(stream, http_header_line, HTTP_HEADER_BLOCK_SIZE, &http_header_line_length) == NULL) {
@@ -776,25 +779,54 @@ finish:
 			http_header_line_length = e - http_header_line + 1;
 			http_header_line[http_header_line_length] = '\0';
 
-			if (!strncasecmp(http_header_line, "Location: ", 10)) {
+			/* The primary definition of an HTTP header in RFC 7230 states:
+			> Each header field consists of a case-insensitive field name followed
+			> by a colon (":"), optional leading whitespace, the field value, and
+			> optional trailing whitespace. */
+			http_header_value = http_header_line + 1;
+			while ( *http_header_value != ':' && http_header_value < http_header_line + http_header_line_length ) {
+				http_header_value++;
+			}
+			http_header_value++;
+			/* If there is no : in the line, don't leave http_header_value as something bogus */
+			if ( http_header_value == http_header_line + http_header_line_length ) {
+				http_header_value_length = 0;
+			}
+			else {
+				while ( (*http_header_value == ' ' || *http_header_value == '\t') && http_header_value < http_header_line + http_header_line_length ) {
+					http_header_value++;
+				}
+				http_header_value_length = http_header_line - http_header_value + http_header_line_length;
+				e = http_header_value + http_header_value_length - 1;
+				while ( *e == ' ' || *e == '\t' ) {
+					e--;
+					http_header_value_length--;
+				}
+				http_header_value[http_header_value_length] = '\0';
+			}
+
+			if (!strncasecmp(http_header_line, "Location:", 9)) {
 				if (context && php_stream_context_get_option(context, "http", "follow_location", &tmpzval) == SUCCESS) {
 					SEPARATE_ZVAL(tmpzval);
 					convert_to_long_ex(tmpzval);
 					follow_location = Z_LVAL_PP(tmpzval);
-				} else if (!(response_code >= 300 && response_code < 304 || 307 == response_code || 308 == response_code)) {
+				} else if (!((response_code >= 300 && response_code < 304) || 307 == response_code || 308 == response_code)) {
 					/* we shouldn't redirect automatically
 					if follow_location isn't set and response_code not in (300, 301, 302, 303 and 307)
 					see http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.3.1
 					RFC 7238 defines 308: http://tools.ietf.org/html/rfc7238 */
 					follow_location = 0;
 				}
-				strlcpy(location, http_header_line + 10, sizeof(location));
-			} else if (!strncasecmp(http_header_line, "Content-Type: ", 14)) {
-				php_stream_notify_info(context, PHP_STREAM_NOTIFY_MIME_TYPE_IS, http_header_line + 14, 0);
-			} else if (!strncasecmp(http_header_line, "Content-Length: ", 16)) {
-				file_size = atoi(http_header_line + 16);
+				strlcpy(location, http_header_value, sizeof(location));
+			} else if (!strncasecmp(http_header_line, "Content-Type:", 13)) {
+				php_stream_notify_info(context, PHP_STREAM_NOTIFY_MIME_TYPE_IS, http_header_value, 0);
+			} else if (!strncasecmp(http_header_line, "Content-Length:", 15)) {
+				file_size = atoi(http_header_value);
 				php_stream_notify_file_size(context, file_size, http_header_line, 0);
-			} else if (!strncasecmp(http_header_line, "Transfer-Encoding: chunked", sizeof("Transfer-Encoding: chunked"))) {
+			} else if (
+				!strncasecmp(http_header_line, "Transfer-Encoding:", 18)
+				&& !strncasecmp(http_header_value, "Chunked", 7)
+			) {
 
 				/* create filter to decode response body */
 				if (!(options & STREAM_ONLY_GET_HEADERS)) {
