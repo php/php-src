@@ -21,10 +21,10 @@ function check_iscallable( $functions ) {
     var_dump( is_callable($func) );  //given only $var argument
     var_dump( is_callable($func, TRUE) );  //given $var and $syntax argument
     var_dump( is_callable($func, TRUE, $callable_name) );
-    echo $callable_name, "\n";
+    echo json_encode($callable_name) . "\n";
     var_dump( is_callable($func, FALSE) );  //given $var and $syntax argument
     var_dump( is_callable($func, FALSE, $callable_name) );
-    echo $callable_name, "\n";
+    echo json_encode($callable_name) . "\n";
     $counter++;
   }
 }
@@ -65,144 +65,144 @@ check_iscallable($undef_functions);
 bool(false)
 bool(true)
 bool(true)
-
+""
 bool(false)
 bool(false)
-
+""
 -- Iteration  2 --
 bool(false)
 bool(true)
 bool(true)
-
+""
 bool(false)
 bool(false)
-
+""
 -- Iteration  3 --
 bool(false)
 bool(true)
 bool(true)
- 
+" "
 bool(false)
 bool(false)
- 
+" "
 -- Iteration  4 --
 bool(false)
 bool(true)
 bool(true)
- 
+" "
 bool(false)
 bool(false)
- 
+" "
 -- Iteration  5 --
 bool(false)
 bool(true)
 bool(true)
-12356
+"12356"
 bool(false)
 bool(false)
-12356
+"12356"
 -- Iteration  6 --
 bool(false)
 bool(true)
 bool(true)
-
+"\u0000"
 bool(false)
 bool(false)
-
+"\u0000"
 -- Iteration  7 --
 bool(false)
 bool(true)
 bool(true)
-\0
+"\\0"
 bool(false)
 bool(false)
-\0
+"\\0"
 -- Iteration  8 --
 bool(false)
 bool(true)
 bool(true)
-hello world
+"hello world"
 bool(false)
 bool(false)
-hello world
+"hello world"
 -- Iteration  9 --
 bool(false)
 bool(true)
 bool(true)
-hello world
+"hello world"
 bool(false)
 bool(false)
-hello world
+"hello world"
 -- Iteration  10 --
 bool(false)
 bool(true)
 bool(true)
-welcome
+"welcome\u0000"
 bool(false)
 bool(false)
-welcome
+"welcome\u0000"
 -- Iteration  11 --
 bool(false)
 bool(true)
 bool(true)
-welcome\0
+"welcome\\0"
 bool(false)
 bool(false)
-welcome\0
+"welcome\\0"
 -- Iteration  12 --
 bool(false)
 bool(true)
 bool(true)
-==%%%***$$$@@@!!
+"==%%%***$$$@@@!!"
 bool(false)
 bool(false)
-==%%%***$$$@@@!!
+"==%%%***$$$@@@!!"
 -- Iteration  13 --
 bool(false)
 bool(true)
 bool(true)
-false
+"false"
 bool(false)
 bool(false)
-false
+"false"
 -- Iteration  14 --
 bool(false)
 bool(true)
 bool(true)
-8
+"8"
 bool(false)
 bool(false)
-8
+"8"
 -- Iteration  15 --
 bool(false)
 bool(true)
 bool(true)
-\t
+"\\t"
 bool(false)
 bool(false)
-\t
+"\\t"
 -- Iteration  16 --
 bool(false)
 bool(true)
 bool(true)
-\007
+"\\007"
 bool(false)
 bool(false)
-\007
+"\\007"
 -- Iteration  17 --
 bool(false)
 bool(true)
 bool(true)
-123
+"123"
 bool(false)
 bool(false)
-123
+"123"
 -- Iteration  18 --
 bool(false)
 bool(true)
 bool(true)
-echo()
+"echo()"
 bool(false)
 bool(false)
-echo()
+"echo()"
 ===DONE===
