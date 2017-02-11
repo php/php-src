@@ -2095,10 +2095,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 #endif
 
 #ifdef PHP_WIN32
-	if (!php_win32_init_random_bytes()) {
-		php_printf("\ncrypto service provider failed\n");
-		return FAILURE;
-	}
+	php_win32_init_rng_lock();
 #endif
 
 	module_shutdown = 0;
@@ -2412,7 +2409,7 @@ void php_module_shutdown(void)
 #endif
 
 #ifdef PHP_WIN32
-	(void)php_win32_shutdown_random_bytes();
+	php_win32_free_rng_lock();
 #endif
 
 	sapi_flush();

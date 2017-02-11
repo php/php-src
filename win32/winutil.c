@@ -51,50 +51,77 @@ int php_win32_check_trailing_space(const char * path, const int path_len) {
 	}
 }
 
-static HCRYPTPROV hCryptProv;
-static BOOL has_crypto_ctx = 0;
+HCRYPTPROV   hCryptProv;
+unsigned int has_crypto_ctx = 0;
 
-#ifdef PHP_EXPORTS
-BOOL php_win32_init_random_bytes(void)
+#ifdef ZTS
+MUTEX_T php_lock_win32_cryptoctx;
+void php_win32_init_rng_lock()
 {
-	int err;
-
-	/* CRYPT_VERIFYCONTEXT > only hashing&co-like use, no need to acces prv keys */
-	has_crypto_ctx = CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_MACHINE_KEYSET|CRYPT_VERIFYCONTEXT);
-	err = GetLastError();
-	if (!has_crypto_ctx) {
-		/* Could mean that the key container does not exist, let try
-		   again by asking for a new one. If it fails here, it surely means that the user running
-		   this process does not have the permission(s) to use this container.
-		 */
-		if (NTE_BAD_KEYSET == err) {
-			has_crypto_ctx = CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_NEWKEYSET | CRYPT_MACHINE_KEYSET | CRYPT_VERIFYCONTEXT);
-		}
-	}
-
-	return has_crypto_ctx;
+	php_lock_win32_cryptoctx = tsrm_mutex_alloc();
 }
 
-BOOL php_win32_shutdown_random_bytes(void)
+void php_win32_free_rng_lock()
 {
-	BOOL ret = TRUE;
-
-	if (has_crypto_ctx) {
-		ret = CryptReleaseContext(hCryptProv, 0);
+	tsrm_mutex_lock(php_lock_win32_cryptoctx);
+	if (has_crypto_ctx == 1) {
+		CryptReleaseContext(hCryptProv, 0);
+		has_crypto_ctx = 0;
 	}
+	tsrm_mutex_unlock(php_lock_win32_cryptoctx);
+	tsrm_mutex_free(php_lock_win32_cryptoctx);
 
-	return ret;
 }
+#else
+#define php_win32_init_rng_lock();
+#define php_win32_free_rng_lock();
 #endif
+
+
 
 PHP_WINUTIL_API int php_win32_get_random_bytes(unsigned char *buf, size_t size) {  /* {{{ */
 
 	BOOL ret;
 
+#ifdef ZTS
+	tsrm_mutex_lock(php_lock_win32_cryptoctx);
+#endif
+
+	if (has_crypto_ctx == 0) {
+		/* CRYPT_VERIFYCONTEXT > only hashing&co-like use, no need to acces prv keys */
+		if (!CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_MACHINE_KEYSET|CRYPT_VERIFYCONTEXT )) {
+			/* Could mean that the key container does not exist, let try
+			   again by asking for a new one. If it fails here, it surely means that the user running
+               this process does not have the permission(s) to use this container.
+             */
+			if (GetLastError() == NTE_BAD_KEYSET) {
+				if (CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_NEWKEYSET | CRYPT_MACHINE_KEYSET | CRYPT_VERIFYCONTEXT )) {
+					has_crypto_ctx = 1;
+				} else {
+					has_crypto_ctx = 0;
+				}
+			}
+		} else {
+			has_crypto_ctx = 1;
+		}
+	}
+
+#ifdef ZTS
+	tsrm_mutex_unlock(php_lock_win32_cryptoctx);
+#endif
+
+	if (has_crypto_ctx == 0) {
+		return FAILURE;
+	}
+
 	/* XXX should go in the loop if size exceeds UINT_MAX */
 	ret = CryptGenRandom(hCryptProv, (DWORD)size, buf);
 
-	return ret ? SUCCESS : FAILURE;
+	if (ret) {
+		return SUCCESS;
+	} else {
+		return FAILURE;
+	}
 }
 /* }}} */
 
