@@ -40,6 +40,9 @@ BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID dummy)
 	switch (reason)
 	{
 		case DLL_PROCESS_ATTACH:
+			WORD wVersionRequested = MAKEWORD(2, 0);
+			WSADATA wsaData;
+
 			/*
 			 * We do not need to check the return value of php_win32_init_gettimeofday()
 			 * because the symbol bare minimum symbol we need is always available on our 
@@ -59,12 +62,18 @@ BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID dummy)
 				fprintf(stderr, "ioutil initialization failed");
 				return ret;
 			}
+
+			ret = ret && (0 == WSAStartup(wVersionRequested, &wsaData));
+			if (!ret) {
+				fprintf(stderr, "winsock initialization failed %d", WSAGetLastError());
+				return ret;
+			}
 			break;
-#if 0 /* prepared */
 		case DLL_PROCESS_DETACH:
-			/* pass */
+			WSACleanup();
 			break;
 
+#if 0 /* prepared */
 		case DLL_THREAD_ATTACH:
 			/* pass */
 			break;

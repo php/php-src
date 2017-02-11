@@ -2057,10 +2057,6 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	zend_module_entry *module;
 
 #ifdef PHP_WIN32
-	WORD wVersionRequested = MAKEWORD(2, 0);
-	WSADATA wsaData;
-#endif
-#ifdef PHP_WIN32
 	php_os = "WINNT";
 
 	old_invalid_parameter_handler =
@@ -2144,14 +2140,6 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 #if HAVE_TZSET
 	tzset();
-#endif
-
-#ifdef PHP_WIN32
-	/* start up winsock services */
-	if (WSAStartup(wVersionRequested, &wsaData) != 0) {
-		php_printf("\nwinsock.dll unusable. %d\n", WSAGetLastError());
-		return FAILURE;
-	}
 #endif
 
 	le_index_ptr = zend_register_list_destructors_ex(NULL, NULL, "index pointer", 0);
@@ -2415,11 +2403,6 @@ void php_module_shutdown(void)
 	sapi_flush();
 
 	zend_shutdown();
-
-#ifdef PHP_WIN32
-	/*close winsock */
-	WSACleanup();
-#endif
 
 	/* Destroys filter & transport registries too */
 	php_shutdown_stream_wrappers(module_number);
