@@ -32,6 +32,7 @@
 #define PREG_PATTERN_ORDER			1
 #define PREG_SET_ORDER				2
 #define PREG_OFFSET_CAPTURE			(1<<8)
+#define PREG_NO_UTF8_CHECK			PCRE_NO_UTF8_CHECK
 
 #define	PREG_SPLIT_NO_EMPTY			(1<<0)
 #define PREG_SPLIT_DELIM_CAPTURE	(1<<1)
@@ -142,6 +143,7 @@ static PHP_MINIT_FUNCTION(pcre)
 {
 	REGISTER_INI_ENTRIES();
 
+	REGISTER_LONG_CONSTANT("PREG_NO_UTF8_CHECK", PREG_NO_UTF8_CHECK, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_PATTERN_ORDER", PREG_PATTERN_ORDER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_SET_ORDER", PREG_SET_ORDER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_OFFSET_CAPTURE", PREG_OFFSET_CAPTURE, CONST_CS | CONST_PERSISTENT);
@@ -619,6 +621,9 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 
 	if (use_flags) {
 		offset_capture = flags & PREG_OFFSET_CAPTURE;
+		if (flags & PREG_NO_UTF8_CHECK) {
+			exoptions |= PCRE_NO_UTF8_CHECK;
+		}
 
 		/*
 		 * subpats_order is pre-set to pattern mode so we change it only if
@@ -1585,6 +1590,9 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 	no_empty = flags & PREG_SPLIT_NO_EMPTY;
 	delim_capture = flags & PREG_SPLIT_DELIM_CAPTURE;
 	offset_capture = flags & PREG_SPLIT_OFFSET_CAPTURE;
+	if (flags & PREG_NO_UTF8_CHECK) {
+		exoptions |= PCRE_NO_UTF8_CHECK;
+	}
 
 	if (limit_val == 0) {
 		limit_val = -1;
