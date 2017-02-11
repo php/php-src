@@ -2549,15 +2549,17 @@ static void php_date_set_time_fraction(timelib_time *time, int microseconds)
 	time->f = microseconds / 1000000;
 }
 
-static void php_date_set_current_time_fraction(timelib_time *time)
+static void php_date_get_current_time_with_fraction(time_t *sec, suseconds_t *usec)
 {
 #if HAVE_GETTIMEOFDAY
 	struct timeval tp = {0}; /* For setting microseconds */
 
 	gettimeofday(&tp, NULL);
-	timelib_set_fraction_from_timeval(time, tp);
+	*sec = tp.tv_sec;
+	*usec = tp.tv_usec;
 #else
-	time->f = 0;
+	*sec = time(NULL);
+	*usec = 0;
 #endif
 }
 
@@ -2569,6 +2571,8 @@ PHPAPI int php_date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, 
 	int type = TIMELIB_ZONETYPE_ID, new_dst = 0;
 	char *new_abbr = NULL;
 	timelib_sll new_offset = 0;
+	time_t sec;
+	suseconds_t usec;
 
 	if (dateobj->time) {
 		timelib_time_dtor(dateobj->time);
@@ -2633,8 +2637,9 @@ PHPAPI int php_date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, 
 			now->tz_abbr = new_abbr;
 			break;
 	}
-	timelib_unixtime2local(now, (timelib_sll) time(NULL));
-	php_date_set_current_time_fraction(now);
+	php_date_get_current_time_with_fraction(&sec, &usec);
+	timelib_unixtime2local(now, (timelib_sll) sec);
+	php_date_set_time_fraction(now, usec);
 	timelib_fill_holes(dateobj->time, now, TIMELIB_NO_CLONE);
 	timelib_update_ts(dateobj->time, tzi);
 	timelib_update_from_sse(dateobj->time);
