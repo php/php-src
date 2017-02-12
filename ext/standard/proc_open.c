@@ -854,6 +854,12 @@ PHP_FUNCTION(proc_open)
 		}
 #endif
 
+#if PHP_CAN_DO_PTS
+		if (dev_ptmx >= 0) {
+			close(dev_ptmx);
+			close(slave_pty);
+		}
+#endif
 		/* close those descriptors that we just opened for the parent stuff,
 		 * dup new descriptors into required descriptors and close the original
 		 * cruft */
@@ -868,13 +874,6 @@ PHP_FUNCTION(proc_open)
 			if (descriptors[i].childend != descriptors[i].index)
 				close(descriptors[i].childend);
 		}
-
-#if PHP_CAN_DO_PTS
-		if (dev_ptmx >= 0) {
-			close(dev_ptmx);
-			close(slave_pty);
-		}
-#endif
 
 		if (cwd) {
 			php_ignore_value(chdir(cwd));
