@@ -1998,14 +1998,12 @@ fastcgi_request_done:
 			}
 			request_body_fd = -2;
 
-			if (EG(exit_status) == 255) {
-				if (CGIG(error_header) && *CGIG(error_header)) {
-					sapi_header_line ctr = {0};
+			if (EG(exit_status) == 255 && CGIG(error_header) && *CGIG(error_header) && !SG(headers_sent)) {
+				sapi_header_line ctr = {0};
 
-					ctr.line = CGIG(error_header);
-					ctr.line_len = strlen(CGIG(error_header));
-					sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
-				}
+				ctr.line = CGIG(error_header);
+				ctr.line_len = strlen(CGIG(error_header));
+				sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
 			}
 
 			fpm_request_end(TSRMLS_C);
