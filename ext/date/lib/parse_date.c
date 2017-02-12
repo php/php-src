@@ -23399,9 +23399,11 @@ timelib_time *timelib_parse_from_format(char *format, char *string, size_t len, 
 				break;
 			case 'a': /* am/pm/a.m./p.m. */
 			case 'A': /* AM/PM/A.M./P.M. */
+				tmp = timelib_meridian_with_check((char **) &ptr, s->time->h);
+
 				if (s->time->h == TIMELIB_UNSET) {
 					add_pbf_error(s, "Meridian can only come after an hour has been found", string, begin);
-				} else if ((tmp = timelib_meridian_with_check((char **) &ptr, s->time->h)) == TIMELIB_UNSET) {
+				} else if (tmp == TIMELIB_UNSET) {
 					add_pbf_error(s, "A meridian could not be found", string, begin);
 				} else {
 					s->time->h += tmp;
