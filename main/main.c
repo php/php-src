@@ -2094,10 +2094,6 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	(void)ts_resource(0);
 #endif
 
-#ifdef PHP_WIN32
-	php_win32_init_rng_lock();
-#endif
-
 	module_shutdown = 0;
 	module_startup = 1;
 	sapi_initialize_empty_request();
