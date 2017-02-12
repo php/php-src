@@ -2002,6 +2002,91 @@ static void increment_string(zval *str) /* {{{ */
 }
 /* }}} */
 
+static void decrement_string(zval *str) /* {{{ */
+{
+	int carry=0;
+	int pos=Z_STRLEN_P(str)-1;
+	char *s=Z_STRVAL_P(str);
+	char *t;
+	int last=0; /* Shut up the compiler warning */
+	int ch;
+
+	if (Z_STRLEN_P(str) == 0) {
+		str_efree(Z_STRVAL_P(str));
+		Z_STRVAL_P(str) = estrndup("-1", sizeof("-1")-1);
+		Z_STRLEN_P(str) = 2;
+		return;
+	}
+
+	if (IS_INTERNED(s)) {
+		Z_STRVAL_P(str) = s = estrndup(s, Z_STRLEN_P(str));
+	}
+
+	while (pos >= 0) {
+		ch = s[pos];
+		if (ch >= 'a' && ch <= 'z') {
+			if (ch == 'a') {
+				s[pos] = 'z';
+				carry=1;
+			} else {
+				s[pos]--;
+				carry=0;
+			}
+			last=LOWER_CASE;
+		} else if (ch >= 'A' && ch <= 'Z') {
+			if (ch == 'A') {
+				s[pos] = 'Z';
+				carry=1;
+			} else {
+				s[pos]--;
+				carry=0;
+			}
+			last=UPPER_CASE;
+		} else if (ch >= '0' && ch <= '9') {
+			if (ch == '0') {
+				s[pos] = '9';
+				carry=1;
+			} else {
+				s[pos]--;
+				carry=0;
+			}
+			last = NUMERIC;
+		} else {
+			carry=0;
+			break;
+		}
+		if (carry == 0) {
+			break;
+		}
+		pos--;
+	}
+
+	if (carry) {
+		if (Z_STRLEN_P(str) > 1) {
+			t = (char *) emalloc(Z_STRLEN_P(str)-1+1);
+			memcpy(t, Z_STRVAL_P(str), Z_STRLEN_P(str) - 1);
+			Z_STRLEN_P(str)--;
+			t[Z_STRLEN_P(str)] = '\0';
+			switch (last) {
+				case NUMERIC:
+					t[Z_STRLEN_P(str) - 1] = '9';
+					break;
+				case UPPER_CASE:
+					t[0] = 'Z';
+					break;
+				case LOWER_CASE:
+					t[0] = 'z';
+					break;
+			}
+			str_efree(Z_STRVAL_P(str));
+			Z_STRVAL_P(str) = t;
+		} else {
+			s[0] = '0';
+		}
+	}
+}
+/* }}} */
+
 ZEND_API int increment_function(zval *op1) /* {{{ */
 {
 	switch (Z_TYPE_P(op1)) {
@@ -2040,7 +2125,7 @@ ZEND_API int increment_function(zval *op1) /* {{{ */
 						ZVAL_DOUBLE(op1, dval+1);
 						break;
 					default:
-						/* Perl style string increment */
+						/* Alphanumeric increment ("a"++ === "b") */
 						increment_string(op1);
 						break;
 				}
@@ -2084,12 +2169,7 @@ ZEND_API int decrement_function(zval *op1) /* {{{ */
 		case IS_DOUBLE:
 			Z_DVAL_P(op1) = Z_DVAL_P(op1) - 1;
 			break;
-		case IS_STRING:		/* Like perl we only support string increment */
-			if (Z_STRLEN_P(op1) == 0) { /* consider as 0 */
-				str_efree(Z_STRVAL_P(op1));
-				ZVAL_LONG(op1, -1);
-				break;
-			}
+		case IS_STRING:
 			switch (is_numeric_string(Z_STRVAL_P(op1), Z_STRLEN_P(op1), &lval, &dval, 0)) {
 				case IS_LONG:
 					str_efree(Z_STRVAL_P(op1));
@@ -2103,6 +2183,10 @@ ZEND_API int decrement_function(zval *op1) /* {{{ */
 				case IS_DOUBLE:
 					str_efree(Z_STRVAL_P(op1));
 					ZVAL_DOUBLE(op1, dval - 1);
+					break;
+				default:
+					/* Alphanumeric decrement ("b"-- === "a") */
+					decrement_string(op1);
 					break;
 			}
 			break;

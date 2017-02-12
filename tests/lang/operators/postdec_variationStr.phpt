@@ -14,7 +14,7 @@ foreach ($strVals as $strVal) {
    $strVal--;
    var_dump($strVal);
 }
-   
+
 ?>
 ===DONE===
 --EXPECT--
@@ -29,21 +29,21 @@ float(0.2)
 --- testing: '-7.7' ---
 float(-8.7)
 --- testing: 'abc' ---
-string(3) "abc"
+string(3) "abb"
 --- testing: '123abc' ---
-string(6) "123abc"
+string(6) "123abb"
 --- testing: '123e5' ---
 float(12299999)
 --- testing: '123e5xyz' ---
-string(8) "123e5xyz"
+string(8) "123e5xyy"
 --- testing: ' 123abc' ---
-string(7) " 123abc"
+string(7) " 123abb"
 --- testing: '123 abc' ---
-string(7) "123 abc"
+string(7) "123 abb"
 --- testing: '123abc ' ---
 string(7) "123abc "
 --- testing: '3.4a' ---
-string(4) "3.4a"
+string(4) "3.3z"
 --- testing: 'a5.9' ---
-string(4) "a5.9"
+string(4) "a5.8"
 ===DONE===
