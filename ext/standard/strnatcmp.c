@@ -141,6 +141,10 @@ PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len
 			else if (ap == aend && bp == bend)
 				/* End of the strings. Let caller sort them out. */
 				return 0;
+			else if (ap == aend)
+				return -1;
+			else if (bp == bend)
+				return 1;			
 			else {
 				/* Keep on comparing from the current point. */
 				ca = *ap; cb = *bp;
