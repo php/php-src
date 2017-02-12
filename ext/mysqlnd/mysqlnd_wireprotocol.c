@@ -1466,6 +1466,7 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 	MYSQLND_PACKET_HEADER header;
 	zend_uchar * p = NULL;
 	zend_bool first_iteration = TRUE;
+	size_t prealloc_more_bytes;
 
 	DBG_ENTER("php_mysqlnd_read_row_ex");
 	
@@ -1481,8 +1482,9 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 	  We're allocating an extra byte, as php_mysqlnd_rowp_read_text_protocol_aux
 	  needs to be able to append a terminating \0 for atoi/atof.
 	*/
-	*data_size = 1;
+	prealloc_more_bytes = 1;
 	
+	*data_size = 0;
 	while (1) {
 		if (FAIL == mysqlnd_read_header(pfc, vio, &header, stats, error_info)) {
 			ret = FAIL;
@@ -1493,7 +1495,7 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 
 		if (first_iteration) {
 			first_iteration = FALSE;
-			*buffer = pool->get_chunk(pool, *data_size);
+			*buffer = pool->get_chunk(pool, *data_size + prealloc_more_bytes);
 			if (!*buffer) {
 				ret = FAIL;
 				break;
@@ -1508,7 +1510,7 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 			/*
 			  We have to realloc the buffer.
 			*/
-			if (FAIL == pool->resize_chunk(pool, *buffer, *data_size)) {
+			if (FAIL == pool->resize_chunk(pool, *buffer, *data_size + prealloc_more_bytes)) {
 				SET_OOM_ERROR(error_info);
 				ret = FAIL;
 				break;
@@ -1531,7 +1533,6 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 		pool->free_chunk(pool, *buffer);
 		*buffer = NULL;
 	}
-	(*data_size)--;
 	DBG_RETURN(ret);
 }
 /* }}} */
