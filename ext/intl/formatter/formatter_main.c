@@ -117,23 +117,20 @@ PHP_METHOD( NumberFormatter, __wakeup )
 {
 		const char* locale = intl_locale_get_default();
 		size_t      pattern_len = 0;
-    	char*       pattern = NULL;
-    	zend_long   style = 0;
-    	UChar*      spattern     = NULL;
-    	int32_t     spattern_len = 0;
+		char*       pattern = NULL;
+		zend_long   style = 0;
+		UChar*      spattern     = NULL;
+		int32_t     spattern_len = 0;
 		zval        rv;
 		zval        *z_locale, *z_style, *z_pattern;
-		zend_string *str;
+		zend_string *zstr_locale, *zstr_pattern;
 
 		return_value = getThis();
 
-    	z_locale = zend_read_property(Z_OBJCE_P(return_value), return_value, "locale", sizeof("locale") - 1, 0, &rv);
+		z_locale = zend_read_property(Z_OBJCE_P(return_value), return_value, "locale", sizeof("locale") - 1, 0, &rv);
 		if (z_locale != NULL) {
-			if (z_locale && Z_TYPE_P(z_locale) == IS_STRING) {
-				str = zval_get_string(z_locale);
-				locale = ZSTR_VAL(str);
-				zend_string_release(str);
-            }
+			zstr_locale = zval_get_string(z_locale);
+			locale = ZSTR_VAL(zstr_locale);
 		}
 
 		z_style = zend_read_property(Z_OBJCE_P(return_value), return_value, "style", sizeof("style") - 1, 0, &rv);
@@ -143,10 +140,9 @@ PHP_METHOD( NumberFormatter, __wakeup )
 
 		z_pattern = zend_read_property(Z_OBJCE_P(return_value), return_value, "pattern", sizeof("pattern") - 1, 0, &rv);
 		if (z_pattern != NULL) {
-			str = zval_get_string(z_pattern);
-			pattern = ZSTR_VAL(str);
-			pattern_len = ZSTR_LEN(str);
-			zend_string_release(str);
+			zstr_pattern = zval_get_string(z_pattern);
+			pattern = ZSTR_VAL(zstr_pattern);
+			pattern_len = ZSTR_LEN(zstr_pattern);
 		}
 
 		FORMATTER_METHOD_INIT_VARS;
@@ -155,16 +151,22 @@ PHP_METHOD( NumberFormatter, __wakeup )
 		nfo = Z_INTL_NUMBERFORMATTER_P(object);
 
 		/* Convert pattern (if specified) to UTF-16. */
-        if(pattern && pattern_len) {
-            intl_convert_utf8_to_utf16(&spattern, &spattern_len, pattern, pattern_len, &INTL_DATA_ERROR_CODE(nfo));
-        }
+		if(pattern && pattern_len) {
+			intl_convert_utf8_to_utf16(&spattern, &spattern_len, pattern, pattern_len, &INTL_DATA_ERROR_CODE(nfo));
+		}
 
 		/* Create an ICU number formatter. */
-    	FORMATTER_OBJECT(nfo) = unum_open(style, spattern, spattern_len, locale, NULL, &INTL_DATA_ERROR_CODE(nfo));
+		FORMATTER_OBJECT(nfo) = unum_open(style, spattern, spattern_len, locale, NULL, &INTL_DATA_ERROR_CODE(nfo));
 
-    	if(spattern) {
-            efree(spattern);
-        }
+		if(spattern) {
+			efree(spattern);
+		}
+		if (z_locale != NULL) {
+			zend_string_release(zstr_locale);
+		}
+		if (z_pattern != NULL) {
+			zend_string_release(zstr_pattern);
+		}
 }
 /* }}} */
 
