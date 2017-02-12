@@ -39,6 +39,10 @@ PHP                                                                        NEWS
   . Fixed bug #73118 (is_callable callable name reports misleading value for
     anonymous classes). (Adam Saponara)
 
+- Streams:
+  . Fixed bug #73496 (Invalid memory access in zend_inline_hash_func).
+    (Laruence)
+
 
 16 Feb 2017 PHP 7.0.16
 

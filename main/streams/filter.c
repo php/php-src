@@ -252,10 +252,10 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 	HashTable *filter_hash = (FG(stream_filters) ? FG(stream_filters) : &stream_filters_hash);
 	php_stream_filter_factory *factory = NULL;
 	php_stream_filter *filter = NULL;
-	int n;
+	size_t n;
 	char *period;
 
-	n = (int)strlen(filtername);
+	n = strlen(filtername);
 
 	if (NULL != (factory = zend_hash_str_find_ptr(filter_hash, filtername, n))) {
 		filter = factory->create_filter(filtername, filterparams, persistent);
@@ -263,7 +263,7 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 		/* try a wildcard */
 		char *wildname;
 
-		wildname = emalloc(n+3);
+		wildname = safe_emalloc(1, n, 3);
 		memcpy(wildname, filtername, n+1);
 		period = wildname + (period - filtername);
 		while (period && !filter) {
