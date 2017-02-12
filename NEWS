@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2017, PHP 7.1.3
 
 - Core:
+  . Fixed bug #74084 (Out of bound read - zend_mm_alloc_small). (Laruence)
   . Fixed bug #73807 (Performance problem with processing large post request).
     (Nikita)
   . Fixed bug #73998 (array_key_exists fails on arrays created by
