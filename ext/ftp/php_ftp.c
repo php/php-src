@@ -780,9 +780,10 @@ PHP_FUNCTION(ftp_mlsd)
 	array_init(return_value);
 	for (ptr = llist; *ptr; ptr++) {
 		array_init(&entry);
-		// Skip invalid entry that cannot be parsed.
-		if(ftp_mlsd_parse_line(entry, *ptr) == 0) {
+		if (ftp_mlsd_parse_line(Z_ARRVAL_P(&entry), *ptr) == SUCCESS) {
 			zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &entry);
+		} else {
+			zval_ptr_dtor(&entry);
 		}
 	}
 

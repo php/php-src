@@ -710,46 +710,45 @@ ftp_mlsd(ftpbuf_t *ftp, const char *path, const size_t path_len)
 /* {{{ ftp_mlsd_parse_line
  */
 int
-ftp_mlsd_parse_line(zval entry, const char *input) {
-
-	int mode = FTP_MLSD_MODE_NAME;
-	const char *name = NULL;
-	size_t name_length = 0;
+ftp_mlsd_parse_line(HashTable *ht, const char *input) {
 
 	zval zstr;
+	const char *end = input + strlen(input);
 
-	while (*input != '\0') {
-		// get the length of the next (name or value) chunk.
-		size_t chunklength = strcspn(input, "=;");
-
-		// Filename begins with a space.
-		if(*input == ' ') {
-			// Skip the space in the output.
-			++input;
-			// The chunk is 1 byte shorter
-			--chunklength;
-			ZVAL_STRINGL(&zstr, input, chunklength);
-			zend_hash_str_update(Z_ARRVAL_P(&entry), "name", strlen("name"), &zstr);
-		}
-		else if(mode == FTP_MLSD_MODE_VALUE) {
-			ZVAL_STRINGL(&zstr, input, chunklength);
-			zend_hash_str_update(Z_ARRVAL_P(&entry), name, name_length, &zstr);
-			name = NULL;
-			mode = FTP_MLSD_MODE_NAME;
-			// Skip the separator
-			++input;
-		}
-		else if(mode == FTP_MLSD_MODE_NAME) {
-			name = input;
-			name_length = chunklength;
-			mode = FTP_MLSD_MODE_VALUE;
-			// Skip the separator
-			++input;
-		}
-		// Move the pointer to the end of the chunk used in strcspn().
-		input += chunklength;
+	const char *sp = memchr(input, ' ', end - input);
+	if (!sp) {
+		php_error_docref(NULL, E_WARNING, "Missing pathname in MLSD response");
+		return FAILURE;
 	}
-	return 0;
+
+	/* Extract pathname */
+	ZVAL_STRINGL(&zstr, sp + 1, end - sp - 1);
+	zend_hash_str_update(ht, "name", sizeof("name")-1, &zstr);
+	end = sp;
+
+	while (input < end) {
+		const char *semi, *eq;
+
+		/* Find end of fact */
+		semi = memchr(input, ';', end - input);
+		if (!semi) {
+			php_error_docref(NULL, E_WARNING, "Malformed fact in MLSD response");
+			return FAILURE;
+		}
+
+		/* Separate fact key and value */
+		eq = memchr(input, '=', semi - input);
+		if (!eq) {
+			php_error_docref(NULL, E_WARNING, "Malformed fact in MLSD response");
+			return FAILURE;
+		}
+
+		ZVAL_STRINGL(&zstr, eq + 1, semi - eq - 1);
+		zend_hash_str_update(ht, input, eq - input, &zstr);
+		input = semi + 1;
+	}
+
+	return SUCCESS;
 }
 /* }}} */
 

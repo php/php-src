@@ -19,9 +19,11 @@ ftp_close($ftp);
 ?>
 --EXPECT--
 bool(true)
-array(3) {
+array(4) {
   [0]=>
   array(8) {
+    ["name"]=>
+    string(1) "."
     ["modify"]=>
     string(14) "20170127230002"
     ["perm"]=>
@@ -36,11 +38,11 @@ array(3) {
     string(4) "0755"
     ["UNIX.owner"]=>
     string(2) "33"
-    ["name"]=>
-    string(1) "."
   }
   [1]=>
   array(8) {
+    ["name"]=>
+    string(2) ".."
     ["modify"]=>
     string(14) "20170127230002"
     ["perm"]=>
@@ -55,11 +57,11 @@ array(3) {
     string(4) "0755"
     ["UNIX.owner"]=>
     string(2) "33"
-    ["name"]=>
-    string(2) ".."
   }
   [2]=>
   array(9) {
+    ["name"]=>
+    string(6) "foobar"
     ["modify"]=>
     string(14) "20170126121225"
     ["perm"]=>
@@ -76,7 +78,14 @@ array(3) {
     string(4) "0644"
     ["UNIX.owner"]=>
     string(2) "33"
+  }
+  [3]=>
+  array(3) {
     ["name"]=>
-    string(6) "foobar"
+    string(9) "path;name"
+    ["fact"]=>
+    string(6) "val=ue"
+    ["empty"]=>
+    string(0) ""
   }
 }
