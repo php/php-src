@@ -15,6 +15,17 @@ PHP                                                                        NEWS
   . Fixed bug #61471 (Incomplete POST does not timeout but is passed to PHP).
     (Zheng Shao)
 
+- Date:
+  . Fixed bug #72719 (Relative datetime format ignores weekday on sundays
+    only). (Derick)
+  . Fixed bug #73294 (DateTime wrong when date string is negative). (Derick)
+  . Fixed bug #73489 (wrong timestamp when call setTimeZone multi times with
+    UTC offset). (xiami, Derick)
+  . Fixed bug #73858 (first/last day of' flag is not being reset). (Derick)
+  . Fixed bug #73942 ($date->modify('Friday this week') doesn't return a Friday
+    if $date is a Sunday). (Derick)
+  . Fixed bug #74057 (wrong day when using "this week" in strtotime). (Derick)
+
 - FPM:
   . Fixed bug #69860 (php-fpm process accounting is broken with keepalive).
     (Denis Yeldandi)
