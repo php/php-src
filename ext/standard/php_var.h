@@ -51,6 +51,7 @@ typedef struct php_unserialize_data* php_unserialize_data_t;
 
 PHPAPI void php_var_serialize(smart_str *buf, zval **struc, php_serialize_data_t *var_hash TSRMLS_DC);
 PHPAPI int php_var_unserialize(zval **rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash TSRMLS_DC);
+void php_var_serialize_release_zval_chain(zval_chain* zval_refs);
 
 #define PHP_VAR_SERIALIZE_INIT(var_hash_ptr) \
 do  { \
@@ -61,6 +62,7 @@ do  { \
 		if (!BG(serialize_lock)) { \
 			BG(serialize).var_hash = (void *)(var_hash_ptr); \
 			BG(serialize).level = 1; \
+			BG(serialize).zval_refs = NULL; \
 		} \
 	} else { \
 		(var_hash_ptr) = (php_serialize_data_t)BG(serialize).var_hash; \
@@ -79,6 +81,7 @@ do { \
 			zend_hash_destroy((php_serialize_data_t)BG(serialize).var_hash); \
 			FREE_HASHTABLE((php_serialize_data_t)BG(serialize).var_hash); \
 			BG(serialize).var_hash = NULL; \
+			php_var_serialize_release_zval_chain(BG(serialize).zval_refs); \
 		} \
 	} \
 } while (0)

@@ -543,6 +543,61 @@ PHP_FUNCTION(var_export)
 
 static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var_hash TSRMLS_DC);
 
+/**
+ * Iterates over zvals captured during serialization, and releases/decrements them
+ */
+void php_var_serialize_release_zval_chain(zval_chain* zval_refs) {
+    zval_chain* node =  BG(serialize).zval_refs;
+    zval_chain* next = NULL;
+    int count = 0;
+
+    while (node != NULL) {
+#if 0
+        fprintf(stderr, "- zval chain %d: ref (%d) %p\n", count, Z_REFCOUNT_P(node->value), node->value);
+#endif
+        count++;
+        next = node->next;
+        zval_ptr_dtor(&(node->value));
+        //Z_DELREF_P(node->value);
+        efree(node);
+        node = next;
+    }
+}
+
+/**
+ * Increments zval reference count in order to keep it alive for the duration of object graph serialization;
+ * registers zval in threadlocal list of zvals to decrement/release when topmost serialization frame is popped
+ */
+static inline void php_var_serialize_capture_zval(zval* var) {
+    // increment reference count
+    zend_uint refcount = Z_ADDREF_P(var);
+    //zval_copy_ctor(var);
+
+    // store on threadlocal serialization list for decrement when serialization frame is popped
+    zval_chain* new_zval = emalloc(sizeof(zval_chain));
+    new_zval->value = var;
+    new_zval->next = NULL;
+    zval_chain** zval_refs = &BG(serialize).zval_refs;
+    
+    // optimize later:
+    // new_zval->next = *zval_refs;
+    // *zval_refs = new_zval;
+    
+    // singly linked list - find the end and append
+    int i = 0;
+    while (*zval_refs) {
+        zval_refs = &((**zval_refs).next);
+        i++;
+    }
+    *zval_refs = new_zval;
+    
+#if 0
+    fprintf(stderr, "+ zval chain %d: ref (%d) %p\n", i, Z_REFCOUNT_P(var), var);
+#endif
+
+}
+
+
 static inline int php_add_var_hash(HashTable *var_hash, zval *var, void *var_old TSRMLS_DC) /* {{{ */
 {
 	ulong var_no;
@@ -571,6 +626,9 @@ static inline int php_add_var_hash(HashTable *var_hash, zval *var, void *var_old
 #endif
 		return FAILURE;
 	}
+
+	// capture the zval to keep it alive for the duration of serialization
+	php_var_serialize_capture_zval(var);
 
 	/* +1 because otherwise hash will think we are trying to store NULL pointer */
 	var_no = zend_hash_num_elements(var_hash) + 1;

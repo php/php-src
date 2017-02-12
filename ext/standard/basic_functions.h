@@ -161,6 +161,11 @@ typedef signed long php_int32;
 
 #define MT_N (624)
 
+typedef struct _zval_chain {
+    zval* value;
+    struct _zval_chain* next;
+} zval_chain;
+
 typedef struct _php_basic_globals {
 	HashTable *user_shutdown_function_names;
 	HashTable putenv_ht;
@@ -208,6 +213,7 @@ typedef struct _php_basic_globals {
 	struct {
 		void *var_hash;
 		unsigned level;
+		zval_chain* zval_refs;
 	} serialize;
 	struct {
 		void *var_hash;
