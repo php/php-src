@@ -25,6 +25,10 @@ PHP                                                                        NEWS
   . Fixed bug #74031 (ReflectionFunction for imagepng is missing last two
     parameters). (finwe)
 
+- Mysqlnd:
+  . Fixed bug #74021 (fetch_array broken data. Data more then MEDIUMBLOB).
+    (Andrew Nester, Nikita)
+
 - Opcache:
   . Fixed bug #74019 (Segfault with list). (Laruence)
 
