@@ -704,6 +704,11 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		RETURN_FALSE;
 	}
 
+	if (array != NULL) {
+		zval_dtor(array);
+		array_init(array);
+	}
+
 	options = MBREX(regex_default_options);
 	if (icase) {
 		options |= ONIG_OPTION_IGNORECASE;
@@ -743,8 +748,6 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	str = string;
 	if (array != NULL) {
 		match_len = regs->end[0] - regs->beg[0];
-		zval_dtor(array);
-		array_init(array);
 		for (i = 0; i < regs->num_regs; i++) {
 			beg = regs->beg[i];
 			end = regs->end[i];
