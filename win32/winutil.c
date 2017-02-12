@@ -94,22 +94,8 @@ PHP_WINUTIL_API int php_win32_get_random_bytes(unsigned char *buf, size_t size) 
 	}
 #endif
 
-#if ZEND_ENABLE_ZVAL_LONG64
-	BOOL call_ret;
-	size_t got = 0;
-
-	do {
-		ULONG to_read = (ULONG)(size - got);
-		call_ret = NT_SUCCESS(BCryptGenRandom(bcrypt_algo, buf, to_read, 0));
-		if (call_ret) {
-			got += to_read;
-			buf += to_read;
-		}
-	} while (call_ret && got < size);
-	ret = (got == size);
-#else
-	ret = NT_SUCCESS(BCryptGenRandom(bcrypt_algo, buf, size, 0));
-#endif
+	/* No sense to loop here, the limit is huge enough. */
+	ret = NT_SUCCESS(BCryptGenRandom(bcrypt_algo, buf, (ULONG)size, 0));
 
 	return ret ? SUCCESS : FAILURE;
 }
