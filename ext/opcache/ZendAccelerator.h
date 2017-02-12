@@ -249,6 +249,7 @@ typedef struct _zend_accel_directives {
 	long           interned_strings_buffer;
 #endif
 	char          *restrict_api;
+	char          *lockfile_path;
 } zend_accel_directives;
 
 typedef struct _zend_accel_globals {
