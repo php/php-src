@@ -197,6 +197,10 @@ static int pdo_dblib_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	if(colno >= stmt->column_count || colno < 0)  {
 		return FAILURE;
 	}
+
+	if (colno == 0) {
+		S->computed_column_name_count = 0;
+	}
 	
 	col = &stmt->columns[colno];
 	fname = (char*)dbcolname(H->link, colno+1);
@@ -205,7 +209,14 @@ static int pdo_dblib_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 		col->name = estrdup(fname);
 		col->namelen = strlen(col->name);
 	} else {
-		col->namelen = spprintf(&col->name, 0, "computed%d", colno);
+		if (S->computed_column_name_count > 0) {
+			col->namelen = spprintf(&col->name, 0, "computed%d", S->computed_column_name_count);
+		} else {
+			col->name = estrdup("computed");
+			col->namelen = strlen("computed");
+		}
+
+		S->computed_column_name_count++;
 	}
 	col->maxlen = dbcollen(H->link, colno+1);
 	col->param_type = PDO_PARAM_STR;
