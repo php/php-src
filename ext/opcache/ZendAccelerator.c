@@ -2648,7 +2648,7 @@ static int accel_startup(zend_extension *extension)
 		case ALLOC_FAILURE:
 			accel_startup_ok = 0;
 			zend_accel_error(ACCEL_LOG_FATAL, "Failure to initialize shared memory structures - probably not enough shared memory.");
-			return SUCCESS;
+			return FAILURE;
 		case SUCCESSFULLY_REATTACHED:
 			accel_shared_globals = (zend_accel_shared_globals *) ZSMMG(app_shared_globals);
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
@@ -2676,7 +2676,7 @@ static int accel_startup(zend_extension *extension)
 		case FAILED_REATTACHED:
 			accel_startup_ok = 0;
 			zend_accel_error(ACCEL_LOG_FATAL, "Failure to initialize shared memory structures - can not reattach to exiting shared memory.");
-			return SUCCESS;
+			return FAILURE;
 			break;
 	}
 
