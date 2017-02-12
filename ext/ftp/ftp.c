@@ -712,26 +712,16 @@ ftp_mlsd(ftpbuf_t *ftp, const char *path, const size_t path_len)
 int
 ftp_mlsd_parse_line(zval entry, const char *input) {
 
-	int linelength = strlen(input);
-	int chunklength = 0;
 	int mode = FTP_MLSD_MODE_NAME;
-
-	char name[FTP_MLSD_CHUNK_LENGTH_MAX + 1] = "";
+	const char *name = NULL;
+	size_t name_length = 0;
 
 	zval zstr;
 
-	if(linelength > FTP_MLSD_LINE_LENGTH_MAX) {
-		php_error_docref(NULL, E_WARNING, "Line of entry '%s' exceed the limit of %u bytes. Skip entry.", input, FTP_MLSD_LINE_LENGTH_MAX);
-		return 1;
-	}
-
-	while(*input != '\0') {
+	while (*input != '\0') {
 		// get the length of the next (name or value) chunk.
-		chunklength = strcspn(input, "=;");
-		if(chunklength > FTP_MLSD_CHUNK_LENGTH_MAX) {
-			php_error_docref(NULL, E_WARNING, "Chunk of entry '%s' exceed the limit of %u bytes. Skip entry.", input, FTP_MLSD_CHUNK_LENGTH_MAX);
-			return 1;
-		}
+		size_t chunklength = strcspn(input, "=;");
+
 		// Filename begins with a space.
 		if(*input == ' ') {
 			// Skip the space in the output.
@@ -743,14 +733,15 @@ ftp_mlsd_parse_line(zval entry, const char *input) {
 		}
 		else if(mode == FTP_MLSD_MODE_VALUE) {
 			ZVAL_STRINGL(&zstr, input, chunklength);
-			zend_hash_str_update(Z_ARRVAL_P(&entry), name, strlen(name), &zstr);
-			memset(&name, 0, FTP_MLSD_CHUNK_LENGTH_MAX);
+			zend_hash_str_update(Z_ARRVAL_P(&entry), name, name_length, &zstr);
+			name = NULL;
 			mode = FTP_MLSD_MODE_NAME;
 			// Skip the separator
 			++input;
 		}
 		else if(mode == FTP_MLSD_MODE_NAME) {
-			strncpy(name, input, chunklength);
+			name = input;
+			name_length = chunklength;
 			mode = FTP_MLSD_MODE_VALUE;
 			// Skip the separator
 			++input;

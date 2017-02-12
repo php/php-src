@@ -39,8 +39,6 @@
 /* XXX this should be configurable at runtime XXX */
 #define	FTP_BUFSIZE	4096
 
-#define FTP_MLSD_LINE_LENGTH_MAX 4096
-#define FTP_MLSD_CHUNK_LENGTH_MAX 256
 #define FTP_MLSD_MODE_NAME 1
 #define FTP_MLSD_MODE_VALUE 2
 
