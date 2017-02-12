@@ -722,14 +722,19 @@ END_EXTERN_C()
 
 #define ZEND_UV(name) (zend_uv.name)
 
-#ifndef ZEND_SIGNALS
-#define HANDLE_BLOCK_INTERRUPTIONS()		if (zend_block_interruptions) { zend_block_interruptions(); }
-#define HANDLE_UNBLOCK_INTERRUPTIONS()		if (zend_unblock_interruptions) { zend_unblock_interruptions(); }
-#else
+/* HANDLE_BLOCK_INTERRUPTIONS is only used for Apache 1 and signal support.
+ * If we have neither of those we can compile it out. */
+#if defined(ZEND_SIGNALS)
 #include "zend_signal.h"
 
 #define HANDLE_BLOCK_INTERRUPTIONS()		ZEND_SIGNAL_BLOCK_INTERRUPUTIONS()
 #define HANDLE_UNBLOCK_INTERRUPTIONS()		ZEND_SIGNAL_UNBLOCK_INTERRUPTIONS()
+#elif defined(HAVE_APACHE)
+#define HANDLE_BLOCK_INTERRUPTIONS()		if (zend_block_interruptions) { zend_block_interruptions(); }
+#define HANDLE_UNBLOCK_INTERRUPTIONS()		if (zend_unblock_interruptions) { zend_unblock_interruptions(); }
+#else
+#define HANDLE_BLOCK_INTERRUPTIONS()
+#define HANDLE_UNBLOCK_INTERRUPTIONS()
 #endif
 
 BEGIN_EXTERN_C()
