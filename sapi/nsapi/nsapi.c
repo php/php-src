@@ -836,9 +836,6 @@ static sapi_module_struct nsapi_sapi_module = {
 	sapi_nsapi_get_request_time,			/* Get request time */
 	NULL,									/* Child terminate */
 
-	NULL,                                   /* Block interruptions */
-	NULL,                                   /* Unblock interruptions */
-
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 

@@ -380,9 +380,6 @@ sapi_module_struct capi_sapi_module = {
    NULL,			/* Get request time */
    NULL,			/* Child terminate */
 
-   NULL,			/* Block interruptions */
-   NULL,			/* Unblock interruptions */
-
    STANDARD_SAPI_MODULE_PROPERTIES
 };
 

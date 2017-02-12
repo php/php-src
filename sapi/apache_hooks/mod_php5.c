@@ -542,12 +542,8 @@ static sapi_module_struct apache_sapi_module = {
 
 	NULL,							/* php.ini path override */
 
-#ifdef PHP_WIN32
-	NULL,
-	NULL,
-#else
-	block_alarms,					/* Block interruptions */
-	unblock_alarms,					/* Unblock interruptions */
+#ifndef PHP_WIN32
+# warning "Support for block_alarms/unblock_alarms has been removed. Memory leaks may result."
 #endif
 
 	NULL,                           /* default post reader */

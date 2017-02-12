@@ -560,8 +560,6 @@ static sapi_module_struct lsapi_sapi_module =
     NULL,                           /* Child terminate */
 #else
     NULL,                           /* php.ini path override */
-    NULL,                           /* block interruptions */
-    NULL,                           /* unblock interruptions */
     NULL,                           /* default post reader */
     NULL,                           /* treat data */
     NULL,                           /* executable location */
