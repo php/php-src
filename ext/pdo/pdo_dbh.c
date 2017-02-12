@@ -38,6 +38,43 @@
 
 static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, long attr, zval *value TSRMLS_DC);
 
+PDO_API zval *pdo_throw_exception_ex(pdo_error_type *pdo_err, long code TSRMLS_DC, const char *format, ...) /* {{{ */
+{
+	va_list arg;
+	char *message;
+	zval *zexception, *info;
+	zend_class_entry *exception_ce;
+
+	va_start(arg, format);
+	zend_vspprintf(&message, 0, format, arg);
+	va_end(arg);
+
+	exception_ce = php_pdo_get_exception();
+
+	MAKE_STD_ZVAL(zexception);
+	object_init_ex(zexception, exception_ce);
+
+	zend_update_property_string(exception_ce, zexception, "message", sizeof("message")-1, message TSRMLS_CC);
+	zend_update_property_long(exception_ce, zexception, "code", sizeof("code")-1, code TSRMLS_CC);
+
+	MAKE_STD_ZVAL(info);
+	array_init(info);
+
+	add_next_index_string(info, *pdo_err, 1);
+	add_next_index_long(info, code);
+	add_next_index_string(info, message, 1);
+
+	efree(message);
+
+	zend_update_property(exception_ce, zexception, "errorInfo", sizeof("errorInfo")-1, info TSRMLS_CC);
+	zval_ptr_dtor(&info);
+
+	zend_throw_exception_internal(zexception TSRMLS_CC);
+
+	return zexception;
+}
+/* }}} */
+
 void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *sqlstate, const char *supp TSRMLS_DC) /* {{{ */
 {
 	pdo_error_type *pdo_err = &dbh->error_code;

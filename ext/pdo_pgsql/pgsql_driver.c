@@ -107,8 +107,7 @@ int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *
 	}
 
 	if (!dbh->methods) {
-		zend_throw_exception_ex(php_pdo_get_exception(), einfo->errcode TSRMLS_CC, "SQLSTATE[%s] [%d] %s",
-				*pdo_err, einfo->errcode, einfo->errmsg);
+		pdo_throw_exception_ex(pdo_err, einfo->errcode TSRMLS_CC, "SQLSTATE[%s] [%d] %s", *pdo_err, einfo->errcode, einfo->errmsg);
 	}
 
 	return errcode;

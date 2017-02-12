@@ -95,7 +95,7 @@ static int dblib_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 	pdo_dblib_stmt *S = ecalloc(1, sizeof(*S));
-	
+
 	S->H = H;
 	stmt->driver_data = S;
 	stmt->methods = &dblib_stmt_methods;
@@ -119,7 +119,7 @@ static long dblib_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRM
 	if (FAIL == dbsqlexec(H->link)) {
 		return -1;
 	}
-	
+
 	resret = dbresults(H->link);
 
 	if (resret == FAIL) {
@@ -165,7 +165,7 @@ static int dblib_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquote
 	*q++ = '\'';
 	*q++ = '\0';
 	*quotedlen = l+1;
-	
+
 	return 1;
 }
 
@@ -173,15 +173,15 @@ static int pdo_dblib_transaction_cmd(const char *cmd, pdo_dbh_t *dbh TSRMLS_DC)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 	RETCODE ret;
-	
+
 	if (FAIL == dbcmd(H->link, cmd)) {
 		return 0;
 	}
-	
+
 	if (FAIL == dbsqlexec(H->link)) {
 		return 0;
 	}
-	
+
 	return 1;
 }
 
@@ -200,25 +200,25 @@ static int dblib_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC)
 	return pdo_dblib_transaction_cmd("ROLLBACK TRANSACTION", dbh TSRMLS_CC);
 }
 
-char *dblib_handle_last_id(pdo_dbh_t *dbh, const char *name, unsigned int *len TSRMLS_DC) 
+char *dblib_handle_last_id(pdo_dbh_t *dbh, const char *name, unsigned int *len TSRMLS_DC)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 
 	RETCODE ret;
 	char *id = NULL;
 
-	/* 
+	/*
 	 * Would use scope_identity() but it's not implemented on Sybase
 	 */
-	
+
 	if (FAIL == dbcmd(H->link, "SELECT @@IDENTITY")) {
 		return NULL;
 	}
-	
+
 	if (FAIL == dbsqlexec(H->link)) {
 		return NULL;
 	}
-	
+
 	ret = dbresults(H->link);
 	if (ret == FAIL || ret == NO_MORE_RESULTS) {
 		dbcancel(H->link);
@@ -226,7 +226,7 @@ char *dblib_handle_last_id(pdo_dbh_t *dbh, const char *name, unsigned int *len T
 	}
 
 	ret = dbnextrow(H->link);
-	
+
 	if (ret == FAIL || ret == NO_MORE_ROWS) {
 		dbcancel(H->link);
 		return NULL;
@@ -239,7 +239,7 @@ char *dblib_handle_last_id(pdo_dbh_t *dbh, const char *name, unsigned int *len T
 
 	id = emalloc(32);
 	*len = dbconvert(NULL, (dbcoltype(H->link, 1)) , (dbdata(H->link, 1)) , (dbdatlen(H->link, 1)), SQLCHAR, id, (DBINT)-1);
-		
+
 	dbcancel(H->link);
 	return id;
 }
@@ -267,7 +267,7 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	pdo_dblib_db_handle *H;
 	int i, nvars, nvers, ret = 0;
 	int *val;
-	
+
 	const pdo_dblib_keyval tdsver[] = {
 		 {"4.2",DBVERSION_42}
 		,{"4.6",DBVERSION_46}
@@ -289,9 +289,11 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 #endif
 		,{"10.0",DBVERSION_100}
 		,{"auto",0} /* Only works with FreeTDS. Other drivers will bork */
-		
+
 	};
-	
+
+	nvers = sizeof(tdsver)/sizeof(tdsver[0]);
+
 	struct pdo_data_src_parser vars[] = {
 		{ "charset",	NULL,	0 }
 		,{ "appname",	"PHP " PDO_DBLIB_FLAVOUR,	0 }
@@ -300,10 +302,9 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 		,{ "secure",	NULL,	0 } /* DBSETLSECURE */
 		,{ "version",	NULL,	0 } /* DBSETLVERSION */
 	};
-	
+
 	nvars = sizeof(vars)/sizeof(vars[0]);
-	nvers = sizeof(tdsver)/sizeof(tdsver[0]);
-	
+
 	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, nvars);
 
 	H = pecalloc(1, sizeof(*H), dbh->is_persistent);
@@ -316,21 +317,21 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 
 	DBERRHANDLE(H->login, (EHANDLEFUNC) error_handler);
 	DBMSGHANDLE(H->login, (MHANDLEFUNC) msg_handler);
-	
+
 	if(vars[5].optval) {
 		for(i=0;i<nvers;i++) {
 			if(strcmp(vars[5].optval,tdsver[i].key) == 0) {
 				if(FAIL==dbsetlversion(H->login, tdsver[i].value)) {
-					pdo_raise_impl_error(dbh, NULL, "HY000", "PDO_DBLIB: Failed to set version specified in connection string." TSRMLS_CC);		
+					pdo_raise_impl_error(dbh, NULL, "HY000", "PDO_DBLIB: Failed to set version specified in connection string." TSRMLS_CC);
 					goto cleanup;
 				}
 				break;
 			}
 		}
-		
+
 		if (i==nvers) {
 			printf("Invalid version '%s'\n", vars[5].optval);
-			pdo_raise_impl_error(dbh, NULL, "HY000", "PDO_DBLIB: Invalid version specified in connection string." TSRMLS_CC);		
+			pdo_raise_impl_error(dbh, NULL, "HY000", "PDO_DBLIB: Invalid version specified in connection string." TSRMLS_CC);
 			goto cleanup; /* unknown version specified */
 		}
 	}
@@ -346,7 +347,7 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 			goto cleanup;
 		}
 	}
-	
+
 #if !PHP_DBLIB_IS_MSSQL
 	if (vars[0].optval) {
 		DBSETLCHARSET(H->login, vars[0].optval);
@@ -404,7 +405,7 @@ cleanup:
 	dbh->driver_data = H;
 
 	if (!ret) {
-		zend_throw_exception_ex(php_pdo_get_exception(), DBLIB_G(err).dberr TSRMLS_CC,
+		pdo_throw_exception_ex(DBLIB_G(err).sqlstate, DBLIB_G(err).dberr TSRMLS_CC,
 			"SQLSTATE[%s] %s (severity %d)",
 			DBLIB_G(err).sqlstate,
 			DBLIB_G(err).dberrstr,
