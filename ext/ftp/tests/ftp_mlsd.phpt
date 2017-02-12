@@ -17,8 +17,14 @@ var_dump(ftp_mlsd($ftp, '.'));
 
 ftp_close($ftp);
 ?>
---EXPECT--
+--EXPECTF--
 bool(true)
+
+Warning: ftp_mlsd(): Missing pathname in MLSD response in %s on line %d
+
+Warning: ftp_mlsd(): Malformed fact in MLSD response in %s on line %d
+
+Warning: ftp_mlsd(): Malformed fact in MLSD response in %s on line %d
 array(4) {
   [0]=>
   array(8) {

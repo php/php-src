@@ -476,6 +476,9 @@ if ($pid) {
 				fputs($fs, "modify=20170127230002;perm=flcdmpe;type=pdir;unique=811U4340002;UNIX.group=33;UNIX.mode=0755;UNIX.owner=33; ..\r\n");
 				fputs($fs, "modify=20170126121225;perm=adfrw;size=4729;type=file;unique=811U4340CB9;UNIX.group=33;UNIX.mode=0644;UNIX.owner=33; foobar\r\n");
 				fputs($fs, "fact=val=ue;empty=; path;name\r\n");
+				fputs($fs, "no_space\r\n");
+				fputs($fs, "no_semi pathname\r\n");
+				fputs($fs, "no_eq; pathname\r\n");
 			}
 
 			fputs($s, "226 Closing data Connection.\r\n");
