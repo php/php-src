@@ -2501,16 +2501,21 @@ SPL_METHOD(SplFileObject, key)
 SPL_METHOD(SplFileObject, next)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	zend_bool has_current_line;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
+	has_current_line = intern->u.file.current_line != NULL;
 	spl_filesystem_file_free_line(intern TSRMLS_CC);
 	if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_AHEAD)) {
 		spl_filesystem_file_read_line(getThis(), intern, 1 TSRMLS_CC);
+		has_current_line = 1;
 	}
-	intern->u.file.current_line_num++;
+	if (has_current_line) {
+		intern->u.file.current_line_num++;
+	}
 } /* }}} */
 
 /* {{{ proto void SplFileObject::setFlags(int flags)
