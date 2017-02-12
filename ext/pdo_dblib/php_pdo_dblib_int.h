@@ -111,7 +111,7 @@ typedef struct {
 typedef struct {
 	LOGINREC	*login;
 	DBPROCESS	*link;
-
+        unsigned skip_empty_rowsets:1;
 	pdo_dblib_err err;
 } pdo_dblib_db_handle;
 
@@ -125,6 +125,9 @@ typedef struct {
 	int value;
 } pdo_dblib_keyval;
 
+enum {
+	PDO_DBLIB_ATTR_SKIP_EMPTY_ROWSETS = PDO_ATTR_DRIVER_SPECIFIC,
+};
 
 ZEND_BEGIN_MODULE_GLOBALS(dblib)
 	pdo_dblib_err err;

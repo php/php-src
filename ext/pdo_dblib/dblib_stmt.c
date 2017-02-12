@@ -120,8 +120,16 @@ static int pdo_dblib_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 	pdo_dblib_db_handle *H = S->H;
 	RETCODE ret;
-	
-	ret = dbresults(H->link);
+        int num_fields;
+        
+        do {
+            ret = dbresults(H->link);
+            num_fields = dbnumcols(H->link);
+        } while (H->skip_empty_rowsets && num_fields <= 0 && ret == SUCCEED);
+    
+        if (H->skip_empty_rowsets && num_fields <= 0) {
+            return 0;
+        }
 	
 	if (FAIL == ret) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO_DBLIB: dbresults() returned FAIL" TSRMLS_CC);		
@@ -133,7 +141,7 @@ static int pdo_dblib_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
 	}
 	
 	stmt->row_count = DBCOUNT(H->link);
-	stmt->column_count = dbnumcols(H->link);
+	stmt->column_count = num_fields;
 	
 	return 1;
 }
