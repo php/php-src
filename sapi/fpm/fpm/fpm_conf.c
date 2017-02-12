@@ -545,17 +545,16 @@ static char *fpm_conf_set_pm(zval *value, void **config, intptr_t offset) /* {{{
 static char *fpm_conf_set_array(zval *key, zval *value, void **config, int convert_to_bool) /* {{{ */
 {
 	struct key_value_s *kv;
-	struct key_value_s ***parent = (struct key_value_s ***) config;
+	key_value_list *parent = *(key_value_list **)config;
 	int b;
 	void *subconf = &b;
 
-	kv = malloc(sizeof(*kv));
+	kv = calloc(1, sizeof(*kv));
 
 	if (!kv) {
 		return "malloc() failed";
 	}
 
-	memset(kv, 0, sizeof(*kv));
 	kv->key = strdup(Z_STRVAL_P(key));
 
 	if (!kv->key) {
@@ -586,8 +585,12 @@ static char *fpm_conf_set_array(zval *key, zval *value, void **config, int conve
 		return "fpm_conf_set_array: strdup(value) failed";
 	}
 
-	kv->next = **parent;
-	**parent = kv;
+	if (parent->head) {
+		parent->tail->next = kv;
+	} else {
+		parent->head = kv;
+	}
+	parent->tail = kv;
 	return NULL;
 }
 /* }}} */
@@ -602,18 +605,20 @@ static void *fpm_worker_pool_config_alloc() /* {{{ */
 		return 0;
 	}
 
-	wp->config = malloc(sizeof(struct fpm_worker_pool_config_s));
+	wp->config = calloc(1, sizeof(struct fpm_worker_pool_config_s));
 
 	if (!wp->config) { 
 		fpm_worker_pool_free(wp);
 		return 0;
 	}
 
-	memset(wp->config, 0, sizeof(struct fpm_worker_pool_config_s));
 	wp->config->listen_backlog = FPM_BACKLOG_DEFAULT;
 	wp->config->pm_process_idle_timeout = 10; /* 10s by default */
 	wp->config->process_priority = 64; /* 64 means unset */
 	wp->config->clear_env = 1;
+	wp->config->env.head = NULL;
+	wp->config->php_values.head = NULL;
+	wp->config->php_admin_values.head = NULL;
 
 	if (!fpm_worker_all_pools) {
 		fpm_worker_all_pools = wp;
@@ -659,19 +664,19 @@ int fpm_worker_pool_config_free(struct fpm_worker_pool_config_s *wpc) /* {{{ */
 	free(wpc->apparmor_hat);
 #endif
 
-	for (kv = wpc->php_values; kv; kv = kv_next) {
+	for (kv = wpc->php_values.head; kv; kv = kv_next) {
 		kv_next = kv->next;
 		free(kv->key);
 		free(kv->value);
 		free(kv);
 	}
-	for (kv = wpc->php_admin_values; kv; kv = kv_next) {
+	for (kv = wpc->php_admin_values.head; kv; kv = kv_next) {
 		kv_next = kv->next;
 		free(kv->key);
 		free(kv->value);
 		free(kv);
 	}
-	for (kv = wpc->env; kv; kv = kv_next) {
+	for (kv = wpc->env.head; kv; kv = kv_next) {
 		kv_next = kv->next;
 		free(kv->key);
 		free(kv->value);
@@ -1073,14 +1078,14 @@ static int fpm_conf_process_all_pools() /* {{{ */
 			char *options[] = FPM_PHP_INI_TO_EXPAND;
 			char **p;
 
-			for (kv = wp->config->php_values; kv; kv = kv->next) {
+			for (kv = wp->config->php_values.head; kv; kv = kv->next) {
 				for (p = options; *p; p++) {
 					if (!strcasecmp(kv->key, *p)) {
 						fpm_evaluate_full_path(&kv->value, wp, NULL, 0);
 					}
 				}
 			}
-			for (kv = wp->config->php_admin_values; kv; kv = kv->next) {
+			for (kv = wp->config->php_admin_values.head; kv; kv = kv->next) {
 				if (!strcasecmp(kv->key, "error_log") && !strcasecmp(kv->value, "syslog")) {
 					continue;
 				}
@@ -1625,15 +1630,15 @@ static void fpm_conf_dump() /* {{{ */
 		zlog(ZLOG_NOTICE, "\tclear_env = %s",                  BOOL2STR(wp->config->clear_env));
 		zlog(ZLOG_NOTICE, "\tsecurity.limit_extensions = %s",  wp->config->security_limit_extensions);
 
-		for (kv = wp->config->env; kv; kv = kv->next) {
+		for (kv = wp->config->env.head; kv; kv = kv->next) {
 			zlog(ZLOG_NOTICE, "\tenv[%s] = %s", kv->key, kv->value);
 		}
 
-		for (kv = wp->config->php_values; kv; kv = kv->next) {
+		for (kv = wp->config->php_values.head; kv; kv = kv->next) {
 			zlog(ZLOG_NOTICE, "\tphp_value[%s] = %s", kv->key, kv->value);
 		}
 
-		for (kv = wp->config->php_admin_values; kv; kv = kv->next) {
+		for (kv = wp->config->php_admin_values.head; kv; kv = kv->next) {
 			zlog(ZLOG_NOTICE, "\tphp_admin_value[%s] = %s", kv->key, kv->value);
 		}
 		zlog(ZLOG_NOTICE, " ");

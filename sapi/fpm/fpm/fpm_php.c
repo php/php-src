@@ -118,13 +118,13 @@ static int fpm_php_apply_defines(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	struct key_value_s *kv;
 
-	for (kv = wp->config->php_values; kv; kv = kv->next) {
+	for (kv = wp->config->php_values.head; kv; kv = kv->next) {
 		if (fpm_php_apply_defines_ex(kv, ZEND_INI_USER) == -1) {
 			zlog(ZLOG_ERROR, "Unable to set php_value '%s'", kv->key);
 		}
 	}
 
-	for (kv = wp->config->php_admin_values; kv; kv = kv->next) {
+	for (kv = wp->config->php_admin_values.head; kv; kv = kv->next) {
 		if (fpm_php_apply_defines_ex(kv, ZEND_INI_SYSTEM) == -1) {
 			zlog(ZLOG_ERROR, "Unable to set php_admin_value '%s'", kv->key);
 		}

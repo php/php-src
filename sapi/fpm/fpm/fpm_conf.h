@@ -20,6 +20,11 @@ struct key_value_s {
 	char *value;
 };
 
+typedef struct _key_value_list {
+	struct key_value_s *head;
+	struct key_value_s *tail;
+} key_value_list;
+
 /*
  * Please keep the same order as in fpm_conf.c and in php-fpm.conf.in
  */
@@ -86,9 +91,9 @@ struct fpm_worker_pool_config_s {
 	int catch_workers_output;
 	int clear_env;
 	char *security_limit_extensions;
-	struct key_value_s *env;
-	struct key_value_s *php_admin_values;
-	struct key_value_s *php_values;
+	key_value_list env;
+	key_value_list php_admin_values;
+	key_value_list php_values;
 #ifdef HAVE_APPARMOR
 	char *apparmor_hat;
 #endif
