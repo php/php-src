@@ -474,6 +474,10 @@ PHP                                                                        NEWS
 - Intl:
   . Fixed bug #72533 (locale_accept_from_http out-of-bounds access). (Stas)
 
+- EXIF:
+  . Fixed bug #50845 (exif_read_data() returns corrupted exif headers).
+    (Bartosz Dziewoński)
+
 - OpenSSL:
   . Fixed bug #71915 (openssl_random_pseudo_bytes is not fork-safe).
     (Jakub Zelenka)
