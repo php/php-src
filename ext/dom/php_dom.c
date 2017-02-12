@@ -907,6 +907,7 @@ PHP_MINIT_FUNCTION(dom)
 
 	zend_hash_init(&dom_xpath_prop_handlers, 0, NULL, NULL, 1);
 	dom_register_prop_handler(&dom_xpath_prop_handlers, "document", dom_xpath_document_read, NULL TSRMLS_CC);
+	dom_register_prop_handler(&dom_xpath_prop_handlers, "enableRegisterNodeNS", dom_xpath_enable_register_node_ns_read, dom_xpath_enable_register_node_ns_write TSRMLS_CC);
 	zend_hash_add(&classes, ce.name, ce.name_length + 1, &dom_xpath_prop_handlers, sizeof(dom_xpath_prop_handlers), NULL);
 #endif
 
@@ -1231,6 +1232,7 @@ zend_object_value dom_xpath_objects_new(zend_class_entry *class_type TSRMLS_DC)
 	intern->registerPhpFunctions = 0;
 	intern->registered_phpfunctions = NULL;
 	intern->node_list = NULL;
+	intern->enable_register_node_ns = 1;
 
 	ALLOC_HASHTABLE(intern->registered_phpfunctions);
 	zend_hash_init(intern->registered_phpfunctions, 0, NULL, ZVAL_PTR_DTOR, 0);
