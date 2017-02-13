@@ -451,12 +451,27 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 					break;
 				/* In most cases IS_TMP_VAR operand may be used only once.
 				 * The operands are usually destroyed by the opcode handler.
-				 * ZEND_CASE is an exception, that keeps operand unchanged,
-				 * and allows its reuse. The number of ZEND_CASE instructions
+				 * ZEND_CASE and ZEND_FETCH_LIST are exceptions, they keeps operand
+				 * unchanged, and allows its reuse. these instructions
 				 * usually terminated by ZEND_FREE that finally kills the value.
 				 */
-				case ZEND_FREE:
-				case ZEND_CASE: {
+				case ZEND_FETCH_LIST: {
+					zend_op *m = opline;
+					do {
+						if (m->opcode == ZEND_FETCH_LIST &&
+							ZEND_OP1_TYPE(m) == type &&
+							ZEND_OP1(m).var == var) {
+							zend_optimizer_update_op1_const(op_array, m, val);
+						}
+						m++;
+					} while (m->opcode != ZEND_FREE || ZEND_OP1_TYPE(m) != type || ZEND_OP1(m).var != var);
+					ZEND_ASSERT(m->opcode == ZEND_FREE && ZEND_OP1_TYPE(m) == type && ZEND_OP1(m).var == var);
+					MAKE_NOP(m);
+					zend_optimizer_remove_live_range(op_array, var);
+					return 1;
+				}
+				case ZEND_CASE:
+				case ZEND_FREE: {
 					zend_op *m, *n;
 					int brk = op_array->last_live_range;
 					zend_bool in_switch = 0;

@@ -648,6 +648,7 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 #ifdef ZEND_WIN32
 	zend_get_windows_version_info(&executor_globals->windows_version_info);
 #endif
+	executor_globals->flags = EG_FLAGS_INITIAL;
 }
 /* }}} */
 

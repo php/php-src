@@ -111,7 +111,10 @@ ZEND_API void zend_objects_store_put(zend_object *object)
 {
 	int handle;
 
-	if (EG(objects_store).free_list_head != -1) {
+	/* When in shutdown sequesnce - do not reuse previously freed handles, to make sure
+	 * the dtors for newly created objects are called in zend_objects_store_call_destructors() loop
+	 */
+	if (!(EG(flags) & EG_FLAGS_IN_SHUTDOWN) && EG(objects_store).free_list_head != -1) {
 		handle = EG(objects_store).free_list_head;
 		EG(objects_store).free_list_head = GET_OBJ_BUCKET_NUMBER(EG(objects_store).object_buckets[handle]);
 	} else {
