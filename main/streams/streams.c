@@ -1706,7 +1706,7 @@ PHPAPI int php_register_url_stream_wrapper(const char *protocol, php_stream_wrap
 		return FAILURE;
 	}
 
-	return zend_hash_str_add_ptr(&url_stream_wrappers_hash, protocol, protocol_len, wrapper) ? SUCCESS : FAILURE;
+	return zend_hash_add_ptr(&url_stream_wrappers_hash, zend_string_init_interned(protocol, protocol_len, 1), wrapper) ? SUCCESS : FAILURE;
 }
 
 PHPAPI int php_unregister_url_stream_wrapper(const char *protocol)
