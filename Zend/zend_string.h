@@ -33,6 +33,8 @@ ZEND_API zend_ulong zend_hash_func(const char *str, size_t len);
 void zend_interned_strings_init(void);
 void zend_interned_strings_dtor(void);
 void zend_known_interned_strings_init(zend_string ***, uint32_t *);
+zend_string *zend_interned_strings_get_empty_string(void);
+void zend_interned_strings_init_thread(void);
 
 END_EXTERN_C()
 
@@ -160,6 +162,13 @@ static zend_always_inline zend_string *zend_string_init(const char *str, size_t 
 	memcpy(ZSTR_VAL(ret), str, len);
 	ZSTR_VAL(ret)[len] = '\0';
 	return ret;
+}
+
+static zend_always_inline zend_string *zend_string_init_interned(const char *str, size_t len, int persistent)
+{
+	zend_string *ret = zend_string_init(str, len, persistent);
+
+	return zend_new_interned_string(ret);
 }
 
 static zend_always_inline zend_string *zend_string_copy(zend_string *s)
@@ -358,27 +367,6 @@ EMPTY_SWITCH_DEFAULT_CASE()
 # error "Unknown SIZEOF_ZEND_LONG"
 #endif
 }
-
-#ifdef ZTS
-static zend_always_inline zend_string* zend_zts_interned_string_init(const char *val, size_t len)
-{
-	zend_string *str;
-
-	str = zend_string_init(val, len, 1);
-
-	zend_string_hash_val(str);
-	GC_FLAGS(str) |= IS_STR_INTERNED;
-	return str;
-}
-
-static zend_always_inline void zend_zts_interned_string_free(zend_string **s)
-{
-	if (NULL != *s) {
-		free(*s);
-		*s = NULL;
-	}
-}
-#endif
 
 #define ZEND_KNOWN_STRINGS(_) \
 	_(ZEND_STR_FILE,                   "file") \

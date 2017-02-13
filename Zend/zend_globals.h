@@ -115,8 +115,6 @@ struct _zend_compiler_globals {
 	zend_string **known_strings;
 	uint32_t    known_strings_count;
 
-	HashTable interned_strings;
-
 	const zend_encoding **script_encoding_list;
 	size_t script_encoding_list_size;
 	zend_bool multibyte;

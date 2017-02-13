@@ -581,7 +581,7 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{
 	}
 	compiler_globals->script_encoding_list = NULL;
 
-	compiler_globals->empty_string = zend_zts_interned_string_init("", sizeof("")-1);
+	compiler_globals->empty_string = zend_interned_strings_get_empty_string();
 
 	memset(compiler_globals->one_char_string, 0, sizeof(compiler_globals->one_char_string));
 
@@ -611,7 +611,7 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals) /* {{
 	}
 	compiler_globals->last_static_member = 0;
 
-	zend_zts_interned_string_free(&compiler_globals->empty_string);
+	/* zend_zts_interned_string_free(&compiler_globals->empty_string); */
 
 	compiler_globals->known_strings = NULL;
 	compiler_globals->known_strings_count = 0;
@@ -670,6 +670,12 @@ static void zend_new_thread_end_handler(THREAD_T thread_id) /* {{{ */
 	if (zend_copy_ini_directives() == SUCCESS) {
 		zend_ini_refresh_caches(ZEND_INI_STAGE_STARTUP);
 	}
+}
+/* }}} */
+
+static void zend_new_thread_begin_handler(THREAD_T thread_id) /* {{{ */
+{
+	zend_interned_strings_init_thread();
 }
 /* }}} */
 #endif
@@ -854,6 +860,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 
 #ifdef ZTS
 	tsrm_set_new_thread_end_handler(zend_new_thread_end_handler);
+	tsrm_set_new_thread_begin_handler(zend_new_thread_begin_handler);
 #endif
 
 	return SUCCESS;
@@ -965,7 +972,12 @@ void zend_shutdown(void) /* {{{ */
 #endif
 	zend_destroy_rsrc_list_dtors();
 
+#ifndef ZTS
+	/* XXX TSRM shutdown will require these yet. No clear solution yet,
+		it might leak, but tsrm_shutdown() should basically free
+		all the resources that were using to the persistent strings. */
 	zend_interned_strings_dtor();
+#endif
 }
 /* }}} */
 
