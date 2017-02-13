@@ -67,6 +67,17 @@ typedef struct _gc_root_buffer {
 	uint32_t                 refcount;
 } gc_root_buffer;
 
+#define GC_NUM_ADDITIONAL_ENTRIES \
+	((4096 - ZEND_MM_OVERHEAD - sizeof(void*) * 2) / sizeof(gc_root_buffer))
+
+typedef struct _gc_additional_bufer gc_additional_buffer;
+
+struct _gc_additional_bufer {
+	uint32_t              used;
+	gc_additional_buffer *next;
+	gc_root_buffer        buf[GC_NUM_ADDITIONAL_ENTRIES];
+};
+
 typedef struct _zend_gc_globals {
 	zend_bool         gc_enabled;
 	zend_bool         gc_active;
@@ -92,6 +103,8 @@ typedef struct _zend_gc_globals {
 	uint32_t zval_remove_from_buffer;
 	uint32_t zval_marked_grey;
 #endif
+
+	gc_additional_buffer *additional_buffer;
 
 } zend_gc_globals;
 
