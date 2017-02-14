@@ -974,8 +974,7 @@ void zend_shutdown(void) /* {{{ */
 
 #ifndef ZTS
 	/* XXX TSRM shutdown will require these yet. No clear solution yet,
-		it might leak, but tsrm_shutdown() should basically free
-		all the resources that were using to the persistent strings. */
+		likely this have to be moved outside zend_shutdown(). */
 	zend_interned_strings_dtor();
 #endif
 }
