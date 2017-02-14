@@ -34,6 +34,7 @@ static void zend_interned_strings_restore_int(void);
 	add permanent strings even after startup, it would be still
 	possible on costs of locking in the thread safe builds. */
 static HashTable interned_strings_permanent;
+static HashTable *interned_strings_permanent_ptr = &interned_strings_permanent;
 
 /* Short living interned strings, these are all those created during
 	the request. They should not be marked permanent. Every thread
@@ -101,16 +102,27 @@ void zend_interned_strings_init_thread(void)
 	zend_init_interned_strings_ht(&interned_strings_volatile);
 }
 
-zend_string *zend_interned_strings_get_empty_string(void)
+ZEND_API zend_string *zend_interned_strings_get_empty_string(void)
 {
 	return empty_string;
+}
+
+ZEND_API HashTable *zend_interned_strings_get_permanent_storage(void)
+{
+	return interned_strings_permanent_ptr;
+}
+
+ZEND_API void zend_interned_strings_get_permanent_storage(HashTable *new_storage)
+{
+	/* XXX Cleanup the old storage before, if needed. */
+	interned_strings_permanent_ptr = new_storage;
 }
 
 void zend_interned_strings_init(void)
 {
 	zend_string *str;
 
-	zend_init_interned_strings_ht(&interned_strings_permanent);
+	zend_init_interned_strings_ht(interned_strings_permanent_ptr);
 	zend_init_interned_strings_ht(&interned_strings_volatile);
 
 	/* interned empty string */
@@ -135,7 +147,7 @@ void zend_interned_strings_init(void)
 void zend_interned_strings_dtor(void)
 {
 	/* ??? still tsrm shutdown is an issue? */
-	zend_hash_destroy(&interned_strings_permanent);
+	zend_hash_destroy(interned_strings_permanent_ptr);
 
 	free(CG(known_strings));
 	CG(known_strings) = NULL;
@@ -159,7 +171,7 @@ static zend_string *zend_new_interned_string_int(zend_string *str)
 	if (permanent_snapshot_exists) {
 		interned_strings = &interned_strings_volatile;
 	} else {
-		interned_strings = &interned_strings_permanent;
+		interned_strings = interned_strings_permanent_ptr;
 	}
 
 	h = zend_string_hash_val(str);
@@ -219,7 +231,7 @@ static void zend_interned_strings_snapshot_int(void)
 {
 	uint32_t idx;
 	Bucket *p;
-	HashTable *interned_strings = &interned_strings_permanent;
+	HashTable *interned_strings = interned_strings_permanent_ptr;
 
 	/* Ensure the function is called only once during startup.
 		All the followup strings will be in the per thread table. */
