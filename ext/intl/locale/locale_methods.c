@@ -320,19 +320,19 @@ static zend_string* get_icu_value_internal( const char* loc_name , char* tag_nam
 		tag_value_len = buflen;
 
 		if( strcmp(tag_name , LOC_SCRIPT_TAG)==0 ){
-			buflen = uloc_getScript ( mod_loc_name , tag_value->val , tag_value_len , &status);
+			buflen = uloc_getScript ( mod_loc_name , ZSTR_VAL(tag_value) , tag_value_len , &status);
 		}
 		if( strcmp(tag_name , LOC_LANG_TAG )==0 ){
-			buflen = uloc_getLanguage ( mod_loc_name , tag_value->val , tag_value_len , &status);
+			buflen = uloc_getLanguage ( mod_loc_name , ZSTR_VAL(tag_value) , tag_value_len , &status);
 		}
 		if( strcmp(tag_name , LOC_REGION_TAG)==0 ){
-			buflen = uloc_getCountry ( mod_loc_name , tag_value->val , tag_value_len , &status);
+			buflen = uloc_getCountry ( mod_loc_name , ZSTR_VAL(tag_value) , tag_value_len , &status);
 		}
 		if( strcmp(tag_name , LOC_VARIANT_TAG)==0 ){
-			buflen = uloc_getVariant ( mod_loc_name , tag_value->val , tag_value_len , &status);
+			buflen = uloc_getVariant ( mod_loc_name , ZSTR_VAL(tag_value) , tag_value_len , &status);
 		}
 		if( strcmp(tag_name , LOC_CANONICALIZE_TAG)==0 ){
-			buflen = uloc_canonicalize ( mod_loc_name , tag_value->val , tag_value_len , &status);
+			buflen = uloc_canonicalize ( mod_loc_name , ZSTR_VAL(tag_value) , tag_value_len , &status);
 		}
 
 		if( U_FAILURE( status ) ) {
@@ -372,7 +372,7 @@ static zend_string* get_icu_value_internal( const char* loc_name , char* tag_nam
 		efree( mod_loc_name);
 	}
 
-	tag_value->len = strlen(tag_value->val);
+	ZSTR_LEN(tag_value) = strlen(ZSTR_VAL(tag_value));
 	return tag_value;
 }
 /* }}} */
@@ -1061,7 +1061,7 @@ static int add_array_entry(const char* loc_name, zval* hash_arr, char* key_name)
 		( strcmp(key_name , LOC_VARIANT_TAG)==0) ){
 		if( result > 0 && key_value){
 			/* Tokenize on the "_" or "-"  */
-			token = php_strtok_r( key_value->val , DELIMITER ,&last_ptr);
+			token = php_strtok_r( ZSTR_VAL(key_value) , DELIMITER ,&last_ptr);
 			if( cur_key_name ){
 				efree( cur_key_name);
 			}
@@ -1189,7 +1189,7 @@ PHP_FUNCTION(locale_get_all_variants)
 		variant = get_icu_value_internal( loc_name , LOC_VARIANT_TAG , &result ,0);
 		if( result > 0 && variant){
 			/* Tokenize on the "_" or "-" */
-			token = php_strtok_r( variant->val , DELIMITER , &saved_ptr);
+			token = php_strtok_r( ZSTR_VAL(variant) , DELIMITER , &saved_ptr);
 			add_next_index_stringl( return_value, token , strlen(token));
 			/* tokenize on the "_" or "-" and stop  at singleton if any	*/
 			while( (token = php_strtok_r(NULL , DELIMITER, &saved_ptr)) && (strlen(token)>1) ){
@@ -1307,18 +1307,18 @@ PHP_FUNCTION(locale_filter_matches)
 		}
 
 		/* Convert to lower case for case-insensitive comparison */
-		cur_lang_tag = ecalloc( 1, can_lang_tag->len + 1);
+		cur_lang_tag = ecalloc( 1, ZSTR_LEN(can_lang_tag) + 1);
 
 		/* Convert to lower case for case-insensitive comparison */
-		result = strToMatch( can_lang_tag->val , cur_lang_tag);
+		result = strToMatch( ZSTR_VAL(can_lang_tag) , cur_lang_tag);
 		if( result == 0) {
 			efree( cur_lang_tag );
 			zend_string_release( can_lang_tag );
 			RETURN_FALSE;
 		}
 
-		cur_loc_range = ecalloc( 1, can_loc_range->len + 1);
-		result = strToMatch( can_loc_range->val , cur_loc_range );
+		cur_loc_range = ecalloc( 1, ZSTR_LEN(can_loc_range) + 1);
+		result = strToMatch( ZSTR_VAL(can_loc_range) , cur_loc_range );
 		if( result == 0) {
 			efree( cur_lang_tag );
 			zend_string_release( can_lang_tag );
@@ -1467,15 +1467,15 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 	if(canonicalize) {
 		for(i=0; i<cur_arr_len; i++) {
 			lang_tag = get_icu_value_internal(cur_arr[i*2], LOC_CANONICALIZE_TAG, &result, 0);
-			if(result != 1 || lang_tag == NULL || !lang_tag->val[0]) {
+			if(result != 1 || lang_tag == NULL || !ZSTR_VAL(lang_tag)[0]) {
 				if(lang_tag) {
 					zend_string_release(lang_tag);
 				}
 				intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "lookup_loc_range: unable to canonicalize lang_tag" , 0);
 				LOOKUP_CLEAN_RETURN(NULL);
 			}
-			cur_arr[i*2] = erealloc(cur_arr[i*2], lang_tag->len+1);
-			result = strToMatch(lang_tag->val, cur_arr[i*2]);
+			cur_arr[i*2] = erealloc(cur_arr[i*2], ZSTR_LEN(lang_tag)+1);
+			result = strToMatch(ZSTR_VAL(lang_tag), cur_arr[i*2]);
 			zend_string_release(lang_tag);
 			if(result == 0) {
 				intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "lookup_loc_range: unable to canonicalize lang_tag" , 0);
@@ -1488,7 +1488,7 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 	if(canonicalize) {
 		/* Canonicalize the loc_range */
 		can_loc_range = get_icu_value_internal(loc_range, LOC_CANONICALIZE_TAG, &result , 0);
-		if( result != 1 || can_loc_range == NULL || !can_loc_range->val[0]) {
+		if( result != 1 || can_loc_range == NULL || !ZSTR_VAL(can_loc_range)[0]) {
 			/* Error */
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "lookup_loc_range: unable to canonicalize loc_range" , 0 );
 			if(can_loc_range) {
@@ -1496,7 +1496,7 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 			}
 			LOOKUP_CLEAN_RETURN(NULL);
 		} else {
-			loc_range = can_loc_range->val;
+			loc_range = ZSTR_VAL(can_loc_range);
 		}
 	}
 

@@ -634,7 +634,7 @@ try_again:
 			}
 		}
 		smart_str_append_const(&soap_headers,"Content-Length: ");
-		smart_str_append_long(&soap_headers, request->len);
+		smart_str_append_long(&soap_headers, ZSTR_LEN(request));
 		smart_str_append_const(&soap_headers, "\r\n");
 
 		/* HTTP Authentication */
@@ -861,7 +861,7 @@ try_again:
 		    (Z_TYPE_P(trace) == IS_TRUE || (Z_TYPE_P(trace) == IS_LONG && Z_LVAL_P(trace) != 0))) {
 			add_property_stringl(this_ptr, "__last_request_headers", ZSTR_VAL(soap_headers.s), ZSTR_LEN(soap_headers.s));
 		}
-		smart_str_appendl(&soap_headers, request->val, request->len);
+		smart_str_appendl(&soap_headers, ZSTR_VAL(request), ZSTR_LEN(request));
 		smart_str_0(&soap_headers);
 
 		err = php_stream_write(stream, ZSTR_VAL(soap_headers.s), ZSTR_LEN(soap_headers.s));
@@ -1263,7 +1263,7 @@ try_again:
 		     strcmp(content_encoding,"x-gzip") == 0) &&
 		     zend_hash_str_exists(EG(function_table), "gzinflate", sizeof("gzinflate")-1)) {
 			ZVAL_STRING(&func, "gzinflate");
-			ZVAL_STRINGL(&params[0], http_body->val+10, http_body->len-10);
+			ZVAL_STRINGL(&params[0], ZSTR_VAL(http_body)+10, ZSTR_LEN(http_body)-10);
 		} else if (strcmp(content_encoding,"deflate") == 0 &&
 		           zend_hash_str_exists(EG(function_table), "gzuncompress", sizeof("gzuncompress")-1)) {
 			ZVAL_STRING(&func, "gzuncompress");
@@ -1430,7 +1430,7 @@ static zend_string* get_http_body(php_stream *stream, int close, char *headers)
 					}
 
 					while (len_size < buf_size) {
-						int len_read = php_stream_read(stream, http_buf->val + http_buf_size, buf_size - len_size);
+						int len_read = php_stream_read(stream, ZSTR_VAL(http_buf) + http_buf_size, buf_size - len_size);
 						if (len_read <= 0) {
 							/* Error or EOF */
 							done = TRUE;
@@ -1488,7 +1488,7 @@ static zend_string* get_http_body(php_stream *stream, int close, char *headers)
 		}
 		http_buf = zend_string_alloc(header_length, 0);
 		while (http_buf_size < header_length) {
-			int len_read = php_stream_read(stream, http_buf->val + http_buf_size, header_length - http_buf_size);
+			int len_read = php_stream_read(stream, ZSTR_VAL(http_buf) + http_buf_size, header_length - http_buf_size);
 			if (len_read <= 0) {
 				break;
 			}
@@ -1502,7 +1502,7 @@ static zend_string* get_http_body(php_stream *stream, int close, char *headers)
 			} else {
 				http_buf = zend_string_alloc(4096, 0);
 			}
-			len_read = php_stream_read(stream, http_buf->val + http_buf_size, 4096);
+			len_read = php_stream_read(stream, ZSTR_VAL(http_buf) + http_buf_size, 4096);
 			if (len_read > 0) {
 				http_buf_size += len_read;
 			}
@@ -1511,8 +1511,8 @@ static zend_string* get_http_body(php_stream *stream, int close, char *headers)
 		return NULL;
 	}
 
-	http_buf->val[http_buf_size] = '\0';
-	http_buf->len = http_buf_size;
+	ZSTR_VAL(http_buf)[http_buf_size] = '\0';
+	ZSTR_LEN(http_buf) = http_buf_size;
 	return http_buf;
 }
 

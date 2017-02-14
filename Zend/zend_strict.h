@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,13 +17,12 @@
 */
 /* $Id$ */
 /*============================================================================
- This file implements the '--enable-strict-api' configure option.
+ This file implements the '--enable-maintainer-strict-api' configure option.
 
  When this option is set, the names of the protected structure fields (those
  defined using using the _ZSTRICT_FIELD() macro) are modified, causing
- compilation to fail when some code attempts a direct access to the structure
- field using its usual name. This allows to detect when code does not respect
- the published API.
+ a compile failure when code attempts a direct access to the structure
+ fields. This allows to detect violations of the published API.
 
  -------------------------------- WARNING ------------------------------------
  Including this file is reserved to source files located in the Zend

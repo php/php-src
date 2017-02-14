@@ -112,7 +112,6 @@ static void zend_ini_add_string(zval *result, zval *op1, zval *op2)
 
 	if (Z_TYPE_P(op1) != IS_STRING) {
 		zend_string *str = zval_get_string(op1);
-<<<<<<< HEAD
 		/* ZEND_ASSERT(!Z_REFCOUNTED_P(op1)); */
 		if (ZEND_SYSTEM_INI) {
 			ZVAL_PSTRINGL(op1, ZSTR_VAL(str), ZSTR_LEN(str));
@@ -120,10 +119,6 @@ static void zend_ini_add_string(zval *result, zval *op1, zval *op2)
 		} else {
 			ZVAL_STR(op1, str);
 		}
-=======
-		ZVAL_PSTRINGL(op1, ZSTR_VAL(str), ZSTR_LEN(str));
-		zend_string_release(str);
->>>>>>> 2a0837b... Fix 'non-strict' zend_string access
 	}
 	op1_len = (int)Z_STRLEN_P(op1);
 	

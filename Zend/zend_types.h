@@ -99,7 +99,6 @@ typedef void (*sort_func_t)(void *, size_t, size_t, compare_func_t, swap_func_t)
 typedef void (*dtor_func_t)(zval *pDest);
 typedef void (*copy_ctor_func_t)(zval *pElement);
 
-<<<<<<< HEAD
 /*
  * zend_type - is an abstraction layer to represent information about type hint.
  * It shouldn't be used directly. Only through ZEND_TYPE_* macros.
@@ -157,9 +156,6 @@ typedef uintptr_t zend_type;
 	ZEND_TYPE_ENCODE_CLASS_CONST_Q2(ZEND_TYPE_ENCODE_CLASS_CONST_ ##allow_null, class_name)
 #define ZEND_TYPE_ENCODE_CLASS_CONST(class_name, allow_null) \
 	ZEND_TYPE_ENCODE_CLASS_CONST_Q1(allow_null, class_name)
-=======
-/* Use Z_xxx() macros (defined below) to access zend_value and zval elements */
->>>>>>> b5b51df... Protect gc/refcount and zval fields
 
 typedef union _zend_value {
 	zend_long         lval;				/* long value */
@@ -200,14 +196,10 @@ struct _zval_struct {
 		uint32_t     num_args;             /* arguments number for EX(This) */
 		uint32_t     fe_pos;               /* foreach position */
 		uint32_t     fe_iter_idx;          /* foreach iterator index */
-<<<<<<< HEAD
 		uint32_t     access_flags;         /* class constant access flags */
 		uint32_t     property_guard;       /* single property guard */
 		uint32_t     extra;                /* not further specified */
-	} u2;
-=======
 	} _ZSTRICT_FIELD(zval_struct,u2);
->>>>>>> b5b51df... Protect gc/refcount and zval fields
 };
 
 /* Access struct elements via the GC_xxx() macros (defined below) */
@@ -422,11 +414,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_CONST_FLAGS(zval)			(zval)._ZSTRICT_FIELD(zval_struct,u1).v.const_flags
 #define Z_CONST_FLAGS_P(zval_p)		Z_CONST_FLAGS(*(zval_p))
 
-<<<<<<< HEAD
-#define Z_TYPE_INFO(zval)			(zval).u1.type_info
-=======
 #define Z_TYPE_INFO(zval)			(zval)._ZSTRICT_FIELD(zval_struct,u1).type_info
->>>>>>> b5b51df... Protect gc/refcount and zval fields
 #define Z_TYPE_INFO_P(zval_p)		Z_TYPE_INFO(*(zval_p))
 
 #define Z_VAR_FLAGS(zval)			(zval)._ZSTRICT_FIELD(zval_struct,u2).var_flags
@@ -450,20 +438,16 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_FE_ITER(zval)				(zval)._ZSTRICT_FIELD(zval_struct,u2).fe_iter_idx
 #define Z_FE_ITER_P(zval_p)			Z_FE_ITER(*(zval_p))
 
-<<<<<<< HEAD
-#define Z_ACCESS_FLAGS(zval)		(zval).u2.access_flags
+#define Z_ACCESS_FLAGS(zval)		(zval)._ZSTRICT_FIELD(zval_struct,u2).access_flags
 #define Z_ACCESS_FLAGS_P(zval_p)	Z_ACCESS_FLAGS(*(zval_p))
 
-#define Z_EXTRA(zval)				(zval).u2.extra
+#define Z_EXTRA(zval)				(zval)._ZSTRICT_FIELD(zval_struct,u2).extra
 #define Z_EXTRA_P(zval_p)			Z_EXTRA(*(zval_p))
 
-#define Z_COUNTED(zval)				(zval).value.counted
-=======
 #define _Z_VALUE(zval)				(zval)._ZSTRICT_FIELD(zval_struct,value)
 #define _Z_VALUE_P(zval_p)			_Z_VALUE(*(zval_p))
 
 #define Z_COUNTED(zval)				_Z_VALUE(zval).counted
->>>>>>> b5b51df... Protect gc/refcount and zval fields
 #define Z_COUNTED_P(zval_p)			Z_COUNTED(*(zval_p))
 
 #define Z_TYPE_MASK					0xff
@@ -533,13 +517,8 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define IS_STR_CONSTANT             (1<<3) /* constant index */
 #define IS_STR_CONSTANT_UNQUALIFIED (1<<4) /* the same as IS_CONSTANT_UNQUALIFIED */
 
-<<<<<<< HEAD
 /* array flags */
 #define IS_ARRAY_IMMUTABLE			(1<<1)
-=======
-/* array flags (zval.value.arr->gc.u.v.flags) */
-#define IS_ARRAY_IMMUTABLE			(1<<1) /* the same as IS_TYPE_IMMUTABLE */
->>>>>>> b5b51df... Protect gc/refcount and zval fields
 
 /* object flags (zval.value.obj->gc.u.v.flags) */
 #define IS_OBJ_APPLY_COUNT			0x07
@@ -602,14 +581,10 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_ISNULL(zval)				(Z_TYPE(zval) == IS_NULL)
 #define Z_ISNULL_P(zval_p)			Z_ISNULL(*(zval_p))
 
-<<<<<<< HEAD
 #define Z_ISERROR(zval)				(Z_TYPE(zval) == _IS_ERROR)
 #define Z_ISERROR_P(zval_p)			Z_ISERROR(*(zval_p))
 
-#define Z_LVAL(zval)				(zval).value.lval
-=======
 #define Z_LVAL(zval)				_Z_VALUE(zval).lval
->>>>>>> b5b51df... Protect gc/refcount and zval fields
 #define Z_LVAL_P(zval_p)			Z_LVAL(*(zval_p))
 
 #define Z_DVAL(zval)				_Z_VALUE(zval).dval
