@@ -112,7 +112,7 @@ ZEND_API HashTable *zend_interned_strings_get_permanent_storage(void)
 	return interned_strings_permanent_ptr;
 }
 
-ZEND_API void zend_interned_strings_get_permanent_storage(HashTable *new_storage)
+ZEND_API void zend_interned_strings_set_permanent_storage(HashTable *new_storage)
 {
 	/* XXX Cleanup the old storage before, if needed. */
 	interned_strings_permanent_ptr = new_storage;

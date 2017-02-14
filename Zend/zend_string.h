@@ -36,7 +36,7 @@ void zend_known_interned_strings_init(zend_string ***, uint32_t *);
 ZEND_API zend_string *zend_interned_strings_get_empty_string(void);
 void zend_interned_strings_init_thread(void);
 ZEND_API HashTable *zend_interned_strings_get_permanent_storage(void);
-ZEND_API void zend_interned_strings_get_permanent_storage(HashTable *new_storage);
+ZEND_API void zend_interned_strings_set_permanent_storage(HashTable *new_storage);
 
 END_EXTERN_C()
 
