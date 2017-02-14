@@ -462,6 +462,11 @@ void fcgi_terminate(void)
 	in_shutdown = 1;
 }
 
+void fcgi_request_set_keep(fcgi_request *req, int new_value)
+{
+	req->keep = new_value;
+}
+
 #ifndef HAVE_ATTRIBUTE_WEAK
 void fcgi_set_logger(fcgi_logger lg) {
 	fcgi_log = lg;
@@ -1469,6 +1474,7 @@ int fcgi_accept_request(fcgi_request *req)
 			return -1;
 		}
 		if (fcgi_read_request(req)) {
+			req->hook.on_read();
 #ifdef _WIN32
 			if (is_impersonate && !req->tcp) {
 				pipe = (HANDLE)_get_osfhandle(req->fd);
