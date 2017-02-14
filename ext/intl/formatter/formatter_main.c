@@ -115,7 +115,7 @@ PHP_METHOD( NumberFormatter, __construct )
  */
 PHP_METHOD( NumberFormatter, __wakeup )
 {
-		const char* locale = intl_locale_get_default();
+		const char* locale = NULL;
 		size_t      pattern_len = 0;
 		char*       pattern = NULL;
 		zend_long   style = 0;
@@ -123,23 +123,26 @@ PHP_METHOD( NumberFormatter, __wakeup )
 		int32_t     spattern_len = 0;
 		zval        rv;
 		zval        *z_locale, *z_style, *z_pattern;
-		zend_string *zstr_locale, *zstr_pattern;
+		zend_string *zstr_locale, *zstr_pattern = NULL;
 
 		return_value = getThis();
 
 		z_locale = zend_read_property(Z_OBJCE_P(return_value), return_value, "locale", sizeof("locale") - 1, 0, &rv);
-		if (z_locale != NULL) {
-			zstr_locale = zval_get_string(z_locale);
-			locale = ZSTR_VAL(zstr_locale);
+		if (z_locale == NULL || Z_TYPE_P(z_locale) != IS_STRING) {
+			return;
 		}
 
+		zstr_locale = zval_get_string(z_locale);
+		locale = ZSTR_VAL(zstr_locale);
+
+
 		z_style = zend_read_property(Z_OBJCE_P(return_value), return_value, "style", sizeof("style") - 1, 0, &rv);
-		if (z_style != NULL) {
+		if (z_style != NULL && Z_TYPE_P(z_style) == IS_LONG) {
 			style = zval_get_long(z_style);
 		}
 
 		z_pattern = zend_read_property(Z_OBJCE_P(return_value), return_value, "pattern", sizeof("pattern") - 1, 0, &rv);
-		if (z_pattern != NULL) {
+		if (z_pattern != NULL && Z_TYPE_P(z_pattern) == IS_STRING) {
 			zstr_pattern = zval_get_string(z_pattern);
 			pattern = ZSTR_VAL(zstr_pattern);
 			pattern_len = ZSTR_LEN(zstr_pattern);
@@ -153,6 +156,18 @@ PHP_METHOD( NumberFormatter, __wakeup )
 		/* Convert pattern (if specified) to UTF-16. */
 		if(pattern && pattern_len) {
 			intl_convert_utf8_to_utf16(&spattern, &spattern_len, pattern, pattern_len, &INTL_DATA_ERROR_CODE(nfo));
+			if (INTL_DATA_ERROR_CODE(nfo) != U_ZERO_ERROR) {
+					intl_errors_set(&nfo->nf_data.error, INTL_DATA_ERROR_CODE(nfo),
+						"Unserializing NumberFormatter failed", 0);
+					if(spattern) {
+						efree(spattern);
+					}
+					zend_string_release(zstr_locale);
+					if (zstr_pattern != NULL) {
+						zend_string_release(zstr_pattern);
+					}
+					return;
+			}
 		}
 
 		/* Create an ICU number formatter. */
@@ -161,12 +176,13 @@ PHP_METHOD( NumberFormatter, __wakeup )
 		if(spattern) {
 			efree(spattern);
 		}
-		if (z_locale != NULL) {
-			zend_string_release(zstr_locale);
-		}
-		if (z_pattern != NULL) {
+
+		zend_string_release(zstr_locale);
+		if (zstr_pattern != NULL) {
 			zend_string_release(zstr_pattern);
 		}
+		intl_errors_set(&nfo->nf_data.error, INTL_DATA_ERROR_CODE(nfo),
+			"Unserializing NumberFormatter instance failed", 0);
 }
 /* }}} */
 
