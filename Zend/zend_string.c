@@ -29,8 +29,18 @@ static zend_string *zend_new_interned_string_int(zend_string *str);
 static void zend_interned_strings_snapshot_int(void);
 static void zend_interned_strings_restore_int(void);
 
+/* Any strings interned in the startup phase. Common to all the threads,
+	won't be free'd until process exit. If we want an ability to 
+	add permanent strings even after startup, it would be still
+	possible on costs of locking in the thread safe builds. */
 static HashTable interned_strings_permanent;
-ZEND_TLS HashTable interned_strings_request;
+
+/* Short living interned strings, these are all those created during
+	the request. They should not be marked permanent. Every thread
+	has its own copies of transient interned strings, which
+	should not be shared between threads. */
+ZEND_TLS HashTable interned_strings_volatile;
+
 static zend_string *empty_string;
 static zend_bool permanent_snapshot_exists = 0;
 
@@ -88,7 +98,7 @@ static void zend_init_interned_strings_ht(HashTable *interned_strings)
 
 void zend_interned_strings_init_thread(void)
 {
-	zend_init_interned_strings_ht(&interned_strings_request);
+	zend_init_interned_strings_ht(&interned_strings_volatile);
 }
 
 zend_string *zend_interned_strings_get_empty_string(void)
@@ -101,7 +111,7 @@ void zend_interned_strings_init(void)
 	zend_string *str;
 
 	zend_init_interned_strings_ht(&interned_strings_permanent);
-	zend_init_interned_strings_ht(&interned_strings_request);
+	zend_init_interned_strings_ht(&interned_strings_volatile);
 
 	/* interned empty string */
 	str = zend_string_alloc(sizeof("")-1, 1);
@@ -147,7 +157,7 @@ static zend_string *zend_new_interned_string_int(zend_string *str)
 	}
 
 	if (permanent_snapshot_exists) {
-		interned_strings = &interned_strings_request;
+		interned_strings = &interned_strings_volatile;
 	} else {
 		interned_strings = &interned_strings_permanent;
 	}
@@ -231,7 +241,7 @@ static void zend_interned_strings_restore_int(void)
 	uint32_t nIndex;
 	uint32_t idx;
 	Bucket *p;
-	HashTable *interned_strings = &interned_strings_request;
+	HashTable *interned_strings = &interned_strings_volatile;
 
 	idx = interned_strings->nNumUsed;
 	while (idx > 0) {
