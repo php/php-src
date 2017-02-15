@@ -60,6 +60,8 @@ PHP                                                                        NEWS
 - Streams:
   . Fixed bug #73496 (Invalid memory access in zend_inline_hash_func).
     (Laruence)
+  . Fixed bug #74090 (stream_get_contents maxlength>-1 returns empty string).
+    (Anatol)
 
 
 16 Feb 2017 PHP 7.0.16
