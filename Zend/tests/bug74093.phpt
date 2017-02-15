@@ -15,4 +15,4 @@ $a2 = range(100000, 999999);
 array_intersect($a1, $a2);
 ?>
 --EXPECTF--
-Fatal error: Maximum execution time of 1+1 seconds exceeded (terminated) in %sbug74093.php on line %d
+Fatal error: Maximum execution time of 1+1 seconds exceeded %s
