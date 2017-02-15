@@ -53,6 +53,10 @@
 #  undef EWOULDBLOCK
 # endif
 # define EWOULDBLOCK WSAEWOULDBLOCK
+# ifdef EMSGSIZE
+#  undef EMSGSIZE
+# endif
+# define EMSGSIZE WSAEMSGSIZE
 #endif
 
 /* This functions transforms the first char to 'w' if it's not 'r', 'a' or 'w'
