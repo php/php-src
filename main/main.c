@@ -1799,6 +1799,8 @@ void php_request_shutdown(void *dummy)
 {
 	zend_bool report_memleaks;
 
+	EG(flags) |= EG_FLAGS_IN_SHUTDOWN;
+
 	report_memleaks = PG(report_memleaks);
 
 	/* EG(current_execute_data) points into nirvana and therefore cannot be safely accessed
@@ -2093,7 +2095,10 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 #endif
 
 #ifdef PHP_WIN32
-	php_win32_init_rng_lock();
+	if (!php_win32_init_random_bytes()) {
+		fprintf(stderr, "\ncrypt algorithm provider initialization failed\n");
+		return FAILURE;
+	}
 #endif
 
 	module_shutdown = 0;
@@ -2407,7 +2412,7 @@ void php_module_shutdown(void)
 #endif
 
 #ifdef PHP_WIN32
-	php_win32_free_rng_lock();
+	(void)php_win32_shutdown_random_bytes();
 #endif
 
 	sapi_flush();

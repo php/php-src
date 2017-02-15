@@ -263,7 +263,7 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 		/* try a wildcard */
 		char *wildname;
 
-		wildname = emalloc(n+3);
+		wildname = safe_emalloc(1, n, 3);
 		memcpy(wildname, filtername, n+1);
 		period = wildname + (period - filtername);
 		while (period && !filter) {
