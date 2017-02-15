@@ -336,7 +336,7 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 					ret = recv(sock->socket, &buf, sizeof(buf), MSG_PEEK);
 					err = php_socket_errno();
 					if (0 == ret || /* the counterpart did properly shutdown*/
-						(0 > ret && err != EWOULDBLOCK && err != EAGAIN)) { /* there was an unrecoverable error */
+						(0 > ret && err != EWOULDBLOCK && err != EAGAIN && err != EMSGSIZE)) { /* there was an unrecoverable error */
 						alive = 0;
 					}
 				}
