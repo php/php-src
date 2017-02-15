@@ -1980,8 +1980,8 @@ PHP_FUNCTION(array_fill)
 			}
 			zend_hash_index_add_new(Z_ARRVAL_P(return_value), start_key, val);
 			while (--num) {
-				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), val);
 				start_key++;
+				zend_hash_index_add_new(Z_ARRVAL_P(return_value), start_key, val);
 			}
 		}
 	} else if (EXPECTED(num == 0)) {
