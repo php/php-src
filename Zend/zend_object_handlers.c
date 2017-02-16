@@ -286,7 +286,7 @@ static zend_always_inline int zend_verify_property_access(zend_property_info *pr
 		} else {
 			scope = zend_get_executed_scope();
 		}
-		return zend_check_protected(property_info->ce, scope);
+		return zend_check_protected(ce, scope);
 	}
 	return 0;
 }
