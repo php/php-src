@@ -33,6 +33,7 @@
 
 #include "php_ini.h"
 #include "php_globals.h"
+#include "php_string.h"
 #define STATE_TAG SOME_OTHER_STATE_TAG
 #include "basic_functions.h"
 #include "url.h"
@@ -122,7 +123,8 @@ static inline void append_modified_url(smart_str *url, smart_str *dest, smart_st
 	 * Don't modify "//example.com" full path, unless
 	 * HTTP_HOST matches.
 	 */
-	if (ZSTR_VAL(url->s)[0] == '/' && ZSTR_VAL(url->s)[1] == '/') {
+	if (ZSTR_LEN(url->s) > 2 && ZSTR_VAL(url->s)[0] == '/' && ZSTR_VAL(url->s)[1] == '/') {
+		const char *end_chars = "/\"'?>\r\n";
 		zval *tmp = NULL, *http_host = NULL;
 		size_t target_len, host_len;
 		if ((!(tmp = zend_hash_str_find(&EG(symbol_table), ZEND_STRL("_SERVER"))))
@@ -132,10 +134,13 @@ static inline void append_modified_url(smart_str *url, smart_str *dest, smart_st
 			smart_str_append_smart_str(dest, url);
 			return;
 		}
+
 		/* HTTP_HOST could be "example.com:8888", etc. */
 		/* Need to find end of URL in buffer */
 		host_len   = strcspn(Z_STRVAL_P(http_host), ":");
-		target_len = strcspn(ZSTR_VAL(url->s)+2, "/\"'?>\r\n");
+		target_len = php_strcspn(
+			ZSTR_VAL(url->s) + 2, (char *) end_chars,
+			ZSTR_VAL(url->s) + ZSTR_LEN(url->s), (char *) end_chars + strlen(end_chars));
 		if (host_len
 			&& host_len == target_len
 			&& strncasecmp(Z_STRVAL_P(http_host), ZSTR_VAL(url->s)+2, host_len)) {
