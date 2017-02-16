@@ -1,5 +1,9 @@
 --TEST--
 Test is_callable() function : usage variations - undefined functions
+--SKIPIF--
+<?php
+if (!extension_loaded('json')) die("skip requires ext/json");
+?>
 --INI--
 precision=14
 error_reporting = E_ALL & ~E_NOTICE | E_STRICT

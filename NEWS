@@ -47,10 +47,6 @@ PHP                                                                        NEWS
   . Fixed bug #74022 (PHP Fast CGI crashes when reading from a pfx file).
     (Anatol)
 
-- Reflection:
-  . Fixed bug #74035 (getNumberOfRequiredParameters wrong for
-    ReflectionClass::newInstance). (Andrew Nester)
-
 - Standard:
   . Fixed bug #74005 (mail.add_x_header causes RFC-breaking lone line feed).
     (Anatol)
