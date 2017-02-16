@@ -6,8 +6,8 @@ $context = stream_context_create(array('ssl' => array('local_cert' => dirname(__
 
 for ($i=0; $i<10 && !$socket; ++$i) {
 	$port = rand(50000, 65535);
-	
-	@$socket = stream_socket_server("tcp://127.0.0.1:$port", $errno, $errstr, STREAM_SERVER_BIND|STREAM_SERVER_LISTEN, $context);
+
+	$socket = @stream_socket_server("tcp://127.0.0.1:$port", $errno, $errstr, STREAM_SERVER_BIND|STREAM_SERVER_LISTEN, $context);
 }
 //set anther random port that is not the same as $port
 do{
@@ -402,20 +402,34 @@ if ($pid) {
 
 		}elseif (preg_match('/^PASV/', $buf, $matches)) {
 			$pasv=true;
-			$p2 = $pasv_port % ((int) 1 << 8);
-			$p1 = ($pasv_port-$p2)/((int) 1 << 8);
 			$host = "127.0.0.1";
-			if (!empty($ssl)) {
-				$soc = stream_socket_server("tcp://127.0.0.1:$pasv_port", $errno, $errstr, STREAM_SERVER_BIND|STREAM_SERVER_LISTEN, $context);
-			} else {
-				$soc = stream_socket_server("tcp://127.0.0.1:$pasv_port");
+			$i=0;
+
+			do {
+				if (!empty($ssl)) {
+					$soc = @stream_socket_server("tcp://127.0.0.1:$pasv_port", $errno, $errstr, STREAM_SERVER_BIND|STREAM_SERVER_LISTEN, $context);
+				} else {
+					$soc = @stream_socket_server("tcp://127.0.0.1:$pasv_port");
+				}
+				/* Could bind port, Try another port */
+				if (!$soc) {
+					$pasv_port = rand(50000, 65535);
+				}
+				$i++;
+			} while ($i<10 && !$soc);
+
+			if (!$soc) {
+				echo "$errstr ($errno)\n";
+				die("could not bind passive port\n");
 			}
 
+			$p2 = $pasv_port % ((int) 1 << 8);
+			$p1 = ($pasv_port-$p2)/((int) 1 << 8);
 			fputs($s, "227 Entering Passive Mode. (127,0,0,1,{$p1},{$p2})\r\n");
 
 			$pasvs = stream_socket_accept($soc,10);
 
-		}elseif (preg_match('/^EPSV/', $buf, $matches)) {
+		} elseif (preg_match('/^EPSV/', $buf, $matches)) {
 			fputs($s, "550 Extended passsive mode not supported.\r\n");
 		} elseif (preg_match('/^SITE EXEC/', $buf, $matches)) {
 			fputs($s, "200 OK\r\n");
