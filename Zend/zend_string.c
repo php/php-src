@@ -25,7 +25,9 @@ ZEND_API zend_string *(*zend_new_interned_string)(zend_string *str);
 ZEND_API void (*zend_interned_strings_snapshot)(void);
 ZEND_API void (*zend_interned_strings_restore)(void);
 
-static zend_string *zend_new_interned_string_int(zend_string *str);
+static zend_string *zend_new_interned_string_int(zend_string *str, HashTable *interned_strings);
+static zend_string *zend_new_interned_string_permanent_int(zend_string *str);
+static zend_string *zend_new_interned_string_volatile_int(zend_string *str);
 static void zend_interned_strings_snapshot_int(void);
 static void zend_interned_strings_restore_int(void);
 
@@ -43,7 +45,6 @@ static HashTable *interned_strings_permanent_ptr = &interned_strings_permanent;
 ZEND_TLS HashTable interned_strings_volatile;
 
 static zend_string *empty_string;
-static zend_bool permanent_snapshot_exists = 0;
 
 ZEND_API zend_ulong zend_hash_func(const char *str, size_t len)
 {
@@ -68,7 +69,7 @@ ZEND_API uint32_t zend_intern_known_strings(const char **strings, uint32_t count
 	for (i = 0; i < count; i++) {
 		zend_string *str = zend_string_init(strings[i], strlen(strings[i]), 1);
 		known_interned_strings[known_interned_strings_count + i] =
-			zend_new_interned_string_int(str);
+			zend_new_interned_string_permanent_int(str);
 	}
 	known_interned_strings_count = old_count + count;
 	return old_count;
@@ -125,10 +126,14 @@ void zend_interned_strings_init(void)
 	zend_init_interned_strings_ht(interned_strings_permanent_ptr);
 	zend_init_interned_strings_ht(&interned_strings_volatile);
 
+	zend_new_interned_string = zend_new_interned_string_permanent_int;
+	zend_interned_strings_snapshot = zend_interned_strings_snapshot_int;
+	zend_interned_strings_restore = zend_interned_strings_restore_int;
+
 	/* interned empty string */
 	str = zend_string_alloc(sizeof("")-1, 1);
 	ZSTR_VAL(str)[0] = '\000';
-	empty_string = zend_new_interned_string_int(str);
+	empty_string = zend_new_interned_string_permanent_int(str);
 #ifndef ZTS
 	CG(empty_string) = empty_string;
 #endif
@@ -138,10 +143,6 @@ void zend_interned_strings_init(void)
 	/* known strings */
 	zend_intern_known_strings(known_strings, (sizeof(known_strings) / sizeof(known_strings[0])) - 1);
 	zend_known_interned_strings_init(&CG(known_strings), &CG(known_strings_count));
-
-	zend_new_interned_string = zend_new_interned_string_int;
-	zend_interned_strings_snapshot = zend_interned_strings_snapshot_int;
-	zend_interned_strings_restore = zend_interned_strings_restore_int;
 }
 
 void zend_interned_strings_dtor(void)
@@ -156,22 +157,15 @@ void zend_interned_strings_dtor(void)
 	known_interned_strings_count = 0;
 }
 
-static zend_string *zend_new_interned_string_int(zend_string *str)
+static zend_string *zend_new_interned_string_int(zend_string *str, HashTable *interned_strings)
 {
 	zend_ulong h;
 	uint32_t nIndex;
 	uint32_t idx;
 	Bucket *p;
-	HashTable *interned_strings;
 
 	if (ZSTR_IS_INTERNED(str)) {
 		return str;
-	}
-
-	if (permanent_snapshot_exists) {
-		interned_strings = &interned_strings_volatile;
-	} else {
-		interned_strings = interned_strings_permanent_ptr;
 	}
 
 	h = zend_string_hash_val(str);
@@ -227,6 +221,17 @@ static zend_string *zend_new_interned_string_int(zend_string *str)
 	return str;
 }
 
+
+static zend_string *zend_new_interned_string_permanent_int(zend_string *str)
+{
+	return zend_new_interned_string_int(str, interned_strings_permanent_ptr);
+}
+
+static zend_string *zend_new_interned_string_volatile_int(zend_string *str)
+{
+	return zend_new_interned_string_int(str, &interned_strings_volatile);
+}
+
 static void zend_interned_strings_snapshot_int(void)
 {
 	uint32_t idx;
@@ -235,7 +240,7 @@ static void zend_interned_strings_snapshot_int(void)
 
 	/* Ensure the function is called only once during startup.
 		All the followup strings will be in the per thread table. */
-	ZEND_ASSERT(0 == permanent_snapshot_exists);
+	ZEND_ASSERT(zend_new_interned_string == zend_new_interned_string_permanent_int);
 
 	idx = interned_strings->nNumUsed;
 	while (idx > 0) {
@@ -245,7 +250,7 @@ static void zend_interned_strings_snapshot_int(void)
 		GC_FLAGS(p->key) |= IS_STR_PERMANENT;
 	}
 
-	permanent_snapshot_exists = 1;
+	zend_new_interned_string = zend_new_interned_string_volatile_int;
 }
 
 static void zend_interned_strings_restore_int(void)
@@ -255,11 +260,12 @@ static void zend_interned_strings_restore_int(void)
 	Bucket *p;
 	HashTable *interned_strings = &interned_strings_volatile;
 
+	ZEND_ASSERT(zend_new_interned_string == zend_new_interned_string_volatile_int);
+
 	idx = interned_strings->nNumUsed;
 	while (idx > 0) {
 		idx--;
 		p = interned_strings->arData + idx;
-		/*if (GC_FLAGS(p->key) & IS_STR_PERMANENT) break;*/
 		interned_strings->nNumUsed--;
 		interned_strings->nNumOfElements--;
 
