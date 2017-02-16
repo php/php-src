@@ -359,7 +359,7 @@ ZEND_API int zend_alter_ini_entry_ex(zend_string *name, zend_string *new_value, 
 		ini_entry->orig_value = ini_entry->value;
 		ini_entry->orig_modifiable = modifiable;
 		ini_entry->modified = 1;
-		zend_hash_add_ptr(EG(modified_ini_directives), name, ini_entry);
+		zend_hash_add_ptr(EG(modified_ini_directives), ini_entry->name, ini_entry);
 	}
 
 	duplicate = zend_string_copy(new_value);
