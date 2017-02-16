@@ -378,13 +378,13 @@ static void autoload_func_info_dtor(zval *element)
 	if (!Z_ISUNDEF(alfi->obj)) {
 		zval_ptr_dtor(&alfi->obj);
 	}
-	if (!Z_ISUNDEF(alfi->closure)) {
-		zval_ptr_dtor(&alfi->closure);
-	}
 	if (alfi->func_ptr &&
 		UNEXPECTED(alfi->func_ptr->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
 		zend_string_release(alfi->func_ptr->common.function_name);
 		zend_free_trampoline(alfi->func_ptr);
+	}
+	if (!Z_ISUNDEF(alfi->closure)) {
+		zval_ptr_dtor(&alfi->closure);
 	}
 	efree(alfi);
 }
