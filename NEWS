@@ -12,6 +12,8 @@ PHP                                                                        NEWS
     get_object_vars). (mhagstrand)
   . Fixed bug #73954 (NAN check fails on Alpine Linux with musl). (Andrea)
   . Fixed bug #74039 (is_infinite(-INF) returns false). (Christian Schmidt)
+  . Fixed bug #73677 (Generating phar.phar core dump with gcc ASAN enabled
+    build). (ondrej)
 
 - Apache:
   . Fixed bug #61471 (Incomplete POST does not timeout but is passed to PHP).
