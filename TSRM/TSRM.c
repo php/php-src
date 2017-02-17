@@ -10,7 +10,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "TSRM.h"
+#include "zend.h"
 
 #ifdef ZTS
 
@@ -120,6 +120,8 @@ static int32 tls_key;
 # warning tsrm_set_interpreter_context is probably broken on this platform
 #endif
 
+TSRM_TLS uint8_t in_main_thread = 0;
+
 /* Startup TSRM (call once for the entire process) */
 TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debug_level, char *debug_filename)
 {
@@ -135,6 +137,11 @@ TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debu
 #elif defined(BETHREADS)
 	tls_key = tls_allocate();
 #endif
+
+	/* ensure singleton */
+	in_main_thread = 1;
+
+	zend_interned_strings_init(ZEND_INTERNED_STRINGS_TSRM);
 
 	tsrm_error_file = stderr;
 	tsrm_error_set(debug_level, debug_filename);
@@ -169,6 +176,11 @@ TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debu
 TSRM_API void tsrm_shutdown(void)
 {
 	int i;
+
+	if (!in_main_thread) {
+		/* ensure singleton */
+		return;
+	}
 
 	if (tsrm_tls_table) {
 		for (i=0; i<tsrm_tls_table_size; i++) {
@@ -212,6 +224,8 @@ TSRM_API void tsrm_shutdown(void)
 #elif defined(TSRM_WIN32)
 	TlsFree(tls_key);
 #endif
+
+	zend_interned_strings_dtor(ZEND_INTERNED_STRINGS_TSRM);
 }
 
 

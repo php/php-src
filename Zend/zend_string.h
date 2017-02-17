@@ -29,14 +29,23 @@ ZEND_API extern zend_string *(*zend_new_interned_string)(zend_string *str);
 ZEND_API extern void (*zend_interned_strings_snapshot)(void);
 ZEND_API extern void (*zend_interned_strings_restore)(void);
 
+/* This implies the init/dtor call stage for permanent interned strings, both
+	calls have to be passed the same value. */
+typedef enum _zend_interned_strings_init_stage {
+	ZEND_INTERNED_STRINGS_UNINITIALIZED,
+	ZEND_INTERNED_STRINGS_SAPI,   /* The most safe case. */
+	ZEND_INTERNED_STRINGS_ENGINE, /* This is only feasible for NTS, probably. */
+	ZEND_INTERNED_STRINGS_TSRM    /* Automatic handling in TSRM startup/shutdown. */
+} zend_interned_strings_init_stage;
+
 ZEND_API zend_ulong zend_hash_func(const char *str, size_t len);
-void zend_interned_strings_init(void);
-void zend_interned_strings_dtor(void);
+ZEND_API void zend_interned_strings_init(zend_interned_strings_init_stage);
+ZEND_API void zend_interned_strings_dtor(zend_interned_strings_init_stage);
 void zend_known_interned_strings_init(zend_string ***, uint32_t *);
 ZEND_API zend_string *zend_interned_strings_get_empty_string(void);
+#ifdef ZTS
 void zend_interned_strings_init_thread(void);
-ZEND_API HashTable *zend_interned_strings_get_permanent_storage(void);
-ZEND_API void zend_interned_strings_set_permanent_storage(HashTable *new_storage);
+#endif
 
 END_EXTERN_C()
 

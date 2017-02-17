@@ -453,6 +453,7 @@ static apr_status_t php_apache_server_shutdown(void *tmp)
 #ifdef ZTS
 	tsrm_shutdown();
 #endif
+	zend_interned_strings_dtor(ZEND_INTERNED_STRINGS_SAPI);
 	return APR_SUCCESS;
 }
 

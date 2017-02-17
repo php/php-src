@@ -841,7 +841,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 #endif
 	EG(error_reporting) = E_ALL & ~E_NOTICE;
 
-	zend_interned_strings_init();
+	zend_interned_strings_init(ZEND_INTERNED_STRINGS_ENGINE);
 	zend_startup_builtin_functions();
 	zend_register_standard_constants();
 	zend_register_auto_global(zend_string_init("GLOBALS", sizeof("GLOBALS") - 1, 1), 1, php_auto_globals_create_globals);
@@ -973,11 +973,7 @@ void zend_shutdown(void) /* {{{ */
 #endif
 	zend_destroy_rsrc_list_dtors();
 
-#ifndef ZTS
-	/* XXX TSRM shutdown will require these yet. No clear solution yet,
-		likely this have to be moved outside zend_shutdown(). */
-	zend_interned_strings_dtor();
-#endif
+	zend_interned_strings_dtor(ZEND_INTERNED_STRINGS_ENGINE);
 }
 /* }}} */
 
