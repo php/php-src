@@ -263,12 +263,12 @@ static void* dasm_labels[zend_lb_MAX];
 ||if (op_type == IS_CONST) {
 |   .if X64
 |   mov r0, aword EX->literals
-|   sse_ins reg, qword [r0 + op.constant]
+|   sse_ins xmm(reg), qword [r0 + op.constant]
 |   .else
-|   sse_ins reg, qword [op.zv]
+|   sse_ins xmm(reg), qword [op.zv]
 |   .endif
 ||} else {
-|   sse_ins reg, qword [FP + op.var]
+|   sse_ins xmm(reg), qword [FP + op.var]
 ||}
 |.endmacro
 
@@ -276,17 +276,17 @@ static void* dasm_labels[zend_lb_MAX];
 ||if (op_type == IS_CONST) {
 |   .if X64
 |   mov r0, aword EX->literals
-|   cvtsi2sd reg, qword [r0 + op.constant]
+|   cvtsi2sd xmm(reg), qword [r0 + op.constant]
 |   .else
-|   cvtsi2sd reg, dword [op.zv]
+|   cvtsi2sd xmm(reg), dword [op.zv]
 |   .endif
 ||} else {
-|   cvtsi2sd reg, aword [FP + op.var]
+|   cvtsi2sd xmm(reg), aword [FP + op.var]
 ||}
 |.endmacro
 
 |.macro SSE_GET_Z_LVAL, reg, zv
-|   cvtsi2sd reg, aword [zv]
+|   cvtsi2sd xmm(reg), aword [zv]
 |.endmacro
 
 |.macro SSE_LOAD, reg, op_type, op
@@ -294,61 +294,45 @@ static void* dasm_labels[zend_lb_MAX];
 |.endmacro
 
 |.macro SSE_GET_Z_DVAL, reg, zv
-|   movsd reg, qword [zv]
+|   movsd xmm(reg), qword [zv]
 |.endmacro
 
-|.macro SSE_MATH, opcode, reg, op_type, op
+|.macro SSE_MATH, opcode, reg, op
 ||switch (opcode) {
 ||    case ZEND_ADD:
 ||    case ZEND_ASSIGN_ADD:
-|         SSE_OP addsd, reg, op_type, op
+|         addsd xmm(reg), op
 ||        break;
 ||    case ZEND_SUB:
 ||    case ZEND_ASSIGN_SUB:
-|         SSE_OP subsd, reg, op_type, op
+|         subsd xmm(reg), op
 ||        break;
 ||    case ZEND_MUL:
 ||    case ZEND_ASSIGN_MUL:
-|         SSE_OP mulsd, reg, op_type, op
+|         mulsd xmm(reg), op
 ||        break;
 ||    case ZEND_DIV:
 ||    case ZEND_ASSIGN_DIV:
-|         SSE_OP divsd, reg, op_type, op
+|         divsd xmm(reg), op
 ||        break;
 ||}
 |.endmacro
 
-|.macro SSE_MATH2, opcode, dst_reg, src_reg
-||switch (opcode) {
-||    case ZEND_ADD:
-||    case ZEND_ASSIGN_ADD:
-|         addsd dst_reg, src_reg
-||        break;
-||    case ZEND_SUB:
-||    case ZEND_ASSIGN_SUB:
-|         subsd dst_reg, src_reg
-||        break;
-||    case ZEND_MUL:
-||    case ZEND_ASSIGN_MUL:
-|         mulsd dst_reg, src_reg
-||        break;
-||    case ZEND_DIV:
-||    case ZEND_ASSIGN_DIV:
-|         divsd dst_reg, src_reg
-||        break;
-||}
+|.macro SSE_MATH_CONST, opcode, reg, op
+|   .if X64
+|   mov r0, aword EX->literals
+|   SSE_MATH, opcode, reg, qword [r0 + op.constant]
+|   .else
+|   SSE_MATH, opcode, reg, qword [op.zv]
+|   .endif
+|.endmacro
+
+|.macro SSE_MATH_REG, opcode, dst_reg, src_reg
+|   SSE_MATH, opcode, dst_reg, xmm(src_reg)
 |.endmacro
 
 |.macro SSE_STORE, zv, reg
-|	movsd qword [zv], reg
-|.endmacro
-
-|.macro DOUBLE_STORE, zv, reg
-|.if X64 or SSE
-|	SSE_STORE zv, reg
-|.else
-|	FPU_STORE zv
-|.endif
+|	movsd qword [zv], xmm(reg)
 |.endmacro
 
 |.macro LONG_OP, long_ins, reg, op_type, op
@@ -2085,17 +2069,21 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 		|.cold_code
 		|1:
 		|.if X64 or SSE
+		int tmp_reg1 = 0;
+		int tmp_reg2 = 1;
+
 		if (op1_type == IS_CONST) {
-			|	SSE_LOAD_LONG xmm0, op1_type, op1
+			|	SSE_LOAD_LONG tmp_reg1, op1_type, op1
 		} else {
-			|  	SSE_GET_Z_LVAL xmm0, Ra(op1_reg)+op1_offset
+			|  	SSE_GET_Z_LVAL tmp_reg1, Ra(op1_reg)+op1_offset
 		}
 		if (op2_type == IS_CONST) {
-			|	SSE_LOAD_LONG xmm1, op2_type, op2
+			|	SSE_LOAD_LONG tmp_reg2, op2_type, op2
 		} else {
-			|  	SSE_GET_Z_LVAL xmm1, Ra(op2_reg)+op2_offset
+			|  	SSE_GET_Z_LVAL tmp_reg2, Ra(op2_reg)+op2_offset
 		}
-		|	SSE_MATH2 opline->opcode, xmm0, xmm1
+		|	SSE_MATH_REG opline->opcode, tmp_reg1, tmp_reg2
+		|	SSE_STORE Ra(res_reg)+res_offset, tmp_reg1
 		|.else
 		if (op2_type == IS_CONST) {
 			|	FPU_LONG_LOAD op2_type, op2
@@ -2108,8 +2096,8 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 			|  	FPU_GET_Z_LVAL Ra(op1_reg)+op1_offset
 		}
 		|	FPU_MATH2 opline->opcode, st1
+		|	FPU_STORE Ra(res_reg)+res_offset
 		|.endif
-		|	DOUBLE_STORE Ra(res_reg)+res_offset, xmm0
 		|	SET_Z_TYPE_INFO Ra(res_reg)+res_offset, IS_DOUBLE
 		|	jmp >2
 		|.code
@@ -2142,16 +2130,19 @@ static int zend_jit_math_long_double(dasm_State    **Dst,
                                      uint32_t        res_offset)
 {
 	|.if X64 or SSE
+		int result_reg = 0;
+
 		if (op1_type == IS_CONST) {
-			|	SSE_LOAD_LONG xmm0, op1_type, op1
+			|	SSE_LOAD_LONG result_reg, op1_type, op1
 		} else {
-			|	SSE_GET_Z_LVAL xmm0, Ra(op1_reg)+op1_offset
+			|	SSE_GET_Z_LVAL result_reg, Ra(op1_reg)+op1_offset
 		}
 		if (op2_type == IS_CONST) {
-			|	SSE_MATH opline->opcode, xmm0, op2_type, op2
+			|	SSE_MATH_CONST opline->opcode, result_reg, op2
 		} else {
-			|	SSE_MATH2 opline->opcode, xmm0, qword [Ra(op2_reg)+op2_offset]
+			|	SSE_MATH opline->opcode, result_reg, qword [Ra(op2_reg)+op2_offset]
 		}
+		|	SSE_STORE Ra(res_reg)+res_offset, result_reg
 	|.else
 		if (op1_type == IS_CONST) {
 			|	FPU_LONG_LOAD op1_type, op1
@@ -2163,8 +2154,8 @@ static int zend_jit_math_long_double(dasm_State    **Dst,
 		} else {
 			|	FPU_MATH2 opline->opcode, qword [Ra(op2_reg)+op2_offset]
 		}
+		|	FPU_STORE Ra(res_reg)+res_offset
 	|.endif
-	|	DOUBLE_STORE Ra(res_reg)+res_offset, xmm0
 	|	SET_Z_TYPE_INFO Ra(res_reg)+res_offset, IS_DOUBLE
 
 	return 1;
@@ -2184,30 +2175,35 @@ static int zend_jit_math_double_long(dasm_State    **Dst,
                                      uint32_t        res_offset)
 {
 	|.if X64 or SSE
+	||	int result_reg = 0;
+	||
 	||	if (opline->opcode == ZEND_ADD || opline->opcode == ZEND_MUL || opline->opcode == ZEND_ASSIGN_ADD || opline->opcode == ZEND_ASSIGN_MUL) {
 	||		if (op2_type == IS_CONST) {
-	|			SSE_LOAD_LONG xmm0, op2_type, op2
+	|			SSE_LOAD_LONG result_reg, op2_type, op2
 	||		} else {
-	|			SSE_GET_Z_LVAL xmm0, Ra(op2_reg)+op2_offset
+	|			SSE_GET_Z_LVAL result_reg, Ra(op2_reg)+op2_offset
 	||		}
 	||		if (op1_type == IS_CONST) {
-	|			SSE_MATH opline->opcode, xmm0, op1_type, op1
+	|			SSE_MATH_CONST opline->opcode, result_reg, op1
 	||		} else {
-	|			SSE_MATH2 opline->opcode, xmm0, qword [Ra(op1_reg)+op1_offset]
+	|			SSE_MATH opline->opcode, result_reg, qword [Ra(op1_reg)+op1_offset]
 	||		}
 	||	} else {
+	||		int tmp_reg = 1;
+	||
 	||		if (op1_type == IS_CONST) {
-	|			SSE_LOAD xmm0, op1_type, op1
+	|			SSE_LOAD result_reg, op1_type, op1
 	||		} else {
-	|			SSE_GET_Z_DVAL xmm0, Ra(op1_reg)+op1_offset
+	|			SSE_GET_Z_DVAL result_reg, Ra(op1_reg)+op1_offset
 	||		}
 	||		if (op2_type == IS_CONST) {
-	|			SSE_LOAD_LONG xmm1, op2_type, op2
+	|			SSE_LOAD_LONG tmp_reg, op2_type, op2
 	||		} else {
-	|			SSE_GET_Z_LVAL xmm1, Ra(op2_reg)+op2_offset
+	|			SSE_GET_Z_LVAL tmp_reg, Ra(op2_reg)+op2_offset
 	||		}
-	|		SSE_MATH2 opline->opcode, xmm0, xmm1
+	|		SSE_MATH_REG opline->opcode, result_reg, tmp_reg
 	||	}
+	|	SSE_STORE Ra(res_reg)+res_offset, result_reg
 	|.else
 	||	if (op2_type == IS_CONST) {
 	|		FPU_LONG_LOAD op2_type, op2
@@ -2228,8 +2224,8 @@ static int zend_jit_math_double_long(dasm_State    **Dst,
 	||		}
 	|		FPU_MATH2 opline->opcode, st1
 	||	}
+	|	FPU_STORE Ra(res_reg)+res_offset
 	|.endif
-	|	DOUBLE_STORE Ra(res_reg)+res_offset, xmm0
 	if (op1_type == IS_CONST || op1_reg != res_reg || op1_offset != res_offset) {
 		|	SET_Z_TYPE_INFO Ra(res_reg)+res_offset, IS_DOUBLE
 	}
@@ -2252,18 +2248,21 @@ static int zend_jit_math_double_double(dasm_State    **Dst,
 	zend_bool same_ops = (op1_type == op2_type) && (op1.var == op2.var);
 
 	|.if X64 or SSE
+	int result_reg = 0;
+
 	if (op1_type == IS_CONST) {
-		|	SSE_LOAD xmm0, op1_type, op1
+		|	SSE_LOAD result_reg, op1_type, op1
 	} else {
-		|	SSE_GET_Z_DVAL xmm0, Ra(op1_reg)+op1_offset
+		|	SSE_GET_Z_DVAL result_reg, Ra(op1_reg)+op1_offset
 	}
 	if (same_ops) {
-		|	SSE_MATH2 opline->opcode, xmm0, xmm0
+		|	SSE_MATH_REG opline->opcode, result_reg, result_reg
 	} else if (op2_type == IS_CONST) {
-		|	SSE_MATH opline->opcode, xmm0, op2_type, op2
+		|	SSE_MATH_CONST opline->opcode, result_reg, op2
 	} else {
-		|	SSE_MATH2 opline->opcode, xmm0, qword [Ra(op2_reg)+op2_offset]
+		|	SSE_MATH opline->opcode, result_reg, qword [Ra(op2_reg)+op2_offset]
 	}
+	|	SSE_STORE Ra(res_reg)+res_offset, result_reg
 	|.else
 	if (op1_type == IS_CONST) {
 		|	FPU_LOAD op1_type, op1
@@ -2275,8 +2274,8 @@ static int zend_jit_math_double_double(dasm_State    **Dst,
 	} else {
 		|	FPU_MATH2 opline->opcode, qword [Ra(op2_reg)+op2_offset]
 	}
+	|	FPU_STORE Ra(res_reg)+res_offset
 	|.endif
-	|	DOUBLE_STORE Ra(res_reg)+res_offset, xmm0
 	if (op1_type == IS_CONST || op1_reg != res_reg || op1_offset != res_offset) {
 		|	SET_Z_TYPE_INFO Ra(res_reg)+res_offset, IS_DOUBLE
 	}
@@ -4311,8 +4310,10 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 static int zend_jit_cmp_long_double(dasm_State **Dst, const zend_op *opline, int b, zend_op_array *op_array, zend_ssa *ssa)
 {
 	|.if X64 or SSE
-	|	SSE_LOAD_LONG xmm0, opline->op1_type, opline->op1
-	|	SSE_OP ucomisd, xmm0, opline->op2_type, opline->op2
+	||	int tmp_reg = 1;
+	||
+	|	SSE_LOAD_LONG tmp_reg, opline->op1_type, opline->op1
+	|	SSE_OP ucomisd, tmp_reg, opline->op2_type, opline->op2
 	|.else
 	|	FPU_LOAD opline->op2_type, opline->op2
 	|	FPU_LONG_LOAD opline->op1_type, opline->op1
@@ -4326,9 +4327,12 @@ static int zend_jit_cmp_long_double(dasm_State **Dst, const zend_op *opline, int
 static int zend_jit_cmp_double_long(dasm_State **Dst, const zend_op *opline, int b, zend_op_array *op_array, zend_ssa *ssa)
 {
 	|.if X64 or SSE
-	|	SSE_LOAD xmm0, opline->op1_type, opline->op1
-	|	SSE_LOAD_LONG xmm1, opline->op2_type, opline->op2
-	|	ucomisd xmm0, xmm1
+		int tmp_reg1 = 0;
+		int tmp_reg2 = 1;
+
+	|	SSE_LOAD tmp_reg1, opline->op1_type, opline->op1
+	|	SSE_LOAD_LONG tmp_reg2, opline->op2_type, opline->op2
+	|	ucomisd xmm(tmp_reg1), xmm(tmp_reg2)
 	|.else
 	|	FPU_LONG_LOAD opline->op2_type, opline->op2
 	|	FPU_LOAD opline->op1_type, opline->op1
@@ -4342,8 +4346,10 @@ static int zend_jit_cmp_double_long(dasm_State **Dst, const zend_op *opline, int
 static int zend_jit_cmp_double_double(dasm_State **Dst, const zend_op *opline, int b, zend_op_array *op_array, zend_ssa *ssa)
 {
 	|.if X64 or SSE
-	|	SSE_LOAD xmm0, opline->op1_type, opline->op1
-	|	SSE_OP ucomisd, xmm0, opline->op2_type, opline->op2
+		int tmp_reg = 0;
+
+	|	SSE_LOAD tmp_reg, opline->op1_type, opline->op1
+	|	SSE_OP ucomisd, tmp_reg, opline->op2_type, opline->op2
 	|.else
 	|	FPU_LOAD opline->op2_type, opline->op2
 	|	FPU_LOAD opline->op1_type, opline->op1
