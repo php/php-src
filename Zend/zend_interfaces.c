@@ -36,8 +36,6 @@ ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_fun
 	int result;
 	zend_fcall_info fci;
 	zval retval;
-	HashTable *function_table;
-
 	zval params[2];
 
 	if (param_count > 0) {
