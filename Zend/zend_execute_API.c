@@ -1217,7 +1217,7 @@ static void zend_timeout_handler(int dummy) /* {{{ */
 		if (output_len > 0) {
 			write(2, log_buffer, MIN(output_len, sizeof(log_buffer)));
 		}
-		_exit(1);
+		_exit(124);
     }
 #endif
 

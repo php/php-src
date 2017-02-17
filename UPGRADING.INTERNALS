@@ -21,7 +21,7 @@ PHP 7.1 INTERNALS UPGRADE NOTES
     - PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zval *return_value);
 
   b. php_win32_get_random_bytes()
-    The iternal randomness source on Windows switched to use CNG API.
+    The internal randomness source on Windows switched to use CNG API.
 
 
 ========================
