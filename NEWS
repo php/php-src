@@ -49,6 +49,8 @@ PHP                                                                        NEWS
   . Fixed bug #74041 (substr_count with length=0 broken). (Nikita)
   . Fixed bug #73118 (is_callable callable name reports misleading value for
     anonymous classes). (Adam Saponara)
+  . Fixed bug #74105 (PHP on Linux should use /dev/urandom when getrandom is
+    not available). (Benjamin Robin)
 
 - Streams:
   . Fixed bug #73496 (Invalid memory access in zend_inline_hash_func).
