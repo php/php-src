@@ -6309,8 +6309,7 @@ static int php_openssl_cipher_update(const EVP_CIPHER *cipher_type,
 
 	*poutbuf = zend_string_alloc((int)data_len + EVP_CIPHER_block_size(cipher_type), 0);
 
-	if ((!enc || data_len > 0) &&
-			!EVP_CipherUpdate(cipher_ctx, (unsigned char*)ZSTR_VAL(*poutbuf),
+	if (!EVP_CipherUpdate(cipher_ctx, (unsigned char*)ZSTR_VAL(*poutbuf),
 					&i, (unsigned char *)data, (int)data_len)) {
 		/* we don't show warning when we fail but if we ever do, then it should look like this:
 		if (mode->is_single_run_aead && !enc) {
@@ -6366,7 +6365,6 @@ PHP_FUNCTION(openssl_encrypt)
 		php_error_docref(NULL, E_WARNING, "Failed to create cipher context");
 		RETURN_FALSE;
 	}
-
 	php_openssl_load_cipher_mode(&mode, cipher_type);
 
 	if (php_openssl_cipher_init(cipher_type, cipher_ctx, &mode,

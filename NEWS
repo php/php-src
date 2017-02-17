@@ -42,6 +42,7 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fixed bug #74022 (PHP Fast CGI crashes when reading from a pfx file).
     (Anatol)
+  . Fixed bug #74099 (Memory leak with openssl_encrypt()). (Andrew Nester)
 
 - Standard:
   . Fixed bug #74005 (mail.add_x_header causes RFC-breaking lone line feed).
