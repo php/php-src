@@ -611,8 +611,6 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals) /* {{
 	}
 	compiler_globals->last_static_member = 0;
 
-	/* zend_zts_interned_string_free(&compiler_globals->empty_string); */
-
 	compiler_globals->known_strings = NULL;
 	compiler_globals->known_strings_count = 0;
 }
