@@ -362,7 +362,6 @@ static void accel_interned_strings_restore_for_php(void)
 {
 }
 
-#ifndef ZTS
 static void accel_interned_strings_restore_state(void)
 {
     uint32_t idx = ZCSG(interned_strings).nNumUsed;
@@ -396,9 +395,7 @@ static void accel_interned_strings_save_state(void)
 {
 	ZCSG(interned_strings_saved_top) = ZCSG(interned_strings_top);
 }
-#endif
 
-#ifndef ZTS
 static zend_string *accel_find_interned_string(zend_string *str)
 {
 /* for now interned strings are supported only for non-ZTS build */
@@ -436,12 +433,9 @@ static zend_string *accel_find_interned_string(zend_string *str)
 
 	return NULL;
 }
-#endif
 
 zend_string *accel_new_interned_string(zend_string *str)
 {
-/* for now interned strings are supported only for non-ZTS build */
-#ifndef ZTS
 	zend_ulong h;
 	uint32_t nIndex;
 	uint32_t idx;
@@ -505,12 +499,8 @@ zend_string *accel_new_interned_string(zend_string *str)
 	HT_HASH(&ZCSG(interned_strings), nIndex) = HT_IDX_TO_HASH(idx);
 	zend_string_release(str);
 	return p->key;
-#else
-	return str;
-#endif
 }
 
-#ifndef ZTS
 /* Copy PHP interned strings from PHP process memory into the shared memory */
 static void accel_use_shm_interned_strings(void)
 {
@@ -635,7 +625,6 @@ static void accel_use_shm_interned_strings(void)
 		}
 	}
 }
-#endif
 
 #ifndef ZEND_WIN32
 static inline void kill_all_lockers(struct flock *mem_usage_check)
@@ -2514,7 +2503,6 @@ static int zend_accel_init_shm(void)
 	zend_accel_hash_init(&ZCSG(hash), ZCG(accel_directives).max_accelerated_files);
 
 	ZCSG(interned_strings_start) = ZCSG(interned_strings_end) = NULL;
-# ifndef ZTS
 	zend_hash_init(&ZCSG(interned_strings), (ZCG(accel_directives).interned_strings_buffer * 1024 * 1024) / _ZSTR_STRUCT_SIZE(8 /* average string length */), NULL, NULL, 1);
 	if (ZCG(accel_directives).interned_strings_buffer) {
 		void *data;
@@ -2537,7 +2525,6 @@ static int zend_accel_init_shm(void)
 //		CG(interned_strings_start) = ZCSG(interned_strings_start);
 //		CG(interned_strings_end) = ZCSG(interned_strings_end);
 	}
-# endif
 
 	orig_new_interned_string = zend_new_interned_string;
 	orig_interned_strings_snapshot = zend_interned_strings_snapshot;
@@ -2546,12 +2533,10 @@ static int zend_accel_init_shm(void)
 	zend_interned_strings_snapshot = accel_interned_strings_snapshot_for_php;
 	zend_interned_strings_restore = accel_interned_strings_restore_for_php;
 
-# ifndef ZTS
 	if (ZCG(accel_directives).interned_strings_buffer) {
 		accel_use_shm_interned_strings();
 		accel_interned_strings_save_state();
 	}
-# endif
 
 	zend_reset_cache_vars();
 
@@ -2807,9 +2792,7 @@ static int accel_startup(zend_extension *extension)
 				zend_new_interned_string = accel_new_interned_string_for_php;
 				zend_interned_strings_snapshot = accel_interned_strings_snapshot_for_php;
 				zend_interned_strings_restore = accel_interned_strings_restore_for_php;
-#ifndef ZTS
 				accel_use_shm_interned_strings();
-#endif
 				zend_shared_alloc_unlock();
 				break;
 			case FAILED_REATTACHED:
@@ -2930,12 +2913,10 @@ void accel_shutdown(void)
 	}
 
 	if (ZCG(accel_directives).interned_strings_buffer) {
-#ifndef ZTS
 		zend_hash_clean(CG(auto_globals));
 		zend_hash_clean(CG(function_table));
 		zend_hash_clean(CG(class_table));
 		zend_hash_clean(EG(zend_constants));
-#endif
 	}
 
 	accel_reset_pcre_cache();
