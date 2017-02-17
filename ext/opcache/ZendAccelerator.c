@@ -1004,7 +1004,6 @@ char *accel_make_persistent_key(const char *path, int path_length, int *key_len)
 			}
 			cwd = ZSTR_VAL(cwd_str);
 			cwd_len = ZSTR_LEN(cwd_str);
-#ifndef ZTS
 			if (ZCG(cwd_check)) {
 				ZCG(cwd_check) = 0;
 				if ((ZCG(counted) || ZCSG(accelerator_enabled))) {
@@ -1033,7 +1032,6 @@ char *accel_make_persistent_key(const char *path, int path_length, int *key_len)
 					}
 				}
 			}
-#endif
 		}
 
 		if (EXPECTED(ZCG(include_path_key_len))) {
@@ -1046,7 +1044,6 @@ char *accel_make_persistent_key(const char *path, int path_length, int *key_len)
 			include_path = ZSTR_VAL(ZCG(include_path));
 			include_path_len = ZSTR_LEN(ZCG(include_path));
 
-#ifndef ZTS
 			if (ZCG(include_path_check)) {
 				ZCG(include_path_check) = 0;
 				if ((ZCG(counted) || ZCSG(accelerator_enabled))) {
@@ -1074,7 +1071,6 @@ char *accel_make_persistent_key(const char *path, int path_length, int *key_len)
 					}
 				}
 			}
-#endif
 		}
 
 		/* Calculate key length */
