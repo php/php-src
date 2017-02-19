@@ -2159,11 +2159,9 @@ static void accel_activate(void)
 				zend_reset_cache_vars();
 				zend_accel_hash_clean(&ZCSG(hash));
 
-#if !defined(ZTS)
 				if (ZCG(accel_directives).interned_strings_buffer) {
 					accel_interned_strings_restore_state();
 				}
-#endif
 
 				zend_shared_alloc_restore_state();
 				ZCSG(accelerator_enabled) = ZCSG(cache_status_before_restart);
