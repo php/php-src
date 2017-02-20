@@ -3196,6 +3196,8 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 		unsigned char digest[16];
 		int len = strlen(SOAP_GLOBAL(cache_dir));
 		time_t cached;
+		char php_api_version[11];
+		int php_api_version_len = 0;
 		char *user = php_get_current_user();
 		int user_len = user ? strlen(user) + 1 : 0;
 
@@ -3204,7 +3206,9 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 		PHP_MD5Update(&context, (unsigned char*)uri, uri_len);
 		PHP_MD5Final(digest, &context);
 		make_digest(md5str, digest);
-		key = emalloc(len+sizeof("/wsdl-")-1+user_len+sizeof(md5str));
+		snprintf(php_api_version, sizeof(php_api_version), "%d-", PHP_API_VERSION);
+		php_api_version_len = strlen(php_api_version);
+		key = emalloc(len+sizeof("/wsdl-")-1+user_len+php_api_version_len+sizeof(md5str));
 		memcpy(key,SOAP_GLOBAL(cache_dir),len);
 		memcpy(key+len,"/wsdl-",sizeof("/wsdl-")-1);
 		len += sizeof("/wsdl-")-1;
@@ -3213,6 +3217,8 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 			len += user_len-1;
 			key[len++] = '-';
 		}
+		memcpy(key+len,php_api_version,php_api_version_len);
+		len += php_api_version_len;
 		memcpy(key+len,md5str,sizeof(md5str));
 
 		if ((sdl = get_sdl_from_cache(key, uri, t-SOAP_GLOBAL(cache_ttl), &cached)) != NULL) {
