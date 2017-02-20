@@ -581,8 +581,6 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{
 	}
 	compiler_globals->script_encoding_list = NULL;
 
-	compiler_globals->empty_string = zend_interned_strings_get_empty_string();
-
 	memset(compiler_globals->one_char_string, 0, sizeof(compiler_globals->one_char_string));
 
 	zend_known_interned_strings_init(&compiler_globals->known_strings, &compiler_globals->known_strings_count);

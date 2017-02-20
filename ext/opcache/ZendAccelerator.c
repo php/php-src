@@ -508,7 +508,7 @@ static void accel_use_shm_interned_strings(void)
 	Bucket *p, *q;
 
 	/* empty string */
-	CG(empty_string) = accel_new_interned_string(CG(empty_string));
+	empty_string = accel_new_interned_string(empty_string);
 	for (j = 0; j < 256; j++) {
 		char s[2];
 		s[0] = j;

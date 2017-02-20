@@ -43,7 +43,7 @@ static HashTable interned_strings_permanent;
 	should not be shared between threads. */
 ZEND_TLS HashTable interned_strings_volatile;
 
-static zend_string *empty_string;
+ZEND_API zend_string *empty_string;
 static zend_bool zend_strings_storage_type = ZEND_INTERNED_STRINGS_UNINITIALIZED;
 
 ZEND_API zend_ulong zend_hash_func(const char *str, size_t len)
@@ -105,11 +105,6 @@ void zend_interned_strings_init_thread(void)
 }
 #endif
 
-ZEND_API zend_string *zend_interned_strings_get_empty_string(void)
-{
-	return empty_string;
-}
-
 ZEND_API void zend_interned_strings_init(zend_interned_strings_init_stage storage_type)
 {
 	zend_string *str;
@@ -130,8 +125,6 @@ ZEND_API void zend_interned_strings_init(zend_interned_strings_init_stage storag
 	ZSTR_VAL(str)[0] = '\000';
 	empty_string = zend_new_interned_string_permanent_int(str);
 #ifndef ZTS
-	CG(empty_string) = empty_string;
-
 	/* one char strings (the actual interned strings are going to be created by ext/opcache) */
 	memset(CG(one_char_string), 0, sizeof(CG(one_char_string)));
 #endif

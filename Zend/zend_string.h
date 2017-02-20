@@ -42,10 +42,10 @@ ZEND_API zend_ulong zend_hash_func(const char *str, size_t len);
 ZEND_API void zend_interned_strings_init(zend_interned_strings_init_stage);
 ZEND_API void zend_interned_strings_dtor(zend_interned_strings_init_stage);
 void zend_known_interned_strings_init(zend_string ***, uint32_t *);
-ZEND_API zend_string *zend_interned_strings_get_empty_string(void);
 #ifdef ZTS
 void zend_interned_strings_init_thread(void);
 #endif
+ZEND_API extern zend_string *empty_string;
 
 END_EXTERN_C()
 
@@ -69,7 +69,7 @@ END_EXTERN_C()
 
 #define ZSTR_IS_INTERNED(s)					(GC_FLAGS(s) & IS_STR_INTERNED)
 
-#define ZSTR_EMPTY_ALLOC()				CG(empty_string)
+#define ZSTR_EMPTY_ALLOC() empty_string
 
 #define _ZSTR_HEADER_SIZE XtOffsetOf(zend_string, val)
 
