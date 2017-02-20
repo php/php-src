@@ -621,7 +621,7 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	ZEND_TSRMLS_CACHE_UPDATE();
 
 	zend_startup_constants();
-	zend_copy_constants(EG(zend_constants), GLOBAL_CONSTANTS_TABLE);
+	zend_copy_constants(executor_globals->zend_constants, GLOBAL_CONSTANTS_TABLE);
 	zend_init_rsrc_plist();
 	zend_init_exception_op();
 	zend_init_call_trampoline_op();
@@ -818,11 +818,13 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 	compiler_globals = ts_resource(compiler_globals_id);
 	executor_globals = ts_resource(executor_globals_id);
 
+	compiler_globals_dtor(compiler_globals);
 	compiler_globals->in_compilation = 0;
-
 	compiler_globals->function_table = GLOBAL_FUNCTION_TABLE;
 	compiler_globals->class_table = GLOBAL_CLASS_TABLE;
 	compiler_globals->auto_globals = GLOBAL_AUTO_GLOBALS_TABLE;
+
+	zend_hash_destroy(executor_globals->zend_constants);
 	executor_globals->zend_constants = GLOBAL_CONSTANTS_TABLE;
 #else
 	ini_scanner_globals_ctor(&ini_scanner_globals);
@@ -883,7 +885,6 @@ void zend_post_startup(void) /* {{{ */
 	short_tags_default = compiler_globals->short_tags;
 	compiler_options_default = compiler_globals->compiler_options;
 
-	zend_destroy_rsrc_list(&EG(persistent_list));
 	if ((script_encoding_list = (zend_encoding **)compiler_globals->script_encoding_list)) {
 		compiler_globals->script_encoding_list = (const zend_encoding **)script_encoding_list;
 	}
@@ -931,19 +932,18 @@ void zend_shutdown(void) /* {{{ */
 	virtual_cwd_deactivate();
 	virtual_cwd_shutdown();
 
-	zend_hash_destroy(GLOBAL_FUNCTION_TABLE);
-	zend_hash_destroy(GLOBAL_CLASS_TABLE);
-	zend_hash_destroy(GLOBAL_AUTO_GLOBALS_TABLE);
-	free(GLOBAL_AUTO_GLOBALS_TABLE);
-
 	zend_shutdown_extensions();
 	free(zend_version_info);
 
+	zend_hash_destroy(GLOBAL_FUNCTION_TABLE);
 	free(GLOBAL_FUNCTION_TABLE);
+	zend_hash_destroy(GLOBAL_CLASS_TABLE);
 	free(GLOBAL_CLASS_TABLE);
-
+	zend_hash_destroy(GLOBAL_AUTO_GLOBALS_TABLE);
+	free(GLOBAL_AUTO_GLOBALS_TABLE);
 	zend_hash_destroy(GLOBAL_CONSTANTS_TABLE);
 	free(GLOBAL_CONSTANTS_TABLE);
+
 	zend_shutdown_strtod();
 
 #ifdef ZTS
