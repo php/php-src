@@ -158,18 +158,19 @@ ZEND_API void zend_interned_strings_dtor(zend_interned_strings_init_stage storag
 	zend_strings_storage_type = ZEND_INTERNED_STRINGS_UNINITIALIZED;
 }
 
-static zend_string *zend_new_interned_string_int(zend_string *str, HashTable *interned_strings)
+static zend_string *zend_interned_string_ht_lookup(zend_string *str, HashTable *interned_strings)
 {
 	zend_ulong h;
 	uint32_t nIndex;
 	uint32_t idx;
 	Bucket *p;
 
-	if (ZSTR_IS_INTERNED(str)) {
-		return str;
+	/* Handle the passed string as read only. */
+	h = ZSTR_H(str);
+	if (!h) {
+		return NULL;
 	}
 
-	h = zend_string_hash_val(str);
 	nIndex = h | interned_strings->nTableMask;
 	idx = HT_HASH(interned_strings, nIndex);
 	while (idx != HT_INVALID_IDX) {
@@ -182,6 +183,25 @@ static zend_string *zend_new_interned_string_int(zend_string *str, HashTable *in
 		}
 		idx = Z_NEXT(p->val);
 	}
+
+	return NULL;
+}
+
+/* This function might be not thread safe at least because it would update the
+	hash val in the passed string. Be sure it is called in the appropriate context. */
+static zend_string *zend_new_interned_string_int(zend_string *str, HashTable *interned_strings)
+{
+	zend_ulong h;
+	uint32_t nIndex;
+	uint32_t idx;
+	Bucket *p;
+	zend_string *ret;
+
+	if (NULL != (ret = zend_interned_string_ht_lookup(str, interned_strings))) {
+		return ret;
+	}
+
+	h = zend_string_hash_val(str);
 
 	GC_REFCOUNT(str) = 1;
 	GC_FLAGS(str) |= IS_STR_INTERNED;
@@ -225,12 +245,28 @@ static zend_string *zend_new_interned_string_int(zend_string *str, HashTable *in
 
 static zend_string *zend_new_interned_string_permanent_int(zend_string *str)
 {
+	if (ZSTR_IS_INTERNED(str)) {
+		return str;
+	}
+
 	return zend_new_interned_string_int(str, &interned_strings_permanent);
 }
 
 static zend_string *zend_new_interned_string_volatile_int(zend_string *str)
 {
-	return zend_new_interned_string_int(str, &interned_strings_volatile);
+	zend_string *ret;
+
+	if (ZSTR_IS_INTERNED(str)) {
+		return str;
+	}
+
+	/* Serve with the permanent strings first, the table is readonly at this point. */
+	ret = zend_interned_string_ht_lookup(str, &interned_strings_permanent);
+	if (!ret) {
+		ret = zend_new_interned_string_int(str, &interned_strings_volatile);
+	}
+
+	return ret;
 }
 
 static void zend_interned_strings_snapshot_int(void)
