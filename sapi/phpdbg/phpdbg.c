@@ -818,6 +818,11 @@ static inline int php_sapi_phpdbg_module_startup(sapi_module_struct *module) /* 
 		return FAILURE;
 	}
 
+#ifdef ZTS
+	tsrm_set_new_thread_end_handler(NULL);
+	tsrm_set_new_thread_begin_handler(NULL);
+#endif
+
 	phpdbg_booted = 1;
 
 	return SUCCESS;
