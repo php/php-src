@@ -25,7 +25,7 @@
 #include <lmcons.h>
 
 PHP_WINUTIL_API char *php_win32_error_to_msg(HRESULT error)
-{
+{/*{{{*/
 	char *buf = NULL;
 
 	FormatMessage(
@@ -34,9 +34,10 @@ PHP_WINUTIL_API char *php_win32_error_to_msg(HRESULT error)
 	);
 
 	return (buf ? (char *) buf : "");
-}
+}/*}}}*/
 
-int php_win32_check_trailing_space(const char * path, const int path_len) {
+int php_win32_check_trailing_space(const char * path, const int path_len)
+{/*{{{*/
 	if (path_len < 1) {
 		return 1;
 	}
@@ -49,7 +50,7 @@ int php_win32_check_trailing_space(const char * path, const int path_len) {
 	} else {
 		return 0;
 	}
-}
+}/*}}}*/
 
 static BCRYPT_ALG_HANDLE bcrypt_algo;
 static BOOL has_crypto_ctx = 0;
@@ -58,7 +59,7 @@ static BOOL has_crypto_ctx = 0;
 
 #ifdef PHP_EXPORTS
 BOOL php_win32_shutdown_random_bytes(void)
-{
+{/*{{{*/
 	BOOL ret = TRUE;
 
 	if (has_crypto_ctx) {
@@ -67,10 +68,10 @@ BOOL php_win32_shutdown_random_bytes(void)
 	}
 
 	return ret;
-}
+}/*}}}*/
 
 BOOL php_win32_init_random_bytes(void)
-{
+{/*{{{*/
 	if (has_crypto_ctx) {
 		return TRUE;
 	}
@@ -78,10 +79,11 @@ BOOL php_win32_init_random_bytes(void)
 	has_crypto_ctx = NT_SUCCESS(BCryptOpenAlgorithmProvider(&bcrypt_algo, BCRYPT_RNG_ALGORITHM, NULL, 0));
 
 	return has_crypto_ctx;
-}
+}/*}}}*/
 #endif
 
-PHP_WINUTIL_API int php_win32_get_random_bytes(unsigned char *buf, size_t size) {  /* {{{ */
+PHP_WINUTIL_API int php_win32_get_random_bytes(unsigned char *buf, size_t size)
+{  /* {{{ */
 
 	BOOL ret;
 
@@ -112,7 +114,7 @@ PHP_WINUTIL_API int php_win32_get_random_bytes(unsigned char *buf, size_t size) 
 */
 
 PHP_WINUTIL_API int php_win32_code_to_errno(unsigned long w32Err)
-{
+{/*{{{*/
     size_t  i;
 
     struct code_to_errno_map
@@ -392,10 +394,10 @@ PHP_WINUTIL_API int php_win32_code_to_errno(unsigned long w32Err)
     assert(!"Unrecognised value");
 
     return EINVAL;
-}
+}/*}}}*/
 
 PHP_WINUTIL_API char *php_win32_get_username(void)
-{
+{/*{{{*/
 	wchar_t unamew[UNLEN + 1];
 	size_t uname_len;
 	char *uname;
@@ -413,7 +415,7 @@ PHP_WINUTIL_API char *php_win32_get_username(void)
 	}
 
 	return uname;
-}
+}/*}}}*/
 
 /*
  * Local variables:
