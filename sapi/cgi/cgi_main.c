@@ -1786,6 +1786,7 @@ int main(int argc, char *argv[])
 #endif
 
 #ifdef ZTS
+	zend_set_main_tsrm_handlers();
 	tsrm_startup(1, 1, 0, NULL);
 	(void)ts_resource(0);
 	ZEND_TSRMLS_CACHE_UPDATE();

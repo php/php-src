@@ -676,6 +676,22 @@ static void zend_new_thread_begin_handler(THREAD_T thread_id) /* {{{ */
 	zend_interned_strings_init_thread();
 }
 /* }}} */
+
+static void zend_tsrm_startup_begin_handler(void)
+{
+	zend_interned_strings_init(ZEND_INTERNED_STRINGS_TSRM);
+}
+
+static void zend_tsrm_shutdown_end_handler(void)
+{
+	zend_interned_strings_dtor(ZEND_INTERNED_STRINGS_TSRM);
+}
+
+ZEND_API void zend_set_main_tsrm_handlers(void)
+{
+	tsrm_set_startup_begin_handler(zend_tsrm_startup_begin_handler);
+	tsrm_set_shutdown_end_handler(zend_tsrm_shutdown_end_handler);
+}
 #endif
 
 #if defined(__FreeBSD__) || defined(__DragonFly__)
