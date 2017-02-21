@@ -165,12 +165,7 @@ static zend_string *zend_interned_string_ht_lookup(zend_string *str, HashTable *
 	uint32_t idx;
 	Bucket *p;
 
-	/* Handle the passed string as read only. */
-	h = ZSTR_H(str);
-	if (!h) {
-		return NULL;
-	}
-
+	h = zend_string_hash_val(str);
 	nIndex = h | interned_strings->nTableMask;
 	idx = HT_HASH(interned_strings, nIndex);
 	while (idx != HT_INVALID_IDX) {
