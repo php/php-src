@@ -182,30 +182,28 @@ TSRM_API void tsrm_shutdown(void)
 		return;
 	}
 
-	if (tsrm_tls_table) {
-		for (i=0; i<tsrm_tls_table_size; i++) {
-			tsrm_tls_entry *p = tsrm_tls_table[i], *next_p;
+	for (i=0; i<tsrm_tls_table_size; i++) {
+		tsrm_tls_entry *p = tsrm_tls_table[i], *next_p;
 
-			while (p) {
-				int j;
+		while (p) {
+			int j;
 
-				next_p = p->next;
-				for (j=0; j<p->count; j++) {
-					if (p->storage[j]) {
-						if (resource_types_table && !resource_types_table[j].done && resource_types_table[j].dtor) {
-							resource_types_table[j].dtor(p->storage[j]);
-						}
-						free(p->storage[j]);
+			next_p = p->next;
+			for (j=0; j<p->count; j++) {
+				if (p->storage[j]) {
+					if (resource_types_table && !resource_types_table[j].done && resource_types_table[j].dtor) {
+						resource_types_table[j].dtor(p->storage[j]);
 					}
+					free(p->storage[j]);
 				}
-				free(p->storage);
-				free(p);
-				p = next_p;
 			}
+			free(p->storage);
+			free(p);
+			p = next_p;
 		}
-		free(tsrm_tls_table);
-		tsrm_tls_table = NULL;
 	}
+	free(tsrm_tls_table);
+	tsrm_tls_table = NULL;
 	if (resource_types_table) {
 		free(resource_types_table);
 		resource_types_table=NULL;
