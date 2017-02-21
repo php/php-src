@@ -43,6 +43,8 @@ static HashTable interned_strings_permanent;
 	should not be shared between threads. */
 ZEND_TLS HashTable interned_strings_volatile;
 
+static HashTable *interned_strings_shm_ptr = NULL;
+
 ZEND_API zend_string *empty_string;
 static zend_bool zend_strings_storage_type = ZEND_INTERNED_STRINGS_UNINITIALIZED;
 
@@ -257,9 +259,20 @@ static zend_string *zend_new_interned_string_volatile_int(zend_string *str)
 
 	/* Serve with the permanent strings first, the table is readonly at this point. */
 	ret = zend_interned_string_ht_lookup(str, &interned_strings_permanent);
-	if (!ret) {
-		ret = zend_new_interned_string_int(str, &interned_strings_volatile);
+	if (ret) {
+		return ret;
 	}
+
+	/* If there are SHM strings, use them. */
+	if (interned_strings_shm_ptr) {
+		ret = zend_interned_string_ht_lookup(str, interned_strings_shm_ptr);
+		if (ret) {
+			return ret;
+		}
+	}
+
+	/* Create a short living interned, freed after the request. */
+	ret = zend_new_interned_string_int(str, &interned_strings_volatile);
 
 	return ret;
 }
@@ -316,6 +329,15 @@ static void zend_interned_strings_restore_int(void)
 			Z_NEXT(HT_HASH_TO_BUCKET(interned_strings, prev)->val) = Z_NEXT(p->val);
  		}
  	}
+}
+
+ZEND_API HashTable *zend_interned_strings_set_shm_table(HashTable *shm_strings)
+{
+	HashTable *old_ptr = interned_strings_shm_ptr;
+
+	interned_strings_shm_ptr = shm_strings;
+
+	return old_ptr;
 }
 
 /*

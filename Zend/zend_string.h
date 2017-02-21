@@ -42,6 +42,7 @@ ZEND_API zend_ulong zend_hash_func(const char *str, size_t len);
 ZEND_API void zend_interned_strings_init(zend_interned_strings_init_stage);
 ZEND_API void zend_interned_strings_dtor(zend_interned_strings_init_stage);
 void zend_known_interned_strings_init(zend_string ***, uint32_t *);
+ZEND_API HashTable *zend_interned_strings_set_shm_table(HashTable *);
 #ifdef ZTS
 void zend_interned_strings_init_thread(void);
 #endif
