@@ -833,12 +833,17 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 	compiler_globals = ts_resource(compiler_globals_id);
 	executor_globals = ts_resource(executor_globals_id);
 
+	compiler_globals_dtor(compiler_globals);
 	compiler_globals->in_compilation = 0;
+	compiler_globals->function_table = (HashTable *) malloc(sizeof(HashTable));
+	compiler_globals->class_table = (HashTable *) malloc(sizeof(HashTable));
 
-	compiler_globals->function_table = GLOBAL_FUNCTION_TABLE;
-	compiler_globals->class_table = GLOBAL_CLASS_TABLE;
+	*compiler_globals->function_table = *GLOBAL_FUNCTION_TABLE;
+	*compiler_globals->class_table = *GLOBAL_CLASS_TABLE;
 	compiler_globals->auto_globals = GLOBAL_AUTO_GLOBALS_TABLE;
-	executor_globals->zend_constants = GLOBAL_CONSTANTS_TABLE;
+
+	zend_hash_destroy(executor_globals->zend_constants);
+	*executor_globals->zend_constants = *GLOBAL_CONSTANTS_TABLE;
 #else
 	ini_scanner_globals_ctor(&ini_scanner_globals);
 	php_scanner_globals_ctor(&language_scanner_globals);
@@ -895,17 +900,28 @@ void zend_post_startup(void) /* {{{ */
 	zend_compiler_globals *compiler_globals = ts_resource(compiler_globals_id);
 	zend_executor_globals *executor_globals = ts_resource(executor_globals_id);
 
-	short_tags_default = compiler_globals->short_tags;
-	compiler_options_default = compiler_globals->compiler_options;
+	*GLOBAL_FUNCTION_TABLE = *compiler_globals->function_table;
+	*GLOBAL_CLASS_TABLE = *compiler_globals->class_table;
+	*GLOBAL_CONSTANTS_TABLE = *executor_globals->zend_constants;
+
+	short_tags_default = CG(short_tags);
+	compiler_options_default = CG(compiler_options);
 
 	zend_destroy_rsrc_list(&EG(persistent_list));
+	free(compiler_globals->function_table);
+	free(compiler_globals->class_table);
 	if ((script_encoding_list = (zend_encoding **)compiler_globals->script_encoding_list)) {
+		compiler_globals_ctor(compiler_globals);
 		compiler_globals->script_encoding_list = (const zend_encoding **)script_encoding_list;
+	} else {
+		compiler_globals_ctor(compiler_globals);
 	}
+	free(EG(zend_constants));
 
 	virtual_cwd_deactivate();
 
-	global_persistent_list = &executor_globals->persistent_list;
+	executor_globals_ctor(executor_globals);
+	global_persistent_list = &EG(persistent_list);
 	zend_copy_ini_directives();
 #else
 	virtual_cwd_deactivate();
@@ -948,6 +964,7 @@ void zend_shutdown(void) /* {{{ */
 
 	zend_hash_destroy(GLOBAL_FUNCTION_TABLE);
 	zend_hash_destroy(GLOBAL_CLASS_TABLE);
+
 	zend_hash_destroy(GLOBAL_AUTO_GLOBALS_TABLE);
 	free(GLOBAL_AUTO_GLOBALS_TABLE);
 
@@ -962,11 +979,6 @@ void zend_shutdown(void) /* {{{ */
 	zend_shutdown_strtod();
 
 #ifdef ZTS
-	/* Explicitly use accessor, these was linked to the global vars. */
-	CG(function_table) = NULL;
-	CG(class_table) = NULL;
-	CG(auto_globals) = NULL;
-	EG(zend_constants) = NULL;
 	GLOBAL_FUNCTION_TABLE = NULL;
 	GLOBAL_CLASS_TABLE = NULL;
 	GLOBAL_AUTO_GLOBALS_TABLE = NULL;
