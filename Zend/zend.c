@@ -833,12 +833,10 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 	compiler_globals = ts_resource(compiler_globals_id);
 	executor_globals = ts_resource(executor_globals_id);
 
+	compiler_globals_dtor(compiler_globals);
 	compiler_globals->in_compilation = 0;
-	zend_hash_destroy(compiler_globals->function_table);
 	compiler_globals->function_table = GLOBAL_FUNCTION_TABLE;
-	zend_hash_destroy(compiler_globals->class_table);
 	compiler_globals->class_table = GLOBAL_CLASS_TABLE;
-	zend_hash_destroy(compiler_globals->auto_globals);
 	compiler_globals->auto_globals = GLOBAL_AUTO_GLOBALS_TABLE;
 
 	zend_hash_destroy(executor_globals->zend_constants);
