@@ -3213,7 +3213,6 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 			len += user_len-1;
 			key[len++] = '-';
 		}
-		key[len++] = '-';
 		if (WSDL_CACHE_VERSION <= 0x9f) {
 			key[len++] = (WSDL_CACHE_VERSION >> 8) + '0';
 		} else {
