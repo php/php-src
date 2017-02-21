@@ -53,7 +53,7 @@ int php_win32_check_trailing_space(const char * path, const int path_len)
 }/*}}}*/
 
 static BCRYPT_ALG_HANDLE bcrypt_algo;
-static BOOL has_crypto_ctx = 0;
+static BOOL has_bcrypt_algo = 0;
 
 #define NT_SUCCESS(Status) (((NTSTATUS)(Status)) >= 0)
 
@@ -62,9 +62,9 @@ BOOL php_win32_shutdown_random_bytes(void)
 {/*{{{*/
 	BOOL ret = TRUE;
 
-	if (has_crypto_ctx) {
+	if (has_bcrypt_algo) {
 		ret = NT_SUCCESS(BCryptCloseAlgorithmProvider(bcrypt_algo, 0));
-		has_crypto_ctx = 0;
+		has_bcrypt_algo = 0;
 	}
 
 	return ret;
@@ -72,13 +72,13 @@ BOOL php_win32_shutdown_random_bytes(void)
 
 BOOL php_win32_init_random_bytes(void)
 {/*{{{*/
-	if (has_crypto_ctx) {
+	if (has_bcrypt_algo) {
 		return TRUE;
 	}
 
-	has_crypto_ctx = NT_SUCCESS(BCryptOpenAlgorithmProvider(&bcrypt_algo, BCRYPT_RNG_ALGORITHM, NULL, 0));
+	has_bcrypt_algo = NT_SUCCESS(BCryptOpenAlgorithmProvider(&bcrypt_algo, BCRYPT_RNG_ALGORITHM, NULL, 0));
 
-	return has_crypto_ctx;
+	return has_bcrypt_algo;
 }/*}}}*/
 #endif
 
@@ -91,7 +91,7 @@ PHP_WINUTIL_API int php_win32_get_random_bytes(unsigned char *buf, size_t size)
 	/* Currently we fail on startup, with CNG API it shows no regressions so far and is secure.
 		Should switch on and try to reinit, if it fails too often on startup. This means also
 		bringing locks back. */
-	if (has_crypto_ctx == 0) {
+	if (has_bcrypt_algo == 0) {
 		return FAILURE;
 	}
 #endif
