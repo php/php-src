@@ -26,8 +26,6 @@
 BEGIN_EXTERN_C()
 
 ZEND_API extern zend_string *(*zend_new_interned_string)(zend_string *str);
-ZEND_API extern void (*zend_interned_strings_snapshot)(void);
-ZEND_API extern void (*zend_interned_strings_restore)(void);
 
 /* This implies the init/dtor call stage for permanent interned strings, both
 	calls have to be passed the same value. */
@@ -41,12 +39,13 @@ typedef enum _zend_interned_strings_init_stage {
 ZEND_API zend_ulong zend_hash_func(const char *str, size_t len);
 ZEND_API void zend_interned_strings_init(zend_interned_strings_init_stage);
 ZEND_API void zend_interned_strings_dtor(zend_interned_strings_init_stage);
-void zend_known_interned_strings_init(zend_string ***, uint32_t *);
-ZEND_API HashTable *zend_interned_strings_set_shm_table(HashTable *);
-#ifdef ZTS
-void zend_interned_strings_init_thread(void);
-#endif
-ZEND_API extern zend_string *empty_string;
+ZEND_API void zend_interned_strings_activate(void);
+ZEND_API void zend_interned_strings_deactivate(void);
+ZEND_API zend_string *zend_interned_string_find_permanent(zend_string *str);
+
+ZEND_API extern zend_string  *zend_empty_string;
+ZEND_API extern zend_string  *zend_one_char_string[256];
+ZEND_API extern zend_string **zend_known_strings;
 
 END_EXTERN_C()
 
@@ -70,7 +69,7 @@ END_EXTERN_C()
 
 #define ZSTR_IS_INTERNED(s)					(GC_FLAGS(s) & IS_STR_INTERNED)
 
-#define ZSTR_EMPTY_ALLOC() empty_string
+#define ZSTR_EMPTY_ALLOC() zend_empty_string
 
 #define _ZSTR_HEADER_SIZE XtOffsetOf(zend_string, val)
 
@@ -418,8 +417,6 @@ ZEND_KNOWN_STRINGS(_ZEND_STR_ID)
 #undef _ZEND_STR_ID
 	ZEND_STR_LAST_KNOWN
 } zend_known_string_id;
-
-ZEND_API uint32_t zend_intern_known_strings(const char **strings, uint32_t count);
 
 #endif /* ZEND_STRING_H */
 

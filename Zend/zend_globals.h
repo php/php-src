@@ -110,9 +110,7 @@ struct _zend_compiler_globals {
 
 	zend_arena *arena;
 
-	zend_string *one_char_string[256];
-	zend_string **known_strings;
-	uint32_t    known_strings_count;
+	HashTable interned_strings;
 
 	const zend_encoding **script_encoding_list;
 	size_t script_encoding_list_size;

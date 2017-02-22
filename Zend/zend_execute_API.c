@@ -957,7 +957,7 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *k
 	}
 
 	if (!EG(autoload_func)) {
-		zend_function *func = zend_hash_find_ptr(EG(function_table), CG(known_strings)[ZEND_STR_MAGIC_AUTOLOAD]);
+		zend_function *func = zend_hash_find_ptr(EG(function_table), zend_known_strings[ZEND_STR_MAGIC_AUTOLOAD]);
 		if (func) {
 			EG(autoload_func) = func;
 		} else {

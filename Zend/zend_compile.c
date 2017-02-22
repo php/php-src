@@ -3467,13 +3467,7 @@ int zend_compile_func_chr(znode *result, zend_ast_list *args) /* {{{ */
 		zend_long c = Z_LVAL_P(zend_ast_get_zval(args->child[0])) & 0xff;
 
 		result->op_type = IS_CONST;
-		if (CG(one_char_string)[c]) {
-			ZVAL_INTERNED_STR(&result->u.constant, CG(one_char_string)[c]);
-		} else {
-			ZVAL_NEW_STR(&result->u.constant, zend_string_alloc(1, 0));
-			Z_STRVAL_P(&result->u.constant)[0] = (char)c;
-			Z_STRVAL_P(&result->u.constant)[1] = '\0';
-		}
+		ZVAL_INTERNED_STR(&result->u.constant, zend_one_char_string[c]);
 		return SUCCESS;
 	} else {
 		return FAILURE;
@@ -8212,11 +8206,7 @@ void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 					return;
 				}
 				c = (zend_uchar) Z_STRVAL_P(container)[offset];
-				if (CG(one_char_string)[c]) {
-					ZVAL_INTERNED_STR(&result, CG(one_char_string)[c]);
-				} else {
-					ZVAL_NEW_STR(&result, zend_string_init((char *) &c, 1, 0));
-				}
+				ZVAL_INTERNED_STR(&result, zend_one_char_string[c]);
 			} else if (Z_TYPE_P(container) <= IS_FALSE) {
 				ZVAL_NULL(&result);
 			} else {

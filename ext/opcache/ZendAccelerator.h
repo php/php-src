@@ -279,7 +279,6 @@ typedef struct _zend_accel_shared_globals {
 	char           *interned_strings_start;
 	char           *interned_strings_top;
 	char           *interned_strings_end;
-	char           *interned_strings_saved_top;
 	HashTable       interned_strings;
 } zend_accel_shared_globals;
 
