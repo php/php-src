@@ -51,6 +51,8 @@
 #elif defined(__sun__)
 # define PHP_OS_FAMILY			"Solaris"
 #elif defined(__linux__)
+# define PHP_OS_FAMILY			"Linux"
+#else
 # define PHP_OS_FAMILY			"Unknown"
 #endif
 
