@@ -249,7 +249,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> non_empty_parameter_list argument_list non_empty_argument_list property_list
 %type <ast> class_const_list class_const_decl name_list trait_adaptations method_body non_empty_for_exprs
 %type <ast> ctor_arguments alt_if_stmt_without_else trait_adaptation_list lexical_vars
-%type <ast> lexical_var_list encaps_list
+%type <ast> lexical_var_list encaps_list declare_list declare_decl declare_scalar
 %type <ast> array_pair non_empty_array_pair_list array_pair_list possible_array_pair
 %type <ast> isset_variable type return_type type_expr
 %type <ast> identifier
@@ -394,6 +394,22 @@ const_list:
 	|	const_decl { $$ = zend_ast_create_list(1, ZEND_AST_CONST_DECL, $1); }
 ;
 
+declare_list:
+		declare_list ',' declare_decl { $$ = zend_ast_list_add($1, $3); }
+	|	declare_decl { $$ = zend_ast_create_list(1, ZEND_AST_CONST_DECL, $1); }
+;
+
+declare_decl:
+		T_STRING '=' declare_scalar
+			{ $$ = zend_ast_create(ZEND_AST_CONST_ELEM, $1, $3, NULL); }
+;
+
+declare_scalar:
+		T_LNUMBER { $$ = $1; }
+	|	T_DNUMBER { $$ = $1; }
+	|	T_CONSTANT_ENCAPSED_STRING { $$ = $1; }
+;
+
 inner_statement_list:
 		inner_statement_list inner_statement
 			{ $$ = zend_ast_list_add($1, $2); }
@@ -440,7 +456,7 @@ statement:
 	|	T_FOREACH '(' expr T_AS foreach_variable T_DOUBLE_ARROW foreach_variable ')'
 		foreach_statement
 			{ $$ = zend_ast_create(ZEND_AST_FOREACH, $3, $7, $5, $9); }
-	|	T_DECLARE '(' const_list ')'
+	|	T_DECLARE '(' declare_list ')'
 			{ zend_handle_encoding_declaration($3); }
 		declare_statement
 			{ $$ = zend_ast_create(ZEND_AST_DECLARE, $3, $6); }
