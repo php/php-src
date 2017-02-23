@@ -43,6 +43,7 @@ PHP                                                                        NEWS
     (Andrew Nester, Nikita)
 
 - Opcache:
+  . Fixed bug #74152 (if statement says true to a null variable). (Laruence)
   . Fixed bug #74019 (Segfault with list). (Laruence)
 
 - OpenSSL:

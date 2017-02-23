@@ -561,6 +561,17 @@ static void zend_rebuild_access_path(zend_cfg *cfg, zend_op_array *op_array, int
 		convert_to_string((v)); \
 	}
 
+static int is_predecessor_smart_branch(zend_op *start, zend_op *predecessor) {
+	do {
+		if (predecessor == start) {
+			return 0;
+		}
+		predecessor--;
+	} while (predecessor->opcode == ZEND_NOP);
+
+	return zend_is_smart_branch(predecessor);
+}
+
 static void strip_nop(zend_code_block *block, zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	zend_op *opline = block->start_opline;
@@ -602,8 +613,7 @@ static void strip_nop(zend_code_block *block, zend_op_array *op_array, zend_opti
 			 && ((opline + 1)->opcode == ZEND_JMPZ
 			  || (opline + 1)->opcode == ZEND_JMPNZ)
 			 && (opline + 1)->op1_type & (IS_CV|IS_CONST)
-			 && opline > op_array->opcodes
-			 && zend_is_smart_branch(opline - 1)) {
+			 && is_predecessor_smart_branch(op_array->opcodes, opline)) {
 				/* don't remove NOP, that splits incorrect smart branch */
 				opline++;
 				break;
