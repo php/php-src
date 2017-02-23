@@ -2019,7 +2019,7 @@ ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module) /
 	lcname = zend_string_alloc(name_len, 1);
 	zend_str_tolower_copy(ZSTR_VAL(lcname), module->name, name_len);
 
-	if ((module_ptr = zend_hash_add_mem(&module_registry, lcname, module, sizeof(zend_module_entry))) == NULL) {
+	if ((module_ptr = zend_hash_add_mem(&module_registry, zend_new_interned_string(lcname), module, sizeof(zend_module_entry))) == NULL) {
 		zend_error(E_CORE_WARNING, "Module '%s' already loaded", module->name);
 		zend_string_release(lcname);
 		return NULL;
