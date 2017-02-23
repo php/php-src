@@ -50,6 +50,8 @@ PHP                                                                        NEWS
     (Anatol)
 
 - Standard:
+  . Fixed bug #74148 (ReflectionFunction incorrectly reports the number of
+    arguments). (Laruence)
   . Fixed bug #74005 (mail.add_x_header causes RFC-breaking lone line feed).
     (Anatol)
   . Fixed bug #73118 (is_callable callable name reports misleading value for
