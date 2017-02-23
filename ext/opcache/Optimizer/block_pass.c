@@ -650,15 +650,15 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			if (block->follow_to) {
 				delete_code_block(block, ctx);
 			}
-			if (block->len == 2
-			 && ((block->start_opline + 1)->opcode == ZEND_JMPZ
-			  || (block->start_opline + 1)->opcode == ZEND_JMPNZ)
-			 && (block->start_opline + 1)->op1_type & (IS_CV|IS_CONST)
-			 && block->start_opline > op_array->opcodes
-			 && zend_is_smart_branch(block->start_opline - 1)) {
-				break;
-			}
 			return;
+		}
+		if (block->len == 2
+		 && ((block->start_opline + 1)->opcode == ZEND_JMPZ
+		  || (block->start_opline + 1)->opcode == ZEND_JMPNZ)
+		 && (block->start_opline + 1)->op1_type & (IS_CV|IS_CONST)
+		 && block->start_opline > op_array->opcodes
+		 && zend_is_smart_branch(block->start_opline - 1)) {
+			break;
 		}
 		block->start_opline++;
 		block->start_opline_no++;
