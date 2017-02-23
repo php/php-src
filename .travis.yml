@@ -48,12 +48,12 @@ env:
 
 before_script:
 - ccache --version
-- ccache -z
+- ccache --zero-stats
 - export USE_CCACHE=1
 - export CACHE_LOGFILE=/tmp/ccache.cache
 # Compile PHP
 - ./travis/compile.sh
-# Setup Extensions 
+# Setup Extensions
 - . ./travis/ext/mysql/setup.sh
 - . ./travis/ext/mysqli/setup.sh
 - . ./travis/ext/pdo_mysql/setup.sh
@@ -65,5 +65,4 @@ script:
 - ./sapi/cli/php run-tests.php -p `pwd`/sapi/cli/php $(if [ $ENABLE_DEBUG == 1 ]; then echo "-d opcache.enable_cli=1 -d zend_extension=`pwd`/modules/opcache.so"; fi) -g "FAIL,XFAIL,BORK,WARN,LEAK,SKIP" --offline --show-diff --set-timeout 120
 
 after_success:
-- ccache -s
-- cat /tmp/ccache.cache
+- ccache --show-stats
