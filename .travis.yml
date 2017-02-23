@@ -32,7 +32,7 @@ cache:
   apt: true
   ccache: true
   directories:
-  - "config.cache"
+  - ~/.ccache
 env:
     global:
       - MYSQL_TEST_HOST=127.0.0.1
@@ -50,7 +50,6 @@ before_script:
 - ccache --version
 - ccache --zero-stats
 - export USE_CCACHE=1
-- export CACHE_LOGFILE=/tmp/ccache.cache
 # Compile PHP
 - ./travis/compile.sh
 # Setup Extensions
