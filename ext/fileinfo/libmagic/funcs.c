@@ -61,17 +61,15 @@ extern public void convert_libmagic_pattern(zval *pattern, char *val, int len, i
 protected int
 file_printf(struct magic_set *ms, const char *fmt, ...)
 {
-	int rv;
 	va_list ap;
-	int len;
 	char *buf = NULL, *newstr;
 
 	va_start(ap, fmt);
-	len = vspprintf(&buf, 0, fmt, ap);
+	vspprintf(&buf, 0, fmt, ap);
 	va_end(ap);
 
 	if (ms->o.buf != NULL) {
-		len = spprintf(&newstr, 0, "%s%s", ms->o.buf, (buf ? buf : ""));
+		spprintf(&newstr, 0, "%s%s", ms->o.buf, (buf ? buf : ""));
 		if (buf) {
 			efree(buf);
 		}
