@@ -319,6 +319,18 @@ static zend_function_entry zend_test_trait_methods[] = {
 };
 #endif
 
+#if ZEND_DEBUG
+static ZEND_METHOD(_ZendTestTrait, testMethod) /* {{{ */ {
+	RETURN_TRUE;
+}
+/* }}} */
+
+static zend_function_entry zend_test_trait_methods[] = {
+    ZEND_ME(_ZendTestTrait, testMethod, arginfo_zend__void, ZEND_ACC_PUBLIC)
+    ZEND_FE_END
+};
+#endif
+
 static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(zend_version,		arginfo_zend__void)
 	ZEND_FE(func_num_args,		arginfo_zend__void)
@@ -415,6 +427,13 @@ ZEND_MINIT_FUNCTION(core) { /* {{{ */
 	zend_test_class_handlers.get_method = zend_test_class_method_get;
 	zend_test_class_handlers.call_method = zend_test_class_call_method;
 
+	INIT_CLASS_ENTRY(class_entry, "_ZendTestTrait", zend_test_trait_methods);
+	zend_test_trait = zend_register_internal_class(&class_entry);
+	zend_test_trait->ce_flags |= ZEND_ACC_TRAIT;
+	zend_declare_property_null(zend_test_trait, "testProp", sizeof("testProp")-1, ZEND_ACC_PUBLIC);
+#endif
+
+#if ZEND_DEBUG
 	INIT_CLASS_ENTRY(class_entry, "_ZendTestTrait", zend_test_trait_methods);
 	zend_test_trait = zend_register_internal_class(&class_entry);
 	zend_test_trait->ce_flags |= ZEND_ACC_TRAIT;
