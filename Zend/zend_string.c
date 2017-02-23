@@ -251,15 +251,25 @@ static zend_string *zend_new_interned_string_request(zend_string *str)
 
 ZEND_API void zend_interned_strings_activate(void)
 {
-	if (zend_new_interned_string == zend_new_interned_string_permanent) {
-		zend_new_interned_string = zend_new_interned_string_request;
-	}
 	zend_init_interned_strings_ht(&CG(interned_strings), 0);
 }
 
 ZEND_API void zend_interned_strings_deactivate(void)
 {
 	zend_hash_destroy(&CG(interned_strings));
+}
+
+ZEND_API void zend_interned_strings_switch_storage(void)
+{
+	static zend_bool switched = 0;
+
+	if (switched) {
+		return;
+	}
+
+	zend_new_interned_string = zend_new_interned_string_request;
+
+	switched = 1;
 }
 
 /*

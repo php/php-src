@@ -2381,6 +2381,8 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	shutdown_memory_manager(1, 0);
  	virtual_cwd_activate();
 
+	zend_interned_strings_switch_storage();
+
 	/* we're done */
 	return retval;
 }

@@ -42,6 +42,7 @@ ZEND_API void zend_interned_strings_dtor(zend_interned_strings_init_stage);
 ZEND_API void zend_interned_strings_activate(void);
 ZEND_API void zend_interned_strings_deactivate(void);
 ZEND_API zend_string *zend_interned_string_find_permanent(zend_string *str);
+ZEND_API void zend_interned_strings_switch_storage(void);
 
 ZEND_API extern zend_string  *zend_empty_string;
 ZEND_API extern zend_string  *zend_one_char_string[256];
