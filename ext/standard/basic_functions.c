@@ -1192,6 +1192,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_fputcsv, 0, 0, 2)
 	ZEND_ARG_INFO(0, fields) /* ARRAY_INFO(0, fields, 1) */
 	ZEND_ARG_INFO(0, delimiter)
 	ZEND_ARG_INFO(0, enclosure)
+	ZEND_ARG_INFO(0, escape_char)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fgetcsv, 0, 0, 1)
