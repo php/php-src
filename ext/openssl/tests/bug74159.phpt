@@ -76,7 +76,7 @@ $clientCode = <<<'CODE'
     $fp = stream_socket_client($serverUri, $errno, $errstr, 1, $clientFlags, $clientCtx);
 
     stream_set_blocking($fp, false);
-    while (0 === ($n = stream_socket_enable_crypto($fp, true, STREAM_CRYPTO_METHOD_ANY_CLIENT)));
+    while (0 === ($n = stream_socket_enable_crypto($fp, true, STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT)));
 
     $data = str_repeat("a", 0xfffff);
     $written = 0;
