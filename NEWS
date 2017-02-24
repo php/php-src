@@ -49,6 +49,8 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fixed bug #74022 (PHP Fast CGI crashes when reading from a pfx file).
     (Anatol)
+  . Fixed bug #74159 (Writing a large buffer to a non-blocking encrypted stream
+    fails with "bad write retry"). (trowski)
 
 - Standard:
   . Fixed bug #74148 (ReflectionFunction incorrectly reports the number of
