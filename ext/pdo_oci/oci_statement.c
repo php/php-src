@@ -602,11 +602,12 @@ static int oci_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 			} else {
 				S->cols[colno].datalen = (ub4) col->maxlen;
 			}
-			if (dtype == SQLT_BIN) {
-				S->cols[colno].datalen *= 3;
+			dtype = SQLT_CHR;
+			if (dtype == SQLT_CHR) {
+				S->cols[colno].datalen *= S->H->max_char_width;
 			}
 			S->cols[colno].data = emalloc(S->cols[colno].datalen + 1);
-			dtype = SQLT_CHR;
+
 
 			/* returning data as a string */
 			col->param_type = PDO_PARAM_STR;
