@@ -240,7 +240,6 @@ dnl PNG is required by GD library
 
 dnl Various checks for GD features
   PHP_GD_ZLIB
-  PHP_GD_TTSTR
   PHP_GD_WEBP
   PHP_GD_JPEG
   PHP_GD_PNG
