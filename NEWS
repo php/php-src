@@ -28,6 +28,10 @@ PHP                                                                        NEWS
   . Fixed bug #69860 (php-fpm process accounting is broken with keepalive).
     (Denis Yeldandi)
 
+- Hash:
+  . Fixed bug #73127 (gost-crypto hash incorrect if input data contains long
+    0xFF sequence). (Grundik)
+
 - GD:
   . Fixed bug #74031 (ReflectionFunction for imagepng is missing last two
     parameters). (finwe)
