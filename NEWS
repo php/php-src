@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2017, PHP 7.1.3
 
 - Core:
+  . Fixed bug #74164 (PHP hangs when an invalid value is dynamically passed to
+    typehinted by-ref arg). (Laruence)
   . Fixed bug #74093 (Maximum execution time of n+2 seconds exceed not written
     in error_log). (Laruence)
   . Fixed bug #73989 (PHP 7.1 Segfaults within Symfony test suite).

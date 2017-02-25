@@ -761,6 +761,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 	if (fci->object &&
 	    (!EG(objects_store).object_buckets ||
 	     !IS_OBJ_VALID(EG(objects_store).object_buckets[fci->object->handle]))) {
+		zend_vm_stack_free_call_frame(call);
 		if (EG(current_execute_data) == &dummy_execute_data) {
 			EG(current_execute_data) = dummy_execute_data.prev_execute_data;
 		}
@@ -770,6 +771,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 	if (func->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED)) {
 		if (func->common.fn_flags & ZEND_ACC_ABSTRACT) {
 			zend_throw_error(NULL, "Cannot call abstract method %s::%s()", ZSTR_VAL(func->common.scope->name), ZSTR_VAL(func->common.function_name));
+			zend_vm_stack_free_call_frame(call);
 			if (EG(current_execute_data) == &dummy_execute_data) {
 				EG(current_execute_data) = dummy_execute_data.prev_execute_data;
 			}
@@ -780,6 +782,13 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 				func->common.scope ? ZSTR_VAL(func->common.scope->name) : "",
 				func->common.scope ? "::" : "",
 				ZSTR_VAL(func->common.function_name));
+			if (UNEXPECTED(EG(exception))) {
+				zend_vm_stack_free_call_frame(call);
+				if (EG(current_execute_data) == &dummy_execute_data) {
+					EG(current_execute_data) = dummy_execute_data.prev_execute_data;
+				}
+				return FAILURE;
+			}
 		}
 	}
 
@@ -800,6 +809,15 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 						func->common.scope ? ZSTR_VAL(func->common.scope->name) : "",
 						func->common.scope ? "::" : "",
 						ZSTR_VAL(func->common.function_name));
+					if (UNEXPECTED(EG(exception))) {
+						ZEND_CALL_NUM_ARGS(call) = i;
+						zend_vm_stack_free_args(call);
+						zend_vm_stack_free_call_frame(call);
+						if (EG(current_execute_data) == &dummy_execute_data) {
+							EG(current_execute_data) = dummy_execute_data.prev_execute_data;
+						}
+						return FAILURE;
+					}
 				}
 			}
 		} else {
