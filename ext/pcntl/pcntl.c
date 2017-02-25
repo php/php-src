@@ -997,7 +997,7 @@ PHP_FUNCTION(pcntl_signal)
 		/* since calling malloc() from within a signal handler is not portable,
 		 * pre-allocate a few records for recording signals */
 		int i;
-		for (i = 0; i < MAX(NSIG-1, SIGRTMAX); i++) {
+		for (i = 0; i < MAX(NSIG, SIGRTMAX+1); i++) {
 			struct php_pcntl_pending_signal *psig;
 
 			psig = emalloc(sizeof(*psig));
@@ -1116,7 +1116,7 @@ PHP_FUNCTION(pcntl_sigprocmask)
 		} else {
 			zend_hash_clean(Z_ARRVAL_P(user_oldset));
 		}
-		for (signo = 1; signo < MAX(NSIG-1, SIGRTMAX); ++signo) {
+		for (signo = 1; signo < MAX(NSIG, SIGRTMAX+1); ++signo) {
 			if (sigismember(&oldset, signo) != 1) {
 				continue;
 			}
