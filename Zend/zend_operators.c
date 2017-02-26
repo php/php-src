@@ -525,7 +525,7 @@ try_again:
 			break;
 		}
 		case IS_TRUE:
-			ZVAL_INTERNED_STR(op, ZSTR_ONE_CHAR('1'));
+			ZVAL_INTERNED_STR(op, ZSTR_CHAR('1'));
 			break;
 		case IS_STRING:
 			break;
@@ -846,7 +846,7 @@ try_again:
 		case IS_FALSE:
 			return ZSTR_EMPTY_ALLOC();
 		case IS_TRUE:
-			return ZSTR_ONE_CHAR('1');
+			return ZSTR_CHAR('1');
 		case IS_RESOURCE: {
 			char buf[sizeof("Resource id #") + MAX_LENGTH_OF_LONG];
 			int len;
@@ -1356,7 +1356,7 @@ try_again:
 
 			if (Z_STRLEN_P(op1) == 1) {
 				zend_uchar not = (zend_uchar) ~*Z_STRVAL_P(op1);
-				ZVAL_INTERNED_STR(result, ZSTR_ONE_CHAR(not));
+				ZVAL_INTERNED_STR(result, ZSTR_CHAR(not));
 			} else {
 				ZVAL_NEW_STR(result, zend_string_alloc(Z_STRLEN_P(op1), 0));
 				for (i = 0; i < Z_STRLEN_P(op1); i++) {
@@ -1404,7 +1404,7 @@ ZEND_API int ZEND_FASTCALL bitwise_or_function(zval *result, zval *op1, zval *op
 				if (result==op1) {
 					zend_string_release(Z_STR_P(result));
 				}
-				ZVAL_INTERNED_STR(result, ZSTR_ONE_CHAR(or));
+				ZVAL_INTERNED_STR(result, ZSTR_CHAR(or));
 				return SUCCESS;
 			}
 			longer = op1;
@@ -1482,7 +1482,7 @@ ZEND_API int ZEND_FASTCALL bitwise_and_function(zval *result, zval *op1, zval *o
 				if (result==op1) {
 					zend_string_release(Z_STR_P(result));
 				}
-				ZVAL_INTERNED_STR(result, ZSTR_ONE_CHAR(and));
+				ZVAL_INTERNED_STR(result, ZSTR_CHAR(and));
 				return SUCCESS;
 			}
 			longer = op1;
@@ -1560,7 +1560,7 @@ ZEND_API int ZEND_FASTCALL bitwise_xor_function(zval *result, zval *op1, zval *o
 				if (result==op1) {
 					zend_string_release(Z_STR_P(result));
 				}
-				ZVAL_INTERNED_STR(result, ZSTR_ONE_CHAR(xor));
+				ZVAL_INTERNED_STR(result, ZSTR_CHAR(xor));
 				return SUCCESS;
 			}
 			longer = op1;
@@ -2273,7 +2273,7 @@ static void ZEND_FASTCALL increment_string(zval *str) /* {{{ */
 
 	if (Z_STRLEN_P(str) == 0) {
 		zend_string_release(Z_STR_P(str));
-		ZVAL_INTERNED_STR(str, ZSTR_ONE_CHAR('1'));
+		ZVAL_INTERNED_STR(str, ZSTR_CHAR('1'));
 		return;
 	}
 
