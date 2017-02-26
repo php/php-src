@@ -71,6 +71,8 @@ END_EXTERN_C()
 #define ZSTR_IS_INTERNED(s)					(GC_FLAGS(s) & IS_STR_INTERNED)
 
 #define ZSTR_EMPTY_ALLOC() zend_empty_string
+#define ZSTR_ONE_CHAR(c) zend_one_char_string[c]
+#define ZSTR_KNOWN(idx) zend_known_strings[idx]
 
 #define _ZSTR_HEADER_SIZE XtOffsetOf(zend_string, val)
 

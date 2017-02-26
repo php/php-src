@@ -1264,7 +1264,7 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 
 	if (result) {
 		/* Return the new character */
-		ZVAL_INTERNED_STR(result, zend_one_char_string[c]);
+		ZVAL_INTERNED_STR(result, ZSTR_ONE_CHAR(c));
 	}
 }
 
@@ -1777,7 +1777,7 @@ try_string_offset:
 				? (zend_long)Z_STRLEN_P(container) + offset : offset;
 			c = (zend_uchar)Z_STRVAL_P(container)[real_offset];
 
-			ZVAL_INTERNED_STR(result, zend_one_char_string[c]);
+			ZVAL_INTERNED_STR(result, ZSTR_ONE_CHAR(c));
 		}
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
 		if (/*dim_type == IS_CV &&*/ UNEXPECTED(Z_TYPE_P(dim) == IS_UNDEF)) {

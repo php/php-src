@@ -2766,7 +2766,7 @@ PHP_FUNCTION(chr)
 	ZEND_PARSE_PARAMETERS_END_EX(c = 0);
 
 	c &= 0xff;
-	ZVAL_INTERNED_STR(return_value, zend_one_char_string[c]);
+	ZVAL_INTERNED_STR(return_value, ZSTR_ONE_CHAR(c));
 }
 /* }}} */
 
