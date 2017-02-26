@@ -551,7 +551,7 @@ static int browser_reg_compare(
 	zend_string *agent_name = va_arg(args, zend_string *);
 	browscap_entry **found_entry_ptr = va_arg(args, browscap_entry **);
 	browscap_entry *found_entry = *found_entry_ptr;
-	ALLOCA_FLAG(use_heap);
+	ALLOCA_FLAG(use_heap)
 	zend_string *pattern_lc, *regex;
 	const char *cur;
 	int i;
