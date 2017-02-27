@@ -55,8 +55,9 @@ static int					resource_types_table_size;
 static MUTEX_T tsmm_mutex;	/* thread-safe memory manager mutex */
 
 /* New thread handlers */
-static tsrm_thread_begin_func_t tsrm_new_thread_begin_handler;
-static tsrm_thread_end_func_t tsrm_new_thread_end_handler;
+static tsrm_thread_begin_func_t tsrm_new_thread_begin_handler = NULL;
+static tsrm_thread_end_func_t tsrm_new_thread_end_handler = NULL;
+static tsrm_shutdown_func_t tsrm_shutdown_handler = NULL;
 
 /* Debug support */
 int tsrm_error(int level, const char *format, ...);
@@ -163,8 +164,6 @@ TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debu
 
 	tsmm_mutex = tsrm_mutex_alloc();
 
-	tsrm_new_thread_begin_handler = tsrm_new_thread_end_handler = NULL;
-
 	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Started up TSRM, %d expected threads, %d expected resources", expected_threads, expected_resources));
 	return 1;
 }
@@ -188,9 +187,7 @@ TSRM_API void tsrm_shutdown(void)
 				int j;
 
 				next_p = p->next;
-				j = p->count;
-				while (j > 0) {
-					j--;
+				for (j=0; j<p->count; j++) {
 					if (p->storage[j]) {
 						if (resource_types_table && !resource_types_table[j].done && resource_types_table[j].dtor) {
 							resource_types_table[j].dtor(p->storage[j]);
@@ -224,6 +221,9 @@ TSRM_API void tsrm_shutdown(void)
 #elif defined(TSRM_WIN32)
 	TlsFree(tls_key);
 #endif
+	if (tsrm_shutdown_handler) {
+		tsrm_shutdown_handler();
+	}
 }
 
 
@@ -751,6 +751,14 @@ TSRM_API void *tsrm_set_new_thread_end_handler(tsrm_thread_end_func_t new_thread
 	return retval;
 }
 
+
+TSRM_API void *tsrm_set_shutdown_handler(tsrm_shutdown_func_t shutdown_handler)
+{
+	void *retval = (void *) tsrm_shutdown_handler;
+
+	tsrm_shutdown_handler = shutdown_handler;
+	return retval;
+}
 
 
 /*

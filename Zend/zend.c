@@ -604,8 +604,6 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals) /* {{
 		pefree((char*)compiler_globals->script_encoding_list, 1);
 	}
 	compiler_globals->last_static_member = 0;
-
-	zend_interned_strings_dtor();
 }
 /* }}} */
 
@@ -847,6 +845,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 
 #ifdef ZTS
 	tsrm_set_new_thread_end_handler(zend_new_thread_end_handler);
+	tsrm_set_shutdown_handler(zend_interned_strings_dtor);
 #endif
 
 	return SUCCESS;

@@ -32,10 +32,6 @@ static zend_string *zend_new_interned_string_request(zend_string *str);
    possible on costs of locking in the thread safe builds. */
 static HashTable interned_strings_permanent;
 
-#ifdef ZTS
-static THREAD_T main_thread_id = -1;
-#endif
-
 ZEND_API zend_string  *zend_empty_string = NULL;
 ZEND_API zend_string  *zend_one_char_string[256];
 ZEND_API zend_string **zend_known_strings = NULL;
@@ -74,10 +70,6 @@ ZEND_API void zend_interned_strings_init(void)
 	int i;
 	zend_string *str;
 
-#ifdef ZTS
-	main_thread_id = tsrm_thread_id();
-#endif
-
 	zend_init_interned_strings_ht(&interned_strings_permanent, 1);
 
 	zend_new_interned_string = zend_new_interned_string_permanent;
@@ -103,13 +95,6 @@ ZEND_API void zend_interned_strings_init(void)
 
 ZEND_API void zend_interned_strings_dtor(void)
 {
-#ifdef ZTS
-	if (tsrm_thread_id() != main_thread_id) {
-		return;
-	}
-	main_thread_id = -1;
-#endif
-
 	zend_hash_destroy(&interned_strings_permanent);
 
 	free(zend_known_strings);
