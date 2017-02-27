@@ -642,7 +642,6 @@ static zend_string *accel_replace_string_by_process_permanent(zend_string *str)
 		zend_string_release(str);
 		return ret;
 	}
-	printf("%s\n", ZSTR_VAL(str));
 	return str;
 }
 
