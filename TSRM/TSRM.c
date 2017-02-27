@@ -224,6 +224,9 @@ TSRM_API void tsrm_shutdown(void)
 	if (tsrm_shutdown_handler) {
 		tsrm_shutdown_handler();
 	}
+	tsrm_new_thread_begin_handler = NULL;
+	tsrm_new_thread_end_handler = NULL;
+	tsrm_shutdown_handler = NULL;
 }
 
 
