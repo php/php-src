@@ -33,6 +33,7 @@ static zend_string *zend_new_interned_string_request(zend_string *str);
 static HashTable interned_strings_permanent;
 
 static zend_new_interned_string_func_t interned_string_request_handler = zend_new_interned_string_request;
+static zend_string_copy_storage_func_t interned_string_copy_storage = NULL;
 
 ZEND_API zend_string  *zend_empty_string = NULL;
 ZEND_API zend_string  *zend_one_char_string[256];
@@ -250,8 +251,16 @@ ZEND_API void zend_interned_strings_set_request_storage_handler(zend_new_interne
 	interned_string_request_handler = handler;
 }
 
+ZEND_API void zend_interned_strings_set_permanent_storage_copy_handler(zend_string_copy_storage_func_t handler)
+{
+	interned_string_copy_storage = handler;
+}
+
 ZEND_API void zend_interned_strings_switch_storage(void)
 {
+	if (interned_string_copy_storage) {
+		interned_string_copy_storage();
+	}
 	zend_new_interned_string = interned_string_request_handler;
 }
 

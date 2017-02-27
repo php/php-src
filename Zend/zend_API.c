@@ -3816,6 +3816,9 @@ ZEND_API int zend_declare_class_constant(zend_class_entry *ce, const char *name,
 	int ret;
 
 	zend_string *key = zend_string_init(name, name_length, ce->type & ZEND_INTERNAL_CLASS);
+	if (ce->type == ZEND_INTERNAL_CLASS) {
+		key = zend_new_interned_string(key);
+	}
 	ret = zend_declare_class_constant_ex(ce, key, value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(key);
 	return ret;

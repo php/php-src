@@ -279,6 +279,7 @@ typedef struct _zend_accel_shared_globals {
 	char           *interned_strings_start;
 	char           *interned_strings_top;
 	char           *interned_strings_end;
+	char           *interned_strings_saved_top;
 	HashTable       interned_strings;
 } zend_accel_shared_globals;
 
@@ -315,6 +316,9 @@ void accelerator_shm_read_unlock(void);
 
 char *accel_make_persistent_key(const char *path, int path_length, int *key_len);
 zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type);
+
+#define IS_ACCEL_INTERNED(str) \
+	((char*)(str) >= ZCSG(interned_strings_start) && (char*)(str) < ZCSG(interned_strings_end))
 
 zend_string *accel_new_interned_string(zend_string *str);
 
