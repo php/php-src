@@ -118,7 +118,6 @@ static void zend_persist_ast_calc(zend_ast *ast)
 
 static void zend_persist_zval_calc(zval *z)
 {
-	zend_uchar flags;
 	uint32_t size;
 
 	switch (Z_TYPE_P(z)) {
@@ -173,7 +172,7 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 		/* already stored */
 		if (op_array->function_name) {
 			zend_string *new_name = zend_shared_alloc_get_xlat_entry(op_array->function_name);
-			if (IS_ACCEL_INTERNED(new_name)) {
+			if (new_name) {
 				op_array->function_name = new_name;
 			}
 		}

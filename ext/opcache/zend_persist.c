@@ -279,7 +279,6 @@ static zend_ast *zend_persist_ast(zend_ast *ast)
 
 static void zend_persist_zval(zval *z)
 {
-	zend_uchar flags;
 	void *new_ptr;
 
 	switch (Z_TYPE_P(z)) {

@@ -97,7 +97,7 @@ static int zend_file_cache_flock(int fd, int type)
 	((char*)(ptr) < (char*)script->size)
 #define IS_UNSERIALIZED(ptr) \
 	(((char*)(ptr) >= (char*)script->mem && (char*)(ptr) < (char*)script->mem + script->size) || \
-	 IS_ACCEL_INTERNED(ptr))
+	 ZSTR_IS_INTERNED(((zend_string*)ptr)))
 #define SERIALIZE_PTR(ptr) do { \
 		if (ptr) { \
 			ZEND_ASSERT(IS_UNSERIALIZED(ptr)); \
@@ -112,7 +112,7 @@ static int zend_file_cache_flock(int fd, int type)
 	} while (0)
 #define SERIALIZE_STR(ptr) do { \
 		if (ptr) { \
-			if (IS_ACCEL_INTERNED(ptr)) { \
+			if (ZSTR_IS_INTERNED(((zend_string*)ptr))) { \
 				(ptr) = zend_file_cache_serialize_interned((zend_string*)(ptr), info); \
 			} else { \
 				ZEND_ASSERT(IS_UNSERIALIZED(ptr)); \
