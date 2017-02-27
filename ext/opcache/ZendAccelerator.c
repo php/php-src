@@ -599,7 +599,7 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 		if (p->key) {
 			p->key = new_interned_string(p->key);
 		}
-		c = (zend_constant*)Z_PTR(q->val);
+		c = (zend_constant*)Z_PTR(p->val);
 		if (c->name) {
 			c->name = new_interned_string(c->name);
 		}
@@ -642,6 +642,7 @@ static zend_string *accel_replace_string_by_process_permanent(zend_string *str)
 		zend_string_release(str);
 		return ret;
 	}
+	ZEND_ASSERT(0);
 	return str;
 }
 
