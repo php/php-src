@@ -32,11 +32,13 @@ static zend_string *zend_new_interned_string_request(zend_string *str);
    possible on costs of locking in the thread safe builds. */
 static HashTable interned_strings_permanent;
 
+#ifdef ZTS
+static THREAD_T main_thread_id = -1;
+#endif
+
 ZEND_API zend_string  *zend_empty_string = NULL;
 ZEND_API zend_string  *zend_one_char_string[256];
 ZEND_API zend_string **zend_known_strings = NULL;
-
-static zend_bool zend_strings_storage_type = ZEND_INTERNED_STRINGS_UNINITIALIZED;
 
 ZEND_API zend_ulong zend_hash_func(const char *str, size_t len)
 {
@@ -66,15 +68,15 @@ static void zend_init_interned_strings_ht(HashTable *interned_strings, int perma
 	interned_strings->u.flags |= HASH_FLAG_INITIALIZED;
 }
 
-ZEND_API void zend_interned_strings_init(zend_interned_strings_init_stage storage_type)
+ZEND_API void zend_interned_strings_init(void)
 {
 	char s[2];
 	int i;
 	zend_string *str;
 
-	if (ZEND_INTERNED_STRINGS_UNINITIALIZED != zend_strings_storage_type || !(storage_type > ZEND_INTERNED_STRINGS_UNINITIALIZED)) {
-		return;
-	}
+#ifdef ZTS
+	main_thread_id = tsrm_thread_id();
+#endif
 
 	zend_init_interned_strings_ht(&interned_strings_permanent, 1);
 
@@ -97,22 +99,21 @@ ZEND_API void zend_interned_strings_init(zend_interned_strings_init_stage storag
 		str = zend_string_init(known_strings[i], strlen(known_strings[i]), 1);
 		zend_known_strings[i] = zend_new_interned_string_permanent(str);
 	}
-
-	zend_strings_storage_type = storage_type;
 }
 
-ZEND_API void zend_interned_strings_dtor(zend_interned_strings_init_stage storage_type)
+ZEND_API void zend_interned_strings_dtor(void)
 {
-	if (ZEND_INTERNED_STRINGS_UNINITIALIZED == storage_type || storage_type != zend_strings_storage_type) {
+#ifdef ZTS
+	if (tsrm_thread_id() != main_thread_id) {
 		return;
 	}
+	main_thread_id = -1;
+#endif
 
 	zend_hash_destroy(&interned_strings_permanent);
 
 	free(zend_known_strings);
 	zend_known_strings = NULL;
-
-	zend_strings_storage_type = ZEND_INTERNED_STRINGS_UNINITIALIZED;
 }
 
 static zend_string *zend_interned_string_ht_lookup(zend_string *str, HashTable *interned_strings)
@@ -195,8 +196,6 @@ static zend_always_inline zend_string *zend_add_interned_string(zend_string *str
 
 ZEND_API zend_string *zend_interned_string_find_permanent(zend_string *str)
 {
-	zend_string *ret;
-
 	if (ZSTR_IS_INTERNED(str) && (GC_FLAGS(str) & IS_STR_PERMANENT)) {
 		return str;
 	}
@@ -263,7 +262,7 @@ ZEND_API void zend_interned_strings_switch_storage(void)
 {
 	static zend_bool switched = 0;
 
-	if (switched) {
+	if (switched || zend_new_interned_string != zend_new_interned_string_permanent) {
 		return;
 	}
 

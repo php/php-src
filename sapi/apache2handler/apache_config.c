@@ -212,8 +212,6 @@ void *create_php_config(apr_pool_t *p, char *dummy)
 {
 	php_conf_rec *newx = (php_conf_rec *) apr_pcalloc(p, sizeof(*newx));
 
-	zend_interned_strings_init(ZEND_INTERNED_STRINGS_SAPI);
-
 	phpapdebug((stderr, "Creating new config (%p) for %s\n", newx, dummy));
 	zend_hash_init(&newx->config, 0, NULL, config_entry_dtor, 1);
 	apr_pool_cleanup_register(p, newx, destroy_php_config, apr_pool_cleanup_null);

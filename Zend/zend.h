@@ -328,8 +328,6 @@ ZEND_API void zend_restore_error_handling(zend_error_handling *saved);
 #include "zend_object_handlers.h"
 #include "zend_operators.h"
 
-ZEND_API void zend_set_main_tsrm_handlers(void);
-
 #endif /* ZEND_H */
 
 /*

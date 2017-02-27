@@ -604,6 +604,8 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals) /* {{
 		pefree((char*)compiler_globals->script_encoding_list, 1);
 	}
 	compiler_globals->last_static_member = 0;
+
+	zend_interned_strings_dtor();
 }
 /* }}} */
 
@@ -663,22 +665,6 @@ static void zend_new_thread_end_handler(THREAD_T thread_id) /* {{{ */
 	}
 }
 /* }}} */
-
-static void zend_tsrm_startup_begin_handler(void)
-{
-	zend_interned_strings_init(ZEND_INTERNED_STRINGS_TSRM);
-}
-
-static void zend_tsrm_shutdown_end_handler(void)
-{
-	zend_interned_strings_dtor(ZEND_INTERNED_STRINGS_TSRM);
-}
-
-ZEND_API void zend_set_main_tsrm_handlers(void)
-{
-	tsrm_set_startup_begin_handler(zend_tsrm_startup_begin_handler);
-	tsrm_set_shutdown_end_handler(zend_tsrm_shutdown_end_handler);
-}
 #endif
 
 #if defined(__FreeBSD__) || defined(__DragonFly__)
@@ -841,7 +827,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 #endif
 	EG(error_reporting) = E_ALL & ~E_NOTICE;
 
-	zend_interned_strings_init(ZEND_INTERNED_STRINGS_ENGINE);
+	zend_interned_strings_init();
 	zend_startup_builtin_functions();
 	zend_register_standard_constants();
 	zend_register_auto_global(zend_string_init("GLOBALS", sizeof("GLOBALS") - 1, 1), 1, php_auto_globals_create_globals);
@@ -972,7 +958,9 @@ void zend_shutdown(void) /* {{{ */
 #endif
 	zend_destroy_rsrc_list_dtors();
 
-	zend_interned_strings_dtor(ZEND_INTERNED_STRINGS_ENGINE);
+#ifndef ZTS
+	zend_interned_strings_dtor();
+#endif
 }
 /* }}} */
 

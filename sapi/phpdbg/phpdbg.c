@@ -1419,8 +1419,6 @@ int main(int argc, char **argv) /* {{{ */
 #endif
 
 phpdbg_main:
-	zend_interned_strings_init(ZEND_INTERNED_STRINGS_SAPI);
-
 #ifdef ZTS
 	tsrm_startup(1, 1, 0, NULL);
 	(void)ts_resource(0);
@@ -2191,8 +2189,6 @@ free_and_return:
 		/* reset internal php_getopt state */
 		php_getopt(-1, argv, OPTIONS, NULL, &php_optind, 0, 0);
 
-		zend_interned_strings_dtor(ZEND_INTERNED_STRINGS_SAPI);
-
 		goto phpdbg_main;
 	}
 
@@ -2205,8 +2201,6 @@ free_and_return:
 		free(address);
 	}
 #endif
-
-	zend_interned_strings_dtor(ZEND_INTERNED_STRINGS_SAPI);
 
 	/* usually 0; just for -rr */
 	return exit_status;

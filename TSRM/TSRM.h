@@ -128,8 +128,7 @@ TSRM_API void ts_free_id(ts_rsrc_id id);
 
 typedef void (*tsrm_thread_begin_func_t)(THREAD_T thread_id);
 typedef void (*tsrm_thread_end_func_t)(THREAD_T thread_id);
-typedef void (*tsrm_main_begin_func_t)(void);
-typedef void (*tsrm_main_end_func_t)(void);
+
 
 TSRM_API int tsrm_error(int level, const char *format, ...);
 TSRM_API void tsrm_error_set(int level, char *debug_filename);
@@ -146,12 +145,6 @@ TSRM_API int tsrm_sigmask(int how, const sigset_t *set, sigset_t *oldset);
 
 TSRM_API void *tsrm_set_new_thread_begin_handler(tsrm_thread_begin_func_t new_thread_begin_handler);
 TSRM_API void *tsrm_set_new_thread_end_handler(tsrm_thread_end_func_t new_thread_end_handler);
-TSRM_API void *tsrm_set_free_thread_begin_handler(tsrm_thread_begin_func_t);
-TSRM_API void *tsrm_set_free_thread_end_handler(tsrm_thread_end_func_t);
-TSRM_API void *tsrm_set_startup_begin_handler(tsrm_main_begin_func_t);
-TSRM_API void *tsrm_set_startup_end_handler(tsrm_main_end_func_t);
-TSRM_API void *tsrm_set_shutdown_begin_handler(tsrm_main_begin_func_t);
-TSRM_API void *tsrm_set_shutdown_end_handler(tsrm_main_end_func_t);
 
 /* these 3 APIs should only be used by people that fully understand the threading model
  * used by PHP/Zend and the selected SAPI. */

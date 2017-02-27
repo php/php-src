@@ -54,15 +54,9 @@ static int					resource_types_table_size;
 
 static MUTEX_T tsmm_mutex;	/* thread-safe memory manager mutex */
 
-/* Main and per thread begin/end callbacks for start and shutdown. */
-static tsrm_thread_begin_func_t tsrm_new_thread_begin_handler = NULL;
-static tsrm_thread_end_func_t tsrm_new_thread_end_handler = NULL;
-static tsrm_thread_begin_func_t tsrm_free_thread_begin_handler = NULL;
-static tsrm_thread_end_func_t tsrm_free_thread_end_handler = NULL;
-static tsrm_main_begin_func_t tsrm_startup_begin_handler = NULL;
-static tsrm_main_end_func_t tsrm_startup_end_handler = NULL;
-static tsrm_main_begin_func_t tsrm_shutdown_begin_handler = NULL;
-static tsrm_main_end_func_t tsrm_shutdown_end_handler = NULL;
+/* New thread handlers */
+static tsrm_thread_begin_func_t tsrm_new_thread_begin_handler;
+static tsrm_thread_end_func_t tsrm_new_thread_end_handler;
 
 /* Debug support */
 int tsrm_error(int level, const char *format, ...);
@@ -147,10 +141,6 @@ TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debu
 	/* ensure singleton */
 	in_main_thread = 1;
 
-	if (tsrm_startup_begin_handler) {
-		tsrm_startup_begin_handler();
-	}
-
 	tsrm_error_file = stderr;
 	tsrm_error_set(debug_level, debug_filename);
 	tsrm_tls_table_size = expected_threads;
@@ -173,9 +163,7 @@ TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debu
 
 	tsmm_mutex = tsrm_mutex_alloc();
 
-	if (tsrm_startup_end_handler) {
-		tsrm_startup_end_handler();
-	}
+	tsrm_new_thread_begin_handler = tsrm_new_thread_end_handler = NULL;
 
 	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Started up TSRM, %d expected threads, %d expected resources", expected_threads, expected_resources));
 	return 1;
@@ -192,10 +180,6 @@ TSRM_API void tsrm_shutdown(void)
 		return;
 	}
 
-	if (tsrm_shutdown_begin_handler) {
-		tsrm_shutdown_begin_handler();
-	}
-
 	if (tsrm_tls_table) {
 		for (i=0; i<tsrm_tls_table_size; i++) {
 			tsrm_tls_entry *p = tsrm_tls_table[i], *next_p;
@@ -204,7 +188,9 @@ TSRM_API void tsrm_shutdown(void)
 				int j;
 
 				next_p = p->next;
-				for (j=0; j<p->count; j++) {
+				j = p->count;
+				while (j > 0) {
+					j--;
 					if (p->storage[j]) {
 						if (resource_types_table && !resource_types_table[j].done && resource_types_table[j].dtor) {
 							resource_types_table[j].dtor(p->storage[j]);
@@ -238,10 +224,6 @@ TSRM_API void tsrm_shutdown(void)
 #elif defined(TSRM_WIN32)
 	TlsFree(tls_key);
 #endif
-
-	if (tsrm_shutdown_end_handler) {
-		tsrm_shutdown_end_handler();
-	}
 }
 
 
@@ -476,10 +458,6 @@ void ts_free_thread(void)
 	hash_value = THREAD_HASH_OF(thread_id, tsrm_tls_table_size);
 	thread_resources = tsrm_tls_table[hash_value];
 
-	if (tsrm_free_thread_begin_handler) {
-		tsrm_free_thread_begin_handler(thread_id);
-	}
-
 	while (thread_resources) {
 		if (thread_resources->thread_id == thread_id) {
 			for (i=0; i<thread_resources->count; i++) {
@@ -505,11 +483,6 @@ void ts_free_thread(void)
 		}
 		thread_resources = thread_resources->next;
 	}
-
-	if (tsrm_free_thread_end_handler) {
-		tsrm_free_thread_end_handler(thread_id);
-	}
-
 	tsrm_mutex_unlock(tsmm_mutex);
 }
 
@@ -778,53 +751,7 @@ TSRM_API void *tsrm_set_new_thread_end_handler(tsrm_thread_end_func_t new_thread
 	return retval;
 }
 
-TSRM_API void *tsrm_set_free_thread_begin_handler(tsrm_thread_begin_func_t free_thread_begin_handler)
-{
-	void *retval = (void *) tsrm_free_thread_begin_handler;
 
-	tsrm_free_thread_begin_handler = free_thread_begin_handler;
-	return retval;
-}
-
-TSRM_API void *tsrm_set_free_thread_end_handler(tsrm_thread_end_func_t free_thread_end_handler)
-{
-	void *retval = (void *) tsrm_free_thread_end_handler;
-
-	tsrm_free_thread_end_handler = free_thread_end_handler;
-	return retval;
-}
-
-TSRM_API void *tsrm_set_startup_begin_handler(tsrm_main_begin_func_t startup_begin_handler)
-{
-	void *retval = (void *) tsrm_startup_begin_handler;
-
-	tsrm_startup_begin_handler = startup_begin_handler;
-	return retval;
-}
-
-TSRM_API void *tsrm_set_startup_end_handler(tsrm_main_end_func_t startup_end_handler)
-{
-	void *retval = (void *) tsrm_startup_end_handler;
-
-	tsrm_startup_end_handler = startup_end_handler;
-	return retval;
-}
-
-TSRM_API void *tsrm_set_shutdown_begin_handler(tsrm_main_begin_func_t shutdown_begin_handler)
-{
-	void *retval = (void *) tsrm_shutdown_begin_handler;
-
-	tsrm_shutdown_begin_handler = shutdown_begin_handler;
-	return retval;
-}
-
-TSRM_API void *tsrm_set_shutdown_end_handler(tsrm_main_end_func_t shutdown_end_handler)
-{
-	void *retval = (void *) tsrm_shutdown_end_handler;
-
-	tsrm_shutdown_end_handler = shutdown_end_handler;
-	return retval;
-}
 
 /*
  * Debug support
