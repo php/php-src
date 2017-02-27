@@ -4562,7 +4562,7 @@ PHP_FUNCTION(parse_str)
 		symbol_table = zend_rebuild_symbol_table();
 		ZVAL_ARR(&tmp, symbol_table);
 		sapi_module.treat_data(PARSE_STRING, res, &tmp);
-		if (UNEXPECTED(zend_hash_del(symbol_table, zend_known_strings[ZEND_STR_THIS]) == SUCCESS)) {
+		if (UNEXPECTED(zend_hash_del(symbol_table, ZSTR_KNOWN(ZEND_STR_THIS)) == SUCCESS)) {
 			zend_throw_error(NULL, "Cannot re-assign $this");
 		}
 	} else 	{
