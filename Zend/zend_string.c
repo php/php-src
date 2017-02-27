@@ -252,15 +252,7 @@ ZEND_API void zend_interned_strings_set_request_storage_handler(zend_new_interne
 
 ZEND_API void zend_interned_strings_switch_storage(void)
 {
-	static zend_bool switched = 0;
-
-	if (switched) {
-		return;
-	}
-
 	zend_new_interned_string = interned_string_request_handler;
-
-	switched = 1;
 }
 
 /*
