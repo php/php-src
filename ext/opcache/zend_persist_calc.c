@@ -36,7 +36,7 @@
 # define ADD_INTERNED_STRING(str, do_free) do { \
 		if (ZCG(current_persistent_script)->corrupted) { \
 			ADD_STRING(str); \
-		} else if (!(GC_FLAGS(str) & IS_STR_PERMANENT)) { \
+		} else if (!IS_ACCEL_INTERNED(str)) { \
 			zend_string *tmp = accel_new_interned_string(str); \
 			if (tmp != (str)) { \
 				if (do_free) { \

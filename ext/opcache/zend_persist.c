@@ -64,12 +64,12 @@
 		zend_set_str_gc_flags(str); \
 	} while (0)
 #define zend_accel_store_interned_string(str) do { \
-		if (!(GC_FLAGS(str) & IS_STR_PERMANENT)) { \
+		if (!IS_ACCEL_INTERNED(str)) { \
 			zend_accel_store_string(str); \
 		} \
 	} while (0)
 #define zend_accel_memdup_interned_string(str) do { \
-		if (!(GC_FLAGS(str) & IS_STR_PERMANENT)) { \
+		if (!IS_ACCEL_INTERNED(str)) { \
 			zend_accel_memdup_string(str); \
 		} \
 	} while (0)
@@ -463,14 +463,14 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		}
 	}
 
-	if (op_array->function_name && !(GC_FLAGS(op_array->function_name) & IS_STR_PERMANENT)) {
+	if (op_array->function_name && !IS_ACCEL_INTERNED(op_array->function_name)) {
 		zend_string *new_name;
 		if (already_stored) {
 			new_name = zend_shared_alloc_get_xlat_entry(op_array->function_name);
 			ZEND_ASSERT(new_name != NULL);
 			op_array->function_name = new_name;
 		} else {
-			zend_accel_store_string(op_array->function_name);
+			zend_accel_store_interned_string(op_array->function_name);
 		}
 	}
 
