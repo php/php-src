@@ -25,7 +25,9 @@
 
 BEGIN_EXTERN_C()
 
-ZEND_API extern zend_string *(*zend_new_interned_string)(zend_string *str);
+typedef zend_string *(*zend_new_interned_string_func_t)(zend_string *str);
+
+ZEND_API extern zend_new_interned_string_func_t zend_new_interned_string;
 
 ZEND_API zend_ulong zend_hash_func(const char *str, size_t len);
 ZEND_API void zend_interned_strings_init(void);
@@ -33,6 +35,7 @@ ZEND_API void zend_interned_strings_dtor(void);
 ZEND_API void zend_interned_strings_activate(void);
 ZEND_API void zend_interned_strings_deactivate(void);
 ZEND_API zend_string *zend_interned_string_find_permanent(zend_string *str);
+ZEND_API void zend_interned_strings_set_request_storage_handler(zend_new_interned_string_func_t handler);
 ZEND_API void zend_interned_strings_switch_storage(void);
 
 ZEND_API extern zend_string  *zend_empty_string;

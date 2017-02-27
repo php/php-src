@@ -32,6 +32,8 @@ static zend_string *zend_new_interned_string_request(zend_string *str);
    possible on costs of locking in the thread safe builds. */
 static HashTable interned_strings_permanent;
 
+static zend_new_interned_string_func_t interned_string_request_handler = zend_new_interned_string_request;
+
 ZEND_API zend_string  *zend_empty_string = NULL;
 ZEND_API zend_string  *zend_one_char_string[256];
 ZEND_API zend_string **zend_known_strings = NULL;
@@ -243,15 +245,20 @@ ZEND_API void zend_interned_strings_deactivate(void)
 	zend_hash_destroy(&CG(interned_strings));
 }
 
+ZEND_API void zend_interned_strings_set_request_storage_handler(zend_new_interned_string_func_t handler)
+{
+	interned_string_request_handler = handler;
+}
+
 ZEND_API void zend_interned_strings_switch_storage(void)
 {
 	static zend_bool switched = 0;
 
-	if (switched || zend_new_interned_string != zend_new_interned_string_permanent) {
+	if (switched) {
 		return;
 	}
 
-	zend_new_interned_string = zend_new_interned_string_request;
+	zend_new_interned_string = interned_string_request_handler;
 
 	switched = 1;
 }

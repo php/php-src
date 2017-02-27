@@ -341,7 +341,6 @@ static inline void accel_unlock_all(void)
 }
 
 /* Interned strings support */
-static zend_string *(*orig_new_interned_string)(zend_string *str);
 
 /* O+ disables creation of interned strings by regular PHP compiler, instead,
  * it creates interned strings in shared memory when saves a script.
@@ -2374,8 +2373,7 @@ static int zend_accel_init_shm(void)
 		ZCSG(interned_strings_top)   = ZCSG(interned_strings_start);
 	}
 
-	orig_new_interned_string = zend_new_interned_string;
-	zend_new_interned_string = accel_new_interned_string_for_php;
+	zend_interned_strings_set_request_storage_handler(accel_new_interned_string_for_php);
 
 	zend_reset_cache_vars();
 
