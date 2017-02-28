@@ -18,4 +18,4 @@ Warning: Unsupported encoding [1] in %sdeclare_003.php on line %d
 
 Warning: Unsupported encoding [11111111111111] in %sdeclare_003.php on line %d
 
-Fatal error: Encoding must be a literal in %s on line %d
+Parse error: syntax error, unexpected 'M_PI' (T_STRING), expecting integer number (T_LNUMBER) or floating-point number (T_DNUMBER) or quoted-string (T_CONSTANT_ENCAPSED_STRING) in %s/declare_003.php on line 5

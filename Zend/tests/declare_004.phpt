@@ -17,4 +17,4 @@ Warning: Unsupported encoding [%d] in %sdeclare_004.php on line 3
 
 Warning: Unsupported encoding [%f] in %sdeclare_004.php on line 4
 
-Fatal error: Encoding must be a literal in %sdeclare_004.php on line 5
+Parse error: syntax error, unexpected 'M_PI' (T_STRING), expecting integer number (T_LNUMBER) or floating-point number (T_DNUMBER) or quoted-string (T_CONSTANT_ENCAPSED_STRING) in %s/declare_004.php on line 5
