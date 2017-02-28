@@ -41,6 +41,21 @@
 #undef sprintf
 #define sprintf php_sprintf
 
+/* Operating system family defintion */
+#ifdef PHP_WIN32
+# define PHP_OS_FAMILY			"Windows"
+#elif defined(BSD) || defined(__DragonFly__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+# define PHP_OS_FAMILY			"BSD"
+#elif defined(__APPLE__) || defined(__MACH__)
+# define PHP_OS_FAMILY			"OSX"
+#elif defined(__sun__)
+# define PHP_OS_FAMILY			"Solaris"
+#elif defined(__linux__)
+# define PHP_OS_FAMILY			"Linux"
+#else
+# define PHP_OS_FAMILY			"Unknown"
+#endif
+
 /* PHP's DEBUG value must match Zend's ZEND_DEBUG value */
 #undef PHP_DEBUG
 #define PHP_DEBUG ZEND_DEBUG

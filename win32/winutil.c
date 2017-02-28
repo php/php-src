@@ -25,7 +25,7 @@
 #include <lmcons.h>
 
 PHP_WINUTIL_API char *php_win32_error_to_msg(HRESULT error)
-{
+{/*{{{*/
 	char *buf = NULL;
 
 	FormatMessage(
@@ -34,9 +34,10 @@ PHP_WINUTIL_API char *php_win32_error_to_msg(HRESULT error)
 	);
 
 	return (buf ? (char *) buf : "");
-}
+}/*}}}*/
 
-int php_win32_check_trailing_space(const char * path, const int path_len) {
+int php_win32_check_trailing_space(const char * path, const int path_len)
+{/*{{{*/
 	if (path_len < 1) {
 		return 1;
 	}
@@ -49,39 +50,40 @@ int php_win32_check_trailing_space(const char * path, const int path_len) {
 	} else {
 		return 0;
 	}
-}
+}/*}}}*/
 
 static BCRYPT_ALG_HANDLE bcrypt_algo;
-static BOOL has_crypto_ctx = 0;
+static BOOL has_bcrypt_algo = 0;
 
 #define NT_SUCCESS(Status) (((NTSTATUS)(Status)) >= 0)
 
 #ifdef PHP_EXPORTS
 BOOL php_win32_shutdown_random_bytes(void)
-{
+{/*{{{*/
 	BOOL ret = TRUE;
 
-	if (has_crypto_ctx) {
+	if (has_bcrypt_algo) {
 		ret = NT_SUCCESS(BCryptCloseAlgorithmProvider(bcrypt_algo, 0));
-		has_crypto_ctx = 0;
+		has_bcrypt_algo = 0;
 	}
 
 	return ret;
-}
+}/*}}}*/
 
 BOOL php_win32_init_random_bytes(void)
-{
-	if (has_crypto_ctx) {
+{/*{{{*/
+	if (has_bcrypt_algo) {
 		return TRUE;
 	}
 
-	has_crypto_ctx = NT_SUCCESS(BCryptOpenAlgorithmProvider(&bcrypt_algo, BCRYPT_RNG_ALGORITHM, NULL, 0));
+	has_bcrypt_algo = NT_SUCCESS(BCryptOpenAlgorithmProvider(&bcrypt_algo, BCRYPT_RNG_ALGORITHM, NULL, 0));
 
-	return has_crypto_ctx;
-}
+	return has_bcrypt_algo;
+}/*}}}*/
 #endif
 
-PHP_WINUTIL_API int php_win32_get_random_bytes(unsigned char *buf, size_t size) {  /* {{{ */
+PHP_WINUTIL_API int php_win32_get_random_bytes(unsigned char *buf, size_t size)
+{  /* {{{ */
 
 	BOOL ret;
 
@@ -89,7 +91,7 @@ PHP_WINUTIL_API int php_win32_get_random_bytes(unsigned char *buf, size_t size) 
 	/* Currently we fail on startup, with CNG API it shows no regressions so far and is secure.
 		Should switch on and try to reinit, if it fails too often on startup. This means also
 		bringing locks back. */
-	if (has_crypto_ctx == 0) {
+	if (has_bcrypt_algo == 0) {
 		return FAILURE;
 	}
 #endif
@@ -112,7 +114,7 @@ PHP_WINUTIL_API int php_win32_get_random_bytes(unsigned char *buf, size_t size) 
 */
 
 PHP_WINUTIL_API int php_win32_code_to_errno(unsigned long w32Err)
-{
+{/*{{{*/
     size_t  i;
 
     struct code_to_errno_map
@@ -392,10 +394,10 @@ PHP_WINUTIL_API int php_win32_code_to_errno(unsigned long w32Err)
     assert(!"Unrecognised value");
 
     return EINVAL;
-}
+}/*}}}*/
 
 PHP_WINUTIL_API char *php_win32_get_username(void)
-{
+{/*{{{*/
 	wchar_t unamew[UNLEN + 1];
 	size_t uname_len;
 	char *uname;
@@ -413,7 +415,7 @@ PHP_WINUTIL_API char *php_win32_get_username(void)
 	}
 
 	return uname;
-}
+}/*}}}*/
 
 /*
  * Local variables:
