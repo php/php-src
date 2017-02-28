@@ -2827,6 +2827,10 @@ static int accel_startup(zend_extension *extension)
 			case SUCCESSFULLY_REATTACHED:
 				zend_shared_alloc_lock();
 				accel_shared_globals = (zend_accel_shared_globals *) ZSMMG(app_shared_globals);
+				if (ZCG(accel_directives).interned_strings_buffer) {
+					zend_interned_strings_set_permanent_storage_copy_handler(accel_use_shm_interned_strings);
+				}
+				zend_interned_strings_set_request_storage_handler(accel_new_interned_string_for_php);
 				zend_shared_alloc_unlock();
 				break;
 			case FAILED_REATTACHED:
