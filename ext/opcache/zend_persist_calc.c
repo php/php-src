@@ -37,6 +37,7 @@
 		if (ZCG(current_persistent_script)->corrupted) { \
 			ADD_STRING(str); \
 		} else if (!(GC_FLAGS(str) & IS_STR_PERMANENT)) { \
+			ZEND_ASSERT(!IS_ACCEL_INTERNED(str)); \
 			zend_string *tmp = accel_new_interned_string(str); \
 			if (tmp != (str)) { \
 				if (do_free) { \
