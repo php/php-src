@@ -61,33 +61,19 @@
  |.define SSE,     1
 |.endif
 
-#define r0        0
-#define r1        1
-#define r2        2
-#define r3        3
-#define r4        4
-#define r5        5
-#define r6        6
-#define r7        7
-#if SIZEOF_SIZE_T == 8
-# define r8       8
-# define r9       9
-# define r10     10
-# define r11     11
-# define r12     12
-# define r13     13
-# define r14     14
-# define r15     15
-# define FP      r14
-# define IP      r15
-# define RX      IP
-# define FCARG1a r7
+#include "jit/zend_jit_x86.h"
+
+const char* zend_reg_name[] = {
+#ifdef __x86_64__
+	"rax", "rcx", "rdx", "rbx", "rsp", "rbp", "rsi", "rdi",
+	"r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+	"xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7",
+	"xmm8", "xmm9", "xmm10", "xmm11", "xmm12", "xmm13", "xmm14", "xm15"
 #else
-# define FP      r6
-# define IP      r7
-# define RX      IP
-# define FCARG1a r1
+	"rax", "rcx", "rdx", "rbx", "rsp", "rbp", "rsi", "rdi",
+	"xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7"
 #endif
+};
 
 |.type EX, zend_execute_data, FP
 |.type OP, zend_op, IP
@@ -263,12 +249,12 @@ static void* dasm_labels[zend_lb_MAX];
 ||if (op_type == IS_CONST) {
 |   .if X64
 |   mov r0, aword EX->literals
-|   sse_ins xmm(reg), qword [r0 + op.constant]
+|   sse_ins xmm(reg-ZREG_XMM0), qword [r0 + op.constant]
 |   .else
-|   sse_ins xmm(reg), qword [op.zv]
+|   sse_ins xmm(reg-ZREG_XMM0), qword [op.zv]
 |   .endif
 ||} else {
-|   sse_ins xmm(reg), qword [FP + op.var]
+|   sse_ins xmm(reg-ZREG_XMM0), qword [FP + op.var]
 ||}
 |.endmacro
 
@@ -276,17 +262,17 @@ static void* dasm_labels[zend_lb_MAX];
 ||if (op_type == IS_CONST) {
 |   .if X64
 |   mov r0, aword EX->literals
-|   cvtsi2sd xmm(reg), qword [r0 + op.constant]
+|   cvtsi2sd xmm(reg-ZREG_XMM0), qword [r0 + op.constant]
 |   .else
-|   cvtsi2sd xmm(reg), dword [op.zv]
+|   cvtsi2sd xmm(reg-ZREG_XMM0), dword [op.zv]
 |   .endif
 ||} else {
-|   cvtsi2sd xmm(reg), aword [FP + op.var]
+|   cvtsi2sd xmm(reg-ZREG_XMM0), aword [FP + op.var]
 ||}
 |.endmacro
 
 |.macro SSE_GET_Z_LVAL, reg, zv
-|   cvtsi2sd xmm(reg), aword [zv]
+|   cvtsi2sd xmm(reg-ZREG_XMM0), aword [zv]
 |.endmacro
 
 |.macro SSE_LOAD, reg, op_type, op
@@ -294,26 +280,26 @@ static void* dasm_labels[zend_lb_MAX];
 |.endmacro
 
 |.macro SSE_GET_Z_DVAL, reg, zv
-|   movsd xmm(reg), qword [zv]
+|   movsd xmm(reg-ZREG_XMM0), qword [zv]
 |.endmacro
 
 |.macro SSE_MATH, opcode, reg, op
 ||switch (opcode) {
 ||    case ZEND_ADD:
 ||    case ZEND_ASSIGN_ADD:
-|         addsd xmm(reg), op
+|         addsd xmm(reg-ZREG_XMM0), op
 ||        break;
 ||    case ZEND_SUB:
 ||    case ZEND_ASSIGN_SUB:
-|         subsd xmm(reg), op
+|         subsd xmm(reg-ZREG_XMM0), op
 ||        break;
 ||    case ZEND_MUL:
 ||    case ZEND_ASSIGN_MUL:
-|         mulsd xmm(reg), op
+|         mulsd xmm(reg-ZREG_XMM0), op
 ||        break;
 ||    case ZEND_DIV:
 ||    case ZEND_ASSIGN_DIV:
-|         divsd xmm(reg), op
+|         divsd xmm(reg-ZREG_XMM0), op
 ||        break;
 ||}
 |.endmacro
@@ -328,11 +314,11 @@ static void* dasm_labels[zend_lb_MAX];
 |.endmacro
 
 |.macro SSE_MATH_REG, opcode, dst_reg, src_reg
-|   SSE_MATH, opcode, dst_reg, xmm(src_reg)
+|   SSE_MATH, opcode, dst_reg, xmm(src_reg-ZREG_XMM0)
 |.endmacro
 
 |.macro SSE_STORE, zv, reg
-|	movsd qword [zv], xmm(reg)
+|	movsd qword [zv], xmm(reg-ZREG_XMM0)
 |.endmacro
 
 |.macro LONG_OP, long_ins, reg, op_type, op
@@ -2069,8 +2055,8 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 		|.cold_code
 		|1:
 		|.if X64 or SSE
-		int tmp_reg1 = 0;
-		int tmp_reg2 = 1;
+		zend_reg tmp_reg1 = ZREG_XMM0;
+		zend_reg tmp_reg2 = ZREG_XMM1;
 
 		if (op1_type == IS_CONST) {
 			|	SSE_LOAD_LONG tmp_reg1, op1_type, op1
@@ -2130,7 +2116,7 @@ static int zend_jit_math_long_double(dasm_State    **Dst,
                                      uint32_t        res_offset)
 {
 	|.if X64 or SSE
-		int result_reg = 0;
+		zend_reg result_reg = ZREG_XMM0;
 
 		if (op1_type == IS_CONST) {
 			|	SSE_LOAD_LONG result_reg, op1_type, op1
@@ -2175,7 +2161,7 @@ static int zend_jit_math_double_long(dasm_State    **Dst,
                                      uint32_t        res_offset)
 {
 	|.if X64 or SSE
-	||	int result_reg = 0;
+	||	zend_reg result_reg = ZREG_XMM0;
 	||
 	||	if (opline->opcode == ZEND_ADD || opline->opcode == ZEND_MUL || opline->opcode == ZEND_ASSIGN_ADD || opline->opcode == ZEND_ASSIGN_MUL) {
 	||		if (op2_type == IS_CONST) {
@@ -2248,7 +2234,7 @@ static int zend_jit_math_double_double(dasm_State    **Dst,
 	zend_bool same_ops = (op1_type == op2_type) && (op1.var == op2.var);
 
 	|.if X64 or SSE
-	int result_reg = 0;
+	zend_reg result_reg = ZREG_XMM0;
 
 	if (op1_type == IS_CONST) {
 		|	SSE_LOAD result_reg, op1_type, op1
@@ -2510,13 +2496,13 @@ static int zend_jit_math_helper(dasm_State    **Dst,
 		|6:
 		|	SAVE_VALID_OPLINE opline
 		if (separate_op1) {
-			if (op1_reg != FCARG1a || op1_offset != 0) {
+			if (op1_reg != ZREG_FCARG1a || op1_offset != 0) {
 				|	SEPARATE_ZVAL_NOREF Ra(op1_reg)+op1_offset, op1_info, 0, op_array->filename, opline->lineno
 			} else {
 				|	SEPARATE_ZVAL_NOREF_REG op1_info, 0, op_array->filename, opline->lineno
 			}
 		}
-		if (res_reg != FCARG1a || res_offset != 0) {
+		if (res_reg != ZREG_FCARG1a || res_offset != 0) {
 			|	lea	FCARG1a, [Ra(res_reg)+res_offset]
 		}
 		if (op1_type == IS_CONST) {
@@ -2595,9 +2581,9 @@ static int zend_jit_math(dasm_State **Dst, const zend_op *opline, int *opnum, ze
 			|	// call = EX(call);
 			|	mov RX, EX->call
 		}
-		return zend_jit_math_helper(Dst, opline, op_array, ssa, opline->op1_type, opline->op1, FP, opline->op1.var, op1_info, opline->op2_type, opline->op2, FP, opline->op2.var, op2_info, RX, (opline+1)->result.var, RES_INFO(), 0);
+		return zend_jit_math_helper(Dst, opline, op_array, ssa, opline->op1_type, opline->op1, ZREG_FP, opline->op1.var, op1_info, opline->op2_type, opline->op2, ZREG_FP, opline->op2.var, op2_info, ZREG_RX, (opline+1)->result.var, RES_INFO(), 0);
 	} else {
-		return zend_jit_math_helper(Dst, opline, op_array, ssa, opline->op1_type, opline->op1, FP, opline->op1.var, op1_info, opline->op2_type, opline->op2, FP, opline->op2.var, op2_info, FP, opline->result.var, RES_INFO(), 0);
+		return zend_jit_math_helper(Dst, opline, op_array, ssa, opline->op1_type, opline->op1, ZREG_FP, opline->op1.var, op1_info, opline->op2_type, opline->op2, ZREG_FP, opline->op2.var, op2_info, ZREG_FP, opline->result.var, RES_INFO(), 0);
 	}
 
 fallback:
@@ -2632,7 +2618,7 @@ static int zend_jit_concat_helper(dasm_State    **Dst,
 			|	IF_NOT_Z_TYPE Ra(op2_reg)+op2_offset, IS_STRING, >6
 		}
 		if (op1_type != IS_CONST && op1_reg == res_reg && op1_offset == res_offset) {
-			if (res_reg != FCARG1a || res_offset != 0) {
+			if (res_reg != ZREG_FCARG1a || res_offset != 0) {
 				|	lea	FCARG1a, [Ra(res_reg)+res_offset]
 			}
 			if (op2_type == IS_CONST) {
@@ -2642,7 +2628,7 @@ static int zend_jit_concat_helper(dasm_State    **Dst,
 			}
 			|	EXT_CALL zend_jit_fast_assign_concat_helper, r0
 		} else {
-			if (res_reg != FCARG1a || res_offset != 0) {
+			if (res_reg != ZREG_FCARG1a || res_offset != 0) {
 				|	lea	FCARG1a, [Ra(res_reg)+res_offset]
 			}
 			if (op1_type == IS_CONST) {
@@ -2678,7 +2664,7 @@ static int zend_jit_concat_helper(dasm_State    **Dst,
 		}
 #endif
 		|	SAVE_VALID_OPLINE opline
-		if (res_reg != FCARG1a || res_offset != 0) {
+		if (res_reg != ZREG_FCARG1a || res_offset != 0) {
 			|	lea	FCARG1a, [Ra(res_reg)+res_offset]
 		}
 		if (op1_type == IS_CONST) {
@@ -2748,9 +2734,9 @@ static int zend_jit_concat(dasm_State **Dst, const zend_op *opline, int *opnum, 
 			|	// call = EX(call);
 			|	mov RX, EX->call
 		}
-		return zend_jit_concat_helper(Dst, opline, op_array, ssa, opline->op1_type, opline->op1, FP, opline->op1.var, op1_info, opline->op2_type, opline->op2, FP, opline->op2.var, op2_info, RX, (opline+1)->result.var, RES_INFO());
+		return zend_jit_concat_helper(Dst, opline, op_array, ssa, opline->op1_type, opline->op1, ZREG_FP, opline->op1.var, op1_info, opline->op2_type, opline->op2, ZREG_FP, opline->op2.var, op2_info, ZREG_RX, (opline+1)->result.var, RES_INFO());
 	} else {
-		return zend_jit_concat_helper(Dst, opline, op_array, ssa, opline->op1_type, opline->op1, FP, opline->op1.var, op1_info, opline->op2_type, opline->op2, FP, opline->op2.var, op2_info, FP, opline->result.var, RES_INFO());
+		return zend_jit_concat_helper(Dst, opline, op_array, ssa, opline->op1_type, opline->op1, ZREG_FP, opline->op1.var, op1_info, opline->op2_type, opline->op2, ZREG_FP, opline->op2.var, op2_info, ZREG_FP, opline->result.var, RES_INFO());
 	}
 
 fallback:
@@ -3098,7 +3084,7 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
                                   int             in_cold)
 /* Labels: 1,2,3 */
 {
-	ZEND_ASSERT(var_reg != r0);
+	ZEND_ASSERT(var_reg != ZREG_R0);
 	if (val_type == IS_CONST) {
 		zval *zv = RT_CONSTANT(op_array, val);
 		if (var2 == (uint32_t)-1) {
@@ -3123,13 +3109,13 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
 				|1:
 			}
 			|	// zend_error(E_NOTICE, "Undefined variable: %s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
-			if (var_reg != FP) {
+			if (var_reg != ZREG_FP) {
 				|	mov aword [r4], Ra(var_reg) // save
 			}
 			|	SAVE_VALID_OPLINE opline
 			|	mov FCARG1d, val.var
 			|	EXT_CALL zend_jit_undefined_op_helper, r0
-			if (var_reg != FP) {
+			if (var_reg != ZREG_FP) {
 				|	mov Ra(var_reg), aword [r4] // restore
 			}
 			|	SET_Z_TYPE_INFO Ra(var_reg)+var_offset, IS_NULL
@@ -3145,7 +3131,7 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
 		}
 		if (val_info & MAY_BE_REF) {
 			if (val_type == IS_CV) {
-				ZEND_ASSERT(var_reg != r2);
+				ZEND_ASSERT(var_reg != ZREG_R2);
 				|	lea r2, [FP + val.var]
 				|	ZVAL_DEREF r2, val_info
 				if (var2 == (uint32_t)-1) {
@@ -3236,7 +3222,7 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 	if (var_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
 		int in_cold = 0;
 
-		ZEND_ASSERT(var_reg != r0);
+		ZEND_ASSERT(var_reg != ZREG_R0);
 		if (var_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
 			|	IF_Z_REFCOUNTED Ra(var_reg)+var_offset, >1
 			|.cold_code
@@ -3261,10 +3247,10 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 			|4:
 		}
 		if (RC_MAY_BE_N(var_info)) {
-			if (var_reg == FP) {
+			if (var_reg == ZREG_FP) {
 				|	GET_Z_PTR FCARG1a, Ra(var_reg)+var_offset
 				|	IF_GC_MAY_NOT_LEAK FCARG1a, eax, >5
-			} else if (var_reg != FCARG1a) {
+			} else if (var_reg != ZREG_FCARG1a) {
 				|	GET_Z_PTR FCARG1a, Ra(var_reg)+var_offset
 				|	IF_GC_MAY_NOT_LEAK FCARG1a, eax, >5
 				|	mov [r4], Ra(var_reg) // save
@@ -3275,7 +3261,7 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 				|	GET_Z_PTR FCARG1a, Ra(var_reg)+var_offset
 			}
 			|	EXT_CALL gc_possible_root, r0
-			if (var_reg != FP) {
+			if (var_reg != ZREG_FP) {
 				|	mov Ra(var_reg), [r4] // restore
 			}
 			if (in_cold) {
@@ -3418,7 +3404,7 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, zend_op_
 		if (opline->op2_type == IS_UNUSED) {
 			uint32_t var_info = zend_array_element_type(op1_info, 0, 0);
 
-			if (!zend_jit_simple_assign(Dst, opline, op_array, ssa, FCARG1a, 0, var_info, (opline+1)->op1_type, (opline+1)->op1, val_info,
+			if (!zend_jit_simple_assign(Dst, opline, op_array, ssa, ZREG_FCARG1a, 0, var_info, (opline+1)->op1_type, (opline+1)->op1, val_info,
 				opline->result_type == IS_UNUSED ? -1 : opline->result.var, 0)) {
 				return 0;
 			}
@@ -3427,7 +3413,7 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, zend_op_
 
 			|	// value = zend_assign_to_variable(variable_ptr, value, OP_DATA_TYPE);
 			|	ZVAL_DEREF FCARG1a, var_info
-			if (!zend_jit_assign_to_variable(Dst, opline, op_array, ssa, FCARG1a, 0, var_info, (opline+1)->op1_type, (opline+1)->op1, val_info,
+			if (!zend_jit_assign_to_variable(Dst, opline, op_array, ssa, ZREG_FCARG1a, 0, var_info, (opline+1)->op1_type, (opline+1)->op1, val_info,
 					opline->result_type == IS_UNUSED ? -1 : opline->result.var)) {
 				return 0;
 			}
@@ -3703,12 +3689,12 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, zend_
 			case ZEND_ASSIGN_SUB:
 			case ZEND_ASSIGN_MUL:
 			case ZEND_ASSIGN_DIV:
-				if (!zend_jit_math_helper(Dst, opline, op_array, ssa, IS_CV, opline->op1, FCARG1a, 0, var_info, (opline+1)->op1_type, (opline+1)->op1, FP, (opline+1)->op1.var, OP1_DATA_INFO(), FCARG1a, 0, OP1_DEF_INFO(), 1)) {
+				if (!zend_jit_math_helper(Dst, opline, op_array, ssa, IS_CV, opline->op1, ZREG_FCARG1a, 0, var_info, (opline+1)->op1_type, (opline+1)->op1, ZREG_FP, (opline+1)->op1.var, OP1_DATA_INFO(), ZREG_FCARG1a, 0, OP1_DEF_INFO(), 1)) {
 					return 0;
 				}
 				break;
 			case ZEND_ASSIGN_CONCAT:
-				if (!zend_jit_concat_helper(Dst, opline, op_array, ssa, IS_CV, opline->op1, FCARG1a, 0, var_info, (opline+1)->op1_type, (opline+1)->op1, FP, (opline+1)->op1.var, OP1_DATA_INFO(), FCARG1a, 0, OP1_DEF_INFO())) {
+				if (!zend_jit_concat_helper(Dst, opline, op_array, ssa, IS_CV, opline->op1, ZREG_FCARG1a, 0, var_info, (opline+1)->op1_type, (opline+1)->op1, ZREG_FP, (opline+1)->op1.var, OP1_DATA_INFO(), ZREG_FCARG1a, 0, OP1_DEF_INFO())) {
 					return 0;
 				}
 				break;
@@ -3895,9 +3881,9 @@ static int zend_jit_assign_op(dasm_State **Dst, const zend_op *opline, zend_op_a
 			case ZEND_ASSIGN_SUB:
 			case ZEND_ASSIGN_MUL:
 			case ZEND_ASSIGN_DIV:
-				return zend_jit_math_helper(Dst, opline, op_array, ssa, opline->op1_type, opline->op1, FCARG1a, 0, op1_info, opline->op2_type, opline->op2, FP, opline->op2.var, op2_info, FCARG1a, 0, OP1_DEF_INFO(), 1);
+				return zend_jit_math_helper(Dst, opline, op_array, ssa, opline->op1_type, opline->op1, ZREG_FCARG1a, 0, op1_info, opline->op2_type, opline->op2, ZREG_FP, opline->op2.var, op2_info, ZREG_FCARG1a, 0, OP1_DEF_INFO(), 1);
 			case ZEND_ASSIGN_CONCAT:
-				return zend_jit_concat_helper(Dst, opline, op_array, ssa, opline->op1_type, opline->op1, FCARG1a, 0, op1_info, opline->op2_type, opline->op2, FP, opline->op2.var, op2_info, FCARG1a, 0, OP1_DEF_INFO());
+				return zend_jit_concat_helper(Dst, opline, op_array, ssa, opline->op1_type, opline->op1, ZREG_FCARG1a, 0, op1_info, opline->op2_type, opline->op2, ZREG_FP, opline->op2.var, op2_info, ZREG_FCARG1a, 0, OP1_DEF_INFO());
 			default:
 				ZEND_ASSERT(0);
 		}
@@ -3907,9 +3893,9 @@ static int zend_jit_assign_op(dasm_State **Dst, const zend_op *opline, zend_op_a
 			case ZEND_ASSIGN_SUB:
 			case ZEND_ASSIGN_MUL:
 			case ZEND_ASSIGN_DIV:
-				return zend_jit_math_helper(Dst, opline, op_array, ssa, opline->op1_type, opline->op1, FP, opline->op1.var, op1_info, opline->op2_type, opline->op2, FP, opline->op2.var, op2_info, FP, opline->op1.var, OP1_DEF_INFO(), 1);
+				return zend_jit_math_helper(Dst, opline, op_array, ssa, opline->op1_type, opline->op1, ZREG_FP, opline->op1.var, op1_info, opline->op2_type, opline->op2, ZREG_FP, opline->op2.var, op2_info, ZREG_FP, opline->op1.var, OP1_DEF_INFO(), 1);
 			case ZEND_ASSIGN_CONCAT:
-				return zend_jit_concat_helper(Dst, opline, op_array, ssa, opline->op1_type, opline->op1, FP, opline->op1.var, op1_info, opline->op2_type, opline->op2, FP, opline->op2.var, op2_info, FP, opline->op1.var, OP1_DEF_INFO());
+				return zend_jit_concat_helper(Dst, opline, op_array, ssa, opline->op1_type, opline->op1, ZREG_FP, opline->op1.var, op1_info, opline->op2_type, opline->op2, ZREG_FP, opline->op2.var, op2_info, ZREG_FP, opline->op1.var, OP1_DEF_INFO());
 			default:
 				ZEND_ASSERT(0);
 		}
@@ -4310,7 +4296,7 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 static int zend_jit_cmp_long_double(dasm_State **Dst, const zend_op *opline, int b, zend_op_array *op_array, zend_ssa *ssa)
 {
 	|.if X64 or SSE
-	||	int tmp_reg = 1;
+	||	zend_reg tmp_reg = ZREG_XMM1;
 	||
 	|	SSE_LOAD_LONG tmp_reg, opline->op1_type, opline->op1
 	|	SSE_OP ucomisd, tmp_reg, opline->op2_type, opline->op2
@@ -4327,12 +4313,12 @@ static int zend_jit_cmp_long_double(dasm_State **Dst, const zend_op *opline, int
 static int zend_jit_cmp_double_long(dasm_State **Dst, const zend_op *opline, int b, zend_op_array *op_array, zend_ssa *ssa)
 {
 	|.if X64 or SSE
-		int tmp_reg1 = 0;
-		int tmp_reg2 = 1;
+		zend_reg tmp_reg1 = ZREG_XMM0;
+		zend_reg tmp_reg2 = ZREG_XMM1;
 
 	|	SSE_LOAD tmp_reg1, opline->op1_type, opline->op1
 	|	SSE_LOAD_LONG tmp_reg2, opline->op2_type, opline->op2
-	|	ucomisd xmm(tmp_reg1), xmm(tmp_reg2)
+	|	ucomisd xmm(tmp_reg1-ZREG_XMM0), xmm(tmp_reg2-ZREG_XMM0)
 	|.else
 	|	FPU_LONG_LOAD opline->op2_type, opline->op2
 	|	FPU_LOAD opline->op1_type, opline->op1
@@ -4346,7 +4332,7 @@ static int zend_jit_cmp_double_long(dasm_State **Dst, const zend_op *opline, int
 static int zend_jit_cmp_double_double(dasm_State **Dst, const zend_op *opline, int b, zend_op_array *op_array, zend_ssa *ssa)
 {
 	|.if X64 or SSE
-		int tmp_reg = 0;
+		zend_reg tmp_reg = ZREG_XMM0;
 
 	|	SSE_LOAD tmp_reg, opline->op1_type, opline->op1
 	|	SSE_OP ucomisd, tmp_reg, opline->op2_type, opline->op2
@@ -5305,7 +5291,7 @@ static int zend_jit_qm_assign(dasm_State **Dst, const zend_op *opline, zend_op_a
 {
 	uint32_t op1_info = OP1_INFO();
 
-	return zend_jit_simple_assign(Dst, opline, op_array, ssa, FP, opline->result.var, -1, opline->op1_type, opline->op1, op1_info, -1, 0);
+	return zend_jit_simple_assign(Dst, opline, op_array, ssa, ZREG_FP, opline->result.var, -1, opline->op1_type, opline->op1, op1_info, -1, 0);
 }
 
 static int zend_jit_assign(dasm_State **Dst, const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
@@ -5322,12 +5308,12 @@ static int zend_jit_assign(dasm_State **Dst, const zend_op *opline, zend_op_arra
 	if (op1_info & MAY_BE_REF) {
 		|	lea	FCARG1a, [FP + opline->op1.var]
 		|	ZVAL_DEREF FCARG1a, op1_info
-		if (!zend_jit_assign_to_variable(Dst, opline, op_array, ssa, FCARG1a, 0, op1_info, opline->op2_type, opline->op2, op2_info,
+		if (!zend_jit_assign_to_variable(Dst, opline, op_array, ssa, ZREG_FCARG1a, 0, op1_info, opline->op2_type, opline->op2, op2_info,
 				opline->result_type == IS_UNUSED ? -1 : opline->result.var)) {
 			return 0;
 		}
 	} else {
-		if (!zend_jit_assign_to_variable(Dst, opline, op_array, ssa, FP, opline->op1.var, op1_info, opline->op2_type, opline->op2, op2_info,
+		if (!zend_jit_assign_to_variable(Dst, opline, op_array, ssa, ZREG_FP, opline->op1.var, op1_info, opline->op2_type, opline->op2, op2_info,
 				opline->result_type == IS_UNUSED ? -1 : opline->result.var)) {
 			return 0;
 		}
