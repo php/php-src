@@ -1895,6 +1895,10 @@ ldap.max_links = -1
 ; absolute path.
 ;curl.cainfo =
 
+; A default value for the CURLOPT_CAPATH option. This is required to be an
+; absolute path. This value must be a correctly hashed certificate directory. See https://www.openssl.org/docs/man1.1.0/apps/c_rehash.html
+;curl.capath =
+
 [openssl]
 ; The location of a Certificate Authority (CA) file on the local filesystem
 ; to use when verifying the identity of SSL/TLS peers. Most users should
