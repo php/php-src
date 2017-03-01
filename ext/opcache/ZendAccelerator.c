@@ -620,6 +620,14 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 			p->key = new_interned_string(p->key);
 		}
 	}
+
+	for (idx = 0; idx < module_registry.nNumUsed; idx++) {
+		p = module_registry.arData + idx;
+
+		if (p->key) {
+			p->key = new_interned_string(p->key);
+		}
+	}
 }
 
 static zend_string *accel_replace_string_by_shm_permanent(zend_string *str)
