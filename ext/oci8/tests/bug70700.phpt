@@ -6,6 +6,7 @@ Chuck Burgess
 ashnazg@php.net
 --SKIPIF--
 <?php
+if (!extension_loaded('mbstring')) die('skip mbstring is not enabled');
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
 ?> 
