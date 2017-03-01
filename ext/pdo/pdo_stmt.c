@@ -223,17 +223,7 @@ int pdo_stmt_describe_columns(pdo_stmt_t *stmt) /* {{{ */
 			}
 		}
 
-#if 0
 		/* update the column index on named bound parameters */
-		if (stmt->bound_params) {
-			struct pdo_bound_param_data *param;
-
-			if (SUCCESS == zend_hash_find(stmt->bound_params, stmt->columns[col].name,
-						stmt->columns[col].namelen, (void**)&param)) {
-				param->paramno = col;
-			}
-		}
-#endif
 		if (stmt->bound_columns) {
 			struct pdo_bound_param_data *param;
 
