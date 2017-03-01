@@ -65,13 +65,11 @@
 	} while (0)
 #define zend_accel_store_interned_string(str) do { \
 		if (!(GC_FLAGS(str) & IS_STR_PERMANENT)) { \
-			ZEND_ASSERT(!IS_ACCEL_INTERNED(str)); \
 			zend_accel_store_string(str); \
 		} \
 	} while (0)
 #define zend_accel_memdup_interned_string(str) do { \
 		if (!(GC_FLAGS(str) & IS_STR_PERMANENT)) { \
-			ZEND_ASSERT(!IS_ACCEL_INTERNED(str)); \
 			zend_accel_memdup_string(str); \
 		} \
 	} while (0)
