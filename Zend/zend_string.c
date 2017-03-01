@@ -184,10 +184,6 @@ static zend_always_inline zend_string *zend_add_interned_string(zend_string *str
 
 ZEND_API zend_string *zend_interned_string_find_permanent(zend_string *str)
 {
-	if (ZSTR_IS_INTERNED(str) && (GC_FLAGS(str) & IS_STR_PERMANENT)) {
-		return str;
-	}
-
 	return zend_interned_string_ht_lookup(str, &interned_strings_permanent);
 }
 

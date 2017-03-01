@@ -667,23 +667,6 @@ static void accel_use_shm_interned_strings(void)
 
 static void accel_use_permanent_interned_strings(void)
 {
-	Bucket *p, *end;
-
-	HANDLE_BLOCK_INTERRUPTIONS();
-	SHM_UNPROTECT();
-	zend_shared_alloc_lock();
-
-	p = ZCSG(interned_strings).arData;
-	end = p + ZCSG(interned_strings).nNumUsed;
-	while (p != end) {
-		GC_FLAGS(p->key) &= ~IS_STR_PERMANENT;
-		p++;
-	}
-
-	zend_shared_alloc_unlock();
-	SHM_PROTECT();
-	HANDLE_UNBLOCK_INTERRUPTIONS();
-
 	accel_copy_permanent_strings(accel_replace_string_by_process_permanent);
 }
 
