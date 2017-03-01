@@ -626,12 +626,18 @@ static zend_string *accel_replace_string_by_shm_permanent(zend_string *str)
 {
 	zend_string *ret = accel_find_interned_string(str);
 
-	if (ret) {
-		zend_string_release(str);
-		return ret;
+	if (!ret) {
+		/* If a string is not in SHM but in the local permanent table,
+		       the particular process might have another set of shared
+		       extensions or were going a different code path and
+		       produce another set of SHM strings. It is no reason to
+		       fail in a reattached process, extending the SHM string
+		       set is ok. */
+		ret = accel_new_interned_string(str);
 	}
-	ZEND_ASSERT(0);
-	return str;
+
+	zend_string_release(str);
+	return ret;
 }
 
 static zend_string *accel_replace_string_by_process_permanent(zend_string *str)
