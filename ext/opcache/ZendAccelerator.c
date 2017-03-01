@@ -630,7 +630,6 @@ static zend_string *accel_replace_string_by_shm_permanent(zend_string *str)
 		zend_string_release(str);
 		return ret;
 	}
-	ZEND_ASSERT(0);
 	return str;
 }
 
