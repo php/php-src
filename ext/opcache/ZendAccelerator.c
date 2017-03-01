@@ -656,6 +656,9 @@ static void accel_use_shm_interned_strings(void)
 		accel_copy_permanent_strings(accel_new_interned_string);
 	} else {
 		accel_copy_permanent_strings(accel_replace_string_by_shm_permanent);
+		if (ZCG(counted)) {
+			accel_deactivate_sub();
+		}
 	}
 	accel_interned_strings_save_state();
 
