@@ -599,12 +599,12 @@ static int oci_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 			} else if (dtype == SQLT_IBFLOAT || dtype == SQLT_IBDOUBLE) {
 				S->cols[colno].datalen = 1024;
 #endif
+			} else if (dtype == SQLT_BIN) {
+				S->cols[colno].datalen = (ub4) col->maxlen * 2; // raw characters to hex digits
 			} else {
-				S->cols[colno].datalen = (ub4) col->maxlen;
+				S->cols[colno].datalen = (ub4) (col->maxlen * S->H->max_char_width);
 			}
-			if (dtype == SQLT_BIN) {
-				S->cols[colno].datalen *= 3;
-			}
+
 			S->cols[colno].data = emalloc(S->cols[colno].datalen + 1);
 			dtype = SQLT_CHR;
 
