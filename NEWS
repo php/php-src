@@ -2,7 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2017, PHP 7.1.4
 
-
+- DOM:
+  . Fixed bug #74004 (LIBXML_NOWARNING flag ingnored on loadHTML*).
+    (somedaysummer)
 
 16 Mar 2017, PHP 7.1.3
 
