@@ -138,15 +138,10 @@ static zend_never_inline void zend_string_table_grow(HashTable *interned_strings
 		interned_strings->nTableMask = -interned_strings->nTableSize;
 		new_data = pemalloc(HT_SIZE(interned_strings), interned_strings->u.flags & HASH_FLAG_PERSISTENT);
 
-		if (EXPECTED(new_data)) {
-			HT_SET_DATA_ADDR(interned_strings, new_data);
-			memcpy(interned_strings->arData, old_buckets, sizeof(Bucket) * interned_strings->nNumUsed);
-			pefree(old_data, interned_strings->u.flags & HASH_FLAG_PERSISTENT);
-			zend_hash_rehash(interned_strings);
-		} else {
-			interned_strings->nTableSize = interned_strings->nTableSize >> 1;
-			interned_strings->nTableMask = -interned_strings->nTableSize;
-		}
+		HT_SET_DATA_ADDR(interned_strings, new_data);
+		memcpy(interned_strings->arData, old_buckets, sizeof(Bucket) * interned_strings->nNumUsed);
+		pefree(old_data, interned_strings->u.flags & HASH_FLAG_PERSISTENT);
+		zend_hash_rehash(interned_strings);
 	}
 }
 
