@@ -489,7 +489,9 @@ ZEND_API int zend_register_constant(zend_constant *c)
 	printf("Registering constant for module %d\n", c->module_number);
 #endif
 
-	c->name = zend_new_interned_string(c->name);
+    if (c->module_number != PHP_USER_CONSTANT) {
+		c->name = zend_new_interned_string(c->name);
+	}
 
 	if (!(c->flags & CONST_CS)) {
 		lowercase_name = zend_string_alloc(ZSTR_LEN(c->name), c->flags & CONST_PERSISTENT);
