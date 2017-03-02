@@ -160,6 +160,6 @@ PHP                                                                        NEWS
   . Use Zend MM for allocation in bundled libxmlrpc (Joe)
 
 - ZIP:
-  . Fixed bug #70103 (ZipArchive::addGlob ignores remove_all_path option). (cmb)
+  . Add support for encrypted archives. (Remi)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
