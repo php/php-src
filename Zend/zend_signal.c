@@ -91,7 +91,7 @@ void zend_signal_handler_defer(int signo, siginfo_t *siginfo, void *context)
 #ifdef ZTS
 	ZEND_TSRMLS_CACHE_UPDATE();
 	/* A signal could hit after TSRM shutdown, in this case globals are already freed. */
-	if (NULL == TSRMG_BULK_STATIC(zend_signal_globals_id, zend_signal_globals_t *)) {
+	if (NULL == TSRMLS_CACHE || NULL == TSRMG_BULK_STATIC(zend_signal_globals_id, zend_signal_globals_t *)) {
 		is_handling_safe = 0;
 	}
 #endif
@@ -181,7 +181,7 @@ static void zend_signal_handler(int signo, siginfo_t *siginfo, void *context)
 	sigset_t sigset;
 	zend_signal_entry_t p_sig;
 #ifdef ZTS
-	if (NULL == TSRMG_BULK_STATIC(zend_signal_globals_id, zend_signal_globals_t *)) {
+	if (NULL == TSRMLS_CACHE || NULL == TSRMG_BULK_STATIC(zend_signal_globals_id, zend_signal_globals_t *)) {
 		p_sig.flags = 0;
 		p_sig.handler = SIG_DFL;
 	} else 
