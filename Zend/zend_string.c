@@ -104,7 +104,7 @@ ZEND_API void zend_interned_strings_dtor(void)
 	zend_known_strings = NULL;
 }
 
-static zend_string *zend_interned_string_ht_lookup(zend_string *str, HashTable *interned_strings)
+static zend_always_inline zend_string *zend_interned_string_ht_lookup(zend_string *str, HashTable *interned_strings)
 {
 	zend_ulong h;
 	uint32_t nIndex;
