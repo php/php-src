@@ -100,6 +100,18 @@ PHP 7.2 UPGRADE NOTES
     (https://wiki.php.net/rfc/argon2_password_hash).
   . proc_nice() is now supported on Windows platforms.
 
+- Zip:
+  . read/write encrypted archive, relying on libzip 1.2.0,
+    using new methods:
+      ZipArchive::setEncryptionName($name, $method [, $password]);
+      ZipArchive::setEncryptionIndex($index, $method [, $password]);
+    and new constants:
+      ZipArchive::EM_NONE
+      ZipArchive::EM_AES_128
+      ZipArchive::EM_AES_192
+      ZipArchive::EM_AES_256
+  . accept 'password' from zip stream context
+
 ========================================
 3. Changes in SAPI modules
 ========================================

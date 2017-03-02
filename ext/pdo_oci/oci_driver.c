@@ -132,12 +132,6 @@ ub4 _oci_error(OCIError *err, pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *what, swor
 					zend_bailout();
 					break;
 
-#if 0
-				case 955:	/* ORA-00955: name is already used by an existing object */
-					*pdo_err = PDO_ERR_ALREADY_EXISTS;
-					break;
-#endif
-
 				case 12154:	/* ORA-12154: TNS:could not resolve service name */
 					strcpy(*pdo_err, "42S02");
 					break;
@@ -698,6 +692,13 @@ static int pdo_oci_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ *
 		oci_drv_error("OCIAttrSet: OCI_ATTR_SESSION");
 		goto cleanup;
 	}
+
+	/* Get max character width */
+ 	H->last_err = OCINlsNumericInfoGet(H->env, H->err, &H->max_char_width, OCI_NLS_CHARSET_MAXBYTESZ);
+ 	if (H->last_err) {
+ 		oci_drv_error("OCINlsNumericInfoGet: OCI_NLS_CHARSET_MAXBYTESZ");
+ 		goto cleanup;
+ 	}
 
 	dbh->methods = &oci_methods;
 	dbh->alloc_own_columns = 1;

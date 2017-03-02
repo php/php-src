@@ -7,8 +7,8 @@ In the "verbose setup method" I'm trying setup the DateTime object myself
 to see if it's the format string which is parsed in correctly or if it's the DateTime
 object which is breaking stuff. From the testing it appears DateTime is broken somehow.
 */
-$ss = 'first day of last month midnight';
-$es = 'first day of this month midnight - 1 second';
+$ss = 'february first day of last month midnight';
+$es = 'february first day of this month midnight - 1 second';
 
 $s = new DateTime($ss);
 $e = new DateTime($es);
@@ -50,7 +50,7 @@ effect on the results of the diff. By modifying the datetime with ->modify every
 it just means you have to be careful of how we work with DateTimes .
 */
 $s = new DateTime($ss);
-$e = new DateTime('first day of this month midnight');
+$e = new DateTime('february first day of this month midnight');
 $e->modify('- 1 second');
 var_dump($e->diff($s)->days); // 30 ... and should be 30
 ?>
