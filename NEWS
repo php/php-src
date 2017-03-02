@@ -60,6 +60,9 @@ PHP                                                                        NEWS
   . Fixed bug #74159 (Writing a large buffer to a non-blocking encrypted stream
     fails with "bad write retry"). (trowski)
 
+- PDO_OCI:
+  . Fixed bug #54379 (PDO_OCI: UTF-8 output gets truncated). (gureedo / Oracle)
+
 - Standard:
   . Fixed bug #74148 (ReflectionFunction incorrectly reports the number of
     arguments). (Laruence)
