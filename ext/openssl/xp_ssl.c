@@ -1640,16 +1640,6 @@ int php_openssl_setup_crypto(php_stream *stream,
 		SSL_set_mode(sslsock->ssl_handle, mode | SSL_MODE_RELEASE_BUFFERS);
 	} while (0);
 #endif
-	
-	do {
-		long mode = SSL_get_mode(sslsock->ssl_handle);
-		SSL_set_mode(sslsock->ssl_handle, mode | SSL_MODE_ENABLE_PARTIAL_WRITE);
-	} while (0);
-	
-	do {
-		long mode = SSL_get_mode(sslsock->ssl_handle);
-		SSL_set_mode(sslsock->ssl_handle, mode | SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER);
-	} while (0);
 
 	if (cparam->inputs.session) {
 		if (cparam->inputs.session->ops != &php_openssl_socket_ops) {
