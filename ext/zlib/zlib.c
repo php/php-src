@@ -940,7 +940,7 @@ PHP_FUNCTION(inflate_add)
 			RETURN_FALSE;
 	}
 	
-	// Lazy-resetting the zlib stream so ctx->total_in remains available until the next inflate_add() call.
+	/* Lazy-resetting the zlib stream so ctx->total_in remains available until the next inflate_add() call. */
 	if (((php_zlib_context *) ctx)->status == Z_STREAM_END)
 	{
 		((php_zlib_context *) ctx)->status = Z_OK;
@@ -961,7 +961,7 @@ PHP_FUNCTION(inflate_add)
 		status = inflate(ctx, flush_type);
 		buffer_used = ZSTR_LEN(out) - ctx->avail_out;
 
-		((php_zlib_context *) ctx)->status = status; // Save status for exposing to userspace
+		((php_zlib_context *) ctx)->status = status; /* Save status for exposing to userspace */
 
 		switch (status) {
 			case Z_OK:
