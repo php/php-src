@@ -35,6 +35,9 @@ PHP 7.2 UPGRADE NOTES
     /^(0|(-?[1-9][0-9]*))$/ where PHP_INT_MIN <= n <= PHP_INT_MAX) to integer
     keys. This fixes the behaviour of previous versions, where numeric string
     property names would become inaccessible string keys.
+  . Unqualified references to undefined constants now generate a Warning instead
+    of a notice. They will generate an Error in a future version of PHP.
+    (https://wiki.php.net/rfc/deprecate-bareword-strings)
   . Minimum supported Windows versions are Windows 7/Server 2008 R2.
 
 - BCMath:

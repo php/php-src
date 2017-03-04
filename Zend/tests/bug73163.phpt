@@ -14,7 +14,7 @@ doSomething();
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught Exception: Use of undefined constant UNDEFINED - assumed 'UNDEFINED' in %s:%d
+Fatal error: Uncaught Exception: Use of undefined constant UNDEFINED - assumed 'UNDEFINED' (this will throw an Error in a future version of PHP) in %s:%d
 Stack trace:
 #0 %s(%d): {closure}(%s)
 #1 %s(%d): doSomething()

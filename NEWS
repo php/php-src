@@ -20,6 +20,8 @@ PHP                                                                        NEWS
     php.exe). (Michele Locati)
   . Implemented "Convert numeric keys in object/array casts" RFC, fixes
     bugs #53838, #61655, #66173, #70925, #72254, etc. (Andrea)
+  . Implemented "Deprecate and Remove Bareword (Unquoted) Strings" RFC.
+    (Rowan Collins)
   . Raised minimum supported Windows versions to Windows 7/Server 2008 R2.
     (Anatol)
   . Implemented minor optimization in array_keys/array_values(). (Sara)
