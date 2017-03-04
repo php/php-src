@@ -611,7 +611,7 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_class_entry *scope) /* {{{ */
 						actual_len -= (actual - Z_STRVAL_P(p));
 					}
 
-					zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'", actual, actual);
+					zend_error(E_WARNING, "Use of undefined constant %s - assumed '%s' (this will throw an error in a future version of PHP)", actual, actual);
 					if (EG(exception)) {
 						RESET_CONSTANT_VISITED(p);
 						return FAILURE;
