@@ -580,12 +580,6 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{
 		compiler_globals->static_members_table = NULL;
 	}
 	compiler_globals->script_encoding_list = NULL;
-
-	compiler_globals->empty_string = zend_zts_interned_string_init("", sizeof("")-1);
-
-	memset(compiler_globals->one_char_string, 0, sizeof(compiler_globals->one_char_string));
-
-	zend_known_interned_strings_init(&compiler_globals->known_strings, &compiler_globals->known_strings_count);
 }
 /* }}} */
 
@@ -610,11 +604,6 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals) /* {{
 		pefree((char*)compiler_globals->script_encoding_list, 1);
 	}
 	compiler_globals->last_static_member = 0;
-
-	zend_zts_interned_string_free(&compiler_globals->empty_string);
-
-	compiler_globals->known_strings = NULL;
-	compiler_globals->known_strings_count = 0;
 }
 /* }}} */
 
@@ -856,6 +845,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 
 #ifdef ZTS
 	tsrm_set_new_thread_end_handler(zend_new_thread_end_handler);
+	tsrm_set_shutdown_handler(zend_interned_strings_dtor);
 #endif
 
 	return SUCCESS;
@@ -967,7 +957,9 @@ void zend_shutdown(void) /* {{{ */
 #endif
 	zend_destroy_rsrc_list_dtors();
 
+#ifndef ZTS
 	zend_interned_strings_dtor();
+#endif
 }
 /* }}} */
 

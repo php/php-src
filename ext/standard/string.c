@@ -2766,13 +2766,7 @@ PHP_FUNCTION(chr)
 	ZEND_PARSE_PARAMETERS_END_EX(c = 0);
 
 	c &= 0xff;
-	if (CG(one_char_string)[c]) {
-		ZVAL_INTERNED_STR(return_value, CG(one_char_string)[c]);
-	} else {
-		ZVAL_NEW_STR(return_value, zend_string_alloc(1, 0));
-		Z_STRVAL_P(return_value)[0] = (char)c;
-		Z_STRVAL_P(return_value)[1] = '\0';
-	}
+	ZVAL_INTERNED_STR(return_value, ZSTR_CHAR(c));
 }
 /* }}} */
 
@@ -4568,7 +4562,7 @@ PHP_FUNCTION(parse_str)
 		symbol_table = zend_rebuild_symbol_table();
 		ZVAL_ARR(&tmp, symbol_table);
 		sapi_module.treat_data(PARSE_STRING, res, &tmp);
-		if (UNEXPECTED(zend_hash_del(symbol_table, CG(known_strings)[ZEND_STR_THIS]) == SUCCESS)) {
+		if (UNEXPECTED(zend_hash_del(symbol_table, ZSTR_KNOWN(ZEND_STR_THIS)) == SUCCESS)) {
 			zend_throw_error(NULL, "Cannot re-assign $this");
 		}
 	} else 	{
