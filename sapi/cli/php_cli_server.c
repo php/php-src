@@ -1368,6 +1368,7 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 	char *buf = safe_pemalloc(1, request->vpath_len, 1 + document_root_len + 1 + sizeof("index.html"), 1);
 	char *p = buf, *prev_path = NULL, *q, *vpath;
 	size_t prev_path_len = 0;
+	int  is_static_file = 0;
 
 	if (!buf) {
 		return;
@@ -1378,6 +1379,13 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 	vpath = p;
 	if (request->vpath_len > 0 && request->vpath[0] != '/') {
 		*p++ = DEFAULT_SLASH;
+	}
+	q = request->vpath + request->vpath_len;
+	while (q > request->vpath) {
+		if (*q-- == '.') {
+			is_static_file = 1;
+			break;
+		}
 	}
 	memmove(p, request->vpath, request->vpath_len);
 #ifdef PHP_WIN32
@@ -1407,7 +1415,7 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 					}
 					file++;
 				}
-				if (!*file) {
+				if (!*file || is_static_file) {
 					if (prev_path) {
 						pefree(prev_path, 1);
 					}
