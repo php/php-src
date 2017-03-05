@@ -190,6 +190,7 @@ typedef struct php_cli_server {
 	size_t document_root_len;
 	char *router;
 	size_t router_len;
+	int redirect;
 	socklen_t socklen;
 	HashTable clients;
 	HashTable extension_mime_types;
@@ -1361,11 +1362,11 @@ static void php_cli_server_request_dtor(php_cli_server_request *req) /* {{{ */
 	}
 } /* }}} */
 
-static void php_cli_server_request_translate_vpath(php_cli_server_request *request, const char *document_root, size_t document_root_len) /* {{{ */
+static void php_cli_server_request_translate_vpath(php_cli_server_request *request, struct php_cli_server *server) /* {{{ */
 {
 	zend_stat_t sb;
 	static const char *index_files[] = { "index.php", "index.html", NULL };
-	char *buf = safe_pemalloc(1, request->vpath_len, 1 + document_root_len + 1 + sizeof("index.html"), 1);
+	char *buf = safe_pemalloc(1, request->vpath_len, 1 + server->document_root_len + 1 + sizeof("index.html"), 1);
 	char *p = buf, *prev_path = NULL, *q, *vpath;
 	size_t prev_path_len = 0;
 	int  is_static_file = 0;
@@ -1374,17 +1375,19 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 		return;
 	}
 
-	memmove(p, document_root, document_root_len);
-	p += document_root_len;
+	memmove(p, server->document_root, server->document_root_len);
+	p += server->document_root_len;
 	vpath = p;
 	if (request->vpath_len > 0 && request->vpath[0] != '/') {
 		*p++ = DEFAULT_SLASH;
 	}
-	q = request->vpath + request->vpath_len;
-	while (q > request->vpath) {
-		if (*q-- == '.') {
-			is_static_file = 1;
-			break;
+	if (!server->redirect) {
+		q = request->vpath + request->vpath_len;
+		while (q > request->vpath) {
+			if (*q-- == '.') {
+				is_static_file = 1;
+				break;
+			}
 		}
 	}
 	memmove(p, request->vpath, request->vpath_len);
@@ -1657,7 +1660,7 @@ static int php_cli_server_client_read_request_on_message_complete(php_http_parse
 {
 	php_cli_server_client *client = parser->data;
 	client->request.protocol_version = parser->http_major * 100 + parser->http_minor;
-	php_cli_server_request_translate_vpath(&client->request, client->server->document_root, client->server->document_root_len);
+	php_cli_server_request_translate_vpath(&client->request, client->server);
 	{
 		const char *vpath = client->request.vpath, *end = vpath + client->request.vpath_len, *p = end;
 		client->request.ext = end;
@@ -2202,7 +2205,7 @@ static void php_cli_server_client_dtor_wrapper(zval *zv) /* {{{ */
 	pefree(p, 1);
 } /* }}} */
 
-static int php_cli_server_ctor(php_cli_server *server, const char *addr, const char *document_root, const char *router) /* {{{ */
+static int php_cli_server_ctor(php_cli_server *server, const char *addr, const char *document_root, const char *router, int redirect) /* {{{ */
 {
 	int retval = SUCCESS;
 	char *host = NULL;
@@ -2304,6 +2307,7 @@ static int php_cli_server_ctor(php_cli_server *server, const char *addr, const c
 		goto out;
 	}
 
+	server->redirect = redirect;
 	server->is_running = 1;
 out:
 	if (retval != SUCCESS) {
@@ -2482,6 +2486,7 @@ int do_cli_server(int argc, char **argv) /* {{{ */
 	char *php_optarg = NULL;
 	int php_optind = 1;
 	int c;
+	int redirect = 0;
 	const char *server_bind_address = NULL;
 	extern const opt_struct OPTIONS[];
 	const char *document_root = NULL;
@@ -2495,6 +2500,9 @@ int do_cli_server(int argc, char **argv) /* {{{ */
 				break;
 			case 't':
 				document_root = php_optarg;
+				break;
+			case 'P':
+				redirect = 1;
 				break;
 		}
 	}
@@ -2528,7 +2536,7 @@ int do_cli_server(int argc, char **argv) /* {{{ */
 		router = argv[php_optind];
 	}
 
-	if (FAILURE == php_cli_server_ctor(&server, server_bind_address, document_root, router)) {
+	if (FAILURE == php_cli_server_ctor(&server, server_bind_address, document_root, router, redirect)) {
 		return 1;
 	}
 	sapi_module.phpinfo_as_text = 0;

@@ -158,6 +158,7 @@ const opt_struct OPTIONS[] = {
 	{'l', 0, "syntax-check"},
 	{'m', 0, "modules"},
 	{'n', 0, "no-php-ini"},
+	{'P', 0, "redirect"},
 	{'q', 0, "no-header"}, /* for compatibility with CGI (do not generate HTTP headers) */
 	{'R', 1, "process-code"},
 	{'H', 0, "hide-args"},
@@ -541,6 +542,7 @@ static void php_cli_usage(char *argv0)
 				"  -H               Hide any passed arguments from external tools.\n"
 				"  -S <addr>:<port> Run with built-in web server.\n"
 				"  -t <docroot>     Specify document root <docroot> for built-in web server.\n"
+				"  -P               Redirect not found files to index.php and set PATH_INFO.\n"
 				"  -s               Output HTML syntax highlighted source.\n"
 				"  -v               Version number\n"
 				"  -w               Output source with stripped comments and whitespace.\n"

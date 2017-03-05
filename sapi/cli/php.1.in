@@ -282,6 +282,13 @@ Start built-in web server on the given local address and port
 Specify the document root to be used by the built-in web server
 .TP
 .PD 0
+.B \-\-redirect
+.TP
+.PD 1
+.B \-P
+Redirect not found files to index.php and set PATH_INFO
+.TP
+.PD 0
 .B \-\-version
 .TP
 .PD 1
