@@ -604,11 +604,7 @@ try_string_offset:
 		real_offset = (UNEXPECTED(offset < 0)) /* Handle negative offset */
 			? (zend_long)Z_STRLEN_P(container) + offset : offset;
 		c = (zend_uchar)Z_STRVAL_P(container)[real_offset];
-			if (CG(one_char_string)[c]) {
-			ZVAL_INTERNED_STR(result, CG(one_char_string)[c]);
-		} else {
-			ZVAL_NEW_STR(result, zend_string_init(Z_STRVAL_P(container) + real_offset, 1, 0));
-		}
+		ZVAL_INTERNED_STR(result, ZSTR_CHAR(c));
 	}
 }
 
@@ -655,11 +651,7 @@ try_string_offset:
 		real_offset = (UNEXPECTED(offset < 0)) /* Handle negative offset */
 			? (zend_long)Z_STRLEN_P(container) + offset : offset;
 		c = (zend_uchar)Z_STRVAL_P(container)[real_offset];
-			if (CG(one_char_string)[c]) {
-			ZVAL_INTERNED_STR(result, CG(one_char_string)[c]);
-		} else {
-			ZVAL_NEW_STR(result, zend_string_init(Z_STRVAL_P(container) + real_offset, 1, 0));
-		}
+		ZVAL_INTERNED_STR(result, ZSTR_CHAR(c));
 	}
 }
 
@@ -931,11 +923,7 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 
 	if (result) {
 		/* Return the new character */
-		if (CG(one_char_string)[c]) {
-			ZVAL_INTERNED_STR(result, CG(one_char_string)[c]);
-		} else {
-			ZVAL_NEW_STR(result, zend_string_init(Z_STRVAL_P(str) + offset, 1, 0));
-		}
+		ZVAL_INTERNED_STR(result, ZSTR_CHAR(c));
 	}
 }
 
