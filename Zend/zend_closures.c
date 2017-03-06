@@ -369,7 +369,7 @@ ZEND_API zend_function *zend_get_closure_invoke_method(zend_object *object) /* {
 	invoke->internal_function.handler = ZEND_MN(Closure___invoke);
 	invoke->internal_function.module = 0;
 	invoke->internal_function.scope = zend_ce_closure;
-	invoke->internal_function.function_name = CG(known_strings)[ZEND_STR_MAGIC_INVOKE];
+	invoke->internal_function.function_name = ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE);
 	return invoke;
 }
 /* }}} */
@@ -509,12 +509,12 @@ static HashTable *zend_closure_get_debug_info(zval *object, int *is_temp) /* {{{
 	if (closure->func.type == ZEND_USER_FUNCTION && closure->func.op_array.static_variables) {
 		HashTable *static_variables = closure->func.op_array.static_variables;
 		ZVAL_ARR(&val, zend_array_dup(static_variables));
-		zend_hash_update(debug_info, CG(known_strings)[ZEND_STR_STATIC], &val);
+		zend_hash_update(debug_info, ZSTR_KNOWN(ZEND_STR_STATIC), &val);
 	}
 
 	if (Z_TYPE(closure->this_ptr) != IS_UNDEF) {
 		Z_ADDREF(closure->this_ptr);
-		zend_hash_update(debug_info, CG(known_strings)[ZEND_STR_THIS], &closure->this_ptr);
+		zend_hash_update(debug_info, ZSTR_KNOWN(ZEND_STR_THIS), &closure->this_ptr);
 	}
 
 	if (arg_info &&

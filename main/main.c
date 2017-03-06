@@ -1601,6 +1601,8 @@ int php_request_startup(void)
 {
 	int retval = SUCCESS;
 
+	zend_interned_strings_activate();
+
 #ifdef HAVE_DTRACE
 	DTRACE_REQUEST_STARTUP(SAFE_FILENAME(SG(request_info).path_translated), SAFE_FILENAME(SG(request_info).request_uri), (char *)SAFE_FILENAME(SG(request_info).request_method));
 #endif /* HAVE_DTRACE */
@@ -1679,6 +1681,8 @@ int php_request_startup(void)
 {
 	int retval = SUCCESS;
 
+	zend_interned_strings_activate();
+
 #if PHP_SIGCHILD
 	signal(SIGCHLD, sigchld_handler);
 #endif
@@ -1711,6 +1715,8 @@ int php_request_startup_for_hook(void)
 {
 	int retval = SUCCESS;
 
+	zend_interned_strings_activate();
+
 #if PHP_SIGCHLD
 	signal(SIGCHLD, sigchld_handler);
 #endif
@@ -1734,8 +1740,8 @@ void php_request_shutdown_for_exec(void *dummy)
 
 	/* used to close fd's in the 3..255 range here, but it's problematic
 	 */
+	zend_interned_strings_deactivate();
 	shutdown_memory_manager(1, 1);
-	zend_interned_strings_restore();
 }
 /* }}} */
 
@@ -1778,11 +1784,11 @@ void php_request_shutdown_for_hook(void *dummy)
 		php_shutdown_stream_hashes();
 	} zend_end_try();
 
+	zend_interned_strings_deactivate();
+
 	zend_try {
 		shutdown_memory_manager(CG(unclean_shutdown), 0);
 	} zend_end_try();
-
-	zend_interned_strings_restore();
 
 #ifdef ZEND_SIGNALS
 	zend_try {
@@ -1891,7 +1897,7 @@ void php_request_shutdown(void *dummy)
 	} zend_end_try();
 
 	/* 15. Free Willy (here be crashes) */
-	zend_interned_strings_restore();
+	zend_interned_strings_deactivate();
 	zend_try {
 		shutdown_memory_manager(CG(unclean_shutdown) || !report_memleaks, 0);
 	} zend_end_try();
@@ -2357,8 +2363,9 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	module_startup = 0;
 
 	shutdown_memory_manager(1, 0);
-	zend_interned_strings_snapshot();
  	virtual_cwd_activate();
+
+	zend_interned_strings_switch_storage();
 
 	/* we're done */
 	return retval;

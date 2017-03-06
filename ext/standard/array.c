@@ -2813,11 +2813,7 @@ PHP_FUNCTION(range)
 			zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 				for (; low >= high; low -= (unsigned int)lstep) {
-					if (CG(one_char_string)[low]) {
-						ZVAL_INTERNED_STR(&tmp, CG(one_char_string)[low]);
-					} else {
-						ZVAL_STRINGL(&tmp, (char*)&low, 1);
-					}
+					ZVAL_INTERNED_STR(&tmp, ZSTR_CHAR(low));
 					ZEND_HASH_FILL_ADD(&tmp);
 					if (((signed int)low - lstep) < 0) {
 						break;
@@ -2833,11 +2829,7 @@ PHP_FUNCTION(range)
 			zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 				for (; low <= high; low += (unsigned int)lstep) {
-					if (CG(one_char_string)[low]) {
-						ZVAL_INTERNED_STR(&tmp, CG(one_char_string)[low]);
-					} else {
-						ZVAL_STRINGL(&tmp, (char*)&low, 1);
-					}
+					ZVAL_INTERNED_STR(&tmp, ZSTR_CHAR(low));
 					ZEND_HASH_FILL_ADD(&tmp);
 					if (((signed int)low + lstep) > 255) {
 						break;
@@ -2846,11 +2838,7 @@ PHP_FUNCTION(range)
 			} ZEND_HASH_FILL_END();
 		} else {
 			array_init(return_value);
-			if (CG(one_char_string)[low]) {
-				ZVAL_INTERNED_STR(&tmp, CG(one_char_string)[low]);
-			} else {
-				ZVAL_STRINGL(&tmp, (char*)&low, 1);
-			}
+			ZVAL_INTERNED_STR(&tmp, ZSTR_CHAR(low));
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 		}
 	} else if (Z_TYPE_P(zlow) == IS_DOUBLE || Z_TYPE_P(zhigh) == IS_DOUBLE || is_step_double) {

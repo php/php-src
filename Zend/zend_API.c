@@ -2019,6 +2019,7 @@ ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module) /
 	lcname = zend_string_alloc(name_len, 1);
 	zend_str_tolower_copy(ZSTR_VAL(lcname), module->name, name_len);
 
+	lcname = zend_new_interned_string(lcname);
 	if ((module_ptr = zend_hash_add_mem(&module_registry, lcname, module, sizeof(zend_module_entry))) == NULL) {
 		zend_error(E_CORE_WARNING, "Module '%s' already loaded", module->name);
 		zend_string_release(lcname);
@@ -3816,6 +3817,9 @@ ZEND_API int zend_declare_class_constant(zend_class_entry *ce, const char *name,
 	int ret;
 
 	zend_string *key = zend_string_init(name, name_length, ce->type & ZEND_INTERNAL_CLASS);
+	if (ce->type == ZEND_INTERNAL_CLASS) {
+		key = zend_new_interned_string(key);
+	}
 	ret = zend_declare_class_constant_ex(ce, key, value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(key);
 	return ret;

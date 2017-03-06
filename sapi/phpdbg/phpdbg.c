@@ -811,15 +811,11 @@ static zend_module_entry sapi_phpdbg_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
-static void phpdbg_interned_strings_nothing(void) { }
-
 static inline int php_sapi_phpdbg_module_startup(sapi_module_struct *module) /* {{{ */
 {
 	if (php_module_startup(module, &sapi_phpdbg_module_entry, 1) == FAILURE) {
 		return FAILURE;
 	}
-	/* prevent zend_interned_strings_restore from invalidating our string pointers too early (in phpdbg allocated memory only gets freed after module shutdown) */
-	zend_interned_strings_restore = phpdbg_interned_strings_nothing;
 
 	phpdbg_booted = 1;
 

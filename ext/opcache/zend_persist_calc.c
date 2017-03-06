@@ -83,9 +83,7 @@ static void zend_hash_persist_calc(HashTable *ht, void (*pPersistElement)(zval *
 
 		/* persist bucket and key */
 		if (p->key) {
-			zend_uchar flags = GC_FLAGS(p->key) & ~ (IS_STR_PERSISTENT | IS_STR_INTERNED | IS_STR_PERMANENT);
 			ADD_INTERNED_STRING(p->key, 1);
-			GC_FLAGS(p->key) |= flags;
 		}
 
 		pPersistElement(&p->val);
@@ -120,18 +118,15 @@ static void zend_persist_ast_calc(zend_ast *ast)
 
 static void zend_persist_zval_calc(zval *z)
 {
-	zend_uchar flags;
 	uint32_t size;
 
 	switch (Z_TYPE_P(z)) {
 		case IS_STRING:
 		case IS_CONSTANT:
-			flags = Z_GC_FLAGS_P(z) & ~ (IS_STR_PERSISTENT | IS_STR_INTERNED | IS_STR_PERMANENT);
 			ADD_INTERNED_STRING(Z_STR_P(z), 0);
 			if (ZSTR_IS_INTERNED(Z_STR_P(z))) {
 				Z_TYPE_FLAGS_P(z) &= ~ (IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
 			}
-			Z_GC_FLAGS_P(z) |= flags;
 			break;
 		case IS_ARRAY:
 			size = zend_shared_memdup_size(Z_ARR_P(z), sizeof(zend_array));
@@ -177,7 +172,7 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 		/* already stored */
 		if (op_array->function_name) {
 			zend_string *new_name = zend_shared_alloc_get_xlat_entry(op_array->function_name);
-			if (IS_ACCEL_INTERNED(new_name)) {
+			if (new_name) {
 				op_array->function_name = new_name;
 			}
 		}

@@ -118,6 +118,9 @@ PHP                                                                        NEWS
     instance. (Adam Baratz)
   . Add test coverage for bug #72969. (Jeff Farr)
 
+- PDO_OCI:
+  . Fixed bug #54379 (PDO_OCI: UTF-8 output gets truncated). (gureedo / Oracle)
+
 - PDO_PgSQL:
   . Fixed bug #73959 (lastInsertId fails to throw an exception for wrong 
     sequence name). (andrewnester)
@@ -157,6 +160,6 @@ PHP                                                                        NEWS
   . Use Zend MM for allocation in bundled libxmlrpc (Joe)
 
 - ZIP:
-  . Fixed bug #70103 (ZipArchive::addGlob ignores remove_all_path option). (cmb)
+  . Add support for encrypted archives. (Remi)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

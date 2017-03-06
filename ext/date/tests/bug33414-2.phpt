@@ -76,13 +76,13 @@ print "wanted=Friday            00:00:00\n\n";
 ?>
 --EXPECT--
 TZ=Pacific/Rarotonga - wrong day.
-tStamp=Thursday 1970-01-01 17:17:17 CKT 0
-result=Tuesday 1970-01-06 00:00:00 CKT 0
+tStamp=Thursday 1970-01-01 17:17:17 -1030 0
+result=Tuesday 1970-01-06 00:00:00 -1030 0
 wanted=Tuesday            00:00:00
 
 TZ=Atlantic/South_Georgia - wrong day.
-tStamp=Thursday 1970-01-01 17:17:17 GST 0
-result=Tuesday 1970-01-06 00:00:00 GST 0
+tStamp=Thursday 1970-01-01 17:17:17 -02 0
+result=Tuesday 1970-01-06 00:00:00 -02 0
 wanted=Tuesday            00:00:00
 
 TZ=America/Port-au-Prince - wrong day.
@@ -91,13 +91,13 @@ result=Monday 2005-04-04 00:00:00 EDT 1
 wanted=Monday            00:00:00
 
 TZ=Pacific/Enderbury - wrong day, off by 2 days.
-tStamp=Thursday 1970-01-01 17:17:17 PHOT 0
-result=Monday 1970-01-05 00:00:00 PHOT 0
+tStamp=Thursday 1970-01-01 17:17:17 -12 0
+result=Monday 1970-01-05 00:00:00 -12 0
 wanted=Monday            00:00:00
 
 TZ=Pacific/Kiritimati - wrong day, off by 2 days.
-tStamp=Thursday 1970-01-01 17:17:17 LINT 0
-result=Monday 1970-01-05 00:00:00 LINT 0
+tStamp=Thursday 1970-01-01 17:17:17 -1040 0
+result=Monday 1970-01-05 00:00:00 -1040 0
 wanted=Monday            00:00:00
 
 TZ=America/Managua - wrong day.
@@ -106,13 +106,13 @@ result=Tuesday 2005-04-12 00:00:00 CDT 1
 wanted=Tuesday            00:00:00
 
 TZ=Pacific/Pitcairn - wrong day.
-tStamp=Thursday 1970-01-01 17:17:17 PNT 0
-result=Wednesday 1970-01-07 00:00:00 PNT 0
+tStamp=Thursday 1970-01-01 17:17:17 -0830 0
+result=Wednesday 1970-01-07 00:00:00 -0830 0
 wanted=Wednesday            00:00:00
 
 TZ=Pacific/Fakaofo - wrong day.
-tStamp=Thursday 1970-01-01 17:17:17 TKT 0
-result=Saturday 1970-01-03 00:00:00 TKT 0
+tStamp=Thursday 1970-01-01 17:17:17 -11 0
+result=Saturday 1970-01-03 00:00:00 -11 0
 wanted=Saturday            00:00:00
 
 TZ=Pacific/Johnston - wrong day.
