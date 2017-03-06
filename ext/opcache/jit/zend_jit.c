@@ -1099,12 +1099,11 @@ static zend_lifetime_interval *zend_jit_sort_intervals(zend_lifetime_interval **
 				zend_lifetime_interval **p = &list;
 
 				while (1) {
-					/*if (*p == NULL) {
+					if (*p == NULL) {
 						*p = last = ival;
 						ival->next = NULL;
 						break;
-					} else*/
-					if ((ival->start < (*p)->start) ||
+					} else if ((ival->start < (*p)->start) ||
 					    (ival->start == (*p)->start &&
 					     ival->end < (*p)->end)) {
 						ival->next = *p;
