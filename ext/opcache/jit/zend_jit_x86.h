@@ -31,15 +31,6 @@ typedef enum _zend_reg {
 	ZREG_R6,
 	ZREG_R7,
 
-	ZREG_RAX = ZREG_R0,
-	ZREG_RCX = ZREG_R1,
-	ZREG_RDX = ZREG_R2,
-	ZREG_RBX = ZREG_R3,
-	ZREG_RSP = ZREG_R4,
-	ZREG_RBP = ZREG_R5,
-	ZREG_RSI = ZREG_R6,
-	ZREG_RDI = ZREG_R7,
-
 #ifdef __x86_64__
 	ZREG_R8,
 	ZREG_R9,
@@ -74,6 +65,15 @@ typedef enum _zend_reg {
 	ZREG_NUM
 } zend_reg;
 
+#define	ZREG_RAX ZREG_R0
+#define	ZREG_RCX ZREG_R1
+#define	ZREG_RDX ZREG_R2
+#define	ZREG_RBX ZREG_R3
+#define	ZREG_RSP ZREG_R4
+#define	ZREG_RBP ZREG_R5
+#define	ZREG_RSI ZREG_R6
+#define	ZREG_RDI ZREG_R7
+
 #ifdef __x86_64__
 # define ZREG_FP      ZREG_R14
 # define ZREG_IP      ZREG_R15
@@ -101,7 +101,7 @@ typedef uint32_t zend_regset;
 	(1 << (reg))
 
 #define ZEND_REGSET_INTERVAL(reg1, reg2) \
-	(((1 << ((reg2) - (reg1))) - 1) << (reg1))
+	(((1 << ((reg2) - (reg1) + 1)) - 1) << (reg1))
 
 #define ZEND_REGSET_IN(regset, reg) \
 	(((regset) & ZEND_REGSET(reg)) != 0)
@@ -141,7 +141,7 @@ typedef uint32_t zend_regset;
 # define ZEND_REGSET_FP \
 	ZEND_REGSET_DIFFERENCE(ZEND_REGSET_INTERVAL(ZREG_XMM0, ZREG_XMM7), ZEND_REGSET_FIXED)
 #define ZEND_REGSET_SCRATCH \
-	(ZEND_REGSET(ZREG_EAX) | ZEND_REGSET(ZREG_ECX) | ZEND_REGSET(ZREG_EDX) | ZEND_REGSET_FP)
+	(ZEND_REGSET(ZREG_RAX) | ZEND_REGSET(ZREG_RCX) | ZEND_REGSET(ZREG_RDX) | ZEND_REGSET_FP)
 #endif
 
 #endif /* ZEND_JIT_X86_H */
