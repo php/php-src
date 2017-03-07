@@ -2547,8 +2547,9 @@ ZEND_BEGIN_ARG_INFO(arginfo_is_float, 0)
 	ZEND_ARG_INFO(0, var)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_string, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_is_string, 0, 0, 1)
 	ZEND_ARG_INFO(0, var)
+	ZEND_ARG_INFO(0, allow_objects)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_is_array, 0)
