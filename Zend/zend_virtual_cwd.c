@@ -432,6 +432,7 @@ static void cwd_globals_ctor(virtual_cwd_globals *cwd_g) /* {{{ */
 	cwd_g->realpath_cache_size = 0;
 	cwd_g->realpath_cache_size_limit = REALPATH_CACHE_SIZE;
 	cwd_g->realpath_cache_ttl = REALPATH_CACHE_TTL;
+	cwd_g->realpath_cache_clean_index = 0;
 	memset(cwd_g->realpath_cache, 0, sizeof(cwd_g->realpath_cache));
 }
 /* }}} */
@@ -684,7 +685,44 @@ static inline void realpath_cache_add(const char *path, int path_len, const char
 		same = 0;
 	}
 
-	if (CWDG(realpath_cache_size) + size <= CWDG(realpath_cache_size_limit)) {
+	if (UNEXPECTED(CWDG(realpath_cache_size_limit) <= size)) {
+		return;
+	}
+
+	/* Evict cache entries in case of a full cache.
+	 * Use round robin and free complete buckets. */
+	if (CWDG(realpath_cache_size) + size > CWDG(realpath_cache_size_limit)) {
+		zend_ulong i;
+		zend_ulong clean_index = CWDG(realpath_cache_clean_index);
+		zend_ulong buckets = sizeof(CWDG(realpath_cache)) / sizeof(CWDG(realpath_cache)[0]);
+
+		for (i = 0; i < buckets; i++) {
+			realpath_cache_bucket **bucket = &(CWDG(realpath_cache)[(clean_index + i) % buckets]);
+
+			while (*bucket != NULL) {
+				realpath_cache_bucket *r = *bucket;
+
+				/* if the pointers match then only subtract the length of the path */
+				if (r->path == r->realpath) {
+					CWDG(realpath_cache_size) -= sizeof(realpath_cache_bucket) + r->path_len + 1;
+				} else {
+					CWDG(realpath_cache_size) -= sizeof(realpath_cache_bucket) + r->path_len + 1 + r->realpath_len + 1;
+				}
+
+				*bucket = (*bucket)->next;
+				free(r);
+			}
+
+			if (CWDG(realpath_cache_size) + size <= CWDG(realpath_cache_size_limit)) {
+				break;
+			}
+		}
+
+		CWDG(realpath_cache_clean_index) = (clean_index + i) % buckets;
+	}
+
+	/* Store new entry */
+	do {
 		realpath_cache_bucket *bucket = malloc(size);
 		zend_ulong n;
 
@@ -715,7 +753,7 @@ static inline void realpath_cache_add(const char *path, int path_len, const char
 		bucket->next = CWDG(realpath_cache)[n];
 		CWDG(realpath_cache)[n] = bucket;
 		CWDG(realpath_cache_size) += size;
-	}
+	} while (0);
 }
 /* }}} */
 
