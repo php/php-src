@@ -1640,11 +1640,11 @@ static int zend_infer_ranges(const zend_op_array *op_array, zend_ssa *ssa) /* {{
 	ALLOCA_FLAG(use_heap);
 
 	worklist = do_alloca(
-		sizeof(zend_ulong) * worklist_len +
-		sizeof(int) * ssa->vars_count +
+		ZEND_MM_ALIGNED_SIZE(sizeof(zend_ulong) * worklist_len) +
+		ZEND_MM_ALIGNED_SIZE(sizeof(int) * ssa->vars_count) +
 		sizeof(int) * ssa->sccs, use_heap);
-	next_scc_var = (int*)(worklist + worklist_len);
-	scc_var = next_scc_var + ssa->vars_count;
+	next_scc_var = (int*)((char*)worklist + ZEND_MM_ALIGNED_SIZE(sizeof(zend_ulong) * worklist_len));
+	scc_var = (int*)((char*)next_scc_var + ZEND_MM_ALIGNED_SIZE(sizeof(int) * ssa->vars_count));
 
 	LOG_SSA_RANGE("Range Inference\n");
 
