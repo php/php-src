@@ -966,10 +966,8 @@ struct _zend_lifetime_interval {
 	int                     ssa_var;
 	int8_t                  reg;
 	zend_bool               split;
-	//???zend_bool               fixed;
 	uint32_t                start;
 	uint32_t                end;
-	//zend_regset             regset;
 	zend_lifetime_interval *next;
 };
 
@@ -986,7 +984,6 @@ static int zend_jit_add_range(zend_lifetime_interval **intervals, int var, uint3
 		ival->ssa_var = var;
 		ival->reg = ZREG_NONE;
 		ival->split = 0;
-		//???ival->fixed = 0;
 		ival->start = from;
 		ival->end = to;
 		ival->next = intervals[var];
@@ -1062,7 +1059,6 @@ static int zend_jit_split_interval(zend_lifetime_interval *current, uint32_t pos
 	ival->ssa_var = current->ssa_var;
 	ival->reg     = ZREG_NONE;
 	ival->split   = 1;
-	//???ival->fixed   = 0;
 	ival->start   = pos;
 	ival->end     = current->end;
 
@@ -1120,6 +1116,25 @@ static zend_lifetime_interval *zend_jit_sort_intervals(zend_lifetime_interval **
 
 	return list;
 }
+
+#ifdef DEBUG_REG_ALLOC
+static void zend_jit_print_regset(zend_regset regset)
+{
+	zend_reg reg;
+	int first = 1;
+
+	for (reg = 0; reg < ZREG_NUM; reg++) {
+		if (ZEND_REGSET_IN(regset, reg)) {
+			if (first) {
+				first = 0;
+				fprintf(stderr, "%s", zend_reg_name[reg]);
+			} else {
+				fprintf(stderr, ", %s", zend_reg_name[reg]);
+			}
+		}
+	}
+}
+#endif
 
 /* See "Linear Scan Register Allocation on SSA Form", Christian Wimmer and
    Michael Franz, CGO'10 (2010), Figure 4. */
@@ -1278,8 +1293,7 @@ static int zend_jit_compute_liveness(zend_op_array *op_array, zend_ssa *ssa, zen
 		if (intervals[i]) {
 			zend_lifetime_interval *ival = intervals[i];
 
-			fprintf(stderr, "#%d: ", ival->ssa_var);
-			fprintf(stderr, "%u-%u", ival->start, ival->end);
+			fprintf(stderr, "#%d: %u-%u", ival->ssa_var, ival->start, ival->end);
 			ival = ival->next;
 			while (ival) {
 				fprintf(stderr, ", %u-%u", ival->start, ival->end);
@@ -1303,18 +1317,21 @@ failure:
    Christian Wimmer VEE'05 (2005), Figure 4. Allocation without spilling.
    and "Linear Scan Register Allocation on SSA Form", Christian Wimmer and
    Michael Franz, CGO'10 (2010), Figure 6. */
-static int zend_jit_try_allocate_free_reg(zend_op_array *op_array, zend_ssa *ssa, zend_lifetime_interval *current, zend_lifetime_interval *active, zend_lifetime_interval *inactive, zend_lifetime_interval **list)
+static int zend_jit_try_allocate_free_reg(zend_op_array *op_array, zend_ssa *ssa, zend_lifetime_interval *current, zend_regset available, zend_lifetime_interval *active, zend_lifetime_interval *inactive, zend_lifetime_interval **list)
 {
 	zend_lifetime_interval *it;
 	uint32_t freeUntilPos[ZREG_NUM];
 	uint32_t pos;
 	zend_reg i, reg;
-	zend_regset available;
 
 	if ((ssa->var_info[current->ssa_var].type & MAY_BE_ANY) == MAY_BE_DOUBLE) {
-		available = ZEND_REGSET_FP;
+		available = ZEND_REGSET_INTERSECTION(available, ZEND_REGSET_FP);
 	} else {
-		available = ZEND_REGSET_GP;
+		available = ZEND_REGSET_INTERSECTION(available, ZEND_REGSET_GP);
+	}
+
+	if (ZEND_REGSET_IS_EMPTY(available)) {
+		return 0;
 	}
 
 	/* Set freeUntilPos of all physical registers to maxInt */
@@ -1336,10 +1353,36 @@ static int zend_jit_try_allocate_free_reg(zend_op_array *op_array, zend_ssa *ssa
 		it = inactive;
 		while (it) {
 			if (current->start < it->end && current->end > it->start) {
-				freeUntilPos[it->reg] = 0;
+				uint32_t next = it->start;
+
+				if (next < freeUntilPos[it->reg]) {
+					freeUntilPos[it->reg] = next;
+				}
 			}
 			it = it->next;
 		}
+	}
+
+	/* Handle Scratch Registers */
+	/* TODO: Optimize ??? */
+	if (current->start + 1 < current->end) {
+		uint32_t line = current->start + 1;
+		zend_regset regset;
+		zend_reg reg;
+
+		do {
+			regset = zend_jit_get_scratch_regset(op_array, ssa, op_array->opcodes + line);
+			if (!ZEND_REGSET_IS_EMPTY(regset)) {
+				for (reg = 0; reg < ZREG_NUM; reg++) {
+					if (ZEND_REGSET_IN(regset, reg)) {
+						if (line < freeUntilPos[reg]) {
+							freeUntilPos[reg] = line;
+						}
+					}
+				}
+			}
+			line++;
+		} while (line != current->end);
 	}
 
 #if 0
@@ -1388,12 +1431,17 @@ static int zend_jit_try_allocate_free_reg(zend_op_array *op_array, zend_ssa *ssa
 		current->reg = reg;
 		return 1;
 	} else {
+		/* TODO: enable interval splitting */
+#if 1
+		return 0;
+#else
 		/* register available for the first part of the interval */
 		if (zend_jit_split_interval(current, pos, list) != SUCCESS) {
 			return 0;
 		}
 		current->reg = reg;
 		return 1;
+#endif
 	}
 }
 
@@ -1414,6 +1462,7 @@ static int zend_jit_linear_scan(zend_op_array *op_array, zend_ssa *ssa, zend_lif
 	zend_lifetime_interval *unhandled, *active, *inactive, *handled;
 	zend_lifetime_interval *current, **p, *q;
 	uint32_t position;
+	zend_regset available = ZEND_REGSET_UNION(ZEND_REGSET_GP, ZEND_REGSET_FP);
 
 #ifdef DEBUG_REG_ALLOC
 	{
@@ -1438,13 +1487,15 @@ static int zend_jit_linear_scan(zend_op_array *op_array, zend_ssa *ssa, zend_lif
 		p = &active;
 		while (*p) {
 			q = *p;
-			if (q->end < position) {
+			if (q->end <= position) {
 				/* move ival from active to handled */
+				ZEND_REGSET_INCL(available, q->reg);
 				*p = q->next;
 				q->next = handled;
 				handled = q;
 			} else if (q->start > position) {
 				/* move ival from active to inactive */
+				ZEND_REGSET_INCL(available, q->reg);
 				*p = q->next;
 				q->next = inactive;
 				inactive = q;
@@ -1463,6 +1514,7 @@ static int zend_jit_linear_scan(zend_op_array *op_array, zend_ssa *ssa, zend_lif
 				handled = q;
 			} else if (q->start <= position) {
 				/* move ival from inactive to active */
+				ZEND_REGSET_EXCL(available, q->reg);
 				*p = q->next;
 				q->next = active;
 				active = q;
@@ -1471,10 +1523,14 @@ static int zend_jit_linear_scan(zend_op_array *op_array, zend_ssa *ssa, zend_lif
 			}
 		}
 
-		if (zend_jit_try_allocate_free_reg(op_array, ssa, current, active, inactive, &unhandled) ||
+		if (zend_jit_try_allocate_free_reg(op_array, ssa, current, available, active, inactive, &unhandled) ||
 		    zend_jit_allocate_blocked_reg()) {
+			ZEND_REGSET_EXCL(available, current->reg);
 			current->next = active;
 			active = current;
+		} else {
+			current->next = handled;
+			handled = current;
 		}
 	}
 
@@ -1484,7 +1540,7 @@ static int zend_jit_linear_scan(zend_op_array *op_array, zend_ssa *ssa, zend_lif
 
 		fprintf(stderr, "After Linear Scan\n");
 		while (ival != NULL) {
-			if (ival->reg >= 0) {
+			if (ival->reg > ZREG_NONE) {
 				fprintf(stderr, "%u-%u: #%d (%s)\n", ival->start, ival->end, ival->ssa_var, zend_reg_name[ival->reg]);
 			} else {
 				fprintf(stderr, "%u-%u: #%d (no-reg)\n", ival->start, ival->end, ival->ssa_var);
@@ -1494,7 +1550,7 @@ static int zend_jit_linear_scan(zend_op_array *op_array, zend_ssa *ssa, zend_lif
 
 		ival = inactive;
 		while (ival != NULL) {
-			if (ival->reg >= 0) {
+			if (ival->reg > ZREG_NONE) {
 				fprintf(stderr, "%u-%u: #%d (%s)\n", ival->start, ival->end, ival->ssa_var, zend_reg_name[ival->reg]);
 			} else {
 				fprintf(stderr, "%u-%u: #%d (no-reg)\n", ival->start, ival->end, ival->ssa_var);
@@ -1504,7 +1560,7 @@ static int zend_jit_linear_scan(zend_op_array *op_array, zend_ssa *ssa, zend_lif
 
 		ival = active;
 		while (ival != NULL) {
-			if (ival->reg >= 0) {
+			if (ival->reg > ZREG_NONE) {
 				fprintf(stderr, "%u-%u: #%d (%s)\n", ival->start, ival->end, ival->ssa_var, zend_reg_name[ival->reg]);
 			} else {
 				fprintf(stderr, "%u-%u: #%d (no-reg)\n", ival->start, ival->end, ival->ssa_var);
