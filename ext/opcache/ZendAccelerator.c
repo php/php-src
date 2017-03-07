@@ -494,7 +494,7 @@ zend_string *accel_new_interned_string(zend_string *str)
 /* Copy PHP interned strings from PHP process memory into the shared memory */
 static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_interned_string)
 {
-	uint32_t idx, j;
+	uint32_t j;
 	Bucket *p, *q;
 
 	/* empty string */
@@ -510,8 +510,7 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 	}
 
 	/* function table hash keys */
-	for (idx = 0; idx < CG(function_table)->nNumUsed; idx++) {
-		p = CG(function_table)->arData + idx;
+	ZEND_HASH_FOREACH_BUCKET(CG(function_table), p) {
 		if (Z_TYPE(p->val) == IS_UNDEF) continue;
 		if (p->key) {
 			p->key = new_interned_string(p->key);
@@ -535,13 +534,12 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 				}
 			}
 		}
-	}
+	} ZEND_HASH_FOREACH_END();
 
 	/* class table hash keys, class names, properties, methods, constants, etc */
-	for (idx = 0; idx < CG(class_table)->nNumUsed; idx++) {
+	ZEND_HASH_FOREACH_BUCKET(CG(class_table), p) {
 		zend_class_entry *ce;
 
-		p = CG(class_table)->arData + idx;
 		if (Z_TYPE(p->val) == IS_UNDEF) continue;
 		ce = (zend_class_entry*)Z_PTR(p->val);
 
@@ -553,10 +551,9 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 			ce->name = new_interned_string(ce->name);
 		}
 
-		for (j = 0; j < ce->properties_info.nNumUsed; j++) {
+		ZEND_HASH_FOREACH_BUCKET(&ce->properties_info, q) {
 			zend_property_info *info;
 
-			q = ce->properties_info.arData + j;
 			if (Z_TYPE(q->val) == IS_UNDEF) continue;
 
 			info = (zend_property_info*)Z_PTR(q->val);
@@ -568,10 +565,9 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 			if (info->name) {
 				info->name = new_interned_string(info->name);
 			}
-		}
+		} ZEND_HASH_FOREACH_END();
 
-		for (j = 0; j < ce->function_table.nNumUsed; j++) {
-			q = ce->function_table.arData + j;
+		ZEND_HASH_FOREACH_BUCKET(&ce->function_table, q) {
 			if (Z_TYPE(q->val) == IS_UNDEF) continue;
 			if (q->key) {
 				q->key = new_interned_string(q->key);
@@ -579,22 +575,20 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 			if (Z_FUNC(q->val)->common.function_name) {
 				Z_FUNC(q->val)->common.function_name = new_interned_string(Z_FUNC(q->val)->common.function_name);
 			}
-		}
+		} ZEND_HASH_FOREACH_END();
 
-		for (j = 0; j < ce->constants_table.nNumUsed; j++) {
-			q = ce->constants_table.arData + j;
+		ZEND_HASH_FOREACH_BUCKET(&ce->constants_table, q) {
 			if (Z_TYPE(q->val) == IS_UNDEF) continue;
 			if (q->key) {
 				q->key = new_interned_string(q->key);
 			}
-		}
-	}
+		} ZEND_HASH_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 
 	/* constant hash keys */
-	for (idx = 0; idx < EG(zend_constants)->nNumUsed; idx++) {
+	ZEND_HASH_FOREACH_BUCKET(EG(zend_constants), p) {
 		zend_constant *c;
 
-		p = EG(zend_constants)->arData + idx;
 		if (Z_TYPE(p->val) == IS_UNDEF) continue;
 		if (p->key) {
 			p->key = new_interned_string(p->key);
@@ -603,13 +597,12 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 		if (c->name) {
 			c->name = new_interned_string(c->name);
 		}
-	}
+	} ZEND_HASH_FOREACH_END();
 
 	/* auto globals hash keys and names */
-	for (idx = 0; idx < CG(auto_globals)->nNumUsed; idx++) {
+	ZEND_HASH_FOREACH_BUCKET(CG(auto_globals), p) {
 		zend_auto_global *auto_global;
 
-		p = CG(auto_globals)->arData + idx;
 		if (Z_TYPE(p->val) == IS_UNDEF) continue;
 
 		auto_global = (zend_auto_global*)Z_PTR(p->val);;
@@ -619,15 +612,13 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 		if (p->key) {
 			p->key = new_interned_string(p->key);
 		}
-	}
+	} ZEND_HASH_FOREACH_END();
 
-	for (idx = 0; idx < module_registry.nNumUsed; idx++) {
-		p = module_registry.arData + idx;
-
+	ZEND_HASH_FOREACH_BUCKET(&module_registry, p) {
 		if (p->key) {
 			p->key = new_interned_string(p->key);
 		}
-	}
+	} ZEND_HASH_FOREACH_END();
 }
 
 static zend_string *accel_replace_string_by_shm_permanent(zend_string *str)
