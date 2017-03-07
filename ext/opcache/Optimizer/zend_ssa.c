@@ -77,12 +77,12 @@ static zend_ssa_phi *add_pi(
 	}
 
 	phi = zend_arena_calloc(arena, 1,
-		sizeof(zend_ssa_phi) +
-		sizeof(int) * ssa->cfg.blocks[to].predecessors_count +
+		ZEND_MM_ALIGNED_SIZE(sizeof(zend_ssa_phi)) +
+		ZEND_MM_ALIGNED_SIZE(sizeof(int) * ssa->cfg.blocks[to].predecessors_count) +
 		sizeof(void*) * ssa->cfg.blocks[to].predecessors_count);
-	phi->sources = (int*)(((char*)phi) + sizeof(zend_ssa_phi));
+	phi->sources = (int*)(((char*)phi) + ZEND_MM_ALIGNED_SIZE(sizeof(zend_ssa_phi)));
 	memset(phi->sources, 0xff, sizeof(int) * ssa->cfg.blocks[to].predecessors_count);
-	phi->use_chains = (zend_ssa_phi**)(((char*)phi->sources) + sizeof(int) * ssa->cfg.blocks[to].predecessors_count);
+	phi->use_chains = (zend_ssa_phi**)(((char*)phi->sources) + ZEND_MM_ALIGNED_SIZE(sizeof(int) * ssa->cfg.blocks[to].predecessors_count));
 
 	phi->pi = from;
 	phi->var = var;
@@ -946,13 +946,13 @@ int zend_build_ssa(zend_arena **arena, const zend_script *script, const zend_op_
 		if (!zend_bitset_empty(phi + j * set_size, set_size)) {
 			ZEND_BITSET_REVERSE_FOREACH(phi + j * set_size, set_size, i) {
 				zend_ssa_phi *phi = zend_arena_calloc(arena, 1,
-					sizeof(zend_ssa_phi) +
-					sizeof(int) * blocks[j].predecessors_count +
+					ZEND_MM_ALIGNED_SIZE(sizeof(zend_ssa_phi)) +
+					ZEND_MM_ALIGNED_SIZE(sizeof(int) * blocks[j].predecessors_count) +
 					sizeof(void*) * blocks[j].predecessors_count);
 
-				phi->sources = (int*)(((char*)phi) + sizeof(zend_ssa_phi));
+				phi->sources = (int*)(((char*)phi) + ZEND_MM_ALIGNED_SIZE(sizeof(zend_ssa_phi)));
 				memset(phi->sources, 0xff, sizeof(int) * blocks[j].predecessors_count);
-				phi->use_chains = (zend_ssa_phi**)(((char*)phi->sources) + sizeof(int) * ssa->cfg.blocks[j].predecessors_count);
+				phi->use_chains = (zend_ssa_phi**)(((char*)phi->sources) + ZEND_MM_ALIGNED_SIZE(sizeof(int) * ssa->cfg.blocks[j].predecessors_count));
 
 				phi->pi = -1;
 				phi->var = i;
