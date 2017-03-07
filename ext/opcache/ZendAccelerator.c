@@ -511,7 +511,6 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 
 	/* function table hash keys */
 	ZEND_HASH_FOREACH_BUCKET(CG(function_table), p) {
-		if (Z_TYPE(p->val) == IS_UNDEF) continue;
 		if (p->key) {
 			p->key = new_interned_string(p->key);
 		}
@@ -540,7 +539,6 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 	ZEND_HASH_FOREACH_BUCKET(CG(class_table), p) {
 		zend_class_entry *ce;
 
-		if (Z_TYPE(p->val) == IS_UNDEF) continue;
 		ce = (zend_class_entry*)Z_PTR(p->val);
 
 		if (p->key) {
@@ -554,8 +552,6 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 		ZEND_HASH_FOREACH_BUCKET(&ce->properties_info, q) {
 			zend_property_info *info;
 
-			if (Z_TYPE(q->val) == IS_UNDEF) continue;
-
 			info = (zend_property_info*)Z_PTR(q->val);
 
 			if (q->key) {
@@ -568,7 +564,6 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 		} ZEND_HASH_FOREACH_END();
 
 		ZEND_HASH_FOREACH_BUCKET(&ce->function_table, q) {
-			if (Z_TYPE(q->val) == IS_UNDEF) continue;
 			if (q->key) {
 				q->key = new_interned_string(q->key);
 			}
@@ -578,7 +573,6 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 		} ZEND_HASH_FOREACH_END();
 
 		ZEND_HASH_FOREACH_BUCKET(&ce->constants_table, q) {
-			if (Z_TYPE(q->val) == IS_UNDEF) continue;
 			if (q->key) {
 				q->key = new_interned_string(q->key);
 			}
@@ -589,7 +583,6 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 	ZEND_HASH_FOREACH_BUCKET(EG(zend_constants), p) {
 		zend_constant *c;
 
-		if (Z_TYPE(p->val) == IS_UNDEF) continue;
 		if (p->key) {
 			p->key = new_interned_string(p->key);
 		}
@@ -602,8 +595,6 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 	/* auto globals hash keys and names */
 	ZEND_HASH_FOREACH_BUCKET(CG(auto_globals), p) {
 		zend_auto_global *auto_global;
-
-		if (Z_TYPE(p->val) == IS_UNDEF) continue;
 
 		auto_global = (zend_auto_global*)Z_PTR(p->val);;
 
