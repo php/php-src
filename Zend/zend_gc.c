@@ -325,9 +325,12 @@ static zend_always_inline gc_root_buffer* gc_find_additional_buffer(zend_refcoun
 
 	/* We have to check each additional_buffer to find which one holds the ref */
 	while (additional_buffer) {
-		gc_root_buffer *root = additional_buffer->buf + (GC_ADDRESS(GC_INFO(ref)) - GC_ROOT_BUFFER_MAX_ENTRIES);
-		if (root->ref == ref) {
-			return root;
+		uint32_t idx = GC_ADDRESS(GC_INFO(ref)) - GC_ROOT_BUFFER_MAX_ENTRIES;
+		if (idx < additional_buffer->used) {
+			gc_root_buffer *root = additional_buffer->buf + idx;
+			if (root->ref == ref) {
+				return root;
+			}
 		}
 		additional_buffer = additional_buffer->next;
 	}
