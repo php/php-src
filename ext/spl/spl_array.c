@@ -288,10 +288,9 @@ static zend_object *spl_array_object_clone(zval *zobject)
 }
 /* }}} */
 
-static zval *spl_array_get_dimension_ptr(int check_inherited, zval *object, zval *offset, int type) /* {{{ */
+static zval *spl_array_get_dimension_ptr(int check_inherited, spl_array_object *intern, zval *offset, int type) /* {{{ */
 {
-	zval *retval = NULL;
-	spl_array_object *intern = Z_SPLARRAY_P(object);
+	zval *retval;
 	zend_long index;
 	zend_string *offset_key;
 	HashTable *ht = spl_array_get_hash_table(intern);
@@ -304,14 +303,6 @@ static zval *spl_array_get_dimension_ptr(int check_inherited, zval *object, zval
 		zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
 		return &EG(error_zval);
 	}
-
-	if (check_inherited && intern->fptr_offset_get) {
-        zend_call_method_with_1_params(object, Z_OBJCE_P(object), &intern->fptr_offset_get, "offsetGet", retval, offset);
-        if (retval) {
-            zval_ptr_dtor(offset);
-            return retval;
-        }
-    }
 
 try_again:
 	switch (Z_TYPE_P(offset)) {
@@ -436,7 +427,7 @@ static zval *spl_array_read_dimension_ex(int check_inherited, zval *object, zval
 		}
 	}
 
-	ret = spl_array_get_dimension_ptr(check_inherited, object, offset, type);
+	ret = spl_array_get_dimension_ptr(check_inherited, intern, offset, type);
 
 	/* When in a write context,
 	 * ZE has to be fooled into thinking this is in a reference set
@@ -910,7 +901,11 @@ static zval *spl_array_get_property_ptr_ptr(zval *object, zval *member, int type
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
 		&& !std_object_handlers.has_property(object, member, 2, NULL)) {
-		return spl_array_get_dimension_ptr(1, object, member, type);
+		// If object has offsetGet overridden, then fallback to read_property call to get proper data.
+		if (intern->fptr_offset_get) {
+			return NULL;
+        }
+		return spl_array_get_dimension_ptr(1, intern, member, type);
 	}
 	return std_object_handlers.get_property_ptr_ptr(object, member, type, cache_slot);
 } /* }}} */
