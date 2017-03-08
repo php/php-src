@@ -3490,6 +3490,7 @@ static void php_putenv_destructor(zval *zv) /* {{{ */
 
 static void basic_globals_ctor(php_basic_globals *basic_globals_p) /* {{{ */
 {
+	BG(mt_rand_seed_fixed) = 0;
 	BG(mt_rand_is_seeded) = 0;
 	BG(mt_rand_mode) = MT_RAND_MT19937;
 	BG(umask) = -1;
@@ -3752,6 +3753,11 @@ PHP_MSHUTDOWN_FUNCTION(basic) /* {{{ */
 PHP_RINIT_FUNCTION(basic) /* {{{ */
 {
 	memset(BG(strtok_table), 0, 256);
+
+	if (BG(mt_rand_seed_fixed)) {
+		BG(mt_rand_seed_fixed) = 0;
+		BG(mt_rand_is_seeded) = 0;
+	}
 
 	BG(serialize_lock) = 0;
 	memset(&BG(serialize), 0, sizeof(BG(serialize)));
@@ -4037,7 +4043,7 @@ PHP_FUNCTION(long2ip)
  ********************/
 
 /* {{{ proto string getenv(string varname[, bool local_only]
-   Get the value of an environment variable or every available environment variable 
+   Get the value of an environment variable or every available environment variable
    if no varname is present  */
 PHP_FUNCTION(getenv)
 {
