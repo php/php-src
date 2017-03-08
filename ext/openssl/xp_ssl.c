@@ -1661,10 +1661,7 @@ int php_openssl_setup_crypto(php_stream *stream,
 	}
 
 #ifdef SSL_MODE_RELEASE_BUFFERS
-	do {
-		long mode = SSL_get_mode(sslsock->ssl_handle);
-		SSL_set_mode(sslsock->ssl_handle, mode | SSL_MODE_RELEASE_BUFFERS);
-	} while (0);
+    SSL_set_mode(sslsock->ssl_handle, SSL_get_mode(sslsock->ssl_handle) | SSL_MODE_RELEASE_BUFFERS);
 #endif
 
 	if (cparam->inputs.session) {
