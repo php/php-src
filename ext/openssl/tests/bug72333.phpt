@@ -17,7 +17,7 @@ $serverCode = <<<'CODE'
 
 	for ($i = 0; $i < 5; $i++) {
 		fread($conn, 100000);
-		usleep(200000);
+		usleep(20000);
 	}
 CODE;
 
