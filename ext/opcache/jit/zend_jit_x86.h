@@ -115,9 +115,6 @@ typedef uint32_t zend_regset;
 #define ZEND_REGSET_UNION(set1, set2) \
 	((set1) | (set2))
 
-#define ZEND_REGSET_UNION(set1, set2) \
-	((set1) | (set2))
-
 #define ZEND_REGSET_INTERSECTION(set1, set2) \
 	((set1) & (set2))
 
