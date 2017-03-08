@@ -2041,6 +2041,11 @@ static PHP_FUNCTION(session_id)
 		RETURN_FALSE;
 	}
 
+	if (name && PS(session_status) == php_session_active) {
+		php_error_docref(NULL, E_WARNING, "Cannot change session id when session is active");
+		RETURN_FALSE;
+	}
+
 	if (PS(id)) {
 		/* keep compatibility for "\0" characters ???
 		 * see: ext/session/tests/session_id_error3.phpt */
