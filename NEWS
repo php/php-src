@@ -12,6 +12,10 @@ PHP                                                                        NEWS
   . Fixed bug #74004 (LIBXML_NOWARNING flag ingnored on loadHTML*).
     (somedaysummer)
 
+- PDO MySQL:
+  . Fixed bug #71003 (Expose MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT to PDO
+    interface). (Thomas Orozco)
+
 - SPL:
   . Fixed bug #74058 (ArrayObject can not notice changes). (Andrew Nester)
 
