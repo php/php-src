@@ -21,6 +21,9 @@ PHP                                                                        NEWS
   . Fixed bug #71003 (Expose MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT to PDO
     interface). (Thomas Orozco)
 
+. Streams:
+  . Fixed bug #74216 (Correctly fail on invalid IP address ports). (Sara)
+
 16 Mar 2017 PHP 7.0.17
 
 - Core:
