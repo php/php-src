@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2017 PHP 7.0.18
 
+- Core:
+  . Fixed bug #73370 (falsely exits with "Out of Memory" when using
+    USE_ZEND_ALLOC=0). (Nikita)
+
 - Date:
   . Fixed bug #72096 (Swatch time value incorrect for dates before 1970). (mcq8)
 
