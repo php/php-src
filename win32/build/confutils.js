@@ -1650,6 +1650,11 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 						/* "--rule-file=win32\build\cppcheck_rules.xml " + */
 						" --std=c89 --std=c++11 " + 
 						"--quiet --inconclusive --template=vs ";
+
+			var cppcheck_build_dir = get_define("CPPCHECK_BUILD_DIR");
+			if (!!cppcheck_build_dir) {
+				analyzer_base_args += "--cppcheck-build-dir=$(CPPCHECK_BUILD_DIR)";
+			}
 		}
 
 		if (PHP_MP_DISABLED) {
