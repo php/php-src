@@ -301,6 +301,10 @@ void php_register_signal_constants(INIT_FUNC_ARGS)
 	REGISTER_LONG_CONSTANT("SIGSYS",   (zend_long) SIGSYS, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SIGBABY",  (zend_long) SIGSYS, CONST_CS | CONST_PERSISTENT);
 #endif
+#ifdef SIGRTMIN
+	REGISTER_LONG_CONSTANT("SIGRTMIN", (zend_long) SIGRTMIN, CONST_CS | CONST_PERSISTENT);
+#endif
+	REGISTER_LONG_CONSTANT("SIGRTMAX", (zend_long) SIGRTMAX, CONST_CS | CONST_PERSISTENT);
 
 #if HAVE_GETPRIORITY || HAVE_SETPRIORITY
 	REGISTER_LONG_CONSTANT("PRIO_PGRP", PRIO_PGRP, CONST_CS | CONST_PERSISTENT);
@@ -984,7 +988,7 @@ PHP_FUNCTION(pcntl_signal)
 		return;
 	}
 
-	if (signo < 1 || signo > 32) {
+	if (signo < 1 || signo > MAX(NSIG-1, SIGRTMAX)) {
 		php_error_docref(NULL, E_WARNING, "Invalid signal");
 		RETURN_FALSE;
 	}
@@ -993,7 +997,7 @@ PHP_FUNCTION(pcntl_signal)
 		/* since calling malloc() from within a signal handler is not portable,
 		 * pre-allocate a few records for recording signals */
 		int i;
-		for (i = 0; i < 32; i++) {
+		for (i = 0; i < MAX(NSIG, SIGRTMAX+1); i++) {
 			struct php_pcntl_pending_signal *psig;
 
 			psig = emalloc(sizeof(*psig));
@@ -1112,7 +1116,7 @@ PHP_FUNCTION(pcntl_sigprocmask)
 		} else {
 			zend_hash_clean(Z_ARRVAL_P(user_oldset));
 		}
-		for (signo = 1; signo < MAX(NSIG-1, SIGRTMAX); ++signo) {
+		for (signo = 1; signo < MAX(NSIG, SIGRTMAX+1); ++signo) {
 			if (sigismember(&oldset, signo) != 1) {
 				continue;
 			}
