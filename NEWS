@@ -21,6 +21,9 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #74058 (ArrayObject can not notice changes). (Andrew Nester)
 
+. Streams:
+  . Fixed bug #74216 (Correctly fail on invalid IP address ports). (Sara)
+
 16 Mar 2017, PHP 7.1.3
 
 - Core:
