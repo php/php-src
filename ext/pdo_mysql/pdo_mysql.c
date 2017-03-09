@@ -132,6 +132,10 @@ static PHP_MINIT_FUNCTION(pdo_mysql)
 	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_MULTI_STATEMENTS", (zend_long)PDO_MYSQL_ATTR_MULTI_STATEMENTS);
 
 #ifdef PDO_USE_MYSQLND
+        REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SSL_SERVER_CN", (zend_long)PDO_MYSQL_ATTR_SSL_SERVER_CN);
+#endif
+
+#ifdef PDO_USE_MYSQLND
 	mysqlnd_reverse_api_register_api(&pdo_mysql_reverse_api);
 #endif
 

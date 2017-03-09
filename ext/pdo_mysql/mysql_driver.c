@@ -608,7 +608,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		zend_string *default_file = NULL, *default_group = NULL;
 #endif
 		zend_long compress = 0;
-		zend_string *ssl_key = NULL, *ssl_cert = NULL, *ssl_ca = NULL, *ssl_capath = NULL, *ssl_cipher = NULL;
+		zend_string *ssl_key = NULL, *ssl_cert = NULL, *ssl_ca = NULL, *ssl_capath = NULL, *ssl_cipher = NULL, *ssl_server_cn = NULL;
 		H->buffered = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_USE_BUFFERED_QUERY, 1);
 
 		H->emulate_prepare = pdo_attr_lval(driver_options,
@@ -697,14 +697,20 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		ssl_ca = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_SSL_CA, NULL);
 		ssl_capath = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_SSL_CAPATH, NULL);
 		ssl_cipher = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_SSL_CIPHER, NULL);
+                ssl_server_cn = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_SSL_SERVER_CN, NULL);
 
-		if (ssl_key || ssl_cert || ssl_ca || ssl_capath || ssl_cipher) {
+		if (ssl_key || ssl_cert || ssl_ca || ssl_capath || ssl_cipher || ssl_server_cn) {
 			mysql_ssl_set(H->server,
 					ssl_key? ZSTR_VAL(ssl_key) : NULL,
 					ssl_cert? ZSTR_VAL(ssl_cert) : NULL,
 					ssl_ca? ZSTR_VAL(ssl_ca) : NULL,
 					ssl_capath? ZSTR_VAL(ssl_capath) : NULL,
+#ifdef PDO_USE_MYSQLND
+					ssl_cipher? ZSTR_VAL(ssl_cipher) : NULL,
+					ssl_server_cn? ZSTR_VAL(ssl_server_cn) : NULL);
+#else
 					ssl_cipher? ZSTR_VAL(ssl_cipher) : NULL);
+#endif
 			if (ssl_key) {
 				zend_string_release(ssl_key);
 			}
@@ -717,6 +723,9 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 			if (ssl_capath) {
 				zend_string_release(ssl_capath);
 			}
+                        if (ssl_server_cn) {
+                                zend_string_release(ssl_server_cn);
+                        }
 			if (ssl_cipher) {
 				zend_string_release(ssl_cipher);
 			}

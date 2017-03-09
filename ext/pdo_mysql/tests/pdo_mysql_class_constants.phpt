@@ -27,6 +27,7 @@ if (!extension_loaded('mysqli') && !extension_loaded('mysqlnd')) {
 		"MYSQL_ATTR_SSL_CIPHER"						=> true,
 		"MYSQL_ATTR_COMPRESS"						=> true,
 		"MYSQL_ATTR_MULTI_STATEMENTS"					=> true,
+		"MYSQL_ATTR_SSL_SERVER_CN"					=> true,
 	);
 
 	if (!MySQLPDOTest::isPDOMySQLnd()) {

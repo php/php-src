@@ -76,7 +76,7 @@
 #define mysql_set_server_option(r,o)	mysqlnd_set_server_option((r), (o))
 #define mysql_set_character_set(r,a)	mysqlnd_set_character_set((r), (a))
 #define mysql_sqlstate(r)				mysqlnd_sqlstate((r))
-#define mysql_ssl_set(c,key,cert,ca,capath,cipher)	mysqlnd_ssl_set((c), (key), (cert), (ca), (capath), (cipher))
+#define mysql_ssl_set(c,key,cert,ca,capath,cipher,cn)	mysqlnd_ssl_set((c), (key), (cert), (ca), (capath), (cipher), (cn))
 #define mysql_stmt_affected_rows(s)		mysqlnd_stmt_affected_rows((s))
 #define mysql_stmt_field_count(s)		mysqlnd_stmt_field_count((s))
 #define mysql_stmt_param_count(s)		mysqlnd_stmt_param_count((s))
