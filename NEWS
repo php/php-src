@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #74149 (static embed SAPI linkage error). (krakjoe)
 
+- Date:
+  . Fixed bug #72096 (Swatch time value incorrect for dates before 1970). (mcq8)
+
 - DOM:
   . Fixed bug #74004 (LIBXML_NOWARNING flag ingnored on loadHTML*).
     (somedaysummer)
