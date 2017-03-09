@@ -2818,7 +2818,7 @@ static ZEND_COLD ZEND_NORETURN void zend_out_of_memory(void)
 ZEND_API void * __zend_malloc(size_t len)
 {
 	void *tmp = malloc(len);
-	if (EXPECTED(tmp)) {
+	if (EXPECTED(tmp || !len)) {
 		return tmp;
 	}
 	zend_out_of_memory();
@@ -2834,7 +2834,7 @@ ZEND_API void * __zend_calloc(size_t nmemb, size_t len)
 ZEND_API void * __zend_realloc(void *p, size_t len)
 {
 	p = realloc(p, len);
-	if (EXPECTED(p)) {
+	if (EXPECTED(p || !len)) {
 		return p;
 	}
 	zend_out_of_memory();
