@@ -43,6 +43,8 @@ PHP                                                                        NEWS
     (Sammy Kaye Powers)
   . Fixed bug #74269 (It's possible to override trait property with different
     loosely-equal value). (pmmaga)
+  . Fixed bug #61970 (Restraining __construct() access level in subclass gives
+    a fatal error). (pmmaga)
 
 - BCMath:
   . Fixed bug #46564 (bcmod truncates fractionals). (liborm85)
