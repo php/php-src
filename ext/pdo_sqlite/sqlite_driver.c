@@ -505,7 +505,7 @@ static int php_sqlite3_collation_callback(void *context,
 	return ret;
 }
 
-/* {{{ bool SQLite::sqliteCreateFunction(string name, mixed callback [, int argcount])
+/* {{{ bool SQLite::sqliteCreateFunction(string name, mixed callback [, int argcount, int flags])
    Registers a UDF with the sqlite db handle */
 static PHP_METHOD(SQLite, sqliteCreateFunction)
 {
@@ -514,16 +514,18 @@ static PHP_METHOD(SQLite, sqliteCreateFunction)
 	char *func_name;
 	size_t func_name_len;
 	zend_long argc = -1;
+	zend_long flags = 0;
 	zend_string *cbname = NULL;
 	pdo_dbh_t *dbh;
 	pdo_sqlite_db_handle *H;
 	int ret;
 
-	ZEND_PARSE_PARAMETERS_START(2, 3)
+	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_STRING(func_name, func_name_len)
 		Z_PARAM_ZVAL_DEREF(callback)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(argc)
+		Z_PARAM_LONG(flags)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	dbh = Z_PDO_DBH_P(getThis());
@@ -540,7 +542,7 @@ static PHP_METHOD(SQLite, sqliteCreateFunction)
 
 	func = (struct pdo_sqlite_func*)ecalloc(1, sizeof(*func));
 
-	ret = sqlite3_create_function(H->db, func_name, argc, SQLITE_UTF8,
+	ret = sqlite3_create_function(H->db, func_name, argc, flags | SQLITE_UTF8,
 			func, php_sqlite3_func_callback, NULL, NULL);
 	if (ret == SQLITE_OK) {
 		func->funcname = estrdup(func_name);
