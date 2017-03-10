@@ -38,7 +38,6 @@ extern zend_module_entry test_module_entry;
 #include "TSRM.h"
 #endif
 
-
 #define TEST_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(test, v)
 
 #if defined(ZTS) && defined(COMPILE_DL_TEST)

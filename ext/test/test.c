@@ -16,8 +16,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -26,16 +24,6 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_test.h"
-
-
-
-static int le_test;
-
-
-
-
-
-
 
 PHP_MINIT_FUNCTION(test)
 {
@@ -48,8 +36,6 @@ PHP_MSHUTDOWN_FUNCTION(test)
 	return SUCCESS;
 }
 
-
-
 PHP_RINIT_FUNCTION(test)
 {
 #if defined(COMPILE_DL_TEST) && defined(ZTS)
@@ -58,27 +44,21 @@ PHP_RINIT_FUNCTION(test)
 	return SUCCESS;
 }
 
-
-
 PHP_RSHUTDOWN_FUNCTION(test)
 {
 	return SUCCESS;
 }
 
-
 PHP_MINFO_FUNCTION(test)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "test support", "enabled");
+	php_info_print_table_header(2, "test extension", "enabled");
 	php_info_print_table_end();
-
 }
-
 
 const zend_function_entry test_functions[] = {
 	PHP_FE_END
 };
-
 
 zend_module_entry test_module_entry = {
 	STANDARD_MODULE_HEADER,
@@ -92,7 +72,6 @@ zend_module_entry test_module_entry = {
 	PHP_TEST_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
-
 
 #ifdef COMPILE_DL_TEST
 #ifdef ZTS
