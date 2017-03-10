@@ -32,6 +32,7 @@ PHP                                                                        NEWS
     spawns another object). (jim at commercebyte dot com)
   . Fixed bug #73971 (Filename got limited to MAX_PATH on Win32 when scan
     directory). (Anatol)
+  . Fixed bug #74149 (static embed SAPI linkage error). (krakjoe)
 
 - BCMath:
   . Fixed bug #46564 (bcmod truncates fractionals). (liborm85)
