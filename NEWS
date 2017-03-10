@@ -23,6 +23,10 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #74058 (ArrayObject can not notice changes). (Andrew Nester)
 
+- Sqlite:
+  . Implemented FR #74217 (Allow creation of deterministic sqlite functions).
+    (Andrew Nester)
+
 . Streams:
   . Fixed bug #74216 (Correctly fail on invalid IP address ports). (Sara)
 
