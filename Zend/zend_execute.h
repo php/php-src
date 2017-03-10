@@ -81,6 +81,10 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 				return variable_ptr;
 			}
 			if (ZEND_CONST_COND(value_type & (IS_VAR|IS_CV), 1) && variable_ptr == value) {
+				if (value_type == IS_VAR && ref) {
+					ZEND_ASSERT(GC_REFCOUNT(ref) > 1);
+					--GC_REFCOUNT(ref);
+				}
 				return variable_ptr;
 			}
 			garbage = Z_COUNTED_P(variable_ptr);
