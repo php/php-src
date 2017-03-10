@@ -353,7 +353,7 @@ static void append_essential_headers(smart_str* buffer, php_cli_server_client *c
 	if (!gettimeofday(&tv, NULL)) {
 		zend_string *dt = php_format_date("r", 1, tv.tv_sec, 1);
 		smart_str_appendl_ex(buffer, "Date: ", 6, persistent);
-		smart_str_appends_ex(buffer, dt->val, persistent);
+		smart_str_appends_ex(buffer, ZSTR_VAL(dt), persistent);
 		smart_str_appendl_ex(buffer, "\r\n", 2, persistent);
 		zend_string_release(dt);
 	}

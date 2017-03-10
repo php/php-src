@@ -10,11 +10,18 @@ else
 	DEBUG="";
 fi
 ./buildconf --force
+
+# Enable 'maintainer-strict-api' option only if supported
+STRICT_API_OPT=''
+./configure --help | grep -- --enable-maintainer-strict-api >/dev/null \
+	&& STRICT_API_OPT="--enable-maintainer-strict-api"
+
 ./configure \
 --prefix=$HOME"/php-install" \
 --quiet \
 $DEBUG \
 $TS \
+$STRICT_API_OPT \
 --enable-phpdbg \
 --enable-fpm \
 --with-pdo-mysql=mysqlnd \
@@ -59,5 +66,5 @@ $TS \
 --with-xpm-dir=/usr \
 --with-kerberos \
 --enable-sysvmsg 
-make -j2 --quiet
+make -j2 -k --quiet
 make install

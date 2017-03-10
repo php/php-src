@@ -100,17 +100,17 @@ static zend_bool php_mail_build_headers_check_field_value(zval *val)
 
 	/* https://tools.ietf.org/html/rfc2822#section-2.2.1 */
 	/* https://tools.ietf.org/html/rfc2822#section-2.2.3 */
-	while (len < value->len) {
-		if (*(value->val+len) == '\r') {
-			if (value->len - len >= 3
-				&&  *(value->val+len+1) == '\n'
-				&& (*(value->val+len+2) == ' '  || *(value->val+len+2) == '\t')) {
+	while (len < ZSTR_LEN(value)) {
+		if (*(ZSTR_VAL(value)+len) == '\r') {
+			if (ZSTR_LEN(value) - len >= 3
+				&&  *(ZSTR_VAL(value)+len+1) == '\n'
+				&& (*(ZSTR_VAL(value)+len+2) == ' '  || *(ZSTR_VAL(value)+len+2) == '\t')) {
 				len += 3;
 				continue;
 			}
 			return FAILURE;
 		}
-		if (*(value->val+len) == '\0') {
+		if (*(ZSTR_VAL(value)+len) == '\0') {
 			return FAILURE;
 		}
 		len++;
@@ -124,8 +124,8 @@ static zend_bool php_mail_build_headers_check_field_name(zend_string *key)
 	size_t len = 0;
 
 	/* https://tools.ietf.org/html/rfc2822#section-2.2 */
-	while (len < key->len) {
-		if (*(key->val+len) < 33 || *(key->val+len) > 126 || *(key->val+len) == ':') {
+	while (len < ZSTR_LEN(key)) {
+		if (*(ZSTR_VAL(key)+len) < 33 || *(ZSTR_VAL(key)+len) > 126 || *(ZSTR_VAL(key)+len) == ':') {
 			return FAILURE;
 		}
 		len++;
@@ -274,7 +274,7 @@ PHPAPI zend_string *php_mail_build_headers(zval *headers)
 	} ZEND_HASH_FOREACH_END();
 
 	/* Remove the last \r\n */
-	if (s.s) s.s->len -= 2;
+	if (s.s) ZSTR_LEN(s.s) -= 2;
 	smart_str_0(&s);
 
 	return s.s;
@@ -509,7 +509,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 			
 			time(&curtime);
 			date_str = php_format_date("d-M-Y H:i:s e", 13, curtime, 1);
-			len = spprintf(&tmp, 0, "[%s] %s%s", date_str->val, logline, PHP_EOL);
+			len = spprintf(&tmp, 0, "[%s] %s%s", ZSTR_VAL(date_str), logline, PHP_EOL);
 			
 			php_mail_log_to_file(mail_log, tmp, len);
 			

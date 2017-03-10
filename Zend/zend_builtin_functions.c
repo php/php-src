@@ -1969,7 +1969,7 @@ static int copy_function_name(zval *zv, int num_args, va_list args, zend_hash_ke
 		char *disable_functions = INI_STR("disable_functions");
 
 		if ((*exclude_disabled == 1) && (disable_functions != NULL)) {
-			if (strstr(disable_functions, func->common.function_name->val) == NULL) {
+			if (strstr(disable_functions, ZSTR_VAL(func->common.function_name)) == NULL) {
 				add_next_index_str(internal_ar, zend_string_copy(hash_key->key));
 			}
 		} else {

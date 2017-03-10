@@ -22,6 +22,7 @@
 #define ZEND_STRING_H
 
 #include "zend.h"
+#include "zend_strict.h"
 
 BEGIN_EXTERN_C()
 
@@ -48,9 +49,9 @@ END_EXTERN_C()
 
 /* Shortcuts */
 
-#define ZSTR_VAL(zstr)  (zstr)->val
-#define ZSTR_LEN(zstr)  (zstr)->len
-#define ZSTR_H(zstr)    (zstr)->h
+#define ZSTR_VAL(zstr)  (zstr)->_ZSTRICT_FIELD(zend_string,val)
+#define ZSTR_LEN(zstr)  (zstr)->_ZSTRICT_FIELD(zend_string,len)
+#define ZSTR_H(zstr)    (zstr)->_ZSTRICT_FIELD(zend_string,h)
 #define ZSTR_HASH(zstr) zend_string_hash_val(zstr)
 
 /* Compatibility macros */
@@ -70,7 +71,7 @@ END_EXTERN_C()
 #define ZSTR_CHAR(c) zend_one_char_string[c]
 #define ZSTR_KNOWN(idx) zend_known_strings[idx]
 
-#define _ZSTR_HEADER_SIZE XtOffsetOf(zend_string, val)
+#define _ZSTR_HEADER_SIZE XtOffsetOf(zend_string, _ZSTRICT_FIELD(zend_string,val))
 
 #define _ZSTR_STRUCT_SIZE(len) (_ZSTR_HEADER_SIZE + len + 1)
 

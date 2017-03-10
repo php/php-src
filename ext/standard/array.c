@@ -152,7 +152,7 @@ static int php_array_key_compare(const void *a, const void *b) /* {{{ */
 			return (zend_long)f->h > (zend_long)s->h ? 1 : -1;
 		} else {
 			l1 = (zend_long)f->h;
-			t = is_numeric_string(s->key->val, s->key->len, &l2, &d, 1);
+			t = is_numeric_string(ZSTR_VAL(s->key), ZSTR_LEN(s->key), &l2, &d, 1);
 			if (t == IS_LONG) {
 				/* pass */
 			} else if (t == IS_DOUBLE) {
@@ -166,7 +166,7 @@ static int php_array_key_compare(const void *a, const void *b) /* {{{ */
 			return zendi_smart_strcmp(f->key, s->key);
 		} else {
 			l2 = (zend_long)s->h;
-			t = is_numeric_string(f->key->val, f->key->len, &l1, &d, 1);
+			t = is_numeric_string(ZSTR_VAL(f->key), ZSTR_LEN(f->key), &l1, &d, 1);
 			if (t == IS_LONG) {
 				/* pass */
 			} else if (t == IS_DOUBLE) {
@@ -196,12 +196,12 @@ static int php_array_key_compare_numeric(const void *a, const void *b) /* {{{ */
 	} else {
 		double d1, d2;
 		if (f->key) {
-			d1 = zend_strtod(f->key->val, NULL);
+			d1 = zend_strtod(ZSTR_VAL(f->key), NULL);
 		} else {
 			d1 = (double)(zend_long)f->h;
 		}
 		if (s->key) {
-			d2 = zend_strtod(s->key->val, NULL);
+			d2 = zend_strtod(ZSTR_VAL(s->key), NULL);
 		} else {
 			d2 = (double)(zend_long)s->h;
 		}
@@ -226,15 +226,15 @@ static int php_array_key_compare_string_case(const void *a, const void *b) /* {{
 	char buf2[MAX_LENGTH_OF_LONG + 1];
 
 	if (f->key) {
-		s1 = f->key->val;
-		l1 = f->key->len;
+		s1 = ZSTR_VAL(f->key);
+		l1 = ZSTR_LEN(f->key);
 	} else {
 		s1 = zend_print_long_to_buf(buf1 + sizeof(buf1) - 1, f->h);
 		l1 = buf1 + sizeof(buf1) - 1 - s1;
 	}
 	if (s->key) {
-		s2 = s->key->val;
-		l2 = s->key->len;
+		s2 = ZSTR_VAL(s->key);
+		l2 = ZSTR_LEN(s->key);
 	} else {
 		s2 = zend_print_long_to_buf(buf2 + sizeof(buf2) - 1, s->h);
 		l2 = buf2 + sizeof(buf2) - 1 - s1;
@@ -259,15 +259,15 @@ static int php_array_key_compare_string(const void *a, const void *b) /* {{{ */
 	char buf2[MAX_LENGTH_OF_LONG + 1];
 
 	if (f->key) {
-		s1 = f->key->val;
-		l1 = f->key->len;
+		s1 = ZSTR_VAL(f->key);
+		l1 = ZSTR_LEN(f->key);
 	} else {
 		s1 = zend_print_long_to_buf(buf1 + sizeof(buf1) - 1, f->h);
 		l1 = buf1 + sizeof(buf1) - 1 - s1;
 	}
 	if (s->key) {
-		s2 = s->key->val;
-		l2 = s->key->len;
+		s2 = ZSTR_VAL(s->key);
+		l2 = ZSTR_LEN(s->key);
 	} else {
 		s2 = zend_print_long_to_buf(buf2 + sizeof(buf2) - 1, s->h);
 		l2 = buf2 + sizeof(buf2) - 1 - s2;
@@ -292,15 +292,15 @@ static int php_array_key_compare_string_natural_general(const void *a, const voi
 	char buf2[MAX_LENGTH_OF_LONG + 1];
 
 	if (f->key) {
-		s1 = f->key->val;
-		l1 = f->key->len;
+		s1 = ZSTR_VAL(f->key);
+		l1 = ZSTR_LEN(f->key);
 	} else {
 		s1 = zend_print_long_to_buf(buf1 + sizeof(buf1) - 1, f->h);
 		l1 = buf1 + sizeof(buf1) - 1 - s1;
 	}
 	if (s->key) {
-		s2 = s->key->val;
-		l2 = s->key->len;
+		s2 = ZSTR_VAL(s->key);
+		l2 = ZSTR_LEN(s->key);
 	} else {
 		s2 = zend_print_long_to_buf(buf2 + sizeof(buf2) - 1, s->h);
 		l2 = buf2 + sizeof(buf2) - 1 - s1;
@@ -343,12 +343,12 @@ static int php_array_key_compare_string_locale(const void *a, const void *b) /* 
 	char buf2[MAX_LENGTH_OF_LONG + 1];
 
 	if (f->key) {
-		s1 = f->key->val;
+		s1 = ZSTR_VAL(f->key);
 	} else {
 		s1 = zend_print_long_to_buf(buf1 + sizeof(buf1) - 1, f->h);
 	}
 	if (s->key) {
-		s2 = s->key->val;
+		s2 = ZSTR_VAL(s->key);
 	} else {
 		s2 = zend_print_long_to_buf(buf2 + sizeof(buf2) - 1, s->h);
 	}

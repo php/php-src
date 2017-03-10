@@ -1694,7 +1694,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_dispatch_try_catch_finally_hel
 			cleanup_live_vars(execute_data, op_num, try_catch->finally_op);
 			Z_OBJ_P(fast_call) = EG(exception);
 			EG(exception) = NULL;
-			fast_call->u2.lineno = (uint32_t)-1;
+			fast_call->_ZSTRICT_FIELD(zval_struct,u2).lineno = (uint32_t)-1;
 			ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[try_catch->finally_op]);
 			ZEND_VM_CONTINUE();
 
@@ -1702,9 +1702,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_dispatch_try_catch_finally_hel
 			zval *fast_call = EX_VAR(EX(func)->op_array.opcodes[try_catch->finally_end].op1.var);
 
 			/* cleanup incomplete RETURN statement */
-			if (fast_call->u2.lineno != (uint32_t)-1
-			 && (EX(func)->op_array.opcodes[fast_call->u2.lineno].op2_type & (IS_TMP_VAR | IS_VAR))) {
-				zval *return_value = EX_VAR(EX(func)->op_array.opcodes[fast_call->u2.lineno].op2.var);
+			if (fast_call->_ZSTRICT_FIELD(zval_struct,u2).lineno != (uint32_t)-1
+			 && (EX(func)->op_array.opcodes[fast_call->_ZSTRICT_FIELD(zval_struct,u2).lineno].op2_type & (IS_TMP_VAR | IS_VAR))) {
+				zval *return_value = EX_VAR(EX(func)->op_array.opcodes[fast_call->_ZSTRICT_FIELD(zval_struct,u2).lineno].op2.var);
 
 				zval_ptr_dtor(return_value);
 			}
@@ -1834,9 +1834,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DISCARD_EXCEPTION_SPEC_HANDLER
 	SAVE_OPLINE();
 
 	/* cleanup incomplete RETURN statement */
-	if (fast_call->u2.lineno != (uint32_t)-1
-	 && (EX(func)->op_array.opcodes[fast_call->u2.lineno].op2_type & (IS_TMP_VAR | IS_VAR))) {
-		zval *return_value = EX_VAR(EX(func)->op_array.opcodes[fast_call->u2.lineno].op2.var);
+	if (fast_call->_ZSTRICT_FIELD(zval_struct,u2).lineno != (uint32_t)-1
+	 && (EX(func)->op_array.opcodes[fast_call->_ZSTRICT_FIELD(zval_struct,u2).lineno].op2_type & (IS_TMP_VAR | IS_VAR))) {
+		zval *return_value = EX_VAR(EX(func)->op_array.opcodes[fast_call->_ZSTRICT_FIELD(zval_struct,u2).lineno].op2.var);
 
 		zval_ptr_dtor(return_value);
 	}
@@ -1858,7 +1858,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CALL_SPEC_HANDLER(ZEND_OP
 
 	Z_OBJ_P(fast_call) = NULL;
 	/* set return address */
-	fast_call->u2.lineno = opline - EX(func)->op_array.opcodes;
+	fast_call->_ZSTRICT_FIELD(zval_struct,u2).lineno = opline - EX(func)->op_array.opcodes;
 	ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline, opline->op1));
 	ZEND_VM_CONTINUE();
 }
@@ -1869,8 +1869,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_RET_SPEC_HANDLER(ZEND_OPC
 	zval *fast_call = EX_VAR(opline->op1.var);
 	uint32_t current_try_catch_offset, current_op_num;
 
-	if (fast_call->u2.lineno != (uint32_t)-1) {
-		const zend_op *fast_ret = EX(func)->op_array.opcodes + fast_call->u2.lineno;
+	if (fast_call->_ZSTRICT_FIELD(zval_struct,u2).lineno != (uint32_t)-1) {
+		const zend_op *fast_ret = EX(func)->op_array.opcodes + fast_call->_ZSTRICT_FIELD(zval_struct,u2).lineno;
 
 		ZEND_VM_SET_OPCODE(fast_ret + 1);
 		ZEND_VM_CONTINUE();
