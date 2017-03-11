@@ -29,8 +29,6 @@
 #include "zend_closures.h"
 #include "zend_generators.h"
 
-#undef ZEND_TEST_EXCEPTIONS
-
 static ZEND_FUNCTION(zend_version);
 static ZEND_FUNCTION(func_num_args);
 static ZEND_FUNCTION(func_get_arg);
@@ -54,11 +52,6 @@ static ZEND_FUNCTION(interface_exists);
 static ZEND_FUNCTION(trait_exists);
 static ZEND_FUNCTION(function_exists);
 static ZEND_FUNCTION(class_alias);
-#if ZEND_DEBUG
-#ifdef ZEND_TEST_EXCEPTIONS
-static ZEND_FUNCTION(crash);
-#endif
-#endif
 static ZEND_FUNCTION(get_included_files);
 static ZEND_FUNCTION(is_subclass_of);
 static ZEND_FUNCTION(is_a);
@@ -261,11 +254,6 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(trait_exists,		arginfo_trait_exists)
 	ZEND_FE(function_exists,	arginfo_function_exists)
 	ZEND_FE(class_alias,		arginfo_class_alias)
-#if ZEND_DEBUG
-#ifdef ZEND_TEST_EXCEPTIONS
-	ZEND_FE(crash,				NULL)
-#endif
-#endif
 	ZEND_FE(get_included_files,	arginfo_zend__void)
 	ZEND_FALIAS(get_required_files,	get_included_files,		arginfo_zend__void)
 	ZEND_FE(is_subclass_of,		arginfo_is_subclass_of)
@@ -1544,25 +1532,6 @@ ZEND_FUNCTION(class_alias)
 	}
 }
 /* }}} */
-
-#if ZEND_DEBUG
-#ifdef ZEND_TEST_EXCEPTIONS
-/* {{{ proto void crash(void)
-   Crash the script */
-ZEND_FUNCTION(crash)
-{
-	char *nowhere = NULL;
-
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
-
-	memcpy(nowhere, "something", sizeof("something"));
-}
-/* }}} */
-#endif
-
-#endif /* ZEND_DEBUG */
 
 /* {{{ proto array get_included_files(void)
    Returns an array with the file names that were include_once()'d */
