@@ -40,9 +40,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_terminate_string, 0, 0, 1)
 	ZEND_ARG_INFO(1, str)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_leak_variable, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_leak_variable, 0, 0, 1)
 	ZEND_ARG_INFO(0, variable)
-	ZEND_ARG_INFO(0, leak_data)
 ZEND_END_ARG_INFO()
 
 ZEND_FUNCTION(zend_test_func)
@@ -89,9 +88,9 @@ ZEND_FUNCTION(zend_terminate_string)
 	ZSTR_VAL(str)[ZSTR_LEN(str)] = '\0';
 }
 
-/* {{{ proto void leak([int num_bytes])
+/* {{{ proto void zend_leak_bytes([int num_bytes])
    Cause an intentional memory leak, for testing/debugging purposes */
-ZEND_FUNCTION(leak)
+ZEND_FUNCTION(zend_leak_bytes)
 {
 	zend_long leakbytes = 3;
 
@@ -103,26 +102,22 @@ ZEND_FUNCTION(leak)
 }
 /* }}} */
 
-/* {{{ proto void leak_variable(mixed variable [, bool leak_data])
-   Leak a variable that is a resource or an object */
-ZEND_FUNCTION(leak_variable)
+/* {{{ proto void zend_leak_variable(mixed variable)
+   Leak a refcounted variable */
+ZEND_FUNCTION(zend_leak_variable)
 {
 	zval *zv;
-	zend_bool leak_data = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &zv, &leak_data) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zv) == FAILURE) {
 		return;
 	}
 
-	if (!leak_data) {
-		Z_ADDREF_P(zv);
-	} else if (Z_TYPE_P(zv) == IS_RESOURCE) {
-		Z_ADDREF_P(zv);
-	} else if (Z_TYPE_P(zv) == IS_OBJECT) {
-		Z_ADDREF_P(zv);
-	} else {
-		zend_error(E_WARNING, "Leaking non-zval data is only applicable to resources and objects");
+	if (!Z_REFCOUNTED_P(zv)) {
+		zend_error(E_WARNING, "Cannot leak variable that is not refcounted");
+		return;
 	}
+
+	Z_ADDREF_P(zv);
 }
 /* }}} */
 
@@ -233,8 +228,8 @@ const zend_function_entry test_functions[] = {
 	ZEND_FE(zend_test_func2, arginfo_zend_test_func2)
 	ZEND_FE(zend_create_unterminated_string, NULL)
 	ZEND_FE(zend_terminate_string, arginfo_zend_terminate_string)
-	ZEND_FE(leak,				NULL)
-	ZEND_FE(leak_variable,		arginfo_leak_variable)
+	ZEND_FE(zend_leak_bytes, NULL)
+	ZEND_FE(zend_leak_variable, arginfo_zend_leak_variable)
 	ZEND_FE_END
 };
 
