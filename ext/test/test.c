@@ -32,7 +32,12 @@ static zend_object_handlers zend_test_class_handlers;
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_zend_test_func, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_zend_test_func2, IS_ARRAY, 1)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_terminate_string, 0, 0, 1)
+	ZEND_ARG_INFO(1, str)
 ZEND_END_ARG_INFO()
 
 ZEND_FUNCTION(zend_test_func)
@@ -47,6 +52,36 @@ ZEND_FUNCTION(zend_test_func2)
 	zval *arg1, *arg2;
 
 	zend_parse_parameters(ZEND_NUM_ARGS(), "|zz", &arg1, &arg2);
+}
+
+/* Create a string without terminating null byte. Must be termined with
+ * zend_terminate_string() before destruction, otherwise a warning is issued
+ * in debug builds. */
+ZEND_FUNCTION(zend_create_unterminated_string)
+{
+	zend_string *str, *res;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &str) == FAILURE) {
+		return;
+	}
+
+	res = zend_string_alloc(ZSTR_LEN(str), 0);
+	memcpy(ZSTR_VAL(res), ZSTR_VAL(str), ZSTR_LEN(str));
+	/* No trailing null byte */
+
+	RETURN_STR(res);
+}
+
+/* Enforce terminate null byte on string. This avoids a warning in debug builds. */
+ZEND_FUNCTION(zend_terminate_string)
+{
+	zend_string *str;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &str) == FAILURE) {
+		return;
+	}
+
+	ZSTR_VAL(str)[ZSTR_LEN(str)] = '\0';
 }
 
 static zend_object *zend_test_class_new(zend_class_entry *class_type) /* {{{ */ {
@@ -152,8 +187,10 @@ PHP_MINFO_FUNCTION(test)
 }
 
 const zend_function_entry test_functions[] = {
-	ZEND_FE(zend_test_func,		arginfo_zend_test_func)
-	ZEND_FE(zend_test_func2,	arginfo_zend_test_func2)
+	ZEND_FE(zend_test_func, arginfo_zend_test_func)
+	ZEND_FE(zend_test_func2, arginfo_zend_test_func2)
+	ZEND_FE(zend_create_unterminated_string, NULL)
+	ZEND_FE(zend_terminate_string, arginfo_zend_terminate_string)
 	ZEND_FE_END
 };
 
