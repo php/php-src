@@ -55,8 +55,6 @@ static ZEND_FUNCTION(trait_exists);
 static ZEND_FUNCTION(function_exists);
 static ZEND_FUNCTION(class_alias);
 #if ZEND_DEBUG
-static ZEND_FUNCTION(leak);
-static ZEND_FUNCTION(leak_variable);
 #ifdef ZEND_TEST_EXCEPTIONS
 static ZEND_FUNCTION(crash);
 #endif
@@ -188,13 +186,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_alias, 0, 0, 2)
 	ZEND_ARG_INFO(0, autoload)
 ZEND_END_ARG_INFO()
 
-#if ZEND_DEBUG
-ZEND_BEGIN_ARG_INFO_EX(arginfo_leak_variable, 0, 0, 1)
-	ZEND_ARG_INFO(0, variable)
-	ZEND_ARG_INFO(0, leak_data)
-ZEND_END_ARG_INFO()
-#endif
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_trigger_error, 0, 0, 1)
 	ZEND_ARG_INFO(0, message)
 	ZEND_ARG_INFO(0, error_type)
@@ -271,8 +262,6 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(function_exists,	arginfo_function_exists)
 	ZEND_FE(class_alias,		arginfo_class_alias)
 #if ZEND_DEBUG
-	ZEND_FE(leak,				NULL)
-	ZEND_FE(leak_variable,		arginfo_leak_variable)
 #ifdef ZEND_TEST_EXCEPTIONS
 	ZEND_FE(crash,				NULL)
 #endif
@@ -1557,44 +1546,6 @@ ZEND_FUNCTION(class_alias)
 /* }}} */
 
 #if ZEND_DEBUG
-/* {{{ proto void leak([int num_bytes])
-   Cause an intentional memory leak, for testing/debugging purposes */
-ZEND_FUNCTION(leak)
-{
-	zend_long leakbytes = 3;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &leakbytes) == FAILURE) {
-		return;
-	}
-
-	emalloc(leakbytes);
-}
-/* }}} */
-
-/* {{{ proto void leak_variable(mixed variable [, bool leak_data])
-   Leak a variable that is a resource or an object */
-ZEND_FUNCTION(leak_variable)
-{
-	zval *zv;
-	zend_bool leak_data = 0;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &zv, &leak_data) == FAILURE) {
-		return;
-	}
-
-	if (!leak_data) {
-		Z_ADDREF_P(zv);
-	} else if (Z_TYPE_P(zv) == IS_RESOURCE) {
-		Z_ADDREF_P(zv);
-	} else if (Z_TYPE_P(zv) == IS_OBJECT) {
-		Z_ADDREF_P(zv);
-	} else {
-		zend_error(E_WARNING, "Leaking non-zval data is only applicable to resources and objects");
-	}
-}
-/* }}} */
-
-
 #ifdef ZEND_TEST_EXCEPTIONS
 /* {{{ proto void crash(void)
    Crash the script */
