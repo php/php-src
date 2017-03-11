@@ -30,10 +30,10 @@ static zend_class_entry *zend_test_class;
 static zend_class_entry *zend_test_trait;
 static zend_object_handlers zend_test_class_handlers;
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_zend_test_func, IS_ARRAY, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_zend_test_array_return, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_zend_test_func2, IS_ARRAY, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_zend_test_nullable_array_return, IS_ARRAY, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_terminate_string, 0, 0, 1)
@@ -46,12 +46,17 @@ ZEND_END_ARG_INFO()
 
 ZEND_FUNCTION(zend_test_func)
 {
+	/* dummy */
+}
+
+ZEND_FUNCTION(zend_test_array_return)
+{
 	zval *arg1, *arg2;
 
 	zend_parse_parameters(ZEND_NUM_ARGS(), "|zz", &arg1, &arg2);
 }
 
-ZEND_FUNCTION(zend_test_func2)
+ZEND_FUNCTION(zend_test_nullable_array_return)
 {
 	zval *arg1, *arg2;
 
@@ -224,8 +229,8 @@ PHP_MINFO_FUNCTION(test)
 }
 
 const zend_function_entry test_functions[] = {
-	ZEND_FE(zend_test_func, arginfo_zend_test_func)
-	ZEND_FE(zend_test_func2, arginfo_zend_test_func2)
+	ZEND_FE(zend_test_array_return, arginfo_zend_test_array_return)
+	ZEND_FE(zend_test_nullable_array_return, arginfo_zend_test_nullable_array_return)
 	ZEND_FE(zend_create_unterminated_string, NULL)
 	ZEND_FE(zend_terminate_string, arginfo_zend_terminate_string)
 	ZEND_FE(zend_leak_bytes, NULL)
