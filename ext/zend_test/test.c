@@ -179,7 +179,7 @@ static zend_function_entry zend_test_trait_methods[] = {
     ZEND_FE_END
 };
 
-PHP_MINIT_FUNCTION(test)
+PHP_MINIT_FUNCTION(zend_test)
 {
 	zend_class_entry class_entry;
 
@@ -203,32 +203,32 @@ PHP_MINIT_FUNCTION(test)
 	return SUCCESS;
 }
 
-PHP_MSHUTDOWN_FUNCTION(test)
+PHP_MSHUTDOWN_FUNCTION(zend_test)
 {
 	return SUCCESS;
 }
 
-PHP_RINIT_FUNCTION(test)
+PHP_RINIT_FUNCTION(zend_test)
 {
-#if defined(COMPILE_DL_TEST) && defined(ZTS)
+#if defined(COMPILE_DL_ZEND_TEST) && defined(ZTS)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	return SUCCESS;
 }
 
-PHP_RSHUTDOWN_FUNCTION(test)
+PHP_RSHUTDOWN_FUNCTION(zend_test)
 {
 	return SUCCESS;
 }
 
-PHP_MINFO_FUNCTION(test)
+PHP_MINFO_FUNCTION(zend_test)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "test extension", "enabled");
+	php_info_print_table_header(2, "zend-test extension", "enabled");
 	php_info_print_table_end();
 }
 
-const zend_function_entry test_functions[] = {
+const zend_function_entry zend_test_functions[] = {
 	ZEND_FE(zend_test_array_return, arginfo_zend_test_array_return)
 	ZEND_FE(zend_test_nullable_array_return, arginfo_zend_test_nullable_array_return)
 	ZEND_FE(zend_create_unterminated_string, NULL)
@@ -238,20 +238,20 @@ const zend_function_entry test_functions[] = {
 	ZEND_FE_END
 };
 
-zend_module_entry test_module_entry = {
+zend_module_entry zend_test_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"test",
-	test_functions,
-	PHP_MINIT(test),
-	PHP_MSHUTDOWN(test),
-	PHP_RINIT(test),	
-	PHP_RSHUTDOWN(test),
-	PHP_MINFO(test),
-	PHP_TEST_VERSION,
+	zend_test_functions,
+	PHP_MINIT(zend_test),
+	PHP_MSHUTDOWN(zend_test),
+	PHP_RINIT(zend_test),
+	PHP_RSHUTDOWN(zend_test),
+	PHP_MINFO(zend_test),
+	PHP_ZEND_TEST_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 
-#ifdef COMPILE_DL_TEST
+#ifdef COMPILE_DL_ZEND_TEST
 #ifdef ZTS
 ZEND_TSRMLS_CACHE_DEFINE()
 #endif

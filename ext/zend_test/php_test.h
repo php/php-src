@@ -21,26 +21,16 @@
 #ifndef PHP_TEST_H
 #define PHP_TEST_H
 
-extern zend_module_entry test_module_entry;
-#define phpext_test_ptr &test_module_entry
+extern zend_module_entry zend_test_module_entry;
+#define phpext_zend_test_ptr &zend_test_module_entry
 
-#define PHP_TEST_VERSION "0.1.0"
-
-#ifdef PHP_WIN32
-#	define PHP_TEST_API __declspec(dllexport)
-#elif defined(__GNUC__) && __GNUC__ >= 4
-#	define PHP_TEST_API __attribute__ ((visibility("default")))
-#else
-#	define PHP_TEST_API
-#endif
+#define PHP_ZEND_TEST_VERSION "0.1.0"
 
 #ifdef ZTS
 #include "TSRM.h"
 #endif
 
-#define TEST_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(test, v)
-
-#if defined(ZTS) && defined(COMPILE_DL_TEST)
+#if defined(ZTS) && defined(COMPILE_DL_ZEND_TEST)
 ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 

@@ -59,6 +59,6 @@ $TS \
 --with-xpm-dir=/usr \
 --with-kerberos \
 --enable-sysvmsg \
---enable-test
+--enable-zend-test
 make -j2 --quiet
 make install
