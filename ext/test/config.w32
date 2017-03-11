@@ -3,6 +3,6 @@
 ARG_ENABLE("test", "enable test extension", "no");
 
 if (PHP_TEST != "no") {
-	EXTENSION("test", "test.c", PHP_EXTNAME_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+	EXTENSION("test", "test.c", PHP_TEST_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 }
 
