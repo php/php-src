@@ -58,9 +58,8 @@
    because the content is in *error_message now */
 #define SMTP_ERROR_RESPONSE(response)	{ \
 											if (response && error_message) { \
-												if (NULL != (*error_message = ecalloc(1, sizeof(SMTP_ERROR_RESPONSE_SPEC) + strlen(response)))) { \
-													snprintf(*error_message, sizeof(SMTP_ERROR_RESPONSE_SPEC) + strlen(response), SMTP_ERROR_RESPONSE_SPEC, response); \
-												} \
+												*error_message = ecalloc(1, sizeof(SMTP_ERROR_RESPONSE_SPEC) + strlen(response)); \
+												snprintf(*error_message, sizeof(SMTP_ERROR_RESPONSE_SPEC) + strlen(response), SMTP_ERROR_RESPONSE_SPEC, response); \
 												efree(response); \
 											} \
 										}
@@ -283,9 +282,7 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 			zend_string_free(headers_lc);
 		}
 		/* 128 is safe here, the specifier in snprintf isn't longer than that */
-		if (NULL == (*error_message = ecalloc(1, HOST_NAME_LEN + 128))) {
-			return FAILURE;
-		}
+		*error_message = ecalloc(1, HOST_NAME_LEN + 128);
 		snprintf(*error_message, HOST_NAME_LEN + 128,
 			"Failed to connect to mailserver at \"%s\" port %d, verify your \"SMTP\" "
 			"and \"smtp_port\" setting in php.ini or use ini_set()",
@@ -559,9 +556,7 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 
 			/* Now that we've identified that we've a Bcc list,
 			   remove it from the current header. */
-			if (NULL == (stripped_header = ecalloc(1, strlen(headers)))) {
-				return OUT_OF_MEMORY;
-			}
+			stripped_header = ecalloc(1, strlen(headers));
 			/* headers = point to string start of header
 			   pos1    = pointer IN headers where the Bcc starts
 			   '4'     = Length of the characters 'bcc:'
@@ -581,9 +576,7 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 	/* Simplify the code that we create a copy of stripped_header no matter if
 	   we actually strip something or not. So we've a single efree() later. */
 	if (headers && !stripped_header) {
-		if (NULL == (stripped_header = estrndup(headers, strlen(headers)))) {
-			return OUT_OF_MEMORY;
-		}
+		stripped_header = estrndup(headers, strlen(headers));
 	}
 
 	if ((res = Post("DATA\r\n")) != SUCCESS) {
@@ -659,9 +652,7 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 
 static int addToHeader(char **header_buffer, const char *specifier, char *string)
 {
-	if (NULL == (*header_buffer = erealloc(*header_buffer, strlen(*header_buffer) + strlen(specifier) + strlen(string) + 1))) {
-		return 0;
-	}
+	*header_buffer = erealloc(*header_buffer, strlen(*header_buffer) + strlen(specifier) + strlen(string) + 1);
 	sprintf(*header_buffer + strlen(*header_buffer), specifier, string);
 	return 1;
 }
@@ -688,9 +679,7 @@ static int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders)
 	size_t i;
 
 	if (xheaders) {
-		if (NULL == (headers_lc = estrdup(xheaders))) {
-			return OUT_OF_MEMORY;
-		}
+		headers_lc = estrdup(xheaders);
 		for (i = 0; i < strlen(headers_lc); i++) {
 			headers_lc[i] = tolower(headers_lc[i]);
 		}
