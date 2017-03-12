@@ -1540,31 +1540,14 @@ static int strfilter_convert_append_bucket(
 						php_stream_bucket_append(buckets_out, new_bucket);
 
 						out_buf_size = ocnt = initial_out_buf_size;
-						if (NULL == (out_buf = pemalloc(out_buf_size, persistent))) {
-							return FAILURE;
-						}
+						out_buf = pemalloc(out_buf_size, persistent);
 						pd = out_buf;
 					} else {
-						char *tbuf;
-						if (NULL == (tbuf = pestrndup(out_buf, (out_buf_size - ocnt), persistent))) {
-							goto out_failure;
-						}
-
-						if (NULL == (new_out_buf = perealloc(out_buf, new_out_buf_size, persistent))) {
-							if (NULL == (new_bucket = php_stream_bucket_new(stream, tbuf, (out_buf_size - ocnt), 1, persistent))) {
-								pefree(tbuf, (out_buf_size - ocnt));
-								goto out_failure;
-							}
-
-							php_stream_bucket_append(buckets_out, new_bucket);
-							return FAILURE;
-						}
-
+						new_out_buf = perealloc(out_buf, new_out_buf_size, persistent);
 						pd = new_out_buf + (pd - out_buf);
 						ocnt += (new_out_buf_size - out_buf_size);
 						out_buf = new_out_buf;
 						out_buf_size = new_out_buf_size;
-						pefree(tbuf, (out_buf_size - ocnt));
 					}
 				} break;
 
