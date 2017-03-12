@@ -469,9 +469,6 @@ CWD_API char *virtual_getcwd_ex(size_t *length) /* {{{ */
 
 		*length = 1;
 		retval = (char *) emalloc(2);
-		if (retval == NULL) {
-			return NULL;
-		}
 		retval[0] = DEFAULT_SLASH;
 		retval[1] = '\0';
 		return retval;
@@ -484,9 +481,6 @@ CWD_API char *virtual_getcwd_ex(size_t *length) /* {{{ */
 
 		*length = state->cwd_length+1;
 		retval = (char *) emalloc(*length+1);
-		if (retval == NULL) {
-			return NULL;
-		}
 		memcpy(retval, state->cwd, *length);
 		retval[0] = toupper(retval[0]);
 		retval[*length-1] = DEFAULT_SLASH;
@@ -1331,13 +1325,6 @@ verify:
 		state->cwd_length = path_length;
 
 		tmp = erealloc(state->cwd, state->cwd_length+1);
-		if (tmp == NULL) {
-			CWD_STATE_FREE(&old_state);
-#if VIRTUAL_CWD_DEBUG
-			fprintf (stderr, "Out of memory\n");
-#endif
-			return 1;
-		}
 		state->cwd = (char *) tmp;
 
 		memcpy(state->cwd, resolved_path, state->cwd_length+1);
@@ -1352,12 +1339,6 @@ verify:
 	} else {
 		state->cwd_length = path_length;
 		tmp = erealloc(state->cwd, state->cwd_length+1);
-		if (tmp == NULL) {
-#if VIRTUAL_CWD_DEBUG
-			fprintf (stderr, "Out of memory\n");
-#endif
-			return 1;
-		}
 		state->cwd = (char *) tmp;
 
 		memcpy(state->cwd, resolved_path, state->cwd_length+1);
@@ -1420,10 +1401,6 @@ CWD_API char *virtual_realpath(const char *path, char *real_path) /* {{{ */
 	/* realpath("") returns CWD */
 	if (!*path) {
 		new_state.cwd = (char*)emalloc(1);
-		if (new_state.cwd == NULL) {
-			retval = NULL;
-			goto end;
-		}
 		new_state.cwd[0] = '\0';
 		new_state.cwd_length = 0;
 		if (VCWD_GETCWD(cwd, MAXPATHLEN)) {
@@ -1433,10 +1410,6 @@ CWD_API char *virtual_realpath(const char *path, char *real_path) /* {{{ */
 		CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	} else {
 		new_state.cwd = (char*)emalloc(1);
-		if (new_state.cwd == NULL) {
-			retval = NULL;
-			goto end;
-		}
 		new_state.cwd[0] = '\0';
 		new_state.cwd_length = 0;
 	}
@@ -1452,7 +1425,6 @@ CWD_API char *virtual_realpath(const char *path, char *real_path) /* {{{ */
 	}
 
 	CWD_STATE_FREE(&new_state);
-end:
 	return retval;
 }
 /* }}} */
@@ -1855,9 +1827,6 @@ CWD_API FILE *virtual_popen(const char *command, const char *type) /* {{{ */
 	dir = CWDG(cwd).cwd;
 
 	ptr = command_line = (char *) emalloc(command_length + sizeof("cd '' ; ") + dir_length + extra+1+1);
-	if (!command_line) {
-		return NULL;
-	}
 	memcpy(ptr, "cd ", sizeof("cd ")-1);
 	ptr += sizeof("cd ")-1;
 
@@ -1902,9 +1871,6 @@ CWD_API char *tsrm_realpath(const char *path, char *real_path) /* {{{ */
 	/* realpath("") returns CWD */
 	if (!*path) {
 		new_state.cwd = (char*)emalloc(1);
-		if (new_state.cwd == NULL) {
-			return NULL;
-		}
 		new_state.cwd[0] = '\0';
 		new_state.cwd_length = 0;
 		if (VCWD_GETCWD(cwd, MAXPATHLEN)) {
@@ -1916,9 +1882,6 @@ CWD_API char *tsrm_realpath(const char *path, char *real_path) /* {{{ */
 		new_state.cwd_length = (int)strlen(cwd);
 	} else {
 		new_state.cwd = (char*)emalloc(1);
-		if (new_state.cwd == NULL) {
-			return NULL;
-		}
 		new_state.cwd[0] = '\0';
 		new_state.cwd_length = 0;
 	}
