@@ -29,15 +29,6 @@
 #include "zend_closures.h"
 #include "zend_generators.h"
 
-#undef ZEND_TEST_EXCEPTIONS
-
-#if ZEND_DEBUG
-static zend_class_entry *zend_test_interface;
-static zend_class_entry *zend_test_class;
-static zend_class_entry *zend_test_trait;
-static zend_object_handlers zend_test_class_handlers;
-#endif
-
 static ZEND_FUNCTION(zend_version);
 static ZEND_FUNCTION(func_num_args);
 static ZEND_FUNCTION(func_get_arg);
@@ -61,13 +52,6 @@ static ZEND_FUNCTION(interface_exists);
 static ZEND_FUNCTION(trait_exists);
 static ZEND_FUNCTION(function_exists);
 static ZEND_FUNCTION(class_alias);
-#if ZEND_DEBUG
-static ZEND_FUNCTION(leak);
-static ZEND_FUNCTION(leak_variable);
-#ifdef ZEND_TEST_EXCEPTIONS
-static ZEND_FUNCTION(crash);
-#endif
-#endif
 static ZEND_FUNCTION(get_included_files);
 static ZEND_FUNCTION(is_subclass_of);
 static ZEND_FUNCTION(is_a);
@@ -93,12 +77,8 @@ static ZEND_FUNCTION(get_extension_funcs);
 static ZEND_FUNCTION(get_defined_constants);
 static ZEND_FUNCTION(debug_backtrace);
 static ZEND_FUNCTION(debug_print_backtrace);
-#if ZEND_DEBUG
-static ZEND_FUNCTION(zend_test_func);
-static ZEND_FUNCTION(zend_test_func2);
-#ifdef ZTS
+#if ZEND_DEBUG && defined(ZTS)
 static ZEND_FUNCTION(zend_thread_id);
-#endif
 #endif
 static ZEND_FUNCTION(gc_mem_caches);
 static ZEND_FUNCTION(gc_collect_cycles);
@@ -199,13 +179,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_alias, 0, 0, 2)
 	ZEND_ARG_INFO(0, autoload)
 ZEND_END_ARG_INFO()
 
-#if ZEND_DEBUG
-ZEND_BEGIN_ARG_INFO_EX(arginfo_leak_variable, 0, 0, 1)
-	ZEND_ARG_INFO(0, variable)
-	ZEND_ARG_INFO(0, leak_data)
-ZEND_END_ARG_INFO()
-#endif
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_trigger_error, 0, 0, 1)
 	ZEND_ARG_INFO(0, message)
 	ZEND_ARG_INFO(0, error_type)
@@ -255,69 +228,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_extension_loaded, 0, 0, 1)
 	ZEND_ARG_INFO(0, extension_name)
 ZEND_END_ARG_INFO()
 
-#if ZEND_DEBUG
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_zend_test_func, IS_ARRAY, 0)
-ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_zend_test_func2, IS_ARRAY, 1)
-ZEND_END_ARG_INFO()
-#endif
-
 /* }}} */
-
-#if ZEND_DEBUG
-static zend_object *zend_test_class_new(zend_class_entry *class_type) /* {{{ */ {
-	zend_object *obj = zend_objects_new(class_type);
-	obj->handlers = &zend_test_class_handlers;
-	return obj;
-}
-/* }}} */
-
-static zend_function *zend_test_class_method_get(zend_object **object, zend_string *name, const zval *key) /* {{{ */ {
-	zend_internal_function *fptr = emalloc(sizeof(zend_internal_function));
-	fptr->type = ZEND_OVERLOADED_FUNCTION_TEMPORARY;
-	fptr->num_args = 1;
-	fptr->arg_info = NULL;
-	fptr->scope = (*object)->ce;
-	fptr->fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
-	fptr->function_name = zend_string_copy(name);
-	fptr->handler = ZEND_FN(zend_test_func);
-	zend_set_function_arg_flags((zend_function*)fptr);
-
-	return (zend_function*)fptr;
-}
-/* }}} */
-
-static zend_function *zend_test_class_static_method_get(zend_class_entry *ce, zend_string *name) /* {{{ */ {
-	zend_internal_function *fptr = emalloc(sizeof(zend_internal_function));
-	fptr->type = ZEND_OVERLOADED_FUNCTION;
-	fptr->num_args = 1;
-	fptr->arg_info = NULL;
-	fptr->scope = ce;
-	fptr->fn_flags = ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_STATIC;
-	fptr->function_name = name;
-	fptr->handler = ZEND_FN(zend_test_func);
-	zend_set_function_arg_flags((zend_function*)fptr);
-
-	return (zend_function*)fptr;
-}
-/* }}} */
-
-static int zend_test_class_call_method(zend_string *method, zend_object *object, INTERNAL_FUNCTION_PARAMETERS) /* {{{ */ {
-	RETVAL_STR(zend_string_copy(method));
-	return 0;
-}
-/* }}} */
-
-static ZEND_METHOD(_ZendTestTrait, testMethod) /* {{{ */ {
-	RETURN_TRUE;
-}
-/* }}} */
-
-static zend_function_entry zend_test_trait_methods[] = {
-    ZEND_ME(_ZendTestTrait, testMethod, arginfo_zend__void, ZEND_ACC_PUBLIC)
-    ZEND_FE_END
-};
-#endif
 
 static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(zend_version,		arginfo_zend__void)
@@ -343,13 +254,6 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(trait_exists,		arginfo_trait_exists)
 	ZEND_FE(function_exists,	arginfo_function_exists)
 	ZEND_FE(class_alias,		arginfo_class_alias)
-#if ZEND_DEBUG
-	ZEND_FE(leak,				NULL)
-	ZEND_FE(leak_variable,		arginfo_leak_variable)
-#ifdef ZEND_TEST_EXCEPTIONS
-	ZEND_FE(crash,				NULL)
-#endif
-#endif
 	ZEND_FE(get_included_files,	arginfo_zend__void)
 	ZEND_FALIAS(get_required_files,	get_included_files,		arginfo_zend__void)
 	ZEND_FE(is_subclass_of,		arginfo_is_subclass_of)
@@ -377,12 +281,8 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(get_defined_constants,		arginfo_get_defined_constants)
 	ZEND_FE(debug_backtrace, 		arginfo_debug_backtrace)
 	ZEND_FE(debug_print_backtrace, 		arginfo_debug_print_backtrace)
-#if ZEND_DEBUG
-	ZEND_FE(zend_test_func,		arginfo_zend_test_func)
-	ZEND_FE(zend_test_func2,	arginfo_zend_test_func2)
-#ifdef ZTS
+#if ZEND_DEBUG && defined(ZTS)
 	ZEND_FE(zend_thread_id,		NULL)
-#endif
 #endif
 	ZEND_FE(gc_mem_caches,      arginfo_zend__void)
 	ZEND_FE(gc_collect_cycles, 	arginfo_zend__void)
@@ -400,26 +300,6 @@ ZEND_MINIT_FUNCTION(core) { /* {{{ */
 	zend_standard_class_def = zend_register_internal_class(&class_entry);
 
 	zend_register_default_classes();
-
-#if ZEND_DEBUG
-	INIT_CLASS_ENTRY(class_entry, "_ZendTestInterface", NULL);
-	zend_test_interface = zend_register_internal_interface(&class_entry);
-	zend_declare_class_constant_long(zend_test_interface, ZEND_STRL("DUMMY"), 0);
-	INIT_CLASS_ENTRY(class_entry, "_ZendTestClass", NULL);
-	zend_test_class = zend_register_internal_class_ex(&class_entry, NULL);
-	zend_class_implements(zend_test_class, 1, zend_test_interface);
-	zend_test_class->create_object = zend_test_class_new;
-	zend_test_class->get_static_method = zend_test_class_static_method_get;
-
-	memcpy(&zend_test_class_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	zend_test_class_handlers.get_method = zend_test_class_method_get;
-	zend_test_class_handlers.call_method = zend_test_class_call_method;
-
-	INIT_CLASS_ENTRY(class_entry, "_ZendTestTrait", zend_test_trait_methods);
-	zend_test_trait = zend_register_internal_class(&class_entry);
-	zend_test_trait->ce_flags |= ZEND_ACC_TRAIT;
-	zend_declare_property_null(zend_test_trait, "testProp", sizeof("testProp")-1, ZEND_ACC_PUBLIC);
-#endif
 
 	return SUCCESS;
 }
@@ -1653,63 +1533,6 @@ ZEND_FUNCTION(class_alias)
 }
 /* }}} */
 
-#if ZEND_DEBUG
-/* {{{ proto void leak([int num_bytes])
-   Cause an intentional memory leak, for testing/debugging purposes */
-ZEND_FUNCTION(leak)
-{
-	zend_long leakbytes = 3;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &leakbytes) == FAILURE) {
-		return;
-	}
-
-	emalloc(leakbytes);
-}
-/* }}} */
-
-/* {{{ proto void leak_variable(mixed variable [, bool leak_data])
-   Leak a variable that is a resource or an object */
-ZEND_FUNCTION(leak_variable)
-{
-	zval *zv;
-	zend_bool leak_data = 0;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &zv, &leak_data) == FAILURE) {
-		return;
-	}
-
-	if (!leak_data) {
-		Z_ADDREF_P(zv);
-	} else if (Z_TYPE_P(zv) == IS_RESOURCE) {
-		Z_ADDREF_P(zv);
-	} else if (Z_TYPE_P(zv) == IS_OBJECT) {
-		Z_ADDREF_P(zv);
-	} else {
-		zend_error(E_WARNING, "Leaking non-zval data is only applicable to resources and objects");
-	}
-}
-/* }}} */
-
-
-#ifdef ZEND_TEST_EXCEPTIONS
-/* {{{ proto void crash(void)
-   Crash the script */
-ZEND_FUNCTION(crash)
-{
-	char *nowhere = NULL;
-
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
-
-	memcpy(nowhere, "something", sizeof("something"));
-}
-/* }}} */
-#endif
-
-#endif /* ZEND_DEBUG */
-
 /* {{{ proto array get_included_files(void)
    Returns an array with the file names that were include_once()'d */
 ZEND_FUNCTION(get_included_files)
@@ -2095,27 +1918,11 @@ ZEND_FUNCTION(create_function)
 }
 /* }}} */
 
-#if ZEND_DEBUG
-ZEND_FUNCTION(zend_test_func)
-{
-	zval *arg1, *arg2;
-
-	zend_parse_parameters(ZEND_NUM_ARGS(), "|zz", &arg1, &arg2);
-}
-
-ZEND_FUNCTION(zend_test_func2)
-{
-	zval *arg1, *arg2;
-
-	zend_parse_parameters(ZEND_NUM_ARGS(), "|zz", &arg1, &arg2);
-}
-
-#ifdef ZTS
+#if ZEND_DEBUG && defined(ZTS)
 ZEND_FUNCTION(zend_thread_id)
 {
 	RETURN_LONG((zend_long)tsrm_thread_id());
 }
-#endif
 #endif
 
 /* {{{ proto string get_resource_type(resource res)
