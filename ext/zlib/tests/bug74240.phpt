@@ -8,13 +8,16 @@ if (!extension_loaded("zlib")) {
 ?>
 --FILE--
 <?php
+
+ini_set('memory_limit', '64M');
+
 $deflator = deflate_init(ZLIB_ENCODING_RAW);
 
 $bytes = str_repeat("*", 65536);
 
 // this crashes after about 500 iterations if PHP is
 // configured for 64M
-for ($i = 0; $i < 10000; $i++) {
+for ($i = 0; $i < 1000; $i++) {
     $output = deflate_add(
         $deflator,
         $bytes,
@@ -23,5 +26,5 @@ for ($i = 0; $i < 10000; $i++) {
 }
 echo "Completed\n";
 ?>
---EXPECTF--
+--EXPECT--
 Completed
