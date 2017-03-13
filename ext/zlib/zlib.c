@@ -1154,10 +1154,8 @@ PHP_FUNCTION(deflate_add)
 		RETURN_EMPTY_STRING();
 	}
 
-	out_size = PHP_ZLIB_BUFFER_SIZE_GUESS(ctx->total_in + in_len);
-	out_size = (ctx->total_out >= out_size) ? 16 : (out_size - ctx->total_out);
-	out_size = (out_size < 16) ? 16 : out_size;
-	out_size += 64;
+	out_size = PHP_ZLIB_BUFFER_SIZE_GUESS(in_len);
+	out_size = (out_size < 64) ? 64 : out_size;
 	out = zend_string_alloc(out_size, 0);
 
 	ctx->next_in = (Bytef *) in_buf;
