@@ -5056,7 +5056,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_CONST_CONST_H
 		zval *retval;
 
 		if (IS_CONST == IS_CONST &&
-			EXPECTED(zobj->ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+			EXPECTED(zend_is_obj_cache_valid(zobj->ce, CACHED_PTR(Z_CACHE_SLOT_P(offset)), IS_CONST))) {
 			uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(offset) + sizeof(void*));
 
 			if (EXPECTED(prop_offset != (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET)) {
@@ -5129,7 +5129,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_CONST_CONST_
 		zval *retval;
 
 		if (IS_CONST == IS_CONST &&
-			EXPECTED(zobj->ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+			EXPECTED(zend_is_obj_cache_valid(zobj->ce, CACHED_PTR(Z_CACHE_SLOT_P(offset)), IS_CONST))) {
 			uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(offset) + sizeof(void*));
 
 			if (EXPECTED(prop_offset != (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET)) {
@@ -5355,8 +5355,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_CO
 	obj = Z_OBJ_P(object);
 	called_scope = obj->ce;
 
-	if (IS_CONST != IS_CONST ||
-	    UNEXPECTED((fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL)) {
+	if (IS_CONST == IS_CONST &&
+		EXPECTED(zend_is_obj_cache_valid(called_scope, CACHED_PTR(Z_CACHE_SLOT_P(function_name)), IS_CONST))) {
+		fbc = CACHED_PTR(Z_CACHE_SLOT_P(function_name) + sizeof(void *));
+	} else {
 	    zend_object *orig_obj = obj;
 
 		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
@@ -8840,7 +8842,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_CONST_CV_HAND
 		zval *retval;
 
 		if (IS_CV == IS_CONST &&
-			EXPECTED(zobj->ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+			EXPECTED(zend_is_obj_cache_valid(zobj->ce, CACHED_PTR(Z_CACHE_SLOT_P(offset)), IS_CONST))) {
 			uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(offset) + sizeof(void*));
 
 			if (EXPECTED(prop_offset != (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET)) {
@@ -8913,7 +8915,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_CONST_CV_HAN
 		zval *retval;
 
 		if (IS_CV == IS_CONST &&
-			EXPECTED(zobj->ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+			EXPECTED(zend_is_obj_cache_valid(zobj->ce, CACHED_PTR(Z_CACHE_SLOT_P(offset)), IS_CONST))) {
 			uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(offset) + sizeof(void*));
 
 			if (EXPECTED(prop_offset != (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET)) {
@@ -9139,8 +9141,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_CV
 	obj = Z_OBJ_P(object);
 	called_scope = obj->ce;
 
-	if (IS_CV != IS_CONST ||
-	    UNEXPECTED((fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL)) {
+	if (IS_CV == IS_CONST &&
+		EXPECTED(zend_is_obj_cache_valid(called_scope, CACHED_PTR(Z_CACHE_SLOT_P(function_name)), IS_CONST))) {
+		fbc = CACHED_PTR(Z_CACHE_SLOT_P(function_name) + sizeof(void *));
+	} else {
 	    zend_object *orig_obj = obj;
 
 		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
@@ -10829,7 +10833,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_CONST_TMPVAR_
 		zval *retval;
 
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-			EXPECTED(zobj->ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+			EXPECTED(zend_is_obj_cache_valid(zobj->ce, CACHED_PTR(Z_CACHE_SLOT_P(offset)), IS_CONST))) {
 			uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(offset) + sizeof(void*));
 
 			if (EXPECTED(prop_offset != (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET)) {
@@ -10903,7 +10907,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_CONST_TMPVAR
 		zval *retval;
 
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-			EXPECTED(zobj->ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+			EXPECTED(zend_is_obj_cache_valid(zobj->ce, CACHED_PTR(Z_CACHE_SLOT_P(offset)), IS_CONST))) {
 			uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(offset) + sizeof(void*));
 
 			if (EXPECTED(prop_offset != (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET)) {
@@ -11130,8 +11134,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_TM
 	obj = Z_OBJ_P(object);
 	called_scope = obj->ce;
 
-	if ((IS_TMP_VAR|IS_VAR) != IS_CONST ||
-	    UNEXPECTED((fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL)) {
+	if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
+		EXPECTED(zend_is_obj_cache_valid(called_scope, CACHED_PTR(Z_CACHE_SLOT_P(function_name)), IS_CONST))) {
+		fbc = CACHED_PTR(Z_CACHE_SLOT_P(function_name) + sizeof(void *));
+	} else {
 	    zend_object *orig_obj = obj;
 
 		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
@@ -13339,7 +13345,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_TMP_CONST_HAN
 		zval *retval;
 
 		if (IS_CONST == IS_CONST &&
-			EXPECTED(zobj->ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+			EXPECTED(zend_is_obj_cache_valid(zobj->ce, CACHED_PTR(Z_CACHE_SLOT_P(offset)), IS_TMP_VAR))) {
 			uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(offset) + sizeof(void*));
 
 			if (EXPECTED(prop_offset != (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET)) {
@@ -14570,7 +14576,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_TMP_CV_HANDLE
 		zval *retval;
 
 		if (IS_CV == IS_CONST &&
-			EXPECTED(zobj->ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+			EXPECTED(zend_is_obj_cache_valid(zobj->ce, CACHED_PTR(Z_CACHE_SLOT_P(offset)), IS_TMP_VAR))) {
 			uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(offset) + sizeof(void*));
 
 			if (EXPECTED(prop_offset != (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET)) {
@@ -15101,7 +15107,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_TMP_TMPVAR_HA
 		zval *retval;
 
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-			EXPECTED(zobj->ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+			EXPECTED(zend_is_obj_cache_valid(zobj->ce, CACHED_PTR(Z_CACHE_SLOT_P(offset)), IS_TMP_VAR))) {
 			uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(offset) + sizeof(void*));
 
 			if (EXPECTED(prop_offset != (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET)) {
@@ -18031,7 +18037,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_VAR_CONST_HAN
 		zval *retval;
 
 		if (IS_CONST == IS_CONST &&
-			EXPECTED(zobj->ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+			EXPECTED(zend_is_obj_cache_valid(zobj->ce, CACHED_PTR(Z_CACHE_SLOT_P(offset)), IS_VAR))) {
 			uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(offset) + sizeof(void*));
 
 			if (EXPECTED(prop_offset != (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET)) {
@@ -18246,7 +18252,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_D
 	}
 
 	if (IS_CONST == IS_CONST &&
-	    EXPECTED(Z_OBJCE_P(object) == CACHED_PTR(Z_CACHE_SLOT_P(property_name)))) {
+		EXPECTED(zend_is_obj_cache_valid(Z_OBJCE_P(object), CACHED_PTR(Z_CACHE_SLOT_P(property_name)), IS_VAR))) {
 		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(property_name) + sizeof(void*));
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
@@ -18404,7 +18410,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_D
 	}
 
 	if (IS_CONST == IS_CONST &&
-	    EXPECTED(Z_OBJCE_P(object) == CACHED_PTR(Z_CACHE_SLOT_P(property_name)))) {
+		EXPECTED(zend_is_obj_cache_valid(Z_OBJCE_P(object), CACHED_PTR(Z_CACHE_SLOT_P(property_name)), IS_VAR))) {
 		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(property_name) + sizeof(void*));
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
@@ -18562,7 +18568,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_D
 	}
 
 	if (IS_CONST == IS_CONST &&
-	    EXPECTED(Z_OBJCE_P(object) == CACHED_PTR(Z_CACHE_SLOT_P(property_name)))) {
+		EXPECTED(zend_is_obj_cache_valid(Z_OBJCE_P(object), CACHED_PTR(Z_CACHE_SLOT_P(property_name)), IS_VAR))) {
 		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(property_name) + sizeof(void*));
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
@@ -18720,7 +18726,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_D
 	}
 
 	if (IS_CONST == IS_CONST &&
-	    EXPECTED(Z_OBJCE_P(object) == CACHED_PTR(Z_CACHE_SLOT_P(property_name)))) {
+		EXPECTED(zend_is_obj_cache_valid(Z_OBJCE_P(object), CACHED_PTR(Z_CACHE_SLOT_P(property_name)), IS_VAR))) {
 		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(property_name) + sizeof(void*));
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
@@ -22260,7 +22266,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_VAR_CV_HANDLE
 		zval *retval;
 
 		if (IS_CV == IS_CONST &&
-			EXPECTED(zobj->ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+			EXPECTED(zend_is_obj_cache_valid(zobj->ce, CACHED_PTR(Z_CACHE_SLOT_P(offset)), IS_VAR))) {
 			uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(offset) + sizeof(void*));
 
 			if (EXPECTED(prop_offset != (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET)) {
@@ -22475,7 +22481,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA
 	}
 
 	if (IS_CV == IS_CONST &&
-	    EXPECTED(Z_OBJCE_P(object) == CACHED_PTR(Z_CACHE_SLOT_P(property_name)))) {
+		EXPECTED(zend_is_obj_cache_valid(Z_OBJCE_P(object), CACHED_PTR(Z_CACHE_SLOT_P(property_name)), IS_VAR))) {
 		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(property_name) + sizeof(void*));
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
@@ -22633,7 +22639,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA
 	}
 
 	if (IS_CV == IS_CONST &&
-	    EXPECTED(Z_OBJCE_P(object) == CACHED_PTR(Z_CACHE_SLOT_P(property_name)))) {
+		EXPECTED(zend_is_obj_cache_valid(Z_OBJCE_P(object), CACHED_PTR(Z_CACHE_SLOT_P(property_name)), IS_VAR))) {
 		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(property_name) + sizeof(void*));
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
@@ -22791,7 +22797,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA
 	}
 
 	if (IS_CV == IS_CONST &&
-	    EXPECTED(Z_OBJCE_P(object) == CACHED_PTR(Z_CACHE_SLOT_P(property_name)))) {
+		EXPECTED(zend_is_obj_cache_valid(Z_OBJCE_P(object), CACHED_PTR(Z_CACHE_SLOT_P(property_name)), IS_VAR))) {
 		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(property_name) + sizeof(void*));
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
@@ -22949,7 +22955,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA
 	}
 
 	if (IS_CV == IS_CONST &&
-	    EXPECTED(Z_OBJCE_P(object) == CACHED_PTR(Z_CACHE_SLOT_P(property_name)))) {
+		EXPECTED(zend_is_obj_cache_valid(Z_OBJCE_P(object), CACHED_PTR(Z_CACHE_SLOT_P(property_name)), IS_VAR))) {
 		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(property_name) + sizeof(void*));
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
@@ -24788,7 +24794,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_VAR_TMPVAR_HA
 		zval *retval;
 
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-			EXPECTED(zobj->ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+			EXPECTED(zend_is_obj_cache_valid(zobj->ce, CACHED_PTR(Z_CACHE_SLOT_P(offset)), IS_VAR))) {
 			uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(offset) + sizeof(void*));
 
 			if (EXPECTED(prop_offset != (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET)) {
@@ -25004,7 +25010,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_
 	}
 
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-	    EXPECTED(Z_OBJCE_P(object) == CACHED_PTR(Z_CACHE_SLOT_P(property_name)))) {
+		EXPECTED(zend_is_obj_cache_valid(Z_OBJCE_P(object), CACHED_PTR(Z_CACHE_SLOT_P(property_name)), IS_VAR))) {
 		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(property_name) + sizeof(void*));
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
@@ -25162,7 +25168,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_
 	}
 
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-	    EXPECTED(Z_OBJCE_P(object) == CACHED_PTR(Z_CACHE_SLOT_P(property_name)))) {
+		EXPECTED(zend_is_obj_cache_valid(Z_OBJCE_P(object), CACHED_PTR(Z_CACHE_SLOT_P(property_name)), IS_VAR))) {
 		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(property_name) + sizeof(void*));
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
@@ -25320,7 +25326,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_
 	}
 
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-	    EXPECTED(Z_OBJCE_P(object) == CACHED_PTR(Z_CACHE_SLOT_P(property_name)))) {
+		EXPECTED(zend_is_obj_cache_valid(Z_OBJCE_P(object), CACHED_PTR(Z_CACHE_SLOT_P(property_name)), IS_VAR))) {
 		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(property_name) + sizeof(void*));
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
@@ -25478,7 +25484,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_
 	}
 
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-	    EXPECTED(Z_OBJCE_P(object) == CACHED_PTR(Z_CACHE_SLOT_P(property_name)))) {
+		EXPECTED(zend_is_obj_cache_valid(Z_OBJCE_P(object), CACHED_PTR(Z_CACHE_SLOT_P(property_name)), IS_VAR))) {
 		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(property_name) + sizeof(void*));
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
@@ -26872,7 +26878,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_UNUSED_CONST_
 		zval *retval;
 
 		if (IS_CONST == IS_CONST &&
-			EXPECTED(zobj->ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+			EXPECTED(zend_is_obj_cache_valid(zobj->ce, CACHED_PTR(Z_CACHE_SLOT_P(offset)), IS_UNUSED))) {
 			uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(offset) + sizeof(void*));
 
 			if (EXPECTED(prop_offset != (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET)) {
@@ -26998,7 +27004,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_UNUSED_CONST
 		zval *retval;
 
 		if (IS_CONST == IS_CONST &&
-			EXPECTED(zobj->ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+			EXPECTED(zend_is_obj_cache_valid(zobj->ce, CACHED_PTR(Z_CACHE_SLOT_P(offset)), IS_UNUSED))) {
 			uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(offset) + sizeof(void*));
 
 			if (EXPECTED(prop_offset != (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET)) {
@@ -27160,7 +27166,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_O
 	}
 
 	if (IS_CONST == IS_CONST &&
-	    EXPECTED(Z_OBJCE_P(object) == CACHED_PTR(Z_CACHE_SLOT_P(property_name)))) {
+		EXPECTED(zend_is_obj_cache_valid(Z_OBJCE_P(object), CACHED_PTR(Z_CACHE_SLOT_P(property_name)), IS_UNUSED))) {
 		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(property_name) + sizeof(void*));
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
@@ -27318,7 +27324,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_O
 	}
 
 	if (IS_CONST == IS_CONST &&
-	    EXPECTED(Z_OBJCE_P(object) == CACHED_PTR(Z_CACHE_SLOT_P(property_name)))) {
+		EXPECTED(zend_is_obj_cache_valid(Z_OBJCE_P(object), CACHED_PTR(Z_CACHE_SLOT_P(property_name)), IS_UNUSED))) {
 		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(property_name) + sizeof(void*));
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
@@ -27476,7 +27482,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_O
 	}
 
 	if (IS_CONST == IS_CONST &&
-	    EXPECTED(Z_OBJCE_P(object) == CACHED_PTR(Z_CACHE_SLOT_P(property_name)))) {
+		EXPECTED(zend_is_obj_cache_valid(Z_OBJCE_P(object), CACHED_PTR(Z_CACHE_SLOT_P(property_name)), IS_UNUSED))) {
 		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(property_name) + sizeof(void*));
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
@@ -27634,7 +27640,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_O
 	}
 
 	if (IS_CONST == IS_CONST &&
-	    EXPECTED(Z_OBJCE_P(object) == CACHED_PTR(Z_CACHE_SLOT_P(property_name)))) {
+		EXPECTED(zend_is_obj_cache_valid(Z_OBJCE_P(object), CACHED_PTR(Z_CACHE_SLOT_P(property_name)), IS_UNUSED))) {
 		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(property_name) + sizeof(void*));
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
@@ -27836,8 +27842,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_C
 	obj = Z_OBJ_P(object);
 	called_scope = obj->ce;
 
-	if (IS_CONST != IS_CONST ||
-	    UNEXPECTED((fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL)) {
+	if (IS_CONST == IS_CONST &&
+		EXPECTED(zend_is_obj_cache_valid(called_scope, CACHED_PTR(Z_CACHE_SLOT_P(function_name)), IS_UNUSED))) {
+		fbc = CACHED_PTR(Z_CACHE_SLOT_P(function_name) + sizeof(void *));
+	} else {
 	    zend_object *orig_obj = obj;
 
 		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
@@ -29434,7 +29442,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_UNUSED_CV_HAN
 		zval *retval;
 
 		if (IS_CV == IS_CONST &&
-			EXPECTED(zobj->ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+			EXPECTED(zend_is_obj_cache_valid(zobj->ce, CACHED_PTR(Z_CACHE_SLOT_P(offset)), IS_UNUSED))) {
 			uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(offset) + sizeof(void*));
 
 			if (EXPECTED(prop_offset != (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET)) {
@@ -29560,7 +29568,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_UNUSED_CV_HA
 		zval *retval;
 
 		if (IS_CV == IS_CONST &&
-			EXPECTED(zobj->ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+			EXPECTED(zend_is_obj_cache_valid(zobj->ce, CACHED_PTR(Z_CACHE_SLOT_P(offset)), IS_UNUSED))) {
 			uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(offset) + sizeof(void*));
 
 			if (EXPECTED(prop_offset != (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET)) {
@@ -29722,7 +29730,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_D
 	}
 
 	if (IS_CV == IS_CONST &&
-	    EXPECTED(Z_OBJCE_P(object) == CACHED_PTR(Z_CACHE_SLOT_P(property_name)))) {
+		EXPECTED(zend_is_obj_cache_valid(Z_OBJCE_P(object), CACHED_PTR(Z_CACHE_SLOT_P(property_name)), IS_UNUSED))) {
 		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(property_name) + sizeof(void*));
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
@@ -29880,7 +29888,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_D
 	}
 
 	if (IS_CV == IS_CONST &&
-	    EXPECTED(Z_OBJCE_P(object) == CACHED_PTR(Z_CACHE_SLOT_P(property_name)))) {
+		EXPECTED(zend_is_obj_cache_valid(Z_OBJCE_P(object), CACHED_PTR(Z_CACHE_SLOT_P(property_name)), IS_UNUSED))) {
 		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(property_name) + sizeof(void*));
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
@@ -30038,7 +30046,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_D
 	}
 
 	if (IS_CV == IS_CONST &&
-	    EXPECTED(Z_OBJCE_P(object) == CACHED_PTR(Z_CACHE_SLOT_P(property_name)))) {
+		EXPECTED(zend_is_obj_cache_valid(Z_OBJCE_P(object), CACHED_PTR(Z_CACHE_SLOT_P(property_name)), IS_UNUSED))) {
 		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(property_name) + sizeof(void*));
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
@@ -30196,7 +30204,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_D
 	}
 
 	if (IS_CV == IS_CONST &&
-	    EXPECTED(Z_OBJCE_P(object) == CACHED_PTR(Z_CACHE_SLOT_P(property_name)))) {
+		EXPECTED(zend_is_obj_cache_valid(Z_OBJCE_P(object), CACHED_PTR(Z_CACHE_SLOT_P(property_name)), IS_UNUSED))) {
 		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(property_name) + sizeof(void*));
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
@@ -30398,8 +30406,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_C
 	obj = Z_OBJ_P(object);
 	called_scope = obj->ce;
 
-	if (IS_CV != IS_CONST ||
-	    UNEXPECTED((fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL)) {
+	if (IS_CV == IS_CONST &&
+		EXPECTED(zend_is_obj_cache_valid(called_scope, CACHED_PTR(Z_CACHE_SLOT_P(function_name)), IS_UNUSED))) {
+		fbc = CACHED_PTR(Z_CACHE_SLOT_P(function_name) + sizeof(void *));
+	} else {
 	    zend_object *orig_obj = obj;
 
 		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
@@ -31196,7 +31206,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_UNUSED_TMPVAR
 		zval *retval;
 
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-			EXPECTED(zobj->ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+			EXPECTED(zend_is_obj_cache_valid(zobj->ce, CACHED_PTR(Z_CACHE_SLOT_P(offset)), IS_UNUSED))) {
 			uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(offset) + sizeof(void*));
 
 			if (EXPECTED(prop_offset != (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET)) {
@@ -31323,7 +31333,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_UNUSED_TMPVA
 		zval *retval;
 
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-			EXPECTED(zobj->ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+			EXPECTED(zend_is_obj_cache_valid(zobj->ce, CACHED_PTR(Z_CACHE_SLOT_P(offset)), IS_UNUSED))) {
 			uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(offset) + sizeof(void*));
 
 			if (EXPECTED(prop_offset != (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET)) {
@@ -31486,7 +31496,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_
 	}
 
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-	    EXPECTED(Z_OBJCE_P(object) == CACHED_PTR(Z_CACHE_SLOT_P(property_name)))) {
+		EXPECTED(zend_is_obj_cache_valid(Z_OBJCE_P(object), CACHED_PTR(Z_CACHE_SLOT_P(property_name)), IS_UNUSED))) {
 		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(property_name) + sizeof(void*));
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
@@ -31644,7 +31654,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_
 	}
 
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-	    EXPECTED(Z_OBJCE_P(object) == CACHED_PTR(Z_CACHE_SLOT_P(property_name)))) {
+		EXPECTED(zend_is_obj_cache_valid(Z_OBJCE_P(object), CACHED_PTR(Z_CACHE_SLOT_P(property_name)), IS_UNUSED))) {
 		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(property_name) + sizeof(void*));
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
@@ -31802,7 +31812,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_
 	}
 
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-	    EXPECTED(Z_OBJCE_P(object) == CACHED_PTR(Z_CACHE_SLOT_P(property_name)))) {
+		EXPECTED(zend_is_obj_cache_valid(Z_OBJCE_P(object), CACHED_PTR(Z_CACHE_SLOT_P(property_name)), IS_UNUSED))) {
 		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(property_name) + sizeof(void*));
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
@@ -31960,7 +31970,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_
 	}
 
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-	    EXPECTED(Z_OBJCE_P(object) == CACHED_PTR(Z_CACHE_SLOT_P(property_name)))) {
+		EXPECTED(zend_is_obj_cache_valid(Z_OBJCE_P(object), CACHED_PTR(Z_CACHE_SLOT_P(property_name)), IS_UNUSED))) {
 		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(property_name) + sizeof(void*));
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
@@ -32162,8 +32172,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_T
 	obj = Z_OBJ_P(object);
 	called_scope = obj->ce;
 
-	if ((IS_TMP_VAR|IS_VAR) != IS_CONST ||
-	    UNEXPECTED((fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL)) {
+	if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
+		EXPECTED(zend_is_obj_cache_valid(called_scope, CACHED_PTR(Z_CACHE_SLOT_P(function_name)), IS_UNUSED))) {
+		fbc = CACHED_PTR(Z_CACHE_SLOT_P(function_name) + sizeof(void *));
+	} else {
 	    zend_object *orig_obj = obj;
 
 		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
@@ -35832,7 +35844,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_CV_CONST_HAND
 		zval *retval;
 
 		if (IS_CONST == IS_CONST &&
-			EXPECTED(zobj->ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+			EXPECTED(zend_is_obj_cache_valid(zobj->ce, CACHED_PTR(Z_CACHE_SLOT_P(offset)), IS_CV))) {
 			uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(offset) + sizeof(void*));
 
 			if (EXPECTED(prop_offset != (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET)) {
@@ -35958,7 +35970,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_CV_CONST_HAN
 		zval *retval;
 
 		if (IS_CONST == IS_CONST &&
-			EXPECTED(zobj->ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+			EXPECTED(zend_is_obj_cache_valid(zobj->ce, CACHED_PTR(Z_CACHE_SLOT_P(offset)), IS_CV))) {
 			uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(offset) + sizeof(void*));
 
 			if (EXPECTED(prop_offset != (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET)) {
@@ -36133,7 +36145,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DA
 	}
 
 	if (IS_CONST == IS_CONST &&
-	    EXPECTED(Z_OBJCE_P(object) == CACHED_PTR(Z_CACHE_SLOT_P(property_name)))) {
+		EXPECTED(zend_is_obj_cache_valid(Z_OBJCE_P(object), CACHED_PTR(Z_CACHE_SLOT_P(property_name)), IS_CV))) {
 		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(property_name) + sizeof(void*));
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
@@ -36291,7 +36303,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DA
 	}
 
 	if (IS_CONST == IS_CONST &&
-	    EXPECTED(Z_OBJCE_P(object) == CACHED_PTR(Z_CACHE_SLOT_P(property_name)))) {
+		EXPECTED(zend_is_obj_cache_valid(Z_OBJCE_P(object), CACHED_PTR(Z_CACHE_SLOT_P(property_name)), IS_CV))) {
 		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(property_name) + sizeof(void*));
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
@@ -36449,7 +36461,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DA
 	}
 
 	if (IS_CONST == IS_CONST &&
-	    EXPECTED(Z_OBJCE_P(object) == CACHED_PTR(Z_CACHE_SLOT_P(property_name)))) {
+		EXPECTED(zend_is_obj_cache_valid(Z_OBJCE_P(object), CACHED_PTR(Z_CACHE_SLOT_P(property_name)), IS_CV))) {
 		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(property_name) + sizeof(void*));
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
@@ -36607,7 +36619,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DA
 	}
 
 	if (IS_CONST == IS_CONST &&
-	    EXPECTED(Z_OBJCE_P(object) == CACHED_PTR(Z_CACHE_SLOT_P(property_name)))) {
+		EXPECTED(zend_is_obj_cache_valid(Z_OBJCE_P(object), CACHED_PTR(Z_CACHE_SLOT_P(property_name)), IS_CV))) {
 		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(property_name) + sizeof(void*));
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
@@ -37269,8 +37281,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_CONST
 	obj = Z_OBJ_P(object);
 	called_scope = obj->ce;
 
-	if (IS_CONST != IS_CONST ||
-	    UNEXPECTED((fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL)) {
+	if (IS_CONST == IS_CONST &&
+		EXPECTED(zend_is_obj_cache_valid(called_scope, CACHED_PTR(Z_CACHE_SLOT_P(function_name)), IS_CV))) {
+		fbc = CACHED_PTR(Z_CACHE_SLOT_P(function_name) + sizeof(void *));
+	} else {
 	    zend_object *orig_obj = obj;
 
 		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
@@ -42056,7 +42070,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_CV_CV_HANDLER
 		zval *retval;
 
 		if (IS_CV == IS_CONST &&
-			EXPECTED(zobj->ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+			EXPECTED(zend_is_obj_cache_valid(zobj->ce, CACHED_PTR(Z_CACHE_SLOT_P(offset)), IS_CV))) {
 			uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(offset) + sizeof(void*));
 
 			if (EXPECTED(prop_offset != (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET)) {
@@ -42182,7 +42196,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_CV_CV_HANDLE
 		zval *retval;
 
 		if (IS_CV == IS_CONST &&
-			EXPECTED(zobj->ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+			EXPECTED(zend_is_obj_cache_valid(zobj->ce, CACHED_PTR(Z_CACHE_SLOT_P(offset)), IS_CV))) {
 			uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(offset) + sizeof(void*));
 
 			if (EXPECTED(prop_offset != (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET)) {
@@ -42357,7 +42371,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_
 	}
 
 	if (IS_CV == IS_CONST &&
-	    EXPECTED(Z_OBJCE_P(object) == CACHED_PTR(Z_CACHE_SLOT_P(property_name)))) {
+		EXPECTED(zend_is_obj_cache_valid(Z_OBJCE_P(object), CACHED_PTR(Z_CACHE_SLOT_P(property_name)), IS_CV))) {
 		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(property_name) + sizeof(void*));
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
@@ -42515,7 +42529,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_
 	}
 
 	if (IS_CV == IS_CONST &&
-	    EXPECTED(Z_OBJCE_P(object) == CACHED_PTR(Z_CACHE_SLOT_P(property_name)))) {
+		EXPECTED(zend_is_obj_cache_valid(Z_OBJCE_P(object), CACHED_PTR(Z_CACHE_SLOT_P(property_name)), IS_CV))) {
 		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(property_name) + sizeof(void*));
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
@@ -42673,7 +42687,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_
 	}
 
 	if (IS_CV == IS_CONST &&
-	    EXPECTED(Z_OBJCE_P(object) == CACHED_PTR(Z_CACHE_SLOT_P(property_name)))) {
+		EXPECTED(zend_is_obj_cache_valid(Z_OBJCE_P(object), CACHED_PTR(Z_CACHE_SLOT_P(property_name)), IS_CV))) {
 		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(property_name) + sizeof(void*));
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
@@ -42831,7 +42845,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_
 	}
 
 	if (IS_CV == IS_CONST &&
-	    EXPECTED(Z_OBJCE_P(object) == CACHED_PTR(Z_CACHE_SLOT_P(property_name)))) {
+		EXPECTED(zend_is_obj_cache_valid(Z_OBJCE_P(object), CACHED_PTR(Z_CACHE_SLOT_P(property_name)), IS_CV))) {
 		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(property_name) + sizeof(void*));
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
@@ -43549,8 +43563,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HA
 	obj = Z_OBJ_P(object);
 	called_scope = obj->ce;
 
-	if (IS_CV != IS_CONST ||
-	    UNEXPECTED((fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL)) {
+	if (IS_CV == IS_CONST &&
+		EXPECTED(zend_is_obj_cache_valid(called_scope, CACHED_PTR(Z_CACHE_SLOT_P(function_name)), IS_CV))) {
+		fbc = CACHED_PTR(Z_CACHE_SLOT_P(function_name) + sizeof(void *));
+	} else {
 	    zend_object *orig_obj = obj;
 
 		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
@@ -45717,7 +45733,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_CV_TMPVAR_HAN
 		zval *retval;
 
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-			EXPECTED(zobj->ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+			EXPECTED(zend_is_obj_cache_valid(zobj->ce, CACHED_PTR(Z_CACHE_SLOT_P(offset)), IS_CV))) {
 			uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(offset) + sizeof(void*));
 
 			if (EXPECTED(prop_offset != (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET)) {
@@ -45844,7 +45860,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_CV_TMPVAR_HA
 		zval *retval;
 
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-			EXPECTED(zobj->ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+			EXPECTED(zend_is_obj_cache_valid(zobj->ce, CACHED_PTR(Z_CACHE_SLOT_P(offset)), IS_CV))) {
 			uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(offset) + sizeof(void*));
 
 			if (EXPECTED(prop_offset != (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET)) {
@@ -46020,7 +46036,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_D
 	}
 
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-	    EXPECTED(Z_OBJCE_P(object) == CACHED_PTR(Z_CACHE_SLOT_P(property_name)))) {
+		EXPECTED(zend_is_obj_cache_valid(Z_OBJCE_P(object), CACHED_PTR(Z_CACHE_SLOT_P(property_name)), IS_CV))) {
 		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(property_name) + sizeof(void*));
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
@@ -46178,7 +46194,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_D
 	}
 
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-	    EXPECTED(Z_OBJCE_P(object) == CACHED_PTR(Z_CACHE_SLOT_P(property_name)))) {
+		EXPECTED(zend_is_obj_cache_valid(Z_OBJCE_P(object), CACHED_PTR(Z_CACHE_SLOT_P(property_name)), IS_CV))) {
 		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(property_name) + sizeof(void*));
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
@@ -46336,7 +46352,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_D
 	}
 
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-	    EXPECTED(Z_OBJCE_P(object) == CACHED_PTR(Z_CACHE_SLOT_P(property_name)))) {
+		EXPECTED(zend_is_obj_cache_valid(Z_OBJCE_P(object), CACHED_PTR(Z_CACHE_SLOT_P(property_name)), IS_CV))) {
 		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(property_name) + sizeof(void*));
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
@@ -46494,7 +46510,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_D
 	}
 
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-	    EXPECTED(Z_OBJCE_P(object) == CACHED_PTR(Z_CACHE_SLOT_P(property_name)))) {
+		EXPECTED(zend_is_obj_cache_valid(Z_OBJCE_P(object), CACHED_PTR(Z_CACHE_SLOT_P(property_name)), IS_CV))) {
 		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(property_name) + sizeof(void*));
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
@@ -47100,8 +47116,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVA
 	obj = Z_OBJ_P(object);
 	called_scope = obj->ce;
 
-	if ((IS_TMP_VAR|IS_VAR) != IS_CONST ||
-	    UNEXPECTED((fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL)) {
+	if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
+		EXPECTED(zend_is_obj_cache_valid(called_scope, CACHED_PTR(Z_CACHE_SLOT_P(function_name)), IS_CV))) {
+		fbc = CACHED_PTR(Z_CACHE_SLOT_P(function_name) + sizeof(void *));
+	} else {
 	    zend_object *orig_obj = obj;
 
 		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
@@ -49060,7 +49078,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_TMPVAR_CONST
 		zval *retval;
 
 		if (IS_CONST == IS_CONST &&
-			EXPECTED(zobj->ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+			EXPECTED(zend_is_obj_cache_valid(zobj->ce, CACHED_PTR(Z_CACHE_SLOT_P(offset)), (IS_TMP_VAR|IS_VAR)))) {
 			uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(offset) + sizeof(void*));
 
 			if (EXPECTED(prop_offset != (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET)) {
@@ -49247,8 +49265,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 	obj = Z_OBJ_P(object);
 	called_scope = obj->ce;
 
-	if (IS_CONST != IS_CONST ||
-	    UNEXPECTED((fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL)) {
+	if (IS_CONST == IS_CONST &&
+		EXPECTED(zend_is_obj_cache_valid(called_scope, CACHED_PTR(Z_CACHE_SLOT_P(function_name)), (IS_TMP_VAR|IS_VAR)))) {
+		fbc = CACHED_PTR(Z_CACHE_SLOT_P(function_name) + sizeof(void *));
+	} else {
 	    zend_object *orig_obj = obj;
 
 		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
@@ -51326,7 +51346,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_TMPVAR_CV_HA
 		zval *retval;
 
 		if (IS_CV == IS_CONST &&
-			EXPECTED(zobj->ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+			EXPECTED(zend_is_obj_cache_valid(zobj->ce, CACHED_PTR(Z_CACHE_SLOT_P(offset)), (IS_TMP_VAR|IS_VAR)))) {
 			uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(offset) + sizeof(void*));
 
 			if (EXPECTED(prop_offset != (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET)) {
@@ -51513,8 +51533,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 	obj = Z_OBJ_P(object);
 	called_scope = obj->ce;
 
-	if (IS_CV != IS_CONST ||
-	    UNEXPECTED((fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL)) {
+	if (IS_CV == IS_CONST &&
+		EXPECTED(zend_is_obj_cache_valid(called_scope, CACHED_PTR(Z_CACHE_SLOT_P(function_name)), (IS_TMP_VAR|IS_VAR)))) {
+		fbc = CACHED_PTR(Z_CACHE_SLOT_P(function_name) + sizeof(void *));
+	} else {
 	    zend_object *orig_obj = obj;
 
 		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
@@ -52617,7 +52639,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_TMPVAR_TMPVA
 		zval *retval;
 
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-			EXPECTED(zobj->ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+			EXPECTED(zend_is_obj_cache_valid(zobj->ce, CACHED_PTR(Z_CACHE_SLOT_P(offset)), (IS_TMP_VAR|IS_VAR)))) {
 			uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(offset) + sizeof(void*));
 
 			if (EXPECTED(prop_offset != (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET)) {
@@ -52805,8 +52827,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_T
 	obj = Z_OBJ_P(object);
 	called_scope = obj->ce;
 
-	if ((IS_TMP_VAR|IS_VAR) != IS_CONST ||
-	    UNEXPECTED((fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL)) {
+	if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
+		EXPECTED(zend_is_obj_cache_valid(called_scope, CACHED_PTR(Z_CACHE_SLOT_P(function_name)), (IS_TMP_VAR|IS_VAR)))) {
+		fbc = CACHED_PTR(Z_CACHE_SLOT_P(function_name) + sizeof(void *));
+	} else {
 	    zend_object *orig_obj = obj;
 
 		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
