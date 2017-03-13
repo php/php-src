@@ -447,13 +447,13 @@ static void php_wddx_serialize_unset(wddx_packet *packet)
 static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 {
 /* OBJECTS_FIXME */
-	zval *ent, fname, *varname;
-	zval retval;
+	zval *ent;
 	zend_string *key;
 	zend_ulong idx;
 	char tmp_buf[WDDX_BUF_LEN];
-	HashTable *objhash, *sleephash;
+	HashTable *objhash;
 	zend_class_entry *ce;
+	int is_temp;
 	PHP_CLASS_ATTRIBUTES;
 
 	PHP_SET_CLASS_ATTRIBUTES(obj);
@@ -464,54 +464,23 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 		return;
 	}
 
-	ZVAL_STRING(&fname, "__sleep");
-	/*
-	 * We try to call __sleep() method on object. It's supposed to return an
-	 * array of property names to be serialized.
-	 */
-	if (call_user_function_ex(CG(function_table), obj, &fname, &retval, 0, 0, 1, NULL) == SUCCESS) {
-		if (!Z_ISUNDEF(retval) && (sleephash = HASH_OF(&retval))) {
-			PHP_CLASS_ATTRIBUTES;
+	php_wddx_add_chunk_static(packet, WDDX_STRUCT_S);
+	snprintf(tmp_buf, WDDX_BUF_LEN, WDDX_VAR_S, PHP_CLASS_NAME_VAR);
+	php_wddx_add_chunk(packet, tmp_buf);
+	php_wddx_add_chunk_static(packet, WDDX_STRING_S);
+	php_wddx_add_chunk_ex(packet, ZSTR_VAL(class_name), ZSTR_LEN(class_name));
+	php_wddx_add_chunk_static(packet, WDDX_STRING_E);
+	php_wddx_add_chunk_static(packet, WDDX_VAR_E);
 
-			PHP_SET_CLASS_ATTRIBUTES(obj);
-
-			php_wddx_add_chunk_static(packet, WDDX_STRUCT_S);
-			snprintf(tmp_buf, WDDX_BUF_LEN, WDDX_VAR_S, PHP_CLASS_NAME_VAR);
-			php_wddx_add_chunk(packet, tmp_buf);
-			php_wddx_add_chunk_static(packet, WDDX_STRING_S);
-			php_wddx_add_chunk_ex(packet, ZSTR_VAL(class_name), ZSTR_LEN(class_name));
-			php_wddx_add_chunk_static(packet, WDDX_STRING_E);
-			php_wddx_add_chunk_static(packet, WDDX_VAR_E);
-
-			objhash = Z_OBJPROP_P(obj);
-
-			ZEND_HASH_FOREACH_VAL(sleephash, varname) {
-				if (Z_TYPE_P(varname) != IS_STRING) {
-					php_error_docref(NULL, E_NOTICE, "__sleep should return an array only containing the names of instance-variables to serialize.");
-					continue;
-				}
-
-				if ((ent = zend_hash_find(objhash, Z_STR_P(varname))) != NULL) {
-					php_wddx_serialize_var(packet, ent, Z_STR_P(varname));
-				}
-			} ZEND_HASH_FOREACH_END();
-
-			php_wddx_add_chunk_static(packet, WDDX_STRUCT_E);
-		}
-	} else {
-		php_wddx_add_chunk_static(packet, WDDX_STRUCT_S);
-		snprintf(tmp_buf, WDDX_BUF_LEN, WDDX_VAR_S, PHP_CLASS_NAME_VAR);
-		php_wddx_add_chunk(packet, tmp_buf);
-		php_wddx_add_chunk_static(packet, WDDX_STRING_S);
-		php_wddx_add_chunk_ex(packet, ZSTR_VAL(class_name), ZSTR_LEN(class_name));
-		php_wddx_add_chunk_static(packet, WDDX_STRING_E);
-		php_wddx_add_chunk_static(packet, WDDX_VAR_E);
-
-		objhash = Z_OBJPROP_P(obj);
+	objhash = Z_OBJ_HT_P(obj)->get_serialize_properties
+				? Z_OBJ_HT_P(obj)->get_serialize_properties(obj, &is_temp)
+				: zend_std_get_serialize_properties(obj, &is_temp);
+	if (objhash) {
 		ZEND_HASH_FOREACH_KEY_VAL(objhash, idx, key, ent) {
 			if (ent == obj) {
 				continue;
 			}
+
 			if (key) {
 				const char *class_name, *prop_name;
 				size_t prop_name_len;
@@ -527,13 +496,16 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 				zend_string_release(key);
 			}
 		} ZEND_HASH_FOREACH_END();
-		php_wddx_add_chunk_static(packet, WDDX_STRUCT_E);
+
+		if (is_temp) {
+			zend_hash_destroy(objhash);
+			FREE_HASHTABLE(objhash);
+		}
 	}
 
-	PHP_CLEANUP_CLASS_ATTRIBUTES();
+	php_wddx_add_chunk_static(packet, WDDX_STRUCT_E);
 
-	zval_ptr_dtor(&fname);
-	zval_ptr_dtor(&retval);
+	PHP_CLEANUP_CLASS_ATTRIBUTES();
 }
 /* }}} */
 
