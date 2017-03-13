@@ -225,7 +225,7 @@ void zend_register_standard_ini_entries(void);
 void zend_post_startup(void);
 void zend_set_utility_values(zend_utility_values *utility_values);
 
-ZEND_API ZEND_COLD void _zend_bailout(char *filename, uint32_t lineno);
+ZEND_API ZEND_COLD void _zend_bailout(const char *filename, uint32_t lineno);
 
 ZEND_API size_t zend_vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap);
 ZEND_API size_t zend_spprintf(char **message, size_t max_len, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 3, 4);
