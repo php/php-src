@@ -1701,6 +1701,130 @@ int zend_std_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **f
 }
 /* }}} */
 
+static int serialize_call_sleep(zval *retval, zval *struc) /* {{{ */
+{
+	zval fname;
+	int res;
+
+	ZVAL_STRINGL(&fname, "__sleep", sizeof("__sleep") - 1);
+	res = call_user_function_ex(CG(function_table), struc, &fname, retval, 0, 0, 1, NULL);
+	zval_dtor(&fname);
+
+	if (res == FAILURE || Z_ISUNDEF_P(retval)) {
+		zval_ptr_dtor(retval);
+		return FAILURE;
+	}
+
+	if (!HASH_OF(retval)) {
+		zval_ptr_dtor(retval);
+		zend_error(E_NOTICE, "serialize(): __sleep should return an array only containing the names of instance-variables to serialize");
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
+static int serialize_try_add_sleep_prop(HashTable *ht, HashTable *props, zend_string *name, zend_string *error_name) /* {{{ */
+{
+	zval *val = zend_hash_find(props, name);
+	if (val == NULL) {
+		return FAILURE;
+	}
+
+	if (Z_TYPE_P(val) == IS_INDIRECT) {
+		val = Z_INDIRECT_P(val);
+		if (Z_TYPE_P(val) == IS_UNDEF) {
+			return FAILURE;
+		}
+	}
+
+	if (!zend_hash_add(ht, name, val)) {
+		zend_error(E_NOTICE, "serialize(): \"%s\" is returned from __sleep multiple times",
+			ZSTR_VAL(error_name));
+		return SUCCESS;
+	}
+
+	Z_TRY_ADDREF_P(val);
+	return SUCCESS;
+}
+/* }}} */
+
+static HashTable *serialize_get_sleep_props(zval *struc, HashTable *sleep_retval) /* {{{ */
+{
+	zend_class_entry *ce = Z_OBJCE_P(struc);
+	HashTable *ht, *props = Z_OBJPROP_P(struc);
+	zval *name_val;
+
+	ALLOC_HASHTABLE(ht);
+	zend_hash_init(ht, zend_hash_num_elements(sleep_retval), NULL, ZVAL_PTR_DTOR, 0); 
+
+	ZEND_HASH_FOREACH_VAL(sleep_retval, name_val) {
+		zend_string *name, *prot_name, *priv_name;
+
+		if (Z_TYPE_P(name_val) != IS_STRING) {
+			zend_error(E_NOTICE, "serialize(): __sleep should return an array only containing the names of instance-variables to serialize.");
+		}
+
+		name = zval_get_string(name_val);
+
+		if (serialize_try_add_sleep_prop(ht, props, name, name) == SUCCESS) {
+			zend_string_release(name);
+			continue;
+		}
+
+		priv_name = zend_mangle_property_name(
+			ZSTR_VAL(ce->name), ZSTR_LEN(ce->name),
+			ZSTR_VAL(name), ZSTR_LEN(name), ce->type & ZEND_INTERNAL_CLASS);
+		if (serialize_try_add_sleep_prop(ht, props, priv_name, name) == SUCCESS) {
+			zend_string_release(name);
+			zend_string_release(priv_name);
+			continue;
+		}
+		zend_string_release(priv_name);
+
+		prot_name = zend_mangle_property_name(
+			"*", 1, ZSTR_VAL(name), ZSTR_LEN(name), ce->type & ZEND_INTERNAL_CLASS);
+		if (serialize_try_add_sleep_prop(ht, props, prot_name, name) == SUCCESS) {
+			zend_string_release(name);
+			zend_string_release(prot_name);
+			continue;
+		}
+		zend_string_release(prot_name);
+
+		zend_error(E_NOTICE, "serialize(): \"%s\" returned as member variable from __sleep() but does not exist", ZSTR_VAL(name));
+		zend_hash_add(ht, name, &EG(uninitialized_zval));
+
+		zend_string_release(name);
+	} ZEND_HASH_FOREACH_END();
+
+	return ht;
+}
+/* }}} */
+
+ZEND_API HashTable *zend_std_get_serialize_properties(zval *obj, int *is_temp) /* {{{ */
+{
+	zend_class_entry *ce = Z_OBJCE_P(obj);
+	HashTable *ht;
+	if (zend_hash_str_exists(&ce->function_table, "__sleep", sizeof("__sleep")-1)) {
+		zval retval;
+
+		if (serialize_call_sleep(&retval, obj) == FAILURE) {
+			return NULL;
+		}
+
+		*is_temp = 1;
+		ht = serialize_get_sleep_props(obj, HASH_OF(&retval));
+		zval_ptr_dtor(&retval);
+
+		return ht;
+	}
+
+	*is_temp = 0;
+	return Z_OBJPROP_P(obj);
+}
+/* }}} */
+
 ZEND_API zend_object_handlers std_object_handlers = {
 	0,										/* offset */
 
@@ -1732,6 +1856,7 @@ ZEND_API zend_object_handlers std_object_handlers = {
 	zend_std_get_gc,						/* get_gc */
 	NULL,									/* do_operation */
 	NULL,									/* compare */
+	zend_std_get_serialize_properties,		/* get_serialize_properties */
 };
 
 /*

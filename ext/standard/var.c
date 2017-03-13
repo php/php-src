@@ -671,131 +671,6 @@ static inline zend_bool php_var_serialize_class_name(smart_str *buf, zval *struc
 }
 /* }}} */
 
-static int php_var_serialize_call_sleep(zval *retval, zval *struc) /* {{{ */
-{
-	zval fname;
-	int res;
-
-	ZVAL_STRINGL(&fname, "__sleep", sizeof("__sleep") - 1);
-	BG(serialize_lock)++;
-	res = call_user_function_ex(CG(function_table), struc, &fname, retval, 0, 0, 1, NULL);
-	BG(serialize_lock)--;
-	zval_dtor(&fname);
-
-	if (res == FAILURE || Z_ISUNDEF_P(retval)) {
-		zval_ptr_dtor(retval);
-		return FAILURE;
-	}
-
-	if (!HASH_OF(retval)) {
-		zval_ptr_dtor(retval);
-		php_error_docref(NULL, E_NOTICE, "__sleep should return an array only containing the names of instance-variables to serialize");
-		return FAILURE;
-	}
-
-	return SUCCESS;
-}
-/* }}} */
-
-static int php_var_serialize_try_add_sleep_prop(HashTable *ht, HashTable *props, zend_string *name, zend_string *error_name) {
-	zval *val = zend_hash_find(props, name);
-	if (val == NULL) {
-		return FAILURE;
-	}
-
-	if (Z_TYPE_P(val) == IS_INDIRECT) {
-		val = Z_INDIRECT_P(val);
-		if (Z_TYPE_P(val) == IS_UNDEF) {
-			return FAILURE;
-		}
-	}
-
-	if (!zend_hash_add(ht, name, val)) {
-		php_error_docref(NULL, E_NOTICE,
-			"\"%s\" is returned from __sleep multiple times", ZSTR_VAL(error_name));
-		return SUCCESS;
-	}
-
-	Z_TRY_ADDREF_P(val);
-	return SUCCESS;
-}
-
-static HashTable *php_var_serialize_get_sleep_props(zval *struc, HashTable *sleep_retval) /* {{{ */
-{
-	zend_class_entry *ce = Z_OBJCE_P(struc);
-	HashTable *ht, *props = Z_OBJPROP_P(struc);
-	zval *name_val;
-
-	ALLOC_HASHTABLE(ht);
-	zend_hash_init(ht, zend_hash_num_elements(sleep_retval), NULL, ZVAL_PTR_DTOR, 0); 
-
-	ZEND_HASH_FOREACH_VAL(sleep_retval, name_val) {
-		zend_string *name, *prot_name, *priv_name;
-
-		if (Z_TYPE_P(name_val) != IS_STRING) {
-			php_error_docref(NULL, E_NOTICE,
-					"__sleep should return an array only containing the names of instance-variables to serialize.");
-		}
-
-		name = zval_get_string(name_val);
-
-		if (php_var_serialize_try_add_sleep_prop(ht, props, name, name) == SUCCESS) {
-			zend_string_release(name);
-			continue;
-		}
-
-		priv_name = zend_mangle_property_name(
-			ZSTR_VAL(ce->name), ZSTR_LEN(ce->name),
-			ZSTR_VAL(name), ZSTR_LEN(name), ce->type & ZEND_INTERNAL_CLASS);
-		if (php_var_serialize_try_add_sleep_prop(ht, props, priv_name, name) == SUCCESS) {
-			zend_string_release(name);
-			zend_string_release(priv_name);
-			continue;
-		}
-		zend_string_release(priv_name);
-
-		prot_name = zend_mangle_property_name(
-			"*", 1, ZSTR_VAL(name), ZSTR_LEN(name), ce->type & ZEND_INTERNAL_CLASS);
-		if (php_var_serialize_try_add_sleep_prop(ht, props, prot_name, name) == SUCCESS) {
-			zend_string_release(name);
-			zend_string_release(prot_name);
-			continue;
-		}
-		zend_string_release(prot_name);
-
-		php_error_docref(NULL, E_NOTICE,
-			"\"%s\" returned as member variable from __sleep() but does not exist", ZSTR_VAL(name));
-		zend_hash_add(ht, name, &EG(uninitialized_zval));
-
-		zend_string_release(name);
-	} ZEND_HASH_FOREACH_END();
-
-	return ht;
-}
-/* }}} */
-
-static HashTable *php_var_serialize_get_props(zval *obj, zend_bool *is_temp)
-{
-	zend_class_entry *ce = Z_OBJCE_P(obj);
-	HashTable *ht;
-	if (ce != PHP_IC_ENTRY && zend_hash_str_exists(&ce->function_table, "__sleep", sizeof("__sleep")-1)) {
-		zval retval;
-
-		if (php_var_serialize_call_sleep(&retval, obj) == FAILURE) {
-			return NULL;
-		}
-
-		*is_temp = 1;
-		ht = php_var_serialize_get_sleep_props(obj, HASH_OF(&retval));
-		zval_ptr_dtor(&retval);
-
-		return ht;
-	}
-
-	*is_temp = 0;
-	return Z_OBJPROP_P(obj);
-}
-
 static void php_var_serialize_nested_data(smart_str *buf, zval *struc, HashTable *ht, uint32_t count, zend_bool incomplete_class, php_serialize_data_t var_hash) /* {{{ */
 {
 	smart_str_append_unsigned(buf, count);
@@ -897,7 +772,8 @@ again:
 		case IS_OBJECT: {
 				zend_class_entry *ce = Z_OBJCE_P(struc);
 				HashTable *ht;
-				zend_bool is_temp, incomplete_class;
+				int is_temp;
+				zend_bool incomplete_class;
 				uint32_t count;
 				zval tmp;
 
@@ -929,7 +805,12 @@ again:
 				/* Make sure the object is not freed by __sleep() or similar. */
 				ZVAL_COPY(&tmp, struc);
 
-				ht = php_var_serialize_get_props(&tmp, &is_temp);
+				BG(serialize_lock)++;
+				ht = Z_OBJ_HT_P(&tmp)->get_serialize_properties
+					? Z_OBJ_HT_P(&tmp)->get_serialize_properties(&tmp, &is_temp)
+					: zend_std_get_serialize_properties(&tmp, &is_temp);
+				BG(serialize_lock)--;
+
 				if (!ht) {
 					if (!EG(exception)) {
 						/* we should still add element even if it's not OK,

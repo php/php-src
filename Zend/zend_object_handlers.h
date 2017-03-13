@@ -121,6 +121,8 @@ typedef HashTable *(*zend_object_get_gc_t)(zval *object, zval **table, int *n);
 
 typedef int (*zend_object_do_operation_t)(zend_uchar opcode, zval *result, zval *op1, zval *op2);
 
+typedef HashTable *(*zend_object_get_serialize_properties_t)(zval *object, int *is_temp);
+
 struct _zend_object_handlers {
 	/* offset of real object header (usually zero) */
 	int										offset;
@@ -153,6 +155,7 @@ struct _zend_object_handlers {
 	zend_object_get_gc_t					get_gc;
 	zend_object_do_operation_t				do_operation;
 	zend_object_compare_zvals_t				compare;
+	zend_object_get_serialize_properties_t	get_serialize_properties;
 };
 
 extern ZEND_API zend_object_handlers std_object_handlers;
@@ -170,6 +173,7 @@ ZEND_API HashTable *zend_std_get_properties(zval *object);
 ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp);
 ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int type);
 ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, void **cache_slot);
+ZEND_API HashTable *zend_std_get_serialize_properties(zval *object, int *is_temp);
 ZEND_API void rebuild_object_properties(zend_object *zobj);
 
 ZEND_API int zend_check_private(union _zend_function *fbc, zend_class_entry *ce, zend_string *function_name);
