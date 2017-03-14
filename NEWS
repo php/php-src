@@ -16,8 +16,8 @@ PHP                                                                        NEWS
     (somedaysummer)
 
 - OpenSSL:
-  . Fixed bug #74159 (Writing a large buffer to a non-blocking encrypted stream
-    fails with "bad write retry"). (trowski)
+  . Fixed bug #72333 (fwrite() on non-blocking SSL sockets doesn't work).
+    (Jakub Zelenka)
 
 - PDO MySQL:
   . Fixed bug #71003 (Expose MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT to PDO
