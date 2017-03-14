@@ -5355,10 +5355,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_CO
 	obj = Z_OBJ_P(object);
 	called_scope = obj->ce;
 
-	if (IS_CONST == IS_CONST &&
-		EXPECTED(zend_is_obj_cache_valid(called_scope, CACHED_PTR(Z_CACHE_SLOT_P(function_name)), IS_CONST, execute_data))) {
-		fbc = CACHED_PTR(Z_CACHE_SLOT_P(function_name) + sizeof(void *));
-	} else {
+	if (IS_CONST != IS_CONST ||
+	    UNEXPECTED((fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL)) {
 	    zend_object *orig_obj = obj;
 
 		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
@@ -9141,10 +9139,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_CV
 	obj = Z_OBJ_P(object);
 	called_scope = obj->ce;
 
-	if (IS_CV == IS_CONST &&
-		EXPECTED(zend_is_obj_cache_valid(called_scope, CACHED_PTR(Z_CACHE_SLOT_P(function_name)), IS_CONST, execute_data))) {
-		fbc = CACHED_PTR(Z_CACHE_SLOT_P(function_name) + sizeof(void *));
-	} else {
+	if (IS_CV != IS_CONST ||
+	    UNEXPECTED((fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL)) {
 	    zend_object *orig_obj = obj;
 
 		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
@@ -11134,10 +11130,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_TM
 	obj = Z_OBJ_P(object);
 	called_scope = obj->ce;
 
-	if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-		EXPECTED(zend_is_obj_cache_valid(called_scope, CACHED_PTR(Z_CACHE_SLOT_P(function_name)), IS_CONST, execute_data))) {
-		fbc = CACHED_PTR(Z_CACHE_SLOT_P(function_name) + sizeof(void *));
-	} else {
+	if ((IS_TMP_VAR|IS_VAR) != IS_CONST ||
+	    UNEXPECTED((fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL)) {
 	    zend_object *orig_obj = obj;
 
 		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
@@ -27842,10 +27836,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_C
 	obj = Z_OBJ_P(object);
 	called_scope = obj->ce;
 
-	if (IS_CONST == IS_CONST &&
-		EXPECTED(zend_is_obj_cache_valid(called_scope, CACHED_PTR(Z_CACHE_SLOT_P(function_name)), IS_UNUSED, execute_data))) {
-		fbc = CACHED_PTR(Z_CACHE_SLOT_P(function_name) + sizeof(void *));
-	} else {
+	if (IS_CONST != IS_CONST ||
+	    UNEXPECTED((fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL)) {
 	    zend_object *orig_obj = obj;
 
 		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
@@ -30406,10 +30398,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_C
 	obj = Z_OBJ_P(object);
 	called_scope = obj->ce;
 
-	if (IS_CV == IS_CONST &&
-		EXPECTED(zend_is_obj_cache_valid(called_scope, CACHED_PTR(Z_CACHE_SLOT_P(function_name)), IS_UNUSED, execute_data))) {
-		fbc = CACHED_PTR(Z_CACHE_SLOT_P(function_name) + sizeof(void *));
-	} else {
+	if (IS_CV != IS_CONST ||
+	    UNEXPECTED((fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL)) {
 	    zend_object *orig_obj = obj;
 
 		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
@@ -32172,10 +32162,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_T
 	obj = Z_OBJ_P(object);
 	called_scope = obj->ce;
 
-	if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-		EXPECTED(zend_is_obj_cache_valid(called_scope, CACHED_PTR(Z_CACHE_SLOT_P(function_name)), IS_UNUSED, execute_data))) {
-		fbc = CACHED_PTR(Z_CACHE_SLOT_P(function_name) + sizeof(void *));
-	} else {
+	if ((IS_TMP_VAR|IS_VAR) != IS_CONST ||
+	    UNEXPECTED((fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL)) {
 	    zend_object *orig_obj = obj;
 
 		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
@@ -37281,10 +37269,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_CONST
 	obj = Z_OBJ_P(object);
 	called_scope = obj->ce;
 
-	if (IS_CONST == IS_CONST &&
-		EXPECTED(zend_is_obj_cache_valid(called_scope, CACHED_PTR(Z_CACHE_SLOT_P(function_name)), IS_CV, execute_data))) {
-		fbc = CACHED_PTR(Z_CACHE_SLOT_P(function_name) + sizeof(void *));
-	} else {
+	if (IS_CONST != IS_CONST ||
+	    UNEXPECTED((fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL)) {
 	    zend_object *orig_obj = obj;
 
 		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
@@ -43563,10 +43549,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HA
 	obj = Z_OBJ_P(object);
 	called_scope = obj->ce;
 
-	if (IS_CV == IS_CONST &&
-		EXPECTED(zend_is_obj_cache_valid(called_scope, CACHED_PTR(Z_CACHE_SLOT_P(function_name)), IS_CV, execute_data))) {
-		fbc = CACHED_PTR(Z_CACHE_SLOT_P(function_name) + sizeof(void *));
-	} else {
+	if (IS_CV != IS_CONST ||
+	    UNEXPECTED((fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL)) {
 	    zend_object *orig_obj = obj;
 
 		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
@@ -47116,10 +47100,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVA
 	obj = Z_OBJ_P(object);
 	called_scope = obj->ce;
 
-	if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-		EXPECTED(zend_is_obj_cache_valid(called_scope, CACHED_PTR(Z_CACHE_SLOT_P(function_name)), IS_CV, execute_data))) {
-		fbc = CACHED_PTR(Z_CACHE_SLOT_P(function_name) + sizeof(void *));
-	} else {
+	if ((IS_TMP_VAR|IS_VAR) != IS_CONST ||
+	    UNEXPECTED((fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL)) {
 	    zend_object *orig_obj = obj;
 
 		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
@@ -49265,10 +49247,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 	obj = Z_OBJ_P(object);
 	called_scope = obj->ce;
 
-	if (IS_CONST == IS_CONST &&
-		EXPECTED(zend_is_obj_cache_valid(called_scope, CACHED_PTR(Z_CACHE_SLOT_P(function_name)), (IS_TMP_VAR|IS_VAR), execute_data))) {
-		fbc = CACHED_PTR(Z_CACHE_SLOT_P(function_name) + sizeof(void *));
-	} else {
+	if (IS_CONST != IS_CONST ||
+	    UNEXPECTED((fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL)) {
 	    zend_object *orig_obj = obj;
 
 		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
@@ -51533,10 +51513,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 	obj = Z_OBJ_P(object);
 	called_scope = obj->ce;
 
-	if (IS_CV == IS_CONST &&
-		EXPECTED(zend_is_obj_cache_valid(called_scope, CACHED_PTR(Z_CACHE_SLOT_P(function_name)), (IS_TMP_VAR|IS_VAR), execute_data))) {
-		fbc = CACHED_PTR(Z_CACHE_SLOT_P(function_name) + sizeof(void *));
-	} else {
+	if (IS_CV != IS_CONST ||
+	    UNEXPECTED((fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL)) {
 	    zend_object *orig_obj = obj;
 
 		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
@@ -52827,10 +52805,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_T
 	obj = Z_OBJ_P(object);
 	called_scope = obj->ce;
 
-	if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-		EXPECTED(zend_is_obj_cache_valid(called_scope, CACHED_PTR(Z_CACHE_SLOT_P(function_name)), (IS_TMP_VAR|IS_VAR), execute_data))) {
-		fbc = CACHED_PTR(Z_CACHE_SLOT_P(function_name) + sizeof(void *));
-	} else {
+	if ((IS_TMP_VAR|IS_VAR) != IS_CONST ||
+	    UNEXPECTED((fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL)) {
 	    zend_object *orig_obj = obj;
 
 		if (UNEXPECTED(obj->handlers->get_method == NULL)) {

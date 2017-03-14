@@ -2976,10 +2976,8 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|THIS|CV, CONST|T
 	obj = Z_OBJ_P(object);
 	called_scope = obj->ce;
 
-	if (OP2_TYPE == IS_CONST &&
-		EXPECTED(zend_is_obj_cache_valid(called_scope, CACHED_PTR(Z_CACHE_SLOT_P(function_name)), OP1_TYPE, execute_data))) {
-		fbc = CACHED_PTR(Z_CACHE_SLOT_P(function_name) + sizeof(void *));
-	} else {
+	if (OP2_TYPE != IS_CONST ||
+	    UNEXPECTED((fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL)) {
 	    zend_object *orig_obj = obj;
 
 		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
