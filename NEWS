@@ -31,8 +31,11 @@ PHP                                                                        NEWS
   . Implemented FR #74217 (Allow creation of deterministic sqlite functions).
     (Andrew Nester)
 
-. Streams:
+- Streams:
   . Fixed bug #74216 (Correctly fail on invalid IP address ports). (Sara)
+
+- Zlib:
+  . Fixed bug #74240 (deflate_add can allocate too much memory). (Matt Bonneau)
 
 16 Mar 2017, PHP 7.1.3
 
