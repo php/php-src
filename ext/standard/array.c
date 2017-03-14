@@ -3989,7 +3989,6 @@ PHP_FUNCTION(array_keys)
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 			if (HT_IS_PACKED(arrval) && HT_IS_WITHOUT_HOLES(arrval)) {
 				/* Optimistic case: range(0..n-1) for vector-like packed array */
-				zval new_val;
 				ZVAL_LONG(&new_val, 0);
 				for (; Z_LVAL(new_val) < elem_count; ++Z_LVAL(new_val)) {
 					ZEND_HASH_FILL_ADD(&new_val);
