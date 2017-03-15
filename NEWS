@@ -8,6 +8,8 @@ PHP                                                                        NEWS
     USE_ZEND_ALLOC=0). (Nikita)
   . Fixed bug #73960 (Leak with instance method calling static method with
     referenced return). (Nikita)
+  . Fixed bug #69676 (Resolution of self::FOO in class constants not correct).
+    (Nikita)
 
 - Date:
   . Fixed bug #72096 (Swatch time value incorrect for dates before 1970). (mcq8)
