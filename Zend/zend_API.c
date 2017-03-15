@@ -1132,7 +1132,7 @@ ZEND_API int zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 			ZEND_HASH_FOREACH_PTR(&class_type->constants_table, c) {
 				val = &c->value;
 				if (Z_CONSTANT_P(val)) {
-					if (UNEXPECTED(zval_update_constant_ex(val, class_type) != SUCCESS)) {
+					if (UNEXPECTED(zval_update_constant_ex(val, c->ce) != SUCCESS)) {
 						return FAILURE;
 					}
 				}
