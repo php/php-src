@@ -1597,8 +1597,7 @@ static int zend_jit_allocate_registers(zend_op_array *op_array, zend_ssa *ssa)
 	for (i = 0; i < ssa->vars_count; i++) {
 		if (/*!ssa->vars[i].no_val
 		 && */!(ssa->var_info[i].type & MAY_BE_REF)
-		 && has_concrete_type(ssa->var_info[i].type)
-		 && (ssa->var_info[i].type & MAY_BE_ANY) == MAY_BE_DOUBLE) {
+		 && zend_jit_may_be_in_reg(op_array, ssa, i)) {
 			zend_bitset_incl(candidates, i);
 			candidates_count++;
 		}

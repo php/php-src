@@ -141,6 +141,50 @@ typedef uint32_t zend_regset;
 	(ZEND_REGSET(ZREG_RAX) | ZEND_REGSET(ZREG_RCX) | ZEND_REGSET(ZREG_RDX) | ZEND_REGSET_FP)
 #endif
 
+typedef uintptr_t zend_jit_addr;
+
+#define IS_CONST_ZVAL            0
+#define IS_MEM_ZVAL              1
+#define IS_REG                   2
+
+#define _ZEND_ADDR_MODE_MASK     0x3
+#define _ZEND_ADDR_REG_SHIFT     2
+#define _ZEND_ADDR_REG_MASK      0x3f
+#define _ZEND_ADDR_OFFSET_SHIFT  8
+
+#define ZEND_ADDR_CONST_ZVAL(zv) \
+	(((zend_jit_addr)(uintptr_t)(zv)) | IS_CONST_ZVAL)
+#define ZEND_ADDR_MEM_ZVAL(reg, offset) \
+	((((zend_jit_addr)(uintptr_t)(offset)) << _ZEND_ADDR_OFFSET_SHIFT) | \
+	(((zend_jit_addr)(uintptr_t)(reg)) << _ZEND_ADDR_REG_SHIFT) | \
+	IS_MEM_ZVAL)
+#define ZEND_ADDR_REG(reg) \
+	((((zend_jit_addr)(uintptr_t)(reg)) << _ZEND_ADDR_REG_SHIFT) | \
+	IS_REG)
+
+#define Z_MODE(addr)     (((addr) & _ZEND_ADDR_MODE_MASK))
+#define Z_ZV(addr)       ((zval*)(addr))
+#define Z_OFFSET(addr)   ((uint32_t)((addr)>>_ZEND_ADDR_OFFSET_SHIFT))
+#define Z_REG(addr)      ((zend_reg)(((addr)>>_ZEND_ADDR_REG_SHIFT) & _ZEND_ADDR_REG_MASK))
+
+static zend_always_inline zend_jit_addr zend_jit_decode_op(const zend_op_array *op_array, zend_uchar op_type, znode_op op)
+{
+	if (op_type == IS_CONST) {
+#if ZEND_USE_ABS_CONST_ADDR
+		return ZEND_ADDR_CONST_ZVAL(op.zv);
+#else
+		return ZEND_ADDR_CONST_ZVAL(RT_CONSTANT(op_array, op));
+#endif
+	} else {
+		return ZEND_ADDR_MEM_ZVAL(ZREG_FP, op.var);
+	}
+}
+
+static zend_always_inline zend_bool zend_jit_same_addr(zend_jit_addr addr1, zend_jit_addr addr2)
+{
+	return (addr1 == addr2);
+}
+
 #endif /* ZEND_JIT_X86_H */
 /*
  * Local variables:
