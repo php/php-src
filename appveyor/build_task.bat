@@ -39,7 +39,6 @@ call configure.bat ^
 	--enable-object-out-dir=%PHP_BUILD_OBJ_DIR% ^
 	--with-php-build=%DEPS_DIR% ^
 	%ADD_CONF% ^
-	--enable-zend-test ^
 	--with-test-ini-ext-exclude=%EXT_EXCLUDE_FROM_TEST%
 if %errorlevel% neq 0 exit /b 3
 
