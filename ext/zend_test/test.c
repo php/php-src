@@ -255,6 +255,6 @@ zend_module_entry zend_test_module_entry = {
 #ifdef ZTS
 ZEND_TSRMLS_CACHE_DEFINE()
 #endif
-ZEND_GET_MODULE(test)
+ZEND_GET_MODULE(zend_test)
 #endif
 
