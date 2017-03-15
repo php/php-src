@@ -294,7 +294,7 @@ implicit_flush = Off
 ; callback-function.
 unserialize_callback_func =
 
-; When floats & doubles are serialized store serialize_precision significant
+; When floats & doubles are serialized, store serialize_precision significant
 ; digits after the floating point. The default value ensures that when floats
 ; are decoded with unserialize, the data will remain the same.
 ; The value is also used for json_encode when encoding double values.
