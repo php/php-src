@@ -164,7 +164,7 @@ myClass::__set_state(array(
    'private_var' => 
   foo::__set_state(array(
   )),
-   'protected_var' => NULL,
+   'protected_var' => null,
    'proected_var' => 
   foo::__set_state(array(
   )),
@@ -180,7 +180,7 @@ myClass::__set_state(array(
    'private_var' => 
   foo::__set_state(array(
   )),
-   'protected_var' => NULL,
+   'protected_var' => null,
    'proected_var' => 
   foo::__set_state(array(
   )),
@@ -196,7 +196,7 @@ string(293) "myClass::__set_state(array(
    'private_var' => 
   foo::__set_state(array(
   )),
-   'protected_var' => NULL,
+   'protected_var' => null,
    'proected_var' => 
   foo::__set_state(array(
   )),
@@ -215,7 +215,7 @@ myClass::__set_state(array(
    'private_var' => 
   foo::__set_state(array(
   )),
-   'protected_var' => NULL,
+   'protected_var' => null,
    'proected_var' => 
   foo::__set_state(array(
   )),
@@ -231,7 +231,7 @@ myClass::__set_state(array(
    'private_var' => 
   foo::__set_state(array(
   )),
-   'protected_var' => NULL,
+   'protected_var' => null,
    'proected_var' => 
   foo::__set_state(array(
   )),
@@ -247,7 +247,7 @@ string(293) "myClass::__set_state(array(
    'private_var' => 
   foo::__set_state(array(
   )),
-   'protected_var' => NULL,
+   'protected_var' => null,
    'proected_var' => 
   foo::__set_state(array(
   )),

@@ -104,7 +104,7 @@ again:
 			php_printf("%sbool(true)\n", COMMON);
 			break;
 		case IS_NULL:
-			php_printf("%sNULL\n", COMMON);
+			php_printf("%snull\n", COMMON);
 			break;
 		case IS_LONG:
 			php_printf("%sint(" ZEND_LONG_FMT ")\n", COMMON, Z_LVAL_P(struc));
@@ -274,7 +274,7 @@ again:
 		php_printf("%sbool(true)\n", COMMON);
 		break;
 	case IS_NULL:
-		php_printf("%sNULL\n", COMMON);
+		php_printf("%snull\n", COMMON);
 		break;
 	case IS_LONG:
 		php_printf("%sint(" ZEND_LONG_FMT ")\n", COMMON, Z_LVAL_P(struc));
@@ -456,7 +456,7 @@ again:
 			smart_str_appendl(buf, "true", 4);
 			break;
 		case IS_NULL:
-			smart_str_appendl(buf, "NULL", 4);
+			smart_str_appendl(buf, "null", 4);
 			break;
 		case IS_LONG:
 			smart_str_append_long(buf, Z_LVAL_P(struc));
@@ -489,7 +489,7 @@ again:
 			myht = Z_ARRVAL_P(struc);
 			if (ZEND_HASH_APPLY_PROTECTION(myht) && myht->u.v.nApplyCount++ > 0) {
 				myht->u.v.nApplyCount--;
-				smart_str_appendl(buf, "NULL", 4);
+				smart_str_appendl(buf, "null", 4);
 				zend_error(E_WARNING, "var_export does not handle circular references");
 				return;
 			}
@@ -515,7 +515,7 @@ again:
 			myht = Z_OBJPROP_P(struc);
 			if (myht) {
 				if (myht->u.v.nApplyCount > 0) {
-					smart_str_appendl(buf, "NULL", 4);
+					smart_str_appendl(buf, "null", 4);
 					zend_error(E_WARNING, "var_export does not handle circular references");
 					return;
 				} else {
@@ -547,7 +547,7 @@ again:
 			goto again;
 			break;
 		default:
-			smart_str_appendl(buf, "NULL", 4);
+			smart_str_appendl(buf, "null", 4);
 			break;
 	}
 }
