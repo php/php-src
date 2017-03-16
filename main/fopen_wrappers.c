@@ -406,16 +406,14 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
 		IS_ABSOLUTE_PATH(PG(doc_root), length)) {
 		int path_len = (int)strlen(path_info);
 		filename = emalloc(length + path_len + 2);
-		if (filename) {
-			memcpy(filename, PG(doc_root), length);
-			if (!IS_SLASH(filename[length - 1])) {	/* length is never 0 */
-				filename[length++] = PHP_DIR_SEPARATOR;
-			}
-			if (IS_SLASH(path_info[0])) {
-				length--;
-			}
-			strncpy(filename + length, path_info, path_len + 1);
+		memcpy(filename, PG(doc_root), length);
+		if (!IS_SLASH(filename[length - 1])) {	/* length is never 0 */
+			filename[length++] = PHP_DIR_SEPARATOR;
 		}
+		if (IS_SLASH(path_info[0])) {
+			length--;
+		}
+		strncpy(filename + length, path_info, path_len + 1);
 	} else {
 		filename = SG(request_info).path_translated;
 	}

@@ -1431,9 +1431,6 @@ static unsigned char *alpn_protos_parse(unsigned short *outlen, const char *in)
 	}
 
 	out = emalloc(strlen(in) + 1);
-	if (!out) {
-		return NULL;
-	}
 
 	for (i = 0; i <= len; ++i) {
 		if (i == len || in[i] == ',') {
