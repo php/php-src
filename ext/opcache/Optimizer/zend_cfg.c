@@ -765,9 +765,9 @@ static void swap_blocks(block_info *a, block_info *b) {
 int zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cfg, uint32_t *flags) /* {{{ */
 {
 	int i, j, k, n;
-	int depth;
+	int depth, time;
 	zend_basic_block *blocks = cfg->blocks;
-	int *dj_spanning_tree;
+	int *entry_times, *exit_times;
 	zend_worklist work;
 	int flag = ZEND_FUNC_NO_LOOPS;
 	block_info *sorted_blocks;
@@ -776,19 +776,24 @@ int zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cfg, uint32
 	ALLOCA_FLAG(sorted_blocks_use_heap)
 
 	ZEND_WORKLIST_ALLOCA(&work, cfg->blocks_count, list_use_heap);
-	dj_spanning_tree = do_alloca(sizeof(int) * cfg->blocks_count, tree_use_heap);
 
-	for (i = 0; i < cfg->blocks_count; i++) {
-		dj_spanning_tree[i] = -1;
-	}
+	/* We don't materialize the DJ spanning tree explicitly, as we are only interested in ancestor
+	 * querties. These are implemented by checking entry/exit times of the DFS search. */
+	entry_times = do_alloca(2 * sizeof(int) * cfg->blocks_count, tree_use_heap);
+	exit_times = entry_times + cfg->blocks_count;
+	memset(entry_times, -1, 2 * sizeof(int) * cfg->blocks_count);
+
 	zend_worklist_push(&work, 0);
+	time = 0;
 	while (zend_worklist_len(&work)) {
 	next:
 		i = zend_worklist_peek(&work);
+		if (entry_times[i] == -1) {
+			entry_times[i] = time++;
+		}
 		/* Visit blocks immediately dominated by i. */
 		for (j = blocks[i].children; j >= 0; j = blocks[j].next_child) {
 			if (zend_worklist_push(&work, j)) {
-				dj_spanning_tree[j] = i;
 				goto next;
 			}
 		}
@@ -800,10 +805,10 @@ int zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cfg, uint32
 			} else if (blocks[succ].idom == i) {
 				continue;
 			} else if (zend_worklist_push(&work, succ)) {
-				dj_spanning_tree[succ] = i;
 				goto next;
 			}
 		}
+		exit_times[i] = time++;
 		zend_worklist_pop(&work);
 	}
 
@@ -840,18 +845,11 @@ int zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cfg, uint32
 				zend_worklist_push(&work, pred);
 			} else {
 				/* Otherwise it's a cross-join edge.  See if it's a branch
-				   to an ancestor on the dominator spanning tree.  */
-				int dj_parent = pred;
-				while (dj_parent >= 0) {
-					if (dj_parent == i) {
-						/* An sp-back edge: mark as irreducible.  */
-						blocks[i].flags |= ZEND_BB_IRREDUCIBLE_LOOP;
-						flag |= ZEND_FUNC_IRREDUCIBLE;
-						flag &= ~ZEND_FUNC_NO_LOOPS;
-						break;
-					} else {
-						dj_parent = dj_spanning_tree[dj_parent];
-					}
+				   to an ancestor on the DJ spanning tree.  */
+				if (entry_times[pred] > entry_times[i] && exit_times[pred] < exit_times[i]) {
+					blocks[i].flags |= ZEND_BB_IRREDUCIBLE_LOOP;
+					flag |= ZEND_FUNC_IRREDUCIBLE;
+					flag &= ~ZEND_FUNC_NO_LOOPS;
 				}
 			}
 		}
@@ -867,7 +865,7 @@ int zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cfg, uint32
 	}
 
 	free_alloca(sorted_blocks, sorted_blocks_use_heap);
-	free_alloca(dj_spanning_tree, tree_use_heap);
+	free_alloca(entry_times, tree_use_heap);
 	ZEND_WORKLIST_FREE_ALLOCA(&work, list_use_heap);
 	*flags |= flag;
 
