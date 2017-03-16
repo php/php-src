@@ -14,11 +14,8 @@ $serverCode = <<<'CODE'
 	$fp = stream_socket_server("ssl://127.0.0.1:10011", $errornum, $errorstr, $flags, $context);
 	phpt_notify();
 	$conn = stream_socket_accept($fp);
-
-	for ($i = 0; $i < 5; $i++) {
-		fread($conn, 100000);
-		usleep(20000);
-	}
+	fread($conn, 100000);
+	phpt_wait();
 CODE;
 
 $clientCode = <<<'CODE'
@@ -40,9 +37,9 @@ $clientCode = <<<'CODE'
 			$buf = substr($buf, $total);
 		}
 	}
-
-	$str1 = str_repeat("a", 5000000);
+	$str1 = str_repeat("a", 3000000);
 	blocking_fwrite($fp, $str1);
+	phpt_notify();
 	echo "done";
 CODE;
 
