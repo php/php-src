@@ -1294,9 +1294,7 @@ int pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 		return 0;
 	}
 
-	if (!(dbh->cls_methods[kind] = pemalloc(sizeof(HashTable), dbh->is_persistent))) {
-		php_error_docref(NULL, E_ERROR, "out of memory while allocating PDO methods.");
-	}
+	dbh->cls_methods[kind] = pemalloc(sizeof(HashTable), dbh->is_persistent);
 	zend_hash_init_ex(dbh->cls_methods[kind], 8, NULL,
 			dbh->is_persistent? cls_method_pdtor : cls_method_dtor, dbh->is_persistent, 0);
 
