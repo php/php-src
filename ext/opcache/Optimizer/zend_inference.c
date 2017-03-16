@@ -269,8 +269,7 @@ int zend_ssa_find_false_dependencies(const zend_op_array *op_array, zend_ssa *ss
 		}
 	}
 
-	while (!zend_bitset_empty(worklist, zend_bitset_len(ssa_vars_count))) {
-		i = zend_bitset_first(worklist, zend_bitset_len(ssa_vars_count));
+	while ((i = zend_bitset_first(worklist, zend_bitset_len(ssa_vars_count))) >= 0) {
 		zend_bitset_excl(worklist, i);
 		if (ssa_vars[i].definition_phi) {
 			/* mark all possible sources as used */
@@ -1568,8 +1567,7 @@ static void zend_infer_ranges_warmup(const zend_op_array *op_array, zend_ssa *ss
 
 		memset(visited, 0, sizeof(zend_ulong) * worklist_len);
 
-		while (!zend_bitset_empty(worklist, worklist_len)) {
-			j = zend_bitset_first(worklist, worklist_len);
+		while ((j = zend_bitset_first(worklist, worklist_len)) >= 0) {
 			zend_bitset_excl(worklist, j);
 			if (zend_inference_calc_range(op_array, ssa, j, 0, 0, &tmp)) {
 #ifdef NEG_RANGE
@@ -1688,8 +1686,7 @@ static int zend_infer_ranges(const zend_op_array *op_array, zend_ssa *ssa) /* {{
 #endif
 
 			/* widening */
-			while (!zend_bitset_empty(worklist, worklist_len)) {
-				j = zend_bitset_first(worklist, worklist_len);
+			while ((j = zend_bitset_first(worklist, worklist_len)) >= 0) {
 				zend_bitset_excl(worklist, j);
 				if (zend_ssa_range_widening(op_array, ssa, j, scc)) {
 					FOR_EACH_VAR_USAGE(j, ADD_SCC_VAR);
@@ -1705,8 +1702,7 @@ static int zend_infer_ranges(const zend_op_array *op_array, zend_ssa *ssa) /* {{
 			}
 
 			/* narrowing */
-			while (!zend_bitset_empty(worklist, worklist_len)) {
-				j = zend_bitset_first(worklist, worklist_len);
+			while ((j = zend_bitset_first(worklist, worklist_len)) >= 0) {
 				zend_bitset_excl(worklist, j);
 				if (zend_ssa_range_narrowing(op_array, ssa, j, scc)) {
 					FOR_EACH_VAR_USAGE(j, ADD_SCC_VAR);
@@ -3270,8 +3266,7 @@ int zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script
 	int i, j;
 	uint32_t tmp;
 
-	while (!zend_bitset_empty(worklist, zend_bitset_len(ssa_vars_count))) {
-		j = zend_bitset_first(worklist, zend_bitset_len(ssa_vars_count));
+	while ((j = zend_bitset_first(worklist, zend_bitset_len(ssa_vars_count))) >= 0) {
 		zend_bitset_excl(worklist, j);
 		if (ssa_vars[j].definition_phi) {
 			zend_ssa_phi *p = ssa_vars[j].definition_phi;
@@ -3884,7 +3879,7 @@ void zend_inference_check_recursive_dependencies(zend_op_array *op_array)
 	zend_func_info *info = ZEND_FUNC_INFO(op_array);
 	zend_call_info *call_info;
 	zend_bitset worklist;
-	int worklist_len;
+	int worklist_len, i;
 	ALLOCA_FLAG(use_heap);
 
 	if (!info->ssa.var_info || !(info->flags & ZEND_FUNC_RECURSIVE)) {
@@ -3901,8 +3896,7 @@ void zend_inference_check_recursive_dependencies(zend_op_array *op_array)
 		}
 		call_info = call_info->next_callee;
 	}
-	while (!zend_bitset_empty(worklist, worklist_len)) {
-		int i = zend_bitset_first(worklist, worklist_len);
+	while ((i = zend_bitset_first(worklist, worklist_len)) >= 0) {
 		zend_bitset_excl(worklist, i);
 		if (!info->ssa.var_info[i].recursive) {
 			info->ssa.var_info[i].recursive = 1;
