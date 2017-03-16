@@ -34,7 +34,7 @@
 #include "Optimizer/zend_call_graph.h"
 #include "Optimizer/zend_dump.h"
 
-//#define REG_ALLOC
+#define REG_ALLOC
 #define DEBUG_REG_ALLOC
 //#define CONTEXT_THREADED_JIT
 #define PREFER_MAP_32BIT
@@ -1536,6 +1536,23 @@ static int zend_jit_linear_scan(zend_op_array *op_array, zend_ssa *ssa, zend_lif
 
 #ifdef DEBUG_REG_ALLOC
 	{
+		int count = 0;
+		zend_lifetime_interval *intervals[3];
+
+		if (handled) {
+			intervals[count++] = handled;
+		}
+		if (inactive) {
+			intervals[count++] = inactive;
+		}
+		if (active) {
+			intervals[count++] = active;
+		}
+		if (count) {
+			handled = zend_jit_sort_intervals(intervals, count);
+		}
+	}
+	{
 		zend_lifetime_interval *ival = handled;
 
 		fprintf(stderr, "After Linear Scan\n");
@@ -1547,7 +1564,7 @@ static int zend_jit_linear_scan(zend_op_array *op_array, zend_ssa *ssa, zend_lif
 			}
 			ival = ival->next;
 		}
-
+/*
 		ival = inactive;
 		while (ival != NULL) {
 			if (ival->reg > ZREG_NONE) {
@@ -1567,6 +1584,7 @@ static int zend_jit_linear_scan(zend_op_array *op_array, zend_ssa *ssa, zend_lif
 			}
 			ival = ival->next;
 		}
+*/
 	}
 #endif
 
