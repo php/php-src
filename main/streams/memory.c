@@ -62,12 +62,8 @@ static size_t php_stream_memory_write(php_stream *stream, const char *buf, size_
 		} else {
 			tmp = erealloc(ms->data, ms->fpos + count);
 		}
-		if (!tmp) {
-			count = ms->fsize - ms->fpos + 1;
-		} else {
-			ms->data = tmp;
-			ms->fsize = ms->fpos + count;
-		}
+		ms->data = tmp;
+		ms->fsize = ms->fpos + count;
 	}
 	if (!ms->data)
 		count = 0;

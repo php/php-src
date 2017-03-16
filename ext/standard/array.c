@@ -4487,10 +4487,6 @@ PHP_FUNCTION(array_unique)
 
 	/* create and sort array with pointers to the target_hash buckets */
 	arTmp = (struct bucketindex *) pemalloc((Z_ARRVAL_P(array)->nNumOfElements + 1) * sizeof(struct bucketindex), Z_ARRVAL_P(array)->u.flags & HASH_FLAG_PERSISTENT);
-	if (!arTmp) {
-		zval_dtor(return_value);
-		RETURN_FALSE;
-	}
 	for (i = 0, idx = 0; idx < Z_ARRVAL_P(array)->nNumUsed; idx++) {
 		p = Z_ARRVAL_P(array)->arData + idx;
 		if (Z_TYPE(p->val) == IS_UNDEF) continue;
@@ -4781,13 +4777,6 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 		}
 		hash = Z_ARRVAL(args[i]);
 		list = (Bucket *) pemalloc((hash->nNumOfElements + 1) * sizeof(Bucket), hash->u.flags & HASH_FLAG_PERSISTENT);
-		if (!list) {
-			PHP_ARRAY_CMP_FUNC_RESTORE();
-
-			efree(ptrs);
-			efree(lists);
-			RETURN_FALSE;
-		}
 		lists[i] = list;
 		ptrs[i] = list;
 		for (idx = 0; idx < hash->nNumUsed; idx++) {
@@ -5203,13 +5192,6 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 		}
 		hash = Z_ARRVAL(args[i]);
 		list = (Bucket *) pemalloc((hash->nNumOfElements + 1) * sizeof(Bucket), hash->u.flags & HASH_FLAG_PERSISTENT);
-		if (!list) {
-			PHP_ARRAY_CMP_FUNC_RESTORE();
-
-			efree(ptrs);
-			efree(lists);
-			RETURN_FALSE;
-		}
 		lists[i] = list;
 		ptrs[i] = list;
 		for (idx = 0; idx < hash->nNumUsed; idx++) {
