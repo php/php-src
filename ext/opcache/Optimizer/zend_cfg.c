@@ -778,7 +778,7 @@ int zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cfg, uint32
 	ZEND_WORKLIST_ALLOCA(&work, cfg->blocks_count, list_use_heap);
 
 	/* We don't materialize the DJ spanning tree explicitly, as we are only interested in ancestor
-	 * querties. These are implemented by checking entry/exit times of the DFS search. */
+	 * queries. These are implemented by checking entry/exit times of the DFS search. */
 	entry_times = do_alloca(2 * sizeof(int) * cfg->blocks_count, tree_use_heap);
 	exit_times = entry_times + cfg->blocks_count;
 	memset(entry_times, -1, 2 * sizeof(int) * cfg->blocks_count);
