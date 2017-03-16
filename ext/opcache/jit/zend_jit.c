@@ -34,7 +34,7 @@
 #include "Optimizer/zend_call_graph.h"
 #include "Optimizer/zend_dump.h"
 
-#define REG_ALLOC
+//#define REG_ALLOC
 #define DEBUG_REG_ALLOC
 //#define CONTEXT_THREADED_JIT
 #define PREFER_MAP_32BIT
