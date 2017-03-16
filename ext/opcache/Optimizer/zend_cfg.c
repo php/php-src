@@ -749,16 +749,31 @@ static int dominates(zend_basic_block *blocks, int a, int b) /* {{{ */
 }
 /* }}} */
 
+typedef struct {
+	int id;
+	int level;
+} block_info;
+static int compare_block_level(const block_info *a, const block_info *b) {
+	return b->level - a->level;
+}
+static void swap_blocks(block_info *a, block_info *b) {
+	block_info tmp = *a;
+	*a = *b;
+	*b = tmp;
+}
+
 int zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cfg, uint32_t *flags) /* {{{ */
 {
-	int i, j, k;
+	int i, j, k, n;
 	int depth;
 	zend_basic_block *blocks = cfg->blocks;
 	int *dj_spanning_tree;
 	zend_worklist work;
 	int flag = ZEND_FUNC_NO_LOOPS;
+	block_info *sorted_blocks;
 	ALLOCA_FLAG(list_use_heap)
 	ALLOCA_FLAG(tree_use_heap)
+	ALLOCA_FLAG(sorted_blocks_use_heap)
 
 	ZEND_WORKLIST_ALLOCA(&work, cfg->blocks_count, list_use_heap);
 	dj_spanning_tree = do_alloca(sizeof(int) * cfg->blocks_count, tree_use_heap);
@@ -792,64 +807,66 @@ int zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cfg, uint32
 		zend_worklist_pop(&work);
 	}
 
+	/* Sort blocks by decreasing level, which is the order in which we want to process them */
+	sorted_blocks = do_alloca(sizeof(block_info) * cfg->blocks_count, sorted_blocks_use_heap);
+	for (i = 0; i < cfg->blocks_count; i++) {
+		sorted_blocks[i].id = i;
+		sorted_blocks[i].level = blocks[i].level;
+	}
+	zend_sort(sorted_blocks, cfg->blocks_count, sizeof(block_info),
+		(compare_func_t) compare_block_level, (swap_func_t) swap_blocks);
+
 	/* Identify loops.  See Sreedhar et al, "Identifying Loops Using DJ
 	   Graphs".  */
 
-	for (i = 0, depth = 0; i < cfg->blocks_count; i++) {
-		if (blocks[i].level > depth) {
-			depth = blocks[i].level;
-		}
-	}
-	for (; depth >= 0; depth--) {
-		for (i = 0; i < cfg->blocks_count; i++) {
-			if (blocks[i].level != depth) {
+	for (n = 0; n < cfg->blocks_count; n++) {
+		i = sorted_blocks[n].id;
+
+		zend_bitset_clear(work.visited, zend_bitset_len(cfg->blocks_count));
+		for (j = 0; j < blocks[i].predecessors_count; j++) {
+			int pred = cfg->predecessors[blocks[i].predecessor_offset + j];
+
+			/* A join edge is one for which the predecessor does not
+			   immediately dominate the successor.  */
+			if (blocks[i].idom == pred) {
 				continue;
 			}
-			zend_bitset_clear(work.visited, zend_bitset_len(cfg->blocks_count));
-			for (j = 0; j < blocks[i].predecessors_count; j++) {
-				int pred = cfg->predecessors[blocks[i].predecessor_offset + j];
 
-				/* A join edge is one for which the predecessor does not
-				   immediately dominate the successor.  */
-				if (blocks[i].idom == pred) {
-					continue;
-				}
-
-				/* In a loop back-edge (back-join edge), the successor dominates
-				   the predecessor.  */
-				if (dominates(blocks, i, pred)) {
-					blocks[i].flags |= ZEND_BB_LOOP_HEADER;
-					flag &= ~ZEND_FUNC_NO_LOOPS;
-					zend_worklist_push(&work, pred);
-				} else {
-					/* Otherwise it's a cross-join edge.  See if it's a branch
-					   to an ancestor on the dominator spanning tree.  */
-					int dj_parent = pred;
-					while (dj_parent >= 0) {
-						if (dj_parent == i) {
-							/* An sp-back edge: mark as irreducible.  */
-							blocks[i].flags |= ZEND_BB_IRREDUCIBLE_LOOP;
-							flag |= ZEND_FUNC_IRREDUCIBLE;
-							flag &= ~ZEND_FUNC_NO_LOOPS;
-							break;
-						} else {
-							dj_parent = dj_spanning_tree[dj_parent];
-						}
+			/* In a loop back-edge (back-join edge), the successor dominates
+			   the predecessor.  */
+			if (dominates(blocks, i, pred)) {
+				blocks[i].flags |= ZEND_BB_LOOP_HEADER;
+				flag &= ~ZEND_FUNC_NO_LOOPS;
+				zend_worklist_push(&work, pred);
+			} else {
+				/* Otherwise it's a cross-join edge.  See if it's a branch
+				   to an ancestor on the dominator spanning tree.  */
+				int dj_parent = pred;
+				while (dj_parent >= 0) {
+					if (dj_parent == i) {
+						/* An sp-back edge: mark as irreducible.  */
+						blocks[i].flags |= ZEND_BB_IRREDUCIBLE_LOOP;
+						flag |= ZEND_FUNC_IRREDUCIBLE;
+						flag &= ~ZEND_FUNC_NO_LOOPS;
+						break;
+					} else {
+						dj_parent = dj_spanning_tree[dj_parent];
 					}
 				}
 			}
-			while (zend_worklist_len(&work)) {
-				j = zend_worklist_pop(&work);
-				if (blocks[j].loop_header < 0 && j != i) {
-					blocks[j].loop_header = i;
-					for (k = 0; k < blocks[j].predecessors_count; k++) {
-						zend_worklist_push(&work, cfg->predecessors[blocks[j].predecessor_offset + k]);
-					}
+		}
+		while (zend_worklist_len(&work)) {
+			j = zend_worklist_pop(&work);
+			if (blocks[j].loop_header < 0 && j != i) {
+				blocks[j].loop_header = i;
+				for (k = 0; k < blocks[j].predecessors_count; k++) {
+					zend_worklist_push(&work, cfg->predecessors[blocks[j].predecessor_offset + k]);
 				}
 			}
 		}
 	}
 
+	free_alloca(sorted_blocks, sorted_blocks_use_heap);
 	free_alloca(dj_spanning_tree, tree_use_heap);
 	ZEND_WORKLIST_FREE_ALLOCA(&work, list_use_heap);
 	*flags |= flag;
