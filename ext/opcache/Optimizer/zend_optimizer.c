@@ -978,9 +978,10 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level, zend
 		}
 
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
-			if (call_graph.op_arrays[i]->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
-				func_info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
-				if (func_info) {
+			func_info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
+			if (func_info) {
+				func_info->call_map = zend_build_call_map(&ctx.arena, func_info, call_graph.op_arrays[i]);
+				if (call_graph.op_arrays[i]->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 					zend_init_func_return_info(call_graph.op_arrays[i], script, &func_info->return_info);
 				}
 			}
