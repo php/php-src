@@ -196,8 +196,8 @@ typedef struct _php_basic_globals {
 	uint32_t *next;       /* next random value is computed from here */
 	int      left;        /* can *next++ this many times before reloading */
 
-    zend_bool mt_rand_seed_fixed; /* How mt_rand() has been seeded */
 	zend_bool mt_rand_is_seeded; /* Whether mt_rand() has been seeded */
+    zend_bool mt_rand_seed_fixed; /* How mt_rand() has been seeded */
 	zend_long mt_rand_mode;
 
 	/* syslog.c */
