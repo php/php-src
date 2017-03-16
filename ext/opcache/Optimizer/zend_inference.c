@@ -1357,21 +1357,24 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 		case ZEND_DO_ICALL:
 		case ZEND_DO_UCALL:
 		case ZEND_DO_FCALL_BY_NAME:
-			if (ssa->ops[line].result_def == var && ZEND_FUNC_INFO(op_array)) {
+			if (ssa->ops[line].result_def == var) {
 				zend_func_info *func_info = ZEND_FUNC_INFO(op_array);
-				zend_call_info *call_info = func_info->callee_info;
-
-				while (call_info && call_info->caller_call_opline != opline) {
-					call_info = call_info->next_callee;
+				zend_call_info *call_info;
+				if (!func_info || !func_info->call_map) {
+					break;
 				}
-				if (call_info) {
-					if (call_info->callee_func->type == ZEND_USER_FUNCTION) {
-						func_info = ZEND_FUNC_INFO(&call_info->callee_func->op_array);
-						if (func_info && func_info->return_info.has_range) {
-							*tmp = func_info->return_info.range;
-							return 1;
-						}
+
+				call_info = func_info->call_map[opline - op_array->opcodes];
+				if (!call_info) {
+					break;
+				}
+				if (call_info->callee_func->type == ZEND_USER_FUNCTION) {
+					func_info = ZEND_FUNC_INFO(&call_info->callee_func->op_array);
+					if (func_info && func_info->return_info.has_range) {
+						*tmp = func_info->return_info.range;
+						return 1;
 					}
+				}
 //TODO: we can't use type inference for internal functions at this point ???
 #if 0
 					uint32_t type;
@@ -1394,7 +1397,6 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 						return 1;
 					}
 #endif
-				}
 			}
 			break;
 		// FIXME: support for more opcodes
@@ -3128,13 +3130,10 @@ static void zend_update_type_info(const zend_op_array *op_array,
 				zend_func_info *func_info = ZEND_FUNC_INFO(op_array);
 				zend_call_info *call_info;
 
-				if (!func_info) {
+				if (!func_info || !func_info->call_map) {
 					goto unknown_opcode;
 				}
-				call_info = func_info->callee_info;
-				while (call_info && call_info->caller_call_opline != opline) {
-					call_info = call_info->next_callee;
-				}
+				call_info = func_info->call_map[opline - op_array->opcodes];
 				if (!call_info) {
 					goto unknown_opcode;
 				}
@@ -3563,11 +3562,7 @@ static int is_recursive_tail_call(const zend_op_array *op_array,
 		zend_op *op = op_array->opcodes + info->ssa.vars[info->ssa.ops[opline - op_array->opcodes].op1_use].definition;
 
 		if (op->opcode == ZEND_DO_UCALL) {
-			zend_call_info *call_info = info->callee_info;
-
-			while (call_info && call_info->caller_call_opline != op) {
-				call_info = call_info->next_callee;
-			}
+			zend_call_info *call_info = info->call_map[op - op_array->opcodes];
 			if (call_info && op_array == &call_info->callee_func->op_array) {
 				return 1;
 			}
