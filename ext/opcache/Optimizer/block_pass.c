@@ -2000,6 +2000,10 @@ void optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		return;
 	}
 
+	if ((uint64_t) op_array->last * (op_array->last_var + op_array->T) > 512 * 1024 * 1024) {
+		return;
+	}
+
     /* Build CFG */
 	checkpoint = zend_arena_checkpoint(ctx->arena);
 	if (!find_code_blocks(op_array, &cfg, ctx)) {
