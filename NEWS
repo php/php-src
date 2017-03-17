@@ -29,6 +29,7 @@ PHP                                                                        NEWS
   . Fixed bug #73973 (assertion error in debug_zval_dump). (andrewnester)
   . Fixed bug #73987 (Method compatibility check looks to original 
     definition and not parent). (pmmaga)
+  . Fixed bug #73991 (JSON_OBJECT_AS_ARRAY not respected). (Sara)
   . Fixed bug #74053 (Corrupted class entries on shutdown when a destructor
     spawns another object). (jim at commercebyte dot com)
   . Fixed bug #73971 (Filename got limited to MAX_PATH on Win32 when scan
