@@ -8043,6 +8043,39 @@ ZEND_VM_HANDLER(51, ZEND_MAKE_REF, VAR|CV, UNUSED)
 	ZEND_VM_NEXT_OPCODE();
 }
 
+ZEND_VM_HANDLER(187, ZEND_SWITCH, CONST|TMPVAR|CV, CONST, JMP_ADDR)
+{
+	USE_OPLINE
+	zend_free_op free_op1, free_op2;
+	zval *op, *table_op, *jump_zv;
+	HashTable *ht;
+
+	op = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+	table_op = GET_OP2_ZVAL_PTR(BP_VAR_R);
+	ht = Z_ARRVAL_P(table_op);
+
+	if (Z_TYPE_P(op) != opline->result.num) {
+		/* Wrong type, fall back to ZEND_CASE chain */
+		ZEND_VM_NEXT_OPCODE();
+	}
+
+	if (opline->result.num == IS_LONG) {
+		jump_zv = zend_hash_index_find(ht, Z_LVAL_P(op));
+	} else {
+		ZEND_ASSERT(opline->result.num == IS_STRING);
+		jump_zv = zend_hash_find(ht, Z_STR_P(op));
+	}
+
+	if (jump_zv != NULL) {
+		ZEND_VM_SET_RELATIVE_OPCODE(opline, Z_LVAL_P(jump_zv));
+		ZEND_VM_CONTINUE();
+	} else {
+		/* default */
+		ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
+		ZEND_VM_CONTINUE();
+	}
+}
+
 ZEND_VM_TYPE_SPEC_HANDLER(ZEND_ADD, (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG), ZEND_ADD_LONG_NO_OVERFLOW, CONST|TMPVARCV, CONST|TMPVARCV, SPEC(NO_CONST_CONST,COMMUTATIVE))
 {
 	USE_OPLINE

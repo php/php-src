@@ -4603,6 +4603,47 @@ void zend_compile_if(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+static zend_uchar determine_switch_jumptable_type(zend_ast_list *cases) {
+	uint32_t i;
+	zend_uchar common_type = IS_UNDEF;
+	for (i = 0; i < cases->children; i++) {
+		zend_ast *case_ast = cases->child[i];
+		zend_ast **cond_ast = &case_ast->child[0];
+		zval *cond_zv;
+		if (!case_ast->child[0]) {
+			/* Skip default clause */
+			continue;
+		}
+
+		zend_eval_const_expr(cond_ast);
+		if ((*cond_ast)->kind != ZEND_AST_ZVAL) {
+			/* Non-constant case */
+			return IS_UNDEF;
+		}
+
+		cond_zv = zend_ast_get_zval(case_ast->child[0]);
+		if (Z_TYPE_P(cond_zv) != IS_LONG && Z_TYPE_P(cond_zv) != IS_STRING) {
+			/* We only optimize switched on integers and strings */
+			return IS_UNDEF;
+		}
+
+		if (common_type == IS_UNDEF) {
+			common_type = Z_TYPE_P(cond_zv);
+		} else if (common_type != Z_TYPE_P(cond_zv)) {
+			/* Non-uniform case types */
+			return IS_UNDEF;
+		}
+
+		if (Z_TYPE_P(cond_zv) == IS_STRING
+				&& is_numeric_string(Z_STRVAL_P(cond_zv), Z_STRLEN_P(cond_zv), NULL, NULL, 0)) {
+			/* Numeric strings cannot be compared with a simple hash lookup */
+			return IS_UNDEF;
+		}
+	}
+
+	return common_type;
+}
+
 void zend_compile_switch(zend_ast *ast) /* {{{ */
 {
 	zend_ast *expr_ast = ast->child[0];
@@ -4613,7 +4654,9 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 
 	znode expr_node, case_node;
 	zend_op *opline;
-	uint32_t *jmpnz_opnums, opnum_default_jmp;
+	uint32_t *jmpnz_opnums, opnum_default_jmp, opnum_switch;
+	zend_uchar jumptable_type;
+	HashTable *jumptable = NULL;
 
 	zend_compile_expr(&expr_node, expr_ast);
 
@@ -4621,6 +4664,23 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 
 	case_node.op_type = IS_TMP_VAR;
 	case_node.u.op.var = get_temporary_variable(CG(active_op_array));
+
+	jumptable_type = determine_switch_jumptable_type(cases);
+	if (jumptable_type != IS_UNDEF && cases->children >= 4) {
+		znode jumptable_op;
+
+		ALLOC_HASHTABLE(jumptable);
+		zend_hash_init(jumptable, cases->children, NULL, NULL, 0);
+		jumptable_op.op_type = IS_CONST;
+		ZVAL_ARR(&jumptable_op.u.constant, jumptable);
+
+		opline = zend_emit_op(NULL, ZEND_SWITCH, &expr_node, &jumptable_op);
+		if (opline->op1_type == IS_CONST) {
+			zval_copy_ctor(CT_CONSTANT(opline->op1));
+		}
+		opline->result.num = jumptable_type;
+		opnum_switch = opline - CG(active_op_array)->opcodes;
+	}
 
 	jmpnz_opnums = safe_emalloc(sizeof(uint32_t), cases->children, 0);
 	for (i = 0; i < cases->children; ++i) {
@@ -4666,8 +4726,27 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 
 		if (cond_ast) {
 			zend_update_jump_target_to_next(jmpnz_opnums[i]);
+
+			if (jumptable) {
+				zval *cond_zv = zend_ast_get_zval(cond_ast);
+				zval jmp_target;
+				ZVAL_LONG(&jmp_target, get_next_op_number(CG(active_op_array))); 
+
+				ZEND_ASSERT(Z_TYPE_P(cond_zv) == jumptable_type);
+				if (Z_TYPE_P(cond_zv) == IS_LONG) {
+					zend_hash_index_add(jumptable, Z_LVAL_P(cond_zv), &jmp_target);
+				} else {
+					ZEND_ASSERT(Z_TYPE_P(cond_zv) == IS_STRING);
+					zend_hash_add(jumptable, Z_STR_P(cond_zv), &jmp_target);
+				}
+			}
 		} else {
 			zend_update_jump_target_to_next(opnum_default_jmp);
+
+			if (jumptable) {
+				opline = &CG(active_op_array)->opcodes[opnum_switch];
+				opline->extended_value = get_next_op_number(CG(active_op_array));
+			}
 		}
 
 		zend_compile_stmt(stmt_ast);
@@ -4675,6 +4754,11 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 
 	if (!has_default_case) {
 		zend_update_jump_target_to_next(opnum_default_jmp);
+
+		if (jumptable) {
+			opline = &CG(active_op_array)->opcodes[opnum_switch];
+			opline->extended_value = get_next_op_number(CG(active_op_array));
+		}
 	}
 
 	zend_end_loop(get_next_op_number(CG(active_op_array)), &expr_node);
