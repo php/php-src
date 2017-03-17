@@ -1794,6 +1794,11 @@ void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		return;
 	}
 
+	if (cfg.blocks_count * (op_array->last_var + op_array->T) > 64 * 1024 * 1024) {
+		zend_arena_release(&ctx->arena, checkpoint);
+		return;
+	}
+
 	if (ctx->debug_level & ZEND_DUMP_BEFORE_BLOCK_PASS) {
 		zend_dump_op_array(op_array, ZEND_DUMP_CFG, "before block pass", &cfg);
 	}

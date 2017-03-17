@@ -18,6 +18,10 @@ PHP                                                                        NEWS
   . Fixed bug #74004 (LIBXML_NOWARNING flag ingnored on loadHTML*).
     (somedaysummer)
 
+- Opcache:
+  . Fixed bug #74250 (OPcache compilation performance regression in PHP 5.6/7
+    with huge classes). (Nikita)
+
 - OpenSSL:
   . Fixed bug #72333 (fwrite() on non-blocking SSL sockets doesn't work).
     (Jakub Zelenka)
