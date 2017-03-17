@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     USE_ZEND_ALLOC=0). (Nikita)
   . Fixed bug #73960 (Leak with instance method calling static method with
     referenced return). (Nikita)
+  . Fixed bug #74265 (Build problems after 7.0.17 release: undefined reference
+    to `isfinite'). (Nikita)
 
 - Date:
   . Fixed bug #72096 (Swatch time value incorrect for dates before 1970). (mcq8)
