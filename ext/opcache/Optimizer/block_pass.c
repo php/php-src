@@ -140,6 +140,27 @@ static void strip_nops(zend_op_array *op_array, zend_basic_block *b)
 	}
 }
 
+static int get_const_switch_target(zend_cfg *cfg, zend_op_array *op_array, zend_basic_block *block, zend_op *opline, zval *val) {
+	HashTable *jumptable = Z_ARRVAL(ZEND_OP2_LITERAL(opline));
+	zval *zv;
+	if ((opline->opcode == ZEND_SWITCH_LONG && Z_TYPE_P(val) != IS_LONG)
+			|| (opline->opcode == ZEND_SWITCH_STRING && Z_TYPE_P(val) != IS_STRING)) {
+		/* fallback to next block */
+		return block->successors[block->successors_count - 1];
+	}
+	if (Z_TYPE_P(val) == IS_LONG) {
+		zv = zend_hash_index_find(jumptable, Z_LVAL_P(val));
+	} else {
+		ZEND_ASSERT(Z_TYPE_P(val) == IS_STRING);
+		zv = zend_hash_find(jumptable, Z_STR_P(val));
+	}
+	if (!zv) {
+		/* default */
+		return block->successors[block->successors_count - 2];
+	}
+	return cfg->map[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, Z_LVAL_P(zv))];
+}
+
 static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array, zend_bitset used_ext, zend_cfg *cfg, zend_op **Tsource)
 {
 	zend_op *opline, *src;
@@ -341,6 +362,25 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 				if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
 					/* LIST variable will be deleted later by FREE */
 					Tsource[VAR_NUM(opline->op1.var)] = NULL;
+				}
+				break;
+
+			case ZEND_SWITCH_LONG:
+			case ZEND_SWITCH_STRING:
+				if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
+					/* SWITCH variable will be deleted later by FREE, so we can't optimize it */
+					Tsource[VAR_NUM(opline->op1.var)] = NULL;
+					break;
+				}
+				if (opline->op1_type == IS_CONST) {
+					int target = get_const_switch_target(cfg, op_array, block, opline, &ZEND_OP1_LITERAL(opline));
+					literal_dtor(&ZEND_OP1_LITERAL(opline));
+					literal_dtor(&ZEND_OP2_LITERAL(opline));
+					opline->opcode = ZEND_JMP;
+					opline->op1_type = IS_UNUSED;
+					opline->op2_type = IS_UNUSED;
+					block->successors_count = 1;
+					block->successors[0] = target;
 				}
 				break;
 
@@ -886,6 +926,20 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 			case ZEND_FE_FETCH_RW:
 				opline->extended_value = ZEND_OPLINE_TO_OFFSET(opline, new_opcodes + blocks[b->successors[0]].start);
 				break;
+			case ZEND_SWITCH_LONG:
+			case ZEND_SWITCH_STRING:
+			{
+				HashTable *jumptable = Z_ARRVAL(ZEND_OP2_LITERAL(opline));
+				zval *zv;
+				uint32_t s = 0;
+				ZEND_ASSERT(b->successors_count == 2 + zend_hash_num_elements(jumptable));
+
+				ZEND_HASH_FOREACH_VAL(jumptable, zv) {
+					Z_LVAL_P(zv) = ZEND_OPLINE_TO_OFFSET(opline, new_opcodes + blocks[b->successors[s++]].start);
+				} ZEND_HASH_FOREACH_END();
+				opline->extended_value = ZEND_OPLINE_TO_OFFSET(opline, new_opcodes + blocks[b->successors[s++]].start);
+				break;
+			}
 		}
 	}
 
@@ -1752,7 +1806,12 @@ static void zend_merge_blocks(zend_op_array *op_array, zend_cfg *cfg)
 				prev->flags |= (b->flags & ZEND_BB_EXIT);
 				prev->len = b->start + b->len - prev->start;
 				prev->successors_count = b->successors_count;
-				memcpy(prev->successors, b->successors, b->successors_count * sizeof(int));
+				if (b->successors != b->successors_storage) {
+					prev->successors = b->successors;
+					b->successors = b->successors_storage;
+				} else {
+					memcpy(prev->successors, b->successors, b->successors_count * sizeof(int));
+				}
 
 				/* unlink & make block empty and unreachable */
 				b->flags = 0;
