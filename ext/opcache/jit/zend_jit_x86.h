@@ -167,7 +167,7 @@ typedef uintptr_t zend_jit_addr;
 #define Z_OFFSET(addr)   ((uint32_t)((addr)>>_ZEND_ADDR_OFFSET_SHIFT))
 #define Z_REG(addr)      ((zend_reg)(((addr)>>_ZEND_ADDR_REG_SHIFT) & _ZEND_ADDR_REG_MASK))
 
-static zend_always_inline zend_jit_addr zend_jit_decode_op(const zend_op_array *op_array, zend_uchar op_type, znode_op op)
+static zend_always_inline zend_jit_addr zend_jit_decode_op(const zend_op_array *op_array, zend_uchar op_type, znode_op op, const zend_op *opline, zend_lifetime_interval **ra, int ssa_var)
 {
 	if (op_type == IS_CONST) {
 #if ZEND_USE_ABS_CONST_ADDR
@@ -176,6 +176,17 @@ static zend_always_inline zend_jit_addr zend_jit_decode_op(const zend_op_array *
 		return ZEND_ADDR_CONST_ZVAL(RT_CONSTANT(op_array, op));
 #endif
 	} else {
+		if (ra && ssa_var >= 0 && ra[ssa_var]) {
+			zend_lifetime_interval *ival = ra[ssa_var];
+			uint32_t line = opline - op_array->opcodes;
+
+			do {
+				if (line >= ival->start && line <= ival->end) {
+					return ZEND_ADDR_REG(ival->reg);
+				}
+				ival = ival->next;
+			} while (ival);
+		}
 		return ZEND_ADDR_MEM_ZVAL(ZREG_FP, op.var);
 	}
 }

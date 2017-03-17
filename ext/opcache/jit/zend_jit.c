@@ -35,7 +35,7 @@
 #include "Optimizer/zend_dump.h"
 
 //#define REG_ALLOC
-#define DEBUG_REG_ALLOC
+//#define DEBUG_REG_ALLOC
 //#define CONTEXT_THREADED_JIT
 #define PREFER_MAP_32BIT
 //#define ZEND_JIT_RECORD
@@ -960,17 +960,6 @@ static int zend_jit_op_array_analyze2(zend_op_array *op_array, zend_script *scri
 }
 
 #ifdef REG_ALLOC
-typedef struct _zend_lifetime_interval zend_lifetime_interval;
-
-struct _zend_lifetime_interval {
-	int                     ssa_var;
-	int8_t                  reg;
-	zend_bool               split;
-	uint32_t                start;
-	uint32_t                end;
-	zend_lifetime_interval *next;
-};
-
 static int zend_jit_add_range(zend_lifetime_interval **intervals, int var, uint32_t from, uint32_t to)
 {
 	zend_lifetime_interval *ival = intervals[var];
@@ -1011,26 +1000,6 @@ static int zend_jit_begin_range(zend_lifetime_interval **intervals, int var, uin
 	return SUCCESS;
 }
 
-static void zend_jit_free_intervals(zend_lifetime_interval **intervals, int count)
-{
-	int i;
-
-	if (intervals) {
-		for (i = 0; i < count; i++) {
-			if (intervals[i]) {
-				zend_lifetime_interval *ival = intervals[i];
-
-				intervals[i] = NULL;
-				do {
-					zend_lifetime_interval *next = ival->next;
-					// TODO: efree(ival);
-					ival = next;
-				} while (ival);
-			}
-		}
-	}
-}
-
 static void zend_jit_insert_interval(zend_lifetime_interval **list, zend_lifetime_interval *ival)
 {
 	while (1) {
@@ -1047,13 +1016,20 @@ static void zend_jit_insert_interval(zend_lifetime_interval **list, zend_lifetim
 	}
 }
 
-static int zend_jit_split_interval(zend_lifetime_interval *current, uint32_t pos, zend_lifetime_interval **list)
+static int zend_jit_split_interval(zend_lifetime_interval *current, uint32_t pos, zend_lifetime_interval **list, zend_lifetime_interval **free)
 {
 	// TODO: emalloc();
-	zend_lifetime_interval *ival = zend_arena_alloc(&CG(arena), sizeof(zend_lifetime_interval));
+	zend_lifetime_interval *ival;
 
-	if (!ival) {
-		return FAILURE;
+	if (*free) {
+		ival = *free;
+		*free = ival->next;
+	} else {
+		ival = zend_arena_alloc(&CG(arena), sizeof(zend_lifetime_interval));
+
+		if (!ival) {
+			return FAILURE;
+		}
 	}
 
 	ival->ssa_var = current->ssa_var;
@@ -1146,17 +1122,28 @@ static int zend_jit_compute_liveness(zend_op_array *op_array, zend_ssa *ssa, zen
 	uint32_t *loop_end;
 	zend_ssa_phi *phi;
 	zend_lifetime_interval **intervals;
+	ALLOCA_FLAG(use_heap);
 
 	set_size = zend_bitset_len(ssa->vars_count);
-	intervals = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_lifetime_interval*));
-	live_in = zend_arena_calloc(&CG(arena), set_size * ssa->cfg.blocks_count, ZEND_BITSET_ELM_SIZE);
-	live = zend_arena_alloc(&CG(arena), set_size * ZEND_BITSET_ELM_SIZE);
-	pi_vars = zend_arena_alloc(&CG(arena), set_size * ZEND_BITSET_ELM_SIZE);
-	loop_end = zend_arena_calloc(&CG(arena), ssa->cfg.blocks_count, sizeof(uint32_t));
+	intervals = do_alloca(
+		ZEND_MM_ALIGNED_SIZE(ssa->vars_count * sizeof(zend_lifetime_interval*)) +
+		ZEND_MM_ALIGNED_SIZE((set_size * ssa->cfg.blocks_count + 2) * ZEND_BITSET_ELM_SIZE) +
+		ZEND_MM_ALIGNED_SIZE(ssa->cfg.blocks_count * sizeof(uint32_t)),
+		use_heap);
 
-	if (!intervals || !live || !live_in || !pi_vars) {
-		goto failure;
+	if (!intervals) {
+		*list = NULL;
+		return FAILURE;
 	}
+
+	live_in = (zend_bitset)((char*)intervals + ZEND_MM_ALIGNED_SIZE(ssa->vars_count * sizeof(zend_lifetime_interval*)));
+	live = (zend_bitset)((char*)live_in + ZEND_MM_ALIGNED_SIZE((set_size * ssa->cfg.blocks_count) * ZEND_BITSET_ELM_SIZE));
+	pi_vars = (zend_bitset)((char*)live + ZEND_MM_ALIGNED_SIZE(set_size * ZEND_BITSET_ELM_SIZE));
+	loop_end = (uint32_t*)((char*)pi_vars + ZEND_MM_ALIGNED_SIZE(set_size * ZEND_BITSET_ELM_SIZE));
+
+	memset(intervals, 0, ssa->vars_count * sizeof(zend_lifetime_interval*));
+	zend_bitset_clear(live_in, set_size * ssa->cfg.blocks_count);
+	memset(loop_end, 0, ssa->cfg.blocks_count * sizeof(uint32_t));
 
 	for (i = ssa->cfg.blocks_count - 1; i >= 0; i--) {
 		zend_basic_block *b = ssa->cfg.blocks + i;
@@ -1305,11 +1292,12 @@ static int zend_jit_compute_liveness(zend_op_array *op_array, zend_ssa *ssa, zen
 #endif
 
 	*list = zend_jit_sort_intervals(intervals, ssa->vars_count);
+	free_alloca(intervals, use_heap);
 	return SUCCESS;
 
 failure:
-	zend_jit_free_intervals(intervals, ssa->vars_count);
 	*list = NULL;
+	free_alloca(intervals, use_heap);
 	return FAILURE;
 }
 
@@ -1317,7 +1305,7 @@ failure:
    Christian Wimmer VEE'05 (2005), Figure 4. Allocation without spilling.
    and "Linear Scan Register Allocation on SSA Form", Christian Wimmer and
    Michael Franz, CGO'10 (2010), Figure 6. */
-static int zend_jit_try_allocate_free_reg(zend_op_array *op_array, zend_ssa *ssa, zend_lifetime_interval *current, zend_regset available, zend_lifetime_interval *active, zend_lifetime_interval *inactive, zend_lifetime_interval **list)
+static int zend_jit_try_allocate_free_reg(zend_op_array *op_array, zend_ssa *ssa, zend_lifetime_interval *current, zend_regset available, zend_lifetime_interval *active, zend_lifetime_interval *inactive, zend_lifetime_interval **list, zend_lifetime_interval **free)
 {
 	zend_lifetime_interval *it;
 	uint32_t freeUntilPos[ZREG_NUM];
@@ -1431,17 +1419,13 @@ static int zend_jit_try_allocate_free_reg(zend_op_array *op_array, zend_ssa *ssa
 		current->reg = reg;
 		return 1;
 	} else {
-		/* TODO: enable interval splitting */
-#if 1
-		return 0;
-#else
+		/* TODO: enable interval splitting ??? */
 		/* register available for the first part of the interval */
-		if (zend_jit_split_interval(current, pos, list) != SUCCESS) {
+		if (1 || zend_jit_split_interval(current, pos, list, free) != SUCCESS) {
 			return 0;
 		}
 		current->reg = reg;
 		return 1;
-#endif
 	}
 }
 
@@ -1457,28 +1441,18 @@ static int zend_jit_allocate_blocked_reg(void)
 
 /* See "Optimized Interval Splitting in a Linear Scan Register Allocator",
    Christian Wimmer VEE'10 (2005), Figure 2. */
-static int zend_jit_linear_scan(zend_op_array *op_array, zend_ssa *ssa, zend_lifetime_interval *list)
+static zend_lifetime_interval* zend_jit_linear_scan(zend_op_array *op_array, zend_ssa *ssa, zend_lifetime_interval *list)
 {
-	zend_lifetime_interval *unhandled, *active, *inactive, *handled;
+	zend_lifetime_interval *unhandled, *active, *inactive, *handled, *free;
 	zend_lifetime_interval *current, **p, *q;
 	uint32_t position;
 	zend_regset available = ZEND_REGSET_UNION(ZEND_REGSET_GP, ZEND_REGSET_FP);
-
-#ifdef DEBUG_REG_ALLOC
-	{
-		zend_lifetime_interval *ival = list;
-
-		fprintf(stderr, "Before Linear Scan\n");
-		while (ival != NULL) {
-			fprintf(stderr, "%u-%u: #%d\n", ival->start, ival->end, ival->ssa_var);
-			ival = ival->next;
-		}
-	}
-#endif
+	int count;
+	zend_lifetime_interval *intervals[3];
 
 	unhandled = list;
-	/* active = inactive = handled = {} */
-	active = inactive = handled = NULL;
+	/* active = inactive = handled = free = {} */
+	active = inactive = handled = free = NULL;
 	while (unhandled != NULL) {
 		current = unhandled;
 		unhandled = unhandled->next;
@@ -1523,92 +1497,53 @@ static int zend_jit_linear_scan(zend_op_array *op_array, zend_ssa *ssa, zend_lif
 			}
 		}
 
-		if (zend_jit_try_allocate_free_reg(op_array, ssa, current, available, active, inactive, &unhandled) ||
+		if (zend_jit_try_allocate_free_reg(op_array, ssa, current, available, active, inactive, &unhandled, &free) ||
 		    zend_jit_allocate_blocked_reg()) {
 			ZEND_REGSET_EXCL(available, current->reg);
 			current->next = active;
 			active = current;
 		} else {
-			current->next = handled;
-			handled = current;
+			current->next = free;
+			free = current;
 		}
 	}
 
-#ifdef DEBUG_REG_ALLOC
-	{
-		int count = 0;
-		zend_lifetime_interval *intervals[3];
+	count = 0;
 
-		if (handled) {
-			intervals[count++] = handled;
-		}
-		if (inactive) {
-			intervals[count++] = inactive;
-		}
-		if (active) {
-			intervals[count++] = active;
-		}
-		if (count) {
-			handled = zend_jit_sort_intervals(intervals, count);
-		}
+	if (handled) {
+		intervals[count++] = handled;
 	}
-	{
-		zend_lifetime_interval *ival = handled;
-
-		fprintf(stderr, "After Linear Scan\n");
-		while (ival != NULL) {
-			if (ival->reg > ZREG_NONE) {
-				fprintf(stderr, "%u-%u: #%d (%s)\n", ival->start, ival->end, ival->ssa_var, zend_reg_name[ival->reg]);
-			} else {
-				fprintf(stderr, "%u-%u: #%d (no-reg)\n", ival->start, ival->end, ival->ssa_var);
-			}
-			ival = ival->next;
-		}
-/*
-		ival = inactive;
-		while (ival != NULL) {
-			if (ival->reg > ZREG_NONE) {
-				fprintf(stderr, "%u-%u: #%d (%s)\n", ival->start, ival->end, ival->ssa_var, zend_reg_name[ival->reg]);
-			} else {
-				fprintf(stderr, "%u-%u: #%d (no-reg)\n", ival->start, ival->end, ival->ssa_var);
-			}
-			ival = ival->next;
-		}
-
-		ival = active;
-		while (ival != NULL) {
-			if (ival->reg > ZREG_NONE) {
-				fprintf(stderr, "%u-%u: #%d (%s)\n", ival->start, ival->end, ival->ssa_var, zend_reg_name[ival->reg]);
-			} else {
-				fprintf(stderr, "%u-%u: #%d (no-reg)\n", ival->start, ival->end, ival->ssa_var);
-			}
-			ival = ival->next;
-		}
-*/
+	if (inactive) {
+		intervals[count++] = inactive;
 	}
-#endif
-
-	return SUCCESS;
+	if (active) {
+		intervals[count++] = active;
+	}
+	if (count) {
+		return zend_jit_sort_intervals(intervals, count);
+	} else {
+		return NULL;
+	}
 }
 
-static int zend_jit_allocate_registers(zend_op_array *op_array, zend_ssa *ssa)
+static zend_lifetime_interval** zend_jit_allocate_registers(zend_op_array *op_array, zend_ssa *ssa)
 {
 	void *checkpoint;
 	int set_size, candidates_count, i;
-	zend_bitset candidates;
-	zend_lifetime_interval *list;
+	zend_bitset candidates = NULL;
+	zend_lifetime_interval *list, *ival;
+	zend_lifetime_interval **intervals;
+	ALLOCA_FLAG(use_heap);
 
 	if (!ssa->var_info) {
-		return SUCCESS;
+		return NULL;
 	}
-
-	checkpoint = zend_arena_checkpoint(CG(arena));
 
 	/* Identify SSA variables suitable for register allocation */
 	set_size = zend_bitset_len(ssa->vars_count);
-	candidates = zend_arena_alloc(&CG(arena), set_size * ZEND_BITSET_ELM_SIZE);
+	candidates = ZEND_BITSET_ALLOCA(set_size, use_heap);
 	if (!candidates) {
-		goto failure;
+		return NULL;
 	}
 	candidates_count = 0;
 	zend_bitset_clear(candidates, set_size);
@@ -1621,26 +1556,80 @@ static int zend_jit_allocate_registers(zend_op_array *op_array, zend_ssa *ssa)
 		}
 	}
 	if (!candidates_count) {
-		goto success;
+		free_alloca(candidates, use_heap);
+		return NULL;
 	}
+
+	checkpoint = zend_arena_checkpoint(CG(arena));
 
 	/* Find life-time intervals */
 	if (zend_jit_compute_liveness(op_array, ssa, candidates, &list) != SUCCESS) {
 		goto failure;
 	}
 
-	/* Linear Scan Register Allocation */
-	if (zend_jit_linear_scan(op_array, ssa, list) != SUCCESS) {
-		goto failure;
-	}
+	if (list) {
+#ifdef DEBUG_REG_ALLOC
+		fprintf(stderr, "Before Linear Scan\n");
+		ival = list;
+		while (ival != NULL) {
+			fprintf(stderr, "%u-%u: #%d\n", ival->start, ival->end, ival->ssa_var);
+			ival = ival->next;
+		}
+#endif
 
-success:
-	zend_arena_release(&CG(arena), checkpoint);
-	return SUCCESS;
+		/* Linear Scan Register Allocation */
+		list = zend_jit_linear_scan(op_array, ssa, list);
+
+		if (list) {
+#ifdef DEBUG_REG_ALLOC
+			fprintf(stderr, "After Linear Scan\n");
+			ival = list;
+			while (ival != NULL) {
+				fprintf(stderr, "%u-%u: #%d (%s)\n", ival->start, ival->end, ival->ssa_var, zend_reg_name[ival->reg]);
+				ival = ival->next;
+			}
+#endif
+
+			intervals = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_lifetime_interval*));
+			if (!intervals) {
+				goto failure;
+			}
+
+			ival = list;
+			while (ival != NULL) {
+				zend_lifetime_interval *next = ival->next;
+
+				ival->next = intervals[ival->ssa_var];
+				intervals[ival->ssa_var] = ival;
+				ival = next;
+			}
+
+#ifdef DEBUG_REG_ALLOC
+			fprintf(stderr, "Allocated Live Ranges\n");
+			for (i = 0; i < ssa->vars_count; i++) {
+				if (intervals[i]) {
+					ival = intervals[i];
+
+					fprintf(stderr, "#%d: %u-%u (%s)", ival->ssa_var, ival->start, ival->end, zend_reg_name[ival->reg]);
+					ival = ival->next;
+					while (ival) {
+						fprintf(stderr, ", %u-%u (%s)", ival->start, ival->end, zend_reg_name[ival->reg]);
+						ival = ival->next;
+					}
+					fprintf(stderr, "\n");
+				}
+			}
+#endif
+
+			free_alloca(candidates, use_heap);
+			return intervals;
+		}
+	}
 
 failure:
 	zend_arena_release(&CG(arena), checkpoint);
-	return FAILURE;
+	free_alloca(candidates, use_heap);
+	return NULL;
 }
 #endif
 
@@ -1651,6 +1640,10 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 	dasm_State* dasm_state = NULL;
 	void *handler;
 	int call_level = 0;
+#ifdef REG_ALLOC
+	void *checkpoint;
+#endif
+	zend_lifetime_interval **ra = NULL;
 
 #ifdef ZEND_JIT_FILTER
 	const char *names[] = {
@@ -1679,6 +1672,11 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 	}
 	return SUCCESS;
 pass:
+#endif
+
+#ifdef REG_ALLOC
+	checkpoint = zend_arena_checkpoint(CG(arena));
+	ra = zend_jit_allocate_registers(op_array, ssa);
 #endif
 
 	/* mark hidden branch targets */
@@ -1804,7 +1802,7 @@ pass:
 					case ZEND_SUB:
 					case ZEND_MUL:
 //					case ZEND_DIV: // TODO: check for division by zero ???
-						if (!zend_jit_math(&dasm_state, opline, &i, op_array, ssa)) {
+						if (!zend_jit_math(&dasm_state, opline, &i, op_array, ssa, ra)) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2126,12 +2124,18 @@ done:
 	}
 	dasm_free(&dasm_state);
 
+#ifdef REG_ALLOC
+	zend_arena_release(&CG(arena), checkpoint);
+#endif
 	return SUCCESS;
 
 jit_failure:
     if (dasm_state) {
 		dasm_free(&dasm_state);
     }
+#ifdef REG_ALLOC
+	zend_arena_release(&CG(arena), checkpoint);
+#endif
 	return FAILURE;
 }
 
@@ -2168,12 +2172,6 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script, cons
 	if (zend_jit_op_array_analyze2(op_array, script, &ssa, &flags) != SUCCESS) {
 		goto jit_failure;
 	}
-
-#ifdef REG_ALLOC
-	if (zend_jit_allocate_registers(op_array, &ssa)  != SUCCESS) {
-		goto jit_failure;
-	}
-#endif
 
 	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_SSA) {
 		zend_dump_op_array(op_array, ZEND_DUMP_HIDE_UNREACHABLE|ZEND_DUMP_RC_INFERENCE|ZEND_DUMP_SSA|ZEND_DUMP_RT_CONSTANTS, "JIT", &ssa);
@@ -2465,11 +2463,6 @@ ZEND_API int zend_jit_script(zend_script *script)
 				if (zend_jit_op_array_analyze2(call_graph.op_arrays[i], script, &info->ssa, &info->flags) != SUCCESS) {
 					goto jit_failure;
 				}
-#ifdef REG_ALLOC
-				if (zend_jit_allocate_registers(call_graph.op_arrays[i], &info->ssa)  != SUCCESS) {
-					goto jit_failure;
-				}
-#endif
 			}
 		}
 
