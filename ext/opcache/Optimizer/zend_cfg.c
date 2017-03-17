@@ -73,7 +73,12 @@ static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_bloc
 						succ->flags |= ZEND_BB_FOLLOW;
 					}
 				} else {
-					ZEND_ASSERT(0);
+					ZEND_ASSERT(opcode == ZEND_SWITCH);
+					if (i == b->successors_count) {
+						succ->flags |= ZEND_BB_FOLLOW;
+					} else {
+						succ->flags |= ZEND_BB_TARGET;
+					}
 				}
 			} else {
 				succ->flags |= ZEND_BB_FOLLOW;
@@ -399,6 +404,17 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 				BB_START(OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes);
 				BB_START(i + 1);
 				break;
+			case ZEND_SWITCH:
+			{
+				HashTable *jumptable = Z_ARRVAL_P(CRT_CONSTANT(opline->op2));
+				zval *zv;
+				ZEND_HASH_FOREACH_VAL(jumptable, zv) {
+					BB_START(ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, Z_LVAL_P(zv)));
+				} ZEND_HASH_FOREACH_END();
+				BB_START(ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
+				BB_START(i + 1);
+				break;
+			}
 			case ZEND_UNSET_VAR:
 			case ZEND_ISSET_ISEMPTY_VAR:
 				if (((opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_LOCAL) &&
@@ -553,6 +569,23 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 				block->successors[0] = block_map[OP_JMP_ADDR(opline, opline->op1) - op_array->opcodes];
 				block->successors[1] = j + 1;
 				break;
+			case ZEND_SWITCH:
+			{
+				HashTable *jumptable = Z_ARRVAL_P(CRT_CONSTANT(opline->op2));
+				zval *zv;
+				uint32_t s = 0;
+
+				block->successors_count = 2 + zend_hash_num_elements(jumptable);
+				block->successors = zend_arena_calloc(arena, block->successors_count, sizeof(int));
+
+				ZEND_HASH_FOREACH_VAL(jumptable, zv) {
+					block->successors[s++] = block_map[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, Z_LVAL_P(zv))];
+				} ZEND_HASH_FOREACH_END();
+
+				block->successors[s++] = block_map[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value)];
+				block->successors[s++] = j + 1;
+				break;
+			}
 			default:
 				block->successors_count = 1;
 				block->successors[0] = j + 1;

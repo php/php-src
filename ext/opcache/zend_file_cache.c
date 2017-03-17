@@ -431,6 +431,7 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 				case ZEND_DECLARE_ANON_INHERITED_CLASS:
 				case ZEND_FE_FETCH_R:
 				case ZEND_FE_FETCH_RW:
+				case ZEND_SWITCH:
 					/* relative extended_value don't have to be changed */
 					break;
 			}
@@ -1030,6 +1031,7 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 				case ZEND_DECLARE_ANON_INHERITED_CLASS:
 				case ZEND_FE_FETCH_R:
 				case ZEND_FE_FETCH_RW:
+				case ZEND_SWITCH:
 					/* relative extended_value don't have to be changed */
 					break;
 			}

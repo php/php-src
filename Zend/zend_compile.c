@@ -2081,6 +2081,7 @@ static void zend_check_live_ranges(zend_op *opline) /* {{{ */
 		} else if (opline->opcode == ZEND_FAST_RET) {
 			/* fast_calls don't have to be destroyed */
 		} else if (opline->opcode == ZEND_CASE ||
+		           opline->opcode == ZEND_SWITCH ||
 		           opline->opcode == ZEND_FE_FETCH_R ||
 		           opline->opcode == ZEND_FE_FETCH_RW ||
 			       opline->opcode == ZEND_FE_FREE ||
