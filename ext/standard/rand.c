@@ -33,7 +33,6 @@
  */
 PHPAPI void php_srand(zend_long seed)
 {
-	BG(mt_rand_seed_fixed) = 1;
 	php_mt_srand(seed);
 }
 /* }}} */

@@ -168,7 +168,6 @@ PHPAPI uint32_t php_mt_rand(void)
 	register uint32_t s1;
 
 	if (UNEXPECTED(!BG(mt_rand_is_seeded))) {
-		BG(mt_rand_seed_fixed) = 0;
 		php_mt_srand(GENERATE_SEED());
 	}
 
@@ -198,12 +197,8 @@ PHP_FUNCTION(mt_srand)
 		Z_PARAM_LONG(mode)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ZEND_NUM_ARGS() == 0) {
-		BG(mt_rand_seed_fixed) = 0;
+	if (ZEND_NUM_ARGS() == 0)
 		seed = GENERATE_SEED();
-	} else {
-		BG(mt_rand_seed_fixed) = 1;
-	}
 
 	switch (mode) {
 		case MT_RAND_PHP:

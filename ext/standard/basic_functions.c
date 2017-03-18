@@ -3490,7 +3490,6 @@ static void php_putenv_destructor(zval *zv) /* {{{ */
 
 static void basic_globals_ctor(php_basic_globals *basic_globals_p) /* {{{ */
 {
-	BG(mt_rand_seed_fixed) = 0;
 	BG(mt_rand_is_seeded) = 0;
 	BG(mt_rand_mode) = MT_RAND_MT19937;
 	BG(umask) = -1;
@@ -3754,11 +3753,6 @@ PHP_RINIT_FUNCTION(basic) /* {{{ */
 {
 	memset(BG(strtok_table), 0, 256);
 
-	if (BG(mt_rand_seed_fixed)) {
-		BG(mt_rand_seed_fixed) = 0;
-		BG(mt_rand_is_seeded) = 0;
-	}
-
 	BG(serialize_lock) = 0;
 	memset(&BG(serialize), 0, sizeof(BG(serialize)));
 	memset(&BG(unserialize), 0, sizeof(BG(unserialize)));
@@ -3809,6 +3803,8 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 #ifdef HAVE_PUTENV
 	zend_hash_destroy(&BG(putenv_ht));
 #endif
+
+	BG(mt_rand_is_seeded) = 0;
 
 	if (BG(umask) != -1) {
 		umask(BG(umask));
