@@ -182,6 +182,7 @@ END_EXTERN_C()
 #undef strlcpy
 #define strlcpy php_strlcpy
 #define HAVE_STRLCPY 1
+#define USE_STRLCPY_PHP_IMPL 1
 #endif
 
 #ifndef HAVE_STRLCAT
@@ -191,6 +192,7 @@ END_EXTERN_C()
 #undef strlcat
 #define strlcat php_strlcat
 #define HAVE_STRLCAT 1
+#define USE_STRLCAT_PHP_IMPL 1
 #endif
 
 #ifndef HAVE_EXPLICIT_BZERO
