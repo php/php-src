@@ -181,6 +181,7 @@ PHPAPI size_t php_strlcpy(char *dst, const char *src, size_t siz);
 END_EXTERN_C()
 #undef strlcpy
 #define strlcpy php_strlcpy
+#define HAVE_STRLCPY 1
 #endif
 
 #ifndef HAVE_STRLCAT
@@ -189,6 +190,7 @@ PHPAPI size_t php_strlcat(char *dst, const char *src, size_t siz);
 END_EXTERN_C()
 #undef strlcat
 #define strlcat php_strlcat
+#define HAVE_STRLCAT 1
 #endif
 
 #ifndef HAVE_EXPLICIT_BZERO
