@@ -1462,6 +1462,23 @@ static zend_lifetime_interval* zend_jit_linear_scan(zend_op_array *op_array, zen
 		while (*p) {
 			q = *p;
 			if (q->end <= position) {
+				if (q->end == position) {
+					/* In some cases, we may (and should) reuse operand
+					   registers for result */
+					switch (op_array->opcodes[position].opcode) {
+						case ZEND_ADD:
+						case ZEND_MUL:
+						case ZEND_QM_ASSIGN:
+							if (q->ssa_var != ssa->ops[position].op1_use) {
+								p = &q->next;
+								continue;
+							}
+							break;
+						default:
+							p = &q->next;
+							continue;
+					}
+				}
 				/* move ival from active to handled */
 				ZEND_REGSET_INCL(available, q->reg);
 				*p = q->next;
