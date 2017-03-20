@@ -1345,7 +1345,13 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN(T_DOUBLE_CAST);
 }
 
-<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("string"|"binary"){TABS_AND_SPACES}")" {
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("string"){TABS_AND_SPACES}")" {
+	RETURN_TOKEN(T_STRING_CAST);
+}
+
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("binary"){TABS_AND_SPACES}")" {
+	zend_error(E_DEPRECATED, "The usage of the binary cast is deprecated");
+
 	RETURN_TOKEN(T_STRING_CAST);
 }
 
@@ -1968,6 +1974,10 @@ inline_char_handler:
 	char *end;
 	int bprefix = (yytext[0] != '\'') ? 1 : 0;
 
+	if (bprefix == 1) {
+		zend_error(E_DEPRECATED, "The usage of the 'b' prefix is deprecated");
+	}
+
 	while (1) {
 		if (YYCURSOR < YYLIMIT) {
 			if (*YYCURSOR == '\'') {
@@ -2035,6 +2045,10 @@ inline_char_handler:
 <ST_IN_SCRIPTING>b?["] {
 	int bprefix = (yytext[0] != '"') ? 1 : 0;
 
+	if (bprefix == 1) {
+		zend_error(E_DEPRECATED, "The usage of the 'b' prefix is deprecated");
+	}
+
 	while (YYCURSOR < YYLIMIT) {
 		switch (*YYCURSOR++) {
 			case '"':
@@ -2078,6 +2092,10 @@ inline_char_handler:
 	char *s;
 	int bprefix = (yytext[0] != '<') ? 1 : 0;
 	zend_heredoc_label *heredoc_label = emalloc(sizeof(zend_heredoc_label));
+
+	if (bprefix == 1) {
+		zend_error(E_DEPRECATED, "The usage of the 'b' prefix is deprecated");
+	}
 
 	CG(zend_lineno)++;
 	heredoc_label->length = yyleng-bprefix-3-1-(yytext[yyleng-2]=='\r'?1:0);

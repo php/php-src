@@ -40,9 +40,6 @@ $wouldblocks = array(
   array(),
   "string",
   "",
-  /* binary input */
-  b"string",
-  b"",
   "\0"
 );
 
@@ -93,10 +90,6 @@ bool(true)
 bool(true)
 -- Inner iteration 11 in 0 --
 bool(true)
--- Inner iteration 12 in 0 --
-bool(true)
--- Inner iteration 13 in 0 --
-bool(true)
 --- Outer iteration 1 ---
 bool(true)
 -- Inner iteration 0 in 1 --
@@ -122,10 +115,6 @@ bool(true)
 -- Inner iteration 10 in 1 --
 bool(true)
 -- Inner iteration 11 in 1 --
-bool(true)
--- Inner iteration 12 in 1 --
-bool(true)
--- Inner iteration 13 in 1 --
 bool(true)
 --- Outer iteration 2 ---
 bool(true)
@@ -153,10 +142,6 @@ bool(true)
 bool(true)
 -- Inner iteration 11 in 2 --
 bool(true)
--- Inner iteration 12 in 2 --
-bool(true)
--- Inner iteration 13 in 2 --
-bool(true)
 --- Outer iteration 3 ---
 bool(true)
 -- Inner iteration 0 in 3 --
@@ -182,10 +167,6 @@ bool(true)
 -- Inner iteration 10 in 3 --
 bool(true)
 -- Inner iteration 11 in 3 --
-bool(true)
--- Inner iteration 12 in 3 --
-bool(true)
--- Inner iteration 13 in 3 --
 bool(true)
 --- Outer iteration 4 ---
 bool(true)
@@ -213,10 +194,6 @@ bool(true)
 bool(true)
 -- Inner iteration 11 in 4 --
 bool(true)
--- Inner iteration 12 in 4 --
-bool(true)
--- Inner iteration 13 in 4 --
-bool(true)
 --- Outer iteration 5 ---
 bool(true)
 -- Inner iteration 0 in 5 --
@@ -242,10 +219,6 @@ bool(true)
 -- Inner iteration 10 in 5 --
 bool(true)
 -- Inner iteration 11 in 5 --
-bool(true)
--- Inner iteration 12 in 5 --
-bool(true)
--- Inner iteration 13 in 5 --
 bool(true)
 --- Outer iteration 6 ---
 bool(true)
@@ -273,10 +246,6 @@ bool(true)
 bool(true)
 -- Inner iteration 11 in 6 --
 bool(true)
--- Inner iteration 12 in 6 --
-bool(true)
--- Inner iteration 13 in 6 --
-bool(true)
 --- Outer iteration 7 ---
 bool(true)
 -- Inner iteration 0 in 7 --
@@ -302,10 +271,6 @@ bool(true)
 -- Inner iteration 10 in 7 --
 bool(true)
 -- Inner iteration 11 in 7 --
-bool(true)
--- Inner iteration 12 in 7 --
-bool(true)
--- Inner iteration 13 in 7 --
 bool(true)
 --- Outer iteration 8 ---
 bool(true)
@@ -333,10 +298,6 @@ bool(true)
 bool(true)
 -- Inner iteration 11 in 8 --
 bool(true)
--- Inner iteration 12 in 8 --
-bool(true)
--- Inner iteration 13 in 8 --
-bool(true)
 --- Outer iteration 9 ---
 bool(true)
 -- Inner iteration 0 in 9 --
@@ -362,10 +323,6 @@ bool(true)
 -- Inner iteration 10 in 9 --
 bool(true)
 -- Inner iteration 11 in 9 --
-bool(true)
--- Inner iteration 12 in 9 --
-bool(true)
--- Inner iteration 13 in 9 --
 bool(true)
 
 *** Done ***
