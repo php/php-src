@@ -108,7 +108,6 @@ typedef struct {
 	unsigned buffered:1;
 	unsigned emulate_prepare:1;
 	unsigned fetch_table_names:1;
-	unsigned _reserved:31;
 #if !PDO_USE_MYSQLND
 	zend_ulong max_buffer_size;
 #endif
