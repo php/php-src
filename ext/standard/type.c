@@ -214,6 +214,21 @@ PHP_FUNCTION(boolval)
 }
 /* }}} */
 
+/* {{{ proto bool boolval(mixed var)
+   Get the boolean value of a variable */
+PHP_FUNCTION(boolval)
+{
+	zval **val;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &val) == FAILURE) {
+		return;
+	}
+
+	RETVAL_ZVAL(*val, 1, 0);
+	convert_to_boolean(return_value);
+}
+/* }}} */
+
 /* {{{ proto string strval(mixed var)
    Get the string value of a variable */
 PHP_FUNCTION(strval)
