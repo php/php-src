@@ -151,22 +151,21 @@ static zend_long dblib_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_l
 
 static int dblib_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, char **quoted, size_t *quotedlen, enum pdo_param_type paramtype)
 {
-
 	size_t i;
 	char * q;
 	*quotedlen = 0;
 
 	/* Detect quoted length, adding extra char for doubled single quotes */
-	for(i=0;i<unquotedlen;i++) {
-		if(unquoted[i] == '\'') ++*quotedlen;
+	for (i = 0; i < unquotedlen; i++) {
+		if (unquoted[i] == '\'') ++*quotedlen;
 		++*quotedlen;
 	}
 
 	*quotedlen += 2; /* +2 for opening, closing quotes */
-	q  = *quoted = emalloc(*quotedlen+1); /* Add byte for terminal null */
+	q = *quoted = emalloc(*quotedlen + 1); /* Add byte for terminal null */
 	*q++ = '\'';
 
-	for (i=0;i<unquotedlen;i++) {
+	for (i = 0; i < unquotedlen; i++) {
 		if (unquoted[i] == '\'') {
 			*q++ = '\'';
 			*q++ = '\'';
