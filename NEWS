@@ -112,6 +112,7 @@ PHP                                                                        NEWS
 
 - PDO:
   . Add "Sent SQL" to debug dump for emulated prepares. (Adam Baratz)
+  . Add parameter types for national character set strings. (Adam Baratz)
 
 - PDO_DBlib:
   . Fixed bug #73234 (Emulated statements let value dictate parameter type).

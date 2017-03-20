@@ -104,6 +104,7 @@ typedef struct {
 typedef struct {
 	MYSQL 		*server;
 
+	unsigned assume_national_character_set_strings:1;
 	unsigned attached:1;
 	unsigned buffered:1;
 	unsigned emulate_prepare:1;
