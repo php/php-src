@@ -2548,7 +2548,7 @@ static void update_errors_warnings(timelib_error_container *last_errors) /* {{{ 
 
 static void php_date_set_time_fraction(timelib_time *time, int microseconds)
 {
-	time->f = microseconds / 1000000;
+	time->f = (double) microseconds / 1000000;
 }
 
 static void php_date_get_current_time_with_fraction(time_t *sec, suseconds_t *usec)
