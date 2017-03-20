@@ -2471,6 +2471,16 @@ ZEND_API int zend_jit_script(zend_script *script)
 		}
 
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
+			info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
+			if (info) {
+				info->call_map = zend_build_call_map(&CG(arena), info, call_graph.op_arrays[i]);
+				if (call_graph.op_arrays[i]->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+					zend_init_func_return_info(call_graph.op_arrays[i], script, &info->return_info);
+				}
+			}
+		}
+
+		for (i = 0; i < call_graph.op_arrays_count; i++) {
 			if (zend_jit_trigger == ZEND_JIT_ON_DOC_COMMENT &&
 			    !zend_needs_manual_jit(call_graph.op_arrays[i])) {
 				continue;
