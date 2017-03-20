@@ -19,7 +19,7 @@ $serverCode = <<<'CODE'
 	stream_set_blocking($conn, false);
 	usleep(50000);
 	$read = [$conn];
-	while (stream_select($read, $write, $except, 180)) {
+	while (stream_select($read, $write, $except, 1)) {
 		$result = fread($conn, 100000);
 		if (!$result) {
 		    break;
@@ -42,7 +42,7 @@ $clientCode = <<<'CODE'
 	function blocking_fwrite($fp, $buf) {
 		$write = [$fp];
 		$total = 0;
-		while (stream_select($read, $write, $except, 180)) {
+		while (stream_select($read, $write, $except, 1)) {
 			$result = fwrite($fp, $buf);
 			if (!$result) {
 			    break;
