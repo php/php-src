@@ -20,7 +20,7 @@
 
 #include "php.h"
 
-#ifndef HAVE_STRLCPY
+#ifdef USE_STRLCPY_PHP_IMPL
 
 /*     $OpenBSD: strlcpy.c,v 1.15 2016/10/16 17:37:39 dtucker Exp $    */
 
