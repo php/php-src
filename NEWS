@@ -165,5 +165,6 @@ PHP                                                                        NEWS
 
 - ZIP:
   . Add support for encrypted archives. (Remi)
+  . Fixed Bug #73803 (Reflection of ZipArchive does not show public properties). (Remi)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
