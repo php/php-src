@@ -116,6 +116,7 @@ typedef struct {
 	DBPROCESS	*link;
 
 	pdo_dblib_err err;
+	unsigned assume_national_character_set_strings:1;
 	unsigned stringify_uniqueidentifier:1;
 } pdo_dblib_db_handle;
 

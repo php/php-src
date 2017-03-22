@@ -46,6 +46,11 @@ PHP 7.2 UPGRADE NOTES
   . The hash_hmac(), hash_hmac_file() and hash_pbkdf2() functions no longer
     accept non-cryptographic hashes.
 
+- JSON
+  . The json_decode() option JSON_OBJECT_AS_ARRAY is used if the second
+    parameter (assoc) is null. Previously JSON_OBJECT_AS_ARRAY was always
+    ignored.
+
 - PCRE:
   . preg_match() and other PCRE functions now distinguish between unmatched
     subpatterns and empty matches by reporting NULL and "" (empty string),
@@ -233,7 +238,7 @@ See also: https://wiki.php.net/rfc/deprecations_php_7_2
 
 - Mbstring
   . mb_check_encoding() accepts array parameter. Both key and value
-    ecodings are checked recursively.
+    encodings are checked recursively.
   . mb_convert_encoding() accepts array parameter. Only value encodings
     are converted recursively.
 

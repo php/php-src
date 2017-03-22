@@ -20,7 +20,7 @@ if /i "%APPVEYOR_REPO_BRANCH:~0,4%" equ "php-" (
 set DEPS_DIR=%PHP_BUILD_CACHE_BASE_DIR%\deps-%PHP_SDK_VC%-%PHP_SDK_ARCH%-%BRANCH%
 rem SDK is cached, deps info is cached as well
 echo Updating dependencies in %DEPS_DIR%
-call phpsdk_deps --update --branch %BRANCH% --stability %STABILITY% --deps %DEPS_DIR%
+call phpsdk_deps --update --branch %BRANCH% --stability %STABILITY% --deps %DEPS_DIR% --crt vc14
 if %errorlevel% neq 0 exit /b 3
 
 call buildconf.bat --force
