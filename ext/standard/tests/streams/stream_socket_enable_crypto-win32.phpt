@@ -10,7 +10,7 @@ if (!extension_loaded('openssl')) {
 if (substr(PHP_OS, 0, 3) != 'WIN' ) {
 	die('skip windows only test');
 }
-if (OPENSSL_VERSION_NUMBER < 0x10001001) die("skip OpenSSLv1.0.1 required");
+if (OPENSSL_VERSION_NUMBER < 0x10100000) die("skip OpenSSLv1.1.0 required");
 ?>
 --FILE--
 <?php
