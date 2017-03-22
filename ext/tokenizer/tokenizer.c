@@ -129,19 +129,9 @@ static zend_bool tokenize(zval *return_value, zend_string *source)
 
 	ZVAL_UNDEF(&token);
 	while ((token_type = lex_scan(&token))) {
-		if (token_type == T_CLOSE_TAG && zendtext[zendleng - 1] != '>') {
-			CG(zend_lineno)++;
-		}
-
 		if (token_type >= 256) {
 			array_init(&keyword);
 			add_next_index_long(&keyword, token_type);
-			if (token_type == T_END_HEREDOC) {
-				if (CG(increment_lineno)) {
-					token_line = ++CG(zend_lineno);
-					CG(increment_lineno) = 0;
-				}
-			}
 			add_next_index_stringl(&keyword, (char *)zendtext, zendleng);
 			add_next_index_long(&keyword, token_line);
 			add_next_index_zval(return_value, &keyword);
@@ -172,6 +162,11 @@ static zend_bool tokenize(zval *return_value, zend_string *source)
 			}
 		} else if (token_type == T_HALT_COMPILER) {
 			need_tokens = 3;
+		}
+
+		if (CG(increment_lineno)) {
+			CG(zend_lineno)++;
+			CG(increment_lineno) = 0;
 		}
 
 		token_line = CG(zend_lineno);
