@@ -7822,7 +7822,8 @@ static zend_bool zend_jit_may_be_in_reg(zend_op_array *op_array, zend_ssa *ssa, 
 		return 0;
 	}
 
-	if ((ssa->var_info[var].type & MAY_BE_ANY) == MAY_BE_DOUBLE) {
+	if (((ssa->var_info[var].type & MAY_BE_ANY) == MAY_BE_DOUBLE) ||
+	    ((ssa->var_info[var].type & MAY_BE_ANY) == MAY_BE_LONG)) {
 		if (ssa->vars[var].definition >= 0) {
 			if (!zend_jit_opline_supports_reg(op_array, ssa, op_array->opcodes + ssa->vars[var].definition, var)) {
 				return 0;
