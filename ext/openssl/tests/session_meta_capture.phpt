@@ -4,7 +4,7 @@ Capture SSL session meta array in stream context
 <?php
 if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (!function_exists("proc_open")) die("skip no proc_open");
-if (OPENSSL_VERSION_NUMBER < 0x10001001) die("skip OpenSSLv1.0.1 required");
+if (OPENSSL_VERSION_NUMBER < 0x10100000) die("skip OpenSSLv1.1.0 required");
 --FILE--
 <?php
 $serverCode = <<<'CODE'
