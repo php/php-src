@@ -178,14 +178,15 @@ static zend_always_inline zend_jit_addr zend_jit_decode_op(const zend_op_array *
 	} else {
 		if (ra && ssa_var >= 0 && ra[ssa_var]) {
 			zend_lifetime_interval *ival = ra[ssa_var];
+			zend_life_range *range = &ival->range;
 			uint32_t line = opline - op_array->opcodes;
 
 			do {
-				if (line >= ival->start && line <= ival->end) {
+				if (line >= range->start && line <= range->end) {
 					return ZEND_ADDR_REG(ival->reg);
 				}
-				ival = ival->next;
-			} while (ival);
+				range = range->next;
+			} while (range);
 		}
 		return ZEND_ADDR_MEM_ZVAL(ZREG_FP, op.var);
 	}

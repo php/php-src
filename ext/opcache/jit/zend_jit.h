@@ -73,14 +73,20 @@ ZEND_API void zend_jit_deactivate(void);
 ZEND_API void zend_jit_status(zval *ret);
 
 typedef struct _zend_lifetime_interval zend_lifetime_interval;
+typedef struct _zend_life_range zend_life_range;
+
+struct _zend_life_range {
+	uint32_t         start;
+	uint32_t         end;
+	zend_life_range *next;
+};
 
 struct _zend_lifetime_interval {
 	int                     ssa_var;
 	int8_t                  reg;
 	zend_bool               split;
-	uint32_t                start;
-	uint32_t                end;
-	zend_lifetime_interval *next;
+	zend_life_range         range;
+	zend_lifetime_interval *list_next;
 };
 
 #endif /* HAVE_JIT_H */
