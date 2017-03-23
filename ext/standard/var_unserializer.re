@@ -319,7 +319,7 @@ static inline int unserialize_allowed_class(
 uiv = [+]? [0-9]+;
 iv = [+-]? [0-9]+;
 nv = [+-]? ([0-9]* "." [0-9]+|[0-9]+ "." [0-9]*);
-nvexp = (iv | nv) [eE] [+-]? iv;
+nvexp = (iv | nv) [eE] iv;
 any = [\000-\377];
 object = [OC];
 */

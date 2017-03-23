@@ -916,7 +916,7 @@ yy45:
 	goto yy18;
 yy46:
 	++YYCURSOR;
-	if ((YYLIMIT - YYCURSOR) < 4) YYFILL(4);
+	if ((YYLIMIT - YYCURSOR) < 3) YYFILL(3);
 	yych = *YYCURSOR;
 	if (yych <= ':') {
 		if (yych <= '.') {
@@ -1045,7 +1045,7 @@ yy67:
 #line 1046 "ext/standard/var_unserializer.c"
 yy69:
 	++YYCURSOR;
-	if ((YYLIMIT - YYCURSOR) < 4) YYFILL(4);
+	if ((YYLIMIT - YYCURSOR) < 3) YYFILL(3);
 	yych = *YYCURSOR;
 	if (yych <= ';') {
 		if (yych <= '/') goto yy18;
@@ -1383,14 +1383,8 @@ yy86:
 #line 1384 "ext/standard/var_unserializer.c"
 yy88:
 	yych = *++YYCURSOR;
-	if (yych <= ',') {
-		if (yych == '+') goto yy96;
-		goto yy18;
-	} else {
-		if (yych <= '-') goto yy96;
-		if (yych <= '/') goto yy18;
-		if (yych >= ':') goto yy18;
-	}
+	if (yych <= '/') goto yy18;
+	if (yych >= ':') goto yy18;
 yy89:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
@@ -1401,7 +1395,7 @@ yy89:
 	goto yy18;
 yy91:
 	yych = *++YYCURSOR;
-	if (yych == ';') goto yy97;
+	if (yych == ';') goto yy96;
 	goto yy18;
 yy92:
 	++YYCURSOR;
@@ -1416,7 +1410,7 @@ yy92:
 	}
 	return object_common2(UNSERIALIZE_PASSTHRU, elements);
 }
-#line 1420 "ext/standard/var_unserializer.c"
+#line 1414 "ext/standard/var_unserializer.c"
 yy94:
 	++YYCURSOR;
 #line 740 "ext/standard/var_unserializer.re"
@@ -1451,13 +1445,8 @@ yy94:
 	ZVAL_STRINGL(rval, str, len);
 	return 1;
 }
-#line 1455 "ext/standard/var_unserializer.c"
+#line 1449 "ext/standard/var_unserializer.c"
 yy96:
-	yych = *++YYCURSOR;
-	if (yych <= '/') goto yy18;
-	if (yych <= '9') goto yy89;
-	goto yy18;
-yy97:
 	++YYCURSOR;
 #line 715 "ext/standard/var_unserializer.re"
 	{
@@ -1475,7 +1464,7 @@ yy97:
 
 	return 1;
 }
-#line 1479 "ext/standard/var_unserializer.c"
+#line 1468 "ext/standard/var_unserializer.c"
 }
 #line 1007 "ext/standard/var_unserializer.re"
 
