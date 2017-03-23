@@ -12,6 +12,7 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #74265 (Build problems after 7.0.17 release: undefined reference
     to `isfinite'). (Nikita)
+  . Fixed bug #74302 (yield fromLABEL is over-greedy). (Sara)
 
 - Date:
   . Fixed bug #72096 (Swatch time value incorrect for dates before 1970). (mcq8)
