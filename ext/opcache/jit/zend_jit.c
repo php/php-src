@@ -1441,7 +1441,7 @@ static int zend_jit_try_allocate_free_reg(zend_op_array *op_array, zend_ssa *ssa
 				}
 			}
 			line++;
-		} while (line < range->end);
+		} while (line <= range->end);
 		range = range->next;
 	} while (range);
 
@@ -1923,7 +1923,7 @@ pass:
 						}
 						goto done;
 					case ZEND_QM_ASSIGN:
-						if (!zend_jit_qm_assign(&dasm_state, opline, op_array, ssa)) {
+						if (!zend_jit_qm_assign(&dasm_state, opline, op_array, ssa, ra)) {
 							goto jit_failure;
 						}
 						goto done;
