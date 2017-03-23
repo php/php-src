@@ -11,7 +11,7 @@ if /i "%APPVEYOR_REPO_BRANCH:~0,4%" equ "php-" (
 	set BRANCH=master
 	set STABILITY=staging
 )
-set DEPS_DIR=%PHP_BUILD_CACHE_BASE_DIR%\deps-%PHP_SDK_VC%-%PHP_SDK_ARCH%-%BRANCH%
+set DEPS_DIR=%PHP_BUILD_CACHE_BASE_DIR%\deps-%BRANCH%-%PHP_SDK_VC%-%PHP_SDK_ARCH%
 
 rem setup MySQL related exts
 set MYSQL_PWD=Password12!
