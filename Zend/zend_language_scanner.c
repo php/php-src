@@ -7073,7 +7073,7 @@ yy744:
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 1145 "Zend/zend_language_scanner.l"
 		{
-	yyless(--yyleng);
+	yyless(yyleng - 1);
 	HANDLE_NEWLINES(yytext, yyleng);
 	RETURN_TOKEN(T_YIELD_FROM);
 }

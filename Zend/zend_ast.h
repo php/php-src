@@ -189,6 +189,7 @@ typedef struct _zend_ast_decl {
 typedef void (*zend_ast_process_t)(zend_ast *ast);
 extern ZEND_API zend_ast_process_t zend_ast_process;
 
+ZEND_API zend_ast *zend_ast_create_zval_with_lineno(zval *zv, zend_ast_attr attr, uint32_t lineno);
 ZEND_API zend_ast *zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr);
 
 ZEND_API zend_ast *zend_ast_create_ex(zend_ast_kind kind, zend_ast_attr attr, ...);
