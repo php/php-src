@@ -1574,6 +1574,7 @@ int zendlex(zend_parser_stack_elem *elem) /* {{{ */
 {
 	zval zv;
 	int retval;
+	uint32_t start_lineno;
 
 	if (CG(increment_lineno)) {
 		CG(zend_lineno)++;
@@ -1582,6 +1583,7 @@ int zendlex(zend_parser_stack_elem *elem) /* {{{ */
 
 again:
 	ZVAL_UNDEF(&zv);
+	start_lineno = CG(zend_lineno);
 	retval = lex_scan(&zv);
 	if (EG(exception)) {
 		return T_ERROR;
@@ -1605,7 +1607,7 @@ again:
 			break;
 	}
 	if (Z_TYPE(zv) != IS_UNDEF) {
-		elem->ast = zend_ast_create_zval(&zv);
+		elem->ast = zend_ast_create_zval_with_lineno(&zv, 0, start_lineno);
 	}
 
 	return retval;
