@@ -71,7 +71,7 @@ awk '
 
 echo '
 	}
-	return "UNKNOWN";
+	return NULL;
 }
 ' >> $outfile
 

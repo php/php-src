@@ -533,6 +533,12 @@ PHP 8.0 UPGRADE NOTES
 7. New Classes and Interfaces
 ========================================
 
+- Tokenizer:
+  . The new PhpToken class adds an object-based interface to the tokenizer.
+    It provides a more uniform and ergonomic representation, while being more
+    memory efficient and faster.
+    RFC: https://wiki.php.net/rfc/token_as_object
+
 ========================================
 8. Removed Extensions and SAPIs
 ========================================
