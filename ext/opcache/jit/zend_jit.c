@@ -1660,7 +1660,7 @@ static zend_lifetime_interval** zend_jit_allocate_registers(zend_op_array *op_ar
 
 	if (list) {
 #ifdef DEBUG_REG_ALLOC
-		fprintf(stderr, "Live Ranges\n");
+		fprintf(stderr, "Live Ranges \"%s\"\n", op_array->function_name ? ZSTR_VAL(op_array->function_name) : "[main]");
 		ival = list;
 		while (ival) {
 			zend_life_range *range;
@@ -1682,7 +1682,7 @@ static zend_lifetime_interval** zend_jit_allocate_registers(zend_op_array *op_ar
 		if (list) {
 
 #ifdef DEBUG_REG_ALLOC
-			fprintf(stderr, "Allocated Live Ranges\n");
+			fprintf(stderr, "Allocated Live Ranges \"%s\"\n", op_array->function_name ? ZSTR_VAL(op_array->function_name) : "[main]");
 			ival = list;
 			while (ival) {
 				zend_life_range *range;
@@ -1965,13 +1965,13 @@ pass:
 					case ZEND_IS_SMALLER:
 					case ZEND_IS_SMALLER_OR_EQUAL:
 					case ZEND_CASE:
-						if (!zend_jit_cmp(&dasm_state, opline, b, &i, op_array, ssa)) {
+						if (!zend_jit_cmp(&dasm_state, opline, b, &i, op_array, ssa, ra)) {
 							goto jit_failure;
 						}
 						goto done;
 					case ZEND_IS_IDENTICAL:
 					case ZEND_IS_NOT_IDENTICAL:
-						if (!zend_jit_identical(&dasm_state, opline, b, &i, op_array, ssa)) {
+						if (!zend_jit_identical(&dasm_state, opline, b, &i, op_array, ssa, ra)) {
 							goto jit_failure;
 						}
 						goto done;
