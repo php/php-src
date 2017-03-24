@@ -1992,7 +1992,7 @@ pass:
 						goto done;
 					case ZEND_BOOL:
 					case ZEND_BOOL_NOT:
-						if (!zend_jit_bool_jmpznz(&dasm_state, opline, b, op_array, ssa)) {
+						if (!zend_jit_bool_jmpznz(&dasm_state, opline, b, op_array, ssa, ra)) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2023,7 +2023,7 @@ pass:
 								goto jit_failure;
 							}
 						} else {
-							if (!zend_jit_bool_jmpznz(&dasm_state, opline, b, op_array, ssa)) {
+							if (!zend_jit_bool_jmpznz(&dasm_state, opline, b, op_array, ssa, ra)) {
 								goto jit_failure;
 							}
 						}
