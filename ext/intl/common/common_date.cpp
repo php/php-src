@@ -125,6 +125,8 @@ U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,
 	}
 
 	if (millis) {
+		php_date_obj *datetime;
+
 		ZVAL_STRING(&zfuncname, "getTimestamp");
 		if (call_user_function(NULL, z, &zfuncname, &retval, 0, NULL)
 				!= SUCCESS || Z_TYPE(retval) != IS_LONG) {
@@ -137,7 +139,8 @@ U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,
 			return FAILURE;
 		}
 
-		*millis = U_MILLIS_PER_SECOND * (double)Z_LVAL(retval);
+		datetime = Z_PHPDATE_P(z);
+		*millis = U_MILLIS_PER_SECOND * ((double)Z_LVAL(retval) + datetime->time->f);
 		zval_ptr_dtor(&zfuncname);
 	}
 
