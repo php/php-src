@@ -1879,7 +1879,7 @@ pass:
 					case ZEND_PRE_DEC:
 					case ZEND_POST_INC:
 					case ZEND_POST_DEC:
-						if (!zend_jit_inc_dec(&dasm_state, opline, op_array, ssa)) {
+						if (!zend_jit_inc_dec(&dasm_state, opline, op_array, ssa, ra)) {
 							goto jit_failure;
 						}
 						goto done;
