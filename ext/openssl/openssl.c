@@ -5159,7 +5159,7 @@ PHP_FUNCTION(openssl_sign)
 	zend_resource *keyresource = NULL;
 	char * data;
 	size_t data_len;
-	EVP_MD_CTX md_ctx;
+	EVP_MD_CTX *md_ctx;
 	zval *method = NULL;
 	zend_long signature_algo = OPENSSL_ALGO_SHA1;
 	const EVP_MD *mdtype;
@@ -5192,9 +5192,11 @@ PHP_FUNCTION(openssl_sign)
 	siglen = EVP_PKEY_size(pkey);
 	sigbuf = zend_string_alloc(siglen, 0);
 
-	EVP_SignInit(&md_ctx, mdtype);
-	EVP_SignUpdate(&md_ctx, data, data_len);
-	if (EVP_SignFinal (&md_ctx, (unsigned char*)ZSTR_VAL(sigbuf), &siglen, pkey)) {
+	md_ctx = EVP_MD_CTX_create();
+	if (md_ctx != NULL &&
+			EVP_SignInit(md_ctx, mdtype) &&
+			EVP_SignUpdate(md_ctx, data, data_len) &&
+			EVP_SignFinal(md_ctx, (unsigned char*)ZSTR_VAL(sigbuf), &siglen, pkey)) {
 		zval_dtor(signature);
 		ZSTR_VAL(sigbuf)[siglen] = '\0';
 		ZSTR_LEN(sigbuf) = siglen;
@@ -5204,7 +5206,7 @@ PHP_FUNCTION(openssl_sign)
 		efree(sigbuf);
 		RETVAL_FALSE;
 	}
-	EVP_MD_CTX_cleanup(&md_ctx);
+	EVP_MD_CTX_destroy(md_ctx);
 	if (keyresource == NULL) {
 		EVP_PKEY_free(pkey);
 	}
@@ -5217,8 +5219,8 @@ PHP_FUNCTION(openssl_verify)
 {
 	zval *key;
 	EVP_PKEY *pkey;
-	int err;
-	EVP_MD_CTX md_ctx;
+	int err = 0;
+	EVP_MD_CTX *md_ctx;
 	const EVP_MD *mdtype;
 	zend_resource *keyresource = NULL;
 	char * data;
@@ -5256,10 +5258,13 @@ PHP_FUNCTION(openssl_verify)
 		RETURN_FALSE;
 	}
 
-	EVP_VerifyInit (&md_ctx, mdtype);
-	EVP_VerifyUpdate (&md_ctx, data, data_len);
-	err = EVP_VerifyFinal(&md_ctx, (unsigned char *)signature, (unsigned int)signature_len, pkey);
-	EVP_MD_CTX_cleanup(&md_ctx);
+	md_ctx = EVP_MD_CTX_create();
+	if (md_ctx != NULL) {
+		EVP_VerifyInit(md_ctx, mdtype);
+		EVP_VerifyUpdate (md_ctx, data, data_len);
+		err = EVP_VerifyFinal(md_ctx, (unsigned char *)signature, (unsigned int)signature_len, pkey);
+	}
+	EVP_MD_CTX_destroy(md_ctx);
 
 	if (keyresource == NULL) {
 		EVP_PKEY_free(pkey);
@@ -5283,7 +5288,7 @@ PHP_FUNCTION(openssl_seal)
 	char *method =NULL;
 	size_t method_len = 0;
 	const EVP_CIPHER *cipher;
-	EVP_CIPHER_CTX ctx;
+	EVP_CIPHER_CTX *ctx;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz/z/a/|sz/", &data, &data_len,
 				&sealdata, &ekeys, &pubkeys, &method, &method_len, &iv) == FAILURE) {
@@ -5336,22 +5341,23 @@ PHP_FUNCTION(openssl_seal)
 		i++;
 	} ZEND_HASH_FOREACH_END();
 
-	if (!EVP_EncryptInit(&ctx,cipher,NULL,NULL)) {
+	ctx = EVP_CIPHER_CTX_new();
+	if (ctx == NULL || !EVP_EncryptInit(ctx,cipher,NULL,NULL)) {
+		EVP_CIPHER_CTX_free(ctx);
 		RETVAL_FALSE;
-		EVP_CIPHER_CTX_cleanup(&ctx);
 		goto clean_exit;
 	}
 
 	/* allocate one byte extra to make room for \0 */
-	buf = emalloc(data_len + EVP_CIPHER_CTX_block_size(&ctx));
-	EVP_CIPHER_CTX_cleanup(&ctx);
+	buf = emalloc(data_len + EVP_CIPHER_CTX_block_size(ctx));
+	EVP_CIPHER_CTX_cleanup(ctx);
 
-	if (!EVP_SealInit(&ctx, cipher, eks, eksl, &iv_buf[0], pkeys, nkeys) ||
-			!EVP_SealUpdate(&ctx, buf, &len1, (unsigned char *)data, (int)data_len) ||
-			!EVP_SealFinal(&ctx, buf + len1, &len2)) {
+	if (!EVP_SealInit(ctx, cipher, eks, eksl, &iv_buf[0], pkeys, nkeys) ||
+			!EVP_SealUpdate(ctx, buf, &len1, (unsigned char *)data, (int)data_len) ||
+			!EVP_SealFinal(ctx, buf + len1, &len2)) {
 		RETVAL_FALSE;
 		efree(buf);
-		EVP_CIPHER_CTX_cleanup(&ctx);
+		EVP_CIPHER_CTX_free(ctx);
 		goto clean_exit;
 	}
 
@@ -5379,7 +5385,7 @@ PHP_FUNCTION(openssl_seal)
 		efree(buf);
 	}
 	RETVAL_LONG(len1 + len2);
-	EVP_CIPHER_CTX_cleanup(&ctx);
+	EVP_CIPHER_CTX_free(ctx);
 
 clean_exit:
 	for (i=0; i<nkeys; i++) {
@@ -5406,7 +5412,7 @@ PHP_FUNCTION(openssl_open)
 	int len1, len2, cipher_iv_len;
 	unsigned char *buf, *iv_buf;
 	zend_resource *keyresource = NULL;
-	EVP_CIPHER_CTX ctx;
+	EVP_CIPHER_CTX *ctx;
 	char * data;
 	size_t data_len;
 	char * ekey;
@@ -5457,26 +5463,23 @@ PHP_FUNCTION(openssl_open)
 
 	buf = emalloc(data_len + 1);
 
-	if (EVP_OpenInit(&ctx, cipher, (unsigned char *)ekey, (int)ekey_len, iv_buf, pkey) &&
-			EVP_OpenUpdate(&ctx, buf, &len1, (unsigned char *)data, (int)data_len)) {
-		if (!EVP_OpenFinal(&ctx, buf + len1, &len2) || (len1 + len2 == 0)) {
-			efree(buf);
-			RETVAL_FALSE;
-		} else {
-			zval_dtor(opendata);
-			buf[len1 + len2] = '\0';
-			ZVAL_NEW_STR(opendata, zend_string_init((char*)buf, len1 + len2, 0));
-			efree(buf);
-			RETVAL_TRUE;
-		}
+	ctx = EVP_CIPHER_CTX_new();
+	if (ctx != NULL && EVP_OpenInit(ctx, cipher, (unsigned char *)ekey, (int)ekey_len, iv_buf, pkey) &&
+			EVP_OpenUpdate(ctx, buf, &len1, (unsigned char *)data, (int)data_len) &&
+			EVP_OpenFinal(ctx, buf + len1, &len2) && (len1 + len2 > 0)) {
+		zval_dtor(opendata);
+		buf[len1 + len2] = '\0';
+		ZVAL_NEW_STR(opendata, zend_string_init((char*)buf, len1 + len2, 0));
+		RETVAL_TRUE;
 	} else {
-		efree(buf);
 		RETVAL_FALSE;
 	}
+
+	efree(buf);
 	if (keyresource == NULL) {
 		EVP_PKEY_free(pkey);
 	}
-	EVP_CIPHER_CTX_cleanup(&ctx);
+	EVP_CIPHER_CTX_free(ctx);
 }
 /* }}} */
 
@@ -5534,7 +5537,7 @@ PHP_FUNCTION(openssl_digest)
 	char *data, *method;
 	size_t data_len, method_len;
 	const EVP_MD *mdtype;
-	EVP_MD_CTX md_ctx;
+	EVP_MD_CTX *md_ctx;
 	unsigned int siglen;
 	zend_string *sigbuf;
 
@@ -5550,9 +5553,10 @@ PHP_FUNCTION(openssl_digest)
 	siglen = EVP_MD_size(mdtype);
 	sigbuf = zend_string_alloc(siglen, 0);
 
-	EVP_DigestInit(&md_ctx, mdtype);
-	EVP_DigestUpdate(&md_ctx, (unsigned char *)data, data_len);
-	if (EVP_DigestFinal (&md_ctx, (unsigned char *)ZSTR_VAL(sigbuf), &siglen)) {
+	md_ctx = EVP_MD_CTX_create();
+	if (EVP_DigestInit(md_ctx, mdtype) &&
+			EVP_DigestUpdate(md_ctx, (unsigned char *)data, data_len) &&
+			EVP_DigestFinal (md_ctx, (unsigned char *)ZSTR_VAL(sigbuf), &siglen)) {
 		if (raw_output) {
 			ZSTR_VAL(sigbuf)[siglen] = '\0';
 			ZSTR_LEN(sigbuf) = siglen;
@@ -5570,6 +5574,8 @@ PHP_FUNCTION(openssl_digest)
 		zend_string_release(sigbuf);
 		RETVAL_FALSE;
 	}
+
+	EVP_MD_CTX_destroy(md_ctx);
 }
 /* }}} */
 
@@ -5615,7 +5621,7 @@ PHP_FUNCTION(openssl_encrypt)
 	char *data, *method, *password, *iv = "";
 	size_t data_len, method_len, password_len, iv_len = 0, max_iv_len;
 	const EVP_CIPHER *cipher_type;
-	EVP_CIPHER_CTX cipher_ctx;
+	EVP_CIPHER_CTX *cipher_ctx;
 	int i=0, keylen;
 	size_t outlen;
 	zend_string *outbuf;
@@ -5651,20 +5657,26 @@ PHP_FUNCTION(openssl_encrypt)
 	outlen = data_len + EVP_CIPHER_block_size(cipher_type);
 	outbuf = zend_string_alloc(outlen, 0);
 
-	EVP_EncryptInit(&cipher_ctx, cipher_type, NULL, NULL);
+	cipher_ctx = EVP_CIPHER_CTX_new();
+	if (!cipher_ctx) {
+		php_error_docref(NULL, E_WARNING, "Failed to create cipher context");
+		RETURN_FALSE;
+	}
+
+	EVP_EncryptInit(cipher_ctx, cipher_type, NULL, NULL);
 	if (password_len > keylen) {
 		PHP_OPENSSL_CHECK_SIZE_T_TO_INT(password_len, password);
-		EVP_CIPHER_CTX_set_key_length(&cipher_ctx, (int)password_len);
+		EVP_CIPHER_CTX_set_key_length(cipher_ctx, (int)password_len);
 	}
-	EVP_EncryptInit_ex(&cipher_ctx, NULL, NULL, key, (unsigned char *)iv);
+	EVP_EncryptInit_ex(cipher_ctx, NULL, NULL, key, (unsigned char *)iv);
 	if (options & OPENSSL_ZERO_PADDING) {
-		EVP_CIPHER_CTX_set_padding(&cipher_ctx, 0);
+		EVP_CIPHER_CTX_set_padding(cipher_ctx, 0);
 	}
 	if (data_len > 0) {
-		EVP_EncryptUpdate(&cipher_ctx, (unsigned char*)ZSTR_VAL(outbuf), &i, (unsigned char *)data, (int)data_len);
+		EVP_EncryptUpdate(cipher_ctx, (unsigned char*)ZSTR_VAL(outbuf), &i, (unsigned char *)data, (int)data_len);
 	}
 	outlen = i;
-	if (EVP_EncryptFinal(&cipher_ctx, (unsigned char *)ZSTR_VAL(outbuf) + i, &i)) {
+	if (EVP_EncryptFinal(cipher_ctx, (unsigned char *)ZSTR_VAL(outbuf) + i, &i)) {
 		outlen += i;
 		if (options & OPENSSL_RAW_DATA) {
 			ZSTR_VAL(outbuf)[outlen] = '\0';
@@ -5687,7 +5699,7 @@ PHP_FUNCTION(openssl_encrypt)
 	if (free_iv) {
 		efree(iv);
 	}
-	EVP_CIPHER_CTX_cleanup(&cipher_ctx);
+	EVP_CIPHER_CTX_free(cipher_ctx);
 }
 /* }}} */
 
@@ -5699,7 +5711,7 @@ PHP_FUNCTION(openssl_decrypt)
 	char *data, *method, *password, *iv = "";
 	size_t data_len, method_len, password_len, iv_len = 0;
 	const EVP_CIPHER *cipher_type;
-	EVP_CIPHER_CTX cipher_ctx;
+	EVP_CIPHER_CTX *cipher_ctx;
 	int i, keylen;
 	size_t outlen;
 	zend_string *outbuf;
@@ -5724,10 +5736,17 @@ PHP_FUNCTION(openssl_decrypt)
 		RETURN_FALSE;
 	}
 
+	cipher_ctx = EVP_CIPHER_CTX_new();
+	if (!cipher_ctx) {
+		php_error_docref(NULL, E_WARNING, "Failed to create cipher context");
+		RETURN_FALSE;
+	}
+
 	if (!(options & OPENSSL_RAW_DATA)) {
 		base64_str = php_base64_decode((unsigned char*)data, data_len);
 		if (!base64_str) {
 			php_error_docref(NULL, E_WARNING, "Failed to base64 decode the input");
+			EVP_CIPHER_CTX_free(cipher_ctx);
 			RETURN_FALSE;
 		}
 		data_len = ZSTR_LEN(base64_str);
@@ -5748,18 +5767,18 @@ PHP_FUNCTION(openssl_decrypt)
 	outlen = data_len + EVP_CIPHER_block_size(cipher_type);
 	outbuf = zend_string_alloc(outlen, 0);
 
-	EVP_DecryptInit(&cipher_ctx, cipher_type, NULL, NULL);
+	EVP_DecryptInit(cipher_ctx, cipher_type, NULL, NULL);
 	if (password_len > keylen) {
 		PHP_OPENSSL_CHECK_SIZE_T_TO_INT(password_len, password);
-		EVP_CIPHER_CTX_set_key_length(&cipher_ctx, (int)password_len);
+		EVP_CIPHER_CTX_set_key_length(cipher_ctx, (int)password_len);
 	}
-	EVP_DecryptInit_ex(&cipher_ctx, NULL, NULL, key, (unsigned char *)iv);
+	EVP_DecryptInit_ex(cipher_ctx, NULL, NULL, key, (unsigned char *)iv);
 	if (options & OPENSSL_ZERO_PADDING) {
-		EVP_CIPHER_CTX_set_padding(&cipher_ctx, 0);
+		EVP_CIPHER_CTX_set_padding(cipher_ctx, 0);
 	}
-	EVP_DecryptUpdate(&cipher_ctx, (unsigned char*)ZSTR_VAL(outbuf), &i, (unsigned char *)data, (int)data_len);
+	EVP_DecryptUpdate(cipher_ctx, (unsigned char*)ZSTR_VAL(outbuf), &i, (unsigned char *)data, (int)data_len);
 	outlen = i;
-	if (EVP_DecryptFinal(&cipher_ctx, (unsigned char *)ZSTR_VAL(outbuf) + i, &i)) {
+	if (EVP_DecryptFinal(cipher_ctx, (unsigned char *)ZSTR_VAL(outbuf) + i, &i)) {
 		outlen += i;
 		ZSTR_VAL(outbuf)[outlen] = '\0';
 		ZSTR_LEN(outbuf) = outlen;
@@ -5777,7 +5796,7 @@ PHP_FUNCTION(openssl_decrypt)
 	if (base64_str) {
 		zend_string_release(base64_str);
 	}
- 	EVP_CIPHER_CTX_cleanup(&cipher_ctx);
+	EVP_CIPHER_CTX_free(cipher_ctx);
 }
 /* }}} */
 
@@ -5815,6 +5834,7 @@ PHP_FUNCTION(openssl_dh_compute_key)
 	zval *key;
 	char *pub_str;
 	size_t pub_len;
+	DH *dh;
 	EVP_PKEY *pkey;
 	BIGNUM *pub;
 	zend_string *data;
@@ -5826,15 +5846,19 @@ PHP_FUNCTION(openssl_dh_compute_key)
 	if ((pkey = (EVP_PKEY *)zend_fetch_resource(Z_RES_P(key), "OpenSSL key", le_key)) == NULL) {
 		RETURN_FALSE;
 	}
-	if (EVP_PKEY_base_id(pkey) != EVP_PKEY_DH || !pkey->pkey.dh) {
+	if (EVP_PKEY_base_id(pkey) != EVP_PKEY_DH) {
+		RETURN_FALSE;
+	}
+	dh = EVP_PKEY_get0_DH(pkey);
+	if (dh == NULL) {
 		RETURN_FALSE;
 	}
 
 	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(pub_len, pub_key);
 	pub = BN_bin2bn((unsigned char*)pub_str, (int)pub_len, NULL);
 
-	data = zend_string_alloc(DH_size(pkey->pkey.dh), 0);
-	len = DH_compute_key((unsigned char*)ZSTR_VAL(data), pub, pkey->pkey.dh);
+	data = zend_string_alloc(DH_size(dh), 0);
+	len = DH_compute_key((unsigned char*)ZSTR_VAL(data), pub, dh);
 
 	if (len >= 0) {
 		ZSTR_LEN(data) = len;
