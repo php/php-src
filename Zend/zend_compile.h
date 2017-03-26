@@ -357,6 +357,7 @@ struct _zend_op_array {
 	zend_function *prototype;
 	uint32_t num_args;
 	uint32_t required_num_args;
+	uint32_t cache_gen;
 	zend_arg_info *arg_info;
 	/* END of common elements */
 
@@ -406,6 +407,7 @@ typedef struct _zend_internal_function {
 	zend_function *prototype;
 	uint32_t num_args;
 	uint32_t required_num_args;
+	uint32_t cache_gen;
 	zend_internal_arg_info *arg_info;
 	/* END of common elements */
 
@@ -429,6 +431,7 @@ union _zend_function {
 		union _zend_function *prototype;
 		uint32_t num_args;
 		uint32_t required_num_args;
+		uint32_t cache_gen; /* For invalidation of INIT_NS_FCALL cache entries */
 		zend_arg_info *arg_info;
 	} common;
 

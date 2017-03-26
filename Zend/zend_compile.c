@@ -64,18 +64,18 @@ typedef struct _zend_loop_var {
 	} u;
 } zend_loop_var;
 
-static inline void zend_alloc_cache_slot(uint32_t literal) {
+static inline void zend_alloc_cache_slots(uint32_t literal, uint32_t num) {
 	zend_op_array *op_array = CG(active_op_array);
 	Z_CACHE_SLOT(op_array->literals[literal]) = op_array->cache_size;
-	op_array->cache_size += sizeof(void*);
+	op_array->cache_size += num * sizeof(void*);
 }
 
-#define POLYMORPHIC_CACHE_SLOT_SIZE 2
+static inline void zend_alloc_cache_slot(uint32_t literal) {
+	zend_alloc_cache_slots(literal, 1);
+}
 
 static inline void zend_alloc_polymorphic_cache_slot(uint32_t literal) {
-	zend_op_array *op_array = CG(active_op_array);
-	Z_CACHE_SLOT(op_array->literals[literal]) = op_array->cache_size;
-	op_array->cache_size += POLYMORPHIC_CACHE_SLOT_SIZE * sizeof(void*);
+	zend_alloc_cache_slots(literal, 2);
 }
 
 ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type);
@@ -1071,6 +1071,21 @@ ZEND_API void function_add_ref(zend_function *function) /* {{{ */
 }
 /* }}} */
 
+static void invalidate_fallback_function(HashTable *function_table, zend_string *lcname)
+{
+	/* If this is a namespaced function that has the same name as a global function, make sure
+	 * we invalidate any cache entries using the global function as fallback. */
+	const char *unqualified_name;
+	size_t unqualified_name_len;
+	if (zend_get_unqualified_name(lcname, &unqualified_name, &unqualified_name_len)) {
+		zend_function *func = zend_hash_str_find_ptr(
+			function_table, unqualified_name, unqualified_name_len);
+		if (func) {
+			func->common.cache_gen++;
+		}
+	}
+}
+
 ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opline, HashTable *function_table, zend_bool compile_time) /* {{{ */
 {
 	zend_function *function, *new_function;
@@ -1107,6 +1122,7 @@ ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opli
 			(*function->op_array.refcount)++;
 		}
 		function->op_array.static_variables = NULL; /* NULL out the unbound function */
+		invalidate_fallback_function(function_table, Z_STR_P(lcname));
 		return SUCCESS;
 	}
 }
@@ -3311,7 +3327,7 @@ void zend_compile_ns_call(znode *result, znode *name_node, zend_ast *args_ast) /
 	opline->op2_type = IS_CONST;
 	opline->op2.constant = zend_add_ns_func_name_literal(
 		CG(active_op_array), Z_STR(name_node->u.constant));
-	zend_alloc_cache_slot(opline->op2.constant);
+	zend_alloc_cache_slots(opline->op2.constant, 2);
 
 	zend_compile_call_common(result, args_ast, NULL);
 }
@@ -3600,13 +3616,14 @@ static int zend_compile_assert(znode *result, zend_ast_list *args, zend_string *
 			ZVAL_STR_COPY(&name_node.u.constant, name);
 
 			opline = zend_emit_op(NULL, ZEND_INIT_FCALL, NULL, &name_node);
+			zend_alloc_cache_slot(opline->op2.constant);
 		} else {
 			opline = zend_emit_op(NULL, ZEND_INIT_NS_FCALL_BY_NAME, NULL, NULL);
 			opline->op2_type = IS_CONST;
 			opline->op2.constant = zend_add_ns_func_name_literal(
 				CG(active_op_array), name);
+			zend_alloc_cache_slots(opline->op2.constant, 2);
 		}
-		zend_alloc_cache_slot(opline->op2.constant);
 
 		if (args->children == 1 &&
 		    (args->child[0]->kind != ZEND_AST_ZVAL ||

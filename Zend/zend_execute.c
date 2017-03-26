@@ -84,6 +84,7 @@ ZEND_API const zend_internal_function zend_pass_function = {
 	NULL,                   /* prototype         */
 	0,                      /* num_args          */
 	0,                      /* required_num_args */
+	0,                      /* cache_gen         */
 	NULL,                   /* arg_info          */
 	ZEND_FN(pass),          /* handler           */
 	NULL,                   /* module            */

@@ -2210,10 +2210,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_NS_FCALL_BY_NAME_SPEC_CON
 	zval *func;
 	zend_function *fbc;
 	zend_execute_data *call;
+	void **cache_slot;
+	uint32_t gen;
 
 	func_name = EX_CONSTANT(opline->op2) + 1;
-	fbc = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)));
-	if (UNEXPECTED(fbc == NULL)) {
+	cache_slot = CACHE_ADDR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)));
+	fbc = CACHED_PTR_EX(cache_slot);
+	gen = (uintptr_t) CACHED_PTR_EX(cache_slot + 1);
+	if (UNEXPECTED(fbc == NULL || gen < fbc->common.cache_gen)) {
 		func = zend_hash_find(EG(function_table), Z_STR_P(func_name));
 		if (func == NULL) {
 			func_name++;
@@ -2225,7 +2229,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_NS_FCALL_BY_NAME_SPEC_CON
 			}
 		}
 		fbc = Z_FUNC_P(func);
-		CACHE_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)), fbc);
+		CACHE_PTR_EX(cache_slot, fbc);
+		CACHE_PTR_EX(cache_slot + 1, (void *) (uintptr_t) fbc->common.cache_gen);
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!fbc->op_array.run_time_cache)) {
 			init_func_run_time_cache(&fbc->op_array);
 		}
