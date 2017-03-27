@@ -115,6 +115,7 @@ PHP_MINIT_FUNCTION(array) /* {{{ */
 	REGISTER_LONG_CONSTANT("SORT_LOCALE_STRING", PHP_SORT_LOCALE_STRING, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SORT_NATURAL", PHP_SORT_NATURAL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SORT_FLAG_CASE", PHP_SORT_FLAG_CASE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SORT_FLAG_REVERSE", PHP_SORT_FLAG_REVERSE, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("CASE_LOWER", CASE_LOWER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CASE_UPPER", CASE_UPPER, CONST_CS | CONST_PERSISTENT);
@@ -565,8 +566,11 @@ static int php_array_reverse_data_compare_string_locale(const void *a, const voi
 /* }}} */
 #endif
 
-static compare_func_t php_get_key_compare_func(zend_long sort_type, int reverse) /* {{{ */
+static compare_func_t php_get_key_compare_func(zend_long sort_type) /* {{{ */
 {
+	int reverse = sort_type & PHP_SORT_FLAG_REVERSE;
+	sort_type &= ~PHP_SORT_FLAG_REVERSE;
+
 	switch (sort_type & ~PHP_SORT_FLAG_CASE) {
 		case PHP_SORT_NUMERIC:
 			if (reverse) {
@@ -631,8 +635,11 @@ static compare_func_t php_get_key_compare_func(zend_long sort_type, int reverse)
 }
 /* }}} */
 
-static compare_func_t php_get_data_compare_func(zend_long sort_type, int reverse) /* {{{ */
+static compare_func_t php_get_data_compare_func(zend_long sort_type) /* {{{ */
 {
+	int reverse = sort_type & PHP_SORT_FLAG_REVERSE;
+	sort_type &= ~PHP_SORT_FLAG_REVERSE;
+
 	switch (sort_type & ~PHP_SORT_FLAG_CASE) {
 		case PHP_SORT_NUMERIC:
 			if (reverse) {
@@ -697,51 +704,424 @@ static compare_func_t php_get_data_compare_func(zend_long sort_type, int reverse
 }
 /* }}} */
 
-/* {{{ proto bool krsort(array &array_arg [, int sort_flags])
-   Sort an array by key value in reverse order */
-PHP_FUNCTION(krsort)
+/* {{{ proto bool sort(array &array_arg [, int sort_flags])
+   Sort an array by value */
+static void php_sort(INTERNAL_FUNCTION_PARAMETERS, int extra_flags) /* {{{ */
 {
 	zval *array;
 	zend_long sort_type = PHP_SORT_REGULAR;
+	zval retval, arg;
 	compare_func_t cmp;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_ARRAY_EX(array, 0, 1)
+		Z_PARAM_ARRAY_OR_OBJECT_EX(array, 0, 1)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(sort_type)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
-	cmp = php_get_key_compare_func(sort_type, 1);
+	switch (Z_TYPE_P(array)) {
+		case IS_ARRAY:
+			cmp = php_get_data_compare_func(sort_type | extra_flags);
 
-	if (zend_hash_sort(Z_ARRVAL_P(array), cmp, 0) == FAILURE) {
-		RETURN_FALSE;
+			if (zend_hash_sort(Z_ARRVAL_P(array), cmp, 1) == FAILURE) {
+				RETURN_FALSE;
+			}
+
+			RETURN_TRUE;
+			break;
+
+		case IS_OBJECT:
+			ZVAL_LONG(&arg, sort_type | extra_flags);
+			if (instanceof_function(Z_OBJCE_P(array), spl_ce_Sortable)) {
+				zend_call_method_with_1_params(array, NULL, NULL, "sort", &retval, &arg);
+				if (Z_TYPE(retval) != IS_UNDEF) {
+					RETURN_ZVAL(&retval, 1, 0);
+				}
+				RETURN_NULL();
+			}
+			break;
 	}
-	RETURN_TRUE;
+
+	zend_error(E_WARNING, "%s() expects parameter 1 to be array, object given", get_active_function_name());
+	RETURN_FALSE;
 }
 /* }}} */
 
 /* {{{ proto bool ksort(array &array_arg [, int sort_flags])
-   Sort an array by key */
-PHP_FUNCTION(ksort)
+   Sort an array by key value */
+static void php_ksort(INTERNAL_FUNCTION_PARAMETERS, int extra_flags) /* {{{ */
 {
 	zval *array;
 	zend_long sort_type = PHP_SORT_REGULAR;
+	zval retval, arg;
 	compare_func_t cmp;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_ARRAY_EX(array, 0, 1)
+		Z_PARAM_ARRAY_OR_OBJECT_EX(array, 0, 1)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(sort_type)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
-	cmp = php_get_key_compare_func(sort_type, 0);
+	switch (Z_TYPE_P(array)) {
+		case IS_ARRAY:
+			cmp = php_get_key_compare_func(sort_type | extra_flags);
 
-	if (zend_hash_sort(Z_ARRVAL_P(array), cmp, 0) == FAILURE) {
-		RETURN_FALSE;
+			if (zend_hash_sort(Z_ARRVAL_P(array), cmp, 0) == FAILURE) {
+				RETURN_FALSE;
+			}
+
+			RETURN_TRUE;
+			break;
+
+		case IS_OBJECT:
+			ZVAL_LONG(&arg, sort_type | extra_flags);
+			if (instanceof_function(Z_OBJCE_P(array), spl_ce_SortableKeys)) {
+				zend_call_method_with_1_params(array, NULL, NULL, "ksort", &retval, &arg);
+				if (Z_TYPE(retval) != IS_UNDEF) {
+					RETURN_ZVAL(&retval, 1, 0);
+				}
+				RETURN_NULL();
+			}
+			break;
 	}
-	RETURN_TRUE;
+
+	zend_error(E_WARNING, "%s() expects parameter 1 to be array, object given", get_active_function_name());
+	RETURN_FALSE;
 }
 /* }}} */
+
+/* {{{ proto bool asort(array &array_arg [, int sort_flags])
+   Sort an array and maintain index association */
+static void php_asort(INTERNAL_FUNCTION_PARAMETERS, int extra_flags) /* {{{ */
+{
+	zval *array;
+	zend_long sort_type = PHP_SORT_REGULAR;
+	zval retval, arg;
+	compare_func_t cmp;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ARRAY_OR_OBJECT_EX(array, 0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(sort_type)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+
+	switch (Z_TYPE_P(array)) {
+		case IS_ARRAY:
+			cmp = php_get_data_compare_func(sort_type | extra_flags);
+
+			if (zend_hash_sort(Z_ARRVAL_P(array), cmp, 0) == FAILURE) {
+				RETURN_FALSE;
+			}
+
+			RETURN_TRUE;
+			break;
+
+		case IS_OBJECT:
+			ZVAL_LONG(&arg, sort_type | extra_flags);
+			if (instanceof_function(Z_OBJCE_P(array), spl_ce_SortableAssoc)) {
+				zend_call_method_with_1_params(array, NULL, NULL, "asort", &retval, &arg);
+				if (Z_TYPE(retval) != IS_UNDEF) {
+					RETURN_ZVAL(&retval, 1, 0);
+				}
+				RETURN_NULL();
+			}
+			break;
+	}
+
+	zend_error(E_WARNING, "%s() expects parameter 1 to be array, object given", get_active_function_name());
+	RETURN_FALSE;
+}
+/* }}} */
+
+static void php_natsort(INTERNAL_FUNCTION_PARAMETERS, int fold_case) /* {{{ */
+{
+	zval *array;
+	zval retval, arg;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_OR_OBJECT_EX(array, 0, 1)
+	ZEND_PARSE_PARAMETERS_END();
+
+	switch (Z_TYPE_P(array)) {
+		case IS_ARRAY:
+			if (fold_case) {
+				if (zend_hash_sort(Z_ARRVAL_P(array), php_array_natural_case_compare, 0) == FAILURE) {
+					return;
+				}
+			} else {
+				if (zend_hash_sort(Z_ARRVAL_P(array), php_array_natural_compare, 0) == FAILURE) {
+					return;
+				}
+			}
+			RETURN_TRUE;
+			break;
+
+		case IS_OBJECT:
+			ZVAL_LONG(&arg, PHP_SORT_NATURAL | (fold_case ? PHP_SORT_FLAG_CASE : 0));
+			if (instanceof_function(Z_OBJCE_P(array), spl_ce_Sortable)) {
+				zend_call_method_with_1_params(array, NULL, NULL, "sort", &retval, &arg);
+				if (Z_TYPE(retval) != IS_UNDEF) {
+					RETURN_ZVAL(&retval, 1, 0);
+				}
+				RETURN_NULL();
+			}
+			break;
+	}
+
+	zend_error(E_WARNING, "%s() expects parameter 1 to be array, object given", get_active_function_name());
+	RETURN_NULL();
+}
+/* }}} */
+
+static int php_array_user_compare(const void *a, const void *b) /* {{{ */
+{
+	Bucket *f;
+	Bucket *s;
+	zval args[2];
+	zval retval;
+
+	f = (Bucket *) a;
+	s = (Bucket *) b;
+
+	ZVAL_COPY(&args[0], &f->val);
+	ZVAL_COPY(&args[1], &s->val);
+
+	BG(user_compare_fci).param_count = 2;
+	BG(user_compare_fci).params = args;
+	BG(user_compare_fci).retval = &retval;
+	BG(user_compare_fci).no_separation = 0;
+	if (zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache)) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
+		zend_long ret = zval_get_long(&retval);
+		zval_ptr_dtor(&retval);
+		zval_ptr_dtor(&args[1]);
+		zval_ptr_dtor(&args[0]);
+		return ret < 0 ? -1 : ret > 0 ? 1 : 0;
+	} else {
+		zval_ptr_dtor(&args[1]);
+		zval_ptr_dtor(&args[0]);
+		return 0;
+	}
+}
+/* }}} */
+
+static int php_array_user_key_compare(const void *a, const void *b) /* {{{ */
+{
+	Bucket *f;
+	Bucket *s;
+	zval args[2];
+	zval retval;
+	zend_long result;
+
+	ZVAL_NULL(&args[0]);
+	ZVAL_NULL(&args[1]);
+
+	f = (Bucket *) a;
+	s = (Bucket *) b;
+
+	if (f->key == NULL) {
+		ZVAL_LONG(&args[0], f->h);
+	} else {
+		ZVAL_STR_COPY(&args[0], f->key);
+	}
+	if (s->key == NULL) {
+		ZVAL_LONG(&args[1], s->h);
+	} else {
+		ZVAL_STR_COPY(&args[1], s->key);
+	}
+
+	BG(user_compare_fci).param_count = 2;
+	BG(user_compare_fci).params = args;
+	BG(user_compare_fci).retval = &retval;
+	BG(user_compare_fci).no_separation = 0;
+	if (zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache)) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
+		result = zval_get_long(&retval);
+		zval_ptr_dtor(&retval);
+	} else {
+		result = 0;
+	}
+
+	zval_ptr_dtor(&args[0]);
+	zval_ptr_dtor(&args[1]);
+
+	return result < 0 ? -1 : result > 0 ? 1 : 0;
+}
+/* }}} */
+
+/* check if comparison function is valid */
+#define PHP_ARRAY_CMP_FUNC_CHECK(func_name)	\
+	if (!zend_is_callable(*func_name, 0, NULL)) {	\
+		php_error_docref(NULL, E_WARNING, "Invalid comparison function");	\
+		BG(user_compare_fci) = old_user_compare_fci; \
+		BG(user_compare_fci_cache) = old_user_compare_fci_cache; \
+		RETURN_FALSE;	\
+	}	\
+
+	/* Clear FCI cache otherwise : for example the same or other array with
+	 * (partly) the same key values has been sorted with uasort() or
+	 * other sorting function the comparison is cached, however the name
+	 * of the function for comparison is not respected. see bug #28739 AND #33295
+	 *
+	 * Following defines will assist in backup / restore values. */
+
+#define PHP_ARRAY_CMP_FUNC_VARS \
+	zend_fcall_info old_user_compare_fci; \
+	zend_fcall_info_cache old_user_compare_fci_cache \
+
+#define PHP_ARRAY_CMP_FUNC_BACKUP() \
+	old_user_compare_fci = BG(user_compare_fci); \
+	old_user_compare_fci_cache = BG(user_compare_fci_cache); \
+	BG(user_compare_fci_cache) = empty_fcall_info_cache; \
+
+#define PHP_ARRAY_CMP_FUNC_RESTORE() \
+	BG(user_compare_fci) = old_user_compare_fci; \
+	BG(user_compare_fci_cache) = old_user_compare_fci_cache; \
+
+static void php_usort(INTERNAL_FUNCTION_PARAMETERS, compare_func_t compare_func, zend_bool renumber) /* {{{ */
+{
+	zval *array;
+	zend_array *arr;
+	zval retval;
+	zval *cmp_function;
+
+	PHP_ARRAY_CMP_FUNC_VARS;
+
+	const char *function_name = get_active_function_name();
+
+	PHP_ARRAY_CMP_FUNC_BACKUP();
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ARRAY_OR_OBJECT_EX(array, 0, 1)
+		Z_PARAM_FUNC(BG(user_compare_fci), BG(user_compare_fci_cache))
+	ZEND_PARSE_PARAMETERS_END_EX( PHP_ARRAY_CMP_FUNC_RESTORE(); return );
+
+
+	switch (Z_TYPE_P(array)) {
+		case IS_ARRAY:
+			arr = Z_ARR_P(array);
+			if (zend_hash_num_elements(arr) == 0)  {
+				PHP_ARRAY_CMP_FUNC_RESTORE();
+				RETURN_TRUE;
+			}
+
+			/* Copy array, so the in-place modifications will not be visible to the callback function */
+			arr = zend_array_dup(arr);
+
+			ZVAL_BOOL(&retval, zend_hash_sort(arr, compare_func, renumber) != FAILURE);
+
+			zval_ptr_dtor(array);
+			ZVAL_ARR(array, arr);
+
+			PHP_ARRAY_CMP_FUNC_RESTORE();
+			RETURN_ZVAL(&retval, 1, 0);
+			break;
+
+		case IS_OBJECT:
+			if (instanceof_function(Z_OBJCE_P(array), spl_ce_Sortable)) {
+				PHP_ARRAY_CMP_FUNC_RESTORE();
+				zend_parse_parameters(ZEND_NUM_ARGS(), "A/z", &array, &cmp_function);
+				zend_call_method(array, NULL, NULL, function_name, strlen(function_name), &retval, 1, cmp_function, NULL);
+				if (Z_TYPE(retval) != IS_UNDEF) {
+					RETURN_ZVAL(&retval, 1, 0);
+				}
+				RETURN_NULL();
+			}
+			break;
+	}
+
+	PHP_ARRAY_CMP_FUNC_RESTORE();
+	zend_error(E_WARNING, "%s() expects parameter 1 to be array, object given", function_name);
+	RETURN_NULL();
+}
+/* }}} */
+
+/* {{{ proto bool sort(array &array_arg [, int sort_flags])
+	Sort an array */
+PHP_FUNCTION(sort)
+{
+	php_sort(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
+/* }}} */
+
+/* {{{ proto bool rsort(array &array_arg [, int sort_flags])
+	Sort an array in reverse order */
+PHP_FUNCTION(rsort)
+{
+	php_sort(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_SORT_FLAG_REVERSE);
+}
+/* }}} */
+
+/* {{{ proto bool asort(array &array_arg [, int sort_flags])
+   Sort an array and maintain index association */
+PHP_FUNCTION(asort)
+{
+	php_asort(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
+/* }}} */
+
+/* {{{ proto bool asort(array &array_arg [, int sort_flags])
+   Sort an array in reverse order and maintain index association */
+PHP_FUNCTION(arsort)
+{
+	php_asort(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_SORT_FLAG_REVERSE);
+}
+/* }}} */
+
+/* {{{ proto void ksort(array &array_arg [, int sort_flags])
+	Sort an array by key */
+PHP_FUNCTION(ksort)
+{
+	php_ksort(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
+/* }}} */
+
+/* {{{ proto void krsort(array &array_arg [, int sort_flags])
+Sort an array by key value in reverse order */
+PHP_FUNCTION(krsort)
+{
+	php_ksort(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_SORT_FLAG_REVERSE);
+}
+/* }}} */
+
+/* {{{ proto void natsort(array &array_arg)
+   Sort an array using natural sort */
+PHP_FUNCTION(natsort)
+{
+	php_natsort(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
+/* }}} */
+
+/* {{{ proto void natcasesort(array &array_arg)
+   Sort an array using case-insensitive natural sort */
+PHP_FUNCTION(natcasesort)
+{
+	php_natsort(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+}
+/* }}} */
+
+/* {{{ proto bool usort(array array_arg, string cmp_function)
+   Sort an array using a user-defined comparison function */
+PHP_FUNCTION(usort)
+{
+	php_usort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_array_user_compare, 1);
+}
+/* }}} */
+
+/* {{{ proto bool uksort(array array_arg, string cmp_function)
+   Sort an array by keys using a user-defined comparison function */
+PHP_FUNCTION(uksort)
+{
+	php_usort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_array_user_key_compare, 0);
+}
+/* }}} */
+
+/* {{{ proto bool uasort(array array_arg, string cmp_function)
+   Sort an array by keys using a user-defined comparison function */
+PHP_FUNCTION(uasort)
+{
+	php_usort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_array_user_compare, 0);
+}
+/* }}} */
+
 
 PHPAPI zend_long php_count_recursive(zval *array, zend_long mode) /* {{{ */
 {
@@ -832,296 +1212,6 @@ PHP_FUNCTION(count)
 			RETURN_LONG(1);
 			break;
 	}
-}
-/* }}} */
-
-static void php_natsort(INTERNAL_FUNCTION_PARAMETERS, int fold_case) /* {{{ */
-{
-	zval *array;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ARRAY_EX(array, 0, 1)
-	ZEND_PARSE_PARAMETERS_END();
-
-	if (fold_case) {
-		if (zend_hash_sort(Z_ARRVAL_P(array), php_array_natural_case_compare, 0) == FAILURE) {
-			return;
-		}
-	} else {
-		if (zend_hash_sort(Z_ARRVAL_P(array), php_array_natural_compare, 0) == FAILURE) {
-			return;
-		}
-	}
-
-	RETURN_TRUE;
-}
-/* }}} */
-
-/* {{{ proto void natsort(array &array_arg)
-   Sort an array using natural sort */
-PHP_FUNCTION(natsort)
-{
-	php_natsort(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
-}
-/* }}} */
-
-/* {{{ proto void natcasesort(array &array_arg)
-   Sort an array using case-insensitive natural sort */
-PHP_FUNCTION(natcasesort)
-{
-	php_natsort(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
-}
-/* }}} */
-
-/* {{{ proto bool asort(array &array_arg [, int sort_flags])
-   Sort an array and maintain index association */
-PHP_FUNCTION(asort)
-{
-	zval *array;
-	zend_long sort_type = PHP_SORT_REGULAR;
-	compare_func_t cmp;
-
-	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_ARRAY_EX(array, 0, 1)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(sort_type)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
-
-	cmp = php_get_data_compare_func(sort_type, 0);
-
-	if (zend_hash_sort(Z_ARRVAL_P(array), cmp, 0) == FAILURE) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
-}
-/* }}} */
-
-/* {{{ proto bool arsort(array &array_arg [, int sort_flags])
-   Sort an array in reverse order and maintain index association */
-PHP_FUNCTION(arsort)
-{
-	zval *array;
-	zend_long sort_type = PHP_SORT_REGULAR;
-	compare_func_t cmp;
-
-	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_ARRAY_EX(array, 0, 1)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(sort_type)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
-
-	cmp = php_get_data_compare_func(sort_type, 1);
-
-	if (zend_hash_sort(Z_ARRVAL_P(array), cmp, 0) == FAILURE) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
-}
-/* }}} */
-
-/* {{{ proto bool sort(array &array_arg [, int sort_flags])
-   Sort an array */
-PHP_FUNCTION(sort)
-{
-	zval *array;
-	zend_long sort_type = PHP_SORT_REGULAR;
-	compare_func_t cmp;
-
-	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_ARRAY_EX(array, 0, 1)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(sort_type)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
-
-	cmp = php_get_data_compare_func(sort_type, 0);
-
-	if (zend_hash_sort(Z_ARRVAL_P(array), cmp, 1) == FAILURE) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
-}
-/* }}} */
-
-/* {{{ proto bool rsort(array &array_arg [, int sort_flags])
-   Sort an array in reverse order */
-PHP_FUNCTION(rsort)
-{
-	zval *array;
-	zend_long sort_type = PHP_SORT_REGULAR;
-	compare_func_t cmp;
-
-	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_ARRAY_EX(array, 0, 1)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(sort_type)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
-
-	cmp = php_get_data_compare_func(sort_type, 1);
-
-	if (zend_hash_sort(Z_ARRVAL_P(array), cmp, 1) == FAILURE) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
-}
-/* }}} */
-
-static int php_array_user_compare(const void *a, const void *b) /* {{{ */
-{
-	Bucket *f;
-	Bucket *s;
-	zval args[2];
-	zval retval;
-
-	f = (Bucket *) a;
-	s = (Bucket *) b;
-
-	ZVAL_COPY(&args[0], &f->val);
-	ZVAL_COPY(&args[1], &s->val);
-
-	BG(user_compare_fci).param_count = 2;
-	BG(user_compare_fci).params = args;
-	BG(user_compare_fci).retval = &retval;
-	BG(user_compare_fci).no_separation = 0;
-	if (zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache)) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
-		zend_long ret = zval_get_long(&retval);
-		zval_ptr_dtor(&retval);
-		zval_ptr_dtor(&args[1]);
-		zval_ptr_dtor(&args[0]);
-		return ret < 0 ? -1 : ret > 0 ? 1 : 0;
-	} else {
-		zval_ptr_dtor(&args[1]);
-		zval_ptr_dtor(&args[0]);
-		return 0;
-	}
-}
-/* }}} */
-
-/* check if comparison function is valid */
-#define PHP_ARRAY_CMP_FUNC_CHECK(func_name)	\
-	if (!zend_is_callable(*func_name, 0, NULL)) {	\
-		php_error_docref(NULL, E_WARNING, "Invalid comparison function");	\
-		BG(user_compare_fci) = old_user_compare_fci; \
-		BG(user_compare_fci_cache) = old_user_compare_fci_cache; \
-		RETURN_FALSE;	\
-	}	\
-
-	/* Clear FCI cache otherwise : for example the same or other array with
-	 * (partly) the same key values has been sorted with uasort() or
-	 * other sorting function the comparison is cached, however the name
-	 * of the function for comparison is not respected. see bug #28739 AND #33295
-	 *
-	 * Following defines will assist in backup / restore values. */
-
-#define PHP_ARRAY_CMP_FUNC_VARS \
-	zend_fcall_info old_user_compare_fci; \
-	zend_fcall_info_cache old_user_compare_fci_cache \
-
-#define PHP_ARRAY_CMP_FUNC_BACKUP() \
-	old_user_compare_fci = BG(user_compare_fci); \
-	old_user_compare_fci_cache = BG(user_compare_fci_cache); \
-	BG(user_compare_fci_cache) = empty_fcall_info_cache; \
-
-#define PHP_ARRAY_CMP_FUNC_RESTORE() \
-	BG(user_compare_fci) = old_user_compare_fci; \
-	BG(user_compare_fci_cache) = old_user_compare_fci_cache; \
-
-static void php_usort(INTERNAL_FUNCTION_PARAMETERS, compare_func_t compare_func, zend_bool renumber) /* {{{ */
-{
-	zval *array;
-	zend_array *arr;
-	zend_bool retval;
-	PHP_ARRAY_CMP_FUNC_VARS;
-
-	PHP_ARRAY_CMP_FUNC_BACKUP();
-
-	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_ARRAY(array)
-		Z_PARAM_FUNC(BG(user_compare_fci), BG(user_compare_fci_cache))
-	ZEND_PARSE_PARAMETERS_END_EX( PHP_ARRAY_CMP_FUNC_RESTORE(); return );
-
-	arr = Z_ARR_P(array);
-	if (zend_hash_num_elements(arr) == 0)  {
-		PHP_ARRAY_CMP_FUNC_RESTORE();
-		RETURN_TRUE;
-	}
-
-	/* Copy array, so the in-place modifications will not be visible to the callback function */
-	arr = zend_array_dup(arr);
-
-	retval = zend_hash_sort(arr, compare_func, renumber) != FAILURE;
-
-	zval_ptr_dtor(array);
-	ZVAL_ARR(array, arr);
-
-	PHP_ARRAY_CMP_FUNC_RESTORE();
-	RETURN_BOOL(retval);
-}
-/* }}} */
-
-/* {{{ proto bool usort(array array_arg, string cmp_function)
-   Sort an array by values using a user-defined comparison function */
-PHP_FUNCTION(usort)
-{
-	php_usort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_array_user_compare, 1);
-}
-/* }}} */
-
-/* {{{ proto bool uasort(array array_arg, string cmp_function)
-   Sort an array with a user-defined comparison function and maintain index association */
-PHP_FUNCTION(uasort)
-{
-	php_usort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_array_user_compare, 0);
-}
-/* }}} */
-
-static int php_array_user_key_compare(const void *a, const void *b) /* {{{ */
-{
-	Bucket *f;
-	Bucket *s;
-	zval args[2];
-	zval retval;
-	zend_long result;
-
-	ZVAL_NULL(&args[0]);
-	ZVAL_NULL(&args[1]);
-
-	f = (Bucket *) a;
-	s = (Bucket *) b;
-
-	if (f->key == NULL) {
-		ZVAL_LONG(&args[0], f->h);
-	} else {
-		ZVAL_STR_COPY(&args[0], f->key);
-	}
-	if (s->key == NULL) {
-		ZVAL_LONG(&args[1], s->h);
-	} else {
-		ZVAL_STR_COPY(&args[1], s->key);
-	}
-
-	BG(user_compare_fci).param_count = 2;
-	BG(user_compare_fci).params = args;
-	BG(user_compare_fci).retval = &retval;
-	BG(user_compare_fci).no_separation = 0;
-	if (zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache)) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
-		result = zval_get_long(&retval);
-		zval_ptr_dtor(&retval);
-	} else {
-		result = 0;
-	}
-
-	zval_ptr_dtor(&args[0]);
-	zval_ptr_dtor(&args[1]);
-
-	return result < 0 ? -1 : result > 0 ? 1 : 0;
-}
-/* }}} */
-
-/* {{{ proto bool uksort(array array_arg, string cmp_function)
-   Sort an array by keys using a user-defined comparison function */
-PHP_FUNCTION(uksort)
-{
-	php_usort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_array_user_key_compare, 0);
 }
 /* }}} */
 
@@ -4475,7 +4565,7 @@ PHP_FUNCTION(array_unique)
 		Z_PARAM_LONG(sort_type)
 	ZEND_PARSE_PARAMETERS_END();
 
-	cmp = php_get_data_compare_func(sort_type, 0);
+	cmp = php_get_data_compare_func(sort_type);
 
 
 	if (Z_ARRVAL_P(array)->nNumOfElements <= 1) {	/* nothing to do */
@@ -4787,7 +4877,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 		ZVAL_UNDEF(&list->val);
 		if (hash->nNumOfElements > 1) {
 			if (behavior == INTERSECT_NORMAL) {
-				zend_sort((void *) lists[i], hash->nNumOfElements, 
+				zend_sort((void *) lists[i], hash->nNumOfElements,
 						sizeof(Bucket), intersect_data_compare_func, (swap_func_t)zend_hash_bucket_swap);
 			} else if (behavior & INTERSECT_ASSOC) { /* triggered also when INTERSECT_KEY */
 				zend_sort((void *) lists[i], hash->nNumOfElements,
@@ -5535,7 +5625,7 @@ PHP_FUNCTION(array_multisort)
 			/* We see the next array, so we update the sort flags of
 			 * the previous array and reset the sort flags. */
 			if (i > 0) {
-				ARRAYG(multisort_func)[num_arrays - 1] = php_get_data_compare_func(sort_type, sort_order != PHP_SORT_ASC);
+				ARRAYG(multisort_func)[num_arrays - 1] = php_get_data_compare_func(sort_type | (sort_order != PHP_SORT_ASC ? PHP_SORT_FLAG_REVERSE : 0));
 				sort_order = PHP_SORT_ASC;
 				sort_type = PHP_SORT_REGULAR;
 			}
@@ -5590,7 +5680,7 @@ PHP_FUNCTION(array_multisort)
 		}
 	}
 	/* Take care of the last array sort flags. */
-	ARRAYG(multisort_func)[num_arrays - 1] = php_get_data_compare_func(sort_type, sort_order != PHP_SORT_ASC);
+	ARRAYG(multisort_func)[num_arrays - 1] = php_get_data_compare_func(sort_type | (sort_order != PHP_SORT_ASC ? PHP_SORT_FLAG_REVERSE : 0));
 
 	/* Make sure the arrays are of the same size. */
 	array_size = zend_hash_num_elements(Z_ARRVAL_P(arrays[0]));

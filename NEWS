@@ -103,7 +103,7 @@ PHP                                                                        NEWS
   . Fixed bug #73949 (leak in mysqli_fetch_object). (krakjoe)
 
 - mysqlnd:
-  . Fixed bug #73800 (sporadic segfault with MYSQLI_OPT_INT_AND_FLOAT_NATIVE). 
+  . Fixed bug #73800 (sporadic segfault with MYSQLI_OPT_INT_AND_FLOAT_NATIVE).
 	(vanviegen)
 
 - OpenSSL:
@@ -146,6 +146,9 @@ PHP                                                                        NEWS
 - SOAP:
   . Fixed bug #69137 (Peer verification fails when using a proxy with SoapClient)
     (Keith Smiley)
+
+- SPL:
+  . Implemented the Sortable RFC (https://wiki.php.net/rfc/sortable). (Gielfeldt)
 
 - SQLite3:
   . Update to Sqlite 3.16.2. (cmb)

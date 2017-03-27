@@ -117,6 +117,7 @@ PHPAPI zend_long php_count_recursive(zval *array, zend_long mode);
 #define PHP_SORT_LOCALE_STRING      5
 #define PHP_SORT_NATURAL            6
 #define PHP_SORT_FLAG_CASE          8
+#define PHP_SORT_FLAG_REVERSE      16
 
 #define COUNT_NORMAL      0
 #define COUNT_RECURSIVE   1

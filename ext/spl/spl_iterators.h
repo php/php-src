@@ -54,6 +54,9 @@ extern PHPAPI zend_class_entry *spl_ce_RecursiveRegexIterator;
 extern PHPAPI zend_class_entry *spl_ce_Countable;
 extern PHPAPI zend_class_entry *spl_ce_CallbackFilterIterator;
 extern PHPAPI zend_class_entry *spl_ce_RecursiveCallbackFilterIterator;
+extern PHPAPI zend_class_entry *spl_ce_Sortable;
+extern PHPAPI zend_class_entry *spl_ce_SortableAssoc;
+extern PHPAPI zend_class_entry *spl_ce_SortableKeys;
 
 PHP_MINIT_FUNCTION(spl_iterators);
 

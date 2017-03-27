@@ -204,12 +204,12 @@ NULL
 
 --instance of classWithToString--
 
-Warning: uksort() expects parameter 1 to be array, object given in %suksort_variation1.php on line %d
+Warning: uksort() expects parameter 2 to be a valid callback, function 'string_val' not found or invalid function name in %suksort_variation1.php on line %d
 NULL
 
 --instance of classWithoutToString--
 
-Warning: uksort() expects parameter 1 to be array, object given in %suksort_variation1.php on line %d
+Warning: uksort() expects parameter 2 to be a valid callback, function 'string_val' not found or invalid function name in %suksort_variation1.php on line %d
 NULL
 
 --undefined var--

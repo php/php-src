@@ -62,6 +62,9 @@ PHPAPI zend_class_entry *spl_ce_RegexIterator;
 PHPAPI zend_class_entry *spl_ce_RecursiveRegexIterator;
 PHPAPI zend_class_entry *spl_ce_Countable;
 PHPAPI zend_class_entry *spl_ce_RecursiveTreeIterator;
+PHPAPI zend_class_entry *spl_ce_Sortable;
+PHPAPI zend_class_entry *spl_ce_SortableAssoc;
+PHPAPI zend_class_entry *spl_ce_SortableKeys;
 
 ZEND_BEGIN_ARG_INFO(arginfo_recursive_it_void, 0)
 ZEND_END_ARG_INFO()
@@ -3675,6 +3678,31 @@ static const zend_function_entry spl_funcs_Countable[] = {
 	PHP_FE_END
 };
 
+ZEND_BEGIN_ARG_INFO(arginfo_array_it_void, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_array_it_uXsort, 0)
+	ZEND_ARG_INFO(0, cmp_function)
+ZEND_END_ARG_INFO();
+
+static const zend_function_entry spl_funcs_Sortable[] = {
+	SPL_ABSTRACT_ME(Sortable, sort,         arginfo_array_it_void)
+	SPL_ABSTRACT_ME(Sortable, usort,        arginfo_array_it_uXsort)
+	PHP_FE_END
+};
+
+static const zend_function_entry spl_funcs_SortableAssoc[] = {
+	SPL_ABSTRACT_ME(SortableAssoc, asort,        arginfo_array_it_void)
+	SPL_ABSTRACT_ME(SortableAssoc, uasort,       arginfo_array_it_uXsort)
+	PHP_FE_END
+};
+
+static const zend_function_entry spl_funcs_SortableKeys[] = {
+	SPL_ABSTRACT_ME(SortableKeys, ksort,        arginfo_array_it_void)
+	SPL_ABSTRACT_ME(SortableKeys, uksort,       arginfo_array_it_uXsort)
+	PHP_FE_END
+};
+
 /* {{{ PHP_MINIT_FUNCTION(spl_iterators)
  */
 PHP_MINIT_FUNCTION(spl_iterators)
@@ -3730,6 +3758,9 @@ PHP_MINIT_FUNCTION(spl_iterators)
 	REGISTER_SPL_SUB_CLASS_EX(ParentIterator, RecursiveFilterIterator, spl_dual_it_new, spl_funcs_ParentIterator);
 
 	REGISTER_SPL_INTERFACE(Countable);
+	REGISTER_SPL_INTERFACE(Sortable);
+	REGISTER_SPL_INTERFACE(SortableAssoc);
+	REGISTER_SPL_INTERFACE(SortableKeys);
 	REGISTER_SPL_INTERFACE(SeekableIterator);
 	REGISTER_SPL_ITERATOR(SeekableIterator);
 

@@ -217,6 +217,9 @@ PHP_FUNCTION(class_uses)
 	SPL_ADD_CLASS(RegexIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(RuntimeException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(SeekableIterator, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(Sortable, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(SortableAssoc, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(SortableKeys, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(SplDoublyLinkedList, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(SplFileInfo, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(SplFileObject, z_list, sub, allow, ce_flags); \

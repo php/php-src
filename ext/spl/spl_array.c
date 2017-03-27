@@ -1497,6 +1497,11 @@ SPL_METHOD(cname, fname) \
 	spl_array_method(INTERNAL_FUNCTION_PARAM_PASSTHRU, #fname, sizeof(#fname)-1, use_arg); \
 }
 
+/* {{{ proto int ArrayObject::sort([int $sort_flags = SORT_REGULAR ])
+       proto int ArrayIterator::sort([int $sort_flags = SORT_REGULAR ])
+   Sort the entries by values. */
+SPL_ARRAY_METHOD(Array, sort, SPL_ARRAY_METHOD_MAY_USER_ARG) /* }}} */
+
 /* {{{ proto int ArrayObject::asort([int $sort_flags = SORT_REGULAR ])
        proto int ArrayIterator::asort([int $sort_flags = SORT_REGULAR ])
    Sort the entries by values. */
@@ -1506,6 +1511,11 @@ SPL_ARRAY_METHOD(Array, asort, SPL_ARRAY_METHOD_MAY_USER_ARG) /* }}} */
        proto int ArrayIterator::ksort([int $sort_flags = SORT_REGULAR ])
    Sort the entries by key. */
 SPL_ARRAY_METHOD(Array, ksort, SPL_ARRAY_METHOD_MAY_USER_ARG) /* }}} */
+
+/* {{{ proto int ArrayObject::usort(callback cmp_function)
+       proto int ArrayIterator::usort(callback cmp_function)
+   Sort the entries by values. */
+SPL_ARRAY_METHOD(Array, usort, SPL_ARRAY_METHOD_USE_ARG) /* }}} */
 
 /* {{{ proto int ArrayObject::uasort(callback cmp_function)
        proto int ArrayIterator::uasort(callback cmp_function)
@@ -1868,16 +1878,16 @@ ZEND_BEGIN_ARG_INFO(arginfo_array_setIteratorClass, 0)
 	ZEND_ARG_INFO(0, iteratorClass)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_array_uXsort, 0)
-	ZEND_ARG_INFO(0, cmp_function)
-ZEND_END_ARG_INFO();
-
 ZEND_BEGIN_ARG_INFO(arginfo_array_unserialize, 0)
 	ZEND_ARG_INFO(0, serialized)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_array_void, 0)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_array_uXsort, 0)
+	ZEND_ARG_INFO(0, cmp_function)
+ZEND_END_ARG_INFO();
 
 static const zend_function_entry spl_funcs_ArrayObject[] = {
 	SPL_ME(Array, __construct,      arginfo_array___construct,      ZEND_ACC_PUBLIC)
@@ -1890,6 +1900,8 @@ static const zend_function_entry spl_funcs_ArrayObject[] = {
 	SPL_ME(Array, count,            arginfo_array_void,             ZEND_ACC_PUBLIC)
 	SPL_ME(Array, getFlags,         arginfo_array_void,             ZEND_ACC_PUBLIC)
 	SPL_ME(Array, setFlags,         arginfo_array_setFlags,         ZEND_ACC_PUBLIC)
+	SPL_ME(Array, sort,             arginfo_array_void,             ZEND_ACC_PUBLIC)
+	SPL_ME(Array, usort,            arginfo_array_uXsort,           ZEND_ACC_PUBLIC)
 	SPL_ME(Array, asort,            arginfo_array_void,             ZEND_ACC_PUBLIC)
 	SPL_ME(Array, ksort,            arginfo_array_void,             ZEND_ACC_PUBLIC)
 	SPL_ME(Array, uasort,           arginfo_array_uXsort,           ZEND_ACC_PUBLIC)
@@ -1917,6 +1929,8 @@ static const zend_function_entry spl_funcs_ArrayIterator[] = {
 	SPL_ME(Array, count,            arginfo_array_void,             ZEND_ACC_PUBLIC)
 	SPL_ME(Array, getFlags,         arginfo_array_void,             ZEND_ACC_PUBLIC)
 	SPL_ME(Array, setFlags,         arginfo_array_setFlags,         ZEND_ACC_PUBLIC)
+	SPL_ME(Array, sort,             arginfo_array_void,             ZEND_ACC_PUBLIC)
+	SPL_ME(Array, usort,            arginfo_array_uXsort,           ZEND_ACC_PUBLIC)
 	SPL_ME(Array, asort,            arginfo_array_void,             ZEND_ACC_PUBLIC)
 	SPL_ME(Array, ksort,            arginfo_array_void,             ZEND_ACC_PUBLIC)
 	SPL_ME(Array, uasort,           arginfo_array_uXsort,           ZEND_ACC_PUBLIC)
@@ -1950,6 +1964,9 @@ PHP_MINIT_FUNCTION(spl_array)
 	REGISTER_SPL_IMPLEMENTS(ArrayObject, ArrayAccess);
 	REGISTER_SPL_IMPLEMENTS(ArrayObject, Serializable);
 	REGISTER_SPL_IMPLEMENTS(ArrayObject, Countable);
+	REGISTER_SPL_IMPLEMENTS(ArrayObject, Sortable);
+	REGISTER_SPL_IMPLEMENTS(ArrayObject, SortableAssoc);
+	REGISTER_SPL_IMPLEMENTS(ArrayObject, SortableKeys);
 	memcpy(&spl_handler_ArrayObject, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 
 	spl_handler_ArrayObject.offset = XtOffsetOf(spl_array_object, std);
@@ -1980,6 +1997,9 @@ PHP_MINIT_FUNCTION(spl_array)
 	REGISTER_SPL_IMPLEMENTS(ArrayIterator, SeekableIterator);
 	REGISTER_SPL_IMPLEMENTS(ArrayIterator, Serializable);
 	REGISTER_SPL_IMPLEMENTS(ArrayIterator, Countable);
+	REGISTER_SPL_IMPLEMENTS(ArrayIterator, Sortable);
+	REGISTER_SPL_IMPLEMENTS(ArrayIterator, SortableAssoc);
+	REGISTER_SPL_IMPLEMENTS(ArrayIterator, SortableKeys);
 	memcpy(&spl_handler_ArrayIterator, &spl_handler_ArrayObject, sizeof(zend_object_handlers));
 	spl_ce_ArrayIterator->get_iterator = spl_array_get_iterator;
 

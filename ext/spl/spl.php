@@ -577,6 +577,52 @@ interface Countable
 	function count();
 }
 
+/** @ingroup SPL
+ * @brief This Interface allows to hook into the global Xsort() functions.
+ * @since PHP 5.6
+ */
+interface Sortable
+{
+	/** Sort the entries by values.
+	 */
+	function sort($sort_flags = SORT_REGULAR);
+
+	/** Sort the entries by values using user defined function.
+	 */
+	function usort(mixed cmp_function);
+}
+
+
+/** @ingroup SPL
+ * @brief This Interface allows to hook into the global XaXsort() functions.
+ * @since PHP 5.6
+ */
+interface SortableAssoc
+{
+	/** Sort the entries by values and maintain indexes.
+	 */
+	function asort($sort_flags = SORT_REGULAR);
+
+	/** Sort the entries by values using user defined function and maintain index.
+	 */
+	function uasort(mixed cmp_function);
+}
+
+/** @ingroup SPL
+ * @brief This Interface allows to hook into the global XkXsort() functions.
+ * @since PHP 5.6
+ */
+interface SortableKeys
+{
+	/** Sort the entries by key.
+	 */
+	function ksort($sort_flags = SORT_REGULAR);
+
+	/** Sort the entries by key using user defined function.
+	 */
+	function uksort(mixed cmp_function);
+}
+
 /** @ingroup ZendEngine
  * @brief Interface for customized serializing
  * @since 5.1
@@ -646,11 +692,15 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Countable
 
 	/** Sort the entries by values.
 	 */
-	function asort() {/**/}
+	function asort($sort_flags = SORT_REGULAR) {/**/}
 
 	/** Sort the entries by key.
 	 */
-	function ksort() {/**/}
+	function ksort($sort_flags = SORT_REGULAR) {/**/}
+
+	/** Sort the entries by values using user defined function.
+	 */
+	function usort(mixed cmp_function) {/**/}
 
 	/** Sort the entries by values using user defined function.
 	 */
@@ -772,6 +822,10 @@ class ArrayIterator implements SeekableIterator, ArrayAccess, Countable
 	/** Sort the entries by key.
 	 */
 	function ksort() {/**/}
+
+	/** Sort the entries by values using user defined function.
+	 */
+	function usort(mixed cmp_function) {/**/}
 
 	/** Sort the entries by values using user defined function.
 	 */
