@@ -641,7 +641,7 @@ static void* dasm_labels[zend_lb_MAX];
 |						mov64 tmp_reg, ((uintptr_t)Z_LVAL_P(zv))
 |						SET_ZVAL_LVAL dst_addr, tmp_reg
 |						SET_ZVAL_LVAL res_addr, tmp_reg
-|					}
+||					}
 ||				} else {
 |					SET_ZVAL_LVAL dst_addr, Z_LVAL_P(zv)
 |					SET_ZVAL_LVAL res_addr, Z_LVAL_P(zv)
