@@ -116,9 +116,9 @@ print "wanted=Monday            00:00:00\n\n";
 
 print "TZ=Africa/Monrovia - Is it OK for this to be 00:44:30 AM? yes\n";
 date_default_timezone_set('Africa/Monrovia');
-$tStamp = mktime (17, 17, 17, 1, 845, 1970);
+$tStamp = mktime (17, 17, 17, 1, 730, 1970);
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
-$strtotime_tstamp = strtotime("next Monday", $tStamp);
+$strtotime_tstamp = strtotime("next Friday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
 print "wanted=Monday            00:44:30\n\n";
 
@@ -282,9 +282,9 @@ result=Monday 1970-01-05 00:00:00 +12 0
 wanted=Monday            00:00:00
 
 TZ=Africa/Monrovia - Is it OK for this to be 00:44:30 AM? yes
-tStamp=Monday 1972-04-24 17:17:17 %s 0
-result=Monday 1972-05-01 00:44:30 GMT 0
-wanted=Monday            00:44:30
+tStamp=Friday 1971-12-31 17:17:17 MMT 0
+result=Friday 1972-01-07 00:44:30 GMT 0
+wanted=Friday            00:44:30
 
 TZ=Asia/Katmandu - Is it OK for this to 0:15 AM?. yes
 tStamp=Wednesday 1985-12-25 17:17:17 +0530 0
