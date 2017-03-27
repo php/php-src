@@ -3804,6 +3804,8 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 	zend_hash_destroy(&BG(putenv_ht));
 #endif
 
+	BG(mt_rand_is_seeded) = 0;
+
 	if (BG(umask) != -1) {
 		umask(BG(umask));
 	}
