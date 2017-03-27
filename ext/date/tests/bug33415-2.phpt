@@ -120,7 +120,7 @@ $tStamp = mktime (17, 17, 17, 1, 730, 1970);
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
 $strtotime_tstamp = strtotime("next Friday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
-print "wanted=Monday            00:44:30\n\n";
+print "wanted=Friday            00:44:30\n\n";
 
 print "TZ=Asia/Katmandu - Is it OK for this to 0:15 AM?. yes\n";
 date_default_timezone_set('Asia/Katmandu');
