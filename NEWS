@@ -2,7 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2017, PHP 7.1.5
 
-
+- Intl:
+  . Fixed bug #65683 (Intl does not support DateTimeImmutable). (Ben Scholzen)
 
 13 Apr 2017, PHP 7.1.4
 
