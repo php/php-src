@@ -20,6 +20,8 @@ PHP                                                                        NEWS
     php.exe). (Michele Locati)
   . Implemented "Convert numeric keys in object/array casts" RFC, fixes
     bugs #53838, #61655, #66173, #70925, #72254, etc. (Andrea)
+  . Implemented "Deprecate and Remove Bareword (Unquoted) Strings" RFC.
+    (Rowan Collins)
   . Raised minimum supported Windows versions to Windows 7/Server 2008 R2.
     (Anatol)
   . Implemented minor optimization in array_keys/array_values(). (Sara)
@@ -155,6 +157,8 @@ PHP                                                                        NEWS
   . Fixed bug #69442 (closing of fd incorrect when PTS enabled). (jaytaph)
   . Fixed bug #72974 (imap is undefined service on AIX). (matthieu.sarter)
   . Fixed bug #72979 (money_format stores wrong length AIX). (matthieu.sarter)
+  . Fixed bug #74300 (unserialize accepts two plus/minus signs for float number exponent part).
+    (xKerman)
 
 - XML:
   . Moved utf8_encode() and utf8_decode() to the Standard extension. (Andrea)
