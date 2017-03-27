@@ -1953,7 +1953,7 @@ pass:
 					case ZEND_SEND_VAR_EX:
 					case ZEND_SEND_VAR_NO_REF:
 					case ZEND_SEND_VAR_NO_REF_EX:
-						if (!zend_jit_send_var(&dasm_state, opline, op_array, ssa)) {
+						if (!zend_jit_send_var(&dasm_state, opline, op_array, ssa, ra)) {
 							goto jit_failure;
 						}
 						goto done;

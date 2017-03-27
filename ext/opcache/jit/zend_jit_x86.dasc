@@ -6393,12 +6393,11 @@ static int zend_jit_send_ref(dasm_State **Dst, const zend_op *opline, zend_op_ar
 	return 1;
 }
 
-static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
+static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa, zend_lifetime_interval **ra)
 {
 	uint32_t op1_info;
 	uint32_t arg_num = opline->op2.num;
 	zend_jit_addr op1_addr, arg_addr;
-
 
 	if ((opline->opcode == ZEND_SEND_VAR_EX ||
 	     opline->opcode == ZEND_SEND_VAR_NO_REF_EX) &&
@@ -6406,7 +6405,7 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		goto fallback;
 	}
 
-	op1_addr = zend_jit_decode_op(op_array, opline->op1_type, opline->op1, opline, NULL, -1);
+	op1_addr = zend_jit_decode_op(op_array, opline->op1_type, opline->op1, opline, ra, ra ? ssa->ops[opline - op_array->opcodes].op1_use : -1);
 	arg_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, opline->result.var);
 	op1_info = OP1_INFO();
 
@@ -6544,6 +6543,16 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, zend_op_ar
 				|2:
 			}
 		} else {
+		    if (ra && ssa->ops[opline - op_array->opcodes].op1_def >= 0) {
+				zend_jit_addr op1_def_addr = zend_jit_decode_op(op_array, opline->op1_type, opline->op1, opline, ra, ra ? ssa->ops[opline - op_array->opcodes].op1_def : -1);
+
+				if (op1_addr != op1_def_addr) {
+					|	ZVAL_COPY_VALUE op1_def_addr, op1_addr, MAY_BE_LONG, ZREG_R0, ZREG_R1
+					if (Z_MODE(op1_def_addr) == IS_REG && Z_MODE(op1_addr) != IS_REG) {
+						op1_addr= op1_def_addr;
+					}
+				}
+			}
 			|	ZVAL_COPY_VALUE arg_addr, op1_addr, op1_info, ZREG_R0, ZREG_R2
 			if (opline->op1_type == IS_CV) {
 				|	TRY_ADDREF op1_info, ah, r2
@@ -8072,6 +8081,7 @@ static zend_bool zend_jit_opline_supports_reg(zend_op_array *op_array, zend_ssa 
 
 	switch (opline->opcode) {
 		case ZEND_QM_ASSIGN:
+		case ZEND_SEND_VAR:
 			return 1;
 		case ZEND_PRE_INC:
 		case ZEND_PRE_DEC:
