@@ -1383,6 +1383,11 @@ static int zend_jit_try_allocate_free_reg(zend_op_array *op_array, zend_ssa *ssa
 		available = ZEND_REGSET_INTERSECTION(available, ZEND_REGSET_GP);
 	}
 
+	/* TODO: Allow usage of preserved registers ???
+	 * Their values have to be stored in prologuee and restored in epilogue
+	 */
+	available = ZEND_REGSET_DIFFERENCE(available, ZEND_REGSET_PRESERVED);
+
 	if (ZEND_REGSET_IS_EMPTY(available)) {
 		return 0;
 	}
