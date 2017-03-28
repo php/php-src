@@ -14,6 +14,9 @@ PHP                                                                        NEWS
     to `isfinite'). (Nikita)
   . Fixed bug #74302 (yield fromLABEL is over-greedy). (Sara)
 
+- Apache:
+  . Reverted patch for bug #61471, fixes bug #74318. (Anatol)
+
 - Date:
   . Fixed bug #72096 (Swatch time value incorrect for dates before 1970). (mcq8)
 
