@@ -988,29 +988,66 @@ static int zend_jit_add_range(zend_lifetime_interval **intervals, int var, uint3
 		ival->range.start = from;
 		ival->range.end = to;
 		ival->range.next = range;
+	} else if (ival->range.start == to + 1) {
+		ival->range.start = from;
 	} else {
-		ZEND_ASSERT(from <= ival->range.start);
-		ZEND_ASSERT(to <= ival->range.end);
-		if (from < ival->range.start) {
-			ival->range.start = from;
+		zend_life_range *range = &ival->range;
+		zend_life_range *last = NULL;
+
+		do {
+			if (range->start > to + 1) {
+				break;
+			} else if (range->end + 1 >= from) {
+				if (range->start > from) {
+					range->start = from;
+				}
+				last = range;
+				range = range->next;
+				while (range) {
+					if (range->start > to + 1) {
+						break;
+					}
+					range = range->next;
+					last->next = range;
+				}
+				if (to > last->end) {
+					last->end = to;
+				}
+				return SUCCESS;
+			}
+			last = range;
+			range = range->next;
+		} while (range);
+
+		range = zend_arena_alloc(&CG(arena), sizeof(zend_life_range));
+		if (!range) {
+			return FAILURE;
 		}
-		if (to > ival->range.end) {
-			ival->range.end = to;
-		}
+		range->start = from;
+		range->end   = to;
+		range->next  = last->next;
+		last->next = range;
 	}
+
 	return SUCCESS;
 }
 
 static int zend_jit_begin_range(zend_lifetime_interval **intervals, int var, uint32_t from)
 {
-	if (!intervals[var] || intervals[var]->range.start > from) {
-		// dead store
-		return zend_jit_add_range(intervals, var, from, from);
+	if (intervals[var]) {
+		zend_life_range *range = &intervals[var]->range;
+
+		do {
+			if (from >= range->start && from <= range->end) {
+				range->start = from;
+				return SUCCESS;
+			}
+			range = range->next;
+		} while (range);
 	}
 
-	intervals[var]->range.start = from;
-
-	return SUCCESS;
+	// dead store
+	return zend_jit_add_range(intervals, var, from, from);
 }
 
 static void zend_jit_insert_interval(zend_lifetime_interval **list, zend_lifetime_interval *ival)
@@ -1147,14 +1184,42 @@ static void zend_jit_print_regset(zend_regset regset)
 }
 #endif
 
+static int *zend_jit_compute_block_order_int(zend_ssa *ssa, int n, int *block_order)
+{
+	zend_basic_block *b = ssa->cfg.blocks + n;
+
+tail_call:
+	*block_order = n;
+	block_order++;
+
+	n = b->children;
+	while (n >= 0) {
+		b = ssa->cfg.blocks + n;
+		if (b->next_child < 0) {
+			goto tail_call;
+		}
+		block_order = zend_jit_compute_block_order_int(ssa, n, block_order);
+		n = b->next_child;
+	}
+
+	return block_order;
+}
+
+static void zend_jit_compute_block_order(zend_ssa *ssa, int *block_order)
+{
+	int *end = zend_jit_compute_block_order_int(ssa, 0, block_order);
+	ZEND_ASSERT(end - block_order == ssa->cfg.blocks_count);
+}
+
 /* See "Linear Scan Register Allocation on SSA Form", Christian Wimmer and
    Michael Franz, CGO'10 (2010), Figure 4. */
 static int zend_jit_compute_liveness(zend_op_array *op_array, zend_ssa *ssa, zend_bitset candidates, zend_lifetime_interval **list)
 {
-	int set_size, i, j, k;
+	int set_size, i, j, k, l;
 	uint32_t n;
 	zend_bitset live, live_in, pi_vars;
-	uint32_t *loop_end;
+	uint32_t *loop_start, *loop_end;
+	int *block_order;
 	zend_ssa_phi *phi;
 	zend_lifetime_interval **intervals;
 	ALLOCA_FLAG(use_heap);
@@ -1163,7 +1228,9 @@ static int zend_jit_compute_liveness(zend_op_array *op_array, zend_ssa *ssa, zen
 	intervals = do_alloca(
 		ZEND_MM_ALIGNED_SIZE(ssa->vars_count * sizeof(zend_lifetime_interval*)) +
 		ZEND_MM_ALIGNED_SIZE((set_size * ssa->cfg.blocks_count + 2) * ZEND_BITSET_ELM_SIZE) +
-		ZEND_MM_ALIGNED_SIZE(ssa->cfg.blocks_count * sizeof(uint32_t)),
+		ZEND_MM_ALIGNED_SIZE(ssa->cfg.blocks_count * sizeof(uint32_t)) +
+		ZEND_MM_ALIGNED_SIZE(ssa->cfg.blocks_count * sizeof(uint32_t)) +
+		ZEND_MM_ALIGNED_SIZE(ssa->cfg.blocks_count * sizeof(int)),
 		use_heap);
 
 	if (!intervals) {
@@ -1174,18 +1241,26 @@ static int zend_jit_compute_liveness(zend_op_array *op_array, zend_ssa *ssa, zen
 	live_in = (zend_bitset)((char*)intervals + ZEND_MM_ALIGNED_SIZE(ssa->vars_count * sizeof(zend_lifetime_interval*)));
 	live = (zend_bitset)((char*)live_in + ZEND_MM_ALIGNED_SIZE((set_size * ssa->cfg.blocks_count) * ZEND_BITSET_ELM_SIZE));
 	pi_vars = (zend_bitset)((char*)live + ZEND_MM_ALIGNED_SIZE(set_size * ZEND_BITSET_ELM_SIZE));
-	loop_end = (uint32_t*)((char*)pi_vars + ZEND_MM_ALIGNED_SIZE(set_size * ZEND_BITSET_ELM_SIZE));
+	loop_start = (uint32_t*)((char*)pi_vars + ZEND_MM_ALIGNED_SIZE(set_size * ZEND_BITSET_ELM_SIZE));
+	loop_end = (uint32_t*)((char*)loop_start + ZEND_MM_ALIGNED_SIZE(ssa->cfg.blocks_count * sizeof(uint32_t)));
+	block_order = (int*)((char*)loop_end + ZEND_MM_ALIGNED_SIZE(ssa->cfg.blocks_count * sizeof(uint32_t)));
+
+	zend_jit_compute_block_order(ssa, block_order);
 
 	memset(intervals, 0, ssa->vars_count * sizeof(zend_lifetime_interval*));
 	zend_bitset_clear(live_in, set_size * ssa->cfg.blocks_count);
+	memset(loop_start, 0, ssa->cfg.blocks_count * sizeof(uint32_t));
 	memset(loop_end, 0, ssa->cfg.blocks_count * sizeof(uint32_t));
 
 	/* TODO: Provide a linear block order where all dominators of a block
 	 * are before this block, and where all blocks belonging to the same loop
 	 * are contiguous ???
 	 */
-	for (i = ssa->cfg.blocks_count - 1; i >= 0; i--) {
-		zend_basic_block *b = ssa->cfg.blocks + i;
+	for (l = ssa->cfg.blocks_count - 1; l >= 0; l--) {
+		zend_basic_block *b;
+
+		i = block_order[l];
+		b = ssa->cfg.blocks + i;
 
 		/* live = UNION of successor.liveIn for each successor of b */
 		/* live.add(phi.inputOf(b)) for each phi of successors of b */
@@ -1291,18 +1366,26 @@ static int zend_jit_compute_liveness(zend_op_array *op_array, zend_ssa *ssa, zen
 			zend_bitset_excl(live, phi->ssa_var);
 		}
 
-		if (b->loop_header >= 0 && !loop_end[b->loop_header]) {
-			loop_end[b->loop_header] = b->start + b->len;
+		if (b->loop_header >= 0) {
+			if (!loop_start[b->loop_header] || b->start < loop_start[b->loop_header]) {
+				loop_start[b->loop_header] = b->start;
+			}
+			if (b->start + b->len > loop_end[b->loop_header]) {
+				loop_end[b->loop_header] = b->start + b->len;
+			}
 		}
 
 		/* if b is loop header */
 		if (b->flags & ZEND_BB_LOOP_HEADER) {
-			if (!loop_end[i]) {
+			if (!loop_start[i] || b->start < loop_start[i]) {
+				loop_start[i] = b->start;
+			}
+			if (b->start + b->len > loop_end[i]) {
 				loop_end[i] = b->start + b->len;
 			}
 			ZEND_BITSET_FOREACH(live, set_size, j) {
 				if (zend_bitset_in(candidates, j)) {
-					if (zend_jit_add_range(intervals, j, b->start, loop_end[i]) != SUCCESS) {
+					if (zend_jit_add_range(intervals, j, loop_start[i], loop_end[i]) != SUCCESS) {
 						goto failure;
 					}
 				}

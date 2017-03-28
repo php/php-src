@@ -8137,10 +8137,8 @@ static zend_bool zend_jit_may_be_in_reg(zend_op_array *op_array, zend_ssa *ssa, 
 
 	if (((ssa->var_info[var].type & MAY_BE_ANY) == MAY_BE_DOUBLE) ||
 	    ((ssa->var_info[var].type & MAY_BE_ANY) == MAY_BE_LONG)) {
-	    int definition_block = -1;
 
 		if (ssa->vars[var].definition >= 0) {
-			definition_block = ssa->cfg.map[ssa->vars[var].definition];
 			if (!zend_jit_opline_supports_reg(op_array, ssa, op_array->opcodes + ssa->vars[var].definition, var)) {
 				return 0;
 			}
@@ -8149,11 +8147,6 @@ static zend_bool zend_jit_may_be_in_reg(zend_op_array *op_array, zend_ssa *ssa, 
 			int use = ssa->vars[var].use_chain;
 
 			do {
-				if (ssa->cfg.map[use] != definition_block) {
-					// TODO: enable global register allocation ???
-					// Incorrect basic block oreder breaks register allocation.
-					return 0;
-				}
 				if (!zend_jit_opline_supports_reg(op_array, ssa, op_array->opcodes + use, var)) {
 					return 0;
 				}
