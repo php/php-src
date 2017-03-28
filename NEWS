@@ -21,6 +21,9 @@ PHP                                                                        NEWS
   . Fixed bug #74004 (LIBXML_NOWARNING flag ingnored on loadHTML*).
     (somedaysummer)
 
+- iconv:
+  . Fixed bug #74230 (iconv fails to fail on surrogates). (Anatol)
+
 - Opcache:
   . Fixed bug #74250 (OPcache compilation performance regression in PHP 5.6/7
     with huge classes). (Nikita)
