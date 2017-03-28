@@ -18,6 +18,9 @@ PHP                                                                        NEWS
   . Fixed bug #74004 (LIBXML_NOWARNING flag ingnored on loadHTML*).
     (somedaysummer)
 
+- iconv:
+  . Fixed bug #74230 (iconv fails to fail on surrogates). (Anatol)
+
 - OpenSSL:
   . Fixed bug #72333 (fwrite() on non-blocking SSL sockets doesn't work).
     (Jakub Zelenka)
