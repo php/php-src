@@ -1211,14 +1211,49 @@ static void zend_jit_compute_block_order(zend_ssa *ssa, int *block_order)
 	ZEND_ASSERT(end - block_order == ssa->cfg.blocks_count);
 }
 
+static zend_bool zend_jit_in_loop(zend_ssa *ssa, int header, zend_basic_block *b)
+{
+	while (b->loop_header >= 0) {
+		if (b->loop_header == header) {
+			return 1;
+		}
+		b = ssa->cfg.blocks + b->loop_header;
+	}
+	return 0;
+}
+
+static void zend_jit_compute_loop_body(zend_ssa *ssa, int header, int n, zend_bitset loop_body)
+{
+	zend_basic_block *b = ssa->cfg.blocks + n;
+	uint32_t i;
+
+tail_call:
+	if (b->len) {
+		for (i = b->start; i < b->start + b->len; i++) {
+			zend_bitset_incl(loop_body, i);
+		}
+	}
+
+	n = b->children;
+	while (n >= 0) {
+		b = ssa->cfg.blocks + n;
+		if (zend_jit_in_loop(ssa, header, b)) {
+			if (b->next_child < 0) {
+				goto tail_call;
+			}
+			zend_jit_compute_loop_body(ssa, header, n, loop_body);
+		}
+		n = b->next_child;
+	}
+}
+
 /* See "Linear Scan Register Allocation on SSA Form", Christian Wimmer and
    Michael Franz, CGO'10 (2010), Figure 4. */
 static int zend_jit_compute_liveness(zend_op_array *op_array, zend_ssa *ssa, zend_bitset candidates, zend_lifetime_interval **list)
 {
 	int set_size, i, j, k, l;
 	uint32_t n;
-	zend_bitset live, live_in, pi_vars;
-	uint32_t *loop_start, *loop_end;
+	zend_bitset live, live_in, pi_vars, loop_body;
 	int *block_order;
 	zend_ssa_phi *phi;
 	zend_lifetime_interval **intervals;
@@ -1227,9 +1262,8 @@ static int zend_jit_compute_liveness(zend_op_array *op_array, zend_ssa *ssa, zen
 	set_size = zend_bitset_len(ssa->vars_count);
 	intervals = do_alloca(
 		ZEND_MM_ALIGNED_SIZE(ssa->vars_count * sizeof(zend_lifetime_interval*)) +
-		ZEND_MM_ALIGNED_SIZE((set_size * ssa->cfg.blocks_count + 2) * ZEND_BITSET_ELM_SIZE) +
-		ZEND_MM_ALIGNED_SIZE(ssa->cfg.blocks_count * sizeof(uint32_t)) +
-		ZEND_MM_ALIGNED_SIZE(ssa->cfg.blocks_count * sizeof(uint32_t)) +
+		ZEND_MM_ALIGNED_SIZE((set_size * (ssa->cfg.blocks_count + 2)) * ZEND_BITSET_ELM_SIZE) +
+		ZEND_MM_ALIGNED_SIZE(zend_bitset_len(op_array->last) * ZEND_BITSET_ELM_SIZE) +
 		ZEND_MM_ALIGNED_SIZE(ssa->cfg.blocks_count * sizeof(int)),
 		use_heap);
 
@@ -1241,16 +1275,12 @@ static int zend_jit_compute_liveness(zend_op_array *op_array, zend_ssa *ssa, zen
 	live_in = (zend_bitset)((char*)intervals + ZEND_MM_ALIGNED_SIZE(ssa->vars_count * sizeof(zend_lifetime_interval*)));
 	live = (zend_bitset)((char*)live_in + ZEND_MM_ALIGNED_SIZE((set_size * ssa->cfg.blocks_count) * ZEND_BITSET_ELM_SIZE));
 	pi_vars = (zend_bitset)((char*)live + ZEND_MM_ALIGNED_SIZE(set_size * ZEND_BITSET_ELM_SIZE));
-	loop_start = (uint32_t*)((char*)pi_vars + ZEND_MM_ALIGNED_SIZE(set_size * ZEND_BITSET_ELM_SIZE));
-	loop_end = (uint32_t*)((char*)loop_start + ZEND_MM_ALIGNED_SIZE(ssa->cfg.blocks_count * sizeof(uint32_t)));
-	block_order = (int*)((char*)loop_end + ZEND_MM_ALIGNED_SIZE(ssa->cfg.blocks_count * sizeof(uint32_t)));
-
-	zend_jit_compute_block_order(ssa, block_order);
+	loop_body = (zend_bitset)((char*)pi_vars + ZEND_MM_ALIGNED_SIZE(set_size * ZEND_BITSET_ELM_SIZE));
+	block_order = (int*)((char*)loop_body + ZEND_MM_ALIGNED_SIZE(zend_bitset_len(op_array->last) * ZEND_BITSET_ELM_SIZE));
 
 	memset(intervals, 0, ssa->vars_count * sizeof(zend_lifetime_interval*));
 	zend_bitset_clear(live_in, set_size * ssa->cfg.blocks_count);
-	memset(loop_start, 0, ssa->cfg.blocks_count * sizeof(uint32_t));
-	memset(loop_end, 0, ssa->cfg.blocks_count * sizeof(uint32_t));
+	zend_jit_compute_block_order(ssa, block_order);
 
 	/* TODO: Provide a linear block order where all dominators of a block
 	 * are before this block, and where all blocks belonging to the same loop
@@ -1366,30 +1396,29 @@ static int zend_jit_compute_liveness(zend_op_array *op_array, zend_ssa *ssa, zen
 			zend_bitset_excl(live, phi->ssa_var);
 		}
 
-		if (b->loop_header >= 0) {
-			if (!loop_start[b->loop_header] || b->start < loop_start[b->loop_header]) {
-				loop_start[b->loop_header] = b->start;
-			}
-			if (b->start + b->len > loop_end[b->loop_header]) {
-				loop_end[b->loop_header] = b->start + b->len;
-			}
-		}
-
 		/* if b is loop header */
-		if (b->flags & ZEND_BB_LOOP_HEADER) {
-			if (!loop_start[i] || b->start < loop_start[i]) {
-				loop_start[i] = b->start;
-			}
-			if (b->start + b->len > loop_end[i]) {
-				loop_end[i] = b->start + b->len;
-			}
-			ZEND_BITSET_FOREACH(live, set_size, j) {
-				if (zend_bitset_in(candidates, j)) {
-					if (zend_jit_add_range(intervals, j, loop_start[i], loop_end[i]) != SUCCESS) {
+		if ((b->flags & ZEND_BB_LOOP_HEADER) &&
+		    !zend_bitset_empty(live, set_size)) {
+			uint32_t set_size2 = zend_bitset_len(op_array->last);
+
+			zend_bitset_clear(loop_body, set_size2);
+			zend_jit_compute_loop_body(ssa, i, i, loop_body);
+			while (!zend_bitset_empty(loop_body, set_size2)) {
+				uint32_t from = zend_bitset_first(loop_body, set_size2);
+				uint32_t to = from;
+
+				do {
+					zend_bitset_excl(loop_body, to);
+					to++;
+				} while (zend_bitset_in(loop_body, to));
+				to--;
+
+				ZEND_BITSET_FOREACH(live, set_size, j) {
+					if (zend_jit_add_range(intervals, j, from, to) != SUCCESS) {
 						goto failure;
 					}
-				}
-			} ZEND_BITSET_FOREACH_END();
+				} ZEND_BITSET_FOREACH_END();
+			}
 		}
 
 		/* b.liveIn = live */
