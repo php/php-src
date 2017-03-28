@@ -8,6 +8,10 @@
 #include "fpm_conf.h"
 #include "fpm_shm.h"
 
+#ifdef HAVE_FPM_CGROUP
+#include <libcgroup.h>
+#endif
+
 struct fpm_worker_pool_s;
 struct fpm_child_s;
 struct fpm_child_stat_s;
@@ -45,6 +49,9 @@ struct fpm_worker_pool_s {
 
 #ifdef HAVE_FPM_ACL
 	void *socket_acl;
+#endif
+#ifdef HAVE_FPM_CGROUP
+	struct cgroup *cgroup;
 #endif
 };
 

@@ -25,6 +25,10 @@
 #include <sys/acl.h>
 #endif
 
+#ifdef HAVE_FPM_CGROUP
+#include <libcgroup.h>
+#endif
+
 #include "fpm.h"
 #include "fpm_conf.h"
 #include "fpm_cleanup.h"
@@ -322,6 +326,33 @@ static int fpm_unix_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
 			wp->home = strdup(pwd->pw_dir);
 		}
 	}
+#ifdef HAVE_FPM_CGROUP
+	if (wp->config->cgroup && *wp->config->cgroup) {
+		wp->cgroup = cgroup_new_cgroup(wp->config->cgroup);
+		if (wp->cgroup == NULL) {
+			zlog(ZLOG_ERROR, "[pool %s] cannot init cgroup structure", wp->config->name);
+			return -1;
+		}
+
+		int ret = cgroup_get_cgroup(wp->cgroup);
+		if (ret != 0) {
+			zlog(ZLOG_ERROR, "[pool %s] cannot read cgroup '%s': %s.", wp->config->name, wp->config->cgroup, cgroup_strerror(ret));
+			return -1;
+		}
+
+		if (!is_root) {
+			uid_t tasks_uid, control_uid;
+			gid_t tasks_gid, control_gid;
+			cgroup_get_uid_gid(wp->cgroup, &tasks_uid, &tasks_gid, &control_uid, &control_gid);
+			
+			/* We also need to check file mode, but libcgroup does not provide the way to get it.
+			 * So continue to proceed with a notice. */
+			if (tasks_uid != geteuid() && tasks_gid != getegid()) {
+				zlog(ZLOG_NOTICE, "[pool %s] may have no access to cgroup '%s'.", wp->config->name, wp->config->cgroup);
+			}
+		}
+	}
+#endif
 	return 0;
 }
 /* }}} */
@@ -369,6 +400,16 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 			zlog(ZLOG_WARNING, "[pool %s] failed to chdir(/)", wp->config->name);
 		}
 	}
+
+#ifdef HAVE_FPM_CGROUP
+	if (wp->cgroup) {
+		int ret = cgroup_attach_task(wp->cgroup);
+		if (ret != 0) {
+			zlog(ZLOG_SYSERROR, "[pool %s] failed change cgroup to (%s): %s.", wp->config->name, wp->config->cgroup, cgroup_strerror(ret));
+			return -1;
+		}
+	}
+#endif
 
 	if (is_root) {
 
@@ -568,6 +609,17 @@ int fpm_unix_init_main() /* {{{ */
 			zlog(ZLOG_NOTICE, "'process.priority' directive is ignored when FPM is not running as root");
 		}
 	}
+
+#ifdef HAVE_FPM_CGROUP
+	for (wp = fpm_worker_all_pools; wp && !(wp->config->cgroup && *wp->config->cgroup); wp = wp->next);
+	if (wp) {
+		int ret = cgroup_init();
+		if (ret != 0) {
+			zlog(ZLOG_SYSERROR, "libcgroup initialization failed: %s", cgroup_strerror(ret));
+			return -1;
+		}
+	}
+#endif
 
 	fpm_globals.parent_pid = getpid();
 	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
