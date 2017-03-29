@@ -8075,6 +8075,34 @@ static int zend_jit_free(dasm_State **Dst, const zend_op *opline, zend_op_array 
 }
 
 #ifdef REG_ALLOC
+static zend_bool zend_jit_may_reuse_reg(zend_op_array *op_array, zend_ssa *ssa, uint32_t position, int def_var, int use_var)
+{
+	if (ssa->var_info[def_var].type != ssa->var_info[use_var].type) {
+		return 0;
+	}
+
+	switch (op_array->opcodes[position].opcode) {
+		case ZEND_QM_ASSIGN:
+		case ZEND_SEND_VAR:
+		case ZEND_PRE_INC:
+		case ZEND_PRE_DEC:
+		case ZEND_POST_INC:
+		case ZEND_POST_DEC:
+			return 1;
+		case ZEND_ADD:
+		case ZEND_SUB:
+		case ZEND_MUL:
+			if (def_var == ssa->ops[position].result_def &&
+			    use_var == ssa->ops[position].op1_use) {
+				return 1;
+			}
+			break;
+		default:
+			break;
+	}
+	return 0;
+}
+
 static zend_bool zend_jit_opline_supports_reg(zend_op_array *op_array, zend_ssa *ssa, zend_op *opline, int var)
 {
 	uint32_t op1_info, op2_info;

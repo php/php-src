@@ -1487,6 +1487,7 @@ static int zend_jit_try_allocate_free_reg(zend_op_array *op_array, zend_ssa *ssa
 	uint32_t freeUntilPos[ZREG_NUM];
 	uint32_t pos;
 	zend_reg i, reg;
+	zend_reg hint = ZREG_NONE;
 	zend_life_range *range;
 
 	if ((ssa->var_info[current->ssa_var].type & MAY_BE_ANY) == MAY_BE_DOUBLE) {
@@ -1512,9 +1513,22 @@ static int zend_jit_try_allocate_free_reg(zend_op_array *op_array, zend_ssa *ssa
 	/* for each interval it in active do */
 	/*   freeUntilPos[it.reg] = 0        */
 	it = active;
-	while (it) {
-		freeUntilPos[it->reg] = 0;
-		it = it->list_next;
+	if (ssa->vars[current->ssa_var].definition == current->range.start) {
+		while (it) {
+			if (current->range.start != zend_interval_end(it)) {
+				freeUntilPos[it->reg] = 0;
+			} else if (zend_jit_may_reuse_reg(op_array, ssa, current->range.start, current->ssa_var, it->ssa_var)) {
+				hint = it->reg;
+			} else {
+				freeUntilPos[it->reg] = 0;
+			}
+			it = it->list_next;
+		}
+	} else {
+		while (it) {
+			freeUntilPos[it->reg] = 0;
+			it = it->list_next;
+		}
 	}
 
 	/* See "Linear Scan Register Allocation on SSA Form", Christian Wimmer and
@@ -1592,6 +1606,11 @@ static int zend_jit_try_allocate_free_reg(zend_op_array *op_array, zend_ssa *ssa
 	}
 #endif
 
+    if (hint != ZREG_NONE && freeUntilPos[hint] > zend_interval_end(current)) {
+		current->reg = hint;
+		return 1;
+    }
+
 	pos = 0; reg = ZREG_NONE;
 	for (i = 0; i < ZREG_NUM; i++) {
 		if (ZEND_REGSET_IN(available, i) && freeUntilPos[i] > pos) {
@@ -1652,26 +1671,10 @@ static zend_lifetime_interval* zend_jit_linear_scan(zend_op_array *op_array, zen
 			q = *p;
 			if (end < position) {
 				/* move ival from active to handled */
-end_interval:
 				ZEND_REGSET_INCL(available, q->reg);
 				*p = q->list_next;
 				q->list_next = handled;
 				handled = q;
-			} else if (end == position) {
-				/* In some cases, we may (and should) reuse operand
-				   registers for result (coalesce) */
-				switch (op_array->opcodes[position].opcode) {
-					case ZEND_QM_ASSIGN:
-					case ZEND_ADD:
-					case ZEND_MUL:
-						if (q->ssa_var == ssa->ops[position].op1_use) {
-							goto end_interval;
-						}
-						break;
-					default:
-						break;
-				}
-				p = &q->list_next;
 			} else if (!zend_interval_covers(q, position)) {
 				/* move ival from active to inactive */
 				ZEND_REGSET_INCL(available, q->reg);
