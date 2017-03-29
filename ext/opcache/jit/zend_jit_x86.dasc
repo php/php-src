@@ -2085,17 +2085,24 @@ fallback:
 }
 
 static int zend_jit_math_long_long(dasm_State    **Dst,
-                                   const zend_op  *opline,
                                    zend_op_array  *op_array,
                                    zend_ssa       *ssa,
-                                   zend_jit_addr  op1_addr,
-                                   zend_jit_addr  op2_addr,
-                                   zend_jit_addr  res_addr,
-                                   uint32_t       res_info)
+                                   const zend_op  *opline,
+                                   zend_jit_addr   op1_addr,
+                                   zend_jit_addr   op2_addr,
+                                   zend_jit_addr   res_addr,
+                                   uint32_t        res_info)
 {
 	zend_bool same_ops = zend_jit_same_addr(op1_addr, op2_addr);
-	zend_reg result_reg =
-		(Z_MODE(res_addr) == IS_REG) ? Z_REG(res_addr) : ZREG_R0;
+	zend_reg result_reg;
+
+	if (Z_MODE(res_addr) == IS_REG) {
+		result_reg = Z_REG(res_addr);
+	} else if (Z_MODE(op1_addr) == IS_REG && zend_ssa_is_last_use(ssa, ssa->ops[opline-op_array->opcodes].op1_use, opline-op_array->opcodes)) {
+		result_reg = Z_REG(op1_addr);
+	} else {
+		result_reg = ZREG_R0;
+	}
 
 	if (opline->opcode == ZEND_MUL &&
 		((Z_MODE(op2_addr) == IS_CONST_ZVAL &&
@@ -2161,6 +2168,8 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 }
 
 static int zend_jit_math_long_double(dasm_State    **Dst,
+                                     zend_op_array  *op_array,
+                                     zend_ssa       *ssa,
                                      const zend_op  *opline,
                                      zend_jit_addr   op1_addr,
                                      zend_jit_addr   op2_addr,
@@ -2187,21 +2196,34 @@ static int zend_jit_math_long_double(dasm_State    **Dst,
 }
 
 static int zend_jit_math_double_long(dasm_State    **Dst,
+                                     zend_op_array  *op_array,
+                                     zend_ssa       *ssa,
                                      const zend_op  *opline,
                                      zend_jit_addr   op1_addr,
                                      zend_jit_addr   op2_addr,
                                      zend_jit_addr   res_addr)
 {
 	|.if SSE
-		zend_reg result_reg =
-			(Z_MODE(res_addr) == IS_REG) ? Z_REG(res_addr) : ZREG_XMM0;
+		zend_reg result_reg;
 
 		if (opline->opcode == ZEND_ADD || opline->opcode == ZEND_MUL || opline->opcode == ZEND_ASSIGN_ADD || opline->opcode == ZEND_ASSIGN_MUL) {
+			if (Z_MODE(res_addr) == IS_REG) {
+				result_reg = Z_REG(res_addr);
+			} else {
+				result_reg = ZREG_XMM0;
+			}
 			|	SSE_GET_ZVAL_LVAL result_reg, op2_addr
 			|	SSE_MATH opline->opcode, result_reg, op1_addr
 		} else {
 			zend_reg tmp_reg = ZREG_XMM1;
 
+			if (Z_MODE(res_addr) == IS_REG) {
+				result_reg = Z_REG(res_addr);
+			} else if (Z_MODE(op1_addr) == IS_REG && zend_ssa_is_last_use(ssa, ssa->ops[opline-op_array->opcodes].op1_use, opline-op_array->opcodes)) {
+				result_reg = Z_REG(op1_addr);
+			} else {
+				result_reg = ZREG_XMM0;
+			}
 			|	SSE_GET_ZVAL_DVAL result_reg, op1_addr
 			|	SSE_GET_ZVAL_LVAL tmp_reg, op2_addr
 			|	SSE_MATH_REG opline->opcode, result_reg, tmp_reg
@@ -2228,6 +2250,8 @@ static int zend_jit_math_double_long(dasm_State    **Dst,
 }
 
 static int zend_jit_math_double_double(dasm_State    **Dst,
+                                       zend_op_array  *op_array,
+                                       zend_ssa       *ssa,
                                        const zend_op  *opline,
                                        zend_jit_addr   op1_addr,
                                        zend_jit_addr   op2_addr,
@@ -2236,8 +2260,15 @@ static int zend_jit_math_double_double(dasm_State    **Dst,
 	zend_bool same_ops = zend_jit_same_addr(op1_addr, op2_addr);
 
 	|.if SSE
-		zend_reg result_reg =
-			(Z_MODE(res_addr) == IS_REG) ? Z_REG(res_addr) : ZREG_XMM0;
+		zend_reg result_reg;
+
+		if (Z_MODE(res_addr) == IS_REG) {
+			result_reg = Z_REG(res_addr);
+		} else if (Z_MODE(op1_addr) == IS_REG && zend_ssa_is_last_use(ssa, ssa->ops[opline-op_array->opcodes].op1_use, opline-op_array->opcodes)) {
+			result_reg = Z_REG(op1_addr);
+		} else {
+			result_reg = ZREG_XMM0;
+		}
 
 		|	SSE_GET_ZVAL_DVAL result_reg, op1_addr
 		if (same_ops) {
@@ -2362,7 +2393,7 @@ static int zend_jit_math_helper(dasm_State    **Dst,
 				if (op2_info & (MAY_BE_ANY-(MAY_BE_LONG|MAY_BE_DOUBLE))) {
 					|	IF_NOT_ZVAL_TYPE op2_addr, IS_DOUBLE, >6
 				}
-				if (!zend_jit_math_long_double(Dst, opline, op1_addr, op2_addr, res_addr)) {
+				if (!zend_jit_math_long_double(Dst, op_array, ssa, opline, op1_addr, op2_addr, res_addr)) {
 					return 0;
 				}
 				|	jmp >5
@@ -2371,7 +2402,7 @@ static int zend_jit_math_helper(dasm_State    **Dst,
 				|	IF_NOT_ZVAL_TYPE op2_addr, IS_LONG, >6
 			}
 		}
-		if (!zend_jit_math_long_long(Dst, opline, op_array, ssa, op1_addr, op2_addr, res_addr, res_info)) {
+		if (!zend_jit_math_long_long(Dst, op_array, ssa, opline, op1_addr, op2_addr, res_addr, res_info)) {
 			return 0;
 		}
 		if (op1_info & MAY_BE_DOUBLE) {
@@ -2388,7 +2419,7 @@ static int zend_jit_math_helper(dasm_State    **Dst,
 						|	IF_NOT_ZVAL_TYPE, op2_addr, IS_DOUBLE, >6
 					}
 				}
-				if (!zend_jit_math_double_double(Dst, opline, op1_addr, op2_addr, res_addr)) {
+				if (!zend_jit_math_double_double(Dst, op_array, ssa, opline, op1_addr, op2_addr, res_addr)) {
 					return 0;
 				}
 				|	jmp >5
@@ -2398,7 +2429,7 @@ static int zend_jit_math_helper(dasm_State    **Dst,
 				if (op2_info & (MAY_BE_ANY-(MAY_BE_LONG|MAY_BE_DOUBLE))) {
 					|	IF_NOT_ZVAL_TYPE op2_addr, IS_LONG, >6
 				}
-				if (!zend_jit_math_double_long(Dst, opline, op1_addr, op2_addr, res_addr)) {
+				if (!zend_jit_math_double_long(Dst, op_array, ssa, opline, op1_addr, op2_addr, res_addr)) {
 					return 0;
 				}
 				|	jmp >5
@@ -2419,7 +2450,7 @@ static int zend_jit_math_helper(dasm_State    **Dst,
 					|	IF_NOT_ZVAL_TYPE op2_addr, IS_DOUBLE, >6
 				}
 			}
-			if (!zend_jit_math_double_double(Dst, opline, op1_addr, op2_addr, res_addr)) {
+			if (!zend_jit_math_double_double(Dst, op_array, ssa, opline, op1_addr, op2_addr, res_addr)) {
 				return 0;
 			}
 		}
@@ -2431,7 +2462,7 @@ static int zend_jit_math_helper(dasm_State    **Dst,
 			if (op2_info & (MAY_BE_ANY-(MAY_BE_DOUBLE|MAY_BE_LONG))) {
 				|	IF_NOT_ZVAL_TYPE op2_addr, IS_LONG, >5
 			}
-			if (!zend_jit_math_double_long(Dst, opline, op1_addr, op2_addr, res_addr)) {
+			if (!zend_jit_math_double_long(Dst, op_array, ssa, opline, op1_addr, op2_addr, res_addr)) {
 				return 0;
 			}
 			if (op2_info & MAY_BE_DOUBLE) {
@@ -2453,7 +2484,7 @@ static int zend_jit_math_helper(dasm_State    **Dst,
 					|	IF_NOT_ZVAL_TYPE op1_addr, IS_DOUBLE, >6
 				}
 			}
-			if (!zend_jit_math_double_double(Dst, opline, op1_addr, op2_addr, res_addr)) {
+			if (!zend_jit_math_double_double(Dst, op_array, ssa, opline, op1_addr, op2_addr, res_addr)) {
 				return 0;
 			}
 		}
@@ -2465,7 +2496,7 @@ static int zend_jit_math_helper(dasm_State    **Dst,
 			if (op1_info & (MAY_BE_ANY-(MAY_BE_DOUBLE|MAY_BE_LONG))) {
 				|	IF_NOT_ZVAL_TYPE op1_addr, IS_LONG, >6
 			}
-			if (!zend_jit_math_long_double(Dst, opline, op1_addr, op2_addr, res_addr)) {
+			if (!zend_jit_math_long_double(Dst, op_array, ssa, opline, op1_addr, op2_addr, res_addr)) {
 				return 0;
 			}
 			if (op1_info & MAY_BE_DOUBLE) {

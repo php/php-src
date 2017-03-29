@@ -82,6 +82,13 @@ static void **dasm_ptr = NULL;
 static int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa);
 static int zend_may_overflow(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa);
 
+static zend_bool zend_ssa_is_last_use(const zend_ssa *ssa, int var, int use)
+{
+	return
+		!ssa->vars[var].phi_use_chain &&
+		zend_ssa_next_use(ssa->ops, var, use) < 0;
+}
+
 #include "dynasm/dasm_x86.h"
 #include "jit/zend_jit_x86.h"
 #include "jit/zend_jit_helpers.c"
