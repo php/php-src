@@ -12,7 +12,7 @@ for ( $i = 0; $i < 1000; $i++ )
 }
 
 var_dump($n = count( $collect ));
-echo ( $n > 900 ) ? "microseconds differ\n" : "microseconds do not differ enough\n";
+echo ( $n > 800 ) ? "microseconds differ\n" : "microseconds do not differ enough ($n)\n";
 ?>
 --EXPECTF--
 int(%d)
