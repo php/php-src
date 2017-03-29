@@ -1,7 +1,10 @@
 --TEST--
 SQLite3::createFunction - Test with flags
 --SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+<?php
+require_once(__DIR__ . '/skipif.inc');
+if (!defined('SQLITE3_DETERMINISTIC')) die('skip system sqlite is to old');
+?>
 --FILE--
 <?php
 
