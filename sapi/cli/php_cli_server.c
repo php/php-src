@@ -213,6 +213,8 @@ static php_cli_server_http_response_status_code_pair template_map[] = {
 static int php_cli_output_is_tty = OUTPUT_NOT_CHECKED;
 #endif
 
+static const char php_cli_server_request_error_unexpected_eof[] = "Unexpected EOF";
+
 static size_t php_cli_server_client_send_through(php_cli_server_client *client, const char *str, size_t str_len);
 static php_cli_server_chunk *php_cli_server_chunk_heap_new_self_contained(size_t len);
 static void php_cli_server_buffer_append(php_cli_server_buffer *buffer, php_cli_server_chunk *chunk);
@@ -1743,7 +1745,7 @@ static int php_cli_server_client_read_request(php_cli_server_client *client, cha
 		*errstr = php_socket_strerror(err, NULL, 0);
 		return -1;
 	} else if (nbytes_read == 0) {
-		*errstr = estrdup("Unexpected EOF");
+		*errstr = estrdup(php_cli_server_request_error_unexpected_eof);
 		return -1;
 	}
 	client->parser.data = client;
@@ -1880,7 +1882,7 @@ static void php_cli_server_client_dtor(php_cli_server_client *client) /* {{{ */
 
 static void php_cli_server_close_connection(php_cli_server *server, php_cli_server_client *client) /* {{{ */
 {
-#ifdef DEBUG
+#if PHP_DEBUG
 	php_cli_server_logf("%s Closing", client->addr_str);
 #endif
 	zend_hash_index_del(&server->clients, client->sock);
@@ -2369,7 +2371,13 @@ static int php_cli_server_recv_event_read_request(php_cli_server *server, php_cl
 	char *errstr = NULL;
 	int status = php_cli_server_client_read_request(client, &errstr);
 	if (status < 0) {
-		php_cli_server_logf("%s Invalid request (%s)", client->addr_str, errstr);
+		if (strcmp(errstr, php_cli_server_request_error_unexpected_eof) == 0 && client->parser.state == s_start_req) {
+#if PHP_DEBUG
+			php_cli_server_logf("%s Closed without sending a request; it was probably just an unused speculative preconnection", client->addr_str);
+#endif
+		} else {
+			php_cli_server_logf("%s Invalid request (%s)", client->addr_str, errstr);
+		}
 		efree(errstr);
 		php_cli_server_close_connection(server, client);
 		return FAILURE;
@@ -2453,7 +2461,7 @@ static int php_cli_server_do_event_for_each_fd_callback(void *_params, php_socke
 			closesocket(client_sock);
 			return SUCCESS;
 		}
-#ifdef DEBUG
+#if PHP_DEBUG
 		php_cli_server_logf("%s Accepted", client->addr_str);
 #endif
 		zend_hash_index_update_ptr(&server->clients, client_sock, client);
