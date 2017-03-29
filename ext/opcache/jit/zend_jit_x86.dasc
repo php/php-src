@@ -8132,30 +8132,34 @@ static zend_bool zend_jit_may_be_in_reg(zend_op_array *op_array, zend_ssa *ssa, 
 	}
 
 	if (ssa->vars[var].no_val) {
+		/* we don't need the value */
 		return 0;
 	}
 
-	if (((ssa->var_info[var].type & MAY_BE_ANY) == MAY_BE_DOUBLE) ||
-	    ((ssa->var_info[var].type & MAY_BE_ANY) == MAY_BE_LONG)) {
+	if (((ssa->var_info[var].type & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) != MAY_BE_DOUBLE) &&
+	    ((ssa->var_info[var].type & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) != MAY_BE_LONG)) {
+	    /* bad type */
+		return 0;
+	}
 
-		if (ssa->vars[var].definition >= 0) {
-			if (!zend_jit_opline_supports_reg(op_array, ssa, op_array->opcodes + ssa->vars[var].definition, var)) {
+	if (ssa->vars[var].definition >= 0) {
+		if (!zend_jit_opline_supports_reg(op_array, ssa, op_array->opcodes + ssa->vars[var].definition, var)) {
+			return 0;
+		}
+	}
+
+	if (ssa->vars[var].use_chain >= 0) {
+		int use = ssa->vars[var].use_chain;
+
+		do {
+			if (!zend_jit_opline_supports_reg(op_array, ssa, op_array->opcodes + use, var)) {
 				return 0;
 			}
-		}
-		if (ssa->vars[var].use_chain >= 0) {
-			int use = ssa->vars[var].use_chain;
-
-			do {
-				if (!zend_jit_opline_supports_reg(op_array, ssa, op_array->opcodes + use, var)) {
-					return 0;
-				}
-				use = zend_ssa_next_use(ssa->ops, var, use);
-			} while (use >= 0);
-		}
-		return 1;
+			use = zend_ssa_next_use(ssa->ops, var, use);
+		} while (use >= 0);
 	}
-	return 0;
+
+	return 1;
 }
 
 static zend_regset zend_jit_get_scratch_regset(zend_op_array *op_array, zend_ssa *ssa, zend_op *opline)

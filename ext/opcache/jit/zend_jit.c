@@ -1756,9 +1756,7 @@ static zend_lifetime_interval** zend_jit_allocate_registers(zend_op_array *op_ar
 	candidates_count = 0;
 	zend_bitset_clear(candidates, set_size);
 	for (i = 0; i < ssa->vars_count; i++) {
-		if (/*!ssa->vars[i].no_val
-		 && */!(ssa->var_info[i].type & MAY_BE_REF)
-		 && zend_jit_may_be_in_reg(op_array, ssa, i)) {
+		if (zend_jit_may_be_in_reg(op_array, ssa, i)) {
 			zend_bitset_incl(candidates, i);
 			candidates_count++;
 		}
