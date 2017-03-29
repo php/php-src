@@ -136,6 +136,9 @@ PHP                                                                        NEWS
 - PDO_Sqlite
   . Switch to sqlite3_prepare_v2() and sqlite3_close_v2() functions (rasmus)
 
+- PHPDBG
+  . Added extended_value to opcode dump output. (Sara)
+
 - posix:
   . Fixed bug #71219 (configure script incorrectly checks for ttyname_r). (atoh)
 
