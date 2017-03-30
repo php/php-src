@@ -191,6 +191,10 @@ op2_use:
 				}
 				if (opline->result_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
 					var_num = EX_VAR_TO_NUM(opline->result.var);
+					if ((build_flags & ZEND_SSA_USE_CV_RESULTS)
+					 && opline->result_type == IS_CV) {
+						DFG_SET(use, set_size, j, var_num);
+					}
 					DFG_SET(def, set_size, j, var_num);
 				}
 			}
