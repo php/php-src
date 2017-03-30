@@ -2258,7 +2258,7 @@ static int zend_jit_math_double_long(dasm_State    **Dst,
 
 	if (Z_MODE(res_addr) == IS_MEM_ZVAL) {
 		if (Z_MODE(op1_addr) != IS_MEM_ZVAL || Z_REG(op1_addr) != Z_REG(res_addr) || Z_OFFSET(op1_addr) != Z_OFFSET(res_addr)) {
-			if ((res_use_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) != MAY_BE_LONG) {
+			if ((res_use_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) != MAY_BE_DOUBLE) {
 				|	SET_ZVAL_TYPE_INFO res_addr, IS_DOUBLE
 			}
 		}
@@ -2304,7 +2304,7 @@ static int zend_jit_math_double_double(dasm_State    **Dst,
 
 	if (Z_MODE(res_addr) == IS_MEM_ZVAL) {
 		if (Z_MODE(op1_addr) != IS_MEM_ZVAL || Z_REG(op1_addr) != Z_REG(res_addr) || Z_OFFSET(op1_addr) != Z_OFFSET(res_addr)) {
-			if ((res_use_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) != MAY_BE_LONG) {
+			if ((res_use_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) != MAY_BE_DOUBLE) {
 				|	SET_ZVAL_TYPE_INFO res_addr, IS_DOUBLE
 			}
 		}
