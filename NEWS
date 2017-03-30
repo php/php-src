@@ -2,7 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2017 PHP 7.0.19
 
-
+- GD:
+  . Fixed bug #74343 (compile fails on solaris 11 with system gd2 library).
+    (krakjoe)
 
 13 Apr 2017 PHP 7.0.18
 
