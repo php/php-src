@@ -2060,7 +2060,7 @@ pass:
 						goto done;
 					case ZEND_SEND_VAL:
 					case ZEND_SEND_VAL_EX:
-						if (!zend_jit_send_val(&dasm_state, opline, op_array, ssa)) {
+						if (!zend_jit_send_val(&dasm_state, opline, op_array, ssa, ra)) {
 							goto jit_failure;
 						}
 						goto done;

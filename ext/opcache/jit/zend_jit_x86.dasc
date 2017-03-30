@@ -6255,7 +6255,7 @@ fallback:
 	}
 }
 
-static int zend_jit_send_val(dasm_State **Dst, const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
+static int zend_jit_send_val(dasm_State **Dst, const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa, zend_lifetime_interval **ra)
 {
 	uint32_t op1_info;
 	uint32_t arg_num = opline->op2.num;
@@ -6290,7 +6290,7 @@ static int zend_jit_send_val(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		|.code
 	}
 
-	op1_addr = zend_jit_decode_op(op_array, opline->op1_type, opline->op1, opline, NULL, -1);
+	op1_addr = zend_jit_decode_op(op_array, opline->op1_type, opline->op1, opline, ra, ra ? ssa->ops[opline - op_array->opcodes].op1_use : -1);
 	arg_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, opline->result.var);
 
 	if (opline->op1_type == IS_CONST) {
@@ -8141,6 +8141,8 @@ static zend_bool zend_jit_opline_supports_reg(zend_op_array *op_array, zend_ssa 
 	switch (opline->opcode) {
 		case ZEND_QM_ASSIGN:
 		case ZEND_SEND_VAR:
+		case ZEND_SEND_VAL:
+		case ZEND_SEND_VAL_EX:
 			return 1;
 		case ZEND_PRE_INC:
 		case ZEND_PRE_DEC:
@@ -8233,6 +8235,8 @@ static zend_regset zend_jit_get_scratch_regset(zend_op_array *op_array, zend_ssa
 			regset = ZEND_REGSET_EMPTY;
 			break;
 		case ZEND_QM_ASSIGN:
+		case ZEND_SEND_VAL:
+		case ZEND_SEND_VAL_EX:
 			op1_info = OP1_INFO();
 			if (!(op1_info & MAY_BE_UNDEF)) {
 				res_info = RES_INFO();
