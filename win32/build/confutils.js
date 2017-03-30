@@ -3345,3 +3345,23 @@ function SETUP_OPENSSL(target, path_to_check, common_name, use_env, add_dir_part
 	return ret;
 }
 
+function check_binary_tools_sdk()
+{
+	var BIN_TOOLS_SDK_VER_MAJOR = 0;
+	var BIN_TOOLS_SDK_VER_MINOR = 0;
+	var BIN_TOOLS_SDK_VER_PATCH = 0;
+
+	var out = execute("cmd /c phpsdk_version");
+
+	if (out.match(/PHP SDK (\d+)\.(\d+)\.(\d+).*/)) {
+		BIN_TOOLS_SDK_VER_MAJOR = parseInt(RegExp.$1);
+		BIN_TOOLS_SDK_VER_MINOR = parseInt(RegExp.$2);
+		BIN_TOOLS_SDK_VER_PATCH = parseInt(RegExp.$3);
+	}
+
+	/* Basic test, extend by need. */
+	if (BIN_TOOLS_SDK_VER_MAJOR < 2) {
+		ERROR("Incompatible binary tools version. Please consult https://wiki.php.net/internals/windows/stepbystepbuild_sdk_2");
+	}
+}
+
