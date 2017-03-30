@@ -80,6 +80,8 @@ PHP                                                                        NEWS
 
 - GD:
   . Implemented imageresolution as getter and setter (Christoph)
+  . Fixed bug #74343 (compile fails on solaris 11 with system gd2 library).
+    (krakjoe)
 
 - GMP:
   . Fixed bug #70896 (gmp_fact() silently ignores non-integer input). (Sara)
