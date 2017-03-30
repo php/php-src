@@ -896,7 +896,7 @@ static int zend_may_overflow(const zend_op *opline, zend_op_array *op_array, zen
 
 static int zend_jit_build_cfg(zend_op_array *op_array, zend_cfg *cfg, uint32_t *flags)
 {
-	if (zend_build_cfg(&CG(arena), op_array, ZEND_CFG_STACKLESS | ZEND_CFG_RECV_ENTRY | ZEND_RT_CONSTANTS | ZEND_CFG_SPLIT_AT_LIVE_RANGES | ZEND_CFG_NO_ENTRY_PREDECESSORS | ZEND_SSA_RC_INFERENCE_FLAG, cfg, flags) != SUCCESS) {
+	if (zend_build_cfg(&CG(arena), op_array, ZEND_CFG_STACKLESS | ZEND_CFG_RECV_ENTRY | ZEND_RT_CONSTANTS | ZEND_CFG_SPLIT_AT_LIVE_RANGES | ZEND_CFG_NO_ENTRY_PREDECESSORS | ZEND_SSA_RC_INFERENCE_FLAG | ZEND_SSA_USE_CV_RESULTS, cfg, flags) != SUCCESS) {
 		return FAILURE;
 	}
 
@@ -928,7 +928,7 @@ static int zend_jit_op_array_analyze1(zend_op_array *op_array, zend_script *scri
 	 && op_array->last_try_catch == 0
 	 && !(op_array->fn_flags & ZEND_ACC_GENERATOR)
 	 && !(*flags & ZEND_FUNC_INDIRECT_VAR_ACCESS)) {
-		if (zend_build_ssa(&CG(arena), script, op_array, ZEND_RT_CONSTANTS | ZEND_SSA_RC_INFERENCE, ssa, flags) != SUCCESS) {
+		if (zend_build_ssa(&CG(arena), script, op_array, ZEND_RT_CONSTANTS | ZEND_SSA_RC_INFERENCE | ZEND_SSA_USE_CV_RESULTS, ssa, flags) != SUCCESS) {
 			return FAILURE;
 		}
 
