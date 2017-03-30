@@ -5488,7 +5488,7 @@ static int zend_jit_qm_assign(dasm_State **Dst, const zend_op *opline, zend_op_a
 	return zend_jit_simple_assign(Dst, opline, op_array, ssa, res_addr, -1, opline->op1_type, opline->op1, op1_addr, op1_info, 0, 0);
 }
 
-static int zend_jit_assign(dasm_State **Dst, const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
+static int zend_jit_assign(dasm_State **Dst, const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa, zend_lifetime_interval **ra)
 {
 	uint32_t op1_info, op2_info;
 	zend_jit_addr op1_addr, op2_addr, res_addr;
@@ -5500,12 +5500,20 @@ static int zend_jit_assign(dasm_State **Dst, const zend_op *opline, zend_op_arra
 	op1_info = OP1_INFO();
 	op2_info = OP2_INFO();
 
-	op1_addr = zend_jit_decode_op(op_array, opline->op1_type, opline->op1, opline, NULL, -1);
-	op2_addr = zend_jit_decode_op(op_array, opline->op2_type, opline->op2, opline, NULL, -1);
+	op1_addr = zend_jit_decode_op(op_array, opline->op1_type, opline->op1, opline, ra, ra ? ssa->ops[opline - op_array->opcodes].op1_use : -1);
+	op2_addr = zend_jit_decode_op(op_array, opline->op2_type, opline->op2, opline, ra, ra ? ssa->ops[opline - op_array->opcodes].op2_use : -1);
 	if (opline->result_type == IS_UNUSED) {
 		res_addr = 0;
 	} else {
-		res_addr = zend_jit_decode_op(op_array, opline->result_type, opline->result, opline, NULL, -1);
+		res_addr = zend_jit_decode_op(op_array, opline->result_type, opline->result, opline, ra, ra ? ssa->ops[opline - op_array->opcodes].result_def : -1);
+	}
+
+	if (ra
+	 && ssa->ops[opline - op_array->opcodes].op2_def >= 0
+	 && !ssa->vars[ssa->ops[opline - op_array->opcodes].op2_def].no_val
+	 && !zend_jit_update_regs(Dst, op2_info, op2_addr,
+			zend_jit_decode_op(op_array, opline->op2_type, opline->op2, opline, ra, ssa->ops[opline - op_array->opcodes].op2_def))) {
+		return 0;
 	}
 
 	if (op1_info & MAY_BE_REF) {
@@ -8115,6 +8123,7 @@ static zend_bool zend_jit_may_reuse_reg(zend_op_array *op_array, zend_ssa *ssa, 
 	switch (op_array->opcodes[position].opcode) {
 		case ZEND_QM_ASSIGN:
 		case ZEND_SEND_VAR:
+		case ZEND_ASSIGN:
 		case ZEND_PRE_INC:
 		case ZEND_PRE_DEC:
 		case ZEND_POST_INC:
@@ -8144,12 +8153,20 @@ static zend_bool zend_jit_opline_supports_reg(zend_op_array *op_array, zend_ssa 
 		case ZEND_SEND_VAL:
 		case ZEND_SEND_VAL_EX:
 			return 1;
+		case ZEND_ASSIGN:
+			op1_info = OP1_INFO();
+			op2_info = OP2_INFO();
+			return
+				opline->op1_type == IS_CV &&
+				!(op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_RESOURCE|MAY_BE_REF)) &&
+				!(op2_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE)));
 		case ZEND_PRE_INC:
 		case ZEND_PRE_DEC:
 		case ZEND_POST_INC:
 		case ZEND_POST_DEC:
 			op1_info = OP1_INFO();
 			return
+				opline->op1_type == IS_CV &&
 				!(op1_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-(MAY_BE_LONG)));
 		case ZEND_ADD:
 		case ZEND_SUB:
@@ -8243,6 +8260,20 @@ static zend_regset zend_jit_get_scratch_regset(zend_op_array *op_array, zend_ssa
 				if ((res_info & (MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE) {
 					regset = ZEND_REGSET(ZREG_XMM0);
 				} else if ((res_info & (MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_LONG) {
+					regset = ZEND_REGSET(ZREG_R0);
+				} else {
+					regset = ZEND_REGSET_UNION(ZEND_REGSET(ZREG_R0), ZEND_REGSET(ZREG_R2));
+				}
+			}
+			break;
+		case ZEND_ASSIGN:
+			op1_info = OP1_INFO();
+			op2_info = OP2_INFO();
+			if (opline->op1_type == IS_CV
+			 && !(op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_RESOURCE|MAY_BE_REF))) {
+				if ((op2_info & (MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE) {
+					regset = ZEND_REGSET(ZREG_XMM0);
+				} else if ((op2_info & (MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_LONG) {
 					regset = ZEND_REGSET(ZREG_R0);
 				} else {
 					regset = ZEND_REGSET_UNION(ZEND_REGSET(ZREG_R0), ZEND_REGSET(ZREG_R2));
