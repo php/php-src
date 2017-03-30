@@ -532,6 +532,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_new_collection, 0, 0, 2)
 	ZEND_ARG_INFO(0, type_name)
 	ZEND_ARG_INFO(0, schema_name)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_register_taf_callback, 0, 0, 2)
+	ZEND_ARG_INFO(0, connection_resource)
+	ZEND_ARG_INFO(0, function_name)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ LOB Method arginfo */
@@ -728,6 +733,7 @@ static unsigned char arginfo_oci_bind_array_by_name[] = { 3, BYREF_NONE, BYREF_N
 #define arginfo_oci_collection_max						NULL
 #define arginfo_oci_collection_trim						NULL
 #define arginfo_oci_new_collection						NULL
+#define arginfo_oci_register_taf_callback				NULL
 #define arginfo_oci_lob_size_method						NULL
 #define arginfo_oci_lob_getbuffering_method				NULL
 #define arginfo_oci_lob_close_method					NULL
@@ -761,6 +767,7 @@ static unsigned char arginfo_oci_bind_array_by_name[] = { 3, BYREF_NONE, BYREF_N
 
 /* {{{ extension function prototypes
 */
+PHP_FUNCTION(oci_register_taf_callback);
 PHP_FUNCTION(oci_bind_by_name);
 PHP_FUNCTION(oci_bind_array_by_name);
 PHP_FUNCTION(oci_define_by_name);
@@ -851,6 +858,7 @@ static
 const
 #endif
 zend_function_entry php_oci_functions[] = {
+	PHP_FE(oci_register_taf_callback,   arginfo_oci_register_taf_callback)
 	PHP_FE(oci_define_by_name,			arginfo_oci_define_by_name)
 	PHP_FE(oci_bind_by_name,			arginfo_oci_bind_by_name)
 	PHP_FE(oci_bind_array_by_name,		arginfo_oci_bind_array_by_name)
@@ -1295,6 +1303,20 @@ PHP_MINIT_FUNCTION(oci)
 /* for OCIWriteTemporaryLob */
 	REGISTER_LONG_CONSTANT("OCI_TEMP_CLOB",OCI_TEMP_CLOB, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OCI_TEMP_BLOB",OCI_TEMP_BLOB, CONST_CS | CONST_PERSISTENT);
+	
+/* for Transparent Application Failover */
+	REGISTER_LONG_CONSTANT("OCI_FO_END", OCI_FO_END, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OCI_FO_ABORT", OCI_FO_ABORT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OCI_FO_REAUTH", OCI_FO_REAUTH, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OCI_FO_BEGIN", OCI_FO_BEGIN, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OCI_FO_ERROR", OCI_FO_ERROR, CONST_CS | CONST_PERSISTENT);
+
+	REGISTER_LONG_CONSTANT("OCI_FO_NONE", OCI_FO_NONE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OCI_FO_SESSION", OCI_FO_SESSION, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OCI_FO_SELECT", OCI_FO_SELECT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OCI_FO_TXNAL", OCI_FO_TXNAL, CONST_CS | CONST_PERSISTENT);
+
+	REGISTER_LONG_CONSTANT("OCI_FO_RETRY", OCI_FO_RETRY, CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
 }
@@ -2373,6 +2395,11 @@ static int php_oci_connection_close(php_oci_connection *connection TSRMLS_DC)
 		pefree(connection->client_id, connection->is_persistent);
 	}
 #endif /* HAVE_OCI8_DTRACE */
+	
+	if (connection->taf_callback) {
+		pefree(connection->taf_callback, connection->is_persistent);
+	}
+	
 	pefree(connection, connection->is_persistent);
 	connection = NULL;
 	OCI_G(in_call) = in_call_save;
@@ -2805,6 +2832,11 @@ static int php_oci_persistent_helper(zend_rsrc_list_entry *le TSRMLS_DC)
 	/* Persistent connection stubs are also counted as they have private session pools */
 	if (le->type == le_pconnection) {
 		connection = (php_oci_connection *)le->ptr;
+		
+		/* Remove TAF callback function as it's bound to current request */
+		if (connection->used_this_request && connection->taf_callback) {
+			php_oci_disable_taf_callback(connection TSRMLS_CC);
+		}
 
 		if (!connection->used_this_request && OCI_G(persistent_timeout) != -1) {
 #ifdef HAVE_OCI8_DTRACE

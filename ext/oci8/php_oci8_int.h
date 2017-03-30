@@ -95,6 +95,8 @@ extern zend_class_entry *oci_coll_class_entry_ptr;
 #define PHP_OCI_LOB_BUFFER_ENABLED  1
 #define PHP_OCI_LOB_BUFFER_USED     2
 
+#define PHP_OCI_TAF_DISABLE_CALLBACK ":disableCallback:"
+
 /* The mode parameter for oci_connect() is overloaded and accepts both
  * privilege and external authentication flags OR'd together.
  * PHP_OCI_CRED_EXT must be distinct from the OCI_xxx privilege
@@ -159,6 +161,8 @@ typedef struct {
 #ifdef HAVE_OCI8_DTRACE
 	char		   *client_id;					/* The oci_set_client_identifier() value */
 #endif
+
+	char		   *taf_callback;				/* The Oracle TAF callback function in the userspace */
 } php_oci_connection;
 /* }}} */
 
@@ -489,6 +493,13 @@ php_oci_bind *php_oci_bind_array_helper_number(zval *var, long max_table_length 
 php_oci_bind *php_oci_bind_array_helper_double(zval *var, long max_table_length TSRMLS_DC);
 php_oci_bind *php_oci_bind_array_helper_string(zval *var, long max_table_length, long maxlength TSRMLS_DC);
 php_oci_bind *php_oci_bind_array_helper_date(zval *var, long max_table_length, php_oci_connection *connection TSRMLS_DC);
+
+/* }}} */
+
+/* {{{ transparent failover related prototypes */
+
+int php_oci_register_taf_callback(php_oci_connection *connection, char *callback TSRMLS_DC);
+int php_oci_disable_taf_callback(php_oci_connection *connection TSRMLS_DC);
 
 /* }}} */
 
