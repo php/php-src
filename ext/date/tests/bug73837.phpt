@@ -11,7 +11,9 @@ for ( $i = 0; $i < 1000; $i++ )
 	$collect[$key] = true;
 }
 
-echo ( count( $collect ) > 990 ) ? "microseconds differ\n" : "microseconds do not differ enough\n";
+var_dump($n = count( $collect ));
+echo ( $n > 800 ) ? "microseconds differ\n" : "microseconds do not differ enough ($n)\n";
 ?>
---EXPECT--
+--EXPECTF--
+int(%d)
 microseconds differ
