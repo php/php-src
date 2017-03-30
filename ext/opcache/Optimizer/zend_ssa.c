@@ -762,6 +762,10 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 					break;
 			}
 			if (opline->result_type == IS_CV) {
+				if ((build_flags & ZEND_SSA_USE_CV_RESULTS)
+				 && opline->opcode != ZEND_RECV) {
+					ssa_ops[k].result_use = var[EX_VAR_TO_NUM(opline->result.var)];
+				}
 				ssa_ops[k].result_def = ssa_vars_count;
 				var[EX_VAR_TO_NUM(opline->result.var)] = ssa_vars_count;
 				ssa_vars_count++;
@@ -1034,7 +1038,7 @@ int zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_array *op_
 			op->op2_use_chain = ssa_vars[op->op2_use].use_chain;
 			ssa_vars[op->op2_use].use_chain = i;
 		}
-		if (op->result_use >= 0) {
+		if (op->result_use >= 0 && op->result_use != op->op1_use && op->result_use != op->op2_use) {
 			op->res_use_chain = ssa_vars[op->result_use].use_chain;
 			ssa_vars[op->result_use].use_chain = i;
 		}
