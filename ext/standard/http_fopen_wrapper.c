@@ -192,8 +192,13 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 			Z_TYPE_P(tmpzval) == IS_STRING &&
 			Z_STRLEN_P(tmpzval) > 0) {
 			use_proxy = 1;
-			transport_len = Z_STRLEN_P(tmpzval);
-			transport_string = estrndup(Z_STRVAL_P(tmpzval), Z_STRLEN_P(tmpzval));
+			if (Z_STRLEN_P(tmpzval) > 2 && Z_STRVAL_P(tmpzval)[Z_STRLEN_P(tmpzval)-1] == '/') {
+				/* ignore trailing slash to preserve BC */
+				transport_len = Z_STRLEN_P(tmpzval)-1;
+			} else {
+				transport_len = Z_STRLEN_P(tmpzval);
+			}
+			transport_string = estrndup(Z_STRVAL_P(tmpzval), transport_len);
 		} else {
 			transport_len = spprintf(&transport_string, 0, "%s://%s:%d", use_ssl ? "ssl" : "tcp", resource->host, resource->port);
 		}
