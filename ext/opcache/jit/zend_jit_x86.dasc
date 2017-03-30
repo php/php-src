@@ -8254,7 +8254,8 @@ static zend_regset zend_jit_get_scratch_regset(zend_op_array *op_array, zend_ssa
 		case ZEND_POST_INC:
 		case ZEND_POST_DEC:
 			op1_info = OP1_INFO();
-			if (!(op1_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-MAY_BE_LONG))) {
+			if (opline->op1_type == IS_CV
+			 && !(op1_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-MAY_BE_LONG))) {
 				regset = ZEND_REGSET_EMPTY;
 				if (opline->result_type != IS_UNUSED) {
 					ZEND_REGSET_INCL(regset, ZREG_R0);
