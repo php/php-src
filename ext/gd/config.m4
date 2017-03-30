@@ -325,7 +325,7 @@ dnl Various checks for GD features
   PHP_GD_FREETYPE2
 
 dnl Header path
-  for i in include/gd include gd ""; do
+  for i in include/gd include/gd2 include gd ""; do
     test -f "$PHP_GD/$i/gd.h" && GD_INCLUDE="$PHP_GD/$i"
   done
 
