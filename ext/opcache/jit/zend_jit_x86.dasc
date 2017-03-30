@@ -8227,15 +8227,24 @@ static zend_bool zend_jit_opline_supports_reg(zend_op_array *op_array, zend_ssa 
 
 static zend_bool zend_jit_may_be_in_reg(zend_op_array *op_array, zend_ssa *ssa, int var)
 {
-	// TODO: enable global register allocation ???
-	// SSA resolution is not implemented yet.
-	if (ssa->vars[var].definition_phi || ssa->vars[var].phi_use_chain) {
-		return 0;
-	}
-
 	if (ssa->vars[var].no_val) {
 		/* we don't need the value */
 		return 0;
+	}
+
+	// TODO: enable global register allocation ???
+	// SSA resolution is not implemented yet.
+	if (ssa->vars[var].definition_phi) {
+		return 0;
+	}
+	if (ssa->vars[var].phi_use_chain) {
+		zend_ssa_phi *phi = ssa->vars[var].phi_use_chain;
+		do {
+			if (!ssa->vars[phi->ssa_var].no_val) {
+				return 0;
+			}
+			phi = zend_ssa_next_use_phi(ssa, var, phi);
+		} while (phi);
 	}
 
 	if (((ssa->var_info[var].type & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) != MAY_BE_DOUBLE) &&

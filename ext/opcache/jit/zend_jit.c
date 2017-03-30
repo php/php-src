@@ -84,9 +84,17 @@ static int zend_may_overflow(const zend_op *opline, zend_op_array *op_array, zen
 
 static zend_bool zend_ssa_is_last_use(const zend_ssa *ssa, int var, int use)
 {
-	return
-		!ssa->vars[var].phi_use_chain &&
-		zend_ssa_next_use(ssa->ops, var, use) < 0;
+	if (ssa->vars[var].phi_use_chain) {
+		zend_ssa_phi *phi = ssa->vars[var].phi_use_chain;
+		do {
+			if (!ssa->vars[phi->ssa_var].no_val) {
+				return 0;
+			}
+			phi = zend_ssa_next_use_phi(ssa, var, phi);
+		} while (phi);
+	}
+
+	return zend_ssa_next_use(ssa->ops, var, use) < 0;
 }
 
 #include "dynasm/dasm_x86.h"
