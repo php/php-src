@@ -244,6 +244,8 @@ for (i = 0; i < calls.length; i++) {
 }
 
 C.WriteBlankLines(1);
+C.WriteLine("check_binary_tools_sdk();");
+C.WriteBlankLines(1);
 C.WriteLine("STDOUT.WriteLine(\"PHP Version: \" + PHP_VERSION_STRING);");
 C.WriteLine("STDOUT.WriteBlankLines(1);");
 C.WriteLine("conf_process_args();");
@@ -258,3 +260,4 @@ C.Write(file_get_contents("win32/build/configure.tail"));
 
 B.WriteLine("@echo off");
 B.WriteLine("cscript /nologo configure.js %*");
+
