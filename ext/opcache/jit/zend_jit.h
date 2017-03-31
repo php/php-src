@@ -38,7 +38,13 @@
 
 #define ZEND_JIT_TRIGGER(n)        (((n) / 10) % 10)
 
+#define ZEND_JIT_REG_ALLOC_NONE    0     /* no register allocation          */
+#define ZEND_JIT_REG_ALLOC_ENABLED 1     /* linear scan register allocation */
+
+#define ZEND_JIT_REG_ALLOC(n)      (((n) / 100) % 10)
+
 #define ZEND_JIT_DEFAULT           "5"
+
 
 /* Makes profile based JIT (opcache.jit=2*) to generate code only for most
  * offten called functions (above the threshold).

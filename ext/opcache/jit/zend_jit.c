@@ -34,7 +34,6 @@
 #include "Optimizer/zend_call_graph.h"
 #include "Optimizer/zend_dump.h"
 
-//#define REG_ALLOC
 //#define CONTEXT_THREADED_JIT
 #define PREFER_MAP_32BIT
 //#define ZEND_JIT_RECORD
@@ -68,6 +67,7 @@ typedef struct _zend_jit_stub {
 
 static zend_uchar zend_jit_level = 0;
 static zend_uchar zend_jit_trigger = 0;
+static zend_uchar zend_jit_reg_alloc = 0;
 
 zend_ulong zend_jit_profile_counter = 0;
 int zend_jit_profile_counter_rid = -1;
@@ -125,6 +125,7 @@ ZEND_API void zend_jit_status(zval *ret)
 	array_init(&stats);
 	add_assoc_long(&stats, "level", zend_jit_level);
 	add_assoc_long(&stats, "trigger", zend_jit_trigger);
+	add_assoc_long(&stats, "reg-alloc", zend_jit_reg_alloc);
 	if (dasm_buf) {
 		add_assoc_long(&stats, "buffer_size", (char*)dasm_end - (char*)dasm_buf);
 		add_assoc_long(&stats, "buffer_free", (char*)dasm_end - (char*)*dasm_ptr);
@@ -973,7 +974,6 @@ static int zend_jit_op_array_analyze2(zend_op_array *op_array, zend_script *scri
 	return SUCCESS;
 }
 
-#ifdef REG_ALLOC
 static int zend_jit_add_range(zend_lifetime_interval **intervals, int var, uint32_t from, uint32_t to)
 {
 	zend_lifetime_interval *ival = intervals[var];
@@ -1852,7 +1852,6 @@ failure:
 	free_alloca(candidates, use_heap);
 	return NULL;
 }
-#endif
 
 static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_opline)
 {
@@ -1861,9 +1860,7 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 	dasm_State* dasm_state = NULL;
 	void *handler;
 	int call_level = 0;
-#ifdef REG_ALLOC
-	void *checkpoint;
-#endif
+	void *checkpoint = NULL;
 	zend_lifetime_interval **ra = NULL;
 
 #ifdef ZEND_JIT_FILTER
@@ -1895,10 +1892,10 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 pass:
 #endif
 
-#ifdef REG_ALLOC
-	checkpoint = zend_arena_checkpoint(CG(arena));
-	ra = zend_jit_allocate_registers(op_array, ssa);
-#endif
+	if (zend_jit_reg_alloc) {
+		checkpoint = zend_arena_checkpoint(CG(arena));
+		ra = zend_jit_allocate_registers(op_array, ssa);
+	}
 
 	/* mark hidden branch targets */
 	for (b = 0; b < ssa->cfg.blocks_count; b++) {
@@ -2345,18 +2342,18 @@ done:
 	}
 	dasm_free(&dasm_state);
 
-#ifdef REG_ALLOC
-	zend_arena_release(&CG(arena), checkpoint);
-#endif
+	if (zend_jit_reg_alloc) {
+		zend_arena_release(&CG(arena), checkpoint);
+	}
 	return SUCCESS;
 
 jit_failure:
     if (dasm_state) {
 		dasm_free(&dasm_state);
     }
-#ifdef REG_ALLOC
-	zend_arena_release(&CG(arena), checkpoint);
-#endif
+	if (zend_jit_reg_alloc) {
+		zend_arena_release(&CG(arena), checkpoint);
+	}
 	return FAILURE;
 }
 
@@ -2792,6 +2789,7 @@ ZEND_API int zend_jit_startup(zend_long jit, size_t size)
 
 	zend_jit_level = ZEND_JIT_LEVEL(jit);
 	zend_jit_trigger = ZEND_JIT_TRIGGER(jit);
+	zend_jit_reg_alloc = ZEND_JIT_REG_ALLOC(jit);
 
 	if (zend_jit_trigger == ZEND_JIT_ON_PROF_REQUEST) {
 		zend_extension dummy;
