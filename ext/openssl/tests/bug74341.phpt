@@ -43,12 +43,12 @@ lOzTF7xAUxmPUnNb2teatMf2Rmj0fs+d
 -----END CERTIFICATE-----
 ';
 
-date_default_timezone_set('Europe/Berlin');
+date_default_timezone_set('UTC');
 
 $parsed_cert = openssl_x509_parse($pem_cert);
 var_dump($parsed_cert['validFrom_time_t']);
 var_dump($parsed_cert['validTo_time_t']);
 ?>
 --EXPECT--
-int(1389052800)
-int(1459494000)
+int(13890%d)
+int(14594%d)
