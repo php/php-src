@@ -2186,10 +2186,13 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 			if (info->return_reference) {
 				internal_function->fn_flags |= ZEND_ACC_RETURN_REFERENCE;
 			}
-			if (ptr->arg_info[ptr->num_args].is_variadic) {
-				internal_function->fn_flags |= ZEND_ACC_VARIADIC;
-				/* Don't count the variadic argument */
-				internal_function->num_args--;
+			int i;
+			for (i = 0; i <= ptr->num_args; i++) {
+				if (ptr->arg_info[i].is_variadic) {
+					internal_function->fn_flags |= ZEND_ACC_VARIADIC;
+					/* Don't count the variadic argument */
+					internal_function->num_args--;
+				}
 			}
 			if (info->type_hint) {
 				if (info->class_name) {
