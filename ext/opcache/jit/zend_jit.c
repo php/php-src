@@ -35,7 +35,6 @@
 #include "Optimizer/zend_dump.h"
 
 //#define REG_ALLOC
-//#define DEBUG_REG_ALLOC
 //#define CONTEXT_THREADED_JIT
 #define PREFER_MAP_32BIT
 //#define ZEND_JIT_RECORD
@@ -1180,7 +1179,6 @@ static zend_lifetime_interval *zend_jit_sort_intervals(zend_lifetime_interval **
 	return list;
 }
 
-#ifdef DEBUG_REG_ALLOC
 static void zend_jit_print_regset(zend_regset regset)
 {
 	zend_reg reg;
@@ -1197,7 +1195,6 @@ static void zend_jit_print_regset(zend_regset regset)
 		}
 	}
 }
-#endif
 
 static int *zend_jit_compute_block_order_int(zend_ssa *ssa, int n, int *block_order)
 {
@@ -1792,30 +1789,8 @@ static zend_lifetime_interval** zend_jit_allocate_registers(zend_op_array *op_ar
 	}
 
 	if (list) {
-#ifdef DEBUG_REG_ALLOC
-		fprintf(stderr, "Live Ranges \"%s\"\n", op_array->function_name ? ZSTR_VAL(op_array->function_name) : "[main]");
-		ival = list;
-		while (ival) {
-			zend_life_range *range;
-
-			fprintf(stderr, "#%d: %u-%u", ival->ssa_var, ival->range.start, ival->range.end);
-			range = ival->range.next;
-			while (range) {
-				fprintf(stderr, ", %u-%u", range->start, range->end);
-				range = range->next;
-			}
-			fprintf(stderr, "\n");
-			ival = ival->list_next;
-		}
-#endif
-
-		/* Linear Scan Register Allocation */
-		list = zend_jit_linear_scan(op_array, ssa, list);
-
-		if (list) {
-
-#ifdef DEBUG_REG_ALLOC
-			fprintf(stderr, "Allocated Live Ranges \"%s\"\n", op_array->function_name ? ZSTR_VAL(op_array->function_name) : "[main]");
+		if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_REG_ALLOC) {
+			fprintf(stderr, "Live Ranges \"%s\"\n", op_array->function_name ? ZSTR_VAL(op_array->function_name) : "[main]");
 			ival = list;
 			while (ival) {
 				zend_life_range *range;
@@ -1826,10 +1801,32 @@ static zend_lifetime_interval** zend_jit_allocate_registers(zend_op_array *op_ar
 					fprintf(stderr, ", %u-%u", range->start, range->end);
 					range = range->next;
 				}
-				fprintf(stderr, " (%s) \n", zend_reg_name[ival->reg]);
+				fprintf(stderr, "\n");
 				ival = ival->list_next;
 			}
-#endif
+		}
+
+		/* Linear Scan Register Allocation */
+		list = zend_jit_linear_scan(op_array, ssa, list);
+
+		if (list) {
+
+			if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_REG_ALLOC) {
+				fprintf(stderr, "Allocated Live Ranges \"%s\"\n", op_array->function_name ? ZSTR_VAL(op_array->function_name) : "[main]");
+				ival = list;
+				while (ival) {
+					zend_life_range *range;
+
+					fprintf(stderr, "#%d: %u-%u", ival->ssa_var, ival->range.start, ival->range.end);
+					range = ival->range.next;
+					while (range) {
+						fprintf(stderr, ", %u-%u", range->start, range->end);
+						range = range->next;
+					}
+					fprintf(stderr, " (%s) \n", zend_reg_name[ival->reg]);
+					ival = ival->list_next;
+				}
+			}
 
 			intervals = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_lifetime_interval*));
 			if (!intervals) {

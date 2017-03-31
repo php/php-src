@@ -55,6 +55,7 @@
 
 #define ZEND_JIT_DEBUG_ASM       (1<<0)
 #define ZEND_JIT_DEBUG_SSA       (1<<1)
+#define ZEND_JIT_DEBUG_REG_ALLOC (1<<2)
 
 #define ZEND_JIT_DEBUG_GDB       (1<<4)
 #define ZEND_JIT_DEBUG_PERF      (1<<5)
