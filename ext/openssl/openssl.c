@@ -659,6 +659,20 @@ static int X509_get_signature_nid(const X509 *x)
 	return OBJ_obj2nid(x->sig_alg->algorithm);
 }
 
+#if OPENSSL_VERSION_NUMBER < 0x10000000L
+
+int EVP_PKEY_id(const EVP_PKEY *pkey)
+{
+	return pkey->type;
+}
+
+int EVP_PKEY_base_id(const EVP_PKEY *pkey)
+{
+	return EVP_PKEY_type(pkey->type);
+}
+
+#endif
+
 #endif
 
 #endif
