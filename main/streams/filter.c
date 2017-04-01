@@ -130,10 +130,6 @@ PHPAPI int php_stream_bucket_split(php_stream_bucket *in, php_stream_bucket **le
 	*left = (php_stream_bucket*)pecalloc(1, sizeof(php_stream_bucket), in->is_persistent);
 	*right = (php_stream_bucket*)pecalloc(1, sizeof(php_stream_bucket), in->is_persistent);
 
-	if (*left == NULL || *right == NULL) {
-		goto exit_fail;
-	}
-
 	(*left)->buf = pemalloc(length, in->is_persistent);
 	(*left)->buflen = length;
 	memcpy((*left)->buf, in->buf, length);
@@ -149,21 +145,6 @@ PHPAPI int php_stream_bucket_split(php_stream_bucket *in, php_stream_bucket **le
 	(*right)->is_persistent = in->is_persistent;
 
 	return SUCCESS;
-
-exit_fail:
-	if (*right) {
-		if ((*right)->buf) {
-			pefree((*right)->buf, in->is_persistent);
-		}
-		pefree(*right, in->is_persistent);
-	}
-	if (*left) {
-		if ((*left)->buf) {
-			pefree((*left)->buf, in->is_persistent);
-		}
-		pefree(*left, in->is_persistent);
-	}
-	return FAILURE;
 }
 
 PHPAPI void php_stream_bucket_delref(php_stream_bucket *bucket)

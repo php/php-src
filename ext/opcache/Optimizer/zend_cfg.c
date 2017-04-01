@@ -291,9 +291,6 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 	cfg->split_at_recv = (build_flags & ZEND_CFG_RECV_ENTRY) != 0 && (op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0;
 
 	cfg->map = block_map = zend_arena_calloc(arena, op_array->last, sizeof(uint32_t));
-	if (!block_map) {
-		return FAILURE;
-	}
 
 	/* Build CFG, Step 1: Find basic blocks starts, calculate number of blocks */
 	BB_START(0);
@@ -460,9 +457,6 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 
 	/* Build CFG, Step 2: Build Array of Basic Blocks */
 	cfg->blocks = blocks = zend_arena_calloc(arena, sizeof(zend_basic_block), blocks_count);
-	if (!blocks) {
-		return FAILURE;
-	}
 
 	blocks_count = -1;
 
@@ -593,10 +587,6 @@ int zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg) /* {{{ */
 	}
 
 	cfg->predecessors = predecessors = (int*)zend_arena_calloc(arena, sizeof(int), edges);
-
-	if (!predecessors) {
-		return FAILURE;
-	}
 
 	edges = 0;
 	for (b = blocks; b < end; b++) {

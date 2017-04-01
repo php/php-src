@@ -1807,10 +1807,6 @@ static php_stream_filter *consumed_filter_create(const char *filtername, zval *f
 
 	/* Create this filter */
 	data = pecalloc(1, sizeof(php_consumed_filter_data), persistent);
-	if (!data) {
-		php_error_docref(NULL, E_WARNING, "Failed allocating %zd bytes", sizeof(php_consumed_filter_data));
-		return NULL;
-	}
 	data->persistent = persistent;
 	data->consumed = 0;
 	data->offset = ~0;
@@ -2015,10 +2011,6 @@ static php_stream_filter *chunked_filter_create(const char *filtername, zval *fi
 
 	/* Create this filter */
 	data = (php_chunked_filter_data *)pecalloc(1, sizeof(php_chunked_filter_data), persistent);
-	if (!data) {
-		php_error_docref(NULL, E_WARNING, "Failed allocating %zd bytes", sizeof(php_chunked_filter_data));
-		return NULL;
-	}
 	data->state = CHUNK_SIZE_START;
 	data->chunk_size = 0;
 	data->persistent = persistent;
