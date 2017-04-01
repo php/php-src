@@ -10,6 +10,7 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug #74404 (Wrong reflection on DateTimeZone::getTransitions).
     (krakjoe)
+  . Fixed bug #74080 (add constant for RFC7231 format datetime). (duncan3dc)
 
 - DOM:
   . Fixed bug #74416 (Wrong reflection on DOMNode::cloneNode).
