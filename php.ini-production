@@ -1791,7 +1791,7 @@ ldap.max_links = -1
 ;opcache.interned_strings_buffer=8
 
 ; The maximum number of keys (scripts) in the OPcache hash table.
-; Only numbers between 200 and 100000 are allowed.
+; Only numbers between 200 and 1000000 are allowed.
 ;opcache.max_accelerated_files=10000
 
 ; The maximum percentage of "wasted" memory until a restart is scheduled.
