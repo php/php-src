@@ -48,5 +48,5 @@ var_dump($parsed_cert['validFrom_time_t']);
 var_dump($parsed_cert['validTo_time_t']);
 ?>
 --EXPECTF--
-int(13890%d)
-int(14594%d)
+int(1389052800)
+int(1459494000)
