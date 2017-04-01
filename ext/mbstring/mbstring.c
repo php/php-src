@@ -732,9 +732,6 @@ php_mb_parse_encoding_list(const char *value, size_t value_length, const mbfl_en
 		}
 		else
 			tmpstr = (char *)estrndup(value, value_length);
-		if (tmpstr == NULL) {
-			return FAILURE;
-		}
 		/* count the number of listed encoding names */
 		endp = tmpstr + value_length;
 		n = 1;

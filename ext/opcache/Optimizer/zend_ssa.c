@@ -869,9 +869,6 @@ int zend_build_ssa(zend_arena **arena, const zend_script *script, const zend_op_
 
 	ssa->rt_constants = (build_flags & ZEND_RT_CONSTANTS);
 	ssa_blocks = zend_arena_calloc(arena, blocks_count, sizeof(zend_ssa_block));
-	if (!ssa_blocks) {
-		return FAILURE;
-	}
 	ssa->blocks = ssa_blocks;
 
 	/* Compute Variable Liveness */

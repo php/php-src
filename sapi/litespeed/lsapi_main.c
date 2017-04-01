@@ -731,8 +731,6 @@ static int lsapi_activate_user_ini_mk_path(_lsapi_activate_user_ini_ctx *ctx,
     /* Extract dir name from path_translated * and store it in 'path' */
     ctx->path_len = strlen(ctx->path);
     path = ctx->path = estrndup(SG(request_info).path_translated, ctx->path_len);
-    if (!path)
-        return FAILURE;
     ctx->path_len = zend_dirname(path, ctx->path_len);
     DEBUG_MESSAGE("dirname: %s", ctx->path);
 
