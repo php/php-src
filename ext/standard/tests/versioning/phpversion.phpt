@@ -3,10 +3,9 @@ phpversion test
 --FILE--
 <?php
 
-print phpversion();
-print "\n";
-print phpversion('standard');
+var_dump(phpversion());
+var_dump(phpversion('standard'));
 
 --EXPECTF--
-%s
-%s
+string(%d) "%s"
+string(%d) "%s"
