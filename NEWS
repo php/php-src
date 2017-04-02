@@ -13,6 +13,9 @@ PHP                                                                        NEWS
   . Fixed bug #74341 (openssl_x509_parse fails to parse ASN.1 UTCTime without
     seconds). (Moritz Fain)
 
+- Standard:
+  . Fixed bug #74361 (Compaction in array_rand() violates COW). (Nikita)
+
 13 Apr 2017, PHP 7.1.4
 
 - Core:
