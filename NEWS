@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2017, PHP 7.1.5
 
+- Core:
+  . Fixed bug #74340 (Magic function __get has different behavior in php 7.1.x).
+    (Nikita)
+
 - GD:
   . Fixed bug #74343 (compile fails on solaris 11 with system gd2 library).
     (krakjoe)
