@@ -81,7 +81,7 @@ static void **dasm_ptr = NULL;
 static int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa);
 static int zend_may_overflow(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa);
 
-static zend_bool zend_ssa_is_last_use(const zend_ssa *ssa, int var, int use)
+static zend_bool zend_ssa_is_last_use(zend_op_array *op_array, const zend_ssa *ssa, int var, int use)
 {
 	if (ssa->vars[var].phi_use_chain) {
 		zend_ssa_phi *phi = ssa->vars[var].phi_use_chain;
@@ -93,7 +93,8 @@ static zend_bool zend_ssa_is_last_use(const zend_ssa *ssa, int var, int use)
 		} while (phi);
 	}
 
-	return zend_ssa_next_use(ssa->ops, var, use) < 0;
+	use = zend_ssa_next_use(ssa->ops, var, use);
+	return use < 0 || zend_ssa_is_no_val_use(op_array->opcodes + use, ssa->ops + use, var);
 }
 
 #include "dynasm/dasm_x86.h"
@@ -1347,12 +1348,14 @@ static int zend_jit_compute_liveness(zend_op_array *op_array, zend_ssa *ssa, zen
 		/* for each operation op of b in reverse order */
 		for (n = b->start + b->len; n > b->start;) {
 			zend_ssa_op *op;
+			const zend_op *opline;
 			uint32_t num;
 
 			n--;
 			op = ssa->ops + n;
+			opline = op_array->opcodes + n;
 
-			if (UNEXPECTED(op_array->opcodes[n].opcode == ZEND_OP_DATA)) {
+			if (UNEXPECTED(opline->opcode == ZEND_OP_DATA)) {
 				num = n - 1;
 			} else {
 				num = n;
@@ -1383,19 +1386,25 @@ static int zend_jit_compute_liveness(zend_op_array *op_array, zend_ssa *ssa, zen
 			/* for each input operand opd of op do */
 			/*   live.add(opd)                     */
 			/*   addRange(opd, b.from, op)         */
-			if (op->op1_use >= 0 && zend_bitset_in(candidates, op->op1_use)) {
+			if (op->op1_use >= 0
+			 && zend_bitset_in(candidates, op->op1_use)
+			 && !zend_ssa_is_no_val_use(opline, op, op->op1_use)) {
 				zend_bitset_incl(live, op->op1_use);
 				if (zend_jit_add_range(intervals, op->op1_use, b->start, num) != SUCCESS) {
 					goto failure;
 				}
 			}
-			if (op->op2_use >= 0 && zend_bitset_in(candidates, op->op2_use)) {
+			if (op->op2_use >= 0
+			 && zend_bitset_in(candidates, op->op2_use)
+			 && !zend_ssa_is_no_val_use(opline, op, op->op2_use)) {
 				zend_bitset_incl(live, op->op2_use);
 				if (zend_jit_add_range(intervals, op->op2_use, b->start, num) != SUCCESS) {
 					goto failure;
 				}
 			}
-			if (op->result_use >= 0 && zend_bitset_in(candidates, op->result_use)) {
+			if (op->result_use >= 0
+			 && zend_bitset_in(candidates, op->result_use)
+			 && !zend_ssa_is_no_val_use(opline, op, op->result_use)) {
 				zend_bitset_incl(live, op->result_use);
 				if (zend_jit_add_range(intervals, op->result_use, b->start, num) != SUCCESS) {
 					goto failure;

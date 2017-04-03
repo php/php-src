@@ -2182,7 +2182,7 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 
 	if (Z_MODE(res_addr) == IS_REG) {
 		result_reg = Z_REG(res_addr);
-	} else if (Z_MODE(op1_addr) == IS_REG && zend_ssa_is_last_use(ssa, ssa->ops[opline-op_array->opcodes].op1_use, opline-op_array->opcodes)) {
+	} else if (Z_MODE(op1_addr) == IS_REG && zend_ssa_is_last_use(op_array, ssa, ssa->ops[opline-op_array->opcodes].op1_use, opline-op_array->opcodes)) {
 		result_reg = Z_REG(op1_addr);
 	} else {
 		result_reg = ZREG_R0;
@@ -2313,7 +2313,7 @@ static int zend_jit_math_double_long(dasm_State    **Dst,
 
 			if (Z_MODE(res_addr) == IS_REG) {
 				result_reg = Z_REG(res_addr);
-			} else if (Z_MODE(op1_addr) == IS_REG && zend_ssa_is_last_use(ssa, ssa->ops[opline-op_array->opcodes].op1_use, opline-op_array->opcodes)) {
+			} else if (Z_MODE(op1_addr) == IS_REG && zend_ssa_is_last_use(op_array, ssa, ssa->ops[opline-op_array->opcodes].op1_use, opline-op_array->opcodes)) {
 				result_reg = Z_REG(op1_addr);
 			} else {
 				result_reg = ZREG_XMM0;
@@ -2361,7 +2361,7 @@ static int zend_jit_math_double_double(dasm_State    **Dst,
 
 		if (Z_MODE(res_addr) == IS_REG) {
 			result_reg = Z_REG(res_addr);
-		} else if (Z_MODE(op1_addr) == IS_REG && zend_ssa_is_last_use(ssa, ssa->ops[opline-op_array->opcodes].op1_use, opline-op_array->opcodes)) {
+		} else if (Z_MODE(op1_addr) == IS_REG && zend_ssa_is_last_use(op_array, ssa, ssa->ops[opline-op_array->opcodes].op1_use, opline-op_array->opcodes)) {
 			result_reg = Z_REG(op1_addr);
 		} else {
 			result_reg = ZREG_XMM0;
@@ -8416,7 +8416,10 @@ static zend_regset zend_jit_get_scratch_regset(zend_op_array *op_array, zend_ssa
 						ZEND_REGSET_INCL(regset, ZREG_XMM1);
 					}
 				} else {
-					regset = ZEND_REGSET_UNION(ZEND_REGSET(ZREG_XMM0), ZEND_REGSET(ZREG_XMM1));
+					regset = ZEND_REGSET(ZREG_XMM0);
+					if (opline->opcode == ZEND_SUB && (op2_info & MAY_BE_LONG)) {
+						ZEND_REGSET_INCL(regset, ZREG_XMM1);
+					}
 				}
 			}
 			break;
@@ -8434,7 +8437,6 @@ static zend_regset zend_jit_get_scratch_regset(zend_op_array *op_array, zend_ssa
 				regset = ZEND_REGSET(ZREG_R0);
 				if ((op1_info & MAY_BE_DOUBLE) || (op2_info & MAY_BE_DOUBLE)) {
 					ZEND_REGSET_INCL(regset, ZREG_XMM0);
-					ZEND_REGSET_INCL(regset, ZREG_XMM1);
 				}
 			}
 			break;
