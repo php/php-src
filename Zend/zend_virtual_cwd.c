@@ -380,7 +380,7 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 	if ((data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0) {
 		size_t len = strlen(path);
 
-		if (path[len-4] == '.') {
+		if (len >= 4 && path[len-4] == '.') {
 			if (_memicmp(path+len-3, "exe", 3) == 0 ||
 				_memicmp(path+len-3, "com", 3) == 0 ||
 				_memicmp(path+len-3, "bat", 3) == 0 ||
