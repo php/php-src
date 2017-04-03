@@ -311,6 +311,14 @@ if (CLANG_TOOLSET) {
 		-Wno-logical-op-parentheses -Wno-msvc-include -Wno-invalid-source-encoding -Wno-unknown-pragmas \
 		-Wno-unused-command-line-argument");
 	}
+
+	ARG_ENABLE("sanitizer", "Enable address sanitizer extension", "no");
+	if (PHP_SANITIZER == "yes") {
+		if (COMPILER_NUMERIC_VERSION < 500) {
+			ERROR("Clang at least 5.0.0 required for sanitation plugins");
+		}
+		add_asan_opts("CFLAGS", "LIBS", "LDFLAGS");
+	}
 }
 
 ARG_WITH("codegen-arch", "Architecture for code generation: ia32, sse, sse2, avx, avx2", "no");
