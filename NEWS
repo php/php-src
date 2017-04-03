@@ -11,6 +11,9 @@ PHP                                                                        NEWS
     seconds). (Moritz Fain)
   . Add OpenSSL 1.1.0 support. (Jakub Zelenka)
 
+- Standard:
+  . Fixed bug #72071 (setcookie allows max-age to be negative). (Craig Duncan)
+
 13 Apr 2017 PHP 7.0.18
 
 - Core:
