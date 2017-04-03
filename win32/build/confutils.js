@@ -3388,11 +3388,23 @@ function get_clang_lib_dir()
 		ERROR("Faled to determine clang lib path");
 	}
 
-	/* FIXME existence check, etc. */
 	if (X64) {
 		ret = PROGRAM_FILES + "\\LLVM\\lib\\clang\\" + ver + "\\lib";
+		if (!FSO.FolderExists(ret)) {
+			ret = null;
+		}
 	} else {
 		ret = PROGRAM_FILESx86 + "\\LLVM\\lib\\clang\\" + ver + "\\lib";
+		if (!FSO.FolderExists(ret)) {
+			ret = PROGRAM_FILES + "\\LLVM\\lib\\clang\\" + ver + "\\lib";
+			if (!FSO.FolderExists(ret)) {
+				ret = null;
+			}
+		}
+	}
+
+	if (null == ret) {
+		ERROR("Invalid clang lib path encountered");
 	}
 
 	return ret;
