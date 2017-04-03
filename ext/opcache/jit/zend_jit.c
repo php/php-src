@@ -1581,7 +1581,7 @@ static int zend_jit_try_allocate_free_reg(zend_op_array *op_array, zend_ssa *ssa
 			if (ssa->ops[line].op1_def != current->ssa_var &&
 			    ssa->ops[line].op2_def != current->ssa_var &&
 			    ssa->ops[line].result_def != current->ssa_var) {
-				regset = zend_jit_get_scratch_regset(op_array, ssa, op_array->opcodes + line);
+				regset = zend_jit_get_scratch_regset(op_array, ssa, line, current->ssa_var);
 				if (!ZEND_REGSET_IS_EMPTY(regset)) {
 					for (reg = 0; reg < ZREG_NUM; reg++) {
 						if (ZEND_REGSET_IN(regset, reg)) {

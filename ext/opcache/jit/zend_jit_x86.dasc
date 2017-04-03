@@ -8347,8 +8347,9 @@ static zend_bool zend_jit_may_be_in_reg(zend_op_array *op_array, zend_ssa *ssa, 
 	return 1;
 }
 
-static zend_regset zend_jit_get_scratch_regset(zend_op_array *op_array, zend_ssa *ssa, zend_op *opline)
+static zend_regset zend_jit_get_scratch_regset(zend_op_array *op_array, zend_ssa *ssa, uint32_t line, int current_var)
 {
+	const zend_op *opline = op_array->opcodes + line;
 	uint32_t op1_info, op2_info, res_info;
 	zend_regset regset = ZEND_REGSET_SCRATCH;
 
@@ -8363,13 +8364,31 @@ static zend_regset zend_jit_get_scratch_regset(zend_op_array *op_array, zend_ssa
 		case ZEND_SEND_VAL_EX:
 			op1_info = OP1_INFO();
 			if (!(op1_info & MAY_BE_UNDEF)) {
-				res_info = RES_INFO();
-				if ((res_info & (MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE) {
+				if (ssa->ops[line].op1_use == current_var) {
+					regset = ZEND_REGSET_EMPTY;
+				} else if ((op1_info & (MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE) {
 					regset = ZEND_REGSET(ZREG_XMM0);
-				} else if ((res_info & (MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_LONG) {
+				} else if ((op1_info & (MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_LONG) {
 					regset = ZEND_REGSET(ZREG_R0);
 				} else {
 					regset = ZEND_REGSET_UNION(ZEND_REGSET(ZREG_R0), ZEND_REGSET(ZREG_R2));
+				}
+			}
+			break;
+		case ZEND_SEND_VAR:
+			op1_info = OP1_INFO();
+			if (!(op1_info & MAY_BE_UNDEF)) {
+				if (ssa->ops[line].op1_use == current_var) {
+					regset = ZEND_REGSET_EMPTY;
+				} else if ((op1_info & (MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE) {
+					regset = ZEND_REGSET(ZREG_XMM0);
+				} else if ((op1_info & (MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_LONG) {
+					regset = ZEND_REGSET(ZREG_R0);
+				} else {
+					regset = ZEND_REGSET_UNION(ZEND_REGSET(ZREG_R0), ZEND_REGSET(ZREG_R2));
+					if (op1_info & MAY_BE_REF) {
+						ZEND_REGSET_INCL(regset, ZREG_R1);
+					}
 				}
 			}
 			break;
@@ -8377,8 +8396,11 @@ static zend_regset zend_jit_get_scratch_regset(zend_op_array *op_array, zend_ssa
 			op1_info = OP1_INFO();
 			op2_info = OP2_INFO();
 			if (opline->op1_type == IS_CV
+			 && !(op2_info & MAY_BE_UNDEF)
 			 && !(op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_RESOURCE|MAY_BE_REF))) {
-				if ((op2_info & (MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE) {
+				if (ssa->ops[line].op2_use == current_var) {
+					regset = ZEND_REGSET_EMPTY;
+				} else if ((op2_info & (MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE) {
 					regset = ZEND_REGSET(ZREG_XMM0);
 				} else if ((op2_info & (MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_LONG) {
 					regset = ZEND_REGSET(ZREG_R0);
