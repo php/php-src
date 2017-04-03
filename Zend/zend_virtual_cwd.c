@@ -237,9 +237,9 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 {
 	WIN32_FILE_ATTRIBUTE_DATA data;
 	LARGE_INTEGER t;
-	const size_t path_len = strlen(path);
+	size_t pathw_len = 0;
 	ALLOCA_FLAG(use_heap_large)
-	wchar_t *pathw = php_win32_ioutil_any_to_w(path);
+	wchar_t *pathw = php_win32_ioutil_conv_any_to_w(path, PHP_WIN32_CP_IGNORE_LEN, &pathw_len);
 
 	if (!pathw) {
 		return -1;
@@ -257,13 +257,13 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 		return ret;
 	}
 
-	if (path_len >= 1 && path[1] == ':') {
-		if (path[0] >= 'A' && path[0] <= 'Z') {
-			buf->st_dev = buf->st_rdev = path[0] - 'A';
+	if (pathw_len >= 1 && pathw[1] == L':') {
+		if (pathw[0] >= L'A' && pathw[0] <= L'Z') {
+			buf->st_dev = buf->st_rdev = pathw[0] - L'A';
 		} else {
-			buf->st_dev = buf->st_rdev = path[0] - 'a';
+			buf->st_dev = buf->st_rdev = pathw[0] - L'a';
 		}
-	} else if (IS_UNC_PATH(path, path_len)) {
+	} else if (PHP_WIN32_IOUTIL_IS_UNC(pathw, pathw_len)) {
 		buf->st_dev = buf->st_rdev = 0;
 	} else {
 		wchar_t cur_path[MAXPATHLEN+1];
@@ -324,13 +324,11 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 	}
 
 	if ((data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0) {
-		size_t len = strlen(path);
-
-		if (len >= 4 && path[len-4] == '.') {
-			if (_memicmp(path+len-3, "exe", 3) == 0 ||
-				_memicmp(path+len-3, "com", 3) == 0 ||
-				_memicmp(path+len-3, "bat", 3) == 0 ||
-				_memicmp(path+len-3, "cmd", 3) == 0) {
+		if (pathw_len >= 4 && pathw[pathw_len-4] == L'.') {
+			if (_wcsnicmp(pathw+pathw_len-3, L"exe", 3) == 0 ||
+				_wcsnicmp(pathw+pathw_len-3, L"com", 3) == 0 ||
+				_wcsnicmp(pathw+pathw_len-3, L"bat", 3) == 0 ||
+				_wcsnicmp(pathw+pathw_len-3, L"cmd", 3) == 0) {
 				buf->st_mode  |= (S_IEXEC|(S_IEXEC>>3)|(S_IEXEC>>6));
 			}
 		}
