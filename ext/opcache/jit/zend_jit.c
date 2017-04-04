@@ -2122,7 +2122,7 @@ pass:
 						}
 						goto done;
 					case ZEND_RETURN:
-						if (!zend_jit_return(&dasm_state, opline, op_array, ssa)) {
+						if (!zend_jit_return(&dasm_state, opline, op_array, ssa, ra)) {
 							goto jit_failure;
 						}
 						goto done;

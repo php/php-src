@@ -7243,7 +7243,7 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, zend_op_
 	return 1;
 }
 
-static int zend_jit_return(dasm_State **Dst, const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
+static int zend_jit_return(dasm_State **Dst, const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa, zend_lifetime_interval **ra)
 {
 	uint32_t op1_info;
 	zend_jit_addr op1_addr, ret_addr;
@@ -7254,7 +7254,7 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, zend_op_arra
 	}
 
 	op1_info = OP1_INFO();
-	op1_addr = zend_jit_decode_op(op_array, opline->op1_type, opline->op1, opline, NULL, -1);
+	op1_addr = zend_jit_decode_op(op_array, opline->op1_type, opline->op1, opline, ra, ra ? ssa->ops[opline - op_array->opcodes].op1_use : -1);
 	if (opline->op1_type == IS_CV && (op1_info & MAY_BE_UNDEF)) {
 		// TODO: support for IS_UNDEF ???
 		return zend_jit_tail_handler(Dst, opline);
@@ -8269,6 +8269,7 @@ static zend_bool zend_jit_opline_supports_reg(zend_op_array *op_array, zend_ssa 
 		case ZEND_IS_IDENTICAL:
 		case ZEND_IS_NOT_IDENTICAL:
 		case ZEND_CASE:
+		case ZEND_RETURN:
 			return 1;
 		case ZEND_ASSIGN:
 			op1_info = OP1_INFO();
@@ -8358,6 +8359,9 @@ static zend_regset zend_jit_get_scratch_regset(zend_op_array *op_array, zend_ssa
 		case ZEND_OP_DATA:
 		case ZEND_JMP:
 			regset = ZEND_REGSET_EMPTY;
+			break;
+		case ZEND_RETURN:
+			regset = ZEND_REGSET(ZREG_R1);
 			break;
 		case ZEND_QM_ASSIGN:
 		case ZEND_SEND_VAL:
