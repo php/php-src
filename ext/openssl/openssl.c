@@ -5674,6 +5674,12 @@ PHP_FUNCTION(openssl_encrypt)
 
 	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(data_len, data);
 
+	cipher_ctx = EVP_CIPHER_CTX_new();
+	if (!cipher_ctx) {
+		php_error_docref(NULL, E_WARNING, "Failed to create cipher context");
+		RETURN_FALSE;
+	}
+
 	keylen = EVP_CIPHER_key_length(cipher_type);
 	if (keylen > password_len) {
 		key = emalloc(keylen);
@@ -5691,12 +5697,6 @@ PHP_FUNCTION(openssl_encrypt)
 
 	outlen = data_len + EVP_CIPHER_block_size(cipher_type);
 	outbuf = zend_string_alloc(outlen, 0);
-
-	cipher_ctx = EVP_CIPHER_CTX_new();
-	if (!cipher_ctx) {
-		php_error_docref(NULL, E_WARNING, "Failed to create cipher context");
-		RETURN_FALSE;
-	}
 
 	EVP_EncryptInit(cipher_ctx, cipher_type, NULL, NULL);
 	if (password_len > keylen) {
