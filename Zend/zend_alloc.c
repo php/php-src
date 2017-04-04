@@ -1297,11 +1297,11 @@ static zend_always_inline zend_mm_debug_info *zend_mm_get_debug_info(zend_mm_hea
 	int page_num;
 	zend_mm_page_info info;
 
-	ZEND_MM_CHECK(page_offset != 0, "zend_mm_heap corrupted #1");
+	ZEND_MM_CHECK(page_offset != 0, "Zend MM: Failed Validation #1 (page_offset != 0) | http://php.net/manual/en/internals2.memory.php");
 	chunk = (zend_mm_chunk*)ZEND_MM_ALIGNED_BASE(ptr, ZEND_MM_CHUNK_SIZE);
 	page_num = (int)(page_offset / ZEND_MM_PAGE_SIZE);
 	info = chunk->map[page_num];
-	ZEND_MM_CHECK(chunk->heap == heap, "zend_mm_heap corrupted #2");
+	ZEND_MM_CHECK(chunk->heap == heap, "Zend MM: Failed Validation #2 (chunk->heap == heap) | http://php.net/manual/en/internals2.memory.php");
 	if (EXPECTED(info & ZEND_MM_IS_SRUN)) {
 		int bin_num = ZEND_MM_SRUN_BIN_NUM(info);
 		return (zend_mm_debug_info*)((char*)ptr + bin_data_size[bin_num] - ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info)));
@@ -1371,13 +1371,13 @@ static zend_always_inline void zend_mm_free_heap(zend_mm_heap *heap, void *ptr Z
 		int page_num = (int)(page_offset / ZEND_MM_PAGE_SIZE);
 		zend_mm_page_info info = chunk->map[page_num];
 
-		ZEND_MM_CHECK(chunk->heap == heap, "zend_mm_heap corrupted #3");
+		ZEND_MM_CHECK(chunk->heap == heap, "Zend MM: Failed Validation #3 (chunk->heap == heap) | http://php.net/manual/en/internals2.memory.php");
 		if (EXPECTED(info & ZEND_MM_IS_SRUN)) {
 			zend_mm_free_small(heap, ptr, ZEND_MM_SRUN_BIN_NUM(info));
 		} else /* if (info & ZEND_MM_IS_LRUN) */ {
 			int pages_count = ZEND_MM_LRUN_PAGES(info);
 
-			ZEND_MM_CHECK(ZEND_MM_ALIGNED_OFFSET(page_offset, ZEND_MM_PAGE_SIZE) == 0, "zend_mm_heap corrupted #4");
+			ZEND_MM_CHECK(ZEND_MM_ALIGNED_OFFSET(page_offset, ZEND_MM_PAGE_SIZE) == 0, "Zend MM: Failed Validation #4 ((ZEND_MM_ALIGNED_OFFSET(page_offset, ZEND_MM_PAGE_SIZE) == 0) | http://php.net/manual/en/internals2.memory.php");
 			zend_mm_free_large(heap, chunk, page_num, pages_count);
 		}
 	}
@@ -1401,7 +1401,7 @@ static size_t zend_mm_size(zend_mm_heap *heap, void *ptr ZEND_FILE_LINE_DC ZEND_
 		chunk = (zend_mm_chunk*)ZEND_MM_ALIGNED_BASE(ptr, ZEND_MM_CHUNK_SIZE);
 		page_num = (int)(page_offset / ZEND_MM_PAGE_SIZE);
 		info = chunk->map[page_num];
-		ZEND_MM_CHECK(chunk->heap == heap, "zend_mm_heap corrupted #5");
+		ZEND_MM_CHECK(chunk->heap == heap, "Zend MM: Failed Validation #5 (chunk->heap == heap) | http://php.net/manual/en/internals2.memory.php");
 		if (EXPECTED(info & ZEND_MM_IS_SRUN)) {
 			return bin_data_size[ZEND_MM_SRUN_BIN_NUM(info)];
 		} else /* if (info & ZEND_MM_IS_LARGE_RUN) */ {
@@ -1512,7 +1512,7 @@ static void *zend_mm_realloc_heap(zend_mm_heap *heap, void *ptr, size_t size, si
 		size = ZEND_MM_ALIGNED_SIZE(size) + ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info));
 #endif
 
-		ZEND_MM_CHECK(chunk->heap == heap, "zend_mm_heap corrupted #6");
+		ZEND_MM_CHECK(chunk->heap == heap, "Zend MM: Failed Validation #6 (chunk->heap == heap) | http://php.net/manual/en/internals2.memory.php");
 		if (info & ZEND_MM_IS_SRUN) {
 			int old_bin_num = ZEND_MM_SRUN_BIN_NUM(info);
 			old_size = bin_data_size[old_bin_num];
@@ -1531,7 +1531,7 @@ static void *zend_mm_realloc_heap(zend_mm_heap *heap, void *ptr, size_t size, si
 				}
 			}
 		} else /* if (info & ZEND_MM_IS_LARGE_RUN) */ {
-			ZEND_MM_CHECK(ZEND_MM_ALIGNED_OFFSET(page_offset, ZEND_MM_PAGE_SIZE) == 0, "zend_mm_heap corrupted #7");
+			ZEND_MM_CHECK(ZEND_MM_ALIGNED_OFFSET(page_offset, ZEND_MM_PAGE_SIZE) == 0, "Zend MM: Failed Validation #7 (ZEND_MM_ALIGNED_OFFSET(page_offset, ZEND_MM_PAGE_SIZE) == 0) | http://php.net/manual/en/internals2.memory.php");
 			old_size = ZEND_MM_LRUN_PAGES(info) * ZEND_MM_PAGE_SIZE;
 			if (size > ZEND_MM_MAX_SMALL_SIZE && size <= ZEND_MM_MAX_LARGE_SIZE) {
 				new_size = ZEND_MM_ALIGNED_SIZE_EX(size, ZEND_MM_PAGE_SIZE);
@@ -1662,7 +1662,7 @@ static size_t zend_mm_del_huge_block(zend_mm_heap *heap, void *ptr ZEND_FILE_LIN
 		prev = list;
 		list = list->next;
 	}
-	ZEND_MM_CHECK(0, "zend_mm_heap corrupted #8");
+	ZEND_MM_CHECK(0, "Zend MM: Failed Validation #8 (0?) | http://php.net/manual/en/internals2.memory.php");
 	return 0;
 }
 
@@ -1675,7 +1675,7 @@ static size_t zend_mm_get_huge_block_size(zend_mm_heap *heap, void *ptr ZEND_FIL
 		}
 		list = list->next;
 	}
-	ZEND_MM_CHECK(0, "zend_mm_heap corrupted #9");
+	ZEND_MM_CHECK(0, "Zend MM: Failed Validation #9 (0?) | http://php.net/manual/en/internals2.memory.php");
 	return 0;
 }
 
@@ -1774,7 +1774,7 @@ static void zend_mm_free_huge(zend_mm_heap *heap, void *ptr ZEND_FILE_LINE_DC ZE
 {
 	size_t size;
 
-	ZEND_MM_CHECK(ZEND_MM_ALIGNED_OFFSET(ptr, ZEND_MM_CHUNK_SIZE) == 0, "zend_mm_heap corrupted #10");
+	ZEND_MM_CHECK(ZEND_MM_ALIGNED_OFFSET(ptr, ZEND_MM_CHUNK_SIZE) == 0, "Zend MM: Failed Validation #10 (ZEND_MM_ALIGNED_OFFSET(ptr, ZEND_MM_CHUNK_SIZE) == 0) | http://php.net/manual/en/internals2.memory.php");
 	size = zend_mm_del_huge_block(heap, ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	zend_mm_chunk_free(heap, ptr, size);
 #if ZEND_MM_STAT || ZEND_MM_LIMIT
@@ -1863,7 +1863,7 @@ ZEND_API size_t zend_mm_gc(zend_mm_heap *heap)
 		p = heap->free_slot[i];
 		while (p != NULL) {
 			chunk = (zend_mm_chunk*)ZEND_MM_ALIGNED_BASE(p, ZEND_MM_CHUNK_SIZE);
-			ZEND_MM_CHECK(chunk->heap == heap, "zend_mm_heap corrupted #11");
+			ZEND_MM_CHECK(chunk->heap == heap, "Zend MM: Failed Validation #11 (chunk->heap == heap) | http://php.net/manual/en/internals2.memory.php");
 			page_offset = ZEND_MM_ALIGNED_OFFSET(p, ZEND_MM_CHUNK_SIZE);
 			ZEND_ASSERT(page_offset != 0);
 			page_num = (int)(page_offset / ZEND_MM_PAGE_SIZE);
@@ -1892,7 +1892,7 @@ ZEND_API size_t zend_mm_gc(zend_mm_heap *heap)
 		p = *q;
 		while (p != NULL) {
 			chunk = (zend_mm_chunk*)ZEND_MM_ALIGNED_BASE(p, ZEND_MM_CHUNK_SIZE);
-			ZEND_MM_CHECK(chunk->heap == heap, "zend_mm_heap corrupted #12");
+			ZEND_MM_CHECK(chunk->heap == heap, "Zend MM: Failed Validation #12 (chunk->heap == heap) | http://php.net/manual/en/internals2.memory.php");
 			page_offset = ZEND_MM_ALIGNED_OFFSET(p, ZEND_MM_CHUNK_SIZE);
 			ZEND_ASSERT(page_offset != 0);
 			page_num = (int)(page_offset / ZEND_MM_PAGE_SIZE);
@@ -2357,7 +2357,7 @@ ZEND_API void* ZEND_FASTCALL _emalloc_huge(size_t size)
 			size_t page_offset = ZEND_MM_ALIGNED_OFFSET(ptr, ZEND_MM_CHUNK_SIZE); \
 			zend_mm_chunk *chunk = (zend_mm_chunk*)ZEND_MM_ALIGNED_BASE(ptr, ZEND_MM_CHUNK_SIZE); \
 			int page_num = page_offset / ZEND_MM_PAGE_SIZE; \
-			ZEND_MM_CHECK(chunk->heap == AG(mm_heap), "zend_mm_heap corrupted #13"); \
+			ZEND_MM_CHECK(chunk->heap == AG(mm_heap), "Zend MM: Failed Validation #13 (chunk->heap == AG(mm_heap)) | http://php.net/manual/en/internals2.memory.php"); \
 			ZEND_ASSERT(chunk->map[page_num] & ZEND_MM_IS_SRUN); \
 			ZEND_ASSERT(ZEND_MM_SRUN_BIN_NUM(chunk->map[page_num]) == _num); \
 			zend_mm_free_small(AG(mm_heap), ptr, _num); \
@@ -2369,7 +2369,7 @@ ZEND_API void* ZEND_FASTCALL _emalloc_huge(size_t size)
 		ZEND_MM_CUSTOM_DEALLOCATOR(ptr); \
 		{ \
 			zend_mm_chunk *chunk = (zend_mm_chunk*)ZEND_MM_ALIGNED_BASE(ptr, ZEND_MM_CHUNK_SIZE); \
-			ZEND_MM_CHECK(chunk->heap == AG(mm_heap), "zend_mm_heap corrupted #14"); \
+			ZEND_MM_CHECK(chunk->heap == AG(mm_heap), "Zend MM: Failed Validation #14 (chunk->heap == AG(mm_heap)) | http://php.net/manual/en/internals2.memory.php"); \
 			zend_mm_free_small(AG(mm_heap), ptr, _num); \
 		} \
 	}
@@ -2387,7 +2387,7 @@ ZEND_API void ZEND_FASTCALL _efree_large(void *ptr, size_t size)
 		int page_num = page_offset / ZEND_MM_PAGE_SIZE;
 		uint32_t pages_count = ZEND_MM_ALIGNED_SIZE_EX(size, ZEND_MM_PAGE_SIZE) / ZEND_MM_PAGE_SIZE;
 
-		ZEND_MM_CHECK(chunk->heap == AG(mm_heap) && ZEND_MM_ALIGNED_OFFSET(page_offset, ZEND_MM_PAGE_SIZE) == 0, "zend_mm_heap corrupted #15");
+		ZEND_MM_CHECK(chunk->heap == AG(mm_heap) && ZEND_MM_ALIGNED_OFFSET(page_offset, ZEND_MM_PAGE_SIZE) == 0, "Zend MM: Failed Validation #15 (chunk->heap == AG(mm_heap) && ZEND_MM_ALIGNED_OFFSET(page_offset, ZEND_MM_PAGE_SIZE) == 0) | http://php.net/manual/en/internals2.memory.php");
 		ZEND_ASSERT(chunk->map[page_num] & ZEND_MM_IS_LRUN);
 		ZEND_ASSERT(ZEND_MM_LRUN_PAGES(chunk->map[page_num]) == pages_count);
 		zend_mm_free_large(AG(mm_heap), chunk, page_num, pages_count);
