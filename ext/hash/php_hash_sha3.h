@@ -21,6 +21,9 @@
 
 #include "php.h"
 
+#define SUCCESS SHA3_SUCCESS /* Avoid conflict between KeccacHash.h and zend_types.h */
+#include "KeccakHash.h"
+
 typedef struct {
 	unsigned char state[200]; // 5 * 5 * sizeof(uint64)
 	uint32_t pos;
