@@ -2602,7 +2602,7 @@ static int zend_jit_math_helper(dasm_State    **Dst,
 			}
 		    |1:
 			if (op2_info & (MAY_BE_ANY-(MAY_BE_DOUBLE|MAY_BE_LONG))) {
-				|	IF_NOT_ZVAL_TYPE op2_addr, IS_LONG, >5
+				|	IF_NOT_ZVAL_TYPE op2_addr, IS_LONG, >6
 			}
 			if (!zend_jit_math_double_long(Dst, op_array, ssa, opline, op1_addr, op2_addr, res_addr, res_use_info)) {
 				return 0;
@@ -8521,9 +8521,20 @@ static zend_regset zend_jit_get_scratch_regset(zend_op_array *op_array, zend_ssa
 			op2_info = OP1_INFO();
 			if (!(op1_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE))) &&
 			    !(op2_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE)))) {
-				regset = ZEND_REGSET(ZREG_R0);
+				regset = ZEND_REGSET_EMPTY;
+				if ((op1_info & MAY_BE_LONG) &&
+				    (op2_info & MAY_BE_LONG) &&
+				    opline->op1_type != IS_CONST &&
+				    opline->op2_type != IS_CONST) {
+					ZEND_REGSET_INCL(regset, ZREG_R0);
+				}
 				if ((op1_info & MAY_BE_DOUBLE) || (op2_info & MAY_BE_DOUBLE)) {
 					ZEND_REGSET_INCL(regset, ZREG_XMM0);
+					|.if X64
+					||	if (opline->op1_type == IS_CONST || opline->op2_type == IS_CONST) {
+					||		ZEND_REGSET_INCL(regset, ZREG_R0);
+					||	}
+					|.endif
 				}
 			}
 			break;

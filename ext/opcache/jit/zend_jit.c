@@ -1649,23 +1649,24 @@ static int zend_jit_try_allocate_free_reg(zend_op_array *op_array, zend_ssa *ssa
 		zend_regset regset;
 		zend_reg reg;
 
-		do {
-			if (ssa->ops[line].op1_def != current->ssa_var &&
-			    ssa->ops[line].op2_def != current->ssa_var &&
-			    ssa->ops[line].result_def != current->ssa_var) {
-				regset = zend_jit_get_scratch_regset(op_array, ssa, line, current->ssa_var);
-				if (!ZEND_REGSET_IS_EMPTY(regset)) {
-					for (reg = 0; reg < ZREG_NUM; reg++) {
-						if (ZEND_REGSET_IN(regset, reg)) {
-							if (line < freeUntilPos[reg]) {
-								freeUntilPos[reg] = line;
-							}
+		if (ssa->ops[line].op1_def == current->ssa_var ||
+		    ssa->ops[line].op2_def == current->ssa_var ||
+		    ssa->ops[line].result_def == current->ssa_var) {
+			line++;
+		}
+		while (line <= range->end) {
+			regset = zend_jit_get_scratch_regset(op_array, ssa, line, current->ssa_var);
+			if (!ZEND_REGSET_IS_EMPTY(regset)) {
+				for (reg = 0; reg < ZREG_NUM; reg++) {
+					if (ZEND_REGSET_IN(regset, reg)) {
+						if (line < freeUntilPos[reg]) {
+							freeUntilPos[reg] = line;
 						}
 					}
 				}
 			}
 			line++;
-		} while (line <= range->end);
+		}
 		range = range->next;
 	} while (range);
 
