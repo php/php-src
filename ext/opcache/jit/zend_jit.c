@@ -987,9 +987,12 @@ static int zend_jit_add_range(zend_lifetime_interval **intervals, int var, uint3
 		ival->ssa_var = var;
 		ival->reg = ZREG_NONE;
 		ival->split = 0;
+		ival->store = 0;
+		ival->load = 0;
 		ival->range.start = from;
 		ival->range.end = to;
 		ival->range.next = NULL;
+		ival->hint = NULL;
 		intervals[var] = ival;
 	} else if (ival->range.start > to + 1) {
 		zend_life_range *range = zend_arena_alloc(&CG(arena), sizeof(zend_life_range));
@@ -1098,9 +1101,14 @@ static int zend_jit_split_interval(zend_lifetime_interval *current, uint32_t pos
 		}
 	}
 
+	current->store = 1;
+
 	ival->ssa_var = current->ssa_var;
 	ival->reg     = ZREG_NONE;
 	ival->split   = 1;
+	ival->store   = 0;
+	ival->load    = 1;
+	ival->hint    = NULL;
 
 	do {
 		if (pos >= range->start && pos <= range->end) {
@@ -1257,6 +1265,31 @@ tail_call:
 			zend_jit_compute_loop_body(ssa, header, n, loop_body);
 		}
 		n = b->next_child;
+	}
+}
+
+static void zend_jit_add_hint(zend_lifetime_interval **intervals, int dst, int src)
+{
+	if (intervals[dst]->range.start < intervals[src]->range.start) {
+		int tmp = src;
+		src = dst;
+		dst = tmp;
+	}
+	while (1) {
+		if (intervals[dst]->hint) {
+			if (intervals[dst]->hint->range.start < intervals[src]->range.start) {
+				int tmp = src;
+				src = intervals[dst]->hint->ssa_var;
+				dst = tmp;
+			} else {
+				dst = intervals[dst]->hint->ssa_var;
+			}
+		} else {
+			if (dst != src) {
+				intervals[dst]->hint = intervals[src];
+			}
+			return;
+		}
 	}
 }
 
@@ -1446,6 +1479,42 @@ static int zend_jit_compute_liveness(zend_op_array *op_array, zend_ssa *ssa, zen
 		zend_bitset_copy(live_in + set_size * i, live, set_size);
 	}
 
+	if (zend_jit_reg_alloc >= ZEND_JIT_REG_ALLOC_GLOBAL) {
+		/* Register hinting (a cheap way for register coalesing) */
+		for (i = 0; i < ssa->vars_count; i++) {
+			if (intervals[i]) {
+				int var = intervals[i]->ssa_var;
+				int src;
+
+				if (ssa->vars[var].definition_phi) {
+					zend_ssa_phi *phi = ssa->vars[var].definition_phi;
+
+					if (phi->pi >= 0) {
+						src = phi->sources[0];
+						if (intervals[src]) {
+							zend_jit_add_hint(intervals, i, src);
+						}
+					} else {
+						for (k = 0; k < ssa->cfg.blocks[phi->block].predecessors_count; k++) {
+							src = phi->sources[k];
+							if (src >= 0) {
+								if (ssa->vars[src].definition_phi
+								 && ssa->vars[src].definition_phi->pi >= 0
+								 && phi->block == ssa->vars[src].definition_phi->block) {
+									/* Skip zero-lenght interval for Pi variable */
+									src = ssa->vars[src].definition_phi->sources[0];
+								}
+								if (intervals[src]) {
+									zend_jit_add_hint(intervals, i, src);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
 	*list = zend_jit_sort_intervals(intervals, ssa->vars_count);
 	free_alloca(intervals, use_heap);
 	return SUCCESS;
@@ -1549,6 +1618,9 @@ static int zend_jit_try_allocate_free_reg(zend_op_array *op_array, zend_ssa *ssa
 		while (it) {
 			freeUntilPos[it->reg] = 0;
 			it = it->list_next;
+		}
+		if (current->hint) {
+			hint = current->hint->reg;
 		}
 	}
 
@@ -1803,12 +1875,26 @@ static zend_lifetime_interval** zend_jit_allocate_registers(zend_op_array *op_ar
 			ival = list;
 			while (ival) {
 				zend_life_range *range;
+				int var_num = ssa->vars[ival->ssa_var].var;
 
-				fprintf(stderr, "#%d: %u-%u", ival->ssa_var, ival->range.start, ival->range.end);
+				fprintf(stderr, "#%d.", ival->ssa_var);
+				zend_dump_var(op_array, (var_num < op_array->last_var ? IS_CV : 0), var_num);
+				fprintf(stderr, ": %u-%u", ival->range.start, ival->range.end);
 				range = ival->range.next;
 				while (range) {
 					fprintf(stderr, ", %u-%u", range->start, range->end);
 					range = range->next;
+				}
+				if (ival->load) {
+					fprintf(stderr, " load");
+				}
+				if (ival->store) {
+					fprintf(stderr, " store");
+				}
+				if (ival->hint) {
+					var_num = ssa->vars[ival->hint->ssa_var].var;
+					fprintf(stderr, " hint=#%d.", ival->hint->ssa_var);
+					zend_dump_var(op_array, (var_num < op_array->last_var ? IS_CV : 0), var_num);
 				}
 				fprintf(stderr, "\n");
 				ival = ival->list_next;
@@ -1819,24 +1905,6 @@ static zend_lifetime_interval** zend_jit_allocate_registers(zend_op_array *op_ar
 		list = zend_jit_linear_scan(op_array, ssa, list);
 
 		if (list) {
-
-			if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_REG_ALLOC) {
-				fprintf(stderr, "Allocated Live Ranges \"%s\"\n", op_array->function_name ? ZSTR_VAL(op_array->function_name) : "[main]");
-				ival = list;
-				while (ival) {
-					zend_life_range *range;
-
-					fprintf(stderr, "#%d: %u-%u", ival->ssa_var, ival->range.start, ival->range.end);
-					range = ival->range.next;
-					while (range) {
-						fprintf(stderr, ", %u-%u", range->start, range->end);
-						range = range->next;
-					}
-					fprintf(stderr, " (%s) \n", zend_reg_name[ival->reg]);
-					ival = ival->list_next;
-				}
-			}
-
 			intervals = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_lifetime_interval*));
 			if (!intervals) {
 				goto failure;
@@ -1849,6 +1917,112 @@ static zend_lifetime_interval** zend_jit_allocate_registers(zend_op_array *op_ar
 				ival->list_next = intervals[ival->ssa_var];
 				intervals[ival->ssa_var] = ival;
 				ival = next;
+			}
+
+			if (zend_jit_reg_alloc >= ZEND_JIT_REG_ALLOC_GLOBAL) {
+				/* Naive SSA resolution */
+				for (i = 0; i < ssa->vars_count; i++) {
+					if (ssa->vars[i].definition_phi && !ssa->vars[i].no_val) {
+						zend_ssa_phi *phi = ssa->vars[i].definition_phi;
+						int k, src;
+
+						if (phi->pi >= 0) {
+							if (!ssa->vars[i].phi_use_chain
+							 || ssa->vars[i].phi_use_chain->block != phi->block) {
+								src = phi->sources[0];
+								if (intervals[i]) {
+									if (!intervals[src]) {
+										intervals[i]->load = 1;
+									} else if (intervals[i]->reg != intervals[src]->reg) {
+										intervals[i]->load = 1;
+										intervals[src]->store = 1;
+									}
+								} else if (intervals[src]) {
+									intervals[src]->store = 1;
+								}
+							}
+						} else {
+							int need_move = 0;
+
+							for (k = 0; k < ssa->cfg.blocks[phi->block].predecessors_count; k++) {
+								src = phi->sources[k];
+								if (src >= 0) {
+									if (ssa->vars[src].definition_phi
+									 && ssa->vars[src].definition_phi->pi >= 0
+									 && phi->block == ssa->vars[src].definition_phi->block) {
+										/* Skip zero-lenght interval for Pi variable */
+										src = ssa->vars[src].definition_phi->sources[0];
+									}
+									if (intervals[i]) {
+										if (!intervals[src]) {
+											need_move = 1;
+										} else if (intervals[i]->reg != intervals[src]->reg) {
+											need_move = 1;
+										}
+									} else if (intervals[src]) {
+										need_move = 1;
+									}
+								}
+							}
+							if (need_move) {
+								if (intervals[i]) {
+									intervals[i]->load = 1;
+								}
+								for (k = 0; k < ssa->cfg.blocks[phi->block].predecessors_count; k++) {
+									src = phi->sources[k];
+									if (src >= 0) {
+										if (ssa->vars[src].definition_phi
+										 && ssa->vars[src].definition_phi->pi >= 0
+										 && phi->block == ssa->vars[src].definition_phi->block) {
+											/* Skip zero-lenght interval for Pi variable */
+											src = ssa->vars[src].definition_phi->sources[0];
+										}
+										if (intervals[src]) {
+											intervals[src]->store = 1;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+
+			if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_REG_ALLOC) {
+				fprintf(stderr, "Allocated Live Ranges \"%s\"\n", op_array->function_name ? ZSTR_VAL(op_array->function_name) : "[main]");
+				for (i = 0; i < ssa->vars_count; i++) {
+					ival = intervals[i];
+					while (ival) {
+						zend_life_range *range;
+						int var_num = ssa->vars[ival->ssa_var].var;
+
+						fprintf(stderr, "#%d.", ival->ssa_var);
+						zend_dump_var(op_array, (var_num < op_array->last_var ? IS_CV : 0), var_num);
+						fprintf(stderr, ": %u-%u", ival->range.start, ival->range.end);
+						range = ival->range.next;
+						while (range) {
+							fprintf(stderr, ", %u-%u", range->start, range->end);
+							range = range->next;
+						}
+						fprintf(stderr, " (%s)", zend_reg_name[ival->reg]);
+						if (ival->load) {
+							fprintf(stderr, " load");
+						}
+						if (ival->store) {
+							fprintf(stderr, " store");
+						}
+						if (ival->hint) {
+							var_num = ssa->vars[ival->hint->ssa_var].var;
+							fprintf(stderr, " hint=#%d.", ival->hint->ssa_var);
+							zend_dump_var(op_array, (var_num < op_array->last_var ? IS_CV : 0), var_num);
+							if (ival->hint->reg != ZREG_NONE) {
+								fprintf(stderr, " (%s)", zend_reg_name[ival->hint->reg]);
+							}
+						}
+						fprintf(stderr, "\n");
+						ival = ival->list_next;
+					}
+				}
 			}
 
 			free_alloca(candidates, use_heap);
@@ -1993,6 +2167,30 @@ pass:
 		}
 		if (!ssa->cfg.blocks[b].len) {
 			continue;
+		}
+		if ((zend_jit_reg_alloc >= ZEND_JIT_REG_ALLOC_GLOBAL) && ra) {
+			zend_ssa_phi *phi = ssa->blocks[b].phis;
+
+			while (phi) {
+				zend_lifetime_interval *ival = ra[phi->ssa_var];
+
+				if (ival) {
+					if (ival->load) {
+						ZEND_ASSERT(ival->reg != ZREG_NONE);
+
+						if (!zend_jit_load_ssa_var(&dasm_state, ssa, phi->ssa_var, ival->reg)) {
+							goto jit_failure;
+						}
+					} else if (ival->store) {
+						ZEND_ASSERT(ival->reg != ZREG_NONE);
+
+						if (!zend_jit_store_ssa_var(&dasm_state, ssa, phi->ssa_var, ival->reg)) {
+							goto jit_failure;
+						}
+					}
+				}
+				phi = phi->next;
+			}
 		}
 		end = ssa->cfg.blocks[b].start + ssa->cfg.blocks[b].len - 1;
 		for (i = ssa->cfg.blocks[b].start; i <= end; i++) {

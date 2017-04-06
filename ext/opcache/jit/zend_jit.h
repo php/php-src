@@ -39,7 +39,8 @@
 #define ZEND_JIT_TRIGGER(n)        (((n) / 10) % 10)
 
 #define ZEND_JIT_REG_ALLOC_NONE    0     /* no register allocation          */
-#define ZEND_JIT_REG_ALLOC_ENABLED 1     /* linear scan register allocation */
+#define ZEND_JIT_REG_ALLOC_ENABLED 1     /* local linear scan register allocation */
+#define ZEND_JIT_REG_ALLOC_GLOBAL  2     /* global linear scan register allocation */
 
 #define ZEND_JIT_REG_ALLOC(n)      (((n) / 100) % 10)
 
@@ -92,7 +93,10 @@ struct _zend_lifetime_interval {
 	int                     ssa_var;
 	int8_t                  reg;
 	zend_bool               split;
+	zend_bool               store;
+	zend_bool               load;
 	zend_life_range         range;
+	zend_lifetime_interval *hint;
 	zend_lifetime_interval *list_next;
 };
 
