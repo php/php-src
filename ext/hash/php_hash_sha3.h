@@ -24,15 +24,10 @@
 #define SUCCESS SHA3_SUCCESS /* Avoid conflict between KeccacHash.h and zend_types.h */
 #include "KeccakHash.h"
 
-typedef struct {
-	unsigned char state[200]; // 5 * 5 * sizeof(uint64)
-	uint32_t pos;
-} PHP_SHA3_CTX;
-
-typedef PHP_SHA3_CTX PHP_SHA3_224_CTX;
-typedef PHP_SHA3_CTX PHP_SHA3_256_CTX;
-typedef PHP_SHA3_CTX PHP_SHA3_384_CTX;
-typedef PHP_SHA3_CTX PHP_SHA3_512_CTX;
+typedef Keccak_HashInstance PHP_SHA3_224_CTX;
+typedef Keccak_HashInstance PHP_SHA3_256_CTX;
+typedef Keccak_HashInstance PHP_SHA3_384_CTX;
+typedef Keccak_HashInstance PHP_SHA3_512_CTX;
 
 PHP_HASH_API void PHP_SHA3224Init(PHP_SHA3_224_CTX*);
 PHP_HASH_API void PHP_SHA3224Update(PHP_SHA3_224_CTX*, const unsigned char*, unsigned int);
