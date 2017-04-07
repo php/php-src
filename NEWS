@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #74343 (compile fails on solaris 11 with system gd2 library).
     (krakjoe)
 
+- MySQLnd:
+  . Fixed bug #74376 (Invalid free of persistent results on error/connection
+    loss). (Yussuf Khalil)
+
 - Intl:
   . Fixed bug #65683 (Intl does not support DateTimeImmutable). (Ben Scholzen)
 
