@@ -16,7 +16,8 @@ AwEHoUQDQgAEPq4hbIWHvB51rdWr8ejrjWo4qVNWVugYFtPg/xLQw0mHkIPZ4DvK
 sqOTOnMoezkbSmVVMuwz9flvnqHGmQvmug==
 -----END EC PRIVATE KEY-----';
 $key = openssl_pkey_get_private($pkey);
-$res = openssl_sign($data ='alpha', $sign, $key, 'ecdsa-with-SHA1');
+$sigalg = (OPENSSL_VERSION_NUMBER < 0x10000000) ? 'ecdsa-with-SHA1' : 'SHA1';
+$res = openssl_sign($data ='alpha', $sign, $key, $sigalg);
 var_dump($res);
 --EXPECTF--
 bool(true)
