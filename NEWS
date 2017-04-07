@@ -140,6 +140,8 @@ PHP                                                                        NEWS
 
 - phar:
   . Fixed bug #74383 phar method parameters reflection correction. (mhagstrand)
+  . Fixed bug #74196 (phar does not correctly handle names containing dots).
+    (mhagstrand)
 
 - PHPDBG
   . Added extended_value to opcode dump output. (Sara)
