@@ -2492,7 +2492,11 @@ static int zend_jit_math_long_double(dasm_State    **Dst,
 			(Z_MODE(res_addr) == IS_REG) ? Z_REG(res_addr) : ZREG_XMM0;
 
 		|	SSE_GET_ZVAL_LVAL result_reg, op1_addr
-		|	SSE_MATH opline->opcode, result_reg, op2_addr
+		if (zend_jit_x86_flags & ZEND_JIT_CPU_AVX) {
+			|	AVX_MATH opline->opcode, result_reg, result_reg, op2_addr
+		} else {
+			|	SSE_MATH opline->opcode, result_reg, op2_addr
+		}
 		|	SSE_SET_ZVAL_DVAL res_addr, result_reg
 	|.else
 		|	FPU_GET_ZVAL_LVAL op1_addr
@@ -2528,7 +2532,11 @@ static int zend_jit_math_double_long(dasm_State    **Dst,
 				result_reg = ZREG_XMM0;
 			}
 			|	SSE_GET_ZVAL_LVAL result_reg, op2_addr
-			|	SSE_MATH opline->opcode, result_reg, op1_addr
+			if (zend_jit_x86_flags & ZEND_JIT_CPU_AVX) {
+				|	AVX_MATH opline->opcode, result_reg, result_reg, op1_addr
+			} else {
+				|	SSE_MATH opline->opcode, result_reg, op1_addr
+			}
 		} else {
 			zend_reg tmp_reg = ZREG_XMM1;
 
