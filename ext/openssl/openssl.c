@@ -909,23 +909,26 @@ static time_t asn1_time_to_time_t(ASN1_UTCTIME * timestr) /* {{{ */
 	char * strbuf;
 	char * thestr;
 	long gmadjust = 0;
+	size_t timestr_len;
 
 	if (ASN1_STRING_type(timestr) != V_ASN1_UTCTIME && ASN1_STRING_type(timestr) != V_ASN1_GENERALIZEDTIME) {
 		php_error_docref(NULL, E_WARNING, "illegal ASN1 data type for timestamp");
 		return (time_t)-1;
 	}
 
-	if ((size_t)ASN1_STRING_length(timestr) != strlen((const char*)ASN1_STRING_data(timestr))) {
+	timestr_len = (size_t)ASN1_STRING_length(timestr);
+
+	if (timestr_len != strlen((const char*)ASN1_STRING_data(timestr))) {
 		php_error_docref(NULL, E_WARNING, "illegal length in timestamp");
 		return (time_t)-1;
 	}
 
-	if (ASN1_STRING_length(timestr) < 13) {
+	if (timestr_len < 13 && timestr_len != 11) {
 		php_error_docref(NULL, E_WARNING, "unable to parse time string %s correctly", timestr->data);
 		return (time_t)-1;
 	}
 
-	if (ASN1_STRING_type(timestr) == V_ASN1_GENERALIZEDTIME && ASN1_STRING_length(timestr) < 15) {
+	if (ASN1_STRING_type(timestr) == V_ASN1_GENERALIZEDTIME && timestr_len < 15) {
 		php_error_docref(NULL, E_WARNING, "unable to parse time string %s correctly", timestr->data);
 		return (time_t)-1;
 	}
@@ -936,11 +939,15 @@ static time_t asn1_time_to_time_t(ASN1_UTCTIME * timestr) /* {{{ */
 
 	/* we work backwards so that we can use atoi more easily */
 
-	thestr = strbuf + ASN1_STRING_length(timestr) - 3;
+	thestr = strbuf + timestr_len - 3;
 
-	thetime.tm_sec = atoi(thestr);
-	*thestr = '\0';
-	thestr -= 2;
+	if (timestr_len == 11) {
+		thetime.tm_sec = 0;
+	} else {
+		thetime.tm_sec = atoi(thestr);
+		*thestr = '\0';
+		thestr -= 2;
+	}
 	thetime.tm_min = atoi(thestr);
 	*thestr = '\0';
 	thestr -= 2;
@@ -977,7 +984,7 @@ static time_t asn1_time_to_time_t(ASN1_UTCTIME * timestr) /* {{{ */
 	** the value of timezone - 3600 seconds. Otherwise, we need to overcorrect and
 	** set the adjustment to the main timezone + 3600 seconds.
 	*/
-	gmadjust = -(thetime.tm_isdst ? (long)timezone - 3600 : (long)timezone + 3600);
+	gmadjust = -(thetime.tm_isdst ? (long)timezone - 3600 : (long)timezone);
 #endif
 	ret += gmadjust;
 

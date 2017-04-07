@@ -23,7 +23,7 @@ var_dump($r2=assert($sa));
 --EXPECTF--
 Deprecated: assert(): Calling assert() with a string argument is deprecated in %s on line %d
 
-Notice: Use of undefined constant threemeninaboat - assumed 'threemeninaboat' in %s(9) : assert code on line 1
+Warning: Use of undefined constant threemeninaboat - assumed 'threemeninaboat' (this will throw an Error in a future version of PHP) in %s(9) : assert code on line 1
 bool(true)
 int(0)
 

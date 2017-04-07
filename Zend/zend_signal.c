@@ -210,7 +210,7 @@ static void zend_signal_handler(int signo, siginfo_t *siginfo, void *context)
 #endif
 			}
 		}
-	} else {
+	} else if (p_sig.handler != SIG_IGN) {
 		if (p_sig.flags & SA_SIGINFO) {
 			if (p_sig.flags & SA_RESETHAND) {
 				SIGG(handlers)[signo-1].flags   = 0;

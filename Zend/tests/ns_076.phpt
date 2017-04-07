@@ -11,11 +11,11 @@ echo "\n";
 var_dump($a);
 echo \unknown;
 --EXPECTF--
-Notice: Use of undefined constant unknown - assumed 'unknown' in %sns_076.php on line %d
+Warning: Use of undefined constant unknown - assumed 'unknown' (this will throw an Error in a future version of PHP) in %sns_076.php on line %d
 
-Notice: Use of undefined constant unknown - assumed 'unknown' in %sns_076.php on line %d
+Warning: Use of undefined constant unknown - assumed 'unknown' (this will throw an Error in a future version of PHP) in %sns_076.php on line %d
 
-Notice: Use of undefined constant unknown - assumed 'unknown' in %sns_076.php on line %d
+Warning: Use of undefined constant unknown - assumed 'unknown' (this will throw an Error in a future version of PHP) in %sns_076.php on line %d
 unknown
 array(1) {
   ["unknown"]=>

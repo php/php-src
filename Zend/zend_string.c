@@ -60,11 +60,7 @@ ZEND_KNOWN_STRINGS(_ZEND_STR_DSC)
 static void zend_init_interned_strings_ht(HashTable *interned_strings, int permanent)
 {
 	zend_hash_init(interned_strings, 1024, NULL, _str_dtor, permanent);
-
-	interned_strings->nTableMask = -interned_strings->nTableSize;
-	HT_SET_DATA_ADDR(interned_strings, pemalloc(HT_SIZE(interned_strings), permanent));
-	HT_HASH_RESET(interned_strings);
-	interned_strings->u.flags |= HASH_FLAG_INITIALIZED;
+	zend_hash_real_init(interned_strings, 0);
 }
 
 ZEND_API void zend_interned_strings_init(void)
@@ -127,52 +123,18 @@ static zend_always_inline zend_string *zend_interned_string_ht_lookup(zend_strin
 	return NULL;
 }
 
-static zend_never_inline void zend_string_table_grow(HashTable *interned_strings)
-{
-	if (EXPECTED(interned_strings->nTableSize < HT_MAX_SIZE)) {	/* Let's double the table size */
-		void *new_data;
-		void *old_data = HT_GET_DATA_ADDR(interned_strings);
-		Bucket *old_buckets = interned_strings->arData;
-
-		interned_strings->nTableSize += interned_strings->nTableSize;
-		interned_strings->nTableMask = -interned_strings->nTableSize;
-		new_data = pemalloc(HT_SIZE(interned_strings), interned_strings->u.flags & HASH_FLAG_PERSISTENT);
-
-		HT_SET_DATA_ADDR(interned_strings, new_data);
-		memcpy(interned_strings->arData, old_buckets, sizeof(Bucket) * interned_strings->nNumUsed);
-		pefree(old_data, interned_strings->u.flags & HASH_FLAG_PERSISTENT);
-		zend_hash_rehash(interned_strings);
-	}
-}
-
 /* This function might be not thread safe at least because it would update the
    hash val in the passed string. Be sure it is called in the appropriate context. */
 static zend_always_inline zend_string *zend_add_interned_string(zend_string *str, HashTable *interned_strings, uint32_t flags)
 {
-	zend_ulong h;
-	uint32_t nIndex;
-	uint32_t idx;
-	Bucket *p;
-
-	h = zend_string_hash_val(str);
+	zval val;
 
 	GC_REFCOUNT(str) = 1;
 	GC_FLAGS(str) |= IS_STR_INTERNED | flags;
 
-	if (UNEXPECTED(interned_strings->nNumUsed >= interned_strings->nTableSize)) {
-		zend_string_table_grow(interned_strings);
-	}
+	ZVAL_INTERNED_STR(&val, str);
 
-	idx = interned_strings->nNumUsed++;
-	interned_strings->nNumOfElements++;
-	p = interned_strings->arData + idx;
-	p->h = h;
-	p->key = str;
-	Z_STR(p->val) = str;
-	Z_TYPE_INFO(p->val) = IS_INTERNED_STRING_EX;
-	nIndex = h | interned_strings->nTableMask;
-	Z_NEXT(p->val) = HT_HASH(interned_strings, nIndex);
-	HT_HASH(interned_strings, nIndex) = HT_IDX_TO_HASH(idx);
+	zend_hash_add_new(interned_strings, str, &val);
 
 	return str;
 }

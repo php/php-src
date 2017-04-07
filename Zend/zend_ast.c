@@ -57,15 +57,19 @@ ZEND_API zend_ast *zend_ast_create_znode(znode *node) {
 	return (zend_ast *) ast;
 }
 
-ZEND_API zend_ast *zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr) {
+ZEND_API zend_ast *zend_ast_create_zval_with_lineno(zval *zv, zend_ast_attr attr, uint32_t lineno) {
 	zend_ast_zval *ast;
 
 	ast = zend_ast_alloc(sizeof(zend_ast_zval));
 	ast->kind = ZEND_AST_ZVAL;
 	ast->attr = attr;
 	ZVAL_COPY_VALUE(&ast->val, zv);
-	ast->val.u2.lineno = CG(zend_lineno);
+	ast->val.u2.lineno = lineno;
 	return (zend_ast *) ast;
+}
+
+ZEND_API zend_ast *zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr) {
+	return zend_ast_create_zval_with_lineno(zv, attr, CG(zend_lineno));
 }
 
 ZEND_API zend_ast *zend_ast_create_decl(
@@ -155,7 +159,14 @@ ZEND_API zend_ast *zend_ast_create_list(uint32_t init_children, zend_ast_kind ki
 		uint32_t i;
 		va_start(va, kind);
 		for (i = 0; i < init_children; ++i) {
-			ast = zend_ast_list_add(ast, va_arg(va, zend_ast *));
+			zend_ast *child = va_arg(va, zend_ast *);
+			ast = zend_ast_list_add(ast, child);
+			if (child != NULL) {
+				uint32_t lineno = zend_ast_get_lineno(child);
+				if (lineno < ast->lineno) {
+					ast->lineno = lineno;
+				}
+			}
 		}
 		va_end(va);
 	}

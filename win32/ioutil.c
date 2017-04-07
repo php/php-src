@@ -453,7 +453,7 @@ PW32IO size_t php_win32_ioutil_dirname(char *path, size_t len)
 
 	endw = pathw + pathw_len - 1;
 
-	if ((2 <= len) && isalpha((int)((unsigned char *)path)[0]) && (':' == path[1])) {
+	if ((2 <= pathw_len) && iswalpha((wint_t)(pathw)[0]) && (L':' == pathw[1])) {
 		pathw += 2;
 		path += 2;
 		len_adjust += 2;

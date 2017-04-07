@@ -153,7 +153,6 @@ bc_out_num (bc_num num, int o_base, void (*out_char)(), int leading_zero)
 	    bc_modulo (int_part, base, &cur_dig, 0);
 		/* PHP Change:  malloc() -> emalloc() */
 	    temp = (stk_rec *) emalloc (sizeof(stk_rec));
-	    if (temp == NULL) bc_out_of_memory();
 	    temp->digit = bc_num2long (cur_dig);
 	    temp->next = digits;
 	    digits = temp;

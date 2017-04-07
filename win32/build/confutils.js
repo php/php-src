@@ -1191,10 +1191,11 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 		MFO.WriteLine("$(BUILD_DIR)\\" + makefiletarget + ": $(DEPS_" + SAPI + ") $(" + SAPI + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(BUILD_DIR)\\" + resname  + " $(BUILD_DIR)\\" + manifest_name);
 	}
 
+	var is_lib = makefiletarget.match(new RegExp("\\.lib$"));
 	if (makefiletarget.match(new RegExp("\\.dll$"))) {
 		ldflags = "/dll $(LDFLAGS)";
 		manifest = "-@$(_VC_MANIFEST_EMBED_DLL)";
-	} else if (makefiletarget.match(new RegExp("\\.lib$"))) {
+	} else if (is_lib) {
 		ldflags = "$(ARFLAGS)";
 		ld = "@$(MAKE_LIB)";
 	} else {
@@ -1202,6 +1203,12 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 		manifest = "-@$(_VC_MANIFEST_EMBED_EXE)";
 	}
 	
+	if (PHP_SANITIZER == "yes") {
+		if (CLANG_TOOLSET) {
+			add_asan_opts("CFLAGS_" + SAPI, "LIBS_" + SAPI, (is_lib ? "ARFLAGS_" : "LDFLAGS_") + SAPI);
+		}
+	}
+
 	if(is_pgo_desired(sapiname) && (PHP_PGI == "yes" || PHP_PGO != "no")) {
 		// Add compiler and link flags if PGO options are selected
 		if (PHP_DEBUG != "yes" && PHP_PGI == "yes") {
@@ -1650,6 +1657,11 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 						/* "--rule-file=win32\build\cppcheck_rules.xml " + */
 						" --std=c89 --std=c++11 " + 
 						"--quiet --inconclusive --template=vs ";
+
+			var cppcheck_build_dir = get_define("CPPCHECK_BUILD_DIR");
+			if (!!cppcheck_build_dir) {
+				analyzer_base_args += "--cppcheck-build-dir=$(CPPCHECK_BUILD_DIR)";
+			}
 		}
 
 		if (PHP_MP_DISABLED) {
@@ -2463,6 +2475,11 @@ function generate_makefile()
 			if (FSO.FolderExists(f)) {
 				extra_path = extra_path + ";" + f;
 			}
+		}
+	}
+	if (PHP_SANITIZER == "yes") {
+		if (CLANG_TOOLSET) {
+			extra_path = extra_path + ";" + get_clang_lib_dir() + "\\windows";
 		}
 	}
 	MF.WriteLine("set-tmp-env:");
@@ -3338,5 +3355,85 @@ function SETUP_OPENSSL(target, path_to_check, common_name, use_env, add_dir_part
 	}
 
 	return ret;
+}
+
+function check_binary_tools_sdk()
+{
+	var BIN_TOOLS_SDK_VER_MAJOR = 0;
+	var BIN_TOOLS_SDK_VER_MINOR = 0;
+	var BIN_TOOLS_SDK_VER_PATCH = 0;
+
+	var out = execute("cmd /c phpsdk_version");
+
+	if (out.match(/PHP SDK (\d+)\.(\d+)\.(\d+).*/)) {
+		BIN_TOOLS_SDK_VER_MAJOR = parseInt(RegExp.$1);
+		BIN_TOOLS_SDK_VER_MINOR = parseInt(RegExp.$2);
+		BIN_TOOLS_SDK_VER_PATCH = parseInt(RegExp.$3);
+	}
+
+	/* Basic test, extend by need. */
+	if (BIN_TOOLS_SDK_VER_MAJOR < 2) {
+		ERROR("Incompatible binary tools version. Please consult https://wiki.php.net/internals/windows/stepbystepbuild_sdk_2");
+	}
+}
+
+function get_clang_lib_dir()
+{
+	var ret = null;
+	var ver = null;
+
+	if (COMPILER_NAME.match(/clang version ([\d\.]+) \((.*)\)/)) {
+		ver = RegExp.$1;
+	} else {
+		ERROR("Faled to determine clang lib path");
+	}
+
+	if (X64) {
+		ret = PROGRAM_FILES + "\\LLVM\\lib\\clang\\" + ver + "\\lib";
+		if (!FSO.FolderExists(ret)) {
+			ret = null;
+		}
+	} else {
+		ret = PROGRAM_FILESx86 + "\\LLVM\\lib\\clang\\" + ver + "\\lib";
+		if (!FSO.FolderExists(ret)) {
+			ret = PROGRAM_FILES + "\\LLVM\\lib\\clang\\" + ver + "\\lib";
+			if (!FSO.FolderExists(ret)) {
+				ret = null;
+			}
+		}
+	}
+
+	if (null == ret) {
+		ERROR("Invalid clang lib path encountered");
+	}
+
+	return ret;
+}
+
+function add_asan_opts(cflags_name, libs_name, ldflags_name)
+{
+
+	var ver = null;
+
+	if (COMPILER_NAME.match(/clang version ([\d\.]+) \((.*)\)/)) {
+		ver = RegExp.$1;
+	} else {
+		ERROR("Faled to determine clang lib path");
+	}
+
+	if (!!cflags_name) {
+		ADD_FLAG(cflags_name, "-fsanitize=address");
+	}
+	if (!!libs_name) {
+		if (X64) {
+			ADD_FLAG(libs_name, "clang_rt.asan_dynamic-x86_64.lib clang_rt.asan_dynamic_runtime_thunk-x86_64.lib");
+		} else {
+			ADD_FLAG(libs_name, "clang_rt.asan_dynamic-i386.lib clang_rt.asan_dynamic_runtime_thunk-i386.lib");
+		}
+	}
+
+	if (!!ldflags_name) {
+		ADD_FLAG(ldflags_name, "/libpath:\"" + get_clang_lib_dir() + "\\windows\"");
+	}
 }
 
