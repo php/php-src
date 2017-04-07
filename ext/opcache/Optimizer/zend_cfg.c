@@ -765,7 +765,7 @@ static void swap_blocks(block_info *a, block_info *b) {
 int zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cfg, uint32_t *flags) /* {{{ */
 {
 	int i, j, k, n;
-	int depth, time;
+	int time;
 	zend_basic_block *blocks = cfg->blocks;
 	int *entry_times, *exit_times;
 	zend_worklist work;
