@@ -68,6 +68,7 @@ typedef struct _zend_jit_stub {
 static zend_uchar zend_jit_level = 0;
 static zend_uchar zend_jit_trigger = 0;
 static zend_uchar zend_jit_reg_alloc = 0;
+static zend_uchar zend_jit_cpu_flags = 0;
 
 zend_ulong zend_jit_profile_counter = 0;
 int zend_jit_profile_counter_rid = -1;
@@ -2998,6 +2999,12 @@ ZEND_API int zend_jit_startup(zend_long jit, size_t size)
 	zend_jit_level = ZEND_JIT_LEVEL(jit);
 	zend_jit_trigger = ZEND_JIT_TRIGGER(jit);
 	zend_jit_reg_alloc = ZEND_JIT_REG_ALLOC(jit);
+	zend_jit_cpu_flags = ZEND_JIT_CPU_FLAGS(jit);
+
+	if (zend_jit_setup() != SUCCESS) {
+		// TODO: error reporting and cleanup ???
+		return FAILURE;
+	}
 
 	if (zend_jit_trigger == ZEND_JIT_ON_PROF_REQUEST) {
 		zend_extension dummy;

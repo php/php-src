@@ -62,6 +62,7 @@
 |.endif
 
 #include "jit/zend_jit_x86.h"
+#include "jit/zend_cpuid.h"
 
 const char* zend_reg_name[] = {
 #ifdef __x86_64__
@@ -74,6 +75,8 @@ const char* zend_reg_name[] = {
 	"xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7"
 #endif
 };
+
+static uint32_t zend_jit_x86_flags = 0;
 
 |.type EX, zend_execute_data, FP
 |.type OP, zend_op, IP
@@ -371,6 +374,48 @@ static void* dasm_labels[zend_lb_MAX];
 ||	} else {
 ||		ZEND_ASSERT(Z_MODE(addr) == IS_MEM_ZVAL);
 |		movsd qword [Ra(Z_REG(addr))+Z_OFFSET(addr)], xmm(reg-ZREG_XMM0)
+||	}
+|.endmacro
+
+|.macro AVX_OP, avx_ins, reg, op1_reg, addr
+||	if (Z_MODE(addr) == IS_CONST_ZVAL) {
+|   	.if X64
+||			if (IS_32BIT(Z_ZV(addr))) {
+|   			avx_ins xmm(reg-ZREG_XMM0), xmm(op1_reg-ZREG_XMM0), qword [Z_ZV(addr)]
+||			} else {
+|   			LOAD_ADDR r0, Z_ZV(addr)
+|   			avx_ins xmm(reg-ZREG_XMM0), xmm(op1_reg-ZREG_XMM0), qword [r0]
+||			}
+|   	.else
+|   		avx_ins xmm(reg-ZREG_XMM0), xmm(op1_reg-ZREG_XMM0), qword [Z_ZV(addr)]
+|   	.endif
+||	} else if (Z_MODE(addr) == IS_MEM_ZVAL) {
+|   	avx_ins xmm(reg-ZREG_XMM0), xmm(op1_reg-ZREG_XMM0), qword [Ra(Z_REG(addr))+Z_OFFSET(addr)]
+||	} else if (Z_MODE(addr) == IS_REG) {
+|   	avx_ins xmm(reg-ZREG_XMM0), xmm(op1_reg-ZREG_XMM0), xmm(Z_REG(addr)-ZREG_XMM0)
+||	} else {
+||		ZEND_ASSERT(0);
+||	}
+|.endmacro
+
+|.macro AVX_MATH, opcode, reg, op1_reg, addr
+||	switch (opcode) {
+||		case ZEND_ADD:
+||		case ZEND_ASSIGN_ADD:
+|			AVX_OP vaddsd, reg, op1_reg, addr
+||			break;
+||		case ZEND_SUB:
+||		case ZEND_ASSIGN_SUB:
+|			AVX_OP vsubsd, reg, op1_reg, addr
+||			break;
+||		case ZEND_MUL:
+||		case ZEND_ASSIGN_MUL:
+|			AVX_OP vmulsd, reg, op1_reg, addr
+||			break;
+||		case ZEND_DIV:
+||		case ZEND_ASSIGN_DIV:
+|			AVX_OP vdivsd, reg, op1_reg, addr
+||			break;
 ||	}
 |.endmacro
 
@@ -1697,6 +1742,31 @@ static const zend_jit_stub zend_jit_stubs[] = {
 	JIT_STUB(not_obj),
 };
 
+static int zend_jit_setup(void)
+{
+	zend_cpuid_info info;
+
+	zend_cpuid(0, 0, &info);
+	if (info.eax < 1) {
+		return FAILURE;
+	}
+	zend_cpuid(1, 0, &info);
+
+	|.if SSE
+		if (!(info.edx & ZEND_CPUID_EDX_SSE2)) {
+			zend_error(E_CORE_ERROR, "CPU doesn't support SSE2");
+			return FAILURE;
+		}
+		if (zend_jit_cpu_flags & ZEND_JIT_CPU_AVX) {
+			if (info.ecx & ZEND_CPUID_ECX_AVX) {
+				zend_jit_x86_flags |= ZEND_JIT_CPU_AVX;
+			}
+		}
+	|.endif
+
+	return SUCCESS;
+}
+
 static int zend_jit_align_func(dasm_State **Dst)
 {
 	reuse_ip = 0;
@@ -2419,11 +2489,17 @@ static int zend_jit_math_double_double(dasm_State    **Dst,
 			result_reg = ZREG_XMM0;
 		}
 
-		|	SSE_GET_ZVAL_DVAL result_reg, op1_addr
-		if (same_ops) {
-			|	SSE_MATH_REG opline->opcode, result_reg, result_reg
+		if (Z_MODE(op1_addr) == IS_REG
+		 && Z_REG(op1_addr) != result_reg
+		 && (zend_jit_x86_flags & ZEND_JIT_CPU_AVX)) {
+				|	AVX_MATH opline->opcode, result_reg, Z_REG(op1_addr), op2_addr
 		} else {
-			|	SSE_MATH opline->opcode, result_reg, op2_addr
+			|	SSE_GET_ZVAL_DVAL result_reg, op1_addr
+			if (same_ops) {
+				|	SSE_MATH_REG opline->opcode, result_reg, result_reg
+			} else {
+				|	SSE_MATH opline->opcode, result_reg, op2_addr
+			}
 		}
 		|	SSE_SET_ZVAL_DVAL res_addr, result_reg
 	|.else

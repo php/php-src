@@ -44,6 +44,11 @@
 
 #define ZEND_JIT_REG_ALLOC(n)      (((n) / 100) % 10)
 
+#define ZEND_JIT_CPU_AVX           1     /* use AVX instructions, if available */
+
+#define ZEND_JIT_CPU_FLAGS(n)      (((n) / 1000) % 10)
+
+
 #define ZEND_JIT_DEFAULT           "5"
 
 
