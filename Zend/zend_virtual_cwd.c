@@ -812,7 +812,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			if (!pathw) {
 				return -1;
 			}
-			hFind = FindFirstFileW(pathw, &dataw);
+			hFind = FindFirstFileExW(pathw, FindExInfoBasic, &dataw, FindExSearchNameMatch, NULL, 0);
 			if (INVALID_HANDLE_VALUE == hFind) {
 				if (use_realpath == CWD_REALPATH) {
 					/* file not found */
