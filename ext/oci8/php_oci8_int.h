@@ -93,6 +93,8 @@ extern zend_class_entry *oci_coll_class_entry_ptr;
 #define PHP_OCI_LOB_BUFFER_ENABLED  1
 #define PHP_OCI_LOB_BUFFER_USED     2
 
+#define PHP_OCI_TAF_DISABLE_CALLBACK ":disableCallback:"
+
 #ifdef OCI_ERROR_MAXMSG_SIZE2
 /* Bigger size is defined from 11.2.0.3 onwards */
 #define PHP_OCI_ERRBUF_LEN OCI_ERROR_MAXMSG_SIZE2
@@ -164,6 +166,8 @@ typedef struct {
 #ifdef HAVE_OCI8_DTRACE
 	char		   *client_id;					/* The oci_set_client_identifier() value */
 #endif
+
+	char		   *taf_callback;				/* The Oracle TAF callback function in the userspace */
 } php_oci_connection;
 /* }}} */
 
@@ -530,6 +534,13 @@ ZEND_BEGIN_MODULE_GLOBALS(oci) /* {{{ Module globals */
 	zend_bool	 events;
 	char		*edition;
 ZEND_END_MODULE_GLOBALS(oci) /* }}} */
+
+/* {{{ transparent failover related prototypes */
+
+int php_oci_register_taf_callback(php_oci_connection *connection, char *callback);
+int php_oci_disable_taf_callback(php_oci_connection *connection);
+
+/* }}} */
 
 #ifdef ZTS
 #define OCI_G(v) TSRMG(oci_globals_id, zend_oci_globals *, v)

@@ -42,6 +42,29 @@
 #define OCI_STMT_CALL 10
 #endif
 
+/* {{{ proto bool oci_register_taf_callback( resource connection [, string callback] )
+   Register a callback function for Oracle Transparent Application Failover (TAF) */
+PHP_FUNCTION(oci_register_taf_callback)
+{
+	zval *z_connection;
+	php_oci_connection *connection;
+	char *callback = NULL;
+	int callback_len = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|s!", &z_connection, &callback, &callback_len) == FAILURE) {
+		return;
+	}
+
+	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
+
+	if (php_oci_register_taf_callback(connection, callback) == 0) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
 /* {{{ proto bool oci_define_by_name(resource stmt, string name, mixed &var [, int type])
    Define a PHP variable to an Oracle column by name */
 /* if you want to define a LOB/CLOB etc make sure you allocate it via OCINewDescriptor BEFORE defining!!! */
@@ -1553,6 +1576,9 @@ PHP_FUNCTION(oci_close)
 											 internally Zend engine increments
 											 RefCount value by 1 */
 		zend_list_close(connection->id);
+	
+	/* Disable Oracle TAF */
+	php_oci_disable_taf_callback(connection);
 
 	/* ZVAL_NULL(z_connection); */
 	
