@@ -2458,6 +2458,8 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 ZEND_API void zend_unregister_functions(const zend_function_entry *functions, int count, HashTable *function_table) /* {{{ */
 {
 	const zend_function_entry *ptr = functions;
+	zend_function *reg_function;
+	zend_arg_info *arg_info;
 	int i=0;
 	HashTable *target_function_table = function_table;
 	zend_string *lowercase_name;
@@ -2473,6 +2475,12 @@ ZEND_API void zend_unregister_functions(const zend_function_entry *functions, in
 		fname_len = strlen(ptr->fname);
 		lowercase_name = zend_string_alloc(fname_len, 0);
 		zend_str_tolower_copy(ZSTR_VAL(lowercase_name), ptr->fname, fname_len);
+		reg_function = zend_hash_find_ptr(target_function_table, lowercase_name);
+		if (reg_function->common.arg_info &&
+			(reg_function->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))) {
+			arg_info = reg_function->common.arg_info - 1;
+			free(arg_info);
+		}
 		zend_hash_del(target_function_table, lowercase_name);
 		zend_string_free(lowercase_name);
 		ptr++;
