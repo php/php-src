@@ -1692,9 +1692,13 @@ ZEND_VM_HELPER(zend_fetch_static_prop_helper, CONST|TMPVAR|CV, UNUSED|CONST|VAR,
 
 			/* check if static properties were destoyed */
 			if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-				zend_throw_error(NULL, "Access to undeclared static property: %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
-				FREE_OP1();
-				HANDLE_EXCEPTION();
+				if (type == BP_VAR_IS) {
+					retval = &EG(uninitialized_zval);
+				} else {
+					zend_throw_error(NULL, "Access to undeclared static property: %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+					FREE_OP1();
+					HANDLE_EXCEPTION();
+				}
 			}
 
 			ZEND_VM_C_GOTO(fetch_static_prop_return);
@@ -1729,24 +1733,31 @@ ZEND_VM_HELPER(zend_fetch_static_prop_helper, CONST|TMPVAR|CV, UNUSED|CONST|VAR,
 				
 			/* check if static properties were destoyed */
 			if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-				zend_throw_error(NULL, "Access to undeclared static property: %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
-				FREE_OP1();
-				HANDLE_EXCEPTION();
+				if (type == BP_VAR_IS) {
+					retval = &EG(uninitialized_zval);
+				} else {
+					zend_throw_error(NULL, "Access to undeclared static property: %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+					FREE_OP1();
+					HANDLE_EXCEPTION();
+				}
 			}
 
 			ZEND_VM_C_GOTO(fetch_static_prop_return);
 		}
 	}
-	retval = zend_std_get_static_property(ce, name, 0);
+	retval = zend_std_get_static_property(ce, name, type == BP_VAR_IS);
 	if (UNEXPECTED(retval == NULL)) {
-		ZEND_ASSERT(EG(exception));
-		if (OP1_TYPE != IS_CONST) {
-			zend_string_release(name);
+		if (type == BP_VAR_IS) {
+			retval = &EG(uninitialized_zval);
+		} else {
+			ZEND_ASSERT(EG(exception));
+			if (OP1_TYPE != IS_CONST) {
+				zend_string_release(name);
+			}
+			FREE_OP1();
+			HANDLE_EXCEPTION();
 		}
-		FREE_OP1();
-		HANDLE_EXCEPTION();
-	}
-	if (OP1_TYPE == IS_CONST && retval) {
+	} else if (OP1_TYPE == IS_CONST) {
 		CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, retval);
 	}
 

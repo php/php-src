@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     (Laruence)
   . Fixed bug #74340 (Magic function __get has different behavior in php 7.1.x).
     (Nikita)
+  . Fixed bug #74188 (Null coalescing operator fails for undeclared static
+    class properties). (tpunt)
 
 - GD:
   . Fixed bug #74343 (compile fails on solaris 11 with system gd2 library).
