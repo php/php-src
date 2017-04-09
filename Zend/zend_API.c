@@ -2476,7 +2476,7 @@ ZEND_API void zend_unregister_functions(const zend_function_entry *functions, in
 		lowercase_name = zend_string_alloc(fname_len, 0);
 		zend_str_tolower_copy(ZSTR_VAL(lowercase_name), ptr->fname, fname_len);
 		reg_function = zend_hash_find_ptr(target_function_table, lowercase_name);
-		if (reg_function->common.arg_info &&
+		if (reg_function && reg_function->common.arg_info &&
 			(reg_function->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))) {
 			arg_info = reg_function->common.arg_info - 1;
 			free(arg_info);
