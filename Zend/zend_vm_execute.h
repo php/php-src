@@ -5055,7 +5055,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 
 			HANDLE_EXCEPTION();
 		}
-		if (retval) {
+		if (EXPECTED(retval)) {
 			if (IS_CONST == IS_CONST) {
 				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, retval);
 			}
@@ -7023,7 +7023,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 
 			HANDLE_EXCEPTION();
 		}
-		if (retval) {
+		if (EXPECTED(retval)) {
 			if (IS_CONST == IS_CONST) {
 				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, retval);
 			}
@@ -7541,7 +7541,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 
 			HANDLE_EXCEPTION();
 		}
-		if (retval) {
+		if (EXPECTED(retval)) {
 			if (IS_CONST == IS_CONST) {
 				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, retval);
 			}
@@ -31473,7 +31473,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 
 			HANDLE_EXCEPTION();
 		}
-		if (retval) {
+		if (EXPECTED(retval)) {
 			if (IS_CV == IS_CONST) {
 				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, retval);
 			}
@@ -33713,7 +33713,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 
 			HANDLE_EXCEPTION();
 		}
-		if (retval) {
+		if (EXPECTED(retval)) {
 			if (IS_CV == IS_CONST) {
 				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, retval);
 			}
@@ -34673,7 +34673,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 
 			HANDLE_EXCEPTION();
 		}
-		if (retval) {
+		if (EXPECTED(retval)) {
 			if (IS_CV == IS_CONST) {
 				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, retval);
 			}
@@ -41946,7 +41946,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 			zval_ptr_dtor_nogc(free_op1);
 			HANDLE_EXCEPTION();
 		}
-		if (retval) {
+		if (EXPECTED(retval)) {
 			if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, retval);
 			}
@@ -42961,7 +42961,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 			zval_ptr_dtor_nogc(free_op1);
 			HANDLE_EXCEPTION();
 		}
-		if (retval) {
+		if (EXPECTED(retval)) {
 			if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, retval);
 			}
@@ -43384,7 +43384,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 			zval_ptr_dtor_nogc(free_op1);
 			HANDLE_EXCEPTION();
 		}
-		if (retval) {
+		if (EXPECTED(retval)) {
 			if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, retval);
 			}

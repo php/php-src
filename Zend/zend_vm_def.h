@@ -1563,7 +1563,7 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMPVAR|CV, UNUSED|CONST|V
 			FREE_OP1();
 			HANDLE_EXCEPTION();
 		}
-		if (retval) {
+		if (EXPECTED(retval)) {
 			if (OP1_TYPE == IS_CONST) {
 				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, retval);
 			}
