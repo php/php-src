@@ -2,9 +2,17 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2017 PHP 7.0.19
 
+- Core:
+  . Fixed bug #74188 (Null coalescing operator fails for undeclared static
+    class properties). (tpunt)
+
 - GD:
   . Fixed bug #74343 (compile fails on solaris 11 with system gd2 library).
     (krakjoe)
+
+- Opcache:
+  . Fixed bug #74250 (OPcache compilation performance regression in PHP 5.6/7
+    with huge classes). (Nikita)
 
 - OpenSSL:
   . Fixed bug #74341 (openssl_x509_parse fails to parse ASN.1 UTCTime without
