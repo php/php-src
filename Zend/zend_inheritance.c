@@ -962,9 +962,6 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 
 	if (ce->ce_flags & ZEND_ACC_IMPLICIT_ABSTRACT_CLASS && ce->type == ZEND_INTERNAL_CLASS) {
 		ce->ce_flags |= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;
-	} else if (!(ce->ce_flags & (ZEND_ACC_IMPLEMENT_INTERFACES|ZEND_ACC_IMPLEMENT_TRAITS))) {
-		/* The verification will be done in runtime by ZEND_VERIFY_ABSTRACT_CLASS */
-		zend_verify_abstract_class(ce);
 	}
 	ce->ce_flags |= parent_ce->ce_flags & (ZEND_HAS_STATIC_IN_METHODS | ZEND_ACC_USE_GUARDS);
 }
@@ -1007,38 +1004,30 @@ static void do_inherit_iface_constant(zend_string *name, zend_class_constant *c,
 
 ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry *iface) /* {{{ */
 {
-	uint32_t i, ignore = 0;
-	uint32_t current_iface_num = ce->num_interfaces;
-	uint32_t parent_iface_num  = ce->parent ? ce->parent->num_interfaces : 0;
-	zend_function *func;
+	zend_bool already_implemented = 0;
+	uint32_t j;
 	zend_string *key;
 	zend_class_constant *c;
 
-	for (i = 0; i < ce->num_interfaces; i++) {
-		if (ce->interfaces[i] == NULL) {
-			memmove(ce->interfaces + i, ce->interfaces + i + 1, sizeof(zend_class_entry*) * (--ce->num_interfaces - i));
-			i--;
-		} else if (ce->interfaces[i] == iface) {
-			if (EXPECTED(i < parent_iface_num)) {
-				ignore = 1;
-			} else {
-				zend_error_noreturn(E_COMPILE_ERROR, "Class %s cannot implement previously implemented interface %s", ZSTR_VAL(ce->name), ZSTR_VAL(iface->name));
-			}
+	/* Check if we already implemented this interface */
+	for (j = 0; j < ce->num_interfaces; j++) {
+		if (ce->interfaces[j] == iface) {
+			already_implemented = 1;
 		}
 	}
-	if (ignore) {
+
+	if (already_implemented) {
 		/* Check for attempt to redeclare interface constants */
 		ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->constants_table, key, c) {
 			do_inherit_constant_check(&iface->constants_table, c, key, iface);
 		} ZEND_HASH_FOREACH_END();
 	} else {
-		if (ce->num_interfaces >= current_iface_num) {
-			if (ce->type == ZEND_INTERNAL_CLASS) {
-				ce->interfaces = (zend_class_entry **) realloc(ce->interfaces, sizeof(zend_class_entry *) * (++current_iface_num));
-			} else {
-				ce->interfaces = (zend_class_entry **) erealloc(ce->interfaces, sizeof(zend_class_entry *) * (++current_iface_num));
-			}
-		}
+		zend_function *func;
+
+		/* Add to interface list */
+		ce->interfaces = perealloc(ce->interfaces,
+			sizeof(zend_class_entry *) * (ce->num_interfaces + 1),
+			ce->type == ZEND_INTERNAL_CLASS);
 		ce->interfaces[ce->num_interfaces++] = iface;
 
 		ZEND_HASH_FOREACH_STR_KEY_PTR(&iface->constants_table, key, c) {
@@ -1055,6 +1044,27 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 
 		do_implement_interface(ce, iface);
 		zend_do_inherit_interfaces(ce, iface);
+	}
+}
+/* }}} */
+
+ZEND_API void zend_do_implement_interfaces(zend_class_entry *ce, zend_class_entry **interfaces, uint32_t num) /* {{{ */
+{
+	uint32_t i, j;
+
+	for (i = 0; i < num; i++) {
+		zend_class_entry *iface = interfaces[i];
+
+		/* Check if this interface is (explicitly) implemented twice */
+		for (j = 0; j < num; j++) {
+			if (i != j && interfaces[j] == iface) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Class %s cannot implement previously implemented interface %s",
+					ZSTR_VAL(ce->name), ZSTR_VAL(iface->name));
+			}
+		}
+
+		zend_do_implement_interface(ce, iface);
 	}
 }
 /* }}} */

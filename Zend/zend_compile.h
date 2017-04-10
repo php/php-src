@@ -244,10 +244,6 @@ typedef struct _zend_oparray_context {
 /* deprecation flag */
 #define ZEND_ACC_DEPRECATED 0x40000
 
-/* class implement interface(s) flag */
-#define ZEND_ACC_IMPLEMENT_INTERFACES 0x80000
-#define ZEND_ACC_IMPLEMENT_TRAITS	  0x400000
-
 /* class constants updated */
 #define ZEND_ACC_CONSTANTS_UPDATED	  0x100000
 
@@ -736,9 +732,9 @@ void zend_handle_encoding_declaration(zend_ast *ast);
 void zend_do_free(znode *op1);
 
 ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opline, HashTable *function_table, zend_bool compile_time);
-ZEND_API zend_class_entry *do_bind_class(const zend_op_array *op_array, const zend_op *opline, HashTable *class_table, zend_bool compile_time);
-ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array, const zend_op *opline, HashTable *class_table, zend_class_entry *parent_ce, zend_bool compile_time);
+ZEND_API zend_class_entry *do_bind_class(zend_class_entry *ce, zend_string *lcname, zend_class_entry *parent_ce, HashTable *class_table, zend_bool compile_time);
 ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array);
+ZEND_API int zend_bind_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce);
 
 void zend_do_extended_info(void);
 void zend_do_extended_fcall_begin(void);
@@ -974,6 +970,12 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 #define ZEND_BRK   254
 #define ZEND_CONT  255
 
+/* Parent class and implemented interface are represented as strings with lowest bit
+ * set. After binding this will be replaced by the actual pointer to the class entry. */
+#define ZEND_MAKE_UNBOUND_CLASS(name) ((zend_class_entry *) ((uintptr_t) name | 1))
+#define ZEND_IS_UNBOUND_CLASS(ce) ((uintptr_t) ce & 1)
+#define ZEND_IS_BOUND_CLASS(ce) !ZEND_IS_UNBOUND_CLASS(ce)
+#define ZEND_GET_UNBOUND_CLASS(ce) ((zend_string *) ((uintptr_t) ce & ~1))
 
 END_EXTERN_C()
 

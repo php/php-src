@@ -443,7 +443,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 						opline->op2.jmp_addr = &new_opcodes[opline->op2.jmp_addr - op_array->opcodes];
 						break;
 					case ZEND_DECLARE_ANON_CLASS:
-					case ZEND_DECLARE_ANON_INHERITED_CLASS:
 					case ZEND_FE_FETCH_R:
 					case ZEND_FE_FETCH_RW:
 						/* relative extended_value don't have to be changed */
@@ -648,6 +647,12 @@ static void zend_persist_class_constant(zval *zv)
 	}
 }
 
+static inline zend_class_entry *zend_persist_unbound_class(zend_class_entry *ce) {
+	zend_string *name = ZEND_GET_UNBOUND_CLASS(ce);
+	zend_accel_store_interned_string(name);
+	return ZEND_MAKE_UNBOUND_CLASS(name);
+}
+
 static void zend_persist_class_entry(zval *zv)
 {
 	zend_class_entry *ce = Z_PTR_P(zv);
@@ -695,15 +700,26 @@ static void zend_persist_class_entry(zval *zv)
 			}
 		}
 		zend_hash_persist(&ce->properties_info, zend_persist_property_info);
-		if (ce->num_interfaces && ce->interfaces) {
-			efree(ce->interfaces);
-		}
-		ce->interfaces = NULL; /* will be filled in on fetch */
 
-		if (ce->num_traits && ce->traits) {
-			efree(ce->traits);
+		if (ZEND_IS_UNBOUND_CLASS(ce->parent)) {
+			ce->parent = zend_persist_unbound_class(ce->parent);
 		}
-		ce->traits = NULL;
+
+		if (ce->interfaces) {
+			int i;
+			for (i = 0; i < ce->num_interfaces; i++) {
+				ce->interfaces[i] = zend_persist_unbound_class(ce->interfaces[i]);
+			}
+			zend_accel_store(ce->interfaces, sizeof(zend_class_entry *) * ce->num_interfaces);
+		}
+
+		if (ce->traits) {
+			int i;
+			for (i = 0; i < ce->num_traits; i++) {
+				ce->traits[i] = zend_persist_unbound_class(ce->traits[i]);
+			}
+			zend_accel_store(ce->traits, sizeof(zend_class_entry *) * ce->num_traits);
+		}
 
 		if (ce->trait_aliases) {
 			int i = 0;
@@ -773,7 +789,7 @@ static int zend_update_parent_ce(zval *zv)
 {
 	zend_class_entry *ce = Z_PTR_P(zv);
 
-	if (ce->parent) {
+	if (ce->parent && ZEND_IS_BOUND_CLASS(ce->parent)) {
 		ce->parent = zend_shared_alloc_get_xlat_entry(ce->parent);
 	}
 

@@ -307,6 +307,11 @@ static void zend_persist_class_constant_calc(zval *zv)
 	}
 }
 
+static inline zend_class_entry *zend_persist_unbound_class_calc(zend_class_entry *ce) {
+	zend_string *name = ZEND_GET_UNBOUND_CLASS(ce);
+	ADD_INTERNED_STRING(name, 0);
+	return ZEND_MAKE_UNBOUND_CLASS(name);
+}
 
 static void zend_persist_class_entry_calc(zval *zv)
 {
@@ -342,6 +347,26 @@ static void zend_persist_class_entry_calc(zval *zv)
 		}
 
 		zend_hash_persist_calc(&ce->properties_info, zend_persist_property_info_calc);
+
+		if (ZEND_IS_UNBOUND_CLASS(ce->parent)) {
+			ce->parent = zend_persist_unbound_class_calc(ce->parent);
+		}
+
+		if (ce->interfaces) {
+			int i;
+			ADD_SIZE(sizeof(zend_class_entry *) * ce->num_interfaces);
+			for (i = 0; i < ce->num_interfaces; i++) {
+				ce->interfaces[i] = zend_persist_unbound_class_calc(ce->interfaces[i]);
+			}
+		}
+
+		if (ce->traits) {
+			int i;
+			ADD_SIZE(sizeof(zend_class_entry *) * ce->num_traits);
+			for (i = 0; i < ce->num_traits; i++) {
+				ce->traits[i] = zend_persist_unbound_class_calc(ce->traits[i]);
+			}
+		}
 
 		if (ce->trait_aliases) {
 			int i = 0;

@@ -383,12 +383,15 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	/* interfaces aren't really implemented, so we create a new table */
 	if (ce->num_interfaces) {
 		ce->interfaces = emalloc(sizeof(zend_class_entry *) * ce->num_interfaces);
-		memset(ce->interfaces, 0, sizeof(zend_class_entry *) * ce->num_interfaces);
-	} else {
-		ce->interfaces = NULL;
+		memcpy(ce->interfaces, old_ce->interfaces, sizeof(zend_class_entry *) * ce->num_interfaces);
 	}
 
-	if (ce->parent) {
+	if (ce->num_traits) {
+		ce->traits = emalloc(sizeof(zend_class_entry *) * ce->num_traits);
+		memcpy(ce->traits, old_ce->traits, sizeof(zend_class_entry *) * ce->num_traits);
+	}
+
+	if (ce->parent && ZEND_IS_BOUND_CLASS(ce->parent)) {
 		ce->parent = ARENA_REALLOC(ce->parent);
 	}
 

@@ -239,8 +239,6 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 		case ZEND_FETCH_CLASS:
 		case ZEND_INIT_FCALL_BY_NAME:
 		/*case ZEND_INIT_NS_FCALL_BY_NAME:*/
-		case ZEND_ADD_INTERFACE:
-		case ZEND_ADD_TRAIT:
 		case ZEND_INSTANCEOF:
 		case ZEND_FETCH_STATIC_PROP_R:
 		case ZEND_FETCH_STATIC_PROP_W:
