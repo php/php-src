@@ -68,7 +68,7 @@ struct sha256_ctx {
 	char buffer[128]; /* NB: always correctly aligned for uint32_t.  */
 };
 
-#if PHP_WIN32 || (!defined(WORDS_BIGENDIAN))
+#if defined(PHP_WIN32) || (!defined(WORDS_BIGENDIAN))
 # define SWAP(n) \
     (((n) << 24) | (((n) & 0xff00) << 8) | (((n) >> 8) & 0xff00) | ((n) >> 24))
 #else
