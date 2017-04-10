@@ -102,6 +102,7 @@ struct _zend_lifetime_interval {
 	zend_bool               load;
 	zend_life_range         range;
 	zend_lifetime_interval *hint;
+	zend_lifetime_interval *used_as_hint;
 	zend_lifetime_interval *list_next;
 };
 

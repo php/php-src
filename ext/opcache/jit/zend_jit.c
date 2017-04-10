@@ -1003,6 +1003,7 @@ static int zend_jit_add_range(zend_lifetime_interval **intervals, int var, uint3
 		ival->range.end = to;
 		ival->range.next = NULL;
 		ival->hint = NULL;
+		ival->used_as_hint = NULL;
 		intervals[var] = ival;
 	} else if (ival->range.start > to + 1) {
 		zend_life_range *range = zend_arena_alloc(&CG(arena), sizeof(zend_life_range));
@@ -1526,6 +1527,17 @@ static int zend_jit_compute_liveness(zend_op_array *op_array, zend_ssa *ssa, zen
 	}
 
 	*list = zend_jit_sort_intervals(intervals, ssa->vars_count);
+
+	if (*list) {
+		zend_lifetime_interval *ival = *list;
+		while (ival) {
+			if (ival->hint) {
+				ival->hint->used_as_hint = ival;
+			}
+			ival = ival->list_next;
+		}
+	}
+
 	free_alloca(intervals, use_heap);
 	return SUCCESS;
 
@@ -1581,13 +1593,14 @@ static uint32_t zend_interval_intersection(zend_lifetime_interval *ival1, zend_l
 
 /* See "Optimized Interval Splitting in a Linear Scan Register Allocator",
    Christian Wimmer VEE'05 (2005), Figure 4. Allocation without spilling */
-static int zend_jit_try_allocate_free_reg(zend_op_array *op_array, zend_ssa *ssa, zend_lifetime_interval *current, zend_regset available, zend_lifetime_interval *active, zend_lifetime_interval *inactive, zend_lifetime_interval **list, zend_lifetime_interval **free)
+static int zend_jit_try_allocate_free_reg(zend_op_array *op_array, zend_ssa *ssa, zend_lifetime_interval *current, zend_regset available, zend_regset *hints, zend_lifetime_interval *active, zend_lifetime_interval *inactive, zend_lifetime_interval **list, zend_lifetime_interval **free)
 {
 	zend_lifetime_interval *it;
 	uint32_t freeUntilPos[ZREG_NUM];
-	uint32_t pos;
-	zend_reg i, reg;
+	uint32_t pos, pos2;
+	zend_reg i, reg, reg2;
 	zend_reg hint = ZREG_NONE;
+	zend_regset low_priority_regs;
 	zend_life_range *range;
 
 	if ((ssa->var_info[current->ssa_var].type & MAY_BE_ANY) == MAY_BE_DOUBLE) {
@@ -1618,7 +1631,12 @@ static int zend_jit_try_allocate_free_reg(zend_op_array *op_array, zend_ssa *ssa
 			if (current->range.start != zend_interval_end(it)) {
 				freeUntilPos[it->reg] = 0;
 			} else if (zend_jit_may_reuse_reg(op_array, ssa, current->range.start, current->ssa_var, it->ssa_var)) {
-				hint = it->reg;
+				if (!ZEND_REGSET_IN(*hints, it->reg) &&
+				    /* TODO: Avoid most often scratch registers. Find a better way ??? */
+				    (!current->used_as_hint ||
+				     (it->reg != ZREG_R0 && it->reg != ZREG_R1 && it->reg != ZREG_XMM0 && it->reg != ZREG_XMM1))) {
+					hint = it->reg;
+				}
 			} else {
 				freeUntilPos[it->reg] = 0;
 			}
@@ -1629,8 +1647,11 @@ static int zend_jit_try_allocate_free_reg(zend_op_array *op_array, zend_ssa *ssa
 			freeUntilPos[it->reg] = 0;
 			it = it->list_next;
 		}
-		if (current->hint) {
-			hint = current->hint->reg;
+	}
+	if (current->hint) {
+		hint = current->hint->reg;
+		if (current->hint->used_as_hint == current) {
+			ZEND_REGSET_EXCL(*hints, hint);
 		}
 	}
 
@@ -1712,14 +1733,40 @@ static int zend_jit_try_allocate_free_reg(zend_op_array *op_array, zend_ssa *ssa
 
     if (hint != ZREG_NONE && freeUntilPos[hint] > zend_interval_end(current)) {
 		current->reg = hint;
+		if (current->used_as_hint) {
+			ZEND_REGSET_INCL(*hints, hint);
+		}
 		return 1;
     }
 
 	pos = 0; reg = ZREG_NONE;
+	pos2 = 0; reg2 = ZREG_NONE;
+	low_priority_regs = *hints;
+	if (current->used_as_hint) {
+		/* TODO: Avoid most often scratch registers. Find a better way ??? */
+		ZEND_REGSET_INCL(low_priority_regs, ZREG_R0);
+		ZEND_REGSET_INCL(low_priority_regs, ZREG_R1);
+		ZEND_REGSET_INCL(low_priority_regs, ZREG_XMM0);
+		ZEND_REGSET_INCL(low_priority_regs, ZREG_XMM1);
+	}
 	for (i = 0; i < ZREG_NUM; i++) {
-		if (ZEND_REGSET_IN(available, i) && freeUntilPos[i] > pos) {
-			reg = i;
-			pos = freeUntilPos[i];
+		if (ZEND_REGSET_IN(available, i)) {
+			if (ZEND_REGSET_IN(low_priority_regs, i)) {
+				if (freeUntilPos[i] > pos2) {
+					reg2 = i;
+					pos2 = freeUntilPos[i];
+				}
+			} else if (freeUntilPos[i] > pos) {
+				reg = i;
+				pos = freeUntilPos[i];
+			}
+		}
+	}
+
+	if (reg == ZREG_NONE) {
+		if (reg2 != ZREG_NONE) {
+			reg = reg2;
+			pos = pos2;
 		}
 	}
 
@@ -1729,6 +1776,9 @@ static int zend_jit_try_allocate_free_reg(zend_op_array *op_array, zend_ssa *ssa
 	} else if (zend_interval_end(current) < pos) {
 		/* register available for the whole interval */
 		current->reg = reg;
+		if (current->used_as_hint) {
+			ZEND_REGSET_INCL(*hints, reg);
+		}
 		return 1;
 	} else {
 		/* TODO: enable interval splitting ??? */
@@ -1737,6 +1787,9 @@ static int zend_jit_try_allocate_free_reg(zend_op_array *op_array, zend_ssa *ssa
 			return 0;
 		}
 		current->reg = reg;
+		if (current->used_as_hint) {
+			ZEND_REGSET_INCL(*hints, reg);
+		}
 		return 1;
 	}
 }
@@ -1759,6 +1812,7 @@ static zend_lifetime_interval* zend_jit_linear_scan(zend_op_array *op_array, zen
 	zend_lifetime_interval *current, **p, *q;
 	uint32_t position;
 	zend_regset available = ZEND_REGSET_UNION(ZEND_REGSET_GP, ZEND_REGSET_FP);
+	zend_regset hints = ZEND_REGSET_EMPTY;
 
 	unhandled = list;
 	/* active = inactive = handled = free = {} */
@@ -1811,7 +1865,7 @@ static zend_lifetime_interval* zend_jit_linear_scan(zend_op_array *op_array, zen
 			}
 		}
 
-		if (zend_jit_try_allocate_free_reg(op_array, ssa, current, available, active, inactive, &unhandled, &free) ||
+		if (zend_jit_try_allocate_free_reg(op_array, ssa, current, available, &hints, active, inactive, &unhandled, &free) ||
 		    zend_jit_allocate_blocked_reg()) {
 			ZEND_REGSET_EXCL(available, current->reg);
 			current->list_next = active;
