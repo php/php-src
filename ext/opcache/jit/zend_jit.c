@@ -98,6 +98,15 @@ static zend_bool zend_ssa_is_last_use(zend_op_array *op_array, const zend_ssa *s
 	return use < 0 || zend_ssa_is_no_val_use(op_array->opcodes + use, ssa->ops + use, var);
 }
 
+static zend_bool zend_is_commutative(zend_uchar opcode)
+{
+	return
+		opcode == ZEND_ADD ||
+		opcode == ZEND_MUL ||
+		opcode == ZEND_ASSIGN_ADD ||
+		opcode == ZEND_ASSIGN_MUL;
+}
+
 #include "dynasm/dasm_x86.h"
 #include "jit/zend_jit_x86.h"
 #include "jit/zend_jit_helpers.c"

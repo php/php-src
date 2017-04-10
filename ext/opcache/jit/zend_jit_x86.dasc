@@ -2525,7 +2525,7 @@ static int zend_jit_math_double_long(dasm_State    **Dst,
 	|.if SSE
 		zend_reg result_reg;
 
-		if (opline->opcode == ZEND_ADD || opline->opcode == ZEND_MUL || opline->opcode == ZEND_ASSIGN_ADD || opline->opcode == ZEND_ASSIGN_MUL) {
+		if (zend_is_commutative(opline->opcode)) {
 			if (Z_MODE(res_addr) == IS_REG) {
 				result_reg = Z_REG(res_addr);
 			} else {
@@ -2611,14 +2611,20 @@ static int zend_jit_math_double_double(dasm_State    **Dst,
 
 		if (zend_jit_x86_flags & ZEND_JIT_CPU_AVX) {
 			zend_reg op1_reg;
+			zend_jit_addr val_addr;
 
 			if (Z_MODE(op1_addr) == IS_REG) {
 				op1_reg = Z_REG(op1_addr);
+				val_addr = op2_addr;
+			} else if (Z_MODE(op2_addr) == IS_REG && zend_is_commutative(opline->opcode)) {
+				op1_reg = Z_REG(op2_addr);
+				val_addr = op1_addr;
 			} else {
 				|	SSE_GET_ZVAL_DVAL result_reg, op1_addr
-				op1_reg =result_reg;
+				op1_reg = result_reg;
+				val_addr = op2_addr;
 			}
-			|	AVX_MATH opline->opcode, result_reg, op1_reg, op2_addr
+			|	AVX_MATH opline->opcode, result_reg, op1_reg, val_addr
 		} else {
 			|	SSE_GET_ZVAL_DVAL result_reg, op1_addr
 			if (same_ops) {
