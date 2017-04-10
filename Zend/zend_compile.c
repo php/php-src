@@ -234,7 +234,6 @@ void zend_oparray_context_begin(zend_oparray_context *prev_context) /* {{{ */
 	CG(context).vars_size = 0;
 	CG(context).literals_size = 0;
 	CG(context).backpatch_count = 0;
-	CG(context).in_finally = 0;
 	CG(context).fast_call_var = -1;
 	CG(context).try_catch_offset = -1;
 	CG(context).current_brk_cont = -1;
@@ -4838,9 +4837,7 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 
 		zend_emit_op(NULL, ZEND_JMP, NULL, NULL);
 
-		CG(context).in_finally++;
 		zend_compile_stmt(finally_ast);
-		CG(context).in_finally--;
 
 		CG(active_op_array)->try_catch_array[try_catch_offset].finally_op = opnum_jmp + 1;
 		CG(active_op_array)->try_catch_array[try_catch_offset].finally_end
