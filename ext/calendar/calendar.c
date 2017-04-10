@@ -313,7 +313,7 @@ PHP_FUNCTION(cal_info)
 
 
 	if (cal != -1 && (cal < 0 || cal >= CAL_NUM_CALS)) {
-		php_error_docref(NULL, E_WARNING, "invalid calendar ID " ZEND_LONG_FMT ".", cal);
+		php_error_docref(NULL, E_WARNING, "invalid calendar ID " ZEND_LONG_FMT, cal);
 		RETURN_FALSE;
 	}
 
@@ -335,7 +335,7 @@ PHP_FUNCTION(cal_days_in_month)
 	}
 
 	if (cal < 0 || cal >= CAL_NUM_CALS) {
-		php_error_docref(NULL, E_WARNING, "invalid calendar ID " ZEND_LONG_FMT ".", cal);
+		php_error_docref(NULL, E_WARNING, "invalid calendar ID " ZEND_LONG_FMT, cal);
 		RETURN_FALSE;
 	}
 
@@ -344,7 +344,7 @@ PHP_FUNCTION(cal_days_in_month)
 	sdn_start = calendar->to_jd(year, month, 1);
 
 	if (sdn_start == 0) {
-		php_error_docref(NULL, E_WARNING, "invalid date.");
+		php_error_docref(NULL, E_WARNING, "invalid date");
 		RETURN_FALSE;
 	}
 
@@ -381,7 +381,7 @@ PHP_FUNCTION(cal_to_jd)
 	}
 
 	if (cal < 0 || cal >= CAL_NUM_CALS) {
-		php_error_docref(NULL, E_WARNING, "invalid calendar ID " ZEND_LONG_FMT ".", cal);
+		php_error_docref(NULL, E_WARNING, "invalid calendar ID " ZEND_LONG_FMT, cal);
 		RETURN_FALSE;
 	}
 
@@ -403,7 +403,7 @@ PHP_FUNCTION(cal_from_jd)
 	}
 
 	if (cal < 0 || cal >= CAL_NUM_CALS) {
-		php_error_docref(NULL, E_WARNING, "invalid calendar ID " ZEND_LONG_FMT "", cal);
+		php_error_docref(NULL, E_WARNING, "invalid calendar ID " ZEND_LONG_FMT, cal);
 		RETURN_FALSE;
 	}
 	calendar = &cal_conversion_table[cal];
@@ -623,7 +623,7 @@ PHP_FUNCTION(jdtojewish)
 		RETURN_STRING(date);
 	} else {
 		if (year <= 0 || year > 9999) {
-			php_error_docref(NULL, E_WARNING, "Year out of range (0-9999).");
+			php_error_docref(NULL, E_WARNING, "Year out of range (0-9999)");
 			RETURN_FALSE;
 		}
 

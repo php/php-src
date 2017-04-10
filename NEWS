@@ -37,7 +37,7 @@ PHP                                                                        NEWS
   . Fixed bug #73971 (Filename got limited to MAX_PATH on Win32 when scan
     directory). (Anatol)
   . Fixed bug #74149 (static embed SAPI linkage error). (krakjoe)
-  . Fixed bug #72359, bug #72451, bug #73706, bug #71115 and athers related
+  . Fixed bug #72359, bug #72451, bug #73706, bug #71115 and others related
     to interned strings handling in TS builds. (Anatol, Dmitry)
 
 - BCMath:
@@ -137,6 +137,12 @@ PHP                                                                        NEWS
 
 - PDO_Sqlite
   . Switch to sqlite3_prepare_v2() and sqlite3_close_v2() functions (rasmus)
+
+- phar:
+  . Fixed bug #74383 (phar method parameters reflection correction). 
+    (mhagstrand)
+  . Fixed bug #74196 (phar does not correctly handle names containing dots).
+    (mhagstrand)
 
 - PHPDBG
   . Added extended_value to opcode dump output. (Sara)

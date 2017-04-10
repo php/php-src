@@ -1,6 +1,6 @@
 diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
---- libmagic.orig/apprentice.c	2016-11-23 17:08:22.955687700 +0100
-+++ libmagic/apprentice.c	2016-11-24 16:55:16.299587400 +0100
+--- libmagic.orig/apprentice.c	2017-04-10 11:46:03.857163505 +0800
++++ libmagic/apprentice.c	2017-04-10 11:46:16.375492995 +0800
 @@ -29,6 +29,8 @@
   * apprentice - make one pass through /etc/magic, learning its secrets.
   */
@@ -49,7 +49,18 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  
  #ifndef SSIZE_MAX
  #define MAXMAGIC_SIZE        ((ssize_t)0x7fffffff)
-@@ -170,38 +175,7 @@
+@@ -75,6 +80,10 @@
+ #endif
+ #endif
+ 
++#ifndef offsetof
++#define offsetof(STRUCTURE,FIELD) ((int)((char*)&((STRUCTURE*)0)->FIELD))
++#endif
++
+ #ifndef MAP_FAILED
+ #define MAP_FAILED (void *) -1
+ #endif
+@@ -170,38 +179,7 @@
  	{ NULL, 0, NULL }
  };
  
@@ -89,7 +100,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  
  struct type_tbl_s {
  	const char name[16];
-@@ -285,6 +259,10 @@
+@@ -285,6 +263,10 @@
  # undef XX
  # undef XX_NULL
  
@@ -100,7 +111,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  private int
  get_type(const struct type_tbl_s *tbl, const char *l, const char **t)
  {
-@@ -409,7 +387,7 @@
+@@ -409,7 +391,7 @@
  	struct mlist *ml;
  
  	mlp->map = NULL;
@@ -109,7 +120,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  		return -1;
  
  	ml->map = idx == 0 ? map : NULL;
-@@ -430,10 +408,8 @@
+@@ -430,10 +412,8 @@
  apprentice_1(struct magic_set *ms, const char *fn, int action)
  {
  	struct magic_map *map;
@@ -120,7 +131,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  
  	if (magicsize != FILE_MAGICSIZE) {
  		file_error(ms, 0, "magic element size %lu != %lu",
-@@ -449,14 +425,15 @@
+@@ -449,14 +429,15 @@
  		return apprentice_compile(ms, map, fn);
  	}
  
@@ -140,7 +151,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  		if (map == NULL)
  			return -1;
  	}
-@@ -478,9 +455,6 @@
+@@ -478,9 +459,6 @@
  		}
  	}
  	return 0;
@@ -150,7 +161,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  }
  
  protected void
-@@ -491,10 +465,16 @@
+@@ -491,10 +469,16 @@
  		return;
  	for (i = 0; i < MAGIC_SETS; i++)
  		mlist_free(ms->mlist[i]);
@@ -171,7 +182,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  }
  
  protected struct magic_set *
-@@ -503,7 +483,7 @@
+@@ -503,7 +487,7 @@
  	struct magic_set *ms;
  	size_t i, len;
  
@@ -180,7 +191,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  	    sizeof(struct magic_set)))) == NULL)
  		return NULL;
  
-@@ -515,7 +495,7 @@
+@@ -515,7 +499,7 @@
  	ms->o.buf = ms->o.pbuf = NULL;
  	len = (ms->c.len = 10) * sizeof(*ms->c.li);
  
@@ -189,7 +200,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  		goto free;
  
  	ms->event_flags = 0;
-@@ -533,46 +513,35 @@
+@@ -533,46 +517,35 @@
  	ms->bytes_max = FILE_BYTES_MAX;
  	return ms;
  free:
@@ -249,7 +260,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  		return NULL;
  	}
  	mlist->next = mlist->prev = mlist;
-@@ -591,61 +560,12 @@
+@@ -591,61 +564,12 @@
  	for (ml = mlist->next; (next = ml->next) != NULL; ml = next) {
  		if (ml->map)
  			apprentice_unmap(CAST(struct magic_map *, ml->map));
@@ -312,7 +323,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  /* const char *fn: list of magic files and directories */
  protected int
  file_apprentice(struct magic_set *ms, const char *fn, int action)
-@@ -657,12 +577,28 @@
+@@ -657,12 +581,28 @@
  	if (ms->mlist[0] != NULL)
  		file_reset(ms);
  
@@ -342,7 +353,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  		file_oomem(ms, strlen(fn));
  		return -1;
  	}
-@@ -675,7 +611,7 @@
+@@ -675,7 +615,7 @@
  				mlist_free(ms->mlist[i]);
  				ms->mlist[i] = NULL;
  			}
@@ -351,7 +362,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  			return -1;
  		}
  	}
-@@ -692,7 +628,7 @@
+@@ -692,7 +632,7 @@
  		fn = p;
  	}
  
@@ -360,7 +371,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  
  	if (errs == -1) {
  		for (i = 0; i < MAGIC_SETS; i++) {
-@@ -1076,7 +1012,7 @@
+@@ -1076,7 +1016,7 @@
  
  		mset[i].max += ALLOC_INCR;
  		if ((mp = CAST(struct magic_entry *,
@@ -369,7 +380,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  		    NULL) {
  			file_oomem(ms, sizeof(*mp) * mset[i].max);
  			return -1;
-@@ -1097,13 +1033,19 @@
+@@ -1097,13 +1037,19 @@
  load_1(struct magic_set *ms, int action, const char *fn, int *errs,
     struct magic_entry_set *mset)
  {
@@ -393,7 +404,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  		if (errno != ENOENT)
  			file_error(ms, errno, "cannot read magic file `%s'",
  				   fn);
-@@ -1113,8 +1055,7 @@
+@@ -1113,8 +1059,7 @@
  
  	memset(&me, 0, sizeof(me));
  	/* read and parse this file */
@@ -403,7 +414,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  		if (len == 0) /* null line, garbage, etc */
  			continue;
  		if (line[len - 1] == '\n') {
-@@ -1172,8 +1113,8 @@
+@@ -1172,8 +1117,8 @@
  	}
  	if (me.mp)
  		(void)addentry(ms, &me, mset);
@@ -414,7 +425,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  }
  
  /*
-@@ -1252,7 +1193,7 @@
+@@ -1252,7 +1197,7 @@
  		mentrycount += me[i].cont_count;
  
  	slen = sizeof(**ma) * mentrycount;
@@ -423,7 +434,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  		file_oomem(ms, slen);
  		return -1;
  	}
-@@ -1274,8 +1215,8 @@
+@@ -1274,8 +1219,8 @@
  	if (me == NULL)
  		return;
  	for (i = 0; i < nme; i++)
@@ -434,7 +445,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  }
  
  private struct magic_map *
-@@ -1284,18 +1225,19 @@
+@@ -1284,18 +1229,19 @@
  	int errs = 0;
  	uint32_t i, j;
  	size_t files = 0, maxfiles = 0;
@@ -459,7 +470,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  	{
  		file_oomem(ms, sizeof(*map));
  		return NULL;
-@@ -1307,22 +1249,26 @@
+@@ -1307,22 +1253,26 @@
  		(void)fprintf(stderr, "%s\n", usg_hdr);
  
  	/* load directory or file */
@@ -494,7 +505,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  				continue;
  			}
  			if (files >= maxfiles) {
-@@ -1330,23 +1276,22 @@
+@@ -1330,23 +1280,22 @@
  				maxfiles = (maxfiles + 1) * 2;
  				mlen = maxfiles * sizeof(*filearr);
  				if ((filearr = CAST(char **,
@@ -524,7 +535,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  	} else
  		load_1(ms, action, fn, &errs, mset);
  	if (errs)
-@@ -1813,7 +1758,7 @@
+@@ -1813,7 +1762,7 @@
  		if (me->cont_count == me->max_count) {
  			struct magic *nm;
  			size_t cnt = me->max_count + ALLOC_CHUNK;
@@ -533,7 +544,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  			    sizeof(*nm) * cnt))) == NULL) {
  				file_oomem(ms, sizeof(*nm) * cnt);
  				return -1;
-@@ -1828,7 +1773,7 @@
+@@ -1828,7 +1777,7 @@
  		static const size_t len = sizeof(*m) * ALLOC_CHUNK;
  		if (me->mp != NULL)
  			return 1;
@@ -542,7 +553,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  			file_oomem(ms, len);
  			return -1;
  		}
-@@ -2032,7 +1977,7 @@
+@@ -2032,7 +1981,7 @@
  
  	m->mask_op = 0;
  	if (*l == '~') {
@@ -551,7 +562,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  			m->mask_op |= FILE_OPINVERSE;
  		else if (ms->flags & MAGIC_CHECK)
  			file_magwarn(ms, "'~' invalid for string types");
-@@ -2041,7 +1986,7 @@
+@@ -2041,7 +1990,7 @@
  	m->str_range = 0;
  	m->str_flags = m->type == FILE_PSTRING ? PSTRING_1_LE : 0;
  	if ((op = get_op(*l)) != -1) {
@@ -560,7 +571,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  			int r;
  
  			if (op != FILE_OPDIVIDE) {
-@@ -2146,11 +2091,6 @@
+@@ -2146,11 +2095,6 @@
  		if (check_format(ms, m) == -1)
  			return -1;
  	}
@@ -572,7 +583,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  	m->mimetype[0] = '\0';		/* initialise MIME type to none */
  	return 0;
  }
-@@ -2222,7 +2162,7 @@
+@@ -2222,7 +2166,7 @@
  
  private int
  parse_extra(struct magic_set *ms, struct magic_entry *me, const char *line,
@@ -581,7 +592,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  {
  	size_t i;
  	const char *l = line;
-@@ -2304,7 +2244,7 @@
+@@ -2304,7 +2248,7 @@
  	struct magic *m = &me->mp[0];
  
  	return parse_extra(ms, me, line,
@@ -590,7 +601,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  	    sizeof(m->mimetype), "MIME", "+-/.", 1);
  }
  
-@@ -2578,14 +2518,18 @@
+@@ -2578,14 +2522,18 @@
  			return -1;
  		}
  		if (m->type == FILE_REGEX) {
@@ -616,7 +627,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  		}
  		return 0;
  	case FILE_FLOAT:
-@@ -2924,79 +2868,145 @@
+@@ -2924,79 +2872,145 @@
  private struct magic_map *
  apprentice_map(struct magic_set *ms, const char *fn)
  {
@@ -640,13 +651,13 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  		file_oomem(ms, sizeof(*map));
 -		goto error;
 +		return NULL;
-+	}
+ 	}
+-	map->type = MAP_TYPE_USER;	/* unspecified */
 +
 +	if (fn == NULL) {
 +		map->p = (void *)&php_magic_database;
 +		goto internal_loaded;
- 	}
--	map->type = MAP_TYPE_USER;	/* unspecified */
++	}
 +
 +#ifdef PHP_WIN32
 +	/* Don't bother on windows with php_stream_open_wrapper,
@@ -799,7 +810,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  }
  
  private int
-@@ -3022,7 +3032,7 @@
+@@ -3022,7 +3036,7 @@
  		version = ptr[1];
  	if (version != VERSIONNO) {
  		file_error(ms, 0, "File %s supports only version %d magic "
@@ -808,7 +819,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  		    VERSIONNO, dbname, version);
  		return -1;
  	}
-@@ -3063,7 +3073,6 @@
+@@ -3063,7 +3077,6 @@
  {
  	static const size_t nm = sizeof(*map->nmagic) * MAGIC_SETS;
  	static const size_t m = sizeof(**map->magic);
@@ -816,7 +827,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  	size_t len;
  	char *dbname;
  	int rv = -1;
-@@ -3072,14 +3081,17 @@
+@@ -3072,14 +3085,17 @@
  		struct magic m;
  		uint32_t h[2 + MAGIC_SETS];
  	} hdr;
@@ -836,7 +847,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  		file_error(ms, errno, "cannot open `%s'", dbname);
  		goto out;
  	}
-@@ -3088,25 +3100,25 @@
+@@ -3088,25 +3104,25 @@
  	hdr.h[1] = VERSIONNO;
  	memcpy(hdr.h + 2, map->nmagic, nm);
  
@@ -868,7 +879,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  	return rv;
  }
  
-@@ -3140,16 +3152,18 @@
+@@ -3140,16 +3156,18 @@
  	q++;
  	/* Compatibility with old code that looked in .mime */
  	if (ms->flags & MAGIC_MIME) {
@@ -893,7 +904,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  
  	/* Compatibility with old code that looked in .mime */
  	if (strstr(fn, ".mime") != NULL)
-@@ -3239,7 +3253,7 @@
+@@ -3239,7 +3257,7 @@
  	m->offset = swap4((uint32_t)m->offset);
  	m->in_offset = swap4((uint32_t)m->in_offset);
  	m->lineno = swap4((uint32_t)m->lineno);
@@ -903,8 +914,8 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  		m->str_flags = swap4(m->str_flags);
  	}
 diff -u libmagic.orig/ascmagic.c libmagic/ascmagic.c
---- libmagic.orig/ascmagic.c	2016-11-23 17:08:23.422184100 +0100
-+++ libmagic/ascmagic.c	2016-11-24 13:42:04.130245900 +0100
+--- libmagic.orig/ascmagic.c	2017-04-10 11:46:03.872171005 +0800
++++ libmagic/ascmagic.c	2017-04-10 11:46:07.197493002 +0800
 @@ -133,7 +133,7 @@
  		/* malloc size is a conservative overestimate; could be
  		   improved, or at least realloced after conversion. */
@@ -925,8 +936,8 @@ diff -u libmagic.orig/ascmagic.c libmagic/ascmagic.c
  	return rv;
  }
 diff -u libmagic.orig/cdf.c libmagic/cdf.c
---- libmagic.orig/cdf.c	2016-11-23 17:08:24.328677300 +0100
-+++ libmagic/cdf.c	2016-11-24 13:42:04.138254700 +0100
+--- libmagic.orig/cdf.c	2017-04-10 11:46:03.857163505 +0800
++++ libmagic/cdf.c	2017-04-10 11:46:07.197493002 +0800
 @@ -43,7 +43,17 @@
  #include <err.h>
  #endif
@@ -1022,8 +1033,8 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  		(void)fprintf(stderr, "Usage: %s <filename>\n", getprogname());
  		return -1;
 diff -u libmagic.orig/cdf.h libmagic/cdf.h
---- libmagic.orig/cdf.h	2016-11-26 14:20:33.240401300 +0100
-+++ libmagic/cdf.h	2016-11-26 14:20:33.781858400 +0100
+--- libmagic.orig/cdf.h	2017-04-10 11:46:03.871170505 +0800
++++ libmagic/cdf.h	2017-04-10 11:46:07.198493002 +0800
 @@ -35,10 +35,12 @@
  #ifndef _H_CDF_
  #define _H_CDF_
@@ -1052,8 +1063,8 @@ diff -u libmagic.orig/cdf.h libmagic/cdf.h
  void cdf_swap_header(cdf_header_t *);
  void cdf_unpack_header(cdf_header_t *, char *);
 diff -u libmagic.orig/cdf_time.c libmagic/cdf_time.c
---- libmagic.orig/cdf_time.c	2016-11-23 17:08:25.086670200 +0100
-+++ libmagic/cdf_time.c	2016-11-24 13:40:19.272464700 +0100
+--- libmagic.orig/cdf_time.c	2017-04-10 11:46:03.872171005 +0800
++++ libmagic/cdf_time.c	2017-04-10 11:46:07.198493002 +0800
 @@ -96,7 +96,7 @@
  }
  
@@ -1103,8 +1114,8 @@ diff -u libmagic.orig/cdf_time.c libmagic/cdf_time.c
  	static const cdf_timestamp_t tst = 0x01A5E403C2D59C00ULL;
  	static const char *ref = "Sat Apr 23 01:30:00 1977";
 diff -u libmagic.orig/compress.c libmagic/compress.c
---- libmagic.orig/compress.c	2016-11-23 17:08:25.345167600 +0100
-+++ libmagic/compress.c	2017-01-05 23:15:53.219543000 +0100
+--- libmagic.orig/compress.c	2017-04-10 11:46:03.864167005 +0800
++++ libmagic/compress.c	2017-04-10 11:46:07.198493002 +0800
 @@ -45,15 +45,13 @@
  #endif
  #include <string.h>
@@ -1269,8 +1280,8 @@ diff -u libmagic.orig/compress.c libmagic/compress.c
 -#endif
 +#endif /* if PHP_FILEINFO_UNCOMPRESS */
 diff -u libmagic.orig/der.c libmagic/der.c
---- libmagic.orig/der.c	2016-11-23 17:08:25.601237900 +0100
-+++ libmagic/der.c	2017-01-05 23:25:59.696458300 +0100
+--- libmagic.orig/der.c	2017-04-10 11:46:03.863166505 +0800
++++ libmagic/der.c	2017-04-10 11:46:07.198493002 +0800
 @@ -51,7 +51,9 @@
  #include "magic.h"
  #include "der.h"
@@ -1299,8 +1310,8 @@ diff -u libmagic.orig/der.c libmagic/der.c
  		if (z < blen - 2)
  			snprintf(buf + z, blen - z, "%.2x", d[i]);
 diff -u libmagic.orig/elfclass.h libmagic/elfclass.h
---- libmagic.orig/elfclass.h	2016-11-23 17:08:25.910282200 +0100
-+++ libmagic/elfclass.h	2015-07-18 21:35:36.472082600 +0200
+--- libmagic.orig/elfclass.h	2017-04-10 11:46:03.857163505 +0800
++++ libmagic/elfclass.h	2017-04-10 11:46:07.198493002 +0800
 @@ -41,7 +41,7 @@
  			return toomany(ms, "program headers", phnum);
  		flags |= FLAGS_IS_CORE;
@@ -1329,8 +1340,8 @@ diff -u libmagic.orig/elfclass.h libmagic/elfclass.h
  		    fsize, elf_getu16(swap, elfhdr.e_machine),
  		    (int)elf_getu16(swap, elfhdr.e_shstrndx),
 diff -u libmagic.orig/file.h libmagic/file.h
---- libmagic.orig/file.h	2016-11-26 14:20:33.428933800 +0100
-+++ libmagic/file.h	2016-11-26 14:20:33.993908600 +0100
+--- libmagic.orig/file.h	2017-04-10 11:46:03.857163505 +0800
++++ libmagic/file.h	2017-04-10 11:46:07.198493002 +0800
 @@ -33,11 +33,9 @@
  #ifndef __file_h__
  #define __file_h__
@@ -1555,8 +1566,8 @@ diff -u libmagic.orig/file.h libmagic/file.h
  #define __RCSID(a)
  #endif
 diff -u libmagic.orig/fsmagic.c libmagic/fsmagic.c
---- libmagic.orig/fsmagic.c	2016-11-23 17:08:26.758003500 +0100
-+++ libmagic/fsmagic.c	2016-11-24 13:41:34.212917300 +0100
+--- libmagic.orig/fsmagic.c	2017-04-10 11:46:03.856163005 +0800
++++ libmagic/fsmagic.c	2017-04-10 11:46:07.199493002 +0800
 @@ -63,27 +63,21 @@
  # define minor(dev)  ((dev) & 0xff)
  #endif
@@ -1873,8 +1884,8 @@ diff -u libmagic.orig/fsmagic.c libmagic/fsmagic.c
  #ifndef __COHERENT__
  	case S_IFSOCK:
 diff -u libmagic.orig/funcs.c libmagic/funcs.c
---- libmagic.orig/funcs.c	2016-11-23 17:08:26.917536700 +0100
-+++ libmagic/funcs.c	2016-11-24 13:42:04.163244800 +0100
+--- libmagic.orig/funcs.c	2017-04-10 11:46:03.864167005 +0800
++++ libmagic/funcs.c	2017-04-10 11:46:07.199493002 +0800
 @@ -31,7 +31,6 @@
  #endif	/* lint */
  
@@ -2235,9 +2246,10 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
  	return rbuf;
  }
  
+Common subdirectories: libmagic.orig/.libs and libmagic/.libs
 diff -u libmagic.orig/magic.c libmagic/magic.c
---- libmagic.orig/magic.c	2016-11-23 17:08:27.605158000 +0100
-+++ libmagic/magic.c	2016-11-24 13:42:10.074024300 +0100
+--- libmagic.orig/magic.c	2017-04-10 11:46:03.872171005 +0800
++++ libmagic/magic.c	2017-04-10 11:46:07.199493002 +0800
 @@ -25,11 +25,6 @@
   * SUCH DAMAGE.
   */
@@ -2739,8 +2751,8 @@ diff -u libmagic.orig/magic.c libmagic/magic.c
  public const char *
  magic_error(struct magic_set *ms)
 diff -u libmagic.orig/magic.h libmagic/magic.h
---- libmagic.orig/magic.h	2016-11-23 17:08:27.691621600 +0100
-+++ libmagic/magic.h	2016-11-24 13:41:34.229416200 +0100
+--- libmagic.orig/magic.h	2017-04-10 11:46:03.857163505 +0800
++++ libmagic/magic.h	2017-04-10 11:46:07.199493002 +0800
 @@ -93,6 +93,7 @@
  
  const char *magic_getpath(const char *, int);
@@ -2758,8 +2770,8 @@ diff -u libmagic.orig/magic.h libmagic/magic.h
  int magic_errno(magic_t);
  
 diff -u libmagic.orig/print.c libmagic/print.c
---- libmagic.orig/print.c	2016-11-23 17:08:28.349281600 +0100
-+++ libmagic/print.c	2016-11-24 13:42:04.178244800 +0100
+--- libmagic.orig/print.c	2017-04-10 11:46:03.872171005 +0800
++++ libmagic/print.c	2017-04-10 11:46:07.199493002 +0800
 @@ -28,6 +28,8 @@
  /*
   * print.c - debugging printout routines
@@ -3023,8 +3035,8 @@ diff -u libmagic.orig/print.c libmagic/print.c
  	if (tm == NULL)
  		goto out;
 diff -u libmagic.orig/readcdf.c libmagic/readcdf.c
---- libmagic.orig/readcdf.c	2016-11-23 17:08:28.502932500 +0100
-+++ libmagic/readcdf.c	2016-11-24 13:42:04.185245900 +0100
+--- libmagic.orig/readcdf.c	2017-04-10 11:46:03.871170505 +0800
++++ libmagic/readcdf.c	2017-04-10 11:46:07.199493002 +0800
 @@ -1,5 +1,5 @@
  /*-
 - * Copyright (c) 2008, 2016 Christos Zoulas
@@ -3130,8 +3142,8 @@ diff -u libmagic.orig/readcdf.c libmagic/readcdf.c
  					    (ec = strchr(c, '\n')) != NULL)
  						*ec = '\0';
 diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
---- libmagic.orig/softmagic.c	2016-11-23 17:08:28.915798800 +0100
-+++ libmagic/softmagic.c	2016-11-24 13:42:10.086018300 +0100
+--- libmagic.orig/softmagic.c	2017-04-10 11:46:03.856163005 +0800
++++ libmagic/softmagic.c	2017-04-10 11:46:07.200493002 +0800
 @@ -43,6 +43,10 @@
  #include <time.h>
  #include "der.h"
@@ -3549,8 +3561,8 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  	}
  	case FILE_INDIRECT:
 diff -u libmagic.orig/strcasestr.c libmagic/strcasestr.c
---- libmagic.orig/strcasestr.c	2016-11-23 17:08:29.069351700 +0100
-+++ libmagic/strcasestr.c	2015-07-18 21:35:36.510103100 +0200
+--- libmagic.orig/strcasestr.c	2017-04-10 11:46:03.872171005 +0800
++++ libmagic/strcasestr.c	2017-04-10 11:46:07.200493002 +0800
 @@ -39,6 +39,8 @@
  
  #include "file.h"

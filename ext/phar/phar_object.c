@@ -2019,7 +2019,7 @@ static int phar_copy_file_contents(phar_entry_info *entry, php_stream *fp) /* {{
 }
 /* }}} */
 
-static zend_object *phar_rename_archive(phar_archive_data **sphar, char *ext, zend_bool compress) /* {{{ */
+static zend_object *phar_rename_archive(phar_archive_data **sphar, char *ext) /* {{{ */
 {
 	const char *oldname = NULL;
 	phar_archive_data *phar = *sphar;
@@ -2031,9 +2031,28 @@ static zend_object *phar_rename_archive(phar_archive_data **sphar, char *ext, ze
 	char *error;
 	const char *pcr_error;
 	int ext_len = ext ? strlen(ext) : 0;
-	size_t new_len, oldname_len;
+	size_t new_len, oldname_len, phar_ext_len;
 	phar_archive_data *pphar = NULL;
 	php_stream_statbuf ssb;
+
+	int phar_ext_list_len, i = 0;
+	char *ext_pos = NULL;
+	/* Array of PHAR extensions, Must be in order, starting with longest
+	 * ending with the shortest. */
+	char *phar_ext_list[] = {
+		".phar.tar.bz2",
+		".phar.tar.gz",
+		".phar.php",
+		".phar.bz2",
+		".phar.zip",
+		".phar.tar",
+		".phar.gz",
+		".tar.bz2",
+		".tar.gz",
+		".phar",
+		".tar",
+		".zip"
+	};
 
 	if (!ext) {
 		if (phar->is_zip) {
@@ -2091,9 +2110,6 @@ static zend_object *phar_rename_archive(phar_archive_data **sphar, char *ext, ze
 		return NULL;
 	}
 
-	if (ext[0] == '.') {
-		++ext;
-	}
 
 	oldpath = estrndup(phar->fname, phar->fname_len);
 	if ((oldname = zend_memrchr(phar->fname, '/', phar->fname_len))) {
@@ -2101,10 +2117,41 @@ static zend_object *phar_rename_archive(phar_archive_data **sphar, char *ext, ze
 	} else {
 		oldname = phar->fname;
 	}
-	oldname_len = strlen(oldname);
 
+	oldname_len = strlen(oldname);
+	/* Copy the old name to create base for the new name */
 	basename = estrndup(oldname, oldname_len);
-	spprintf(&newname, 0, "%s.%s", strtok(basename, "."), ext);
+
+	phar_ext_list_len = sizeof(phar_ext_list)/sizeof(phar_ext_list[0]);
+	/* Remove possible PHAR extensions */
+	/* phar_ext_list must be in order of longest extension to shortest */
+	for (i=0; i < phar_ext_list_len; i++) {
+		phar_ext_len = strlen(phar_ext_list[i]);
+		if (phar_ext_len && oldname_len > phar_ext_len) {
+			/* Check if the basename strings ends with the extension */
+			if (memcmp(phar_ext_list[i], basename + (oldname_len - phar_ext_len), phar_ext_len) == 0) {
+				ext_pos = basename + (oldname_len - phar_ext_len);
+				ext_pos[0] = '\0';
+				break;
+			}
+		}
+		ext_pos = NULL;
+	}
+
+	/* If no default PHAR extension found remove the last extension */
+	if (!ext_pos) {
+		ext_pos = strrchr(basename, '.');
+		if (ext_pos) {
+			ext_pos[0] = '\0';
+		}
+	}
+	ext_pos = NULL;
+
+	if (ext[0] == '.') {
+		++ext;
+	}
+	/* Append extension to the basename */
+	spprintf(&newname, 0, "%s.%s", basename, ext);
 	efree(basename);
 
 	basepath = estrndup(oldpath, (strlen(oldpath) - oldname_len));
@@ -2321,7 +2368,7 @@ no_copy:
 		phar_add_virtual_dirs(phar, newentry.filename, newentry.filename_len);
 	} ZEND_HASH_FOREACH_END();
 
-	if ((ret = phar_rename_archive(&phar, ext, 0))) {
+	if ((ret = phar_rename_archive(&phar, ext))) {
 		return ret;
 	} else {
 		if(phar != NULL) {
@@ -5134,7 +5181,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_webPhar, 0, 0, 0)
 	ZEND_ARG_INFO(0, rewrites)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_running, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_running, 0, 0, 0)
 	ZEND_ARG_INFO(0, retphar)
 ZEND_END_ARG_INFO()
 
