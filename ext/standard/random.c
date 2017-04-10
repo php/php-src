@@ -27,7 +27,7 @@
 #include "zend_exceptions.h"
 #include "php_random.h"
 
-#if PHP_WIN32
+#ifdef PHP_WIN32
 # include "win32/winutil.h"
 #endif
 #ifdef __linux__
@@ -83,7 +83,7 @@ PHP_MSHUTDOWN_FUNCTION(random)
 /* {{{ */
 PHPAPI int php_random_bytes(void *bytes, size_t size, zend_bool should_throw)
 {
-#if PHP_WIN32
+#ifdef PHP_WIN32
 	/* Defer to CryptGenRandom on Windows */
 	if (php_win32_get_random_bytes(bytes, size) == FAILURE) {
 		if (should_throw) {

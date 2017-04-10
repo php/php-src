@@ -627,7 +627,7 @@ static int _php_source_op_to_ipv4_op(enum source_op sop)
 
 #endif /* HAS_MCAST_EXT */
 
-#if PHP_WIN32
+#ifdef PHP_WIN32
 int php_if_index_to_addr4(unsigned if_index, php_socket *php_sock, struct in_addr *out_addr)
 {
 	MIB_IPADDRTABLE *addr_table;
