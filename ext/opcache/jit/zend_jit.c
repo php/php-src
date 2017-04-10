@@ -1038,6 +1038,7 @@ static int zend_jit_add_range(zend_lifetime_interval **intervals, int var, uint3
 					if (range->start > to + 1) {
 						break;
 					}
+					last->end = range->end;
 					range = range->next;
 					last->next = range;
 				}
