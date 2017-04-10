@@ -32,7 +32,8 @@ PHP                                                                        NEWS
     seconds). (Moritz Fain)
 
 - phar:
-  . Fixed bug #74383 phar method parameters reflection correction. (mhagstrand)
+  . Fixed bug #74383 (phar method parameters reflection correction). 
+    (mhagstrand)
 
 - Standard:
   . Fixed bug #72071 (setcookie allows max-age to be negative). (Craig Duncan)
