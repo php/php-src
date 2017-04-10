@@ -15,6 +15,8 @@ PHP                                                                        NEWS
     loss). (Yussuf Khalil)
 
 - OpenSSL:
+  . Fixed bug #74402 (segfault on random_bytes, bin2hex, openssl_seal).
+    (Laruence)
   . Fixed bug #74341 (openssl_x509_parse fails to parse ASN.1 UTCTime without
     seconds). (Moritz Fain)
 
