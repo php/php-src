@@ -45,6 +45,8 @@ static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_bloc
 				if (b->successors_count == 1) {
 					if (opcode == ZEND_JMP) {
 						succ->flags |= ZEND_BB_TARGET;
+					} else {
+						succ->flags |= ZEND_BB_FOLLOW;
 
 						if (cfg->split_at_calls) {
 							if (opcode == ZEND_INCLUDE_OR_EVAL ||
@@ -63,8 +65,6 @@ static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_bloc
 								b->flags |= ZEND_BB_RECV_ENTRY;
 							}
 						}
-					} else {
-						succ->flags |= ZEND_BB_FOLLOW;
 					}
 				} else if (b->successors_count == 2) {
 					if (i == 0 || opcode == ZEND_JMPZNZ) {
