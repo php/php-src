@@ -102,6 +102,7 @@ typedef struct _zend_cfg {
 #define ZEND_CFG_NO_ENTRY_PREDECESSORS (1<<25)
 #define ZEND_CFG_RECV_ENTRY            (1<<24)
 #define ZEND_CALL_TREE                 (1<<23)
+#define ZEND_SSA_USE_CV_RESULTS        (1<<22)
 
 #define CRT_CONSTANT_EX(op_array, node, rt_constants) \
 	((rt_constants) ? \

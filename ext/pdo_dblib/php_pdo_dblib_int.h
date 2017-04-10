@@ -53,6 +53,7 @@
 # define SQLINT1	SYBINT1
 # define SQLINT2	SYBINT2
 # define SQLINT4	SYBINT4
+# define SQLINT8	SYBINT8
 # define SQLINTN	SYBINTN
 # define SQLBIT		SYBBIT
 # define SQLFLT4	SYBREAL
@@ -115,6 +116,7 @@ typedef struct {
 	DBPROCESS	*link;
 
 	pdo_dblib_err err;
+	unsigned assume_national_character_set_strings:1;
 	unsigned stringify_uniqueidentifier:1;
 } pdo_dblib_db_handle;
 
@@ -147,6 +149,7 @@ enum {
 	PDO_DBLIB_ATTR_CONNECTION_TIMEOUT = PDO_ATTR_DRIVER_SPECIFIC,
 	PDO_DBLIB_ATTR_QUERY_TIMEOUT,
 	PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER,
+	PDO_DBLIB_ATTR_VERSION,
 };
 
 #endif

@@ -410,7 +410,7 @@ static unsigned int check_mb_utf16(const char *start, const char *end)
 }
 
 
-static uint mysqlnd_mbcharlen_utf16(unsigned int utf16)
+static uint32_t mysqlnd_mbcharlen_utf16(unsigned int utf16)
 {
   return UTF16_HIGH_HEAD(utf16) ? 4 : 2;
 }

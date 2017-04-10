@@ -27,7 +27,6 @@
 #include "zend_llist.h"
 #include "zend_operators.h"
 #ifdef PHP_WIN32
-#include "win95nt.h"
 #include "win32/php_stdint.h"
 #endif
 #include <sys/stat.h>
@@ -273,7 +272,7 @@ struct _sapi_module_struct {
 
 struct _sapi_post_entry {
 	char *content_type;
-	uint content_type_len;
+	uint32_t content_type_len;
 	void (*post_reader)(void);
 	void (*post_handler)(char *content_type_dup, void *arg);
 };

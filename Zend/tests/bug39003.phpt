@@ -10,10 +10,9 @@ class ClassName
 
 function test (OtherClassName $object) { }
 
-function __autoload($class)
-{
+spl_autoload_register(function ($class) {
     var_dump("__autload($class)");
-}
+});
 
 $obj = new ClassName;
 test($obj);

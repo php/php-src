@@ -1661,7 +1661,7 @@ int php_init_stream_wrappers(int module_number)
 	return (php_stream_xport_register("tcp", php_stream_generic_socket_factory) == SUCCESS
 			&&
 			php_stream_xport_register("udp", php_stream_generic_socket_factory) == SUCCESS
-#if defined(AF_UNIX) && !(defined(PHP_WIN32) || defined(__riscos__) || defined(NETWARE))
+#if defined(AF_UNIX) && !(defined(PHP_WIN32) || defined(__riscos__))
 			&&
 			php_stream_xport_register("unix", php_stream_generic_socket_factory) == SUCCESS
 			&&
@@ -1706,7 +1706,7 @@ PHPAPI int php_register_url_stream_wrapper(const char *protocol, php_stream_wrap
 		return FAILURE;
 	}
 
-	return zend_hash_str_add_ptr(&url_stream_wrappers_hash, protocol, protocol_len, wrapper) ? SUCCESS : FAILURE;
+	return zend_hash_add_ptr(&url_stream_wrappers_hash, zend_string_init_interned(protocol, protocol_len, 1), wrapper) ? SUCCESS : FAILURE;
 }
 
 PHPAPI int php_unregister_url_stream_wrapper(const char *protocol)

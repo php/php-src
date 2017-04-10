@@ -33,7 +33,7 @@
 # include <winsock2.h>
 # include <windows.h>
 # include <Ws2tcpip.h>
-#else	/* This holds good for NetWare too, both for Winsock and Berkeley sockets */
+#else
 #include <netinet/in.h>
 #if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
@@ -55,11 +55,6 @@
 #ifdef HAVE_DNS_H
 #include <dns.h>
 #endif
-#endif
-
-/* Borrowed from SYS/SOCKET.H */
-#if defined(NETWARE) && defined(USE_WINSOCK)
-#define AF_INET 2   /* internetwork: UDP, TCP, etc. */
 #endif
 
 #ifndef MAXHOSTNAMELEN
@@ -159,9 +154,9 @@ PHP_FUNCTION(gethostbyaddr)
 	size_t addr_len;
 	zend_string *hostname;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &addr, &addr_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(addr, addr_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	hostname = php_gethostbyaddr(addr);
 
@@ -220,9 +215,9 @@ PHP_FUNCTION(gethostbyname)
 	char *hostname;
 	size_t hostname_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &hostname, &hostname_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(hostname, hostname_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if(hostname_len > MAXFQDNLEN) {
 		/* name too long, protect from CVE-2015-0235 */
@@ -244,9 +239,9 @@ PHP_FUNCTION(gethostbynamel)
 	struct in_addr in;
 	int i;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &hostname, &hostname_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(hostname, hostname_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if(hostname_len > MAXFQDNLEN) {
 		/* name too long, protect from CVE-2015-0235 */
@@ -309,7 +304,7 @@ static zend_string *php_gethostbyname(char *name)
 #endif /* HAVE_FULL_DNS_FUNCS || defined(PHP_WIN32) */
 
 /* Note: These functions are defined in ext/standard/dns_win32.c for Windows! */
-#if !defined(PHP_WIN32) && (HAVE_DNS_SEARCH_FUNC && !(defined(__BEOS__) || defined(NETWARE)))
+#if !defined(PHP_WIN32) && (HAVE_DNS_SEARCH_FUNC && !defined(__BEOS__))
 
 #ifndef HFIXEDSZ
 #define HFIXEDSZ        12      /* fixed data in header <arpa/nameser.h> */
@@ -372,9 +367,11 @@ PHP_FUNCTION(dns_check_record)
 	struct __res_state *handle = &state;
 #endif
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &hostname, &hostname_len, &rectype, &rectype_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(hostname, hostname_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING(rectype, rectype_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (hostname_len == 0) {
 		php_error_docref(NULL, E_WARNING, "Host cannot be empty");
@@ -478,7 +475,7 @@ static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_t
 
 	if (raw) {
 		add_assoc_long(subarray, "type", type);
-		add_assoc_stringl(subarray, "data", (char*) cp, (uint) dlen);
+		add_assoc_stringl(subarray, "data", (char*) cp, (uint32_t) dlen);
 		cp += dlen;
 		return cp;
 	}
@@ -807,10 +804,14 @@ PHP_FUNCTION(dns_get_record)
 	int type, first_query = 1, store_results = 1;
 	zend_bool raw = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lz/!z/!b",
-			&hostname, &hostname_len, &type_param, &authns, &addtl, &raw) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 5)
+		Z_PARAM_STRING(hostname, hostname_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(type_param)
+		Z_PARAM_ZVAL_DEREF_EX(authns, 1, 1)
+		Z_PARAM_ZVAL_DEREF_EX(addtl, 1, 1)
+		Z_PARAM_BOOL(raw)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (authns) {
 		zval_dtor(authns);
@@ -1038,9 +1039,12 @@ PHP_FUNCTION(dns_get_mx)
 	struct __res_state *handle = &state;
 #endif
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz/|z/", &hostname, &hostname_len, &mx_list, &weight_list) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STRING(hostname, hostname_len)
+		Z_PARAM_ZVAL_DEREF_EX(mx_list, 0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL_DEREF_EX(weight_list, 0, 1)
+	ZEND_PARSE_PARAMETERS_END();
 
 	zval_dtor(mx_list);
 	array_init(mx_list);
@@ -1110,7 +1114,7 @@ PHP_FUNCTION(dns_get_mx)
 }
 /* }}} */
 #endif /* HAVE_FULL_DNS_FUNCS */
-#endif /* !defined(PHP_WIN32) && (HAVE_DNS_SEARCH_FUNC && !(defined(__BEOS__) || defined(NETWARE))) */
+#endif /* !defined(PHP_WIN32) && (HAVE_DNS_SEARCH_FUNC && !defined(__BEOS__)) */
 
 #if HAVE_FULL_DNS_FUNCS || defined(PHP_WIN32)
 PHP_MINIT_FUNCTION(dns) {

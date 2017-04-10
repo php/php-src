@@ -321,11 +321,11 @@ static inline zend_bool can_elide_return_type_check(
 		return 0;
 	}
 
-	if (info->type_hint == IS_CALLABLE) {
+	if (ZEND_TYPE_CODE(info->type) == IS_CALLABLE) {
 		return 0;
 	}
 
-	if (info->class_name) {
+	if (ZEND_TYPE_IS_CLASS(info->type)) {
 		if (!use_info->ce || !def_info->ce || !instanceof_function(use_info->ce, def_info->ce)) {
 			return 0;
 		}

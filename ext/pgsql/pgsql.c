@@ -1510,20 +1510,6 @@ err:
 }
 /* }}} */
 
-#if 0
-/* {{{ php_pgsql_get_default_link
- */
-static int php_pgsql_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
-{
-	if (PGG(default_link)==-1) { /* no link opened yet, implicitly open one */
-		ht = 0;
-		php_pgsql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
-	}
-	return PGG(default_link);
-}
-/* }}} */
-#endif
-
 /* {{{ proto resource pg_connect(string connection_string[, int connect_type] | [string host, string port [, string options [, string tty,]]] string database)
    Open a PostgreSQL connection */
 PHP_FUNCTION(pg_connect)
@@ -7060,7 +7046,7 @@ PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result, zval *ret_array, l
 	char *field_name;
 	size_t num_fields;
 	int pg_numrows, pg_row;
-	uint i;
+	uint32_t i;
 	assert(Z_TYPE_P(ret_array) == IS_ARRAY);
 
 	if ((pg_numrows = PQntuples(pg_result)) <= 0) {

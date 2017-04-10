@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Stig Sæther Bakken <ssb@php.net>                            |
+   | Authors: Stig SÃ¦ther Bakken <ssb@php.net>                            |
    |          Andreas Karajannis <Andreas.Karajannis@gmd.de>              |
    |          Frank M. Kromann <frank@kromann.info>  Support for DB/2 CLI |
    |          Kevin N. Shallow <kshallow@tampabay.rr.com> Birdstep Support|

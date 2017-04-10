@@ -117,3 +117,10 @@ ZEND_API void ZEND_FASTCALL smart_str_append_escaped(smart_str *str, const char 
 		}
 	}
 }
+
+ZEND_API void ZEND_FASTCALL smart_str_append_printf(smart_str *dest, const char *format, ...) {
+	va_list arg;
+	va_start(arg, format);
+	zend_printf_to_smart_str(dest, format, arg);
+	va_end(arg);
+}

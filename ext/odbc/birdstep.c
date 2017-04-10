@@ -32,7 +32,6 @@
 
 #if WIN32
 # include "config.w32.h"
-# include "win95nt.h"
 # ifdef PHP_EXPORTS
 #  define PHPAPI __declspec(dllexport)
 # else

@@ -62,12 +62,8 @@ static size_t php_stream_memory_write(php_stream *stream, const char *buf, size_
 		} else {
 			tmp = erealloc(ms->data, ms->fpos + count);
 		}
-		if (!tmp) {
-			count = ms->fsize - ms->fpos + 1;
-		} else {
-			ms->data = tmp;
-			ms->fsize = ms->fpos + count;
-		}
+		ms->data = tmp;
+		ms->fsize = ms->fpos + count;
 	}
 	if (!ms->data)
 		count = 0;
@@ -214,17 +210,9 @@ static int php_stream_memory_stat(php_stream *stream, php_stream_statbuf *ssb) /
 
 	ssb->sb.st_size = ms->fsize;
 	ssb->sb.st_mode |= S_IFREG; /* regular file */
-
-#ifdef NETWARE
-	ssb->sb.st_mtime.tv_sec = timestamp;
-	ssb->sb.st_atime.tv_sec = timestamp;
-	ssb->sb.st_ctime.tv_sec = timestamp;
-#else
 	ssb->sb.st_mtime = timestamp;
 	ssb->sb.st_atime = timestamp;
 	ssb->sb.st_ctime = timestamp;
-#endif
-
 	ssb->sb.st_nlink = 1;
 	ssb->sb.st_rdev = -1;
 	/* this is only for APC, so use /dev/null device - no chance of conflict there! */

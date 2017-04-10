@@ -59,9 +59,9 @@ PHP_FUNCTION(readlink)
 	char buff[MAXPATHLEN];
 	int ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &link, &link_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_PATH(link, link_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (php_check_open_basedir(link)) {
 		RETURN_FALSE;
@@ -90,9 +90,9 @@ PHP_FUNCTION(linkinfo)
 	zend_stat_t sb;
 	int ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &link, &link_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_PATH(link, link_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	dirname = estrndup(link, link_len);
 	php_dirname(dirname, link_len);
@@ -126,9 +126,10 @@ PHP_FUNCTION(symlink)
 	char dirname[MAXPATHLEN];
 	size_t len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pp", &topath, &topath_len, &frompath, &frompath_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_PATH(topath, topath_len)
+		Z_PARAM_PATH(frompath, frompath_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!expand_filepath(frompath, source_p)) {
 		php_error_docref(NULL, E_WARNING, "No such file or directory");
@@ -182,9 +183,10 @@ PHP_FUNCTION(link)
 	char source_p[MAXPATHLEN];
 	char dest_p[MAXPATHLEN];
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pp", &topath, &topath_len, &frompath, &frompath_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_PATH(topath, topath_len)
+		Z_PARAM_PATH(frompath, frompath_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!expand_filepath(frompath, source_p) || !expand_filepath(topath, dest_p)) {
 		php_error_docref(NULL, E_WARNING, "No such file or directory");

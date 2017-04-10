@@ -20,9 +20,9 @@
 
 #include "php.h"
 
-#ifndef HAVE_STRLCAT
+#ifdef USE_STRLCAT_PHP_IMPL
 
-/*	$OpenBSD: strlcat.c,v 1.2 1999/06/17 16:28:58 millert Exp $	*/
+/*     $OpenBSD: strlcat.c,v 1.17 2016/10/14 18:19:04 dtucker Exp $    */
 
 /*
  * Copyright (c) 1998 Todd C. Miller <Todd.Miller@courtesan.com>
@@ -52,7 +52,7 @@
  */
 
 #if defined(LIBC_SCCS) && !defined(lint)
-static char *rcsid = "$OpenBSD: strlcat.c,v 1.2 1999/06/17 16:28:58 millert Exp $";
+static char *rcsid = "$OpenBSD: strlcat.c,v 1.17 2016/10/14 18:19:04 dtucker Exp $";
 #endif /* LIBC_SCCS and not lint */
 
 #include <sys/types.h>
@@ -69,29 +69,34 @@ PHPAPI size_t php_strlcat(dst, src, siz)
 	const char *src;
 	size_t siz;
 {
-	register char *d = dst;
-	register const char *s = src;
-	register size_t n = siz;
+	const char *d = dst;
+	const char *s = src;
+	size_t n = siz;
 	size_t dlen;
 
 	/* Find the end of dst and adjust bytes left but don't go past end */
-	while (*d != '\0' && n-- != 0)
-		d++;
-	dlen = d - dst;
+	while (n-- != 0 && *dst != '\0')
+		dst++;
+	dlen = (uintptr_t)dst - (uintptr_t)d;
 	n = siz - dlen;
 
-	if (n == 0)
-		return(dlen + strlen(s));
-	while (*s != '\0') {
-		if (n != 1) {
-			*d++ = *s;
+	if (n-- == 0)
+		return(dlen + strlen(src));
+	while (*src != '\0') {
+		if (n != 0) {
+			*dst++ = *src;
 			n--;
 		}
-		s++;
+		src++;
 	}
-	*d = '\0';
+	*dst = '\0';
 
-	return(dlen + (s - src));	/* count does not include NUL */
+	/*
+	 * Cast pointers to unsigned type before calculation, to avoid signed
+	 * overflow when the string ends where the MSB has changed.
+	 * Return value does not include NUL.
+	 */
+	return(dlen + ((uintptr_t)src - (uintptr_t)s));
 }
 
 #endif /* !HAVE_STRLCAT */

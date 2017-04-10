@@ -11,9 +11,9 @@ Test get_declared_traits() function : testing autoloaded traits
 
 echo "*** Testing get_declared_traits() : testing autoloaded traits ***\n";
 
-function __autoload($trait_name) {
+spl_autoload_register(function ($trait_name) {
     require_once $trait_name . '.inc';
-}
+});
 
 echo "\n-- before instance is declared --\n";
 var_dump(in_array('AutoTrait', get_declared_traits()));

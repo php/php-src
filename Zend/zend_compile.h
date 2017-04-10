@@ -121,6 +121,8 @@ typedef struct _zend_file_context {
 	HashTable *imports;
 	HashTable *imports_function;
 	HashTable *imports_const;
+
+	HashTable seen_symbols;
 } zend_file_context;
 
 typedef union _zend_parser_stack_elem {
@@ -254,6 +256,7 @@ typedef struct _zend_oparray_context {
 
 
 #define ZEND_ACC_CLOSURE              0x100000
+#define ZEND_ACC_FAKE_CLOSURE         0x40
 #define ZEND_ACC_GENERATOR            0x800000
 
 #define ZEND_ACC_NO_RT_ARENA          0x80000
@@ -319,20 +322,16 @@ typedef struct _zend_class_constant {
 /* arg_info for internal functions */
 typedef struct _zend_internal_arg_info {
 	const char *name;
-	const char *class_name;
-	zend_uchar type_hint;
+	zend_type type;
 	zend_uchar pass_by_reference;
-	zend_bool allow_null;
 	zend_bool is_variadic;
 } zend_internal_arg_info;
 
 /* arg_info for user functions */
 typedef struct _zend_arg_info {
 	zend_string *name;
-	zend_string *class_name;
-	zend_uchar type_hint;
+	zend_type type;
 	zend_uchar pass_by_reference;
-	zend_bool allow_null;
 	zend_bool is_variadic;
 } zend_arg_info;
 
@@ -343,10 +342,8 @@ typedef struct _zend_arg_info {
  */
 typedef struct _zend_internal_function_info {
 	zend_uintptr_t required_num_args;
-	const char *class_name;
-	zend_uchar type_hint;
+	zend_type type;
 	zend_bool return_reference;
-	zend_bool allow_null;
 	zend_bool _is_variadic;
 } zend_internal_function_info;
 
@@ -474,6 +471,7 @@ struct _zend_execute_data {
 #define ZEND_CALL_ALLOCATED          (1 << 7)
 #define ZEND_CALL_GENERATOR          (1 << 8)
 #define ZEND_CALL_DYNAMIC            (1 << 9)
+#define ZEND_CALL_FAKE_CLOSURE       (1 << 10)
 
 #define ZEND_CALL_INFO_SHIFT         16
 
@@ -965,6 +963,11 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 #define ZEND_ARRAY_ELEMENT_REF		(1<<0)
 #define ZEND_ARRAY_NOT_PACKED		(1<<1)
 #define ZEND_ARRAY_SIZE_SHIFT		2
+
+/* For "use" AST nodes and the seen symbol table */
+#define ZEND_SYMBOL_CLASS    (1<<0)
+#define ZEND_SYMBOL_FUNCTION (1<<1)
+#define ZEND_SYMBOL_CONST    (1<<2)
 
 /* Pseudo-opcodes that are used only temporarily during compilation */
 #define ZEND_GOTO  253

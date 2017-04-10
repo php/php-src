@@ -191,8 +191,11 @@ PHP_FUNCTION(mt_srand)
 	zend_long seed = 0;
 	zend_long mode = MT_RAND_MT19937;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ll", &seed, &mode) == FAILURE)
-		return;
+	ZEND_PARSE_PARAMETERS_START(0, 2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(seed)
+		Z_PARAM_LONG(mode)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZEND_NUM_ARGS() == 0)
 		seed = GENERATE_SEED();
@@ -288,9 +291,10 @@ PHP_FUNCTION(mt_rand)
 		RETURN_LONG(php_mt_rand() >> 1);
 	}
 
-	if (zend_parse_parameters(argc, "ll", &min, &max) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_LONG(min)
+		Z_PARAM_LONG(max)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (UNEXPECTED(max < min)) {
 		php_error_docref(NULL, E_WARNING, "max(" ZEND_LONG_FMT ") is smaller than min(" ZEND_LONG_FMT ")", max, min);

@@ -55,8 +55,6 @@
 
 #ifdef PHP_WIN32
 #include <winsock2.h>
-#elif defined(NETWARE) && defined(USE_WINSOCK)
-#include <novsock2.h>
 #else
 #include <netinet/in.h>
 #include <netdb.h>
@@ -65,7 +63,7 @@
 #endif
 #endif
 
-#if defined(PHP_WIN32) || defined(__riscos__) || defined(NETWARE)
+#if defined(PHP_WIN32) || defined(__riscos__)
 #undef AF_UNIX
 #endif
 
@@ -184,7 +182,7 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 		}
 #endif
 
-#if defined(PHP_WIN32) || defined(NETWARE)
+#ifdef PHP_WIN32
 		path_file = strrchr(path_tmp, DEFAULT_SLASH);
 		if (!path_file) {
 			path_file = strrchr(path_tmp, '/');
@@ -197,7 +195,7 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 			return -1;
 		} else {
 			path_len = path_file - path_tmp + 1;
-#if defined(PHP_WIN32) || defined(NETWARE)
+#ifdef PHP_WIN32
 			if (path_len > 1 && path_tmp[path_len - 2] == ':') {
 				if (path_len != 3) {
 					return -1;
@@ -219,7 +217,7 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 		int basedir_len = (int)strlen(basedir);
 		/* Handler for basedirs that end with a / */
 		resolved_basedir_len = (int)strlen(resolved_basedir);
-#if defined(PHP_WIN32) || defined(NETWARE)
+#ifdef PHP_WIN32
 		if (basedir[basedir_len - 1] == PHP_DIR_SEPARATOR || basedir[basedir_len - 1] == '/') {
 #else
 		if (basedir[basedir_len - 1] == PHP_DIR_SEPARATOR) {
@@ -242,7 +240,7 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 		}
 
 		/* Check the path */
-#if defined(PHP_WIN32) || defined(NETWARE)
+#ifdef PHP_WIN32
 		if (strncasecmp(resolved_basedir, resolved_name, resolved_basedir_len) == 0) {
 #else
 		if (strncmp(resolved_basedir, resolved_name, resolved_basedir_len) == 0) {
@@ -257,7 +255,7 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 		} else {
 			/* /openbasedir/ and /openbasedir are the same directory */
 			if (resolved_basedir_len == (resolved_name_len + 1) && resolved_basedir[resolved_basedir_len - 1] == PHP_DIR_SEPARATOR) {
-#if defined(PHP_WIN32) || defined(NETWARE)
+#ifdef PHP_WIN32
 				if (strncasecmp(resolved_basedir, resolved_name, resolved_name_len) == 0) {
 #else
 				if (strncmp(resolved_basedir, resolved_name, resolved_name_len) == 0) {
@@ -408,16 +406,14 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
 		IS_ABSOLUTE_PATH(PG(doc_root), length)) {
 		int path_len = (int)strlen(path_info);
 		filename = emalloc(length + path_len + 2);
-		if (filename) {
-			memcpy(filename, PG(doc_root), length);
-			if (!IS_SLASH(filename[length - 1])) {	/* length is never 0 */
-				filename[length++] = PHP_DIR_SEPARATOR;
-			}
-			if (IS_SLASH(path_info[0])) {
-				length--;
-			}
-			strncpy(filename + length, path_info, path_len + 1);
+		memcpy(filename, PG(doc_root), length);
+		if (!IS_SLASH(filename[length - 1])) {	/* length is never 0 */
+			filename[length++] = PHP_DIR_SEPARATOR;
 		}
+		if (IS_SLASH(path_info[0])) {
+			length--;
+		}
+		strncpy(filename + length, path_info, path_len + 1);
 	} else {
 		filename = SG(request_info).path_translated;
 	}

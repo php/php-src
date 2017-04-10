@@ -49,6 +49,8 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #include "zend_language_scanner.h"
 #include <zend_language_parser.h>
 
+#include "zend_portability.h"
+
 #include <stdarg.h>
 #include <stdlib.h>
 #include <math.h>
@@ -58,10 +60,6 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #ifndef PHP_WIN32
 #include <sys/types.h>
 #include <sys/stat.h>
-#endif
-
-#ifdef NETWARE
-#include <netinet/in.h>
 #endif
 
 #ifndef PHP_WIN32
@@ -963,7 +961,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_gethostname, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !(defined(__BEOS__) || defined(NETWARE)))
+#if defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !defined(__BEOS__))
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dns_check_record, 0, 0, 1)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, type)
@@ -985,7 +983,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_dns_get_mx, 0, 0, 2)
 ZEND_END_ARG_INFO()
 # endif
 
-#endif /* defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !(defined(__BEOS__) || defined(NETWARE))) */
+#endif /* defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !defined(__BEOS__)) */
 /* }}} */
 
 /* {{{ exec.c */
@@ -1205,7 +1203,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_fgetcsv, 0, 0, 1)
 	ZEND_ARG_INFO(0, escape)
 ZEND_END_ARG_INFO()
 
-#if (!defined(__BEOS__) && !defined(NETWARE) && HAVE_REALPATH) || defined(ZTS)
+#if (!defined(__BEOS__) && HAVE_REALPATH) || defined(ZTS)
 ZEND_BEGIN_ARG_INFO(arginfo_realpath, 0)
 	ZEND_ARG_INFO(0, path)
 ZEND_END_ARG_INFO()
@@ -1231,7 +1229,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_disk_free_space, 0)
 	ZEND_ARG_INFO(0, path)
 ZEND_END_ARG_INFO()
 
-#ifndef NETWARE
 ZEND_BEGIN_ARG_INFO(arginfo_chgrp, 0)
 	ZEND_ARG_INFO(0, filename)
 	ZEND_ARG_INFO(0, group)
@@ -1241,7 +1238,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_chown, 0)
 	ZEND_ARG_INFO(0, filename)
 	ZEND_ARG_INFO(0, user)
 ZEND_END_ARG_INFO()
-#endif
 
 #if HAVE_LCHOWN
 ZEND_BEGIN_ARG_INFO(arginfo_lchgrp, 0)
@@ -2013,6 +2009,17 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_supports_lock, 0, 0, 1)
     ZEND_ARG_INFO(0, stream)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_isatty, 0, 0, 1)
+	ZEND_ARG_INFO(0, stream)
+ZEND_END_ARG_INFO()
+
+#ifdef PHP_WIN32
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sapi_windows_vt100_support, 0, 0, 1)
+	ZEND_ARG_INFO(0, stream)
+	ZEND_ARG_INFO(0, enable)
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_select, 0, 0, 4)
 	ZEND_ARG_INFO(1, read_streams) /* ARRAY_INFO(1, read_streams, 1) */
 	ZEND_ARG_INFO(1, write_streams) /* ARRAY_INFO(1, write_streams, 1) */
@@ -2467,6 +2474,14 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_substr_compare, 0, 0, 3)
 	ZEND_ARG_INFO(0, length)
 	ZEND_ARG_INFO(0, case_sensitivity)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_utf8_encode, 0, 0, 1)
+	ZEND_ARG_INFO(0, data)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_utf8_decode, 0, 0, 1)
+	ZEND_ARG_INFO(0, data)
+ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ syslog.c */
 #ifdef HAVE_SYSLOG_H
@@ -2766,6 +2781,8 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(str_split,														arginfo_str_split)
 	PHP_FE(strpbrk,															arginfo_strpbrk)
 	PHP_FE(substr_compare,													arginfo_substr_compare)
+	PHP_FE(utf8_encode, 													arginfo_utf8_encode)
+	PHP_FE(utf8_decode, 													arginfo_utf8_decode)
 
 #ifdef HAVE_STRCOLL
 	PHP_FE(strcoll,															arginfo_strcoll)
@@ -3042,7 +3059,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(gethostname,													arginfo_gethostname)
 #endif
 
-#if defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !(defined(__BEOS__) || defined(NETWARE)))
+#if defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !defined(__BEOS__))
 
 	PHP_FE(dns_check_record,												arginfo_dns_check_record)
 	PHP_FALIAS(checkdnsrr,			dns_check_record,						arginfo_dns_check_record)
@@ -3136,6 +3153,10 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(stream_copy_to_stream,											arginfo_stream_copy_to_stream)
 	PHP_FE(stream_get_contents,												arginfo_stream_get_contents)
 	PHP_FE(stream_supports_lock,											arginfo_stream_supports_lock)
+	PHP_FE(stream_isatty,													arginfo_stream_isatty)
+#ifdef PHP_WIN32
+	PHP_FE(sapi_windows_vt100_support,										arginfo_sapi_windows_vt100_support)
+#endif
 	PHP_FE(fgetcsv,															arginfo_fgetcsv)
 	PHP_FE(fputcsv,															arginfo_fputcsv)
 	PHP_FE(flock,															arginfo_flock)
@@ -3167,7 +3188,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 
 	PHP_FALIAS(socket_get_status, stream_get_meta_data,						arginfo_stream_get_meta_data)
 
-#if (!defined(__BEOS__) && !defined(NETWARE) && HAVE_REALPATH) || defined(ZTS)
+#if (!defined(__BEOS__) && HAVE_REALPATH) || defined(ZTS)
 	PHP_FE(realpath,														arginfo_realpath)
 #endif
 
@@ -3226,10 +3247,8 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(is_link,															arginfo_is_link)
 	PHP_NAMED_FE(stat,				php_if_stat,							arginfo_stat)
 	PHP_NAMED_FE(lstat,				php_if_lstat,							arginfo_lstat)
-#ifndef NETWARE
 	PHP_FE(chown,															arginfo_chown)
 	PHP_FE(chgrp,															arginfo_chgrp)
-#endif
 #if HAVE_LCHOWN
 	PHP_FE(lchown,															arginfo_lchown)
 #endif
@@ -3518,40 +3537,15 @@ static void basic_globals_dtor(php_basic_globals *basic_globals_p) /* {{{ */
 }
 /* }}} */
 
-#define PHP_DOUBLE_INFINITY_HIGH       0x7ff00000
-#define PHP_DOUBLE_QUIET_NAN_HIGH      0xfff80000
-
 PHPAPI double php_get_nan(void) /* {{{ */
 {
-#if HAVE_HUGE_VAL_NAN
-	return HUGE_VAL + -HUGE_VAL;
-#elif defined(__i386__) || defined(_X86_) || defined(ALPHA) || defined(_ALPHA) || defined(__alpha)
-	double val = 0.0;
-	((uint32_t*)&val)[1] = PHP_DOUBLE_QUIET_NAN_HIGH;
-	((uint32_t*)&val)[0] = 0;
-	return val;
-#elif HAVE_ATOF_ACCEPTS_NAN
-	return atof("NAN");
-#else
-	return 0.0/0.0;
-#endif
+	return ZEND_NAN;
 }
 /* }}} */
 
 PHPAPI double php_get_inf(void) /* {{{ */
 {
-#if HAVE_HUGE_VAL_INF
-	return HUGE_VAL;
-#elif defined(__i386__) || defined(_X86_) || defined(ALPHA) || defined(_ALPHA) || defined(__alpha)
-	double val = 0.0;
-	((uint32_t*)&val)[1] = PHP_DOUBLE_INFINITY_HIGH;
-	((uint32_t*)&val)[0] = 0;
-	return val;
-#elif HAVE_ATOF_ACCEPTS_INF
-	return atof("INF");
-#else
-	return 1.0/0.0;
-#endif
+	return ZEND_INFINITY;
 }
 /* }}} */
 
@@ -3643,8 +3637,8 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	REGISTER_MATH_CONSTANT(M_SQRT2);
 	REGISTER_MATH_CONSTANT(M_SQRT1_2);
 	REGISTER_MATH_CONSTANT(M_SQRT3);
-	REGISTER_DOUBLE_CONSTANT("INF", php_get_inf(), CONST_CS | CONST_PERSISTENT);
-	REGISTER_DOUBLE_CONSTANT("NAN", php_get_nan(), CONST_CS | CONST_PERSISTENT);
+	REGISTER_DOUBLE_CONSTANT("INF", ZEND_INFINITY, CONST_CS | CONST_PERSISTENT);
+	REGISTER_DOUBLE_CONSTANT("NAN", ZEND_NAN, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("PHP_ROUND_HALF_UP", PHP_ROUND_HALF_UP, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHP_ROUND_HALF_DOWN", PHP_ROUND_HALF_DOWN, CONST_CS | CONST_PERSISTENT);
@@ -3705,7 +3699,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	php_register_url_stream_wrapper("http", &php_stream_http_wrapper);
 	php_register_url_stream_wrapper("ftp", &php_stream_ftp_wrapper);
 
-#if defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !(defined(__BEOS__) || defined(NETWARE)))
+#if defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !defined(__BEOS__))
 # if defined(PHP_WIN32) || HAVE_FULL_DNS_FUNCS
 	BASIC_MINIT_SUBMODULE(dns)
 # endif
@@ -3877,9 +3871,9 @@ PHP_FUNCTION(constant)
 	zval *c;
 	zend_class_entry *scope;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &const_name) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(const_name)
+	ZEND_PARSE_PARAMETERS_END();
 
 	scope = zend_get_executed_scope();
 	c = zend_get_constant_ex(const_name, scope, ZEND_FETCH_CLASS_SILENT);
@@ -3909,9 +3903,9 @@ PHP_NAMED_FUNCTION(php_inet_ntop)
 	int af = AF_INET;
 	char buffer[40];
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &address, &address_len) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(address, address_len)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 #ifdef HAVE_IPV6
 	if (address_len == 16) {
@@ -3943,9 +3937,9 @@ PHP_NAMED_FUNCTION(php_inet_pton)
 	size_t address_len;
 	char buffer[17];
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &address, &address_len) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(address, address_len)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	memset(buffer, 0, sizeof(buffer));
 
@@ -3983,9 +3977,9 @@ PHP_FUNCTION(ip2long)
 	zend_ulong ip;
 #endif
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &addr, &addr_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(addr, addr_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 #ifdef HAVE_INET_PTON
 	if (addr_len == 0 || inet_pton(AF_INET, addr, &ip) != 1) {
@@ -4014,14 +4008,18 @@ PHP_FUNCTION(ip2long)
 PHP_FUNCTION(long2ip)
 {
 	zend_ulong ip;
+	zend_long sip;
 	struct in_addr myaddr;
 #ifdef HAVE_INET_PTON
 	char str[40];
 #endif
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &ip) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(sip)
+	ZEND_PARSE_PARAMETERS_END();
+
+	/* autoboxes on 32bit platforms, but that's expected */
+	ip = (zend_ulong)sip;
 
 	myaddr.s_addr = htonl(ip);
 #ifdef HAVE_INET_PTON
@@ -4049,9 +4047,11 @@ PHP_FUNCTION(getenv)
 	size_t str_len;
 	zend_bool local_only = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|sb", &str, &str_len, &local_only) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_BOOL(local_only)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if (!str) {
 		array_init(return_value);
@@ -4127,9 +4127,9 @@ PHP_FUNCTION(putenv)
 	int error_code;
 #endif
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &setting, &setting_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(setting, setting_len)
+	ZEND_PARSE_PARAMETERS_END();
 
     if(setting_len == 0 || setting[0] == '=') {
     	php_error_docref(NULL, E_WARNING, "Invalid parameter syntax");
@@ -4301,9 +4301,12 @@ PHP_FUNCTION(getopt)
 	int optname_len = 0;
 	opt_struct *opts, *orig_opts;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|az/", &options, &options_len, &p_longopts, &zoptind) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_STRING(options, options_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY(p_longopts)
+		Z_PARAM_ZVAL_DEREF_EX(zoptind, 0, 1)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	/* Init zoptind to 1 */
 	if (zoptind) {
@@ -4481,9 +4484,10 @@ PHP_FUNCTION(sleep)
 {
 	zend_long num;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &num) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(num)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+
 	if (num < 0) {
 		php_error_docref(NULL, E_WARNING, "Number of seconds must be greater than or equal to 0");
 		RETURN_FALSE;
@@ -4504,9 +4508,10 @@ PHP_FUNCTION(usleep)
 #if HAVE_USLEEP
 	zend_long num;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &num) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(num)
+	ZEND_PARSE_PARAMETERS_END();
+
 	if (num < 0) {
 		php_error_docref(NULL, E_WARNING, "Number of microseconds must be greater than or equal to 0");
 		RETURN_FALSE;
@@ -4524,9 +4529,10 @@ PHP_FUNCTION(time_nanosleep)
 	zend_long tv_sec, tv_nsec;
 	struct timespec php_req, php_rem;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &tv_sec, &tv_nsec) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_LONG(tv_sec)
+		Z_PARAM_LONG(tv_nsec)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (tv_sec < 0) {
 		php_error_docref(NULL, E_WARNING, "The seconds value must be greater than 0");
@@ -4562,9 +4568,9 @@ PHP_FUNCTION(time_sleep_until)
 	struct timeval tm;
 	struct timespec php_req, php_rem;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &d_ts) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_DOUBLE(d_ts)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (gettimeofday((struct timeval *) &tm, NULL) != 0) {
 		RETURN_FALSE;
@@ -4639,11 +4645,11 @@ PHP_FUNCTION(get_cfg_var)
 	size_t varname_len;
 	zval *retval;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &varname, &varname_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(varname, varname_len)
+	ZEND_PARSE_PARAMETERS_END();
 
-	retval = cfg_get_entry(varname, (uint)varname_len);
+	retval = cfg_get_entry(varname, (uint32_t)varname_len);
 
 	if (retval) {
 		if (Z_TYPE_P(retval) == IS_ARRAY) {
@@ -4704,9 +4710,13 @@ PHP_FUNCTION(error_log)
 	int opt_err = 0, argc = ZEND_NUM_ARGS();
 	zend_long erropt = 0;
 
-	if (zend_parse_parameters(argc, "s|lps", &message, &message_len, &erropt, &opt, &opt_len, &headers, &headers_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 4)
+		Z_PARAM_STRING(message, message_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(erropt)
+		Z_PARAM_PATH(opt, opt_len)
+		Z_PARAM_STRING(headers, headers_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (argc > 1) {
 		opt_err = (int)erropt;
@@ -4876,9 +4886,10 @@ PHP_FUNCTION(forward_static_call)
 	zend_fcall_info_cache fci_cache;
 	zend_class_entry *called_scope;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f*", &fci, &fci_cache, &fci.params, &fci.param_count) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, -1)
+		Z_PARAM_FUNC(fci, fci_cache)
+		Z_PARAM_VARIADIC('*', fci.params, fci.param_count)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!EX(prev_execute_data)->func->common.scope) {
 		zend_throw_error(NULL, "Cannot call forward_static_call() when no class scope is active");
@@ -4911,9 +4922,10 @@ PHP_FUNCTION(forward_static_call_array)
 	zend_fcall_info_cache fci_cache;
 	zend_class_entry *called_scope;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "fa/", &fci, &fci_cache, &params) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_FUNC(fci, fci_cache)
+		Z_PARAM_ARRAY_EX(params, 0, 1)
+	ZEND_PARSE_PARAMETERS_END();
 
 	zend_fcall_info_args(&fci, params);
 	fci.retval = &retval;
@@ -5183,9 +5195,11 @@ PHP_FUNCTION(highlight_file)
 	zend_syntax_highlighter_ini syntax_highlighter_ini;
 	zend_bool i = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|b", &filename, &filename_len, &i) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_PATH(filename, filename_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(i)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if (php_check_open_basedir(filename)) {
 		RETURN_FALSE;
@@ -5224,9 +5238,9 @@ PHP_FUNCTION(php_strip_whitespace)
 	zend_lex_state original_lex_state;
 	zend_file_handle file_handle;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &filename, &filename_len) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_PATH(filename, filename_len)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	php_output_start_default();
 
@@ -5262,9 +5276,11 @@ PHP_FUNCTION(highlight_string)
 	zend_bool i = 0;
 	int old_error_reporting = EG(error_reporting);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &expr, &i) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ZVAL_DEREF(expr)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(i)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 	convert_to_string_ex(expr);
 
 	if (i) {
@@ -5305,11 +5321,11 @@ PHP_FUNCTION(ini_get)
 	char *varname, *str;
 	size_t varname_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &varname, &varname_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(varname, varname_len)
+	ZEND_PARSE_PARAMETERS_END();
 
-	str = zend_ini_string(varname, (uint)varname_len, 0);
+	str = zend_ini_string(varname, (uint32_t)varname_len, 0);
 
 	if (!str) {
 		RETURN_FALSE;
@@ -5378,9 +5394,11 @@ PHP_FUNCTION(ini_get_all)
 	zend_module_entry *module;
 	zend_bool details = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!b", &extname, &extname_len, &details) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING_EX(extname, extname_len, 1, 0)
+		Z_PARAM_BOOL(details)
+	ZEND_PARSE_PARAMETERS_END();
 
 	zend_ini_sort_entries();
 
@@ -5415,9 +5433,10 @@ PHP_FUNCTION(ini_set)
 	zend_string *new_value;
 	char *old_value;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &varname, &new_value) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STR(varname)
+		Z_PARAM_STR(new_value)
+	ZEND_PARSE_PARAMETERS_END();
 
 	old_value = zend_ini_string(ZSTR_VAL(varname), (int)ZSTR_LEN(varname), 0);
 
@@ -5457,9 +5476,9 @@ PHP_FUNCTION(ini_restore)
 {
 	zend_string *varname;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &varname) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(varname)
+	ZEND_PARSE_PARAMETERS_END();
 
 	zend_restore_ini_entry(varname, PHP_INI_STAGE_RUNTIME);
 }
@@ -5473,9 +5492,9 @@ PHP_FUNCTION(set_include_path)
 	char *old_value;
 	zend_string *key;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P", &new_value) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_PATH_STR(new_value)
+	ZEND_PARSE_PARAMETERS_END();
 
 	old_value = zend_ini_string("include_path", sizeof("include_path") - 1, 0);
 	/* copy to return here, because alter might free it! */
@@ -5501,7 +5520,7 @@ PHP_FUNCTION(get_include_path)
 {
 	char *str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "") == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -5521,7 +5540,7 @@ PHP_FUNCTION(restore_include_path)
 {
 	zend_string *key;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "") == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 	key = zend_string_init("include_path", sizeof("include_path")-1, 0);
@@ -5537,9 +5556,11 @@ PHP_FUNCTION(print_r)
 	zval *var;
 	zend_bool do_return = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &var, &do_return) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ZVAL_DEREF(var)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(do_return)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if (do_return) {
 		RETURN_STR(zend_print_zval_r_to_str(var, 0));
@@ -5573,9 +5594,10 @@ PHP_FUNCTION(ignore_user_abort)
 	zend_bool arg = 0;
 	int old_setting;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &arg) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(arg)
+	ZEND_PARSE_PARAMETERS_END();
 
 	old_setting = (unsigned short)PG(ignore_user_abort);
 
@@ -5598,9 +5620,10 @@ PHP_FUNCTION(getservbyname)
 	size_t name_len, proto_len;
 	struct servent *serv;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &name, &name_len, &proto, &proto_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STRING(name, name_len)
+		Z_PARAM_STRING(proto, proto_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 
 /* empty string behaves like NULL on windows implementation of
@@ -5641,9 +5664,10 @@ PHP_FUNCTION(getservbyport)
 	zend_long port;
 	struct servent *serv;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls", &port, &proto, &proto_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_LONG(port)
+		Z_PARAM_STRING(proto, proto_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	serv = getservbyport(htons((unsigned short) port), proto);
 
@@ -5665,9 +5689,9 @@ PHP_FUNCTION(getprotobyname)
 	size_t name_len;
 	struct protoent *ent;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(name, name_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	ent = getprotobyname(name);
 
@@ -5688,9 +5712,9 @@ PHP_FUNCTION(getprotobynumber)
 	zend_long proto;
 	struct protoent *ent;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &proto) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(proto)
+	ZEND_PARSE_PARAMETERS_END();
 
 	ent = getprotobynumber((int)proto);
 
@@ -5765,9 +5789,9 @@ PHP_FUNCTION(unregister_tick_function)
 	zval *function;
 	user_tick_function_entry tick_fe;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z/", &function) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL_DEREF_EX(function, 0, 1)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!BG(user_tick_functions)) {
 		return;
@@ -5796,9 +5820,9 @@ PHP_FUNCTION(is_uploaded_file)
 		RETURN_FALSE;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &path, &path_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(path, path_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (zend_hash_str_exists(SG(rfc1867_uploaded_files), path, path_len)) {
 		RETURN_TRUE;
@@ -5824,9 +5848,10 @@ PHP_FUNCTION(move_uploaded_file)
 		RETURN_FALSE;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sp", &path, &path_len, &new_path, &new_path_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STRING(path, path_len)
+		Z_PARAM_PATH(new_path, new_path_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!zend_hash_str_exists(SG(rfc1867_uploaded_files), path, path_len)) {
 		RETURN_FALSE;
@@ -5952,9 +5977,12 @@ PHP_FUNCTION(parse_ini_file)
 	zend_file_handle fh;
 	zend_ini_parser_cb_t ini_parser_cb;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|bl", &filename, &filename_len, &process_sections, &scanner_mode) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_PATH(filename, filename_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(process_sections)
+		Z_PARAM_LONG(scanner_mode)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if (filename_len == 0) {
 		php_error_docref(NULL, E_WARNING, "Filename cannot be empty!");
@@ -5992,9 +6020,12 @@ PHP_FUNCTION(parse_ini_string)
 	zend_long scanner_mode = ZEND_INI_SCANNER_NORMAL;
 	zend_ini_parser_cb_t ini_parser_cb;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|bl", &str, &str_len, &process_sections, &scanner_mode) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(process_sections)
+		Z_PARAM_LONG(scanner_mode)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if (INT_MAX - str_len < ZEND_MMAP_AHEAD) {
 		RETVAL_FALSE;

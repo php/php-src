@@ -79,8 +79,8 @@ if (($row = $stmt->fetch(PDO::FETCH_ASSOC)) && ($row['value'] != '')) {
 		}
 
 		$fp = fopen($filename, "w");
-		fwrite($fp, b"1;foo\n");
-		fwrite($fp, b"2;bar");
+		fwrite($fp, "1;foo\n");
+		fwrite($fp, "2;bar");
 		fclose($fp);
 
 		// This should fail, the PS protocol should not support it.

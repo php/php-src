@@ -185,6 +185,8 @@ void init_executor(void) /* {{{ */
 	EG(ht_iterators) = EG(ht_iterators_slots);
 	memset(EG(ht_iterators), 0, sizeof(EG(ht_iterators_slots)));
 
+	EG(each_deprecation_thrown) = 0;
+
 	EG(active) = 1;
 }
 /* }}} */
@@ -505,7 +507,7 @@ ZEND_API zend_string *zend_get_executed_filename_ex(void) /* {{{ */
 }
 /* }}} */
 
-ZEND_API uint zend_get_executed_lineno(void) /* {{{ */
+ZEND_API uint32_t zend_get_executed_lineno(void) /* {{{ */
 {
 	zend_execute_data *ex = EG(current_execute_data);
 
@@ -573,7 +575,7 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_class_entry *scope) /* {{{ */
 			zend_throw_error(NULL, "Cannot declare self-referencing constant '%s'", Z_STRVAL_P(p));
 			return FAILURE;
 		}
-		inline_change = (Z_TYPE_FLAGS_P(p) & IS_TYPE_IMMUTABLE) == 0;
+		inline_change = (Z_TYPE_FLAGS_P(p) & IS_TYPE_REFCOUNTED) != 0;
 		SEPARATE_ZVAL_NOREF(p);
 		MARK_CONSTANT_VISITED(p);
 		if (Z_CONST_FLAGS_P(p) & IS_CONSTANT_CLASS) {
@@ -609,7 +611,7 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_class_entry *scope) /* {{{ */
 						actual_len -= (actual - Z_STRVAL_P(p));
 					}
 
-					zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'", actual, actual);
+					zend_error(E_WARNING, "Use of undefined constant %s - assumed '%s' (this will throw an Error in a future version of PHP)", actual, actual);
 					if (EG(exception)) {
 						RESET_CONSTANT_VISITED(p);
 						return FAILURE;
@@ -638,7 +640,7 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_class_entry *scope) /* {{{ */
 	} else if (Z_TYPE_P(p) == IS_CONSTANT_AST) {
 		zval tmp;
 
-		inline_change = (Z_TYPE_FLAGS_P(p) & IS_TYPE_IMMUTABLE) == 0;
+		inline_change = (Z_TYPE_FLAGS_P(p) & IS_TYPE_REFCOUNTED) != 0;
 		if (UNEXPECTED(zend_ast_evaluate(&tmp, Z_ASTVAL_P(p), scope) != SUCCESS)) {
 			return FAILURE;
 		}
@@ -833,9 +835,15 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 	}
 
 	if (UNEXPECTED(func->op_array.fn_flags & ZEND_ACC_CLOSURE)) {
+		uint32_t call_info;
+
 		ZEND_ASSERT(GC_TYPE((zend_object*)func->op_array.prototype) == IS_OBJECT);
 		GC_REFCOUNT((zend_object*)func->op_array.prototype)++;
-		ZEND_ADD_CALL_FLAG(call, ZEND_CALL_CLOSURE);
+		call_info = ZEND_CALL_CLOSURE;
+		if (func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) {
+			call_info |= ZEND_CALL_FAKE_CLOSURE;
+		}
+		ZEND_ADD_CALL_FLAG(call, call_info);
 	}
 
 	if (func->type == ZEND_USER_FUNCTION) {		
@@ -911,9 +919,15 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 		EG(current_execute_data) = dummy_execute_data.prev_execute_data;
 	}
 
-	if (EG(exception)) {
-		zend_throw_exception_internal(NULL);
+	if (UNEXPECTED(EG(exception))) {
+		if (UNEXPECTED(!EG(current_execute_data))) {
+			zend_throw_exception_internal(NULL);
+		} else if (EG(current_execute_data)->func &&
+		           ZEND_USER_CODE(EG(current_execute_data)->func->common.type)) {
+			zend_rethrow_exception(EG(current_execute_data));
+		}
 	}
+
 	return SUCCESS;
 }
 /* }}} */
@@ -961,7 +975,7 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *k
 	}
 
 	if (!EG(autoload_func)) {
-		zend_function *func = zend_hash_find_ptr(EG(function_table), CG(known_strings)[ZEND_STR_MAGIC_AUTOLOAD]);
+		zend_function *func = zend_hash_find_ptr(EG(function_table), ZSTR_KNOWN(ZEND_STR_MAGIC_AUTOLOAD));
 		if (func) {
 			EG(autoload_func) = func;
 		} else {
@@ -1197,7 +1211,7 @@ static void zend_timeout_handler(int dummy) /* {{{ */
     if (EG(timed_out)) {
 		/* Die on hard timeout */
 		const char *error_filename = NULL;
-		uint error_lineno = 0;
+		uint32_t error_lineno = 0;
 		char log_buffer[2048];
 		int output_len = 0;
 

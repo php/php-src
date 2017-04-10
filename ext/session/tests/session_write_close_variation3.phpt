@@ -30,7 +30,7 @@ ob_end_flush();
 *** Testing session_write_close() : variation ***
 array(0) {
 }
-NULL
+bool(true)
 array(0) {
 }
 bool(true)

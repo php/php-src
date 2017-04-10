@@ -105,8 +105,7 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 				return variable_ptr;
 			} else { /* we need to split */
 				/* optimized version of GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr) */
-				if ((Z_COLLECTABLE_P(variable_ptr)) &&
-		    		UNEXPECTED(!GC_INFO(garbage))) {
+				if (UNEXPECTED(GC_MAY_LEAK(garbage))) {
 					gc_possible_root(garbage);
 				}
 			}
@@ -220,12 +219,12 @@ static zend_always_inline void zend_vm_stack_free_extra_args_ex(uint32_t call_in
 		do {
 			p--;
 			if (Z_REFCOUNTED_P(p)) {
-				if (!Z_DELREF_P(p)) {
-					zend_refcounted *r = Z_COUNTED_P(p);
+				zend_refcounted *r = Z_COUNTED_P(p);
+				if (!--GC_REFCOUNT(r)) {
 					ZVAL_NULL(p);
 					zval_dtor_func(r);
 				} else {
-					GC_ZVAL_CHECK_POSSIBLE_ROOT(p);
+					gc_check_possible_root(r);
 				}
 			}
 		} while (p != end);
@@ -288,7 +287,7 @@ ZEND_API const char *get_active_class_name(const char **space);
 ZEND_API const char *get_active_function_name(void);
 ZEND_API const char *zend_get_executed_filename(void);
 ZEND_API zend_string *zend_get_executed_filename_ex(void);
-ZEND_API uint zend_get_executed_lineno(void);
+ZEND_API uint32_t zend_get_executed_lineno(void);
 ZEND_API zend_class_entry *zend_get_executed_scope(void);
 ZEND_API zend_bool zend_is_executing(void);
 
@@ -323,6 +322,8 @@ ZEND_API zval *zend_get_zval_ptr(int op_type, const znode_op *node, const zend_e
 ZEND_API void zend_clean_and_cache_symbol_table(zend_array *symbol_table);
 void zend_free_compiled_variables(zend_execute_data *execute_data);
 void zend_cleanup_unfinished_execution(zend_execute_data *execute_data, uint32_t op_num, uint32_t catch_op_num);
+
+ZEND_API int ZEND_FASTCALL zend_do_fcall_overloaded(zend_execute_data *call, zval *ret);
 
 #define CACHE_ADDR(num) \
 	((void**)((char*)EX_RUN_TIME_CACHE() + (num)))

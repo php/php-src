@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Bjørn Borud - Guardian Networks AS <borud@guardian.no>       |
+   | Author: BjÃ¸rn Borud - Guardian Networks AS <borud@guardian.no>       |
    +----------------------------------------------------------------------+
  */
 /* $Id$ */
@@ -60,9 +60,10 @@ PHP_FUNCTION(soundex)
 	 0,							/* Y */
 	 '2'};						/* Z */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &str, &str_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(str, str_len)
+	ZEND_PARSE_PARAMETERS_END();
+
 	if (str_len == 0) {
 		RETURN_FALSE;
 	}

@@ -411,10 +411,6 @@ static int browscap_read_file(char *filename, browser_data *browdata, int persis
 	fh.type = ZEND_HANDLE_FP;
 
 	browdata->htab = pemalloc(sizeof *browdata->htab, persistent);
-	if (browdata->htab == NULL) {
-		return FAILURE;
-	}
-
 	zend_hash_init_ex(browdata->htab, 0, NULL, 
 		persistent ? browscap_entry_dtor_persistent : browscap_entry_dtor, persistent, 0);
 
@@ -551,7 +547,7 @@ static int browser_reg_compare(
 	zend_string *agent_name = va_arg(args, zend_string *);
 	browscap_entry **found_entry_ptr = va_arg(args, browscap_entry **);
 	browscap_entry *found_entry = *found_entry_ptr;
-	ALLOCA_FLAG(use_heap);
+	ALLOCA_FLAG(use_heap)
 	zend_string *pattern_lc, *regex;
 	const char *cur;
 	int i;
@@ -687,9 +683,11 @@ PHP_FUNCTION(get_browser)
 		bdata = &global_bdata;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S!b", &agent_name, &return_array) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_EX(agent_name, 1, 0)
+		Z_PARAM_BOOL(return_array)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (agent_name == NULL) {
 		zval *http_user_agent = NULL;

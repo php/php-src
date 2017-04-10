@@ -197,22 +197,26 @@ struct _php_stream  {
 	void *wrapperthis;		/* convenience pointer for a instance of a wrapper */
 	zval wrapperdata;		/* fgetwrapperdata retrieves this */
 
-	int fgetss_state;		/* for fgetss to handle multiline tags */
-	int is_persistent;
-	char mode[16];			/* "rwb" etc. ala stdio */
-	zend_resource *res;		/* used for auto-cleanup */
-	int in_free;			/* to prevent recursion during free */
+	uint8_t is_persistent:1;
+	uint8_t in_free:2;			/* to prevent recursion during free */
+	uint8_t eof:1;
+	uint8_t __exposed:1;	/* non-zero if exposed as a zval somewhere */
+
 	/* so we know how to clean it up correctly.  This should be set to
 	 * PHP_STREAM_FCLOSE_XXX as appropriate */
-	int fclose_stdiocast;
+	uint8_t fclose_stdiocast:2;
+
+	uint8_t fgetss_state;		/* for fgetss to handle multiline tags */
+
+	char mode[16];			/* "rwb" etc. ala stdio */
+
+	uint32_t flags;	/* PHP_STREAM_FLAG_XXX */
+
+	zend_resource *res;		/* used for auto-cleanup */
 	FILE *stdiocast;    /* cache this, otherwise we might leak! */
-	int __exposed;	/* non-zero if exposed as a zval somewhere */
 	char *orig_path;
 
 	zend_resource *ctx;
-	int flags;	/* PHP_STREAM_FLAG_XXX */
-
-	int eof;
 
 	/* buffer */
 	zend_off_t position; /* of underlying stream */
@@ -226,7 +230,7 @@ struct _php_stream  {
 
 #if ZEND_DEBUG
 	const char *open_filename;
-	uint open_lineno;
+	uint32_t open_lineno;
 #endif
 
 	struct _php_stream *enclosing_stream; /* this is a private stream owned by enclosing_stream */
@@ -249,11 +253,11 @@ END_EXTERN_C()
 
 #define php_stream_get_resource_id(stream)		((php_stream *)(stream))->res->handle
 /* use this to tell the stream that it is OK if we don't explicitly close it */
-#define php_stream_auto_cleanup(stream)	{ (stream)->__exposed++; }
+#define php_stream_auto_cleanup(stream)	{ (stream)->__exposed = 1; }
 /* use this to assign the stream to a zval and tell the stream that is
  * has been exported to the engine; it will expect to be closed automatically
  * when the resources are auto-destructed */
-#define php_stream_to_zval(stream, zval)	{ ZVAL_RES(zval, (stream)->res); (stream)->__exposed++; }
+#define php_stream_to_zval(stream, zval)	{ ZVAL_RES(zval, (stream)->res); (stream)->__exposed = 1; }
 
 #define php_stream_from_zval(xstr, pzval)	do { \
 	if (((xstr) = (php_stream*)zend_fetch_resource2_ex((pzval), \

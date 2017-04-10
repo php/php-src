@@ -180,7 +180,7 @@ SAPI_API void sapi_handle_post(void *arg)
 static void sapi_read_post_data(void)
 {
 	sapi_post_entry *post_entry;
-	uint content_type_length = (uint)strlen(SG(request_info).content_type);
+	uint32_t content_type_length = (uint32_t)strlen(SG(request_info).content_type);
 	char *content_type = estrndup(SG(request_info).content_type, content_type_length);
 	char *p;
 	char oldchar=0;
@@ -302,21 +302,21 @@ SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 }
 
 
-static inline char *get_default_content_type(uint prefix_len, uint *len)
+static inline char *get_default_content_type(uint32_t prefix_len, uint32_t *len)
 {
 	char *mimetype, *charset, *content_type;
-	uint mimetype_len, charset_len;
+	uint32_t mimetype_len, charset_len;
 
 	if (SG(default_mimetype)) {
 		mimetype = SG(default_mimetype);
-		mimetype_len = (uint)strlen(SG(default_mimetype));
+		mimetype_len = (uint32_t)strlen(SG(default_mimetype));
 	} else {
 		mimetype = SAPI_DEFAULT_MIMETYPE;
 		mimetype_len = sizeof(SAPI_DEFAULT_MIMETYPE) - 1;
 	}
 	if (SG(default_charset)) {
 		charset = SG(default_charset);
-		charset_len = (uint)strlen(SG(default_charset));
+		charset_len = (uint32_t)strlen(SG(default_charset));
 	} else {
 		charset = SAPI_DEFAULT_CHARSET;
 		charset_len = sizeof(SAPI_DEFAULT_CHARSET) - 1;
@@ -344,7 +344,7 @@ static inline char *get_default_content_type(uint prefix_len, uint *len)
 
 SAPI_API char *sapi_get_default_content_type(void)
 {
-	uint len;
+	uint32_t len;
 
 	return get_default_content_type(0, &len);
 }
@@ -352,7 +352,7 @@ SAPI_API char *sapi_get_default_content_type(void)
 
 SAPI_API void sapi_get_default_content_type_header(sapi_header_struct *default_header)
 {
-    uint len;
+    uint32_t len;
 
 	default_header->header = get_default_content_type(sizeof("Content-type: ")-1, &len);
 	default_header->header_len = len;
@@ -733,7 +733,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 		return SUCCESS;
 	} else {
 		/* new line/NUL character safety check */
-		uint i;
+		uint32_t i;
 		for (i = 0; i < header_line_len; i++) {
 			/* RFC 7230 ch. 3.2.4 deprecates folding support */
 			if (header_line[i] == '\n' || header_line[i] == '\r') {
@@ -795,7 +795,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 					PHP_STRLCPY(newheader, "Content-type: ", newlen, sizeof("Content-type: ")-1);
 					strlcat(newheader, mimetype, newlen);
 					sapi_header.header = newheader;
-					sapi_header.header_len = (uint)(newlen - 1);
+					sapi_header.header_len = (uint32_t)(newlen - 1);
 					efree(header_line);
 				}
 				efree(mimetype);
@@ -855,7 +855,7 @@ SAPI_API int sapi_send_headers(void)
 	 * in case of an error situation.
 	 */
 	if (SG(sapi_headers).send_default_content_type && sapi_module.send_headers) {
-	    uint len = 0;
+	    uint32_t len = 0;
 		char *default_mimetype = get_default_content_type(0, &len);
 
 		if (default_mimetype && len) {
@@ -902,7 +902,7 @@ SAPI_API int sapi_send_headers(void)
 
 				if (SG(sapi_headers).http_status_line) {
 					http_status_line.header = SG(sapi_headers).http_status_line;
-					http_status_line.header_len = (uint)strlen(SG(sapi_headers).http_status_line);
+					http_status_line.header_len = (uint32_t)strlen(SG(sapi_headers).http_status_line);
 				} else {
 					http_status_line.header = buf;
 					http_status_line.header_len = slprintf(buf, sizeof(buf), "HTTP/1.0 %d X", SG(sapi_headers).http_response_code);

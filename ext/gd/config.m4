@@ -35,9 +35,6 @@ PHP_ARG_WITH(xpm-dir, for the location of libXpm,
 PHP_ARG_WITH(freetype-dir, for FreeType 2,
 [  --with-freetype-dir[=DIR] GD: Set the path to FreeType 2 install prefix], no, no)
 
-PHP_ARG_ENABLE(gd-native-ttf, whether to enable truetype string function in GD,
-[  --enable-gd-native-ttf  GD: Enable TrueType string function], no, no)
-
 PHP_ARG_ENABLE(gd-jis-conv, whether to enable JIS-mapped Japanese font support in GD,
 [  --enable-gd-jis-conv    GD: Enable JIS-mapped Japanese font support], no, no)
 
@@ -206,17 +203,10 @@ AC_DEFUN([PHP_GD_FREETYPE2],[
 
     PHP_EVAL_INCLINE($FREETYPE2_CFLAGS)
     PHP_EVAL_LIBLINE($FREETYPE2_LIBS, GD_SHARED_LIBADD)
-    AC_DEFINE(USE_GD_IMGSTRTTF, 1, [ ])
     AC_DEFINE(HAVE_LIBFREETYPE,1,[ ])
     AC_DEFINE(ENABLE_GD_TTF,1,[ ])
   else
     AC_MSG_RESULT([If configure fails try --with-freetype-dir=<DIR>])
-  fi
-])
-
-AC_DEFUN([PHP_GD_TTSTR],[
-  if test "$PHP_GD_NATIVE_TTF" = "yes"; then
-    AC_DEFINE(USE_GD_IMGSTRTTF, 1, [ ])
   fi
 ])
 
@@ -231,6 +221,7 @@ AC_DEFUN([PHP_GD_CHECK_VERSION],[
   PHP_CHECK_LIBRARY(gd, gdImageCreateFromWebp,  [AC_DEFINE(HAVE_GD_WEBP,             1, [ ])], [], [ $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageCreateFromJpeg,  [AC_DEFINE(HAVE_GD_JPG,              1, [ ])], [], [ $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageCreateFromXpm,   [AC_DEFINE(HAVE_GD_XPM,              1, [ ])], [], [ $GD_SHARED_LIBADD ])
+  PHP_CHECK_LIBRARY(gd, gdImageCreateFromBmp,   [AC_DEFINE(HAVE_GD_BMP,              1, [ ])], [], [ $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageStringFT,        [AC_DEFINE(HAVE_GD_FREETYPE,         1, [ ])], [], [ $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdVersionString,        [AC_DEFINE(HAVE_GD_LIBVERSION,       1, [ ])], [], [ $GD_SHARED_LIBADD ])
 ])
@@ -249,7 +240,6 @@ dnl PNG is required by GD library
 
 dnl Various checks for GD features
   PHP_GD_ZLIB
-  PHP_GD_TTSTR
   PHP_GD_WEBP
   PHP_GD_JPEG
   PHP_GD_PNG
@@ -265,9 +255,10 @@ if test "$PHP_GD" = "yes"; then
                  libgd/gd_png.c libgd/gd_jpeg.c libgd/gdxpm.c libgd/gdfontt.c libgd/gdfonts.c \
                  libgd/gdfontmb.c libgd/gdfontl.c libgd/gdfontg.c libgd/gdtables.c libgd/gdft.c \
                  libgd/gdcache.c libgd/gdkanji.c libgd/wbmp.c libgd/gd_wbmp.c libgd/gdhelpers.c \
-                 libgd/gd_topal.c libgd/gd_gif_in.c libgd/xbm.c libgd/gd_gif_out.c libgd/gd_security.c \
-                 libgd/gd_filter.c libgd/gd_pixelate.c libgd/gd_arc.c libgd/gd_rotate.c libgd/gd_color.c \
-                 libgd/gd_transform.c libgd/gd_crop.c libgd/gd_interpolation.c libgd/gd_matrix.c"
+                 libgd/gd_topal.c libgd/gd_gif_in.c libgd/gd_xbm.c libgd/gd_gif_out.c libgd/gd_security.c \
+                 libgd/gd_filter.c libgd/gd_pixelate.c libgd/gd_rotate.c libgd/gd_color_match.c \
+                 libgd/gd_transform.c libgd/gd_crop.c libgd/gd_interpolation.c libgd/gd_matrix.c \
+                 libgd/gd_bmp.c"
 
 dnl check for fabsf and floorf which are available since C99
   AC_CHECK_FUNCS(fabsf floorf)
@@ -275,6 +266,7 @@ dnl check for fabsf and floorf which are available since C99
 dnl These are always available with bundled library
   AC_DEFINE(HAVE_GD_BUNDLED,          1, [ ])
   AC_DEFINE(HAVE_GD_PNG,              1, [ ])
+  AC_DEFINE(HAVE_GD_BMP,              1, [ ])
   AC_DEFINE(HAVE_GD_CACHE_CREATE,     1, [ ])
 
 dnl Make sure the libgd/ is first in the include path

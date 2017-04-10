@@ -1396,7 +1396,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 	}
 	DBG_INF_FMT("ret=%s row_count=%u warnings=%u server_status=%u",
 				ret == PASS? "PASS":"FAIL",
-				(uint) set->row_count,
+				(uint32_t) set->row_count,
 				UPSERT_STATUS_GET_WARNINGS(conn->upsert_status),
 				UPSERT_STATUS_GET_SERVER_STATUS(conn->upsert_status));
 end:

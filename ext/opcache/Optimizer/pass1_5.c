@@ -436,7 +436,6 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			}
 
 			/* pre-evaluate constant functions:
-			   defined(x)
 			   constant(x)
 			   function_exists(x)
 			   is_callable(x)
@@ -518,24 +517,6 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						MAKE_NOP(opline);
 						break;
 					}
-				} else if (Z_STRLEN(ZEND_OP2_LITERAL(init_opline)) == sizeof("defined")-1 &&
-					!memcmp(Z_STRVAL(ZEND_OP2_LITERAL(init_opline)),
-						"defined", sizeof("defined")-1) &&
-					!zend_optimizer_is_disabled_func("defined", sizeof("defined") - 1)) {
-					zval t;
-
-					if (zend_optimizer_get_persistent_constant(Z_STR(ZEND_OP1_LITERAL(send1_opline)), &t, 0)) {
-
-						ZVAL_TRUE(&t);
-						if (zend_optimizer_replace_by_const(op_array, opline + 1, IS_VAR, ZEND_RESULT(opline).var, &t)) {
-							literal_dtor(&ZEND_OP2_LITERAL(init_opline));
-							MAKE_NOP(init_opline);
-							literal_dtor(&ZEND_OP1_LITERAL(send1_opline));
-							MAKE_NOP(send1_opline);
-							MAKE_NOP(opline);
-							break;
-						}
-					}
 				} else if (Z_STRLEN(ZEND_OP2_LITERAL(init_opline)) == sizeof("constant")-1 &&
 					!memcmp(Z_STRVAL(ZEND_OP2_LITERAL(init_opline)),
 						"constant", sizeof("constant")-1) &&
@@ -551,21 +532,6 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 							MAKE_NOP(opline);
 							break;
 						}
-					}
-				} else if ((CG(compiler_options) & ZEND_COMPILE_NO_BUILTIN_STRLEN) == 0 &&
-					Z_STRLEN(ZEND_OP2_LITERAL(init_opline)) == sizeof("strlen") - 1 &&
-					!memcmp(Z_STRVAL(ZEND_OP2_LITERAL(init_opline)), "strlen", sizeof("strlen") - 1) &&
-					!zend_optimizer_is_disabled_func("strlen", sizeof("strlen") - 1)) {
-					zval t;
-
-					ZVAL_LONG(&t, Z_STRLEN(ZEND_OP1_LITERAL(send1_opline)));
-					if (zend_optimizer_replace_by_const(op_array, opline + 1, IS_VAR, ZEND_RESULT(opline).var, &t)) {
-						literal_dtor(&ZEND_OP2_LITERAL(init_opline));
-						MAKE_NOP(init_opline);
-						literal_dtor(&ZEND_OP1_LITERAL(send1_opline));
-						MAKE_NOP(send1_opline);
-						MAKE_NOP(opline);
-						break;
 					}
 				/* dirname(IS_CONST/IS_STRING) -> IS_CONST/IS_STRING */
 				} else if (Z_STRLEN(ZEND_OP2_LITERAL(init_opline)) == sizeof("dirname")-1 &&

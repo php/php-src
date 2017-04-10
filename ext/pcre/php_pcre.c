@@ -551,7 +551,6 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	new_entry.preg_options = poptions;
 	new_entry.compile_options = coptions;
 #if HAVE_SETLOCALE
-	new_entry.locale = NULL;
 	new_entry.tables = tables;
 #endif
 	new_entry.refcount = 0;
@@ -647,7 +646,11 @@ static inline void add_offset_pair(zval *result, char *str, int len, int offset,
 	array_init_size(&match_pair, 2);
 
 	/* Add (match, offset) to the return value */
-	ZVAL_STRINGL(&tmp, str, len);
+	if (offset < 0) { /* unset substring */
+		ZVAL_NULL(&tmp);
+	} else {
+		ZVAL_STRINGL(&tmp, str, len);
+	}
 	zend_hash_next_index_insert_new(Z_ARRVAL(match_pair), &tmp);
 	ZVAL_LONG(&tmp, offset);
 	zend_hash_next_index_insert_new(Z_ARRVAL(match_pair), &tmp);
@@ -848,8 +851,12 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 							}
 						} else {
 							for (i = 0; i < count; i++) {
-								add_next_index_stringl(&match_sets[i], (char *)stringlist[i],
-													   offsets[(i<<1)+1] - offsets[i<<1]);
+								if (offsets[i<<1] < 0) { /* unset substring */
+									add_next_index_null(&match_sets[i]);
+								} else {
+									add_next_index_stringl(&match_sets[i], (char *)stringlist[i],
+														   offsets[(i<<1)+1] - offsets[i<<1]);
+								}
 							}
 						}
 						/* Add MARK, if available */
@@ -862,11 +869,11 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 						/*
 						 * If the number of captured subpatterns on this run is
 						 * less than the total possible number, pad the result
-						 * arrays with empty strings.
+						 * arrays with NULLs.
 						 */
 						if (count < num_subpats) {
 							for (; i < num_subpats; i++) {
-								add_next_index_string(&match_sets[i], "");
+								add_next_index_null(&match_sets[i]);
 							}
 						}
 					} else {
@@ -883,11 +890,19 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 							} else {
 								for (i = 0; i < count; i++) {
 									if (subpat_names[i]) {
-										add_assoc_stringl(&result_set, subpat_names[i], (char *)stringlist[i],
+									if (offsets[i<<1] < 0) { /* unset substring */
+										add_assoc_null(&result_set, subpat_names[i]);
+									} else {
+											add_assoc_stringl(&result_set, subpat_names[i], (char *)stringlist[i],
+																   offsets[(i<<1)+1] - offsets[i<<1]);
+									}
+									}
+									if (offsets[i<<1] < 0) { /* unset substring */
+										add_next_index_null(&result_set);
+									} else {
+										add_next_index_stringl(&result_set, (char *)stringlist[i],
 															   offsets[(i<<1)+1] - offsets[i<<1]);
 									}
-									add_next_index_stringl(&result_set, (char *)stringlist[i],
-														   offsets[(i<<1)+1] - offsets[i<<1]);
 								}
 							}
 						} else {
@@ -898,8 +913,12 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 								}
 							} else {
 								for (i = 0; i < count; i++) {
-									add_next_index_stringl(&result_set, (char *)stringlist[i],
-														   offsets[(i<<1)+1] - offsets[i<<1]);
+									if (offsets[i<<1] < 0) { /* unset substring */
+										add_next_index_null(&result_set);
+									} else {
+										add_next_index_stringl(&result_set, (char *)stringlist[i],
+															   offsets[(i<<1)+1] - offsets[i<<1]);
+									}
 								}
 							}
 						}
@@ -922,11 +941,19 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 						} else {
 							for (i = 0; i < count; i++) {
 								if (subpat_names[i]) {
-									add_assoc_stringl(subpats, subpat_names[i], (char *)stringlist[i],
-													  offsets[(i<<1)+1] - offsets[i<<1]);
+									if (offsets[i<<1] < 0) { /* unset substring */
+										add_assoc_null(subpats, subpat_names[i]);
+									} else {
+										add_assoc_stringl(subpats, subpat_names[i], (char *)stringlist[i],
+														  offsets[(i<<1)+1] - offsets[i<<1]);
+									}
 								}
-								add_next_index_stringl(subpats, (char *)stringlist[i],
-													   offsets[(i<<1)+1] - offsets[i<<1]);
+								if (offsets[i<<1] < 0) { /* unset substring */
+									add_next_index_null(subpats);
+								} else {
+									add_next_index_stringl(subpats, (char *)stringlist[i],
+														   offsets[(i<<1)+1] - offsets[i<<1]);
+								}
 							}
 						}
 					} else {
@@ -938,8 +965,12 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 							}
 						} else {
 							for (i = 0; i < count; i++) {
-								add_next_index_stringl(subpats, (char *)stringlist[i],
-													   offsets[(i<<1)+1] - offsets[i<<1]);
+								if (offsets[i<<1] < 0) { /* unset substring */
+									add_next_index_null(subpats);
+								} else {
+									add_next_index_stringl(subpats, (char *)stringlist[i],
+														   offsets[(i<<1)+1] - offsets[i<<1]);
+								}
 							}
 						}
 					}

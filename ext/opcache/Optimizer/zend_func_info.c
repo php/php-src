@@ -37,6 +37,9 @@ typedef struct _func_info_t {
 	info_func_t info_func;
 } func_info_t;
 
+/* MSVC defines its own IN macro, undefine it here */
+#undef IN
+
 #define F0(name, info) \
 	{name, sizeof(name)-1, (FUNC_MAY_WARN | (info)), NULL}
 #define F1(name, info) \
@@ -572,7 +575,7 @@ static const func_info_t func_infos[] = {
 #ifdef HAVE_GETHOSTNAME
 	F1("gethostname",                  MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 #endif
-#if defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !(defined(__BEOS__) || defined(NETWARE)))
+#if defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !(defined(__BEOS__)))
 	F0("dns_check_record",             MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("checkdnsrr",                   MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 # if defined(PHP_WIN32) || HAVE_FULL_DNS_FUNCS
@@ -686,7 +689,7 @@ static const func_info_t func_infos[] = {
 	F0("socket_set_timeout",           MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 #endif
 	F1("socket_get_status",            MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ANY),
-#if (!defined(__BEOS__) && !defined(NETWARE) && HAVE_REALPATH) || defined(ZTS)
+#if (!defined(__BEOS__) && HAVE_REALPATH) || defined(ZTS)
 	F1("realpath",                     MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 #endif
 #ifdef HAVE_FNMATCH
@@ -731,10 +734,8 @@ static const func_info_t func_infos[] = {
 	F0("is_link",                      MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F1("stat",                         MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_FALSE | MAY_BE_ARRAY_OF_TRUE | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING),
 	F1("lstat",                        MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_FALSE | MAY_BE_ARRAY_OF_TRUE | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING),
-#ifndef NETWARE
 	F0("chown",                        MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("chgrp",                        MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-#endif
 #if HAVE_LCHOWN
 	F0("lchown",                       MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 #endif

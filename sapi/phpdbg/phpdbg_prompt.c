@@ -58,9 +58,6 @@ extern int phpdbg_startup_run;
 #include "win32/param.h"
 #include "win32/winutil.h"
 #define GET_DL_ERROR()  php_win_err()
-#elif defined(NETWARE)
-#include <sys/param.h>
-#define GET_DL_ERROR()  dlerror()
 #else
 #include <sys/param.h>
 #define GET_DL_ERROR()  DL_ERROR()
@@ -528,7 +525,7 @@ int phpdbg_compile_stdin(zend_string *code) {
 
 	ZVAL_STR(&zv, code);
 
-	PHPDBG_G(ops) = zend_compile_string(&zv, "-");
+	PHPDBG_G(ops) = zend_compile_string(&zv, "Standard input code");
 
 	zend_string_release(code);
 
@@ -539,18 +536,18 @@ int phpdbg_compile_stdin(zend_string *code) {
 	if (PHPDBG_G(exec)) {
 		efree(PHPDBG_G(exec));
 	}
-	PHPDBG_G(exec) = estrdup("-");
-	PHPDBG_G(exec_len) = 1;
+	PHPDBG_G(exec) = estrdup("Standard input code");
+	PHPDBG_G(exec_len) = sizeof("Standard input code") - 1;
 	{ /* remove leading ?> from source */
 		int i;
 		/* remove trailing data after zero byte, used for avoiding conflicts in eval()'ed code snippets */
-		zend_string *source_path = strpprintf(0, "-%c%p", 0, PHPDBG_G(ops)->opcodes);
+		zend_string *source_path = strpprintf(0, "Standard input code%c%p", 0, PHPDBG_G(ops)->opcodes);
 		phpdbg_file_source *data = zend_hash_find_ptr(&PHPDBG_G(file_sources), source_path);
 		dtor_func_t dtor = PHPDBG_G(file_sources).pDestructor;
 		PHPDBG_G(file_sources).pDestructor = NULL;
 		zend_hash_del(&PHPDBG_G(file_sources), source_path);
 		PHPDBG_G(file_sources).pDestructor = dtor;
-		zend_hash_str_update_ptr(&PHPDBG_G(file_sources), "-", 1, data);
+		zend_hash_str_update_ptr(&PHPDBG_G(file_sources), "Standard input code", sizeof("Standard input code")-1, data);
 		zend_string_release(source_path);
 
 		for (i = 1; i <= data->lines; i++) {
@@ -560,7 +557,7 @@ int phpdbg_compile_stdin(zend_string *code) {
 		memmove(data->buf, data->buf + 2, data->len);
 	}
 
-	phpdbg_notice("compile", "context=\"-\"", "Successful compilation of stdin input");
+	phpdbg_notice("compile", "context=\"Standard input code\"", "Successful compilation of stdin input");
 
 	return SUCCESS;
 }
@@ -611,8 +608,8 @@ int phpdbg_compile(void) /* {{{ */
 			zend_hash_del(&PHPDBG_G(file_sources), PHPDBG_G(ops)->filename);
 			PHPDBG_G(file_sources).pDestructor = dtor;
 
-			data = erealloc(data, sizeof(phpdbg_file_source) + sizeof(uint) * ++data->lines);
-			memmove(data->line + 1, data->line, sizeof(uint) * data->lines);
+			data = erealloc(data, sizeof(phpdbg_file_source) + sizeof(uint32_t) * ++data->lines);
+			memmove(data->line + 1, data->line, sizeof(uint32_t) * data->lines);
 			data->line[0] = 0;
 			data->buf = erealloc(data->buf, data->len + start_line_len);
 			memmove(data->buf + start_line_len, data->buf, data->len);
@@ -1208,7 +1205,7 @@ PHPDBG_COMMAND(break) /* {{{ */
 {
 	if (!param) {
 		if (PHPDBG_G(exec)) {
-			phpdbg_set_breakpoint_file_ex(
+			phpdbg_set_breakpoint_file(
 				zend_get_executed_filename(),
 				strlen(zend_get_executed_filename()),
 				zend_get_executed_lineno());
@@ -1221,7 +1218,7 @@ PHPDBG_COMMAND(break) /* {{{ */
 			break;
 		case NUMERIC_PARAM:
 			if (PHPDBG_G(exec)) {
-				phpdbg_set_breakpoint_file_ex(phpdbg_current_file(), strlen(phpdbg_current_file()), param->num);
+				phpdbg_set_breakpoint_file(phpdbg_current_file(), strlen(phpdbg_current_file()), param->num);
 			} else {
 				phpdbg_error("inactive", "type=\"noexec\"", "Execution context not set!");
 			}
@@ -1236,7 +1233,7 @@ PHPDBG_COMMAND(break) /* {{{ */
 			phpdbg_set_breakpoint_function_opline(param->str, param->num);
 			break;
 		case FILE_PARAM:
-			phpdbg_set_breakpoint_file(param->file.name, param->file.line);
+			phpdbg_set_breakpoint_file(param->file.name, 0, param->file.line);
 			break;
 		case NUMERIC_FILE_PARAM:
 			phpdbg_set_breakpoint_file_opline(param->file.name, param->file.line);

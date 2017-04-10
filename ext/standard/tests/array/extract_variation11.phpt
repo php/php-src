@@ -10,4 +10,4 @@ $foo = 'changed.foo';
 var_dump($a['foo']);
 ?>
 --EXPECTF--
-%unicode|string%(11) "changed.foo"
+string(11) "changed.foo"

@@ -300,12 +300,35 @@ static char *pdo_mysql_last_insert_id(pdo_dbh_t *dbh, const char *name, size_t *
 static int mysql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, char **quoted, size_t *quotedlen, enum pdo_param_type paramtype )
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
+	zend_bool use_national_character_set = 0;
+
+	if (H->assume_national_character_set_strings) {
+		use_national_character_set = 1;
+	}
+	if ((paramtype & PDO_PARAM_STR_NATL) == PDO_PARAM_STR_NATL) {
+		use_national_character_set = 1;
+	}
+	if ((paramtype & PDO_PARAM_STR_CHAR) == PDO_PARAM_STR_CHAR) {
+		use_national_character_set = 0;
+	}
+
 	PDO_DBG_ENTER("mysql_handle_quoter");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
 	PDO_DBG_INF_FMT("unquoted=%.*s", (int)unquotedlen, unquoted);
-	*quoted = safe_emalloc(2, unquotedlen, 3);
-	*quotedlen = mysql_real_escape_string(H->server, *quoted + 1, unquoted, unquotedlen);
-	(*quoted)[0] =(*quoted)[++*quotedlen] = '\'';
+	*quoted = safe_emalloc(2, unquotedlen, 3 + (use_national_character_set ? 1 : 0));
+
+	if (use_national_character_set) {
+		*quotedlen = mysql_real_escape_string(H->server, *quoted + 2, unquoted, unquotedlen);
+		(*quoted)[0] = 'N';
+		(*quoted)[1] = '\'';
+
+		++*quotedlen; /* N prefix */
+	} else {
+		*quotedlen = mysql_real_escape_string(H->server, *quoted + 1, unquoted, unquotedlen);
+		(*quoted)[0] = '\'';
+	}
+
+	(*quoted)[++*quotedlen] = '\'';
 	(*quoted)[++*quotedlen] = '\0';
 	PDO_DBG_INF_FMT("quoted=%.*s", (int)*quotedlen, *quoted);
 	PDO_DBG_RETURN(1);
@@ -369,7 +392,7 @@ static inline int mysql_handle_autocommit(pdo_dbh_t *dbh)
 static int pdo_mysql_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 {
 	zend_long lval = zval_get_long(val);
-	zend_bool bval = lval? 1 : 0;
+	zend_bool bval = lval ? 1 : 0;
 	PDO_DBG_ENTER("pdo_mysql_set_attribute");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
 	PDO_DBG_INF_FMT("attr=%l", attr);
@@ -382,18 +405,25 @@ static int pdo_mysql_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			}
 			PDO_DBG_RETURN(1);
 
+		case PDO_ATTR_DEFAULT_STR_PARAM:
+			((pdo_mysql_db_handle *)dbh->driver_data)->assume_national_character_set_strings = lval == PDO_PARAM_STR_NATL ? 1 : 0;
+			PDO_DBG_RETURN(1);
+
 		case PDO_MYSQL_ATTR_USE_BUFFERED_QUERY:
 			/* ignore if the new value equals the old one */
 			((pdo_mysql_db_handle *)dbh->driver_data)->buffered = bval;
 			PDO_DBG_RETURN(1);
+
 		case PDO_MYSQL_ATTR_DIRECT_QUERY:
 		case PDO_ATTR_EMULATE_PREPARES:
 			/* ignore if the new value equals the old one */
 			((pdo_mysql_db_handle *)dbh->driver_data)->emulate_prepare = bval;
 			PDO_DBG_RETURN(1);
+
 		case PDO_ATTR_FETCH_TABLE_NAMES:
 			((pdo_mysql_db_handle *)dbh->driver_data)->fetch_table_names = bval;
 			PDO_DBG_RETURN(1);
+
 #ifndef PDO_USE_MYSQLND
 		case PDO_MYSQL_ATTR_MAX_BUFFER_SIZE:
 			if (lval < 0) {
@@ -450,8 +480,13 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 			}
 		}
 			break;
+
 		case PDO_ATTR_AUTOCOMMIT:
 			ZVAL_LONG(return_value, dbh->auto_commit);
+			break;
+
+		case PDO_ATTR_DEFAULT_STR_PARAM:
+			ZVAL_LONG(return_value, H->assume_national_character_set_strings ? PDO_PARAM_STR_NATL : PDO_PARAM_STR_CHAR);
 			break;
 
 		case PDO_MYSQL_ATTR_USE_BUFFERED_QUERY:
@@ -597,6 +632,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 	H->max_buffer_size = 1024*1024;
 #endif
 
+	H->assume_national_character_set_strings = 0;
 	H->buffered = H->emulate_prepare = 1;
 
 	/* handle MySQL options */
@@ -615,6 +651,9 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 			PDO_MYSQL_ATTR_DIRECT_QUERY, H->emulate_prepare);
 		H->emulate_prepare = pdo_attr_lval(driver_options,
 			PDO_ATTR_EMULATE_PREPARES, H->emulate_prepare);
+
+		H->assume_national_character_set_strings = pdo_attr_lval(driver_options,
+			PDO_ATTR_DEFAULT_STR_PARAM, 0) == PDO_PARAM_STR_NATL ? 1 : 0;
 
 #ifndef PDO_USE_MYSQLND
 		H->max_buffer_size = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_MAX_BUFFER_SIZE, H->max_buffer_size);

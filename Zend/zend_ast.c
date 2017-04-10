@@ -277,7 +277,7 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 			zval *zv = zend_ast_get_zval(ast);
 
 			if (Z_OPT_CONSTANT_P(zv)) {
-				if (!(Z_TYPE_FLAGS_P(zv) & IS_TYPE_IMMUTABLE)) {
+				if (Z_TYPE_FLAGS_P(zv) & IS_TYPE_REFCOUNTED) {
 					if (UNEXPECTED(zval_update_constant_ex(zv, scope) != SUCCESS)) {
 						ret = FAILURE;
 						break;

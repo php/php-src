@@ -26,28 +26,28 @@ var_dump($_POST);
 array(2) {
   [%d]=>
   array(5) {
-    [%u|b%"name"]=>
+    ["name"]=>
     %string|unicode%(9) "file1.txt"
-    [%u|b%"type"]=>
+    ["type"]=>
     %string|unicode%(16) "text/plain-file1"
-    [%u|b%"tmp_name"]=>
+    ["tmp_name"]=>
     %string|unicode%(%d) "%s"
-    [%u|b%"error"]=>
+    ["error"]=>
     int(0)
-    [%u|b%"size"]=>
+    ["size"]=>
     int(1)
   }
   [%d]=>
   array(5) {
-    [%u|b%"name"]=>
+    ["name"]=>
     %string|unicode%(9) "file2.txt"
-    [%u|b%"type"]=>
+    ["type"]=>
     %string|unicode%(16) "text/plain-file2"
-    [%u|b%"tmp_name"]=>
+    ["tmp_name"]=>
     %string|unicode%(%d) "%s"
-    [%u|b%"error"]=>
+    ["error"]=>
     int(0)
-    [%u|b%"size"]=>
+    ["size"]=>
     int(1)
   }
 }

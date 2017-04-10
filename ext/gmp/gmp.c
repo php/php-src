@@ -173,7 +173,7 @@ const zend_function_entry gmp_functions[] = {
 	ZEND_FE(gmp_legendre,	arginfo_gmp_binary)
 	ZEND_FE(gmp_cmp,		arginfo_gmp_binary)
 	ZEND_FE(gmp_sign,		arginfo_gmp_unary)
-	ZEND_FE(gmp_random,		arginfo_gmp_random)
+	ZEND_DEP_FE(gmp_random,		arginfo_gmp_random)
 	ZEND_FE(gmp_random_seed,	arginfo_gmp_random_seed)
 	ZEND_FE(gmp_random_bits,  arginfo_gmp_random_bits)
 	ZEND_FE(gmp_random_range, arginfo_gmp_random_range)
@@ -1365,7 +1365,16 @@ ZEND_FUNCTION(gmp_fact)
 			RETURN_FALSE;
 		}
 	} else {
-		if (zval_get_long(a_arg) < 0) {
+		/* Use convert_to_number first to detect getting non-integer */
+		convert_scalar_to_number(a_arg);
+		if (Z_TYPE_P(a_arg) != IS_LONG) {
+			convert_to_long(a_arg);
+			if (Z_LVAL_P(a_arg) >= 0) {
+				/* Only warn if we'll make it past the non-negative check */
+				php_error_docref(NULL, E_WARNING, "Number has to be an integer");
+			}
+		}
+		if (Z_LVAL_P(a_arg) < 0) {
 			php_error_docref(NULL, E_WARNING, "Number has to be greater than or equal to 0");
 			RETURN_FALSE;
 		}

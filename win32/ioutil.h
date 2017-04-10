@@ -114,6 +114,8 @@ typedef enum {
 	&& 0 == wcsncmp((pathw), PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW, PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW))
 #define PHP_WIN32_IOUTIL_IS_ABSOLUTEW(pathw, path_lenw) (PHP_WIN32_IOUTIL_IS_LONG_PATHW(pathw, path_lenw) \
 	|| path_lenw >= 3 && PHP_WIN32_IOUTIL_IS_LETTERW(pathw[0]) && L':' == pathw[1] && IS_SLASHW(pathw[2]))
+#define PHP_WIN32_IOUTIL_IS_UNC(pathw, path_lenw) (path_lenw >= 2 && PHP_WIN32_IOUTIL_IS_SLASHW(pathw[0]) && PHP_WIN32_IOUTIL_IS_SLASHW(pathw[1]) \
+	|| path_lenw >= PHP_WIN32_IOUTIL_UNC_PATH_PREFIX_LENW && 0 == wcsncmp((pathw), PHP_WIN32_IOUTIL_UNC_PATH_PREFIXW, PHP_WIN32_IOUTIL_UNC_PATH_PREFIX_LENW))
 
 #define PHP_WIN32_IOUTIL_INIT_W(path) \
 	wchar_t *pathw = php_win32_ioutil_any_to_w(path); \
@@ -466,7 +468,7 @@ __forceinline static char *php_win32_ioutil_getcwd(char *buf, int len)
 		/* If buf was NULL, the result has to be freed outside here. */
 		buf = tmp_bufa;
 	} else {
-		if (tmp_bufa_len + 1 > len) {
+		if (tmp_bufa_len + 1 > (size_t)len) {
 			free(tmp_bufa);
 			SET_ERRNO_FROM_WIN32_CODE(ERROR_INSUFFICIENT_BUFFER);
 			return NULL;

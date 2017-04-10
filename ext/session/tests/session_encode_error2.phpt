@@ -220,7 +220,7 @@ bool(true)
 
 -- Iteration 20 --
 bool(true)
-bool(false)
+string(33) "Hello World!|s:12:"Hello World!";"
 bool(true)
 
 -- Iteration 21 --

@@ -14,4 +14,4 @@ $foo = new Foo();
 
 ?>
 --EXPECTF--
-Notice: Use of undefined constant FOO - assumed 'FOO' in %s on line %d
+Warning: Use of undefined constant FOO - assumed 'FOO' (this will throw an Error in a future version of PHP) in %s on line %d

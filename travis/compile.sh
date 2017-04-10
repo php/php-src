@@ -31,7 +31,6 @@ $TS \
 --enable-zip \
 --with-zlib \
 --with-zlib-dir=/usr \
---with-mcrypt=/usr \
 --enable-soap \
 --enable-xmlreader \
 --with-xsl \
@@ -59,6 +58,7 @@ $TS \
 --with-freetype-dir=/usr \
 --with-xpm-dir=/usr \
 --with-kerberos \
---enable-sysvmsg 
+--enable-sysvmsg \
+--enable-zend-test
 make -j2 --quiet
 make install

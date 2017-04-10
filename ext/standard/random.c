@@ -195,9 +195,9 @@ PHP_FUNCTION(random_bytes)
 	zend_long size;
 	zend_string *bytes;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "l", &size) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START_EX(ZEND_PARSE_PARAMS_THROW, 1, 1)
+		Z_PARAM_LONG(size)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (size < 1) {
 		zend_throw_exception(zend_ce_error, "Length must be greater than 0", 0);
@@ -269,9 +269,10 @@ PHP_FUNCTION(random_int)
 	zend_long max;
 	zend_long result;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "ll", &min, &max) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START_EX(ZEND_PARSE_PARAMS_THROW, 2, 2)
+		Z_PARAM_LONG(min)
+		Z_PARAM_LONG(max)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (min > max) {
 		zend_throw_exception(zend_ce_error, "Minimum value must be less than or equal to the maximum value", 0);

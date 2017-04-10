@@ -450,9 +450,8 @@ static void place_essa_pis(
 			if ((pi = add_pi(arena, op_array, dfg, ssa, j, bt, var))) {
 				pi_type_mask(pi, mask_for_type_check(type));
 			}
-			if (type != IS_OBJECT && type != IS_RESOURCE) {
-				/* is_object() and is_resource() may return false, even though the value is
-				 * an object/resource. */
+			if (type != IS_RESOURCE) {
+				/* is_resource() may return false for closed resources */
 				if ((pi = add_pi(arena, op_array, dfg, ssa, j, bf, var))) {
 					pi_not_type_mask(pi, mask_for_type_check(type));
 				}
@@ -763,6 +762,10 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 					break;
 			}
 			if (opline->result_type == IS_CV) {
+				if ((build_flags & ZEND_SSA_USE_CV_RESULTS)
+				 && opline->opcode != ZEND_RECV) {
+					ssa_ops[k].result_use = var[EX_VAR_TO_NUM(opline->result.var)];
+				}
 				ssa_ops[k].result_def = ssa_vars_count;
 				var[EX_VAR_TO_NUM(opline->result.var)] = ssa_vars_count;
 				ssa_vars_count++;
@@ -866,9 +869,6 @@ int zend_build_ssa(zend_arena **arena, const zend_script *script, const zend_op_
 
 	ssa->rt_constants = (build_flags & ZEND_RT_CONSTANTS);
 	ssa_blocks = zend_arena_calloc(arena, blocks_count, sizeof(zend_ssa_block));
-	if (!ssa_blocks) {
-		return FAILURE;
-	}
 	ssa->blocks = ssa_blocks;
 
 	/* Compute Variable Liveness */
@@ -1035,7 +1035,7 @@ int zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_array *op_
 			op->op2_use_chain = ssa_vars[op->op2_use].use_chain;
 			ssa_vars[op->op2_use].use_chain = i;
 		}
-		if (op->result_use >= 0) {
+		if (op->result_use >= 0 && op->result_use != op->op1_use && op->result_use != op->op2_use) {
 			op->res_use_chain = ssa_vars[op->result_use].use_chain;
 			ssa_vars[op->result_use].use_chain = i;
 		}

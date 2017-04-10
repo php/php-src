@@ -54,6 +54,10 @@
 #include <limits.h>
 #endif
 
+#ifdef PHP_WIN32
+# include "win32/nice.h"
+#endif
+
 static size_t cmd_max_len;
 
 /* {{{ PHP_MINIT_FUNCTION(exec) */
@@ -209,15 +213,15 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 	zval *ret_code=NULL, *ret_array=NULL;
 	int ret;
 
-	if (mode) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|z/", &cmd, &cmd_len, &ret_code) == FAILURE) {
-			RETURN_FALSE;
+	ZEND_PARSE_PARAMETERS_START(1, (mode ? 2 : 3))
+		Z_PARAM_STRING(cmd, cmd_len)
+		Z_PARAM_OPTIONAL
+		if (!mode) {
+			Z_PARAM_ZVAL_DEREF_EX(ret_array, 0, 1)
 		}
-	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|z/z/", &cmd, &cmd_len, &ret_array, &ret_code) == FAILURE) {
-			RETURN_FALSE;
-		}
-	}
+		Z_PARAM_ZVAL_DEREF_EX(ret_code, 0, 1)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+
 	if (!cmd_len) {
 		php_error_docref(NULL, E_WARNING, "Cannot execute a blank command");
 		RETURN_FALSE;
@@ -473,9 +477,9 @@ PHP_FUNCTION(escapeshellcmd)
 	char *command;
 	size_t command_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &command, &command_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(command, command_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (command_len) {
 		if (command_len != strlen(command)) {
@@ -496,9 +500,9 @@ PHP_FUNCTION(escapeshellarg)
 	char *argument;
 	size_t argument_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &argument, &argument_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(argument, argument_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (argument) {
 		if (argument_len != strlen(argument)) {
@@ -520,9 +524,9 @@ PHP_FUNCTION(shell_exec)
 	zend_string *ret;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &command, &command_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(command, command_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 #ifdef PHP_WIN32
 	if ((in=VCWD_POPEN(command, "rt"))==NULL) {
@@ -550,14 +554,18 @@ PHP_FUNCTION(proc_nice)
 {
 	zend_long pri;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &pri) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(pri)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	errno = 0;
 	php_ignore_value(nice(pri));
 	if (errno) {
+#ifdef PHP_WIN32
+		php_error_docref(NULL, E_WARNING, php_win_err());
+#else
 		php_error_docref(NULL, E_WARNING, "Only a super user may attempt to increase the priority of a process");
+#endif
 		RETURN_FALSE;
 	}
 

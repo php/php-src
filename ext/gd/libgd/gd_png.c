@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "gd.h"
+#include "gd_errors.h"
 
 /* JCE: Arrange HAVE_LIBPNG so that it can be set in gd.h */
 #ifdef HAVE_LIBPNG
@@ -61,11 +62,11 @@ static void gdPngErrorHandler (png_structp png_ptr, png_const_charp msg)
 	 * been defined.
 	 */
 
-	php_gd_error_ex(E_WARNING, "gd-png:  fatal libpng error: %s", msg);
+	gd_error_ex(GD_WARNING, "gd-png:  fatal libpng error: %s", msg);
 
 	jmpbuf_ptr = png_get_error_ptr (png_ptr);
 	if (jmpbuf_ptr == NULL) { /* we are completely hosed now */
-		php_gd_error_ex(E_ERROR, "gd-png:  EXTREMELY fatal error: jmpbuf unrecoverable; terminating.");
+		gd_error_ex(GD_ERROR, "gd-png:  EXTREMELY fatal error: jmpbuf unrecoverable; terminating.");
 	}
 
 	longjmp (jmpbuf_ptr->jmpbuf, 1);
@@ -120,8 +121,8 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 #endif
 	png_structp png_ptr;
 	png_infop info_ptr;
-	png_uint_32 width, height, rowbytes, w, h;
-	int bit_depth, color_type, interlace_type;
+	png_uint_32 width, height, rowbytes, w, h, res_x, res_y;
+	int bit_depth, color_type, interlace_type, unit_type;
 	int num_palette, num_trans;
 	png_colorp palette;
 	png_color_16p trans_gray_rgb;
@@ -156,13 +157,13 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 	png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 #endif
 	if (png_ptr == NULL) {
-		php_gd_error("gd-png error: cannot allocate libpng main struct");
+		gd_error("gd-png error: cannot allocate libpng main struct");
 		return NULL;
 	}
 
 	info_ptr = png_create_info_struct(png_ptr);
 	if (info_ptr == NULL) {
-		php_gd_error("gd-png error: cannot allocate libpng info struct");
+		gd_error("gd-png error: cannot allocate libpng info struct");
 		png_destroy_read_struct (&png_ptr, NULL, NULL);
 
 		return NULL;
@@ -178,7 +179,7 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 	 */
 #ifdef PNG_SETJMP_SUPPORTED
 	if (setjmp(jbw.jmpbuf)) {
-		php_gd_error("gd-png error: setjmp returns error condition");
+		gd_error("gd-png error: setjmp returns error condition");
 		png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
 
 		return NULL;
@@ -198,7 +199,7 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 		im = gdImageCreate((int) width, (int) height);
 	}
 	if (im == NULL) {
-		php_gd_error("gd-png error: cannot allocate gdImage struct");
+		gd_error("gd-png error: cannot allocate gdImage struct");
 		png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
 
 		return NULL;
@@ -215,7 +216,7 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 	 */
 #ifdef PNG_SETJMP_SUPPORTED
 	if (setjmp(jbw.jmpbuf)) {
-		php_gd_error("gd-png error: setjmp returns error condition");
+		gd_error("gd-png error: setjmp returns error condition");
 		png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
 		gdFree(image_data);
 		gdFree(row_pointers);
@@ -226,11 +227,25 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 	}
 #endif
 
+#ifdef PNG_pHYs_SUPPORTED
+	/* check if the resolution is specified */
+	if (png_get_valid(png_ptr, info_ptr, PNG_INFO_pHYs)) {
+		if (png_get_pHYs(png_ptr, info_ptr, &res_x, &res_y, &unit_type)) {
+			switch (unit_type) {
+			case PNG_RESOLUTION_METER:
+				im->res_x = DPM2DPI(res_x);
+				im->res_y = DPM2DPI(res_y);
+				break;
+			}
+		}
+	}
+#endif
+
 	switch (color_type) {
 		case PNG_COLOR_TYPE_PALETTE:
 			png_get_PLTE(png_ptr, info_ptr, &palette, &num_palette);
 #ifdef DEBUG
-			php_gd_error("gd-png color_type is palette, colors: %d", num_palette);
+			gd_error("gd-png color_type is palette, colors: %d", num_palette);
 #endif /* DEBUG */
 			if (png_get_valid (png_ptr, info_ptr, PNG_INFO_tRNS)) {
 				/* gd 2.0: we support this rather thoroughly now. Grab the
@@ -253,7 +268,7 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 		case PNG_COLOR_TYPE_GRAY:
 			/* create a fake palette and check for single-shade transparency */
 			if ((palette = (png_colorp) gdMalloc (256 * sizeof (png_color))) == NULL) {
-				php_gd_error("gd-png error: cannot allocate gray palette");
+				gd_error("gd-png error: cannot allocate gray palette");
 				png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
 
 				return NULL;
@@ -402,7 +417,7 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 	if (!im->trueColor) {
 		for (i = num_palette; i < gdMaxColors; ++i) {
 			if (!open[i]) {
-				php_gd_error("gd-png warning: image data references out-of-range color index (%d)", i);
+				gd_error("gd-png warning: image data references out-of-range color index (%d)", i);
 			}
 		}
 	}
@@ -484,13 +499,13 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level, int basefilte
 	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 #endif
 	if (png_ptr == NULL) {
-		php_gd_error("gd-png error: cannot allocate libpng main struct");
+		gd_error("gd-png error: cannot allocate libpng main struct");
 		return;
 	}
 
 	info_ptr = png_create_info_struct(png_ptr);
 	if (info_ptr == NULL) {
-		php_gd_error("gd-png error: cannot allocate libpng info struct");
+		gd_error("gd-png error: cannot allocate libpng info struct");
 		png_destroy_write_struct (&png_ptr, (png_infopp) NULL);
 
 		return;
@@ -498,7 +513,7 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level, int basefilte
 
 #ifdef PNG_SETJMP_SUPPORTED
 	if (setjmp(jbw.jmpbuf)) {
-		php_gd_error("gd-png error: setjmp returns error condition");
+		gd_error("gd-png error: setjmp returns error condition");
 		png_destroy_write_struct (&png_ptr, &info_ptr);
 
 		return;
@@ -518,13 +533,19 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level, int basefilte
 
 	/* 2.0.12: this is finally a parameter */
 	if (level != -1 && (level < 0 || level > 9)) {
-		php_gd_error("gd-png error: compression level must be 0 through 9");
+		gd_error("gd-png error: compression level must be 0 through 9");
 		return;
 	}
 	png_set_compression_level(png_ptr, level);
 	if (basefilter >= 0) {
 		png_set_filter(png_ptr, PNG_FILTER_TYPE_BASE, basefilter);
 	}
+
+#ifdef PNG_pHYs_SUPPORTED
+	/* 2.1.0: specify the resolution */
+	png_set_pHYs(png_ptr, info_ptr, DPI2DPM(im->res_x), DPI2DPM(im->res_y),
+	             PNG_RESOLUTION_METER);
+#endif
 
 	/* can set this to a smaller value without compromising compression if all
 	 * image data is 16K or less; will save some decoder memory [min == 8]
@@ -550,7 +571,7 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level, int basefilte
 			}
 		}
 		if (colors == 0) {
-			php_gd_error("gd-png error: no colors in palette");
+			gd_error("gd-png error: no colors in palette");
 			goto bail;
 		}
 		if (colors < im->colorsTotal) {

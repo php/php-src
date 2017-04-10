@@ -2,9 +2,9 @@
 Validation of class names in the autoload process
 --FILE--
 <?php
-function __autoload($name) {
+spl_autoload_register(function ($name) {
 	echo "$name\n";
-}
+});
 $a = "../BUG";
 $x = new $a;
 echo "BUG\n";

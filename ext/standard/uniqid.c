@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Stig Sæther Bakken <ssb@php.net>                             |
+   | Author: Stig SÃ¦ther Bakken <ssb@php.net>                             |
    +----------------------------------------------------------------------+
  */
 
@@ -54,10 +54,11 @@ PHP_FUNCTION(uniqid)
 	size_t prefix_len = 0;
 	struct timeval tv;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|sb", &prefix, &prefix_len,
-							  &more_entropy)) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING(prefix, prefix_len)
+		Z_PARAM_BOOL(more_entropy)
+	ZEND_PARSE_PARAMETERS_END();
 
 #if HAVE_USLEEP && !defined(PHP_WIN32)
 	if (!more_entropy) {

@@ -21,11 +21,11 @@
 
 #include "php.h"
 #include "winutil.h"
-#include <wincrypt.h>
+#include <bcrypt.h>
 #include <lmcons.h>
 
 PHP_WINUTIL_API char *php_win32_error_to_msg(HRESULT error)
-{
+{/*{{{*/
 	char *buf = NULL;
 
 	FormatMessage(
@@ -34,9 +34,10 @@ PHP_WINUTIL_API char *php_win32_error_to_msg(HRESULT error)
 	);
 
 	return (buf ? (char *) buf : "");
-}
+}/*}}}*/
 
-int php_win32_check_trailing_space(const char * path, const int path_len) {
+int php_win32_check_trailing_space(const char * path, const int path_len)
+{/*{{{*/
 	if (path_len < 1) {
 		return 1;
 	}
@@ -49,79 +50,56 @@ int php_win32_check_trailing_space(const char * path, const int path_len) {
 	} else {
 		return 0;
 	}
-}
+}/*}}}*/
 
-HCRYPTPROV   hCryptProv;
-unsigned int has_crypto_ctx = 0;
+static BCRYPT_ALG_HANDLE bcrypt_algo;
+static BOOL has_bcrypt_algo = 0;
 
-#ifdef ZTS
-MUTEX_T php_lock_win32_cryptoctx;
-void php_win32_init_rng_lock()
-{
-	php_lock_win32_cryptoctx = tsrm_mutex_alloc();
-}
+#define NT_SUCCESS(Status) (((NTSTATUS)(Status)) >= 0)
 
-void php_win32_free_rng_lock()
-{
-	tsrm_mutex_lock(php_lock_win32_cryptoctx);
-	if (has_crypto_ctx == 1) {
-		CryptReleaseContext(hCryptProv, 0);
-		has_crypto_ctx = 0;
+#ifdef PHP_EXPORTS
+BOOL php_win32_shutdown_random_bytes(void)
+{/*{{{*/
+	BOOL ret = TRUE;
+
+	if (has_bcrypt_algo) {
+		ret = NT_SUCCESS(BCryptCloseAlgorithmProvider(bcrypt_algo, 0));
+		has_bcrypt_algo = 0;
 	}
-	tsrm_mutex_unlock(php_lock_win32_cryptoctx);
-	tsrm_mutex_free(php_lock_win32_cryptoctx);
 
-}
-#else
-#define php_win32_init_rng_lock();
-#define php_win32_free_rng_lock();
+	return ret;
+}/*}}}*/
+
+BOOL php_win32_init_random_bytes(void)
+{/*{{{*/
+	if (has_bcrypt_algo) {
+		return TRUE;
+	}
+
+	has_bcrypt_algo = NT_SUCCESS(BCryptOpenAlgorithmProvider(&bcrypt_algo, BCRYPT_RNG_ALGORITHM, NULL, 0));
+
+	return has_bcrypt_algo;
+}/*}}}*/
 #endif
 
-
-
-PHP_WINUTIL_API int php_win32_get_random_bytes(unsigned char *buf, size_t size) {  /* {{{ */
+PHP_WINUTIL_API int php_win32_get_random_bytes(unsigned char *buf, size_t size)
+{  /* {{{ */
 
 	BOOL ret;
 
-#ifdef ZTS
-	tsrm_mutex_lock(php_lock_win32_cryptoctx);
-#endif
-
-	if (has_crypto_ctx == 0) {
-		/* CRYPT_VERIFYCONTEXT > only hashing&co-like use, no need to acces prv keys */
-		if (!CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_MACHINE_KEYSET|CRYPT_VERIFYCONTEXT )) {
-			/* Could mean that the key container does not exist, let try
-			   again by asking for a new one. If it fails here, it surely means that the user running
-               this process does not have the permission(s) to use this container.
-             */
-			if (GetLastError() == NTE_BAD_KEYSET) {
-				if (CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_NEWKEYSET | CRYPT_MACHINE_KEYSET | CRYPT_VERIFYCONTEXT )) {
-					has_crypto_ctx = 1;
-				} else {
-					has_crypto_ctx = 0;
-				}
-			}
-		} else {
-			has_crypto_ctx = 1;
-		}
-	}
-
-#ifdef ZTS
-	tsrm_mutex_unlock(php_lock_win32_cryptoctx);
-#endif
-
-	if (has_crypto_ctx == 0) {
+#if 0
+	/* Currently we fail on startup, with CNG API it shows no regressions so far and is secure.
+		Should switch on and try to reinit, if it fails too often on startup. This means also
+		bringing locks back. */
+	if (has_bcrypt_algo == 0) {
 		return FAILURE;
 	}
+#endif
 
-	/* XXX should go in the loop if size exceeds UINT_MAX */
-	ret = CryptGenRandom(hCryptProv, (DWORD)size, buf);
+	/* No sense to loop here, the limit is huge enough. */
+	ret = NT_SUCCESS(BCryptGenRandom(bcrypt_algo, buf, (ULONG)size, 0));
 
-	if (ret) {
-		return SUCCESS;
-	} else {
-		return FAILURE;
-	}
+	return ret ? SUCCESS : FAILURE;
 }
 /* }}} */
 
@@ -136,7 +114,7 @@ PHP_WINUTIL_API int php_win32_get_random_bytes(unsigned char *buf, size_t size) 
 */
 
 PHP_WINUTIL_API int php_win32_code_to_errno(unsigned long w32Err)
-{
+{/*{{{*/
     size_t  i;
 
     struct code_to_errno_map
@@ -416,10 +394,10 @@ PHP_WINUTIL_API int php_win32_code_to_errno(unsigned long w32Err)
     assert(!"Unrecognised value");
 
     return EINVAL;
-}
+}/*}}}*/
 
 PHP_WINUTIL_API char *php_win32_get_username(void)
-{
+{/*{{{*/
 	wchar_t unamew[UNLEN + 1];
 	size_t uname_len;
 	char *uname;
@@ -437,7 +415,7 @@ PHP_WINUTIL_API char *php_win32_get_username(void)
 	}
 
 	return uname;
-}
+}/*}}}*/
 
 /*
  * Local variables:

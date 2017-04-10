@@ -287,7 +287,6 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 #if 0
 		/* pre-evaluate functions:
 		   constant(x)
-		   defined(x)
 		   function_exists(x)
 		   extension_loaded(x)
 		   BAD: interacts badly with Accelerator
@@ -304,16 +303,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 				zval *arg = &OPLINE_OP1_LITERAL(sv);
 				char *fname = FUNCTION_CACHE->funcs[Z_LVAL(ZEND_OP1_LITERAL(fcall))].function_name;
 				int flen = FUNCTION_CACHE->funcs[Z_LVAL(ZEND_OP1_LITERAL(fcall))].name_len;
-				if(flen == sizeof("defined")-1 && zend_binary_strcasecmp(fname, flen, "defined", sizeof("defined")-1) == 0) {
-					zval c;
-					if(zend_optimizer_get_persistent_constant(Z_STR_P(arg), &c, 0 ELS_CC) != 0) {
-						literal_dtor(arg);
-						MAKE_NOP(sv);
-						MAKE_NOP(fcall);
-						LITERAL_BOOL(opline->op1, 1);
-						ZEND_OP1_TYPE(opline) = IS_CONST;
-					}
-				} else if((flen == sizeof("function_exists")-1 && zend_binary_strcasecmp(fname, flen, "function_exists", sizeof("function_exists")-1) == 0) ||
+				if((flen == sizeof("function_exists")-1 && zend_binary_strcasecmp(fname, flen, "function_exists", sizeof("function_exists")-1) == 0) ||
 						  (flen == sizeof("is_callable")-1 && zend_binary_strcasecmp(fname, flen, "is_callable", sizeof("is_callable")-1) == 0)
 						  ) {
 					zend_function *function;

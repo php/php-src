@@ -1960,6 +1960,9 @@ inline_char_handler:
 
 <ST_IN_SCRIPTING>"?>"{NEWLINE}? {
 	BEGIN(INITIAL);
+	if (yytext[yyleng-1] != '>') {
+		CG(increment_lineno) = 1;
+	}
 	RETURN_TOKEN(T_CLOSE_TAG);  /* implicit ';' at php-end tag */
 }
 

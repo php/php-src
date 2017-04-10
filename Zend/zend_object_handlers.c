@@ -163,7 +163,7 @@ ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp) /* {{{ *
 
 	zend_call_method_with_0_params(object, ce, &ce->__debugInfo, ZEND_DEBUGINFO_FUNC_NAME, &retval);
 	if (Z_TYPE(retval) == IS_ARRAY) {
-		if (Z_IMMUTABLE(retval)) {
+		if (!Z_REFCOUNTED(retval)) {
 			*is_temp = 1;
 			return zend_array_dup(Z_ARRVAL(retval));
 		} else if (Z_REFCOUNT(retval) <= 1) {
@@ -206,10 +206,8 @@ static void zend_std_call_getter(zval *object, zval *member, zval *retval) /* {{
 }
 /* }}} */
 
-static int zend_std_call_setter(zval *object, zval *member, zval *value) /* {{{ */
+static void zend_std_call_setter(zval *object, zval *member, zval *value) /* {{{ */
 {
-	zval retval;
-	int result;
 	zend_class_entry *ce = Z_OBJCE_P(object);
 	zend_class_entry *orig_fake_scope = EG(fake_scope);
 
@@ -218,20 +216,10 @@ static int zend_std_call_setter(zval *object, zval *member, zval *value) /* {{{ 
 	/* __set handler is called with two arguments:
 	     property name
 	     value to be set
-
-	   it should return whether the call was successful or not
 	*/
-	zend_call_method_with_2_params(object, ce, &ce->__set, ZEND_SET_FUNC_NAME, &retval, member, value);
+	zend_call_method_with_2_params(object, ce, &ce->__set, ZEND_SET_FUNC_NAME, NULL, member, value);
 
-	if (Z_TYPE(retval) != IS_UNDEF) {
-		result = i_zend_is_true(&retval) ? SUCCESS : FAILURE;
-		zval_ptr_dtor(&retval);
-		EG(fake_scope) = orig_fake_scope;
-		return result;
-	} else {
-		EG(fake_scope) = orig_fake_scope;
-		return FAILURE;
-	}
+	EG(fake_scope) = orig_fake_scope;
 }
 /* }}} */
 
@@ -732,9 +720,7 @@ found:
 
 			ZVAL_COPY(&tmp_object, object);
 			(*guard) |= IN_SET; /* prevent circular setting */
-			if (zend_std_call_setter(&tmp_object, member, value) != SUCCESS) {
-				/* for now, just ignore it - __set should take care of warnings, etc. */
-			}
+			zend_std_call_setter(&tmp_object, member, value);
 			(*guard) &= ~IN_SET;
 			zval_ptr_dtor(&tmp_object);
 		} else if (EXPECTED(property_offset != ZEND_WRONG_PROPERTY_OFFSET)) {
@@ -1260,7 +1246,6 @@ static zend_always_inline zend_function *zend_get_user_callstatic_function(zend_
 ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_string *function_name, const zval *key) /* {{{ */
 {
 	zend_function *fbc = NULL;
-	char *lc_class_name;
 	zend_string *lc_function_name;
 	zend_object *object;
 	zend_class_entry *scope;
@@ -1271,21 +1256,19 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 		lc_function_name = zend_string_tolower(function_name);
 	}
 
-	if (ZSTR_LEN(function_name) == ZSTR_LEN(ce->name) && ce->constructor) {
-		lc_class_name = zend_str_tolower_dup(ZSTR_VAL(ce->name), ZSTR_LEN(ce->name));
-		/* Only change the method to the constructor if the constructor isn't called __construct
-		 * we check for __ so we can be binary safe for lowering, we should use ZEND_CONSTRUCTOR_FUNC_NAME
-		 */
-		if (!memcmp(lc_class_name, ZSTR_VAL(lc_function_name), ZSTR_LEN(function_name)) && memcmp(ZSTR_VAL(ce->constructor->common.function_name), "__", sizeof("__") - 1)) {
-			fbc = ce->constructor;
-		}
-		efree(lc_class_name);
-	}
-
-	if (EXPECTED(!fbc)) {
+	do {
 		zval *func = zend_hash_find(&ce->function_table, lc_function_name);
 		if (EXPECTED(func != NULL)) {
 			fbc = Z_FUNC_P(func);
+		} else if (ce->constructor
+			&& ZSTR_LEN(lc_function_name) == ZSTR_LEN(ce->name)
+			&& zend_binary_strncasecmp(ZSTR_VAL(lc_function_name), ZSTR_LEN(lc_function_name), ZSTR_VAL(ce->name), ZSTR_LEN(lc_function_name), ZSTR_LEN(lc_function_name)) == 0
+			/* Only change the method to the constructor if the constructor isn't called __construct
+			 * we check for __ so we can be binary safe for lowering, we should use ZEND_CONSTRUCTOR_FUNC_NAME
+			 */
+			&& (ZSTR_VAL(ce->constructor->common.function_name)[0] != '_'
+				|| ZSTR_VAL(ce->constructor->common.function_name)[1] != '_')) {
+			fbc = ce->constructor;
 		} else {
 			if (UNEXPECTED(!key)) {
 				zend_string_release(lc_function_name);
@@ -1308,7 +1291,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 	   			return NULL;
 			}
 		}
-	}
+	} while (0);
 
 #if MBO_0
 	/* right now this function is used for non static method lookup too */
@@ -1699,7 +1682,7 @@ int zend_std_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **f
 
 	ce = Z_OBJCE_P(obj);
 
-	if ((func = zend_hash_find(&ce->function_table, CG(known_strings)[ZEND_STR_MAGIC_INVOKE])) == NULL) {
+	if ((func = zend_hash_find(&ce->function_table, ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE))) == NULL) {
 		return FAILURE;
 	}
 	*fptr_ptr = Z_FUNC_P(func);

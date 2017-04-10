@@ -41,6 +41,7 @@
 #define HASH_FLAG_INITIALIZED      (1<<3)
 #define HASH_FLAG_STATIC_KEYS      (1<<4) /* long and interned strings */
 #define HASH_FLAG_HAS_EMPTY_IND    (1<<5)
+#define HASH_FLAG_ALLOW_COW_VIOLATION (1<<6)
 
 #define HT_IS_PACKED(ht) \
 	(((ht)->u.flags & HASH_FLAG_PACKED) != 0)
@@ -50,6 +51,12 @@
 
 #define HT_HAS_STATIC_KEYS_ONLY(ht) \
 	(((ht)->u.flags & (HASH_FLAG_PACKED|HASH_FLAG_STATIC_KEYS)) != 0)
+
+#if ZEND_DEBUG
+# define HT_ALLOW_COW_VIOLATION(ht) (ht)->u.flags |= HASH_FLAG_ALLOW_COW_VIOLATION
+#else
+# define HT_ALLOW_COW_VIOLATION(ht)
+#endif
 
 typedef struct _zend_hash_key {
 	zend_ulong h;
@@ -247,6 +254,8 @@ ZEND_API uint32_t zend_array_count(HashTable *ht);
 ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source);
 ZEND_API void ZEND_FASTCALL zend_array_destroy(HashTable *ht);
 ZEND_API void ZEND_FASTCALL zend_symtable_clean(HashTable *ht);
+ZEND_API HashTable* ZEND_FASTCALL zend_symtable_to_proptable(HashTable *ht);
+ZEND_API HashTable* ZEND_FASTCALL zend_proptable_to_symtable(HashTable *ht, zend_bool always_duplicate);
 
 ZEND_API int ZEND_FASTCALL _zend_handle_numeric_str_ex(const char *key, size_t length, zend_ulong *idx);
 
@@ -801,7 +810,7 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 			if (UNEXPECTED(Z_TYPE_P(_z) == IS_UNDEF)) continue;
 
 #define ZEND_HASH_REVERSE_FOREACH(_ht, indirect) do { \
-		uint _idx; \
+		uint32_t _idx; \
 		for (_idx = (_ht)->nNumUsed; _idx > 0; _idx--) { \
 			Bucket *_p = (_ht)->arData + _idx - 1; \
 			zval *_z = &_p->val; \

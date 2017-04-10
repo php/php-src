@@ -10,6 +10,9 @@ if (PHP_MBSTRING != "no") {
 
 	EXTENSION("mbstring", "mbstring.c php_unicode.c mb_gpc.c", PHP_MBSTRING_SHARED);
 
+	FSO.CopyFile("ext\\mbstring\\oniguruma\\src\\oniguruma.h",
+		"ext\\mbstring\\oniguruma\\oniguruma.h", true);
+
 	if (PHP_LIBMBFL != "no" &&
 			CHECK_HEADER_ADD_INCLUDE("mbfl/mbfilter.h", "CFLAGS_LIBMBFL", PHP_LIBMBFL + "\\include") &&
 			CHECK_LIB("mbfl.lib", "libmbfl", PHP_LIBMBFL + "\\lib")) {
@@ -74,8 +77,13 @@ if (PHP_MBSTRING != "no") {
 	AC_DEFINE('HAVE_MBSTR_RU', 1, 'RU');
 	AC_DEFINE('HAVE_MBSTR_TW', 1, 'TW');
 
-	FSO.CopyFile("ext\\mbstring\\oniguruma\\win32\\config.h",
-		"ext\\mbstring\\oniguruma\\config.h", true);
+	if (X64) {
+		FSO.CopyFile("ext\\mbstring\\oniguruma\\src\\config.h.win64",
+			"ext\\mbstring\\oniguruma\\src\\config.h", true);
+	} else {
+		FSO.CopyFile("ext\\mbstring\\oniguruma\\src\\config.h.win32",
+			"ext\\mbstring\\oniguruma\\src\\config.h", true);
+	}
 
 	if (PHP_MBREGEX != "no") {
 		AC_DEFINE('HAVE_STDARG_PROTOTYPES', 1, 'have stdarg.h');
@@ -84,16 +92,7 @@ if (PHP_MBSTRING != "no") {
 		if (PHP_MBREGEX_BACKTRACK != "no") {
 			AC_DEFINE('USE_COMBINATION_EXPLOSION_CHECK', 1);
 		}
-		ADD_SOURCES("ext/mbstring/oniguruma", "regcomp.c regerror.c \
-			regenc.c regexec.c reggnu.c regparse.c regposerr.c \
-			regext.c regsyntax.c regtrav.c regversion.c st.c", "mbstring");
-		ADD_SOURCES("ext/mbstring/oniguruma/enc", "ascii.c big5.c \
-			euc_jp.c euc_kr.c euc_tw.c iso8859_1.c iso8859_2.c \
-			iso8859_3.c iso8859_4.c iso8859_5.c iso8859_6.c \
-			iso8859_7.c iso8859_8.c iso8859_9.c iso8859_10.c \
-			iso8859_11.c iso8859_13.c iso8859_14.c iso8859_15.c iso8859_16.c \
-			koi8.c koi8_r.c sjis.c utf8.c unicode.c utf16_be.c utf16_le.c \
-			utf32_be.c utf32_le.c gb18030.c", "mbstring");
+		ADD_SOURCES("ext/mbstring/oniguruma/src", "ascii.c big5.c cp1251.c euc_jp.c euc_jp_prop.c euc_kr.c euc_tw.c gb18030.c iso8859_1.c iso8859_10.c iso8859_11.c iso8859_13.c iso8859_14.c iso8859_15.c iso8859_16.c iso8859_2.c iso8859_3.c iso8859_4.c iso8859_5.c iso8859_6.c iso8859_7.c iso8859_8.c iso8859_9.c koi8.c koi8_r.c mktable.c onig_init.c regcomp.c regenc.c regerror.c regexec.c regext.c reggnu.c regparse.c regposerr.c regposix.c regsyntax.c regtrav.c regversion.c sjis.c sjis_prop.c st.c unicode.c unicode_fold1_key.c unicode_fold2_key.c unicode_fold3_key.c unicode_unfold_key.c utf16_be.c utf16_le.c utf32_be.c utf32_le.c utf8.c", "mbstring");
 		ADD_SOURCES("ext/mbstring", "php_mbregex.c", "mbstring");
 		PHP_INSTALL_HEADERS("ext/mbstring", "php_mbregex.h");
 	}

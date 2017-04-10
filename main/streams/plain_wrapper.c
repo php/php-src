@@ -51,7 +51,7 @@
 #define php_stream_fopen_from_file_int(file, mode)	_php_stream_fopen_from_file_int((file), (mode) STREAMS_CC)
 #define php_stream_fopen_from_file_int_rel(file, mode)	 _php_stream_fopen_from_file_int((file), (mode) STREAMS_REL_CC)
 
-#if !defined(WINDOWS) && !defined(NETWARE)
+#ifndef PHP_WIN32
 extern int php_get_uid_by_name(const char *name, uid_t *uid);
 extern int php_get_gid_by_name(const char *name, gid_t *gid);
 #endif
@@ -1170,7 +1170,7 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_f
 			zend_stat_t sb;
 			if (php_copy_file(url_from, url_to) == SUCCESS) {
 				if (VCWD_STAT(url_from, &sb) == 0) {
-#  if !defined(TSRM_WIN32) && !defined(NETWARE)
+#  ifndef TSRM_WIN32
 					if (VCWD_CHMOD(url_to, sb.st_mode)) {
 						if (errno == EPERM) {
 							php_error_docref2(NULL, url_from, url_to, E_WARNING, "%s", strerror(errno));
@@ -1331,7 +1331,7 @@ static int php_plain_files_rmdir(php_stream_wrapper *wrapper, const char *url, i
 static int php_plain_files_metadata(php_stream_wrapper *wrapper, const char *url, int option, void *value, php_stream_context *context)
 {
 	struct utimbuf *newtime;
-#if !defined(WINDOWS) && !defined(NETWARE)
+#ifndef PHP_WIN32
 	uid_t uid;
 	gid_t gid;
 #endif
@@ -1370,7 +1370,7 @@ static int php_plain_files_metadata(php_stream_wrapper *wrapper, const char *url
 
 			ret = VCWD_UTIME(url, newtime);
 			break;
-#if !defined(WINDOWS) && !defined(NETWARE)
+#ifndef PHP_WIN32
 		case PHP_STREAM_META_OWNER_NAME:
 		case PHP_STREAM_META_OWNER:
 			if(option == PHP_STREAM_META_OWNER_NAME) {

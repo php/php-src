@@ -121,12 +121,11 @@ typedef struct _phpdbg_breakcond_t {
 PHPDBG_API void phpdbg_resolve_op_array_breaks(zend_op_array *op_array);
 PHPDBG_API int phpdbg_resolve_op_array_break(phpdbg_breakopline_t *brake, zend_op_array *op_array);
 PHPDBG_API int phpdbg_resolve_opline_break(phpdbg_breakopline_t *new_break);
-PHPDBG_API HashTable *phpdbg_resolve_pending_file_break_ex(const char *file, uint filelen, zend_string *cur, HashTable *fileht);
+PHPDBG_API HashTable *phpdbg_resolve_pending_file_break_ex(const char *file, uint32_t filelen, zend_string *cur, HashTable *fileht);
 PHPDBG_API void phpdbg_resolve_pending_file_break(const char *file); /* }}} */
 
 /* {{{ Breakpoint Creation API */
-PHPDBG_API void phpdbg_set_breakpoint_file(const char* filename, long lineno);
-PHPDBG_API void phpdbg_set_breakpoint_file_ex(const char* filename, size_t path_len, long lineno);
+PHPDBG_API void phpdbg_set_breakpoint_file(const char* filename, size_t path_len, long lineno);
 PHPDBG_API void phpdbg_set_breakpoint_symbol(const char* func_name, size_t func_name_len);
 PHPDBG_API void phpdbg_set_breakpoint_method(const char* class_name, const char* func_name);
 PHPDBG_API void phpdbg_set_breakpoint_opcode(const char* opname, size_t opname_len);

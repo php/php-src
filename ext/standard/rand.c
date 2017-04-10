@@ -57,9 +57,10 @@ PHP_FUNCTION(rand)
 		RETURN_LONG(php_mt_rand() >> 1);
 	}
 
-	if (zend_parse_parameters(argc, "ll", &min, &max) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_LONG(min)
+		Z_PARAM_LONG(max)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (max < min) {
 		RETURN_LONG(php_mt_rand_common(max, min));

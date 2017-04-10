@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Stig Sæther Bakken <ssb@php.net>                            |
+   | Authors: Stig SÃ¦ther Bakken <ssb@php.net>                            |
    |          Thies C. Arntzen <thies@thieso.net>                         |
    |          Sterling Hughes <sterling@php.net>                          |
    +----------------------------------------------------------------------+
@@ -212,14 +212,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_xml_parser_get_option, 0, 0, 2)
 	ZEND_ARG_INFO(0, option)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_utf8_encode, 0, 0, 1)
-	ZEND_ARG_INFO(0, data)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_utf8_decode, 0, 0, 1)
-	ZEND_ARG_INFO(0, data)
-ZEND_END_ARG_INFO()
-
 const zend_function_entry xml_functions[] = {
 	PHP_FE(xml_parser_create,					arginfo_xml_parser_create)
 	PHP_FE(xml_parser_create_ns,				arginfo_xml_parser_create_ns)
@@ -243,8 +235,6 @@ const zend_function_entry xml_functions[] = {
 	PHP_FE(xml_parser_free, 					arginfo_xml_parser_free)
 	PHP_FE(xml_parser_set_option, 				arginfo_xml_parser_set_option)
 	PHP_FE(xml_parser_get_option,				arginfo_xml_parser_get_option)
-	PHP_FE(utf8_encode, 						arginfo_utf8_encode)
-	PHP_FE(utf8_decode, 						arginfo_utf8_decode)
 	PHP_FE_END
 };
 
@@ -1664,46 +1654,6 @@ PHP_FUNCTION(xml_parser_get_option)
 	}
 
 	RETVAL_FALSE;	/* never reached */
-}
-/* }}} */
-
-/* {{{ proto string utf8_encode(string data) 
-   Encodes an ISO-8859-1 string to UTF-8 */
-PHP_FUNCTION(utf8_encode)
-{
-	char *arg;
-	size_t arg_len;
-	zend_string *encoded;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &arg, &arg_len) == FAILURE) {
-		return;
-	}
-
-	encoded = xml_utf8_encode(arg, arg_len, (XML_Char*)"ISO-8859-1");
-	if (encoded == NULL) {
-		RETURN_FALSE;
-	}
-	RETURN_STR(encoded);
-}
-/* }}} */
-
-/* {{{ proto string utf8_decode(string data) 
-   Converts a UTF-8 encoded string to ISO-8859-1 */
-PHP_FUNCTION(utf8_decode)
-{
-	char *arg;
-	size_t arg_len;
-	zend_string *decoded;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &arg, &arg_len) == FAILURE) {
-		return;
-	}
-
-	decoded = xml_utf8_decode((XML_Char*)arg, arg_len, (XML_Char*)"ISO-8859-1");
-	if (decoded == NULL) {
-		RETURN_FALSE;
-	}
-	RETURN_STR(decoded);
 }
 /* }}} */
 

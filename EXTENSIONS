@@ -262,6 +262,12 @@ PRIMARY MAINTAINER:  Derick Rethans <derick@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
+EXTENSION:           enchant
+PRIMARY MAINTAINER:  Unknown
+MAINTENANCE:         Maintained
+STATUS:              Working
+SINCE:               5.3
+-------------------------------------------------------------------------------
 EXTENSION:           exif
 PRIMARY MAINTAINER:  Marcus Boerger <helly@php.net>
 MAINTENANCE:         Maintained
@@ -281,7 +287,7 @@ STATUS:              Working
 SINCE:               5.2
 -------------------------------------------------------------------------------
 EXTENSION:           ftp
-PRIMARY MAINTAINER:  Stefan Esser <sesser@php.net>
+PRIMARY MAINTAINER:  Unknown
 MAINTENANCE:         Odd fixes
 STATUS:              Working
 -------------------------------------------------------------------------------
@@ -335,11 +341,6 @@ STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           mbstring
 PRIMARY MAINTAINER:  Rui Hirokawa <hirokawa@php.net>
-MAINTENANCE:         Maintained
-STATUS:              Working
--------------------------------------------------------------------------------
-EXTENSION:           mcrypt
-PRIMARY MAINTAINER:  Derick Rethans <derick@derickrethans.nl>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------

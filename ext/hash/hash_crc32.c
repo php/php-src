@@ -79,7 +79,8 @@ const php_hash_ops php_hash_crc32_ops = {
 	(php_hash_copy_func_t) PHP_CRC32Copy,
 	4, /* what to say here? */
 	4,
-	sizeof(PHP_CRC32_CTX)
+	sizeof(PHP_CRC32_CTX),
+	0
 };
 
 const php_hash_ops php_hash_crc32b_ops = {
@@ -89,7 +90,8 @@ const php_hash_ops php_hash_crc32b_ops = {
 	(php_hash_copy_func_t) PHP_CRC32Copy,
 	4, /* what to say here? */
 	4,
-	sizeof(PHP_CRC32_CTX)
+	sizeof(PHP_CRC32_CTX),
+	0
 };
 
 /*

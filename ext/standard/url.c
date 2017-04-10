@@ -336,9 +336,11 @@ PHP_FUNCTION(parse_url)
 	php_url *resource;
 	zend_long key = -1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &str, &str_len, &key) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(key)
+	ZEND_PARSE_PARAMETERS_END();
 
 	resource = php_url_parse_ex(str, str_len);
 	if (resource == NULL) {
@@ -655,9 +657,12 @@ PHP_FUNCTION(get_headers)
 	zval *zcontext = NULL;
 	php_stream_context *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lr!", &url, &url_len, &format, &zcontext) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_STRING(url, url_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(format)
+		Z_PARAM_RESOURCE_EX(zcontext, 1, 0)
+	ZEND_PARSE_PARAMETERS_END();
 
 	context = php_stream_context_from_zval(zcontext, 0);
 

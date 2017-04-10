@@ -439,7 +439,7 @@ failure:
 	}
 }
 
-zend_constant *zend_quick_get_constant(const zval *key, uint32_t flags)
+ZEND_API zend_constant* ZEND_FASTCALL zend_quick_get_constant(const zval *key, uint32_t flags)
 {
 	zend_constant *c;
 
@@ -489,6 +489,10 @@ ZEND_API int zend_register_constant(zend_constant *c)
 #if 0
 	printf("Registering constant for module %d\n", c->module_number);
 #endif
+
+    if (c->module_number != PHP_USER_CONSTANT) {
+		c->name = zend_new_interned_string(c->name);
+	}
 
 	if (!(c->flags & CONST_CS)) {
 		lowercase_name = zend_string_alloc(ZSTR_LEN(c->name), c->flags & CONST_PERSISTENT);

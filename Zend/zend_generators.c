@@ -425,7 +425,7 @@ static void zend_generator_throw_exception(zend_generator *generator, zval *exce
 	if (exception) {
 		zend_throw_exception_object(exception);
 	} else {
-		zend_throw_exception_internal(NULL);
+		zend_rethrow_exception(EG(current_execute_data));
 	}
 	generator->execute_data->opline++;
 	EG(current_execute_data) = original_execute_data;
@@ -741,12 +741,8 @@ static int zend_generator_get_next_delegated_value(zend_generator *generator) /*
 	}
 	return SUCCESS;
 
-exception: {
-		zend_execute_data *ex = EG(current_execute_data);
-		EG(current_execute_data) = generator->execute_data;
-		zend_throw_exception_internal(NULL);
-		EG(current_execute_data) = ex;
-	}
+exception:
+	zend_rethrow_exception(generator->execute_data);
 
 failure:
 	zval_ptr_dtor(&generator->values);
@@ -834,7 +830,11 @@ try_again:
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			if (generator == orig_generator) {
 				zend_generator_close(generator, 0);
-				zend_throw_exception_internal(NULL);
+				if (EG(current_execute_data) &&
+				    EG(current_execute_data)->func &&
+				    ZEND_USER_CODE(EG(current_execute_data)->func->common.type)) {
+					zend_rethrow_exception(EG(current_execute_data));
+				}
 			} else {
 				generator = zend_generator_get_current(orig_generator);
 				zend_generator_throw_exception(generator, NULL);

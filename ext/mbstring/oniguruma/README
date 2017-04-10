@@ -1,8 +1,8 @@
-README  2007/05/31
+README  2016/05/06
 
-Oniguruma  ----   (C) K.Kosako <sndgk393 AT ybb DOT ne DOT jp>
+Oniguruma  ----   (C) K.Kosako <kkosako0@gmail.com>
 
-http://www.geocities.jp/kosako3/oniguruma/
+https://github.com/kkos/oniguruma
 
 Oniguruma is a regular expressions library.
 The characteristics of this library is that different character encoding
@@ -30,17 +30,15 @@ Install
 
  Case 1: Unix and Cygwin platform
 
-   1. ./configure
-   2. make
-   3. make install
+   1. autoreconf -vfi   (* case: configure script is not found.)
+
+   2. ./configure
+   3. make
+   4. make install
 
    * uninstall
 
      make uninstall
-
-   * test (ASCII/EUC-JP)
-
-     make atest
 
    * configuration check
 
@@ -51,18 +49,19 @@ Install
 
 
 
- Case 2: Win32 platform (VC++)
+ Case 2: Windows 64/32bit platform (Visual Studio)
 
-   1. copy win32\Makefile Makefile
-   2. copy win32\config.h config.h
-   3. nmake
+   execute make_win64 or make_win32
 
-      onig_s.lib:  static link library
-      onig.dll:    dynamic link library
+      src/onig_s.lib:  static link library
+      src/onig.dll:    dynamic link library
 
   * test (ASCII/Shift_JIS)
-   4. copy win32\testc.c testc.c
-   5. nmake ctest
+      1. cd src
+      2. copy ..\windows\testc.c .
+      3. nmake -f Makefile.windows ctest
+
+  (I have checked by Visual Studio Community 2015)
 
 
 
@@ -103,6 +102,7 @@ Sample Programs
   sample/posix.c     POSIX API sample.
   sample/sql.c       example of the variable meta characters.
                      (SQL-like pattern matching)
+  sample/user_property.c  example of user defined Unicode property.
 
 Test Programs
   sample/syntax.c    Perl, Java and ASIS syntax test.
@@ -136,39 +136,39 @@ Source Files
   regposerr.c        POSIX error message function.
   regposix.c         POSIX API functions.
 
-  enc/mktable.c      character type table generator.
-  enc/ascii.c        ASCII encoding.
-  enc/euc_jp.c       EUC-JP encoding.
-  enc/euc_tw.c       EUC-TW encoding.
-  enc/euc_kr.c       EUC-KR, EUC-CN encoding.
-  enc/sjis.c         Shift_JIS encoding.
-  enc/big5.c         Big5      encoding.
-  enc/gb18030.c      GB18030   encoding.
-  enc/koi8.c         KOI8      encoding.
-  enc/koi8_r.c       KOI8-R    encoding.
-  enc/cp1251.c       CP1251    encoding.
-  enc/iso8859_1.c    ISO-8859-1  encoding. (Latin-1)
-  enc/iso8859_2.c    ISO-8859-2  encoding. (Latin-2)
-  enc/iso8859_3.c    ISO-8859-3  encoding. (Latin-3)
-  enc/iso8859_4.c    ISO-8859-4  encoding. (Latin-4)
-  enc/iso8859_5.c    ISO-8859-5  encoding. (Cyrillic)
-  enc/iso8859_6.c    ISO-8859-6  encoding. (Arabic)
-  enc/iso8859_7.c    ISO-8859-7  encoding. (Greek)
-  enc/iso8859_8.c    ISO-8859-8  encoding. (Hebrew)
-  enc/iso8859_9.c    ISO-8859-9  encoding. (Latin-5 or Turkish)
-  enc/iso8859_10.c   ISO-8859-10 encoding. (Latin-6 or Nordic)
-  enc/iso8859_11.c   ISO-8859-11 encoding. (Thai)
-  enc/iso8859_13.c   ISO-8859-13 encoding. (Latin-7 or Baltic Rim)
-  enc/iso8859_14.c   ISO-8859-14 encoding. (Latin-8 or Celtic)
-  enc/iso8859_15.c   ISO-8859-15 encoding. (Latin-9 or West European with Euro)
-  enc/iso8859_16.c   ISO-8859-16 encoding.
+  mktable.c          character type table generator.
+  ascii.c            ASCII encoding.
+  euc_jp.c           EUC-JP encoding.
+  euc_tw.c           EUC-TW encoding.
+  euc_kr.c           EUC-KR, EUC-CN encoding.
+  sjis.c             Shift_JIS encoding.
+  big5.c             Big5      encoding.
+  gb18030.c          GB18030   encoding.
+  koi8.c             KOI8      encoding.
+  koi8_r.c           KOI8-R    encoding.
+  cp1251.c           CP1251    encoding.
+  iso8859_1.c        ISO-8859-1  encoding. (Latin-1)
+  iso8859_2.c        ISO-8859-2  encoding. (Latin-2)
+  iso8859_3.c        ISO-8859-3  encoding. (Latin-3)
+  iso8859_4.c        ISO-8859-4  encoding. (Latin-4)
+  iso8859_5.c        ISO-8859-5  encoding. (Cyrillic)
+  iso8859_6.c        ISO-8859-6  encoding. (Arabic)
+  iso8859_7.c        ISO-8859-7  encoding. (Greek)
+  iso8859_8.c        ISO-8859-8  encoding. (Hebrew)
+  iso8859_9.c        ISO-8859-9  encoding. (Latin-5 or Turkish)
+  iso8859_10.c       ISO-8859-10 encoding. (Latin-6 or Nordic)
+  iso8859_11.c       ISO-8859-11 encoding. (Thai)
+  iso8859_13.c       ISO-8859-13 encoding. (Latin-7 or Baltic Rim)
+  iso8859_14.c       ISO-8859-14 encoding. (Latin-8 or Celtic)
+  iso8859_15.c       ISO-8859-15 encoding. (Latin-9 or West European with Euro)
+  iso8859_16.c       ISO-8859-16 encoding.
                      (Latin-10 or South-Eastern European with Euro)
-  enc/utf8.c         UTF-8    encoding.
-  enc/utf16_be.c     UTF-16BE encoding.
-  enc/utf16_le.c     UTF-16LE encoding.
-  enc/utf32_be.c     UTF-32BE encoding.
-  enc/utf32_le.c     UTF-32LE encoding.
-  enc/unicode.c      Unicode information data.
+  utf8.c             UTF-8    encoding.
+  utf16_be.c         UTF-16BE encoding.
+  utf16_le.c         UTF-16LE encoding.
+  utf32_be.c         UTF-32BE encoding.
+  utf32_le.c         UTF-32LE encoding.
+  unicode.c          common codes of Unicode encoding.
 
   win32/Makefile     Makefile for Win32 (VC++)
   win32/config.h     config.h for Win32
@@ -186,4 +186,4 @@ ToDo
 and I'm thankful to Akinori MUSHA.
 
 
-Mail Address: K.Kosako <sndgk393 AT ybb DOT ne DOT jp>
+Mail Address: K.Kosako <kkosako0@gmail.com>

@@ -57,7 +57,7 @@ PHPAPI int usleep(unsigned int useconds);
 #ifdef PHP_EXPORTS
 /* This symbols are needed only for the DllMain, but should not be exported 
 	or be available when used with PHP binaries. */
-BOOL php_win32_init_gettimeofday(void);
+void php_win32_init_gettimeofday(void);
 #endif
 
 #endif

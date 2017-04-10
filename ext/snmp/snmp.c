@@ -43,14 +43,6 @@
 #include <errno.h>
 #include <process.h>
 #include "win32/time.h"
-#elif defined(NETWARE)
-#ifdef USE_WINSOCK
-#include <novsock2.h>
-#else
-#include <sys/socket.h>
-#endif
-#include <errno.h>
-#include <sys/timeval.h>
 #else
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -575,24 +567,14 @@ static void php_snmp_getvalue(struct variable_list *vars, zval *snmpval, int val
 			dbuf = (char *)emalloc(val_len + 1);
 		}
 
-		if (!dbuf) {
-			php_error_docref(NULL, E_WARNING, "emalloc() failed: %s, fallback to static buffer", strerror(errno));
-			buf = &(sbuf[0]);
-			buflen = sizeof(sbuf) - 1;
-			break;
-		}
-
 		buf = dbuf;
 		buflen = val_len;
 	}
 
 	if((valueretrieval & SNMP_VALUE_PLAIN) && val_len > buflen){
-		if ((dbuf = (char *)emalloc(val_len + 1))) {
-			buf = dbuf;
-			buflen = val_len;
-		} else {
-			php_error_docref(NULL, E_WARNING, "emalloc() failed: %s, fallback to static buffer", strerror(errno));
-		}
+		dbuf = (char *)emalloc(val_len + 1);
+		buf = dbuf;
+		buflen = val_len;
 	}
 
 	if (valueretrieval & SNMP_VALUE_PLAIN) {
@@ -980,11 +962,6 @@ static int php_snmp_parse_oid(zval *object, int st, struct objid_query *objid_qu
 	objid_query->array_output = ((st & SNMP_CMD_WALK) ? TRUE : FALSE);
 	if (Z_TYPE_P(oid) == IS_STRING) {
 		objid_query->vars = (snmpobjarg *)emalloc(sizeof(snmpobjarg));
-		if (objid_query->vars == NULL) {
-			php_error_docref(NULL, E_WARNING, "emalloc() failed while parsing oid: %s", strerror(errno));
-			efree(objid_query->vars);
-			return FALSE;
-		}
 		objid_query->vars[objid_query->count].oid = Z_STRVAL_P(oid);
 		if (st & SNMP_CMD_SET) {
 			if (Z_TYPE_P(type) == IS_STRING && Z_TYPE_P(value) == IS_STRING) {
@@ -1009,11 +986,6 @@ static int php_snmp_parse_oid(zval *object, int st, struct objid_query *objid_qu
 			return FALSE;
 		}
 		objid_query->vars = (snmpobjarg *)safe_emalloc(sizeof(snmpobjarg), zend_hash_num_elements(Z_ARRVAL_P(oid)), 0);
-		if (objid_query->vars == NULL) {
-			php_error_docref(NULL, E_WARNING, "emalloc() failed while parsing oid array: %s", strerror(errno));
-			efree(objid_query->vars);
-			return FALSE;
-		}
 		objid_query->array_output = ( (st & SNMP_CMD_SET) ? FALSE : TRUE );
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(oid), tmp_oid) {
 			convert_to_string_ex(tmp_oid);
@@ -1120,10 +1092,6 @@ static int netsnmp_session_init(php_snmp_session **session_p, int version, char 
 
 	*session_p = (php_snmp_session *)emalloc(sizeof(php_snmp_session));
 	session = *session_p;
-	if (session == NULL) {
-		php_error_docref(NULL, E_WARNING, "emalloc() failed allocating session");
-		return (-1);
-	}
 	memset(session, 0, sizeof(php_snmp_session));
 
 	snmp_sess_init(session);
@@ -1132,10 +1100,6 @@ static int netsnmp_session_init(php_snmp_session **session_p, int version, char 
 	session->remote_port = SNMP_PORT;
 
 	session->peername = emalloc(MAX_NAME_LEN);
-	if (session->peername == NULL) {
-		php_error_docref(NULL, E_WARNING, "emalloc() failed while copying hostname");
-		return (-1);
-	}
 	/* we copy original hostname for further processing */
 	strlcpy(session->peername, hostname, MAX_NAME_LEN);
 	host_ptr = session->peername;
@@ -1325,10 +1289,6 @@ static int netsnmp_session_set_contextEngineID(struct snmp_session *s, char * co
 	size_t	ebuf_len = 32, eout_len = 0;
 	u_char	*ebuf = (u_char *) emalloc(ebuf_len);
 
-	if (ebuf == NULL) {
-		php_error_docref(NULL, E_WARNING, "malloc failure setting contextEngineID");
-		return (-1);
-	}
 	if (!snmp_hex_to_binary(&ebuf, &ebuf_len, &eout_len, 1, contextEngineID)) {
 		php_error_docref(NULL, E_WARNING, "Bad engine ID value '%s'", contextEngineID);
 		efree(ebuf);

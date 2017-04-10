@@ -1,6 +1,6 @@
 // vim:ft=javascript
 // $Id$
-// "Master" config file; think of it as a configure.in
+// "Master" config file; think of it as a configure.ac
 // equivalent.
 
 ARG_WITH("toolset", "Toolset to use for the compilation, give: vs, clang, icc. " +
@@ -63,6 +63,9 @@ toolset_setup_common_cflags();
 ARG_WITH('mp', 'Tell Visual Studio use up to [n,auto,disable] processes for compilation', 'auto');
 var PHP_MP_DISABLED = true;
 if (VS_TOOLSET && PHP_MP != 'disable') {
+	if(PHP_DEBUG == 'yes') {
+		STDOUT.WriteLine('WARNING: Debug builds cannot be built using multi processing');
+	} else {
 		// no from disable-all 
 		if(PHP_MP == 'auto' || PHP_MP == 'no') {
 			 ADD_FLAG('CFLAGS', ' /MP ');
@@ -75,6 +78,7 @@ if (VS_TOOLSET && PHP_MP != 'disable') {
 				STDOUT.WriteLine('WARNING: Invalid argument for MP: ' + PHP_MP);
 			}
 		}
+	}
 }
 
 if (!PHP_MP_DISABLED) {
@@ -239,7 +243,6 @@ ADD_SOURCES("main", "main.c snprintf.c spprintf.c getopt.c fopen_wrappers.c \
 	strlcat.c mergesort.c reentrancy.c php_variables.c php_ticks.c network.c \
 	php_open_temporary_file.c output.c internal_functions.c php_sprintf.c");
 ADD_FLAG("CFLAGS_BD_MAIN", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
-ADD_SOURCES("win32", "inet.c fnmatch.c sockets.c");
 
 AC_DEFINE('HAVE_STRNLEN', 1);
 
@@ -249,7 +252,8 @@ ADD_FLAG("CFLAGS_BD_MAIN_STREAMS", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 
 ADD_SOURCES("win32", "dllmain.c glob.c readdir.c \
 	registry.c select.c sendmail.c time.c winutil.c wsyslog.c globals.c \
-	getrusage.c ftok.c ioutil.c codepage.c");
+	getrusage.c ftok.c ioutil.c codepage.c nice.c \
+	inet.c fnmatch.c sockets.c console.c");
 
 ADD_FLAG("CFLAGS_BD_WIN32", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 
@@ -304,7 +308,16 @@ if (CLANG_TOOLSET) {
 	ARG_WITH("uncritical-warn-choke", "Disable some uncritical warnings", "yes");
 	if (PHP_UNCRITICAL_WARN_CHOKE != "no") {
 		ADD_FLAG("CFLAGS", "-Wno-ignored-attributes -Wno-deprecated-declarations -Wno-missing-braces \
-		-Wno-logical-op-parentheses -Wno-msvc-include -Wno-invalid-source-encoding -Wno-unknown-pragmas");
+		-Wno-logical-op-parentheses -Wno-msvc-include -Wno-invalid-source-encoding -Wno-unknown-pragmas \
+		-Wno-unused-command-line-argument");
+	}
+
+	ARG_ENABLE("sanitizer", "Enable address sanitizer extension", "no");
+	if (PHP_SANITIZER == "yes") {
+		if (COMPILER_NUMERIC_VERSION < 500) {
+			ERROR("Clang at least 5.0.0 required for sanitation plugins");
+		}
+		add_asan_opts("CFLAGS", "LIBS", "LDFLAGS");
 	}
 }
 
@@ -312,6 +325,12 @@ ARG_WITH("codegen-arch", "Architecture for code generation: ia32, sse, sse2, avx
 toolset_setup_codegen_arch();
 
 ARG_WITH("all-shared", "Force all the non obligatory extensions to be shared", "no");
+
+// Config profiles (--with-config-profile=<name>) will save a certain config to php-src/config.<name>.bat
+// so that it can be executed like: cofig.<name> instead of a long list of parameters
+//
+// Note, nice as a name is disallowed and will generate a warning and skip saving
+ARG_WITH('config-profile', 'Name of the configuration profile to save this to in php-src/config.name.bat', 'no');
 
 ARG_ENABLE("test-ini", "Enable automatic php.ini generation. The test.ini will be put \
 		into the build dir and used to automatically load the shared extensions.", "yes");

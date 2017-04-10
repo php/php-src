@@ -21,6 +21,7 @@
 #include "php.h"
 #include "ext/standard/php_var.h"
 #include "php_incomplete_class.h"
+#include "zend_portability.h"
 
 struct php_unserialize_data {
 	void *first;
@@ -315,10 +316,10 @@ static inline int unserialize_allowed_class(
 
 
 /*!re2c
-uiv = [+]? [0-9]+;
+uiv = [0-9]+;
 iv = [+-]? [0-9]+;
 nv = [+-]? ([0-9]* "." [0-9]+|[0-9]+ "." [0-9]*);
-nvexp = (iv | nv) [eE] [+-]? iv;
+nvexp = (iv | nv) [eE] iv;
 any = [\000-\377];
 object = [OC];
 */
@@ -363,10 +364,6 @@ static inline size_t parse_uiv(const unsigned char *p)
 {
 	unsigned char cursor;
 	size_t result = 0;
-
-	if (*p == '+') {
-		p++;
-	}
 
 	while (1) {
 		cursor = *p;
@@ -622,13 +619,13 @@ static int php_var_unserialize_internal(UNSERIALIZE_PARAMETER)
 
 /*!re2c
 
-"R:" iv ";"		{
+"R:" uiv ";"		{
 	zend_long id;
 
  	*p = YYCURSOR;
 	if (!var_hash) return 0;
 
-	id = parse_iv(start + 2) - 1;
+	id = parse_uiv(start + 2) - 1;
 	if (id == -1 || (rval_ref = var_access(var_hash, id)) == NULL) {
 		return 0;
 	}
@@ -648,13 +645,13 @@ static int php_var_unserialize_internal(UNSERIALIZE_PARAMETER)
 	return 1;
 }
 
-"r:" iv ";"		{
+"r:" uiv ";"		{
 	zend_long id;
 
  	*p = YYCURSOR;
 	if (!var_hash) return 0;
 
-	id = parse_iv(start + 2) - 1;
+	id = parse_uiv(start + 2) - 1;
 	if (id == -1 || (rval_ref = var_access(var_hash, id)) == NULL) {
 		return 0;
 	}
@@ -715,11 +712,11 @@ static int php_var_unserialize_internal(UNSERIALIZE_PARAMETER)
 	*p = YYCURSOR;
 
 	if (!strncmp((char*)start + 2, "NAN", 3)) {
-		ZVAL_DOUBLE(rval, php_get_nan());
+		ZVAL_DOUBLE(rval, ZEND_NAN);
 	} else if (!strncmp((char*)start + 2, "INF", 3)) {
-		ZVAL_DOUBLE(rval, php_get_inf());
+		ZVAL_DOUBLE(rval, ZEND_INFINITY);
 	} else if (!strncmp((char*)start + 2, "-INF", 4)) {
-		ZVAL_DOUBLE(rval, -php_get_inf());
+		ZVAL_DOUBLE(rval, -ZEND_INFINITY);
 	} else {
 		ZVAL_NULL(rval);
 	}
@@ -819,6 +816,12 @@ use_double:
 		zend_hash_real_init(Z_ARRVAL_P(rval), 0);
 	}
 
+	/* The array may contain references to itself, in which case we'll be modifying an
+	 * rc>1 array. This is okay, since the array is, ostensibly, only visible to
+	 * unserialize (in practice unserialization handlers also see it). Ideally we should
+	 * prohibit "r:" references to non-objects, as we only generate them for objects. */
+	HT_ALLOW_COW_VIOLATION(Z_ARRVAL_P(rval));
+
 	if (!process_nested_data(UNSERIALIZE_PASSTHRU, Z_ARRVAL_P(rval), elements, 0)) {
 		return 0;
 	}
@@ -826,7 +829,7 @@ use_double:
 	return finish_nested_data(UNSERIALIZE_PASSTHRU);
 }
 
-"o:" iv ":" ["] {
+"o:" uiv ":" ["] {
 	long elements;
     if (!var_hash) return 0;
 

@@ -78,14 +78,11 @@ PHP_FUNCTION(clearstatcache);
 #define getuid() 1
 #endif
 
-#ifdef PHP_WIN32
-typedef unsigned int php_stat_len;
-#else
-typedef int php_stat_len;
-#endif
+/* Compatibility. */
+typedef size_t php_stat_len;
 
-PHPAPI void php_clear_stat_cache(zend_bool clear_realpath_cache, const char *filename, int filename_len);
-PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int type, zval *return_value);
+PHPAPI void php_clear_stat_cache(zend_bool clear_realpath_cache, const char *filename, size_t filename_len);
+PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zval *return_value);
 
 /* Switches for various filestat functions: */
 #define FS_PERMS    0

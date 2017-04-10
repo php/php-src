@@ -109,7 +109,7 @@ void		ftp_gc(ftpbuf_t *ftp);
 ftpbuf_t*	ftp_close(ftpbuf_t *ftp);
 
 /* logs into the FTP server, returns true on success, false on error */
-int		ftp_login(ftpbuf_t *ftp, const char *user, const char *pass);
+int		ftp_login(ftpbuf_t *ftp, const char *user, const size_t user_len, const char *pass, const size_t pass_len);
 
 /* reinitializes the connection, returns true on success, false on error */
 int		ftp_reinit(ftpbuf_t *ftp);
@@ -121,13 +121,13 @@ const char*	ftp_syst(ftpbuf_t *ftp);
 const char*	ftp_pwd(ftpbuf_t *ftp);
 
 /* exec a command [special features], return true on success, false on error */
-int 	ftp_exec(ftpbuf_t *ftp, const char *cmd);
+int 	ftp_exec(ftpbuf_t *ftp, const char *cmd, const size_t cmd_len);
 
 /* send a raw ftp command, return response as a hashtable, NULL on error */
-void	ftp_raw(ftpbuf_t *ftp, const char *cmd, zval *return_value);
+void	ftp_raw(ftpbuf_t *ftp, const char *cmd, const size_t cmd_len, zval *return_value);
 
 /* changes directories, return true on success, false on error */
-int		ftp_chdir(ftpbuf_t *ftp, const char *dir);
+int		ftp_chdir(ftpbuf_t *ftp, const char *dir, const size_t dir_len);
 
 /* changes to parent directory, return true on success, false on error */
 int		ftp_cdup(ftpbuf_t *ftp);
@@ -135,10 +135,10 @@ int		ftp_cdup(ftpbuf_t *ftp);
 /* creates a directory, return the directory name on success, NULL on error.
  * the return value must be freed
  */
-zend_string* ftp_mkdir(ftpbuf_t *ftp, const char *dir);
+zend_string* ftp_mkdir(ftpbuf_t *ftp, const char *dir, const size_t dir_len);
 
 /* removes a directory, return true on success, false on error */
-int		ftp_rmdir(ftpbuf_t *ftp, const char *dir);
+int		ftp_rmdir(ftpbuf_t *ftp, const char *dir, const size_t dir_len);
 
 /* Set permissions on a file */
 int		ftp_chmod(ftpbuf_t *ftp, const int mode, const char *filename, const int filename_len);
@@ -154,14 +154,26 @@ int		ftp_alloc(ftpbuf_t *ftp, const zend_long size, zend_string **response);
  * or NULL on error.  the return array must be freed (but don't
  * free the array elements)
  */
-char**		ftp_nlist(ftpbuf_t *ftp, const char *path);
+char**		ftp_nlist(ftpbuf_t *ftp, const char *path, const size_t path_len);
 
 /* returns a NULL-terminated array of lines returned by the ftp
  * LIST command for the given path or NULL on error.  the return
  * array must be freed (but don't
  * free the array elements)
  */
-char**		ftp_list(ftpbuf_t *ftp, const char *path, int recursive);
+char**		ftp_list(ftpbuf_t *ftp, const char *path, const size_t path_len, int recursive);
+
+/* populates a hashtable with the facts contained in one line of
+ * an MLSD response.
+ */
+int			ftp_mlsd_parse_line(HashTable *ht, const char *input);
+
+/* returns a NULL-terminated array of lines returned by the ftp
+ * MLSD command for the given path or NULL on error.  the return
+ * array must be freed (but don't
+ * free the array elements)
+ */
+char**		ftp_mlsd(ftpbuf_t *ftp, const char *path, const size_t path_len);
 
 /* switches passive mode on or off
  * returns true on success, false on error
@@ -171,37 +183,37 @@ int		ftp_pasv(ftpbuf_t *ftp, int pasv);
 /* retrieves a file and saves its contents to outfp
  * returns true on success, false on error
  */
-int		ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, zend_long resumepos);
+int		ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, const size_t path_len, ftptype_t type, zend_long resumepos);
 
 /* stores the data from a file, socket, or process as a file on the remote server
  * returns true on success, false on error
  */
-int		ftp_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, zend_long startpos);
+int		ftp_put(ftpbuf_t *ftp, const char *path, const size_t path_len, php_stream *instream, ftptype_t type, zend_long startpos);
 
 /* returns the size of the given file, or -1 on error */
-zend_long		ftp_size(ftpbuf_t *ftp, const char *path);
+zend_long		ftp_size(ftpbuf_t *ftp, const char *path, const size_t path_len);
 
 /* returns the last modified time of the given file, or -1 on error */
-time_t		ftp_mdtm(ftpbuf_t *ftp, const char *path);
+time_t		ftp_mdtm(ftpbuf_t *ftp, const char *path, const size_t path_len);
 
 /* renames a file on the server */
-int		ftp_rename(ftpbuf_t *ftp, const char *src, const char *dest);
+int		ftp_rename(ftpbuf_t *ftp, const char *src, const size_t src_len, const char *dest, const size_t dest_len);
 
 /* deletes the file from the server */
-int		ftp_delete(ftpbuf_t *ftp, const char *path);
+int		ftp_delete(ftpbuf_t *ftp, const char *path, const size_t path_len);
 
 /* sends a SITE command to the server */
-int		ftp_site(ftpbuf_t *ftp, const char *cmd);
+int		ftp_site(ftpbuf_t *ftp, const char *cmd, const size_t cmd_len);
 
 /* retrieves part of a file and saves its contents to outfp
  * returns true on success, false on error
  */
-int		ftp_nb_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, zend_long resumepos);
+int		ftp_nb_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, const size_t path_len, ftptype_t type, zend_long resumepos);
 
 /* stores the data from a file, socket, or process as a file on the remote server
  * returns true on success, false on error
  */
-int		ftp_nb_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, zend_long startpos);
+int		ftp_nb_put(ftpbuf_t *ftp, const char *path, const size_t path_len, php_stream *instream, ftptype_t type, zend_long startpos);
 
 /* continues a previous nb_(f)get command
  */

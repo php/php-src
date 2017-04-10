@@ -202,7 +202,7 @@ dist: all build-dist
 snap: build-snap build-devel build-dist
 
 $(BUILD_DIR)\deplister.exe:	win32\build\deplister.c
-	$(PHP_CL) /Fo$(BUILD_DIR)\ /Fd$(BUILD_DIR)\ /Fp$(BUILD_DIR)\ /FR$(BUILD_DIR) /Fe$(BUILD_DIR)\deplister.exe win32\build\deplister.c imagehlp.lib
+	$(CC) /Fo$(BUILD_DIR)\ /Fd$(BUILD_DIR)\ /Fp$(BUILD_DIR)\ /FR$(BUILD_DIR) /Fe$(BUILD_DIR)\deplister.exe win32\build\deplister.c imagehlp.lib
 
 msi-installer: dist
 	$(BUILD_DIR)\php.exe ..\php-installer\build-installer.php "$(BUILD_DIR)" "$(PHPDLL)" "$(SAPI_TARGETS)" "$(EXT_TARGETS)" "$(PECL_TARGETS)"

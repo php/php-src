@@ -140,7 +140,7 @@ static int phar_dir_flush(php_stream *stream) /* {{{ */
  * This is used to get a unique listing of virtual directories within a phar,
  * for iterating over opendir()ed phar directories.
  */
-static int phar_add_empty(HashTable *ht, char *arKey, uint nKeyLength)  /* {{{ */
+static int phar_add_empty(HashTable *ht, char *arKey, uint32_t nKeyLength)  /* {{{ */
 {
 	zval dummy;
 
@@ -183,7 +183,7 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest) /* {{{ */
 	size_t dirlen = strlen(dir);
 	char *entry, *found, *save;
 	zend_string *str_key;
-	uint keylen;
+	uint32_t keylen;
 	zend_ulong unused;
 
 	ALLOC_HASHTABLE(data);
@@ -204,8 +204,8 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest) /* {{{ */
 		}
 
 		keylen = ZSTR_LEN(str_key);
-		if (keylen <= (uint)dirlen) {
-			if (keylen == 0 || keylen < (uint)dirlen || !strncmp(ZSTR_VAL(str_key), dir, dirlen)) {
+		if (keylen <= (uint32_t)dirlen) {
+			if (keylen == 0 || keylen < (uint32_t)dirlen || !strncmp(ZSTR_VAL(str_key), dir, dirlen)) {
 				if (SUCCESS != zend_hash_move_forward(manifest)) {
 					break;
 				}
@@ -309,7 +309,7 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 	zend_ulong unused;
 	phar_archive_data *phar;
 	phar_entry_info *entry = NULL;
-	uint host_len;
+	uint32_t host_len;
 
 	if ((resource = phar_parse_url(wrapper, path, mode, options)) == NULL) {
 		php_stream_wrapper_log_error(wrapper, options, "phar url \"%s\" is unknown", path);
@@ -385,7 +385,7 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 		while (FAILURE != zend_hash_has_more_elements(&phar->manifest)) {
 			if (HASH_KEY_NON_EXISTENT !=
 					zend_hash_get_current_key(&phar->manifest, &str_key, &unused)) {
-				if (ZSTR_LEN(str_key) > (uint)i_len && 0 == memcmp(ZSTR_VAL(str_key), internal_file, i_len)) {
+				if (ZSTR_LEN(str_key) > (uint32_t)i_len && 0 == memcmp(ZSTR_VAL(str_key), internal_file, i_len)) {
 					/* directory found */
 					internal_file = estrndup(internal_file,
 							i_len);
@@ -415,7 +415,7 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 	char *error, *arch, *entry2;
 	int arch_len, entry_len;
 	php_url *resource = NULL;
-	uint host_len;
+	uint32_t host_len;
 
 	/* pre-readonly check, we need to know if this is a data phar */
 	if (FAILURE == phar_split_fname(url_from, strlen(url_from), &arch, &arch_len, &entry2, &entry_len, 2, 2)) {
@@ -547,10 +547,10 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 	char *error, *arch, *entry2;
 	int arch_len, entry_len;
 	php_url *resource = NULL;
-	uint host_len;
+	uint32_t host_len;
 	zend_string *str_key;
 	zend_ulong unused;
-	uint path_len;
+	uint32_t path_len;
 
 	/* pre-readonly check, we need to know if this is a data phar */
 	if (FAILURE == phar_split_fname(url, strlen(url), &arch, &arch_len, &entry2, &entry_len, 2, 2)) {

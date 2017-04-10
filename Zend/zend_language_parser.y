@@ -327,14 +327,14 @@ top_statement:
 			{ $$ = zend_ast_create(ZEND_AST_NAMESPACE, NULL, $4); }
 	|	T_USE mixed_group_use_declaration ';'		{ $$ = $2; }
 	|	T_USE use_type group_use_declaration ';'	{ $$ = $3; $$->attr = $2; }
-	|	T_USE use_declarations ';'					{ $$ = $2; $$->attr = T_CLASS; }
+	|	T_USE use_declarations ';'					{ $$ = $2; $$->attr = ZEND_SYMBOL_CLASS; }
 	|	T_USE use_type use_declarations ';'			{ $$ = $3; $$->attr = $2; }
 	|	T_CONST const_list ';'						{ $$ = $2; }
 ;
 
 use_type:
-	 	T_FUNCTION 		{ $$ = T_FUNCTION; }
-	| 	T_CONST 		{ $$ = T_CONST; }
+	 	T_FUNCTION 		{ $$ = ZEND_SYMBOL_FUNCTION; }
+	| 	T_CONST 		{ $$ = ZEND_SYMBOL_CONST; }
 ;
 
 group_use_declaration:
@@ -373,7 +373,7 @@ use_declarations:
 ;
 
 inline_use_declaration:
-		unprefixed_use_declaration { $$ = $1; $$->attr = T_CLASS; }
+		unprefixed_use_declaration { $$ = $1; $$->attr = ZEND_SYMBOL_CLASS; }
 	|	use_type unprefixed_use_declaration { $$ = $2; $$->attr = $1; }
 ;
 
@@ -1030,7 +1030,7 @@ function_call:
 
 class_name:
 		T_STATIC
-			{ zval zv; ZVAL_INTERNED_STR(&zv, CG(known_strings)[ZEND_STR_STATIC]);
+			{ zval zv; ZVAL_INTERNED_STR(&zv, ZSTR_KNOWN(ZEND_STR_STATIC));
 			  $$ = zend_ast_create_zval_ex(&zv, ZEND_NAME_NOT_FQ); }
 	|	name { $$ = $1; }
 ;

@@ -24,12 +24,6 @@
 
 #define PHP_SPL_VERSION PHP_VERSION
 
-#if 0
-#define SPL_DEBUG(x)	x
-#else
-#define SPL_DEBUG(x)
-#endif
-
 extern zend_module_entry spl_module_entry;
 #define phpext_spl_ptr &spl_module_entry
 

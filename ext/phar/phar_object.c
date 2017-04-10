@@ -1411,7 +1411,7 @@ struct _phar_t {
 	char *b;
 	zval *ret;
 	php_stream *fp;
-	uint l;
+	uint32_t l;
 	int count;
 };
 
@@ -1420,10 +1420,10 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 	zval *value;
 	zend_bool close_fp = 1;
 	struct _phar_t *p_obj = (struct _phar_t*) puser;
-	uint base_len = p_obj->l, str_key_len;
+	uint32_t str_key_len, base_len = p_obj->l;
 	phar_entry_data *data;
 	php_stream *fp;
-	php_stat_len fname_len;
+	size_t fname_len;
 	size_t contents_len;
 	char *fname, *error = NULL, *base = p_obj->b, *save = NULL, *temp = NULL;
 	zend_string *opened;
@@ -1501,7 +1501,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 				switch (intern->type) {
 					case SPL_FS_DIR:
 						test = spl_filesystem_object_get_path(intern, NULL);
-						fname_len = (php_stat_len)spprintf(&fname, 0, "%s%c%s", test, DEFAULT_SLASH, intern->u.dir.entry.d_name);
+						fname_len = spprintf(&fname, 0, "%s%c%s", test, DEFAULT_SLASH, intern->u.dir.entry.d_name);
 						php_stat(fname, fname_len, FS_IS_DIR, &dummy);
 
 						if (Z_TYPE(dummy) == IS_TRUE) {
@@ -1515,7 +1515,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 
 						if (test) {
 							fname = test;
-							fname_len = (php_stat_len)strlen(fname);
+							fname_len = strlen(fname);
 						} else {
 							zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Could not resolve file path");
 							return ZEND_HASH_APPLY_STOP;
@@ -1531,7 +1531,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 							return ZEND_HASH_APPLY_STOP;
 						}
 
-						fname_len = (php_stat_len)strlen(fname);
+						fname_len = strlen(fname);
 						save = fname;
 						goto phar_spl_fileinfo;
 				}
@@ -1543,7 +1543,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 	}
 
 	fname = Z_STRVAL_P(value);
-	fname_len = (php_stat_len)Z_STRLEN_P(value);
+	fname_len = Z_STRLEN_P(value);
 
 phar_spl_fileinfo:
 	if (base_len) {
@@ -1820,7 +1820,7 @@ PHP_METHOD(Phar, buildFromDirectory)
 	pass.c = apply_reg ? Z_OBJCE(regexiter) : Z_OBJCE(iteriter);
 	pass.p = phar_obj;
 	pass.b = dir;
-	pass.l = (uint)dir_len;
+	pass.l = (uint32_t)dir_len;
 	pass.count = 0;
 	pass.ret = return_value;
 	pass.fp = php_stream_fopen_tmpfile();
@@ -1908,7 +1908,7 @@ PHP_METHOD(Phar, buildFromIterator)
 	pass.c = Z_OBJCE_P(obj);
 	pass.p = phar_obj;
 	pass.b = base;
-	pass.l = (uint)base_len;
+	pass.l = (uint32_t)base_len;
 	pass.ret = return_value;
 	pass.count = 0;
 	pass.fp = php_stream_fopen_tmpfile();
@@ -2623,8 +2623,8 @@ PHP_METHOD(Phar, delete)
 		zend_throw_exception_ex(phar_ce_PharException, 0, "phar \"%s\" is persistent, unable to copy on write", phar_obj->archive->fname);
 		return;
 	}
-	if (zend_hash_str_exists(&phar_obj->archive->manifest, fname, (uint) fname_len)) {
-		if (NULL != (entry = zend_hash_str_find_ptr(&phar_obj->archive->manifest, fname, (uint) fname_len))) {
+	if (zend_hash_str_exists(&phar_obj->archive->manifest, fname, (uint32_t) fname_len)) {
+		if (NULL != (entry = zend_hash_str_find_ptr(&phar_obj->archive->manifest, fname, (uint32_t) fname_len))) {
 			if (entry->is_deleted) {
 				/* entry is deleted, but has not been flushed to disk yet */
 				RETURN_TRUE;
@@ -3463,14 +3463,14 @@ PHP_METHOD(Phar, copy)
 		RETURN_FALSE;
 	}
 
-	if (!zend_hash_str_exists(&phar_obj->archive->manifest, oldfile, (uint) oldfile_len) || NULL == (oldentry = zend_hash_str_find_ptr(&phar_obj->archive->manifest, oldfile, (uint) oldfile_len)) || oldentry->is_deleted) {
+	if (!zend_hash_str_exists(&phar_obj->archive->manifest, oldfile, (uint32_t) oldfile_len) || NULL == (oldentry = zend_hash_str_find_ptr(&phar_obj->archive->manifest, oldfile, (uint32_t) oldfile_len)) || oldentry->is_deleted) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
 			"file \"%s\" cannot be copied to file \"%s\", file does not exist in %s", oldfile, newfile, phar_obj->archive->fname);
 		RETURN_FALSE;
 	}
 
-	if (zend_hash_str_exists(&phar_obj->archive->manifest, newfile, (uint) newfile_len)) {
-		if (NULL != (temp = zend_hash_str_find_ptr(&phar_obj->archive->manifest, newfile, (uint) newfile_len)) || !temp->is_deleted) {
+	if (zend_hash_str_exists(&phar_obj->archive->manifest, newfile, (uint32_t) newfile_len)) {
+		if (NULL != (temp = zend_hash_str_find_ptr(&phar_obj->archive->manifest, newfile, (uint32_t) newfile_len)) || !temp->is_deleted) {
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
 				"file \"%s\" cannot be copied to file \"%s\", file must not already exist in phar %s", oldfile, newfile, phar_obj->archive->fname);
 			RETURN_FALSE;
@@ -3491,7 +3491,7 @@ PHP_METHOD(Phar, copy)
 			return;
 		}
 		/* re-populate with copied-on-write entry */
-		oldentry = zend_hash_str_find_ptr(&phar_obj->archive->manifest, oldfile, (uint) oldfile_len);
+		oldentry = zend_hash_str_find_ptr(&phar_obj->archive->manifest, oldfile, (uint32_t) oldfile_len);
 	}
 
 	memcpy((void *) &newentry, oldentry, sizeof(phar_entry_info));
@@ -3546,8 +3546,8 @@ PHP_METHOD(Phar, offsetExists)
 		RETURN_FALSE;
 	}
 
-	if (zend_hash_str_exists(&phar_obj->archive->manifest, fname, (uint) fname_len)) {
-		if (NULL != (entry = zend_hash_str_find_ptr(&phar_obj->archive->manifest, fname, (uint) fname_len))) {
+	if (zend_hash_str_exists(&phar_obj->archive->manifest, fname, (uint32_t) fname_len)) {
+		if (NULL != (entry = zend_hash_str_find_ptr(&phar_obj->archive->manifest, fname, (uint32_t) fname_len))) {
 			if (entry->is_deleted) {
 				/* entry is deleted, but has not been flushed to disk yet */
 				RETURN_FALSE;
@@ -3560,7 +3560,7 @@ PHP_METHOD(Phar, offsetExists)
 		}
 		RETURN_TRUE;
 	} else {
-		if (zend_hash_str_exists(&phar_obj->archive->virtual_dirs, fname, (uint) fname_len)) {
+		if (zend_hash_str_exists(&phar_obj->archive->virtual_dirs, fname, (uint32_t) fname_len)) {
 			RETURN_TRUE;
 		}
 		RETURN_FALSE;
@@ -3779,8 +3779,8 @@ PHP_METHOD(Phar, offsetUnset)
 		RETURN_FALSE;
 	}
 
-	if (zend_hash_str_exists(&phar_obj->archive->manifest, fname, (uint) fname_len)) {
-		if (NULL != (entry = zend_hash_str_find_ptr(&phar_obj->archive->manifest, fname, (uint) fname_len))) {
+	if (zend_hash_str_exists(&phar_obj->archive->manifest, fname, (uint32_t) fname_len)) {
+		if (NULL != (entry = zend_hash_str_find_ptr(&phar_obj->archive->manifest, fname, (uint32_t) fname_len))) {
 			if (entry->is_deleted) {
 				/* entry is deleted, but has not been flushed to disk yet */
 				return;
@@ -3792,7 +3792,7 @@ PHP_METHOD(Phar, offsetUnset)
 					return;
 				}
 				/* re-populate entry after copy on write */
-				entry = zend_hash_str_find_ptr(&phar_obj->archive->manifest, fname, (uint) fname_len);
+				entry = zend_hash_str_find_ptr(&phar_obj->archive->manifest, fname, (uint32_t) fname_len);
 			}
 			entry->is_modified = 0;
 			entry->is_deleted = 1;

@@ -59,7 +59,7 @@ static void end_write(TsHashTable *ht)
 }
 
 /* delegates */
-ZEND_API void _zend_ts_hash_init(TsHashTable *ht, uint nSize, dtor_func_t pDestructor, zend_bool persistent ZEND_FILE_LINE_DC)
+ZEND_API void _zend_ts_hash_init(TsHashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent ZEND_FILE_LINE_DC)
 {
 #ifdef ZTS
 	ht->mx_reader = tsrm_mutex_alloc();
@@ -69,7 +69,7 @@ ZEND_API void _zend_ts_hash_init(TsHashTable *ht, uint nSize, dtor_func_t pDestr
 	_zend_hash_init(TS_HASH(ht), nSize, pDestructor, persistent ZEND_FILE_LINE_RELAY_CC);
 }
 
-ZEND_API void _zend_ts_hash_init_ex(TsHashTable *ht, uint nSize, dtor_func_t pDestructor, zend_bool persistent, zend_bool bApplyProtection ZEND_FILE_LINE_DC)
+ZEND_API void _zend_ts_hash_init_ex(TsHashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent, zend_bool bApplyProtection ZEND_FILE_LINE_DC)
 {
 #ifdef ZTS
 	ht->mx_reader = tsrm_mutex_alloc();

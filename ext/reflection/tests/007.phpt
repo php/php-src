@@ -53,10 +53,9 @@ function test($class)
 	echo "\n";
 }
 
-function __autoload($class)
-{
+spl_autoload_register(function ($class) {
 	echo __FUNCTION__ . "($class)\n";
-}
+});
 
 test('Class_does_not_exist');
 
@@ -94,7 +93,7 @@ test('WithCtorWithArgs');
 --EXPECTF--
 
 ====>Class_does_not_exist
-__autoload(Class_does_not_exist)
+{closure}(Class_does_not_exist)
 string(41) "Class Class_does_not_exist does not exist"
 ====>NoCtor
 ====>newInstance()

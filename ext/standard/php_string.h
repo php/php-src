@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
-   |          Stig Sæther Bakken <ssb@php.net>                            |
+   |          Stig SÃ¦ther Bakken <ssb@php.net>                            |
    +----------------------------------------------------------------------+
 */
 
@@ -93,6 +93,8 @@ PHP_FUNCTION(str_word_count);
 PHP_FUNCTION(str_split);
 PHP_FUNCTION(strpbrk);
 PHP_FUNCTION(substr_compare);
+PHP_FUNCTION(utf8_encode);
+PHP_FUNCTION(utf8_decode);
 #ifdef HAVE_STRCOLL
 PHP_FUNCTION(strcoll);
 #endif
@@ -133,8 +135,8 @@ PHPAPI char *php_stristr(char *s, char *t, size_t s_len, size_t t_len);
 PHPAPI zend_string *php_str_to_str(char *haystack, size_t length, char *needle,
 		size_t needle_len, char *str, size_t str_len);
 PHPAPI zend_string *php_trim(zend_string *str, char *what, size_t what_len, int mode);
-PHPAPI size_t php_strip_tags(char *rbuf, size_t len, int *state, const char *allow, size_t allow_len);
-PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, int *stateptr, const char *allow, size_t allow_len, zend_bool allow_tag_spaces);
+PHPAPI size_t php_strip_tags(char *rbuf, size_t len, uint8_t *state, const char *allow, size_t allow_len);
+PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, uint8_t *stateptr, const char *allow, size_t allow_len, zend_bool allow_tag_spaces);
 PHPAPI void php_implode(const zend_string *delim, zval *arr, zval *return_value);
 PHPAPI void php_explode(const zend_string *delim, zend_string *str, zval *return_value, zend_long limit);
 

@@ -48,6 +48,7 @@
 #define PHP_GDIMG_TYPE_GD2      9
 #define PHP_GDIMG_TYPE_GD2PART  10
 #define PHP_GDIMG_TYPE_WEBP     11
+#define PHP_GDIMG_TYPE_BMP      12
 
 #ifdef PHP_WIN32
 #	define PHP_GD_API __declspec(dllexport)
@@ -60,6 +61,7 @@
 PHPAPI extern const char php_sig_gif[3];
 PHPAPI extern const char php_sig_jpg[3];
 PHPAPI extern const char php_sig_png[8];
+PHPAPI extern const char php_sig_bmp[2];
 
 extern zend_module_entry gd_module_entry;
 #define phpext_gd_ptr &gd_module_entry
@@ -123,9 +125,7 @@ PHP_FUNCTION(imagerotate);
 
 PHP_FUNCTION(imageflip);
 
-#ifdef HAVE_GD_BUNDLED
 PHP_FUNCTION(imageantialias);
-#endif
 
 PHP_FUNCTION(imagecrop);
 PHP_FUNCTION(imagecropauto);
@@ -151,6 +151,9 @@ PHP_FUNCTION(imagecreatefromwbmp);
 PHP_FUNCTION(imagecreatefromgd);
 PHP_FUNCTION(imagecreatefromgd2);
 PHP_FUNCTION(imagecreatefromgd2part);
+#if defined(HAVE_GD_BMP)
+PHP_FUNCTION(imagecreatefrombmp);
+#endif
 #if defined(HAVE_GD_XPM)
 PHP_FUNCTION(imagecreatefromxpm);
 #endif
@@ -171,17 +174,23 @@ PHP_FUNCTION(imagewebp);
 PHP_FUNCTION(imagewbmp);
 PHP_FUNCTION(imagegd);
 PHP_FUNCTION(imagegd2);
+#if defined(HAVE_GD_BMP)
+PHP_FUNCTION(imagebmp);
+#endif
 
 PHP_FUNCTION(imageinterlace);
 PHP_FUNCTION(imageline);
 PHP_FUNCTION(imageloadfont);
 PHP_FUNCTION(imagepolygon);
+PHP_FUNCTION(imageopenpolygon);
 PHP_FUNCTION(imagerectangle);
 PHP_FUNCTION(imagesetpixel);
 PHP_FUNCTION(imagestring);
 PHP_FUNCTION(imagestringup);
 PHP_FUNCTION(imagesx);
 PHP_FUNCTION(imagesy);
+PHP_FUNCTION(imagesetclip);
+PHP_FUNCTION(imagegetclip);
 PHP_FUNCTION(imagedashedline);
 PHP_FUNCTION(imagettfbbox);
 PHP_FUNCTION(imagettftext);
@@ -197,6 +206,8 @@ PHP_FUNCTION(imagexbm);
 
 PHP_FUNCTION(imagefilter);
 PHP_FUNCTION(imageconvolution);
+
+PHP_FUNCTION(imageresolution);
 
 PHP_GD_API int phpi_get_le_gd(void);
 

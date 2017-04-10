@@ -34,7 +34,7 @@ typedef struct _zend_lex_state {
 	zend_ptr_stack heredoc_label_stack;
 
 	zend_file_handle *in;
-	uint lineno;
+	uint32_t lineno;
 	zend_string *filename;
 
 	/* original (unfiltered) script */

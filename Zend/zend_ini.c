@@ -359,7 +359,7 @@ ZEND_API int zend_alter_ini_entry_ex(zend_string *name, zend_string *new_value, 
 		ini_entry->orig_value = ini_entry->value;
 		ini_entry->orig_modifiable = modifiable;
 		ini_entry->modified = 1;
-		zend_hash_add_ptr(EG(modified_ini_directives), name, ini_entry);
+		zend_hash_add_ptr(EG(modified_ini_directives), ini_entry->name, ini_entry);
 	}
 
 	duplicate = zend_string_copy(new_value);
@@ -400,7 +400,7 @@ ZEND_API int zend_restore_ini_entry(zend_string *name, int stage) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int zend_ini_register_displayer(char *name, uint name_length, void (*displayer)(zend_ini_entry *ini_entry, int type)) /* {{{ */
+ZEND_API int zend_ini_register_displayer(char *name, uint32_t name_length, void (*displayer)(zend_ini_entry *ini_entry, int type)) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
 
@@ -418,7 +418,7 @@ ZEND_API int zend_ini_register_displayer(char *name, uint name_length, void (*di
  * Data retrieval
  */
 
-ZEND_API zend_long zend_ini_long(char *name, uint name_length, int orig) /* {{{ */
+ZEND_API zend_long zend_ini_long(char *name, uint32_t name_length, int orig) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
 
@@ -435,7 +435,7 @@ ZEND_API zend_long zend_ini_long(char *name, uint name_length, int orig) /* {{{ 
 }
 /* }}} */
 
-ZEND_API double zend_ini_double(char *name, uint name_length, int orig) /* {{{ */
+ZEND_API double zend_ini_double(char *name, uint32_t name_length, int orig) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
 
@@ -452,7 +452,7 @@ ZEND_API double zend_ini_double(char *name, uint name_length, int orig) /* {{{ *
 }
 /* }}} */
 
-ZEND_API char *zend_ini_string_ex(char *name, uint name_length, int orig, zend_bool *exists) /* {{{ */
+ZEND_API char *zend_ini_string_ex(char *name, uint32_t name_length, int orig, zend_bool *exists) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
 
@@ -476,7 +476,7 @@ ZEND_API char *zend_ini_string_ex(char *name, uint name_length, int orig, zend_b
 }
 /* }}} */
 
-ZEND_API char *zend_ini_string(char *name, uint name_length, int orig) /* {{{ */
+ZEND_API char *zend_ini_string(char *name, uint32_t name_length, int orig) /* {{{ */
 {
 	zend_bool exists = 1;
 	char *return_value;
@@ -498,7 +498,7 @@ static void zend_ini_displayer_cb(zend_ini_entry *ini_entry, int type) /* {{{ */
 		ini_entry->displayer(ini_entry, type);
 	} else {
 		char *display_string;
-		uint display_string_length;
+		uint32_t display_string_length;
 
 		if (type == ZEND_INI_DISPLAY_ORIG && ini_entry->modified) {
 			if (ini_entry->orig_value) {

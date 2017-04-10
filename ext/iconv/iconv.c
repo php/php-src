@@ -291,16 +291,12 @@ PHP_MINIT_FUNCTION(miconv)
 	}
 #elif HAVE_GLIBC_ICONV
 	version = (char *)gnu_get_libc_version();
-#elif defined(NETWARE)
-	version = "OS built-in";
 #endif
 
 #ifdef PHP_ICONV_IMPL
 	REGISTER_STRING_CONSTANT("ICONV_IMPL", PHP_ICONV_IMPL, CONST_CS | CONST_PERSISTENT);
 #elif HAVE_LIBICONV
 	REGISTER_STRING_CONSTANT("ICONV_IMPL", "libiconv", CONST_CS | CONST_PERSISTENT);
-#elif defined(NETWARE)
-	REGISTER_STRING_CONSTANT("ICONV_IMPL", "Novell", CONST_CS | CONST_PERSISTENT);
 #else
 	REGISTER_STRING_CONSTANT("ICONV_IMPL", "unknown", CONST_CS | CONST_PERSISTENT);
 #endif
@@ -428,7 +424,7 @@ static int php_iconv_output_handler(void **nothing, php_output_context *output_c
 			} else {
 				len = spprintf(&content_type, 0, "Content-Type:%.*s; charset=%s", mimetype_len ? mimetype_len : (int) strlen(mimetype), mimetype, get_output_encoding());
 			}
-			if (content_type && SUCCESS == sapi_add_header(content_type, (uint)len, 0)) {
+			if (content_type && SUCCESS == sapi_add_header(content_type, (uint32_t)len, 0)) {
 				SG(sapi_headers).send_default_content_type = 0;
 				php_output_handler_hook(PHP_OUTPUT_HANDLER_HOOK_IMMUTABLE, NULL);
 			}
@@ -584,12 +580,7 @@ PHP_ICONV_API php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len, 
 	out_buffer = zend_string_alloc(out_size, 0);
 	out_p = ZSTR_VAL(out_buffer);
 
-#ifdef NETWARE
-	result = iconv(cd, (char **) &in_p, &in_size, (char **)
-#else
-	result = iconv(cd, (const char **) &in_p, &in_size, (char **)
-#endif
-				&out_p, &out_left);
+	result = iconv(cd, (const char **) &in_p, &in_size, (char **) &out_p, &out_left);
 
 	if (result == (size_t)(-1)) {
 		zend_string_free(out_buffer);
@@ -2573,14 +2564,9 @@ static php_iconv_err_t php_iconv_stream_filter_ctor(php_iconv_stream_filter *sel
 		const char *to_charset, size_t to_charset_len,
 		const char *from_charset, size_t from_charset_len, int persistent)
 {
-	if (NULL == (self->to_charset = pemalloc(to_charset_len + 1, persistent))) {
-		return PHP_ICONV_ERR_ALLOC;
-	}
+	self->to_charset = pemalloc(to_charset_len + 1, persistent);
 	self->to_charset_len = to_charset_len;
-	if (NULL == (self->from_charset = pemalloc(from_charset_len + 1, persistent))) {
-		pefree(self->to_charset, persistent);
-		return PHP_ICONV_ERR_ALLOC;
-	}
+	self->from_charset = pemalloc(from_charset_len + 1, persistent);
 	self->from_charset_len = from_charset_len;
 
 	memcpy(self->to_charset, to_charset, to_charset_len);
@@ -2623,9 +2609,7 @@ static int php_iconv_stream_filter_append_bucket(
 	}
 
 	out_buf_size = ocnt = prev_ocnt = initial_out_buf_size;
-	if (NULL == (out_buf = pemalloc(out_buf_size, persistent))) {
-		return FAILURE;
-	}
+	out_buf = pemalloc(out_buf_size, persistent);
 
 	pd = out_buf;
 
@@ -2674,19 +2658,10 @@ static int php_iconv_stream_filter_append_bucket(
 							php_stream_bucket_append(buckets_out, new_bucket);
 
 							out_buf_size = ocnt = initial_out_buf_size;
-							if (NULL == (out_buf = pemalloc(out_buf_size, persistent))) {
-								return FAILURE;
-							}
+							out_buf = pemalloc(out_buf_size, persistent);
 							pd = out_buf;
 						} else {
-							if (NULL == (new_out_buf = perealloc(out_buf, new_out_buf_size, persistent))) {
-								if (NULL == (new_bucket = php_stream_bucket_new(stream, out_buf, (out_buf_size - ocnt), 1, persistent))) {
-									goto out_failure;
-								}
-
-								php_stream_bucket_append(buckets_out, new_bucket);
-								return FAILURE;
-							}
+							new_out_buf = perealloc(out_buf, new_out_buf_size, persistent);
 							pd = new_out_buf + (pd - out_buf);
 							ocnt += (new_out_buf_size - out_buf_size);
 							out_buf = new_out_buf;
@@ -2751,19 +2726,10 @@ static int php_iconv_stream_filter_append_bucket(
 						php_stream_bucket_append(buckets_out, new_bucket);
 
 						out_buf_size = ocnt = initial_out_buf_size;
-						if (NULL == (out_buf = pemalloc(out_buf_size, persistent))) {
-							return FAILURE;
-						}
+						out_buf = pemalloc(out_buf_size, persistent);
 						pd = out_buf;
 					} else {
-						if (NULL == (new_out_buf = perealloc(out_buf, new_out_buf_size, persistent))) {
-							if (NULL == (new_bucket = php_stream_bucket_new(stream, out_buf, (out_buf_size - ocnt), 1, persistent))) {
-								goto out_failure;
-							}
-
-							php_stream_bucket_append(buckets_out, new_bucket);
-							return FAILURE;
-						}
+						new_out_buf = perealloc(out_buf, new_out_buf_size, persistent);
 						pd = new_out_buf + (pd - out_buf);
 						ocnt += (new_out_buf_size - out_buf_size);
 						out_buf = new_out_buf;
@@ -2869,7 +2835,7 @@ static php_stream_filter_ops php_iconv_stream_filter_ops = {
 };
 
 /* {{{ php_iconv_stream_filter_create */
-static php_stream_filter *php_iconv_stream_filter_factory_create(const char *name, zval *params, int persistent)
+static php_stream_filter *php_iconv_stream_filter_factory_create(const char *name, zval *params, uint8_t persistent)
 {
 	php_stream_filter *retval = NULL;
 	php_iconv_stream_filter *inst;
@@ -2895,9 +2861,7 @@ static php_stream_filter *php_iconv_stream_filter_factory_create(const char *nam
 		return NULL;
 	}
 
-	if (NULL == (inst = pemalloc(sizeof(php_iconv_stream_filter), persistent))) {
-		return NULL;
-	}
+	inst = pemalloc(sizeof(php_iconv_stream_filter), persistent);
 
 	if (php_iconv_stream_filter_ctor(inst, to_charset, to_charset_len, from_charset, from_charset_len, persistent) != PHP_ICONV_ERR_SUCCESS) {
 		pefree(inst, persistent);

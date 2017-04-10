@@ -103,7 +103,7 @@ static void phar_split_cache_list(void) /* {{{ */
 	char *key, *lasts, *end;
 	char ds[2];
 	phar_archive_data *phar;
-	uint i = 0;
+	uint32_t i = 0;
 
 	if (!PHAR_G(cache_list) || !(PHAR_G(cache_list)[0])) {
 		return;
@@ -1956,11 +1956,11 @@ woohoo:
 				HASH_KEY_NON_EXISTENT != zend_hash_get_current_key(&(PHAR_G(phar_fname_map)), &str_key, &unused);
 				zend_hash_move_forward(&(PHAR_G(phar_fname_map)))
 			) {
-				if (ZSTR_LEN(str_key) > (uint) filename_len) {
+				if (ZSTR_LEN(str_key) > (uint32_t) filename_len) {
 					continue;
 				}
 
-				if (!memcmp(filename, ZSTR_VAL(str_key), ZSTR_LEN(str_key)) && ((uint)filename_len == ZSTR_LEN(str_key)
+				if (!memcmp(filename, ZSTR_VAL(str_key), ZSTR_LEN(str_key)) && ((uint32_t)filename_len == ZSTR_LEN(str_key)
 					|| filename[ZSTR_LEN(str_key)] == '/' || filename[ZSTR_LEN(str_key)] == '\0')) {
 					if (NULL == (pphar = zend_hash_get_current_data_ptr(&(PHAR_G(phar_fname_map))))) {
 						break;
@@ -1975,11 +1975,11 @@ woohoo:
 					HASH_KEY_NON_EXISTENT != zend_hash_get_current_key(&cached_phars, &str_key, &unused);
 					zend_hash_move_forward(&cached_phars)
 				) {
-					if (ZSTR_LEN(str_key) > (uint) filename_len) {
+					if (ZSTR_LEN(str_key) > (uint32_t) filename_len) {
 						continue;
 					}
 
-					if (!memcmp(filename, ZSTR_VAL(str_key), ZSTR_LEN(str_key)) && ((uint)filename_len == ZSTR_LEN(str_key)
+					if (!memcmp(filename, ZSTR_VAL(str_key), ZSTR_LEN(str_key)) && ((uint32_t)filename_len == ZSTR_LEN(str_key)
 						|| filename[ZSTR_LEN(str_key)] == '/' || filename[ZSTR_LEN(str_key)] == '\0')) {
 						if (NULL == (pphar = zend_hash_get_current_data_ptr(&cached_phars))) {
 							break;

@@ -241,18 +241,6 @@ int zend_ssa_find_sccs(const zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
 }
 /* }}} */
 
-static inline zend_bool is_no_val_use(const zend_op *opline, const zend_ssa_op *ssa_op, int var)
-{
-	if (opline->opcode == ZEND_ASSIGN ||
-			(opline->opcode == ZEND_UNSET_VAR && (opline->extended_value & ZEND_QUICK_SET))) {
-		return ssa_op->op1_use == var && ssa_op->op2_use != var;
-	}
-	if (opline->opcode == ZEND_FE_FETCH_R) {
-		return ssa_op->op2_use == var && ssa_op->op1_use != var;
-	}
-	return 0;
-}
-
 int zend_ssa_find_false_dependencies(const zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
 {
 	zend_ssa_var *ssa_vars = ssa->vars;
@@ -274,7 +262,7 @@ int zend_ssa_find_false_dependencies(const zend_op_array *op_array, zend_ssa *ss
 		ssa_vars[i].no_val = 1; /* mark as unused */
 		use = ssa->vars[i].use_chain;
 		while (use >= 0) {
-			if (!is_no_val_use(&op_array->opcodes[use], &ssa->ops[use], i)) {
+			if (!zend_ssa_is_no_val_use(&op_array->opcodes[use], &ssa->ops[use], i)) {
 				ssa_vars[i].no_val = 0; /* used directly */
 				zend_bitset_incl(worklist, i);
 				break;
@@ -314,7 +302,7 @@ zend_ulong minOR(zend_ulong a, zend_ulong b, zend_ulong c, zend_ulong d)
 {
 	zend_ulong m, temp;
 
-	m = 1L << (sizeof(zend_ulong) * 8 - 1);
+	m = Z_UL(1) << (sizeof(zend_ulong) * 8 - 1);
 	while (m != 0) {
 		if (~a & c & m) {
 			temp = (a | m) & -m;
@@ -338,7 +326,7 @@ zend_ulong maxOR(zend_ulong a, zend_ulong b, zend_ulong c, zend_ulong d)
 {
 	zend_ulong m, temp;
 
-	m = 1L << (sizeof(zend_ulong) * 8 - 1);
+	m = Z_UL(1) << (sizeof(zend_ulong) * 8 - 1);
 	while (m != 0) {
 		if (b & d & m) {
 			temp = (b - m) | (m - 1);
@@ -361,7 +349,7 @@ zend_ulong minAND(zend_ulong a, zend_ulong b, zend_ulong c, zend_ulong d)
 {
 	zend_ulong m, temp;
 
-	m = 1L << (sizeof(zend_ulong) * 8 - 1);
+	m = Z_UL(1) << (sizeof(zend_ulong) * 8 - 1);
 	while (m != 0) {
 		if (~a & ~c & m) {
 			temp = (a | m) & -m;
@@ -384,7 +372,7 @@ zend_ulong maxAND(zend_ulong a, zend_ulong b, zend_ulong c, zend_ulong d)
 {
 	zend_ulong m, temp;
 
-	m = 1L << (sizeof(zend_ulong) * 8 - 1);
+	m = Z_UL(1) << (sizeof(zend_ulong) * 8 - 1);
 	while (m != 0) {
 		if (b & ~d & m) {
 			temp = (b | ~m) | (m - 1);
@@ -1335,13 +1323,13 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 					return 1;
 				} else if (op_array->arg_info &&
 				    opline->op1.num <= op_array->num_args) {
-					if (op_array->arg_info[opline->op1.num-1].type_hint == IS_LONG) {
+					if (ZEND_TYPE_CODE(op_array->arg_info[opline->op1.num-1].type) == IS_LONG) {
 						tmp->underflow = 0;
 						tmp->min = ZEND_LONG_MIN;
 						tmp->max = ZEND_LONG_MAX;
 						tmp->overflow = 0;
 						return 1;
-					} else if (op_array->arg_info[opline->op1.num-1].type_hint == _IS_BOOL) {
+					} else if (ZEND_TYPE_CODE(op_array->arg_info[opline->op1.num-1].type) == _IS_BOOL) {
 						tmp->underflow = 0;
 						tmp->min = 0;
 						tmp->max = 1;
@@ -1548,7 +1536,7 @@ static void zend_infer_ranges_warmup(const zend_op_array *op_array, zend_ssa *ss
 	int worklist_len = zend_bitset_len(ssa->vars_count);
 	int j, n;
 	zend_ssa_range tmp;
-	ALLOCA_FLAG(use_heap);
+	ALLOCA_FLAG(use_heap)
 	zend_bitset worklist = do_alloca(sizeof(zend_ulong) * worklist_len * 2, use_heap);
 	zend_bitset visited = worklist + worklist_len;
 #ifdef NEG_RANGE
@@ -2095,31 +2083,33 @@ static uint32_t zend_fetch_arg_info(const zend_script *script, zend_arg_info *ar
 	uint32_t tmp = 0;
 
 	*pce = NULL;
-	if (arg_info->class_name) {
+	if (ZEND_TYPE_IS_CLASS(arg_info->type)) {
 		// class type hinting...
-		zend_string *lcname = zend_string_tolower(arg_info->class_name);
+		zend_string *lcname = zend_string_tolower(ZEND_TYPE_NAME(arg_info->type));
 		tmp |= MAY_BE_OBJECT;
 		*pce = get_class_entry(script, lcname);
 		zend_string_release(lcname);
-	} else if (arg_info->type_hint != IS_UNDEF) {
-		if (arg_info->type_hint == IS_VOID) {
+	} else if (ZEND_TYPE_IS_CODE(arg_info->type)) {
+		zend_uchar type_hint = ZEND_TYPE_CODE(arg_info->type);
+
+		if (type_hint == IS_VOID) {
 			tmp |= MAY_BE_NULL;
-		} else if (arg_info->type_hint == IS_CALLABLE) {
+		} else if (type_hint == IS_CALLABLE) {
 			tmp |= MAY_BE_STRING|MAY_BE_OBJECT|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
-		} else if (arg_info->type_hint == IS_ITERABLE) {
+		} else if (type_hint == IS_ITERABLE) {
 			tmp |= MAY_BE_OBJECT|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
-		} else if (arg_info->type_hint == IS_ARRAY) {
+		} else if (type_hint == IS_ARRAY) {
 			tmp |= MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
-		} else if (arg_info->type_hint == _IS_BOOL) {
+		} else if (type_hint == _IS_BOOL) {
 			tmp |= MAY_BE_TRUE|MAY_BE_FALSE;
 		} else {
-			ZEND_ASSERT(arg_info->type_hint < IS_REFERENCE);
-			tmp |= 1 << arg_info->type_hint;
+			ZEND_ASSERT(type_hint < IS_REFERENCE);
+			tmp |= 1 << type_hint;
 		}
 	} else {
 		tmp |= MAY_BE_ANY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
 	}
-	if (arg_info->allow_null) {
+	if (ZEND_TYPE_ALLOW_NULL(arg_info->type)) {
 		tmp |= MAY_BE_NULL;
 	}
 	return tmp;
@@ -3390,7 +3380,7 @@ static zend_bool can_convert_to_double(
 		zend_op *opline = &op_array->opcodes[use];
 		zend_ssa_op *ssa_op = &ssa->ops[use];
 
-		if (is_no_val_use(opline, ssa_op, var_num)) {
+		if (zend_ssa_is_no_val_use(opline, ssa_op, var_num)) {
 			continue;
 		}
 

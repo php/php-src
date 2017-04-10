@@ -56,7 +56,6 @@ config.cache
 config.h.in
 config.log
 config.nice
-config.nice.bat
 config.status
 config.sub
 config_vars.mk
@@ -174,6 +173,7 @@ tests/*/*/*.sh
 
 # Extension specifc ignores
 ext/*/configure.in
+ext/*/configure.ac
 ext/*/ltmain.sh
 ext/*/libs.mk
 ext/*/build
@@ -214,6 +214,7 @@ ext/mssql/Makefile.global
 ext/mssql/acinclude.m4
 ext/mssql/config.sub
 ext/mssql/configure.in
+ext/mssql/configure.ac
 ext/mssql/ltmain.sh
 ext/mysql/weztest.sqlite
 ext/oci8/tests/*.tmp
@@ -285,3 +286,4 @@ win32/*.positions
 win32/ext
 win32/phpts.def
 win32/wsyslog.h
+config.*.bat

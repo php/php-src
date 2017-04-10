@@ -28,13 +28,6 @@
 #ifdef PHP_WIN32
 #define O_RDONLY _O_RDONLY
 #include "win32/param.h"
-#elif defined(NETWARE)
-#ifdef USE_WINSOCK
-#include <novsock2.h>
-#else
-#include <sys/socket.h>
-#endif
-#include <sys/param.h>
 #else
 #include <sys/param.h>
 #endif
@@ -247,9 +240,10 @@ PHP_FUNCTION(pack)
 	int outputpos = 0, outputsize = 0;
 	zend_string *output;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s*", &format, &formatlen, &argv, &num_args) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, -1)
+		Z_PARAM_STRING(format, formatlen)
+		Z_PARAM_VARIADIC('*', argv, num_args)
+	ZEND_PARSE_PARAMETERS_END();
 
 	/* We have a maximum of <formatlen> format codes to deal with */
 	formatcodes = safe_emalloc(formatlen, sizeof(*formatcodes), 0);
@@ -727,10 +721,12 @@ PHP_FUNCTION(unpack)
 	int i;
 	zend_long offset = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS|l", &formatarg,
-		&inputarg, &offset) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STR(formatarg)
+		Z_PARAM_STR(inputarg)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(offset)
+	ZEND_PARSE_PARAMETERS_END();
 
 	format = ZSTR_VAL(formatarg);
 	formatlen = ZSTR_LEN(formatarg);

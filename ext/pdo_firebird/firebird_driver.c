@@ -37,56 +37,9 @@ static int firebird_alloc_prepare_stmt(pdo_dbh_t*, const char*, size_t, XSQLDA*,
 /* map driver specific error message to PDO error */
 void _firebird_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, char const *file, zend_long line) /* {{{ */
 {
-#if 0
-	pdo_firebird_db_handle *H = stmt ? ((pdo_firebird_stmt *)stmt->driver_data)->H
-		: (pdo_firebird_db_handle *)dbh->driver_data;
-#endif
 	pdo_error_type *const error_code = stmt ? &stmt->error_code : &dbh->error_code;
 
-#if 0
-	switch (isc_sqlcode(H->isc_status)) {
-
-		case 0:
-			*error_code = PDO_ERR_NONE;
-			break;
-		default:
-			*error_code = PDO_ERR_CANT_MAP;
-			break;
-		case -104:
-			*error_code = PDO_ERR_SYNTAX;
-			break;
-		case -530:
-		case -803:
-			*error_code = PDO_ERR_CONSTRAINT;
-			break;
-		case -204:
-		case -205:
-		case -206:
-		case -829:
-			*error_code = PDO_ERR_NOT_FOUND;
-			break;
-
-			*error_code = PDO_ERR_ALREADY_EXISTS;
-			break;
-
-			*error_code = PDO_ERR_NOT_IMPLEMENTED;
-			break;
-		case -313:
-		case -804:
-			*error_code = PDO_ERR_MISMATCH;
-			break;
-		case -303:
-		case -314:
-		case -413:
-			*error_code = PDO_ERR_TRUNCATED;
-			break;
-
-			*error_code = PDO_ERR_DISCONNECTED;
-			break;
-	}
-#else
 	strcpy(*error_code, "HY000");
-#endif
 }
 /* }}} */
 
