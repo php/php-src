@@ -143,7 +143,8 @@ static void strip_nops(zend_op_array *op_array, zend_basic_block *b)
 static int get_const_switch_target(zend_cfg *cfg, zend_op_array *op_array, zend_basic_block *block, zend_op *opline, zval *val) {
 	HashTable *jumptable = Z_ARRVAL(ZEND_OP2_LITERAL(opline));
 	zval *zv;
-	if (Z_TYPE_P(val) != opline->result.num) {
+	if ((opline->opcode == ZEND_SWITCH_LONG && Z_TYPE_P(val) != IS_LONG)
+			|| (opline->opcode == ZEND_SWITCH_STRING && Z_TYPE_P(val) != IS_STRING)) {
 		/* fallback to next block */
 		return block->successors[block->successors_count - 1];
 	}
@@ -364,7 +365,8 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 				}
 				break;
 
-			case ZEND_SWITCH:
+			case ZEND_SWITCH_LONG:
+			case ZEND_SWITCH_STRING:
 				if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
 					/* SWITCH variable will be deleted later by FREE, so we can't optimize it */
 					Tsource[VAR_NUM(opline->op1.var)] = NULL;
@@ -924,7 +926,8 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 			case ZEND_FE_FETCH_RW:
 				opline->extended_value = ZEND_OPLINE_TO_OFFSET(opline, new_opcodes + blocks[b->successors[0]].start);
 				break;
-			case ZEND_SWITCH:
+			case ZEND_SWITCH_LONG:
+			case ZEND_SWITCH_STRING:
 			{
 				HashTable *jumptable = Z_ARRVAL(ZEND_OP2_LITERAL(opline));
 				zval *zv;

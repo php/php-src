@@ -670,7 +670,8 @@ ZEND_API int pass_two(zend_op_array *op_array)
 					opline->opcode = ZEND_GENERATOR_RETURN;
 				}
 				break;
-			case ZEND_SWITCH:
+			case ZEND_SWITCH_LONG:
+			case ZEND_SWITCH_STRING:
 			{
 				/* absolute indexes to relative offsets */
 				HashTable *jumptable = Z_ARRVAL_P(CT_CONSTANT(opline->op2));

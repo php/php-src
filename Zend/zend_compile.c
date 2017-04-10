@@ -2081,7 +2081,8 @@ static void zend_check_live_ranges(zend_op *opline) /* {{{ */
 		} else if (opline->opcode == ZEND_FAST_RET) {
 			/* fast_calls don't have to be destroyed */
 		} else if (opline->opcode == ZEND_CASE ||
-		           opline->opcode == ZEND_SWITCH ||
+		           opline->opcode == ZEND_SWITCH_LONG ||
+		           opline->opcode == ZEND_SWITCH_STRING ||
 		           opline->opcode == ZEND_FE_FETCH_R ||
 		           opline->opcode == ZEND_FE_FETCH_RW ||
 			       opline->opcode == ZEND_FE_FREE ||
@@ -4645,6 +4646,17 @@ static zend_uchar determine_switch_jumptable_type(zend_ast_list *cases) {
 	return common_type;
 }
 
+static zend_bool should_use_jumptable(zend_ast_list *cases, zend_uchar jumptable_type) {
+	/* Thresholds are chosen based on when the average switch time for equidistributed
+	 * input becomes smaller when using the jumptable optimization. */
+	if (jumptable_type == IS_LONG) {
+		return cases->children >= 5;
+	} else {
+		ZEND_ASSERT(jumptable_type == IS_STRING);
+		return cases->children >= 2;
+	}
+}
+
 void zend_compile_switch(zend_ast *ast) /* {{{ */
 {
 	zend_ast *expr_ast = ast->child[0];
@@ -4667,7 +4679,7 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 	case_node.u.op.var = get_temporary_variable(CG(active_op_array));
 
 	jumptable_type = determine_switch_jumptable_type(cases);
-	if (jumptable_type != IS_UNDEF && cases->children >= 4) {
+	if (jumptable_type != IS_UNDEF && should_use_jumptable(cases, jumptable_type)) {
 		znode jumptable_op;
 
 		ALLOC_HASHTABLE(jumptable);
@@ -4675,11 +4687,12 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 		jumptable_op.op_type = IS_CONST;
 		ZVAL_ARR(&jumptable_op.u.constant, jumptable);
 
-		opline = zend_emit_op(NULL, ZEND_SWITCH, &expr_node, &jumptable_op);
+		opline = zend_emit_op(NULL,
+			jumptable_type == IS_LONG ? ZEND_SWITCH_LONG : ZEND_SWITCH_STRING,
+			&expr_node, &jumptable_op);
 		if (opline->op1_type == IS_CONST) {
 			zval_copy_ctor(CT_CONSTANT(opline->op1));
 		}
-		opline->result.num = jumptable_type;
 		opnum_switch = opline - CG(active_op_array)->opcodes;
 	}
 

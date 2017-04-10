@@ -8043,29 +8043,54 @@ ZEND_VM_HANDLER(51, ZEND_MAKE_REF, VAR|CV, UNUSED)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(187, ZEND_SWITCH, CONST|TMPVAR|CV, CONST, JMP_ADDR)
+ZEND_VM_HANDLER(187, ZEND_SWITCH_LONG, CONST|TMPVAR|CV, CONST, JMP_ADDR)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
-	zval *op, *table_op, *jump_zv;
-	HashTable *ht;
+	zval *op, *jump_zv;
+	HashTable *jumptable;
 
 	op = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
-	table_op = GET_OP2_ZVAL_PTR(BP_VAR_R);
-	ht = Z_ARRVAL_P(table_op);
+	jumptable = Z_ARRVAL_P(GET_OP2_ZVAL_PTR(BP_VAR_R));
 
-	if (Z_TYPE_P(op) != opline->result.num) {
-		/* Wrong type, fall back to ZEND_CASE chain */
-		ZEND_VM_NEXT_OPCODE();
+	if (Z_TYPE_P(op) != IS_LONG) {
+		ZVAL_DEREF(op);
+		if (Z_TYPE_P(op) != IS_LONG) {
+			/* Wrong type, fall back to ZEND_CASE chain */
+			ZEND_VM_NEXT_OPCODE();
+		}
 	}
 
-	if (opline->result.num == IS_LONG) {
-		jump_zv = zend_hash_index_find(ht, Z_LVAL_P(op));
+	jump_zv = zend_hash_index_find(jumptable, Z_LVAL_P(op));
+	if (jump_zv != NULL) {
+		ZEND_VM_SET_RELATIVE_OPCODE(opline, Z_LVAL_P(jump_zv));
+		ZEND_VM_CONTINUE();
 	} else {
-		ZEND_ASSERT(opline->result.num == IS_STRING);
-		jump_zv = zend_hash_find(ht, Z_STR_P(op));
+		/* default */
+		ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
+		ZEND_VM_CONTINUE();
+	}
+}
+
+ZEND_VM_HANDLER(188, ZEND_SWITCH_STRING, CONST|TMPVAR|CV, CONST, JMP_ADDR)
+{
+	USE_OPLINE
+	zend_free_op free_op1, free_op2;
+	zval *op, *jump_zv;
+	HashTable *jumptable;
+
+	op = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+	jumptable = Z_ARRVAL_P(GET_OP2_ZVAL_PTR(BP_VAR_R));
+
+	if (Z_TYPE_P(op) != IS_STRING) {
+		ZVAL_DEREF(op);
+		if (Z_TYPE_P(op) != IS_STRING) {
+			/* Wrong type, fall back to ZEND_CASE chain */
+			ZEND_VM_NEXT_OPCODE();
+		}
 	}
 
+	jump_zv = zend_hash_find(jumptable, Z_STR_P(op));
 	if (jump_zv != NULL) {
 		ZEND_VM_SET_RELATIVE_OPCODE(opline, Z_LVAL_P(jump_zv));
 		ZEND_VM_CONTINUE();
