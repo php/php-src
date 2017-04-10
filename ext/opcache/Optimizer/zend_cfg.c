@@ -56,13 +56,13 @@ static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_bloc
 								opcode == ZEND_DO_FCALL ||
 								opcode == ZEND_DO_UCALL ||
 								opcode == ZEND_DO_FCALL_BY_NAME) {
-								b->flags |= ZEND_BB_ENTRY;
+								succ->flags |= ZEND_BB_ENTRY;
 							}
 						}
 						if (cfg->split_at_recv) {
 							if (opcode == ZEND_RECV ||
 								opcode == ZEND_RECV_INIT) {
-								b->flags |= ZEND_BB_RECV_ENTRY;
+								succ->flags |= ZEND_BB_RECV_ENTRY;
 							}
 						}
 					}
