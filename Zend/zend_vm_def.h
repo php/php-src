@@ -1515,9 +1515,13 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMPVAR|CV, UNUSED|CONST|V
 
 				/* check if static properties were destoyed */
 				if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-					zend_throw_error(NULL, "Access to undeclared static property: %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
-					FREE_OP1();
-					HANDLE_EXCEPTION();
+					if (type == BP_VAR_IS) {
+						retval = &EG(uninitialized_zval);
+					} else {
+						zend_throw_error(NULL, "Access to undeclared static property: %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+						FREE_OP1();
+						HANDLE_EXCEPTION();
+					}
 				}
 
 				ZEND_VM_C_GOTO(fetch_var_return);
@@ -1539,15 +1543,19 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMPVAR|CV, UNUSED|CONST|V
 				
 				/* check if static properties were destoyed */
 				if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-					zend_throw_error(NULL, "Access to undeclared static property: %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
-					FREE_OP1();
-					HANDLE_EXCEPTION();
+					if (type == BP_VAR_IS) {
+						retval = &EG(uninitialized_zval);
+					} else {
+						zend_throw_error(NULL, "Access to undeclared static property: %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+						FREE_OP1();
+						HANDLE_EXCEPTION();
+					}
 				}
 
 				ZEND_VM_C_GOTO(fetch_var_return);
 			}
 		}
-		retval = zend_std_get_static_property(ce, name, 0);
+		retval = zend_std_get_static_property(ce, name, type == BP_VAR_IS);
 		if (UNEXPECTED(EG(exception))) {
 			if (OP1_TYPE != IS_CONST) {
 				zend_string_release(name);
@@ -1555,8 +1563,12 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMPVAR|CV, UNUSED|CONST|V
 			FREE_OP1();
 			HANDLE_EXCEPTION();
 		}
-		if (OP1_TYPE == IS_CONST && retval) {
-			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, retval);
+		if (EXPECTED(retval)) {
+			if (OP1_TYPE == IS_CONST) {
+				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, retval);
+			}
+		} else {
+			retval = &EG(uninitialized_zval);
 		}
 
 		FREE_OP1();
