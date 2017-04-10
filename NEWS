@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2017 PHP 7.0.19
 
+- Date:
+  . Fixed bug #74404 (Wrong reflection on DateTimeZone::getTransitions).
+    (krakjoe)
+
 - Fileinfo:
   . Fixed bug #74379 (syntax error compile error in libmagic/apprentice.c).
     (Laruence)
