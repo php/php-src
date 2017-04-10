@@ -196,6 +196,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 						LITERAL_CLASS_CONST, (ZEND_OP1_TYPE(opline) == IS_CONST) ? 1 : 2, 1,
 						op_array);
 					break;
+				case ZEND_ASSIGN_STATIC_PROP:
 				case ZEND_FETCH_STATIC_PROP_R:
 				case ZEND_FETCH_STATIC_PROP_W:
 				case ZEND_FETCH_STATIC_PROP_RW:
@@ -204,6 +205,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 				case ZEND_FETCH_STATIC_PROP_FUNC_ARG:
 				case ZEND_UNSET_STATIC_PROP:
 				case ZEND_ISSET_ISEMPTY_STATIC_PROP:
+handle_static_prop:
 					if (ZEND_OP2_TYPE(opline) == IS_CONST) {
 						LITERAL_INFO(opline->op2.constant, LITERAL_CLASS, 1, 1, 2);
 					}
@@ -265,6 +267,9 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 				case ZEND_ASSIGN_BW_OR:
 				case ZEND_ASSIGN_BW_AND:
 				case ZEND_ASSIGN_BW_XOR:
+					if (opline->extended_value == ZEND_ASSIGN_STATIC_PROP) {
+						goto handle_static_prop;
+					}
 					if (ZEND_OP2_TYPE(opline) == IS_CONST) {
 						if (opline->extended_value == ZEND_ASSIGN_OBJ) {
 							optimizer_literal_obj_info(
