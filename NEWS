@@ -48,6 +48,8 @@ PHP                                                                        NEWS
 
 - Date:
   . Fixed bug #69587 (DateInterval properties and isset). (jhdxr)
+  . Fixed bug #74404 (Wrong reflection on DateTimeZone::getTransitions).
+    (krakjoe)
 
 - DOM:
   . Fixed bug #67474 (getElementsByTagNameNS filter on default ns). (aboks)
