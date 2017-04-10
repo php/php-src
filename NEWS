@@ -41,6 +41,8 @@ PHP                                                                        NEWS
     to interned strings handling in TS builds. (Anatol, Dmitry)
   . Implemented "Trailing Commas In List Syntax" RFC for group use lists only.
     (Sammy Kaye Powers)
+  . Fixed bug #74269 (It's possible to override trait property with different
+    loosely-equal value). (pmmaga)
 
 - BCMath:
   . Fixed bug #46564 (bcmod truncates fractionals). (liborm85)

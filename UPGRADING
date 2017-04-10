@@ -39,6 +39,8 @@ PHP 7.2 UPGRADE NOTES
     of a notice. They will generate an Error in a future version of PHP.
     (https://wiki.php.net/rfc/deprecate-bareword-strings)
   . Minimum supported Windows versions are Windows 7/Server 2008 R2.
+  . Initial trait property value compatibility check will no longer perform
+    any casts. (Bug #74269)
 
 - BCMath:
   . The bcmod() function no longer truncates fractional numbers to integers. As
