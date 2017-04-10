@@ -143,7 +143,7 @@ END_EXTERN_C()
 #endif
 
 #ifndef HAVE_SOCKLEN_T
-# if PHP_WIN32
+# ifdef PHP_WIN32
 typedef int socklen_t;
 # else
 typedef unsigned int socklen_t;
