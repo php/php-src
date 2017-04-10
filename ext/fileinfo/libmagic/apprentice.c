@@ -80,6 +80,10 @@ FILE_RCSID("@(#)$File: apprentice.c,v 1.230 2015/01/02 21:29:39 christos Exp $")
 #endif
 #endif
 
+#ifndef offsetof
+#define offsetof(STRUCTURE,FIELD) ((int)((char*)&((STRUCTURE*)0)->FIELD))
+#endif
+
 #ifndef MAP_FAILED
 #define MAP_FAILED (void *) -1
 #endif
