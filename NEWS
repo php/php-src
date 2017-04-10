@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #74188 (Null coalescing operator fails for undeclared static
     class properties). (tpunt)
 
+- Date:
+  . Fixed bug #74404 (Wrong reflection on DateTimeZone::getTransitions).
+    (krakjoe)
+
 - Fileinfo:
   . Fixed bug #74379 (syntax error compile error in libmagic/apprentice.c).
     (Laruence)
