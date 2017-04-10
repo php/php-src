@@ -517,6 +517,8 @@ static int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_s
 		case ZEND_DEFINED:
 		case ZEND_ISSET_ISEMPTY_THIS:
 		case ZEND_COALESCE:
+		case ZEND_SWITCH_LONG:
+		case ZEND_SWITCH_STRING:
 			return 0;
 		case ZEND_INIT_FCALL:
 			/* can't throw, because call is resolved at compile time */
@@ -1352,7 +1354,7 @@ static int zend_jit_compute_liveness(zend_op_array *op_array, zend_ssa *ssa, zen
 		/* live = UNION of successor.liveIn for each successor of b */
 		/* live.add(phi.inputOf(b)) for each phi of successors of b */
 		zend_bitset_clear(live, set_size);
-		for (j = 0; j < 2 && b->successors[j] >= 0; j++) {
+		for (j = 0; j < b->successors_count; j++) {
 			int succ = b->successors[j];
 
 			zend_bitset_union(live, live_in + set_size * succ, set_size);
@@ -2486,6 +2488,8 @@ pass:
 					break;
 				case ZEND_NOP:
 				case ZEND_OP_DATA:
+				case ZEND_SWITCH_LONG:
+				case ZEND_SWITCH_STRING:
 					break;
 				case ZEND_JMP:
 					if (!zend_jit_jmp(&dasm_state, ssa->cfg.blocks[b].successors[0])) {
