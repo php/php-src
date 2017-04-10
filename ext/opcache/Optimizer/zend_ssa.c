@@ -61,6 +61,7 @@ static zend_bool needs_pi(const zend_op_array *op_array, zend_dfg *dfg, zend_ssa
 	/* Check that the other successor of the from block does not dominate all other predecessors.
 	 * If it does, we'd probably end up annihilating a positive+negative pi assertion. */
 	from_block = &ssa->cfg.blocks[from];
+	ZEND_ASSERT(from_block->successors_count == 2);
 	other_successor = from_block->successors[0] == to
 		? from_block->successors[1] : from_block->successors[0];
 	return !dominates_other_predecessors(&ssa->cfg, to_block, other_successor, from);
@@ -779,53 +780,51 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 		}
 	}
 
-	for (i = 0; i < 2; i++) {
+	for (i = 0; i < blocks[n].successors_count; i++) {
 		int succ = blocks[n].successors[i];
-		if (succ >= 0) {
-			zend_ssa_phi *p;
-			for (p = ssa_blocks[succ].phis; p; p = p->next) {
-				if (p->pi == n) {
-					/* e-SSA Pi */
-					if (p->has_range_constraint) {
-						if (p->constraint.range.min_var >= 0) {
-							p->constraint.range.min_ssa_var = var[p->constraint.range.min_var];
-						}
-						if (p->constraint.range.max_var >= 0) {
-							p->constraint.range.max_ssa_var = var[p->constraint.range.max_var];
-						}
+		zend_ssa_phi *p;
+		for (p = ssa_blocks[succ].phis; p; p = p->next) {
+			if (p->pi == n) {
+				/* e-SSA Pi */
+				if (p->has_range_constraint) {
+					if (p->constraint.range.min_var >= 0) {
+						p->constraint.range.min_ssa_var = var[p->constraint.range.min_var];
 					}
-					for (j = 0; j < blocks[succ].predecessors_count; j++) {
-						p->sources[j] = var[p->var];
+					if (p->constraint.range.max_var >= 0) {
+						p->constraint.range.max_ssa_var = var[p->constraint.range.max_var];
 					}
-					if (p->ssa_var < 0) {
-						p->ssa_var = ssa_vars_count;
-						ssa_vars_count++;
-					}
-				} else if (p->pi < 0) {
-					/* Normal Phi */
-					for (j = 0; j < blocks[succ].predecessors_count; j++)
-						if (ssa->cfg.predecessors[blocks[succ].predecessor_offset + j] == n) {
-							break;
-						}
-					ZEND_ASSERT(j < blocks[succ].predecessors_count);
+				}
+				for (j = 0; j < blocks[succ].predecessors_count; j++) {
 					p->sources[j] = var[p->var];
 				}
-			}
-			for (p = ssa_blocks[succ].phis; p && (p->pi >= 0); p = p->next) {
-				if (p->pi == n) {
-					zend_ssa_phi *q = p->next;
-					while (q) {
-						if (q->pi < 0 && q->var == p->var) {
-							for (j = 0; j < blocks[succ].predecessors_count; j++) {
-								if (ssa->cfg.predecessors[blocks[succ].predecessor_offset + j] == n) {
-									break;
-								}
-							}
-							ZEND_ASSERT(j < blocks[succ].predecessors_count);
-							q->sources[j] = p->ssa_var;
-						}
-						q = q->next;
+				if (p->ssa_var < 0) {
+					p->ssa_var = ssa_vars_count;
+					ssa_vars_count++;
+				}
+			} else if (p->pi < 0) {
+				/* Normal Phi */
+				for (j = 0; j < blocks[succ].predecessors_count; j++)
+					if (ssa->cfg.predecessors[blocks[succ].predecessor_offset + j] == n) {
+						break;
 					}
+				ZEND_ASSERT(j < blocks[succ].predecessors_count);
+				p->sources[j] = var[p->var];
+			}
+		}
+		for (p = ssa_blocks[succ].phis; p && (p->pi >= 0); p = p->next) {
+			if (p->pi == n) {
+				zend_ssa_phi *q = p->next;
+				while (q) {
+					if (q->pi < 0 && q->var == p->var) {
+						for (j = 0; j < blocks[succ].predecessors_count; j++) {
+							if (ssa->cfg.predecessors[blocks[succ].predecessor_offset + j] == n) {
+								break;
+							}
+						}
+						ZEND_ASSERT(j < blocks[succ].predecessors_count);
+						q->sources[j] = p->ssa_var;
+					}
+					q = q->next;
 				}
 			}
 		}

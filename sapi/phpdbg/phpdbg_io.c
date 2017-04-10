@@ -349,7 +349,7 @@ PHPDBG_API int phpdbg_create_listenable_socket(const char *addr, unsigned short 
 }
 
 PHPDBG_API void phpdbg_close_socket(int sock) {
-	if (socket >= 0) {
+	if (sock >= 0) {
 #ifdef _WIN32
 		closesocket(sock);
 #else

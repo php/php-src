@@ -670,6 +670,19 @@ ZEND_API int pass_two(zend_op_array *op_array)
 					opline->opcode = ZEND_GENERATOR_RETURN;
 				}
 				break;
+			case ZEND_SWITCH_LONG:
+			case ZEND_SWITCH_STRING:
+			{
+				/* absolute indexes to relative offsets */
+				HashTable *jumptable = Z_ARRVAL_P(CT_CONSTANT(opline->op2));
+				zval *zv;
+				ZEND_HASH_FOREACH_VAL(jumptable, zv) {
+					Z_LVAL_P(zv) = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, Z_LVAL_P(zv));
+				} ZEND_HASH_FOREACH_END();
+
+				opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, opline->extended_value);
+				break;
+			}
 		}
 		if (opline->op1_type == IS_CONST) {
 			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline->op1);
