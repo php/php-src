@@ -31,6 +31,9 @@ PHP                                                                        NEWS
   . Fixed bug #74341 (openssl_x509_parse fails to parse ASN.1 UTCTime without
     seconds). (Moritz Fain)
 
+- phar:
+  . Fixed bug #74383 phar method parameters reflection correction. (mhagstrand)
+
 - Standard:
   . Fixed bug #72071 (setcookie allows max-age to be negative). (Craig Duncan)
   . Fixed bug #74361 (Compaction in array_rand() violates COW). (Nikita)
