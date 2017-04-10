@@ -23,7 +23,7 @@
 #include "zend_execute.h"
 #include "zend_inheritance.h"
 #include "zend_smart_str.h"
-#include "zend_inheritance.h"
+#include "zend_operators.h"
 
 static void overriden_ptr_dtor(zval *zv) /* {{{ */
 {
@@ -1576,15 +1576,11 @@ static void zend_do_traits_property_binding(zend_class_entry *ce) /* {{{ */
 						== (flags & (ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC))) {
 						/* flags are identical, now the value needs to be checked */
 						if (flags & ZEND_ACC_STATIC) {
-							not_compatible = (FAILURE == compare_function(&compare_result,
-											  &ce->default_static_members_table[coliding_prop->offset],
-											  &ce->traits[i]->default_static_members_table[property_info->offset]))
-								  || (Z_LVAL(compare_result) != 0);
+							not_compatible = fast_is_not_identical_function(&ce->default_static_members_table[coliding_prop->offset],
+											  &ce->traits[i]->default_static_members_table[property_info->offset]);
 						} else {
-							not_compatible = (FAILURE == compare_function(&compare_result,
-											  &ce->default_properties_table[OBJ_PROP_TO_NUM(coliding_prop->offset)],
-											  &ce->traits[i]->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)]))
-								  || (Z_LVAL(compare_result) != 0);
+							not_compatible = fast_is_not_identical_function(&ce->default_properties_table[OBJ_PROP_TO_NUM(coliding_prop->offset)],
+											  &ce->traits[i]->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)]);
 						}
 					} else {
 						/* the flags are not identical, thus, we assume properties are not compatible */
