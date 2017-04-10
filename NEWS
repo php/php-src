@@ -19,7 +19,8 @@ PHP                                                                        NEWS
     seconds). (Moritz Fain)
 
 - phar:
-  . Fixed bug #74383 phar method parameters reflection correction. (mhagstrand)
+  . Fixed bug #74383 (phar method parameters reflection correction). 
+    (mhagstrand)
 
 13 Apr 2017 PHP 7.0.18
 
