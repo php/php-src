@@ -5897,7 +5897,6 @@ PHP_FUNCTION(openssl_seal)
 
 	if (len1 + len2 > 0) {
 		zval_dtor(sealdata);
-		buf[len1 + len2] = '\0';
 		ZVAL_NEW_STR(sealdata, zend_string_init((char*)buf, len1 + len2, 0));
 		efree(buf);
 
