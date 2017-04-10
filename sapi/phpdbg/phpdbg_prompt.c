@@ -1257,7 +1257,7 @@ PHPDBG_API const char *phpdbg_load_module_or_extension(char **path, char **name)
 	handle = DL_LOAD(*path);
 
 	if (!handle) {
-#if PHP_WIN32
+#ifdef PHP_WIN32
 		char *err = GET_DL_ERROR();
 		if (err && err[0]) {
 			phpdbg_error("dl", "type=\"unknown\"", "%s", err);

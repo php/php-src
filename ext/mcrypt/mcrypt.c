@@ -26,7 +26,7 @@
 
 #if HAVE_LIBMCRYPT
 
-#if PHP_WIN32
+#ifdef PHP_WIN32
 # include "win32/winutil.h"
 #endif
 
@@ -1376,7 +1376,7 @@ PHP_FUNCTION(mcrypt_create_iv)
 	iv = ecalloc(size + 1, 1);
 
 	if (source == RANDOM || source == URANDOM) {
-#if PHP_WIN32
+#ifdef PHP_WIN32
 		/* random/urandom equivalent on Windows */
 		BYTE *iv_b = (BYTE *) iv;
 		if (php_win32_get_random_bytes(iv_b, (size_t) size) == FAILURE){

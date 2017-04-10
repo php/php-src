@@ -131,7 +131,7 @@ PHPAPI int php_load_extension(char *filename, int type, int start_now)
 	/* load dynamic symbol */
 	handle = DL_LOAD(libpath);
 	if (!handle) {
-#if PHP_WIN32
+#ifdef PHP_WIN32
 		char *err = GET_DL_ERROR();
 		if (err && (*err != '\0')) {
 			php_error_docref(NULL, error_type, "Unable to load dynamic library '%s' - %s", libpath, err);
