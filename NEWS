@@ -139,7 +139,8 @@ PHP                                                                        NEWS
   . Switch to sqlite3_prepare_v2() and sqlite3_close_v2() functions (rasmus)
 
 - phar:
-  . Fixed bug #74383 phar method parameters reflection correction. (mhagstrand)
+  . Fixed bug #74383 (phar method parameters reflection correction). 
+    (mhagstrand)
   . Fixed bug #74196 (phar does not correctly handle names containing dots).
     (mhagstrand)
 
