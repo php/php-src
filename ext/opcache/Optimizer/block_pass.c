@@ -1462,7 +1462,9 @@ static void zend_jmp_optimization(zend_code_block *block, zend_op_array *op_arra
 						break;
 					}
 				}
-				if (last_op->op1_type & (IS_VAR|IS_TMP_VAR)) {
+				if (last_op->op1_type == IS_CV) {
+					break;
+				} else if (last_op->op1_type & (IS_VAR|IS_TMP_VAR)) {
 					last_op->opcode = ZEND_FREE;
 					last_op->op2.num = 0;
 					block->op2_to = NULL;

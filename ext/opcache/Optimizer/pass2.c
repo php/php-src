@@ -156,7 +156,14 @@ void zend_optimizer_pass2(zend_op_array *op_array)
 					/* JMPNZ(X, L1), JMP(L2) => JMPZNZ(X, L2, L1) */
 					if (ZEND_OP2(opline).opline_num == ZEND_OP1(opline + 1).opline_num) {
 						/* JMPZ(X, L1), JMP(L1) => NOP, JMP(L1) */
-						MAKE_NOP(opline);
+						if (opline->op1_type == IS_CV) {
+							break;
+						} else if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
+							opline->opcode = ZEND_FREE;
+							opline->op2.num = 0;
+						} else {
+							MAKE_NOP(opline);
+						}
 					} else {
 						if (opline->opcode == ZEND_JMPZ) {
 							opline->extended_value = ZEND_OP1(opline + 1).opline_num;
