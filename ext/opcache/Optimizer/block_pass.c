@@ -1176,7 +1176,10 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 			if (block->successors[0] == block->successors[1]) {
 				/* L: JMP[N]Z(X, L+1) -> NOP or FREE(X) */
 
-				if (last_op->op1_type & (IS_VAR|IS_TMP_VAR)) {
+				if (last_op->op1_type == IS_CV) {
+					last_op->opcode = ZEND_CHECK_VAR;
+					last_op->op2.num = 0;
+				} else if (last_op->op1_type & (IS_VAR|IS_TMP_VAR)) {
 					last_op->opcode = ZEND_FREE;
 					last_op->op2.num = 0;
 				} else {
