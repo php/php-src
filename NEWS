@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #74188 (Null coalescing operator fails for undeclared static
     class properties). (tpunt)
 
+- Fileinfo:
+  . Fixed bug #74379 (syntax error compile error in libmagic/apprentice.c).
+    (Laruence)
+
 - GD:
   . Fixed bug #74343 (compile fails on solaris 11 with system gd2 library).
     (krakjoe)
