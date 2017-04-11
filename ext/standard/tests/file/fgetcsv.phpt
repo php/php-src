@@ -13,11 +13,11 @@ various fgetcsv() functionality tests
 		'aaa,',
 		',"aaa"',
 		'"",""',
-		'"\\"","aaa"',
+		'"\\""","aaa"',
 		'"""""",',
 		'""""",aaa',
 		'"\\""",aaa',
-		'aaa,"\\"bbb,ccc',
+		'aaa,"\\""bbb",ccc',
 		'aaa,bbb   ',
 		'aaa,"bbb   "',
 		'aaa"aaa","bbb"bbb',
@@ -114,17 +114,19 @@ array(1) {
   string(7) """,aaa
 "
 }
-array(1) {
-  [0]=>
-  string(8) "\"",aaa
-"
-}
 array(2) {
+  [0]=>
+  string(2) "\""
+  [1]=>
+  string(3) "aaa"
+}
+array(3) {
   [0]=>
   string(3) "aaa"
   [1]=>
-  string(10) "\"bbb,ccc
-"
+  string(5) "\"bbb"
+  [2]=>
+  string(3) "ccc"
 }
 array(2) {
   [0]=>
