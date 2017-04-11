@@ -46,13 +46,16 @@
    OCI TAF callback function, calling userspace function */
 sb4 callback_fn(OCISvcCtx *svchp, OCIEnv *envhp, php_oci_connection *fo_ctx, ub4 fo_type, ub4 fo_event)
 {
+	/* Create zval */
+	zval retval, callback, params[3];
+
+	/* Default return value */
+	sb4 returnValue = 0;
+
 	/* Check if userspace callback function was disabled */
 	if (!fo_ctx->taf_callback || !strcmp(PHP_OCI_TAF_DISABLE_CALLBACK, fo_ctx->taf_callback)) {
 		return 0;
 	}
-
-	/* Create zval */
-	zval retval, callback, params[3];
 
 	/* Initialize zval */
 	ZVAL_STRING(&callback, fo_ctx->taf_callback, 1);
@@ -65,8 +68,7 @@ sb4 callback_fn(OCISvcCtx *svchp, OCIEnv *envhp, php_oci_connection *fo_ctx, ub4
 		php_error_docref(NULL, E_WARNING, "Unable to call taf callback function, is it defined?");
 	}
 
-	/* Return value */
-	sb4 returnValue = 0;
+	/* Set return value */
 	if(Z_TYPE(retval) == IS_LONG) {
 		returnValue = (sb4) Z_LVAL(retval);
 	}
@@ -101,6 +103,9 @@ int php_oci_register_taf_callback(php_oci_connection *connection, char *callback
 	sword errstatus;
 	char *oldCallback = NULL;
 
+	/* temporary failover callback structure */
+	OCIFocbkStruct failover;
+
 	if (!callback) {
 		/* Disable callback */
 		if (!connection->taf_callback || !strcmp(PHP_OCI_TAF_DISABLE_CALLBACK, connection->taf_callback)) {
@@ -123,8 +128,6 @@ int php_oci_register_taf_callback(php_oci_connection *connection, char *callback
 		return 0;
 	}
 
-	/* temporary failover callback structure */
-	OCIFocbkStruct failover;
 	/* set context */
 	failover.fo_ctx = connection;
 

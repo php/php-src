@@ -49,7 +49,7 @@ PHP_FUNCTION(oci_register_taf_callback)
 	zval *z_connection;
 	php_oci_connection *connection;
 	char *callback = NULL;
-	int callback_len = 0;
+	size_t callback_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|s!", &z_connection, &callback, &callback_len) == FAILURE) {
 		return;
