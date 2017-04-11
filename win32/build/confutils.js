@@ -2879,7 +2879,6 @@ function toolset_setup_project_tools()
 		ERROR('bison is required')
 	}
 
-	/* TODO throw error, ignore for now for BC. */
 	if (!PATH_PROG('sed')) {
 		ERROR('sed is required')
 	}
