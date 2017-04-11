@@ -1967,6 +1967,7 @@ static zend_lifetime_interval** zend_jit_allocate_registers(zend_op_array *op_ar
 				fprintf(stderr, "\n");
 				ival = ival->list_next;
 			}
+			fprintf(stderr, "\n");
 		}
 
 		/* Linear Scan Register Allocation */
@@ -2091,6 +2092,7 @@ static zend_lifetime_interval** zend_jit_allocate_registers(zend_op_array *op_ar
 						ival = ival->list_next;
 					}
 				}
+				fprintf(stderr, "\n");
 			}
 
 			free_alloca(candidates, use_heap);

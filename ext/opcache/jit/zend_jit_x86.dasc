@@ -2624,13 +2624,29 @@ static int zend_jit_math_double_double(dasm_State    **Dst,
 				op1_reg = result_reg;
 				val_addr = op2_addr;
 			}
-			|	AVX_MATH opline->opcode, result_reg, op1_reg, val_addr
+			if ((opline->opcode == ZEND_MUL || opline->opcode == ZEND_ASSIGN_MUL) &&
+			    Z_MODE(val_addr) == IS_CONST_ZVAL && Z_DVAL_P(Z_ZV(val_addr)) == 2.0) {
+				|	AVX_MATH_REG ZEND_ADD, result_reg, op1_reg, op1_reg
+			} else {
+				|	AVX_MATH opline->opcode, result_reg, op1_reg, val_addr
+			}
 		} else {
-			|	SSE_GET_ZVAL_DVAL result_reg, op1_addr
+			zend_jit_addr val_addr;
+
+			if (Z_MODE(op1_addr) != IS_REG && Z_MODE(op2_addr) == IS_REG && zend_is_commutative(opline->opcode)) {
+				|	SSE_GET_ZVAL_DVAL result_reg, op2_addr
+				val_addr = op1_addr;
+			} else {
+				|	SSE_GET_ZVAL_DVAL result_reg, op1_addr
+				val_addr = op2_addr;
+			}
 			if (same_ops) {
 				|	SSE_MATH_REG opline->opcode, result_reg, result_reg
+			} else if ((opline->opcode == ZEND_MUL || opline->opcode == ZEND_ASSIGN_MUL) &&
+			    Z_MODE(val_addr) == IS_CONST_ZVAL && Z_DVAL_P(Z_ZV(val_addr)) == 2.0) {
+				|	SSE_MATH_REG ZEND_ADD, result_reg, result_reg
 			} else {
-				|	SSE_MATH opline->opcode, result_reg, op2_addr
+				|	SSE_MATH opline->opcode, result_reg, val_addr
 			}
 		}
 		|	SSE_SET_ZVAL_DVAL res_addr, result_reg
