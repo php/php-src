@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-30 Mar 2017 PHP 7.0.18RC1
+13 Apr 2017 PHP 7.0.18
 
 - Core:
   . Fixed bug #73370 (falsely exits with "Out of Memory" when using
