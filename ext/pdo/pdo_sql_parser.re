@@ -271,9 +271,11 @@ safe:
 
 						default:
 							buf = zval_get_string(parameter);
+                            zval* driver_params = emalloc( sizeof( zval ));
+                            ZVAL_COPY( driver_params, &( param->driver_params ));
 							if (!stmt->dbh->methods->quoter(stmt->dbh, ZSTR_VAL(buf),
 									ZSTR_LEN(buf), &plc->quoted, &plc->qlen,
-									param_type)) {
+									param_type, driver_params)) {
 								/* bork */
 								ret = -1;
 								strncpy(stmt->error_code, stmt->dbh->error_code, 6);
@@ -282,6 +284,7 @@ safe:
 								}
 								goto clean_up;
 							}
+                            efree( driver_params );
 							plc->freeq = 1;
 					}
 
