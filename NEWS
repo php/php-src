@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-30 Mar 2017, PHP 7.1.4RC1
+13 Apr 2017, PHP 7.1.4
 
 - Core:
   . Fixed bug #74149 (static embed SAPI linkage error). (krakjoe)
