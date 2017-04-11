@@ -1923,7 +1923,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3_openblob, 0, 0, 3)
 	ZEND_ARG_INFO(0, dbname)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(argingo_sqlite3_enableexceptions, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3_enableexceptions, 0, 0, 0)
 	ZEND_ARG_INFO(0, enableExceptions)
 ZEND_END_ARG_INFO()
 
