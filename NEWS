@@ -153,6 +153,10 @@ PHP                                                                        NEWS
 - PDO_OCI:
   . Fixed bug #54379 (PDO_OCI: UTF-8 output gets truncated). (gureedo / Oracle)
 
+- SQLite3:
+  . Fixed bug #74413 (incorrect reflection for SQLite3::enableExceptions).
+    (krakjoe)
+
 - Standard:
   . Fixed bug #74005 (mail.add_x_header causes RFC-breaking lone line feed).
     (Anatol)
