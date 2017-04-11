@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2017 PHP 7.0.19
 
+- Core:
+  . Fixed bug #74408 (Endless loop bypassing execution time limit). (Laruence)
+
 - Date:
   . Fixed bug #74404 (Wrong reflection on DateTimeZone::getTransitions).
     (krakjoe)

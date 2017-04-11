@@ -755,6 +755,15 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 			}
 			zend_error(E_DEPRECATED, "%s", error);
 			efree(error);
+			if (UNEXPECTED(EG(exception))) {
+				if (callable_name) {
+					zend_string_release(callable_name);
+				}
+				if (EG(current_execute_data) == &dummy_execute_data) {
+					EG(current_execute_data) = dummy_execute_data.prev_execute_data;
+				}
+				return FAILURE;
+			}
 		}
 		zend_string_release(callable_name);
 	}
