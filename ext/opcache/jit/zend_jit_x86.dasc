@@ -2265,7 +2265,11 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, zend_op_arr
 		|	ZVAL_COPY_VALUE res_addr, res_use_info, op1_addr, MAY_BE_LONG, ZREG_R0, ZREG_R1
 	}
 	if (op1_addr != op1_def_addr) {
-		|	ZVAL_COPY_VALUE op1_def_addr, op1_info, op1_addr, MAY_BE_LONG, ZREG_R0, ZREG_R1
+		if (Z_MODE(op1_addr) != IS_REG && Z_MODE(res_addr) == IS_REG) {
+			|	ZVAL_COPY_VALUE op1_def_addr, op1_info, res_addr, MAY_BE_LONG, ZREG_R0, ZREG_R1
+		} else {
+			|	ZVAL_COPY_VALUE op1_def_addr, op1_info, op1_addr, MAY_BE_LONG, ZREG_R0, ZREG_R1
+		}
 	}
 	if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
 		|	LONG_OP_WITH_CONST add, op1_def_addr, Z_L(1)
