@@ -26,6 +26,10 @@ PHP                                                                        NEWS
   . Fixed bug #74383 (phar method parameters reflection correction). 
     (mhagstrand)
 
+- Standard:
+  . Fixed bug #74409 (Reflection information for ini_get_all() is incomplete).
+    (Sebastian Bergmann)
+
 13 Apr 2017 PHP 7.0.18
 
 - Core:
