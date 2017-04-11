@@ -67,13 +67,13 @@ PHPAPI int php_select(int max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, stru
 			if (handles[n_handles] == INVALID_HANDLE_VALUE) {
 				/* socket */
 				if (SAFE_FD_ISSET(i, rfds)) {
-					FD_SET((uint)i, &sock_read);
+					FD_SET((uint32_t)i, &sock_read);
 				}
 				if (SAFE_FD_ISSET(i, wfds)) {
-					FD_SET((uint)i, &sock_write);
+					FD_SET((uint32_t)i, &sock_write);
 				}
 				if (SAFE_FD_ISSET(i, efds)) {
-					FD_SET((uint)i, &sock_except);
+					FD_SET((uint32_t)i, &sock_except);
 				}
 				if (i > sock_max_fd) {
 					sock_max_fd = i;
@@ -117,7 +117,7 @@ PHPAPI int php_select(int max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, stru
 			/* check handles */
 			DWORD wret;
 
-			wret = MsgWaitForMultipleObjects(n_handles, handles, FALSE, retcode > 0 ? 0 : 100, QS_ALLEVENTS);
+			wret = WaitForMultipleObjects(n_handles, handles, FALSE, retcode > 0 ? 0 : 100);
 
 			if (wret == WAIT_TIMEOUT) {
 				/* set retcode to 0; this is the default.
@@ -136,13 +136,13 @@ PHPAPI int php_select(int max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, stru
 				for (i = 0; i < n_handles; i++) {
 					if (WAIT_OBJECT_0 == WaitForSingleObject(handles[i], 0)) {
 						if (SAFE_FD_ISSET(handle_slot_to_fd[i], rfds)) {
-							FD_SET((uint)handle_slot_to_fd[i], &aread);
+							FD_SET((uint32_t)handle_slot_to_fd[i], &aread);
 						}
 						if (SAFE_FD_ISSET(handle_slot_to_fd[i], wfds)) {
-							FD_SET((uint)handle_slot_to_fd[i], &awrite);
+							FD_SET((uint32_t)handle_slot_to_fd[i], &awrite);
 						}
 						if (SAFE_FD_ISSET(handle_slot_to_fd[i], efds)) {
-							FD_SET((uint)handle_slot_to_fd[i], &aexcept);
+							FD_SET((uint32_t)handle_slot_to_fd[i], &aexcept);
 						}
 						retcode++;
 					}
