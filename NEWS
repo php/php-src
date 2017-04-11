@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2017, PHP 7.1.5
 
 - Core:
+  . Fixed bug #74408 (Endless loop bypassing execution time limit). (Laruence)
   . Fixed bug #74353 (Segfault when killing within bash script trap code).
     (Laruence)
   . Fixed bug #74340 (Magic function __get has different behavior in php 7.1.x).
