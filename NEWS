@@ -33,6 +33,10 @@ PHP                                                                        NEWS
   . Fixed bug #74409 (Reflection information for ini_get_all() is incomplete).
     (Sebastian Bergmann)
 
+- SQLite3:
+  . Fixed bug #74413 (incorrect reflection for SQLite3::enableExceptions).
+    (krakjoe)
+
 13 Apr 2017 PHP 7.0.18
 
 - Core:
