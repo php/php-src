@@ -2202,7 +2202,7 @@ static int zend_jit_load_ssa_var(dasm_State **Dst, zend_ssa *ssa, int var, zend_
 	return zend_jit_load_reg(Dst, src, dst, info);
 }
 
-static int zend_jit_update_regs(dasm_State **Dst, zend_jit_addr src, zend_jit_addr dst, uint32_t info)
+static int zend_jit_update_regs(dasm_State **Dst, zend_jit_addr src, zend_jit_addr dst, uint32_t info, zend_lifetime_interval *src_ival)
 {
 	if (src != dst) {
 		if (Z_MODE(src) == IS_REG) {
@@ -2219,8 +2219,10 @@ static int zend_jit_update_regs(dasm_State **Dst, zend_jit_addr src, zend_jit_ad
 					ZEND_ASSERT(0);
 				}
 			} else if (Z_MODE(dst) == IS_MEM_ZVAL) {
-				if (!zend_jit_spill_store(Dst, src, dst, info, 1)) {
-					return 0;
+				if (!src_ival->load && !src_ival->store) {
+					if (!zend_jit_spill_store(Dst, src, dst, info, 1)) {
+						return 0;
+					}
 				}
 			} else {
 				ZEND_ASSERT(0);
@@ -5874,7 +5876,7 @@ static int zend_jit_qm_assign(dasm_State **Dst, const zend_op *opline, zend_op_a
 	 && !ssa->vars[ssa->ops[opline - op_array->opcodes].op1_def].no_val) {
 		zend_jit_addr op1_def_addr = zend_jit_decode_op(op_array, opline->op1_type, opline->op1, opline, ra, ssa->ops[opline - op_array->opcodes].op1_def);
 
-		if (!zend_jit_update_regs(Dst, op1_addr, op1_def_addr, op1_info)) {
+		if (!zend_jit_update_regs(Dst, op1_addr, op1_def_addr, op1_info, ra[ssa->ops[opline - op_array->opcodes].op1_use])) {
 			return 0;
 		}
 	}
@@ -5913,7 +5915,7 @@ static int zend_jit_assign(dasm_State **Dst, const zend_op *opline, zend_op_arra
 	 && !ssa->vars[ssa->ops[opline - op_array->opcodes].op2_def].no_val) {
 		zend_jit_addr op2_def_addr = zend_jit_decode_op(op_array, opline->op2_type, opline->op2, opline, ra, ssa->ops[opline - op_array->opcodes].op2_def);
 
-		if (!zend_jit_update_regs(Dst, op2_addr, op2_def_addr, op2_info)) {
+		if (!zend_jit_update_regs(Dst, op2_addr, op2_def_addr, op2_info, ra[ssa->ops[opline - op_array->opcodes].op2_use])) {
 			return 0;
 		}
 	}
@@ -6989,7 +6991,7 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, zend_op_ar
 			 && !ssa->vars[ssa->ops[opline - op_array->opcodes].op1_def].no_val) {
 				zend_jit_addr op1_def_addr = zend_jit_decode_op(op_array, opline->op1_type, opline->op1, opline, ra, ssa->ops[opline - op_array->opcodes].op1_def);
 
-				if (!zend_jit_update_regs(Dst, op1_addr, op1_def_addr, op1_info)) {
+				if (!zend_jit_update_regs(Dst, op1_addr, op1_def_addr, op1_info, ra[ssa->ops[opline - op_array->opcodes].op1_use])) {
 					return 0;
 				}
 				if (Z_MODE(op1_def_addr) == IS_REG && Z_MODE(op1_addr) != IS_REG) {
