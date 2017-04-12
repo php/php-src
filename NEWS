@@ -72,6 +72,9 @@ PHP                                                                        NEWS
 - iconv:
   . Fixed bug #74230 (iconv fails to fail on surrogates). (Anatol)
 
+- OCI8:
+  . Fixed uninitialized data causing random crash. (Dmitry)
+
 - Opcache:
   . Fixed bug #74250 (OPcache compilation performance regression in PHP 5.6/7
     with huge classes). (Nikita)
