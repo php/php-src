@@ -1207,16 +1207,14 @@ static void zend_jit_print_regset(zend_regset regset)
 	zend_reg reg;
 	int first = 1;
 
-	for (reg = 0; reg < ZREG_NUM; reg++) {
-		if (ZEND_REGSET_IN(regset, reg)) {
-			if (first) {
-				first = 0;
-				fprintf(stderr, "%s", zend_reg_name[reg]);
-			} else {
-				fprintf(stderr, ", %s", zend_reg_name[reg]);
-			}
+	ZEND_REGSET_FOREACH(regset, reg) {
+		if (first) {
+			first = 0;
+			fprintf(stderr, "%s", zend_reg_name[reg]);
+		} else {
+			fprintf(stderr, ", %s", zend_reg_name[reg]);
 		}
-	}
+	} ZEND_REGSET_FOREACH_END();
 }
 
 static int *zend_jit_compute_block_order_int(zend_ssa *ssa, int n, int *block_order)
@@ -1690,15 +1688,11 @@ static int zend_jit_try_allocate_free_reg(zend_op_array *op_array, zend_ssa *ssa
 		}
 		while (line <= range->end) {
 			regset = zend_jit_get_scratch_regset(op_array, ssa, line, current->ssa_var);
-			if (!ZEND_REGSET_IS_EMPTY(regset)) {
-				for (reg = 0; reg < ZREG_NUM; reg++) {
-					if (ZEND_REGSET_IN(regset, reg)) {
-						if (line < freeUntilPos[reg]) {
-							freeUntilPos[reg] = line;
-						}
-					}
+			ZEND_REGSET_FOREACH(regset, reg) {
+				if (line < freeUntilPos[reg]) {
+					freeUntilPos[reg] = line;
 				}
-			}
+			} ZEND_REGSET_FOREACH_END();
 			line++;
 		}
 		range = range->next;
@@ -1752,19 +1746,18 @@ static int zend_jit_try_allocate_free_reg(zend_op_array *op_array, zend_ssa *ssa
 		ZEND_REGSET_INCL(low_priority_regs, ZREG_XMM0);
 		ZEND_REGSET_INCL(low_priority_regs, ZREG_XMM1);
 	}
-	for (i = 0; i < ZREG_NUM; i++) {
-		if (ZEND_REGSET_IN(available, i)) {
-			if (ZEND_REGSET_IN(low_priority_regs, i)) {
-				if (freeUntilPos[i] > pos2) {
-					reg2 = i;
-					pos2 = freeUntilPos[i];
-				}
-			} else if (freeUntilPos[i] > pos) {
-				reg = i;
-				pos = freeUntilPos[i];
+
+	ZEND_REGSET_FOREACH(available, i) {
+		if (ZEND_REGSET_IN(low_priority_regs, i)) {
+			if (freeUntilPos[i] > pos2) {
+				reg2 = i;
+				pos2 = freeUntilPos[i];
 			}
+		} else if (freeUntilPos[i] > pos) {
+			reg = i;
+			pos = freeUntilPos[i];
 		}
-	}
+	} ZEND_REGSET_FOREACH_END();
 
 	if (reg == ZREG_NONE) {
 		if (reg2 != ZREG_NONE) {

@@ -145,6 +145,21 @@ typedef uint32_t zend_regset;
 	(ZEND_REGSET(ZREG_RBX) | ZEND_REGSET(ZREG_RBP))
 #endif
 
+#define ZEND_REGSET_FIRST(set) ((zend_reg)__builtin_ctz(set))
+#define ZEND_REGSET_LAST(set)  ((zend_reg)(__builtin_clz(set)^31)))
+
+#define ZEND_REGSET_FOREACH(set, reg) \
+	do { \
+		zend_regset _tmp = (set); \
+		while (!ZEND_REGSET_IS_EMPTY(_tmp)) { \
+			zend_reg _reg = ZEND_REGSET_FIRST(_tmp); \
+			ZEND_REGSET_EXCL(_tmp, _reg); \
+			reg = _reg; \
+
+#define ZEND_REGSET_FOREACH_END() \
+		} \
+	} while (0)
+
 typedef uintptr_t zend_jit_addr;
 
 #define IS_CONST_ZVAL            0
