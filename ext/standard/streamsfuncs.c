@@ -30,6 +30,9 @@
 #include "streamsfuncs.h"
 #include "php_network.h"
 #include "php_string.h"
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #ifndef PHP_WIN32
 #define php_select(m, r, w, e, t)	select(m, r, w, e, t)
@@ -1645,7 +1648,7 @@ PHP_FUNCTION(stream_isatty)
 	else {
 		RETURN_FALSE;
 	}
-#elif HAVE_POSIX
+#elif HAVE_UNISTD_H
 	/* Check if the file descriptor identifier is a terminal */
 	if (isatty(fileno)) {
 		RETURN_TRUE;
