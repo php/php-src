@@ -164,6 +164,8 @@ PHP                                                                        NEWS
 
 - SQLite3:
   . Update to Sqlite 3.16.2. (cmb)
+  . Fixed bug #74413 (incorrect reflection for SQLite3::enableExceptions).
+    (krakjoe)
 
 - Standard:
   . Add subject to mail log. (tomsommer)

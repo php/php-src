@@ -117,7 +117,7 @@ PHPAPI int php_select(int max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, stru
 			/* check handles */
 			DWORD wret;
 
-			wret = MsgWaitForMultipleObjects(n_handles, handles, FALSE, retcode > 0 ? 0 : 100, QS_ALLEVENTS);
+			wret = WaitForMultipleObjects(n_handles, handles, FALSE, retcode > 0 ? 0 : 100);
 
 			if (wret == WAIT_TIMEOUT) {
 				/* set retcode to 0; this is the default.

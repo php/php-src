@@ -1221,6 +1221,9 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 		}
 
 		ldflags += " /PGD:$(PGOPGD_DIR)\\" + makefiletarget.substring(0, makefiletarget.indexOf(".")) + ".pgd";
+	} else if (PHP_DEBUG != "yes") {
+		ADD_FLAG('CFLAGS_' + SAPI, "/GL");
+		ADD_FLAG('LDFLAGS_' + SAPI, "/LTCG");
 	}
 
 	if (MODE_PHPIZE) {
@@ -1421,6 +1424,9 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 			ADD_FLAG('CFLAGS_' + EXT, "/GL /O2");
 
 			ldflags = " /PGD:$(PGOPGD_DIR)\\" + dllname.substring(0, dllname.indexOf(".")) + ".pgd";
+		} else if (PHP_DEBUG != "yes") {
+			ADD_FLAG('CFLAGS_' + EXT, "/GL");
+			ADD_FLAG('LDFLAGS_' + EXT, "/LTCG");
 		}
 
 		MFO.WriteLine("$(BUILD_DIR)\\" + libname + ": $(BUILD_DIR)\\" + dllname);
@@ -1463,6 +1469,9 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 				ADD_FLAG("STATIC_EXT_CFLAGS", "/GL /O2");
 				static_pgo_enabled = true;
 			}
+		} else if (PHP_DEBUG != "yes") {
+			ADD_FLAG("STATIC_EXT_CFLAGS", "/GL");
+			ADD_FLAG('STATIC_EXT_LDFLAGS', "/LTCG");
 		}
 
 		/* find the header that declares the module pointer,
@@ -2879,8 +2888,9 @@ function toolset_setup_project_tools()
 		ERROR('bison is required')
 	}
 
-	/* TODO throw error, ignore for now for BC. */
-	PATH_PROG('sed');
+	if (!PATH_PROG('sed')) {
+		ERROR('sed is required')
+	}
 
 	RE2C = PATH_PROG('re2c');
 	if (RE2C) {
@@ -2889,6 +2899,10 @@ function toolset_setup_project_tools()
 
 		RE2CVERS = probe_binary(RE2C, "version");
 		STDOUT.WriteLine('  Detected re2c version ' + RE2CVERS);
+
+		if (RE2CVERS.match(/^\d+.\d+$/)) {
+			RE2CVERS += ".0";
+		}
 
 		intvers = RE2CVERS.replace(pattern, '') - 0;
 		intmin = MINRE2C.replace(pattern, '') - 0;

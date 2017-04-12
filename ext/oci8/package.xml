@@ -46,12 +46,12 @@ Interoperability Support" (ID 207303.1) for details.
   <active>no</active>
  </lead>
 
- <date>2016-10-17</date>
+ <date>2017-04-12</date>
  <time>12:00:00</time>
 
   <version>
-   <release>2.1.3</release>
-   <api>2.1.3</api>
+   <release>2.1.4</release>
+   <api>2.1.4</api>
   </version>
   <stability>
    <release>stable</release>
@@ -60,7 +60,7 @@ Interoperability Support" (ID 207303.1) for details.
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
 This version is for PHP 7 only.
-Fixed bug #71148 (Bind reference overwritten on PHP 7)
+Fixed uninitialized data causing random crash
   </notes>
  <contents>
   <dir name="/">
@@ -468,6 +468,22 @@ Fixed bug #71148 (Bind reference overwritten on PHP 7)
  </extsrcrelease>
  <changelog>
 
+<release>
+  <version>
+   <release>2.1.3</release>
+   <api>2.1.3</api>
+  </version>
+  <stability>
+   <release>stable</release>
+   <api>stable</api>
+  </stability>
+  <license uri="http://www.php.net/license">PHP</license>
+  <notes>
+This version is for PHP 7 only.
+Fixed bug #71148 (Bind reference overwritten on PHP 7)
+  </notes>
+</release>
+   
 <release>
   <version>
    <release>2.1.2</release>
