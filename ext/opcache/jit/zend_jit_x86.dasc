@@ -557,15 +557,19 @@ static void* dasm_labels[zend_lb_MAX];
 
 |.macro GET_ZVAL_LVAL, reg, addr
 ||	if (Z_MODE(addr) == IS_CONST_ZVAL) {
-|   	.if X64
-||  		if (!IS_SIGNED_32BIT(Z_LVAL_P(Z_ZV(addr)))) {
-|   			mov64 Ra(reg), Z_LVAL_P(Z_ZV(addr))
-||  		} else {
+||		if (Z_LVAL_P(Z_ZV(addr)) == 0) {
+|  			xor Ra(reg), Ra(reg)
+||		} else {
+|   		.if X64
+||  			if (!IS_SIGNED_32BIT(Z_LVAL_P(Z_ZV(addr)))) {
+|   				mov64 Ra(reg), Z_LVAL_P(Z_ZV(addr))
+||  			} else {
+|   				mov Ra(reg), Z_LVAL_P(Z_ZV(addr))
+||  			}
+|   		.else
 |   			mov Ra(reg), Z_LVAL_P(Z_ZV(addr))
-||  		}
-|   	.else
-|   		mov Ra(reg), Z_LVAL_P(Z_ZV(addr))
-|   	.endif
+|   		.endif
+||		}
 ||	} else if (Z_MODE(addr) == IS_MEM_ZVAL) {
 |   	mov Ra(reg), aword [Ra(Z_REG(addr))+Z_OFFSET(addr)]
 ||	} else if (Z_MODE(addr) == IS_REG) {
@@ -704,6 +708,8 @@ static void* dasm_labels[zend_lb_MAX];
 ||				}
 |				FPU_SET_ZVAL_DVAL dst_addr
 |			.endif
+||		} else if (Z_LVAL_P(zv) == 0 && Z_MODE(dst_addr) == IS_REG) {
+|			xor Ra(Z_REG(dst_addr)), Ra(Z_REG(dst_addr))
 ||		} else {
 |			.if X64
 ||				if (!IS_SIGNED_32BIT(Z_LVAL_P(zv))) {
@@ -768,6 +774,14 @@ static void* dasm_labels[zend_lb_MAX];
 ||				}
 |				FPU_SET_ZVAL_DVAL res_addr
 |			.endif
+||		} else if (Z_LVAL_P(zv) == 0 && (Z_MODE(dst_addr) == IS_REG || Z_MODE(res_addr) == IS_REG)) {
+||				if (Z_MODE(dst_addr) == IS_REG) {
+|					xor Ra(Z_REG(dst_addr)), Ra(Z_REG(dst_addr))
+|					SET_ZVAL_LVAL res_addr, Ra(Z_REG(dst_addr))
+||				} else {
+|					xor Ra(Z_REG(res_addr)), Ra(Z_REG(res_addr))
+|					SET_ZVAL_LVAL dst_addr, Ra(Z_REG(res_addr))
+||				}
 ||		} else {
 |			.if X64
 ||				if (!IS_SIGNED_32BIT(Z_LVAL_P(zv))) {
@@ -782,13 +796,27 @@ static void* dasm_labels[zend_lb_MAX];
 |						SET_ZVAL_LVAL dst_addr, tmp_reg
 |						SET_ZVAL_LVAL res_addr, tmp_reg
 ||					}
+||				} else if (Z_MODE(dst_addr) == IS_REG) {
+|					SET_ZVAL_LVAL dst_addr, Z_LVAL_P(zv)
+|					SET_ZVAL_LVAL res_addr, Ra(Z_REG(dst_addr))
+||				} else if (Z_MODE(res_addr) == IS_REG) {
+|					SET_ZVAL_LVAL res_addr, Z_LVAL_P(zv)
+|					SET_ZVAL_LVAL dst_addr, Ra(Z_REG(res_addr))
 ||				} else {
 |					SET_ZVAL_LVAL dst_addr, Z_LVAL_P(zv)
 |					SET_ZVAL_LVAL res_addr, Z_LVAL_P(zv)
 ||				}
 |			.else
-|				SET_ZVAL_LVAL dst_addr, Z_LVAL_P(zv)
-|				SET_ZVAL_LVAL res_addr, Z_LVAL_P(zv)
+||				if (Z_MODE(dst_addr) == IS_REG) {
+|					SET_ZVAL_LVAL dst_addr, Z_LVAL_P(zv)
+|					SET_ZVAL_LVAL res_addr, Ra(Z_REG(dst_addr))
+||				} else if (Z_MODE(res_addr) == IS_REG) {
+|					SET_ZVAL_LVAL res_addr, Z_LVAL_P(zv)
+|					SET_ZVAL_LVAL dst_addr, Ra(Z_REG(res_addr))
+||				} else {
+|					SET_ZVAL_LVAL dst_addr, Z_LVAL_P(zv)
+|					SET_ZVAL_LVAL res_addr, Z_LVAL_P(zv)
+||				}
 |			.endif
 ||		}
 ||	}
@@ -1093,7 +1121,7 @@ static void* dasm_labels[zend_lb_MAX];
 ||		if (filename) {
 |			LOAD_ADDR FCARG2a, ZSTR_VAL((zend_string*)filename)
 ||		} else {
-|			mov FCARG2a, 0
+|			xor FCARG2a, FCARG2a
 ||		}
 |		.if X64
 |			mov CARG3d, lineno
@@ -1184,7 +1212,7 @@ static void* dasm_labels[zend_lb_MAX];
 ||			if (filename) {
 |				LOAD_ADDR FCARG2a, ZSTR_VAL((zend_string*)filename)
 ||			} else {
-|				mov FCARG2a, 0
+|				xor FCARG2a, FCARG2a
 ||			}
 |			.if X64
 |				mov CARG3d, lineno
