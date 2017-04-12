@@ -3191,7 +3191,11 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 					|	// if (EXPECTED((zend_ulong)(_h) < (zend_ulong)(_ht)->nNumUsed))
 					|.if X64
 						|	movsxd r0, dword [FCARG1a + offsetof(zend_array, nNumUsed)]
-						|	cmp r0, val
+						if (val == 0) {
+							|	test r0, r0
+						} else {
+							|	cmp r0, val
+						}
 					|.else
 						|	cmp dword [FCARG1a + offsetof(zend_array, nNumUsed)], val
 					|.endif
@@ -4305,9 +4309,17 @@ static int zend_jit_cmp_long_long(dasm_State **Dst, const zend_op *opline, int b
 	zend_bool swap = 0;
 
 	if (Z_MODE(op1_addr) == IS_REG) {
-		|	LONG_OP cmp, Ra(Z_REG(op1_addr)), op2_addr
+		if (Z_MODE(op2_addr) == IS_CONST_ZVAL && Z_LVAL_P(Z_ZV(op2_addr)) == 0) {
+			|	test Ra(Z_REG(op1_addr)), Ra(Z_REG(op1_addr))
+		} else {
+			|	LONG_OP cmp, Ra(Z_REG(op1_addr)), op2_addr
+		}
 	} else if (Z_MODE(op2_addr) == IS_REG) {
-		|	LONG_OP cmp, Ra(Z_REG(op2_addr)), op1_addr
+		if (Z_MODE(op1_addr) == IS_CONST_ZVAL && Z_LVAL_P(Z_ZV(op1_addr)) == 0) {
+			|	test Ra(Z_REG(op2_addr)), Ra(Z_REG(op2_addr))
+		} else {
+			|	LONG_OP cmp, Ra(Z_REG(op2_addr)), op1_addr
+		}
 		swap = 1;
 	} else if (Z_MODE(op1_addr) == IS_CONST_ZVAL && Z_MODE(op2_addr) != IS_CONST_ZVAL) {
 		|	LONG_OP_WITH_CONST cmp, op2_addr, Z_LVAL_P(Z_ZV(op1_addr))
@@ -4316,7 +4328,11 @@ static int zend_jit_cmp_long_long(dasm_State **Dst, const zend_op *opline, int b
 		|	LONG_OP_WITH_CONST cmp, op1_addr, Z_LVAL_P(Z_ZV(op2_addr))
 	} else {
 		|	GET_ZVAL_LVAL ZREG_R0, op1_addr
-		|	LONG_OP cmp, r0, op2_addr
+		if (Z_MODE(op2_addr) == IS_CONST_ZVAL && Z_LVAL_P(Z_ZV(op2_addr)) == 0) {
+			|	test r0, r0
+		} else {
+			|	LONG_OP cmp, r0, op2_addr
+		}
 	}
 	if (((opline+1)->opcode == ZEND_JMPZ_EX ||
 	     (opline+1)->opcode == ZEND_JMPNZ_EX) &&
@@ -8086,7 +8102,7 @@ static int zend_jit_bind_global(dasm_State **Dst, const zend_op *opline, zend_op
 	//value = Z_INDIRECT_P(value)
 	|	mov r0, [r0]
 	|	mov cl, byte [r0 + 8]
-	|	cmp cl, IS_UNDEF
+	|	test cl, cl // cmp cl, IS_UNDEF
 	|	jne >2
 	|	SET_Z_TYPE_INFO r0, IS_NULL
 	|	jmp >8
