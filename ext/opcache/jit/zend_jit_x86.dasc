@@ -2210,13 +2210,23 @@ static int zend_jit_store_ssa_var(dasm_State **Dst, zend_ssa *ssa, int var, zend
 	return zend_jit_spill_store(Dst, src, dst, info, 1);
 }
 
-static int zend_jit_store_ssa_var_if_necessary(dasm_State **Dst, zend_ssa *ssa, zend_lifetime_interval **ra, zend_jit_addr src, int var)
+static int zend_jit_store_ssa_var_if_necessary(dasm_State **Dst, zend_ssa *ssa, zend_lifetime_interval **ra, zend_jit_addr src, int var, int old_var)
 {
 	if (Z_MODE(src) == IS_REG && ra[var] && ra[var]->store) {
 		zend_jit_addr dst = ZEND_ADDR_MEM_ZVAL(ZREG_FP, (uint32_t)(uintptr_t)ZEND_CALL_VAR_NUM(NULL, ssa->vars[var].var));
 		uint32_t info = ssa->var_info[var].type;
+		zend_bool set_type = 1;
 
-		return zend_jit_spill_store(Dst, src, dst, info, 1);
+		if (old_var >= 0) {
+			uint32_t old_info = ssa->var_info[old_var].type;
+			if ((info & (MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)) ==
+			    (old_info & (MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF))) {
+				if (!ra[old_var] || ra[old_var]->load || ra[old_var]->store) {
+					set_type = 0;
+				}
+			}
+		}
+		return zend_jit_spill_store(Dst, src, dst, info, set_type);
 	}
 	return 1;
 }
@@ -2403,11 +2413,11 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, zend_op_arr
 		|.code
 	}
 	|3:
-	if (ra && !zend_jit_store_ssa_var_if_necessary(Dst, ssa, ra, op1_def_addr, ssa->ops[opline - op_array->opcodes].op1_def)) {
+	if (ra && !zend_jit_store_ssa_var_if_necessary(Dst, ssa, ra, op1_def_addr, ssa->ops[opline - op_array->opcodes].op1_def, ssa->ops[opline - op_array->opcodes].op1_use)) {
 		return 0;
 	}
 	if (opline->result_type != IS_UNUSED) {
-		if (ra && !zend_jit_store_ssa_var_if_necessary(Dst, ssa, ra, res_addr, ssa->ops[opline - op_array->opcodes].result_def)) {
+		if (ra && !zend_jit_store_ssa_var_if_necessary(Dst, ssa, ra, res_addr, ssa->ops[opline - op_array->opcodes].result_def, ssa->ops[opline - op_array->opcodes].result_use)) {
 			return 0;
 		}
 	}
@@ -3033,7 +3043,7 @@ static int zend_jit_math(dasm_State **Dst, const zend_op *opline, int *opnum, ze
 	if (!zend_jit_math_helper(Dst, opline, op_array, ssa, opline->op1_type, opline->op1, op1_addr, op1_info, opline->op2_type, opline->op2, op2_addr, op2_info, opline->result.var, res_addr, RES_INFO(), res_use_info, 0)) {
 		return 0;
 	}
-	if (ra && !zend_jit_store_ssa_var_if_necessary(Dst, ssa, ra, res_addr, ssa->ops[opline - op_array->opcodes].result_def)) {
+	if (ra && !zend_jit_store_ssa_var_if_necessary(Dst, ssa, ra, res_addr, ssa->ops[opline - op_array->opcodes].result_def, ssa->ops[opline - op_array->opcodes].result_use)) {
 		return 0;
 	}
 	return 1;
@@ -5928,7 +5938,7 @@ static int zend_jit_qm_assign(dasm_State **Dst, const zend_op *opline, zend_op_a
 	if (!zend_jit_simple_assign(Dst, opline, op_array, ssa, res_addr, -1, opline->op1_type, opline->op1, op1_addr, op1_info, 0, 0)) {
 		return 0;
 	}
-	if (ra && !zend_jit_store_ssa_var_if_necessary(Dst, ssa, ra, res_addr, ssa->ops[opline - op_array->opcodes].result_def)) {
+	if (ra && !zend_jit_store_ssa_var_if_necessary(Dst, ssa, ra, res_addr, ssa->ops[opline - op_array->opcodes].result_def, ssa->ops[opline - op_array->opcodes].result_use)) {
 		return 0;
 	}
 	return 1;

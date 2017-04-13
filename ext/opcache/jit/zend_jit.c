@@ -1763,6 +1763,7 @@ static int zend_jit_try_allocate_free_reg(zend_op_array *op_array, zend_ssa *ssa
 		if (reg2 != ZREG_NONE) {
 			reg = reg2;
 			pos = pos2;
+			reg2 = ZREG_NONE;
 		}
 	}
 
@@ -1776,6 +1777,16 @@ static int zend_jit_try_allocate_free_reg(zend_op_array *op_array, zend_ssa *ssa
 			ZEND_REGSET_INCL(*hints, reg);
 		}
 		return 1;
+#if 0
+	// TODO: allow low prioirity register usage
+	} else if (reg2 != ZREG_NONE && zend_interval_end(current) < pos2) {
+		/* register available for the whole interval */
+		current->reg = reg2;
+		if (current->used_as_hint) {
+			ZEND_REGSET_INCL(*hints, reg2);
+		}
+		return 1;
+#endif
 	} else {
 		/* TODO: enable interval splitting ??? */
 		/* register available for the first part of the interval */
