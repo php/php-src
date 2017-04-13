@@ -9,6 +9,10 @@ PHP                                                                        NEWS
   . Fixed bug #74404 (Wrong reflection on DateTimeZone::getTransitions).
     (krakjoe)
 
+- DOM:
+  . Fixed bug #74416 (Wrong reflection on DOMNode::cloneNode).
+    (Remi, Fabien Villepinte)
+
 - Fileinfo:
   . Fixed bug #74379 (syntax error compile error in libmagic/apprentice.c).
     (Laruence)
