@@ -35,6 +35,7 @@ PHP                                                                        NEWS
   . Fixed bug #65683 (Intl does not support DateTimeImmutable). (Ben Scholzen)
   . Fixed bug #74298 (IntlDateFormatter->format() doesn't return
     microseconds/fractions). (Andrew Nester)
+  . Fixed bug #74433 (wrong reflection for Normalizer methods). (villfa)
 
 - OpenSSL:
   . Fixed bug #74341 (openssl_x509_parse fails to parse ASN.1 UTCTime without
