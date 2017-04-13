@@ -2059,10 +2059,11 @@ static zend_lifetime_interval** zend_jit_allocate_registers(zend_op_array *op_ar
 						}
 					}
 				}
-				/* Load elimination */
+				/* Remove useless register allocation */
 				for (i = 0; i < ssa->vars_count; i++) {
 					if (intervals[i] &&
-					    intervals[i]->load &&
+					    (intervals[i]->load ||
+					     intervals[i]->store && ssa->vars[i].definition >= 0) &&
 					    ssa->vars[i].use_chain < 0) {
 					    zend_bool may_remove = 1;
 						zend_ssa_phi *phi = ssa->vars[i].phi_use_chain;
