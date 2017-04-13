@@ -221,7 +221,7 @@ safe:
 							buf = ZSTR_EMPTY_ALLOC();
 						}
 						if (!stmt->dbh->methods->quoter(stmt->dbh, ZSTR_VAL(buf), ZSTR_LEN(buf), &plc->quoted, &plc->qlen,
-								param->param_type)) {
+								param->param_type, NULL)) {
 							/* bork */
 							ret = -1;
 							strncpy(stmt->error_code, stmt->dbh->error_code, 6);

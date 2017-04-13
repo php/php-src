@@ -1154,7 +1154,7 @@ static PHP_METHOD(PDO, quote)
 		RETURN_FALSE;
 	}
 
-	if (dbh->methods->quoter(dbh, str, str_len, &qstr, &qlen, paramtype)) {
+	if (dbh->methods->quoter(dbh, str, str_len, &qstr, &qlen, paramtype, NULL)) {
 		RETVAL_STRINGL(qstr, qlen);
 		efree(qstr);
 		return;
