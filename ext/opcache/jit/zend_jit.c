@@ -2150,6 +2150,16 @@ static zend_lifetime_interval** zend_jit_allocate_registers(zend_op_array *op_ar
 						}
 					}
 				}
+				/* Remove intervals used once */
+				for (i = 0; i < ssa->vars_count; i++) {
+					if (intervals[i] &&
+					    intervals[i]->load &&
+					    intervals[i]->store &&
+					    (ssa->vars[i].use_chain < 0 ||
+					     zend_ssa_next_use(ssa->ops, i, ssa->vars[i].use_chain) < 0)) {
+						intervals[i] = NULL;
+					}
+				}
 			}
 
 			if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_REG_ALLOC) {
