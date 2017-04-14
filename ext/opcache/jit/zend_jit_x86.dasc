@@ -2587,14 +2587,17 @@ static int zend_jit_math_double_long(dasm_State    **Dst,
 				|	SSE_MATH opline->opcode, result_reg, op1_addr
 			}
 		} else {
-			zend_reg tmp_reg = ZREG_XMM1;
+			zend_reg tmp_reg;
 
 			if (Z_MODE(res_addr) == IS_REG) {
 				result_reg = Z_REG(res_addr);
+				tmp_reg = ZREG_XMM0;
 			} else if (Z_MODE(op1_addr) == IS_REG && zend_ssa_is_last_use(op_array, ssa, ssa->ops[opline-op_array->opcodes].op1_use, opline-op_array->opcodes)) {
 				result_reg = Z_REG(op1_addr);
+				tmp_reg = ZREG_XMM0;
 			} else {
 				result_reg = ZREG_XMM0;
+				tmp_reg = ZREG_XMM1;
 			}
 			if (zend_jit_x86_flags & ZEND_JIT_CPU_AVX) {
 				zend_reg op1_reg;
@@ -7618,9 +7621,15 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, zend_op_arra
 	}
 
 	// if (!EX(return_value))
-	|	mov r1, EX->return_value
-	|	test r1, r1
-	ret_addr = ZEND_ADDR_MEM_ZVAL(ZREG_R1, 0);
+	if (Z_MODE(op1_addr) == IS_REG && Z_REG(op1_addr) == ZREG_R1) {
+		|	mov r2, EX->return_value
+		|	test r2, r2
+		ret_addr = ZEND_ADDR_MEM_ZVAL(ZREG_R2, 0);
+	} else {
+		|	mov r1, EX->return_value
+		|	test r1, r1
+		ret_addr = ZEND_ADDR_MEM_ZVAL(ZREG_R1, 0);
+	}
 	if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) &&
 	    (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
 		|	jz >1
@@ -8708,6 +8717,19 @@ static zend_bool zend_jit_may_be_in_reg(zend_op_array *op_array, zend_ssa *ssa, 
 	return 1;
 }
 
+static zend_bool zend_needs_extra_reg_for_const(zend_op_array *op_array, zend_uchar op_type, znode_op op)
+{
+|.if X64
+||	if (op_type == IS_CONST) {
+||		zval *zv = RT_CONSTANT(op_array, op);
+||		if (Z_TYPE_P(zv) == IS_DOUBLE && !Z_DVAL_Z(zv) == 0 && !IS_32BIT(zv)) {
+||			return 1;
+||		}
+||	}
+|.endif
+	return 0;
+}
+
 static zend_regset zend_jit_get_scratch_regset(zend_op_array *op_array, zend_ssa *ssa, uint32_t line, int current_var)
 {
 	const zend_op *opline = op_array->opcodes + line;
@@ -8718,19 +8740,25 @@ static zend_regset zend_jit_get_scratch_regset(zend_op_array *op_array, zend_ssa
 		case ZEND_NOP:
 		case ZEND_OP_DATA:
 		case ZEND_JMP:
+		case ZEND_RETURN:
 			regset = ZEND_REGSET_EMPTY;
 			break;
-		case ZEND_RETURN:
-			regset = ZEND_REGSET(ZREG_R1);
-			break;
 		case ZEND_QM_ASSIGN:
+			if (ssa->ops[line].op1_def == current_var ||
+			    ssa->ops[line].result_def == current_var) {
+				regset = ZEND_REGSET_EMPTY;
+				break;
+			}
+			/* break missing intentionally */
 		case ZEND_SEND_VAL:
 		case ZEND_SEND_VAL_EX:
+			if (ssa->ops[line].op1_use == current_var) {
+				regset = ZEND_REGSET_EMPTY;
+				break;
+			}
 			op1_info = OP1_INFO();
 			if (!(op1_info & MAY_BE_UNDEF)) {
-				if (ssa->ops[line].op1_use == current_var) {
-					regset = ZEND_REGSET_EMPTY;
-				} else if ((op1_info & (MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE) {
+				if ((op1_info & (MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE) {
 					regset = ZEND_REGSET(ZREG_XMM0);
 				} else if ((op1_info & (MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_LONG) {
 					regset = ZEND_REGSET(ZREG_R0);
@@ -8740,11 +8768,14 @@ static zend_regset zend_jit_get_scratch_regset(zend_op_array *op_array, zend_ssa
 			}
 			break;
 		case ZEND_SEND_VAR:
+			if (ssa->ops[line].op1_use == current_var ||
+			    ssa->ops[line].op1_def == current_var) {
+				regset = ZEND_REGSET_EMPTY;
+				break;
+			}
 			op1_info = OP1_INFO();
 			if (!(op1_info & MAY_BE_UNDEF)) {
-				if (ssa->ops[line].op1_use == current_var) {
-					regset = ZEND_REGSET_EMPTY;
-				} else if ((op1_info & (MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE) {
+				if ((op1_info & (MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE) {
 					regset = ZEND_REGSET(ZREG_XMM0);
 				} else if ((op1_info & (MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_LONG) {
 					regset = ZEND_REGSET(ZREG_R0);
@@ -8757,14 +8788,19 @@ static zend_regset zend_jit_get_scratch_regset(zend_op_array *op_array, zend_ssa
 			}
 			break;
 		case ZEND_ASSIGN:
+			if (ssa->ops[line].op2_use == current_var ||
+			    ssa->ops[line].op2_def == current_var ||
+			    ssa->ops[line].op1_def == current_var ||
+			    ssa->ops[line].result_def == current_var) {
+				regset = ZEND_REGSET_EMPTY;
+				break;
+			}
 			op1_info = OP1_INFO();
 			op2_info = OP2_INFO();
 			if (opline->op1_type == IS_CV
 			 && !(op2_info & MAY_BE_UNDEF)
 			 && !(op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_RESOURCE|MAY_BE_REF))) {
-				if (ssa->ops[line].op2_use == current_var) {
-					regset = ZEND_REGSET_EMPTY;
-				} else if ((op2_info & (MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE) {
+				if ((op2_info & (MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE) {
 					regset = ZEND_REGSET(ZREG_XMM0);
 				} else if ((op2_info & (MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_LONG) {
 					regset = ZEND_REGSET(ZREG_R0);
@@ -8777,14 +8813,16 @@ static zend_regset zend_jit_get_scratch_regset(zend_op_array *op_array, zend_ssa
 		case ZEND_PRE_DEC:
 		case ZEND_POST_INC:
 		case ZEND_POST_DEC:
+			if (ssa->ops[line].op1_use == current_var ||
+			    ssa->ops[line].op1_def == current_var ||
+			    ssa->ops[line].result_def == current_var) {
+				regset = ZEND_REGSET_EMPTY;
+				break;
+			}
 			op1_info = OP1_INFO();
 			if (opline->op1_type == IS_CV
 			 && !(op1_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-MAY_BE_LONG))) {
 				regset = ZEND_REGSET_EMPTY;
-				if (opline->result_type != IS_UNUSED) {
-					ZEND_REGSET_INCL(regset, ZREG_R0);
-					ZEND_REGSET_INCL(regset, ZREG_R1);
-				}
 			}
 			break;
 		case ZEND_ADD:
@@ -8794,23 +8832,46 @@ static zend_regset zend_jit_get_scratch_regset(zend_op_array *op_array, zend_ssa
 			op2_info = OP1_INFO();
 			if (!(op1_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE))) &&
 			    !(op2_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE)))) {
-				res_info = OP1_INFO();
-				if (res_info & MAY_BE_LONG) {
-					regset = ZEND_REGSET(ZREG_R0);
+
+				regset = ZEND_REGSET_EMPTY;
+				if ((op1_info & MAY_BE_LONG) && (op2_info & MAY_BE_LONG)) {
+					if (ssa->ops[line].result_def != current_var &&
+					    (ssa->ops[line].op1_use != current_var || !zend_ssa_is_last_use(op_array, ssa, current_var, opline-op_array->opcodes))) {
+						ZEND_REGSET_INCL(regset, ZREG_R0);
+					}
+					res_info = OP1_INFO();
 					if (res_info & MAY_BE_DOUBLE) {
 						ZEND_REGSET_INCL(regset, ZREG_XMM0);
 						ZEND_REGSET_INCL(regset, ZREG_XMM1);
 					}
-				} else {
-					regset = ZEND_REGSET(ZREG_XMM0);
-					if (opline->opcode == ZEND_SUB && (op2_info & MAY_BE_LONG)) {
-						ZEND_REGSET_INCL(regset, ZREG_XMM1);
+				}
+				if ((op1_info & MAY_BE_LONG) && (op2_info & MAY_BE_DOUBLE)) {
+					if (ssa->ops[line].result_def != current_var) {
+						ZEND_REGSET_INCL(regset, ZREG_XMM0);
 					}
-					|.if X64
-					||	if (opline->op1_type == IS_CONST || opline->op2_type == IS_CONST) {
-					||		ZEND_REGSET_INCL(regset, ZREG_R0);
-					||	}
-					|.endif
+				}
+				if ((op1_info & MAY_BE_DOUBLE) && (op2_info & MAY_BE_LONG)) {
+					if (zend_is_commutative(opline->opcode)) {
+						if (ssa->ops[line].result_def != current_var) {
+							ZEND_REGSET_INCL(regset, ZREG_XMM0);
+						}
+					} else {
+						ZEND_REGSET_INCL(regset, ZREG_XMM0);
+						if (ssa->ops[line].result_def != current_var &&
+						    (ssa->ops[line].op1_use != current_var || !zend_ssa_is_last_use(op_array, ssa, current_var, opline-op_array->opcodes))) {
+							ZEND_REGSET_INCL(regset, ZREG_XMM1);
+						}
+					}
+				}
+				if ((op1_info & MAY_BE_DOUBLE) && (op2_info & MAY_BE_DOUBLE)) {
+					if (ssa->ops[line].result_def != current_var &&
+					    (ssa->ops[line].op1_use != current_var || !zend_ssa_is_last_use(op_array, ssa, current_var, opline-op_array->opcodes))) {
+						ZEND_REGSET_INCL(regset, ZREG_XMM0);
+					}
+				}
+				if (zend_needs_extra_reg_for_const(op_array, opline->op1_type, opline->op1) ||
+				    zend_needs_extra_reg_for_const(op_array, opline->op1_type, opline->op2)) {
+					ZEND_REGSET_INCL(regset, ZREG_R0);
 				}
 			}
 			break;
@@ -8826,19 +8887,28 @@ static zend_regset zend_jit_get_scratch_regset(zend_op_array *op_array, zend_ssa
 			if (!(op1_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE))) &&
 			    !(op2_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE)))) {
 				regset = ZEND_REGSET_EMPTY;
-				if ((op1_info & MAY_BE_LONG) &&
-				    (op2_info & MAY_BE_LONG) &&
-				    opline->op1_type != IS_CONST &&
-				    opline->op2_type != IS_CONST) {
-					ZEND_REGSET_INCL(regset, ZREG_R0);
+				if ((op1_info & MAY_BE_LONG) && (op2_info & MAY_BE_LONG) &&
+				    opline->op1_type != IS_CONST && opline->op2_type != IS_CONST) {
+					if (ssa->ops[line].op1_use != current_var &&
+					    ssa->ops[line].op2_use != current_var) {
+						ZEND_REGSET_INCL(regset, ZREG_R0);
+					}
 				}
-				if ((op1_info & MAY_BE_DOUBLE) || (op2_info & MAY_BE_DOUBLE)) {
+				if ((op1_info & MAY_BE_LONG) && (op2_info & MAY_BE_DOUBLE)) {
 					ZEND_REGSET_INCL(regset, ZREG_XMM0);
-					|.if X64
-					||	if (opline->op1_type == IS_CONST || opline->op2_type == IS_CONST) {
-					||		ZEND_REGSET_INCL(regset, ZREG_R0);
-					||	}
-					|.endif
+				}
+				if ((op1_info & MAY_BE_DOUBLE) && (op2_info & MAY_BE_LONG)) {
+					ZEND_REGSET_INCL(regset, ZREG_XMM0);
+				}
+				if ((op1_info & MAY_BE_DOUBLE) && (op2_info & MAY_BE_DOUBLE)) {
+					if (ssa->ops[line].op1_use != current_var &&
+					    ssa->ops[line].op2_use != current_var) {
+						ZEND_REGSET_INCL(regset, ZREG_XMM0);
+					}
+				}
+				if (zend_needs_extra_reg_for_const(op_array, opline->op1_type, opline->op1) ||
+				    zend_needs_extra_reg_for_const(op_array, opline->op1_type, opline->op2)) {
+					ZEND_REGSET_INCL(regset, ZREG_R0);
 				}
 			}
 			break;
