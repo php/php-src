@@ -25,6 +25,7 @@ PHP                                                                        NEWS
 
 - intl:
   . Fixed bug #74433 (wrong reflection for Normalizer methods). (villfa)
+  . Fixed bug #74439 (wrong reflection for Locale methods). (villfa)
 
 - MySQLnd:
   . Added support for MySQL 8.0 types. (Johannes)
