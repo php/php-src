@@ -162,8 +162,12 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa)
 				zend_op *opline;
 				zend_op *new_opline;
 
-				opline = op_array->opcodes + end - 1;
 				b->len = target - b->start;
+				opline = op_array->opcodes + end - 1;
+				if (opline->opcode == ZEND_NOP) {
+					continue;
+				}
+
 				new_opline = op_array->opcodes + target - 1;
 				switch (new_opline->opcode) {
 					case ZEND_JMP:

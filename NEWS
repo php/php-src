@@ -37,6 +37,9 @@ PHP                                                                        NEWS
     microseconds/fractions). (Andrew Nester)
   . Fixed bug #74433 (wrong reflection for Normalizer methods). (villfa)
 
+- Opcache:
+  . Fixed bug #74431 (foreach infinite loop). (Nikita)
+
 - OpenSSL:
   . Fixed bug #74341 (openssl_x509_parse fails to parse ASN.1 UTCTime without
     seconds). (Moritz Fain)
