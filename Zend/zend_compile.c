@@ -4810,6 +4810,7 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 
 			if (!is_last_class) {
 				jmp_multicatch[j] = zend_emit_jump(0);
+				opline = &CG(active_op_array)->opcodes[opnum_catch];
 				opline->extended_value = get_next_op_number(CG(active_op_array));
 			}
 		}

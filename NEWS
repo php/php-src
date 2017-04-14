@@ -10,6 +10,7 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #74188 (Null coalescing operator fails for undeclared static
     class properties). (tpunt)
+  . Fixed bug #74444 (multiple catch freezes in some cases). (David Matějka)
 
 - Date:
   . Fixed bug #74404 (Wrong reflection on DateTimeZone::getTransitions).
