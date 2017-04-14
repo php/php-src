@@ -1064,14 +1064,26 @@ static int zend_jit_add_range(zend_lifetime_interval **intervals, int var, uint3
 	return SUCCESS;
 }
 
-static int zend_jit_begin_range(zend_lifetime_interval **intervals, int var, uint32_t from)
+static int zend_jit_begin_range(zend_lifetime_interval **intervals, int var, uint32_t block_start, uint32_t from)
 {
-	if (intervals[var]) {
+	if (block_start != from && intervals[var]) {
 		zend_life_range *range = &intervals[var]->range;
 
 		do {
 			if (from >= range->start && from <= range->end) {
-				range->start = from;
+				if (range->start == block_start) {
+					range->start = from;
+				} else {
+					zend_life_range *r = zend_arena_alloc(&CG(arena), sizeof(zend_life_range));
+					if (!r) {
+						return FAILURE;
+					}
+					r->start = from;
+					r->end = range->end;
+					r->next = range->next;
+					range->end = block_start - 1;
+					range->next = r;
+				}
 				return SUCCESS;
 			}
 			range = range->next;
@@ -1410,19 +1422,19 @@ static int zend_jit_compute_liveness(zend_op_array *op_array, zend_ssa *ssa, zen
 			/*   setFrom(opd, op)                   */
 			/*   live.remove(opd)                   */
 			if (op->op1_def >= 0 && zend_bitset_in(candidates, op->op1_def)) {
-				if (zend_jit_begin_range(intervals, op->op1_def, num) != SUCCESS) {
+				if (zend_jit_begin_range(intervals, op->op1_def, b->start, num) != SUCCESS) {
 					goto failure;
 				}
 				zend_bitset_excl(live, op->op1_def);
 			}
 			if (op->op2_def >= 0 && zend_bitset_in(candidates, op->op2_def)) {
-				if (zend_jit_begin_range(intervals, op->op2_def, num) != SUCCESS) {
+				if (zend_jit_begin_range(intervals, op->op2_def, b->start, num) != SUCCESS) {
 					goto failure;
 				}
 				zend_bitset_excl(live, op->op2_def);
 			}
 			if (op->result_def >= 0 && zend_bitset_in(candidates, op->result_def)) {
-				if (zend_jit_begin_range(intervals, op->result_def, num) != SUCCESS) {
+				if (zend_jit_begin_range(intervals, op->result_def, b->start, num) != SUCCESS) {
 					goto failure;
 				}
 				zend_bitset_excl(live, op->result_def);
@@ -1462,33 +1474,41 @@ static int zend_jit_compute_liveness(zend_op_array *op_array, zend_ssa *ssa, zen
 			zend_bitset_excl(live, phi->ssa_var);
 		}
 
+		/* b.liveIn = live */
+		zend_bitset_copy(live_in + set_size * i, live, set_size);
+	}
+
+	for (i = ssa->cfg.blocks_count - 1; i >= 0; i--) {
+		zend_basic_block *b = ssa->cfg.blocks + i;
+
 		/* if b is loop header */
-		if ((b->flags & ZEND_BB_LOOP_HEADER) &&
-		    !zend_bitset_empty(live, set_size)) {
-			uint32_t set_size2 = zend_bitset_len(op_array->last);
+		if ((b->flags & ZEND_BB_LOOP_HEADER)) {
+			live = live_in + set_size * i;
 
-			zend_bitset_clear(loop_body, set_size2);
-			zend_jit_compute_loop_body(ssa, i, i, loop_body);
-			while (!zend_bitset_empty(loop_body, set_size2)) {
-				uint32_t from = zend_bitset_first(loop_body, set_size2);
-				uint32_t to = from;
+			if (!zend_bitset_empty(live, set_size)) {
+				uint32_t set_size2 = zend_bitset_len(op_array->last);
 
-				do {
-					zend_bitset_excl(loop_body, to);
-					to++;
-				} while (zend_bitset_in(loop_body, to));
-				to--;
+				zend_bitset_clear(loop_body, set_size2);
+				zend_jit_compute_loop_body(ssa, i, i, loop_body);
+				while (!zend_bitset_empty(loop_body, set_size2)) {
+					uint32_t from = zend_bitset_first(loop_body, set_size2);
+					uint32_t to = from;
 
-				ZEND_BITSET_FOREACH(live, set_size, j) {
-					if (zend_jit_add_range(intervals, j, from, to) != SUCCESS) {
-						goto failure;
-					}
-				} ZEND_BITSET_FOREACH_END();
+					do {
+						zend_bitset_excl(loop_body, to);
+						to++;
+					} while (zend_bitset_in(loop_body, to));
+					to--;
+
+					ZEND_BITSET_FOREACH(live, set_size, j) {
+						if (zend_jit_add_range(intervals, j, from, to) != SUCCESS) {
+							goto failure;
+						}
+					} ZEND_BITSET_FOREACH_END();
+				}
 			}
 		}
 
-		/* b.liveIn = live */
-		zend_bitset_copy(live_in + set_size * i, live, set_size);
 	}
 
 	if (zend_jit_reg_alloc >= ZEND_JIT_REG_ALLOC_GLOBAL) {
