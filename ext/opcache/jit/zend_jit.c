@@ -1522,33 +1522,51 @@ static int zend_jit_compute_liveness(zend_op_array *op_array, zend_ssa *ssa, zen
 							}
 						}
 					}
-				} else if (ssa->vars[var].definition >= 0) {
+				}
+			}
+		}
+		for (i = 0; i < ssa->vars_count; i++) {
+			if (intervals[i] && !intervals[i]->hint) {
+				int var = intervals[i]->ssa_var;
+
+				if (ssa->vars[var].definition >= 0) {
 					uint32_t line = ssa->vars[var].definition;
 					const zend_op *opline = op_array->opcodes + line;
 
 					switch (opline->opcode) {
 						case ZEND_QM_ASSIGN:
-						case ZEND_SEND_VAR:
-							if (i == ssa->ops[line].op1_def &&
-							    ssa->ops[line].op1_use >= 0 &&
-							    intervals[ssa->ops[line].op1_use]) {
+						case ZEND_POST_INC:
+						case ZEND_POST_DEC:
+							if (ssa->ops[line].op1_use >= 0 &&
+							    intervals[ssa->ops[line].op1_use] &&
+							    (var == ssa->ops[line].op1_def ||
+							     (var == ssa->ops[line].result_def &&
+							      (ssa->ops[line].op1_def < 0 ||
+							       !intervals[ssa->ops[line].op1_def])))) {
 								zend_jit_add_hint(intervals, i, ssa->ops[line].op1_use);
 							}
 							break;
+						case ZEND_SEND_VAR:
 						case ZEND_PRE_INC:
 						case ZEND_PRE_DEC:
-						case ZEND_POST_INC:
-						case ZEND_POST_DEC:
-							if (i == ssa->ops[line].op1_def &&
+							if (var == ssa->ops[line].op1_def &&
 							    ssa->ops[line].op1_use >= 0 &&
 							    intervals[ssa->ops[line].op1_use]) {
 								zend_jit_add_hint(intervals, i, ssa->ops[line].op1_use);
 							}
 							break;
 						case ZEND_ASSIGN:
-							if (i == ssa->ops[line].op2_def &&
-							    ssa->ops[line].op2_use >= 0 &&
-							    intervals[ssa->ops[line].op2_use]) {
+							if (ssa->ops[line].op2_use >= 0 &&
+							    intervals[ssa->ops[line].op2_use] &&
+							    (var == ssa->ops[line].op2_def ||
+								 (var == ssa->ops[line].op1_def &&
+							      (ssa->ops[line].op2_def < 0 ||
+							       !intervals[ssa->ops[line].op2_def])) ||
+								 (var == ssa->ops[line].result_def &&
+							      (ssa->ops[line].op2_def < 0 ||
+							       !intervals[ssa->ops[line].op2_def]) &&
+							      (ssa->ops[line].op1_def < 0 ||
+							       !intervals[ssa->ops[line].op1_def])))) {
 								zend_jit_add_hint(intervals, i, ssa->ops[line].op2_use);
 							}
 							break;
@@ -2094,7 +2112,7 @@ static zend_lifetime_interval** zend_jit_allocate_registers(zend_op_array *op_ar
 				for (i = 0; i < ssa->vars_count; i++) {
 					if (intervals[i] &&
 					    (intervals[i]->load ||
-					     intervals[i]->store && ssa->vars[i].definition >= 0) &&
+					     (intervals[i]->store && ssa->vars[i].definition >= 0)) &&
 					    ssa->vars[i].use_chain < 0) {
 					    zend_bool may_remove = 1;
 						zend_ssa_phi *phi = ssa->vars[i].phi_use_chain;
