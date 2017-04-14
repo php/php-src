@@ -39,6 +39,7 @@ PHP                                                                        NEWS
 
 - Opcache:
   . Fixed bug #74431 (foreach infinite loop). (Nikita)
+  . Fixed bug #74442 (Opcached version produces a nested array). (Nikita)
 
 - OpenSSL:
   . Fixed bug #74341 (openssl_x509_parse fails to parse ASN.1 UTCTime without
