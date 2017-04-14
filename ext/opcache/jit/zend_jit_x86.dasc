@@ -8722,7 +8722,7 @@ static zend_bool zend_needs_extra_reg_for_const(zend_op_array *op_array, zend_uc
 |.if X64
 ||	if (op_type == IS_CONST) {
 ||		zval *zv = RT_CONSTANT(op_array, op);
-||		if (Z_TYPE_P(zv) == IS_DOUBLE && !Z_DVAL_Z(zv) == 0 && !IS_32BIT(zv)) {
+||		if (Z_TYPE_P(zv) == IS_DOUBLE && Z_DVAL_P(zv) != 0 && !IS_32BIT(zv)) {
 ||			return 1;
 ||		}
 ||	}
