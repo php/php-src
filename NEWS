@@ -93,6 +93,9 @@ PHP                                                                        NEWS
     (krakjoe)
   . Changed HashContext from resource to object. (Rouven Weßling, Sara)
 
+- intl:
+  . Fixed bug #74433 (wrong reflection for Normalizer methods). (villfa)
+
 - Mbstring:
   . Implemented request #66024 (mb_chr() and mb_ord()). (Masakielastic, Yasuo)
   . Implemented request #65081 (mb_scrub()). (Masakielastic, Yasuo)
