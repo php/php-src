@@ -59164,14 +59164,18 @@ ZEND_API void zend_serialize_opcode_handler(zend_op *op)
 	if (!zend_handlers_table) {
 		init_opcode_serialiser();
 	}
-	zv = zend_hash_index_find(zend_handlers_table, (zend_long)(zend_uintptr_t)op->handler);
-	ZEND_ASSERT(zv != NULL);
-	op->handler = (const void *)(zend_uintptr_t)Z_LVAL_P(zv);
+	if((zend_long)(zend_uintptr_t)op->handler > zend_handlers_count){//for double serialize op->handler
+		zv = zend_hash_index_find(zend_handlers_table, (zend_long)(zend_uintptr_t)op->handler);
+		ZEND_ASSERT(zv != NULL);
+		op->handler = (const void *)(zend_uintptr_t)Z_LVAL_P(zv);
+	}
 }
 
 ZEND_API void zend_deserialize_opcode_handler(zend_op *op)
 {
-	op->handler = zend_opcode_handlers[(zend_uintptr_t)op->handler];
+	if((zend_long)(zend_uintptr_t)op->handler<=zend_handlers_count){//for double unserialize op->handler
+		op->handler = zend_opcode_handlers[(zend_uintptr_t)op->handler];
+	}
 }
 
 static const void *zend_vm_get_opcode_handler_ex(uint32_t spec, const zend_op* op)
