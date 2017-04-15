@@ -146,6 +146,9 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					LITERAL_INFO(opline->op2.constant, LITERAL_FUNC, 1, 1, 3);
 					break;
 				case ZEND_INIT_METHOD_CALL:
+					if (ZEND_OP1_TYPE(opline) == IS_CONST) {
+						LITERAL_INFO(opline->op1.constant, LITERAL_VALUE, 1, 0, 1);
+					}
 					if (ZEND_OP2_TYPE(opline) == IS_CONST) {
 						optimizer_literal_obj_info(
 							info,
