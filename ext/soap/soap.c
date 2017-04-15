@@ -3191,6 +3191,24 @@ PHP_METHOD(SoapClient, __getCookies)
 }
 /* }}} */
 
+/* {{{ proto array SoapClient::__getCookies ( void )
+   Returns list of cookies */
+PHP_METHOD(SoapClient, __getCookies)
+{
+	zval **cookies, *tmp;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	array_init(return_value);
+
+	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_cookies", sizeof("_cookies"), (void **)&cookies) != FAILURE) {
+		zend_hash_copy(Z_ARRVAL_P(return_value), Z_ARRVAL_P(*cookies), (copy_ctor_func_t) zval_add_ref, (void *)&tmp, sizeof(zval*));
+	}
+}
+/* }}} */
+
 /* {{{ proto void SoapClient::__setSoapHeaders(array SoapHeaders)
    Sets SOAP headers for subsequent calls (replaces any previous
    values).
