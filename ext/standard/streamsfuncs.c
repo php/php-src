@@ -250,6 +250,40 @@ PHP_FUNCTION(stream_socket_server)
 }
 /* }}} */
 
+/* {{{ proto bool stream_socket_listen(resource serverstream)
+   Listen for client connections on a socket previously bound via stream_socket_server() */
+PHP_FUNCTION(stream_socket_listen)
+{
+	php_stream *stream = NULL;
+	zval *zstream = NULL, **zbacklog = NULL;
+	int backlog = 32;
+	char *error_text = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zstream) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	php_stream_from_zval(stream, &zstream);
+
+	if (stream->context && php_stream_context_get_option(stream->context, "socket", "backlog", &zbacklog) == SUCCESS) {
+		zval *ztmp = *zbacklog;			
+		convert_to_long_ex(&ztmp);
+		backlog = Z_LVAL_P(ztmp);
+		if (ztmp != *zbacklog) {
+			zval_ptr_dtor(&ztmp);
+		}
+	}
+	
+	if (0 != php_stream_xport_listen(stream, backlog, &error_text TSRMLS_CC)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, error_text == NULL ? "Unknown error" : error_text);
+		RETURN_FALSE;
+	} else {
+		php_stream_to_zval(stream, return_value);
+		RETURN_TRUE;
+	}
+}
+/* }}} */
+
 /* {{{ proto resource stream_socket_accept(resource serverstream, [ double timeout [, string &peername ]])
    Accept a client connection from a server socket */
 PHP_FUNCTION(stream_socket_accept)

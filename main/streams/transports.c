@@ -276,6 +276,9 @@ PHPAPI int php_stream_xport_listen(php_stream *stream, int backlog, zend_string 
 		}
 
 		return param.outputs.returncode;
+
+	} else if (ret == PHP_STREAM_OPTION_RETURN_NOTIMPL) {
+		*error_text = "listening not supported on this stream";
 	}
 
 	return ret;

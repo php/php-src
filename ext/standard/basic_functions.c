@@ -1950,6 +1950,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_socket_server, 0, 0, 1)
 	ZEND_ARG_INFO(0, context)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_stream_socket_listen, 0)
+    ZEND_ARG_INFO(0, serverstream)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_socket_accept, 0, 0, 1)
 	ZEND_ARG_INFO(0, serverstream)
 	ZEND_ARG_INFO(0, timeout)
@@ -3140,6 +3144,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(stream_filter_remove,											arginfo_stream_filter_remove)
 	PHP_FE(stream_socket_client,											arginfo_stream_socket_client)
 	PHP_FE(stream_socket_server,											arginfo_stream_socket_server)
+	PHP_FE(stream_socket_listen,											arginfo_stream_socket_listen)
 	PHP_FE(stream_socket_accept,											arginfo_stream_socket_accept)
 	PHP_FE(stream_socket_get_name,											arginfo_stream_socket_get_name)
 	PHP_FE(stream_socket_recvfrom,											arginfo_stream_socket_recvfrom)
