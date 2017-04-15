@@ -35,6 +35,9 @@ PHP 7.2 UPGRADE NOTES
     /^(0|(-?[1-9][0-9]*))$/ where PHP_INT_MIN <= n <= PHP_INT_MAX) to integer
     keys. This fixes the behaviour of previous versions, where numeric string
     property names would become inaccessible string keys.
+  . Unqualified references to undefined constants now generate a Warning instead
+    of a notice. They will generate an Error in a future version of PHP.
+    (https://wiki.php.net/rfc/deprecate-bareword-strings)
   . Minimum supported Windows versions are Windows 7/Server 2008 R2.
 
 - BCMath:
@@ -46,6 +49,11 @@ PHP 7.2 UPGRADE NOTES
   . The hash_hmac(), hash_hmac_file() and hash_pbkdf2() functions no longer
     accept non-cryptographic hashes.
 
+- JSON
+  . The json_decode() option JSON_OBJECT_AS_ARRAY is used if the second
+    parameter (assoc) is null. Previously JSON_OBJECT_AS_ARRAY was always
+    ignored.
+
 - PCRE:
   . preg_match() and other PCRE functions now distinguish between unmatched
     subpatterns and empty matches by reporting NULL and "" (empty string),
@@ -53,7 +61,7 @@ PHP 7.2 UPGRADE NOTES
 
 - Session:
   . Removed register_globals related code and "!" can be used as $_SESSION key name.
-  . Session is made to manage session status corretly and prevents invalid operations.
+  . Session is made to manage session status correctly and prevents invalid operations.
     Only inappropriate codes are affected by this change. If you have problems with this,
     it means you have problem in your code.
     . Functions are made to set or return correct session status.
@@ -165,7 +173,7 @@ See also: https://wiki.php.net/rfc/deprecations_php_7_2
     'PASSWORD_ARGON2_DEFAULT_TIME_COST', and 'PASSWORD_ARGON2_DEFAULT_THREADS' respectively if not set.
   . password_verify() can verify Argon2i hashes.
   . password_get_info() and password_needs_rehash() can accept Argon2i hashes.
-  . mail()/mb_send_mail() accept array $extra_header. Array paramter is checked against RFC 2822.
+  . mail()/mb_send_mail() accept array $extra_header. Array parameter is checked against RFC 2822.
     Array format is 
     $extra_headers = [
       'Header-Name' => 'Header value',
@@ -233,7 +241,7 @@ See also: https://wiki.php.net/rfc/deprecations_php_7_2
 
 - Mbstring
   . mb_check_encoding() accepts array parameter. Both key and value
-    ecodings are checked recursively.
+    encodings are checked recursively.
   . mb_convert_encoding() accepts array parameter. Only value encodings
     are converted recursively.
 

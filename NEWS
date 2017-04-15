@@ -20,18 +20,25 @@ PHP                                                                        NEWS
     php.exe). (Michele Locati)
   . Implemented "Convert numeric keys in object/array casts" RFC, fixes
     bugs #53838, #61655, #66173, #70925, #72254, etc. (Andrea)
+  . Implemented "Deprecate and Remove Bareword (Unquoted) Strings" RFC.
+    (Rowan Collins)
   . Raised minimum supported Windows versions to Windows 7/Server 2008 R2.
     (Anatol)
+  . Implemented minor optimization in array_keys/array_values(). (Sara)
   . Fixed bug #73969 (segfault in debug_print_backtrace). (andrewnester)
   . Added PHP_OS_FAMILY constant to determine on which OS we are. (Jan Altensen)
   . Fixed bug #73994 (arginfo incorrect for unpack). (krakjoe)
   . Fixed bug #73973 (assertion error in debug_zval_dump). (andrewnester)
   . Fixed bug #73987 (Method compatibility check looks to original 
     definition and not parent). (pmmaga)
+  . Fixed bug #73991 (JSON_OBJECT_AS_ARRAY not respected). (Sara)
   . Fixed bug #74053 (Corrupted class entries on shutdown when a destructor
     spawns another object). (jim at commercebyte dot com)
   . Fixed bug #73971 (Filename got limited to MAX_PATH on Win32 when scan
     directory). (Anatol)
+  . Fixed bug #74149 (static embed SAPI linkage error). (krakjoe)
+  . Fixed bug #72359, bug #72451, bug #73706, bug #71115 and others related
+    to interned strings handling in TS builds. (Anatol, Dmitry)
 
 - BCMath:
   . Fixed bug #46564 (bcmod truncates fractionals). (liborm85)
@@ -41,6 +48,8 @@ PHP                                                                        NEWS
 
 - Date:
   . Fixed bug #69587 (DateInterval properties and isset). (jhdxr)
+  . Fixed bug #74404 (Wrong reflection on DateTimeZone::getTransitions).
+    (krakjoe)
 
 - DOM:
   . Fixed bug #67474 (getElementsByTagNameNS filter on default ns). (aboks)
@@ -73,6 +82,8 @@ PHP                                                                        NEWS
 
 - GD:
   . Implemented imageresolution as getter and setter (Christoph)
+  . Fixed bug #74343 (compile fails on solaris 11 with system gd2 library).
+    (krakjoe)
 
 - GMP:
   . Fixed bug #70896 (gmp_fact() silently ignores non-integer input). (Sara)
@@ -81,6 +92,9 @@ PHP                                                                        NEWS
   . Fixed bug #73961 (environmental build dependency in hash sha3 source).
     (krakjoe)
   . Changed HashContext from resource to object. (Rouven Weßling, Sara)
+
+- intl:
+  . Fixed bug #74433 (wrong reflection for Normalizer methods). (villfa)
 
 - Mbstring:
   . Implemented request #66024 (mb_chr() and mb_ord()). (Masakielastic, Yasuo)
@@ -109,6 +123,7 @@ PHP                                                                        NEWS
 
 - PDO:
   . Add "Sent SQL" to debug dump for emulated prepares. (Adam Baratz)
+  . Add parameter types for national character set strings. (Adam Baratz)
 
 - PDO_DBlib:
   . Fixed bug #73234 (Emulated statements let value dictate parameter type).
@@ -128,6 +143,15 @@ PHP                                                                        NEWS
 - PDO_Sqlite
   . Switch to sqlite3_prepare_v2() and sqlite3_close_v2() functions (rasmus)
 
+- phar:
+  . Fixed bug #74383 (phar method parameters reflection correction). 
+    (mhagstrand)
+  . Fixed bug #74196 (phar does not correctly handle names containing dots).
+    (mhagstrand)
+
+- PHPDBG
+  . Added extended_value to opcode dump output. (Sara)
+
 - posix:
   . Fixed bug #71219 (configure script incorrectly checks for ttyname_r). (atoh)
 
@@ -143,6 +167,8 @@ PHP                                                                        NEWS
 
 - SQLite3:
   . Update to Sqlite 3.16.2. (cmb)
+  . Fixed bug #74413 (incorrect reflection for SQLite3::enableExceptions).
+    (krakjoe)
 
 - Standard:
   . Add subject to mail log. (tomsommer)
@@ -151,6 +177,8 @@ PHP                                                                        NEWS
   . Fixed bug #69442 (closing of fd incorrect when PTS enabled). (jaytaph)
   . Fixed bug #72974 (imap is undefined service on AIX). (matthieu.sarter)
   . Fixed bug #72979 (money_format stores wrong length AIX). (matthieu.sarter)
+  . Fixed bug #74300 (unserialize accepts two plus/minus signs for float number exponent part).
+    (xKerman)
 
 - XML:
   . Moved utf8_encode() and utf8_decode() to the Standard extension. (Andrea)
@@ -161,5 +189,6 @@ PHP                                                                        NEWS
 
 - ZIP:
   . Add support for encrypted archives. (Remi)
+  . Fixed Bug #73803 (Reflection of ZipArchive does not show public properties). (Remi)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

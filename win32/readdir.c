@@ -62,7 +62,7 @@ DIR *opendir(const char *dir)
 		filespecw[index] = L'\0';
 	wcscat(filespecw, L"\\*");
 
-	if ((handle = FindFirstFileW(filespecw, &(dp->fileinfo))) == INVALID_HANDLE_VALUE) {
+	if ((handle = FindFirstFileExW(filespecw, FindExInfoBasic, &(dp->fileinfo), FindExSearchNameMatch, NULL, FIND_FIRST_EX_LARGE_FETCH)) == INVALID_HANDLE_VALUE) {
 		DWORD err = GetLastError();
 		if (err == ERROR_NO_MORE_FILES || err == ERROR_FILE_NOT_FOUND) {
 			dp->finished = 1;
@@ -201,7 +201,7 @@ int rewinddir(DIR *dp)
 		filespecw[index] = L'\0';
 	wcscat(filespecw, L"/*");
 
-	if ((handle = FindFirstFileW(filespecw, &(dp->fileinfo))) == INVALID_HANDLE_VALUE) {
+	if ((handle = FindFirstFileExW(filespecw, FindExInfoBasic, &(dp->fileinfo), FindExSearchNameMatch, NULL, FIND_FIRST_EX_LARGE_FETCH)) == INVALID_HANDLE_VALUE) {
 		dp->finished = 1;
 	}
 

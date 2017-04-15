@@ -492,9 +492,6 @@ MYSQLND_METHOD(mysqlnd_vio, enable_ssl)(MYSQLND_VIO * const net)
 	zend_bool any_flag = FALSE;
 
 	DBG_ENTER("mysqlnd_vio::enable_ssl");
-	if (!context) {
-		DBG_RETURN(FAIL);
-	}
 
 	if (net->data->options.ssl_key) {
 		zval key_zval;

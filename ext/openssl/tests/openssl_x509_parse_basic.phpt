@@ -3,14 +3,6 @@ openssl_x509_parse() tests
 --SKIPIF--
 <?php if (!extension_loaded("openssl")) print "skip"; 
 if (OPENSSL_VERSION_NUMBER < 0x10000000) die("skip Output requires OpenSSL 1.0");
-if(substr(PHP_OS, 0, 3) == 'WIN') {
-	$exp = "W. Europe Standard Time";
-	$cmd = "powershell -command [System.TimeZoneInfo]::Local.Id";
-	$r = trim(shell_exec($cmd));
-	if ($exp !== $r) {
-		die("skip expect '$exp', got '$r'");
-	}
-}
 ?>
 --FILE--
 <?php

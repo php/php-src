@@ -191,6 +191,10 @@ op2_use:
 				}
 				if (opline->result_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
 					var_num = EX_VAR_TO_NUM(opline->result.var);
+					if ((build_flags & ZEND_SSA_USE_CV_RESULTS)
+					 && opline->result_type == IS_CV) {
+						DFG_SET(use, set_size, j, var_num);
+					}
 					DFG_SET(def, set_size, j, var_num);
 				}
 			}
@@ -216,10 +220,10 @@ op2_use:
 			if ((blocks[j].flags & ZEND_BB_REACHABLE) == 0) {
 				continue;
 			}
-			if (blocks[j].successors[0] >= 0) {
+			if (blocks[j].successors_count != 0) {
 				zend_bitset_copy(DFG_BITSET(out, set_size, j), DFG_BITSET(in, set_size, blocks[j].successors[0]), set_size);
-				if (blocks[j].successors[1] >= 0) {
-					zend_bitset_union(DFG_BITSET(out, set_size, j), DFG_BITSET(in, set_size, blocks[j].successors[1]), set_size);
+				for (k = 1; k < blocks[j].successors_count; k++) {
+					zend_bitset_union(DFG_BITSET(out, set_size, j), DFG_BITSET(in, set_size, blocks[j].successors[k]), set_size);
 				}
 			} else {
 				zend_bitset_clear(DFG_BITSET(out, set_size, j), set_size);

@@ -1722,6 +1722,7 @@ php_oci_bind *php_oci_bind_array_helper_string(zval *var, zend_long max_table_le
 	}
 	
 	bind = emalloc(sizeof(php_oci_bind));
+	ZVAL_UNDEF(&bind->parameter);
 	bind->array.elements		= (text *)safe_emalloc(max_table_length * (maxlength + 1), sizeof(text), 0);
 	memset(bind->array.elements, 0, max_table_length * (maxlength + 1) * sizeof(text));
 	bind->array.current_length	= zend_hash_num_elements(Z_ARRVAL_P(var));
@@ -1781,6 +1782,7 @@ php_oci_bind *php_oci_bind_array_helper_number(zval *var, zend_long max_table_le
 	hash = HASH_OF(var);
 
 	bind = emalloc(sizeof(php_oci_bind));
+	ZVAL_UNDEF(&bind->parameter);
 	bind->array.elements		= (ub4 *)safe_emalloc(max_table_length, sizeof(ub4), 0);
 	bind->array.current_length	= zend_hash_num_elements(Z_ARRVAL_P(var));
 	bind->array.old_length		= bind->array.current_length;
@@ -1820,6 +1822,7 @@ php_oci_bind *php_oci_bind_array_helper_double(zval *var, zend_long max_table_le
 	hash = HASH_OF(var);
 
 	bind = emalloc(sizeof(php_oci_bind));
+	ZVAL_UNDEF(&bind->parameter);
 	bind->array.elements		= (double *)safe_emalloc(max_table_length, sizeof(double), 0);
 	bind->array.current_length	= zend_hash_num_elements(Z_ARRVAL_P(var));
 	bind->array.old_length		= bind->array.current_length;
@@ -1860,6 +1863,7 @@ php_oci_bind *php_oci_bind_array_helper_date(zval *var, zend_long max_table_leng
 	hash = HASH_OF(var);
 
 	bind = emalloc(sizeof(php_oci_bind));
+	ZVAL_UNDEF(&bind->parameter);
 	bind->array.elements		= (OCIDate *)safe_emalloc(max_table_length, sizeof(OCIDate), 0);
 	bind->array.current_length	= zend_hash_num_elements(Z_ARRVAL_P(var));
 	bind->array.old_length		= bind->array.current_length;

@@ -157,6 +157,21 @@ static zend_always_inline zend_ssa_phi* zend_ssa_next_use_phi(const zend_ssa *ss
 	return NULL;
 }
 
+static zend_always_inline zend_bool zend_ssa_is_no_val_use(const zend_op *opline, const zend_ssa_op *ssa_op, int var)
+{
+	if (opline->opcode == ZEND_ASSIGN ||
+			(opline->opcode == ZEND_UNSET_VAR && (opline->extended_value & ZEND_QUICK_SET))) {
+		return ssa_op->op1_use == var && ssa_op->op2_use != var;
+	}
+	if (opline->opcode == ZEND_FE_FETCH_R) {
+		return ssa_op->op2_use == var && ssa_op->op1_use != var;
+	}
+	if (ssa_op->result_use == var && opline->opcode != ZEND_ADD_ARRAY_ELEMENT) {
+		return 1;
+	}
+	return 0;
+}
+
 #endif /* ZEND_SSA_H */
 
 /*

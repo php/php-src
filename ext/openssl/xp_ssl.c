@@ -1431,9 +1431,6 @@ static unsigned char *alpn_protos_parse(unsigned short *outlen, const char *in)
 	}
 
 	out = emalloc(strlen(in) + 1);
-	if (!out) {
-		return NULL;
-	}
 
 	for (i = 0; i <= len; ++i) {
 		if (i == len || in[i] == ',') {
@@ -1627,21 +1624,8 @@ int php_openssl_setup_crypto(php_stream *stream,
 	}
 
 #ifdef SSL_MODE_RELEASE_BUFFERS
-	do {
-		long mode = SSL_get_mode(sslsock->ssl_handle);
-		SSL_set_mode(sslsock->ssl_handle, mode | SSL_MODE_RELEASE_BUFFERS);
-	} while (0);
+	SSL_set_mode(sslsock->ssl_handle, SSL_get_mode(sslsock->ssl_handle) | SSL_MODE_RELEASE_BUFFERS);
 #endif
-	
-	do {
-		long mode = SSL_get_mode(sslsock->ssl_handle);
-		SSL_set_mode(sslsock->ssl_handle, mode | SSL_MODE_ENABLE_PARTIAL_WRITE);
-	} while (0);
-	
-	do {
-		long mode = SSL_get_mode(sslsock->ssl_handle);
-		SSL_set_mode(sslsock->ssl_handle, mode | SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER);
-	} while (0);
 
 	if (cparam->inputs.session) {
 		if (cparam->inputs.session->ops != &php_openssl_socket_ops) {
@@ -1776,6 +1760,16 @@ static int php_openssl_enable_crypto(php_stream *stream,
 
 		if (SUCCESS == php_set_sock_blocking(sslsock->s.socket, 0)) {
 			sslsock->s.is_blocked = 0;
+			/* The following mode are added only if we are able to change socket
+			 * to non blocking mode which is also used for read and write */
+			SSL_set_mode(
+				sslsock->ssl_handle,
+				(
+					SSL_get_mode(sslsock->ssl_handle) |
+					SSL_MODE_ENABLE_PARTIAL_WRITE |
+					SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER
+				)
+			);
 		}
 
 		timeout = sslsock->is_client ? &sslsock->connect_timeout : &sslsock->s.timeout;

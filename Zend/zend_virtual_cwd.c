@@ -237,9 +237,9 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 {
 	WIN32_FILE_ATTRIBUTE_DATA data;
 	LARGE_INTEGER t;
-	const size_t path_len = strlen(path);
+	size_t pathw_len = 0;
 	ALLOCA_FLAG(use_heap_large)
-	wchar_t *pathw = php_win32_ioutil_any_to_w(path);
+	wchar_t *pathw = php_win32_ioutil_conv_any_to_w(path, PHP_WIN32_CP_IGNORE_LEN, &pathw_len);
 
 	if (!pathw) {
 		return -1;
@@ -257,13 +257,13 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 		return ret;
 	}
 
-	if (path_len >= 1 && path[1] == ':') {
-		if (path[0] >= 'A' && path[0] <= 'Z') {
-			buf->st_dev = buf->st_rdev = path[0] - 'A';
+	if (pathw_len >= 1 && pathw[1] == L':') {
+		if (pathw[0] >= L'A' && pathw[0] <= L'Z') {
+			buf->st_dev = buf->st_rdev = pathw[0] - L'A';
 		} else {
-			buf->st_dev = buf->st_rdev = path[0] - 'a';
+			buf->st_dev = buf->st_rdev = pathw[0] - L'a';
 		}
-	} else if (IS_UNC_PATH(path, path_len)) {
+	} else if (PHP_WIN32_IOUTIL_IS_UNC(pathw, pathw_len)) {
 		buf->st_dev = buf->st_rdev = 0;
 	} else {
 		wchar_t cur_path[MAXPATHLEN+1];
@@ -324,13 +324,11 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 	}
 
 	if ((data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0) {
-		size_t len = strlen(path);
-
-		if (path[len-4] == '.') {
-			if (_memicmp(path+len-3, "exe", 3) == 0 ||
-				_memicmp(path+len-3, "com", 3) == 0 ||
-				_memicmp(path+len-3, "bat", 3) == 0 ||
-				_memicmp(path+len-3, "cmd", 3) == 0) {
+		if (pathw_len >= 4 && pathw[pathw_len-4] == L'.') {
+			if (_wcsnicmp(pathw+pathw_len-3, L"exe", 3) == 0 ||
+				_wcsnicmp(pathw+pathw_len-3, L"com", 3) == 0 ||
+				_wcsnicmp(pathw+pathw_len-3, L"bat", 3) == 0 ||
+				_wcsnicmp(pathw+pathw_len-3, L"cmd", 3) == 0) {
 				buf->st_mode  |= (S_IEXEC|(S_IEXEC>>3)|(S_IEXEC>>6));
 			}
 		}
@@ -469,9 +467,6 @@ CWD_API char *virtual_getcwd_ex(size_t *length) /* {{{ */
 
 		*length = 1;
 		retval = (char *) emalloc(2);
-		if (retval == NULL) {
-			return NULL;
-		}
 		retval[0] = DEFAULT_SLASH;
 		retval[1] = '\0';
 		return retval;
@@ -484,9 +479,6 @@ CWD_API char *virtual_getcwd_ex(size_t *length) /* {{{ */
 
 		*length = state->cwd_length+1;
 		retval = (char *) emalloc(*length+1);
-		if (retval == NULL) {
-			return NULL;
-		}
 		memcpy(retval, state->cwd, *length);
 		retval[0] = toupper(retval[0]);
 		retval[*length-1] = DEFAULT_SLASH;
@@ -820,7 +812,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			if (!pathw) {
 				return -1;
 			}
-			hFind = FindFirstFileW(pathw, &dataw);
+			hFind = FindFirstFileExW(pathw, FindExInfoBasic, &dataw, FindExSearchNameMatch, NULL, 0);
 			if (INVALID_HANDLE_VALUE == hFind) {
 				if (use_realpath == CWD_REALPATH) {
 					/* file not found */
@@ -1331,13 +1323,6 @@ verify:
 		state->cwd_length = path_length;
 
 		tmp = erealloc(state->cwd, state->cwd_length+1);
-		if (tmp == NULL) {
-			CWD_STATE_FREE(&old_state);
-#if VIRTUAL_CWD_DEBUG
-			fprintf (stderr, "Out of memory\n");
-#endif
-			return 1;
-		}
 		state->cwd = (char *) tmp;
 
 		memcpy(state->cwd, resolved_path, state->cwd_length+1);
@@ -1352,12 +1337,6 @@ verify:
 	} else {
 		state->cwd_length = path_length;
 		tmp = erealloc(state->cwd, state->cwd_length+1);
-		if (tmp == NULL) {
-#if VIRTUAL_CWD_DEBUG
-			fprintf (stderr, "Out of memory\n");
-#endif
-			return 1;
-		}
 		state->cwd = (char *) tmp;
 
 		memcpy(state->cwd, resolved_path, state->cwd_length+1);
@@ -1420,10 +1399,6 @@ CWD_API char *virtual_realpath(const char *path, char *real_path) /* {{{ */
 	/* realpath("") returns CWD */
 	if (!*path) {
 		new_state.cwd = (char*)emalloc(1);
-		if (new_state.cwd == NULL) {
-			retval = NULL;
-			goto end;
-		}
 		new_state.cwd[0] = '\0';
 		new_state.cwd_length = 0;
 		if (VCWD_GETCWD(cwd, MAXPATHLEN)) {
@@ -1433,10 +1408,6 @@ CWD_API char *virtual_realpath(const char *path, char *real_path) /* {{{ */
 		CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	} else {
 		new_state.cwd = (char*)emalloc(1);
-		if (new_state.cwd == NULL) {
-			retval = NULL;
-			goto end;
-		}
 		new_state.cwd[0] = '\0';
 		new_state.cwd_length = 0;
 	}
@@ -1452,7 +1423,6 @@ CWD_API char *virtual_realpath(const char *path, char *real_path) /* {{{ */
 	}
 
 	CWD_STATE_FREE(&new_state);
-end:
 	return retval;
 }
 /* }}} */
@@ -1855,9 +1825,6 @@ CWD_API FILE *virtual_popen(const char *command, const char *type) /* {{{ */
 	dir = CWDG(cwd).cwd;
 
 	ptr = command_line = (char *) emalloc(command_length + sizeof("cd '' ; ") + dir_length + extra+1+1);
-	if (!command_line) {
-		return NULL;
-	}
 	memcpy(ptr, "cd ", sizeof("cd ")-1);
 	ptr += sizeof("cd ")-1;
 
@@ -1902,9 +1869,6 @@ CWD_API char *tsrm_realpath(const char *path, char *real_path) /* {{{ */
 	/* realpath("") returns CWD */
 	if (!*path) {
 		new_state.cwd = (char*)emalloc(1);
-		if (new_state.cwd == NULL) {
-			return NULL;
-		}
 		new_state.cwd[0] = '\0';
 		new_state.cwd_length = 0;
 		if (VCWD_GETCWD(cwd, MAXPATHLEN)) {
@@ -1916,9 +1880,6 @@ CWD_API char *tsrm_realpath(const char *path, char *real_path) /* {{{ */
 		new_state.cwd_length = (int)strlen(cwd);
 	} else {
 		new_state.cwd = (char*)emalloc(1);
-		if (new_state.cwd == NULL) {
-			return NULL;
-		}
 		new_state.cwd[0] = '\0';
 		new_state.cwd_length = 0;
 	}

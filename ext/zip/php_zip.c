@@ -801,6 +801,9 @@ static void php_zip_register_prop_handler(HashTable *prop_handler, char *name, z
 	hnd.read_const_char_from_obj_func = read_char_from_obj_func;
 	hnd.type = rettype;
 	zend_hash_str_add_mem(prop_handler, name, strlen(name), &hnd, sizeof(zip_prop_handler));
+
+	/* Register for reflection */
+	zend_declare_property_null(zip_class_entry, name, strlen(name), ZEND_ACC_PUBLIC);
 }
 /* }}} */
 

@@ -140,6 +140,27 @@ static void strip_nops(zend_op_array *op_array, zend_basic_block *b)
 	}
 }
 
+static int get_const_switch_target(zend_cfg *cfg, zend_op_array *op_array, zend_basic_block *block, zend_op *opline, zval *val) {
+	HashTable *jumptable = Z_ARRVAL(ZEND_OP2_LITERAL(opline));
+	zval *zv;
+	if ((opline->opcode == ZEND_SWITCH_LONG && Z_TYPE_P(val) != IS_LONG)
+			|| (opline->opcode == ZEND_SWITCH_STRING && Z_TYPE_P(val) != IS_STRING)) {
+		/* fallback to next block */
+		return block->successors[block->successors_count - 1];
+	}
+	if (Z_TYPE_P(val) == IS_LONG) {
+		zv = zend_hash_index_find(jumptable, Z_LVAL_P(val));
+	} else {
+		ZEND_ASSERT(Z_TYPE_P(val) == IS_STRING);
+		zv = zend_hash_find(jumptable, Z_STR_P(val));
+	}
+	if (!zv) {
+		/* default */
+		return block->successors[block->successors_count - 2];
+	}
+	return cfg->map[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, Z_LVAL_P(zv))];
+}
+
 static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array, zend_bitset used_ext, zend_cfg *cfg, zend_op **Tsource)
 {
 	zend_op *opline, *src;
@@ -341,6 +362,25 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 				if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
 					/* LIST variable will be deleted later by FREE */
 					Tsource[VAR_NUM(opline->op1.var)] = NULL;
+				}
+				break;
+
+			case ZEND_SWITCH_LONG:
+			case ZEND_SWITCH_STRING:
+				if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
+					/* SWITCH variable will be deleted later by FREE, so we can't optimize it */
+					Tsource[VAR_NUM(opline->op1.var)] = NULL;
+					break;
+				}
+				if (opline->op1_type == IS_CONST) {
+					int target = get_const_switch_target(cfg, op_array, block, opline, &ZEND_OP1_LITERAL(opline));
+					literal_dtor(&ZEND_OP1_LITERAL(opline));
+					literal_dtor(&ZEND_OP2_LITERAL(opline));
+					opline->opcode = ZEND_JMP;
+					opline->op1_type = IS_UNUSED;
+					opline->op2_type = IS_UNUSED;
+					block->successors_count = 1;
+					block->successors[0] = target;
 				}
 				break;
 
@@ -886,6 +926,20 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 			case ZEND_FE_FETCH_RW:
 				opline->extended_value = ZEND_OPLINE_TO_OFFSET(opline, new_opcodes + blocks[b->successors[0]].start);
 				break;
+			case ZEND_SWITCH_LONG:
+			case ZEND_SWITCH_STRING:
+			{
+				HashTable *jumptable = Z_ARRVAL(ZEND_OP2_LITERAL(opline));
+				zval *zv;
+				uint32_t s = 0;
+				ZEND_ASSERT(b->successors_count == 2 + zend_hash_num_elements(jumptable));
+
+				ZEND_HASH_FOREACH_VAL(jumptable, zv) {
+					Z_LVAL_P(zv) = ZEND_OPLINE_TO_OFFSET(opline, new_opcodes + blocks[b->successors[s++]].start);
+				} ZEND_HASH_FOREACH_END();
+				opline->extended_value = ZEND_OPLINE_TO_OFFSET(opline, new_opcodes + blocks[b->successors[s++]].start);
+				break;
+			}
 		}
 	}
 
@@ -1079,7 +1133,7 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 						last_op->op1.constant = zend_optimizer_add_literal(op_array, &zv);
 					}
 					DEL_SOURCE(block, block->successors[0]);
-					block->successors[0] = -1;
+					block->successors_count = 0;
 #if 0
 				/* Temporarily disabled - see bug #0025274 */
 				} else if (0&& block->op1_to != block &&
@@ -1152,13 +1206,13 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 					/* JMPNZ(true) -> JMP */
 					last_op->opcode = ZEND_JMP;
 					DEL_SOURCE(block, block->successors[1]);
-					block->successors[1] = -1;
+					block->successors_count = 1;
 				} else {
 					/* JMPNZ(false) -> NOP */
 					MAKE_NOP(last_op);
 					DEL_SOURCE(block, block->successors[0]);
+					block->successors_count = 1;
 					block->successors[0] = block->successors[1];
-					block->successors[1] = -1;
 				}
 				break;
 			}
@@ -1166,13 +1220,16 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 			if (block->successors[0] == block->successors[1]) {
 				/* L: JMP[N]Z(X, L+1) -> NOP or FREE(X) */
 
-				if (last_op->op1_type & (IS_VAR|IS_TMP_VAR)) {
+				if (last_op->op1_type == IS_CV) {
+					last_op->opcode = ZEND_CHECK_VAR;
+					last_op->op2.num = 0;
+				} else if (last_op->op1_type & (IS_VAR|IS_TMP_VAR)) {
 					last_op->opcode = ZEND_FREE;
 					last_op->op2.num = 0;
 				} else {
 					MAKE_NOP(last_op);
 				}
-				block->successors[1] = -1;
+				block->successors_count = 1;
 				break;
 			}
 
@@ -1301,8 +1358,8 @@ next_target:
 					last_op->opcode = ZEND_QM_ASSIGN;
 					SET_UNUSED(last_op->op2);
 					DEL_SOURCE(block, block->successors[0]);
+					block->successors_count = 1;
 					block->successors[0] = block->successors[1];
-					block->successors[1] = -1;
 				}
 				break;
 			}
@@ -1401,7 +1458,7 @@ next_target_ex:
 					SET_UNUSED(last_op->op1);
 					SET_UNUSED(last_op->op2);
 					DEL_SOURCE(block, block->successors[1]);
-					block->successors[1] = -1;
+					block->successors_count = 1;
 				} else {
 					/* JMPZNZ(true,L1,L2) -> JMP(L2) */
 					literal_dtor(&ZEND_OP1_LITERAL(last_op));
@@ -1409,8 +1466,8 @@ next_target_ex:
 					SET_UNUSED(last_op->op1);
 					SET_UNUSED(last_op->op2);
 					DEL_SOURCE(block, block->successors[0]);
+					block->successors_count = 1;
 					block->successors[0] = block->successors[1];
-					block->successors[1] = -1;
 				}
 			} else if (block->successors[0] == block->successors[1]) {
 				/* both goto the same one - it's JMP */
@@ -1419,7 +1476,7 @@ next_target_ex:
 					last_op->opcode = ZEND_JMP;
 					SET_UNUSED(last_op->op1);
 					SET_UNUSED(last_op->op2);
-					block->successors[1] = -1;
+					block->successors_count = 1;
 				}
 			} else if (block->successors[0] == next) {
 				/* jumping to next on Z - can follow to it and jump only on NZ */
@@ -1603,7 +1660,7 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 		    (next_block->flags & ZEND_BB_TARGET)) {
 			/* Skip continuation of "extended" BB */
 			zend_bitset_copy(usage, used_ext, bitset_len);
-		} else if (block->successors[1] != -1) {
+		} else if (block->successors_count > 1) {
 			zend_bitset_union(usage, used_ext, bitset_len);
 		}
 		next_block = block;
@@ -1721,8 +1778,7 @@ static void zend_merge_blocks(zend_op_array *op_array, zend_cfg *cfg)
 		if (b->flags & ZEND_BB_REACHABLE) {
 			if ((b->flags & ZEND_BB_FOLLOW) &&
 			    !(b->flags & (ZEND_BB_TARGET | ZEND_BB_PROTECTED)) &&
-			    prev &&
-			    prev->successors[0] == i && prev->successors[1] == -1)
+			    prev && prev->successors_count == 1 && prev->successors[0] == i)
 			{
 				zend_op *last_op = op_array->opcodes + prev->start + prev->len - 1;
 				if (prev->len != 0 && last_op->opcode == ZEND_JMP) {
@@ -1749,14 +1805,18 @@ static void zend_merge_blocks(zend_op_array *op_array, zend_cfg *cfg)
 				/* re-link */
 				prev->flags |= (b->flags & ZEND_BB_EXIT);
 				prev->len = b->start + b->len - prev->start;
-				prev->successors[0] = b->successors[0];
-				prev->successors[1] = b->successors[1];
+				prev->successors_count = b->successors_count;
+				if (b->successors != b->successors_storage) {
+					prev->successors = b->successors;
+					b->successors = b->successors_storage;
+				} else {
+					memcpy(prev->successors, b->successors, b->successors_count * sizeof(int));
+				}
 
 				/* unlink & make block empty and unreachable */
 				b->flags = 0;
 				b->len = 0;
-				b->successors[0] = -1;
-				b->successors[1] = -1;
+				b->successors_count = 0;
 			} else {
 				prev = b;
 			}
@@ -1780,6 +1840,11 @@ void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
     /* Build CFG */
 	checkpoint = zend_arena_checkpoint(ctx->arena);
 	if (zend_build_cfg(&ctx->arena, op_array, ZEND_CFG_SPLIT_AT_LIVE_RANGES, &cfg, NULL) != SUCCESS) {
+		zend_arena_release(&ctx->arena, checkpoint);
+		return;
+	}
+
+	if (cfg.blocks_count * (op_array->last_var + op_array->T) > 64 * 1024 * 1024) {
 		zend_arena_release(&ctx->arena, checkpoint);
 		return;
 	}

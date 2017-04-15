@@ -1919,7 +1919,7 @@ use_read_property:
 	}
 }
 
-static zend_always_inline zval* zend_fetch_static_property_address(zend_execute_data *execute_data, zval *varname, zend_uchar varname_type, znode_op op2, zend_uchar op2_type)
+static zend_always_inline zval* zend_fetch_static_property_address(zend_execute_data *execute_data, zval *varname, zend_uchar varname_type, znode_op op2, zend_uchar op2_type, int type)
 {
 	zval *retval;
 	zend_string *name;
@@ -1943,7 +1943,9 @@ static zend_always_inline zval* zend_fetch_static_property_address(zend_execute_
 
 			/* check if static properties were destoyed */
 			if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-				zend_throw_error(NULL, "Access to undeclared static property: %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+				if (type != BP_VAR_IS) {
+					zend_throw_error(NULL, "Access to undeclared static property: %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+				}
 				return NULL;
 			}
 
@@ -1979,7 +1981,9 @@ static zend_always_inline zval* zend_fetch_static_property_address(zend_execute_
 
 			/* check if static properties were destoyed */
 			if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-				zend_throw_error(NULL, "Access to undeclared static property: %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+				if (type != BP_VAR_IS) {
+					zend_throw_error(NULL, "Access to undeclared static property: %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+				}
 				return NULL;
 			}
 
@@ -1987,7 +1991,7 @@ static zend_always_inline zval* zend_fetch_static_property_address(zend_execute_
 		}
 	}
 
-	retval = zend_std_get_static_property(ce, name, 0);
+	retval = zend_std_get_static_property(ce, name, type == BP_VAR_IS);
 
 	if (varname_type != IS_CONST) {
 		zend_string_release(name);

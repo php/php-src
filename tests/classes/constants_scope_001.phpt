@@ -29,7 +29,7 @@ ErrorCodesDerived::print_fatal_error_codes();
 ?>
 --EXPECTF--
 
-Notice: Use of undefined constant FATAL - assumed 'FATAL' in %sconstants_scope_001.php on line %d
+Warning: Use of undefined constant FATAL - assumed 'FATAL' (this will throw an Error in a future version of PHP) in %sconstants_scope_001.php on line %d
 FATAL = FATAL
 self::FATAL = Fatal error
 self::FATAL = Worst error

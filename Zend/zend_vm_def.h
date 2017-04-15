@@ -1542,13 +1542,17 @@ ZEND_VM_HELPER(zend_fetch_static_prop_helper, CONST|TMPVAR|CV, UNUSED|CONST|VAR,
 	SAVE_OPLINE();
 	varname = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 
-	retval = zend_fetch_static_property_address(execute_data, varname, OP1_TYPE, opline->op2, OP2_TYPE);
-
+	retval = zend_fetch_static_property_address(execute_data, varname, OP1_TYPE, opline->op2, OP2_TYPE, type);
+	
 	if (UNEXPECTED(retval == NULL)) {
-		ZEND_ASSERT(EG(exception));
-		FREE_OP1();
-		ZVAL_UNDEF(EX_VAR(opline->result.var));
-		HANDLE_EXCEPTION();
+		if (EG(exception)) {
+			FREE_OP1();
+			ZVAL_UNDEF(EX_VAR(opline->result.var));
+			HANDLE_EXCEPTION();
+		} else {
+			ZEND_ASSERT(type == BP_VAR_IS);
+			retval = &EG(uninitialized_zval);
+		}
 	}
 
 	FREE_OP1();
@@ -4908,7 +4912,7 @@ ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, UNUSED, CONST, CONST_FETCH)
 						actual, Z_STRLEN_P(EX_CONSTANT(opline->op2)) - (actual - Z_STRVAL_P(EX_CONSTANT(opline->op2))));
 			}
 			/* non-qualified constant - allow text substitution */
-			zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
+			zend_error(E_WARNING, "Use of undefined constant %s - assumed '%s' (this will throw an Error in a future version of PHP)",
 					Z_STRVAL_P(EX_VAR(opline->result.var)), Z_STRVAL_P(EX_VAR(opline->result.var)));
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		} else {
@@ -4986,7 +4990,7 @@ ZEND_VM_HANDLER(181, ZEND_FETCH_CLASS_CONSTANT, VAR|CONST|UNUSED|CLASS_FETCH, CO
 			}
 			value = &c->value;
 			if (Z_CONSTANT_P(value)) {
-				zval_update_constant_ex(value, ce);
+				zval_update_constant_ex(value, c->ce);
 				if (UNEXPECTED(EG(exception) != NULL)) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
 					HANDLE_EXCEPTION();
@@ -8037,6 +8041,64 @@ ZEND_VM_HANDLER(51, ZEND_MAKE_REF, VAR|CV, UNUSED)
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), op1);
 	}
 	ZEND_VM_NEXT_OPCODE();
+}
+
+ZEND_VM_HANDLER(187, ZEND_SWITCH_LONG, CONST|TMPVAR|CV, CONST, JMP_ADDR)
+{
+	USE_OPLINE
+	zend_free_op free_op1, free_op2;
+	zval *op, *jump_zv;
+	HashTable *jumptable;
+
+	op = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+	jumptable = Z_ARRVAL_P(GET_OP2_ZVAL_PTR(BP_VAR_R));
+
+	if (Z_TYPE_P(op) != IS_LONG) {
+		ZVAL_DEREF(op);
+		if (Z_TYPE_P(op) != IS_LONG) {
+			/* Wrong type, fall back to ZEND_CASE chain */
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
+
+	jump_zv = zend_hash_index_find(jumptable, Z_LVAL_P(op));
+	if (jump_zv != NULL) {
+		ZEND_VM_SET_RELATIVE_OPCODE(opline, Z_LVAL_P(jump_zv));
+		ZEND_VM_CONTINUE();
+	} else {
+		/* default */
+		ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
+		ZEND_VM_CONTINUE();
+	}
+}
+
+ZEND_VM_HANDLER(188, ZEND_SWITCH_STRING, CONST|TMPVAR|CV, CONST, JMP_ADDR)
+{
+	USE_OPLINE
+	zend_free_op free_op1, free_op2;
+	zval *op, *jump_zv;
+	HashTable *jumptable;
+
+	op = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+	jumptable = Z_ARRVAL_P(GET_OP2_ZVAL_PTR(BP_VAR_R));
+
+	if (Z_TYPE_P(op) != IS_STRING) {
+		ZVAL_DEREF(op);
+		if (Z_TYPE_P(op) != IS_STRING) {
+			/* Wrong type, fall back to ZEND_CASE chain */
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
+
+	jump_zv = zend_hash_find(jumptable, Z_STR_P(op));
+	if (jump_zv != NULL) {
+		ZEND_VM_SET_RELATIVE_OPCODE(opline, Z_LVAL_P(jump_zv));
+		ZEND_VM_CONTINUE();
+	} else {
+		/* default */
+		ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
+		ZEND_VM_CONTINUE();
+	}
 }
 
 ZEND_VM_TYPE_SPEC_HANDLER(ZEND_ADD, (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG), ZEND_ADD_LONG_NO_OVERFLOW, CONST|TMPVARCV, CONST|TMPVARCV, SPEC(NO_CONST_CONST,COMMUTATIVE))

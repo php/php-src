@@ -31,11 +31,6 @@
 
 /* "Private" routines to bcmath. */
 
-/* variables */
-#if SANDER_0
-extern bc_num _bc_Free_list;
-#endif
-
 /* routines */
 int _bc_do_compare (bc_num n1, bc_num n2, int use_sign, int ignore_last);
 bc_num _bc_do_add (bc_num n1, bc_num n2, int scale_min);

@@ -42,10 +42,11 @@
 #define ZEND_BB_PROTECTED        (ZEND_BB_ENTRY|ZEND_BB_RECV_ENTRY|ZEND_BB_TRY|ZEND_BB_CATCH|ZEND_BB_FINALLY|ZEND_BB_FINALLY_END|ZEND_BB_GEN_VAR|ZEND_BB_KILL_VAR)
 
 typedef struct _zend_basic_block {
+	int              *successors;         /* successor block indices     */
 	uint32_t          flags;
 	uint32_t          start;              /* first opcode number         */
 	uint32_t          len;                /* number of opcodes           */
-	int               successors[2];      /* up to 2 successor blocks    */
+	int               successors_count;   /* number of successors        */
 	int               predecessors_count; /* number of predecessors      */
 	int               predecessor_offset; /* offset of 1-st predecessor  */
 	int               idom;               /* immediate dominator block   */
@@ -53,6 +54,7 @@ typedef struct _zend_basic_block {
 	int               level;              /* steps away from the entry in the dom. tree */
 	int               children;           /* list of dominated blocks    */
 	int               next_child;         /* next dominated block        */
+	int               successors_storage[2]; /* up to 2 successor blocks */
 } zend_basic_block;
 
 /*
@@ -102,6 +104,7 @@ typedef struct _zend_cfg {
 #define ZEND_CFG_NO_ENTRY_PREDECESSORS (1<<25)
 #define ZEND_CFG_RECV_ENTRY            (1<<24)
 #define ZEND_CALL_TREE                 (1<<23)
+#define ZEND_SSA_USE_CV_RESULTS        (1<<22)
 
 #define CRT_CONSTANT_EX(op_array, node, rt_constants) \
 	((rt_constants) ? \

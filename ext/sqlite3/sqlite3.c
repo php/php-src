@@ -897,7 +897,7 @@ static int php_sqlite3_callback_compare(void *coll, int a_len, const void *a, in
 }
 /* }}} */
 
-/* {{{ proto bool SQLite3::createFunction(string name, mixed callback [, int argcount])
+/* {{{ proto bool SQLite3::createFunction(string name, mixed callback [, int argcount, int flags])
    Allows registration of a PHP function as a SQLite UDF that can be called within SQL statements. */
 PHP_METHOD(sqlite3, createFunction)
 {
@@ -909,11 +909,12 @@ PHP_METHOD(sqlite3, createFunction)
 	zval *callback_func;
 	zend_string *callback_name;
 	zend_long sql_func_num_args = -1;
+	zend_long flags = 0;
 	db_obj = Z_SQLITE3_DB_P(object);
 
 	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz|l", &sql_func, &sql_func_len, &callback_func, &sql_func_num_args) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz|ll", &sql_func, &sql_func_len, &callback_func, &sql_func_num_args, &flags) == FAILURE) {
 		return;
 	}
 
@@ -930,7 +931,7 @@ PHP_METHOD(sqlite3, createFunction)
 
 	func = (php_sqlite3_func *)ecalloc(1, sizeof(*func));
 
-	if (sqlite3_create_function(db_obj->db, sql_func, sql_func_num_args, SQLITE_UTF8, func, php_sqlite3_callback_func, NULL, NULL) == SQLITE_OK) {
+	if (sqlite3_create_function(db_obj->db, sql_func, sql_func_num_args, flags | SQLITE_UTF8, func, php_sqlite3_callback_func, NULL, NULL) == SQLITE_OK) {
 		func->func_name = estrdup(sql_func);
 
 		ZVAL_COPY(&func->func, callback_func);
@@ -1900,6 +1901,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3_createfunction, 0, 0, 2)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, callback)
 	ZEND_ARG_INFO(0, argument_count)
+	ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3_createaggregate, 0, 0, 3)
@@ -1921,7 +1923,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3_openblob, 0, 0, 3)
 	ZEND_ARG_INFO(0, dbname)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3_enableexceptions, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3_enableexceptions, 0, 0, 0)
 	ZEND_ARG_INFO(0, enableExceptions)
 ZEND_END_ARG_INFO()
 
@@ -2286,6 +2288,10 @@ PHP_MINIT_FUNCTION(sqlite3)
 	REGISTER_LONG_CONSTANT("SQLITE3_OPEN_READONLY", SQLITE_OPEN_READONLY, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SQLITE3_OPEN_READWRITE", SQLITE_OPEN_READWRITE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SQLITE3_OPEN_CREATE", SQLITE_OPEN_CREATE, CONST_CS | CONST_PERSISTENT);
+
+#ifdef SQLITE_DETERMINISTIC
+	REGISTER_LONG_CONSTANT("SQLITE3_DETERMINISTIC", SQLITE_DETERMINISTIC, CONST_CS | CONST_PERSISTENT);
+#endif
 
 	return SUCCESS;
 }

@@ -259,13 +259,14 @@ static PHP_FUNCTION(json_decode)
 	char *str;
 	size_t str_len;
 	zend_bool assoc = 0; /* return JS objects as PHP objects by default */
+	zend_bool assoc_null = 1;
 	zend_long depth = PHP_JSON_PARSER_DEFAULT_DEPTH;
 	zend_long options = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_STRING(str, str_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_BOOL(assoc)
+		Z_PARAM_BOOL_EX(assoc, assoc_null, 1, 0)
 		Z_PARAM_LONG(depth)
 		Z_PARAM_LONG(options)
 	ZEND_PARSE_PARAMETERS_END();
@@ -288,10 +289,12 @@ static PHP_FUNCTION(json_decode)
 	}
 
 	/* For BC reasons, the bool $assoc overrides the long $options bit for PHP_JSON_OBJECT_AS_ARRAY */
-	if (assoc) {
-		options |=  PHP_JSON_OBJECT_AS_ARRAY;
-	} else {
-		options &= ~PHP_JSON_OBJECT_AS_ARRAY;
+	if (!assoc_null) {
+		if (assoc) {
+			options |=  PHP_JSON_OBJECT_AS_ARRAY;
+		} else {
+			options &= ~PHP_JSON_OBJECT_AS_ARRAY;
+		}
 	}
 
 	php_json_decode_ex(return_value, str, str_len, options, depth);

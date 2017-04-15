@@ -181,6 +181,8 @@ PHPAPI size_t php_strlcpy(char *dst, const char *src, size_t siz);
 END_EXTERN_C()
 #undef strlcpy
 #define strlcpy php_strlcpy
+#define HAVE_STRLCPY 1
+#define USE_STRLCPY_PHP_IMPL 1
 #endif
 
 #ifndef HAVE_STRLCAT
@@ -189,6 +191,8 @@ PHPAPI size_t php_strlcat(char *dst, const char *src, size_t siz);
 END_EXTERN_C()
 #undef strlcat
 #define strlcat php_strlcat
+#define HAVE_STRLCAT 1
+#define USE_STRLCAT_PHP_IMPL 1
 #endif
 
 #ifndef HAVE_EXPLICIT_BZERO
@@ -206,7 +210,7 @@ END_EXTERN_C()
 #endif
 
 #ifndef HAVE_SOCKLEN_T
-# if PHP_WIN32
+# ifdef PHP_WIN32
 typedef int socklen_t;
 # else
 typedef unsigned int socklen_t;
@@ -319,7 +323,7 @@ END_EXTERN_C()
 #define STR_PRINT(str)	((str)?(str):"")
 
 #ifndef MAXPATHLEN
-# if PHP_WIN32
+# ifdef PHP_WIN32
 #  include "win32/ioutil.h"
 #  define MAXPATHLEN PHP_WIN32_IOUTIL_MAXPATHLEN
 # elif PATH_MAX
