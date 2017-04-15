@@ -297,9 +297,9 @@ PHP_WINUTIL_API int php_win32_code_to_errno(unsigned long w32Err)
         /* 124 */   ,   {   ERROR_INVALID_HANDLE            ,   EINVAL          }
 #if 0
         /* 125 */   ,   {   0                               ,   0               }
-        /* 126 */   ,   {   0                               ,   0               }
-        /* 127 */   ,   {   0                               ,   0               }
 #endif
+        /* 126 */   ,   {   ERROR_MOD_NOT_FOUND             ,   ENOENT          }
+        /* 127 */   ,   {   ERROR_PROC_NOT_FOUND            ,   ENOENT          }
         /* 128 */   ,   {   ERROR_WAIT_NO_CHILDREN          ,   ECHILD          }
         /* 129 */   ,   {   ERROR_CHILD_NOT_COMPLETE        ,   ECHILD          }
         /* 130 */   ,   {   ERROR_DIRECT_ACCESS_HANDLE      ,   EBADF           }
