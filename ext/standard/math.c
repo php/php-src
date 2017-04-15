@@ -724,6 +724,19 @@ PHP_FUNCTION(log)
 }
 /* }}} */
 
+/* {{{ proto float log2(float number)
+   Returns the base-2 logarithm of the number */
+PHP_FUNCTION(log2)
+{
+	double num;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &num) == FAILURE) {
+		return;
+	}
+	RETURN_DOUBLE(log2(num));
+}
+/* }}} */
+
 /* {{{ proto float log10(float number)
    Returns the base-10 logarithm of the number */
 PHP_FUNCTION(log10)

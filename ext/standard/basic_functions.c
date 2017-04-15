@@ -1700,6 +1700,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_log, 0, 0, 1)
 	ZEND_ARG_INFO(0, base)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_log2, 0)
+	ZEND_ARG_INFO(0, number)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO(arginfo_log10, 0)
 	ZEND_ARG_INFO(0, number)
 ZEND_END_ARG_INFO()
@@ -2939,6 +2943,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(pow,																arginfo_pow)
 	PHP_FE(exp,																arginfo_exp)
 	PHP_FE(log,																arginfo_log)
+	PHP_FE(log2,															arginfo_log2)
 	PHP_FE(log10,															arginfo_log10)
 	PHP_FE(sqrt,															arginfo_sqrt)
 	PHP_FE(hypot,															arginfo_hypot)
