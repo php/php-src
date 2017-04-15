@@ -98,7 +98,7 @@ User Functions/Methods Naming Conventions
 
     Ok:
     'date_interval_create_from_date_string'
-    (could be 'date_int_create_from_date_str'?)
+    (could be 'date_intvl_create_from_date_str'?)
     'get_html_translation_table'
     (could be 'html_get_trans_table'?)
 
