@@ -7314,6 +7314,8 @@ void zend_compile_expr(znode *result, zend_ast *ast) /* {{{ */
 
 void zend_compile_var(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 {
+	CG(zend_lineno) = zend_ast_get_lineno(ast);
+
 	switch (ast->kind) {
 		case ZEND_AST_VAR:
 			zend_compile_simple_var(result, ast, type, 0);
