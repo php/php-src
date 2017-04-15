@@ -20,6 +20,7 @@
 /* $Id$ */
 
 #include "zend_extensions.h"
+#include "php.h"
 
 ZEND_API zend_llist zend_extensions;
 ZEND_API uint32_t zend_extension_flags = 0;
@@ -31,8 +32,28 @@ int zend_load_extension(const char *path)
 	DL_HANDLE handle;
 	zend_extension *new_extension;
 	zend_extension_version_info *extension_version_info;
+	char *normalized_path;
+	char *extension_dir = INI_STR("extension_dir");
+	int extension_dir_len = strlen(extension_dir);
 
-	handle = DL_LOAD(path);
+	if (strchr(path, '/') == NULL || strchr(path, DEFAULT_SLASH) == NULL) {
+		if (extension_dir && extension_dir[0]) {
+			if (IS_SLASH(extension_dir[extension_dir_len-1])) {
+				spprintf(&normalized_path, 0, "%s%s", extension_dir, path);
+			} else {
+				spprintf(&normalized_path, 0, "%s%c%s", extension_dir, DEFAULT_SLASH, path);
+			}
+		} else {
+			return FAILURE;
+		}
+	} else {
+		normalized_path = estrdup(path);
+	}
+
+	handle = DL_LOAD(normalized_path);
+
+	efree(normalized_path);
+
 	if (!handle) {
 #ifndef ZEND_WIN32
 		fprintf(stderr, "Failed loading %s:  %s\n", path, DL_ERROR());
