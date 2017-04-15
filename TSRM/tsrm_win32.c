@@ -671,7 +671,6 @@ TSRM_API int shmget(int key, int size, int flags)
 TSRM_API void *shmat(int key, const void *shmaddr, int flags)
 {
 	shm_pair *shm = shm_get(key, NULL);
-	int err;
 
 	if (!shm->segment) {
 		return (void*)-1;
@@ -679,8 +678,8 @@ TSRM_API void *shmat(int key, const void *shmaddr, int flags)
 
 	shm->addr = MapViewOfFileEx(shm->segment, FILE_MAP_ALL_ACCESS, 0, 0, 0, NULL);
 
-	err = GetLastError();
-	if (err) {
+	if (NULL == shm->addr) {
+		int err = GetLastError();
 		/* Catch more errors */
 		if (ERROR_NOT_ENOUGH_MEMORY == err) {
 			_set_errno(ENOMEM);
