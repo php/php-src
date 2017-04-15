@@ -1664,7 +1664,7 @@ zend.assertions = 1
 ; substitute_character used when character cannot be converted
 ; one from another
 ; http://php.net/mbstring.substitute-character
-;mbstring.substitute_character = none
+;mbstring.substitute_character = 63
 
 ; overload(replace) single byte functions by mbstring functions.
 ; mail(), ereg(), etc are overloaded by mb_send_mail(), mb_ereg(),
