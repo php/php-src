@@ -814,4 +814,9 @@ TSRM_API void *tsrm_get_ls_cache(void)
 	return tsrm_tls_get();
 }
 
+TSRM_API uint8_t tsrm_is_main_thread(void)
+{
+	return in_main_thread;
+}
+
 #endif /* ZTS */
