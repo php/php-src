@@ -3300,12 +3300,23 @@ SPL_METHOD(EmptyIterator, next)
 	}
 } /* }}} */
 
+/* {{{ proto int EmptyIterator::count()
+   Does nothing */
+SPL_METHOD(EmptyIterator, count)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	RETURN_LONG(0);
+} /* }}} */
+
 static const zend_function_entry spl_funcs_EmptyIterator[] = {
 	SPL_ME(EmptyIterator, rewind,           arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
 	SPL_ME(EmptyIterator, valid,            arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
 	SPL_ME(EmptyIterator, key,              arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
 	SPL_ME(EmptyIterator, current,          arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
 	SPL_ME(EmptyIterator, next,             arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
+	SPL_ME(EmptyIterator, count,            arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 
@@ -3775,6 +3786,7 @@ PHP_MINIT_FUNCTION(spl_iterators)
 
 	REGISTER_SPL_STD_CLASS_EX(EmptyIterator, NULL, spl_funcs_EmptyIterator);
 	REGISTER_SPL_ITERATOR(EmptyIterator);
+	REGISTER_SPL_IMPLEMENTS(EmptyIterator, Countable);
 
 	REGISTER_SPL_SUB_CLASS_EX(RecursiveTreeIterator, RecursiveIteratorIterator, spl_RecursiveTreeIterator_new, spl_funcs_RecursiveTreeIterator);
 	REGISTER_SPL_CLASS_CONST_LONG(RecursiveTreeIterator, "BYPASS_CURRENT",      RTIT_BYPASS_CURRENT);

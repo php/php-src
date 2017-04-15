@@ -15,7 +15,7 @@
  * @version 1.0
  * @since PHP 5.1
  */
-class EmptyIterator implements Iterator
+class EmptyIterator implements Iterator, Countable
 {
 	/** No operation.
 	 * @return void
@@ -57,6 +57,15 @@ class EmptyIterator implements Iterator
 	{
 		// nothing to do
 	}
+
+	/** 
+	 * @return int
+	 */
+	function count()
+	{
+		return 0;
+	}
+
 }
 
 ?>
