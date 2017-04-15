@@ -79,7 +79,7 @@ Stack trace:
 #0 %sbug72101.php(8): {closure}(2, 'Parameter 1 to ...', '%s', 8, Array)
 #1 %sbug72101.php(27): PHPUnit_Framework_MockObject_Stub_ReturnCallback->invoke(Object(PHPUnit_Framework_MockObject_Invocation_Static))
 #2 %sbug72101.php(19): PHPUnit_Framework_MockObject_Matcher->invoked(Object(PHPUnit_Framework_MockObject_Invocation_Static))
-#3 %sbug72101.php(51): PHPUnit_Framework_MockObject_InvocationMocker->invoke(Object(PHPUnit_Framework_MockObject_Invocation_Static))
+#3 %sbug72101.php(52): PHPUnit_Framework_MockObject_InvocationMocker->invoke(Object(PHPUnit_Framework_MockObject_Invocation_Static))
 #4 %sbug72101.php(72): Mock_MethodCallbackByReference_7b180d26->bar(0, 0, 0)
 #5 {main}
   thrown in %sbug72101.php on line 61
