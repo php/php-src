@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #74408 (Endless loop bypassing execution time limit). (Laruence)
+  . Fixed bug #74410 (stream_select() is broken on Windows Nanoserver).
+    (Matt Ficken)
 
 - Date:
   . Fixed bug #74404 (Wrong reflection on DateTimeZone::getTransitions).
