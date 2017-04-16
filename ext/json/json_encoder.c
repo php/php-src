@@ -547,9 +547,14 @@ again:
 			break;
 
 		case IS_LONG:
-			smart_str_append_long(buf, Z_LVAL_P(val));
-			break;
-
+			if (options & PHP_JSON_BIGINT_AS_STRING)
+			{
+				convert_to_string(val);
+				php_json_escape_string(buf, Z_STRVAL_P(val), Z_STRLEN_P(val), options);
+			}else{
+  				smart_str_append_long(buf, Z_LVAL_P(val));
+			}
+ 			break;
 		case IS_DOUBLE:
 			if (php_json_is_valid_double(Z_DVAL_P(val))) {
 				php_json_encode_double(buf, Z_DVAL_P(val), options);
