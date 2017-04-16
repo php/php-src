@@ -2213,6 +2213,13 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 		REGISTER_MAIN_STRINGL_CONSTANT("PHP_BINARY", "", 0, CONST_PERSISTENT | CONST_CS);
 	}
 
+	/* Standard three-way comparison/ordering enumeration
+	 * Matches <=>
+	 */
+	REGISTER_MAIN_LONG_CONSTANT("CMP_LT", -1, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("CMP_EQ", 0, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("CMP_GT", 1, CONST_PERSISTENT | CONST_CS);
+
 	php_output_register_constants();
 	php_rfc1867_register_constants();
 
