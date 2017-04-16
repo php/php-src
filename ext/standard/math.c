@@ -393,6 +393,7 @@ PHP_FUNCTION(round)
 		case IS_DOUBLE:
 			return_val = (Z_TYPE_P(value) == IS_LONG) ? (double)Z_LVAL_P(value) : Z_DVAL_P(value);
 			return_val = _php_math_round(return_val, (int)places, (int)mode);
+			return_val = (return_val == -0) ? 0 : return_val;
 			RETURN_DOUBLE(return_val);
 			break;
 
