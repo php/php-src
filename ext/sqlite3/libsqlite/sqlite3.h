@@ -114,16 +114,16 @@ extern "C" {
 ** system</a>.  ^The SQLITE_SOURCE_ID macro evaluates to
 ** a string which identifies a particular check-in of SQLite
 ** within its configuration management system.  ^The SQLITE_SOURCE_ID
-** string contains the date and time of the check-in (UTC) and an SHA1
-** hash of the entire source tree.
+** string contains the date and time of the check-in (UTC) and a SHA1
+** or SHA3-256 hash of the entire source tree.
 **
 ** See also: [sqlite3_libversion()],
 ** [sqlite3_libversion_number()], [sqlite3_sourceid()],
 ** [sqlite_version()] and [sqlite_source_id()].
 */
-#define SQLITE_VERSION        "3.17.0"
-#define SQLITE_VERSION_NUMBER 3017000
-#define SQLITE_SOURCE_ID      "2017-02-13 16:02:40 ada05cfa86ad7f5645450ac7a2a21c9aa6e57d2c"
+#define SQLITE_VERSION        "3.18.0"
+#define SQLITE_VERSION_NUMBER 3018000
+#define SQLITE_SOURCE_ID      "2017-03-28 18:48:43 424a0d380332858ee55bdebc4af3789f74e70a2b3ba1cf29d84b9b4bcf3e2e37"
 
 /*
 ** CAPI3REF: Run-Time Library Version Numbers
@@ -2040,20 +2040,30 @@ SQLITE_API int sqlite3_extended_result_codes(sqlite3*, int onoff);
 ** the table has a column of type [INTEGER PRIMARY KEY] then that column
 ** is another alias for the rowid.
 **
-** ^The sqlite3_last_insert_rowid(D) interface returns the [rowid] of the 
-** most recent successful [INSERT] into a rowid table or [virtual table]
-** on database connection D.
-** ^Inserts into [WITHOUT ROWID] tables are not recorded.
-** ^If no successful [INSERT]s into rowid tables
-** have ever occurred on the database connection D, 
-** then sqlite3_last_insert_rowid(D) returns zero.
+** ^The sqlite3_last_insert_rowid(D) interface usually returns the [rowid] of
+** the most recent successful [INSERT] into a rowid table or [virtual table]
+** on database connection D. ^Inserts into [WITHOUT ROWID] tables are not
+** recorded. ^If no successful [INSERT]s into rowid tables have ever occurred 
+** on the database connection D, then sqlite3_last_insert_rowid(D) returns 
+** zero.
 **
-** ^(If an [INSERT] occurs within a trigger or within a [virtual table]
-** method, then this routine will return the [rowid] of the inserted
-** row as long as the trigger or virtual table method is running.
-** But once the trigger or virtual table method ends, the value returned 
-** by this routine reverts to what it was before the trigger or virtual
-** table method began.)^
+** As well as being set automatically as rows are inserted into database
+** tables, the value returned by this function may be set explicitly by
+** [sqlite3_set_last_insert_rowid()]
+**
+** Some virtual table implementations may INSERT rows into rowid tables as
+** part of committing a transaction (e.g. to flush data accumulated in memory
+** to disk). In this case subsequent calls to this function return the rowid
+** associated with these internal INSERT operations, which leads to 
+** unintuitive results. Virtual table implementations that do write to rowid
+** tables in this way can avoid this problem by restoring the original 
+** rowid value using [sqlite3_set_last_insert_rowid()] before returning 
+** control to the user.
+**
+** ^(If an [INSERT] occurs within a trigger then this routine will 
+** return the [rowid] of the inserted row as long as the trigger is 
+** running. Once the trigger program ends, the value returned 
+** by this routine reverts to what it was before the trigger was fired.)^
 **
 ** ^An [INSERT] that fails due to a constraint violation is not a
 ** successful [INSERT] and does not change the value returned by this
@@ -2079,6 +2089,16 @@ SQLITE_API int sqlite3_extended_result_codes(sqlite3*, int onoff);
 ** last insert [rowid].
 */
 SQLITE_API sqlite3_int64 sqlite3_last_insert_rowid(sqlite3*);
+
+/*
+** CAPI3REF: Set the Last Insert Rowid value.
+** METHOD: sqlite3
+**
+** The sqlite3_set_last_insert_rowid(D, R) method allows the application to
+** set the value returned by calling sqlite3_last_insert_rowid(D) to R 
+** without inserting a row into the database.
+*/
+SQLITE_API void sqlite3_set_last_insert_rowid(sqlite3*,sqlite3_int64);
 
 /*
 ** CAPI3REF: Count The Number Of Rows Modified
@@ -3404,9 +3424,9 @@ SQLITE_API int sqlite3_limit(sqlite3*, int id, int newVal);
 **
 ** [[SQLITE_LIMIT_VDBE_OP]] ^(<dt>SQLITE_LIMIT_VDBE_OP</dt>
 ** <dd>The maximum number of instructions in a virtual machine program
-** used to implement an SQL statement.  This limit is not currently
-** enforced, though that might be added in some future release of
-** SQLite.</dd>)^
+** used to implement an SQL statement.  If [sqlite3_prepare_v2()] or
+** the equivalent tries to allocate space for more than this many opcodes
+** in a single prepared statement, an SQLITE_NOMEM error is returned.</dd>)^
 **
 ** [[SQLITE_LIMIT_FUNCTION_ARG]] ^(<dt>SQLITE_LIMIT_FUNCTION_ARG</dt>
 ** <dd>The maximum number of arguments on a function.</dd>)^
@@ -3443,6 +3463,7 @@ SQLITE_API int sqlite3_limit(sqlite3*, int id, int newVal);
 #define SQLITE_LIMIT_VARIABLE_NUMBER           9
 #define SQLITE_LIMIT_TRIGGER_DEPTH            10
 #define SQLITE_LIMIT_WORKER_THREADS           11
+
 
 /*
 ** CAPI3REF: Compiling An SQL Statement
