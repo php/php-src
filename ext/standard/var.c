@@ -1153,6 +1153,27 @@ PHP_FUNCTION(memory_get_peak_usage) {
 }
 /* }}} */
 
+/* {{{ proto bool swipe(mixed var1, mixed var2)
+   Swaps the value of var1 and var2. */
+PHP_FUNCTION(swap)
+{
+	zval temp, *val1, *val2;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &val1, &val2) == FAILURE) {
+		RETURN_FALSE;
+	}
+	
+	ALLOC_INIT_ZVAL(temp);
+	
+	ZVAL_COPY_VALUE(temp, val1);
+	ZVAL_COPY_VALUE(val1, val2);
+	ZVAL_COPY_VALUE(val2, temp);
+	
+	RETURN_TRUE;
+	
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4

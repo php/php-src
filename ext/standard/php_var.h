@@ -31,6 +31,7 @@ PHP_FUNCTION(serialize);
 PHP_FUNCTION(unserialize);
 PHP_FUNCTION(memory_get_usage);
 PHP_FUNCTION(memory_get_peak_usage);
+PHP_FUNCTION(swap);
 
 PHPAPI void php_var_dump(zval *struc, int level);
 PHPAPI void php_var_export(zval *struc, int level);
