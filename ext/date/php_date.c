@@ -309,6 +309,11 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_date_method_timestamp_get, 0)
 ZEND_END_ARG_INFO()
 
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_method_create_from_immutable, 0, 0, 1)
+	ZEND_ARG_INFO(0, DateTimeImmutable)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_date_method_create_from_mutable, 0, 0, 1)
 	ZEND_ARG_INFO(0, DateTime)
 ZEND_END_ARG_INFO()
@@ -472,6 +477,7 @@ const zend_function_entry date_funcs_date[] = {
 	PHP_ME(DateTime,			__construct,		arginfo_date_create, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
 	PHP_ME(DateTime,			__wakeup,			NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(DateTime,			__set_state,		NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	PHP_ME(DateTime,			createFromImmutable,	arginfo_date_method_create_from_immutable, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(createFromFormat, date_create_from_format,	arginfo_date_create_from_format, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(getLastErrors, date_get_last_errors,	arginfo_date_get_last_errors, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(format,		date_format,		arginfo_date_method_format, 0)
@@ -2816,7 +2822,28 @@ PHP_METHOD(DateTimeImmutable, __construct)
 }
 /* }}} */
 
-/* {{{ proto DateTimeImmutable::createFromMutable(DateTimeZone object)
+/* {{{ proto DateTime::createFromImmutable(DateTimeImmutable object)
+   Creates new DateTime object from an existing immutable DateTimeImmutable object.
+*/
+PHP_METHOD(DateTime, createFromImmutable)
+{
+	zval *datetimeimmutable_object = NULL;
+	php_date_obj *new_obj = NULL;
+	php_date_obj *old_obj = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(datetimeimmutable_object, date_ce_immutable)
+	ZEND_PARSE_PARAMETERS_END();
+
+	php_date_instantiate(date_ce_date, return_value);
+	old_obj = Z_PHPDATE_P(datetimeimmutable_object);
+	new_obj = Z_PHPDATE_P(return_value);
+
+	new_obj->time = timelib_time_clone(old_obj->time);
+}
+/* }}} */
+
+/* {{{ proto DateTimeImmutable::createFromMutable(DateTime object)
    Creates new DateTimeImmutable object from an existing mutable DateTime object.
 */
 PHP_METHOD(DateTimeImmutable, createFromMutable)
@@ -2833,14 +2860,7 @@ PHP_METHOD(DateTimeImmutable, createFromMutable)
 	old_obj = Z_PHPDATE_P(datetime_object);
 	new_obj = Z_PHPDATE_P(return_value);
 
-	new_obj->time = timelib_time_ctor();
-	*new_obj->time = *old_obj->time;
-	if (old_obj->time->tz_abbr) {
-		new_obj->time->tz_abbr = timelib_strdup(old_obj->time->tz_abbr);
-	}
-	if (old_obj->time->tz_info) {
-		new_obj->time->tz_info = old_obj->time->tz_info;
-	}
+	new_obj->time = timelib_time_clone(old_obj->time);
 }
 /* }}} */
 
