@@ -253,6 +253,17 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
 	save_text($info_file, $php_info);
 	$info_params = array();
 	settings2array($ini_overwrites, $info_params);
+	// The line below removes all "-d extension=..." directives from the command line. Why?
+	// Assume we created an extension A.so, which depends on another extension (e.g. dom.so).
+	// And we run "phpize; ./configure; make test" on A extension. In this case Makefile of A
+	// calls "run-tests.php ... -d extension=A.so", but it doesn't include "-d extension=dom.so"
+	// as well, because it has no idea about extension dependencies. So the run-test-info.php below
+	// fails with "PHP Warning: Cannot load module 'A' because required module 'dom' is not loaded.".
+	// BTW all phpt tests of A extension succeed, because there may be "--EXTENSIONS--" section in
+	// phpt files, which mentions dom.so dependency. So, we do not need "-d extension=-..." below,
+	// this is only an informational call (to print out PHP SAPI version etc.), real phpt tests
+	// are executed separately (and they, of course, have "-d extension=A.so" not removed).
+	unset($info_params['extension']);
 	settings2params($info_params);
 	$php_info = `$php $pass_options $info_params $no_file_cache "$info_file"`;
 	define('TESTED_PHP_VERSION', `$php -n -r "echo PHP_VERSION;"`);
