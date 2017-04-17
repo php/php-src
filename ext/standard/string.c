@@ -971,6 +971,11 @@ PHP_FUNCTION(wordwrap)
 		RETURN_FALSE;
 	}
 
+	if (ZSTR_LEN(text) > ULONG_MAX / (breakchar_len + 1) - 1) {
+		php_error_docref(NULL, E_WARNING, "Integer overflow has occurred");
+		RETURN_FALSE;
+	}
+
 	/* Special case for a single-character break as it needs no
 	   additional storage space */
 	if (breakchar_len == 1 && !docut) {
