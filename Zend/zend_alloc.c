@@ -2177,6 +2177,7 @@ void zend_mm_shutdown(zend_mm_heap *heap, int full, int silent)
 		list = list->next;
 		zend_mm_chunk_free(heap, q->ptr, q->size);
 	}
+	heap->huge_list = NULL;
 
 	/* move all chunks except of the first one into the cache */
 	p = heap->main_chunk->next;
