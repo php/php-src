@@ -5,6 +5,9 @@ Bug #70018 (exec does not strip all whitespace)
 if ("cli" != php_sapi_name()) {
   die("skip.. CLI only test");
 }
+if (`echo -e test` == "-e test\n") {
+  die("skip.. /bin/echo does not support -e");
+}
 ?>
 --FILE--
 <?php
