@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - intl:
   . Fixed bug #74468 (wrong reflection on Collator::sortWithSortKeys). (villfa)
 
+- xmlreader:
+  . Fixed bug #74457 (Wrong reflection on XMLReader::expand). (villfa)
+
 11 May 2017 PHP 7.0.19
 
 - Core:
