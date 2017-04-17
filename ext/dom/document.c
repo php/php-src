@@ -1295,7 +1295,7 @@ PHP_METHOD(domdocument, __construct)
 }
 /* }}} end DOMDocument::__construct */
 
-char *_dom_get_valid_file_path(char *source, char *resolved_path, int resolved_path_len ) /* {{{ */
+char *_dom_get_valid_file_path(char *source, char *resolved_path, int resolved_path_len) /* {{{ */
 {
 	xmlURI *uri;
 	xmlChar *escsource;
