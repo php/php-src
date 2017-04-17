@@ -39,6 +39,7 @@ PHP                                                                        NEWS
   . Fixed bug #74298 (IntlDateFormatter->format() doesn't return
     microseconds/fractions). (Andrew Nester)
   . Fixed bug #74433 (wrong reflection for Normalizer methods). (villfa)
+  . Fixed bug #74439 (wrong reflection for Locale methods). (villfa)
 
 - Opcache:
   . Fixed bug #74431 (foreach infinite loop). (Nikita)
