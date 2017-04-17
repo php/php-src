@@ -62,6 +62,8 @@ PHP                                                                        NEWS
 
 - Date:
   . Fixed bug #69587 (DateInterval properties and isset). (jhdxr)
+  . Implemented request #71520 (Adding the DateTime constants to
+    the DateTimeInterface interface). (bugs dot php dot net at majkl578 dot cz)
   . Fixed bug #74404 (Wrong reflection on DateTimeZone::getTransitions).
     (krakjoe)
   . Fixed bug #74080 (add constant for RFC7231 format datetime). (duncan3dc)
