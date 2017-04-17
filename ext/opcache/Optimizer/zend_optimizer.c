@@ -64,46 +64,6 @@ int zend_optimizer_get_collected_constant(HashTable *constants, zval *name, zval
 	return 0;
 }
 
-int zend_optimizer_lookup_cv(zend_op_array *op_array, zend_string* name)
-{
-	int i = 0;
-	zend_ulong hash_value = zend_string_hash_val(name);
-
-	while (i < op_array->last_var) {
-		if (op_array->vars[i] == name ||
-		    (ZSTR_H(op_array->vars[i]) == hash_value &&
-		     ZSTR_LEN(op_array->vars[i]) == ZSTR_LEN(name) &&
-		     memcmp(ZSTR_VAL(op_array->vars[i]), ZSTR_VAL(name), ZSTR_LEN(name)) == 0)) {
-			return (int)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, i);
-		}
-		i++;
-	}
-	i = op_array->last_var;
-	op_array->last_var++;
-	op_array->vars = erealloc(op_array->vars, op_array->last_var * sizeof(zend_string*));
-	op_array->vars[i] = zend_string_dup(name, 0);
-
-	/* all IS_TMP_VAR and IS_VAR variable numbers have to be adjusted */
-	{
-		zend_op *opline = op_array->opcodes;
-		zend_op *end = opline + op_array->last;
-		while (opline < end) {
-			if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
-				opline->op1.var += sizeof(zval);
-			}
-			if (opline->op2_type & (IS_TMP_VAR|IS_VAR)) {
-				opline->op2.var += sizeof(zval);
-			}
-			if (opline->result_type & (IS_TMP_VAR|IS_VAR)) {
-				opline->result.var += sizeof(zval);
-			}
-			opline++;
-		}
-	}
-
-	return (int)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, i);
-}
-
 int zend_optimizer_add_literal(zend_op_array *op_array, zval *zv)
 {
 	int i = op_array->last_literal;

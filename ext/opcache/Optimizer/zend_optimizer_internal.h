@@ -80,7 +80,6 @@ int  zend_optimizer_add_literal(zend_op_array *op_array, zval *zv);
 int  zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int copy);
 void zend_optimizer_collect_constant(zend_optimizer_ctx *ctx, zval *name, zval* value);
 int  zend_optimizer_get_collected_constant(HashTable *constants, zval *name, zval* value);
-int  zend_optimizer_lookup_cv(zend_op_array *op_array, zend_string* name);
 int zend_optimizer_update_op1_const(zend_op_array *op_array,
                                     zend_op       *opline,
                                     zval          *val);
