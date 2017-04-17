@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #74860 (Uncaught exceptions not being formatted properly when
     error_log set to "syslog"). (Philip Prindeville)
 
+- Date:
+  . Implemented FR #74668: Add DateTime::createFromImmutable() method.
+    (majkl578, Rican7)
+
 - cURL:
   . Fixed bug #74125 (Fixed finding CURL on systems with multiarch support).
     (cebe)

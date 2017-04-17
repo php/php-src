@@ -49,6 +49,10 @@ Standard:
 6. New Functions
 ========================================
 
+Date:
+  . Added the DateTime::createFromImmutable() method, which mirrors
+    DateTimeImmutable::createFromMutable().
+
 ========================================
 7. New Classes and Interfaces
 ========================================
