@@ -3154,27 +3154,94 @@ function toolset_setup_common_libs()
 	DEFINE("LIBS", "kernel32.lib ole32.lib user32.lib advapi32.lib shell32.lib ws2_32.lib Dnsapi.lib psapi.lib bcrypt.lib");
 }
 
+function vs_warnings() {
+    var warnings = {};
+    warnings[4100] = "disable";	// Unreferenced formal parameter
+    warnings[4127] = "disable";	// Conditional expression is constant (usually a macro expansion, not an error)
+
+    warnings[4668] = "disable";	// Using #if UNDEFINED_MACRO instead of #ifdef UNDEFINED_MACRO
+    warnings[4710] = "disable";	// The compiler decided not to inline a function marked as INLINE
+    warnings[4711] = "disable";	// The compiler decided to inline a function
+
+    warnings[4820] = "disable";	// Message about padding bytes added to a structurenote
+
+    // By default, output all warnings but not as errors.
+    ADD_FLAG("CFLAGS", "/Wall /WX-");
+
+    // turn the warning array into compiler switches
+    for (var k in warnings) {
+        switch (warnings[k]) {
+            case "disable":
+                ADD_FLAG("CFLAGS", "/wd" + k);
+                break;
+            case "once":
+                ADD_FLAG("CFLAGS", "/wo" + k);
+                break;
+            case "error":
+                ADD_FLAG("CFLAGS", "/we" + k);
+                break;
+            default:
+                ERROR("Unknown warning type '" + warnings[k] + "' for warning " + k);
+                break;
+        }
+    }
+
+    // also perform static analysis of the code and output it to the build directory
+    ADD_FLAG("CFLAGS", "/analyze:log \"$(BUILD_DIR)\\codeanalysis.txt\" /analyze:quiet ");
+}
+
 function toolset_setup_build_mode()
 {
-	if (PHP_DEBUG == "yes") {
-		ADD_FLAG("CFLAGS", "/LDd /MDd /W3 /Gm /Od /D _DEBUG /D ZEND_DEBUG=1 " +
-			(X64?"/Zi":"/ZI"));
-		ADD_FLAG("LDFLAGS", "/debug");
-		// Avoid problems when linking to release libraries that use the release
-		// version of the libc
-		ADD_FLAG("PHP_LDFLAGS", "/nodefaultlib:msvcrt");
-	} else {
-		// Generate external debug files when --enable-debug-pack is specified
-		if (PHP_DEBUG_PACK == "yes") {
-			ADD_FLAG("CFLAGS", "/Zi");
-			ADD_FLAG("LDFLAGS", "/incremental:no /debug /opt:ref,icf");
-		}
-		// Equivalent to Release_TSInline build -> best optimization
-		ADD_FLAG("CFLAGS", "/LD /MD /W3 /Ox /D NDebug /D NDEBUG /D ZEND_WIN32_FORCE_INLINE /GF /D ZEND_DEBUG=0");
+    if (PHP_DEBUG == "yes") {
+        ADD_FLAG("CFLAGS", "/LDd /MDd /Gm /Od /D _DEBUG /D ZEND_DEBUG=1");
+        // Avoid problems when linking to release libraries that use the release
+        // version of the libc
+        ADD_FLAG("PHP_LDFLAGS", "/nodefaultlib:msvcrt");
 
-		// if you have VS.Net /GS hardens the binary against buffer overruns
-		// ADD_FLAG("CFLAGS", "/GS");
-	}
+        // Poison uninitialized locals, detect local variable stack buffer under/overruns and detect calling-convention errors
+        ADD_FLAG("CFLAGS", "/RTCs");
+
+        // Detect integer truncation errors
+        ADD_FLAG("CFLAGS", "/RTCc");
+
+        // Abort on uninitialized local use
+        ADD_FLAG("CFLAGS", "/RTCu");
+
+    } else {
+        ADD_FLAG("LDFLAGS", "/incremental:no /opt:ref,icf");
+        // Equivalent to Release_TSInline build -> best optimization
+        ADD_FLAG("CFLAGS", "/LD /MD /Ox /D NDebug /D NDEBUG /D ZEND_WIN32_FORCE_INLINE /GF /D ZEND_DEBUG=0");
+    }
+
+    //
+    // Security features for both Release and Debug builds:
+    //
+
+    // Enable PDBs by default.
+    ADD_FLAG("CFLAGS", "/Zi");
+    ADD_FLAG("LDFLAGS", "/debug");
+
+    // Set the compiler to output code-quality and possible errors to the console.
+    vs_warnings();
+
+    // Detects and prevents some stack buffer overruns that overwrite a function's return address. 
+    // This reduces the ability of hackers to cause exploit stack-overflow based memory corruptions in PHP deployed on Windows servers
+    ADD_FLAG("CFLAGS", "/GS");
+
+    // Detects and prevents function pointer corruptions caused by uninitialized local variables, use-after-free vulnerabilities, heap-overflows
+    // and some categories of stack-overflow vulnerabilities.
+    // This dramatically reduces the ability of hackers to cause exploit memory corruptions on PHP deployed on Windows Servers
+    // (Only available in Visual Studio 2015+)
+    if (VCVERS >= 1900) {
+        ADD_FLAG("CFLAGS", "/guard:cf");
+        ADD_FLAG("LDFLAGS", "/guard:cf");
+    }
+
+    // Mark the binary as supporting Data Execution prevention to dramatically reduce exploitability of memory-corruption bugs
+    ADD_FLAG("LDFLAGS", "/NXCOMPAT");
+
+    // Mark the binary as supporting Address Space Layout Randomization to dramatically reduce exploitability of memory-corruption bugs
+    ADD_FLAG("LDFLAGS", "/DYNAMICBASE");
 }
 
 function object_out_dir_option_handle()
