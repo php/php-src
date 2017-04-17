@@ -97,11 +97,11 @@ and build three tarballs (gz, bz2 and xz).
 and output verification information to be included in announcement email
 
 14. Copy those tarballs (scp, rsync) to downloads.php.net, in your homedir there should be a
-directory "downloads/". Copy them into there, so that the system can generate
-MD5 sums. If you do not have this directory, talk to Derick or Dan.
+directory "public_html/". Copy them into there, so that the system can generate
+MD5 sums. If you do not have this directory, create it.
 
-15. Now the RC can be found on http://downloads.php.net/yourname,
-f.e. http://downloads.php.net/derick/
+15. Now the RC can be found on http://downloads.php.net/~yourname,
+f.e. http://downloads.php.net/~derick/
 
 16. Once the release has been tagged, contact the PHP Windows development team
 (internals-win@lists.php.net) so that Windows binaries can be created. Once

@@ -4887,6 +4887,7 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 
 			if (!is_last_class) {
 				jmp_multicatch[j] = zend_emit_jump(0);
+				opline = &CG(active_op_array)->opcodes[opnum_catch];
 				opline->extended_value = get_next_op_number(CG(active_op_array));
 			}
 		}
@@ -8062,6 +8063,8 @@ void zend_compile_expr(znode *result, zend_ast *ast) /* {{{ */
 
 void zend_compile_var(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 {
+	CG(zend_lineno) = zend_ast_get_lineno(ast);
+
 	switch (ast->kind) {
 		case ZEND_AST_VAR:
 			zend_compile_simple_var(result, ast, type, 0);

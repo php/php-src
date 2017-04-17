@@ -50,6 +50,7 @@ PHP                                                                        NEWS
   . Fixed bug #69587 (DateInterval properties and isset). (jhdxr)
   . Fixed bug #74404 (Wrong reflection on DateTimeZone::getTransitions).
     (krakjoe)
+  . Fixed bug #74080 (add constant for RFC7231 format datetime). (duncan3dc)
 
 - DOM:
   . Fixed bug #67474 (getElementsByTagNameNS filter on default ns). (aboks)
@@ -95,6 +96,7 @@ PHP                                                                        NEWS
 
 - intl:
   . Fixed bug #74433 (wrong reflection for Normalizer methods). (villfa)
+  . Fixed bug #74439 (wrong reflection for Locale methods). (villfa)
 
 - Mbstring:
   . Implemented request #66024 (mb_chr() and mb_ord()). (Masakielastic, Yasuo)
@@ -166,7 +168,7 @@ PHP                                                                        NEWS
     (Keith Smiley)
 
 - SQLite3:
-  . Update to Sqlite 3.16.2. (cmb)
+  . Update to Sqlite 3.18.0. (cmb)
   . Fixed bug #74413 (incorrect reflection for SQLite3::enableExceptions).
     (krakjoe)
 
