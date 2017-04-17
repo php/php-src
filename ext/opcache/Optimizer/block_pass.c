@@ -165,7 +165,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					COPY_NODE(opline->op1, src->op1);
 					VAR_SOURCE(op1) = NULL;
 					MAKE_NOP(src);
-				} else {
+				} else if (opline->opcode != ZEND_FETCH_LIST && opline->opcode != ZEND_CASE) {
 					zval c = ZEND_OP1_LITERAL(src);
 					zval_copy_ctor(&c);
 					if (zend_optimizer_update_op1_const(op_array, opline, &c)) {

@@ -43,6 +43,8 @@ PHP                                                                        NEWS
   . Fixed bug #74439 (wrong reflection for Locale methods). (villfa)
 
 - Opcache:
+  . Fixed bug #74456 (Segmentation error while running a script in CLI mode).
+    (Laruence)
   . Fixed bug #74431 (foreach infinite loop). (Nikita)
   . Fixed bug #74442 (Opcached version produces a nested array). (Nikita)
 
