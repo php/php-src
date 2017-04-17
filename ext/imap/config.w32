@@ -16,6 +16,7 @@ if (PHP_IMAP == "yes") {
 		CHECK_LIB("crypt32.lib", "imap");
 		EXTENSION("imap", "php_imap.c", true);
 
+		ADD_FLAG("LDFLAGS_IMAP", "/FORCE:MULTIPLE");
 		ADD_FLAG("CFLAGS_IMAP", "/D HAVE_IMAP2000=1 /D HAVE_IMAP2004=1 /D HAVE_IMAP2007a=1 /D HAVE_IMAP2007b=1 /D HAVE_IMAP_SSL=1");
 		AC_DEFINE('HAVE_IMAP', 1, 'Have IMAP support', true);
 		AC_DEFINE('HAVE_NEW_MIME2TEXT', 1, 'Have utf8_mime2text', true);
