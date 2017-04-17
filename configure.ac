@@ -461,6 +461,7 @@ limits.h \
 locale.h \
 monetary.h \
 netdb.h \
+poll.h \
 pwd.h \
 resolv.h \
 signal.h \
