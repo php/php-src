@@ -1848,6 +1848,13 @@ static int zend_jit_not_obj_stub(dasm_State **Dst)
 	return 1;
 }
 
+static int zend_jit_double_one_stub(dasm_State **Dst)
+{
+	|->one:
+	|.dword 0, 0x3ff00000
+	return 1;
+}
+
 static const zend_jit_stub zend_jit_stubs[] = {
 	JIT_STUB(interrupt_handler),
 	JIT_STUB(exception_handler),
@@ -1863,6 +1870,7 @@ static const zend_jit_stub zend_jit_stubs[] = {
 	JIT_STUB(undefined_index_ex),
 	JIT_STUB(cannot_add_element_ex),
 	JIT_STUB(not_obj),
+	JIT_STUB(double_one),
 };
 
 static int zend_jit_setup(void)
@@ -2404,10 +2412,47 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, zend_op_arr
 
 			|	SEPARATE_ZVAL_NOREF var_addr, op1_info, 0, op_array->filename, opline->lineno
 		}
-		if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
-			|	EXT_CALL increment_function, r0
+		if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE))) {
+			if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
+				|	EXT_CALL increment_function, r0
+			} else {
+				|	EXT_CALL decrement_function, r0
+			}
 		} else {
-			|	EXT_CALL decrement_function, r0
+			zend_reg tmp_reg;
+			if (Z_MODE(op1_def_addr) == IS_REG) {
+				tmp_reg = Z_REG(op1_def_addr);
+			} else if (Z_MODE(op1_addr) == IS_REG && zend_ssa_is_last_use(op_array, ssa, ssa->ops[opline-op_array->opcodes].op1_use, opline-op_array->opcodes)) {
+				tmp_reg = Z_REG(op1_addr);
+			} else {
+				tmp_reg = ZREG_XMM0;
+			}
+			|.if SSE
+			|	SSE_GET_ZVAL_DVAL tmp_reg, op1_addr
+			if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
+				if (zend_jit_x86_flags & ZEND_JIT_CPU_AVX) {
+					|	vaddsd xmm(tmp_reg-ZREG_XMM0), xmm(tmp_reg-ZREG_XMM0), qword [->one]
+				} else {
+					|	addsd xmm(tmp_reg-ZREG_XMM0), qword [->one]
+				}
+			} else {
+				if (zend_jit_x86_flags & ZEND_JIT_CPU_AVX) {
+					|	vsubsd xmm(tmp_reg-ZREG_XMM0), xmm(tmp_reg-ZREG_XMM0), qword [->one]
+				} else {
+					|	subsd xmm(tmp_reg-ZREG_XMM0), qword [->one]
+				}
+			}
+			|	SSE_SET_ZVAL_DVAL op1_def_addr, tmp_reg
+			|.else
+			|	FPU_GET_ZVAL_DVAL op1_addr
+			|	fld1
+			if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
+				|	fadd
+			} else {
+				|	fsub
+			}
+			|	FPU_SET_ZVAL_DVAL op1_def_addr
+			|.endif
 		}
 		if ((opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_PRE_DEC) &&
 		    opline->result_type != IS_UNUSED) {
@@ -8651,7 +8696,8 @@ static zend_bool zend_jit_opline_supports_reg(zend_op_array *op_array, zend_ssa 
 			op1_info = OP1_INFO();
 			return
 				opline->op1_type == IS_CV &&
-				!(op1_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-(MAY_BE_LONG)));
+				(op1_info & MAY_BE_LONG) &&
+				!(op1_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE)));
 		case ZEND_BOOL:
 		case ZEND_BOOL_NOT:
 		case ZEND_JMPZ:
@@ -8778,7 +8824,6 @@ static zend_regset zend_jit_get_scratch_regset(zend_op_array *op_array, zend_ssa
 				if ((op1_info & (MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE) {
 					regset = ZEND_REGSET(ZREG_XMM0);
 				} else if ((op1_info & (MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_LONG) {
-					regset = ZEND_REGSET(ZREG_R0);
 				} else {
 					regset = ZEND_REGSET_UNION(ZEND_REGSET(ZREG_R0), ZEND_REGSET(ZREG_R2));
 					if (op1_info & MAY_BE_REF) {
@@ -8821,8 +8866,12 @@ static zend_regset zend_jit_get_scratch_regset(zend_op_array *op_array, zend_ssa
 			}
 			op1_info = OP1_INFO();
 			if (opline->op1_type == IS_CV
-			 && !(op1_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-MAY_BE_LONG))) {
+			 && (op1_info & MAY_BE_LONG)
+			 && !(op1_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE)))) {
 				regset = ZEND_REGSET_EMPTY;
+				if (op1_info & MAY_BE_DOUBLE) {
+					regset = ZEND_REGSET(ZREG_XMM0);
+				}
 			}
 			break;
 		case ZEND_ADD:
