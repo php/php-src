@@ -103,8 +103,19 @@ static zend_bool zend_is_commutative(zend_uchar opcode)
 	return
 		opcode == ZEND_ADD ||
 		opcode == ZEND_MUL ||
+		opcode == ZEND_BW_OR ||
+		opcode == ZEND_BW_AND ||
+		opcode == ZEND_BW_XOR ||
 		opcode == ZEND_ASSIGN_ADD ||
-		opcode == ZEND_ASSIGN_MUL;
+		opcode == ZEND_ASSIGN_MUL||
+		opcode == ZEND_ASSIGN_BW_OR ||
+		opcode == ZEND_ASSIGN_BW_AND ||
+		opcode == ZEND_ASSIGN_BW_XOR;
+}
+
+static zend_bool zend_long_is_power_of_two(zend_long x)
+{
+	return (x > 0) && !(x & (x - 1));
 }
 
 #include "dynasm/dasm_x86.h"
@@ -2392,9 +2403,13 @@ pass:
 							goto jit_failure;
 						}
 						goto done;
-					case ZEND_SR:
+					case ZEND_BW_OR:
+					case ZEND_BW_AND:
+					case ZEND_BW_XOR:
 					case ZEND_SL:
-						if (!zend_jit_shift(&dasm_state, opline, op_array, ssa)) {
+					case ZEND_SR:
+					case ZEND_MOD:
+						if (!zend_jit_long_math(&dasm_state, opline, &i, op_array, ssa, ra)) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2417,6 +2432,12 @@ pass:
 					case ZEND_ASSIGN_MUL:
 //					case ZEND_ASSIGN_DIV: // TODO: check for division by zero ???
 					case ZEND_ASSIGN_CONCAT:
+					case ZEND_ASSIGN_BW_OR:
+					case ZEND_ASSIGN_BW_AND:
+					case ZEND_ASSIGN_BW_XOR:
+					case ZEND_ASSIGN_SL:
+					case ZEND_ASSIGN_SR:
+					case ZEND_ASSIGN_MOD:
 						if (!zend_jit_assign_op(&dasm_state, opline, op_array, ssa)) {
 							goto jit_failure;
 						}

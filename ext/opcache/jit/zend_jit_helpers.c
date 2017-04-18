@@ -1179,6 +1179,342 @@ static void ZEND_FASTCALL zend_jit_assign_dim_div_helper(zval *container, zval *
 	}
 }
 
+static void ZEND_FASTCALL zend_jit_assign_dim_bw_or_helper(zval *container, zval *dim, zval *value)
+{
+	if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		zval *object = container;
+		zval *property = dim;
+		zval *z;
+		zval rv, res;
+
+		if (Z_OBJ_HT_P(object)->read_dimension &&
+			(z = Z_OBJ_HT_P(object)->read_dimension(object, property, BP_VAR_R, &rv)) != NULL) {
+
+			if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
+				zval rv2;
+				zval *value = Z_OBJ_HT_P(z)->get(z, &rv2);
+
+				if (z == &rv) {
+					zval_ptr_dtor(&rv);
+				}
+				ZVAL_COPY_VALUE(z, value);
+			}
+			bitwise_or_function(&res, Z_ISREF_P(z) ? Z_REFVAL_P(z) : z, value);
+			Z_OBJ_HT_P(object)->write_dimension(object, property, &res);
+			if (z == &rv) {
+				zval_ptr_dtor(&rv);
+			}
+//???			if (retval) {
+//???				ZVAL_COPY(retval, &res);
+//???			}
+			zval_ptr_dtor(&res);
+		} else {
+			zend_error(E_WARNING, "Attempt to assign property of non-object");
+//???			if (retval) {
+//???				ZVAL_NULL(retval);
+//???			}
+		}
+	} else {
+		if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
+			if (!dim) {
+				zend_throw_error(NULL, "[] operator not supported for strings");
+			} else {
+				zend_check_string_offset(dim, BP_VAR_RW);
+				zend_wrong_string_offset();
+			}
+//???		} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
+//???			ZEND_VM_C_GOTO(assign_dim_op_convert_to_array);
+		} else {
+//???			if (UNEXPECTED(OP1_TYPE != IS_VAR || EXPECTED(!Z_ISERROR_P(container)))) {
+				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+//???			}
+//???			if (retval) {
+//???				ZVAL_NULL(retval);
+//???			}
+		}
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_assign_dim_bw_and_helper(zval *container, zval *dim, zval *value)
+{
+	if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		zval *object = container;
+		zval *property = dim;
+		zval *z;
+		zval rv, res;
+
+		if (Z_OBJ_HT_P(object)->read_dimension &&
+			(z = Z_OBJ_HT_P(object)->read_dimension(object, property, BP_VAR_R, &rv)) != NULL) {
+
+			if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
+				zval rv2;
+				zval *value = Z_OBJ_HT_P(z)->get(z, &rv2);
+
+				if (z == &rv) {
+					zval_ptr_dtor(&rv);
+				}
+				ZVAL_COPY_VALUE(z, value);
+			}
+			bitwise_and_function(&res, Z_ISREF_P(z) ? Z_REFVAL_P(z) : z, value);
+			Z_OBJ_HT_P(object)->write_dimension(object, property, &res);
+			if (z == &rv) {
+				zval_ptr_dtor(&rv);
+			}
+//???			if (retval) {
+//???				ZVAL_COPY(retval, &res);
+//???			}
+			zval_ptr_dtor(&res);
+		} else {
+			zend_error(E_WARNING, "Attempt to assign property of non-object");
+//???			if (retval) {
+//???				ZVAL_NULL(retval);
+//???			}
+		}
+	} else {
+		if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
+			if (!dim) {
+				zend_throw_error(NULL, "[] operator not supported for strings");
+			} else {
+				zend_check_string_offset(dim, BP_VAR_RW);
+				zend_wrong_string_offset();
+			}
+//???		} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
+//???			ZEND_VM_C_GOTO(assign_dim_op_convert_to_array);
+		} else {
+//???			if (UNEXPECTED(OP1_TYPE != IS_VAR || EXPECTED(!Z_ISERROR_P(container)))) {
+				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+//???			}
+//???			if (retval) {
+//???				ZVAL_NULL(retval);
+//???			}
+		}
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_assign_dim_bw_xor_helper(zval *container, zval *dim, zval *value)
+{
+	if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		zval *object = container;
+		zval *property = dim;
+		zval *z;
+		zval rv, res;
+
+		if (Z_OBJ_HT_P(object)->read_dimension &&
+			(z = Z_OBJ_HT_P(object)->read_dimension(object, property, BP_VAR_R, &rv)) != NULL) {
+
+			if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
+				zval rv2;
+				zval *value = Z_OBJ_HT_P(z)->get(z, &rv2);
+
+				if (z == &rv) {
+					zval_ptr_dtor(&rv);
+				}
+				ZVAL_COPY_VALUE(z, value);
+			}
+			bitwise_xor_function(&res, Z_ISREF_P(z) ? Z_REFVAL_P(z) : z, value);
+			Z_OBJ_HT_P(object)->write_dimension(object, property, &res);
+			if (z == &rv) {
+				zval_ptr_dtor(&rv);
+			}
+//???			if (retval) {
+//???				ZVAL_COPY(retval, &res);
+//???			}
+			zval_ptr_dtor(&res);
+		} else {
+			zend_error(E_WARNING, "Attempt to assign property of non-object");
+//???			if (retval) {
+//???				ZVAL_NULL(retval);
+//???			}
+		}
+	} else {
+		if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
+			if (!dim) {
+				zend_throw_error(NULL, "[] operator not supported for strings");
+			} else {
+				zend_check_string_offset(dim, BP_VAR_RW);
+				zend_wrong_string_offset();
+			}
+//???		} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
+//???			ZEND_VM_C_GOTO(assign_dim_op_convert_to_array);
+		} else {
+//???			if (UNEXPECTED(OP1_TYPE != IS_VAR || EXPECTED(!Z_ISERROR_P(container)))) {
+				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+//???			}
+//???			if (retval) {
+//???				ZVAL_NULL(retval);
+//???			}
+		}
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_assign_dim_sl_helper(zval *container, zval *dim, zval *value)
+{
+	if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		zval *object = container;
+		zval *property = dim;
+		zval *z;
+		zval rv, res;
+
+		if (Z_OBJ_HT_P(object)->read_dimension &&
+			(z = Z_OBJ_HT_P(object)->read_dimension(object, property, BP_VAR_R, &rv)) != NULL) {
+
+			if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
+				zval rv2;
+				zval *value = Z_OBJ_HT_P(z)->get(z, &rv2);
+
+				if (z == &rv) {
+					zval_ptr_dtor(&rv);
+				}
+				ZVAL_COPY_VALUE(z, value);
+			}
+			shift_left_function(&res, Z_ISREF_P(z) ? Z_REFVAL_P(z) : z, value);
+			Z_OBJ_HT_P(object)->write_dimension(object, property, &res);
+			if (z == &rv) {
+				zval_ptr_dtor(&rv);
+			}
+//???			if (retval) {
+//???				ZVAL_COPY(retval, &res);
+//???			}
+			zval_ptr_dtor(&res);
+		} else {
+			zend_error(E_WARNING, "Attempt to assign property of non-object");
+//???			if (retval) {
+//???				ZVAL_NULL(retval);
+//???			}
+		}
+	} else {
+		if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
+			if (!dim) {
+				zend_throw_error(NULL, "[] operator not supported for strings");
+			} else {
+				zend_check_string_offset(dim, BP_VAR_RW);
+				zend_wrong_string_offset();
+			}
+//???		} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
+//???			ZEND_VM_C_GOTO(assign_dim_op_convert_to_array);
+		} else {
+//???			if (UNEXPECTED(OP1_TYPE != IS_VAR || EXPECTED(!Z_ISERROR_P(container)))) {
+				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+//???			}
+//???			if (retval) {
+//???				ZVAL_NULL(retval);
+//???			}
+		}
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_assign_dim_sr_helper(zval *container, zval *dim, zval *value)
+{
+	if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		zval *object = container;
+		zval *property = dim;
+		zval *z;
+		zval rv, res;
+
+		if (Z_OBJ_HT_P(object)->read_dimension &&
+			(z = Z_OBJ_HT_P(object)->read_dimension(object, property, BP_VAR_R, &rv)) != NULL) {
+
+			if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
+				zval rv2;
+				zval *value = Z_OBJ_HT_P(z)->get(z, &rv2);
+
+				if (z == &rv) {
+					zval_ptr_dtor(&rv);
+				}
+				ZVAL_COPY_VALUE(z, value);
+			}
+			shift_right_function(&res, Z_ISREF_P(z) ? Z_REFVAL_P(z) : z, value);
+			Z_OBJ_HT_P(object)->write_dimension(object, property, &res);
+			if (z == &rv) {
+				zval_ptr_dtor(&rv);
+			}
+//???			if (retval) {
+//???				ZVAL_COPY(retval, &res);
+//???			}
+			zval_ptr_dtor(&res);
+		} else {
+			zend_error(E_WARNING, "Attempt to assign property of non-object");
+//???			if (retval) {
+//???				ZVAL_NULL(retval);
+//???			}
+		}
+	} else {
+		if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
+			if (!dim) {
+				zend_throw_error(NULL, "[] operator not supported for strings");
+			} else {
+				zend_check_string_offset(dim, BP_VAR_RW);
+				zend_wrong_string_offset();
+			}
+//???		} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
+//???			ZEND_VM_C_GOTO(assign_dim_op_convert_to_array);
+		} else {
+//???			if (UNEXPECTED(OP1_TYPE != IS_VAR || EXPECTED(!Z_ISERROR_P(container)))) {
+				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+//???			}
+//???			if (retval) {
+//???				ZVAL_NULL(retval);
+//???			}
+		}
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_assign_dim_mod_helper(zval *container, zval *dim, zval *value)
+{
+	if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		zval *object = container;
+		zval *property = dim;
+		zval *z;
+		zval rv, res;
+
+		if (Z_OBJ_HT_P(object)->read_dimension &&
+			(z = Z_OBJ_HT_P(object)->read_dimension(object, property, BP_VAR_R, &rv)) != NULL) {
+
+			if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
+				zval rv2;
+				zval *value = Z_OBJ_HT_P(z)->get(z, &rv2);
+
+				if (z == &rv) {
+					zval_ptr_dtor(&rv);
+				}
+				ZVAL_COPY_VALUE(z, value);
+			}
+			mod_function(&res, Z_ISREF_P(z) ? Z_REFVAL_P(z) : z, value);
+			Z_OBJ_HT_P(object)->write_dimension(object, property, &res);
+			if (z == &rv) {
+				zval_ptr_dtor(&rv);
+			}
+//???			if (retval) {
+//???				ZVAL_COPY(retval, &res);
+//???			}
+			zval_ptr_dtor(&res);
+		} else {
+			zend_error(E_WARNING, "Attempt to assign property of non-object");
+//???			if (retval) {
+//???				ZVAL_NULL(retval);
+//???			}
+		}
+	} else {
+		if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
+			if (!dim) {
+				zend_throw_error(NULL, "[] operator not supported for strings");
+			} else {
+				zend_check_string_offset(dim, BP_VAR_RW);
+				zend_wrong_string_offset();
+			}
+//???		} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
+//???			ZEND_VM_C_GOTO(assign_dim_op_convert_to_array);
+		} else {
+//???			if (UNEXPECTED(OP1_TYPE != IS_VAR || EXPECTED(!Z_ISERROR_P(container)))) {
+				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+//???			}
+//???			if (retval) {
+//???				ZVAL_NULL(retval);
+//???			}
+		}
+	}
+}
+
 static void ZEND_FASTCALL zend_jit_assign_dim_concat_helper(zval *container, zval *dim, zval *value)
 {
 	if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
