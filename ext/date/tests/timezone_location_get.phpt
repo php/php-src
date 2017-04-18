@@ -15,7 +15,7 @@ array(4) {
   ["country_code"]=>
   string(2) "NO"
   ["latitude"]=>
-  float(59.91666)
+  float(59.9166%d)
   ["longitude"]=>
   float(10.75)
   ["comments"]=>
