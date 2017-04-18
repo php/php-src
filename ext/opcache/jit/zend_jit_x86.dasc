@@ -2392,47 +2392,47 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, zend_op_arr
 	if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_LONG)) {
 		|.cold_code
 		|2:
-		|	SAVE_VALID_OPLINE opline
-		if (op1_info & MAY_BE_UNDEF) {
-			|	IF_NOT_ZVAL_TYPE op1_addr, IS_UNDEF, >2
-			|	// zend_error(E_NOTICE, "Undefined variable: %s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
-			|	mov FCARG1d, opline->op1.var
-			|	EXT_CALL zend_jit_undefined_op_helper, r0
-			|	SET_ZVAL_TYPE_INFO op1_addr, IS_NULL
-			op1_info |= MAY_BE_NULL;
-		}
-		|2:
-		|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
-		|	// ZVAL_DEREF(var_ptr);
-		|	ZVAL_DEREF FCARG1a, op1_info
-		if ((opline->opcode == ZEND_POST_INC || opline->opcode == ZEND_POST_DEC)) {
-			if (opline->result_type != IS_UNUSED) {
-				zend_jit_addr val_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, 0);
+		if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE))) {
+			|	SAVE_VALID_OPLINE opline
+			if (op1_info & MAY_BE_UNDEF) {
+				|	IF_NOT_ZVAL_TYPE op1_addr, IS_UNDEF, >2
+				|	// zend_error(E_NOTICE, "Undefined variable: %s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
+				|	mov FCARG1d, opline->op1.var
+				|	EXT_CALL zend_jit_undefined_op_helper, r0
+				|	SET_ZVAL_TYPE_INFO op1_addr, IS_NULL
+				op1_info |= MAY_BE_NULL;
+			}
+			|2:
+			|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
+			|	// ZVAL_DEREF(var_ptr);
+			|	ZVAL_DEREF FCARG1a, op1_info
+			if ((opline->opcode == ZEND_POST_INC || opline->opcode == ZEND_POST_DEC)) {
+				if (opline->result_type != IS_UNUSED) {
+					zend_jit_addr val_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, 0);
 
-				|	ZVAL_COPY_VALUE res_addr, res_use_info, val_addr, op1_info, ZREG_R0, ZREG_R2
-				|	//ZVAL_COPY_CTOR op1_info, ah, r2, op_array->filename, opline->lineno
-				if (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
-					if (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY)) {
-						|	IF_NOT_FLAGS ah, IS_TYPE_REFCOUNTED + IS_TYPE_COPYABLE, >2
-						|	IF_FLAGS ah, IS_TYPE_COPYABLE, >1
-						|	GC_ADDREF r2
-						|	jmp >2
-						|1:
-						|	mov aword [r4], FCARG1a // save
-						|	ZVAL_COPY_CTOR_FUNC op_array->filename, opline->lineno
-						|	mov FCARG1a, aword [r4] // restore
-						|2:
-					} else {
-						|	TRY_ADDREF op1_info, ah, r2
+					|	ZVAL_COPY_VALUE res_addr, res_use_info, val_addr, op1_info, ZREG_R0, ZREG_R2
+					|	//ZVAL_COPY_CTOR op1_info, ah, r2, op_array->filename, opline->lineno
+					if (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
+						if (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY)) {
+							|	IF_NOT_FLAGS ah, IS_TYPE_REFCOUNTED + IS_TYPE_COPYABLE, >2
+							|	IF_FLAGS ah, IS_TYPE_COPYABLE, >1
+							|	GC_ADDREF r2
+							|	jmp >2
+							|1:
+							|	mov aword [r4], FCARG1a // save
+							|	ZVAL_COPY_CTOR_FUNC op_array->filename, opline->lineno
+							|	mov FCARG1a, aword [r4] // restore
+							|2:
+						} else {
+							|	TRY_ADDREF op1_info, ah, r2
+						}
 					}
 				}
-			}
-		} else {
-			zend_jit_addr var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, 0);
+			} else {
+				zend_jit_addr var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, 0);
 
-			|	SEPARATE_ZVAL_NOREF var_addr, op1_info, 0, op_array->filename, opline->lineno
-		}
-		if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE))) {
+				|	SEPARATE_ZVAL_NOREF var_addr, op1_info, 0, op_array->filename, opline->lineno
+			}
 			if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
 				|	EXT_CALL increment_function, r0
 			} else {
@@ -2440,38 +2440,44 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, zend_op_arr
 			}
 		} else {
 			zend_reg tmp_reg;
-			if (Z_MODE(op1_def_addr) == IS_REG) {
-				tmp_reg = Z_REG(op1_def_addr);
-			} else if (Z_MODE(op1_addr) == IS_REG && zend_ssa_is_last_use(op_array, ssa, ssa->ops[opline-op_array->opcodes].op1_use, opline-op_array->opcodes)) {
-				tmp_reg = Z_REG(op1_addr);
-			} else {
-				tmp_reg = ZREG_XMM0;
+
+			if ((opline->opcode == ZEND_POST_INC || opline->opcode == ZEND_POST_DEC)) {
+				if (opline->result_type != IS_UNUSED) {
+					|	ZVAL_COPY_VALUE res_addr, res_use_info, op1_addr, MAY_BE_DOUBLE, ZREG_R0, ZREG_R2
+				}
 			}
 			|.if SSE
-			|	SSE_GET_ZVAL_DVAL tmp_reg, op1_addr
-			if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
-				if (zend_jit_x86_flags & ZEND_JIT_CPU_AVX) {
-					|	vaddsd xmm(tmp_reg-ZREG_XMM0), xmm(tmp_reg-ZREG_XMM0), qword [->one]
+				if (Z_MODE(op1_def_addr) == IS_REG) {
+					tmp_reg = Z_REG(op1_def_addr);
+				} else if (Z_MODE(op1_addr) == IS_REG && zend_ssa_is_last_use(op_array, ssa, ssa->ops[opline-op_array->opcodes].op1_use, opline-op_array->opcodes)) {
+					tmp_reg = Z_REG(op1_addr);
 				} else {
-					|	addsd xmm(tmp_reg-ZREG_XMM0), qword [->one]
+					tmp_reg = ZREG_XMM0;
 				}
-			} else {
-				if (zend_jit_x86_flags & ZEND_JIT_CPU_AVX) {
-					|	vsubsd xmm(tmp_reg-ZREG_XMM0), xmm(tmp_reg-ZREG_XMM0), qword [->one]
+				|	SSE_GET_ZVAL_DVAL tmp_reg, op1_addr
+				if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
+					if (zend_jit_x86_flags & ZEND_JIT_CPU_AVX) {
+						|	vaddsd xmm(tmp_reg-ZREG_XMM0), xmm(tmp_reg-ZREG_XMM0), qword [->one]
+					} else {
+						|	addsd xmm(tmp_reg-ZREG_XMM0), qword [->one]
+					}
 				} else {
-					|	subsd xmm(tmp_reg-ZREG_XMM0), qword [->one]
+					if (zend_jit_x86_flags & ZEND_JIT_CPU_AVX) {
+						|	vsubsd xmm(tmp_reg-ZREG_XMM0), xmm(tmp_reg-ZREG_XMM0), qword [->one]
+					} else {
+						|	subsd xmm(tmp_reg-ZREG_XMM0), qword [->one]
+					}
 				}
-			}
-			|	SSE_SET_ZVAL_DVAL op1_def_addr, tmp_reg
+				|	SSE_SET_ZVAL_DVAL op1_def_addr, tmp_reg
 			|.else
-			|	FPU_GET_ZVAL_DVAL op1_addr
-			|	fld1
-			if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
-				|	fadd
-			} else {
-				|	fsub
-			}
-			|	FPU_SET_ZVAL_DVAL op1_def_addr
+				|	FPU_GET_ZVAL_DVAL op1_addr
+				|	fld1
+				if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
+					|	fadd
+				} else {
+					|	fsub
+				}
+				|	FPU_SET_ZVAL_DVAL op1_def_addr
 			|.endif
 		}
 		if ((opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_PRE_DEC) &&
