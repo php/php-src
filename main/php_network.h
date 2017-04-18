@@ -121,7 +121,7 @@ typedef int php_socket_t;
 /* #define PHP_USE_POLL_2_EMULATION 1 */
 
 #if defined(HAVE_SYS_POLL_H) && defined(HAVE_POLL)
-# include <sys/poll.h>
+# include <poll.h>
 typedef struct pollfd php_pollfd;
 #else
 typedef struct _php_pollfd {
