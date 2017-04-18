@@ -9,10 +9,26 @@ if [[ "$ENABLE_DEBUG" == 1 ]]; then
 else
 	DEBUG="";
 fi
+
+if [[ -z "$CONFIG_LOG_FILE" ]]; then
+	CONFIG_QUIET="--quiet"
+	CONFIG_LOG_FILE="/dev/stdout"
+else
+	CONFIG_QUIET=""
+fi
+if [[ -z "$MAKE_LOG_FILE" ]]; then
+	MAKE_QUIET="--quiet"
+	MAKE_LOG_FILE="/dev/stdout"
+else
+	MAKE_QUIET=""
+fi
+
+MAKE_JOBS=${MAKE_JOBS:-2}
+
 ./buildconf --force
 ./configure \
---prefix=$HOME"/php-install" \
---quiet \
+--prefix="$HOME"/php-install \
+$CONFIG_QUIET \
 $DEBUG \
 $TS \
 --enable-phpdbg \
@@ -59,6 +75,8 @@ $TS \
 --with-xpm-dir=/usr \
 --with-kerberos \
 --enable-sysvmsg \
---enable-zend-test
-make -j2 --quiet
-make install
+--enable-zend-test \
+> "$CONFIG_LOG_FILE"
+
+make "-j${MAKE_JOBS}" $MAKE_QUIET > "$MAKE_LOG_FILE"
+make install >> "$MAKE_LOG_FILE"
