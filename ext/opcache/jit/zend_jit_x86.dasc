@@ -3925,6 +3925,10 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 				return 0;
 			}
 			|	mov FCARG1a, aword [r4] // restore
+			if (val_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
+				|	cmp dword [FCARG1a], 0
+				|	jnz >3
+			}
 			|	ZVAL_DTOR_FUNC var_info, op_array->filename, opline
 			|	jmp >3
 			|4:
