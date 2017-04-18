@@ -107,17 +107,86 @@ static void* dasm_labels[zend_lb_MAX];
 |	.endif
 |.endmacro
 
-|.macro PUSH_ADDR, addr, tmp_reg
-|	.if X64
+|.macro ADDR_OP1, addr_ins, addr, tmp_reg
+|  	.if X64
 ||		if (IS_32BIT(addr)) {
-|			push ((ptrdiff_t)addr)    // 0x48 0xc7 0xc0 <imm-32-bit>
-|| 		} else {
-|			mov64 tmp_reg, ((ptrdiff_t)addr)  // 0x48 0xb8 <imm-64-bit>
-|			push tmp_reg
+|			addr_ins ((ptrdiff_t)addr)
+||		} else {
+|			mov64 tmp_reg, ((ptrdiff_t)addr)
+|			addr_ins tmp_reg
 ||		}
 |	.else
-|		push ((ptrdiff_t)addr)
+|   	addr_ins ((ptrdiff_t)addr)
+| 	.endif
+|.endmacro
+
+|.macro ADDR_OP2_2, addr_ins, op1, addr, tmp_reg
+|  	.if X64
+||		if (IS_32BIT(addr)) {
+|			addr_ins op1, ((ptrdiff_t)addr)
+||		} else {
+|			mov64 tmp_reg, ((ptrdiff_t)addr)
+|			addr_ins op1, tmp_reg
+||		}
+|	.else
+|   	addr_ins op1, ((ptrdiff_t)addr)
+| 	.endif
+|.endmacro
+
+|.macro PUSH_ADDR, addr, tmp_reg
+|	ADDR_OP1 push, addr, tmp_reg
+|.endmacro
+
+|.macro MEM_OP1, mem_ins, prefix, addr, tmp_reg
+|	.if X64
+||		if (IS_32BIT(addr)) {
+|			mem_ins prefix [addr]
+|| 		} else {
+|			mov64 tmp_reg, ((ptrdiff_t)addr)
+|			mem_ins prefix [tmp_reg]
+||		}
+|	.else
+|		mem_ins prefix [addr]
 |	.endif
+|.endmacro
+
+|.macro MEM_OP2_1, mem_ins, prefix, addr, op2, tmp_reg
+|  	.if X64
+||		if (IS_32BIT(addr)) {
+|			mem_ins prefix [addr], op2
+||		} else {
+|			mov64 tmp_reg, ((ptrdiff_t)addr)
+|			mem_ins prefix [tmp_reg], op2
+||		}
+|	.else
+|   	mem_ins prefix [addr], op2
+| 	.endif
+|.endmacro
+
+|.macro MEM_OP2_2, mem_ins, op1, prefix, addr, tmp_reg
+|  	.if X64
+||		if (IS_32BIT(addr)) {
+|			mem_ins op1, prefix [addr]
+||		} else {
+|			mov64 tmp_reg, ((ptrdiff_t)addr)
+|			mem_ins op1, prefix [tmp_reg]
+||		}
+|	.else
+|   	mem_ins op1, prefix [addr]
+| 	.endif
+|.endmacro
+
+|.macro MEM_OP3_3, mem_ins, op1, op2, prefix, addr, tmp_reg
+|  	.if X64
+||		if (IS_32BIT(addr)) {
+|			mem_ins op1, op2, prefix [addr]
+||		} else {
+|			mov64 tmp_reg, ((ptrdiff_t)addr)
+|			mem_ins op1, op2, prefix [tmp_reg]
+||		}
+|	.else
+|   	mem_ins op1, op2, prefix [addr]
+| 	.endif
 |.endmacro
 
 |.macro LOAD_BASE_ADDR, reg, base, offset
@@ -231,14 +300,7 @@ static void* dasm_labels[zend_lb_MAX];
 
 |.macro FPU_OP, fp_ins, addr
 ||	if (Z_MODE(addr) == IS_CONST_ZVAL) {
-|   	.if X64
-||			if (IS_32BIT(Z_ZV(addr))) {
-|   			fp_ins qword [Z_ZV(addr)]
-||			} else {
-|   			LOAD_ADDR r0, Z_ZV(addr)
-|   			fp_ins qword [r0]
-||			}
-|   	.endif
+|		MEM_OP1 fp_ins, qword, Z_ZV(addr), r0
 ||	} else if (Z_MODE(addr) == IS_MEM_ZVAL) {
 |   	fp_ins qword [Ra(Z_REG(addr))+Z_OFFSET(addr)]
 ||	} else {
@@ -286,16 +348,7 @@ static void* dasm_labels[zend_lb_MAX];
 
 |.macro SSE_OP, sse_ins, reg, addr
 ||	if (Z_MODE(addr) == IS_CONST_ZVAL) {
-|   	.if X64
-||			if (IS_32BIT(Z_ZV(addr))) {
-|   			sse_ins xmm(reg-ZREG_XMM0), qword [Z_ZV(addr)]
-||			} else {
-|   			LOAD_ADDR r0, Z_ZV(addr)
-|   			sse_ins, xmm(reg-ZREG_XMM0), qword [r0]
-||			}
-|   	.else
-|   		sse_ins xmm(reg-ZREG_XMM0), qword [Z_ZV(addr)]
-|   	.endif
+|		MEM_OP2_2 sse_ins, xmm(reg-ZREG_XMM0), qword, Z_ZV(addr), r0
 ||	} else if (Z_MODE(addr) == IS_MEM_ZVAL) {
 |   	sse_ins xmm(reg-ZREG_XMM0), qword [Ra(Z_REG(addr))+Z_OFFSET(addr)]
 ||	} else if (Z_MODE(addr) == IS_REG) {
@@ -328,28 +381,11 @@ static void* dasm_labels[zend_lb_MAX];
 
 |.macro SSE_GET_ZVAL_LVAL, reg, addr
 ||	if (Z_MODE(addr) == IS_CONST_ZVAL) {
-|		.if X64
-||			if (IS_32BIT(Z_ZV(addr))) {
-||				if (zend_jit_x86_flags & ZEND_JIT_CPU_AVX) {
-|					vcvtsi2sd xmm(reg-ZREG_XMM0), xmm(reg-ZREG_XMM0), aword [Z_ZV(addr)]
-||				} else {
-|					cvtsi2sd xmm(reg-ZREG_XMM0), aword [Z_ZV(addr)]
-||				}
-||			} else {
-|				LOAD_ADDR r0, Z_ZV(addr)
-||				if (zend_jit_x86_flags & ZEND_JIT_CPU_AVX) {
-|					vcvtsi2sd xmm(reg-ZREG_XMM0), xmm(reg-ZREG_XMM0), aword [r0]
-||				} else {
-|					cvtsi2sd xmm(reg-ZREG_XMM0), aword [r0]
-||				}
-||			}
-|   	.else
-||			if (zend_jit_x86_flags & ZEND_JIT_CPU_AVX) {
-|				vcvtsi2sd xmm(reg-ZREG_XMM0), xmm(reg-ZREG_XMM0), aword [Z_ZV(addr)]
-||			} else {
-|				cvtsi2sd xmm(reg-ZREG_XMM0), aword [Z_ZV(addr)]
-||			}
-|   	.endif
+||		if (zend_jit_x86_flags & ZEND_JIT_CPU_AVX) {
+|			MEM_OP3_3 vcvtsi2sd, xmm(reg-ZREG_XMM0), xmm(reg-ZREG_XMM0), aword, Z_ZV(addr), r0
+||		} else {
+|			MEM_OP2_2 cvtsi2sd, xmm(reg-ZREG_XMM0), aword, Z_ZV(addr), r0
+||		}
 ||	} else if (Z_MODE(addr) == IS_MEM_ZVAL) {
 ||		if (zend_jit_x86_flags & ZEND_JIT_CPU_AVX) {
 |			vcvtsi2sd xmm(reg-ZREG_XMM0), xmm(reg-ZREG_XMM0), aword [Ra(Z_REG(addr))+Z_OFFSET(addr)]
@@ -445,16 +481,7 @@ static void* dasm_labels[zend_lb_MAX];
 
 |.macro AVX_OP, avx_ins, reg, op1_reg, addr
 ||	if (Z_MODE(addr) == IS_CONST_ZVAL) {
-|   	.if X64
-||			if (IS_32BIT(Z_ZV(addr))) {
-|   			avx_ins xmm(reg-ZREG_XMM0), xmm(op1_reg-ZREG_XMM0), qword [Z_ZV(addr)]
-||			} else {
-|   			LOAD_ADDR r0, Z_ZV(addr)
-|   			avx_ins xmm(reg-ZREG_XMM0), xmm(op1_reg-ZREG_XMM0), qword [r0]
-||			}
-|   	.else
-|   		avx_ins xmm(reg-ZREG_XMM0), xmm(op1_reg-ZREG_XMM0), qword [Z_ZV(addr)]
-|   	.endif
+|		MEM_OP3_3 avx_ins, xmm(reg-ZREG_XMM0), xmm(op1_reg-ZREG_XMM0), qword, Z_ZV(addr), r0
 ||	} else if (Z_MODE(addr) == IS_MEM_ZVAL) {
 |   	avx_ins xmm(reg-ZREG_XMM0), xmm(op1_reg-ZREG_XMM0), qword [Ra(Z_REG(addr))+Z_OFFSET(addr)]
 ||	} else if (Z_MODE(addr) == IS_REG) {
@@ -654,16 +681,7 @@ static void* dasm_labels[zend_lb_MAX];
 
 |.macro FPU_LONG_OP, fp_ins, addr
 ||	if (Z_MODE(addr) == IS_CONST_ZVAL) {
-|   	.if X64
-||			if (IS_32BIT(Z_ZV(addr))) {
-|   			fp_ins dword [Z_ZV(addr)]
-||			} else {
-|				LOAD_ADDR r0, Z_ZV(addr)
-|   			fp_ins qword [r0]
-||			}
-|   	.else
-|   		fp_ins dword [Z_ZV(addr)]
-|   	.endif
+|		MEM_OP1 fp_ins, aword, Z_ZV(addr), r0
 ||	} else if (Z_MODE(addr) == IS_MEM_ZVAL) {
 |   	fp_ins aword [Ra(Z_REG(addr))+Z_OFFSET(addr)]
 ||	} else if (Z_MODE(addr) == IS_REG) {
@@ -1182,16 +1200,7 @@ static void* dasm_labels[zend_lb_MAX];
 ||	if (op == last_valid_opline) {
 |		mov aword EX->opline, IP
 ||	} else {
-|		.if X64
-||			if (IS_32BIT(op)) {
-|				mov aword EX->opline, ((ptrdiff_t)op)
-||			} else {
-|				mov64 r0, ((ptrdiff_t)op)
-|				mov aword EX->opline, r0
-||			}
-|		.else
-|			mov aword EX->opline, op
-|		.endif
+|		ADDR_OP2_2 mov, aword EX->opline, op, r0
 ||	}
 |.endmacro
 
@@ -1535,9 +1544,9 @@ static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 {
 	|->interrupt_handler:
 	|	//EG(vm_interrupt) = 0;
-	|	mov byte [&EG(vm_interrupt)], 0
+	|	MEM_OP2_1 mov, byte, &EG(vm_interrupt), 0, r0
 	|	//if (EG(timed_out)) {
-	|	cmp byte [&EG(timed_out)], 0
+	|	MEM_OP2_1 cmp, byte, &EG(timed_out), 0, r0
 	|	je >1
 	|	//zend_timeout(0);
 	|.if X64
@@ -1563,7 +1572,7 @@ static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 		|.endif
 		|	//ZEND_VM_ENTER();
 		|	//execute_data = EG(current_execute_data);
-		|	mov FP, aword [&EG(current_execute_data)]
+		|	MEM_OP2_2 mov, FP, aword, &EG(current_execute_data), r0
 		|	// LOAD_OPLINE();
 		|	mov IP, EX->opline
 		|	//}
@@ -1613,7 +1622,7 @@ static int zend_jit_leave_throw_stub(dasm_State **Dst)
 	|	cmp byte OP:IP->opcode, ZEND_HANDLE_EXCEPTION
 	|	je >5
 	|	// EG(opline_before_exception) = opline;
-	|	mov aword [&EG(opline_before_exception)], IP
+	|	MEM_OP2_1 mov, aword, &EG(opline_before_exception), IP, r0
 	|5:
 	|	// opline = EG(exception_op);
 	|	LOAD_ADDR IP, &EG(exception_op)
@@ -1982,7 +1991,7 @@ static int zend_jit_check_timeout(dasm_State **Dst, const zend_op *opline)
 			return 0;
 		}
 #else
-		|	cmp byte [&EG(vm_interrupt)], 0
+		|	MEM_OP2_1 cmp, byte, &EG(vm_interrupt), 0, r0
 		|	jne >1
 		|.cold_code
 		|1:
@@ -1992,14 +2001,14 @@ static int zend_jit_check_timeout(dasm_State **Dst, const zend_op *opline)
 		return 1;
 #endif
 	}
-	|	cmp byte [&EG(vm_interrupt)], 0
+	|	MEM_OP2_1 cmp, byte, &EG(vm_interrupt), 0, r0
 	|	jne ->interrupt_handler
 	return 1;
 }
 
 static int zend_jit_check_exception(dasm_State **Dst)
 {
-	|	cmp aword [&EG(exception)], 0
+	|	MEM_OP2_1 cmp, aword, &EG(exception), 0, r0
 	|	jne ->exception_handler
 	return 1;
 }
@@ -2007,7 +2016,7 @@ static int zend_jit_check_exception(dasm_State **Dst)
 static int zend_jit_check_exception_undef_result(dasm_State **Dst, const zend_op *opline)
 {
 	if (opline->result_type & (IS_TMP_VAR|IS_VAR)) {
-		|	cmp aword [&EG(exception)], 0
+		|	MEM_OP2_1 cmp, aword, &EG(exception), 0, r0
 		|	mov r0, opline->result.var
 		|	jne ->exception_handler_undef
 		return 1;
@@ -6181,9 +6190,8 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, int b, 
 				|3:
 			}
 			if (zend_may_throw(opline, op_array, ssa)) {
-				if (!zend_jit_check_exception_undef_result(Dst, opline)) {
-					return 0;
-				}
+				|	MEM_OP2_1 cmp, aword, &EG(exception), 0, r1
+				|	jne ->exception_handler_undef
 			}
 
 			|	test r0, r0
@@ -6320,9 +6328,9 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, zen
 	zend_jit_start_reuse_ip();
 
 	|	// if (UNEXPECTED(used_stack > (size_t)(((char*)EG(vm_stack_end)) - (char*)call))) {
-	|	mov RX, aword [&EG(vm_stack_top)]
+	|	MEM_OP2_2 mov, RX, aword, &EG(vm_stack_top), r1
 	|	// Check Stack Overflow
-	|	mov r2, aword [&EG(vm_stack_end)]
+	|	MEM_OP2_2 mov, r2, aword, &EG(vm_stack_end), r1
 	|	sub r2, RX
 	if (func) {
 		|	cmp r2, used_stack
@@ -6347,9 +6355,9 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, zen
 	|.code
 
 	if (func) {
-		|	add aword [&EG(vm_stack_top)], used_stack
+		|	MEM_OP2_1 add, aword, &EG(vm_stack_top), used_stack, r1
 	} else {
-		|	add aword [&EG(vm_stack_top)], FCARG1a
+		|	MEM_OP2_1 add, aword, &EG(vm_stack_top), FCARG1a, r1
 	}
 	|	// zend_vm_init_call_frame(call, call_info, func, num_args, called_scope, object);
 	|	// ZEND_SET_CALL_INFO(call, 0, call_info);
@@ -6357,16 +6365,7 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, zen
 	|	// call->func = func;
 	if (func && func->type == ZEND_INTERNAL_FUNCTION) {
 		|1:
-		|.if X64
-			if (!IS_32BIT(func)) {
-				|	mov aword EX:RX->func, func
-			} else {
-				|	LOAD_ADDR r0, func
-				|	mov aword EX:RX->func, r0
-			}
-		|.else
-			|	mov aword EX:RX->func, func
-		|.endif
+		|	ADDR_OP2_2 mov, aword EX:RX->func, func, r1
 	} else {
 		|	mov aword EX:RX->func, r0
 		|1:
@@ -6647,7 +6646,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 			|.cold_code
 			|1:
 			|	EXT_CALL zend_jit_deprecated_or_abstract_helper, r0
-			|	cmp aword [&EG(exception)], 0
+			|	MEM_OP2_1 cmp, aword, &EG(exception), 0, r0
 			|	jne ->exception_handler
 			|	mov r0, EX:RX->func // reload
 			|	jmp >1
@@ -6658,7 +6657,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 			|	jmp ->exception_handler
 		} else if (func->common.fn_flags & ZEND_ACC_DEPRECATED) {
 			|	EXT_CALL zend_jit_deprecated_or_abstract_helper, r0
-			|	cmp aword [&EG(exception)], 0
+			|	MEM_OP2_1 cmp, aword, &EG(exception), 0, r0
 			|	jne ->exception_handler
 			|	mov r0, EX:RX->func // reload
 		}
@@ -6723,7 +6722,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		|.endif
 
 		|	// EG(current_execute_data) = execute_data;
-		|	mov aword [&EG(current_execute_data)], RX
+		|	MEM_OP2_1 mov, aword, &EG(current_execute_data), RX, r1
 		|	mov FP, RX
 
 		|	// opline = op_array->opcodes;
@@ -6790,7 +6789,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 			/* recursive call */
 #ifdef CONTEXT_THREADED_JIT
 			|	call =>(call_info->num_args+ssa->cfg.blocks_count)
-			|	cmp aword [&EG(exception)], 0
+			|	MEM_OP2_1 cmp, aword, &EG(exception), 0, r0
 			|	jne ->exception_handler
 			if (!func) {
 				|	jmp >9
@@ -6801,7 +6800,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		} else {
 #ifdef CONTEXT_THREADED_JIT
 			|	call aword [IP]
-			|	cmp aword [&EG(exception)], 0
+			|	MEM_OP2_1 cmp, aword, &EG(exception), 0, r0
 			|	jne ->exception_handler
 			if (!func) {
 				|	jmp >9
@@ -6844,7 +6843,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 				|.cold_code
 				|1:
 				|	EXT_CALL zend_jit_deprecated_or_abstract_helper, r0
-				|	cmp aword [&EG(exception)], 0
+				|	MEM_OP2_1 cmp, aword, &EG(exception), 0, r0
 				|	jne ->exception_handler
 				|	mov r0, EX:RX->func // reload
 				|	jmp >1
@@ -6855,7 +6854,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 				|	jmp ->exception_handler
 			} else if (func->common.fn_flags & ZEND_ACC_DEPRECATED) {
 				|	EXT_CALL zend_jit_deprecated_or_abstract_helper, r0
-				|	cmp aword [&EG(exception)], 0
+				|	MEM_OP2_1 cmp, aword, &EG(exception), 0, r0
 				|	jne ->exception_handler
 				|	mov r0, EX:RX->func // reload
 			}
@@ -6870,7 +6869,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		|	SET_Z_TYPE_INFO FCARG2a, IS_NULL
 
 		|	// EG(current_execute_data) = execute_data;
-		|	mov aword [&EG(current_execute_data)], RX
+		|	MEM_OP2_1 mov, aword, &EG(current_execute_data), RX, r1
 
 		if (!func || (func->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
 			if (!func) {
@@ -6915,7 +6914,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		|.endif
 
 		|	// EG(current_execute_data) = execute_data;
-		|	mov aword [&EG(current_execute_data)], FP
+		|	MEM_OP2_1 mov, aword, &EG(current_execute_data), FP, r0
 
 		|	// zend_vm_stack_free_args(call);
 		if (func) {
@@ -6939,7 +6938,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 			|	GET_Z_PTR r0, RX + offsetof(zend_execute_data, This)
 			if (opline->op1.num & ZEND_CALL_CTOR) {
 				|	// if (UNEXPECTED(EG(exception)
-				|	cmp aword [&EG(exception)], 0
+				|	MEM_OP2_1 cmp, aword, &EG(exception), 0, r1
 				|	je >1
 				|	// GC_REFCOUNT(object)--;
 				|	GC_DELREF r0
@@ -6964,7 +6963,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		|	EXT_CALL zend_jit_free_call_frame, r0
 		|	jmp >1
 		|.code
-		|	mov aword [&EG(vm_stack_top)], RX
+		|	MEM_OP2_1 mov, aword, &EG(vm_stack_top), RX, r0
 		|1:
 
 		if (!RETURN_VALUE_USED(opline)) {
@@ -6979,7 +6978,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		}
 
 		|	// if (UNEXPECTED(EG(exception) != NULL)) {
-		|	cmp aword [&EG(exception)], 0
+		|	MEM_OP2_1 cmp, aword, &EG(exception), 0, r0
 		|	jne >1
 		|.cold_code
 		|1:
@@ -7807,7 +7806,7 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, zend_op_
 	if (op_array->scope || (op_array->fn_flags & ZEND_ACC_CLOSURE)) {
 		|	// EG(current_execute_data) = EX(prev_execute_data);
 		|	mov r0, EX->prev_execute_data
-		|	mov aword [&EG(current_execute_data)], r0
+		|	MEM_OP2_1 mov, aword, &EG(current_execute_data), r0, r1
 		if (op_array->scope) {
 			|	// if (call_info & ZEND_CALL_RELEASE_THIS)
 			|	test FCARG1d, ZEND_CALL_RELEASE_THIS
@@ -7822,7 +7821,7 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, zend_op_
 			|	mov r0, EX->This.value.obj
 			if (op_array->scope && op_array->scope->constructor == (zend_function*)op_array) {
 				|	// if (UNEXPECTED(EG(exception) != NULL)
-				|	cmp aword [&EG(exception)], 0
+				|	MEM_OP2_1 cmp, aword, &EG(exception), 0, r1
 				|	jne >6
 				|.cold_code
 				|6:
@@ -7863,19 +7862,19 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, zend_op_
 		}
 		|4:
 		|	// EG(vm_stack_top) = (zval*)execute_data;
-		|	mov aword [&EG(vm_stack_top)], FP
+		|	MEM_OP2_1 mov, aword, &EG(vm_stack_top), FP, r0
 		|	// execute_data = EX(prev_execute_data);
 		|	mov FP, EX->prev_execute_data
 	} else {
 		|	// EG(vm_stack_top) = (zval*)execute_data;
-		|	mov aword [&EG(vm_stack_top)], FP
+		|	MEM_OP2_1 mov, aword, &EG(vm_stack_top), FP, r0
 		|	// execute_data = EX(prev_execute_data);
 		|	mov FP, EX->prev_execute_data
 		|	// EG(current_execute_data) = execute_data
-		|	mov aword [&EG(current_execute_data)], FP
+		|	MEM_OP2_1 mov, aword, &EG(current_execute_data), FP, r0
 	}
 	|	// if (EG(exception))
-	|	cmp aword [&EG(exception)], 0
+	|	MEM_OP2_1 cmp, aword, &EG(exception), 0, r0
 	|	mov IP, EX->opline
 	|	jne ->leave_throw_handler
 	|	// opline = EX(opline) + 1
@@ -8342,7 +8341,7 @@ static int zend_jit_bind_global(dasm_State **Dst, const zend_op *opline, zend_op
 	|	mov r0, aword [r0 + Z_CACHE_SLOT_P(varname)]
 	|	sub r0, 1
 	//if (EXPECTED(idx < EG(symbol_table).nNumUsed))
-	|	cmp r0, [&EG(symbol_table).nNumUsed]
+	|	MEM_OP2_2 cmp, eax, dword, &EG(symbol_table).nNumUsed, r1
 	|	jae >9
 	//Bucket *p = EG(symbol_table).arData + idx;
 	|.if X64
@@ -8350,37 +8349,22 @@ static int zend_jit_bind_global(dasm_State **Dst, const zend_op *opline, zend_op
 	|.else
 		|	imul r0, sizeof(Bucket)
 	|.endif
-	|.if X64
-		|	LOAD_ADDR r1, &EG(symbol_table.arData)
-		|	add r0, [r1]
-	|.else
-		|	add r0, [&EG(symbol_table).arData]
-	|.endif
+	|	MEM_OP2_2 add, r0, aword, &EG(symbol_table).arData, r1
 	|	IF_Z_TYPE r0, IS_UNDEF, >9
 	//	(EXPECTED(p->key == Z_STR_P(varname))
-	|.if X64
-		|	LOAD_ADDR r1, Z_PTR_P(varname)
-		|	cmp [r0 + offsetof(Bucket, key)], r1
-	|.else
-		|	cmp aword [r0 + offsetof(Bucket, key)], Z_PTR_P(varname)
-	|.endif
+	|	ADDR_OP2_2 cmp, aword [r0 + offsetof(Bucket, key)], Z_PTR_P(varname), r1
 	|	jne >1
 	|.cold_code
 	|1:
 	//(EXPECTED(p->h == ZSTR_H(Z_STR_P(varname)))
-	|.if X64
-		|	mov64 r1, ZSTR_H(Z_STR_P(varname))
-		|	cmp qword [r0 + offsetof(Bucket, h)], r1
-	|.else
-		|	cmp dword [r0 + offsetof(Bucket, h)], ZSTR_H(Z_STR_P(varname))
-	|.endif
+	|	ADDR_OP2_2 cmp, aword [r0 + offsetof(Bucket, h)], ZSTR_H(Z_STR_P(varname)), r1
 	|	jne >9
 	//EXPECTED(p->key != NULL)
 	|	mov r1, [r0 + offsetof(Bucket, key)]
 	|	test r1, r1
 	|	jz >9
 	//EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(varname))
-	|	cmp dword [r1 + offsetof(zend_string, len)], Z_STRLEN_P(varname)
+	|	ADDR_OP2_2 cmp, aword [r1 + offsetof(zend_string, len)], Z_STRLEN_P(varname), r2
 	|	jne >9
 	//EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(varname), Z_STRLEN_P(varname)) == 0)
 	|	add r1, offsetof(zend_string, val)
