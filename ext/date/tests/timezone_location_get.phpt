@@ -10,7 +10,7 @@ date.timezone=UTC
 $location = timezone_location_get(new DateTimeZone("Europe/Oslo"));
 var_dump($location);
 ?>
---EXPECT--
+--EXPECTF--
 array(4) {
   ["country_code"]=>
   string(2) "NO"
