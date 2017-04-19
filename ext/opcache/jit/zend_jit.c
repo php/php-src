@@ -2168,7 +2168,20 @@ static zend_lifetime_interval** zend_jit_allocate_registers(zend_op_array *op_ar
 					    intervals[i]->store &&
 					    (ssa->vars[i].use_chain < 0 ||
 					     zend_ssa_next_use(ssa->ops, i, ssa->vars[i].use_chain) < 0)) {
-						intervals[i] = NULL;
+						zend_bool may_remove = 1;
+						zend_ssa_phi *phi = ssa->vars[i].phi_use_chain;
+
+						while (phi) {
+							if (intervals[phi->ssa_var] &&
+							    !intervals[phi->ssa_var]->load) {
+								may_remove = 0;
+								break;
+							}
+							phi = zend_ssa_next_use_phi(ssa, i, phi);
+						}
+						if (may_remove) {
+							intervals[i] = NULL;
+						}
 					}
 				}
 			}
