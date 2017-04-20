@@ -99,6 +99,8 @@ PHP 7.2 UPGRADE NOTES
     inherited method. This complies with contravariance of method argument types
     under the Liskov Substitution Principle.
     (https://wiki.php.net/rfc/parameter-no-type-variance)
+  . A trailing comma in group use statements is now allowed.
+    (https://wiki.php.net/rfc/list-syntax-trailing-commas)
 
 - PCRE:
   . Added `J` modifier for setting PCRE_DUPNAMES.

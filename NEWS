@@ -39,6 +39,8 @@ PHP                                                                        NEWS
   . Fixed bug #74149 (static embed SAPI linkage error). (krakjoe)
   . Fixed bug #72359, bug #72451, bug #73706, bug #71115 and others related
     to interned strings handling in TS builds. (Anatol, Dmitry)
+  . Implemented "Trailing Commas In List Syntax" RFC for group use lists only.
+    (Sammy Kaye Powers)
 
 - BCMath:
   . Fixed bug #46564 (bcmod truncates fractionals). (liborm85)
