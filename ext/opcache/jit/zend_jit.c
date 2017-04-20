@@ -2604,6 +2604,11 @@ pass:
 							goto jit_failure;
 						}
 						goto done;
+					case ZEND_ECHO:
+						if (!zend_jit_echo(&dasm_state, opline, op_array, ssa)) {
+							goto jit_failure;
+						}
+						goto done;
 					default:
 						break;
 				}

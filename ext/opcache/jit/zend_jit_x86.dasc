@@ -8990,6 +8990,48 @@ static int zend_jit_free(dasm_State **Dst, const zend_op *opline, zend_op_array 
 	return 1;
 }
 
+static int zend_jit_echo(dasm_State **Dst, const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
+{
+	if (opline->op1_type == IS_CONST) {
+		zval *zv = RT_CONSTANT(op_array, opline->op1);
+
+		if (Z_TYPE_P(zv) == IS_STRING) {
+			size_t len = Z_STRLEN_P(zv);
+
+			if (len > 0) {
+				const char *str = Z_STRVAL_P(zv);
+
+				if (!zend_jit_set_valid_ip(Dst, opline)) {
+					return 0;
+				}
+				|	//SAVE_OPLINE();
+				|	mov EX->opline, IP
+				|.if X64
+					|	LOAD_ADDR CARG1, str
+					|	LOAD_ADDR CARG2, len
+					|	EXT_CALL zend_write, r0
+				|.else
+					|	sub r4, 8
+					|	push len
+					|	push str
+					|	EXT_CALL zend_write, r0
+					|	add r4, 16
+				|.endif
+				if (!zend_jit_check_exception(Dst)) {
+					return 0;
+				}
+			}
+			return 1;
+		}
+	}
+
+	if (!zend_jit_handler(Dst, opline, 1)) {
+		return 0;
+	}
+
+	return 1;
+}
+
 static zend_bool zend_jit_may_reuse_reg(zend_op_array *op_array, zend_ssa *ssa, uint32_t position, int def_var, int use_var)
 {
 	if (ssa->var_info[def_var].type != ssa->var_info[use_var].type) {
