@@ -186,11 +186,12 @@ static zend_string *zend_jit_func_name(zend_op_array *op_array)
 	}
 }
 
-static void *dasm_link_and_encode(dasm_State    **dasm_state,
-                                  zend_op_array  *op_array,
-                                  zend_cfg       *cfg,
-                                  const zend_op  *rt_opline,
-                                  const char     *name)
+static void *dasm_link_and_encode(dasm_State             **dasm_state,
+                                  zend_op_array           *op_array,
+                                  zend_ssa                *ssa,
+                                  const zend_op           *rt_opline,
+                                  zend_lifetime_interval **ra,
+                                  const char              *name)
 {
 	size_t size;
 	int ret;
@@ -199,19 +200,41 @@ static void *dasm_link_and_encode(dasm_State    **dasm_state,
 	zend_string *str = NULL;
 #endif
 
-    if (rt_opline && cfg && cfg->map) {
+    if (rt_opline && ssa && ssa->cfg.map) {
 		/* Create additional entry point, to switch from interpreter to JIT-ed
 		 * code at run-time.
 		 */
-		int b = cfg->map[rt_opline - op_array->opcodes];
+		int b = ssa->cfg.map[rt_opline - op_array->opcodes];
 
 #ifdef CONTEXT_THREADED_JIT
-		if (!(cfg->blocks[b].flags & (ZEND_BB_START|ZEND_BB_RECV_ENTRY))) {
+		if (!(ssa->cfg.blocks[b].flags & (ZEND_BB_START|ZEND_BB_RECV_ENTRY))) {
 #else
-		if (!(cfg->blocks[b].flags & (ZEND_BB_START|ZEND_BB_ENTRY|ZEND_BB_RECV_ENTRY))) {
+		if (!(ssa->cfg.blocks[b].flags & (ZEND_BB_START|ZEND_BB_ENTRY|ZEND_BB_RECV_ENTRY))) {
 #endif
-			zend_jit_label(dasm_state, cfg->blocks_count + b);
+			zend_jit_label(dasm_state, ssa->cfg.blocks_count + b);
 			zend_jit_prologue(dasm_state);
+			if (ra) {
+				int i;
+				zend_lifetime_interval *ival;
+				zend_life_range *range;
+				uint32_t pos = rt_opline - op_array->opcodes;
+
+				for (i = 0; i < ssa->vars_count; i++) {
+					ival = ra[i];
+
+					if (ival && ival->reg != ZREG_NONE) {
+						range = &ival->range;
+
+						if (pos >= range->start && pos <= range->end) {
+							if (!zend_jit_load_ssa_var(dasm_state, ssa, i, ival->reg)) {
+								return NULL;
+							}
+							break;
+						}
+						range = range->next;
+					}
+				}
+			}
 			zend_jit_jmp(dasm_state, b);
 		}
     }
@@ -237,26 +260,26 @@ static void *dasm_link_and_encode(dasm_State    **dasm_state,
 	entry = *dasm_ptr;
 	*dasm_ptr = (void*)((char*)*dasm_ptr + ZEND_MM_ALIGNED_SIZE_EX(size, DASM_ALIGNMENT));
 
-	if (op_array && cfg) {
+	if (op_array && ssa) {
 		int b;
 
-		for (b = 0; b < cfg->blocks_count; b++) {
+		for (b = 0; b < ssa->cfg.blocks_count; b++) {
 #ifdef CONTEXT_THREADED_JIT
-			if (cfg->blocks[b].flags & (ZEND_BB_START|ZEND_BB_RECV_ENTRY)) {
+			if (ssa->cfg.blocks[b].flags & (ZEND_BB_START|ZEND_BB_RECV_ENTRY)) {
 #else
-			if (cfg->blocks[b].flags & (ZEND_BB_START|ZEND_BB_ENTRY|ZEND_BB_RECV_ENTRY)) {
+			if (ssa->cfg.blocks[b].flags & (ZEND_BB_START|ZEND_BB_ENTRY|ZEND_BB_RECV_ENTRY)) {
 #endif
-				zend_op *opline = op_array->opcodes + cfg->blocks[b].start;
+				zend_op *opline = op_array->opcodes + ssa->cfg.blocks[b].start;
 
 				opline->handler = (void*)(((char*)entry) +
-					dasm_getpclabel(dasm_state, cfg->blocks_count + b));
+					dasm_getpclabel(dasm_state, ssa->cfg.blocks_count + b));
 			}
 		}
-	    if (rt_opline && cfg && cfg->map) {
-			int b = cfg->map[rt_opline - op_array->opcodes];
+	    if (rt_opline && ssa && ssa->cfg.map) {
+			int b = ssa->cfg.map[rt_opline - op_array->opcodes];
 			zend_op *opline = (zend_op*)rt_opline;
 			opline->handler = (void*)(((char*)entry) +
-				dasm_getpclabel(dasm_state, cfg->blocks_count + b));
+				dasm_getpclabel(dasm_state, ssa->cfg.blocks_count + b));
 		}
 	}
 
@@ -278,7 +301,7 @@ static void *dasm_link_and_encode(dasm_State    **dasm_state,
 			name,
 			(op_array && op_array->filename) ? ZSTR_VAL(op_array->filename) : NULL,
 			op_array,
-			cfg,
+			&ssa->cfg,
 			entry,
 			size);
 	}
@@ -2759,7 +2782,7 @@ done:
 		}
 	}
 
-	handler = dasm_link_and_encode(&dasm_state, op_array, &ssa->cfg, rt_opline, NULL);
+	handler = dasm_link_and_encode(&dasm_state, op_array, ssa, rt_opline, ra, NULL);
 	if (!handler) {
 		goto jit_failure;
 	}
@@ -3196,7 +3219,7 @@ static int zend_jit_make_stubs(void)
 		if (!zend_jit_stubs[i].stub(&dasm_state)) {
 			return 0;
 		}
-		if (!dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, zend_jit_stubs[i].name)) {
+		if (!dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, zend_jit_stubs[i].name)) {
 			return 0;
 		}
 	}
