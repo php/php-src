@@ -377,7 +377,7 @@ PHP_FUNCTION(bcdiv)
 			RETVAL_STR(bc_num2str(result));
 			break;
 		case -1: /* division by zero */
-			php_error_docref(NULL, E_WARNING, "Division by zero");
+			zend_throw_exception_ex(NULL, 0, "Division by zero");
 			break;
 	}
 
@@ -411,7 +411,7 @@ PHP_FUNCTION(bcmod)
 			RETVAL_STR(bc_num2str(result));
 			break;
 		case -1:
-			php_error_docref(NULL, E_WARNING, "Division by zero");
+			zend_throw_exception_ex(NULL, 0, "Division by zero");
 			break;
 	}
 
