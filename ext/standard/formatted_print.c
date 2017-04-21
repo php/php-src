@@ -484,7 +484,7 @@ php_formatted_print(zend_execute_data *execute_data, int use_array, int format_o
 							  "sprintf: now looking at '%c', inpos=%d\n",
 							  format[inpos], inpos));
 				for (;; inpos++) {
-					if (format[inpos] == ' ' || format[inpos] == '0') {
+					if ((format[inpos] == ' ' || format[inpos] == '0') && padding = ' ') {
 						padding = format[inpos];
 					} else if (format[inpos] == '-') {
 						alignment = ALIGN_LEFT;
