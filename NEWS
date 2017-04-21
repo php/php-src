@@ -10,6 +10,8 @@ PHP                                                                        NEWS
   . Fixed bug #74819 (wddx_deserialize() heap out-of-bound read via
     php_parse_date()). (Derick)
   . Fixed bug #74878 (Data race in ZTS builds). (Nikita)
+  . Fixed bug #49649 (unserialize() doesn't handle changes in property 
+    visibility). (pmmaga)
 
 - Date:
   . Fixed bug #74852 (property_exists returns true on unknown DateInterval 

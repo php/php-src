@@ -427,14 +427,58 @@ numeric_key:
 		} else {
 			if (EXPECTED(Z_TYPE(key) == IS_STRING)) {
 string_key:
-				if ((old_data = zend_hash_find(ht, Z_STR(key))) != NULL) {
-					if (Z_TYPE_P(old_data) == IS_INDIRECT) {
-						old_data = Z_INDIRECT_P(old_data);
+				{
+					zend_property_info *existing_propinfo;
+					zend_string *new_key, *unmangled;
+					const char *unmangled_class = NULL; 
+					const char *unmangled_prop;
+					size_t unmangled_prop_len;
+
+					if (UNEXPECTED(zend_unmangle_property_name_ex(Z_STR(key), &unmangled_class, &unmangled_prop, &unmangled_prop_len) == FAILURE)) {
+						zval_dtor(&key);
+						return 0;
 					}
-					var_push_dtor(var_hash, old_data);
-					data = zend_hash_update_ind(ht, Z_STR(key), &d);
-				} else {
-					data = zend_hash_add_new(ht, Z_STR(key), &d);
+
+					unmangled = zend_string_init(unmangled_prop, unmangled_prop_len, 0);
+					if (Z_TYPE_P(rval) == IS_OBJECT
+							&& ((existing_propinfo = zend_hash_find_ptr(&Z_OBJCE_P(rval)->properties_info, unmangled)) != NULL) 
+							&& (existing_propinfo->flags & ZEND_ACC_PPP_MASK)) {
+						if (existing_propinfo->flags & ZEND_ACC_PROTECTED) {
+							new_key = zend_mangle_property_name(
+								"*", 1, ZSTR_VAL(unmangled), ZSTR_LEN(unmangled), Z_OBJCE_P(rval)->type & ZEND_INTERNAL_CLASS);
+							zend_string_release(unmangled);
+						} else if (existing_propinfo->flags & ZEND_ACC_PRIVATE) {
+							if (unmangled_class != NULL && strcmp(unmangled_class, "*") != 0) {
+								new_key = zend_mangle_property_name(
+									unmangled_class, strlen(unmangled_class),
+									ZSTR_VAL(unmangled), ZSTR_LEN(unmangled),
+									Z_OBJCE_P(rval)->type & ZEND_INTERNAL_CLASS);
+							} else {
+								new_key = zend_mangle_property_name(
+									ZSTR_VAL(existing_propinfo->ce->name), ZSTR_LEN(existing_propinfo->ce->name),
+									ZSTR_VAL(unmangled), ZSTR_LEN(unmangled),
+									Z_OBJCE_P(rval)->type & ZEND_INTERNAL_CLASS);
+							}
+							zend_string_release(unmangled);
+						} else {
+							ZEND_ASSERT(existing_propinfo->flags & ZEND_ACC_PUBLIC);
+							new_key = unmangled;
+						}
+						zend_string_release(Z_STR(key));
+						Z_STR(key) = new_key;
+					} else {
+						zend_string_release(unmangled);
+					}
+
+					if ((old_data = zend_hash_find(ht, Z_STR(key))) != NULL) {
+						if (Z_TYPE_P(old_data) == IS_INDIRECT) {
+							old_data = Z_INDIRECT_P(old_data);
+						}
+						var_push_dtor(var_hash, old_data);
+						data = zend_hash_update_ind(ht, Z_STR(key), &d);
+					} else {
+						data = zend_hash_add_new(ht, Z_STR(key), &d);
+					}
 				}
 			} else if (Z_TYPE(key) == IS_LONG) {
 				/* object properties should include no integers */
