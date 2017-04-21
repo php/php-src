@@ -4453,6 +4453,7 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, zend_
 
 	if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY)) {
 		uint32_t var_info = zend_array_element_type(op1_info, 0, 0);
+		uint32_t var_def_info = zend_array_element_type(OP1_DEF_INFO(), 1, 0);
 
 		|6:
 		if (opline->op2_type == IS_UNUSED) {
@@ -4498,7 +4499,7 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, zend_
 			case ZEND_ASSIGN_SUB:
 			case ZEND_ASSIGN_MUL:
 			case ZEND_ASSIGN_DIV:
-				if (!zend_jit_math_helper(Dst, opline, op_array, ssa, IS_CV, opline->op1, var_addr, var_info, (opline+1)->op1_type, (opline+1)->op1, op3_addr, OP1_DATA_INFO(), 0, var_addr, OP1_DEF_INFO(), var_info, 1)) {
+				if (!zend_jit_math_helper(Dst, opline, op_array, ssa, IS_CV, opline->op1, var_addr, var_info, (opline+1)->op1_type, (opline+1)->op1, op3_addr, OP1_DATA_INFO(), 0, var_addr, var_def_info, var_info, 1)) {
 					return 0;
 				}
 				break;
