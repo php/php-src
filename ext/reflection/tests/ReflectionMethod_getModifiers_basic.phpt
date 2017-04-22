@@ -115,7 +115,7 @@ Modifiers for method TestClass::__call():
 
 
 Modifiers for method TestClass::__clone():
-0x08008100
+0x08000100
 
 
 Modifiers for method TestClass::__get():
@@ -183,7 +183,7 @@ Modifiers for method TestClass::__call():
 
 
 Modifiers for method TestClass::__clone():
-0x08008100
+0x08000100
 
 
 Modifiers for method TestClass::__get():
