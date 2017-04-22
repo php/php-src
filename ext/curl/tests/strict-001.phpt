@@ -51,5 +51,5 @@ Caught: Argument 3 passed to curl_setopt() must be of type integer, boolean give
 Caught: Argument 3 passed to curl_setopt() must be of type string, object given
 Caught: Argument 3 passed to curl_setopt() must be of type string, integer given
 Caught: Argument 3 passed to curl_setopt() must be of type resource, string given
-Caught: Argument 3 passed to curl_setopt() must be iterable, string given
+Caught: Argument 3 passed to curl_setopt() must be of type array, string given
 Caught: Argument 3 passed to curl_setopt() must be callable, string given
