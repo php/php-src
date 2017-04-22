@@ -501,9 +501,14 @@ static int php_stream_temp_cast(php_stream *stream, int castas, void **ret)
 		return FAILURE;
 	}
 
+	file = php_stream_fopen_tmpfile();
+	if (file == NULL) {
+		php_error_docref(NULL, E_WARNING, "Unable to create temporary file.");
+		return FAILURE;
+	}
+
 	/* perform the conversion and then pass the request on to the innerstream */
 	membuf = php_stream_memory_get_buffer(ts->innerstream, &memsize);
-	file = php_stream_fopen_tmpfile();
 	php_stream_write(file, membuf, memsize);
 	pos = php_stream_tell(ts->innerstream);
 
