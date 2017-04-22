@@ -101,6 +101,9 @@ PHP 7.2 UPGRADE NOTES
     inherited method. This complies with contravariance of method argument types
     under the Liskov Substitution Principle.
     (https://wiki.php.net/rfc/parameter-no-type-variance)
+  . It is now allowed to override an abstract method with another abstract
+    method in a child class.
+    (https://wiki.php.net/rfc/allow-abstract-function-override)
   . A trailing comma in group use statements is now allowed.
     (https://wiki.php.net/rfc/list-syntax-trailing-commas)
 
