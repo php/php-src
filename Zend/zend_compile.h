@@ -199,22 +199,20 @@ typedef struct _zend_oparray_context {
 	HashTable *labels;
 } zend_oparray_context;
 
+/*
+ * Function and method flags
+ *
+ * Free flags:
+ * 0x10
+ * 0x20
+ * 0x2000000
+ */
+
 /* method flags (types) */
 #define ZEND_ACC_STATIC			0x01
 #define ZEND_ACC_ABSTRACT		0x02
 #define ZEND_ACC_FINAL			0x04
 #define ZEND_ACC_IMPLEMENTED_ABSTRACT		0x08
-
-/* class flags (types) */
-/* ZEND_ACC_IMPLICIT_ABSTRACT_CLASS is used for abstract classes (since it is set by any abstract method even interfaces MAY have it set, too). */
-/* ZEND_ACC_EXPLICIT_ABSTRACT_CLASS denotes that a class was explicitly defined as abstract by using the keyword. */
-#define ZEND_ACC_IMPLICIT_ABSTRACT_CLASS	0x10
-#define ZEND_ACC_EXPLICIT_ABSTRACT_CLASS	0x20
-#define ZEND_ACC_INTERFACE		            0x40
-#define ZEND_ACC_TRAIT						0x80
-#define ZEND_ACC_ANON_CLASS                 0x100
-#define ZEND_ACC_ANON_BOUND                 0x200
-#define ZEND_ACC_INHERITED                  0x400
 
 /* method flags (visibility) */
 /* The order of those must be kept - public < protected < private */
@@ -242,17 +240,6 @@ typedef struct _zend_oparray_context {
 
 /* deprecation flag */
 #define ZEND_ACC_DEPRECATED 0x40000
-
-/* class implement interface(s) flag */
-#define ZEND_ACC_IMPLEMENT_INTERFACES 0x80000
-#define ZEND_ACC_IMPLEMENT_TRAITS	  0x400000
-
-/* class constants updated */
-#define ZEND_ACC_CONSTANTS_UPDATED	  0x100000
-
-/* user class has methods with static variables */
-#define ZEND_HAS_STATIC_IN_METHODS    0x800000
-
 
 #define ZEND_ACC_CLOSURE              0x100000
 #define ZEND_ACC_FAKE_CLOSURE         0x40
@@ -291,6 +278,33 @@ typedef struct _zend_oparray_context {
 
 /* op_array uses strict mode types */
 #define ZEND_ACC_STRICT_TYPES			0x80000000
+
+/*
+ * Class flags
+ *
+ * Classes also use the ZEND_ACC_FINAL (0x04) flag, otherwise there is no overlap.
+ */
+
+/* class flags (types) */
+/* ZEND_ACC_IMPLICIT_ABSTRACT_CLASS is used for abstract classes (since it is set by any abstract method even interfaces MAY have it set, too). */
+/* ZEND_ACC_EXPLICIT_ABSTRACT_CLASS denotes that a class was explicitly defined as abstract by using the keyword. */
+#define ZEND_ACC_IMPLICIT_ABSTRACT_CLASS	0x10
+#define ZEND_ACC_EXPLICIT_ABSTRACT_CLASS	0x20
+#define ZEND_ACC_INTERFACE		            0x40
+#define ZEND_ACC_TRAIT						0x80
+#define ZEND_ACC_ANON_CLASS                 0x100
+#define ZEND_ACC_ANON_BOUND                 0x200
+#define ZEND_ACC_INHERITED                  0x400
+
+/* class implement interface(s) flag */
+#define ZEND_ACC_IMPLEMENT_INTERFACES 0x80000
+#define ZEND_ACC_IMPLEMENT_TRAITS	  0x400000
+
+/* class constants updated */
+#define ZEND_ACC_CONSTANTS_UPDATED	  0x100000
+
+/* user class has methods with static variables */
+#define ZEND_HAS_STATIC_IN_METHODS    0x800000
 
 char *zend_visibility_string(uint32_t fn_flags);
 
