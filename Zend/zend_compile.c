@@ -6146,7 +6146,6 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 		}
 	}
 	if (ce->clone) {
-		ce->clone->common.fn_flags |= ZEND_ACC_CLONE;
 		if (ce->clone->common.fn_flags & ZEND_ACC_STATIC) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Clone method %s::%s() cannot be static",
 				ZSTR_VAL(ce->name), ZSTR_VAL(ce->clone->common.function_name));

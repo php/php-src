@@ -205,6 +205,7 @@ typedef struct _zend_oparray_context {
  * Free flags:
  * 0x10
  * 0x20
+ * 0x8000
  * 0x2000000
  */
 
@@ -227,7 +228,6 @@ typedef struct _zend_oparray_context {
 /* method flags (special method detection) */
 #define ZEND_ACC_CTOR		0x2000
 #define ZEND_ACC_DTOR		0x4000
-#define ZEND_ACC_CLONE		0x8000
 
 /* method flag used by Closure::__invoke() */
 #define ZEND_ACC_USER_ARG_INFO 0x80
