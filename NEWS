@@ -13,6 +13,8 @@ PHP                                                                        NEWS
   . Fixed bug #74444 (multiple catch freezes in some cases). (David Matějka)
   . Fixed bug #74410 (stream_select() is broken on Windows Nanoserver).
     (Matt Ficken)
+  . Fixed bug #74337 (php-cgi.exe crash on facebook callback).
+    (Anton Serbulov)
 
 - Date:
   . Fixed bug #74404 (Wrong reflection on DateTimeZone::getTransitions).
