@@ -56,6 +56,10 @@ PHP                                                                        NEWS
   . Fixed bug #74383 (phar method parameters reflection correction). 
     (mhagstrand)
 
+- Readline:
+  . Fixed bug #74489 (readline() immediately returns false in interactive
+    console mode). (Anatol)
+
 - Standard:
   . Fixed bug #72071 (setcookie allows max-age to be negative). (Craig Duncan)
   . Fixed bug #74361 (Compaction in array_rand() violates COW). (Nikita)
