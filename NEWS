@@ -51,6 +51,8 @@ PHP                                                                        NEWS
   . Fixed bug #74442 (Opcached version produces a nested array). (Nikita)
 
 - OpenSSL:
+  . Fixed bug #73711 (Segfault in openssl_pkey_new when generating DSA or DH
+    key). (Jakub Zelenka)
   . Fixed bug #74341 (openssl_x509_parse fails to parse ASN.1 UTCTime without
     seconds). (Moritz Fain)
 
