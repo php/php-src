@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2017 PHP 7.0.19
 
 - Core:
+  . Fixed bug #74188 (Null coalescing operator fails for undeclared static
+    class properties). (tpunt)
   . Fixed bug #74408 (Endless loop bypassing execution time limit). (Laruence)
   . Fixed bug #74410 (stream_select() is broken on Windows Nanoserver).
     (Matt Ficken)
@@ -40,6 +42,7 @@ PHP                                                                        NEWS
     key). (Jakub Zelenka)
   . Fixed bug #74341 (openssl_x509_parse fails to parse ASN.1 UTCTime without
     seconds). (Moritz Fain)
+  . Added OpenSSL 1.1.0 support. (Jakub Zelenka)
 
 - phar:
   . Fixed bug #74383 (phar method parameters reflection correction). 
@@ -48,6 +51,7 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #74409 (Reflection information for ini_get_all() is incomplete).
     (Sebastian Bergmann)
+  . Fixed bug #72071 (setcookie allows max-age to be negative). (Craig Duncan)
 
 - SQLite3:
   . Fixed bug #74413 (incorrect reflection for SQLite3::enableExceptions).
