@@ -19,6 +19,7 @@ EXPORTS
     inflateSync
     inflateCopy
     inflateReset
+    inflateReset2
     inflateBack
     inflateBackEnd
     zlibCompileFlags
