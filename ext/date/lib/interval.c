@@ -73,7 +73,7 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 
 	rt->days = fabs(floor((one->sse - two->sse - (dst_h_corr * 3600) - (dst_m_corr * 60)) / 86400));
 
-	timelib_do_rel_normalize(rt->invert ? one : two, rt);
+	timelib_do_rel_normalize(one, rt);
 
 	/* We need to do this after normalisation otherwise we can't get "24H" */
 	if (one_backup.dst == 1 && two_backup.dst == 0 && two->sse >= one->sse + 86400) {

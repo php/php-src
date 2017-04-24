@@ -74,7 +74,7 @@ static void dec_month(timelib_sll *y, timelib_sll *m)
 	}
 }
 
-static void do_range_limit_days_relative(timelib_sll *base_y, timelib_sll *base_m, timelib_sll *y, timelib_sll *m, timelib_sll *d, timelib_sll invert)
+static void do_range_limit_days_relative(timelib_sll *base_y, timelib_sll *base_m, timelib_sll *y, timelib_sll *m, timelib_sll *d)
 {
 	timelib_sll leapyear;
 	timelib_sll month, year;
@@ -88,28 +88,15 @@ static void do_range_limit_days_relative(timelib_sll *base_y, timelib_sll *base_
 /*
 	printf( "S: Y%d M%d   %d %d %d   %d\n", year, month, *y, *m, *d, days);
 */
-	if (!invert) {
-		while (*d < 0) {
-			dec_month(&year, &month);
-			leapyear = timelib_is_leap(year);
-			days = leapyear ? days_in_month_leap[month] : days_in_month[month];
+	while (*d < 0) {
+		leapyear = timelib_is_leap(year);
+		days = leapyear ? days_in_month_leap[month] : days_in_month[month];
 
-			/* printf( "I  Y%d M%d   %d %d %d   %d\n", year, month, *y, *m, *d, days); */
+		/* printf( "I  Y%d M%d   %d %d %d   %d\n", year, month, *y, *m, *d, days); */
 
-			*d += days;
-			(*m)--;
-		}
-	} else {
-		while (*d < 0) {
-			leapyear = timelib_is_leap(year);
-			days = leapyear ? days_in_month_leap[month] : days_in_month[month];
-
-			/* printf( "I  Y%d M%d   %d %d %d   %d\n", year, month, *y, *m, *d, days); */
-
-			*d += days;
-			(*m)--;
-			inc_month(&year, &month);
-		}
+		*d += days;
+		(*m)--;
+		inc_month(&year, &month);
 	}
 	/*
 	printf( "E: Y%d M%d   %d %d %d   %d\n", year, month, *y, *m, *d, days);
@@ -198,7 +185,7 @@ void timelib_do_rel_normalize(timelib_time *base, timelib_rel_time *rt)
 	do_range_limit(0, 24, 24, &rt->h, &rt->d);
 	do_range_limit(0, 12, 12, &rt->m, &rt->y);
 
-	do_range_limit_days_relative(&base->y, &base->m, &rt->y, &rt->m, &rt->d, rt->invert);
+	do_range_limit_days_relative(&base->y, &base->m, &rt->y, &rt->m, &rt->d);
 	do_range_limit(0, 12, 12, &rt->m, &rt->y);
 }
 
