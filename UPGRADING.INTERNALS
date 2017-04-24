@@ -3,6 +3,7 @@ PHP 7.1 INTERNALS UPGRADE NOTES
 1. Internal API changes
   a. Path related functions
   b. php_win32_get_random_bytes()
+  c. nice() Windows implementation
 
 2. Build system changes
   a. Unix build system changes
@@ -23,6 +24,9 @@ PHP 7.1 INTERNALS UPGRADE NOTES
   b. php_win32_get_random_bytes()
     The internal randomness source on Windows switched to use CNG API.
 
+  c. nice() now have a Windows alternative that is implemented in win32/nice.c, using
+	   SetPriorityClass(). See the implementation for more in-depth details. This also 
+	   defines HAVE_NICE.
 
 ========================
 2. Build system changes
@@ -33,9 +37,6 @@ PHP 7.1 INTERNALS UPGRADE NOTES
   b. Windows build system changes
 
     .  Minimum supported Windows versions are Windows 7/Server 2008 R2.
-    .  nice() now have a Windows alternative that is implemented in win32/nice.c, using
-	   SetPriorityClass(). See the implementation for more in-depth details. This also 
-	   defines HAVE_NICE.
 
 ========================
 3. Module changes
