@@ -8288,11 +8288,14 @@ static int zend_jit_fetch_dim_read(dasm_State **Dst, const zend_op *opline, zend
 			|	GET_ZVAL_PTR r1, val_addr
 			|	IF_NOT_ZVAL_TYPE val_addr, IS_REFERENCE, >1
 			|	cmp dword [r1], 1
-			|	jne >1
+			|	je >3
+			|.cold_code
+			|3:
 			|	LOAD_ZVAL_ADDR FCARG1a, res_addr
 			|	LOAD_ZVAL_ADDR FCARG2a, val_addr
 			|	EXT_CALL zend_jit_zval_copy_unref_helper, r0
 			|	jmp >9
+			|.code
 			|1:
 			|	GC_ADDREF r1
 			|2:
