@@ -1,7 +1,7 @@
 // $Id$
 // vim:ft=javascript
 
-ARG_WITH("openssl", "OpenSSL support", "no");
+ARG_WITH("openssl", "OpenSSL support", "no,shared");
 
 if (PHP_OPENSSL != "no") {
 	if (CHECK_LIB("ssleay32.lib", "openssl", PHP_OPENSSL) &&
