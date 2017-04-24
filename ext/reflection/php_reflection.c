@@ -3460,13 +3460,15 @@ ZEND_METHOD(reflection_method, getModifiers)
 {
 	reflection_object *intern;
 	zend_function *mptr;
+	uint32_t keep_flags = ZEND_ACC_PPP_MASK | ZEND_ACC_IMPLICIT_PUBLIC
+		| ZEND_ACC_STATIC | ZEND_ACC_ABSTRACT | ZEND_ACC_FINAL;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 	GET_REFLECTION_OBJECT_PTR(mptr);
 
-	RETURN_LONG(mptr->common.fn_flags);
+	RETURN_LONG((mptr->common.fn_flags & keep_flags));
 }
 /* }}} */
 
@@ -4663,13 +4665,15 @@ ZEND_METHOD(reflection_class, getModifiers)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
+	uint32_t keep_flags = ZEND_ACC_FINAL
+		| ZEND_ACC_EXPLICIT_ABSTRACT_CLASS | ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	RETURN_LONG(ce->ce_flags & ~(ZEND_ACC_CONSTANTS_UPDATED|ZEND_ACC_USE_GUARDS|ZEND_ACC_INHERITED));
+	RETURN_LONG((ce->ce_flags & keep_flags));
 }
 /* }}} */
 
@@ -5451,13 +5455,14 @@ ZEND_METHOD(reflection_property, getModifiers)
 {
 	reflection_object *intern;
 	property_reference *ref;
+	uint32_t keep_flags = ZEND_ACC_PPP_MASK | ZEND_ACC_IMPLICIT_PUBLIC | ZEND_ACC_STATIC;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	RETURN_LONG(ref->prop.flags);
+	RETURN_LONG((ref->prop.flags & keep_flags));
 }
 /* }}} */
 

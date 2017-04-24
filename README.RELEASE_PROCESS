@@ -315,3 +315,11 @@ the news entry.
 Please make sure that the mail to php-announce@ is its own completely separate email.
 This is to make sure that replies to the announcement on php-general@ or internals@
 will not accidentally hit the php-announce@ mailinglist.
+
+New Release Manager Checklist
+-----------------------------
+
+1. Email systems@ to get setup for access to downloads.php.net
+
+2. Create a GPG key for your @php.net address and publish it by editing `include/gpg-keys.inc`
+   in the `web-php` repository, adding the output of `gpg --fingerprint "$USER@php.net"`
