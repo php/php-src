@@ -9,6 +9,7 @@ PHP 7.1 INTERNALS UPGRADE NOTES
   a. Unix build system changes
   b. Windows build system changes
 
+
 3. Module changes
 
 ========================
@@ -28,6 +29,7 @@ PHP 7.1 INTERNALS UPGRADE NOTES
 	   SetPriorityClass(). See the implementation for more in-depth details. This also 
 	   defines HAVE_NICE.
 
+
 ========================
 2. Build system changes
 ========================
@@ -37,6 +39,11 @@ PHP 7.1 INTERNALS UPGRADE NOTES
   b. Windows build system changes
 
     .  Minimum supported Windows versions are Windows 7/Server 2008 R2.
+    . --enable-one-shot configure option is removed, --with-mp is usable.
+    . The new binary tools SDK is required for Windows builds, the
+      documentation is available under https://wiki.php.net/internals/windows/stepbystepbuild_sdk_2
+    . Visual Studio 2017 is utilized for the Windows builds
+    . Clang build with ASAN is supported with clang 5+
 
 ========================
 3. Module changes
@@ -46,4 +53,7 @@ PHP 7.1 INTERNALS UPGRADE NOTES
   . php_session_start()/session_reset_id() return value is changed from void to int.
     It returns SUCCESS/FAILURE.
   . Session module manages session status correctly.
+
+- OpenSSL:
+  . Windows builds ship with OpenSSL 1.1 by default, lower versions are still supported with custom deps.
 
