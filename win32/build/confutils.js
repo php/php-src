@@ -2795,11 +2795,6 @@ function PHP_INSTALL_HEADERS(dir, headers_list)
 PHP_SNAPSHOT_BUILD = "no";
 if (!MODE_PHPIZE) {
 	ARG_ENABLE('snapshot-build', 'Build a snapshot; turns on everything it can and ignores build errors', 'no');
-
-	// one-shot build optimizes build by asking compiler to build
-	// several objects at once, reducing overhead of starting new
-	// compiler processes.
-	ARG_ENABLE('one-shot', 'Optimize for fast build - best for release and snapshot builders, not so hot for edit-and-rebuild hacking', 'no');
 }
 
 function toolset_option_handle()
