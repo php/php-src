@@ -1496,6 +1496,7 @@ PHP_MINIT_FUNCTION(openssl)
 
 	REGISTER_LONG_CONSTANT("OPENSSL_RAW_DATA", OPENSSL_RAW_DATA, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OPENSSL_ZERO_PADDING", OPENSSL_ZERO_PADDING, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OPENSSL_VARIABLE_LENGTH_PRIORITY", OPENSSL_VARIABLE_LENGTH_PRIORITY, CONST_CS|CONST_PERSISTENT);
 
 #ifndef OPENSSL_NO_TLSEXT
 	/* SNI support included */
@@ -6266,20 +6267,7 @@ static int php_openssl_cipher_init(const EVP_CIPHER *cipher_type,
 	int key_len, password_len;
 	size_t max_iv_len;
 
-	/* check and set key */
-	password_len = (int) *ppassword_len;
-	key_len = EVP_CIPHER_key_length(cipher_type);
-	if (key_len > password_len) {
-		key = emalloc(key_len);
-		memset(key, 0, key_len);
-		memcpy(key, *ppassword, password_len);
-		*ppassword = (char *) key;
-		*ppassword_len = key_len;
-		*free_password = 1;
-	} else {
-		key = (unsigned char*)*ppassword;
-		*free_password = 0;
-	}
+	*free_password = 0;
 
 	max_iv_len = EVP_CIPHER_iv_length(cipher_type);
 	if (enc && *piv_len == 0 && max_iv_len > 0 && !mode->is_aead) {
@@ -6304,9 +6292,25 @@ static int php_openssl_cipher_init(const EVP_CIPHER *cipher_type,
 			return FAILURE;
 		}
 	}
-	if (password_len > key_len && !EVP_CIPHER_CTX_set_key_length(cipher_ctx, password_len)) {
+	/* check and set key */
+	password_len = (int) *ppassword_len;
+	key_len = EVP_CIPHER_key_length(cipher_type);
+	if (key_len > password_len && (!(OPENSSL_VARIABLE_LENGTH_PRIORITY & options) || !EVP_CIPHER_CTX_set_key_length(cipher_ctx, password_len))) {
+		if (OPENSSL_VARIABLE_LENGTH_PRIORITY & options) {
+			php_openssl_store_errors();
+		}
+		key = emalloc(key_len);
+		memset(key, 0, key_len);
+		memcpy(key, *ppassword, password_len);
+		*ppassword = (char *) key;
+		*ppassword_len = key_len;
+		*free_password = 1;
+	} else if (password_len > key_len && !EVP_CIPHER_CTX_set_key_length(cipher_ctx, password_len)) {
 		php_openssl_store_errors();
+	} else {
+		key = (unsigned char*)*ppassword;
 	}
+
 	if (!EVP_CipherInit_ex(cipher_ctx, NULL, NULL, key, (unsigned char *)*piv, enc)) {
 		php_openssl_store_errors();
 		return FAILURE;
