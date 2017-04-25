@@ -55,6 +55,10 @@ PHP                                                                        NEWS
     (Sebastian Bergmann)
   . Fixed bug #72071 (setcookie allows max-age to be negative). (Craig Duncan)
 
+- Streams:
+  . Fixed bug #74429 (Remote socket URI with unique persistence identifier
+    broken). (Sara)
+
 - SQLite3:
   . Fixed bug #74413 (incorrect reflection for SQLite3::enableExceptions).
     (krakjoe)
