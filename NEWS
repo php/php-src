@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2017 PHP 7.0.19
+?? ??? 2017 PHP 7.0.20
+
+
+
+11 May 2017 PHP 7.0.19
 
 - Core:
   . Fixed bug #74188 (Null coalescing operator fails for undeclared static
