@@ -19,20 +19,28 @@
 #include "php_hash.h"
 #include "php_hash_sha3.h"
 
+#define SUCCESS SHA3_SUCCESS /* Avoid conflict between KeccacHash.h and zend_types.h */
+#include "KeccakHash.h"
+
+typedef Keccak_HashInstance PHP_SHA3_224_CTX;
+typedef Keccak_HashInstance PHP_SHA3_256_CTX;
+typedef Keccak_HashInstance PHP_SHA3_384_CTX;
+typedef Keccak_HashInstance PHP_SHA3_512_CTX;
+
 
 // ==========================================================================
 
 #define DECLARE_SHA3_OPS(bits) \
-void PHP_SHA3##bits##Init(PHP_SHA3_##bits##_CTX* ctx) { \
+void PHP_SHA3##bits##Init(void *ctx) { \
 	Keccak_HashInitialize_SHA3_##bits((Keccak_HashInstance *)ctx); \
 } \
-void PHP_SHA3##bits##Update(PHP_SHA3_##bits##_CTX* ctx, \
+void PHP_SHA3##bits##Update(void *ctx, \
                             const unsigned char* input, \
                             unsigned int inputLen) { \
 	Keccak_HashUpdate((Keccak_HashInstance *)ctx, input, inputLen * 8); \
 } \
 void PHP_SHA3##bits##Final(unsigned char* digest, \
-                           PHP_SHA3_##bits##_CTX* ctx) { \
+                           void *ctx) { \
 	Keccak_HashFinal((Keccak_HashInstance *)ctx, digest); \
 } \
 const php_hash_ops php_hash_sha3_##bits##_ops = { \

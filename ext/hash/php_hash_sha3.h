@@ -21,29 +21,21 @@
 
 #include "php.h"
 
-#define SUCCESS SHA3_SUCCESS /* Avoid conflict between KeccacHash.h and zend_types.h */
-#include "KeccakHash.h"
+PHP_HASH_API void PHP_SHA3224Init(void *);
+PHP_HASH_API void PHP_SHA3224Update(void *, const unsigned char*, unsigned int);
+PHP_HASH_API void PHP_SAH3224Final(unsigned char[32], void *);
 
-typedef Keccak_HashInstance PHP_SHA3_224_CTX;
-typedef Keccak_HashInstance PHP_SHA3_256_CTX;
-typedef Keccak_HashInstance PHP_SHA3_384_CTX;
-typedef Keccak_HashInstance PHP_SHA3_512_CTX;
+PHP_HASH_API void PHP_SHA3256Init(void *);
+PHP_HASH_API void PHP_SHA3256Update(void *, const unsigned char*, unsigned int);
+PHP_HASH_API void PHP_SAH3256Final(unsigned char[32], void *);
 
-PHP_HASH_API void PHP_SHA3224Init(PHP_SHA3_224_CTX*);
-PHP_HASH_API void PHP_SHA3224Update(PHP_SHA3_224_CTX*, const unsigned char*, unsigned int);
-PHP_HASH_API void PHP_SAH3224Final(unsigned char[32], PHP_SHA3_224_CTX*);
+PHP_HASH_API void PHP_SHA3384Init(void *);
+PHP_HASH_API void PHP_SHA3384Update(void *, const unsigned char*, unsigned int);
+PHP_HASH_API void PHP_SAH3384Final(unsigned char[32], void *);
 
-PHP_HASH_API void PHP_SHA3256Init(PHP_SHA3_256_CTX*);
-PHP_HASH_API void PHP_SHA3256Update(PHP_SHA3_256_CTX*, const unsigned char*, unsigned int);
-PHP_HASH_API void PHP_SAH3256Final(unsigned char[32], PHP_SHA3_256_CTX*);
-
-PHP_HASH_API void PHP_SHA3384Init(PHP_SHA3_384_CTX*);
-PHP_HASH_API void PHP_SHA3384Update(PHP_SHA3_384_CTX*, const unsigned char*, unsigned int);
-PHP_HASH_API void PHP_SAH3384Final(unsigned char[32], PHP_SHA3_384_CTX*);
-
-PHP_HASH_API void PHP_SHA3512Init(PHP_SHA3_512_CTX*);
-PHP_HASH_API void PHP_SHA3512Update(PHP_SHA3_512_CTX*, const unsigned char*, unsigned int);
-PHP_HASH_API void PHP_SAH3512Final(unsigned char[32], PHP_SHA3_512_CTX*);
+PHP_HASH_API void PHP_SHA3512Init(void *);
+PHP_HASH_API void PHP_SHA3512Update(void *, const unsigned char*, unsigned int);
+PHP_HASH_API void PHP_SAH3512Final(unsigned char[32], void *);
 
 #endif
 /*
