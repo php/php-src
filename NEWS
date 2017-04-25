@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2017, PHP 7.1.5
+?? ??? 2017, PHP 7.1.6
+
+
+
+11 May 2017, PHP 7.1.5
 
 - Core:
   . Fixed bug #74408 (Endless loop bypassing execution time limit). (Laruence)
