@@ -22,32 +22,39 @@
 #define SUCCESS SHA3_SUCCESS /* Avoid conflict between KeccacHash.h and zend_types.h */
 #include "KeccakHash.h"
 
-typedef Keccak_HashInstance PHP_SHA3_224_CTX;
-typedef Keccak_HashInstance PHP_SHA3_256_CTX;
-typedef Keccak_HashInstance PHP_SHA3_384_CTX;
-typedef Keccak_HashInstance PHP_SHA3_512_CTX;
-
 
 // ==========================================================================
 
+static int hash_sha3_copy(const void *ops, void *orig_context, void *dest_context)
+{
+	PHP_SHA3_CTX* orig = (PHP_SHA3_CTX*)orig_context;
+	PHP_SHA3_CTX* dest = (PHP_SHA3_CTX*)dest_context;
+	dest->hashinstance = emalloc(sizeof(Keccak_HashInstance));
+	memcpy(dest->hashinstance, orig->hashinstance, sizeof(Keccak_HashInstance));
+	return SUCCESS;
+}
+
 #define DECLARE_SHA3_OPS(bits) \
-void PHP_SHA3##bits##Init(void *ctx) { \
-	Keccak_HashInitialize_SHA3_##bits((Keccak_HashInstance *)ctx); \
+void PHP_SHA3##bits##Init(PHP_SHA3_##bits##_CTX* ctx) { \
+	ctx->hashinstance = emalloc(sizeof(Keccak_HashInstance)); \
+	Keccak_HashInitialize_SHA3_##bits((Keccak_HashInstance *)ctx->hashinstance); \
 } \
-void PHP_SHA3##bits##Update(void *ctx, \
+void PHP_SHA3##bits##Update(PHP_SHA3_##bits##_CTX* ctx, \
                             const unsigned char* input, \
                             unsigned int inputLen) { \
-	Keccak_HashUpdate((Keccak_HashInstance *)ctx, input, inputLen * 8); \
+	Keccak_HashUpdate((Keccak_HashInstance *)ctx->hashinstance, input, inputLen * 8); \
 } \
 void PHP_SHA3##bits##Final(unsigned char* digest, \
-                           void *ctx) { \
-	Keccak_HashFinal((Keccak_HashInstance *)ctx, digest); \
+                           PHP_SHA3_##bits##_CTX* ctx) { \
+	Keccak_HashFinal((Keccak_HashInstance *)ctx->hashinstance, digest); \
+	efree(ctx->hashinstance); \
+	ctx->hashinstance = NULL; \
 } \
 const php_hash_ops php_hash_sha3_##bits##_ops = { \
 	(php_hash_init_func_t) PHP_SHA3##bits##Init, \
 	(php_hash_update_func_t) PHP_SHA3##bits##Update, \
 	(php_hash_final_func_t) PHP_SHA3##bits##Final, \
-	php_hash_copy, \
+	hash_sha3_copy, \
 	bits >> 3, \
 	(1600 - (2 * bits)) >> 3, \
 	sizeof(PHP_SHA3_##bits##_CTX), \
