@@ -381,10 +381,17 @@ function conf_process_args()
 				} else {
 					/* we matched the non-default arg */
 					if (argval == null) {
-						argval = arg.defval == "no" ? "yes" : "no";
+						if (arg.defval == "no") {
+							argval = "yes";
+						} else if (arg.defval == "no,shared") {
+							argval = "yes,shared";
+							shared = true;
+						} else {
+							argval = "no";
+						}
 					}
 				}
-				
+
 				arg.argval = argval;
 				eval("PHP_" + arg.symval + " = argval;");
 				eval("PHP_" + arg.symval + "_SHARED = shared;");
@@ -2788,11 +2795,6 @@ function PHP_INSTALL_HEADERS(dir, headers_list)
 PHP_SNAPSHOT_BUILD = "no";
 if (!MODE_PHPIZE) {
 	ARG_ENABLE('snapshot-build', 'Build a snapshot; turns on everything it can and ignores build errors', 'no');
-
-	// one-shot build optimizes build by asking compiler to build
-	// several objects at once, reducing overhead of starting new
-	// compiler processes.
-	ARG_ENABLE('one-shot', 'Optimize for fast build - best for release and snapshot builders, not so hot for edit-and-rebuild hacking', 'no');
 }
 
 function toolset_option_handle()
@@ -3354,18 +3356,18 @@ function SETUP_OPENSSL(target, path_to_check, common_name, use_env, add_dir_part
 	var ret = 0;
 	var cflags_var = "CFLAGS_" + target.toUpperCase();
 
-	if (CHECK_LIB("ssleay32.lib", target, path_to_check, common_name) &&
-			CHECK_LIB("libeay32.lib", target, path_to_check, common_name) &&
-			CHECK_LIB("crypt32.lib", target, path_to_check, common_name) &&
-			CHECK_HEADER_ADD_INCLUDE("openssl/ssl.h", cflags_var, path_to_check, use_env, add_dir_part, add_to_flag_only)) {
-		/* Openssl 1.0.x and lower */
-		return 1;
-	} else if (CHECK_LIB("libcrypto.lib", target, path_to_check) &&
+	if (CHECK_LIB("libcrypto.lib", target, path_to_check) &&
 			CHECK_LIB("libssl.lib", target, path_to_check) &&
 			CHECK_LIB("crypt32.lib", target, path_to_check, common_name) &&
 			CHECK_HEADER_ADD_INCLUDE("openssl/ssl.h", cflags_var, path_to_check, use_env, add_dir_part, add_to_flag_only)) {
 		/* Openssl 1.1.x */
 		return 2;
+	} else if (CHECK_LIB("ssleay32.lib", target, path_to_check, common_name) &&
+			CHECK_LIB("libeay32.lib", target, path_to_check, common_name) &&
+			CHECK_LIB("crypt32.lib", target, path_to_check, common_name) &&
+			CHECK_HEADER_ADD_INCLUDE("openssl/ssl.h", cflags_var, path_to_check, use_env, add_dir_part, add_to_flag_only)) {
+		/* Openssl 1.0.x and lower */
+		return 1;
 	}
 
 	return ret;
