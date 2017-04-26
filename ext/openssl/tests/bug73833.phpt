@@ -7,11 +7,12 @@ if (!extension_loaded("openssl")) die("skip openssl not loaded");
 --FILE--
 <?php
 $passwords = ["abc\x00defghijkl", "abcdefghikjl"];
+$conf = ['config' => __DIR__.'/openssl.cnf'];
 
 foreach($passwords as $password) {
-	$key = openssl_pkey_new();
+	$key = openssl_pkey_new($conf);
 
-	if (openssl_pkey_export($key, $privatePEM, $password) === false) {
+	if (openssl_pkey_export($key, $privatePEM, $password, $conf) === false) {
 		echo "Failed to encrypt.\n";
 	} else {
 		echo "Encrypted!\n";
