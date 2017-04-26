@@ -1539,6 +1539,7 @@ PHP_FUNCTION(fastcgi_finish_request) /* {{{ */
 
 		fcgi_end(request);
 		fcgi_close(request, 0, 0);
+		request->closed = 1;
 		RETURN_TRUE;
 	}
 
