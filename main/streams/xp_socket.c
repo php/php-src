@@ -581,7 +581,7 @@ static inline char *parse_ip_address_ex(const char *str, size_t str_len, int *po
 			return NULL;
 		}
 		*portno = strtol(p + 2, &e, 10);
-		if (e && *e && *e != '/') {
+		if (e && *e) {
 			if (get_err) {
 				*err = strpprintf(0, "Failed to parse address \"%s\"", str);
 			}
@@ -600,7 +600,7 @@ static inline char *parse_ip_address_ex(const char *str, size_t str_len, int *po
 	if (colon) {
 		char *e = NULL;
 		*portno = strtol(colon + 1, &e, 10);
-		if (!e || !*e || *e == '/') {
+		if (!e || !*e) {
 			return estrndup(str, colon - str);
 		}
 	}
