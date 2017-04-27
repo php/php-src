@@ -19,6 +19,7 @@ PHP                                                                        NEWS
     (Matt Ficken)
   . Fixed bug #74337 (php-cgi.exe crash on facebook callback).
     (Anton Serbulov)
+  . Patch for bug #74216 was reverted. (Anatol)
 
 - Date:
   . Fixed bug #74404 (Wrong reflection on DateTimeZone::getTransitions).
@@ -36,6 +37,10 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #74343 (compile fails on solaris 11 with system gd2 library).
     (krakjoe)
+
+- MySQLi:
+  . Fixed bug #74432 (mysqli_connect adding ":3306" to $host if $port parameter
+    not given). (Anatol)
 
 - MySQLnd:
   . Fixed bug #74376 (Invalid free of persistent results on error/connection
