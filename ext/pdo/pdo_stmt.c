@@ -554,6 +554,14 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *typ
 			}
 			break;
 
+		case PDO_PARAM_FLT:
+			if (value && value_len == sizeof(double)) {
+				ZVAL_DOUBLE(dest, *(double*)value);
+				break;
+			}
+			ZVAL_NULL(dest);
+			break;
+
 		case PDO_PARAM_INT:
 			if (value && value_len == sizeof(zend_long)) {
 				ZVAL_LONG(dest, *(zend_long*)value);
@@ -622,6 +630,10 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *typ
 
 	if (type != new_type) {
 		switch (new_type) {
+			case PDO_PARAM_FLT:
+				/* TODO: test coverage */
+				/* invoked via do_fetch_common() / if (do_bind && stmt->bound_columns) */
+				convert_to_double_ex(dest);
 			case PDO_PARAM_INT:
 				convert_to_long_ex(dest);
 				break;

@@ -105,6 +105,25 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 						pdo_sqlite_error_stmt(stmt);
 						return 0;
 
+					case PDO_PARAM_FLT:
+						if (Z_ISREF(param->parameter)) {
+							parameter = Z_REFVAL(param->parameter);
+						} else {
+							parameter = &param->parameter;
+						}
+						if (Z_TYPE_P(parameter) == IS_NULL) {
+							if (sqlite3_bind_null(S->stmt, param->paramno + 1) == SQLITE_OK) {
+								return 1;
+							}
+						} else {
+							convert_to_double(parameter);
+							if (SQLITE_OK == sqlite3_bind_double(S->stmt, param->paramno + 1, Z_DVAL_P(parameter))) {
+								return 1;
+							}
+						}
+						pdo_sqlite_error_stmt(stmt);
+						return 0;
+
 					case PDO_PARAM_INT:
 					case PDO_PARAM_BOOL:
 						if (Z_ISREF(param->parameter)) {

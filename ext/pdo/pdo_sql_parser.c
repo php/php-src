@@ -569,6 +569,12 @@ safe:
 							plc->freeq = 0;
 							break;
 
+						/* TODO: test coverage */
+						case PDO_PARAM_FLT:
+							plc->qlen = spprintf(&plc->quoted, 0, "%.*H", (int) EG(precision), zval_get_double(parameter));
+							plc->freeq = 1;
+							break;
+
 						case PDO_PARAM_INT:
 							buf = zend_long_to_str(zval_get_long(parameter));
 
