@@ -6305,9 +6305,10 @@ static int php_openssl_cipher_init(const EVP_CIPHER *cipher_type,
 		*ppassword = (char *) key;
 		*ppassword_len = key_len;
 		*free_password = 1;
-	} else if (password_len > key_len && !EVP_CIPHER_CTX_set_key_length(cipher_ctx, password_len)) {
-		php_openssl_store_errors();
 	} else {
+		if (password_len > key_len && !EVP_CIPHER_CTX_set_key_length(cipher_ctx, password_len)) {
+			php_openssl_store_errors();
+		}
 		key = (unsigned char*)*ppassword;
 	}
 
