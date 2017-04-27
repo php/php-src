@@ -2736,6 +2736,13 @@ static int accel_startup(zend_extension *extension)
 	zend_function *func;
 	zend_ini_entry *ini_entry;
 
+	/* check loaded state here to prevent double accel_globals_ctor()
+	 * zend won't do this for zend_extension */
+	if (accel_startup_ok) {
+		zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME " already loaded");
+		return FAILURE;
+	}
+
 #ifdef ZTS
 	accel_globals_id = ts_allocate_id(&accel_globals_id, sizeof(zend_accel_globals), (ts_allocate_ctor) accel_globals_ctor, (ts_allocate_dtor) accel_globals_dtor);
 #else
