@@ -525,7 +525,8 @@ CWD_API char *virtual_getcwd(char *buf, size_t size) /* {{{ */
 static inline zend_ulong realpath_cache_key(const char *path, size_t path_len) /* {{{ */
 {
 	register zend_ulong h;
-	char *bucket_key_start = tsrm_win32_get_path_sid_key(path);
+	size_t bucket_key_len;
+	char *bucket_key_start = tsrm_win32_get_path_sid_key(path, path_len, &bucket_key_len);
 	char *bucket_key = (char *)bucket_key_start;
 	const char *e;
 
@@ -533,7 +534,7 @@ static inline zend_ulong realpath_cache_key(const char *path, size_t path_len) /
 		return 0;
 	}
 
-	e = bucket_key + strlen(bucket_key);
+	e = bucket_key + bucket_key_len;
 	for (h = Z_UL(2166136261); bucket_key < e;) {
 		h *= Z_UL(16777619);
 		h ^= *bucket_key++;

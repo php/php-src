@@ -107,33 +107,36 @@ TSRM_API void tsrm_win32_shutdown(void)
 #endif
 }
 
-char * tsrm_win32_get_path_sid_key(const char *pathname)
+char * tsrm_win32_get_path_sid_key(const char *pathname, size_t pathname_len, size_t *key_len)
 {
 	PSID pSid = TWG(impersonation_token_sid);
 	TCHAR *ptcSid = NULL;
 	char *bucket_key = NULL;
-	size_t ptc_sid_len, pathname_len;
-
-	pathname_len = strlen(pathname);
+	size_t ptc_sid_len;
 
 	if (!pSid) {
 		bucket_key = (char *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, pathname_len + 1);
 		if (!bucket_key) {
+			*key_len = 0;
 			return NULL;
 		}
 		memcpy(bucket_key, pathname, pathname_len);
+		*key_len = pathname_len;
 		return bucket_key;
 	}
 
 	if (!ConvertSidToStringSid(pSid, &ptcSid)) {
+		*key_len = 0;
 		return NULL;
 	}
 
 
 	ptc_sid_len = strlen(ptcSid);
-	bucket_key = (char *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, pathname_len + ptc_sid_len + 1);
+	*key_len = pathname_len + ptc_sid_len;
+	bucket_key = (char *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, *key_len + 1);
 	if (!bucket_key) {
 		LocalFree(ptcSid);
+		*key_len = 0;
 		return NULL;
 	}
 
