@@ -539,7 +539,9 @@ static inline zend_ulong realpath_cache_key(const char *path, size_t path_len) /
 		h *= Z_UL(16777619);
 		h ^= *bucket_key++;
 	}
-	HeapFree(GetProcessHeap(), 0, (LPVOID)bucket_key_start);
+	if (bucket_key_start != path) {
+		HeapFree(GetProcessHeap(), 0, (LPVOID)bucket_key_start);
+	}
 	return h;
 }
 /* }}} */

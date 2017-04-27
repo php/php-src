@@ -115,14 +115,8 @@ char * tsrm_win32_get_path_sid_key(const char *pathname, size_t pathname_len, si
 	size_t ptc_sid_len;
 
 	if (!pSid) {
-		bucket_key = (char *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, pathname_len + 1);
-		if (!bucket_key) {
-			*key_len = 0;
-			return NULL;
-		}
-		memcpy(bucket_key, pathname, pathname_len);
 		*key_len = pathname_len;
-		return bucket_key;
+		return pathname;
 	}
 
 	if (!ConvertSidToStringSid(pSid, &ptcSid)) {
