@@ -5699,6 +5699,7 @@ PHP_FUNCTION(openssl_encrypt)
 	}
 
 	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(data_len, data);
+	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(password_len, password);
 
 	cipher_ctx = EVP_CIPHER_CTX_new();
 	if (!cipher_ctx) {
@@ -5726,7 +5727,6 @@ PHP_FUNCTION(openssl_encrypt)
 
 	EVP_EncryptInit(cipher_ctx, cipher_type, NULL, NULL);
 	if (password_len > keylen) {
-		PHP_OPENSSL_CHECK_SIZE_T_TO_INT(password_len, password);
 		EVP_CIPHER_CTX_set_key_length(cipher_ctx, (int)password_len);
 	}
 	EVP_EncryptInit_ex(cipher_ctx, NULL, NULL, key, (unsigned char *)iv);
@@ -5790,6 +5790,7 @@ PHP_FUNCTION(openssl_decrypt)
 	}
 
 	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(data_len, data);
+	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(password_len, password);
 
 	cipher_type = EVP_get_cipherbyname(method);
 	if (!cipher_type) {
@@ -5830,7 +5831,6 @@ PHP_FUNCTION(openssl_decrypt)
 
 	EVP_DecryptInit(cipher_ctx, cipher_type, NULL, NULL);
 	if (password_len > keylen) {
-		PHP_OPENSSL_CHECK_SIZE_T_TO_INT(password_len, password);
 		EVP_CIPHER_CTX_set_key_length(cipher_ctx, (int)password_len);
 	}
 	EVP_DecryptInit_ex(cipher_ctx, NULL, NULL, key, (unsigned char *)iv);
