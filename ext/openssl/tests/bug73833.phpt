@@ -7,7 +7,7 @@ if (!extension_loaded("openssl")) die("skip openssl not loaded");
 --FILE--
 <?php
 $passwords = ["abc\x00defghijkl", "abcdefghikjl"];
-$conf = ['config' => __DIR__.'/openssl.cnf'];
+$conf = ['config' => __DIR__ . DIRECTORY_SEPARATOR . 'openssl.cnf'];
 
 foreach($passwords as $password) {
 	$key = openssl_pkey_new($conf);
