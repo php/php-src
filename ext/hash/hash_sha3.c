@@ -29,7 +29,6 @@ static int hash_sha3_copy(const void *ops, void *orig_context, void *dest_contex
 {
 	PHP_SHA3_CTX* orig = (PHP_SHA3_CTX*)orig_context;
 	PHP_SHA3_CTX* dest = (PHP_SHA3_CTX*)dest_context;
-	dest->hashinstance = emalloc(sizeof(Keccak_HashInstance));
 	memcpy(dest->hashinstance, orig->hashinstance, sizeof(Keccak_HashInstance));
 	return SUCCESS;
 }
