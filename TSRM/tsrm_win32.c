@@ -110,7 +110,7 @@ TSRM_API void tsrm_win32_shutdown(void)
 char * tsrm_win32_get_path_sid_key(const char *pathname, size_t pathname_len, size_t *key_len)
 {
 	PSID pSid = TWG(impersonation_token_sid);
-	TCHAR *ptcSid = NULL;
+	char *ptcSid = NULL;
 	char *bucket_key = NULL;
 	size_t ptc_sid_len;
 
