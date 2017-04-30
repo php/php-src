@@ -66,6 +66,8 @@ PHP                                                                        NEWS
     key). (Jakub Zelenka)
   . Fixed bug #74341 (openssl_x509_parse fails to parse ASN.1 UTCTime without
     seconds). (Moritz Fain)
+  . Fixed bug #73808 (iv length warning too restrictive for aes-128-ccm).
+    (Jakub Zelenka)
 
 - phar:
   . Fixed bug #74383 (phar method parameters reflection correction). 
