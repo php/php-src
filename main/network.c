@@ -51,7 +51,9 @@
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
-#if HAVE_SYS_POLL_H
+#if HAVE_POLL_H
+#include <poll.h>
+#elif HAVE_SYS_POLL_H
 #include <sys/poll.h>
 #endif
 
