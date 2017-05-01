@@ -634,6 +634,7 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *typ
 				/* TODO: test coverage */
 				/* invoked via do_fetch_common() / if (do_bind && stmt->bound_columns) */
 				convert_to_double_ex(dest);
+				break;
 			case PDO_PARAM_INT:
 				convert_to_long_ex(dest);
 				break;
