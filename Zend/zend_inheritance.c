@@ -1532,7 +1532,6 @@ static void zend_do_traits_property_binding(zend_class_entry *ce) /* {{{ */
 	size_t i;
 	zend_property_info *property_info;
 	zend_property_info *coliding_prop;
-	zval compare_result;
 	zend_string* prop_name;
 	const char* class_name_unused;
 	zend_bool not_compatible;
