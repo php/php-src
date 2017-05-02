@@ -25,8 +25,8 @@ $encrypted = openssl_encrypt($padded_data, $method, $password, OPENSSL_RAW_DATA|
 $output = openssl_decrypt($encrypted, $method, $password, OPENSSL_RAW_DATA|OPENSSL_ZERO_PADDING, $iv);
 var_dump(rtrim($output));
 // if we want to prefer variable length cipher setting
-$encrypted = openssl_encrypt($data, "bf-ecb", $password, OPENSSL_VARIABLE_LENGTH_PRIORITY);
-$output = openssl_decrypt($encrypted, "bf-ecb", $password, OPENSSL_VARIABLE_LENGTH_PRIORITY);
+$encrypted = openssl_encrypt($data, "bf-ecb", $password, OPENSSL_DONT_ZERO_PAD_KEY);
+$output = openssl_decrypt($encrypted, "bf-ecb", $password, OPENSSL_DONT_ZERO_PAD_KEY);
 var_dump($output);
 ?>
 --EXPECT--

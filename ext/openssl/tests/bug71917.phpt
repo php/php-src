@@ -10,7 +10,7 @@ function test($envkey) {
   $publicKey = "file://" . dirname(__FILE__) . "/public.key";
   $privateKey = "file://" . dirname(__FILE__) . "/private_rsa_1024.key";
   openssl_public_encrypt($envkey, $envelope, $publicKey);
-  $sealed = openssl_encrypt('plaintext', 'rc4', $envkey, OPENSSL_RAW_DATA | OPENSSL_VARIABLE_LENGTH_PRIORITY);
+  $sealed = openssl_encrypt('plaintext', 'rc4', $envkey, OPENSSL_RAW_DATA | OPENSSL_DONT_ZERO_PAD_KEY);
   openssl_open($sealed, $output, $envelope, $privateKey, 'rc4');
   var_dump($output === 'plaintext');
 }

@@ -1496,7 +1496,7 @@ PHP_MINIT_FUNCTION(openssl)
 
 	REGISTER_LONG_CONSTANT("OPENSSL_RAW_DATA", OPENSSL_RAW_DATA, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OPENSSL_ZERO_PADDING", OPENSSL_ZERO_PADDING, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("OPENSSL_VARIABLE_LENGTH_PRIORITY", OPENSSL_VARIABLE_LENGTH_PRIORITY, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OPENSSL_DONT_ZERO_PAD_KEY", OPENSSL_DONT_ZERO_PAD_KEY, CONST_CS|CONST_PERSISTENT);
 
 #ifndef OPENSSL_NO_TLSEXT
 	/* SNI support included */
@@ -6295,9 +6295,11 @@ static int php_openssl_cipher_init(const EVP_CIPHER *cipher_type,
 	/* check and set key */
 	password_len = (int) *ppassword_len;
 	key_len = EVP_CIPHER_key_length(cipher_type);
-	if (key_len > password_len && (!(OPENSSL_VARIABLE_LENGTH_PRIORITY & options) || !EVP_CIPHER_CTX_set_key_length(cipher_ctx, password_len))) {
-		if (OPENSSL_VARIABLE_LENGTH_PRIORITY & options) {
+	if (key_len > password_len) {
+		if ((OPENSSL_DONT_ZERO_PAD_KEY & options) && !EVP_CIPHER_CTX_set_key_length(cipher_ctx, password_len)) {
 			php_openssl_store_errors();
+			php_error_docref(NULL, E_WARNING, "Key length cannot be set for the cipher method");
+			return FAILURE;
 		}
 		key = emalloc(key_len);
 		memset(key, 0, key_len);
