@@ -535,7 +535,7 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 		efree(tempMailTo);
 	}
 	else if (headers) {
-		if (pos1 = strstr(headers_lc, "bcc:")) {
+		if ((pos1 = strstr(headers_lc, "bcc:")) && (pos1 == headers_lc || *(pos1-1) == '\n')) {
 			/* Real offset is memaddress from the original headers + difference of
 			 * string found in the lowercase headrs + 4 characters to jump over
 			 * the bcc: */
