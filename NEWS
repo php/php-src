@@ -193,6 +193,9 @@ PHP                                                                        NEWS
   . Moved utf8_encode() and utf8_decode() to the Standard extension. (Andrea)
   . Fixed bug #72135 (malformed XML causes fault) (edgarsandi)
 
+- xmlreader:
+  . Fixed bug #74457 (Wrong reflection on XMLReader::expand). (villfa)
+
 - XMLRPC:
   . Use Zend MM for allocation in bundled libxmlrpc (Joe)
 
