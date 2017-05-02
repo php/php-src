@@ -158,7 +158,7 @@ double timelib_ts_to_juliandate(timelib_sll ts);
 int timelib_astro_rise_set_altitude(timelib_time *time, double lon, double lat, double altit, int upper_limb, double *h_rise, double *h_set, timelib_sll *ts_rise, timelib_sll *ts_set, timelib_sll *ts_transit);
 
 /* from interval.c */
-timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two);
+timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two, bool absolute);
 timelib_time *timelib_add(timelib_time *t, timelib_rel_time *interval);
 timelib_time *timelib_sub(timelib_time *t, timelib_rel_time *interval);
 
