@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - intl:
   . Fixed bug #74468 (wrong reflection on Collator::sortWithSortKeys). (villfa)
 
+- Standard:
+  . Fixed bug #74510 (win32/sendmail.c anchors CC header but not BCC).
+    (Damian Wadley, Anatol)
+
 - xmlreader:
   . Fixed bug #74457 (Wrong reflection on XMLReader::expand). (villfa)
 
