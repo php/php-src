@@ -159,11 +159,7 @@ ZEND_API void zend_objects_store_del(zend_object *object) /* {{{ */
 
 				if (object->handlers->dtor_obj) {
 					GC_REFCOUNT(object)++;
-					zend_try {
-						object->handlers->dtor_obj(object);
-					} zend_catch {
-						failure = 1;
-					} zend_end_try();
+					object->handlers->dtor_obj(object);
 					GC_REFCOUNT(object)--;
 				}
 			}
