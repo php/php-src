@@ -50,7 +50,7 @@ TEST 5
 bool(true)
 bool(true)
 
-Warning: openssl_encrypt(): Setting of IV length for AEAD mode failed, the expected length is 12 bytes in %s on line %d
+Warning: openssl_encrypt(): Setting of IV length for AEAD mode failed in %s on line %d
 bool(false)
 
 Warning: openssl_encrypt(): Retrieving verification tag failed in %s on line %d

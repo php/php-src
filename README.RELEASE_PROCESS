@@ -322,4 +322,15 @@ New Release Manager Checklist
 1. Email systems@ to get setup for access to downloads.php.net
 
 2. Create a GPG key for your @php.net address and publish it by editing `include/gpg-keys.inc`
-   in the `web-php` repository, adding the output of `gpg --fingerprint "$USER@php.net"`
+   in the `web-php` repository, adding the output of `gpg --fingerprint "$USER@php.net"`. Let
+   one or more of the previous RMs sign your key.
+
+3. Request karma to eding main/php_version.h. Possibly karma for other restricted parts of 
+   php-src might come in question.
+
+4. Request karma for web/qa.git and web/php.git for publishing release announcements.
+
+5. Request moderation access to announce@php.net and primary-qa-tester@lists.php.net lists, to
+   be able to moderate your release announcements. All the announcements should be sent from
+   the @php.net alias.
+

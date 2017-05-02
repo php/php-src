@@ -184,7 +184,7 @@ static zend_bool zend_is_reserved_class_name(const zend_string *name) /* {{{ */
 }
 /* }}} */
 
-ZEND_API void zend_assert_valid_class_name(const zend_string *name) /* {{{ */
+void zend_assert_valid_class_name(const zend_string *name) /* {{{ */
 {
 	if (zend_is_reserved_class_name(name)) {
 		zend_error_noreturn(E_COMPILE_ERROR,

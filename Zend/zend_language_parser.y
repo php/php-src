@@ -338,17 +338,22 @@ use_type:
 ;
 
 group_use_declaration:
-		namespace_name T_NS_SEPARATOR '{' unprefixed_use_declarations '}'
+		namespace_name T_NS_SEPARATOR '{' unprefixed_use_declarations possible_comma '}'
 			{ $$ = zend_ast_create(ZEND_AST_GROUP_USE, $1, $4); }
-	|	T_NS_SEPARATOR namespace_name T_NS_SEPARATOR '{' unprefixed_use_declarations '}'
+	|	T_NS_SEPARATOR namespace_name T_NS_SEPARATOR '{' unprefixed_use_declarations possible_comma '}'
 			{ $$ = zend_ast_create(ZEND_AST_GROUP_USE, $2, $5); }
 ;
 
 mixed_group_use_declaration:
-		namespace_name T_NS_SEPARATOR '{' inline_use_declarations '}'
+		namespace_name T_NS_SEPARATOR '{' inline_use_declarations possible_comma '}'
 			{ $$ = zend_ast_create(ZEND_AST_GROUP_USE, $1, $4);}
-	|	T_NS_SEPARATOR namespace_name T_NS_SEPARATOR '{' inline_use_declarations '}'
+	|	T_NS_SEPARATOR namespace_name T_NS_SEPARATOR '{' inline_use_declarations possible_comma '}'
 			{ $$ = zend_ast_create(ZEND_AST_GROUP_USE, $2, $5); }
+;
+
+possible_comma:
+		/* empty */
+	|	','
 ;
 
 inline_use_declarations:
