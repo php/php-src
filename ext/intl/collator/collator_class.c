@@ -88,6 +88,10 @@ ZEND_BEGIN_ARG_INFO_EX( collator_sort_args, 0, 0, 1 )
 	ZEND_ARG_INFO( 0, flags )
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX( collator_sort_with_sort_keys_args, 0, 0, 1 )
+	ZEND_ARG_ARRAY_INFO( 1, arr, 0 )
+ZEND_END_ARG_INFO()
+
 /* }}} */
 
 /* {{{ Collator_class_functions
@@ -99,7 +103,7 @@ zend_function_entry Collator_class_functions[] = {
 	ZEND_FENTRY( create, ZEND_FN( collator_create ), collator_1_arg, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
 	PHP_NAMED_FE( compare, ZEND_FN( collator_compare ), collator_2_args )
 	PHP_NAMED_FE( sort, ZEND_FN( collator_sort ), collator_sort_args )
-	PHP_NAMED_FE( sortWithSortKeys, ZEND_FN( collator_sort_with_sort_keys ), collator_sort_args )
+	PHP_NAMED_FE( sortWithSortKeys, ZEND_FN( collator_sort_with_sort_keys ), collator_sort_with_sort_keys_args )
 	PHP_NAMED_FE( asort, ZEND_FN( collator_asort ), collator_sort_args )
 	PHP_NAMED_FE( getAttribute, ZEND_FN( collator_get_attribute ), collator_1_arg )
 	PHP_NAMED_FE( setAttribute, ZEND_FN( collator_set_attribute ), collator_2_args )

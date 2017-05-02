@@ -2,7 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2017, PHP 7.1.6
 
-
+- intl:
+  . Fixed bug #74468 (wrong reflection on Collator::sortWithSortKeys). (villfa)
 
 11 May 2017, PHP 7.1.5
 
