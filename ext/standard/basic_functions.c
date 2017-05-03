@@ -560,6 +560,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_array_rand, 0, 0, 1)
 	ZEND_ARG_INFO(0, num_req)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_array_pick, 0)
+	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO(arginfo_array_sum, 0)
 	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
 ZEND_END_ARG_INFO()
@@ -3351,6 +3355,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(array_flip,														arginfo_array_flip)
 	PHP_FE(array_change_key_case,											arginfo_array_change_key_case)
 	PHP_FE(array_rand,														arginfo_array_rand)
+	PHP_FE(array_pick,														arginfo_array_pick)
 	PHP_FE(array_unique,													arginfo_array_unique)
 	PHP_FE(array_intersect,													arginfo_array_intersect)
 	PHP_FE(array_intersect_key,												arginfo_array_intersect_key)

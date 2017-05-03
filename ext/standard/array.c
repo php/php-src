@@ -5780,6 +5780,38 @@ PHP_FUNCTION(array_rand)
 }
 /* }}} */
 
+/* {{{ proto mixed array_pick(array input)
+   Return value for random entry in the array */
+PHP_FUNCTION(array_pick)
+{
+	zval *input;
+	long randval;
+	int num_avail, key_type;
+	zval **data;
+	HashPosition pos;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &input) == FAILURE) {
+		return;
+	}
+
+	num_avail = zend_hash_num_elements(Z_ARRVAL_P(input));
+
+	/* We can't use zend_hash_index_find() because the array may have string keys or gaps. */
+	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(input), &pos);
+	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(input), (void **) &data, &pos) != HASH_KEY_NON_EXISTANT) {
+
+		randval = php_rand(TSRMLS_C);
+
+		if ((double) (randval / (PHP_RAND_MAX + 1.0)) < 1.0 / (double) num_avail) {
+			RETURN_ZVAL(*data, 1, 0);
+		}
+		num_avail--;
+		zend_hash_move_forward_ex(Z_ARRVAL_P(input), &pos);
+	}
+}
+/* }}} */
+
+
 /* {{{ proto mixed array_sum(array input)
    Returns the sum of the array entries */
 PHP_FUNCTION(array_sum)
