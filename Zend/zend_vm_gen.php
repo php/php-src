@@ -1647,6 +1647,9 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 							out($f,"# define ZEND_VM_TAIL_CALL(call) return call\n");
 							out($f,"# define ZEND_VM_CONTINUE()      return  0\n");
 							out($f,"# define ZEND_VM_RETURN()        return -1\n");
+							if ($kind == ZEND_VM_KIND_HYBRID) {
+								out($f,"# define ZEND_VM_HOT\n");
+							}
 							out($f,"#endif\n");
 							out($f,"\n");
 							out($f,"typedef ZEND_OPCODE_HANDLER_RET (ZEND_FASTCALL *opcode_handler_t) (ZEND_OPCODE_HANDLER_ARGS);\n");
