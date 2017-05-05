@@ -31,6 +31,7 @@
 #include "ext/dom/xml_common.h"
 #include "ext/dom/dom_ce.h"
 #endif
+#include <libxml/parser.h>
 #include <libxml/xmlreader.h>
 #include <libxml/uri.h>
 
@@ -874,7 +875,9 @@ PHP_METHOD(xmlreader, open)
 	}
 
 	if (!source_len) {
-		php_error_docref(NULL, E_WARNING, "Empty string supplied as input");
+		if(!(options & XML_PARSE_NOWARNING)) {
+			php_error_docref(NULL, E_WARNING, "Empty string supplied as input");
+		}
 		RETURN_FALSE;
 	}
 
@@ -885,7 +888,9 @@ PHP_METHOD(xmlreader, open)
 	}
 
 	if (reader == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to open source data");
+		if(!(options & XML_PARSE_NOWARNING)) {
+			php_error_docref(NULL, E_WARNING, "Unable to open source data");
+		}
 		RETURN_FALSE;
 	}
 
