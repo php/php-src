@@ -11,11 +11,11 @@ PHP_ARG_WITH(mm,for mm support,
 if test "$PHP_SESSION" != "no"; then
   PHP_PWRITE_TEST
   PHP_PREAD_TEST
-  PHP_NEW_EXTENSION(session, mod_user_class.c session.c mod_files.c mod_mm.c mod_user.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+  PHP_NEW_EXTENSION(session, serializer_user.c mod_user_class.c session.c mod_files.c mod_mm.c mod_user.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
   PHP_ADD_EXTENSION_DEP(session, hash, true)
   PHP_ADD_EXTENSION_DEP(session, spl)
   PHP_SUBST(SESSION_SHARED_LIBADD)
-  PHP_INSTALL_HEADERS(ext/session, [php_session.h mod_files.h mod_user.h])
+  PHP_INSTALL_HEADERS(ext/session, [php_session.h mod_serializer.h mod_files.h mod_user.h])
   AC_DEFINE(HAVE_PHP_SESSION,1,[ ])
 fi
 
