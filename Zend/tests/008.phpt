@@ -12,7 +12,11 @@ var_dump(define(array(1,2,3,4,5), 1));
 var_dump(define(" ", 1));
 var_dump(define("[[[", 2));
 var_dump(define("test const", 3));
-var_dump(define("test const", 3));
+try {
+	var_dump(define("test const", 3));
+} catch (Throwable $e) {
+	echo "Exception: " . $e->getMessage() . "\n";
+}
 var_dump(define("test", array(1)));
 var_dump(define("test1", new stdclass));
 
@@ -38,9 +42,7 @@ NULL
 bool(true)
 bool(true)
 bool(true)
-
-Notice: Constant test const already defined in %s on line %d
-bool(false)
+Exception: Constant test const already defined
 bool(true)
 
 Warning: Constants may only evaluate to scalar values or arrays in %s on line %d

@@ -520,7 +520,11 @@ ZEND_API int zend_register_constant(zend_constant *c)
 		if (ZSTR_VAL(c->name)[0] == '\0' && ZSTR_LEN(c->name) > sizeof("\0__COMPILER_HALT_OFFSET__")-1
 			&& memcmp(ZSTR_VAL(name), "\0__COMPILER_HALT_OFFSET__", sizeof("\0__COMPILER_HALT_OFFSET__")) == 0) {
 		}
-		zend_error(E_NOTICE,"Constant %s already defined", ZSTR_VAL(name));
+		if (EG(current_execute_data)) {
+			zend_throw_error(NULL, "Constant %s already defined", ZSTR_VAL(name));
+		} else {
+			zend_error(E_NOTICE,"Constant %s already defined", ZSTR_VAL(name));
+		}
 		zend_string_release(c->name);
 		if (!(c->flags & CONST_PERSISTENT)) {
 			zval_dtor(&c->value);
