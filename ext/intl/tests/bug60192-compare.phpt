@@ -16,4 +16,4 @@ $c = new Collator2();
 $a = $c->compare('h', 'H');
 --EXPECTF--
 
-Catchable fatal error: Collator::compare(): Object not initialized in %s on line %d
+Recoverable fatal error: Collator::compare(): Object not initialized in %s on line %d

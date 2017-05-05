@@ -1058,7 +1058,7 @@ static ZEND_COLD void php_error_cb(int type, const char *error_filename, const u
 				error_type_str = "Fatal error";
 				break;
 			case E_RECOVERABLE_ERROR:
-				error_type_str = "Catchable fatal error";
+				error_type_str = "Recoverable fatal error";
 				break;
 			case E_WARNING:
 			case E_CORE_WARNING:
