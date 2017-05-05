@@ -415,6 +415,7 @@ PHPAPI char *php_get_current_user(void);
 END_EXTERN_C()
 
 /* PHP-named Zend macro wrappers */
+#define PHP_FUNCTION_PROLOUGE   ZEND_FUNCTION_PROLOUGE
 #define PHP_FN					ZEND_FN
 #define PHP_MN					ZEND_MN
 #define PHP_NAMED_FUNCTION		ZEND_NAMED_FUNCTION
