@@ -9,14 +9,14 @@
    
 $conf = array(
 /* path to the php source tree */
-'TEST_PHP_SRCDIR'      =>    NULL,
+'TEST_PHP_SRCDIR'      =>    null,
 
 /* executable that will be tested.  Not used for
    web based tests */
-'TEST_PHP_EXECUTABLE'  =>    NULL,
+'TEST_PHP_EXECUTABLE'  =>    null,
 
 /* php.ini to use when executing php */
-'PHPRC'                =>    NULL,
+'PHPRC'                =>    null,
 
 /* log format */
 'TEST_PHP_LOG_FORMAT'  =>    'LEODC',
@@ -34,7 +34,7 @@ $conf = array(
 'NO_INTERACTION'       =>    true,
 
 /* base url prefixed to any requests */
-'TEST_WEB_BASE_URL'    =>    NULL,
+'TEST_WEB_BASE_URL'    =>    null,
 
 /* if set, copy phpt files into this directory,
    which should be accessible via an http server.  The
@@ -43,12 +43,12 @@ $conf = array(
    TEST_WEB_BASE_URL should be the base url pointing
    to TEST_PHP_SRCDIR, which should then be accessible via
    an http server.
-   
+
    An example would be:
    TEST_WEB_BASE_URL=http://localhost/test
    TEST_BASE_PATH=/path/to/htdocs/test
 */
-'TEST_BASE_PATH'   =>    NULL,
+'TEST_BASE_PATH'   =>    null,
 
 /* file extension of pages requested via http
    this allows for php to be configured to parse
@@ -60,7 +60,7 @@ $conf = array(
 'TEST_CONTEXT_INFO'    =>    false,
 
 /* : or ; separated list of paths */
-'TEST_PATHS'           =>    NULL
+'TEST_PATHS'           =>    null
 /* additional configuration items that may be set
    to provide proxy support for testes:
   timeout
@@ -70,5 +70,3 @@ $conf = array(
   proxy_pass
 */
 );
-
-?>
