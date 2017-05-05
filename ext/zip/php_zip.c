@@ -1660,6 +1660,7 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 		size_t real_len = strlen(remove_path);
 		if ((real_len > 1) && ((remove_path[real_len - 1] == '/') || (remove_path[real_len - 1] == '\\'))) {
 			remove_path[real_len - 1] = '\0';
+			remove_path_len -= 1;
 		}
 	}
 
