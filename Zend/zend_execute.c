@@ -1800,8 +1800,13 @@ try_string_offset:
 		if (type != BP_VAR_IS && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
 			zval_undefined_cv(EG(current_execute_data)->opline->op1.var, EG(current_execute_data));
 		}
-		if (/*dim_type == IS_CV &&*/ UNEXPECTED(Z_TYPE_P(dim) == IS_UNDEF)) {
+		if (UNEXPECTED(Z_TYPE_P(dim) == IS_UNDEF)) {
 			zval_undefined_cv(EG(current_execute_data)->opline->op2.var, EG(current_execute_data));
+		}
+
+		if (EG(current_execute_data)->opline->op1_type != IS_VAR ||
+			(EG(current_execute_data)->opline->op1_type == IS_VAR && Z_TYPE_P(container) != IS_NULL)) {
+			zend_error(E_NOTICE, "Illegal offset type");
 		}
 		ZVAL_NULL(result);
 	}
