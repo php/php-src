@@ -523,7 +523,7 @@ report_memleaks = On
 ; Development Value: Off
 ; Production Value: Off
 ; http://php.net/track-errors
-track_errors = Off
+;track_errors = Off
 
 ; Turn off normal error reporting and emit XML-RPC error XML
 ; http://php.net/xmlrpc-errors
