@@ -710,7 +710,7 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size)
 		}
 
 		/* just break anyway, to avoid greedy read */
-		if (stream->wrapper != &php_plain_files_wrapper) {
+		if (!stream->wrapper || stream->wrapper->is_url) {
 			break;
 		}
 	}
