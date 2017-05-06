@@ -18,6 +18,9 @@ PHP                                                                        NEWS
 - FTP:
   . Fixed bug #74598 (ftp:// wrapper ignores context arg). (Sara)
 
+- PHAR:
+  . Fixed bug #74386 (Phar::__construct reflection incorrect). (villfa)
+
 - Streams:
   . Fixed bug #74556 (stream_socket_get_name() returns '\0'). (Sara)
 
