@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - intl:
   . Fixed bug #74468 (wrong reflection on Collator::sortWithSortKeys). (villfa)
 
+- MySQLi:
+  . Fixed bug #74547 (mysqli::change_user() doesn't accept null as $database
+    argument w/strict_types). (Anatol)
+
 - phar:
   . Fixed bug #51918 (Phar::webPhar() does not handle requests sent through PUT
     and DELETE method). (Christian Weiske)
