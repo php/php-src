@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2017, PHP 7.1.6
 
+- Core:
+  . Fixed bug #74546 (SIGILL in ZEND_FETCH_CLASS_CONSTANT_SPEC_CONST_CONST).
+    (Laruence)
+
 - intl:
   . Fixed bug #74468 (wrong reflection on Collator::sortWithSortKeys). (villfa)
 
