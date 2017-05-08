@@ -19,7 +19,7 @@ $csr_info = array(
 $private = openssl_pkey_new($config);
 while (openssl_error_string()) {}
 $csr_res = openssl_csr_new($csr_info, $private,
-	['config' => __DIR__."/openssl.cnf"]);
+	['config' => __DIR__. DIRECTORY_SEPARATOR . "openssl.cnf"]);
 if (!$csr_res) {
 	while ($e = openssl_error_string()) { $err = $e; }
 	die("Failed; last error: $err");

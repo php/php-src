@@ -39,6 +39,12 @@ PHP                                                                        NEWS
   . Fixed bug #74149 (static embed SAPI linkage error). (krakjoe)
   . Fixed bug #72359, bug #72451, bug #73706, bug #71115 and others related
     to interned strings handling in TS builds. (Anatol, Dmitry)
+  . Implemented "Trailing Commas In List Syntax" RFC for group use lists only.
+    (Sammy Kaye Powers)
+  . Fixed bug #74269 (It's possible to override trait property with different
+    loosely-equal value). (pmmaga)
+  . Fixed bug #61970 (Restraining __construct() access level in subclass gives
+    a fatal error). (pmmaga)
 
 - BCMath:
   . Fixed bug #46564 (bcmod truncates fractionals). (liborm85)
@@ -97,6 +103,7 @@ PHP                                                                        NEWS
 - intl:
   . Fixed bug #74433 (wrong reflection for Normalizer methods). (villfa)
   . Fixed bug #74439 (wrong reflection for Locale methods). (villfa)
+  . Fixed bug #74468 (wrong reflection on Collator::sortWithSortKeys). (villfa)
 
 - Mbstring:
   . Implemented request #66024 (mb_chr() and mb_ord()). (Masakielastic, Yasuo)
@@ -185,6 +192,9 @@ PHP                                                                        NEWS
 - XML:
   . Moved utf8_encode() and utf8_decode() to the Standard extension. (Andrea)
   . Fixed bug #72135 (malformed XML causes fault) (edgarsandi)
+
+- xmlreader:
+  . Fixed bug #74457 (Wrong reflection on XMLReader::expand). (villfa)
 
 - XMLRPC:
   . Use Zend MM for allocation in bundled libxmlrpc (Joe)

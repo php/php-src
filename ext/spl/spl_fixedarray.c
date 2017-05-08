@@ -495,7 +495,7 @@ static int spl_fixedarray_object_has_dimension(zval *object, zval *offset, int c
 
 	intern = Z_SPLFIXEDARRAY_P(object);
 
-	if (intern->fptr_offset_get) {
+	if (intern->fptr_offset_has) {
 		zval rv;
 		SEPARATE_ARG_IF_REF(offset);
 		zend_call_method_with_1_params(object, intern->std.ce, &intern->fptr_offset_has, "offsetExists", &rv, offset);
