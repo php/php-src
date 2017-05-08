@@ -6669,8 +6669,11 @@ void zend_compile_class_const(znode *result, zend_ast *ast) /* {{{ */
 		return;
 	}
 
-	zend_eval_const_expr(&class_ast);
-	zend_eval_const_expr(&const_ast);
+	zend_eval_const_expr(&ast->child[0]);
+	zend_eval_const_expr(&ast->child[1]);
+
+	class_ast = ast->child[0];
+	const_ast = ast->child[1];
 
 	if (class_ast->kind == ZEND_AST_ZVAL) {
 		resolved_name = zend_resolve_class_name_ast(class_ast);
