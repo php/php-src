@@ -149,6 +149,9 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 	size_t path_cleaned_len;
 	cwd_state new_state;
 	zend_string *file_basename;
+	struct utimbuf newtimebuf;
+	struct utimbuf *newtime = &newtimebuf;
+	php_stream_wrapper *wrapper;
 
 	new_state.cwd = CWD_STATE_ALLOC(1);
 	new_state.cwd[0] = '\0';
@@ -260,6 +263,14 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 
 	php_stream_close(stream);
 	n = zip_fclose(zf);
+
+	/* try to set mtime of extracted file; don't mind if that fails */
+	newtime->modtime = sb.mtime;
+	newtime->actime = time(NULL);
+	wrapper = php_stream_locate_url_wrapper(fullpath, NULL, 0);
+	if (wrapper && wrapper->wops) {
+		wrapper->wops->stream_metadata(wrapper, fullpath, PHP_STREAM_META_TOUCH, newtime, NULL);
+	}
 
 done:
 	efree(fullpath);
