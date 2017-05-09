@@ -2,8 +2,8 @@
 Test session_set_save_handler() : basic class wrapping existing handler
 --INI--
 session.use_strict_mode=1
-session.save_handler=files
 session.name=PHPSESSID
+session.save_handler=files
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
