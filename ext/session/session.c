@@ -2554,6 +2554,10 @@ ZEND_BEGIN_ARG_INFO(arginfo_session_class_updateTimestamp, 0)
 	ZEND_ARG_INFO(0, key)
 	ZEND_ARG_INFO(0, val)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_session_start, 0, 0, 0)
+	ZEND_ARG_INFO(0, options) /* array */
+ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ session_functions[]
@@ -2566,7 +2570,7 @@ static const zend_function_entry session_functions[] = {
 	PHP_FE(session_regenerate_id,     arginfo_session_regenerate_id)
 	PHP_FE(session_decode,            arginfo_session_decode)
 	PHP_FE(session_encode,            arginfo_session_void)
-	PHP_FE(session_start,             arginfo_session_void)
+	PHP_FE(session_start,             arginfo_session_start)
 	PHP_FE(session_destroy,           arginfo_session_void)
 	PHP_FE(session_unset,             arginfo_session_void)
 	PHP_FE(session_set_save_handler,  arginfo_session_set_save_handler)
