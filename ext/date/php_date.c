@@ -3684,7 +3684,7 @@ PHP_METHOD(DateTimeImmutable, setTimestamp)
 */
 PHP_FUNCTION(date_timestamp_get)
 {
-	zval         *object;
+	zval         *object, new_object;
 	php_date_obj *dateobj;
 	zend_long          timestamp;
 	int           error;
@@ -3692,7 +3692,9 @@ PHP_FUNCTION(date_timestamp_get)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &object, date_ce_interface) == FAILURE) {
 		RETURN_FALSE;
 	}
-	dateobj = Z_PHPDATE_P(object);
+
+	date_clone_immutable(object, &new_object TSRMLS_CC);
+	dateobj = Z_PHPDATE_P(&new_object);
 	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
 	timelib_update_ts(dateobj->time, NULL);
 
