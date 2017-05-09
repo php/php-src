@@ -550,7 +550,7 @@ try_again:
 			break;
 		}
 		case IS_ARRAY:
-			zend_error(E_NOTICE, "Array to string conversion");
+			zend_error(E_RECOVERABLE_ERROR, "Array could not be converted to string");
 			zval_ptr_dtor(op);
 			ZVAL_NEW_STR(op, zend_string_init("Array", sizeof("Array")-1, 0));
 			break;
@@ -861,7 +861,7 @@ try_again:
 			return zend_strpprintf(0, "%.*G", (int) EG(precision), Z_DVAL_P(op));
 		}
 		case IS_ARRAY:
-			zend_error(E_NOTICE, "Array to string conversion");
+			zend_error(E_RECOVERABLE_ERROR, "Array could not be converted to string");
 			return zend_string_init("Array", sizeof("Array")-1, 0);
 		case IS_OBJECT: {
 			zval tmp;
