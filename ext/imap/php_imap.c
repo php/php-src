@@ -4055,18 +4055,64 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 	if (!INI_STR("sendmail_path")) {
 		return 0;
 	}
-	sendmail = popen(INI_STR("sendmail_path"), "w");
+	
+	char *sendmail_path				= INI_STR("sendmail_path");
+	char *appended_sendmail_path	= NULL;
+	int	rpath_length				= strlen(rpath);
+	int sendmail_length				= strlen(sendmail_path);
+	char *force_extra_parameters	= INI_STR("mail.force_extra_parameters");
+	char *extra_cmd					= NULL;
+	
+	if (force_extra_parameters) {
+		extra_cmd	= php_escape_shell_cmd(force_extra_parameters);
+	}
+	
+	if (rpath && rpath[0]) {
+		appended_sendmail_path	= emalloc(sendmail_length + 3 + rpath_length + 1);
+		strncpy(appended_sendmail_path, sendmail_path, 50);
+		strncat(appended_sendmail_path, " -f", 3);
+		strncat(appended_sendmail_path, rpath, rpath_length);
+		sendmail_path			= appended_sendmail_path;
+	}
+	
+	if (extra_cmd) {
+		spprintf(&sendmail_path, 0, "%s %s", sendmail_path, extra_cmd);
+	}
+	
+	sendmail = popen(sendmail_path, "w");
+	
+	if (appended_sendmail_path) {
+		efree(appended_sendmail_path);
+	}
+	
+	if (extra_cmd) {
+		efree(extra_cmd);
+	}
+	
 	if (sendmail) {
-		if (rpath && rpath[0]) fprintf(sendmail, "From: %s\n", rpath);
+		if (rpath && rpath[0]) {
+            fprintf(sendmail, "From: %s\n", rpath);
+        }
+
 		fprintf(sendmail, "To: %s\n", to);
-		if (cc && cc[0]) fprintf(sendmail, "Cc: %s\n", cc);
-		if (bcc && bcc[0]) fprintf(sendmail, "Bcc: %s\n", bcc);
+
+		if (cc && cc[0]) {
+            fprintf(sendmail, "Cc: %s\n", cc);
+        }
+
+		if (bcc && bcc[0]) {
+            fprintf(sendmail, "Bcc: %s\n", bcc);
+        }
+
 		fprintf(sendmail, "Subject: %s\n", subject);
+
 		if (headers != NULL) {
 			fprintf(sendmail, "%s\n", headers);
 		}
+
 		fprintf(sendmail, "\n%s\n", message);
 		ret = pclose(sendmail);
+
 		if (ret == -1) {
 			return 0;
 		} else {
