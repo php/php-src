@@ -4,6 +4,9 @@ Bug #73100 (session_destroy null dereference in ps_files_path_create)
 <?php
 if (!extension_loaded('session')) die('skip session extension not available');
 ?>
+--INI--
+session.save_path=
+session.save_handler=files
 --FILE--
 <?php
 ob_start();
