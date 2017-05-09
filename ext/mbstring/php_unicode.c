@@ -186,7 +186,7 @@ MBSTRING_API unsigned long php_unicode_toupper(unsigned long code, enum mbfl_no_
 		 */
 		field = 1;
 		l = _uccase_len[0] + _uccase_len[1];
-		r = _uccase_size - 3;
+		r = (_uccase_size * 3) - 3;
 	}
 	return case_lookup(code, l, r, field);
 }
@@ -217,7 +217,7 @@ MBSTRING_API unsigned long php_unicode_tolower(unsigned long code, enum mbfl_no_
 		 */
 		field = 2;
 		l = _uccase_len[0] + _uccase_len[1];
-		r = _uccase_size - 3;
+		r = (_uccase_size * 3) - 3;
 	}
 	return case_lookup(code, l, r, field);
 }
