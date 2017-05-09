@@ -328,7 +328,8 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 #endif
 
 		/* by-ref constraints on arguments are invariant */
-		if (fe_arg_info->pass_by_reference != proto_arg_info->pass_by_reference) {
+		if ((!fe_arg_info->pass_by_reference && proto_arg_info->pass_by_reference)
+			|| (fe_arg_info->pass_by_reference && !proto_arg_info->pass_by_reference)) {
 			return 0;
 		}
 	}
