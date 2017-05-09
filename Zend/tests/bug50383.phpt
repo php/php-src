@@ -55,6 +55,7 @@ Array
 
                 )
 
+            [strict_types] => 0
         )
 
     [1] => Array
@@ -66,6 +67,7 @@ Array
                 (
                 )
 
+            [strict_types] => 0
         )
 
 )
@@ -88,6 +90,7 @@ Array
 
                 )
 
+            [strict_types] => 0
         )
 
     [1] => Array
@@ -99,6 +102,7 @@ Array
                 (
                 )
 
+            [strict_types] => 0
         )
 
 )

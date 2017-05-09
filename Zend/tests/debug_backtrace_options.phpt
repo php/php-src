@@ -80,6 +80,7 @@ Array
                 (
                 )
 
+            [strict_types] => 0
         )
 
     [1] => Array
@@ -94,6 +95,7 @@ Array
                     [2] => backtrace_print
                 )
 
+            [strict_types] => 0
         )
 
     [2] => Array
@@ -113,6 +115,7 @@ Array
                     [1] => backtrace_print
                 )
 
+            [strict_types] => 0
         )
 
     [3] => Array
@@ -128,6 +131,7 @@ Array
                     [1] => backtrace_print
                 )
 
+            [strict_types] => 0
         )
 
 )
@@ -144,6 +148,7 @@ Array
                     [0] => 1
                 )
 
+            [strict_types] => 0
         )
 
     [1] => Array
@@ -158,6 +163,7 @@ Array
                     [2] => backtrace_print
                 )
 
+            [strict_types] => 0
         )
 
     [2] => Array
@@ -177,6 +183,7 @@ Array
                     [1] => backtrace_print
                 )
 
+            [strict_types] => 0
         )
 
     [3] => Array
@@ -192,6 +199,7 @@ Array
                     [1] => backtrace_print
                 )
 
+            [strict_types] => 0
         )
 
 )
@@ -208,6 +216,7 @@ Array
                     [0] => 
                 )
 
+            [strict_types] => 0
         )
 
     [1] => Array
@@ -222,6 +231,7 @@ Array
                     [2] => backtrace_print
                 )
 
+            [strict_types] => 0
         )
 
     [2] => Array
@@ -237,6 +247,7 @@ Array
                     [1] => backtrace_print
                 )
 
+            [strict_types] => 0
         )
 
     [3] => Array
@@ -252,6 +263,7 @@ Array
                     [1] => backtrace_print
                 )
 
+            [strict_types] => 0
         )
 
 )
@@ -268,6 +280,7 @@ Array
                     [0] => 1
                 )
 
+            [strict_types] => 0
         )
 
     [1] => Array
@@ -282,6 +295,7 @@ Array
                     [2] => backtrace_print
                 )
 
+            [strict_types] => 0
         )
 
     [2] => Array
@@ -301,6 +315,7 @@ Array
                     [1] => backtrace_print
                 )
 
+            [strict_types] => 0
         )
 
     [3] => Array
@@ -316,6 +331,7 @@ Array
                     [1] => backtrace_print
                 )
 
+            [strict_types] => 0
         )
 
 )
@@ -327,6 +343,7 @@ Array
             [file] => %sdebug_backtrace_options.php
             [line] => 23
             [function] => backtrace_print
+            [strict_types] => 0
         )
 
     [1] => Array
@@ -334,6 +351,7 @@ Array
             [file] => %sdebug_backtrace_options.php
             [line] => %d
             [function] => doit
+            [strict_types] => 0
         )
 
     [2] => Array
@@ -343,6 +361,7 @@ Array
             [function] => doCall
             [class] => foo
             [type] => ->
+            [strict_types] => 0
         )
 
     [3] => Array
@@ -352,6 +371,7 @@ Array
             [function] => statCall
             [class] => foo
             [type] => ::
+            [strict_types] => 0
         )
 
 )
@@ -363,6 +383,7 @@ Array
             [file] => %sdebug_backtrace_options.php
             [line] => 25
             [function] => backtrace_print
+            [strict_types] => 0
         )
 
     [1] => Array
@@ -370,6 +391,7 @@ Array
             [file] => %sdebug_backtrace_options.php
             [line] => %d
             [function] => doit
+            [strict_types] => 0
         )
 
     [2] => Array
@@ -383,6 +405,7 @@ Array
                 )
 
             [type] => ->
+            [strict_types] => 0
         )
 
     [3] => Array
@@ -392,6 +415,7 @@ Array
             [function] => statCall
             [class] => foo
             [type] => ::
+            [strict_types] => 0
         )
 
 )

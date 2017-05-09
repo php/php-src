@@ -2546,6 +2546,9 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 				debug_backtrace_get_args(call, &tmp);
 				zend_hash_add_new(Z_ARRVAL(stack_frame), ZSTR_KNOWN(ZEND_STR_ARGS), &tmp);
 			}
+
+			ZVAL_LONG(&tmp, (func->common.fn_flags & ZEND_ACC_STRICT_TYPES) == ZEND_ACC_STRICT_TYPES);
+			zend_hash_add_new(Z_ARRVAL(stack_frame), CG(known_strings)[ZEND_STR_STRICT_TYPES], &tmp);
 		} else {
 			/* i know this is kinda ugly, but i'm trying to avoid extra cycles in the main execution loop */
 			zend_bool build_filename_arg = 1;

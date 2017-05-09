@@ -408,6 +408,7 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_SEVERITY,               "severity") \
 	_(ZEND_STR_STRING,                 "string") \
 	_(ZEND_STR_TRACE,                  "trace") \
+	_(ZEND_STR_STRICT_TYPES,           "strict_types") \
 
 
 typedef enum _zend_known_string_id {
