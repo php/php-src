@@ -50,7 +50,7 @@ static void random_globals_ctor(php_random_globals *random_globals_p)
 
 static void random_globals_dtor(php_random_globals *random_globals_p)
 {
-	if (random_globals_p->fd > 0) {
+	if (random_globals_p->fd >= 0) {
 		close(random_globals_p->fd);
 		random_globals_p->fd = -1;
 	}
