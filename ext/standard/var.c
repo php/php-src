@@ -390,8 +390,11 @@ static void php_array_element_export(zval *zv, zend_ulong index, zend_string *ke
 	if (key == NULL) { /* numeric key */
 		buffer_append_spaces(buf, level+1);
 		smart_str_append_long(buf, (zend_long) index);
-		smart_str_appendl(buf, " => ", 4);
-
+		if (Z_TYPE_P(zv) == IS_ARRAY) {
+			smart_str_appendl(buf, " =>", 3);
+		} else {
+			smart_str_appendl(buf, " => ", 4);
+		}
 	} else { /* string key */
 		zend_string *tmp_str;
 		zend_string *ckey = php_addcslashes(key, 0, "'\\", 2);
@@ -401,7 +404,11 @@ static void php_array_element_export(zval *zv, zend_ulong index, zend_string *ke
 
 		smart_str_appendc(buf, '\'');
 		smart_str_append(buf, tmp_str);
-		smart_str_appendl(buf, "' => ", 5);
+		if (Z_TYPE_P(zv) == IS_ARRAY) {
+			smart_str_appendl(buf, "' =>", 4);
+		} else {
+			smart_str_appendl(buf, "' => ", 5);
+		}
 
 		zend_string_free(ckey);
 		zend_string_free(tmp_str);
