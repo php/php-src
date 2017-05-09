@@ -83,6 +83,7 @@
 
 #include "fsock.h"
 #include "fopen_wrappers.h"
+#include "php_fopen_wrappers.h"
 #include "streamsfuncs.h"
 #include "php_globals.h"
 
@@ -917,6 +918,34 @@ PHPAPI PHP_FUNCTION(fclose)
 	php_stream_free(stream,
 		PHP_STREAM_FREE_KEEP_RSRC |
 		(stream->is_persistent ? PHP_STREAM_FREE_CLOSE_PERSISTENT : PHP_STREAM_FREE_CLOSE));
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto bool freopen(string filename, string mode, resource fp)
+   Reopen an open file pointer */
+PHPAPI PHP_FUNCTION(freopen)
+{
+	char *filename, *mode;
+	int filename_len, mode_len;
+	zval *arg1;
+	php_stream *stream;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "psr", &filename, &filename_len, &mode, &mode_len, &arg1) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	PHP_STREAM_TO_ZVAL(stream, arg1);
+
+	if (stream->wrapper != &php_plain_files_wrapper && stream->wrapper != &php_stream_php_wrapper) {
+		php_error_docref(NULL, E_WARNING, "%pd is not a valid file", stream->res->handle);
+		RETURN_FALSE;
+	}
+
+	if (!php_stream_freopen(filename, mode, stream)) {
+		RETURN_FALSE;
+	}
 
 	RETURN_TRUE;
 }

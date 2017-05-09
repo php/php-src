@@ -32,6 +32,7 @@ PHP_FUNCTION(tempnam);
 PHP_NAMED_FUNCTION(php_if_tmpfile);
 PHP_NAMED_FUNCTION(php_if_fopen);
 PHPAPI PHP_FUNCTION(fclose);
+PHPAPI PHP_FUNCTION(freopen);
 PHP_FUNCTION(popen);
 PHP_FUNCTION(pclose);
 PHPAPI PHP_FUNCTION(feof);

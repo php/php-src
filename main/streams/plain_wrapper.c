@@ -1468,7 +1468,6 @@ PHPAPI php_stream *_php_stream_fopen_with_path(const char *filename, const char 
 			}
 		}
 
-
 		if (((options & STREAM_DISABLE_OPEN_BASEDIR) == 0) && php_check_open_basedir(filename)) {
 			return NULL;
 		}
@@ -1573,6 +1572,56 @@ stream_skip:
 
 }
 /* }}} */
+
+/* {{{ php_stream_freopen */
+PHPAPI int _php_stream_freopen(char *filename, char *mode, php_stream *stream STREAMS_DC)
+{
+	int open_flags;
+	char *realpath = NULL;
+	int fd;
+
+	int fileno = ((php_stdio_stream_data *)stream->abstract)->fd;
+
+	if (!filename || !*filename) {
+		php_error_docref(NULL, E_WARNING, "Filename cannot be empty");
+		return 0;
+	}
+
+	if (FAILURE == php_stream_parse_fopen_modes(mode, &open_flags)) {
+		php_error_docref(NULL, E_WARNING, "`%s' is not a valid mode for freopen", mode);
+		return 0;
+	}
+
+	if ((realpath = expand_filepath(filename, NULL)) == NULL) {
+		return 0;
+	}
+
+	if (php_stream_flush(stream)) {
+		efree(realpath);
+		return 0;
+	}
+
+	fd = open(realpath, open_flags, 0666);
+	efree(realpath);
+
+	if (fd == -1) {
+		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
+		return 0;
+	}
+
+	if (dup2(fd, fileno) == -1) {
+		close(fd);
+		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
+		return 0;
+	}
+	close(fd);
+
+	pefree(stream->orig_path, stream->is_persistent);
+	stream->orig_path = pestrdup(filename, stream->is_persistent);
+	return 1;
+}
+/* }}} */
+
 
 /*
  * Local variables:
