@@ -142,9 +142,13 @@ struct reserved_class_name {
 };
 static const struct reserved_class_name reserved_class_names[] = {
 	{ZEND_STRL("bool")},
+	{ZEND_STRL("boolean")},
 	{ZEND_STRL("false")},
 	{ZEND_STRL("float")},
+	{ZEND_STRL("double")},
 	{ZEND_STRL("int")},
+	{ZEND_STRL("integer")},
+	{ZEND_STRL("long")},
 	{ZEND_STRL("null")},
 	{ZEND_STRL("parent")},
 	{ZEND_STRL("self")},
@@ -214,6 +218,36 @@ static zend_always_inline zend_uchar zend_lookup_builtin_type_by_name(const zend
 }
 /* }}} */
 
+typedef struct _illegal_builtin_type_alias_info {
+	const char* name;
+	const size_t name_len;
+	const char* replacement;
+} illegal_builtin_type_alias_info;
+
+static const illegal_builtin_type_alias_info illegal_builtin_type_aliases[] = {
+	{"integer", sizeof("integer") - 1, "int"},
+	{"long", sizeof("long") - 1, "int"},
+	{"double", sizeof("double") - 1, "float"},
+	{"boolean", sizeof("boolean") - 1, "bool"},
+	{NULL, 0, NULL}
+};
+
+
+static zend_always_inline const char *zend_lookup_illegal_builtin_type_alias_replacement(const zend_string *name) /* {{{ */
+{
+	const illegal_builtin_type_alias_info *info = &illegal_builtin_type_aliases[0];
+
+	for (; info->name; ++info) {
+		if (ZSTR_LEN(name) == info->name_len
+			&& zend_binary_strcasecmp(ZSTR_VAL(name), ZSTR_LEN(name), info->name, info->name_len) == 0
+		) {
+			return info->replacement;
+		}
+	}
+
+	return NULL;
+}
+/* }}} */
 
 void zend_oparray_context_begin(zend_oparray_context *prev_context) /* {{{ */
 {
@@ -4463,6 +4497,7 @@ static void zend_compile_typename(zend_ast *ast, zend_arg_info *arg_info) /* {{{
 	} else {
 		zend_string *class_name = zend_ast_get_str(ast);
 		zend_uchar type = zend_lookup_builtin_type_by_name(class_name);
+		const char *alternative;
 
 		if (type != 0) {
 			if (ast->attr != ZEND_NAME_NOT_FQ) {
@@ -4471,6 +4506,9 @@ static void zend_compile_typename(zend_ast *ast, zend_arg_info *arg_info) /* {{{
 					ZSTR_VAL(zend_string_tolower(class_name)));
 			}
 			arg_info->type_hint = type;
+		} else if (NULL != (alternative = zend_lookup_illegal_builtin_type_alias_replacement(class_name))) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"'%s' is not a valid type hint, use '%s' instead", ZSTR_VAL(class_name), alternative);
 		} else {
 			uint32_t fetch_type = zend_get_class_fetch_type_ast(ast);
 			if (fetch_type == ZEND_FETCH_CLASS_DEFAULT) {
