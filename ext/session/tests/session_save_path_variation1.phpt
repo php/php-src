@@ -4,6 +4,7 @@ Test session_save_path() function : variation
 session.gc_probability=0
 session.save_path=
 session.name=PHPSESSID
+session.save_handler=files
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--

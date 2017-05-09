@@ -7,6 +7,7 @@ session.gc_divisor=1
 session.gc_maxlifetime=0
 session.save_path=
 session.name=PHPSESSID
+session.save_handler=files
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--

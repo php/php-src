@@ -3,6 +3,7 @@ Bug #60634 (Segmentation fault when trying to die() in SessionHandler::write())
 --INI--
 session.save_path=
 session.name=PHPSESSID
+session.save_handler=files
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
