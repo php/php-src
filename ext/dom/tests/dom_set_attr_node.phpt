@@ -61,7 +61,9 @@ object(DOMException)#%d (7) {
       ["args"]=>
       array(1) {
         [0]=>
-        DOMAttr
+        
+Warning: var_dump(): %s
+DOMAttr
       }
     }
   }
