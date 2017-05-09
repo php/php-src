@@ -987,6 +987,13 @@ ZEND_METHOD(Generator, __wakeup)
 }
 /* }}} */
 
+/* count_elements implementation */
+static void zend_generator_count_elements(zval *object, zend_long *count) /* {{{ */
+{
+	zend_throw_exception(NULL, "Counting of 'Generator' is not allowed", 0);
+}
+/* }}} */
+
 /* get_iterator implementation */
 
 static void zend_generator_iterator_dtor(zend_object_iterator *iterator) /* {{{ */
@@ -1140,6 +1147,7 @@ void zend_register_generator_ce(void) /* {{{ */
 	zend_generator_handlers.get_gc = zend_generator_get_gc;
 	zend_generator_handlers.clone_obj = NULL;
 	zend_generator_handlers.get_constructor = zend_generator_get_constructor;
+	zend_generator_handlers.count_elements = zend_generator_count_elements;
 
 	INIT_CLASS_ENTRY(ce, "ClosedGeneratorException", NULL);
 	zend_ce_ClosedGeneratorException = zend_register_internal_class_ex(&ce, zend_ce_exception);
