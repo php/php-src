@@ -345,7 +345,9 @@ void MYSQLND_METHOD(mysqlnd_res, free_result_internal)(MYSQLND_RES * result)
 	result->m.free_result_contents(result);
 
 	if (result->conn) {
-		result->conn->m->free_reference(result->conn);
+		if (result->conn->m) {
+			result->conn->m->free_reference(result->conn);
+		}
 		result->conn = NULL;
 	}
 
