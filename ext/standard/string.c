@@ -191,6 +191,48 @@ static zend_string *php_hex2bin(const unsigned char *old, const size_t oldlen)
 }
 /* }}} */
 
+
+/* {{{ php_ts_bin2hex 
+ */
+static zend_string *php_bin2hex_ts(const unsigned char *old, const size_t oldlen)
+{
+    zend_string *result;
+    size_t i, j;
+    int b = 0;
+    
+    result = zend_string_safe_alloc(oldlen, 2 * sizeof(char), 0, 0);
+    
+    for (i = j = 0; i < oldlen; i++) {
+        b = old[i] >> 4;
+        result->val[j++] = (char) (87 + b + (((b - 10) >> 31) & -39));
+        b = old[i] & 0xf;
+        result->val[j++] = (char) (87 + b + (((b - 10) >> 31) & -39));
+    }
+    result->val[j] = '\0';
+    
+    return result;
+}
+/* }}} */
+
+/* {{{ proto string ts_bin2hex(string data)
+ */
+PHP_FUNCTION(bin2hex_ts)
+{
+    zend_string *result;
+    zend_string *data;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &data) == FAILURE) {
+        return;
+    }
+    result = php_bin2hex_ts((unsigned char *)data->val, data->len);
+    
+    if (!result) {
+        return;
+    }
+    
+    RETURN_STR(result);
+}
+/* }}} */
+
 #ifdef HAVE_LOCALECONV
 /* {{{ localeconv_r
  * glibc's localeconv is not reentrant, so lets make it so ... sorta */

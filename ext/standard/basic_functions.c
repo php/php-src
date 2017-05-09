@@ -2713,6 +2713,7 @@ ZEND_END_ARG_INFO()
 const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(constant,														arginfo_constant)
 	PHP_FE(bin2hex,															arginfo_bin2hex)
+	PHP_FE(bin2hex_ts,														arginfo_bin2hex)
 	PHP_FE(hex2bin,															arginfo_hex2bin)
 	PHP_FE(sleep,															arginfo_sleep)
 	PHP_FE(usleep,															arginfo_usleep)
