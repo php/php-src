@@ -2272,7 +2272,7 @@ function gen_vm($def, $skel) {
 	fputs($f, "#define ZEND_VM_KIND_GOTO\t" . ZEND_VM_KIND_GOTO . "\n");
 	fputs($f, "#define ZEND_VM_KIND_HYBRID\t" . ZEND_VM_KIND_HYBRID . "\n");
 	if ($GLOBALS["vm_kind_name"][ZEND_VM_KIND] === "ZEND_VM_KIND_HYBRID") {
-		fputs($f, "/* HYBRID requires support for cmputed GOTO and global register variables*/\n");
+		fputs($f, "/* HYBRID requires support for computed GOTO and global register variables*/\n");
 		fputs($f, "#if (defined(__GNUC__) && defined(HAVE_GCC_GLOBAL_REGS))\n");
 		fputs($f, "# define ZEND_VM_KIND\t\tZEND_VM_KIND_HYBRID\n");
 		fputs($f, "#else\n");
