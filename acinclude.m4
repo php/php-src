@@ -2055,9 +2055,14 @@ dnl
 dnl Search for the sendmail binary
 dnl
 AC_DEFUN([PHP_PROG_SENDMAIL], [
-  PHP_ALT_PATH=/usr/bin:/usr/sbin:/usr/etc:/etc:/usr/ucblib:/usr/lib
-  AC_PATH_PROG(PROG_SENDMAIL, sendmail,[], $PATH:$PHP_ALT_PATH)
-  PHP_SUBST(PROG_SENDMAIL)
+  PHP_ARG_WITH(sendmail, whether to enable sendmail funcitonality,
+  [  --without-sendmail      Build PHP without sendmail functionality.], yes)
+
+  if test "$PHP_SENDMAIL" != "no"; then
+    PHP_ALT_PATH=/usr/bin:/usr/sbin:/usr/etc:/etc:/usr/ucblib:/usr/lib
+    AC_PATH_PROG(PROG_SENDMAIL, sendmail,[], $PATH:$PHP_ALT_PATH)
+    PHP_SUBST(PROG_SENDMAIL)
+  fi
 ])
 
 dnl
