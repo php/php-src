@@ -322,17 +322,33 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 
 				rc = SQLDescribeParam(S->stmt, (SQLUSMALLINT) param->paramno+1, &sqltype, &precision, &scale, &nullable);
 				if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
-					/* MS Access, for instance, doesn't support SQLDescribeParam,
-					 * so we need to guess */
-					sqltype = PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_LOB ?
-									SQL_LONGVARBINARY :
-									SQL_LONGVARCHAR;
-					precision = 4000;
-					scale = 5;
-					nullable = 1;
-
-					if (param->max_value_len > 0) {
-						precision = param->max_value_len;
+					/* if the PDO_PARAM_TYPE is string, lets see if we can fit it in a varchar. */
+					if ((Z_TYPE_P(param->parameter) != IS_ARRAY && 
+							Z_TYPE_P(param->parameter) != IS_OBJECT &&
+							Z_TYPE_P(param->parameter) != IS_RESOURCE) &&
+							param->max_value_len <= 0 && 
+							(Z_STRLEN_P(param->parameter) < 4000 ||
+								Z_TYPE_P(param->parameter) != IS_STRING)) {
+						sqltype = SQL_VARCHAR;
+						if(Z_TYPE_P(param->parameter) == IS_STRING) {
+							precision = Z_STRLEN_P(param->parameter);
+						} else {
+							precision = 10;
+						}
+						scale = 0;
+					} else {
+						/* MS Access, for instance, doesn't support SQLDescribeParam,
+						 * so we need to guess */
+						sqltype = PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_LOB ?
+										SQL_LONGVARBINARY :
+										SQL_LONGVARCHAR;
+						precision = 4000;
+						scale = 5;
+						nullable = 1;
+	
+						if (param->max_value_len > 0) {
+							precision = param->max_value_len;
+						}
 					}
 				}
 				if (sqltype == SQL_BINARY || sqltype == SQL_VARBINARY || sqltype == SQL_LONGVARBINARY) {
