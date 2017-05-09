@@ -46,7 +46,7 @@
 #include "phpdbg_wait.h"
 #include "phpdbg_eol.h"
 
-#if ZEND_VM_KIND != ZEND_VM_KIND_CALL
+#if ZEND_VM_KIND != ZEND_VM_KIND_CALL && ZEND_VM_KIND != ZEND_VM_KIND_HYBRID
 #error "phpdbg can only be built with CALL zend vm kind"
 #endif
 
