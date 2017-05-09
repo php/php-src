@@ -2741,6 +2741,20 @@ SPL_METHOD(SplFileObject, fflush)
 	RETURN_BOOL(!php_stream_flush(intern->u.file.stream));
 } /* }}} */
 
+/* {{{ proto resource SplFileObject::getStream()
+   Get the internal stream resource for the file */
+SPL_METHOD(SplFileObject, getStream)
+{
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
+
+	if(!intern->u.file.stream) {
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
+		return;
+	}
+
+	php_stream_to_zval(intern->u.file.stream, return_value);
+} /* }}} */
+
 /* {{{ proto int SplFileObject::ftell()
    Return current file position */
 SPL_METHOD(SplFileObject, ftell)
@@ -3062,6 +3076,7 @@ static const zend_function_entry spl_SplFileObject_functions[] = {
 	SPL_ME(SplFileObject, getCsvControl,  arginfo_splfileinfo_void,          ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileObject, flock,          arginfo_file_object_flock,         ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileObject, fflush,         arginfo_splfileinfo_void,          ZEND_ACC_PUBLIC)
+	SPL_ME(SplFileObject, getStream,      arginfo_splfileinfo_void,          ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileObject, ftell,          arginfo_splfileinfo_void,          ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileObject, fseek,          arginfo_file_object_fseek,         ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileObject, fgetc,          arginfo_splfileinfo_void,          ZEND_ACC_PUBLIC)
