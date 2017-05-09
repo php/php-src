@@ -113,19 +113,31 @@ string(39) "testing<br />\nwordwrap<br />\nfunction"
 Warning: wordwrap(): Can't force cut when width is zero in %s on line %d
 bool(false)
 -- Iteration 2 --
-string(25) "testing
-wordwrap
-function"
-string(39) "testing<br />\nwordwrap<br />\nfunction"
-string(39) "testing<br />\nwordwrap<br />\nfunction"
-string(223) "<br />\nt<br />\ne<br />\ns<br />\nt<br />\ni<br />\nn<br />\ng<br />\n<br />\nw<br />\no<br />\nr<br />\nd<br />\nw<br />\nr<br />\na<br />\np<br />\n<br />\nf<br />\nu<br />\nn<br />\nc<br />\nt<br />\ni<br />\no<br />\nn"
+
+Warning: wordwrap(): Length should be non-negative in %swordwrap_variation2.php on line %d
+bool(false)
+
+Warning: wordwrap(): Length should be non-negative in %swordwrap_variation2.php on line %d
+bool(false)
+
+Warning: wordwrap(): Length should be non-negative in %swordwrap_variation2.php on line %d
+bool(false)
+
+Warning: wordwrap(): Length should be non-negative in %swordwrap_variation2.php on line %d
+bool(false)
 -- Iteration 3 --
-string(25) "testing
-wordwrap
-function"
-string(39) "testing<br />\nwordwrap<br />\nfunction"
-string(39) "testing<br />\nwordwrap<br />\nfunction"
-string(223) "<br />\nt<br />\ne<br />\ns<br />\nt<br />\ni<br />\nn<br />\ng<br />\n<br />\nw<br />\no<br />\nr<br />\nd<br />\nw<br />\nr<br />\na<br />\np<br />\n<br />\nf<br />\nu<br />\nn<br />\nc<br />\nt<br />\ni<br />\no<br />\nn"
+
+Warning: wordwrap(): Length should be non-negative in %swordwrap_variation2.php on line %d
+bool(false)
+
+Warning: wordwrap(): Length should be non-negative in %swordwrap_variation2.php on line %d
+bool(false)
+
+Warning: wordwrap(): Length should be non-negative in %swordwrap_variation2.php on line %d
+bool(false)
+
+Warning: wordwrap(): Length should be non-negative in %swordwrap_variation2.php on line %d
+bool(false)
 -- Iteration 4 --
 
 Warning: wordwrap() expects parameter 2 to be integer, array given in %s on line %d
