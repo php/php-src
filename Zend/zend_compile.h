@@ -513,16 +513,16 @@ struct _zend_execute_data {
 	(call)->This.u2.num_args
 
 #define ZEND_CALL_FRAME_SLOT \
-	((int)((ZEND_MM_ALIGNED_SIZE(sizeof(zend_execute_data)) + ZEND_MM_ALIGNED_SIZE(sizeof(zval)) - 1) / ZEND_MM_ALIGNED_SIZE(sizeof(zval))))
+	((unsigned int)((ZEND_MM_ALIGNED_SIZE(sizeof(zend_execute_data)) + ZEND_MM_ALIGNED_SIZE(sizeof(zval)) - 1) / ZEND_MM_ALIGNED_SIZE(sizeof(zval))))
 
 #define ZEND_CALL_VAR(call, n) \
-	((zval*)(((char*)(call)) + ((int)(n))))
+	((zval*)(((char*)(call)) + ((unsigned int)(n))))
 
 #define ZEND_CALL_VAR_NUM(call, n) \
-	(((zval*)(call)) + (ZEND_CALL_FRAME_SLOT + ((int)(n))))
+	(((zval*)(call)) + (ZEND_CALL_FRAME_SLOT + ((unsigned int)(n))))
 
 #define ZEND_CALL_ARG(call, n) \
-	ZEND_CALL_VAR_NUM(call, ((int)(n)) - 1)
+	ZEND_CALL_VAR_NUM(call, ((unsigned int)(n)) - 1)
 
 #define EX(element) 			((execute_data)->element)
 

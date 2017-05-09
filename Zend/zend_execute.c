@@ -2965,7 +2965,7 @@ ZEND_API int ZEND_FASTCALL zend_do_fcall_overloaded(zend_execute_data *call, zva
 	OPLINE = opline; \
 	ZEND_VM_CONTINUE()
 # define ZEND_VM_SMART_BRANCH(_result, _check) do { \
-		int __result; \
+		zend_ulong __result; \
 		if (EXPECTED((opline+1)->opcode == ZEND_JMPZ)) { \
 			__result = (_result); \
 		} else if (EXPECTED((opline+1)->opcode == ZEND_JMPNZ)) { \
