@@ -38,7 +38,7 @@
 			php_dns_free_res(res)
 #else
 #define php_dns_free_handle(res) \
-			res_nclose(res); \
+			res_ndestroy(res); \
 			php_dns_free_res(res)
 #endif
 
