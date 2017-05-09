@@ -1,6 +1,7 @@
 --TEST--
 highlight_string() handling of heredoc
 --INI--
+highlight.use_css=no
 highlight.html=#000000
 --FILE--
 <?php

@@ -30,8 +30,8 @@ $o = new test;
 
 file_put_contents($filename, $code);
 
-var_dump(`"$php" -n -s "$filename"`);
-var_dump(`"$php" -n -s "unknown"`);
+var_dump(`"$php" -d highlight.use_css=0 -n -s "$filename"`);
+var_dump(`"$php" -d highlight.use_css=0 -n -s "unknown"`);
 
 @unlink($filename);
 

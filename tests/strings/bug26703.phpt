@@ -1,6 +1,7 @@
 --TEST--
 Bug #26703 (Certain characters inside strings incorrectly treated as keywords)
 --INI--
+highlight.use_css=no
 highlight.string=#DD0000
 highlight.comment=#FF9900
 highlight.keyword=#007700

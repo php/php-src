@@ -1,6 +1,7 @@
 --TEST--
 highlight_string() buffering
 --INI--
+highlight.use_css=no
 highlight.string=#DD0000
 highlight.comment=#FF9900
 highlight.keyword=#007700

@@ -3,6 +3,8 @@ Test function show_source() by calling it with its expected arguments and output
 --CREDITS--
 Francesco Fullone ff@ideato.it
 #PHPTestFest Cesena Italia on 2009-06-20
+--INI--
+highlight.use_css = no
 --FILE--
 <?php
 echo "*** Test by calling method or function with its expected arguments and output to variable ***\n";

@@ -5178,6 +5178,7 @@ PHPAPI zend_bool append_user_shutdown_function(php_shutdown_function_entry shutd
 
 ZEND_API void php_get_highlight_struct(zend_syntax_highlighter_ini *syntax_highlighter_ini) /* {{{ */
 {
+	syntax_highlighter_ini->use_css           = INI_BOOL("highlight.use_css");
 	syntax_highlighter_ini->highlight_comment = INI_STR("highlight.comment");
 	syntax_highlighter_ini->highlight_default = INI_STR("highlight.default");
 	syntax_highlighter_ini->highlight_html    = INI_STR("highlight.html");
