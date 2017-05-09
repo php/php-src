@@ -311,7 +311,7 @@ PHP_FUNCTION(abs)
 /* }}} */
 
 /* {{{ proto float ceil(float number)
-   Returns the next highest integer value of the number */
+   Returns the next highest integer value (as float) of the number */
 PHP_FUNCTION(ceil)
 {
 	zval *value;
