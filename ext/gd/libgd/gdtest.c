@@ -250,6 +250,9 @@ main (int argc, char **argv)
   gdImageCopyMerge (im2, im3, 150, 200, 10, 10, 90, 50, 50);
   gdImageCopyMerge (im2, im3, 180, 70, 10, 10, 90, 50, 50);
 
+  gdImageCopyMergeAlpha (im2, im3, 150, 200, 10, 10, 90, 50, 50);
+  gdImageCopyMergeAlpha (im2, im3, 180, 70, 10, 10, 90, 50, 50);
+
   gdImageCopyMergeGray (im2, im3, 250, 160, 10, 10, 90, 50, 50);
   gdImageCopyMergeGray (im2, im3, 80, 70, 10, 10, 90, 50, 50);
 

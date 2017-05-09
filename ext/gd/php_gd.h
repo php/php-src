@@ -96,6 +96,7 @@ PHP_FUNCTION(imagecolorsforindex);
 PHP_FUNCTION(imagecolortransparent);
 PHP_FUNCTION(imagecopy);
 PHP_FUNCTION(imagecopymerge);
+PHP_FUNCTION(imagecopymergealpha);
 PHP_FUNCTION(imagecopyresized);
 PHP_FUNCTION(imagetypes);
 PHP_FUNCTION(imagecreate);

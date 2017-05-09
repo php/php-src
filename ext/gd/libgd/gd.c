@@ -2343,6 +2343,82 @@ void gdImageCopyMerge (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int s
 	}
 }
 
+/* This function is a real alpha channel operations,
+   but it has restrictions. */
+void gdImageCopyMergeAlpha (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX, int srcY, int w, int h, int pct)
+{
+	int c;
+	int x, y;
+	int toy;
+	toy = dstY;
+	
+	if (pct == 100) {
+		/* no opacity adjustment required pass through to gdImageCopy() */
+		gdImageCopy(dst, src, dstX, dstY, srcX, srcY, w, h);
+		return;
+	}
+
+	if (pct == 0) {
+		/* 0% opacity? nothing needs to be done */
+		return;
+	}
+	
+	if (src->trueColor && dst->trueColor) {
+		/* support for maintaining the alpha (transparency) of both source and
+		 * destination images (assuming they are true colour) while opacity blending.
+		 */
+		int         ca, cr, cg, cb, nc;
+		float       na;
+		float       ac;
+
+		/* we need to loop through the src image to get the max transparency level */
+		int mt = 0;
+
+		for (y = 0; y < h; y++) {
+			for (x = 0; x < w; x++) {
+				c  = gdImageGetTrueColorPixel (src, srcX + x, srcY + y);
+				ca = gdImageAlpha(src, c);
+
+				mt = ca > mt ? ca : mt;
+			}
+		}
+
+		if (mt < (gdAlphaMax / 2)) {
+			mt = gdAlphaMax - mt;
+		}
+
+		/* alpha correction factor */
+		ac = (float)mt / gdAlphaMax;
+
+		/* loop through the image again and set/adjust alpha channel level */
+		for (y = 0; y < h; y++) {
+			for (x = 0; x < w; x++) {
+				c  = gdImageGetTrueColorPixel (src, srcX + x, srcY + y);
+				ca = gdImageAlpha(src, c);
+				cr = gdImageRed(src, c);
+				cg = gdImageGreen(src, c);
+				cb = gdImageBlue(src, c);
+
+				na = (ca + gdAlphaMax - (gdAlphaMax * ((float)pct / 100))) * ac;
+				na = (na > gdAlphaMax) ? gdAlphaMax : ((na < gdAlphaOpaque) ? gdAlphaOpaque: na);
+
+				nc = gdImageColorAllocateAlpha(dst, cr, cg, cb, (int)na);
+				if (nc == -1) {
+					gdImageColorClosestAlpha(dst, cr, cg, cb, (int)na);
+				}
+
+				/* set pixel on destination image */
+				gdImageSetPixel (dst, dstX + x, dstY + y, nc);
+			}
+		}
+
+		return;
+	}
+	
+	/* falback */
+	gdImageCopyMerge(dst, src, dstX, dstY, srcX, srcY, w, h, pct);
+}
+
 /* This function is a substitute for real alpha channel operations,
    so it doesn't pay attention to the alpha channel. */
 void gdImageCopyMergeGray (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX, int srcY, int w, int h, int pct)

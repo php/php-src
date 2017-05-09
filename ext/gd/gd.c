@@ -672,7 +672,17 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagecopymerge, 0)
 	ZEND_ARG_INFO(0, src_h)
 	ZEND_ARG_INFO(0, pct)
 ZEND_END_ARG_INFO()
-
+ZEND_BEGIN_ARG_INFO(arginfo_imagecopymergealpha, 0)
+	ZEND_ARG_INFO(0, src_im)
+	ZEND_ARG_INFO(0, dst_im)
+	ZEND_ARG_INFO(0, dst_x)
+	ZEND_ARG_INFO(0, dst_y)
+	ZEND_ARG_INFO(0, src_x)
+	ZEND_ARG_INFO(0, src_y)
+	ZEND_ARG_INFO(0, src_w)
+	ZEND_ARG_INFO(0, src_h)
+	ZEND_ARG_INFO(0, pct)
+ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_imagecopymergegray, 0)
 	ZEND_ARG_INFO(0, src_im)
 	ZEND_ARG_INFO(0, dst_im)
@@ -883,6 +893,7 @@ const zend_function_entry gd_functions[] = {
 	PHP_FE(imagecolorsforindex,						arginfo_imagecolorsforindex)
 	PHP_FE(imagecopy,								arginfo_imagecopy)
 	PHP_FE(imagecopymerge,							arginfo_imagecopymerge)
+	PHP_FE(imagecopymergealpha,						arginfo_imagecopymergealpha)
 	PHP_FE(imagecopymergegray,						arginfo_imagecopymergegray)
 	PHP_FE(imagecopyresized,						arginfo_imagecopyresized)
 	PHP_FE(imagecreate,								arginfo_imagecreate)
@@ -3778,6 +3789,35 @@ PHP_FUNCTION(imagecopymerge)
 	pct  = PCT;
 
 	gdImageCopyMerge(im_dst, im_src, dstX, dstY, srcX, srcY, srcW, srcH, pct);
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto bool imagecopymergealpha(resource src_im, resource dst_im, int dst_x, int dst_y, int src_x, int src_y, int src_w, int src_h, int pct)
+   Merge one part of an image with another -while preserving Alpha channel*/
+PHP_FUNCTION(imagecopymergealpha)
+{
+	zval *SIM, *DIM;
+	long SX, SY, SW, SH, DX, DY, PCT;
+	gdImagePtr im_dst, im_src;
+	int srcH, srcW, srcY, srcX, dstY, dstX, pct;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrlllllll", &DIM, &SIM, &DX, &DY, &SX, &SY, &SW, &SH, &PCT) == FAILURE) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, &SIM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im_dst, gdImagePtr, &DIM, -1, "Image", le_gd);
+
+	srcX = SX;
+	srcY = SY;
+	srcH = SH;
+	srcW = SW;
+	dstX = DX;
+	dstY = DY;
+	pct  = PCT;
+
+	gdImageCopyMergeAlpha(im_dst, im_src, dstX, dstY, srcX, srcY, srcW, srcH, pct);
 	RETURN_TRUE;
 }
 /* }}} */
