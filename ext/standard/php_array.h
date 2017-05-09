@@ -102,6 +102,7 @@ PHP_FUNCTION(array_map);
 PHP_FUNCTION(array_key_exists);
 PHP_FUNCTION(array_chunk);
 PHP_FUNCTION(array_combine);
+PHP_FUNCTION(array_get);
 
 PHPAPI int php_array_merge(HashTable *dest, HashTable *src);
 PHPAPI int php_array_merge_recursive(HashTable *dest, HashTable *src);
