@@ -48,6 +48,7 @@ PHP_FUNCTION(pow);
 PHP_FUNCTION(sqrt);
 PHP_FUNCTION(rand);
 PHP_FUNCTION(mt_srand);
+PHP_FUNCTION(mt_srand_array);
 PHP_FUNCTION(mt_rand);
 PHP_FUNCTION(mt_getrandmax);
 PHP_FUNCTION(abs);

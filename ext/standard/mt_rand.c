@@ -151,7 +151,10 @@ PHPAPI void php_mt_srand(uint32_t seed)
 {
 	/* Seed the generator with a simple uint32 */
 	php_mt_initialize(seed, BG(state));
-	php_mt_reload();
+
+	/* Reload the generator when mt_rand is next called.
+	 * (Reloading immediately would break php_mt_srand_array.) */
+	BG(left) = 0;
 
 	/* Seed only once */
 	BG(mt_rand_is_seeded) = 1;
@@ -209,6 +212,85 @@ PHP_FUNCTION(mt_srand)
 	}
 	
 	php_mt_srand(seed);
+}
+/* }}} */
+
+/* {{{ proto void mt_srand_array(array seed)
+   Seeds Mersenne Twister random number generator with multiple integers */
+PHP_FUNCTION(mt_srand_array)
+{
+	zval *arr = 0, *tmp;
+	uint32_t length = 0, seed_j;
+	zend_long seed_j_long;
+	double seed_j_double;
+	int i, j, k, first_loop = 1;
+	uint32_t *mt = BG(state);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a", &arr) == FAILURE)
+		return;
+
+	length = zend_hash_num_elements(Z_ARRVAL_P(arr));
+	if (length == 0) {
+		php_error_docref(NULL, E_WARNING, "expects parameter 1 to be an array with at least 1 element");
+		return;
+	}
+
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(arr), tmp) {
+		if (UNEXPECTED(Z_TYPE_P(tmp) == IS_REFERENCE)) {
+			tmp = Z_REFVAL_P(tmp);
+		}
+		seed_j_double = 0.5;
+		if (Z_TYPE_P(tmp) == IS_LONG) {
+			seed_j_double = Z_LVAL_P(tmp);
+		} else if (Z_TYPE_P(tmp) == IS_DOUBLE) {
+			seed_j_double = Z_DVAL_P(tmp);
+		} else if (Z_TYPE_P(tmp) == IS_STRING) {
+			if (is_numeric_string(Z_STRVAL_P(tmp), Z_STRLEN_P(tmp), &seed_j_long, &seed_j_double, -1) == IS_LONG) {
+				seed_j_double = seed_j_long;
+			}
+		}
+		/* check for range */
+		if (seed_j_double > UINT32_MAX || seed_j_double < INT32_MIN) {
+			php_error_docref(NULL, E_WARNING, "expects parameter 1 to be an array of 32-bit integers");
+			return;
+		}
+		/* check for decimals */
+		/* (notice the default 0.5, which also provokes this warning) */
+		if (seed_j_double != (uint32_t)seed_j_double && seed_j_double != (int32_t)seed_j_double) {
+			php_error_docref(NULL, E_WARNING, "expects parameter 1 to be an array of integers");
+			return;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	php_mt_srand(19650218U);
+	i = 1;
+	k = 0;
+	while (k < N) {
+		j = 0;
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(arr), tmp) {
+			seed_j = zval_get_long(tmp);
+			mt[i] = ((mt[i] ^ ((mt[i-1] ^ (mt[i-1] >> 30)) * 1664525U)) + seed_j + j) & 0xffffffffU;
+			i++; j++; k++;
+			if (i == N) {
+				mt[0] = mt[N-1];
+				i = 1;
+			}
+			if (!first_loop && k == N) {
+				break;
+			}
+		} ZEND_HASH_FOREACH_END();
+		first_loop = 0;
+	}
+	for (k = 1; k < N; ++k) {
+		mt[i] = ((mt[i] ^ ((mt[i-1] ^ (mt[i-1] >> 30)) * 1566083941U)) - i) & 0xffffffffU;
+		i++;
+		if (i == N) {
+			mt[0] = mt[N-1];
+			i = 1;
+		}
+	}
+
+	mt[0] = 0x80000000U;
 }
 /* }}} */
 
