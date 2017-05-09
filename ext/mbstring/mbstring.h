@@ -133,7 +133,8 @@ PHP_FUNCTION(mb_check_encoding);
 PHP_FUNCTION(mb_ord);
 PHP_FUNCTION(mb_chr);
 PHP_FUNCTION(mb_scrub);
-
+PHP_FUNCTION(mb_at);
+PHP_FUNCTION(mb_codepoint_at);
 
 MBSTRING_API char *php_mb_safe_strrchr_ex(const char *s, unsigned int c,
                                     size_t nbytes, const mbfl_encoding *enc);
