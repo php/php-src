@@ -60,8 +60,10 @@ static ZEND_FUNCTION(get_object_vars);
 static ZEND_FUNCTION(get_class_methods);
 static ZEND_FUNCTION(trigger_error);
 static ZEND_FUNCTION(set_error_handler);
+static ZEND_FUNCTION(get_error_handler);
 static ZEND_FUNCTION(restore_error_handler);
 static ZEND_FUNCTION(set_exception_handler);
+static ZEND_FUNCTION(get_exception_handler);
 static ZEND_FUNCTION(restore_exception_handler);
 static ZEND_FUNCTION(get_declared_classes);
 static ZEND_FUNCTION(get_declared_traits);
@@ -264,8 +266,10 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(trigger_error,		arginfo_trigger_error)
 	ZEND_FALIAS(user_error,		trigger_error,		arginfo_trigger_error)
 	ZEND_FE(set_error_handler,		arginfo_set_error_handler)
+	ZEND_FE(get_error_handler,		arginfo_zend__void)
 	ZEND_FE(restore_error_handler,		arginfo_zend__void)
 	ZEND_FE(set_exception_handler,		arginfo_set_exception_handler)
+	ZEND_FE(get_exception_handler,		arginfo_zend__void)
 	ZEND_FE(restore_exception_handler,	arginfo_zend__void)
 	ZEND_FE(get_declared_classes, 		arginfo_zend__void)
 	ZEND_FE(get_declared_traits, 		arginfo_zend__void)
@@ -1620,6 +1624,20 @@ ZEND_FUNCTION(set_error_handler)
 }
 /* }}} */
 
+/* {{{ proto string get_error_handler(void)
+   Returns the currently defined error handler, or null */
+ZEND_FUNCTION(get_error_handler)
+{
+        if (zend_parse_parameters_none() == FAILURE) {
+                return;
+        }
+
+	if (Z_TYPE(EG(user_error_handler)) != IS_UNDEF) {
+		RETVAL_ZVAL(&EG(user_error_handler), 1, 0);
+	}
+}
+/* }}} */
+
 /* {{{ proto void restore_error_handler(void)
    Restores the previously defined error handler function */
 ZEND_FUNCTION(restore_error_handler)
@@ -1683,6 +1701,20 @@ ZEND_FUNCTION(set_exception_handler)
 	}
 
 	ZVAL_COPY(&EG(user_exception_handler), exception_handler);
+}
+/* }}} */
+
+/* {{{ proto string get_exception_handler(void)
+   Returns the currently defined exception handler, or null */
+ZEND_FUNCTION(get_exception_handler)
+{
+        if (zend_parse_parameters_none() == FAILURE) {
+                return;
+        }
+
+	if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
+		RETVAL_ZVAL(&EG(user_exception_handler), 1, 0);
+	}
 }
 /* }}} */
 
