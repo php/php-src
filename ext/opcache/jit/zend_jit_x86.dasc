@@ -61,6 +61,8 @@
  |.define SSE,     1
 |.endif
 
+|.define HYBRID_SPAD, 16
+
 #include "jit/zend_jit_x86.h"
 #include "jit/zend_cpuid.h"
 
@@ -1578,7 +1580,11 @@ static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 		|	//}
 	}
 	|	//ZEND_VM_CONTINUE()
+#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
+	|	add r4, HYBRID_SPAD
+#else
 	|	add r4, SPAD // stack alignment
+#endif
 	|	jmp aword [IP]
 
 	return 1;
@@ -1586,9 +1592,19 @@ static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 
 static int zend_jit_exception_handler_stub(dasm_State **Dst)
 {
+//#ifdef ZEND_VM_KIND_HYBRID
+//	const void *handler = zend_get_real_opcode_handler(EG(exception_op));
+//#else
+	const void *handler = EG(exception_op)->handler;
+//#endif
+
 	|->exception_handler:
+#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
+	|	add r4, HYBRID_SPAD
+#else
 	|	add r4, SPAD // stack alignment
-	|	EXT_JMP EG(exception_op)->handler, r0
+#endif
+	|	EXT_JMP handler, r0
 
 	return 1;
 }
@@ -1605,12 +1621,24 @@ static int zend_jit_exception_handler_undef_stub(dasm_State **Dst)
 static int zend_jit_leave_function_stub(dasm_State **Dst)
 {
 	|->leave_function_handler:
+#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
+	|	test FCARG1d, ZEND_CALL_TOP
+	|	jnz >1
+	|	EXT_CALL zend_jit_leave_nested_func_helper, r0
+	|	add r4, HYBRID_SPAD // stack alignment
+	|	jmp aword [IP]
+	|1:
+	|	EXT_CALL zend_jit_leave_top_func_helper, r0
+	|	add r4, HYBRID_SPAD // stack alignment
+	|	jmp aword [IP]
+#else
 	|	add r4, SPAD
 	|	test FCARG1d, ZEND_CALL_TOP
 	|	jnz >1
 	|	EXT_JMP zend_jit_leave_nested_func_helper, r0
 	|1:
 	|	EXT_JMP zend_jit_leave_top_func_helper, r0
+#endif
 
 	return 1;
 }
@@ -1976,7 +2004,11 @@ static int zend_jit_align_func(dasm_State **Dst)
 
 static int zend_jit_prologue(dasm_State **Dst)
 {
+#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
+	|	sub r4, HYBRID_SPAD
+#else
 	|	sub r4, SPAD // stack alignment
+#endif
 	return 1;
 }
 
@@ -2063,10 +2095,16 @@ static int zend_jit_check_exception_undef_result(dasm_State **Dst, const zend_op
 
 static int zend_jit_handler(dasm_State **Dst, const zend_op *opline, int may_throw)
 {
+#ifdef ZEND_VM_KIND_HYBRID
+	const void *handler = zend_get_real_opcode_handler(opline);
+#else
+	const void *handler = opline->handler;
+#endif
+
 	if (!zend_jit_set_valid_ip(Dst, opline)) {
 		return 0;
 	}
-	|	EXT_CALL opline->handler, r0
+	|	EXT_CALL handler, r0
 	if (may_throw) {
 		zend_jit_check_exception(Dst);
 	}
@@ -2103,11 +2141,21 @@ static int zend_jit_handler(dasm_State **Dst, const zend_op *opline, int may_thr
 
 static int zend_jit_tail_handler(dasm_State **Dst, const zend_op *opline)
 {
+//#ifdef ZEND_VM_KIND_HYBRID
+//	const void *handler = zend_get_real_opcode_handler(opline);
+//#else
+	const void *handler = opline->handler;
+//#endif
+
 	if (!zend_jit_set_valid_ip(Dst, opline)) {
 		return 0;
 	}
+#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
+	|	add r4, HYBRID_SPAD
+#else
 	|	add r4, SPAD // stack alignment
-	|	EXT_JMP opline->handler, r0
+#endif
+	|	EXT_JMP handler, r0
 	last_valid_opline = NULL;
 	return 1;
 }
@@ -6939,7 +6987,11 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 				|	jmp >9
 			}
 #else
+#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
+			|	add r4, HYBRID_SPAD
+#else
 			|	add r4, SPAD // stack alignment
+#endif
 			|	jmp aword [IP]
 #endif
 		}
@@ -8012,7 +8064,11 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, zend_op_
 	|	jne ->leave_throw_handler
 	|	// opline = EX(opline) + 1
 	|	add IP, sizeof(zend_op)
+#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
+	|	add r4, HYBRID_SPAD
+#else
 	|	add r4, SPAD // stack alignment
+#endif
 #ifdef CONTEXT_THREADED_JIT
 	|	ret
 #else
