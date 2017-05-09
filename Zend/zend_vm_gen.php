@@ -1849,7 +1849,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 							break;
 						case ZEND_VM_KIND_HYBRID:
 							out($f,"#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)\n");
-							out($f, $m[1]."HYBRID_SWITCH();".$m[3]."\n");
+							out($f, $m[1]."HYBRID_SWITCH()".$m[3]."\n");
 							out($f,"#else\n");
 						case ZEND_VM_KIND_CALL:
 							out($f,"#if defined(ZEND_VM_FP_GLOBAL_REG) && defined(ZEND_VM_IP_GLOBAL_REG)\n");
