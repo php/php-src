@@ -2980,8 +2980,10 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|THIS|CV, CONST|T
 	obj = Z_OBJ_P(object);
 	called_scope = obj->ce;
 
-	if (OP2_TYPE != IS_CONST ||
-	    UNEXPECTED((fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL)) {
+	if (OP2_TYPE == IS_CONST &&
+	    EXPECTED(CACHED_PTR(Z_CACHE_SLOT_P(function_name)) == called_scope)) {
+	    fbc = CACHED_PTR(Z_CACHE_SLOT_P(function_name) + sizeof(void*));
+	} else {
 	    zend_object *orig_obj = obj;
 
 		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
@@ -3075,8 +3077,8 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, UNUSED|CLASS_FETCH|CONST|VAR,
 		/* nothing to do */
 	} else if (OP1_TYPE != IS_CONST &&
 	           OP2_TYPE == IS_CONST &&
-	           (fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)), ce))) {
-		/* do nothing */
+	           EXPECTED(CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2))) == ce)) {
+		fbc = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)) + sizeof(void*));
 	} else if (OP2_TYPE != IS_UNUSED) {
 		zend_free_op free_op2;
 
@@ -4976,7 +4978,8 @@ ZEND_VM_HANDLER(181, ZEND_FETCH_CLASS_CONSTANT, VAR|CONST|UNUSED|CLASS_FETCH, CO
 			} else {
 				ce = Z_CE_P(EX_VAR(opline->op1.var));
 			}
-			if ((value = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)), ce)) != NULL) {
+			if (EXPECTED(CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2))) == ce)) {
+				value = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)) + sizeof(void*));
 				break;
 			}
 		}
@@ -6320,7 +6323,9 @@ ZEND_VM_HANDLER(180, ZEND_ISSET_ISEMPTY_STATIC_PROP, CONST|TMPVAR|CV, UNUSED|CLA
 			ce = Z_CE_P(EX_VAR(opline->op2.var));
 		}
 		if (OP1_TYPE == IS_CONST &&
-		    (value = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce)) != NULL) {
+		    EXPECTED(CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1))) == ce)) {
+
+			value = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)) + sizeof(void*));
 
 			/* check if static properties were destoyed */
 			if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {

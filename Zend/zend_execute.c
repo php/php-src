@@ -1974,7 +1974,8 @@ static zend_always_inline zval* zend_fetch_static_property_address(zend_execute_
 			ce = Z_CE_P(EX_VAR(op2.var));
 		}
 		if (varname_type == IS_CONST &&
-		    (retval = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(varname), ce)) != NULL) {
+		    EXPECTED(CACHED_PTR(Z_CACHE_SLOT_P(varname)) == ce)) {
+			retval = CACHED_PTR(Z_CACHE_SLOT_P(varname) + sizeof(void*));
 
 			/* check if static properties were destoyed */
 			if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
