@@ -30,4 +30,28 @@ if test "$PHP_OPENSSL" != "no"; then
   if test "$PHP_SYSTEM_CIPHERS" != "no"; then
     AC_DEFINE(USE_OPENSSL_SYSTEM_CIPHERS,1,[ Use system default cipher list instead of hardcoded value ])
   fi
+
+  AC_MSG_CHECKING([for pthread_atfork requirement])
+	AC_TRY_RUN([
+	#include <pthread.h>
+	#include <openssl/opensslv.h>
+	
+	int routine() {}
+	int main(int argc, char *argv[])
+	{
+#if OPENSSL_VERSION_NUMBER < 0x10100001L
+		pthread_atfork(NULL, NULL, routine);
+		return 0;
+#else
+		return 1;
+#endif	
+	}
+	], [
+	  AC_MSG_RESULT([required])
+	  AC_DEFINE(OPENSSL_USE_ATFORK, 1, [Whether atfork hack is required for openssl])
+	  OPENSSL_EXTRA_LIBS+="-pthread"
+	  PHP_SUBST(OPENSSL_EXTRA_LIBS)
+	], [
+	  AC_MSG_RESULT([not required])
+	])
 fi
