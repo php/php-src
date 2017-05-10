@@ -992,8 +992,6 @@
 	{ "ist",   0,  19800, "Asia/Dacca"                    },
 	{ "ist",   0,  19800, "Asia/Dhaka"                    },
 	{ "ist",   0,  19800, "Asia/Karachi"                  },
-	{ "ist",   0,  19800, "Asia/Kathmandu"                },
-	{ "ist",   0,  19800, "Asia/Katmandu"                 },
 	{ "ist",   0,  19800, "Asia/Kolkata"                  },
 	{ "ist",   0,  19800, "Asia/Thimbu"                   },
 	{ "ist",   0,  19800, "Asia/Thimphu"                  },
