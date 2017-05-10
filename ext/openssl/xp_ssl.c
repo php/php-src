@@ -2573,8 +2573,7 @@ php_stream *php_openssl_ssl_socket_factory(const char *proto, size_t protolen,
 #endif
 	} else if (strncmp(proto, "tls", protolen) == 0) {
 		sslsock->enable_on_connect = 1;
-		/* STREAM_CRYPTO_METHOD_TLS_CLIENT is just TLSv1 for BC reasons with pre-5.6 */
-		sslsock->method = get_crypto_method(context, STREAM_CRYPTO_METHOD_SSLv23_CLIENT);
+		sslsock->method = get_crypto_method(context, STREAM_CRYPTO_METHOD_TLS_ANY_CLIENT);
 	} else if (strncmp(proto, "tlsv1.0", protolen) == 0) {
 		sslsock->enable_on_connect = 1;
 		sslsock->method = STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT;
