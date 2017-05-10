@@ -149,32 +149,22 @@ PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length
 			break;
 		}
 		if (ch == base64_pad) {
-			/* fail if the padding character is second in a group (like V===) */
-			/* FIXME: why do we still allow invalid padding in other places in the middle of the string? */
-			if (i % 4 == 1) {
-				zend_string_free(result);
-				return NULL;
-			}
 			padding++;
 			continue;
 		}
 
 		ch = base64_reverse_table[ch];
-		if (!strict) {
-			/* skip unknown characters and whitespace */
-			if (ch < 0) {
-				continue;
+		/* handle unknown characters and whitespace */
+		if (ch < 0) {
+			/* strict: fail on bad characters */
+			if (strict && ch == -2) {
+				goto fail;
 			}
-		} else {
-			/* skip whitespace */
-			if (ch == -1) {
-				continue;
-			}
-			/* fail on bad characters or if any data follows padding */
-			if (ch == -2 || padding) {
-				zend_string_free(result);
-				return NULL;
-			}
+			continue;
+		}
+		/* fail on bad characters or if any data follows padding */
+		if (padding) {
+			goto fail;
 		}
 
 		switch(i % 4) {
@@ -195,11 +185,23 @@ PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length
 		}
 		i++;
 	}
+	/* fail if the input is truncated (only one char in last group) */
+	if (i % 4 == 1) {
+		goto fail;
+	}
+	/* fail if there are more than 2 padding characters */
+	if (padding > 2) {
+		goto fail;
+	}
 
 	ZSTR_LEN(result) = j;
 	ZSTR_VAL(result)[ZSTR_LEN(result)] = '\0';
 
 	return result;
+
+fail:
+	zend_string_free(result);
+	return NULL;
 }
 /* }}} */
 
