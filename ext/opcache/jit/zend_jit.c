@@ -79,8 +79,16 @@ static void *dasm_buf = NULL;
 static void *dasm_end = NULL;
 static void **dasm_ptr = NULL;
 
+#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
+static const void *hybrid_runtime_jit = NULL;
+static const void *hybrid_profile_jit = NULL;
+static const void *hybrid_func_counter = NULL;
+static const void *hybrid_loop_counter = NULL;
+#endif
+
 static int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa);
 static int zend_may_overflow(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa);
+static void ZEND_FASTCALL zend_runtime_jit(void);
 
 static zend_bool zend_ssa_is_last_use(zend_op_array *op_array, const zend_ssa *ssa, int var, int use)
 {
@@ -2926,7 +2934,11 @@ void zend_jit_check_funcs(HashTable *function_table, zend_bool is_method) {
 		while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
 			opline++;
 		}
+#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
+		if (opline->handler == hybrid_profile_jit) {
+#else
 		if (opline->handler == zend_jit_profile_helper) {
+#endif
 			zend_ulong counter = (zend_ulong)ZEND_COUNTER_INFO(op_array);
 			ZEND_COUNTER_INFO(op_array) = 0;
 			opline->handler = ZEND_FUNC_INFO(op_array);
@@ -2990,13 +3002,22 @@ static int zend_jit_setup_hot_counters(zend_op_array *op_array)
 		opline++;
 	}
 
+#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
+	opline->handler = (const void*)hybrid_func_counter;
+#else
 	opline->handler = (const void*)zend_jit_func_counter_helper;
+#endif
 
 	for (i = 0; i < cfg.blocks_count; i++) {
 		if ((cfg.blocks[i].flags & ZEND_BB_REACHABLE) &&
 		    (cfg.blocks[i].flags & ZEND_BB_LOOP_HEADER)) {
+#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
+		    op_array->opcodes[cfg.blocks[i].start].handler =
+				(const void*)hybrid_loop_counter;
+#else
 		    op_array->opcodes[cfg.blocks[i].start].handler =
 				(const void*)zend_jit_loop_counter_helper;
+#endif
 		}
 	}
 
@@ -3032,11 +3053,19 @@ ZEND_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 
 		/* Set run-time JIT handler */
 		while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
+#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
+			opline->handler = (const void*)hybrid_runtime_jit;
+#else
 			opline->handler = (const void*)zend_runtime_jit;
+#endif
 			opline++;
 		}
 		ZEND_SET_FUNC_INFO(op_array, (void*)opline->handler);
+#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
+		opline->handler = (const void*)hybrid_runtime_jit;
+#else
 		opline->handler = (const void*)zend_runtime_jit;
+#endif
 
 		return SUCCESS;
 	} else if (zend_jit_trigger == ZEND_JIT_ON_PROF_REQUEST) {
@@ -3047,7 +3076,11 @@ ZEND_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 				opline++;
 			}
 			ZEND_SET_FUNC_INFO(op_array, (void*)opline->handler);
+#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
+			opline->handler = (const void*)hybrid_profile_jit;
+#else
 			opline->handler = zend_jit_profile_helper;
+#endif
 		}
 
 		return SUCCESS;
@@ -3223,6 +3256,45 @@ static int zend_jit_make_stubs(void)
 			return 0;
 		}
 	}
+
+#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
+	dasm_setup(&dasm_state, dasm_actions);
+	if (!zend_jit_hybrid_runtime_jit_stub(&dasm_state)) {
+		return 0;
+	}
+	hybrid_runtime_jit = dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, "JIT$$hybrid_runtime_jit");
+	if (!hybrid_runtime_jit) {
+		return 0;
+	}
+
+	dasm_setup(&dasm_state, dasm_actions);
+	if (!zend_jit_hybrid_profile_jit_stub(&dasm_state)) {
+		return 0;
+	}
+	hybrid_profile_jit = dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, "JIT$$hybrid_profile_jit");
+	if (!hybrid_profile_jit) {
+		return 0;
+	}
+
+	dasm_setup(&dasm_state, dasm_actions);
+	if (!zend_jit_hybrid_func_counter_stub(&dasm_state)) {
+		return 0;
+	}
+	hybrid_func_counter = dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, "JIT$$hybrid_func_counter");
+	if (!hybrid_profile_jit) {
+		return 0;
+	}
+
+	dasm_setup(&dasm_state, dasm_actions);
+	if (!zend_jit_hybrid_loop_counter_stub(&dasm_state)) {
+		return 0;
+	}
+	hybrid_loop_counter = dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, "JIT$$hybrid_loop_counter");
+	if (!hybrid_profile_jit) {
+		return 0;
+	}
+#endif
+
 	dasm_free(&dasm_state);
 	return 1;
 }

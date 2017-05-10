@@ -1947,6 +1947,189 @@ static int zend_jit_double_one_stub(dasm_State **Dst)
 	return 1;
 }
 
+#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
+static int zend_jit_hybrid_runtime_jit_stub(dasm_State **Dst)
+{
+	|->hybrid_runtime_jit:
+	|	EXT_CALL zend_runtime_jit, r0
+	|	jmp aword [IP]
+	return 1;
+}
+
+static int zend_jit_hybrid_profile_jit_stub(dasm_State **Dst)
+{
+	|->hybrid_profile_jit:
+	|	// ++zend_jit_profile_counter;
+	|	.if X64
+	|		LOAD_ADDR r0, &zend_jit_profile_counter
+	|		inc aword [r0]
+	|	.else
+	|		inc aword [&zend_jit_profile_counter]
+	|	.endif
+	|	// op_array = (zend_op_array*)EX(func);
+	|	mov r0, EX->func
+	|	// ++(ZEND_COUNTER_INFO(op_array));
+	|	inc aword [r0 + offsetof(zend_op_array, reserved[zend_jit_profile_counter_rid])]
+	|	// handler = (const void*)ZEND_FUNC_INFO(op_array);
+	|	mov r0, aword [r0 + offsetof(zend_op_array, reserved[zend_func_info_rid])]
+	|	// return ((zend_vm_opcode_handler_t)handler)();
+	|	jmp	r0
+	return 1;
+}
+
+static int zend_jit_hybrid_func_counter_stub(dasm_State **Dst)
+{
+	|->hybrid_func_counter:
+	|	mov r0, EX->func
+	|	mov r1, aword [r0 + offsetof(zend_op_array, function_name)]
+	|	test r1, r1
+	|	jne	>1
+	|	mov r0, aword [r0 + offsetof(zend_op_array, filename)]
+	|1:
+	|	shr r0, 3
+	|	mov r1, r0
+	|	.if X64
+	|		shr r0, 30
+	|		xor r0, r1
+	|		mov64 r1, 0xbf58476d1ce4e5b9
+	|		imul r0, r1
+	|		mov r1, r0
+	|		shr r0, 27
+	|		xor r0, r1
+	|		mov64 r1, 0x94d049bb133111eb
+	|		imul r0, r1
+	|		mov r1, r0
+	|		shr r0, 31
+	|		xor r1, r0
+	|		and r1, ZEND_HOT_COUNTERS_COUNT-1
+	|		LOAD_ADDR r0, &zend_jit_hot_counters
+	|		sub word [r0+r1*2], ZEND_JIT_HOT_FUNC_COST
+	|	.else
+	|		shr r0, 16
+	|		xor r0, r1
+	|		imul r0, 0x45d9f3b
+	|		mov r1, r0
+	|		shr r0, 16
+	|		xor r0, r1
+	|		imul r0, 0x45d9f3b
+	|		mov r1, r0
+	|		shr r0, 16
+	|		xor r1, r0
+	|		and r1, ZEND_HOT_COUNTERS_COUNT-1
+	|		sub word [r1*2+&zend_jit_hot_counters], ZEND_JIT_HOT_FUNC_COST
+	|	.endif
+	|	jle >1
+	|	mov r1, EX->func
+	|	mov	r0, IP
+	|	sub r0, aword [r1 + offsetof(zend_op_array, opcodes)]
+	|	// divide by sizeof(zend_op)
+	|	.if X64
+	|		sar r0, 5
+	|	.else
+	|		sar r0, 2
+	|		imul r0, 0xb6db6db7
+	|	.endif
+	|	mov r1, aword [r1 + offsetof(zend_op_array, reserved[zend_func_info_rid])]
+	|	.if X64
+	|		jmp aword [r1+r0*8]
+	|	.else
+	|		jmp aword [r1+r0*4]
+	|	.endif
+	|1:
+	|	.if X64
+	|		mov word [r0+r1*2], ZEND_JIT_HOT_COUNTER_INIT
+	|		mov CARG1, FP
+	|		mov CARG2, IP
+	|		EXT_CALL zend_jit_hot_func, r0
+	|	.else
+	|		mov word [r1*2+&zend_jit_hot_counters], ZEND_JIT_HOT_COUNTER_INIT
+	|		sub r4, 8
+	|		push IP
+	|		push FP
+	|		EXT_CALL zend_jit_hot_func, r0
+	|		add r4, 16
+	|	.endif
+	|	jmp	aword [IP]
+	return 1;
+}
+
+static int zend_jit_hybrid_loop_counter_stub(dasm_State **Dst)
+{
+	|->hybrid_loop_counter:
+	|	mov r0, EX->func
+	|	mov r1, aword [r0 + offsetof(zend_op_array, function_name)]
+	|	test r1, r1
+	|	jne	>1
+	|	mov r0, aword [r0 + offsetof(zend_op_array, filename)]
+	|1:
+	|	shr r0, 3
+	|	mov r1, r0
+	|	.if X64
+	|		shr r0, 30
+	|		xor r0, r1
+	|		mov64 r1, 0xbf58476d1ce4e5b9
+	|		imul r0, r1
+	|		mov r1, r0
+	|		shr r0, 27
+	|		xor r0, r1
+	|		mov64 r1, 0x94d049bb133111eb
+	|		imul r0, r1
+	|		mov r1, r0
+	|		shr r0, 31
+	|		xor r1, r0
+	|		and r1, ZEND_HOT_COUNTERS_COUNT-1
+	|		LOAD_ADDR r0, &zend_jit_hot_counters
+	|		sub word [r0+r1*2], ZEND_JIT_HOT_LOOP_COST
+	|	.else
+	|		shr r0, 16
+	|		xor r0, r1
+	|		imul r0, 0x45d9f3b
+	|		mov r1, r0
+	|		shr r0, 16
+	|		xor r0, r1
+	|		imul r0, 0x45d9f3b
+	|		mov r1, r0
+	|		shr r0, 16
+	|		xor r1, r0
+	|		and r1, ZEND_HOT_COUNTERS_COUNT-1
+	|		sub word [r1*2+&zend_jit_hot_counters], ZEND_JIT_HOT_LOOP_COST
+	|	.endif
+	|	jle >1
+	|	mov r1, EX->func
+	|	mov	r0, IP
+	|	sub r0, aword [r1 + offsetof(zend_op_array, opcodes)]
+	|	// divide by sizeof(zend_op)
+	|	.if X64
+	|		sar r0, 5
+	|	.else
+	|		sar r0, 2
+	|		imul r0, 0xb6db6db7
+	|	.endif
+	|	mov r1, aword [r1 + offsetof(zend_op_array, reserved[zend_func_info_rid])]
+	|	.if X64
+	|		jmp aword [r1+r0*8]
+	|	.else
+	|		jmp aword [r1+r0*4]
+	|	.endif
+	|1:
+	|	.if X64
+	|		mov word [r0+r1*2], ZEND_JIT_HOT_COUNTER_INIT
+	|		mov CARG1, FP
+	|		mov CARG2, IP
+	|		EXT_CALL zend_jit_hot_func, r0
+	|	.else
+	|		mov word [r1*2+&zend_jit_hot_counters], ZEND_JIT_HOT_COUNTER_INIT
+	|		sub r4, 8
+	|		push IP
+	|		push FP
+	|		EXT_CALL zend_jit_hot_func, r0
+	|		add r4, 16
+	|	.endif
+	|	jmp	aword [IP]
+	return 1;
+}
+#endif
+
 static const zend_jit_stub zend_jit_stubs[] = {
 	JIT_STUB(interrupt_handler),
 	JIT_STUB(exception_handler),

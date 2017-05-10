@@ -2844,6 +2844,8 @@ static int accel_startup(zend_extension *extension)
 		/* Init auto-global strings */
 		zend_accel_init_auto_globals();
 
+		zend_optimizer_startup();
+
 		zend_shared_alloc_lock();
 #ifdef HAVE_JIT
 		if (ZCG(accel_directives).jit &&
@@ -2917,8 +2919,6 @@ file_cache_fallback:
 		zend_accel_blacklist_init(&accel_blacklist);
 		zend_accel_blacklist_load(&accel_blacklist, ZCG(accel_directives.user_blacklist_filename));
 	}
-
-	zend_optimizer_startup();
 
 	return SUCCESS;
 }
