@@ -1,4 +1,4 @@
---TEST--n
+--TEST--
 Bug #14580 (key() not binary safe)
 --FILE--
 <?php
