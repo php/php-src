@@ -47,29 +47,28 @@
 sb4 callback_fn(OCISvcCtx *svchp, OCIEnv *envhp, php_oci_connection *fo_ctx, ub4 fo_type, ub4 fo_event)
 {
 	/* Create zval */
-	zval retval, callback, params[3];
+	zval retval, params[3];
 
 	/* Default return value */
 	sb4 returnValue = 0;
 
 	/* Check if userspace callback function was disabled */
-	if (!fo_ctx->taf_callback || !strcmp(PHP_OCI_TAF_DISABLE_CALLBACK, fo_ctx->taf_callback)) {
+	if (Z_ISUNDEF(fo_ctx->taf_callback)) {
 		return 0;
 	}
 
 	/* Initialize zval */
-	ZVAL_STRING(&callback, fo_ctx->taf_callback, 1);
 	ZVAL_RES(&params[0], fo_ctx->id);
 	ZVAL_LONG(&params[1], fo_event);
 	ZVAL_LONG(&params[2], fo_type);
 
 	/* Call user function (if possible) */
-	if (call_user_function(EG(function_table), NULL, &callback, &retval, 3, params) == FAILURE) {
+	if (call_user_function(EG(function_table), NULL, &fo_ctx->taf_callback, &retval, 3, params) == FAILURE) {
 		php_error_docref(NULL, E_WARNING, "Unable to call taf callback function, is it defined?");
 	}
 
 	/* Set return value */
-	if(Z_TYPE(retval) == IS_LONG) {
+	if (Z_TYPE(retval) == IS_LONG) {
 		returnValue = (sb4) Z_LVAL(retval);
 	}
 
@@ -77,7 +76,6 @@ sb4 callback_fn(OCISvcCtx *svchp, OCIEnv *envhp, php_oci_connection *fo_ctx, ub4
 	ZVAL_NULL(&params[0]);
 
 	/* Cleanup */
-	zval_dtor(&callback);
 	zval_dtor(&retval);
 	zval_dtor(&params[0]);
 	zval_dtor(&params[1]);
@@ -101,30 +99,33 @@ int php_oci_disable_taf_callback(php_oci_connection *connection)
 int php_oci_register_taf_callback(php_oci_connection *connection, char *callback)
 {
 	sword errstatus;
-	char *oldCallback = NULL;
+	int registered = 0;
 
 	/* temporary failover callback structure */
 	OCIFocbkStruct failover;
 
 	if (!callback) {
 		/* Disable callback */
-		if (!connection->taf_callback || !strcmp(PHP_OCI_TAF_DISABLE_CALLBACK, connection->taf_callback)) {
+		if (Z_ISUNDEF(connection->taf_callback)) {
 			return 0; // Nothing to disable
 		}
 
-		oldCallback = connection->taf_callback;
-		callback = PHP_OCI_TAF_DISABLE_CALLBACK;
-	} else if (connection->taf_callback) {
-		/* Overwriting old callback */
-		oldCallback = connection->taf_callback;
+		registered = 1;
+		zval_ptr_dtor(&connection->taf_callback);
+		ZVAL_UNDEF(&connection->taf_callback);
+	} else {
+		if (!Z_ISUNDEF(connection->taf_callback)) {
+			registered = 1;
+			zval_ptr_dtor(&connection->taf_callback);
+			ZVAL_UNDEF(&connection->taf_callback);
+		}
+
+		/* Set userspace callback function */
+		ZVAL_COPY(&connection->taf_callback, callback);
 	}
 
-	/* Set userspace callback function */
-	connection->taf_callback = pestrdup(callback, connection->is_persistent);
-
 	/* OCI callback function already registered */
-	if (oldCallback) {
-		pefree(oldCallback, connection->is_persistent);
+	if (registered) {
 		return 0;
 	}
 
@@ -138,7 +139,8 @@ int php_oci_register_taf_callback(php_oci_connection *connection, char *callback
 	PHP_OCI_CALL_RETURN(errstatus, OCIAttrSet, (connection->server, (ub4) OCI_HTYPE_SERVER, (void *) &failover, (ub4) 0, (ub4) OCI_ATTR_FOCBK, connection->err));
 
 	if (errstatus  != OCI_SUCCESS) {
-		pefree(connection->taf_callback, connection->is_persistent);
+		zval_ptr_dtor(&connection->taf_callback);
+		ZVAL_UNDEF(&connection->taf_callback);
 		connection->errcode = php_oci_error(connection->err, errstatus);
 		return 2;
 	}

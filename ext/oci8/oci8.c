@@ -1951,6 +1951,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 			connection = (php_oci_connection *) ecalloc(1, sizeof(php_oci_connection));
 			connection->hash_key = zend_string_dup(hashed_details.s, 0);
 			connection->is_persistent = 0;
+			ZVAL_UNDEF(&connection->taf_callback);
 #ifdef HAVE_OCI8_DTRACE
 			connection->client_id = NULL;
 #endif
@@ -1965,6 +1966,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 				return NULL;
 			}
 			connection->is_persistent = 1;
+			ZVAL_UNDEF(&connection->taf_callback);
 #ifdef HAVE_OCI8_DTRACE
 			connection->client_id = NULL;
 #endif
@@ -1973,6 +1975,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 		connection = (php_oci_connection *) ecalloc(1, sizeof(php_oci_connection));
 		connection->hash_key = zend_string_dup(hashed_details.s, 0);
 		connection->is_persistent = 0;
+		ZVAL_UNDEF(&connection->taf_callback);
 #ifdef HAVE_OCI8_DTRACE
 		connection->client_id = NULL;
 #endif
@@ -2247,9 +2250,9 @@ static int php_oci_connection_close(php_oci_connection *connection)
 	}
 #endif /* HAVE_OCI8_DTRACE */
 
-	if (connection->taf_callback) {
-		pefree(connection->taf_callback, connection->is_persistent);
-		connection->taf_callback = NULL;
+	if (!Z_ISUNDEF(connection->taf_callback)) {
+		zval_ptr_dtor(&connection->taf_callback);
+		ZVAL_UNDEF(&connection->taf_callback);
 	}
 
 	pefree(connection, connection->is_persistent);
@@ -2695,7 +2698,7 @@ static int php_oci_persistent_helper(zval *zv)
 		connection = (php_oci_connection *)le->ptr;
 
 		/* Remove TAF callback function as it's bound to current request */
-		if (connection->used_this_request && connection->taf_callback) {
+		if (connection->used_this_request && !Z_ISUNDEF(connection->taf_callback)) {
 			php_oci_disable_taf_callback(connection);
 		}
 

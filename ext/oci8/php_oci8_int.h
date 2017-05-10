@@ -167,7 +167,7 @@ typedef struct {
 	char		   *client_id;					/* The oci_set_client_identifier() value */
 #endif
 
-	char		   *taf_callback;				/* The Oracle TAF callback function in the userspace */
+	zval		    taf_callback;				/* The Oracle TAF callback function in the userspace */
 } php_oci_connection;
 /* }}} */
 
@@ -537,7 +537,7 @@ ZEND_END_MODULE_GLOBALS(oci) /* }}} */
 
 /* {{{ transparent failover related prototypes */
 
-int php_oci_register_taf_callback(php_oci_connection *connection, char *callback);
+int php_oci_register_taf_callback(php_oci_connection *connection, zval *callback);
 int php_oci_disable_taf_callback(php_oci_connection *connection);
 
 /* }}} */
