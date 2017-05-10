@@ -41,23 +41,35 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 		rt->invert = 1;
 	}
 
-	/* Calculate correction for DST change over, but only if the TZ type is ID
-	 * and it's the same */
+	int flag_apply_localtime=0;
+
 	if (one->zone_type == 3 && two->zone_type == 3
-		&& (strcmp(one->tz_info->name, two->tz_info->name) == 0)
-		&& (one->z != two->z))
-	{
-		dst_corr = two->z - one->z;
-		dst_h_corr = dst_corr / 3600;
-		dst_m_corr = (dst_corr % 3600) / 60;
+		&& (strcmp(one->tz_info->name, two->tz_info->name) == 0))
+	{	
+		/* Calculate correction for DST change over, but only if the TZ type is ID
+	 	* and it's the same */
+		if ((one->z != two->z))
+		{
+			dst_corr = two->z - one->z;
+			dst_h_corr = dst_corr / 3600;
+			dst_m_corr = (dst_corr % 3600) / 60;
+			memcpy(&one_backup, one, sizeof(one_backup));
+			memcpy(&two_backup, two, sizeof(two_backup));
+			flag_apply_localtime = 1;
+		}
+	}else{
+			flag_apply_localtime = 1;
 	}
 
 	/* Save old TZ info */
 	memcpy(&one_backup, one, sizeof(one_backup));
 	memcpy(&two_backup, two, sizeof(two_backup));
 
-    timelib_apply_localtime(one, 0);
-    timelib_apply_localtime(two, 0);
+	if (flag_apply_localtime==1)
+	{
+		timelib_apply_localtime(one, 0);
+		timelib_apply_localtime(two, 0);
+	}
 
 	rt->y = two->y - one->y;
 	rt->m = two->m - one->m;
@@ -117,8 +129,7 @@ timelib_time *timelib_add(timelib_time *old_time, timelib_rel_time *interval)
 	t->sse_uptodate = 0;
 
 	timelib_update_ts(t, NULL);
-
-//	printf("%lld %lld %d\n", old_time->dst, t->dst, (t->sse - old_time->sse));
+	
 	/* Adjust for backwards DST changeover */
 	if (old_time->dst == 1 && t->dst == 0 && !interval->y && !interval->m && !interval->d) {
 		t->sse -= old_time->z;
