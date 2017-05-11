@@ -9,5 +9,6 @@ $ret = preg_match('/(?:\D+|<\d+>)*[!?]/', 'foobar foobar foobar');
 var_dump($ret);
 
 ?>
---EXPECT--
+--EXPECTF--
+Notice: preg_match(): PCRE error 2 in %s%ebug52732.php on line %d
 bool(false)

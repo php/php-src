@@ -14,6 +14,7 @@ preg_match($regex, $subject, $matches);
 
 var_dump($matches);
 --EXPECTF--
+Notice: preg_split(): PCRE error 1 in %s%ebug70345.php on line %d
 Array
 (
     [0] => aaaaxyzaaaa

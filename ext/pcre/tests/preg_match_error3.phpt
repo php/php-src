@@ -10,6 +10,7 @@ if (ini_get("pcre.jit") === FALSE) {
 var_dump(preg_match('/^(foo)+$/', str_repeat('foo', 1024*8192)));
 var_dump(preg_last_error() === PREG_JIT_STACKLIMIT_ERROR);
 ?>
---EXPECT--
+--EXPECTF--
+Notice: preg_match(): PCRE error 6 in %s%epreg_match_error3.php on line %d
 bool(false)
 bool(true)

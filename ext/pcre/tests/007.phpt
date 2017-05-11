@@ -26,7 +26,7 @@ var_dump(preg_last_error() == PREG_BAD_UTF8_ERROR);
 
 echo "Done!\n";
 ?>
---EXPECT--
+--EXPECTF--
 array(1) {
   [0]=>
   string(1) "o"
@@ -54,6 +54,8 @@ array(1) {
 string(6) "ola123"
 string(6) "olaÿ23"
 bool(true)
+
+Notice: preg_replace_callback(): PCRE error 4 in %s%e007.php on line %d
 NULL
 bool(true)
 Done!

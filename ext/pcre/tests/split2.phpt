@@ -310,6 +310,8 @@ array(6) {
 Warning: preg_last_error() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 bool(true)
+
+Notice: preg_split(): PCRE error 3 in %s%esplit2.php on line %d
 array(1) {
   [0]=>
   string(6) "ab2c3u"

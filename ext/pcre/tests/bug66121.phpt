@@ -17,7 +17,7 @@ var_dump(preg_replace('/(?<!ක)/u', '*', "ක\xFC"));
 var_dump(preg_match_all('/(?<!ක)/u', "\xFCම", $matches, PREG_OFFSET_CAPTURE));
 var_dump(preg_match_all('/(?<!ක)/u', "\xFCම", $matches, PREG_OFFSET_CAPTURE));
 ?>
---EXPECT--
+--EXPECTF--
 string(4) "*ක"
 string(5) "*ම*"
 string(2) "*k"
@@ -41,7 +41,15 @@ array(1) {
     }
   }
 }
+
+Notice: preg_replace(): PCRE error 4 in %s%ebug66121.php on line %d
 NULL
+
+Notice: preg_replace(): PCRE error 4 in %s%ebug66121.php on line %d
 NULL
+
+Notice: preg_match_all(): PCRE error 4 in %s%ebug66121.php on line %d
 bool(false)
+
+Notice: preg_match_all(): PCRE error 4 in %s%ebug66121.php on line %d
 bool(false)

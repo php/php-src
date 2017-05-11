@@ -16,7 +16,8 @@ var_dump(preg_last_error());
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECTF--
+Notice: preg_replace(): PCRE error 4 in %s%einvalid_utf8.php on line %d
 NULL
 int(4)
 Done
