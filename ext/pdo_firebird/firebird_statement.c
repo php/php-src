@@ -1,4 +1,4 @@
-/*
+﻿/*
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
@@ -229,6 +229,9 @@ static int firebird_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 #endif
 				col->param_type = PDO_PARAM_INT;
 				break;
+			case SQL_BOOLEAN:
+				col->param_type = PDO_PARAM_BOOL;
+				break;
 			default:
 				col->param_type = PDO_PARAM_STR;
 				break;
@@ -415,6 +418,11 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 				case SQL_DOUBLE:
 					*ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);
 					*len = slprintf(*ptr, CHAR_BUF_LEN, "%F" , *(double*)var->sqldata);
+					break;
+				case SQL_BOOLEAN:
+					*len = sizeof(zend_bool);
+					*ptr = FETCH_BUF(S->fetch_buf[colno], zend_bool, 1, NULL);
+					*(zend_bool*)*ptr = *(FB_BOOLEAN*)var->sqldata;
 					break;
 				case SQL_TYPE_DATE:
 					isc_decode_sql_date((ISC_DATE*)var->sqldata, &t);
