@@ -17,6 +17,10 @@ PHP                                                                        NEWS
   . Fixed bug #51918 (Phar::webPhar() does not handle requests sent through PUT
     and DELETE method). (Christian Weiske)
 
+- Readline:
+  . Fixed bug #74490 (readline() moves the cursor to the beginning of the line).
+    (Anatol)
+
 - Standard:
   . Fixed bug #74510 (win32/sendmail.c anchors CC header but not BCC).
     (Damian Wadley, Anatol)
