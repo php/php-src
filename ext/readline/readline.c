@@ -214,7 +214,7 @@ PHP_MINFO_FUNCTION(readline)
    Reads a line */
 PHP_FUNCTION(readline)
 {
-	char *prompt = "";
+	char *prompt = NULL;
 	size_t prompt_len;
 	char *result;
 
