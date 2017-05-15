@@ -6455,7 +6455,11 @@ static zend_bool zend_try_ct_eval_magic_const(zval *zv, zend_ast *ast) /* {{{ */
 		{
 			zend_string *filename = CG(compiled_filename);
 			zend_string *dirname = zend_string_init(ZSTR_VAL(filename), ZSTR_LEN(filename), 0);
+#ifdef ZEND_WIN32
+			php_win32_ioutil_dirname(ZSTR_VAL(dirname), ZSTR_LEN(dirname));
+#else
 			zend_dirname(ZSTR_VAL(dirname), ZSTR_LEN(dirname));
+#endif
 
 			if (strcmp(ZSTR_VAL(dirname), ".") == 0) {
 				dirname = zend_string_extend(dirname, MAXPATHLEN, 0);
