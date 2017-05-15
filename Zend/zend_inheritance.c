@@ -188,12 +188,14 @@ static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_inf
 	if (ZEND_TYPE_IS_CLASS(fe_arg_info->type) && ZEND_TYPE_IS_CLASS(proto_arg_info->type)) {
 		zend_string *fe_class_name, *proto_class_name;
 		const char *class_name;
+		size_t class_name_len;
 
 		fe_class_name = ZEND_TYPE_NAME(fe_arg_info->type);
 		class_name = ZSTR_VAL(fe_class_name);
-		if (!strcasecmp(class_name, "parent") && proto->common.scope) {
+		class_name_len = ZSTR_LEN(fe_class_name);
+		if (class_name_len == sizeof("parent")-1 && !strcasecmp(class_name, "parent") && proto->common.scope) {
 			fe_class_name = zend_string_copy(proto->common.scope->name);
-		} else if (!strcasecmp(class_name, "self") && fe->common.scope) {
+		} else if (class_name_len == sizeof("self")-1 && !strcasecmp(class_name, "self") && fe->common.scope) {
 			fe_class_name = zend_string_copy(fe->common.scope->name);
 		} else {
 			zend_string_addref(fe_class_name);
@@ -201,15 +203,16 @@ static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_inf
 
 		proto_class_name = ZEND_TYPE_NAME(proto_arg_info->type);
 		class_name = ZSTR_VAL(proto_class_name);
-		if (!strcasecmp(class_name, "parent") && proto->common.scope && proto->common.scope->parent) {
+		class_name_len = ZSTR_LEN(proto_class_name);
+		if (class_name_len == sizeof("parent")-1 && !strcasecmp(class_name, "parent") && proto->common.scope && proto->common.scope->parent) {
 			proto_class_name = zend_string_copy(proto->common.scope->parent->name);
-		} else if (!strcasecmp(class_name, "self") && proto->common.scope) {
+		} else if (class_name_len == sizeof("self")-1 && !strcasecmp(class_name, "self") && proto->common.scope) {
 			proto_class_name = zend_string_copy(proto->common.scope->name);
 		} else {
 			zend_string_addref(proto_class_name);
 		}
 
-		if (strcasecmp(ZSTR_VAL(fe_class_name), ZSTR_VAL(proto_class_name)) != 0) {
+		if (fe_class_name != proto_class_name && strcasecmp(ZSTR_VAL(fe_class_name), ZSTR_VAL(proto_class_name)) != 0) {
 			if (fe->common.type != ZEND_USER_FUNCTION) {
 				zend_string_release(proto_class_name);
 				zend_string_release(fe_class_name);
