@@ -570,7 +570,7 @@ safe:
 							break;
 
 						/* TODO: test coverage */
-						case PDO_PARAM_FLT:
+						case PDO_PARAM_FLOAT:
 							plc->qlen = spprintf(&plc->quoted, 0, "%.*H", (int) EG(precision), zval_get_double(parameter));
 							plc->freeq = 1;
 							break;

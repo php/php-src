@@ -105,7 +105,7 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 						pdo_sqlite_error_stmt(stmt);
 						return 0;
 
-					case PDO_PARAM_FLT:
+					case PDO_PARAM_FLOAT:
 						if (Z_ISREF(param->parameter)) {
 							parameter = Z_REFVAL(param->parameter);
 						} else {
