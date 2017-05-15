@@ -2557,7 +2557,7 @@ php_stream *php_openssl_ssl_socket_factory(const char *proto, size_t protolen,
 
 	if (strncmp(proto, "ssl", protolen) == 0) {
 		sslsock->enable_on_connect = 1;
-		sslsock->method = get_crypto_method(context, STREAM_CRYPTO_METHOD_ANY_CLIENT);
+		sslsock->method = get_crypto_method(context, STREAM_CRYPTO_METHOD_TLS_ANY_CLIENT);
 	} else if (strncmp(proto, "sslv2", protolen) == 0) {
 		php_error_docref(NULL, E_WARNING, "SSLv2 unavailable in this PHP version");
 		php_stream_close(stream);
