@@ -478,7 +478,7 @@ function save_or_mail_results()
 $test_files = array();
 $redir_tests = array();
 $test_results = array();
-$PHP_FAILED_TESTS = array('BORKED' => array(), 'FAILED' => array(), 'WARNED' => array(), 'LEAKED' => array(), 'XFAILED' => array());
+$PHP_FAILED_TESTS = array('BORKED' => array(), 'FAILED' => array(), 'WARNED' => array(), 'LEAKED' => array(), 'XFAILED' => array(), 'SLOW' => array());
 
 // If parameters given assume they represent selected tests to run.
 $result_tests_file= false;
@@ -497,6 +497,7 @@ $temp_target = null;
 $temp_urlbase = null;
 $conf_passed = null;
 $no_clean = false;
+$slow_min_ms = INF;
 
 $cfgtypes = array('show', 'keep');
 $cfgfiles = array('skip', 'php', 'clean', 'out', 'diff', 'exp');
@@ -657,6 +658,9 @@ if (isset($argc) && $argc > 1) {
 						$cfg['show'][$file] = true;
 					}
 					break;
+				case '--show-slow':
+					$slow_min_ms = $argv[++$i];
+					break;
 				case '--temp-source':
 					$temp_source = $argv[++$i];
 					break;
@@ -773,6 +777,9 @@ Options:
                 'exp' or the difference between them 'diff'. The result types
                 get written independent of the log format, however 'diff' only
                 exists when a test fails.
+
+    --show-slow [n]
+                Show all tests that took longer than [n] milliseconds to run.
 
     --no-clean  Do not execute clean section if any.
 
@@ -1250,6 +1257,7 @@ function run_test($php, $file, $env)
 	global $valgrind_version;
 	global $SHOW_ONLY_GROUPS;
 	global $no_file_cache;
+	global $slow_min_ms;
 	$temp_filenames = null;
 	$org_file = $file;
 
@@ -1934,10 +1942,21 @@ COMMAND $cmd
 ";
 
 	junit_start_timer($shortname);
+	$startTime = microtime(true);
 
 	$out = system_with_timeout($cmd, $env, isset($section_text['STDIN']) ? $section_text['STDIN'] : null, $captureStdIn, $captureStdOut, $captureStdErr);
 
 	junit_finish_timer($shortname);
+	$time = microtime(true) - $startTime;
+	if ($time * 1000 >= $slow_min_ms) {
+		$PHP_FAILED_TESTS['SLOW'][] = array(
+			'name'      => $file,
+			'test_name' => (is_array($IN_REDIRECT) ? $IN_REDIRECT['via'] : '') . $tested . " [$tested_file]",
+			'output'    => '',
+			'diff'      => '',
+			'info'      => $time,
+		);
+	}
 
 	if (array_key_exists('CLEAN', $section_text) && (!$no_clean || $cfg['keep']['clean'])) {
 
@@ -2518,6 +2537,22 @@ Time taken      : ' . sprintf('%4d seconds', $end_time - $start_time) . '
 =====================================================================
 ';
 	$failed_test_summary = '';
+
+	if (count($PHP_FAILED_TESTS['SLOW'])) {
+		usort($PHP_FAILED_TESTS['SLOW'], function($a, $b) {
+			return $a['info'] < $b['info'] ? 1 : -1;
+		});
+
+		$failed_test_summary .= '
+=====================================================================
+SLOW TEST SUMMARY
+---------------------------------------------------------------------
+';
+		foreach ($PHP_FAILED_TESTS['SLOW'] as $failed_test_data) {
+			$failed_test_summary .= sprintf('(%.3f s) ', $failed_test_data['info']) . $failed_test_data['test_name'] . "\n";
+		}
+		$failed_test_summary .=  "=====================================================================\n";
+	}
 
 	if (count($PHP_FAILED_TESTS['XFAILED'])) {
 		$failed_test_summary .= '
