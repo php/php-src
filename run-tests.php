@@ -481,6 +481,7 @@ $test_results = array();
 $PHP_FAILED_TESTS = array('BORKED' => array(), 'FAILED' => array(), 'WARNED' => array(), 'LEAKED' => array(), 'XFAILED' => array());
 
 // If parameters given assume they represent selected tests to run.
+$result_tests_file= false;
 $failed_tests_file= false;
 $pass_option_n = false;
 $pass_options = '';
@@ -579,6 +580,9 @@ if (isset($argc) && $argc > 1) {
 					break;
 				case 'a':
 					$failed_tests_file = fopen($argv[++$i], 'a+t');
+					break;
+				case 'W':
+					$result_tests_file = fopen($argv[++$i], 'w+t');
 					break;
 				case 'c':
 					$conf_passed = $argv[++$i];
@@ -712,6 +716,8 @@ Options:
 
     -a <file>   Same as -w but append rather then truncating <file>.
 
+    -W <file>   Write a list of all tests and their result status to <file>.
+
     -c <file>   Look for php.ini in directory <file> or use <file> as ini.
 
     -n          Pass -n option to the php binary (Do not use a php.ini).
@@ -839,6 +845,10 @@ HELP;
 
 		if ($failed_tests_file) {
 			fclose($failed_tests_file);
+		}
+
+		if ($result_tests_file) {
+			fclose($result_tests_file);
 		}
 
 		compute_summary();
@@ -972,6 +982,10 @@ $end_time = time();
 
 if ($failed_tests_file) {
 	fclose($failed_tests_file);
+}
+
+if ($result_tests_file) {
+	fclose($result_tests_file);
 }
 
 // Summarize results
@@ -1175,7 +1189,7 @@ function system_with_timeout($commandline, $env = null, $stdin = null, $captureS
 
 function run_all_tests($test_files, $env, $redir_tested = null)
 {
-	global $test_results, $failed_tests_file, $php, $test_idx;
+	global $test_results, $failed_tests_file, $result_tests_file, $php, $test_idx;
 
 	foreach($test_files as $name) {
 
@@ -1197,6 +1211,9 @@ function run_all_tests($test_files, $env, $redir_tested = null)
 			$test_results[$index] = $result;
 			if ($failed_tests_file && ($result == 'XFAILED' || $result == 'FAILED' || $result == 'WARNED' || $result == 'LEAKED')) {
 				fwrite($failed_tests_file, "$index\n");
+			}
+			if ($result_tests_file) {
+				fwrite($result_tests_file, "$result\t$index\n");
 			}
 		}
 	}
