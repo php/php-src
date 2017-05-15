@@ -319,6 +319,7 @@ static const uint32_t *zend_spec_handlers;
 static const void **zend_opcode_handlers;
 static int zend_handlers_count;
 static const void *zend_vm_get_opcode_handler(zend_uchar opcode, const zend_op* op);
+static const void *zend_vm_get_real_opcode_handler(zend_uchar opcode, const zend_op* op);
 
 
 #ifdef ZEND_VM_FP_GLOBAL_REG
@@ -399,7 +400,7 @@ typedef ZEND_OPCODE_HANDLER_RET (ZEND_FASTCALL *opcode_handler_t) (ZEND_OPCODE_H
 #endif
 #define ZEND_VM_INTERRUPT()      ZEND_VM_TAIL_CALL(zend_interrupt_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 #define ZEND_VM_LOOP_INTERRUPT() zend_interrupt_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-#define ZEND_VM_DISPATCH(opcode, opline) ZEND_VM_TAIL_CALL(((opcode_handler_t)zend_vm_get_opcode_handler(opcode, opline))(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+#define ZEND_VM_DISPATCH(opcode, opline) ZEND_VM_TAIL_CALL(((opcode_handler_t)zend_vm_get_real_opcode_handler(opcode, opline))(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_interrupt_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS);
 
@@ -59303,6 +59304,23 @@ static const void *zend_vm_get_opcode_handler_ex(uint32_t spec, const zend_op* o
 static const void *zend_vm_get_opcode_handler(zend_uchar opcode, const zend_op* op)
 {
 	return zend_vm_get_opcode_handler_ex(zend_spec_handlers[opcode], op);
+}
+
+static const void *zend_vm_get_real_opcode_handler(zend_uchar opcode, const zend_op* op)
+{
+	const void *handler = zend_vm_get_opcode_handler_ex(zend_spec_handlers[opcode], op);
+#if ZEND_VM_KIND == ZEND_VM_KIND_HYBRID
+	zval *zv;
+
+	if (!zend_handlers_table) {
+	init_opcode_serialiser();
+	}
+	zv = zend_hash_index_find(zend_handlers_table, (zend_long)(zend_uintptr_t)handler);
+	ZEND_ASSERT(zv != NULL);
+	return zend_opcode_real_handlers[Z_LVAL_P(zv)];
+#else
+	return handler;
+#endif
 }
 
 ZEND_API void zend_vm_set_opcode_handler(zend_op* op)

@@ -1587,7 +1587,8 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 						out($f,"static zend_op hybrid_return_op;\n");
 						out($f,"#endif\n");
 					}
-					out($f,"static const void *zend_vm_get_opcode_handler(zend_uchar opcode, const zend_op* op);\n\n");
+					out($f,"static const void *zend_vm_get_opcode_handler(zend_uchar opcode, const zend_op* op);\n");
+					out($f,"static const void *zend_vm_get_real_opcode_handler(zend_uchar opcode, const zend_op* op);\n\n");
 					switch ($kind) {
 						case ZEND_VM_KIND_HYBRID:
 							out($f,"#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)\n");
@@ -1690,7 +1691,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 							out($f,"#endif\n");
 							out($f,"#define ZEND_VM_INTERRUPT()      ZEND_VM_TAIL_CALL(zend_interrupt_helper".($spec?"_SPEC":"")."(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));\n");
 							out($f,"#define ZEND_VM_LOOP_INTERRUPT() zend_interrupt_helper".($spec?"_SPEC":"")."(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n");
-							out($f,"#define ZEND_VM_DISPATCH(opcode, opline) ZEND_VM_TAIL_CALL(((opcode_handler_t)zend_vm_get_opcode_handler(opcode, opline))(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));\n");
+							out($f,"#define ZEND_VM_DISPATCH(opcode, opline) ZEND_VM_TAIL_CALL(((opcode_handler_t)zend_vm_get_real_opcode_handler(opcode, opline))(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));\n");
 							out($f,"\n");
 							out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_interrupt_helper".($spec?"_SPEC":"")."(ZEND_OPCODE_HANDLER_ARGS);");
 							out($f,"\n");
@@ -2452,6 +2453,27 @@ function gen_vm($def, $skel) {
 	} else {
 		out($f, "\treturn zend_vm_get_opcode_handler_ex(zend_spec_handlers[opcode], op);\n");
 	}
+	out($f, "}\n\n");
+
+	// Generate zend_vm_get_real_opcode_handler() function
+	out($f, "static const void *zend_vm_get_real_opcode_handler(zend_uchar opcode, const zend_op* op)\n");
+	out($f, "{\n");
+	if (!ZEND_VM_SPEC) {
+		out($f, "\tconst void *handler = zend_vm_get_opcode_handler_ex(opcode, op);\n");
+	} else {
+		out($f, "\tconst void *handler = zend_vm_get_opcode_handler_ex(zend_spec_handlers[opcode], op);\n");
+	}
+	out($f, "#if ZEND_VM_KIND == ZEND_VM_KIND_HYBRID\n");
+	out($f, "\tzval *zv;\n\n");
+	out($f, "\tif (!zend_handlers_table) {\n");
+	out($f, "\tinit_opcode_serialiser();\n");
+	out($f, "\t}\n");
+	out($f, "\tzv = zend_hash_index_find(zend_handlers_table, (zend_long)(zend_uintptr_t)handler);\n");
+	out($f, "\tZEND_ASSERT(zv != NULL);\n");
+	out($f, "\treturn zend_opcode_real_handlers[Z_LVAL_P(zv)];\n");
+	out($f, "#else\n");
+	out($f, "\treturn handler;\n");
+	out($f, "#endif\n");
 	out($f, "}\n\n");
 
 	// Generate zend_vm_get_opcode_handler() function
