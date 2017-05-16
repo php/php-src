@@ -2,7 +2,7 @@
 Bug #74589 __DIR__ wrong for unicode character, UTF-8
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) != 'WIN' || PHP_OS != 'Linux') {
+if (substr(PHP_OS, 0, 3) != 'WIN' && PHP_OS != 'Linux') {
     die('skip Linux or Windows only');
 }
 ?>
@@ -35,7 +35,7 @@ echo shell_exec("$php -n $test_file");
 ===DONE===
 --EXPECTF--	
 string(%d) "%sbug74589_新建文件夹"
-string(%d) "%sbug74589_新建文件夹\test.php"
+string(%d) "%sbug74589_新建文件夹%etest.php"
 bool(true)
 ===DONE===
 --CLEAN--
