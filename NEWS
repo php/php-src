@@ -13,6 +13,9 @@ PHP                                                                        NEWS
   . Fixed bug #74547 (mysqli::change_user() doesn't accept null as $database
     argument w/strict_types). (Anatol)
 
+- Opcache:
+  . Fixed bug #74596 (SIGSEGV with opcache.revalidate_path enabled). (Laruence)
+
 - phar:
   . Fixed bug #51918 (Phar::webPhar() does not handle requests sent through PUT
     and DELETE method). (Christian Weiske)
