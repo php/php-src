@@ -2,7 +2,7 @@
 Bug #61780 (Inconsistent PCRE captures in match results): basics
 --FILE--
 <?php
-preg_match('/(a)?([a-z]*)(\d*)/', '123', $matches);
+preg_match('/(a)?([a-z]*)(\d*)/', '123', $matches, PREG_UNMATCHED_AS_NULL);
 var_dump($matches);
 ?>
 --EXPECT--
