@@ -59222,7 +59222,7 @@ ZEND_API void zend_deserialize_opcode_handler(zend_op *op)
 	op->handler = zend_opcode_handlers[(zend_uintptr_t)op->handler];
 }
 
-ZEND_API const void *zend_get_real_opcode_handler(const zend_op *op)
+ZEND_API const void *zend_get_opcode_handler_func(const zend_op *op)
 {
 #if ZEND_VM_KIND == ZEND_VM_KIND_CALL
 	return op->handler;
@@ -59234,16 +59234,16 @@ ZEND_API const void *zend_get_real_opcode_handler(const zend_op *op)
 	}
 	zv = zend_hash_index_find(zend_handlers_table, (zend_long)(zend_uintptr_t)op->handler);
 	ZEND_ASSERT(zv != NULL);
-	return zend_opcode_real_handlers[Z_LVAL_P(zv)];
+	return zend_opcode_handler_funcs[Z_LVAL_P(zv)];
 #else
 	return NULL;
 #endif
 }
 
-ZEND_API const zend_op *zend_get_real_exit_op(void)
+ZEND_API const zend_op *zend_get_halt_op(void)
 {
 #if ZEND_VM_KIND == ZEND_VM_KIND_HYBRID
-	return &hybrid_return_op;
+	return &hybrid_halt_op;
 #else
 	return NULL;
 #endif

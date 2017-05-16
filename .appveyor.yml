@@ -44,7 +44,7 @@ environment:
 services:
         # the setup scripts have to be touched, once some other db version is used
         - mysql
-        - postgresql95
+        - postgresql96
 
 platform:
         - x64
