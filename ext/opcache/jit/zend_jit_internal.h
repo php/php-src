@@ -36,6 +36,8 @@ void zend_jit_hot_func(zend_execute_data *execute_data, const zend_op *opline);
 /* VM handlers */
 typedef void (ZEND_FASTCALL *zend_vm_opcode_handler_t)(void);
 
+extern const zend_op *zend_jit_halt_op;
+
 /* VM helpers */
 void ZEND_FASTCALL zend_jit_leave_nested_func_helper(uint32_t call_info);
 void ZEND_FASTCALL zend_jit_leave_top_func_helper(uint32_t call_info);

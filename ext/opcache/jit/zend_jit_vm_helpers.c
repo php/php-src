@@ -85,11 +85,7 @@ void ZEND_FASTCALL zend_jit_leave_top_func_helper(uint32_t call_info)
 		OBJ_RELEASE((zend_object*)EX(func)->op_array.prototype);
 	}
 	execute_data = EG(current_execute_data);
-#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
-	opline = zend_get_real_exit_op();
-#else
-	opline = NULL;
-#endif
+	opline = zend_jit_halt_op;
 }
 
 void ZEND_FASTCALL zend_jit_copy_extra_args_helper(void)
