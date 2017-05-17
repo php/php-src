@@ -45,6 +45,17 @@ static zend_module_entry **module_post_deactivate_handlers;
 
 static zend_class_entry  **class_cleanup_handlers;
 
+ZEND_API zval * zend_get_array_value(zend_string *key, zval * argument_array)
+{
+    zval * retval;
+    HashTable * argument_array_table;
+    argument_array_table = Z_ARRVAL_P(argument_array);
+    if ((retval = zend_hash_find(argument_array_table, key)) != NULL) {
+        return retval;
+    }
+    return NULL;
+}
+
 /* this function doesn't check for too many parameters */
 ZEND_API int zend_get_parameters(int ht, int param_count, ...) /* {{{ */
 {
@@ -209,7 +220,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_count_error(zend_boo
 
 	zend_internal_argument_count_error(
 				throw_ || ZEND_ARG_USES_STRICT_TYPES(),
-				"%s%s%s() expects %s %d parameter%s, %d given", 
+				"%s%s%s() expects %s %d parameter%s, %d given",
 				class_name, \
 				class_name[0] ? "::" : "", \
 				ZSTR_VAL(active_function->common.function_name),
@@ -2261,7 +2272,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 		}
 
 		if (reg_function->common.arg_info &&
-		    (reg_function->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))) { 
+		    (reg_function->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))) {
 			/* convert "const char*" class type names into "zend_string*" */
 			uint32_t i;
 			uint32_t num_args = reg_function->common.num_args + 1;

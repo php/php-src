@@ -262,6 +262,9 @@ ZEND_API int _zend_get_parameters_array_ex(int param_count, zval *argument_array
 /* internal function to efficiently copy parameters when executing __call() */
 ZEND_API int zend_copy_parameters_array(int param_count, zval *argument_array);
 
+/* Get array value by key */
+ZEND_API zval * zend_get_array_value(zend_string *key, zval *argument_array);
+
 #define zend_get_parameters_array(ht, param_count, argument_array) \
 	_zend_get_parameters_array_ex(param_count, argument_array)
 #define zend_get_parameters_array_ex(param_count, argument_array) \
