@@ -370,7 +370,7 @@ __forceinline static FILE *php_win32_ioutil_fopen(const char *patha, const char 
 	free(pathw);
 	free(modew);
 
-	if (0 > ret) {
+	if (!ret) {
 		_set_errno(err);
 	}
 	return ret;
