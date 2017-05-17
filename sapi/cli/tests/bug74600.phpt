@@ -29,6 +29,10 @@ var_dump(stream_get_contents($pipes[2]));
 proc_terminate($proc);
 proc_close($proc);
 ?>
+--CLEAN--
+<?php
+unlink(__DIR__ . "/bug74600.ini");
+?>
 --EXPECTF--
 string(4) "okey"
 string(0) ""
