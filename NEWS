@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug #74546 (SIGILL in ZEND_FETCH_CLASS_CONSTANT_SPEC_CONST_CONST).
     (Laruence)
   . Fixed bug #74589 (__DIR__ wrong for unicode character). (Anatol)
+  . Fixed bug #74606 (Segfault within try/catch/finally nesting in Generators).
+    (Bob, Nikita)
 
 - intl:
   . Fixed bug #74468 (wrong reflection on Collator::sortWithSortKeys). (villfa)
