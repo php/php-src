@@ -27,6 +27,16 @@ echo "Stream Contents\n";
 var_dump(stream_get_contents($stream));
 echo "Closing Stream\n";
 var_dump(fclose($stream));
+echo "Opening stream in write mode\n";
+$stream = $db->openBlob('test', 'data', 1, 'main', 1);
+var_dump($stream);
+echo "Writing to blob\n";
+var_dump(fwrite($stream, 'ABCD'));
+echo "Stream Contents\n";
+fseek($stream, 0);
+var_dump(stream_get_contents($stream));
+echo "Closing Stream\n";
+var_dump(fclose($stream));
 echo "Closing database\n";
 var_dump($db->close());
 echo "Done\n";
@@ -43,6 +53,14 @@ bool(true)
 resource(%d) of type (stream)
 Stream Contents
 string(9) "TEST TEST"
+Closing Stream
+bool(true)
+Opening stream in write mode
+resource(%d) of type (stream)
+Writing to blob
+int(4)
+Stream Contents
+string(9) "ABCD TEST"
 Closing Stream
 bool(true)
 Closing database
