@@ -27,7 +27,12 @@
 #define ZEND_VM_KIND_SWITCH	2
 #define ZEND_VM_KIND_GOTO	3
 #define ZEND_VM_KIND_HYBRID	4
-#define ZEND_VM_KIND		ZEND_VM_KIND_CALL
+/* HYBRID requires support for computed GOTO and global register variables*/
+#if (defined(__GNUC__) && defined(HAVE_GCC_GLOBAL_REGS))
+# define ZEND_VM_KIND		ZEND_VM_KIND_HYBRID
+#else
+# define ZEND_VM_KIND		ZEND_VM_KIND_CALL
+#endif
 
 #define ZEND_VM_OP_SPEC          0x00000001
 #define ZEND_VM_OP_CONST         0x00000002
