@@ -2723,7 +2723,7 @@ function gen_vm($def, $skel) {
 function usage() {
 	echo("\nUsage: php zend_vm_gen.php [options]\n".
 	     "\nOptions:".
-	     "\n  --with-vm-kind=CALL|SWITCH|GOTO|HYBRID - select threading model (default is CALL)".
+	     "\n  --with-vm-kind=CALL|SWITCH|GOTO|HYBRID - select threading model (default is HYBRID)".
 	     "\n  --without-specializer                  - disable executor specialization".
 	     "\n  --with-lines                           - enable #line directives".
 	     "\n\n");
@@ -2770,7 +2770,7 @@ for ($i = 1; $i < $argc; $i++) {
 // Using defaults
 if (!defined("ZEND_VM_KIND")) {
 	// Using CALL threading by default
-	define("ZEND_VM_KIND", ZEND_VM_KIND_CALL);
+	define("ZEND_VM_KIND", ZEND_VM_KIND_HYBRID);
 }
 if (!defined("ZEND_VM_SPEC")) {
 	// Using specialized executor by default
