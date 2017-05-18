@@ -3807,18 +3807,18 @@ static inline void php_array_merge_or_replace_wrapper(INTERNAL_FUNCTION_PARAMETE
 		Z_PARAM_VARIADIC('+', args, argc)
 	ZEND_PARSE_PARAMETERS_END();
 
-	for (i = 0; i < argc; i++) {
-		zval *arg = args + i;
-
-		if (Z_TYPE_P(arg) != IS_ARRAY) {
-			php_error_docref(NULL, E_WARNING, "Argument #%d is not an array", i + 1);
-			RETURN_NULL();
-		}
-	}
-
 
 	if (replace) {
 		HashTable *dest;
+
+		for (i = 0; i < argc; i++) {
+			zval *arg = args + i;
+
+			if (Z_TYPE_P(arg) != IS_ARRAY) {
+				php_error_docref(NULL, E_WARNING, "Argument #%d is not an array", i + 1);
+				RETURN_NULL();
+			}
+		}
 
 		/* copy first array */
 		arg = args;
@@ -3838,11 +3838,22 @@ static inline void php_array_merge_or_replace_wrapper(INTERNAL_FUNCTION_PARAMETE
 	} else {
 		zval *src_entry;
 		HashTable *src, *dest;
+		uint32_t count = 0;
+
+		for (i = 0; i < argc; i++) {
+			zval *arg = args + i;
+
+			if (Z_TYPE_P(arg) != IS_ARRAY) {
+				php_error_docref(NULL, E_WARNING, "Argument #%d is not an array", i + 1);
+				RETURN_NULL();
+			}
+			count += zend_hash_num_elements(Z_ARRVAL_P(arg));
+		}
 
 		arg = args;
 		src  = Z_ARRVAL_P(arg);
 		/* copy first array */
-		array_init_size(return_value, zend_hash_num_elements(src));
+		array_init_size(return_value, count);
 		dest = Z_ARRVAL_P(return_value);
 		if (src->u.flags & HASH_FLAG_PACKED) {
 			zend_hash_real_init(dest, 1);
