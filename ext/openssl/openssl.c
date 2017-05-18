@@ -2795,6 +2795,7 @@ PHP_FUNCTION(openssl_pkcs12_read)
 	if(d2i_PKCS12_bio(bio_in, &p12)) {
 		if(PKCS12_parse(p12, pass, &pkey, &cert, &ca)) {
 			BIO * bio_out;
+			int cert_num;
 
 			zval_dtor(zout);
 			array_init(zout);
@@ -2821,11 +2822,12 @@ PHP_FUNCTION(openssl_pkcs12_read)
 				BIO_free(bio_out);
 			}
 
-			if (ca && sk_X509_num(ca)) {
+			cert_num = sk_X509_num(ca);
+			if (ca && cert_num > 0) {
 
 				array_init(&zextracerts);
 
-				for (i=0; i < sk_X509_num(ca); i++) {
+				for (i=0; i < cert_num; i++) {
 					zval zextracert;
 					X509* aCA = sk_X509_pop(ca);
 					if (!aCA) break;
