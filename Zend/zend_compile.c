@@ -7298,6 +7298,9 @@ void zend_compile_array(znode *result, zend_ast *ast) /* {{{ */
 		return;
 	}
 
+	/* Empty arrays are handled at compile-time */
+	ZEND_ASSERT(list->children > 0);
+
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *elem_ast = list->child[i];
 		zend_ast *value_ast, *key_ast;
@@ -7339,11 +7342,6 @@ void zend_compile_array(znode *result, zend_ast *ast) /* {{{ */
 		if (key_ast && key_node.op_type == IS_CONST && Z_TYPE(key_node.u.constant) == IS_STRING) {
 			packed = 0;
 		}
-	}
-
-	/* Handle empty array */
-	if (!list->children) {
-		zend_emit_op_tmp(result, ZEND_INIT_ARRAY, NULL, NULL);
 	}
 
 	/* Add a flag to INIT_ARRAY if we know this array cannot be packed */
