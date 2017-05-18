@@ -152,6 +152,29 @@ static zend_string *php_bin2hex(const unsigned char *old, const size_t oldlen)
 }
 /* }}} */
 
+
+/* {{{ php_ts_bin2hex
+ */
+static zend_string *php_ts_bin2hex(const unsigned char *old, const size_t oldlen)
+{
+	zend_string *result;
+	size_t i, j;
+	int b = 0;
+
+	result = zend_string_safe_alloc(oldlen, 2 * sizeof(char), 0, 0);
+
+	for (i = j = 0; i < oldlen; i++) {
+	        b = old[i] >> 4; 
+	        result->val[j++] = (char) (87 + b + (((b - 10) >> 31) & -39));
+	        b = old[i] & 0xf;
+	        result->val[j++] = (char) (87 + b + (((b - 10) >> 31) & -39));
+	}
+	result->val[j] = '\0';
+
+	return result;
+}
+/* }}} */
+
 /* {{{ php_hex2bin
  */
 static zend_string *php_hex2bin(const unsigned char *old, const size_t oldlen)
@@ -259,6 +282,27 @@ PHP_FUNCTION(bin2hex)
 	ZEND_PARSE_PARAMETERS_END();
 
 	result = php_bin2hex((unsigned char *)ZSTR_VAL(data), ZSTR_LEN(data));
+
+	if (!result) {
+		RETURN_FALSE;
+	}
+
+	RETURN_STR(result);
+}
+/* }}} */
+
+/* {{{ proto string ts_bin2hex(string data)
+   Converts the binary representation of data to hex (timing safe) */
+PHP_FUNCTION(ts_bin2hex)
+{
+	zend_string *result;
+	zend_string *data;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &data) == FAILURE) {
+		return;
+	}
+
+	result = php_ts_bin2hex((unsigned char *)data->val, data->len);
 
 	if (!result) {
 		RETURN_FALSE;
