@@ -8,7 +8,7 @@ sebs@php.net
 Testfest 2009 Munich
 --FILE--
 <?php
-echo php_sapi_name();
+var_dump(php_sapi_name());
 ?>
 --EXPECT--
-cgi-fcgi
+string(8) "cgi-fcgi"
