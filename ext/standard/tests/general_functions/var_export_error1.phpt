@@ -29,10 +29,10 @@ var_dump( var_export($var, $return, $extra_arg) );
 -- Testing var_export() function with Zero arguments --
 
 Warning: var_export() expects at least 1 parameter, 0 given in %s on line 12
-NULL
+null
 
 -- Testing var_export() function with more than expected no. of arguments --
 
 Warning: var_export() expects at most 2 parameters, 3 given in %s on line 19
-NULL
+null
 ===DONE===

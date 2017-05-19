@@ -16,7 +16,7 @@ unset ($unset_var); // now a null
 $null_var = NULL;
 
 $valid_nulls = array(
-                "NULL" =>  NULL,
+                "NULL" => NULL,
                 "null" => null,
                 "null_var" => $null_var,
 );
@@ -40,20 +40,20 @@ foreach($valid_nulls as $key => $null_value) {
 *** Output for null values ***
 
 -- Iteration: NULL --
-NULL
-NULL
-string(4) "NULL"
+null
+null
+string(4) "null"
 
 
 -- Iteration: null --
-NULL
-NULL
-string(4) "NULL"
+null
+null
+string(4) "null"
 
 
 -- Iteration: null_var --
-NULL
-NULL
-string(4) "NULL"
+null
+null
+string(4) "null"
 
 ===DONE===

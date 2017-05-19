@@ -693,25 +693,25 @@ string(9) "array (
 
 Iteration 2
 array (
-  0 => NULL,
+  0 => null,
 )
 array (
-  0 => NULL,
+  0 => null,
 )
 string(22) "array (
-  0 => NULL,
+  0 => null,
 )"
 
 
 Iteration 3
 array (
-  0 => NULL,
+  0 => null,
 )
 array (
-  0 => NULL,
+  0 => null,
 )
 string(22) "array (
-  0 => NULL,
+  0 => null,
 )"
 
 
@@ -970,7 +970,7 @@ myClass::__set_state(array(
    'private_var' => 
   foo::__set_state(array(
   )),
-   'protected_var' => NULL,
+   'protected_var' => null,
    'proected_var' => 
   foo::__set_state(array(
   )),
@@ -986,7 +986,7 @@ myClass::__set_state(array(
    'private_var' => 
   foo::__set_state(array(
   )),
-   'protected_var' => NULL,
+   'protected_var' => null,
    'proected_var' => 
   foo::__set_state(array(
   )),
@@ -1002,7 +1002,7 @@ string(293) "myClass::__set_state(array(
    'private_var' => 
   foo::__set_state(array(
   )),
-   'protected_var' => NULL,
+   'protected_var' => null,
    'proected_var' => 
   foo::__set_state(array(
   )),
@@ -1021,7 +1021,7 @@ myClass::__set_state(array(
    'private_var' => 
   foo::__set_state(array(
   )),
-   'protected_var' => NULL,
+   'protected_var' => null,
    'proected_var' => 
   foo::__set_state(array(
   )),
@@ -1037,7 +1037,7 @@ myClass::__set_state(array(
    'private_var' => 
   foo::__set_state(array(
   )),
-   'protected_var' => NULL,
+   'protected_var' => null,
    'proected_var' => 
   foo::__set_state(array(
   )),
@@ -1053,7 +1053,7 @@ string(293) "myClass::__set_state(array(
    'private_var' => 
   foo::__set_state(array(
   )),
-   'protected_var' => NULL,
+   'protected_var' => null,
    'proected_var' => 
   foo::__set_state(array(
   )),
@@ -1118,28 +1118,28 @@ string(36) "concreteClass::__set_state(array(
 *** Output for null values ***
 
 Iteration 1
-NULL
-NULL
-string(4) "NULL"
+null
+null
+string(4) "null"
 
 
 Iteration 2
-NULL
-NULL
-string(4) "NULL"
+null
+null
+string(4) "null"
 
 
 Iteration 3
-NULL
-NULL
-string(4) "NULL"
+null
+null
+string(4) "null"
 
 
 *** Testing error conditions ***
 
 Warning: var_export() expects at least 1 parameter, 0 given in %s on line %d
-NULL
+null
 Warning: var_export() expects at most 2 parameters, 3 given in %s on line %d
-NULL
+null
 
 Done

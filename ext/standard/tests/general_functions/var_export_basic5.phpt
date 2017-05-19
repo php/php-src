@@ -60,25 +60,25 @@ string(9) "array (
 
 --Iteration: array(NULL) --
 array (
-  0 => NULL,
+  0 => null,
 )
 array (
-  0 => NULL,
+  0 => null,
 )
 string(22) "array (
-  0 => NULL,
+  0 => null,
 )"
 
 
 --Iteration: array(null) --
 array (
-  0 => NULL,
+  0 => null,
 )
 array (
-  0 => NULL,
+  0 => null,
 )
 string(22) "array (
-  0 => NULL,
+  0 => null,
 )"
 
 

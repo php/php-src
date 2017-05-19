@@ -481,12 +481,12 @@ array(0) {
 -- Iteration 2 --
 array(1) {
   [0]=>
-  NULL
+  null
 }
 -- Iteration 3 --
 array(1) {
   [0]=>
-  NULL
+  null
 }
 -- Iteration 4 --
 array(1) {
@@ -803,7 +803,7 @@ object(object_class)#5 (7) {
   int(11)
 }
 -- Iteration 9 --
-NULL
+null
 
 ** Testing var_dump() on objects having circular reference **
 object(object_class)#13 (8) {
@@ -875,7 +875,7 @@ array(4) {
   [2]=>
   bool(true)
   [3]=>
-  NULL
+  null
 }
 -- Iteration 3 --
 array(4) {
@@ -915,7 +915,7 @@ array(6) {
 -- Iteration 5 --
 array(4) {
   [0]=>
-  NULL
+  null
   [1]=>
   float(20000000000)
   [2]=>
@@ -928,7 +928,7 @@ array(4) {
   [0]=>
   string(27) "array(1,2,3,4)1.0000002TRUE"
   [1]=>
-  NULL
+  null
   [2]=>
   float(4611333)
   [3]=>
@@ -937,13 +937,13 @@ array(4) {
 
 *** Testing var_dump() on miscelleneous input arguments ***
 -- Iteration 1 --
-NULL
+null
 -- Iteration 2 --
-NULL
+null
 -- Iteration 3 --
-NULL
+null
 -- Iteration 4 --
-NULL
+null
 
 *** Testing var_dump() on multiple arguments ***
 array(15) {
@@ -1125,12 +1125,12 @@ array(15) {
   [1]=>
   array(1) {
     [0]=>
-    NULL
+    null
   }
   [2]=>
   array(1) {
     [0]=>
-    NULL
+    null
   }
   [3]=>
   array(1) {
@@ -1463,17 +1463,17 @@ array(9) {
     int(11)
   }
   [8]=>
-  NULL
+  null
 }
 array(4) {
   [0]=>
-  NULL
+  null
   [1]=>
-  NULL
+  null
   [2]=>
-  NULL
+  null
   [3]=>
-  NULL
+  null
 }
 array(6) {
   [0]=>
@@ -1501,7 +1501,7 @@ array(6) {
     [2]=>
     bool(true)
     [3]=>
-    NULL
+    null
   }
   [2]=>
   array(4) {
@@ -1541,7 +1541,7 @@ array(6) {
   [4]=>
   array(4) {
     [0]=>
-    NULL
+    null
     [1]=>
     float(20000000000)
     [2]=>
@@ -1554,7 +1554,7 @@ array(6) {
     [0]=>
     string(27) "array(1,2,3,4)1.0000002TRUE"
     [1]=>
-    NULL
+    null
     [2]=>
     float(4611333)
     [3]=>
