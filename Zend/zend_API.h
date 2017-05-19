@@ -696,18 +696,31 @@ END_EXTERN_C()
 #define FAST_ZPP 1
 
 #define Z_EXPECTED_TYPES(_) \
-	_(Z_EXPECTED_LONG,		"integer") \
-	_(Z_EXPECTED_BOOL,		"boolean") \
-	_(Z_EXPECTED_STRING,	"string") \
-	_(Z_EXPECTED_ARRAY,		"array") \
-	_(Z_EXPECTED_FUNC,		"valid callback") \
-	_(Z_EXPECTED_RESOURCE,	"resource") \
-	_(Z_EXPECTED_PATH,		"a valid path") \
-	_(Z_EXPECTED_OBJECT,	"object") \
-	_(Z_EXPECTED_DOUBLE,	"float")
+	_(Z_EXPECTED_LONG, \
+		"integer (or convertible float, convertible string or boolean)", \
+		"integer" \
+	) \
+	_(Z_EXPECTED_DOUBLE, \
+		"float (or integer, convertible string or boolean)", \
+		"float (or integer)" \
+	) \
+	_(Z_EXPECTED_STRING, \
+		"string (or integer, float, boolean or convertible object)", \
+		"string" \
+	) \
+	_(Z_EXPECTED_BOOL, \
+		"boolean (or integer, float or string)", \
+		"boolean" \
+	) \
+	_(Z_EXPECTED_ARRAY,		"array",			"array") \
+	_(Z_EXPECTED_FUNC,		"valid callback",	"valid callback") \
+	_(Z_EXPECTED_RESOURCE,	"resource",			"resource") \
+	_(Z_EXPECTED_PATH,		"a valid path",		"a valid path") \
+	_(Z_EXPECTED_OBJECT,	"object",			"object")
 
-#define Z_EXPECTED_TYPE_ENUM(id, str) id,
-#define Z_EXPECTED_TYPE_STR(id, str)  str,
+#define Z_EXPECTED_TYPE_ENUM(id, str_weak, str_strict) id,
+#define Z_EXPECTED_TYPE_STR_WEAK(id, str_weak, str_strict)  str_weak,
+#define Z_EXPECTED_TYPE_STR_STRICT(id, str_weak, str_strict)  str_strict,
 
 typedef enum _zend_expected_type {
 	Z_EXPECTED_TYPES(Z_EXPECTED_TYPE_ENUM)

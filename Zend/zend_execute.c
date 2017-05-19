@@ -642,6 +642,7 @@ static inline int make_real_object(zval *object)
 static ZEND_COLD void zend_verify_type_error_common(
 		const zend_function *zf, const zend_arg_info *arg_info,
 		const zend_class_entry *ce, zval *value,
+		zend_bool strict,
 		const char **fname, const char **fsep, const char **fclass,
 		const char **need_msg, const char **need_kind, const char **need_or_null,
 		const char **given_msg, const char **given_kind)
@@ -672,7 +673,31 @@ static ZEND_COLD void zend_verify_type_error_common(
 			*need_kind = ZSTR_VAL(ZEND_TYPE_NAME(arg_info->type));
 		}
 	} else {
+		static const char * const expected_error_weak[] = {
+			Z_EXPECTED_TYPES(Z_EXPECTED_TYPE_STR_WEAK)
+			NULL
+		};
+		static const char * const expected_error_strict[] = {
+			Z_EXPECTED_TYPES(Z_EXPECTED_TYPE_STR_STRICT)
+			NULL
+		};
 		switch (ZEND_TYPE_CODE(arg_info->type)) {
+			case IS_LONG:
+				*need_msg = "be an ";
+				*need_kind = (strict ? expected_error_strict : expected_error_weak)[Z_EXPECTED_LONG];
+				break;
+			case IS_DOUBLE:
+				*need_msg = "be a ";
+				*need_kind = (strict ? expected_error_strict : expected_error_weak)[Z_EXPECTED_DOUBLE];
+				break;
+			case IS_STRING:
+				*need_msg = "be a ";
+				*need_kind = (strict ? expected_error_strict : expected_error_weak)[Z_EXPECTED_STRING];
+				break;
+			case _IS_BOOL:
+				*need_msg = "be a ";
+				*need_kind = (strict ? expected_error_strict : expected_error_weak)[Z_EXPECTED_BOOL];
+				break;
 			case IS_OBJECT:
 				*need_msg = "be an ";
 				*need_kind = "object";
@@ -714,7 +739,8 @@ static ZEND_COLD void zend_verify_type_error_common(
 
 static ZEND_COLD void zend_verify_arg_error(
 		const zend_function *zf, const zend_arg_info *arg_info,
-		int arg_num, const zend_class_entry *ce, zval *value)
+		int arg_num, const zend_class_entry *ce, zval *value,
+		zend_bool strict)
 {
 	zend_execute_data *ptr = EG(current_execute_data)->prev_execute_data;
 	const char *fname, *fsep, *fclass;
@@ -722,7 +748,7 @@ static ZEND_COLD void zend_verify_arg_error(
 
 	if (value) {
 		zend_verify_type_error_common(
-			zf, arg_info, ce, value,
+			zf, arg_info, ce, value, strict,
 			&fname, &fsep, &fclass, &need_msg, &need_kind, &need_or_null, &given_msg, &given_kind);
 
 		if (zf->common.type == ZEND_USER_FUNCTION) {
@@ -882,7 +908,7 @@ static zend_always_inline int zend_verify_arg_type(zend_function *zf, uint32_t a
 	}
 
 	if (UNEXPECTED(!zend_check_type(cur_arg_info->type, arg, &ce, cache_slot, default_value, zf->common.scope, 0))) {
-		zend_verify_arg_error(zf, cur_arg_info, arg_num, ce, arg);
+		zend_verify_arg_error(zf, cur_arg_info, arg_num, ce, arg, ZEND_ARG_USES_STRICT_TYPES());
 		return 0;
 	}
 
@@ -934,14 +960,14 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(zend_execute_data *
 }
 
 static ZEND_COLD void zend_verify_return_error(
-		const zend_function *zf, const zend_class_entry *ce, zval *value)
+		const zend_function *zf, const zend_class_entry *ce, zval *value, zend_bool strict)
 {
 	const zend_arg_info *arg_info = &zf->common.arg_info[-1];
 	const char *fname, *fsep, *fclass;
 	const char *need_msg, *need_kind, *need_or_null, *given_msg, *given_kind;
 
 	zend_verify_type_error_common(
-		zf, arg_info, ce, value,
+		zf, arg_info, ce, value, strict,
 		&fname, &fsep, &fclass, &need_msg, &need_kind, &need_or_null, &given_msg, &given_kind); 
 
 	zend_type_error("Return value of %s%s%s() must %s%s%s, %s%s returned",
@@ -957,7 +983,7 @@ static ZEND_COLD void zend_verify_internal_return_error(
 	const char *need_msg, *need_kind, *need_or_null, *given_msg, *given_kind;
 
 	zend_verify_type_error_common(
-		zf, arg_info, ce, value,
+		zf, arg_info, ce, value, 1,
 		&fname, &fsep, &fclass, &need_msg, &need_kind, &need_or_null, &given_msg, &given_kind); 
 
 	zend_error_noreturn(E_CORE_ERROR, "Return value of %s%s%s() must %s%s%s, %s%s returned",
@@ -1008,7 +1034,7 @@ static zend_always_inline void zend_verify_return_type(zend_function *zf, zval *
 	zend_class_entry *ce = NULL;
 	
 	if (UNEXPECTED(!zend_check_type(ret_info->type, ret, &ce, cache_slot, NULL, NULL, 1))) {
-		zend_verify_return_error(zf, ce, ret);
+		zend_verify_return_error(zf, ce, ret, ZEND_RET_USES_STRICT_TYPES());
 	}
 }
 
@@ -1028,7 +1054,7 @@ static ZEND_COLD int zend_verify_missing_return_type(zend_function *zf, void **c
 				}
 			}
 		}
-		zend_verify_return_error(zf, ce, NULL);
+		zend_verify_return_error(zf, ce, NULL, ZEND_RET_USES_STRICT_TYPES());
 		return 0;
 	}
 	return 1;

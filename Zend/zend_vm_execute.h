@@ -4031,7 +4031,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_STRLEN_SPEC_CONST_HANDLER(ZEND
 				}
 				zval_ptr_dtor(&tmp);
 			}
-			zend_internal_type_error(strict, "strlen() expects parameter 1 to be string, %s given", zend_get_type_by_const(Z_TYPE_P(value)));
+			zend_internal_type_error(strict, strict
+				? "strlen() expects parameter 1 to be string, %s given"
+			    : "strlen() expects parameter 1 to be string (or integer, float, boolean or convertible object), %s given",
+				zend_get_type_by_const(Z_TYPE_P(value)));
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		} while (0);
 	}
@@ -34266,7 +34269,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_STRLEN_SPEC_CV_HANDLER(ZEND_OP
 				}
 				zval_ptr_dtor(&tmp);
 			}
-			zend_internal_type_error(strict, "strlen() expects parameter 1 to be string, %s given", zend_get_type_by_const(Z_TYPE_P(value)));
+			zend_internal_type_error(strict, strict
+				? "strlen() expects parameter 1 to be string, %s given"
+			    : "strlen() expects parameter 1 to be string (or integer, float, boolean or convertible object), %s given",
+				zend_get_type_by_const(Z_TYPE_P(value)));
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		} while (0);
 	}
@@ -48477,7 +48483,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_STRLEN_SPEC_TMPVAR_HANDLER(ZEN
 				}
 				zval_ptr_dtor(&tmp);
 			}
-			zend_internal_type_error(strict, "strlen() expects parameter 1 to be string, %s given", zend_get_type_by_const(Z_TYPE_P(value)));
+			zend_internal_type_error(strict, strict
+				? "strlen() expects parameter 1 to be string, %s given"
+			    : "strlen() expects parameter 1 to be string (or integer, float, boolean or convertible object), %s given",
+				zend_get_type_by_const(Z_TYPE_P(value)));
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		} while (0);
 	}

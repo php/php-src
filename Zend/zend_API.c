@@ -254,13 +254,19 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_type_error(zend_bool 
 {
 	const char *space;
 	const char *class_name = get_active_class_name(&space);
-	static const char * const expected_error[] = {
-		Z_EXPECTED_TYPES(Z_EXPECTED_TYPE_STR)
+	static const char * const expected_error_weak[] = {
+		Z_EXPECTED_TYPES(Z_EXPECTED_TYPE_STR_WEAK)
+		NULL
+	};
+	static const char * const expected_error_strict[] = {
+		Z_EXPECTED_TYPES(Z_EXPECTED_TYPE_STR_STRICT)
 		NULL
 	};
 
 	zend_internal_type_error(throw_ || ZEND_ARG_USES_STRICT_TYPES(), "%s%s%s() expects parameter %d to be %s, %s given",
-		class_name, space, get_active_function_name(), num, expected_error[expected_type], zend_zval_type_name(arg));
+		class_name, space, get_active_function_name(), num,
+		(ZEND_ARG_USES_STRICT_TYPES() ? expected_error_strict : expected_error_weak)[expected_type],
+		zend_zval_type_name(arg));
 }
 /* }}} */
 
@@ -530,6 +536,15 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 	int check_null = 0;
 	int separate = 0;
 	zval *real_arg = arg;
+	static const char * const expected_error_weak[] = {
+		Z_EXPECTED_TYPES(Z_EXPECTED_TYPE_STR_WEAK)
+		NULL
+	};
+	static const char * const expected_error_strict[] = {
+		Z_EXPECTED_TYPES(Z_EXPECTED_TYPE_STR_STRICT)
+		NULL
+	};
+	const char * const *expected_error = ZEND_ARG_USES_STRICT_TYPES() ? expected_error_strict : expected_error_weak;
 
 	/* scan through modifiers */
 	ZVAL_DEREF(arg);
@@ -558,7 +573,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 				}
 
 				if (!zend_parse_arg_long(arg, p, is_null, check_null, c == 'L')) {
-					return "integer";
+					return expected_error[Z_EXPECTED_LONG];
 				}
 			}
 			break;
@@ -573,7 +588,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 				}
 
 				if (!zend_parse_arg_double(arg, p, is_null, check_null)) {
-					return "float";
+					return expected_error[Z_EXPECTED_DOUBLE];
 				}
 			}
 			break;
@@ -583,7 +598,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 				char **p = va_arg(*va, char **);
 				size_t *pl = va_arg(*va, size_t *);
 				if (!zend_parse_arg_string(arg, p, pl, check_null)) {
-					return "string";
+					return expected_error[Z_EXPECTED_STRING];
 				}
 			}
 			break;
@@ -593,7 +608,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 				char **p = va_arg(*va, char **);
 				size_t *pl = va_arg(*va, size_t *);
 				if (!zend_parse_arg_path(arg, p, pl, check_null)) {
-					return "a valid path";
+					return expected_error[Z_EXPECTED_PATH];
 				}
 			}
 			break;
@@ -602,7 +617,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 			{
 				zend_string **str = va_arg(*va, zend_string **);
 				if (!zend_parse_arg_path_str(arg, str, check_null)) {
-					return "a valid path";
+					return expected_error[Z_EXPECTED_PATH];
 				}
 			}
 			break;
@@ -611,7 +626,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 			{
 				zend_string **str = va_arg(*va, zend_string **);
 				if (!zend_parse_arg_str(arg, str, check_null)) {
-					return "string";
+					return expected_error[Z_EXPECTED_STRING];
 				}
 			}
 			break;
@@ -626,7 +641,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 				}
 
 				if (!zend_parse_arg_bool(arg, p, is_null, check_null)) {
-					return "boolean";
+					return expected_error[Z_EXPECTED_BOOL];
 				}
 			}
 			break;
@@ -636,7 +651,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 				zval **p = va_arg(*va, zval **);
 
 				if (!zend_parse_arg_resource(arg, p, check_null)) {
-					return "resource";
+					return expected_error[Z_EXPECTED_RESOURCE];
 				}
 			}
 			break;
@@ -647,7 +662,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 				zval **p = va_arg(*va, zval **);
 
 				if (!zend_parse_arg_array(arg, p, check_null, c == 'A')) {
-					return "array";
+					return expected_error[Z_EXPECTED_ARRAY];
 				}
 			}
 			break;
@@ -658,7 +673,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 				HashTable **p = va_arg(*va, HashTable **);
 
 				if (!zend_parse_arg_array_ht(arg, p, check_null, c == 'H', separate)) {
-					return "array";
+					return expected_error[Z_EXPECTED_ARRAY];
 				}
 			}
 			break;
@@ -668,7 +683,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 				zval **p = va_arg(*va, zval **);
 
 				if (!zend_parse_arg_object(arg, p, NULL, check_null)) {
-					return "object";
+					return expected_error[Z_EXPECTED_OBJECT];
 				}
 			}
 			break;
@@ -682,7 +697,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 					if (ce) {
 						return ZSTR_VAL(ce->name);
 					} else {
-						return "object";
+						return expected_error[Z_EXPECTED_OBJECT];
 					}
 				}
 			}
