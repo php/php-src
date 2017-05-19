@@ -33,7 +33,7 @@ bool(false)
 int(-1)
 int(0)
 
-Warning: substr_compare() expects parameter 5 to be boolean, object given in %s on line %d
+Warning: substr_compare() expects parameter 5 to be boolean (or integer, float or string), object given in %s on line %d
 bool(false)
 Test
 
@@ -41,6 +41,6 @@ Warning: substr_compare(): The length must be greater than or equal to zero in %
 bool(false)
 int(4)
 
-Warning: substr_compare() expects parameter 4 to be integer, string given in %s on line %d
+Warning: substr_compare() expects parameter 4 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
 bool(false)
 Done

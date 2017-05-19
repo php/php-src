@@ -52,7 +52,7 @@ bool(false)
 
 Arg value is Array
 
-Warning: preg_grep() expects parameter 1 to be string, array given in %spreg_grep_error1.php on line %d
+Warning: preg_grep() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %spreg_grep_error1.php on line %d
 NULL
 
 Arg value is /[a-zA-Z]/
@@ -63,6 +63,6 @@ array(2) {
   string(4) "test"
 }
 
-Warning: preg_grep() expects parameter 1 to be string, object given in %spreg_grep_error1.php on line %d
+Warning: preg_grep() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given in %spreg_grep_error1.php on line %d
 NULL
 Done

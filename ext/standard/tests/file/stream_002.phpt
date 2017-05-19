@@ -46,7 +46,7 @@ bool(false)
 int(0)
 string(27) "Failed to parse address "1""
 
-Warning: stream_socket_client() expects parameter 1 to be string, array given in %s on line %d
+Warning: stream_socket_client() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 bool(false)
 int(0)
 string(27) "Failed to parse address "1""

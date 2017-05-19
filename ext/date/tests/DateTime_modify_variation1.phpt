@@ -157,22 +157,22 @@ object(DateTime)#3 (3) {
 
 -- empty array --
 
-Warning: DateTime::modify() expects parameter 1 to be string, array given in %sDateTime_modify_variation1.php on line 99
+Warning: DateTime::modify() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %sDateTime_modify_variation1.php on line 99
 bool(false)
 
 -- int indexed array --
 
-Warning: DateTime::modify() expects parameter 1 to be string, array given in %sDateTime_modify_variation1.php on line 99
+Warning: DateTime::modify() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %sDateTime_modify_variation1.php on line 99
 bool(false)
 
 -- associative array --
 
-Warning: DateTime::modify() expects parameter 1 to be string, array given in %sDateTime_modify_variation1.php on line 99
+Warning: DateTime::modify() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %sDateTime_modify_variation1.php on line 99
 bool(false)
 
 -- nested arrays --
 
-Warning: DateTime::modify() expects parameter 1 to be string, array given in %sDateTime_modify_variation1.php on line 99
+Warning: DateTime::modify() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %sDateTime_modify_variation1.php on line 99
 bool(false)
 
 -- uppercase NULL --
@@ -242,7 +242,7 @@ bool(false)
 
 -- instance of classWithoutToString --
 
-Warning: DateTime::modify() expects parameter 1 to be string, object given in %sDateTime_modify_variation1.php on line 99
+Warning: DateTime::modify() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given in %sDateTime_modify_variation1.php on line 99
 bool(false)
 
 -- undefined var --
@@ -257,6 +257,6 @@ bool(false)
 
 -- resource --
 
-Warning: DateTime::modify() expects parameter 1 to be string, resource given in %sDateTime_modify_variation1.php on line 99
+Warning: DateTime::modify() expects parameter 1 to be string (or integer, float, boolean or convertible object), resource given in %sDateTime_modify_variation1.php on line 99
 bool(false)
 ===DONE===

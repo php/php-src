@@ -51,16 +51,16 @@ NULL
 
 -- Testing ezmlm_hash() function with invalid input - ARRAY --
 
-Warning: ezmlm_hash() expects parameter 1 to be string, array given in %s on line %d
+Warning: ezmlm_hash() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
 -- Testing ezmlm_hash() function with invalid input - OBJECT without 'cast_object' method --
 
-Warning: ezmlm_hash() expects parameter 1 to be string, object given in %s on line %d
+Warning: ezmlm_hash() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given in %s on line %d
 NULL
 
 -- Testing ezmlm_hash() function with invalid input - RESOURCE --
 
-Warning: ezmlm_hash() expects parameter 1 to be string, resource given in %s on line %d
+Warning: ezmlm_hash() expects parameter 1 to be string (or integer, float, boolean or convertible object), resource given in %s on line %d
 NULL
 ===DONE===

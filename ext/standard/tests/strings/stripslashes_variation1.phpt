@@ -125,23 +125,23 @@ string(13) "1.07654321E-9"
 string(3) "0.5"
 -- Iteration 10 --
 
-Warning: stripslashes() expects parameter 1 to be string, array given in %s on line %d
+Warning: stripslashes() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: stripslashes() expects parameter 1 to be string, array given in %s on line %d
+Warning: stripslashes() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: stripslashes() expects parameter 1 to be string, array given in %s on line %d
+Warning: stripslashes() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 13 --
 
-Warning: stripslashes() expects parameter 1 to be string, array given in %s on line %d
+Warning: stripslashes() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 14 --
 
-Warning: stripslashes() expects parameter 1 to be string, array given in %s on line %d
+Warning: stripslashes() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 15 --
 string(1) "1"
@@ -163,7 +163,7 @@ string(0) ""
 string(6) "obj'ct"
 -- Iteration 24 --
 
-Warning: stripslashes() expects parameter 1 to be string, resource given in %s on line %d
+Warning: stripslashes() expects parameter 1 to be string (or integer, float, boolean or convertible object), resource given in %s on line %d
 NULL
 -- Iteration 25 --
 string(0) ""

@@ -49,10 +49,10 @@ NULL
 Warning: preg_replace_callback_array() expects parameter 1 to be array, integer given in %s on line %d
 NULL
 
-Warning: preg_replace_callback_array() expects parameter 3 to be integer, string given in %s on line %d
+Warning: preg_replace_callback_array() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
 NULL
 
-Warning: preg_replace_callback() expects parameter 4 to be integer, array given in %s on line %d
+Warning: preg_replace_callback() expects parameter 4 to be integer (or convertible float, convertible string or boolean), array given in %s on line %d
 NULL
 string(0) ""
 

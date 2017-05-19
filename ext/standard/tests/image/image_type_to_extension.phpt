@@ -91,10 +91,10 @@ Constant: IMAGETYPE_WEBP
 	With dot: .webp
 	Without dot: webp
 
-Warning: image_type_to_extension() expects parameter 2 to be boolean, array given in %s on line %d
+Warning: image_type_to_extension() expects parameter 2 to be boolean (or integer, float or string), array given in %s on line %d
 bool(false)
 
-Warning: image_type_to_extension() expects parameter 1 to be integer, object given in %s on line %d
+Warning: image_type_to_extension() expects parameter 1 to be integer (or convertible float, convertible string or boolean), object given in %s on line %d
 bool(false)
 bool(false)
 

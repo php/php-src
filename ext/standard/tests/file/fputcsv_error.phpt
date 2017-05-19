@@ -48,7 +48,7 @@ Warning: fputcsv() expects at least 2 parameters, 0 given in %s on line %d
 NULL
 -- Testing fputcsv() with more than expected number of arguments --
 
-Warning: fputcsv() expects parameter 5 to be string, resource given in %s on line %d
+Warning: fputcsv() expects parameter 5 to be string (or integer, float, boolean or convertible object), resource given in %s on line %d
 NULL
 -- Testing fputcsv() with invalid arguments --
 -- Iteration 1 --

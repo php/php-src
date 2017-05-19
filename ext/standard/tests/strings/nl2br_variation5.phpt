@@ -109,23 +109,23 @@ string(7) "1.06E-9"
 string(3) "0.5"
 -- Iteration 10 --
 
-Warning: nl2br() expects parameter 1 to be string, array given in %s on line %d
+Warning: nl2br() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: nl2br() expects parameter 1 to be string, array given in %s on line %d
+Warning: nl2br() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: nl2br() expects parameter 1 to be string, array given in %s on line %d
+Warning: nl2br() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 13 --
 
-Warning: nl2br() expects parameter 1 to be string, array given in %s on line %d
+Warning: nl2br() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 14 --
 
-Warning: nl2br() expects parameter 1 to be string, array given in %s on line %d
+Warning: nl2br() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 15 --
 string(0) ""
@@ -141,7 +141,7 @@ string(1) "1"
 string(0) ""
 -- Iteration 21 --
 
-Warning: nl2br() expects parameter 1 to be string, resource given in %s on line %d
+Warning: nl2br() expects parameter 1 to be string (or integer, float, boolean or convertible object), resource given in %s on line %d
 NULL
 -- Iteration 22 --
 string(9) "My String"

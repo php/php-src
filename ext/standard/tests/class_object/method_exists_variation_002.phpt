@@ -116,27 +116,27 @@ bool(false)
 Error: 8 - Array to string conversion, %smethod_exists_variation_002.php(%d)
 
 Arg value Array 
-Error: 2 - method_exists() expects parameter 2 to be string, array given, %s(77)
+Error: 2 - method_exists() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given, %s(77)
 NULL
 Error: 8 - Array to string conversion, %smethod_exists_variation_002.php(%d)
 
 Arg value Array 
-Error: 2 - method_exists() expects parameter 2 to be string, array given, %s(77)
+Error: 2 - method_exists() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given, %s(77)
 NULL
 Error: 8 - Array to string conversion, %smethod_exists_variation_002.php(%d)
 
 Arg value Array 
-Error: 2 - method_exists() expects parameter 2 to be string, array given, %s(77)
+Error: 2 - method_exists() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given, %s(77)
 NULL
 Error: 8 - Array to string conversion, %smethod_exists_variation_002.php(%d)
 
 Arg value Array 
-Error: 2 - method_exists() expects parameter 2 to be string, array given, %s(77)
+Error: 2 - method_exists() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given, %s(77)
 NULL
 Error: 8 - Array to string conversion, %smethod_exists_variation_002.php(%d)
 
 Arg value Array 
-Error: 2 - method_exists() expects parameter 2 to be string, array given, %s(77)
+Error: 2 - method_exists() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given, %s(77)
 NULL
 
 Arg value  
@@ -165,7 +165,7 @@ bool(false)
 Error: 4096 - Object of class stdClass could not be converted to string, %s(76)
 
 Arg value  
-Error: 2 - method_exists() expects parameter 2 to be string, object given, %s(77)
+Error: 2 - method_exists() expects parameter 2 to be string (or integer, float, boolean or convertible object), object given, %s(77)
 NULL
 
 Arg value  

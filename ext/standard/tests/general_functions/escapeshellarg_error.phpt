@@ -58,16 +58,16 @@ NULL
 
 -- Testing escapeshellarg() function with a object supplied for argument --
 
-Warning: escapeshellarg() expects parameter 1 to be string, object given in %s on line %d
+Warning: escapeshellarg() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given in %s on line %d
 NULL
 
 -- Testing escapeshellarg() function with a resource supplied for argument --
 
-Warning: escapeshellarg() expects parameter 1 to be string, resource given in %s on line %d
+Warning: escapeshellarg() expects parameter 1 to be string (or integer, float, boolean or convertible object), resource given in %s on line %d
 NULL
 
 -- Testing escapeshellarg() function with a array supplied for argument --
 
-Warning: escapeshellarg() expects parameter 1 to be string, array given in %s on line %d
+Warning: escapeshellarg() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 ===Done===

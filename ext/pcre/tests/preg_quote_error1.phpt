@@ -28,9 +28,9 @@ string(16) "this is a string"
 
 Arg value is: Array
 
-Warning: preg_quote() expects parameter 1 to be string, array given in %spreg_quote_error1.php on line %d
+Warning: preg_quote() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %spreg_quote_error1.php on line %d
 NULL
 
-Warning: preg_quote() expects parameter 1 to be string, object given in %spreg_quote_error1.php on line %d
+Warning: preg_quote() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given in %spreg_quote_error1.php on line %d
 NULL
 Done

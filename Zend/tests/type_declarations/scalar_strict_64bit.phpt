@@ -70,52 +70,52 @@ Testing 'int' type:
 int(1)
 
 *** Trying string(1) "1"
-*** Caught Argument 1 passed to {closure}() must be of the type integer, string given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be an integer, string given, called in %s on line %d
 
 *** Trying float(1)
-*** Caught Argument 1 passed to {closure}() must be of the type integer, float given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be an integer, float given, called in %s on line %d
 
 *** Trying float(1.5)
-*** Caught Argument 1 passed to {closure}() must be of the type integer, float given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be an integer, float given, called in %s on line %d
 
 *** Trying string(2) "1a"
-*** Caught Argument 1 passed to {closure}() must be of the type integer, string given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be an integer, string given, called in %s on line %d
 
 *** Trying string(1) "a"
-*** Caught Argument 1 passed to {closure}() must be of the type integer, string given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be an integer, string given, called in %s on line %d
 
 *** Trying string(0) ""
-*** Caught Argument 1 passed to {closure}() must be of the type integer, string given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be an integer, string given, called in %s on line %d
 
 *** Trying int(9223372036854775807)
 int(9223372036854775807)
 
 *** Trying float(NAN)
-*** Caught Argument 1 passed to {closure}() must be of the type integer, float given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be an integer, float given, called in %s on line %d
 
 *** Trying bool(true)
-*** Caught Argument 1 passed to {closure}() must be of the type integer, boolean given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be an integer, boolean given, called in %s on line %d
 
 *** Trying bool(false)
-*** Caught Argument 1 passed to {closure}() must be of the type integer, boolean given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be an integer, boolean given, called in %s on line %d
 
 *** Trying NULL
-*** Caught Argument 1 passed to {closure}() must be of the type integer, null given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be an integer, null given, called in %s on line %d
 
 *** Trying array(0) {
 }
-*** Caught Argument 1 passed to {closure}() must be of the type integer, array given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be an integer, array given, called in %s on line %d
 
 *** Trying object(stdClass)#6 (0) {
 }
-*** Caught Argument 1 passed to {closure}() must be of the type integer, object given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be an integer, object given, called in %s on line %d
 
 *** Trying object(Stringable)#7 (0) {
 }
-*** Caught Argument 1 passed to {closure}() must be of the type integer, object given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be an integer, object given, called in %s on line %d
 
 *** Trying resource(5) of type (stream)
-*** Caught Argument 1 passed to {closure}() must be of the type integer, resource given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be an integer, resource given, called in %s on line %d
 
 Testing 'float' type:
 
@@ -123,7 +123,7 @@ Testing 'float' type:
 float(1)
 
 *** Trying string(1) "1"
-*** Caught Argument 1 passed to {closure}() must be of the type float, string given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a float (or integer), string given, called in %s on line %d
 
 *** Trying float(1)
 float(1)
@@ -132,13 +132,13 @@ float(1)
 float(1.5)
 
 *** Trying string(2) "1a"
-*** Caught Argument 1 passed to {closure}() must be of the type float, string given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a float (or integer), string given, called in %s on line %d
 
 *** Trying string(1) "a"
-*** Caught Argument 1 passed to {closure}() must be of the type float, string given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a float (or integer), string given, called in %s on line %d
 
 *** Trying string(0) ""
-*** Caught Argument 1 passed to {closure}() must be of the type float, string given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a float (or integer), string given, called in %s on line %d
 
 *** Trying int(9223372036854775807)
 float(9.2233720368548E+18)
@@ -147,42 +147,42 @@ float(9.2233720368548E+18)
 float(NAN)
 
 *** Trying bool(true)
-*** Caught Argument 1 passed to {closure}() must be of the type float, boolean given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a float (or integer), boolean given, called in %s on line %d
 
 *** Trying bool(false)
-*** Caught Argument 1 passed to {closure}() must be of the type float, boolean given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a float (or integer), boolean given, called in %s on line %d
 
 *** Trying NULL
-*** Caught Argument 1 passed to {closure}() must be of the type float, null given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a float (or integer), null given, called in %s on line %d
 
 *** Trying array(0) {
 }
-*** Caught Argument 1 passed to {closure}() must be of the type float, array given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a float (or integer), array given, called in %s on line %d
 
 *** Trying object(stdClass)#6 (0) {
 }
-*** Caught Argument 1 passed to {closure}() must be of the type float, object given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a float (or integer), object given, called in %s on line %d
 
 *** Trying object(Stringable)#7 (0) {
 }
-*** Caught Argument 1 passed to {closure}() must be of the type float, object given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a float (or integer), object given, called in %s on line %d
 
 *** Trying resource(5) of type (stream)
-*** Caught Argument 1 passed to {closure}() must be of the type float, resource given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a float (or integer), resource given, called in %s on line %d
 
 Testing 'string' type:
 
 *** Trying int(1)
-*** Caught Argument 1 passed to {closure}() must be of the type string, integer given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a string, integer given, called in %s on line %d
 
 *** Trying string(1) "1"
 string(1) "1"
 
 *** Trying float(1)
-*** Caught Argument 1 passed to {closure}() must be of the type string, float given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a string, float given, called in %s on line %d
 
 *** Trying float(1.5)
-*** Caught Argument 1 passed to {closure}() must be of the type string, float given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a string, float given, called in %s on line %d
 
 *** Trying string(2) "1a"
 string(2) "1a"
@@ -194,63 +194,63 @@ string(1) "a"
 string(0) ""
 
 *** Trying int(9223372036854775807)
-*** Caught Argument 1 passed to {closure}() must be of the type string, integer given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a string, integer given, called in %s on line %d
 
 *** Trying float(NAN)
-*** Caught Argument 1 passed to {closure}() must be of the type string, float given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a string, float given, called in %s on line %d
 
 *** Trying bool(true)
-*** Caught Argument 1 passed to {closure}() must be of the type string, boolean given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a string, boolean given, called in %s on line %d
 
 *** Trying bool(false)
-*** Caught Argument 1 passed to {closure}() must be of the type string, boolean given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a string, boolean given, called in %s on line %d
 
 *** Trying NULL
-*** Caught Argument 1 passed to {closure}() must be of the type string, null given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a string, null given, called in %s on line %d
 
 *** Trying array(0) {
 }
-*** Caught Argument 1 passed to {closure}() must be of the type string, array given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a string, array given, called in %s on line %d
 
 *** Trying object(stdClass)#6 (0) {
 }
-*** Caught Argument 1 passed to {closure}() must be of the type string, object given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a string, object given, called in %s on line %d
 
 *** Trying object(Stringable)#7 (0) {
 }
-*** Caught Argument 1 passed to {closure}() must be of the type string, object given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a string, object given, called in %s on line %d
 
 *** Trying resource(5) of type (stream)
-*** Caught Argument 1 passed to {closure}() must be of the type string, resource given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a string, resource given, called in %s on line %d
 
 Testing 'bool' type:
 
 *** Trying int(1)
-*** Caught Argument 1 passed to {closure}() must be of the type boolean, integer given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a boolean, integer given, called in %s on line %d
 
 *** Trying string(1) "1"
-*** Caught Argument 1 passed to {closure}() must be of the type boolean, string given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a boolean, string given, called in %s on line %d
 
 *** Trying float(1)
-*** Caught Argument 1 passed to {closure}() must be of the type boolean, float given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a boolean, float given, called in %s on line %d
 
 *** Trying float(1.5)
-*** Caught Argument 1 passed to {closure}() must be of the type boolean, float given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a boolean, float given, called in %s on line %d
 
 *** Trying string(2) "1a"
-*** Caught Argument 1 passed to {closure}() must be of the type boolean, string given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a boolean, string given, called in %s on line %d
 
 *** Trying string(1) "a"
-*** Caught Argument 1 passed to {closure}() must be of the type boolean, string given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a boolean, string given, called in %s on line %d
 
 *** Trying string(0) ""
-*** Caught Argument 1 passed to {closure}() must be of the type boolean, string given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a boolean, string given, called in %s on line %d
 
 *** Trying int(9223372036854775807)
-*** Caught Argument 1 passed to {closure}() must be of the type boolean, integer given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a boolean, integer given, called in %s on line %d
 
 *** Trying float(NAN)
-*** Caught Argument 1 passed to {closure}() must be of the type boolean, float given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a boolean, float given, called in %s on line %d
 
 *** Trying bool(true)
 bool(true)
@@ -259,21 +259,21 @@ bool(true)
 bool(false)
 
 *** Trying NULL
-*** Caught Argument 1 passed to {closure}() must be of the type boolean, null given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a boolean, null given, called in %s on line %d
 
 *** Trying array(0) {
 }
-*** Caught Argument 1 passed to {closure}() must be of the type boolean, array given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a boolean, array given, called in %s on line %d
 
 *** Trying object(stdClass)#6 (0) {
 }
-*** Caught Argument 1 passed to {closure}() must be of the type boolean, object given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a boolean, object given, called in %s on line %d
 
 *** Trying object(Stringable)#7 (0) {
 }
-*** Caught Argument 1 passed to {closure}() must be of the type boolean, object given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a boolean, object given, called in %s on line %d
 
 *** Trying resource(5) of type (stream)
-*** Caught Argument 1 passed to {closure}() must be of the type boolean, resource given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a boolean, resource given, called in %s on line %d
 
 Done

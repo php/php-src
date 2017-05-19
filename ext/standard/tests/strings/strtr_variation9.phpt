@@ -123,42 +123,42 @@ bool(false)
 
 -- Iteration 7 --
 
-Warning: strtr() expects parameter 1 to be string, array given in %s on line %d
+Warning: strtr() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
-Warning: strtr() expects parameter 1 to be string, array given in %s on line %d
+Warning: strtr() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
 -- Iteration 8 --
 
-Warning: strtr() expects parameter 1 to be string, array given in %s on line %d
+Warning: strtr() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
-Warning: strtr() expects parameter 1 to be string, array given in %s on line %d
+Warning: strtr() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
 -- Iteration 9 --
 
-Warning: strtr() expects parameter 1 to be string, array given in %s on line %d
+Warning: strtr() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
-Warning: strtr() expects parameter 1 to be string, array given in %s on line %d
+Warning: strtr() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
 -- Iteration 10 --
 
-Warning: strtr() expects parameter 1 to be string, array given in %s on line %d
+Warning: strtr() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
-Warning: strtr() expects parameter 1 to be string, array given in %s on line %d
+Warning: strtr() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
 -- Iteration 11 --
 
-Warning: strtr() expects parameter 1 to be string, array given in %s on line %d
+Warning: strtr() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
-Warning: strtr() expects parameter 1 to be string, array given in %s on line %d
+Warning: strtr() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
 -- Iteration 12 --
@@ -205,10 +205,10 @@ bool(false)
 
 -- Iteration 19 --
 
-Warning: strtr() expects parameter 1 to be string, resource given in %s on line %d
+Warning: strtr() expects parameter 1 to be string (or integer, float, boolean or convertible object), resource given in %s on line %d
 NULL
 
-Warning: strtr() expects parameter 1 to be string, resource given in %s on line %d
+Warning: strtr() expects parameter 1 to be string (or integer, float, boolean or convertible object), resource given in %s on line %d
 NULL
 
 -- Iteration 20 --

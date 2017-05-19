@@ -146,23 +146,23 @@ string(13) "1.07654321E-9"
 string(3) "0.5"
 -- Iteration 16 --
 
-Warning: ucwords() expects parameter 1 to be string, array given in %s on line %d
+Warning: ucwords() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 17 --
 
-Warning: ucwords() expects parameter 1 to be string, array given in %s on line %d
+Warning: ucwords() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 18 --
 
-Warning: ucwords() expects parameter 1 to be string, array given in %s on line %d
+Warning: ucwords() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 19 --
 
-Warning: ucwords() expects parameter 1 to be string, array given in %s on line %d
+Warning: ucwords() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 20 --
 
-Warning: ucwords() expects parameter 1 to be string, array given in %s on line %d
+Warning: ucwords() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 21 --
 string(1) "1"
@@ -196,6 +196,6 @@ string(0) ""
 string(0) ""
 -- Iteration 36 --
 
-Warning: ucwords() expects parameter 1 to be string, resource given in %s on line %d
+Warning: ucwords() expects parameter 1 to be string (or integer, float, boolean or convertible object), resource given in %s on line %d
 NULL
 Done

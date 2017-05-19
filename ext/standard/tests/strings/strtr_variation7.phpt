@@ -111,17 +111,17 @@ string(6) "234101"
 
 -- Iteration 7 --
 
-Warning: strtr() expects parameter 3 to be string, array given in %s on line %d
+Warning: strtr() expects parameter 3 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
 -- Iteration 8 --
 
-Warning: strtr() expects parameter 3 to be string, array given in %s on line %d
+Warning: strtr() expects parameter 3 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
 -- Iteration 9 --
 
-Warning: strtr() expects parameter 3 to be string, array given in %s on line %d
+Warning: strtr() expects parameter 3 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
 -- Iteration 10 --
@@ -147,7 +147,7 @@ string(6) "plesam"
 
 -- Iteration 17 --
 
-Warning: strtr() expects parameter 3 to be string, resource given in %s on line %d
+Warning: strtr() expects parameter 3 to be string (or integer, float, boolean or convertible object), resource given in %s on line %d
 NULL
 
 -- Iteration 18 --

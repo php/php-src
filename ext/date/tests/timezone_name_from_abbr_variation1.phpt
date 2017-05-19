@@ -130,22 +130,22 @@ string(13) "Europe/London"
 
 -- empty array --
 
-Warning: timezone_name_from_abbr() expects parameter 1 to be string, array given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 bool(false)
 
 -- int indexed array --
 
-Warning: timezone_name_from_abbr() expects parameter 1 to be string, array given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 bool(false)
 
 -- associative array --
 
-Warning: timezone_name_from_abbr() expects parameter 1 to be string, array given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 bool(false)
 
 -- nested arrays --
 
-Warning: timezone_name_from_abbr() expects parameter 1 to be string, array given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 bool(false)
 
 -- uppercase NULL --
@@ -189,7 +189,7 @@ string(13) "Europe/London"
 
 -- instance of classWithoutToString --
 
-Warning: timezone_name_from_abbr() expects parameter 1 to be string, object given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given in %s on line %d
 bool(false)
 
 -- undefined var --
@@ -200,6 +200,6 @@ string(13) "Europe/London"
 
 -- resource --
 
-Warning: timezone_name_from_abbr() expects parameter 1 to be string, resource given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 1 to be string (or integer, float, boolean or convertible object), resource given in %s on line %d
 bool(false)
 ===DONE===

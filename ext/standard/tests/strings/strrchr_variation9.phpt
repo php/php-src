@@ -151,23 +151,23 @@ string(7) "1.06E-9"
 string(2) ".5"
 -- Iteration 10 --
 
-Warning: strrchr() expects parameter 1 to be string, array given in %s on line %d
+Warning: strrchr() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: strrchr() expects parameter 1 to be string, array given in %s on line %d
+Warning: strrchr() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: strrchr() expects parameter 1 to be string, array given in %s on line %d
+Warning: strrchr() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 13 --
 
-Warning: strrchr() expects parameter 1 to be string, array given in %s on line %d
+Warning: strrchr() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 14 --
 
-Warning: strrchr() expects parameter 1 to be string, array given in %s on line %d
+Warning: strrchr() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 15 --
 bool(false)
@@ -189,7 +189,7 @@ bool(false)
 bool(false)
 -- Iteration 24 --
 
-Warning: strrchr() expects parameter 1 to be string, resource given in %s on line %d
+Warning: strrchr() expects parameter 1 to be string (or integer, float, boolean or convertible object), resource given in %s on line %d
 NULL
 -- Iteration 25 --
 bool(false)

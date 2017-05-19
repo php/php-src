@@ -100,23 +100,23 @@ int(6)
 int(6)
 -- Iteration 6 --
 
-Warning: stripos() expects parameter 3 to be integer, array given in %s on line %d
+Warning: stripos() expects parameter 3 to be integer (or convertible float, convertible string or boolean), array given in %s on line %d
 NULL
 -- Iteration 7 --
 
-Warning: stripos() expects parameter 3 to be integer, array given in %s on line %d
+Warning: stripos() expects parameter 3 to be integer (or convertible float, convertible string or boolean), array given in %s on line %d
 NULL
 -- Iteration 8 --
 
-Warning: stripos() expects parameter 3 to be integer, array given in %s on line %d
+Warning: stripos() expects parameter 3 to be integer (or convertible float, convertible string or boolean), array given in %s on line %d
 NULL
 -- Iteration 9 --
 
-Warning: stripos() expects parameter 3 to be integer, array given in %s on line %d
+Warning: stripos() expects parameter 3 to be integer (or convertible float, convertible string or boolean), array given in %s on line %d
 NULL
 -- Iteration 10 --
 
-Warning: stripos() expects parameter 3 to be integer, array given in %s on line %d
+Warning: stripos() expects parameter 3 to be integer (or convertible float, convertible string or boolean), array given in %s on line %d
 NULL
 -- Iteration 11 --
 int(6)
@@ -128,15 +128,15 @@ int(6)
 int(6)
 -- Iteration 15 --
 
-Warning: stripos() expects parameter 3 to be integer, object given in %s on line %d
+Warning: stripos() expects parameter 3 to be integer (or convertible float, convertible string or boolean), object given in %s on line %d
 NULL
 -- Iteration 16 --
 
-Warning: stripos() expects parameter 3 to be integer, string given in %s on line %d
+Warning: stripos() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
 NULL
 -- Iteration 17 --
 
-Warning: stripos() expects parameter 3 to be integer, string given in %s on line %d
+Warning: stripos() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
 NULL
 -- Iteration 18 --
 int(6)
@@ -144,7 +144,7 @@ int(6)
 int(6)
 -- Iteration 20 --
 
-Warning: stripos() expects parameter 3 to be integer, resource given in %s on line %d
+Warning: stripos() expects parameter 3 to be integer (or convertible float, convertible string or boolean), resource given in %s on line %d
 NULL
 -- Iteration 21 --
 int(6)

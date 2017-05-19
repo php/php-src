@@ -125,15 +125,15 @@ string
 string
 -- Iteration 10 --
 
-Warning: money_format() expects parameter 1 to be string, array given in %s on line %d
+Warning: money_format() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: money_format() expects parameter 1 to be string, array given in %s on line %d
+Warning: money_format() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: money_format() expects parameter 1 to be string, array given in %s on line %d
+Warning: money_format() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 13 --
 string
@@ -157,13 +157,13 @@ string
 string
 -- Iteration 23 --
 
-Warning: money_format() expects parameter 1 to be string, object given in %s on line %d
+Warning: money_format() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given in %s on line %d
 NULL
 -- Iteration 24 --
 string
 -- Iteration 25 --
 
-Warning: money_format() expects parameter 1 to be string, resource given in %s on line %d
+Warning: money_format() expects parameter 1 to be string (or integer, float, boolean or convertible object), resource given in %s on line %d
 NULL
 -- Iteration 26 --
 string

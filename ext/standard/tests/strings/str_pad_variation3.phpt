@@ -106,15 +106,15 @@ string(20) "Test string-20.5-20."
 string(20) "Test string101234567"
 -- Iteration 9 --
 
-Warning: str_pad() expects parameter 3 to be string, array given in %s on line %d
+Warning: str_pad() expects parameter 3 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 10 --
 
-Warning: str_pad() expects parameter 3 to be string, array given in %s on line %d
+Warning: str_pad() expects parameter 3 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: str_pad() expects parameter 3 to be string, array given in %s on line %d
+Warning: str_pad() expects parameter 3 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 12 --
 string(20) "Test string111111111"
@@ -140,7 +140,7 @@ NULL
 string(20) "Test stringsample ob"
 -- Iteration 19 --
 
-Warning: str_pad() expects parameter 3 to be string, resource given in %s on line %d
+Warning: str_pad() expects parameter 3 to be string (or integer, float, boolean or convertible object), resource given in %s on line %d
 NULL
 -- Iteration 20 --
 

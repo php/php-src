@@ -134,19 +134,19 @@ string(4) "path"
 string(4) "path"
 
 --empty array--
-Error: 2 - basename() expects parameter 2 to be string, array given, %s(%d)
+Error: 2 - basename() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given, %s(%d)
 NULL
 
 --int indexed array--
-Error: 2 - basename() expects parameter 2 to be string, array given, %s(%d)
+Error: 2 - basename() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given, %s(%d)
 NULL
 
 --associative array--
-Error: 2 - basename() expects parameter 2 to be string, array given, %s(%d)
+Error: 2 - basename() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given, %s(%d)
 NULL
 
 --nested arrays--
-Error: 2 - basename() expects parameter 2 to be string, array given, %s(%d)
+Error: 2 - basename() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given, %s(%d)
 NULL
 
 --uppercase NULL--
@@ -177,7 +177,7 @@ string(4) "path"
 string(4) "path"
 
 --instance of classWithoutToString--
-Error: 2 - basename() expects parameter 2 to be string, object given, %s(%d)
+Error: 2 - basename() expects parameter 2 to be string (or integer, float, boolean or convertible object), object given, %s(%d)
 NULL
 
 --undefined var--

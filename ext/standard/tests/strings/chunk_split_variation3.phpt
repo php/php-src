@@ -113,23 +113,23 @@ string(100) "This1.07654321E-9 is 1.07654321E-9simp1.07654321E-9le s1.07654321E-
 string(40) "This0.5 is 0.5simp0.5le s0.5trin0.5g.0.5"
 -- Iteration 10 --
 
-Warning: chunk_split() expects parameter 3 to be string, array given in %s on line %d
+Warning: chunk_split() expects parameter 3 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: chunk_split() expects parameter 3 to be string, array given in %s on line %d
+Warning: chunk_split() expects parameter 3 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: chunk_split() expects parameter 3 to be string, array given in %s on line %d
+Warning: chunk_split() expects parameter 3 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 13 --
 
-Warning: chunk_split() expects parameter 3 to be string, array given in %s on line %d
+Warning: chunk_split() expects parameter 3 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 14 --
 
-Warning: chunk_split() expects parameter 3 to be string, array given in %s on line %d
+Warning: chunk_split() expects parameter 3 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 15 --
 string(22) "This is simple string."
@@ -155,6 +155,6 @@ string(22) "This is simple string."
 string(22) "This is simple string."
 -- Iteration 26 --
 
-Warning: chunk_split() expects parameter 3 to be string, resource given in %s on line %d
+Warning: chunk_split() expects parameter 3 to be string (or integer, float, boolean or convertible object), resource given in %s on line %d
 NULL
 Done

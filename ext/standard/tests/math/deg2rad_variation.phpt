@@ -45,7 +45,7 @@ float(0.401425728)
 float(0.4092797096)
 float(0.4092797096)
 
-Warning: deg2rad() expects parameter 1 to be float, string given in %s on line %d
+Warning: deg2rad() expects parameter 1 to be float (or integer, convertible string or boolean), string given in %s on line %d
 NULL
 float(17.45329252)
 

@@ -103,15 +103,15 @@ string(19) "!---Hello World---!"
 string(19) "!---Hello World---!"
 -- Iteration 10 --
 
-Warning: rtrim() expects parameter 2 to be string, array given in %s on line %d
+Warning: rtrim() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: rtrim() expects parameter 2 to be string, array given in %s on line %d
+Warning: rtrim() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: rtrim() expects parameter 2 to be string, array given in %s on line %d
+Warning: rtrim() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 13 --
 string(19) "!---Hello World---!"
@@ -129,7 +129,7 @@ string(19) "!---Hello World---!"
 string(19) "!---Hello World---!"
 -- Iteration 20 --
 
-Warning: rtrim() expects parameter 2 to be string, resource given in %s on line %d
+Warning: rtrim() expects parameter 2 to be string (or integer, float, boolean or convertible object), resource given in %s on line %d
 NULL
 -- Iteration 21 --
 string(19) "!---Hello World---!"

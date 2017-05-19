@@ -18,10 +18,10 @@ var_dump(convert_uudecode(substr($enc, 0, -10)));
 echo "Done\n";
 ?>
 --EXPECTF--	
-Warning: convert_uuencode() expects parameter 1 to be string, array given in %s on line %d
+Warning: convert_uuencode() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 bool(false)
 
-Warning: convert_uudecode() expects parameter 1 to be string, array given in %s on line %d
+Warning: convert_uudecode() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 bool(false)
 bool(false)
 bool(false)

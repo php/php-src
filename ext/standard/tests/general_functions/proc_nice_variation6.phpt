@@ -50,7 +50,7 @@ foreach ( $variation_array as $var ) {
 ?>
 --EXPECTF--
 *** Test substituting argument 1 with object values ***
-Error: 2 - proc_nice() expects parameter 1 to be integer, object given, %s(%d)
+Error: 2 - proc_nice() expects parameter 1 to be integer (or convertible float, convertible string or boolean), object given, %s(%d)
 bool(false)
-Error: 2 - proc_nice() expects parameter 1 to be integer, object given, %s(%d)
+Error: 2 - proc_nice() expects parameter 1 to be integer (or convertible float, convertible string or boolean), object given, %s(%d)
 bool(false)

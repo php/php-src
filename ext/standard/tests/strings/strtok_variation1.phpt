@@ -127,23 +127,23 @@ string(11) "1.07654321E"
 string(3) "0.5"
 -- Iteration 10 --
 
-Warning: strtok() expects parameter 1 to be string, array given in %s on line %d
+Warning: strtok() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: strtok() expects parameter 1 to be string, array given in %s on line %d
+Warning: strtok() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: strtok() expects parameter 1 to be string, array given in %s on line %d
+Warning: strtok() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 13 --
 
-Warning: strtok() expects parameter 1 to be string, array given in %s on line %d
+Warning: strtok() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 14 --
 
-Warning: strtok() expects parameter 1 to be string, array given in %s on line %d
+Warning: strtok() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 15 --
 string(1) "1"
@@ -169,6 +169,6 @@ bool(false)
 bool(false)
 -- Iteration 26 --
 
-Warning: strtok() expects parameter 1 to be string, resource given in %s on line %d
+Warning: strtok() expects parameter 1 to be string (or integer, float, boolean or convertible object), resource given in %s on line %d
 NULL
 Done

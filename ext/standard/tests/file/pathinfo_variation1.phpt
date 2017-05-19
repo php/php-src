@@ -136,19 +136,19 @@ string(1) "."
 string(1) "."
 
 --empty array--
-Error: 2 - pathinfo() expects parameter 1 to be string, array given, %s(%d)
+Error: 2 - pathinfo() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given, %s(%d)
 NULL
 
 --int indexed array--
-Error: 2 - pathinfo() expects parameter 1 to be string, array given, %s(%d)
+Error: 2 - pathinfo() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given, %s(%d)
 NULL
 
 --associative array--
-Error: 2 - pathinfo() expects parameter 1 to be string, array given, %s(%d)
+Error: 2 - pathinfo() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given, %s(%d)
 NULL
 
 --nested arrays--
-Error: 2 - pathinfo() expects parameter 1 to be string, array given, %s(%d)
+Error: 2 - pathinfo() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given, %s(%d)
 NULL
 
 --uppercase NULL--
@@ -179,7 +179,7 @@ string(0) ""
 string(1) "."
 
 --instance of classWithoutToString--
-Error: 2 - pathinfo() expects parameter 1 to be string, object given, %s(%d)
+Error: 2 - pathinfo() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given, %s(%d)
 NULL
 
 --undefined var--

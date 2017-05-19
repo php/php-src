@@ -120,23 +120,23 @@ Error: 2 - getimagesize(0.5): failed to open stream: No such file or directory, 
 bool(false)
 
 -- Arg value: array() --
-Error: 2 - getimagesize() expects parameter 1 to be string, array given, %s(%d)
+Error: 2 - getimagesize() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given, %s(%d)
 NULL
 
 -- Arg value: array(0) --
-Error: 2 - getimagesize() expects parameter 1 to be string, array given, %s(%d)
+Error: 2 - getimagesize() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given, %s(%d)
 NULL
 
 -- Arg value: array(1) --
-Error: 2 - getimagesize() expects parameter 1 to be string, array given, %s(%d)
+Error: 2 - getimagesize() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given, %s(%d)
 NULL
 
 -- Arg value: array(1, 2) --
-Error: 2 - getimagesize() expects parameter 1 to be string, array given, %s(%d)
+Error: 2 - getimagesize() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given, %s(%d)
 NULL
 
 -- Arg value: array('color' => 'red', 'item' => 'pen') --
-Error: 2 - getimagesize() expects parameter 1 to be string, array given, %s(%d)
+Error: 2 - getimagesize() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given, %s(%d)
 NULL
 
 -- Arg value: NULL --
@@ -172,7 +172,7 @@ Error: 2 - getimagesize(): Filename cannot be empty, %s(%d)
 bool(false)
 
 -- Arg value: new stdclass() --
-Error: 2 - getimagesize() expects parameter 1 to be string, object given, %s(%d)
+Error: 2 - getimagesize() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given, %s(%d)
 NULL
 
 -- Arg value: undefined_var --

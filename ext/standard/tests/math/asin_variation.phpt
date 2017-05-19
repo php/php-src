@@ -45,7 +45,7 @@ float(NAN)
 float(NAN)
 float(NAN)
 
-Warning: asin() expects parameter 1 to be float, string given in %s on line %d
+Warning: asin() expects parameter 1 to be float (or integer, convertible string or boolean), string given in %s on line %d
 NULL
 float(NAN)
 

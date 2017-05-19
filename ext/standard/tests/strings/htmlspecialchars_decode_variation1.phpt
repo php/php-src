@@ -113,23 +113,23 @@ string(13) "1.07654321E-9"
 string(3) "0.5"
 -- Iterator 10 --
 
-Warning: htmlspecialchars_decode() expects parameter 1 to be string, array given in %s on line %d
+Warning: htmlspecialchars_decode() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iterator 11 --
 
-Warning: htmlspecialchars_decode() expects parameter 1 to be string, array given in %s on line %d
+Warning: htmlspecialchars_decode() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iterator 12 --
 
-Warning: htmlspecialchars_decode() expects parameter 1 to be string, array given in %s on line %d
+Warning: htmlspecialchars_decode() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iterator 13 --
 
-Warning: htmlspecialchars_decode() expects parameter 1 to be string, array given in %s on line %d
+Warning: htmlspecialchars_decode() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iterator 14 --
 
-Warning: htmlspecialchars_decode() expects parameter 1 to be string, array given in %s on line %d
+Warning: htmlspecialchars_decode() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iterator 15 --
 string(0) ""
@@ -155,7 +155,7 @@ string(0) ""
 string(0) ""
 -- Iterator 26 --
 
-Warning: htmlspecialchars_decode() expects parameter 1 to be string, resource given in %s on line %d
+Warning: htmlspecialchars_decode() expects parameter 1 to be string (or integer, float, boolean or convertible object), resource given in %s on line %d
 NULL
 ===DONE===
 	

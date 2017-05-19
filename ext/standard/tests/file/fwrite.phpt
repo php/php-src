@@ -33,7 +33,7 @@ echo "Done\n";
 Warning: fwrite() expects at least 2 parameters, 1 given in %s on line %d
 bool(false)
 
-Warning: fwrite() expects parameter 2 to be string, array given in %s on line %d
+Warning: fwrite() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 bool(false)
 int(0)
 int(0)

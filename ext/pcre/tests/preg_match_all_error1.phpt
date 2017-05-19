@@ -56,7 +56,7 @@ NULL
 
 Arg value is Array
 
-Warning: preg_match_all() expects parameter 1 to be string, array given in %spreg_match_all_error1.php on line %d
+Warning: preg_match_all() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %spreg_match_all_error1.php on line %d
 bool(false)
 NULL
 
@@ -76,6 +76,6 @@ array(1) {
   }
 }
 
-Warning: preg_match_all() expects parameter 1 to be string, object given in %spreg_match_all_error1.php on line %d
+Warning: preg_match_all() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given in %spreg_match_all_error1.php on line %d
 bool(false)
 NULL

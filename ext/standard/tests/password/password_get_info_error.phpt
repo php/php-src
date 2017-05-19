@@ -12,6 +12,6 @@ echo "OK!";
 Warning: password_get_info() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: password_get_info() expects parameter 1 to be string, array given in %s on line %d
+Warning: password_get_info() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 OK!

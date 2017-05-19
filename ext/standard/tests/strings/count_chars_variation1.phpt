@@ -190,15 +190,15 @@ array(8) {
 }
 -- Iteration 10 --
 
-Warning: count_chars() expects parameter 1 to be string, array given in %s on line %d
+Warning: count_chars() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: count_chars() expects parameter 1 to be string, array given in %s on line %d
+Warning: count_chars() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: count_chars() expects parameter 1 to be string, array given in %s on line %d
+Warning: count_chars() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 13 --
 array(1) {
@@ -251,7 +251,7 @@ array(12) {
 }
 -- Iteration 20 --
 
-Warning: count_chars() expects parameter 1 to be string, resource given in %s on line %d
+Warning: count_chars() expects parameter 1 to be string (or integer, float, boolean or convertible object), resource given in %s on line %d
 NULL
 -- Iteration 21 --
 array(0) {

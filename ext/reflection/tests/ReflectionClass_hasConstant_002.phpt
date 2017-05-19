@@ -33,8 +33,8 @@ bool(false)
 bool(false)
 bool(false)
 
-Warning: ReflectionClass::hasConstant() expects parameter 1 to be string, array given in %s on line 14
+Warning: ReflectionClass::hasConstant() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line 14
 NULL
 
-Warning: ReflectionClass::hasConstant() expects parameter 1 to be string, object given in %s on line 15
+Warning: ReflectionClass::hasConstant() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given in %s on line 15
 NULL

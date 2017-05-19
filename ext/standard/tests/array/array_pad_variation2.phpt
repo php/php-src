@@ -161,23 +161,23 @@ array(2) {
 }
 -- Iteration 7 --
 
-Warning: array_pad() expects parameter 2 to be integer, array given in %s on line %d
+Warning: array_pad() expects parameter 2 to be integer (or convertible float, convertible string or boolean), array given in %s on line %d
 NULL
 -- Iteration 8 --
 
-Warning: array_pad() expects parameter 2 to be integer, array given in %s on line %d
+Warning: array_pad() expects parameter 2 to be integer (or convertible float, convertible string or boolean), array given in %s on line %d
 NULL
 -- Iteration 9 --
 
-Warning: array_pad() expects parameter 2 to be integer, array given in %s on line %d
+Warning: array_pad() expects parameter 2 to be integer (or convertible float, convertible string or boolean), array given in %s on line %d
 NULL
 -- Iteration 10 --
 
-Warning: array_pad() expects parameter 2 to be integer, array given in %s on line %d
+Warning: array_pad() expects parameter 2 to be integer (or convertible float, convertible string or boolean), array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: array_pad() expects parameter 2 to be integer, array given in %s on line %d
+Warning: array_pad() expects parameter 2 to be integer (or convertible float, convertible string or boolean), array given in %s on line %d
 NULL
 -- Iteration 12 --
 array(2) {
@@ -223,23 +223,23 @@ array(2) {
 }
 -- Iteration 18 --
 
-Warning: array_pad() expects parameter 2 to be integer, string given in %s on line %d
+Warning: array_pad() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
 NULL
 -- Iteration 19 --
 
-Warning: array_pad() expects parameter 2 to be integer, string given in %s on line %d
+Warning: array_pad() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
 NULL
 -- Iteration 20 --
 
-Warning: array_pad() expects parameter 2 to be integer, string given in %s on line %d
+Warning: array_pad() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
 NULL
 -- Iteration 21 --
 
-Warning: array_pad() expects parameter 2 to be integer, string given in %s on line %d
+Warning: array_pad() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
 NULL
 -- Iteration 22 --
 
-Warning: array_pad() expects parameter 2 to be integer, object given in %s on line %d
+Warning: array_pad() expects parameter 2 to be integer (or convertible float, convertible string or boolean), object given in %s on line %d
 NULL
 -- Iteration 23 --
 array(2) {

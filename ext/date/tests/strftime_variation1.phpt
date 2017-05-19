@@ -138,34 +138,34 @@ string(3) "0.5"
 
 --empty array--
 
-Warning: strftime() expects parameter 1 to be string, array given in %s on line %d
+Warning: strftime() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 bool(false)
 
-Warning: strftime() expects parameter 1 to be string, array given in %s on line %d
+Warning: strftime() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 bool(false)
 
 --int indexed array--
 
-Warning: strftime() expects parameter 1 to be string, array given in %s on line %d
+Warning: strftime() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 bool(false)
 
-Warning: strftime() expects parameter 1 to be string, array given in %s on line %d
+Warning: strftime() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 bool(false)
 
 --associative array--
 
-Warning: strftime() expects parameter 1 to be string, array given in %s on line %d
+Warning: strftime() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 bool(false)
 
-Warning: strftime() expects parameter 1 to be string, array given in %s on line %d
+Warning: strftime() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 bool(false)
 
 --nested arrays--
 
-Warning: strftime() expects parameter 1 to be string, array given in %s on line %d
+Warning: strftime() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 bool(false)
 
-Warning: strftime() expects parameter 1 to be string, array given in %s on line %d
+Warning: strftime() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 bool(false)
 
 --uppercase NULL--
@@ -206,10 +206,10 @@ string(14) "Class A object"
 
 --instance of classWithoutToString--
 
-Warning: strftime() expects parameter 1 to be string, object given in %s on line %d
+Warning: strftime() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given in %s on line %d
 bool(false)
 
-Warning: strftime() expects parameter 1 to be string, object given in %s on line %d
+Warning: strftime() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given in %s on line %d
 bool(false)
 
 --undefined var--

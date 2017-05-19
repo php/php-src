@@ -138,38 +138,38 @@ string(3) "0.5"
 string(2) "0."
 -- Iteration 10 --
 
-Warning: chop() expects parameter 1 to be string, array given in %s on line %d
+Warning: chop() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
-Warning: chop() expects parameter 1 to be string, array given in %s on line %d
+Warning: chop() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: chop() expects parameter 1 to be string, array given in %s on line %d
+Warning: chop() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
-Warning: chop() expects parameter 1 to be string, array given in %s on line %d
+Warning: chop() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: chop() expects parameter 1 to be string, array given in %s on line %d
+Warning: chop() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
-Warning: chop() expects parameter 1 to be string, array given in %s on line %d
+Warning: chop() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 13 --
 
-Warning: chop() expects parameter 1 to be string, array given in %s on line %d
+Warning: chop() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
-Warning: chop() expects parameter 1 to be string, array given in %s on line %d
+Warning: chop() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 14 --
 
-Warning: chop() expects parameter 1 to be string, array given in %s on line %d
+Warning: chop() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
-Warning: chop() expects parameter 1 to be string, array given in %s on line %d
+Warning: chop() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 15 --
 string(1) "1"
@@ -206,9 +206,9 @@ string(16) " @#$%Object @#$%"
 string(11) " @#$%Object"
 -- Iteration 26 --
 
-Warning: chop() expects parameter 1 to be string, resource given in %s on line %d
+Warning: chop() expects parameter 1 to be string (or integer, float, boolean or convertible object), resource given in %s on line %d
 NULL
 
-Warning: chop() expects parameter 1 to be string, resource given in %s on line %d
+Warning: chop() expects parameter 1 to be string (or integer, float, boolean or convertible object), resource given in %s on line %d
 NULL
 Done

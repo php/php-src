@@ -113,27 +113,27 @@ string(3) "0.5"
 Error: 8 - Array to string conversion, %srawurlencode_variation_001.php(%d)
 
 Arg value Array 
-Error: 2 - rawurlencode() expects parameter 1 to be string, array given, %s(74)
+Error: 2 - rawurlencode() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given, %s(74)
 NULL
 Error: 8 - Array to string conversion, %srawurlencode_variation_001.php(%d)
 
 Arg value Array 
-Error: 2 - rawurlencode() expects parameter 1 to be string, array given, %s(74)
+Error: 2 - rawurlencode() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given, %s(74)
 NULL
 Error: 8 - Array to string conversion, %srawurlencode_variation_001.php(%d)
 
 Arg value Array 
-Error: 2 - rawurlencode() expects parameter 1 to be string, array given, %s(74)
+Error: 2 - rawurlencode() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given, %s(74)
 NULL
 Error: 8 - Array to string conversion, %srawurlencode_variation_001.php(%d)
 
 Arg value Array 
-Error: 2 - rawurlencode() expects parameter 1 to be string, array given, %s(74)
+Error: 2 - rawurlencode() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given, %s(74)
 NULL
 Error: 8 - Array to string conversion, %srawurlencode_variation_001.php(%d)
 
 Arg value Array 
-Error: 2 - rawurlencode() expects parameter 1 to be string, array given, %s(74)
+Error: 2 - rawurlencode() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given, %s(74)
 NULL
 
 Arg value  
@@ -162,7 +162,7 @@ string(0) ""
 Error: 4096 - Object of class stdClass could not be converted to string, %s(73)
 
 Arg value  
-Error: 2 - rawurlencode() expects parameter 1 to be string, object given, %s(74)
+Error: 2 - rawurlencode() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given, %s(74)
 NULL
 
 Arg value  

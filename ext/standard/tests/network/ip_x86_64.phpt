@@ -54,16 +54,16 @@ bool(false)
 bool(false)
 int(1869573999)
 
-Warning: ip2long() expects parameter 1 to be string, array given in %sip_x86_64.php on line %d
+Warning: ip2long() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %sip_x86_64.php on line %d
 NULL
 
 Warning: long2ip() expects exactly 1 parameter, 0 given in %sip_x86_64.php on line %d
 NULL
 string(13) "255.254.82.80"
 
-Warning: long2ip() expects parameter 1 to be integer, string given in %sip_x86_64.php on line %d
+Warning: long2ip() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given in %sip_x86_64.php on line %d
 NULL
 
-Warning: long2ip() expects parameter 1 to be integer, array given in %sip_x86_64.php on line %d
+Warning: long2ip() expects parameter 1 to be integer (or convertible float, convertible string or boolean), array given in %sip_x86_64.php on line %d
 NULL
 Done

@@ -48,5 +48,5 @@ NULL
 Class C does not have a property named 
 string(3) "def"
 
-Warning: ReflectionClass::getStaticPropertyValue() expects parameter 1 to be string, array given in %s on line 28
+Warning: ReflectionClass::getStaticPropertyValue() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line 28
 NULL

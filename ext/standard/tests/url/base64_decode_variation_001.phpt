@@ -122,23 +122,23 @@ bool(false)
 bool(false)
 
 -- Arg value array() --
-Error: 2 - base64_decode() expects parameter 1 to be string, array given, %s(%d)
+Error: 2 - base64_decode() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given, %s(%d)
 NULL
 
 -- Arg value array(0) --
-Error: 2 - base64_decode() expects parameter 1 to be string, array given, %s(%d)
+Error: 2 - base64_decode() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given, %s(%d)
 NULL
 
 -- Arg value array(1) --
-Error: 2 - base64_decode() expects parameter 1 to be string, array given, %s(%d)
+Error: 2 - base64_decode() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given, %s(%d)
 NULL
 
 -- Arg value array(1, 2) --
-Error: 2 - base64_decode() expects parameter 1 to be string, array given, %s(%d)
+Error: 2 - base64_decode() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given, %s(%d)
 NULL
 
 -- Arg value array('color' => 'red', 'item' => 'pen' --
-Error: 2 - base64_decode() expects parameter 1 to be string, array given, %s(%d)
+Error: 2 - base64_decode() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given, %s(%d)
 NULL
 
 -- Arg value NULL --
@@ -166,7 +166,7 @@ string(0) ""
 string(0) ""
 
 -- Arg value stdClass object --
-Error: 2 - base64_decode() expects parameter 1 to be string, object given, %s(%d)
+Error: 2 - base64_decode() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given, %s(%d)
 NULL
 
 -- Arg value undefined variable --
@@ -176,6 +176,6 @@ string(0) ""
 string(0) ""
 
 -- Arg value resource --
-Error: 2 - base64_decode() expects parameter 1 to be string, resource given, %s(%d)
+Error: 2 - base64_decode() expects parameter 1 to be string (or integer, float, boolean or convertible object), resource given, %s(%d)
 NULL
 ===Done===

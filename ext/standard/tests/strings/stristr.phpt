@@ -22,13 +22,13 @@ stristr() function
 Warning: stristr() expects at least 2 parameters, 0 given in %s on line %d
 NULL
 
-Warning: stristr() expects parameter 1 to be string, array given in %s on line %d
+Warning: stristr() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
 Warning: stristr(): needle is not a string or an integer in %s on line %d
 bool(false)
 
-Warning: stristr() expects parameter 1 to be string, array given in %s on line %d
+Warning: stristr() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 string(11) "tEsT sTrInG"
 string(6) "sTrInG"

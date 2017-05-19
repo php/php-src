@@ -16,4 +16,4 @@ try {
 }
 ?>
 --EXPECT--
-string(72) "Return value of getNumber() must be of the type integer, string returned"
+string(117) "Return value of getNumber() must be an integer (or convertible float, convertible string or boolean), string returned"

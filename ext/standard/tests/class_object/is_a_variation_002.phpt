@@ -117,27 +117,27 @@ bool(false)
 
 Arg value Array 
 
-Warning: is_a() expects parameter 2 to be string, array given in %s on line %d
+Warning: is_a() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
 Arg value Array 
 
-Warning: is_a() expects parameter 2 to be string, array given in %s on line %d
+Warning: is_a() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
 Arg value Array 
 
-Warning: is_a() expects parameter 2 to be string, array given in %s on line %d
+Warning: is_a() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
 Arg value Array 
 
-Warning: is_a() expects parameter 2 to be string, array given in %s on line %d
+Warning: is_a() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
 Arg value Array 
 
-Warning: is_a() expects parameter 2 to be string, array given in %s on line %d
+Warning: is_a() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
 Arg value  
