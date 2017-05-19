@@ -732,7 +732,7 @@ isInternal: yes
 isUserDefined: no
 returnsReference: no
 Modifiers: 256
-Number of Parameters: 1
+Number of Parameters: 2
 Number of Required Parameters: 1
 
 Inspecting parameter 'query' of method 'query'
@@ -740,6 +740,13 @@ isArray: no
 allowsNull: no
 isPassedByReference: no
 isOptional: no
+isDefaultValueAvailable: no
+
+Inspecting parameter 'resultmode' of method 'query'
+isArray: no
+allowsNull: no
+isPassedByReference: no
+isOptional: yes
 isDefaultValueAvailable: no
 
 Inspecting method 'real_connect'
