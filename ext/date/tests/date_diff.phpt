@@ -33,7 +33,7 @@ for ( $i = 0; $i < COUNT; $i++)
 		*/
 
 		$current = clone $dates[$i];
-		$int = new DateInterval( $diff->format( 'P%yY%mM%dD' ) );
+		$int = new DateInterval( $diff->format( 'P%aD' ) );
 		if ( $current > $dates[$j] )
 		{
 			$current->sub( $int );
