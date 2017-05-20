@@ -4003,6 +4003,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_STRLEN_SPEC_CONST_HANDLER(ZEND
 		ZEND_VM_NEXT_OPCODE();
 	} else {
 		zend_bool strict;
+		const char *error_adjective = "";
 
 		if ((IS_CONST & (IS_VAR|IS_CV)) && Z_TYPE_P(value) == IS_REFERENCE) {
 			value = Z_REFVAL_P(value);
@@ -4024,7 +4025,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_STRLEN_SPEC_CONST_HANDLER(ZEND
 				zval tmp;
 
 				ZVAL_COPY(&tmp, value);
-				if (zend_parse_arg_str_weak(&tmp, &str)) {
+				if (zend_parse_arg_str_weak(&tmp, &str, &error_adjective)) {
 					ZVAL_LONG(EX_VAR(opline->result.var), ZSTR_LEN(str));
 					zval_ptr_dtor(&tmp);
 					break;
@@ -4032,9 +4033,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_STRLEN_SPEC_CONST_HANDLER(ZEND
 				zval_ptr_dtor(&tmp);
 			}
 			zend_internal_type_error(strict, strict
-				? "strlen() expects parameter 1 to be string, %s given"
-			    : "strlen() expects parameter 1 to be string (or integer, float, boolean or convertible object), %s given",
-				zend_get_type_by_const(Z_TYPE_P(value)));
+				? "strlen() expects parameter 1 to be string, %s%s given"
+			    : "strlen() expects parameter 1 to be string (or integer, float, boolean or convertible object), %s%s given",
+				error_adjective, zend_get_type_by_const(Z_TYPE_P(value)));
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		} while (0);
 	}
@@ -34241,6 +34242,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_STRLEN_SPEC_CV_HANDLER(ZEND_OP
 		ZEND_VM_NEXT_OPCODE();
 	} else {
 		zend_bool strict;
+		const char *error_adjective = "";
 
 		if ((IS_CV & (IS_VAR|IS_CV)) && Z_TYPE_P(value) == IS_REFERENCE) {
 			value = Z_REFVAL_P(value);
@@ -34262,7 +34264,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_STRLEN_SPEC_CV_HANDLER(ZEND_OP
 				zval tmp;
 
 				ZVAL_COPY(&tmp, value);
-				if (zend_parse_arg_str_weak(&tmp, &str)) {
+				if (zend_parse_arg_str_weak(&tmp, &str, &error_adjective)) {
 					ZVAL_LONG(EX_VAR(opline->result.var), ZSTR_LEN(str));
 					zval_ptr_dtor(&tmp);
 					break;
@@ -34270,9 +34272,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_STRLEN_SPEC_CV_HANDLER(ZEND_OP
 				zval_ptr_dtor(&tmp);
 			}
 			zend_internal_type_error(strict, strict
-				? "strlen() expects parameter 1 to be string, %s given"
-			    : "strlen() expects parameter 1 to be string (or integer, float, boolean or convertible object), %s given",
-				zend_get_type_by_const(Z_TYPE_P(value)));
+				? "strlen() expects parameter 1 to be string, %s%s given"
+			    : "strlen() expects parameter 1 to be string (or integer, float, boolean or convertible object), %s%s given",
+				error_adjective, zend_get_type_by_const(Z_TYPE_P(value)));
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		} while (0);
 	}
@@ -48455,6 +48457,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_STRLEN_SPEC_TMPVAR_HANDLER(ZEN
 		ZEND_VM_NEXT_OPCODE();
 	} else {
 		zend_bool strict;
+		const char *error_adjective = "";
 
 		if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && Z_TYPE_P(value) == IS_REFERENCE) {
 			value = Z_REFVAL_P(value);
@@ -48476,7 +48479,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_STRLEN_SPEC_TMPVAR_HANDLER(ZEN
 				zval tmp;
 
 				ZVAL_COPY(&tmp, value);
-				if (zend_parse_arg_str_weak(&tmp, &str)) {
+				if (zend_parse_arg_str_weak(&tmp, &str, &error_adjective)) {
 					ZVAL_LONG(EX_VAR(opline->result.var), ZSTR_LEN(str));
 					zval_ptr_dtor(&tmp);
 					break;
@@ -48484,9 +48487,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_STRLEN_SPEC_TMPVAR_HANDLER(ZEN
 				zval_ptr_dtor(&tmp);
 			}
 			zend_internal_type_error(strict, strict
-				? "strlen() expects parameter 1 to be string, %s given"
-			    : "strlen() expects parameter 1 to be string (or integer, float, boolean or convertible object), %s given",
-				zend_get_type_by_const(Z_TYPE_P(value)));
+				? "strlen() expects parameter 1 to be string, %s%s given"
+			    : "strlen() expects parameter 1 to be string (or integer, float, boolean or convertible object), %s%s given",
+				error_adjective, zend_get_type_by_const(Z_TYPE_P(value)));
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		} while (0);
 	}

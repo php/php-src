@@ -250,7 +250,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_count_error(zend_boo
 }
 /* }}} */
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_type_error(zend_bool throw_, int num, zend_expected_type expected_type, zval *arg) /* {{{ */
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_type_error(zend_bool throw_, int num, zend_expected_type expected_type, zval *arg, const char *error_adjective) /* {{{ */
 {
 	const char *space;
 	const char *class_name = get_active_class_name(&space);
@@ -263,10 +263,10 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_type_error(zend_bool 
 		NULL
 	};
 
-	zend_internal_type_error(throw_ || ZEND_ARG_USES_STRICT_TYPES(), "%s%s%s() expects parameter %d to be %s, %s given",
+	zend_internal_type_error(throw_ || ZEND_ARG_USES_STRICT_TYPES(), "%s%s%s() expects parameter %d to be %s, %s%s given",
 		class_name, space, get_active_function_name(), num,
 		(ZEND_ARG_USES_STRICT_TYPES() ? expected_error_strict : expected_error_weak)[expected_type],
-		zend_zval_type_name(arg));
+		error_adjective, zend_zval_type_name(arg));
 }
 /* }}} */
 
@@ -354,13 +354,15 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_bool_slow(zval *arg, zend_bool *dest) 
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL zend_parse_arg_long_weak(zval *arg, zend_long *dest) /* {{{ */
+ZEND_API int ZEND_FASTCALL zend_parse_arg_long_weak(zval *arg, zend_long *dest, const char **error_adjective) /* {{{ */
 {
 	if (EXPECTED(Z_TYPE_P(arg) == IS_DOUBLE)) {
 		if (UNEXPECTED(zend_isnan(Z_DVAL_P(arg)))) {
+			*error_adjective = "non-convertible (NAN) ";
 			return 0;
 		}
 		if (UNEXPECTED(!ZEND_DOUBLE_FITS_LONG(Z_DVAL_P(arg)))) {
+			*error_adjective = "non-convertible (less than PHP_INT_MIN or greater than PHP_INT_MAX) ";
 			return 0;
 		} else {
 			*dest = zend_dval_to_lval(Z_DVAL_P(arg));
@@ -372,14 +374,17 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_long_weak(zval *arg, zend_long *dest) 
 		if (UNEXPECTED((type = is_numeric_str_function(Z_STR_P(arg), dest, &d)) != IS_LONG)) {
 			if (EXPECTED(type != 0)) {
 				if (UNEXPECTED(zend_isnan(d))) {
+					*error_adjective = "non-convertible (NAN) numeric ";
 					return 0;
 				}
 				if (UNEXPECTED(!ZEND_DOUBLE_FITS_LONG(d))) {
+					*error_adjective = "non-convertible (less than PHP_INT_MIN or greater than PHP_INT_MAX) numeric ";
 					return 0;
 				} else {
 					*dest = zend_dval_to_lval(d);
 				}
 			} else {
+				*error_adjective = "non-numeric ";
 				return 0;
 			}
 		}
@@ -394,19 +399,20 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_long_weak(zval *arg, zend_long *dest) 
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL zend_parse_arg_long_slow(zval *arg, zend_long *dest) /* {{{ */
+ZEND_API int ZEND_FASTCALL zend_parse_arg_long_slow(zval *arg, zend_long *dest, const char **error_adjective) /* {{{ */
 {
 	if (UNEXPECTED(ZEND_ARG_USES_STRICT_TYPES())) {
 		return 0;
 	}
-	return zend_parse_arg_long_weak(arg, dest);
+	return zend_parse_arg_long_weak(arg, dest, error_adjective);
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL zend_parse_arg_long_cap_weak(zval *arg, zend_long *dest) /* {{{ */
+ZEND_API int ZEND_FASTCALL zend_parse_arg_long_cap_weak(zval *arg, zend_long *dest, const char **error_adjective) /* {{{ */
 {
 	if (EXPECTED(Z_TYPE_P(arg) == IS_DOUBLE)) {
 		if (UNEXPECTED(zend_isnan(Z_DVAL_P(arg)))) {
+			*error_adjective = "non-convertible (NAN) ";
 			return 0;
 		}
 		*dest = zend_dval_to_lval_cap(Z_DVAL_P(arg));
@@ -417,10 +423,12 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_long_cap_weak(zval *arg, zend_long *de
 		if (UNEXPECTED((type = is_numeric_str_function(Z_STR_P(arg), dest, &d)) != IS_LONG)) {
 			if (EXPECTED(type != 0)) {
 				if (UNEXPECTED(zend_isnan(d))) {
+					*error_adjective = "non-convertible (NAN) numeric ";
 					return 0;
 				}
 				*dest = zend_dval_to_lval_cap(d);
 			} else {
+				*error_adjective = "non-numeric ";
 				return 0;
 			}
 		}
@@ -435,16 +443,16 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_long_cap_weak(zval *arg, zend_long *de
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL zend_parse_arg_long_cap_slow(zval *arg, zend_long *dest) /* {{{ */
+ZEND_API int ZEND_FASTCALL zend_parse_arg_long_cap_slow(zval *arg, zend_long *dest, const char **error_adjective) /* {{{ */
 {
 	if (UNEXPECTED(ZEND_ARG_USES_STRICT_TYPES())) {
 		return 0;
 	}
-	return zend_parse_arg_long_cap_weak(arg, dest);
+	return zend_parse_arg_long_cap_weak(arg, dest, error_adjective);
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL zend_parse_arg_double_weak(zval *arg, double *dest) /* {{{ */
+ZEND_API int ZEND_FASTCALL zend_parse_arg_double_weak(zval *arg, double *dest, const char **error_adjective) /* {{{ */
 {
 	if (EXPECTED(Z_TYPE_P(arg) == IS_LONG)) {
 		*dest = (double)Z_LVAL_P(arg);
@@ -456,6 +464,7 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_double_weak(zval *arg, double *dest) /
 			if (EXPECTED(type != 0)) {
 				*dest = (double)(l);
 			} else {
+				*error_adjective = "non-numeric ";
 				return 0;
 			}
 		}
@@ -470,7 +479,7 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_double_weak(zval *arg, double *dest) /
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL zend_parse_arg_double_slow(zval *arg, double *dest) /* {{{ */
+ZEND_API int ZEND_FASTCALL zend_parse_arg_double_slow(zval *arg, double *dest, const char **error_adjective) /* {{{ */
 {
 	if (EXPECTED(Z_TYPE_P(arg) == IS_LONG)) {
 		/* SSTH Exception: IS_LONG may be accepted instead as IS_DOUBLE */
@@ -478,11 +487,11 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_double_slow(zval *arg, double *dest) /
 	} else if (UNEXPECTED(ZEND_ARG_USES_STRICT_TYPES())) {
 		return 0;
 	}
-	return zend_parse_arg_double_weak(arg, dest);
+	return zend_parse_arg_double_weak(arg, dest, error_adjective);
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, zend_string **dest) /* {{{ */
+ZEND_API int ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, zend_string **dest, const char **error_adjective) /* {{{ */
 {
 	if (EXPECTED(Z_TYPE_P(arg) < IS_STRING)) {
 		convert_to_string(arg);
@@ -512,6 +521,7 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, zend_string **dest
 			}
 			zval_ptr_dtor(z);
 		}
+		*error_adjective = "non-convertible (does not support __toString) ";
 		return 0;
 	} else {
 		return 0;
@@ -520,16 +530,16 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, zend_string **dest
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL zend_parse_arg_str_slow(zval *arg, zend_string **dest) /* {{{ */
+ZEND_API int ZEND_FASTCALL zend_parse_arg_str_slow(zval *arg, zend_string **dest, const char **error_adjective) /* {{{ */
 {
 	if (UNEXPECTED(ZEND_ARG_USES_STRICT_TYPES())) {
 		return 0;
 	}
-	return zend_parse_arg_str_weak(arg, dest);
+	return zend_parse_arg_str_weak(arg, dest, error_adjective);
 }
 /* }}} */
 
-static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, const char **spec, char **error, int *severity) /* {{{ */
+static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, const char **spec, char **error, int *severity, const char **error_adjective) /* {{{ */
 {
 	const char *spec_walk = *spec;
 	char c = *spec_walk++;
@@ -572,7 +582,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 					is_null = va_arg(*va, zend_bool *);
 				}
 
-				if (!zend_parse_arg_long(arg, p, is_null, check_null, c == 'L')) {
+				if (!zend_parse_arg_long(arg, p, is_null, check_null, c == 'L', error_adjective)) {
 					return expected_error[Z_EXPECTED_LONG];
 				}
 			}
@@ -587,7 +597,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 					is_null = va_arg(*va, zend_bool *);
 				}
 
-				if (!zend_parse_arg_double(arg, p, is_null, check_null)) {
+				if (!zend_parse_arg_double(arg, p, is_null, check_null, error_adjective)) {
 					return expected_error[Z_EXPECTED_DOUBLE];
 				}
 			}
@@ -597,7 +607,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 			{
 				char **p = va_arg(*va, char **);
 				size_t *pl = va_arg(*va, size_t *);
-				if (!zend_parse_arg_string(arg, p, pl, check_null)) {
+				if (!zend_parse_arg_string(arg, p, pl, check_null, error_adjective)) {
 					return expected_error[Z_EXPECTED_STRING];
 				}
 			}
@@ -607,7 +617,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 			{
 				char **p = va_arg(*va, char **);
 				size_t *pl = va_arg(*va, size_t *);
-				if (!zend_parse_arg_path(arg, p, pl, check_null)) {
+				if (!zend_parse_arg_path(arg, p, pl, check_null, error_adjective)) {
 					return expected_error[Z_EXPECTED_PATH];
 				}
 			}
@@ -616,7 +626,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 		case 'P':
 			{
 				zend_string **str = va_arg(*va, zend_string **);
-				if (!zend_parse_arg_path_str(arg, str, check_null)) {
+				if (!zend_parse_arg_path_str(arg, str, check_null, error_adjective)) {
 					return expected_error[Z_EXPECTED_PATH];
 				}
 			}
@@ -625,7 +635,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 		case 'S':
 			{
 				zend_string **str = va_arg(*va, zend_string **);
-				if (!zend_parse_arg_str(arg, str, check_null)) {
+				if (!zend_parse_arg_str(arg, str, check_null, error_adjective)) {
 					return expected_error[Z_EXPECTED_STRING];
 				}
 			}
@@ -795,8 +805,9 @@ static int zend_parse_arg(int arg_num, zval *arg, va_list *va, const char **spec
 	const char *expected_type = NULL;
 	char *error = NULL;
 	int severity = 0;
+	const char *error_adjective = "";
 
-	expected_type = zend_parse_arg_impl(arg_num, arg, va, spec, &error, &severity);
+	expected_type = zend_parse_arg_impl(arg_num, arg, va, spec, &error, &severity, &error_adjective);
 	if (expected_type) {
 		if (!(flags & ZEND_PARSE_PARAMS_QUIET) && (*expected_type || error)) {
 			const char *space;
@@ -810,9 +821,9 @@ static int zend_parse_arg(int arg_num, zval *arg, va_list *va, const char **spec
 				efree(error);
 			} else {
 				zend_internal_type_error(throw_exception,
-						"%s%s%s() expects parameter %d to be %s, %s given",
+						"%s%s%s() expects parameter %d to be %s, %s%s given",
 						class_name, space, get_active_function_name(), arg_num, expected_type,
-						zend_zval_type_name(arg));
+						error_adjective, zend_zval_type_name(arg));
 			}
 		}
 		if (severity != E_DEPRECATED) {
