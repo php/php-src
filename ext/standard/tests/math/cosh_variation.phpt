@@ -45,7 +45,7 @@ float(4872401723)
 float(7641446995)
 float(7641446995)
 
-Warning: cosh() expects parameter 1 to be float (or integer, convertible string or boolean), string given in %s on line %d
+Warning: cosh() expects parameter 1 to be float (or integer, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 float(INF)
 

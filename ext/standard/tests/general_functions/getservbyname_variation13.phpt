@@ -34,5 +34,5 @@ foreach ( $variation_array as $var ) {
 *** Test substituting argument 2 with object values ***
 bool(false)
 
-Warning: getservbyname() expects parameter 2 to be string (or integer, float, boolean or convertible object), object given in %s.php on line %d
+Warning: getservbyname() expects parameter 2 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given in %s.php on line %d
 NULL

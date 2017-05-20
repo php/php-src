@@ -199,7 +199,7 @@ int(1)
 
 -- empty string DQ --
 
-Warning: timezone_transitions_get() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: timezone_transitions_get() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 string(7) "boolean"
 
 Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
@@ -207,7 +207,7 @@ int(1)
 
 -- empty string SQ --
 
-Warning: timezone_transitions_get() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: timezone_transitions_get() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 string(7) "boolean"
 
 Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
@@ -215,7 +215,7 @@ int(1)
 
 -- string DQ --
 
-Warning: timezone_transitions_get() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: timezone_transitions_get() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 string(7) "boolean"
 
 Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
@@ -223,7 +223,7 @@ int(1)
 
 -- string SQ --
 
-Warning: timezone_transitions_get() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: timezone_transitions_get() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 string(7) "boolean"
 
 Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
@@ -231,7 +231,7 @@ int(1)
 
 -- mixed case string --
 
-Warning: timezone_transitions_get() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: timezone_transitions_get() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 string(7) "boolean"
 
 Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
@@ -239,7 +239,7 @@ int(1)
 
 -- heredoc --
 
-Warning: timezone_transitions_get() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: timezone_transitions_get() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 string(7) "boolean"
 
 Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d

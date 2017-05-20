@@ -40,5 +40,5 @@ foreach ( $variation_array as $var ) {
 *** Test substituting argument 1 with object values ***
 string(1) "0"
 
-Warning: get_cfg_var() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given in %s.php on line %d
+Warning: get_cfg_var() expects parameter 1 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given in %s.php on line %d
 NULL

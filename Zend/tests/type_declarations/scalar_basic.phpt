@@ -79,16 +79,16 @@ E_NOTICE: A non well formed numeric value encountered on line %d
 int(1)
 
 *** Trying string(1) "a"
-*** Caught Argument 1 passed to {closure}() must be an integer (or convertible float, convertible string or boolean), string given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be an integer (or convertible float, convertible string or boolean), non-numeric string given, called in %s on line %d
 
 *** Trying string(0) ""
-*** Caught Argument 1 passed to {closure}() must be an integer (or convertible float, convertible string or boolean), string given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be an integer (or convertible float, convertible string or boolean), non-numeric string given, called in %s on line %d
 
 *** Trying int(%d)
 int(%d)
 
 *** Trying float(NAN)
-*** Caught Argument 1 passed to {closure}() must be an integer (or convertible float, convertible string or boolean), float given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be an integer (or convertible float, convertible string or boolean), non-convertible (NAN) float given, called in %s on line %d
 
 *** Trying bool(true)
 int(1)
@@ -133,10 +133,10 @@ E_NOTICE: A non well formed numeric value encountered on line %d
 float(1)
 
 *** Trying string(1) "a"
-*** Caught Argument 1 passed to {closure}() must be a float (or integer, convertible string or boolean), string given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a float (or integer, convertible string or boolean), non-numeric string given, called in %s on line %d
 
 *** Trying string(0) ""
-*** Caught Argument 1 passed to {closure}() must be a float (or integer, convertible string or boolean), string given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a float (or integer, convertible string or boolean), non-numeric string given, called in %s on line %d
 
 *** Trying int(%d)
 float(%s)
@@ -212,7 +212,7 @@ string(0) ""
 
 *** Trying object(stdClass)#%s (0) {
 }
-*** Caught Argument 1 passed to {closure}() must be a string (or integer, float, boolean or convertible object), object given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be a string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given, called in %s on line %d
 
 *** Trying object(Stringable)#%s (0) {
 }

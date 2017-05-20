@@ -413,12 +413,12 @@ array(9) {
 
 -- Iteration 16 --
 
-Warning: date_sun_info() expects parameter 2 to be float (or integer, convertible string or boolean), string given in %s on line %d
+Warning: date_sun_info() expects parameter 2 to be float (or integer, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 -- Iteration 17 --
 
-Warning: date_sun_info() expects parameter 2 to be float (or integer, convertible string or boolean), string given in %s on line %d
+Warning: date_sun_info() expects parameter 2 to be float (or integer, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 -- Iteration 18 --
@@ -428,17 +428,17 @@ bool(false)
 
 -- Iteration 19 --
 
-Warning: date_sun_info() expects parameter 2 to be float (or integer, convertible string or boolean), string given in %s on line %d
+Warning: date_sun_info() expects parameter 2 to be float (or integer, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 -- Iteration 20 --
 
-Warning: date_sun_info() expects parameter 2 to be float (or integer, convertible string or boolean), string given in %s on line %d
+Warning: date_sun_info() expects parameter 2 to be float (or integer, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 -- Iteration 21 --
 
-Warning: date_sun_info() expects parameter 2 to be float (or integer, convertible string or boolean), string given in %s on line %d
+Warning: date_sun_info() expects parameter 2 to be float (or integer, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 -- Iteration 22 --

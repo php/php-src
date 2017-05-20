@@ -177,7 +177,7 @@ string(4) "path"
 string(4) "path"
 
 --instance of classWithoutToString--
-Error: 2 - basename() expects parameter 2 to be string (or integer, float, boolean or convertible object), object given, %s(%d)
+Error: 2 - basename() expects parameter 2 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given, %s(%d)
 NULL
 
 --undefined var--

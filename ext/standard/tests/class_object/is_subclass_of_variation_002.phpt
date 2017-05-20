@@ -165,7 +165,7 @@ bool(false)
 Error: 4096 - Object of class stdClass could not be converted to string, %s(%d)
 
 Arg value  
-Error: 2 - is_subclass_of() expects parameter 2 to be string (or integer, float, boolean or convertible object), object given, %s(%d)
+Error: 2 - is_subclass_of() expects parameter 2 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given, %s(%d)
 NULL
 
 Arg value  

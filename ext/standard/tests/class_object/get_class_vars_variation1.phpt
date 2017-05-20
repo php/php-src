@@ -170,7 +170,7 @@ bool(false)
 
 --instance of classWithoutToString--
 
-Warning: get_class_vars() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given in %sget_class_vars_variation1.php on line %d
+Warning: get_class_vars() expects parameter 1 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given in %sget_class_vars_variation1.php on line %d
 NULL
 
 --undefined var--

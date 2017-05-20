@@ -157,7 +157,7 @@ string
 string
 -- Iteration 23 --
 
-Warning: money_format() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given in %s on line %d
+Warning: money_format() expects parameter 1 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given in %s on line %d
 NULL
 -- Iteration 24 --
 string

@@ -148,11 +148,11 @@ array(3) {
 }
 -- Iteration 10 --
 
-Warning: get_html_translation_table() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %s
+Warning: get_html_translation_table() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %s
 NULL
 -- Iteration 11 --
 
-Warning: get_html_translation_table() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %s
+Warning: get_html_translation_table() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %s
 NULL
 -- Iteration 12 --
 
@@ -160,11 +160,11 @@ Warning: get_html_translation_table() expects parameter 2 to be integer (or conv
 NULL
 -- Iteration 13 --
 
-Warning: get_html_translation_table() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %s
+Warning: get_html_translation_table() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %s
 NULL
 -- Iteration 14 --
 
-Warning: get_html_translation_table() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %s
+Warning: get_html_translation_table() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %s
 NULL
 -- Iteration 15 --
 array(3) {

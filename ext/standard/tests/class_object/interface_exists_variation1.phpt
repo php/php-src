@@ -173,7 +173,7 @@ bool(false)
 
 --instance of classWithoutToString--
 
-Warning: interface_exists() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given in %sinterface_exists_variation1.php on line %d
+Warning: interface_exists() expects parameter 1 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given in %sinterface_exists_variation1.php on line %d
 NULL
 
 --undefined var--

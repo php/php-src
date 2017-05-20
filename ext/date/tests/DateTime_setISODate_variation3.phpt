@@ -264,32 +264,32 @@ object(DateTime)#%d (3) {
 
 -- empty string DQ --
 
-Warning: DateTime::setISODate() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: DateTime::setISODate() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 -- empty string SQ --
 
-Warning: DateTime::setISODate() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: DateTime::setISODate() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 -- string DQ --
 
-Warning: DateTime::setISODate() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: DateTime::setISODate() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 -- string SQ --
 
-Warning: DateTime::setISODate() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: DateTime::setISODate() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 -- mixed case string --
 
-Warning: DateTime::setISODate() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: DateTime::setISODate() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 -- heredoc --
 
-Warning: DateTime::setISODate() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: DateTime::setISODate() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 -- instance of classWithToString --

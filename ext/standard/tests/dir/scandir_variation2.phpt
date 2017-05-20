@@ -229,12 +229,12 @@ array(2) {
 
 -- Iteration 16 --
 
-Warning: scandir() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: scandir() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 17 --
 
-Warning: scandir() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: scandir() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 18 --
@@ -244,17 +244,17 @@ NULL
 
 -- Iteration 19 --
 
-Warning: scandir() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: scandir() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: scandir() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: scandir() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: scandir() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: scandir() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 22 --

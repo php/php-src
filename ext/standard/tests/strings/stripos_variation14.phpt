@@ -132,11 +132,11 @@ Warning: stripos() expects parameter 3 to be integer (or convertible float, conv
 NULL
 -- Iteration 16 --
 
-Warning: stripos() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: stripos() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 -- Iteration 17 --
 
-Warning: stripos() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: stripos() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 -- Iteration 18 --
 int(6)

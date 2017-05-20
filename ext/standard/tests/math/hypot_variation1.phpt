@@ -139,12 +139,12 @@ float(5)
 
 -- Iteration 17 --
 
-Warning: hypot() expects parameter 1 to be float (or integer, convertible string or boolean), string given in %s on line %d
+Warning: hypot() expects parameter 1 to be float (or integer, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 18 --
 
-Warning: hypot() expects parameter 1 to be float (or integer, convertible string or boolean), string given in %s on line %d
+Warning: hypot() expects parameter 1 to be float (or integer, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 19 --
@@ -154,17 +154,17 @@ NULL
 
 -- Iteration 20 --
 
-Warning: hypot() expects parameter 1 to be float (or integer, convertible string or boolean), string given in %s on line %d
+Warning: hypot() expects parameter 1 to be float (or integer, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: hypot() expects parameter 1 to be float (or integer, convertible string or boolean), string given in %s on line %d
+Warning: hypot() expects parameter 1 to be float (or integer, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 22 --
 
-Warning: hypot() expects parameter 1 to be float (or integer, convertible string or boolean), string given in %s on line %d
+Warning: hypot() expects parameter 1 to be float (or integer, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 23 --

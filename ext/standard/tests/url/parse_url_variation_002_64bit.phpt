@@ -161,19 +161,19 @@ Arg value
 string(4) "http"
 
 Arg value  
-Error: 2 - parse_url() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given, %s(71)
+Error: 2 - parse_url() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given, %s(71)
 NULL
 
 Arg value  
-Error: 2 - parse_url() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given, %s(71)
+Error: 2 - parse_url() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given, %s(71)
 NULL
 
 Arg value string 
-Error: 2 - parse_url() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given, %s(71)
+Error: 2 - parse_url() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given, %s(71)
 NULL
 
 Arg value string 
-Error: 2 - parse_url() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given, %s(71)
+Error: 2 - parse_url() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given, %s(71)
 NULL
 Error: 4096 - Object of class stdClass could not be converted to string, %s(70)
 

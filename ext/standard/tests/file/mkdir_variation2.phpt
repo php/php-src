@@ -160,22 +160,22 @@ Directory created
 Directory created
 
 --empty string DQ--
-Error: 2 - mkdir() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given, %s(%d)
+Error: 2 - mkdir() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given, %s(%d)
 
 --empty string SQ--
-Error: 2 - mkdir() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given, %s(%d)
+Error: 2 - mkdir() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given, %s(%d)
 
 --string DQ--
-Error: 2 - mkdir() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given, %s(%d)
+Error: 2 - mkdir() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given, %s(%d)
 
 --string SQ--
-Error: 2 - mkdir() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given, %s(%d)
+Error: 2 - mkdir() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given, %s(%d)
 
 --mixed case string--
-Error: 2 - mkdir() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given, %s(%d)
+Error: 2 - mkdir() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given, %s(%d)
 
 --heredoc--
-Error: 2 - mkdir() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given, %s(%d)
+Error: 2 - mkdir() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given, %s(%d)
 
 --instance of classWithToString--
 Error: 2 - mkdir() expects parameter 2 to be integer (or convertible float, convertible string or boolean), object given, %s(%d)

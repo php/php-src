@@ -242,7 +242,7 @@ bool(false)
 
 -- instance of classWithoutToString --
 
-Warning: date_modify() expects parameter 2 to be string (or integer, float, boolean or convertible object), object given in %sdate_modify_variation2.php on line 99
+Warning: date_modify() expects parameter 2 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given in %sdate_modify_variation2.php on line 99
 bool(false)
 
 -- undefined var --

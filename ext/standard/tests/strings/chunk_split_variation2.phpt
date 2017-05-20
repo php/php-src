@@ -100,7 +100,7 @@ Warning: chunk_split(): Chunk length should be greater than zero in %schunk_spli
 bool(false)
 -- Iteration 3 --
 
-Warning: chunk_split() expects parameter 2 to be integer (or convertible float, convertible string or boolean), float given in %s on line %d
+Warning: chunk_split() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-convertible (less than PHP_INT_MIN or greater than PHP_INT_MAX) float given in %s on line %d
 NULL
 -- Iteration 4 --
 
@@ -152,19 +152,19 @@ Warning: chunk_split(): Chunk length should be greater than zero in %schunk_spli
 bool(false)
 -- Iteration 17 --
 
-Warning: chunk_split() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %schunk_split_variation2.php on line %d
+Warning: chunk_split() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %schunk_split_variation2.php on line %d
 NULL
 -- Iteration 18 --
 
-Warning: chunk_split() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %schunk_split_variation2.php on line %d
+Warning: chunk_split() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %schunk_split_variation2.php on line %d
 NULL
 -- Iteration 19 --
 
-Warning: chunk_split() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %schunk_split_variation2.php on line %d
+Warning: chunk_split() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %schunk_split_variation2.php on line %d
 NULL
 -- Iteration 20 --
 
-Warning: chunk_split() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %schunk_split_variation2.php on line %d
+Warning: chunk_split() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %schunk_split_variation2.php on line %d
 NULL
 -- Iteration 21 --
 

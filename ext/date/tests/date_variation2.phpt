@@ -170,32 +170,32 @@ string(24) "January 1, 1970, 1:00 am"
 
 -- empty string DQ --
 
-Warning: date() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: date() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 -- empty string SQ --
 
-Warning: date() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: date() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 -- string DQ --
 
-Warning: date() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: date() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 -- string SQ --
 
-Warning: date() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: date() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 -- mixed case string --
 
-Warning: date() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: date() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 -- heredoc --
 
-Warning: date() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: date() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 -- instance of classWithToString --

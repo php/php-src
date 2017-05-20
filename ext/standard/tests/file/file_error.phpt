@@ -36,7 +36,7 @@ NULL
 Warning: file() expects at most 3 parameters, 4 given in %s on line %d
 NULL
 
-Warning: file() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: file() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 array(0) {
 }

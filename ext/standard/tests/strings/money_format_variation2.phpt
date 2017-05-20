@@ -149,11 +149,11 @@ string
 string
 -- Iteration 19 --
 
-Warning: money_format() expects parameter 2 to be float (or integer, convertible string or boolean), string given in %s on line %d
+Warning: money_format() expects parameter 2 to be float (or integer, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 -- Iteration 20 --
 
-Warning: money_format() expects parameter 2 to be float (or integer, convertible string or boolean), string given in %s on line %d
+Warning: money_format() expects parameter 2 to be float (or integer, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 -- Iteration 21 --
 
@@ -161,7 +161,7 @@ Notice: A non well formed numeric value encountered in %s on line %d
 string
 -- Iteration 22 --
 
-Warning: money_format() expects parameter 2 to be float (or integer, convertible string or boolean), string given in %s on line %d
+Warning: money_format() expects parameter 2 to be float (or integer, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 -- Iteration 23 --
 

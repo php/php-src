@@ -35,7 +35,7 @@ object(ArrayObject)#%d (1) {
   }
 }
 
-Warning: ksort() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %sarrayObject_ksort_basic1.php on line %d
+Warning: ksort() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %sarrayObject_ksort_basic1.php on line %d
 bool(false)
 object(ArrayObject)#2 (1) {
   ["storage":"ArrayObject":private]=>

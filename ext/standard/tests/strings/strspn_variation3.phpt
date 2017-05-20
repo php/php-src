@@ -187,34 +187,34 @@ int(2)
 
 -- Iteration with start value as "" --
 
-Warning: strspn() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: strspn() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
-Warning: strspn() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: strspn() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration with start value as "" --
 
-Warning: strspn() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: strspn() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
-Warning: strspn() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
-NULL
-
--- Iteration with start value as "string" --
-
-Warning: strspn() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
-NULL
-
-Warning: strspn() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: strspn() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration with start value as "string" --
 
-Warning: strspn() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: strspn() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
-Warning: strspn() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: strspn() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
+NULL
+
+-- Iteration with start value as "string" --
+
+Warning: strspn() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
+NULL
+
+Warning: strspn() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration with start value as "object" --

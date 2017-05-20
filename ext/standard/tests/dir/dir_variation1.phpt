@@ -161,6 +161,6 @@ NULL
 
 -- Iteration 18 --
 
-Warning: dir() expects parameter 1 to be a valid path, object given in %s on line %d
+Warning: dir() expects parameter 1 to be a valid path, non-convertible (does not support __toString) object given in %s on line %d
 NULL
 Done

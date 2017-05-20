@@ -264,32 +264,32 @@ object(DateTime)#%d (3) {
 
 -- empty string DQ --
 
-Warning: date_isodate_set() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: date_isodate_set() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 -- empty string SQ --
 
-Warning: date_isodate_set() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: date_isodate_set() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 -- string DQ --
 
-Warning: date_isodate_set() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: date_isodate_set() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 -- string SQ --
 
-Warning: date_isodate_set() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: date_isodate_set() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 -- mixed case string --
 
-Warning: date_isodate_set() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: date_isodate_set() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 -- heredoc --
 
-Warning: date_isodate_set() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: date_isodate_set() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 -- instance of classWithToString --

@@ -158,11 +158,11 @@ int(0)
 int(0)
 -- Iteration 22 --
 
-Warning: strncmp() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in%s on line %d
+Warning: strncmp() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in%s on line %d
 NULL
 -- Iteration 23 --
 
-Warning: strncmp() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in%s on line %d
+Warning: strncmp() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in%s on line %d
 NULL
 -- Iteration 24 --
 int(0)

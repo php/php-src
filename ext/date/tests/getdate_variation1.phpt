@@ -351,32 +351,32 @@ array(11) {
 
 --empty string DQ--
 
-Warning: getdate() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: getdate() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 --empty string SQ--
 
-Warning: getdate() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: getdate() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 --string DQ--
 
-Warning: getdate() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: getdate() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 --string SQ--
 
-Warning: getdate() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: getdate() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 --mixed case string--
 
-Warning: getdate() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: getdate() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 --heredoc--
 
-Warning: getdate() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: getdate() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 --instance of classWithToString--

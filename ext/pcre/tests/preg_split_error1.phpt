@@ -63,5 +63,5 @@ array(3) {
   string(4) " 5 6"
 }
 
-Warning: preg_split() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given in %spreg_split_error1.php on line %d
+Warning: preg_split() expects parameter 1 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given in %spreg_split_error1.php on line %d
 bool(false)

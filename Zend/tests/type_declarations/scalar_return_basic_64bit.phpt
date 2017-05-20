@@ -76,13 +76,13 @@ int(1)
 E_NOTICE: A non well formed numeric value encountered on line %d
 int(1)
 *** Trying string(1) "a"
-*** Caught Return value of {closure}() must be an integer (or convertible float, convertible string or boolean), string returned in %s on line %d
+*** Caught Return value of {closure}() must be an integer (or convertible float, convertible string or boolean), non-numeric string returned in %s on line %d
 *** Trying string(0) ""
-*** Caught Return value of {closure}() must be an integer (or convertible float, convertible string or boolean), string returned in %s on line %d
+*** Caught Return value of {closure}() must be an integer (or convertible float, convertible string or boolean), non-numeric string returned in %s on line %d
 *** Trying int(9223372036854775807)
 int(9223372036854775807)
 *** Trying float(NAN)
-*** Caught Return value of {closure}() must be an integer (or convertible float, convertible string or boolean), float returned in %s on line %d
+*** Caught Return value of {closure}() must be an integer (or convertible float, convertible string or boolean), non-convertible (NAN) float returned in %s on line %d
 *** Trying bool(true)
 int(1)
 *** Trying bool(false)
@@ -114,9 +114,9 @@ float(1.5)
 E_NOTICE: A non well formed numeric value encountered on line %d
 float(1)
 *** Trying string(1) "a"
-*** Caught Return value of {closure}() must be a float (or integer, convertible string or boolean), string returned in %s on line %d
+*** Caught Return value of {closure}() must be a float (or integer, convertible string or boolean), non-numeric string returned in %s on line %d
 *** Trying string(0) ""
-*** Caught Return value of {closure}() must be a float (or integer, convertible string or boolean), string returned in %s on line %d
+*** Caught Return value of {closure}() must be a float (or integer, convertible string or boolean), non-numeric string returned in %s on line %d
 *** Trying int(9223372036854775807)
 float(9.2233720368548E+18)
 *** Trying float(NAN)
@@ -169,7 +169,7 @@ string(0) ""
 *** Caught Return value of {closure}() must be a string (or integer, float, boolean or convertible object), array returned in %s on line %d
 *** Trying object(stdClass)#6 (0) {
 }
-*** Caught Return value of {closure}() must be a string (or integer, float, boolean or convertible object), object returned in %s on line %d
+*** Caught Return value of {closure}() must be a string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object returned in %s on line %d
 *** Trying object(Stringable)#7 (0) {
 }
 string(6) "foobar"

@@ -61,7 +61,7 @@ Warning: long2ip() expects exactly 1 parameter, 0 given in %sip_x86_64.php on li
 NULL
 string(13) "255.254.82.80"
 
-Warning: long2ip() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given in %sip_x86_64.php on line %d
+Warning: long2ip() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %sip_x86_64.php on line %d
 NULL
 
 Warning: long2ip() expects parameter 1 to be integer (or convertible float, convertible string or boolean), array given in %sip_x86_64.php on line %d

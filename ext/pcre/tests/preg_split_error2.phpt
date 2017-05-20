@@ -29,6 +29,6 @@ Arg value is: Array
 Warning: preg_split() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %spreg_split_error2.php on line %d
 bool(false)
 
-Warning: preg_split() expects parameter 2 to be string (or integer, float, boolean or convertible object), object given in %spreg_split_error2.php on line %d
+Warning: preg_split() expects parameter 2 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given in %spreg_split_error2.php on line %d
 bool(false)
 Done

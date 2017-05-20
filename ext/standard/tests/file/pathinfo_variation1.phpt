@@ -179,7 +179,7 @@ string(0) ""
 string(1) "."
 
 --instance of classWithoutToString--
-Error: 2 - pathinfo() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given, %s(%d)
+Error: 2 - pathinfo() expects parameter 1 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given, %s(%d)
 NULL
 
 --undefined var--

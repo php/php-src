@@ -242,7 +242,7 @@ bool(false)
 
 -- instance of classWithoutToString --
 
-Warning: DateTime::modify() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given in %sDateTime_modify_variation1.php on line 99
+Warning: DateTime::modify() expects parameter 1 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given in %sDateTime_modify_variation1.php on line 99
 bool(false)
 
 -- undefined var --

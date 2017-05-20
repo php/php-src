@@ -189,17 +189,17 @@ array(4) {
 }
 -- Iteration 10 --
 
-Warning: get_html_translation_table() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: get_html_translation_table() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
-Warning: get_html_translation_table() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: get_html_translation_table() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: get_html_translation_table() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: get_html_translation_table() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
-Warning: get_html_translation_table() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: get_html_translation_table() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 -- Iteration 12 --
 
@@ -210,17 +210,17 @@ Warning: get_html_translation_table() expects parameter 1 to be integer (or conv
 NULL
 -- Iteration 13 --
 
-Warning: get_html_translation_table() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: get_html_translation_table() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
-Warning: get_html_translation_table() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: get_html_translation_table() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 -- Iteration 14 --
 
-Warning: get_html_translation_table() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: get_html_translation_table() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
-Warning: get_html_translation_table() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: get_html_translation_table() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 -- Iteration 15 --
 array(4) {

@@ -123,22 +123,22 @@ string(24) "application/octet-stream"
 
 -- Iteration 14 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: image_type_to_mime_type() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 15 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: image_type_to_mime_type() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 16 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: image_type_to_mime_type() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 17 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: image_type_to_mime_type() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 18 --

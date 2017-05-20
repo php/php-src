@@ -45,7 +45,7 @@ float(1.527345431)
 float(1.528178225)
 float(1.528178225)
 
-Warning: atan() expects parameter 1 to be float (or integer, convertible string or boolean), string given in %s on line %d
+Warning: atan() expects parameter 1 to be float (or integer, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 float(1.569796327)
 

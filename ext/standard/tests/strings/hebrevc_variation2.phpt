@@ -338,11 +338,11 @@ string(241) ".The hebrevcc function converts logical Hebrew text to visual text<
 "
 -- Iteration 19 --
 
-Warning: hebrevc() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: hebrevc() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 -- Iteration 20 --
 
-Warning: hebrevc() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: hebrevc() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 -- Iteration 21 --
 

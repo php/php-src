@@ -153,12 +153,12 @@ bool(false)
 
 -- Iteration 17 --
 
-Warning: base_convert() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: base_convert() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 18 --
 
-Warning: base_convert() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: base_convert() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 19 --
@@ -168,17 +168,17 @@ NULL
 
 -- Iteration 20 --
 
-Warning: base_convert() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: base_convert() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: base_convert() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: base_convert() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 22 --
 
-Warning: base_convert() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: base_convert() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 23 --

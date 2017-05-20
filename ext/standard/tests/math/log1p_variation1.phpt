@@ -145,12 +145,12 @@ float(0)
 
 -- Iteration 18 --
 
-Warning: log1p() expects parameter 1 to be float (or integer, convertible string or boolean), string given in %s on line %d
+Warning: log1p() expects parameter 1 to be float (or integer, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 19 --
 
-Warning: log1p() expects parameter 1 to be float (or integer, convertible string or boolean), string given in %s on line %d
+Warning: log1p() expects parameter 1 to be float (or integer, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 20 --
@@ -160,17 +160,17 @@ NULL
 
 -- Iteration 21 --
 
-Warning: log1p() expects parameter 1 to be float (or integer, convertible string or boolean), string given in %s on line %d
+Warning: log1p() expects parameter 1 to be float (or integer, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 22 --
 
-Warning: log1p() expects parameter 1 to be float (or integer, convertible string or boolean), string given in %s on line %d
+Warning: log1p() expects parameter 1 to be float (or integer, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 23 --
 
-Warning: log1p() expects parameter 1 to be float (or integer, convertible string or boolean), string given in %s on line %d
+Warning: log1p() expects parameter 1 to be float (or integer, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 24 --

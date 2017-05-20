@@ -83,15 +83,15 @@ Warning: flock() expects parameter 2 to be integer (or convertible float, conver
 NULL
 
 --- Iteration 6 ---
-Warning: flock() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: flock() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 --- Iteration 7 ---
-Warning: flock() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: flock() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 --- Iteration 8 ---
-Warning: flock() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: flock() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 Warning: flock(): supplied resource is not a valid stream resource in %s on line %d

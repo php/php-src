@@ -352,46 +352,46 @@ NULL
 
 -- Iteration 17 --
 
-Warning: array_chunk() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: array_chunk() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
-Warning: array_chunk() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: array_chunk() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
-Warning: array_chunk() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: array_chunk() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 18 --
 
-Warning: array_chunk() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: array_chunk() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
-Warning: array_chunk() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: array_chunk() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
-Warning: array_chunk() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: array_chunk() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 19 --
 
-Warning: array_chunk() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: array_chunk() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
-Warning: array_chunk() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: array_chunk() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
-Warning: array_chunk() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: array_chunk() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: array_chunk() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: array_chunk() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
-Warning: array_chunk() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: array_chunk() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
-Warning: array_chunk() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: array_chunk() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 21 --
@@ -407,23 +407,23 @@ NULL
 
 -- Iteration 22 --
 
-Warning: array_chunk() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: array_chunk() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
-Warning: array_chunk() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: array_chunk() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
-Warning: array_chunk() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: array_chunk() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 23 --
 
-Warning: array_chunk() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: array_chunk() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
-Warning: array_chunk() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: array_chunk() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
-Warning: array_chunk() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: array_chunk() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 Done

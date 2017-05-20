@@ -144,11 +144,11 @@ int(0)
 int(0)
 -- Iteration 19 --
 
-Warning: strncasecmp() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: strncasecmp() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 -- Iteration 20 --
 
-Warning: strncasecmp() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: strncasecmp() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 -- Iteration 21 --
 int(0)

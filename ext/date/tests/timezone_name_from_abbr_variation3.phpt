@@ -168,32 +168,32 @@ string(3) "UTC"
 
 -- empty string DQ --
 
-Warning: timezone_name_from_abbr() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 -- empty string SQ --
 
-Warning: timezone_name_from_abbr() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 -- string DQ --
 
-Warning: timezone_name_from_abbr() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 -- string SQ --
 
-Warning: timezone_name_from_abbr() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 -- mixed case string --
 
-Warning: timezone_name_from_abbr() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 -- heredoc --
 
-Warning: timezone_name_from_abbr() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 -- instance of classWithToString --

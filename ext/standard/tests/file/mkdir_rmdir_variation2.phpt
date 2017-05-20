@@ -65,10 +65,10 @@ bool(false)
 
 *** Testing mkdir() and rmdir() for binary safe functionality ***
 
-Warning: mkdir() expects parameter 1 to be a valid path, string given in %s on line %d
+Warning: mkdir() expects parameter 1 to be a valid path, null-byte-containing string given in %s on line %d
 bool(false)
 
-Warning: rmdir() expects parameter 1 to be a valid path, string given in %s on line %d
+Warning: rmdir() expects parameter 1 to be a valid path, null-byte-containing string given in %s on line %d
 bool(false)
 
 *** Testing mkdir() with miscelleneous input ***

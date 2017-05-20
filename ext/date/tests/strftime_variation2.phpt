@@ -145,32 +145,32 @@ string(20) "Jan 01 1970 05:30:00"
 
 --empty string DQ--
 
-Warning: strftime() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: strftime() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 --empty string SQ--
 
-Warning: strftime() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: strftime() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 --string DQ--
 
-Warning: strftime() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: strftime() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 --string SQ--
 
-Warning: strftime() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: strftime() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 --mixed case string--
 
-Warning: strftime() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: strftime() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 --heredoc--
 
-Warning: strftime() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: strftime() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 --instance of classWithToString--

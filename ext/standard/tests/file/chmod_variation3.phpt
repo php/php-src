@@ -195,7 +195,7 @@ Error: 2 - chmod(): No such file or directory, %s(%d)
 bool(false)
 
 --instance of classWithoutToString--
-Error: 2 - chmod() expects parameter 1 to be a valid path, object given, %s(%d)
+Error: 2 - chmod() expects parameter 1 to be a valid path, non-convertible (does not support __toString) object given, %s(%d)
 NULL
 
 --undefined var--

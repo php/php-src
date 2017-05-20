@@ -168,32 +168,32 @@ int(%i)
 
 -- empty string DQ --
 
-Warning: mktime() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: mktime() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 -- empty string SQ --
 
-Warning: mktime() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: mktime() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 -- string DQ --
 
-Warning: mktime() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: mktime() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 -- string SQ --
 
-Warning: mktime() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: mktime() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 -- mixed case string --
 
-Warning: mktime() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: mktime() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 -- heredoc --
 
-Warning: mktime() expects parameter 3 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: mktime() expects parameter 3 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 -- instance of classWithToString --

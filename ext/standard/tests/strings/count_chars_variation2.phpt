@@ -137,11 +137,11 @@ bool(true)
 bool(true)
 -- Iteration 19 --
 
-Warning: count_chars() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: count_chars() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 -- Iteration 20 --
 
-Warning: count_chars() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: count_chars() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 -- Iteration 21 --
 

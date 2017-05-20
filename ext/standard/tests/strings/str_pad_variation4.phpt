@@ -123,11 +123,11 @@ Warning: str_pad(): Padding type has to be STR_PAD_LEFT, STR_PAD_RIGHT, or STR_P
 NULL
 -- Iteration 10 --
 
-Warning: str_pad() expects parameter 4 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: str_pad() expects parameter 4 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: str_pad() expects parameter 4 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: str_pad() expects parameter 4 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 -- Iteration 12 --
 string(20) "****Test string*****"

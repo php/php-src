@@ -332,8 +332,8 @@ FAILED: DateTime::__construct(): Failed to parse time string (Class A object) at
 FAILED: DateTime::__construct(): Failed to parse time string (Class A object) at position 0 (C): The timezone could not be found in the database
 
 -- instance of classWithoutToString --
-FAILED: DateTime::__construct() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given
-FAILED: DateTime::__construct() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given
+FAILED: DateTime::__construct() expects parameter 1 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given
+FAILED: DateTime::__construct() expects parameter 1 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given
 
 -- undefined var --
 object(DateTime)#%d (3) {

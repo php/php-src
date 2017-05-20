@@ -172,7 +172,7 @@ Error: 2 - getimagesize(): Filename cannot be empty, %s(%d)
 bool(false)
 
 -- Arg value: new stdclass() --
-Error: 2 - getimagesize() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given, %s(%d)
+Error: 2 - getimagesize() expects parameter 1 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given, %s(%d)
 NULL
 
 -- Arg value: undefined_var --

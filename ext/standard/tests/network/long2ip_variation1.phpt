@@ -160,27 +160,27 @@ string(7) "0.0.0.1"
 string(7) "0.0.0.0"
 
 --empty string DQ--
-Error: 2 - long2ip() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given, %slong2ip_variation1.php(%d)
+Error: 2 - long2ip() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given, %slong2ip_variation1.php(%d)
 NULL
 
 --empty string SQ--
-Error: 2 - long2ip() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given, %slong2ip_variation1.php(%d)
+Error: 2 - long2ip() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given, %slong2ip_variation1.php(%d)
 NULL
 
 --string DQ--
-Error: 2 - long2ip() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given, %slong2ip_variation1.php(%d)
+Error: 2 - long2ip() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given, %slong2ip_variation1.php(%d)
 NULL
 
 --string SQ--
-Error: 2 - long2ip() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given, %slong2ip_variation1.php(%d)
+Error: 2 - long2ip() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given, %slong2ip_variation1.php(%d)
 NULL
 
 --mixed case string--
-Error: 2 - long2ip() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given, %slong2ip_variation1.php(%d)
+Error: 2 - long2ip() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given, %slong2ip_variation1.php(%d)
 NULL
 
 --heredoc--
-Error: 2 - long2ip() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given, %slong2ip_variation1.php(%d)
+Error: 2 - long2ip() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given, %slong2ip_variation1.php(%d)
 NULL
 
 --instance of classWithToString--

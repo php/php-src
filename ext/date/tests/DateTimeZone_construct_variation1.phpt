@@ -179,7 +179,7 @@ FAILED: DateTimeZone::__construct(): Unknown or bad timezone (hello world)
 FAILED: DateTimeZone::__construct(): Unknown or bad timezone (Class A object)
 
 -- instance of classWithoutToString --
-FAILED: DateTimeZone::__construct() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given
+FAILED: DateTimeZone::__construct() expects parameter 1 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given
 
 -- undefined var --
 FAILED: DateTimeZone::__construct(): Unknown or bad timezone ()

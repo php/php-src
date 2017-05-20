@@ -184,11 +184,11 @@ bool(false)
 bool(false)
 -- Iteration 23 --
 
-Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+Warning: fnmatch() expects parameter 1 to be a valid path, null-byte-containing string given in %s on line %d
 NULL
 -- Iteration 24 --
 
-Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+Warning: fnmatch() expects parameter 1 to be a valid path, null-byte-containing string given in %s on line %d
 NULL
 -- Iteration 25 --
 bool(false)
@@ -264,82 +264,82 @@ bool(true)
 -- Iteration 0 --
 bool(true)
 
-Warning: fnmatch() expects parameter 2 to be a valid path, string given in %s on line %d
+Warning: fnmatch() expects parameter 2 to be a valid path, null-byte-containing string given in %s on line %d
 NULL
 bool(true)
 
-Warning: fnmatch() expects parameter 2 to be a valid path, string given in %s on line %d
+Warning: fnmatch() expects parameter 2 to be a valid path, null-byte-containing string given in %s on line %d
 NULL
 bool(false)
 bool(true)
 -- Iteration 1 --
 
-Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+Warning: fnmatch() expects parameter 1 to be a valid path, null-byte-containing string given in %s on line %d
 NULL
 
-Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+Warning: fnmatch() expects parameter 1 to be a valid path, null-byte-containing string given in %s on line %d
 NULL
 
-Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+Warning: fnmatch() expects parameter 1 to be a valid path, null-byte-containing string given in %s on line %d
 NULL
 
-Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+Warning: fnmatch() expects parameter 1 to be a valid path, null-byte-containing string given in %s on line %d
 NULL
 
-Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+Warning: fnmatch() expects parameter 1 to be a valid path, null-byte-containing string given in %s on line %d
 NULL
 
-Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+Warning: fnmatch() expects parameter 1 to be a valid path, null-byte-containing string given in %s on line %d
 NULL
 -- Iteration 2 --
 bool(true)
 
-Warning: fnmatch() expects parameter 2 to be a valid path, string given in %s on line %d
+Warning: fnmatch() expects parameter 2 to be a valid path, null-byte-containing string given in %s on line %d
 NULL
 bool(true)
 
-Warning: fnmatch() expects parameter 2 to be a valid path, string given in %s on line %d
+Warning: fnmatch() expects parameter 2 to be a valid path, null-byte-containing string given in %s on line %d
 NULL
 bool(false)
 bool(true)
 -- Iteration 3 --
 
-Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+Warning: fnmatch() expects parameter 1 to be a valid path, null-byte-containing string given in %s on line %d
 NULL
 
-Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+Warning: fnmatch() expects parameter 1 to be a valid path, null-byte-containing string given in %s on line %d
 NULL
 
-Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+Warning: fnmatch() expects parameter 1 to be a valid path, null-byte-containing string given in %s on line %d
 NULL
 
-Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+Warning: fnmatch() expects parameter 1 to be a valid path, null-byte-containing string given in %s on line %d
 NULL
 
-Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+Warning: fnmatch() expects parameter 1 to be a valid path, null-byte-containing string given in %s on line %d
 NULL
 
-Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+Warning: fnmatch() expects parameter 1 to be a valid path, null-byte-containing string given in %s on line %d
 NULL
 -- Iteration 4 --
 bool(false)
 
-Warning: fnmatch() expects parameter 2 to be a valid path, string given in %s on line %d
+Warning: fnmatch() expects parameter 2 to be a valid path, null-byte-containing string given in %s on line %d
 NULL
 bool(false)
 
-Warning: fnmatch() expects parameter 2 to be a valid path, string given in %s on line %d
+Warning: fnmatch() expects parameter 2 to be a valid path, null-byte-containing string given in %s on line %d
 NULL
 bool(true)
 bool(false)
 -- Iteration 5 --
 bool(true)
 
-Warning: fnmatch() expects parameter 2 to be a valid path, string given in %s on line %d
+Warning: fnmatch() expects parameter 2 to be a valid path, null-byte-containing string given in %s on line %d
 NULL
 bool(true)
 
-Warning: fnmatch() expects parameter 2 to be a valid path, string given in %s on line %d
+Warning: fnmatch() expects parameter 2 to be a valid path, null-byte-containing string given in %s on line %d
 NULL
 bool(false)
 bool(true)
@@ -442,7 +442,7 @@ bool(true)
 bool(true)
 bool(true)
 
-Warning: fnmatch() expects parameter 2 to be a valid path, string given in %s on line %d
+Warning: fnmatch() expects parameter 2 to be a valid path, null-byte-containing string given in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -451,7 +451,7 @@ bool(true)
 bool(true)
 bool(true)
 
-Warning: fnmatch() expects parameter 2 to be a valid path, string given in %s on line %d
+Warning: fnmatch() expects parameter 2 to be a valid path, null-byte-containing string given in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -460,35 +460,35 @@ bool(true)
 bool(true)
 bool(true)
 
-Warning: fnmatch() expects parameter 2 to be a valid path, string given in %s on line %d
+Warning: fnmatch() expects parameter 2 to be a valid path, null-byte-containing string given in %s on line %d
 NULL
 bool(false)
 bool(false)
 -- Iteration 3 --
 
-Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+Warning: fnmatch() expects parameter 1 to be a valid path, null-byte-containing string given in %s on line %d
 NULL
 
-Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+Warning: fnmatch() expects parameter 1 to be a valid path, null-byte-containing string given in %s on line %d
 NULL
 
-Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+Warning: fnmatch() expects parameter 1 to be a valid path, null-byte-containing string given in %s on line %d
 NULL
 
-Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+Warning: fnmatch() expects parameter 1 to be a valid path, null-byte-containing string given in %s on line %d
 NULL
 
-Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+Warning: fnmatch() expects parameter 1 to be a valid path, null-byte-containing string given in %s on line %d
 NULL
 
-Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+Warning: fnmatch() expects parameter 1 to be a valid path, null-byte-containing string given in %s on line %d
 NULL
 -- Iteration 4 --
 bool(false)
 bool(false)
 bool(false)
 
-Warning: fnmatch() expects parameter 2 to be a valid path, string given in %s on line %d
+Warning: fnmatch() expects parameter 2 to be a valid path, null-byte-containing string given in %s on line %d
 NULL
 bool(true)
 bool(false)
@@ -497,7 +497,7 @@ bool(false)
 bool(false)
 bool(false)
 
-Warning: fnmatch() expects parameter 2 to be a valid path, string given in %s on line %d
+Warning: fnmatch() expects parameter 2 to be a valid path, null-byte-containing string given in %s on line %d
 NULL
 bool(false)
 bool(true)

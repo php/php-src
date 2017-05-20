@@ -240,12 +240,12 @@ array(3) {
 
 -- Iteration 16 --
 
-Warning: array_change_key_case() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: array_change_key_case() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 17 --
 
-Warning: array_change_key_case() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: array_change_key_case() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 18 --
@@ -255,17 +255,17 @@ NULL
 
 -- Iteration 19 --
 
-Warning: array_change_key_case() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: array_change_key_case() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: array_change_key_case() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: array_change_key_case() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: array_change_key_case() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: array_change_key_case() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 22 --

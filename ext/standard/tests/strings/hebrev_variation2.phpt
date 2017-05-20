@@ -230,11 +230,11 @@ string(109) ".The hebrev function converts logical Hebrew text to visual text
 "
 -- Iteration 19 --
 
-Warning: hebrev() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: hebrev() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 -- Iteration 20 --
 
-Warning: hebrev() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: hebrev() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 -- Iteration 21 --
 

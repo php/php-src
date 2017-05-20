@@ -17,5 +17,5 @@ bool(true)
 bool(false)
 bool(false)
 
-Warning: trait_exists() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given in %s on line %d
+Warning: trait_exists() expects parameter 1 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given in %s on line %d
 NULL

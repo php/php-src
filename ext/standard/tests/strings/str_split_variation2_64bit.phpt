@@ -258,19 +258,19 @@ Warning: str_split(): The length of each segment must be greater than zero in %s
 bool(false)
 --Iteration 17 --
 
-Warning: str_split() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: str_split() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 --Iteration 18 --
 
-Warning: str_split() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: str_split() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 --Iteration 19 --
 
-Warning: str_split() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: str_split() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 --Iteration 20 --
 
-Warning: str_split() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: str_split() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 --Iteration 21 --
 

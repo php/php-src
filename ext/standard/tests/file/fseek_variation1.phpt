@@ -159,25 +159,25 @@ int(0)
 
 Arg value  
 
-Warning: fseek() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: fseek() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 int(0)
 
 Arg value  
 
-Warning: fseek() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: fseek() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 int(0)
 
 Arg value string 
 
-Warning: fseek() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: fseek() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 int(0)
 
 Arg value string 
 
-Warning: fseek() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: fseek() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 int(0)
 

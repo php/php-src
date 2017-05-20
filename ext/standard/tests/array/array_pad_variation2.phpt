@@ -223,19 +223,19 @@ array(2) {
 }
 -- Iteration 18 --
 
-Warning: array_pad() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: array_pad() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 -- Iteration 19 --
 
-Warning: array_pad() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: array_pad() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 -- Iteration 20 --
 
-Warning: array_pad() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: array_pad() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 -- Iteration 21 --
 
-Warning: array_pad() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: array_pad() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 -- Iteration 22 --
 

@@ -171,7 +171,7 @@ bool(false)
 Error: 4096 - Object of class stdClass could not be converted to string, %s(76)
 
 Arg value  
-Error: 2 - trait_exists() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given, %s(77)
+Error: 2 - trait_exists() expects parameter 1 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given, %s(77)
 NULL
 
 Arg value  

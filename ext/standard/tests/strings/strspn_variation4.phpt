@@ -160,22 +160,22 @@ int(0)
 
 -- Iteration with len value as "" --
 
-Warning: strspn() expects parameter 4 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: strspn() expects parameter 4 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration with len value as "" --
 
-Warning: strspn() expects parameter 4 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: strspn() expects parameter 4 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration with len value as "string" --
 
-Warning: strspn() expects parameter 4 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: strspn() expects parameter 4 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration with len value as "string" --
 
-Warning: strspn() expects parameter 4 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: strspn() expects parameter 4 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration with len value as "object" --

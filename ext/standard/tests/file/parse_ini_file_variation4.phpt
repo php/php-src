@@ -197,7 +197,7 @@ Error: 2 - parse_ini_file(Class A object): failed to open stream: No such file o
 bool(false)
 
 --instance of classWithoutToString--
-Error: 2 - parse_ini_file() expects parameter 1 to be a valid path, object given, %s(%d)
+Error: 2 - parse_ini_file() expects parameter 1 to be a valid path, non-convertible (does not support __toString) object given, %s(%d)
 bool(false)
 
 --undefined var--

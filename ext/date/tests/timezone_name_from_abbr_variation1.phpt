@@ -189,7 +189,7 @@ string(13) "Europe/London"
 
 -- instance of classWithoutToString --
 
-Warning: timezone_name_from_abbr() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 1 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given in %s on line %d
 bool(false)
 
 -- undefined var --

@@ -87,10 +87,10 @@ NULL
 object(stdClass)#%d (0) {
 }
 
-Warning: CachingIterator::offsetExists() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given in %siterator_044.php on line %d
+Warning: CachingIterator::offsetExists() expects parameter 1 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given in %siterator_044.php on line %d
 NULL
 
-Warning: CachingIterator::offsetGet() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given in %siterator_044.php on line %d
+Warning: CachingIterator::offsetGet() expects parameter 1 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given in %siterator_044.php on line %d
 NULL
 ===2===
 object(MyFoo)#%d (0) {
@@ -132,10 +132,10 @@ int(0)
 object(stdClass)#1 (0) {
 }
 
-Warning: CachingIterator::offsetExists() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given in %siterator_044.php on line %d
+Warning: CachingIterator::offsetExists() expects parameter 1 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given in %siterator_044.php on line %d
 NULL
 
-Warning: CachingIterator::offsetGet() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given in %siterator_044.php on line %d
+Warning: CachingIterator::offsetGet() expects parameter 1 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given in %siterator_044.php on line %d
 NULL
 ===2===
 object(MyFoo)#2 (0) {

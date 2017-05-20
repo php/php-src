@@ -105,19 +105,19 @@ int(6)
 int(6)
 -- Iteration 16 --
 
-Warning: sizeof() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: sizeof() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 -- Iteration 17 --
 
-Warning: sizeof() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: sizeof() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 -- Iteration 18 --
 
-Warning: sizeof() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: sizeof() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 -- Iteration 19 --
 
-Warning: sizeof() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: sizeof() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 -- Iteration 20 --
 int(6)

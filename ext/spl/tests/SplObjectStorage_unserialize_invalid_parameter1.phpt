@@ -22,6 +22,6 @@ foreach($data_provider as $input) {
 Warning: SplObjectStorage::unserialize() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
-Warning: SplObjectStorage::unserialize() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given in %s on line %d
+Warning: SplObjectStorage::unserialize() expects parameter 1 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given in %s on line %d
 NULL
 

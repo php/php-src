@@ -83,7 +83,7 @@ It has _speci@l ch@r$ 2222 !!!Now \k as escape char to test
 chunk_split():::"
 -- Iteration 7 --
 
-Warning: chunk_split() expects parameter 2 to be integer (or convertible float, convertible string or boolean), float given in %s on line %d
+Warning: chunk_split() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-convertible (less than PHP_INT_MIN or greater than PHP_INT_MAX) float given in %s on line %d
 NULL
 -- Iteration 8 --
 

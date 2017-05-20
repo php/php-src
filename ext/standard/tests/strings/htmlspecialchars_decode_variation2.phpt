@@ -103,7 +103,7 @@ string(104) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 =
 
 -- Iteration 3 --
 
-Warning: htmlspecialchars_decode() expects parameter 2 to be integer (or convertible float, convertible string or boolean), float given in %s on line %d
+Warning: htmlspecialchars_decode() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-convertible (less than PHP_INT_MIN or greater than PHP_INT_MAX) float given in %s on line %d
 NULL
 
 -- Iteration 4 --
@@ -157,22 +157,22 @@ string(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 =
 
 -- Iteration 17 --
 
-Warning: htmlspecialchars_decode() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %shtmlspecialchars_decode_variation2.php on line %d
+Warning: htmlspecialchars_decode() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %shtmlspecialchars_decode_variation2.php on line %d
 NULL
 
 -- Iteration 18 --
 
-Warning: htmlspecialchars_decode() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %shtmlspecialchars_decode_variation2.php on line %d
+Warning: htmlspecialchars_decode() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %shtmlspecialchars_decode_variation2.php on line %d
 NULL
 
 -- Iteration 19 --
 
-Warning: htmlspecialchars_decode() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %shtmlspecialchars_decode_variation2.php on line %d
+Warning: htmlspecialchars_decode() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %shtmlspecialchars_decode_variation2.php on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: htmlspecialchars_decode() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %shtmlspecialchars_decode_variation2.php on line %d
+Warning: htmlspecialchars_decode() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %shtmlspecialchars_decode_variation2.php on line %d
 NULL
 
 -- Iteration 21 --

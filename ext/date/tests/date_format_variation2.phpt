@@ -192,7 +192,7 @@ string(66) "CThursdaypm4141 PM 2005b14Europe/London2005-07-14T22:30:41+01:0031"
 
 -- instance of classWithoutToString --
 
-Warning: date_format() expects parameter 2 to be string (or integer, float, boolean or convertible object), object given in %s on line %d
+Warning: date_format() expects parameter 2 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given in %s on line %d
 bool(false)
 
 -- undefined var --

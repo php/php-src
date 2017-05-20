@@ -28,5 +28,5 @@ Warning: RecursiveTreeIterator::setPrefixPart() expects exactly 2 parameters, 1 
 
 Warning: RecursiveTreeIterator::setPrefixPart() expects parameter 1 to be integer (or convertible float, convertible string or boolean), object given in %s on line %d
 
-Warning: RecursiveTreeIterator::setPrefixPart() expects parameter 2 to be string (or integer, float, boolean or convertible object), object given in %s on line %d
+Warning: RecursiveTreeIterator::setPrefixPart() expects parameter 2 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given in %s on line %d
 ===DONE===

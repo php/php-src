@@ -205,10 +205,10 @@ string(%d) "%s"
 
 --instance of classWithoutToString--
 
-Warning: gmdate() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given in %s on line %d
+Warning: gmdate() expects parameter 1 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given in %s on line %d
 bool(false)
 
-Warning: gmdate() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given in %s on line %d
+Warning: gmdate() expects parameter 1 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given in %s on line %d
 bool(false)
 
 --undefined var--

@@ -164,7 +164,7 @@ Error: 2 - fwrite() expects parameter 2 to be string (or integer, float, boolean
 --instance of classWithToString--
 Class A object
 --instance of classWithoutToString--
-Error: 2 - fwrite() expects parameter 2 to be string (or integer, float, boolean or convertible object), object given, %s(%d)
+Error: 2 - fwrite() expects parameter 2 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given, %s(%d)
 
 --undefined var--
 

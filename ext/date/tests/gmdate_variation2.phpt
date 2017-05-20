@@ -164,32 +164,32 @@ string(24) "1970-01-01T00:00:00+0000"
 
 --empty string DQ--
 
-Warning: gmdate() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: gmdate() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 --empty string SQ--
 
-Warning: gmdate() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: gmdate() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 --string DQ--
 
-Warning: gmdate() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: gmdate() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 --string SQ--
 
-Warning: gmdate() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: gmdate() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 --mixed case string--
 
-Warning: gmdate() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: gmdate() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 --heredoc--
 
-Warning: gmdate() expects parameter 2 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: gmdate() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 --instance of classWithToString--

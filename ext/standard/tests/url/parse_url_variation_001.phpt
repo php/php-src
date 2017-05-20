@@ -209,7 +209,7 @@ array(1) {
 Error: 4096 - Object of class stdClass could not be converted to string, %s(69)
 
 Arg value  
-Error: 2 - parse_url() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given, %s(70)
+Error: 2 - parse_url() expects parameter 1 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given, %s(70)
 NULL
 
 Arg value  

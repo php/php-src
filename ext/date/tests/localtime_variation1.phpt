@@ -510,50 +510,50 @@ array(9) {
 
 --empty string DQ--
 
-Warning: localtime() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: localtime() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
-Warning: localtime() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: localtime() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 --empty string SQ--
 
-Warning: localtime() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: localtime() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
-Warning: localtime() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: localtime() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 --string DQ--
 
-Warning: localtime() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: localtime() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
-Warning: localtime() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: localtime() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 --string SQ--
 
-Warning: localtime() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: localtime() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
-Warning: localtime() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: localtime() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 --mixed case string--
 
-Warning: localtime() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: localtime() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
-Warning: localtime() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: localtime() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 --heredoc--
 
-Warning: localtime() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: localtime() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
-Warning: localtime() expects parameter 1 to be integer (or convertible float, convertible string or boolean), string given in %s on line %d
+Warning: localtime() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 bool(false)
 
 --instance of classWithToString--

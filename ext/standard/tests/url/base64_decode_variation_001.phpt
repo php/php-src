@@ -166,7 +166,7 @@ string(0) ""
 string(0) ""
 
 -- Arg value stdClass object --
-Error: 2 - base64_decode() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given, %s(%d)
+Error: 2 - base64_decode() expects parameter 1 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given, %s(%d)
 NULL
 
 -- Arg value undefined variable --

@@ -48,7 +48,7 @@ NULL
 Warning: php_uname() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
-Warning: php_uname() expects parameter 1 to be string (or integer, float, boolean or convertible object), object given in %s on line %d
+Warning: php_uname() expects parameter 1 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given in %s on line %d
 NULL
 
 Warning: php_uname() expects parameter 1 to be string (or integer, float, boolean or convertible object), resource given in %s on line %d
