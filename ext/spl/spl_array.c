@@ -901,6 +901,10 @@ static zval *spl_array_get_property_ptr_ptr(zval *object, zval *member, int type
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
 		&& !std_object_handlers.has_property(object, member, 2, NULL)) {
+		// If object has offsetGet overridden, then fallback to read_property call to get proper data.
+		if (intern->fptr_offset_get) {
+			return NULL;
+        }
 		return spl_array_get_dimension_ptr(1, intern, member, type);
 	}
 	return std_object_handlers.get_property_ptr_ptr(object, member, type, cache_slot);
