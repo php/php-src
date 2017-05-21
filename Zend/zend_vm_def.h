@@ -7783,6 +7783,8 @@ ZEND_VM_HANDLER(158, ZEND_CALL_TRAMPOLINE, ANY, ANY)
 	zend_execute_data *call;
 	USE_OPLINE
 
+	SAVE_OPLINE();
+
 	args = emalloc(sizeof(zend_array));
 	zend_hash_init(args, num_args, NULL, ZVAL_PTR_DTOR, 0);
 	if (num_args) {
@@ -7798,7 +7800,6 @@ ZEND_VM_HANDLER(158, ZEND_CALL_TRAMPOLINE, ANY, ANY)
 		} ZEND_HASH_FILL_END();
 	}
 
-	SAVE_OPLINE();
 	call = execute_data;
 	execute_data = EG(current_execute_data) = EX(prev_execute_data);
 
