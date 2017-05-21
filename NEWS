@@ -55,6 +55,7 @@ PHP                                                                        NEWS
     a fatal error). (pmmaga)
   . Fixed bug #63384 (Cannot override an abstract method with an abstract
     method). (pmmaga, wes)
+  . Fixed bug #74607 (Traits enforce different inheritance rules). (pmmaga)
   . Fixed misparsing of abstract unix domain socket names. (Sara)
 
 - BCMath:
