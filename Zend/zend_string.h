@@ -408,6 +408,14 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_SEVERITY,               "severity") \
 	_(ZEND_STR_STRING,                 "string") \
 	_(ZEND_STR_TRACE,                  "trace") \
+	_(ZEND_STR_SCHEME,                 "scheme") \
+	_(ZEND_STR_HOST,                   "host") \
+	_(ZEND_STR_PORT,                   "port") \
+	_(ZEND_STR_USER,                   "user") \
+	_(ZEND_STR_PASS,                   "pass") \
+	_(ZEND_STR_PATH,                   "path") \
+	_(ZEND_STR_QUERY,                  "query") \
+	_(ZEND_STR_FRAGMENT,               "fragment") \
 
 
 typedef enum _zend_known_string_id {
