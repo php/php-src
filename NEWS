@@ -194,6 +194,8 @@ PHP                                                                        NEWS
 
 - PDO_OCI:
   . Fixed bug #54379 (PDO_OCI: UTF-8 output gets truncated). (gureedo / Oracle)
+  . Fixed bug #74631 (PDO_PCO with PHP-FPM: OCI environment initialized
+    before PHP-FPM sets it up). (Ingmar Runge)
 
 - Standard:
   . Fixed bug #74148 (ReflectionFunction incorrectly reports the number of
