@@ -2467,3 +2467,6 @@ PHP                                                                        NEWS
   . Fixed bug #67161 (ZipArchive::getStream() returns NULL for certain file).
     (Christoph M. Becker)
 
+- OCI8:
+  . Fixed bug #74625 (Integer overflow in oci_bind_array_by_name). (Ingmar Runge)
+
