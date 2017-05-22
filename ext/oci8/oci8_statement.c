@@ -38,6 +38,13 @@
 #include "php_oci8.h"
 #include "php_oci8_int.h"
 
+#if defined(OCI_MAJOR_VERSION) && (OCI_MAJOR_VERSION > 10) && \
+	(defined(__x86_64__) || defined(__LP64__) || defined(_LP64) || defined(_WIN64))
+typedef ub8 oci_phpsized_int;
+#else
+typedef ub4 oci_phpsized_int;
+#endif
+
 /* {{{ php_oci_statement_create()
  Create statemend handle and allocate necessary resources */
 php_oci_statement *php_oci_statement_create(php_oci_connection *connection, char *query, int query_len)
@@ -997,10 +1004,10 @@ int php_oci_bind_post_exec(zval *data)
 				for (i = 0; i < (int) bind->array.current_length; i++) {
 					if ((i < (int) bind->array.old_length) && (entry = zend_hash_get_current_data(hash)) != NULL) {
 						zval_dtor(entry);
-						ZVAL_LONG(entry, ((ub4 *)(bind->array.elements))[i]);
+						ZVAL_LONG(entry, ((oci_phpsized_int *)(bind->array.elements))[i]);
 						zend_hash_move_forward(hash);
 					} else {
-						add_next_index_long(bind->zval, ((ub4 *)(bind->array.elements))[i]);
+						add_next_index_long(bind->zval, ((oci_phpsized_int *)(bind->array.elements))[i]);
 					}
 				}
 				break;
@@ -1153,14 +1160,8 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, size_t name_l
 				return 1;
 			}
 			convert_to_long(param);
-#if defined(OCI_MAJOR_VERSION) && (OCI_MAJOR_VERSION > 10) &&			\
-	(defined(__x86_64__) || defined(__LP64__) || defined(_LP64) || defined(_WIN64)) 
-			bind_data = (ub8 *)&Z_LVAL_P(param);
-			value_sz = sizeof(ub8);
-#else
-			bind_data = (ub4 *)&Z_LVAL_P(param);
-			value_sz = sizeof(ub4);
-#endif
+			bind_data = (oci_phpsized_int *)&Z_LVAL_P(param);
+			value_sz = sizeof(oci_phpsized_int);
 			mode = OCI_DEFAULT;
 			break;
 			
@@ -1783,10 +1784,10 @@ php_oci_bind *php_oci_bind_array_helper_number(zval *var, zend_long max_table_le
 
 	bind = emalloc(sizeof(php_oci_bind));
 	ZVAL_UNDEF(&bind->parameter);
-	bind->array.elements		= (ub4 *)safe_emalloc(max_table_length, sizeof(ub4), 0);
+	bind->array.elements		= (oci_phpsized_int *)safe_emalloc(max_table_length, sizeof(oci_phpsized_int), 0);
 	bind->array.current_length	= zend_hash_num_elements(Z_ARRVAL_P(var));
 	bind->array.old_length		= bind->array.current_length;
-	bind->array.max_length		= sizeof(ub4);
+	bind->array.max_length		= sizeof(oci_phpsized_int);
 	bind->array.element_lengths	= safe_emalloc(max_table_length, sizeof(ub2), 0);
 	memset(bind->array.element_lengths, 0, max_table_length * sizeof(ub2));
 	bind->array.indicators		= NULL;
@@ -1794,14 +1795,14 @@ php_oci_bind *php_oci_bind_array_helper_number(zval *var, zend_long max_table_le
 	zend_hash_internal_pointer_reset(hash);
 	for (i = 0; i < max_table_length; i++) {
 		if (i < bind->array.current_length) {
-			bind->array.element_lengths[i] = sizeof(ub4);
+			bind->array.element_lengths[i] = sizeof(oci_phpsized_int);
 		}
 		if ((i < bind->array.current_length) && (entry = zend_hash_get_current_data(hash)) != NULL) {
 			convert_to_long_ex(entry);
-			((ub4 *)bind->array.elements)[i] = (ub4) Z_LVAL_P(entry);
+			((oci_phpsized_int *)bind->array.elements)[i] = (oci_phpsized_int) Z_LVAL_P(entry);
 			zend_hash_move_forward(hash);
 		} else {
-			((ub4 *)bind->array.elements)[i] = 0;
+			((oci_phpsized_int *)bind->array.elements)[i] = 0;
 		}
 	}
 	zend_hash_internal_pointer_reset(hash);
