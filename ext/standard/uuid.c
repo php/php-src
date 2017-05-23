@@ -138,7 +138,7 @@ PHPAPI int php_uuid_parse(php_uuid *uuid, const char *input, const size_t input_
 	}
 
 	if ((limit - position + 1) < PHP_UUID_HEX_LEN) {
-		if (throw == TRUE) {
+		if (throw) {
 			throw_uuid_parsing_exception_invalid_len(input, input_len, position, limit - position + 1);
 		}
 		return FAILURE;
@@ -162,7 +162,7 @@ PHPAPI int php_uuid_parse(php_uuid *uuid, const char *input, const size_t input_
 				continue;
 			}
 			else {
-				if (throw == TRUE) {
+				if (throw) {
 					throw_uuid_parsing_exception_invalid_char(input, input_len, position);
 				}
 				return FAILURE;
@@ -186,14 +186,14 @@ PHPAPI int php_uuid_parse(php_uuid *uuid, const char *input, const size_t input_
 				continue;
 			}
 			else {
-				if (throw == TRUE) {
+				if (throw) {
 					throw_uuid_parsing_exception_invalid_char(input, input_len, position);
 				}
 				return FAILURE;
 			}
 
 			if (digit > PHP_UUID_HEX_LEN) {
-				if (throw == TRUE) {
+				if (throw) {
 					throw_uuid_parsing_exception(
 						input,
 						input_len,
@@ -212,7 +212,7 @@ PHPAPI int php_uuid_parse(php_uuid *uuid, const char *input, const size_t input_
 	}
 
 	if (digit < PHP_UUID_HEX_LEN) {
-		if (throw == TRUE) {
+		if (throw) {
 			throw_uuid_parsing_exception_invalid_len(input, input_len, position, digit);
 		}
 		return FAILURE;
@@ -428,7 +428,7 @@ PHP_MINIT_FUNCTION(uuid)
 
 static zend_always_inline php_uuid *get_bytes(zval *object)
 {
-	return (php_uuid *) Z_STRVAL_P(zend_read_property(php_ce_UUID, object, UUID_BINARY_PROP, UUID_BINARY_PROP_LEN, TRUE, NULL));
+	return (php_uuid *) Z_STRVAL_P(zend_read_property(php_ce_UUID, object, UUID_BINARY_PROP, UUID_BINARY_PROP_LEN, 1, NULL));
 }
 
 static zend_always_inline void new_uuid(zval *object, const php_uuid uuid)
@@ -541,7 +541,7 @@ PHP_METHOD(UUID, __set)   { zend_throw_error(zend_ce_error, "Cannot set dynamic 
 
 PHP_METHOD(UUID, __wakeup)
 {
-	size_t len = Z_STRLEN_P(zend_read_property(php_ce_UUID, &EX(This), UUID_BINARY_PROP, UUID_BINARY_PROP_LEN, TRUE, NULL));
+	size_t len = Z_STRLEN_P(zend_read_property(php_ce_UUID, &EX(This), UUID_BINARY_PROP, UUID_BINARY_PROP_LEN, 1, NULL));
 
 	if (len != PHP_UUID_LEN) {
 		zend_throw_exception_ex(
@@ -627,7 +627,7 @@ PHP_METHOD(UUIDParsingException, getInput)
 		&EX(This),
 		UUID_EX_INPUT_PROP,
 		UUID_EX_INPUT_PROP_LEN,
-		TRUE,
+		1,
 		NULL
 	), 1, 0);
 }
@@ -640,7 +640,7 @@ PHP_METHOD(UUIDParsingException, getPosition)
 		&EX(This),
 		UUID_EX_POSITION_PROP,
 		UUID_EX_POSITON_PROP_LEN,
-		TRUE,
+		1,
 		NULL
 	), 1, 0);
 }

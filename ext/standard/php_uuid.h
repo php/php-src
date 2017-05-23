@@ -1,4 +1,4 @@
-﻿/*
+/*
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
@@ -296,7 +296,7 @@ PHPAPI int php_uuid_parse(php_uuid *uuid, const char *input, const size_t input_
  * @param[in] input_len
  * @return `SUCCESS` if the string was parsed as UUID, `FAILURE` otherwise.
  */
-#define php_uuid_parse_silent(uuid, input, input_len) php_uuid_parse(uuid, input, input_len, FALSE)
+#define php_uuid_parse_silent(uuid, input, input_len) php_uuid_parse(uuid, input, input_len, 0)
 
 /**
  * Parse the string as UUID and throw PHP exceptions on failures.
@@ -307,7 +307,7 @@ PHPAPI int php_uuid_parse(php_uuid *uuid, const char *input, const size_t input_
  * @param[in] input_len
  * @return `SUCCESS` if the string was parsed as UUID, `FAILURE` otherwise.
  */
-#define php_uuid_parse_throw(uuid, input, input_len) php_uuid_parse(uuid, input, input_len, TRUE)
+#define php_uuid_parse_throw(uuid, input, input_len) php_uuid_parse(uuid, input, input_len, 1)
 
 /**
  * Create version 3 UUID.
@@ -402,7 +402,7 @@ PHPAPI int php_uuid_create_v4(php_uuid *uuid, const zend_bool throw);
  * @return `SUCCESS` if the generation succeeded, `FAILURE` if it was not
  *     possible to gather sufficient entropy.
  */
-#define php_uuid_create_v4_silent(uuid) php_uuid_create_v4(uuid, FALSE)
+#define php_uuid_create_v4_silent(uuid) php_uuid_create_v4(uuid, 0)
 
 /**
  * Create version 4 UUID and throw PHP exception if it is not possible to
@@ -413,7 +413,7 @@ PHPAPI int php_uuid_create_v4(php_uuid *uuid, const zend_bool throw);
  * @return `SUCCESS` if the generation succeeded, `FAILURE` if it was not
  *     possible to gather sufficient entropy.
  */
-#define php_uuid_create_v4_throw(uuid) php_uuid_create_v4(uuid, TRUE)
+#define php_uuid_create_v4_throw(uuid) php_uuid_create_v4(uuid, 1)
 
 /**
  * Create version 5 UUID.
