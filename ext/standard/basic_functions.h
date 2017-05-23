@@ -67,6 +67,7 @@ PHP_FUNCTION(long2ip);
 /* system functions */
 PHP_FUNCTION(getenv);
 PHP_FUNCTION(putenv);
+PHP_FUNCTION(environ);
 
 PHP_FUNCTION(getopt);
 
