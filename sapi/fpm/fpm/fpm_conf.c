@@ -154,6 +154,7 @@ static struct ini_value_parser_s ini_fpm_pool_options[] = {
 	{ "chdir",                     &fpm_conf_set_string,      WPO(chdir) },
 	{ "catch_workers_output",      &fpm_conf_set_boolean,     WPO(catch_workers_output) },
 	{ "clear_env",                 &fpm_conf_set_boolean,     WPO(clear_env) },
+	{ "security.exec_basedir",     &fpm_conf_set_string,      WPO(security_exec_basedir) },
 	{ "security.limit_extensions", &fpm_conf_set_string,      WPO(security_limit_extensions) },
 #ifdef HAVE_APPARMOR
 	{ "apparmor_hat",              &fpm_conf_set_string,      WPO(apparmor_hat) },
@@ -655,6 +656,7 @@ int fpm_worker_pool_config_free(struct fpm_worker_pool_config_s *wpc) /* {{{ */
 	free(wpc->slowlog);
 	free(wpc->chroot);
 	free(wpc->chdir);
+	free(wpc->security_exec_basedir);
 	free(wpc->security_limit_extensions);
 #ifdef HAVE_APPARMOR
 	free(wpc->apparmor_hat);
@@ -1038,6 +1040,20 @@ static int fpm_conf_process_all_pools() /* {{{ */
 					zlog(ZLOG_ERROR, "[pool %s] the chdir path '%s' does not exist or is not a directory", wp->config->name, wp->config->chdir);
 					return -1;
 				}
+			}
+		}
+
+		/* security.exec_basedir */
+		if (wp->config->security_exec_basedir) {
+			size_t path_len;
+
+			fpm_evaluate_full_path(&wp->config->security_exec_basedir, wp, NULL, 0);
+
+			path_len = strlen(wp->config->security_exec_basedir);
+
+			if (!path_len || wp->config->security_exec_basedir[path_len - 1] != '/') {
+				zlog(ZLOG_ERROR, "[pool %s] the security.exec_basedir path '%s' must end with a '/'", wp->config->name, wp->config->security_exec_basedir);
+				return -1;
 			}
 		}
 
@@ -1668,6 +1684,7 @@ static void fpm_conf_dump() /* {{{ */
 		zlog(ZLOG_NOTICE, "\tchdir = %s",                      STR2STR(wp->config->chdir));
 		zlog(ZLOG_NOTICE, "\tcatch_workers_output = %s",       BOOL2STR(wp->config->catch_workers_output));
 		zlog(ZLOG_NOTICE, "\tclear_env = %s",                  BOOL2STR(wp->config->clear_env));
+		zlog(ZLOG_NOTICE, "\tsecurity.exec_basedir = %s",      wp->config->security_exec_basedir);
 		zlog(ZLOG_NOTICE, "\tsecurity.limit_extensions = %s",  wp->config->security_limit_extensions);
 
 		for (kv = wp->config->env; kv; kv = kv->next) {

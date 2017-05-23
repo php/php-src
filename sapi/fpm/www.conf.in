@@ -12,6 +12,7 @@
 ; - 'chdir'
 ; - 'php_values'
 ; - 'php_admin_values'
+; - 'security.exec_basedir'
 ; When not set, the global prefix (or @php_fpm_prefix@) applies instead.
 ; Note: This directive can also be relative to the global prefix.
 ; Default Value: none
@@ -373,6 +374,13 @@ pm.max_spare_servers = 3
 ; via getenv(), $_ENV and $_SERVER.
 ; Default Value: yes
 ;clear_env = no
+
+; Limits the directory which can be used to execute the request script.
+; This can be used to ensure that pools defined for specific users can
+; only be used to execute scripts under the control of those users.
+; This value must be defined as an absolute path and end with a '/'.
+; Default Value: not set
+;security.exec_basedir =
 
 ; Limits the extensions of the main script FPM will allow to parse. This can
 ; prevent configuration mistakes on the web server side. You should only limit

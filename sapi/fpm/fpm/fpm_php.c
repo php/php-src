@@ -21,6 +21,7 @@
 #include "fpm_worker_pool.h"
 #include "zlog.h"
 
+static char *exec_basedir = NULL;
 static char **limit_extensions = NULL;
 
 static int fpm_php_zend_ini_alter_master(char *name, int name_length, char *new_value, int new_value_length, int mode, int stage) /* {{{ */
@@ -221,10 +222,29 @@ int fpm_php_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 		return -1;
 	}
 
+	if (wp->config->security_exec_basedir) {
+		exec_basedir = strdup(wp->config->security_exec_basedir);
+	}
+
 	if (wp->limit_extensions) {
 		limit_extensions = wp->limit_extensions;
 	}
 	return 0;
+}
+/* }}} */
+
+int fpm_php_check_exec_basedir(char *path) /* {{{ */
+{
+	if (!path || !exec_basedir) {
+		return 0; /* allowed by default */
+	}
+
+	if (strncmp(path, exec_basedir, strlen(exec_basedir)) == 0) {
+		return 0; /* allow as the exec base dir matches the path */
+	}
+
+	zlog(ZLOG_NOTICE, "Access to the script '%s' has been denied (see security.exec_basedir)", path);
+	return 1;
 }
 /* }}} */
 

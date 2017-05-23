@@ -86,6 +86,7 @@ struct fpm_worker_pool_config_s {
 	char *chdir;
 	int catch_workers_output;
 	int clear_env;
+	char *security_exec_basedir;
 	char *security_limit_extensions;
 	struct key_value_s *env;
 	struct key_value_s *php_admin_values;

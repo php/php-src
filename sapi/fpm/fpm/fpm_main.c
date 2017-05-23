@@ -1929,6 +1929,12 @@ consult the installation file that came with this distribution, or visit \n\
 				goto fastcgi_request_done;
 			}
 
+			if (UNEXPECTED(fpm_php_check_exec_basedir(SG(request_info).path_translated))) {
+				SG(sapi_headers).http_response_code = 403;
+				PUTS("Access denied.\n");
+				goto fastcgi_request_done;
+			}
+
 			if (UNEXPECTED(fpm_php_limit_extensions(SG(request_info).path_translated))) {
 				SG(sapi_headers).http_response_code = 403;
 				PUTS("Access denied.\n");
