@@ -1,4 +1,4 @@
-/*
+﻿/*
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
@@ -3707,6 +3707,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 #endif
 
 	BASIC_MINIT_SUBMODULE(random)
+	BASIC_MINIT_SUBMODULE(uuid)
 
 	return SUCCESS;
 }
@@ -4040,7 +4041,7 @@ PHP_FUNCTION(long2ip)
  ********************/
 
 /* {{{ proto string getenv(string varname[, bool local_only]
-   Get the value of an environment variable or every available environment variable 
+   Get the value of an environment variable or every available environment variable
    if no varname is present  */
 PHP_FUNCTION(getenv)
 {
