@@ -1,0 +1,17 @@
+--TEST--
+UUID::parse throws UUIDParsingException if too many hexadecimal digits are found
+--CREDITS--
+Richard Fussenegger php@fleshgrinder.com
+--FILE--
+<?php
+
+try {
+    UUID::parse('12345678-1234-1234-1234-123456789abcdef');
+}
+catch (UUIDParsingException $e) {
+    echo $e->getMessage() , "\n";
+}
+
+?>
+--EXPECT--
+Expected no more than 32 hexadecimal digits
