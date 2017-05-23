@@ -267,7 +267,7 @@ PHP_FUNCTION(stream_socket_accept)
 		Z_PARAM_RESOURCE(zstream)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_DOUBLE(timeout)
-		Z_PARAM_ZVAL_EX(zpeername, 0, 1)
+		Z_PARAM_ZVAL_DEREF(zpeername)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	php_stream_from_zval(stream, zstream);
@@ -282,7 +282,7 @@ PHP_FUNCTION(stream_socket_accept)
 	tv.tv_usec = conv % 1000000;
 #endif
 	if (zpeername) {
-		zval_dtor(zpeername);
+		zval_ptr_dtor(zpeername);
 		ZVAL_NULL(zpeername);
 	}
 
