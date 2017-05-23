@@ -839,7 +839,7 @@ repeat:
 			RETURN_FALSE;
 	}
 
-	ZVAL_DUP(&c.value, val);
+	ZVAL_COPY(&c.value, val);
 	zval_ptr_dtor(&val_free);
 register_constant:
 	c.flags = case_sensitive; /* non persistent */
