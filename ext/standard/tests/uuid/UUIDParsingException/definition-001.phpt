@@ -1,0 +1,24 @@
+--TEST--
+UUIDParsingException class definition.
+--CREDITS--
+Richard Fussenegger php@fleshgrinder.com
+--FILE--
+<?php
+
+$c = new ReflectionClass(UUIDParsingException::class);
+
+var_dump(
+    $c->isAbstract(),
+    $c->isFinal(),
+    $c->isInstantiable(),
+    $c->isInternal(),
+    $c->isSubclassOf(Exception::class)
+);
+
+?>
+--EXPECT--
+bool(false)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
