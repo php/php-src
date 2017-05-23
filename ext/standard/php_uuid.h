@@ -265,7 +265,7 @@ PHPAPI extern const uint8_t PHP_UUID_VERSION_5_NAME_BASED_SHA1;
  * php_uuid_parse_silent(&uuid, "urn:uuid:01234567-89ab-cdef-0123-456789abcdef", sizeof("urn:uuid:01234567-89ab-cdef-0123-456789abcdef") - 1);
  * php_uuid_parse_silent(&uuid, "{01234567-89ab-cdef-0123-456789abcdef}", sizeof("{01234567-89ab-cdef-0123-456789abcdef}") - 1);
  *
- * // Leading and trailing gargabe is ignored, so are extraneous hyphens.
+ * // Leading and trailing garbage is ignored, so are extraneous hyphens.
  * php_uuid_parse_silent(&uuid, " \t ---- { urn:uuid:----0123-4567-89ab-cdef-0123-4567-89ab-cdef---- } ---- \t ", sizeof(" \t ---- { urn:uuid:----0123-4567-89ab-cdef-0123-4567-89ab-cdef---- } ---- \t ") - 1);
  *
  * // However, note that there cannot be whitespace or braces between the URN
