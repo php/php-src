@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2017 PHP 7.0.20
+25 May 2017 PHP 7.0.20RC1
 
 - Core:
   . Fixed bug #74600 (crash (SIGSEGV) in _zend_hash_add_or_update_i).
