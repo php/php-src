@@ -17,7 +17,7 @@ CREDIT_LINE("COM and .Net", "Wez Furlong");
 CREDIT_LINE("ctype", "Hartmut Holzgraefe");
 CREDIT_LINE("cURL", "Sterling Hughes");
 CREDIT_LINE("Date/Time Support", "Derick Rethans");
-CREDIT_LINE("DB-LIB (MS SQL, Sybase)", "Wez Furlong, Frank M. Kromann");
+CREDIT_LINE("DB-LIB (MS SQL, Sybase)", "Wez Furlong, Frank M. Kromann, Adam Baratz");
 CREDIT_LINE("DBA", "Sascha Schumann, Marcus Boerger");
 CREDIT_LINE("DOM", "Christian Stocker, Rob Richards, Marcus Boerger");
 CREDIT_LINE("enchant", "Pierre-Alain Joye, Ilia Alshanetsky");

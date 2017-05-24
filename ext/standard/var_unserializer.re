@@ -761,7 +761,13 @@ use_double:
 	YYCURSOR += 2;
 	*p = YYCURSOR;
 
-	ZVAL_STRINGL(rval, str, len);
+	if (len == 0) {
+		ZVAL_EMPTY_STRING(rval);
+	} else if (len == 1) {
+		ZVAL_INTERNED_STR(rval, ZSTR_CHAR((zend_uchar)*str));
+	} else {
+		ZVAL_STRINGL(rval, str, len);
+	}
 	return 1;
 }
 
