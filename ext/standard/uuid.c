@@ -380,6 +380,24 @@ PHP_MINIT_FUNCTION(uuid)
 		PHP_FE_END
 	};
 
+	ZEND_BEGIN_ARG_INFO_EX(UUIDParsingException___construct_args, NULL, 0, 2)
+		ZEND_ARG_TYPE_INFO(0, reason, IS_STRING, 0)
+		ZEND_ARG_TYPE_INFO(0, input, IS_STRING, 0)
+		ZEND_ARG_TYPE_INFO(0, position, IS_LONG, 0)
+		ZEND_ARG_OBJ_INFO(0, previous, Throwable, 1)
+		ZEND_END_ARG_INFO();
+	ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUIDParsingException_getInput_args, IS_STRING, 0)
+		ZEND_END_ARG_INFO();
+	ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUIDParsingException_getPosition_args, IS_LONG, 0)
+		ZEND_END_ARG_INFO();
+
+	static const zend_function_entry uuid_parsing_exception_methods[] = {
+		PHP_ME(UUIDParsingException, __construct, UUIDParsingException___construct_args, ZEND_ACC_PUBLIC)
+		PHP_ME(UUIDParsingException, getInput,    UUIDParsingException_getInput_args,    ZEND_ACC_PUBLIC)
+		PHP_ME(UUIDParsingException, getPosition, UUIDParsingException_getPosition_args, ZEND_ACC_PUBLIC)
+		PHP_FE_END
+	};
+
 	INIT_CLASS_ENTRY(ce, "UUID", uuid_methods);
 	php_ce_UUID = zend_register_internal_class(&ce);
 	php_ce_UUID->ce_flags |= ZEND_ACC_FINAL;
@@ -396,24 +414,6 @@ PHP_MINIT_FUNCTION(uuid)
 	zend_declare_class_constant_long(php_ce_UUID, "VERSION_5_NAME_BASED_SHA1", sizeof("VERSION_5_NAME_BASED_SHA1") - 1, PHP_UUID_VERSION_5_NAME_BASED_SHA1);
 
 	zend_declare_property_null(php_ce_UUID, UUID_BINARY_PROP, UUID_BINARY_PROP_LEN, ZEND_ACC_PRIVATE);
-
-	ZEND_BEGIN_ARG_INFO_EX(UUIDParsingException___construct_args, NULL, 0, 2)
-		ZEND_ARG_TYPE_INFO(0, reason, IS_STRING, 0)
-		ZEND_ARG_TYPE_INFO(0, input, IS_STRING, 0)
-		ZEND_ARG_TYPE_INFO(0, position, IS_LONG, 0)
-		ZEND_ARG_OBJ_INFO(0, previous, Throwable, 1)
-	ZEND_END_ARG_INFO();
-	ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUIDParsingException_getInput_args, IS_STRING, 0)
-	ZEND_END_ARG_INFO();
-	ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUIDParsingException_getPosition_args, IS_LONG, 0)
-	ZEND_END_ARG_INFO();
-
-	static const zend_function_entry uuid_parsing_exception_methods[] = {
-		PHP_ME(UUIDParsingException, __construct, UUIDParsingException___construct_args, ZEND_ACC_PUBLIC)
-		PHP_ME(UUIDParsingException, getInput,    UUIDParsingException_getInput_args,    ZEND_ACC_PUBLIC)
-		PHP_ME(UUIDParsingException, getPosition, UUIDParsingException_getPosition_args, ZEND_ACC_PUBLIC)
-		PHP_FE_END
-	};
 
 	INIT_CLASS_ENTRY(ce, "UUIDParsingException", uuid_parsing_exception_methods);
 	php_ce_UUIDParsingException = zend_register_internal_class_ex(&ce, zend_ce_exception);
