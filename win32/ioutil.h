@@ -246,7 +246,9 @@ __forceinline static int php_win32_ioutil_access(const char *path, mode_t mode)
 	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, -1, 1)
 
 	ret = _waccess(pathw, mode);
-	_get_errno(&err);
+	if (0 > ret) {
+		_get_errno(&err);
+	}
 	PHP_WIN32_IOUTIL_CLEANUP_W()
 
 	if (0 > ret) {
@@ -279,7 +281,9 @@ __forceinline static int php_win32_ioutil_open(const char *path, int flags, ...)
 	}
 
 	ret = php_win32_ioutil_open_w(pathw, flags, mode);
-	err = GetLastError();
+	if (0 > ret) {
+		err = GetLastError();
+	}
 	PHP_WIN32_IOUTIL_CLEANUP_W()
 
 	if (0 > ret) {
@@ -368,11 +372,13 @@ __forceinline static FILE *php_win32_ioutil_fopen(const char *patha, const char 
 	}
 
 	ret = _wfopen(pathw, modew);
-	_get_errno(&err);
+	if (!ret) {
+		_get_errno(&err);
+	}
 	free(pathw);
 	free(modew);
 
-	if (0 > ret) {
+	if (!ret) {
 		_set_errno(err);
 	}
 	return ret;
@@ -405,7 +411,9 @@ __forceinline static int php_win32_ioutil_rename(const char *oldnamea, const cha
 	}
 
 	ret = php_win32_ioutil_rename_w(oldnamew, newnamew);
-	err = GetLastError();
+	if (0 > ret) {
+		err = GetLastError();
+	}
 
 	free(oldnamew);
 	free(newnamew);
@@ -429,7 +437,9 @@ __forceinline static int php_win32_ioutil_chdir(const char *patha)
 	}
 
 	ret = php_win32_ioutil_chdir_w(pathw);
-	err = GetLastError();
+	if (0 > ret) {
+		err = GetLastError();
+	}
 
 	free(pathw);
 
@@ -495,7 +505,9 @@ __forceinline static int php_win32_ioutil_chmod(const char *patha, int mode)
 	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, -1, 1)
 
 	ret = _wchmod(pathw, mode);
-	_get_errno(&err);
+	if (0 > ret) {
+		_get_errno(&err);
+	}
 
 	free(pathw);
 

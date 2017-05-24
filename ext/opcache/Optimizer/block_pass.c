@@ -1117,6 +1117,7 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 						last_op->op1.constant = zend_optimizer_add_literal(op_array, &zv);
 					}
 					DEL_SOURCE(block, block->successors[0]);
+					block->successors_count = 2;
 					block->successors[0] = target_block->successors[0];
 					block->successors[1] = target_block->successors[1];
 					ADD_SOURCE(block, block->successors[0]);

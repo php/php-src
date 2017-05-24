@@ -94,6 +94,28 @@ if (ob_get_level()) echo "Not all buffers were deleted.\n";
 error_reporting(E_ALL);
 
 $environment = isset($_ENV) ? $_ENV : array();
+// Note: php.ini-development sets variables_order="GPCS" not "EGPCS", in which case $_ENV is NOT populated.
+//       detect and handle this case, or die or warn
+if (empty($environment)) {
+	// not documented, but returns array of all environment variables
+	$environment = getenv();
+}
+if (empty($environment['TEMP'])) {
+	$environment['TEMP'] = sys_get_temp_dir();
+	
+	if (empty($environment['TEMP'])) {
+		// for example, OpCache on Windows will fail in this case because child processes (for tests) will not get
+		// a TEMP variable, so GetTempPath() will fallback to c:\windows, while GetTempPath() will return %TEMP% for parent
+		// (likely a different path). The parent will initialize the OpCache in that path, and child will fail to reattach to
+		// the OpCache because it will be using the wrong path.
+		die("TEMP environment is NOT set");
+	} else if (count($environment)==1) {
+		// not having other environment variables, only having TEMP, is probably ok, but strange and may make a 
+		// difference in the test pass rate, so warn the user.
+		echo "WARNING: Only 1 environment variable will be available to tests(TEMP environment variable)".PHP_EOL;
+	}
+}
+//
 if ((substr(PHP_OS, 0, 3) == "WIN") && empty($environment["SystemRoot"])) {
   $environment["SystemRoot"] = getenv("SystemRoot");
 }

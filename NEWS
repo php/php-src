@@ -104,6 +104,7 @@ PHP                                                                        NEWS
   . Fixed bug #74433 (wrong reflection for Normalizer methods). (villfa)
   . Fixed bug #74439 (wrong reflection for Locale methods). (villfa)
   . Fixed bug #74468 (wrong reflection on Collator::sortWithSortKeys). (villfa)
+  . Fixed bug #63790 (test using Spoofchecker which may be unavailable). (Sara)
 
 - Mbstring:
   . Implemented request #66024 (mb_chr() and mb_ord()). (Masakielastic, Yasuo)
