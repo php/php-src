@@ -2584,15 +2584,7 @@ pass:
 							/* skip */
 						} else if ((opline->opcode == ZEND_JMPZ ||
 						           (opline->opcode == ZEND_JMPNZ)) &&
-						    ((opline-1)->opcode == ZEND_IS_IDENTICAL ||
-						     (opline-1)->opcode == ZEND_IS_NOT_IDENTICAL ||
-						     (opline-1)->opcode == ZEND_ISSET_ISEMPTY_VAR ||
-						     (opline-1)->opcode == ZEND_ISSET_ISEMPTY_STATIC_PROP ||
-						     (opline-1)->opcode == ZEND_ISSET_ISEMPTY_DIM_OBJ ||
-						     (opline-1)->opcode == ZEND_ISSET_ISEMPTY_PROP_OBJ ||
-						     (opline-1)->opcode == ZEND_INSTANCEOF ||
-						     (opline-1)->opcode == ZEND_TYPE_CHECK ||
-						     (opline-1)->opcode == ZEND_DEFINED)) {
+							       zend_is_smart_branch(opline-1)) {
 						    /* smart branch */
 							if (!zend_jit_cond_jmp(&dasm_state, opline + 1, ssa->cfg.blocks[b].successors[0])) {
 								goto jit_failure;
@@ -2732,15 +2724,7 @@ pass:
 								}
 								break;
 							}
-						} else if ((opline-1)->opcode == ZEND_IS_IDENTICAL ||
-						           (opline-1)->opcode == ZEND_IS_NOT_IDENTICAL ||
-						           (opline-1)->opcode == ZEND_ISSET_ISEMPTY_VAR ||
-						           (opline-1)->opcode == ZEND_ISSET_ISEMPTY_STATIC_PROP ||
-						           (opline-1)->opcode == ZEND_ISSET_ISEMPTY_DIM_OBJ ||
-						           (opline-1)->opcode == ZEND_ISSET_ISEMPTY_PROP_OBJ ||
-						           (opline-1)->opcode == ZEND_INSTANCEOF ||
-						           (opline-1)->opcode == ZEND_TYPE_CHECK ||
-						           (opline-1)->opcode == ZEND_DEFINED) {
+						} else if (zend_is_smart_branch(opline-1)) {
 						    /* smart branch */
 							if (!zend_jit_cond_jmp(&dasm_state, opline + 1, ssa->cfg.blocks[b].successors[0])) {
 								goto jit_failure;
