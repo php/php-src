@@ -560,39 +560,4 @@ PHPAPI zend_always_inline void php_uuid_to_string(php_uuid_string *buffer, const
  */
 PHP_MINIT_FUNCTION(uuid);
 
-/**
- * Final UUID class methods.
- *
- * @see ext/standard/stubs/UUID.php
- */
-PHP_METHOD(UUID, __construct);
-PHP_METHOD(UUID, fromBinary);
-PHP_METHOD(UUID, parse);
-PHP_METHOD(UUID, v3);
-PHP_METHOD(UUID, v4);
-PHP_METHOD(UUID, v5);
-PHP_METHOD(UUID, NamespaceDNS);
-PHP_METHOD(UUID, NamespaceOID);
-PHP_METHOD(UUID, NamespaceURL);
-PHP_METHOD(UUID, NamespaceX500);
-PHP_METHOD(UUID, Nil);
-PHP_METHOD(UUID, __clone);
-PHP_METHOD(UUID, __set);
-PHP_METHOD(UUID, __wakeup);
-PHP_METHOD(UUID, getVariant);
-PHP_METHOD(UUID, getVersion);
-PHP_METHOD(UUID, isNil);
-PHP_METHOD(UUID, toBinary);
-PHP_METHOD(UUID, toHex);
-PHP_METHOD(UUID, toString);
-
-/**
- * Final UUIDParseException class methods (extends Exception).
- *
- * @see ext/standard/stubs/UUIDParseException.php
- */
-PHP_METHOD(UUIDParseException, __construct);
-PHP_METHOD(UUIDParseException, getInput);
-PHP_METHOD(UUIDParseException, getPosition);
-
 #endif /* PHP_UUID_H */
