@@ -1,14 +1,14 @@
 --TEST--
-UUIDParsingException::__construct with 3 arguments
+UUIDParseException::__construct with 3 arguments
 --CREDITS--
 Richard Fussenegger php@fleshgrinder.com
 --FILE--
 <?php
 
-$e = new UUIDParsingException('variation-002-reason', 'variation-002-input', 42);
+$e = new UUIDParseException('variation-002-reason', 'variation-002-input', 42);
 
 foreach (['message', 'input', 'position'] as $p) {
-    $p = new ReflectionProperty(UUIDParsingException::class, $p);
+    $p = new ReflectionProperty(UUIDParseException::class, $p);
     $p->setAccessible(true);
     var_dump($p->getValue($e));
 }

@@ -1,11 +1,11 @@
 --TEST--
-UUIDParsingException::__construct method signature
+UUIDParseException::__construct method signature
 --CREDITS--
 Richard Fussenegger php@fleshgrinder.com
 --FILE--
 <?php
 
-$m = new ReflectionMethod(UUIDParsingException::class, '__construct');
+$m = new ReflectionMethod(UUIDParseException::class, '__construct');
 
 var_dump(
     $m->getNumberOfParameters(),

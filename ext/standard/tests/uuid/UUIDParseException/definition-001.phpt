@@ -1,11 +1,11 @@
 --TEST--
-UUIDParsingException class definition.
+UUIDParseException class definition.
 --CREDITS--
 Richard Fussenegger php@fleshgrinder.com
 --FILE--
 <?php
 
-$c = new ReflectionClass(UUIDParsingException::class);
+$c = new ReflectionClass(UUIDParseException::class);
 
 var_dump(
     $c->isAbstract(),

@@ -1,11 +1,11 @@
 --TEST--
-UUIDParsingException::__construct 1. parameter definition
+UUIDParseException::__construct 1. parameter definition
 --CREDITS--
 Richard Fussenegger php@fleshgrinder.com
 --FILE--
 <?php
 
-$p = (new ReflectionMethod(UUIDParsingException::class, '__construct'))->getParameters()[0];
+$p = (new ReflectionMethod(UUIDParseException::class, '__construct'))->getParameters()[0];
 
 var_dump(
 	$p->getName(),

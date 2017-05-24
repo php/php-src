@@ -1,11 +1,11 @@
 --TEST--
-UUIDParsingException::getInput
+UUIDParseException::getInput
 --CREDITS--
 Richard Fussenegger php@fleshgrinder.com
 --FILE--
 <?php
 
-var_dump((new UUIDParsingException('', 'input-test'))->getInput());
+var_dump((new UUIDParseException('', 'input-test'))->getInput());
 
 ?>
 --EXPECT--

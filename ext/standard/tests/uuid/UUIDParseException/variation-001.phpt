@@ -1,11 +1,11 @@
 --TEST--
-UUIDParsingException construction with custom position
+UUIDParseException construction with custom position
 --CREDITS--
 Richard Fussenegger php@fleshgrinder.com
 --FILE--
 <?php
 
-$e = new UUIDParsingException('variation-001-reason', 'variation-001-input', 1);
+$e = new UUIDParseException('variation-001-reason', 'variation-001-input', 1);
 
 var_dump(
 	$e->getCode(),

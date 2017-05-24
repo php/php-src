@@ -297,7 +297,7 @@ final class UUID {
 	 * try {
 	 *     UUID::parse('urn:uuid:{01234567-89ab-cdef-0123-456789abcdef');
 	 * }
-	 * catch (UUIDParsingException $e) {
+	 * catch (UUIDParseException $e) {
 	 *     assert($e->getMessage() === 'Expected hexadecimal digit, but found
 	 * '{' (0x7b)');
 	 * }
@@ -311,7 +311,7 @@ final class UUID {
 	 * @see toString
 	 * @param string $input to parse as UUID and construct the instance from.
 	 * @return UUID constructed from the parsed input.
-	 * @throws UUIDParsingException if parsing of the input fails.
+	 * @throws UUIDParseException if parsing of the input fails.
 	 */
 	public static function parse(string $input): UUID { }
 

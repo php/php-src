@@ -1,5 +1,5 @@
 --TEST--
-UUID::parse throws UUIDParsingException if there are less than 32 chars
+UUID::parse throws UUIDParseException if there are less than 32 chars
 --CREDITS--
 Richard Fussenegger php@fleshgrinder.com
 --FILE--
@@ -15,7 +15,7 @@ foreach ([
     try {
         UUID::parse($date);
     }
-    catch (UUIDParsingException $e) {
+    catch (UUIDParseException $e) {
         echo $e->getMessage() , "\n";
     }
 }

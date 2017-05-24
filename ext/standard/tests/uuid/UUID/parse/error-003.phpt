@@ -1,5 +1,5 @@
 --TEST--
-UUID::parse throws UUIDParsingException for non-hexadecimal characters
+UUID::parse throws UUIDParseException for non-hexadecimal characters
 --CREDITS--
 Richard Fussenegger php@fleshgrinder.com
 --FILE--
@@ -8,7 +8,7 @@ Richard Fussenegger php@fleshgrinder.com
 try {
     UUID::parse('01234567-89ab-cdef-0123-456789abcPHP');
 }
-catch (UUIDParsingException $e) {
+catch (UUIDParseException $e) {
     echo $e->getMessage() , "\n";
 }
 

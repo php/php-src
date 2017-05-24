@@ -1,11 +1,11 @@
 --TEST--
-UUIDParsingException construction with custom position and previous exception
+UUIDParseException construction with custom position and previous exception
 --CREDITS--
 Richard Fussenegger php@fleshgrinder.com
 --FILE--
 <?php
 
-$e = new UUIDParsingException('variation-003-reason', 'variation-003-input', 3, $previous = new Exception);
+$e = new UUIDParseException('variation-003-reason', 'variation-003-input', 3, $previous = new Exception);
 
 var_dump(
 	$e->getCode(),

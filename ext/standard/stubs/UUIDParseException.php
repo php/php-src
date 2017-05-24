@@ -1,6 +1,6 @@
 <?php
 /**
- * PHP stub with full documentation for the native UUIDParsingException class.
+ * PHP stub with full documentation for the native UUIDParseException class.
  *
  * This class is available as polyfill for PHP 5 and 7 at
  * [GitHub](https://github.com/Fleshgrinder/php-uuid).
@@ -16,7 +16,7 @@
  * try {
  *     UUID::parse('php');
  * }
- * catch (UUIDParsingException $e) {
+ * catch (UUIDParseException $e) {
  *     echo $e->getMessage();  // Expected at least 32 characters, but got 3 characters
  *     echo $e->getInput();    // php
  *     echo $e->getPosition(); // 0
@@ -25,7 +25,7 @@
  * try {
  *     UUID::parse('12345678-1234-1234-1234-123456789php');
  * }
- * catch (UUIDParsingException $e) {
+ * catch (UUIDParseException $e) {
  *     echo $e->getMessage();  // Expected hexadecimal digit, but found 'p' (0x70)
  *     echo $e->getInput();    // 12345678-1234-1234-1234-123456789php
  *     echo $e->getPosition(); // 33
@@ -34,7 +34,7 @@
  * try {
  *     UUID::parse('12345678-1234-1234-1234-123456789abcdef');
  * }
- * catch (UUIDParsingException $e) {
+ * catch (UUIDParseException $e) {
  *     echo $e->getMessage();  // Expected no more than 32 hexadecimal digits
  *     echo $e->getInput();    // 12345678-1234-1234-1234-123456789abcdef
  *     echo $e->getPosition(); // 37
@@ -45,7 +45,7 @@
  *
  * @see \UUID::parse()
  */
-final class UUIDParsingException extends Exception {
+final class UUIDParseException extends Exception {
 	/** @var string */
 	private $input;
 
@@ -53,7 +53,7 @@ final class UUIDParsingException extends Exception {
 	private $position;
 
 	/**
-	 * Construct new UUID parsing exception instance.
+	 * Construct new UUID parse exception instance.
 	 *
 	 * @param string $reason why parsing the UUID string failed.
 	 * @param string $input that should be parsed.

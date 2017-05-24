@@ -1,11 +1,11 @@
 --TEST--
-UUIDParsingException construction
+UUIDParseException construction
 --CREDITS--
 Richard Fussenegger php@fleshgrinder.com
 --FILE--
 <?php
 
-$e = new UUIDParsingException('basic-reason', 'basic-input');
+$e = new UUIDParseException('basic-reason', 'basic-input');
 
 var_dump(
     $e->getCode(),

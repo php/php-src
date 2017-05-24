@@ -113,8 +113,8 @@
 /** UUID class entry for usage by other modules. */
 PHPAPI extern zend_class_entry *php_ce_UUID;
 
-/** UUIDParsingException class entry for usage by other modules. */
-PHPAPI extern zend_class_entry *php_ce_UUIDParsingException;
+/** UUIDParseException class entry for usage by other modules. */
+PHPAPI extern zend_class_entry *php_ce_UUIDParseException;
 
 /** UUID binary representation to store the 128 bit number in 16 bytes. */
 PHPAPI typedef uint8_t php_uuid[16];
@@ -587,12 +587,12 @@ PHP_METHOD(UUID, toHex);
 PHP_METHOD(UUID, toString);
 
 /**
- * Final UUIDParsingException class methods (extends Exception).
+ * Final UUIDParseException class methods (extends Exception).
  *
- * @see ext/standard/stubs/UUIDParsingException.php
+ * @see ext/standard/stubs/UUIDParseException.php
  */
-PHP_METHOD(UUIDParsingException, __construct);
-PHP_METHOD(UUIDParsingException, getInput);
-PHP_METHOD(UUIDParsingException, getPosition);
+PHP_METHOD(UUIDParseException, __construct);
+PHP_METHOD(UUIDParseException, getInput);
+PHP_METHOD(UUIDParseException, getPosition);
 
 #endif /* PHP_UUID_H */

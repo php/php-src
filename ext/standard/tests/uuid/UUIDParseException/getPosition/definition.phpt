@@ -1,11 +1,11 @@
 --TEST--
-UUIDParsingException::getPosition method signature
+UUIDParseException::getPosition method signature
 --CREDITS--
 Richard Fussenegger php@fleshgrinder.com
 --FILE--
 <?php
 
-$m = new ReflectionMethod(UUIDParsingException::class, 'getPosition');
+$m = new ReflectionMethod(UUIDParseException::class, 'getPosition');
 
 var_dump(
 	$m->getNumberOfParameters(),

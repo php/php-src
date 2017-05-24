@@ -30,7 +30,7 @@
 #endif
 
 PHPAPI zend_class_entry *php_ce_UUID;
-PHPAPI zend_class_entry *php_ce_UUIDParsingException;
+PHPAPI zend_class_entry *php_ce_UUIDParseException;
 
 PHPAPI const php_uuid PHP_UUID_NAMESPACE_DNS            = "\x6b\xa7\xb8\x10\x9d\xad\x11\xd1\x80\xb4\x00\xc0\x4f\xd4\x30\xc8";
 PHPAPI const php_uuid PHP_UUID_NAMESPACE_OID            = "\x6b\xa7\xb8\x12\x9d\xad\x11\xd1\x80\xb4\x00\xc0\x4f\xd4\x30\xc8";
@@ -73,7 +73,7 @@ static zend_always_inline void php_uuid_set_version(php_uuid *uuid, const uint8_
 	(*uuid)[6] = ((*uuid)[6] & 0x0F) | (version << 4);
 }
 
-static ZEND_COLD zend_object *throw_uuid_parsing_exception(const char *input, const size_t input_len, const size_t position, const char *reason, ...)
+static ZEND_COLD zend_object *throw_uuid_parse_exception(const char *input, const size_t input_len, const size_t position, const char *reason, ...)
 {
 	va_list format_args;
 	char *formatted_reason;
@@ -83,19 +83,19 @@ static ZEND_COLD zend_object *throw_uuid_parsing_exception(const char *input, co
 	va_start(format_args, reason);
 	zend_vspprintf(&formatted_reason, 0, reason, format_args);
 	va_end(format_args);
-	object = zend_throw_exception(php_ce_UUIDParsingException, formatted_reason, 0);
+	object = zend_throw_exception(php_ce_UUIDParseException, formatted_reason, 0);
 	efree(formatted_reason);
 
 	ZVAL_OBJ(&exception, object);
-	zend_update_property_stringl(php_ce_UUIDParsingException, &exception, UUID_EX_INPUT_PROP, UUID_EX_INPUT_PROP_LEN, input, input_len);
-	zend_update_property_long(php_ce_UUIDParsingException, &exception, UUID_EX_POSITION_PROP, UUID_EX_POSITON_PROP_LEN, position);
+	zend_update_property_stringl(php_ce_UUIDParseException, &exception, UUID_EX_INPUT_PROP, UUID_EX_INPUT_PROP_LEN, input, input_len);
+	zend_update_property_long(php_ce_UUIDParseException, &exception, UUID_EX_POSITION_PROP, UUID_EX_POSITON_PROP_LEN, position);
 
 	return object;
 }
 
-static zend_always_inline zend_object *throw_uuid_parsing_exception_invalid_len(const char *input, const size_t input_len, const size_t position, const size_t actual)
+static zend_always_inline zend_object *throw_uuid_parse_exception_invalid_len(const char *input, const size_t input_len, const size_t position, const size_t actual)
 {
-	return throw_uuid_parsing_exception(
+	return throw_uuid_parse_exception(
 		input,
 		input_len,
 		position,
@@ -105,9 +105,9 @@ static zend_always_inline zend_object *throw_uuid_parsing_exception_invalid_len(
 	);
 }
 
-static zend_always_inline zend_object *throw_uuid_parsing_exception_invalid_char(const char *input, const size_t input_len, const size_t position)
+static zend_always_inline zend_object *throw_uuid_parse_exception_invalid_char(const char *input, const size_t input_len, const size_t position)
 {
-	return throw_uuid_parsing_exception(
+	return throw_uuid_parse_exception(
 		input,
 		input_len,
 		position,
@@ -139,7 +139,7 @@ PHPAPI int php_uuid_parse(php_uuid *uuid, const char *input, const size_t input_
 
 	if ((limit - position + 1) < PHP_UUID_HEX_LEN) {
 		if (throw) {
-			throw_uuid_parsing_exception_invalid_len(input, input_len, position, limit - position + 1);
+			throw_uuid_parse_exception_invalid_len(input, input_len, position, limit - position + 1);
 		}
 		return FAILURE;
 	}
@@ -163,7 +163,7 @@ PHPAPI int php_uuid_parse(php_uuid *uuid, const char *input, const size_t input_
 			}
 			else {
 				if (throw) {
-					throw_uuid_parsing_exception_invalid_char(input, input_len, position);
+					throw_uuid_parse_exception_invalid_char(input, input_len, position);
 				}
 				return FAILURE;
 			}
@@ -187,14 +187,14 @@ PHPAPI int php_uuid_parse(php_uuid *uuid, const char *input, const size_t input_
 			}
 			else {
 				if (throw) {
-					throw_uuid_parsing_exception_invalid_char(input, input_len, position);
+					throw_uuid_parse_exception_invalid_char(input, input_len, position);
 				}
 				return FAILURE;
 			}
 
 			if (digit > PHP_UUID_HEX_LEN) {
 				if (throw) {
-					throw_uuid_parsing_exception(
+					throw_uuid_parse_exception(
 						input,
 						input_len,
 						position,
@@ -213,7 +213,7 @@ PHPAPI int php_uuid_parse(php_uuid *uuid, const char *input, const size_t input_
 
 	if (digit < PHP_UUID_HEX_LEN) {
 		if (throw) {
-			throw_uuid_parsing_exception_invalid_len(input, input_len, position, digit);
+			throw_uuid_parse_exception_invalid_len(input, input_len, position, digit);
 		}
 		return FAILURE;
 	}
@@ -380,21 +380,21 @@ PHP_MINIT_FUNCTION(uuid)
 		PHP_FE_END
 	};
 
-	ZEND_BEGIN_ARG_INFO_EX(UUIDParsingException___construct_args, NULL, 0, 2)
+	ZEND_BEGIN_ARG_INFO_EX(UUIDParseException___construct_args, NULL, 0, 2)
 		ZEND_ARG_TYPE_INFO(0, reason, IS_STRING, 0)
 		ZEND_ARG_TYPE_INFO(0, input, IS_STRING, 0)
 		ZEND_ARG_TYPE_INFO(0, position, IS_LONG, 0)
 		ZEND_ARG_OBJ_INFO(0, previous, Throwable, 1)
 		ZEND_END_ARG_INFO();
-	ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUIDParsingException_getInput_args, IS_STRING, 0)
+	ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUIDParseException_getInput_args, IS_STRING, 0)
 		ZEND_END_ARG_INFO();
-	ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUIDParsingException_getPosition_args, IS_LONG, 0)
+	ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUIDParseException_getPosition_args, IS_LONG, 0)
 		ZEND_END_ARG_INFO();
 
-	static const zend_function_entry uuid_parsing_exception_methods[] = {
-		PHP_ME(UUIDParsingException, __construct, UUIDParsingException___construct_args, ZEND_ACC_PUBLIC)
-		PHP_ME(UUIDParsingException, getInput,    UUIDParsingException_getInput_args,    ZEND_ACC_PUBLIC)
-		PHP_ME(UUIDParsingException, getPosition, UUIDParsingException_getPosition_args, ZEND_ACC_PUBLIC)
+	static const zend_function_entry uuid_parse_exception_methods[] = {
+		PHP_ME(UUIDParseException, __construct, UUIDParseException___construct_args, ZEND_ACC_PUBLIC)
+		PHP_ME(UUIDParseException, getInput,    UUIDParseException_getInput_args,    ZEND_ACC_PUBLIC)
+		PHP_ME(UUIDParseException, getPosition, UUIDParseException_getPosition_args, ZEND_ACC_PUBLIC)
 		PHP_FE_END
 	};
 
@@ -415,13 +415,13 @@ PHP_MINIT_FUNCTION(uuid)
 
 	zend_declare_property_null(php_ce_UUID, UUID_BINARY_PROP, UUID_BINARY_PROP_LEN, ZEND_ACC_PRIVATE);
 
-	INIT_CLASS_ENTRY(ce, "UUIDParsingException", uuid_parsing_exception_methods);
-	php_ce_UUIDParsingException = zend_register_internal_class_ex(&ce, zend_ce_exception);
-	php_ce_UUIDParsingException->ce_flags |= ZEND_ACC_FINAL;
-	php_ce_UUIDParsingException->create_object = zend_ce_exception->create_object;
+	INIT_CLASS_ENTRY(ce, "UUIDParseException", uuid_parse_exception_methods);
+	php_ce_UUIDParseException = zend_register_internal_class_ex(&ce, zend_ce_exception);
+	php_ce_UUIDParseException->ce_flags |= ZEND_ACC_FINAL;
+	php_ce_UUIDParseException->create_object = zend_ce_exception->create_object;
 
-	zend_declare_property_null(php_ce_UUIDParsingException, UUID_EX_INPUT_PROP,    UUID_EX_INPUT_PROP_LEN,   ZEND_ACC_PRIVATE);
-	zend_declare_property_null(php_ce_UUIDParsingException, UUID_EX_POSITION_PROP, UUID_EX_POSITON_PROP_LEN, ZEND_ACC_PRIVATE);
+	zend_declare_property_null(php_ce_UUIDParseException, UUID_EX_INPUT_PROP,    UUID_EX_INPUT_PROP_LEN,   ZEND_ACC_PRIVATE);
+	zend_declare_property_null(php_ce_UUIDParseException, UUID_EX_POSITION_PROP, UUID_EX_POSITON_PROP_LEN, ZEND_ACC_PRIVATE);
 
 	return SUCCESS;
 }
@@ -588,7 +588,7 @@ PHP_METHOD(UUID, toString)
 	RETURN_STRINGL(buffer, PHP_UUID_STRING_LEN);
 }
 
-PHP_METHOD(UUIDParsingException, __construct)
+PHP_METHOD(UUIDParseException, __construct)
 {
 	zval *reason   = NULL;
 	zval *input    = NULL;
@@ -599,20 +599,20 @@ PHP_METHOD(UUIDParsingException, __construct)
 		zend_throw_exception_ex(
 			zend_ce_argument_count_error,
 			0,
-			"Too few arguments to method UUIDParsingException::__construct(), %u passed and at least 2 expected",
+			"Too few arguments to method UUIDParseException::__construct(), %u passed and at least 2 expected",
 			ZEND_NUM_ARGS()
 		);
 		return;
 	}
 
 	zend_update_property_ex(zend_ce_exception, &EX(This), ZSTR_KNOWN(ZEND_STR_MESSAGE), reason);
-	zend_update_property(php_ce_UUIDParsingException, &EX(This), UUID_EX_INPUT_PROP, UUID_EX_INPUT_PROP_LEN, input);
+	zend_update_property(php_ce_UUIDParseException, &EX(This), UUID_EX_INPUT_PROP, UUID_EX_INPUT_PROP_LEN, input);
 
 	if (position != NULL) {
-		zend_update_property(php_ce_UUIDParsingException, &EX(This), UUID_EX_POSITION_PROP, UUID_EX_POSITON_PROP_LEN, position);
+		zend_update_property(php_ce_UUIDParseException, &EX(This), UUID_EX_POSITION_PROP, UUID_EX_POSITON_PROP_LEN, position);
 	}
 	else {
-		zend_update_property_long(php_ce_UUIDParsingException, &EX(This), UUID_EX_POSITION_PROP, UUID_EX_POSITON_PROP_LEN, 0);
+		zend_update_property_long(php_ce_UUIDParseException, &EX(This), UUID_EX_POSITION_PROP, UUID_EX_POSITON_PROP_LEN, 0);
 	}
 
 	if (previous != NULL) {
@@ -620,10 +620,10 @@ PHP_METHOD(UUIDParsingException, __construct)
 	}
 }
 
-PHP_METHOD(UUIDParsingException, getInput)
+PHP_METHOD(UUIDParseException, getInput)
 {
 	RETURN_ZVAL(zend_read_property(
-		php_ce_UUIDParsingException,
+		php_ce_UUIDParseException,
 		&EX(This),
 		UUID_EX_INPUT_PROP,
 		UUID_EX_INPUT_PROP_LEN,
@@ -633,10 +633,10 @@ PHP_METHOD(UUIDParsingException, getInput)
 }
 
 /* */
-PHP_METHOD(UUIDParsingException, getPosition)
+PHP_METHOD(UUIDParseException, getPosition)
 {
 	RETURN_ZVAL(zend_read_property(
-		php_ce_UUIDParsingException,
+		php_ce_UUIDParseException,
 		&EX(This),
 		UUID_EX_POSITION_PROP,
 		UUID_EX_POSITON_PROP_LEN,

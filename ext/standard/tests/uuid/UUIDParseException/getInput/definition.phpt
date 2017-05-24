@@ -1,11 +1,11 @@
 --TEST--
-UUIDParsingException::getInput method signature
+UUIDParseException::getInput method signature
 --CREDITS--
 Richard Fussenegger php@fleshgrinder.com
 --FILE--
 <?php
 
-$m = new ReflectionMethod(UUIDParsingException::class, 'getInput');
+$m = new ReflectionMethod(UUIDParseException::class, 'getInput');
 
 var_dump(
     $m->getNumberOfParameters(),
