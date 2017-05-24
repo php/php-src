@@ -93,8 +93,6 @@ extern zend_class_entry *oci_coll_class_entry_ptr;
 #define PHP_OCI_LOB_BUFFER_ENABLED  1
 #define PHP_OCI_LOB_BUFFER_USED     2
 
-#define PHP_OCI_TAF_DISABLE_CALLBACK ":disableCallback:"
-
 #ifdef OCI_ERROR_MAXMSG_SIZE2
 /* Bigger size is defined from 11.2.0.3 onwards */
 #define PHP_OCI_ERRBUF_LEN OCI_ERROR_MAXMSG_SIZE2

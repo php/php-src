@@ -25,8 +25,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 
 
 #ifdef HAVE_CONFIG_H
@@ -53,7 +51,7 @@ sb4 callback_fn(OCISvcCtx *svchp, OCIEnv *envhp, php_oci_connection *fo_ctx, ub4
 	sb4 returnValue = 0;
 
 	/* Check if userspace callback function was disabled */
-	if (Z_ISUNDEF(fo_ctx->taf_callback)) {
+	if (Z_ISUNDEF(fo_ctx->taf_callback) || Z_ISNULL(fo_ctx->taf_callback)) {
 		return 0;
 	}
 
@@ -96,7 +94,7 @@ int php_oci_disable_taf_callback(php_oci_connection *connection)
 
 /* {{{ php_oci_register_taf_callback()
    Register a callback function for Oracle TAF */
-int php_oci_register_taf_callback(php_oci_connection *connection, char *callback)
+int php_oci_register_taf_callback(php_oci_connection *connection, zval *callback)
 {
 	sword errstatus;
 	int registered = 0;
@@ -106,18 +104,20 @@ int php_oci_register_taf_callback(php_oci_connection *connection, char *callback
 
 	if (!callback) {
 		/* Disable callback */
-		if (Z_ISUNDEF(connection->taf_callback)) {
-			return 0; // Nothing to disable
+		if (Z_ISUNDEF(connection->taf_callback) || Z_ISNULL(connection->taf_callback)) {
+			return 1; // Nothing to disable
 		}
 
 		registered = 1;
 		zval_ptr_dtor(&connection->taf_callback);
-		ZVAL_UNDEF(&connection->taf_callback);
+		ZVAL_NULL(&connection->taf_callback);
 	} else {
 		if (!Z_ISUNDEF(connection->taf_callback)) {
 			registered = 1;
-			zval_ptr_dtor(&connection->taf_callback);
-			ZVAL_UNDEF(&connection->taf_callback);
+			if (!Z_ISNULL(connection->taf_callback)) {
+				zval_ptr_dtor(&connection->taf_callback);
+				ZVAL_NULL(&connection->taf_callback);
+			}
 		}
 
 		/* Set userspace callback function */
@@ -126,7 +126,7 @@ int php_oci_register_taf_callback(php_oci_connection *connection, char *callback
 
 	/* OCI callback function already registered */
 	if (registered) {
-		return 0;
+		return 1;
 	}
 
 	/* set context */
@@ -142,11 +142,11 @@ int php_oci_register_taf_callback(php_oci_connection *connection, char *callback
 		zval_ptr_dtor(&connection->taf_callback);
 		ZVAL_UNDEF(&connection->taf_callback);
 		connection->errcode = php_oci_error(connection->err, errstatus);
-		return 2;
+		return 0;
 	}
 
 	/* successful conclusion */
-	return 0;
+	return 1;
 }
 /* }}} */
 

@@ -2251,7 +2251,10 @@ static int php_oci_connection_close(php_oci_connection *connection)
 #endif /* HAVE_OCI8_DTRACE */
 
 	if (!Z_ISUNDEF(connection->taf_callback)) {
-		zval_ptr_dtor(&connection->taf_callback);
+		/* If it's NULL, then its value should be freed already */
+		if (!Z_ISNULL(connection->taf_callback)) {
+			zval_ptr_dtor(&connection->taf_callback);
+		}
 		ZVAL_UNDEF(&connection->taf_callback);
 	}
 
@@ -2698,7 +2701,7 @@ static int php_oci_persistent_helper(zval *zv)
 		connection = (php_oci_connection *)le->ptr;
 
 		/* Remove TAF callback function as it's bound to current request */
-		if (connection->used_this_request && !Z_ISUNDEF(connection->taf_callback)) {
+		if (connection->used_this_request && !Z_ISUNDEF(connection->taf_callback) && !Z_ISNULL(connection->taf_callback)) {
 			php_oci_disable_taf_callback(connection);
 		}
 

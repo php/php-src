@@ -67,7 +67,7 @@ PHP_FUNCTION(oci_register_taf_callback)
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
-	if (php_oci_register_taf_callback(connection, callback) == 0) {
+	if (php_oci_register_taf_callback(connection, callback)) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
