@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.2
 
 - Core:
+  . Added ZEND_IN_ARRAY instruction, implementing optimized in_array() builtin
+    function, through hash lookup in flipped array. (Dmitry)
   . Removed IS_TYPE_IMMUTABLE (it's the same as COPYABLE & !REFCOUNTED). (Dmitry)
   . Removed the sql.safe_mode directive. (Kalle)
   . Removed support for Netware. (Kalle)
