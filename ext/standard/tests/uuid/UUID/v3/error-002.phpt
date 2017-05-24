@@ -14,4 +14,4 @@ catch (ArgumentCountError $e) {
 
 ?>
 --EXPECT--
-Too few arguments to method UUID::v3(), 1 passed and exactly 2 expected
+UUID::v3() expects exactly 2 parameters, 1 given

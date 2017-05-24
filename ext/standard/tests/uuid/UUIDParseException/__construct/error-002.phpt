@@ -14,4 +14,4 @@ catch (ArgumentCountError $e) {
 
 ?>
 --EXPECT--
-Too few arguments to method UUIDParseException::__construct(), 1 passed and at least 2 expected
+UUIDParseException::__construct() expects at least 2 parameters, 1 given

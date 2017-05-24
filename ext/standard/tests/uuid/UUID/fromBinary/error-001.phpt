@@ -14,4 +14,4 @@ catch (ArgumentCountError $e) {
 
 ?>
 --EXPECT--
-Too few arguments to method UUID::fromBinary(), 0 passed and exactly 1 expected
+UUID::fromBinary() expects exactly 1 parameter, 0 given

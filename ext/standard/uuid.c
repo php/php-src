@@ -314,18 +314,6 @@ static zend_always_inline void new_uuid(zval *object, const php_uuid uuid)
 	zend_update_property_stringl(php_ce_UUID, object, UUID_BINARY_PROP, UUID_BINARY_PROP_LEN, uuid, PHP_UUID_LEN);
 }
 
-static zend_always_inline zend_object *throw_argument_count_error(const char *method, const size_t passed, const size_t expected)
-{
-	return zend_throw_exception_ex(
-		zend_ce_argument_count_error,
-		0,
-		"Too few arguments to method UUID::%s(), %u passed and exactly %u expected",
-		method,
-		passed,
-		expected
-	);
-}
-
 PHP_METHOD(UUID, __construct) { /* NOOP */ }
 
 PHP_METHOD(UUID, fromBinary)
@@ -333,8 +321,7 @@ PHP_METHOD(UUID, fromBinary)
 	char *input = NULL;
 	size_t input_len;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, MIN(1, ZEND_NUM_ARGS()), "s", &input, &input_len) == FAILURE) {
-		throw_argument_count_error("fromBinary", ZEND_NUM_ARGS(), 1);
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &input, &input_len) == FAILURE) {
 		return;
 	}
 
@@ -358,8 +345,7 @@ PHP_METHOD(UUID, parse)
 	size_t input_len;
 	php_uuid uuid;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, MIN(ZEND_NUM_ARGS(), 1), "s", &input, &input_len) == FAILURE) {
-		throw_argument_count_error("parse", ZEND_NUM_ARGS(), 1);
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &input, &input_len) == FAILURE) {
 		return;
 	}
 
@@ -374,8 +360,7 @@ PHP_METHOD(UUID, v3)
 	size_t name_len;
 	php_uuid uuid;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, MIN(ZEND_NUM_ARGS(), 2), "zs", &namespace, &name, &name_len) == FAILURE) {
-		throw_argument_count_error("v3", ZEND_NUM_ARGS(), 2);
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "zs", &namespace, &name, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -398,8 +383,7 @@ PHP_METHOD(UUID, v5)
 	size_t name_len;
 	php_uuid uuid;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, MIN(ZEND_NUM_ARGS(), 2), "zs", &namespace, &name, &name_len) == FAILURE) {
-		throw_argument_count_error("v5", ZEND_NUM_ARGS(), 2);
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "zs", &namespace, &name, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -545,13 +529,7 @@ PHP_METHOD(UUIDParseException, __construct)
 	zval *position = NULL;
 	zval *previous = NULL;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, MIN(ZEND_NUM_ARGS(), 4), "zz|zz!", &reason, &input, &position, &previous) == FAILURE) {
-		zend_throw_exception_ex(
-			zend_ce_argument_count_error,
-			0,
-			"Too few arguments to method UUIDParseException::__construct(), %u passed and at least 2 expected",
-			ZEND_NUM_ARGS()
-		);
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "zz|zz!", &reason, &input, &position, &previous) == FAILURE) {
 		return;
 	}
 
