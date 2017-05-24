@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.2
 
 - Core:
+  . Added ZEND_IN_ARRAY instruction, implementing optimized in_array() builtin
+    function, through hash lookup in flipped array. (Dmitry)
   . Removed IS_TYPE_IMMUTABLE (it's the same as COPYABLE & !REFCOUNTED). (Dmitry)
   . Removed the sql.safe_mode directive. (Kalle)
   . Removed support for Netware. (Kalle)
@@ -45,6 +47,8 @@ PHP                                                                        NEWS
     loosely-equal value). (pmmaga)
   . Fixed bug #61970 (Restraining __construct() access level in subclass gives
     a fatal error). (pmmaga)
+  . Fixed bug #63384 (Cannot override an abstract method with an abstract
+    method). (pmmaga, wes)
 
 - BCMath:
   . Fixed bug #46564 (bcmod truncates fractionals). (liborm85)
