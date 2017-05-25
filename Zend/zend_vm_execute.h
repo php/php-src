@@ -6423,10 +6423,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IN_ARRAY_SPEC_CONST_CONST_HAND
 {
 	USE_OPLINE
 
-	zval *op1 = EX_CONSTANT(opline->op1);
+	zval *op1;
 	HashTable *ht = Z_ARRVAL_P(EX_CONSTANT(opline->op2));
 	int result;
 
+	SAVE_OPLINE();
+	op1 = EX_CONSTANT(opline->op1);
 	if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 		result = zend_hash_exists(ht, Z_STR_P(op1));
 	} else if (opline->extended_value) {
@@ -6442,7 +6444,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IN_ARRAY_SPEC_CONST_CONST_HAND
 		zval tmp;
 
 		result = 0;
-		SAVE_OPLINE();
 		ZEND_HASH_FOREACH_STR_KEY(ht, key) {
 			ZVAL_STR(&tmp, key);
 			compare_function(&tmp, op1, &tmp);
@@ -6451,15 +6452,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IN_ARRAY_SPEC_CONST_CONST_HAND
 				break;
 			}
 		} ZEND_HASH_FOREACH_END();
-
-		ZEND_VM_SMART_BRANCH(result, 1);
-		ZVAL_BOOL(EX_VAR(opline->result.var), result);
-		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	}
 
-	ZEND_VM_SMART_BRANCH(result, 0);
+	ZEND_VM_SMART_BRANCH(result, 1);
 	ZVAL_BOOL(EX_VAR(opline->result.var), result);
-	ZEND_VM_NEXT_OPCODE();
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_R_INDEX_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -13815,10 +13812,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IN_ARRAY_SPEC_TMP_CONST_HANDLE
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *op1 = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1);
+	zval *op1;
 	HashTable *ht = Z_ARRVAL_P(EX_CONSTANT(opline->op2));
 	int result;
 
+	SAVE_OPLINE();
+	op1 = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1);
 	if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 		result = zend_hash_exists(ht, Z_STR_P(op1));
 	} else if (opline->extended_value) {
@@ -13834,7 +13833,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IN_ARRAY_SPEC_TMP_CONST_HANDLE
 		zval tmp;
 
 		result = 0;
-		SAVE_OPLINE();
 		ZEND_HASH_FOREACH_STR_KEY(ht, key) {
 			ZVAL_STR(&tmp, key);
 			compare_function(&tmp, op1, &tmp);
@@ -13843,15 +13841,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IN_ARRAY_SPEC_TMP_CONST_HANDLE
 				break;
 			}
 		} ZEND_HASH_FOREACH_END();
-		zval_ptr_dtor_nogc(free_op1);
-		ZEND_VM_SMART_BRANCH(result, 1);
-		ZVAL_BOOL(EX_VAR(opline->result.var), result);
-		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	}
 	zval_ptr_dtor_nogc(free_op1);
-	ZEND_VM_SMART_BRANCH(result, 0);
+	ZEND_VM_SMART_BRANCH(result, 1);
 	ZVAL_BOOL(EX_VAR(opline->result.var), result);
-	ZEND_VM_NEXT_OPCODE();
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -19947,10 +19941,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IN_ARRAY_SPEC_VAR_CONST_HANDLE
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *op1 = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1);
+	zval *op1;
 	HashTable *ht = Z_ARRVAL_P(EX_CONSTANT(opline->op2));
 	int result;
 
+	SAVE_OPLINE();
+	op1 = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1);
 	if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 		result = zend_hash_exists(ht, Z_STR_P(op1));
 	} else if (opline->extended_value) {
@@ -19966,7 +19962,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IN_ARRAY_SPEC_VAR_CONST_HANDLE
 		zval tmp;
 
 		result = 0;
-		SAVE_OPLINE();
 		ZEND_HASH_FOREACH_STR_KEY(ht, key) {
 			ZVAL_STR(&tmp, key);
 			compare_function(&tmp, op1, &tmp);
@@ -19975,15 +19970,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IN_ARRAY_SPEC_VAR_CONST_HANDLE
 				break;
 			}
 		} ZEND_HASH_FOREACH_END();
-		zval_ptr_dtor_nogc(free_op1);
-		ZEND_VM_SMART_BRANCH(result, 1);
-		ZVAL_BOOL(EX_VAR(opline->result.var), result);
-		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	}
 	zval_ptr_dtor_nogc(free_op1);
-	ZEND_VM_SMART_BRANCH(result, 0);
+	ZEND_VM_SMART_BRANCH(result, 1);
 	ZVAL_BOOL(EX_VAR(opline->result.var), result);
-	ZEND_VM_NEXT_OPCODE();
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -38331,10 +38322,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IN_ARRAY_SPEC_CV_CONST_HANDLER
 {
 	USE_OPLINE
 
-	zval *op1 = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op1.var);
+	zval *op1;
 	HashTable *ht = Z_ARRVAL_P(EX_CONSTANT(opline->op2));
 	int result;
 
+	SAVE_OPLINE();
+	op1 = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op1.var);
 	if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 		result = zend_hash_exists(ht, Z_STR_P(op1));
 	} else if (opline->extended_value) {
@@ -38350,7 +38343,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IN_ARRAY_SPEC_CV_CONST_HANDLER
 		zval tmp;
 
 		result = 0;
-		SAVE_OPLINE();
 		ZEND_HASH_FOREACH_STR_KEY(ht, key) {
 			ZVAL_STR(&tmp, key);
 			compare_function(&tmp, op1, &tmp);
@@ -38359,15 +38351,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IN_ARRAY_SPEC_CV_CONST_HANDLER
 				break;
 			}
 		} ZEND_HASH_FOREACH_END();
-
-		ZEND_VM_SMART_BRANCH(result, 1);
-		ZVAL_BOOL(EX_VAR(opline->result.var), result);
-		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	}
 
-	ZEND_VM_SMART_BRANCH(result, 0);
+	ZEND_VM_SMART_BRANCH(result, 1);
 	ZVAL_BOOL(EX_VAR(opline->result.var), result);
-	ZEND_VM_NEXT_OPCODE();
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_R_INDEX_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)

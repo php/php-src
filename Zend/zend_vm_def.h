@@ -8106,10 +8106,12 @@ ZEND_VM_HANDLER(189, ZEND_IN_ARRAY, CONST|TMP|VAR|CV, CONST, NUM)
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *op1 = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
+	zval *op1;
 	HashTable *ht = Z_ARRVAL_P(EX_CONSTANT(opline->op2));
 	int result;
 
+	SAVE_OPLINE();
+	op1 = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
 	if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 		result = zend_hash_exists(ht, Z_STR_P(op1));
 	} else if (opline->extended_value) {
@@ -8125,7 +8127,6 @@ ZEND_VM_HANDLER(189, ZEND_IN_ARRAY, CONST|TMP|VAR|CV, CONST, NUM)
 		zval tmp;
 
 		result = 0;
-		SAVE_OPLINE();
 		ZEND_HASH_FOREACH_STR_KEY(ht, key) {
 			ZVAL_STR(&tmp, key);
 			compare_function(&tmp, op1, &tmp);
@@ -8134,15 +8135,11 @@ ZEND_VM_HANDLER(189, ZEND_IN_ARRAY, CONST|TMP|VAR|CV, CONST, NUM)
 				break;
 			}
 		} ZEND_HASH_FOREACH_END();
-		FREE_OP1();
-		ZEND_VM_SMART_BRANCH(result, 1);
-		ZVAL_BOOL(EX_VAR(opline->result.var), result);
-		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	}
 	FREE_OP1();
-	ZEND_VM_SMART_BRANCH(result, 0);
+	ZEND_VM_SMART_BRANCH(result, 1);
 	ZVAL_BOOL(EX_VAR(opline->result.var), result);
-	ZEND_VM_NEXT_OPCODE();
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_ADD, (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG), ZEND_ADD_LONG_NO_OVERFLOW, CONST|TMPVARCV, CONST|TMPVARCV, SPEC(NO_CONST_CONST,COMMUTATIVE))
