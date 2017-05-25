@@ -5,12 +5,10 @@ Richard Fussenegger php@fleshgrinder.com
 --FILE--
 <?php
 
-$bytes = random_bytes(16);
-$uuid  = UUID::fromBinary($bytes);
-
+$uuid  = UUID::fromBinary('                ');
 $p = new ReflectionProperty($uuid, 'binary');
 $p->setAccessible(true);
-var_dump($p->getValue($uuid) === $bytes);
+var_dump($p->getValue($uuid) === '                ');
 
 ?>
 --EXPECT--
