@@ -15,4 +15,4 @@ class B extends A {
 
 ?>
 --EXPECTF--
-Fatal error: Declaration of B::example($a, $b, $c = NULL) must be compatible with A::example($a, $b = NULL, $c = NULL) in %s
+Warning: Declaration of B::example($a, $b, $c = NULL) should be compatible with A::example($a, $b = NULL, $c = NULL) in %s
