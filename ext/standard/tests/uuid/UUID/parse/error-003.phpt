@@ -1,12 +1,12 @@
 --TEST--
-UUID::parse throws UUIDParseException for non-hexadecimal characters
+UUID::parse throws UUIDParseException if too many hexadecimal digits are found
 --CREDITS--
 Richard Fussenegger php@fleshgrinder.com
 --FILE--
 <?php
 
 try {
-	UUID::parse('01234567-89ab-cdef-0123-456789abcPHP');
+	UUID::parse('12345678-1234-1234-1234-123456789abcdef');
 }
 catch (UUIDParseException $e) {
 	echo $e->getMessage(), "\n";
@@ -14,4 +14,4 @@ catch (UUIDParseException $e) {
 
 ?>
 --EXPECT--
-Expected hexadecimal digit, but found 'P' (0x50)
+Expected no more than 32 hexadecimal digits
