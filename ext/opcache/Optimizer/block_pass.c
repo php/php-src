@@ -532,6 +532,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 							case ZEND_INSTANCEOF:
 							case ZEND_TYPE_CHECK:
 							case ZEND_DEFINED:
+							case ZEND_IN_ARRAY:
 								if (opline->opcode == ZEND_BOOL_NOT) {
 									break;
 								}

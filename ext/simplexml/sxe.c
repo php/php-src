@@ -211,7 +211,7 @@ PHP_MINIT_FUNCTION(sxe) /* {{{ */
 	ce_SimpleXMLIterator->create_object = ce_SimpleXMLElement->create_object;
 
 	zend_class_implements(ce_SimpleXMLIterator, 1, spl_ce_RecursiveIterator);
-	zend_class_implements(ce_SimpleXMLIterator, 1, spl_ce_Countable);
+	zend_class_implements(ce_SimpleXMLIterator, 1, zend_ce_countable);
 
 	return SUCCESS;
 }

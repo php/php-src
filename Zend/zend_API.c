@@ -202,6 +202,36 @@ ZEND_API char *zend_zval_type_name(const zval *arg) /* {{{ */
 }
 /* }}} */
 
+ZEND_API zend_string *zend_zval_get_type(const zval *arg) /* {{{ */
+{
+	switch (Z_TYPE_P(arg)) {
+		case IS_NULL:
+			return ZSTR_KNOWN(ZEND_STR_NULL);
+		case IS_FALSE:
+		case IS_TRUE:
+			return ZSTR_KNOWN(ZEND_STR_BOOLEAN);
+		case IS_LONG:
+			return ZSTR_KNOWN(ZEND_STR_INTEGER);
+		case IS_DOUBLE:
+			return ZSTR_KNOWN(ZEND_STR_DOUBLE);
+		case IS_STRING:
+			return ZSTR_KNOWN(ZEND_STR_STRING);
+		case IS_ARRAY:
+			return ZSTR_KNOWN(ZEND_STR_ARRAY);
+		case IS_OBJECT:
+			return ZSTR_KNOWN(ZEND_STR_OBJECT);
+		case IS_RESOURCE:
+			if (zend_rsrc_list_get_rsrc_type(Z_RES_P(arg))) {
+				return ZSTR_KNOWN(ZEND_STR_RESOURCE);
+			} else {
+				return ZSTR_KNOWN(ZEND_STR_CLOSED_RESOURCE);
+			}
+		default:
+			return NULL;
+	}
+}
+/* }}} */
+
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_count_error(zend_bool throw_, int num_args, int min_num_args, int max_num_args) /* {{{ */
 {
 	zend_function *active_function = EG(current_execute_data)->func;

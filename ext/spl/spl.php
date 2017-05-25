@@ -566,7 +566,7 @@ interface Iterator extends Traversable
 	function valid();
 }
 
-/** @ingroup SPL
+/** @ingroup ZendEngine
  * @brief This Interface allows to hook into the global count() function.
  * @since PHP 5.1
  */
