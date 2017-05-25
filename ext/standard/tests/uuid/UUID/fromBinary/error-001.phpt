@@ -6,10 +6,10 @@ Richard Fussenegger php@fleshgrinder.com
 <?php
 
 try {
-    UUID::fromBinary();
+	UUID::fromBinary();
 }
 catch (ArgumentCountError $e) {
-    echo $e->getMessage();
+	echo $e->getMessage();
 }
 
 ?>

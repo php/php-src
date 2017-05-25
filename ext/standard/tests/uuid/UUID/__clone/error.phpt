@@ -12,7 +12,7 @@ try {
 	$m->invoke(UUID::Nil());
 }
 catch (Error $e) {
-    echo $e->getMessage();
+	echo $e->getMessage();
 }
 
 ?>

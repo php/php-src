@@ -8,11 +8,11 @@ Richard Fussenegger php@fleshgrinder.com
 $uuid = UUID::Nil();
 
 var_dump(
-    $uuid->getVariant(),
-    $uuid->getVersion(),
-    $uuid->toBinary() === "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",
-    $uuid->toHex(),
-    $uuid->toString()
+	$uuid->getVariant(),
+	$uuid->getVersion(),
+	$uuid->toBinary() === "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",
+	$uuid->toHex(),
+	$uuid->toString()
 );
 
 ?>

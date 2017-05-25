@@ -8,11 +8,11 @@ Richard Fussenegger php@fleshgrinder.com
 $c = new ReflectionClass(UUIDParseException::class);
 
 var_dump(
-    $c->isAbstract(),
-    $c->isFinal(),
-    $c->isInstantiable(),
-    $c->isInternal(),
-    $c->isSubclassOf(Exception::class)
+	$c->isAbstract(),
+	$c->isFinal(),
+	$c->isInstantiable(),
+	$c->isInternal(),
+	$c->isSubclassOf(Exception::class)
 );
 
 ?>

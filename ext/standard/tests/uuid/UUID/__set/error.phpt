@@ -9,7 +9,7 @@ try {
 	UUID::Nil()->dynamic_property = 'value';
 }
 catch (Error $e) {
-    echo $e->getMessage();
+	echo $e->getMessage();
 }
 
 ?>

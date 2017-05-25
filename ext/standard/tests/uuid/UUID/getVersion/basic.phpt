@@ -6,7 +6,7 @@ Richard Fussenegger php@fleshgrinder.com
 <?php
 
 for ($i = 0; $i < 16; ++$i) {
-    var_dump(UUID::fromBinary(sprintf("\x00\x00\x00\x00\x00\x00%s\x00\x00\x00\x00\x00\x00\x00\x00\x00", chr($i << 4)))->getVersion());
+	var_dump(UUID::fromBinary(sprintf("\x00\x00\x00\x00\x00\x00%s\x00\x00\x00\x00\x00\x00\x00\x00\x00", chr($i << 4)))->getVersion());
 }
 
 ?>

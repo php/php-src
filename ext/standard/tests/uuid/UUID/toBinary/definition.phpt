@@ -8,10 +8,10 @@ Richard Fussenegger php@fleshgrinder.com
 $m = new ReflectionMethod(UUID::class, 'toBinary');
 
 var_dump(
-    $m->getNumberOfParameters(),
-    $m->getNumberOfRequiredParameters(),
-    (string) $m->getReturnType(),
-    $m->isPublic(),
+	$m->getNumberOfParameters(),
+	$m->getNumberOfRequiredParameters(),
+	(string) $m->getReturnType(),
+	$m->isPublic(),
 	$m->isStatic()
 );
 

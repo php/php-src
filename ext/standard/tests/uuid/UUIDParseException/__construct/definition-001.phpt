@@ -8,10 +8,10 @@ Richard Fussenegger php@fleshgrinder.com
 $m = new ReflectionMethod(UUIDParseException::class, '__construct');
 
 var_dump(
-    $m->getNumberOfParameters(),
-    $m->getNumberOfRequiredParameters(),
-    $m->hasReturnType(),
-    $m->isPublic()
+	$m->getNumberOfParameters(),
+	$m->getNumberOfRequiredParameters(),
+	$m->hasReturnType(),
+	$m->isPublic()
 );
 
 ?>

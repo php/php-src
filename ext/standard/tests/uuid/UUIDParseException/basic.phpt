@@ -8,13 +8,13 @@ Richard Fussenegger php@fleshgrinder.com
 $e = new UUIDParseException('basic-reason', 'basic-input');
 
 var_dump(
-    $e->getCode(),
-    $e->getFile() === __FILE__,
-    $e->getInput(),
-    $e->getLine(),
-    $e->getMessage(),
-    $e->getPosition(),
-    $e->getPrevious()
+	$e->getCode(),
+	$e->getFile() === __FILE__,
+	$e->getInput(),
+	$e->getLine(),
+	$e->getMessage(),
+	$e->getPosition(),
+	$e->getPrevious()
 );
 
 ?>

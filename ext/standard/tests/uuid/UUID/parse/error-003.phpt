@@ -6,10 +6,10 @@ Richard Fussenegger php@fleshgrinder.com
 <?php
 
 try {
-    UUID::parse('01234567-89ab-cdef-0123-456789abcPHP');
+	UUID::parse('01234567-89ab-cdef-0123-456789abcPHP');
 }
 catch (UUIDParseException $e) {
-    echo $e->getMessage() , "\n";
+	echo $e->getMessage(), "\n";
 }
 
 ?>

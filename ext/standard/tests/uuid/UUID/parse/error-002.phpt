@@ -5,19 +5,21 @@ Richard Fussenegger php@fleshgrinder.com
 --FILE--
 <?php
 
-foreach ([
-    '',
-    '0',
-    str_repeat('0', 31),
-    '0123456789-0123456789-0123456789',
-    " \t{012345678901234567890123456789}\t ",
-] as $date) {
-    try {
-        UUID::parse($date);
-    }
-    catch (UUIDParseException $e) {
-        echo $e->getMessage() , "\n";
-    }
+foreach (
+	[
+		'',
+		'0',
+		str_repeat('0', 31),
+		'0123456789-0123456789-0123456789',
+		" \t{012345678901234567890123456789}\t ",
+	] as $date
+) {
+	try {
+		UUID::parse($date);
+	}
+	catch (UUIDParseException $e) {
+		echo $e->getMessage(), "\n";
+	}
 }
 
 ?>

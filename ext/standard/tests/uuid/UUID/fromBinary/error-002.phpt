@@ -6,12 +6,12 @@ Richard Fussenegger php@fleshgrinder.com
 <?php
 
 foreach ([0, 1, 15, 17, random_int(18, 256)] as $i) {
-    try {
-        UUID::fromBinary($i === 0 ? '' : random_bytes($i));
-    }
-    catch (InvalidArgumentException $e) {
-        echo $e->getMessage() , "\n";
-    }
+	try {
+		UUID::fromBinary($i === 0 ? '' : random_bytes($i));
+	}
+	catch (InvalidArgumentException $e) {
+		echo $e->getMessage(), "\n";
+	}
 }
 
 ?>

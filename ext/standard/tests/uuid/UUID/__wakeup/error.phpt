@@ -7,11 +7,11 @@ Richard Fussenegger php@fleshgrinder.com
 
 foreach ([0, 1, 15, 17, random_int(18, 256)] as $i) {
 	try {
-	    $bytes = $i === 0 ? '' : random_bytes($i);
+		$bytes = $i === 0 ? '' : random_bytes($i);
 		unserialize("O:4:\"UUID\":1:{s:12:\"\0UUID\0binary\";s:{$i}:\"{$bytes}\";}");
 	}
 	catch (UnexpectedValueException $e) {
-		echo $e->getMessage() , "\n";
+		echo $e->getMessage(), "\n";
 	}
 }
 

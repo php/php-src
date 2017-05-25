@@ -8,10 +8,10 @@ Richard Fussenegger php@fleshgrinder.com
 $m = new ReflectionMethod(UUID::class, '__construct');
 
 var_dump(
-    $m->getNumberOfParameters(),
-    $m->getNumberOfRequiredParameters(),
-    $m->hasReturnType(),
-    $m->isPrivate(),
+	$m->getNumberOfParameters(),
+	$m->getNumberOfRequiredParameters(),
+	$m->hasReturnType(),
+	$m->isPrivate(),
 	$m->isStatic()
 );
 

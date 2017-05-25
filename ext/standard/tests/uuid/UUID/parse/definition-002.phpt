@@ -8,12 +8,12 @@ Richard Fussenegger php@fleshgrinder.com
 $p = (new ReflectionMethod(UUID::class, 'parse'))->getParameters()[0];
 
 var_dump(
-    $p->getName(),
-    $p->allowsNull(),
-    (string) $p->getType(),
-    $p->isOptional(),
-    $p->isPassedByReference(),
-    $p->isVariadic()
+	$p->getName(),
+	$p->allowsNull(),
+	(string) $p->getType(),
+	$p->isOptional(),
+	$p->isPassedByReference(),
+	$p->isVariadic()
 );
 
 ?>

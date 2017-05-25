@@ -8,11 +8,11 @@ Richard Fussenegger php@fleshgrinder.com
 $m = new ReflectionMethod(UUID::class, '__clone');
 
 var_dump(
-    $m->getNumberOfParameters(),
-    $m->getNumberOfRequiredParameters(),
-    $m->hasReturnType(),
-    $m->isPrivate(),
-    $m->isStatic()
+	$m->getNumberOfParameters(),
+	$m->getNumberOfRequiredParameters(),
+	$m->hasReturnType(),
+	$m->isPrivate(),
+	$m->isStatic()
 );
 
 ?>

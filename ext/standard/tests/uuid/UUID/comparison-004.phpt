@@ -11,15 +11,15 @@ Richard Fussenegger php@fleshgrinder.com
 
 $a = UUID::fromBinary("\1\1\1\1\1\1\1\1\1\1\1\1\1\1\1\1");
 $b = UUID::fromBinary("\2\2\2\2\2\2\2\2\2\2\2\2\2\2\2\2");
-echo var_dump($a < $b, $a == $b, $a > $b) , "\n";
+echo var_dump($a < $b, $a == $b, $a > $b), "\n";
 
 $a = UUID::fromBinary("\1\1\1\1\1\1\1\1\1\1\1\1\1\1\1\1");
 $b = UUID::fromBinary("\1\1\1\1\1\1\1\1\1\1\1\1\1\1\1\1");
-echo var_dump($a < $b, $a == $b, $a > $b) , "\n";
+echo var_dump($a < $b, $a == $b, $a > $b), "\n";
 
 $a = UUID::fromBinary("\2\2\2\2\2\2\2\2\2\2\2\2\2\2\2\2");
 $b = UUID::fromBinary("\1\1\1\1\1\1\1\1\1\1\1\1\1\1\1\1");
-echo var_dump($a < $b, $a == $b, $a > $b) , "\n";
+echo var_dump($a < $b, $a == $b, $a > $b), "\n";
 
 ?>
 --EXPECT--

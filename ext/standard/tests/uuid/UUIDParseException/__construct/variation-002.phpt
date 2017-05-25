@@ -8,9 +8,9 @@ Richard Fussenegger php@fleshgrinder.com
 $e = new UUIDParseException('variation-002-reason', 'variation-002-input', 42);
 
 foreach (['message', 'input', 'position'] as $p) {
-    $p = new ReflectionProperty(UUIDParseException::class, $p);
-    $p->setAccessible(true);
-    var_dump($p->getValue($e));
+	$p = new ReflectionProperty(UUIDParseException::class, $p);
+	$p->setAccessible(true);
+	var_dump($p->getValue($e));
 }
 
 ?>

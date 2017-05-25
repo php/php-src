@@ -8,18 +8,18 @@ Richard Fussenegger php@fleshgrinder.com
 $c = new ReflectionClass(UUID::class);
 
 var_dump(
-    $c->getInterfaces() === [],
-    $c->getParentClass(),
-    $c->isAbstract(),
-    $c->isCloneable(),
-    $c->isFinal(),
-    $c->isInstantiable(),
-    $c->isInterface(),
-    $c->isInternal(),
-    $c->isIterateable(),
-    $c->isTrait(),
-    count($c->getConstants()),
-    count($c->getProperties())
+	$c->getInterfaces() === [],
+	$c->getParentClass(),
+	$c->isAbstract(),
+	$c->isCloneable(),
+	$c->isFinal(),
+	$c->isInstantiable(),
+	$c->isInterface(),
+	$c->isInternal(),
+	$c->isIterateable(),
+	$c->isTrait(),
+	count($c->getConstants()),
+	count($c->getProperties())
 );
 
 ?>

@@ -8,12 +8,12 @@ Richard Fussenegger php@fleshgrinder.com
 $m = new ReflectionMethod(UUIDParseException::class, 'getInput');
 
 var_dump(
-    $m->getNumberOfParameters(),
-    $m->getNumberOfRequiredParameters(),
-    (string) $m->getReturnType(),
-    $m->isAbstract(),
-    $m->isPublic(),
-    $m->isStatic()
+	$m->getNumberOfParameters(),
+	$m->getNumberOfRequiredParameters(),
+	(string) $m->getReturnType(),
+	$m->isAbstract(),
+	$m->isPublic(),
+	$m->isStatic()
 );
 
 ?>

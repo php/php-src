@@ -6,10 +6,10 @@ Richard Fussenegger php@fleshgrinder.com
 <?php
 
 try {
-    UUID::parse();
+	UUID::parse();
 }
 catch (ArgumentCountError $e) {
-    echo $e->getMessage();
+	echo $e->getMessage();
 }
 
 ?>

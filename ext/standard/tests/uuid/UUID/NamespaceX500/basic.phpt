@@ -8,11 +8,11 @@ Richard Fussenegger php@fleshgrinder.com
 $uuid = UUID::NamespaceX500();
 
 var_dump(
-    $uuid->getVariant() === UUID::VARIANT_RFC4122,
-    $uuid->getVersion() === UUID::VERSION_1_TIME_BASED,
-    $uuid->toBinary() === "\x6b\xa7\xb8\x14\x9d\xad\x11\xd1\x80\xb4\x00\xc0\x4f\xd4\x30\xc8",
-    $uuid->toHex(),
-    $uuid->toString()
+	$uuid->getVariant() === UUID::VARIANT_RFC4122,
+	$uuid->getVersion() === UUID::VERSION_1_TIME_BASED,
+	$uuid->toBinary() === "\x6b\xa7\xb8\x14\x9d\xad\x11\xd1\x80\xb4\x00\xc0\x4f\xd4\x30\xc8",
+	$uuid->toHex(),
+	$uuid->toString()
 );
 
 ?>

@@ -9,10 +9,10 @@ $p = (new ReflectionMethod(UUIDParseException::class, '__construct'))->getParame
 
 var_dump(
 	$p->getName(),
-    $p->allowsNull(),
+	$p->allowsNull(),
 	(string) $p->getType(),
-    $p->isOptional(),
-    $p->isPassedByReference()
+	$p->isOptional(),
+	$p->isPassedByReference()
 );
 
 ?>
