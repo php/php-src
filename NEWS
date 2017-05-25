@@ -3,7 +3,7 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.2
 
 - Core:
-  . Added ZEND_COUNT, ZEND_GET_CLASS, ZEMD_GET_CALLED_CLASS, ZEND_GET_TYPE
+  . Added ZEND_COUNT, ZEND_GET_CLASS, ZEND_GET_CALLED_CLASS, ZEND_GET_TYPE
     instructions, to implement corresponding builtin functions. (Dmitry)
   . "Countable" interface is moved from SPL to Core. (Dmitry)
   . Added ZEND_IN_ARRAY instruction, implementing optimized in_array() builtin
