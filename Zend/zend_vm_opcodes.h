@@ -261,7 +261,8 @@ END_EXTERN_C()
 #define ZEND_SWITCH_LONG                     187
 #define ZEND_SWITCH_STRING                   188
 #define ZEND_IN_ARRAY                        189
+#define ZEND_COUNT                           190
 
-#define ZEND_VM_LAST_OPCODE                  189
+#define ZEND_VM_LAST_OPCODE                  190
 
 #endif

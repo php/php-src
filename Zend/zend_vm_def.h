@@ -8142,6 +8142,52 @@ ZEND_VM_HANDLER(189, ZEND_IN_ARRAY, CONST|TMP|VAR|CV, CONST, NUM)
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+ZEND_VM_HANDLER(190, ZEND_COUNT, CONST|TMP|VAR|CV, UNUSED)
+{
+	USE_OPLINE
+	zend_free_op free_op1;
+	zval *op1;
+	zend_long count;
+
+	SAVE_OPLINE();
+	op1 = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
+	do {
+		if (Z_TYPE_P(op1) == IS_ARRAY) {
+			count = zend_array_count(Z_ARRVAL_P(op1));
+			break;
+		} else if (Z_TYPE_P(op1) == IS_OBJECT) {
+			/* first, we check if the handler is defined */
+			if (Z_OBJ_HT_P(op1)->count_elements) {
+				if (SUCCESS == Z_OBJ_HT_P(op1)->count_elements(op1, &count)) {
+					break;
+				}
+			}
+
+			/* if not and the object implements Countable we call its count() method */
+			if (instanceof_function(Z_OBJCE_P(op1), zend_ce_countable)) {
+				zval retval;
+
+				zend_call_method_with_0_params(op1, NULL, NULL, "count", &retval);
+				count = zval_get_long(&retval);
+				zval_ptr_dtor(&retval);
+				break;
+			}
+
+			/* If There's no handler and it doesn't implement Countable then add a warning */
+			count = 1;
+		} else if (Z_TYPE_P(op1) == IS_NULL) {
+			count = 0;
+		} else {
+			count = 1;
+		}
+		zend_error(E_WARNING, "count(): Parameter must be an array or an object that implements Countable");
+	} while (0);
+
+	ZVAL_LONG(EX_VAR(opline->result.var), count);
+	FREE_OP1();
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_ADD, (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG), ZEND_ADD_LONG_NO_OVERFLOW, CONST|TMPVARCV, CONST|TMPVARCV, SPEC(NO_CONST_CONST,COMMUTATIVE))
 {
 	USE_OPLINE

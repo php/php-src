@@ -3723,6 +3723,20 @@ static int zend_compile_func_in_array(znode *result, zend_ast_list *args) /* {{{
 }
 /* }}} */
 
+int zend_compile_func_count(znode *result, zend_ast_list *args) /* {{{ */
+{
+	znode arg_node;
+
+	if (args->children != 1 || args->child[0]->kind == ZEND_AST_UNPACK) {
+		return FAILURE;
+	}
+
+	zend_compile_expr(&arg_node, args->child[0]);
+	zend_emit_op_tmp(result, ZEND_COUNT, &arg_node, NULL);
+	return SUCCESS;
+}
+/* }}} */
+
 int zend_try_compile_special_func(znode *result, zend_string *lcname, zend_ast_list *args, zend_function *fbc, uint32_t type) /* {{{ */
 {
 	if (fbc->internal_function.handler == ZEND_FN(display_disabled_function)) {
@@ -3783,6 +3797,8 @@ int zend_try_compile_special_func(znode *result, zend_string *lcname, zend_ast_l
 		return zend_compile_func_cuf(result, args, lcname);
 	} else if (zend_string_equals_literal(lcname, "in_array")) {
 		return zend_compile_func_in_array(result, args);
+	} else if (zend_string_equals_literal(lcname, "count")) {
+		return zend_compile_func_count(result, args);
 	} else {
 		return FAILURE;
 	}

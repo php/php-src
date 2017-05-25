@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.2
 
 - Core:
+  . Added ZEND_COUNT instruction, to implement corresponding builtin. (Dmitry)
   . "Countable" interface is moved from SPL to Core. (Dmitry)
   . Added ZEND_IN_ARRAY instruction, implementing optimized in_array() builtin
     function, through hash lookup in flipped array. (Dmitry)
