@@ -3757,13 +3757,11 @@ int zend_compile_func_get_class(znode *result, zend_ast_list *args) /* {{{ */
 
 int zend_compile_func_get_called_class(znode *result, zend_ast_list *args) /* {{{ */
 {
-	znode arg_node;
-
 	if (args->children != 0) {
 		return FAILURE;
 	}
 
-	zend_emit_op_tmp(result, ZEND_GET_CALLED_CLASS, &arg_node, NULL);
+	zend_emit_op_tmp(result, ZEND_GET_CALLED_CLASS, NULL, NULL);
 	return SUCCESS;
 }
 /* }}} */
