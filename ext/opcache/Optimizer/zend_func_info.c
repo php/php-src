@@ -589,7 +589,7 @@ static const func_info_t func_infos[] = {
 	F0("doubleval",                    MAY_BE_NULL | MAY_BE_DOUBLE),
 	FN("strval",                       MAY_BE_NULL | MAY_BE_STRING),
 	F0("boolval",                      MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	F1("gettype",                      MAY_BE_NULL | MAY_BE_STRING),
+	FN("gettype",                      MAY_BE_NULL | MAY_BE_STRING),
 	F0("settype",                      MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	FC("is_null",                      zend_is_type_info),
 	F0("is_resource",                  MAY_BE_FALSE | MAY_BE_TRUE), // TODO: inline with support for closed resources

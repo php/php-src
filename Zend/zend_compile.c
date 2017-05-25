@@ -3644,15 +3644,31 @@ static int zend_compile_func_in_array(znode *result, zend_ast_list *args) /* {{{
 	zend_op *opline;
 
 	if (args->children == 3) {
-		if (args->child[2]->kind != ZEND_AST_ZVAL) {
+		if (args->child[2]->kind == ZEND_AST_ZVAL) {
+			strict = zend_is_true(zend_ast_get_zval(args->child[2]));
+		} else if (args->child[2]->kind == ZEND_AST_CONST) {
+			zval value;
+			zend_ast *name_ast = args->child[2]->child[0];
+			zend_bool is_fully_qualified;
+			zend_string *resolved_name = zend_resolve_const_name(
+				zend_ast_get_str(name_ast), name_ast->attr, &is_fully_qualified);
+
+			if (!zend_try_ct_eval_const(&value, resolved_name, is_fully_qualified)) {
+				zend_string_release(resolved_name);
+				return FAILURE;
+			}
+
+			zend_string_release(resolved_name);
+			strict = zend_is_true(&value);
+			zval_ptr_dtor(&value);
+		} else {
 			return FAILURE;
 		}
-		strict = zend_is_true(zend_ast_get_zval(args->child[2]));
+	} else if (args->children != 2) {
+		return FAILURE;
 	}
 
-	if (args->children < 2
-	 || args->children > 3
-	 || args->child[1]->kind != ZEND_AST_ARRAY
+	if (args->child[1]->kind != ZEND_AST_ARRAY
 	 || !zend_try_ct_eval_array(&array.u.constant, args->child[1])) {
 		return FAILURE;
 	}
@@ -3660,7 +3676,6 @@ static int zend_compile_func_in_array(znode *result, zend_ast_list *args) /* {{{
 	if (zend_hash_num_elements(Z_ARRVAL(array.u.constant)) > 0) {
 		zend_bool ok = 1;
 		zval *val, tmp;
-		zend_ulong idx;
 		HashTable *src = Z_ARRVAL(array.u.constant);
 		HashTable *dst = emalloc(sizeof(HashTable));
 
@@ -3681,7 +3696,8 @@ static int zend_compile_func_in_array(znode *result, zend_ast_list *args) /* {{{
 			} ZEND_HASH_FOREACH_END();
 		} else {
 			ZEND_HASH_FOREACH_VAL(src, val) {
-				if (Z_TYPE_P(val) != IS_STRING || ZEND_HANDLE_NUMERIC(Z_STR_P(val), idx)) {
+				if (Z_TYPE_P(val) != IS_STRING
+				 || is_numeric_string(Z_STRVAL_P(val), Z_STRLEN_P(val), NULL, NULL, 0)) {
 					zend_array_destroy(dst);
 					ok = 0;
 					break;
@@ -3703,6 +3719,63 @@ static int zend_compile_func_in_array(znode *result, zend_ast_list *args) /* {{{
 	opline = zend_emit_op_tmp(result, ZEND_IN_ARRAY, &needly, &array);
 	opline->extended_value = strict;
 
+	return SUCCESS;
+}
+/* }}} */
+
+int zend_compile_func_count(znode *result, zend_ast_list *args) /* {{{ */
+{
+	znode arg_node;
+
+	if (args->children != 1 || args->child[0]->kind == ZEND_AST_UNPACK) {
+		return FAILURE;
+	}
+
+	zend_compile_expr(&arg_node, args->child[0]);
+	zend_emit_op_tmp(result, ZEND_COUNT, &arg_node, NULL);
+	return SUCCESS;
+}
+/* }}} */
+
+int zend_compile_func_get_class(znode *result, zend_ast_list *args) /* {{{ */
+{
+	if (args->children == 0) {
+		zend_emit_op_tmp(result, ZEND_GET_CLASS, NULL, NULL);
+	} else {
+		znode arg_node;
+
+		if (args->children != 1 || args->child[0]->kind == ZEND_AST_UNPACK) {
+			return FAILURE;
+		}
+
+		zend_compile_expr(&arg_node, args->child[0]);
+		zend_emit_op_tmp(result, ZEND_GET_CLASS, &arg_node, NULL);
+	}
+	return SUCCESS;
+}
+/* }}} */
+
+int zend_compile_func_get_called_class(znode *result, zend_ast_list *args) /* {{{ */
+{
+	if (args->children != 0) {
+		return FAILURE;
+	}
+
+	zend_emit_op_tmp(result, ZEND_GET_CALLED_CLASS, NULL, NULL);
+	return SUCCESS;
+}
+/* }}} */
+
+int zend_compile_func_gettype(znode *result, zend_ast_list *args) /* {{{ */
+{
+	znode arg_node;
+
+	if (args->children != 1 || args->child[0]->kind == ZEND_AST_UNPACK) {
+		return FAILURE;
+	}
+
+	zend_compile_expr(&arg_node, args->child[0]);
+	zend_emit_op_tmp(result, ZEND_GET_TYPE, &arg_node, NULL);
 	return SUCCESS;
 }
 /* }}} */
@@ -3767,6 +3840,14 @@ int zend_try_compile_special_func(znode *result, zend_string *lcname, zend_ast_l
 		return zend_compile_func_cuf(result, args, lcname);
 	} else if (zend_string_equals_literal(lcname, "in_array")) {
 		return zend_compile_func_in_array(result, args);
+	} else if (zend_string_equals_literal(lcname, "count")) {
+		return zend_compile_func_count(result, args);
+	} else if (zend_string_equals_literal(lcname, "get_class")) {
+		return zend_compile_func_get_class(result, args);
+	} else if (zend_string_equals_literal(lcname, "get_called_class")) {
+		return zend_compile_func_get_called_class(result, args);
+	} else if (zend_string_equals_literal(lcname, "gettype")) {
+		return zend_compile_func_gettype(result, args);
 	} else {
 		return FAILURE;
 	}
