@@ -5,10 +5,9 @@ Richard Fussenegger php@fleshgrinder.com
 --FILE--
 <?php
 
-$uuid = UUID::v4();
-$ser  = serialize($uuid);
+$uuid = UUID::fromBinary("\1\1\1\1\1\1\1\1\1\1\1\1\1\1\1\1");
 
-var_dump(unserialize($ser) == $uuid);
+var_dump($uuid == unserialize(serialize($uuid)));
 
 ?>
 --EXPECT--
