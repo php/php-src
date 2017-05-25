@@ -303,7 +303,7 @@ PHPAPI zend_always_inline void php_uuid_to_string(php_uuid_string *buffer, const
 	);
 }
 
-static zend_always_inline php_uuid *get_bytes(zval *object)
+static zend_always_inline php_uuid *get_bytes(/*const*/ zval *object)
 {
 	return (php_uuid *) Z_STRVAL_P(zend_read_property(php_ce_UUID, object, UUID_BINARY_PROP, UUID_BINARY_PROP_LEN, 1, NULL));
 }
@@ -386,6 +386,9 @@ ZEND_END_ARG_INFO()
 PHP_METHOD(UUID, v4)
 {
 	php_uuid uuid;
+
+	zend_parse_parameters_none();
+
 	if (php_uuid_create_v4_throw(&uuid) == SUCCESS) {
 		new_uuid(return_value, uuid);
 	}
@@ -414,6 +417,8 @@ ZEND_END_ARG_INFO()
 
 PHP_METHOD(UUID, NamespaceDNS)
 {
+	zend_parse_parameters_none();
+
 	new_uuid(return_value, PHP_UUID_NAMESPACE_DNS);
 }
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_NamespaceDNS_args, UUID, 0)
@@ -421,6 +426,8 @@ ZEND_END_ARG_INFO()
 
 PHP_METHOD(UUID, NamespaceOID)
 {
+	zend_parse_parameters_none();
+
 	new_uuid(return_value, PHP_UUID_NAMESPACE_OID);
 }
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_NamespaceOID_args, UUID, 0)
@@ -428,6 +435,8 @@ ZEND_END_ARG_INFO()
 
 PHP_METHOD(UUID, NamespaceURL)
 {
+	zend_parse_parameters_none();
+
 	new_uuid(return_value, PHP_UUID_NAMESPACE_URL);
 }
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_NamespaceURL_args, UUID, 0)
@@ -435,6 +444,8 @@ ZEND_END_ARG_INFO()
 
 PHP_METHOD(UUID, NamespaceX500)
 {
+	zend_parse_parameters_none();
+
 	new_uuid(return_value, PHP_UUID_NAMESPACE_X500);
 }
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_NamespaceX500_args, UUID, 0)
@@ -442,6 +453,8 @@ ZEND_END_ARG_INFO()
 
 PHP_METHOD(UUID, Nil)
 {
+	zend_parse_parameters_none();
+
 	new_uuid(return_value, PHP_UUID_NIL);
 }
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_Nil_args, UUID, 0)
@@ -467,6 +480,9 @@ PHP_METHOD(UUID, __wakeup)
 {
 	size_t len = Z_STRLEN_P(zend_read_property(php_ce_UUID, &EX(This), UUID_BINARY_PROP, UUID_BINARY_PROP_LEN, 1, NULL));
 
+	zend_parse_parameters_none();
+
+
 	if (len != PHP_UUID_LEN) {
 		zend_throw_exception_ex(
 			spl_ce_UnexpectedValueException,
@@ -482,6 +498,8 @@ ZEND_END_ARG_INFO()
 
 PHP_METHOD(UUID, getVariant)
 {
+	zend_parse_parameters_none();
+
 	RETURN_LONG(php_uuid_get_variant(*get_bytes(&EX(This))));
 }
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_getVariant_args, IS_LONG, 0)
@@ -489,6 +507,8 @@ ZEND_END_ARG_INFO()
 
 PHP_METHOD(UUID, getVersion)
 {
+	zend_parse_parameters_none();
+
 	RETURN_LONG(php_uuid_get_version(*get_bytes(&EX(This))));
 }
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_getVersion_args, IS_LONG, 0)
@@ -496,6 +516,8 @@ ZEND_END_ARG_INFO()
 
 PHP_METHOD(UUID, isNil)
 {
+	zend_parse_parameters_none();
+
 	RETURN_BOOL(php_uuid_is_nil(*get_bytes(&EX(This))));
 }
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_isNil_args, _IS_BOOL, 0)
@@ -503,6 +525,8 @@ ZEND_END_ARG_INFO()
 
 PHP_METHOD(UUID, toBinary)
 {
+	zend_parse_parameters_none();
+
 	RETURN_STRINGL(*get_bytes(&EX(This)), PHP_UUID_LEN);
 }
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_toBinary_args, IS_STRING, 0)
@@ -511,6 +535,9 @@ ZEND_END_ARG_INFO()
 PHP_METHOD(UUID, toHex)
 {
 	php_uuid_hex buffer;
+
+	zend_parse_parameters_none();
+
 	php_uuid_to_hex(&buffer, *get_bytes(&EX(This)));
 	RETURN_STRINGL(buffer, PHP_UUID_HEX_LEN);
 }
@@ -520,6 +547,9 @@ ZEND_END_ARG_INFO()
 PHP_METHOD(UUID, toString)
 {
 	php_uuid_string buffer;
+
+	zend_parse_parameters_none();
+
 	php_uuid_to_string(&buffer, *get_bytes(&EX(This)));
 	RETURN_STRINGL(buffer, PHP_UUID_STRING_LEN);
 }
@@ -584,6 +614,8 @@ ZEND_END_ARG_INFO()
 
 PHP_METHOD(UUIDParseException, getInput)
 {
+	zend_parse_parameters_none();
+
 	RETURN_ZVAL(zend_read_property(
 		php_ce_UUIDParseException,
 		&EX(This),
@@ -598,6 +630,8 @@ ZEND_END_ARG_INFO()
 
 PHP_METHOD(UUIDParseException, getPosition)
 {
+	zend_parse_parameters_none();
+
 	RETURN_ZVAL(zend_read_property(
 		php_ce_UUIDParseException,
 		&EX(This),
