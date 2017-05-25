@@ -2082,6 +2082,98 @@ PHP_FUNCTION(ldap_compare)
 }
 /* }}} */
 
+/* {{{ proto bool ldap_control_create(resource link, string oid, mixed value, bool iscritical) */
+PHP_FUNCTION(ldap_control_create)
+{
+	zval *link;
+	zend_bool iscritical, hasoid;
+	ldap_linkdata *ld;
+	char *oid, *value;
+	BerElement *ber = NULL;
+    size_t oid_len, value_len;
+	LDAPControl ctrl, *currcntrls;
+	LDAP *ldap;
+	int rc, myargcount = ZEND_NUM_ARGS();
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rss|b", &link, &oid,  &oid_len, &value, &value_len, &iscritical) != SUCCESS) {
+		php_error_docref(NULL, E_WARNING, "Foo");
+		RETURN_FALSE;
+	}
+
+    if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
+		php_error_docref(NULL, E_WARNING, "Bar");
+		RETURN_FALSE;
+	}
+	ldap = ld->link;
+
+	ber = ber_alloc_t(LBER_USE_DER);
+	if (ber == NULL) {
+		php_error_docref(NULL, E_WARNING, "Unable to alloc BER encoding resources for paged results control");
+		RETURN_FALSE;
+	}
+	ctrl.ldctl_iscritical = 0;
+
+	switch (myargcount) {
+		case 4:
+			ctrl.ldctl_iscritical = iscritical;
+	}
+
+	if (ber_printf(ber, "{s}", value) == LBER_ERROR) {
+		php_error_docref(NULL, E_WARNING, "Unable to BER printf paged results control");
+		RETVAL_FALSE;
+		goto lcpr_error_out;
+	}
+	rc = ber_flatten2(ber, &ctrl.ldctl_value, 0);
+	if (rc == LBER_ERROR) {
+		php_error_docref(NULL, E_WARNING, "Unable to BER encode paged results control");
+		RETVAL_FALSE;
+		goto lcpr_error_out;
+	}
+
+
+	ctrl.ldctl_oid = oid;
+
+//	ldap_get_option(ldap, LDAP_OPT_SERVER_CONTROLS, currcntrls);
+//
+//    // Check whether there's already a Control with the given OID
+//    hasoid = 0;
+//	for (int i = 0; i < sizeof(currcntrls); i++) {
+//        if (strcmp(currcntrls[i].ldctl_oid, oid) == 0) {
+//            hasoid = 1;
+//        }
+//    }
+    int i = 0;
+    LDAPControl* ctrlsp[2];
+//    LDAPControl *ctrlsp[sizeof(currcntrls)+1];
+//    for (; i < sizeof(currcntrls) - 1; i++) {
+//        ctrlsp[i] = &currcntrls[i];
+//    }
+
+    ctrlsp[i++] = &ctrl;
+    ctrlsp[i] = NULL;
+
+
+
+	rc = ldap_set_option(ldap, LDAP_OPT_SERVER_CONTROLS, ctrlsp);
+	if (rc != LDAP_SUCCESS) {
+		php_error_docref(NULL, E_WARNING, "Unable to set paged results control: %s (%d)", ldap_err2string(rc), rc);
+		RETVAL_FALSE;
+		goto lcpr_error_out;
+	}
+	RETVAL_TRUE;
+
+
+
+lcpr_error_out:
+	if (ber != NULL) {
+		ber_free(ber, 1);
+	}
+	return;
+
+
+}
+/* }}} */
+
 /* {{{ proto bool ldap_sort(resource link, resource result, string sortfilter)
    Sort LDAP result entries */
 PHP_FUNCTION(ldap_sort)
@@ -2265,8 +2357,17 @@ PHP_FUNCTION(ldap_get_option)
 			ZVAL_STRING(retval, val);
 			ldap_memfree(val);
 		} break;
+	case LDAP_OPT_SERVER_CONTROLS: {
+
+        LDAPControl *val = NULL;
+
+        if (ldap_get_option(ld->link, option, &val) || val == NULL) {
+            RETURN_FALSE;
+        }
+        zval_ptr_dtor(retval);
+        ZVAL_STRING(retval, val[0].ldctl_oid);
+    } break;
 /* options not implemented
-	case LDAP_OPT_SERVER_CONTROLS:
 	case LDAP_OPT_CLIENT_CONTROLS:
 	case LDAP_OPT_API_INFO:
 	case LDAP_OPT_API_FEATURE_INFO:
@@ -3336,6 +3437,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_sort, 0, 0, 3)
 	ZEND_ARG_INFO(0, sortfilter)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_control_create, 0, 0, 3)
+    ZEND_ARG_INFO(0, link)
+    ZEND_ARG_INFO(0, oid)
+    ZEND_ARG_INFO(0, value)
+    ZEND_ARG_INFO(0, iscritical)
+ZEND_END_ARG_INFO()
+
 #ifdef LDAP_CONTROL_PAGEDRESULTS
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_control_paged_result, 0, 0, 2)
 	ZEND_ARG_INFO(0, link)
@@ -3474,6 +3582,8 @@ const zend_function_entry ldap_functions[] = {
 	PHP_FE(ldap_error,									arginfo_ldap_resource)
 	PHP_FE(ldap_compare,								arginfo_ldap_compare)
 	PHP_DEP_FE(ldap_sort,									arginfo_ldap_sort)
+	PHP_FE(ldap_control_create,                    arginfo_ldap_control_create)
+
 
 #if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || HAVE_ORALDAP
 	PHP_FE(ldap_rename,									arginfo_ldap_rename)
