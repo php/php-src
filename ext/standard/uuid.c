@@ -314,7 +314,12 @@ static zend_always_inline void new_uuid(zval *object, const php_uuid uuid)
 	zend_update_property_stringl(php_ce_UUID, object, UUID_BINARY_PROP, UUID_BINARY_PROP_LEN, uuid, PHP_UUID_LEN);
 }
 
-PHP_METHOD(UUID, __construct) { /* NOOP */ }
+PHP_METHOD(UUID, __construct)
+{
+	/* NOOP */
+}
+ZEND_BEGIN_ARG_INFO(UUID___construct_args, NULL)
+ZEND_END_ARG_INFO()
 
 PHP_METHOD(UUID, fromBinary)
 {
@@ -338,6 +343,9 @@ PHP_METHOD(UUID, fromBinary)
 
 	new_uuid(return_value, input);
 }
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(UUID_fromBinary_args, 0, 1, UUID, 0)
+	ZEND_ARG_TYPE_INFO(0, input, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
 PHP_METHOD(UUID, parse)
 {
@@ -352,6 +360,9 @@ PHP_METHOD(UUID, parse)
 	php_uuid_parse_throw(&uuid, input, input_len);
 	new_uuid(return_value, uuid);
 }
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(UUID_parse_args, 0, 1, UUID, 0)
+	ZEND_ARG_TYPE_INFO(0, input, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
 PHP_METHOD(UUID, v3)
 {
@@ -367,6 +378,10 @@ PHP_METHOD(UUID, v3)
 	php_uuid_create_v3(&uuid, get_bytes(namespace), name, name_len);
 	new_uuid(return_value, uuid);
 }
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(UUID_v3_args, 0, 2, UUID, 0)
+	ZEND_ARG_OBJ_INFO(0, namespace, UUID, 0)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
 PHP_METHOD(UUID, v4)
 {
@@ -375,6 +390,8 @@ PHP_METHOD(UUID, v4)
 		new_uuid(return_value, uuid);
 	}
 }
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_v4_args, UUID, 0)
+ZEND_END_ARG_INFO()
 
 PHP_METHOD(UUID, v5)
 {
@@ -390,15 +407,61 @@ PHP_METHOD(UUID, v5)
 	php_uuid_create_v5(&uuid, get_bytes(namespace), name, name_len);
 	new_uuid(return_value, uuid);
 }
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(UUID_v5_args, 0, 2, UUID, 0)
+	ZEND_ARG_OBJ_INFO(0, namespace, UUID, 0)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
-PHP_METHOD(UUID, NamespaceDNS)  { new_uuid(return_value, PHP_UUID_NAMESPACE_DNS);  }
-PHP_METHOD(UUID, NamespaceOID)  { new_uuid(return_value, PHP_UUID_NAMESPACE_OID);  }
-PHP_METHOD(UUID, NamespaceURL)  { new_uuid(return_value, PHP_UUID_NAMESPACE_URL);  }
-PHP_METHOD(UUID, NamespaceX500) { new_uuid(return_value, PHP_UUID_NAMESPACE_X500); }
-PHP_METHOD(UUID, Nil)           { new_uuid(return_value, PHP_UUID_NIL);            }
+PHP_METHOD(UUID, NamespaceDNS)
+{
+	new_uuid(return_value, PHP_UUID_NAMESPACE_DNS);
+}
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_NamespaceDNS_args, UUID, 0)
+ZEND_END_ARG_INFO()
 
-PHP_METHOD(UUID, __clone) { zend_throw_error(zend_ce_error, "Cannot clone immutable UUID object");                     }
-PHP_METHOD(UUID, __set)   { zend_throw_error(zend_ce_error, "Cannot set dynamic properties on immutable UUID object"); }
+PHP_METHOD(UUID, NamespaceOID)
+{
+	new_uuid(return_value, PHP_UUID_NAMESPACE_OID);
+}
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_NamespaceOID_args, UUID, 0)
+ZEND_END_ARG_INFO()
+
+PHP_METHOD(UUID, NamespaceURL)
+{
+	new_uuid(return_value, PHP_UUID_NAMESPACE_URL);
+}
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_NamespaceURL_args, UUID, 0)
+ZEND_END_ARG_INFO()
+
+PHP_METHOD(UUID, NamespaceX500)
+{
+	new_uuid(return_value, PHP_UUID_NAMESPACE_X500);
+}
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_NamespaceX500_args, UUID, 0)
+ZEND_END_ARG_INFO()
+
+PHP_METHOD(UUID, Nil)
+{
+	new_uuid(return_value, PHP_UUID_NIL);
+}
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_Nil_args, UUID, 0)
+ZEND_END_ARG_INFO()
+
+PHP_METHOD(UUID, __clone)
+{
+	zend_throw_error(zend_ce_error, "Cannot clone immutable UUID object");
+}
+ZEND_BEGIN_ARG_INFO(UUID___clone_args, NULL)
+ZEND_END_ARG_INFO()
+
+PHP_METHOD(UUID, __set)
+{
+	zend_throw_error(zend_ce_error, "Cannot set dynamic properties on immutable UUID object");
+}
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID___set_args, IS_VOID, 0)
+	ZEND_ARG_INFO(0, _)
+	ZEND_ARG_INFO(0, __)
+ZEND_END_ARG_INFO()
 
 PHP_METHOD(UUID, __wakeup)
 {
@@ -414,26 +477,36 @@ PHP_METHOD(UUID, __wakeup)
 		);
 	}
 }
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID___wakeup_args, IS_VOID, 0)
+ZEND_END_ARG_INFO()
 
 PHP_METHOD(UUID, getVariant)
 {
 	RETURN_LONG(php_uuid_get_variant(*get_bytes(&EX(This))));
 }
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_getVariant_args, IS_LONG, 0)
+ZEND_END_ARG_INFO()
 
 PHP_METHOD(UUID, getVersion)
 {
 	RETURN_LONG(php_uuid_get_version(*get_bytes(&EX(This))));
 }
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_getVersion_args, IS_LONG, 0)
+ZEND_END_ARG_INFO()
 
 PHP_METHOD(UUID, isNil)
 {
 	RETURN_BOOL(php_uuid_is_nil(*get_bytes(&EX(This))));
 }
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_isNil_args, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
 
 PHP_METHOD(UUID, toBinary)
 {
 	RETURN_STRINGL(*get_bytes(&EX(This)), PHP_UUID_LEN);
 }
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_toBinary_args, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
 PHP_METHOD(UUID, toHex)
 {
@@ -441,6 +514,8 @@ PHP_METHOD(UUID, toHex)
 	php_uuid_to_hex(&buffer, *get_bytes(&EX(This)));
 	RETURN_STRINGL(buffer, PHP_UUID_HEX_LEN);
 }
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_toHex_args, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
 PHP_METHOD(UUID, toString)
 {
@@ -448,53 +523,6 @@ PHP_METHOD(UUID, toString)
 	php_uuid_to_string(&buffer, *get_bytes(&EX(This)));
 	RETURN_STRINGL(buffer, PHP_UUID_STRING_LEN);
 }
-
-ZEND_BEGIN_ARG_INFO(UUID___construct_args, NULL)
-ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(UUID_fromBinary_args, 0, 1, UUID, 0)
-	ZEND_ARG_TYPE_INFO(0, input, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(UUID_parse_args, 0, 1, UUID, 0)
-	ZEND_ARG_TYPE_INFO(0, input, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(UUID_v3_args, 0, 2, UUID, 0)
-	ZEND_ARG_OBJ_INFO(0, namespace, UUID, 0)
-	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_v4_args, UUID, 0)
-ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(UUID_v5_args, 0, 2, UUID, 0)
-	ZEND_ARG_OBJ_INFO(0, namespace, UUID, 0)
-	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_NamespaceDNS_args, UUID, 0)
-ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_NamespaceOID_args, UUID, 0)
-ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_NamespaceURL_args, UUID, 0)
-ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_NamespaceX500_args, UUID, 0)
-ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_Nil_args, UUID, 0)
-ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_INFO(UUID___clone_args, NULL)
-ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID___set_args, IS_VOID, 0)
-	ZEND_ARG_INFO(0, _)
-	ZEND_ARG_INFO(0, __)
-ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID___wakeup_args, IS_VOID, 0)
-ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_getVariant_args, IS_LONG, 0)
-ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_getVersion_args, IS_LONG, 0)
-ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_isNil_args, _IS_BOOL, 0)
-ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_toBinary_args, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_toHex_args, IS_STRING, 0)
-ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_toString_args, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -547,6 +575,12 @@ PHP_METHOD(UUIDParseException, __construct)
 		zend_update_property_ex(zend_ce_exception, &EX(This), ZSTR_KNOWN(ZEND_STR_PREVIOUS), previous);
 	}
 }
+ZEND_BEGIN_ARG_INFO_EX(UUIDParseException___construct_args, NULL, 0, 2)
+	ZEND_ARG_TYPE_INFO(0, reason, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, input, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, position, IS_LONG, 0)
+	ZEND_ARG_OBJ_INFO(0, previous, Throwable, 1)
+ZEND_END_ARG_INFO()
 
 PHP_METHOD(UUIDParseException, getInput)
 {
@@ -559,8 +593,9 @@ PHP_METHOD(UUIDParseException, getInput)
 		NULL
 	), 1, 0);
 }
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUIDParseException_getInput_args, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
-/* */
 PHP_METHOD(UUIDParseException, getPosition)
 {
 	RETURN_ZVAL(zend_read_property(
@@ -572,15 +607,6 @@ PHP_METHOD(UUIDParseException, getPosition)
 		NULL
 	), 1, 0);
 }
-
-ZEND_BEGIN_ARG_INFO_EX(UUIDParseException___construct_args, NULL, 0, 2)
-	ZEND_ARG_TYPE_INFO(0, reason, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, input, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, position, IS_LONG, 0)
-	ZEND_ARG_OBJ_INFO(0, previous, Throwable, 1)
-ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUIDParseException_getInput_args, IS_STRING, 0)
-ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUIDParseException_getPosition_args, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
