@@ -43,7 +43,7 @@
  * ?>
  * ```
  *
- * @see \UUID::parse()
+ * @see UUID::parse()
  */
 final class UUIDParseException extends Exception {
 	/** @var string */

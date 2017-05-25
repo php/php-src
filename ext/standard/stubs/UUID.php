@@ -256,7 +256,7 @@ final class UUID {
 	 * @param string $input string of exactly 16 bytes to construct the
 	 *     instance from.
 	 * @return UUID instance constructed from the input.
-	 * @throws \InvalidArgumentException if the input is not exactly 16 bytes
+	 * @throws InvalidArgumentException if the input is not exactly 16 bytes
 	 *     long.
 	 */
 	public static function fromBinary(string $input): UUID { }
@@ -520,7 +520,7 @@ final class UUID {
 	 * @see https://php.net/uuid.__wakeup
 	 * @see unserialize()
 	 * @return void
-	 * @throws \UnexpectedValueException if the binary string is not exactly 16
+	 * @throws UnexpectedValueException if the binary string is not exactly 16
 	 *     bytes long.
 	 */
 	public function __wakeup(): void { }
