@@ -21,13 +21,10 @@
 #include "php_uuid.h"
 
 #include "zend_exceptions.h"
+#include "ext/spl/spl_exceptions.h"
 #include "md5.h"
 #include "php_random.h"
 #include "sha1.h"
-
-#ifdef HAVE_SPL
-#	include "ext/spl/spl_exceptions.h"
-#endif
 
 PHPAPI zend_class_entry *php_ce_UUID;
 PHPAPI zend_class_entry *php_ce_UUIDParseException;
