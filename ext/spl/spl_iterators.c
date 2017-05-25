@@ -60,7 +60,6 @@ PHPAPI zend_class_entry *spl_ce_EmptyIterator;
 PHPAPI zend_class_entry *spl_ce_AppendIterator;
 PHPAPI zend_class_entry *spl_ce_RegexIterator;
 PHPAPI zend_class_entry *spl_ce_RecursiveRegexIterator;
-PHPAPI zend_class_entry *spl_ce_Countable;
 PHPAPI zend_class_entry *spl_ce_RecursiveTreeIterator;
 
 ZEND_BEGIN_ARG_INFO(arginfo_recursive_it_void, 0)
@@ -3670,11 +3669,6 @@ static const zend_function_entry spl_funcs_OuterIterator[] = {
 	PHP_FE_END
 };
 
-static const zend_function_entry spl_funcs_Countable[] = {
-	SPL_ABSTRACT_ME(Countable, count,   arginfo_recursive_it_void)
-	PHP_FE_END
-};
-
 /* {{{ PHP_MINIT_FUNCTION(spl_iterators)
  */
 PHP_MINIT_FUNCTION(spl_iterators)
@@ -3729,7 +3723,6 @@ PHP_MINIT_FUNCTION(spl_iterators)
 
 	REGISTER_SPL_SUB_CLASS_EX(ParentIterator, RecursiveFilterIterator, spl_dual_it_new, spl_funcs_ParentIterator);
 
-	REGISTER_SPL_INTERFACE(Countable);
 	REGISTER_SPL_INTERFACE(SeekableIterator);
 	REGISTER_SPL_ITERATOR(SeekableIterator);
 
