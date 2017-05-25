@@ -61,11 +61,27 @@ static const uint8_t UUID_EX_POSITON_PROP_LEN           = sizeof(UUID_EX_POSITIO
 static const char URN_PREFIX[]                          = "urn:uuid:";
 static const uint8_t URN_PREFIX_LEN                     = sizeof(URN_PREFIX) - 1;
 
+/**
+ * Set UUID variant to RFC 4122, the only supported variant.
+ *
+ * @param[out] uuid to set the variant.
+ */
 static zend_always_inline void set_variant_rfc4122(php_uuid *uuid)
 {
 	(*uuid)[8] = ((*uuid)[8] & 0x3F) | 0x80;
 }
 
+/**
+ * Set UUID version.
+ *
+ * @see PHP_UUID_VERSION_1_TIME_BASED
+ * @see PHP_UUID_VERSION_2_DCE_SECURITY
+ * @see PHP_UUID_VERSION_3_NAME_BASED_MD5
+ * @see PHP_UUID_VERSION_4_RANDOM
+ * @see PHP_UUID_VERSION_5_NAME_BASED_SHA1
+ * @param[out] uuid to set the version.
+ * @param[in] version to set.
+ */
 static zend_always_inline void php_uuid_set_version(php_uuid *uuid, const uint8_t version)
 {
 	assert(PHP_UUID_VERSION_MIN <= version && version <= PHP_UUID_VERSION_MAX);
@@ -73,6 +89,15 @@ static zend_always_inline void php_uuid_set_version(php_uuid *uuid, const uint8_
 	(*uuid)[6] = ((*uuid)[6] & 0x0F) | (version << 4);
 }
 
+/**
+ * Throw UUIDParseException.
+ *
+ * @param[in] input that could not be parsed.
+ * @param[in] input_len
+ * @param[in] position at which parsing failed.
+ * @param[in] reason why parsing failed.
+ * @param[in] ... arguments to format the reason.
+ */
 static ZEND_COLD zend_object *throw_uuid_parse_exception(const char *input, const size_t input_len, const size_t position, const char *reason, ...)
 {
 	va_list format_args;
@@ -93,6 +118,14 @@ static ZEND_COLD zend_object *throw_uuid_parse_exception(const char *input, cons
 	return object;
 }
 
+/**
+ * Throw UUIDParseException because of insufficient input.
+ *
+ * @param[in] input that could not be parsed.
+ * @param[in] input_len
+ * @param[in] position at which parsing failed.
+ * @param[in] actual amount of characters that were found.
+ */
 static zend_always_inline zend_object *throw_uuid_parse_exception_invalid_len(const char *input, const size_t input_len, const size_t position, const size_t actual)
 {
 	return throw_uuid_parse_exception(
@@ -105,6 +138,13 @@ static zend_always_inline zend_object *throw_uuid_parse_exception_invalid_len(co
 	);
 }
 
+/**
+ * Throw UUIDParseException because of an invalid character.
+ *
+ * @param[in] input that could not be parsed.
+ * @param[in] input_len
+ * @param[in] position at which parsing failed.
+ */
 static zend_always_inline zend_object *throw_uuid_parse_exception_invalid_char(const char *input, const size_t input_len, const size_t position)
 {
 	return throw_uuid_parse_exception(
@@ -303,24 +343,38 @@ PHPAPI zend_always_inline void php_uuid_to_string(php_uuid_string *buffer, const
 	);
 }
 
+/**
+ * Get the UUID's bytes from the private property.
+ *
+ * @param[in] object to get the bytes from.
+ */
 static zend_always_inline php_uuid *get_bytes(/*const*/ zval *object)
 {
 	return (php_uuid *) Z_STRVAL_P(zend_read_property(php_ce_UUID, object, UUID_BINARY_PROP, UUID_BINARY_PROP_LEN, 1, NULL));
 }
 
+/**
+ * Construct new UUID instance.
+ *
+ * @param[out] object to store the UUID instance int.
+ * @param[in] uuid to construct the instance from.
+ */
 static zend_always_inline void new_uuid(zval *object, const php_uuid uuid)
 {
 	object_init_ex(object, php_ce_UUID);
 	zend_update_property_stringl(php_ce_UUID, object, UUID_BINARY_PROP, UUID_BINARY_PROP_LEN, uuid, PHP_UUID_LEN);
 }
 
+/* private function __construct() {{{ */
 PHP_METHOD(UUID, __construct)
 {
 	/* NOOP */
 }
 ZEND_BEGIN_ARG_INFO(UUID___construct_args, NULL)
 ZEND_END_ARG_INFO()
+/* }}} */
 
+/* public static function fromBinary(string $input): UUID {{{ */
 PHP_METHOD(UUID, fromBinary)
 {
 	char *input = NULL;
@@ -346,7 +400,9 @@ PHP_METHOD(UUID, fromBinary)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(UUID_fromBinary_args, 0, 1, UUID, 0)
 	ZEND_ARG_TYPE_INFO(0, input, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+/* }}} */
 
+/* public static function parse(string $input): UUID {{{ */
 PHP_METHOD(UUID, parse)
 {
 	char *input = NULL;
@@ -363,7 +419,9 @@ PHP_METHOD(UUID, parse)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(UUID_parse_args, 0, 1, UUID, 0)
 	ZEND_ARG_TYPE_INFO(0, input, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+/* }}} */
 
+/* public static function v3(UUID $namespace, string $name): UUID {{{ */
 PHP_METHOD(UUID, v3)
 {
 	zval *namespace = NULL;
@@ -382,7 +440,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(UUID_v3_args, 0, 2, UUID, 0)
 	ZEND_ARG_OBJ_INFO(0, namespace, UUID, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+/* }}} */
 
+/* public static function v4(): UUID {{{ */
 PHP_METHOD(UUID, v4)
 {
 	php_uuid uuid;
@@ -395,7 +455,9 @@ PHP_METHOD(UUID, v4)
 }
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_v4_args, UUID, 0)
 ZEND_END_ARG_INFO()
+/* }}} */
 
+/* public static function v5(UUID $namespace, string $name): UUID {{{ */
 PHP_METHOD(UUID, v5)
 {
 	zval *namespace = NULL;
@@ -414,7 +476,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(UUID_v5_args, 0, 2, UUID, 0)
 	ZEND_ARG_OBJ_INFO(0, namespace, UUID, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+/* }}} */
 
+/* public static function NamespaceDNS(): UUID {{{ */
 PHP_METHOD(UUID, NamespaceDNS)
 {
 	zend_parse_parameters_none();
@@ -423,7 +487,9 @@ PHP_METHOD(UUID, NamespaceDNS)
 }
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_NamespaceDNS_args, UUID, 0)
 ZEND_END_ARG_INFO()
+/* }}} */
 
+/* public static function NamespaceOID(): UUID {{{ */
 PHP_METHOD(UUID, NamespaceOID)
 {
 	zend_parse_parameters_none();
@@ -432,7 +498,9 @@ PHP_METHOD(UUID, NamespaceOID)
 }
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_NamespaceOID_args, UUID, 0)
 ZEND_END_ARG_INFO()
+/* }}} */
 
+/* public static function NamespaceURL(): UUID {{{ */
 PHP_METHOD(UUID, NamespaceURL)
 {
 	zend_parse_parameters_none();
@@ -441,7 +509,9 @@ PHP_METHOD(UUID, NamespaceURL)
 }
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_NamespaceURL_args, UUID, 0)
 ZEND_END_ARG_INFO()
+/* }}} */
 
+/* public static function NamespaceX500(): UUID {{{ */
 PHP_METHOD(UUID, NamespaceX500)
 {
 	zend_parse_parameters_none();
@@ -450,7 +520,9 @@ PHP_METHOD(UUID, NamespaceX500)
 }
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_NamespaceX500_args, UUID, 0)
 ZEND_END_ARG_INFO()
+/* }}} */
 
+/* public static function Nil(): UUID {{{ */
 PHP_METHOD(UUID, Nil)
 {
 	zend_parse_parameters_none();
@@ -459,14 +531,18 @@ PHP_METHOD(UUID, Nil)
 }
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_Nil_args, UUID, 0)
 ZEND_END_ARG_INFO()
+/* }}} */
 
+/* private function __clone() {{{ */
 PHP_METHOD(UUID, __clone)
 {
 	zend_throw_error(zend_ce_error, "Cannot clone immutable UUID object");
 }
 ZEND_BEGIN_ARG_INFO(UUID___clone_args, NULL)
 ZEND_END_ARG_INFO()
+/* }}} */
 
+/* public function __set($_, $__): void {{{ */
 PHP_METHOD(UUID, __set)
 {
 	zend_throw_error(zend_ce_error, "Cannot set dynamic properties on immutable UUID object");
@@ -475,7 +551,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID___set_args, IS_VOID, 0)
 	ZEND_ARG_INFO(0, _)
 	ZEND_ARG_INFO(0, __)
 ZEND_END_ARG_INFO()
+/* }}} */
 
+/* public function __wakeup(): void {{{ */
 PHP_METHOD(UUID, __wakeup)
 {
 	size_t len = Z_STRLEN_P(zend_read_property(php_ce_UUID, &EX(This), UUID_BINARY_PROP, UUID_BINARY_PROP_LEN, 1, NULL));
@@ -495,7 +573,9 @@ PHP_METHOD(UUID, __wakeup)
 }
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID___wakeup_args, IS_VOID, 0)
 ZEND_END_ARG_INFO()
+/* }}} */
 
+/* public function getVaraitn(): int {{{ */
 PHP_METHOD(UUID, getVariant)
 {
 	zend_parse_parameters_none();
@@ -504,7 +584,9 @@ PHP_METHOD(UUID, getVariant)
 }
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_getVariant_args, IS_LONG, 0)
 ZEND_END_ARG_INFO()
+/* }}} */
 
+/* public function getVersion(): int {{{ */
 PHP_METHOD(UUID, getVersion)
 {
 	zend_parse_parameters_none();
@@ -513,7 +595,9 @@ PHP_METHOD(UUID, getVersion)
 }
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_getVersion_args, IS_LONG, 0)
 ZEND_END_ARG_INFO()
+/* }}} */
 
+/* public function isNil(): bool {{{ */
 PHP_METHOD(UUID, isNil)
 {
 	zend_parse_parameters_none();
@@ -522,7 +606,9 @@ PHP_METHOD(UUID, isNil)
 }
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_isNil_args, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
+/* }}} */
 
+/* public function toBinary(): string {{{ */
 PHP_METHOD(UUID, toBinary)
 {
 	zend_parse_parameters_none();
@@ -531,7 +617,9 @@ PHP_METHOD(UUID, toBinary)
 }
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_toBinary_args, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+/* }}} */
 
+/* public function toHex(): string {{{ */
 PHP_METHOD(UUID, toHex)
 {
 	php_uuid_hex buffer;
@@ -543,7 +631,9 @@ PHP_METHOD(UUID, toHex)
 }
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_toHex_args, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+/* }}} */
 
+/* public function toString(): string {{{ */
 PHP_METHOD(UUID, toString)
 {
 	php_uuid_string buffer;
@@ -555,6 +645,7 @@ PHP_METHOD(UUID, toString)
 }
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_toString_args, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+/* }}} */
 
 static const zend_function_entry uuid_methods[] = {
 	PHP_ME(UUID, __construct,   UUID___construct_args,   ZEND_ACC_PRIVATE)
@@ -580,6 +671,7 @@ static const zend_function_entry uuid_methods[] = {
 	PHP_FE_END
 };
 
+/* public function __construct(string $reason, string $input, int $position = 0, ?Throwable $previous = null) {{{ */
 PHP_METHOD(UUIDParseException, __construct)
 {
 	zval *reason   = NULL;
@@ -611,7 +703,9 @@ ZEND_BEGIN_ARG_INFO_EX(UUIDParseException___construct_args, NULL, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, position, IS_LONG, 0)
 	ZEND_ARG_OBJ_INFO(0, previous, Throwable, 1)
 ZEND_END_ARG_INFO()
+/* }}} */
 
+/* public function getInput(): string {{{ */
 PHP_METHOD(UUIDParseException, getInput)
 {
 	zend_parse_parameters_none();
@@ -627,7 +721,9 @@ PHP_METHOD(UUIDParseException, getInput)
 }
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUIDParseException_getInput_args, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+/* }}} */
 
+/* public function getPosition(): int {{{ */
 PHP_METHOD(UUIDParseException, getPosition)
 {
 	zend_parse_parameters_none();
@@ -643,6 +739,7 @@ PHP_METHOD(UUIDParseException, getPosition)
 }
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUIDParseException_getPosition_args, IS_LONG, 0)
 ZEND_END_ARG_INFO()
+/* }}} */
 
 static const zend_function_entry uuid_parse_exception_methods[] = {
 	PHP_ME(UUIDParseException, __construct, UUIDParseException___construct_args, ZEND_ACC_PUBLIC)
