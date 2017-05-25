@@ -32,6 +32,7 @@
 #define spl_ce_Aggregate     zend_ce_aggregate
 #define spl_ce_ArrayAccess   zend_ce_arrayaccess
 #define spl_ce_Serializable  zend_ce_serializable
+#define spl_ce_Countable     zend_ce_countable
 
 extern PHPAPI zend_class_entry *spl_ce_RecursiveIterator;
 extern PHPAPI zend_class_entry *spl_ce_RecursiveIteratorIterator;
@@ -51,7 +52,6 @@ extern PHPAPI zend_class_entry *spl_ce_EmptyIterator;
 extern PHPAPI zend_class_entry *spl_ce_AppendIterator;
 extern PHPAPI zend_class_entry *spl_ce_RegexIterator;
 extern PHPAPI zend_class_entry *spl_ce_RecursiveRegexIterator;
-extern PHPAPI zend_class_entry *spl_ce_Countable;
 extern PHPAPI zend_class_entry *spl_ce_CallbackFilterIterator;
 extern PHPAPI zend_class_entry *spl_ce_RecursiveCallbackFilterIterator;
 
