@@ -26,55 +26,17 @@
 PHP_FUNCTION(gettype)
 {
 	zval *arg;
+	zend_string *type;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_ZVAL_DEREF(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	switch (Z_TYPE_P(arg)) {
-		case IS_NULL:
-			RETVAL_STRING("NULL");
-			break;
-
-		case IS_FALSE:
-		case IS_TRUE:
-			RETVAL_STRING("boolean");
-			break;
-
-		case IS_LONG:
-			RETVAL_STRING("integer");
-			break;
-
-		case IS_DOUBLE:
-			RETVAL_STRING("double");
-			break;
-
-		case IS_STRING:
-			RETVAL_STRING("string");
-			break;
-
-		case IS_ARRAY:
-			RETVAL_STRING("array");
-			break;
-
-		case IS_OBJECT:
-			RETVAL_STRING("object");
-			break;
-
-		case IS_RESOURCE:
-			{
-				const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(arg));
-
-				if (type_name) {
-					RETVAL_STRING("resource");
-				} else {
-					RETVAL_STRING("resource (closed)");
-				}
-				break;
-			}
-
-		default:
-			RETVAL_STRING("unknown type");
+	type = zend_zval_get_type(arg);
+	if (EXPECTED(type)) {
+		RETURN_INTERNED_STR(type);
+	} else {
+		RETURN_STRING("unknown type");
 	}
 }
 /* }}} */

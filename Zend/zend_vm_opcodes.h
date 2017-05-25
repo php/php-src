@@ -262,7 +262,10 @@ END_EXTERN_C()
 #define ZEND_SWITCH_STRING                   188
 #define ZEND_IN_ARRAY                        189
 #define ZEND_COUNT                           190
+#define ZEND_GET_CLASS                       191
+#define ZEND_GET_CALLED_CLASS                192
+#define ZEND_GET_TYPE                        193
 
-#define ZEND_VM_LAST_OPCODE                  190
+#define ZEND_VM_LAST_OPCODE                  193
 
 #endif

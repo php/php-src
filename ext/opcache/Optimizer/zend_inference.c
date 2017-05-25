@@ -3163,6 +3163,13 @@ static void zend_update_type_info(const zend_op_array *op_array,
 		case ZEND_COUNT:
 			UPDATE_SSA_TYPE(MAY_BE_LONG, ssa_ops[i].result_def);
 			break;
+		case ZEND_GET_CLASS:
+		case ZEND_GET_CALLED_CLASS:
+			UPDATE_SSA_TYPE(MAY_BE_FALSE|MAY_BE_STRING, ssa_ops[i].result_def);
+			break;
+		case ZEND_GET_TYPE:
+			UPDATE_SSA_TYPE(MAY_BE_STRING, ssa_ops[i].result_def);
+			break;
 		case ZEND_TYPE_CHECK:
 		case ZEND_DEFINED:
 			UPDATE_SSA_TYPE(MAY_BE_FALSE|MAY_BE_TRUE, ssa_ops[i].result_def);

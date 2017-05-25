@@ -416,6 +416,13 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_PATH,                   "path") \
 	_(ZEND_STR_QUERY,                  "query") \
 	_(ZEND_STR_FRAGMENT,               "fragment") \
+	_(ZEND_STR_NULL,                   "NULL") \
+	_(ZEND_STR_BOOLEAN,                "boolean") \
+	_(ZEND_STR_INTEGER,                "integer") \
+	_(ZEND_STR_DOUBLE,                 "double") \
+	_(ZEND_STR_ARRAY,                  "array") \
+	_(ZEND_STR_RESOURCE,               "resource") \
+	_(ZEND_STR_CLOSED_RESOURCE,        "resource (closed)") \
 
 
 typedef enum _zend_known_string_id {

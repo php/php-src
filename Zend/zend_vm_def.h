@@ -8188,6 +8188,75 @@ ZEND_VM_HANDLER(190, ZEND_COUNT, CONST|TMP|VAR|CV, UNUSED)
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+ZEND_VM_HANDLER(191, ZEND_GET_CLASS, UNUSED|CONST|TMP|VAR|CV, UNUSED)
+{
+	USE_OPLINE
+
+	if (OP1_TYPE == IS_UNUSED) {
+		if (UNEXPECTED(!EX(func)->common.scope)) {
+			SAVE_OPLINE();
+			zend_error(E_WARNING, "get_class() called without object from outside a class");
+			ZVAL_FALSE(EX_VAR(opline->result.var));
+			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+		} else {
+			ZVAL_STR_COPY(EX_VAR(opline->result.var), EX(func)->common.scope->name);
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else {
+		zend_free_op free_op1;
+		zval *op1;
+
+		SAVE_OPLINE();
+		op1 = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
+		if (Z_TYPE_P(op1) == IS_OBJECT) {
+			ZVAL_STR_COPY(EX_VAR(opline->result.var), Z_OBJCE_P(op1)->name);
+		} else {
+			zend_error(E_WARNING, "get_class() expects parameter 1 to be object, %s given", zend_get_type_by_const(Z_TYPE_P(op1)));
+			ZVAL_FALSE(EX_VAR(opline->result.var));
+		}
+		FREE_OP1();
+		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+	}
+}
+
+ZEND_VM_HANDLER(192, ZEND_GET_CALLED_CLASS, UNUSED, UNUSED)
+{
+	USE_OPLINE
+
+	if (Z_TYPE(EX(This)) == IS_OBJECT) {
+		ZVAL_STR_COPY(EX_VAR(opline->result.var), Z_OBJCE(EX(This))->name);
+	} else if (Z_CE(EX(This))) {
+		ZVAL_STR_COPY(EX_VAR(opline->result.var), Z_CE(EX(This))->name);
+	} else {
+		ZVAL_FALSE(EX_VAR(opline->result.var));
+		if (UNEXPECTED(!EX(func)->common.scope)) {
+			SAVE_OPLINE();
+			zend_error(E_WARNING, "get_called_class() called from outside a class");
+			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+		}
+	}
+	ZEND_VM_NEXT_OPCODE();
+}
+
+ZEND_VM_HANDLER(193, ZEND_GET_TYPE, CONST|TMP|VAR|CV, UNUSED)
+{
+	USE_OPLINE
+	zend_free_op free_op1;
+	zval *op1;
+	zend_string *type;
+
+	SAVE_OPLINE();
+	op1 = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
+	type = zend_zval_get_type(op1);
+	if (EXPECTED(type)) {
+		ZVAL_INTERNED_STR(EX_VAR(opline->result.var), type);
+	} else {
+		ZVAL_STRING(EX_VAR(opline->result.var), "unknown type");
+	}
+	FREE_OP1();
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_ADD, (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG), ZEND_ADD_LONG_NO_OVERFLOW, CONST|TMPVARCV, CONST|TMPVARCV, SPEC(NO_CONST_CONST,COMMUTATIVE))
 {
 	USE_OPLINE
