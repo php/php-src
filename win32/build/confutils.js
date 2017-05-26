@@ -2240,6 +2240,7 @@ function generate_phpize()
 	prefix = prefix.replace(new RegExp("/", "g"), "\\");
 	prefix = prefix.replace(new RegExp("\\\\", "g"), "\\\\");
 	MF.WriteLine("var PHP_PREFIX=" + '"' + prefix + '"');
+	MF.WriteLine("var PHP_DEBUG=" + '"' + PHP_DEBUG + '"');
 	MF.WriteLine("var PHP_ZTS=" + '"' + (PHP_ZTS.toLowerCase() == "yes" ? "Yes" : "No") + '"');
 	MF.WriteLine("var VC_VERSION=" + VCVERS);
 	MF.WriteLine("var PHP_VERSION=" + PHP_VERSION);
