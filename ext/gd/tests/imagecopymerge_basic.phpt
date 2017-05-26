@@ -3,6 +3,9 @@ Testing imagecopymerge() of GD library
 --CREDITS--
 Cleston Viel Vieira de Sousa <cleston [dot] vs [at] gmail [dot] com>
 #testfest PHPSP on 2009-06-20
+
+Updated by Sean Fraaser <frasmage [at] gmail [dot] com>
+PHP[tek] 2017
 --SKIPIF--
 <?php 
 if (!extension_loaded("gd")) die("skip GD not present");
@@ -26,6 +29,6 @@ $rgb = imagecolorsforindex($des, $color);
 echo $rgb['red'], ", ", $rgb['green'], ", ", $rgb['blue'], "\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 203, 203, 241

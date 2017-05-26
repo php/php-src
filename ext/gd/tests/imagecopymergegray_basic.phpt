@@ -2,7 +2,7 @@
 Testing imagecopymergegray() of GD library
 --CREDITS--
 Sean Fraser <frasmage [at] gmail [dot] com>
-# PHP[tek] 2017
+PHP[tek] 2017
 --SKIPIF--
 <?php 
 if (!extension_loaded("gd")) die("skip GD not present");
