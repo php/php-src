@@ -60,6 +60,8 @@ final class UUIDParseException extends Exception {
 	 * @param int $position at which parsing failed.
 	 * @param Throwable|null $previous error/exception that lead to this
 	 *     failure, if any.
+	 * @throws ArgumentCountError if less than two or more than four arguments
+	 *     are passed.
 	 */
 	public function __construct(string $reason, string $input, int $position = 0, ?Throwable $previous = null) { }
 
@@ -67,6 +69,7 @@ final class UUIDParseException extends Exception {
 	 * Get the original input string that should have been parsed as a UUID.
 	 *
 	 * @return string
+	 * @throws ArgumentCountError if arguments are passed.
 	 */
 	public function getInput(): string { }
 
@@ -74,6 +77,7 @@ final class UUIDParseException extends Exception {
 	 * Get the position in the input string where the parsing failure occurred.
 	 *
 	 * @return int
+	 * @throws ArgumentCountError if arguments are passed.
 	 */
 	public function getPosition(): int { }
 }

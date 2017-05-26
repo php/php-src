@@ -77,7 +77,8 @@
  * assert($uuid->getVariant() === UUID::VARIANT_RFC4122);
  * assert($uuid->getVersion() === UUID::VERSION_1_TIME_BASED);
  *
- * assert($uuid->toBinary() === "\x12\x3E\x45\x67\xE8\x9B\x12\xD3\xA4\x56\x42\x66\x55\x44\x00\x00");
+ * assert($uuid->toBinary() ===
+ * "\x12\x3E\x45\x67\xE8\x9B\x12\xD3\xA4\x56\x42\x66\x55\x44\x00\x00");
  * assert($uuid->toHex() === '123e4567e89b12d3a456426655440000');
  * assert($uuid->toString() === '123e4567-e89b-12d3-a456-426655440000');
  *
@@ -256,6 +257,7 @@ final class UUID {
 	 * @param string $input string of exactly 16 bytes to construct the
 	 *     instance from.
 	 * @return UUID instance constructed from the input.
+	 * @throws ArgumentCountError if less or more than one argument is passed.
 	 * @throws InvalidArgumentException if the input is not exactly 16 bytes
 	 *     long.
 	 */
@@ -289,8 +291,7 @@ final class UUID {
 	 * UUID::parse('{01234567-89ab-cdef-0123-456789abcdef}');
 	 *
 	 * // Leading and trailing garbage is ignored, so are extraneous hyphens.
-	 * UUID::parse(" \t ---- {
-	 * urn:uuid:----0123-4567-89ab-cdef-0123-4567-89ab-cdef---- } ---- \t ");
+	 * UUID::parse(" \t ---- { urn:uuid:----0123-4567-89ab-cdef-0123-4567-89ab-cdef---- } ---- \t ");
 	 *
 	 * // However, note that there cannot be whitespace or braces between the
 	 * // URN scheme and the UUID itUUID.
@@ -298,8 +299,7 @@ final class UUID {
 	 *     UUID::parse('urn:uuid:{01234567-89ab-cdef-0123-456789abcdef');
 	 * }
 	 * catch (UUIDParseException $e) {
-	 *     assert($e->getMessage() === 'Expected hexadecimal digit, but found
-	 * '{' (0x7b)');
+	 *     assert($e->getMessage() === 'Expected hexadecimal digit, but found '{' (0x7b)');
 	 * }
 	 *
 	 * ?>
@@ -311,6 +311,7 @@ final class UUID {
 	 * @see toString
 	 * @param string $input to parse as UUID and construct the instance from.
 	 * @return UUID constructed from the parsed input.
+	 * @throws ArgumentCountError if less or more than one argument is passed.
 	 * @throws UUIDParseException if parsing of the input fails.
 	 */
 	public static function parse(string $input): UUID { }
@@ -348,7 +349,8 @@ final class UUID {
 	 * assert($uuid->getVariant() === UUID::VARIANT_RFC4122);
 	 * assert($uuid->getVersion() === UUID::VERSION_3_NAME_BASED_MD5);
 	 * assert($uuid->toString()   === '11a38b9a-b3da-360f-9353-a5a725514269');
-	 * assert($uuid               == UUID::v3(UUID::NamespaceDNS(), 'php.net'));
+	 * assert($uuid               == UUID::v3(UUID::NamespaceDNS(),
+	 * 'php.net'));
 	 *
 	 * ?>
 	 * ```
@@ -360,6 +362,7 @@ final class UUID {
 	 * @param UUID $namespace to construct the UUID in.
 	 * @param string $name to construct the UUID from.
 	 * @return UUID
+	 * @throws ArgumentCountError if less or more than two arguments are passed.
 	 */
 	public static function v3(UUID $namespace, string $name): UUID { }
 
@@ -393,6 +396,7 @@ final class UUID {
 	 * @see https://en.wikipedia.org/wiki/Universally_unique_identifier#Version_4_.28random.29
 	 * @return UUID
 	 * @throws Exception if it was not possible to gather sufficient entropy.
+	 * @throws ArgumentCountError if arguments are passed.
 	 */
 	public static function v4(): UUID { }
 
@@ -424,7 +428,8 @@ final class UUID {
 	 * assert($uuid->getVariant() === UUID::VARIANT_RFC4122);
 	 * assert($uuid->getVersion() === UUID::VERSION_5_NAME_BASED_SHA1);
 	 * assert($uuid->toString()   === 'c4a760a8-dbcf-5254-a0d9-6a4474bd1b62');
-	 * assert($uuid               == UUID::v5(UUID::NamespaceDNS(), 'php.net'));
+	 * assert($uuid               == UUID::v5(UUID::NamespaceDNS(),
+	 * 'php.net'));
 	 *
 	 * ?>
 	 * ```
@@ -436,6 +441,7 @@ final class UUID {
 	 * @param UUID $namespace to construct the UUID in.
 	 * @param string $name to construct the UUID from.
 	 * @return UUID
+	 * @throws ArgumentCountError if less or more than two arguments are passed.
 	 */
 	public static function v5(UUID $namespace, string $name): UUID { }
 
@@ -447,6 +453,7 @@ final class UUID {
 	 * @see https://tools.ietf.org/html/rfc4122#appendix-C
 	 * @see https://en.wikipedia.org/wiki/Domain_Name_System
 	 * @return UUID
+	 * @throws ArgumentCountError if arguments are passed.
 	 */
 	public static function NamespaceDNS(): UUID { }
 
@@ -458,6 +465,7 @@ final class UUID {
 	 * @see https://tools.ietf.org/html/rfc4122#appendix-C
 	 * @see https://en.wikipedia.org/wiki/Object_identifier
 	 * @return UUID
+	 * @throws ArgumentCountError if arguments are passed.
 	 */
 	public static function NamespaceOID(): UUID { }
 
@@ -469,6 +477,7 @@ final class UUID {
 	 * @see https://tools.ietf.org/html/rfc4122#appendix-C
 	 * @see https://en.wikipedia.org/wiki/URL
 	 * @return UUID
+	 * @throws ArgumentCountError if arguments are passed.
 	 */
 	public static function NamespaceURL(): UUID { }
 
@@ -483,6 +492,7 @@ final class UUID {
 	 * @see https://en.wikipedia.org/wiki/X.500
 	 * @see https://en.wikipedia.org/wiki/Lightweight_Directory_Access_Protocol
 	 * @return UUID
+	 * @throws ArgumentCountError if arguments are passed.
 	 */
 	public static function NamespaceX500(): UUID { }
 
@@ -494,6 +504,7 @@ final class UUID {
 	 * @see https://tools.ietf.org/html/rfc4122#section-4.1.7
 	 * @see https://en.wikipedia.org/wiki/Universally_unique_identifier#Nil_UUID
 	 * @return UUID
+	 * @throws ArgumentCountError if arguments are passed.
 	 */
 	public static function Nil(): UUID { }
 
@@ -520,6 +531,7 @@ final class UUID {
 	 * @see https://php.net/uuid.__wakeup
 	 * @see unserialize()
 	 * @return void
+	 * @throws ArgumentCountError if arguments are passed.
 	 * @throws UnexpectedValueException if the binary string is not exactly 16
 	 *     bytes long.
 	 */
@@ -542,6 +554,7 @@ final class UUID {
 	 * @see UUID::VARIANT_FUTURE_RESERVED
 	 * @returns int An integer in [0, 3] where each value corresponds to one of
 	 *     the `UUID::VARIANT_*` class constants.
+	 * @throws ArgumentCountError if arguments are passed.
 	 */
 	public function getVariant(): int { }
 
@@ -566,6 +579,7 @@ final class UUID {
 	 * @return int An integer in [0, 15], the values [1, 5] correspond to one
 	 *     of the `UUID::VERSION_*` class constants. The others are not defined
 	 *     in RFC 4122.
+	 * @throws ArgumentCountError if arguments are passed.
 	 */
 	public function getVersion(): int { }
 
@@ -580,6 +594,7 @@ final class UUID {
 	 * @see Nil
 	 * @return bool **TRUE** if this is the special nil UUID; **FALSE**
 	 *     otherwise.
+	 * @throws ArgumentCountError if arguments are passed.
 	 */
 	public function isNil(): bool { }
 
@@ -597,7 +612,8 @@ final class UUID {
 	 * <?php
 	 *
 	 * $uuid = UUID::NamespaceDNS();
-	 * assert($uuid->toBinary() === "\x6b\xa7\xb8\x10\x9d\xad\x11\xd1\x80\xb4\x00\xc0\x4f\xd4\x30\xc8");
+	 * assert($uuid->toBinary() ===
+	 * "\x6b\xa7\xb8\x10\x9d\xad\x11\xd1\x80\xb4\x00\xc0\x4f\xd4\x30\xc8");
 	 *
 	 * ?>
 	 * ```
@@ -605,6 +621,7 @@ final class UUID {
 	 * @since 7.2
 	 * @see https://php.net/uuid.toBinary
 	 * @return string
+	 * @throws ArgumentCountError if arguments are passed.
 	 */
 	public function toBinary(): string { }
 
@@ -628,6 +645,7 @@ final class UUID {
 	 * @since 7.2
 	 * @see https://php.net/uuid.toHex
 	 * @return string
+	 * @throws ArgumentCountError if arguments are passed.
 	 */
 	public function toHex(): string { }
 
@@ -654,6 +672,7 @@ final class UUID {
 	 * @see https://tools.ietf.org/html/rfc4122#page-4
 	 * @see https://en.wikipedia.org/wiki/Universally_unique_identifier#Format
 	 * @return string
+	 * @throws ArgumentCountError if arguments are passed.
 	 */
 	public function toString(): string { }
 
