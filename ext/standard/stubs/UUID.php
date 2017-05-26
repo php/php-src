@@ -77,8 +77,7 @@
  * assert($uuid->getVariant() === UUID::VARIANT_RFC4122);
  * assert($uuid->getVersion() === UUID::VERSION_1_TIME_BASED);
  *
- * assert($uuid->toBinary() ===
- * "\x12\x3E\x45\x67\xE8\x9B\x12\xD3\xA4\x56\x42\x66\x55\x44\x00\x00");
+ * assert($uuid->toBinary() === "\x12\x3E\x45\x67\xE8\x9B\x12\xD3\xA4\x56\x42\x66\x55\x44\x00\x00");
  * assert($uuid->toHex() === '123e4567e89b12d3a456426655440000');
  * assert($uuid->toString() === '123e4567-e89b-12d3-a456-426655440000');
  *
@@ -268,17 +267,15 @@ final class UUID {
 	 *
 	 * The following UUID representations are parsable:
 	 *
-	 * - hexadecimal representations (`aaaaaaaabbbbccccddddeeeeeeeeeeeee`),
-	 * - string representations (`aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeeee`),
+	 * - hexadecimal (`aaaaaaaabbbbccccddddeeeeeeeeeeeee`),
+	 * - string (`aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeeee`),
 	 * - URNs (`urn:uuid:aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeeee`), and
-	 * - Microsoft representations (`{aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeeee}`).
+	 * - Microsoft (`{aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeeee}`).
 	 *
 	 * Leading and trailing whitespace, namely spaces (` `) and tabs (`\t`), is
 	 * ignored, so are leading opening braces (`{`) and trailing closing braces
 	 * (`}`). Hyphens (`-`) are ignored everywhere. The parsing algorithm
-	 * follows the [robustness
-	 * principle](https://en.wikipedia.org/wiki/Robustness_principle) and is
-	 * not meant for validation.
+	 * follows the [robustness principle][wrp] and is not meant for validation.
 	 *
 	 * ## Examples
 	 * ```
@@ -305,6 +302,7 @@ final class UUID {
 	 * ?>
 	 * ```
 	 *
+	 * [wrp]: https://en.wikipedia.org/wiki/Robustness_principle
 	 * @since 7.2
 	 * @see https://php.net/uuid.parse
 	 * @see toHex
@@ -349,8 +347,7 @@ final class UUID {
 	 * assert($uuid->getVariant() === UUID::VARIANT_RFC4122);
 	 * assert($uuid->getVersion() === UUID::VERSION_3_NAME_BASED_MD5);
 	 * assert($uuid->toString()   === '11a38b9a-b3da-360f-9353-a5a725514269');
-	 * assert($uuid               == UUID::v3(UUID::NamespaceDNS(),
-	 * 'php.net'));
+	 * assert($uuid               ==  UUID::v3(UUID::NamespaceDNS(), 'php.net'));
 	 *
 	 * ?>
 	 * ```
@@ -385,7 +382,7 @@ final class UUID {
 	 * assert($uuid->isNil()      === false);
 	 * assert($uuid->getVariant() === UUID::VARIANT_RFC4122);
 	 * assert($uuid->getVersion() === UUID::VERSION_4_RANDOM);
-	 * assert($uuid               != UUID::v4());
+	 * assert($uuid               !=  UUID::v4());
 	 *
 	 * ?>
 	 * ```
@@ -428,8 +425,7 @@ final class UUID {
 	 * assert($uuid->getVariant() === UUID::VARIANT_RFC4122);
 	 * assert($uuid->getVersion() === UUID::VERSION_5_NAME_BASED_SHA1);
 	 * assert($uuid->toString()   === 'c4a760a8-dbcf-5254-a0d9-6a4474bd1b62');
-	 * assert($uuid               == UUID::v5(UUID::NamespaceDNS(),
-	 * 'php.net'));
+	 * assert($uuid               ==  UUID::v5(UUID::NamespaceDNS(), 'php.net'));
 	 *
 	 * ?>
 	 * ```
@@ -611,9 +607,7 @@ final class UUID {
 	 * ```
 	 * <?php
 	 *
-	 * $uuid = UUID::NamespaceDNS();
-	 * assert($uuid->toBinary() ===
-	 * "\x6b\xa7\xb8\x10\x9d\xad\x11\xd1\x80\xb4\x00\xc0\x4f\xd4\x30\xc8");
+	 * assert(UUID::NamespaceDNS()->toBinary() === "\x6b\xa7\xb8\x10\x9d\xad\x11\xd1\x80\xb4\x00\xc0\x4f\xd4\x30\xc8");
 	 *
 	 * ?>
 	 * ```
@@ -636,8 +630,7 @@ final class UUID {
 	 * ```
 	 * <?php
 	 *
-	 * $uuid = UUID::NamespaceDNS();
-	 * assert($uuid->toHex() === '6ba7b8109dad11d180b400c04fd430c8');
+	 * assert(UUID::NamespaceDNS()->toHex() === '6ba7b8109dad11d180b400c04fd430c8');
 	 *
 	 * ?>
 	 * ```
@@ -661,8 +654,7 @@ final class UUID {
 	 * ```
 	 * <?php
 	 *
-	 * $uuid = UUID::NamespaceDNS();
-	 * assert($uuid->toString() === '6ba7b810-9dad-11d1-80b4-00c04fd430c8');
+	 * assert(UUID::NamespaceDNS()->toString() === '6ba7b810-9dad-11d1-80b4-00c04fd430c8');
 	 *
 	 * ?>
 	 * ```
@@ -682,6 +674,7 @@ final class UUID {
 	 * immutable objects.
 	 *
 	 * @return void
+	 * @throws Error upon every invocation.
 	 */
 	private function __clone() { }
 }
