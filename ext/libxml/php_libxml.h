@@ -100,6 +100,7 @@ PHP_LIBXML_API int php_libxml_decrement_doc_ref(php_libxml_node_object *object);
 PHP_LIBXML_API xmlNodePtr php_libxml_import_node(zval *object);
 PHP_LIBXML_API zval *php_libxml_register_export(zend_class_entry *ce, php_libxml_export_node export_function);
 /* When an explicit freeing of node and children is required */
+PHP_LIBXML_API void php_libxml_node_free_list(xmlNodePtr node);
 PHP_LIBXML_API void php_libxml_node_free_resource(xmlNodePtr node);
 /* When object dtor is called as node may still be referenced */
 PHP_LIBXML_API void php_libxml_node_decrement_resource(php_libxml_node_object *object);
