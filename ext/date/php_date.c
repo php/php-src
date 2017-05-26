@@ -2397,8 +2397,11 @@ static zend_object *date_object_clone_interval(zval *this_ptr) /* {{{ */
 	php_interval_obj *new_obj = php_interval_obj_from_obj(date_object_new_interval_ex(old_obj->std.ce, 0));
 
 	zend_objects_clone_members(&new_obj->std, &old_obj->std);
+	new_obj->initialized = old_obj->initialized;
+	if (old_obj->diff) {
+		new_obj->diff = timelib_rel_time_clone(old_obj->diff);
+	}
 
-	/** FIX ME ADD CLONE STUFF **/
 	return &new_obj->std;
 } /* }}} */
 
@@ -2481,8 +2484,23 @@ static zend_object *date_object_clone_period(zval *this_ptr) /* {{{ */
 	php_period_obj *new_obj = php_period_obj_from_obj(date_object_new_period_ex(old_obj->std.ce, 0));
 
 	zend_objects_clone_members(&new_obj->std, &old_obj->std);
+	new_obj->initialized = old_obj->initialized;
+	new_obj->recurrences = old_obj->recurrences;
+	new_obj->include_start_date = old_obj->include_start_date;
+	new_obj->start_ce = old_obj->start_ce;
 
-	/** FIX ME ADD CLONE STUFF **/
+	if (old_obj->start) {
+		new_obj->start = timelib_time_clone(old_obj->start);
+	}
+	if (old_obj->current) {
+		new_obj->current = timelib_time_clone(old_obj->current);
+	}
+	if (old_obj->end) {
+        new_obj->end = timelib_time_clone(old_obj->end);
+    }
+    if (old_obj->interval) {
+        new_obj->interval = timelib_rel_time_clone(old_obj->interval);
+    }
 	return &new_obj->std;
 } /* }}} */
 
