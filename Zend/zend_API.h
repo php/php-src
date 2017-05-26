@@ -1,4 +1,4 @@
-/*
+a/*
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
@@ -268,6 +268,8 @@ ZEND_API int zend_copy_parameters_array(int param_count, zval *argument_array);
 	_zend_get_parameters_array_ex(param_count, argument_array)
 #define zend_parse_parameters_none() \
 	(EXPECTED(ZEND_NUM_ARGS() == 0) ? SUCCESS : zend_parse_parameters(ZEND_NUM_ARGS(), ""))
+#define zend_parse_parameters_none_throw() \
+	(EXPECTED(ZEND_NUM_ARGS() == 0) ? SUCCESS : zend_parse_parameters_throw(ZEND_NUM_ARGS(), ""))
 
 /* Parameter parsing API -- andrei */
 
