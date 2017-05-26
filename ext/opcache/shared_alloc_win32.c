@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -76,26 +76,39 @@ static void zend_win_error_message(int type, char *msg, int err)
 
 static char *create_name_with_username(char *name)
 {
-	static char newname[MAXPATHLEN + UNLEN + 4];
-	char uname[UNLEN + 1];
-	DWORD unsize = UNLEN;
+	static char newname[MAXPATHLEN + UNLEN + 4 + 1 + 32];
+	char *uname;
 
-	GetUserName(uname, &unsize);
-	snprintf(newname, sizeof(newname) - 1, "%s@%s", name, uname);
+	uname = php_win32_get_username();
+	if (!uname) {
+		return NULL;
+	}
+	snprintf(newname, sizeof(newname) - 1, "%s@%s@%.32s", name, uname, ZCG(system_id));
+
+	free(uname);
+
 	return newname;
 }
 
 static char *get_mmap_base_file(void)
 {
-	static char windir[MAXPATHLEN+UNLEN + 3 + sizeof("\\\\@")];
-	char uname[UNLEN + 1];
-	DWORD unsize = UNLEN;
+	static char windir[MAXPATHLEN+UNLEN + 3 + sizeof("\\\\@") + 1 + 32];
+	char *uname;
 	int l;
 
+	uname = php_win32_get_username();
+	if (!uname) {
+		return NULL;
+	}
 	GetTempPath(MAXPATHLEN, windir);
-	GetUserName(uname, &unsize);
 	l = strlen(windir);
-	snprintf(windir + l, sizeof(windir) - l - 1, "\\%s@%s", ACCEL_FILEMAP_BASE, uname);
+	if ('\\' == windir[l-1]) {
+		l--;
+	}
+	snprintf(windir + l, sizeof(windir) - l - 1, "\\%s@%s@%.32s", ACCEL_FILEMAP_BASE, uname, ZCG(system_id));
+
+	free(uname);
+
 	return windir;
 }
 
@@ -131,8 +144,8 @@ static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
 	FILE *fp = fopen(mmap_base_file, "r");
 	MEMORY_BASIC_INFORMATION info;
 
-	err = GetLastError();
 	if (!fp) {
+		err = GetLastError();
 		zend_win_error_message(ACCEL_LOG_WARNING, mmap_base_file, err);
 		zend_win_error_message(ACCEL_LOG_FATAL, "Unable to open base address file", err);
 		*error_in="fopen";
@@ -146,20 +159,44 @@ static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
 		return ALLOC_FAILURE;
 	}
 	fclose(fp);
-
 	/* Check if the requested address space is free */
 	if (VirtualQuery(wanted_mapping_base, &info, sizeof(info)) == 0 ||
 	    info.State != MEM_FREE ||
 	    info.RegionSize < requested_size) {
+#if ENABLE_FILE_CACHE_FALLBACK
+		if (ZCG(accel_directives).file_cache && ZCG(accel_directives).file_cache_fallback) {
+			size_t pre_size, wanted_mb_save;
+
+			wanted_mb_save = (size_t)wanted_mapping_base;
+
+			err = ERROR_INVALID_ADDRESS;
+			zend_win_error_message(ACCEL_LOG_WARNING, "Base address marks unusable memory region (fall-back to file cache)", err);
+
+			pre_size = ZEND_ALIGNED_SIZE(sizeof(zend_smm_shared_globals)) + ZEND_ALIGNED_SIZE(sizeof(zend_shared_segment)) + ZEND_ALIGNED_SIZE(sizeof(void *)) + ZEND_ALIGNED_SIZE(sizeof(int));
+			/* Map only part of SHM to have access opcache shared globals */
+			mapping_base = MapViewOfFileEx(memfile, FILE_MAP_ALL_ACCESS, 0, 0, pre_size + ZEND_ALIGNED_SIZE(sizeof(zend_accel_shared_globals)), NULL);
+			if (mapping_base == NULL) {
+				err = GetLastError();
+				zend_win_error_message(ACCEL_LOG_FATAL, "Unable to reattach to opcache shared globals", err);
+				return ALLOC_FAILURE;
+			}
+			accel_shared_globals = (zend_accel_shared_globals *)((char *)((zend_smm_shared_globals *)mapping_base)->app_shared_globals + ((char *)mapping_base - (char *)wanted_mb_save));
+
+			/* Make this process to use file-cache only */
+			ZCG(accel_directives).file_cache_only = 1;
+
+			return ALLOC_FALLBACK;
+		}
+#endif
 	    err = ERROR_INVALID_ADDRESS;
-		zend_win_error_message(ACCEL_LOG_FATAL, "Unable to reattach to base address", err);
+		zend_win_error_message(ACCEL_LOG_FATAL, "Base address marks unusable memory region. Please setup opcache.file_cache and opcache.file_cache_fallback directives for more convenient Opcache usage", err);
 		return ALLOC_FAILURE;
    	}
 
 	mapping_base = MapViewOfFileEx(memfile, FILE_MAP_ALL_ACCESS, 0, 0, 0, wanted_mapping_base);
-	err = GetLastError();
 
 	if (mapping_base == NULL) {
+		err = GetLastError();
 		if (err == ERROR_INVALID_ADDRESS) {
 			zend_win_error_message(ACCEL_LOG_FATAL, "Unable to reattach to base address", err);
 			return ALLOC_FAILURE;
@@ -173,7 +210,7 @@ static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
 
 static int create_segments(size_t requested_size, zend_shared_segment ***shared_segments_p, int *shared_segments_count, char **error_in)
 {
-	int err, ret;
+	int err = 0, ret;
 	zend_shared_segment *shared_segment;
 	int map_retries = 0;
 	void *default_mapping_base_set[] = { 0, 0 };
@@ -195,23 +232,28 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	   and we have to sleep some time (until the child releases the mapping object) and retry.*/
 	do {
 		memfile = OpenFileMapping(FILE_MAP_WRITE, 0, create_name_with_username(ACCEL_FILEMAP_NAME));
-		err = GetLastError();
 		if (memfile == NULL) {
+			err = GetLastError();
 			break;
 		}
 
 		ret =  zend_shared_alloc_reattach(requested_size, error_in);
-		err = GetLastError();
 		if (ret == ALLOC_FAIL_MAPPING) {
+			err = GetLastError();
 			/* Mapping failed, wait for mapping object to get freed and retry */
-            CloseHandle(memfile);
+			CloseHandle(memfile);
 			memfile = NULL;
+			if (++map_retries >= MAX_MAP_RETRIES) {
+				break;
+			}
+			zend_shared_alloc_unlock_win32();
 			Sleep(1000 * (map_retries + 1));
+			zend_shared_alloc_lock_win32();
 		} else {
 			zend_shared_alloc_unlock_win32();
 			return ret;
 		}
-	} while (++map_retries < MAX_MAP_RETRIES);
+	} while (1);
 
 	if (map_retries == MAX_MAP_RETRIES) {
 		zend_shared_alloc_unlock_win32();
@@ -224,8 +266,9 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	*shared_segments_count = 1;
 	*shared_segments_p = (zend_shared_segment **) calloc(1, sizeof(zend_shared_segment)+sizeof(void *));
 	if (!*shared_segments_p) {
+		err = GetLastError();
 		zend_shared_alloc_unlock_win32();
-		zend_win_error_message(ACCEL_LOG_FATAL, "calloc() failed", GetLastError());
+		zend_win_error_message(ACCEL_LOG_FATAL, "calloc() failed", err);
 		*error_in = "calloc";
 		return ALLOC_FAILURE;
 	}
@@ -234,8 +277,8 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 
 	memfile	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, requested_size,
 								create_name_with_username(ACCEL_FILEMAP_NAME));
-	err = GetLastError();
 	if (memfile == NULL) {
+		err = GetLastError();
 		zend_shared_alloc_unlock_win32();
 		zend_win_error_message(ACCEL_LOG_FATAL, "Unable to create file mapping", err);
 		*error_in = "CreateFileMapping";
@@ -246,29 +289,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	   be taken (fail to map). So under Vista, we try to map into a hard coded predefined addresses
 	   in high memory. */
 	if (!ZCG(accel_directives).mmap_base || !*ZCG(accel_directives).mmap_base) {
-		do {
-			OSVERSIONINFOEX osvi;
-			SYSTEM_INFO si;
-
-			ZeroMemory(&si, sizeof(SYSTEM_INFO));
-			ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
-
-			osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-
-			if (! GetVersionEx ((OSVERSIONINFO *) &osvi)) {
-				osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-				if (!GetVersionEx((OSVERSIONINFO *)&osvi)) {
-					break;
-				}
-			}
-
-			GetSystemInfo(&si);
-
-			/* Are we running Vista ? */
-			if (osvi.dwPlatformId == VER_PLATFORM_WIN32_NT && osvi.dwMajorVersion == 6) {
-				wanted_mapping_base = vista_mapping_base_set;
-			}
-		} while (0);
+		wanted_mapping_base = vista_mapping_base_set;
 	} else {
 		char *s = ZCG(accel_directives).mmap_base;
 
@@ -291,8 +312,8 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 		wanted_mapping_base++;
 	} while (!mapping_base);
 
-	err = GetLastError();
 	if (mapping_base == NULL) {
+		err = GetLastError();
 		zend_shared_alloc_unlock_win32();
 		zend_win_error_message(ACCEL_LOG_FATAL, "Unable to create view for file mapping", err);
 		*error_in = "MapViewOfFile";
@@ -300,8 +321,8 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	} else {
 		char *mmap_base_file = get_mmap_base_file();
 		FILE *fp = fopen(mmap_base_file, "w");
-		err = GetLastError();
 		if (!fp) {
+			err = GetLastError();
 			zend_shared_alloc_unlock_win32();
 			zend_win_error_message(ACCEL_LOG_WARNING, mmap_base_file, err);
 			zend_win_error_message(ACCEL_LOG_FATAL, "Unable to write base address", err);
@@ -324,10 +345,13 @@ static int detach_segment(zend_shared_segment *shared_segment)
 	zend_shared_alloc_lock_win32();
 	if (mapping_base) {
 		UnmapViewOfFile(mapping_base);
+		mapping_base = NULL;
 	}
 	CloseHandle(memfile);
+	memfile = NULL;
 	zend_shared_alloc_unlock_win32();
 	CloseHandle(memory_mutex);
+	memory_mutex = NULL;
 	return 0;
 }
 

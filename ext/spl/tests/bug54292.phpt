@@ -5,7 +5,7 @@ Bug #54292 (Wrong parameter causes crash in SplFileObject::__construct())
 
 try {
 	new SplFileObject('foo', array());
-} catch (Exception $e) {
+} catch (TypeError $e) {
 	var_dump($e->getMessage());
 }
 

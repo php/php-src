@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -152,7 +152,7 @@ zend_module_entry filter_module_entry = {
 
 #ifdef COMPILE_DL_FILTER
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(filter)
 #endif
@@ -162,7 +162,7 @@ static PHP_INI_MH(UpdateDefaultFilter) /* {{{ */
 	int i, size = sizeof(filter_list) / sizeof(filter_list_entry);
 
 	for (i = 0; i < size; ++i) {
-		if ((strcasecmp(new_value->val, filter_list[i].name) == 0)) {
+		if ((strcasecmp(ZSTR_VAL(new_value), filter_list[i].name) == 0)) {
 			IF_G(default_filter) = filter_list[i].id;
 			return SUCCESS;
 		}
@@ -180,7 +180,7 @@ static PHP_INI_MH(OnUpdateFlags)
 	if (!new_value) {
 		IF_G(default_filter_flags) = FILTER_FLAG_NO_ENCODE_QUOTES;
 	} else {
-		IF_G(default_filter_flags) = atoi(new_value->val);
+		IF_G(default_filter_flags) = atoi(ZSTR_VAL(new_value));
 	}
 	return SUCCESS;
 }
@@ -286,6 +286,8 @@ PHP_MINIT_FUNCTION(filter)
 
 	REGISTER_LONG_CONSTANT("FILTER_FLAG_HOSTNAME", FILTER_FLAG_HOSTNAME, CONST_CS | CONST_PERSISTENT);
 
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_EMAIL_UNICODE", FILTER_FLAG_EMAIL_UNICODE, CONST_CS | CONST_PERSISTENT);
+
 	sapi_register_input_filter(php_sapi_filter, php_sapi_filter_init);
 
 	return SUCCESS;
@@ -388,8 +390,14 @@ static void php_zval_filter(zval *value, zend_long filter, zend_long flags, zval
 
 		ce = Z_OBJCE_P(value);
 		if (!ce->__tostring) {
-			ZVAL_FALSE(value);
-			return;
+			zval_ptr_dtor(value);
+			/* #67167: doesn't return null on failure for objects */
+			if (flags & FILTER_NULL_ON_FAILURE) {
+				ZVAL_NULL(value);
+			} else {
+				ZVAL_FALSE(value);
+			}
+			goto handle_default;
 		}
 	}
 
@@ -398,6 +406,7 @@ static void php_zval_filter(zval *value, zend_long filter, zend_long flags, zval
 
 	filter_func.function(value, flags, options, charset);
 
+handle_default:
 	if (options && (Z_TYPE_P(options) == IS_ARRAY || Z_TYPE_P(options) == IS_OBJECT) &&
 		((flags & FILTER_NULL_ON_FAILURE && Z_TYPE_P(value) == IS_NULL) ||
 		(!(flags & FILTER_NULL_ON_FAILURE) && Z_TYPE_P(value) == IS_FALSE)) &&
@@ -540,7 +549,7 @@ static zval *php_filter_get_storage(zend_long arg)/* {{{ */
 			if (PG(auto_globals_jit)) {
 				zend_is_auto_global_str(ZEND_STRL("_ENV"));
 			}
-			array_ptr = &IF_G(env_array) ? &IF_G(env_array) : &PG(http_globals)[TRACK_VARS_ENV];
+			array_ptr = !Z_ISUNDEF(IF_G(env_array)) ? &IF_G(env_array) : &PG(http_globals)[TRACK_VARS_ENV];
 			break;
 		case PARSE_SESSION:
 			/* FIXME: Implement session source */
@@ -684,14 +693,14 @@ static void php_filter_array_handler(zval *input, zval *op, zval *return_value, 
 				zval_ptr_dtor(return_value);
 				RETURN_FALSE;
 	 		}
-			if (arg_key->len == 0) {
+			if (ZSTR_LEN(arg_key) == 0) {
 				php_error_docref(NULL, E_WARNING, "Empty keys are not allowed in the definition array");
 				zval_ptr_dtor(return_value);
 				RETURN_FALSE;
 			}
 			if ((tmp = zend_hash_find(Z_ARRVAL_P(input), arg_key)) == NULL) {
 				if (add_empty) {
-					add_assoc_null_ex(return_value, arg_key->val, arg_key->len);
+					add_assoc_null_ex(return_value, ZSTR_VAL(arg_key), ZSTR_LEN(arg_key));
 				}
 			} else {
 				zval nval;

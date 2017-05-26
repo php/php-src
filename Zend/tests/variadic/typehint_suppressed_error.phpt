@@ -1,5 +1,5 @@
 --TEST--
-Error suppression for typehints on variadic arguments works
+Error suppression for types on variadic arguments works
 --FILE--
 <?php
 
@@ -9,7 +9,7 @@ function test(array... $args) {
 
 try {
 	test([0], [1], 2);
-} catch(EngineException $e) {
+} catch(Error $e) {
 	var_dump($e->getMessage());
 }
 

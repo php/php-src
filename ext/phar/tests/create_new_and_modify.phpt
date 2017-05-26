@@ -23,7 +23,7 @@ include $pname . '/a.php';
 
 if (function_exists("opcache_get_status")) {
 	$status = opcache_get_status();
-	if ($status["opcache_enabled"]) {
+	if ($status["opcache_enabled"] || (isset($status["file_cache_only"]) && $status["file_cache_only"])) {
 		ini_set("opcache.revalidate_freq", "0");
 		sleep(2);
 	}
@@ -35,9 +35,9 @@ file_put_contents($pname .'/b.php', "another!\n");
 $phar = new Phar($fname);
 $sig2 = $phar->getSignature();
 
-var_dump($sig1[b'hash']);
-var_dump($sig2[b'hash']);
-var_dump($sig1[b'hash'] != $sig2[b'hash']);
+var_dump($sig1['hash']);
+var_dump($sig2['hash']);
+var_dump($sig1['hash'] != $sig2['hash']);
 
 include $pname . '/a.php';
 include $pname . '/b.php';

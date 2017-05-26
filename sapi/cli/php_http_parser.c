@@ -89,8 +89,10 @@ static const char *method_strings[] =
   , "LOCK"
   , "MKCOL"
   , "MOVE"
+  , "MKCALENDAR"
   , "PROPFIND"
   , "PROPPATCH"
+  , "SEARCH"
   , "UNLOCK"
   , "REPORT"
   , "MKACTIVITY"
@@ -193,75 +195,6 @@ static const uint8_t normal_url_char[256] = {
         1,       1,       1,       1,       1,       1,       1,       0 };
 
 
-enum state
-  { s_dead = 1 /* important that this is > 0 */
-
-  , s_start_req_or_res
-  , s_res_or_resp_H
-  , s_start_res
-  , s_res_H
-  , s_res_HT
-  , s_res_HTT
-  , s_res_HTTP
-  , s_res_first_http_major
-  , s_res_http_major
-  , s_res_first_http_minor
-  , s_res_http_minor
-  , s_res_first_status_code
-  , s_res_status_code
-  , s_res_status
-  , s_res_line_almost_done
-
-  , s_start_req
-
-  , s_req_method
-  , s_req_spaces_before_url
-  , s_req_schema
-  , s_req_schema_slash
-  , s_req_schema_slash_slash
-  , s_req_host
-  , s_req_port
-  , s_req_path
-  , s_req_query_string_start
-  , s_req_query_string
-  , s_req_fragment_start
-  , s_req_fragment
-  , s_req_http_start
-  , s_req_http_H
-  , s_req_http_HT
-  , s_req_http_HTT
-  , s_req_http_HTTP
-  , s_req_first_http_major
-  , s_req_http_major
-  , s_req_first_http_minor
-  , s_req_http_minor
-  , s_req_line_almost_done
-
-  , s_header_field_start
-  , s_header_field
-  , s_header_value_start
-  , s_header_value
-
-  , s_header_almost_done
-
-  , s_headers_almost_done
-  /* Important: 's_headers_almost_done' must be the last 'header' state. All
-   * states beyond this must be 'body' states. It is used for overflow
-   * checking. See the PARSING_HEADER() macro.
-   */
-  , s_chunk_size_start
-  , s_chunk_size
-  , s_chunk_size_almost_done
-  , s_chunk_parameters
-  , s_chunk_data
-  , s_chunk_data_almost_done
-  , s_chunk_data_done
-
-  , s_body_identity
-  , s_body_identity_eof
-  };
-
-
 #define PARSING_HEADER(state) (state <= s_headers_almost_done && 0 == (parser->flags & F_TRAILING))
 
 
@@ -325,7 +258,8 @@ size_t php_http_parser_execute (php_http_parser *parser,
                             const char *data,
                             size_t len)
 {
-  char c, ch;
+  char ch;
+  signed char c;
   const char *p = data, *pe;
   size_t to_read;
 
@@ -583,12 +517,12 @@ size_t php_http_parser_execute (php_http_parser *parser,
           case 'G': parser->method = PHP_HTTP_GET; break;
           case 'H': parser->method = PHP_HTTP_HEAD; break;
           case 'L': parser->method = PHP_HTTP_LOCK; break;
-          case 'M': parser->method = PHP_HTTP_MKCOL; /* or MOVE, MKACTIVITY, MERGE, M-SEARCH */ break;
+          case 'M': parser->method = PHP_HTTP_MKCOL; /* or MOVE, MKCALENDAR, MKACTIVITY, MERGE, M-SEARCH */ break;
           case 'N': parser->method = PHP_HTTP_NOTIFY; break;
           case 'O': parser->method = PHP_HTTP_OPTIONS; break;
           case 'P': parser->method = PHP_HTTP_POST; /* or PROPFIND or PROPPATCH or PUT */ break;
           case 'R': parser->method = PHP_HTTP_REPORT; break;
-          case 'S': parser->method = PHP_HTTP_SUBSCRIBE; break;
+          case 'S': parser->method = PHP_HTTP_SUBSCRIBE; /* or SEARCH */ break;
           case 'T': parser->method = PHP_HTTP_TRACE; break;
           case 'U': parser->method = PHP_HTTP_UNLOCK; /* or UNSUBSCRIBE */ break;
           default: parser->method = PHP_HTTP_NOT_IMPLEMENTED; break;
@@ -596,7 +530,6 @@ size_t php_http_parser_execute (php_http_parser *parser,
         state = s_req_method;
         break;
       }
-
       case s_req_method:
       {
         const char *matcher;
@@ -604,25 +537,34 @@ size_t php_http_parser_execute (php_http_parser *parser,
           goto error;
 
         matcher = method_strings[parser->method];
-        if (ch == ' ' && (matcher[index] == '\0' || parser->method == PHP_HTTP_NOT_IMPLEMENTED)) {
+        if (ch == ' ') {
+          if (parser->method != PHP_HTTP_NOT_IMPLEMENTED && matcher[index] != '\0') {
+            parser->method = PHP_HTTP_NOT_IMPLEMENTED;
+          }
           state = s_req_spaces_before_url;
-        } else if (ch == matcher[index]) {
+        } else if (parser->method == PHP_HTTP_NOT_IMPLEMENTED || ch == matcher[index]) {
           ; /* nada */
         } else if (parser->method == PHP_HTTP_CONNECT) {
           if (index == 1 && ch == 'H') {
             parser->method = PHP_HTTP_CHECKOUT;
           } else if (index == 2  && ch == 'P') {
             parser->method = PHP_HTTP_COPY;
+          } else {
+            parser->method = PHP_HTTP_NOT_IMPLEMENTED;
           }
         } else if (parser->method == PHP_HTTP_MKCOL) {
           if (index == 1 && ch == 'O') {
             parser->method = PHP_HTTP_MOVE;
+          } else if (index == 3 && ch == 'A') {
+            parser->method = PHP_HTTP_MKCALENDAR;
           } else if (index == 1 && ch == 'E') {
             parser->method = PHP_HTTP_MERGE;
           } else if (index == 1 && ch == '-') {
             parser->method = PHP_HTTP_MSEARCH;
           } else if (index == 2 && ch == 'A') {
             parser->method = PHP_HTTP_MKACTIVITY;
+          } else {
+            parser->method = PHP_HTTP_NOT_IMPLEMENTED;
           }
         } else if (index == 1 && parser->method == PHP_HTTP_POST && ch == 'R') {
           parser->method = PHP_HTTP_PROPFIND; /* or HTTP_PROPPATCH */
@@ -630,6 +572,8 @@ size_t php_http_parser_execute (php_http_parser *parser,
           parser->method = PHP_HTTP_PUT;
         } else if (index == 1 && parser->method == PHP_HTTP_POST && ch == 'A') {
           parser->method = PHP_HTTP_PATCH;
+        } else if (index == 1 && parser->method == PHP_HTTP_SUBSCRIBE && ch == 'E') {
+          parser->method = PHP_HTTP_SEARCH;
         } else if (index == 2 && parser->method == PHP_HTTP_UNLOCK && ch == 'S') {
           parser->method = PHP_HTTP_UNSUBSCRIBE;
         } else if (index == 4 && parser->method == PHP_HTTP_PROPFIND && ch == 'P') {
@@ -1526,7 +1470,7 @@ size_t php_http_parser_execute (php_http_parser *parser,
           p += to_read - 1;
         }
 
-        if (to_read == parser->content_length) {
+        if (to_read == (size_t)parser->content_length) {
           state = s_chunk_data_almost_done;
         }
 

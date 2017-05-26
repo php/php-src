@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -59,12 +59,12 @@ static char HEXCHARS[] = "0123456789ABCDEF";
 inline static void
 php_sprintf_appendchar(zend_string **buffer, size_t *pos, char add)
 {
-	if (!*buffer || (*pos + 1) >= (*buffer)->len) {
-		PRINTF_DEBUG(("%s(): ereallocing buffer to %d bytes\n", get_active_function_name(), (*buffer)->len));
-		*buffer = zend_string_extend(*buffer, (*buffer)->len << 1, 0);
+	if (!*buffer || (*pos + 1) >= ZSTR_LEN(*buffer)) {
+		PRINTF_DEBUG(("%s(): ereallocing buffer to %d bytes\n", get_active_function_name(), ZSTR_LEN(*buffer)));
+		*buffer = zend_string_extend(*buffer, ZSTR_LEN(*buffer) << 1, 0);
 	}
 	PRINTF_DEBUG(("sprintf: appending '%c', pos=\n", add, *pos));
-	(*buffer)->val[(*pos)++] = add;
+	ZSTR_VAL(*buffer)[(*pos)++] = add;
 }
 /* }}} */
 
@@ -83,17 +83,17 @@ php_sprintf_appendstring(zend_string **buffer, size_t *pos, char *add,
 	npad = (min_width < copy_len) ? 0 : min_width - copy_len;
 
 	PRINTF_DEBUG(("sprintf: appendstring(%x, %d, %d, \"%s\", %d, '%c', %d)\n",
-				  *buffer, *pos, (*buffer)->len, add, min_width, padding, alignment));
+				  *buffer, *pos, ZSTR_LEN(*buffer), add, min_width, padding, alignment));
 	m_width = MAX(min_width, copy_len);
 
 	if(m_width > INT_MAX - *pos - 1) {
-		zend_error_noreturn(E_ERROR, "Field width %d is too long", m_width);
+		zend_error_noreturn(E_ERROR, "Field width %zd is too long", m_width);
 	}
 
 	req_size = *pos + m_width + 1;
 
-	if (!*buffer || req_size > (*buffer)->len) {
-		size_t size = (*buffer)->len;
+	if (!*buffer || req_size > ZSTR_LEN(*buffer)) {
+		size_t size = ZSTR_LEN(*buffer);
 		while (req_size > size) {
 			if (size > ZEND_SIZE_MAX/2) {
 				zend_error_noreturn(E_ERROR, "Field width %zd is too long", req_size);
@@ -105,21 +105,21 @@ php_sprintf_appendstring(zend_string **buffer, size_t *pos, char *add,
 	}
 	if (alignment == ALIGN_RIGHT) {
 		if ((neg || always_sign) && padding=='0') {
-			(*buffer)->val[(*pos)++] = (neg) ? '-' : '+';
+			ZSTR_VAL(*buffer)[(*pos)++] = (neg) ? '-' : '+';
 			add++;
 			len--;
 			copy_len--;
 		}
 		while (npad-- > 0) {
-			(*buffer)->val[(*pos)++] = padding;
+			ZSTR_VAL(*buffer)[(*pos)++] = padding;
 		}
 	}
 	PRINTF_DEBUG(("sprintf: appending \"%s\"\n", add));
-	memcpy(&(*buffer)->val[*pos], add, copy_len + 1);
+	memcpy(&ZSTR_VAL(*buffer)[*pos], add, copy_len + 1);
 	*pos += copy_len;
 	if (alignment == ALIGN_LEFT) {
 		while (npad--) {
-			(*buffer)->val[(*pos)++] = padding;
+			ZSTR_VAL(*buffer)[(*pos)++] = padding;
 		}
 	}
 }
@@ -136,7 +136,7 @@ php_sprintf_appendint(zend_string **buffer, size_t *pos, zend_long number,
 	register unsigned int i = NUM_BUF_SIZE - 1, neg = 0;
 
 	PRINTF_DEBUG(("sprintf: appendint(%x, %x, %x, %d, %d, '%c', %d)\n",
-				  *buffer, pos, &(*buffer)->len, number, width, padding, alignment));
+				  *buffer, pos, &ZSTR_LEN(*buffer), number, width, padding, alignment));
 	if (number < 0) {
 		neg = 1;
 		magn = ((zend_ulong) -(number + 1)) + 1;
@@ -180,7 +180,7 @@ php_sprintf_appenduint(zend_string **buffer, size_t *pos,
 	register unsigned int i = NUM_BUF_SIZE - 1;
 
 	PRINTF_DEBUG(("sprintf: appenduint(%x, %x, %x, %d, %d, '%c', %d)\n",
-				  *buffer, pos, &(*buffer)->len, number, width, padding, alignment));
+				  *buffer, pos, &ZSTR_LEN(*buffer), number, width, padding, alignment));
 	magn = (zend_ulong) number;
 
 	/* Can't right-pad 0's on integers */
@@ -224,7 +224,7 @@ php_sprintf_appenddouble(zend_string **buffer, size_t *pos,
 #endif
 
 	PRINTF_DEBUG(("sprintf: appenddouble(%x, %x, %x, %f, %d, '%c', %d, %c)\n",
-				  *buffer, pos, &(*buffer)->len, number, width, padding, alignment, fmt));
+				  *buffer, pos, &ZSTR_LEN(*buffer), number, width, padding, alignment, fmt));
 	if ((adjust & ADJ_PRECISION) == 0) {
 		precision = FLOAT_PRECISION;
 	} else if (precision > MAX_FLOAT_PRECISION) {
@@ -317,7 +317,7 @@ php_sprintf_append2n(zend_string **buffer, size_t *pos, zend_long number,
 	register int andbits = (1 << n) - 1;
 
 	PRINTF_DEBUG(("sprintf: append2n(%x, %x, %x, %d, %d, '%c', %d, %d, %x)\n",
-				  *buffer, pos, &(*buffer)->len, number, width, padding, alignment, n,
+				  *buffer, pos, &ZSTR_LEN(*buffer), number, width, padding, alignment, n,
 				  chartable));
 	PRINTF_DEBUG(("sprintf: append2n 2^%d andbits=%x\n", n, andbits));
 
@@ -383,7 +383,7 @@ php_sprintf_getnumber(char *buffer, size_t *pos)
  *
  */
 static zend_string *
-php_formatted_print(int param_count, int use_array, int format_offset)
+php_formatted_print(zend_execute_data *execute_data, int use_array, int format_offset)
 {
 	zval *newargs = NULL;
 	zval *args, *z_format;
@@ -395,9 +395,9 @@ php_formatted_print(int param_count, int use_array, int format_offset)
 	int always_sign;
 	size_t format_len;
 
-	if (zend_parse_parameters(param_count, "+", &args, &argc) == FAILURE) {
-		return NULL;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, -1)
+		Z_PARAM_VARIADIC('+', args, argc)
+	ZEND_PARSE_PARAMETERS_END_EX(return NULL);
 
 	/* verify the number of args */
 	if ((use_array && argc != (2 + format_offset))
@@ -414,7 +414,6 @@ php_formatted_print(int param_count, int use_array, int format_offset)
 		z_format = &args[format_offset];
 		array = &args[1 + format_offset];
 		if (Z_TYPE_P(array) != IS_ARRAY) {
-			SEPARATE_ZVAL(array);
 			convert_to_array(array);
 		}
 
@@ -513,9 +512,6 @@ php_formatted_print(int param_count, int use_array, int format_offset)
 							efree(newargs);
 						}
 						php_error_docref(NULL, E_WARNING, "Width must be greater than zero and less than %d", INT_MAX);
-						if (newargs) {
-							efree(newargs);
-						}
 						return NULL;
 					}
 					adjusting |= ADJ_WIDTH;
@@ -535,9 +531,6 @@ php_formatted_print(int param_count, int use_array, int format_offset)
 								efree(newargs);
 							}
 							php_error_docref(NULL, E_WARNING, "Precision must be greater than zero and less than %d", INT_MAX);
-							if (newargs) {
-								efree(newargs);
-							}
 							return NULL;
 						}
 						adjusting |= ADJ_PRECISION;
@@ -573,10 +566,10 @@ php_formatted_print(int param_count, int use_array, int format_offset)
 				case 's': {
 					zend_string *str = zval_get_string(tmp);
 					php_sprintf_appendstring(&result, &outpos,
-											 str->val,
+											 ZSTR_VAL(str),
 											 width, precision, padding,
 											 alignment,
-											 str->len,
+											 ZSTR_LEN(str),
 											 0, expprec, 0);
 					zend_string_release(str);
 					break;
@@ -658,8 +651,8 @@ php_formatted_print(int param_count, int use_array, int format_offset)
 	}
 
 	/* possibly, we have to make sure we have room for the terminating null? */
-	result->val[outpos]=0;
-	result->len = outpos;
+	ZSTR_VAL(result)[outpos]=0;
+	ZSTR_LEN(result) = outpos;
 	return result;
 }
 /* }}} */
@@ -670,7 +663,7 @@ PHP_FUNCTION(user_sprintf)
 {
 	zend_string *result;
 
-	if ((result=php_formatted_print(ZEND_NUM_ARGS(), 0, 0))==NULL) {
+	if ((result=php_formatted_print(execute_data, 0, 0))==NULL) {
 		RETURN_FALSE;
 	}
 	RETVAL_STR(result);
@@ -683,7 +676,7 @@ PHP_FUNCTION(vsprintf)
 {
 	zend_string *result;
 
-	if ((result=php_formatted_print(ZEND_NUM_ARGS(), 1, 0))==NULL) {
+	if ((result=php_formatted_print(execute_data, 1, 0))==NULL) {
 		RETURN_FALSE;
 	}
 	RETVAL_STR(result);
@@ -697,10 +690,10 @@ PHP_FUNCTION(user_printf)
 	zend_string *result;
 	size_t rlen;
 
-	if ((result=php_formatted_print(ZEND_NUM_ARGS(), 0, 0))==NULL) {
+	if ((result=php_formatted_print(execute_data, 0, 0))==NULL) {
 		RETURN_FALSE;
 	}
-	rlen = PHPWRITE(result->val, result->len);
+	rlen = PHPWRITE(ZSTR_VAL(result), ZSTR_LEN(result));
 	zend_string_free(result);
 	RETURN_LONG(rlen);
 }
@@ -713,10 +706,10 @@ PHP_FUNCTION(vprintf)
 	zend_string *result;
 	size_t rlen;
 
-	if ((result=php_formatted_print(ZEND_NUM_ARGS(), 1, 0))==NULL) {
+	if ((result=php_formatted_print(execute_data, 1, 0))==NULL) {
 		RETURN_FALSE;
 	}
-	rlen = PHPWRITE(result->val, result->len);
+	rlen = PHPWRITE(ZSTR_VAL(result), ZSTR_LEN(result));
 	zend_string_free(result);
 	RETURN_LONG(rlen);
 }
@@ -734,19 +727,20 @@ PHP_FUNCTION(fprintf)
 		WRONG_PARAM_COUNT;
 	}
 
-	if (zend_parse_parameters(1, "r", &arg1) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, -1)
+		Z_PARAM_RESOURCE(arg1)
+		/* php_formatted_print does its own zpp for extra args */
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	php_stream_from_zval(stream, arg1);
 
-	if ((result=php_formatted_print(ZEND_NUM_ARGS(), 0, 1))==NULL) {
+	if ((result=php_formatted_print(execute_data, 0, 1))==NULL) {
 		RETURN_FALSE;
 	}
 
-	php_stream_write(stream, result->val, result->len);
+	php_stream_write(stream, ZSTR_VAL(result), ZSTR_LEN(result));
 
-	RETVAL_LONG(result->len);
+	RETVAL_LONG(ZSTR_LEN(result));
 	zend_string_free(result);
 }
 /* }}} */
@@ -763,19 +757,20 @@ PHP_FUNCTION(vfprintf)
 		WRONG_PARAM_COUNT;
 	}
 
-	if (zend_parse_parameters(1, "r", &arg1) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, -1)
+		Z_PARAM_RESOURCE(arg1)
+		/* php_formatted_print does its own zpp for extra args */
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	php_stream_from_zval(stream, arg1);
 
-	if ((result=php_formatted_print(ZEND_NUM_ARGS(), 1, 1))==NULL) {
+	if ((result=php_formatted_print(execute_data, 1, 1))==NULL) {
 		RETURN_FALSE;
 	}
 
-	php_stream_write(stream, result->val, result->len);
+	php_stream_write(stream, ZSTR_VAL(result), ZSTR_LEN(result));
 
-	RETVAL_LONG(result->len);
+	RETVAL_LONG(ZSTR_LEN(result));
 	zend_string_free(result);
 }
 /* }}} */

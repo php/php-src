@@ -9,8 +9,26 @@ if [[ "$ENABLE_DEBUG" == 1 ]]; then
 else
 	DEBUG="";
 fi
+
+if [[ -z "$CONFIG_LOG_FILE" ]]; then
+	CONFIG_QUIET="--quiet"
+	CONFIG_LOG_FILE="/dev/stdout"
+else
+	CONFIG_QUIET=""
+fi
+if [[ -z "$MAKE_LOG_FILE" ]]; then
+	MAKE_QUIET="--quiet"
+	MAKE_LOG_FILE="/dev/stdout"
+else
+	MAKE_QUIET=""
+fi
+
+MAKE_JOBS=${MAKE_JOBS:-2}
+
 ./buildconf --force
-./configure --quiet \
+./configure \
+--prefix="$HOME"/php-install \
+$CONFIG_QUIET \
 $DEBUG \
 $TS \
 --enable-phpdbg \
@@ -21,7 +39,7 @@ $TS \
 --with-pdo-pgsql \
 --with-pdo-sqlite \
 --enable-intl \
---with-pear \
+--without-pear \
 --with-gd \
 --with-jpeg-dir=/usr \
 --with-png-dir=/usr \
@@ -29,7 +47,6 @@ $TS \
 --enable-zip \
 --with-zlib \
 --with-zlib-dir=/usr \
---with-mcrypt=/usr \
 --enable-soap \
 --enable-xmlreader \
 --with-xsl \
@@ -54,12 +71,12 @@ $TS \
 --with-pspell=/usr \
 --with-enchant=/usr \
 --enable-wddx \
---with-imap \
---with-imap-ssl \
 --with-freetype-dir=/usr \
---with-t1lib=/usr \
 --with-xpm-dir=/usr \
 --with-kerberos \
---enable-sysvmsg 
-make -j2 --quiet
-sudo make install
+--enable-sysvmsg \
+--enable-zend-test \
+> "$CONFIG_LOG_FILE"
+
+make "-j${MAKE_JOBS}" $MAKE_QUIET > "$MAKE_LOG_FILE"
+make install >> "$MAKE_LOG_FILE"

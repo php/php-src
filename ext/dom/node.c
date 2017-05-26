@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -49,7 +49,7 @@ ZEND_END_ARG_INFO();
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_has_child_nodes, 0, 0, 0)
 ZEND_END_ARG_INFO();
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_clone_node, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_clone_node, 0, 0, 0)
 	ZEND_ARG_INFO(0, deep)
 ZEND_END_ARG_INFO();
 
@@ -346,7 +346,7 @@ int dom_node_node_value_write(dom_object *obj, zval *newval)
 		case XML_PI_NODE:
 			{
 				zend_string *str = zval_get_string(newval);
-				xmlNodeSetContentLen(nodep, (xmlChar *) str->val, str->len + 1);
+				xmlNodeSetContentLen(nodep, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str) + 1);
 				zend_string_release(str);
 				break;
 			}
@@ -551,7 +551,8 @@ int dom_node_next_sibling_read(dom_object *obj, zval *retval)
 
 	nextsib = nodep->next;
 	if (!nextsib) {
-		return FAILURE;
+		ZVAL_NULL(retval);
+		return SUCCESS;
 	}
 
 	php_dom_create_object(nextsib, retval, obj);
@@ -723,7 +724,7 @@ int dom_node_prefix_write(dom_object *obj, zval *newval)
 				}
 			}
 			str = zval_get_string(newval);
-			prefix = str->val;
+			prefix = ZSTR_VAL(str);
 			if (nsnode && nodep->ns != NULL && !xmlStrEqual(nodep->ns->prefix, (xmlChar *)prefix)) {
 				strURI = (char *) nodep->ns->href;
 				if (strURI == NULL ||
@@ -849,7 +850,6 @@ int dom_node_text_content_write(dom_object *obj, zval *newval)
 {
 	xmlNode *nodep = dom_object_get_node(obj);
 	zend_string *str;
-	xmlChar *enc_str;
 
 	if (nodep == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 0);
@@ -864,14 +864,14 @@ int dom_node_text_content_write(dom_object *obj, zval *newval)
 				php_libxml_node_free_list((xmlNodePtr) nodep->children);
 				nodep->children = NULL;
 			}
-		default:
-			str = zval_get_string(newval);
-			enc_str = xmlEncodeEntitiesReentrant(nodep->doc, (xmlChar *) str->val);
-			xmlNodeSetContent(nodep, enc_str);
-			xmlFree(enc_str);
-			zend_string_release(str);
 			break;
 	}
+
+	str = zval_get_string(newval);
+	/* we have to use xmlNodeAddContent() to get the same behavior as with xmlNewText() */
+	xmlNodeSetContent(nodep, (xmlChar *) "");
+	xmlNodeAddContent(nodep, (xmlChar *) ZSTR_VAL(str));
+	zend_string_release(str);
 
 	return SUCCESS;
 }
@@ -1362,9 +1362,9 @@ PHP_FUNCTION(dom_node_clone_node)
 	xmlNode *n, *node;
 	int ret;
 	dom_object *intern;
-	zend_long recursive = 0;
+	zend_bool recursive = 0;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|l", &id, dom_node_class_entry, &recursive) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|b", &id, dom_node_class_entry, &recursive) == FAILURE) {
 		return;
 	}
 
@@ -1759,7 +1759,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 			ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(tmp), prefix, tmpns) {
 				if (Z_TYPE_P(tmpns) == IS_STRING) {
 					if (prefix) {
-						xmlXPathRegisterNs(ctxp, (xmlChar *) prefix->val, (xmlChar *) Z_STRVAL_P(tmpns));
+						xmlXPathRegisterNs(ctxp, (xmlChar *) ZSTR_VAL(prefix), (xmlChar *) Z_STRVAL_P(tmpns));
 					}
 				}
 			} ZEND_HASH_FOREACH_END();

@@ -3,7 +3,6 @@ Phar: fopen a .phar for writing (existing file) tar-based
 --SKIPIF--
 <?php
 if (!extension_loaded("phar")) die("skip");
-if (version_compare(PHP_VERSION, "5.3", "<")) die("skip requires 5.3 or later");
 ?>
 --INI--
 phar.readonly=0
@@ -31,13 +30,13 @@ $phar->stopBuffering();
 ini_set('phar.readonly', 1);
 
 function err_handler($errno, $errstr, $errfile, $errline) {
-	echo "Catchable fatal error: $errstr in $errfile on line $errline\n";
+	echo "Recoverable fatal error: $errstr in $errfile on line $errline\n";
 }
 
 set_error_handler("err_handler", E_RECOVERABLE_ERROR);
 
 $fp = fopen($alias . '/b/c.php', 'wb');
-fwrite($fp, b'extra');
+fwrite($fp, 'extra');
 fclose($fp);
 
 include $alias . '/b/c.php';

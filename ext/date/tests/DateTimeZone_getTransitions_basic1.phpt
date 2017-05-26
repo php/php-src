@@ -16,7 +16,7 @@ date_default_timezone_set("Europe/London");
 // Create a DateTimeZone object
 $tz = new DateTimeZone("Europe/London");
 
-$tran = $tz->getTransitions();
+$tran = $tz->getTransitions(-306972000, -37241999);
 
 if (!is_array($tran)) {
 	echo "TEST FAILED: Expected an array\n";
@@ -25,14 +25,14 @@ if (!is_array($tran)) {
 echo "\n-- Total number of transitions: " . count($tran). " --\n"; 
 
 echo "\n-- Format a sample entry for Spring 1963 --\n";
-var_dump( $tran[97] );	
+var_dump( $tran[6] );
 
 ?>
 ===DONE===
 --EXPECT--
 *** Testing DateTimeZone::getTransitions() : basic functionality ***
 
--- Total number of transitions: 243 --
+-- Total number of transitions: 18 --
 
 -- Format a sample entry for Spring 1963 --
 array(5) {

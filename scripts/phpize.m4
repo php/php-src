@@ -1,4 +1,4 @@
-dnl This file becomes configure.in for self-contained extensions.
+dnl This file becomes configure.ac for self-contained extensions.
 
 AC_PREREQ(2.59)
 AC_INIT(config.m4)
@@ -93,7 +93,7 @@ php_zts_is_enabled
   PHP_THREAD_SAFETY=no
 ])
 CPPFLAGS=$old_CPPFLAGS
-AC_MSG_RESULT([$PHP_DEBUG])
+AC_MSG_RESULT([$PHP_THREAD_SAFETY])
 
 dnl Support for building and testing Zend extensions
 ZEND_EXT_TYPE="zend_extension"

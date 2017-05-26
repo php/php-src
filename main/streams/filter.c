@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -68,28 +68,17 @@ PHPAPI int php_stream_filter_register_factory_volatile(const char *filterpattern
 
 /* Buckets */
 
-PHPAPI php_stream_bucket *php_stream_bucket_new(php_stream *stream, char *buf, size_t buflen, int own_buf, int buf_persistent)
+PHPAPI php_stream_bucket *php_stream_bucket_new(php_stream *stream, char *buf, size_t buflen, uint8_t own_buf, uint8_t buf_persistent)
 {
 	int is_persistent = php_stream_is_persistent(stream);
 	php_stream_bucket *bucket;
 
 	bucket = (php_stream_bucket*)pemalloc(sizeof(php_stream_bucket), is_persistent);
-
-	if (bucket == NULL) {
-		return NULL;
-	}
-
 	bucket->next = bucket->prev = NULL;
 
 	if (is_persistent && !buf_persistent) {
 		/* all data in a persistent bucket must also be persistent */
 		bucket->buf = pemalloc(buflen, 1);
-
-		if (bucket->buf == NULL) {
-			pefree(bucket, 1);
-			return NULL;
-		}
-
 		memcpy(bucket->buf, buf, buflen);
 		bucket->buflen = buflen;
 		bucket->own_buf = 1;
@@ -141,10 +130,6 @@ PHPAPI int php_stream_bucket_split(php_stream_bucket *in, php_stream_bucket **le
 	*left = (php_stream_bucket*)pecalloc(1, sizeof(php_stream_bucket), in->is_persistent);
 	*right = (php_stream_bucket*)pecalloc(1, sizeof(php_stream_bucket), in->is_persistent);
 
-	if (*left == NULL || *right == NULL) {
-		goto exit_fail;
-	}
-
 	(*left)->buf = pemalloc(length, in->is_persistent);
 	(*left)->buflen = length;
 	memcpy((*left)->buf, in->buf, length);
@@ -160,21 +145,6 @@ PHPAPI int php_stream_bucket_split(php_stream_bucket *in, php_stream_bucket **le
 	(*right)->is_persistent = in->is_persistent;
 
 	return SUCCESS;
-
-exit_fail:
-	if (*right) {
-		if ((*right)->buf) {
-			pefree((*right)->buf, in->is_persistent);
-		}
-		pefree(*right, in->is_persistent);
-	}
-	if (*left) {
-		if ((*left)->buf) {
-			pefree((*left)->buf, in->is_persistent);
-		}
-		pefree(*left, in->is_persistent);
-	}
-	return FAILURE;
 }
 
 PHPAPI void php_stream_bucket_delref(php_stream_bucket *bucket)
@@ -247,15 +217,15 @@ PHPAPI void php_stream_bucket_unlink(php_stream_bucket *bucket)
  * match. If that fails, we try "convert.charset.*", then "convert.*"
  * This means that we don't need to clog up the hashtable with a zillion
  * charsets (for example) but still be able to provide them all as filters */
-PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval *filterparams, int persistent)
+PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval *filterparams, uint8_t persistent)
 {
 	HashTable *filter_hash = (FG(stream_filters) ? FG(stream_filters) : &stream_filters_hash);
 	php_stream_filter_factory *factory = NULL;
 	php_stream_filter *filter = NULL;
-	int n;
+	size_t n;
 	char *period;
 
-	n = (int)strlen(filtername);
+	n = strlen(filtername);
 
 	if (NULL != (factory = zend_hash_str_find_ptr(filter_hash, filtername, n))) {
 		filter = factory->create_filter(filtername, filterparams, persistent);
@@ -263,7 +233,7 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 		/* try a wildcard */
 		char *wildname;
 
-		wildname = emalloc(n+3);
+		wildname = safe_emalloc(1, n, 3);
 		memcpy(wildname, filtername, n+1);
 		period = wildname + (period - filtername);
 		while (period && !filter) {
@@ -290,7 +260,7 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 	return filter;
 }
 
-PHPAPI php_stream_filter *_php_stream_filter_alloc(php_stream_filter_ops *fops, void *abstract, int persistent STREAMS_DC)
+PHPAPI php_stream_filter *_php_stream_filter_alloc(php_stream_filter_ops *fops, void *abstract, uint8_t persistent STREAMS_DC)
 {
 	php_stream_filter *filter;
 
@@ -358,7 +328,7 @@ PHPAPI int php_stream_filter_append_ex(php_stream_filter_chain *chain, php_strea
 		php_stream_bucket_append(brig_inp, bucket);
 		status = filter->fops->filter(stream, filter, brig_inp, brig_outp, &consumed, PSFS_FLAG_NORMAL);
 
-		if (stream->readpos + consumed > (uint)stream->writepos) {
+		if (stream->readpos + consumed > (uint32_t)stream->writepos) {
 			/* No behaving filter should cause this. */
 			status = PSFS_ERR_FATAL;
 		}

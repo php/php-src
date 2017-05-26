@@ -133,11 +133,6 @@ ZEND_BEGIN_ARG_INFO_EX(collator_static_1_arg, 0, 0, 1)
 	ZEND_ARG_INFO(0, arg1)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(collator_static_2_args, 0, 0, 2)
-	ZEND_ARG_INFO(0, arg1)
-	ZEND_ARG_INFO(0, arg2)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(collator_0_args, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, object, Collator, 0)
 ZEND_END_ARG_INFO()
@@ -157,6 +152,11 @@ ZEND_BEGIN_ARG_INFO_EX(collator_sort_args, 0, 0, 2)
 	ZEND_ARG_OBJ_INFO(0, object, Collator, 0)
 	ZEND_ARG_ARRAY_INFO(1, arr, 0)
 	ZEND_ARG_INFO(0, sort_flags)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(collator_sort_with_sort_keys_args, 0, 0, 2)
+	ZEND_ARG_OBJ_INFO(0, coll, Collator, 0)
+	ZEND_ARG_ARRAY_INFO(1, arr, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(numfmt_parse_arginfo, 0, 0, 2)
@@ -378,13 +378,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_idn_to_ascii, 0, 0, 1)
 	ZEND_ARG_INFO(1, idn_info)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_idn_to_utf8, 0, 0, 1)
-	ZEND_ARG_INFO(0, domain)
-	ZEND_ARG_INFO(0, option)
-	ZEND_ARG_INFO(0, variant)
-	ZEND_ARG_INFO(1, idn_info)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle_create_proc, 0, 0, 2 )
 	ZEND_ARG_INFO( 0, locale )
 	ZEND_ARG_INFO( 0, bundlename )
@@ -451,10 +444,6 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX( arginfo_tz_create_enumeration, 0, 0, 0 )
 	ZEND_ARG_INFO( 0, countryOrRawOffset )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( arginfo_tz_count_equivalent_ids, 0, 0, 1 )
-	ZEND_ARG_INFO( 0, zoneId )
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX( arginfo_tz_create_time_zone_id_enumeration, 0, 0, 1 )
@@ -645,7 +634,7 @@ zend_function_entry intl_functions[] = {
 	PHP_FE( collator_get_strength, collator_0_args )
 	PHP_FE( collator_set_strength, collator_1_arg )
 	PHP_FE( collator_sort, collator_sort_args )
-	PHP_FE( collator_sort_with_sort_keys, collator_sort_args )
+	PHP_FE( collator_sort_with_sort_keys, collator_sort_with_sort_keys_args )
 	PHP_FE( collator_asort, collator_sort_args )
 	PHP_FE( collator_get_locale, collator_1_arg )
 	PHP_FE( collator_get_error_code, collator_0_args )
@@ -892,7 +881,7 @@ zend_module_entry intl_module_entry = {
 
 #ifdef COMPILE_DL_INTL
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE( intl )
 #endif

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -53,14 +53,8 @@
 #include <sys/socket.h>
 #endif
 
-#ifndef S_ISREG
-#define S_ISREG(mode)	(((mode) & S_IFMT) == S_IFREG)
-#endif
-
 #ifdef PHP_WIN32
 #include <winsock2.h>
-#elif defined(NETWARE) && defined(USE_WINSOCK)
-#include <novsock2.h>
 #else
 #include <netinet/in.h>
 #include <netdb.h>
@@ -69,7 +63,7 @@
 #endif
 #endif
 
-#if defined(PHP_WIN32) || defined(__riscos__) || defined(NETWARE)
+#if defined(PHP_WIN32) || defined(__riscos__)
 #undef AF_UNIX
 #endif
 
@@ -94,24 +88,24 @@ PHPAPI ZEND_INI_MH(OnUpdateBaseDir)
 
 	if (stage == PHP_INI_STAGE_STARTUP || stage == PHP_INI_STAGE_SHUTDOWN || stage == PHP_INI_STAGE_ACTIVATE || stage == PHP_INI_STAGE_DEACTIVATE) {
 		/* We're in a PHP_INI_SYSTEM context, no restrictions */
-		*p = new_value ? new_value->val : NULL;
+		*p = new_value ? ZSTR_VAL(new_value) : NULL;
 		return SUCCESS;
 	}
 
 	/* Otherwise we're in runtime */
 	if (!*p || !**p) {
 		/* open_basedir not set yet, go ahead and give it a value */
-		*p = new_value->val;
+		*p = ZSTR_VAL(new_value);
 		return SUCCESS;
 	}
 
 	/* Shortcut: When we have a open_basedir and someone tries to unset, we know it'll fail */
-	if (!new_value || !*new_value->val) {
+	if (!new_value || !*ZSTR_VAL(new_value)) {
 		return FAILURE;
 	}
 
 	/* Is the proposed open_basedir at least as restrictive as the current setting? */
-	ptr = pathbuf = estrdup(new_value->val);
+	ptr = pathbuf = estrdup(ZSTR_VAL(new_value));
 	while (ptr && *ptr) {
 		end = strchr(ptr, DEFAULT_DIR_SEPARATOR);
 		if (end != NULL) {
@@ -128,7 +122,7 @@ PHPAPI ZEND_INI_MH(OnUpdateBaseDir)
 	efree(pathbuf);
 
 	/* Everything checks out, set it */
-	*p = new_value->val;
+	*p = ZSTR_VAL(new_value);
 
 	return SUCCESS;
 }
@@ -148,7 +142,7 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 	char *path_file;
 	int resolved_basedir_len;
 	int resolved_name_len;
-	int path_len;
+	size_t path_len;
 	int nesting_level = 0;
 
 	/* Special case basedir==".": Use script-directory */
@@ -157,7 +151,7 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 		strlcpy(local_open_basedir, basedir, sizeof(local_open_basedir));
 	}
 
-	path_len = (int)strlen(path);
+	path_len = strlen(path);
 	if (path_len > (MAXPATHLEN - 1)) {
 		/* empty and too long paths are invalid */
 		return -1;
@@ -168,7 +162,7 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 		return -1;
 	}
 
-	path_len = (int)strlen(resolved_name);
+	path_len = strlen(resolved_name);
 	memcpy(path_tmp, resolved_name, path_len + 1); /* safe */
 
 	while (VCWD_REALPATH(path_tmp, resolved_name) == NULL) {
@@ -188,7 +182,7 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 		}
 #endif
 
-#if defined(PHP_WIN32) || defined(NETWARE)
+#ifdef PHP_WIN32
 		path_file = strrchr(path_tmp, DEFAULT_SLASH);
 		if (!path_file) {
 			path_file = strrchr(path_tmp, '/');
@@ -201,7 +195,7 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 			return -1;
 		} else {
 			path_len = path_file - path_tmp + 1;
-#if defined(PHP_WIN32) || defined(NETWARE)
+#ifdef PHP_WIN32
 			if (path_len > 1 && path_tmp[path_len - 2] == ':') {
 				if (path_len != 3) {
 					return -1;
@@ -223,7 +217,7 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 		int basedir_len = (int)strlen(basedir);
 		/* Handler for basedirs that end with a / */
 		resolved_basedir_len = (int)strlen(resolved_basedir);
-#if defined(PHP_WIN32) || defined(NETWARE)
+#ifdef PHP_WIN32
 		if (basedir[basedir_len - 1] == PHP_DIR_SEPARATOR || basedir[basedir_len - 1] == '/') {
 #else
 		if (basedir[basedir_len - 1] == PHP_DIR_SEPARATOR) {
@@ -246,7 +240,7 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 		}
 
 		/* Check the path */
-#if defined(PHP_WIN32) || defined(NETWARE)
+#ifdef PHP_WIN32
 		if (strncasecmp(resolved_basedir, resolved_name, resolved_basedir_len) == 0) {
 #else
 		if (strncmp(resolved_basedir, resolved_name, resolved_basedir_len) == 0) {
@@ -261,7 +255,7 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 		} else {
 			/* /openbasedir/ and /openbasedir are the same directory */
 			if (resolved_basedir_len == (resolved_name_len + 1) && resolved_basedir[resolved_basedir_len - 1] == PHP_DIR_SEPARATOR) {
-#if defined(PHP_WIN32) || defined(NETWARE)
+#ifdef PHP_WIN32
 				if (strncasecmp(resolved_basedir, resolved_name, resolved_name_len) == 0) {
 #else
 				if (strncmp(resolved_basedir, resolved_name, resolved_name_len) == 0) {
@@ -412,16 +406,14 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
 		IS_ABSOLUTE_PATH(PG(doc_root), length)) {
 		int path_len = (int)strlen(path_info);
 		filename = emalloc(length + path_len + 2);
-		if (filename) {
-			memcpy(filename, PG(doc_root), length);
-			if (!IS_SLASH(filename[length - 1])) {	/* length is never 0 */
-				filename[length++] = PHP_DIR_SEPARATOR;
-			}
-			if (IS_SLASH(path_info[0])) {
-				length--;
-			}
-			strncpy(filename + length, path_info, path_len + 1);
+		memcpy(filename, PG(doc_root), length);
+		if (!IS_SLASH(filename[length - 1])) {	/* length is never 0 */
+			filename[length++] = PHP_DIR_SEPARATOR;
 		}
+		if (IS_SLASH(path_info[0])) {
+			length--;
+		}
+		strncpy(filename + length, path_info, path_len + 1);
 	} else {
 		filename = SG(request_info).path_translated;
 	}
@@ -509,6 +501,13 @@ PHPAPI zend_string *php_resolve_path(const char *filename, int filename_length, 
 	     (IS_SLASH(filename[1]) ||
 	      ((filename[1] == '.') && IS_SLASH(filename[2])))) ||
 	    IS_ABSOLUTE_PATH(filename, filename_length) ||
+#ifdef PHP_WIN32
+		/* This should count as an absolute local path as well, however
+		   IS_ABSOLUTE_PATH doesn't care about this path form till now. It
+		   might be a big thing to extend, thus just a local handling for
+		   now. */
+		filename_length >=2 && IS_SLASH(filename[0]) && !IS_SLASH(filename[1]) ||
+#endif
 	    !path ||
 	    !*path) {
 		if (tsrm_realpath(filename, resolved_path)) {
@@ -533,7 +532,7 @@ PHPAPI zend_string *php_resolve_path(const char *filename, int filename_length, 
 		}
 		end = strchr(p, DEFAULT_DIR_SEPARATOR);
 		if (end) {
-			if ((end-ptr) + 1 + filename_length + 1 >= MAXPATHLEN) {
+			if (filename_length > (MAXPATHLEN - 2) || (end-ptr) > MAXPATHLEN || (end-ptr) + 1 + (size_t)filename_length + 1 >= MAXPATHLEN) {
 				ptr = end + 1;
 				continue;
 			}
@@ -542,9 +541,9 @@ PHPAPI zend_string *php_resolve_path(const char *filename, int filename_length, 
 			memcpy(trypath+(end-ptr)+1, filename, filename_length+1);
 			ptr = end+1;
 		} else {
-			int len = (int)strlen(ptr);
+			size_t len = strlen(ptr);
 
-			if (len + 1 + filename_length + 1 >= MAXPATHLEN) {
+			if (filename_length > (MAXPATHLEN - 2) || len > MAXPATHLEN || len + 1 + (size_t)filename_length + 1 >= MAXPATHLEN) {
 				break;
 			}
 			memcpy(trypath, ptr, len);
@@ -577,11 +576,12 @@ PHPAPI zend_string *php_resolve_path(const char *filename, int filename_length, 
 	 */
 	if (zend_is_executing() &&
 	    (exec_filename = zend_get_executed_filename_ex()) != NULL) {
-		const char *exec_fname = exec_filename->val;
-		size_t exec_fname_length = exec_filename->len;
+		const char *exec_fname = ZSTR_VAL(exec_filename);
+		size_t exec_fname_length = ZSTR_LEN(exec_filename);
 
 		while ((--exec_fname_length < SIZE_MAX) && !IS_SLASH(exec_fname[exec_fname_length]));
 		if (exec_fname_length > 0 &&
+			filename_length < (MAXPATHLEN - 2) &&
 		    exec_fname_length + 1 + filename_length + 1 < MAXPATHLEN) {
 			memcpy(trypath, exec_fname, exec_fname_length + 1);
 			memcpy(trypath+exec_fname_length + 1, filename, filename_length+1);
@@ -644,7 +644,7 @@ PHPAPI FILE *php_fopen_with_path(const char *filename, const char *mode, const c
 	if ((*filename == '.')
 	/* Absolute path open */
 	 || IS_ABSOLUTE_PATH(filename, filename_length)
-	 || (!path || (path && !*path))
+	 || (!path || !*path)
 	) {
 		return php_fopen_and_set_opened_path(filename, mode, opened_path);
 	}
@@ -655,8 +655,8 @@ PHPAPI FILE *php_fopen_with_path(const char *filename, const char *mode, const c
 	 */
 	if (zend_is_executing() &&
 	    (exec_filename = zend_get_executed_filename_ex()) != NULL) {
-		const char *exec_fname = exec_filename->val;
-		size_t exec_fname_length = exec_filename->len;
+		const char *exec_fname = ZSTR_VAL(exec_filename);
+		size_t exec_fname_length = ZSTR_LEN(exec_filename);
 
 		while ((--exec_fname_length < SIZE_MAX) && !IS_SLASH(exec_fname[exec_fname_length]));
 		if ((exec_fname && exec_fname[0] == '[') || exec_fname_length <= 0) {

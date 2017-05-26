@@ -35,13 +35,6 @@ static zend_object_handlers Collator_handlers;
  * Auxiliary functions needed by objects of 'Collator' class
  */
 
-/* {{{ Collator_objects_dtor */
-static void Collator_objects_dtor(zend_object *object )
-{
-	zend_objects_destroy_object(object );
-}
-/* }}} */
-
 /* {{{ Collator_objects_free */
 void Collator_objects_free(zend_object *object )
 {
@@ -95,6 +88,10 @@ ZEND_BEGIN_ARG_INFO_EX( collator_sort_args, 0, 0, 1 )
 	ZEND_ARG_INFO( 0, flags )
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX( collator_sort_with_sort_keys_args, 0, 0, 1 )
+	ZEND_ARG_ARRAY_INFO( 1, arr, 0 )
+ZEND_END_ARG_INFO()
+
 /* }}} */
 
 /* {{{ Collator_class_functions
@@ -106,7 +103,7 @@ zend_function_entry Collator_class_functions[] = {
 	ZEND_FENTRY( create, ZEND_FN( collator_create ), collator_1_arg, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
 	PHP_NAMED_FE( compare, ZEND_FN( collator_compare ), collator_2_args )
 	PHP_NAMED_FE( sort, ZEND_FN( collator_sort ), collator_sort_args )
-	PHP_NAMED_FE( sortWithSortKeys, ZEND_FN( collator_sort_with_sort_keys ), collator_sort_args )
+	PHP_NAMED_FE( sortWithSortKeys, ZEND_FN( collator_sort_with_sort_keys ), collator_sort_with_sort_keys_args )
 	PHP_NAMED_FE( asort, ZEND_FN( collator_asort ), collator_sort_args )
 	PHP_NAMED_FE( getAttribute, ZEND_FN( collator_get_attribute ), collator_1_arg )
 	PHP_NAMED_FE( setAttribute, ZEND_FN( collator_set_attribute ), collator_2_args )
@@ -138,7 +135,6 @@ void collator_register_Collator_class( void )
 	   for which we don't have the place to keep */
 	Collator_handlers.offset = XtOffsetOf(Collator_object, zo);
 	Collator_handlers.clone_obj = NULL;
-	Collator_handlers.dtor_obj = Collator_objects_dtor;
 	Collator_handlers.free_obj = Collator_objects_free;
 
 	/* Declare 'Collator' class properties. */

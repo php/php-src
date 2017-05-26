@@ -34,22 +34,22 @@ set_error_handler('eh');
 
 try {
 	var_dump(intlcal_get_least_maximum(1, 1));
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 try {
 	var_dump(intlcal_get_maximum(1, 1));
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 try {
 	var_dump(intlcal_get_greatest_minimum(1, -1));
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 try {
 	var_dump(intlcal_get_minimum(1, -1));
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 
@@ -98,11 +98,11 @@ bool(false)
 
 Warning: intlcal_get_minimum(): intlcal_get_minimum: invalid field in %s on line %d
 bool(false)
-error: 1, Argument 1 passed to intlcal_get_least_maximum() must be an instance of IntlCalendar, integer given
+error: 0, Argument 1 passed to intlcal_get_least_maximum() must be an instance of IntlCalendar, integer given
 
-error: 1, Argument 1 passed to intlcal_get_maximum() must be an instance of IntlCalendar, integer given
+error: 0, Argument 1 passed to intlcal_get_maximum() must be an instance of IntlCalendar, integer given
 
-error: 1, Argument 1 passed to intlcal_get_greatest_minimum() must be an instance of IntlCalendar, integer given
+error: 0, Argument 1 passed to intlcal_get_greatest_minimum() must be an instance of IntlCalendar, integer given
 
-error: 1, Argument 1 passed to intlcal_get_minimum() must be an instance of IntlCalendar, integer given
+error: 0, Argument 1 passed to intlcal_get_minimum() must be an instance of IntlCalendar, integer given
 

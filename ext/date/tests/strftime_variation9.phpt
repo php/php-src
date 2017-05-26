@@ -1,5 +1,5 @@
 --TEST--
-Test strftime() function : usage variation - Checking week related formats which are not supported on Windows.
+Test strftime() function : usage variation - Checking week related formats which was not supported on Windows before VC14.
 --SKIPIF--
 <?php
 if (strtoupper(substr(PHP_OS, 0, 3)) != 'WIN') {
@@ -17,7 +17,7 @@ if (strtoupper(substr(PHP_OS, 0, 3)) != 'WIN') {
 echo "*** Testing strftime() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-setlocale(LC_ALL, "en_US");
+setlocale(LC_ALL, "C");
 date_default_timezone_set("Asia/Calcutta");
 $timestamp = mktime(8, 8, 8, 8, 8, 2008);
 
@@ -41,10 +41,10 @@ foreach($inputs as $key =>$value) {
 *** Testing strftime() : usage variation ***
 
 --The ISO 8601:1988 week number--
-bool(false)
-bool(false)
+string(2) "%d"
+string(2) "32"
 
 --Weekday as decimal--
-bool(false)
-bool(false)
+string(1) "%d"
+string(1) "5"
 ===DONE===

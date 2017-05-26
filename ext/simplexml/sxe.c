@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -71,6 +71,7 @@ PHP_METHOD(ce_SimpleXMLIterator, valid)
 PHP_METHOD(ce_SimpleXMLIterator, current)
 {
 	php_sxe_object *sxe = Z_SXEOBJ_P(getThis());
+	zval *data;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -80,7 +81,9 @@ PHP_METHOD(ce_SimpleXMLIterator, current)
 		return; /* return NULL */
 	}
 
-	RETURN_ZVAL(&sxe->iter.data, 1, 0);
+	data = &sxe->iter.data;
+	ZVAL_DEREF(data);
+	ZVAL_COPY(return_value, data);
 }
 /* }}} */
 
@@ -158,6 +161,7 @@ PHP_METHOD(ce_SimpleXMLIterator, hasChildren)
 PHP_METHOD(ce_SimpleXMLIterator, getChildren)
 {
 	php_sxe_object *sxe = Z_SXEOBJ_P(getThis());
+	zval *data;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -166,7 +170,10 @@ PHP_METHOD(ce_SimpleXMLIterator, getChildren)
 	if (Z_ISUNDEF(sxe->iter.data) || sxe->iter.type == SXE_ITER_ATTRLIST) {
 		return; /* return NULL */
 	}
-	RETURN_ZVAL(&sxe->iter.data, 1, 0);
+
+	data = &sxe->iter.data;
+	ZVAL_DEREF(data);
+	ZVAL_COPY(return_value, data);
 }
 
 /* {{{ arginfo */
@@ -182,7 +189,7 @@ static const zend_function_entry funcs_SimpleXMLIterator[] = {
 	PHP_ME(ce_SimpleXMLIterator, next,                   arginfo_simplexmliterator__void, ZEND_ACC_PUBLIC)
 	PHP_ME(ce_SimpleXMLIterator, hasChildren,            arginfo_simplexmliterator__void, ZEND_ACC_PUBLIC)
 	PHP_ME(ce_SimpleXMLIterator, getChildren,            arginfo_simplexmliterator__void, ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 
@@ -204,7 +211,7 @@ PHP_MINIT_FUNCTION(sxe) /* {{{ */
 	ce_SimpleXMLIterator->create_object = ce_SimpleXMLElement->create_object;
 
 	zend_class_implements(ce_SimpleXMLIterator, 1, spl_ce_RecursiveIterator);
-	zend_class_implements(ce_SimpleXMLIterator, 1, spl_ce_Countable);
+	zend_class_implements(ce_SimpleXMLIterator, 1, zend_ce_countable);
 
 	return SUCCESS;
 }

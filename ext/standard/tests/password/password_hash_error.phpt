@@ -41,8 +41,12 @@ NULL
 Warning: password_hash() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
+Deprecated: password_hash(): Use of the 'salt' option to password_hash is deprecated in %s on line %d
+
 Warning: password_hash(): Non-string salt parameter supplied in %s on line %d
 NULL
+
+Deprecated: password_hash(): Use of the 'salt' option to password_hash is deprecated in %s on line %d
 
 Warning: password_hash(): Provided salt is too short: 4 expecting 22 in %s on line %d
 NULL

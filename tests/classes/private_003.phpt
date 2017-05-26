@@ -1,7 +1,5 @@
 --TEST--
 ZE2 A private method cannot be called in a derived class
---SKIPIF--
-<?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
 --FILE--
 <?php
 ini_set("error_reporting",2039);
@@ -33,4 +31,8 @@ echo "Done\n"; // shouldn't be displayed
 --EXPECTF--
 Call show()
 
-Fatal error: Call to private method pass::show() from context 'fail' in %s on line %d
+Fatal error: Uncaught Error: Call to private method pass::show() from context 'fail' in %s:%d
+Stack trace:
+#0 %s(%d): fail::not_ok()
+#1 {main}
+  thrown in %s on line %d

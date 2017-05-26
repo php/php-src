@@ -56,7 +56,7 @@ array(2) {
   [1]=>
   object(GMP)#%d (1) {
     ["num"]=>
-    string(2) "36"
+    string(3) "-36"
   }
 }
 array(2) {

@@ -55,8 +55,9 @@ static int					resource_types_table_size;
 static MUTEX_T tsmm_mutex;	/* thread-safe memory manager mutex */
 
 /* New thread handlers */
-static tsrm_thread_begin_func_t tsrm_new_thread_begin_handler;
-static tsrm_thread_end_func_t tsrm_new_thread_end_handler;
+static tsrm_thread_begin_func_t tsrm_new_thread_begin_handler = NULL;
+static tsrm_thread_end_func_t tsrm_new_thread_end_handler = NULL;
+static tsrm_shutdown_func_t tsrm_shutdown_handler = NULL;
 
 /* Debug support */
 int tsrm_error(int level, const char *format, ...);
@@ -120,6 +121,8 @@ static int32 tls_key;
 # warning tsrm_set_interpreter_context is probably broken on this platform
 #endif
 
+TSRM_TLS uint8_t in_main_thread = 0;
+
 /* Startup TSRM (call once for the entire process) */
 TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debug_level, char *debug_filename)
 {
@@ -135,6 +138,9 @@ TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debu
 #elif defined(BETHREADS)
 	tls_key = tls_allocate();
 #endif
+
+	/* ensure singleton */
+	in_main_thread = 1;
 
 	tsrm_error_file = stderr;
 	tsrm_error_set(debug_level, debug_filename);
@@ -158,8 +164,6 @@ TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debu
 
 	tsmm_mutex = tsrm_mutex_alloc();
 
-	tsrm_new_thread_begin_handler = tsrm_new_thread_end_handler = NULL;
-
 	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Started up TSRM, %d expected threads, %d expected resources", expected_threads, expected_resources));
 	return 1;
 }
@@ -169,6 +173,11 @@ TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debu
 TSRM_API void tsrm_shutdown(void)
 {
 	int i;
+
+	if (!in_main_thread) {
+		/* ensure singleton */
+		return;
+	}
 
 	if (tsrm_tls_table) {
 		for (i=0; i<tsrm_tls_table_size; i++) {
@@ -212,6 +221,12 @@ TSRM_API void tsrm_shutdown(void)
 #elif defined(TSRM_WIN32)
 	TlsFree(tls_key);
 #endif
+	if (tsrm_shutdown_handler) {
+		tsrm_shutdown_handler();
+	}
+	tsrm_new_thread_begin_handler = NULL;
+	tsrm_new_thread_end_handler = NULL;
+	tsrm_shutdown_handler = NULL;
 }
 
 
@@ -318,15 +333,6 @@ TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id)
 	int hash_value;
 	tsrm_tls_entry *thread_resources;
 
-#ifdef NETWARE
-	/* The below if loop is added for NetWare to fix an abend while unloading PHP
-	 * when an Apache unload command is issued on the system console.
-	 * While exiting from PHP, at the end for some reason, this function is called
-	 * with tsrm_tls_table = NULL. When this happened, the server abends when
-	 * tsrm_tls_table is accessed since it is NULL.
-	 */
-	if(tsrm_tls_table) {
-#endif
 	if (!th_id) {
 		/* Fast path for looking up the resources for the current
 		 * thread. Its used by just about every call to
@@ -380,9 +386,6 @@ TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id)
 	 * changes to the structure as we read it.
 	 */
 	TSRM_SAFE_RETURN_RSRC(thread_resources->storage, id, thread_resources->count);
-#ifdef NETWARE
-	}	/* if(tsrm_tls_table) */
-#endif
 }
 
 /* frees an interpreter context.  You are responsible for making sure that
@@ -752,6 +755,14 @@ TSRM_API void *tsrm_set_new_thread_end_handler(tsrm_thread_end_func_t new_thread
 }
 
 
+TSRM_API void *tsrm_set_shutdown_handler(tsrm_shutdown_func_t shutdown_handler)
+{
+	void *retval = (void *) tsrm_shutdown_handler;
+
+	tsrm_shutdown_handler = shutdown_handler;
+	return retval;
+}
+
 
 /*
  * Debug support
@@ -801,6 +812,11 @@ void tsrm_error_set(int level, char *debug_filename)
 TSRM_API void *tsrm_get_ls_cache(void)
 {
 	return tsrm_tls_get();
+}
+
+TSRM_API uint8_t tsrm_is_main_thread(void)
+{
+	return in_main_thread;
 }
 
 #endif /* ZTS */

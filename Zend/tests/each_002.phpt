@@ -3,10 +3,12 @@ Testing each() with array and object
 --FILE--
 <?php
 
-$foo = each(new stdClass);
+$a = new stdClass;
+$foo = each($a);
 var_dump($foo);
 
-var_dump(each(new stdClass));
+$a = new stdClass;
+var_dump(each($a));
 
 $a = array(new stdClass);
 var_dump(each($a));
@@ -14,6 +16,7 @@ var_dump(each($a));
 
 ?>
 --EXPECTF--
+Deprecated: The each() function is deprecated. This message will be suppressed on further calls in %s on line %d
 bool(false)
 bool(false)
 array(4) {

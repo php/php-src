@@ -5,7 +5,7 @@ Bug #64966 (segfault in zend_do_fcall_common_helper_SPEC)
 function test($func) {
 	try {
 		$a = $func("");
-	} catch (EngineException $e) {
+	} catch (Error $e) {
 		throw new Exception();
 	}
 	return true;
@@ -21,7 +21,7 @@ $a = new A();
 $a->b();
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'Exception' in %sbug64966.php:6
+Fatal error: Uncaught Exception in %sbug64966.php:6
 Stack trace:
 #0 %sbug64966.php(13): test('iterator_apply')
 #1 %sbug64966.php(18): A->b()

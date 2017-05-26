@@ -5,12 +5,13 @@ This is the github mirror of the official PHP repository located at
 http://git.php.net.
 
 [![Build Status](https://secure.travis-ci.org/php/php-src.svg?branch=master)](http://travis-ci.org/php/php-src)
+[![Build status](https://ci.appveyor.com/api/projects/status/meyur6fviaxgdwdy?svg=true)](https://ci.appveyor.com/project/php/php-src)
 
 Pull Requests
 =============
 PHP accepts pull requests via github. Discussions are done on github, but
 depending on the topic can also be relayed to the official PHP developer
-mailinglist internals@lists.php.net.
+mailing list internals@lists.php.net.
 
 New features require an RFC and must be accepted by the developers.
 See https://wiki.php.net/rfc and https://wiki.php.net/rfc/voting for more

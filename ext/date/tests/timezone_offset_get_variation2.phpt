@@ -109,7 +109,7 @@ foreach($inputs as $variation =>$datetime) {
     echo "\n-- $variation --\n";
     try {
 		var_dump( timezone_offset_get($object, $datetime) );
-	} catch (EngineException $ex) {
+	} catch (Error $ex) {
 		echo $ex->getMessage()."\n";
 	}
 };

@@ -11,7 +11,7 @@ date.timezone = UTC
 <?php include('skipif.inc'); ?>
 --FILE--
 <?php
-
+ob_start();
 $data = date('r');
 
 session_start();

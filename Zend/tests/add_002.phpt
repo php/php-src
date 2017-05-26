@@ -10,7 +10,7 @@ $o->prop = "value";
 
 try {
 	var_dump($a + $o);
-} catch (EngineException $e) {
+} catch (Error $e) {
 	echo "\nException: " . $e->getMessage() . "\n";
 }
 
@@ -26,4 +26,7 @@ Exception: Unsupported operand types
 
 Notice: Object of class stdClass could not be converted to int in %s on line %d
 
-Fatal error: Unsupported operand types in %s on line %d
+Fatal error: Uncaught Error: Unsupported operand types in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

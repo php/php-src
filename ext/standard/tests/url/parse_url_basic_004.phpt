@@ -80,6 +80,7 @@ echo "Done";
 --> /foo.php?a=b&c=d   : NULL
 --> foo.php?a=b&c=d   : NULL
 --> http://user:passwd@www.example.com:8080?bar=1&boom=0   : int(8080)
+--> http://user_me-you:my_pas-word@www.example.com:8080?bar=1&boom=0   : int(8080)
 --> file:///path/to/file   : NULL
 --> file://path/to/file   : NULL
 --> file:/path/to/file   : NULL
@@ -97,8 +98,8 @@ echo "Done";
 --> http://::?   : NULL
 --> http://::#   : NULL
 --> x://::6.5   : int(6)
---> http://?:/   : NULL
---> http://@?:/   : NULL
+--> http://?:/   : bool(false)
+--> http://@?:/   : bool(false)
 --> file:///:   : NULL
 --> file:///a:/   : NULL
 --> file:///ab:/   : NULL

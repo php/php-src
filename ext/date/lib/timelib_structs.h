@@ -1,22 +1,26 @@
 /*
-   +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
-   +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
-   +----------------------------------------------------------------------+
-   | Authors: Derick Rethans <derick@derickrethans.nl>                    |
-   +----------------------------------------------------------------------+
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2015 Derick Rethans
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
-
-/* $Id$ */
 
 #ifndef __TIMELIB_STRUCTS_H__
 #define __TIMELIB_STRUCTS_H__
@@ -121,7 +125,7 @@ typedef unsigned __int64  uint64_t;
 #include <strings.h>
 #endif
 
-#if defined(__X86_64__) || defined(__LP64__) || defined(_LP64) || defined(_WIN64)
+#if (defined(__x86_64__) || defined(__LP64__) || defined(_LP64) || defined(_WIN64)) && !defined(TIMELIB_FORCE_LONG32)
 typedef int64_t timelib_long;
 typedef uint64_t timelib_ulong;
 # define TIMELIB_LONG_MAX INT64_MAX
@@ -176,12 +180,22 @@ typedef struct tlocinfo
 typedef struct timelib_tzinfo
 {
 	char    *name;
-	uint32_t ttisgmtcnt;
-	uint32_t ttisstdcnt;
-	uint32_t leapcnt;
-	uint32_t timecnt;
-	uint32_t typecnt;
-	uint32_t charcnt;
+	struct {
+		uint32_t ttisgmtcnt;
+		uint32_t ttisstdcnt;
+		uint32_t leapcnt;
+		uint32_t timecnt;
+		uint32_t typecnt;
+		uint32_t charcnt;
+	} bit32;
+	struct {
+		uint64_t ttisgmtcnt;
+		uint64_t ttisstdcnt;
+		uint64_t leapcnt;
+		uint64_t timecnt;
+		uint64_t typecnt;
+		uint64_t charcnt;
+	} bit64;
 
 	int32_t *trans;
 	unsigned char *trans_idx;
@@ -202,6 +216,7 @@ typedef struct timelib_special {
 typedef struct timelib_rel_time {
 	timelib_sll y, m, d; /* Years, Months and Days */
 	timelib_sll h, i, s; /* Hours, mInutes and Seconds */
+	double      f;       /* Fraction */
 
 	int weekday; /* Stores the day in 'next monday' */
 	int weekday_behavior; /* 0: the current day should *not* be counted when advancing forwards; 1: the current day *should* be counted */

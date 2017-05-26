@@ -16,4 +16,4 @@ class C implements IFoo {
 }
 
 --EXPECTF--
-Fatal error: Declaration of TFoo::oneArgument() must be compatible with IFoo::oneArgument($a) in %s on line %d
+Fatal error: Declaration of C::oneArgument() must be compatible with IFoo::oneArgument($a) in %s on line %d

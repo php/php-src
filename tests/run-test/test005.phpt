@@ -1,9 +1,11 @@
 --TEST--
-Error message handling (without ZendOptimizer)
+Error message handling (with ZendOpcache)
 --SKIPIF--
 <?php
-!extension_loaded("Zend Optimizer") or die("skip Zend Optimizer is loaded");
+extension_loaded("Zend Opcache") or die("skip Zend Opcache is not loaded");
 ?>
+--INI--
+track_errors=1
 --FILE--
 <?php
 // If this test fails ask the developers of run-test.php
@@ -24,6 +26,7 @@ $error = 1 / $zero;
 var_dump($php_errormsg);
 ?>
 --EXPECTF--
+Deprecated: Directive 'track_errors' is deprecated in Unknown on line 0
 string(1) "1"
 string(5) "32767"
 string(1) "0"

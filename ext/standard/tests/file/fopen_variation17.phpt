@@ -39,7 +39,7 @@ function runtest() {
     
 	$tmpfile = $extraDir . '/' . basename(__FILE__, ".php") . ".tmp";
 	$h = fopen($tmpfile, "w+", true);
-	fwrite($h, (binary) "This is the test file");
+	fwrite($h, "This is the test file");
 	fclose($h);
 	
 	$h = @fopen($dir1.'/'.$tmpfile, "r");

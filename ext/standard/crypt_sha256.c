@@ -68,7 +68,7 @@ struct sha256_ctx {
 	char buffer[128]; /* NB: always correctly aligned for uint32_t.  */
 };
 
-#if PHP_WIN32 || (!defined(WORDS_BIGENDIAN))
+#if defined(PHP_WIN32) || (!defined(WORDS_BIGENDIAN))
 # define SWAP(n) \
     (((n) << 24) | (((n) & 0xff00) << 8) | (((n) >> 8) & 0xff00) | ((n) >> 24))
 #else
@@ -596,8 +596,8 @@ char * php_sha256_crypt(const char *key, const char *salt)
 	password.  We can compute an upper bound for the size of the
 	result in advance and so we can prepare the buffer we pass to
 	`sha256_crypt_r'.  */
-	static char *buffer;
-	static int buflen;
+	ZEND_TLS char *buffer;
+	ZEND_TLS int buflen = 0;
 	int needed = (sizeof(sha256_salt_prefix) - 1
 			+ sizeof(sha256_rounds_prefix) + 9 + 1
 			+ (int)strlen(salt) + 1 + 43 + 1);

@@ -3,7 +3,10 @@
 
 ARG_WITH("wddx", "WDDX support", "yes");
 
-if (PHP_WDDX == "yes" && PHP_LIBXML == "yes") {
+if (PHP_WDDX == "yes" &&
+	PHP_LIBXML == "yes" &&
+	CHECK_HEADER_ADD_INCLUDE("libxml/parser.h", "CFLAGS_WDDX", PHP_PHP_BUILD + "\\include\\libxml2")
+) {
 	EXTENSION("wddx", "wddx.c");
 	AC_DEFINE("HAVE_WDDX", 1, "WDDX support");
 

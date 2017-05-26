@@ -21,7 +21,7 @@ Test fopen and fclose() functions - usage variations - "xt" mode
    and fclose function
 */
 $file_path = dirname(__FILE__);
-$string = b"abcdefghij\nmnopqrst\tuvwxyz\n0123456789";
+$string = "abcdefghij\nmnopqrst\tuvwxyz\n0123456789";
 $file = $file_path."/007_variation15.tmp";
 
 echo "*** Test fopen() & fclose() functions:  with 'xt' mode ***\n";
@@ -45,14 +45,14 @@ unlink(dirname(__FILE__)."/007_variation15.tmp");
 --EXPECTF--
 *** Test fopen() & fclose() functions:  with 'xt' mode ***
 resource(%d) of type (stream)
-%unicode|string%(6) "stream"
+string(6) "stream"
 int(0)
 int(37)
 int(37)
 string(0) ""
 int(0)
 bool(true)
-%unicode|string%(7) "Unknown"
+string(7) "Unknown"
 
 Warning: fopen(%s): failed to open stream: File exists in %s on line %s
 *** Done ***

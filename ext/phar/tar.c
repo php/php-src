@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | TAR archive support for Phar                                         |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2015 The PHP Group                                |
+  | Copyright (c) 2005-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -19,9 +19,9 @@
 
 #include "phar_internal.h"
 
-static php_uint32 phar_tar_number(char *buf, int len) /* {{{ */
+static uint32_t phar_tar_number(char *buf, int len) /* {{{ */
 {
-	php_uint32 num = 0;
+	uint32_t num = 0;
 	int i = 0;
 
 	while (i < len && buf[i] == ' ') {
@@ -62,7 +62,7 @@ static php_uint32 phar_tar_number(char *buf, int len) /* {{{ */
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-static int phar_tar_octal(char *buf, php_uint32 val, int len) /* {{{ */
+static int phar_tar_octal(char *buf, uint32_t val, int len) /* {{{ */
 {
 	char *p = buf;
 	int s = len;
@@ -84,9 +84,9 @@ static int phar_tar_octal(char *buf, php_uint32 val, int len) /* {{{ */
 }
 /* }}} */
 
-static php_uint32 phar_tar_checksum(char *buf, int len) /* {{{ */
+static uint32_t phar_tar_checksum(char *buf, int len) /* {{{ */
 {
-	php_uint32 sum = 0;
+	uint32_t sum = 0;
 	char *end = buf + len;
 
 	while (buf != end) {
@@ -100,8 +100,8 @@ static php_uint32 phar_tar_checksum(char *buf, int len) /* {{{ */
 int phar_is_tar(char *buf, char *fname) /* {{{ */
 {
 	tar_header *header = (tar_header *) buf;
-	php_uint32 checksum = phar_tar_number(header->checksum, sizeof(header->checksum));
-	php_uint32 ret;
+	uint32_t checksum = phar_tar_number(header->checksum, sizeof(header->checksum));
+	uint32_t ret;
 	char save[sizeof(header->checksum)], *bname;
 
 	/* assume that the first filename in a tar won't begin with <?php */
@@ -195,15 +195,23 @@ static int phar_tar_process_metadata(phar_entry_info *entry, php_stream *fp) /* 
 }
 /* }}} */
 
-int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, phar_archive_data** pphar, int is_data, php_uint32 compression, char **error) /* {{{ */
+#if !HAVE_STRNLEN
+static size_t strnlen(const char *s, size_t maxlen) {
+        char *r = (char *)memchr(s, '\0', maxlen);
+        return r ? r-s : maxlen;
+}
+#endif
+
+int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, phar_archive_data** pphar, int is_data, uint32_t compression, char **error) /* {{{ */
 {
 	char buf[512], *actual_alias = NULL, *p;
 	phar_entry_info entry = {0};
 	size_t pos = 0, read, totalsize;
 	tar_header *hdr;
-	php_uint32 sum1, sum2, size, old;
+	uint32_t sum1, sum2, size, old;
 	phar_archive_data *myphar, *actual;
 	int last_was_longlink = 0;
+	int linkname_len;
 
 	if (error) {
 		*error = NULL;
@@ -264,7 +272,7 @@ int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, 
 			goto next;
 		}
 
-		if (((!old && hdr->prefix[0] == 0) || old) && strlen(hdr->name) == sizeof(".phar/signature.bin")-1 && !strncmp(hdr->name, ".phar/signature.bin", sizeof(".phar/signature.bin")-1)) {
+		if (((!old && hdr->prefix[0] == 0) || old) && strnlen(hdr->name, 100) == sizeof(".phar/signature.bin")-1 && !strncmp(hdr->name, ".phar/signature.bin", sizeof(".phar/signature.bin")-1)) {
 			zend_off_t curloc;
 
 			if (size > 511) {
@@ -278,7 +286,7 @@ bail:
 			}
 			curloc = php_stream_tell(fp);
 			read = php_stream_read(fp, buf, size);
-			if (read != size) {
+			if (read != size || read <= 8) {
 				if (error) {
 					spprintf(error, 4096, "phar error: tar-based phar \"%s\" signature cannot be read", fname);
 				}
@@ -291,7 +299,7 @@ bail:
 		| ((((unsigned char*)(buffer))[1]) <<  8) \
 		| (((unsigned char*)(buffer))[0]))
 #else
-# define PHAR_GET_32(buffer) (php_uint32) *(buffer)
+# define PHAR_GET_32(buffer) (uint32_t) *(buffer)
 #endif
 			myphar->sig_flags = PHAR_GET_32(buf);
 			if (FAILURE == phar_verify_signature(fp, php_stream_tell(fp) - size - 512, myphar->sig_flags, buf + 8, size - 8, fname, &myphar->signature, &myphar->sig_len, error)) {
@@ -307,7 +315,7 @@ bail:
 			if (((hdr->typeflag == '\0') || (hdr->typeflag == TAR_FILE)) && size > 0) {
 				/* this is not good enough - seek succeeds even on truncated tars */
 				php_stream_seek(fp, 512, SEEK_CUR);
-				if ((uint)php_stream_tell(fp) > totalsize) {
+				if ((uint32_t)php_stream_tell(fp) > totalsize) {
 					if (error) {
 						spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
 					}
@@ -348,7 +356,7 @@ bail:
 			entry.filename_len = entry.uncompressed_filesize;
 
 			/* Check for overflow - bug 61065 */
-			if (entry.filename_len == UINT_MAX) {
+			if (entry.filename_len == UINT_MAX || entry.filename_len == 0) {
 				if (error) {
 					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (invalid entry size)", fname);
 				}
@@ -375,7 +383,7 @@ bail:
 
 			/* this is not good enough - seek succeeds even on truncated tars */
 			php_stream_seek(fp, size, SEEK_CUR);
-			if ((uint)php_stream_tell(fp) > totalsize) {
+			if ((uint32_t)php_stream_tell(fp) > totalsize) {
 				efree(entry.filename);
 				if (error) {
 					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
@@ -434,7 +442,7 @@ bail:
 			entry.filename_len = i;
 			entry.filename = pestrndup(hdr->name, i, myphar->is_persistent);
 
-			if (entry.filename[entry.filename_len - 1] == '/') {
+			if (i > 0 && entry.filename[entry.filename_len - 1] == '/') {
 				/* some tar programs store directories with trailing slash */
 				entry.filename[entry.filename_len - 1] = '\0';
 				entry.filename_len--;
@@ -460,9 +468,7 @@ bail:
 		entry.flags = phar_tar_number(hdr->mode, sizeof(hdr->mode)) & PHAR_ENT_PERM_MASK;
 		entry.timestamp = phar_tar_number(hdr->mtime, sizeof(hdr->mtime));
 		entry.is_persistent = myphar->is_persistent;
-#ifndef S_ISDIR
-#define S_ISDIR(mode)	(((mode)&S_IFMT) == S_IFDIR)
-#endif
+
 		if (old && entry.tar_type == TAR_FILE && S_ISDIR(entry.flags)) {
 			entry.tar_type = TAR_DIR;
 		}
@@ -474,30 +480,27 @@ bail:
 		}
 
 		entry.link = NULL;
-
+		/* link field is null-terminated unless it has 100 non-null chars.
+		 * Thus we can not use strlen. */
+		linkname_len = strnlen(hdr->linkname, 100);
 		if (entry.tar_type == TAR_LINK) {
-			if (!zend_hash_str_exists(&myphar->manifest, hdr->linkname, strlen(hdr->linkname))) {
+			if (!zend_hash_str_exists(&myphar->manifest, hdr->linkname, linkname_len)) {
 				if (error) {
-					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file - hard link to non-existent file \"%s\"", fname, hdr->linkname);
+					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file - hard link to non-existent file \"%.*s\"", fname, linkname_len, hdr->linkname);
 				}
 				pefree(entry.filename, entry.is_persistent);
 				php_stream_close(fp);
 				phar_destroy_phar_data(myphar);
 				return FAILURE;
 			}
-			entry.link = estrdup(hdr->linkname);
+			entry.link = estrndup(hdr->linkname, linkname_len);
 		} else if (entry.tar_type == TAR_SYMLINK) {
-			entry.link = estrdup(hdr->linkname);
+			entry.link = estrndup(hdr->linkname, linkname_len);
 		}
 		phar_set_inode(&entry);
-		if ((newentry = zend_hash_str_add_mem(&myphar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info))) == NULL) {
-			if (error) {
-				spprintf(error, 4096, "phar error: tar-based phar \"%s\" cannot be registered", entry.filename);
-			}
-			php_stream_close(fp);
-			phar_destroy_phar_data(myphar);
-			return FAILURE;
-		}
+
+		newentry = zend_hash_str_update_mem(&myphar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info));
+		ZEND_ASSERT(newentry != NULL);
 
 		if (entry.is_persistent) {
 			++entry.manifest_pos;
@@ -567,7 +570,7 @@ bail:
 next:
 			/* this is not good enough - seek succeeds even on truncated tars */
 			php_stream_seek(fp, size, SEEK_CUR);
-			if ((uint)php_stream_tell(fp) > totalsize) {
+			if ((uint32_t)php_stream_tell(fp) > totalsize) {
 				if (error) {
 					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
 				}
@@ -858,7 +861,7 @@ int phar_tar_setmetadata(zval *metadata, phar_entry_info *entry, char **error) /
 	PHP_VAR_SERIALIZE_INIT(metadata_hash);
 	php_var_serialize(&entry->metadata_str, metadata, &metadata_hash);
 	PHP_VAR_SERIALIZE_DESTROY(metadata_hash);
-	entry->uncompressed_filesize = entry->compressed_filesize = entry->metadata_str.s ? entry->metadata_str.s->len : 0;
+	entry->uncompressed_filesize = entry->compressed_filesize = entry->metadata_str.s ? ZSTR_LEN(entry->metadata_str.s) : 0;
 
 	if (entry->fp && entry->fp_type == PHAR_MOD) {
 		php_stream_close(entry->fp);
@@ -872,7 +875,7 @@ int phar_tar_setmetadata(zval *metadata, phar_entry_info *entry, char **error) /
 		spprintf(error, 0, "phar error: unable to create temporary file");
 		return -1;
 	}
-	if (entry->metadata_str.s->len != php_stream_write(entry->fp, entry->metadata_str.s->val, entry->metadata_str.s->len)) {
+	if (ZSTR_LEN(entry->metadata_str.s) != php_stream_write(entry->fp, ZSTR_VAL(entry->metadata_str.s), ZSTR_LEN(entry->metadata_str.s))) {
 		spprintf(error, 0, "phar tar error: unable to write metadata to magic metadata file \"%s\"", entry->filename);
 		zend_hash_str_del(&(entry->phar->manifest), entry->filename, entry->filename_len);
 		return ZEND_HASH_APPLY_STOP;
@@ -956,6 +959,8 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 	entry.tar_type = '0';
 	entry.phar = phar;
 	entry.fp_type = PHAR_MOD;
+	entry.fp = NULL;
+	entry.filename = NULL;
 
 	if (phar->is_persistent) {
 		if (error) {
@@ -974,6 +979,7 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 		entry.filename_len = sizeof(".phar/alias.txt")-1;
 		entry.fp = php_stream_fopen_tmpfile();
 		if (entry.fp == NULL) {
+			efree(entry.filename);
 			spprintf(error, 0, "phar error: unable to create temporary file");
 			return -1;
 		}
@@ -981,6 +987,8 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 			if (error) {
 				spprintf(error, 0, "unable to set alias in tar-based phar \"%s\"", phar->fname);
 			}
+			php_stream_close(entry.fp);
+			efree(entry.filename);
 			return EOF;
 		}
 
@@ -990,8 +998,12 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 			if (error) {
 				spprintf(error, 0, "unable to set alias in tar-based phar \"%s\"", phar->fname);
 			}
+			php_stream_close(entry.fp);
+			efree(entry.filename);
 			return EOF;
 		}
+		/* At this point the entry is saved into the manifest. The manifest destroy
+			routine will care about any resources to be freed. */
 	} else {
 		zend_hash_str_del(&phar->manifest, ".phar/alias.txt", sizeof(".phar/alias.txt")-1);
 	}
@@ -1019,8 +1031,8 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 			{
 				zend_string *str = php_stream_copy_to_mem(stubfile, len, 0);
 				if (str) {
-					len = str->len;
-					user_stub = estrndup(str->val, str->len);
+					len = ZSTR_LEN(str);
+					user_stub = estrndup(ZSTR_VAL(str), ZSTR_LEN(str));
 					zend_string_release(str);
 				} else {
 					user_stub = NULL;
@@ -1227,12 +1239,12 @@ nostub:
 		}
 #ifdef WORDS_BIGENDIAN
 # define PHAR_SET_32(var, buffer) \
-	*(php_uint32 *)(var) = (((((unsigned char*)&(buffer))[3]) << 24) \
+	*(uint32_t *)(var) = (((((unsigned char*)&(buffer))[3]) << 24) \
 		| ((((unsigned char*)&(buffer))[2]) << 16) \
 		| ((((unsigned char*)&(buffer))[1]) << 8) \
 		| (((unsigned char*)&(buffer))[0]))
 #else
-# define PHAR_SET_32(var, buffer) *(php_uint32 *)(var) = (php_uint32) (buffer)
+# define PHAR_SET_32(var, buffer) *(uint32_t *)(var) = (uint32_t) (buffer)
 #endif
 		PHAR_SET_32(sigbuf, phar->sig_flags);
 		PHAR_SET_32(sigbuf + 4, signature_length);

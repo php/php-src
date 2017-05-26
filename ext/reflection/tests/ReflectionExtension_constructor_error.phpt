@@ -7,22 +7,19 @@ Leon Luijkx <leon@phpgg.nl>
 <?php
 try {
 	$obj = new ReflectionExtension();
-}
-catch(ReflectionException $re) {
+} catch (TypeError $re) {
 	echo "Ok - ".$re->getMessage().PHP_EOL;
 }
 
 try {
 	$obj = new ReflectionExtension('foo', 'bar');
-}
-catch(ReflectionException $re) {
+} catch (TypeError $re) {
 	echo "Ok - ".$re->getMessage().PHP_EOL;
 }
 
 try {
 	$obj = new ReflectionExtension([]);
-}
-catch(ReflectionException $re) {
+} catch (TypeError $re) {
 	echo "Ok - ".$re->getMessage().PHP_EOL;
 }
 

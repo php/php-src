@@ -18,4 +18,4 @@ class UserGateway_MySql implements UserGateway {
 }
 
 --EXPECTF--
-Fatal error: Declaration of UserGateway_MySql::find() must be compatible with UserGateway::find($id): User in %s on line 9
+Fatal error: Declaration of UserGateway_MySql::find($id) must be compatible with UserGateway::find($id): User in %s on line 9

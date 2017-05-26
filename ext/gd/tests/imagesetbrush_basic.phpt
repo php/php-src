@@ -26,12 +26,8 @@ imagesetbrush($mainimg, $img);
 // Draw a couple of brushes, each overlaying each
 imageline($mainimg, 50, 50, 50, 60, IMG_COLOR_BRUSHED);
 
-// Get output and generate md5 hash
-ob_start();
-imagepng($mainimg, null, 9);
-$result_image = ob_get_contents();
-ob_end_clean();
-echo md5(base64_encode($result_image));
+include_once __DIR__ . '/func.inc';
+test_image_equals_file(__DIR__ . '/imagesetbrush_basic.png', $mainimg);
 ?>
 --EXPECT--
-8168577c0d1fe6d9d11397cb15263d82
+The images are equal.

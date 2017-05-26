@@ -42,22 +42,22 @@ $db = MySQLPDOTest::factory();
 ?>
 --EXPECTF--
 object(PDORow)#%d (2) {
-  [%u|b%"queryString"]=>
-  %unicode|string%(17) "SELECT 1 AS "one""
-  [%u|b%"one"]=>
-  %unicode|string%(1) "1"
+  ["queryString"]=>
+  string(17) "SELECT 1 AS "one""
+  ["one"]=>
+  string(1) "1"
 }
-%unicode|string%(1) "1"
-%unicode|string%(1) "1"
-%unicode|string%(17) "SELECT 1 AS "one""
+string(1) "1"
+string(1) "1"
+string(17) "SELECT 1 AS "one""
 ----------------------------------
 object(PDORow)#%d (2) {
-  [%u|b%"queryString"]=>
-  %unicode|string%(19) "SELECT id FROM test"
-  [%u|b%"id"]=>
-  %unicode|string%(1) "1"
+  ["queryString"]=>
+  string(19) "SELECT id FROM test"
+  ["id"]=>
+  string(1) "1"
 }
-%unicode|string%(19) "SELECT id FROM test"
+string(19) "SELECT id FROM test"
 ----------------------------------
 
 Notice: Trying to get property of non-object in %s on line %d

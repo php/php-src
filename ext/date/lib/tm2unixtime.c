@@ -1,22 +1,26 @@
 /*
-   +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
-   +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
-   +----------------------------------------------------------------------+
-   | Authors: Derick Rethans <derick@derickrethans.nl>                    |
-   +----------------------------------------------------------------------+
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2015 Derick Rethans
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
-
-/* $Id$ */
 
 #include "timelib.h"
 
@@ -27,6 +31,18 @@ static int month_tab[12]          = {   0,  31,  59,  90, 120, 151, 181, 212, 24
 /*                                    dec  jan  feb  mrt  apr  may  jun  jul  aug  sep  oct  nov  dec */
 static int days_in_month_leap[13] = {  31,  31,  29,  31,  30,  31,  30,  31,  31,  30,  31,  30,  31 };
 static int days_in_month[13]      = {  31,  31,  28,  31,  30,  31,  30,  31,  31,  30,  31,  30,  31 };
+
+static void do_range_limit_fraction(double *fraction, timelib_sll *seconds)
+{
+	if (*fraction < 0) {
+		*fraction += 1;
+		*seconds -= 1;
+	}
+	if (*fraction > 1) {
+		*fraction -= 1;
+		*seconds += 1;
+	}
+}
 
 static void do_range_limit(timelib_sll start, timelib_sll end, timelib_sll adj, timelib_sll *a, timelib_sll *b)
 {
@@ -148,9 +164,17 @@ static void do_adjust_for_weekday(timelib_time* time)
 	current_dow = timelib_day_of_week(time->y, time->m, time->d);
 	if (time->relative.weekday_behavior == 2)
 	{
-		if (time->relative.weekday == 0) {
+		/* To make "this week" work, where the current DOW is a "sunday" */
+		if (current_dow == 0 && time->relative.weekday != 0) {
+			time->relative.weekday -= 7;
+		}
+
+		/* To make "sunday this week" work, where the current DOW is not a
+		 * "sunday" */
+		if (time->relative.weekday == 0 && current_dow != 0) {
 			time->relative.weekday = 7;
 		}
+
 		time->d -= current_dow;
 		time->d += time->relative.weekday;
 		return;
@@ -180,6 +204,7 @@ void timelib_do_rel_normalize(timelib_time *base, timelib_rel_time *rt)
 
 void timelib_do_normalize(timelib_time* time)
 {
+	if (time->f != TIMELIB_UNSET) do_range_limit_fraction(&time->f, &time->s);
 	if (time->s != TIMELIB_UNSET) do_range_limit(0, 60, 60, &time->s, &time->i);
 	if (time->s != TIMELIB_UNSET) do_range_limit(0, 60, 60, &time->i, &time->h);
 	if (time->s != TIMELIB_UNSET) do_range_limit(0, 24, 24, &time->h, &time->d);
@@ -197,6 +222,8 @@ static void do_adjust_relative(timelib_time* time)
 	timelib_do_normalize(time);
 
 	if (time->have_relative) {
+		time->f += time->relative.f;
+
 		time->s += time->relative.s;
 		time->i += time->relative.i;
 		time->h += time->relative.h;
@@ -342,7 +369,7 @@ static timelib_sll do_years(timelib_sll year)
 	return res;
 }
 
-static timelib_sll do_months(timelib_ull month, timelib_ull year)
+static timelib_sll do_months(timelib_ull month, timelib_sll year)
 {
 	if (timelib_is_leap(year)) {
 		return ((month_tab_leap[month - 1] + 1) * SECS_PER_DAY);
@@ -423,9 +450,9 @@ static timelib_sll do_adjust_timezone(timelib_time *tz, timelib_tzinfo *tzi)
 
 					tz->dst = gmt_offset->is_dst;
 					if (tz->tz_abbr) {
-						free(tz->tz_abbr);
+						timelib_free(tz->tz_abbr);
 					}
-					tz->tz_abbr = strdup(gmt_offset->abbr);
+					tz->tz_abbr = timelib_strdup(gmt_offset->abbr);
 					timelib_time_offset_dtor(gmt_offset);
 				}
 				return tmp;
@@ -451,7 +478,7 @@ void timelib_update_ts(timelib_time* time, timelib_tzinfo* tzi)
 	time->sse = res;
 
 	time->sse_uptodate = 1;
-	time->have_relative = time->relative.have_weekday_relative = time->relative.have_special_relative = 0;
+	time->have_relative = time->relative.have_weekday_relative = time->relative.have_special_relative = time->relative.first_last_day_of = 0;
 }
 
 #if 0

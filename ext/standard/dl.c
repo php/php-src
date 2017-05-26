@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -40,9 +40,6 @@
 #include "win32/param.h"
 #include "win32/winutil.h"
 #define GET_DL_ERROR()	php_win_err()
-#elif defined(NETWARE)
-#include <sys/param.h>
-#define GET_DL_ERROR()	dlerror()
 #else
 #include <sys/param.h>
 #define GET_DL_ERROR()	DL_ERROR()
@@ -56,9 +53,9 @@ PHPAPI PHP_FUNCTION(dl)
 	char *filename;
 	size_t filename_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &filename, &filename_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(filename, filename_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!PG(enable_dl)) {
 		php_error_docref(NULL, E_WARNING, "Dynamically loaded extensions aren't enabled");
@@ -71,19 +68,13 @@ PHPAPI PHP_FUNCTION(dl)
 	}
 
 	php_dl(filename, MODULE_TEMPORARY, return_value, 0);
-	if (Z_LVAL_P(return_value) == 1) {
+	if (Z_TYPE_P(return_value) == IS_TRUE) {
 		EG(full_tables_cleanup) = 1;
 	}
 }
 /* }}} */
 
 #if defined(HAVE_LIBDL)
-
-#ifdef ZTS
-#define USING_ZTS 1
-#else
-#define USING_ZTS 0
-#endif
 
 /* {{{ php_load_extension
  */
@@ -131,7 +122,7 @@ PHPAPI int php_load_extension(char *filename, int type, int start_now)
 	/* load dynamic symbol */
 	handle = DL_LOAD(libpath);
 	if (!handle) {
-#if PHP_WIN32
+#ifdef PHP_WIN32
 		char *err = GET_DL_ERROR();
 		if (err && (*err != '\0')) {
 			php_error_docref(NULL, error_type, "Unable to load dynamic library '%s' - %s", libpath, err);
@@ -237,7 +228,7 @@ PHP_MINFO_FUNCTION(dl)
 PHPAPI void php_dl(char *file, int type, zval *return_value, int start_now)
 {
 	php_error_docref(NULL, E_WARNING, "Cannot dynamically load %s - dynamic modules are not supported", file);
-	RETURN_FALSE;
+	RETVAL_FALSE;
 }
 
 PHP_MINFO_FUNCTION(dl)

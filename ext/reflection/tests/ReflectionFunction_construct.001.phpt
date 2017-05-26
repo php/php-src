@@ -9,31 +9,27 @@ Steve Seear <stevseea@php.net>
 try {
 	$a = new ReflectionFunction(array(1, 2, 3));
 	echo "exception not thrown.".PHP_EOL;
-}
-catch(ReflectionException $re) {
+} catch (TypeError $re) {
 	echo "Ok - ".$re->getMessage().PHP_EOL;
 }
 try {
 	$a = new ReflectionFunction('nonExistentFunction');
-} catch (Exception $e) {
+} catch (ReflectionException $e) {
 	echo $e->getMessage().PHP_EOL;
 }
 try {
 	$a = new ReflectionFunction();
-}
-catch(ReflectionException $re) {
+} catch (TypeError $re) {
 	echo "Ok - ".$re->getMessage().PHP_EOL;
 }
 try {
 	$a = new ReflectionFunction(1, 2);
-}
-catch(ReflectionException $re) {
+} catch (TypeError $re) {
 	echo "Ok - ".$re->getMessage().PHP_EOL;
 }
 try {
 	$a = new ReflectionFunction([]);
-}
-catch(ReflectionException $re) {
+} catch (TypeError $re) {
 	echo "Ok - ".$re->getMessage().PHP_EOL;
 }
 

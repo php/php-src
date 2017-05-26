@@ -16,5 +16,4 @@ CREDIT_LINE("CLI", "Edin Kadribasic, Marcus Boerger, Johannes Schlueter, Moriyos
 CREDIT_LINE("Embed", "Edin Kadribasic");
 CREDIT_LINE("FastCGI Process Manager", "Andrei Nigmatulin, dreamcat4, Antony Dovgal, Jerome Loyet");
 CREDIT_LINE("litespeed", "George Wang");
-CREDIT_LINE("NSAPI", "Jayakumar Muthukumarasamy, Uwe Schindler");
 CREDIT_LINE("phpdbg", "Felipe Pena, Joe Watkins, Bob Weinand");

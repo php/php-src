@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -49,29 +49,16 @@
 
 #define GC_ADDRESS(v) \
 	((v) & ~GC_COLOR)
-#define GC_SET_ADDRESS(v, a) \
-	do {(v) = ((v) & GC_COLOR) | (a);} while (0)
-#define GC_GET_COLOR(v) \
+#define GC_INFO_GET_COLOR(v) \
 	(((zend_uintptr_t)(v)) & GC_COLOR)
-#define GC_SET_COLOR(v, c) \
+#define GC_INFO_SET_ADDRESS(v, a) \
+	do {(v) = ((v) & GC_COLOR) | (a);} while (0)
+#define GC_INFO_SET_COLOR(v, c) \
 	do {(v) = ((v) & ~GC_COLOR) | (c);} while (0)
-#define GC_SET_BLACK(v) \
+#define GC_INFO_SET_BLACK(v) \
 	do {(v) = (v) & ~GC_COLOR;} while (0)
-#define GC_SET_PURPLE(v) \
+#define GC_INFO_SET_PURPLE(v) \
 	do {(v) = (v) | GC_COLOR;} while (0)
-
-#define GC_ZVAL_ADDRESS(v) \
-	GC_ADDRESS(Z_GC_INFO_P(v))
-#define GC_ZVAL_SET_ADDRESS(v, a) \
-	GC_SET_ADDRESS(Z_GC_INFO_P(v), (a))
-#define GC_ZVAL_GET_COLOR(v) \
-	GC_GET_COLOR(Z_GC_INFO_P(v))
-#define GC_ZVAL_SET_COLOR(v, c) \
-	GC_SET_COLOR(Z_GC_INFO_P(v), (c))
-#define GC_ZVAL_SET_BLACK(v) \
-	GC_SET_BLACK(Z_GC_INFO_P(v))
-#define GC_ZVAL_SET_PURPLE(v) \
-	GC_SET_PURPLE(Z_GC_INFO_P(v))
 
 typedef struct _gc_root_buffer {
 	zend_refcounted          *ref;
@@ -79,6 +66,17 @@ typedef struct _gc_root_buffer {
 	struct _gc_root_buffer   *prev;
 	uint32_t                 refcount;
 } gc_root_buffer;
+
+#define GC_NUM_ADDITIONAL_ENTRIES \
+	((4096 - ZEND_MM_OVERHEAD - sizeof(void*) * 2) / sizeof(gc_root_buffer))
+
+typedef struct _gc_additional_bufer gc_additional_buffer;
+
+struct _gc_additional_bufer {
+	uint32_t              used;
+	gc_additional_buffer *next;
+	gc_root_buffer        buf[GC_NUM_ADDITIONAL_ENTRIES];
+};
 
 typedef struct _zend_gc_globals {
 	zend_bool         gc_enabled;
@@ -106,6 +104,8 @@ typedef struct _zend_gc_globals {
 	uint32_t zval_marked_grey;
 #endif
 
+	gc_additional_buffer *additional_buffer;
+
 } zend_gc_globals;
 
 #ifdef ZTS
@@ -132,9 +132,6 @@ ZEND_API void gc_reset(void);
 ZEND_API int  zend_gc_collect_cycles(void);
 END_EXTERN_C()
 
-#define GC_ZVAL_CHECK_POSSIBLE_ROOT(z) \
-	gc_check_possible_root((z))
-
 #define GC_REMOVE_FROM_BUFFER(p) do { \
 		zend_refcounted *_p = (zend_refcounted*)(p); \
 		if (GC_ADDRESS(GC_INFO(_p))) { \
@@ -142,11 +139,23 @@ END_EXTERN_C()
 		} \
 	} while (0)
 
-static zend_always_inline void gc_check_possible_root(zval *z)
+#define GC_MAY_LEAK(ref) \
+	((GC_TYPE_INFO(ref) & \
+		(GC_INFO_MASK | (GC_COLLECTABLE << GC_FLAGS_SHIFT))) == \
+	(GC_COLLECTABLE << GC_FLAGS_SHIFT))
+
+static zend_always_inline void gc_check_possible_root(zend_refcounted *ref)
 {
-	ZVAL_DEREF(z);
-	if (Z_COLLECTABLE_P(z) && UNEXPECTED(!Z_GC_INFO_P(z))) {
-		gc_possible_root(Z_COUNTED_P(z));
+	if (GC_TYPE(ref) == IS_REFERENCE) {
+		zval *zv = &((zend_reference*)ref)->val;
+
+		if (!Z_REFCOUNTED_P(zv)) {
+			return;
+		}
+		ref = Z_COUNTED_P(zv);
+	}
+	if (UNEXPECTED(GC_MAY_LEAK(ref))) {
+		gc_possible_root(ref);
 	}
 }
 

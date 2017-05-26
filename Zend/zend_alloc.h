@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@zend.com>                                |
    |          Zeev Suraski <zeev@zend.com>                                |
+   |          Dmitry Stogov <dmitry@zend.com>                             |
    +----------------------------------------------------------------------+
 */
 
@@ -41,14 +42,31 @@
 
 #define ZEND_MM_ALIGNED_SIZE(size)	(((size) + ZEND_MM_ALIGNMENT - Z_L(1)) & ZEND_MM_ALIGNMENT_MASK)
 
+#define ZEND_MM_ALIGNED_SIZE_EX(size, alignment) \
+	(((size) + ((alignment) - Z_L(1))) & ~((alignment) - Z_L(1)))
+
 typedef struct _zend_leak_info {
 	void *addr;
 	size_t size;
 	const char *filename;
 	const char *orig_filename;
-	uint lineno;
-	uint orig_lineno;
+	uint32_t lineno;
+	uint32_t orig_lineno;
 } zend_leak_info;
+
+#if ZEND_DEBUG
+typedef struct _zend_mm_debug_info {
+	size_t             size;
+	const char        *filename;
+	const char        *orig_filename;
+	uint32_t               lineno;
+	uint32_t               orig_lineno;
+} zend_mm_debug_info;
+
+# define ZEND_MM_OVERHEAD ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info))
+#else 
+# define ZEND_MM_OVERHEAD 0
+#endif
 
 BEGIN_EXTERN_C()
 
@@ -70,7 +88,7 @@ ZEND_API size_t ZEND_FASTCALL _zend_mem_block_size(void *ptr ZEND_FILE_LINE_DC Z
 #include "zend_alloc_sizes.h"
 
 /* _emalloc() & _efree() specialization */
-#if !ZEND_DEBUG && !defined(_WIN32)
+#if !ZEND_DEBUG && defined(HAVE_BUILTIN_CONSTANT_P)
 
 # define _ZEND_BIN_ALLOCATOR_DEF(_num, _size, _elements, _pages, x, y) \
 	ZEND_API void* ZEND_FASTCALL _emalloc_  ## _size(void) ZEND_ATTRIBUTE_MALLOC;
@@ -169,33 +187,9 @@ ZEND_API void ZEND_FASTCALL _efree_huge(void *, size_t size);
 #define estrndup_rel(s, length)					_estrndup((s), (length) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
 #define zend_mem_block_size_rel(ptr)			_zend_mem_block_size((ptr) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
 
-zend_always_inline static void * __zend_malloc(size_t len)
-{
-	void *tmp = malloc(len);
-	if (tmp) {
-		return tmp;
-	}
-	fprintf(stderr, "Out of memory\n");
-	exit(1);
-}
-
-zend_always_inline static void * __zend_calloc(size_t nmemb, size_t len)
-{
-	void *tmp = _safe_malloc(nmemb, len, 0);
-	memset(tmp, 0, nmemb * len);
-	return tmp;
-}
-
-zend_always_inline static void * __zend_realloc(void *p, size_t len)
-{
-	p = realloc(p, len);
-	if (p) {
-		return p;
-	}
-	fprintf(stderr, "Out of memory\n");
-	exit(1);
-}
-
+ZEND_API void * __zend_malloc(size_t len) ZEND_ATTRIBUTE_MALLOC ZEND_ATTRIBUTE_ALLOC_SIZE(1);
+ZEND_API void * __zend_calloc(size_t nmemb, size_t len) ZEND_ATTRIBUTE_MALLOC ZEND_ATTRIBUTE_ALLOC_SIZE2(1,2);
+ZEND_API void * __zend_realloc(void *p, size_t len) ZEND_ATTRIBUTE_ALLOC_SIZE(2);
 
 /* Selective persistent/non persistent allocation macros */
 #define pemalloc(size, persistent) ((persistent)?__zend_malloc(size):emalloc(size))
@@ -266,7 +260,15 @@ ZEND_API size_t ZEND_FASTCALL _zend_mm_block_size(zend_mm_heap *heap, void *p ZE
 #define zend_mm_block_size_rel(heap, p)		_zend_mm_block_size((heap), (p) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
 
 ZEND_API zend_mm_heap *zend_mm_set_heap(zend_mm_heap *new_heap);
+ZEND_API zend_mm_heap *zend_mm_get_heap(void);
 
+ZEND_API size_t zend_mm_gc(zend_mm_heap *heap);
+
+#define ZEND_MM_CUSTOM_HEAP_NONE  0
+#define ZEND_MM_CUSTOM_HEAP_STD   1
+#define ZEND_MM_CUSTOM_HEAP_DEBUG 2
+
+ZEND_API int zend_mm_is_custom_heap(zend_mm_heap *new_heap);
 ZEND_API void zend_mm_set_custom_handlers(zend_mm_heap *heap,
                                           void* (*_malloc)(size_t),
                                           void  (*_free)(void*),
@@ -276,22 +278,119 @@ ZEND_API void zend_mm_get_custom_handlers(zend_mm_heap *heap,
                                           void  (**_free)(void*),
                                           void* (**_realloc)(void*, size_t));
 
+#if ZEND_DEBUG
+ZEND_API void zend_mm_set_custom_debug_handlers(zend_mm_heap *heap,
+                                          void* (*_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                          void  (*_free)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                          void* (*_realloc)(void*, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC));
+#endif
+
 typedef struct _zend_mm_storage zend_mm_storage;
 
 typedef	void* (*zend_mm_chunk_alloc_t)(zend_mm_storage *storage, size_t size, size_t alignment);
 typedef void  (*zend_mm_chunk_free_t)(zend_mm_storage *storage, void *chunk, size_t size);
-typedef void  (*zend_mm_chunk_truncate_t)(zend_mm_storage *storage, void *chunk, size_t old_size, size_t new_size);
-typedef void  (*zend_mm_storage_dtor_t)(zend_mm_storage *storage);
+typedef int   (*zend_mm_chunk_truncate_t)(zend_mm_storage *storage, void *chunk, size_t old_size, size_t new_size);
+typedef int   (*zend_mm_chunk_extend_t)(zend_mm_storage *storage, void *chunk, size_t old_size, size_t new_size);
 
-struct _zend_mm_storage {
+typedef struct _zend_mm_handlers {
 	zend_mm_chunk_alloc_t       chunk_alloc;
 	zend_mm_chunk_free_t        chunk_free;
 	zend_mm_chunk_truncate_t    chunk_truncate;
-	zend_mm_storage_dtor_t      dtor;
+	zend_mm_chunk_extend_t      chunk_extend;
+} zend_mm_handlers;
+
+struct _zend_mm_storage {
+	const zend_mm_handlers handlers;
+	void *data;
 };
 
 ZEND_API zend_mm_storage *zend_mm_get_storage(zend_mm_heap *heap);
-ZEND_API zend_mm_heap *zend_mm_startup_ex(zend_mm_storage *storage);
+ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_handlers *handlers, void *data, size_t data_size);
+
+/*
+
+// The following example shows how to use zend_mm_heap API with custom storage
+
+static zend_mm_heap *apc_heap = NULL;
+static HashTable    *apc_ht = NULL;
+
+typedef struct _apc_data {
+	void     *mem;
+	uint32_t  free_pages;
+} apc_data;
+
+static void *apc_chunk_alloc(zend_mm_storage *storage, size_t size, size_t alignment)
+{
+	apc_data *data = (apc_data*)(storage->data);
+	size_t real_size = ((size + (ZEND_MM_CHUNK_SIZE-1)) & ~(ZEND_MM_CHUNK_SIZE-1));
+	uint32_t count = real_size / ZEND_MM_CHUNK_SIZE;
+	uint32_t first, last, i;
+
+	ZEND_ASSERT(alignment == ZEND_MM_CHUNK_SIZE);
+
+	for (first = 0; first < 32; first++) {
+		if (!(data->free_pages & (1 << first))) {
+			last = first;
+			do {
+				if (last - first == count - 1) {
+					for (i = first; i <= last; i++) {
+						data->free_pages |= (1 << i);
+					}
+					return (void *)(((char*)(data->mem)) + ZEND_MM_CHUNK_SIZE * (1 << first));
+				}
+				last++;
+			} while (last < 32 && !(data->free_pages & (1 << last)));
+			first = last;
+		}
+	}
+	return NULL;
+}
+
+static void apc_chunk_free(zend_mm_storage *storage, void *chunk, size_t size)
+{
+	apc_data *data = (apc_data*)(storage->data);
+	uint32_t i;
+
+	ZEND_ASSERT(((uintptr_t)chunk & (ZEND_MM_CHUNK_SIZE - 1)) == 0);
+
+	i = ((uintptr_t)chunk - (uintptr_t)(data->mem)) / ZEND_MM_CHUNK_SIZE;
+	while (1) {
+		data->free_pages &= ~(1 << i);
+		if (size <= ZEND_MM_CHUNK_SIZE) {
+			break;
+		}
+		size -= ZEND_MM_CHUNK_SIZE;
+	}
+}
+
+static void apc_init_heap(void)
+{
+	zend_mm_handlers apc_handlers = {
+		apc_chunk_alloc,
+		apc_chunk_free,
+		NULL,
+		NULL,
+	};
+	apc_data tmp_data;
+	zend_mm_heap *old_heap;
+
+	// Preallocate properly aligned SHM chunks (64MB)
+	tmp_data.mem = shm_memalign(ZEND_MM_CHUNK_SIZE, ZEND_MM_CHUNK_SIZE * 32);
+	
+	// Initialize temporary storage data
+	tmp_data.free_pages = 0;
+
+	// Create heap
+	apc_heap = zend_mm_startup_ex(&apc_handlers, &tmp_data, sizeof(tmp_data));
+
+	// Allocate some data in the heap
+	old_heap = zend_mm_set_heap(apc_heap);
+	ALLOC_HASHTABLE(apc_ht);
+	zend_hash_init(apc_ht, 64, NULL, ZVAL_PTR_DTOR, 0);
+	zend_mm_set_heap(old_heap);
+}
+ 
+*/
 
 END_EXTERN_C()
 

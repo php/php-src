@@ -7,11 +7,11 @@ if (!class_exists('finfo'))
 --FILE--
 <?php
 
-$finfo = new finfo(1, '', false);
-var_dump($finfo);
+try {
+    $finfo = new finfo(1, '', false);
+    var_dump($finfo);
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 --EXPECTF--
-Fatal error: Uncaught exception 'Exception' with message 'finfo::finfo() expects at most 2 parameters, 3 given' in %sbug61173.php:3
-Stack trace:
-#0 %sbug61173.php(3): finfo->finfo(1, '', false)
-#1 {main}
-  thrown in %sbug61173.php on line 3
+finfo::finfo() expects at most 2 parameters, 3 given

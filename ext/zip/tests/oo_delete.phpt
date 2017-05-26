@@ -63,7 +63,8 @@ $sb = $zip->statIndex(1);
 var_dump($sb);
 $sb = $zip->statIndex(2);
 var_dump($sb);
-$zip->close();
+// suppress irrelevant error message:
+@$zip->close();
 unset($zip);
 
 if (file_exists($file)) {

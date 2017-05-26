@@ -11,12 +11,8 @@ Rafael Dohms <rdohms [at] gmail [dot] com>
 <?php
 $image = imagecreatetruecolor(180, 30);
 
-ob_start();
-imagepng($image, null, 9);
-$img = ob_get_contents();
-ob_end_clean();
-
-echo md5(base64_encode($img));
+include_once __DIR__ . '/func.inc';
+test_image_equals_file(__DIR__ . '/imagecreatetruecolor_basic.png', $image);
 ?>
 --EXPECT--
-5a8fe9864cbd20e5dbe730c77f30db95
+The images are equal.

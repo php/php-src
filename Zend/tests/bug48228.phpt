@@ -24,7 +24,7 @@ $l_aa->dosome();
 ?>
 --EXPECTF--
 
-Fatal error: Uncaught exception 'Exception' in %s
+Fatal error: Uncaught Exception in %s
 Stack trace:
 #0 %s(%d): do_throw()
 #1 %s(%d): aa->dosome()

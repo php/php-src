@@ -58,7 +58,7 @@ AC_DEFUN([PHP_LDAP_SASL_CHECKS], [
       break
     fi
   done
-  
+
   if test "$LDAP_SASL_DIR"; then
     LDAP_SASL_INCDIR=$LDAP_SASL_DIR/include
     LDAP_SASL_LIBDIR=$LDAP_SASL_DIR/$PHP_LIBDIR
@@ -71,7 +71,7 @@ AC_DEFUN([PHP_LDAP_SASL_CHECKS], [
   else
     SASL_LIB="-L$LDAP_SASL_LIBDIR -lsasl2"
   fi
-  
+
   PHP_CHECK_LIBRARY(sasl2, sasl_version,
   [
     PHP_ADD_INCLUDE($LDAP_SASL_INCDIR)
@@ -125,7 +125,7 @@ if test "$PHP_LDAP" != "no"; then
     PHP_ADD_LIBRARY_WITH_PATH(ldap, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
 
   elif test -f $LDAP_LIBDIR/libssldap50.$SHLIB_SUFFIX_NAME; then
-    if test -n "$LDAP_PTHREAD"; then 
+    if test -n "$LDAP_PTHREAD"; then
       PHP_ADD_LIBRARY($LDAP_PTHREAD)
     fi
     PHP_ADD_LIBRARY_WITH_PATH(nspr4, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
@@ -138,7 +138,7 @@ if test "$PHP_LDAP" != "no"; then
     AC_DEFINE(HAVE_NSLDAP,1,[ ])
 
   elif test -f $LDAP_LIBDIR/libldapssl41.$SHLIB_SUFFIX_NAME; then
-    if test -n "$LDAP_PTHREAD"; then 
+    if test -n "$LDAP_PTHREAD"; then
       PHP_ADD_LIBRARY($LDAP_PTHREAD)
     fi
     PHP_ADD_LIBRARY_WITH_PATH(nspr3, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
@@ -148,14 +148,14 @@ if test "$PHP_LDAP" != "no"; then
     AC_DEFINE(HAVE_NSLDAP,1,[ ])
 
   elif test -f $LDAP_LIBDIR/libldapssl30.$SHLIB_SUFFIX_NAME; then
-    if test -n "$LDAP_PTHREAD"; then 
+    if test -n "$LDAP_PTHREAD"; then
       PHP_ADD_LIBRARY($LDAP_PTHREAD)
     fi
     PHP_ADD_LIBRARY_WITH_PATH(ldapssl30, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
     AC_DEFINE(HAVE_NSLDAP,1,[ ])
 
   elif test -f $LDAP_LIBDIR/libldap30.$SHLIB_SUFFIX_NAME; then
-    if test -n "$LDAP_PTHREAD"; then 
+    if test -n "$LDAP_PTHREAD"; then
       PHP_ADD_LIBRARY($LDAP_PTHREAD)
     fi
     PHP_ADD_LIBRARY_WITH_PATH(ldap30, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
@@ -187,7 +187,7 @@ if test "$PHP_LDAP" != "no"; then
   PHP_ADD_INCLUDE($LDAP_INCDIR)
   PHP_SUBST(LDAP_SHARED_LIBADD)
   AC_DEFINE(HAVE_LDAP,1,[ ])
-  
+
   dnl Save original values
   _SAVE_CPPFLAGS=$CPPFLAGS
   _SAVE_LIBS=$LIBS
@@ -204,8 +204,8 @@ if test "$PHP_LDAP" != "no"; then
 
   dnl Solaris 2.8 claims to be 2004 API, but doesn't have
   dnl ldap_parse_reference() nor ldap_start_tls_s()
-  AC_CHECK_FUNCS([ldap_parse_result ldap_parse_reference ldap_start_tls_s])
-  
+  AC_CHECK_FUNCS([ldap_parse_result ldap_parse_reference ldap_start_tls_s ldap_control_find])
+
   dnl
   dnl SASL check
   dnl
@@ -215,12 +215,12 @@ if test "$PHP_LDAP" != "no"; then
 
   dnl
   dnl Sanity check
-  dnl 
+  dnl
   AC_CHECK_FUNC(ldap_bind_s, [], [
-    AC_MSG_ERROR([LDAP build check failed. Please check config.log for more information.]) 
+    AC_MSG_ERROR([LDAP build check failed. Please check config.log for more information.])
   ])
-  
+
   dnl Restore original values
   CPPFLAGS=$_SAVE_CPPFLAGS
   LIBS=$_SAVE_LIBS
-fi 
+fi

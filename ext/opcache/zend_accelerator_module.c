@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -80,13 +80,13 @@ static zend_function_entry accel_functions[] = {
 	/* Private functions */
 	ZEND_FE(opcache_get_configuration,		arginfo_opcache_none)
 	ZEND_FE(opcache_get_status,				arginfo_opcache_get_status)
-	{ NULL, NULL, NULL, 0, 0 }
+	ZEND_FE_END
 };
 
 static int validate_api_restriction(void)
 {
 	if (ZCG(accel_directives).restrict_api && *ZCG(accel_directives).restrict_api) {
-		int len = strlen(ZCG(accel_directives).restrict_api);
+		size_t len = strlen(ZCG(accel_directives).restrict_api);
 
 		if (!SG(request_info).path_translated ||
 		    strlen(SG(request_info).path_translated) < len ||
@@ -112,7 +112,7 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
 	(void)entry; (void)mh_arg2; (void)mh_arg3; (void)stage;
 
 	p = (zend_long *) (base + (size_t)mh_arg1);
-	memsize = atoi(new_value->val);
+	memsize = atoi(ZSTR_VAL(new_value));
 	/* sanity check we must use at least 8 MB */
 	if (memsize < 8) {
 		const char *new_new_value = "8";
@@ -130,7 +130,11 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
 
 		ini_entry->value = zend_string_init(new_new_value, 1, 1);
 	}
-	*p = memsize * (1024 * 1024);
+	if (UNEXPECTED(memsize > ZEND_ULONG_MAX / (1024 * 1024))) {
+		*p = ZEND_ULONG_MAX;
+	} else {
+		*p = memsize * (1024 * 1024);
+	}
 	return SUCCESS;
 }
 
@@ -148,7 +152,7 @@ static ZEND_INI_MH(OnUpdateMaxAcceleratedFiles)
 	(void)entry; (void)mh_arg2; (void)mh_arg3; (void)stage;
 
 	p = (zend_long *) (base + (size_t)mh_arg1);
-	size = atoi(new_value->val);
+	size = atoi(ZSTR_VAL(new_value));
 	/* sanity check we must use a value between MIN_ACCEL_FILES and MAX_ACCEL_FILES */
 
 	if (size < MIN_ACCEL_FILES || size > MAX_ACCEL_FILES) {
@@ -192,7 +196,7 @@ static ZEND_INI_MH(OnUpdateMaxWastedPercentage)
 	(void)entry; (void)mh_arg2; (void)mh_arg3; (void)stage;
 
 	p = (double *) (base + (size_t)mh_arg1);
-	percentage = atoi(new_value->val);
+	percentage = atoi(ZSTR_VAL(new_value));
 
 	if (percentage <= 0 || percentage > 50) {
 		const char *new_new_value = "5";
@@ -200,7 +204,7 @@ static ZEND_INI_MH(OnUpdateMaxWastedPercentage)
 
 		percentage = 5;
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache.max_wasted_percentage must be set between 1 and 50.\n");
-		zend_accel_error(ACCEL_LOG_WARNING, ACCELERATOR_PRODUCT_NAME " will use 5%.\n");
+		zend_accel_error(ACCEL_LOG_WARNING, ACCELERATOR_PRODUCT_NAME " will use 5%%.\n");
 		if ((ini_entry = zend_hash_str_find_ptr(EG(ini_directives),
 					"opcache.max_wasted_percentage",
 					sizeof("opcache.max_wasted_percentage")-1)) == NULL) {
@@ -228,10 +232,10 @@ static ZEND_INI_MH(OnEnable)
 #endif
 
 		p = (zend_bool *) (base+(size_t) mh_arg1);
-		if ((new_value->len == 2 && strcasecmp("on", new_value->val) == 0) ||
-		    (new_value->len == 3 && strcasecmp("yes", new_value->val) == 0) ||
-		    (new_value->len == 4 && strcasecmp("true", new_value->val) == 0) ||
-			atoi(new_value->val) != 0) {
+		if ((ZSTR_LEN(new_value) == 2 && strcasecmp("on", ZSTR_VAL(new_value)) == 0) ||
+		    (ZSTR_LEN(new_value) == 3 && strcasecmp("yes", ZSTR_VAL(new_value)) == 0) ||
+		    (ZSTR_LEN(new_value) == 4 && strcasecmp("true", ZSTR_VAL(new_value)) == 0) ||
+			atoi(ZSTR_VAL(new_value)) != 0) {
 			zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME " can't be temporary enabled (it may be only disabled till the end of request)");
 			return FAILURE;
 		} else {
@@ -241,18 +245,49 @@ static ZEND_INI_MH(OnEnable)
 	}
 }
 
+#ifdef HAVE_OPCACHE_FILE_CACHE
+static ZEND_INI_MH(OnUpdateFileCache)
+{
+	if (new_value) {
+		if (!ZSTR_LEN(new_value)) {
+			new_value = NULL;
+		} else {
+			zend_stat_t buf;
+
+		    if (!IS_ABSOLUTE_PATH(ZSTR_VAL(new_value), ZSTR_LEN(new_value)) ||
+			    zend_stat(ZSTR_VAL(new_value), &buf) != 0 ||
+			    !S_ISDIR(buf.st_mode) ||
+#ifndef ZEND_WIN32
+				access(ZSTR_VAL(new_value), R_OK | W_OK | X_OK) != 0) {
+#else
+				_access(ZSTR_VAL(new_value), 06) != 0) {
+#endif
+				zend_accel_error(ACCEL_LOG_WARNING, "opcache.file_cache must be a full path of accessable directory.\n");
+				new_value = NULL;
+			}
+		}
+	}
+	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+	return SUCCESS;
+}
+#endif
+
 ZEND_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("opcache.enable"             , "1", PHP_INI_ALL,    OnEnable,     enabled                             , zend_accel_globals, accel_globals)
 	STD_PHP_INI_BOOLEAN("opcache.use_cwd"            , "1", PHP_INI_SYSTEM, OnUpdateBool, accel_directives.use_cwd            , zend_accel_globals, accel_globals)
 	STD_PHP_INI_BOOLEAN("opcache.validate_timestamps", "1", PHP_INI_ALL   , OnUpdateBool, accel_directives.validate_timestamps, zend_accel_globals, accel_globals)
+	STD_PHP_INI_BOOLEAN("opcache.validate_permission", "0", PHP_INI_SYSTEM, OnUpdateBool, accel_directives.validate_permission, zend_accel_globals, accel_globals)
+#ifndef ZEND_WIN32
+	STD_PHP_INI_BOOLEAN("opcache.validate_root"      , "0", PHP_INI_SYSTEM, OnUpdateBool, accel_directives.validate_root      , zend_accel_globals, accel_globals)
+#endif
 	STD_PHP_INI_BOOLEAN("opcache.inherited_hack"     , "1", PHP_INI_SYSTEM, OnUpdateBool, accel_directives.inherited_hack     , zend_accel_globals, accel_globals)
 	STD_PHP_INI_BOOLEAN("opcache.dups_fix"           , "0", PHP_INI_ALL   , OnUpdateBool, accel_directives.ignore_dups        , zend_accel_globals, accel_globals)
 	STD_PHP_INI_BOOLEAN("opcache.revalidate_path"    , "0", PHP_INI_ALL   , OnUpdateBool, accel_directives.revalidate_path    , zend_accel_globals, accel_globals)
 
 	STD_PHP_INI_ENTRY("opcache.log_verbosity_level"   , "1"   , PHP_INI_SYSTEM, OnUpdateLong, accel_directives.log_verbosity_level,       zend_accel_globals, accel_globals)
-	STD_PHP_INI_ENTRY("opcache.memory_consumption"    , "64"  , PHP_INI_SYSTEM, OnUpdateMemoryConsumption,    accel_directives.memory_consumption,        zend_accel_globals, accel_globals)
-	STD_PHP_INI_ENTRY("opcache.interned_strings_buffer", "4"  , PHP_INI_SYSTEM, OnUpdateLong,                 accel_directives.interned_strings_buffer,   zend_accel_globals, accel_globals)
-	STD_PHP_INI_ENTRY("opcache.max_accelerated_files" , "2000", PHP_INI_SYSTEM, OnUpdateMaxAcceleratedFiles,	 accel_directives.max_accelerated_files,     zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.memory_consumption"    , "128"  , PHP_INI_SYSTEM, OnUpdateMemoryConsumption,    accel_directives.memory_consumption,        zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.interned_strings_buffer", "8"  , PHP_INI_SYSTEM, OnUpdateLong,                 accel_directives.interned_strings_buffer,   zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.max_accelerated_files" , "10000", PHP_INI_SYSTEM, OnUpdateMaxAcceleratedFiles,	 accel_directives.max_accelerated_files,     zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.max_wasted_percentage" , "5"   , PHP_INI_SYSTEM, OnUpdateMaxWastedPercentage,	 accel_directives.max_wasted_percentage,     zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.consistency_checks"    , "0"   , PHP_INI_ALL   , OnUpdateLong,	             accel_directives.consistency_checks,        zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.force_restart_timeout" , "180" , PHP_INI_SYSTEM, OnUpdateLong,	             accel_directives.force_restart_timeout,     zend_accel_globals, accel_globals)
@@ -264,17 +299,31 @@ ZEND_INI_BEGIN()
 
 	STD_PHP_INI_ENTRY("opcache.protect_memory"        , "0"  , PHP_INI_SYSTEM, OnUpdateBool,                  accel_directives.protect_memory,            zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.save_comments"         , "1"  , PHP_INI_SYSTEM, OnUpdateBool,                  accel_directives.save_comments,             zend_accel_globals, accel_globals)
-	STD_PHP_INI_ENTRY("opcache.load_comments"         , "1"  , PHP_INI_ALL,    OnUpdateBool,                  accel_directives.load_comments,             zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.fast_shutdown"         , "0"  , PHP_INI_SYSTEM, OnUpdateBool,                  accel_directives.fast_shutdown,             zend_accel_globals, accel_globals)
 
 	STD_PHP_INI_ENTRY("opcache.optimization_level"    , DEFAULT_OPTIMIZATION_LEVEL , PHP_INI_SYSTEM, OnUpdateLong, accel_directives.optimization_level,   zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.opt_debug_level"       , "0"      , PHP_INI_SYSTEM, OnUpdateLong,             accel_directives.opt_debug_level,            zend_accel_globals, accel_globals)
 	STD_PHP_INI_BOOLEAN("opcache.enable_file_override"	, "0"   , PHP_INI_SYSTEM, OnUpdateBool,              accel_directives.file_override_enabled,     zend_accel_globals, accel_globals)
-	STD_PHP_INI_BOOLEAN("opcache.enable_cli"             , "0"   , PHP_INI_SYSTEM, OnUpdateBool,              accel_directives.enable_cli,                zend_accel_globals, accel_globals)
+	STD_PHP_INI_BOOLEAN("opcache.enable_cli"             , "1"   , PHP_INI_SYSTEM, OnUpdateBool,              accel_directives.enable_cli,                zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.error_log"                , ""    , PHP_INI_SYSTEM, OnUpdateString,	         accel_directives.error_log,                 zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.restrict_api"             , ""    , PHP_INI_SYSTEM, OnUpdateString,	         accel_directives.restrict_api,              zend_accel_globals, accel_globals)
 
-#ifdef ZEND_WIN32
+#ifndef ZEND_WIN32
+	STD_PHP_INI_ENTRY("opcache.lockfile_path"             , "/tmp"    , PHP_INI_SYSTEM, OnUpdateString,           accel_directives.lockfile_path,              zend_accel_globals, accel_globals)
+#else
 	STD_PHP_INI_ENTRY("opcache.mmap_base", NULL, PHP_INI_SYSTEM,	OnUpdateString,	                             accel_directives.mmap_base,                 zend_accel_globals, accel_globals)
+#endif
+
+#ifdef HAVE_OPCACHE_FILE_CACHE
+	STD_PHP_INI_ENTRY("opcache.file_cache"                    , NULL  , PHP_INI_SYSTEM, OnUpdateFileCache, accel_directives.file_cache,                    zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.file_cache_only"               , "0"   , PHP_INI_SYSTEM, OnUpdateBool,	   accel_directives.file_cache_only,               zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.file_cache_consistency_checks" , "1"   , PHP_INI_SYSTEM, OnUpdateBool,	   accel_directives.file_cache_consistency_checks, zend_accel_globals, accel_globals)
+#endif
+#if ENABLE_FILE_CACHE_FALLBACK
+	STD_PHP_INI_ENTRY("opcache.file_cache_fallback"           , "1"   , PHP_INI_SYSTEM, OnUpdateBool,	   accel_directives.file_cache_fallback,           zend_accel_globals, accel_globals)
+#endif
+#ifdef HAVE_HUGE_CODE_PAGES
+	STD_PHP_INI_BOOLEAN("opcache.huge_code_pages"             , "0"   , PHP_INI_SYSTEM, OnUpdateBool,      accel_directives.huge_code_pages,               zend_accel_globals, accel_globals)
 #endif
 ZEND_INI_END()
 
@@ -283,13 +332,13 @@ static int filename_is_in_cache(zend_string *filename)
 	char *key;
 	int key_length;
 
-	key = accel_make_persistent_key(filename->val, filename->len, &key_length);
+	key = accel_make_persistent_key(ZSTR_VAL(filename), ZSTR_LEN(filename), &key_length);
 	if (key != NULL) {
 		zend_persistent_script *persistent_script = zend_accel_hash_str_find(&ZCSG(hash), key, key_length);
 		if (persistent_script && !persistent_script->corrupted) {
 			zend_file_handle handle = {{0}, NULL, NULL, 0, 0};
 
-			handle.filename = filename->val;
+			handle.filename = ZSTR_VAL(filename);
 			handle.type = ZEND_HANDLE_FILENAME;
 
 			if (ZCG(accel_directives).validate_timestamps) {
@@ -356,6 +405,12 @@ void zend_accel_override_file_functions(void)
 {
 	zend_function *old_function;
 	if (ZCG(enabled) && accel_startup_ok && ZCG(accel_directives).file_override_enabled) {
+#ifdef HAVE_OPCACHE_FILE_CACHE
+		if (ZCG(accel_directives).file_cache_only) {
+			zend_accel_error(ACCEL_LOG_WARNING, "file_override_enabled has no effect when file_cache_only is set");
+			return;
+		}
+#endif
 		/* override file_exists */
 		if ((old_function = zend_hash_str_find_ptr(CG(function_table), "file_exists", sizeof("file_exists")-1)) != NULL) {
 			orig_file_exists = old_function->internal_function.handler;
@@ -385,16 +440,41 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 {
 	php_info_print_table_start();
 
-	if (ZCG(enabled) && accel_startup_ok && (ZCG(counted) || ZCSG(accelerator_enabled))) {
+	if (ZCG(enabled) && accel_startup_ok &&
+#ifdef HAVE_OPCACHE_FILE_CACHE
+		((ZCG(counted) || ZCSG(accelerator_enabled)) || ZCG(accel_directives).file_cache_only)
+#else
+		(ZCG(counted) || ZCSG(accelerator_enabled))
+#endif
+	) {
 		php_info_print_table_row(2, "Opcode Caching", "Up and Running");
 	} else {
 		php_info_print_table_row(2, "Opcode Caching", "Disabled");
 	}
-	if (ZCG(enabled) && accel_startup_ok && ZCSG(accelerator_enabled) && ZCG(accel_directives).optimization_level) {
+	if (ZCG(enabled) && accel_startup_ok && ZCG(accel_directives).optimization_level) {
 		php_info_print_table_row(2, "Optimization", "Enabled");
 	} else {
 		php_info_print_table_row(2, "Optimization", "Disabled");
 	}
+#ifdef HAVE_OPCACHE_FILE_CACHE
+	if (!ZCG(accel_directives).file_cache_only) {
+		php_info_print_table_row(2, "SHM Cache", "Enabled");
+	} else {
+		php_info_print_table_row(2, "SHM Cache", "Disabled");
+	}
+	if (ZCG(accel_directives).file_cache) {
+		php_info_print_table_row(2, "File Cache", "Enabled");
+	} else {
+		php_info_print_table_row(2, "File Cache", "Disabled");
+	}
+	if (ZCG(accel_directives).file_cache_only) {
+		if (!accel_startup_ok || zps_api_failure_reason) {
+			php_info_print_table_row(2, "Startup Failed", zps_api_failure_reason);
+		} else {
+			php_info_print_table_row(2, "Startup", "OK");
+		}
+	} else
+#endif
 	if (ZCG(enabled)) {
 		if (!accel_startup_ok || zps_api_failure_reason) {
 			php_info_print_table_row(2, "Startup Failed", zps_api_failure_reason);
@@ -402,33 +482,33 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 			char buf[32];
 			php_info_print_table_row(2, "Startup", "OK");
 			php_info_print_table_row(2, "Shared memory model", zend_accel_get_shared_model());
-			snprintf(buf, sizeof(buf), "%pd", (zend_ulong)ZCSG(hits));
+			snprintf(buf, sizeof(buf), ZEND_LONG_FMT, (zend_ulong)ZCSG(hits));
 			php_info_print_table_row(2, "Cache hits", buf);
-			snprintf(buf, sizeof(buf), "%pd", ZSMMG(memory_exhausted)?ZCSG(misses):ZCSG(misses)-ZCSG(blacklist_misses));
+			snprintf(buf, sizeof(buf), ZEND_LONG_FMT, ZSMMG(memory_exhausted)?ZCSG(misses):ZCSG(misses)-ZCSG(blacklist_misses));
 			php_info_print_table_row(2, "Cache misses", buf);
 			snprintf(buf, sizeof(buf), ZEND_LONG_FMT, ZCG(accel_directives).memory_consumption-zend_shared_alloc_get_free_memory()-ZSMMG(wasted_shared_memory));
 			php_info_print_table_row(2, "Used memory", buf);
-			snprintf(buf, sizeof(buf), "%pd", zend_shared_alloc_get_free_memory());
+			snprintf(buf, sizeof(buf), ZEND_LONG_FMT, zend_shared_alloc_get_free_memory());
 			php_info_print_table_row(2, "Free memory", buf);
-			snprintf(buf, sizeof(buf), "%pd", ZSMMG(wasted_shared_memory));
+			snprintf(buf, sizeof(buf), ZEND_LONG_FMT, ZSMMG(wasted_shared_memory));
 			php_info_print_table_row(2, "Wasted memory", buf);
 			if (ZCSG(interned_strings_start) && ZCSG(interned_strings_end) && ZCSG(interned_strings_top)) {
-				snprintf(buf, sizeof(buf), "%pd", ZCSG(interned_strings_top) - ZCSG(interned_strings_start));
+				snprintf(buf, sizeof(buf), ZEND_LONG_FMT, ZCSG(interned_strings_top) - ZCSG(interned_strings_start));
 				php_info_print_table_row(2, "Interned Strings Used memory", buf);
-				snprintf(buf, sizeof(buf), "%pd", ZCSG(interned_strings_end) - ZCSG(interned_strings_top));
+				snprintf(buf, sizeof(buf), ZEND_LONG_FMT, ZCSG(interned_strings_end) - ZCSG(interned_strings_top));
 				php_info_print_table_row(2, "Interned Strings Free memory", buf);
 			}
-			snprintf(buf, sizeof(buf), "%ld", ZCSG(hash).num_direct_entries);
+			snprintf(buf, sizeof(buf), "%d", ZCSG(hash).num_direct_entries);
 			php_info_print_table_row(2, "Cached scripts", buf);
-			snprintf(buf, sizeof(buf), "%ld", ZCSG(hash).num_entries);
+			snprintf(buf, sizeof(buf), "%d", ZCSG(hash).num_entries);
 			php_info_print_table_row(2, "Cached keys", buf);
-			snprintf(buf, sizeof(buf), "%pd", ZCSG(hash).max_num_entries);
+			snprintf(buf, sizeof(buf), "%d", ZCSG(hash).max_num_entries);
 			php_info_print_table_row(2, "Max keys", buf);
-			snprintf(buf, sizeof(buf), "%pd", ZCSG(oom_restarts));
+			snprintf(buf, sizeof(buf), ZEND_LONG_FMT, ZCSG(oom_restarts));
 			php_info_print_table_row(2, "OOM restarts", buf);
-			snprintf(buf, sizeof(buf), "%pd", ZCSG(hash_restarts));
+			snprintf(buf, sizeof(buf), ZEND_LONG_FMT, ZCSG(hash_restarts));
 			php_info_print_table_row(2, "Hash keys restarts", buf);
-			snprintf(buf, sizeof(buf), "%pd", ZCSG(manual_restarts));
+			snprintf(buf, sizeof(buf), ZEND_LONG_FMT, ZCSG(manual_restarts));
 			php_info_print_table_row(2, "Manual restarts", buf);
 		}
 	}
@@ -446,8 +526,10 @@ static zend_module_entry accel_module_entry = {
 	NULL,
 	NULL,
 	zend_accel_info,
-	ACCELERATOR_VERSION "FE",
-	STANDARD_MODULE_PROPERTIES
+	PHP_VERSION,
+	NO_MODULE_GLOBALS,
+	accel_post_deactivate,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 
 int start_accel_module(void)
@@ -459,7 +541,7 @@ int start_accel_module(void)
    Get the scripts which are accelerated by ZendAccelerator */
 static int accelerator_get_scripts(zval *return_value)
 {
-	uint i;
+	uint32_t i;
 	zval persistent_script_report;
 	zend_accel_hash_entry *cache_entry;
 	struct tm *ta;
@@ -482,7 +564,7 @@ static int accelerator_get_scripts(zval *return_value)
 			script = (zend_persistent_script *)cache_entry->data;
 
 			array_init(&persistent_script_report);
-			add_assoc_str(&persistent_script_report, "full_path", zend_string_dup(script->full_path, 0));
+			add_assoc_str(&persistent_script_report, "full_path", zend_string_dup(script->script.filename, 0));
 			add_assoc_long(&persistent_script_report, "hits", (zend_long)script->dynamic_members.hits);
 			add_assoc_long(&persistent_script_report, "memory_consumption", script->dynamic_members.memory_consumption);
 			ta = localtime(&script->dynamic_members.last_used);
@@ -529,6 +611,17 @@ static ZEND_FUNCTION(opcache_get_status)
 
 	/* Trivia */
 	add_assoc_bool(return_value, "opcache_enabled", ZCG(enabled) && (ZCG(counted) || ZCSG(accelerator_enabled)));
+
+#ifdef HAVE_OPCACHE_FILE_CACHE
+	if (ZCG(accel_directives).file_cache) {
+		add_assoc_string(return_value, "file_cache", ZCG(accel_directives).file_cache);
+	}
+	if (ZCG(accel_directives).file_cache_only) {
+		add_assoc_bool(return_value, "file_cache_only", 1);
+		return;
+	}
+#endif
+
 	add_assoc_bool(return_value, "cache_full", ZSMMG(memory_exhausted));
 	add_assoc_bool(return_value, "restart_pending", ZCSG(restart_pending));
 	add_assoc_bool(return_value, "restart_in_progress", ZCSG(restart_in_progress));
@@ -606,6 +699,10 @@ static ZEND_FUNCTION(opcache_get_configuration)
 	add_assoc_bool(&directives, "opcache.enable_cli",          ZCG(accel_directives).enable_cli);
 	add_assoc_bool(&directives, "opcache.use_cwd",             ZCG(accel_directives).use_cwd);
 	add_assoc_bool(&directives, "opcache.validate_timestamps", ZCG(accel_directives).validate_timestamps);
+	add_assoc_bool(&directives, "opcache.validate_permission", ZCG(accel_directives).validate_permission);
+#ifndef ZEND_WIN32
+	add_assoc_bool(&directives, "opcache.validate_root",       ZCG(accel_directives).validate_root);
+#endif
 	add_assoc_bool(&directives, "opcache.inherited_hack",      ZCG(accel_directives).inherited_hack);
 	add_assoc_bool(&directives, "opcache.dups_fix",            ZCG(accel_directives).ignore_dups);
 	add_assoc_bool(&directives, "opcache.revalidate_path",     ZCG(accel_directives).revalidate_path);
@@ -625,16 +722,25 @@ static ZEND_FUNCTION(opcache_get_configuration)
 
 	add_assoc_bool(&directives,   "opcache.protect_memory",         ZCG(accel_directives).protect_memory);
 	add_assoc_bool(&directives,   "opcache.save_comments",          ZCG(accel_directives).save_comments);
-	add_assoc_bool(&directives,   "opcache.load_comments",          ZCG(accel_directives).load_comments);
 	add_assoc_bool(&directives,   "opcache.fast_shutdown",          ZCG(accel_directives).fast_shutdown);
 	add_assoc_bool(&directives,   "opcache.enable_file_override",   ZCG(accel_directives).file_override_enabled);
 	add_assoc_long(&directives, 	 "opcache.optimization_level",     ZCG(accel_directives).optimization_level);
+
+#ifndef ZEND_WIN32
+	add_assoc_string(&directives, "opcache.lockfile_path",          STRING_NOT_NULL(ZCG(accel_directives).lockfile_path));
+#endif
+
+#ifdef HAVE_OPCACHE_FILE_CACHE
+	add_assoc_string(&directives, "opcache.file_cache",                    ZCG(accel_directives).file_cache ? ZCG(accel_directives).file_cache : "");
+	add_assoc_bool(&directives,   "opcache.file_cache_only",               ZCG(accel_directives).file_cache_only);
+	add_assoc_bool(&directives,   "opcache.file_cache_consistency_checks", ZCG(accel_directives).file_cache_consistency_checks);
+#endif
 
 	add_assoc_zval(return_value, "directives", &directives);
 
 	/*version */
 	array_init(&version);
-	add_assoc_string(&version, "version", ACCELERATOR_VERSION);
+	add_assoc_string(&version, "version", PHP_VERSION);
 	add_assoc_string(&version, "opcache_product_name", ACCELERATOR_PRODUCT_NAME);
 	add_assoc_zval(return_value, "version", &version);
 
@@ -656,7 +762,11 @@ static ZEND_FUNCTION(opcache_reset)
 		RETURN_FALSE;
 	}
 
-	if (!ZCG(enabled) || !accel_startup_ok || !ZCSG(accelerator_enabled)) {
+	if ((!ZCG(enabled) || !accel_startup_ok || !ZCSG(accelerator_enabled))
+#if ENABLE_FILE_CACHE_FALLBACK
+	&& !fallback_process
+#endif
+	) {
 		RETURN_FALSE;
 	}
 

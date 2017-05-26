@@ -32,7 +32,6 @@ Bz2 is an extension to create and parse bzip2 compressed data.
             <file role="src">config.m4</file>
             <file role="doc">php_bz2.h</file>
             <file role="src">bz2.c</file>
-            <file role="src">bz2.dsp</file>
          </dir>
      </filelist> 
 </package>

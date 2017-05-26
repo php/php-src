@@ -291,7 +291,7 @@ int fpm_event_pre_init(char *machanism) /* {{{ */
 	}
 	return -1;
 }
-/* }} */
+/* }}} */
 
 const char *fpm_event_machanism_name() /* {{{ */
 {
@@ -538,4 +538,3 @@ int fpm_event_del(struct fpm_event_s *ev) /* {{{ */
 }
 /* }}} */
 
-/* }}} */

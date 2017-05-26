@@ -35,7 +35,6 @@ package.xml added to support installation using pear installer
   <filelist>
    <file role="src" name="config.m4"/>
    <file role="src" name="config.w32"/>
-   <file role="src" name="mysqli.dsp"/>
    <file role="src" name="mysqli.c"/>
    <file role="src" name="mysqli_api.c"/>
    <file role="src" name="mysqli_fe.c"/>

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2015 The PHP Group                                |
+  | Copyright (c) 2006-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -12,13 +12,13 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Georg Richter <georg@mysql.com>                             |
-  |          Andrey Hristov <andrey@mysql.com>                           |
-  |          Ulf Wendel <uwendel@mysql.com>                              |
+  | Authors: Andrey Hristov <andrey@php.net>                             |
+  |          Ulf Wendel <uw@php.net>                                     |
+  |          Georg Richter <georg@php.net>                               |
   +----------------------------------------------------------------------+
 */
+
 #include "php.h"
-#include "php_globals.h"
 #include "mysqlnd.h"
 #include "mysqlnd_priv.h"
 #include "mysqlnd_debug.h"
@@ -410,7 +410,7 @@ static unsigned int check_mb_utf16(const char *start, const char *end)
 }
 
 
-static uint mysqlnd_mbcharlen_utf16(unsigned int utf16)
+static uint32_t mysqlnd_mbcharlen_utf16(unsigned int utf16)
 {
   return UTF16_HIGH_HEAD(utf16) ? 4 : 2;
 }
@@ -687,6 +687,53 @@ const MYSQLND_CHARSET mysqlnd_charsets[] =
 	{ 249, "gb18030", "gb18030_bin", 1, 4, "", mysqlnd_mbcharlen_gb18030, my_ismbchar_gb18030},
 
 	{ 254, UTF8_MB3, UTF8_MB3"_general_cs", 1, 3, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 255, UTF8_MB4, UTF8_MB4"_0900_ai_ci", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 256, UTF8_MB4, UTF8_MB4"_de_pb_0900_ai_ci", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 257, UTF8_MB4, UTF8_MB4"_is_0900_ai_ci", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 258, UTF8_MB4, UTF8_MB4"_lv_0900_ai_ci", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 259, UTF8_MB4, UTF8_MB4"_ro_0900_ai_ci", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 260, UTF8_MB4, UTF8_MB4"_sl_0900_ai_ci", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 261, UTF8_MB4, UTF8_MB4"_pl_0900_ai_ci", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 262, UTF8_MB4, UTF8_MB4"_et_0900_ai_ci", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 263, UTF8_MB4, UTF8_MB4"_es_0900_ai_ci", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 264, UTF8_MB4, UTF8_MB4"_sv_0900_ai_ci", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 265, UTF8_MB4, UTF8_MB4"_tr_0900_ai_ci", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 266, UTF8_MB4, UTF8_MB4"_cs_0900_ai_ci", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 267, UTF8_MB4, UTF8_MB4"_da_0900_ai_ci", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 268, UTF8_MB4, UTF8_MB4"_lt_0900_ai_ci", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 269, UTF8_MB4, UTF8_MB4"_sk_0900_ai_ci", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 270, UTF8_MB4, UTF8_MB4"_es_trad_0900_ai_ci", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 271, UTF8_MB4, UTF8_MB4"_la_0900_ai_ci", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 272, UTF8_MB4, UTF8_MB4"_fa_0900_ai_ci", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 273, UTF8_MB4, UTF8_MB4"_eo_0900_ai_ci", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 274, UTF8_MB4, UTF8_MB4"_hu_0900_ai_ci", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 275, UTF8_MB4, UTF8_MB4"_hr_0900_ai_ci", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 276, UTF8_MB4, UTF8_MB4"_si_0900_ai_ci", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 277, UTF8_MB4, UTF8_MB4"_vi_0900_ai_ci", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 278, UTF8_MB4, UTF8_MB4"_0900_as_cs", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 279, UTF8_MB4, UTF8_MB4"_de_pb_0900_as_cs", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 280, UTF8_MB4, UTF8_MB4"_is_0900_as_cs", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 281, UTF8_MB4, UTF8_MB4"_lv_0900_as_cs", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 282, UTF8_MB4, UTF8_MB4"_ro_0900_as_cs", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 283, UTF8_MB4, UTF8_MB4"_sl_0900_as_cs", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 284, UTF8_MB4, UTF8_MB4"_pl_0900_as_cs", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 285, UTF8_MB4, UTF8_MB4"_et_0900_as_cs", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 286, UTF8_MB4, UTF8_MB4"_es_0900_as_cs", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 287, UTF8_MB4, UTF8_MB4"_sv_0900_as_cs", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 288, UTF8_MB4, UTF8_MB4"_tr_0900_as_cs", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 289, UTF8_MB4, UTF8_MB4"_cs_0900_as_cs", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 290, UTF8_MB4, UTF8_MB4"_da_0900_as_cs", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 291, UTF8_MB4, UTF8_MB4"_lt_0900_as_cs", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 292, UTF8_MB4, UTF8_MB4"_sk_0900_as_cs", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 293, UTF8_MB4, UTF8_MB4"_es_trad_0900_as_cs", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 294, UTF8_MB4, UTF8_MB4"_la_0900_as_cs", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 295, UTF8_MB4, UTF8_MB4"_fa_0900_as_cs", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 296, UTF8_MB4, UTF8_MB4"_eo_0900_as_cs", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 297, UTF8_MB4, UTF8_MB4"_hu_0900_as_cs", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 298, UTF8_MB4, UTF8_MB4"_hr_0900_as_cs", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 299, UTF8_MB4, UTF8_MB4"_si_0900_as_cs", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 300, UTF8_MB4, UTF8_MB4"_vi_0900_as_cs", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 303, UTF8_MB4, UTF8_MB4"_ja_0900_as_cs", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
 	{   0, NULL, NULL, 0, 0, NULL, NULL, NULL}
 };
 /* }}} */
@@ -867,7 +914,7 @@ static struct st_mysqlnd_plugin_charsets mysqlnd_plugin_charsets_plugin =
 		MYSQLND_VERSION_ID,
 		PHP_MYSQLND_VERSION,
 		"PHP License 3.01",
-		"Andrey Hristov <andrey@mysql.com>,  Ulf Wendel <uwendel@mysql.com>, Georg Richter <georg@mysql.com>",
+		"Andrey Hristov <andrey@php.net>,  Ulf Wendel <uw@php.net>, Georg Richter <georg@php.net>",
 		{
 			NULL, /* no statistics , will be filled later if there are some */
 			NULL, /* no statistics */

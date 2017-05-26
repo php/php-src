@@ -442,9 +442,9 @@ Array
 *** Testing print_r() on float variables ***
 
 -- Iteration 1 --
-0
-0
-0
+-0
+-0
+-0
 -- Iteration 2 --
 0
 0
@@ -1605,7 +1605,7 @@ Array
 -- Iteration 4 --
 Array
 (
-    [0] => 0
+    [0] => -0
     [1] => Where am I?
     [2] => Array
         (
@@ -1621,7 +1621,7 @@ Array
 
 Array
 (
-    [0] => 0
+    [0] => -0
     [1] => Where am I?
     [2] => Array
         (
@@ -1637,7 +1637,7 @@ Array
 
 Array
 (
-    [0] => 0
+    [0] => -0
     [1] => Where am I?
     [2] => Array
         (
@@ -1720,8 +1720,12 @@ Array
 
 
 *** Testing print_r() on anonymous functions ***
+
+Deprecated: Function create_function() is deprecated in %s on line %d
 New anonymous function:  lambda_1
-2 * 3 = 6 lambda_2
+2 * 3 = 6
+Deprecated: Function create_function() is deprecated in %s on line %d
+ lambda_2
 
 *** Testing error conditions ***
 

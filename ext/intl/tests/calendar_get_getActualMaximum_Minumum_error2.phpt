@@ -19,65 +19,65 @@ set_error_handler('eh');
 
 try {
 	var_dump(intlcal_get($c));
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 try {
 	var_dump(intlcal_get_actual_maximum($c));
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 try {
 	var_dump(intlcal_get_actual_minimum($c));
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 
 try {
 	var_dump(intlcal_get($c, -1));
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 try {
 	var_dump(intlcal_get_actual_maximum($c, -1));
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 try {
 	var_dump(intlcal_get_actual_minimum($c, -1));
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 
 try {
 	var_dump(intlcal_get($c, "s"));
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 try {
 	var_dump(intlcal_get_actual_maximum($c, "s"));
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 try {
 	var_dump(intlcal_get_actual_minimum($c, "s"));
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 
 try {
 	var_dump(intlcal_get(1));
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 try {
 	var_dump(intlcal_get_actual_maximum(1));
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 try {
 	var_dump(intlcal_get_actual_minimum(1));
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 --EXPECT--
@@ -105,9 +105,9 @@ bool(false)
 error: 2, intlcal_get_actual_minimum() expects parameter 2 to be integer, string given
 error: 2, intlcal_get_actual_minimum(): intlcal_get_actual_minimum: bad arguments
 bool(false)
-error: 1, Argument 1 passed to intlcal_get() must be an instance of IntlCalendar, integer given
+error: 0, Argument 1 passed to intlcal_get() must be an instance of IntlCalendar, integer given
 
-error: 1, Argument 1 passed to intlcal_get_actual_maximum() must be an instance of IntlCalendar, integer given
+error: 0, Argument 1 passed to intlcal_get_actual_maximum() must be an instance of IntlCalendar, integer given
 
-error: 1, Argument 1 passed to intlcal_get_actual_minimum() must be an instance of IntlCalendar, integer given
+error: 0, Argument 1 passed to intlcal_get_actual_minimum() must be an instance of IntlCalendar, integer given
 

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -32,7 +32,8 @@ const php_hash_ops php_hash_joaat_ops = {
 	(php_hash_copy_func_t) php_hash_copy,
 	4,
 	4,
-	sizeof(PHP_JOAAT_CTX)
+	sizeof(PHP_JOAAT_CTX),
+	0
 };
 
 PHP_HASH_API void PHP_JOAATInit(PHP_JOAAT_CTX *context)
@@ -70,8 +71,8 @@ PHP_HASH_API void PHP_JOAATFinal(unsigned char digest[4], PHP_JOAAT_CTX * contex
  * returns:
  *  32 bit hash as a static hash type
  */
-static php_hash_uint32
-joaat_buf(void *buf, size_t len, php_hash_uint32 hval)
+static uint32_t
+joaat_buf(void *buf, size_t len, uint32_t hval)
 {
     size_t i;
     unsigned char *input = (unsigned char *)buf;

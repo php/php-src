@@ -8,15 +8,15 @@ method_exists() on non-existent class, with __autoload().
  * Alias to functions: 
  */
 
-function __autoload($name) {
-	echo "In __autoload($name)\n"; 
-} 
+spl_autoload_register(function ($name) {
+	echo "In autoload($name)\n"; 
+});
 
 var_dump(method_exists('UndefC', 'func'));
 
 echo "Done";
 ?>
 --EXPECTF--
-In __autoload(UndefC)
+In autoload(UndefC)
 bool(false)
 Done

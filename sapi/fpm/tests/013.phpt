@@ -16,7 +16,6 @@ error_log = $logfile
 log_level = warning
 [unconfined]
 listen = 127.0.0.1:$port
-user = foo
 pm = dynamic
 pm.max_children = 5
 pm.start_servers = 2
@@ -27,8 +26,8 @@ EOT;
 $fpm = run_fpm($cfg, $tail);
 if (is_resource($fpm)) {
     $i = 0;
-	while (($i++ < 30) && !($fp = @fsockopen('127.0.0.1', $port))) {
-		usleep(10000);
+	while (($i++ < 60) && !($fp = @fsockopen('127.0.0.1', $port))) {
+		usleep(50000);
 	}
 	if ($fp) {
 		echo "Started\n";

@@ -7,7 +7,7 @@ include "skipif.inc";
 --FILE--
 <?php
 include "php_cli_server.inc";
-php_cli_server_start('echo done, "\n";', null);
+php_cli_server_start('echo "done\n";', null);
 
 list($host, $port) = explode(':', PHP_CLI_SERVER_ADDRESS);
 $port = intval($port)?:80;
@@ -65,6 +65,7 @@ fclose($fp);
 
 HTTP/1.1 200 OK
 Host: %s
+Date: %s
 Connection: close
 X-Powered-By: %s
 Content-type: %s
@@ -72,6 +73,7 @@ Content-type: %s
 done
 HTTP/1.1 404 Not Found
 Host: %s
+Date: %s
 Connection: close
 Content-Type: %s
 Content-Length: %d

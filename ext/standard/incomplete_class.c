@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,8 +27,8 @@
 		"access a property of an incomplete object. " \
 		"Please ensure that the class definition \"%s\" of the object " \
 		"you are trying to operate on was loaded _before_ " \
-		"unserialize() gets called or provide a __autoload() function " \
-		"to load the class definition "
+		"unserialize() gets called or provide an autoloader " \
+		"to load the class definition"
 
 static zend_object_handlers php_incomplete_object_handlers;
 
@@ -41,7 +41,7 @@ static void incomplete_class_message(zval *object, int error_type)
 	class_name = php_lookup_class_name(object);
 
 	if (class_name) {
-		php_error_docref(NULL, error_type, INCOMPLETE_CLASS_MSG, class_name->val);
+		php_error_docref(NULL, error_type, INCOMPLETE_CLASS_MSG, ZSTR_VAL(class_name));
 		zend_string_release(class_name);
 	} else {
 		php_error_docref(NULL, error_type, INCOMPLETE_CLASS_MSG, "unknown");
@@ -54,7 +54,8 @@ static zval *incomplete_class_get_property(zval *object, zval *member, int type,
 	incomplete_class_message(object, E_NOTICE);
 
 	if (type == BP_VAR_W || type == BP_VAR_RW) {
-		return &EG(error_zval);
+		ZVAL_ERROR(rv);
+		return rv;
 	} else {
 		return &EG(uninitialized_zval);
 	}

@@ -10,7 +10,7 @@ $foo = function() {
 };
 try {
 	var_dump($foo->a);
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	echo "Error: {$ex->getMessage()}\n";
 }
 ?>

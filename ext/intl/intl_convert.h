@@ -25,8 +25,7 @@ void intl_convert_utf8_to_utf16(
 	const char* src,    size_t  src_len,
 	UErrorCode* status );
 
-void intl_convert_utf16_to_utf8(
-	char**       target, size_t* target_len,
+zend_string* intl_convert_utf16_to_utf8(
 	const UChar* src,    int32_t  src_len,
 	UErrorCode*  status );
 

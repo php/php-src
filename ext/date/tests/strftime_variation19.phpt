@@ -1,5 +1,5 @@
 --TEST--
-Test strftime() function : usage variation - Checking newline and tab formats which are not supported on Windows.
+Test strftime() function : usage variation - Checking newline and tab formats which was not supported on Windows before VC14.
 --SKIPIF--
 <?php
 if (strtoupper(substr(PHP_OS, 0, 3)) != 'WIN') {
@@ -41,10 +41,12 @@ foreach($inputs as $key =>$value) {
 *** Testing strftime() : usage variation ***
 
 --Newline character--
-bool(false)
-bool(false)
+string(1) "
+"
+string(1) "
+"
 
 --Tab character--
-bool(false)
-bool(false)
+string(1) "	"
+string(1) "	"
 ===DONE===

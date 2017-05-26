@@ -10,6 +10,8 @@ if (!(isset($matches[0]) && $matches[1] < 12)) {
     die("skip expected output only valid when using pre-Oracle 12c database");
 }
 ?>
+--ENV--
+NLS_LANG=
 --FILE--
 <?php
 

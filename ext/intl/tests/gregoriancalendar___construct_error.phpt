@@ -22,7 +22,7 @@ try {
 }
 try {
 	var_dump(new IntlGregorianCalendar(1,2,3,4,NULL,array()));
-} catch (IntlException $e) {
+} catch (TypeError $e) {
 	print_exception($e);
 }
 --EXPECTF--

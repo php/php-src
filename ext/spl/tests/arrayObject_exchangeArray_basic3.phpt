@@ -98,16 +98,14 @@ object(C)#3 (2) {
   ["addedToOriginal"]=>
   string(17) "added To Original"
 }
-array(2) {
-  ["pub1"]=>
-  string(7) "public1"
+array(1) {
   ["addedToCopy"]=>
   string(13) "added To Copy"
 }
 
 
 --> exchangeArray() with bad arg type:
-Exception:Passed variable is not an array or object, using empty array instead
+Exception:Passed variable is not an array or object
 
 Notice: Undefined variable: copy in %s on line 46
 object(ArrayObject)#3 (1) {

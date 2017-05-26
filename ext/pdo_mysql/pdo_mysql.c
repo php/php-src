@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -33,7 +33,7 @@
 
 #ifdef COMPILE_DL_PDO_MYSQL
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
+ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(pdo_mysql)
 #endif
@@ -130,6 +130,9 @@ static PHP_MINIT_FUNCTION(pdo_mysql)
 	 REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SERVER_PUBLIC_KEY", (zend_long)PDO_MYSQL_ATTR_SERVER_PUBLIC_KEY);
 #endif
 	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_MULTI_STATEMENTS", (zend_long)PDO_MYSQL_ATTR_MULTI_STATEMENTS);
+#ifdef PDO_USE_MYSQLND
+	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SSL_VERIFY_SERVER_CERT", (zend_long)PDO_MYSQL_ATTR_SSL_VERIFY_SERVER_CERT);
+#endif
 
 #ifdef PDO_USE_MYSQLND
 	mysqlnd_reverse_api_register_api(&pdo_mysql_reverse_api);
@@ -229,7 +232,6 @@ const zend_function_entry pdo_mysql_functions[] = {
 /* }}} */
 
 /* {{{ pdo_mysql_deps[] */
-#if ZEND_MODULE_API_NO >= 20050922
 static const zend_module_dep pdo_mysql_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
 #ifdef PDO_USE_MYSQLND
@@ -237,7 +239,6 @@ static const zend_module_dep pdo_mysql_deps[] = {
 #endif
 	ZEND_MOD_END
 };
-#endif
 /* }}} */
 
 /* {{{ pdo_mysql_module_entry */

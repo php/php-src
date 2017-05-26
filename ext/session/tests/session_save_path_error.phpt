@@ -4,6 +4,7 @@ Test session_save_path() function : error functionality
 session.gc_probability=0
 session.save_path=
 session.name=PHPSESSID
+session.save_handler=files
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
@@ -84,7 +85,6 @@ $inputs = array(
 /*24*/ $fp
 );
 
-session_start();
 
 $iterator = 1;
 foreach($inputs as $input) {
@@ -93,7 +93,6 @@ foreach($inputs as $input) {
     $iterator++;
 };
 
-session_destroy();
 fclose($fp);
 echo "Done";
 ob_end_flush();

@@ -3,7 +3,7 @@ Testing that imageloadfont() breaks on non-string first parameter
 --CREDITS--
 Neveo Harrison <neveoo [at] gmail [dot] com> #testfest #tek11
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded("gd")) die("skip GD not present");
 ?>
 --FILE--

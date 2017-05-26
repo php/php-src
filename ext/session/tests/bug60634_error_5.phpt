@@ -3,6 +3,7 @@ Bug #60634 (Segmentation fault when trying to die() in SessionHandler::write()) 
 --INI--
 session.save_path=
 session.name=PHPSESSID
+session.save_handler=files
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
@@ -44,4 +45,9 @@ echo "um, hi\n";
 --EXPECTF--
 close: goodbye cruel world
 
-Fatal error: Call to undefined function undefined_function() in %s on line %d
+Fatal error: Uncaught Error: Call to undefined function undefined_function() in %s:%d
+Stack trace:
+#0 [internal function]: close()
+#1 %s(%d): session_write_close()
+#2 {main}
+  thrown in %s on line %d

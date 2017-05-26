@@ -1,21 +1,22 @@
 <?php # $Id$
 /* piece together a windows binary distro */
 
-$build_dir = $argv[1];
-$php_build_dir = $argv[2];
-$phpdll = $argv[3];
-$sapi_targets = explode(" ", $argv[4]);
-$ext_targets = explode(" ", $argv[5]);
-$pecl_targets = explode(" ", $argv[6]);
-$snapshot_template = $argv[7];
+$php_version = $argv[1];
+$build_dir = $argv[2];
+$php_build_dir = $argv[3];
+$phpdll = $argv[4];
+$sapi_targets = explode(" ", $argv[5]);
+$ext_targets = explode(" ", $argv[6]);
+$pecl_targets = explode(" ", $argv[7]);
+$snapshot_template = $argv[8];
 
 $is_debug = preg_match("/^debug/i", $build_dir);
 
 echo "Making dist for $build_dir\n";
 
-$dist_dir = $build_dir . "/php-" . phpversion();
-$test_dir = $build_dir . "/php-test-pack-" . phpversion();
-$pecl_dir = $build_dir . "/pecl-" . phpversion();
+$dist_dir = $build_dir . "/php-" . $php_version;
+$test_dir = $build_dir . "/php-test-pack-" . $php_version;
+$pecl_dir = $build_dir . "/pecl-" . $php_version;
 
 @mkdir($dist_dir);
 @mkdir("$dist_dir/ext");
@@ -258,12 +259,11 @@ foreach ($general_files as $src => $dest) {
 $branch = "HEAD"; // TODO - determine this from SVN branche name
 $fp = fopen("$dist_dir/snapshot.txt", "w");
 $now = date("r");
-$version = phpversion();
 fwrite($fp, <<<EOT
 This snapshot was automatically generated on
 $now
 
-Version: $version
+Version: $php_version
 Branch: $branch
 Build: $build_dir
 
@@ -339,6 +339,22 @@ foreach ($ENCHANT_DLLS as $dll) {
 
 	if (!copy($php_build_dir . '/bin/' . $filename, "$dest/" . basename($filename))) {
 			echo "WARNING: couldn't copy $filename into the dist dir";
+	}
+}
+
+$SASL_DLLS = $php_build_dir . "/bin/sasl2/sasl*.dll";
+$fls = glob($SASL_DLLS);
+if (!empty($fls)) {
+	$sasl_dest_dir = "$dist_dir/sasl2";
+	if (!file_exists($sasl_dest_dir) || !is_dir($sasl_dest_dir)) {
+		if (!mkdir("$sasl_dest_dir", 0777, true)) {
+			echo "WARNING: couldn't create '$sasl_dest_dir' for SASL2 auth plugins ";
+		}
+	}
+	foreach ($fls as $fl) {
+		if (!copy($fl, "$sasl_dest_dir/" . basename($fl))) {
+			echo "WARNING: couldn't copy $fl into the $sasl_dest_dir";
+		}
 	}
 }
 
@@ -482,7 +498,7 @@ if (!$use_pear_template) {
 
 	/* grab the bootstrap script */
 	echo "Downloading go-pear\n";
-	copy("http://pear.php.net/go-pear", "$dist_dir/PEAR/go-pear.php");
+	copy("https://pear.php.net/go-pear.phar", "$dist_dir/PEAR/go-pear.php");
 
 	/* import the package list -- sets $packages variable */
 	include "pear/go-pear-list.php";

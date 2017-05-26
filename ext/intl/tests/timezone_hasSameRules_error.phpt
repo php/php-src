@@ -18,22 +18,22 @@ set_error_handler("error_handler");
 $tz = IntlTimeZone::createTimeZone('Europe/Lisbon');
 try {
 	var_dump($tz->hasSameRules('foo'));
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	var_dump($ex->getCode(), $ex->getMessage());
 	echo "\n";
 }
 
 try {
 	var_dump(intltz_has_same_rules(null, $tz));
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	var_dump($ex->getCode(), $ex->getMessage());
 	echo "\n";
 }
 
 --EXPECT--
-int(1)
+int(0)
 string(99) "Argument 1 passed to IntlTimeZone::hasSameRules() must be an instance of IntlTimeZone, string given"
 
-int(1)
+int(0)
 string(92) "Argument 1 passed to intltz_has_same_rules() must be an instance of IntlTimeZone, null given"
 

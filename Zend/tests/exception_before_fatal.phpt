@@ -10,38 +10,38 @@ set_error_handler("exception_error_handler");
 
 try {
     $foo->a();
-} catch(BaseException $e) {
+} catch(Throwable $e) {
     var_dump($e->getMessage());
 }
 
 try {
     new $foo();
-} catch(BaseException $e) {
+} catch(Throwable $e) {
     var_dump($e->getMessage());
 }
 
 try {
     throw $foo;
-} catch(BaseException $e) {
+} catch(Throwable $e) {
     var_dump($e->getMessage());
 }
 
 try {
     $foo();
-} catch(BaseException $e) {
+} catch(Throwable $e) {
     var_dump($e->getMessage());
 }
 
 try {
     $foo::b();
-} catch(BaseException $e) {
+} catch(Throwable $e) {
     var_dump($e->getMessage());
 }
 
 
 try {
     $b = clone $foo;
-} catch(BaseException $e) {
+} catch(Throwable $e) {
     var_dump($e->getMessage());
 }
 
@@ -50,7 +50,7 @@ class b {
 
 try {
     b::$foo();
-} catch(BaseException $e) {
+} catch(Throwable $e) {
     var_dump($e->getMessage());
 }
 ?>

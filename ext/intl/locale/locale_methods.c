@@ -124,7 +124,7 @@ static int16_t findOffset(const char* const* list, const char* key)
 static char* getPreferredTag(const char* gf_tag)
 {
 	char* result = NULL;
-	int grOffset = 0;
+	zend_off_t grOffset = 0;
 
 	grOffset = findOffset( LOC_GRANDFATHERED ,gf_tag);
 	if(grOffset < 0) {
@@ -145,10 +145,10 @@ static char* getPreferredTag(const char* gf_tag)
 * or -1 if no token
 * strtokr equivalent search for token in reverse direction
 */
-static int getStrrtokenPos(char* str, int savedPos)
+static zend_off_t getStrrtokenPos(char* str, zend_off_t savedPos)
 {
-	int result =-1;
-	int i;
+	zend_off_t result =-1;
+	zend_off_t i;
 
 	for(i=savedPos-1; i>=0; i--) {
 		if(isIDSeparator(*(str+i)) ){
@@ -175,14 +175,14 @@ static int getStrrtokenPos(char* str, int savedPos)
 * returns -1 if no singleton
 * strtok equivalent search for singleton
 */
-static int getSingletonPos(const char* str)
+static zend_off_t getSingletonPos(const char* str)
 {
-	int result =-1;
-	int i=0;
-	int len = 0;
+	zend_off_t result =-1;
+	zend_off_t i=0;
+	size_t len = 0;
 
 	if( str && ((len=strlen(str))>0) ){
-		for( i=0; i<len ; i++){
+		for( i=0; (size_t)i < len ; i++){
 			if( isIDSeparator(*(str+i)) ){
 				if( i==1){
 					/* string is of the form x-avy or a-prv1 */
@@ -235,7 +235,7 @@ PHP_NAMED_FUNCTION(zif_locale_set_default)
 		RETURN_FALSE;
 	}
 
-	if (locale_name->len == 0) {
+	if (ZSTR_LEN(locale_name) == 0) {
 		default_locale = (char *)uloc_getDefault();
 		locale_name = zend_string_init(default_locale, strlen(default_locale), 0);
 	}
@@ -256,25 +256,28 @@ PHP_NAMED_FUNCTION(zif_locale_set_default)
 * common code shared by get_primary_language,get_script or get_region or get_variant
 * result = 0 if error, 1 if successful , -1 if no value
 */
-static char* get_icu_value_internal( const char* loc_name , char* tag_name, int* result , int fromParseLocale)
+static zend_string* get_icu_value_internal( const char* loc_name , char* tag_name, int* result , int fromParseLocale)
 {
-	char*		tag_value	= NULL;
-	int32_t     	tag_value_len   = 512;
+	zend_string* tag_value	    = NULL;
+	int32_t      tag_value_len  = 512;
 
-	int		singletonPos   	= 0;
-	char*       	mod_loc_name	= NULL;
-	int 		grOffset	= 0;
+	zend_off_t   singletonPos   = 0;
+	char*        mod_loc_name   = NULL;
+	zend_off_t   grOffset       = 0;
 
-	int32_t     	buflen          = 512;
-	UErrorCode  	status          = U_ZERO_ERROR;
+	int32_t      buflen         = 512;
+	UErrorCode   status         = U_ZERO_ERROR;
 
+	if (strlen(loc_name) > INTL_MAX_LOCALE_LEN) {
+		return NULL;
+	}
 
 	if( strcmp(tag_name, LOC_CANONICALIZE_TAG) != 0 ){
 		/* Handle  grandfathered languages */
 		grOffset =  findOffset( LOC_GRANDFATHERED , loc_name );
 		if( grOffset >= 0 ){
 			if( strcmp(tag_name , LOC_LANG_TAG)==0 ){
-				return estrdup(loc_name);
+				return zend_string_init(loc_name, strlen(loc_name), 0);
 			} else {
 				/* Since Grandfathered , no value , do nothing , retutn NULL */
 				return NULL;
@@ -285,7 +288,7 @@ static char* get_icu_value_internal( const char* loc_name , char* tag_name, int*
 		/* Handle singletons */
 		if( strcmp(tag_name , LOC_LANG_TAG)==0 ){
 			if( strlen(loc_name)>1 && (isIDPrefix(loc_name) == 1) ){
-				return estrdup(loc_name);
+				return zend_string_init(loc_name, strlen(loc_name), 0);
 			}
 		}
 
@@ -308,36 +311,41 @@ static char* get_icu_value_internal( const char* loc_name , char* tag_name, int*
 	}
 
 	/* Proceed to ICU */
-    do{
-		tag_value = erealloc( tag_value , buflen  );
+	do{
+		if (tag_value) {
+			tag_value = zend_string_realloc( tag_value , buflen, 0);
+		} else {
+			tag_value = zend_string_alloc( buflen, 0);
+		}
 		tag_value_len = buflen;
 
 		if( strcmp(tag_name , LOC_SCRIPT_TAG)==0 ){
-			buflen = uloc_getScript ( mod_loc_name ,tag_value , tag_value_len , &status);
+			buflen = uloc_getScript ( mod_loc_name , tag_value->val , tag_value_len , &status);
 		}
 		if( strcmp(tag_name , LOC_LANG_TAG )==0 ){
-			buflen = uloc_getLanguage ( mod_loc_name ,tag_value , tag_value_len , &status);
+			buflen = uloc_getLanguage ( mod_loc_name , tag_value->val , tag_value_len , &status);
 		}
 		if( strcmp(tag_name , LOC_REGION_TAG)==0 ){
-			buflen = uloc_getCountry ( mod_loc_name ,tag_value , tag_value_len , &status);
+			buflen = uloc_getCountry ( mod_loc_name , tag_value->val , tag_value_len , &status);
 		}
 		if( strcmp(tag_name , LOC_VARIANT_TAG)==0 ){
-			buflen = uloc_getVariant ( mod_loc_name ,tag_value , tag_value_len , &status);
+			buflen = uloc_getVariant ( mod_loc_name , tag_value->val , tag_value_len , &status);
 		}
 		if( strcmp(tag_name , LOC_CANONICALIZE_TAG)==0 ){
-			buflen = uloc_canonicalize ( mod_loc_name ,tag_value , tag_value_len , &status);
+			buflen = uloc_canonicalize ( mod_loc_name , tag_value->val , tag_value_len , &status);
 		}
 
 		if( U_FAILURE( status ) ) {
 			if( status == U_BUFFER_OVERFLOW_ERROR ) {
 				status = U_ZERO_ERROR;
+				buflen++; /* add space for \0 */
 				continue;
 			}
 
 			/* Error in retriving data */
 			*result = 0;
 			if( tag_value ){
-				efree( tag_value );
+				zend_string_release( tag_value );
 			}
 			if( mod_loc_name ){
 				efree( mod_loc_name);
@@ -350,7 +358,7 @@ static char* get_icu_value_internal( const char* loc_name , char* tag_name, int*
 		/* No value found */
 		*result = -1;
 		if( tag_value ){
-			efree( tag_value );
+			zend_string_release( tag_value );
 		}
 		if( mod_loc_name ){
 			efree( mod_loc_name);
@@ -363,6 +371,8 @@ static char* get_icu_value_internal( const char* loc_name , char* tag_name, int*
 	if( mod_loc_name ){
 		efree( mod_loc_name);
 	}
+
+	tag_value->len = strlen(tag_value->val);
 	return tag_value;
 }
 /* }}} */
@@ -377,7 +387,7 @@ static void get_icu_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAMETERS)
 	const char* loc_name        	= NULL;
 	size_t         loc_name_len    	= 0;
 
-	char*       tag_value		= NULL;
+	zend_string*   tag_value		= NULL;
 	char*       empty_result	= "";
 
 	int         result    		= 0;
@@ -398,7 +408,10 @@ static void get_icu_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAMETERS)
 
 	if(loc_name_len == 0) {
 		loc_name = intl_locale_get_default();
+		loc_name_len = strlen(loc_name);
 	}
+	
+	INTL_CHECK_LOCALE_LEN(loc_name_len);
 
 	/* Call ICU get */
 	tag_value = get_icu_value_internal( loc_name , tag_name , &result ,0);
@@ -406,16 +419,14 @@ static void get_icu_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAMETERS)
 	/* No value found */
 	if( result == -1 ) {
 		if( tag_value){
-			efree( tag_value);
+			zend_string_release( tag_value);
 		}
 		RETURN_STRING( empty_result);
 	}
 
 	/* value found */
 	if( tag_value){
-		RETVAL_STRING( tag_value );
-		//???
-		efree(tag_value);
+		RETVAL_STR( tag_value );
 		return;
 	}
 
@@ -428,7 +439,7 @@ static void get_icu_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 }
-/* }}} */
+/* }}} */ 
 
 /* {{{ proto static string Locale::getScript($locale)
  * gets the script for the $locale
@@ -487,8 +498,7 @@ static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAME
 	int32_t     buflen          	= 512;
 	UErrorCode  status          	= U_ZERO_ERROR;
 
-	char*       utf8value		= NULL;
-	size_t      utf8value_len   	= 0;
+	zend_string* u8str;
 
   	char*       msg             	= NULL;
 	int         grOffset    	= 0;
@@ -591,9 +601,9 @@ static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAME
 		disp_loc_name = NULL;
 	}
 	/* Convert display locale name from UTF-16 to UTF-8. */
-	intl_convert_utf16_to_utf8( &utf8value, &utf8value_len, disp_name, buflen, &status );
+	u8str = intl_convert_utf16_to_utf8(disp_name, buflen, &status );
 	efree( disp_name );
-	if( U_FAILURE( status ) )
+	if( !u8str )
 	{
 		spprintf(&msg, 0, "locale_get_display_%s :error converting display name for %s to UTF-8", tag_name , tag_name );
 		intl_error_set( NULL, status, msg , 1 );
@@ -601,10 +611,7 @@ static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAME
 		RETURN_FALSE;
 	}
 
-	RETVAL_STRINGL( utf8value, utf8value_len );
-	//????
-	efree(utf8value);
-
+	RETVAL_NEW_STR( u8str );
 }
 /* }}} */
 
@@ -695,8 +702,8 @@ PHP_FUNCTION( locale_get_keywords )
 	ICU uloc.h #define 	ULOC_KEYWORD_AND_VALUES_CAPACITY   100
 	hence the kw_value buffer size is 100
 */
-	char*	 	kw_value        = NULL;
-    int32_t     kw_value_len    = 100;
+	zend_string *kw_value_str;
+    int32_t     kw_value_len = 100;
 
     intl_error_reset( NULL );
 
@@ -708,6 +715,8 @@ PHP_FUNCTION( locale_get_keywords )
 
         RETURN_FALSE;
     }
+
+	INTL_CHECK_LOCALE_LEN(strlen(loc_name));
 
     if(loc_name_len == 0) {
         loc_name = intl_locale_get_default();
@@ -721,29 +730,28 @@ PHP_FUNCTION( locale_get_keywords )
     	array_init( return_value );
 
     	while( ( kw_key = uenum_next( e, &kw_key_len, &status ) ) != NULL ){
-			kw_value = ecalloc( 1 , kw_value_len  );
+    		kw_value_len = 100;
+			kw_value_str = zend_string_alloc(kw_value_len, 0);
 
 			/* Get the keyword value for each keyword */
-			kw_value_len=uloc_getKeywordValue( loc_name,kw_key, kw_value, kw_value_len ,  &status );
+			kw_value_len=uloc_getKeywordValue( loc_name, kw_key, ZSTR_VAL(kw_value_str), kw_value_len, &status );
 			if (status == U_BUFFER_OVERFLOW_ERROR) {
 				status = U_ZERO_ERROR;
-				kw_value = erealloc( kw_value , kw_value_len+1);
-				kw_value_len=uloc_getKeywordValue( loc_name,kw_key, kw_value, kw_value_len+1 ,  &status );
+				kw_value_str = zend_string_extend(kw_value_str, kw_value_len, 0);
+				kw_value_len=uloc_getKeywordValue( loc_name,kw_key, ZSTR_VAL(kw_value_str), kw_value_len+1, &status );
 			} else if(!U_FAILURE(status)) {
-				kw_value = erealloc( kw_value , kw_value_len+1);
+				kw_value_str = zend_string_truncate(kw_value_str, kw_value_len, 0);
 			}
 			if (U_FAILURE(status)) {
-	        		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "locale_get_keywords: Error encountered while getting the keyword  value for the  keyword", 0 );
-				if( kw_value){
-					efree( kw_value );
+				intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "locale_get_keywords: Error encountered while getting the keyword  value for the  keyword", 0 );
+				if( kw_value_str){
+					zend_string_free( kw_value_str );
 				}
 				zval_dtor(return_value);
         		RETURN_FALSE;
 			}
 
-			// TODO: avoid reallocation ???
-       		add_assoc_stringl( return_value, (char *)kw_key, kw_value , kw_value_len);
-       		efree(kw_value);
+       		add_assoc_str( return_value, (char *)kw_key, kw_value_str);
 		} /* end of while */
 
 	} /* end of if e!=NULL */
@@ -827,7 +835,7 @@ static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, 
 			smart_str_appendl(loc_name, Z_STRVAL_P(ele_value) , Z_STRLEN_P(ele_value));
 			return SUCCESS;
 		} else if(Z_TYPE_P(ele_value) == IS_ARRAY ) {
-			HashTable *arr = HASH_OF(ele_value);
+			HashTable *arr = Z_ARRVAL_P(ele_value);
 			zval *data;
 
 			ZEND_HASH_FOREACH_VAL(arr, data) {
@@ -923,7 +931,7 @@ PHP_FUNCTION(locale_compose)
 		RETURN_FALSE;
 	}
 
-	hash_arr = HASH_OF( arr );
+	hash_arr = Z_ARRVAL_P( arr );
 
 	if( !hash_arr || zend_hash_num_elements( hash_arr ) == 0 )
 		RETURN_FALSE;
@@ -990,42 +998,38 @@ PHP_FUNCTION(locale_compose)
 * e.g. for locale='en_US-x-prv1-prv2-prv3'
 * returns a pointer to the string 'prv1-prv2-prv3'
 */
-static char* get_private_subtags(const char* loc_name)
+static zend_string* get_private_subtags(const char* loc_name)
 {
-	char* 	result =NULL;
-	int 	singletonPos = 0;
-	int 	len =0;
-	const char* 	mod_loc_name =NULL;
+	zend_string* result = NULL;
+	zend_off_t   singletonPos = 0;
+	size_t       len = 0;
+	const char*  mod_loc_name =NULL;
 
 	if( loc_name && (len = strlen(loc_name)>0 ) ){
 		mod_loc_name = loc_name ;
 		len   = strlen(mod_loc_name);
-		while( (singletonPos = getSingletonPos(mod_loc_name))!= -1){
-
-			if( singletonPos!=-1){
-				if( (*(mod_loc_name+singletonPos)=='x') || (*(mod_loc_name+singletonPos)=='X') ){
-					/* private subtag start found */
-					if( singletonPos + 2 ==  len){
-						/* loc_name ends with '-x-' ; return  NULL */
-					}
-					else{
-						/* result = mod_loc_name + singletonPos +2; */
-						result = estrndup(mod_loc_name + singletonPos+2  , (len -( singletonPos +2) ) );
-					}
-					break;
+		while( (singletonPos = getSingletonPos(mod_loc_name)) > -1){
+			if( (*(mod_loc_name+singletonPos)=='x') || (*(mod_loc_name+singletonPos)=='X') ){
+				/* private subtag start found */
+				if( singletonPos + 2 ==  len){
+					/* loc_name ends with '-x-' ; return  NULL */
 				}
 				else{
-					if( singletonPos + 1 >=  len){
-						/* String end */
-						break;
-					} else {
-						/* singleton found but not a private subtag , hence check further in the string for the private subtag */
-						mod_loc_name = mod_loc_name + singletonPos +1;
-						len = strlen(mod_loc_name);
-					}
+					/* result = mod_loc_name + singletonPos +2; */
+					result = zend_string_init(mod_loc_name + singletonPos+2  , (len -( singletonPos +2) ), 0);
+				}
+				break;
+			}
+			else{
+				if((size_t)(singletonPos + 1) >= len){
+					/* String end */
+					break;
+				} else {
+					/* singleton found but not a private subtag , hence check further in the string for the private subtag */
+					mod_loc_name = mod_loc_name + singletonPos +1;
+					len = strlen(mod_loc_name);
 				}
 			}
-
 		} /* end of while */
 	}
 
@@ -1037,7 +1041,7 @@ static char* get_private_subtags(const char* loc_name)
 */
 static int add_array_entry(const char* loc_name, zval* hash_arr, char* key_name)
 {
-	char*   key_value 	= NULL;
+	zend_string*   key_value 	= NULL;
 	char*   cur_key_name	= NULL;
 	char*   token        	= NULL;
 	char*   last_ptr  	= NULL;
@@ -1057,7 +1061,7 @@ static int add_array_entry(const char* loc_name, zval* hash_arr, char* key_name)
 		( strcmp(key_name , LOC_VARIANT_TAG)==0) ){
 		if( result > 0 && key_value){
 			/* Tokenize on the "_" or "-"  */
-			token = php_strtok_r( key_value , DELIMITER ,&last_ptr);
+			token = php_strtok_r( key_value->val , DELIMITER ,&last_ptr);
 			if( cur_key_name ){
 				efree( cur_key_name);
 			}
@@ -1074,10 +1078,15 @@ static int add_array_entry(const char* loc_name, zval* hash_arr, char* key_name)
 			}
 */
 		}
+		if (key_value) {
+			zend_string_release(key_value);
+		}
 	} else {
 		if( result == 1 ){
-			add_assoc_string( hash_arr, key_name , key_value);
+			add_assoc_str( hash_arr, key_name , key_value);
 			cur_result = 1;
+		} else if (key_value) {
+			zend_string_release(key_value);
 		}
 	}
 
@@ -1085,9 +1094,6 @@ static int add_array_entry(const char* loc_name, zval* hash_arr, char* key_name)
 		efree( cur_key_name);
 	}
 	/*if( key_name != LOC_PRIVATE_TAG && key_value){*/
-	if( key_value){
-		efree(key_value);
-	}
 	return cur_result;
 }
 /* }}} */
@@ -1114,6 +1120,8 @@ PHP_FUNCTION(locale_parse)
 
         RETURN_FALSE;
     }
+
+    INTL_CHECK_LOCALE_LEN(strlen(loc_name));
 
     if(loc_name_len == 0) {
         loc_name = intl_locale_get_default();
@@ -1149,7 +1157,7 @@ PHP_FUNCTION(locale_get_all_variants)
 
 	int	result		= 0;
 	char*	token		= NULL;
-	char*	variant		= NULL;
+	zend_string*	variant		= NULL;
 	char*	saved_ptr	= NULL;
 
 	intl_error_reset( NULL );
@@ -1165,8 +1173,10 @@ PHP_FUNCTION(locale_get_all_variants)
 
 	if(loc_name_len == 0) {
 		loc_name = intl_locale_get_default();
+		loc_name_len = strlen(loc_name);
 	}
 
+	INTL_CHECK_LOCALE_LEN(loc_name_len);
 
 	array_init( return_value );
 
@@ -1179,7 +1189,7 @@ PHP_FUNCTION(locale_get_all_variants)
 		variant = get_icu_value_internal( loc_name , LOC_VARIANT_TAG , &result ,0);
 		if( result > 0 && variant){
 			/* Tokenize on the "_" or "-" */
-			token = php_strtok_r( variant , DELIMITER , &saved_ptr);
+			token = php_strtok_r( variant->val , DELIMITER , &saved_ptr);
 			add_next_index_stringl( return_value, token , strlen(token));
 			/* tokenize on the "_" or "-" and stop  at singleton if any	*/
 			while( (token = php_strtok_r(NULL , DELIMITER, &saved_ptr)) && (strlen(token)>1) ){
@@ -1187,7 +1197,7 @@ PHP_FUNCTION(locale_get_all_variants)
 			}
 		}
 		if( variant ){
-			efree( variant );
+			zend_string_release( variant );
 		}
 	}
 
@@ -1246,8 +1256,8 @@ PHP_FUNCTION(locale_filter_matches)
 	char*		token		= 0;
 	char*		chrcheck	= NULL;
 
-	char*       	can_lang_tag    = NULL;
-	char*       	can_loc_range   = NULL;
+	zend_string*   	can_lang_tag    = NULL;
+	zend_string*   	can_loc_range   = NULL;
 
 	char*       	cur_lang_tag    = NULL;
 	char*       	cur_loc_range   = NULL;
@@ -1269,11 +1279,15 @@ PHP_FUNCTION(locale_filter_matches)
 
 	if(loc_range_len == 0) {
 		loc_range = intl_locale_get_default();
+		loc_range_len = strlen(loc_range);
 	}
 
 	if( strcmp(loc_range,"*")==0){
 		RETURN_TRUE;
 	}
+
+	INTL_CHECK_LOCALE_LEN(loc_range_len);
+	INTL_CHECK_LOCALE_LEN(lang_tag_len);
 
 	if( boolCanonical ){
 		/* canonicalize loc_range */
@@ -1293,23 +1307,23 @@ PHP_FUNCTION(locale_filter_matches)
 		}
 
 		/* Convert to lower case for case-insensitive comparison */
-		cur_lang_tag = ecalloc( 1, strlen(can_lang_tag) + 1);
+		cur_lang_tag = ecalloc( 1, can_lang_tag->len + 1);
 
 		/* Convert to lower case for case-insensitive comparison */
-		result = strToMatch( can_lang_tag , cur_lang_tag);
+		result = strToMatch( can_lang_tag->val , cur_lang_tag);
 		if( result == 0) {
 			efree( cur_lang_tag );
-			efree( can_lang_tag );
+			zend_string_release( can_lang_tag );
 			RETURN_FALSE;
 		}
 
-		cur_loc_range = ecalloc( 1, strlen(can_loc_range) + 1);
-		result = strToMatch( can_loc_range , cur_loc_range );
+		cur_loc_range = ecalloc( 1, can_loc_range->len + 1);
+		result = strToMatch( can_loc_range->val , cur_loc_range );
 		if( result == 0) {
 			efree( cur_lang_tag );
-			efree( can_lang_tag );
+			zend_string_release( can_lang_tag );
 			efree( cur_loc_range );
-			efree( can_loc_range );
+			zend_string_release( can_loc_range );
 			RETURN_FALSE;
 		}
 
@@ -1327,10 +1341,10 @@ PHP_FUNCTION(locale_filter_matches)
 					efree( cur_loc_range );
 				}
 				if( can_lang_tag){
-					efree( can_lang_tag );
+					zend_string_release( can_lang_tag );
 				}
 				if( can_loc_range){
-					efree( can_loc_range );
+					zend_string_release( can_loc_range );
 				}
 				RETURN_TRUE;
 			}
@@ -1344,10 +1358,10 @@ PHP_FUNCTION(locale_filter_matches)
 			efree( cur_loc_range );
 		}
 		if( can_lang_tag){
-			efree( can_lang_tag );
+			zend_string_release( can_lang_tag );
 		}
 		if( can_loc_range){
-			efree( can_loc_range );
+			zend_string_release( can_loc_range );
 		}
 		RETURN_FALSE;
 
@@ -1415,21 +1429,21 @@ static void array_cleanup( char* arr[] , int arr_size)
 * returns the lookup result to lookup_loc_range_src_php
 * internal function
 */
-static char* lookup_loc_range(const char* loc_range, HashTable* hash_arr, int canonicalize )
+static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr, int canonicalize )
 {
 	int	i = 0;
 	int	cur_arr_len = 0;
 	int result = 0;
 
-	char* lang_tag = NULL;
+	zend_string* lang_tag = NULL;
 	zval* ele_value = NULL;
 	char** cur_arr = NULL;
 
 	char* cur_loc_range	= NULL;
-	char* can_loc_range	= NULL;
-	int	saved_pos = 0;
+	zend_string* can_loc_range	= NULL;
+	zend_off_t saved_pos = 0;
 
-	char* return_value = NULL;
+	zend_string* return_value = NULL;
 
 	cur_arr = ecalloc(zend_hash_num_elements(hash_arr)*2, sizeof(char *));
 	ZEND_HASH_FOREACH_VAL(hash_arr, ele_value) {
@@ -1453,16 +1467,16 @@ static char* lookup_loc_range(const char* loc_range, HashTable* hash_arr, int ca
 	if(canonicalize) {
 		for(i=0; i<cur_arr_len; i++) {
 			lang_tag = get_icu_value_internal(cur_arr[i*2], LOC_CANONICALIZE_TAG, &result, 0);
-			if(result != 1 || lang_tag == NULL || !lang_tag[0]) {
+			if(result != 1 || lang_tag == NULL || !lang_tag->val[0]) {
 				if(lang_tag) {
-					efree(lang_tag);
+					zend_string_release(lang_tag);
 				}
 				intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "lookup_loc_range: unable to canonicalize lang_tag" , 0);
 				LOOKUP_CLEAN_RETURN(NULL);
 			}
-			cur_arr[i*2] = erealloc(cur_arr[i*2], strlen(lang_tag)+1);
-			result = strToMatch(lang_tag, cur_arr[i*2]);
-			efree(lang_tag);
+			cur_arr[i*2] = erealloc(cur_arr[i*2], lang_tag->len+1);
+			result = strToMatch(lang_tag->val, cur_arr[i*2]);
+			zend_string_release(lang_tag);
 			if(result == 0) {
 				intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "lookup_loc_range: unable to canonicalize lang_tag" , 0);
 				LOOKUP_CLEAN_RETURN(NULL);
@@ -1474,15 +1488,15 @@ static char* lookup_loc_range(const char* loc_range, HashTable* hash_arr, int ca
 	if(canonicalize) {
 		/* Canonicalize the loc_range */
 		can_loc_range = get_icu_value_internal(loc_range, LOC_CANONICALIZE_TAG, &result , 0);
-		if( result != 1 || can_loc_range == NULL || !can_loc_range[0]) {
+		if( result != 1 || can_loc_range == NULL || !can_loc_range->val[0]) {
 			/* Error */
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "lookup_loc_range: unable to canonicalize loc_range" , 0 );
 			if(can_loc_range) {
-				efree(can_loc_range);
+				zend_string_release(can_loc_range);
 			}
 			LOOKUP_CLEAN_RETURN(NULL);
 		} else {
-			loc_range = can_loc_range;
+			loc_range = can_loc_range->val;
 		}
 	}
 
@@ -1490,7 +1504,7 @@ static char* lookup_loc_range(const char* loc_range, HashTable* hash_arr, int ca
 	/* convert to lower and replace hyphens */
 	result = strToMatch(loc_range, cur_loc_range);
 	if(can_loc_range) {
-		efree(can_loc_range);
+		zend_string_release(can_loc_range);
 	}
 	if(result == 0) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "lookup_loc_range: unable to canonicalize lang_tag" , 0);
@@ -1503,7 +1517,8 @@ static char* lookup_loc_range(const char* loc_range, HashTable* hash_arr, int ca
 		for(i=0; i< cur_arr_len; i++){
 			if(cur_arr[i*2] != NULL && strlen(cur_arr[i*2]) == saved_pos && strncmp(cur_loc_range, cur_arr[i*2], saved_pos) == 0) {
 				/* Match found */
-				return_value = estrdup(canonicalize?cur_arr[i*2]:cur_arr[i*2+1]);
+				char *str = canonicalize ? cur_arr[i*2] : cur_arr[i*2+1];
+				return_value = zend_string_init(str, strlen(str), 0);
 				efree(cur_loc_range);
 				LOOKUP_CLEAN_RETURN(return_value);
 			}
@@ -1528,46 +1543,51 @@ static char* lookup_loc_range(const char* loc_range, HashTable* hash_arr, int ca
 */
 PHP_FUNCTION(locale_lookup)
 {
-	char*      	fallback_loc  		= NULL;
-	size_t        	fallback_loc_len	= 0;
+	zend_string*   	fallback_loc_str	= NULL;
 	const char*    	loc_range      		= NULL;
 	size_t        	loc_range_len  		= 0;
 
 	zval*		arr				= NULL;
 	HashTable*	hash_arr		= NULL;
 	zend_bool	boolCanonical	= 0;
-	char*	 	result			=NULL;
+	zend_string* 	result_str	= NULL;
 
 	intl_error_reset( NULL );
 
-	if(zend_parse_parameters( ZEND_NUM_ARGS(), "as|bs", &arr, &loc_range, &loc_range_len,
-		&boolCanonical,	&fallback_loc, &fallback_loc_len) == FAILURE) {
+	if(zend_parse_parameters( ZEND_NUM_ARGS(), "as|bS", &arr, &loc_range, &loc_range_len,
+		&boolCanonical,	&fallback_loc_str) == FAILURE) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"locale_lookup: unable to parse input params", 0 );
 		RETURN_FALSE;
 	}
 
 	if(loc_range_len == 0) {
-		loc_range = intl_locale_get_default();
+		if(fallback_loc_str) {
+			loc_range = ZSTR_VAL(fallback_loc_str);
+			loc_range_len = ZSTR_LEN(fallback_loc_str);
+		} else {
+			loc_range = intl_locale_get_default();
+			loc_range_len = strlen(loc_range);
+		}
 	}
 
-	hash_arr = HASH_OF(arr);
+	hash_arr = Z_ARRVAL_P(arr);
+
+	INTL_CHECK_LOCALE_LEN(loc_range_len);
 
 	if( !hash_arr || zend_hash_num_elements( hash_arr ) == 0 ) {
 		RETURN_EMPTY_STRING();
 	}
 
-	result = lookup_loc_range(loc_range, hash_arr, boolCanonical);
-	if(result == NULL || result[0] == '\0') {
-		if( fallback_loc ) {
-			result = estrndup(fallback_loc, fallback_loc_len);
+	result_str = lookup_loc_range(loc_range, hash_arr, boolCanonical);
+	if(result_str == NULL || ZSTR_VAL(result_str)[0] == '\0') {
+		if( fallback_loc_str ) {
+			result_str = zend_string_copy(fallback_loc_str);
 		} else {
 			RETURN_EMPTY_STRING();
 		}
 	}
 
-	RETVAL_STRINGL(result, strlen(result));
-	//????
-	efree(result);
+	RETURN_STR(result_str);
 }
 /* }}} */
 
@@ -1593,6 +1613,24 @@ PHP_FUNCTION(locale_accept_from_http)
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 		"locale_accept_from_http: unable to parse input parameters", 0 );
 		RETURN_FALSE;
+	}
+	if(http_accept_len > ULOC_FULLNAME_CAPACITY) {
+		/* check each fragment, if any bigger than capacity, can't do it due to bug #72533 */
+		char *start = http_accept;
+		char *end;
+		size_t len;
+		do {
+			end = strchr(start, ',');
+			len = end ? end-start : http_accept_len-(start-http_accept);
+			if(len > ULOC_FULLNAME_CAPACITY) {
+				intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
+						"locale_accept_from_http: locale string too long", 0 );
+				RETURN_FALSE;
+			}
+			if(end) {
+				start = end+1;
+			}
+		} while(end != NULL);
 	}
 
 	available = ures_openAvailableLocales(NULL, &status);

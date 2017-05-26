@@ -74,12 +74,12 @@ var_dump($st->fetchAll(PDO::FETCH_FUNC, array('bar', 'inexistent')));
 ?>
 --EXPECTF--
 object(PDOStatement)#%d (1) {
-  [%u|b%"queryString"]=>
+  ["queryString"]=>
   %string|unicode%(21) "SELECT * FROM testing"
 }
 data: 1, php
 object(PDOStatement)#%d (1) {
-  [%u|b%"queryString"]=>
+  ["queryString"]=>
   %string|unicode%(21) "SELECT * FROM testing"
 }
 data: 2, 
@@ -102,7 +102,7 @@ bool(false)
 Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: no array or string given in %s on line %d
 bool(false)
 
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: cannot access self:: when no class scope is active in %s on line %d
+Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: class 'PDOStatement' does not have a method 'foo' in %s on line %d
 bool(false)
 array(2) {
   [0]=>

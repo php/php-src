@@ -368,7 +368,7 @@ int(-2147483648)
 
 *** Testing var_dump() on float variables ***
 -- Iteration 1 --
-float(0)
+float(-0)
 -- Iteration 2 --
 float(0)
 -- Iteration 3 --
@@ -893,7 +893,7 @@ array(4) {
 -- Iteration 4 --
 array(6) {
   [0]=>
-  float(0)
+  float(-0)
   [1]=>
   string(11) "Where am I?"
   [2]=>
@@ -1022,7 +1022,7 @@ array(15) {
 }
 array(32) {
   [0]=>
-  float(0)
+  float(-0)
   [1]=>
   float(0)
   [2]=>
@@ -1519,7 +1519,7 @@ array(6) {
   [3]=>
   array(6) {
     [0]=>
-    float(0)
+    float(-0)
     [1]=>
     string(11) "Where am I?"
     [2]=>
@@ -1563,8 +1563,12 @@ array(6) {
 }
 
 *** Testing var_dump() on anonymous functions ***
+
+Deprecated: Function create_function() is deprecated in %s on line %d
 New anonymous function:  lambda_1
 string(9) "2 * 3 = 6"
+
+Deprecated: Function create_function() is deprecated in %s on line %d
 string(9) " lambda_2"
 
 *** Testing error conditions ***

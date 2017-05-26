@@ -22,7 +22,7 @@ class Foo {
     }
 }
 
-class Error {
+class ErrorTest {
     private $trace;
     public function __construct() {
         $this->trace = debug_backtrace(1);
@@ -32,11 +32,11 @@ class Error {
 class Bar {
     public function __destruct() {
         Stat::getInstance();
-        new Error();
+        new ErrorTest();
     }
 
     public function test() {
-        new Error();
+        new ErrorTest();
     }
 }
 
@@ -44,5 +44,6 @@ $foo = new Foo();
 $bar = new Bar();
 $bar->test();
 ?>
---EXPECTF--
-Fatal error: Access to undeclared static property: Stat::$requests in %sbug64720.php on line 12
+OK
+--EXPECT--
+OK

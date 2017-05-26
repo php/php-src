@@ -40,4 +40,4 @@ Warning: base_convert(): Invalid `from base' (1) in %s on line %d
 Warning: base_convert(): Invalid `to base' (37) in %s on line %s
 Incorrect input
 
-Catchable fatal error: Object of class classA could not be converted to string in %s on line %d
+Recoverable fatal error: Object of class classA could not be converted to string in %s on line %d

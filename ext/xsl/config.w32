@@ -6,7 +6,9 @@ ARG_WITH("xsl", "xsl support", "no");
 if (PHP_XSL != "no") {
 	if (PHP_DOM == "yes" && PHP_LIBXML == "yes"
 	&& ADD_EXTENSION_DEP('xsl', 'libxml')
-	&& ADD_EXTENSION_DEP('xsl', 'dom')) {
+	&& ADD_EXTENSION_DEP('xsl', 'dom')
+	&& CHECK_HEADER_ADD_INCLUDE("libxml/tree.h", "CFLAGS_XSL", PHP_PHP_BUILD + "\\include\\libxml2")
+	) {
 		var ext_xsl_lib_found = false;
 		var ext_exslt_lib_found = false;
 

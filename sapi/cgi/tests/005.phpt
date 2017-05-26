@@ -1,7 +1,14 @@
 --TEST--
 using invalid combinations of cmdline options
 --SKIPIF--
-<?php include "skipif.inc"; ?>
+<?php
+
+if (substr(PHP_OS, 0, 3) == 'WIN') {
+	die ("skip not for Windows");
+}
+
+include "skipif.inc";
+?>
 --FILE--
 <?php
 

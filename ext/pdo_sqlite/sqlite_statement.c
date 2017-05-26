@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -91,7 +91,7 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 			if (param->is_param) {
 
 				if (param->paramno == -1) {
-					param->paramno = sqlite3_bind_parameter_index(S->stmt, param->name->val) - 1;
+					param->paramno = sqlite3_bind_parameter_index(S->stmt, ZSTR_VAL(param->name)) - 1;
 				}
 
 				switch (PDO_PARAM_TYPE(param->param_type)) {
@@ -138,11 +138,12 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 							parameter = &param->parameter;
 						}
 						if (Z_TYPE_P(parameter) == IS_RESOURCE) {
-							php_stream *stm;
+							php_stream *stm = NULL;
 							php_stream_from_zval_no_verify(stm, parameter);
 							if (stm) {
+								zend_string *mem = php_stream_copy_to_mem(stm, PHP_STREAM_COPY_ALL, 0);
 								zval_ptr_dtor(parameter);
-								ZVAL_STR(parameter, php_stream_copy_to_mem(stm, PHP_STREAM_COPY_ALL, 0));
+								ZVAL_STR(parameter, mem ? mem : ZSTR_EMPTY_ALLOC());
 							} else {
 								pdo_raise_impl_error(stmt->dbh, stmt, "HY105", "Expected a stream resource");
 								return 0;
@@ -233,6 +234,7 @@ static int pdo_sqlite_stmt_fetch(pdo_stmt_t *stmt,
 static int pdo_sqlite_stmt_describe(pdo_stmt_t *stmt, int colno)
 {
 	pdo_sqlite_stmt *S = (pdo_sqlite_stmt*)stmt->driver_data;
+	const char *str;
 
 	if(colno >= sqlite3_column_count(S->stmt)) {
 		/* error invalid column */
@@ -240,8 +242,8 @@ static int pdo_sqlite_stmt_describe(pdo_stmt_t *stmt, int colno)
 		return 0;
 	}
 
-	stmt->columns[colno].name = estrdup(sqlite3_column_name(S->stmt, colno));
-	stmt->columns[colno].namelen = strlen(stmt->columns[colno].name);
+	str = sqlite3_column_name(S->stmt, colno);
+	stmt->columns[colno].name = zend_string_init(str, strlen(str), 0);
 	stmt->columns[colno].maxlen = 0xffffffff;
 	stmt->columns[colno].precision = 0;
 

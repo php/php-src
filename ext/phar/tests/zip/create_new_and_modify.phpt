@@ -17,7 +17,7 @@ file_put_contents($pname . '/a.php', "brand new!\n");
 
 if (function_exists("opcache_get_status")) {
 	$status = opcache_get_status();
-	if ($status["opcache_enabled"]) {
+	if ($status["opcache_enabled"] || (isset($status["file_cache_only"]) && $status["file_cache_only"])) {
 		ini_set("opcache.revalidate_freq", "0");
 		sleep(2);
 	}

@@ -33,6 +33,10 @@
 #error "Use this header only with Microsoft Visual C++ compilers!"
 #endif // _MSC_VER ]
 
+// Starting with vc14, many of the C11 features are now included, so we only
+// need many of these typedefs and defines for older VS suites
+#if _MSC_VER < 1900
+
 #ifndef _MSC_INTTYPES_H_ // [
 #define _MSC_INTTYPES_H_
 
@@ -303,3 +307,8 @@ imaxdiv_t __cdecl imaxdiv(intmax_t numer, intmax_t denom)
 
 
 #endif // _MSC_INTTYPES_H_ ]
+
+#else
+#include <inttypes.h>
+#endif
+

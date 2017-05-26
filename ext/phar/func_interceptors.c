@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar php single-file executable PHP extension                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2015 The PHP Group                                |
+  | Copyright (c) 2005-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -150,7 +150,7 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 			}
 			if (use_include_path) {
 				if ((entry_str = phar_find_in_include_path(entry, entry_len, NULL))) {
-					name = entry_str->val;
+					name = ZSTR_VAL(entry_str);
 					goto phar_it;
 				} else {
 					/* this file is not in the phar, use the original path */
@@ -200,14 +200,14 @@ phar_it:
 			}
 
 			if (offset > 0 && php_stream_seek(stream, offset, SEEK_SET) < 0) {
-				php_error_docref(NULL, E_WARNING, "Failed to seek to position %pd in the stream", offset);
+				php_error_docref(NULL, E_WARNING, "Failed to seek to position " ZEND_LONG_FMT " in the stream", offset);
 				php_stream_close(stream);
 				RETURN_FALSE;
 			}
 
 			/* uses mmap if possible */
 			contents = php_stream_copy_to_mem(stream, maxlen, 0);
-			if (contents && contents->len > 0) {
+			if (contents && ZSTR_LEN(contents) > 0) {
 				RETVAL_STR(contents);
 			} else if (contents) {
 				zend_string_release(contents);
@@ -278,7 +278,7 @@ PHAR_FUNC(phar_readfile) /* {{{ */
 				efree(arch);
 				goto skip_phar;
 			} else {
-				name = entry_str->val;
+				name = ZSTR_VAL(entry_str);
 			}
 		} else {
 			entry = phar_fix_filepath(estrndup(entry, entry_len), &entry_len, 1);
@@ -379,7 +379,7 @@ PHAR_FUNC(phar_fopen) /* {{{ */
 				efree(arch);
 				goto skip_phar;
 			} else {
-				name = entry_str->val;
+				name = ZSTR_VAL(entry_str);
 			}
 		} else {
 			entry = phar_fix_filepath(estrndup(entry, entry_len), &entry_len, 1);
@@ -429,18 +429,6 @@ skip_phar:
 }
 /* }}} */
 
-#ifndef S_ISDIR
-#define S_ISDIR(mode)	(((mode)&S_IFMT) == S_IFDIR)
-#endif
-#ifndef S_ISREG
-#define S_ISREG(mode)	(((mode)&S_IFMT) == S_IFREG)
-#endif
-#ifndef S_ISLNK
-#define S_ISLNK(mode)	(((mode)&S_IFMT) == S_IFLNK)
-#endif
-
-#define S_IXROOT ( S_IXUSR | S_IXGRP | S_IXOTH )
-
 #define IS_LINK_OPERATION(__t) ((__t) == FS_TYPE || (__t) == FS_IS_LINK || (__t) == FS_LSTAT)
 #define IS_EXISTS_CHECK(__t) ((__t) == FS_EXISTS  || (__t) == FS_IS_W || (__t) == FS_IS_R || (__t) == FS_IS_X || (__t) == FS_IS_FILE || (__t) == FS_IS_DIR || (__t) == FS_IS_LINK)
 #define IS_ABLE_CHECK(__t) ((__t) == FS_IS_R || (__t) == FS_IS_W || (__t) == FS_IS_X)
@@ -458,7 +446,6 @@ static void phar_fancy_stat(zend_stat_t *stat_sb, int type, zval *return_value)
 		"size", "atime", "mtime", "ctime", "blksize", "blocks"
 	};
 
-#ifndef NETWARE
 	if (type >= FS_IS_W && type <= FS_IS_X) {
 		if(stat_sb->st_uid==getuid()) {
 			rmask=S_IRUSR;
@@ -488,7 +475,6 @@ static void phar_fancy_stat(zend_stat_t *stat_sb, int type, zval *return_value)
 			}
 		}
 	}
-#endif
 
 	switch (type) {
 	case FS_PERMS:
@@ -502,23 +488,11 @@ static void phar_fancy_stat(zend_stat_t *stat_sb, int type, zval *return_value)
 	case FS_GROUP:
 		RETURN_LONG((zend_long)stat_sb->st_gid);
 	case FS_ATIME:
-#ifdef NETWARE
-		RETURN_LONG((zend_long)stat_sb->st_atime.tv_sec);
-#else
 		RETURN_LONG((zend_long)stat_sb->st_atime);
-#endif
 	case FS_MTIME:
-#ifdef NETWARE
-		RETURN_LONG((zend_long)stat_sb->st_mtime.tv_sec);
-#else
 		RETURN_LONG((zend_long)stat_sb->st_mtime);
-#endif
 	case FS_CTIME:
-#ifdef NETWARE
-		RETURN_LONG((zend_long)stat_sb->st_ctime.tv_sec);
-#else
 		RETURN_LONG((zend_long)stat_sb->st_ctime);
-#endif
 	case FS_TYPE:
 		if (S_ISLNK(stat_sb->st_mode)) {
 			RETURN_STRING("link");
@@ -560,15 +534,9 @@ static void phar_fancy_stat(zend_stat_t *stat_sb, int type, zval *return_value)
 		ZVAL_LONG(&stat_rdev, -1);
 #endif
 		ZVAL_LONG(&stat_size, stat_sb->st_size);
-#ifdef NETWARE
-		ZVAL_LONG(&stat_atime, (stat_sb->st_atime).tv_sec);
-		ZVAL_LONG(&stat_mtime, (stat_sb->st_mtime).tv_sec);
-		ZVAL_LONG(&stat_ctime, (stat_sb->st_ctime).tv_sec);
-#else
 		ZVAL_LONG(&stat_atime, stat_sb->st_atime);
 		ZVAL_LONG(&stat_mtime, stat_sb->st_mtime);
 		ZVAL_LONG(&stat_ctime, stat_sb->st_ctime);
-#endif
 #ifdef HAVE_ST_BLKSIZE
 		ZVAL_LONG(&stat_blksize, stat_sb->st_blksize);
 #else
@@ -580,35 +548,35 @@ static void phar_fancy_stat(zend_stat_t *stat_sb, int type, zval *return_value)
 		ZVAL_LONG(&stat_blocks,-1);
 #endif
 		/* Store numeric indexes in proper order */
-		zend_hash_next_index_insert(HASH_OF(return_value), &stat_dev);
-		zend_hash_next_index_insert(HASH_OF(return_value), &stat_ino);
-		zend_hash_next_index_insert(HASH_OF(return_value), &stat_mode);
-		zend_hash_next_index_insert(HASH_OF(return_value), &stat_nlink);
-		zend_hash_next_index_insert(HASH_OF(return_value), &stat_uid);
-		zend_hash_next_index_insert(HASH_OF(return_value), &stat_gid);
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_dev);
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_ino);
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_mode);
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_nlink);
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_uid);
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_gid);
 
-		zend_hash_next_index_insert(HASH_OF(return_value), &stat_rdev);
-		zend_hash_next_index_insert(HASH_OF(return_value), &stat_size);
-		zend_hash_next_index_insert(HASH_OF(return_value), &stat_atime);
-		zend_hash_next_index_insert(HASH_OF(return_value), &stat_mtime);
-		zend_hash_next_index_insert(HASH_OF(return_value), &stat_ctime);
-		zend_hash_next_index_insert(HASH_OF(return_value), &stat_blksize);
-		zend_hash_next_index_insert(HASH_OF(return_value), &stat_blocks);
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_rdev);
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_size);
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_atime);
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_mtime);
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_ctime);
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_blksize);
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_blocks);
 
 		/* Store string indexes referencing the same zval*/
-		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[0], strlen(stat_sb_names[0]), &stat_dev);
-		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[1], strlen(stat_sb_names[1]), &stat_ino);
-		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[2], strlen(stat_sb_names[2]), &stat_mode);
-		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[3], strlen(stat_sb_names[3]), &stat_nlink);
-		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[4], strlen(stat_sb_names[4]), &stat_uid);
-		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[5], strlen(stat_sb_names[5]), &stat_gid);
-		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[6], strlen(stat_sb_names[6]), &stat_rdev);
-		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[7], strlen(stat_sb_names[7]), &stat_size);
-		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[8], strlen(stat_sb_names[8]), &stat_atime);
-		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[9], strlen(stat_sb_names[9]), &stat_mtime);
-		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[10], strlen(stat_sb_names[10]), &stat_ctime);
-		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[11], strlen(stat_sb_names[11]), &stat_blksize);
-		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[12], strlen(stat_sb_names[12]), &stat_blocks);
+		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[0], strlen(stat_sb_names[0]), &stat_dev);
+		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[1], strlen(stat_sb_names[1]), &stat_ino);
+		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[2], strlen(stat_sb_names[2]), &stat_mode);
+		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[3], strlen(stat_sb_names[3]), &stat_nlink);
+		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[4], strlen(stat_sb_names[4]), &stat_uid);
+		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[5], strlen(stat_sb_names[5]), &stat_gid);
+		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[6], strlen(stat_sb_names[6]), &stat_rdev);
+		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[7], strlen(stat_sb_names[7]), &stat_size);
+		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[8], strlen(stat_sb_names[8]), &stat_atime);
+		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[9], strlen(stat_sb_names[9]), &stat_mtime);
+		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[10], strlen(stat_sb_names[10]), &stat_ctime);
+		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[11], strlen(stat_sb_names[11]), &stat_blksize);
+		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[12], strlen(stat_sb_names[12]), &stat_blocks);
 
 		return;
 	}
@@ -617,7 +585,7 @@ static void phar_fancy_stat(zend_stat_t *stat_sb, int type, zval *return_value)
 }
 /* }}} */
 
-static void phar_file_stat(const char *filename, php_stat_len filename_length, int type, void (*orig_stat_func)(INTERNAL_FUNCTION_PARAMETERS), INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
+static void phar_file_stat(const char *filename, size_t filename_length, int type, void (*orig_stat_func)(INTERNAL_FUNCTION_PARAMETERS), INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 {
 	if (!filename_length) {
 		RETURN_FALSE;
@@ -681,15 +649,9 @@ splitted:
 				sb.st_size = 0;
 				sb.st_mode = 0777;
 				sb.st_mode |= S_IFDIR; /* regular directory */
-#ifdef NETWARE
-				sb.st_mtime.tv_sec = phar->max_timestamp;
-				sb.st_atime.tv_sec = phar->max_timestamp;
-				sb.st_ctime.tv_sec = phar->max_timestamp;
-#else
 				sb.st_mtime = phar->max_timestamp;
 				sb.st_atime = phar->max_timestamp;
 				sb.st_ctime = phar->max_timestamp;
-#endif
 				goto statme_baby;
 			} else {
 				char *save;
@@ -727,15 +689,9 @@ notfound:
 					sb.st_size = 0;
 					sb.st_mode = 0777;
 					sb.st_mode |= S_IFDIR; /* regular directory */
-#ifdef NETWARE
-					sb.st_mtime.tv_sec = phar->max_timestamp;
-					sb.st_atime.tv_sec = phar->max_timestamp;
-					sb.st_ctime.tv_sec = phar->max_timestamp;
-#else
 					sb.st_mtime = phar->max_timestamp;
 					sb.st_atime = phar->max_timestamp;
 					sb.st_ctime = phar->max_timestamp;
-#endif
 					goto statme_baby;
 				}
 				PHAR_G(cwd) = save;
@@ -759,15 +715,9 @@ stat_entry:
 					sb.st_mode |= S_IFREG; /* regular file */
 				}
 				/* timestamp is just the timestamp when this was added to the phar */
-#ifdef NETWARE
-				sb.st_mtime.tv_sec = data->timestamp;
-				sb.st_atime.tv_sec = data->timestamp;
-				sb.st_ctime.tv_sec = data->timestamp;
-#else
 				sb.st_mtime = data->timestamp;
 				sb.st_atime = data->timestamp;
 				sb.st_ctime = data->timestamp;
-#endif
 			} else {
 				sb.st_size = 0;
 				sb.st_mode = data->flags & PHAR_ENT_PERM_MASK;
@@ -776,15 +726,9 @@ stat_entry:
 					sb.st_mode |= S_IFLNK;
 				}
 				/* timestamp is just the timestamp when this was added to the phar */
-#ifdef NETWARE
-				sb.st_mtime.tv_sec = data->timestamp;
-				sb.st_atime.tv_sec = data->timestamp;
-				sb.st_ctime.tv_sec = data->timestamp;
-#else
 				sb.st_mtime = data->timestamp;
 				sb.st_atime = data->timestamp;
 				sb.st_ctime = data->timestamp;
-#endif
 			}
 
 statme_baby:
@@ -826,7 +770,7 @@ void fname(INTERNAL_FUNCTION_PARAMETERS) { \
 			return; \
 		} \
 		\
-		phar_file_stat(filename, (php_stat_len) filename_len, funcnum, PHAR_G(orig), INTERNAL_FUNCTION_PARAM_PASSTHRU); \
+		phar_file_stat(filename, filename_len, funcnum, PHAR_G(orig), INTERNAL_FUNCTION_PARAM_PASSTHRU); \
 	} \
 }
 /* }}} */

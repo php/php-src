@@ -7785,4 +7785,10 @@ Matched, but offsets vector is too small to show all matches
     NON QUOTED \"QUOT\"\"ED\" AFTER \"NOT MATCHED
  0: NON QUOTED "QUOT""ED" AFTER 
 
+/(?(?!)a|b)/
+    bbb
+ 0: b
+    aaa 
+No match
+
 /-- End of testinput8 --/

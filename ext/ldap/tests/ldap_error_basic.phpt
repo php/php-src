@@ -11,7 +11,7 @@ Patrick Allaert <patrickallaert@php.net>
 require "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
-@ldap_add($link, "badDN dc=my-domain,dc=com", array(
+@ldap_add($link, "badDN $base", array(
 	"objectClass"	=> array(
 		"top",
 		"dcObject",

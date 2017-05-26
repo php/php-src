@@ -9,9 +9,10 @@ PHPDBG_SOURCES='phpdbg.c phpdbg_prompt.c phpdbg_cmd.c phpdbg_info.c phpdbg_help.
 		'phpdbg_sigio_win32.c phpdbg_eol.c phpdbg_out.c';
 PHPDBG_DLL='php' + PHP_VERSION + 'phpdbg.dll';
 PHPDBG_EXE='phpdbg.exe';
+PHPDBG_CFLAGS='/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1';
 
 if (PHP_PHPDBG == "yes") {
-	SAPI('phpdbg', PHPDBG_SOURCES, PHPDBG_EXE);
+	SAPI('phpdbg', PHPDBG_SOURCES, PHPDBG_EXE, PHPDBG_CFLAGS);
 	ADD_FLAG("LIBS_PHPDBG", "ws2_32.lib user32.lib");
 	ADD_FLAG("CFLAGS_PHPDBG", "/D YY_NO_UNISTD_H");
 	ADD_FLAG("LDFLAGS_PHPDBG", "/stack:8388608");

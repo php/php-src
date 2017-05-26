@@ -19,17 +19,17 @@ try {
 }
 try {
 	var_dump(new IntlRuleBasedBreakIterator());
-} catch (IntlException $e) {
+} catch (TypeError $e) {
 	print_exception($e);
 }
 try {
 	var_dump(new IntlRuleBasedBreakIterator(1,2,3));
-} catch (IntlException $e) {
+} catch (TypeError $e) {
 	print_exception($e);
 }
 try {
 	var_dump(new IntlRuleBasedBreakIterator('[\p{Letter}\uFFFD]+;[:number:]+;', array()));
-} catch (IntlException $e) {
+} catch (TypeError $e) {
 	print_exception($e);
 }
 try {

@@ -9,4 +9,8 @@ function f($a=array(namespace\bar=>0)) {
 echo f()."\n";
 ?>
 --EXPECTF--
-Fatal error: Undefined constant 'bar' in %sbug43344_13.php on line %d
+Fatal error: Uncaught Error: Undefined constant 'bar' in %sbug43344_13.php:%d
+Stack trace:
+#0 %s(%d): f()
+#1 {main}
+  thrown in %sbug43344_13.php on line %d

@@ -17,7 +17,7 @@ CREDIT_LINE("COM and .Net", "Wez Furlong");
 CREDIT_LINE("ctype", "Hartmut Holzgraefe");
 CREDIT_LINE("cURL", "Sterling Hughes");
 CREDIT_LINE("Date/Time Support", "Derick Rethans");
-CREDIT_LINE("DB-LIB (MS SQL, Sybase)", "Wez Furlong, Frank M. Kromann");
+CREDIT_LINE("DB-LIB (MS SQL, Sybase)", "Wez Furlong, Frank M. Kromann, Adam Baratz");
 CREDIT_LINE("DBA", "Sascha Schumann, Marcus Boerger");
 CREDIT_LINE("DOM", "Christian Stocker, Rob Richards, Marcus Boerger");
 CREDIT_LINE("enchant", "Pierre-Alain Joye, Ilia Alshanetsky");
@@ -36,7 +36,6 @@ CREDIT_LINE("Internationalization", "Ed Batutis, Vladimir Iordanov, Dmitry Lakht
 CREDIT_LINE("JSON", "Jakub Zelenka, Omar Kilani, Scott MacVicar");
 CREDIT_LINE("LDAP", "Amitay Isaacs, Eric Warnke, Rasmus Lerdorf, Gerrit Thomson, Stig Venaas");
 CREDIT_LINE("LIBXML", "Christian Stocker, Rob Richards, Marcus Boerger, Wez Furlong, Shane Caraveo");
-CREDIT_LINE("mcrypt", "Sascha Schumann, Derick Rethans");
 CREDIT_LINE("Multibyte String Functions", "Tsukada Takuya, Rui Hirokawa");
 CREDIT_LINE("MySQL driver for PDO", "George Schlossnagle, Wez Furlong, Ilia Alshanetsky, Johannes Schlueter");
 CREDIT_LINE("MySQLi", "Zak Greant, Georg Richter, Andrey Hristov, Ulf Wendel");

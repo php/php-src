@@ -16,4 +16,11 @@ print "Done!\n";
 
 ?>
 --EXPECTF--
+Warning: SessionHandler::open(): Session is not active in %s on line 5
+
+Warning: SessionHandler::open(): Session is not active in %s on line 6
+
+Warning: SessionHandler::open(): Session is not active in %s on line 7
+
+Warning: SessionHandler::open(): Session is not active in %s on line 8
 Done!

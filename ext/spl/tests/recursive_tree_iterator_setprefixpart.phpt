@@ -28,5 +28,5 @@ Warning: RecursiveTreeIterator::setPrefixPart() expects exactly 2 parameters, 1 
 
 Warning: RecursiveTreeIterator::setPrefixPart() expects parameter 1 to be integer, object given in %s on line %d
 
-Warning: RecursiveTreeIterator::setPrefixPart() expects parameter 2 to be %binary_string_optional%, object given in %s on line %d
+Warning: RecursiveTreeIterator::setPrefixPart() expects parameter 2 to be string, object given in %s on line %d
 ===DONE===

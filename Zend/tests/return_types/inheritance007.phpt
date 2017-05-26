@@ -19,4 +19,4 @@ class Bar extends Foo {
 }
 
 --EXPECTF--
-Fatal error: Declaration of Bar::test() must be compatible with Foo::test(): Traversable in %sinheritance007.php on line 12
+Fatal error: Declaration of Bar::test(): ArrayObject must be compatible with Foo::test(): Traversable in %sinheritance007.php on line 12

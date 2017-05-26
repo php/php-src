@@ -18,7 +18,7 @@ $testClassInstance = new TestClass();
 
 try {
     var_dump($foo->invokeArgs($testClassInstance, true));
-} catch (EngineException $e) {
+} catch (Error $e) {
     var_dump($e->getMessage());
 }
 

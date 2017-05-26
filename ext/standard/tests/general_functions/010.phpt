@@ -13,7 +13,7 @@ class test {
 
 try {
 	var_dump(register_shutdown_function(array("test","__call")));
-} catch (EngineException $e) {
+} catch (Error $e) {
 	echo "\nException: " . $e->getMessage() . "\n";
 }
 

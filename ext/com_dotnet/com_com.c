@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -52,6 +52,8 @@ PHP_FUNCTION(com_create_instance)
 		RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE,
 		&authid, EOAC_NONE
 	};
+	zend_long cp = GetACP();
+	const struct php_win32_cp *cp_it;
 
 	php_com_initialize();
 	obj = CDNO_FETCH(object);
@@ -59,15 +61,22 @@ PHP_FUNCTION(com_create_instance)
 	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
 			ZEND_NUM_ARGS(), "s|s!ls",
 			&module_name, &module_name_len, &server_name, &server_name_len,
-			&obj->code_page, &typelib_name, &typelib_name_len) &&
+			&cp, &typelib_name, &typelib_name_len) &&
 		FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
 			ZEND_NUM_ARGS(), "sa|ls",
-			&module_name, &module_name_len, &server_params, &obj->code_page,
+			&module_name, &module_name_len, &server_params, &cp,
 			&typelib_name, &typelib_name_len)) {
 
 		php_com_throw_exception(E_INVALIDARG, "Could not create COM object - invalid arguments!");
 		return;
 	}
+
+	cp_it = php_win32_cp_get_by_id((DWORD)cp);
+	if (!cp_it) {
+		php_com_throw_exception(E_INVALIDARG, "Could not create COM object - invalid codepage!");
+		return;
+	}
+	obj->code_page = (int)cp;
 
 	if (server_name) {
 		ctx = CLSCTX_REMOTE_SERVER;
@@ -76,7 +85,7 @@ PHP_FUNCTION(com_create_instance)
 
 		/* decode the data from the array */
 
-		if (NULL != (tmp = zend_hash_str_find(HASH_OF(server_params),
+		if (NULL != (tmp = zend_hash_str_find(Z_ARRVAL_P(server_params),
 				"Server", sizeof("Server")-1))) {
 			convert_to_string_ex(tmp);
 			server_name = Z_STRVAL_P(tmp);
@@ -84,28 +93,28 @@ PHP_FUNCTION(com_create_instance)
 			ctx = CLSCTX_REMOTE_SERVER;
 		}
 
-		if (NULL != (tmp = zend_hash_str_find(HASH_OF(server_params),
+		if (NULL != (tmp = zend_hash_str_find(Z_ARRVAL_P(server_params),
 				"Username", sizeof("Username")-1))) {
 			convert_to_string_ex(tmp);
 			user_name = Z_STRVAL_P(tmp);
 			user_name_len = Z_STRLEN_P(tmp);
 		}
 
-		if (NULL != (tmp = zend_hash_str_find(HASH_OF(server_params),
+		if (NULL != (tmp = zend_hash_str_find(Z_ARRVAL_P(server_params),
 				"Password", sizeof("Password")-1))) {
 			convert_to_string_ex(tmp);
 			password = Z_STRVAL_P(tmp);
 			password_len = Z_STRLEN_P(tmp);
 		}
 
-		if (NULL != (tmp = zend_hash_str_find(HASH_OF(server_params),
+		if (NULL != (tmp = zend_hash_str_find(Z_ARRVAL_P(server_params),
 				"Domain", sizeof("Domain")-1))) {
 			convert_to_string_ex(tmp);
 			domain_name = Z_STRVAL_P(tmp);
 			domain_name_len = Z_STRLEN_P(tmp);
 		}
 
-		if (NULL != (tmp = zend_hash_str_find(HASH_OF(server_params),
+		if (NULL != (tmp = zend_hash_str_find(Z_ARRVAL_P(server_params),
 				"Flags", sizeof("Flags")-1))) {
 			convert_to_long_ex(tmp);
 			ctx = (CLSCTX)Z_LVAL_P(tmp);
@@ -553,7 +562,10 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_function *
 			for (i = 0, j = 0; i < nargs; i++) {
 				/* if this was byref, update the zval */
 				if (f->arg_info[nargs - i - 1].pass_by_reference) {
-					SEPARATE_ZVAL_IF_NOT_REF(&args[nargs - i - 1]);
+					zval *arg = &args[nargs - i - 1];
+
+					ZVAL_DEREF(arg);
+					SEPARATE_ZVAL_NOREF(arg);
 
 					/* if the variant is pointing at the byref_vals, we need to map
 					 * the pointee value as a zval; otherwise, the value is pointing
@@ -561,14 +573,12 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_function *
 					if (V_VT(&vargs[i]) & VT_BYREF) {
 						if (vargs[i].byref == &V_UINT(&byref_vals[j])) {
 							/* copy that value */
-							php_com_zval_from_variant(&args[nargs - i - 1], &byref_vals[j],
-								obj->code_page);
+							php_com_zval_from_variant(arg, &byref_vals[j], obj->code_page);
 						}
 					} else {
 						/* not sure if this can ever happen; the variant we marked as BYREF
 						 * is no longer BYREF - copy its value */
-						php_com_zval_from_variant(&args[nargs - i - 1], &vargs[i],
-							obj->code_page);
+						php_com_zval_from_variant(arg, &vargs[i], obj->code_page);
 					}
 					VariantClear(&byref_vals[j]);
 					j++;
@@ -810,7 +820,7 @@ PHP_FUNCTION(com_message_pump)
 }
 /* }}} */
 
-/* {{{ proto bool com_load_typelib(string typelib_name [, int case_insensitive])
+/* {{{ proto bool com_load_typelib(string typelib_name [, bool case_insensitive])
    Loads a Typelibrary and registers its constants */
 PHP_FUNCTION(com_load_typelib)
 {

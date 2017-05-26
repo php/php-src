@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,16 +31,16 @@
 
 #include "zend_llist.h"
 
-#define DEBUG_ZEND 0
-
 #define SET_UNUSED(op)  op ## _type = IS_UNUSED
 
 #define MAKE_NOP(opline) do { \
-	opline->opcode = ZEND_NOP; \
-	memset(&opline->result, 0, sizeof(opline->result)); \
-	memset(&opline->op1, 0, sizeof(opline->op1)); \
-	memset(&opline->op2, 0, sizeof(opline->op2)); \
-	opline->result_type = opline->op1_type = opline->op2_type = IS_UNUSED; \
+	(opline)->op1.num = 0; \
+	(opline)->op2.num = 0; \
+	(opline)->result.num = 0; \
+	(opline)->opcode = ZEND_NOP; \
+	(opline)->op1_type =  IS_UNUSED; \
+	(opline)->op2_type = IS_UNUSED; \
+	(opline)->result_type = IS_UNUSED; \
 } while (0)
 
 #define RESET_DOC_COMMENT() do { \
@@ -53,18 +53,7 @@
 typedef struct _zend_op_array zend_op_array;
 typedef struct _zend_op zend_op;
 
-typedef struct _zend_compiler_context {
-	uint32_t  opcodes_size;
-	int        vars_size;
-	int        literals_size;
-	int        current_brk_cont;
-	int        backpatch_count;
-	int        in_finally;
-	uint32_t   fast_call_var;
-	HashTable *labels;
-} zend_compiler_context;
-
-/* On 64-bi systems less optimal, but more compact VM code leads to better
+/* On 64-bit systems less optimal, but more compact VM code leads to better
  * performance. So on 32-bit systems we use absolute addresses for jump
  * targets and constants, but on 64-bit systems realtive 32-bit offsets */
 #if SIZEOF_SIZE_T == 4
@@ -116,6 +105,26 @@ static zend_always_inline znode *zend_ast_get_znode(zend_ast *ast) {
 	return &((zend_ast_znode *) ast)->node;
 }
 
+typedef struct _zend_declarables {
+	zend_long ticks;
+} zend_declarables;
+
+/* Compilation context that is different for each file, but shared between op arrays. */
+typedef struct _zend_file_context {
+	zend_declarables declarables;
+	znode implementing_class;
+
+	zend_string *current_namespace;
+	zend_bool in_namespace;
+	zend_bool has_bracketed_namespaces;
+
+	HashTable *imports;
+	HashTable *imports_function;
+	HashTable *imports_const;
+
+	HashTable seen_symbols;
+} zend_file_context;
+
 typedef union _zend_parser_stack_elem {
 	zend_ast *ast;
 	zend_string *str;
@@ -164,29 +173,47 @@ typedef struct _zend_try_catch_element {
 	uint32_t finally_end;
 } zend_try_catch_element;
 
-#if SIZEOF_ZEND_LONG == 8
-# ifdef _WIN32
-#  define THIS_HASHVAL 6385726429Ui64
-# else
-#  define THIS_HASHVAL 6385726429ULL
-# endif
-#else
-#define THIS_HASHVAL 2090759133UL
-#endif
+#define ZEND_LIVE_TMPVAR  0
+#define ZEND_LIVE_LOOP    1
+#define ZEND_LIVE_SILENCE 2
+#define ZEND_LIVE_ROPE    3
+#define ZEND_LIVE_MASK    3
+
+typedef struct _zend_live_range {
+	uint32_t var; /* low bits are used for variable type (ZEND_LIVE_* macros) */
+	uint32_t start;
+	uint32_t end;
+} zend_live_range;
+
+/* Compilation context that is different for each op array. */
+typedef struct _zend_oparray_context {
+	uint32_t   opcodes_size;
+	int        vars_size;
+	int        literals_size;
+	int        backpatch_count;
+	uint32_t   fast_call_var;
+	uint32_t   try_catch_offset;
+	int        current_brk_cont;
+	int        last_brk_cont;
+	zend_brk_cont_element *brk_cont_array;
+	HashTable *labels;
+} zend_oparray_context;
+
+/*
+ * Function and method flags
+ *
+ * Free flags:
+ * 0x10
+ * 0x20
+ * 0x8000
+ * 0x2000000
+ */
 
 /* method flags (types) */
 #define ZEND_ACC_STATIC			0x01
 #define ZEND_ACC_ABSTRACT		0x02
 #define ZEND_ACC_FINAL			0x04
 #define ZEND_ACC_IMPLEMENTED_ABSTRACT		0x08
-
-/* class flags (types) */
-/* ZEND_ACC_IMPLICIT_ABSTRACT_CLASS is used for abstract classes (since it is set by any abstract method even interfaces MAY have it set, too). */
-/* ZEND_ACC_EXPLICIT_ABSTRACT_CLASS denotes that a class was explicitly defined as abstract by using the keyword. */
-#define ZEND_ACC_IMPLICIT_ABSTRACT_CLASS	0x10
-#define ZEND_ACC_EXPLICIT_ABSTRACT_CLASS	0x20
-#define ZEND_ACC_INTERFACE		            0x40
-#define ZEND_ACC_TRAIT						0x80
 
 /* method flags (visibility) */
 /* The order of those must be kept - public < protected < private */
@@ -201,7 +228,9 @@ typedef struct _zend_try_catch_element {
 /* method flags (special method detection) */
 #define ZEND_ACC_CTOR		0x2000
 #define ZEND_ACC_DTOR		0x4000
-#define ZEND_ACC_CLONE		0x8000
+
+/* method flag used by Closure::__invoke() */
+#define ZEND_ACC_USER_ARG_INFO 0x80
 
 /* method flag (bc only), any method that has this flag can be used statically and non statically. */
 #define ZEND_ACC_ALLOW_STATIC	0x10000
@@ -212,22 +241,17 @@ typedef struct _zend_try_catch_element {
 /* deprecation flag */
 #define ZEND_ACC_DEPRECATED 0x40000
 
-/* class implement interface(s) flag */
-#define ZEND_ACC_IMPLEMENT_INTERFACES 0x80000
-#define ZEND_ACC_IMPLEMENT_TRAITS	  0x400000
-
-/* class constants updated */
-#define ZEND_ACC_CONSTANTS_UPDATED	  0x100000
-
-/* user class has methods with static variables */
-#define ZEND_HAS_STATIC_IN_METHODS    0x800000
-
-
 #define ZEND_ACC_CLOSURE              0x100000
+#define ZEND_ACC_FAKE_CLOSURE         0x40
 #define ZEND_ACC_GENERATOR            0x800000
 
-/* function flag for internal user call handlers __call, __callstatic */
-#define ZEND_ACC_CALL_VIA_HANDLER     0x200000
+#define ZEND_ACC_NO_RT_ARENA          0x80000
+
+/* call through user function trampoline. e.g. __call, __callstatic */
+#define ZEND_ACC_CALL_VIA_TRAMPOLINE  0x200000
+
+/* call through internal function handler. e.g. Closure::invoke() */
+#define ZEND_ACC_CALL_VIA_HANDLER     ZEND_ACC_CALL_VIA_TRAMPOLINE
 
 /* disable inline caching */
 #define ZEND_ACC_NEVER_CACHE          0x400000
@@ -240,7 +264,7 @@ typedef struct _zend_try_catch_element {
 /* class has magic methods __get/__set/__unset/__isset that use guards */
 #define ZEND_ACC_USE_GUARDS				0x1000000
 
-/* function has arguments with type hinting */
+/* function has typed arguments */
 #define ZEND_ACC_HAS_TYPE_HINTS			0x10000000
 
 /* op_array has finally blocks */
@@ -249,11 +273,38 @@ typedef struct _zend_try_catch_element {
 /* internal function is allocated at arena */
 #define ZEND_ACC_ARENA_ALLOCATED		0x20000000
 
-/* Function has a return type hint (or class has such non-private function) */
+/* Function has a return type (or class has such non-private function) */
 #define ZEND_ACC_HAS_RETURN_TYPE		0x40000000
 
 /* op_array uses strict mode types */
 #define ZEND_ACC_STRICT_TYPES			0x80000000
+
+/*
+ * Class flags
+ *
+ * Classes also use the ZEND_ACC_FINAL (0x04) flag, otherwise there is no overlap.
+ */
+
+/* class flags (types) */
+/* ZEND_ACC_IMPLICIT_ABSTRACT_CLASS is used for abstract classes (since it is set by any abstract method even interfaces MAY have it set, too). */
+/* ZEND_ACC_EXPLICIT_ABSTRACT_CLASS denotes that a class was explicitly defined as abstract by using the keyword. */
+#define ZEND_ACC_IMPLICIT_ABSTRACT_CLASS	0x10
+#define ZEND_ACC_EXPLICIT_ABSTRACT_CLASS	0x20
+#define ZEND_ACC_INTERFACE		            0x40
+#define ZEND_ACC_TRAIT						0x80
+#define ZEND_ACC_ANON_CLASS                 0x100
+#define ZEND_ACC_ANON_BOUND                 0x200
+#define ZEND_ACC_INHERITED                  0x400
+
+/* class implement interface(s) flag */
+#define ZEND_ACC_IMPLEMENT_INTERFACES 0x80000
+#define ZEND_ACC_IMPLEMENT_TRAITS	  0x400000
+
+/* class constants updated */
+#define ZEND_ACC_CONSTANTS_UPDATED	  0x100000
+
+/* user class has methods with static variables */
+#define ZEND_HAS_STATIC_IN_METHODS    0x800000
 
 char *zend_visibility_string(uint32_t fn_flags);
 
@@ -275,43 +326,44 @@ typedef struct _zend_property_info {
 #define OBJ_PROP_TO_NUM(offset) \
 	((offset - OBJ_PROP_TO_OFFSET(0)) / sizeof(zval))
 
+typedef struct _zend_class_constant {
+	zval value; /* access flags are stored in reserved: zval.u2.access_flags */
+	zend_string *doc_comment;
+	zend_class_entry *ce;
+} zend_class_constant;
+
 /* arg_info for internal functions */
 typedef struct _zend_internal_arg_info {
 	const char *name;
-	const char *class_name;
-	zend_uchar type_hint;
+	zend_type type;
 	zend_uchar pass_by_reference;
-	zend_bool allow_null;
 	zend_bool is_variadic;
 } zend_internal_arg_info;
 
 /* arg_info for user functions */
 typedef struct _zend_arg_info {
 	zend_string *name;
-	zend_string *class_name;
-	zend_uchar type_hint;
+	zend_type type;
 	zend_uchar pass_by_reference;
-	zend_bool allow_null;
 	zend_bool is_variadic;
 } zend_arg_info;
 
 /* the following structure repeats the layout of zend_internal_arg_info,
  * but its fields have different meaning. It's used as the first element of
  * arg_info array to define properties of internal functions.
- * It's also used for return type hinting.
+ * It's also used for the return type.
  */
 typedef struct _zend_internal_function_info {
 	zend_uintptr_t required_num_args;
-	const char *class_name;
-	zend_uchar type_hint;
+	zend_type type;
 	zend_bool return_reference;
-	zend_bool allow_null;
 	zend_bool _is_variadic;
 } zend_internal_function_info;
 
 struct _zend_op_array {
 	/* Common elements */
 	zend_uchar type;
+	zend_uchar arg_flags[3]; /* bitset of arg_info.pass_by_reference */
 	uint32_t fn_flags;
 	zend_string *function_name;
 	zend_class_entry *scope;
@@ -323,8 +375,6 @@ struct _zend_op_array {
 
 	uint32_t *refcount;
 
-	uint32_t this_var;
-
 	uint32_t last;
 	zend_op *opcodes;
 
@@ -332,9 +382,9 @@ struct _zend_op_array {
 	uint32_t T;
 	zend_string **vars;
 
-	int last_brk_cont;
+	int last_live_range;
 	int last_try_catch;
-	zend_brk_cont_element *brk_cont_array;
+	zend_live_range *live_range;
 	zend_try_catch_element *try_catch_array;
 
 	/* static variables support */
@@ -362,6 +412,7 @@ struct _zend_op_array {
 typedef struct _zend_internal_function {
 	/* Common elements */
 	zend_uchar type;
+	zend_uchar arg_flags[3]; /* bitset of arg_info.pass_by_reference */
 	uint32_t fn_flags;
 	zend_string* function_name;
 	zend_class_entry *scope;
@@ -373,15 +424,18 @@ typedef struct _zend_internal_function {
 
 	void (*handler)(INTERNAL_FUNCTION_PARAMETERS);
 	struct _zend_module_entry *module;
+	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 } zend_internal_function;
 
-#define ZEND_FN_SCOPE_NAME(function)  ((function) && (function)->common.scope ? (function)->common.scope->name->val : "")
+#define ZEND_FN_SCOPE_NAME(function)  ((function) && (function)->common.scope ? ZSTR_VAL((function)->common.scope->name) : "")
 
 union _zend_function {
 	zend_uchar type;	/* MUST be the first element of this struct! */
+	uint32_t   quick_arg_flags;
 
 	struct {
 		zend_uchar type;  /* never used */
+		zend_uchar arg_flags[3]; /* bitset of arg_info.pass_by_reference */
 		uint32_t fn_flags;
 		zend_string *function_name;
 		zend_class_entry *scope;
@@ -406,17 +460,16 @@ struct _zend_execute_data {
 	const zend_op       *opline;           /* executed opline                */
 	zend_execute_data   *call;             /* current call                   */
 	zval                *return_value;
-	zend_function       *func;             /* executed op_array              */
-	zval                 This;
-#if ZEND_EX_USE_RUN_TIME_CACHE
-	void               **run_time_cache;
-#endif
-#if ZEND_EX_USE_LITERALS
-	zval                *literals;
-#endif
-	zend_class_entry    *called_scope;
+	zend_function       *func;             /* executed function              */
+	zval                 This;             /* this + call_info + num_args    */
 	zend_execute_data   *prev_execute_data;
 	zend_array          *symbol_table;
+#if ZEND_EX_USE_RUN_TIME_CACHE
+	void               **run_time_cache;   /* cache op_array->run_time_cache */
+#endif
+#if ZEND_EX_USE_LITERALS
+	zval                *literals;         /* cache op_array->literals       */
+#endif
 };
 
 #define ZEND_CALL_FUNCTION           (0 << 0)
@@ -425,20 +478,35 @@ struct _zend_execute_data {
 #define ZEND_CALL_TOP                (1 << 1)
 #define ZEND_CALL_FREE_EXTRA_ARGS    (1 << 2) /* equal to IS_TYPE_REFCOUNTED */
 #define ZEND_CALL_CTOR               (1 << 3)
-#define ZEND_CALL_CTOR_RESULT_UNUSED (1 << 4)
+#define ZEND_CALL_HAS_SYMBOL_TABLE   (1 << 4)
+#define ZEND_CALL_CLOSURE            (1 << 5)
+#define ZEND_CALL_RELEASE_THIS       (1 << 6)
+#define ZEND_CALL_ALLOCATED          (1 << 7)
+#define ZEND_CALL_GENERATOR          (1 << 8)
+#define ZEND_CALL_DYNAMIC            (1 << 9)
+#define ZEND_CALL_FAKE_CLOSURE       (1 << 10)
+
+#define ZEND_CALL_INFO_SHIFT         16
 
 #define ZEND_CALL_INFO(call) \
-	(Z_TYPE_INFO((call)->This) >> 24)
+	(Z_TYPE_INFO((call)->This) >> ZEND_CALL_INFO_SHIFT)
+
+#define ZEND_CALL_KIND_EX(call_info) \
+	(call_info & (ZEND_CALL_CODE | ZEND_CALL_TOP))
 
 #define ZEND_CALL_KIND(call) \
-	(ZEND_CALL_INFO(call) & (ZEND_CALL_CODE | ZEND_CALL_TOP))
+	ZEND_CALL_KIND_EX(ZEND_CALL_INFO(call))
 
-#define ZEND_SET_CALL_INFO(call, info) do { \
-		Z_TYPE_INFO((call)->This) = IS_OBJECT_EX | ((info) << 24); \
+#define ZEND_SET_CALL_INFO(call, object, info) do { \
+		Z_TYPE_INFO((call)->This) = ((object) ? IS_OBJECT_EX : IS_UNDEF) | ((info) << ZEND_CALL_INFO_SHIFT); \
 	} while (0)
 
-#define ZEND_ADD_CALL_FLAG(call, info) do { \
-		Z_TYPE_INFO((call)->This) |= ((info) << 24); \
+#define ZEND_ADD_CALL_FLAG_EX(call_info, flag) do { \
+		call_info |= ((flag) << ZEND_CALL_INFO_SHIFT); \
+	} while (0)
+
+#define ZEND_ADD_CALL_FLAG(call, flag) do { \
+		ZEND_ADD_CALL_FLAG_EX(Z_TYPE_INFO((call)->This), flag); \
 	} while (0)
 
 #define ZEND_CALL_NUM_ARGS(call) \
@@ -479,7 +547,10 @@ struct _zend_execute_data {
 #define EX_VAR(n)				ZEND_CALL_VAR(execute_data, n)
 #define EX_VAR_NUM(n)			ZEND_CALL_VAR_NUM(execute_data, n)
 
-#define EX_VAR_TO_NUM(n)		(ZEND_CALL_VAR(NULL, n) - ZEND_CALL_VAR_NUM(NULL, 0))
+#define EX_VAR_TO_NUM(n)		((uint32_t)(ZEND_CALL_VAR(NULL, n) - ZEND_CALL_VAR_NUM(NULL, 0)))
+
+#define ZEND_OPLINE_TO_OFFSET(opline, target) \
+	((char*)(target) - (char*)(opline))
 
 #define ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, opline_num) \
 	((char*)&(op_array)->opcodes[opline_num] - (char*)(opline))
@@ -496,6 +567,10 @@ struct _zend_execute_data {
 # define OP_JMP_ADDR(opline, node) \
 	(node).jmp_addr
 
+# define ZEND_SET_OP_JMP_ADDR(opline, node, val) do { \
+		(node).jmp_addr = (val); \
+	} while (0)
+
 /* convert jump target from compile-time to run-time */
 # define ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, node) do { \
 		(node).jmp_addr = (op_array)->opcodes + (node).opline_num; \
@@ -511,6 +586,10 @@ struct _zend_execute_data {
 /* run-time jump target */
 # define OP_JMP_ADDR(opline, node) \
 	ZEND_OFFSET_TO_OPLINE(opline, (node).jmp_offset)
+
+# define ZEND_SET_OP_JMP_ADDR(opline, node, val) do { \
+		(node).jmp_offset = ZEND_OPLINE_TO_OFFSET(opline, val); \
+	} while (0)
 
 /* convert jump target from compile-time to run-time */
 # define ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, node) do { \
@@ -617,8 +696,6 @@ struct _zend_execute_data {
 #define IS_UNUSED	(1<<3)	/* Unused variable */
 #define IS_CV		(1<<4)	/* Compiled variable */
 
-#define EXT_TYPE_UNUSED	(1<<5)
-
 #include "zend_globals.h"
 
 BEGIN_EXTERN_C()
@@ -626,7 +703,11 @@ BEGIN_EXTERN_C()
 void init_compiler(void);
 void shutdown_compiler(void);
 void zend_init_compiler_data_structures(void);
-void zend_init_compiler_context(void);
+
+void zend_oparray_context_begin(zend_oparray_context *prev_context);
+void zend_oparray_context_end(zend_oparray_context *prev_context);
+void zend_file_context_begin(zend_file_context *prev_context);
+void zend_file_context_end(zend_file_context *prev_context);
 
 extern ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type);
 extern ZEND_API zend_op_array *(*zend_compile_string)(zval *source_string, char *filename);
@@ -655,11 +736,13 @@ ZEND_API unary_op_type get_unary_op(int opcode);
 ZEND_API binary_op_type get_binary_op(int opcode);
 
 void zend_stop_lexing(void);
-void zend_emit_final_return(zval *zv);
+void zend_emit_final_return(int return_one);
+
+/* Used during AST construction */
 zend_ast *zend_ast_append_str(zend_ast *left, zend_ast *right);
+zend_ast *zend_negate_num_string(zend_ast *ast);
 uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag);
 uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag);
-zend_ast *zend_ast_append_doc_comment(zend_ast *list);
 void zend_handle_encoding_declaration(zend_ast *ast);
 
 /* parser-driven code generators */
@@ -670,19 +753,13 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array *op_array, const ze
 ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array, const zend_op *opline, HashTable *class_table, zend_class_entry *parent_ce, zend_bool compile_time);
 ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array);
 
-/* Functions for a null terminated pointer list, used for traits parsing and compilation */
-void zend_init_list(void *result, void *item);
-void zend_add_to_list(void *result, void *item);
-
 void zend_do_extended_info(void);
 void zend_do_extended_fcall_begin(void);
 void zend_do_extended_fcall_end(void);
 
 void zend_verify_namespace(void);
-void zend_do_end_compilation(void);
 
-void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2);
-void zend_release_labels(int temporary);
+void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline);
 
 ZEND_API void function_add_ref(zend_function *function);
 
@@ -693,6 +770,7 @@ ZEND_API void function_add_ref(zend_function *function);
 ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type);
 ZEND_API zend_op_array *compile_string(zval *source_string, char *filename);
 ZEND_API zend_op_array *compile_filename(int type, zval *filename);
+ZEND_API void zend_try_exception_handler();
 ZEND_API int zend_execute_scripts(int type, zval *retval, int file_count, ...);
 ZEND_API int open_file_for_scanning(zend_file_handle *file_handle);
 ZEND_API void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_size);
@@ -720,16 +798,15 @@ ZEND_API int zend_unmangle_property_name_ex(const zend_string *name, const char 
 
 zend_op *get_next_op(zend_op_array *op_array);
 void init_op(zend_op *op);
-int get_next_op_number(zend_op_array *op_array);
-int print_class(zend_class_entry *class_entry);
-void print_op_array(zend_op_array *op_array, int optimizations);
+uint32_t get_next_op_number(zend_op_array *op_array);
 ZEND_API int pass_two(zend_op_array *op_array);
-zend_brk_cont_element *get_next_brk_cont_element(zend_op_array *op_array);
+zend_brk_cont_element *get_next_brk_cont_element(void);
 ZEND_API zend_bool zend_is_compiling(void);
 ZEND_API char *zend_make_compiled_string_description(const char *name);
 ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers);
 uint32_t zend_get_class_fetch_type(zend_string *name);
-ZEND_API zend_uchar zend_get_call_op(zend_uchar init_op, zend_function *fbc);
+ZEND_API zend_uchar zend_get_call_op(const zend_op *init_op, zend_function *fbc);
+ZEND_API int zend_is_smart_branch(zend_op *opline);
 
 typedef zend_bool (*zend_auto_global_callback)(zend_string *name);
 typedef struct _zend_auto_global {
@@ -744,18 +821,17 @@ ZEND_API void zend_activate_auto_globals(void);
 ZEND_API zend_bool zend_is_auto_global(zend_string *name);
 ZEND_API zend_bool zend_is_auto_global_str(char *name, size_t len);
 ZEND_API size_t zend_dirname(char *path, size_t len);
+ZEND_API void zend_set_function_arg_flags(zend_function *func);
 
 int zendlex(zend_parser_stack_elem *elem);
 
 int zend_add_literal(zend_op_array *op_array, zval *zv);
 
-ZEND_API void zend_assert_valid_class_name(const zend_string *const_name);
+void zend_assert_valid_class_name(const zend_string *const_name);
 
 /* BEGIN: OPCODES */
 
 #include "zend_vm_opcodes.h"
-
-#define ZEND_OP_DATA				137
 
 /* END: OPCODES */
 
@@ -772,16 +848,6 @@ ZEND_API void zend_assert_valid_class_name(const zend_string *const_name);
 #define ZEND_FETCH_CLASS_SILENT      0x0100
 #define ZEND_FETCH_CLASS_EXCEPTION   0x0200
 
-/* variable parsing type (compile-time) */
-#define ZEND_PARSED_MEMBER				(1<<0)
-#define ZEND_PARSED_METHOD_CALL			(1<<1)
-#define ZEND_PARSED_STATIC_MEMBER		(1<<2)
-#define ZEND_PARSED_FUNCTION_CALL		(1<<3)
-#define ZEND_PARSED_VARIABLE			(1<<4)
-#define ZEND_PARSED_REFERENCE_VARIABLE	(1<<5)
-#define ZEND_PARSED_NEW					(1<<6)
-#define ZEND_PARSED_LIST_EXPR			(1<<7)
-
 #define ZEND_PARAM_REF      (1<<0)
 #define ZEND_PARAM_VARIADIC (1<<1)
 
@@ -789,8 +855,11 @@ ZEND_API void zend_assert_valid_class_name(const zend_string *const_name);
 #define ZEND_NAME_NOT_FQ   1
 #define ZEND_NAME_RELATIVE 2
 
-/* unset types */
-#define ZEND_UNSET_REG 0
+#define ZEND_TYPE_NULLABLE (1<<8)
+
+#define ZEND_ARRAY_SYNTAX_LIST 1  /* list() */
+#define ZEND_ARRAY_SYNTAX_LONG 2  /* array() */
+#define ZEND_ARRAY_SYNTAX_SHORT 3 /* [] */
 
 /* var status for backpatching */
 #define BP_VAR_R			0
@@ -799,7 +868,6 @@ ZEND_API void zend_assert_valid_class_name(const zend_string *const_name);
 #define BP_VAR_IS			3
 #define BP_VAR_FUNC_ARG		4
 #define BP_VAR_UNSET		5
-#define BP_VAR_REF          6   /* right-hand side of by-ref assignment */
 
 /* Bottom 3 bits are the type, top bits are arg num for BP_VAR_FUNC_ARG */
 #define BP_VAR_SHIFT 3
@@ -830,10 +898,7 @@ ZEND_API void zend_assert_valid_class_name(const zend_string *const_name);
 /* global/local fetches */
 #define ZEND_FETCH_GLOBAL			0x00000000
 #define ZEND_FETCH_LOCAL			0x10000000
-#define ZEND_FETCH_STATIC			0x20000000
-#define ZEND_FETCH_STATIC_MEMBER	0x30000000
 #define ZEND_FETCH_GLOBAL_LOCK		0x40000000
-#define ZEND_FETCH_LEXICAL			0x50000000
 
 #define ZEND_FETCH_TYPE_MASK		0x70000000
 
@@ -846,18 +911,13 @@ ZEND_API void zend_assert_valid_class_name(const zend_string *const_name);
 
 #define ZEND_FETCH_ARG_MASK         0x000fffff
 
-#define EXT_TYPE_FREE_ON_RETURN		(1<<2)
-
-#define ZEND_MEMBER_FUNC_CALL	1<<0
-
-#define ZEND_ARG_SEND_BY_REF (1<<0)
-#define ZEND_ARG_COMPILE_TIME_BOUND (1<<1)
-#define ZEND_ARG_SEND_FUNCTION (1<<2)
-#define ZEND_ARG_SEND_SILENT   (1<<3)
+#define ZEND_FREE_ON_RETURN     (1<<0)
 
 #define ZEND_SEND_BY_VAL     0
 #define ZEND_SEND_BY_REF     1
 #define ZEND_SEND_PREFER_REF 2
+
+#define ZEND_DIM_IS 1
 
 static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, uint32_t arg_num, uint32_t mask)
 {
@@ -880,6 +940,32 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 #define ARG_MAY_BE_SENT_BY_REF(zf, arg_num) \
 	zend_check_arg_send_type(zf, arg_num, ZEND_SEND_PREFER_REF)
 
+/* Quick API to check firat 12 arguments */
+#define MAX_ARG_FLAG_NUM 12
+
+#ifdef WORDS_BIGENDIAN
+# define ZEND_SET_ARG_FLAG(zf, arg_num, mask) do { \
+		(zf)->quick_arg_flags |= ((mask) << ((arg_num) - 1) * 2); \
+	} while (0)
+# define ZEND_CHECK_ARG_FLAG(zf, arg_num, mask) \
+	(((zf)->quick_arg_flags >> (((arg_num) - 1) * 2)) & (mask))
+#else
+# define ZEND_SET_ARG_FLAG(zf, arg_num, mask) do { \
+		(zf)->quick_arg_flags |= (((mask) << 6) << (arg_num) * 2); \
+	} while (0)
+# define ZEND_CHECK_ARG_FLAG(zf, arg_num, mask) \
+	(((zf)->quick_arg_flags >> (((arg_num) + 3) * 2)) & (mask))
+#endif
+
+#define QUICK_ARG_MUST_BE_SENT_BY_REF(zf, arg_num) \
+	ZEND_CHECK_ARG_FLAG(zf, arg_num, ZEND_SEND_BY_REF)
+
+#define QUICK_ARG_SHOULD_BE_SENT_BY_REF(zf, arg_num) \
+	ZEND_CHECK_ARG_FLAG(zf, arg_num, ZEND_SEND_BY_REF|ZEND_SEND_PREFER_REF)
+
+#define QUICK_ARG_MAY_BE_SENT_BY_REF(zf, arg_num) \
+	ZEND_CHECK_ARG_FLAG(zf, arg_num, ZEND_SEND_PREFER_REF)
+
 #define ZEND_RETURN_VAL 0
 #define ZEND_RETURN_REF 1
 
@@ -887,15 +973,20 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 #define ZEND_RETURNS_FUNCTION 1<<0
 #define ZEND_RETURNS_VALUE    1<<1
 
-#define ZEND_FAST_RET_TO_CATCH		1
-#define ZEND_FAST_RET_TO_FINALLY	2
-
-#define ZEND_FAST_CALL_FROM_CATCH	1
-#define ZEND_FAST_CALL_FROM_FINALLY	2
-
 #define ZEND_ARRAY_ELEMENT_REF		(1<<0)
 #define ZEND_ARRAY_NOT_PACKED		(1<<1)
 #define ZEND_ARRAY_SIZE_SHIFT		2
+
+/* For "use" AST nodes and the seen symbol table */
+#define ZEND_SYMBOL_CLASS    (1<<0)
+#define ZEND_SYMBOL_FUNCTION (1<<1)
+#define ZEND_SYMBOL_CONST    (1<<2)
+
+/* Pseudo-opcodes that are used only temporarily during compilation */
+#define ZEND_GOTO  253
+#define ZEND_BRK   254
+#define ZEND_CONT  255
+
 
 END_EXTERN_C()
 
@@ -917,36 +1008,47 @@ END_EXTERN_C()
  * to change the default compiler behavior */
 
 /* generate extended debug information */
-#define ZEND_COMPILE_EXTENDED_INFO				(1<<0)
+#define ZEND_COMPILE_EXTENDED_INFO              (1<<0)
 
 /* call op_array handler of extendions */
 #define ZEND_COMPILE_HANDLE_OP_ARRAY            (1<<1)
 
 /* generate ZEND_INIT_FCALL_BY_NAME for internal functions instead of ZEND_INIT_FCALL */
-#define ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS	(1<<2)
+#define ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS  (1<<2)
 
 /* don't perform early binding for classes inherited form internal ones;
  * in namespaces assume that internal class that doesn't exist at compile-time
  * may apper in run-time */
-#define ZEND_COMPILE_IGNORE_INTERNAL_CLASSES	(1<<3)
+#define ZEND_COMPILE_IGNORE_INTERNAL_CLASSES    (1<<3)
 
 /* generate ZEND_DECLARE_INHERITED_CLASS_DELAYED opcode to delay early binding */
-#define ZEND_COMPILE_DELAYED_BINDING			(1<<4)
+#define ZEND_COMPILE_DELAYED_BINDING            (1<<4)
 
 /* disable constant substitution at compile-time */
-#define ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION	(1<<5)
+#define ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION   (1<<5)
 
 /* disable usage of builtin instruction for strlen() */
-#define ZEND_COMPILE_NO_BUILTIN_STRLEN			(1<<6)
+#define ZEND_COMPILE_NO_BUILTIN_STRLEN          (1<<6)
 
 /* disable substitution of persistent constants at compile-time */
 #define ZEND_COMPILE_NO_PERSISTENT_CONSTANT_SUBSTITUTION	(1<<7)
+
+/* generate ZEND_INIT_FCALL_BY_NAME for userland functions instead of ZEND_INIT_FCALL */
+#define ZEND_COMPILE_IGNORE_USER_FUNCTIONS      (1<<8)
+
+/* force IS_OBJ_USE_GUARDS for all classes */
+#define ZEND_COMPILE_GUARDS						(1<<9)
+
+/* disable builtin special case function calls */
+#define ZEND_COMPILE_NO_BUILTINS				(1<<10)
 
 /* The default value for CG(compiler_options) */
 #define ZEND_COMPILE_DEFAULT					ZEND_COMPILE_HANDLE_OP_ARRAY
 
 /* The default value for CG(compiler_options) during eval() */
 #define ZEND_COMPILE_DEFAULT_FOR_EVAL			0
+
+ZEND_API zend_bool zend_binary_op_produces_numeric_string_error(uint32_t opcode, zval *op1, zval *op2);
 
 #endif /* ZEND_COMPILE_H */
 

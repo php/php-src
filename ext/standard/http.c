@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -36,7 +36,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 	const char *prop_name;
 	size_t arg_sep_len, newprefix_len, prop_len;
 	zend_ulong idx;
-	zval *zdata = NULL, copyzval;
+	zval *zdata = NULL;
 
 	if (!ht) {
 		return FAILURE;
@@ -58,7 +58,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 	ZEND_HASH_FOREACH_KEY_VAL_IND(ht, idx, key, zdata) {
 		/* handling for private & protected object properties */
 		if (key) {
-			if (key->val[0] == '\0' && type != NULL) {
+			if (ZSTR_VAL(key)[0] == '\0' && type != NULL) {
 				const char *tmp;
 
 				zend_object *zobj = Z_OBJ_P(type);
@@ -68,8 +68,8 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				}
 				zend_unmangle_property_name_ex(key, &tmp, &prop_name, &prop_len);
 			} else {
-				prop_name = key->val;
-				prop_len = key->len;
+				prop_name = ZSTR_VAL(key);
+				prop_len = ZSTR_LEN(key);
 			}
 		} else {
 			prop_name = NULL;
@@ -85,7 +85,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				} else {
 					ekey = php_url_encode(prop_name, prop_len);
 				}
-				newprefix_len = key_suffix_len + ekey->len + key_prefix_len + 3 /* %5B */;
+				newprefix_len = key_suffix_len + ZSTR_LEN(ekey) + key_prefix_len + 3 /* %5B */;
 				newprefix = emalloc(newprefix_len + 1);
 				p = newprefix;
 
@@ -94,8 +94,8 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 					p += key_prefix_len;
 				}
 
-				memcpy(p, ekey->val, ekey->len);
-				p += ekey->len;
+				memcpy(p, ZSTR_VAL(ekey), ZSTR_LEN(ekey));
+				p += ZSTR_LEN(ekey);
 				zend_string_free(ekey);
 
 				if (key_suffix) {
@@ -110,7 +110,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				char *ekey;
 				size_t ekey_len;
 				/* Is an integer key */
-				ekey_len = spprintf(&ekey, 0, "%pd", idx);
+				ekey_len = spprintf(&ekey, 0, ZEND_LONG_FMT, idx);
 				newprefix_len = key_prefix_len + num_prefix_len + ekey_len + key_suffix_len + 3 /* %5B */;
 				newprefix = emalloc(newprefix_len + 1);
 				p = newprefix;
@@ -204,16 +204,14 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				default:
 					{
 						zend_string *ekey;
-						/* fall back on convert to string */
-						ZVAL_DUP(&copyzval, zdata);
-						convert_to_string_ex(&copyzval);
+						zend_string *tmp = zval_get_string(zdata);
 						if (enc_type == PHP_QUERY_RFC3986) {
-							ekey = php_raw_url_encode(Z_STRVAL(copyzval), Z_STRLEN(copyzval));
+							ekey = php_raw_url_encode(ZSTR_VAL(tmp), ZSTR_LEN(tmp));
 						} else {
-							ekey = php_url_encode(Z_STRVAL(copyzval), Z_STRLEN(copyzval));
+							ekey = php_url_encode(ZSTR_VAL(tmp), ZSTR_LEN(tmp));
 						}
 						smart_str_append(formstr, ekey);
-						zval_ptr_dtor(&copyzval);
+						zend_string_release(tmp);
 						zend_string_free(ekey);
 					}
 			}
@@ -234,9 +232,13 @@ PHP_FUNCTION(http_build_query)
 	smart_str formstr = {0};
 	zend_long enc_type = PHP_QUERY_RFC1738;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|ssl", &formdata, &prefix, &prefix_len, &arg_sep, &arg_sep_len, &enc_type) != SUCCESS) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 4)
+		Z_PARAM_ZVAL_DEREF(formdata)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING(prefix, prefix_len)
+		Z_PARAM_STRING(arg_sep, arg_sep_len)
+		Z_PARAM_LONG(enc_type)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if (Z_TYPE_P(formdata) != IS_ARRAY && Z_TYPE_P(formdata) != IS_OBJECT) {
 		php_error_docref(NULL, E_WARNING, "Parameter 1 expected to be Array or Object.  Incorrect value given");

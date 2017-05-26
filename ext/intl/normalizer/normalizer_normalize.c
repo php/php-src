@@ -45,8 +45,7 @@ PHP_FUNCTION( normalizer_normalize )
 	UChar*			uret_buf = NULL;
 	int32_t			uret_len = 0;
 
-	char*			ret_buf = NULL;
-	size_t			ret_len = 0;
+	zend_string*    u8str;
 
 	int32_t			size_needed;
 
@@ -149,9 +148,9 @@ PHP_FUNCTION( normalizer_normalize )
 	uret_len = size_needed;
 
 	/* Convert normalized string from UTF-16 to UTF-8. */
-	intl_convert_utf16_to_utf8( &ret_buf, &ret_len, uret_buf, uret_len, &status );
+	u8str = intl_convert_utf16_to_utf8(uret_buf, uret_len, &status );
 	efree( uret_buf );
-	if( U_FAILURE( status ) )
+	if( !u8str )
 	{
 		intl_error_set( NULL, status,
 				"normalizer_normalize: error converting normalized text UTF-8", 0 );
@@ -159,9 +158,7 @@ PHP_FUNCTION( normalizer_normalize )
 	}
 
 	/* Return it. */
-	RETVAL_STRINGL( ret_buf, ret_len );
-	//???
-	efree(ret_buf);
+	RETVAL_NEW_STR( u8str );
 }
 /* }}} */
 

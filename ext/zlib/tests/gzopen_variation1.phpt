@@ -1,17 +1,17 @@
 --TEST--
-Test gzopen() function : usage variation 
+Test gzopen() function : usage variation
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-	print "skip - zlib extension not loaded"; 
-}	 
+	print "skip - zlib extension not loaded";
+}
 ?>
 --FILE--
 <?php
 /* Prototype  : resource gzopen(string filename, string mode [, int use_include_path])
- * Description: Open a .gz-file and return a .gz-file pointer 
+ * Description: Open a .gz-file and return a .gz-file pointer
  * Source code: ext/zlib/zlib.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing gzopen() : usage variation ***\n";
@@ -102,9 +102,9 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
+
       // resource variable
-      'resource' => $fp      
+      'resource' => $fp
 );
 
 // loop through each element of the array for filename
@@ -158,19 +158,19 @@ Error: 2 - gzopen(0.5): failed to open stream: No such file or directory, %s(%d)
 bool(false)
 
 --empty array--
-Error: 2 - gzopen() expects parameter 1 to be string, array given, %s(%d)
+Error: 2 - gzopen() expects parameter 1 to be a valid path, array given, %s(%d)
 NULL
 
 --int indexed array--
-Error: 2 - gzopen() expects parameter 1 to be string, array given, %s(%d)
+Error: 2 - gzopen() expects parameter 1 to be a valid path, array given, %s(%d)
 NULL
 
 --associative array--
-Error: 2 - gzopen() expects parameter 1 to be string, array given, %s(%d)
+Error: 2 - gzopen() expects parameter 1 to be a valid path, array given, %s(%d)
 NULL
 
 --nested arrays--
-Error: 2 - gzopen() expects parameter 1 to be string, array given, %s(%d)
+Error: 2 - gzopen() expects parameter 1 to be a valid path, array given, %s(%d)
 NULL
 
 --uppercase NULL--
@@ -210,7 +210,7 @@ Error: 2 - gzopen(Class A object): failed to open stream: No such file or direct
 bool(false)
 
 --instance of classWithoutToString--
-Error: 2 - gzopen() expects parameter 1 to be string, object given, %s(%d)
+Error: 2 - gzopen() expects parameter 1 to be a valid path, object given, %s(%d)
 NULL
 
 --undefined var--
@@ -222,7 +222,7 @@ Error: 2 - gzopen(): Filename cannot be empty, %s(%d)
 bool(false)
 
 --resource--
-Error: 2 - gzopen() expects parameter 1 to be string, resource given, %s(%d)
+Error: 2 - gzopen() expects parameter 1 to be a valid path, resource given, %s(%d)
 NULL
 ===DONE===
 

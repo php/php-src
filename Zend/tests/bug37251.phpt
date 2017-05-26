@@ -10,7 +10,7 @@ class Foo {
 try {
 	$foo = new Foo();
 	$foo->bar();
-} catch (EngineException $e) {
+} catch (Error $e) {
 	echo 'OK';
 }
 --EXPECT--

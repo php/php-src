@@ -124,27 +124,27 @@ echo "Done\n";
 --- Variation 1: global variable inside a function ---
 
 -- Value of global variable, before calling dump_globalvar() --
-long(10)
+int(10)
 
 -- Value of local variable inside dump_globalvar() --
-long(10)
+int(10)
 
 -- Value of global variable inside dump_globalvar() --
-long(10)
+int(10)
 
 -- Value of global variable, after exiting dump_globalvar() --
-long(10)
+int(10)
 
 --- Variation 2: one variable references another ---
 
 -- Value of $first_var: --
-long(10)
+int(10)
 
 -- Value of $ref_first_var --
 NULL
 
 -- Value of $first_var --
-long(10)
+int(10)
 
 -- Value of $ref_first_var --
 
@@ -152,18 +152,18 @@ Notice: Undefined variable: ref_first_var in %s on line %d
 NULL
 
 -- Value of $first_var --
-long(10)
+int(10)
 
 --- Variation 3: multiple references of variables ---
 
 -- Value of $var_1: (before referencing) --
-long(10)
+int(10)
 
 -- Value of $var_2: (referencing var_1) --
-long(10)
+int(10)
 
 -- Value of $var_3: (referencing var_2) --
-long(10)
+int(10)
 
 -- Value of $var_3: (after unsetting var_3) --
 
@@ -171,10 +171,10 @@ Notice: Undefined variable: var_3 in %s on line %d
 NULL
 
 -- Value of $var_2: --
-long(10)
+int(10)
 
 -- Value of $var_3: --
-long(10)
+int(10)
 
 -- Value of $var_1: (after unsetting variable_1) --
 
@@ -182,7 +182,7 @@ Notice: Undefined variable: var_1 in %s on line %d
 NULL
 
 -- Value of $var_2: --
-long(10)
+int(10)
 
 *** Testing debug_zval_dump() on miscelleneous input arguments ***
 -- Iteration 1 --

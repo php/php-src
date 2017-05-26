@@ -23,7 +23,7 @@ try {
 ?>
 ==DONE==
 <?php exit(0); ?>
---EXPECT--
+--EXPECTF--
 before
-in catch: DirectoryIterator::__construct(c:\not\exists\here,c:\not\exists\here): The system cannot find the path specified. (code: 3)
+in catch: DirectoryIterator::__construct(c:\not\exists\here,c:\not\exists\here): %s (code: 3)
 ==DONE==

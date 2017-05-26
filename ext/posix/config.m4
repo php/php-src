@@ -11,7 +11,7 @@ if test "$PHP_POSIX" = "yes"; then
 
   AC_CHECK_HEADERS(sys/mkdev.h)
 
-  AC_CHECK_FUNCS(seteuid setegid setsid getsid setpgid getpgid ctermid mkfifo mknod getrlimit getlogin getgroups makedev initgroups getpwuid_r getgrgid_r)
+  AC_CHECK_FUNCS(seteuid setegid setsid getsid setpgid getpgid ctermid mkfifo mknod setrlimit getrlimit getlogin getgroups makedev initgroups getpwuid_r getgrgid_r)
 
   AC_MSG_CHECKING([for working ttyname_r() implementation])
   AC_TRY_RUN([
@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
 {
 	char buf[64];
 
-	return ttyname_r(0, buf, 64) ? 1 : 0;
+	return !ttyname_r(0, buf, 64);
 }
   ],[
     AC_MSG_RESULT([yes])

@@ -7,7 +7,7 @@ class VariableStream {
 	var $position;
 	var $varname;
 
-	function __construct($var) {
+	function __construct($var = null) {
 		throw new Exception("constructor");
 	}
 
@@ -102,11 +102,10 @@ var_dump($myvar);
 echo "Done\n";
 ?>
 --EXPECTF--	
-Warning: Missing argument 1 for VariableStream::__construct() in %s on line %d
 
 Warning: fopen(var://myvar): failed to open stream: "VariableStream::stream_open" call failed in %s on line %d
 
-Fatal error: Uncaught exception 'Exception' with message 'constructor' in %s:%d
+Fatal error: Uncaught Exception: constructor in %s:%d
 Stack trace:
 #0 [internal function]: VariableStream->__construct()
 #1 %s(%d): fopen('var://myvar', 'r+')

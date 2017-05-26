@@ -6,8 +6,7 @@ Philip Norton philipnorton42@gmail.com
 <?php
 try {
 	$array = new SplFixedArray(new SplFixedArray(3));
-}
-catch(InvalidArgumentException $iae) {
+} catch (TypeError $iae) {
 	echo "Ok - ".$iae->getMessage().PHP_EOL;
 }
 

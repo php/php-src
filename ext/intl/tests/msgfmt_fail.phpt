@@ -13,7 +13,8 @@ function err($fmt) {
 }
 
 function print_exception($e) {
-	echo "\nException: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine() . "\n";
+	echo "\n" . get_class($e) . ": " . $e->getMessage()
+       . " in " . $e->getFile() . " on line " . $e->getLine() . "\n";
 }
 
 function crt($t, $l, $s) {
@@ -21,7 +22,7 @@ function crt($t, $l, $s) {
 		case $t == "O":
 			try {
 				return new MessageFormatter($l, $s);
-			} catch (IntlException $e) {
+			} catch (Throwable $e) {
 				print_exception($e);
 				return null;
 			}
@@ -46,7 +47,7 @@ $args = array(
 
 try {
 	$fmt = new MessageFormatter();
-} catch (IntlException $e) {
+} catch (TypeError $e) {
 	print_exception($e);
 	$fmt = null;
 }
@@ -57,7 +58,7 @@ $fmt = MessageFormatter::create();
 err($fmt);
 try {
 	$fmt = new MessageFormatter('en');
-} catch (IntlException $e) {
+} catch (TypeError $e) {
 	print_exception($e);
 	$fmt = null;
 }
@@ -78,7 +79,7 @@ foreach($args as $arg) {
 
 ?>
 --EXPECTF--
-Exception: MessageFormatter::__construct() expects exactly 2 parameters, 0 given in %s on line %d
+TypeError: MessageFormatter::__construct() expects exactly 2 parameters, 0 given in %s on line %d
 'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
 
 Warning: msgfmt_create() expects exactly 2 parameters, 0 given in %s on line %d
@@ -87,7 +88,7 @@ Warning: msgfmt_create() expects exactly 2 parameters, 0 given in %s on line %d
 Warning: MessageFormatter::create() expects exactly 2 parameters, 0 given in %s on line %d
 'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
 
-Exception: MessageFormatter::__construct() expects exactly 2 parameters, 1 given in %s on line %d
+TypeError: MessageFormatter::__construct() expects exactly 2 parameters, 1 given in %s on line %d
 'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
 
 Warning: msgfmt_create() expects exactly 2 parameters, 1 given in %s on line %d
@@ -96,17 +97,17 @@ Warning: msgfmt_create() expects exactly 2 parameters, 1 given in %s on line %d
 Warning: MessageFormatter::create() expects exactly 2 parameters, 1 given in %s on line %d
 'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
 
-Exception: Constructor failed in %smsgfmt_fail2.php on line %d
+IntlException: Constructor failed in %smsgfmt_fail2.php on line %d
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 
-Exception: Constructor failed in %smsgfmt_fail2.php on line %d
+IntlException: Constructor failed in %smsgfmt_fail2.php on line %d
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 
-Exception: MessageFormatter::__construct() expects parameter 1 to be string, array given in %s on line %d
+TypeError: MessageFormatter::__construct() expects parameter 1 to be string, array given in %s on line %d
 'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
 
 Warning: MessageFormatter::create() expects parameter 1 to be string, array given in %s on line %d
@@ -115,17 +116,17 @@ Warning: MessageFormatter::create() expects parameter 1 to be string, array give
 Warning: msgfmt_create() expects parameter 1 to be string, array given in %s on line %d
 'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
 
-Exception: Constructor failed in %smsgfmt_fail2.php on line %d
+IntlException: Constructor failed in %smsgfmt_fail2.php on line %d
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 
-Exception: Constructor failed in %smsgfmt_fail2.php on line %d
+IntlException: Constructor failed in %smsgfmt_fail2.php on line %d
 'msgfmt_create: message formatter creation failed: U_UNMATCHED_BRACES'
 'msgfmt_create: message formatter creation failed: U_UNMATCHED_BRACES'
 'msgfmt_create: message formatter creation failed: U_UNMATCHED_BRACES'
 
-Exception: Constructor failed in %smsgfmt_fail2.php on line %d
+IntlException: Constructor failed in %smsgfmt_fail2.php on line %d
 'msgfmt_create: error converting pattern to UTF-16: U_INVALID_CHAR_FOUND'
 'msgfmt_create: error converting pattern to UTF-16: U_INVALID_CHAR_FOUND'
 'msgfmt_create: error converting pattern to UTF-16: U_INVALID_CHAR_FOUND'

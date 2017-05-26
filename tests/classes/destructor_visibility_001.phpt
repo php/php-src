@@ -1,7 +1,5 @@
 --TEST--
 ZE2 Ensuring destructor visibility
---SKIPIF--
-<?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
 --FILE--
 <?php
 
@@ -21,4 +19,7 @@ unset($obj);
 ?>
 ===DONE===
 --EXPECTF--
-Fatal error: Call to private Derived::__destruct() from context '' in %sdestructor_visibility_001.php on line %d
+Fatal error: Uncaught Error: Call to private Derived::__destruct() from context '' in %sdestructor_visibility_001.php:%d
+Stack trace:
+#0 {main}
+  thrown in %sdestructor_visibility_001.php on line %d

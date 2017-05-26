@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -30,7 +30,7 @@
 #	include "win32/time.h"
 #endif
 
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 /* copied from php-src/main/snprintf.c and slightly modified */
 /*
@@ -861,11 +861,10 @@ PHPDBG_API int phpdbg_xml_vasprintf(char **buf, const char *format, zend_bool es
 	*buf = NULL;
 
 	if (cc >= 0) {
-		if ((*buf = emalloc(++cc)) != NULL) {
-			if ((cc = phpdbg_xml_vsnprintf(*buf, cc, format, escape_xml, ap)) < 0) {
-				efree(*buf);
-				*buf = NULL;
-			}
+		*buf = emalloc(++cc);
+		if ((cc = phpdbg_xml_vsnprintf(*buf, cc, format, escape_xml, ap)) < 0) {
+			efree(*buf);
+			*buf = NULL;
 		}
 	}
 
@@ -1032,8 +1031,8 @@ static int phpdbg_process_print(int fd, int type, const char *tag, const char *m
 						PHPDBG_G(in_script_xml) = type;
 					}
 					encoded = php_escape_html_entities((unsigned char *) msg, msglen, 0, ENT_NOQUOTES, PG(internal_encoding) && PG(internal_encoding)[0] ? PG(internal_encoding) : (SG(default_charset) ? SG(default_charset) : "UTF-8"));
-					buflen = encoded->len;
-					memcpy(buf = emalloc(buflen + 1), encoded->val, buflen);
+					buflen = ZSTR_LEN(encoded);
+					memcpy(buf = emalloc(buflen + 1), ZSTR_VAL(encoded), buflen);
 					phpdbg_encode_ctrl_chars(&buf, &buflen);
 					phpdbg_mixed_write(fd, buf, buflen);
 					efree(buf);
@@ -1281,6 +1280,7 @@ PHPDBG_API int phpdbg_out_internal(int fd, const char *fmt, ...) {
 		len = phpdbg_mixed_write(fd, buffer, buflen);
 	}
 
+	efree(buffer);
 	return len;
 }
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -166,24 +166,26 @@ struct _php_stream_wrapper	{
 	int is_url;						/* so that PG(allow_url_fopen) can be respected */
 };
 
-#define PHP_STREAM_FLAG_NO_SEEK						1
-#define PHP_STREAM_FLAG_NO_BUFFER					2
+#define PHP_STREAM_FLAG_NO_SEEK						0x1
+#define PHP_STREAM_FLAG_NO_BUFFER					0x2
 
-#define PHP_STREAM_FLAG_EOL_UNIX					0 /* also includes DOS */
-#define PHP_STREAM_FLAG_DETECT_EOL					4
-#define PHP_STREAM_FLAG_EOL_MAC						8
+#define PHP_STREAM_FLAG_EOL_UNIX					0x0 /* also includes DOS */
+#define PHP_STREAM_FLAG_DETECT_EOL					0x4
+#define PHP_STREAM_FLAG_EOL_MAC						0x8
 
 /* set this when the stream might represent "interactive" data.
  * When set, the read buffer will avoid certain operations that
  * might otherwise cause the read to block for much longer than
  * is strictly required. */
-#define PHP_STREAM_FLAG_AVOID_BLOCKING				16
+#define PHP_STREAM_FLAG_AVOID_BLOCKING					0x10
 
-#define PHP_STREAM_FLAG_NO_CLOSE					32
+#define PHP_STREAM_FLAG_NO_CLOSE					0x20
 
-#define PHP_STREAM_FLAG_IS_DIR						64
+#define PHP_STREAM_FLAG_IS_DIR						0x40
 
-#define PHP_STREAM_FLAG_NO_FCLOSE					128
+#define PHP_STREAM_FLAG_NO_FCLOSE					0x80
+
+#define PHP_STREAM_FLAG_WAS_WRITTEN					0x80000000
 
 struct _php_stream  {
 	php_stream_ops *ops;
@@ -195,22 +197,26 @@ struct _php_stream  {
 	void *wrapperthis;		/* convenience pointer for a instance of a wrapper */
 	zval wrapperdata;		/* fgetwrapperdata retrieves this */
 
-	int fgetss_state;		/* for fgetss to handle multiline tags */
-	int is_persistent;
-	char mode[16];			/* "rwb" etc. ala stdio */
-	zend_resource *res;		/* used for auto-cleanup */
-	int in_free;			/* to prevent recursion during free */
+	uint8_t is_persistent:1;
+	uint8_t in_free:2;			/* to prevent recursion during free */
+	uint8_t eof:1;
+	uint8_t __exposed:1;	/* non-zero if exposed as a zval somewhere */
+
 	/* so we know how to clean it up correctly.  This should be set to
 	 * PHP_STREAM_FCLOSE_XXX as appropriate */
-	int fclose_stdiocast;
+	uint8_t fclose_stdiocast:2;
+
+	uint8_t fgetss_state;		/* for fgetss to handle multiline tags */
+
+	char mode[16];			/* "rwb" etc. ala stdio */
+
+	uint32_t flags;	/* PHP_STREAM_FLAG_XXX */
+
+	zend_resource *res;		/* used for auto-cleanup */
 	FILE *stdiocast;    /* cache this, otherwise we might leak! */
-	int __exposed;	/* non-zero if exposed as a zval somewhere */
 	char *orig_path;
 
 	zend_resource *ctx;
-	int flags;	/* PHP_STREAM_FLAG_XXX */
-
-	int eof;
 
 	/* buffer */
 	zend_off_t position; /* of underlying stream */
@@ -224,7 +230,7 @@ struct _php_stream  {
 
 #if ZEND_DEBUG
 	const char *open_filename;
-	uint open_lineno;
+	uint32_t open_lineno;
 #endif
 
 	struct _php_stream *enclosing_stream; /* this is a private stream owned by enclosing_stream */
@@ -247,11 +253,11 @@ END_EXTERN_C()
 
 #define php_stream_get_resource_id(stream)		((php_stream *)(stream))->res->handle
 /* use this to tell the stream that it is OK if we don't explicitly close it */
-#define php_stream_auto_cleanup(stream)	{ (stream)->__exposed++; }
+#define php_stream_auto_cleanup(stream)	{ (stream)->__exposed = 1; }
 /* use this to assign the stream to a zval and tell the stream that is
  * has been exported to the engine; it will expect to be closed automatically
  * when the resources are auto-destructed */
-#define php_stream_to_zval(stream, zval)	{ ZVAL_RES(zval, (stream)->res); (stream)->__exposed++; }
+#define php_stream_to_zval(stream, zval)	{ ZVAL_RES(zval, (stream)->res); (stream)->__exposed = 1; }
 
 #define php_stream_from_zval(xstr, pzval)	do { \
 	if (((xstr) = (php_stream*)zend_fetch_resource2_ex((pzval), \
@@ -265,7 +271,7 @@ END_EXTERN_C()
 		RETURN_FALSE; \
 	} \
 } while (0)
-#define php_stream_from_res_no_verify(xstr, pzval)	(xstr) = (php_stream*)zend_fetch_resource((res), "stream", php_file_le_stream(), php_file_le_pstream())
+#define php_stream_from_res_no_verify(xstr, pzval)	(xstr) = (php_stream*)zend_fetch_resource2((res), "stream", php_file_le_stream(), php_file_le_pstream())
 #define php_stream_from_zval_no_verify(xstr, pzval)	(xstr) = (php_stream*)zend_fetch_resource2_ex((pzval), "stream", php_file_le_stream(), php_file_le_pstream())
 
 BEGIN_EXTERN_C()
@@ -284,6 +290,7 @@ PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream *
 #define PHP_STREAM_FREE_RSRC_DTOR			8 /* called from the resource list dtor */
 #define PHP_STREAM_FREE_PERSISTENT			16 /* manually freeing a persistent connection */
 #define PHP_STREAM_FREE_IGNORE_ENCLOSING	32 /* don't close the enclosing stream instead */
+#define PHP_STREAM_FREE_KEEP_RSRC			64 /* keep associated zend_resource */
 #define PHP_STREAM_FREE_CLOSE				(PHP_STREAM_FREE_CALL_DTOR | PHP_STREAM_FREE_RELEASE_STREAM)
 #define PHP_STREAM_FREE_CLOSE_CASTED		(PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_PRESERVE_HANDLE)
 #define PHP_STREAM_FREE_CLOSE_PERSISTENT	(PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_PERSISTENT)
@@ -310,11 +317,7 @@ PHPAPI size_t _php_stream_write(php_stream *stream, const char *buf, size_t coun
 PHPAPI void _php_stream_fill_read_buffer(php_stream *stream, size_t size);
 #define php_stream_fill_read_buffer(stream, size)	_php_stream_fill_read_buffer((stream), (size))
 
-#ifdef ZTS
-PHPAPI size_t _php_stream_printf(php_stream *stream, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
-#else
 PHPAPI size_t _php_stream_printf(php_stream *stream, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
-#endif
 
 /* php_stream_printf macro & function require */
 #define php_stream_printf _php_stream_printf
@@ -436,6 +439,9 @@ END_EXTERN_C()
  * is still connected; for files, this does not really have meaning */
 #define PHP_STREAM_OPTION_CHECK_LIVENESS	12 /* no parameters */
 
+/* Enable/disable blocking reads on anonymous pipes on Windows. */
+#define PHP_STREAM_OPTION_PIPE_BLOCKING 13
+
 #define PHP_STREAM_OPTION_RETURN_OK			 0 /* option set OK */
 #define PHP_STREAM_OPTION_RETURN_ERR		-1 /* problem setting option */
 #define PHP_STREAM_OPTION_RETURN_NOTIMPL	-2 /* underlying stream does not implement; streams can handle it instead */
@@ -543,6 +549,9 @@ END_EXTERN_C()
 /* assume the path passed in exists and is fully expanded, avoiding syscalls */
 #define STREAM_ASSUME_REALPATH          0x00004000
 
+/* Allow blocking reads on anonymous pipes on Windows. */
+#define STREAM_USE_BLOCKING_PIPE        0x00008000
+
 /* Antique - no longer has meaning */
 #define IGNORE_URL_WIN 0
 
@@ -563,18 +572,8 @@ PHPAPI const char *php_stream_locate_eol(php_stream *stream, zend_string *buf);
 #define php_stream_open_wrapper(path, mode, options, opened)	_php_stream_open_wrapper_ex((path), (mode), (options), (opened), NULL STREAMS_CC)
 #define php_stream_open_wrapper_ex(path, mode, options, opened, context)	_php_stream_open_wrapper_ex((path), (mode), (options), (opened), (context) STREAMS_CC)
 
-#define php_stream_get_from_zval(stream, zstream, mode, options, opened, context) \
-		if (Z_TYPE_PP((zstream)) == IS_RESOURCE) { \
-			php_stream_from_zval((stream), (zstream)); \
-		} else (stream) = Z_TYPE_PP((zstream)) == IS_STRING ?  \
-			php_stream_open_wrapper_ex(Z_STRVAL_PP((zstream)), (mode), (options), (opened), (context)) : NULL
-
 /* pushes an error message onto the stack for a wrapper instance */
-#ifdef ZTS
-PHPAPI void php_stream_wrapper_log_error(php_stream_wrapper *wrapper, int options, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 4, 5);
-#else
 PHPAPI void php_stream_wrapper_log_error(php_stream_wrapper *wrapper, int options, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
-#endif
 
 #define PHP_STREAM_UNCHANGED	0 /* orig stream was seekable anyway */
 #define PHP_STREAM_RELEASED		1 /* newstream should be used; origstream is no longer valid */
