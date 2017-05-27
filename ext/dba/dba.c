@@ -956,27 +956,26 @@ restart:
 				int flags = fcntl(info->fd, F_GETFL);
 				fcntl(info->fd, F_SETFL, flags & ~O_APPEND);
 #elif defined(PHP_WIN32)
-	} else if (modenr == DBA_CREAT && need_creation && !restarted) {
-		zend_bool close_both;
+			} else if (modenr == DBA_CREAT && need_creation && !restarted) {
+				zend_bool close_both;
 
-		close_both = (info->fp != info->lock.fp);
-		php_stream_close(info->lock.fp);
-		if (close_both) {
-			php_stream_close(info->fp);
-		}
-		info->fp = NULL;
-		info->lock.fp = NULL;
-		info->fd = -1;
+				close_both = (info->fp != info->lock.fp);
+				php_stream_close(info->lock.fp);
+				if (close_both) {
+					php_stream_close(info->fp);
+				}
+				info->fp = NULL;
+				info->lock.fp = NULL;
+				info->fd = -1;
 
-		pefree(info->lock.name, persistent);
+				pefree(info->lock.name, persistent);
 
-		lock_file_mode = "r+b";
+				lock_file_mode = "r+b";
 
-		restarted = 1;
-		goto restart;
+				restarted = 1;
+				goto restart;
 #endif
 			}
-
 		}
 	}
 
