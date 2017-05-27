@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #74658 (Undefined constants in array properties result in broken
     properties). (Laruence)
 
+- Opcache:
+  . Fixed bug #74663 (Segfault with opcache.memory_protect and
+    validate_timestamp). (Laruence)
+
 - SPL:
   . Fixed bug #74478 (null coalescing operator failing with SplFixedArray).
     (jhdxr)
