@@ -1160,9 +1160,8 @@ ZEND_API int zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 
 			*scope = old_scope;
 		}
+		class_type->ce_flags |= ZEND_ACC_CONSTANTS_UPDATED;
 	}
-
-	class_type->ce_flags |= ZEND_ACC_CONSTANTS_UPDATED;
 
 	return SUCCESS;
 }
