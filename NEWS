@@ -152,6 +152,8 @@ PHP                                                                        NEWS
 
 - PDO_OCI:
   . Fixed bug #54379 (PDO_OCI: UTF-8 output gets truncated). (gureedo / Oracle)
+  . Fixed bug #74631 (PDO_PCO with PHP-FPM: OCI environment initialized
+    before PHP-FPM sets it up). (Ingmar Runge)
 
 - PDO_PgSQL:
   . Fixed bug #73959 (lastInsertId fails to throw an exception for wrong 

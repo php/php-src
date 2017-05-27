@@ -29,6 +29,9 @@
 #include "pdo/php_pdo_driver.h"
 #include "php_pdo_oci.h"
 #include "php_pdo_oci_int.h"
+#ifdef ZTS
+#include <TSRM/TSRM.h>
+#endif
 
 /* {{{ pdo_oci_functions[] */
 const zend_function_entry pdo_oci_functions[] = {
@@ -50,7 +53,7 @@ zend_module_entry pdo_oci_module_entry = {
 	pdo_oci_functions,
 	PHP_MINIT(pdo_oci),
 	PHP_MSHUTDOWN(pdo_oci),
-	NULL,
+	PHP_RINIT(pdo_oci),
 	NULL,
 	PHP_MINFO(pdo_oci),
 	PHP_PDO_OCI_VERSION,
@@ -80,18 +83,48 @@ const ub4 PDO_OCI_INIT_MODE =
 /* true global environment */
 OCIEnv *pdo_oci_Env = NULL;
 
+#ifdef ZTS
+/* lock for pdo_oci_Env initialization */
+static MUTEX_T pdo_oci_env_mutex;
+#endif
+
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(pdo_oci)
 {
 	php_pdo_register_driver(&pdo_oci_driver);
 
-#if HAVE_OCIENVCREATE
-	OCIEnvCreate(&pdo_oci_Env, PDO_OCI_INIT_MODE, NULL, NULL, NULL, NULL, 0, NULL);
-#else
-	OCIInitialize(PDO_OCI_INIT_MODE, NULL, NULL, NULL, NULL);
-	OCIEnvInit(&pdo_oci_Env, OCI_DEFAULT, 0, NULL);
+	// Defer OCI init to PHP_RINIT_FUNCTION because with php-fpm,
+	// NLS_LANG is not yet available here.
+
+#ifdef ZTS
+	pdo_oci_env_mutex = tsrm_mutex_alloc();
 #endif
+
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_RINIT_FUNCTION
+ */
+PHP_RINIT_FUNCTION(pdo_oci)
+{
+	if (!pdo_oci_Env) {
+#ifdef ZTS
+		tsrm_mutex_lock(pdo_oci_env_mutex);
+		if (!pdo_oci_Env) { // double-checked locking idiom
+#endif
+#if HAVE_OCIENVCREATE
+		OCIEnvCreate(&pdo_oci_Env, PDO_OCI_INIT_MODE, NULL, NULL, NULL, NULL, 0, NULL);
+#else
+		OCIInitialize(PDO_OCI_INIT_MODE, NULL, NULL, NULL, NULL);
+		OCIEnvInit(&pdo_oci_Env, OCI_DEFAULT, 0, NULL);
+#endif
+#ifdef ZTS
+		}
+		tsrm_mutex_unlock(pdo_oci_env_mutex);
+#endif
+	}
 
 	return SUCCESS;
 }
@@ -102,7 +135,15 @@ PHP_MINIT_FUNCTION(pdo_oci)
 PHP_MSHUTDOWN_FUNCTION(pdo_oci)
 {
 	php_pdo_unregister_driver(&pdo_oci_driver);
-	OCIHandleFree((dvoid*)pdo_oci_Env, OCI_HTYPE_ENV);
+
+	if (pdo_oci_Env) {
+		OCIHandleFree((dvoid*)pdo_oci_Env, OCI_HTYPE_ENV);
+	}
+
+#ifdef ZTS
+	tsrm_mutex_free(pdo_oci_env_mutex);
+#endif
+
 	return SUCCESS;
 }
 /* }}} */
