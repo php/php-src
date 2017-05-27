@@ -646,6 +646,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	char *lock_name;
 #ifdef PHP_WIN32
 	zend_bool restarted = 0;
+	zend_bool need_creation = 0;
 #endif
 
 	if (ac < 2) {
@@ -767,10 +768,8 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			break;
 		case 'c': {
 #ifdef PHP_WIN32
-			php_stream_statbuf ssb;
-			zend_bool need_creation = 0;
-
 			if (hptr->flags & (DBA_NO_APPEND|DBA_CAST_AS_FD)) {
+				php_stream_statbuf ssb;
 				need_creation = (SUCCESS != php_stream_stat_path(Z_STRVAL(args[0]), &ssb));
 			}
 #endif
@@ -957,7 +956,7 @@ restart:
 				int flags = fcntl(info->fd, F_GETFL);
 				fcntl(info->fd, F_SETFL, flags & ~O_APPEND);
 #elif defined(PHP_WIN32)
-	} else if (modenr == DBA_CREAT && !restarted) {
+	} else if (modenr == DBA_CREAT && need_creation && !restarted) {
 		zend_bool close_both;
 
 		close_both = (info->fp != info->lock.fp);
