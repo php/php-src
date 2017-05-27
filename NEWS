@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2017, PHP 7.1.7
 
+- Core:
+  . Fixed bug #74658 (Undefined constants in array properties result in broken
+    properties). (Laruence)
+
 - SPL:
   . Fixed bug #74478 (null coalescing operator failing with SplFixedArray).
     (jhdxr)
