@@ -52,6 +52,7 @@ PHP                                                                        NEWS
     a fatal error). (pmmaga)
   . Fixed bug #63384 (Cannot override an abstract method with an abstract
     method). (pmmaga, wes)
+  . Fixed misparsing of abstract unix domain socket names. (Sara)
 
 - BCMath:
   . Fixed bug #46564 (bcmod truncates fractionals). (liborm85)
@@ -202,6 +203,7 @@ PHP                                                                        NEWS
   . Fixed bug #72979 (money_format stores wrong length AIX). (matthieu.sarter)
   . Fixed bug #74300 (unserialize accepts two plus/minus signs for float number exponent part).
     (xKerman)
+  . Fixed bug #74556 (stream_socket_get_name() returns '\0'). (Sara)
 
 - XML:
   . Moved utf8_encode() and utf8_decode() to the Standard extension. (Andrea)
