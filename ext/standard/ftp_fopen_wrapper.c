@@ -908,7 +908,7 @@ static int php_stream_ftp_unlink(php_stream_wrapper *wrapper, const char *url, i
 	int result;
 	char tmp_line[512];
 
-	stream = php_ftp_fopen_connect(wrapper, url, "r", 0, NULL, NULL, NULL, &resource, NULL, NULL);
+	stream = php_ftp_fopen_connect(wrapper, url, "r", 0, NULL, context, NULL, &resource, NULL, NULL);
 	if (!stream) {
 		if (options & REPORT_ERRORS) {
 			php_error_docref(NULL, E_WARNING, "Unable to connect to %s", url);
@@ -979,7 +979,7 @@ static int php_stream_ftp_rename(php_stream_wrapper *wrapper, const char *url_fr
 		goto rename_errexit;
 	}
 
-	stream = php_ftp_fopen_connect(wrapper, url_from, "r", 0, NULL, NULL, NULL, NULL, NULL, NULL);
+	stream = php_ftp_fopen_connect(wrapper, url_from, "r", 0, NULL, context, NULL, NULL, NULL, NULL);
 	if (!stream) {
 		if (options & REPORT_ERRORS) {
 			php_error_docref(NULL, E_WARNING, "Unable to connect to %s", resource_from->host);
@@ -1037,7 +1037,7 @@ static int php_stream_ftp_mkdir(php_stream_wrapper *wrapper, const char *url, in
 	int result, recursive = options & PHP_STREAM_MKDIR_RECURSIVE;
 	char tmp_line[512];
 
-	stream = php_ftp_fopen_connect(wrapper, url, "r", 0, NULL, NULL, NULL, &resource, NULL, NULL);
+	stream = php_ftp_fopen_connect(wrapper, url, "r", 0, NULL, context, NULL, &resource, NULL, NULL);
 	if (!stream) {
 		if (options & REPORT_ERRORS) {
 			php_error_docref(NULL, E_WARNING, "Unable to connect to %s", url);
@@ -1131,7 +1131,7 @@ static int php_stream_ftp_rmdir(php_stream_wrapper *wrapper, const char *url, in
 	int result;
 	char tmp_line[512];
 
-	stream = php_ftp_fopen_connect(wrapper, url, "r", 0, NULL, NULL, NULL, &resource, NULL, NULL);
+	stream = php_ftp_fopen_connect(wrapper, url, "r", 0, NULL, context, NULL, &resource, NULL, NULL);
 	if (!stream) {
 		if (options & REPORT_ERRORS) {
 			php_error_docref(NULL, E_WARNING, "Unable to connect to %s", url);
