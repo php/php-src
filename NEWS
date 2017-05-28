@@ -65,6 +65,10 @@ PHP                                                                        NEWS
     (krakjoe)
   . Fixed bug #74080 (add constant for RFC7231 format datetime). (duncan3dc)
 
+- Dba:
+  . Fixed bug #72885 (flatfile: dba_fetch() fails to read replaced entry).
+    (Anatol)
+
 - DOM:
   . Fixed bug #67474 (getElementsByTagNameNS filter on default ns). (aboks)
   . Fixed bug #54382 (getAttributeNodeNS doesn't get xmlns* attributes).
@@ -92,6 +96,7 @@ PHP                                                                        NEWS
     (Mike)
 
 - FTP:
+  . Fixed bug #74598 (ftp:// wrapper ignores context arg). (Sara)
   . Implement MLSD for structured listing of directories. (blar)
 
 - GD:

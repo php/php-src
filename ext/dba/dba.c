@@ -644,6 +644,10 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	int persistent_flag = persistent ? STREAM_OPEN_PERSISTENT : 0;
 	zend_string *opened_path = NULL;
 	char *lock_name;
+#ifdef PHP_WIN32
+	zend_bool restarted = 0;
+	zend_bool need_creation = 0;
+#endif
 
 	if (ac < 2) {
 		WRONG_PARAM_COUNT;
@@ -762,7 +766,13 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			lock_mode = (lock_flag & DBA_LOCK_WRITER) ? LOCK_EX : 0;
 			file_mode = "r+b";
 			break;
-		case 'c':
+		case 'c': {
+#ifdef PHP_WIN32
+			if (hptr->flags & (DBA_NO_APPEND|DBA_CAST_AS_FD)) {
+				php_stream_statbuf ssb;
+				need_creation = (SUCCESS != php_stream_stat_path(Z_STRVAL(args[0]), &ssb));
+			}
+#endif
 			modenr = DBA_CREAT;
 			lock_mode = (lock_flag & DBA_LOCK_CREAT) ? LOCK_EX : 0;
 			if (lock_mode) {
@@ -771,18 +781,34 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 					 * when the lib opens the file it is already created
 					 */
 					file_mode = "r+b";       /* read & write, seek 0 */
+#ifdef PHP_WIN32
+					if (!need_creation) {
+						lock_file_mode = "r+b";
+					} else
+#endif
 					lock_file_mode = "a+b";  /* append */
 				} else {
+#ifdef PHP_WIN32
+					if (!need_creation) {
+						file_mode = "r+b";
+					} else
+#endif
 					file_mode = "a+b";       /* append */
 					lock_file_mode = "w+b";  /* create/truncate */
 				}
 			} else {
+#ifdef PHP_WIN32
+				if (!need_creation) {
+					file_mode = "r+b";
+				} else
+#endif
 				file_mode = "a+b";
 			}
 			/* In case of the 'a+b' append mode, the handler is responsible
 			 * to handle any rewind problems (see flatfile handler).
 			 */
 			break;
+		}
 		case 'n':
 			modenr = DBA_TRUNC;
 			lock_mode = (lock_flag & DBA_LOCK_TRUNC) ? LOCK_EX : 0;
@@ -849,6 +875,9 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 	}
 
+#ifdef PHP_WIN32
+restart:
+#endif
 	if (!error && lock_mode) {
 		if (lock_dbf) {
 			lock_name = Z_STRVAL(args[0]);
@@ -926,6 +955,25 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			} else if (modenr == DBA_CREAT) {
 				int flags = fcntl(info->fd, F_GETFL);
 				fcntl(info->fd, F_SETFL, flags & ~O_APPEND);
+#elif defined(PHP_WIN32)
+	} else if (modenr == DBA_CREAT && need_creation && !restarted) {
+		zend_bool close_both;
+
+		close_both = (info->fp != info->lock.fp);
+		php_stream_close(info->lock.fp);
+		if (close_both) {
+			php_stream_close(info->fp);
+		}
+		info->fp = NULL;
+		info->lock.fp = NULL;
+		info->fd = -1;
+
+		pefree(info->lock.name, persistent);
+
+		lock_file_mode = "r+b";
+
+		restarted = 1;
+		goto restart;
 #endif
 			}
 
