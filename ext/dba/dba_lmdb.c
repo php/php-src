@@ -269,6 +269,7 @@ DBA_FIRSTKEY_FUNC(lmdb)
 	if (rc) {
 		mdb_txn_abort(LMDB_IT(txn));
 		mdb_cursor_close(LMDB_IT(cur));
+		LMDB_IT(cur) = NULL;
 		if (MDB_NOTFOUND != rc) {
 			php_error_docref0(NULL, E_WARNING, "%s", mdb_strerror(rc));
 		}
