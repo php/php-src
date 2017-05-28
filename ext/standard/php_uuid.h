@@ -362,7 +362,7 @@ PHPAPI int php_uuid_parse(php_uuid *uuid, const char *input, const size_t input_
  * @param[in] name to create the UUID from.
  * @param[in] name_len
  */
-PHPAPI void php_uuid_create_v3(php_uuid *uuid, const php_uuid namespace, const char *name, const size_t name_len);
+PHPAPI void php_uuid_create_v3(php_uuid *uuid, const php_uuid *namespace, const char *name, const size_t name_len);
 
 /**
  * Create version 4 UUID.
@@ -466,7 +466,7 @@ PHPAPI int php_uuid_create_v4(php_uuid *uuid, const zend_bool throw);
  * @param[in] name to create the UUID from.
  * @param[in] name_len
  */
-PHPAPI void php_uuid_create_v5(php_uuid *uuid, const php_uuid namespace, const char *name, const size_t name_len);
+PHPAPI void php_uuid_create_v5(php_uuid *uuid, const php_uuid *namespace, const char *name, const size_t name_len);
 
 /**
  * Get the variant associated with this UUID.
@@ -484,11 +484,11 @@ PHPAPI void php_uuid_create_v5(php_uuid *uuid, const php_uuid namespace, const c
  * @param[in] uuid to get the variant from.
  * @return The variant of the given UUID.
  */
-static zend_always_inline const php_uuid_variant php_uuid_get_variant(const php_uuid uuid)
+static zend_always_inline const php_uuid_variant php_uuid_get_variant(const php_uuid *uuid)
 {
-	if ((uuid.bytes[8] & 0xC0) == 0x80) return PHP_UUID_VARIANT_RFC4122;
-	if ((uuid.bytes[8] & 0xE0) == 0xC0) return PHP_UUID_VARIANT_MICROSOFT;
-	if ((uuid.bytes[8] & 0x80) == 0x00) return PHP_UUID_VARIANT_NCS;
+	if ((uuid->bytes[8] & 0xC0) == 0x80) return PHP_UUID_VARIANT_RFC4122;
+	if ((uuid->bytes[8] & 0xE0) == 0xC0) return PHP_UUID_VARIANT_MICROSOFT;
+	if ((uuid->bytes[8] & 0x80) == 0x00) return PHP_UUID_VARIANT_NCS;
 	return PHP_UUID_VARIANT_FUTURE_RESERVED;
 }
 
@@ -513,9 +513,9 @@ static zend_always_inline const php_uuid_variant php_uuid_get_variant(const php_
  *     values [1, 5] correspond to one of the `PHP_UUID_VERSION_*` constants.
  *     The others are not defined in RFC 4122.
  */
-static zend_always_inline const uint8_t php_uuid_get_version(const php_uuid uuid)
+static zend_always_inline const uint8_t php_uuid_get_version(const php_uuid *uuid)
 {
-	return uuid.bytes[6] >> 4;
+	return uuid->bytes[6] >> 4;
 }
 
 /**
@@ -527,9 +527,9 @@ static zend_always_inline const uint8_t php_uuid_get_version(const php_uuid uuid
  * @param[in] uuid to check.
  * @return TRUE if the UUID contains the special nil UUID; FALSE otherwise.
  */
-static zend_always_inline const int php_uuid_is_nil(const php_uuid uuid)
+static zend_always_inline const int php_uuid_is_nil(const php_uuid *uuid)
 {
-	return memcmp(uuid.bytes, "", PHP_UUID_LEN) == 0;
+	return memcmp(uuid->bytes, "", PHP_UUID_LEN) == 0;
 }
 
 /**
@@ -550,16 +550,16 @@ static zend_always_inline const int php_uuid_is_nil(const php_uuid uuid)
  * @param[out] buffer to store the hexadecimal representation in.
  * @param[in] uuid to convert.
  */
-static zend_always_inline void php_uuid_to_hex(php_uuid_hex *buffer, const php_uuid uuid)
+static zend_always_inline void php_uuid_to_hex(php_uuid_hex *buffer, const php_uuid *uuid)
 {
 	sprintf(
 		buffer->str,
 		"%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
-		uuid.bytes[0], uuid.bytes[1], uuid.bytes[2], uuid.bytes[3],
-		uuid.bytes[4], uuid.bytes[5],
-		uuid.bytes[6], uuid.bytes[7],
-		uuid.bytes[8], uuid.bytes[9],
-		uuid.bytes[10], uuid.bytes[11], uuid.bytes[12], uuid.bytes[13], uuid.bytes[14], uuid.bytes[15]
+		uuid->bytes[0], uuid->bytes[1], uuid->bytes[2], uuid->bytes[3],
+		uuid->bytes[4], uuid->bytes[5],
+		uuid->bytes[6], uuid->bytes[7],
+		uuid->bytes[8], uuid->bytes[9],
+		uuid->bytes[10], uuid->bytes[11], uuid->bytes[12], uuid->bytes[13], uuid->bytes[14], uuid->bytes[15]
 	);
 }
 
@@ -582,16 +582,16 @@ static zend_always_inline void php_uuid_to_hex(php_uuid_hex *buffer, const php_u
  * @param[out] buffer to store the string representation in.
  * @param[in] uuid to convert.
  */
-static zend_always_inline void php_uuid_to_string(php_uuid_string *buffer, const php_uuid uuid)
+static zend_always_inline void php_uuid_to_string(php_uuid_string *buffer, const php_uuid *uuid)
 {
 	sprintf(
 		buffer->str,
 		"%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
-		uuid.bytes[0], uuid.bytes[1], uuid.bytes[2], uuid.bytes[3],
-		uuid.bytes[4], uuid.bytes[5],
-		uuid.bytes[6], uuid.bytes[7],
-		uuid.bytes[8], uuid.bytes[9],
-		uuid.bytes[10], uuid.bytes[11], uuid.bytes[12], uuid.bytes[13], uuid.bytes[14], uuid.bytes[15]
+		uuid->bytes[0], uuid->bytes[1], uuid->bytes[2], uuid->bytes[3],
+		uuid->bytes[4], uuid->bytes[5],
+		uuid->bytes[6], uuid->bytes[7],
+		uuid->bytes[8], uuid->bytes[9],
+		uuid->bytes[10], uuid->bytes[11], uuid->bytes[12], uuid->bytes[13], uuid->bytes[14], uuid->bytes[15]
 	);
 }
 

@@ -256,12 +256,12 @@ PHPAPI int php_uuid_parse(php_uuid *uuid, const char *input, const size_t input_
 	return SUCCESS;
 }
 
-PHPAPI void php_uuid_create_v3(php_uuid *uuid, const php_uuid namespace, const char *name, const size_t name_len)
+PHPAPI void php_uuid_create_v3(php_uuid *uuid, const php_uuid *namespace, const char *name, const size_t name_len)
 {
 	PHP_MD5_CTX context;
 
 	PHP_MD5Init(&context);
-	PHP_MD5Update(&context, namespace.bytes, PHP_UUID_LEN);
+	PHP_MD5Update(&context, namespace->bytes, PHP_UUID_LEN);
 	PHP_MD5Update(&context, name, name_len);
 	PHP_MD5Final(uuid->bytes, &context);
 	set_variant_rfc4122(uuid);
@@ -280,13 +280,13 @@ PHPAPI int php_uuid_create_v4(php_uuid *uuid, const zend_bool throw)
 	return result;
 }
 
-PHPAPI void php_uuid_create_v5(php_uuid *uuid, const php_uuid namespace, const char *name, const size_t name_len)
+PHPAPI void php_uuid_create_v5(php_uuid *uuid, const php_uuid *namespace, const char *name, const size_t name_len)
 {
 	PHP_SHA1_CTX context;
 	char digest[20];
 
 	PHP_SHA1Init(&context);
-	PHP_SHA1Update(&context, namespace.bytes, PHP_UUID_LEN);
+	PHP_SHA1Update(&context, namespace->bytes, PHP_UUID_LEN);
 	PHP_SHA1Update(&context, name, name_len);
 	PHP_SHA1Final(digest, &context);
 	memcpy(uuid->bytes, digest, PHP_UUID_LEN);
@@ -307,9 +307,9 @@ PHPAPI void php_uuid_create_v5(php_uuid *uuid, const php_uuid namespace, const c
  * @throws TypeError if the value is not of type string.
  * @throws Error if the string value is not exactly 16 bytes long.
  */
-static zend_always_inline php_uuid *get_uuid(/*const*/ zval uuid_object)
+static zend_always_inline php_uuid *get_uuid(/*const*/ zval *uuid_object)
 {
-	zval *bytes = zend_read_property(php_ce_UUID, &uuid_object, UUID_PROP_NAME, UUID_PROP_NAME_LEN, 1, NULL);
+	zval *bytes = zend_read_property(php_ce_UUID, uuid_object, UUID_PROP_NAME, UUID_PROP_NAME_LEN, 1, NULL);
 
 	if (Z_TYPE_P(bytes) != IS_STRING) {
 		zend_throw_error(
@@ -344,10 +344,10 @@ static zend_always_inline php_uuid *get_uuid(/*const*/ zval uuid_object)
  * @param[out] object to store the UUID instance int.
  * @param[in] uuid to construct the instance from.
  */
-static zend_always_inline void new_uuid(zval *object, const php_uuid uuid)
+static zend_always_inline void new_uuid(zval *object, const php_uuid *uuid)
 {
 	object_init_ex(object, php_ce_UUID);
-	zend_update_property_stringl(php_ce_UUID, object, UUID_PROP_NAME, UUID_PROP_NAME_LEN, uuid.bytes, PHP_UUID_LEN);
+	zend_update_property_stringl(php_ce_UUID, object, UUID_PROP_NAME, UUID_PROP_NAME_LEN, uuid->bytes, PHP_UUID_LEN);
 }
 
 /* private function __construct() {{{ */
@@ -390,7 +390,7 @@ ZEND_END_ARG_INFO()
 /* public static function parse(string $input): self {{{ */
 PHP_METHOD(UUID, parse)
 {
-	zval *input = NULL;
+	zval *input    = NULL;
 	php_uuid uuid;
 
 	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "z", &input) == FAILURE) {
@@ -401,7 +401,7 @@ PHP_METHOD(UUID, parse)
 		return;
 	}
 
-	new_uuid(return_value, uuid);
+	new_uuid(return_value, &uuid);
 }
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(UUID_parse_args, 0, 1, self, 0)
 	ZEND_ARG_TYPE_INFO(0, input, IS_STRING, 0)
@@ -420,13 +420,13 @@ PHP_METHOD(UUID, v3)
 		return;
 	}
 
-	nsid = get_uuid(*namespace);
+	nsid = get_uuid(namespace);
 	if (nsid == NULL) {
 		return;
 	}
 
-	php_uuid_create_v3(&uuid, *nsid, Z_STRVAL_P(name), Z_STRLEN_P(name));
-	new_uuid(return_value, uuid);
+	php_uuid_create_v3(&uuid, nsid, Z_STRVAL_P(name), Z_STRLEN_P(name));
+	new_uuid(return_value, &uuid);
 }
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(UUID_v3_args, 0, 2, self, 0)
 	ZEND_ARG_OBJ_INFO(0, namespace, self, 0)
@@ -447,7 +447,7 @@ PHP_METHOD(UUID, v4)
 		return;
 	}
 
-	new_uuid(return_value, uuid);
+	new_uuid(return_value, &uuid);
 }
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_v4_args, self, 0)
 ZEND_END_ARG_INFO()
@@ -465,13 +465,13 @@ PHP_METHOD(UUID, v5)
 		return;
 	}
 
-	nsid = get_uuid(*namespace);
+	nsid = get_uuid(namespace);
 	if (nsid == NULL) {
 		return;
 	}
 
-	php_uuid_create_v5(&uuid, *nsid, Z_STRVAL_P(name), Z_STRLEN_P(name));
-	new_uuid(return_value, uuid);
+	php_uuid_create_v5(&uuid, nsid, Z_STRVAL_P(name), Z_STRLEN_P(name));
+	new_uuid(return_value, &uuid);
 }
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(UUID_v5_args, 0, 2, self, 0)
 	ZEND_ARG_OBJ_INFO(0, namespace, self, 0)
@@ -486,7 +486,7 @@ PHP_METHOD(UUID, NamespaceDNS)
 		return;
 	}
 
-	new_uuid(return_value, PHP_UUID_NAMESPACE_DNS);
+	new_uuid(return_value, &PHP_UUID_NAMESPACE_DNS);
 }
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_NamespaceDNS_args, self, 0)
 ZEND_END_ARG_INFO()
@@ -499,7 +499,7 @@ PHP_METHOD(UUID, NamespaceOID)
 		return;
 	}
 
-	new_uuid(return_value, PHP_UUID_NAMESPACE_OID);
+	new_uuid(return_value, &PHP_UUID_NAMESPACE_OID);
 }
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_NamespaceOID_args, self, 0)
 ZEND_END_ARG_INFO()
@@ -512,7 +512,7 @@ PHP_METHOD(UUID, NamespaceURL)
 		return;
 	}
 
-	new_uuid(return_value, PHP_UUID_NAMESPACE_URL);
+	new_uuid(return_value, &PHP_UUID_NAMESPACE_URL);
 }
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_NamespaceURL_args, self, 0)
 ZEND_END_ARG_INFO()
@@ -525,7 +525,7 @@ PHP_METHOD(UUID, NamespaceX500)
 		return;
 	}
 
-	new_uuid(return_value, PHP_UUID_NAMESPACE_X500);
+	new_uuid(return_value, &PHP_UUID_NAMESPACE_X500);
 }
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_NamespaceX500_args, self, 0)
 ZEND_END_ARG_INFO()
@@ -538,7 +538,7 @@ PHP_METHOD(UUID, Nil)
 		return;
 	}
 
-	new_uuid(return_value, PHP_UUID_NIL);
+	new_uuid(return_value, &PHP_UUID_NIL);
 }
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_Nil_args, self, 0)
 ZEND_END_ARG_INFO()
@@ -612,12 +612,12 @@ PHP_METHOD(UUID, getVariant)
 		return;
 	}
 
-	uuid = get_uuid(EX(This));
+	uuid = get_uuid(&EX(This));
 	if (uuid == NULL) {
 		return;
 	}
 
-	RETURN_LONG(php_uuid_get_variant(*uuid));
+	RETURN_LONG(php_uuid_get_variant(uuid));
 }
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_getVariant_args, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -632,12 +632,12 @@ PHP_METHOD(UUID, getVersion)
 		return;
 	}
 
-	uuid = get_uuid(EX(This));
+	uuid = get_uuid(&EX(This));
 	if (uuid == NULL) {
 		return;
 	}
 
-	RETURN_LONG(php_uuid_get_version(*uuid));
+	RETURN_LONG(php_uuid_get_version(uuid));
 }
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_getVersion_args, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -652,12 +652,12 @@ PHP_METHOD(UUID, isNil)
 		return;
 	}
 
-	uuid = get_uuid(EX(This));
+	uuid = get_uuid(&EX(This));
 	if (uuid == NULL) {
 		return;
 	}
 
-	RETURN_BOOL(php_uuid_is_nil(*uuid));
+	RETURN_BOOL(php_uuid_is_nil(uuid));
 }
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_isNil_args, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
@@ -672,7 +672,7 @@ PHP_METHOD(UUID, toBinary)
 		return;
 	}
 
-	uuid = get_uuid(EX(This));
+	uuid = get_uuid(&EX(This));
 	if (uuid == NULL) {
 		return;
 	}
@@ -693,12 +693,12 @@ PHP_METHOD(UUID, toHex)
 		return;
 	}
 
-	uuid = get_uuid(EX(This));
+	uuid = get_uuid(&EX(This));
 	if (uuid == NULL) {
 		return;
 	}
 
-	php_uuid_to_hex(&buffer, *uuid);
+	php_uuid_to_hex(&buffer, uuid);
 
 	RETURN_STRINGL(buffer.str, PHP_UUID_HEX_LEN);
 }
@@ -716,12 +716,12 @@ PHP_METHOD(UUID, toString)
 		return;
 	}
 
-	uuid = get_uuid(EX(This));
+	uuid = get_uuid(&EX(This));
 	if (uuid == NULL) {
 		return;
 	}
 
-	php_uuid_to_string(&buffer, *uuid);
+	php_uuid_to_string(&buffer, uuid);
 
 	RETURN_STRINGL(buffer.str, PHP_UUID_STRING_LEN);
 }
