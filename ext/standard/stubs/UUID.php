@@ -222,7 +222,7 @@ final class UUID {
 	 * @see toBinary
 	 * @var string
 	 */
-	private $binary;
+	private $bytes;
 
 	/**
 	 * Use {@see fromBinary} or {@see parse} to construct a new instance.

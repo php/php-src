@@ -7,7 +7,7 @@ Richard Fussenegger php@fleshgrinder.com
 
 $uuid = UUID::parse(" \t ---- { urn:uuid:----0123-4567-89ab-cdef-0123-4567-89ab-cdef---- } ---- \t ");
 
-$p = new ReflectionProperty($uuid, 'binary');
+$p = new ReflectionProperty($uuid, 'bytes');
 $p->setAccessible(true);
 var_dump($p->getValue($uuid) === "\x01\x23\x45\x67\x89\xab\xcd\xef\x01\x23\x45\x67\x89\xab\xcd\xef");
 
