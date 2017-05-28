@@ -34,7 +34,7 @@ if (PHP_DBA != "no") {
 		}
 	}
 
-	if (PHP_QDBM != "no") {
+	if (PHP_LMDB != "no") {
 		if (CHECK_LIB("liblmdb_a.lib", "dba", PHP_DBA) &&
 			CHECK_HEADER_ADD_INCLUDE("lmdb.h", "CFLAGS_DBA") &&
 			CHECK_LIB("ntdll.lib", "dba", PHP_DBA)) {
