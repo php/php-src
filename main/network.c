@@ -661,7 +661,7 @@ PHPAPI void php_network_populate_name_from_sockaddr(
 
 					if (ua->sun_path[0] == '\0') {
 						/* abstract name */
-						int len = strlen(ua->sun_path + 1) + 1;
+						int len = sl - sizeof(sa_family_t);
 						*textaddr = zend_string_init((char*)ua->sun_path, len, 0);
 					} else {
 						int len = strlen(ua->sun_path);

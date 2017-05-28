@@ -314,6 +314,11 @@ PHP_FUNCTION(stream_socket_get_name)
 		RETURN_FALSE;
 	}
 
+	if (!ZSTR_LEN(name)) {
+		zend_string_release(name);
+		RETURN_FALSE;
+	}
+
 	RETVAL_STR(name);
 }
 /* }}} */
