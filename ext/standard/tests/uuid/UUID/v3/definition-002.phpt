@@ -20,7 +20,7 @@ var_dump(
 --EXPECT--
 string(9) "namespace"
 bool(false)
-string(4) "UUID"
+string(4) "self"
 bool(false)
 bool(false)
 bool(false)

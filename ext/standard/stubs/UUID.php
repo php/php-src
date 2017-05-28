@@ -260,7 +260,7 @@ final class UUID {
 	 * @throws InvalidArgumentException if the input is not exactly 16 bytes
 	 *     long.
 	 */
-	public static function fromBinary(string $input): UUID { }
+	public static function fromBinary(string $input): self { }
 
 	/**
 	 * Parse the given string as UUID.
@@ -312,7 +312,7 @@ final class UUID {
 	 * @throws ArgumentCountError if less or more than one argument is passed.
 	 * @throws UUIDParseException if parsing of the input fails.
 	 */
-	public static function parse(string $input): UUID { }
+	public static function parse(string $input): self { }
 
 	/**
 	 * Construct new version 3 UUID.
@@ -361,7 +361,7 @@ final class UUID {
 	 * @return UUID
 	 * @throws ArgumentCountError if less or more than two arguments are passed.
 	 */
-	public static function v3(UUID $namespace, string $name): UUID { }
+	public static function v3(self $namespace, string $name): self { }
 
 	/**
 	 * Construct new version 4 UUID.
@@ -395,7 +395,7 @@ final class UUID {
 	 * @throws Exception if it was not possible to gather sufficient entropy.
 	 * @throws ArgumentCountError if arguments are passed.
 	 */
-	public static function v4(): UUID { }
+	public static function v4(): self { }
 
 	/**
 	 * Construct new version 5 UUID.
@@ -439,7 +439,7 @@ final class UUID {
 	 * @return UUID
 	 * @throws ArgumentCountError if less or more than two arguments are passed.
 	 */
-	public static function v5(UUID $namespace, string $name): UUID { }
+	public static function v5(self $namespace, string $name): self { }
 
 	/**
 	 * Construct new Domain Name System (DNS) namespace UUID instance.
@@ -451,7 +451,7 @@ final class UUID {
 	 * @return UUID
 	 * @throws ArgumentCountError if arguments are passed.
 	 */
-	public static function NamespaceDNS(): UUID { }
+	public static function NamespaceDNS(): self { }
 
 	/**
 	 * Construct new Object Identifier (OID) namespace UUID instance.
@@ -463,7 +463,7 @@ final class UUID {
 	 * @return UUID
 	 * @throws ArgumentCountError if arguments are passed.
 	 */
-	public static function NamespaceOID(): UUID { }
+	public static function NamespaceOID(): self { }
 
 	/**
 	 * Construct new Uniform Resource Locator (URL) namespace UUID instance.
@@ -475,7 +475,7 @@ final class UUID {
 	 * @return UUID
 	 * @throws ArgumentCountError if arguments are passed.
 	 */
-	public static function NamespaceURL(): UUID { }
+	public static function NamespaceURL(): self { }
 
 	/**
 	 * Construct new X.500 Distinguished Names (X.500 DN) namespace UUID
@@ -490,7 +490,7 @@ final class UUID {
 	 * @return UUID
 	 * @throws ArgumentCountError if arguments are passed.
 	 */
-	public static function NamespaceX500(): UUID { }
+	public static function NamespaceX500(): self { }
 
 	/**
 	 * Construct special nil UUID that has all 128 bits set to zero.
@@ -502,7 +502,7 @@ final class UUID {
 	 * @return UUID
 	 * @throws ArgumentCountError if arguments are passed.
 	 */
-	public static function Nil(): UUID { }
+	public static function Nil(): self { }
 
 	/**
 	 * Callback for dynamic adding of properties which throws an {@see Error}

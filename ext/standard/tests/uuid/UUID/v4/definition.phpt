@@ -19,6 +19,6 @@ var_dump(
 --EXPECT--
 int(0)
 int(0)
-string(4) "UUID"
+string(4) "self"
 bool(true)
 bool(true)

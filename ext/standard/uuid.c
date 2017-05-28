@@ -371,7 +371,7 @@ ZEND_BEGIN_ARG_INFO(UUID___construct_args, NULL)
 ZEND_END_ARG_INFO()
 /* }}} */
 
-/* public static function fromBinary(string $input): UUID {{{ */
+/* public static function fromBinary(string $input): self {{{ */
 PHP_METHOD(UUID, fromBinary)
 {
 	char *input = NULL;
@@ -394,12 +394,12 @@ PHP_METHOD(UUID, fromBinary)
 
 	new_uuid(return_value, input);
 }
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(UUID_fromBinary_args, 0, 1, UUID, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(UUID_fromBinary_args, 0, 1, self, 0)
 	ZEND_ARG_TYPE_INFO(0, input, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
 
-/* public static function parse(string $input): UUID {{{ */
+/* public static function parse(string $input): self {{{ */
 PHP_METHOD(UUID, parse)
 {
 	char *input = NULL;
@@ -414,12 +414,12 @@ PHP_METHOD(UUID, parse)
 		new_uuid(return_value, uuid);
 	}
 }
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(UUID_parse_args, 0, 1, UUID, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(UUID_parse_args, 0, 1, self, 0)
 	ZEND_ARG_TYPE_INFO(0, input, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
 
-/* public static function v3(UUID $namespace, string $name): UUID {{{ */
+/* public static function v3(self $namespace, string $name): self {{{ */
 PHP_METHOD(UUID, v3)
 {
 	zval *namespace = NULL;
@@ -434,13 +434,13 @@ PHP_METHOD(UUID, v3)
 	php_uuid_create_v3(&uuid, get_bytes(namespace), name, name_len);
 	new_uuid(return_value, uuid);
 }
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(UUID_v3_args, 0, 2, UUID, 0)
-	ZEND_ARG_OBJ_INFO(0, namespace, UUID, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(UUID_v3_args, 0, 2, self, 0)
+	ZEND_ARG_OBJ_INFO(0, namespace, self, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
 
-/* public static function v4(): UUID {{{ */
+/* public static function v4(): self {{{ */
 PHP_METHOD(UUID, v4)
 {
 	php_uuid uuid;
@@ -453,11 +453,11 @@ PHP_METHOD(UUID, v4)
 		new_uuid(return_value, uuid);
 	}
 }
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_v4_args, UUID, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_v4_args, self, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
 
-/* public static function v5(UUID $namespace, string $name): UUID {{{ */
+/* public static function v5(self $namespace, string $name): self {{{ */
 PHP_METHOD(UUID, v5)
 {
 	zval *namespace = NULL;
@@ -472,13 +472,13 @@ PHP_METHOD(UUID, v5)
 	php_uuid_create_v5(&uuid, get_bytes(namespace), name, name_len);
 	new_uuid(return_value, uuid);
 }
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(UUID_v5_args, 0, 2, UUID, 0)
-	ZEND_ARG_OBJ_INFO(0, namespace, UUID, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(UUID_v5_args, 0, 2, self, 0)
+	ZEND_ARG_OBJ_INFO(0, namespace, self, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
 
-/* public static function NamespaceDNS(): UUID {{{ */
+/* public static function NamespaceDNS(): self {{{ */
 PHP_METHOD(UUID, NamespaceDNS)
 {
 	if (zend_parse_parameters_none_throw() == FAILURE) {
@@ -487,11 +487,11 @@ PHP_METHOD(UUID, NamespaceDNS)
 
 	new_uuid(return_value, PHP_UUID_NAMESPACE_DNS);
 }
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_NamespaceDNS_args, UUID, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_NamespaceDNS_args, self, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
 
-/* public static function NamespaceOID(): UUID {{{ */
+/* public static function NamespaceOID(): self {{{ */
 PHP_METHOD(UUID, NamespaceOID)
 {
 	if (zend_parse_parameters_none_throw() == FAILURE) {
@@ -500,11 +500,11 @@ PHP_METHOD(UUID, NamespaceOID)
 
 	new_uuid(return_value, PHP_UUID_NAMESPACE_OID);
 }
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_NamespaceOID_args, UUID, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_NamespaceOID_args, self, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
 
-/* public static function NamespaceURL(): UUID {{{ */
+/* public static function NamespaceURL(): self {{{ */
 PHP_METHOD(UUID, NamespaceURL)
 {
 	if (zend_parse_parameters_none_throw() == FAILURE) {
@@ -513,11 +513,11 @@ PHP_METHOD(UUID, NamespaceURL)
 
 	new_uuid(return_value, PHP_UUID_NAMESPACE_URL);
 }
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_NamespaceURL_args, UUID, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_NamespaceURL_args, self, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
 
-/* public static function NamespaceX500(): UUID {{{ */
+/* public static function NamespaceX500(): self {{{ */
 PHP_METHOD(UUID, NamespaceX500)
 {
 	if (zend_parse_parameters_none_throw() == FAILURE) {
@@ -526,11 +526,11 @@ PHP_METHOD(UUID, NamespaceX500)
 
 	new_uuid(return_value, PHP_UUID_NAMESPACE_X500);
 }
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_NamespaceX500_args, UUID, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_NamespaceX500_args, self, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
 
-/* public static function Nil(): UUID {{{ */
+/* public static function Nil(): self {{{ */
 PHP_METHOD(UUID, Nil)
 {
 	if (zend_parse_parameters_none_throw() == FAILURE) {
@@ -539,7 +539,7 @@ PHP_METHOD(UUID, Nil)
 
 	new_uuid(return_value, PHP_UUID_NIL);
 }
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_Nil_args, UUID, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_Nil_args, self, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
 
