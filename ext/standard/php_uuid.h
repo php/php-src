@@ -475,7 +475,13 @@ PHPAPI void php_uuid_create_v5(php_uuid *uuid, const php_uuid *namespace, const 
  * @param[in] uuid to get the variant from.
  * @return The variant of the given UUID.
  */
-PHPAPI zend_always_inline const php_uuid_variant php_uuid_get_variant(const php_uuid uuid);
+static zend_always_inline const php_uuid_variant php_uuid_get_variant(const php_uuid uuid)
+{
+	if ((uuid[8] & 0xC0) == 0x80) return PHP_UUID_VARIANT_RFC4122;
+	if ((uuid[8] & 0xE0) == 0xC0) return PHP_UUID_VARIANT_MICROSOFT;
+	if ((uuid[8] & 0x80) == 0x00) return PHP_UUID_VARIANT_NCS;
+	return PHP_UUID_VARIANT_FUTURE_RESERVED;
+}
 
 /**
  * Get the version associated with this UUID.
@@ -498,7 +504,10 @@ PHPAPI zend_always_inline const php_uuid_variant php_uuid_get_variant(const php_
  *     values [1, 5] correspond to one of the `PHP_UUID_VERSION_*` constants.
  *     The others are not defined in RFC 4122.
  */
-PHPAPI zend_always_inline const uint8_t php_uuid_get_version(const php_uuid uuid);
+static zend_always_inline const uint8_t php_uuid_get_version(const php_uuid uuid)
+{
+	return uuid[6] >> 4;
+}
 
 /**
  * Check if the given UUID is the special nil UUID that has all 128 bits set
@@ -509,7 +518,10 @@ PHPAPI zend_always_inline const uint8_t php_uuid_get_version(const php_uuid uuid
  * @param[in] uuid to check.
  * @return TRUE if the UUID contains the special nil UUID; FALSE otherwise.
  */
-PHPAPI zend_always_inline const int php_uuid_is_nil(const php_uuid uuid);
+static zend_always_inline const int php_uuid_is_nil(const php_uuid uuid)
+{
+	return memcmp(uuid, PHP_UUID_NIL, PHP_UUID_LEN) == 0;
+}
 
 /**
  * Convert the UUID to its hexadecimal representation.
@@ -529,7 +541,18 @@ PHPAPI zend_always_inline const int php_uuid_is_nil(const php_uuid uuid);
  * @param[out] buffer to store the hexadecimal representation in.
  * @param[in] uuid to convert.
  */
-PHPAPI zend_always_inline void php_uuid_to_hex(php_uuid_hex *buffer, const php_uuid uuid);
+static zend_always_inline void php_uuid_to_hex(php_uuid_hex *buffer, const php_uuid uuid)
+{
+	sprintf(
+		(char *) buffer,
+		"%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
+		uuid[0], uuid[1], uuid[2], uuid[3],
+		uuid[4], uuid[5],
+		uuid[6], uuid[7],
+		uuid[8], uuid[9],
+		uuid[10], uuid[11], uuid[12], uuid[13], uuid[14], uuid[15]
+	);
+}
 
 /**
  * Convert the UUID to its string representation.
@@ -550,7 +573,18 @@ PHPAPI zend_always_inline void php_uuid_to_hex(php_uuid_hex *buffer, const php_u
  * @param[out] buffer to store the string representation in.
  * @param[in] uuid to convert.
  */
-PHPAPI zend_always_inline void php_uuid_to_string(php_uuid_string *buffer, const php_uuid uuid);
+static zend_always_inline void php_uuid_to_string(php_uuid_string *buffer, const php_uuid uuid)
+{
+	sprintf(
+		(char *) buffer,
+		"%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
+		uuid[0], uuid[1], uuid[2], uuid[3],
+		uuid[4], uuid[5],
+		uuid[6], uuid[7],
+		uuid[8], uuid[9],
+		uuid[10], uuid[11], uuid[12], uuid[13], uuid[14], uuid[15]
+	);
+}
 
 /**
  * Initialization function of the standard UUID submodule.

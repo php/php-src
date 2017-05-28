@@ -296,50 +296,6 @@ PHPAPI void php_uuid_create_v5(php_uuid *uuid, const php_uuid *namespace, const 
 	php_uuid_set_version(uuid, PHP_UUID_VERSION_5_NAME_BASED_SHA1);
 }
 
-PHPAPI zend_always_inline const php_uuid_variant php_uuid_get_variant(const php_uuid uuid)
-{
-	if ((uuid[8] & 0xC0) == 0x80) return PHP_UUID_VARIANT_RFC4122;
-	if ((uuid[8] & 0xE0) == 0xC0) return PHP_UUID_VARIANT_MICROSOFT;
-	if ((uuid[8] & 0x80) == 0x00) return PHP_UUID_VARIANT_NCS;
-	return PHP_UUID_VARIANT_FUTURE_RESERVED;
-}
-
-PHPAPI zend_always_inline const uint8_t php_uuid_get_version(const php_uuid uuid)
-{
-	return uuid[6] >> 4;
-}
-
-PHPAPI zend_always_inline const int php_uuid_is_nil(const php_uuid uuid)
-{
-	return memcmp(uuid, PHP_UUID_NIL, PHP_UUID_LEN) == 0;
-}
-
-PHPAPI zend_always_inline void php_uuid_to_hex(php_uuid_hex *buffer, const php_uuid uuid)
-{
-	sprintf(
-		(char *) buffer,
-		"%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
-		uuid[0], uuid[1], uuid[2], uuid[3],
-		uuid[4], uuid[5],
-		uuid[6], uuid[7],
-		uuid[8], uuid[9],
-		uuid[10], uuid[11], uuid[12], uuid[13], uuid[14], uuid[15]
-	);
-}
-
-PHPAPI zend_always_inline void php_uuid_to_string(php_uuid_string *buffer, const php_uuid uuid)
-{
-	sprintf(
-		(char *) buffer,
-		"%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
-		uuid[0], uuid[1], uuid[2], uuid[3],
-		uuid[4], uuid[5],
-		uuid[6], uuid[7],
-		uuid[8], uuid[9],
-		uuid[10], uuid[11], uuid[12], uuid[13], uuid[14], uuid[15]
-	);
-}
-
 /**
  * Get the UUID's bytes from the private property.
  *
