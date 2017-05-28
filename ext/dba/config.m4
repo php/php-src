@@ -100,6 +100,9 @@ PHP_ARG_WITH(dbm,,
 PHP_ARG_WITH(tcadb,,
 [  --with-tcadb[=DIR]        DBA: Tokyo Cabinet abstract DB support], no, no)
 
+PHP_ARG_WITH(lmdb,,
+[  --with-lmdb[=DIR]        DBA: Lightning memory-mapped database support], no, no)
+
 
 dnl
 dnl Library checks
@@ -227,6 +230,37 @@ if test "$PHP_TCADB" != "no"; then
   PHP_DBA_STD_ATTACH
 fi
 PHP_DBA_STD_RESULT(tcadb)
+
+dnl LMDB
+if test "$PHP_LMDB" != "no"; then
+  PHP_DBA_STD_BEGIN
+  for i in $PHP_LMDB /usr/local /usr; do
+	if test -f "$i/include/lmdb.h"; then
+	  THIS_PREFIX=$i
+	  PHP_ADD_INCLUDE($THIS_PREFIX/include)
+	  THIS_INCLUDE=$i/include/lmdb.h
+	  break
+	fi
+  done
+
+  if test -n "$THIS_INCLUDE"; then
+	for LIB in lmdb; do
+	  PHP_CHECK_LIBRARY($LIB, mdb_open, [
+		AC_DEFINE_UNQUOTED(LMDB_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
+		AC_DEFINE(DBA_LMDB, 1, [ ])
+		THIS_LIBS=$LIB
+	  ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
+	  if test -n "$THIS_LIBS"; then
+		break
+	  fi
+	done
+  fi
+
+  PHP_DBA_STD_ASSIGN
+  PHP_DBA_STD_CHECK
+  PHP_DBA_STD_ATTACH
+fi
+PHP_DBA_STD_RESULT(lmdb)
 
 dnl Berkeley specific (library and version test)
 dnl parameters(version, library list, function)
