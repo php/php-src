@@ -390,7 +390,7 @@ static dba_handler handler[] = {
 #define DBA_DEFAULT "qdbm"
 #elif DBA_TCADB
 #define DBA_DEFAULT "tcadb"
-#else
+#elif DBA_LMDB
 #define DBA_DEFAULT "lmdb"
 #else
 #define DBA_DEFAULT ""
