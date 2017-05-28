@@ -566,19 +566,32 @@ ZEND_END_ARG_INFO()
 /* public function __wakeup(): void {{{ */
 PHP_METHOD(UUID, __wakeup)
 {
-	size_t len = Z_STRLEN_P(zend_read_property(php_ce_UUID, &EX(This), UUID_BINARY_PROP, UUID_BINARY_PROP_LEN, 1, NULL));
+	zval *binary = NULL;
 
 	if (zend_parse_parameters_none_throw() == FAILURE) {
 		return;
 	}
 
-	if (len != PHP_UUID_LEN) {
+	binary = zend_read_property(php_ce_UUID, &EX(This), UUID_BINARY_PROP, UUID_BINARY_PROP_LEN, 1, NULL);
+
+	if (Z_TYPE_P(binary) != IS_STRING) {
+		zend_throw_exception_ex(
+			spl_ce_UnexpectedValueException,
+			0,
+			"Expected value of type %s, but found %s",
+			zend_get_type_by_const(IS_STRING),
+			zend_zval_type_name(binary)
+		);
+		return;
+	}
+
+	if (Z_STRLEN_P(binary) != PHP_UUID_LEN) {
 		zend_throw_exception_ex(
 			spl_ce_UnexpectedValueException,
 			0,
 			"Expected exactly %u bytes, but found %u",
 			PHP_UUID_LEN,
-			len
+			Z_STRLEN_P(binary)
 		);
 	}
 }

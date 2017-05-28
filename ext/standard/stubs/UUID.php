@@ -528,8 +528,8 @@ final class UUID {
 	 * @see unserialize()
 	 * @return void
 	 * @throws ArgumentCountError if arguments are passed.
-	 * @throws UnexpectedValueException if the binary string is not exactly 16
-	 *     bytes long.
+	 * @throws UnexpectedValueException if the value of the {@see binary}
+	 *     property is not of type string, or not exactly 16 bytes long.
 	 */
 	public function __wakeup(): void { }
 
