@@ -96,6 +96,7 @@ PHP                                                                        NEWS
     (Mike)
 
 - FTP:
+  . Fixed bug #74598 (ftp:// wrapper ignores context arg). (Sara)
   . Implement MLSD for structured listing of directories. (blar)
 
 - GD:
