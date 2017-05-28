@@ -247,10 +247,10 @@ PHPAPI extern const uint8_t PHP_UUID_VERSION_5_NAME_BASED_SHA1;
  *
  * The following UUID representations are parsable:
  *
- * - hexadecimal representations (`aaaaaaaabbbbccccddddeeeeeeeeeeeee`),
- * - string representations (`aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeeee`),
- * - URNs (`urn:uuid:aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeeee`), and
- * - Microsoft representations (`{aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeeee}`).
+ * - hexadecimal (`00000000111122223333444444444444`),
+ * - string (`00000000-1111-2222-3333-444444444444`),
+ * - URNs (`urn:uuid:00000000-1111-2222-3333-444444444444`), and
+ * - Microsoft (`{00000000-1111-2222-3333-444444444444}`).
  *
  * Leading and trailing whitespace, namely spaces (` `) and tabs (`\t`), is
  * ignored, so are leading opening braces (`{`) and trailing closing braces
