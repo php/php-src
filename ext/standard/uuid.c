@@ -546,7 +546,7 @@ ZEND_END_ARG_INFO()
 /* private function __clone() {{{ */
 PHP_METHOD(UUID, __clone)
 {
-	zend_throw_error(zend_ce_error, "Cannot clone immutable UUID object");
+	zend_throw_error(zend_ce_error, "Cannot clone immutable %s object", ZSTR_VAL(php_ce_UUID->name));
 }
 ZEND_BEGIN_ARG_INFO(UUID___clone_args, NULL)
 ZEND_END_ARG_INFO()
@@ -555,7 +555,7 @@ ZEND_END_ARG_INFO()
 /* public function __set($_, $__): void {{{ */
 PHP_METHOD(UUID, __set)
 {
-	zend_throw_error(zend_ce_error, "Cannot set dynamic properties on immutable UUID object");
+	zend_throw_error(zend_ce_error, "Cannot set dynamic properties on immutable %s object", ZSTR_VAL(php_ce_UUID->name));
 }
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID___set_args, IS_VOID, 0)
 	ZEND_ARG_INFO(0, _)
