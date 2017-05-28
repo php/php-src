@@ -256,14 +256,14 @@ PHPAPI int php_uuid_parse(php_uuid *uuid, const char *input, const size_t input_
 	return SUCCESS;
 }
 
-PHPAPI void php_uuid_create_v3(php_uuid *uuid, const php_uuid *namespace, const char *name, const size_t name_len)
+PHPAPI void php_uuid_create_v3(php_uuid *uuid, const php_uuid namespace, const char *name, const size_t name_len)
 {
 	PHP_MD5_CTX context;
 
 	PHP_MD5Init(&context);
-	PHP_MD5Update(&context, (char *) namespace, PHP_UUID_LEN);
+	PHP_MD5Update(&context, namespace.bytes, PHP_UUID_LEN);
 	PHP_MD5Update(&context, name, name_len);
-	PHP_MD5Final((char *)uuid, &context);
+	PHP_MD5Final(uuid->bytes, &context);
 	set_variant_rfc4122(uuid);
 	php_uuid_set_version(uuid, PHP_UUID_VERSION_3_NAME_BASED_MD5);
 }
@@ -280,28 +280,62 @@ PHPAPI int php_uuid_create_v4(php_uuid *uuid, const zend_bool throw)
 	return result;
 }
 
-PHPAPI void php_uuid_create_v5(php_uuid *uuid, const php_uuid *namespace, const char *name, const size_t name_len)
+PHPAPI void php_uuid_create_v5(php_uuid *uuid, const php_uuid namespace, const char *name, const size_t name_len)
 {
 	PHP_SHA1_CTX context;
 	char digest[20];
 
 	PHP_SHA1Init(&context);
-	PHP_SHA1Update(&context, (char *) namespace, PHP_UUID_LEN);
+	PHP_SHA1Update(&context, namespace.bytes, PHP_UUID_LEN);
 	PHP_SHA1Update(&context, name, name_len);
 	PHP_SHA1Final(digest, &context);
-	memcpy(uuid, digest, PHP_UUID_LEN);
+	memcpy(uuid->bytes, digest, PHP_UUID_LEN);
 	set_variant_rfc4122(uuid);
 	php_uuid_set_version(uuid, PHP_UUID_VERSION_5_NAME_BASED_SHA1);
 }
 
 /**
- * Get the UUID's bytes from the private property.
+ * Get the UUID from the given UUID object.
  *
- * @param[in] object to get the bytes from.
+ * We are required to check the type and length of the encapsulated value upon
+ * every access because users can change the value through various ways (e.g.
+ * reflection, closures, ...) and there is nothing that prevents them from
+ * doing so.
+ *
+ * @param[in] uuid_object to get the UUID from.
+ * @return SUCCESS if the UUID could be read from the object, FAILURE otherwise.
+ * @throws TypeError if the value is not of type string.
+ * @throws Error if the string value is not exactly 16 bytes long.
  */
-static zend_always_inline php_uuid *get_bytes(/*const*/ zval *object)
+static zend_always_inline php_uuid *get_uuid(/*const*/ zval uuid_object)
 {
-	return (php_uuid *) Z_STRVAL_P(zend_read_property(php_ce_UUID, object, UUID_PROP_NAME, UUID_PROP_NAME_LEN, 1, NULL));
+	zval *bytes = zend_read_property(php_ce_UUID, &uuid_object, UUID_PROP_NAME, UUID_PROP_NAME_LEN, 1, NULL);
+
+	if (Z_TYPE_P(bytes) != IS_STRING) {
+		zend_throw_error(
+			zend_ce_type_error,
+			"Expected %s::$%s value to be of type %s, but found %s",
+			ZSTR_VAL(php_ce_UUID->name),
+			UUID_PROP_NAME,
+			zend_get_type_by_const(IS_STRING),
+			zend_zval_type_name(bytes)
+		);
+		return NULL;
+	}
+
+	if (Z_STRLEN_P(bytes) != PHP_UUID_LEN) {
+		zend_throw_error(
+			zend_ce_error,
+			"Expected %s::$%s value to be exactly %u bytes long, but found %u",
+			ZSTR_VAL(php_ce_UUID->name),
+			UUID_PROP_NAME,
+			PHP_UUID_LEN,
+			Z_STRLEN_P(bytes)
+		);
+		return NULL;
+	}
+
+	return (php_uuid *) Z_STRVAL_P(bytes);
 }
 
 /**
@@ -363,9 +397,11 @@ PHP_METHOD(UUID, parse)
 		return;
 	}
 
-	if (php_uuid_parse_throw(&uuid, Z_STRVAL_P(input), Z_STRLEN_P(input)) == SUCCESS) {
-		new_uuid(return_value, uuid);
+	if (php_uuid_parse_throw(&uuid, Z_STRVAL_P(input), Z_STRLEN_P(input)) == FAILURE) {
+		return;
 	}
+
+	new_uuid(return_value, uuid);
 }
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(UUID_parse_args, 0, 1, self, 0)
 	ZEND_ARG_TYPE_INFO(0, input, IS_STRING, 0)
@@ -377,13 +413,19 @@ PHP_METHOD(UUID, v3)
 {
 	zval *namespace = NULL;
 	zval *name      = NULL;
+	php_uuid *nsid  = NULL;
 	php_uuid uuid;
 
 	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "zz", &namespace, &name) == FAILURE) {
 		return;
 	}
 
-	php_uuid_create_v3(&uuid, get_bytes(namespace), Z_STRVAL_P(name), Z_STRLEN_P(name));
+	nsid = get_uuid(*namespace);
+	if (nsid == NULL) {
+		return;
+	}
+
+	php_uuid_create_v3(&uuid, *nsid, Z_STRVAL_P(name), Z_STRLEN_P(name));
 	new_uuid(return_value, uuid);
 }
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(UUID_v3_args, 0, 2, self, 0)
@@ -401,9 +443,11 @@ PHP_METHOD(UUID, v4)
 		return;
 	}
 
-	if (php_uuid_create_v4_throw(&uuid) == SUCCESS) {
-		new_uuid(return_value, uuid);
+	if (php_uuid_create_v4_throw(&uuid) == FAILURE) {
+		return;
 	}
+
+	new_uuid(return_value, uuid);
 }
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_v4_args, self, 0)
 ZEND_END_ARG_INFO()
@@ -414,13 +458,19 @@ PHP_METHOD(UUID, v5)
 {
 	zval *namespace = NULL;
 	zval *name      = NULL;
+	php_uuid *nsid  = NULL;
 	php_uuid uuid;
 
 	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "zz", &namespace, &name) == FAILURE) {
 		return;
 	}
 
-	php_uuid_create_v5(&uuid, get_bytes(namespace), Z_STRVAL_P(name), Z_STRLEN_P(name));
+	nsid = get_uuid(*namespace);
+	if (nsid == NULL) {
+		return;
+	}
+
+	php_uuid_create_v5(&uuid, *nsid, Z_STRVAL_P(name), Z_STRLEN_P(name));
 	new_uuid(return_value, uuid);
 }
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(UUID_v5_args, 0, 2, self, 0)
@@ -517,33 +567,36 @@ ZEND_END_ARG_INFO()
 /* public function __wakeup(): void {{{ */
 PHP_METHOD(UUID, __wakeup)
 {
-	zval *binary = NULL;
+	zval *bytes = zend_read_property(php_ce_UUID, &EX(This), UUID_PROP_NAME, UUID_PROP_NAME_LEN, 1, NULL);
 
 	if (zend_parse_parameters_none_throw() == FAILURE) {
 		return;
 	}
 
-	binary = zend_read_property(php_ce_UUID, &EX(This), UUID_PROP_NAME, UUID_PROP_NAME_LEN, 1, NULL);
-
-	if (Z_TYPE_P(binary) != IS_STRING) {
+	if (Z_TYPE_P(bytes) != IS_STRING) {
 		zend_throw_exception_ex(
 			spl_ce_UnexpectedValueException,
 			0,
-			"Expected value of type %s, but found %s",
+			"Expected %s::$%s value to be of type %s, but found %s",
+			ZSTR_VAL(php_ce_UUID->name),
+			UUID_PROP_NAME,
 			zend_get_type_by_const(IS_STRING),
-			zend_zval_type_name(binary)
+			zend_zval_type_name(bytes)
 		);
 		return;
 	}
 
-	if (Z_STRLEN_P(binary) != PHP_UUID_LEN) {
+	if (Z_STRLEN_P(bytes) != PHP_UUID_LEN) {
 		zend_throw_exception_ex(
 			spl_ce_UnexpectedValueException,
 			0,
-			"Expected exactly %u bytes, but found %u",
+			"Expected %s::$%s value to be exactly %u bytes long, but found %u",
+			ZSTR_VAL(php_ce_UUID->name),
+			UUID_PROP_NAME,
 			PHP_UUID_LEN,
-			Z_STRLEN_P(binary)
+			Z_STRLEN_P(bytes)
 		);
+		return;
 	}
 }
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID___wakeup_args, IS_VOID, 0)
@@ -553,11 +606,18 @@ ZEND_END_ARG_INFO()
 /* public function getVaraitn(): int {{{ */
 PHP_METHOD(UUID, getVariant)
 {
+	php_uuid *uuid = NULL;
+
 	if (zend_parse_parameters_none_throw() == FAILURE) {
 		return;
 	}
 
-	RETURN_LONG(php_uuid_get_variant(*get_bytes(&EX(This))));
+	uuid = get_uuid(EX(This));
+	if (uuid == NULL) {
+		return;
+	}
+
+	RETURN_LONG(php_uuid_get_variant(*uuid));
 }
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_getVariant_args, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -566,11 +626,18 @@ ZEND_END_ARG_INFO()
 /* public function getVersion(): int {{{ */
 PHP_METHOD(UUID, getVersion)
 {
+	php_uuid *uuid = NULL;
+
 	if (zend_parse_parameters_none_throw() == FAILURE) {
 		return;
 	}
 
-	RETURN_LONG(php_uuid_get_version(*get_bytes(&EX(This))));
+	uuid = get_uuid(EX(This));
+	if (uuid == NULL) {
+		return;
+	}
+
+	RETURN_LONG(php_uuid_get_version(*uuid));
 }
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_getVersion_args, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -579,11 +646,18 @@ ZEND_END_ARG_INFO()
 /* public function isNil(): bool {{{ */
 PHP_METHOD(UUID, isNil)
 {
+	php_uuid *uuid = NULL;
+
 	if (zend_parse_parameters_none_throw() == FAILURE) {
 		return;
 	}
 
-	RETURN_BOOL(php_uuid_is_nil(*get_bytes(&EX(This))));
+	uuid = get_uuid(EX(This));
+	if (uuid == NULL) {
+		return;
+	}
+
+	RETURN_BOOL(php_uuid_is_nil(*uuid));
 }
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_isNil_args, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
@@ -592,18 +666,18 @@ ZEND_END_ARG_INFO()
 /* public function toBinary(): string {{{ */
 PHP_METHOD(UUID, toBinary)
 {
+	php_uuid *uuid = NULL;
+
 	if (zend_parse_parameters_none_throw() == FAILURE) {
 		return;
 	}
 
-	RETURN_ZVAL(zend_read_property(
-		php_ce_UUID,
-		&EX(This),
-		UUID_PROP_NAME,
-		UUID_PROP_NAME_LEN,
-		1,
-		NULL
-	), 1, 0);
+	uuid = get_uuid(EX(This));
+	if (uuid == NULL) {
+		return;
+	}
+
+	RETURN_STRINGL(uuid->bytes, PHP_UUID_LEN);
 }
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_toBinary_args, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -612,13 +686,20 @@ ZEND_END_ARG_INFO()
 /* public function toHex(): string {{{ */
 PHP_METHOD(UUID, toHex)
 {
+	php_uuid *uuid = NULL;
 	php_uuid_hex buffer;
 
 	if (zend_parse_parameters_none_throw() == FAILURE) {
 		return;
 	}
 
-	php_uuid_to_hex(&buffer, *get_bytes(&EX(This)));
+	uuid = get_uuid(EX(This));
+	if (uuid == NULL) {
+		return;
+	}
+
+	php_uuid_to_hex(&buffer, *uuid);
+
 	RETURN_STRINGL(buffer.str, PHP_UUID_HEX_LEN);
 }
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_toHex_args, IS_STRING, 0)
@@ -628,13 +709,20 @@ ZEND_END_ARG_INFO()
 /* public function toString(): string {{{ */
 PHP_METHOD(UUID, toString)
 {
+	php_uuid *uuid = NULL;
 	php_uuid_string buffer;
 
 	if (zend_parse_parameters_none_throw() == FAILURE) {
 		return;
 	}
 
-	php_uuid_to_string(&buffer, *get_bytes(&EX(This)));
+	uuid = get_uuid(EX(This));
+	if (uuid == NULL) {
+		return;
+	}
+
+	php_uuid_to_string(&buffer, *uuid);
+
 	RETURN_STRINGL(buffer.str, PHP_UUID_STRING_LEN);
 }
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_toString_args, IS_STRING, 0)

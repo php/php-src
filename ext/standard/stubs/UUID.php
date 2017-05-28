@@ -11,8 +11,7 @@
  *
  * This class provides generation and parsing capabilities for Universally
  * Unique Identifiers (UUIDs, also known as Globally Unique Identifiers
- * [GUIDs])
- * as specified in RFC 4122.
+ * [GUIDs]) as specified in [RFC 4122][rfc].
  *
  * UUIDs are 128 bit integers that guarantee uniqueness across space and time.
  * They are mainly used to assign identifiers to entities without requiring a
@@ -22,7 +21,7 @@
  *
  * There are different types of UUIDs, known as variants. This implementation
  * generates UUIDs according to the Leach-Salz variant; the one specified in
- * RFC 4122 as variant 1. Textual parsing supports both variant 1 and 2
+ * [RFC 4122][rfc] as variant 1. Textual parsing supports both variant 1 and 2
  * (Microsoft), and construction supports any kind of UUID. However, note that
  * the provided methods are **not** guaranteed to provide meaningful results if
  * any other variant than the Leach-Salz one is used.
@@ -40,7 +39,7 @@
  * and thus uses the best available random source of the operating system.
  *
  * Versions 1 and 2 are not supported due to privacy/security concerns. Refer
- * to the Wikipedia article for more information.
+ * to the [Wikipedia article][wiki] for more information.
  *
  * ## Examples
  * ```
@@ -116,10 +115,10 @@
  * ?>
  * ```
  *
+ * [rfc]: https://tools.ietf.org/html/rfc4122
+ * [wiki]: https://en.wikipedia.org/wiki/Universally_unique_identifier
  * @since 7.2
  * @see https://php.net/uuid
- * @see https://en.wikipedia.org/wiki/Universally_unique_identifier
- * @see https://tools.ietf.org/html/rfc4122
  */
 final class UUID {
 	/**
@@ -161,8 +160,9 @@ final class UUID {
 	 *
 	 * Generation of this version is not supported by this implementation due
 	 * to security concerns. Version 4 UUIDs are a good replacement for version
-	 * 1 UUIDs without the privacy/security concerns (see Wikipedia).
+	 * 1 UUIDs without the privacy/security concerns (see [Wikipedia][wiki]).
 	 *
+	 * [wiki]: https://en.wikipedia.org/wiki/Universally_unique_identifier
 	 * @since 7.2
 	 * @see https://tools.ietf.org/html/rfc4122#section-4.2
 	 * @see https://en.wikipedia.org/wiki/Universally_unique_identifier#Version_1_.28date-time_and_MAC_address.29
@@ -176,9 +176,10 @@ final class UUID {
 	 * Generation of this version is not supported by this implementation due
 	 * to security concerns, and uniqueness limitations for applications with
 	 * high allocations. Version 4 UUIDs are a good replacement for version 2
-	 * UUIDs without the privacy/security concerns (see Wikipedia), and they
-	 * support high allocations.
+	 * UUIDs without the privacy/security concerns (see [Wikipedia][wiki]), and
+	 * they support high allocations.
 	 *
+	 * [wiki]: https://en.wikipedia.org/wiki/Universally_unique_identifier
 	 * @since 7.2
 	 * @see https://tools.ietf.org/html/rfc4122#section-4.2
 	 * @see https://en.wikipedia.org/wiki/Universally_unique_identifier#Version_2_.28date-time_and_MAC_Address.2C_DCE_security_version.29
@@ -253,12 +254,10 @@ final class UUID {
 	 * @since 7.2
 	 * @see https://php.net/uuid.fromBinary
 	 * @see toBinary
-	 * @param string $input string of exactly 16 bytes to construct the
-	 *     instance from.
-	 * @return UUID instance constructed from the input.
-	 * @throws ArgumentCountError if less or more than one argument is passed.
-	 * @throws InvalidArgumentException if the input is not exactly 16 bytes
-	 *     long.
+	 * @param $input string of exactly 16 bytes to construct the instance from.
+	 * @returns UUID constructed from the binary input.
+	 * @throws \ArgumentCountError if less or more than one argument is passed.
+	 * @throws \InvalidArgumentException if the input is not 16 bytes long.
 	 */
 	public static function fromBinary(string $input): self { }
 
@@ -307,10 +306,10 @@ final class UUID {
 	 * @see https://php.net/uuid.parse
 	 * @see toHex
 	 * @see toString
-	 * @param string $input to parse as UUID and construct the instance from.
-	 * @return UUID constructed from the parsed input.
-	 * @throws ArgumentCountError if less or more than one argument is passed.
-	 * @throws UUIDParseException if parsing of the input fails.
+	 * @param $input to parse as UUID and construct the instance from.
+	 * @returns UUID constructed from the parsed input.
+	 * @throws \ArgumentCountError if less or more than one argument is passed.
+	 * @throws \UUIDParseException if parsing of the input fails.
 	 */
 	public static function parse(string $input): self { }
 
@@ -356,10 +355,11 @@ final class UUID {
 	 * @see https://php.net/uuid.v3
 	 * @see https://tools.ietf.org/html/rfc4122#section-4.3
 	 * @see https://en.wikipedia.org/wiki/Universally_unique_identifier#Versions_3_and_5_.28namespace_name-based.29
-	 * @param UUID $namespace to construct the UUID in.
-	 * @param string $name to construct the UUID from.
-	 * @return UUID
-	 * @throws ArgumentCountError if less or more than two arguments are passed.
+	 * @param $namespace to construct the UUID in.
+	 * @param $name to construct the UUID from.
+	 * @returns UUID constructed from the name in the namespace.
+	 * @throws \ArgumentCountError if less or more than two arguments are passed.
+	 * @throws \Error if the namespace does not encapsulate a valid UUID.
 	 */
 	public static function v3(self $namespace, string $name): self { }
 
@@ -391,9 +391,9 @@ final class UUID {
 	 * @see https://php.net/uuid.v4
 	 * @see https://tools.ietf.org/html/rfc4122#section-4.4
 	 * @see https://en.wikipedia.org/wiki/Universally_unique_identifier#Version_4_.28random.29
-	 * @return UUID
-	 * @throws Exception if it was not possible to gather sufficient entropy.
-	 * @throws ArgumentCountError if arguments are passed.
+	 * @returns UUID constructed from random data.
+	 * @throws \Exception if it was not possible to gather sufficient entropy.
+	 * @throws \ArgumentCountError if arguments are passed.
 	 */
 	public static function v4(): self { }
 
@@ -434,10 +434,11 @@ final class UUID {
 	 * @see https://php.net/uuid.v5
 	 * @see @see https://tools.ietf.org/html/rfc4122#section-4.3
 	 * @see https://en.wikipedia.org/wiki/Universally_unique_identifier#Versions_3_and_5_.28namespace_name-based.29
-	 * @param UUID $namespace to construct the UUID in.
-	 * @param string $name to construct the UUID from.
-	 * @return UUID
-	 * @throws ArgumentCountError if less or more than two arguments are passed.
+	 * @param $namespace to construct the UUID in.
+	 * @param $name to construct the UUID from.
+	 * @returns UUID constructed from the name in the namespace.
+	 * @throws \ArgumentCountError if less or more than two arguments are passed.
+	 * @throws \Error if the namespace does not encapsulate a valid UUID.
 	 */
 	public static function v5(self $namespace, string $name): self { }
 
@@ -448,8 +449,8 @@ final class UUID {
 	 * @see https://php.net/uuid.NamespaceDNS
 	 * @see https://tools.ietf.org/html/rfc4122#appendix-C
 	 * @see https://en.wikipedia.org/wiki/Domain_Name_System
-	 * @return UUID
-	 * @throws ArgumentCountError if arguments are passed.
+	 * @returns Predefined DNS namespace UUID.
+	 * @throws \ArgumentCountError if arguments are passed.
 	 */
 	public static function NamespaceDNS(): self { }
 
@@ -460,8 +461,8 @@ final class UUID {
 	 * @see https://php.net/uuid.NamespaceOID
 	 * @see https://tools.ietf.org/html/rfc4122#appendix-C
 	 * @see https://en.wikipedia.org/wiki/Object_identifier
-	 * @return UUID
-	 * @throws ArgumentCountError if arguments are passed.
+	 * @returns Predefined OID namespace UUID.
+	 * @throws \ArgumentCountError if arguments are passed.
 	 */
 	public static function NamespaceOID(): self { }
 
@@ -472,8 +473,8 @@ final class UUID {
 	 * @see https://php.net/uuid.NamespaceURL
 	 * @see https://tools.ietf.org/html/rfc4122#appendix-C
 	 * @see https://en.wikipedia.org/wiki/URL
-	 * @return UUID
-	 * @throws ArgumentCountError if arguments are passed.
+	 * @returns Predefined URL namespace UUID.
+	 * @throws \ArgumentCountError if arguments are passed.
 	 */
 	public static function NamespaceURL(): self { }
 
@@ -487,8 +488,8 @@ final class UUID {
 	 * @see https://tools.ietf.org/html/rfc4122#appendix-C
 	 * @see https://en.wikipedia.org/wiki/X.500
 	 * @see https://en.wikipedia.org/wiki/Lightweight_Directory_Access_Protocol
-	 * @return UUID
-	 * @throws ArgumentCountError if arguments are passed.
+	 * @returns Predefined X.500 namespace UUID instance.
+	 * @throws \ArgumentCountError if arguments are passed.
 	 */
 	public static function NamespaceX500(): self { }
 
@@ -499,8 +500,8 @@ final class UUID {
 	 * @see https://php.net/uuid.Nil
 	 * @see https://tools.ietf.org/html/rfc4122#section-4.1.7
 	 * @see https://en.wikipedia.org/wiki/Universally_unique_identifier#Nil_UUID
-	 * @return UUID
-	 * @throws ArgumentCountError if arguments are passed.
+	 * @returns Predefined special nil UUID.
+	 * @throws \ArgumentCountError if arguments are passed.
 	 */
 	public static function Nil(): self { }
 
@@ -515,8 +516,8 @@ final class UUID {
 	 * @see https://php.net/uuid.__set
 	 * @param mixed $_
 	 * @param mixed $__
-	 * @return void
-	 * @throws Error upon every invocation, direct or indirect.
+	 * @returns void
+	 * @throws \Error upon every invocation, direct or indirect.
 	 */
 	public function __set($_, $__): void { }
 
@@ -526,9 +527,9 @@ final class UUID {
 	 * @since 7.2
 	 * @see https://php.net/uuid.__wakeup
 	 * @see unserialize()
-	 * @return void
-	 * @throws ArgumentCountError if arguments are passed.
-	 * @throws UnexpectedValueException if the value of the {@see binary}
+	 * @returns void
+	 * @throws \ArgumentCountError if arguments are passed.
+	 * @throws \UnexpectedValueException if the value of the {@see bytes}
 	 *     property is not of type string, or not exactly 16 bytes long.
 	 */
 	public function __wakeup(): void { }
@@ -548,9 +549,10 @@ final class UUID {
 	 * @see UUID::VARIANT_RFC4122
 	 * @see UUID::VARIANT_MICROSOFT
 	 * @see UUID::VARIANT_FUTURE_RESERVED
-	 * @returns int An integer in [0, 3] where each value corresponds to one of
-	 *     the `UUID::VARIANT_*` class constants.
-	 * @throws ArgumentCountError if arguments are passed.
+	 * @returns An integer in [0, 3] where each value corresponds to one of the
+	 *     `UUID::VARIANT_*` class constants.
+	 * @throws \ArgumentCountError if arguments are passed.
+	 * @throws \Error if this instance does not encapsulate a valid UUID.
 	 */
 	public function getVariant(): int { }
 
@@ -572,10 +574,11 @@ final class UUID {
 	 * @see UUID::VERSION_3_NAME_BASED_MD5
 	 * @see UUID::VERSION_4_RANDOM
 	 * @see UUID::VERSION_5_NAME_BASED_SHA1
-	 * @return int An integer in [0, 15], the values [1, 5] correspond to one
-	 *     of the `UUID::VERSION_*` class constants. The others are not defined
-	 *     in RFC 4122.
-	 * @throws ArgumentCountError if arguments are passed.
+	 * @returns An integer in [0, 15], the values [1, 5] correspond to one of the
+	 *     `UUID::VERSION_*` class constants. The others are not defined in
+	 *     RFC 4122.
+	 * @throws \ArgumentCountError if arguments are passed.
+	 * @throws \Error if this instance does not encapsulate a valid UUID.
 	 */
 	public function getVersion(): int { }
 
@@ -588,9 +591,9 @@ final class UUID {
 	 * @see https://tools.ietf.org/html/rfc4122#section-4.1.7
 	 * @see https://en.wikipedia.org/wiki/Universally_unique_identifier#Nil_UUID
 	 * @see Nil
-	 * @return bool **TRUE** if this is the special nil UUID; **FALSE**
-	 *     otherwise.
-	 * @throws ArgumentCountError if arguments are passed.
+	 * @returns **TRUE** if this is the special nil UUID; **FALSE** otherwise.
+	 * @throws \ArgumentCountError if arguments are passed.
+	 * @throws \Error if this instance does not encapsulate a valid UUID.
 	 */
 	public function isNil(): bool { }
 
@@ -614,8 +617,9 @@ final class UUID {
 	 *
 	 * @since 7.2
 	 * @see https://php.net/uuid.toBinary
-	 * @return string
-	 * @throws ArgumentCountError if arguments are passed.
+	 * @returns Binary representation of the UUID.
+	 * @throws \ArgumentCountError if arguments are passed.
+	 * @throws \Error if this instance does not encapsulate a valid UUID.
 	 */
 	public function toBinary(): string { }
 
@@ -637,8 +641,9 @@ final class UUID {
 	 *
 	 * @since 7.2
 	 * @see https://php.net/uuid.toHex
-	 * @return string
-	 * @throws ArgumentCountError if arguments are passed.
+	 * @returns Hexadecimal representation of the UUID.
+	 * @throws \ArgumentCountError if arguments are passed.
+	 * @throws \Error if this instance does not encapsulate a valid UUID.
 	 */
 	public function toHex(): string { }
 
@@ -663,8 +668,9 @@ final class UUID {
 	 * @see https://php.net/uuid.toString
 	 * @see https://tools.ietf.org/html/rfc4122#page-4
 	 * @see https://en.wikipedia.org/wiki/Universally_unique_identifier#Format
-	 * @return string
-	 * @throws ArgumentCountError if arguments are passed.
+	 * @returns String representation of the UUID.
+	 * @throws \ArgumentCountError if arguments are passed.
+	 * @throws \Error if this instance does not encapsulate a valid UUID.
 	 */
 	public function toString(): string { }
 
@@ -673,8 +679,8 @@ final class UUID {
 	 * disables cloning of this object, since it makes no sense to clone
 	 * immutable objects.
 	 *
-	 * @return void
-	 * @throws Error upon every invocation.
+	 * @returns void
+	 * @throws \Error upon every invocation.
 	 */
 	private function __clone() { }
 }

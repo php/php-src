@@ -14,4 +14,4 @@ catch (UnexpectedValueException $e) {
 
 ?>
 --EXPECTF--
-Expected value of type string, but found null
+Expected UUID::$bytes value to be of type string, but found null

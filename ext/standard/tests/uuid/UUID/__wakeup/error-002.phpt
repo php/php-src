@@ -17,8 +17,8 @@ foreach ([0, 1, 15, 17, random_int(18, 256)] as $i) {
 
 ?>
 --EXPECTF--
-Expected exactly 16 bytes, but found 0
-Expected exactly 16 bytes, but found 1
-Expected exactly 16 bytes, but found 15
-Expected exactly 16 bytes, but found 17
-Expected exactly 16 bytes, but found %d
+Expected UUID::$bytes value to be exactly 16 bytes long, but found 0
+Expected UUID::$bytes value to be exactly 16 bytes long, but found 1
+Expected UUID::$bytes value to be exactly 16 bytes long, but found 15
+Expected UUID::$bytes value to be exactly 16 bytes long, but found 17
+Expected UUID::$bytes value to be exactly 16 bytes long, but found %d

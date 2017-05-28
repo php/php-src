@@ -286,8 +286,9 @@ PHPAPI extern const uint8_t PHP_UUID_VERSION_5_NAME_BASED_SHA1;
  * @param[out] uuid to store the result in.
  * @param[in] input to parse as UUID.
  * @param[in] input_len
- * @param[in] throw whether to throw PHP exceptions (`TRUE`), or not (`FALSE`).
+ * @param[in] throw whether to throw PHP exceptions (`1`), or not (`0`).
  * @return `SUCCESS` if the string was parsed as UUID, `FAILURE` otherwise.
+ * @throws UUIDParseException if throw is enabled and parsing fails.
  */
 PHPAPI int php_uuid_parse(php_uuid *uuid, const char *input, const size_t input_len, const zend_bool throw);
 
@@ -310,6 +311,7 @@ PHPAPI int php_uuid_parse(php_uuid *uuid, const char *input, const size_t input_
  * @param[in] input to parse as UUID.
  * @param[in] input_len
  * @return `SUCCESS` if the string was parsed as UUID, `FAILURE` otherwise.
+ * @throws UUIDParseException if throw is enabled and parsing fails.
  */
 #define php_uuid_parse_throw(uuid, input, input_len) php_uuid_parse(uuid, input, input_len, 1)
 
@@ -360,7 +362,7 @@ PHPAPI int php_uuid_parse(php_uuid *uuid, const char *input, const size_t input_
  * @param[in] name to create the UUID from.
  * @param[in] name_len
  */
-PHPAPI void php_uuid_create_v3(php_uuid *uuid, const php_uuid *namespace, const char *name, const size_t name_len);
+PHPAPI void php_uuid_create_v3(php_uuid *uuid, const php_uuid namespace, const char *name, const size_t name_len);
 
 /**
  * Create version 4 UUID.
@@ -391,10 +393,11 @@ PHPAPI void php_uuid_create_v3(php_uuid *uuid, const php_uuid *namespace, const 
  * @see php_uuid_create_v4_silent
  * @see php_uuid_create_v4_throw
  * @param[out] uuid to store the result.
- * @param[in] throw whether to throw a PHP exception (`TRUE`) if it was not
- *     possible to gather sufficient entropy, or not (`FALSE`).
+ * @param[in] throw whether to throw a PHP exception (`1`), or not (`0`).
  * @return `SUCCESS` if the generation succeeded, `FAILURE` if it was not
  *     possible to gather sufficient entropy.
+ * @throws Exception if throw is enabled and it was not possible to gather
+ *     sufficient entropy for generating random bytes.
  */
 PHPAPI int php_uuid_create_v4(php_uuid *uuid, const zend_bool throw);
 
@@ -416,6 +419,8 @@ PHPAPI int php_uuid_create_v4(php_uuid *uuid, const zend_bool throw);
  * @param[out] uuid to store the result.
  * @return `SUCCESS` if the generation succeeded, `FAILURE` if it was not
  *     possible to gather sufficient entropy.
+ * @throws Exception if throw is enabled and it was not possible to gather
+ *     sufficient entropy for generating random bytes.
  */
 #define php_uuid_create_v4_throw(uuid) php_uuid_create_v4(uuid, 1)
 
@@ -461,7 +466,7 @@ PHPAPI int php_uuid_create_v4(php_uuid *uuid, const zend_bool throw);
  * @param[in] name to create the UUID from.
  * @param[in] name_len
  */
-PHPAPI void php_uuid_create_v5(php_uuid *uuid, const php_uuid *namespace, const char *name, const size_t name_len);
+PHPAPI void php_uuid_create_v5(php_uuid *uuid, const php_uuid namespace, const char *name, const size_t name_len);
 
 /**
  * Get the variant associated with this UUID.
