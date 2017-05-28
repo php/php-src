@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #74658 (Undefined constants in array properties result in broken
     properties). (Laruence)
+  . Fixed misparsing of abstract unix domain socket names. (Sara)
 
 - Opcache:
   . Fixed bug #74663 (Segfault with opcache.memory_protect and
@@ -16,6 +17,9 @@ PHP                                                                        NEWS
 
 - FTP:
   . Fixed bug #74598 (ftp:// wrapper ignores context arg). (Sara)
+
+- Streams:
+  . Fixed bug #74556 (stream_socket_get_name() returns '\0'). (Sara)
 
 8 Jun 2017 PHP 7.0.20
 
