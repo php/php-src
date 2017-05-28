@@ -254,8 +254,8 @@ final class UUID {
 	 * @since 7.2
 	 * @see https://php.net/uuid.fromBinary
 	 * @see toBinary
-	 * @param $input string of exactly 16 bytes to construct the instance from.
-	 * @returns UUID constructed from the binary input.
+	 * @param string $input string of exactly 16 bytes to construct the instance from.
+	 * @return \UUID UUID constructed from the binary input.
 	 * @throws \ArgumentCountError if less or more than one argument is passed.
 	 * @throws \InvalidArgumentException if the input is not 16 bytes long.
 	 */
@@ -306,8 +306,8 @@ final class UUID {
 	 * @see https://php.net/uuid.parse
 	 * @see toHex
 	 * @see toString
-	 * @param $input to parse as UUID and construct the instance from.
-	 * @returns UUID constructed from the parsed input.
+	 * @param string $input to parse as UUID and construct the instance from.
+	 * @return \UUID UUID constructed from the parsed input.
 	 * @throws \ArgumentCountError if less or more than one argument is passed.
 	 * @throws \UUIDParseException if parsing of the input fails.
 	 */
@@ -355,9 +355,9 @@ final class UUID {
 	 * @see https://php.net/uuid.v3
 	 * @see https://tools.ietf.org/html/rfc4122#section-4.3
 	 * @see https://en.wikipedia.org/wiki/Universally_unique_identifier#Versions_3_and_5_.28namespace_name-based.29
-	 * @param $namespace to construct the UUID in.
-	 * @param $name to construct the UUID from.
-	 * @returns UUID constructed from the name in the namespace.
+	 * @param \UUID $namespace to construct the UUID in.
+	 * @param string $name to construct the UUID from.
+	 * @return \UUID UUID constructed from the name in the namespace.
 	 * @throws \ArgumentCountError if less or more than two arguments are passed.
 	 * @throws \Error if the namespace does not encapsulate a valid UUID.
 	 */
@@ -391,7 +391,7 @@ final class UUID {
 	 * @see https://php.net/uuid.v4
 	 * @see https://tools.ietf.org/html/rfc4122#section-4.4
 	 * @see https://en.wikipedia.org/wiki/Universally_unique_identifier#Version_4_.28random.29
-	 * @returns UUID constructed from random data.
+	 * @return \UUID UUID constructed from random data.
 	 * @throws \Exception if it was not possible to gather sufficient entropy.
 	 * @throws \ArgumentCountError if arguments are passed.
 	 */
@@ -434,9 +434,9 @@ final class UUID {
 	 * @see https://php.net/uuid.v5
 	 * @see @see https://tools.ietf.org/html/rfc4122#section-4.3
 	 * @see https://en.wikipedia.org/wiki/Universally_unique_identifier#Versions_3_and_5_.28namespace_name-based.29
-	 * @param $namespace to construct the UUID in.
-	 * @param $name to construct the UUID from.
-	 * @returns UUID constructed from the name in the namespace.
+	 * @param \UUID $namespace to construct the UUID in.
+	 * @param string $name to construct the UUID from.
+	 * @return \UUID UUID constructed from the name in the namespace.
 	 * @throws \ArgumentCountError if less or more than two arguments are passed.
 	 * @throws \Error if the namespace does not encapsulate a valid UUID.
 	 */
@@ -449,7 +449,7 @@ final class UUID {
 	 * @see https://php.net/uuid.NamespaceDNS
 	 * @see https://tools.ietf.org/html/rfc4122#appendix-C
 	 * @see https://en.wikipedia.org/wiki/Domain_Name_System
-	 * @returns Predefined DNS namespace UUID.
+	 * @return \UUID Predefined DNS namespace UUID.
 	 * @throws \ArgumentCountError if arguments are passed.
 	 */
 	public static function NamespaceDNS(): self { }
@@ -461,7 +461,7 @@ final class UUID {
 	 * @see https://php.net/uuid.NamespaceOID
 	 * @see https://tools.ietf.org/html/rfc4122#appendix-C
 	 * @see https://en.wikipedia.org/wiki/Object_identifier
-	 * @returns Predefined OID namespace UUID.
+	 * @return \UUID Predefined OID namespace UUID.
 	 * @throws \ArgumentCountError if arguments are passed.
 	 */
 	public static function NamespaceOID(): self { }
@@ -473,7 +473,7 @@ final class UUID {
 	 * @see https://php.net/uuid.NamespaceURL
 	 * @see https://tools.ietf.org/html/rfc4122#appendix-C
 	 * @see https://en.wikipedia.org/wiki/URL
-	 * @returns Predefined URL namespace UUID.
+	 * @return \UUID Predefined URL namespace UUID.
 	 * @throws \ArgumentCountError if arguments are passed.
 	 */
 	public static function NamespaceURL(): self { }
@@ -488,7 +488,7 @@ final class UUID {
 	 * @see https://tools.ietf.org/html/rfc4122#appendix-C
 	 * @see https://en.wikipedia.org/wiki/X.500
 	 * @see https://en.wikipedia.org/wiki/Lightweight_Directory_Access_Protocol
-	 * @returns Predefined X.500 namespace UUID instance.
+	 * @return \UUID Predefined X.500 namespace UUID instance.
 	 * @throws \ArgumentCountError if arguments are passed.
 	 */
 	public static function NamespaceX500(): self { }
@@ -500,7 +500,7 @@ final class UUID {
 	 * @see https://php.net/uuid.Nil
 	 * @see https://tools.ietf.org/html/rfc4122#section-4.1.7
 	 * @see https://en.wikipedia.org/wiki/Universally_unique_identifier#Nil_UUID
-	 * @returns Predefined special nil UUID.
+	 * @return \UUID Predefined special nil UUID.
 	 * @throws \ArgumentCountError if arguments are passed.
 	 */
 	public static function Nil(): self { }
@@ -516,7 +516,7 @@ final class UUID {
 	 * @see https://php.net/uuid.__set
 	 * @param mixed $_
 	 * @param mixed $__
-	 * @returns void
+	 * @return void
 	 * @throws \Error upon every invocation, direct or indirect.
 	 */
 	public function __set($_, $__): void { }
@@ -527,7 +527,7 @@ final class UUID {
 	 * @since 7.2
 	 * @see https://php.net/uuid.__wakeup
 	 * @see unserialize()
-	 * @returns void
+	 * @return void
 	 * @throws \ArgumentCountError if arguments are passed.
 	 * @throws \UnexpectedValueException if the value of the {@see bytes}
 	 *     property is not of type string, or not exactly 16 bytes long.
@@ -549,8 +549,8 @@ final class UUID {
 	 * @see UUID::VARIANT_RFC4122
 	 * @see UUID::VARIANT_MICROSOFT
 	 * @see UUID::VARIANT_FUTURE_RESERVED
-	 * @returns An integer in [0, 3] where each value corresponds to one of the
-	 *     `UUID::VARIANT_*` class constants.
+	 * @return int An integer in [0, 3] where each value corresponds to one of
+	 *     the `UUID::VARIANT_*` class constants.
 	 * @throws \ArgumentCountError if arguments are passed.
 	 * @throws \Error if this instance does not encapsulate a valid UUID.
 	 */
@@ -574,9 +574,9 @@ final class UUID {
 	 * @see UUID::VERSION_3_NAME_BASED_MD5
 	 * @see UUID::VERSION_4_RANDOM
 	 * @see UUID::VERSION_5_NAME_BASED_SHA1
-	 * @returns An integer in [0, 15], the values [1, 5] correspond to one of the
-	 *     `UUID::VERSION_*` class constants. The others are not defined in
-	 *     RFC 4122.
+	 * @return int An integer in [0, 15], the values [1, 5] correspond to one
+	 *     of the `UUID::VERSION_*` class constants. The others are not defined
+	 *     in RFC 4122.
 	 * @throws \ArgumentCountError if arguments are passed.
 	 * @throws \Error if this instance does not encapsulate a valid UUID.
 	 */
@@ -591,7 +591,8 @@ final class UUID {
 	 * @see https://tools.ietf.org/html/rfc4122#section-4.1.7
 	 * @see https://en.wikipedia.org/wiki/Universally_unique_identifier#Nil_UUID
 	 * @see Nil
-	 * @returns **TRUE** if this is the special nil UUID; **FALSE** otherwise.
+	 * @return bool **TRUE** if this is the special nil UUID; **FALSE**
+	 *     otherwise.
 	 * @throws \ArgumentCountError if arguments are passed.
 	 * @throws \Error if this instance does not encapsulate a valid UUID.
 	 */
@@ -617,7 +618,7 @@ final class UUID {
 	 *
 	 * @since 7.2
 	 * @see https://php.net/uuid.toBinary
-	 * @returns Binary representation of the UUID.
+	 * @return string Binary representation of the UUID.
 	 * @throws \ArgumentCountError if arguments are passed.
 	 * @throws \Error if this instance does not encapsulate a valid UUID.
 	 */
@@ -641,7 +642,7 @@ final class UUID {
 	 *
 	 * @since 7.2
 	 * @see https://php.net/uuid.toHex
-	 * @returns Hexadecimal representation of the UUID.
+	 * @return string Hexadecimal representation of the UUID.
 	 * @throws \ArgumentCountError if arguments are passed.
 	 * @throws \Error if this instance does not encapsulate a valid UUID.
 	 */
@@ -668,7 +669,7 @@ final class UUID {
 	 * @see https://php.net/uuid.toString
 	 * @see https://tools.ietf.org/html/rfc4122#page-4
 	 * @see https://en.wikipedia.org/wiki/Universally_unique_identifier#Format
-	 * @returns String representation of the UUID.
+	 * @return string String representation of the UUID.
 	 * @throws \ArgumentCountError if arguments are passed.
 	 * @throws \Error if this instance does not encapsulate a valid UUID.
 	 */
@@ -679,7 +680,7 @@ final class UUID {
 	 * disables cloning of this object, since it makes no sense to clone
 	 * immutable objects.
 	 *
-	 * @returns void
+	 * @return void
 	 * @throws \Error upon every invocation.
 	 */
 	private function __clone() { }
