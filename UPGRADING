@@ -238,7 +238,8 @@ See also: https://wiki.php.net/rfc/deprecations_php_7_2
 
 - EXIF:
    . Added extended exif tag support for the following formats: 
-     Samsung, DJI, Panasonic, Sony, Pentax, Minolta & Sigma/Foveon.
+     Samsung, DJI, Panasonic, Sony, Pentax, Minolta, Sigma/Foveon, 
+	 AGFA, Kyocera, Ricoh & Epson.
 
 - GD:
   . Removed --enable-gd-native-ttf configuration option which was unused as

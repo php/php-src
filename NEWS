@@ -78,7 +78,8 @@ PHP                                                                        NEWS
 
 - EXIF:
   . Added support for vendor specific tags for the following formats:
-    Samsung, DJI, Panasonic, Sony, Pentax, Minolta & Sigma/Foveon. (Kalle)
+    Samsung, DJI, Panasonic, Sony, Pentax, Minolta, Sigma/Foveon, AGFA, 
+	Kyocera, Ricoh & Epson. (Kalle)
   . Fixed bug #72682 (exif_read_data() fails to read all data for some
     images). (Kalle)
   . Fixed bug #71534 (Type confusion in exif_read_data() leading to heap
