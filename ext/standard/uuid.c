@@ -29,33 +29,23 @@
 PHPAPI zend_class_entry *php_ce_UUID;
 PHPAPI zend_class_entry *php_ce_UUIDParseException;
 
-PHPAPI const php_uuid PHP_UUID_NAMESPACE_DNS            = { "\x6b\xa7\xb8\x10\x9d\xad\x11\xd1\x80\xb4\x00\xc0\x4f\xd4\x30\xc8" };
-PHPAPI const php_uuid PHP_UUID_NAMESPACE_OID            = { "\x6b\xa7\xb8\x12\x9d\xad\x11\xd1\x80\xb4\x00\xc0\x4f\xd4\x30\xc8" };
-PHPAPI const php_uuid PHP_UUID_NAMESPACE_URL            = { "\x6b\xa7\xb8\x11\x9d\xad\x11\xd1\x80\xb4\x00\xc0\x4f\xd4\x30\xc8" };
-PHPAPI const php_uuid PHP_UUID_NAMESPACE_X500           = { "\x6b\xa7\xb8\x14\x9d\xad\x11\xd1\x80\xb4\x00\xc0\x4f\xd4\x30\xc8" };
-PHPAPI const php_uuid PHP_UUID_NIL                      = { "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00" };
+static const uint8_t UUID_VERSION_MIN         = 0;
+static const uint8_t UUID_VERSION_MAX         = 15;
 
-static const uint8_t PHP_UUID_VERSION_MIN               = 0;
-PHPAPI const uint8_t PHP_UUID_VERSION_1_TIME_BASED      = 1;
-PHPAPI const uint8_t PHP_UUID_VERSION_2_DCE_SECURITY    = 2;
-PHPAPI const uint8_t PHP_UUID_VERSION_3_NAME_BASED_MD5  = 3;
-PHPAPI const uint8_t PHP_UUID_VERSION_4_RANDOM          = 4;
-PHPAPI const uint8_t PHP_UUID_VERSION_5_NAME_BASED_SHA1 = 5;
-static const uint8_t PHP_UUID_VERSION_MAX               = 15;
+static const uint8_t UUID_HEX_LEN             = sizeof(php_uuid_hex) - 1;
+static const uint8_t UUID_STRING_LEN          = sizeof(php_uuid_string) - 1;
 
-PHPAPI const uint8_t PHP_UUID_HEX_LEN                   = sizeof(php_uuid_hex) - 1;
-PHPAPI const uint8_t PHP_UUID_STRING_LEN                = sizeof(php_uuid_string) - 1;
+static const char UUID_BYTES_PROP[]           = "bytes";
+static const uint8_t UUID_BYTES_PROP_LEN      = sizeof(UUID_BYTES_PROP) - 1;
 
-static const char UUID_PROP_NAME[]                      = "bytes";
-static const uint8_t UUID_PROP_NAME_LEN                 = sizeof(UUID_PROP_NAME) - 1;
+static const char UUID_EX_INPUT_PROP[]        = "input";
+static const uint8_t UUID_EX_INPUT_PROP_LEN   = sizeof(UUID_EX_INPUT_PROP) - 1;
 
-static const char UUID_EX_INPUT_PROP[]                  = "input";
-static const uint8_t UUID_EX_INPUT_PROP_LEN             = sizeof(UUID_EX_INPUT_PROP) - 1;
-static const char UUID_EX_POSITION_PROP[]               = "position";
-static const uint8_t UUID_EX_POSITON_PROP_LEN           = sizeof(UUID_EX_POSITION_PROP) - 1;
+static const char UUID_EX_POSITION_PROP[]     = "position";
+static const uint8_t UUID_EX_POSITON_PROP_LEN = sizeof(UUID_EX_POSITION_PROP) - 1;
 
-static const char URN_PREFIX[]                          = "urn:uuid:";
-static const uint8_t URN_PREFIX_LEN                     = sizeof(URN_PREFIX) - 1;
+static const char URN_PREFIX[]                = "urn:uuid:";
+static const uint8_t URN_PREFIX_LEN           = sizeof(URN_PREFIX) - 1;
 
 /**
  * Set UUID variant to RFC 4122, the only supported variant.
@@ -80,7 +70,7 @@ static zend_always_inline void set_variant_rfc4122(php_uuid *uuid)
  */
 static zend_always_inline void php_uuid_set_version(php_uuid *uuid, const uint8_t version)
 {
-	assert(PHP_UUID_VERSION_MIN <= version && version <= PHP_UUID_VERSION_MAX);
+	assert(UUID_VERSION_MIN <= version && version <= UUID_VERSION_MAX);
 
 	uuid->bytes[6] = (uuid->bytes[6] & 0x0F) | (version << 4);
 }
@@ -129,7 +119,7 @@ static zend_always_inline zend_object *throw_uuid_parse_exception_invalid_len(co
 		input_len,
 		position,
 		"Expected at least %u hexadecimal digits, but got %u",
-		PHP_UUID_HEX_LEN,
+		UUID_HEX_LEN,
 		actual
 	);
 }
@@ -172,7 +162,7 @@ PHPAPI int php_uuid_parse(php_uuid *uuid, const char *input, const size_t input_
 		--limit;
 	}
 
-	if ((limit - position + 1) < PHP_UUID_HEX_LEN) {
+	if ((limit - position + 1) < UUID_HEX_LEN) {
 		if (throw) {
 			throw_uuid_parse_exception_invalid_len(input, input_len, position, limit - position + 1);
 		}
@@ -227,14 +217,14 @@ PHPAPI int php_uuid_parse(php_uuid *uuid, const char *input, const size_t input_
 				return FAILURE;
 			}
 
-			if (digit > PHP_UUID_HEX_LEN) {
+			if (digit > UUID_HEX_LEN) {
 				if (throw) {
 					throw_uuid_parse_exception(
 						input,
 						input_len,
 						position,
 						"Expected no more than %u hexadecimal digits",
-						PHP_UUID_HEX_LEN
+						UUID_HEX_LEN
 					);
 				}
 				return FAILURE;
@@ -246,7 +236,7 @@ PHPAPI int php_uuid_parse(php_uuid *uuid, const char *input, const size_t input_
 		++digit;
 	}
 
-	if (digit < PHP_UUID_HEX_LEN) {
+	if (digit < UUID_HEX_LEN) {
 		if (throw) {
 			throw_uuid_parse_exception_invalid_len(input, input_len, position, digit);
 		}
@@ -309,14 +299,14 @@ PHPAPI void php_uuid_create_v5(php_uuid *uuid, const php_uuid *namespace, const 
  */
 static zend_always_inline php_uuid *get_uuid(/*const*/ zval *uuid_object)
 {
-	zval *bytes = zend_read_property(php_ce_UUID, uuid_object, UUID_PROP_NAME, UUID_PROP_NAME_LEN, 1, NULL);
+	zval *bytes = zend_read_property(php_ce_UUID, uuid_object, UUID_BYTES_PROP, UUID_BYTES_PROP_LEN, 1, NULL);
 
 	if (Z_TYPE_P(bytes) != IS_STRING) {
 		zend_throw_error(
 			zend_ce_type_error,
 			"Expected %s::$%s value to be of type %s, but found %s",
 			ZSTR_VAL(php_ce_UUID->name),
-			UUID_PROP_NAME,
+			UUID_BYTES_PROP,
 			zend_get_type_by_const(IS_STRING),
 			zend_zval_type_name(bytes)
 		);
@@ -328,7 +318,7 @@ static zend_always_inline php_uuid *get_uuid(/*const*/ zval *uuid_object)
 			zend_ce_error,
 			"Expected %s::$%s value to be exactly %u bytes long, but found %u",
 			ZSTR_VAL(php_ce_UUID->name),
-			UUID_PROP_NAME,
+			UUID_BYTES_PROP,
 			PHP_UUID_LEN,
 			Z_STRLEN_P(bytes)
 		);
@@ -347,7 +337,7 @@ static zend_always_inline php_uuid *get_uuid(/*const*/ zval *uuid_object)
 static zend_always_inline void new_uuid(zval *object, const php_uuid *uuid)
 {
 	object_init_ex(object, php_ce_UUID);
-	zend_update_property_stringl(php_ce_UUID, object, UUID_PROP_NAME, UUID_PROP_NAME_LEN, uuid->bytes, PHP_UUID_LEN);
+	zend_update_property_stringl(php_ce_UUID, object, UUID_BYTES_PROP, UUID_BYTES_PROP_LEN, uuid->bytes, PHP_UUID_LEN);
 }
 
 /* private function __construct() {{{ */
@@ -380,7 +370,7 @@ PHP_METHOD(UUID, fromBinary)
 	}
 
 	object_init_ex(return_value, php_ce_UUID);
-	zend_update_property(php_ce_UUID, return_value, UUID_PROP_NAME, UUID_PROP_NAME_LEN, input);
+	zend_update_property(php_ce_UUID, return_value, UUID_BYTES_PROP, UUID_BYTES_PROP_LEN, input);
 }
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(UUID_fromBinary_args, 0, 1, self, 0)
 	ZEND_ARG_TYPE_INFO(0, input, IS_STRING, 0)
@@ -567,7 +557,7 @@ ZEND_END_ARG_INFO()
 /* public function __wakeup(): void {{{ */
 PHP_METHOD(UUID, __wakeup)
 {
-	zval *bytes = zend_read_property(php_ce_UUID, &EX(This), UUID_PROP_NAME, UUID_PROP_NAME_LEN, 1, NULL);
+	zval *bytes = zend_read_property(php_ce_UUID, &EX(This), UUID_BYTES_PROP, UUID_BYTES_PROP_LEN, 1, NULL);
 
 	if (zend_parse_parameters_none_throw() == FAILURE) {
 		return;
@@ -579,7 +569,7 @@ PHP_METHOD(UUID, __wakeup)
 			0,
 			"Expected %s::$%s value to be of type %s, but found %s",
 			ZSTR_VAL(php_ce_UUID->name),
-			UUID_PROP_NAME,
+			UUID_BYTES_PROP,
 			zend_get_type_by_const(IS_STRING),
 			zend_zval_type_name(bytes)
 		);
@@ -592,7 +582,7 @@ PHP_METHOD(UUID, __wakeup)
 			0,
 			"Expected %s::$%s value to be exactly %u bytes long, but found %u",
 			ZSTR_VAL(php_ce_UUID->name),
-			UUID_PROP_NAME,
+			UUID_BYTES_PROP,
 			PHP_UUID_LEN,
 			Z_STRLEN_P(bytes)
 		);
@@ -700,7 +690,7 @@ PHP_METHOD(UUID, toHex)
 
 	php_uuid_to_hex(&buffer, uuid);
 
-	RETURN_STRINGL(buffer.str, PHP_UUID_HEX_LEN);
+	RETURN_STRINGL(buffer.str, UUID_HEX_LEN);
 }
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_toHex_args, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -723,7 +713,7 @@ PHP_METHOD(UUID, toString)
 
 	php_uuid_to_string(&buffer, uuid);
 
-	RETURN_STRINGL(buffer.str, PHP_UUID_STRING_LEN);
+	RETURN_STRINGL(buffer.str, UUID_STRING_LEN);
 }
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_toString_args, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -853,7 +843,7 @@ PHP_MINIT_FUNCTION(uuid)
 	zend_declare_class_constant_long(php_ce_UUID, "VERSION_4_RANDOM", sizeof("VERSION_4_RANDOM") - 1, PHP_UUID_VERSION_4_RANDOM);
 	zend_declare_class_constant_long(php_ce_UUID, "VERSION_5_NAME_BASED_SHA1", sizeof("VERSION_5_NAME_BASED_SHA1") - 1, PHP_UUID_VERSION_5_NAME_BASED_SHA1);
 
-	zend_declare_property_null(php_ce_UUID, UUID_PROP_NAME, UUID_PROP_NAME_LEN, ZEND_ACC_PRIVATE);
+	zend_declare_property_null(php_ce_UUID, UUID_BYTES_PROP, UUID_BYTES_PROP_LEN, ZEND_ACC_PRIVATE);
 
 	INIT_CLASS_ENTRY(ce, "UUIDParseException", uuid_parse_exception_methods);
 	php_ce_UUIDParseException = zend_register_internal_class_ex(&ce, zend_ce_exception);

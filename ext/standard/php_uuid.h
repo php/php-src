@@ -124,14 +124,20 @@ PHPAPI typedef struct php_uuid {
 	uint8_t bytes[PHP_UUID_LEN];
 } php_uuid;
 
+/** UUID hexadecimal representation length with terminating NUL. */
+#define PHP_UUID_HEX_LEN 33
+
 /** UUID hexadecimal representation: `000000001111222233334444444444444444\0` */
 PHPAPI typedef struct php_uuid_hex {
-	char str[33];
+	char str[PHP_UUID_HEX_LEN];
 } php_uuid_hex;
+
+/** UUID string representation length with terminating NUL. */
+#define PHP_UUID_STRING_LEN 37
 
 /** UUID string representation: `00000000-1111-2222-3333-4444444444444444\0` */
 PHPAPI typedef struct php_uuid_string {
-	char str[37];
+	char str[PHP_UUID_STRING_LEN];
 } php_uuid_string;
 
 /**
@@ -140,7 +146,7 @@ PHPAPI typedef struct php_uuid_string {
  * @see https://tools.ietf.org/html/rfc4122#appendix-C
  * @see https://en.wikipedia.org/wiki/Domain_Name_System
  */
-PHPAPI extern const php_uuid PHP_UUID_NAMESPACE_DNS;
+static const php_uuid PHP_UUID_NAMESPACE_DNS = { "\x6b\xa7\xb8\x10\x9d\xad\x11\xd1\x80\xb4\x00\xc0\x4f\xd4\x30\xc8" };
 
 /**
 * Object Identifier (OID) namespace UUID.
@@ -148,7 +154,7 @@ PHPAPI extern const php_uuid PHP_UUID_NAMESPACE_DNS;
  * @see https://tools.ietf.org/html/rfc4122#appendix-C
  * @see https://en.wikipedia.org/wiki/Object_identifier
  */
-PHPAPI extern const php_uuid PHP_UUID_NAMESPACE_OID;
+static const php_uuid PHP_UUID_NAMESPACE_OID = { "\x6b\xa7\xb8\x12\x9d\xad\x11\xd1\x80\xb4\x00\xc0\x4f\xd4\x30\xc8" };
 
 /**
  * Uniform Resource Locator (URL) namespace UUID.
@@ -156,7 +162,7 @@ PHPAPI extern const php_uuid PHP_UUID_NAMESPACE_OID;
  * @see https://tools.ietf.org/html/rfc4122#appendix-C
  * @see https://en.wikipedia.org/wiki/URL
  */
-PHPAPI extern const php_uuid PHP_UUID_NAMESPACE_URL;
+static const php_uuid PHP_UUID_NAMESPACE_URL = { "\x6b\xa7\xb8\x11\x9d\xad\x11\xd1\x80\xb4\x00\xc0\x4f\xd4\x30\xc8" };
 
 /**
  * X.500 Distinguished Names (X.500 DN) namespace UUID. The names that are to
@@ -166,7 +172,7 @@ PHPAPI extern const php_uuid PHP_UUID_NAMESPACE_URL;
  * @see https://en.wikipedia.org/wiki/X.500
  * @see https://en.wikipedia.org/wiki/Lightweight_Directory_Access_Protocol
  */
-PHPAPI extern const php_uuid PHP_UUID_NAMESPACE_X500;
+static const php_uuid PHP_UUID_NAMESPACE_X500 = { "\x6b\xa7\xb8\x14\x9d\xad\x11\xd1\x80\xb4\x00\xc0\x4f\xd4\x30\xc8" };
 
 /**
  * Special nil UUID that has all 128 bits set to zero.
@@ -174,7 +180,7 @@ PHPAPI extern const php_uuid PHP_UUID_NAMESPACE_X500;
  * @see https://tools.ietf.org/html/rfc4122#section-4.1.7
  * @see https://en.wikipedia.org/wiki/Universally_unique_identifier#Nil_UUID
  */
-PHPAPI extern const php_uuid PHP_UUID_NIL;
+static const php_uuid PHP_UUID_NIL = { "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00" };
 
 /**
  * UUID variants as defined in RFC 4122.
@@ -198,7 +204,7 @@ PHPAPI typedef enum php_uuid_variant {
  * @see https://tools.ietf.org/html/rfc4122#section-4.2
  * @see https://en.wikipedia.org/wiki/Universally_unique_identifier#Version_1_.28date-time_and_MAC_address.29
  */
-PHPAPI extern const uint8_t PHP_UUID_VERSION_1_TIME_BASED;
+static const uint8_t PHP_UUID_VERSION_1_TIME_BASED = 1;
 
 /**
  * Version code for date-time and IEEE 802 MAC address UUIDs (DCE security
@@ -213,7 +219,7 @@ PHPAPI extern const uint8_t PHP_UUID_VERSION_1_TIME_BASED;
  * @see https://tools.ietf.org/html/rfc4122#section-4.2
  * @see https://en.wikipedia.org/wiki/Universally_unique_identifier#Version_2_.28date-time_and_MAC_Address.2C_DCE_security_version.29
  */
-PHPAPI extern const uint8_t PHP_UUID_VERSION_2_DCE_SECURITY;
+static const uint8_t PHP_UUID_VERSION_2_DCE_SECURITY = 2;
 
 /**
  * Version code for namespace/name-based MD5 hashed UUIDs.
@@ -222,7 +228,7 @@ PHPAPI extern const uint8_t PHP_UUID_VERSION_2_DCE_SECURITY;
  * @see https://tools.ietf.org/html/rfc4122#section-4.3
  * @see https://en.wikipedia.org/wiki/Universally_unique_identifier#Versions_3_and_5_.28namespace_name-based.29
  */
-PHPAPI extern const uint8_t PHP_UUID_VERSION_3_NAME_BASED_MD5;
+static const uint8_t PHP_UUID_VERSION_3_NAME_BASED_MD5 = 3;
 
 /**
  * Version code for random UUIDs.
@@ -231,7 +237,7 @@ PHPAPI extern const uint8_t PHP_UUID_VERSION_3_NAME_BASED_MD5;
  * @see https://tools.ietf.org/html/rfc4122#section-4.4
  * @see https://en.wikipedia.org/wiki/Universally_unique_identifier#Version_4_.28random.29
  */
-PHPAPI extern const uint8_t PHP_UUID_VERSION_4_RANDOM;
+static const uint8_t PHP_UUID_VERSION_4_RANDOM = 4;
 
 /**
  * Version code for namespace/name-based SHA1 hashed UUIDs.
@@ -240,7 +246,7 @@ PHPAPI extern const uint8_t PHP_UUID_VERSION_4_RANDOM;
  * @see https://tools.ietf.org/html/rfc4122#section-4.3
  * @see https://en.wikipedia.org/wiki/Universally_unique_identifier#Versions_3_and_5_.28namespace_name-based.29
  */
-PHPAPI extern const uint8_t PHP_UUID_VERSION_5_NAME_BASED_SHA1;
+static const uint8_t PHP_UUID_VERSION_5_NAME_BASED_SHA1 = 5;
 
 /**
  * Parse the given string as UUID.
@@ -529,7 +535,7 @@ static zend_always_inline const uint8_t php_uuid_get_version(const php_uuid *uui
  */
 static zend_always_inline const int php_uuid_is_nil(const php_uuid *uuid)
 {
-	return memcmp(uuid->bytes, "", PHP_UUID_LEN) == 0;
+	return memcmp(uuid->bytes, &PHP_UUID_NIL, PHP_UUID_LEN) == 0;
 }
 
 /**
