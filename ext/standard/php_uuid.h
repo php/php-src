@@ -120,7 +120,7 @@ PHPAPI extern zend_class_entry *php_ce_UUIDParseException;
 #define PHP_UUID_LEN 16
 
 /** UUID binary representation to store the 128 bit number in 16 bytes. */
-PHPAPI typedef struct php_uuid {
+typedef struct php_uuid {
 	uint8_t bytes[PHP_UUID_LEN];
 } php_uuid;
 
@@ -128,7 +128,7 @@ PHPAPI typedef struct php_uuid {
 #define PHP_UUID_HEX_LEN 33
 
 /** UUID hexadecimal representation: `000000001111222233334444444444444444\0` */
-PHPAPI typedef struct php_uuid_hex {
+typedef struct php_uuid_hex {
 	char str[PHP_UUID_HEX_LEN];
 } php_uuid_hex;
 
@@ -136,7 +136,7 @@ PHPAPI typedef struct php_uuid_hex {
 #define PHP_UUID_STRING_LEN 37
 
 /** UUID string representation: `00000000-1111-2222-3333-4444444444444444\0` */
-PHPAPI typedef struct php_uuid_string {
+typedef struct php_uuid_string {
 	char str[PHP_UUID_STRING_LEN];
 } php_uuid_string;
 
@@ -145,7 +145,7 @@ PHPAPI typedef struct php_uuid_string {
  *
  * @see https://tools.ietf.org/html/rfc4122#section-4.1.1
  */
-PHPAPI typedef enum php_uuid_variant {
+typedef enum php_uuid_variant {
 	PHP_UUID_VARIANT_NCS             = 0, /* 0b0xx */
 	PHP_UUID_VARIANT_RFC4122         = 1, /* 0b10x */
 	PHP_UUID_VARIANT_MICROSOFT       = 2, /* 0b110 */
