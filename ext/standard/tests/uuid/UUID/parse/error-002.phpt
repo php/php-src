@@ -5,6 +5,9 @@ Richard Fussenegger php@fleshgrinder.com
 --FILE--
 <?php
 
+use PHP\Std\UUID;
+use PHP\Std\UUIDParseException;
+
 try {
 	UUID::parse('01234567-89ab-cdef-0123-456789abcPHP');
 }

@@ -5,6 +5,8 @@ Richard Fussenegger php@fleshgrinder.com
 --FILE--
 <?php
 
+use PHP\Std\UUID;
+
 var_dump(UUID::v3(UUID::NamespaceDNS(), 'php.net')->toString());
 
 ?>

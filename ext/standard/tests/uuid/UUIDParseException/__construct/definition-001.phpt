@@ -5,6 +5,8 @@ Richard Fussenegger php@fleshgrinder.com
 --FILE--
 <?php
 
+use PHP\Std\UUIDParseException;
+
 $m = new ReflectionMethod(UUIDParseException::class, '__construct');
 
 var_dump(

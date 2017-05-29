@@ -21,6 +21,7 @@
 #include "php_uuid.h"
 
 #include "zend_exceptions.h"
+#include "php_standard.h"
 #include "ext/spl/spl_exceptions.h"
 #include "md5.h"
 #include "php_random.h"
@@ -728,7 +729,7 @@ PHP_MINIT_FUNCTION(uuid)
 {
 	zend_class_entry ce;
 
-	INIT_CLASS_ENTRY(ce, "UUID", uuid_methods);
+	INIT_NS_CLASS_ENTRY(ce, PHP_STD_NAMESPACE, "UUID", uuid_methods);
 	php_ce_UUID = zend_register_internal_class(&ce);
 	php_ce_UUID->ce_flags |= ZEND_ACC_FINAL;
 
@@ -745,7 +746,7 @@ PHP_MINIT_FUNCTION(uuid)
 
 	zend_declare_property_null(php_ce_UUID, UUID_BYTES_PROP, UUID_BYTES_PROP_LEN, ZEND_ACC_PRIVATE);
 
-	INIT_CLASS_ENTRY(ce, "UUIDParseException", uuid_parse_exception_methods);
+	INIT_NS_CLASS_ENTRY(ce, PHP_STD_NAMESPACE, "UUIDParseException", uuid_parse_exception_methods);
 	php_ce_UUIDParseException = zend_register_internal_class_ex(&ce, zend_ce_exception);
 	php_ce_UUIDParseException->ce_flags |= ZEND_ACC_FINAL;
 	php_ce_UUIDParseException->create_object = zend_ce_exception->create_object;

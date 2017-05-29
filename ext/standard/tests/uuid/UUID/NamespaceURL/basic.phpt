@@ -5,6 +5,8 @@ Richard Fussenegger php@fleshgrinder.com
 --FILE--
 <?php
 
+use PHP\Std\UUID;
+
 $uuid = UUID::NamespaceURL();
 
 var_dump(

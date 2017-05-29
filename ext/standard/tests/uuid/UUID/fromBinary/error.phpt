@@ -5,6 +5,8 @@ Richard Fussenegger php@fleshgrinder.com
 --FILE--
 <?php
 
+use PHP\Std\UUID;
+
 foreach ([0, 1, 15, 17, random_int(18, 256)] as $i) {
 	try {
 		UUID::fromBinary($i === 0 ? '' : random_bytes($i));

@@ -5,6 +5,8 @@ Richard Fussenegger php@fleshgrinder.com
 --FILE--
 <?php
 
+use PHP\Std\UUID;
+
 $p = (new ReflectionMethod(UUID::class, 'v3'))->getParameters()[1];
 
 var_dump(

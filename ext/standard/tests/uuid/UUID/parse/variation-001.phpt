@@ -5,6 +5,8 @@ Richard Fussenegger php@fleshgrinder.com
 --FILE--
 <?php
 
+use PHP\Std\UUID;
+
 $uuid = UUID::parse('123E4567E89B12D3A456426655440000');
 
 $p = new ReflectionProperty($uuid, 'bytes');

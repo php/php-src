@@ -5,6 +5,8 @@ Richard Fussenegger php@fleshgrinder.com
 --FILE--
 <?php
 
+use PHP\Std\UUID;
+
 for ($i = 0; $i < 16; ++$i) {
 	var_dump(UUID::fromBinary(sprintf("\x00\x00\x00\x00\x00\x00%s\x00\x00\x00\x00\x00\x00\x00\x00\x00", chr($i << 4)))->getVersion());
 }

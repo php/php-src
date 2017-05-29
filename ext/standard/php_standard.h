@@ -65,6 +65,9 @@
 #include "php_version.h"
 #define PHP_STANDARD_VERSION PHP_VERSION
 
+/* PHP standard module namespace. */
+#define PHP_STD_NAMESPACE PHP_NAMESPACE PHP_NAMESPACE_SEPARATOR "Std"
+
 #define phpext_standard_ptr basic_functions_module_ptr
 PHP_MINIT_FUNCTION(standard_filters);
 PHP_MSHUTDOWN_FUNCTION(standard_filters);

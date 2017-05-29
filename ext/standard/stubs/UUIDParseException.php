@@ -6,12 +6,16 @@
  * [GitHub](https://github.com/Fleshgrinder/php-uuid).
  */
 
+namespace PHP\Std;
+
 /**
- * Thrown if parsing of a UUID from a string fails.
+ * Thrown if parsing of a PHP\Std\UUID from a string fails.
  *
  * ## Examples
  * ```
  * <?php
+ *
+ * use PHP\Std\{UUID, UUIDParseException};
  *
  * try {
  *     UUID::parse('php');
@@ -43,7 +47,7 @@
  * ?>
  * ```
  *
- * @see UUID::parse()
+ * @see \PHP\Std\UUID::parse()
  */
 final class UUIDParseException extends \Exception {
 	/** @var string */

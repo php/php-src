@@ -5,8 +5,10 @@ Richard Fussenegger php@fleshgrinder.com
 --FILE--
 <?php
 
-$uuid  = UUID::fromBinary('                ');
-$p = new ReflectionProperty($uuid, 'bytes');
+use PHP\Std\UUID;
+
+$uuid = UUID::fromBinary('                ');
+$p    = new ReflectionProperty($uuid, 'bytes');
 $p->setAccessible(true);
 var_dump($p->getValue($uuid) === '                ');
 

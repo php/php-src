@@ -5,7 +5,7 @@ Richard Fussenegger php@fleshgrinder.com
 --FILE--
 <?php
 
-$e = new UUIDParseException('basic-reason', 'basic-input');
+$e = new PHP\Std\UUIDParseException('basic-reason', 'basic-input');
 
 var_dump(
 	$e->getCode(),

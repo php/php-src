@@ -5,6 +5,8 @@ Richard Fussenegger php@fleshgrinder.com
 --FILE--
 <?php
 
+use PHP\Std\UUID;
+
 var_dump(
 	UUID::VERSION_1_TIME_BASED,
 	UUID::VERSION_2_DCE_SECURITY,

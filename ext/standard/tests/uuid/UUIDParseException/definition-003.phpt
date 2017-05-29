@@ -5,6 +5,8 @@ Richard Fussenegger php@fleshgrinder.com
 --FILE--
 <?php
 
+use PHP\Std\UUIDParseException;
+
 $p = new ReflectionProperty(UUIDParseException::class, 'position');
 
 var_dump($p->isPrivate(), $p->isStatic());

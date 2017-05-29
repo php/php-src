@@ -5,6 +5,8 @@ Richard Fussenegger php@fleshgrinder.com
 --FILE--
 <?php
 
+use PHP\Std\UUIDParseException;
+
 var_dump((new UUIDParseException('', '', 42))->getPosition());
 
 ?>

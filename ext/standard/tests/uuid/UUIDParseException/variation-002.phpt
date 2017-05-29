@@ -5,7 +5,7 @@ Richard Fussenegger php@fleshgrinder.com
 --FILE--
 <?php
 
-$e = new UUIDParseException('variation-002-reason', 'variation-002-input', 2, $previous = new Error);
+$e = new PHP\Std\UUIDParseException('variation-002-reason', 'variation-002-input', 2, $previous = new Error);
 
 var_dump(
 	$e->getCode(),

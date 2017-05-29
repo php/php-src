@@ -5,6 +5,8 @@ Richard Fussenegger php@fleshgrinder.com
 --FILE--
 <?php
 
+use PHP\Std\UUID;
+
 $m = new ReflectionMethod(UUID::class, '__clone');
 $m->setAccessible(true);
 
@@ -17,4 +19,4 @@ catch (Error $e) {
 
 ?>
 --EXPECT--
-Cannot clone immutable UUID object
+Cannot clone immutable PHP\Std\UUID object

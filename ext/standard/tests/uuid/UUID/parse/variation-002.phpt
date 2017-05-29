@@ -5,6 +5,8 @@ Richard Fussenegger php@fleshgrinder.com
 --FILE--
 <?php
 
+use PHP\Std\UUID;
+
 $uuid = UUID::parse(" \t{\t{ { \t123e4567e89b12d3a456426655440000");
 
 $p = new ReflectionProperty($uuid, 'bytes');

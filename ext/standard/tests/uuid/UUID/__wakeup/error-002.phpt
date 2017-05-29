@@ -8,7 +8,7 @@ Richard Fussenegger php@fleshgrinder.com
 foreach ([0, 1, 15, 17, random_int(18, 256)] as $i) {
 	try {
 		$bytes = $i === 0 ? '' : random_bytes($i);
-		unserialize("O:4:\"UUID\":1:{s:11:\"\0UUID\0bytes\";s:{$i}:\"{$bytes}\";}");
+		unserialize("O:12:\"PHP\Std\UUID\":1:{s:19:\"\0PHP\Std\UUID\0bytes\";s:{$i}:\"{$bytes}\";}");
 	}
 	catch (UnexpectedValueException $e) {
 		echo $e->getMessage(), "\n";
@@ -17,8 +17,8 @@ foreach ([0, 1, 15, 17, random_int(18, 256)] as $i) {
 
 ?>
 --EXPECTF--
-Expected UUID::$bytes value to be exactly 16 bytes long, but found 0
-Expected UUID::$bytes value to be exactly 16 bytes long, but found 1
-Expected UUID::$bytes value to be exactly 16 bytes long, but found 15
-Expected UUID::$bytes value to be exactly 16 bytes long, but found 17
-Expected UUID::$bytes value to be exactly 16 bytes long, but found %d
+Expected PHP\Std\UUID::$bytes value to be exactly 16 bytes long, but found 0
+Expected PHP\Std\UUID::$bytes value to be exactly 16 bytes long, but found 1
+Expected PHP\Std\UUID::$bytes value to be exactly 16 bytes long, but found 15
+Expected PHP\Std\UUID::$bytes value to be exactly 16 bytes long, but found 17
+Expected PHP\Std\UUID::$bytes value to be exactly 16 bytes long, but found %d

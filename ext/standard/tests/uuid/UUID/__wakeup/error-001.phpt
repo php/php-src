@@ -6,7 +6,7 @@ Richard Fussenegger php@fleshgrinder.com
 <?php
 
 try {
-    unserialize("O:4:\"UUID\":1:{s:11:\"\0UUID\0bytes\";N;}");
+    unserialize("O:12:\"PHP\Std\UUID\":1:{s:19:\"\0PHP\Std\UUID\0bytes\";N;}");
 }
 catch (UnexpectedValueException $e) {
     echo $e->getMessage(), "\n";
@@ -14,4 +14,4 @@ catch (UnexpectedValueException $e) {
 
 ?>
 --EXPECTF--
-Expected UUID::$bytes value to be of type string, but found null
+Expected PHP\Std\UUID::$bytes value to be of type string, but found null

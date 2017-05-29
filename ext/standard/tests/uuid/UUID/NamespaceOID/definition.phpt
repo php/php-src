@@ -5,6 +5,8 @@ Richard Fussenegger php@fleshgrinder.com
 --FILE--
 <?php
 
+use PHP\Std\UUID;
+
 $m = new ReflectionMethod(UUID::class, 'NamespaceOID');
 
 var_dump(

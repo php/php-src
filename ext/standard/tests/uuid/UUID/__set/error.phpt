@@ -5,6 +5,8 @@ Richard Fussenegger php@fleshgrinder.com
 --FILE--
 <?php
 
+use PHP\Std\UUID;
+
 try {
 	UUID::Nil()->dynamic_property = 'value';
 }
@@ -14,4 +16,4 @@ catch (Error $e) {
 
 ?>
 --EXPECT--
-Cannot set dynamic properties on immutable UUID object
+Cannot set dynamic properties on immutable PHP\Std\UUID object

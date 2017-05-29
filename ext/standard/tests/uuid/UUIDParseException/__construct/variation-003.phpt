@@ -5,6 +5,8 @@ Richard Fussenegger php@fleshgrinder.com
 --FILE--
 <?php
 
+use PHP\Std\UUIDParseException;
+
 $e = new UUIDParseException('variation-003-reason', 'variation-003-input', 84, $previous = new Exception);
 
 foreach (['message', 'input', 'position'] as $p) {
