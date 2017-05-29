@@ -473,13 +473,13 @@ ZEND_END_ARG_INFO()
 #define PHP_UUID_NAMED_CONSTRUCTOR(method_name, name)                       \
 	PHP_METHOD(UUID, method_name)                                           \
 	{                                                                       \
-		const php_uuid name = php_uuid_##name##();                          \
+		const php_uuid name = php_uuid_##name();                            \
 		                                                                    \
 		if (zend_parse_parameters_none_throw() == FAILURE) {                \
 			return;                                                         \
 		}                                                                   \
 		                                                                    \
-		new_uuid(return_value, &##name##);                                  \
+		new_uuid(return_value, &name);                                      \
 	}                                                                       \
 	ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_##method_name##_args, self, 0) \
 	ZEND_END_ARG_INFO()
