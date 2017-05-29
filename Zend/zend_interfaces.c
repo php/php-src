@@ -28,6 +28,7 @@ ZEND_API zend_class_entry *zend_ce_aggregate;
 ZEND_API zend_class_entry *zend_ce_iterator;
 ZEND_API zend_class_entry *zend_ce_arrayaccess;
 ZEND_API zend_class_entry *zend_ce_serializable;
+ZEND_API zend_class_entry *zend_ce_countable;
 
 /* {{{ zend_call_method
  Only returns the returned zval if retval_ptr != NULL */
@@ -470,6 +471,13 @@ static int zend_implement_serializable(zend_class_entry *interface, zend_class_e
 }
 /* }}}*/
 
+/* {{{ zend_implement_countable */
+static int zend_implement_countable(zend_class_entry *interface, zend_class_entry *class_type)
+{
+	return SUCCESS;
+}
+/* }}}*/
+
 /* {{{ function tables */
 const zend_function_entry zend_funcs_aggregate[] = {
 	ZEND_ABSTRACT_ME(iterator, getIterator, NULL)
@@ -517,6 +525,14 @@ const zend_function_entry zend_funcs_serializable[] = {
 	ZEND_FENTRY(unserialize, NULL, arginfo_serializable_serialize, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT|ZEND_ACC_CTOR)
 	ZEND_FE_END
 };
+
+ZEND_BEGIN_ARG_INFO(arginfo_countable_count, 0)
+ZEND_END_ARG_INFO()
+
+const zend_function_entry zend_funcs_countable[] = {
+	ZEND_ABSTRACT_ME(Countable, count, arginfo_countable_count)
+	ZEND_FE_END
+};
 /* }}} */
 
 /* {{{ zend_register_interfaces */
@@ -533,6 +549,8 @@ ZEND_API void zend_register_interfaces(void)
 	REGISTER_MAGIC_INTERFACE(arrayaccess, ArrayAccess);
 
 	REGISTER_MAGIC_INTERFACE(serializable, Serializable);
+
+	REGISTER_MAGIC_INTERFACE(countable, Countable);
 }
 /* }}} */
 

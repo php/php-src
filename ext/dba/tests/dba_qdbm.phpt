@@ -31,6 +31,4 @@ array(3) {
   ["key5"]=>
   string(23) "The last content string"
 }
-
-Warning: dba_popen(%stest0.dbm,r-): Locking cannot be disabled for handler qdbm in %sdba_handler.inc on line %d
 ===DONE===

@@ -246,40 +246,23 @@ static int php_json_encode_array(smart_str *buf, zval *val, int options, php_jso
 }
 /* }}} */
 
-static int php_json_utf8_to_utf16(unsigned short *utf16, char utf8[], size_t len) /* {{{ */
+static int php_json_valid_utf8(char utf8[], size_t len) /* {{{ */
 {
 	size_t pos = 0, us;
-	int j, status;
+	int status;
 
-	if (utf16) {
-		/* really convert the utf8 string */
-		for (j=0 ; pos < len ; j++) {
+	while (pos < len) {
+		us = (unsigned char)utf8[pos];
+		if (us < 0x80) {
+			pos++;
+		} else {
 			us = php_next_utf8_char((const unsigned char *)utf8, len, &pos, &status);
 			if (status != SUCCESS) {
-				return -1;
-			}
-			/* From http://en.wikipedia.org/wiki/UTF16 */
-			if (us >= 0x10000) {
-				us -= 0x10000;
-				utf16[j++] = (unsigned short)((us >> 10) | 0xd800);
-				utf16[j] = (unsigned short)((us & 0x3ff) | 0xdc00);
-			} else {
-				utf16[j] = (unsigned short)us;
-			}
-		}
-	} else {
-		/* Only check if utf8 string is valid, and compute utf16 length */
-		for (j=0 ; pos < len ; j++) {
-			us = php_next_utf8_char((const unsigned char *)utf8, len, &pos, &status);
-			if (status != SUCCESS) {
-				return -1;
-			}
-			if (us >= 0x10000) {
-				j++;
+				return 0;
 			}
 		}
 	}
-	return j;
+	return 1;
 }
 /* }}} */
 
@@ -315,7 +298,7 @@ static int php_json_escape_string(
 
 	if (options & PHP_JSON_UNESCAPED_UNICODE) {
 		/* validate UTF-8 string first */
-		if (php_json_utf8_to_utf16(NULL, s, len) < 0) {
+		if (!php_json_valid_utf8(s, len)) {
 			encoder->error_code = PHP_JSON_ERROR_UTF8;
 			if (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) {
 				smart_str_appendl(buf, "null", 4);

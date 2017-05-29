@@ -674,7 +674,12 @@ static int do_cli(int argc, char **argv) /* {{{ */
 	char *exec_direct=NULL, *exec_run=NULL, *exec_begin=NULL, *exec_end=NULL;
 	char *arg_free=NULL, **arg_excp=&arg_free;
 	char *script_file=NULL, *translated_path = NULL;
+#if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE) && (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
+	DWORD pl[1];
+	int interactive = (GetConsoleProcessList(pl, 1) == 1) && !IsDebuggerPresent();
+#else
 	int interactive=0;
+#endif
 	int lineno = 0;
 	const char *param_error=NULL;
 	int hide_argv = 0;

@@ -2940,6 +2940,7 @@ PHP_FUNCTION(openssl_pkcs12_read)
 
 	if (d2i_PKCS12_bio(bio_in, &p12) && PKCS12_parse(p12, pass, &pkey, &cert, &ca)) {
 		BIO * bio_out;
+		int cert_num;
 
 		zval_dtor(zout);
 		array_init(zout);
@@ -2970,10 +2971,11 @@ PHP_FUNCTION(openssl_pkcs12_read)
 			BIO_free(bio_out);
 		}
 
-		if (ca && sk_X509_num(ca)) {
+		cert_num = sk_X509_num(ca);
+		if (ca && cert_num) {
 			array_init(&zextracerts);
 
-			for (i = 0; i < sk_X509_num(ca); i++) {
+			for (i = 0; i < cert_num; i++) {
 				zval zextracert;
 				X509* aCA = sk_X509_pop(ca);
 				if (!aCA) break;
@@ -6214,9 +6216,7 @@ static int php_openssl_validate_iv(char **piv, size_t *piv_len, size_t iv_requir
 
 	if (mode->is_aead) {
 		if (EVP_CIPHER_CTX_ctrl(cipher_ctx, mode->aead_ivlen_flag, *piv_len, NULL) != 1) {
-			php_error_docref(NULL, E_WARNING,
-					"Setting of IV length for AEAD mode failed, the expected length is %zd bytes",
-					iv_required_len);
+			php_error_docref(NULL, E_WARNING, "Setting of IV length for AEAD mode failed");
 			return FAILURE;
 		}
 		return SUCCESS;

@@ -341,7 +341,7 @@ static const func_info_t func_infos[] = {
 #ifdef HAVE_STRFMON
 	F1("money_format",                 MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 #endif
-	F1("substr",                       MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
+	FN("substr",                       MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	FN("substr_replace",               MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_STRING),
 	F1("quotemeta",                    MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F1("ucfirst",                      MAY_BE_NULL | MAY_BE_STRING),
@@ -544,9 +544,9 @@ static const func_info_t func_infos[] = {
 	F1("show_source",                  MAY_BE_FALSE | MAY_BE_STRING),
 	F1("highlight_string",             MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_STRING),
 	F1("php_strip_whitespace",         MAY_BE_FALSE | MAY_BE_STRING),
-	F1("ini_get",                      MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
+	FN("ini_get",                      MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F1("ini_get_all",                  MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_NULL | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY),
-	F1("ini_set",                      MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
+	FN("ini_set",                      MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F1("ini_alter",                    MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F0("ini_restore",                  MAY_BE_NULL),
 	F1("get_include_path",             MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
@@ -589,7 +589,7 @@ static const func_info_t func_infos[] = {
 	F0("doubleval",                    MAY_BE_NULL | MAY_BE_DOUBLE),
 	FN("strval",                       MAY_BE_NULL | MAY_BE_STRING),
 	F0("boolval",                      MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	F1("gettype",                      MAY_BE_NULL | MAY_BE_STRING),
+	FN("gettype",                      MAY_BE_NULL | MAY_BE_STRING),
 	F0("settype",                      MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	FC("is_null",                      zend_is_type_info),
 	F0("is_resource",                  MAY_BE_FALSE | MAY_BE_TRUE), // TODO: inline with support for closed resources

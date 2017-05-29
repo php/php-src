@@ -3,6 +3,11 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.2
 
 - Core:
+  . Added ZEND_COUNT, ZEND_GET_CLASS, ZEND_GET_CALLED_CLASS, ZEND_GET_TYPE
+    instructions, to implement corresponding builtin functions. (Dmitry)
+  . "Countable" interface is moved from SPL to Core. (Dmitry)
+  . Added ZEND_IN_ARRAY instruction, implementing optimized in_array() builtin
+    function, through hash lookup in flipped array. (Dmitry)
   . Removed IS_TYPE_IMMUTABLE (it's the same as COPYABLE & !REFCOUNTED). (Dmitry)
   . Removed the sql.safe_mode directive. (Kalle)
   . Removed support for Netware. (Kalle)
@@ -39,6 +44,15 @@ PHP                                                                        NEWS
   . Fixed bug #74149 (static embed SAPI linkage error). (krakjoe)
   . Fixed bug #72359, bug #72451, bug #73706, bug #71115 and others related
     to interned strings handling in TS builds. (Anatol, Dmitry)
+  . Implemented "Trailing Commas In List Syntax" RFC for group use lists only.
+    (Sammy Kaye Powers)
+  . Fixed bug #74269 (It's possible to override trait property with different
+    loosely-equal value). (pmmaga)
+  . Fixed bug #61970 (Restraining __construct() access level in subclass gives
+    a fatal error). (pmmaga)
+  . Fixed bug #63384 (Cannot override an abstract method with an abstract
+    method). (pmmaga, wes)
+  . Fixed misparsing of abstract unix domain socket names. (Sara)
 
 - BCMath:
   . Fixed bug #46564 (bcmod truncates fractionals). (liborm85)
@@ -52,6 +66,10 @@ PHP                                                                        NEWS
     (krakjoe)
   . Fixed bug #74080 (add constant for RFC7231 format datetime). (duncan3dc)
 
+- Dba:
+  . Fixed bug #72885 (flatfile: dba_fetch() fails to read replaced entry).
+    (Anatol)
+
 - DOM:
   . Fixed bug #67474 (getElementsByTagNameNS filter on default ns). (aboks)
   . Fixed bug #54382 (getAttributeNodeNS doesn't get xmlns* attributes).
@@ -61,7 +79,8 @@ PHP                                                                        NEWS
 
 - EXIF:
   . Added support for vendor specific tags for the following formats:
-    Samsung, DJI, Panasonic, Sony, Pentax, Minolta & Sigma/Foveon. (Kalle)
+    Samsung, DJI, Panasonic, Sony, Pentax, Minolta, Sigma/Foveon, AGFA, 
+	Kyocera, Ricoh & Epson. (Kalle)
   . Fixed bug #72682 (exif_read_data() fails to read all data for some
     images). (Kalle)
   . Fixed bug #71534 (Type confusion in exif_read_data() leading to heap
@@ -79,6 +98,7 @@ PHP                                                                        NEWS
     (Mike)
 
 - FTP:
+  . Fixed bug #74598 (ftp:// wrapper ignores context arg). (Sara)
   . Implement MLSD for structured listing of directories. (blar)
 
 - GD:
@@ -97,6 +117,8 @@ PHP                                                                        NEWS
 - intl:
   . Fixed bug #74433 (wrong reflection for Normalizer methods). (villfa)
   . Fixed bug #74439 (wrong reflection for Locale methods). (villfa)
+  . Fixed bug #74468 (wrong reflection on Collator::sortWithSortKeys). (villfa)
+  . Fixed bug #63790 (test using Spoofchecker which may be unavailable). (Sara)
 
 - Mbstring:
   . Implemented request #66024 (mb_chr() and mb_ord()). (Masakielastic, Yasuo)
@@ -150,6 +172,7 @@ PHP                                                                        NEWS
     (mhagstrand)
   . Fixed bug #74196 (phar does not correctly handle names containing dots).
     (mhagstrand)
+  . Fixed bug #74386 (Phar::__construct reflection incorrect). (villfa)
 
 - PHPDBG
   . Added extended_value to opcode dump output. (Sara)
@@ -181,10 +204,14 @@ PHP                                                                        NEWS
   . Fixed bug #72979 (money_format stores wrong length AIX). (matthieu.sarter)
   . Fixed bug #74300 (unserialize accepts two plus/minus signs for float number exponent part).
     (xKerman)
+  . Fixed bug #74556 (stream_socket_get_name() returns '\0'). (Sara)
 
 - XML:
   . Moved utf8_encode() and utf8_decode() to the Standard extension. (Andrea)
   . Fixed bug #72135 (malformed XML causes fault) (edgarsandi)
+
+- xmlreader:
+  . Fixed bug #74457 (Wrong reflection on XMLReader::expand). (villfa)
 
 - XMLRPC:
   . Use Zend MM for allocation in bundled libxmlrpc (Joe)

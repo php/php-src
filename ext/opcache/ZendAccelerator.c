@@ -1001,6 +1001,17 @@ int validate_timestamp_and_record(zend_persistent_script *persistent_script, zen
 	}
 }
 
+int validate_timestamp_and_record_ex(zend_persistent_script *persistent_script, zend_file_handle *file_handle)
+{
+	int ret;
+
+	SHM_UNPROTECT();
+	ret = validate_timestamp_and_record(persistent_script, file_handle);
+	SHM_PROTECT();
+
+	return ret;
+}
+
 /* Instead of resolving full real path name each time we need to identify file,
  * we create a key that consist from requested file name, current working
  * directory, current include_path, etc */
@@ -1749,7 +1760,10 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 				return accelerator_orig_compile_file(file_handle, type);
 			}
 			persistent_script = zend_accel_hash_str_find(&ZCSG(hash), key, key_length);
+		} else if (UNEXPECTED(is_stream_path(file_handle->filename) && !is_cacheable_stream_path(file_handle->filename))) {
+			return accelerator_orig_compile_file(file_handle, type);
 		}
+
 		if (!persistent_script) {
 			/* try to find cached script by full real path */
 			zend_accel_hash_entry *bucket;
