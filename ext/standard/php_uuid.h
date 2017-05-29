@@ -129,7 +129,7 @@ typedef struct php_uuid {
 
 /** UUID hexadecimal representation: `000000001111222233334444444444444444\0` */
 typedef struct php_uuid_hex {
-	unsigned char str[PHP_UUID_HEX_LEN];
+	char str[PHP_UUID_HEX_LEN];
 } php_uuid_hex;
 
 /** UUID string representation length with terminating NUL. */
@@ -137,7 +137,7 @@ typedef struct php_uuid_hex {
 
 /** UUID string representation: `00000000-1111-2222-3333-4444444444444444\0` */
 typedef struct php_uuid_string {
-	unsigned char str[PHP_UUID_STRING_LEN];
+	char str[PHP_UUID_STRING_LEN];
 } php_uuid_string;
 
 /**
