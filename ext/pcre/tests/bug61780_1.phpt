@@ -2,22 +2,22 @@
 Bug #61780 (Inconsistent PCRE captures in match results): numeric subpatterns
 --FILE--
 <?php
-preg_match('/(4)?(2)?\d/', '23456', $matches);
+preg_match('/(4)?(2)?\d/', '23456', $matches, PREG_UNMATCHED_AS_NULL);
 var_export($matches);
 echo "\n\n";
-preg_match('/(4)?(2)?\d/', '23456', $matches, PREG_OFFSET_CAPTURE);
+preg_match('/(4)?(2)?\d/', '23456', $matches, PREG_OFFSET_CAPTURE | PREG_UNMATCHED_AS_NULL);
 var_export($matches);
 echo "\n\n";
-preg_match_all('/(4)?(2)?\d/', '123456', $matches);
+preg_match_all('/(4)?(2)?\d/', '123456', $matches, PREG_UNMATCHED_AS_NULL);
 var_export($matches);
 echo "\n\n";
-preg_match_all('/(4)?(2)?\d/', '123456', $matches, PREG_OFFSET_CAPTURE);
+preg_match_all('/(4)?(2)?\d/', '123456', $matches, PREG_OFFSET_CAPTURE | PREG_UNMATCHED_AS_NULL);
 var_export($matches);
 echo "\n\n";
-preg_match_all('/(4)?(2)?\d/', '123456', $matches, PREG_SET_ORDER);
+preg_match_all('/(4)?(2)?\d/', '123456', $matches, PREG_SET_ORDER | PREG_UNMATCHED_AS_NULL);
 var_export($matches);
 echo "\n\n";
-preg_match_all('/(4)?(2)?\d/', '123456', $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
+preg_match_all('/(4)?(2)?\d/', '123456', $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE | PREG_UNMATCHED_AS_NULL);
 var_export($matches);
 ?>
 --EXPECT--

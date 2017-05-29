@@ -51,6 +51,7 @@
 #include "php_inifile.h"
 #include "php_qdbm.h"
 #include "php_tcadb.h"
+#include "php_lmdb.h"
 
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dba_popen, 0, 0, 2)
@@ -227,7 +228,7 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free)
 		return len;
 	} else {
 		zval tmp;
-		int len;
+		size_t len;
 
 		ZVAL_COPY(&tmp, key);
 		convert_to_string(&tmp);
@@ -363,6 +364,9 @@ static dba_handler handler[] = {
 #if DBA_TCADB
 	DBA_HND(tcadb, DBA_LOCK_ALL)
 #endif
+#if DBA_LMDB
+	DBA_HND(lmdb, DBA_LOCK_EXT)
+#endif
 	{ NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL }
 };
 
@@ -386,6 +390,8 @@ static dba_handler handler[] = {
 #define DBA_DEFAULT "qdbm"
 #elif DBA_TCADB
 #define DBA_DEFAULT "tcadb"
+#elif DBA_LMDB
+#define DBA_DEFAULT "lmdb"
 #else
 #define DBA_DEFAULT ""
 #endif
@@ -607,7 +613,7 @@ dba_info *php_dba_find(const char* path)
 {
 	zend_resource *le;
 	dba_info *info;
-	int numitems, i;
+	zend_long numitems, i;
 
 	numitems = zend_hash_next_free_element(&EG(regular_list));
 	for (i=1; i<numitems; i++) {
@@ -636,7 +642,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	dba_info *info, *other;
 	dba_handler *hptr;
 	char *key = NULL, *error = NULL;
-	int keylen = 0;
+	size_t keylen = 0;
 	int i;
 	int lock_mode, lock_flag, lock_dbf = 0;
 	char *file_mode;
@@ -956,27 +962,26 @@ restart:
 				int flags = fcntl(info->fd, F_GETFL);
 				fcntl(info->fd, F_SETFL, flags & ~O_APPEND);
 #elif defined(PHP_WIN32)
-	} else if (modenr == DBA_CREAT && need_creation && !restarted) {
-		zend_bool close_both;
+			} else if (modenr == DBA_CREAT && need_creation && !restarted) {
+				zend_bool close_both;
 
-		close_both = (info->fp != info->lock.fp);
-		php_stream_close(info->lock.fp);
-		if (close_both) {
-			php_stream_close(info->fp);
-		}
-		info->fp = NULL;
-		info->lock.fp = NULL;
-		info->fd = -1;
+				close_both = (info->fp != info->lock.fp);
+				php_stream_close(info->lock.fp);
+				if (close_both) {
+					php_stream_close(info->fp);
+				}
+				info->fp = NULL;
+				info->lock.fp = NULL;
+				info->fd = -1;
 
-		pefree(info->lock.name, persistent);
+				pefree(info->lock.name, persistent);
 
-		lock_file_mode = "r+b";
+				lock_file_mode = "r+b";
 
-		restarted = 1;
-		goto restart;
+				restarted = 1;
+				goto restart;
 #endif
 			}
-
 		}
 	}
 
@@ -1062,7 +1067,7 @@ PHP_FUNCTION(dba_exists)
 PHP_FUNCTION(dba_fetch)
 {
 	char *val;
-	int len = 0;
+	size_t len = 0;
 	DBA_ID_GET2_3;
 
 	if (ac==3) {
@@ -1135,7 +1140,7 @@ PHP_FUNCTION(dba_key_split)
 PHP_FUNCTION(dba_firstkey)
 {
 	char *fkey;
-	int len;
+	size_t len;
 	zval *id;
 	dba_info *info = NULL;
 
@@ -1162,7 +1167,7 @@ PHP_FUNCTION(dba_firstkey)
 PHP_FUNCTION(dba_nextkey)
 {
 	char *nkey;
-	int len;
+	size_t len;
 	zval *id;
 	dba_info *info = NULL;
 
