@@ -392,7 +392,7 @@ static zend_always_inline int php_uuid_parse_throw(php_uuid *uuid, const char *i
  * @param[in] name to create the UUID from.
  * @param[in] name_len
  */
-PHPAPI void php_uuid_create_v3(php_uuid *uuid, const php_uuid *namespace, const unsigned char *name, const size_t name_len);
+PHPAPI void php_uuid_create_v3(php_uuid *uuid, const php_uuid *namespace, const char *name, const size_t name_len);
 
 /**
  * Create version 4 UUID.
@@ -503,7 +503,7 @@ static zend_always_inline int php_uuid_create_v4_throw(php_uuid *uuid)
  * @param[in] name to create the UUID from.
  * @param[in] name_len
  */
-PHPAPI void php_uuid_create_v5(php_uuid *uuid, const php_uuid *namespace, const unsigned char *name, const size_t name_len);
+PHPAPI void php_uuid_create_v5(php_uuid *uuid, const php_uuid *namespace, const char *name, const size_t name_len);
 
 /**
  * Get the variant associated with this UUID.

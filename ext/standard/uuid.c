@@ -29,23 +29,23 @@
 PHPAPI zend_class_entry *php_ce_UUID;
 PHPAPI zend_class_entry *php_ce_UUIDParseException;
 
-static const uint8_t UUID_VERSION_MIN              = 0;
-static const uint8_t UUID_VERSION_MAX              = 15;
+static const uint8_t UUID_VERSION_MIN         = 0;
+static const uint8_t UUID_VERSION_MAX         = 15;
 
-static const uint8_t UUID_HEX_LEN                  = sizeof(php_uuid_hex) - 1;
-static const uint8_t UUID_STRING_LEN               = sizeof(php_uuid_string) - 1;
+static const uint8_t UUID_HEX_LEN             = sizeof(php_uuid_hex) - 1;
+static const uint8_t UUID_STRING_LEN          = sizeof(php_uuid_string) - 1;
 
-static const unsigned char UUID_BYTES_PROP[]       = "bytes";
-static const uint8_t UUID_BYTES_PROP_LEN           = sizeof(UUID_BYTES_PROP) - 1;
+static const char UUID_BYTES_PROP[]           = "bytes";
+static const uint8_t UUID_BYTES_PROP_LEN      = sizeof(UUID_BYTES_PROP) - 1;
 
-static const unsigned char UUID_EX_INPUT_PROP[]    = "input";
-static const uint8_t UUID_EX_INPUT_PROP_LEN        = sizeof(UUID_EX_INPUT_PROP) - 1;
+static const char UUID_EX_INPUT_PROP[]        = "input";
+static const uint8_t UUID_EX_INPUT_PROP_LEN   = sizeof(UUID_EX_INPUT_PROP) - 1;
 
-static const unsigned char UUID_EX_POSITION_PROP[] = "position";
-static const uint8_t UUID_EX_POSITON_PROP_LEN      = sizeof(UUID_EX_POSITION_PROP) - 1;
+static const char UUID_EX_POSITION_PROP[]     = "position";
+static const uint8_t UUID_EX_POSITON_PROP_LEN = sizeof(UUID_EX_POSITION_PROP) - 1;
 
-static const unsigned char URN_PREFIX[]            = "urn:uuid:";
-static const uint8_t URN_PREFIX_LEN                = sizeof(URN_PREFIX) - 1;
+static const char URN_PREFIX[]                = "urn:uuid:";
+static const uint8_t URN_PREFIX_LEN           = sizeof(URN_PREFIX) - 1;
 
 /**
  * Set UUID variant to RFC 4122, the only supported variant.
@@ -170,7 +170,7 @@ PHPAPI int php_uuid_parse(php_uuid *uuid, const char *input, const size_t input_
 	}
 
 	for (; position <= limit; ++position) {
-		const unsigned char chr = input[position];
+		const char chr = input[position];
 
 		/* First digit of the byte. */
 		if (digit % 2 == 0) {
@@ -246,7 +246,7 @@ PHPAPI int php_uuid_parse(php_uuid *uuid, const char *input, const size_t input_
 	return SUCCESS;
 }
 
-PHPAPI void php_uuid_create_v3(php_uuid *uuid, const php_uuid *namespace, const unsigned char *name, const size_t name_len)
+PHPAPI void php_uuid_create_v3(php_uuid *uuid, const php_uuid *namespace, const char *name, const size_t name_len)
 {
 	PHP_MD5_CTX context;
 
@@ -270,14 +270,14 @@ PHPAPI int php_uuid_create_v4(php_uuid *uuid, const zend_bool throw)
 	return result;
 }
 
-PHPAPI void php_uuid_create_v5(php_uuid *uuid, const php_uuid *namespace, const unsigned char *name, const size_t name_len)
+PHPAPI void php_uuid_create_v5(php_uuid *uuid, const php_uuid *namespace, const char *name, const size_t name_len)
 {
 	PHP_SHA1_CTX context;
-	char digest[20];
+	unsigned char digest[20];
 
 	PHP_SHA1Init(&context);
 	PHP_SHA1Update(&context, namespace->bytes, PHP_UUID_LEN);
-	PHP_SHA1Update(&context, name, name_len);
+	PHP_SHA1Update(&context, (const unsigned char *) name, name_len);
 	PHP_SHA1Final(digest, &context);
 	memcpy(uuid->bytes, digest, PHP_UUID_LEN);
 	set_variant_rfc4122(uuid);
