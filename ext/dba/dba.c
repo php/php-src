@@ -228,7 +228,7 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free)
 		return len;
 	} else {
 		zval tmp;
-		int len;
+		size_t len;
 
 		ZVAL_COPY(&tmp, key);
 		convert_to_string(&tmp);
@@ -613,7 +613,7 @@ dba_info *php_dba_find(const char* path)
 {
 	zend_resource *le;
 	dba_info *info;
-	int numitems, i;
+	zend_long numitems, i;
 
 	numitems = zend_hash_next_free_element(&EG(regular_list));
 	for (i=1; i<numitems; i++) {
@@ -642,7 +642,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	dba_info *info, *other;
 	dba_handler *hptr;
 	char *key = NULL, *error = NULL;
-	int keylen = 0;
+	size_t keylen = 0;
 	int i;
 	int lock_mode, lock_flag, lock_dbf = 0;
 	char *file_mode;
