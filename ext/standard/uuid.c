@@ -30,23 +30,23 @@
 PHPAPI zend_class_entry *php_ce_UUID;
 PHPAPI zend_class_entry *php_ce_UUIDParseException;
 
-static const uint8_t UUID_VERSION_MIN         = 0;
-static const uint8_t UUID_VERSION_MAX         = 15;
+static const uint8_t UUID_VERSION_MIN              = 0;
+static const uint8_t UUID_VERSION_MAX              = 15;
 
-static const uint8_t UUID_HEX_LEN             = sizeof(php_uuid_hex) - 1;
-static const uint8_t UUID_STRING_LEN          = sizeof(php_uuid_string) - 1;
+static const uint8_t UUID_HEX_LEN                  = sizeof(php_uuid_hex) - 1;
+static const uint8_t UUID_STRING_LEN               = sizeof(php_uuid_string) - 1;
 
-static const char UUID_BYTES_PROP[]           = "bytes";
-static const uint8_t UUID_BYTES_PROP_LEN      = sizeof(UUID_BYTES_PROP) - 1;
+static const unsigned char UUID_BYTES_PROP[]       = "bytes";
+static const uint8_t UUID_BYTES_PROP_LEN           = sizeof(UUID_BYTES_PROP) - 1;
 
-static const char UUID_EX_INPUT_PROP[]        = "input";
-static const uint8_t UUID_EX_INPUT_PROP_LEN   = sizeof(UUID_EX_INPUT_PROP) - 1;
+static const unsigned char UUID_EX_INPUT_PROP[]    = "input";
+static const uint8_t UUID_EX_INPUT_PROP_LEN        = sizeof(UUID_EX_INPUT_PROP) - 1;
 
-static const char UUID_EX_POSITION_PROP[]     = "position";
-static const uint8_t UUID_EX_POSITON_PROP_LEN = sizeof(UUID_EX_POSITION_PROP) - 1;
+static const unsigned char UUID_EX_POSITION_PROP[] = "position";
+static const uint8_t UUID_EX_POSITON_PROP_LEN      = sizeof(UUID_EX_POSITION_PROP) - 1;
 
-static const char URN_PREFIX[]                = "urn:uuid:";
-static const uint8_t URN_PREFIX_LEN           = sizeof(URN_PREFIX) - 1;
+static const unsigned char URN_PREFIX[]            = "urn:uuid:";
+static const uint8_t URN_PREFIX_LEN                = sizeof(URN_PREFIX) - 1;
 
 /**
  * Set UUID variant to RFC 4122, the only supported variant.
@@ -85,7 +85,7 @@ static zend_always_inline void php_uuid_set_version(php_uuid *uuid, const uint8_
  * @param[in] reason why parsing failed.
  * @param[in] ... arguments to format the reason.
  */
-static ZEND_COLD zend_object *throw_uuid_parse_exception(const char *input, const size_t input_len, const size_t position, const char *reason, ...)
+static ZEND_COLD zend_object *throw_uuid_parse_exception(const unsigned char *input, const size_t input_len, const size_t position, const unsigned char *reason, ...)
 {
 	va_list format_args;
 	char *formatted_reason;
@@ -113,7 +113,7 @@ static ZEND_COLD zend_object *throw_uuid_parse_exception(const char *input, cons
  * @param[in] position at which parsing failed.
  * @param[in] actual amount of characters that were found.
  */
-static zend_always_inline zend_object *throw_uuid_parse_exception_invalid_len(const char *input, const size_t input_len, const size_t position, const size_t actual)
+static zend_always_inline zend_object *throw_uuid_parse_exception_invalid_len(const unsigned char *input, const size_t input_len, const size_t position, const size_t actual)
 {
 	return throw_uuid_parse_exception(
 		input,
@@ -132,7 +132,7 @@ static zend_always_inline zend_object *throw_uuid_parse_exception_invalid_len(co
  * @param[in] input_len
  * @param[in] position at which parsing failed.
  */
-static zend_always_inline zend_object *throw_uuid_parse_exception_invalid_char(const char *input, const size_t input_len, const size_t position)
+static zend_always_inline zend_object *throw_uuid_parse_exception_invalid_char(const unsigned char *input, const size_t input_len, const size_t position)
 {
 	return throw_uuid_parse_exception(
 		input,
@@ -144,7 +144,7 @@ static zend_always_inline zend_object *throw_uuid_parse_exception_invalid_char(c
 	);
 }
 
-PHPAPI int php_uuid_parse(php_uuid *uuid, const char *input, const size_t input_len, const zend_bool throw)
+PHPAPI int php_uuid_parse(php_uuid *uuid, const unsigned char *input, const size_t input_len, const zend_bool throw)
 {
 	size_t position = 0;
 	size_t digit    = 0;
@@ -171,7 +171,7 @@ PHPAPI int php_uuid_parse(php_uuid *uuid, const char *input, const size_t input_
 	}
 
 	for (; position <= limit; ++position) {
-		const char chr = input[position];
+		const unsigned char chr = input[position];
 
 		/* First digit of the byte. */
 		if (digit % 2 == 0) {
@@ -247,7 +247,7 @@ PHPAPI int php_uuid_parse(php_uuid *uuid, const char *input, const size_t input_
 	return SUCCESS;
 }
 
-PHPAPI void php_uuid_create_v3(php_uuid *uuid, const php_uuid *namespace, const char *name, const size_t name_len)
+PHPAPI void php_uuid_create_v3(php_uuid *uuid, const php_uuid *namespace, const unsigned char *name, const size_t name_len)
 {
 	PHP_MD5_CTX context;
 
@@ -271,7 +271,7 @@ PHPAPI int php_uuid_create_v4(php_uuid *uuid, const zend_bool throw)
 	return result;
 }
 
-PHPAPI void php_uuid_create_v5(php_uuid *uuid, const php_uuid *namespace, const char *name, const size_t name_len)
+PHPAPI void php_uuid_create_v5(php_uuid *uuid, const php_uuid *namespace, const unsigned char *name, const size_t name_len)
 {
 	PHP_SHA1_CTX context;
 	char digest[20];

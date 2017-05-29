@@ -129,7 +129,7 @@ typedef struct php_uuid {
 
 /** UUID hexadecimal representation: `000000001111222233334444444444444444\0` */
 typedef struct php_uuid_hex {
-	char str[PHP_UUID_HEX_LEN];
+	unsigned char str[PHP_UUID_HEX_LEN];
 } php_uuid_hex;
 
 /** UUID string representation length with terminating NUL. */
@@ -137,7 +137,7 @@ typedef struct php_uuid_hex {
 
 /** UUID string representation: `00000000-1111-2222-3333-4444444444444444\0` */
 typedef struct php_uuid_string {
-	char str[PHP_UUID_STRING_LEN];
+	unsigned char str[PHP_UUID_STRING_LEN];
 } php_uuid_string;
 
 /**
@@ -313,7 +313,7 @@ static const zend_always_inline php_uuid php_uuid_nil()
  * @return `SUCCESS` if the string was parsed as UUID, `FAILURE` otherwise.
  * @throws UUIDParseException if throw is enabled and parsing fails.
  */
-PHPAPI int php_uuid_parse(php_uuid *uuid, const char *input, const size_t input_len, const zend_bool throw);
+PHPAPI int php_uuid_parse(php_uuid *uuid, const unsigned char *input, const size_t input_len, const zend_bool throw);
 
 /**
  * Silently parse the string as UUID.
@@ -324,7 +324,7 @@ PHPAPI int php_uuid_parse(php_uuid *uuid, const char *input, const size_t input_
  * @param[in] input_len
  * @return `SUCCESS` if the string was parsed as UUID, `FAILURE` otherwise.
  */
-static zend_always_inline int php_uuid_parse_silent(php_uuid *uuid, const char *input, const size_t input_len)
+static zend_always_inline int php_uuid_parse_silent(php_uuid *uuid, const unsigned char *input, const size_t input_len)
 {
 	return php_uuid_parse(uuid, input, input_len, 0);
 }
@@ -339,7 +339,7 @@ static zend_always_inline int php_uuid_parse_silent(php_uuid *uuid, const char *
  * @return `SUCCESS` if the string was parsed as UUID, `FAILURE` otherwise.
  * @throws UUIDParseException if throw is enabled and parsing fails.
  */
-static zend_always_inline int php_uuid_parse_throw(php_uuid *uuid, const char *input, const size_t input_len)
+static zend_always_inline int php_uuid_parse_throw(php_uuid *uuid, const unsigned char *input, const size_t input_len)
 {
 	return php_uuid_parse(uuid, input, input_len, 1);
 }
@@ -392,7 +392,7 @@ static zend_always_inline int php_uuid_parse_throw(php_uuid *uuid, const char *i
  * @param[in] name to create the UUID from.
  * @param[in] name_len
  */
-PHPAPI void php_uuid_create_v3(php_uuid *uuid, const php_uuid *namespace, const char *name, const size_t name_len);
+PHPAPI void php_uuid_create_v3(php_uuid *uuid, const php_uuid *namespace, const unsigned char *name, const size_t name_len);
 
 /**
  * Create version 4 UUID.
@@ -503,7 +503,7 @@ static zend_always_inline int php_uuid_create_v4_throw(php_uuid *uuid)
  * @param[in] name to create the UUID from.
  * @param[in] name_len
  */
-PHPAPI void php_uuid_create_v5(php_uuid *uuid, const php_uuid *namespace, const char *name, const size_t name_len);
+PHPAPI void php_uuid_create_v5(php_uuid *uuid, const php_uuid *namespace, const unsigned char *name, const size_t name_len);
 
 /**
  * Get the variant associated with this UUID.
