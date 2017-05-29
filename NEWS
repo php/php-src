@@ -172,6 +172,7 @@ PHP                                                                        NEWS
     (mhagstrand)
   . Fixed bug #74196 (phar does not correctly handle names containing dots).
     (mhagstrand)
+  . Fixed bug #74386 (Phar::__construct reflection incorrect). (villfa)
 
 - PHPDBG
   . Added extended_value to opcode dump output. (Sara)
