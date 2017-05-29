@@ -69,7 +69,7 @@
  * php_random_bytes_silent(&uuid, PHP_UUID_LEN);
  * php_uuid_set_variant(&uuid, PHP_UUID_VARIANT_FUTURE_RESERVED);
  * 
- * php_uuid_create_v3(&uuid, &PHP_UUID_NAMESPACE_DNS, "php.net", sizeof("php.net") - 1);
+ * php_uuid_create_v3(&uuid, php_uuid_namespace_dns(), "php.net", sizeof("php.net") - 1);
  * assert(php_uuid_is_nil(uuid) == FALSE);
  * assert(php_uuid_get_variant(uuid) == PHP_UUID_VARIANT_RFC4122);
  * assert(php_uuid_get_version(uuid) == PHP_UUID_VERSION_3_NAME_BASED_MD5);
@@ -79,7 +79,7 @@
  * assert(php_uuid_get_variant(uuid) == PHP_UUID_VARIANT_RFC4122);
  * assert(php_uuid_get_version(uuid) == PHP_UUID_VERSION_4_RANDOM);
  * 
- * php_uuid_create_v5(&uuid, &PHP_UUID_NAMESPACE_DNS, "php.net", sizeof("php.net") - 1);
+ * php_uuid_create_v5(&uuid, php_uuid_namespace_dns(), "php.net", sizeof("php.net") - 1);
  * assert(php_uuid_is_nil(uuid) == FALSE);
  * assert(php_uuid_get_variant(uuid) == PHP_UUID_VARIANT_RFC4122);
  * assert(php_uuid_get_version(uuid) == PHP_UUID_VERSION_5_NAME_BASED_SHA1);
@@ -139,48 +139,6 @@ PHPAPI typedef struct php_uuid_hex {
 PHPAPI typedef struct php_uuid_string {
 	char str[PHP_UUID_STRING_LEN];
 } php_uuid_string;
-
-/**
- * Domain Name System (DNS) namespace UUID.
- *
- * @see https://tools.ietf.org/html/rfc4122#appendix-C
- * @see https://en.wikipedia.org/wiki/Domain_Name_System
- */
-static const php_uuid PHP_UUID_NAMESPACE_DNS = { "\x6b\xa7\xb8\x10\x9d\xad\x11\xd1\x80\xb4\x00\xc0\x4f\xd4\x30\xc8" };
-
-/**
-* Object Identifier (OID) namespace UUID.
-*
- * @see https://tools.ietf.org/html/rfc4122#appendix-C
- * @see https://en.wikipedia.org/wiki/Object_identifier
- */
-static const php_uuid PHP_UUID_NAMESPACE_OID = { "\x6b\xa7\xb8\x12\x9d\xad\x11\xd1\x80\xb4\x00\xc0\x4f\xd4\x30\xc8" };
-
-/**
- * Uniform Resource Locator (URL) namespace UUID.
- *
- * @see https://tools.ietf.org/html/rfc4122#appendix-C
- * @see https://en.wikipedia.org/wiki/URL
- */
-static const php_uuid PHP_UUID_NAMESPACE_URL = { "\x6b\xa7\xb8\x11\x9d\xad\x11\xd1\x80\xb4\x00\xc0\x4f\xd4\x30\xc8" };
-
-/**
- * X.500 Distinguished Names (X.500 DN) namespace UUID. The names that are to
- * be hashed in this namespace can be in DER or a text output format.
- *
- * @see https://tools.ietf.org/html/rfc4122#appendix-C
- * @see https://en.wikipedia.org/wiki/X.500
- * @see https://en.wikipedia.org/wiki/Lightweight_Directory_Access_Protocol
- */
-static const php_uuid PHP_UUID_NAMESPACE_X500 = { "\x6b\xa7\xb8\x14\x9d\xad\x11\xd1\x80\xb4\x00\xc0\x4f\xd4\x30\xc8" };
-
-/**
- * Special nil UUID that has all 128 bits set to zero.
- *
- * @see https://tools.ietf.org/html/rfc4122#section-4.1.7
- * @see https://en.wikipedia.org/wiki/Universally_unique_identifier#Nil_UUID
- */
-static const php_uuid PHP_UUID_NIL = { "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00" };
 
 /**
  * UUID variants as defined in RFC 4122.
@@ -247,6 +205,63 @@ static const uint8_t PHP_UUID_VERSION_4_RANDOM = 4;
  * @see https://en.wikipedia.org/wiki/Universally_unique_identifier#Versions_3_and_5_.28namespace_name-based.29
  */
 static const uint8_t PHP_UUID_VERSION_5_NAME_BASED_SHA1 = 5;
+
+/**
+ * Domain Name System (DNS) namespace UUID.
+ *
+ * @see https://tools.ietf.org/html/rfc4122#appendix-C
+ * @see https://en.wikipedia.org/wiki/Domain_Name_System
+ */
+static const zend_always_inline php_uuid php_uuid_namespace_dns()
+{
+	return (php_uuid) { "\x6b\xa7\xb8\x10\x9d\xad\x11\xd1\x80\xb4\x00\xc0\x4f\xd4\x30\xc8" };
+}
+
+/**
+* Object Identifier (OID) namespace UUID.
+*
+ * @see https://tools.ietf.org/html/rfc4122#appendix-C
+ * @see https://en.wikipedia.org/wiki/Object_identifier
+ */
+static const zend_always_inline php_uuid php_uuid_namespace_oid()
+{
+	return (php_uuid) { "\x6b\xa7\xb8\x12\x9d\xad\x11\xd1\x80\xb4\x00\xc0\x4f\xd4\x30\xc8" };
+}
+
+/**
+ * Uniform Resource Locator (URL) namespace UUID.
+ *
+ * @see https://tools.ietf.org/html/rfc4122#appendix-C
+ * @see https://en.wikipedia.org/wiki/URL
+ */
+static const zend_always_inline php_uuid php_uuid_namespace_url()
+{
+	return (php_uuid) { "\x6b\xa7\xb8\x11\x9d\xad\x11\xd1\x80\xb4\x00\xc0\x4f\xd4\x30\xc8" };
+}
+
+/**
+ * X.500 Distinguished Names (X.500 DN) namespace UUID. The names that are to
+ * be hashed in this namespace can be in DER or a text output format.
+ *
+ * @see https://tools.ietf.org/html/rfc4122#appendix-C
+ * @see https://en.wikipedia.org/wiki/X.500
+ * @see https://en.wikipedia.org/wiki/Lightweight_Directory_Access_Protocol
+ */
+static const zend_always_inline php_uuid php_uuid_namespace_x500()
+{
+	return (php_uuid) { "\x6b\xa7\xb8\x14\x9d\xad\x11\xd1\x80\xb4\x00\xc0\x4f\xd4\x30\xc8" };
+}
+
+/**
+ * Special nil UUID that has all 128 bits set to zero.
+ *
+ * @see https://tools.ietf.org/html/rfc4122#section-4.1.7
+ * @see https://en.wikipedia.org/wiki/Universally_unique_identifier#Nil_UUID
+ */
+static const zend_always_inline php_uuid php_uuid_nil()
+{
+	return (php_uuid) { "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00" };
+}
 
 /**
  * Parse the given string as UUID.
@@ -333,10 +348,10 @@ PHPAPI int php_uuid_parse(php_uuid *uuid, const char *input, const size_t input_
  * byte representation and the given name. The namespace itself must be
  * another UUID. This can be any UUID, or one of the predefined ones:
  *
- * - {@see PHP_UUID_NAMESPACE_DNS}
- * - {@see PHP_UUID_NAMESPACE_OID}
- * - {@see PHP_UUID_NAMESPACE_URL}
- * - {@see PHP_UUID_NAMESPACE_X500}
+ * - {@see php_uuid_namespace_dns}
+ * - {@see php_uuid_namespace_oid}
+ * - {@see php_uuid_namespace_url}
+ * - {@see php_uuid_namespace_x500}
  *
  * A particular name within the same namespace always results in the same
  * version 3 UUID, across all RFC 4122 compliant UUID implementations.
@@ -344,9 +359,10 @@ PHPAPI int php_uuid_parse(php_uuid *uuid, const char *input, const size_t input_
  *
  * ## Examples
  * ```
+ * const php_uuid nsid = php_uuid_namespace_dns();
  * php_uuid uuid;
  *
- * php_uuid_create_v3(&uuid, PHP_UUID_NAMESPACE_DNS, "php.net", sizeof("php.net") - 1);
+ * php_uuid_create_v3(&uuid, &nsid, "php.net", sizeof("php.net") - 1);
  *
  * assert(php_uuid_is_nil(uuid)      == FALSE);
  * assert(php_uuid_get_variant(uuid) == PHP_UUID_VARIANT_RFC4122);
@@ -357,7 +373,7 @@ PHPAPI int php_uuid_parse(php_uuid *uuid, const char *input, const size_t input_
  * assert(memcmp(&str, "11a38b9a-b3da-360f-9353-a5a725514269", PHP_UUID_STRING_LEN) == 0);
  *
  * php_uuid tmp;
- * php_uuid_create_v3(&tmp, PHP_UUID_NAMESPACE_DNS, "php.net", sizeof("php.net") - 1);
+ * php_uuid_create_v3(&tmp, &nsid, "php.net", sizeof("php.net") - 1);
  * assert(memcmp(&tmp, &uuid, PHP_UUID_LEN) == 0);
  * ```
  *
@@ -437,10 +453,10 @@ PHPAPI int php_uuid_create_v4(php_uuid *uuid, const zend_bool throw);
  * byte representation and the given name. The namespace itself must be
  * another UUID. This can be any UUID, or one of the predefined ones:
  *
- * - {@see PHP_UUID_NAMESPACE_DNS}
- * - {@see PHP_UUID_NAMESPACE_OID}
- * - {@see PHP_UUID_NAMESPACE_URL}
- * - {@see PHP_UUID_NAMESPACE_X500}
+ * - {@see php_uuid_namespace_dns}
+ * - {@see php_uuid_namespace_oid}
+ * - {@see php_uuid_namespace_url}
+ * - {@see php_uuid_namespace_x500}
  *
  * A particular name within the same namespace always results in the same
  * version 5 UUID, across all RFC 4122 compliant UUID implementations.
@@ -448,9 +464,10 @@ PHPAPI int php_uuid_create_v4(php_uuid *uuid, const zend_bool throw);
  *
  * ## Examples
  * ```
+ * const php_uuid nsid = php_uuid_namespace_dns();
  * php_uuid uuid;
  *
- * php_uuid_create_v5(&uuid, PHP_UUID_NAMESPACE_DNS, "php.net", sizeof("php.net") - 1);
+ * php_uuid_create_v5(&uuid, &nsid, "php.net", sizeof("php.net") - 1);
  *
  * assert(php_uuid_is_nil(uuid)      == FALSE);
  * assert(php_uuid_get_variant(uuid) == PHP_UUID_VARIANT_RFC4122);
@@ -461,7 +478,7 @@ PHPAPI int php_uuid_create_v4(php_uuid *uuid, const zend_bool throw);
  * assert(memcmp(&str, "c4a760a8-dbcf-5254-a0d9-6a4474bd1b62", PHP_UUID_STRING_LEN) == 0);
  *
  * php_uuid tmp;
- * php_uuid_create_v5(&tmp, PHP_UUID_NAMESPACE_DNS, "php.net", sizeof("php.net") - 1);
+ * php_uuid_create_v5(&tmp, &nsid, "php.net", sizeof("php.net") - 1);
  * assert(memcmp(&tmp, &uuid, PHP_UUID_LEN) == 0);
  * ```
  *
@@ -535,7 +552,9 @@ static zend_always_inline const uint8_t php_uuid_get_version(const php_uuid *uui
  */
 static zend_always_inline const int php_uuid_is_nil(const php_uuid *uuid)
 {
-	return memcmp(uuid->bytes, &PHP_UUID_NIL, PHP_UUID_LEN) == 0;
+	const php_uuid nil = php_uuid_nil();
+
+	return memcmp(uuid->bytes, &nil, PHP_UUID_LEN) == 0;
 }
 
 /**
@@ -547,9 +566,10 @@ static zend_always_inline const int php_uuid_is_nil(const php_uuid *uuid)
  *
  * ## Examples
  * ```
+ * const php_uuid nsid = php_uuid_namespace_dns();
  * php_uuid_hex hex;
  *
- * php_uuid_to_hex(&hex, PHP_UUID_NAMESPACE_DNS);
+ * php_uuid_to_hex(&hex, &nsid);
  * assert(memcmp(&hex, "6ba7b8109dad11d180b400c04fd430c8", PHP_UUID_HEX_LEN) == 0);
  * ```
  *
@@ -579,9 +599,10 @@ static zend_always_inline void php_uuid_to_hex(php_uuid_hex *buffer, const php_u
  *
  * ## Examples
  * ```
+ * const php_uuid nsid = php_uuid_namespace_dns();
  * php_uuid_string str;
  *
- * php_uuid_to_hex(&str, PHP_UUID_NAMESPACE_DNS);
+ * php_uuid_to_hex(&str, &nsid);
  * assert(memcmp(&str, "6ba7b810-9dad-11d1-80b4-00c04fd430c8", PHP_UUID_STRING_LEN) == 0);
  * ```
  *

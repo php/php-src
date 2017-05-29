@@ -469,69 +469,26 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(UUID_v5_args, 0, 2, self, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
 
-/* public static function NamespaceDNS(): self {{{ */
-PHP_METHOD(UUID, NamespaceDNS)
-{
-	if (zend_parse_parameters_none_throw() == FAILURE) {
-		return;
-	}
+/* public static function ##method_name##(): self {{{ */
+#define PHP_UUID_NAMED_CONSTRUCTOR(method_name, name)                       \
+	PHP_METHOD(UUID, method_name)                                           \
+	{                                                                       \
+		const php_uuid name = php_uuid_##name##();                          \
+		                                                                    \
+		if (zend_parse_parameters_none_throw() == FAILURE) {                \
+			return;                                                         \
+		}                                                                   \
+		                                                                    \
+		new_uuid(return_value, &##name##);                                  \
+	}                                                                       \
+	ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_##method_name##_args, self, 0) \
+	ZEND_END_ARG_INFO()
 
-	new_uuid(return_value, &PHP_UUID_NAMESPACE_DNS);
-}
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_NamespaceDNS_args, self, 0)
-ZEND_END_ARG_INFO()
-/* }}} */
-
-/* public static function NamespaceOID(): self {{{ */
-PHP_METHOD(UUID, NamespaceOID)
-{
-	if (zend_parse_parameters_none_throw() == FAILURE) {
-		return;
-	}
-
-	new_uuid(return_value, &PHP_UUID_NAMESPACE_OID);
-}
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_NamespaceOID_args, self, 0)
-ZEND_END_ARG_INFO()
-/* }}} */
-
-/* public static function NamespaceURL(): self {{{ */
-PHP_METHOD(UUID, NamespaceURL)
-{
-	if (zend_parse_parameters_none_throw() == FAILURE) {
-		return;
-	}
-
-	new_uuid(return_value, &PHP_UUID_NAMESPACE_URL);
-}
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_NamespaceURL_args, self, 0)
-ZEND_END_ARG_INFO()
-/* }}} */
-
-/* public static function NamespaceX500(): self {{{ */
-PHP_METHOD(UUID, NamespaceX500)
-{
-	if (zend_parse_parameters_none_throw() == FAILURE) {
-		return;
-	}
-
-	new_uuid(return_value, &PHP_UUID_NAMESPACE_X500);
-}
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_NamespaceX500_args, self, 0)
-ZEND_END_ARG_INFO()
-/* }}} */
-
-/* public static function Nil(): self {{{ */
-PHP_METHOD(UUID, Nil)
-{
-	if (zend_parse_parameters_none_throw() == FAILURE) {
-		return;
-	}
-
-	new_uuid(return_value, &PHP_UUID_NIL);
-}
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(UUID_Nil_args, self, 0)
-ZEND_END_ARG_INFO()
+PHP_UUID_NAMED_CONSTRUCTOR(NamespaceDNS, namespace_dns)
+PHP_UUID_NAMED_CONSTRUCTOR(NamespaceOID, namespace_oid)
+PHP_UUID_NAMED_CONSTRUCTOR(NamespaceURL, namespace_url)
+PHP_UUID_NAMED_CONSTRUCTOR(NamespaceX500, namespace_x500)
+PHP_UUID_NAMED_CONSTRUCTOR(Nil, nil)
 /* }}} */
 
 /* private function __clone() {{{ */
@@ -593,20 +550,15 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID___wakeup_args, IS_VOID, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
 
+#define PHP_UUID_GET_THIS_UUID()                               \
+	php_uuid *uuid = NULL;                                     \
+	if (zend_parse_parameters_none_throw() == FAILURE) return; \
+	if ((uuid = get_uuid(&EX(This))) == NULL) return;
+
 /* public function getVaraitn(): int {{{ */
 PHP_METHOD(UUID, getVariant)
 {
-	php_uuid *uuid = NULL;
-
-	if (zend_parse_parameters_none_throw() == FAILURE) {
-		return;
-	}
-
-	uuid = get_uuid(&EX(This));
-	if (uuid == NULL) {
-		return;
-	}
-
+	PHP_UUID_GET_THIS_UUID();
 	RETURN_LONG(php_uuid_get_variant(uuid));
 }
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_getVariant_args, IS_LONG, 0)
@@ -616,17 +568,7 @@ ZEND_END_ARG_INFO()
 /* public function getVersion(): int {{{ */
 PHP_METHOD(UUID, getVersion)
 {
-	php_uuid *uuid = NULL;
-
-	if (zend_parse_parameters_none_throw() == FAILURE) {
-		return;
-	}
-
-	uuid = get_uuid(&EX(This));
-	if (uuid == NULL) {
-		return;
-	}
-
+	PHP_UUID_GET_THIS_UUID();
 	RETURN_LONG(php_uuid_get_version(uuid));
 }
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_getVersion_args, IS_LONG, 0)
@@ -636,17 +578,7 @@ ZEND_END_ARG_INFO()
 /* public function isNil(): bool {{{ */
 PHP_METHOD(UUID, isNil)
 {
-	php_uuid *uuid = NULL;
-
-	if (zend_parse_parameters_none_throw() == FAILURE) {
-		return;
-	}
-
-	uuid = get_uuid(&EX(This));
-	if (uuid == NULL) {
-		return;
-	}
-
+	PHP_UUID_GET_THIS_UUID();
 	RETURN_BOOL(php_uuid_is_nil(uuid));
 }
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_isNil_args, _IS_BOOL, 0)
@@ -656,17 +588,7 @@ ZEND_END_ARG_INFO()
 /* public function toBinary(): string {{{ */
 PHP_METHOD(UUID, toBinary)
 {
-	php_uuid *uuid = NULL;
-
-	if (zend_parse_parameters_none_throw() == FAILURE) {
-		return;
-	}
-
-	uuid = get_uuid(&EX(This));
-	if (uuid == NULL) {
-		return;
-	}
-
+	PHP_UUID_GET_THIS_UUID();
 	RETURN_STRINGL(uuid->bytes, PHP_UUID_LEN);
 }
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_toBinary_args, IS_STRING, 0)
@@ -676,20 +598,9 @@ ZEND_END_ARG_INFO()
 /* public function toHex(): string {{{ */
 PHP_METHOD(UUID, toHex)
 {
-	php_uuid *uuid = NULL;
 	php_uuid_hex buffer;
-
-	if (zend_parse_parameters_none_throw() == FAILURE) {
-		return;
-	}
-
-	uuid = get_uuid(&EX(This));
-	if (uuid == NULL) {
-		return;
-	}
-
+	PHP_UUID_GET_THIS_UUID();
 	php_uuid_to_hex(&buffer, uuid);
-
 	RETURN_STRINGL(buffer.str, UUID_HEX_LEN);
 }
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_toHex_args, IS_STRING, 0)
@@ -699,20 +610,9 @@ ZEND_END_ARG_INFO()
 /* public function toString(): string {{{ */
 PHP_METHOD(UUID, toString)
 {
-	php_uuid *uuid = NULL;
 	php_uuid_string buffer;
-
-	if (zend_parse_parameters_none_throw() == FAILURE) {
-		return;
-	}
-
-	uuid = get_uuid(&EX(This));
-	if (uuid == NULL) {
-		return;
-	}
-
+	PHP_UUID_GET_THIS_UUID();
 	php_uuid_to_string(&buffer, uuid);
-
 	RETURN_STRINGL(buffer.str, UUID_STRING_LEN);
 }
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_toString_args, IS_STRING, 0)
