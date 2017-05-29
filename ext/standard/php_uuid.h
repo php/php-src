@@ -313,7 +313,7 @@ static const zend_always_inline php_uuid php_uuid_nil()
  * @return `SUCCESS` if the string was parsed as UUID, `FAILURE` otherwise.
  * @throws UUIDParseException if throw is enabled and parsing fails.
  */
-PHPAPI int php_uuid_parse(php_uuid *uuid, const unsigned char *input, const size_t input_len, const zend_bool throw);
+PHPAPI int php_uuid_parse(php_uuid *uuid, const char *input, const size_t input_len, const zend_bool throw);
 
 /**
  * Silently parse the string as UUID.
@@ -324,7 +324,7 @@ PHPAPI int php_uuid_parse(php_uuid *uuid, const unsigned char *input, const size
  * @param[in] input_len
  * @return `SUCCESS` if the string was parsed as UUID, `FAILURE` otherwise.
  */
-static zend_always_inline int php_uuid_parse_silent(php_uuid *uuid, const unsigned char *input, const size_t input_len)
+static zend_always_inline int php_uuid_parse_silent(php_uuid *uuid, const char *input, const size_t input_len)
 {
 	return php_uuid_parse(uuid, input, input_len, 0);
 }
@@ -339,7 +339,7 @@ static zend_always_inline int php_uuid_parse_silent(php_uuid *uuid, const unsign
  * @return `SUCCESS` if the string was parsed as UUID, `FAILURE` otherwise.
  * @throws UUIDParseException if throw is enabled and parsing fails.
  */
-static zend_always_inline int php_uuid_parse_throw(php_uuid *uuid, const unsigned char *input, const size_t input_len)
+static zend_always_inline int php_uuid_parse_throw(php_uuid *uuid, const char *input, const size_t input_len)
 {
 	return php_uuid_parse(uuid, input, input_len, 1);
 }

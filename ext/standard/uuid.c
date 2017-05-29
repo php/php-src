@@ -85,7 +85,7 @@ static zend_always_inline void php_uuid_set_version(php_uuid *uuid, const uint8_
  * @param[in] reason why parsing failed.
  * @param[in] ... arguments to format the reason.
  */
-static ZEND_COLD zend_object *throw_uuid_parse_exception(const unsigned char *input, const size_t input_len, const size_t position, const unsigned char *reason, ...)
+static ZEND_COLD zend_object *throw_uuid_parse_exception(const char *input, const size_t input_len, const size_t position, const char *reason, ...)
 {
 	va_list format_args;
 	char *formatted_reason;
@@ -113,7 +113,7 @@ static ZEND_COLD zend_object *throw_uuid_parse_exception(const unsigned char *in
  * @param[in] position at which parsing failed.
  * @param[in] actual amount of characters that were found.
  */
-static zend_always_inline zend_object *throw_uuid_parse_exception_invalid_len(const unsigned char *input, const size_t input_len, const size_t position, const size_t actual)
+static zend_always_inline zend_object *throw_uuid_parse_exception_invalid_len(const char *input, const size_t input_len, const size_t position, const size_t actual)
 {
 	return throw_uuid_parse_exception(
 		input,
@@ -132,7 +132,7 @@ static zend_always_inline zend_object *throw_uuid_parse_exception_invalid_len(co
  * @param[in] input_len
  * @param[in] position at which parsing failed.
  */
-static zend_always_inline zend_object *throw_uuid_parse_exception_invalid_char(const unsigned char *input, const size_t input_len, const size_t position)
+static zend_always_inline zend_object *throw_uuid_parse_exception_invalid_char(const char *input, const size_t input_len, const size_t position)
 {
 	return throw_uuid_parse_exception(
 		input,
@@ -144,7 +144,7 @@ static zend_always_inline zend_object *throw_uuid_parse_exception_invalid_char(c
 	);
 }
 
-PHPAPI int php_uuid_parse(php_uuid *uuid, const unsigned char *input, const size_t input_len, const zend_bool throw)
+PHPAPI int php_uuid_parse(php_uuid *uuid, const char *input, const size_t input_len, const zend_bool throw)
 {
 	size_t position = 0;
 	size_t digit    = 0;
