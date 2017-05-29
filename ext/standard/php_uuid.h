@@ -121,7 +121,7 @@ PHPAPI extern zend_class_entry *php_ce_UUIDParseException;
 
 /** UUID binary representation to store the 128 bit number in 16 bytes. */
 typedef struct php_uuid {
-	uint8_t bytes[PHP_UUID_LEN];
+	char bytes[PHP_UUID_LEN];
 } php_uuid;
 
 /** UUID hexadecimal representation length with terminating NUL. */
