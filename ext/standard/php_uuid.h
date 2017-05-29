@@ -206,6 +206,8 @@ static const uint8_t PHP_UUID_VERSION_4_RANDOM = 4;
  */
 static const uint8_t PHP_UUID_VERSION_5_NAME_BASED_SHA1 = 5;
 
+BEGIN_EXTERN_C()
+
 /**
  * Domain Name System (DNS) namespace UUID.
  *
@@ -322,7 +324,10 @@ PHPAPI int php_uuid_parse(php_uuid *uuid, const char *input, const size_t input_
  * @param[in] input_len
  * @return `SUCCESS` if the string was parsed as UUID, `FAILURE` otherwise.
  */
-#define php_uuid_parse_silent(uuid, input, input_len) php_uuid_parse(uuid, input, input_len, 0)
+static zend_always_inline int php_uuid_parse_silent(php_uuid *uuid, const char *input, const size_t input_len)
+{
+	return php_uuid_parse(uuid, input, input_len, 0);
+}
 
 /**
  * Parse the string as UUID and throw PHP exceptions on failures.
@@ -334,7 +339,10 @@ PHPAPI int php_uuid_parse(php_uuid *uuid, const char *input, const size_t input_
  * @return `SUCCESS` if the string was parsed as UUID, `FAILURE` otherwise.
  * @throws UUIDParseException if throw is enabled and parsing fails.
  */
-#define php_uuid_parse_throw(uuid, input, input_len) php_uuid_parse(uuid, input, input_len, 1)
+static zend_always_inline int php_uuid_parse_throw(php_uuid *uuid, const char *input, const size_t input_len)
+{
+	return php_uuid_parse(uuid, input, input_len, 1);
+}
 
 /**
  * Create version 3 UUID.
@@ -431,7 +439,10 @@ PHPAPI int php_uuid_create_v4(php_uuid *uuid, const zend_bool throw);
  * @return `SUCCESS` if the generation succeeded, `FAILURE` if it was not
  *     possible to gather sufficient entropy.
  */
-#define php_uuid_create_v4_silent(uuid) php_uuid_create_v4(uuid, 0)
+static zend_always_inline int php_uuid_create_v4_silent(php_uuid *uuid)
+{
+	return php_uuid_create_v4(uuid, 0);
+}
 
 /**
  * Create version 4 UUID and throw PHP exception if it is not possible to
@@ -444,7 +455,10 @@ PHPAPI int php_uuid_create_v4(php_uuid *uuid, const zend_bool throw);
  * @throws Exception if throw is enabled and it was not possible to gather
  *     sufficient entropy for generating random bytes.
  */
-#define php_uuid_create_v4_throw(uuid) php_uuid_create_v4(uuid, 1)
+static zend_always_inline int php_uuid_create_v4_throw(php_uuid *uuid)
+{
+	return php_uuid_create_v4(uuid, 1);
+}
 
 /**
  * Create version 5 UUID.
@@ -507,7 +521,7 @@ PHPAPI void php_uuid_create_v5(php_uuid *uuid, const php_uuid *namespace, const 
  * @param[in] uuid to get the variant from.
  * @return The variant of the given UUID.
  */
-static zend_always_inline const php_uuid_variant php_uuid_get_variant(const php_uuid *uuid)
+static const zend_always_inline php_uuid_variant php_uuid_get_variant(const php_uuid *uuid)
 {
 	if ((uuid->bytes[8] & 0xC0) == 0x80) return PHP_UUID_VARIANT_RFC4122;
 	if ((uuid->bytes[8] & 0xE0) == 0xC0) return PHP_UUID_VARIANT_MICROSOFT;
@@ -536,7 +550,7 @@ static zend_always_inline const php_uuid_variant php_uuid_get_variant(const php_
  *     values [1, 5] correspond to one of the `PHP_UUID_VERSION_*` constants.
  *     The others are not defined in RFC 4122.
  */
-static zend_always_inline const uint8_t php_uuid_get_version(const php_uuid *uuid)
+static const zend_always_inline uint8_t php_uuid_get_version(const php_uuid *uuid)
 {
 	return uuid->bytes[6] >> 4;
 }
@@ -550,7 +564,7 @@ static zend_always_inline const uint8_t php_uuid_get_version(const php_uuid *uui
  * @param[in] uuid to check.
  * @return TRUE if the UUID contains the special nil UUID; FALSE otherwise.
  */
-static zend_always_inline const int php_uuid_is_nil(const php_uuid *uuid)
+static const zend_always_inline int php_uuid_is_nil(const php_uuid *uuid)
 {
 	const php_uuid nil = php_uuid_nil();
 
@@ -621,6 +635,8 @@ static zend_always_inline void php_uuid_to_string(php_uuid_string *buffer, const
 		uuid->bytes[10], uuid->bytes[11], uuid->bytes[12], uuid->bytes[13], uuid->bytes[14], uuid->bytes[15]
 	);
 }
+
+END_EXTERN_C()
 
 /**
  * Initialization function of the standard UUID submodule.

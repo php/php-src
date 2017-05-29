@@ -550,7 +550,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID___wakeup_args, IS_VOID, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
 
-#define PHP_UUID_GET_THIS_UUID()                               \
+#define PHP_UUID_ACCESSOR                                      \
 	php_uuid *uuid = NULL;                                     \
 	if (zend_parse_parameters_none_throw() == FAILURE) return; \
 	if ((uuid = get_uuid(&EX(This))) == NULL) return;
@@ -558,7 +558,7 @@ ZEND_END_ARG_INFO()
 /* public function getVaraitn(): int {{{ */
 PHP_METHOD(UUID, getVariant)
 {
-	PHP_UUID_GET_THIS_UUID();
+	PHP_UUID_ACCESSOR;
 	RETURN_LONG(php_uuid_get_variant(uuid));
 }
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_getVariant_args, IS_LONG, 0)
@@ -568,7 +568,7 @@ ZEND_END_ARG_INFO()
 /* public function getVersion(): int {{{ */
 PHP_METHOD(UUID, getVersion)
 {
-	PHP_UUID_GET_THIS_UUID();
+	PHP_UUID_ACCESSOR;
 	RETURN_LONG(php_uuid_get_version(uuid));
 }
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_getVersion_args, IS_LONG, 0)
@@ -578,7 +578,7 @@ ZEND_END_ARG_INFO()
 /* public function isNil(): bool {{{ */
 PHP_METHOD(UUID, isNil)
 {
-	PHP_UUID_GET_THIS_UUID();
+	PHP_UUID_ACCESSOR;
 	RETURN_BOOL(php_uuid_is_nil(uuid));
 }
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_isNil_args, _IS_BOOL, 0)
@@ -588,7 +588,7 @@ ZEND_END_ARG_INFO()
 /* public function toBinary(): string {{{ */
 PHP_METHOD(UUID, toBinary)
 {
-	PHP_UUID_GET_THIS_UUID();
+	PHP_UUID_ACCESSOR;
 	RETURN_STRINGL(uuid->bytes, PHP_UUID_LEN);
 }
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_toBinary_args, IS_STRING, 0)
@@ -599,7 +599,7 @@ ZEND_END_ARG_INFO()
 PHP_METHOD(UUID, toHex)
 {
 	php_uuid_hex buffer;
-	PHP_UUID_GET_THIS_UUID();
+	PHP_UUID_ACCESSOR;
 	php_uuid_to_hex(&buffer, uuid);
 	RETURN_STRINGL(buffer.str, UUID_HEX_LEN);
 }
@@ -611,7 +611,7 @@ ZEND_END_ARG_INFO()
 PHP_METHOD(UUID, toString)
 {
 	php_uuid_string buffer;
-	PHP_UUID_GET_THIS_UUID();
+	PHP_UUID_ACCESSOR;
 	php_uuid_to_string(&buffer, uuid);
 	RETURN_STRINGL(buffer.str, UUID_STRING_LEN);
 }
