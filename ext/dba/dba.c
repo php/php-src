@@ -1067,7 +1067,7 @@ PHP_FUNCTION(dba_exists)
 PHP_FUNCTION(dba_fetch)
 {
 	char *val;
-	int len = 0;
+	size_t len = 0;
 	DBA_ID_GET2_3;
 
 	if (ac==3) {
@@ -1140,7 +1140,7 @@ PHP_FUNCTION(dba_key_split)
 PHP_FUNCTION(dba_firstkey)
 {
 	char *fkey;
-	int len;
+	size_t len;
 	zval *id;
 	dba_info *info = NULL;
 
@@ -1167,7 +1167,7 @@ PHP_FUNCTION(dba_firstkey)
 PHP_FUNCTION(dba_nextkey)
 {
 	char *nkey;
-	int len;
+	size_t len;
 	zval *id;
 	dba_info *info = NULL;
 
