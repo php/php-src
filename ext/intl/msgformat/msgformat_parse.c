@@ -110,6 +110,7 @@ PHP_FUNCTION( msgfmt_parse_message )
 		RETURN_FALSE;
 	}
 
+	INTL_CHECK_LOCALE_LEN(slocale_len);
 	memset(mfo, 0, sizeof(*mfo));
 	msgformat_data_init(&mfo->mf_data);
 
