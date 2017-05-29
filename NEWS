@@ -64,13 +64,14 @@ PHP                                                                        NEWS
   . Fix integer overflows (Joshua Rogers)
 
 - Date:
+  . Fixed bug #55407 (Impossible to prototype DateTime::createFromFormat).
+    (kelunik)
   . Fixed bug #69587 (DateInterval properties and isset). (jhdxr)
   . Fixed bug #74404 (Wrong reflection on DateTimeZone::getTransitions).
     (krakjoe)
   . Fixed bug #74080 (add constant for RFC7231 format datetime). (duncan3dc)
   . Fixed bug #74639 (implement clone for DatePeriod and DateInterval).
     (andrewnester)
-
 
 - Dba:
   . Fixed bug #72885 (flatfile: dba_fetch() fails to read replaced entry).
