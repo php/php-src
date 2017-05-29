@@ -41,7 +41,8 @@ if test "$PHP_HASH" != "no"; then
     php_hash_haval.h php_hash_tiger.h php_hash_gost.h php_hash_snefru.h \
     php_hash_whirlpool.h php_hash_adler32.h php_hash_crc32.h \
     php_hash_fnv.h php_hash_joaat.h php_hash_sha3.h"
-  
+
+  PHP_ADD_BUILD_DIR(ext/hash/$SHA3_DIR, 1)
   PHP_NEW_EXTENSION(hash, $EXT_HASH_SOURCES, $ext_shared,,$PHP_HASH_CFLAGS)
   ifdef([PHP_INSTALL_HEADERS], [
   	PHP_INSTALL_HEADERS(ext/hash, $EXT_HASH_HEADERS)
