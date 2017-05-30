@@ -8311,6 +8311,78 @@ ZEND_VM_HANDLER(193, ZEND_GET_TYPE, CONST|TMP|VAR|CV, UNUSED)
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+ZEND_VM_HANDLER(194, ZEND_FUNC_NUM_ARGS, UNUSED, UNUSED)
+{
+	ZVAL_LONG(EX_VAR(opline->result.var), EX_NUM_ARGS());
+	ZEND_VM_NEXT_OPCODE();
+}
+
+ZEND_VM_HANDLER(195, ZEND_FUNC_GET_ARGS, UNUSED|CONST, UNUSED)
+{
+	USE_OPLINE
+	zend_array *ht;
+	uint32_t arg_count, first_extra_arg, i, n;
+	zval *p, *q;
+
+	arg_count = EX_NUM_ARGS();
+	ht = (zend_array *) emalloc(sizeof(zend_array));
+	if (OP1_TYPE == IS_CONST) {
+		i = Z_LVAL_P(EX_CONSTANT(opline->op1));
+		if (arg_count < i) {
+			i = 0;
+		} else {
+			i = arg_count - i;
+		}
+		zend_hash_init(ht, i, NULL, ZVAL_PTR_DTOR, 0);
+	} else {
+		zend_hash_init(ht, arg_count, NULL, ZVAL_PTR_DTOR, 0);
+	}
+	ZVAL_ARR(EX_VAR(opline->result.var), ht);
+	if (arg_count) {
+		first_extra_arg = EX(func)->op_array.num_args;
+		zend_hash_real_init(ht, 1);
+		ZEND_HASH_FILL_PACKED(ht) {
+			i = 0;
+			n = 0;
+			if (OP1_TYPE == IS_CONST) {
+				i = Z_LVAL_P(EX_CONSTANT(opline->op1));
+			}
+			p = EX_VAR_NUM(i);
+			if (arg_count > first_extra_arg) {
+				while (i < first_extra_arg) {
+					q = p;
+					if (EXPECTED(Z_TYPE_INFO_P(q) != IS_UNDEF)) {
+						ZVAL_DEREF(q);
+						if (Z_OPT_REFCOUNTED_P(q)) {
+							Z_ADDREF_P(q);
+						}
+						n++;
+					}
+					ZEND_HASH_FILL_ADD(q);
+					p++;
+					i++;
+				}
+				p = EX_VAR_NUM(EX(func)->op_array.last_var + EX(func)->op_array.T);
+			}
+			while (i < arg_count) {
+				q = p;
+				if (EXPECTED(Z_TYPE_INFO_P(q) != IS_UNDEF)) {
+					ZVAL_DEREF(q);
+					if (Z_OPT_REFCOUNTED_P(q)) {
+						Z_ADDREF_P(q);
+					}
+					n++;
+				}
+				ZEND_HASH_FILL_ADD(q);
+				p++;
+				i++;
+			}
+		} ZEND_HASH_FILL_END();
+		ht->nNumOfElements = n;
+	}
+	ZEND_VM_NEXT_OPCODE();
+}
+
 ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_ADD, (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG), ZEND_ADD_LONG_NO_OVERFLOW, CONST|TMPVARCV, CONST|TMPVARCV, SPEC(NO_CONST_CONST,COMMUTATIVE))
 {
 	USE_OPLINE
