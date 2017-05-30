@@ -2989,6 +2989,7 @@ PHP_FUNCTION(openssl_pkcs12_read)
 				}
 
 				X509_free(aCA);
+				BIO_free(bio_out);
 			}
 
 			sk_X509_free(ca);
