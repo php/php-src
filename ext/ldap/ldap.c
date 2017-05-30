@@ -415,7 +415,7 @@ PHP_FUNCTION(ldap_connect)
 	{
 		int rc = LDAP_SUCCESS;
 		char	*url = host;
-		if (!ldap_is_ldap_url(url)) {
+		if (url && !ldap_is_ldap_url(url)) {
 			int	urllen = hostlen + sizeof( "ldap://:65535" );
 
 			if (port <= 0 || port > 65535) {
@@ -425,7 +425,7 @@ PHP_FUNCTION(ldap_connect)
 			}
 
 			url = emalloc(urllen);
-			snprintf( url, urllen, "ldap://%s:" ZEND_LONG_FMT, host ? host : "", port );
+			snprintf( url, urllen, "ldap://%s:" ZEND_LONG_FMT, host, port );
 		}
 
 #ifdef LDAP_API_FEATURE_X_OPENLDAP
