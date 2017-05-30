@@ -262,7 +262,7 @@ static int php_session_decode(zend_string *data) /* {{{ */
  * into URLs.
  */
 
-static char hexconvtab[] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ,-";
+static char hexconvtab[] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-";
 
 /* returns a pointer to the byte after the last valid character in out */
 static size_t bin_to_readable(unsigned char *in, size_t inlen, char *out, char nbits) /* {{{ */
