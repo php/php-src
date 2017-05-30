@@ -3,8 +3,8 @@ Bug #74639 Cloning DatePeriod leads to segfault
 --FILE--
 <?php
 
-$start = new DateTime('2017-05-22 09:00:00', new \DateTimeZone('Europe/Berlin'));
-$end = new DateTime('2017-08-24 18:00:00', new \DateTimeZone('Europe/Berlin'));
+$start = new DateTime('2017-05-22 09:00:00');
+$end = new DateTime('2017-08-24 18:00:00');
 $interval = $start->diff($end);
 
 $period = new DatePeriod($start, $interval, $end);
