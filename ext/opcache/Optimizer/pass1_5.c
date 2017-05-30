@@ -485,7 +485,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 
 					zend_string_release(lc_name);
 					if (!m) {
-						if (!PG(enable_dl)) {
+						if (PG(enable_dl)) {
 							break;
 						} else {
 							ZVAL_FALSE(&t);
