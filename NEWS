@@ -129,6 +129,7 @@ PHP                                                                        NEWS
   . Added array input support to mb_convert_encoding(). (Yasuo)
   . Added array input support to mb_check_encoding(). (Yasuo)
   . Fixed bug #69079 (enhancement for mb_substitute_character). (masakielastic)
+  . Update to oniguruma version 6.3.0. (Remi)
 
 - Mcrypt:
   . The deprecated mcrypt extension has been moved to PECL. (leigh)
