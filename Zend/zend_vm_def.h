@@ -4465,8 +4465,8 @@ ZEND_VM_C_LABEL(send_again):
 ZEND_VM_HANDLER(119, ZEND_SEND_ARRAY, ANY, ANY)
 {
 	USE_OPLINE
-	zend_free_op free_op1;
-	zval *args;
+	zend_free_op free_op1, free_op2;
+	zval *args, *op2;
 
 	SAVE_OPLINE();
 	args = GET_OP1_ZVAL_PTR(BP_VAR_R);
@@ -4488,44 +4488,98 @@ ZEND_VM_HANDLER(119, ZEND_SEND_ARRAY, ANY, ANY)
 		EX(call)->func = (zend_function*)&zend_pass_function;
 		Z_OBJ(EX(call)->This) = NULL;
 		ZEND_SET_CALL_INFO(EX(call), 0, ZEND_CALL_INFO(EX(call)) & ~ZEND_CALL_RELEASE_THIS);
+		FREE_UNFETCHED_OP2();
 	} else {
 		uint32_t arg_num;
 		HashTable *ht;
 		zval *arg, *param;
 
+
 ZEND_VM_C_LABEL(send_array):
 		ht = Z_ARRVAL_P(args);
-		zend_vm_stack_extend_call_frame(&EX(call), 0, zend_hash_num_elements(ht));
+		if (OP2_TYPE != IS_UNUSED) {
+			zend_free_op free_op2;
+			zval *op2 = GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R);
+			uint32_t skip = opline->extended_value;
+			uint32_t count = zend_hash_num_elements(ht);
+			zend_long len = zval_get_long(op2);
 
-		arg_num = 1;
-		param = ZEND_CALL_ARG(EX(call), 1);
-		ZEND_HASH_FOREACH_VAL(ht, arg) {
-			if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
-				if (UNEXPECTED(!Z_ISREF_P(arg))) {
-					if (!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
-						/* By-value send is not allowed -- emit a warning,
-						 * but still perform the call. */
-						zend_error(E_WARNING,
-							"Parameter %d to %s%s%s() expected to be a reference, value given",
-							arg_num,
-							EX(call)->func->common.scope ? ZSTR_VAL(EX(call)->func->common.scope->name) : "",
-							EX(call)->func->common.scope ? "::" : "",
-							ZSTR_VAL(EX(call)->func->common.function_name));
+			if (len < 0) {
+				len += (zend_long)(count - skip);
+			}
+			if (skip < count && len > 0) {
+				if (len > (zend_long)(count - skip)) {
+					len = (zend_long)(count - skip);
+				}
+				zend_vm_stack_extend_call_frame(&EX(call), 0, len);
+				arg_num = 1;
+				param = ZEND_CALL_ARG(EX(call), 1);
+				ZEND_HASH_FOREACH_VAL(ht, arg) {
+					if (skip > 0) {
+						skip--;
+						continue;
+					} else if ((zend_long)(arg_num - 1) >= len) {
+						break;
+					} else if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+						if (UNEXPECTED(!Z_ISREF_P(arg))) {
+							if (!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+								/* By-value send is not allowed -- emit a warning,
+								 * but still perform the call. */
+								zend_error(E_WARNING,
+									"Parameter %d to %s%s%s() expected to be a reference, value given",
+									arg_num,
+									EX(call)->func->common.scope ? ZSTR_VAL(EX(call)->func->common.scope->name) : "",
+									EX(call)->func->common.scope ? "::" : "",
+									ZSTR_VAL(EX(call)->func->common.function_name));
 
+							}
+						}
+					} else {
+						if (Z_ISREF_P(arg) &&
+						    !(EX(call)->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
+							/* don't separate references for __call */
+							arg = Z_REFVAL_P(arg);
+						}
+					}
+					ZVAL_COPY(param, arg);
+					ZEND_CALL_NUM_ARGS(EX(call))++;
+					arg_num++;
+					param++;
+				} ZEND_HASH_FOREACH_END();
+			}
+			FREE_OP2();
+		} else {
+			zend_vm_stack_extend_call_frame(&EX(call), 0, zend_hash_num_elements(ht));
+			arg_num = 1;
+			param = ZEND_CALL_ARG(EX(call), 1);
+			ZEND_HASH_FOREACH_VAL(ht, arg) {
+				if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+					if (UNEXPECTED(!Z_ISREF_P(arg))) {
+						if (!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+							/* By-value send is not allowed -- emit a warning,
+							 * but still perform the call. */
+							zend_error(E_WARNING,
+								"Parameter %d to %s%s%s() expected to be a reference, value given",
+								arg_num,
+								EX(call)->func->common.scope ? ZSTR_VAL(EX(call)->func->common.scope->name) : "",
+								EX(call)->func->common.scope ? "::" : "",
+								ZSTR_VAL(EX(call)->func->common.function_name));
+
+						}
+					}
+				} else {
+					if (Z_ISREF_P(arg) &&
+					    !(EX(call)->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
+						/* don't separate references for __call */
+						arg = Z_REFVAL_P(arg);
 					}
 				}
-			} else {
-				if (Z_ISREF_P(arg) &&
-				    !(EX(call)->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
-					/* don't separate references for __call */
-					arg = Z_REFVAL_P(arg);
-				}
-			}
-			ZVAL_COPY(param, arg);
-			ZEND_CALL_NUM_ARGS(EX(call))++;
-			arg_num++;
-			param++;
-		} ZEND_HASH_FOREACH_END();
+				ZVAL_COPY(param, arg);
+				ZEND_CALL_NUM_ARGS(EX(call))++;
+				arg_num++;
+				param++;
+			} ZEND_HASH_FOREACH_END();
+		}
 	}
 	FREE_OP1();
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
