@@ -648,8 +648,12 @@ static inline void add_offset_pair(zval *result, char *str, int len, int offset,
 	array_init_size(&match_pair, 2);
 
 	/* Add (match, offset) to the return value */
-	if (unmatched_as_null && offset < 0) {
-		ZVAL_NULL(&tmp);
+	if (offset < 0) {
+		if (unmatched_as_null) {
+			ZVAL_NULL(&tmp);
+		} else {
+			ZVAL_EMPTY_STRING(&tmp);
+		}
 	} else {
 		ZVAL_STRINGL(&tmp, str, len);
 	}
@@ -856,8 +860,12 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 							}
 						} else {
 							for (i = 0; i < count; i++) {
-								if (unmatched_as_null && offsets[i<<1] < 0) {
-									add_next_index_null(&match_sets[i]);
+								if (offsets[i<<1] < 0) {
+									if (unmatched_as_null) {
+										add_next_index_null(&match_sets[i]);
+									} else {
+										add_next_index_str(&match_sets[i], ZSTR_EMPTY_ALLOC());
+									}
 								} else {
 									add_next_index_stringl(&match_sets[i], (char *)stringlist[i],
 														   offsets[(i<<1)+1] - offsets[i<<1]);
@@ -881,7 +889,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 								if (unmatched_as_null) {
 									add_next_index_null(&match_sets[i]);
 								} else {
-									add_next_index_string(&match_sets[i], "");
+									add_next_index_str(&match_sets[i], ZSTR_EMPTY_ALLOC());
 								}
 							}
 						}
@@ -899,15 +907,23 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 							} else {
 								for (i = 0; i < count; i++) {
 									if (subpat_names[i]) {
-										if (unmatched_as_null && offsets[i<<1] < 0) {
-											add_assoc_null(&result_set, subpat_names[i]);
+										if (offsets[i<<1] < 0) {
+											if (unmatched_as_null) {
+												add_assoc_null(&result_set, subpat_names[i]);
+											} else {
+												add_assoc_str(&result_set, subpat_names[i], ZSTR_EMPTY_ALLOC());
+											}
 										} else {
 											add_assoc_stringl(&result_set, subpat_names[i], (char *)stringlist[i],
 															  offsets[(i<<1)+1] - offsets[i<<1]);
 										}
 									}
-									if (unmatched_as_null && offsets[i<<1] < 0) {
-										add_next_index_null(&result_set);
+									if (offsets[i<<1] < 0) {
+										if (unmatched_as_null) {
+											add_next_index_null(&result_set);
+										} else {
+											add_next_index_str(&result_set, ZSTR_EMPTY_ALLOC());
+										}
 									} else {
 										add_next_index_stringl(&result_set, (char *)stringlist[i],
 															   offsets[(i<<1)+1] - offsets[i<<1]);
@@ -922,8 +938,12 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 								}
 							} else {
 								for (i = 0; i < count; i++) {
-									if (unmatched_as_null && offsets[i<<1] < 0) {
-										add_next_index_null(&result_set);
+									if (offsets[i<<1] < 0) {
+										if (unmatched_as_null) {
+											add_next_index_null(&result_set);
+										} else {
+											add_next_index_str(&result_set, ZSTR_EMPTY_ALLOC());
+										}
 									} else {
 										add_next_index_stringl(&result_set, (char *)stringlist[i],
 															   offsets[(i<<1)+1] - offsets[i<<1]);
@@ -950,15 +970,23 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 						} else {
 							for (i = 0; i < count; i++) {
 								if (subpat_names[i]) {
-									if (unmatched_as_null && offsets[i<<1] < 0) {
-										add_assoc_null(subpats, subpat_names[i]);
+									if (offsets[i<<1] < 0) {
+										if (unmatched_as_null) {
+											add_assoc_null(subpats, subpat_names[i]);
+										} else {
+											add_assoc_str(subpats, subpat_names[i], ZSTR_EMPTY_ALLOC());
+										}
 									} else {
 										add_assoc_stringl(subpats, subpat_names[i], (char *)stringlist[i],
 														  offsets[(i<<1)+1] - offsets[i<<1]);
 									}
 								}
-								if (unmatched_as_null && offsets[i<<1] < 0) {
-									add_next_index_null(subpats);
+								if (offsets[i<<1] < 0) {
+									if (unmatched_as_null) {
+										add_next_index_null(subpats);
+									} else {
+										add_next_index_str(subpats, ZSTR_EMPTY_ALLOC());
+									}
 								} else {
 									add_next_index_stringl(subpats, (char *)stringlist[i],
 														   offsets[(i<<1)+1] - offsets[i<<1]);
@@ -974,8 +1002,12 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 							}
 						} else {
 							for (i = 0; i < count; i++) {
-								if (unmatched_as_null && offsets[i<<1] < 0) {
-									add_next_index_null(subpats);
+								if (offsets[i<<1] < 0) {
+									if (unmatched_as_null) {
+										add_next_index_null(subpats);
+									} else {
+										add_next_index_str(subpats, ZSTR_EMPTY_ALLOC());
+									}
 								} else {
 									add_next_index_stringl(subpats, (char *)stringlist[i],
 														   offsets[(i<<1)+1] - offsets[i<<1]);
