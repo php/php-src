@@ -3562,6 +3562,7 @@ int zend_compile_func_cufa(znode *result, zend_ast_list *args, zend_string *lcna
 
 		if (Z_TYPE_P(name) == IS_STRING
 		 && zend_string_equals_literal_ci(Z_STR_P(name), "array_slice")
+		 && (!FC(current_namespace) || args->child[1]->child[0]->attr == ZEND_NAME_FQ)
 		 && list->children == 3
 		 && list->child[1]->kind == ZEND_AST_ZVAL) {
 			zval *zv = zend_ast_get_zval(list->child[1]);
@@ -3845,6 +3846,7 @@ int zend_compile_func_array_slice(znode *result, zend_ast_list *args) /* {{{ */
 
 		if (Z_TYPE_P(name) == IS_STRING
 		 && zend_string_equals_literal_ci(Z_STR_P(name), "func_get_args")
+		 && (!FC(current_namespace) || args->child[0]->child[0]->attr == ZEND_NAME_FQ)
 		 && list->children == 0
 		 && Z_TYPE_P(zv) == IS_LONG
 		 && Z_LVAL_P(zv) >= 0) {
