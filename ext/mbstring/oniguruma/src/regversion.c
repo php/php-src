@@ -49,7 +49,7 @@ onig_copyright(void)
   static char s[58];
 
   xsnprintf(s, sizeof(s),
-            "Oniguruma %d.%d.%d : Copyright (C) 2002-2017 K.Kosako",
+            "Oniguruma %d.%d.%d : Copyright (C) 2002-2016 K.Kosako",
             ONIGURUMA_VERSION_MAJOR,
             ONIGURUMA_VERSION_MINOR,
             ONIGURUMA_VERSION_TEENY);

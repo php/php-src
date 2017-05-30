@@ -71,6 +71,7 @@
 
 #define INIT_MATCH_STACK_SIZE                     160
 #define DEFAULT_MATCH_STACK_LIMIT_SIZE              0 /* unlimited */
+#define DEFAULT_PARSE_DEPTH_LIMIT                4096
 
 #if defined(__GNUC__)
 #  define ARG_UNUSED  __attribute__ ((unused))
@@ -200,17 +201,17 @@
 } while(0)
 
 /* sizeof(OnigCodePoint) */
-#define WORD_ALIGNMENT_SIZE     SIZEOF_SIZE_T
+#define WORD_ALIGNMENT_SIZE     SIZEOF_LONG
 
 #define GET_ALIGNMENT_PAD_SIZE(addr,pad_size) do {\
   (pad_size) = WORD_ALIGNMENT_SIZE \
-               - ((size_t)(addr) % WORD_ALIGNMENT_SIZE);\
+               - ((unsigned int )(addr) % WORD_ALIGNMENT_SIZE);\
   if ((pad_size) == WORD_ALIGNMENT_SIZE) (pad_size) = 0;\
 } while (0)
 
 #define ALIGNMENT_RIGHT(addr) do {\
   (addr) += (WORD_ALIGNMENT_SIZE - 1);\
-  (addr) -= ((size_t)(addr) % WORD_ALIGNMENT_SIZE);\
+  (addr) -= ((unsigned int )(addr) % WORD_ALIGNMENT_SIZE);\
 } while (0)
 
 #endif /* PLATFORM_UNALIGNED_WORD_ACCESS */
@@ -522,7 +523,7 @@ typedef int RelAddrType;
 typedef int AbsAddrType;
 typedef int LengthType;
 typedef int RepeatNumType;
-typedef short int MemNumType;
+typedef int MemNumType;
 typedef short int StateCheckNumType;
 typedef void* PointerType;
 
@@ -661,11 +662,7 @@ typedef struct {
   BBuf*  mbuf;   /* multi-byte info or NULL */
 } CClassNode;
 
-#ifdef _WIN64
-typedef __int64 OnigStackIndex;
-#else
 typedef long OnigStackIndex;
-#endif
 
 typedef struct _OnigStackType {
   unsigned int type;
@@ -751,7 +748,7 @@ extern void onig_print_compiled_byte_code P_((FILE* f, UChar* bp, UChar** nextp,
 
 #ifdef ONIG_DEBUG_STATISTICS
 extern void onig_statistics_init P_((void));
-extern void onig_print_statistics P_((FILE* f));
+extern int  onig_print_statistics P_((FILE* f));
 #endif
 #endif
 
