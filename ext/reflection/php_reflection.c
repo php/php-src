@@ -5131,7 +5131,12 @@ ZEND_METHOD(reflection_class, isIterable)
 	METHOD_NOTSTATIC(reflection_class_ptr);
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	RETURN_BOOL(ce->get_iterator != NULL);
+	if (ce->ce_flags & (ZEND_ACC_INTERFACE | ZEND_ACC_IMPLICIT_ABSTRACT_CLASS |
+	                    ZEND_ACC_TRAIT     | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
+		RETURN_FALSE;
+	}
+
+	RETURN_BOOL(ce->get_iterator || instanceof_function(ce, zend_ce_traversable));
 }
 /* }}} */
 
