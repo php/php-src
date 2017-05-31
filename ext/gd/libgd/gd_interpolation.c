@@ -935,7 +935,6 @@ static inline LineContribType *_gdContributionsCalc(unsigned int line_size, unsi
 	int windows_size;
 	unsigned int u;
 	LineContribType *res;
-	int overflow_error = 0;
 
 	if (scale_d < 1.0) {
 		width_d = filter_width_d / scale_d;
