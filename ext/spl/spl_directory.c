@@ -1519,6 +1519,15 @@ SPL_METHOD(RecursiveDirectoryIterator, getChildren)
 }
 /* }}} */
 
+/* {{{ proto void SplFileObject::getFileResource()
+   Get the underlying file resource */
+SPL_METHOD(SplFileObject, getFileResource)
+{
+       spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
+
+       php_stream_to_zval(intern->u.file.stream, return_value);
+} /* }}} */
+
 /* {{{ proto void RecursiveDirectoryIterator::getSubPath()
    Get sub path */
 SPL_METHOD(RecursiveDirectoryIterator, getSubPath)
@@ -3080,6 +3089,7 @@ static const zend_function_entry spl_SplFileObject_functions[] = {
 	SPL_ME(SplFileObject, getMaxLineLen,  arginfo_splfileinfo_void,          ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileObject, hasChildren,    arginfo_splfileinfo_void,          ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileObject, getChildren,    arginfo_splfileinfo_void,          ZEND_ACC_PUBLIC)
+	SPL_ME(SplFileObject, getFileResource,arginfo_splfileinfo_void,          ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileObject, seek,           arginfo_file_object_seek,          ZEND_ACC_PUBLIC)
 	/* mappings */
 	SPL_MA(SplFileObject, getCurrentLine, SplFileObject, fgets,      arginfo_splfileinfo_void, ZEND_ACC_PUBLIC)
