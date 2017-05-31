@@ -15,6 +15,10 @@ PHP                                                                        NEWS
   . Fixed bug #74663 (Segfault with opcache.memory_protect and
     validate_timestamp). (Laruence)
 
+- Reflection:
+  . Fixed bug #74673 (Segfault when cast Reflection object to string with
+    undefined constant). (Laruence)
+
 - SPL:
   . Fixed bug #74478 (null coalescing operator failing with SplFixedArray).
     (jhdxr)
