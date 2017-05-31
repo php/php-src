@@ -299,6 +299,13 @@ void zend_optimizer_pass3(zend_op_array *op_array)
 							  JMPZ_EX(X,L1+1) */
 							ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target + 1);
 							break;
+						} else if (target->opcode == ZEND_BOOL &&
+						           SAME_VAR(opline->result, target->op1)) {
+							/* convert Y = JMPZ_EX(X,L1), L1: Z = BOOL(Y) to
+							   Z = JMPZ_EX(X,L1+1) */
+							opline->result.var = target->result.var;
+							ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target + 1);
+							break;
 						} else {
 							break;
 						}
