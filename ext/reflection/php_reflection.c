@@ -462,7 +462,9 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 		zval *value;
 
 		ZEND_HASH_FOREACH_STR_KEY_VAL(&ce->constants_table, key, value) {
-			zval_update_constant_ex(value, 1, NULL);
+			if (UNEXPECTED(zval_update_constant_ex(value, 1, NULL) == FAILURE)) {
+				return;
+			}
 			_const_string(str, ZSTR_VAL(key), value, indent);
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -708,7 +710,11 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 			ZVAL_DUP(&zv, RT_CONSTANT(&fptr->op_array, precv->op2));
 			old_scope = EG(scope);
 			EG(scope) = fptr->common.scope;
-			zval_update_constant_ex(&zv, 1, NULL);
+			if (UNEXPECTED(zval_update_constant_ex(&zv, 1, NULL) == FAILURE)) {
+				EG(scope) = old_scope;
+				zval_ptr_dtor(&zv);
+				return;
+			}
 			EG(scope) = old_scope;
 			if (Z_TYPE(zv) == IS_TRUE) {
 				string_write(str, "true", sizeof("true")-1);
