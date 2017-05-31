@@ -249,11 +249,13 @@ PHPAPI int php_uuid_parse(php_uuid *uuid, const char *input, const size_t input_
 PHPAPI void php_uuid_create_v3(php_uuid *uuid, const php_uuid *namespace, const char *name, const size_t name_len)
 {
 	PHP_MD5_CTX context;
+	unsigned char digest[16];
 
 	PHP_MD5Init(&context);
 	PHP_MD5Update(&context, namespace->bytes, PHP_UUID_LEN);
 	PHP_MD5Update(&context, name, name_len);
-	PHP_MD5Final(uuid->bytes, &context);
+	PHP_MD5Final(digest, &context);
+	memcpy(uuid->bytes, digest, PHP_UUID_LEN);
 	set_variant_rfc4122(uuid);
 	php_uuid_set_version(uuid, PHP_UUID_VERSION_3_NAME_BASED_MD5);
 }
@@ -276,7 +278,7 @@ PHPAPI void php_uuid_create_v5(php_uuid *uuid, const php_uuid *namespace, const 
 	unsigned char digest[20];
 
 	PHP_SHA1Init(&context);
-	PHP_SHA1Update(&context, namespace->bytes, PHP_UUID_LEN);
+	PHP_SHA1Update(&context, (const unsigned char *) namespace->bytes, PHP_UUID_LEN);
 	PHP_SHA1Update(&context, (const unsigned char *) name, name_len);
 	PHP_SHA1Final(digest, &context);
 	memcpy(uuid->bytes, digest, PHP_UUID_LEN);
@@ -337,7 +339,7 @@ static zend_always_inline php_uuid *get_uuid(/*const*/ zval *uuid_object)
 static zend_always_inline void new_uuid(zval *object, const php_uuid *uuid)
 {
 	object_init_ex(object, php_ce_UUID);
-	zend_update_property_stringl(php_ce_UUID, object, UUID_BYTES_PROP, UUID_BYTES_PROP_LEN, uuid->bytes, PHP_UUID_LEN);
+	zend_update_property_stringl(php_ce_UUID, object, UUID_BYTES_PROP, UUID_BYTES_PROP_LEN, (const char *) uuid->bytes, PHP_UUID_LEN);
 }
 
 /* private function __construct() {{{ */
@@ -589,7 +591,7 @@ ZEND_END_ARG_INFO()
 PHP_METHOD(UUID, toBinary)
 {
 	PHP_UUID_ACCESSOR;
-	RETURN_STRINGL(uuid->bytes, PHP_UUID_LEN);
+	RETURN_STRINGL((const char *) uuid->bytes, PHP_UUID_LEN);
 }
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(UUID_toBinary_args, IS_STRING, 0)
 ZEND_END_ARG_INFO()
