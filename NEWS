@@ -12,6 +12,8 @@ PHP                                                                        NEWS
   . Removed IS_TYPE_IMMUTABLE (it's the same as COPYABLE & !REFCOUNTED). (Dmitry)
   . Removed the sql.safe_mode directive. (Kalle)
   . Removed support for Netware. (Kalle)
+  . Renamed ReflectionClass::isIterateable() to ReflectionClass::isIterable()
+    (alias original name for BC). (Sara)
   . Fixed bug #54535 (WSA cleanup executes before MSHUTDOWN). (Kalle)
   . Implemented FR #69791 (Disallow mail header injections by extra headers)
     (Yasuo)

@@ -5117,9 +5117,9 @@ ZEND_METHOD(reflection_class, implementsInterface)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionClass::isIterateable()
-   Returns whether this class is iterateable (can be used inside foreach) */
-ZEND_METHOD(reflection_class, isIterateable)
+/* {{{ proto public bool ReflectionClass::isIterable()
+   Returns whether this class is iterable (can be used inside foreach) */
+ZEND_METHOD(reflection_class, isIterable)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
@@ -6465,7 +6465,8 @@ static const zend_function_entry reflection_class_functions[] = {
 	ZEND_ME(reflection_class, getStaticPropertyValue, arginfo_reflection_class_getStaticPropertyValue, 0)
 	ZEND_ME(reflection_class, setStaticPropertyValue, arginfo_reflection_class_setStaticPropertyValue, 0)
 	ZEND_ME(reflection_class, getDefaultProperties, arginfo_reflection__void, 0)
-	ZEND_ME(reflection_class, isIterateable, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_class, isIterable, arginfo_reflection__void, 0)
+	ZEND_MALIAS(reflection_class, isIterateable, isIterable, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, implementsInterface, arginfo_reflection_class_implementsInterface, 0)
 	ZEND_ME(reflection_class, getExtension, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, getExtensionName, arginfo_reflection__void, 0)
