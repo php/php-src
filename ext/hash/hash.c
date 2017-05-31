@@ -830,7 +830,7 @@ PHP_FUNCTION(hash_equals)
 {
 	zval *known_zval, *user_zval;
 	char *known_str, *user_str;
-	int result = 0;
+	unsigned int result = 0;
 	size_t j;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &known_zval, &user_zval) == FAILURE) {
@@ -860,7 +860,7 @@ PHP_FUNCTION(hash_equals)
 		result |= known_str[j] ^ user_str[j];
 	}
 
-	RETURN_BOOL(0 == result);
+	RETURN_BOOL(1 & ((result - 1) >> CHAR_BIT));
 }
 /* }}} */
 
