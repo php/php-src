@@ -42,7 +42,7 @@
 #define OCI_STMT_CALL 10
 #endif
 
-/* {{{ proto bool oci_register_taf_callback( resource connection [, string callback] )
+/* {{{ proto bool oci_register_taf_callback( resource connection [, mixed callback] )
    Register a callback function for Oracle Transparent Application Failover (TAF) */
 PHP_FUNCTION(oci_register_taf_callback)
 {
@@ -67,7 +67,7 @@ PHP_FUNCTION(oci_register_taf_callback)
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
-	if (php_oci_register_taf_callback(connection, callback)) {
+	if (php_oci_register_taf_callback(connection, callback) == 0) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;

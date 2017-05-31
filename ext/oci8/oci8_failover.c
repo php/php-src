@@ -105,7 +105,7 @@ int php_oci_register_taf_callback(php_oci_connection *connection, zval *callback
 	if (!callback) {
 		/* Disable callback */
 		if (Z_ISUNDEF(connection->taf_callback) || Z_ISNULL(connection->taf_callback)) {
-			return 1; // Nothing to disable
+			return 0; // Nothing to disable
 		}
 
 		registered = 1;
@@ -126,7 +126,7 @@ int php_oci_register_taf_callback(php_oci_connection *connection, zval *callback
 
 	/* OCI callback function already registered */
 	if (registered) {
-		return 1;
+		return 0;
 	}
 
 	/* set context */
@@ -142,11 +142,11 @@ int php_oci_register_taf_callback(php_oci_connection *connection, zval *callback
 		zval_ptr_dtor(&connection->taf_callback);
 		ZVAL_UNDEF(&connection->taf_callback);
 		connection->errcode = php_oci_error(connection->err, errstatus);
-		return 0;
+		return 1;
 	}
 
 	/* successful conclusion */
-	return 1;
+	return 0;
 }
 /* }}} */
 
