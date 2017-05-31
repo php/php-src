@@ -1476,6 +1476,7 @@ int fcgi_accept_request(fcgi_request *req)
 		}
 		req->hook.on_read();
 		if (fcgi_read_request(req)) {
+			req->hook.on_read();
 #ifdef _WIN32
 			if (is_impersonate && !req->tcp) {
 				pipe = (HANDLE)_get_osfhandle(req->fd);
