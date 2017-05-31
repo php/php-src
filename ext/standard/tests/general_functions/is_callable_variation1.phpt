@@ -63,7 +63,6 @@ check_iscallable($undef_functions);
 
 ?>
 ===DONE===
---EXPECTF--
 *** Testing is_callable() on undefined functions ***
 -- Iteration  1 --
 bool(false)
