@@ -380,6 +380,9 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 
 		ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->constants_table, key, c) {
 			_class_const_string(str, ZSTR_VAL(key), c, ZSTR_VAL(sub_indent));
+			if (UNEXPECTED(EG(exception))) {
+				return;
+			}
 		} ZEND_HASH_FOREACH_END();
 	}
 	smart_str_append_printf(str, "%s  }\n", indent);
@@ -637,7 +640,10 @@ static void _parameter_string(smart_str *str, zend_function *fptr, struct _zend_
 
 			smart_str_appends(str, " = ");
 			ZVAL_DUP(&zv, RT_CONSTANT(&fptr->op_array, precv->op2));
-			zval_update_constant_ex(&zv, fptr->common.scope);
+			if (UNEXPECTED(zval_update_constant_ex(&zv, fptr->common.scope) == FAILURE)) {
+				zval_ptr_dtor(&zv);
+				return;
+			}
 			if (Z_TYPE(zv) == IS_TRUE) {
 				smart_str_appends(str, "true");
 			} else if (Z_TYPE(zv) == IS_FALSE) {
