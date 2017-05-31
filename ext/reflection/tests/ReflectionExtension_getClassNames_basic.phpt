@@ -19,7 +19,7 @@ array(6) {
   [3]=>
   string(14) "AssertionError"
   [4]=>
-  string(4) "UUID"
+  string(12) "PHP\Std\UUID"
   [5]=>
-  string(18) "UUIDParseException"
+  string(26) "PHP\Std\UUIDParseException"
 }
