@@ -34,17 +34,21 @@
  * - Calling this with NULL sets as a portable way to sleep with sub-second
  *   accuracy is not supported.
  * */
-PHPAPI int php_select(SOCKET max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, struct timeval *tv)
+PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, struct timeval *tv)
 {
 	ULONGLONG ms_total, limit;
 	HANDLE handles[MAXIMUM_WAIT_OBJECTS];
-	int handle_slot_to_fd[MAXIMUM_WAIT_OBJECTS];
-	int n_handles = 0, i;
+	php_socket_t handle_slot_to_fd[MAXIMUM_WAIT_OBJECTS];
+	php_socket_t n_handles = 0, i;
 	fd_set sock_read, sock_write, sock_except;
 	fd_set aread, awrite, aexcept;
-	int sock_max_fd = -1;
+	php_socket_t sock_max_fd = -1;
 	struct timeval tvslice;
 	int retcode;
+
+	if (max_fd < 0) {
+		return FAILURE;
+	}
 
 #define SAFE_FD_ISSET(fd, set)	(set != NULL && FD_ISSET(fd, set))
 
@@ -136,13 +140,13 @@ PHPAPI int php_select(SOCKET max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, s
 				for (i = 0; i < n_handles; i++) {
 					if (WAIT_OBJECT_0 == WaitForSingleObject(handles[i], 0)) {
 						if (SAFE_FD_ISSET(handle_slot_to_fd[i], rfds)) {
-							FD_SET((uint32_t)handle_slot_to_fd[i], &aread);
+							FD_SET((php_socket_t) handle_slot_to_fd[i], &aread);
 						}
 						if (SAFE_FD_ISSET(handle_slot_to_fd[i], wfds)) {
-							FD_SET((uint32_t)handle_slot_to_fd[i], &awrite);
+							FD_SET((php_socket_t) handle_slot_to_fd[i], &awrite);
 						}
 						if (SAFE_FD_ISSET(handle_slot_to_fd[i], efds)) {
-							FD_SET((uint32_t)handle_slot_to_fd[i], &aexcept);
+							FD_SET((php_socket_t) handle_slot_to_fd[i], &aexcept);
 						}
 						retcode++;
 					}
