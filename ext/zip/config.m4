@@ -113,11 +113,11 @@ if test "$PHP_ZIP" != "no"; then
     PHP_NEW_EXTENSION(zip, php_zip.c zip_stream.c, $ext_shared,, $LIBZIP_CFLAGS)
     PHP_SUBST(ZIP_SHARED_LIBADD)
   else
-    AC_MSG_WARN(========================================================);
-    AC_MSG_WARN(Use of bundled libzip is deprecated and will be removed.);
-    AC_MSG_WARN(Some features such as encryption are not available.);
-    AC_MSG_WARN(Use system library and --with-libzip is recommended.);
-    AC_MSG_WARN(========================================================);
+    AC_MSG_WARN(========================================================)
+    AC_MSG_WARN(Use of bundled libzip is deprecated and will be removed.)
+    AC_MSG_WARN(Some features such as encryption are not available.)
+    AC_MSG_WARN(Use system library and --with-libzip is recommended.)
+    AC_MSG_WARN(========================================================)
 
 
   PHP_ZIP_SOURCES="$PHP_ZIP_SOURCES lib/zip_add.c lib/zip_add_dir.c lib/zip_add_entry.c\
