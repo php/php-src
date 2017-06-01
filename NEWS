@@ -68,6 +68,9 @@ PHP                                                                        NEWS
   . Fixed bug #74404 (Wrong reflection on DateTimeZone::getTransitions).
     (krakjoe)
   . Fixed bug #74080 (add constant for RFC7231 format datetime). (duncan3dc)
+  . Fixed bug #74639 (implement clone for DatePeriod and DateInterval).
+    (andrewnester)
+
 
 - Dba:
   . Fixed bug #72885 (flatfile: dba_fetch() fails to read replaced entry).
