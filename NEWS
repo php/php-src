@@ -68,6 +68,8 @@ PHP                                                                        NEWS
   . Fixed bug #74404 (Wrong reflection on DateTimeZone::getTransitions).
     (krakjoe)
   . Fixed bug #74080 (add constant for RFC7231 format datetime). (duncan3dc)
+  . Implemented FR #74668: Add DateTime::createFromImmutable() method.
+    (bugs dot php dot net at majkl578 dot cz, Rican7)
 
 - Dba:
   . Fixed bug #72885 (flatfile: dba_fetch() fails to read replaced entry).
