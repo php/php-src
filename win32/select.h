@@ -18,6 +18,6 @@
 
 /* $Id$ */
 
-#include "php_network.h"
+#include <WinSock2.h>
 
-PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, struct timeval *tv);
+PHPAPI int php_select(SOCKET max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, struct timeval *tv);
