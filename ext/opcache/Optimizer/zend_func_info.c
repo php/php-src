@@ -224,7 +224,7 @@ static const func_info_t func_infos[] = {
 	F0("gc_disable",              MAY_BE_NULL),
 	F0("func_num_args",           MAY_BE_LONG),
 	FN("func_get_arg",            UNKNOWN_INFO),
-	F1("func_get_args",           MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF),
+	F1("func_get_args",           MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_ANY),
 	FC("strlen",                  zend_strlen_info),
 	FC("strcmp",                  zend_l_ss_info),
 	FC("strncmp",                 zend_lb_ssn_info),

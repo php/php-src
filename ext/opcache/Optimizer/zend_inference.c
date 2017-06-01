@@ -1354,6 +1354,7 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 			}
 			break;
 		case ZEND_COUNT:
+		case ZEND_FUNC_NUM_ARGS:
 			tmp->min = 0;
 			tmp->max = ZEND_LONG_MAX;
 			return 1;
@@ -3161,7 +3162,11 @@ static void zend_update_type_info(const zend_op_array *op_array,
 			UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
 			break;
 		case ZEND_COUNT:
+		case ZEND_FUNC_NUM_ARGS:
 			UPDATE_SSA_TYPE(MAY_BE_LONG, ssa_ops[i].result_def);
+			break;
+		case ZEND_FUNC_GET_ARGS:
+			UPDATE_SSA_TYPE(MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_ANY, ssa_ops[i].result_def);
 			break;
 		case ZEND_GET_CLASS:
 		case ZEND_GET_CALLED_CLASS:

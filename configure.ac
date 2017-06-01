@@ -751,6 +751,8 @@ if test "x$php_crypt_r" = "x1"; then
   PHP_CRYPT_R_STYLE
 fi
 
+PHP_CHECK_VALGRIND
+
 dnl General settings.
 dnl -------------------------------------------------------------------------
 PHP_CONFIGURE_PART(General settings)
