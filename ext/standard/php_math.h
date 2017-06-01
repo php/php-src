@@ -105,6 +105,10 @@ PHP_FUNCTION(atanh);
 #define M_LN10         2.30258509299404568402  /* log_e 10 */
 #endif
 
+#ifndef M_TAU
+#define M_TAU          6.28318530717958647692  /* tau (2pi) */
+#endif
+
 #ifndef M_PI
 #define M_PI           3.14159265358979323846  /* pi */
 #endif
