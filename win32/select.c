@@ -34,7 +34,7 @@
  * - Calling this with NULL sets as a portable way to sleep with sub-second
  *   accuracy is not supported.
  * */
-PHPAPI int php_select(SOCKET max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, struct timeval *tv)
+PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, struct timeval *tv)
 {
 	ULONGLONG ms_total, limit;
 	HANDLE handles[MAXIMUM_WAIT_OBJECTS];
