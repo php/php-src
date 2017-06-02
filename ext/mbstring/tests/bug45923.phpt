@@ -154,11 +154,11 @@ bool(false)
 Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 > Offset: -1
-int(8)
-> Offset: -3
-int(8)
-> Offset: -6
 int(4)
+> Offset: -3
+int(4)
+> Offset: -6
+int(0)
 > Offset: -20
 
 Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
@@ -181,11 +181,11 @@ bool(false)
 Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 > Offset: -1
-int(8)
-> Offset: -3
-int(8)
-> Offset: -6
 int(4)
+> Offset: -3
+int(4)
+> Offset: -6
+int(0)
 > Offset: -20
 
 Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
@@ -208,11 +208,11 @@ bool(false)
 Warning: strripos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 > Offset: -1
-int(8)
-> Offset: -3
-int(8)
-> Offset: -6
 int(4)
+> Offset: -3
+int(4)
+> Offset: -6
+int(0)
 > Offset: -20
 
 Warning: strripos(): Offset is greater than the length of haystack string in %s on line %d
@@ -235,11 +235,11 @@ bool(false)
 Warning: mb_strripos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 > Offset: -1
-int(8)
-> Offset: -3
-int(8)
-> Offset: -6
 int(4)
+> Offset: -3
+int(4)
+> Offset: -6
+int(0)
 > Offset: -20
 
 Warning: mb_strripos(): Offset is greater than the length of haystack string in %s on line %d
