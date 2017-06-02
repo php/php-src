@@ -715,7 +715,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 										   subpattern after a global match */
 	pcre_extra		*extra = pce->extra;/* Holds results of studying */
 	pcre_extra		 extra_data;		/* Used locally for exec options */
-	int				 exoptions = 0;		/* Execution options */
+	int				 no_utf_check = 0;  /* Execution options */
 	int				 count = 0;			/* Count of matched subpatterns */
 	int				*offsets;			/* Array of subpattern offsets */
 	int				 num_subpats;		/* Number of captured subpatterns */
@@ -729,6 +729,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 	int				 unmatched_as_null;	/* Null non-matches: yes/no */
 	unsigned char   *mark = NULL;		/* Target for MARK name */
 	zval			 marks;				/* Array of marks for PREG_PATTERN_ORDER */
+
 	ALLOCA_FLAG(use_heap);
 
 	ZVAL_UNDEF(&marks);
@@ -814,13 +815,26 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 	matched = 0;
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 
+#ifdef HAVE_PCRE_JIT_SUPPORT
+	if (!(pce->compile_options & PCRE_UTF8)) {
+		no_utf_check = PCRE_NO_UTF8_CHECK;
+	}
+#endif
+
 	do {
 		/* Execute the regular expression. */
+#ifdef HAVE_PCRE_JIT_SUPPORT
+		if ((extra->flags & PCRE_EXTRA_EXECUTABLE_JIT)
+		 && no_utf_check && !g_notempty) {
+			count = pcre_jit_exec(pce->re, extra, subject, (int)subject_len, (int)start_offset,
+						  no_utf_check|g_notempty, offsets, size_offsets, jit_stack);
+		} else
+#endif
 		count = pcre_exec(pce->re, extra, subject, (int)subject_len, (int)start_offset,
-						  exoptions|g_notempty, offsets, size_offsets);
+						  no_utf_check|g_notempty, offsets, size_offsets);
 
 		/* the string was already proved to be valid UTF-8 */
-		exoptions |= PCRE_NO_UTF8_CHECK;
+		no_utf_check = PCRE_NO_UTF8_CHECK;
 
 		/* Check for too many substrings condition. */
 		if (count == 0) {
@@ -1215,7 +1229,7 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 {
 	pcre_extra		*extra = pce->extra;/* Holds results of studying */
 	pcre_extra		 extra_data;		/* Used locally for exec options */
-	int				 exoptions = 0;		/* Execution options */
+	int				 no_utf_check = 0;	/* Execution options */
 	int				 count = 0;			/* Count of matched subpatterns */
 	int				*offsets;			/* Array of subpattern offsets */
 	char 			**subpat_names;		/* Array for named subpatterns */
@@ -1294,17 +1308,30 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 	result_len = 0;
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 
+#ifdef HAVE_PCRE_JIT_SUPPORT
+	if (!(pce->compile_options & PCRE_UTF8)) {
+		no_utf_check = PCRE_NO_UTF8_CHECK;
+	}
+#endif
+
 	while (1) {
 #ifdef PCRE_EXTRA_MARK
 		extra->mark = &mark;
 		extra->flags |= PCRE_EXTRA_MARK;
 #endif
 		/* Execute the regular expression. */
+#ifdef HAVE_PCRE_JIT_SUPPORT
+		if ((extra->flags & PCRE_EXTRA_EXECUTABLE_JIT)
+		 && no_utf_check && !g_notempty) {
+			count = pcre_jit_exec(pce->re, extra, subject, subject_len, start_offset,
+						  no_utf_check|g_notempty, offsets, size_offsets, jit_stack);
+		} else
+#endif
 		count = pcre_exec(pce->re, extra, subject, subject_len, start_offset,
-						  exoptions|g_notempty, offsets, size_offsets);
+						  no_utf_check|g_notempty, offsets, size_offsets);
 
 		/* the string was already proved to be valid UTF-8 */
-		exoptions |= PCRE_NO_UTF8_CHECK;
+		no_utf_check = PCRE_NO_UTF8_CHECK;
 
 		/* Check for too many substrings condition. */
 		if (UNEXPECTED(count == 0)) {
@@ -1839,7 +1866,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 	pcre_extra		 extra_data;		/* Used locally for exec options */
 	int				*offsets;			/* Array of subpattern offsets */
 	int				 size_offsets;		/* Size of the offsets array */
-	int				 exoptions = 0;		/* Execution options */
+	int				 no_utf_check = 0;	/* Execution options */
 	int				 count = 0;			/* Count of matched subpatterns */
 	int				 start_offset;		/* Where the new search starts */
 	int				 next_offset;		/* End of the last delimiter match + 1 */
@@ -1886,14 +1913,28 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 	last_match = subject;
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 
+#ifdef HAVE_PCRE_JIT_SUPPORT
+	if (!(pce->compile_options & PCRE_UTF8)) {
+		no_utf_check = PCRE_NO_UTF8_CHECK;
+	}
+#endif
+
 	/* Get next piece if no limit or limit not yet reached and something matched*/
 	while ((limit_val == -1 || limit_val > 1)) {
+#ifdef HAVE_PCRE_JIT_SUPPORT
+		if ((extra->flags & PCRE_EXTRA_EXECUTABLE_JIT)
+		 && no_utf_check && !g_notempty) {
+			count = pcre_jit_exec(pce->re, extra, subject,
+						  subject_len, start_offset,
+						  no_utf_check|g_notempty, offsets, size_offsets, jit_stack);
+		} else
+#endif
 		count = pcre_exec(pce->re, extra, subject,
 						  subject_len, start_offset,
-						  exoptions|g_notempty, offsets, size_offsets);
+						  no_utf_check|g_notempty, offsets, size_offsets);
 
 		/* the string was already proved to be valid UTF-8 */
-		exoptions |= PCRE_NO_UTF8_CHECK;
+		no_utf_check = PCRE_NO_UTF8_CHECK;
 
 		/* Check for too many substrings condition. */
 		if (count == 0) {
@@ -2112,6 +2153,7 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 	int				*offsets;			/* Array of subpattern offsets */
 	int				 size_offsets;		/* Size of the offsets array */
 	int				 count = 0;			/* Count of matched subpatterns */
+	int				 no_utf_check = 0;	/* Execution options */
 	zend_string		*string_key;
 	zend_ulong		 num_key;
 	zend_bool		 invert;			/* Whether to return non-matching
@@ -2143,14 +2185,31 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 
+#ifdef HAVE_PCRE_JIT_SUPPORT
+	if (!(pce->compile_options & PCRE_UTF8)) {
+		no_utf_check = PCRE_NO_UTF8_CHECK;
+	}
+#endif
+
 	/* Go through the input array */
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(input), num_key, string_key, entry) {
 		zend_string *subject_str = zval_get_string(entry);
 
 		/* Perform the match */
+#ifdef HAVE_PCRE_JIT_SUPPORT
+		if ((extra->flags & PCRE_EXTRA_EXECUTABLE_JIT)
+		 && no_utf_check) {
+			count = pcre_jit_exec(pce->re, extra, ZSTR_VAL(subject_str),
+						  (int)ZSTR_LEN(subject_str), 0,
+						  no_utf_check, offsets, size_offsets, jit_stack);
+		} else
+#endif
 		count = pcre_exec(pce->re, extra, ZSTR_VAL(subject_str),
 						  (int)ZSTR_LEN(subject_str), 0,
-						  0, offsets, size_offsets);
+						  no_utf_check, offsets, size_offsets);
+
+		/* the string was already proved to be valid UTF-8 */
+		no_utf_check = PCRE_NO_UTF8_CHECK;
 
 		/* Check for too many substrings condition. */
 		if (count == 0) {

@@ -150,6 +150,7 @@ PHP                                                                        NEWS
   . Fixed bug #71519 (add serial hex to return value array). (xrobau)
 
 - PCRE:
+  . Added support for PCRE JIT fast path API. (dmitry)
   . Fixed bug #61780 (Inconsistent PCRE captures in match results). (cmb)
 
 - PDO:
