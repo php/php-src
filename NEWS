@@ -18,6 +18,7 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug #74663 (Segfault with opcache.memory_protect and
     validate_timestamp). (Laruence)
+  . Revert opcache.enable_cli to default disabled. (Nikita)
 
 - Reflection:
   . Fixed bug #74673 (Segfault when cast Reflection object to string with

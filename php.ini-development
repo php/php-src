@@ -1782,7 +1782,7 @@ ldap.max_links = -1
 ;opcache.enable=1
 
 ; Determines if Zend OPCache is enabled for the CLI version of PHP
-;opcache.enable_cli=1
+;opcache.enable_cli=0
 
 ; The OPcache shared memory storage size.
 ;opcache.memory_consumption=128
