@@ -13,7 +13,7 @@ var_dump((new \IntlDateFormatter(
     'UTC',
     \IntlDateFormatter::GREGORIAN,
     'yyyy-MM-dd HH:mm:ss.SSSSSS'
-))->format(new \DateTime('2017-01-01 01:02:03.123456')));
+))->format(new \DateTime('2017-01-01 01:02:03.123456', new \DateTimeZone('UTC'))));
 
 var_dump(datefmt_create(
     'en-US',
@@ -22,7 +22,7 @@ var_dump(datefmt_create(
     'UTC',
     \IntlDateFormatter::GREGORIAN,
     'yyyy-MM-dd HH:mm:ss.SSSSSS'
-)->format(new \DateTime('2017-01-01 01:02:03.123456')));
+)->format(new \DateTime('2017-01-01 01:02:03.123456', new \DateTimeZone('UTC'))));
 ?>
 --EXPECTF--
 string(26) "2017-01-01T01:02:03.123456"
