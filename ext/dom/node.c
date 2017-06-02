@@ -337,6 +337,8 @@ int dom_node_node_value_write(dom_object *obj, zval *newval)
 		case XML_ATTRIBUTE_NODE:
 			if (nodep->children) {
 				node_list_unlink(nodep->children);
+				php_libxml_node_free_list((xmlNodePtr) nodep->children);
+				nodep->children = NULL;
 			}
 		case XML_TEXT_NODE:
 		case XML_COMMENT_NODE:
@@ -852,6 +854,17 @@ int dom_node_text_content_write(dom_object *obj, zval *newval)
 	if (nodep == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 0);
 		return FAILURE;
+	}
+
+	switch (nodep->type) {
+		case XML_ELEMENT_NODE:
+		case XML_ATTRIBUTE_NODE:
+			if (nodep->children) {
+				node_list_unlink(nodep->children);
+				php_libxml_node_free_list((xmlNodePtr) nodep->children);
+				nodep->children = NULL;
+			}
+			break;
 	}
 
 	str = zval_get_string(newval);
