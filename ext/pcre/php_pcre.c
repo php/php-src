@@ -1314,11 +1314,16 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 	}
 #endif
 
-	while (1) {
 #ifdef PCRE_EXTRA_MARK
+	if (EXPECTED(replace)) {
+		extra->flags &= ~PCRE_EXTRA_MARK;
+	} else {
 		extra->mark = &mark;
 		extra->flags |= PCRE_EXTRA_MARK;
+	}
 #endif
+
+	while (1) {
 		/* Execute the regular expression. */
 #ifdef HAVE_PCRE_JIT_SUPPORT
 		if ((extra->flags & PCRE_EXTRA_EXECUTABLE_JIT)
@@ -1342,8 +1347,8 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 		piece = subject + start_offset;
 
 		/* if (EXPECTED(count > 0 && (limit == -1 || limit > 0))) */
-		if (EXPECTED(count > 0 && (offsets[1] - offsets[0] >= 0) && limit)) {
-			if (UNEXPECTED(replace_count)) {
+		if (count > 0 && (offsets[1] - offsets[0] >= 0) && limit) {
+			if (replace_count) {
 				++*replace_count;
 			}
 
@@ -1442,10 +1447,10 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 				zend_string_release(eval_result);
 			}
 
-			if (EXPECTED(limit)) {
+			if (limit) {
 				limit--;
 			}
-		} else if (count == PCRE_ERROR_NOMATCH || UNEXPECTED(limit == 0)) {
+		} else if (count == PCRE_ERROR_NOMATCH || limit == 0) {
 			/* If we previously set PCRE_NOTEMPTY_ATSTART after a null match,
 			   this is not necessarily the end. We need to advance
 			   the start offset, and continue. Fudge the offset values
