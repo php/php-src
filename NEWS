@@ -11,6 +11,9 @@ PHP                                                                        NEWS
   . Fixed bug #74639 (implement clone for DatePeriod and DateInterval).
     (andrewnester)
 
+- DOM:
+  . Fixed bug #69373 (References to deleted XPath query results). (ttoohey)
+
 - Intl:
   . Fixed bug #73473 (Stack Buffer Overflow in msgfmt_parse_message). (libnex)
 
