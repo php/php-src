@@ -87,7 +87,7 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 
 	if (n_handles == 0) {
 		/* plain sockets only - let winsock handle the whole thing */
-		return select(NULL, rfds, wfds, efds, tv);
+		return select(0, rfds, wfds, efds, tv);
 	}
 
 	/* mixture of handles and sockets; lets multiplex between
@@ -111,7 +111,7 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 			tvslice.tv_sec = 0;
 			tvslice.tv_usec = 100000;
 
-			retcode = select(NULL, &aread, &awrite, &aexcept, &tvslice);
+			retcode = select(0, &aread, &awrite, &aexcept, &tvslice);
 		}
 		if (n_handles > 0) {
 			/* check handles */
