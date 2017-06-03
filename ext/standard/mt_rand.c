@@ -207,7 +207,7 @@ PHP_FUNCTION(mt_srand)
 		default:
 			BG(mt_rand_mode) = MT_RAND_MT19937;
 	}
-	
+
 	php_mt_srand(seed);
 }
 /* }}} */
