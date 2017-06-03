@@ -379,6 +379,7 @@ static void cwd_globals_ctor(virtual_cwd_globals *cwd_g) /* {{{ */
 	cwd_g->realpath_cache_size = 0;
 	cwd_g->realpath_cache_size_limit = REALPATH_CACHE_SIZE;
 	cwd_g->realpath_cache_ttl = REALPATH_CACHE_TTL;
+	cwd_g->realpath_cache_last_prune = 0;
 	memset(cwd_g->realpath_cache, 0, sizeof(cwd_g->realpath_cache));
 }
 /* }}} */
@@ -578,6 +579,21 @@ CWD_API void realpath_cache_clean(void) /* {{{ */
 }
 /* }}} */
 
+static inline void realpath_cache_remove_bucket(realpath_cache_bucket **bucket) /* {{{ */
+{
+	realpath_cache_bucket *r = *bucket;
+	*bucket = (*bucket)->next;
+
+	/* if the pointers match then only subtract the length of the path */
+	if(r->path == r->realpath) {
+		CWDG(realpath_cache_size) -= sizeof(realpath_cache_bucket) + r->path_len + 1;
+	} else {
+		CWDG(realpath_cache_size) -= sizeof(realpath_cache_bucket) + r->path_len + 1 + r->realpath_len + 1;
+	}
+	free(r);
+}
+/* }}} */
+
 CWD_API void realpath_cache_del(const char *path, size_t path_len) /* {{{ */
 {
 	zend_ulong key = realpath_cache_key(path, path_len);
@@ -587,21 +603,39 @@ CWD_API void realpath_cache_del(const char *path, size_t path_len) /* {{{ */
 	while (*bucket != NULL) {
 		if (key == (*bucket)->key && path_len == (*bucket)->path_len &&
 					memcmp(path, (*bucket)->path, path_len) == 0) {
-			realpath_cache_bucket *r = *bucket;
-			*bucket = (*bucket)->next;
-
-			/* if the pointers match then only subtract the length of the path */
-		   	if(r->path == r->realpath) {
-				CWDG(realpath_cache_size) -= sizeof(realpath_cache_bucket) + r->path_len + 1;
-			} else {
-				CWDG(realpath_cache_size) -= sizeof(realpath_cache_bucket) + r->path_len + 1 + r->realpath_len + 1;
-			}
-
-			free(r);
+			realpath_cache_remove_bucket(bucket);
 			return;
 		} else {
 			bucket = &(*bucket)->next;
 		}
+	}
+}
+/* }}} */
+
+static void realpath_cache_prune(time_t t) /* {{{ */
+{
+	/* Remove all expired cache entries */
+	unsigned i;
+	for (i = 0; i < REALPATH_CACHE_HT_SIZE; i++) {
+		realpath_cache_bucket **bucket = &CWDG(realpath_cache)[i];
+		while (*bucket != NULL) {
+			if ((*bucket)->expires < t) {
+				realpath_cache_remove_bucket(bucket);
+			} else {
+				bucket = &(*bucket)->next;
+			}
+		}
+	}
+}
+/* }}} */
+
+static void realpath_cache_maybe_prune(time_t t) /* {{{ */
+{
+	/* Only prune in intervals >= TTL */
+	zend_long ttl = CWDG(realpath_cache_ttl);
+	if (ttl && CWDG(realpath_cache_last_prune) + ttl < t) {
+		realpath_cache_prune(t);
+		CWDG(realpath_cache_last_prune) = t;
 	}
 }
 /* }}} */
@@ -617,7 +651,14 @@ static inline void realpath_cache_add(const char *path, int path_len, const char
 		same = 0;
 	}
 
-	if (CWDG(realpath_cache_size) + size <= CWDG(realpath_cache_size_limit)) {
+	if (CWDG(realpath_cache_size) + size > CWDG(realpath_cache_size_limit)) {
+		realpath_cache_maybe_prune(t);
+		if (CWDG(realpath_cache_size) + size > CWDG(realpath_cache_size_limit)) {
+			return;
+		}
+	}
+
+	{
 		realpath_cache_bucket *bucket = malloc(size);
 		zend_ulong n;
 
@@ -660,16 +701,7 @@ static inline realpath_cache_bucket* realpath_cache_find(const char *path, size_
 
 	while (*bucket != NULL) {
 		if (CWDG(realpath_cache_ttl) && (*bucket)->expires < t) {
-			realpath_cache_bucket *r = *bucket;
-			*bucket = (*bucket)->next;
-
-			/* if the pointers match then only subtract the length of the path */
-		   	if(r->path == r->realpath) {
-				CWDG(realpath_cache_size) -= sizeof(realpath_cache_bucket) + r->path_len + 1;
-			} else {
-				CWDG(realpath_cache_size) -= sizeof(realpath_cache_bucket) + r->path_len + 1 + r->realpath_len + 1;
-			}
-			free(r);
+			realpath_cache_remove_bucket(bucket);
 		} else if (key == (*bucket)->key && path_len == (*bucket)->path_len &&
 					memcmp(path, (*bucket)->path, path_len) == 0) {
 			return *bucket;

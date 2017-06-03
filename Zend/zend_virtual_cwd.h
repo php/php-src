@@ -197,6 +197,7 @@ CWD_API char *tsrm_realpath(const char *path, char *real_path);
 
 #define REALPATH_CACHE_TTL  (2*60) /* 2 minutes */
 #define REALPATH_CACHE_SIZE 0      /* disabled while php.ini isn't loaded */
+#define REALPATH_CACHE_HT_SIZE 1024
 
 typedef struct _realpath_cache_bucket {
 	zend_ulong                    key;
@@ -220,7 +221,8 @@ typedef struct _virtual_cwd_globals {
 	zend_long                   realpath_cache_size;
 	zend_long                   realpath_cache_size_limit;
 	zend_long                   realpath_cache_ttl;
-	realpath_cache_bucket *realpath_cache[1024];
+	time_t                      realpath_cache_last_prune;
+	realpath_cache_bucket *realpath_cache[REALPATH_CACHE_HT_SIZE];
 } virtual_cwd_globals;
 
 #ifdef ZTS
