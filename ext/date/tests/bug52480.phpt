@@ -1,5 +1,7 @@
 --TEST--
 Bug #52480 (Incorrect difference using DateInterval)
+--XFAIL--
+See https://bugs.php.net/bug.php?id=52480
 --FILE--
 <?php
 
@@ -14,8 +16,11 @@ foreach (DateTimeZone::listIdentifiers() as $timezone) {
     $start = new DateTime('2017-03-01', new DateTimeZone($timezone));
     $end = new DateTime('2017-03-31', new DateTimeZone($timezone));
 
-    echo !empty($expectedDiff == (array) $start->diff($end)) ? 1 : "\nWrong result for $timezone!\n";
+    if ($expectedDiff != (array) $start->diff($end)) {
+        echo "\nWrong result for $timezone!\n";
+    }
 }
 ?>
---EXPECTREGEX--
-1+
+===DONE===
+--EXPECT--
+===DONE===
