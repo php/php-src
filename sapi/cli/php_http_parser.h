@@ -79,6 +79,9 @@ enum php_http_method
   , PHP_HTTP_POST
   , PHP_HTTP_PUT
   , PHP_HTTP_PATCH
+  /* RFC-2068, section 19.6.1.2 */
+  , PHP_HTTP_LINK 
+  , PHP_HTTP_UNLINK 
   /* pathological */
   , PHP_HTTP_CONNECT
   , PHP_HTTP_OPTIONS
