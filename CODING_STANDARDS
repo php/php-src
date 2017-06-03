@@ -155,10 +155,10 @@ User Functions/Methods Naming Conventions
     possible. Each word in the class name should start with a capital letter,
     without underscore delimiters. The class name should be prefixed with the
     name of the "parent set" (e.g. the name of the extension) if no namespaces
-    are used. Abbreviations and acronyms should be avoided wherever possible,
-    unless they are much more widely used than the long form (e.g. HTTP or URL).
-    Both abbreviations and acronyms follow the same letter-casing as any other
-    word.
+    are used. Abbreviations and acronyms as well as initialisms should be
+    avoided wherever possible, unless they are much more widely used than the
+    long form (e.g. HTTP or URL). Abbreviations, acronyms, and initialisms
+    follow the same letter-casing as any other word.
 
     Good:
     'Curl'
@@ -166,8 +166,10 @@ User Functions/Methods Naming Conventions
     'HttpStatusCode'
     'Url'
     'BTreeMap' (B-tree Map)
+    'Id' (Identifier and Identity Document)
     'Char' (Character)
     'Intl' (Internationalization)
+    'Radar' (Radio Detecting and Ranging)
 
     Bad:
     'curl'
@@ -175,8 +177,10 @@ User Functions/Methods Naming Conventions
     'HTTPStatusCode'
     'URL'
     'BtreeMap'
+    'ID'
     'CHAR'
     'INTL'
+    'RADAR'
 
 Internal Function Naming Conventions
 ----------------------
