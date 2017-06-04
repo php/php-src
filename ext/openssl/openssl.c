@@ -668,6 +668,11 @@ int DSA_set0_key(DSA *d, BIGNUM *pub_key, BIGNUM *priv_key)
 	return 1;
 }
 
+static const unsigned char *ASN1_STRING_get0_data(const ASN1_STRING *asn1)
+{
+	return M_ASN1_STRING_data(asn1);
+}
+
 #if OPENSSL_VERSION_NUMBER < 0x10002000L || defined (LIBRESSL_VERSION_NUMBER)
 
 static int X509_get_signature_nid(const X509 *x)
@@ -837,9 +842,9 @@ static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int s
 	}
 
 	for (i = 0; i < X509_NAME_entry_count(name); i++) {
-		unsigned char *to_add = NULL;
+		const unsigned char *to_add = NULL;
 		int to_add_len = 0;
-		int needs_free = 0;
+		unsigned char *to_add_buf = NULL;
 
 		ne = X509_NAME_get_entry(name, i);
 		obj = X509_NAME_ENTRY_get_object(ne);
@@ -854,34 +859,36 @@ static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int s
 		str = X509_NAME_ENTRY_get_data(ne);
 		if (ASN1_STRING_type(str) != V_ASN1_UTF8STRING) {
 			/* ASN1_STRING_to_UTF8(3): The converted data is copied into a newly allocated buffer */
-			to_add_len = ASN1_STRING_to_UTF8(&to_add, str);
-			needs_free = 1;
+			to_add_len = ASN1_STRING_to_UTF8(&to_add_buf, str);
+			to_add = to_add_buf;
 		} else {
-			/* ASN1_STRING_data(3): Since this is an internal pointer it should not be freed or modified in any way */
-			to_add = ASN1_STRING_data(str);
+			/* ASN1_STRING_get0_data(3): Since this is an internal pointer it should not be freed or modified in any way */
+			to_add = ASN1_STRING_get0_data(str);
 			to_add_len = ASN1_STRING_length(str);
 		}
 
 		if (to_add_len != -1) {
 			if ((data = zend_hash_str_find(Z_ARRVAL(subitem), sname, strlen(sname))) != NULL) {
 				if (Z_TYPE_P(data) == IS_ARRAY) {
-					add_next_index_stringl(data, (char *)to_add, to_add_len);
+					add_next_index_stringl(data, (const char *)to_add, to_add_len);
 				} else if (Z_TYPE_P(data) == IS_STRING) {
 					array_init(&tmp);
 					add_next_index_str(&tmp, zend_string_copy(Z_STR_P(data)));
-					add_next_index_stringl(&tmp, (char *)to_add, to_add_len);
+					add_next_index_stringl(&tmp, (const char *)to_add, to_add_len);
 					zend_hash_str_update(Z_ARRVAL(subitem), sname, strlen(sname), &tmp);
 				}
 			} else {
+				/* it might be better to expand it and pass zval from ZVAL_STRING
+				 * to zend_symtable_str_update so we do not silently drop const
+				 * but we need a test to cover this part first */
 				add_assoc_stringl(&subitem, sname, (char *)to_add, to_add_len);
 			}
 		} else {
 			php_openssl_store_errors();
 		}
 
-		if (needs_free) {
-			/* ASN1_STRING_to_UTF8(3): The buffer out should be freed using free(3) */
-			OPENSSL_free(to_add);
+		if (to_add_buf != NULL) {
+			OPENSSL_free(to_add_buf);
 		}
 	}
 
@@ -920,7 +927,7 @@ static time_t asn1_time_to_time_t(ASN1_UTCTIME * timestr) /* {{{ */
 
 	timestr_len = (size_t)ASN1_STRING_length(timestr);
 
-	if (timestr_len != strlen((const char*)ASN1_STRING_data(timestr))) {
+	if (timestr_len != strlen((const char *)ASN1_STRING_get0_data(timestr))) {
 		php_error_docref(NULL, E_WARNING, "illegal length in timestamp");
 		return (time_t)-1;
 	}
@@ -935,7 +942,7 @@ static time_t asn1_time_to_time_t(ASN1_UTCTIME * timestr) /* {{{ */
 		return (time_t)-1;
 	}
 
-	strbuf = estrdup((char *)ASN1_STRING_data(timestr));
+	strbuf = estrdup((const char *)ASN1_STRING_get0_data(timestr));
 
 	memset(&thetime, 0, sizeof(thetime));
 
@@ -2045,7 +2052,7 @@ PHP_FUNCTION(openssl_spki_export_challenge)
 		goto cleanup;
 	}
 
-	RETVAL_STRING((char *) ASN1_STRING_data(spki->spkac->challenge));
+	RETVAL_STRING((const char *)ASN1_STRING_get0_data(spki->spkac->challenge));
 	goto cleanup;
 
 cleanup:
@@ -2236,19 +2243,19 @@ static int openssl_x509v3_subjectAltName(BIO *bio, X509_EXTENSION *extension)
 			case GEN_EMAIL:
 				BIO_puts(bio, "email:");
 				as = name->d.rfc822Name;
-				BIO_write(bio, ASN1_STRING_data(as),
+				BIO_write(bio, ASN1_STRING_get0_data(as),
 					ASN1_STRING_length(as));
 				break;
 			case GEN_DNS:
 				BIO_puts(bio, "DNS:");
 				as = name->d.dNSName;
-				BIO_write(bio, ASN1_STRING_data(as),
+				BIO_write(bio, ASN1_STRING_get0_data(as),
 					ASN1_STRING_length(as));
 				break;
 			case GEN_URI:
 				BIO_puts(bio, "URI:");
 				as = name->d.uniformResourceIdentifier;
-				BIO_write(bio, ASN1_STRING_data(as),
+				BIO_write(bio, ASN1_STRING_get0_data(as),
 					ASN1_STRING_length(as));
 				break;
 			default:
