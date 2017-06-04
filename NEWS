@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fixed bug #74720 (pkcs7_en/decrypt does not work if \x1a is used in
     content). (Anatol)
+  . Use TLS_ANY for default ssl:// and tls:// negotiation.
+    (Niklas Keller, me at kelunik dot com)
 
 - SQLite3:
   . Update to Sqlite 3.19.3. (cmb)
