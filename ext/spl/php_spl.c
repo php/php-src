@@ -794,6 +794,43 @@ PHP_FUNCTION(spl_object_hash)
 }
 /* }}} */
 
+static zend_object_handlers immut_object_handlers = {};
+
+static void immut_write_property(zval *object, zval *member, zval *value, void **cache_slot) /* {{{ */
+{
+	zend_throw_exception(zend_ce_exception, "Attempt to modify property from immutable class instance", 0);
+}
+
+static zval *immut_read_property_by_ref(zval *object, zval *member, int type, void **cache_slot)
+{
+	zend_throw_exception(zend_ce_exception, "Attempt to get property by reference from immutable class instance", 0);
+
+	return NULL;
+}
+
+static void immut_unset_property(zval *object, zval *member, void **cache_slot) /* {{{ */
+{
+	zend_throw_exception(zend_ce_exception, "Attempt to unset property from immutable class instance", 0);
+}
+
+/* {{{ proto object obj spl_object_freeze(object obj)
+ Turn existing object instance to immutable */
+PHP_FUNCTION(spl_object_freeze)
+{
+	zval *zv = NULL;
+	zend_object *obj = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &zv) == FAILURE) {
+		return;
+	}
+
+	obj = (zend_object *) Z_OBJ_P(zv);
+	obj->handlers = &immut_object_handlers;
+
+	RETVAL_ZVAL(zv, 1, 0);
+}
+/* }}} */
+
 PHPAPI zend_string *php_spl_object_hash(zval *obj) /* {{{*/
 {
 	intptr_t hash_handle, hash_handlers;
@@ -915,6 +952,10 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_spl_object_hash, 0, 0, 1)
 	ZEND_ARG_INFO(0, obj)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_spl_object_freeze, 0, 0, 1)
+	ZEND_ARG_INFO(0, object)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ spl_functions
@@ -931,6 +972,7 @@ const zend_function_entry spl_functions[] = {
 	PHP_FE(class_implements,        arginfo_class_implements)
 	PHP_FE(class_uses,              arginfo_class_uses)
 	PHP_FE(spl_object_hash,         arginfo_spl_object_hash)
+	PHP_FE(spl_object_freeze,      arginfo_spl_object_freeze)
 #ifdef SPL_ITERATORS_H
 	PHP_FE(iterator_to_array,       arginfo_iterator_to_array)
 	PHP_FE(iterator_count,          arginfo_iterator)
@@ -952,6 +994,11 @@ PHP_MINIT_FUNCTION(spl)
 	PHP_MINIT(spl_heap)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(spl_fixedarray)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(spl_observer)(INIT_FUNC_ARGS_PASSTHRU);
+
+	memcpy(&immut_object_handlers, zend_get_std_object_handlers(), sizeof(immut_object_handlers));
+	immut_object_handlers.write_property = immut_write_property;
+	immut_object_handlers.unset_property = immut_unset_property;
+	immut_object_handlers.get_property_ptr_ptr = immut_read_property_by_ref;
 
 	return SUCCESS;
 }
