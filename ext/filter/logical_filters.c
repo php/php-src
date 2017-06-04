@@ -21,7 +21,7 @@
 /* $Id$ */
 
 #include "php_filter.h"
-ZEND_DECLARE_MODULE_GLOBALS(filter)
+ZEND_EXTERN_MODULE_GLOBALS(filter)
 #include "filter_private.h"
 #include "ext/standard/url.h"
 #include "ext/standard/html_tables.h"
