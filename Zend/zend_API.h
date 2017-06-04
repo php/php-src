@@ -409,8 +409,8 @@ ZEND_API int add_assoc_bool_ex(zval *arg, const char *key, size_t key_len, int b
 ZEND_API int add_assoc_resource_ex(zval *arg, const char *key, size_t key_len, zend_resource *r);
 ZEND_API int add_assoc_double_ex(zval *arg, const char *key, size_t key_len, double d);
 ZEND_API int add_assoc_str_ex(zval *arg, const char *key, size_t key_len, zend_string *str);
-ZEND_API int add_assoc_string_ex(zval *arg, const char *key, size_t key_len, char *str);
-ZEND_API int add_assoc_stringl_ex(zval *arg, const char *key, size_t key_len, char *str, size_t length);
+ZEND_API int add_assoc_string_ex(zval *arg, const char *key, size_t key_len, const char *str);
+ZEND_API int add_assoc_stringl_ex(zval *arg, const char *key, size_t key_len, const char *str, size_t length);
 ZEND_API int add_assoc_zval_ex(zval *arg, const char *key, size_t key_len, zval *value);
 
 #define add_assoc_long(__arg, __key, __n) add_assoc_long_ex(__arg, __key, strlen(__key), __n)
