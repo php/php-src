@@ -34,7 +34,6 @@ dynlib.m4
 Makefile
 Makefile.fragments
 Makefile.objects
-ZendEngine1
 _libs
 acconfig.h
 aclocal.m4
@@ -214,10 +213,7 @@ win32/wsyslog.h
 /Debug/
 /Debug_TS/
 /Release/
-/Release_inline/
 /Release_TS/
-/Release_TS_inline/
-/Release_TSDbg/
 /x64/
 
 # ------------------------------------------------------------------------------ Tests
