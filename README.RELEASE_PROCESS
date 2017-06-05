@@ -323,7 +323,8 @@ New Release Manager Checklist
 
 2. Create a GPG key for your @php.net address and publish it by editing `include/gpg-keys.inc`
    in the `web-php` repository, adding the output of `gpg --fingerprint "$USER@php.net"`. Let
-   one or more of the previous RMs sign your key.
+   one or more of the previous RMs sign your key. Publish your public key to pgp.mit.edu with:
+   `gpg --keyserver pgp.mit.edu --send-keys $KEYID`
 
 3. Request karma to eding main/php_version.h. Possibly karma for other restricted parts of 
    php-src might come in question.
