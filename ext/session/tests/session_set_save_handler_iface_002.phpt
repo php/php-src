@@ -85,6 +85,6 @@ session_start();
 *** Testing session_set_save_handler() function: interface wrong ***
 bool(true)
 
-Warning: session_set_save_handler() expects parameter 1 to be SessionHandlerInterface, object given in %s
+Warning: session_set_save_handler(): Session save handler object must implement SessionSaveHandlerInterface or SessionHandlerInter in %s on line %d
 bool(false)
 good handler writing

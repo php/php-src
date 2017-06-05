@@ -312,6 +312,9 @@ PHPAPI ZEND_EXTERN_MODULE_GLOBALS(ps)
 
 void php_session_auto_start(void *data);
 
+#define PS_SAVE_HANDLER_IFACE_NAME "SessionSaveHandlerInterface"
+extern zend_class_entry *php_session_save_handler_iface_entry;
+
 #define PS_CLASS_NAME "SessionHandler"
 extern PHPAPI zend_class_entry *php_session_class_entry;
 
