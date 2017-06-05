@@ -1787,7 +1787,7 @@ ZEND_VM_HANDLER(82, ZEND_FETCH_OBJ_R, CONST|TMP|VAR|UNUSED|THIS|CV, CONST|TMPVAR
 
 			if (EXPECTED(prop_offset != (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET)) {
 				retval = OBJ_PROP(zobj, prop_offset);
-				if (EXPECTED(Z_TYPE_P(retval) != IS_UNDEF)) {
+				if (EXPECTED(Z_TYPE_INFO_P(retval) != IS_UNDEF)) {
 					ZVAL_COPY_UNREF(EX_VAR(opline->result.var), retval);
 					break;
 				}
@@ -4462,11 +4462,11 @@ ZEND_VM_C_LABEL(send_again):
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HANDLER(119, ZEND_SEND_ARRAY, ANY, ANY)
+ZEND_VM_HANDLER(119, ZEND_SEND_ARRAY, ANY, ANY, NUM)
 {
 	USE_OPLINE
-	zend_free_op free_op1;
-	zval *args;
+	zend_free_op free_op1, free_op2;
+	zval *args, *op2;
 
 	SAVE_OPLINE();
 	args = GET_OP1_ZVAL_PTR(BP_VAR_R);
@@ -4488,44 +4488,98 @@ ZEND_VM_HANDLER(119, ZEND_SEND_ARRAY, ANY, ANY)
 		EX(call)->func = (zend_function*)&zend_pass_function;
 		Z_OBJ(EX(call)->This) = NULL;
 		ZEND_SET_CALL_INFO(EX(call), 0, ZEND_CALL_INFO(EX(call)) & ~ZEND_CALL_RELEASE_THIS);
+		FREE_UNFETCHED_OP2();
 	} else {
 		uint32_t arg_num;
 		HashTable *ht;
 		zval *arg, *param;
 
+
 ZEND_VM_C_LABEL(send_array):
 		ht = Z_ARRVAL_P(args);
-		zend_vm_stack_extend_call_frame(&EX(call), 0, zend_hash_num_elements(ht));
+		if (OP2_TYPE != IS_UNUSED) {
+			zend_free_op free_op2;
+			zval *op2 = GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R);
+			uint32_t skip = opline->extended_value;
+			uint32_t count = zend_hash_num_elements(ht);
+			zend_long len = zval_get_long(op2);
 
-		arg_num = 1;
-		param = ZEND_CALL_ARG(EX(call), 1);
-		ZEND_HASH_FOREACH_VAL(ht, arg) {
-			if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
-				if (UNEXPECTED(!Z_ISREF_P(arg))) {
-					if (!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
-						/* By-value send is not allowed -- emit a warning,
-						 * but still perform the call. */
-						zend_error(E_WARNING,
-							"Parameter %d to %s%s%s() expected to be a reference, value given",
-							arg_num,
-							EX(call)->func->common.scope ? ZSTR_VAL(EX(call)->func->common.scope->name) : "",
-							EX(call)->func->common.scope ? "::" : "",
-							ZSTR_VAL(EX(call)->func->common.function_name));
+			if (len < 0) {
+				len += (zend_long)(count - skip);
+			}
+			if (skip < count && len > 0) {
+				if (len > (zend_long)(count - skip)) {
+					len = (zend_long)(count - skip);
+				}
+				zend_vm_stack_extend_call_frame(&EX(call), 0, len);
+				arg_num = 1;
+				param = ZEND_CALL_ARG(EX(call), 1);
+				ZEND_HASH_FOREACH_VAL(ht, arg) {
+					if (skip > 0) {
+						skip--;
+						continue;
+					} else if ((zend_long)(arg_num - 1) >= len) {
+						break;
+					} else if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+						if (UNEXPECTED(!Z_ISREF_P(arg))) {
+							if (!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+								/* By-value send is not allowed -- emit a warning,
+								 * but still perform the call. */
+								zend_error(E_WARNING,
+									"Parameter %d to %s%s%s() expected to be a reference, value given",
+									arg_num,
+									EX(call)->func->common.scope ? ZSTR_VAL(EX(call)->func->common.scope->name) : "",
+									EX(call)->func->common.scope ? "::" : "",
+									ZSTR_VAL(EX(call)->func->common.function_name));
 
+							}
+						}
+					} else {
+						if (Z_ISREF_P(arg) &&
+						    !(EX(call)->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
+							/* don't separate references for __call */
+							arg = Z_REFVAL_P(arg);
+						}
+					}
+					ZVAL_COPY(param, arg);
+					ZEND_CALL_NUM_ARGS(EX(call))++;
+					arg_num++;
+					param++;
+				} ZEND_HASH_FOREACH_END();
+			}
+			FREE_OP2();
+		} else {
+			zend_vm_stack_extend_call_frame(&EX(call), 0, zend_hash_num_elements(ht));
+			arg_num = 1;
+			param = ZEND_CALL_ARG(EX(call), 1);
+			ZEND_HASH_FOREACH_VAL(ht, arg) {
+				if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+					if (UNEXPECTED(!Z_ISREF_P(arg))) {
+						if (!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+							/* By-value send is not allowed -- emit a warning,
+							 * but still perform the call. */
+							zend_error(E_WARNING,
+								"Parameter %d to %s%s%s() expected to be a reference, value given",
+								arg_num,
+								EX(call)->func->common.scope ? ZSTR_VAL(EX(call)->func->common.scope->name) : "",
+								EX(call)->func->common.scope ? "::" : "",
+								ZSTR_VAL(EX(call)->func->common.function_name));
+
+						}
+					}
+				} else {
+					if (Z_ISREF_P(arg) &&
+					    !(EX(call)->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
+						/* don't separate references for __call */
+						arg = Z_REFVAL_P(arg);
 					}
 				}
-			} else {
-				if (Z_ISREF_P(arg) &&
-				    !(EX(call)->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
-					/* don't separate references for __call */
-					arg = Z_REFVAL_P(arg);
-				}
-			}
-			ZVAL_COPY(param, arg);
-			ZEND_CALL_NUM_ARGS(EX(call))++;
-			arg_num++;
-			param++;
-		} ZEND_HASH_FOREACH_END();
+				ZVAL_COPY(param, arg);
+				ZEND_CALL_NUM_ARGS(EX(call))++;
+				arg_num++;
+				param++;
+			} ZEND_HASH_FOREACH_END();
+		}
 	}
 	FREE_OP1();
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -8255,6 +8309,80 @@ ZEND_VM_HANDLER(193, ZEND_GET_TYPE, CONST|TMP|VAR|CV, UNUSED)
 	}
 	FREE_OP1();
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+ZEND_VM_HANDLER(194, ZEND_FUNC_NUM_ARGS, UNUSED, UNUSED)
+{
+	USE_OPLINE
+
+	ZVAL_LONG(EX_VAR(opline->result.var), EX_NUM_ARGS());
+	ZEND_VM_NEXT_OPCODE();
+}
+
+ZEND_VM_HANDLER(195, ZEND_FUNC_GET_ARGS, UNUSED|CONST, UNUSED)
+{
+	USE_OPLINE
+	zend_array *ht;
+	uint32_t arg_count, first_extra_arg, i, n;
+	zval *p, *q;
+
+	arg_count = EX_NUM_ARGS();
+	ht = (zend_array *) emalloc(sizeof(zend_array));
+	if (OP1_TYPE == IS_CONST) {
+		i = Z_LVAL_P(EX_CONSTANT(opline->op1));
+		if (arg_count < i) {
+			i = 0;
+		} else {
+			i = arg_count - i;
+		}
+		zend_hash_init(ht, i, NULL, ZVAL_PTR_DTOR, 0);
+	} else {
+		zend_hash_init(ht, arg_count, NULL, ZVAL_PTR_DTOR, 0);
+	}
+	ZVAL_ARR(EX_VAR(opline->result.var), ht);
+	if (arg_count) {
+		first_extra_arg = EX(func)->op_array.num_args;
+		zend_hash_real_init(ht, 1);
+		ZEND_HASH_FILL_PACKED(ht) {
+			i = 0;
+			n = 0;
+			if (OP1_TYPE == IS_CONST) {
+				i = Z_LVAL_P(EX_CONSTANT(opline->op1));
+			}
+			p = EX_VAR_NUM(i);
+			if (arg_count > first_extra_arg) {
+				while (i < first_extra_arg) {
+					q = p;
+					if (EXPECTED(Z_TYPE_INFO_P(q) != IS_UNDEF)) {
+						ZVAL_DEREF(q);
+						if (Z_OPT_REFCOUNTED_P(q)) {
+							Z_ADDREF_P(q);
+						}
+						n++;
+					}
+					ZEND_HASH_FILL_ADD(q);
+					p++;
+					i++;
+				}
+				p = EX_VAR_NUM(EX(func)->op_array.last_var + EX(func)->op_array.T);
+			}
+			while (i < arg_count) {
+				q = p;
+				if (EXPECTED(Z_TYPE_INFO_P(q) != IS_UNDEF)) {
+					ZVAL_DEREF(q);
+					if (Z_OPT_REFCOUNTED_P(q)) {
+						Z_ADDREF_P(q);
+					}
+					n++;
+				}
+				ZEND_HASH_FILL_ADD(q);
+				p++;
+				i++;
+			}
+		} ZEND_HASH_FILL_END();
+		ht->nNumOfElements = n;
+	}
+	ZEND_VM_NEXT_OPCODE();
 }
 
 ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_ADD, (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG), ZEND_ADD_LONG_NO_OVERFLOW, CONST|TMPVARCV, CONST|TMPVARCV, SPEC(NO_CONST_CONST,COMMUTATIVE))

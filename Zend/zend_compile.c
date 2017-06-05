@@ -3554,6 +3554,37 @@ int zend_compile_func_cufa(znode *result, zend_ast_list *args, zend_string *lcna
 	}
 
 	zend_compile_init_user_func(args->child[0], 0, lcname);
+	if (args->child[1]->kind == ZEND_AST_CALL
+	 && args->child[1]->child[0]->kind == ZEND_AST_ZVAL
+	 && Z_TYPE_P(zend_ast_get_zval(args->child[1]->child[0])) == IS_STRING
+	 && args->child[1]->child[1]->kind == ZEND_AST_ARG_LIST) {
+		zend_string *orig_name = zend_ast_get_str(args->child[1]->child[0]);
+		zend_ast_list *list = zend_ast_get_list(args->child[1]->child[1]);
+		zend_bool is_fully_qualified;
+		zend_string *name = zend_resolve_function_name(orig_name, args->child[1]->child[0]->attr, &is_fully_qualified);
+
+		if (zend_string_equals_literal_ci(name, "array_slice")
+		 && list->children == 3
+		 && list->child[1]->kind == ZEND_AST_ZVAL) {
+			zval *zv = zend_ast_get_zval(list->child[1]);
+
+			if (Z_TYPE_P(zv) == IS_LONG
+			 && Z_LVAL_P(zv) >= 0
+			 && Z_LVAL_P(zv) <= 0x7fffffff) {
+				zend_op *opline;
+				znode len_node;
+
+				zend_compile_expr(&arg_node, list->child[0]);
+				zend_compile_expr(&len_node, list->child[2]);
+				opline = zend_emit_op(NULL, ZEND_SEND_ARRAY, &arg_node, &len_node);
+				opline->extended_value = Z_LVAL_P(zv);
+				zend_emit_op(result, ZEND_DO_FCALL, NULL, NULL);
+				zend_string_release(name);
+				return SUCCESS;
+			}
+		}
+		zend_string_release(name);
+	}
 	zend_compile_expr(&arg_node, args->child[1]);
 	zend_emit_op(NULL, ZEND_SEND_ARRAY, &arg_node, NULL);
 	zend_emit_op(result, ZEND_DO_FCALL, NULL, NULL);
@@ -3780,6 +3811,61 @@ int zend_compile_func_gettype(znode *result, zend_ast_list *args) /* {{{ */
 }
 /* }}} */
 
+int zend_compile_func_num_args(znode *result, zend_ast_list *args) /* {{{ */
+{
+	if (CG(active_op_array)->function_name && args->children == 0) {
+		zend_emit_op_tmp(result, ZEND_FUNC_NUM_ARGS, NULL, NULL);
+		return SUCCESS;
+	} else {
+		return FAILURE;
+	}
+}
+/* }}} */
+
+int zend_compile_func_get_args(znode *result, zend_ast_list *args) /* {{{ */
+{
+	if (CG(active_op_array)->function_name && args->children == 0) {
+		zend_emit_op_tmp(result, ZEND_FUNC_GET_ARGS, NULL, NULL);
+		return SUCCESS;
+	} else {
+		return FAILURE;
+	}
+}
+/* }}} */
+
+int zend_compile_func_array_slice(znode *result, zend_ast_list *args) /* {{{ */
+{
+	if (CG(active_op_array)->function_name
+	 && args->children == 2
+	 && args->child[0]->kind == ZEND_AST_CALL
+	 && args->child[0]->child[0]->kind == ZEND_AST_ZVAL
+	 && Z_TYPE_P(zend_ast_get_zval(args->child[0]->child[0])) == IS_STRING
+	 && args->child[0]->child[1]->kind == ZEND_AST_ARG_LIST
+	 && args->child[1]->kind == ZEND_AST_ZVAL) {
+
+		zend_string *orig_name = zend_ast_get_str(args->child[0]->child[0]);
+		zend_bool is_fully_qualified;
+		zend_string *name = zend_resolve_function_name(orig_name, args->child[0]->child[0]->attr, &is_fully_qualified);
+		zend_ast_list *list = zend_ast_get_list(args->child[0]->child[1]);
+		zval *zv = zend_ast_get_zval(args->child[1]);
+		znode first;
+
+		if (zend_string_equals_literal_ci(name, "func_get_args")
+		 && list->children == 0
+		 && Z_TYPE_P(zv) == IS_LONG
+		 && Z_LVAL_P(zv) >= 0) {
+			first.op_type = IS_CONST;
+			ZVAL_LONG(&first.u.constant, Z_LVAL_P(zv));
+			zend_emit_op_tmp(result, ZEND_FUNC_GET_ARGS, &first, NULL);
+			zend_string_release(name);
+			return SUCCESS;
+		}
+		zend_string_release(name);
+	}
+	return FAILURE;
+}
+/* }}} */
+
 int zend_try_compile_special_func(znode *result, zend_string *lcname, zend_ast_list *args, zend_function *fbc, uint32_t type) /* {{{ */
 {
 	if (fbc->internal_function.handler == ZEND_FN(display_disabled_function)) {
@@ -3848,6 +3934,12 @@ int zend_try_compile_special_func(znode *result, zend_string *lcname, zend_ast_l
 		return zend_compile_func_get_called_class(result, args);
 	} else if (zend_string_equals_literal(lcname, "gettype")) {
 		return zend_compile_func_gettype(result, args);
+	} else if (zend_string_equals_literal(lcname, "func_num_args")) {
+		return zend_compile_func_num_args(result, args);
+	} else if (zend_string_equals_literal(lcname, "func_get_args")) {
+		return zend_compile_func_get_args(result, args);
+	} else if (zend_string_equals_literal(lcname, "array_slice")) {
+		return zend_compile_func_array_slice(result, args);
 	} else {
 		return FAILURE;
 	}

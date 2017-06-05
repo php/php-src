@@ -96,6 +96,10 @@ int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
 # include "openssl/applink.c"
 #endif
 
+#ifdef HAVE_VALGRIND
+# include "valgrind/callgrind.h"
+#endif
+
 #ifndef PHP_WIN32
 /* XXX this will need to change later when threaded fastcgi is implemented.  shane */
 struct sigaction act, old_term, old_quit, old_int;
@@ -2246,6 +2250,11 @@ consult the installation file that came with this distribution, or visit \n\
 						if (comma) {
 							warmup_repeats = atoi(php_optarg);
 							repeats = atoi(comma + 1);
+#ifdef HAVE_VALGRIND
+							if (warmup_repeats > 0) {
+								CALLGRIND_STOP_INSTRUMENTATION;
+							}
+#endif
 						} else {
 							repeats = atoi(php_optarg);
 						}
@@ -2667,6 +2676,9 @@ fastcgi_request_done:
 							gettimeofday(&start, NULL);
 #else
 							time(&start);
+#endif
+#ifdef HAVE_VALGRIND
+							CALLGRIND_START_INSTRUMENTATION;
 #endif
 						}
 						continue;

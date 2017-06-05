@@ -1118,8 +1118,6 @@ ZEND_API void zend_merge_properties(zval *obj, HashTable *properties) /* {{{ */
 ZEND_API int zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 {
 	if (!(class_type->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
-		class_type->ce_flags |= ZEND_ACC_CONSTANTS_UPDATED;
-
 		if (class_type->parent) {
 			if (UNEXPECTED(zend_update_class_constants(class_type->parent) != SUCCESS)) {
 				return FAILURE;
@@ -1188,7 +1186,9 @@ ZEND_API int zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 				ce = ce->parent;
 			}
 		}
+		class_type->ce_flags |= ZEND_ACC_CONSTANTS_UPDATED;
 	}
+
 	return SUCCESS;
 }
 /* }}} */

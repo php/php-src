@@ -3,14 +3,17 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.2
 
 - Core:
-  . Added ZEND_COUNT, ZEND_GET_CLASS, ZEMD_GET_CALLED_CLASS, ZEND_GET_TYPE
-    instructions, to implement corresponding builtin functions. (Dmitry)
+  . Added ZEND_COUNT, ZEND_GET_CLASS, ZEND_GET_CALLED_CLASS, ZEND_GET_TYPE,
+    ZEND_FUNC_NUM_ARGS, ZEND_FUNC_GET_ARGS instructions, to implement
+    corresponding builtin functions. (Dmitry)
   . "Countable" interface is moved from SPL to Core. (Dmitry)
   . Added ZEND_IN_ARRAY instruction, implementing optimized in_array() builtin
     function, through hash lookup in flipped array. (Dmitry)
   . Removed IS_TYPE_IMMUTABLE (it's the same as COPYABLE & !REFCOUNTED). (Dmitry)
   . Removed the sql.safe_mode directive. (Kalle)
   . Removed support for Netware. (Kalle)
+  . Renamed ReflectionClass::isIterateable() to ReflectionClass::isIterable()
+    (alias original name for BC). (Sara)
   . Fixed bug #54535 (WSA cleanup executes before MSHUTDOWN). (Kalle)
   . Implemented FR #69791 (Disallow mail header injections by extra headers)
     (Yasuo)
@@ -52,6 +55,8 @@ PHP                                                                        NEWS
     a fatal error). (pmmaga)
   . Fixed bug #63384 (Cannot override an abstract method with an abstract
     method). (pmmaga, wes)
+  . Fixed bug #74607 (Traits enforce different inheritance rules). (pmmaga)
+  . Fixed misparsing of abstract unix domain socket names. (Sara)
 
 - BCMath:
   . Fixed bug #46564 (bcmod truncates fractionals). (liborm85)
@@ -60,10 +65,20 @@ PHP                                                                        NEWS
   . Fix integer overflows (Joshua Rogers)
 
 - Date:
+  . Fixed bug #55407 (Impossible to prototype DateTime::createFromFormat).
+    (kelunik)
   . Fixed bug #69587 (DateInterval properties and isset). (jhdxr)
   . Fixed bug #74404 (Wrong reflection on DateTimeZone::getTransitions).
     (krakjoe)
   . Fixed bug #74080 (add constant for RFC7231 format datetime). (duncan3dc)
+  . Fixed bug #74639 (implement clone for DatePeriod and DateInterval).
+    (andrewnester)
+  . Implemented FR #71520 (Adding the DateTime constants to the
+    DateTimeInterface interface). (Majkl578)
+
+- Dba:
+  . Fixed bug #72885 (flatfile: dba_fetch() fails to read replaced entry).
+    (Anatol)
 
 - DOM:
   . Fixed bug #67474 (getElementsByTagNameNS filter on default ns). (aboks)
@@ -74,7 +89,8 @@ PHP                                                                        NEWS
 
 - EXIF:
   . Added support for vendor specific tags for the following formats:
-    Samsung, DJI, Panasonic, Sony, Pentax, Minolta & Sigma/Foveon. (Kalle)
+    Samsung, DJI, Panasonic, Sony, Pentax, Minolta, Sigma/Foveon, AGFA, 
+	Kyocera, Ricoh & Epson. (Kalle)
   . Fixed bug #72682 (exif_read_data() fails to read all data for some
     images). (Kalle)
   . Fixed bug #71534 (Type confusion in exif_read_data() leading to heap
@@ -92,6 +108,7 @@ PHP                                                                        NEWS
     (Mike)
 
 - FTP:
+  . Fixed bug #74598 (ftp:// wrapper ignores context arg). (Sara)
   . Implement MLSD for structured listing of directories. (blar)
 
 - GD:
@@ -121,6 +138,7 @@ PHP                                                                        NEWS
   . Added array input support to mb_convert_encoding(). (Yasuo)
   . Added array input support to mb_check_encoding(). (Yasuo)
   . Fixed bug #69079 (enhancement for mb_substitute_character). (masakielastic)
+  . Update to oniguruma version 6.3.0. (Remi)
 
 - Mcrypt:
   . The deprecated mcrypt extension has been moved to PECL. (leigh)
@@ -136,6 +154,7 @@ PHP                                                                        NEWS
   . Fixed bug #71519 (add serial hex to return value array). (xrobau)
 
 - PCRE:
+  . Added support for PCRE JIT fast path API. (dmitry)
   . Fixed bug #61780 (Inconsistent PCRE captures in match results). (cmb)
 
 - PDO:
@@ -165,6 +184,7 @@ PHP                                                                        NEWS
     (mhagstrand)
   . Fixed bug #74196 (phar does not correctly handle names containing dots).
     (mhagstrand)
+  . Fixed bug #74386 (Phar::__construct reflection incorrect). (villfa)
 
 - PHPDBG
   . Added extended_value to opcode dump output. (Sara)
@@ -196,6 +216,7 @@ PHP                                                                        NEWS
   . Fixed bug #72979 (money_format stores wrong length AIX). (matthieu.sarter)
   . Fixed bug #74300 (unserialize accepts two plus/minus signs for float number exponent part).
     (xKerman)
+  . Fixed bug #74556 (stream_socket_get_name() returns '\0'). (Sara)
 
 - XML:
   . Moved utf8_encode() and utf8_decode() to the Standard extension. (Andrea)
@@ -209,6 +230,7 @@ PHP                                                                        NEWS
 
 - ZIP:
   . Add support for encrypted archives. (Remi)
+  . Use of bundled libzip is deprecated, --with-libzip option is recommended. (Remi)
   . Fixed Bug #73803 (Reflection of ZipArchive does not show public properties). (Remi)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

@@ -56,11 +56,6 @@ PHP 7.2 UPGRADE NOTES
     parameter (assoc) is null. Previously JSON_OBJECT_AS_ARRAY was always
     ignored.
 
-- PCRE:
-  . preg_match() and other PCRE functions now distinguish between unmatched
-    subpatterns and empty matches by reporting NULL and "" (empty string),
-    respectively. Formerly, either was reported as empty string.
-
 - Session:
   . Removed register_globals related code and "!" can be used as $_SESSION key name.
   . Session is made to manage session status correctly and prevents invalid operations.
@@ -109,6 +104,9 @@ PHP 7.2 UPGRADE NOTES
 
 - PCRE:
   . Added `J` modifier for setting PCRE_DUPNAMES.
+  . Added `PREG_UNMATCHED_AS_NULL` flag to allow distinguish between unmatched
+    subpatterns and empty matches by reporting NULL and "" (empty string),
+    respectively.
 
 - Standard:
   . Simplified password hashing API updated to support Argon2i hashes when PHP is compiled with libargon2
@@ -238,7 +236,8 @@ See also: https://wiki.php.net/rfc/deprecations_php_7_2
 
 - EXIF:
    . Added extended exif tag support for the following formats: 
-     Samsung, DJI, Panasonic, Sony, Pentax, Minolta & Sigma/Foveon.
+     Samsung, DJI, Panasonic, Sony, Pentax, Minolta, Sigma/Foveon, 
+	 AGFA, Kyocera, Ricoh & Epson.
 
 - GD:
   . Removed --enable-gd-native-ttf configuration option which was unused as
@@ -276,6 +275,9 @@ See also: https://wiki.php.net/rfc/deprecations_php_7_2
 - GD:
   . IMG_EFFECT_MULTIPLY
   . IMG_BMP
+
+- PCRE
+  . PREG_UNMATCHED_AS_NULL
 
 - Standard:
   . PASSWORD_ARGON2_DEFAULT_MEMORY_COST

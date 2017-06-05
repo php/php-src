@@ -2,7 +2,7 @@
   cp1251.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2006-2017  Byte      <byte AT mail DOT kna DOT ru>
+ * Copyright (c) 2006-2016  Byte      <byte AT mail DOT kna DOT ru>
  *                          K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *

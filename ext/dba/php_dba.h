@@ -79,12 +79,12 @@ typedef struct dba_handler {
 	int flags; /* whether and how dba does locking and other flags*/
 	int (*open)(dba_info *, char **error);
 	void (*close)(dba_info *);
-	char* (*fetch)(dba_info *, char *, int, int, int *);
-	int (*update)(dba_info *, char *, int, char *, int, int);
-	int (*exists)(dba_info *, char *, int);
-	int (*delete)(dba_info *, char *, int);
-	char* (*firstkey)(dba_info *, int *);
-	char* (*nextkey)(dba_info *, int *);
+	char* (*fetch)(dba_info *, char *, size_t, int, size_t *);
+	int (*update)(dba_info *, char *, size_t, char *, size_t, int);
+	int (*exists)(dba_info *, char *, size_t);
+	int (*delete)(dba_info *, char *, size_t);
+	char* (*firstkey)(dba_info *, size_t *);
+	char* (*nextkey)(dba_info *, size_t *);
 	int (*optimize)(dba_info *);
 	int (*sync)(dba_info *);
 	char* (*info)(struct dba_handler *hnd, dba_info *);
@@ -98,17 +98,17 @@ typedef struct dba_handler {
 #define DBA_CLOSE_FUNC(x) \
 	void dba_close_##x(dba_info *info)
 #define DBA_FETCH_FUNC(x) \
-	char *dba_fetch_##x(dba_info *info, char *key, int keylen, int skip, int *newlen)
+	char *dba_fetch_##x(dba_info *info, char *key, size_t keylen, int skip, size_t *newlen)
 #define DBA_UPDATE_FUNC(x) \
-	int dba_update_##x(dba_info *info, char *key, int keylen, char *val, int vallen, int mode)
+	int dba_update_##x(dba_info *info, char *key, size_t keylen, char *val, size_t vallen, int mode)
 #define DBA_EXISTS_FUNC(x) \
-	int dba_exists_##x(dba_info *info, char *key, int keylen)
+	int dba_exists_##x(dba_info *info, char *key, size_t keylen)
 #define DBA_DELETE_FUNC(x) \
-	int dba_delete_##x(dba_info *info, char *key, int keylen)
+	int dba_delete_##x(dba_info *info, char *key, size_t keylen)
 #define DBA_FIRSTKEY_FUNC(x) \
-	char *dba_firstkey_##x(dba_info *info, int *newlen)
+	char *dba_firstkey_##x(dba_info *info, size_t *newlen)
 #define DBA_NEXTKEY_FUNC(x) \
-	char *dba_nextkey_##x(dba_info *info, int *newlen)
+	char *dba_nextkey_##x(dba_info *info, size_t *newlen)
 #define DBA_OPTIMIZE_FUNC(x) \
 	int dba_optimize_##x(dba_info *info)
 #define DBA_SYNC_FUNC(x) \

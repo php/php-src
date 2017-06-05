@@ -130,11 +130,13 @@ static int collision = 0;
 static int init_st = 0;
 
 static void
-stat_col()
+stat_col(void)
 {
-    FILE *f = fopen("/tmp/col", "w");
-    fprintf(f, "collision: %d\n", collision);
-    fclose(f);
+  FILE *f = fopen("/tmp/col", "w");
+  if (f == 0) return ;
+
+  (void) fprintf(f, "collision: %d\n", collision);
+  (void) fclose(f);
 }
 #endif
 
@@ -155,10 +157,16 @@ st_init_table_with_size(type, size)
     size = new_size(size);	/* round up to prime number */
 
     tbl = alloc(st_table);
+    if (tbl == 0) return 0;
+
     tbl->type = type;
     tbl->num_entries = 0;
     tbl->num_bins = size;
     tbl->bins = (st_table_entry **)Calloc(size, sizeof(st_table_entry*));
+    if (tbl->bins == 0) {
+      free(tbl);
+      return 0;
+    }
 
     return tbl;
 }
@@ -320,6 +328,9 @@ rehash(table)
 
     new_num_bins = new_size(old_num_bins+1);
     new_bins = (st_table_entry**)Calloc(new_num_bins, sizeof(st_table_entry*));
+    if (new_bins == 0) {
+      return ;
+    }
 
     for(i = 0; i < old_num_bins; i++) {
 	ptr = table->bins[i];

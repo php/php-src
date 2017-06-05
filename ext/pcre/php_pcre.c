@@ -33,6 +33,7 @@
 #define PREG_PATTERN_ORDER			1
 #define PREG_SET_ORDER				2
 #define PREG_OFFSET_CAPTURE			(1<<8)
+#define PREG_UNMATCHED_AS_NULL		(1<<9)
 
 #define	PREG_SPLIT_NO_EMPTY			(1<<0)
 #define PREG_SPLIT_DELIM_CAPTURE	(1<<1)
@@ -188,6 +189,7 @@ static PHP_MINIT_FUNCTION(pcre)
 	REGISTER_LONG_CONSTANT("PREG_PATTERN_ORDER", PREG_PATTERN_ORDER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_SET_ORDER", PREG_SET_ORDER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_OFFSET_CAPTURE", PREG_OFFSET_CAPTURE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PREG_UNMATCHED_AS_NULL", PREG_UNMATCHED_AS_NULL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_SPLIT_NO_EMPTY", PREG_SPLIT_NO_EMPTY, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_SPLIT_DELIM_CAPTURE", PREG_SPLIT_DELIM_CAPTURE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_SPLIT_OFFSET_CAPTURE", PREG_SPLIT_OFFSET_CAPTURE, CONST_CS | CONST_PERSISTENT);
@@ -639,15 +641,19 @@ PHPAPI pcre* pcre_get_compiled_regex_ex(zend_string *regex, pcre_extra **extra, 
 /* }}} */
 
 /* {{{ add_offset_pair */
-static inline void add_offset_pair(zval *result, char *str, int len, int offset, char *name)
+static inline void add_offset_pair(zval *result, char *str, int len, int offset, char *name, int unmatched_as_null)
 {
 	zval match_pair, tmp;
 
 	array_init_size(&match_pair, 2);
 
 	/* Add (match, offset) to the return value */
-	if (offset < 0) { /* unset substring */
-		ZVAL_NULL(&tmp);
+	if (offset < 0) {
+		if (unmatched_as_null) {
+			ZVAL_NULL(&tmp);
+		} else {
+			ZVAL_EMPTY_STRING(&tmp);
+		}
 	} else {
 		ZVAL_STRINGL(&tmp, str, len);
 	}
@@ -705,24 +711,25 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 {
 	zval			 result_set,		/* Holds a set of subpatterns after
 										   a global match */
-				    *match_sets = NULL;	/* An array of sets of matches for each
+					*match_sets = NULL;	/* An array of sets of matches for each
 										   subpattern after a global match */
 	pcre_extra		*extra = pce->extra;/* Holds results of studying */
 	pcre_extra		 extra_data;		/* Used locally for exec options */
-	int				 exoptions = 0;		/* Execution options */
+	int				 no_utf_check = 0;  /* Execution options */
 	int				 count = 0;			/* Count of matched subpatterns */
 	int				*offsets;			/* Array of subpattern offsets */
 	int				 num_subpats;		/* Number of captured subpatterns */
 	int				 size_offsets;		/* Size of the offsets array */
 	int				 matched;			/* Has anything matched */
 	int				 g_notempty = 0;	/* If the match should not be empty */
-	const char	   **stringlist;		/* Holds list of subpatterns */
 	char 		   **subpat_names;		/* Array for named subpatterns */
 	int				 i;
 	int				 subpats_order;		/* Order of subpattern matches */
-	int				 offset_capture;    /* Capture match offsets: yes/no */
-	unsigned char   *mark = NULL;       /* Target for MARK name */
-	zval            marks;      		/* Array of marks for PREG_PATTERN_ORDER */
+	int				 offset_capture;	/* Capture match offsets: yes/no */
+	int				 unmatched_as_null;	/* Null non-matches: yes/no */
+	unsigned char   *mark = NULL;		/* Target for MARK name */
+	zval			 marks;				/* Array of marks for PREG_PATTERN_ORDER */
+
 	ALLOCA_FLAG(use_heap);
 
 	ZVAL_UNDEF(&marks);
@@ -737,6 +744,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 
 	if (use_flags) {
 		offset_capture = flags & PREG_OFFSET_CAPTURE;
+		unmatched_as_null = flags & PREG_UNMATCHED_AS_NULL;
 
 		/*
 		 * subpats_order is pre-set to pattern mode so we change it only if
@@ -752,6 +760,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 		}
 	} else {
 		offset_capture = 0;
+		unmatched_as_null = 0;
 	}
 
 	/* Negative offset counts from the end of the string. */
@@ -806,13 +815,26 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 	matched = 0;
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 
+#ifdef HAVE_PCRE_JIT_SUPPORT
+	if (!(pce->compile_options & PCRE_UTF8)) {
+		no_utf_check = PCRE_NO_UTF8_CHECK;
+	}
+#endif
+
 	do {
 		/* Execute the regular expression. */
+#ifdef HAVE_PCRE_JIT_SUPPORT
+		if ((extra->flags & PCRE_EXTRA_EXECUTABLE_JIT)
+		 && no_utf_check && !g_notempty) {
+			count = pcre_jit_exec(pce->re, extra, subject, (int)subject_len, (int)start_offset,
+						  no_utf_check|g_notempty, offsets, size_offsets, jit_stack);
+		} else
+#endif
 		count = pcre_exec(pce->re, extra, subject, (int)subject_len, (int)start_offset,
-						  exoptions|g_notempty, offsets, size_offsets);
+						  no_utf_check|g_notempty, offsets, size_offsets);
 
 		/* the string was already proved to be valid UTF-8 */
-		exoptions |= PCRE_NO_UTF8_CHECK;
+		no_utf_check = PCRE_NO_UTF8_CHECK;
 
 		/* Check for too many substrings condition. */
 		if (count == 0) {
@@ -827,7 +849,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 			/* If subpatterns array has been passed, fill it in with values. */
 			if (subpats != NULL) {
 				/* Try to get the list of substrings and display a warning if failed. */
-				if ((offsets[1] - offsets[0] < 0) || pcre_get_substring_list(subject, offsets, count, &stringlist) < 0) {
+				if (offsets[1] - offsets[0] < 0) {
 					if (subpat_names) {
 						efree(subpat_names);
 					}
@@ -846,15 +868,19 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 						/* For each subpattern, insert it into the appropriate array. */
 						if (offset_capture) {
 							for (i = 0; i < count; i++) {
-								add_offset_pair(&match_sets[i], (char *)stringlist[i],
-												offsets[(i<<1)+1] - offsets[i<<1], offsets[i<<1], NULL);
+								add_offset_pair(&match_sets[i], subject + offsets[i<<1],
+												offsets[(i<<1)+1] - offsets[i<<1], offsets[i<<1], NULL, unmatched_as_null);
 							}
 						} else {
 							for (i = 0; i < count; i++) {
-								if (offsets[i<<1] < 0) { /* unset substring */
-									add_next_index_null(&match_sets[i]);
+								if (offsets[i<<1] < 0) {
+									if (unmatched_as_null) {
+										add_next_index_null(&match_sets[i]);
+									} else {
+										add_next_index_str(&match_sets[i], ZSTR_EMPTY_ALLOC());
+									}
 								} else {
-									add_next_index_stringl(&match_sets[i], (char *)stringlist[i],
+									add_next_index_stringl(&match_sets[i], subject + offsets[i<<1],
 														   offsets[(i<<1)+1] - offsets[i<<1]);
 								}
 							}
@@ -869,11 +895,15 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 						/*
 						 * If the number of captured subpatterns on this run is
 						 * less than the total possible number, pad the result
-						 * arrays with NULLs.
+						 * arrays with NULLs or empty strings.
 						 */
 						if (count < num_subpats) {
 							for (; i < num_subpats; i++) {
-								add_next_index_null(&match_sets[i]);
+								if (unmatched_as_null) {
+									add_next_index_null(&match_sets[i]);
+								} else {
+									add_next_index_str(&match_sets[i], ZSTR_EMPTY_ALLOC());
+								}
 							}
 						}
 					} else {
@@ -884,23 +914,31 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 						if (subpat_names) {
 							if (offset_capture) {
 								for (i = 0; i < count; i++) {
-									add_offset_pair(&result_set, (char *)stringlist[i],
-													offsets[(i<<1)+1] - offsets[i<<1], offsets[i<<1], subpat_names[i]);
+									add_offset_pair(&result_set, subject + offsets[i<<1],
+													offsets[(i<<1)+1] - offsets[i<<1], offsets[i<<1], subpat_names[i], unmatched_as_null);
 								}
 							} else {
 								for (i = 0; i < count; i++) {
 									if (subpat_names[i]) {
-									if (offsets[i<<1] < 0) { /* unset substring */
-										add_assoc_null(&result_set, subpat_names[i]);
-									} else {
-											add_assoc_stringl(&result_set, subpat_names[i], (char *)stringlist[i],
-																   offsets[(i<<1)+1] - offsets[i<<1]);
+										if (offsets[i<<1] < 0) {
+											if (unmatched_as_null) {
+												add_assoc_null(&result_set, subpat_names[i]);
+											} else {
+												add_assoc_str(&result_set, subpat_names[i], ZSTR_EMPTY_ALLOC());
+											}
+										} else {
+											add_assoc_stringl(&result_set, subpat_names[i], subject + offsets[i<<1],
+															  offsets[(i<<1)+1] - offsets[i<<1]);
+										}
 									}
-									}
-									if (offsets[i<<1] < 0) { /* unset substring */
-										add_next_index_null(&result_set);
+									if (offsets[i<<1] < 0) {
+										if (unmatched_as_null) {
+											add_next_index_null(&result_set);
+										} else {
+											add_next_index_str(&result_set, ZSTR_EMPTY_ALLOC());
+										}
 									} else {
-										add_next_index_stringl(&result_set, (char *)stringlist[i],
+										add_next_index_stringl(&result_set, subject + offsets[i<<1],
 															   offsets[(i<<1)+1] - offsets[i<<1]);
 									}
 								}
@@ -908,15 +946,19 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 						} else {
 							if (offset_capture) {
 								for (i = 0; i < count; i++) {
-									add_offset_pair(&result_set, (char *)stringlist[i],
-													offsets[(i<<1)+1] - offsets[i<<1], offsets[i<<1], NULL);
+									add_offset_pair(&result_set, subject + offsets[i<<1],
+													offsets[(i<<1)+1] - offsets[i<<1], offsets[i<<1], NULL, unmatched_as_null);
 								}
 							} else {
 								for (i = 0; i < count; i++) {
-									if (offsets[i<<1] < 0) { /* unset substring */
-										add_next_index_null(&result_set);
+									if (offsets[i<<1] < 0) {
+										if (unmatched_as_null) {
+											add_next_index_null(&result_set);
+										} else {
+											add_next_index_str(&result_set, ZSTR_EMPTY_ALLOC());
+										}
 									} else {
-										add_next_index_stringl(&result_set, (char *)stringlist[i],
+										add_next_index_stringl(&result_set, subject + offsets[i<<1],
 															   offsets[(i<<1)+1] - offsets[i<<1]);
 									}
 								}
@@ -934,24 +976,32 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 					if (subpat_names) {
 						if (offset_capture) {
 							for (i = 0; i < count; i++) {
-								add_offset_pair(subpats, (char *)stringlist[i],
+								add_offset_pair(subpats, subject + offsets[i<<1],
 												offsets[(i<<1)+1] - offsets[i<<1],
-												offsets[i<<1], subpat_names[i]);
+												offsets[i<<1], subpat_names[i], unmatched_as_null);
 							}
 						} else {
 							for (i = 0; i < count; i++) {
 								if (subpat_names[i]) {
-									if (offsets[i<<1] < 0) { /* unset substring */
-										add_assoc_null(subpats, subpat_names[i]);
+									if (offsets[i<<1] < 0) {
+										if (unmatched_as_null) {
+											add_assoc_null(subpats, subpat_names[i]);
+										} else {
+											add_assoc_str(subpats, subpat_names[i], ZSTR_EMPTY_ALLOC());
+										}
 									} else {
-										add_assoc_stringl(subpats, subpat_names[i], (char *)stringlist[i],
+										add_assoc_stringl(subpats, subpat_names[i], subject + offsets[i<<1],
 														  offsets[(i<<1)+1] - offsets[i<<1]);
 									}
 								}
-								if (offsets[i<<1] < 0) { /* unset substring */
-									add_next_index_null(subpats);
+								if (offsets[i<<1] < 0) {
+									if (unmatched_as_null) {
+										add_next_index_null(subpats);
+									} else {
+										add_next_index_str(subpats, ZSTR_EMPTY_ALLOC());
+									}
 								} else {
-									add_next_index_stringl(subpats, (char *)stringlist[i],
+									add_next_index_stringl(subpats, subject + offsets[i<<1],
 														   offsets[(i<<1)+1] - offsets[i<<1]);
 								}
 							}
@@ -959,16 +1009,20 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 					} else {
 						if (offset_capture) {
 							for (i = 0; i < count; i++) {
-								add_offset_pair(subpats, (char *)stringlist[i],
+								add_offset_pair(subpats, subject + offsets[i<<1],
 												offsets[(i<<1)+1] - offsets[i<<1],
-												offsets[i<<1], NULL);
+												offsets[i<<1], NULL, unmatched_as_null);
 							}
 						} else {
 							for (i = 0; i < count; i++) {
-								if (offsets[i<<1] < 0) { /* unset substring */
-									add_next_index_null(subpats);
+								if (offsets[i<<1] < 0) {
+									if (unmatched_as_null) {
+										add_next_index_null(subpats);
+									} else {
+										add_next_index_str(subpats, ZSTR_EMPTY_ALLOC());
+									}
 								} else {
-									add_next_index_stringl(subpats, (char *)stringlist[i],
+									add_next_index_stringl(subpats, subject + offsets[i<<1],
 														   offsets[(i<<1)+1] - offsets[i<<1]);
 								}
 							}
@@ -979,8 +1033,6 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 						add_assoc_string_ex(subpats, "MARK", sizeof("MARK") - 1, (char *)mark);
 					}
 				}
-
-				pcre_free((void *) stringlist);
 			}
 		} else if (count == PCRE_ERROR_NOMATCH) {
 			/* If we previously set PCRE_NOTEMPTY_ATSTART after a null match,
@@ -1177,7 +1229,7 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 {
 	pcre_extra		*extra = pce->extra;/* Holds results of studying */
 	pcre_extra		 extra_data;		/* Used locally for exec options */
-	int				 exoptions = 0;		/* Execution options */
+	int				 no_utf_check = 0;	/* Execution options */
 	int				 count = 0;			/* Count of matched subpatterns */
 	int				*offsets;			/* Array of subpattern offsets */
 	char 			**subpat_names;		/* Array for named subpatterns */
@@ -1256,17 +1308,35 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 	result_len = 0;
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 
-	while (1) {
+#ifdef HAVE_PCRE_JIT_SUPPORT
+	if (!(pce->compile_options & PCRE_UTF8)) {
+		no_utf_check = PCRE_NO_UTF8_CHECK;
+	}
+#endif
+
 #ifdef PCRE_EXTRA_MARK
+	if (EXPECTED(replace)) {
+		extra->flags &= ~PCRE_EXTRA_MARK;
+	} else {
 		extra->mark = &mark;
 		extra->flags |= PCRE_EXTRA_MARK;
+	}
 #endif
+
+	while (1) {
 		/* Execute the regular expression. */
+#ifdef HAVE_PCRE_JIT_SUPPORT
+		if ((extra->flags & PCRE_EXTRA_EXECUTABLE_JIT)
+		 && no_utf_check && !g_notempty) {
+			count = pcre_jit_exec(pce->re, extra, subject, subject_len, start_offset,
+						  no_utf_check|g_notempty, offsets, size_offsets, jit_stack);
+		} else
+#endif
 		count = pcre_exec(pce->re, extra, subject, subject_len, start_offset,
-						  exoptions|g_notempty, offsets, size_offsets);
+						  no_utf_check|g_notempty, offsets, size_offsets);
 
 		/* the string was already proved to be valid UTF-8 */
-		exoptions |= PCRE_NO_UTF8_CHECK;
+		no_utf_check = PCRE_NO_UTF8_CHECK;
 
 		/* Check for too many substrings condition. */
 		if (UNEXPECTED(count == 0)) {
@@ -1277,8 +1347,8 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 		piece = subject + start_offset;
 
 		/* if (EXPECTED(count > 0 && (limit == -1 || limit > 0))) */
-		if (EXPECTED(count > 0 && (offsets[1] - offsets[0] >= 0) && limit)) {
-			if (UNEXPECTED(replace_count)) {
+		if (count > 0 && (offsets[1] - offsets[0] >= 0) && limit) {
+			if (replace_count) {
 				++*replace_count;
 			}
 
@@ -1377,10 +1447,10 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 				zend_string_release(eval_result);
 			}
 
-			if (EXPECTED(limit)) {
+			if (limit) {
 				limit--;
 			}
-		} else if (count == PCRE_ERROR_NOMATCH || UNEXPECTED(limit == 0)) {
+		} else if (count == PCRE_ERROR_NOMATCH || limit == 0) {
 			/* If we previously set PCRE_NOTEMPTY_ATSTART after a null match,
 			   this is not necessarily the end. We need to advance
 			   the start offset, and continue. Fudge the offset values
@@ -1801,7 +1871,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 	pcre_extra		 extra_data;		/* Used locally for exec options */
 	int				*offsets;			/* Array of subpattern offsets */
 	int				 size_offsets;		/* Size of the offsets array */
-	int				 exoptions = 0;		/* Execution options */
+	int				 no_utf_check = 0;	/* Execution options */
 	int				 count = 0;			/* Count of matched subpatterns */
 	int				 start_offset;		/* Where the new search starts */
 	int				 next_offset;		/* End of the last delimiter match + 1 */
@@ -1848,14 +1918,28 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 	last_match = subject;
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 
+#ifdef HAVE_PCRE_JIT_SUPPORT
+	if (!(pce->compile_options & PCRE_UTF8)) {
+		no_utf_check = PCRE_NO_UTF8_CHECK;
+	}
+#endif
+
 	/* Get next piece if no limit or limit not yet reached and something matched*/
 	while ((limit_val == -1 || limit_val > 1)) {
+#ifdef HAVE_PCRE_JIT_SUPPORT
+		if ((extra->flags & PCRE_EXTRA_EXECUTABLE_JIT)
+		 && no_utf_check && !g_notempty) {
+			count = pcre_jit_exec(pce->re, extra, subject,
+						  subject_len, start_offset,
+						  no_utf_check|g_notempty, offsets, size_offsets, jit_stack);
+		} else
+#endif
 		count = pcre_exec(pce->re, extra, subject,
 						  subject_len, start_offset,
-						  exoptions|g_notempty, offsets, size_offsets);
+						  no_utf_check|g_notempty, offsets, size_offsets);
 
 		/* the string was already proved to be valid UTF-8 */
-		exoptions |= PCRE_NO_UTF8_CHECK;
+		no_utf_check = PCRE_NO_UTF8_CHECK;
 
 		/* Check for too many substrings condition. */
 		if (count == 0) {
@@ -1869,7 +1953,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 
 				if (offset_capture) {
 					/* Add (match, offset) pair to the return value */
-					add_offset_pair(return_value, last_match, (int)(&subject[offsets[0]]-last_match), next_offset, NULL);
+					add_offset_pair(return_value, last_match, (int)(&subject[offsets[0]]-last_match), next_offset, NULL, 0);
 				} else {
 					/* Add the piece to the return value */
 					ZVAL_STRINGL(&tmp, last_match, &subject[offsets[0]]-last_match);
@@ -1891,7 +1975,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 					/* If we have matched a delimiter */
 					if (!no_empty || match_len > 0) {
 						if (offset_capture) {
-							add_offset_pair(return_value, &subject[offsets[i<<1]], match_len, offsets[i<<1], NULL);
+							add_offset_pair(return_value, &subject[offsets[i<<1]], match_len, offsets[i<<1], NULL, 0);
 						} else {
 							ZVAL_STRINGL(&tmp, &subject[offsets[i<<1]], match_len);
 							zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
@@ -1928,11 +2012,10 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 
 	start_offset = (int)(last_match - subject); /* the offset might have been incremented, but without further successful matches */
 
-	if (!no_empty || start_offset < subject_len)
-	{
+	if (!no_empty || start_offset < subject_len) {
 		if (offset_capture) {
 			/* Add the last (match, offset) pair to the return value */
-			add_offset_pair(return_value, &subject[start_offset], subject_len - start_offset, start_offset, NULL);
+			add_offset_pair(return_value, &subject[start_offset], subject_len - start_offset, start_offset, NULL, 0);
 		} else {
 			/* Add the last piece to the return value */
 			ZVAL_STRINGL(&tmp, last_match, subject + subject_len - last_match);
@@ -2075,6 +2158,7 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 	int				*offsets;			/* Array of subpattern offsets */
 	int				 size_offsets;		/* Size of the offsets array */
 	int				 count = 0;			/* Count of matched subpatterns */
+	int				 no_utf_check = 0;	/* Execution options */
 	zend_string		*string_key;
 	zend_ulong		 num_key;
 	zend_bool		 invert;			/* Whether to return non-matching
@@ -2106,14 +2190,31 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 
+#ifdef HAVE_PCRE_JIT_SUPPORT
+	if (!(pce->compile_options & PCRE_UTF8)) {
+		no_utf_check = PCRE_NO_UTF8_CHECK;
+	}
+#endif
+
 	/* Go through the input array */
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(input), num_key, string_key, entry) {
 		zend_string *subject_str = zval_get_string(entry);
 
 		/* Perform the match */
+#ifdef HAVE_PCRE_JIT_SUPPORT
+		if ((extra->flags & PCRE_EXTRA_EXECUTABLE_JIT)
+		 && no_utf_check) {
+			count = pcre_jit_exec(pce->re, extra, ZSTR_VAL(subject_str),
+						  (int)ZSTR_LEN(subject_str), 0,
+						  no_utf_check, offsets, size_offsets, jit_stack);
+		} else
+#endif
 		count = pcre_exec(pce->re, extra, ZSTR_VAL(subject_str),
 						  (int)ZSTR_LEN(subject_str), 0,
-						  0, offsets, size_offsets);
+						  no_utf_check, offsets, size_offsets);
+
+		/* the string was already proved to be valid UTF-8 */
+		no_utf_check = PCRE_NO_UTF8_CHECK;
 
 		/* Check for too many substrings condition. */
 		if (count == 0) {

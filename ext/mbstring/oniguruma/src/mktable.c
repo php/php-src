@@ -2,7 +2,7 @@
   mktable.c
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2007  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2016  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,10 @@
 #include <stdio.h>
 #include <locale.h>
 
+#ifndef __USE_ISOC99
 #define __USE_ISOC99
+#endif
+
 #include <ctype.h>
 
 #include "regenc.h"
@@ -1108,11 +1111,13 @@ static int exec(FILE* fp, ENC_INFO* einfo)
 #define NCOL  8
 
   int c, val, enc;
+  int r;
 
   enc = einfo->num;
 
-  fprintf(fp, "static const unsigned short Enc%s_CtypeTable[256] = {\n",
-	  einfo->name);
+  r = fprintf(fp, "static const unsigned short Enc%s_CtypeTable[256] = {\n",
+              einfo->name);
+  if (r < 0) return -1;
 
   for (c = 0; c < 256; c++) {
     val = 0;
@@ -1131,20 +1136,33 @@ static int exec(FILE* fp, ENC_INFO* einfo)
     if (IsWord  (enc, c))   val |= BIT_CTYPE_WORD;
     if (IsAscii (enc, c))   val |= BIT_CTYPE_ASCII;
 
-    if (c % NCOL == 0) fputs("  ", fp);
-    fprintf(fp, "0x%04x", val);
-    if (c != 255) fputs(",", fp);
+    if (c % NCOL == 0) {
+      r = fputs("  ", fp);
+      if (r < 0) return -1;
+    }
+    r = fprintf(fp, "0x%04x", val);
+    if (r < 0) return -1;
+
+    if (c != 255) {
+      r = fputs(",", fp);
+      if (r < 0) return -1;
+    }
     if (c != 0 && c % NCOL == (NCOL-1))
-      fputs("\n", fp);
+      r = fputs("\n", fp);
     else
-      fputs(" ", fp);
+      r = fputs(" ", fp);
+
+    if (r < 0) return -1;
   }
-  fprintf(fp, "};\n");
+  r = fprintf(fp, "};\n");
+  if (r < 0) return -1;
+
   return 0;
 }
 
 extern int main(int argc ARG_UNUSED, char* argv[] ARG_UNUSED)
 {
+  int r;
   int i;
   FILE* fp = stdout;
 
@@ -1155,7 +1173,11 @@ extern int main(int argc ARG_UNUSED, char* argv[] ARG_UNUSED)
   /* setlocale(LC_ALL, "fr_FR.iso88591"); */
 
   for (i = 0; i < (int )(sizeof(Info)/sizeof(ENC_INFO)); i++) {
-    exec(fp, &Info[i]);
+    r = exec(fp, &Info[i]);
+    if (r < 0) {
+      fprintf(stderr, "FAIL exec(): %d\n", r);
+      return -1;
+    }
   }
 
   return 0;
