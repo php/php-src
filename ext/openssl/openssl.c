@@ -5051,11 +5051,10 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 
 			certout = BIO_new_file(signersfilename, "w");
 			if (certout) {
-				int i;
 				signers = PKCS7_get0_signers(p7, NULL, (int)flags);
 				if (signers != NULL) {
 
-					for (i = 0; i < sk_X509_num(signers); i++) {
+					for (int i = 0; i < sk_X509_num(signers); i++) {
 						if (!PEM_write_bio_X509(certout, sk_X509_value(signers, i))) {
 							php_openssl_store_errors();
 							RETVAL_LONG(-1);
