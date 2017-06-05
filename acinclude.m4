@@ -245,10 +245,19 @@ dnl iterate over the sources
   for ac_src in $2; do
   
 dnl remove the suffix
-      IFS=.
-      set $ac_src
-      ac_obj=[$]1
-      IFS=$old_IFS
+dnl      IFS=.
+dnl      set $ac_src
+dnl      ac_obj=[$]1
+dnl      IFS=$old_IFS
+
+dnl remove the suffix
+      ac_obj=`echo $ac_src|$SED 's/\.[[^\.]]*$//g'`
+
+dnl modify object filename if source file is not in ac_srcdir
+      ac_src_path=`echo $ac_srcdir$ac_src|$SED -e 's%/\{2,\}%/%g' -e ':begin' -e 's%[[^/]]*/\.\./%%' -e 'tbegin' -e 's%^\.\./%/%g'`
+      if test $ac_srcdir != `echo $ac_src_path|cut -c -${#ac_srcdir}`; then
+        ac_obj=`echo $ac_src|$SED 's%\.\./%_parent_dir.%g'|$SED 's%/%_dir.%g'|$SED 's/\.[^\.]*$//g'`
+      fi
       
 dnl append to the array which has been dynamically chosen at m4 time
       $4="[$]$4 [$]ac_bdir[$]ac_obj.lo"
