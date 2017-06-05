@@ -383,10 +383,19 @@ static void* dasm_labels[zend_lb_MAX];
 
 |.macro SSE_GET_ZVAL_LVAL, reg, addr
 ||	if (Z_MODE(addr) == IS_CONST_ZVAL) {
-||		if (zend_jit_x86_flags & ZEND_JIT_CPU_AVX) {
-|			MEM_OP3_3 vcvtsi2sd, xmm(reg-ZREG_XMM0), xmm(reg-ZREG_XMM0), aword, Z_ZV(addr), r0
+|.if X64
+||		if (!IS_SIGNED_32BIT(Z_LVAL_P(Z_ZV(addr)))) {
+|			mov64 r0, Z_LVAL_P(Z_ZV(addr))
 ||		} else {
-|			MEM_OP2_2 cvtsi2sd, xmm(reg-ZREG_XMM0), aword, Z_ZV(addr), r0
+|			mov r0, Z_LVAL_P(Z_ZV(addr))
+||		}
+|.else
+|		mov r0, Z_LVAL_P(Z_ZV(addr))
+|.endif
+||		if (zend_jit_x86_flags & ZEND_JIT_CPU_AVX) {
+|			vcvtsi2sd, xmm(reg-ZREG_XMM0), xmm(reg-ZREG_XMM0), r0
+||		} else {
+|			cvtsi2sd, xmm(reg-ZREG_XMM0), r0
 ||		}
 ||	} else if (Z_MODE(addr) == IS_MEM_ZVAL) {
 ||		if (zend_jit_x86_flags & ZEND_JIT_CPU_AVX) {
