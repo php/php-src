@@ -56,6 +56,7 @@ PHPAPI zend_class_entry  *spl_ce_RecursiveArrayIterator;
 #define SPL_ARRAY_USE_OTHER          0x02000000
 #define SPL_ARRAY_INT_MASK           0xFFFF0000
 #define SPL_ARRAY_CLONE_MASK         0x0100FFFF
+#define SPL_ARRAY_SERIALIZE_MASK     0x0200FFFF
 
 #define SPL_ARRAY_METHOD_NO_ARG				0
 #define SPL_ARRAY_METHOD_USE_ARG    		1
@@ -1698,7 +1699,7 @@ SPL_METHOD(Array, serialize)
 
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 
-	ZVAL_LONG(&flags, (intern->ar_flags & SPL_ARRAY_CLONE_MASK));
+	ZVAL_LONG(&flags, (intern->ar_flags & SPL_ARRAY_SERIALIZE_MASK));
 
 	/* storage */
 	smart_str_appendl(&buf, "x:", 2);
@@ -1786,8 +1787,8 @@ SPL_METHOD(Array, unserialize)
 		if (*p!='a' && *p!='O' && *p!='C' && *p!='r') {
 			goto outexcept;
 		}
-		intern->ar_flags &= ~SPL_ARRAY_CLONE_MASK;
-		intern->ar_flags |= flags & SPL_ARRAY_CLONE_MASK;
+		intern->ar_flags &= ~SPL_ARRAY_SERIALIZE_MASK;
+		intern->ar_flags |= flags & SPL_ARRAY_SERIALIZE_MASK;
 		zval_ptr_dtor(&intern->array);
 		ZVAL_UNDEF(&intern->array);
 		if (!php_var_unserialize(&intern->array, &p, s + buf_len, &var_hash)
