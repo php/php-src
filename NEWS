@@ -2,7 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2017 PHP 7.0.23
 
-
+- SPL:
+  . Fixed bug #74669 (Unserialize ArrayIterator broken). (Andrew Nester)
 
 03 Aug 2017 PHP 7.0.22
 

@@ -1734,13 +1734,14 @@ SPL_METHOD(Array, serialize)
  */
 SPL_METHOD(Array, unserialize)
 {
-	spl_array_object *intern = Z_SPLARRAY_P(getThis());
+	zval *object = getThis();
+	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	char *buf;
 	size_t buf_len;
 	const unsigned char *p, *s;
 	php_unserialize_data_t var_hash;
-	zval *members, *zflags;
+	zval *members, *zflags, *array;
 	zend_long flags;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &buf, &buf_len) == FAILURE) {
@@ -1782,24 +1783,38 @@ SPL_METHOD(Array, unserialize)
 	}
 	++p;
 
-	if (*p!='m') {
-		if (*p!='a' && *p!='O' && *p!='C' && *p!='r') {
-			goto outexcept;
-		}
+	if (flags & SPL_ARRAY_IS_SELF) {
+		/* If IS_SELF is used, the flags are not followed by an array/object */
 		intern->ar_flags &= ~SPL_ARRAY_CLONE_MASK;
 		intern->ar_flags |= flags & SPL_ARRAY_CLONE_MASK;
 		zval_ptr_dtor(&intern->array);
 		ZVAL_UNDEF(&intern->array);
-		if (!php_var_unserialize(&intern->array, &p, s + buf_len, &var_hash)
-				|| (Z_TYPE(intern->array) != IS_ARRAY && Z_TYPE(intern->array) != IS_OBJECT)) {
+	} else {
+		if (*p!='a' && *p!='O' && *p!='C' && *p!='r') {
 			goto outexcept;
 		}
-		var_push_dtor(&var_hash, &intern->array);
+
+		array = var_tmp_var(&var_hash);
+		if (!php_var_unserialize(array, &p, s + buf_len, &var_hash)
+				|| (Z_TYPE_P(array) != IS_ARRAY && Z_TYPE_P(array) != IS_OBJECT)) {
+			goto outexcept;
+		}
+
+		intern->ar_flags &= ~SPL_ARRAY_CLONE_MASK;
+		intern->ar_flags |= flags & SPL_ARRAY_CLONE_MASK;
+
+		if (Z_TYPE_P(array) == IS_ARRAY) {
+			zval_ptr_dtor(&intern->array);
+			ZVAL_COPY(&intern->array, array);
+		} else {
+			spl_array_set_array(object, intern, array, 0L, 1);
+		}
+
+		if (*p != ';') {
+			goto outexcept;
+		}
+        ++p;
 	}
-	if (*p != ';') {
-		goto outexcept;
-	}
-	++p;
 
 	/* members */
 	if (*p!= 'm' || *++p != ':') {
