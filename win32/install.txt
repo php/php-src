@@ -1028,6 +1028,7 @@ extension=php_bz2.dll
    php_snmp.dll SNMP get and walk functions NT only!
    php_soap.dll SOAP functions PHP >= 5.0.0
    php_sockets.dll Socket functions None
+   php_sodium.dll Sodium cryptography library PHP >= 7.2.0
    php_sybase_ct.dll Sybase functions Requires: Sybase client libraries
    php_tidy.dll Tidy functions PHP >= 5.0.0
    php_tokenizer.dll Tokenizer functions Built in since PHP 4.3.0
