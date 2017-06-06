@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.2
+08 Jun 2017, PHP 7.2.0alpha1
 
 - Core:
   . Added ZEND_COUNT, ZEND_GET_CLASS, ZEND_GET_CALLED_CLASS, ZEND_GET_TYPE,
