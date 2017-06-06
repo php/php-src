@@ -4465,7 +4465,7 @@ ZEND_VM_C_LABEL(send_again):
 ZEND_VM_HANDLER(119, ZEND_SEND_ARRAY, ANY, ANY, NUM)
 {
 	USE_OPLINE
-	zend_free_op free_op1, free_op2;
+	zend_free_op free_op1;
 	zval *args, *op2;
 
 	SAVE_OPLINE();

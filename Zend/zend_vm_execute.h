@@ -1322,7 +1322,7 @@ send_again:
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_ARRAY_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	zend_free_op free_op1, free_op2;
+	zend_free_op free_op1;
 	zval *args, *op2;
 
 	SAVE_OPLINE();
