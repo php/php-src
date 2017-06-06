@@ -103,9 +103,9 @@ MD5 sums. If you do not have this directory, create it.
 15. Now the RC can be found on http://downloads.php.net/~yourname,
 f.e. http://downloads.php.net/~derick/
 
-16. Once the release has been tagged, contact the PHP Windows development team
-(internals-win@lists.php.net) so that Windows binaries can be created. Once
-those are made, they should be placed into the same directory as the source snapshots.
+16. Once the release has been tagged, contact the release-managers@ distribution list
+so that Windows binaries can be created.  Once those are made, they should be placed
+into the same directory as the source snapshots.
 
 Getting the non stable release (alpha/beta/RC) announced
 --------------------------------------------------------
@@ -319,7 +319,8 @@ will not accidentally hit the php-announce@ mailinglist.
 New Release Manager Checklist
 -----------------------------
 
-1. Email systems@ to get setup for access to downloads.php.net
+1. Email systems@ to get setup for access to downloads.php.net and to be added to the
+   release-managers@ distribution list.
 
 2. Create a GPG key for your @php.net address and publish it by editing `include/gpg-keys.inc`
    in the `web-php` repository, adding the output of `gpg --fingerprint "$USER@php.net"`. Let
