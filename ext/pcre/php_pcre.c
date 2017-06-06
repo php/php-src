@@ -2037,43 +2037,90 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
    Quote regular expression characters plus an optional character */
 static PHP_FUNCTION(preg_quote)
 {
-	size_t		 in_str_len;
-	char	*in_str;		/* Input string argument */
-	char	*in_str_end;    /* End of the input string */
-	size_t		 delim_len = 0;
-	char	*delim = NULL;	/* Additional delimiter argument */
-	zend_string	*out_str;	/* Output string with quoted characters */
-	char 	*p,				/* Iterator for input string */
-			*q,				/* Iterator for output string */
-			 delim_char=0,	/* Delimiter character to be quoted */
-			 c;				/* Current character */
-	zend_bool quote_delim = 0; /* Whether to quote additional delim char */
+	zend_string *str;       		/* Input string argument */
+	zend_string	*delim = NULL;		/* Additional delimiter argument */
+	char		*in_str;			/* Input string */
+	char		*in_str_end;    	/* End of the input string */
+	zend_string	*out_str;			/* Output string with quoted characters */
+	size_t       extra_len;         /* Number of additional characters */
+	char 		*p,					/* Iterator for input string */
+				*q,					/* Iterator for output string */
+				 delim_char = '\0',	/* Delimiter character to be quoted */
+				 c;					/* Current character */
 
 	/* Get the arguments and check for errors */
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STRING(in_str, in_str_len)
+		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING(delim, delim_len)
+		Z_PARAM_STR(delim)
 	ZEND_PARSE_PARAMETERS_END();
 
-	in_str_end = in_str + in_str_len;
-
 	/* Nothing to do if we got an empty string */
-	if (in_str == in_str_end) {
+	if (ZSTR_LEN(str) == 0) {
 		RETURN_EMPTY_STRING();
 	}
 
-	if (delim && *delim) {
-		delim_char = delim[0];
-		quote_delim = 1;
+	in_str = ZSTR_VAL(str);
+	in_str_end = in_str + ZSTR_LEN(str);
+
+	if (delim) {
+		delim_char = ZSTR_VAL(delim)[0];
 	}
 
+	/* Go through the string and quote necessary characters */
+	extra_len = 0;
+	p = in_str;
+	do {
+		c = *p;
+		switch(c) {
+			case '.':
+			case '\\':
+			case '+':
+			case '*':
+			case '?':
+			case '[':
+			case '^':
+			case ']':
+			case '$':
+			case '(':
+			case ')':
+			case '{':
+			case '}':
+			case '=':
+			case '!':
+			case '>':
+			case '<':
+			case '|':
+			case ':':
+			case '-':
+				extra_len++;
+				break;
+
+			case '\0':
+				extra_len+=3;
+				break;
+
+			default:
+				if (c == delim_char) {
+					extra_len++;
+				}
+				break;
+		}
+		p++;
+	} while (p != in_str_end);
+
+	if (extra_len == 0) {
+		RETURN_STR_COPY(str);
+	}
+
+do_quote:
 	/* Allocate enough memory so that even if each character
 	   is quoted, we won't run out of room */
-	out_str = zend_string_safe_alloc(4, in_str_len, 0, 0);
+	out_str = zend_string_safe_alloc(1, ZSTR_LEN(str), extra_len, 0);
+	q = ZSTR_VAL(out_str);
+	p = in_str;
 
-	/* Go through the string and quote necessary characters */
-	for (p = in_str, q = ZSTR_VAL(out_str); p != in_str_end; p++) {
+	do {
 		c = *p;
 		switch(c) {
 			case '.':
@@ -2108,16 +2155,16 @@ static PHP_FUNCTION(preg_quote)
 				break;
 
 			default:
-				if (quote_delim && c == delim_char)
+				if (c == delim_char) {
 					*q++ = '\\';
+				}
 				*q++ = c;
 				break;
 		}
-	}
+		p++;
+	} while (p != in_str_end);
 	*q = '\0';
 
-	/* Reallocate string and return it */
-	out_str = zend_string_truncate(out_str, q - ZSTR_VAL(out_str), 0);
 	RETURN_NEW_STR(out_str);
 }
 /* }}} */
