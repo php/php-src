@@ -103,11 +103,6 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(environment), key, element) {
 		str = zval_get_string(element);
 
-		if (ZSTR_LEN(str) == 0) {
-			zend_string_release(str);
-			continue;
-		}
-
 		sizeenv += ZSTR_LEN(str) + 1;
 
 		if (key && ZSTR_LEN(key)) {
