@@ -64,6 +64,7 @@ CREDIT_LINE("SimpleXML", "Sterling Hughes, Marcus Boerger, Rob Richards");
 CREDIT_LINE("SNMP", "Rasmus Lerdorf, Harrie Hazewinkel, Mike Jackson, Steven Lawrance, Johann Hanne, Boris Lytochkin");
 CREDIT_LINE("SOAP", "Brad Lafountain, Shane Caraveo, Dmitry Stogov");
 CREDIT_LINE("Sockets", "Chris Vandomelen, Sterling Hughes, Daniel Beulshausen, Jason Greene");
+CREDIT_LINE("Sodium", "Frank Denis");
 CREDIT_LINE("SPL", "Marcus Boerger, Etienne Kneuss");
 CREDIT_LINE("SQLite 3.x driver for PDO", "Wez Furlong");
 CREDIT_LINE("SQLite3", "Scott MacVicar, Ilia Alshanetsky, Brad Dewar");

@@ -14,6 +14,7 @@ addons:
       - libpspell-dev
       - librecode-dev
       - libsasl2-dev
+      - libsodium-dev
       - libxpm-dev
       - libt1-dev
 
