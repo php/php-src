@@ -1064,7 +1064,7 @@ static size_t php_sqlite3_stream_write(php_stream *stream, const char *buf, size
 {
 	php_stream_sqlite3_data *sqlite3_stream = (php_stream_sqlite3_data *) stream->abstract;
 
-	if (sqlite3_stream->flags == 0) {
+	if (sqlite3_stream->flags & SQLITE_OPEN_READONLY) {
 		php_error_docref(NULL, E_WARNING, "Can't write to blob stream: is open as read only");
 		return 0;
 	}
@@ -1221,7 +1221,7 @@ PHP_METHOD(sqlite3, openBlob)
 	zval *object = getThis();
 	char *table, *column, *dbname = "main", *mode = "rb";
 	size_t table_len, column_len, dbname_len;
-	zend_long rowid, flags = 0;
+	zend_long rowid, flags = SQLITE_OPEN_READONLY, sqlite_flags = 0;
 	sqlite3_blob *blob = NULL;
 	php_stream_sqlite3_data *sqlite3_stream;
 	php_stream *stream;
@@ -1234,7 +1234,9 @@ PHP_METHOD(sqlite3, openBlob)
 		return;
 	}
 
-	if (sqlite3_blob_open(db_obj->db, dbname, table, column, rowid, flags, &blob) != SQLITE_OK) {
+	sqlite_flags = (flags & SQLITE_OPEN_READWRITE) ? 1 : 0;
+
+	if (sqlite3_blob_open(db_obj->db, dbname, table, column, rowid, sqlite_flags, &blob) != SQLITE_OK) {
 		php_sqlite3_error(db_obj, "Unable to open blob: %s", sqlite3_errmsg(db_obj->db));
 		RETURN_FALSE;
 	}
@@ -1245,7 +1247,7 @@ PHP_METHOD(sqlite3, openBlob)
 	sqlite3_stream->position = 0;
 	sqlite3_stream->size = sqlite3_blob_bytes(blob);
 
-	if (flags != 0) {
+	if (sqlite_flags != 0) {
 		mode = "r+b";
 	}
 
