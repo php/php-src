@@ -104,8 +104,8 @@ MD5 sums. If you do not have this directory, create it.
 f.e. http://downloads.php.net/~derick/
 
 16. Once the release has been tagged, contact the release-managers@ distribution list
-so that Windows binaries can be created.  Once those are made, they should be placed
-into the same directory as the source snapshots.
+so that Windows binaries can be created.  Once those are made, they can be found at
+http://windows.php.net/download
 
 Getting the non stable release (alpha/beta/RC) announced
 --------------------------------------------------------
