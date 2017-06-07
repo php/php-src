@@ -670,9 +670,6 @@ static ZEND_COLD void zend_verify_type_error_common(
 		if (ZEND_TYPE_IS_CLASS(arg_info->type) && Z_TYPE_P(value) == IS_OBJECT) {
 			*given_msg = "instance of ";
 			*given_kind = ZSTR_VAL(Z_OBJCE_P(value)->name);
-		} else if (!ZEND_TYPE_IS_CLASS(arg_info->type) && Z_TYPE_P(value) == IS_OBJECT) {
-			*given_msg = "is an ";
-			*given_kind = ZSTR_VAL(Z_OBJCE_P(value)->name);
 		} else {
 			*given_msg = zend_zval_type_name(value);
 			*given_kind = "";
