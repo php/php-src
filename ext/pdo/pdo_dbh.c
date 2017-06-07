@@ -1321,10 +1321,13 @@ int pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 			if (info->return_reference) {
 				func.fn_flags |= ZEND_ACC_RETURN_REFERENCE;
 			}
-			if (funcs->arg_info[funcs->num_args].is_variadic) {
-				func.fn_flags |= ZEND_ACC_VARIADIC;
-				/* Don't count the variadic argument */
-				func.num_args--;
+			int i;
+			for (i = 0; i <= funcs->num_args; i++) {
+				if (funcs->arg_info[i].is_variadic) {
+					func.fn_flags |= ZEND_ACC_VARIADIC;
+					/* Don't count the variadic argument */
+					func.num_args--;
+				}
 			}
 		} else {
 			func.arg_info = NULL;

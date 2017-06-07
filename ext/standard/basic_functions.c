@@ -461,9 +461,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_array_intersect_key, 0, 0, 2)
 	ZEND_ARG_VARIADIC_INFO(0, arrays)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_array_intersect_ukey, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_array_intersect_ukey, 0, 0, 3)
 	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg2, 0) */
+	ZEND_ARG_VARIADIC_INFO(0, arrays)
 	ZEND_ARG_INFO(0, callback_key_compare_func)
 ZEND_END_ARG_INFO()
 
@@ -472,9 +472,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_array_intersect, 0, 0, 2)
 	ZEND_ARG_VARIADIC_INFO(0, arrays)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_array_uintersect, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_array_uintersect, 0, 0, 3)
 	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg2, 0) */
+	ZEND_ARG_VARIADIC_INFO(0, arrays)
 	ZEND_ARG_INFO(0, callback_data_compare_func)
 ZEND_END_ARG_INFO()
 
@@ -483,21 +483,21 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_array_intersect_assoc, 0, 0, 2)
 	ZEND_ARG_VARIADIC_INFO(0, arrays)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_array_uintersect_assoc, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_array_uintersect_assoc, 0, 0, 3)
 	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg2, 0) */
+	ZEND_ARG_VARIADIC_INFO(0, arrays)
 	ZEND_ARG_INFO(0, callback_data_compare_func)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_array_intersect_uassoc, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_array_intersect_uassoc, 0, 0, 3)
 	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg2, 0) */
+	ZEND_ARG_VARIADIC_INFO(0, arrays)
 	ZEND_ARG_INFO(0, callback_key_compare_func)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_array_uintersect_uassoc, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_array_uintersect_uassoc, 0, 0, 4)
 	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg2, 0) */
+	ZEND_ARG_VARIADIC_INFO(0, arrays)
 	ZEND_ARG_INFO(0, callback_data_compare_func)
 	ZEND_ARG_INFO(0, callback_key_compare_func)
 ZEND_END_ARG_INFO()
@@ -507,9 +507,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_array_diff_key, 0, 0, 2)
 	ZEND_ARG_VARIADIC_INFO(0, arrays)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_array_diff_ukey, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_array_diff_ukey, 0, 0, 3)
 	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg2, 0) */
+	ZEND_ARG_VARIADIC_INFO(0, arrays)
 	ZEND_ARG_INFO(0, callback_key_comp_func)
 ZEND_END_ARG_INFO()
 
@@ -518,9 +518,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_array_diff, 0, 0, 2)
 	ZEND_ARG_VARIADIC_INFO(0, arrays)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_array_udiff, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_array_udiff, 0, 0, 3)
 	ZEND_ARG_INFO(0, arr1)
-	ZEND_ARG_INFO(0, arr2)
+	ZEND_ARG_VARIADIC_INFO(0, arrays)
 	ZEND_ARG_INFO(0, callback_data_comp_func)
 ZEND_END_ARG_INFO()
 
@@ -529,21 +529,21 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_array_diff_assoc, 0, 0, 2)
 	ZEND_ARG_VARIADIC_INFO(0, arrays)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_array_diff_uassoc, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_array_diff_uassoc, 0, 0, 3)
 	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg2, 0) */
+	ZEND_ARG_VARIADIC_INFO(0, arrays)
 	ZEND_ARG_INFO(0, callback_data_comp_func)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_array_udiff_assoc, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_array_udiff_assoc, 0, 0, 3)
 	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg2, 0) */
+    ZEND_ARG_VARIADIC_INFO(0, arrays)
 	ZEND_ARG_INFO(0, callback_key_comp_func)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_array_udiff_uassoc, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_array_udiff_uassoc, 0, 0, 4)
 	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg2, 0) */
+    ZEND_ARG_VARIADIC_INFO(0, arrays)
 	ZEND_ARG_INFO(0, callback_data_comp_func)
 	ZEND_ARG_INFO(0, callback_key_comp_func)
 ZEND_END_ARG_INFO()
