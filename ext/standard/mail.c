@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -52,11 +52,6 @@
 #include "win32/sendmail.h"
 #endif
 
-#ifdef NETWARE
-#define EX_OK           0       /* successful termination */
-#define EX_TEMPFAIL     75      /* temp failure; user is invited to retry */
-#endif
-
 #define SKIP_LONG_HEADER_SEP(str, pos)																	\
 	if (str[pos] == '\r' && str[pos + 1] == '\n' && (str[pos + 2] == ' ' || str[pos + 2] == '\t')) {	\
 		pos += 2;																						\
@@ -83,9 +78,9 @@ PHP_FUNCTION(ezmlm_hash)
 	unsigned int h = 5381;
 	size_t j, str_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &str, &str_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(str, str_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	for (j = 0; j < str_len; j++) {
 		h = (h + (h << 5)) ^ (zend_ulong) (unsigned char) tolower(str[j]);
@@ -300,9 +295,14 @@ PHP_FUNCTION(mail)
 	char *to_r, *subject_r;
 	char *p, *e;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss|zS", &to, &to_len, &subject, &subject_len, &message, &message_len, &headers, &extra_cmd) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(3, 5)
+		Z_PARAM_STRING(to, to_len)
+		Z_PARAM_STRING(subject, subject_len)
+		Z_PARAM_STRING(message, message_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL_DEREF(headers)
+		Z_PARAM_STR(extra_cmd)
+	ZEND_PARSE_PARAMETERS_END();
 
 	/* ASCIIZ check */
 	MAIL_ASCIIZ_CHECK(to, to_len);
@@ -418,7 +418,7 @@ void php_mail_log_to_syslog(char *message) {
 
 void php_mail_log_to_file(char *filename, char *message, size_t message_size) {
 	/* Write 'message' to the given file. */
-	uint flags = IGNORE_URL_WIN | REPORT_ERRORS | STREAM_DISABLE_OPEN_BASEDIR;
+	uint32_t flags = IGNORE_URL_WIN | REPORT_ERRORS | STREAM_DISABLE_OPEN_BASEDIR;
 	php_stream *stream = php_stream_open_wrapper(filename, "a", flags, NULL);
 	if (stream) {
 		php_stream_write(stream, message, message_size);
@@ -468,7 +468,7 @@ static int php_mail_detect_multiple_crlf(char *hdr) {
  */
 PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char *extra_cmd)
 {
-#if (defined PHP_WIN32 || defined NETWARE)
+#ifdef PHP_WIN32 
 	int tsm_err;
 	char *tsm_errmsg = NULL;
 #endif
@@ -489,34 +489,35 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	return val;	\
 
 	if (mail_log && *mail_log) {
-		char *tmp;
-		time_t curtime;
-		size_t l;
-		zend_string *date_str;
+		char *logline;
 
-		time(&curtime);
-		date_str = php_format_date("d-M-Y H:i:s e", 13, curtime, 1);
-
-		l = spprintf(&tmp, 0, "[%s] mail() on [%s:%d]: To: %s -- Headers: %s\n", ZSTR_VAL(date_str), zend_get_executed_filename(), zend_get_executed_lineno(), to, hdr ? hdr : "");
-
-		zend_string_free(date_str);
+		spprintf(&logline, 0, "mail() on [%s:%d]: To: %s -- Headers: %s -- Subject: %s", zend_get_executed_filename(), zend_get_executed_lineno(), to, hdr ? hdr : "", subject);
 
 		if (hdr) {
-			php_mail_log_crlf_to_spaces(tmp);
+			php_mail_log_crlf_to_spaces(logline);
 		}
 
 		if (!strcmp(mail_log, "syslog")) {
-			/* Drop the final space when logging to syslog. */
-			tmp[l - 1] = 0;
-			php_mail_log_to_syslog(tmp);
-		}
-		else {
-			/* Convert the final space to a newline when logging to file. */
-			tmp[l - 1] = '\n';
-			php_mail_log_to_file(mail_log, tmp, l);
+			php_mail_log_to_syslog(logline);
+		} else {
+			/* Add date when logging to file */
+			char *tmp;
+			time_t curtime;
+			zend_string *date_str;
+			size_t len;
+			
+			
+			time(&curtime);
+			date_str = php_format_date("d-M-Y H:i:s e", 13, curtime, 1);
+			len = spprintf(&tmp, 0, "[%s] %s%s", date_str->val, logline, PHP_EOL);
+			
+			php_mail_log_to_file(mail_log, tmp, len);
+			
+			zend_string_free(date_str);
+			efree(tmp);
 		}
 
-		efree(tmp);
+		efree(logline);
 	}
 
 	if (PG(mail_x_header)) {
@@ -539,7 +540,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	}
 
 	if (!sendmail_path) {
-#if (defined PHP_WIN32 || defined NETWARE)
+#ifdef PHP_WIN32
 		/* handle old style win smtp sending */
 		if (TSendMail(INI_STR("SMTP"), &tsm_err, &tsm_errmsg, hdr, subject, to, message, NULL, NULL, NULL) == FAILURE) {
 			if (tsm_errmsg) {

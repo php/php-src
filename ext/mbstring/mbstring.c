@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -104,6 +104,11 @@ static void php_mb_gpc_get_detect_order(const zend_encoding ***list, size_t *lis
 
 static void php_mb_gpc_set_input_encoding(const zend_encoding *encoding);
 
+static inline zend_bool php_mb_is_unsupported_no_encoding(enum mbfl_no_encoding no_enc);
+
+static inline zend_bool php_mb_is_no_encoding_unicode(enum mbfl_no_encoding no_enc);
+
+static inline zend_bool php_mb_is_no_encoding_utf8(enum mbfl_no_encoding no_enc);
 /* }}} */
 
 /* {{{ php_mb_default_identify_list */
@@ -1332,7 +1337,7 @@ static PHP_INI_MH(OnUpdate_mbstring_http_output)
 /* }}} */
 
 /* {{{ static _php_mb_ini_mbstring_internal_encoding_set */
-int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, uint new_value_length)
+int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, uint32_t new_value_length)
 {
 	const mbfl_encoding *encoding;
 
@@ -1639,8 +1644,9 @@ PHP_RINIT_FUNCTION(mbstring)
 
  	/* override original function. */
 	if (MBSTRG(func_overload)){
-		p = &(mb_ovld[0]);
+		zend_error(E_DEPRECATED, "The mbstring.func_overload directive is deprecated");
 
+		p = &(mb_ovld[0]);
 		CG(compiler_options) |= ZEND_COMPILE_NO_BUILTIN_STRLEN;
 		while (p->type > 0) {
 			if ((MBSTRG(func_overload) & p->type) == p->type &&
@@ -1992,6 +1998,73 @@ PHP_FUNCTION(mb_detect_order)
 }
 /* }}} */
 
+static inline int php_mb_check_code_point(long cp)
+{
+	enum mbfl_no_encoding no_enc;
+	char* buf;
+	char buf_len;
+
+	no_enc = MBSTRG(current_internal_encoding)->no_encoding;
+
+	if (php_mb_is_no_encoding_utf8(no_enc)) {
+
+		if ((cp > 0 && 0xd800 > cp) || (cp > 0xdfff && 0x110000 > cp)) {
+			return 1;
+		}
+
+		return 0;
+	} else if (php_mb_is_no_encoding_unicode(no_enc)) {
+
+		if (0 > cp || cp > 0x10ffff) {
+			return 0;
+		}
+
+		return 1;
+
+	// backward compatibility
+	} else if (php_mb_is_unsupported_no_encoding(no_enc)) {
+		return cp < 0xffff && cp > 0x0;
+	}
+
+	if (cp < 0x100) {
+		buf_len = 1;
+		buf = (char *) safe_emalloc(buf_len, 1, 1);
+		buf[0] = cp;
+		buf[1] = 0;
+	} else if (cp < 0x10000) {
+		buf_len = 2;
+		buf = (char *) safe_emalloc(buf_len, 1, 1);
+		buf[0] = cp >> 8;
+		buf[1] = cp & 0xff;
+		buf[2] = 0;
+	} else if (cp < 0x1000000) {
+		buf_len = 3;
+		buf = (char *) safe_emalloc(buf_len, 1, 1);
+		buf[0] = cp >> 16;
+		buf[1] = (cp >> 8) & 0xff;
+		buf[2] = cp & 0xff;
+		buf[3] = 0;
+	} else {
+		buf_len = 4;
+		buf = (char *) safe_emalloc(buf_len, 1, 1);
+		buf[0] = cp >> 24;
+		buf[1] = (cp >> 16) & 0xff;
+		buf[2] = (cp >> 8) & 0xff;
+		buf[3] = cp & 0xff;
+		buf[4] = 0;
+	}
+
+	if (php_mb_check_encoding(buf, buf_len, NULL)) {
+		efree(buf);
+
+		return 1;
+	}
+
+	efree(buf);
+
+	return 0;
+}
+
 /* {{{ proto mixed mb_substitute_character([mixed substchar])
    Sets the current substitute_character or returns the current substitute_character */
 PHP_FUNCTION(mb_substitute_character)
@@ -2026,7 +2099,7 @@ PHP_FUNCTION(mb_substitute_character)
 				} else {
 					convert_to_long_ex(arg1);
 
-					if (Z_LVAL_P(arg1) < 0xffff && Z_LVAL_P(arg1) > 0x0) {
+					if (php_mb_check_code_point(Z_LVAL_P(arg1))) {
 						MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
 						MBSTRG(current_filter_illegal_substchar) = Z_LVAL_P(arg1);
 					} else {
@@ -2037,7 +2110,7 @@ PHP_FUNCTION(mb_substitute_character)
 				break;
 			default:
 				convert_to_long_ex(arg1);
-				if (Z_LVAL_P(arg1) < 0xffff && Z_LVAL_P(arg1) > 0x0) {
+				if (php_mb_check_code_point(Z_LVAL_P(arg1))) {
 					MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
 					MBSTRG(current_filter_illegal_substchar) = Z_LVAL_P(arg1);
 				} else {
@@ -2122,6 +2195,8 @@ PHP_FUNCTION(mb_parse_str)
 			efree(encstr);
 			return;
 		}
+
+		php_error_docref(NULL, E_DEPRECATED, "Calling mb_parse_str() without the result argument is deprecated");
 
 		symbol_table = zend_rebuild_symbol_table();
 		ZVAL_ARR(&tmp, symbol_table);
@@ -3124,7 +3199,7 @@ PHP_FUNCTION(mb_strimwidth)
 	if (from < 0) {
 		from += swidth;
 	}
-		
+
 	if (from < 0 || (size_t)from > str_len) {
 		php_error_docref(NULL, E_WARNING, "Start position is out of range");
 		RETURN_FALSE;
@@ -3939,10 +4014,12 @@ PHP_FUNCTION(mb_convert_variables)
 					target_hash = HASH_OF(var);
 					if (target_hash != NULL) {
 						while ((hash_entry = zend_hash_get_current_data(target_hash)) != NULL) {
-							if (++target_hash->u.v.nApplyCount > 1) {
-								--target_hash->u.v.nApplyCount;
-								recursion_error = 1;
-								goto detect_end;
+							if (Z_REFCOUNTED_P(var)) {
+								if (++target_hash->u.v.nApplyCount > 1) {
+									--target_hash->u.v.nApplyCount;
+									recursion_error = 1;
+									goto detect_end;
+								}
 							}
 							zend_hash_move_forward(target_hash);
 							if (Z_TYPE_P(hash_entry) == IS_INDIRECT) {
@@ -3986,15 +4063,17 @@ detect_end:
 		}
 		if (recursion_error) {
 			while(stack_level-- && (var = &stack[stack_level])) {
-				if (HASH_OF(var)->u.v.nApplyCount > 1) {
-					HASH_OF(var)->u.v.nApplyCount--;
+				if (Z_REFCOUNTED_P(var)) {
+					if (HASH_OF(var)->u.v.nApplyCount > 1) {
+						HASH_OF(var)->u.v.nApplyCount--;
+					}
 				}
 			}
 			efree(stack);
 			if (elist != NULL) {
 				efree((void *)elist);
 			}
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot handle recursive references");
+			php_error_docref(NULL, E_WARNING, "Cannot handle recursive references");
 			RETURN_FALSE;
 		}
 		efree(stack);
@@ -4051,10 +4130,12 @@ detect_end:
 						hash_entry = hash_entry_ptr;
 						ZVAL_DEREF(hash_entry);
 						if (Z_TYPE_P(hash_entry) == IS_ARRAY || Z_TYPE_P(hash_entry) == IS_OBJECT) {
-							if (++(HASH_OF(hash_entry)->u.v.nApplyCount) > 1) {
-								--(HASH_OF(hash_entry)->u.v.nApplyCount);
-								recursion_error = 1;
-								goto conv_end;
+							if (Z_REFCOUNTED_P(hash_entry)) {
+								if (++(HASH_OF(hash_entry)->u.v.nApplyCount) > 1) {
+									--(HASH_OF(hash_entry)->u.v.nApplyCount);
+									recursion_error = 1;
+									goto conv_end;
+								}
 							}
 							if (stack_level >= stack_max) {
 								stack_max += PHP_MBSTR_STACK_BLOCK_SIZE;
@@ -4102,12 +4183,14 @@ conv_end:
 
 		if (recursion_error) {
 			while(stack_level-- && (var = &stack[stack_level])) {
-				if (HASH_OF(var)->u.v.nApplyCount > 1) {
-					HASH_OF(var)->u.v.nApplyCount--;
+				if (Z_REFCOUNTED_P(var)) {
+					if (HASH_OF(var)->u.v.nApplyCount > 1) {
+						HASH_OF(var)->u.v.nApplyCount--;
+					}
 				}
 			}
 			efree(stack);
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot handle recursive references");
+			php_error_docref(NULL, E_WARNING, "Cannot handle recursive references");
 			RETURN_FALSE;
 		}
 		efree(stack);

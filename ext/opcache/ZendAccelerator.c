@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -117,6 +117,8 @@ static int (*accelerator_orig_zend_stream_open_function)(const char *filename, z
 static zend_string *(*accelerator_orig_zend_resolve_path)(const char *filename, int filename_len);
 static void (*orig_chdir)(INTERNAL_FUNCTION_PARAMETERS) = NULL;
 static ZEND_INI_MH((*orig_include_path_on_modify)) = NULL;
+
+static void accel_gen_system_id(void);
 
 #ifdef ZEND_WIN32
 # define INCREMENT(v) InterlockedIncrement64(&ZCSG(v))
@@ -363,8 +365,8 @@ static void accel_interned_strings_restore_for_php(void)
 #ifndef ZTS
 static void accel_interned_strings_restore_state(void)
 {
-    uint idx = ZCSG(interned_strings).nNumUsed;
-    uint nIndex;
+    uint32_t idx = ZCSG(interned_strings).nNumUsed;
+    uint32_t nIndex;
     Bucket *p;
 
 	memset(ZCSG(interned_strings_saved_top),
@@ -401,8 +403,8 @@ static zend_string *accel_find_interned_string(zend_string *str)
 {
 /* for now interned strings are supported only for non-ZTS build */
 	zend_ulong h;
-	uint nIndex;
-	uint idx;
+	uint32_t nIndex;
+	uint32_t idx;
 	Bucket *arData, *p;
 
 	if (IS_ACCEL_INTERNED(str)) {
@@ -441,8 +443,8 @@ zend_string *accel_new_interned_string(zend_string *str)
 /* for now interned strings are supported only for non-ZTS build */
 #ifndef ZTS
 	zend_ulong h;
-	uint nIndex;
-	uint idx;
+	uint32_t nIndex;
+	uint32_t idx;
 	Bucket *p;
 
 #ifdef HAVE_OPCACHE_FILE_CACHE
@@ -512,7 +514,7 @@ zend_string *accel_new_interned_string(zend_string *str)
 /* Copy PHP interned strings from PHP process memory into the shared memory */
 static void accel_use_shm_interned_strings(void)
 {
-	uint idx, j;
+	uint32_t idx, j;
 	Bucket *p, *q;
 
 	/* empty string */
@@ -536,6 +538,22 @@ static void accel_use_shm_interned_strings(void)
 		}
 		if (Z_FUNC(p->val)->common.function_name) {
 			Z_FUNC(p->val)->common.function_name = accel_new_interned_string(Z_FUNC(p->val)->common.function_name);
+		}
+		if (Z_FUNC(p->val)->common.arg_info &&
+		    (Z_FUNC(p->val)->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))) { 
+			uint32_t i;
+			uint32_t num_args = Z_FUNC(p->val)->common.num_args + 1;
+			zend_arg_info *arg_info = Z_FUNC(p->val)->common.arg_info - 1;
+
+			if (Z_FUNC(p->val)->common.fn_flags & ZEND_ACC_VARIADIC) {
+				num_args++;
+			}
+			for (i = 0 ; i < num_args; i++) {
+				if (ZEND_TYPE_IS_CLASS(arg_info[i].type)) {
+					zend_bool allow_null = ZEND_TYPE_ALLOW_NULL(arg_info[i].type);
+					arg_info[i].type = ZEND_TYPE_ENCODE_CLASS(accel_new_interned_string(ZEND_TYPE_NAME(arg_info[i].type)), allow_null);
+				}
+			}
 		}
 	}
 
@@ -585,7 +603,7 @@ static void accel_use_shm_interned_strings(void)
 
 		for (j = 0; j < ce->constants_table.nNumUsed; j++) {
 			q = ce->constants_table.arData + j;
-			if (!Z_TYPE(q->val) == IS_UNDEF) continue;
+			if (Z_TYPE(q->val) == IS_UNDEF) continue;
 			if (q->key) {
 				q->key = accel_new_interned_string(q->key);
 			}
@@ -595,7 +613,7 @@ static void accel_use_shm_interned_strings(void)
 	/* constant hash keys */
 	for (idx = 0; idx < EG(zend_constants)->nNumUsed; idx++) {
 		p = EG(zend_constants)->arData + idx;
-		if (!Z_TYPE(p->val) == IS_UNDEF) continue;
+		if (Z_TYPE(p->val) == IS_UNDEF) continue;
 		if (p->key) {
 			p->key = accel_new_interned_string(p->key);
 		}
@@ -1203,7 +1221,7 @@ static void zend_accel_add_key(char *key, unsigned int key_length, zend_accel_ha
 #ifdef HAVE_OPCACHE_FILE_CACHE
 static zend_persistent_script *cache_script_in_file_cache(zend_persistent_script *new_persistent_script, int *from_shared_memory)
 {
-	uint memory_used;
+	uint32_t memory_used;
 
 	/* Check if script may be stored in shared memory */
 	if (!zend_accel_script_persistable(new_persistent_script)) {
@@ -1261,7 +1279,7 @@ static zend_persistent_script *cache_script_in_file_cache(zend_persistent_script
 static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_script *new_persistent_script, char *key, unsigned int key_length, int *from_shared_memory)
 {
 	zend_accel_hash_entry *bucket;
-	uint memory_used;
+	uint32_t memory_used;
 
 	/* Check if script may be stored in shared memory */
 	if (!zend_accel_script_persistable(new_persistent_script)) {
@@ -1771,6 +1789,20 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		ZCG(counted) = 1;
 	}
 
+	/* Revalidate acessibility of cached file */
+	if (EXPECTED(persistent_script != NULL) &&
+	    UNEXPECTED(ZCG(accel_directives).validate_permission) &&
+	    file_handle->type == ZEND_HANDLE_FILENAME &&
+	    UNEXPECTED(access(ZSTR_VAL(persistent_script->script.filename), R_OK) != 0)) {
+		if (type == ZEND_REQUIRE) {
+			zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename);
+			zend_bailout();
+		} else {
+			zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
+		}
+		return NULL;
+	}
+
 	HANDLE_BLOCK_INTERRUPTIONS();
 	SHM_UNPROTECT();
 
@@ -2081,6 +2113,29 @@ static void accel_activate(void)
 #ifdef HAVE_OPCACHE_FILE_CACHE
 	if (ZCG(accel_directives).file_cache_only) {
 		return;
+	}
+#endif
+
+#ifndef ZEND_WIN32
+	if (ZCG(accel_directives).validate_root) {
+		struct stat buf;
+
+		if (stat("/", &buf) != 0) {
+			ZCG(root_hash) = 0;
+		} else {
+			ZCG(root_hash) = buf.st_ino;
+			if (sizeof(buf.st_ino) > sizeof(ZCG(root_hash))) {
+				if (ZCG(root_hash) != buf.st_ino) {
+					zend_string *key = zend_string_init("opcache.enable", sizeof("opcache.enable")-1, 0);
+					zend_alter_ini_entry_chars(key, "0", 1, ZEND_INI_SYSTEM, ZEND_INI_STAGE_RUNTIME);
+					zend_string_release(key);
+					zend_accel_error(ACCEL_LOG_WARNING, "Can't cache files in chroot() directory with too big inode");
+					return;
+				}
+			}
+		}
+	} else {
+		ZCG(root_hash) = 0;
 	}
 #endif
 
@@ -2520,6 +2575,9 @@ static void accel_globals_ctor(zend_accel_globals *accel_globals)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	memset(accel_globals, 0, sizeof(zend_accel_globals));
+
+	/* TODO refactor to init this just once. */
+	accel_gen_system_id();
 }
 
 static void accel_globals_internal_func_dtor(zval *zv)
@@ -2904,11 +2962,18 @@ void accel_shutdown(void)
 
 void zend_accel_schedule_restart(zend_accel_restart_reason reason)
 {
+	const char *zend_accel_restart_reason_text[ACCEL_RESTART_USER + 1] = {
+		"out of memory",
+		"hash overflow",
+		"user",
+	};
+
 	if (ZCSG(restart_pending)) {
 		/* don't schedule twice */
 		return;
 	}
-	zend_accel_error(ACCEL_LOG_DEBUG, "Restart Scheduled!");
+	zend_accel_error(ACCEL_LOG_DEBUG, "Restart Scheduled! Reason: %s",
+			zend_accel_restart_reason_text[reason]);
 
 	HANDLE_BLOCK_INTERRUPTIONS();
 	SHM_UNPROTECT();
@@ -2974,7 +3039,7 @@ ZEND_EXT_API zend_extension zend_extension_entry = {
 	PHP_VERSION,							/* version */
 	"Zend Technologies",					/* author */
 	"http://www.zend.com/",					/* URL */
-	"Copyright (c) 1999-2016",				/* copyright */
+	"Copyright (c) 1999-2017",				/* copyright */
 	accel_startup,					   		/* startup */
 	NULL,									/* shutdown */
 	accel_activate,							/* per-script activation */

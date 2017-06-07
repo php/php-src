@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -148,7 +148,7 @@ enum {
 	PDO_DBLIB_ATTR_CONNECTION_TIMEOUT = PDO_ATTR_DRIVER_SPECIFIC,
 	PDO_DBLIB_ATTR_QUERY_TIMEOUT,
 	PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER,
+	PDO_DBLIB_ATTR_VERSION,
 };
 
 #endif
-

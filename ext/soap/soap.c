@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -69,7 +69,7 @@ static void delete_service(void *service);
 static void delete_url(void *handle);
 static void delete_hashtable(void *hashtable);
 
-static void soap_error_handler(int error_num, const char *error_filename, const uint error_lineno, const char *format, va_list args);
+static void soap_error_handler(int error_num, const char *error_filename, const uint32_t error_lineno, const char *format, va_list args);
 
 #define SOAP_SERVER_BEGIN_CODE() \
 	zend_bool _old_handler = SOAP_GLOBAL(use_soap_error_handler);\
@@ -165,7 +165,7 @@ zend_class_entry* soap_var_class_entry;
 
 ZEND_DECLARE_MODULE_GLOBALS(soap)
 
-static void (*old_error_handler)(int, const char *, const uint, const char*, va_list);
+static void (*old_error_handler)(int, const char *, const uint32_t, const char*, va_list);
 
 #ifdef va_copy
 #define call_old_error_handler(error_num, error_filename, error_lineno, format, args) \
@@ -941,6 +941,8 @@ PHP_METHOD(SoapFault, __toString)
 	zend_string *str;
 	zend_fcall_info fci;
 	zval *this_ptr;
+	zend_string *faultcode_val, *faultstring_val, *file_val;
+	zend_long line_val;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -964,16 +966,19 @@ PHP_METHOD(SoapFault, __toString)
 
 	zval_ptr_dtor(&fci.function_name);
 
-	convert_to_string(faultcode);
-	convert_to_string(faultstring);
-	convert_to_string(file);
-	convert_to_long(line);
+	faultcode_val = zval_get_string(faultcode);
+	faultstring_val = zval_get_string(faultstring);
+	file_val = zval_get_string(file);
+	line_val = zval_get_long(line);
 	convert_to_string(&trace);
 
 	str = strpprintf(0, "SoapFault exception: [%s] %s in %s:" ZEND_LONG_FMT "\nStack trace:\n%s",
-	               Z_STRVAL_P(faultcode), Z_STRVAL_P(faultstring), Z_STRVAL_P(file), Z_LVAL_P(line),
+	               ZSTR_VAL(faultcode_val), ZSTR_VAL(faultstring_val), ZSTR_VAL(file_val), line_val,
 	               Z_STRLEN(trace) ? Z_STRVAL(trace) : "#0 {main}\n");
 
+	zend_string_release(file_val);
+	zend_string_release(faultstring_val);
+	zend_string_release(faultcode_val);
 	zval_ptr_dtor(&trace);
 
 	RETVAL_STR(str);
@@ -2121,7 +2126,7 @@ static void soap_server_fault(char* code, char* string, char *actor, zval* detai
 	zend_bailout();
 }
 
-static void soap_error_handler(int error_num, const char *error_filename, const uint error_lineno, const char *format, va_list args)
+static void soap_error_handler(int error_num, const char *error_filename, const uint32_t error_lineno, const char *format, va_list args)
 {
 	zend_bool _old_in_compilation;
 	zend_execute_data *_old_current_execute_data;
@@ -3202,12 +3207,8 @@ PHP_METHOD(SoapClient, __setSoapHeaders)
 	if (headers == NULL || Z_TYPE_P(headers) == IS_NULL) {
 		zend_hash_str_del(Z_OBJPROP_P(this_ptr), "__default_headers", sizeof("__default_headers")-1);
 	} else if (Z_TYPE_P(headers) == IS_ARRAY) {
-		zval *default_headers;
-
 		verify_soap_headers_array(Z_ARRVAL_P(headers));
-		if ((default_headers = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "__default_headers", sizeof("__default_headers")-1)) == NULL) {
-			add_property_zval(this_ptr, "__default_headers", headers);
-		}
+		add_property_zval(this_ptr, "__default_headers", headers);
 	} else if (Z_TYPE_P(headers) == IS_OBJECT &&
 	           instanceof_function(Z_OBJCE_P(headers), soap_header_class_entry)) {
 		zval default_headers;

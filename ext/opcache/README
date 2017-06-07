@@ -102,6 +102,16 @@ opcache.validate_timestamps (default "1")
 	The frequency of the check is controlled by the directive
 	"opcache.revalidate_freq".
 
+opcache.validate_permission (default "0")
+	Leads OPcache to check file readability on each access to cached file.
+	This directive should be enabled in shared hosting environment, when few
+	users (PHP-FPM pools) reuse the common OPcache shared memory.
+
+opcache.validate_root (default "0")
+	This directive prevents file name collisions in different "chroot"
+	environments. It should be enabled for sites that may serve requests in
+	different "chroot" environments.
+
 opcache.revalidate_freq (default "2")
 	How often (in seconds) to check file timestamps for changes to the shared
 	memory storage allocation. ("1" means validate once per second, but only

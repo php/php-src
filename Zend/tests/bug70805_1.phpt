@@ -1,5 +1,7 @@
 --TEST--
 Bug #70805 (Segmentation faults whilst running Drupal 8 test suite) (Crash)
+--INI--
+zend.enable_gc = 1
 --FILE--
 <?php
 class A {
@@ -27,7 +29,7 @@ $c = new A;
 $array = array($c); 
 unset($c);
 
-while ($i++ < 9997) {
+while ($i++ < 9998) {
 	$t = [];
 	$t[] = &$t;
 	unset($t);

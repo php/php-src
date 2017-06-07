@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -54,6 +54,7 @@ PHP_FUNCTION(ftp_chmod);
 PHP_FUNCTION(ftp_alloc);
 PHP_FUNCTION(ftp_nlist);
 PHP_FUNCTION(ftp_rawlist);
+PHP_FUNCTION(ftp_mlsd);
 PHP_FUNCTION(ftp_systype);
 PHP_FUNCTION(ftp_pasv);
 PHP_FUNCTION(ftp_get);

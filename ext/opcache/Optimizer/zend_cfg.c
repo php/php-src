@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, CFG - Control Flow Graph                                |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -135,12 +135,11 @@ static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *
 					b->flags |= ZEND_BB_GEN_VAR;
 					b = blocks + block_map[live_range->end];
 					b->flags |= ZEND_BB_KILL_VAR;
-					if (!(b->flags & ZEND_BB_REACHABLE)) {
+					if (!(b->flags & (ZEND_BB_REACHABLE|ZEND_BB_UNREACHABLE_FREE))) {
 						if (cfg->split_at_live_ranges) {
 							changed = 1;
 							zend_mark_reachable(op_array->opcodes, cfg, b);
 						} else {
-							ZEND_ASSERT(!(b->flags & ZEND_BB_UNREACHABLE_FREE));
 							ZEND_ASSERT(b->start == live_range->end);
 							b->flags |= ZEND_BB_UNREACHABLE_FREE;
 						}

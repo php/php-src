@@ -11,9 +11,9 @@ Test get_declared_classes() function : testing autoloaded classes
 
 echo "*** Testing get_declared_classes() : testing autoloaded classes ***\n";
 
-function __autoload($class_name) {
+spl_autoload_register(function ($class_name) {
     require_once $class_name . '.inc';
-}
+});
 
 echo "\n-- before instance is declared --\n";
 var_dump(in_array('AutoLoaded', get_declared_classes()));

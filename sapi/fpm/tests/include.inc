@@ -3,7 +3,6 @@
 function get_fpm_path() /* {{{ */
 {
 	$php_path = getenv("TEST_PHP_EXECUTABLE");
-
 	for ($i = 0; $i < 2; $i++) {
 		$slash_pos = strrpos($php_path, "/");
 		if ($slash_pos) {
@@ -13,9 +12,16 @@ function get_fpm_path() /* {{{ */
 		}
 	}
 
-	if ($php_path && is_dir($php_path) && file_exists($php_path."/fpm/php-fpm") && is_executable($php_path."/fpm/php-fpm")) { 
-		/* gotcha */
-		return $php_path."/fpm/php-fpm";
+
+	if ($php_path && is_dir($php_path)) {
+		if (file_exists($php_path."/fpm/php-fpm") && is_executable($php_path."/fpm/php-fpm")) {
+			/* gotcha */
+			return $php_path."/fpm/php-fpm";
+		}
+		$php_sbin_fpm = $php_path."/sbin/php-fpm";
+		if (file_exists($php_sbin_fpm) && is_executable($php_sbin_fpm)) {
+			return $php_sbin_fpm;
+		}
 	}
 	return false;
 }
@@ -89,7 +95,8 @@ function run_fpm_till($needle, $config, $max = 10) /* {{{ */
 /* }}} */
 
 function fpm_display_log($tail, $n=1, $ignore='systemd') { /* {{{ */
-	while ($n) {
+	/* Read $n lines or until EOF */
+	while ($n>0 || ($n<0 && !feof($tail))) {
 		$a = fgets($tail);
 		if (empty($ignore) || !strpos($a, $ignore)) {
 			echo $a;

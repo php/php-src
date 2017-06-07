@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,6 +33,18 @@
 #define zend_accel_memdup(p, size) \
 	    _zend_shared_memdup((void*)p, size, 0)
 
+#ifdef HAVE_OPCACHE_FILE_CACHE
+#define zend_set_str_gc_flags(str) do { \
+	if (ZCG(accel_directives).file_cache_only) { \
+		GC_FLAGS(str) = IS_STR_INTERNED; \
+	} else { \
+		GC_FLAGS(str) = IS_STR_INTERNED | IS_STR_PERMANENT; \
+	} \
+} while (0)
+#else
+#define zend_set_str_gc_flags(str) GC_FLAGS(str) = IS_STR_INTERNED | IS_STR_PERMANENT
+#endif
+
 #define zend_accel_store_string(str) do { \
 		zend_string *new_str = zend_shared_alloc_get_xlat_entry(str); \
 		if (new_str) { \
@@ -43,13 +55,13 @@
 			zend_string_release(str); \
 	    	str = new_str; \
 	    	zend_string_hash_val(str); \
-	    	GC_FLAGS(str) = IS_STR_INTERNED | IS_STR_PERMANENT; \
+		zend_set_str_gc_flags(str); \
 		} \
     } while (0)
 #define zend_accel_memdup_string(str) do { \
 		str = zend_accel_memdup(str, _ZSTR_STRUCT_SIZE(ZSTR_LEN(str))); \
     	zend_string_hash_val(str); \
-		GC_FLAGS(str) = IS_STR_INTERNED | IS_STR_PERMANENT; \
+		zend_set_str_gc_flags(str); \
 	} while (0)
 #define zend_accel_store_interned_string(str) do { \
 		if (!IS_ACCEL_INTERNED(str)) { \
@@ -276,18 +288,15 @@ static void zend_persist_zval(zval *z)
 			flags = Z_GC_FLAGS_P(z) & ~ (IS_STR_PERSISTENT | IS_STR_INTERNED | IS_STR_PERMANENT);
 			zend_accel_store_interned_string(Z_STR_P(z));
 			Z_GC_FLAGS_P(z) |= flags;
-			Z_TYPE_FLAGS_P(z) &= ~(IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
-			if (Z_TYPE_P(z) == IS_CONSTANT) {
-				Z_TYPE_FLAGS_P(z) |= IS_TYPE_IMMUTABLE;
-			}
+			Z_TYPE_FLAGS_P(z) &= ~IS_TYPE_REFCOUNTED;
 			break;
 		case IS_ARRAY:
 			new_ptr = zend_shared_alloc_get_xlat_entry(Z_ARR_P(z));
 			if (new_ptr) {
 				Z_ARR_P(z) = new_ptr;
-				Z_TYPE_FLAGS_P(z) = IS_TYPE_IMMUTABLE;
+				Z_TYPE_FLAGS_P(z) = IS_TYPE_COPYABLE;
 			} else {
-				if (Z_IMMUTABLE_P(z)) {
+				if (!Z_REFCOUNTED_P(z)) {
 					Z_ARR_P(z) = zend_accel_memdup(Z_ARR_P(z), sizeof(zend_array));
 					zend_hash_persist_immutable(Z_ARRVAL_P(z));
 				} else {
@@ -295,7 +304,7 @@ static void zend_persist_zval(zval *z)
 					zend_accel_store(Z_ARR_P(z), sizeof(zend_array));
 					zend_hash_persist(Z_ARRVAL_P(z), zend_persist_zval);
 					/* make immutable array */
-					Z_TYPE_FLAGS_P(z) = IS_TYPE_IMMUTABLE;
+					Z_TYPE_FLAGS_P(z) = IS_TYPE_COPYABLE;
 					GC_REFCOUNT(Z_COUNTED_P(z)) = 2;
 					GC_FLAGS(Z_COUNTED_P(z)) |= IS_ARRAY_IMMUTABLE;
 					Z_ARRVAL_P(z)->u.flags |= HASH_FLAG_STATIC_KEYS;
@@ -316,11 +325,11 @@ static void zend_persist_zval(zval *z)
 			new_ptr = zend_shared_alloc_get_xlat_entry(Z_AST_P(z));
 			if (new_ptr) {
 				Z_AST_P(z) = new_ptr;
-				Z_TYPE_FLAGS_P(z) = IS_TYPE_CONSTANT | IS_TYPE_IMMUTABLE;
+				Z_TYPE_FLAGS_P(z) = IS_TYPE_CONSTANT | IS_TYPE_COPYABLE;
 			} else {
 				zend_accel_store(Z_AST_P(z), sizeof(zend_ast_ref));
 				Z_ASTVAL_P(z) = zend_persist_ast(Z_ASTVAL_P(z));
-				Z_TYPE_FLAGS_P(z) = IS_TYPE_CONSTANT | IS_TYPE_IMMUTABLE;
+				Z_TYPE_FLAGS_P(z) = IS_TYPE_CONSTANT | IS_TYPE_COPYABLE;
 				GC_REFCOUNT(Z_COUNTED_P(z)) = 2;
 			}
 			break;
@@ -495,8 +504,12 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 				if (arg_info[i].name) {
 					zend_accel_store_interned_string(arg_info[i].name);
 				}
-				if (arg_info[i].class_name) {
-					zend_accel_store_interned_string(arg_info[i].class_name);
+				if (ZEND_TYPE_IS_CLASS(arg_info[i].type)) {
+					zend_string *type_name = ZEND_TYPE_NAME(arg_info[i].type);
+					zend_bool allow_null = ZEND_TYPE_ALLOW_NULL(arg_info[i].type);
+
+					zend_accel_store_interned_string(type_name);
+					arg_info[i].type = ZEND_TYPE_ENCODE_CLASS(type_name, allow_null);
 				}
 			}
 		}

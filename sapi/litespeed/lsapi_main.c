@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -687,7 +687,7 @@ static void walk_down_the_path(char* path_start,
 
 typedef struct {
     char *path;
-    uint path_len;
+    uint32_t path_len;
     char *doc_root;
     user_config_cache_entry *entry;
 } _lsapi_activate_user_ini_ctx;
@@ -816,7 +816,7 @@ static int lsapi_activate_user_ini_walk_down_the_path(_lsapi_activate_user_ini_c
                                                       void* next)
 {
     time_t request_time = sapi_get_request_time();
-    uint path_len, docroot_len;
+    uint32_t path_len, docroot_len;
     int rc = SUCCESS;
     fn_activate_user_ini_chain_t *fn_next = next;
 
@@ -865,7 +865,7 @@ static int lsapi_activate_user_ini_finally(_lsapi_activate_user_ini_ctx *ctx,
     return rc;
 }
 
-static int lsapi_activate_user_ini(TSRMLS_D)
+static int lsapi_activate_user_ini( void )
 {
     _lsapi_activate_user_ini_ctx ctx;
     /**
@@ -1083,9 +1083,9 @@ static int cli_main( int argc, char * argv[] )
             case 'v':
                 if (php_request_startup() != FAILURE) {
 #if ZEND_DEBUG
-                    php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) 1997-2016 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
+                    php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) 1997-2017 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
 #else
-                    php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2016 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
+                    php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2017 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
 #endif
 #ifdef PHP_OUTPUT_NEWAPI
                     php_output_end_all();

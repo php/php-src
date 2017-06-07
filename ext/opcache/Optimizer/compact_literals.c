@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -123,6 +123,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 	int l_null = -1;
 	int l_false = -1;
 	int l_true = -1;
+	int l_empty_arr = -1;
 	HashTable hash;
 	zend_string *key = NULL;
 	void *checkpoint = zend_arena_checkpoint(ctx->arena);
@@ -292,7 +293,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 				case ZEND_DECLARE_CLASS:
 				case ZEND_DECLARE_INHERITED_CLASS:
 				case ZEND_DECLARE_INHERITED_CLASS_DELAYED:
-					LITERAL_INFO(opline->op1.constant, LITERAL_VALUE, 1, 0, 2);
+					LITERAL_INFO(opline->op1.constant, LITERAL_VALUE, 0, 0, 2);
 					break;
 				case ZEND_RECV:
 				case ZEND_RECV_VARIADIC:
@@ -481,6 +482,22 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 						}
 					}
 					break;
+				case IS_ARRAY:
+					if (zend_hash_num_elements(Z_ARRVAL(op_array->literals[i])) == 0) {
+						if (l_empty_arr < 0) {
+							l_empty_arr = j;
+							if (i != j) {
+								op_array->literals[j] = op_array->literals[i];
+								info[j] = info[i];
+							}
+							j++;
+						} else {
+							zval_dtor(&op_array->literals[i]);
+						}
+						map[i] = l_empty_arr;
+						break;
+					}
+					/* break missing intentionally */
 				default:
 					/* don't merge other types */
 					map[i] = j;

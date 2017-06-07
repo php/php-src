@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -144,8 +144,9 @@ static PHP_MINFO_FUNCTION(ctype)
  */
 #define CTYPE(iswhat) \
 	zval *c, tmp; \
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &c) == FAILURE) \
-		return; \
+	ZEND_PARSE_PARAMETERS_START(1, 1); \
+		Z_PARAM_ZVAL_DEREF(c) \
+	ZEND_PARSE_PARAMETERS_END(); \
 	if (Z_TYPE_P(c) == IS_LONG) { \
 		if (Z_LVAL_P(c) <= 255 && Z_LVAL_P(c) >= 0) { \
 			RETURN_BOOL(iswhat((int)Z_LVAL_P(c))); \

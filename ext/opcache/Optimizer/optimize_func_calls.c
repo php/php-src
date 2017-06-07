@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -71,8 +71,6 @@ static void zend_delete_call_instructions(zend_op *opline)
 				break;
 			case ZEND_SEND_VAL:
 			case ZEND_SEND_VAR:
-			case ZEND_SEND_VAR_NO_REF:
-			case ZEND_SEND_REF:
 				if (call == 0) {
 					if (opline->op1_type == IS_CONST) {
 						MAKE_NOP(opline);
@@ -102,6 +100,8 @@ static void zend_try_inline_call(zend_op_array *op_array, zend_op *fcall, zend_o
 		zend_op *ret_opline = func->op_array.opcodes + func->op_array.num_args;
 
 		if (ret_opline->op1_type == IS_CONST) {
+			uint32_t i, num_args = func->op_array.num_args;
+			num_args += (func->op_array.fn_flags & ZEND_ACC_VARIADIC) != 0;
 
 			if (fcall->opcode == ZEND_INIT_METHOD_CALL && fcall->op1_type == IS_UNUSED) {
 				/* TODO: we can't inlne methods, because $this may be used
@@ -109,17 +109,27 @@ static void zend_try_inline_call(zend_op_array *op_array, zend_op *fcall, zend_o
 				 */
 				return;
 			}
+
+			for (i = 0; i < num_args; i++) {
+				/* Don't inline functions with by-reference arguments. This would require
+				 * correct handling of INDIRECT arguments. */
+				if (func->op_array.arg_info[i].pass_by_reference) {
+					return;
+				}
+			}
+
 			if (fcall->extended_value < func->op_array.num_args) {
 				/* don't inline funcions with named constants in default arguments */
-				uint32_t n = fcall->extended_value;
+				i = fcall->extended_value;
 
 				do {
-					if (Z_CONSTANT_P(RT_CONSTANT(&func->op_array, func->op_array.opcodes[n].op2))) {
+					if (Z_CONSTANT_P(RT_CONSTANT(&func->op_array, func->op_array.opcodes[i].op2))) {
 						return;
 					}
-					n++;
-				} while (n < func->op_array.num_args);
+					i++;
+				} while (i < func->op_array.num_args);
 			}
+
 			if (RETURN_VALUE_USED(opline)) {
 				zval zv;
 
@@ -158,11 +168,11 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			case ZEND_INIT_STATIC_METHOD_CALL:
 			case ZEND_INIT_METHOD_CALL:
 			case ZEND_INIT_FCALL:
+			case ZEND_NEW:
 				call_stack[call].func = zend_optimizer_get_called_func(
 					ctx->script, op_array, opline, 0);
-				call_stack[call].try_inline = 1;
+				call_stack[call].try_inline = opline->opcode != ZEND_NEW;
 				/* break missing intentionally */
-			case ZEND_NEW:
 			case ZEND_INIT_DYNAMIC_CALL:
 			case ZEND_INIT_USER_CALL:
 				call_stack[call].opline = opline;
@@ -194,7 +204,8 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						fcall->op2.constant = fcall->op2.constant + 1;
 						opline->opcode = zend_get_call_op(fcall, call_stack[call].func);
 					} else if (fcall->opcode == ZEND_INIT_STATIC_METHOD_CALL
-							|| fcall->opcode == ZEND_INIT_METHOD_CALL) {
+							|| fcall->opcode == ZEND_INIT_METHOD_CALL
+							|| fcall->opcode == ZEND_NEW) {
 						/* We don't have specialized opcodes for this, do nothing */
 					} else {
 						ZEND_ASSERT(0);
@@ -222,6 +233,14 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 							opline->opcode = ZEND_FETCH_STATIC_PROP_W;
 						}
 					} else {
+						if (opline->opcode == ZEND_FETCH_DIM_FUNC_ARG
+								&& opline->op2_type == IS_UNUSED) {
+							/* FETCH_DIM_FUNC_ARG supports UNUSED op2, while FETCH_DIM_R does not.
+							 * Performing the replacement would create an invalid opcode. */
+							call_stack[call - 1].try_inline = 0;
+							break;
+						}
+
 						opline->extended_value &= ZEND_FETCH_TYPE_MASK;
 						if (opline->opcode != ZEND_FETCH_STATIC_PROP_FUNC_ARG) {
 							opline->opcode -= 12;

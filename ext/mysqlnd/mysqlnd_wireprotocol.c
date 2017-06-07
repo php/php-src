@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2016 The PHP Group                                |
+  | Copyright (c) 2006-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -1460,16 +1460,16 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 						MYSQLND_ERROR_INFO * error_info,
 						MYSQLND_MEMORY_POOL * pool,
 						MYSQLND_MEMORY_POOL_CHUNK ** buffer,
-						size_t * data_size, zend_bool persistent_alloc,
-						unsigned int prealloc_more_bytes)
+						size_t * data_size, zend_bool persistent_alloc)
 {
 	enum_func_status ret = PASS;
 	MYSQLND_PACKET_HEADER header;
 	zend_uchar * p = NULL;
 	zend_bool first_iteration = TRUE;
+	size_t prealloc_more_bytes;
 
 	DBG_ENTER("php_mysqlnd_read_row_ex");
-
+	
 	/*
 	  To ease the process the server splits everything in packets up to 2^24 - 1.
 	  Even in the case the payload is evenly divisible by this value, the last
@@ -1478,7 +1478,13 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 	  zero-length byte, don't read the body, there is no such.
 	*/
 
-	*data_size = prealloc_more_bytes;
+	/*
+	  We're allocating an extra byte, as php_mysqlnd_rowp_read_text_protocol_aux
+	  needs to be able to append a terminating \0 for atoi/atof.
+	*/
+	prealloc_more_bytes = 1;
+	
+	*data_size = 0;
 	while (1) {
 		if (FAIL == mysqlnd_read_header(pfc, vio, &header, stats, error_info)) {
 			ret = FAIL;
@@ -1489,7 +1495,7 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 
 		if (first_iteration) {
 			first_iteration = FALSE;
-			*buffer = pool->get_chunk(pool, *data_size);
+			*buffer = pool->get_chunk(pool, *data_size + prealloc_more_bytes);
 			if (!*buffer) {
 				ret = FAIL;
 				break;
@@ -1504,7 +1510,7 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 			/*
 			  We have to realloc the buffer.
 			*/
-			if (FAIL == pool->resize_chunk(pool, *buffer, *data_size)) {
+			if (FAIL == pool->resize_chunk(pool, *buffer, *data_size + prealloc_more_bytes)) {
 				SET_OOM_ERROR(error_info);
 				ret = FAIL;
 				break;
@@ -1527,7 +1533,6 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 		pool->free_chunk(pool, *buffer);
 		*buffer = NULL;
 	}
-	*data_size -= prealloc_more_bytes;
 	DBG_RETURN(ret);
 }
 /* }}} */
@@ -1634,7 +1639,6 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 	zval *current_field, *end_field, *start_field;
 	zend_uchar * p = row_buffer->ptr;
 	size_t data_size = row_buffer->app;
-	zend_uchar * bit_area = (zend_uchar*) row_buffer->ptr + data_size + 1; /* we allocate from here */
 	const zend_uchar * const packet_end = (zend_uchar*) row_buffer->ptr + data_size;
 
 	DBG_ENTER("php_mysqlnd_rowp_read_text_protocol_aux");
@@ -1745,30 +1749,22 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 #endif /* MYSQLND_STRING_TO_INT_CONVERSION */
 			if (fields_metadata[i].type == MYSQL_TYPE_BIT) {
 				/*
-				  BIT fields are specially handled. As they come as bit mask, we have
-				  to convert it to human-readable representation. As the bits take
-				  less space in the protocol than the numbers they represent, we don't
-				  have enough space in the packet buffer to overwrite inside.
-				  Thus, a bit more space is pre-allocated at the end of the buffer,
-				  see php_mysqlnd_rowp_read(). And we add the strings at the end.
-				  Definitely not nice, _hackish_ :(, but works.
+				  BIT fields are specially handled. As they come as bit mask, they have
+				  to be converted to human-readable representation.
 				*/
-				zend_uchar *start = bit_area;
 				ps_fetch_from_1_to_8_bytes(current_field, &(fields_metadata[i]), 0, (const zend_uchar **) &p, len);
 				/*
 				  We have advanced in ps_fetch_from_1_to_8_bytes. We should go back because
 				  later in this function there will be an advancement.
 				*/
 				p -= len;
-				if (Z_TYPE_P(current_field) == IS_LONG) {
-					bit_area += 1 + sprintf((char *)start, ZEND_LONG_FMT, Z_LVAL_P(current_field));
-					ZVAL_STRINGL(current_field, (char *) start, bit_area - start - 1);
-				} else if (Z_TYPE_P(current_field) == IS_STRING){
-					memcpy(bit_area, Z_STRVAL_P(current_field), Z_STRLEN_P(current_field));
-					bit_area += Z_STRLEN_P(current_field);
-					*bit_area++ = '\0';
-					zval_dtor(current_field);
-					ZVAL_STRINGL(current_field, (char *) start, bit_area - start - 1);
+				if (Z_TYPE_P(current_field) == IS_LONG && !as_int_or_float) {
+					/* we are using the text protocol, so convert to string */
+					char tmp[22];
+					const size_t tmp_len = sprintf((char *)&tmp, MYSQLND_LLU_SPEC, Z_LVAL_P(current_field));
+					ZVAL_STRINGL(current_field, tmp, tmp_len);
+				} else if (Z_TYPE_P(current_field) == IS_STRING) {
+					/* nothing to do here, as we want a string and ps_fetch_from_1_to_8_bytes() has given us one */
 				}
 			} else {
 				ZVAL_STRINGL(current_field, (char *)p, len);
@@ -1825,20 +1821,13 @@ php_mysqlnd_rowp_read(void * _packet)
 	MYSQLND_STATS * stats = packet->header.stats;
 	zend_uchar *p;
 	enum_func_status ret = PASS;
-	size_t post_alloc_for_bit_fields = 0;
 	size_t data_size = 0;
 
 	DBG_ENTER("php_mysqlnd_rowp_read");
 
-	if (!packet->binary_protocol && packet->bit_fields_count) {
-		/* For every field we need terminating \0 */
-		post_alloc_for_bit_fields = packet->bit_fields_total_len + packet->bit_fields_count;
-	}
-
 	ret = php_mysqlnd_read_row_ex(pfc, vio, stats, error_info,
 								  packet->result_set_memory_pool, &packet->row_buffer, &data_size,
-								  packet->persistent_alloc, post_alloc_for_bit_fields
-								 );
+								  packet->persistent_alloc);
 	if (FAIL == ret) {
 		goto end;
 	}
@@ -1847,7 +1836,15 @@ php_mysqlnd_rowp_read(void * _packet)
 										packet_type_to_statistic_packet_count[PROT_ROW_PACKET],
 										1);
 
-	/* packet->row_buffer->ptr is of size 'data_size + 1' */
+	/*
+	  packet->row_buffer->ptr is of size 'data_size'
+	  in pre-7.0 it was really 'data_size + 1' although it was counted as 'data_size'
+	  The +1 was for the additional byte needed to \0 terminate the last string in the row.
+	  This was needed as the zvals of pre-7.0 could use external memory (no copy param to ZVAL_STRINGL).
+	  However, in 7.0+ the strings always copy. Thus this +1 byte was removed. Also the optimization or \0
+	  terminating every string, which did overwrite the lengths from the packet. For this reason we needed
+	  to keep (and copy) the lengths externally.
+	*/
 	packet->header.size = data_size;
 	packet->row_buffer->app = data_size;
 

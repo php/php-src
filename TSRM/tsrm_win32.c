@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -296,14 +296,14 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 
 		if (CWDG(realpath_cache_size_limit)) {
 			t = time(0);
-			bucket = realpath_cache_lookup(pathname, (int)strlen(pathname), t);
+			bucket = realpath_cache_lookup(pathname, strlen(pathname), t);
 			if(bucket == NULL && real_path == NULL) {
 				/* We used the pathname directly. Call tsrm_realpath */
 				/* so that entry is created in realpath cache */
 				real_path = (char *)malloc(MAXPATHLEN);
 				if(tsrm_realpath(pathname, real_path) != NULL) {
 					pathname = real_path;
-					bucket = realpath_cache_lookup(pathname, (int)strlen(pathname), t);
+					bucket = realpath_cache_lookup(pathname, strlen(pathname), t);
 					PHP_WIN32_IOUTIL_REINIT_W(pathname);
 				}
 			}

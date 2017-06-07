@@ -62,6 +62,8 @@ Warning: idn_to_ascii(): idn_to_ascii: empty domain name in %s on line %d
 bool(false)
 fourth arg for 2003 variant (only notice raised):
 
+Deprecated: idn_to_ascii(): INTL_IDNA_VARIANT_2003 is deprecated in %s on line %d
+
 Notice: idn_to_ascii(): 4 arguments were provided, but INTL_IDNA_VARIANT_2003 only takes 3 - extra argument ignored in %s on line %d
 string(7) "foo.com"
 with error, but no details arg:

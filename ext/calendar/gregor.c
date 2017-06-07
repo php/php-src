@@ -195,7 +195,7 @@ zend_long GregorianToSdn(
 						   int inputMonth,
 						   int inputDay)
 {
-	int year;
+	zend_long year;
 	int month;
 
 	/* check for invalid dates */

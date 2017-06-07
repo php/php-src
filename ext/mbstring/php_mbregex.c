@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -708,8 +708,10 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	string_len,
 	_php_mb_regex_mbctype2name(MBREX(current_mbctype))
 	)) {
-		zval_dtor(array);
-		array_init(array);
+		if (array != NULL) {
+			zval_dtor(array);
+			array_init(array);
+		}
 		RETURN_FALSE;
 	}
 
@@ -1343,13 +1345,13 @@ PHP_FUNCTION(mb_ereg_search_regs)
 PHP_FUNCTION(mb_ereg_search_init)
 {
 	size_t argc = ZEND_NUM_ARGS();
-	zval *arg_str;
+	zend_string *arg_str;
 	char *arg_pattern = NULL, *arg_options = NULL;
 	size_t arg_pattern_len = 0, arg_options_len = 0;
 	OnigSyntaxType *syntax = NULL;
 	OnigOptionType option;
 
-	if (zend_parse_parameters(argc, "z|ss", &arg_str, &arg_pattern, &arg_pattern_len, &arg_options, &arg_options_len) == FAILURE) {
+	if (zend_parse_parameters(argc, "S|ss", &arg_str, &arg_pattern, &arg_pattern_len, &arg_options, &arg_options_len) == FAILURE) {
 		return;
 	}
 
@@ -1377,17 +1379,17 @@ PHP_FUNCTION(mb_ereg_search_init)
 		zval_ptr_dtor(&MBREX(search_str));
 	}
 
-	ZVAL_DUP(&MBREX(search_str), arg_str);
+	ZVAL_STR_COPY(&MBREX(search_str), arg_str);
 
 	if (php_mb_check_encoding(
-	Z_STRVAL_P(arg_str),
-	Z_STRLEN_P(arg_str),
+	ZSTR_VAL(arg_str),
+	ZSTR_LEN(arg_str),
 	_php_mb_regex_mbctype2name(MBREX(current_mbctype))
 	)) {
 		MBREX(search_pos) = 0;
 		RETVAL_TRUE;
 	} else {
-		MBREX(search_pos) = Z_STRLEN_P(arg_str);
+		MBREX(search_pos) = ZSTR_LEN(arg_str);
 		RETVAL_FALSE;
 	}
 

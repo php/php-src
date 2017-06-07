@@ -1,7 +1,8 @@
 PHP 7.1 INTERNALS UPGRADE NOTES
 
 1. Internal API changes
-  a.
+  a. Path related functions
+  b. php_win32_get_random_bytes()
 
 2. Build system changes
   a. Unix build system changes
@@ -13,7 +14,15 @@ PHP 7.1 INTERNALS UPGRADE NOTES
 1. Internal API changes
 ========================
 
-  a.
+  a. Path related functions
+    - CWD_API void realpath_cache_del(const char *path, size_t path_len);
+    - CWD_API realpath_cache_bucket* realpath_cache_lookup(const char *path, size_t path_len, time_t t);
+    - PHPAPI void php_clear_stat_cache(zend_bool clear_realpath_cache, const char *filename, size_t filename_len);
+    - PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zval *return_value);
+
+  b. php_win32_get_random_bytes()
+    The internal randomness source on Windows switched to use CNG API.
+
 
 ========================
 2. Build system changes
@@ -23,11 +32,17 @@ PHP 7.1 INTERNALS UPGRADE NOTES
 
   b. Windows build system changes
 
-    *  nice() now have a Windows alternative that is implemented in win32/nice.c, using 
+    .  Minimum supported Windows versions are Windows 7/Server 2008 R2.
+    .  nice() now have a Windows alternative that is implemented in win32/nice.c, using
 	   SetPriorityClass(). See the implementation for more in-depth details. This also 
 	   defines HAVE_NICE.
 
 ========================
 3. Module changes
 ========================
+
+- Session:
+  . php_session_start()/session_reset_id() return value is changed from void to int.
+    It returns SUCCESS/FAILURE.
+  . Session module manages session status correctly.
 

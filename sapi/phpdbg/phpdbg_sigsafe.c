@@ -13,13 +13,13 @@ static void* zend_mm_mem_alloc(zend_mm_storage *storage, size_t size, size_t ali
 		return (void *) (((size_t) PHPDBG_G(sigsafe_mem).mem & ~(alignment - 1)) + alignment);
 	}
 
-	quiet_write(PHPDBG_G(io)[PHPDBG_STDERR].fd, ZEND_STRL("Tried to allocate more than " EXP_STR(PHPDBG_SIGSAFE_MEM_SIZE) " bytes from stack memory in signal handler ... bailing out of signal handler\n"));
+	zend_quiet_write(PHPDBG_G(io)[PHPDBG_STDERR].fd, ZEND_STRL("Tried to allocate more than " EXP_STR(PHPDBG_SIGSAFE_MEM_SIZE) " bytes from stack memory in signal handler ... bailing out of signal handler\n"));
 
 	if (*EG(bailout)) {
 		LONGJMP(*EG(bailout), FAILURE);
 	}
 
-	quiet_write(PHPDBG_G(io)[PHPDBG_STDERR].fd, ZEND_STRL("Bailed out without a bailout address in signal handler!\n"));
+	zend_quiet_write(PHPDBG_G(io)[PHPDBG_STDERR].fd, ZEND_STRL("Bailed out without a bailout address in signal handler!\n"));
 
 	return NULL;
 }

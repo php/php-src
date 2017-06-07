@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,13 +27,9 @@ PHP_WINUTIL_API char *php_win32_error_to_msg(HRESULT error);
 #define php_win_err()	php_win32_error_to_msg(GetLastError())
 int php_win32_check_trailing_space(const char * path, const int path_len);
 PHP_WINUTIL_API int php_win32_get_random_bytes(unsigned char *buf, size_t size);
-
-#ifdef ZTS
-void php_win32_init_rng_lock();
-void php_win32_free_rng_lock();
-#else
-#define php_win32_init_rng_lock();
-#define php_win32_free_rng_lock();
+#ifdef PHP_EXPORTS
+BOOL php_win32_init_random_bytes(void);
+BOOL php_win32_shutdown_random_bytes(void);
 #endif
 
 #if !defined(ECURDIR)

@@ -288,7 +288,7 @@ dnl Check for available functions
 dnl
 dnl log2 could be used to improve the log function, however it requires C99. The check for log2 should be turned on,
 dnl as soon as we support C99.
-AC_CHECK_FUNCS(getcwd getwd asinh acosh atanh log1p hypot glob strfmon nice fpclass isinf isnan mempcpy strpncpy)
+AC_CHECK_FUNCS(getcwd getwd asinh acosh atanh log1p hypot glob strfmon nice fpclass mempcpy strpncpy)
 AC_FUNC_FNMATCH	
 
 dnl
@@ -340,6 +340,7 @@ dnl Detect library functions needed by php dns_xxx functions
 dnl ext/standard/php_dns.h will collect these in a single define: HAVE_FULL_DNS_FUNCS
 dnl
 PHP_CHECK_FUNC(res_nsearch, resolv, bind, socket)
+PHP_CHECK_FUNC(res_ndestroy, resolv, bind, socket)
 PHP_CHECK_FUNC(dns_search, resolv, bind, socket)
 PHP_CHECK_FUNC(dn_expand, resolv, bind, socket)
 PHP_CHECK_FUNC(dn_skipname, resolv, bind, socket)
@@ -407,11 +408,6 @@ dnl
 dnl Check for arc4random on BSD systems
 dnl
 AC_CHECK_DECLS([arc4random_buf])
-
-dnl
-dnl Check for getrandom on newer Linux kernels
-dnl
-AC_CHECK_DECLS([getrandom])
 
 dnl
 dnl Check for argon2

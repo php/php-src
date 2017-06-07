@@ -8,9 +8,9 @@ Test get_parent_class() function : usage variations  - unexpected argument type.
  * Alias to functions: 
  */
 
-function __autoload($className) {
-	echo "In __autoload($className)\n";
-}
+spl_autoload_register(function ($className) {
+	echo "In autoload($className)\n";
+});
 
 function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
 	echo "Error: $err_no - $err_msg, $filename($linenum)\n";
@@ -160,11 +160,11 @@ Arg value
 bool(false)
 
 Arg value string 
-In __autoload(string)
+In autoload(string)
 bool(false)
 
 Arg value String 
-In __autoload(String)
+In autoload(String)
 bool(false)
 Error: 4096 - Object of class stdClass could not be converted to string, %s(77)
 

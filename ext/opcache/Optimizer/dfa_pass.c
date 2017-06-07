@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -312,16 +312,20 @@ static inline zend_bool can_elide_return_type_check(
 	zend_ssa_var_info *use_info = &ssa->var_info[ssa_op->op1_use];
 	zend_ssa_var_info *def_info = &ssa->var_info[ssa_op->op1_def];
 
+	if (use_info->type & MAY_BE_REF) {
+		return 0;
+	}
+
 	/* A type is possible that is not in the allowed types */
 	if ((use_info->type & (MAY_BE_ANY|MAY_BE_UNDEF)) & ~(def_info->type & MAY_BE_ANY)) {
 		return 0;
 	}
 
-	if (info->type_hint == IS_CALLABLE) {
+	if (ZEND_TYPE_CODE(info->type) == IS_CALLABLE) {
 		return 0;
 	}
 
-	if (info->class_name) {
+	if (ZEND_TYPE_IS_CLASS(info->type)) {
 		if (!use_info->ce || !def_info->ce || !instanceof_function(use_info->ce, def_info->ce)) {
 			return 0;
 		}
@@ -350,6 +354,12 @@ static zend_bool opline_supports_assign_contraction(
 		/* POST_INC/DEC write the result variable before performing the inc/dec. For $i = $i++
 		 * eliding the temporary variable would thus yield an incorrect result. */
 		return opline->op1_type != IS_CV || opline->op1.var != cv_var;
+	}
+
+	if (opline->opcode == ZEND_INIT_ARRAY) {
+		/* INIT_ARRAY initializes the result array before reading key/value. */
+		return (opline->op1_type != IS_CV || opline->op1.var != cv_var)
+			&& (opline->op2_type != IS_CV || opline->op2.var != cv_var);
 	}
 
 	return 1;
@@ -565,19 +575,23 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 // op_1: VERIFY_RETURN_TYPE #orig_var.CV [T] -> #v.CV [T] => NOP
 
 				int orig_var = ssa->ops[op_1].op1_use;
-				int ret = ssa->vars[v].use_chain;
+				if (zend_ssa_unlink_use_chain(ssa, op_1, orig_var)) {
 
-				ssa->vars[orig_var].use_chain = ret;
-				ssa->ops[ret].op1_use = orig_var;
+					int ret = ssa->vars[v].use_chain;
 
-				ssa->vars[v].definition = -1;
-				ssa->vars[v].use_chain = -1;
+					ssa->ops[ret].op1_use = orig_var;
+					ssa->ops[ret].op1_use_chain = ssa->vars[orig_var].use_chain;
+					ssa->vars[orig_var].use_chain = ret;
 
-				ssa->ops[op_1].op1_def = -1;
-				ssa->ops[op_1].op1_use = -1;
+					ssa->vars[v].definition = -1;
+					ssa->vars[v].use_chain = -1;
 
-				MAKE_NOP(opline);
-				remove_nops = 1;
+					ssa->ops[op_1].op1_def = -1;
+					ssa->ops[op_1].op1_use = -1;
+
+					MAKE_NOP(opline);
+					remove_nops = 1;
+				}
 
 			} else if (ssa->ops[op_1].op1_def == v
 			 && !RETURN_VALUE_USED(opline)

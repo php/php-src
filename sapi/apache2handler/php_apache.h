@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -46,11 +46,7 @@ typedef struct php_struct {
 	request_rec *r;
 	apr_bucket_brigade *brigade;
 	/* stat structure of the current file */
-#if defined(NETWARE) && defined(CLIB_STAT_PATCH)
-	struct stat_libc finfo;
-#else
 	zend_stat_t finfo;
-#endif
 	/* Whether or not we've processed PHP in the output filters yet. */
 	int request_processed;
 	/* final content type */
@@ -79,6 +75,7 @@ typedef struct {
 	zend_bool engine;
 	zend_bool xbithack;
 	zend_bool last_modified;
+	zend_bool post_read_error;
 } php_apache2_info_struct;
 
 extern zend_module_entry apache2_module_entry;

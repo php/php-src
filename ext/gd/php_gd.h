@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -48,6 +48,7 @@
 #define PHP_GDIMG_TYPE_GD2      9
 #define PHP_GDIMG_TYPE_GD2PART  10
 #define PHP_GDIMG_TYPE_WEBP     11
+#define PHP_GDIMG_TYPE_BMP      12
 
 #ifdef PHP_WIN32
 #	define PHP_GD_API __declspec(dllexport)
@@ -60,6 +61,7 @@
 PHPAPI extern const char php_sig_gif[3];
 PHPAPI extern const char php_sig_jpg[3];
 PHPAPI extern const char php_sig_png[8];
+PHPAPI extern const char php_sig_bmp[2];
 
 extern zend_module_entry gd_module_entry;
 #define phpext_gd_ptr &gd_module_entry
@@ -149,6 +151,9 @@ PHP_FUNCTION(imagecreatefromwbmp);
 PHP_FUNCTION(imagecreatefromgd);
 PHP_FUNCTION(imagecreatefromgd2);
 PHP_FUNCTION(imagecreatefromgd2part);
+#if defined(HAVE_GD_BMP)
+PHP_FUNCTION(imagecreatefrombmp);
+#endif
 #if defined(HAVE_GD_XPM)
 PHP_FUNCTION(imagecreatefromxpm);
 #endif
@@ -169,6 +174,9 @@ PHP_FUNCTION(imagewebp);
 PHP_FUNCTION(imagewbmp);
 PHP_FUNCTION(imagegd);
 PHP_FUNCTION(imagegd2);
+#if defined(HAVE_GD_BMP)
+PHP_FUNCTION(imagebmp);
+#endif
 
 PHP_FUNCTION(imageinterlace);
 PHP_FUNCTION(imageline);

@@ -9,9 +9,6 @@ if (!in_array('SHA-256', $arr)) die("skip hash extension loaded shared"); ?>
 --INI--
 phar.require_hash=0
 phar.readonly=0
---ENV--
-TEMP=.
-TMP=.
 --FILE--
 <?php
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar';

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -291,16 +291,12 @@ PHP_MINIT_FUNCTION(miconv)
 	}
 #elif HAVE_GLIBC_ICONV
 	version = (char *)gnu_get_libc_version();
-#elif defined(NETWARE)
-	version = "OS built-in";
 #endif
 
 #ifdef PHP_ICONV_IMPL
 	REGISTER_STRING_CONSTANT("ICONV_IMPL", PHP_ICONV_IMPL, CONST_CS | CONST_PERSISTENT);
 #elif HAVE_LIBICONV
 	REGISTER_STRING_CONSTANT("ICONV_IMPL", "libiconv", CONST_CS | CONST_PERSISTENT);
-#elif defined(NETWARE)
-	REGISTER_STRING_CONSTANT("ICONV_IMPL", "Novell", CONST_CS | CONST_PERSISTENT);
 #else
 	REGISTER_STRING_CONSTANT("ICONV_IMPL", "unknown", CONST_CS | CONST_PERSISTENT);
 #endif
@@ -428,7 +424,7 @@ static int php_iconv_output_handler(void **nothing, php_output_context *output_c
 			} else {
 				len = spprintf(&content_type, 0, "Content-Type:%.*s; charset=%s", mimetype_len ? mimetype_len : (int) strlen(mimetype), mimetype, get_output_encoding());
 			}
-			if (content_type && SUCCESS == sapi_add_header(content_type, (uint)len, 0)) {
+			if (content_type && SUCCESS == sapi_add_header(content_type, (uint32_t)len, 0)) {
 				SG(sapi_headers).send_default_content_type = 0;
 				php_output_handler_hook(PHP_OUTPUT_HANDLER_HOOK_IMMUTABLE, NULL);
 			}
@@ -584,12 +580,7 @@ PHP_ICONV_API php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len, 
 	out_buffer = zend_string_alloc(out_size, 0);
 	out_p = ZSTR_VAL(out_buffer);
 
-#ifdef NETWARE
-	result = iconv(cd, (char **) &in_p, &in_size, (char **)
-#else
-	result = iconv(cd, (const char **) &in_p, &in_size, (char **)
-#endif
-				&out_p, &out_left);
+	result = iconv(cd, (const char **) &in_p, &in_size, (char **) &out_p, &out_left);
 
 	if (result == (size_t)(-1)) {
 		zend_string_free(out_buffer);

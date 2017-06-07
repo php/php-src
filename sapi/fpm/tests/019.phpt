@@ -46,7 +46,7 @@ if (is_resource($fpm)) {
 	printf("File %s %s\n", $pidfile, (file_exists(__DIR__.'/'.$pidfile) ? "exists" : "missing"));
 
 	proc_terminate($fpm);
-	echo stream_get_contents($tail);
+    fpm_display_log($tail, -1);
     fclose($tail);
     proc_close($fpm);
 	printf("File %s %s\n", $pidfile, (file_exists(__DIR__.'/'.$pidfile) ? "still exists" : "removed"));

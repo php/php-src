@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,24 +31,24 @@ PHP_CURL_API zend_class_entry *curl_CURLFile_class;
 
 static void curlfile_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
-	char *fname = NULL, *mime = NULL, *postname = NULL;
-	size_t fname_len, mime_len, postname_len;
+	zend_string *fname, *mime = NULL, *postname = NULL;
 	zval *cf = return_value;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|ss", &fname, &fname_len, &mime, &mime_len, &postname, &postname_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1,3)
+		Z_PARAM_PATH_STR(fname)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR(mime)
+		Z_PARAM_STR(postname)
+	ZEND_PARSE_PARAMETERS_END();
 
-	if (fname) {
-		zend_update_property_string(curl_CURLFile_class, cf, "name", sizeof("name")-1, fname);
-	}
+	zend_update_property_string(curl_CURLFile_class, cf, "name", sizeof("name")-1, ZSTR_VAL(fname));
 
 	if (mime) {
-		zend_update_property_string(curl_CURLFile_class, cf, "mime", sizeof("mime")-1, mime);
+		zend_update_property_string(curl_CURLFile_class, cf, "mime", sizeof("mime")-1, ZSTR_VAL(mime));
 	}
 
 	if (postname) {
-		zend_update_property_string(curl_CURLFile_class, cf, "postname", sizeof("postname")-1, postname);
+		zend_update_property_string(curl_CURLFile_class, cf, "postname", sizeof("postname")-1, ZSTR_VAL(postname));
 	}
 }
 
@@ -84,13 +84,13 @@ static void curlfile_get_property(char *name, size_t name_len, INTERNAL_FUNCTION
 
 static void curlfile_set_property(char *name, size_t name_len, INTERNAL_FUNCTION_PARAMETERS)
 {
-	char *arg = NULL;
-	size_t arg_len;
+	zend_string *arg;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &arg, &arg_len) == FAILURE) {
-		return;
-	}
-	zend_update_property_string(curl_CURLFile_class, getThis(), name, name_len, arg);
+	ZEND_PARSE_PARAMETERS_START(1,1)
+		Z_PARAM_STR(arg)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_update_property_string(curl_CURLFile_class, getThis(), name, name_len, ZSTR_VAL(arg));
 }
 
 /* {{{ proto string CURLFile::getFilename()

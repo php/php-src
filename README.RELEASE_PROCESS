@@ -65,7 +65,7 @@ credits files in ext/standard.
 
 4. Checkout the release branch for this release (e.g., PHP-5.4.2) from the main branch.
 
-5. Bump the version numbers in ``main/php_version.h``, ``configure.in`` and possibly ``NEWS``.
+5. Bump the version numbers in ``main/php_version.h``, ``configure.ac`` and possibly ``NEWS``.
 Do not use abbreviations for alpha and beta. Do not use dashes, you should
 ``#define PHP_VERSION "5.4.22RC1"`` and not ``#define PHP_VERSION "5.4.22-RC1"``
 
@@ -79,7 +79,7 @@ Do not use abbreviations for alpha and beta. Do not use dashes, you should
 9. Tag the repository release branch with the version, e.g.:
 ``git tag -u YOURKEYID php-5.4.2RC2``
 
-10. Bump the version numbers in ``main/php_version.h``, ``configure.in`` and ``NEWS``
+10. Bump the version numbers in ``main/php_version.h``, ``configure.ac`` and ``NEWS``
 in the *main* branch (PHP-5.4 for example) to prepare for the **next** version.
 F.e. if the RC is "5.4.1RC1" then the new one should be "5.4.2-dev" - regardless if we get
 a new RC or not. This is to make sure ``version_compare()`` can correctly work.
@@ -93,24 +93,27 @@ Commit the changes to the main branch.
 12. run: ``PHPROOT=. ./makedist 5.4.2RC2``, this will export the tree, create configure
 and build three tarballs (gz, bz2 and xz).
 
-13. Copy those tarballs (scp, rsync) to downloads.php.net, in your homedir there should be a
+13. run ``scripts/dev/gen_verify_stub <version> [identity]``, this will sign the tarballs
+and output verification information to be included in announcement email
+
+14. Copy those tarballs (scp, rsync) to downloads.php.net, in your homedir there should be a
 directory "downloads/". Copy them into there, so that the system can generate
 MD5 sums. If you do not have this directory, talk to Derick or Dan.
 
-14. Now the RC can be found on http://downloads.php.net/yourname,
+15. Now the RC can be found on http://downloads.php.net/yourname,
 f.e. http://downloads.php.net/derick/
 
-15. Once the release has been tagged, contact the PHP Windows development team
+16. Once the release has been tagged, contact the PHP Windows development team
 (internals-win@lists.php.net) so that Windows binaries can be created. Once
 those are made, they should be placed into the same directory as the source snapshots.
 
 Getting the non stable release (alpha/beta/RC) announced
 --------------------------------------------------------
 
-1. Send an email (see example here: http://news.php.net/php.internals/19486)
-**To** ``internals@lists.php.net`` and ``php-general@lists.php.net`` lists
-pointing out "the location of the release" and "the possible release date of
-either the next RC, or the final release".
+1. Send an email **To** ``internals@lists.php.net`` and ``php-general@lists.php.net`` 
+lists pointing out "the location of the release" and "the possible release date of
+either the next RC, or the final release". Include in this information the verification
+information output by ``gen_verify_stub``.
 
 2. Send an email (see example here http://news.php.net/php.pear.qa/5201) **To**
 ``php-qa@lists.php.net`` and ``primary-qa-tester@lists.php.net``.
@@ -149,7 +152,7 @@ Rolling a stable release
 ------------------------
 
 1. Checkout your release branch, you should have created when releasing previous RC
-and bump the version numbers in ``main/php_version.h``, ``configure.in`` and possibly ``NEWS``.
+and bump the version numbers in ``main/php_version.h``, ``configure.ac`` and possibly ``NEWS``.
 
 2. If a CVE commit needs to be merged to the release, then have it committed to
 the base branches and merged upwards as usual (f.e commit the CVE fix to 5.3,
@@ -190,8 +193,8 @@ Check if the pear files are updated (phar).
 This is to fetch the last commit id from php-distributions.git and commit this
 last commit id to web/php.git, then, mirrors will now sync
 
-12. Once the release has been tagged, contact the PHP Windows development team
-(internals-win@lists.php.net) so that Windows binaries can be created.
+12. Once the release has been tagged, contact release managers, windows builders, and package maintainers
+so that they can build releases. Do not send this announcement to any public lists.
 
 Getting the stable release announced
 ------------------------------------

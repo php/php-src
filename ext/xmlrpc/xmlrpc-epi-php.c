@@ -37,7 +37,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -328,7 +328,7 @@ static int add_string(zval* list, char* id, char* string) {
 	else   return add_next_index_string(list, string);
 }
 
-static int add_stringl(zval* list, char* id, char* string, uint length) {
+static int add_stringl(zval* list, char* id, char* string, uint32_t length) {
 	if(id) return add_assoc_stringl(list, id, string, length);
 	else   return add_next_index_stringl(list, string, length);
 }

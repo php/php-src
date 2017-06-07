@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -560,11 +560,6 @@ PHP_RSHUTDOWN_FUNCTION(pcntl)
 	while (PCNTL_G(head)) {
 		sig = PCNTL_G(head);
 		PCNTL_G(head) = sig->next;
-#ifdef HAVE_STRUCT_SIGINFO_T
-		if (sig->siginfo) {
-			zend_array_destroy(sig->siginfo);
-		}
-#endif
 		efree(sig);
 	}
 	while (PCNTL_G(spares)) {
@@ -1379,11 +1374,7 @@ static void pcntl_signal_handler(int signo)
 	psig->next = NULL;
 
 #ifdef HAVE_STRUCT_SIGINFO_T
-	zval user_siginfo;
-	array_init(&user_siginfo);
-	pcntl_siginfo_to_zval(signo, siginfo, &user_siginfo);
-	psig->siginfo = zend_array_dup(Z_ARRVAL(user_siginfo));
-	zval_ptr_dtor(&user_siginfo);
+	psig->siginfo = *siginfo;
 #endif
 
 	/* the head check is important, as the tick handler cannot atomically clear both
@@ -1428,14 +1419,14 @@ void pcntl_signal_dispatch()
 	PCNTL_G(head) = NULL; /* simple stores are atomic */
 
 	/* Allocate */
-
 	while (queue) {
 		if ((handle = zend_hash_index_find(&PCNTL_G(php_signal_table), queue->signo)) != NULL) {
 			if (Z_TYPE_P(handle) != IS_LONG) {
 				ZVAL_NULL(&retval);
 				ZVAL_LONG(&params[0], queue->signo);
 #ifdef HAVE_STRUCT_SIGINFO_T
-				ZVAL_ARR(&params[1], queue->siginfo);
+				array_init(&params[1]);
+				pcntl_siginfo_to_zval(queue->signo, &queue->siginfo, &params[1]);
 #else
 				ZVAL_NULL(&params[1]);
 #endif

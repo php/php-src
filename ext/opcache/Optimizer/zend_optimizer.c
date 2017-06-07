@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -198,6 +198,11 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 		case ZEND_SEPARATE:
 		case ZEND_SEND_VAR_NO_REF:
 		case ZEND_SEND_VAR_NO_REF_EX:
+			zval_ptr_dtor(val);
+			return 0;
+		case ZEND_VERIFY_RETURN_TYPE:
+			/* This would require a non-local change.
+			 * zend_optimizer_replace_by_const() supports this. */
 			zval_ptr_dtor(val);
 			return 0;
 		case ZEND_CONCAT:
@@ -446,12 +451,27 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 					break;
 				/* In most cases IS_TMP_VAR operand may be used only once.
 				 * The operands are usually destroyed by the opcode handler.
-				 * ZEND_CASE is an exception, that keeps operand unchanged,
-				 * and allows its reuse. The number of ZEND_CASE instructions
+				 * ZEND_CASE and ZEND_FETCH_LIST are exceptions, they keeps operand
+				 * unchanged, and allows its reuse. these instructions
 				 * usually terminated by ZEND_FREE that finally kills the value.
 				 */
-				case ZEND_FREE:
-				case ZEND_CASE: {
+				case ZEND_FETCH_LIST: {
+					zend_op *m = opline;
+					do {
+						if (m->opcode == ZEND_FETCH_LIST &&
+							ZEND_OP1_TYPE(m) == type &&
+							ZEND_OP1(m).var == var) {
+							zend_optimizer_update_op1_const(op_array, m, val);
+						}
+						m++;
+					} while (m->opcode != ZEND_FREE || ZEND_OP1_TYPE(m) != type || ZEND_OP1(m).var != var);
+					ZEND_ASSERT(m->opcode == ZEND_FREE && ZEND_OP1_TYPE(m) == type && ZEND_OP1(m).var == var);
+					MAKE_NOP(m);
+					zend_optimizer_remove_live_range(op_array, var);
+					return 1;
+				}
+				case ZEND_CASE:
+				case ZEND_FREE: {
 					zend_op *m, *n;
 					int brk = op_array->last_live_range;
 					zend_bool in_switch = 0;
@@ -501,16 +521,21 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 				}
 				case ZEND_VERIFY_RETURN_TYPE: {
 					zend_arg_info *ret_info = op_array->arg_info - 1;
-					ZEND_ASSERT((opline + 1)->opcode == ZEND_RETURN || (opline + 1)->opcode == ZEND_RETURN_BY_REF);
-					if (ret_info->class_name
-						|| ret_info->type_hint == IS_CALLABLE
-						|| !ZEND_SAME_FAKE_TYPE(ret_info->type_hint, Z_TYPE_P(val))
+					if (ZEND_TYPE_IS_CLASS(ret_info->type)
+						|| ZEND_TYPE_CODE(ret_info->type) == IS_CALLABLE
+						|| !ZEND_SAME_FAKE_TYPE(ZEND_TYPE_CODE(ret_info->type), Z_TYPE_P(val))
 						|| (op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
 						zval_dtor(val);
 						return 0;
 					}
 					MAKE_NOP(opline);
-					opline++;
+
+					/* zend_handle_loops_and_finally may inserts other oplines */
+					do {
+						++opline;
+					} while (opline->opcode != ZEND_RETURN && opline->opcode != ZEND_RETURN_BY_REF);
+					ZEND_ASSERT(ZEND_OP1(opline).var == var);
+
 					break;
 				  }
 				default:
@@ -535,6 +560,33 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 	}
 
 	return 1;
+}
+
+static zend_class_entry *get_class_entry_from_op1(
+		zend_script *script, zend_op_array *op_array, zend_op *opline, zend_bool rt_constants) {
+	if (opline->op1_type == IS_CONST) {
+		zval *op1 = CRT_CONSTANT_EX(op_array, opline->op1, rt_constants);
+		if (Z_TYPE_P(op1) == IS_STRING) {
+			zend_string *class_name = Z_STR_P(op1 + 1);
+			zend_class_entry *ce;
+			if (script && (ce = zend_hash_find_ptr(&script->class_table, class_name))) {
+				return ce;
+			} else if ((ce = zend_hash_find_ptr(EG(class_table), class_name))) {
+				if (ce->type == ZEND_INTERNAL_CLASS) {
+					return ce;
+				} else if (ce->type == ZEND_USER_CLASS &&
+						   ce->info.user.filename &&
+						   ce->info.user.filename == op_array->filename) {
+					return ce;
+				}
+			}
+		}
+	} else if (opline->op1_type == IS_UNUSED && op_array->scope
+			&& !(op_array->scope->ce_flags & ZEND_ACC_TRAIT)
+			&& (opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF) {
+		return op_array->scope;
+	}
+	return NULL;
 }
 
 zend_function *zend_optimizer_get_called_func(
@@ -579,25 +631,8 @@ zend_function *zend_optimizer_get_called_func(
 			break;
 		case ZEND_INIT_STATIC_METHOD_CALL:
 			if (opline->op2_type == IS_CONST && Z_TYPE_P(GET_OP(op2)) == IS_STRING) {
-				zend_class_entry *ce = NULL;
-				if (opline->op1_type == IS_CONST && Z_TYPE_P(GET_OP(op1)) == IS_STRING) {
-					zend_string *class_name = Z_STR_P(GET_OP(op1) + 1);
-					if (script && (ce = zend_hash_find_ptr(&script->class_table, class_name))) {
-						/* pass */
-					} else if ((ce = zend_hash_find_ptr(EG(class_table), class_name))) {
-						if (ce->type == ZEND_INTERNAL_CLASS) {
-							/* pass */
-						} else if (ce->type != ZEND_USER_CLASS ||
-						           !ce->info.user.filename ||
-						           ce->info.user.filename != op_array->filename) {
-							ce = NULL;
-						}
-					}
-				} else if (opline->op1_type == IS_UNUSED && op_array->scope
-						&& !(op_array->scope->ce_flags & ZEND_ACC_TRAIT)
-						&& (opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF) {
-					ce = op_array->scope;
-				}
+				zend_class_entry *ce = get_class_entry_from_op1(
+					script, op_array, opline, rt_constants);
 				if (ce) {
 					zend_string *func_name = Z_STR_P(GET_OP(op2) + 1);
 					return zend_hash_find_ptr(&ce->function_table, func_name);
@@ -622,6 +657,15 @@ zend_function *zend_optimizer_get_called_func(
 				}
 			}
 			break;
+		case ZEND_NEW:
+		{
+			zend_class_entry *ce = get_class_entry_from_op1(
+				script, op_array, opline, rt_constants);
+			if (ce && ce->type == ZEND_USER_CLASS) {
+				return ce->constructor;
+			}
+			break;
+		}
 	}
 	return NULL;
 #undef GET_OP

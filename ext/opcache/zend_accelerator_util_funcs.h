@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -37,7 +37,7 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 
 #define ADLER32_INIT 1     /* initial Adler-32 value */
 
-unsigned int zend_adler32(unsigned int checksum, signed char *buf, uint len);
+unsigned int zend_adler32(unsigned int checksum, signed char *buf, uint32_t len);
 
 unsigned int zend_accel_script_checksum(zend_persistent_script *persistent_script);
 

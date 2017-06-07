@@ -29,22 +29,33 @@ document ____executor_globals
 end
 
 define print_cvs
-	____executor_globals
-	set $p = $eg.current_execute_data.CVs
-	set $c = $eg.current_execute_data.op_array.last_var
-	set $v = $eg.current_execute_data.op_array.vars
-	set $i = 0
-
-	printf "Compiled variables count: %d\n", $c
-	while $i < $c
-		printf "%d = %s\n", $i, $v[$i].name
-		if $p[$i] != 0
-			printzv *$p[$i]
-		else
-			printf "*uninitialized*\n"
-		end
-		set $i = $i + 1
+	if $argc == 0
+		____executor_globals
+		set $cv_ex_ptr = $eg.current_execute_data
+	else
+		set $cv_ex_ptr = (zend_execute_data *)$arg0
 	end
+	set $cv_count = $cv_ex_ptr.func.op_array.last_var
+	set $cv = $cv_ex_ptr.func.op_array.vars
+	set $cv_idx = 0
+	set $callFrameSize = (sizeof(zend_execute_data) + sizeof(zval) - 1) / sizeof(zval)
+
+	printf "Compiled variables count: %d\n\n", $cv_count
+	while $cv_idx < $cv_count
+		printf "[%d] '%s'\n", $cv_idx, $cv[$cv_idx].val
+		set $zvalue = ((zval *) $cv_ex_ptr) + $callFrameSize + $cv_idx
+		printzv $zvalue
+		set $cv_idx = $cv_idx + 1
+	end
+end
+
+document print_cvs
+	Prints the compiled variables and their values.
+	If a zend_execute_data pointer is set this will print the compiled
+	variables of that scope. If no parameter is used it will use
+	current_execute_data for scope.
+
+	usage: print_cvs [zend_execute_data *]
 end
 
 define dump_bt
@@ -196,12 +207,17 @@ define ____printzv_contents
 		____executor_globals
 		set $handle = $zvalue->value.obj.handle
 		set $handlers = $zvalue->value.obj.handlers
-        set $zobj = $zvalue->value.obj
-        set $cname = $zobj->ce->name->val
+		set $zobj = $zvalue->value.obj
+		set $cname = $zobj->ce->name->val
 		printf "(%s) #%d", $cname, $handle
 		if ! $arg1
 			if $handlers->get_properties == &zend_std_get_properties
-				set $ht = $zobj->properties
+				if $zobj->properties
+					set $ht = $zobj->properties
+				else
+					set $ht = &$zobj->ce->properties_info
+				end
+				printf "\nProperties "
 				if $ht
 					set $ind = $ind + 1
 					____print_ht $ht 1
@@ -212,7 +228,7 @@ define ____printzv_contents
 						set $i = $i - 1
 					end
 				else
-					echo "no properties found"
+					echo "not found"
 				end
 			end
 		end
@@ -455,9 +471,9 @@ define print_inh
 end
 
 define print_pi
-	set $pi = $arg0
+	set $pi = (zend_property_info *)$arg0
 	printf "[%p] {\n", $pi
-	printf "    h     = %lu\n", $pi->h
+	printf "    ce = [%p] %s\n", $pi->ce, $pi->ce->name->val
 	printf "    flags = %d (", $pi->flags
 	if $pi->flags & 0x100
 		printf "ZEND_ACC_PUBLIC"
@@ -476,16 +492,27 @@ define print_pi
 	end
 	printf ")\n"
 	printf "    name  = "
-	____print_str $pi->name $pi->name_length
-	printf "\n}\n"
+	print_zstr $pi->name
+	printf "}\n"
+end
+
+document print_pi
+	Takes a pointer to an object's property and prints the property information
+	usage: print_pi <ptr>
 end
 
 define ____print_str
 	set $tmp = 0
 	set $str = $arg0
+	if $argc > 2
+		set $maxlen = $arg2
+	else
+		set $maxlen = 256
+	end
+
 	printf "\""
-	while $tmp < $arg1 && $tmp < 256
-		if $str[$tmp] > 32 && $str[$tmp] < 127
+	while $tmp < $arg1 && $tmp < $maxlen
+		if $str[$tmp] > 31 && $str[$tmp] < 127
 			printf "%c", $str[$tmp]
 		else
 			printf "\\%o", $str[$tmp]
@@ -554,6 +581,23 @@ document printzops
 	dump operands of the current opline
 end
 
+define print_zstr
+	set $zstr = (zend_string *)$arg0
+	if $argc == 2
+		set $maxlen = $arg1
+	else
+		set $maxlen = $zstr->len
+	end
+	printf "string(%d) ", $zstr->len
+	____print_str $zstr->val $zstr->len $maxlen
+	printf "\n"
+end
+
+document print_zstr
+	print the length and contents of a zend string
+	usage: print_zstr <ptr> [max length]
+end
+
 define zbacktrace
 	____executor_globals
 	dump_bt $eg.current_execute_data
@@ -564,79 +608,6 @@ document zbacktrace
 	This command is almost a short cut for
 	> (gdb) ____executor_globals
 	> (gdb) dump_bt $eg.current_execute_data
-end
-
-define zmemcheck
-	set $p = alloc_globals.head
-	set $stat = "?"
-	set $total_size = 0
-	if $arg0 != 0
-		set $not_found = 1
-	else
-		set $not_found = 0
-	end
-	printf " block      size      status file:line\n"
-	printf "-------------------------------------------------------------------------------\n"
-	while $p
-		set $aptr = $p + sizeof(struct _zend_mem_header) + sizeof(align_test)
-		if $arg0 == 0 || (void *)$aptr == (void *)$arg0
-			if $p->magic == 0x7312f8dc 
-				set $stat = "OK"
-			end
-			if $p->magic == 0x99954317
-				set $stat = "FREED"
-			end
-			if $p->magic == 0xfb8277dc
-				set $stat = "CACHED"
-			end
-			set $filename = strrchr($p->filename->val, '/')
-			if !$filename
-				set $filename = $p->filename->val
-			else
-				set $filename = $filename + 1
-			end
-			printf " %p ", $aptr
-			if $p->size == sizeof(struct _zval_struct) && ((struct _zval_struct *)$aptr)->type >= 0 && ((struct _zval_struct *)$aptr)->type < 10
-				printf "ZVAL?(%-2d) ", $p->size
-			else
-				printf "%-9d ", $p->size
-			end
-			set $total_size = $total_size + $p->size
-			printf "%-06s %s:%d", $stat, $filename, $p->lineno
-			if $p->orig_filename
-				set $orig_filename = strrchr($p->orig_filename, '/')
-				if !$orig_filename
-					set $orig_filename = $p->orig_filename
-				else
-					set $orig_filename = $orig_filename + 1
-				end
-				printf " <= %s:%d\n", $orig_filename, $p->orig_lineno
-			else
-				printf "\n"
-			end
-			if $arg0 != 0
-				set $p = 0
-				set $not_found = 0
-			else
-				set $p = $p->pNext
-			end
-		else
-			set $p = $p->pNext
-		end
-	end
-	if $not_found
-		printf "no such block that begins at %p.\n", $aptr
-	end
-	if $arg0 == 0
-		printf "-------------------------------------------------------------------------------\n"
-		printf "     total: %d bytes\n", $total_size
-	end
-end
-
-document zmemcheck
-	show status of a memory block.
-	usage: zmemcheck [ptr].
-	if ptr is 0, all blocks will be listed.
 end
 
 define lookup_root

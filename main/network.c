@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -32,9 +32,6 @@
 # include "win32/inet.h"
 # define O_RDONLY _O_RDONLY
 # include "win32/param.h"
-#elif defined(NETWARE)
-#include <sys/timeval.h>
-#include <sys/param.h>
 #else
 #include <sys/param.h>
 #endif
@@ -55,17 +52,8 @@
 #include <sys/poll.h>
 #endif
 
-#if defined(NETWARE)
-#ifdef USE_WINSOCK
-#include <novsock2.h>
-#else
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#include <sys/select.h>
-#include <sys/socket.h>
-#endif
-#elif !defined(PHP_WIN32)
+
+#ifndef PHP_WIN32
 #include <netinet/in.h>
 #include <netdb.h>
 #if HAVE_ARPA_INET_H
@@ -79,7 +67,7 @@ int inet_aton(const char *, struct in_addr *);
 
 #include "php_network.h"
 
-#if defined(PHP_WIN32) || defined(__riscos__) || defined(NETWARE)
+#if defined(PHP_WIN32) || defined(__riscos__)
 #undef AF_UNIX
 #endif
 

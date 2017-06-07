@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2016 The PHP Group                                |
+  | Copyright (c) 2006-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -82,9 +82,6 @@ PHPAPI MYSQLND_DEBUG * mysqlnd_debug_init(const char * skip_functions[]);
 #if defined(__GNUC__) || defined(PHP_WIN32)
 #ifdef PHP_WIN32
 #include "win32/time.h"
-#elif defined(NETWARE)
-#include <sys/timeval.h>
-#include <sys/time.h>
 #else
 #include <sys/time.h>
 #endif

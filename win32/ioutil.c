@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -445,7 +445,8 @@ PW32IO size_t php_win32_ioutil_dirname(char *path, size_t len)
 	
 	start = path;
 
-	startw = pathw = php_win32_ioutil_conv_any_to_w(path, len, &pathw_len);
+	/* Don't really care about the path normalization, pure parsing here. */
+	startw = pathw = php_win32_cp_conv_any_to_w(path, len, &pathw_len);
 	if (!pathw) {
 		return 0;
 	}

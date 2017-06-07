@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2016 The PHP Group                                |
+  | Copyright (c) 2006-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -2032,8 +2032,9 @@ MYSQLND_METHOD(mysqlnd_stmt, free_result)(MYSQLND_STMT * const s)
 		stmt->state = MYSQLND_STMT_PREPARED;
 	}
 
-	/* Line is free! */
-	SET_CONNECTION_STATE(&conn->state, CONN_READY);
+	if (GET_CONNECTION_STATE(&conn->state) != CONN_QUIT_SENT) {
+		SET_CONNECTION_STATE(&conn->state, CONN_READY);
+	}
 
 	DBG_RETURN(PASS);
 }

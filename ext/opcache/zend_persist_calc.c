@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -53,7 +53,7 @@ static void zend_persist_zval_calc(zval *z);
 
 static void zend_hash_persist_calc(HashTable *ht, void (*pPersistElement)(zval *pElement))
 {
-	uint idx;
+	uint32_t idx;
 	Bucket *p;
 
 	if (!(ht->u.flags & HASH_FLAG_INITIALIZED) || ht->nNumUsed == 0) {
@@ -121,7 +121,7 @@ static void zend_persist_ast_calc(zend_ast *ast)
 static void zend_persist_zval_calc(zval *z)
 {
 	zend_uchar flags;
-	uint size;
+	uint32_t size;
 
 	switch (Z_TYPE_P(z)) {
 		case IS_STRING:
@@ -230,8 +230,12 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 			if (arg_info[i].name) {
 				ADD_INTERNED_STRING(arg_info[i].name, 1);
 			}
-			if (arg_info[i].class_name) {
-				ADD_INTERNED_STRING(arg_info[i].class_name, 1);
+			if (ZEND_TYPE_IS_CLASS(arg_info[i].type)) {
+				zend_string *type_name = ZEND_TYPE_NAME(arg_info[i].type);
+				zend_bool allow_null = ZEND_TYPE_ALLOW_NULL(arg_info[i].type);
+
+				ADD_INTERNED_STRING(type_name, 1);
+				arg_info[i].type = ZEND_TYPE_ENCODE_CLASS(type_name, allow_null);
 			}
 		}
 	}
@@ -396,7 +400,7 @@ static void zend_accel_persist_class_table_calc(HashTable *class_table)
 	zend_hash_persist_calc(class_table, zend_persist_class_entry_calc);
 }
 
-uint zend_accel_script_persist_calc(zend_persistent_script *new_persistent_script, char *key, unsigned int key_length)
+uint32_t zend_accel_script_persist_calc(zend_persistent_script *new_persistent_script, char *key, unsigned int key_length)
 {
 	new_persistent_script->mem = NULL;
 	new_persistent_script->size = 0;

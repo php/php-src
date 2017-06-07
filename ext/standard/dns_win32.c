@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2008-2016 The PHP Group                                |
+   | Copyright (c) 2008-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -164,7 +164,7 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 
 	if (raw) {
 		add_assoc_long(subarray, "type", type);
-		add_assoc_stringl(subarray, "data", (char*) &pRec->Data, (uint) pRec->wDataLength);
+		add_assoc_stringl(subarray, "data", (char*) &pRec->Data, (uint32_t) pRec->wDataLength);
 		return;
 	}
 
@@ -341,18 +341,18 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 }
 /* }}} */
 
-/* {{{ proto array|false dns_get_record(string hostname [, int type[, array authns, array addtl]])
+/* {{{ proto array|false dns_get_record(string hostname [, int type[, array &authns[, array &addtl[, bool raw]]]])
    Get any Resource Record corresponding to a given Internet host name */
 PHP_FUNCTION(dns_get_record)
 {
 	char *hostname;
 	size_t hostname_len;
-	long type_param = PHP_DNS_ANY;
+	zend_long type_param = PHP_DNS_ANY;
 	zval *authns = NULL, *addtl = NULL;
 	int type, type_to_fetch, first_query = 1, store_results = 1;
 	zend_bool raw = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lz!z!b",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lz/!z/!b",
 			&hostname, &hostname_len, &type_param, &authns, &addtl, &raw) == FAILURE) {
 		return;
 	}

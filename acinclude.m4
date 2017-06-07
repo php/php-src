@@ -842,10 +842,6 @@ AC_DEFUN([PHP_SHARED_MODULE],[
       suffix=so
       link_cmd='$(LIBTOOL) --mode=link ifelse($4,,[$(CC)],[$(CXX)]) $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS) -Wl,-G -o '$3'/$1.la -export-dynamic -avoid-version -prefer-pic -module -rpath $(phplibdir) $(EXTRA_LDFLAGS) $($2) $(translit($1,a-z_-,A-Z__)_SHARED_LIBADD) && mv -f '$3'/.libs/$1.so '$3'/$1.so'
       ;;
-    *netware*[)]
-      suffix=nlm
-      link_cmd='$(LIBTOOL) --mode=link ifelse($4,,[$(CC)],[$(CXX)]) $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS) -o [$]@ -shared -export-dynamic -avoid-version -prefer-pic -module -rpath $(phplibdir) $(EXTRA_LDFLAGS) $($2) ifelse($1, php7lib, , -L$(top_builddir)/netware -lphp7lib) $(translit(ifelse($1, php7lib, $1, m4_substr($1, 3)),a-z_-,A-Z__)_SHARED_LIBADD)'
-      ;;
     *[)]
       suffix=la
       link_cmd='$(LIBTOOL) --mode=link ifelse($4,,[$(CC)],[$(CXX)]) $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS) -o [$]@ -export-dynamic -avoid-version -prefer-pic -module -rpath $(phplibdir) $(EXTRA_LDFLAGS) $($2) $(translit($1,a-z_-,A-Z__)_SHARED_LIBADD)'
@@ -970,14 +966,7 @@ dnl ---------------------------------------------- Static module
 dnl ---------------------------------------------- Shared module
       [PHP_]translit($1,a-z_-,A-Z__)[_SHARED]=yes
       PHP_ADD_SOURCES_X($ext_dir,$2,$ac_extra,shared_objects_$1,yes)
-      case $host_alias in
-        *netware*[)]
-          PHP_SHARED_MODULE(php$1,shared_objects_$1, $ext_builddir, $6, $7)
-          ;;
-        *[)]
-          PHP_SHARED_MODULE($1,shared_objects_$1, $ext_builddir, $6, $7)
-          ;;
-      esac
+      PHP_SHARED_MODULE($1,shared_objects_$1, $ext_builddir, $6, $7)
       AC_DEFINE_UNQUOTED([COMPILE_DL_]translit($1,a-z_-,A-Z__), 1, Whether to build $1 as dynamic module)
     fi
   fi
@@ -1376,8 +1365,11 @@ main() {
   dir = opendir("/");
   if (!dir) 
     exit(1);
-  if (readdir_r(dir, (struct dirent *) entry, &pentry) == 0)
+  if (readdir_r(dir, (struct dirent *) entry, &pentry) == 0) {
+    close(dir);
     exit(0);
+  }
+  close(dir);
   exit(1);
 }
     ],[
@@ -2264,7 +2256,7 @@ AC_DEFUN([PHP_SETUP_KERBEROS],[
   fi
 
   dnl If krb5-config is found try using it
-  if test "$PHP_KERBEROS" = "yes" && test -x "$KRB5_CONFIG"; then
+  if test "$PHP_KERBEROS" != "no" && test -x "$KRB5_CONFIG"; then
     KERBEROS_LIBS=`$KRB5_CONFIG --libs gssapi`
     KERBEROS_CFLAGS=`$KRB5_CONFIG --cflags gssapi`
 
@@ -2672,10 +2664,14 @@ AC_DEFUN([PHP_CONFIG_NICE],[
 
 EOF
 
+  clean_configure_args=$ac_configure_args
   for var in CFLAGS CXXFLAGS CPPFLAGS LDFLAGS EXTRA_LDFLAGS_PROGRAM LIBS CC CXX; do
     eval val=\$$var
     if test -n "$val"; then
       echo "$var='$val' \\" >> $1
+      if test `expr "X$ac_configure_args" : ".*${var}.*"` != 0; then
+        clean_configure_args=$(echo $clean_configure_args | sed -e "s#'$var=$val'##")
+      fi
     fi
   done
 
@@ -2685,7 +2681,7 @@ EOF
   else 
     CONFIGURE_COMMAND="$CONFIGURE_COMMAND [$]0"
   fi
-  CONFIGURE_ARGS="$ac_configure_args"
+  CONFIGURE_ARGS="$clean_configure_args"
   while test "X$CONFIGURE_ARGS" != "X";
   do
    if CURRENT_ARG=`expr "X$CONFIGURE_ARGS" : "X *\('[[^']]*'\)"`
@@ -2698,12 +2694,6 @@ EOF
    else
     break
    fi
-   for var in CFLAGS CXXFLAGS CPPFLAGS LDFLAGS EXTRA_LDFLAGS_PROGRAM LIBS CC CXX; do
-    if test `expr "X$CURRENT_ARG" : "X.*${var}.*"` != 0;
-	then
-      continue 2
-	fi
-   done
    $as_echo "$CURRENT_ARG \\" >>$1
    CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS $CURRENT_ARG"
   done
@@ -3231,3 +3221,6 @@ AC_DEFUN([PHP_CHECK_BUILTIN_SSUBLL_OVERFLOW], [
    [$have_builtin_ssubll_overflow], [Whether the compiler supports __builtin_ssubll_overflow])
 
 ])
+
+dnl Load the AX_CHECK_COMPILE_FLAG macro from the autoconf archive.
+m4_include([build/ax_check_compile_flag.m4])

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -190,7 +190,9 @@ ZEND_API void zend_clear_exception(void) /* {{{ */
 	}
 	OBJ_RELEASE(EG(exception));
 	EG(exception) = NULL;
-	EG(current_execute_data)->opline = EG(opline_before_exception);
+	if (EG(current_execute_data)) {
+		EG(current_execute_data)->opline = EG(opline_before_exception);
+	}
 #if ZEND_DEBUG
 	EG(opline_before_exception) = NULL;
 #endif
@@ -518,12 +520,8 @@ static void _build_trace_args(zval *arg, smart_str *str) /* {{{ */
 			smart_str_appends(str, ", ");
 			break;
 		case IS_DOUBLE: {
-			double dval = Z_DVAL_P(arg);
-			char *s_tmp = emalloc(MAX_LENGTH_OF_DOUBLE + EG(precision) + 1);
-			int l_tmp = zend_sprintf(s_tmp, "%.*G", (int) EG(precision), dval);  /* SAFE */
-			smart_str_appendl(str, s_tmp, l_tmp);
+			smart_str_append_printf(str, "%.*G", (int) EG(precision), Z_DVAL_P(arg));
 			smart_str_appends(str, ", ");
-			efree(s_tmp);
 			break;
 		}
 		case IS_ARRAY:
@@ -648,30 +646,6 @@ ZEND_METHOD(exception, getPrevious)
 
 	ZVAL_COPY(return_value, GET_PROPERTY_SILENT(getThis(), ZEND_STR_PREVIOUS));
 } /* }}} */
-
-size_t zend_spprintf(char **message, size_t max_len, const char *format, ...) /* {{{ */
-{
-	va_list arg;
-	size_t len;
-
-	va_start(arg, format);
-	len = zend_vspprintf(message, max_len, format, arg);
-	va_end(arg);
-	return len;
-}
-/* }}} */
-
-zend_string *zend_strpprintf(size_t max_len, const char *format, ...) /* {{{ */
-{
-	va_list arg;
-	zend_string *str;
-
-	va_start(arg, format);
-	str = zend_vstrpprintf(max_len, format, arg);
-	va_end(arg);
-	return str;
-}
-/* }}} */
 
 /* {{{ proto string Exception|Error::__toString()
    Obtain the string representation of the Exception object */
@@ -961,7 +935,7 @@ ZEND_API ZEND_COLD zend_object *zend_throw_error_exception(zend_class_entry *exc
 }
 /* }}} */
 
-static void zend_error_va(int type, const char *file, uint lineno, const char *format, ...) /* {{{ */
+static void zend_error_va(int type, const char *file, uint32_t lineno, const char *format, ...) /* {{{ */
 {
 	va_list args;
 
@@ -971,7 +945,7 @@ static void zend_error_va(int type, const char *file, uint lineno, const char *f
 }
 /* }}} */
 
-static void zend_error_helper(int type, const char *filename, const uint lineno, const char *format, ...) /* {{{ */
+static void zend_error_helper(int type, const char *filename, const uint32_t lineno, const char *format, ...) /* {{{ */
 {
 	va_list va;
 

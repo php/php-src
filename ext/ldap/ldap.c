@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,12 +28,6 @@
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
-
-/* Additional headers for NetWare */
-#if defined(NETWARE) && (NEW_LIBC)
-#include <sys/select.h>
-#include <sys/timeval.h>
 #endif
 
 #include "php.h"
@@ -1476,7 +1470,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 	zend_ulong index;
 	int is_full_add=0; /* flag for full add operation so ldap_mod_add can be put back into oper, gerrit THomson */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsa", &link, &dn, &dn_len, &entry) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsa/", &link, &dn, &dn_len, &entry) != SUCCESS) {
 		return;
 	}
 
@@ -1524,6 +1518,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 		if (Z_TYPE_P(value) != IS_ARRAY) {
 			num_values = 1;
 		} else {
+			SEPARATE_ARRAY(value);
 			num_values = zend_hash_num_elements(Z_ARRVAL_P(value));
 		}
 
@@ -1649,9 +1644,9 @@ PHP_FUNCTION(ldap_delete)
 
 /* {{{ _ldap_str_equal_to_const
  */
-static int _ldap_str_equal_to_const(const char *str, uint str_len, const char *cstr)
+static int _ldap_str_equal_to_const(const char *str, uint32_t str_len, const char *cstr)
 {
-	uint i;
+	uint32_t i;
 
 	if (strlen(cstr) != str_len)
 		return 0;
@@ -1668,9 +1663,9 @@ static int _ldap_str_equal_to_const(const char *str, uint str_len, const char *c
 
 /* {{{ _ldap_strlen_max
  */
-static int _ldap_strlen_max(const char *str, uint max_len)
+static int _ldap_strlen_max(const char *str, uint32_t max_len)
 {
-	uint i;
+	uint32_t i;
 
 	for (i = 0; i < max_len; ++i) {
 		if (str[i] == '\0') {
@@ -1703,7 +1698,7 @@ PHP_FUNCTION(ldap_modify_batch)
 	int i, j, k;
 	int num_mods, num_modprops, num_modvals;
 	LDAPMod **ldap_mods;
-	uint oper;
+	uint32_t oper;
 
 	/*
 	$mods = array(
@@ -1729,7 +1724,7 @@ PHP_FUNCTION(ldap_modify_batch)
 	);
 	*/
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsa", &link, &dn, &dn_len, &mods) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsa/", &link, &dn, &dn_len, &mods) != SUCCESS) {
 		return;
 	}
 
@@ -1774,6 +1769,7 @@ PHP_FUNCTION(ldap_modify_batch)
 				RETURN_FALSE;
 			}
 
+			SEPARATE_ARRAY(mod);
 			/* for the modification hashtable... */
 			zend_hash_internal_pointer_reset(Z_ARRVAL_P(mod));
 			num_modprops = zend_hash_num_elements(Z_ARRVAL_P(mod));
@@ -1848,6 +1844,7 @@ PHP_FUNCTION(ldap_modify_batch)
 						RETURN_FALSE;
 					}
 
+					SEPARATE_ARRAY(modinfo);
 					/* is the array not empty? */
 					zend_hash_internal_pointer_reset(Z_ARRVAL_P(modinfo));
 					num_modvals = zend_hash_num_elements(Z_ARRVAL_P(modinfo));

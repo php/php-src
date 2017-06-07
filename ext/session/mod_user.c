@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -30,12 +30,20 @@ ps_module ps_mod_user = {
 static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval)
 {
 	int i;
+	if (PS(in_save_handler)) {
+		PS(in_save_handler) = 0;
+		ZVAL_UNDEF(retval);
+		php_error_docref(NULL, E_WARNING, "Cannot call session save handler in a recursive manner");
+		return;
+	}
+	PS(in_save_handler) = 1;
 	if (call_user_function(EG(function_table), NULL, func, retval, argc, argv) == FAILURE) {
 		zval_ptr_dtor(retval);
 		ZVAL_UNDEF(retval);
 	} else if (Z_ISUNDEF_P(retval)) {
 		ZVAL_NULL(retval);
 	}
+	PS(in_save_handler) = 0;
 	for (i = 0; i < argc; i++) {
 		zval_ptr_dtor(&argv[i]);
 	}

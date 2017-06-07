@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -37,9 +37,6 @@
 
 #ifdef ZEND_WIN32
 # include "zend_config.w32.h"
-# define ZEND_PATHS_SEPARATOR		';'
-#elif defined(NETWARE)
-# include <zend_config.h>
 # define ZEND_PATHS_SEPARATOR		';'
 #elif defined(__riscos__)
 # include <zend_config.h>
@@ -126,9 +123,17 @@
 # define ZEND_IGNORE_VALUE(x) ((void) (x))
 #endif
 
+#define zend_quiet_write(...) ZEND_IGNORE_VALUE(write(__VA_ARGS__))
+
 /* all HAVE_XXX test have to be after the include of zend_config above */
 
 #if defined(HAVE_LIBDL) && !defined(ZEND_WIN32)
+
+# if defined(__has_feature)
+#  if __has_feature(address_sanitizer)
+#   define __SANITIZE_ADDRESS__
+#  endif
+# endif
 
 # ifndef RTLD_LAZY
 #  define RTLD_LAZY 1    /* Solaris 1, FreeBSD's (2.1.7.1 and older) */
@@ -140,7 +145,7 @@
 
 # if defined(RTLD_GROUP) && defined(RTLD_WORLD) && defined(RTLD_PARENT)
 #  define DL_LOAD(libname)			dlopen(libname, RTLD_LAZY | RTLD_GLOBAL | RTLD_GROUP | RTLD_WORLD | RTLD_PARENT)
-# elif defined(RTLD_DEEPBIND)
+# elif defined(RTLD_DEEPBIND) && !defined(__SANITIZE_ADDRESS__)
 #  define DL_LOAD(libname)			dlopen(libname, RTLD_LAZY | RTLD_GLOBAL | RTLD_DEEPBIND)
 # else
 #  define DL_LOAD(libname)			dlopen(libname, RTLD_LAZY | RTLD_GLOBAL)
@@ -238,11 +243,13 @@ char *alloca();
 # define ZEND_FASTCALL
 #endif
 
-#if defined(__GNUC__) && ZEND_GCC_VERSION >= 3004
-#else
-# define __restrict__
+#ifndef restrict
+# if defined(__GNUC__) && ZEND_GCC_VERSION >= 3004
+# else
+#  define __restrict__
+# endif
+# define restrict __restrict__
 #endif
-#define restrict __restrict__
 
 #if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__)) || __has_attribute(noreturn)
 # define HAVE_NORETURN
@@ -338,7 +345,7 @@ char *alloca();
 
 #endif
 
-#if (HAVE_ALLOCA || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && defined(NETWARE)) && !(defined(ZTS) && defined(HPUX)) && !defined(DARWIN)
+#if (HAVE_ALLOCA || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS)) && !(defined(ZTS) && defined(HPUX)) && !defined(DARWIN)
 # define ZEND_ALLOCA_MAX_SIZE (32 * 1024)
 # define ALLOCA_FLAG(name) \
 	zend_bool name;
@@ -368,9 +375,9 @@ char *alloca();
 #endif
 
 #if ZEND_DEBUG
-# define ZEND_FILE_LINE_D				const char *__zend_filename, const uint __zend_lineno
+# define ZEND_FILE_LINE_D				const char *__zend_filename, const uint32_t __zend_lineno
 # define ZEND_FILE_LINE_DC				, ZEND_FILE_LINE_D
-# define ZEND_FILE_LINE_ORIG_D			const char *__zend_orig_filename, const uint __zend_orig_lineno
+# define ZEND_FILE_LINE_ORIG_D			const char *__zend_orig_filename, const uint32_t __zend_orig_lineno
 # define ZEND_FILE_LINE_ORIG_DC			, ZEND_FILE_LINE_ORIG_D
 # define ZEND_FILE_LINE_RELAY_C			__zend_filename, __zend_lineno
 # define ZEND_FILE_LINE_RELAY_CC		, ZEND_FILE_LINE_RELAY_C
@@ -473,7 +480,7 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 #define ZEND_TRUTH(x)		((x) ? 1 : 0)
 #define ZEND_LOG_XOR(a, b)		(ZEND_TRUTH(a) ^ ZEND_TRUTH(b))
 
-#define ZEND_MAX_RESERVED_RESOURCES	4
+#define ZEND_MAX_RESERVED_RESOURCES	6
 
 /* excpt.h on Digital Unix 4.0 defines function_table */
 #undef function_table
@@ -481,7 +488,7 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 #ifdef ZEND_WIN32
 #define ZEND_SECURE_ZERO(var, size) RtlSecureZeroMemory((var), (size))
 #else
-#define ZEND_SECURE_ZERO(var, size) memset((var), 0, (size))
+#define ZEND_SECURE_ZERO(var, size) explicit_bzero((var), (size))
 #endif
 
 /* This check should only be used on network socket, not file descriptors */

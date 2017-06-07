@@ -59,12 +59,12 @@ array(1) {
   ["lazy_write"]=>
   bool(false)
 }
-NULL
+bool(true)
 string(6) "testid"
 *** With lazy_write ***
 string(6) "testid"
 bool(true)
-NULL
+bool(true)
 string(6) "testid"
 *** Cleanup ***
 string(6) "testid"

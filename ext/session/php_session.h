@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,7 +27,7 @@
 # include "ext/hash/php_hash.h"
 #endif
 
-#define PHP_SESSION_API 20150121
+#define PHP_SESSION_API 20161017
 
 #include "php_version.h"
 #define PHP_SESSION_VERSION PHP_VERSION
@@ -204,6 +204,8 @@ typedef struct _php_ps_globals {
 
 	zend_bool use_strict_mode; /* whether or not PHP accepts unknown session ids */
 	zend_bool lazy_write; /* omit session write when it is possible */
+	zend_bool in_save_handler; /* state if session is in save handler or not */
+	zend_bool set_handler;     /* state if session module i setting handler or not */
 	zend_string *session_vars; /* serialized original session data */
 } php_ps_globals;
 
@@ -253,6 +255,7 @@ PHPAPI int php_session_update_timestamp(PS_UPDATE_TIMESTAMP_ARGS);
 
 PHPAPI void session_adapt_url(const char *, size_t, char **, size_t *);
 
+PHPAPI int php_session_destroy(void);
 PHPAPI void php_add_session_var(zend_string *name);
 PHPAPI zval *php_set_session_var(zend_string *name, zval *state_val, php_unserialize_data_t *var_hash);
 PHPAPI zval *php_get_session_var(zend_string *name);
@@ -264,13 +267,14 @@ PHPAPI int php_session_register_serializer(const char *name,
 	        int (*decode)(PS_SERIALIZER_DECODE_ARGS));
 
 PHPAPI void php_session_set_id(char *id);
-PHPAPI void php_session_start(void);
+PHPAPI int php_session_start(void);
+PHPAPI int php_session_flush(int write);
 
 PHPAPI ps_module *_php_find_ps_module(char *name);
 PHPAPI const ps_serializer *_php_find_ps_serializer(char *name);
 
 PHPAPI int php_session_valid_key(const char *key);
-PHPAPI void php_session_reset_id(void);
+PHPAPI int php_session_reset_id(void);
 
 #define PS_ADD_VARL(name) do {										\
 	php_add_session_var(name);							\
@@ -309,16 +313,16 @@ PHPAPI ZEND_EXTERN_MODULE_GLOBALS(ps)
 void php_session_auto_start(void *data);
 
 #define PS_CLASS_NAME "SessionHandler"
-extern zend_class_entry *php_session_class_entry;
+extern PHPAPI zend_class_entry *php_session_class_entry;
 
 #define PS_IFACE_NAME "SessionHandlerInterface"
-extern zend_class_entry *php_session_iface_entry;
+extern PHPAPI zend_class_entry *php_session_iface_entry;
 
 #define PS_SID_IFACE_NAME "SessionIdInterface"
-extern zend_class_entry *php_session_id_iface_entry;
+extern PHPAPI zend_class_entry *php_session_id_iface_entry;
 
 #define PS_UPDATE_TIMESTAMP_IFACE_NAME "SessionUpdateTimestampHandlerInterface"
-extern zend_class_entry *php_session_update_timestamp_iface_entry;
+extern PHPAPI zend_class_entry *php_session_update_timestamp_iface_entry;
 
 extern PHP_METHOD(SessionHandler, open);
 extern PHP_METHOD(SessionHandler, close);

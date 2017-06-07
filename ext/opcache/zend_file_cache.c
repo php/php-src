@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -436,8 +436,15 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 				if (!IS_SERIALIZED(p->name)) {
 					SERIALIZE_STR(p->name);
 				}
-				if (!IS_SERIALIZED(p->class_name)) {
-					SERIALIZE_STR(p->class_name);
+				if (ZEND_TYPE_IS_CLASS(p->type)) {
+					zend_string *type_name = ZEND_TYPE_NAME(p->type);
+
+					if (!IS_SERIALIZED(type_name)) {
+						zend_bool allow_null = ZEND_TYPE_ALLOW_NULL(p->type);
+
+						SERIALIZE_STR(type_name);
+						p->type = ZEND_TYPE_ENCODE_CLASS(type_name, allow_null);
+					}
 				}
 				p++;
 			}
@@ -1011,8 +1018,15 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 				if (!IS_UNSERIALIZED(p->name)) {
 					UNSERIALIZE_STR(p->name);
 				}
-				if (!IS_UNSERIALIZED(p->class_name)) {
-					UNSERIALIZE_STR(p->class_name);
+				if (ZEND_TYPE_IS_CLASS(p->type)) {
+					zend_string *type_name = ZEND_TYPE_NAME(p->type);
+
+					if (!IS_UNSERIALIZED(type_name)) {
+						zend_bool allow_null = ZEND_TYPE_ALLOW_NULL(p->type);
+
+						UNSERIALIZE_STR(type_name);
+						p->type = ZEND_TYPE_ENCODE_CLASS(type_name, allow_null);
+					}
 				}
 				p++;
 			}

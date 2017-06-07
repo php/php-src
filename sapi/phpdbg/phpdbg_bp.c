@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,6 +25,7 @@
 #include "phpdbg_utils.h"
 #include "phpdbg_opcode.h"
 #include "zend_globals.h"
+#include "ext/standard/php_string.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
@@ -135,10 +136,12 @@ PHPDBG_API void phpdbg_export_breakpoints_to_string(char **str) /* {{{ */
 
 					switch (brake->type) {
 						case PHPDBG_BREAK_FILE: {
+							zend_string *filename = php_addcslashes(zend_string_init(((phpdbg_breakfile_t*)brake)->filename, strlen(((phpdbg_breakfile_t*)brake)->filename), 0), 1, "\\\"\n", 3);
 							phpdbg_asprintf(&new_str,
-								"%sbreak %s:%lu\n", *str,
-								((phpdbg_breakfile_t*)brake)->filename,
+								"%sbreak \"%s\":%lu\n", *str,
+								ZSTR_VAL(filename),
 								((phpdbg_breakfile_t*)brake)->line);
+							zend_string_release(filename);
 						} break;
 
 						case PHPDBG_BREAK_SYM: {
@@ -170,10 +173,12 @@ PHPDBG_API void phpdbg_export_breakpoints_to_string(char **str) /* {{{ */
 						} break;
 
 						case PHPDBG_BREAK_FILE_OPLINE: {
+							zend_string *filename = php_addcslashes(zend_string_init(((phpdbg_breakopline_t*)brake)->class_name, strlen(((phpdbg_breakopline_t*)brake)->class_name), 0), 1, "\\\"\n", 3);
 							phpdbg_asprintf(&new_str,
-								"%sbreak %s:#%llu\n", *str,
-								((phpdbg_breakopline_t*)brake)->class_name,
+								"%sbreak \"%s\":#%llu\n", *str,
+								ZSTR_VAL(filename),
 								((phpdbg_breakopline_t*)brake)->opline_num);
+							zend_string_release(filename);
 						} break;
 
 						case PHPDBG_BREAK_OPCODE: {
@@ -199,12 +204,14 @@ PHPDBG_API void phpdbg_export_breakpoints_to_string(char **str) /* {{{ */
 											conditional->code);
 									break;
 
-									case FILE_PARAM:
+									case FILE_PARAM: {
+										zend_string *filename = php_addcslashes(zend_string_init(conditional->param.file.name, strlen(conditional->param.file.name), 0), 1, "\\\"\n", 3);
 										phpdbg_asprintf(&new_str,
-											"%sbreak at %s:%lu if %s\n", *str,
-											conditional->param.file.name, conditional->param.file.line,
+											"%sbreak at \"%s\":%lu if %s\n", *str,
+											ZSTR_VAL(filename), conditional->param.file.line,
 											conditional->code);
-									break;
+										zend_string_release(filename);
+									} break;
 
 									default: { /* do nothing */ } break;
 								}
@@ -317,7 +324,7 @@ PHPDBG_API void phpdbg_set_breakpoint_file(const char *path, size_t path_len, lo
 	zend_string_release(path_str);
 } /* }}} */
 
-PHPDBG_API HashTable *phpdbg_resolve_pending_file_break_ex(const char *file, uint filelen, zend_string *cur, HashTable *fileht) /* {{{ */
+PHPDBG_API HashTable *phpdbg_resolve_pending_file_break_ex(const char *file, uint32_t filelen, zend_string *cur, HashTable *fileht) /* {{{ */
 {
 	phpdbg_debug("file: %s, filelen: %u, cur: %s, curlen %u, pos: %c, memcmp: %d\n", file, filelen, ZSTR_VAL(cur), ZSTR_LEN(cur), filelen > ZSTR_LEN(cur) ? file[filelen - ZSTR_LEN(cur) - 1] : '?', filelen > ZSTR_LEN(cur) ? memcmp(file + filelen - ZSTR_LEN(cur), ZSTR_VAL(cur), ZSTR_LEN(cur)) : 0);
 
@@ -366,7 +373,7 @@ PHPDBG_API HashTable *phpdbg_resolve_pending_file_break_ex(const char *file, uin
 PHPDBG_API void phpdbg_resolve_pending_file_break(const char *file) /* {{{ */
 {
 	HashTable *fileht;
-	uint filelen = strlen(file);
+	uint32_t filelen = strlen(file);
 	zend_string *cur;
 
 	phpdbg_debug("was compiled: %s\n", file);

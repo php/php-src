@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -110,6 +110,23 @@ ZEND_API void destroy_zend_function(zend_function *function)
 		ZEND_ASSERT(function->type == ZEND_INTERNAL_FUNCTION);
 		ZEND_ASSERT(function->common.function_name);
 		zend_string_release(function->common.function_name);
+
+		if (function->common.arg_info &&
+		    (function->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))) { 
+			uint32_t i;
+			uint32_t num_args = function->common.num_args + 1;
+			zend_arg_info *arg_info = function->common.arg_info - 1;
+
+			if (function->common.fn_flags & ZEND_ACC_VARIADIC) {
+				num_args++;
+			}
+			for (i = 0 ; i < num_args; i++) {
+				if (ZEND_TYPE_IS_CLASS(arg_info[i].type)) {
+					zend_string_release(ZEND_TYPE_NAME(arg_info[i].type));
+				}
+			}
+			free(arg_info);
+		}
 	}
 }
 
@@ -134,7 +151,14 @@ ZEND_API void zend_function_dtor(zval *zv)
 ZEND_API void zend_cleanup_op_array_data(zend_op_array *op_array)
 {
 	if (op_array->static_variables &&
-	    !(GC_FLAGS(op_array->static_variables) & IS_ARRAY_IMMUTABLE)) {
+	    !(GC_FLAGS(op_array->static_variables) & IS_ARRAY_IMMUTABLE)
+	) {
+		/* The static variables are initially shared when inheriting methods and will
+		 * be separated on first use. If they are never used, they stay shared. Cleaning
+		 * a shared static variables table is safe, as the intention is to clean all
+		 * such tables. */
+		HT_ALLOW_COW_VIOLATION(op_array->static_variables);
+
 		zend_hash_clean(op_array->static_variables);
 	}
 }
@@ -433,8 +457,8 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 			if (arg_info[i].name) {
 				zend_string_release(arg_info[i].name);
 			}
-			if (arg_info[i].class_name) {
-				zend_string_release(arg_info[i].class_name);
+			if (ZEND_TYPE_IS_CLASS(arg_info[i].type)) {
+				zend_string_release(ZEND_TYPE_NAME(arg_info[i].type));
 			}
 		}
 		efree(arg_info);

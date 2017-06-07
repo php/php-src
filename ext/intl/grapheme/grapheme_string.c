@@ -110,7 +110,8 @@ PHP_FUNCTION(grapheme_strpos)
 	size_t haystack_len, needle_len;
 	const char *found;
 	zend_long loffset = 0;
-	int32_t offset = 0, noffset = 0;
+	int32_t offset = 0;
+	size_t noffset = 0;
 	zend_long ret_pos;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l", &haystack, &haystack_len, &needle, &needle_len, &loffset) == FAILURE) {
@@ -676,8 +677,10 @@ PHP_FUNCTION(grapheme_stristr)
 static inline int32_t
 grapheme_extract_charcount_iter(UBreakIterator *bi, int32_t csize, unsigned char *pstr, int32_t str_len)
 {
-	int pos = 0, prev_pos = 0;
-	int ret_pos = 0, prev_ret_pos = 0;
+	int pos = 0;
+	int ret_pos = 0;
+	int break_pos, prev_break_pos;
+	int count = 0;
 
 	while ( 1 ) {
 		pos = ubrk_next(bi);
@@ -686,23 +689,24 @@ grapheme_extract_charcount_iter(UBreakIterator *bi, int32_t csize, unsigned char
 			break;
 		}
 
+		for ( break_pos = ret_pos; break_pos < pos; ) {
+			count++;
+			prev_break_pos = break_pos;
+			U8_FWD_1(pstr, break_pos, str_len);
+
+			if ( prev_break_pos == break_pos ) {
+				/* something wrong - malformed utf8? */
+				csize = 0;
+				break;
+			}
+		}
+
 		/* if we are beyond our limit, then the loop is done */
-		if ( pos > csize ) {
+		if ( count > csize ) {
 			break;
 		}
 
-		/* update our pointer in the original UTF-8 buffer by as many characters
-		   as ubrk_next iterated over */
-
-		prev_ret_pos = ret_pos;
-		U8_FWD_N(pstr, ret_pos, str_len, pos - prev_pos);
-
-		if ( prev_ret_pos == ret_pos ) {
-			/* something wrong - malformed utf8? */
-			break;
-		}
-
-		prev_pos = pos;
+		ret_pos = break_pos;
 	}
 
 	return ret_pos;
@@ -713,8 +717,8 @@ grapheme_extract_charcount_iter(UBreakIterator *bi, int32_t csize, unsigned char
 static inline int32_t
 grapheme_extract_bytecount_iter(UBreakIterator *bi, int32_t bsize, unsigned char *pstr, int32_t str_len)
 {
-	int pos = 0, prev_pos = 0;
-	int ret_pos = 0, prev_ret_pos = 0;
+	int pos = 0;
+	int ret_pos = 0;
 
 	while ( 1 ) {
 		pos = ubrk_next(bi);
@@ -723,20 +727,11 @@ grapheme_extract_bytecount_iter(UBreakIterator *bi, int32_t bsize, unsigned char
 			break;
 		}
 
-		prev_ret_pos = ret_pos;
-		U8_FWD_N(pstr, ret_pos, str_len, pos - prev_pos);
-
-		if ( ret_pos > bsize ) {
-			ret_pos = prev_ret_pos;
+		if ( pos > bsize ) {
 			break;
 		}
 
-		if ( prev_ret_pos == ret_pos ) {
-			/* something wrong - malformed utf8? */
-			break;
-		}
-
-		prev_pos = pos;
+		ret_pos = pos;
 	}
 
 	return ret_pos;
@@ -747,7 +742,7 @@ grapheme_extract_bytecount_iter(UBreakIterator *bi, int32_t bsize, unsigned char
 static inline int32_t
 grapheme_extract_count_iter(UBreakIterator *bi, int32_t size, unsigned char *pstr, int32_t str_len)
 {
-	int pos = 0, next_pos = 0;
+	int next_pos = 0;
 	int ret_pos = 0;
 
 	while ( size ) {
@@ -756,15 +751,9 @@ grapheme_extract_count_iter(UBreakIterator *bi, int32_t size, unsigned char *pst
 		if ( UBRK_DONE == next_pos ) {
 			break;
 		}
-		pos = next_pos;
+		ret_pos = next_pos;
 		size--;
 	}
-
-	/* pos is one past the last UChar - and represent the number of code units to
-		advance in the utf-8 buffer
-	*/
-
-	U8_FWD_N(pstr, ret_pos, str_len, pos);
 
 	return ret_pos;
 }
@@ -785,9 +774,8 @@ static grapheme_extract_iter grapheme_extract_iters[] = {
 PHP_FUNCTION(grapheme_extract)
 {
 	char *str, *pstr;
-	UChar *ustr;
+	UText ut = UTEXT_INITIALIZER;
 	size_t str_len;
-	int32_t ustr_len;
 	zend_long size; /* maximum number of grapheme clusters, bytes, or characters (based on extract_type) to return */
 	zend_long lstart = 0; /* starting position in str in bytes */
 	int32_t start = 0;
@@ -875,21 +863,15 @@ PHP_FUNCTION(grapheme_extract)
 		RETURN_STRINGL(pstr, nsize);
 	}
 
-	/* convert the strings to UTF-16. */
-	ustr = NULL;
-	ustr_len = 0;
 	status = U_ZERO_ERROR;
-	intl_convert_utf8_to_utf16(&ustr, &ustr_len, pstr, str_len, &status );
+	utext_openUTF8(&ut, pstr, str_len, &status);
 
 	if ( U_FAILURE( status ) ) {
 		/* Set global error code. */
 		intl_error_set_code( NULL, status );
 
 		/* Set error messages. */
-		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 0 );
-
-		if ( NULL != ustr )
-			efree( ustr );
+		intl_error_set_custom_msg( NULL, "Error opening UTF-8 text", 0 );
 
 		RETURN_FALSE;
 	}
@@ -898,8 +880,7 @@ PHP_FUNCTION(grapheme_extract)
 	status = U_ZERO_ERROR;
 	bi = grapheme_get_break_iterator(u_break_iterator_buffer, &status );
 
-	ubrk_setText(bi, ustr, ustr_len, &status);
-
+	ubrk_setUText(bi, &ut, &status);
 	/* if the caller put us in the middle of a grapheme, we can't detect it in all cases since we
 		can't back up. So, we will not do anything. */
 
@@ -907,9 +888,7 @@ PHP_FUNCTION(grapheme_extract)
 	/* it's ok to convert str_len to in32_t since if it were too big intl_convert_utf8_to_utf16 above would fail */
 	ret_pos = (*grapheme_extract_iters[extract_type])(bi, size, (unsigned char *)pstr, (int32_t)str_len);
 
-	if (ustr) {
-		efree(ustr);
-	}
+	utext_close(&ut);
 	ubrk_close(bi);
 
 	if ( NULL != next ) {

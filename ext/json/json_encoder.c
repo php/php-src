@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -117,14 +117,14 @@ static inline void php_json_encode_double(smart_str *buf, double d, int options)
 
 #define PHP_JSON_HASH_APPLY_PROTECTION_INC(_tmp_ht) \
 	do { \
-		if (tmp_ht && ZEND_HASH_APPLY_PROTECTION(_tmp_ht)) { \
+		if (_tmp_ht && ZEND_HASH_APPLY_PROTECTION(_tmp_ht)) { \
 			ZEND_HASH_INC_APPLY_COUNT(_tmp_ht); \
 		} \
 	} while (0)
 
 #define PHP_JSON_HASH_APPLY_PROTECTION_DEC(_tmp_ht) \
 	do { \
-		if (tmp_ht && ZEND_HASH_APPLY_PROTECTION(_tmp_ht)) { \
+		if (_tmp_ht && ZEND_HASH_APPLY_PROTECTION(_tmp_ht)) { \
 			ZEND_HASH_DEC_APPLY_COUNT(_tmp_ht); \
 		} \
 	} while (0)
@@ -142,11 +142,13 @@ static int php_json_encode_array(smart_str *buf, zval *val, int options, php_jso
 		r = PHP_JSON_OUTPUT_OBJECT;
 	}
 
-	if (myht && ZEND_HASH_GET_APPLY_COUNT(myht) > 1) {
+	if (myht && ZEND_HASH_GET_APPLY_COUNT(myht) > 0) {
 		encoder->error_code = PHP_JSON_ERROR_RECURSION;
 		smart_str_appendl(buf, "null", 4);
 		return FAILURE;
 	}
+
+	PHP_JSON_HASH_APPLY_PROTECTION_INC(myht);
 
 	if (r == PHP_JSON_OUTPUT_ARRAY) {
 		smart_str_appendc(buf, '[');
@@ -162,13 +164,8 @@ static int php_json_encode_array(smart_str *buf, zval *val, int options, php_jso
 		zend_string *key;
 		zval *data;
 		zend_ulong index;
-		HashTable *tmp_ht;
 
 		ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, data) {
-			ZVAL_DEREF(data);
-			tmp_ht = HASH_OF(data);
-			PHP_JSON_HASH_APPLY_PROTECTION_INC(tmp_ht);
-
 			if (r == PHP_JSON_OUTPUT_ARRAY) {
 				if (need_comma) {
 					smart_str_appendc(buf, ',');
@@ -182,7 +179,6 @@ static int php_json_encode_array(smart_str *buf, zval *val, int options, php_jso
 				if (key) {
 					if (ZSTR_VAL(key)[0] == '\0' && ZSTR_LEN(key) > 0 && Z_TYPE_P(val) == IS_OBJECT) {
 						/* Skip protected and private members. */
-						PHP_JSON_HASH_APPLY_PROTECTION_DEC(tmp_ht);
 						continue;
 					}
 
@@ -218,13 +214,13 @@ static int php_json_encode_array(smart_str *buf, zval *val, int options, php_jso
 
 			if (php_json_encode_zval(buf, data, options, encoder) == FAILURE &&
 					!(options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR)) {
-				PHP_JSON_HASH_APPLY_PROTECTION_DEC(tmp_ht);
+				PHP_JSON_HASH_APPLY_PROTECTION_DEC(myht);
 				return FAILURE;
 			}
-
-			PHP_JSON_HASH_APPLY_PROTECTION_DEC(tmp_ht);
 		} ZEND_HASH_FOREACH_END();
 	}
+
+	PHP_JSON_HASH_APPLY_PROTECTION_DEC(myht);
 
 	if (encoder->depth > encoder->max_depth) {
 		encoder->error_code = PHP_JSON_ERROR_DEPTH;
@@ -475,17 +471,11 @@ static int php_json_escape_string(
 static int php_json_encode_serializable_object(smart_str *buf, zval *val, int options, php_json_encoder *encoder) /* {{{ */
 {
 	zend_class_entry *ce = Z_OBJCE_P(val);
+	HashTable* myht = Z_OBJPROP_P(val);
 	zval retval, fname;
-	HashTable* myht;
 	int return_code;
 
-	if (Z_TYPE_P(val) == IS_ARRAY) {
-		myht = Z_ARRVAL_P(val);
-	} else {
-		myht = Z_OBJPROP_P(val);
-	}
-
-	if (myht && ZEND_HASH_GET_APPLY_COUNT(myht) > 1) {
+	if (myht && ZEND_HASH_GET_APPLY_COUNT(myht) > 0) {
 		encoder->error_code = PHP_JSON_ERROR_RECURSION;
 		if (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) {
 			smart_str_appendl(buf, "null", 4);
@@ -493,6 +483,7 @@ static int php_json_encode_serializable_object(smart_str *buf, zval *val, int op
 		return FAILURE;
 	}
 
+	PHP_JSON_HASH_APPLY_PROTECTION_INC(myht);
 
 	ZVAL_STRING(&fname, "jsonSerialize");
 
@@ -505,6 +496,7 @@ static int php_json_encode_serializable_object(smart_str *buf, zval *val, int op
 		if (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) {
 			smart_str_appendl(buf, "null", 4);
 		}
+		PHP_JSON_HASH_APPLY_PROTECTION_DEC(myht);
 		return FAILURE;
 	}
 
@@ -516,16 +508,19 @@ static int php_json_encode_serializable_object(smart_str *buf, zval *val, int op
 		if (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) {
 			smart_str_appendl(buf, "null", 4);
 		}
+		PHP_JSON_HASH_APPLY_PROTECTION_DEC(myht);
 		return FAILURE;
 	}
 
 	if ((Z_TYPE(retval) == IS_OBJECT) &&
 		(Z_OBJ(retval) == Z_OBJ_P(val))) {
 		/* Handle the case where jsonSerialize does: return $this; by going straight to encode array */
+		PHP_JSON_HASH_APPLY_PROTECTION_DEC(myht);
 		return_code = php_json_encode_array(buf, &retval, options, encoder);
 	} else {
 		/* All other types, encode as normal */
 		return_code = php_json_encode_zval(buf, &retval, options, encoder);
+		PHP_JSON_HASH_APPLY_PROTECTION_DEC(myht);
 	}
 
 	zval_ptr_dtor(&retval);

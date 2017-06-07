@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -115,8 +115,6 @@
 #undef memcpy
 #define memcpy(...) memcpy_tmp(__VA_ARGS__)
 #endif
-
-#define quiet_write(...) ZEND_IGNORE_VALUE(write(__VA_ARGS__))
 
 #if !defined(PHPDBG_WEBDATA_TRANSFER_H) && !defined(PHPDBG_WEBHELPER_H)
 

@@ -2677,6 +2677,14 @@ zend_strtod
 			}
 		}
  dig_done:
+ 	if (nd < 0) {
+ 		/* overflow */
+ 		nd = DBL_DIG + 2;
+ 	}
+ 	if (nf < 0) {
+ 		/* overflow */
+ 		nf = DBL_DIG + 2;
+ 	}
 	e = 0;
 	if (c == 'e' || c == 'E') {
 		if (!nd && !nz && !nz0) {
@@ -4529,7 +4537,7 @@ static void destroy_freelist(void)
 		}
 		freelist[i] = NULL;
 	}
-	FREE_DTOA_LOCK(0) 
+	FREE_DTOA_LOCK(0)
 }
 
 #ifdef __cplusplus

@@ -22,20 +22,14 @@
 #include "php.h"				/*php specific */
 #include <stdio.h>
 #include <stdlib.h>
-#ifndef NETWARE
 #include <winsock2.h>
 #include "time.h"
 # include <Ws2tcpip.h>
-#else	/* NETWARE */
-#include <netware/sendmail_nw.h>
-#endif	/* NETWARE */
 #include <string.h>
 #include <math.h>
-#ifndef NETWARE
 #include <malloc.h>
 #include <memory.h>
 #include <winbase.h>
-#endif	/* NETWARE */
 #include "sendmail.h"
 #include "php_ini.h"
 #include "inet.h"
@@ -48,6 +42,8 @@
 
 #include "ext/standard/php_string.h"
 #include "ext/date/php_date.h"
+
+#define SENDMAIL_DEBUG 0
 
 /*enum
    {
@@ -72,11 +68,7 @@
 
 
 char seps[] = " ,\t\n";
-#ifndef NETWARE
 char *php_mailer = "PHP 7 WIN32";
-#else
-char *php_mailer = "PHP 7 NetWare";
-#endif	/* NETWARE */
 
 /* Error messages */
 static char *ErrorMessages[] =
@@ -171,7 +163,7 @@ static zend_string *php_win32_mail_trim_header(char *header)
 	regex = zend_string_init(PHP_WIN32_MAIL_RMVDBL_PATTERN, sizeof(PHP_WIN32_MAIL_RMVDBL_PATTERN)-1, 0);
 
 	result2 = php_pcre_replace(regex,
-				   result, result->val, (int)result->len,
+				   result, ZSTR_VAL(result), (int)ZSTR_LEN(result),
 				   &replace,
 				  0,
 				  -1,
@@ -206,7 +198,7 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 {
 	int ret;
 	char *RPath = NULL;
-	zend_string *headers_lc = NULL; /* headers_lc is only created if we've a header at all */
+	zend_string *headers_lc = NULL, *headers_trim = NULL; /* headers_lc is only created if we've a header at all */
 	char *pos1 = NULL, *pos2 = NULL;
 
 	if (host == NULL) {
@@ -221,19 +213,16 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 
 	if (headers) {
 		char *pos = NULL;
-		size_t i;
 
 		/* Use PCRE to trim the header into the right format */
-		if (NULL == (headers_lc = php_win32_mail_trim_header(headers))) {
+		if (NULL == (headers_trim = php_win32_mail_trim_header(headers))) {
 			*error = W32_SM_PCRE_ERROR;
 			return FAILURE;
 		}
 
 		/* Create a lowercased header for all the searches so we're finally case
 		 * insensitive when searching for a pattern. */
-		for (i = 0; i < headers_lc->len; i++) {
-			headers_lc->val[i] = tolower(headers_lc->val[i]);
-		}
+		headers_lc = zend_string_tolower(headers_trim);
 	}
 
 	/* Fall back to sendmail_from php.ini setting */
@@ -243,14 +232,14 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 		RPath = estrdup(INI_STR("sendmail_from"));
 	} else if (headers_lc) {
 		int found = 0;
-		char *lookup = headers_lc->val;
+		char *lookup = ZSTR_VAL(headers_lc);
 
 		while (lookup) {
 			pos1 = strstr(lookup, "from:");
 
 			if (!pos1) {
 				break;
-			} else if (pos1 != headers_lc->val && *(pos1-1) != '\n') {
+			} else if (pos1 != ZSTR_VAL(headers_lc) && *(pos1-1) != '\n') {
 				if (strlen(pos1) >= sizeof("from:")) {
 					lookup = pos1 + sizeof("from:");
 					continue;
@@ -290,6 +279,7 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 			efree(RPath);
 		}
 		if (headers) {
+			zend_string_free(headers_trim);
 			zend_string_free(headers_lc);
 		}
 		/* 128 is safe here, the specifier in snprintf isn't longer than that */
@@ -302,12 +292,13 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 			PW32G(mail_host), !INI_INT("smtp_port") ? 25 : INI_INT("smtp_port"));
 		return FAILURE;
 	} else {
-		ret = SendText(RPath, Subject, mailTo, mailCc, mailBcc, data, headers, headers_lc->val, error_message);
+		ret = SendText(RPath, Subject, mailTo, mailCc, mailBcc, data, headers ? ZSTR_VAL(headers_trim) : NULL, headers ? ZSTR_VAL(headers_lc) : NULL, error_message);
 		TSMClose();
 		if (RPath) {
 			efree(RPath);
 		}
 		if (headers) {
+			zend_string_free(headers_trim);
 			zend_string_free(headers_lc);
 		}
 		if (ret != SUCCESS) {
@@ -633,8 +624,8 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 
 	/* send message contents in 1024 chunks */
 	{
-		char c, *e2, *e = data_cln->val + data_cln->len;
-		p = data_cln->val;
+		char c, *e2, *e = ZSTR_VAL(data_cln) + ZSTR_LEN(data_cln);
+		p = ZSTR_VAL(data_cln);
 
 		while (e - p > 1024) {
 			e2 = p + 1024;
@@ -711,7 +702,7 @@ static int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders)
 		time_t tNow = time(NULL);
 		zend_string *dt = php_format_date("r", 1, tNow, 1);
 
-		snprintf(header_buffer, MAIL_BUFFER_SIZE, "Date: %s\r\n", dt->val);
+		snprintf(header_buffer, MAIL_BUFFER_SIZE, "Date: %s\r\n", ZSTR_VAL(dt));
 		zend_string_free(dt);
 	}
 
@@ -779,6 +770,10 @@ static int MailConnect()
 	IN6_ADDR addr6;
 #endif
 	SOCKADDR_IN sock_in;
+
+#if SENDMAIL_DEBUG
+return 0;
+#endif
 
 	/* Create Socket */
 	if ((PW32G(mail_socket) = socket(PF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET) {
@@ -866,6 +861,12 @@ static int Post(LPCSTR msg)
 	int slen;
 	int index = 0;
 
+#if SENDMAIL_DEBUG
+	if (msg)
+		printf("POST: '%s'\n", msg);
+	return (SUCCESS);
+#endif
+
 	while (len > 0) {
 		if ((slen = send(PW32G(mail_socket), msg + index, len, 0)) < 1)
 			return (FAILED_TO_SEND);
@@ -893,6 +894,10 @@ static int Ack(char **server_response)
 	int rlen;
 	int Index = 0;
 	int Received = 0;
+
+#if SENDMAIL_DEBUG
+	return (SUCCESS);
+#endif
 
 again:
 

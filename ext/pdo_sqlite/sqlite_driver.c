@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -161,7 +161,7 @@ static int sqlite_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 
 		pdo_sqlite_cleanup_callbacks(H);
 		if (H->db) {
-			sqlite3_close(H->db);
+			sqlite3_close_v2(H->db);
 			H->db = NULL;
 		}
 		if (einfo->errmsg) {
@@ -193,7 +193,7 @@ static int sqlite_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_le
 		return 0;
 	}
 
-	i = sqlite3_prepare(H->db, sql, sql_len, &S->stmt, &tail);
+	i = sqlite3_prepare_v2(H->db, sql, sql_len, &S->stmt, &tail);
 	if (i == SQLITE_OK) {
 		return 1;
 	}
@@ -519,10 +519,12 @@ static PHP_METHOD(SQLite, sqliteCreateFunction)
 	pdo_sqlite_db_handle *H;
 	int ret;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "sz|l",
-			&func_name, &func_name_len, &callback, &argc)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STRING(func_name, func_name_len)
+		Z_PARAM_ZVAL_DEREF(callback)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(argc)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	dbh = Z_PDO_DBH_P(getThis());
 	PDO_CONSTRUCT_CHECK;
@@ -589,10 +591,13 @@ static PHP_METHOD(SQLite, sqliteCreateAggregate)
 	pdo_sqlite_db_handle *H;
 	int ret;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "szz|l",
-			&func_name, &func_name_len, &step_callback, &fini_callback, &argc)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(3, 4)
+		Z_PARAM_STRING(func_name, func_name_len)
+		Z_PARAM_ZVAL_DEREF(step_callback)
+		Z_PARAM_ZVAL_DEREF(fini_callback)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(argc)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	dbh = Z_PDO_DBH_P(getThis());
 	PDO_CONSTRUCT_CHECK;
@@ -649,10 +654,10 @@ static PHP_METHOD(SQLite, sqliteCreateCollation)
 	pdo_sqlite_db_handle *H;
 	int ret;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "sz",
-		&collation_name, &collation_name_len, &callback)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STRING(collation_name, collation_name_len)
+		Z_PARAM_ZVAL_DEREF(callback)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	dbh = Z_PDO_DBH_P(getThis());
 	PDO_CONSTRUCT_CHECK;

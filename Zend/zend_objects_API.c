@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -111,7 +111,10 @@ ZEND_API void zend_objects_store_put(zend_object *object)
 {
 	int handle;
 
-	if (EG(objects_store).free_list_head != -1) {
+	/* When in shutdown sequesnce - do not reuse previously freed handles, to make sure
+	 * the dtors for newly created objects are called in zend_objects_store_call_destructors() loop
+	 */
+	if (!(EG(flags) & EG_FLAGS_IN_SHUTDOWN) && EG(objects_store).free_list_head != -1) {
 		handle = EG(objects_store).free_list_head;
 		EG(objects_store).free_list_head = GET_OBJ_BUCKET_NUMBER(EG(objects_store).object_buckets[handle]);
 	} else {
@@ -208,12 +211,6 @@ ZEND_API void zend_objects_store_del(zend_object *object) /* {{{ */
 ZEND_API void zend_object_store_set_object(zval *zobject, zend_object *object)
 {
 	EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(zobject)] = object;
-}
-
-/* Called when the ctor was terminated by an exception */
-ZEND_API void zend_object_store_ctor_failed(zend_object *obj)
-{
-	GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
 }
 
 ZEND_API zend_object_handlers *zend_get_std_object_handlers(void)

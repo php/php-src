@@ -338,7 +338,7 @@ disable_classes =
 ; be increased on systems where PHP opens many files to reflect the quantity of
 ; the file operations performed.
 ; http://php.net/realpath-cache-size
-;realpath_cache_size = 16k
+;realpath_cache_size = 4096k
 
 ; Duration of time, in seconds for which to cache realpath information for a given
 ; file or directory. For systems with rarely changing files, consider increasing this
@@ -1195,6 +1195,19 @@ mysqlnd.collect_statistics = On
 ; http://php.net/mysqlnd.collect_memory_statistics
 mysqlnd.collect_memory_statistics = Off
 
+; Records communication from all extensions using mysqlnd to the specified log
+; file.
+; http://php.net/mysqlnd.debug
+;mysqlnd.debug =
+
+; Defines which queries will be logged.
+; http://php.net/mysqlnd.log_mask
+;mysqlnd.log_mask = 0
+
+; Default size of the mysqlnd memory pool, which is used by result sets.
+; http://php.net/mysqlnd.mempool_default_size
+;mysqlnd.mempool_default_size = 16000
+
 ; Size of a pre-allocated buffer used when sending commands to MySQL in bytes.
 ; http://php.net/mysqlnd.net_cmd_buffer_size
 ;mysqlnd.net_cmd_buffer_size = 2048
@@ -1203,6 +1216,15 @@ mysqlnd.collect_memory_statistics = Off
 ; bytes.
 ; http://php.net/mysqlnd.net_read_buffer_size
 ;mysqlnd.net_read_buffer_size = 32768
+
+; Timeout for network requests in seconds.
+; http://php.net/mysqlnd.net_read_timeout
+;mysqlnd.net_read_timeout = 31536000
+
+; SHA-256 Authentication Plugin related. File with the MySQL server public RSA
+; key.
+; http://php.net/mysqlnd.sha256_server_public_key
+;mysqlnd.sha256_server_public_key =
 
 [OCI8]
 
@@ -1447,7 +1469,7 @@ session.use_trans_sid = 0
 ; Set session ID character length. This value could be between 22 to 256.
 ; Shorter length than default is supported only for compatibility reason.
 ; Users should use 32 or more chars.
-; http://php.net/session.sid_length
+; http://php.net/session.sid-length
 ; Default Value: 32
 ; Development Value: 26
 ; Production Value: 26
@@ -1737,36 +1759,25 @@ soap.wsdl_cache_limit = 5
 ; Sets the maximum number of open links or -1 for unlimited.
 ldap.max_links = -1
 
-[mcrypt]
-; For more information about mcrypt settings see http://php.net/mcrypt-module-open
-
-; Directory where to load mcrypt algorithms
-; Default: Compiled in into libmcrypt (usually /usr/local/lib/libmcrypt)
-;mcrypt.algorithms_dir=
-
-; Directory where to load mcrypt modes
-; Default: Compiled in into libmcrypt (usually /usr/local/lib/libmcrypt)
-;mcrypt.modes_dir=
-
 [dba]
 ;dba.default_handler=
 
 [opcache]
 ; Determines if Zend OPCache is enabled
-;opcache.enable=0
+;opcache.enable=1
 
 ; Determines if Zend OPCache is enabled for the CLI version of PHP
-;opcache.enable_cli=0
+;opcache.enable_cli=1
 
 ; The OPcache shared memory storage size.
-;opcache.memory_consumption=64
+;opcache.memory_consumption=128
 
 ; The amount of memory for interned strings in Mbytes.
-;opcache.interned_strings_buffer=4
+;opcache.interned_strings_buffer=8
 
 ; The maximum number of keys (scripts) in the OPcache hash table.
 ; Only numbers between 200 and 100000 are allowed.
-;opcache.max_accelerated_files=2000
+;opcache.max_accelerated_files=10000
 
 ; The maximum percentage of "wasted" memory until a restart is scheduled.
 ;opcache.max_wasted_percentage=5
@@ -1794,6 +1805,7 @@ ldap.max_links = -1
 ;opcache.save_comments=1
 
 ; If enabled, a fast shutdown sequence is used for the accelerated code
+; Depending on the used Memory Manager this may cause some incompatibilities.
 ;opcache.fast_shutdown=0
 
 ; Allow file existence override (file_exists, etc.) performance feature.
@@ -1871,6 +1883,12 @@ ldap.max_links = -1
 ; Enables or disables copying of PHP code (text segment) into HUGE PAGES.
 ; This should improve performance, but requires appropriate OS configuration.
 ;opcache.huge_code_pages=1
+
+; Validate cached file permissions.
+;opcache.validate_permission=0
+
+; Prevent name collisions in chroot'ed environment.
+;opcache.validate_root=0
 
 [curl]
 ; A default value for the CURLOPT_CAINFO option. This is required to be an

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -30,8 +30,6 @@
  *  +-----------------------+-----------------------------+
  *  | Expression            | Priority type                |
  *  +-----------------------+-----------------------------+
- *  | priority < -14        | REALTIME_PRIORITY_CLASS      |
- *  +-----------------------+-----------------------------+
  *  | priority < -9         | HIGH_PRIORITY_CLASS          |
  *  +-----------------------+-----------------------------+
  *  | priority < -4         | ABOVE_NORMAL_PRIORITY_CLASS  |
@@ -48,15 +46,26 @@
  *
  * This is applied to the main process, not per thread, although this could 
  * be implemented using SetThreadPriority() at one point.
+ *
+ * Note, the following priority classes are left out with intention:
+ *
+ *   . REALTIME_PRIORITY_CLASS
+ *     Realtime priority class requires special system permissions to set, and 
+ *     can be dangerous in certain cases.
+ *
+ *   . PROCESS_MODE_BACKGROUND_BEGIN
+ *   . PROCESS_MODE_BACKGROUND_END
+ *     Process mode is not covered because it can easily forgotten to be changed 
+ *     back and can cause unforseen side effects that is hard to debug. Besides 
+ *     that, these do generally not really fit into making a Windows somewhat
+ *     compatible nice() function.
  */
 
 PHPAPI int nice(zend_long p)
 {
 	DWORD dwFlag = NORMAL_PRIORITY_CLASS;
 
-	if (p < -14) {
-		dwFlag = REALTIME_PRIORITY_CLASS;
-	} else if (p < -9) { 
+	if (p < -9) { 
 		dwFlag = HIGH_PRIORITY_CLASS;
 	} else if (p < -4) {
 		dwFlag = ABOVE_NORMAL_PRIORITY_CLASS;

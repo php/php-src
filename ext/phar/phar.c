@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar php single-file executable PHP extension                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2016 The PHP Group                                |
+  | Copyright (c) 2005-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -103,7 +103,7 @@ static void phar_split_cache_list(void) /* {{{ */
 	char *key, *lasts, *end;
 	char ds[2];
 	phar_archive_data *phar;
-	uint i = 0;
+	uint32_t i = 0;
 
 	if (!PHAR_G(cache_list) || !(PHAR_G(cache_list)[0])) {
 		return;
@@ -284,11 +284,13 @@ int phar_archive_delref(phar_archive_data *phar) /* {{{ */
 		PHAR_G(last_phar) = NULL;
 		PHAR_G(last_phar_name) = PHAR_G(last_alias) = NULL;
 
-		if (phar->fp && !(phar->flags & PHAR_FILE_COMPRESSION_MASK)) {
+		if (phar->fp && (!(phar->flags & PHAR_FILE_COMPRESSION_MASK) || !phar->alias)) {
 			/* close open file handle - allows removal or rename of
 			the file on windows, which has greedy locking
 			only close if the archive was not already compressed.  If it
-			was compressed, then the fp does not refer to the original file */
+			was compressed, then the fp does not refer to the original file.
+			We're also closing compressed files to save resources,
+			but only if the archive isn't aliased. */
 			php_stream_close(phar->fp);
 			phar->fp = NULL;
 		}
@@ -983,7 +985,6 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 		/* if the alias is stored we enforce it (implicit overrides explicit) */
 		if (alias && alias_len && (alias_len != (int)tmp_len || strncmp(alias, buffer, tmp_len)))
 		{
-			buffer[tmp_len] = '\0';
 			php_stream_close(fp);
 
 			if (signature) {
@@ -991,7 +992,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 			}
 
 			if (error) {
-				spprintf(error, 0, "cannot load phar \"%s\" with implicit alias \"%s\" under different alias \"%s\"", fname, buffer, alias);
+				spprintf(error, 0, "cannot load phar \"%s\" with implicit alias \"%.*s\" under different alias \"%s\"", fname, tmp_len, buffer, alias);
 			}
 
 			efree(savebuf);
@@ -1057,7 +1058,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 	entry.is_persistent = mydata->is_persistent;
 
 	for (manifest_index = 0; manifest_index < manifest_count; ++manifest_index) {
-		if (buffer + 4 > endbuffer) {
+		if (buffer + 28 > endbuffer) {
 			MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest entry)")
 		}
 
@@ -1071,7 +1072,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 			entry.manifest_pos = manifest_index;
 		}
 
-		if (entry.filename_len + 20 > (size_t)(endbuffer - buffer)) {
+		if (entry.filename_len > (size_t)(endbuffer - buffer - 24)) {
 			MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest entry)");
 		}
 
@@ -1955,11 +1956,11 @@ woohoo:
 				HASH_KEY_NON_EXISTENT != zend_hash_get_current_key(&(PHAR_G(phar_fname_map)), &str_key, &unused);
 				zend_hash_move_forward(&(PHAR_G(phar_fname_map)))
 			) {
-				if (ZSTR_LEN(str_key) > (uint) filename_len) {
+				if (ZSTR_LEN(str_key) > (uint32_t) filename_len) {
 					continue;
 				}
 
-				if (!memcmp(filename, ZSTR_VAL(str_key), ZSTR_LEN(str_key)) && ((uint)filename_len == ZSTR_LEN(str_key)
+				if (!memcmp(filename, ZSTR_VAL(str_key), ZSTR_LEN(str_key)) && ((uint32_t)filename_len == ZSTR_LEN(str_key)
 					|| filename[ZSTR_LEN(str_key)] == '/' || filename[ZSTR_LEN(str_key)] == '\0')) {
 					if (NULL == (pphar = zend_hash_get_current_data_ptr(&(PHAR_G(phar_fname_map))))) {
 						break;
@@ -1974,11 +1975,11 @@ woohoo:
 					HASH_KEY_NON_EXISTENT != zend_hash_get_current_key(&cached_phars, &str_key, &unused);
 					zend_hash_move_forward(&cached_phars)
 				) {
-					if (ZSTR_LEN(str_key) > (uint) filename_len) {
+					if (ZSTR_LEN(str_key) > (uint32_t) filename_len) {
 						continue;
 					}
 
-					if (!memcmp(filename, ZSTR_VAL(str_key), ZSTR_LEN(str_key)) && ((uint)filename_len == ZSTR_LEN(str_key)
+					if (!memcmp(filename, ZSTR_VAL(str_key), ZSTR_LEN(str_key)) && ((uint32_t)filename_len == ZSTR_LEN(str_key)
 						|| filename[ZSTR_LEN(str_key)] == '/' || filename[ZSTR_LEN(str_key)] == '\0')) {
 						if (NULL == (pphar = zend_hash_get_current_data_ptr(&cached_phars))) {
 							break;
@@ -3270,19 +3271,33 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type)
 
 				/* zip or tar-based phar */
 				spprintf(&name, 4096, "phar://%s/%s", file_handle->filename, ".phar/stub.php");
-				if (SUCCESS == phar_orig_zend_open((const char *)name, file_handle)) {
+				if (SUCCESS == phar_orig_zend_open((const char *)name, &f)) {
+
 					efree(name);
 					name = NULL;
-					file_handle->filename = f.filename;
-					if (file_handle->opened_path) {
-						efree(file_handle->opened_path);
+
+					f.filename = file_handle->filename;
+					if (f.opened_path) {
+						efree(f.opened_path);
 					}
-					file_handle->opened_path = f.opened_path;
-					file_handle->free_filename = f.free_filename;
-				} else {
+					f.opened_path = file_handle->opened_path;
+					f.free_filename = file_handle->free_filename;
+
+					switch (file_handle->type) {
+						case ZEND_HANDLE_STREAM:
+						case ZEND_HANDLE_MAPPED:
+							if (file_handle->handle.stream.closer && file_handle->handle.stream.handle) {
+								file_handle->handle.stream.closer(file_handle->handle.stream.handle);
+							}
+							file_handle->handle.stream.handle = NULL;
+							break;
+						default:
+							break;
+					}
 					*file_handle = f;
 				}
 			} else if (phar->flags & PHAR_FILE_COMPRESSION_MASK) {
+				zend_file_handle_dtor(file_handle);
 				/* compressed phar */
 				file_handle->type = ZEND_HANDLE_STREAM;
 				/* we do our own reading directly from the phar, don't change the next line */

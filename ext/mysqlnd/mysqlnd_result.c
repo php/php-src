@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2016 The PHP Group                                |
+  | Copyright (c) 2006-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -968,8 +968,6 @@ MYSQLND_METHOD(mysqlnd_res, use_result)(MYSQLND_RES * const result, const zend_b
 		row_packet->field_count = result->field_count;
 		row_packet->binary_protocol = ps;
 		row_packet->fields_metadata = result->meta->fields;
-		row_packet->bit_fields_count = result->meta->bit_fields_count;
-		row_packet->bit_fields_total_len = result->meta->bit_fields_total_len;
 
 		result->unbuf->row_packet = row_packet;
 	}
@@ -1322,8 +1320,6 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 	row_packet->field_count = meta->field_count;
 	row_packet->binary_protocol = binary_protocol;
 	row_packet->fields_metadata = meta->fields;
-	row_packet->bit_fields_count	= meta->bit_fields_count;
-	row_packet->bit_fields_total_len = meta->bit_fields_total_len;
 
 	row_packet->skip_extraction = TRUE; /* let php_mysqlnd_rowp_read() not allocate row_packet->fields, we will do it */
 
@@ -1400,7 +1396,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 	}
 	DBG_INF_FMT("ret=%s row_count=%u warnings=%u server_status=%u",
 				ret == PASS? "PASS":"FAIL",
-				(uint) set->row_count,
+				(uint32_t) set->row_count,
 				UPSERT_STATUS_GET_WARNINGS(conn->upsert_status),
 				UPSERT_STATUS_GET_SERVER_STATUS(conn->upsert_status));
 end:

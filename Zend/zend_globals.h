@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -214,6 +214,7 @@ struct _zend_executor_globals {
 
 	zend_bool active;
 	zend_bool valid_symbol_table;
+	zend_uchar flags;
 
 	zend_long assertions;
 
@@ -230,8 +231,13 @@ struct _zend_executor_globals {
 	zend_function trampoline;
 	zend_op       call_trampoline_op;
 
+	zend_bool each_deprecation_thrown;
+
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
+
+#define EG_FLAGS_INITIAL	0x00
+#define EG_FLAGS_IN_SHUTDOWN	0x01
 
 struct _zend_ini_scanner_globals {
 	zend_file_handle *yy_in;

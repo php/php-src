@@ -1,5 +1,7 @@
 --TEST--
 Bug #63734 (Garbage collector can free zvals that are still referenced)
+--INI--
+zend.enable_gc = 1
 --FILE--
 <?php
 class C {

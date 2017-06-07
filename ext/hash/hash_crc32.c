@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -79,7 +79,8 @@ const php_hash_ops php_hash_crc32_ops = {
 	(php_hash_copy_func_t) PHP_CRC32Copy,
 	4, /* what to say here? */
 	4,
-	sizeof(PHP_CRC32_CTX)
+	sizeof(PHP_CRC32_CTX),
+	0
 };
 
 const php_hash_ops php_hash_crc32b_ops = {
@@ -89,7 +90,8 @@ const php_hash_ops php_hash_crc32b_ops = {
 	(php_hash_copy_func_t) PHP_CRC32Copy,
 	4, /* what to say here? */
 	4,
-	sizeof(PHP_CRC32_CTX)
+	sizeof(PHP_CRC32_CTX),
+	0
 };
 
 /*

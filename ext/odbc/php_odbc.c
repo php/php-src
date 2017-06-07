@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Stig Sæther Bakken <ssb@php.net>                            |
+   | Authors: Stig SÃ¦ther Bakken <ssb@php.net>                            |
    |          Andreas Karajannis <Andreas.Karajannis@gmd.de>              |
    |          Frank M. Kromann <frank@kromann.info>  Support for DB/2 CLI |
    |          Kevin N. Shallow <kshallow@tampabay.rr.com> Birdstep Support|
@@ -876,9 +876,7 @@ PHP_MINFO_FUNCTION(odbc)
 /* {{{ odbc_sql_error */
 void odbc_sql_error(ODBC_SQL_ERROR_PARAMS)
 {
-	char   	    state[6];
 	SQLINTEGER	error;        /* Not used */
-	char   	    errormsg[SQL_MAX_MESSAGE_LENGTH];
 	SQLSMALLINT	errormsgsize; /* Not used */
 	RETCODE rc;
 	ODBC_SQL_ENV_T henv;
@@ -897,21 +895,19 @@ void odbc_sql_error(ODBC_SQL_ERROR_PARAMS)
 	   while(henv != SQL_NULL_HENV){
 		do {
 	 */
-	rc = SQLError(henv, conn, stmt, state, &error, errormsg, sizeof(errormsg)-1, &errormsgsize);
+	rc = SQLError(henv, conn, stmt, ODBCG(laststate), &error, ODBCG(lasterrormsg), sizeof(ODBCG(lasterrormsg))-1, &errormsgsize);
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
-		snprintf(state, sizeof(state), "HY000");
-		snprintf(errormsg, sizeof(errormsg), "Failed to fetch error message");
+		snprintf(ODBCG(laststate), sizeof(ODBCG(laststate)), "HY000");
+		snprintf(ODBCG(lasterrormsg), sizeof(ODBCG(lasterrormsg)), "Failed to fetch error message");
 	}
 	if (conn_resource) {
-		memcpy(conn_resource->laststate, state, sizeof(state));
-		memcpy(conn_resource->lasterrormsg, errormsg, sizeof(errormsg));
+		memcpy(conn_resource->laststate, ODBCG(laststate), sizeof(ODBCG(laststate)));
+		memcpy(conn_resource->lasterrormsg, ODBCG(lasterrormsg), sizeof(ODBCG(lasterrormsg)));
 	}
-	memcpy(ODBCG(laststate), state, sizeof(state));
-	memcpy(ODBCG(lasterrormsg), errormsg, sizeof(errormsg));
 	if (func) {
-		php_error_docref(NULL, E_WARNING, "SQL error: %s, SQL state %s in %s", errormsg, state, func);
+		php_error_docref(NULL, E_WARNING, "SQL error: %s, SQL state %s in %s", ODBCG(lasterrormsg), ODBCG(laststate), func);
 	} else {
-		php_error_docref(NULL, E_WARNING, "SQL error: %s, SQL state %s", errormsg, state);
+		php_error_docref(NULL, E_WARNING, "SQL error: %s, SQL state %s", ODBCG(lasterrormsg), ODBCG(laststate));
 	}
 	/*		
 		} while (SQL_SUCCEEDED(rc));
@@ -2442,6 +2438,7 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 	RETCODE rc;
 	
 	*conn = (odbc_connection *)pemalloc(sizeof(odbc_connection), persistent);
+	memset(*conn, 0, sizeof(odbc_connection));
 	(*conn)->persistent = persistent;
 	SQLAllocEnv(&((*conn)->henv));
 	SQLAllocConnect((*conn)->henv, &((*conn)->hdbc));
@@ -3047,38 +3044,30 @@ static void php_odbc_lasterror(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	odbc_connection *conn;
 	zval *pv_handle;
-	zend_string *ptr;
-	int len;
+	char *ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|r", &pv_handle) == FAILURE) {
 		return;
-	}
-
-	if (mode == 0) {  /* last state */
-		len = 6;
-	} else { /* last error message */
-		len = SQL_MAX_MESSAGE_LENGTH;
 	}
 
 	if (ZEND_NUM_ARGS() == 1) {
 		if (!(conn = (odbc_connection *)zend_fetch_resource2(Z_RES_P(pv_handle), "ODBC-Link", le_conn, le_pconn))) {
 			RETURN_FALSE;
 		}
-		ptr = zend_string_alloc(len + 1, 0);
 		if (mode == 0) {
-			strlcpy(ZSTR_VAL(ptr), conn->laststate, len+1);
+			ret = conn->laststate;
 		} else {
-			strlcpy(ZSTR_VAL(ptr), conn->lasterrormsg, len+1);
+			ret = conn->lasterrormsg;
 		}
 	} else {
-		ptr = zend_string_alloc(len, 0);
 		if (mode == 0) {
-			strlcpy(ZSTR_VAL(ptr), ODBCG(laststate), len+1);
+			ret = ODBCG(laststate);
 		} else {
-			strlcpy(ZSTR_VAL(ptr), ODBCG(lasterrormsg), len+1);
+			ret = ODBCG(lasterrormsg);
 		}
 	}
-	RETVAL_STR(ptr);
+
+	RETURN_STRING(ret);
 }
 /* }}} */
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -322,20 +322,16 @@ typedef struct _zend_class_constant {
 /* arg_info for internal functions */
 typedef struct _zend_internal_arg_info {
 	const char *name;
-	const char *class_name;
-	zend_uchar type_hint;
+	zend_type type;
 	zend_uchar pass_by_reference;
-	zend_bool allow_null;
 	zend_bool is_variadic;
 } zend_internal_arg_info;
 
 /* arg_info for user functions */
 typedef struct _zend_arg_info {
 	zend_string *name;
-	zend_string *class_name;
-	zend_uchar type_hint;
+	zend_type type;
 	zend_uchar pass_by_reference;
-	zend_bool allow_null;
 	zend_bool is_variadic;
 } zend_arg_info;
 
@@ -346,10 +342,8 @@ typedef struct _zend_arg_info {
  */
 typedef struct _zend_internal_function_info {
 	zend_uintptr_t required_num_args;
-	const char *class_name;
-	zend_uchar type_hint;
+	zend_type type;
 	zend_bool return_reference;
-	zend_bool allow_null;
 	zend_bool _is_variadic;
 } zend_internal_function_info;
 
@@ -730,7 +724,10 @@ ZEND_API binary_op_type get_binary_op(int opcode);
 
 void zend_stop_lexing(void);
 void zend_emit_final_return(int return_one);
+
+/* Used during AST construction */
 zend_ast *zend_ast_append_str(zend_ast *left, zend_ast *right);
+zend_ast *zend_negate_num_string(zend_ast *ast);
 uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag);
 uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag);
 void zend_handle_encoding_declaration(zend_ast *ast);

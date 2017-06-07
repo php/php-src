@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -1174,7 +1174,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 	return ctx.sdl;
 }
 
-#define WSDL_CACHE_VERSION 0x0e
+#define WSDL_CACHE_VERSION 0x0f
 
 #define WSDL_CACHE_GET(ret,type,buf)   memcpy(&ret,*buf,sizeof(type)); *buf += sizeof(type);
 #define WSDL_CACHE_GET_INT(ret,buf)    ret = ((unsigned char)(*buf)[0])|((unsigned char)(*buf)[1]<<8)|((unsigned char)(*buf)[2]<<16)|((int)(*buf)[3]<<24); *buf += 4;
@@ -3204,7 +3204,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 		PHP_MD5Update(&context, (unsigned char*)uri, uri_len);
 		PHP_MD5Final(digest, &context);
 		make_digest(md5str, digest);
-		key = emalloc(len+sizeof("/wsdl-")-1+user_len+sizeof(md5str));
+		key = emalloc(len+sizeof("/wsdl-")-1+user_len+2+sizeof(md5str));
 		memcpy(key,SOAP_GLOBAL(cache_dir),len);
 		memcpy(key+len,"/wsdl-",sizeof("/wsdl-")-1);
 		len += sizeof("/wsdl-")-1;
@@ -3212,6 +3212,16 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 			memcpy(key+len, user, user_len-1);
 			len += user_len-1;
 			key[len++] = '-';
+		}
+		if (WSDL_CACHE_VERSION <= 0x9f) {
+			key[len++] = (WSDL_CACHE_VERSION >> 8) + '0';
+		} else {
+			key[len++] = (WSDL_CACHE_VERSION >> 8) - 10 + 'a';
+		}
+		if ((WSDL_CACHE_VERSION & 0xf) <= 0x9) {
+			key[len++] = (WSDL_CACHE_VERSION & 0xf) + '0';
+		} else {
+			key[len++] = (WSDL_CACHE_VERSION & 0xf) - 10 + 'a';
 		}
 		memcpy(key+len,md5str,sizeof(md5str));
 

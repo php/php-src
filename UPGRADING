@@ -24,10 +24,73 @@ PHP 7.2 UPGRADE NOTES
     closed resources.
   . is_object() will now return true for objects of class
     __PHP_Incomplete_Class.
+  . Support for Netware operating systems have been removed.
+  . Casting arrays to objects (with (object) or settype()) will now covert
+    integer keys to string property names. This fixes the behaviour of previous
+    versions, where integer keys would become inaccessible properties with
+    integer names.
+  . Casting objects to arrays (with (array) or settype()), and retrieving
+    object properties in an array with get_object_vars(), will now convert
+    numeric string property names (that is, property names of the format
+    /^(0|(-?[1-9][0-9]*))$/ where PHP_INT_MIN <= n <= PHP_INT_MAX) to integer
+    keys. This fixes the behaviour of previous versions, where numeric string
+    property names would become inaccessible string keys.
+  . Minimum supported Windows versions are Windows 7/Server 2008 R2.
+
+- BCMath:
+  . The bcmod() function no longer truncates fractional numbers to integers. As
+    such, its behavior now follows fmod() rather than the `%` operator. For
+    example `bcmod('4', '3.5')` now returns '0.5' instead of '1'.
+
+- Hash:
+  . The hash_hmac(), hash_hmac_file() and hash_pbkdf2() functions no longer
+    accept non-cryptographic hashes.
+
+- PCRE:
+  . preg_match() and other PCRE functions now distinguish between unmatched
+    subpatterns and empty matches by reporting NULL and "" (empty string),
+    respectively. Formerly, either was reported as empty string.
+
+- Session:
+  . Removed register_globals related code and "!" can be used as $_SESSION key name.
+  . Session is made to manage session status corretly and prevents invalid operations.
+    Only inappropriate codes are affected by this change. If you have problems with this,
+    it means you have problem in your code.
+    . Functions are made to set or return correct session status.
+        session_start(), session_status(), session_regenerate_id()
+    . Functions are made to return bool from null. These functions have void parameter
+      and void parameter is checked.
+        session_unset(), session_write_close()/session_commit(), session_abort(),
+        session_reset()
+    . Functions prohibit invalid operations with regard to session status and
+      HTTP header status, returns correct bool return value.
+        session_start(), session_set_cookie_params(), session_name(), session_module_name(),
+        session_set_save_handler(), session_regenerate_id(), session_cache_limiter(),
+        session_cache_expire(), session_unset(), session_destroy(),
+        session_write_close()/session_commit(), session_reset()
+    . INI value change by ini_set() returns update status correctly.　Invalid INI modifications
+      are checked and made to fail.
+        session.name, session.save_path, session.cookie_lifetime, session.cookie_path,
+        session.cookie_domain, session.cookie_httponly, session.cookie_secure,
+        session.use_cookies, session.use_only_cookies, session.use_strict_mode,
+        session.referer_check, session.cache_limiter, session.cache_expire,
+        session.lazy_write, session.save_handler, session.serialize_handler,
+        session.gc_probability, session.gc_divior, session.gc_maxlifetime,
+    . Some E_ERRORs are changed to E_WARNING since session status is managed correctly.
+        session_start()
+    . Session no longer initialize $_SESSION for invalid and useless session.
+        session_start()
+
 
 ========================================
 2. New Features
 ========================================
+
+- Core:
+  . It is now possible to remove argument type annotations when overriding an
+    inherited method. This complies with contravariance of method argument types
+    under the Liskov Substitution Principle.
+    (https://wiki.php.net/rfc/parameter-no-type-variance)
 
 - PCRE:
   . Added `J` modifier for setting PCRE_DUPNAMES.
@@ -44,6 +107,40 @@ PHP 7.2 UPGRADE NOTES
 ========================================
 4. Deprecated Functionality
 ========================================
+
+All the deprecated functionality listed in the following will be removed in
+PHP 8.0.
+
+- Core:
+  . The trace_errors ini directive has been deprecated.
+  . The __autoload() mechanism has been deprecated, use spl_autoload_register()
+    instead.
+  . The (unset) cast has been deprecated. This does not affect the unset($var)
+    language construct.
+  . The create_function() function has been deprecated, use anonymous functions
+    instead.
+  . The each() function has been deprecated, use a foreach loop instead.
+
+- GD:
+  . png2wbmp() and jpeg2wbmp() have been deprecated.
+
+- GMP:
+  . The gmp_random() function has been deprecated, use gmp_random_bits() or
+    gmp_random_range() instead.
+
+- Intl:
+  . INTL_IDNA_VARIANT_2003 has been deprecated; use INTL_IDNA_VARIANT_UTS46
+    instead.
+
+- Mbstring:
+  . The mbstring.func_overload ini directive has been deprecated.
+
+- Standard:
+  . Calling parse_str() without the result argument has been deprecated.
+  . Calling assert() with a string argument has been deprecated, use an ordinary
+    expression instead.
+
+See also: https://wiki.php.net/rfc/deprecations_php_7_2
 
 ========================================
 5. Changed Functions
@@ -63,6 +160,9 @@ PHP 7.2 UPGRADE NOTES
       'Multiple' => ['One header', 'Another header'],
       'Multiline' = "FirstLine\r\n SecondLine",
     ];
+  . count() now raises a warning when an invalid parameter is passed.
+    Only arrays and objects implementing the Countable interface should be passed.
+  . pack() and unpack() now support float and double in both little and big endian.
 
 - XML:
   . utf8_encode() and utf8_decode() have been moved to the Standard extension
@@ -80,6 +180,7 @@ PHP 7.2 UPGRADE NOTES
   . Added imagesetclip() and imagegetclip().
   . Added imageopenpolygon().
   . Added imageresolution().
+  . Added imagecreatefrombmp() and imagebmp().
 
 - Mbstring:
   . Added mb_chr() and mb_ord().
@@ -96,6 +197,12 @@ PHP 7.2 UPGRADE NOTES
 ========================================
 8. Removed Extensions and SAPIs
 ========================================
+
+- Mcrypt:
+  . The deprecated mcrypt extension has been moved to PECL.
+  . libmcrypt has not been maintained since 2007 and the continued use of this
+    extension is strongly discouraged.
+  . Users are advised to use alternatives such as OpenSSL or libsodium.
 
 ========================================
 9. Other Changes to Extensions
@@ -118,6 +225,10 @@ PHP 7.2 UPGRADE NOTES
   . mb_convert_encoding() accepts array parameter. Only value encodings
     are converted recursively.
 
+- pdo_sqlite
+  . Use sqlite3_prepare_v2() and sqlite3_close_v2() functions instead of their
+    legacy counterparts.
+
 ========================================
 10. New Global Constants
 ========================================
@@ -129,9 +240,14 @@ PHP 7.2 UPGRADE NOTES
                       x + 1.0 != 1.0
   . PHP_FLOAT_MIN     min representable float number
   . PHP_FLOAT_MAX     max representable float number
+  . PHP_OS_FAMILY     current operating system family
+
+- Fileinfo:
+  . FILEINFO_EXTENSION include list of possible file extensions
 
 - GD:
   . IMG_EFFECT_MULTIPLY
+  . IMG_BMP
 
 - Standard:
   . PASSWORD_ARGON2_DEFAULT_MEMORY_COST
@@ -145,6 +261,9 @@ PHP 7.2 UPGRADE NOTES
 
 - sql.safe_mode
   . This INI directive have been removed.
+
+- realpath_cache_size
+  . Set to 4096k by default
 
 ========================================
 12. Windows Support
