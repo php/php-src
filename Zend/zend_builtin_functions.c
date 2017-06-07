@@ -532,9 +532,10 @@ ZEND_FUNCTION(strcmp)
 {
 	zend_string *s1, *s2;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &s1, &s2) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STR(s1)
+		Z_PARAM_STR(s2)
+	ZEND_PARSE_PARAMETERS_END();
 
 	RETURN_LONG(zend_binary_strcmp(ZSTR_VAL(s1), ZSTR_LEN(s1), ZSTR_VAL(s2), ZSTR_LEN(s2)));
 }
@@ -547,9 +548,11 @@ ZEND_FUNCTION(strncmp)
 	zend_string *s1, *s2;
 	zend_long len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SSl", &s1, &s2, &len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_STR(s1)
+		Z_PARAM_STR(s2)
+		Z_PARAM_LONG(len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (len < 0) {
 		zend_error(E_WARNING, "Length must be greater than or equal to 0");
@@ -566,9 +569,10 @@ ZEND_FUNCTION(strcasecmp)
 {
 	zend_string *s1, *s2;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &s1, &s2) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STR(s1)
+		Z_PARAM_STR(s2)
+	ZEND_PARSE_PARAMETERS_END();
 
 	RETURN_LONG(zend_binary_strcasecmp(ZSTR_VAL(s1), ZSTR_LEN(s1), ZSTR_VAL(s2), ZSTR_LEN(s2)));
 }
@@ -581,9 +585,11 @@ ZEND_FUNCTION(strncasecmp)
 	zend_string *s1, *s2;
 	zend_long len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SSl", &s1, &s2, &len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_STR(s1)
+		Z_PARAM_STR(s2)
+		Z_PARAM_LONG(len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (len < 0) {
 		zend_error(E_WARNING, "Length must be greater than or equal to 0");
