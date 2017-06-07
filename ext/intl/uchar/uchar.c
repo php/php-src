@@ -166,7 +166,7 @@ IC_METHOD(getNumericValue) {
 
 /* {{{ proto void IntlChar::enumCharTypes(callable $callback) */
 ZEND_BEGIN_ARG_INFO_EX(enumCharTypes_arginfo, 0, ZEND_RETURN_VALUE, 0)
-	ZEND_ARG_INFO(0, callback)
+	ZEND_ARG_CALLABLE_INFO(0, callback, 0)
 ZEND_END_ARG_INFO();
 typedef struct _enumCharType_data {
 	zend_fcall_info fci;

@@ -2396,7 +2396,7 @@ static const zend_function_entry spl_funcs_FilterIterator[] = {
 
 ZEND_BEGIN_ARG_INFO(arginfo_callback_filter_it___construct, 0)
 	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
-	ZEND_ARG_INFO(0, callback)
+	ZEND_ARG_CALLABLE_INFO(0, callback, 0)
 ZEND_END_ARG_INFO();
 
 static const zend_function_entry spl_funcs_CallbackFilterIterator[] = {
@@ -2407,7 +2407,7 @@ static const zend_function_entry spl_funcs_CallbackFilterIterator[] = {
 
 ZEND_BEGIN_ARG_INFO(arginfo_recursive_callback_filter_it___construct, 0)
 	ZEND_ARG_OBJ_INFO(0, iterator, RecursiveIterator, 0)
-	ZEND_ARG_INFO(0, callback)
+	ZEND_ARG_CALLABLE_INFO(0, callback, 0)
 ZEND_END_ARG_INFO();
 
 static const zend_function_entry spl_funcs_RecursiveCallbackFilterIterator[] = {

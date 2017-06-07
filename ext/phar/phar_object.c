@@ -5197,7 +5197,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_webPhar, 0, 0, 0)
 	ZEND_ARG_INFO(0, index)
 	ZEND_ARG_INFO(0, f404)
 	ZEND_ARG_INFO(0, mimetypes)
-	ZEND_ARG_INFO(0, rewrites)
+	ZEND_ARG_CALLABLE_INFO(0, rewrites, 0)
 ZEND_END_ARG_INFO()
 
 PHAR_ARG_INFO

@@ -141,7 +141,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ main/sapi.c */
 ZEND_BEGIN_ARG_INFO(arginfo_header_register_callback, 0)
-	ZEND_ARG_INFO(0, callback)
+	ZEND_ARG_CALLABLE_INFO(0, callback, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
 
@@ -259,17 +259,17 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_usort, 0)
 	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, cmp_function)
+	ZEND_ARG_CALLABLE_INFO(0, cmp_function, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_uasort, 0)
 	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, cmp_function)
+	ZEND_ARG_CALLABLE_INFO(0, cmp_function, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_uksort, 0)
 	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, cmp_function)
+	ZEND_ARG_CALLABLE_INFO(0, cmp_function, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_end, 0)
@@ -306,13 +306,13 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_array_walk, 0, 0, 2)
 	ZEND_ARG_INFO(1, input) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, funcname)
+	ZEND_ARG_CALLABLE_INFO(0, funcname, 0)
 	ZEND_ARG_INFO(0, userdata)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_array_walk_recursive, 0, 0, 2)
 	ZEND_ARG_INFO(1, input) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, funcname)
+	ZEND_ARG_CALLABLE_INFO(0, funcname, 0)
 	ZEND_ARG_INFO(0, userdata)
 ZEND_END_ARG_INFO()
 
@@ -464,7 +464,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_array_intersect_ukey, 0)
 	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
 	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg2, 0) */
-	ZEND_ARG_INFO(0, callback_key_compare_func)
+	ZEND_ARG_CALLABLE_INFO(0, callback_key_compare_func, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_array_intersect, 0, 0, 2)
@@ -475,7 +475,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_array_uintersect, 0)
 	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
 	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg2, 0) */
-	ZEND_ARG_INFO(0, callback_data_compare_func)
+	ZEND_ARG_CALLABLE_INFO(0, callback_data_compare_func, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_array_intersect_assoc, 0, 0, 2)
@@ -486,20 +486,20 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_array_uintersect_assoc, 0)
 	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
 	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg2, 0) */
-	ZEND_ARG_INFO(0, callback_data_compare_func)
+	ZEND_ARG_CALLABLE_INFO(0, callback_data_compare_func, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_array_intersect_uassoc, 0)
 	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
 	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg2, 0) */
-	ZEND_ARG_INFO(0, callback_key_compare_func)
+	ZEND_ARG_CALLABLE_INFO(0, callback_key_compare_func, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_array_uintersect_uassoc, 0)
 	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
 	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg2, 0) */
-	ZEND_ARG_INFO(0, callback_data_compare_func)
-	ZEND_ARG_INFO(0, callback_key_compare_func)
+	ZEND_ARG_CALLABLE_INFO(0, callback_data_compare_func, 0)
+	ZEND_ARG_CALLABLE_INFO(0, callback_key_compare_func, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_array_diff_key, 0, 0, 2)
@@ -510,7 +510,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_array_diff_ukey, 0)
 	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
 	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg2, 0) */
-	ZEND_ARG_INFO(0, callback_key_comp_func)
+	ZEND_ARG_CALLABLE_INFO(0, callback_key_comp_func, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_array_diff, 0, 0, 2)
@@ -521,7 +521,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_array_udiff, 0)
 	ZEND_ARG_INFO(0, arr1)
 	ZEND_ARG_INFO(0, arr2)
-	ZEND_ARG_INFO(0, callback_data_comp_func)
+	ZEND_ARG_CALLABLE_INFO(0, callback_data_comp_func, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_array_diff_assoc, 0, 0, 2)
@@ -532,20 +532,20 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_array_diff_uassoc, 0)
 	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
 	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg2, 0) */
-	ZEND_ARG_INFO(0, callback_data_comp_func)
+	ZEND_ARG_CALLABLE_INFO(0, callback_data_comp_func, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_array_udiff_assoc, 0)
 	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
 	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg2, 0) */
-	ZEND_ARG_INFO(0, callback_key_comp_func)
+	ZEND_ARG_CALLABLE_INFO(0, callback_key_comp_func, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_array_udiff_uassoc, 0)
 	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
 	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg2, 0) */
-	ZEND_ARG_INFO(0, callback_data_comp_func)
-	ZEND_ARG_INFO(0, callback_key_comp_func)
+	ZEND_ARG_CALLABLE_INFO(0, callback_data_comp_func, 0)
+	ZEND_ARG_CALLABLE_INFO(0, callback_key_comp_func, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_array_multisort, 0, 0, 1)
@@ -570,18 +570,18 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_array_reduce, 0, 0, 2)
 	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
-	ZEND_ARG_INFO(0, callback)
+	ZEND_ARG_CALLABLE_INFO(0, callback, 0)
 	ZEND_ARG_INFO(0, initial)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_array_filter, 0, 0, 1)
 	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
-	ZEND_ARG_INFO(0, callback)
+	ZEND_ARG_CALLABLE_INFO(0, callback, 0)
     ZEND_ARG_INFO(0, use_keys)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_array_map, 0, 0, 2)
-	ZEND_ARG_INFO(0, callback)
+	ZEND_ARG_CALLABLE_INFO(0, callback, 0)
 	ZEND_ARG_VARIADIC_INFO(0, arrays)
 ZEND_END_ARG_INFO()
 
@@ -691,27 +691,27 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_error_clear_last, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_call_user_func, 0, 0, 1)
-	ZEND_ARG_INFO(0, function_name)
+	ZEND_ARG_CALLABLE_INFO(0, function_name, 0)
 	ZEND_ARG_VARIADIC_INFO(0, parameters)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_call_user_func_array, 0, 0, 2)
-	ZEND_ARG_INFO(0, function_name)
+	ZEND_ARG_CALLABLE_INFO(0, function_name, 0)
 	ZEND_ARG_INFO(0, parameters) /* ARRAY_INFO(0, parameters, 1) */
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_forward_static_call, 0, 0, 1)
-	ZEND_ARG_INFO(0, function_name)
+	ZEND_ARG_CALLABLE_INFO(0, function_name, 0)
 	ZEND_ARG_VARIADIC_INFO(0, parameters)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_forward_static_call_array, 0, 0, 2)
-	ZEND_ARG_INFO(0, function_name)
+	ZEND_ARG_CALLABLE_INFO(0, function_name, 0)
 	ZEND_ARG_INFO(0, parameters) /* ARRAY_INFO(0, parameters, 1) */
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_register_shutdown_function, 0, 0, 1)
-	ZEND_ARG_INFO(0, function_name)
+	ZEND_ARG_CALLABLE_INFO(0, function_name, 0)
 	ZEND_ARG_VARIADIC_INFO(0, parameters)
 ZEND_END_ARG_INFO()
 
