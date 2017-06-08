@@ -1056,7 +1056,6 @@ static zend_bool zend_traits_method_compatibility_check(zend_function *fn, zend_
 	uint32_t other_flags = other_fn->common.scope->ce_flags;
 
 	return zend_do_perform_implementation_check(fn, other_fn)
-		&& ((other_fn->common.scope->ce_flags & ZEND_ACC_INTERFACE) || zend_do_perform_implementation_check(other_fn, fn))
 		&& ((fn_flags & (ZEND_ACC_FINAL|ZEND_ACC_STATIC)) ==
 		    (other_flags & (ZEND_ACC_FINAL|ZEND_ACC_STATIC))); /* equal final and static qualifier */
 }
@@ -1126,12 +1125,13 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 								ZSTR_VAL(zend_get_function_declaration(fn)),
 								ZSTR_VAL(zend_get_function_declaration(existing_fn)));
 						}
-					} else if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
+					}
+					if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 						/* Make sure the abstract declaration is compatible with previous declaration */
 						if (UNEXPECTED(!zend_traits_method_compatibility_check(existing_fn, fn))) {
 							zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
-								ZSTR_VAL(zend_get_function_declaration(fn)),
-								ZSTR_VAL(zend_get_function_declaration(existing_fn)));
+								ZSTR_VAL(zend_get_function_declaration(existing_fn)),
+								ZSTR_VAL(zend_get_function_declaration(fn)));
 						}
 						return;
 					}
@@ -1154,8 +1154,8 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 			/* Make sure the abstract declaration is compatible with previous declaration */
 			if (UNEXPECTED(!zend_traits_method_compatibility_check(existing_fn, fn))) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
-					ZSTR_VAL(zend_get_function_declaration(fn)),
-					ZSTR_VAL(zend_get_function_declaration(existing_fn)));
+					ZSTR_VAL(zend_get_function_declaration(existing_fn)),
+					ZSTR_VAL(zend_get_function_declaration(fn)));
 			}
 			return;
 		} else if (UNEXPECTED(existing_fn->common.scope->ce_flags & ZEND_ACC_TRAIT)) {
