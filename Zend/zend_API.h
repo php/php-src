@@ -35,7 +35,7 @@ BEGIN_EXTERN_C()
 
 typedef struct _zend_function_entry {
 	const char *fname;
-	void (*handler)(INTERNAL_FUNCTION_PARAMETERS);
+	zif_handler handler;
 	const struct _zend_internal_arg_info *arg_info;
 	uint32_t num_args;
 	uint32_t flags;
