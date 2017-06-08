@@ -54,9 +54,18 @@ PHP_FUNCTION(htmlspecialchars_decode);
 PHP_FUNCTION(html_entity_decode);
 PHP_FUNCTION(get_html_translation_table);
 
+enum entity_charset {
+  cs_utf_8, cs_8859_1, cs_cp1252, cs_8859_15, cs_cp1251,
+	cs_8859_5, cs_cp866, cs_macroman, cs_koi8r, cs_big5,
+	cs_gb2312, cs_big5hkscs, cs_sjis, cs_eucjp,
+	cs_numelems /* used to count the number of charsets */
+};
+
 PHPAPI zend_string *php_escape_html_entities(unsigned char *old, size_t oldlen, int all, int flags, char *hint_charset);
 PHPAPI zend_string *php_escape_html_entities_ex(unsigned char *old, size_t oldlen, int all, int flags, char *hint_charset, zend_bool double_encode);
 PHPAPI zend_string *php_unescape_html_entities(zend_string *str, int all, int flags, char *hint_charset);
 PHPAPI unsigned int php_next_utf8_char(const unsigned char *str, size_t str_len, size_t *cursor, int *status);
+PHPAPI unsigned int get_next_char(enum entity_charset charset, const unsigned char *str, size_t str_len, size_t *cursor, int *status);
+PHPAPI enum entity_charset determine_charset(char *charset_hint);
 
 #endif /* HTML_H */
