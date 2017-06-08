@@ -17,7 +17,11 @@ echo "*** curl_setopt() call with CURLOPT_HTTPHEADER\n";
 $url = "{$host}/";
 $ch = curl_init();
 
-curl_setopt($ch, CURLOPT_HTTPHEADER, 1);
+try {
+  curl_setopt($ch, CURLOPT_HTTPHEADER, 1);
+} catch (\TypeError $e) {
+  echo "Caught: ", $e->getMessage(), "\n";
+}
 
 $curl_content = curl_exec($ch);
 curl_close($ch);
@@ -38,7 +42,6 @@ var_dump( $curl_content );
 ?>
 --EXPECTF--
 *** curl_setopt() call with CURLOPT_HTTPHEADER
-
-Warning: curl_setopt(): You must pass either an object or an array with the CURLOPT_HTTPHEADER argument in %s on line %d
+Caught: Argument 3 passed to curl_setopt() must be of type array, integer given
 bool(false)
 bool(true)
