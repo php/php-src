@@ -1522,6 +1522,7 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 		if (PASS != (ret = pfc->data->m.receive(pfc, vio, p, header.size, stats, error_info))) {
 			DBG_ERR("Empty row packet body");
 			php_error(E_WARNING, "Empty row packet body");
+			ret = FAIL;
 			break;
 		}
 
