@@ -338,6 +338,15 @@ static int php_json_escape_string(
 				smart_str_appendl(buf, &s[pos - 3], 3);
 				continue;
 			}
+			/* Escape U+2028/U+2029 line terminators, UNLESS both
+			   JSON_UNESCAPED_UNICODE and
+			   JSON_UNESCAPED_LINE_TERMINATORS were provided */
+			if ((options & PHP_JSON_UNESCAPED_UNICODE)
+				&& ((options & PHP_JSON_UNESCAPED_LINE_TERMINATORS)
+					|| us < 0x2028 || us > 0x2029)) {
+				smart_str_appendl(buf, &s[pos - 3], 3);
+				continue;
+			}
 			/* From http://en.wikipedia.org/wiki/UTF16 */
 			if (us >= 0x10000) {
 				unsigned int next_us;
