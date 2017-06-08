@@ -2349,7 +2349,7 @@ PDO_API void php_pdo_free_statement(pdo_stmt_t *stmt)
 	do_fetch_opt_finish(stmt, 1);
 
 	if (!Z_ISUNDEF(stmt->database_object_handle)) {
-		zval_ptr_dtor(&stmt->database_object_handle);
+		Z_DELREF(stmt->database_object_handle);
 	}
 	zend_object_std_dtor(&stmt->std);
 }
