@@ -13,7 +13,7 @@ shmop extension test
 	$write_d2 = "test #2 append data to shared memory segment";
 
 	echo "shm open for create: ";
-	$shm_id = shmop_open($hex_shm_id, "n", 0644, 1024);   
+	$shm_id = shmop_open($hex_shm_id, "c", 0644, 1024);
 	if (!$shm_id) {
 		die("failed\n");
 	} else {
