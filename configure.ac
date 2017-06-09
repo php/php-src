@@ -18,6 +18,9 @@ PHP_CANONICAL_HOST_TARGET
 
 AC_CONFIG_HEADER(main/php_config.h)
 AH_TOP([
+#ifndef PHP_CONFIG_H
+#define PHP_CONFIG_H
+
 #if defined(__GNUC__) && __GNUC__ >= 4
 # define ZEND_API __attribute__ ((visibility("default")))
 # define ZEND_DLEXPORT __attribute__ ((visibility("default")))
@@ -98,6 +101,8 @@ int zend_sprintf(char *buffer, const char *format, ...);
 #endif /* ifndef ZEND_ACCONFIG_H_NO_C_PROTOS */
 
 #undef PTHREADS
+
+#endif /* PHP_CONFIG_H */
 ])
 
 PHP_MAJOR_VERSION=7
