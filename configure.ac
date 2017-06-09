@@ -30,9 +30,6 @@ AH_TOP([
 
 #undef uint
 #undef ulong
-
-/* Define if you want to enable memory limit support */
-#define MEMORY_LIMIT 0
 ])
 AH_BOTTOM([
 #ifndef ZEND_ACCONFIG_H_NO_C_PROTOS
