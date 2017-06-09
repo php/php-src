@@ -5120,7 +5120,7 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 		return;
 	}
 
-	infile = BIO_new_file(infilename, "r");
+	infile = BIO_new_file(infilename, (flags & PKCS7_BINARY) ? "rb" : "r");
 	if (infile == NULL) {
 		php_openssl_store_errors();
 		goto clean_exit;
@@ -5278,7 +5278,7 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 		goto clean_exit;
 	}
 
-	infile = BIO_new_file(infilename, "r");
+	infile = BIO_new_file(infilename, (flags & PKCS7_BINARY) ? "rb" : "r");
 	if (infile == NULL) {
 		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "error opening input file %s!", infilename);
