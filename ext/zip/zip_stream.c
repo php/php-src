@@ -30,6 +30,9 @@
 
 #include "ext/standard/url.h"
 
+/* needed for ssize_t definition */
+#include <sys/types.h>
+
 struct php_zip_stream_data_t {
 	struct zip *za;
 	struct zip_file *zf;
