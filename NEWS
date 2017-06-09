@@ -26,6 +26,10 @@ PHP                                                                        NEWS
     validate_timestamp). (Laruence)
   . Revert opcache.enable_cli to default disabled. (Nikita)
 
+- OpenSSL:
+  . Fixed bug #74720 (pkcs7_en/decrypt does not work if \x1a is used in
+    content). (Anatol)
+
 - Reflection:
   . Fixed bug #74673 (Segfault when cast Reflection object to string with
     undefined constant). (Laruence)
