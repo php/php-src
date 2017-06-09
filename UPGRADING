@@ -102,6 +102,9 @@ PHP 7.2 UPGRADE NOTES
   . A trailing comma in group use statements is now allowed.
     (https://wiki.php.net/rfc/list-syntax-trailing-commas)
 
+- DBA:
+  . Implemented support for the LMDB backend.
+
 - PCRE:
   . Added `J` modifier for setting PCRE_DUPNAMES.
   . Added `PREG_UNMATCHED_AS_NULL` flag to allow distinguish between unmatched
