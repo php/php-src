@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.2.0alpha2
 
+- OpenSSL:
+  . Fixed bug #74720 (pkcs7_en/decrypt does not work if \x1a is used in
+    content). (Anatol)
+
 - SQLite3:
   . Update to Sqlite 3.19.3. (cmb)
 
