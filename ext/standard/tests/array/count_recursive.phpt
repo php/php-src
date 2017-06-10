@@ -130,6 +130,7 @@ fclose( $resource1 );
 closedir( $resource2 );
 ?>
 --EXPECTF--
+Deprecated: In the next major version of PHP the implicit keys of this array will start from -1 instead of 0 in %s
 *** Testing basic functionality of count() function ***
 -- Testing NULL --
 
