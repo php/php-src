@@ -20,7 +20,7 @@ image_type_to_mime_type()
 	sort($files);
 	foreach($files as $file) {
 		$result[$file] = getimagesize(dirname(__FILE__)."/$file");
-		$result[$file] = image_type_to_mime_type($result[$file][2]);
+		$result[$file] = image_type_to_mime_type($result[$file]["type"]);
 	}
 	var_dump($result);
 ?>

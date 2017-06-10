@@ -23,13 +23,13 @@ var_dump($arr);
 --EXPECT--
 *** Testing getimagesize() : wbmp format ***
 array(5) {
-  [0]=>
+  ["width"]=>
   int(75)
-  [1]=>
+  ["height"]=>
   int(50)
-  [2]=>
+  ["type"]=>
   int(15)
-  [3]=>
+  ["text"]=>
   string(22) "width="75" height="50""
   ["mime"]=>
   string(18) "image/vnd.wap.wbmp"

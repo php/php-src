@@ -15,13 +15,13 @@ var_dump($i2);
 ?>
 --EXPECT--
 array(7) {
-  [0]=>
+  ["width"]=>
   int(120)
-  [1]=>
+  ["height"]=>
   int(67)
-  [2]=>
+  ["type"]=>
   int(1)
-  [3]=>
+  ["text"]=>
   string(23) "width="120" height="67""
   ["bits"]=>
   int(7)
@@ -31,13 +31,13 @@ array(7) {
   string(9) "image/gif"
 }
 array(7) {
-  [0]=>
+  ["width"]=>
   int(120)
-  [1]=>
+  ["height"]=>
   int(67)
-  [2]=>
+  ["type"]=>
   int(1)
-  [3]=>
+  ["text"]=>
   string(23) "width="120" height="67""
   ["bits"]=>
   int(7)
