@@ -1442,11 +1442,11 @@ static void php_getimagesize_from_stream(php_stream *stream, zval *info, INTERNA
 	if (result) {
 		char temp[MAX_LENGTH_OF_LONG * 2 + sizeof("width=\"\" height=\"\"")];
 		array_init(return_value);
-		add_index_long(return_value, 0, result->width);
-		add_index_long(return_value, 1, result->height);
-		add_index_long(return_value, 2, itype);
+		add_assoc_long(return_value, "width", result->width);
+		add_assoc_long(return_value, "height", result->height);
+		add_assoc_long(return_value, "type", itype);
 		snprintf(temp, sizeof(temp), "width=\"%d\" height=\"%d\"", result->width, result->height);
-		add_index_string(return_value, 3, temp);
+		add_assoc_string(return_value, "text", temp);
 
 		if (result->bits != 0) {
 			add_assoc_long(return_value, "bits", result->bits);
