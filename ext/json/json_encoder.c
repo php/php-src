@@ -246,33 +246,13 @@ static int php_json_encode_array(smart_str *buf, zval *val, int options, php_jso
 }
 /* }}} */
 
-static int php_json_valid_utf8(char utf8[], size_t len) /* {{{ */
-{
-	size_t pos = 0, us;
-	int status;
-
-	while (pos < len) {
-		us = (unsigned char)utf8[pos];
-		if (us < 0x80) {
-			pos++;
-		} else {
-			us = php_next_utf8_char((const unsigned char *)utf8, len, &pos, &status);
-			if (status != SUCCESS) {
-				return 0;
-			}
-		}
-	}
-	return 1;
-}
-/* }}} */
-
 static int php_json_escape_string(
 		smart_str *buf, char *s, size_t len,
 		int options, php_json_encoder *encoder) /* {{{ */
 {
 	int status;
 	unsigned int us;
-	size_t pos, checkpoint;
+	size_t prev_pos, pos, checkpoint;
 
 	if (len == 0) {
 		smart_str_appendl(buf, "\"\"", 2);
@@ -295,18 +275,6 @@ static int php_json_escape_string(
 		}
 
 	}
-
-	if (options & PHP_JSON_UNESCAPED_UNICODE) {
-		/* validate UTF-8 string first */
-		if (!php_json_valid_utf8(s, len)) {
-			encoder->error_code = PHP_JSON_ERROR_UTF8;
-			if (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) {
-				smart_str_appendl(buf, "null", 4);
-			}
-			return FAILURE;
-		}
-	}
-
 	pos = 0;
 	checkpoint = buf->s ? ZSTR_LEN(buf->s) : 0;
 
@@ -315,27 +283,27 @@ static int php_json_escape_string(
 	smart_str_appendc(buf, '"');
 
 	do {
-		us = (unsigned char)s[pos];
-		if (us >= 0x80 && (!(options & PHP_JSON_UNESCAPED_UNICODE) || us == 0xE2)) {
-			/* UTF-8 character */
-			us = php_next_utf8_char((const unsigned char *)s, len, &pos, &status);
-			if (status != SUCCESS) {
-				if (buf->s) {
-					ZSTR_LEN(buf->s) = checkpoint;
-				}
-				encoder->error_code = PHP_JSON_ERROR_UTF8;
-				if (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) {
-					smart_str_appendl(buf, "null", 4);
-				}
-				return FAILURE;
+		prev_pos = pos;
+		us = php_next_utf8_char((unsigned char *)s, len, &pos, &status);
+		/* check whether UTF8 character is correct */
+		if (status != SUCCESS) {
+			if (buf->s) {
+				ZSTR_LEN(buf->s) = checkpoint;
 			}
+			encoder->error_code = PHP_JSON_ERROR_UTF8;
+			if (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) {
+				smart_str_appendl(buf, "null", 4);
+			}
+			return FAILURE;
+		}
+		if (us >= 0x80 && (!(options & PHP_JSON_UNESCAPED_UNICODE) || (unsigned char)s[prev_pos] == 0xE2)) {
 			/* Escape U+2028/U+2029 line terminators, UNLESS both
 			   JSON_UNESCAPED_UNICODE and
 			   JSON_UNESCAPED_LINE_TERMINATORS were provided */
 			if ((options & PHP_JSON_UNESCAPED_UNICODE)
 				&& ((options & PHP_JSON_UNESCAPED_LINE_TERMINATORS)
 					|| us < 0x2028 || us > 0x2029)) {
-				smart_str_appendl(buf, &s[pos - 3], 3);
+				smart_str_appendl(buf, &s[prev_pos], 3);
 				continue;
 			}
 			/* From http://en.wikipedia.org/wiki/UTF16 */
@@ -357,8 +325,6 @@ static int php_json_escape_string(
 			smart_str_appendc(buf, digits[(us & 0xf0)   >> 4]);
 			smart_str_appendc(buf, digits[(us & 0xf)]);
 		} else {
-			pos++;
-
 			switch (us) {
 				case '"':
 					if (options & PHP_JSON_HEX_QUOT) {
@@ -434,7 +400,7 @@ static int php_json_escape_string(
 
 				default:
 					if (us >= ' ') {
-						smart_str_appendc(buf, (unsigned char) us);
+						smart_str_appendl(buf, s + prev_pos, pos - prev_pos);
 					} else {
 						smart_str_appendl(buf, "\\u00", sizeof("\\u00")-1);
 						smart_str_appendc(buf, digits[(us & 0xf0)   >> 4]);
