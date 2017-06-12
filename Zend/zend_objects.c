@@ -29,24 +29,14 @@
 
 ZEND_API void zend_object_std_init(zend_object *object, zend_class_entry *ce)
 {
-	zval *p, *end;
-
 	GC_REFCOUNT(object) = 1;
 	GC_TYPE_INFO(object) = IS_OBJECT | (GC_COLLECTABLE << GC_FLAGS_SHIFT);
 	object->ce = ce;
 	object->properties = NULL;
 	zend_objects_store_put(object);
-	p = object->properties_table;
-	if (EXPECTED(ce->default_properties_count != 0)) {
-		end = p + ce->default_properties_count;
-		do {
-			ZVAL_UNDEF(p);
-			p++;
-		} while (p != end);
-	}
 	if (UNEXPECTED(ce->ce_flags & ZEND_ACC_USE_GUARDS)) {
 		GC_FLAGS(object) |= IS_OBJ_USE_GUARDS;
-		ZVAL_UNDEF(p);
+		ZVAL_UNDEF(object->properties_table + object->ce->default_properties_count);
 	}
 }
 
@@ -251,6 +241,16 @@ ZEND_API zend_object *zend_objects_clone_obj(zval *zobject)
 	 * overwritten one then it must itself be overwritten */
 	old_object = Z_OBJ_P(zobject);
 	new_object = zend_objects_new(old_object->ce);
+
+	/* zend_objects_clone_members() expect the properties to be initialized. */
+	if (new_object->ce->default_properties_count) {
+		zval *p = new_object->properties_table;
+		zval *end = p + new_object->ce->default_properties_count;
+		do {
+			ZVAL_UNDEF(p);
+			p++;
+		} while (p != end);
+	}
 
 	zend_objects_clone_members(new_object, old_object);
 

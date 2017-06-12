@@ -28,7 +28,10 @@ ZEND_API void zend_vm_set_opcode_handler(zend_op* opcode);
 ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* opcode, uint32_t op1_info, uint32_t op2_info, uint32_t res_info);
 ZEND_API void zend_serialize_opcode_handler(zend_op *op);
 ZEND_API void zend_deserialize_opcode_handler(zend_op *op);
+ZEND_API const void *zend_get_opcode_handler_func(const zend_op *op);
+ZEND_API const zend_op *zend_get_halt_op(void);
 ZEND_API int zend_vm_call_opcode_handler(zend_execute_data *ex);
+ZEND_API int zend_vm_kind(void);
 
 END_EXTERN_C()
 

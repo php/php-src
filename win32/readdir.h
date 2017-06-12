@@ -22,7 +22,7 @@ struct dirent {
 	long d_ino;					/* inode (always 1 in WIN32) */
 	off_t d_off;					/* offset to this dirent */
 	unsigned short d_reclen;			/* length of d_name */
-	char d_name[_MAX_FNAME*4+1];	/* filename with care about UTF-8 (null terminated) */
+	char *d_name;	/* null terminated filename in the current encoding, glyph number <= 255 wchar_t's + \0 byte */
 };
 
 /* typedef DIR - not the same as Unix */

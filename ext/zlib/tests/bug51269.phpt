@@ -14,7 +14,7 @@ header('Vary: Cookie');
 echo 'foo';
 ?>
 --EXPECTF--
-%s
+%a
 --EXPECTHEADERS--
 Vary: Cookie
 Content-Encoding: gzip

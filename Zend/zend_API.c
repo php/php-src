@@ -202,6 +202,36 @@ ZEND_API char *zend_zval_type_name(const zval *arg) /* {{{ */
 }
 /* }}} */
 
+ZEND_API zend_string *zend_zval_get_type(const zval *arg) /* {{{ */
+{
+	switch (Z_TYPE_P(arg)) {
+		case IS_NULL:
+			return ZSTR_KNOWN(ZEND_STR_NULL);
+		case IS_FALSE:
+		case IS_TRUE:
+			return ZSTR_KNOWN(ZEND_STR_BOOLEAN);
+		case IS_LONG:
+			return ZSTR_KNOWN(ZEND_STR_INTEGER);
+		case IS_DOUBLE:
+			return ZSTR_KNOWN(ZEND_STR_DOUBLE);
+		case IS_STRING:
+			return ZSTR_KNOWN(ZEND_STR_STRING);
+		case IS_ARRAY:
+			return ZSTR_KNOWN(ZEND_STR_ARRAY);
+		case IS_OBJECT:
+			return ZSTR_KNOWN(ZEND_STR_OBJECT);
+		case IS_RESOURCE:
+			if (zend_rsrc_list_get_rsrc_type(Z_RES_P(arg))) {
+				return ZSTR_KNOWN(ZEND_STR_RESOURCE);
+			} else {
+				return ZSTR_KNOWN(ZEND_STR_CLOSED_RESOURCE);
+			}
+		default:
+			return NULL;
+	}
+}
+/* }}} */
+
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_count_error(zend_bool throw_, int num_args, int min_num_args, int max_num_args) /* {{{ */
 {
 	zend_function *active_function = EG(current_execute_data)->func;
@@ -1088,8 +1118,6 @@ ZEND_API void zend_merge_properties(zval *obj, HashTable *properties) /* {{{ */
 ZEND_API int zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 {
 	if (!(class_type->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
-		class_type->ce_flags |= ZEND_ACC_CONSTANTS_UPDATED;
-
 		if (class_type->parent) {
 			if (UNEXPECTED(zend_update_class_constants(class_type->parent) != SUCCESS)) {
 				return FAILURE;
@@ -1132,7 +1160,7 @@ ZEND_API int zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 			ZEND_HASH_FOREACH_PTR(&class_type->constants_table, c) {
 				val = &c->value;
 				if (Z_CONSTANT_P(val)) {
-					if (UNEXPECTED(zval_update_constant_ex(val, class_type) != SUCCESS)) {
+					if (UNEXPECTED(zval_update_constant_ex(val, c->ce) != SUCCESS)) {
 						return FAILURE;
 					}
 				}
@@ -1158,7 +1186,9 @@ ZEND_API int zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 				ce = ce->parent;
 			}
 		}
+		class_type->ce_flags |= ZEND_ACC_CONSTANTS_UPDATED;
 	}
+
 	return SUCCESS;
 }
 /* }}} */
@@ -1377,7 +1407,7 @@ ZEND_API int add_assoc_str_ex(zval *arg, const char *key, size_t key_len, zend_s
 }
 /* }}} */
 
-ZEND_API int add_assoc_string_ex(zval *arg, const char *key, size_t key_len, char *str) /* {{{ */
+ZEND_API int add_assoc_string_ex(zval *arg, const char *key, size_t key_len, const char *str) /* {{{ */
 {
 	zval *ret, tmp;
 
@@ -1387,7 +1417,7 @@ ZEND_API int add_assoc_string_ex(zval *arg, const char *key, size_t key_len, cha
 }
 /* }}} */
 
-ZEND_API int add_assoc_stringl_ex(zval *arg, const char *key, size_t key_len, char *str, size_t length) /* {{{ */
+ZEND_API int add_assoc_stringl_ex(zval *arg, const char *key, size_t key_len, const char *str, size_t length) /* {{{ */
 {
 	zval *ret, tmp;
 
@@ -2019,6 +2049,7 @@ ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module) /
 	lcname = zend_string_alloc(name_len, 1);
 	zend_str_tolower_copy(ZSTR_VAL(lcname), module->name, name_len);
 
+	lcname = zend_new_interned_string(lcname);
 	if ((module_ptr = zend_hash_add_mem(&module_registry, lcname, module, sizeof(zend_module_entry))) == NULL) {
 		zend_error(E_CORE_WARNING, "Module '%s' already loaded", module->name);
 		zend_string_release(lcname);
@@ -2380,7 +2411,6 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 			dtor->common.fn_flags &= ~ZEND_ACC_ALLOW_STATIC;
 		}
 		if (clone) {
-			clone->common.fn_flags |= ZEND_ACC_CLONE;
 			if (clone->common.fn_flags & ZEND_ACC_STATIC) {
 				zend_error(error_type, "Constructor %s::%s() cannot be static", ZSTR_VAL(scope->name), ZSTR_VAL(clone->common.function_name));
 			}
@@ -3816,6 +3846,9 @@ ZEND_API int zend_declare_class_constant(zend_class_entry *ce, const char *name,
 	int ret;
 
 	zend_string *key = zend_string_init(name, name_length, ce->type & ZEND_INTERNAL_CLASS);
+	if (ce->type == ZEND_INTERNAL_CLASS) {
+		key = zend_new_interned_string(key);
+	}
 	ret = zend_declare_class_constant_ex(ce, key, value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(key);
 	return ret;

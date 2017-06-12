@@ -26,7 +26,13 @@
 #define ZEND_VM_KIND_CALL	1
 #define ZEND_VM_KIND_SWITCH	2
 #define ZEND_VM_KIND_GOTO	3
-#define ZEND_VM_KIND		ZEND_VM_KIND_CALL
+#define ZEND_VM_KIND_HYBRID	4
+/* HYBRID requires support for computed GOTO and global register variables*/
+#if (defined(__GNUC__) && defined(HAVE_GCC_GLOBAL_REGS))
+# define ZEND_VM_KIND		ZEND_VM_KIND_HYBRID
+#else
+# define ZEND_VM_KIND		ZEND_VM_KIND_CALL
+#endif
 
 #define ZEND_VM_OP_SPEC          0x00000001
 #define ZEND_VM_OP_CONST         0x00000002
@@ -252,7 +258,16 @@ END_EXTERN_C()
 #define ZEND_BIND_STATIC                     183
 #define ZEND_FETCH_THIS                      184
 #define ZEND_ISSET_ISEMPTY_THIS              186
+#define ZEND_SWITCH_LONG                     187
+#define ZEND_SWITCH_STRING                   188
+#define ZEND_IN_ARRAY                        189
+#define ZEND_COUNT                           190
+#define ZEND_GET_CLASS                       191
+#define ZEND_GET_CALLED_CLASS                192
+#define ZEND_GET_TYPE                        193
+#define ZEND_FUNC_NUM_ARGS                   194
+#define ZEND_FUNC_GET_ARGS                   195
 
-#define ZEND_VM_LAST_OPCODE                  186
+#define ZEND_VM_LAST_OPCODE                  195
 
 #endif

@@ -22,7 +22,7 @@ file_put_contents($fl, $test_content);
 $descriptorspec = array(0 => array("pipe", "r"),1 => array("pipe", "w"));
 $pipes = array();
 
-$process = proc_open(PHP_BINARY.' -f ' . $fl, $descriptorspec, $pipes, NULL, NULL, array("blocking_pipes" => true));
+$process = proc_open(PHP_BINARY.' -n -f ' . $fl, $descriptorspec, $pipes, NULL, NULL, array("blocking_pipes" => true));
 
 for($i = 0; $i < 10; $i++){
 	fwrite($pipes[0], "hello$i\r\n");

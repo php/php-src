@@ -102,6 +102,7 @@ int fcgi_accept_request(fcgi_request *req);
 int fcgi_finish_request(fcgi_request *req, int force_close);
 const char *fcgi_get_last_client_ip();
 void fcgi_set_in_shutdown(int new_value);
+void fcgi_request_set_keep(fcgi_request *req, int new_value);
 
 #ifndef HAVE_ATTRIBUTE_WEAK
 typedef void (*fcgi_logger)(int type, const char *fmt, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);

@@ -231,7 +231,6 @@ static PHP_MSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD]);
 	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_COND]);
 	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP]);
-	zend_hash_destroy(&PHPDBG_G(file_sources));
 	zend_hash_destroy(&PHPDBG_G(seek));
 	zend_hash_destroy(&PHPDBG_G(registered));
 	phpdbg_destroy_watchpoints();
@@ -812,15 +811,11 @@ static zend_module_entry sapi_phpdbg_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
-static void phpdbg_interned_strings_nothing(void) { }
-
 static inline int php_sapi_phpdbg_module_startup(sapi_module_struct *module) /* {{{ */
 {
 	if (php_module_startup(module, &sapi_phpdbg_module_entry, 1) == FAILURE) {
 		return FAILURE;
 	}
-	/* prevent zend_interned_strings_restore from invalidating our string pointers too early (in phpdbg allocated memory only gets freed after module shutdown) */
-	zend_interned_strings_restore = phpdbg_interned_strings_nothing;
 
 	phpdbg_booted = 1;
 
@@ -2151,6 +2146,8 @@ phpdbg_out:
 			php_stream_wrapper *wrapper = zend_hash_str_find_ptr(php_stream_get_url_stream_wrappers_hash(), ZEND_STRL("php"));
 			wrapper->wops->stream_opener = PHPDBG_G(orig_url_wrap_php);
 		}
+
+		zend_hash_destroy(&PHPDBG_G(file_sources));
 
 		zend_try {
 			php_module_shutdown();

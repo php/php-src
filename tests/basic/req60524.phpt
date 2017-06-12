@@ -4,7 +4,7 @@ Req #60524 (Specify temporary directory)
 sys_temp_dir=/path/to/temp/dir
 --SKIPIF--
 <?php
-if(PHP_OS_FAMILY === "WIN") {
+if(PHP_OS_FAMILY === "Windows") {
     die('skip non-windows only test');
 }
 ?>

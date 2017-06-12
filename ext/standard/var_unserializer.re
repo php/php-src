@@ -316,10 +316,10 @@ static inline int unserialize_allowed_class(
 
 
 /*!re2c
-uiv = [+]? [0-9]+;
+uiv = [0-9]+;
 iv = [+-]? [0-9]+;
 nv = [+-]? ([0-9]* "." [0-9]+|[0-9]+ "." [0-9]*);
-nvexp = (iv | nv) [eE] [+-]? iv;
+nvexp = (iv | nv) [eE] iv;
 any = [\000-\377];
 object = [OC];
 */
@@ -364,10 +364,6 @@ static inline size_t parse_uiv(const unsigned char *p)
 {
 	unsigned char cursor;
 	size_t result = 0;
-
-	if (*p == '+') {
-		p++;
-	}
 
 	while (1) {
 		cursor = *p;
@@ -623,13 +619,13 @@ static int php_var_unserialize_internal(UNSERIALIZE_PARAMETER)
 
 /*!re2c
 
-"R:" iv ";"		{
+"R:" uiv ";"		{
 	zend_long id;
 
  	*p = YYCURSOR;
 	if (!var_hash) return 0;
 
-	id = parse_iv(start + 2) - 1;
+	id = parse_uiv(start + 2) - 1;
 	if (id == -1 || (rval_ref = var_access(var_hash, id)) == NULL) {
 		return 0;
 	}
@@ -649,13 +645,13 @@ static int php_var_unserialize_internal(UNSERIALIZE_PARAMETER)
 	return 1;
 }
 
-"r:" iv ";"		{
+"r:" uiv ";"		{
 	zend_long id;
 
  	*p = YYCURSOR;
 	if (!var_hash) return 0;
 
-	id = parse_iv(start + 2) - 1;
+	id = parse_uiv(start + 2) - 1;
 	if (id == -1 || (rval_ref = var_access(var_hash, id)) == NULL) {
 		return 0;
 	}
@@ -765,7 +761,13 @@ use_double:
 	YYCURSOR += 2;
 	*p = YYCURSOR;
 
-	ZVAL_STRINGL(rval, str, len);
+	if (len == 0) {
+		ZVAL_EMPTY_STRING(rval);
+	} else if (len == 1) {
+		ZVAL_INTERNED_STR(rval, ZSTR_CHAR((zend_uchar)*str));
+	} else {
+		ZVAL_STRINGL(rval, str, len);
+	}
 	return 1;
 }
 
@@ -833,7 +835,7 @@ use_double:
 	return finish_nested_data(UNSERIALIZE_PASSTHRU);
 }
 
-"o:" iv ":" ["] {
+"o:" uiv ":" ["] {
 	long elements;
     if (!var_hash) return 0;
 

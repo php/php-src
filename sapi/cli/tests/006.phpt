@@ -39,10 +39,11 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
     }
   }
 
-  - Constants [15] {
+  - Constants [16] {
     Constant [ integer PREG_PATTERN_ORDER ] { 1 }
     Constant [ integer PREG_SET_ORDER ] { 2 }
     Constant [ integer PREG_OFFSET_CAPTURE ] { 256 }
+    Constant [ integer PREG_UNMATCHED_AS_NULL ] { 512 }
     Constant [ integer PREG_SPLIT_NO_EMPTY ] { 1 }
     Constant [ integer PREG_SPLIT_DELIM_CAPTURE ] { 2 }
     Constant [ integer PREG_SPLIT_OFFSET_CAPTURE ] { 4 }

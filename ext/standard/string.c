@@ -791,7 +791,99 @@ static inline int php_charmask(unsigned char *input, size_t len, char *mask)
 }
 /* }}} */
 
-/* {{{ php_trim()
+/* {{{ php_trim_int()
+ * mode 1 : trim left
+ * mode 2 : trim right
+ * mode 3 : trim left and right
+ * what indicates which chars are to be trimmed. NULL->default (' \t\n\r\v\0')
+ */
+static zend_always_inline zend_string *php_trim_int(zend_string *str, char *what, size_t what_len, int mode)
+{
+	const char *start = ZSTR_VAL(str);
+	const char *end = start + ZSTR_LEN(str);
+	char mask[256];
+
+	if (what) {
+		if (what_len == 1) {
+			char p = *what;
+			if (mode & 1) {
+				while (start != end) {
+					if (*start == p) {
+						start++;
+					} else {
+						break;
+					}
+				}
+			}
+			if (mode & 2) {
+				while (start != end) {
+					if (*(end-1) == p) {
+						end--;
+					} else {
+						break;
+					}
+				}
+			}
+		} else {
+			php_charmask((unsigned char*)what, what_len, mask);
+
+			if (mode & 1) {
+				while (start != end) {
+					if (mask[(unsigned char)*start]) {
+						start++;
+					} else {
+						break;
+					}
+				}
+			}
+			if (mode & 2) {
+				while (start != end) {
+					if (mask[(unsigned char)*(end-1)]) {
+						end--;
+					} else {
+						break;
+					}
+				}
+			}
+		}
+	} else {
+		if (mode & 1) {
+			while (start != end) {
+				unsigned char c = (unsigned char)*start;
+
+				if (c <= ' ' &&
+				    (c == ' ' || c == '\n' || c == '\r' || c == '\t' || c == '\v' || c == '\0')) {
+					start++;
+				} else {
+					break;
+				}
+			}
+		}
+		if (mode & 2) {
+			while (start != end) {
+				unsigned char c = (unsigned char)*(end-1);
+
+				if (c <= ' ' &&
+				    (c == ' ' || c == '\n' || c == '\r' || c == '\t' || c == '\v' || c == '\0')) {
+					end--;
+				} else {
+					break;
+				}
+			}
+		}
+	}
+
+	if (ZSTR_LEN(str) == end - start) {
+		return zend_string_copy(str);
+	} else if (end - start == 0) {
+		return ZSTR_EMPTY_ALLOC();
+	} else {
+		return zend_string_init(start, end - start, 0);
+	}
+}
+/* }}} */
+
+/* {{{ php_trim_int()
  * mode 1 : trim left
  * mode 2 : trim right
  * mode 3 : trim left and right
@@ -799,105 +891,14 @@ static inline int php_charmask(unsigned char *input, size_t len, char *mask)
  */
 PHPAPI zend_string *php_trim(zend_string *str, char *what, size_t what_len, int mode)
 {
-	const char *c = ZSTR_VAL(str);
-	size_t len = ZSTR_LEN(str);
-	register size_t i;
-	size_t trimmed = 0;
-	char mask[256];
-
-	if (what) {
-		if (what_len == 1) {
-			char p = *what;
-			if (mode & 1) {
-				for (i = 0; i < len; i++) {
-					if (c[i] == p) {
-						trimmed++;
-					} else {
-						break;
-					}
-				}
-				len -= trimmed;
-				c += trimmed;
-			}
-			if (mode & 2) {
-				if (len > 0) {
-					i = len - 1;
-					do {
-						if (c[i] == p) {
-							len--;
-						} else {
-							break;
-						}
-					} while (i-- != 0);
-				}
-			}
-		} else {
-			php_charmask((unsigned char*)what, what_len, mask);
-
-			if (mode & 1) {
-				for (i = 0; i < len; i++) {
-					if (mask[(unsigned char)c[i]]) {
-						trimmed++;
-					} else {
-						break;
-					}
-				}
-				len -= trimmed;
-				c += trimmed;
-			}
-			if (mode & 2) {
-				if (len > 0) {
-					i = len - 1;
-					do {
-						if (mask[(unsigned char)c[i]]) {
-							len--;
-						} else {
-							break;
-						}
-					} while (i-- != 0);
-				}
-			}
-		}
-	} else {
-		if (mode & 1) {
-			for (i = 0; i < len; i++) {
-				if ((unsigned char)c[i] <= ' ' &&
-				    (c[i] == ' ' || c[i] == '\n' || c[i] == '\r' || c[i] == '\t' || c[i] == '\v' || c[i] == '\0')) {
-					trimmed++;
-				} else {
-					break;
-				}
-			}
-			len -= trimmed;
-			c += trimmed;
-		}
-		if (mode & 2) {
-			if (len > 0) {
-				i = len - 1;
-				do {
-					if ((unsigned char)c[i] <= ' ' &&
-					    (c[i] == ' ' || c[i] == '\n' || c[i] == '\r' || c[i] == '\t' || c[i] == '\v' || c[i] == '\0')) {
-						len--;
-					} else {
-						break;
-					}
-				} while (i-- != 0);
-			}
-		}
-	}
-
-	if (ZSTR_LEN(str) == len) {
-		return zend_string_copy(str);
-	} else {
-		return zend_string_init(c, len, 0);
-	}
+	return php_trim_int(str, what, what_len, mode);
 }
 /* }}} */
 
 /* {{{ php_do_trim
  * Base for trim(), rtrim() and ltrim() functions.
  */
-static void php_do_trim(INTERNAL_FUNCTION_PARAMETERS, int mode)
+static zend_always_inline void php_do_trim(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	zend_string *str;
 	zend_string *what = NULL;
@@ -908,7 +909,7 @@ static void php_do_trim(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		Z_PARAM_STR(what)
 	ZEND_PARSE_PARAMETERS_END();
 
-	ZVAL_STR(return_value, php_trim(str, (what ? ZSTR_VAL(what) : NULL), (what ? ZSTR_LEN(what) : 0), mode));
+	ZVAL_STR(return_value, php_trim_int(str, (what ? ZSTR_VAL(what) : NULL), (what ? ZSTR_LEN(what) : 0), mode));
 }
 /* }}} */
 
@@ -1094,7 +1095,15 @@ PHPAPI void php_explode(const zend_string *delim, zend_string *str, zval *return
 		zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 	} else {
 		do {
-			ZVAL_STRINGL(&tmp, p1, p2 - p1);
+			size_t l = p2 - p1;
+
+			if (l == 0) {
+				ZVAL_EMPTY_STRING(&tmp);
+			} else if (l == 1) {
+				ZVAL_INTERNED_STR(&tmp, ZSTR_CHAR((zend_uchar)(*p1)));
+			} else {
+				ZVAL_STRINGL(&tmp, p1, p2 - p1);
+			}
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 			p1 = p2 + ZSTR_LEN(delim);
 			p2 = (char *) php_memnstr(p1, ZSTR_VAL(delim), ZSTR_LEN(delim), endp);
@@ -2420,6 +2429,14 @@ PHP_FUNCTION(substr)
 		l = ZSTR_LEN(str) - f;
 	}
 
+	if (l == 0) {
+		RETURN_EMPTY_STRING();
+	} else if (l == 1) {
+		RETURN_INTERNED_STR(ZSTR_CHAR((zend_uchar)(ZSTR_VAL(str)[f])));
+	} else if (l == ZSTR_LEN(str)) {
+		RETURN_STR_COPY(str);
+	}
+
 	RETURN_STRINGL(ZSTR_VAL(str) + f, l);
 }
 /* }}} */
@@ -2766,13 +2783,7 @@ PHP_FUNCTION(chr)
 	ZEND_PARSE_PARAMETERS_END_EX(c = 0);
 
 	c &= 0xff;
-	if (CG(one_char_string)[c]) {
-		ZVAL_INTERNED_STR(return_value, CG(one_char_string)[c]);
-	} else {
-		ZVAL_NEW_STR(return_value, zend_string_alloc(1, 0));
-		Z_STRVAL_P(return_value)[0] = (char)c;
-		Z_STRVAL_P(return_value)[1] = '\0';
-	}
+	ZVAL_INTERNED_STR(return_value, ZSTR_CHAR(c));
 }
 /* }}} */
 
@@ -3233,7 +3244,14 @@ static zend_string *php_str_to_str_ex(zend_string *haystack,
 nothing_todo:
 		return zend_string_copy(haystack);
 	} else {
-		new_str = zend_string_init(str, str_len, 0);
+		if (str_len == 0) {
+			new_str = ZSTR_EMPTY_ALLOC();
+		} else if (str_len == 1) {
+			new_str = ZSTR_CHAR((zend_uchar)(*str));
+		} else {
+			new_str = zend_string_init(str, str_len, 0);
+		}
+
 		(*replace_count)++;
 		return new_str;
 	}
@@ -4086,7 +4104,7 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 		Z_PARAM_ZVAL(replace)
 		Z_PARAM_ZVAL(subject)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL_EX(zcount, 0, 1)
+		Z_PARAM_ZVAL_DEREF(zcount)
 	ZEND_PARSE_PARAMETERS_END();
 
 	/* Make sure we're dealing with strings and do the replacement. */
@@ -4568,7 +4586,7 @@ PHP_FUNCTION(parse_str)
 		symbol_table = zend_rebuild_symbol_table();
 		ZVAL_ARR(&tmp, symbol_table);
 		sapi_module.treat_data(PARSE_STRING, res, &tmp);
-		if (UNEXPECTED(zend_hash_del(symbol_table, CG(known_strings)[ZEND_STR_THIS]) == SUCCESS)) {
+		if (UNEXPECTED(zend_hash_del(symbol_table, ZSTR_KNOWN(ZEND_STR_THIS)) == SUCCESS)) {
 			zend_throw_error(NULL, "Cannot re-assign $this");
 		}
 	} else 	{

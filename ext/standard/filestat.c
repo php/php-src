@@ -996,7 +996,7 @@ PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zva
 /* another quickie macro to make defining similar functions easier */
 /* {{{ FileFunction(name, funcnum) */
 #define FileFunction(name, funcnum) \
-void name(INTERNAL_FUNCTION_PARAMETERS) { \
+ZEND_NAMED_FUNCTION(name) { \
 	char *filename; \
 	size_t filename_len; \
 	\

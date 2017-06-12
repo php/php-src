@@ -120,19 +120,16 @@ ZEND_API const zend_internal_function zend_pass_function = {
 
 #define CV_DEF_OF(i) (EX(func)->op_array.vars[i])
 
-#define ZEND_VM_MAIN_STACK_PAGE_SLOTS (16 * 1024) /* should be a power of 2 */
-#define ZEND_VM_GENERATOR_STACK_PAGE_SLOTS (256)
+#define ZEND_VM_STACK_PAGE_SLOTS (16 * 1024) /* should be a power of 2 */
 
-#define ZEND_VM_STACK_PAGE_SLOTS(gen) ((gen) ? ZEND_VM_GENERATOR_STACK_PAGE_SLOTS : ZEND_VM_MAIN_STACK_PAGE_SLOTS)
+#define ZEND_VM_STACK_PAGE_SIZE  (ZEND_VM_STACK_PAGE_SLOTS * sizeof(zval))
 
-#define ZEND_VM_STACK_PAGE_SIZE(gen)  (ZEND_VM_STACK_PAGE_SLOTS(gen) * sizeof(zval))
+#define ZEND_VM_STACK_FREE_PAGE_SIZE \
+	((ZEND_VM_STACK_PAGE_SLOTS - ZEND_VM_STACK_HEADER_SLOTS) * sizeof(zval))
 
-#define ZEND_VM_STACK_FREE_PAGE_SIZE(gen) \
-	((ZEND_VM_STACK_PAGE_SLOTS(gen) - ZEND_VM_STACK_HEADER_SLOTS) * sizeof(zval))
-
-#define ZEND_VM_STACK_PAGE_ALIGNED_SIZE(gen, size) \
+#define ZEND_VM_STACK_PAGE_ALIGNED_SIZE(size) \
 	(((size) + ZEND_VM_STACK_HEADER_SLOTS * sizeof(zval) \
-	  + (ZEND_VM_STACK_PAGE_SIZE(gen) - 1)) & ~(ZEND_VM_STACK_PAGE_SIZE(gen) - 1))
+	  + (ZEND_VM_STACK_PAGE_SIZE - 1)) & ~(ZEND_VM_STACK_PAGE_SIZE - 1))
 
 static zend_always_inline zend_vm_stack zend_vm_stack_new_page(size_t size, zend_vm_stack prev) {
 	zend_vm_stack page = (zend_vm_stack)emalloc(size);
@@ -145,7 +142,7 @@ static zend_always_inline zend_vm_stack zend_vm_stack_new_page(size_t size, zend
 
 ZEND_API void zend_vm_stack_init(void)
 {
-	EG(vm_stack) = zend_vm_stack_new_page(ZEND_VM_STACK_PAGE_SIZE(0 /* main stack */), NULL);
+	EG(vm_stack) = zend_vm_stack_new_page(ZEND_VM_STACK_PAGE_SIZE, NULL);
 	EG(vm_stack)->top++;
 	EG(vm_stack_top) = EG(vm_stack)->top;
 	EG(vm_stack_end) = EG(vm_stack)->end;
@@ -170,8 +167,8 @@ ZEND_API void* zend_vm_stack_extend(size_t size)
 	stack = EG(vm_stack);
 	stack->top = EG(vm_stack_top);
 	EG(vm_stack) = stack = zend_vm_stack_new_page(
-		EXPECTED(size < ZEND_VM_STACK_FREE_PAGE_SIZE(0)) ?
-			ZEND_VM_STACK_PAGE_SIZE(0) : ZEND_VM_STACK_PAGE_ALIGNED_SIZE(0, size),
+		EXPECTED(size < ZEND_VM_STACK_FREE_PAGE_SIZE) ?
+			ZEND_VM_STACK_PAGE_SIZE : ZEND_VM_STACK_PAGE_ALIGNED_SIZE(size),
 		stack);
 	ptr = stack->top;
 	EG(vm_stack_top) = (void*)(((char*)ptr) + size);
@@ -1264,11 +1261,7 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 
 	if (result) {
 		/* Return the new character */
-		if (CG(one_char_string)[c]) {
-			ZVAL_INTERNED_STR(result, CG(one_char_string)[c]);
-		} else {
-			ZVAL_NEW_STR(result, zend_string_init(Z_STRVAL_P(str) + offset, 1, 0));
-		}
+		ZVAL_INTERNED_STR(result, ZSTR_CHAR(c));
 	}
 }
 
@@ -1781,11 +1774,7 @@ try_string_offset:
 				? (zend_long)Z_STRLEN_P(container) + offset : offset;
 			c = (zend_uchar)Z_STRVAL_P(container)[real_offset];
 
-			if (CG(one_char_string)[c]) {
-				ZVAL_INTERNED_STR(result, CG(one_char_string)[c]);
-			} else {
-				ZVAL_NEW_STR(result, zend_string_init(Z_STRVAL_P(container) + real_offset, 1, 0));
-			}
+			ZVAL_INTERNED_STR(result, ZSTR_CHAR(c));
 		}
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
 		if (/*dim_type == IS_CV &&*/ UNEXPECTED(Z_TYPE_P(dim) == IS_UNDEF)) {
@@ -1927,7 +1916,7 @@ use_read_property:
 	}
 }
 
-static zend_always_inline zval* zend_fetch_static_property_address(zend_execute_data *execute_data, zval *varname, zend_uchar varname_type, znode_op op2, zend_uchar op2_type)
+static zend_always_inline zval* zend_fetch_static_property_address(zend_execute_data *execute_data, zval *varname, zend_uchar varname_type, znode_op op2, zend_uchar op2_type, int type)
 {
 	zval *retval;
 	zend_string *name;
@@ -1951,7 +1940,9 @@ static zend_always_inline zval* zend_fetch_static_property_address(zend_execute_
 
 			/* check if static properties were destoyed */
 			if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-				zend_throw_error(NULL, "Access to undeclared static property: %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+				if (type != BP_VAR_IS) {
+					zend_throw_error(NULL, "Access to undeclared static property: %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+				}
 				return NULL;
 			}
 
@@ -1983,11 +1974,14 @@ static zend_always_inline zval* zend_fetch_static_property_address(zend_execute_
 			ce = Z_CE_P(EX_VAR(op2.var));
 		}
 		if (varname_type == IS_CONST &&
-		    (retval = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(varname), ce)) != NULL) {
+		    EXPECTED(CACHED_PTR(Z_CACHE_SLOT_P(varname)) == ce)) {
+			retval = CACHED_PTR(Z_CACHE_SLOT_P(varname) + sizeof(void*));
 
 			/* check if static properties were destoyed */
 			if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-				zend_throw_error(NULL, "Access to undeclared static property: %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+				if (type != BP_VAR_IS) {
+					zend_throw_error(NULL, "Access to undeclared static property: %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+				}
 				return NULL;
 			}
 
@@ -1995,7 +1989,7 @@ static zend_always_inline zval* zend_fetch_static_property_address(zend_execute_
 		}
 	}
 
-	retval = zend_std_get_static_property(ce, name, 0);
+	retval = zend_std_get_static_property(ce, name, type == BP_VAR_IS);
 
 	if (varname_type != IS_CONST) {
 		zend_string_release(name);

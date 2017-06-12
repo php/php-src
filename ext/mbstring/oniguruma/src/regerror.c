@@ -54,6 +54,8 @@ onig_error_code_to_format(int code)
     p = "fail to memory allocation"; break;
   case ONIGERR_MATCH_STACK_LIMIT_OVER:
     p = "match-stack limit over"; break;
+  case ONIGERR_PARSE_DEPTH_LIMIT_OVER:
+    p = "parse depth limit over"; break;
   case ONIGERR_TYPE_BUG:
     p = "undefined type (bug)"; break;
   case ONIGERR_PARSER_BUG:
@@ -348,21 +350,12 @@ onig_snprintf_with_pattern(buf, bufsize, enc, pat, pat_end, fmt, va_alist)
 
     p = pat;
     while (p < pat_end) {
-      if (*p == '\\') {
-	*s++ = *p++;
-	len = enclen(enc, p);
-	while (len-- > 0) *s++ = *p++;
-      }
-      else if (*p == '/') {
-	*s++ = (unsigned char )'\\';
-	*s++ = *p++;
-      }
-      else if (ONIGENC_IS_MBC_HEAD(enc, p)) {
+      if (ONIGENC_IS_MBC_HEAD(enc, p)) {
         len = enclen(enc, p);
         if (ONIGENC_MBC_MINLEN(enc) == 1) {
           while (len-- > 0) *s++ = *p++;
         }
-        else { /* for UTF16 */
+        else { /* for UTF16/32 */
           int blen;
 
           while (len-- > 0) {
@@ -372,6 +365,15 @@ onig_snprintf_with_pattern(buf, bufsize, enc, pat, pat_end, fmt, va_alist)
             while (blen-- > 0) *s++ = *bp++;
           }
         }
+      }
+      else if (*p == '\\') {
+	*s++ = *p++;
+	len = enclen(enc, p);
+	while (len-- > 0) *s++ = *p++;
+      }
+      else if (*p == '/') {
+	*s++ = (unsigned char )'\\';
+	*s++ = *p++;
       }
       else if (!ONIGENC_IS_CODE_PRINT(enc, *p) &&
 	       !ONIGENC_IS_CODE_SPACE(enc, *p)) {

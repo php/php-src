@@ -167,7 +167,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_date_create_from_format, 0, 0, 2)
 	ZEND_ARG_INFO(0, format)
 	ZEND_ARG_INFO(0, time)
-	ZEND_ARG_INFO(0, object)
+	ZEND_ARG_OBJ_INFO(0, object, DateTimeZone, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_date_parse, 0, 0, 1)
@@ -345,7 +345,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_timezone_transitions_get, 0, 0, 1)
 	ZEND_ARG_INFO(0, timestamp_end)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_timezone_method_transitions_get, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_timezone_method_transitions_get, 0, 0, 0)
 	ZEND_ARG_INFO(0, timestamp_begin)
 	ZEND_ARG_INFO(0, timestamp_end)
 ZEND_END_ARG_INFO()
@@ -776,6 +776,11 @@ PHP_RSHUTDOWN_FUNCTION(date)
 #define DATE_FORMAT_RFC1123  "D, d M Y H:i:s O"
 
 /*
+ * RFC7231, Section 7.1.1: http://tools.ietf.org/html/rfc7231
+ */
+#define DATE_FORMAT_RFC7231  "D, d M Y H:i:s \\G\\M\\T"
+
+/*
  * RFC2822, Section 3.3: http://www.ietf.org/rfc/rfc2822.txt
  *  FWS             =       ([*WSP CRLF] 1*WSP) /   ; Folding white space
  *  CFWS            =       *([FWS] comment) (([FWS] comment) / FWS)
@@ -868,6 +873,7 @@ PHP_MINIT_FUNCTION(date)
 	REGISTER_STRING_CONSTANT("DATE_RFC850",  DATE_FORMAT_RFC850,  CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("DATE_RFC1036", DATE_FORMAT_RFC1036, CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("DATE_RFC1123", DATE_FORMAT_RFC1123, CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("DATE_RFC7231", DATE_FORMAT_RFC7231, CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("DATE_RFC2822", DATE_FORMAT_RFC2822, CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("DATE_RFC3339", DATE_FORMAT_RFC3339, CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("DATE_RFC3339_EXTENDED", DATE_FORMAT_RFC3339_EXTENDED, CONST_CS | CONST_PERSISTENT);
@@ -1153,11 +1159,12 @@ static zend_string *date_format(char *format, size_t format_len, timelib_time *t
 			case 'a': length = slprintf(buffer, 32, "%s", t->h >= 12 ? "pm" : "am"); break;
 			case 'A': length = slprintf(buffer, 32, "%s", t->h >= 12 ? "PM" : "AM"); break;
 			case 'B': {
-				int retval = (((((long)t->sse)-(((long)t->sse) - ((((long)t->sse) % 86400) + 3600))) * 10) / 864);
-				while (retval < 0) {
-					retval += 1000;
+				int retval = ((((long)t->sse)-(((long)t->sse) - ((((long)t->sse) % 86400) + 3600))) * 10);
+				if (retval < 0) {
+					retval += 864000;
 				}
-				retval = retval % 1000;
+				/* Make sure to do this on a positive int to avoid rounding errors */
+				retval = (retval / 864)  % 1000;
 				length = slprintf(buffer, 32, "%03d", retval);
 				break;
 			}
@@ -1350,11 +1357,12 @@ PHPAPI int php_idate(char format, time_t ts, int localtime)
 
 		/* Swatch Beat a.k.a. Internet Time */
 		case 'B':
-			retval = (((((long)t->sse)-(((long)t->sse) - ((((long)t->sse) % 86400) + 3600))) * 10) / 864);
-			while (retval < 0) {
-				retval += 1000;
+			retval = ((((long)t->sse)-(((long)t->sse) - ((((long)t->sse) % 86400) + 3600))) * 10);
+			if (retval < 0) {
+				retval += 864000;
 			}
-			retval = retval % 1000;
+			/* Make sure to do this on a positive int to avoid rounding errors */
+			retval = (retval / 864) % 1000;
 			break;
 
 		/* time */
@@ -2056,6 +2064,23 @@ static void date_register_classes(void) /* {{{ */
 	date_ce_interface = zend_register_internal_interface(&ce_interface);
 	date_ce_interface->interface_gets_implemented = implement_date_interface_handler;
 
+#define REGISTER_DATE_INTERFACE_CONST_STRING(const_name, value) \
+	zend_declare_class_constant_stringl(date_ce_interface, const_name, sizeof(const_name)-1, value, sizeof(value)-1);
+
+	REGISTER_DATE_INTERFACE_CONST_STRING("ATOM",             DATE_FORMAT_RFC3339);
+	REGISTER_DATE_INTERFACE_CONST_STRING("COOKIE",           DATE_FORMAT_COOKIE);
+	REGISTER_DATE_INTERFACE_CONST_STRING("ISO8601",          DATE_FORMAT_ISO8601);
+	REGISTER_DATE_INTERFACE_CONST_STRING("RFC822",           DATE_FORMAT_RFC822);
+	REGISTER_DATE_INTERFACE_CONST_STRING("RFC850",           DATE_FORMAT_RFC850);
+	REGISTER_DATE_INTERFACE_CONST_STRING("RFC1036",          DATE_FORMAT_RFC1036);
+	REGISTER_DATE_INTERFACE_CONST_STRING("RFC1123",          DATE_FORMAT_RFC1123);
+	REGISTER_DATE_INTERFACE_CONST_STRING("RFC7231",          DATE_FORMAT_RFC7231);
+	REGISTER_DATE_INTERFACE_CONST_STRING("RFC2822",          DATE_FORMAT_RFC2822);
+	REGISTER_DATE_INTERFACE_CONST_STRING("RFC3339",          DATE_FORMAT_RFC3339);
+	REGISTER_DATE_INTERFACE_CONST_STRING("RFC3339_EXTENDED", DATE_FORMAT_RFC3339_EXTENDED);
+	REGISTER_DATE_INTERFACE_CONST_STRING("RSS",              DATE_FORMAT_RFC1123);
+	REGISTER_DATE_INTERFACE_CONST_STRING("W3C",              DATE_FORMAT_RFC3339);
+
 	INIT_CLASS_ENTRY(ce_date, "DateTime", date_funcs_date);
 	ce_date.create_object = date_object_new_date;
 	date_ce_date = zend_register_internal_class_ex(&ce_date, NULL);
@@ -2067,22 +2092,6 @@ static void date_register_classes(void) /* {{{ */
 	date_object_handlers_date.get_properties = date_object_get_properties;
 	date_object_handlers_date.get_gc = date_object_get_gc;
 	zend_class_implements(date_ce_date, 1, date_ce_interface);
-
-#define REGISTER_DATE_CLASS_CONST_STRING(const_name, value) \
-	zend_declare_class_constant_stringl(date_ce_date, const_name, sizeof(const_name)-1, value, sizeof(value)-1);
-
-	REGISTER_DATE_CLASS_CONST_STRING("ATOM",             DATE_FORMAT_RFC3339);
-	REGISTER_DATE_CLASS_CONST_STRING("COOKIE",           DATE_FORMAT_COOKIE);
-	REGISTER_DATE_CLASS_CONST_STRING("ISO8601",          DATE_FORMAT_ISO8601);
-	REGISTER_DATE_CLASS_CONST_STRING("RFC822",           DATE_FORMAT_RFC822);
-	REGISTER_DATE_CLASS_CONST_STRING("RFC850",           DATE_FORMAT_RFC850);
-	REGISTER_DATE_CLASS_CONST_STRING("RFC1036",          DATE_FORMAT_RFC1036);
-	REGISTER_DATE_CLASS_CONST_STRING("RFC1123",          DATE_FORMAT_RFC1123);
-	REGISTER_DATE_CLASS_CONST_STRING("RFC2822",          DATE_FORMAT_RFC2822);
-	REGISTER_DATE_CLASS_CONST_STRING("RFC3339",          DATE_FORMAT_RFC3339);
-	REGISTER_DATE_CLASS_CONST_STRING("RFC3339_EXTENDED", DATE_FORMAT_RFC3339_EXTENDED);
-	REGISTER_DATE_CLASS_CONST_STRING("RSS",              DATE_FORMAT_RFC1123);
-	REGISTER_DATE_CLASS_CONST_STRING("W3C",              DATE_FORMAT_RFC3339);
 
 	INIT_CLASS_ENTRY(ce_immutable, "DateTimeImmutable", date_funcs_immutable);
 	ce_immutable.create_object = date_object_new_date;
@@ -2406,8 +2415,11 @@ static zend_object *date_object_clone_interval(zval *this_ptr) /* {{{ */
 	php_interval_obj *new_obj = php_interval_obj_from_obj(date_object_new_interval_ex(old_obj->std.ce, 0));
 
 	zend_objects_clone_members(&new_obj->std, &old_obj->std);
+	new_obj->initialized = old_obj->initialized;
+	if (old_obj->diff) {
+		new_obj->diff = timelib_rel_time_clone(old_obj->diff);
+	}
 
-	/** FIX ME ADD CLONE STUFF **/
 	return &new_obj->std;
 } /* }}} */
 
@@ -2490,8 +2502,23 @@ static zend_object *date_object_clone_period(zval *this_ptr) /* {{{ */
 	php_period_obj *new_obj = php_period_obj_from_obj(date_object_new_period_ex(old_obj->std.ce, 0));
 
 	zend_objects_clone_members(&new_obj->std, &old_obj->std);
+	new_obj->initialized = old_obj->initialized;
+	new_obj->recurrences = old_obj->recurrences;
+	new_obj->include_start_date = old_obj->include_start_date;
+	new_obj->start_ce = old_obj->start_ce;
 
-	/** FIX ME ADD CLONE STUFF **/
+	if (old_obj->start) {
+		new_obj->start = timelib_time_clone(old_obj->start);
+	}
+	if (old_obj->current) {
+		new_obj->current = timelib_time_clone(old_obj->current);
+	}
+	if (old_obj->end) {
+        new_obj->end = timelib_time_clone(old_obj->end);
+    }
+    if (old_obj->interval) {
+        new_obj->interval = timelib_rel_time_clone(old_obj->interval);
+    }
 	return &new_obj->std;
 } /* }}} */
 
@@ -2564,18 +2591,20 @@ static void update_errors_warnings(timelib_error_container *last_errors) /* {{{ 
 
 static void php_date_set_time_fraction(timelib_time *time, int microseconds)
 {
-	time->f = microseconds / 1000000;
+	time->f = (double) microseconds / 1000000;
 }
 
-static void php_date_set_current_time_fraction(timelib_time *time)
+static void php_date_get_current_time_with_fraction(time_t *sec, suseconds_t *usec)
 {
 #if HAVE_GETTIMEOFDAY
 	struct timeval tp = {0}; /* For setting microseconds */
 
 	gettimeofday(&tp, NULL);
-	timelib_set_fraction_from_timeval(time, tp);
+	*sec = tp.tv_sec;
+	*usec = tp.tv_usec;
 #else
-	time->f = 0;
+	*sec = time(NULL);
+	*usec = 0;
 #endif
 }
 
@@ -2587,6 +2616,8 @@ PHPAPI int php_date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, 
 	int type = TIMELIB_ZONETYPE_ID, new_dst = 0;
 	char *new_abbr = NULL;
 	timelib_sll new_offset = 0;
+	time_t sec;
+	suseconds_t usec;
 
 	if (dateobj->time) {
 		timelib_time_dtor(dateobj->time);
@@ -2651,8 +2682,9 @@ PHPAPI int php_date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, 
 			now->tz_abbr = new_abbr;
 			break;
 	}
-	timelib_unixtime2local(now, (timelib_sll) time(NULL));
-	php_date_set_current_time_fraction(now);
+	php_date_get_current_time_with_fraction(&sec, &usec);
+	timelib_unixtime2local(now, (timelib_sll) sec);
+	php_date_set_time_fraction(now, usec);
 	timelib_fill_holes(dateobj->time, now, TIMELIB_NO_CLONE);
 	timelib_update_ts(dateobj->time, tzi);
 	timelib_update_from_sse(dateobj->time);

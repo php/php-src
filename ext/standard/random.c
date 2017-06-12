@@ -27,7 +27,7 @@
 #include "zend_exceptions.h"
 #include "php_random.h"
 
-#if PHP_WIN32
+#ifdef PHP_WIN32
 # include "win32/winutil.h"
 #endif
 #ifdef __linux__
@@ -83,7 +83,7 @@ PHP_MSHUTDOWN_FUNCTION(random)
 /* {{{ */
 PHPAPI int php_random_bytes(void *bytes, size_t size, zend_bool should_throw)
 {
-#if PHP_WIN32
+#ifdef PHP_WIN32
 	/* Defer to CryptGenRandom on Windows */
 	if (php_win32_get_random_bytes(bytes, size) == FAILURE) {
 		if (should_throw) {
@@ -93,14 +93,13 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, zend_bool should_throw)
 	}
 #elif HAVE_DECL_ARC4RANDOM_BUF && ((defined(__OpenBSD__) && OpenBSD >= 201405) || (defined(__NetBSD__) && __NetBSD_Version__ >= 700000001))
 	arc4random_buf(bytes, size);
-#elif defined(__linux__) && defined(SYS_getrandom)
-	/* Linux getrandom(2) syscall */
+#else
 	size_t read_bytes = 0;
-	size_t amount_to_read = 0;
 	ssize_t n;
-
+#if defined(__linux__) && defined(SYS_getrandom)
+	/* Linux getrandom(2) syscall */
 	/* Keep reading until we get enough entropy */
-	do {
+	while (read_bytes < size) {
 		/* Below, (bytes + read_bytes)  is pointer arithmetic.
 
 		   bytes   read_bytes  size
@@ -110,11 +109,17 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, zend_bool should_throw)
 		              amount_to_read
 
 		*/
-		amount_to_read = size - read_bytes;
+		size_t amount_to_read = size - read_bytes;
 		n = syscall(SYS_getrandom, bytes + read_bytes, amount_to_read, 0);
 
 		if (n == -1) {
-			if (errno == EINTR || errno == EAGAIN) {
+			if (errno == ENOSYS) {
+				/* This can happen if PHP was compiled against a newer kernel where getrandom()
+				 * is available, but then runs on an older kernel without getrandom(). If this
+				 * happens we simply fall back to reading from /dev/urandom. */
+				ZEND_ASSERT(read_bytes == 0);
+				break;
+			} else if (errno == EINTR || errno == EAGAIN) {
 				/* Try again */
 				continue;
 			}
@@ -130,53 +135,52 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, zend_bool should_throw)
 		}
 
 		read_bytes += (size_t) n;
-	} while (read_bytes < size);
-#else
-	int    fd = RANDOM_G(fd);
-	struct stat st;
-	size_t read_bytes = 0;
-	ssize_t n;
-
-	if (fd < 0) {
-#if HAVE_DEV_URANDOM
-		fd = open("/dev/urandom", O_RDONLY);
+	}
 #endif
-		if (fd < 0) {
-			if (should_throw) {
-				zend_throw_exception(zend_ce_exception, "Cannot open source device", 0);
-			}
-			return FAILURE;
-		}
-		/* Does the file exist and is it a character device? */
-		if (fstat(fd, &st) != 0 || 
-# ifdef S_ISNAM
-                !(S_ISNAM(st.st_mode) || S_ISCHR(st.st_mode))
-# else
-                !S_ISCHR(st.st_mode)
-# endif
-		) {
-			close(fd);
-			if (should_throw) {
-				zend_throw_exception(zend_ce_exception, "Error reading from source device", 0);
-			}
-			return FAILURE;
-		}
-		RANDOM_G(fd) = fd;
-	}
-
-	while (read_bytes < size) {
-		n = read(fd, bytes + read_bytes, size - read_bytes);
-		if (n <= 0) {
-			break;
-		}
-		read_bytes += n;
-	}
-
 	if (read_bytes < size) {
-		if (should_throw) {
-			zend_throw_exception(zend_ce_exception, "Could not gather sufficient random data", 0);
+		int    fd = RANDOM_G(fd);
+		struct stat st;
+
+		if (fd < 0) {
+#if HAVE_DEV_URANDOM
+			fd = open("/dev/urandom", O_RDONLY);
+#endif
+			if (fd < 0) {
+				if (should_throw) {
+					zend_throw_exception(zend_ce_exception, "Cannot open source device", 0);
+				}
+				return FAILURE;
+			}
+			/* Does the file exist and is it a character device? */
+			if (fstat(fd, &st) != 0 ||
+# ifdef S_ISNAM
+					!(S_ISNAM(st.st_mode) || S_ISCHR(st.st_mode))
+# else
+					!S_ISCHR(st.st_mode)
+# endif
+			) {
+				close(fd);
+				if (should_throw) {
+					zend_throw_exception(zend_ce_exception, "Error reading from source device", 0);
+				}
+				return FAILURE;
+			}
+			RANDOM_G(fd) = fd;
 		}
-		return FAILURE;
+
+		for (read_bytes = 0; read_bytes < size; read_bytes += (size_t) n) {
+			n = read(fd, bytes + read_bytes, size - read_bytes);
+			if (n <= 0) {
+				break;
+			}
+		}
+
+		if (read_bytes < size) {
+			if (should_throw) {
+				zend_throw_exception(zend_ce_exception, "Could not gather sufficient random data", 0);
+			}
+			return FAILURE;
+		}
 	}
 #endif
 

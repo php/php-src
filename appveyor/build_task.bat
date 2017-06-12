@@ -12,15 +12,14 @@ if %errorlevel% neq 0 exit /b 3
 
 if /i "%APPVEYOR_REPO_BRANCH:~0,4%" equ "php-" (
 	set BRANCH=%APPVEYOR_REPO_BRANCH:~4,3%
-	set STABILITY=stable
 ) else (
 	set BRANCH=master
-	set STABILITY=staging
 )
-set DEPS_DIR=%PHP_BUILD_CACHE_BASE_DIR%\deps-%PHP_SDK_VC%-%PHP_SDK_ARCH%-%BRANCH%
+set STABILITY=staging
+set DEPS_DIR=%PHP_BUILD_CACHE_BASE_DIR%\deps-%BRANCH%-%PHP_SDK_VC%-%PHP_SDK_ARCH%
 rem SDK is cached, deps info is cached as well
 echo Updating dependencies in %DEPS_DIR%
-call phpsdk_deps --update --branch %BRANCH% --stability %STABILITY% --deps %DEPS_DIR%
+call phpsdk_deps --update --no-backup --branch %BRANCH% --stability %STABILITY% --deps %DEPS_DIR% --crt %PHP_BUILD_CRT%
 if %errorlevel% neq 0 exit /b 3
 
 call buildconf.bat --force
@@ -28,7 +27,7 @@ if %errorlevel% neq 0 exit /b 3
 
 if "%THREAD_SAFE%" equ "0" set ADD_CONF=--disable-zts
 
-set EXT_EXCLUDE_FROM_TEST=snmp,oci8_12c,pdo_oci,pdo_odbc,odbc,pdo_firebird,interbase,ldap,imap,dba
+set EXT_EXCLUDE_FROM_TEST=snmp,oci8_12c,pdo_oci,pdo_odbc,odbc,pdo_firebird,interbase,ldap,imap
 if "%OPCACHE%" equ "0" set EXT_EXCLUDE_FROM_TEST=%EXT_EXCLUDE_FROM_TEST%,opcache
 
 call configure.bat ^

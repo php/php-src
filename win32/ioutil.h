@@ -114,6 +114,8 @@ typedef enum {
 	&& 0 == wcsncmp((pathw), PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW, PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW))
 #define PHP_WIN32_IOUTIL_IS_ABSOLUTEW(pathw, path_lenw) (PHP_WIN32_IOUTIL_IS_LONG_PATHW(pathw, path_lenw) \
 	|| path_lenw >= 3 && PHP_WIN32_IOUTIL_IS_LETTERW(pathw[0]) && L':' == pathw[1] && IS_SLASHW(pathw[2]))
+#define PHP_WIN32_IOUTIL_IS_UNC(pathw, path_lenw) (path_lenw >= 2 && PHP_WIN32_IOUTIL_IS_SLASHW(pathw[0]) && PHP_WIN32_IOUTIL_IS_SLASHW(pathw[1]) \
+	|| path_lenw >= PHP_WIN32_IOUTIL_UNC_PATH_PREFIX_LENW && 0 == wcsncmp((pathw), PHP_WIN32_IOUTIL_UNC_PATH_PREFIXW, PHP_WIN32_IOUTIL_UNC_PATH_PREFIX_LENW))
 
 #define PHP_WIN32_IOUTIL_INIT_W(path) \
 	wchar_t *pathw = php_win32_ioutil_any_to_w(path); \
@@ -244,7 +246,9 @@ __forceinline static int php_win32_ioutil_access(const char *path, mode_t mode)
 	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, -1, 1)
 
 	ret = _waccess(pathw, mode);
-	_get_errno(&err);
+	if (0 > ret) {
+		_get_errno(&err);
+	}
 	PHP_WIN32_IOUTIL_CLEANUP_W()
 
 	if (0 > ret) {
@@ -277,7 +281,9 @@ __forceinline static int php_win32_ioutil_open(const char *path, int flags, ...)
 	}
 
 	ret = php_win32_ioutil_open_w(pathw, flags, mode);
-	err = GetLastError();
+	if (0 > ret) {
+		err = GetLastError();
+	}
 	PHP_WIN32_IOUTIL_CLEANUP_W()
 
 	if (0 > ret) {
@@ -366,11 +372,13 @@ __forceinline static FILE *php_win32_ioutil_fopen(const char *patha, const char 
 	}
 
 	ret = _wfopen(pathw, modew);
-	_get_errno(&err);
+	if (!ret) {
+		_get_errno(&err);
+	}
 	free(pathw);
 	free(modew);
 
-	if (0 > ret) {
+	if (!ret) {
 		_set_errno(err);
 	}
 	return ret;
@@ -403,7 +411,9 @@ __forceinline static int php_win32_ioutil_rename(const char *oldnamea, const cha
 	}
 
 	ret = php_win32_ioutil_rename_w(oldnamew, newnamew);
-	err = GetLastError();
+	if (0 > ret) {
+		err = GetLastError();
+	}
 
 	free(oldnamew);
 	free(newnamew);
@@ -427,7 +437,9 @@ __forceinline static int php_win32_ioutil_chdir(const char *patha)
 	}
 
 	ret = php_win32_ioutil_chdir_w(pathw);
-	err = GetLastError();
+	if (0 > ret) {
+		err = GetLastError();
+	}
 
 	free(pathw);
 
@@ -493,7 +505,9 @@ __forceinline static int php_win32_ioutil_chmod(const char *patha, int mode)
 	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, -1, 1)
 
 	ret = _wchmod(pathw, mode);
-	_get_errno(&err);
+	if (0 > ret) {
+		_get_errno(&err);
+	}
 
 	free(pathw);
 

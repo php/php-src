@@ -163,6 +163,11 @@ char**		ftp_nlist(ftpbuf_t *ftp, const char *path, const size_t path_len);
  */
 char**		ftp_list(ftpbuf_t *ftp, const char *path, const size_t path_len, int recursive);
 
+/* populates a hashtable with the facts contained in one line of
+ * an MLSD response.
+ */
+int			ftp_mlsd_parse_line(HashTable *ht, const char *input);
+
 /* returns a NULL-terminated array of lines returned by the ftp
  * MLSD command for the given path or NULL on error.  the return
  * array must be freed (but don't

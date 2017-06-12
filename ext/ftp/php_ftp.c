@@ -755,13 +755,14 @@ PHP_FUNCTION(ftp_rawlist)
 /* }}} */
 
 /* {{{ proto array ftp_mlsd(resource stream, string directory)
-   Returns a detailed listing of a directory as an array of output lines */
+   Returns a detailed listing of a directory as an array of parsed output lines */
 PHP_FUNCTION(ftp_mlsd)
 {
 	zval		*z_ftp;
 	ftpbuf_t	*ftp;
 	char		**llist, **ptr, *dir;
 	size_t		dir_len;
+	zval		entry;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &z_ftp, &dir, &dir_len) == FAILURE) {
 		return;
@@ -778,8 +779,14 @@ PHP_FUNCTION(ftp_mlsd)
 
 	array_init(return_value);
 	for (ptr = llist; *ptr; ptr++) {
-		add_next_index_string(return_value, *ptr);
+		array_init(&entry);
+		if (ftp_mlsd_parse_line(Z_ARRVAL_P(&entry), *ptr) == SUCCESS) {
+			zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &entry);
+		} else {
+			zval_ptr_dtor(&entry);
+		}
 	}
+
 	efree(llist);
 }
 /* }}} */

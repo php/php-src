@@ -25,14 +25,24 @@
 
 BEGIN_EXTERN_C()
 
-ZEND_API extern zend_string *(*zend_new_interned_string)(zend_string *str);
-ZEND_API extern void (*zend_interned_strings_snapshot)(void);
-ZEND_API extern void (*zend_interned_strings_restore)(void);
+typedef void (*zend_string_copy_storage_func_t)(void);
+typedef zend_string *(*zend_new_interned_string_func_t)(zend_string *str);
+
+ZEND_API extern zend_new_interned_string_func_t zend_new_interned_string;
 
 ZEND_API zend_ulong zend_hash_func(const char *str, size_t len);
-void zend_interned_strings_init(void);
-void zend_interned_strings_dtor(void);
-void zend_known_interned_strings_init(zend_string ***, uint32_t *);
+ZEND_API void zend_interned_strings_init(void);
+ZEND_API void zend_interned_strings_dtor(void);
+ZEND_API void zend_interned_strings_activate(void);
+ZEND_API void zend_interned_strings_deactivate(void);
+ZEND_API zend_string *zend_interned_string_find_permanent(zend_string *str);
+ZEND_API void zend_interned_strings_set_request_storage_handler(zend_new_interned_string_func_t handler);
+ZEND_API void zend_interned_strings_set_permanent_storage_copy_handler(zend_string_copy_storage_func_t handler);
+ZEND_API void zend_interned_strings_switch_storage(void);
+
+ZEND_API extern zend_string  *zend_empty_string;
+ZEND_API extern zend_string  *zend_one_char_string[256];
+ZEND_API extern zend_string **zend_known_strings;
 
 END_EXTERN_C()
 
@@ -56,7 +66,9 @@ END_EXTERN_C()
 
 #define ZSTR_IS_INTERNED(s)					(GC_FLAGS(s) & IS_STR_INTERNED)
 
-#define ZSTR_EMPTY_ALLOC()				CG(empty_string)
+#define ZSTR_EMPTY_ALLOC() zend_empty_string
+#define ZSTR_CHAR(c) zend_one_char_string[c]
+#define ZSTR_KNOWN(idx) zend_known_strings[idx]
 
 #define _ZSTR_HEADER_SIZE XtOffsetOf(zend_string, val)
 
@@ -160,6 +172,13 @@ static zend_always_inline zend_string *zend_string_init(const char *str, size_t 
 	memcpy(ZSTR_VAL(ret), str, len);
 	ZSTR_VAL(ret)[len] = '\0';
 	return ret;
+}
+
+static zend_always_inline zend_string *zend_string_init_interned(const char *str, size_t len, int persistent)
+{
+	zend_string *ret = zend_string_init(str, len, persistent);
+
+	return zend_new_interned_string(ret);
 }
 
 static zend_always_inline zend_string *zend_string_copy(zend_string *s)
@@ -359,27 +378,6 @@ EMPTY_SWITCH_DEFAULT_CASE()
 #endif
 }
 
-#ifdef ZTS
-static zend_always_inline zend_string* zend_zts_interned_string_init(const char *val, size_t len)
-{
-	zend_string *str;
-
-	str = zend_string_init(val, len, 1);
-
-	zend_string_hash_val(str);
-	GC_FLAGS(str) |= IS_STR_INTERNED;
-	return str;
-}
-
-static zend_always_inline void zend_zts_interned_string_free(zend_string **s)
-{
-	if (NULL != *s) {
-		free(*s);
-		*s = NULL;
-	}
-}
-#endif
-
 #define ZEND_KNOWN_STRINGS(_) \
 	_(ZEND_STR_FILE,                   "file") \
 	_(ZEND_STR_LINE,                   "line") \
@@ -410,6 +408,21 @@ static zend_always_inline void zend_zts_interned_string_free(zend_string **s)
 	_(ZEND_STR_SEVERITY,               "severity") \
 	_(ZEND_STR_STRING,                 "string") \
 	_(ZEND_STR_TRACE,                  "trace") \
+	_(ZEND_STR_SCHEME,                 "scheme") \
+	_(ZEND_STR_HOST,                   "host") \
+	_(ZEND_STR_PORT,                   "port") \
+	_(ZEND_STR_USER,                   "user") \
+	_(ZEND_STR_PASS,                   "pass") \
+	_(ZEND_STR_PATH,                   "path") \
+	_(ZEND_STR_QUERY,                  "query") \
+	_(ZEND_STR_FRAGMENT,               "fragment") \
+	_(ZEND_STR_NULL,                   "NULL") \
+	_(ZEND_STR_BOOLEAN,                "boolean") \
+	_(ZEND_STR_INTEGER,                "integer") \
+	_(ZEND_STR_DOUBLE,                 "double") \
+	_(ZEND_STR_ARRAY,                  "array") \
+	_(ZEND_STR_RESOURCE,               "resource") \
+	_(ZEND_STR_CLOSED_RESOURCE,        "resource (closed)") \
 
 
 typedef enum _zend_known_string_id {
@@ -418,8 +431,6 @@ ZEND_KNOWN_STRINGS(_ZEND_STR_ID)
 #undef _ZEND_STR_ID
 	ZEND_STR_LAST_KNOWN
 } zend_known_string_id;
-
-ZEND_API uint32_t zend_intern_known_strings(const char **strings, uint32_t count);
 
 #endif /* ZEND_STRING_H */
 

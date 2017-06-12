@@ -508,9 +508,7 @@ PHP_FUNCTION(stream_bucket_new)
 
 	php_stream_from_zval(stream, zstream);
 
-	if (!(pbuffer = pemalloc(buffer_len, php_stream_is_persistent(stream)))) {
-		RETURN_FALSE;
-	}
+	pbuffer = pemalloc(buffer_len, php_stream_is_persistent(stream));
 
 	memcpy(pbuffer, buffer, buffer_len);
 

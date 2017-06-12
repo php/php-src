@@ -115,7 +115,7 @@ zend_bool fallback_process = 0; /* process uses file cache fallback */
 static zend_op_array *(*accelerator_orig_compile_file)(zend_file_handle *file_handle, int type);
 static int (*accelerator_orig_zend_stream_open_function)(const char *filename, zend_file_handle *handle );
 static zend_string *(*accelerator_orig_zend_resolve_path)(const char *filename, int filename_len);
-static void (*orig_chdir)(INTERNAL_FUNCTION_PARAMETERS) = NULL;
+static zif_handler orig_chdir = NULL;
 static ZEND_INI_MH((*orig_include_path_on_modify)) = NULL;
 
 static void accel_gen_system_id(void);
@@ -341,9 +341,6 @@ static inline void accel_unlock_all(void)
 }
 
 /* Interned strings support */
-static zend_string *(*orig_new_interned_string)(zend_string *str);
-static void (*orig_interned_strings_snapshot)(void);
-static void (*orig_interned_strings_restore)(void);
 
 /* O+ disables creation of interned strings by regular PHP compiler, instead,
  * it creates interned strings in shared memory when saves a script.
@@ -354,15 +351,6 @@ static zend_string *accel_new_interned_string_for_php(zend_string *str)
 	return str;
 }
 
-static void accel_interned_strings_snapshot_for_php(void)
-{
-}
-
-static void accel_interned_strings_restore_for_php(void)
-{
-}
-
-#ifndef ZTS
 static void accel_interned_strings_restore_state(void)
 {
     uint32_t idx = ZCSG(interned_strings).nNumUsed;
@@ -396,9 +384,7 @@ static void accel_interned_strings_save_state(void)
 {
 	ZCSG(interned_strings_saved_top) = ZCSG(interned_strings_top);
 }
-#endif
 
-#ifndef ZTS
 static zend_string *accel_find_interned_string(zend_string *str)
 {
 /* for now interned strings are supported only for non-ZTS build */
@@ -411,6 +397,7 @@ static zend_string *accel_find_interned_string(zend_string *str)
 		/* this is already an interned string */
 		return str;
 	}
+
 	if (!ZCG(counted)) {
 		if (accel_activate_add() == FAILURE) {
 			return str;
@@ -436,12 +423,9 @@ static zend_string *accel_find_interned_string(zend_string *str)
 
 	return NULL;
 }
-#endif
 
 zend_string *accel_new_interned_string(zend_string *str)
 {
-/* for now interned strings are supported only for non-ZTS build */
-#ifndef ZTS
 	zend_ulong h;
 	uint32_t nIndex;
 	uint32_t idx;
@@ -505,39 +489,33 @@ zend_string *accel_new_interned_string(zend_string *str)
 	HT_HASH(&ZCSG(interned_strings), nIndex) = HT_IDX_TO_HASH(idx);
 	zend_string_release(str);
 	return p->key;
-#else
-	return str;
-#endif
 }
 
-#ifndef ZTS
 /* Copy PHP interned strings from PHP process memory into the shared memory */
-static void accel_use_shm_interned_strings(void)
+static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_interned_string)
 {
-	uint32_t idx, j;
+	uint32_t j;
 	Bucket *p, *q;
 
 	/* empty string */
-	CG(empty_string) = accel_new_interned_string(CG(empty_string));
+	zend_empty_string = new_interned_string(zend_empty_string);
 	for (j = 0; j < 256; j++) {
 		char s[2];
 		s[0] = j;
 		s[1] = 0;
-		CG(one_char_string)[j] = accel_new_interned_string(zend_string_init(s, 1, 0));
+		zend_one_char_string[j] = new_interned_string(zend_string_init(s, 1, 0));
 	}
-	for (j = 0; j < CG(known_strings_count); j++) {
-		CG(known_strings)[j] = accel_new_interned_string(CG(known_strings)[j]);
+	for (j = 0; j < ZEND_STR_LAST_KNOWN; j++) {
+		zend_known_strings[j] = new_interned_string(zend_known_strings[j]);
 	}
 
 	/* function table hash keys */
-	for (idx = 0; idx < CG(function_table)->nNumUsed; idx++) {
-		p = CG(function_table)->arData + idx;
-		if (Z_TYPE(p->val) == IS_UNDEF) continue;
+	ZEND_HASH_FOREACH_BUCKET(CG(function_table), p) {
 		if (p->key) {
-			p->key = accel_new_interned_string(p->key);
+			p->key = new_interned_string(p->key);
 		}
 		if (Z_FUNC(p->val)->common.function_name) {
-			Z_FUNC(p->val)->common.function_name = accel_new_interned_string(Z_FUNC(p->val)->common.function_name);
+			Z_FUNC(p->val)->common.function_name = new_interned_string(Z_FUNC(p->val)->common.function_name);
 		}
 		if (Z_FUNC(p->val)->common.arg_info &&
 		    (Z_FUNC(p->val)->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))) { 
@@ -551,91 +529,138 @@ static void accel_use_shm_interned_strings(void)
 			for (i = 0 ; i < num_args; i++) {
 				if (ZEND_TYPE_IS_CLASS(arg_info[i].type)) {
 					zend_bool allow_null = ZEND_TYPE_ALLOW_NULL(arg_info[i].type);
-					arg_info[i].type = ZEND_TYPE_ENCODE_CLASS(accel_new_interned_string(ZEND_TYPE_NAME(arg_info[i].type)), allow_null);
+					arg_info[i].type = ZEND_TYPE_ENCODE_CLASS(new_interned_string(ZEND_TYPE_NAME(arg_info[i].type)), allow_null);
 				}
 			}
 		}
-	}
+	} ZEND_HASH_FOREACH_END();
 
 	/* class table hash keys, class names, properties, methods, constants, etc */
-	for (idx = 0; idx < CG(class_table)->nNumUsed; idx++) {
+	ZEND_HASH_FOREACH_BUCKET(CG(class_table), p) {
 		zend_class_entry *ce;
 
-		p = CG(class_table)->arData + idx;
-		if (Z_TYPE(p->val) == IS_UNDEF) continue;
 		ce = (zend_class_entry*)Z_PTR(p->val);
 
 		if (p->key) {
-			p->key = accel_new_interned_string(p->key);
+			p->key = new_interned_string(p->key);
 		}
 
 		if (ce->name) {
-			ce->name = accel_new_interned_string(ce->name);
+			ce->name = new_interned_string(ce->name);
 		}
 
-		for (j = 0; j < ce->properties_info.nNumUsed; j++) {
+		ZEND_HASH_FOREACH_BUCKET(&ce->properties_info, q) {
 			zend_property_info *info;
-
-			q = ce->properties_info.arData + j;
-			if (Z_TYPE(q->val) == IS_UNDEF) continue;
 
 			info = (zend_property_info*)Z_PTR(q->val);
 
 			if (q->key) {
-				q->key = accel_new_interned_string(q->key);
+				q->key = new_interned_string(q->key);
 			}
 
 			if (info->name) {
-				info->name = accel_new_interned_string(info->name);
+				info->name = new_interned_string(info->name);
 			}
-		}
+		} ZEND_HASH_FOREACH_END();
 
-		for (j = 0; j < ce->function_table.nNumUsed; j++) {
-			q = ce->function_table.arData + j;
-			if (Z_TYPE(q->val) == IS_UNDEF) continue;
+		ZEND_HASH_FOREACH_BUCKET(&ce->function_table, q) {
 			if (q->key) {
-				q->key = accel_new_interned_string(q->key);
+				q->key = new_interned_string(q->key);
 			}
 			if (Z_FUNC(q->val)->common.function_name) {
-				Z_FUNC(q->val)->common.function_name = accel_new_interned_string(Z_FUNC(q->val)->common.function_name);
+				Z_FUNC(q->val)->common.function_name = new_interned_string(Z_FUNC(q->val)->common.function_name);
 			}
-		}
+		} ZEND_HASH_FOREACH_END();
 
-		for (j = 0; j < ce->constants_table.nNumUsed; j++) {
-			q = ce->constants_table.arData + j;
-			if (Z_TYPE(q->val) == IS_UNDEF) continue;
+		ZEND_HASH_FOREACH_BUCKET(&ce->constants_table, q) {
 			if (q->key) {
-				q->key = accel_new_interned_string(q->key);
+				q->key = new_interned_string(q->key);
 			}
-		}
-	}
+		} ZEND_HASH_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 
 	/* constant hash keys */
-	for (idx = 0; idx < EG(zend_constants)->nNumUsed; idx++) {
-		p = EG(zend_constants)->arData + idx;
-		if (Z_TYPE(p->val) == IS_UNDEF) continue;
+	ZEND_HASH_FOREACH_BUCKET(EG(zend_constants), p) {
+		zend_constant *c;
+
 		if (p->key) {
-			p->key = accel_new_interned_string(p->key);
+			p->key = new_interned_string(p->key);
 		}
-	}
+		c = (zend_constant*)Z_PTR(p->val);
+		if (c->name) {
+			c->name = new_interned_string(c->name);
+		}
+	} ZEND_HASH_FOREACH_END();
 
 	/* auto globals hash keys and names */
-	for (idx = 0; idx < CG(auto_globals)->nNumUsed; idx++) {
+	ZEND_HASH_FOREACH_BUCKET(CG(auto_globals), p) {
 		zend_auto_global *auto_global;
-
-		p = CG(auto_globals)->arData + idx;
-		if (Z_TYPE(p->val) == IS_UNDEF) continue;
 
 		auto_global = (zend_auto_global*)Z_PTR(p->val);;
 
 		zend_string_addref(auto_global->name);
-		auto_global->name = accel_new_interned_string(auto_global->name);
+		auto_global->name = new_interned_string(auto_global->name);
 		if (p->key) {
-			p->key = accel_new_interned_string(p->key);
+			p->key = new_interned_string(p->key);
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	ZEND_HASH_FOREACH_BUCKET(&module_registry, p) {
+		if (p->key) {
+			p->key = new_interned_string(p->key);
+		}
+	} ZEND_HASH_FOREACH_END();
+}
+
+static zend_string *accel_replace_string_by_shm_permanent(zend_string *str)
+{
+	zend_string *ret = accel_find_interned_string(str);
+
+	if (ret) {
+		zend_string_release(str);
+		return ret;
+	}
+	return str;
+}
+
+static zend_string *accel_replace_string_by_process_permanent(zend_string *str)
+{
+	zend_string *ret = zend_interned_string_find_permanent(str);
+
+	if (ret) {
+		zend_string_release(str);
+		return ret;
+	}
+	ZEND_ASSERT(0);
+	return str;
+}
+
+
+static void accel_use_shm_interned_strings(void)
+{
+	HANDLE_BLOCK_INTERRUPTIONS();
+	SHM_UNPROTECT();
+	zend_shared_alloc_lock();
+
+	if (ZCSG(interned_strings_saved_top) == NULL) {
+		accel_copy_permanent_strings(accel_new_interned_string);
+	} else {
+		accel_copy_permanent_strings(accel_replace_string_by_shm_permanent);
+		if (ZCG(counted)) {
+			accel_deactivate_sub();
 		}
 	}
+	accel_interned_strings_save_state();
+
+	zend_shared_alloc_unlock();
+	SHM_PROTECT();
+	HANDLE_UNBLOCK_INTERRUPTIONS();
 }
-#endif
+
+static void accel_use_permanent_interned_strings(void)
+{
+	accel_copy_permanent_strings(accel_replace_string_by_process_permanent);
+}
 
 #ifndef ZEND_WIN32
 static inline void kill_all_lockers(struct flock *mem_usage_check)
@@ -976,6 +1001,17 @@ int validate_timestamp_and_record(zend_persistent_script *persistent_script, zen
 	}
 }
 
+int validate_timestamp_and_record_ex(zend_persistent_script *persistent_script, zend_file_handle *file_handle)
+{
+	int ret;
+
+	SHM_UNPROTECT();
+	ret = validate_timestamp_and_record(persistent_script, file_handle);
+	SHM_PROTECT();
+
+	return ret;
+}
+
 /* Instead of resolving full real path name each time we need to identify file,
  * we create a key that consist from requested file name, current working
  * directory, current include_path, etc */
@@ -1015,7 +1051,6 @@ char *accel_make_persistent_key(const char *path, int path_length, int *key_len)
 			}
 			cwd = ZSTR_VAL(cwd_str);
 			cwd_len = ZSTR_LEN(cwd_str);
-#ifndef ZTS
 			if (ZCG(cwd_check)) {
 				ZCG(cwd_check) = 0;
 				if ((ZCG(counted) || ZCSG(accelerator_enabled))) {
@@ -1044,7 +1079,6 @@ char *accel_make_persistent_key(const char *path, int path_length, int *key_len)
 					}
 				}
 			}
-#endif
 		}
 
 		if (EXPECTED(ZCG(include_path_key_len))) {
@@ -1057,7 +1091,6 @@ char *accel_make_persistent_key(const char *path, int path_length, int *key_len)
 			include_path = ZSTR_VAL(ZCG(include_path));
 			include_path_len = ZSTR_LEN(ZCG(include_path));
 
-#ifndef ZTS
 			if (ZCG(include_path_check)) {
 				ZCG(include_path_check) = 0;
 				if ((ZCG(counted) || ZCSG(accelerator_enabled))) {
@@ -1085,7 +1118,6 @@ char *accel_make_persistent_key(const char *path, int path_length, int *key_len)
 					}
 				}
 			}
-#endif
 		}
 
 		/* Calculate key length */
@@ -1728,7 +1760,10 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 				return accelerator_orig_compile_file(file_handle, type);
 			}
 			persistent_script = zend_accel_hash_str_find(&ZCSG(hash), key, key_length);
+		} else if (UNEXPECTED(is_stream_path(file_handle->filename) && !is_cacheable_stream_path(file_handle->filename))) {
+			return accelerator_orig_compile_file(file_handle, type);
 		}
+
 		if (!persistent_script) {
 			/* try to find cached script by full real path */
 			zend_accel_hash_entry *bucket;
@@ -2174,11 +2209,9 @@ static void accel_activate(void)
 				zend_reset_cache_vars();
 				zend_accel_hash_clean(&ZCSG(hash));
 
-#if !defined(ZTS)
 				if (ZCG(accel_directives).interned_strings_buffer) {
 					accel_interned_strings_restore_state();
 				}
-#endif
 
 				zend_shared_alloc_restore_state();
 				ZCSG(accelerator_enabled) = ZCSG(cache_status_before_restart);
@@ -2514,7 +2547,6 @@ static int zend_accel_init_shm(void)
 	zend_accel_hash_init(&ZCSG(hash), ZCG(accel_directives).max_accelerated_files);
 
 	ZCSG(interned_strings_start) = ZCSG(interned_strings_end) = NULL;
-# ifndef ZTS
 	zend_hash_init(&ZCSG(interned_strings), (ZCG(accel_directives).interned_strings_buffer * 1024 * 1024) / _ZSTR_STRUCT_SIZE(8 /* average string length */), NULL, NULL, 1);
 	if (ZCG(accel_directives).interned_strings_buffer) {
 		void *data;
@@ -2531,27 +2563,11 @@ static int zend_accel_init_shm(void)
 		HT_HASH_RESET(&ZCSG(interned_strings));
 		ZCSG(interned_strings_end)   = ZCSG(interned_strings_start) + (ZCG(accel_directives).interned_strings_buffer * 1024 * 1024);
 		ZCSG(interned_strings_top)   = ZCSG(interned_strings_start);
-
-//		orig_interned_strings_start = CG(interned_strings_start);
-//		orig_interned_strings_end = CG(interned_strings_end);
-//		CG(interned_strings_start) = ZCSG(interned_strings_start);
-//		CG(interned_strings_end) = ZCSG(interned_strings_end);
+		ZCSG(interned_strings_saved_top) = NULL;
+		zend_interned_strings_set_permanent_storage_copy_handler(accel_use_shm_interned_strings);
 	}
-# endif
 
-	orig_new_interned_string = zend_new_interned_string;
-	orig_interned_strings_snapshot = zend_interned_strings_snapshot;
-	orig_interned_strings_restore = zend_interned_strings_restore;
-	zend_new_interned_string = accel_new_interned_string_for_php;
-	zend_interned_strings_snapshot = accel_interned_strings_snapshot_for_php;
-	zend_interned_strings_restore = accel_interned_strings_restore_for_php;
-
-# ifndef ZTS
-	if (ZCG(accel_directives).interned_strings_buffer) {
-		accel_use_shm_interned_strings();
-		accel_interned_strings_save_state();
-	}
-# endif
+	zend_interned_strings_set_request_storage_handler(accel_new_interned_string_for_php);
 
 	zend_reset_cache_vars();
 
@@ -2800,16 +2816,10 @@ static int accel_startup(zend_extension *extension)
 			case SUCCESSFULLY_REATTACHED:
 				zend_shared_alloc_lock();
 				accel_shared_globals = (zend_accel_shared_globals *) ZSMMG(app_shared_globals);
-				orig_new_interned_string = zend_new_interned_string;
-				orig_interned_strings_snapshot = zend_interned_strings_snapshot;
-				orig_interned_strings_restore = zend_interned_strings_restore;
-
-				zend_new_interned_string = accel_new_interned_string_for_php;
-				zend_interned_strings_snapshot = accel_interned_strings_snapshot_for_php;
-				zend_interned_strings_restore = accel_interned_strings_restore_for_php;
-#ifndef ZTS
-				accel_use_shm_interned_strings();
-#endif
+				if (ZCG(accel_directives).interned_strings_buffer) {
+					zend_interned_strings_set_permanent_storage_copy_handler(accel_use_shm_interned_strings);
+				}
+				zend_interned_strings_set_request_storage_handler(accel_new_interned_string_for_php);
 				zend_shared_alloc_unlock();
 				break;
 			case FAILED_REATTACHED:
@@ -2929,24 +2939,15 @@ void accel_shutdown(void)
 		return;
 	}
 
-	if (ZCG(accel_directives).interned_strings_buffer) {
-#ifndef ZTS
-		zend_hash_clean(CG(auto_globals));
-		zend_hash_clean(CG(function_table));
-		zend_hash_clean(CG(class_table));
-		zend_hash_clean(EG(zend_constants));
-#endif
-	}
-
-	accel_reset_pcre_cache();
-
-	zend_new_interned_string = orig_new_interned_string;
-	zend_interned_strings_snapshot = orig_interned_strings_snapshot;
-	zend_interned_strings_restore = orig_interned_strings_restore;
-
 #ifdef HAVE_OPCACHE_FILE_CACHE
 	file_cache_only = ZCG(accel_directives).file_cache_only;
 #endif
+
+	if (!file_cache_only && ZCG(accel_directives).interned_strings_buffer) {
+		accel_use_permanent_interned_strings();
+	}
+
+	accel_reset_pcre_cache();
 
 	accel_free_ts_resources();
 

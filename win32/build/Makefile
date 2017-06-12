@@ -29,6 +29,14 @@ MCFILE=$(BUILD_DIR)\wsyslog.rc
 BUILD_DIR_DEV_NAME=php-$(PHP_VERSION_STRING)-devel-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE)
 BUILD_DIR_DEV=$(BUILD_DIR)\$(BUILD_DIR_DEV_NAME)
 
+!if "$(DEBUGGER)" == "1"
+DEBUGGER_CMD=devenv
+DEBUGGER_ARGS=/debugexe
+!else
+DEBUGGER_CMD=
+DEBUGGER_ARGS=
+!endif
+
 all: generated_files $(EXT_TARGETS) $(PECL_TARGETS) $(SAPI_TARGETS)
 
 build_dirs: $(BUILD_DIR) $(BUILD_DIRS_SUB) $(BUILD_DIR_DEV)
@@ -151,18 +159,19 @@ clean-pgo: clean-all
 	-del /f /q $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)$(PHP_ZTS_ARCHIVE_POSTFIX)-Win32-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE).zip
 	-del /f /q $(BUILD_DIR)\php-test-pack-$(PHP_VERSION_STRING).zip
 
+
 !if $(PHP_TEST_INI_PATH) == ""
 test: set-tmp-env
-	"$(BUILD_DIR)\php.exe" -d open_basedir= -d output_buffering=0 run-tests.php $(TESTS) -p "$(BUILD_DIR)\php.exe"
+	$(DEBUGGER_CMD) $(DEBUGGER_ARGS) "$(BUILD_DIR)\php.exe" -d open_basedir= -d output_buffering=0 run-tests.php $(TESTS) -p "$(BUILD_DIR)\php.exe"
 
 run: set-tmp-env
-	"$(BUILD_DIR)\php.exe" $(ARGS)
+	$(DEBUGGER_CMD) $(DEBUGGER_ARGS) "$(BUILD_DIR)\php.exe" $(ARGS)
 !else
 test: set-tmp-env
-	"$(BUILD_DIR)\php.exe" -n -c $(PHP_TEST_INI_PATH) -d open_basedir= -d output_buffering=0 -d memory_limit=-1 run-tests.php -p "$(BUILD_DIR)\php.exe" -n -c $(PHP_TEST_INI_PATH) $(TESTS)
+	$(DEBUGGER_CMD) $(DEBUGGER_ARGS) "$(BUILD_DIR)\php.exe" -n -c $(PHP_TEST_INI_PATH) -d open_basedir= -d output_buffering=0 -d memory_limit=-1 run-tests.php -p "$(BUILD_DIR)\php.exe" -n -c $(PHP_TEST_INI_PATH) $(TESTS)
 
 run: set-tmp-env
-	"$(BUILD_DIR)\php.exe" -n -c $(PHP_TEST_INI_PATH) $(ARGS)
+	$(DEBUGGER_CMD) $(DEBUGGER_ARGS) "$(BUILD_DIR)\php.exe" -n -c $(PHP_TEST_INI_PATH) $(ARGS)
 !endif
 
 build-snap: set-tmp-env generated_files
@@ -177,7 +186,7 @@ build-dist: $(BUILD_DIR)\deplister.exe
 	-del /f /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING)$(PHP_ZTS_ARCHIVE_POSTFIX)-Win32-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE).zip
 	-del /f /q $(BUILD_DIR)\php-debug-pack-$(PHP_VERSION_STRING)$(PHP_ZTS_ARCHIVE_POSTFIX)-Win32-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE).zip
 	-del /f /q $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)$(PHP_ZTS_ARCHIVE_POSTFIX)-Win32-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE).zip
-	$(BUILD_DIR)\php.exe -d date.timezone=UTC -n -dphar.readonly=0 win32/build/mkdist.php "$(BUILD_DIR)" "$(PHP_BUILD)" "$(PHPDLL)" "$(SAPI_TARGETS)" "$(EXT_TARGETS) $(PHP_EXTRA_DIST_FILES)" "$(PECL_TARGETS) $(PECL_EXTRA_DIST_FILES)" "$(SNAPSHOT_TEMPLATE)"
+	$(PHP_SDK_PHP_CMD) -d date.timezone=UTC -n -dphar.readonly=0 win32/build/mkdist.php "$(PHP_VERSION_STRING)" "$(BUILD_DIR)" "$(PHP_BUILD)" "$(PHPDLL)" "$(SAPI_TARGETS)" "$(EXT_TARGETS) $(PHP_EXTRA_DIST_FILES)" "$(PECL_TARGETS) $(PECL_EXTRA_DIST_FILES)" "$(SNAPSHOT_TEMPLATE)"
 	cd $(BUILD_DIR)\php-$(PHP_VERSION_STRING)
 	-$(ZIP) -9 -q -r ..\php-$(PHP_VERSION_STRING)$(PHP_ZTS_ARCHIVE_POSTFIX)-Win32-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE).zip .
 	cd $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)

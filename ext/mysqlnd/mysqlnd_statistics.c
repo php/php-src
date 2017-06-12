@@ -217,9 +217,6 @@ PHPAPI void
 mysqlnd_stats_init(MYSQLND_STATS ** stats, const size_t statistic_count, const zend_bool persistent)
 {
 	*stats = pecalloc(1, sizeof(MYSQLND_STATS), persistent);
-	if (*stats == NULL) {
-		return;
-	}
 	(*stats)->values = pecalloc(statistic_count, sizeof(uint64_t), persistent);
 	(*stats)->triggers = pecalloc(statistic_count, sizeof(mysqlnd_stat_trigger), persistent);
 	(*stats)->in_trigger = FALSE;

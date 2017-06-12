@@ -104,11 +104,11 @@ typedef struct {
 typedef struct {
 	MYSQL 		*server;
 
+	unsigned assume_national_character_set_strings:1;
 	unsigned attached:1;
 	unsigned buffered:1;
 	unsigned emulate_prepare:1;
 	unsigned fetch_table_names:1;
-	unsigned _reserved:31;
 #if !PDO_USE_MYSQLND
 	zend_ulong max_buffer_size;
 #endif
@@ -179,6 +179,9 @@ enum {
 	PDO_MYSQL_ATTR_SERVER_PUBLIC_KEY,
 #endif
 	PDO_MYSQL_ATTR_MULTI_STATEMENTS,
+#ifdef PDO_USE_MYSQLND
+	PDO_MYSQL_ATTR_SSL_VERIFY_SERVER_CERT,
+#endif
 };
 
 #endif

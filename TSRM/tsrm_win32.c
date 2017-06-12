@@ -107,33 +107,30 @@ TSRM_API void tsrm_win32_shutdown(void)
 #endif
 }
 
-char * tsrm_win32_get_path_sid_key(const char *pathname)
+char * tsrm_win32_get_path_sid_key(const char *pathname, size_t pathname_len, size_t *key_len)
 {
 	PSID pSid = TWG(impersonation_token_sid);
-	TCHAR *ptcSid = NULL;
+	char *ptcSid = NULL;
 	char *bucket_key = NULL;
-	size_t ptc_sid_len, pathname_len;
-
-	pathname_len = strlen(pathname);
+	size_t ptc_sid_len;
 
 	if (!pSid) {
-		bucket_key = (char *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, pathname_len + 1);
-		if (!bucket_key) {
-			return NULL;
-		}
-		memcpy(bucket_key, pathname, pathname_len);
-		return bucket_key;
+		*key_len = pathname_len;
+		return pathname;
 	}
 
 	if (!ConvertSidToStringSid(pSid, &ptcSid)) {
+		*key_len = 0;
 		return NULL;
 	}
 
 
 	ptc_sid_len = strlen(ptcSid);
-	bucket_key = (char *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, pathname_len + ptc_sid_len + 1);
+	*key_len = pathname_len + ptc_sid_len;
+	bucket_key = (char *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, *key_len + 1);
 	if (!bucket_key) {
 		LocalFree(ptcSid);
+		*key_len = 0;
 		return NULL;
 	}
 
@@ -725,7 +722,6 @@ TSRM_API int shmget(key_t key, size_t size, int flags)
 TSRM_API void *shmat(int key, const void *shmaddr, int flags)
 {
 	shm_pair *shm = shm_get(key, NULL);
-	int err;
 
 	if (!shm->segment) {
 		return (void*)-1;
@@ -733,8 +729,8 @@ TSRM_API void *shmat(int key, const void *shmaddr, int flags)
 
 	shm->addr = MapViewOfFileEx(shm->segment, FILE_MAP_ALL_ACCESS, 0, 0, 0, NULL);
 
-	err = GetLastError();
-	if (err) {
+	if (NULL == shm->addr) {
+		int err = GetLastError();
 		SET_ERRNO_FROM_WIN32_CODE(err);
 		return (void*)-1;
 	}

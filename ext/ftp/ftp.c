@@ -707,6 +707,50 @@ ftp_mlsd(ftpbuf_t *ftp, const char *path, const size_t path_len)
 }
 /* }}} */
 
+/* {{{ ftp_mlsd_parse_line
+ */
+int
+ftp_mlsd_parse_line(HashTable *ht, const char *input) {
+
+	zval zstr;
+	const char *end = input + strlen(input);
+
+	const char *sp = memchr(input, ' ', end - input);
+	if (!sp) {
+		php_error_docref(NULL, E_WARNING, "Missing pathname in MLSD response");
+		return FAILURE;
+	}
+
+	/* Extract pathname */
+	ZVAL_STRINGL(&zstr, sp + 1, end - sp - 1);
+	zend_hash_str_update(ht, "name", sizeof("name")-1, &zstr);
+	end = sp;
+
+	while (input < end) {
+		const char *semi, *eq;
+
+		/* Find end of fact */
+		semi = memchr(input, ';', end - input);
+		if (!semi) {
+			php_error_docref(NULL, E_WARNING, "Malformed fact in MLSD response");
+			return FAILURE;
+		}
+
+		/* Separate fact key and value */
+		eq = memchr(input, '=', semi - input);
+		if (!eq) {
+			php_error_docref(NULL, E_WARNING, "Malformed fact in MLSD response");
+			return FAILURE;
+		}
+
+		ZVAL_STRINGL(&zstr, eq + 1, semi - eq - 1);
+		zend_hash_str_update(ht, input, eq - input, &zstr);
+		input = semi + 1;
+	}
+
+	return SUCCESS;
+}
+/* }}} */
 
 /* {{{ ftp_type
  */

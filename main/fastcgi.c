@@ -76,7 +76,9 @@ static int is_impersonate = 0;
 # include <netdb.h>
 # include <signal.h>
 
-# if defined(HAVE_SYS_POLL_H) && defined(HAVE_POLL)
+# if defined(HAVE_POLL_H) && defined(HAVE_POLL)
+#  include <poll.h>
+# elif defined(HAVE_SYS_POLL_H) && defined(HAVE_POLL)
 #  include <sys/poll.h>
 # endif
 # if defined(HAVE_SYS_SELECT_H)
@@ -460,6 +462,11 @@ int fcgi_in_shutdown(void)
 void fcgi_terminate(void)
 {
 	in_shutdown = 1;
+}
+
+void fcgi_request_set_keep(fcgi_request *req, int new_value)
+{
+	req->keep = new_value;
 }
 
 #ifndef HAVE_ATTRIBUTE_WEAK
@@ -1425,11 +1432,9 @@ int fcgi_accept_request(fcgi_request *req)
 				break;
 #else
 				if (req->fd >= 0) {
-#if defined(HAVE_SYS_POLL_H) && defined(HAVE_POLL)
+#if defined(HAVE_POLL)
 					struct pollfd fds;
 					int ret;
-
-					req->hook.on_read();
 
 					fds.fd = req->fd;
 					fds.events = POLLIN;
@@ -1443,8 +1448,6 @@ int fcgi_accept_request(fcgi_request *req)
 					}
 					fcgi_close(req, 1, 0);
 #else
-					req->hook.on_read();
-
 					if (req->fd < FD_SETSIZE) {
 						struct timeval tv = {5,0};
 						fd_set set;
@@ -1471,6 +1474,7 @@ int fcgi_accept_request(fcgi_request *req)
 		} else if (in_shutdown) {
 			return -1;
 		}
+		req->hook.on_read();
 		if (fcgi_read_request(req)) {
 #ifdef _WIN32
 			if (is_impersonate && !req->tcp) {

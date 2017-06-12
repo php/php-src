@@ -1706,7 +1706,7 @@ PHPAPI int php_register_url_stream_wrapper(const char *protocol, php_stream_wrap
 		return FAILURE;
 	}
 
-	return zend_hash_str_add_ptr(&url_stream_wrappers_hash, protocol, protocol_len, wrapper) ? SUCCESS : FAILURE;
+	return zend_hash_add_ptr(&url_stream_wrappers_hash, zend_string_init_interned(protocol, protocol_len, 1), wrapper) ? SUCCESS : FAILURE;
 }
 
 PHPAPI int php_unregister_url_stream_wrapper(const char *protocol)
@@ -2231,6 +2231,7 @@ PHPAPI int php_stream_context_set_option(php_stream_context *context,
 	zval *wrapperhash;
 	zval category;
 
+	SEPARATE_ARRAY(&context->options);
 	wrapperhash = zend_hash_str_find(Z_ARRVAL(context->options), wrappername, strlen(wrappername));
 	if (NULL == wrapperhash) {
 		array_init(&category);
@@ -2241,6 +2242,7 @@ PHPAPI int php_stream_context_set_option(php_stream_context *context,
 	}
 	ZVAL_DEREF(optionvalue);
 	Z_TRY_ADDREF_P(optionvalue);
+	SEPARATE_ARRAY(wrapperhash);
 	return zend_hash_str_update(Z_ARRVAL_P(wrapperhash), optionname, strlen(optionname), optionvalue) ? SUCCESS : FAILURE;
 }
 /* }}} */

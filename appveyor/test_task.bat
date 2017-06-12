@@ -11,7 +11,7 @@ if /i "%APPVEYOR_REPO_BRANCH:~0,4%" equ "php-" (
 	set BRANCH=master
 	set STABILITY=staging
 )
-set DEPS_DIR=%PHP_BUILD_CACHE_BASE_DIR%\deps-%PHP_SDK_VC%-%PHP_SDK_ARCH%-%BRANCH%
+set DEPS_DIR=%PHP_BUILD_CACHE_BASE_DIR%\deps-%BRANCH%-%PHP_SDK_VC%-%PHP_SDK_ARCH%
 
 rem setup MySQL related exts
 set MYSQL_PWD=Password12!
@@ -71,5 +71,7 @@ copy %PHP_BUILD_CACHE_ENCHANT_DICT_DIR%\* %USERPROFILE%\enchant\myspell
 mkdir c:\tests_tmp
 
 cd "%APPVEYOR_BUILD_FOLDER%"
-nmake test TESTS="%OPCACHE_OPTS% -q --offline --show-diff --set-timeout 120 -g FAIL,XFAIL,BORK,WARN,LEAK,SKIP --temp-source c:\tests_tmp --temp-target c:\tests_tmp"
+nmake test TESTS="%OPCACHE_OPTS% -q --offline --show-diff --show-slow 1000 --set-timeout 120 -g FAIL,XFAIL,BORK,WARN,LEAK,SKIP --temp-source c:\tests_tmp --temp-target c:\tests_tmp"
+
+exit /b %errorlevel%
 

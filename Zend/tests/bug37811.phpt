@@ -23,6 +23,6 @@ string(3) "Foo"
 
 Warning: Constants may only evaluate to scalar values or arrays in %sbug37811.php on line %d
 
-Notice: Use of undefined constant Baz - assumed 'Baz' in %sbug37811.php on line %d
+Warning: Use of undefined constant Baz - assumed 'Baz' (this will throw an Error in a future version of PHP) in %sbug37811.php on line %d
 string(3) "Baz"
 ===DONE===

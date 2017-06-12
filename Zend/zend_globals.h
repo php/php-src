@@ -110,11 +110,6 @@ struct _zend_compiler_globals {
 
 	zend_arena *arena;
 
-	zend_string *empty_string;
-	zend_string *one_char_string[256];
-	zend_string **known_strings;
-	uint32_t    known_strings_count;
-
 	HashTable interned_strings;
 
 	const zend_encoding **script_encoding_list;
@@ -214,6 +209,7 @@ struct _zend_executor_globals {
 
 	zend_bool active;
 	zend_bool valid_symbol_table;
+	zend_uchar flags;
 
 	zend_long assertions;
 
@@ -234,6 +230,9 @@ struct _zend_executor_globals {
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
+
+#define EG_FLAGS_INITIAL	0x00
+#define EG_FLAGS_IN_SHUTDOWN	0x01
 
 struct _zend_ini_scanner_globals {
 	zend_file_handle *yy_in;

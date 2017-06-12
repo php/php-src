@@ -30,6 +30,9 @@
 
 #include "ext/standard/url.h"
 
+/* needed for ssize_t definition */
+#include <sys/types.h>
+
 struct php_zip_stream_data_t {
 	struct zip *za;
 	struct zip_file *zf;
@@ -309,6 +312,14 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 
 	za = zip_open(file_dirname, ZIP_CREATE, &err);
 	if (za) {
+		zval *tmpzval;
+
+		if (NULL != (tmpzval = php_stream_context_get_option(context, "zip", "password"))) {
+			if (Z_TYPE_P(tmpzval) != IS_STRING || zip_set_default_password(za, Z_STRVAL_P(tmpzval))) {
+				php_error_docref(NULL, E_WARNING, "Can't set zip password");
+			}
+		}
+
 		zf = zip_fopen(za, fragment, 0);
 		if (zf) {
 			self = emalloc(sizeof(*self));
@@ -348,7 +359,7 @@ static php_stream_wrapper_ops zip_stream_wops = {
 	NULL,	/* rename */
 	NULL,	/* mkdir */
 	NULL,	/* rmdir */
-	NULL
+	NULL	/* metadata */
 };
 
 php_stream_wrapper php_stream_zip_wrapper = {

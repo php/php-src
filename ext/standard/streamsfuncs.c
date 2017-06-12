@@ -30,6 +30,9 @@
 #include "streamsfuncs.h"
 #include "php_network.h"
 #include "php_string.h"
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #ifndef PHP_WIN32
 #define php_select(m, r, w, e, t)	select(m, r, w, e, t)
@@ -264,7 +267,7 @@ PHP_FUNCTION(stream_socket_accept)
 		Z_PARAM_RESOURCE(zstream)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_DOUBLE(timeout)
-		Z_PARAM_ZVAL_EX(zpeername, 0, 1)
+		Z_PARAM_ZVAL_DEREF(zpeername)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	php_stream_from_zval(stream, zstream);
@@ -279,7 +282,7 @@ PHP_FUNCTION(stream_socket_accept)
 	tv.tv_usec = conv % 1000000;
 #endif
 	if (zpeername) {
-		zval_dtor(zpeername);
+		zval_ptr_dtor(zpeername);
 		ZVAL_NULL(zpeername);
 	}
 
@@ -324,6 +327,11 @@ PHP_FUNCTION(stream_socket_get_name)
 				&name,
 				NULL, NULL
 				) || !name) {
+		RETURN_FALSE;
+	}
+
+	if (!ZSTR_LEN(name)) {
+		zend_string_release(name);
 		RETURN_FALSE;
 	}
 
@@ -1629,38 +1637,23 @@ PHP_FUNCTION(stream_isatty)
 
 	if (php_stream_can_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT) == SUCCESS) {
 		php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT, (void*)&fileno, 0);
-	}
-	else if (php_stream_can_cast(stream, PHP_STREAM_AS_FD) == SUCCESS) {
+	} else if (php_stream_can_cast(stream, PHP_STREAM_AS_FD) == SUCCESS) {
 		php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)&fileno, 0);
-	}
-	else {
+	} else {
 		RETURN_FALSE;
 	}
 
 #ifdef PHP_WIN32
 	/* Check if the Windows standard handle is redirected to file */
-	if (php_win32_console_fileno_is_console(fileno)) {
-		RETURN_TRUE;
-	}
-	else {
-		RETURN_FALSE;
-	}
-#elif HAVE_POSIX
+	RETVAL_BOOL(php_win32_console_fileno_is_console(fileno));
+#elif HAVE_UNISTD_H
 	/* Check if the file descriptor identifier is a terminal */
-	if (isatty(fileno)) {
-		RETURN_TRUE;
-	}
-	else {
-		RETURN_FALSE;
-	}
+	RETVAL_BOOL(isatty(fileno));
 #else
-	zend_stat_t stat;
-	if (zend_fstat(fileno, &stat) == 0) {
-		if ((stat.st_mode & /*S_IFMT*/0170000) == /*S_IFCHR*/0020000) {
-			RETURN_TRUE;
-		}
+	{
+		zend_stat_t stat = {0};
+		RETVAL_BOOL(zend_fstat(fileno, &stat) == 0 && (stat.st_mode & /*S_IFMT*/0170000) == /*S_IFCHR*/0020000);
 	}
-	RETURN_NULL();
 #endif
 }
 

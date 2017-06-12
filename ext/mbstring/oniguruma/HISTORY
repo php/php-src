@@ -1,5 +1,35 @@
 History
 
+2017/05/29: Version 6.3.0
+
+2017/05/24: fix #60 : invalid state(CCS_VALUE) in parse_char_class()
+2017/05/24: fix #59 : access to invalid address by reg->dmax value
+2017/05/23: fix invalid increment of start position in onig_scan()
+2017/05/23: fix #58 : access to invalid address by reg->dmin value
+2017/05/23: fix #57 : DATA_ENSURE() check must be before data access
+2017/05/22: fix #56 : return invalid result for codepoint 0xFFFFFFFF
+2017/05/19: [new] add \o{17777777777} syntax.
+2017/05/19: fix #55 : Byte value expressed in octal must be smaller than 256
+
+2017/04/08: Version 6.2.0
+
+2017/03/15: fix: size in xmemcpy in stack_double (PR #51)
+2017/02/21: Initialize return value
+2017/01/03: NEW API: add onig_set_capture_num_limit()
+2017/01/03: change MemNumType from short int to int
+2016/12/13: fix: [0-9-a] was not allowed as [0-9\-a]
+2016/12/13: fix: illegal capture after recursive call
+2016/12/13: fix: problem with optimization of \z
+2016/12/13: fix: .* optimization
+2016/12/13: Set a limit of parser recursion
+2016/12/12: fix; that warnings are not shown properly
+2016/12/12: fix: /[a-c#]+\W/ =~ "def#" fails when encoding is UTF-16/32
+2016/12/12: fix: /[\x{0}-X]/i doesn't match properly when UTF-16/32 is used.
+
+2016/12/11: Version 6.1.3
+
+2016/12/11: fix: Syntax error: redirection unexpected (expecting word) #35
+
 2016/11/07: Version 6.1.2
 
 2016/10/25: allow word bound, word begin and word end in look-behind.

@@ -33,6 +33,7 @@
 #define PREG_PATTERN_ORDER			1
 #define PREG_SET_ORDER				2
 #define PREG_OFFSET_CAPTURE			(1<<8)
+#define PREG_UNMATCHED_AS_NULL		(1<<9)
 
 #define	PREG_SPLIT_NO_EMPTY			(1<<0)
 #define PREG_SPLIT_DELIM_CAPTURE	(1<<1)
@@ -188,6 +189,7 @@ static PHP_MINIT_FUNCTION(pcre)
 	REGISTER_LONG_CONSTANT("PREG_PATTERN_ORDER", PREG_PATTERN_ORDER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_SET_ORDER", PREG_SET_ORDER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_OFFSET_CAPTURE", PREG_OFFSET_CAPTURE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PREG_UNMATCHED_AS_NULL", PREG_UNMATCHED_AS_NULL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_SPLIT_NO_EMPTY", PREG_SPLIT_NO_EMPTY, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_SPLIT_DELIM_CAPTURE", PREG_SPLIT_DELIM_CAPTURE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_SPLIT_OFFSET_CAPTURE", PREG_SPLIT_OFFSET_CAPTURE, CONST_CS | CONST_PERSISTENT);
@@ -639,15 +641,19 @@ PHPAPI pcre* pcre_get_compiled_regex_ex(zend_string *regex, pcre_extra **extra, 
 /* }}} */
 
 /* {{{ add_offset_pair */
-static inline void add_offset_pair(zval *result, char *str, int len, int offset, char *name)
+static inline void add_offset_pair(zval *result, char *str, int len, int offset, char *name, int unmatched_as_null)
 {
 	zval match_pair, tmp;
 
 	array_init_size(&match_pair, 2);
 
 	/* Add (match, offset) to the return value */
-	if (offset < 0) { /* unset substring */
-		ZVAL_NULL(&tmp);
+	if (offset < 0) {
+		if (unmatched_as_null) {
+			ZVAL_NULL(&tmp);
+		} else {
+			ZVAL_EMPTY_STRING(&tmp);
+		}
 	} else {
 		ZVAL_STRINGL(&tmp, str, len);
 	}
@@ -677,7 +683,7 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) /* {{{ *
 		Z_PARAM_STR(regex)
 		Z_PARAM_STR(subject)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL_EX(subpats, 0, 1)
+		Z_PARAM_ZVAL_DEREF(subpats)
 		Z_PARAM_LONG(flags)
 		Z_PARAM_LONG(start_offset)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
@@ -705,24 +711,25 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 {
 	zval			 result_set,		/* Holds a set of subpatterns after
 										   a global match */
-				    *match_sets = NULL;	/* An array of sets of matches for each
+					*match_sets = NULL;	/* An array of sets of matches for each
 										   subpattern after a global match */
 	pcre_extra		*extra = pce->extra;/* Holds results of studying */
 	pcre_extra		 extra_data;		/* Used locally for exec options */
-	int				 exoptions = 0;		/* Execution options */
+	int				 no_utf_check = 0;  /* Execution options */
 	int				 count = 0;			/* Count of matched subpatterns */
 	int				*offsets;			/* Array of subpattern offsets */
 	int				 num_subpats;		/* Number of captured subpatterns */
 	int				 size_offsets;		/* Size of the offsets array */
 	int				 matched;			/* Has anything matched */
 	int				 g_notempty = 0;	/* If the match should not be empty */
-	const char	   **stringlist;		/* Holds list of subpatterns */
 	char 		   **subpat_names;		/* Array for named subpatterns */
 	int				 i;
 	int				 subpats_order;		/* Order of subpattern matches */
-	int				 offset_capture;    /* Capture match offsets: yes/no */
-	unsigned char   *mark = NULL;       /* Target for MARK name */
-	zval            marks;      		/* Array of marks for PREG_PATTERN_ORDER */
+	int				 offset_capture;	/* Capture match offsets: yes/no */
+	int				 unmatched_as_null;	/* Null non-matches: yes/no */
+	unsigned char   *mark = NULL;		/* Target for MARK name */
+	zval			 marks;				/* Array of marks for PREG_PATTERN_ORDER */
+
 	ALLOCA_FLAG(use_heap);
 
 	ZVAL_UNDEF(&marks);
@@ -737,6 +744,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 
 	if (use_flags) {
 		offset_capture = flags & PREG_OFFSET_CAPTURE;
+		unmatched_as_null = flags & PREG_UNMATCHED_AS_NULL;
 
 		/*
 		 * subpats_order is pre-set to pattern mode so we change it only if
@@ -752,6 +760,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 		}
 	} else {
 		offset_capture = 0;
+		unmatched_as_null = 0;
 	}
 
 	/* Negative offset counts from the end of the string. */
@@ -806,13 +815,26 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 	matched = 0;
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 
+#ifdef HAVE_PCRE_JIT_SUPPORT
+	if (!(pce->compile_options & PCRE_UTF8)) {
+		no_utf_check = PCRE_NO_UTF8_CHECK;
+	}
+#endif
+
 	do {
 		/* Execute the regular expression. */
+#ifdef HAVE_PCRE_JIT_SUPPORT
+		if ((extra->flags & PCRE_EXTRA_EXECUTABLE_JIT)
+		 && no_utf_check && !g_notempty) {
+			count = pcre_jit_exec(pce->re, extra, subject, (int)subject_len, (int)start_offset,
+						  no_utf_check|g_notempty, offsets, size_offsets, jit_stack);
+		} else
+#endif
 		count = pcre_exec(pce->re, extra, subject, (int)subject_len, (int)start_offset,
-						  exoptions|g_notempty, offsets, size_offsets);
+						  no_utf_check|g_notempty, offsets, size_offsets);
 
 		/* the string was already proved to be valid UTF-8 */
-		exoptions |= PCRE_NO_UTF8_CHECK;
+		no_utf_check = PCRE_NO_UTF8_CHECK;
 
 		/* Check for too many substrings condition. */
 		if (count == 0) {
@@ -827,7 +849,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 			/* If subpatterns array has been passed, fill it in with values. */
 			if (subpats != NULL) {
 				/* Try to get the list of substrings and display a warning if failed. */
-				if ((offsets[1] - offsets[0] < 0) || pcre_get_substring_list(subject, offsets, count, &stringlist) < 0) {
+				if (offsets[1] - offsets[0] < 0) {
 					if (subpat_names) {
 						efree(subpat_names);
 					}
@@ -846,15 +868,19 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 						/* For each subpattern, insert it into the appropriate array. */
 						if (offset_capture) {
 							for (i = 0; i < count; i++) {
-								add_offset_pair(&match_sets[i], (char *)stringlist[i],
-												offsets[(i<<1)+1] - offsets[i<<1], offsets[i<<1], NULL);
+								add_offset_pair(&match_sets[i], subject + offsets[i<<1],
+												offsets[(i<<1)+1] - offsets[i<<1], offsets[i<<1], NULL, unmatched_as_null);
 							}
 						} else {
 							for (i = 0; i < count; i++) {
-								if (offsets[i<<1] < 0) { /* unset substring */
-									add_next_index_null(&match_sets[i]);
+								if (offsets[i<<1] < 0) {
+									if (unmatched_as_null) {
+										add_next_index_null(&match_sets[i]);
+									} else {
+										add_next_index_str(&match_sets[i], ZSTR_EMPTY_ALLOC());
+									}
 								} else {
-									add_next_index_stringl(&match_sets[i], (char *)stringlist[i],
+									add_next_index_stringl(&match_sets[i], subject + offsets[i<<1],
 														   offsets[(i<<1)+1] - offsets[i<<1]);
 								}
 							}
@@ -869,11 +895,15 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 						/*
 						 * If the number of captured subpatterns on this run is
 						 * less than the total possible number, pad the result
-						 * arrays with NULLs.
+						 * arrays with NULLs or empty strings.
 						 */
 						if (count < num_subpats) {
 							for (; i < num_subpats; i++) {
-								add_next_index_null(&match_sets[i]);
+								if (unmatched_as_null) {
+									add_next_index_null(&match_sets[i]);
+								} else {
+									add_next_index_str(&match_sets[i], ZSTR_EMPTY_ALLOC());
+								}
 							}
 						}
 					} else {
@@ -884,23 +914,31 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 						if (subpat_names) {
 							if (offset_capture) {
 								for (i = 0; i < count; i++) {
-									add_offset_pair(&result_set, (char *)stringlist[i],
-													offsets[(i<<1)+1] - offsets[i<<1], offsets[i<<1], subpat_names[i]);
+									add_offset_pair(&result_set, subject + offsets[i<<1],
+													offsets[(i<<1)+1] - offsets[i<<1], offsets[i<<1], subpat_names[i], unmatched_as_null);
 								}
 							} else {
 								for (i = 0; i < count; i++) {
 									if (subpat_names[i]) {
-									if (offsets[i<<1] < 0) { /* unset substring */
-										add_assoc_null(&result_set, subpat_names[i]);
-									} else {
-											add_assoc_stringl(&result_set, subpat_names[i], (char *)stringlist[i],
-																   offsets[(i<<1)+1] - offsets[i<<1]);
+										if (offsets[i<<1] < 0) {
+											if (unmatched_as_null) {
+												add_assoc_null(&result_set, subpat_names[i]);
+											} else {
+												add_assoc_str(&result_set, subpat_names[i], ZSTR_EMPTY_ALLOC());
+											}
+										} else {
+											add_assoc_stringl(&result_set, subpat_names[i], subject + offsets[i<<1],
+															  offsets[(i<<1)+1] - offsets[i<<1]);
+										}
 									}
-									}
-									if (offsets[i<<1] < 0) { /* unset substring */
-										add_next_index_null(&result_set);
+									if (offsets[i<<1] < 0) {
+										if (unmatched_as_null) {
+											add_next_index_null(&result_set);
+										} else {
+											add_next_index_str(&result_set, ZSTR_EMPTY_ALLOC());
+										}
 									} else {
-										add_next_index_stringl(&result_set, (char *)stringlist[i],
+										add_next_index_stringl(&result_set, subject + offsets[i<<1],
 															   offsets[(i<<1)+1] - offsets[i<<1]);
 									}
 								}
@@ -908,15 +946,19 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 						} else {
 							if (offset_capture) {
 								for (i = 0; i < count; i++) {
-									add_offset_pair(&result_set, (char *)stringlist[i],
-													offsets[(i<<1)+1] - offsets[i<<1], offsets[i<<1], NULL);
+									add_offset_pair(&result_set, subject + offsets[i<<1],
+													offsets[(i<<1)+1] - offsets[i<<1], offsets[i<<1], NULL, unmatched_as_null);
 								}
 							} else {
 								for (i = 0; i < count; i++) {
-									if (offsets[i<<1] < 0) { /* unset substring */
-										add_next_index_null(&result_set);
+									if (offsets[i<<1] < 0) {
+										if (unmatched_as_null) {
+											add_next_index_null(&result_set);
+										} else {
+											add_next_index_str(&result_set, ZSTR_EMPTY_ALLOC());
+										}
 									} else {
-										add_next_index_stringl(&result_set, (char *)stringlist[i],
+										add_next_index_stringl(&result_set, subject + offsets[i<<1],
 															   offsets[(i<<1)+1] - offsets[i<<1]);
 									}
 								}
@@ -934,24 +976,32 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 					if (subpat_names) {
 						if (offset_capture) {
 							for (i = 0; i < count; i++) {
-								add_offset_pair(subpats, (char *)stringlist[i],
+								add_offset_pair(subpats, subject + offsets[i<<1],
 												offsets[(i<<1)+1] - offsets[i<<1],
-												offsets[i<<1], subpat_names[i]);
+												offsets[i<<1], subpat_names[i], unmatched_as_null);
 							}
 						} else {
 							for (i = 0; i < count; i++) {
 								if (subpat_names[i]) {
-									if (offsets[i<<1] < 0) { /* unset substring */
-										add_assoc_null(subpats, subpat_names[i]);
+									if (offsets[i<<1] < 0) {
+										if (unmatched_as_null) {
+											add_assoc_null(subpats, subpat_names[i]);
+										} else {
+											add_assoc_str(subpats, subpat_names[i], ZSTR_EMPTY_ALLOC());
+										}
 									} else {
-										add_assoc_stringl(subpats, subpat_names[i], (char *)stringlist[i],
+										add_assoc_stringl(subpats, subpat_names[i], subject + offsets[i<<1],
 														  offsets[(i<<1)+1] - offsets[i<<1]);
 									}
 								}
-								if (offsets[i<<1] < 0) { /* unset substring */
-									add_next_index_null(subpats);
+								if (offsets[i<<1] < 0) {
+									if (unmatched_as_null) {
+										add_next_index_null(subpats);
+									} else {
+										add_next_index_str(subpats, ZSTR_EMPTY_ALLOC());
+									}
 								} else {
-									add_next_index_stringl(subpats, (char *)stringlist[i],
+									add_next_index_stringl(subpats, subject + offsets[i<<1],
 														   offsets[(i<<1)+1] - offsets[i<<1]);
 								}
 							}
@@ -959,16 +1009,20 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 					} else {
 						if (offset_capture) {
 							for (i = 0; i < count; i++) {
-								add_offset_pair(subpats, (char *)stringlist[i],
+								add_offset_pair(subpats, subject + offsets[i<<1],
 												offsets[(i<<1)+1] - offsets[i<<1],
-												offsets[i<<1], NULL);
+												offsets[i<<1], NULL, unmatched_as_null);
 							}
 						} else {
 							for (i = 0; i < count; i++) {
-								if (offsets[i<<1] < 0) { /* unset substring */
-									add_next_index_null(subpats);
+								if (offsets[i<<1] < 0) {
+									if (unmatched_as_null) {
+										add_next_index_null(subpats);
+									} else {
+										add_next_index_str(subpats, ZSTR_EMPTY_ALLOC());
+									}
 								} else {
-									add_next_index_stringl(subpats, (char *)stringlist[i],
+									add_next_index_stringl(subpats, subject + offsets[i<<1],
 														   offsets[(i<<1)+1] - offsets[i<<1]);
 								}
 							}
@@ -978,10 +1032,19 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 					if (mark) {
 						add_assoc_string_ex(subpats, "MARK", sizeof("MARK") - 1, (char *)mark);
 					}
+					break;
 				}
-
-				pcre_free((void *) stringlist);
 			}
+
+			/* Advance to the next piece. */
+			start_offset = offsets[1];
+
+			/* If we have matched an empty string, mimic what Perl's /g options does.
+			   This turns out to be rather cunning. First we set PCRE_NOTEMPTY_ATSTART and try
+			   the match again at the same point. If this fails (picked up above) we
+			   advance to the next character. */
+			g_notempty = (start_offset == offsets[0]) ? PCRE_NOTEMPTY_ATSTART | PCRE_ANCHORED : 0;
+
 		} else if (count == PCRE_ERROR_NOMATCH) {
 			/* If we previously set PCRE_NOTEMPTY_ATSTART after a null match,
 			   this is not necessarily the end. We need to advance
@@ -990,23 +1053,14 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 			if (g_notempty != 0 && start_offset < subject_len) {
 				int unit_len = calculate_unit_length(pce, subject + start_offset);
 
-				offsets[0] = (int)start_offset;
-				offsets[1] = (int)(start_offset + unit_len);
+				start_offset += unit_len;
+				g_notempty = 0;
 			} else
 				break;
 		} else {
 			pcre_handle_exec_error(count);
 			break;
 		}
-
-		/* If we have matched an empty string, mimic what Perl's /g options does.
-		   This turns out to be rather cunning. First we set PCRE_NOTEMPTY_ATSTART and try
-		   the match again at the same point. If this fails (picked up above) we
-		   advance to the next character. */
-		g_notempty = (offsets[1] == offsets[0])? PCRE_NOTEMPTY_ATSTART | PCRE_ANCHORED : 0;
-
-		/* Advance to the position right after the last full match */
-		start_offset = offsets[1];
 	} while (global);
 
 	/* Add the match sets to the output array and clean up */
@@ -1107,31 +1161,36 @@ static int preg_get_backref(char **str, int *backref)
 
 /* {{{ preg_do_repl_func
  */
-static zend_string *preg_do_repl_func(zval *function, char *subject, int *offsets, char **subpat_names, int count, unsigned char *mark)
+static zend_string *preg_do_repl_func(zend_fcall_info *fci, zend_fcall_info_cache *fcc, char *subject, int *offsets, char **subpat_names, int count, unsigned char *mark)
 {
 	zend_string *result_str;
 	zval		 retval;			/* Function return value */
-	zval	     args[1];			/* Argument to pass to function */
+	zval	     arg;				/* Argument to pass to function */
 	int			 i;
 
-	array_init_size(&args[0], count + (mark ? 1 : 0));
+	array_init_size(&arg, count + (mark ? 1 : 0));
 	if (subpat_names) {
 		for (i = 0; i < count; i++) {
 			if (subpat_names[i]) {
-				add_assoc_stringl(&args[0], subpat_names[i], &subject[offsets[i<<1]] , offsets[(i<<1)+1] - offsets[i<<1]);
+				add_assoc_stringl(&arg, subpat_names[i], &subject[offsets[i<<1]] , offsets[(i<<1)+1] - offsets[i<<1]);
 			}
-			add_next_index_stringl(&args[0], &subject[offsets[i<<1]], offsets[(i<<1)+1] - offsets[i<<1]);
+			add_next_index_stringl(&arg, &subject[offsets[i<<1]], offsets[(i<<1)+1] - offsets[i<<1]);
 		}
 	} else {
 		for (i = 0; i < count; i++) {
-			add_next_index_stringl(&args[0], &subject[offsets[i<<1]], offsets[(i<<1)+1] - offsets[i<<1]);
+			add_next_index_stringl(&arg, &subject[offsets[i<<1]], offsets[(i<<1)+1] - offsets[i<<1]);
 		}
 	}
 	if (mark) {
-		add_assoc_string(&args[0], "MARK", (char *) mark);
+		add_assoc_string(&arg, "MARK", (char *) mark);
 	}
 
-	if (call_user_function_ex(EG(function_table), NULL, function, &retval, 1, args, 0, NULL) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
+	fci->retval = &retval;
+	fci->param_count = 1;
+	fci->params = &arg;
+	fci->no_separation = 0;
+
+	if (zend_call_function(fci, fcc) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
 		result_str = zval_get_string(&retval);
 		zval_ptr_dtor(&retval);
 	} else {
@@ -1142,7 +1201,7 @@ static zend_string *preg_do_repl_func(zval *function, char *subject, int *offset
 		result_str = zend_string_init(&subject[offsets[0]], offsets[1] - offsets[0], 0);
 	}
 
-	zval_ptr_dtor(&args[0]);
+	zval_ptr_dtor(&arg);
 
 	return result_str;
 }
@@ -1153,7 +1212,7 @@ static zend_string *preg_do_repl_func(zval *function, char *subject, int *offset
 PHPAPI zend_string *php_pcre_replace(zend_string *regex,
 							  zend_string *subject_str,
 							  char *subject, int subject_len,
-							  zval *replace_val, int is_callable_replace,
+							  zend_string *replace_str,
 							  int limit, int *replace_count)
 {
 	pcre_cache_entry	*pce;			    /* Compiled regular expression */
@@ -1164,8 +1223,8 @@ PHPAPI zend_string *php_pcre_replace(zend_string *regex,
 		return NULL;
 	}
 	pce->refcount++;
-	result = php_pcre_replace_impl(pce, subject_str, subject, subject_len, replace_val,
-		is_callable_replace, limit, replace_count);
+	result = php_pcre_replace_impl(pce, subject_str, subject, subject_len, replace_str,
+		limit, replace_count);
 	pce->refcount--;
 
 	return result;
@@ -1173,11 +1232,11 @@ PHPAPI zend_string *php_pcre_replace(zend_string *regex,
 /* }}} */
 
 /* {{{ php_pcre_replace_impl() */
-PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *subject_str, char *subject, int subject_len, zval *replace_val, int is_callable_replace, int limit, int *replace_count)
+PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *subject_str, char *subject, int subject_len, zend_string *replace_str, int limit, int *replace_count)
 {
 	pcre_extra		*extra = pce->extra;/* Holds results of studying */
 	pcre_extra		 extra_data;		/* Used locally for exec options */
-	int				 exoptions = 0;		/* Execution options */
+	int				 no_utf_check = 0;	/* Execution options */
 	int				 count = 0;			/* Count of matched subpatterns */
 	int				*offsets;			/* Array of subpattern offsets */
 	char 			**subpat_names;		/* Array for named subpatterns */
@@ -1189,17 +1248,14 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 	int				 backref;			/* Backreference number */
 	int				 start_offset;		/* Where the new search starts */
 	int				 g_notempty=0;		/* If the match should not be empty */
-	char			*replace=NULL,		/* Replacement string */
-					*walkbuf,			/* Location of current replacement in the result */
+	char			*walkbuf,			/* Location of current replacement in the result */
 					*walk,				/* Used to walk the replacement string */
 					*match,				/* The current match */
 					*piece,				/* The current piece of subject */
-					*replace_end=NULL,	/* End of replacement string */
+					*replace_end,		/* End of replacement string */
 					 walk_last;			/* Last walked character */
 	size_t			result_len; 		/* Length of result */
-	unsigned char   *mark = NULL;       /* Target for MARK name */
 	zend_string		*result;			/* Result of replacement */
-	zend_string     *eval_result=NULL;  /* Result of custom function */
 
 	ALLOCA_FLAG(use_heap);
 
@@ -1214,11 +1270,6 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 	if (UNEXPECTED(pce->preg_options & PREG_REPLACE_EVAL)) {
 		php_error_docref(NULL, E_WARNING, "The /e modifier is no longer supported, use preg_replace_callback instead");
 		return NULL;
-	}
-
-	if (!is_callable_replace) {
-		replace = Z_STRVAL_P(replace_val);
-		replace_end = replace + Z_STRLEN_P(replace_val);
 	}
 
 	/* Calculate the size of the offsets array, and allocate memory for it. */
@@ -1256,17 +1307,30 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 	result_len = 0;
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 
-	while (1) {
-#ifdef PCRE_EXTRA_MARK
-		extra->mark = &mark;
-		extra->flags |= PCRE_EXTRA_MARK;
+#ifdef HAVE_PCRE_JIT_SUPPORT
+	if (!(pce->compile_options & PCRE_UTF8)) {
+		no_utf_check = PCRE_NO_UTF8_CHECK;
+	}
 #endif
+
+#ifdef PCRE_EXTRA_MARK
+	extra->flags &= ~PCRE_EXTRA_MARK;
+#endif
+
+	while (1) {
 		/* Execute the regular expression. */
+#ifdef HAVE_PCRE_JIT_SUPPORT
+		if ((extra->flags & PCRE_EXTRA_EXECUTABLE_JIT)
+		 && no_utf_check && !g_notempty) {
+			count = pcre_jit_exec(pce->re, extra, subject, subject_len, start_offset,
+						  no_utf_check|g_notempty, offsets, size_offsets, jit_stack);
+		} else
+#endif
 		count = pcre_exec(pce->re, extra, subject, subject_len, start_offset,
-						  exoptions|g_notempty, offsets, size_offsets);
+						  no_utf_check|g_notempty, offsets, size_offsets);
 
 		/* the string was already proved to be valid UTF-8 */
-		exoptions |= PCRE_NO_UTF8_CHECK;
+		no_utf_check = PCRE_NO_UTF8_CHECK;
 
 		/* Check for too many substrings condition. */
 		if (UNEXPECTED(count == 0)) {
@@ -1277,8 +1341,10 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 		piece = subject + start_offset;
 
 		/* if (EXPECTED(count > 0 && (limit == -1 || limit > 0))) */
-		if (EXPECTED(count > 0 && (offsets[1] - offsets[0] >= 0) && limit)) {
-			if (UNEXPECTED(replace_count)) {
+		if (count > 0 && (offsets[1] - offsets[0] >= 0) && limit) {
+			zend_bool simple_string = 1;
+
+			if (replace_count) {
 				++*replace_count;
 			}
 
@@ -1287,47 +1353,53 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 
 			new_len = result_len + offsets[0] - start_offset; /* part before the match */
 
-			/* if (!is_callable_replace) */
-			if (EXPECTED(replace)) {
-				/* do regular substitution */
-				walk = replace;
-				walk_last = 0;
+			walk = ZSTR_VAL(replace_str);
+			replace_end = walk + ZSTR_LEN(replace_str);
+			walk_last = 0;
 
-				while (walk < replace_end) {
-					if ('\\' == *walk || '$' == *walk) {
-						if (walk_last == '\\') {
-							walk++;
-							walk_last = 0;
-							continue;
-						}
-						if (preg_get_backref(&walk, &backref)) {
-							if (backref < count)
-								new_len += offsets[(backref<<1)+1] - offsets[backref<<1];
-							continue;
-						}
+			while (walk < replace_end) {
+				if ('\\' == *walk || '$' == *walk) {
+					simple_string = 0;
+					if (walk_last == '\\') {
+						walk++;
+						walk_last = 0;
+						continue;
 					}
-					new_len++;
-					walk++;
-					walk_last = walk[-1];
-				}
-
-				if (new_len >= alloc_len) {
-					alloc_len = zend_safe_address_guarded(2, new_len, alloc_len);
-					if (result == NULL) {
-						result = zend_string_alloc(alloc_len, 0);
-					} else {
-						result = zend_string_extend(result, alloc_len, 0);
+					if (preg_get_backref(&walk, &backref)) {
+						if (backref < count)
+							new_len += offsets[(backref<<1)+1] - offsets[backref<<1];
+						continue;
 					}
 				}
+				new_len++;
+				walk++;
+				walk_last = walk[-1];
+			}
 
+			if (new_len >= alloc_len) {
+				alloc_len = zend_safe_address_guarded(2, new_len, alloc_len);
+				if (result == NULL) {
+					result = zend_string_alloc(alloc_len, 0);
+				} else {
+					result = zend_string_extend(result, alloc_len, 0);
+				}
+			}
+
+			if (match-piece > 0) {
 				/* copy the part of the string before the match */
 				memcpy(&ZSTR_VAL(result)[result_len], piece, match-piece);
 				result_len += (match-piece);
+			}
 
+			if (simple_string) {
+				/* copy replacement */
+				memcpy(&ZSTR_VAL(result)[result_len], ZSTR_VAL(replace_str), ZSTR_LEN(replace_str)+1);
+				result_len += ZSTR_LEN(replace_str);
+			} else {
 				/* copy replacement and backrefs */
 				walkbuf = ZSTR_VAL(result) + result_len;
 
-				walk = replace;
+				walk = ZSTR_VAL(replace_str);
 				walk_last = 0;
 				while (walk < replace_end) {
 					if ('\\' == *walk || '$' == *walk) {
@@ -1351,36 +1423,22 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 				*walkbuf = '\0';
 				/* increment the result length by how much we've added to the string */
 				result_len += (walkbuf - (ZSTR_VAL(result) + result_len));
-			} else {
-				/* Use custom function to get replacement string and its length. */
-				eval_result = preg_do_repl_func(replace_val, subject, offsets, subpat_names, count, mark);
-				ZEND_ASSERT(eval_result);
-				new_len = zend_safe_address_guarded(1, ZSTR_LEN(eval_result), new_len);
-				if (new_len >= alloc_len) {
-					alloc_len = zend_safe_address_guarded(2, new_len, alloc_len);
-					if (result == NULL) {
-						result = zend_string_alloc(alloc_len, 0);
-					} else {
-						result = zend_string_extend(result, alloc_len, 0);
-					}
-				}
-				/* copy the part of the string before the match */
-				memcpy(ZSTR_VAL(result) + result_len, piece, match-piece);
-				result_len += (int)(match-piece);
-
-				/* copy replacement and backrefs */
-				walkbuf = ZSTR_VAL(result) + result_len;
-
-				/* If using custom function, copy result to the buffer and clean up. */
-				memcpy(walkbuf, ZSTR_VAL(eval_result), ZSTR_LEN(eval_result));
-				result_len += (int)ZSTR_LEN(eval_result);
-				zend_string_release(eval_result);
 			}
 
-			if (EXPECTED(limit)) {
+			if (limit) {
 				limit--;
 			}
-		} else if (count == PCRE_ERROR_NOMATCH || UNEXPECTED(limit == 0)) {
+
+			/* Advance to the next piece. */
+			start_offset = offsets[1];
+
+			/* If we have matched an empty string, mimic what Perl's /g options does.
+			   This turns out to be rather cunning. First we set PCRE_NOTEMPTY_ATSTART and try
+			   the match again at the same point. If this fails (picked up above) we
+			   advance to the next character. */
+			g_notempty = (start_offset == offsets[0]) ? PCRE_NOTEMPTY_ATSTART | PCRE_ANCHORED : 0;
+
+		} else if (count == PCRE_ERROR_NOMATCH || limit == 0) {
 			/* If we previously set PCRE_NOTEMPTY_ATSTART after a null match,
 			   this is not necessarily the end. We need to advance
 			   the start offset, and continue. Fudge the offset values
@@ -1388,10 +1446,10 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 			if (g_notempty != 0 && start_offset < subject_len) {
 				int unit_len = calculate_unit_length(pce, piece);
 
-				offsets[0] = start_offset;
-				offsets[1] = start_offset + unit_len;
+				start_offset += unit_len;
 				memcpy(ZSTR_VAL(result) + result_len, piece, unit_len);
 				result_len += unit_len;
+				g_notempty = 0;
 			} else {
 				if (!result && subject_str) {
 					result = zend_string_copy(subject_str);
@@ -1416,20 +1474,11 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 		} else {
 			pcre_handle_exec_error(count);
 			if (result) {
-				zend_string_free(result);
+				zend_string_release(result);
 				result = NULL;
 			}
 			break;
 		}
-
-		/* If we have matched an empty string, mimic what Perl's /g options does.
-		   This turns out to be rather cunning. First we set PCRE_NOTEMPTY_ATSTART and try
-		   the match again at the same point. If this fails (picked up above) we
-		   advance to the next character. */
-		g_notempty = (offsets[1] == offsets[0])? PCRE_NOTEMPTY_ATSTART | PCRE_ANCHORED : 0;
-
-		/* Advance to the next piece. */
-		start_offset = offsets[1];
 	}
 
 	if (size_offsets <= 32) {
@@ -1445,129 +1494,515 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 }
 /* }}} */
 
-/* {{{ php_replace_in_subject
- */
-static zend_string *php_replace_in_subject(zval *regex, zval *replace, zval *subject, int limit, int is_callable_replace, int *replace_count)
+/* {{{ php_pcre_replace_func_impl() */
+static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_string *subject_str, char *subject, int subject_len, zend_fcall_info *fci, zend_fcall_info_cache *fcc, int limit, int *replace_count)
 {
-	zval		*regex_entry,
-				*replace_value,
-				 empty_replace;
-	zend_string *result;
-	uint32_t replace_idx;
-	zend_string	*subject_str = zval_get_string(subject);
+	pcre_extra		*extra = pce->extra;/* Holds results of studying */
+	pcre_extra		 extra_data;		/* Used locally for exec options */
+	int				 no_utf_check = 0;	/* Execution options */
+	int				 count = 0;			/* Count of matched subpatterns */
+	int				*offsets;			/* Array of subpattern offsets */
+	char 			**subpat_names;		/* Array for named subpatterns */
+	int				 num_subpats;		/* Number of captured subpatterns */
+	int				 size_offsets;		/* Size of the offsets array */
+	size_t			 new_len;			/* Length of needed storage */
+	size_t			 alloc_len;			/* Actual allocated length */
+	int				 start_offset;		/* Where the new search starts */
+	int				 g_notempty=0;		/* If the match should not be empty */
+	char			*match,				/* The current match */
+					*piece;				/* The current piece of subject */
+	size_t			result_len; 		/* Length of result */
+	unsigned char   *mark = NULL;       /* Target for MARK name */
+	zend_string		*result;			/* Result of replacement */
+	zend_string     *eval_result=NULL;  /* Result of custom function */
 
-	/* FIXME: This might need to be changed to ZSTR_EMPTY_ALLOC(). Check if this zval could be dtor()'ed somehow */
-	ZVAL_EMPTY_STRING(&empty_replace);
+	ALLOCA_FLAG(use_heap);
 
-	if (ZEND_SIZE_T_INT_OVFL(ZSTR_LEN(subject_str))) {
-			php_error_docref(NULL, E_WARNING, "Subject is too long");
-			return NULL;
+	if (extra == NULL) {
+		extra_data.flags = PCRE_EXTRA_MATCH_LIMIT | PCRE_EXTRA_MATCH_LIMIT_RECURSION;
+		extra = &extra_data;
 	}
 
-	/* If regex is an array */
-	if (Z_TYPE_P(regex) == IS_ARRAY) {
-		replace_value = replace;
-		replace_idx = 0;
+	extra->match_limit = (unsigned long)PCRE_G(backtrack_limit);
+	extra->match_limit_recursion = (unsigned long)PCRE_G(recursion_limit);
+
+	if (UNEXPECTED(pce->preg_options & PREG_REPLACE_EVAL)) {
+		php_error_docref(NULL, E_WARNING, "The /e modifier is no longer supported, use preg_replace_callback instead");
+		return NULL;
+	}
+
+	/* Calculate the size of the offsets array, and allocate memory for it. */
+	num_subpats = pce->capture_count + 1;
+	size_offsets = num_subpats * 3;
+	if (size_offsets <= 32) {
+		offsets = (int *)do_alloca(size_offsets * sizeof(int), use_heap);
+	} else {
+		offsets = (int *)safe_emalloc(size_offsets, sizeof(int), 0);
+	}
+
+	/*
+	 * Build a mapping from subpattern numbers to their names. We will
+	 * allocate the table only if there are any named subpatterns.
+	 */
+	subpat_names = NULL;
+	if (UNEXPECTED(pce->name_count > 0)) {
+		subpat_names = make_subpats_table(num_subpats, pce);
+		if (!subpat_names) {
+			if (size_offsets <= 32) {
+				free_alloca(offsets, use_heap);
+			} else {
+				efree(offsets);
+			}
+			return NULL;
+		}
+	}
+
+	alloc_len = 0;
+	result = NULL;
+
+	/* Initialize */
+	match = NULL;
+	start_offset = 0;
+	result_len = 0;
+	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
+
+#ifdef HAVE_PCRE_JIT_SUPPORT
+	if (!(pce->compile_options & PCRE_UTF8)) {
+		no_utf_check = PCRE_NO_UTF8_CHECK;
+	}
+#endif
+
+#ifdef PCRE_EXTRA_MARK
+	extra->mark = &mark;
+	extra->flags |= PCRE_EXTRA_MARK;
+#endif
+
+	while (1) {
+		/* Execute the regular expression. */
+#ifdef HAVE_PCRE_JIT_SUPPORT
+		if ((extra->flags & PCRE_EXTRA_EXECUTABLE_JIT)
+		 && no_utf_check && !g_notempty) {
+			count = pcre_jit_exec(pce->re, extra, subject, subject_len, start_offset,
+						  no_utf_check|g_notempty, offsets, size_offsets, jit_stack);
+		} else
+#endif
+		count = pcre_exec(pce->re, extra, subject, subject_len, start_offset,
+						  no_utf_check|g_notempty, offsets, size_offsets);
+
+		/* the string was already proved to be valid UTF-8 */
+		no_utf_check = PCRE_NO_UTF8_CHECK;
+
+		/* Check for too many substrings condition. */
+		if (UNEXPECTED(count == 0)) {
+			php_error_docref(NULL,E_NOTICE, "Matched, but too many substrings");
+			count = size_offsets / 3;
+		}
+
+		piece = subject + start_offset;
+
+		/* if (EXPECTED(count > 0 && (limit == -1 || limit > 0))) */
+		if (count > 0 && (offsets[1] - offsets[0] >= 0) && limit) {
+			if (replace_count) {
+				++*replace_count;
+			}
+
+			/* Set the match location in subject */
+			match = subject + offsets[0];
+
+			new_len = result_len + offsets[0] - start_offset; /* part before the match */
+
+			/* Use custom function to get replacement string and its length. */
+			eval_result = preg_do_repl_func(fci, fcc, subject, offsets, subpat_names, count, mark);
+			ZEND_ASSERT(eval_result);
+			new_len = zend_safe_address_guarded(1, ZSTR_LEN(eval_result), new_len);
+			if (new_len >= alloc_len) {
+				alloc_len = zend_safe_address_guarded(2, new_len, alloc_len);
+				if (result == NULL) {
+					result = zend_string_alloc(alloc_len, 0);
+				} else {
+					result = zend_string_extend(result, alloc_len, 0);
+				}
+			}
+
+			if (match-piece > 0) {
+				/* copy the part of the string before the match */
+				memcpy(ZSTR_VAL(result) + result_len, piece, match-piece);
+				result_len += (int)(match-piece);
+			}
+
+			/* If using custom function, copy result to the buffer and clean up. */
+			memcpy(ZSTR_VAL(result) + result_len, ZSTR_VAL(eval_result), ZSTR_LEN(eval_result));
+			result_len += (int)ZSTR_LEN(eval_result);
+			zend_string_release(eval_result);
+
+			if (limit) {
+				limit--;
+			}
+
+			/* Advance to the next piece. */
+			start_offset = offsets[1];
+
+			/* If we have matched an empty string, mimic what Perl's /g options does.
+			   This turns out to be rather cunning. First we set PCRE_NOTEMPTY_ATSTART and try
+			   the match again at the same point. If this fails (picked up above) we
+			   advance to the next character. */
+			g_notempty = (start_offset == offsets[0]) ? PCRE_NOTEMPTY_ATSTART | PCRE_ANCHORED : 0;
+
+		} else if (count == PCRE_ERROR_NOMATCH || limit == 0) {
+			/* If we previously set PCRE_NOTEMPTY_ATSTART after a null match,
+			   this is not necessarily the end. We need to advance
+			   the start offset, and continue. Fudge the offset values
+			   to achieve this, unless we're already at the end of the string. */
+			if (g_notempty != 0 && start_offset < subject_len) {
+				int unit_len = calculate_unit_length(pce, piece);
+
+				start_offset += unit_len;
+				memcpy(ZSTR_VAL(result) + result_len, piece, unit_len);
+				result_len += unit_len;
+				g_notempty = 0;
+			} else {
+				if (!result && subject_str) {
+					result = zend_string_copy(subject_str);
+					break;
+				}
+				new_len = result_len + subject_len - start_offset;
+				if (new_len >= alloc_len) {
+					alloc_len = new_len; /* now we know exactly how long it is */
+					if (NULL != result) {
+						result = zend_string_realloc(result, alloc_len, 0);
+					} else {
+						result = zend_string_alloc(alloc_len, 0);
+					}
+				}
+				/* stick that last bit of string on our output */
+				memcpy(ZSTR_VAL(result) + result_len, piece, subject_len - start_offset);
+				result_len += subject_len - start_offset;
+				ZSTR_VAL(result)[result_len] = '\0';
+				ZSTR_LEN(result) = result_len;
+				break;
+			}
+		} else {
+			pcre_handle_exec_error(count);
+			if (result) {
+				zend_string_release(result);
+				result = NULL;
+			}
+			break;
+		}
+	}
+
+	if (size_offsets <= 32) {
+		free_alloca(offsets, use_heap);
+	} else {
+		efree(offsets);
+	}
+	if (UNEXPECTED(subpat_names)) {
+		efree(subpat_names);
+	}
+
+	return result;
+}
+/* }}} */
+
+/* {{{ php_pcre_replace_func
+ */
+static zend_always_inline zend_string *php_pcre_replace_func(zend_string *regex,
+							  zend_string *subject_str,
+							  zend_fcall_info *fci, zend_fcall_info_cache *fcc,
+							  int limit, int *replace_count)
+{
+	pcre_cache_entry	*pce;			    /* Compiled regular expression */
+	zend_string	 		*result;			/* Function result */
+
+	/* Compile regex or get it from cache. */
+	if ((pce = pcre_get_compiled_regex_cache(regex)) == NULL) {
+		return NULL;
+	}
+	pce->refcount++;
+	result = php_pcre_replace_func_impl(pce, subject_str, ZSTR_VAL(subject_str), ZSTR_LEN(subject_str), fci, fcc,
+		limit, replace_count);
+	pce->refcount--;
+
+	return result;
+}
+/* }}} */
+
+/* {{{ php_pcre_replace_array
+ */
+static zend_string *php_pcre_replace_array(HashTable *regex, zval *replace, zend_string *subject_str, int limit, int *replace_count)
+{
+	zval		*regex_entry;
+	zend_string *result;
+	zend_string *replace_str;
+
+	if (Z_TYPE_P(replace) == IS_ARRAY) {
+		uint32_t replace_idx = 0;
+		HashTable *replace_ht = Z_ARRVAL_P(replace);
 
 		/* For each entry in the regex array, get the entry */
-		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(regex), regex_entry) {
-			zval replace_str;
+		ZEND_HASH_FOREACH_VAL(regex, regex_entry) {
 			/* Make sure we're dealing with strings. */
 			zend_string *regex_str = zval_get_string(regex_entry);
+			zval *zv;
 
-			ZVAL_UNDEF(&replace_str);
-			/* If replace is an array and not a callable construct */
-			if (Z_TYPE_P(replace) == IS_ARRAY && !is_callable_replace) {
-				/* Get current entry */
-				while (replace_idx < Z_ARRVAL_P(replace)->nNumUsed) {
-					if (Z_TYPE(Z_ARRVAL_P(replace)->arData[replace_idx].val) != IS_UNDEF) {
-						ZVAL_COPY(&replace_str, &Z_ARRVAL_P(replace)->arData[replace_idx].val);
-						break;
-					}
-					replace_idx++;
+			/* Get current entry */
+			while (1) {
+				if (replace_idx == replace_ht->nNumUsed) {
+					replace_str = ZSTR_EMPTY_ALLOC();
+					break;
 				}
-				if (!Z_ISUNDEF(replace_str)) {
-					if (!is_callable_replace) {
-						convert_to_string(&replace_str);
-					}
-					replace_value = &replace_str;
-					replace_idx++;
-				} else {
-					/* We've run out of replacement strings, so use an empty one */
-					replace_value = &empty_replace;
+				zv = &replace_ht->arData[replace_idx].val;
+				replace_idx++;
+				if (Z_TYPE_P(zv) != IS_UNDEF) {
+					replace_str = zval_get_string(zv);
+					break;
 				}
 			}
 
 			/* Do the actual replacement and put the result back into subject_str
 			   for further replacements. */
-			if ((result = php_pcre_replace(regex_str,
-										   subject_str,
-										   ZSTR_VAL(subject_str),
-										   (int)ZSTR_LEN(subject_str),
-										   replace_value,
-										   is_callable_replace,
-										   limit,
-										   replace_count)) != NULL) {
-				zend_string_release(subject_str);
-				subject_str = result;
-			} else {
-				zend_string_release(subject_str);
-				zend_string_release(regex_str);
-				zval_dtor(&replace_str);
-				return NULL;
-			}
-
+			result = php_pcre_replace(regex_str,
+									  subject_str,
+									  ZSTR_VAL(subject_str),
+									  (int)ZSTR_LEN(subject_str),
+									  replace_str,
+									  limit,
+									  replace_count);
+			zend_string_release(replace_str);
 			zend_string_release(regex_str);
-			zval_dtor(&replace_str);
+			zend_string_release(subject_str);
+			subject_str = result;
+			if (UNEXPECTED(result == NULL)) {
+				break;
+			}
 		} ZEND_HASH_FOREACH_END();
 
-		return subject_str;
 	} else {
+		replace_str = Z_STR_P(replace);
+
+		/* For each entry in the regex array, get the entry */
+		ZEND_HASH_FOREACH_VAL(regex, regex_entry) {
+			/* Make sure we're dealing with strings. */
+			zend_string *regex_str = zval_get_string(regex_entry);
+
+			/* Do the actual replacement and put the result back into subject_str
+			   for further replacements. */
+			result = php_pcre_replace(regex_str,
+									  subject_str,
+									  ZSTR_VAL(subject_str),
+									  (int)ZSTR_LEN(subject_str),
+									  replace_str,
+									  limit,
+									  replace_count);
+			zend_string_release(regex_str);
+			zend_string_release(subject_str);
+			subject_str = result;
+
+			if (UNEXPECTED(result == NULL)) {
+				break;
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+
+	return subject_str;
+}
+/* }}} */
+
+/* {{{ php_replace_in_subject
+ */
+static zend_always_inline zend_string *php_replace_in_subject(zval *regex, zval *replace, zval *subject, int limit, int *replace_count)
+{
+	zend_string *result;
+	zend_string *subject_str = zval_get_string(subject);
+
+	if (UNEXPECTED(ZEND_SIZE_T_INT_OVFL(ZSTR_LEN(subject_str)))) {
+		zend_string_release(subject_str);
+		php_error_docref(NULL, E_WARNING, "Subject is too long");
+		result = NULL;
+	} else if (Z_TYPE_P(regex) != IS_ARRAY) {
 		result = php_pcre_replace(Z_STR_P(regex),
 								  subject_str,
 								  ZSTR_VAL(subject_str),
 								  (int)ZSTR_LEN(subject_str),
-								  replace,
-								  is_callable_replace,
+								  Z_STR_P(replace),
+								  limit,
+								  replace_count);
+		zend_string_release(subject_str);
+	} else {
+		result = php_pcre_replace_array(Z_ARRVAL_P(regex),
+										replace,
+										subject_str,
+										limit,
+										replace_count);
+	}
+	return result;
+}
+/* }}} */
+
+/* {{{ php_replace_in_subject_func
+ */
+static zend_string *php_replace_in_subject_func(zval *regex, zend_fcall_info *fci, zend_fcall_info_cache *fcc, zval *subject, int limit, int *replace_count)
+{
+	zval		*regex_entry;
+	zend_string *result;
+	zend_string	*subject_str = zval_get_string(subject);
+
+	if (UNEXPECTED(ZEND_SIZE_T_INT_OVFL(ZSTR_LEN(subject_str)))) {
+		php_error_docref(NULL, E_WARNING, "Subject is too long");
+		return NULL;
+	}
+
+	if (Z_TYPE_P(regex) != IS_ARRAY) {
+		result = php_pcre_replace_func(Z_STR_P(regex),
+								  subject_str,
+								  fci, fcc,
 								  limit,
 								  replace_count);
 		zend_string_release(subject_str);
 		return result;
+	} else {
+		/* If regex is an array */
+
+		/* For each entry in the regex array, get the entry */
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(regex), regex_entry) {
+			/* Make sure we're dealing with strings. */
+			zend_string *regex_str = zval_get_string(regex_entry);
+
+			/* Do the actual replacement and put the result back into subject_str
+			   for further replacements. */
+			result = php_pcre_replace_func(regex_str,
+										   subject_str,
+										   fci, fcc,
+										   limit,
+										   replace_count);
+			zend_string_release(regex_str);
+			zend_string_release(subject_str);
+			subject_str = result;
+			if (UNEXPECTED(result == NULL)) {
+				break;
+			}
+		} ZEND_HASH_FOREACH_END();
+
+		return subject_str;
 	}
 }
 /* }}} */
 
-/* {{{ preg_replace_impl
+/* {{{ preg_replace_func_impl
  */
-static int preg_replace_impl(zval *return_value, zval *regex, zval *replace, zval *subject, zend_long limit_val, int is_callable_replace, int is_filter)
+static int preg_replace_func_impl(zval *return_value, zval *regex, zend_fcall_info *fci, zend_fcall_info_cache *fcc, zval *subject, zend_long limit_val)
 {
-	zval		*subject_entry;
 	zend_string	*result;
-	zend_string	*string_key;
-	zend_ulong	 num_key;
-	int			 replace_count = 0, old_replace_count;
-
-	if (Z_TYPE_P(replace) != IS_ARRAY && (Z_TYPE_P(replace) != IS_OBJECT || !is_callable_replace)) {
-		convert_to_string_ex(replace);
-	}
+	int			 replace_count = 0;
 
 	if (Z_TYPE_P(regex) != IS_ARRAY) {
 		convert_to_string_ex(regex);
 	}
 
-	/* if subject is an array */
-	if (Z_TYPE_P(subject) == IS_ARRAY) {
+	if (Z_TYPE_P(subject) != IS_ARRAY) {
+		result = php_replace_in_subject_func(regex, fci, fcc, subject, limit_val, &replace_count);
+		if (result != NULL) {
+			RETVAL_STR(result);
+		} else {
+			RETVAL_NULL();
+		}
+	} else {
+		/* if subject is an array */
+		zval		*subject_entry, zv;
+		zend_string	*string_key;
+		zend_ulong	 num_key;
+
+		array_init_size(return_value, zend_hash_num_elements(Z_ARRVAL_P(subject)));
+
+		/* For each subject entry, convert it to string, then perform replacement
+		   and add the result to the return_value array. */
+		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(subject), num_key, string_key, subject_entry) {
+			result = php_replace_in_subject_func(regex, fci, fcc, subject_entry, limit_val, &replace_count);
+			if (result != NULL) {
+				/* Add to return array */
+				ZVAL_STR(&zv, result);
+				if (string_key) {
+					zend_hash_add_new(Z_ARRVAL_P(return_value), string_key, &zv);
+				} else {
+					zend_hash_index_add_new(Z_ARRVAL_P(return_value), num_key, &zv);
+				}
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+
+	return replace_count;
+}
+/* }}} */
+
+/* {{{ preg_replace_common
+ */
+static void preg_replace_common(INTERNAL_FUNCTION_PARAMETERS, int is_filter)
+{
+	zval *regex, *replace, *subject, *zcount = NULL;
+	zend_long limit = -1;
+	int replace_count = 0;
+	zend_string	*result;
+	int old_replace_count;
+
+	/* Get function parameters and do error-checking. */
+	ZEND_PARSE_PARAMETERS_START(3, 5)
+		Z_PARAM_ZVAL(regex)
+		Z_PARAM_ZVAL(replace)
+		Z_PARAM_ZVAL(subject)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(limit)
+		Z_PARAM_ZVAL_DEREF(zcount)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (Z_TYPE_P(replace) != IS_ARRAY) {
+		convert_to_string_ex(replace);
+		if (Z_TYPE_P(regex) != IS_ARRAY) {
+			convert_to_string_ex(regex);
+		}
+	} else {
+		if (Z_TYPE_P(regex) != IS_ARRAY) {
+			php_error_docref(NULL, E_WARNING, "Parameter mismatch, pattern is a string while replacement is an array");
+			RETURN_FALSE;
+		}
+	}
+
+	if (Z_TYPE_P(subject) != IS_ARRAY) {
+		old_replace_count = replace_count;
+		result = php_replace_in_subject(regex,
+										replace,
+										subject,
+										limit,
+										&replace_count);
+		if (result != NULL) {
+			if (!is_filter || replace_count > old_replace_count) {
+				RETVAL_STR(result);
+			} else {
+				zend_string_release(result);
+				RETVAL_NULL();
+			}
+		} else {
+			RETVAL_NULL();
+		}
+	} else {
+		/* if subject is an array */
+		zval		*subject_entry, zv;
+		zend_string	*string_key;
+		zend_ulong	 num_key;
+
 		array_init_size(return_value, zend_hash_num_elements(Z_ARRVAL_P(subject)));
 
 		/* For each subject entry, convert it to string, then perform replacement
 		   and add the result to the return_value array. */
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(subject), num_key, string_key, subject_entry) {
 			old_replace_count = replace_count;
-			if ((result = php_replace_in_subject(regex, replace, subject_entry, limit_val, is_callable_replace, &replace_count)) != NULL) {
+			result = php_replace_in_subject(regex,
+											replace,
+											subject_entry,
+											limit,
+											&replace_count);
+			if (result != NULL) {
 				if (!is_filter || replace_count > old_replace_count) {
 					/* Add to return array */
-					zval zv;
-
 					ZVAL_STR(&zv, result);
 					if (string_key) {
 						zend_hash_add_new(Z_ARRVAL_P(return_value), string_key, &zv);
@@ -1579,22 +2014,12 @@ static int preg_replace_impl(zval *return_value, zval *regex, zval *replace, zva
 				}
 			}
 		} ZEND_HASH_FOREACH_END();
-	} else {
-		/* if subject is not an array */
-		old_replace_count = replace_count;
-		if ((result = php_replace_in_subject(regex, replace, subject, limit_val, is_callable_replace, &replace_count)) != NULL) {
-			if (!is_filter || replace_count > old_replace_count) {
-				RETVAL_STR(result);
-			} else {
-				zend_string_release(result);
-				RETVAL_NULL();
-			}
-		} else {
-			RETVAL_NULL();
-		}
 	}
 
-	return replace_count;
+	if (zcount) {
+		zval_ptr_dtor(zcount);
+		ZVAL_LONG(zcount, replace_count);
+	}
 }
 /* }}} */
 
@@ -1602,30 +2027,7 @@ static int preg_replace_impl(zval *return_value, zval *regex, zval *replace, zva
    Perform Perl-style regular expression replacement. */
 static PHP_FUNCTION(preg_replace)
 {
-	zval *regex, *replace, *subject, *zcount = NULL;
-	zend_long limit = -1;
-	int replace_count;
-
-	/* Get function parameters and do error-checking. */
-	ZEND_PARSE_PARAMETERS_START(3, 5)
-		Z_PARAM_ZVAL(regex)
-		Z_PARAM_ZVAL(replace)
-		Z_PARAM_ZVAL(subject)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(limit)
-		Z_PARAM_ZVAL_EX(zcount, 0, 1)
-	ZEND_PARSE_PARAMETERS_END();
-
-	if (Z_TYPE_P(replace) == IS_ARRAY && Z_TYPE_P(regex) != IS_ARRAY) {
-		php_error_docref(NULL, E_WARNING, "Parameter mismatch, pattern is a string while replacement is an array");
-		RETURN_FALSE;
-	}
-
-	replace_count = preg_replace_impl(return_value, regex, replace, subject, limit, 0, 0);
-	if (zcount) {
-		zval_ptr_dtor(zcount);
-		ZVAL_LONG(zcount, replace_count);
-	}
+	preg_replace_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
@@ -1637,6 +2039,8 @@ static PHP_FUNCTION(preg_replace_callback)
 	zend_long limit = -1;
 	zend_string	*callback_name;
 	int replace_count;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
 
 	/* Get function parameters and do error-checking. */
 	ZEND_PARSE_PARAMETERS_START(3, 5)
@@ -1645,10 +2049,10 @@ static PHP_FUNCTION(preg_replace_callback)
 		Z_PARAM_ZVAL(subject)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(limit)
-		Z_PARAM_ZVAL_EX(zcount, 0, 1)
+		Z_PARAM_ZVAL_DEREF(zcount)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (!zend_is_callable(replace, 0, &callback_name)) {
+	if (!zend_is_callable_ex(replace, NULL, 0, &callback_name, &fcc, NULL)) {
 		php_error_docref(NULL, E_WARNING, "Requires argument 2, '%s', to be a valid callback", ZSTR_VAL(callback_name));
 		zend_string_release(callback_name);
 		ZVAL_STR(return_value, zval_get_string(subject));
@@ -1656,7 +2060,11 @@ static PHP_FUNCTION(preg_replace_callback)
 	}
 	zend_string_release(callback_name);
 
-	replace_count = preg_replace_impl(return_value, regex, replace, subject, limit, 1, 0);
+	fci.size = sizeof(fci);
+	fci.object = NULL;
+	ZVAL_COPY_VALUE(&fci.function_name, replace);
+
+	replace_count = preg_replace_func_impl(return_value, regex, &fci, &fcc, subject, limit);
 	if (zcount) {
 		zval_ptr_dtor(zcount);
 		ZVAL_LONG(zcount, replace_count);
@@ -1673,6 +2081,8 @@ static PHP_FUNCTION(preg_replace_callback_array)
 	zend_string *str_idx;
 	zend_string *callback_name;
 	int replace_count = 0;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
 
 	/* Get function parameters and do error-checking. */
 	ZEND_PARSE_PARAMETERS_START(2, 4)
@@ -1680,8 +2090,11 @@ static PHP_FUNCTION(preg_replace_callback_array)
 		Z_PARAM_ZVAL(subject)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(limit)
-		Z_PARAM_ZVAL_EX(zcount, 0, 1)
+		Z_PARAM_ZVAL_DEREF(zcount)
 	ZEND_PARSE_PARAMETERS_END();
+
+	fci.size = sizeof(fci);
+	fci.object = NULL;
 
 	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(pattern), str_idx, replace) {
 		if (str_idx) {
@@ -1692,7 +2105,7 @@ static PHP_FUNCTION(preg_replace_callback_array)
 			RETURN_NULL();
 		}
 
-		if (!zend_is_callable(replace, 0, &callback_name)) {
+		if (!zend_is_callable_ex(replace, NULL, 0, &callback_name, &fcc, NULL)) {
 			php_error_docref(NULL, E_WARNING, "'%s' is not a valid callback", ZSTR_VAL(callback_name));
 			zend_string_release(callback_name);
 			zval_ptr_dtor(&regex);
@@ -1702,10 +2115,12 @@ static PHP_FUNCTION(preg_replace_callback_array)
 		}
 		zend_string_release(callback_name);
 
-		if (Z_ISNULL_P(return_value)) {
-			replace_count += preg_replace_impl(&zv, &regex, replace, subject, limit, 1, 0);
+		ZVAL_COPY_VALUE(&fci.function_name, replace);
+
+		replace_count += preg_replace_func_impl(&zv, &regex, &fci, &fcc, subject, limit);
+		if (subject != return_value) {
+			subject = return_value;
 		} else {
-			replace_count += preg_replace_impl(&zv, &regex, replace, return_value, limit, 1, 0);
 			zval_ptr_dtor(return_value);
 		}
 
@@ -1730,30 +2145,7 @@ static PHP_FUNCTION(preg_replace_callback_array)
    Perform Perl-style regular expression replacement and only return matches. */
 static PHP_FUNCTION(preg_filter)
 {
-	zval *regex, *replace, *subject, *zcount = NULL;
-	zend_long limit = -1;
-	int replace_count;
-
-	/* Get function parameters and do error-checking. */
-	ZEND_PARSE_PARAMETERS_START(3, 5)
-		Z_PARAM_ZVAL(regex)
-		Z_PARAM_ZVAL(replace)
-		Z_PARAM_ZVAL(subject)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(limit)
-		Z_PARAM_ZVAL_EX(zcount, 0, 1)
-	ZEND_PARSE_PARAMETERS_END();
-
-	if (Z_TYPE_P(replace) == IS_ARRAY && Z_TYPE_P(regex) != IS_ARRAY) {
-		php_error_docref(NULL, E_WARNING, "Parameter mismatch, pattern is a string while replacement is an array");
-		RETURN_FALSE;
-	}
-
-	replace_count = preg_replace_impl(return_value, regex, replace, subject, limit, 0, 1);
-	if (zcount) {
-		zval_ptr_dtor(zcount);
-		ZVAL_LONG(zcount, replace_count);
-	}
+	preg_replace_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
@@ -1801,7 +2193,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 	pcre_extra		 extra_data;		/* Used locally for exec options */
 	int				*offsets;			/* Array of subpattern offsets */
 	int				 size_offsets;		/* Size of the offsets array */
-	int				 exoptions = 0;		/* Execution options */
+	int				 no_utf_check = 0;	/* Execution options */
 	int				 count = 0;			/* Count of matched subpatterns */
 	int				 start_offset;		/* Where the new search starts */
 	int				 next_offset;		/* End of the last delimiter match + 1 */
@@ -1848,14 +2240,28 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 	last_match = subject;
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 
+#ifdef HAVE_PCRE_JIT_SUPPORT
+	if (!(pce->compile_options & PCRE_UTF8)) {
+		no_utf_check = PCRE_NO_UTF8_CHECK;
+	}
+#endif
+
 	/* Get next piece if no limit or limit not yet reached and something matched*/
 	while ((limit_val == -1 || limit_val > 1)) {
+#ifdef HAVE_PCRE_JIT_SUPPORT
+		if ((extra->flags & PCRE_EXTRA_EXECUTABLE_JIT)
+		 && no_utf_check && !g_notempty) {
+			count = pcre_jit_exec(pce->re, extra, subject,
+						  subject_len, start_offset,
+						  no_utf_check|g_notempty, offsets, size_offsets, jit_stack);
+		} else
+#endif
 		count = pcre_exec(pce->re, extra, subject,
 						  subject_len, start_offset,
-						  exoptions|g_notempty, offsets, size_offsets);
+						  no_utf_check|g_notempty, offsets, size_offsets);
 
 		/* the string was already proved to be valid UTF-8 */
-		exoptions |= PCRE_NO_UTF8_CHECK;
+		no_utf_check = PCRE_NO_UTF8_CHECK;
 
 		/* Check for too many substrings condition. */
 		if (count == 0) {
@@ -1869,7 +2275,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 
 				if (offset_capture) {
 					/* Add (match, offset) pair to the return value */
-					add_offset_pair(return_value, last_match, (int)(&subject[offsets[0]]-last_match), next_offset, NULL);
+					add_offset_pair(return_value, last_match, (int)(&subject[offsets[0]]-last_match), next_offset, NULL, 0);
 				} else {
 					/* Add the piece to the return value */
 					ZVAL_STRINGL(&tmp, last_match, &subject[offsets[0]]-last_match);
@@ -1891,7 +2297,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 					/* If we have matched a delimiter */
 					if (!no_empty || match_len > 0) {
 						if (offset_capture) {
-							add_offset_pair(return_value, &subject[offsets[i<<1]], match_len, offsets[i<<1], NULL);
+							add_offset_pair(return_value, &subject[offsets[i<<1]], match_len, offsets[i<<1], NULL, 0);
 						} else {
 							ZVAL_STRINGL(&tmp, &subject[offsets[i<<1]], match_len);
 							zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
@@ -1899,14 +2305,24 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 					}
 				}
 			}
+
+			/* Advance to the position right after the last full match */
+			start_offset = offsets[1];
+
+			/* If we have matched an empty string, mimic what Perl's /g options does.
+			   This turns out to be rather cunning. First we set PCRE_NOTEMPTY_ATSTART and try
+			   the match again at the same point. If this fails (picked up above) we
+			   advance to the next character. */
+			g_notempty = (start_offset == offsets[0])? PCRE_NOTEMPTY_ATSTART | PCRE_ANCHORED : 0;
+
 		} else if (count == PCRE_ERROR_NOMATCH) {
 			/* If we previously set PCRE_NOTEMPTY_ATSTART after a null match,
 			   this is not necessarily the end. We need to advance
 			   the start offset, and continue. Fudge the offset values
 			   to achieve this, unless we're already at the end of the string. */
 			if (g_notempty != 0 && start_offset < subject_len) {
-				offsets[0] = start_offset;
-				offsets[1] = start_offset + calculate_unit_length(pce, subject + start_offset);
+				start_offset += calculate_unit_length(pce, subject + start_offset);
+				g_notempty = 0;
 			} else {
 				break;
 			}
@@ -1914,25 +2330,15 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 			pcre_handle_exec_error(count);
 			break;
 		}
-
-		/* If we have matched an empty string, mimic what Perl's /g options does.
-		   This turns out to be rather cunning. First we set PCRE_NOTEMPTY_ATSTART and try
-		   the match again at the same point. If this fails (picked up above) we
-		   advance to the next character. */
-		g_notempty = (offsets[1] == offsets[0])? PCRE_NOTEMPTY_ATSTART | PCRE_ANCHORED : 0;
-
-		/* Advance to the position right after the last full match */
-		start_offset = offsets[1];
 	}
 
 
 	start_offset = (int)(last_match - subject); /* the offset might have been incremented, but without further successful matches */
 
-	if (!no_empty || start_offset < subject_len)
-	{
+	if (!no_empty || start_offset < subject_len) {
 		if (offset_capture) {
 			/* Add the last (match, offset) pair to the return value */
-			add_offset_pair(return_value, &subject[start_offset], subject_len - start_offset, start_offset, NULL);
+			add_offset_pair(return_value, &subject[start_offset], subject_len - start_offset, start_offset, NULL, 0);
 		} else {
 			/* Add the last piece to the return value */
 			ZVAL_STRINGL(&tmp, last_match, subject + subject_len - last_match);
@@ -1954,43 +2360,89 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
    Quote regular expression characters plus an optional character */
 static PHP_FUNCTION(preg_quote)
 {
-	size_t		 in_str_len;
-	char	*in_str;		/* Input string argument */
-	char	*in_str_end;    /* End of the input string */
-	size_t		 delim_len = 0;
-	char	*delim = NULL;	/* Additional delimiter argument */
-	zend_string	*out_str;	/* Output string with quoted characters */
-	char 	*p,				/* Iterator for input string */
-			*q,				/* Iterator for output string */
-			 delim_char=0,	/* Delimiter character to be quoted */
-			 c;				/* Current character */
-	zend_bool quote_delim = 0; /* Whether to quote additional delim char */
+	zend_string *str;       		/* Input string argument */
+	zend_string	*delim = NULL;		/* Additional delimiter argument */
+	char		*in_str;			/* Input string */
+	char		*in_str_end;    	/* End of the input string */
+	zend_string	*out_str;			/* Output string with quoted characters */
+	size_t       extra_len;         /* Number of additional characters */
+	char 		*p,					/* Iterator for input string */
+				*q,					/* Iterator for output string */
+				 delim_char = '\0',	/* Delimiter character to be quoted */
+				 c;					/* Current character */
 
 	/* Get the arguments and check for errors */
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STRING(in_str, in_str_len)
+		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING(delim, delim_len)
+		Z_PARAM_STR(delim)
 	ZEND_PARSE_PARAMETERS_END();
 
-	in_str_end = in_str + in_str_len;
-
 	/* Nothing to do if we got an empty string */
-	if (in_str == in_str_end) {
+	if (ZSTR_LEN(str) == 0) {
 		RETURN_EMPTY_STRING();
 	}
 
-	if (delim && *delim) {
-		delim_char = delim[0];
-		quote_delim = 1;
+	in_str = ZSTR_VAL(str);
+	in_str_end = in_str + ZSTR_LEN(str);
+
+	if (delim) {
+		delim_char = ZSTR_VAL(delim)[0];
+	}
+
+	/* Go through the string and quote necessary characters */
+	extra_len = 0;
+	p = in_str;
+	do {
+		c = *p;
+		switch(c) {
+			case '.':
+			case '\\':
+			case '+':
+			case '*':
+			case '?':
+			case '[':
+			case '^':
+			case ']':
+			case '$':
+			case '(':
+			case ')':
+			case '{':
+			case '}':
+			case '=':
+			case '!':
+			case '>':
+			case '<':
+			case '|':
+			case ':':
+			case '-':
+				extra_len++;
+				break;
+
+			case '\0':
+				extra_len+=3;
+				break;
+
+			default:
+				if (c == delim_char) {
+					extra_len++;
+				}
+				break;
+		}
+		p++;
+	} while (p != in_str_end);
+
+	if (extra_len == 0) {
+		RETURN_STR_COPY(str);
 	}
 
 	/* Allocate enough memory so that even if each character
 	   is quoted, we won't run out of room */
-	out_str = zend_string_safe_alloc(4, in_str_len, 0, 0);
+	out_str = zend_string_safe_alloc(1, ZSTR_LEN(str), extra_len, 0);
+	q = ZSTR_VAL(out_str);
+	p = in_str;
 
-	/* Go through the string and quote necessary characters */
-	for (p = in_str, q = ZSTR_VAL(out_str); p != in_str_end; p++) {
+	do {
 		c = *p;
 		switch(c) {
 			case '.':
@@ -2025,16 +2477,16 @@ static PHP_FUNCTION(preg_quote)
 				break;
 
 			default:
-				if (quote_delim && c == delim_char)
+				if (c == delim_char) {
 					*q++ = '\\';
+				}
 				*q++ = c;
 				break;
 		}
-	}
+		p++;
+	} while (p != in_str_end);
 	*q = '\0';
 
-	/* Reallocate string and return it */
-	out_str = zend_string_truncate(out_str, q - ZSTR_VAL(out_str), 0);
 	RETURN_NEW_STR(out_str);
 }
 /* }}} */
@@ -2075,6 +2527,7 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 	int				*offsets;			/* Array of subpattern offsets */
 	int				 size_offsets;		/* Size of the offsets array */
 	int				 count = 0;			/* Count of matched subpatterns */
+	int				 no_utf_check = 0;	/* Execution options */
 	zend_string		*string_key;
 	zend_ulong		 num_key;
 	zend_bool		 invert;			/* Whether to return non-matching
@@ -2106,14 +2559,31 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 
+#ifdef HAVE_PCRE_JIT_SUPPORT
+	if (!(pce->compile_options & PCRE_UTF8)) {
+		no_utf_check = PCRE_NO_UTF8_CHECK;
+	}
+#endif
+
 	/* Go through the input array */
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(input), num_key, string_key, entry) {
 		zend_string *subject_str = zval_get_string(entry);
 
 		/* Perform the match */
+#ifdef HAVE_PCRE_JIT_SUPPORT
+		if ((extra->flags & PCRE_EXTRA_EXECUTABLE_JIT)
+		 && no_utf_check) {
+			count = pcre_jit_exec(pce->re, extra, ZSTR_VAL(subject_str),
+						  (int)ZSTR_LEN(subject_str), 0,
+						  no_utf_check, offsets, size_offsets, jit_stack);
+		} else
+#endif
 		count = pcre_exec(pce->re, extra, ZSTR_VAL(subject_str),
 						  (int)ZSTR_LEN(subject_str), 0,
-						  0, offsets, size_offsets);
+						  no_utf_check, offsets, size_offsets);
+
+		/* the string was already proved to be valid UTF-8 */
+		no_utf_check = PCRE_NO_UTF8_CHECK;
 
 		/* Check for too many substrings condition. */
 		if (count == 0) {

@@ -4,7 +4,20 @@
 ARG_ENABLE("zip", "ZIP support", "yes");
 
 if (PHP_ZIP != "no") {
-	if (CHECK_HEADER_ADD_INCLUDE("zlib.h", "CFLAGS_ZIP", "..\\zlib;" + PHP_ZIP) &&
+	if (CHECK_HEADER_ADD_INCLUDE("zip.h", "CFLAGS_ZIP", PHP_PHP_BUILD + "\\include;" + PHP_EXTRA_INCLUDES) &&
+		CHECK_HEADER_ADD_INCLUDE("zipconf.h", "CFLAGS_ZIP", PHP_PHP_BUILD + "\\lib\\libzip\\include;" + PHP_EXTRA_LIBS + "\\libzip\\include;" + PHP_ZIP) &&
+		(PHP_ZIP_SHARED && CHECK_LIB("libzip.lib", "zip", PHP_ZIP) || CHECK_LIB("libzip_a.lib", "zip", PHP_ZIP))
+	) {
+		EXTENSION('zip', 'php_zip.c zip_stream.c');
+
+		if (!PHP_ZIP_SHARED) {
+			AC_DEFINE("ZIP_STATIC", 1);
+		}
+
+		AC_DEFINE('HAVE_ZIP', 1);
+		AC_DEFINE('HAVE_LIBZIP', 1);
+		ADD_FLAG("CFLAGS_ZIP", "/D _WIN32");
+	} else if (CHECK_HEADER_ADD_INCLUDE("zlib.h", "CFLAGS_ZIP", "..\\zlib;" + PHP_ZIP) &&
 		CHECK_HEADER_ADD_INCLUDE("zipconf.h", "CFLAGS_ZIP", configure_module_dirname + "\\lib;" + PHP_ZIP) &&
 		(((PHP_ZLIB=="no") && (CHECK_LIB("zlib_a.lib", "zip", PHP_ZIP) ||  CHECK_LIB("zlib.lib", "zip", PHP_ZIP))) || 
 			(PHP_ZLIB_SHARED && CHECK_LIB("zlib.lib", "zip", PHP_ZIP)) || (PHP_ZLIB == "yes" && (!PHP_ZLIB_SHARED)))

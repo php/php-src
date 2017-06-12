@@ -23,7 +23,7 @@
 #include "zend_execute.h"
 #include "zend_inheritance.h"
 #include "zend_smart_str.h"
-#include "zend_inheritance.h"
+#include "zend_operators.h"
 
 static void overriden_ptr_dtor(zval *zv) /* {{{ */
 {
@@ -188,12 +188,14 @@ static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_inf
 	if (ZEND_TYPE_IS_CLASS(fe_arg_info->type) && ZEND_TYPE_IS_CLASS(proto_arg_info->type)) {
 		zend_string *fe_class_name, *proto_class_name;
 		const char *class_name;
+		size_t class_name_len;
 
 		fe_class_name = ZEND_TYPE_NAME(fe_arg_info->type);
 		class_name = ZSTR_VAL(fe_class_name);
-		if (!strcasecmp(class_name, "parent") && proto->common.scope) {
+		class_name_len = ZSTR_LEN(fe_class_name);
+		if (class_name_len == sizeof("parent")-1 && !strcasecmp(class_name, "parent") && proto->common.scope) {
 			fe_class_name = zend_string_copy(proto->common.scope->name);
-		} else if (!strcasecmp(class_name, "self") && fe->common.scope) {
+		} else if (class_name_len == sizeof("self")-1 && !strcasecmp(class_name, "self") && fe->common.scope) {
 			fe_class_name = zend_string_copy(fe->common.scope->name);
 		} else {
 			zend_string_addref(fe_class_name);
@@ -201,15 +203,16 @@ static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_inf
 
 		proto_class_name = ZEND_TYPE_NAME(proto_arg_info->type);
 		class_name = ZSTR_VAL(proto_class_name);
-		if (!strcasecmp(class_name, "parent") && proto->common.scope && proto->common.scope->parent) {
+		class_name_len = ZSTR_LEN(proto_class_name);
+		if (class_name_len == sizeof("parent")-1 && !strcasecmp(class_name, "parent") && proto->common.scope && proto->common.scope->parent) {
 			proto_class_name = zend_string_copy(proto->common.scope->parent->name);
-		} else if (!strcasecmp(class_name, "self") && proto->common.scope) {
+		} else if (class_name_len == sizeof("self")-1 && !strcasecmp(class_name, "self") && proto->common.scope) {
 			proto_class_name = zend_string_copy(proto->common.scope->name);
 		} else {
 			zend_string_addref(proto_class_name);
 		}
 
-		if (strcasecmp(ZSTR_VAL(fe_class_name), ZSTR_VAL(proto_class_name)) != 0) {
+		if (fe_class_name != proto_class_name && strcasecmp(ZSTR_VAL(fe_class_name), ZSTR_VAL(proto_class_name)) != 0) {
 			if (fe->common.type != ZEND_USER_FUNCTION) {
 				zend_string_release(proto_class_name);
 				zend_string_release(fe_class_name);
@@ -548,16 +551,6 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 	uint32_t child_flags;
 	uint32_t parent_flags = parent->common.fn_flags;
 
-	if ((parent->common.scope->ce_flags & ZEND_ACC_INTERFACE) == 0
-		&& parent->common.fn_flags & ZEND_ACC_ABSTRACT
-		&& parent->common.scope != (child->common.prototype ? child->common.prototype->common.scope : child->common.scope)
-		&& child->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_IMPLEMENTED_ABSTRACT)) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Can't inherit abstract function %s::%s() (previously declared abstract in %s)",
-			ZSTR_VAL(parent->common.scope->name),
-			ZSTR_VAL(child->common.function_name),
-			child->common.prototype ? ZSTR_VAL(child->common.prototype->common.scope->name) : ZSTR_VAL(child->common.scope->name));
-	}
-
 	if (UNEXPECTED(parent_flags & ZEND_ACC_FINAL)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot override final method %s::%s()", ZEND_FN_SCOPE_NAME(parent), ZSTR_VAL(child->common.function_name));
 	}
@@ -578,8 +571,9 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot make non abstract method %s::%s() abstract in class %s", ZEND_FN_SCOPE_NAME(parent), ZSTR_VAL(child->common.function_name), ZEND_FN_SCOPE_NAME(child));
 	}
 
-	/* Prevent derived classes from restricting access that was available in parent classes */
-	if (UNEXPECTED((child_flags & ZEND_ACC_PPP_MASK) > (parent_flags & ZEND_ACC_PPP_MASK))) {
+	/* Prevent derived classes from restricting access that was available in parent classes (except deriving from non-abstract ctors) */
+	if (UNEXPECTED((!(child_flags & ZEND_ACC_CTOR) || (parent_flags & (ZEND_ACC_ABSTRACT | ZEND_ACC_IMPLEMENTED_ABSTRACT))) &&
+		(child_flags & ZEND_ACC_PPP_MASK) > (parent_flags & ZEND_ACC_PPP_MASK))) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Access level to %s::%s() must be %s (as in class %s)%s", ZEND_FN_SCOPE_NAME(child), ZSTR_VAL(child->common.function_name), zend_visibility_string(parent_flags), ZEND_FN_SCOPE_NAME(parent), (parent_flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
 	}
 
@@ -1094,7 +1088,6 @@ static zend_bool zend_traits_method_compatibility_check(zend_function *fn, zend_
 	uint32_t other_flags = other_fn->common.scope->ce_flags;
 
 	return zend_do_perform_implementation_check(fn, other_fn)
-		&& ((other_fn->common.scope->ce_flags & ZEND_ACC_INTERFACE) || zend_do_perform_implementation_check(other_fn, fn))
 		&& ((fn_flags & (ZEND_ACC_FINAL|ZEND_ACC_STATIC)) ==
 		    (other_flags & (ZEND_ACC_FINAL|ZEND_ACC_STATIC))); /* equal final and static qualifier */
 }
@@ -1103,7 +1096,7 @@ static zend_bool zend_traits_method_compatibility_check(zend_function *fn, zend_
 static void zend_add_magic_methods(zend_class_entry* ce, zend_string* mname, zend_function* fe) /* {{{ */
 {
 	if (zend_string_equals_literal(mname, ZEND_CLONE_FUNC_NAME)) {
-		ce->clone = fe; fe->common.fn_flags |= ZEND_ACC_CLONE;
+		ce->clone = fe;
 	} else if (zend_string_equals_literal(mname, ZEND_CONSTRUCTOR_FUNC_NAME)) {
 		if (ce->constructor && (!ce->parent || ce->constructor != ce->parent->constructor)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "%s has colliding constructor definitions coming from traits", ZSTR_VAL(ce->name));
@@ -1164,12 +1157,13 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 								ZSTR_VAL(zend_get_function_declaration(fn)),
 								ZSTR_VAL(zend_get_function_declaration(existing_fn)));
 						}
-					} else if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
+					}
+					if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 						/* Make sure the abstract declaration is compatible with previous declaration */
 						if (UNEXPECTED(!zend_traits_method_compatibility_check(existing_fn, fn))) {
 							zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
-								ZSTR_VAL(zend_get_function_declaration(fn)),
-								ZSTR_VAL(zend_get_function_declaration(existing_fn)));
+								ZSTR_VAL(zend_get_function_declaration(existing_fn)),
+								ZSTR_VAL(zend_get_function_declaration(fn)));
 						}
 						return;
 					}
@@ -1192,8 +1186,8 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 			/* Make sure the abstract declaration is compatible with previous declaration */
 			if (UNEXPECTED(!zend_traits_method_compatibility_check(existing_fn, fn))) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
-					ZSTR_VAL(zend_get_function_declaration(fn)),
-					ZSTR_VAL(zend_get_function_declaration(existing_fn)));
+					ZSTR_VAL(zend_get_function_declaration(existing_fn)),
+					ZSTR_VAL(zend_get_function_declaration(fn)));
 			}
 			return;
 		} else if (UNEXPECTED(existing_fn->common.scope->ce_flags & ZEND_ACC_TRAIT)) {
@@ -1531,7 +1525,6 @@ static void zend_do_traits_property_binding(zend_class_entry *ce) /* {{{ */
 	size_t i;
 	zend_property_info *property_info;
 	zend_property_info *coliding_prop;
-	zval compare_result;
 	zend_string* prop_name;
 	const char* class_name_unused;
 	zend_bool not_compatible;
@@ -1576,15 +1569,11 @@ static void zend_do_traits_property_binding(zend_class_entry *ce) /* {{{ */
 						== (flags & (ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC))) {
 						/* flags are identical, now the value needs to be checked */
 						if (flags & ZEND_ACC_STATIC) {
-							not_compatible = (FAILURE == compare_function(&compare_result,
-											  &ce->default_static_members_table[coliding_prop->offset],
-											  &ce->traits[i]->default_static_members_table[property_info->offset]))
-								  || (Z_LVAL(compare_result) != 0);
+							not_compatible = fast_is_not_identical_function(&ce->default_static_members_table[coliding_prop->offset],
+											  &ce->traits[i]->default_static_members_table[property_info->offset]);
 						} else {
-							not_compatible = (FAILURE == compare_function(&compare_result,
-											  &ce->default_properties_table[OBJ_PROP_TO_NUM(coliding_prop->offset)],
-											  &ce->traits[i]->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)]))
-								  || (Z_LVAL(compare_result) != 0);
+							not_compatible = fast_is_not_identical_function(&ce->default_properties_table[OBJ_PROP_TO_NUM(coliding_prop->offset)],
+											  &ce->traits[i]->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)]);
 						}
 					} else {
 						/* the flags are not identical, thus, we assume properties are not compatible */

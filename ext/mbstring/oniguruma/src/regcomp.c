@@ -761,17 +761,17 @@ compile_length_quantifier_node(QtfrNode* qn, regex_t* reg)
   if (infinite && qn->lower <= 1) {
     if (qn->greedy) {
       if (qn->lower == 1)
-	len = SIZE_OP_JUMP;
+        len = SIZE_OP_JUMP;
       else
-	len = 0;
+        len = 0;
 
       len += SIZE_OP_PUSH + cklen + mod_tlen + SIZE_OP_JUMP;
     }
     else {
       if (qn->lower == 0)
-	len = SIZE_OP_JUMP;
+        len = SIZE_OP_JUMP;
       else
-	len = 0;
+        len = 0;
 
       len += mod_tlen + SIZE_OP_PUSH + cklen;
     }
@@ -785,10 +785,10 @@ compile_length_quantifier_node(QtfrNode* qn, regex_t* reg)
   else if (qn->upper == 1 && qn->greedy) {
     if (qn->lower == 0) {
       if (CKN_ON) {
-	len = SIZE_OP_STATE_CHECK_PUSH + tlen;
+        len = SIZE_OP_STATE_CHECK_PUSH + tlen;
       }
       else {
-	len = SIZE_OP_PUSH + tlen;
+        len = SIZE_OP_PUSH + tlen;
       }
     }
     else {
@@ -1230,6 +1230,11 @@ compile_length_enclose_node(EncloseNode* node, regex_t* reg)
         len += (IS_ENCLOSE_RECURSION(node)
                 ? SIZE_OP_MEMORY_END_REC : SIZE_OP_MEMORY_END);
     }
+    else if (IS_ENCLOSE_RECURSION(node)) {
+      len = SIZE_OP_MEMORY_START_PUSH;
+      len += tlen + (BIT_STATUS_AT(reg->bt_mem_end, node->regnum)
+                     ? SIZE_OP_MEMORY_END_PUSH_REC : SIZE_OP_MEMORY_END_REC);
+    }
     else
 #endif
     {
@@ -1250,7 +1255,7 @@ compile_length_enclose_node(EncloseNode* node, regex_t* reg)
       if (tlen < 0) return tlen;
 
       len = tlen * qn->lower
-	  + SIZE_OP_PUSH + tlen + SIZE_OP_POP + SIZE_OP_JUMP;
+        + SIZE_OP_PUSH + tlen + SIZE_OP_POP + SIZE_OP_JUMP;
     }
     else {
       len = SIZE_OP_PUSH_STOP_BT + tlen + SIZE_OP_POP_STOP_BT;
@@ -1321,6 +1326,14 @@ compile_enclose_node(EncloseNode* node, regex_t* reg)
       if (r) return r;
       r = add_opcode(reg, OP_RETURN);
     }
+    else if (IS_ENCLOSE_RECURSION(node)) {
+      if (BIT_STATUS_AT(reg->bt_mem_end, node->regnum))
+        r = add_opcode(reg, OP_MEMORY_END_PUSH_REC);
+      else
+        r = add_opcode(reg, OP_MEMORY_END_REC);
+      if (r) return r;
+      r = add_mem_num(reg, node->regnum);
+    }
     else
 #endif
     {
@@ -1349,7 +1362,7 @@ compile_enclose_node(EncloseNode* node, regex_t* reg)
       r = add_opcode(reg, OP_POP);
       if (r) return r;
       r = add_opcode_rel_addr(reg, OP_JUMP,
-	 -((int )SIZE_OP_PUSH + len + (int )SIZE_OP_POP + (int )SIZE_OP_JUMP));
+             -((int )SIZE_OP_PUSH + len + (int )SIZE_OP_POP + (int )SIZE_OP_JUMP));
     }
     else {
       r = add_opcode(reg, OP_PUSH_STOP_BT);
@@ -2132,16 +2145,16 @@ get_char_length_tree1(Node* node, regex_t* reg, int* len, int level)
       switch (en->type) {
       case ENCLOSE_MEMORY:
 #ifdef USE_SUBEXP_CALL
-	if (IS_ENCLOSE_CLEN_FIXED(en))
-	  *len = en->char_len;
-	else {
-	  r = get_char_length_tree1(en->target, reg, len, level);
-	  if (r == 0) {
-	    en->char_len = *len;
-	    SET_ENCLOSE_STATUS(node, NST_CLEN_FIXED);
-	  }
-	}
-	break;
+        if (IS_ENCLOSE_CLEN_FIXED(en))
+          *len = en->char_len;
+        else {
+          r = get_char_length_tree1(en->target, reg, len, level);
+          if (r == 0) {
+            en->char_len = *len;
+            SET_ENCLOSE_STATUS(node, NST_CLEN_FIXED);
+          }
+        }
+        break;
 #endif
       case ENCLOSE_OPTION:
       case ENCLOSE_STOP_BACKTRACK:
@@ -2231,6 +2244,7 @@ is_not_included(Node* x, Node* y, regex_t* reg)
             return 0;
           }
           else {
+            if (IS_NOT_NULL(xc->mbuf)) return 0;
             for (i = 0; i < SINGLE_BYTE_SIZE; i++) {
               if (! IS_CODE_SB_WORD(reg->enc, i)) {
                 if (!IS_NCCLASS_NOT(xc)) {
@@ -2580,17 +2594,17 @@ get_min_len(Node* node, OnigLen *min, ScanEnv* env)
         if (IS_ENCLOSE_MIN_FIXED(en))
           *min = en->min_len;
         else {
-	  if (IS_ENCLOSE_MARK1(NENCLOSE(node)))
-	    *min = 0;  // recursive
-	  else {
-	    SET_ENCLOSE_STATUS(node, NST_MARK1);
-	    r = get_min_len(en->target, min, env);
-	    CLEAR_ENCLOSE_STATUS(node, NST_MARK1);
-	    if (r == 0) {
-	      en->min_len = *min;
-	      SET_ENCLOSE_STATUS(node, NST_MIN_FIXED);
-	    }
-	  }
+          if (IS_ENCLOSE_MARK1(NENCLOSE(node)))
+            *min = 0;  // recursive
+          else {
+            SET_ENCLOSE_STATUS(node, NST_MARK1);
+            r = get_min_len(en->target, min, env);
+            CLEAR_ENCLOSE_STATUS(node, NST_MARK1);
+            if (r == 0) {
+              en->min_len = *min;
+              SET_ENCLOSE_STATUS(node, NST_MIN_FIXED);
+            }
+          }
         }
         break;
 
@@ -2699,22 +2713,22 @@ get_max_len(Node* node, OnigLen *max, ScanEnv* env)
       EncloseNode* en = NENCLOSE(node);
       switch (en->type) {
       case ENCLOSE_MEMORY:
-	if (IS_ENCLOSE_MAX_FIXED(en))
-	  *max = en->max_len;
-	else {
-	  if (IS_ENCLOSE_MARK1(NENCLOSE(node)))
-	    *max = ONIG_INFINITE_DISTANCE;
-	  else {
-	    SET_ENCLOSE_STATUS(node, NST_MARK1);
-	    r = get_max_len(en->target, max, env);
-	    CLEAR_ENCLOSE_STATUS(node, NST_MARK1);
-	    if (r == 0) {
-	      en->max_len = *max;
-	      SET_ENCLOSE_STATUS(node, NST_MAX_FIXED);
-	    }
-	  }
-	}
-	break;
+        if (IS_ENCLOSE_MAX_FIXED(en))
+          *max = en->max_len;
+        else {
+          if (IS_ENCLOSE_MARK1(NENCLOSE(node)))
+            *max = ONIG_INFINITE_DISTANCE;
+          else {
+            SET_ENCLOSE_STATUS(node, NST_MARK1);
+            r = get_max_len(en->target, max, env);
+            CLEAR_ENCLOSE_STATUS(node, NST_MARK1);
+            if (r == 0) {
+              en->max_len = *max;
+              SET_ENCLOSE_STATUS(node, NST_MAX_FIXED);
+            }
+          }
+        }
+        break;
 
       case ENCLOSE_OPTION:
       case ENCLOSE_STOP_BACKTRACK:
@@ -3673,6 +3687,8 @@ setup_comb_exp_check(Node* node, int state, ScanEnv* env)
 #define IN_NOT        (1<<1)
 #define IN_REPEAT     (1<<2)
 #define IN_VAR_REPEAT (1<<3)
+#define IN_CALL       (1<<4)
+#define IN_RECCALL    (1<<5)
 
 /* setup_tree does the following work.
  1. check empty loop. (set qn->target_empty_info)
@@ -3843,10 +3859,16 @@ setup_tree(Node* node, regex_t* reg, int state, ScanEnv* env)
         break;
 
       case ENCLOSE_MEMORY:
-        if ((state & (IN_ALT | IN_NOT | IN_VAR_REPEAT)) != 0) {
+        if ((state & (IN_ALT | IN_NOT | IN_VAR_REPEAT | IN_CALL)) != 0) {
           BIT_STATUS_ON_AT(env->bt_mem_start, en->regnum);
           /* SET_ENCLOSE_STATUS(node, NST_MEM_IN_ALT_NOT); */
         }
+        if (IS_ENCLOSE_CALLED(en))
+          state |= IN_CALL;
+        if (IS_ENCLOSE_RECURSION(en))
+          state |= IN_RECCALL;
+        else if ((state & IN_RECCALL) != 0)
+          SET_CALL_RECURSION(node);
         r = setup_tree(en->target, reg, state, env);
         break;
 
@@ -4159,6 +4181,9 @@ concat_opt_anc_info(OptAncInfo* to, OptAncInfo* left, OptAncInfo* right,
   to->right_anchor = right->right_anchor;
   if (right_len == 0) {
     to->right_anchor |= left->right_anchor;
+  }
+  else {
+    to->right_anchor |= (left->right_anchor & ANCHOR_PREC_READ_NOT);
   }
 }
 
@@ -4534,7 +4559,7 @@ concat_left_node_opt_info(OnigEncoding enc, NodeOptInfo* to, NodeOptInfo* add)
   if (to->expr.len > 0) {
     if (add->len.max > 0) {
       if (to->expr.len > (int )add->len.max)
-	to->expr.len = add->len.max;
+        to->expr.len = add->len.max;
 
       if (to->expr.mmd.max == 0)
         select_opt_exact_info(enc, &to->exb, &to->expr);
@@ -4932,7 +4957,7 @@ set_optimize_exact_info(regex_t* reg, OptExactInfo* e)
     reg->exact_end = reg->exact + e->len;
  
     allow_reverse =
-	ONIGENC_IS_ALLOWED_REVERSE_MATCH(reg->enc, reg->exact, reg->exact_end);
+      ONIGENC_IS_ALLOWED_REVERSE_MATCH(reg->enc, reg->exact, reg->exact_end);
 
     if (e->len >= 3 || (e->len >= 2 && allow_reverse)) {
       r = set_bm_skip(reg->exact, reg->exact_end, reg->enc,
@@ -5003,12 +5028,14 @@ set_optimize_info_from_tree(Node* node, regex_t* reg, ScanEnv* scan_env)
   if (r) return r;
 
   reg->anchor = opt.anc.left_anchor & (ANCHOR_BEGIN_BUF |
-        ANCHOR_BEGIN_POSITION | ANCHOR_ANYCHAR_STAR | ANCHOR_ANYCHAR_STAR_ML);
+        ANCHOR_BEGIN_POSITION | ANCHOR_ANYCHAR_STAR | ANCHOR_ANYCHAR_STAR_ML |
+        ANCHOR_LOOK_BEHIND);
 
   if ((opt.anc.left_anchor & (ANCHOR_LOOK_BEHIND | ANCHOR_PREC_READ_NOT)) != 0)
     reg->anchor &= ~ANCHOR_ANYCHAR_STAR_ML;
 
-  reg->anchor |= opt.anc.right_anchor & (ANCHOR_END_BUF | ANCHOR_SEMI_END_BUF);
+  reg->anchor |= opt.anc.right_anchor & (ANCHOR_END_BUF | ANCHOR_SEMI_END_BUF |
+       ANCHOR_PREC_READ_NOT);
 
   if (reg->anchor & (ANCHOR_END_BUF | ANCHOR_SEMI_END_BUF)) {
     reg->anchor_dmin = opt.len.min;
@@ -5018,7 +5045,7 @@ set_optimize_info_from_tree(Node* node, regex_t* reg, ScanEnv* scan_env)
   if (opt.exb.len > 0 || opt.exm.len > 0) {
     select_opt_exact_info(reg->enc, &opt.exb, &opt.exm);
     if (opt.map.value > 0 &&
-	comp_opt_exact_or_map_info(&opt.exb, &opt.map) > 0) {
+        comp_opt_exact_or_map_info(&opt.exb, &opt.map) > 0) {
       goto set_map;
     }
     else {

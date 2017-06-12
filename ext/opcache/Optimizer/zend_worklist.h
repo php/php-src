@@ -44,9 +44,6 @@ static inline int zend_worklist_stack_prepare(zend_arena **arena, zend_worklist_
 	ZEND_ASSERT(len >= 0);
 
 	stack->buf = (int*)zend_arena_calloc(arena, sizeof(*stack->buf), len);
-	if (!stack->buf) {
-		return FAILURE;
-	}
 	stack->len = 0;
 	stack->capacity = len;
 
@@ -77,10 +74,10 @@ typedef struct _zend_worklist {
 } zend_worklist;
 
 #define ZEND_WORKLIST_ALLOCA(w, _len, use_heap) do { \
-		(w)->stack.buf = (int*)do_alloca(sizeof(int) * _len + sizeof(zend_ulong) * zend_bitset_len(_len), use_heap); \
+		(w)->stack.buf = (int*)do_alloca(ZEND_MM_ALIGNED_SIZE(sizeof(int) * _len) + sizeof(zend_ulong) * zend_bitset_len(_len), use_heap); \
 		(w)->stack.len = 0; \
 		(w)->stack.capacity = _len; \
-		(w)->visited = (zend_bitset)((w)->stack.buf + _len); \
+		(w)->visited = (zend_bitset)((char*)(w)->stack.buf + ZEND_MM_ALIGNED_SIZE(sizeof(int) * _len)); \
 		memset((w)->visited, 0, sizeof(zend_ulong) * zend_bitset_len(_len)); \
 	} while (0)
 
@@ -91,9 +88,6 @@ static inline int zend_worklist_prepare(zend_arena **arena, zend_worklist *workl
 {
 	ZEND_ASSERT(len >= 0);
 	worklist->visited = (zend_bitset)zend_arena_calloc(arena, sizeof(zend_ulong), zend_bitset_len(len));
-	if (!worklist->visited) {
-		return FAILURE;
-	}
 	return zend_worklist_stack_prepare(arena, &worklist->stack, len);
 }
 

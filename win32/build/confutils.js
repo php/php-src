@@ -381,10 +381,17 @@ function conf_process_args()
 				} else {
 					/* we matched the non-default arg */
 					if (argval == null) {
-						argval = arg.defval == "no" ? "yes" : "no";
+						if (arg.defval == "no") {
+							argval = "yes";
+						} else if (arg.defval == "no,shared") {
+							argval = "yes,shared";
+							shared = true;
+						} else {
+							argval = "no";
+						}
 					}
 				}
-				
+
 				arg.argval = argval;
 				eval("PHP_" + arg.symval + " = argval;");
 				eval("PHP_" + arg.symval + "_SHARED = shared;");
@@ -1191,10 +1198,11 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 		MFO.WriteLine("$(BUILD_DIR)\\" + makefiletarget + ": $(DEPS_" + SAPI + ") $(" + SAPI + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(BUILD_DIR)\\" + resname  + " $(BUILD_DIR)\\" + manifest_name);
 	}
 
+	var is_lib = makefiletarget.match(new RegExp("\\.lib$"));
 	if (makefiletarget.match(new RegExp("\\.dll$"))) {
 		ldflags = "/dll $(LDFLAGS)";
 		manifest = "-@$(_VC_MANIFEST_EMBED_DLL)";
-	} else if (makefiletarget.match(new RegExp("\\.lib$"))) {
+	} else if (is_lib) {
 		ldflags = "$(ARFLAGS)";
 		ld = "@$(MAKE_LIB)";
 	} else {
@@ -1202,6 +1210,12 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 		manifest = "-@$(_VC_MANIFEST_EMBED_EXE)";
 	}
 	
+	if (PHP_SANITIZER == "yes") {
+		if (CLANG_TOOLSET) {
+			add_asan_opts("CFLAGS_" + SAPI, "LIBS_" + SAPI, (is_lib ? "ARFLAGS_" : "LDFLAGS_") + SAPI);
+		}
+	}
+
 	if(is_pgo_desired(sapiname) && (PHP_PGI == "yes" || PHP_PGO != "no")) {
 		// Add compiler and link flags if PGO options are selected
 		if (PHP_DEBUG != "yes" && PHP_PGI == "yes") {
@@ -1214,6 +1228,9 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 		}
 
 		ldflags += " /PGD:$(PGOPGD_DIR)\\" + makefiletarget.substring(0, makefiletarget.indexOf(".")) + ".pgd";
+	} else if (PHP_DEBUG != "yes") {
+		ADD_FLAG('CFLAGS_' + SAPI, "/GL");
+		ADD_FLAG('LDFLAGS_' + SAPI, "/LTCG:INCREMENTAL");
 	}
 
 	if (MODE_PHPIZE) {
@@ -1414,6 +1431,9 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 			ADD_FLAG('CFLAGS_' + EXT, "/GL /O2");
 
 			ldflags = " /PGD:$(PGOPGD_DIR)\\" + dllname.substring(0, dllname.indexOf(".")) + ".pgd";
+		} else if (PHP_DEBUG != "yes") {
+			ADD_FLAG('CFLAGS_' + EXT, "/GL");
+			ADD_FLAG('LDFLAGS_' + EXT, "/LTCG:INCREMENTAL");
 		}
 
 		MFO.WriteLine("$(BUILD_DIR)\\" + libname + ": $(BUILD_DIR)\\" + dllname);
@@ -1456,6 +1476,9 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 				ADD_FLAG("STATIC_EXT_CFLAGS", "/GL /O2");
 				static_pgo_enabled = true;
 			}
+		} else if (PHP_DEBUG != "yes") {
+			ADD_FLAG("STATIC_EXT_CFLAGS", "/GL");
+			ADD_FLAG('STATIC_EXT_LDFLAGS', "/LTCG:INCREMENTAL");
 		}
 
 		/* find the header that declares the module pointer,
@@ -1650,6 +1673,11 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 						/* "--rule-file=win32\build\cppcheck_rules.xml " + */
 						" --std=c89 --std=c++11 " + 
 						"--quiet --inconclusive --template=vs ";
+
+			var cppcheck_build_dir = get_define("CPPCHECK_BUILD_DIR");
+			if (!!cppcheck_build_dir) {
+				analyzer_base_args += "--cppcheck-build-dir=$(CPPCHECK_BUILD_DIR)";
+			}
 		}
 
 		if (PHP_MP_DISABLED) {
@@ -2465,6 +2493,11 @@ function generate_makefile()
 			}
 		}
 	}
+	if (PHP_SANITIZER == "yes") {
+		if (CLANG_TOOLSET) {
+			extra_path = extra_path + ";" + get_clang_lib_dir() + "\\windows";
+		}
+	}
 	MF.WriteLine("set-tmp-env:");
 	MF.WriteLine("	@set PATH=" + extra_path + ";$(PATH)");
 
@@ -2762,11 +2795,6 @@ function PHP_INSTALL_HEADERS(dir, headers_list)
 PHP_SNAPSHOT_BUILD = "no";
 if (!MODE_PHPIZE) {
 	ARG_ENABLE('snapshot-build', 'Build a snapshot; turns on everything it can and ignores build errors', 'no');
-
-	// one-shot build optimizes build by asking compiler to build
-	// several objects at once, reducing overhead of starting new
-	// compiler processes.
-	ARG_ENABLE('one-shot', 'Optimize for fast build - best for release and snapshot builders, not so hot for edit-and-rebuild hacking', 'no');
 }
 
 function toolset_option_handle()
@@ -2862,8 +2890,9 @@ function toolset_setup_project_tools()
 		ERROR('bison is required')
 	}
 
-	/* TODO throw error, ignore for now for BC. */
-	PATH_PROG('sed');
+	if (!PATH_PROG('sed')) {
+		ERROR('sed is required')
+	}
 
 	RE2C = PATH_PROG('re2c');
 	if (RE2C) {
@@ -2872,6 +2901,10 @@ function toolset_setup_project_tools()
 
 		RE2CVERS = probe_binary(RE2C, "version");
 		STDOUT.WriteLine('  Detected re2c version ' + RE2CVERS);
+
+		if (RE2CVERS.match(/^\d+.\d+$/)) {
+			RE2CVERS += ".0";
+		}
 
 		intvers = RE2CVERS.replace(pattern, '') - 0;
 		intmin = MINRE2C.replace(pattern, '') - 0;
@@ -3120,7 +3153,7 @@ function toolset_setup_common_ldlags()
 function toolset_setup_common_libs()
 {
 	// urlmon.lib ole32.lib oleaut32.lib uuid.lib gdi32.lib winspool.lib comdlg32.lib
-	DEFINE("LIBS", "kernel32.lib ole32.lib user32.lib advapi32.lib shell32.lib ws2_32.lib Dnsapi.lib psapi.lib");
+	DEFINE("LIBS", "kernel32.lib ole32.lib user32.lib advapi32.lib shell32.lib ws2_32.lib Dnsapi.lib psapi.lib bcrypt.lib");
 }
 
 function toolset_setup_build_mode()
@@ -3323,20 +3356,100 @@ function SETUP_OPENSSL(target, path_to_check, common_name, use_env, add_dir_part
 	var ret = 0;
 	var cflags_var = "CFLAGS_" + target.toUpperCase();
 
-	if (CHECK_LIB("ssleay32.lib", target, path_to_check, common_name) &&
-			CHECK_LIB("libeay32.lib", target, path_to_check, common_name) &&
-			CHECK_LIB("crypt32.lib", target, path_to_check, common_name) &&
-			CHECK_HEADER_ADD_INCLUDE("openssl/ssl.h", cflags_var, path_to_check, use_env, add_dir_part, add_to_flag_only)) {
-		/* Openssl 1.0.x and lower */
-		return 1;
-	} else if (CHECK_LIB("libcrypto.lib", target, path_to_check) &&
+	if (CHECK_LIB("libcrypto.lib", target, path_to_check) &&
 			CHECK_LIB("libssl.lib", target, path_to_check) &&
 			CHECK_LIB("crypt32.lib", target, path_to_check, common_name) &&
 			CHECK_HEADER_ADD_INCLUDE("openssl/ssl.h", cflags_var, path_to_check, use_env, add_dir_part, add_to_flag_only)) {
 		/* Openssl 1.1.x */
 		return 2;
+	} else if (CHECK_LIB("ssleay32.lib", target, path_to_check, common_name) &&
+			CHECK_LIB("libeay32.lib", target, path_to_check, common_name) &&
+			CHECK_LIB("crypt32.lib", target, path_to_check, common_name) &&
+			CHECK_HEADER_ADD_INCLUDE("openssl/ssl.h", cflags_var, path_to_check, use_env, add_dir_part, add_to_flag_only)) {
+		/* Openssl 1.0.x and lower */
+		return 1;
 	}
 
 	return ret;
+}
+
+function check_binary_tools_sdk()
+{
+	var BIN_TOOLS_SDK_VER_MAJOR = 0;
+	var BIN_TOOLS_SDK_VER_MINOR = 0;
+	var BIN_TOOLS_SDK_VER_PATCH = 0;
+
+	var out = execute("cmd /c phpsdk_version");
+
+	if (out.match(/PHP SDK (\d+)\.(\d+)\.(\d+).*/)) {
+		BIN_TOOLS_SDK_VER_MAJOR = parseInt(RegExp.$1);
+		BIN_TOOLS_SDK_VER_MINOR = parseInt(RegExp.$2);
+		BIN_TOOLS_SDK_VER_PATCH = parseInt(RegExp.$3);
+	}
+
+	/* Basic test, extend by need. */
+	if (BIN_TOOLS_SDK_VER_MAJOR < 2) {
+		ERROR("Incompatible binary tools version. Please consult https://wiki.php.net/internals/windows/stepbystepbuild_sdk_2");
+	}
+}
+
+function get_clang_lib_dir()
+{
+	var ret = null;
+	var ver = null;
+
+	if (COMPILER_NAME.match(/clang version ([\d\.]+) \((.*)\)/)) {
+		ver = RegExp.$1;
+	} else {
+		ERROR("Faled to determine clang lib path");
+	}
+
+	if (X64) {
+		ret = PROGRAM_FILES + "\\LLVM\\lib\\clang\\" + ver + "\\lib";
+		if (!FSO.FolderExists(ret)) {
+			ret = null;
+		}
+	} else {
+		ret = PROGRAM_FILESx86 + "\\LLVM\\lib\\clang\\" + ver + "\\lib";
+		if (!FSO.FolderExists(ret)) {
+			ret = PROGRAM_FILES + "\\LLVM\\lib\\clang\\" + ver + "\\lib";
+			if (!FSO.FolderExists(ret)) {
+				ret = null;
+			}
+		}
+	}
+
+	if (null == ret) {
+		ERROR("Invalid clang lib path encountered");
+	}
+
+	return ret;
+}
+
+function add_asan_opts(cflags_name, libs_name, ldflags_name)
+{
+
+	var ver = null;
+
+	if (COMPILER_NAME.match(/clang version ([\d\.]+) \((.*)\)/)) {
+		ver = RegExp.$1;
+	} else {
+		ERROR("Faled to determine clang lib path");
+	}
+
+	if (!!cflags_name) {
+		ADD_FLAG(cflags_name, "-fsanitize=address");
+	}
+	if (!!libs_name) {
+		if (X64) {
+			ADD_FLAG(libs_name, "clang_rt.asan_dynamic-x86_64.lib clang_rt.asan_dynamic_runtime_thunk-x86_64.lib");
+		} else {
+			ADD_FLAG(libs_name, "clang_rt.asan_dynamic-i386.lib clang_rt.asan_dynamic_runtime_thunk-i386.lib");
+		}
+	}
+
+	if (!!ldflags_name) {
+		ADD_FLAG(ldflags_name, "/libpath:\"" + get_clang_lib_dir() + "\\windows\"");
+	}
 }
 

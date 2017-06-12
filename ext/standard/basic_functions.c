@@ -736,6 +736,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ini_get_all, 0, 0, 0)
 	ZEND_ARG_INFO(0, extension)
+	ZEND_ARG_INFO(0, details)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_ini_set, 0)
@@ -1192,6 +1193,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_fputcsv, 0, 0, 2)
 	ZEND_ARG_INFO(0, fields) /* ARRAY_INFO(0, fields, 1) */
 	ZEND_ARG_INFO(0, delimiter)
 	ZEND_ARG_INFO(0, enclosure)
+	ZEND_ARG_INFO(0, escape_char)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fgetcsv, 0, 0, 1)
@@ -3803,6 +3805,8 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 	zend_hash_destroy(&BG(putenv_ht));
 #endif
 
+	BG(mt_rand_is_seeded) = 0;
+
 	if (BG(umask) != -1) {
 		umask(BG(umask));
 	}
@@ -4737,6 +4741,7 @@ PHPAPI int _php_error_log(int opt_err, char *message, char *opt, char *headers) 
 PHPAPI int _php_error_log_ex(int opt_err, char *message, size_t message_len, char *opt, char *headers) /* {{{ */
 {
 	php_stream *stream = NULL;
+	size_t nbytes;
 
 	switch (opt_err)
 	{
@@ -4756,8 +4761,11 @@ PHPAPI int _php_error_log_ex(int opt_err, char *message, size_t message_len, cha
 			if (!stream) {
 				return FAILURE;
 			}
-			php_stream_write(stream, message, message_len);
+			nbytes = php_stream_write(stream, message, message_len);
 			php_stream_close(stream);
+			if (nbytes != message_len) {
+				return FAILURE;
+			}
 			break;
 
 		case 4: /* send to SAPI */
@@ -5312,7 +5320,7 @@ PHP_FUNCTION(highlight_string)
 PHP_FUNCTION(ini_get)
 {
 	char *varname, *str;
-	size_t varname_len;
+	size_t varname_len, len;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STRING(varname, varname_len)
@@ -5324,7 +5332,13 @@ PHP_FUNCTION(ini_get)
 		RETURN_FALSE;
 	}
 
-	RETURN_STRING(str);
+	len = strlen(str);
+	if (len == 0) {
+		RETURN_EMPTY_STRING();
+	} else if (len == 1) {
+		RETURN_INTERNED_STR(ZSTR_CHAR((zend_uchar)str[0]));
+	}
+	RETURN_STRINGL(str, len);
 }
 /* }}} */
 
@@ -5435,7 +5449,15 @@ PHP_FUNCTION(ini_set)
 
 	/* copy to return here, because alter might free it! */
 	if (old_value) {
-		RETVAL_STRING(old_value);
+		size_t len = strlen(old_value);
+
+		if (len == 0) {
+			RETVAL_EMPTY_STRING();
+		} else if (len == 1) {
+			RETVAL_INTERNED_STR(ZSTR_CHAR((zend_uchar)old_value[0]));
+		} else {
+			RETVAL_STRINGL(old_value, len);
+		}
 	} else {
 		RETVAL_FALSE;
 	}

@@ -1,11 +1,34 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.2
+?? ??? ????, PHP 7.2.0alpha2
+
+- GD:
+  . Fixed bug #74744 (gd.h: stdarg.h include missing for va_list use in
+    gdErrorMethod). (rainer dot jung at kippdata dot de, cmb)
+
+- OpenSSL:
+  . Fixed bug #74720 (pkcs7_en/decrypt does not work if \x1a is used in
+    content). (Anatol)
+  . Use TLS_ANY for default ssl:// and tls:// negotiation.
+    (Niklas Keller, me at kelunik dot com)
+
+- SQLite3:
+  . Update to Sqlite 3.19.3. (cmb)
+
+08 Jun 2017, PHP 7.2.0alpha1
 
 - Core:
+  . Added ZEND_COUNT, ZEND_GET_CLASS, ZEND_GET_CALLED_CLASS, ZEND_GET_TYPE,
+    ZEND_FUNC_NUM_ARGS, ZEND_FUNC_GET_ARGS instructions, to implement
+    corresponding builtin functions. (Dmitry)
+  . "Countable" interface is moved from SPL to Core. (Dmitry)
+  . Added ZEND_IN_ARRAY instruction, implementing optimized in_array() builtin
+    function, through hash lookup in flipped array. (Dmitry)
   . Removed IS_TYPE_IMMUTABLE (it's the same as COPYABLE & !REFCOUNTED). (Dmitry)
   . Removed the sql.safe_mode directive. (Kalle)
   . Removed support for Netware. (Kalle)
+  . Renamed ReflectionClass::isIterateable() to ReflectionClass::isIterable()
+    (alias original name for BC). (Sara)
   . Fixed bug #54535 (WSA cleanup executes before MSHUTDOWN). (Kalle)
   . Implemented FR #69791 (Disallow mail header injections by extra headers)
     (Yasuo)
@@ -20,14 +43,35 @@ PHP                                                                        NEWS
     php.exe). (Michele Locati)
   . Implemented "Convert numeric keys in object/array casts" RFC, fixes
     bugs #53838, #61655, #66173, #70925, #72254, etc. (Andrea)
+  . Implemented "Deprecate and Remove Bareword (Unquoted) Strings" RFC.
+    (Rowan Collins)
   . Raised minimum supported Windows versions to Windows 7/Server 2008 R2.
     (Anatol)
+  . Implemented minor optimization in array_keys/array_values(). (Sara)
   . Fixed bug #73969 (segfault in debug_print_backtrace). (andrewnester)
   . Added PHP_OS_FAMILY constant to determine on which OS we are. (Jan Altensen)
   . Fixed bug #73994 (arginfo incorrect for unpack). (krakjoe)
   . Fixed bug #73973 (assertion error in debug_zval_dump). (andrewnester)
   . Fixed bug #73987 (Method compatibility check looks to original 
     definition and not parent). (pmmaga)
+  . Fixed bug #73991 (JSON_OBJECT_AS_ARRAY not respected). (Sara)
+  . Fixed bug #74053 (Corrupted class entries on shutdown when a destructor
+    spawns another object). (jim at commercebyte dot com)
+  . Fixed bug #73971 (Filename got limited to MAX_PATH on Win32 when scan
+    directory). (Anatol)
+  . Fixed bug #74149 (static embed SAPI linkage error). (krakjoe)
+  . Fixed bug #72359, bug #72451, bug #73706, bug #71115 and others related
+    to interned strings handling in TS builds. (Anatol, Dmitry)
+  . Implemented "Trailing Commas In List Syntax" RFC for group use lists only.
+    (Sammy Kaye Powers)
+  . Fixed bug #74269 (It's possible to override trait property with different
+    loosely-equal value). (pmmaga)
+  . Fixed bug #61970 (Restraining __construct() access level in subclass gives
+    a fatal error). (pmmaga)
+  . Fixed bug #63384 (Cannot override an abstract method with an abstract
+    method). (pmmaga, wes)
+  . Fixed bug #74607 (Traits enforce different inheritance rules). (pmmaga)
+  . Fixed misparsing of abstract unix domain socket names. (Sara)
 
 - BCMath:
   . Fixed bug #46564 (bcmod truncates fractionals). (liborm85)
@@ -36,7 +80,20 @@ PHP                                                                        NEWS
   . Fix integer overflows (Joshua Rogers)
 
 - Date:
+  . Fixed bug #55407 (Impossible to prototype DateTime::createFromFormat).
+    (kelunik)
   . Fixed bug #69587 (DateInterval properties and isset). (jhdxr)
+  . Fixed bug #74404 (Wrong reflection on DateTimeZone::getTransitions).
+    (krakjoe)
+  . Fixed bug #74080 (add constant for RFC7231 format datetime). (duncan3dc)
+  . Fixed bug #74639 (implement clone for DatePeriod and DateInterval).
+    (andrewnester)
+  . Implemented FR #71520 (Adding the DateTime constants to the
+    DateTimeInterface interface). (Majkl578)
+
+- Dba:
+  . Fixed bug #72885 (flatfile: dba_fetch() fails to read replaced entry).
+    (Anatol)
 
 - DOM:
   . Fixed bug #67474 (getElementsByTagNameNS filter on default ns). (aboks)
@@ -47,7 +104,8 @@ PHP                                                                        NEWS
 
 - EXIF:
   . Added support for vendor specific tags for the following formats:
-    Samsung, DJI, Panasonic, Sony, Pentax, Minolta & Sigma/Foveon. (Kalle)
+    Samsung, DJI, Panasonic, Sony, Pentax, Minolta, Sigma/Foveon, AGFA, 
+	Kyocera, Ricoh & Epson. (Kalle)
   . Fixed bug #72682 (exif_read_data() fails to read all data for some
     images). (Kalle)
   . Fixed bug #71534 (Type confusion in exif_read_data() leading to heap
@@ -65,10 +123,13 @@ PHP                                                                        NEWS
     (Mike)
 
 - FTP:
+  . Fixed bug #74598 (ftp:// wrapper ignores context arg). (Sara)
   . Implement MLSD for structured listing of directories. (blar)
 
 - GD:
   . Implemented imageresolution as getter and setter (Christoph)
+  . Fixed bug #74343 (compile fails on solaris 11 with system gd2 library).
+    (krakjoe)
 
 - GMP:
   . Fixed bug #70896 (gmp_fact() silently ignores non-integer input). (Sara)
@@ -78,6 +139,12 @@ PHP                                                                        NEWS
     (krakjoe)
   . Changed HashContext from resource to object. (Rouven Weßling, Sara)
 
+- intl:
+  . Fixed bug #74433 (wrong reflection for Normalizer methods). (villfa)
+  . Fixed bug #74439 (wrong reflection for Locale methods). (villfa)
+  . Fixed bug #74468 (wrong reflection on Collator::sortWithSortKeys). (villfa)
+  . Fixed bug #63790 (test using Spoofchecker which may be unavailable). (Sara)
+
 - Mbstring:
   . Implemented request #66024 (mb_chr() and mb_ord()). (Masakielastic, Yasuo)
   . Implemented request #65081 (mb_scrub()). (Masakielastic, Yasuo)
@@ -86,6 +153,7 @@ PHP                                                                        NEWS
   . Added array input support to mb_convert_encoding(). (Yasuo)
   . Added array input support to mb_check_encoding(). (Yasuo)
   . Fixed bug #69079 (enhancement for mb_substitute_character). (masakielastic)
+  . Update to oniguruma version 6.3.0. (Remi)
 
 - Mcrypt:
   . The deprecated mcrypt extension has been moved to PECL. (leigh)
@@ -101,10 +169,12 @@ PHP                                                                        NEWS
   . Fixed bug #71519 (add serial hex to return value array). (xrobau)
 
 - PCRE:
+  . Added support for PCRE JIT fast path API. (dmitry)
   . Fixed bug #61780 (Inconsistent PCRE captures in match results). (cmb)
 
 - PDO:
   . Add "Sent SQL" to debug dump for emulated prepares. (Adam Baratz)
+  . Add parameter types for national character set strings. (Adam Baratz)
 
 - PDO_DBlib:
   . Fixed bug #73234 (Emulated statements let value dictate parameter type).
@@ -114,12 +184,25 @@ PHP                                                                        NEWS
     instance. (Adam Baratz)
   . Add test coverage for bug #72969. (Jeff Farr)
 
+- PDO_OCI:
+  . Fixed bug #54379 (PDO_OCI: UTF-8 output gets truncated). (gureedo / Oracle)
+
 - PDO_PgSQL:
   . Fixed bug #73959 (lastInsertId fails to throw an exception for wrong 
     sequence name). (andrewnester)
 
 - PDO_Sqlite
   . Switch to sqlite3_prepare_v2() and sqlite3_close_v2() functions (rasmus)
+
+- phar:
+  . Fixed bug #74383 (phar method parameters reflection correction). 
+    (mhagstrand)
+  . Fixed bug #74196 (phar does not correctly handle names containing dots).
+    (mhagstrand)
+  . Fixed bug #74386 (Phar::__construct reflection incorrect). (villfa)
+
+- PHPDBG
+  . Added extended_value to opcode dump output. (Sara)
 
 - posix:
   . Fixed bug #71219 (configure script incorrectly checks for ttyname_r). (atoh)
@@ -135,7 +218,9 @@ PHP                                                                        NEWS
     (Keith Smiley)
 
 - SQLite3:
-  . Update to Sqlite 3.16.2. (cmb)
+  . Update to Sqlite 3.18.0. (cmb)
+  . Fixed bug #74413 (incorrect reflection for SQLite3::enableExceptions).
+    (krakjoe)
 
 - Standard:
   . Add subject to mail log. (tomsommer)
@@ -144,15 +229,23 @@ PHP                                                                        NEWS
   . Fixed bug #69442 (closing of fd incorrect when PTS enabled). (jaytaph)
   . Fixed bug #72974 (imap is undefined service on AIX). (matthieu.sarter)
   . Fixed bug #72979 (money_format stores wrong length AIX). (matthieu.sarter)
+  . Fixed bug #74300 (unserialize accepts two plus/minus signs for float number exponent part).
+    (xKerman)
+  . Fixed bug #74556 (stream_socket_get_name() returns '\0'). (Sara)
 
 - XML:
   . Moved utf8_encode() and utf8_decode() to the Standard extension. (Andrea)
   . Fixed bug #72135 (malformed XML causes fault) (edgarsandi)
 
+- xmlreader:
+  . Fixed bug #74457 (Wrong reflection on XMLReader::expand). (villfa)
+
 - XMLRPC:
   . Use Zend MM for allocation in bundled libxmlrpc (Joe)
 
 - ZIP:
-  . Fixed bug #70103 (ZipArchive::addGlob ignores remove_all_path option). (cmb)
+  . Add support for encrypted archives. (Remi)
+  . Use of bundled libzip is deprecated, --with-libzip option is recommended. (Remi)
+  . Fixed Bug #73803 (Reflection of ZipArchive does not show public properties). (Remi)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

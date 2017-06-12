@@ -327,6 +327,7 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 		size_t const_name_len = name_len - class_name_len - 2;
 		zend_string *constant_name = zend_string_init(colon + 1, const_name_len, 0);
 		zend_string *class_name = zend_string_init(name, class_name_len, 0);
+		zend_class_constant *c = NULL;
 		zval *ret_constant = NULL;
 
 		if (zend_string_equals_literal_ci(class_name, "self")) {
@@ -355,7 +356,7 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 			ce = zend_fetch_class(class_name, flags);
 		}
 		if (ce) {
-			zend_class_constant *c = zend_hash_find_ptr(&ce->constants_table, constant_name);
+			c = zend_hash_find_ptr(&ce->constants_table, constant_name);
 			if (c == NULL) {
 				if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
 					zend_throw_error(NULL, "Undefined class constant '%s::%s'", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
@@ -380,7 +381,7 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 				}
 				MARK_CONSTANT_VISITED(ret_constant);
 			}
-			if (UNEXPECTED(zval_update_constant_ex(ret_constant, ce) != SUCCESS)) {
+			if (UNEXPECTED(zval_update_constant_ex(ret_constant, c->ce) != SUCCESS)) {
 				RESET_CONSTANT_VISITED(ret_constant);
 				ret_constant = NULL;
 				goto failure;
@@ -488,6 +489,10 @@ ZEND_API int zend_register_constant(zend_constant *c)
 #if 0
 	printf("Registering constant for module %d\n", c->module_number);
 #endif
+
+    if (c->module_number != PHP_USER_CONSTANT) {
+		c->name = zend_new_interned_string(c->name);
+	}
 
 	if (!(c->flags & CONST_CS)) {
 		lowercase_name = zend_string_alloc(ZSTR_LEN(c->name), c->flags & CONST_PERSISTENT);

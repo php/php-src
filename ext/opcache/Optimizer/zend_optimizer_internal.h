@@ -80,7 +80,6 @@ int  zend_optimizer_add_literal(zend_op_array *op_array, zval *zv);
 int  zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int copy);
 void zend_optimizer_collect_constant(zend_optimizer_ctx *ctx, zval *name, zval* value);
 int  zend_optimizer_get_collected_constant(HashTable *constants, zval *name, zval* value);
-int  zend_optimizer_lookup_cv(zend_op_array *op_array, zend_string* name);
 int zend_optimizer_update_op1_const(zend_op_array *op_array,
                                     zend_op       *opline,
                                     zval          *val);
@@ -109,5 +108,7 @@ int zend_optimizer_is_disabled_func(const char *name, size_t len);
 zend_function *zend_optimizer_get_called_func(
 		zend_script *script, zend_op_array *op_array, zend_op *opline, zend_bool rt_constants);
 uint32_t zend_optimizer_classify_function(zend_string *name, uint32_t num_args);
+void zend_optimizer_migrate_jump(zend_op_array *op_array, zend_op *new_opline, zend_op *opline);
+void zend_optimizer_shift_jump(zend_op_array *op_array, zend_op *opline, uint32_t *shiftlist);
 
 #endif

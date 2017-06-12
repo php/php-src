@@ -37,7 +37,7 @@ DIR *opendir(const char *dir)
 		return NULL;
 	}
 
-	dp = (DIR *) malloc(sizeof(DIR));
+	dp = (DIR *) calloc(1, sizeof(DIR));
 	if (dp == NULL) {
 		return NULL;
 	}
@@ -62,7 +62,7 @@ DIR *opendir(const char *dir)
 		filespecw[index] = L'\0';
 	wcscat(filespecw, L"\\*");
 
-	if ((handle = FindFirstFileW(filespecw, &(dp->fileinfo))) == INVALID_HANDLE_VALUE) {
+	if ((handle = FindFirstFileExW(filespecw, FindExInfoBasic, &(dp->fileinfo), FindExSearchNameMatch, NULL, FIND_FIRST_EX_LARGE_FETCH)) == INVALID_HANDLE_VALUE) {
 		DWORD err = GetLastError();
 		if (err == ERROR_NO_MORE_FILES || err == ERROR_FILE_NOT_FOUND) {
 			dp->finished = 1;
@@ -87,6 +87,7 @@ DIR *opendir(const char *dir)
 struct dirent *readdir(DIR *dp)
 {
 	char *_tmp;
+	size_t reclen;
 
 	if (!dp || dp->finished)
 		return NULL;
@@ -98,14 +99,15 @@ struct dirent *readdir(DIR *dp)
 		}
 	}
 
-	_tmp = php_win32_ioutil_w_to_any(dp->fileinfo.cFileName);
+	_tmp = php_win32_cp_conv_w_to_any(dp->fileinfo.cFileName, PHP_WIN32_CP_IGNORE_LEN, &reclen);
 	if (!_tmp) {
 		/* wide to utf8 failed, should never happen. */
 		return NULL;
 	}
-	strlcpy(dp->dent.d_name, _tmp, _MAX_FNAME*4+1);
-	dp->dent.d_reclen = (unsigned short)strlen(dp->dent.d_name);
-	free(_tmp);
+	if (dp->dent.d_name)
+		free(dp->dent.d_name);
+	dp->dent.d_name = _tmp;
+	dp->dent.d_reclen = (unsigned short)reclen;
 	
 	dp->offset++;
 
@@ -118,6 +120,7 @@ struct dirent *readdir(DIR *dp)
 int readdir_r(DIR *dp, struct dirent *entry, struct dirent **result)
 {
 	char *_tmp;
+	size_t reclen;
 
 	if (!dp || dp->finished) {
 		*result = NULL;
@@ -132,15 +135,16 @@ int readdir_r(DIR *dp, struct dirent *entry, struct dirent **result)
 		}
 	}
 
-	_tmp = php_win32_ioutil_w_to_any(dp->fileinfo.cFileName);
+	_tmp = php_win32_cp_conv_w_to_any(dp->fileinfo.cFileName, PHP_WIN32_CP_IGNORE_LEN, &reclen);
 	if (!_tmp) {
 		/* wide to utf8 failed, should never happen. */
 		result = NULL;
 		return 0;
 	}
-	strlcpy(dp->dent.d_name, _tmp, _MAX_FNAME*4+1);
-	dp->dent.d_reclen = (unsigned short)strlen(dp->dent.d_name);
-	free(_tmp);
+	if (dp->dent.d_name)
+		free(dp->dent.d_name);
+	dp->dent.d_name = _tmp;
+	dp->dent.d_reclen = (unsigned short)reclen;
 
 	dp->offset++;
 
@@ -165,6 +169,8 @@ int closedir(DIR *dp)
 	}
 	if (dp->dirw)
 		free(dp->dirw);
+	if (dp->dent.d_name)
+		free(dp->dent.d_name);
 	if (dp)
 		free(dp);
 
@@ -195,7 +201,7 @@ int rewinddir(DIR *dp)
 		filespecw[index] = L'\0';
 	wcscat(filespecw, L"/*");
 
-	if ((handle = FindFirstFileW(filespecw, &(dp->fileinfo))) == INVALID_HANDLE_VALUE) {
+	if ((handle = FindFirstFileExW(filespecw, FindExInfoBasic, &(dp->fileinfo), FindExSearchNameMatch, NULL, FIND_FIRST_EX_LARGE_FETCH)) == INVALID_HANDLE_VALUE) {
 		dp->finished = 1;
 	}
 
