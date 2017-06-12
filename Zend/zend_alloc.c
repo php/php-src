@@ -1222,7 +1222,7 @@ static zend_never_inline void *zend_mm_alloc_small_slow(zend_mm_heap *heap, uint
 	end = (zend_mm_free_slot*)((char*)bin + (bin_data_size[bin_num] * (bin_elements[bin_num] - 1)));
 	heap->free_slot[bin_num] = p = (zend_mm_free_slot*)((char*)bin + bin_data_size[bin_num]);
 	do {
-		p->next_free_slot = (zend_mm_free_slot*)((char*)p + bin_data_size[bin_num]);;
+		p->next_free_slot = (zend_mm_free_slot*)((char*)p + bin_data_size[bin_num]);
 #if ZEND_DEBUG
 		do {
 			zend_mm_debug_info *dbg = (zend_mm_debug_info*)((char*)p + bin_data_size[bin_num] - ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info)));
