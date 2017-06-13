@@ -48,6 +48,10 @@ PHP                                                                        NEWS
 - PHAR:
   . Fixed bug #74386 (Phar::__construct reflection incorrect). (villfa)
 
+- SOAP
+  . Fixed bug #74679 (Incorrect conversion array with WSDL_CACHE_MEMORY).
+    (Dmitry)
+
 - Streams:
   . Fixed bug #74556 (stream_socket_get_name() returns '\0'). (Sara)
 
