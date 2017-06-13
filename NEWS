@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2017 PHP 7.0.21
 
 - Core:
+  . Fixed bug #74738 (Multiple [PATH=] and [HOST=] sections not properly
+    parsed). (Manuel Mausz)
   . Fixed bug #74658 (Undefined constants in array properties result in broken
     properties). (Laruence)
   . Fixed misparsing of abstract unix domain socket names. (Sara)
