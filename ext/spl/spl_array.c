@@ -56,7 +56,6 @@ PHPAPI zend_class_entry  *spl_ce_RecursiveArrayIterator;
 #define SPL_ARRAY_USE_OTHER          0x02000000
 #define SPL_ARRAY_INT_MASK           0xFFFF0000
 #define SPL_ARRAY_CLONE_MASK         0x0100FFFF
-#define SPL_ARRAY_SERIALIZE_MASK     0x0200FFFF
 
 #define SPL_ARRAY_METHOD_NO_ARG				0
 #define SPL_ARRAY_METHOD_USE_ARG    		1
@@ -1699,7 +1698,7 @@ SPL_METHOD(Array, serialize)
 
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 
-	ZVAL_LONG(&flags, (intern->ar_flags & SPL_ARRAY_SERIALIZE_MASK));
+	ZVAL_LONG(&flags, (intern->ar_flags & SPL_ARRAY_CLONE_MASK));
 
 	/* storage */
 	smart_str_appendl(&buf, "x:", 2);
@@ -1735,13 +1734,14 @@ SPL_METHOD(Array, serialize)
  */
 SPL_METHOD(Array, unserialize)
 {
-	spl_array_object *intern = Z_SPLARRAY_P(getThis());
+	zval *object = getThis();
+	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	char *buf;
 	size_t buf_len;
 	const unsigned char *p, *s;
 	php_unserialize_data_t var_hash;
-	zval *members, *zflags;
+	zval *members, *zflags, array;
 	zend_long flags;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &buf, &buf_len) == FAILURE) {
@@ -1787,13 +1787,22 @@ SPL_METHOD(Array, unserialize)
 		if (*p!='a' && *p!='O' && *p!='C' && *p!='r') {
 			goto outexcept;
 		}
-		intern->ar_flags &= ~SPL_ARRAY_SERIALIZE_MASK;
-		intern->ar_flags |= flags & SPL_ARRAY_SERIALIZE_MASK;
+		intern->ar_flags &= ~SPL_ARRAY_CLONE_MASK;
+		intern->ar_flags |= flags & SPL_ARRAY_CLONE_MASK;
 		zval_ptr_dtor(&intern->array);
 		ZVAL_UNDEF(&intern->array);
-		if (!php_var_unserialize(&intern->array, &p, s + buf_len, &var_hash)
-				|| (Z_TYPE(intern->array) != IS_ARRAY && Z_TYPE(intern->array) != IS_OBJECT)) {
+
+		if (!php_var_unserialize(&array, &p, s + buf_len, &var_hash)
+				|| (Z_TYPE(array) != IS_ARRAY && Z_TYPE(array) != IS_OBJECT)) {
 			goto outexcept;
+		}
+
+		if (Z_TYPE(array) == IS_ARRAY ||
+			Z_OBJ_HT(array) == &spl_handler_ArrayObject ||
+			Z_OBJ_HT(array) == &spl_handler_ArrayIterator) {
+			spl_array_set_array(object, intern, &array, 0L, 1);
+		} else {
+			ZVAL_COPY(&intern->array, &array);
 		}
 		var_push_dtor(&var_hash, &intern->array);
 	}

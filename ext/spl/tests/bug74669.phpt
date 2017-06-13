@@ -58,25 +58,27 @@ foreach ($container as $key => $value) {
     echo $key . ' => ' . $value . PHP_EOL;
 }
 
-// test to check unserialize of old format
-$oldFormat = 'C:11:"ArrayObject":76:{x:i:0;C:11:"ArrayObject":37:{x:i:0;a:2:{i:0;i:1;i:1;i:2;};m:a:0:{}};m:a:0:{}}';
-$obj = unserialize($oldFormat);
-print_r($obj);
+$arObj = new ArrayObject(['test1', 'test2']);
+$serialized = serialize($container);
+unset($arObj);
+
+$arObj = unserialize($serialized);
+foreach($arObj as $key => $value) {
+    echo $key . ' => ' . $value . PHP_EOL;
+}
+
+$payload = 'x:i:33554432;O:8:"stdClass":0:{};m:a:0:{}';
+$str = 'C:11:"ArrayObject":' . strlen($payload) . ':{' . $payload . '}';
+$ao = unserialize($str);
+var_dump($ao['foo']);
 
 ?>
---EXPECT--
+--EXPECTF--
 0 => test1
 1 => test2
-ArrayObject Object
-(
-    [storage:ArrayObject:private] => ArrayObject Object
-        (
-            [storage:ArrayObject:private] => Array
-                (
-                    [0] => 1
-                    [1] => 2
-                )
+0 => test1
+1 => test2
 
-        )
+Notice: Undefined index: foo in %s on line %s
+NULL
 
-)
