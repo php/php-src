@@ -119,7 +119,7 @@ zend_function_entry Collator_class_functions[] = {
 	PHP_NAMED_FE( getLocale, ZEND_FN( collator_get_locale ), collator_1_arg )
 	PHP_NAMED_FE( getErrorCode, ZEND_FN( collator_get_error_code ), collator_0_args )
 	PHP_NAMED_FE( getErrorMessage, ZEND_FN( collator_get_error_message ), collator_0_args )
-	PHP_NAMED_FE( getSortKey, ZEND_FN( collator_get_sort_key ), collator_2_args )
+	PHP_NAMED_FE( getSortKey, ZEND_FN( collator_get_sort_key ), collator_1_arg )
 	PHP_FE_END
 };
 /* }}} */
