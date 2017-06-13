@@ -288,6 +288,8 @@ PHP                                                                        NEWS
     anonymous classes). (Adam Saponara)
   . Fixed bug #74105 (PHP on Linux should use /dev/urandom when getrandom is
     not available). (Benjamin Robin)
+  . Fixed bug #74708 (Invalid Reflection signatures for random_bytes and
+    random_int). (Tyson Andre, Remi)
 
 - Streams:
   . Fixed bug #73496 (Invalid memory access in zend_inline_hash_func).
