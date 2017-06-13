@@ -31,6 +31,10 @@ PHP                                                                        NEWS
   . Fixed bug #74478 (null coalescing operator failing with SplFixedArray).
     (jhdxr)
 
+- Standard:
+  . Fixed bug #74708 (Invalid Reflection signatures for random_bytes and
+    random_int). (Tyson Andre, Remi)
+
 - FTP:
   . Fixed bug #74598 (ftp:// wrapper ignores context arg). (Sara)
 
