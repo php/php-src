@@ -655,7 +655,7 @@ zend_function_entry intl_functions[] = {
 	PHP_FE( collator_get_locale, collator_1_arg )
 	PHP_FE( collator_get_error_code, collator_0_args )
 	PHP_FE( collator_get_error_message, collator_0_args )
-	PHP_FE( collator_get_sort_key, collator_2_args )
+	PHP_FE( collator_get_sort_key, collator_1_arg )
 
 	/* formatter functions */
 	PHP_FE( numfmt_create, arginfo_numfmt_create )

@@ -2,7 +2,6 @@
 Bug #74705 Wrong reflection on Collator::getSortKey
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if (version_compare(INTL_ICU_VERSION, '51.2') >=  0) die('skip for ICU < 51.2'); ?>
 --FILE--
 <?php
 $rm = new ReflectionMethod(Collator::class, 'getSortKey');
