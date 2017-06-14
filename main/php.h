@@ -47,7 +47,7 @@
 #elif defined(BSD) || defined(__DragonFly__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
 # define PHP_OS_FAMILY			"BSD"
 #elif defined(__APPLE__) || defined(__MACH__)
-# define PHP_OS_FAMILY			"Mac"
+# define PHP_OS_FAMILY			"Darwin"
 #elif defined(__sun__)
 # define PHP_OS_FAMILY			"Solaris"
 #elif defined(__linux__)
