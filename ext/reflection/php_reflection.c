@@ -2906,6 +2906,7 @@ static zend_string *reflection_type_name(type_reference *param) {
 	switch (ZEND_TYPE_CODE(param->arg_info->type)) {
 		case IS_ARRAY:    return zend_string_init("array", sizeof("array") - 1, 0);
 		case IS_CALLABLE: return zend_string_init("callable", sizeof("callable") - 1, 0);
+		case IS_OBJECT:   return zend_string_init("object", sizeof("object") - 1, 0);
 		case IS_STRING:   return zend_string_init("string", sizeof("string") - 1, 0);
 		case _IS_BOOL:    return zend_string_init("bool", sizeof("bool") - 1, 0);
 		case IS_LONG:     return zend_string_init("int", sizeof("int") - 1, 0);
