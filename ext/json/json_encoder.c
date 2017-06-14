@@ -252,7 +252,7 @@ static int php_json_escape_string(
 {
 	int status;
 	unsigned int us;
-	size_t prev_pos, pos, checkpoint;
+	size_t pos, checkpoint;
 
 	if (len == 0) {
 		smart_str_appendl(buf, "\"\"", 2);
@@ -283,27 +283,31 @@ static int php_json_escape_string(
 	smart_str_appendc(buf, '"');
 
 	do {
-		prev_pos = pos;
-		us = php_next_utf8_char((unsigned char *)s, len, &pos, &status);
-		/* check whether UTF8 character is correct */
-		if (status != SUCCESS) {
-			if (buf->s) {
-				ZSTR_LEN(buf->s) = checkpoint;
+		us = (unsigned char)s[pos];
+		if (us >= 0x80) {
+			size_t prev_pos = pos;
+
+			us = php_next_utf8_char((unsigned char *)s, len, &pos, &status);
+
+			/* check whether UTF8 character is correct */
+			if (status != SUCCESS) {
+				if (buf->s) {
+					ZSTR_LEN(buf->s) = checkpoint;
+				}
+				encoder->error_code = PHP_JSON_ERROR_UTF8;
+				if (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) {
+					smart_str_appendl(buf, "null", 4);
+				}
+				return FAILURE;
 			}
-			encoder->error_code = PHP_JSON_ERROR_UTF8;
-			if (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) {
-				smart_str_appendl(buf, "null", 4);
-			}
-			return FAILURE;
-		}
-		if (us >= 0x80 && (!(options & PHP_JSON_UNESCAPED_UNICODE) || (unsigned char)s[prev_pos] == 0xE2)) {
+
 			/* Escape U+2028/U+2029 line terminators, UNLESS both
 			   JSON_UNESCAPED_UNICODE and
 			   JSON_UNESCAPED_LINE_TERMINATORS were provided */
 			if ((options & PHP_JSON_UNESCAPED_UNICODE)
-				&& ((options & PHP_JSON_UNESCAPED_LINE_TERMINATORS)
+			    && ((options & PHP_JSON_UNESCAPED_LINE_TERMINATORS)
 					|| us < 0x2028 || us > 0x2029)) {
-				smart_str_appendl(buf, &s[prev_pos], 3);
+				smart_str_appendl(buf, s + prev_pos, pos - prev_pos);
 				continue;
 			}
 			/* From http://en.wikipedia.org/wiki/UTF16 */
@@ -325,6 +329,8 @@ static int php_json_escape_string(
 			smart_str_appendc(buf, digits[(us & 0xf0)   >> 4]);
 			smart_str_appendc(buf, digits[(us & 0xf)]);
 		} else {
+			pos++;
+
 			switch (us) {
 				case '"':
 					if (options & PHP_JSON_HEX_QUOT) {
@@ -400,7 +406,7 @@ static int php_json_escape_string(
 
 				default:
 					if (us >= ' ') {
-						smart_str_appendl(buf, s + prev_pos, pos - prev_pos);
+						smart_str_appendc(buf, (unsigned char) us);
 					} else {
 						smart_str_appendl(buf, "\\u00", sizeof("\\u00")-1);
 						smart_str_appendc(buf, digits[(us & 0xf0)   >> 4]);

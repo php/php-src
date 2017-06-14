@@ -6520,7 +6520,8 @@ ZEND_VM_C_LABEL(isset_str_offset):
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
-					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
+					|| (OP2_TYPE != IS_CONST
+						&& Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				lval = zval_get_long(offset);
 				ZEND_VM_C_GOTO(isset_str_offset);
