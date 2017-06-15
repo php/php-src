@@ -46,6 +46,11 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 	struct timeval tvslice;
 	int retcode;
 
+	/* As max_fd is unsigned, non socket might overflow. */
+	if (max_fd > (php_socket_t)INT_MAX) {
+		return -1;
+	}
+
 #define SAFE_FD_ISSET(fd, set)	(set != NULL && FD_ISSET(fd, set))
 
 	/* calculate how long we need to wait in milliseconds */
@@ -61,7 +66,7 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 	FD_ZERO(&sock_except);
 
 	/* build an array of handles for non-sockets */
-	for (i = 0; i < INT_MAX && i < max_fd; i++) {
+	for (i = 0; i < max_fd; i++) {
 		if (SAFE_FD_ISSET(i, rfds) || SAFE_FD_ISSET(i, wfds) || SAFE_FD_ISSET(i, efds)) {
 			handles[n_handles] = (HANDLE)(zend_uintptr_t)_get_osfhandle(i);
 			if (handles[n_handles] == INVALID_HANDLE_VALUE) {
@@ -87,7 +92,7 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 
 	if (n_handles == 0) {
 		/* plain sockets only - let winsock handle the whole thing */
-		return select(0, rfds, wfds, efds, tv);
+		return select(-1, rfds, wfds, efds, tv);
 	}
 
 	/* mixture of handles and sockets; lets multiplex between
@@ -111,7 +116,7 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 			tvslice.tv_sec = 0;
 			tvslice.tv_usec = 100000;
 
-			retcode = select(0, &aread, &awrite, &aexcept, &tvslice);
+			retcode = select(-1, &aread, &awrite, &aexcept, &tvslice);
 		}
 		if (n_handles > 0) {
 			/* check handles */
