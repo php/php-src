@@ -248,7 +248,7 @@ static void print_extensions(void) /* {{{ */
 #define STDERR_FILENO 2
 #endif
 
-static inline int sapi_cli_select(int fd)
+static inline int sapi_cli_select(php_socket_t fd)
 {
 	fd_set wfd, dfd;
 	struct timeval tv;

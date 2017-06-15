@@ -2904,15 +2904,15 @@ static zend_string *reflection_type_name(type_reference *param) {
 		return zend_string_copy(ZEND_TYPE_NAME(param->arg_info->type));
 	}
 	switch (ZEND_TYPE_CODE(param->arg_info->type)) {
-		case IS_ARRAY:    return zend_string_init("array", sizeof("array") - 1, 0);
-		case IS_CALLABLE: return zend_string_init("callable", sizeof("callable") - 1, 0);
-		case IS_STRING:   return zend_string_init("string", sizeof("string") - 1, 0);
+		/* keep this for BC, bool vs boolean, int vs integer */
 		case _IS_BOOL:    return zend_string_init("bool", sizeof("bool") - 1, 0);
 		case IS_LONG:     return zend_string_init("int", sizeof("int") - 1, 0);
-		case IS_DOUBLE:   return zend_string_init("float", sizeof("float") - 1, 0);
-		case IS_VOID:     return zend_string_init("void", sizeof("void") - 1, 0);
-		case IS_ITERABLE: return zend_string_init("iterable", sizeof("iterable") - 1, 0);
-		EMPTY_SWITCH_DEFAULT_CASE()
+		/* use zend API for other types */
+		default:
+			{
+			char *name = zend_get_type_by_const(ZEND_TYPE_CODE(param->arg_info->type));
+			return zend_string_init(name, strlen(name), 0);
+			}
 	}
 }
 /* }}} */

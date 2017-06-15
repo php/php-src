@@ -46,6 +46,18 @@ extern "C" {
 #include <stdio.h>
 #include "gd_io.h"
 
+/* va_list needed in gdErrorMethod */
+#ifdef PHP_WIN32
+# include <stdarg.h>
+#else
+# if HAVE_STDARG_H
+# include <stdarg.h>
+# else
+#  if HAVE_SYS_VARARGS_H
+#  include <sys/varargs.h>
+#  endif
+# endif
+#endif
 
 /* The maximum number of palette entries in palette-based images.
 	In the wonderful new world of gd 2.0, you can of course have

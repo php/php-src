@@ -41,9 +41,9 @@
 #define MAX_ACCEL_FILES 1000000
 #define TOKENTOSTR(X) #X
 
-static void (*orig_file_exists)(INTERNAL_FUNCTION_PARAMETERS) = NULL;
-static void (*orig_is_file)(INTERNAL_FUNCTION_PARAMETERS) = NULL;
-static void (*orig_is_readable)(INTERNAL_FUNCTION_PARAMETERS) = NULL;
+static zif_handler orig_file_exists = NULL;
+static zif_handler orig_is_file = NULL;
+static zif_handler orig_is_readable = NULL;
 
 ZEND_BEGIN_ARG_INFO(arginfo_opcache_none, 0)
 ZEND_END_ARG_INFO()
@@ -374,7 +374,7 @@ static int accel_file_in_cache(INTERNAL_FUNCTION_PARAMETERS)
 	return filename_is_in_cache(Z_STR(zfilename));
 }
 
-static void accel_file_exists(INTERNAL_FUNCTION_PARAMETERS)
+static ZEND_NAMED_FUNCTION(accel_file_exists)
 {
 	if (accel_file_in_cache(INTERNAL_FUNCTION_PARAM_PASSTHRU)) {
 		RETURN_TRUE;
@@ -383,7 +383,7 @@ static void accel_file_exists(INTERNAL_FUNCTION_PARAMETERS)
 	}
 }
 
-static void accel_is_file(INTERNAL_FUNCTION_PARAMETERS)
+static ZEND_NAMED_FUNCTION(accel_is_file)
 {
 	if (accel_file_in_cache(INTERNAL_FUNCTION_PARAM_PASSTHRU)) {
 		RETURN_TRUE;
@@ -392,7 +392,7 @@ static void accel_is_file(INTERNAL_FUNCTION_PARAMETERS)
 	}
 }
 
-static void accel_is_readable(INTERNAL_FUNCTION_PARAMETERS)
+static ZEND_NAMED_FUNCTION(accel_is_readable)
 {
 	if (accel_file_in_cache(INTERNAL_FUNCTION_PARAM_PASSTHRU)) {
 		RETURN_TRUE;

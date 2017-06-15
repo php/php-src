@@ -409,6 +409,9 @@ struct _zend_op_array {
 #define ZEND_RETURN_VALUE				0
 #define ZEND_RETURN_REFERENCE			1
 
+/* zend_internal_function_handler */
+typedef void (*zif_handler)(INTERNAL_FUNCTION_PARAMETERS);
+
 typedef struct _zend_internal_function {
 	/* Common elements */
 	zend_uchar type;
@@ -422,7 +425,7 @@ typedef struct _zend_internal_function {
 	zend_internal_arg_info *arg_info;
 	/* END of common elements */
 
-	void (*handler)(INTERNAL_FUNCTION_PARAMETERS);
+	zif_handler handler;
 	struct _zend_module_entry *module;
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 } zend_internal_function;

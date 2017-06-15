@@ -1,6 +1,21 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.2
+?? ??? ????, PHP 7.2.0alpha2
+
+- GD:
+  . Fixed bug #74744 (gd.h: stdarg.h include missing for va_list use in
+    gdErrorMethod). (rainer dot jung at kippdata dot de, cmb)
+
+- OpenSSL:
+  . Fixed bug #74720 (pkcs7_en/decrypt does not work if \x1a is used in
+    content). (Anatol)
+  . Use TLS_ANY for default ssl:// and tls:// negotiation.
+    (Niklas Keller, me at kelunik dot com)
+
+- SQLite3:
+  . Update to Sqlite 3.19.3. (cmb)
+
+08 Jun 2017, PHP 7.2.0alpha1
 
 - Core:
   . Added ZEND_COUNT, ZEND_GET_CLASS, ZEND_GET_CALLED_CLASS, ZEND_GET_TYPE,

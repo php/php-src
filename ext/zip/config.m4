@@ -188,21 +188,6 @@ in
 esac
 AC_SUBST([MANFMT])
 
-AH_BOTTOM([
-#ifndef HAVE_SSIZE_T
-#  if SIZEOF_SIZE_T == SIZEOF_INT
-typedef int ssize_t;
-#  elif SIZEOF_SIZE_T == SIZEOF_LONG
-typedef long ssize_t;
-#  elif SIZEOF_SIZE_T == SIZEOF_LONG_LONG
-typedef long long ssize_t;
-#  else
-#error no suitable type for ssize_t found
-#  endif
-#endif
-])
-
-
   dnl so we always include the known-good working hack.
   PHP_ADD_MAKEFILE_FRAGMENT
 fi

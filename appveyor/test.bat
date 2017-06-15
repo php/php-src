@@ -8,3 +8,5 @@ if not exist "%SDK_RUNNER%" (
 
 call %SDK_RUNNER% -t %APPVEYOR_BUILD_FOLDER%\appveyor\test_task.bat
 
+exit /b %errorlevel%
+
