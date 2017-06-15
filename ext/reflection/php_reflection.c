@@ -2992,19 +2992,17 @@ ZEND_METHOD(reflection_type, __toString)
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	switch (param->arg_info->type_hint) {
-		case IS_ARRAY:    RETURN_STRINGL("array", sizeof("array") - 1);
-		case IS_CALLABLE: RETURN_STRINGL("callable", sizeof("callable") - 1);
 		case IS_OBJECT:
 			if (param->fptr->type == ZEND_INTERNAL_FUNCTION &&
 			    !(param->fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
 				RETURN_STRING(((zend_internal_arg_info*)param->arg_info)->class_name);
 			}
 			RETURN_STR_COPY(param->arg_info->class_name);
-		case IS_STRING:   RETURN_STRINGL("string", sizeof("string") - 1);
+		/* keep this for BC, bool vs boolean, int vs integer */
 		case _IS_BOOL:    RETURN_STRINGL("bool", sizeof("bool") - 1);
 		case IS_LONG:     RETURN_STRINGL("int", sizeof("int") - 1);
-		case IS_DOUBLE:   RETURN_STRINGL("float", sizeof("float") - 1);
-		EMPTY_SWITCH_DEFAULT_CASE()
+		/* use zend API for other types */
+		default:          RETURN_STRING(zend_get_type_by_const(param->arg_info->type_hint));
 	}
 }
 /* }}} */
