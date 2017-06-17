@@ -761,24 +761,6 @@ static zend_bool zlib_create_dictionary_string(HashTable *options, char **dict, 
 		switch (Z_TYPE_P(option_buffer)) {
 			case IS_STRING: {
 				zend_string *str = Z_STR_P(option_buffer);
-				size_t i;
-				zend_bool last_null = 1;
-
-				for (i = 0; i < ZSTR_LEN(str); i++) {
-					if (ZSTR_VAL(str)[i]) {
-						last_null = 0;
-					} else {
-						if (last_null) {
-							php_error_docref(NULL, E_WARNING, "dictionary string must not contain empty entries (two consecutive NULL-bytes or one at the very beginning)");
-							return 0;
-						}
-						last_null = 1;
-					}
-				}
-				if (!last_null) {
-					php_error_docref(NULL, E_WARNING, "dictionary string must be NULL-byte terminated (each dictionary entry has to be NULL-terminated)");
-				}
-
 				*dict = emalloc(ZSTR_LEN(str));
 				memcpy(*dict, ZSTR_VAL(str), ZSTR_LEN(str));
 				*dictlen = ZSTR_LEN(str);
@@ -894,6 +876,21 @@ PHP_FUNCTION(inflate_init)
 	}
 
 	if (Z_OK == inflateInit2(ctx, encoding)) {
+		if (encoding == PHP_ZLIB_ENCODING_RAW && dictlen > 0) {
+			php_zlib_context *php_ctx = (php_zlib_context *) ctx;
+			switch (inflateSetDictionary(ctx, (Bytef *) php_ctx->inflateDict, php_ctx->inflateDictlen)) {
+				case Z_OK:
+					efree(php_ctx->inflateDict);
+					php_ctx->inflateDict = NULL;
+					break;
+				case Z_DATA_ERROR:
+					php_error_docref(NULL, E_WARNING, "dictionary does not match expected dictionary (incorrect adler32 hash)");
+					efree(php_ctx->inflateDict);
+					php_ctx->inflateDict = NULL;
+					RETURN_FALSE;
+				EMPTY_SWITCH_DEFAULT_CASE()
+			}
+		}
 		RETURN_RES(zend_register_resource(ctx, le_inflate));
 	} else {
 		efree(ctx);
