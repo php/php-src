@@ -433,11 +433,20 @@ if test "$PHP_PASSWORD_ARGON2" != "no"; then
   PHP_ADD_LIBRARY_WITH_PATH(argon2, $ARGON2_DIR/$PHP_LIBDIR)
   PHP_ADD_INCLUDE($ARGON2_DIR/include)
 
+  AC_MSG_CHECKING([for argon2_hash function])
   AC_CHECK_LIB(argon2, argon2_hash, [
     LIBS="$LIBS -largon2"
     AC_DEFINE(HAVE_ARGON2LIB, 1, [ Define to 1 if you have the <argon2.h> header file ])
   ], [
     AC_MSG_ERROR([Problem with libargon2.(a|so). Please verify that Argon2 header and libaries are installed])
+  ])
+
+  AC_MSG_CHECKING([for argon2id_hash_raw function])
+  AC_CHECK_LIB(argon2, argon2id_hash_raw, [
+    LIBS="$LIBS -largon2"
+    AC_DEFINE(HAVE_ARGON2ID, 1, [ Define to 1 if Argon2 library has support for Argon2ID])
+  ], [
+    AC_MSG_RESULT([not found])
   ])
 fi
 
