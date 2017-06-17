@@ -55,23 +55,27 @@ typedef enum {
 	PHP_JSON_ERROR_UTF16
 } php_json_error_code;
 
+/* json_decode() options */
+#define PHP_JSON_OBJECT_AS_ARRAY            (1<<0)
+#define PHP_JSON_BIGINT_AS_STRING           (1<<1)
+
 /* json_encode() options */
-#define PHP_JSON_HEX_TAG                 (1<<0)
-#define PHP_JSON_HEX_AMP                 (1<<1)
-#define PHP_JSON_HEX_APOS                (1<<2)
-#define PHP_JSON_HEX_QUOT                (1<<3)
-#define PHP_JSON_FORCE_OBJECT            (1<<4)
-#define PHP_JSON_NUMERIC_CHECK           (1<<5)
-#define PHP_JSON_UNESCAPED_SLASHES       (1<<6)
-#define PHP_JSON_PRETTY_PRINT            (1<<7)
-#define PHP_JSON_UNESCAPED_UNICODE       (1<<8)
-#define PHP_JSON_PARTIAL_OUTPUT_ON_ERROR (1<<9)
-#define PHP_JSON_PRESERVE_ZERO_FRACTION  (1<<10)
+#define PHP_JSON_HEX_TAG                    (1<<0)
+#define PHP_JSON_HEX_AMP                    (1<<1)
+#define PHP_JSON_HEX_APOS                   (1<<2)
+#define PHP_JSON_HEX_QUOT                   (1<<3)
+#define PHP_JSON_FORCE_OBJECT               (1<<4)
+#define PHP_JSON_NUMERIC_CHECK              (1<<5)
+#define PHP_JSON_UNESCAPED_SLASHES          (1<<6)
+#define PHP_JSON_PRETTY_PRINT               (1<<7)
+#define PHP_JSON_UNESCAPED_UNICODE          (1<<8)
+#define PHP_JSON_PARTIAL_OUTPUT_ON_ERROR    (1<<9)
+#define PHP_JSON_PRESERVE_ZERO_FRACTION     (1<<10)
 #define PHP_JSON_UNESCAPED_LINE_TERMINATORS (1<<11)
 
-/* json_decode() options */
-#define PHP_JSON_OBJECT_AS_ARRAY         (1<<0)
-#define PHP_JSON_BIGINT_AS_STRING        (1<<1)
+/* json_decode() and json_encode() common options */
+#define PHP_JSON_INVALID_UTF8_IGNORE        (1<<20)
+#define PHP_JSON_INVALID_UTF8_SUBSTITUTE    (1<<21)
 
 /* Internal flags */
 #define PHP_JSON_OUTPUT_ARRAY	0

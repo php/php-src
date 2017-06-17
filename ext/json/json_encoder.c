@@ -291,14 +291,22 @@ static int php_json_escape_string(
 
 			/* check whether UTF8 character is correct */
 			if (status != SUCCESS) {
-				if (buf->s) {
-					ZSTR_LEN(buf->s) = checkpoint;
+				if (options & PHP_JSON_INVALID_UTF8_IGNORE) {
+					/* ignore invalid UTF8 character */
+					continue;
+				} else if (options & PHP_JSON_INVALID_UTF8_SUBSTITUTE) {
+					/* Use Unicode character 'REPLACEMENT CHARACTER' (U+FFFD) */
+					us = 0xfffd;
+				} else {
+					if (buf->s) {
+						ZSTR_LEN(buf->s) = checkpoint;
+					}
+					encoder->error_code = PHP_JSON_ERROR_UTF8;
+					if (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) {
+						smart_str_appendl(buf, "null", 4);
+					}
+					return FAILURE;
 				}
-				encoder->error_code = PHP_JSON_ERROR_UTF8;
-				if (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) {
-					smart_str_appendl(buf, "null", 4);
-				}
-				return FAILURE;
 			}
 
 			/* Escape U+2028/U+2029 line terminators, UNLESS both
