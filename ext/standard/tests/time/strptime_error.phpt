@@ -32,6 +32,9 @@ echo "\n-- Testing strptime() function with more than expected no. of arguments 
 $extra_arg = 10;
 var_dump( strptime($date, $format, $extra_arg) );
 
+echo "\n-- Testing strptime() function on failure --\n";
+var_dump( strptime('foo', $format) );
+
 ?>
 ===DONE===
 --EXPECTF--
@@ -51,5 +54,8 @@ NULL
 
 Warning: strptime() expects exactly 2 parameters, 3 given in %s on line %d
 NULL
+
+-- Testing strptime() function on failure --
+bool(false)
 ===DONE===
 
