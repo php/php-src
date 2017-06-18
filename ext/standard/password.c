@@ -545,6 +545,9 @@ PHP_FUNCTION(password_hash)
 					threads,
 					(uint32_t)salt_len,
 					out_len
+#if HAVE_ARGON2ID
+					, type
+#endif
 				);
 
 				out = emalloc(out_len + 1);
