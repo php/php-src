@@ -111,6 +111,9 @@ PHP 7.2 UPGRADE NOTES
     subpatterns and empty matches by reporting NULL and "" (empty string),
     respectively.
 
+- SQLite3:
+  . Implemented writing to BLOBs.
+
 - Standard:
   . Simplified password hashing API updated to support Argon2i hashes when PHP is compiled with libargon2
     (https://wiki.php.net/rfc/argon2_password_hash).

@@ -1057,13 +1057,36 @@ typedef struct {
 	sqlite3_blob *blob;
 	size_t		 position;
 	size_t       size;
+	int          flags;
 } php_stream_sqlite3_data;
 
 static size_t php_sqlite3_stream_write(php_stream *stream, const char *buf, size_t count)
 {
-/*	php_stream_sqlite3_data *sqlite3_stream = (php_stream_sqlite3_data *) stream->abstract; */
+	php_stream_sqlite3_data *sqlite3_stream = (php_stream_sqlite3_data *) stream->abstract;
 
-	return 0;
+	if (sqlite3_stream->flags & SQLITE_OPEN_READONLY) {
+		php_error_docref(NULL, E_WARNING, "Can't write to blob stream: is open as read only");
+		return 0;
+	}
+
+	if (sqlite3_stream->position + count > sqlite3_stream->size) {
+		php_error_docref(NULL, E_WARNING, "It is not possible to increase the size of a BLOB");
+		return 0;
+	}
+
+	if (sqlite3_blob_write(sqlite3_stream->blob, buf, count, sqlite3_stream->position) != SQLITE_OK) {
+		return 0;
+	}
+
+	if (sqlite3_stream->position + count >= sqlite3_stream->size) {
+		stream->eof = 1;
+		sqlite3_stream->position = sqlite3_stream->size;
+	}
+	else {
+		sqlite3_stream->position += count;
+	}
+
+	return count;
 }
 
 static size_t php_sqlite3_stream_read(php_stream *stream, char *buf, size_t count)
@@ -1190,15 +1213,15 @@ static php_stream_ops php_stream_sqlite3_ops = {
 	NULL
 };
 
-/* {{{ proto resource SQLite3::openBlob(string table, string column, int rowid [, string dbname])
+/* {{{ proto resource SQLite3::openBlob(string table, string column, int rowid [, string dbname [, int flags]])
    Open a blob as a stream which we can read / write to. */
 PHP_METHOD(sqlite3, openBlob)
 {
 	php_sqlite3_db_object *db_obj;
 	zval *object = getThis();
-	char *table, *column, *dbname = "main";
+	char *table, *column, *dbname = "main", *mode = "rb";
 	size_t table_len, column_len, dbname_len;
-	zend_long rowid, flags = 0;
+	zend_long rowid, flags = SQLITE_OPEN_READONLY, sqlite_flags = 0;
 	sqlite3_blob *blob = NULL;
 	php_stream_sqlite3_data *sqlite3_stream;
 	php_stream *stream;
@@ -1207,21 +1230,28 @@ PHP_METHOD(sqlite3, openBlob)
 
 	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ssl|s", &table, &table_len, &column, &column_len, &rowid, &dbname, &dbname_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ssl|sl", &table, &table_len, &column, &column_len, &rowid, &dbname, &dbname_len, &flags) == FAILURE) {
 		return;
 	}
 
-	if (sqlite3_blob_open(db_obj->db, dbname, table, column, rowid, flags, &blob) != SQLITE_OK) {
+	sqlite_flags = (flags & SQLITE_OPEN_READWRITE) ? 1 : 0;
+
+	if (sqlite3_blob_open(db_obj->db, dbname, table, column, rowid, sqlite_flags, &blob) != SQLITE_OK) {
 		php_sqlite3_error(db_obj, "Unable to open blob: %s", sqlite3_errmsg(db_obj->db));
 		RETURN_FALSE;
 	}
 
 	sqlite3_stream = emalloc(sizeof(php_stream_sqlite3_data));
 	sqlite3_stream->blob = blob;
+	sqlite3_stream->flags = flags;
 	sqlite3_stream->position = 0;
 	sqlite3_stream->size = sqlite3_blob_bytes(blob);
 
-	stream = php_stream_alloc(&php_stream_sqlite3_ops, sqlite3_stream, 0, "rb");
+	if (sqlite_flags != 0) {
+		mode = "r+b";
+	}
+
+	stream = php_stream_alloc(&php_stream_sqlite3_ops, sqlite3_stream, 0, mode);
 
 	if (stream) {
 		php_stream_to_zval(stream, return_value);
@@ -1921,6 +1951,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3_openblob, 0, 0, 3)
 	ZEND_ARG_INFO(0, column)
 	ZEND_ARG_INFO(0, rowid)
 	ZEND_ARG_INFO(0, dbname)
+	ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3_enableexceptions, 0, 0, 0)
