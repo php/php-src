@@ -4306,12 +4306,12 @@ PHP_FUNCTION(getopt)
 		Z_PARAM_STRING(options, options_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY(p_longopts)
-		Z_PARAM_ZVAL_DEREF_EX(zoptind, 0, 1)
+		Z_PARAM_ZVAL_DEREF(zoptind)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	/* Init zoptind to 1 */
 	if (zoptind) {
-		zval_dtor(zoptind);
+		zval_ptr_dtor(zoptind);
 		ZVAL_LONG(zoptind, 1);
 	}
 
@@ -5278,7 +5278,7 @@ PHP_FUNCTION(highlight_string)
 	int old_error_reporting = EG(error_reporting);
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_ZVAL_DEREF(expr)
+		Z_PARAM_ZVAL(expr)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(i)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
@@ -5572,7 +5572,7 @@ PHP_FUNCTION(print_r)
 	zend_bool do_return = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_ZVAL_DEREF(var)
+		Z_PARAM_ZVAL(var)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(do_return)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
@@ -5805,7 +5805,7 @@ PHP_FUNCTION(unregister_tick_function)
 	user_tick_function_entry tick_fe;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL_DEREF_EX(function, 0, 1)
+		Z_PARAM_ZVAL(function)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!BG(user_tick_functions)) {

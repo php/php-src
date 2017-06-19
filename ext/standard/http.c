@@ -233,7 +233,7 @@ PHP_FUNCTION(http_build_query)
 	zend_long enc_type = PHP_QUERY_RFC1738;
 
 	ZEND_PARSE_PARAMETERS_START(1, 4)
-		Z_PARAM_ZVAL_DEREF(formdata)
+		Z_PARAM_ZVAL(formdata)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING(prefix, prefix_len)
 		Z_PARAM_STRING(arg_sep, arg_sep_len)

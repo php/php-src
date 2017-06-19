@@ -573,7 +573,7 @@ PHP_FUNCTION(var_export)
 	smart_str buf = {0};
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_ZVAL_DEREF(var)
+		Z_PARAM_ZVAL(var)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(return_output)
 	ZEND_PARSE_PARAMETERS_END();
@@ -1024,7 +1024,7 @@ PHP_FUNCTION(serialize)
 	smart_str buf = {0};
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL_DEREF(struc)
+		Z_PARAM_ZVAL(struc)
 	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_VAR_SERIALIZE_INIT(var_hash);

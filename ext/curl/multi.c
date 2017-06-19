@@ -254,7 +254,7 @@ PHP_FUNCTION(curl_multi_exec)
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_RESOURCE(z_mh)
-		Z_PARAM_ZVAL_DEREF_EX(z_still_running, 0, 1)
+		Z_PARAM_ZVAL_DEREF(z_still_running)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ((mh = (php_curlm *)zend_fetch_resource(Z_RES_P(z_mh), le_curl_multi_handle_name, le_curl_multi_handle)) == NULL) {
@@ -277,9 +277,9 @@ PHP_FUNCTION(curl_multi_exec)
 		}
 	}
 
-	convert_to_long(z_still_running);
-	still_running = Z_LVAL_P(z_still_running);
+	still_running = zval_get_long(z_still_running);
 	error = curl_multi_perform(mh->multi, &still_running);
+	zval_ptr_dtor(z_still_running);
 	ZVAL_LONG(z_still_running, still_running);
 
 	SAVE_CURLM_ERROR(mh, error);
@@ -314,7 +314,7 @@ PHP_FUNCTION(curl_multi_getcontent)
 }
 /* }}} */
 
-/* {{{ proto array curl_multi_info_read(resource mh [, long msgs_in_queue])
+/* {{{ proto array curl_multi_info_read(resource mh [, long &msgs_in_queue])
    Get information about the current transfers */
 PHP_FUNCTION(curl_multi_info_read)
 {
@@ -327,7 +327,7 @@ PHP_FUNCTION(curl_multi_info_read)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_RESOURCE(z_mh)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL_DEREF_EX(zmsgs_in_queue, 0, 1)
+		Z_PARAM_ZVAL_DEREF(zmsgs_in_queue)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ((mh = (php_curlm *)zend_fetch_resource(Z_RES_P(z_mh), le_curl_multi_handle_name, le_curl_multi_handle)) == NULL) {
@@ -608,7 +608,7 @@ PHP_FUNCTION(curl_multi_setopt)
 	ZEND_PARSE_PARAMETERS_START(3,3)
 		Z_PARAM_RESOURCE(z_mh)
 		Z_PARAM_LONG(options)
-		Z_PARAM_ZVAL_DEREF(zvalue)
+		Z_PARAM_ZVAL(zvalue)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ((mh = (php_curlm *)zend_fetch_resource(Z_RES_P(z_mh), le_curl_multi_handle_name, le_curl_multi_handle)) == NULL) {

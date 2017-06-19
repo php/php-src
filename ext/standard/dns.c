@@ -808,17 +808,17 @@ PHP_FUNCTION(dns_get_record)
 		Z_PARAM_STRING(hostname, hostname_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(type_param)
-		Z_PARAM_ZVAL_DEREF_EX(authns, 1, 1)
-		Z_PARAM_ZVAL_DEREF_EX(addtl, 1, 1)
+		Z_PARAM_ZVAL_DEREF_EX(authns, 1, 0)
+		Z_PARAM_ZVAL_DEREF_EX(addtl, 1, 0)
 		Z_PARAM_BOOL(raw)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (authns) {
-		zval_dtor(authns);
+		zval_ptr_dtor(authns);
 		array_init(authns);
 	}
 	if (addtl) {
-		zval_dtor(addtl);
+		zval_ptr_dtor(addtl);
 		array_init(addtl);
 	}
 
@@ -1041,16 +1041,16 @@ PHP_FUNCTION(dns_get_mx)
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STRING(hostname, hostname_len)
-		Z_PARAM_ZVAL_DEREF_EX(mx_list, 0, 1)
+		Z_PARAM_ZVAL_DEREF(mx_list)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL_DEREF_EX(weight_list, 0, 1)
+		Z_PARAM_ZVAL_DEREF(weight_list)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zval_dtor(mx_list);
+	zval_ptr_dtor(mx_list);
 	array_init(mx_list);
 
 	if (weight_list) {
-		zval_dtor(weight_list);
+		zval_ptr_dtor(weight_list);
 		array_init(weight_list);
 	}
 

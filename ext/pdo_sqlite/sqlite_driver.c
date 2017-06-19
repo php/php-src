@@ -522,7 +522,7 @@ static PHP_METHOD(SQLite, sqliteCreateFunction)
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_STRING(func_name, func_name_len)
-		Z_PARAM_ZVAL_DEREF(callback)
+		Z_PARAM_ZVAL(callback)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(argc)
 		Z_PARAM_LONG(flags)
@@ -595,8 +595,8 @@ static PHP_METHOD(SQLite, sqliteCreateAggregate)
 
 	ZEND_PARSE_PARAMETERS_START(3, 4)
 		Z_PARAM_STRING(func_name, func_name_len)
-		Z_PARAM_ZVAL_DEREF(step_callback)
-		Z_PARAM_ZVAL_DEREF(fini_callback)
+		Z_PARAM_ZVAL(step_callback)
+		Z_PARAM_ZVAL(fini_callback)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(argc)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
@@ -658,7 +658,7 @@ static PHP_METHOD(SQLite, sqliteCreateCollation)
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_STRING(collation_name, collation_name_len)
-		Z_PARAM_ZVAL_DEREF(callback)
+		Z_PARAM_ZVAL(callback)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	dbh = Z_PDO_DBH_P(getThis());
