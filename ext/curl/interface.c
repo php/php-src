@@ -2111,7 +2111,6 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 	CURLcode error = CURLE_OK;
 	zend_long lval;
 
-	ZVAL_DEREF(zvalue);
 	switch (option) {
 		/* Long options */
 		case CURLOPT_SSL_VERIFYHOST:
@@ -2989,6 +2988,7 @@ PHP_FUNCTION(curl_setopt_array)
 					"Array keys must be CURLOPT constants or equivalent integer values");
 			RETURN_FALSE;
 		}
+		ZVAL_DEREF(entry);
 		if (_php_curl_setopt(ch, (zend_long) option, entry) == FAILURE) {
 			RETURN_FALSE;
 		}
