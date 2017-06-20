@@ -2,26 +2,34 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.2.0alpha2
 
+- Core:
+  . Change PHP_OS_FAMILY value from "OSX" to "Darwin". (sb, kalle)
+
 - GD:
   . Fixed bug #74744 (gd.h: stdarg.h include missing for va_list use in
     gdErrorMethod). (rainer dot jung at kippdata dot de, cmb)
 
 - OCI8:
- . Add TAF callback (PR #2459). (KoenigsKind)
+  . Add TAF callback (PR #2459). (KoenigsKind)
 
 - OpenSSL:
   . Fixed bug #74720 (pkcs7_en/decrypt does not work if \x1a is used in
     content). (Anatol)
   . Use TLS_ANY for default ssl:// and tls:// negotiation.
     (Niklas Keller, me at kelunik dot com)
+  . Fix leak in openssl_spki_new(). (jelle at vdwaa dot nl)
 
 - PDO_OCI:
   . Fixed Bug #74537 (Align --with-pdo-oci configure option with --with-oci8 syntax).
+    (Tianfang Yang)
+  . Support Instant Client 12.2 in --with-pdo-oci configure option.
     (Tianfang Yang)
 
 - Standard:
   . Compatibility with libargon2 versions 20161029 and 20160821.
     (charlesportwoodii at erianna dot com)
+  . Fixed Bug #74737 (mysqli_get_client_info reflection info).
+    (mhagstrand at gmail dot com)
 
 - Streams:
   . Default ssl/single_dh_use and ssl/honor_cipher_order to true.
@@ -29,6 +37,7 @@ PHP                                                                        NEWS
 
 - SQLite3:
   . Update to Sqlite 3.19.3. (cmb)
+  . Implement writing to blobs. (bohwaz at github dot com)
 
 08 Jun 2017, PHP 7.2.0alpha1
 
