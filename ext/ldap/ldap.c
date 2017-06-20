@@ -3405,7 +3405,7 @@ PHP_FUNCTION(ldap_exop_passwd)
 	LDAPMessage *ldap_res;
 	int rc, msgid, myargcount = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|zzzz", &link, &user, &oldpw, &newpw, &newpasswd) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|zzzz/", &link, &user, &oldpw, &newpw, &newpasswd) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -3439,7 +3439,6 @@ PHP_FUNCTION(ldap_exop_passwd)
 		/* synchronous call */
 		rc = ldap_passwd_s(ld->link, &luser,
 			loldpw.bv_len > 0 ? &loldpw : NULL,
-			/* loldpw.bv_len > 0 ? &loldpw : NULL, */
 			lnewpw.bv_len > 0 ? &lnewpw : NULL,
 			&lnewpasswd, NULL, NULL);
 		if (rc != LDAP_SUCCESS ) {
@@ -3887,9 +3886,9 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_exop_passwd, 0, 0, 5)
 	ZEND_ARG_INFO(0, link)
-	ZEND_ARG_INFO(1, user)
-	ZEND_ARG_INFO(1, oldpw)
-	ZEND_ARG_INFO(1, newpw)
+	ZEND_ARG_INFO(0, user)
+	ZEND_ARG_INFO(0, oldpw)
+	ZEND_ARG_INFO(0, newpw)
 	ZEND_ARG_INFO(1, newpasswd)
 ZEND_END_ARG_INFO()
 
@@ -3903,7 +3902,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_refresh, 0, 0, 4)
 	ZEND_ARG_INFO(0, link)
 	ZEND_ARG_INFO(0, dn)
-	ZEND_ARG_INFO(1, ttl)
+	ZEND_ARG_INFO(0, ttl)
 	ZEND_ARG_INFO(0, newttl)
 ZEND_END_ARG_INFO()
 #endif

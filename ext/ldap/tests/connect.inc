@@ -21,6 +21,12 @@ function ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version) 
 	return $link;
 }
 
+function test_bind($host, $port, $user, $passwd, $protocol_version) {
+	$link = ldap_connect($host, $port);
+	ldap_set_option($link, LDAP_OPT_PROTOCOL_VERSION, $protocol_version);
+	return ldap_bind($link, $user, $passwd);
+}
+
 function insert_dummy_data($link, $base) {
 	// Create root if not there
 	$testBase = ldap_read($link, $base, '(objectClass=*)', array('objectClass'));
