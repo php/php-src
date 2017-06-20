@@ -28,6 +28,10 @@ PHP                                                                        NEWS
   . Fixed bug #74663 (Segfault with opcache.memory_protect and
     validate_timestamp). (Laruence)
 
+- PDO_OCI:
+  . Support Instant Client 12.2 in --with-pdo-oci configure option.
+    (Tianfang Yang)
+
 - Reflection:
   . Fixed bug #74673 (Segfault when cast Reflection object to string with
     undefined constant). (Laruence)

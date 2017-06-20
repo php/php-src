@@ -2,16 +2,31 @@ dnl $Id$
 dnl config.m4 for extension pdo_oci
 dnl vim:et:sw=2:ts=2:
 
-SUPPORTED_LIB_VERS="9.0 10.1 11.1 12.1"  # The lib vers are not bumped when the DB version is bumped
+if test -z "$SED"; then
+  PHP_PDO_OCI_SED="sed";
+else
+  PHP_PDO_OCI_SED="$SED";
+fi
+
+PHP_PDO_OCI_TAIL1=`echo a | tail -n1 2>/dev/null`
+if test "$PHP_PDO_OCI_TAIL1" = "a"; then
+    PHP_PDO_OCI_TAIL1="tail -n1"
+else
+    PHP_PDO_OCI_TAIL1="tail -1"
+fi
+
 AC_DEFUN([AC_PDO_OCI_VERSION],[
   AC_MSG_CHECKING([Oracle version])
-  for OCI_VER in $SUPPORTED_LIB_VERS; do
-    if test -f $PDO_OCI_DIR/lib/libclntsh.$SHLIB_SUFFIX_NAME.$OCI_VER; then
-      PDO_OCI_VERSION="$OCI_VER"
-    fi
-  done
-  if test -z "$PDO_OCI_VERSION"; then
-    AC_MSG_ERROR([Oracle required OCI8 libraries not found under $PDO_OCI_DIR])
+  PDO_OCI_LCS_BASE=$PDO_OCI_LIB_DIR/libclntsh.$SHLIB_SUFFIX_NAME
+  PDO_OCI_LCS=`ls $PDO_OCI_LCS_BASE.*.1 2> /dev/null | $PHP_PDO_OCI_TAIL1`  # Oracle 10g, 11g, 12c etc
+  if test -f "$PDO_OCI_LCS"; then
+    dnl Oracle 10g, 11g 12c etc.  The x.2 version libraries are named x.1 for drop in compatibility
+    PDO_OCI_VERSION=`echo $PDO_OCI_LCS | $PHP_PDO_OCI_SED -e 's/.*\.\(.*\)\.1$/\1.1/'`
+  elif test -f $PDO_OCI_LCS_BASE.9.0; then
+    dnl There is no case for Oracle 9.2. Oracle 9.2 libraries have a 9.0 suffix for drop-in compatibility with Oracle 9.0
+    PDO_OCI_VERSION=9.0
+  else
+    AC_MSG_ERROR(Oracle libclntsh.$SHLIB_SUFFIX_NAME client library not found or its version is lower than 9)
   fi
   AC_MSG_RESULT($PDO_OCI_VERSION)
 ])                                                                                                                                                                
@@ -147,12 +162,11 @@ You need to tell me where to find your Oracle Instant Client SDK, or set ORACLE_
   fi
 
   case $PDO_OCI_VERSION in
-    9.0|10.1|10.2|11.1|11.2|12.1)
-      PHP_ADD_LIBRARY(clntsh, 1, PDO_OCI_SHARED_LIBADD)
-      ;;
-
-    *)
+    7.3|8.0|8.1)
       AC_MSG_ERROR(Unsupported Oracle version $PDO_OCI_VERSION)
+      ;;
+    *)
+      PHP_ADD_LIBRARY(clntsh, 1, PDO_OCI_SHARED_LIBADD)
       ;;
   esac
 
