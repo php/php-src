@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2017 PHP 7.0.21
+?? ??? 2017 PHP 7.0.22
+
+
+
+06 Jul 2017 PHP 7.0.21
 
 - Core:
   . Fixed bug #74738 (Multiple [PATH=] and [HOST=] sections not properly
