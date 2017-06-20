@@ -164,6 +164,8 @@ typedef struct {
 #ifdef HAVE_OCI8_DTRACE
 	char		   *client_id;					/* The oci_set_client_identifier() value */
 #endif
+
+	zval		    taf_callback;				/* The Oracle TAF callback function in the userspace */
 } php_oci_connection;
 /* }}} */
 
@@ -530,6 +532,13 @@ ZEND_BEGIN_MODULE_GLOBALS(oci) /* {{{ Module globals */
 	zend_bool	 events;
 	char		*edition;
 ZEND_END_MODULE_GLOBALS(oci) /* }}} */
+
+/* {{{ transparent failover related prototypes */
+
+int php_oci_register_taf_callback(php_oci_connection *connection, zval *callback);
+int php_oci_disable_taf_callback(php_oci_connection *connection);
+
+/* }}} */
 
 #ifdef ZTS
 #define OCI_G(v) TSRMG(oci_globals_id, zend_oci_globals *, v)
