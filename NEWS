@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.2.0alpha2
+22 Jun 2017, PHP 7.2.0alpha2
 
 - Core:
   . Change PHP_OS_FAMILY value from "OSX" to "Darwin". (sb, kalle)
