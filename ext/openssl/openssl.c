@@ -4982,14 +4982,14 @@ PHP_FUNCTION(openssl_seal)
 	buf = emalloc(data_len + EVP_CIPHER_CTX_block_size(&ctx));
 	EVP_CIPHER_CTX_cleanup(&ctx);
 
-	if (!EVP_SealInit(&ctx, cipher, eks, eksl, NULL, pkeys, nkeys) || !EVP_SealUpdate(&ctx, buf, &len1, (unsigned char *)data, data_len)) {
+	if (EVP_SealInit(&ctx, cipher, eks, eksl, NULL, pkeys, nkeys) <= 0 ||
+			!EVP_SealUpdate(&ctx, buf, &len1, (unsigned char *)data, data_len) ||
+			!EVP_SealFinal(&ctx, buf + len1, &len2)) {
 		RETVAL_FALSE;
 		efree(buf);
 		EVP_CIPHER_CTX_cleanup(&ctx);
 		goto clean_exit;
 	}
-
-	EVP_SealFinal(&ctx, buf + len1, &len2);
 
 	if (len1 + len2 > 0) {
 		zval_dtor(sealdata);
