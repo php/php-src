@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.2.0alpha2
 
+- Core:
+  . Allow loading PHP/Zend extensions by name in ini files (extension=<name>).
+    (francois at tekwire dot net)
+
 - GD:
   . Fixed bug #74744 (gd.h: stdarg.h include missing for va_list use in
     gdErrorMethod). (rainer dot jung at kippdata dot de, cmb)
@@ -22,6 +26,8 @@ PHP                                                                        NEWS
 - Standard:
   . Compatibility with libargon2 versions 20161029 and 20160821.
     (charlesportwoodii at erianna dot com)
+  . Add support for extension name as argument to dl().
+    (francois at tekwire dot net)
 
 - Streams:
   . Default ssl/single_dh_use and ssl/honor_cipher_order to true.

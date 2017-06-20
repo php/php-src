@@ -362,15 +362,43 @@ static void php_load_zend_extension_cb(void *arg)
 	if (IS_ABSOLUTE_PATH(filename, length)) {
 		zend_load_extension(filename);
 	} else {
-	    char *libpath;
+		char *libpath, *orig_libpath;
 		char *extension_dir = INI_STR("extension_dir");
 		int extension_dir_len = (int)strlen(extension_dir);
-
-		if (IS_SLASH(extension_dir[extension_dir_len-1])) {
-			spprintf(&libpath, 0, "%s%s", extension_dir, filename);
+		int slash_suffix = IS_SLASH(extension_dir[extension_dir_len-1]);
+		/* Try as filename first */
+		if (slash_suffix) {
+			spprintf(&libpath, 0, "%s%s", extension_dir, filename); /* SAFE */
 		} else {
-			spprintf(&libpath, 0, "%s%c%s", extension_dir, DEFAULT_SLASH, filename);
+			spprintf(&libpath, 0, "%s%c%s", extension_dir, DEFAULT_SLASH, filename); /* SAFE */
 		}
+		if (VCWD_ACCESS(libpath, F_OK)) {
+			/* If file does not exist, consider as extension name and build file name */
+			orig_libpath = libpath;
+#if PHP_WIN32
+			if (slash_suffix) {
+				spprintf(&libpath, 0, "%sphp_%s." PHP_SHLIB_SUFFIX, extension_dir, filename); /* SAFE */
+			} else {
+				spprintf(&libpath, 0, "%s%cphp_%s." PHP_SHLIB_SUFFIX, extension_dir, DEFAULT_SLASH, filename); /* SAFE */
+			}
+#else
+			if (slash_suffix) {
+				spprintf(&libpath, 0, "%s%s." PHP_SHLIB_SUFFIX, extension_dir, filename); /* SAFE */
+			} else {
+				spprintf(&libpath, 0, "%s%c%s." PHP_SHLIB_SUFFIX, extension_dir, DEFAULT_SLASH, filename); /* SAFE */
+			}
+#endif
+			if (VCWD_ACCESS(libpath, F_OK)) {
+				fprintf(stderr, "Cannot access Zend extension %s (Tried: %s, %s)\n", filename, orig_libpath, libpath);
+				/* See http://support.microsoft.com/kb/190351 */
+				fflush(stderr);
+				efree(orig_libpath);
+				efree(libpath);
+				return;
+			}
+			efree(orig_libpath);
+		}
+
 		zend_load_extension(libpath);
 		efree(libpath);
 	}
