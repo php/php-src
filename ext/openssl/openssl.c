@@ -5926,7 +5926,7 @@ PHP_FUNCTION(openssl_seal)
 	buf = emalloc(data_len + EVP_CIPHER_CTX_block_size(ctx));
 	EVP_CIPHER_CTX_cleanup(ctx);
 
-	if (!EVP_SealInit(ctx, cipher, eks, eksl, &iv_buf[0], pkeys, nkeys) ||
+	if (EVP_SealInit(ctx, cipher, eks, eksl, &iv_buf[0], pkeys, nkeys) <= 0 ||
 			!EVP_SealUpdate(ctx, buf, &len1, (unsigned char *)data, (int)data_len) ||
 			!EVP_SealFinal(ctx, buf + len1, &len2)) {
 		efree(buf);
