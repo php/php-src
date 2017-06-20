@@ -240,7 +240,7 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(strncmp,		arginfo_strncmp)
 	ZEND_FE(strcasecmp,		arginfo_strcmp)
 	ZEND_FE(strncasecmp,		arginfo_strncmp)
-	ZEND_FE(each,			arginfo_each)
+	ZEND_DEP_FE(each,		arginfo_each)
 	ZEND_FE(error_reporting,	arginfo_error_reporting)
 	ZEND_FE(define,			arginfo_define)
 	ZEND_FE(defined,		arginfo_defined)
