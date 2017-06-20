@@ -55,7 +55,7 @@ static void zend_ini_do_op(char type, zval *result, zval *op1, zval *op2)
 	int i_result;
 	int i_op1, i_op2;
 	int str_len;
-	char str_result[MAX_LENGTH_OF_LONG];
+	char str_result[MAX_LENGTH_OF_LONG+1];
 
 	i_op1 = atoi(Z_STRVAL_P(op1));
 	zend_string_free(Z_STR_P(op1));
