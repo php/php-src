@@ -37,6 +37,10 @@ PHP                                                                        NEWS
   . Fixed bug #74720 (pkcs7_en/decrypt does not work if \x1a is used in
     content). (Anatol)
 
+- PDO_OCI:
+  . Support Instant Client 12.2 in --with-pdo-oci configure option.
+    (Tianfang Yang)
+
 - Reflection:
   . Fixed bug #74673 (Segfault when cast Reflection object to string with
     undefined constant). (Laruence)
