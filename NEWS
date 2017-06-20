@@ -21,6 +21,9 @@ PHP                                                                        NEWS
   . Add oniguruma upstream fix (CVE-2017-9224, CVE-2017-9226, CVE-2017-9227,
     CVE-2017-9228, CVE-2017-9229) (Remi, Mamoru TASAKA)
 
+- OCI8:
+ . Add TAF callback (PR #2459). (KoenigsKind)
+
 - Opcache:
   . Fixed bug #74663 (Segfault with opcache.memory_protect and
     validate_timestamp). (Laruence)
