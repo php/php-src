@@ -2672,13 +2672,13 @@ PHP_FUNCTION(ldap_parse_exop_passwd)
    Extract information from <draft-zeilenga-ldap-authzid> whoami extended operation result (a Work in Progress) */
 PHP_FUNCTION(ldap_parse_exop_whoami)
 {
-	zval *link, *result, **authzid;
+	zval *link, *result, *authzid;
 	ldap_linkdata *ld;
 	LDAPMessage *ldap_result;
 	struct berval *lauthzid;
 	int rc, myargcount = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrZ", &link, &result, &authzid) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrz/", &link, &result, &authzid) != SUCCESS) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -2696,11 +2696,11 @@ PHP_FUNCTION(ldap_parse_exop_whoami)
 		RETURN_FALSE;
 	}
 
-	zval_dtor(*authzid);
+	zval_dtor(authzid);
 	if (lauthzid == NULL) {
-		ZVAL_EMPTY_STRING(*authzid);
+		ZVAL_EMPTY_STRING(authzid);
 	} else {
-		ZVAL_STRINGL(*authzid, lauthzid->bv_val, lauthzid->bv_len);
+		ZVAL_STRINGL(authzid, lauthzid->bv_val, lauthzid->bv_len);
 		ldap_memfree(lauthzid->bv_val);
 		ldap_memfree(lauthzid);
 	}
@@ -3496,7 +3496,7 @@ PHP_FUNCTION(ldap_exop_whoami)
 	LDAPMessage *ldap_res;
 	int rc, msgid, myargcount = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|z", &link, &authzid) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|z/", &link, &authzid) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
