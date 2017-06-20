@@ -8749,6 +8749,57 @@ ZEND_VM_C_LABEL(send_var_by_ref_simple):
 	ZEND_VM_NEXT_OPCODE();
 }
 
+ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_FE_FETCH_R, op->op2_type == IS_CV && (op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_ARRAY, ZEND_FE_FETCH_R_SIMPLE, VAR, CV, JMP_ADDR, SPEC(RETVAL))
+{
+	USE_OPLINE
+	zval *array;
+	zval *value, *variable_ptr;
+	uint32_t value_type;
+	HashTable *fe_ht;
+	HashPosition pos;
+	Bucket *p;
+
+	array = EX_VAR(opline->op1.var);
+	SAVE_OPLINE();
+	fe_ht = Z_ARRVAL_P(array);
+	pos = Z_FE_POS_P(array);
+	p = fe_ht->arData + pos;
+	while (1) {
+		if (UNEXPECTED(pos >= fe_ht->nNumUsed)) {
+			/* reached end of iteration */
+			ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
+			ZEND_VM_CONTINUE();
+		}
+		value = &p->val;
+		value_type = Z_TYPE_INFO_P(value);
+		if (EXPECTED(value_type != IS_UNDEF)) {
+			if (UNEXPECTED(value_type == IS_INDIRECT)) {
+				value = Z_INDIRECT_P(value);
+				value_type = Z_TYPE_INFO_P(value);
+				if (EXPECTED(value_type != IS_UNDEF)) {
+					break;
+				}
+			} else {
+				break;
+			}
+		}
+		pos++;
+		p++;
+	}
+	Z_FE_POS_P(array) = pos + 1;
+	if (RETURN_VALUE_USED(opline)) {
+		if (!p->key) {
+			ZVAL_LONG(EX_VAR(opline->result.var), p->h);
+		} else {
+			ZVAL_STR_COPY(EX_VAR(opline->result.var), p->key);
+		}
+	}
+
+	variable_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op2.var EXECUTE_DATA_CC);
+	zend_assign_to_variable(variable_ptr, value, IS_CV);
+	ZEND_VM_NEXT_OPCODE();
+}
+
 ZEND_VM_DEFINE_OP(137, ZEND_OP_DATA);
 
 ZEND_VM_HELPER(zend_interrupt_helper, ANY, ANY)
