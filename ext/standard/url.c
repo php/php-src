@@ -112,6 +112,10 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 			if (!isalpha(*p) && !isdigit(*p) && *p != '+' && *p != '.' && *p != '-') {
 				if (e + 1 < ue && e < s + strcspn(s, "?#")) {
 					goto parse_port;
+				} else if (s + 1 < ue && *s == '/' && *(s + 1) == '/') { /* relative-scheme URL */
+					s += 2;
+					e = 0;
+					goto parse_host;
 				} else {
 					goto just_path;
 				}
@@ -208,6 +212,7 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 		goto just_path;
 	}
 
+	parse_host:
 	/* Binary-safe strcspn(s, "/?#") */
 	e = ue;
 	if ((p = memchr(s, '/', e - s))) {

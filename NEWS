@@ -2,7 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2017 PHP 7.0.22
 
-
+- Core:
+  . Fixed bug #74780 (parse_url() borken when query string contains colon). 
+    (jhdxr)
 
 06 Jul 2017 PHP 7.0.21
 
