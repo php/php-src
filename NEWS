@@ -15,11 +15,15 @@ PHP                                                                        NEWS
   . Use TLS_ANY for default ssl:// and tls:// negotiation.
     (Niklas Keller, me at kelunik dot com)
 
-- Standard
+- PDO_OCI:
+  . Fixed Bug #74537 (Align --with-pdo-oci configure option with --with-oci8 syntax).
+    (Tianfang Yang)
+
+- Standard:
   . Compatibility with libargon2 versions 20161029 and 20160821.
     (charlesportwoodii at erianna dot com)
 
-- Streams
+- Streams:
   . Default ssl/single_dh_use and ssl/honor_cipher_order to true.
     (me at kelunik dot com)
 

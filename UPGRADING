@@ -265,6 +265,10 @@ See also: https://wiki.php.net/rfc/deprecations_php_7_2
   . mb_convert_encoding() accepts array parameter. Only value encodings
     are converted recursively.
 
+- PDO_OCI:
+  . The '--with-pdo-oci' configure syntax no longer needs the vesion number of the
+    Oracle Instant Client.
+
 - pdo_sqlite
   . Use sqlite3_prepare_v2() and sqlite3_close_v2() functions instead of their
     legacy counterparts.
