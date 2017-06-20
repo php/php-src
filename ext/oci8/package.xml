@@ -46,7 +46,7 @@ Interoperability Support" (ID 207303.1) for details.
   <active>no</active>
  </lead>
 
- <date>2017-04-12</date>
+ <date>2017-06-20</date>
  <time>12:00:00</time>
 
   <version>
@@ -447,6 +447,7 @@ Fixed uninitialized data causing random crash
    <file name="oci8_interface.c" role="src" />
    <file name="oci8_lob.c" role="src" />
    <file name="oci8_statement.c" role="src" />
+   <file name="oci8_failover.c" role="src" />
    <file name="php_oci8.h" role="src" />
    <file name="php_oci8_int.h" role="src" />
    <file name="README" role="doc" />
@@ -467,6 +468,22 @@ Fixed uninitialized data causing random crash
   <configureoption default="autodetect" name="with-oci8" prompt="Please provide the path to the ORACLE_HOME directory. Use &apos;instantclient,/path/to/instant/client/lib&apos; if you&apos;re compiling with Oracle Instant Client" />
  </extsrcrelease>
  <changelog>
+
+<release>
+  <version>
+   <release>2.1.5</release>
+   <api>2.1.5</api>
+  </version>
+  <stability>
+   <release>stable</release>
+   <api>stable</api>
+  </stability>
+  <license uri="http://www.php.net/license">PHP</license>
+  <notes>
+This version is for PHP 7 only.
+Added TAF callback support (PR #2459, KoenigsKind) 
+  </notes>
+</release>
 
 <release>
   <version>
