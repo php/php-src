@@ -62,7 +62,7 @@ static inline void php_converter_throw_failure(php_converter_object *objval, UEr
 /* {{{ php_converter_default_callback */
 static void php_converter_default_callback(zval *return_value, zval *zobj, zend_long reason, zval *error) {
 	ZVAL_DEREF(error);
-	zval_dtor(error);
+	zval_ptr_dtor(error);
 	ZVAL_LONG(error, U_ZERO_ERROR);
 	/* Basic functionality so children can call parent::toUCallback() */
 	switch (reason) {

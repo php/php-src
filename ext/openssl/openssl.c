@@ -1859,20 +1859,18 @@ PHP_FUNCTION(openssl_spki_new)
 	s = zend_string_alloc(strlen(spkac) + strlen(spkstr), 0);
 	sprintf(ZSTR_VAL(s), "%s%s", spkac, spkstr);
 	ZSTR_LEN(s) = strlen(ZSTR_VAL(s));
+	OPENSSL_free(spkstr);
 
 	RETVAL_STR(s);
 	goto cleanup;
 
 cleanup:
 
-	if (keyresource == NULL && spki != NULL) {
+	if (spki != NULL) {
 		NETSCAPE_SPKI_free(spki);
 	}
 	if (keyresource == NULL && pkey != NULL) {
 		EVP_PKEY_free(pkey);
-	}
-	if (keyresource == NULL && spkstr != NULL) {
-		efree(spkstr);
 	}
 
 	if (s && ZSTR_LEN(s) <= 0) {

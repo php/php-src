@@ -363,7 +363,7 @@ PHP_FUNCTION(round)
 	double return_val;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
-		Z_PARAM_ZVAL_DEREF(value)
+		Z_PARAM_ZVAL(value)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(precision)
 		Z_PARAM_LONG(mode)
@@ -627,8 +627,8 @@ PHP_FUNCTION(pow)
 	zval *zbase, *zexp;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_ZVAL_DEREF_EX(zbase, 0, 1)
-		Z_PARAM_ZVAL_DEREF_EX(zexp, 0, 1)
+		Z_PARAM_ZVAL(zbase)
+		Z_PARAM_ZVAL(zexp)
 	ZEND_PARSE_PARAMETERS_END();
 
 	pow_function(return_value, zbase, zexp);
@@ -983,7 +983,7 @@ PHP_FUNCTION(bindec)
 	zval *arg;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL_DEREF(arg)
+		Z_PARAM_ZVAL(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
 	convert_to_string_ex(arg);
@@ -1000,7 +1000,7 @@ PHP_FUNCTION(hexdec)
 	zval *arg;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL_DEREF(arg)
+		Z_PARAM_ZVAL(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
 	convert_to_string_ex(arg);
@@ -1017,7 +1017,7 @@ PHP_FUNCTION(octdec)
 	zval *arg;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL_DEREF(arg)
+		Z_PARAM_ZVAL(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
 	convert_to_string_ex(arg);
@@ -1035,7 +1035,7 @@ PHP_FUNCTION(decbin)
 	zend_string *result;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL_DEREF(arg)
+		Z_PARAM_ZVAL(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
 	convert_to_long_ex(arg);
@@ -1052,7 +1052,7 @@ PHP_FUNCTION(decoct)
 	zend_string *result;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL_DEREF(arg)
+		Z_PARAM_ZVAL(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
 	convert_to_long_ex(arg);
@@ -1069,7 +1069,7 @@ PHP_FUNCTION(dechex)
 	zend_string *result;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL_DEREF(arg)
+		Z_PARAM_ZVAL(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
 	convert_to_long_ex(arg);
@@ -1087,7 +1087,7 @@ PHP_FUNCTION(base_convert)
 	zend_string *result;
 
 	ZEND_PARSE_PARAMETERS_START(3, 3)
-		Z_PARAM_ZVAL_DEREF(number)
+		Z_PARAM_ZVAL(number)
 		Z_PARAM_LONG(frombase)
 		Z_PARAM_LONG(tobase)
 	ZEND_PARSE_PARAMETERS_END();

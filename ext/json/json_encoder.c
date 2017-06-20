@@ -329,90 +329,93 @@ static int php_json_escape_string(
 			smart_str_appendc(buf, digits[(us & 0xf0)   >> 4]);
 			smart_str_appendc(buf, digits[(us & 0xf)]);
 		} else {
+			static const uint32_t charmap[4] = {
+				0xffffffff, 0x500080c4, 0x10000000, 0x00000000};
+
 			pos++;
+			if (EXPECTED(!(charmap[us >> 5] & (1 << (us & 0x1f))))) {
+				smart_str_appendc(buf, (unsigned char) us);
+			} else {
+				switch (us) {
+					case '"':
+						if (options & PHP_JSON_HEX_QUOT) {
+							smart_str_appendl(buf, "\\u0022", 6);
+						} else {
+							smart_str_appendl(buf, "\\\"", 2);
+						}
+						break;
 
-			switch (us) {
-				case '"':
-					if (options & PHP_JSON_HEX_QUOT) {
-						smart_str_appendl(buf, "\\u0022", 6);
-					} else {
-						smart_str_appendl(buf, "\\\"", 2);
-					}
-					break;
+					case '\\':
+						smart_str_appendl(buf, "\\\\", 2);
+						break;
 
-				case '\\':
-					smart_str_appendl(buf, "\\\\", 2);
-					break;
+					case '/':
+						if (options & PHP_JSON_UNESCAPED_SLASHES) {
+							smart_str_appendc(buf, '/');
+						} else {
+							smart_str_appendl(buf, "\\/", 2);
+						}
+						break;
 
-				case '/':
-					if (options & PHP_JSON_UNESCAPED_SLASHES) {
-						smart_str_appendc(buf, '/');
-					} else {
-						smart_str_appendl(buf, "\\/", 2);
-					}
-					break;
+					case '\b':
+						smart_str_appendl(buf, "\\b", 2);
+						break;
 
-				case '\b':
-					smart_str_appendl(buf, "\\b", 2);
-					break;
+					case '\f':
+						smart_str_appendl(buf, "\\f", 2);
+						break;
 
-				case '\f':
-					smart_str_appendl(buf, "\\f", 2);
-					break;
+					case '\n':
+						smart_str_appendl(buf, "\\n", 2);
+						break;
 
-				case '\n':
-					smart_str_appendl(buf, "\\n", 2);
-					break;
+					case '\r':
+						smart_str_appendl(buf, "\\r", 2);
+						break;
 
-				case '\r':
-					smart_str_appendl(buf, "\\r", 2);
-					break;
+					case '\t':
+						smart_str_appendl(buf, "\\t", 2);
+						break;
 
-				case '\t':
-					smart_str_appendl(buf, "\\t", 2);
-					break;
+					case '<':
+						if (options & PHP_JSON_HEX_TAG) {
+							smart_str_appendl(buf, "\\u003C", 6);
+						} else {
+							smart_str_appendc(buf, '<');
+						}
+						break;
 
-				case '<':
-					if (options & PHP_JSON_HEX_TAG) {
-						smart_str_appendl(buf, "\\u003C", 6);
-					} else {
-						smart_str_appendc(buf, '<');
-					}
-					break;
+					case '>':
+						if (options & PHP_JSON_HEX_TAG) {
+							smart_str_appendl(buf, "\\u003E", 6);
+						} else {
+							smart_str_appendc(buf, '>');
+						}
+						break;
 
-				case '>':
-					if (options & PHP_JSON_HEX_TAG) {
-						smart_str_appendl(buf, "\\u003E", 6);
-					} else {
-						smart_str_appendc(buf, '>');
-					}
-					break;
+					case '&':
+						if (options & PHP_JSON_HEX_AMP) {
+							smart_str_appendl(buf, "\\u0026", 6);
+						} else {
+							smart_str_appendc(buf, '&');
+						}
+						break;
 
-				case '&':
-					if (options & PHP_JSON_HEX_AMP) {
-						smart_str_appendl(buf, "\\u0026", 6);
-					} else {
-						smart_str_appendc(buf, '&');
-					}
-					break;
+					case '\'':
+						if (options & PHP_JSON_HEX_APOS) {
+							smart_str_appendl(buf, "\\u0027", 6);
+						} else {
+							smart_str_appendc(buf, '\'');
+						}
+						break;
 
-				case '\'':
-					if (options & PHP_JSON_HEX_APOS) {
-						smart_str_appendl(buf, "\\u0027", 6);
-					} else {
-						smart_str_appendc(buf, '\'');
-					}
-					break;
-
-				default:
-					if (us >= ' ') {
-						smart_str_appendc(buf, (unsigned char) us);
-					} else {
+					default:
+						ZEND_ASSERT(us < ' ');
 						smart_str_appendl(buf, "\\u00", sizeof("\\u00")-1);
 						smart_str_appendc(buf, digits[(us & 0xf0)   >> 4]);
 						smart_str_appendc(buf, digits[(us & 0xf)]);
-					}
-					break;
+						break;
+				}
 			}
 		}
 	} while (pos < len);

@@ -1851,7 +1851,7 @@ PHP_FUNCTION(stristr)
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(haystack)
-		Z_PARAM_ZVAL_DEREF(needle)
+		Z_PARAM_ZVAL(needle)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(part)
 	ZEND_PARSE_PARAMETERS_END();
@@ -1906,7 +1906,7 @@ PHP_FUNCTION(strstr)
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(haystack)
-		Z_PARAM_ZVAL_DEREF(needle)
+		Z_PARAM_ZVAL(needle)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(part)
 	ZEND_PARSE_PARAMETERS_END();
@@ -2011,7 +2011,7 @@ PHP_FUNCTION(stripos)
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(haystack)
-		Z_PARAM_ZVAL_DEREF(needle)
+		Z_PARAM_ZVAL(needle)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(offset)
 	ZEND_PARSE_PARAMETERS_END();
@@ -2142,7 +2142,7 @@ PHP_FUNCTION(strripos)
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(haystack)
-		Z_PARAM_ZVAL_DEREF(zneedle)
+		Z_PARAM_ZVAL(zneedle)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(offset)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
@@ -2248,7 +2248,7 @@ PHP_FUNCTION(strrchr)
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_STR(haystack)
-		Z_PARAM_ZVAL_DEREF(needle)
+		Z_PARAM_ZVAL(needle)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (Z_TYPE_P(needle) == IS_STRING) {
@@ -2457,11 +2457,11 @@ PHP_FUNCTION(substr_replace)
 	zval *tmp_str = NULL, *tmp_from = NULL, *tmp_repl = NULL, *tmp_len= NULL;
 
 	ZEND_PARSE_PARAMETERS_START(3, 4)
-		Z_PARAM_ZVAL_DEREF(str)
-		Z_PARAM_ZVAL_DEREF(repl)
-		Z_PARAM_ZVAL_DEREF(from)
+		Z_PARAM_ZVAL(str)
+		Z_PARAM_ZVAL(repl)
+		Z_PARAM_ZVAL(from)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL_DEREF_EX(len, 0, 1)
+		Z_PARAM_ZVAL(len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (Z_TYPE_P(str) != IS_ARRAY) {
@@ -3588,7 +3588,7 @@ PHP_FUNCTION(similar_text)
 		Z_PARAM_STR(t1)
 		Z_PARAM_STR(t2)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL_DEREF_EX(percent, 0, 1)
+		Z_PARAM_ZVAL_DEREF(percent)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ac > 2) {
@@ -4449,7 +4449,7 @@ PHP_FUNCTION(strip_tags)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL_DEREF(allow)
+		Z_PARAM_ZVAL(allow)
 	ZEND_PARSE_PARAMETERS_END();
 
 	/* To maintain a certain BC, we allow anything for the second parameter and return original string */
@@ -4556,7 +4556,7 @@ PHP_FUNCTION(setlocale)
 }
 /* }}} */
 
-/* {{{ proto void parse_str(string encoded_string [, array result])
+/* {{{ proto void parse_str(string encoded_string [, array &result])
    Parses GET/POST/COOKIE data and sets global variables */
 PHP_FUNCTION(parse_str)
 {
@@ -4568,7 +4568,7 @@ PHP_FUNCTION(parse_str)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STRING(arg, arglen)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL_DEREF_EX(arrayArg, 0, 1)
+		Z_PARAM_ZVAL_DEREF(arrayArg)
 	ZEND_PARSE_PARAMETERS_END();
 
 	res = estrndup(arg, arglen);
@@ -4590,13 +4590,10 @@ PHP_FUNCTION(parse_str)
 			zend_throw_error(NULL, "Cannot re-assign $this");
 		}
 	} else 	{
-		zval ret;
-
 		/* Clear out the array that was passed in. */
-		zval_dtor(arrayArg);
-		array_init(&ret);
-		sapi_module.treat_data(PARSE_STRING, res, &ret);
-		ZVAL_COPY_VALUE(arrayArg, &ret);
+		zval_ptr_dtor(arrayArg);
+		array_init(arrayArg);
+		sapi_module.treat_data(PARSE_STRING, res, arrayArg);
 	}
 }
 /* }}} */

@@ -502,7 +502,7 @@ PHP_FUNCTION(stream_bucket_new)
 	php_stream_bucket *bucket;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_ZVAL_DEREF(zstream)
+		Z_PARAM_ZVAL(zstream)
 		Z_PARAM_STRING(buffer, buffer_len)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 

@@ -1377,8 +1377,8 @@ static PHP_METHOD(PDOStatement, fetchAll)
 	ZEND_PARSE_PARAMETERS_START(0, 3)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(how)
-		Z_PARAM_ZVAL_DEREF(arg2)
-		Z_PARAM_ZVAL_DEREF(ctor_args)
+		Z_PARAM_ZVAL(arg2)
+		Z_PARAM_ZVAL(ctor_args)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if (!pdo_stmt_verify_mode(stmt, how, 1)) {
@@ -1699,7 +1699,7 @@ static PHP_METHOD(PDOStatement, setAttribute)
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_LONG(attr)
-		Z_PARAM_ZVAL_DEREF_EX(value, 1, 0)
+		Z_PARAM_ZVAL_EX(value, 1, 0)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if (!stmt->methods->set_attribute) {

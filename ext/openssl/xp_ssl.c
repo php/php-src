@@ -1252,12 +1252,12 @@ static int set_server_specific_opts(php_stream *stream, SSL_CTX *ctx) /* {{{ */
 
 	set_server_dh_param(stream, ctx);
 	zv = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", "single_dh_use");
-	if (zv != NULL && zend_is_true(zv)) {
+	if (zv == NULL || zend_is_true(zv)) {
 		ssl_ctx_options |= SSL_OP_SINGLE_DH_USE;
 	}
 
 	zv = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", "honor_cipher_order");
-	if (zv != NULL && zend_is_true(zv)) {
+	if (zv == NULL || zend_is_true(zv)) {
 		ssl_ctx_options |= SSL_OP_CIPHER_SERVER_PREFERENCE;
 	}
 

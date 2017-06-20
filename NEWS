@@ -12,6 +12,14 @@ PHP                                                                        NEWS
   . Use TLS_ANY for default ssl:// and tls:// negotiation.
     (Niklas Keller, me at kelunik dot com)
 
+- Standard
+  . Compatibility with libargon2 versions 20161029 and 20160821.
+    (charlesportwoodii at erianna dot com)
+
+- Streams
+  . Default ssl/single_dh_use and ssl/honor_cipher_order to true.
+    (me at kelunik dot com)
+
 - SQLite3:
   . Update to Sqlite 3.19.3. (cmb)
 

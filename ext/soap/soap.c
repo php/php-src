@@ -2952,6 +2952,7 @@ PHP_METHOD(SoapClient, __call)
 		} ZEND_HASH_FOREACH_END();
 	}
 	if (output_headers) {
+		zval_ptr_dtor(output_headers);
 		array_init(output_headers);
 	}
 	do_soap_call(execute_data, this_ptr, function, function_len, arg_count, real_args, return_value, location, soap_action, uri, soap_headers, output_headers);
