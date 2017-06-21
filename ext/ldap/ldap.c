@@ -2634,7 +2634,7 @@ PHP_FUNCTION(ldap_parse_exop_passwd)
 	struct berval lnewpasswd;
 	int rc, myargcount = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrz", &link, &result, &newpasswd) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrz/", &link, &result, &newpasswd) != SUCCESS) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -3898,6 +3898,27 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_exop_whoami, 0, 0, 2)
 ZEND_END_ARG_INFO()
 #endif
 
+#ifdef HAVE_LDAP_PARSE_EXTENDED_RESULT
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_parse_exop, 0, 0, 4)
+	ZEND_ARG_INFO(0, link)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(1, retoid)
+	ZEND_ARG_INFO(1, retdata)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_parse_exop_passwd, 0, 0, 3)
+	ZEND_ARG_INFO(0, link)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(1, newpasswd)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_parse_exop_whoami, 0, 0, 3)
+	ZEND_ARG_INFO(0, link)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(1, authzid)
+ZEND_END_ARG_INFO()
+#endif
+
 #ifdef HAVE_LDAP_REFRESH
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_refresh, 0, 0, 4)
 	ZEND_ARG_INFO(0, link)
@@ -3971,12 +3992,14 @@ const zend_function_entry ldap_functions[] = {
 	PHP_FE(ldap_start_tls,								arginfo_ldap_resource)
 #endif
 #ifdef HAVE_LDAP_EXTENDED_OPERATION_S
-	PHP_FE(ldap_exop,
-	arginfo_ldap_exop)
-	PHP_FE(ldap_exop_passwd,
-	arginfo_ldap_exop_passwd)
-	PHP_FE(ldap_exop_whoami,
-	arginfo_ldap_exop_whoami)
+	PHP_FE(ldap_exop,									arginfo_ldap_exop)
+	PHP_FE(ldap_exop_passwd,							arginfo_ldap_exop_passwd)
+	PHP_FE(ldap_exop_whoami,							arginfo_ldap_exop_whoami)
+#endif
+#ifdef HAVE_LDAP_PARSE_EXTENDED_RESULT
+	PHP_FE(ldap_parse_exop,								arginfo_ldap_parse_exop)
+	PHP_FE(ldap_parse_exop_passwd,						arginfo_ldap_parse_exop_passwd)
+	PHP_FE(ldap_parse_exop_whoami,						arginfo_ldap_parse_exop_whoami)
 #endif
 #ifdef HAVE_LDAP_REFRESH
 	PHP_FE(ldap_refresh,
