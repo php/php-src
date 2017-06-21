@@ -2433,8 +2433,6 @@ static void zend_accel_fast_shutdown(void)
 	EG(function_table)->nNumUsed = EG(function_table)->nNumOfElements;
 	EG(class_table)->nNumUsed = EG(class_table)->nNumOfElements;
 	EG(zend_constants)->nNumUsed = EG(zend_constants)->nNumOfElements;
-
-	CG(unclean_shutdown) = 1;
 }
 #endif
 
