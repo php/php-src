@@ -961,6 +961,8 @@ expr_without_variable:
 			{ $$ = zend_ast_create(ZEND_AST_CONDITIONAL, $1, NULL, $4); }
 	|	expr T_COALESCE expr
 			{ $$ = zend_ast_create(ZEND_AST_COALESCE, $1, $3); }
+	|	expr T_COALESCE
+			{ zval z; ZVAL_NULL(&z); $$ = zend_ast_create(ZEND_AST_COALESCE, $1, zend_ast_create_zval_ex(&z, 0)); }
 	|	internal_functions_in_yacc { $$ = $1; }
 	|	T_INT_CAST expr		{ $$ = zend_ast_create_cast(IS_LONG, $2); }
 	|	T_DOUBLE_CAST expr	{ $$ = zend_ast_create_cast(IS_DOUBLE, $2); }
