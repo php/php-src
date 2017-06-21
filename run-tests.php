@@ -254,6 +254,7 @@ $ini_overwrites = array(
 		'log_errors_max_len=0',
 		'opcache.fast_shutdown=0',
 		'opcache.file_update_protection=0',
+		'zend.assertions=1',
 	);
 
 $no_file_cache = '-d opcache.file_cache= -d opcache.file_cache_only=0';
