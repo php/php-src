@@ -50,7 +50,7 @@
 #endif
 
 #define SMART_STRING_DO_REALLOC(d, what) \
-	(d)->c = SMART_STRING_REALLOC((d)->c, (d)->a + 1, (what))
+	(d)->c = (char *) SMART_STRING_REALLOC((d)->c, (d)->a + 1, (what))
 
 #define smart_string_alloc4(d, n, what, newlen) do {				\
 	if (!(d)->c) {													\
