@@ -14,6 +14,7 @@ PHP                                                                        NEWS
 
 - OCI8:
   . Add TAF callback (PR #2459). (KoenigsKind)
+  . Fixed bug #74625 (Integer overflow in oci_bind_array_by_name). (Ingmar Runge)
 
 - OpenSSL:
   . Fixed bug #74720 (pkcs7_en/decrypt does not work if \x1a is used in
@@ -24,8 +25,6 @@ PHP                                                                        NEWS
 
 - PDO_OCI:
   . Fixed Bug #74537 (Align --with-pdo-oci configure option with --with-oci8 syntax).
-    (Tianfang Yang)
-  . Support Instant Client 12.2 in --with-pdo-oci configure option.
     (Tianfang Yang)
 
 - Standard:
