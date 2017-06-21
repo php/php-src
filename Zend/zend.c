@@ -903,31 +903,6 @@ void zend_post_startup(void) /* {{{ */
 void zend_shutdown(void) /* {{{ */
 {
 	zend_destroy_rsrc_list(&EG(persistent_list));
-	if (EG(active))
-	{
-		/*
-		 * The order of destruction is important here.
-		 * See bugs #65463 and 66036.
-		 */
-		zend_function *func;
-		zend_class_entry *ce;
-
-		ZEND_HASH_REVERSE_FOREACH_PTR(GLOBAL_FUNCTION_TABLE, func) {
-			if (func->type == ZEND_USER_FUNCTION) {
-				zend_cleanup_op_array_data((zend_op_array *) func);
-			}
-		} ZEND_HASH_FOREACH_END();
-		ZEND_HASH_REVERSE_FOREACH_PTR(GLOBAL_CLASS_TABLE, ce) {
-			if (ce->type == ZEND_USER_CLASS) {
-				zend_cleanup_user_class_data(ce);
-			} else {
-				break;
-			}
-		} ZEND_HASH_FOREACH_END();
-		zend_cleanup_internal_classes();
-		zend_hash_reverse_apply(GLOBAL_FUNCTION_TABLE, (apply_func_t) clean_non_persistent_function_full);
-		zend_hash_reverse_apply(GLOBAL_CLASS_TABLE, (apply_func_t) clean_non_persistent_class_full);
-	}
 	zend_destroy_modules();
 
 	virtual_cwd_deactivate();
