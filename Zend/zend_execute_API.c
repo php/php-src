@@ -275,9 +275,6 @@ void shutdown_executor(void) /* {{{ */
 */
 		zend_llist_apply(&zend_extensions, (llist_apply_func_t) zend_extension_deactivator);
 
-		if (CG(unclean_shutdown)) {
-			EG(symbol_table).pDestructor = zend_unclean_zval_ptr_dtor;
-		}
 		zend_hash_graceful_reverse_destroy(&EG(symbol_table));
 	} zend_end_try();
 	EG(valid_symbol_table) = 0;
