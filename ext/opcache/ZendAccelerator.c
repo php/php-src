@@ -1361,9 +1361,15 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 #ifdef __SSE2__
 	/* Align to 64-byte boundary */
 	ZCG(mem) = zend_shared_alloc(memory_used + 64);
-	ZCG(mem) = (void*)(((zend_uintptr_t)ZCG(mem) + 63L) & ~63L);
+	if (ZCG(mem)) {
+		memset(ZCG(mem), 0, memory_used + 64);
+		ZCG(mem) = (void*)(((zend_uintptr_t)ZCG(mem) + 63L) & ~63L);
+	}
 #else
 	ZCG(mem) = zend_shared_alloc(memory_used);
+	if (ZCG(mem)) {
+		memset(ZCG(mem), 0, memory_used);
+	}
 #endif
 	if (!ZCG(mem)) {
 		zend_shared_alloc_destroy_xlat_table();
@@ -2542,6 +2548,7 @@ static int zend_accel_init_shm(void)
 		zend_shared_alloc_unlock();
 		return FAILURE;
 	}
+	memset(accel_shared_globals, 0, sizeof(zend_accel_shared_globals));
 	ZSMMG(app_shared_globals) = accel_shared_globals;
 
 	zend_accel_hash_init(&ZCSG(hash), ZCG(accel_directives).max_accelerated_files);
