@@ -50,8 +50,8 @@ Interoperability Support" (ID 207303.1) for details.
  <time>12:00:00</time>
 
   <version>
-   <release>2.1.4</release>
-   <api>2.1.4</api>
+   <release>2.1.5</release>
+   <api>2.1.5</api>
   </version>
   <stability>
    <release>stable</release>
@@ -60,7 +60,7 @@ Interoperability Support" (ID 207303.1) for details.
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
 This version is for PHP 7 only.
-Fixed uninitialized data causing random crash
+Added TAF callback support (PR #2459, KoenigsKind) 
   </notes>
  <contents>
   <dir name="/">
@@ -471,8 +471,8 @@ Fixed uninitialized data causing random crash
 
 <release>
   <version>
-   <release>2.1.5</release>
-   <api>2.1.5</api>
+   <release>2.1.4</release>
+   <api>2.1.4</api>
   </version>
   <stability>
    <release>stable</release>
@@ -481,7 +481,7 @@ Fixed uninitialized data causing random crash
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
 This version is for PHP 7 only.
-Added TAF callback support (PR #2459, KoenigsKind) 
+Fixed uninitialized data causing random crash
   </notes>
 </release>
 
