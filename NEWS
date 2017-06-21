@@ -30,7 +30,8 @@ PHP                                                                        NEWS
     CVE-2017-9228, CVE-2017-9229) (Remi, Mamoru TASAKA)
 
 - OCI8:
- . Add TAF callback (PR #2459). (KoenigsKind)
+  . Add TAF callback (PR #2459). (KoenigsKind)
+  . Fixed bug #74625 (Integer overflow in oci_bind_array_by_name). (Ingmar Runge)
 
 - Opcache:
   . Fixed bug #74663 (Segfault with opcache.memory_protect and
