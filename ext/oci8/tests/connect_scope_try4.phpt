@@ -29,7 +29,7 @@ echo "Test 1\n";
 
 // Make errors throw exceptions
 
-set_error_handler(create_function('$x, $y', 'throw new Exception($y, $x);'));
+set_error_handler(function($x, $y) { throw new Exception($y, $x); });
 
 try
 {
