@@ -61,6 +61,7 @@ Interoperability Support" (ID 207303.1) for details.
   <notes>
 This version is for PHP 7 only.
 Added TAF callback support (PR #2459, KoenigsKind) 
+Fixed bug #74625 (Integer overflow in oci_bind_array_by_name). (Ingmar Runge)
   </notes>
  <contents>
   <dir name="/">
@@ -164,6 +165,7 @@ Added TAF callback support (PR #2459, KoenigsKind)
     <file name="bug71422.phpt" role="test" />
     <file name="bug71600.phpt" role="test" />
     <file name="bug72524.phpt" role="test" />
+    <file name="bug74625.phpt" role="test" />
     <file name="clientversion.phpt" role="test" />
     <file name="close.phpt" role="test" />
     <file name="coll_001.phpt" role="test" />
