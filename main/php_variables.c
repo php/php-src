@@ -458,7 +458,7 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 	switch (arg) {
 		case PARSE_GET:
 		case PARSE_STRING:
-			separator = (char *) estrdup(PG(arg_separator).input);
+			separator = PG(arg_separator).input;
 			break;
 		case PARSE_COOKIE:
 			separator = ";\0";
@@ -511,10 +511,6 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 		}
 next_cookie:
 		var = php_strtok_r(NULL, separator, &strtok_buf);
-	}
-
-	if (arg != PARSE_COOKIE) {
-		efree(separator);
 	}
 
 	if (free_buffer) {
