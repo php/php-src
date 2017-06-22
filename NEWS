@@ -34,6 +34,8 @@ PHP                                                                        NEWS
     content). (Anatol)
   . Use TLS_ANY for default ssl:// and tls:// negotiation. (kelunik)
   . Fix leak in openssl_spki_new(). (jelle at vdwaa dot nl)
+  . Added openssl_pkcs7_read() and pk7 parameter to openssl_pkcs7_verify().
+    (jelle at vdwaa dot nl)
 
 - PDO_OCI:
   . Fixed Bug #74537 (Align --with-pdo-oci configure option with --with-oci8 syntax).
