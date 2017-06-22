@@ -3,7 +3,7 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.2.0alpha3
 
 - Core:
-  . Fixed bug #74780 (parse_url() borken when query string contains colon). 
+  . Fixed bug #74780 (parse_url() broken when query string contains colon). 
     (jhdxr)
   . Fixed bug #74761 (Unary operator expected error on some systems). (petk)
   . Allow loading PHP/Zend extensions by name in ini files (extension=<name>).
