@@ -81,7 +81,7 @@ PHPAPI PHP_FUNCTION(dl)
 PHPAPI int php_load_extension(char *filename, int type, int start_now)
 {
 	void *handle;
-	char *libpath, *orig_libpath;
+	char *libpath;
 	zend_module_entry *module_entry;
 	zend_module_entry *(*get_module)(void);
 	int error_type, slash_suffix;
@@ -118,22 +118,20 @@ PHPAPI int php_load_extension(char *filename, int type, int start_now)
 		}
 		if (VCWD_ACCESS(libpath, F_OK)) {
 			/* If file does not exist, consider as extension name and build file name */
-			orig_libpath = libpath;
+			const char *libpath_prefix = "";
+			char *orig_libpath = libpath;
 #if PHP_WIN32
-			if (slash_suffix) {
-				spprintf(&libpath, 0, "%sphp_%s." PHP_SHLIB_SUFFIX, extension_dir, filename); /* SAFE */
-			} else {
-				spprintf(&libpath, 0, "%s%cphp_%s." PHP_SHLIB_SUFFIX, extension_dir, DEFAULT_SLASH, filename); /* SAFE */
-			}
-#else
-			if (slash_suffix) {
-				spprintf(&libpath, 0, "%s%s." PHP_SHLIB_SUFFIX, extension_dir, filename); /* SAFE */
-			} else {
-				spprintf(&libpath, 0, "%s%c%s." PHP_SHLIB_SUFFIX, extension_dir, DEFAULT_SLASH, filename); /* SAFE */
-			}
+			libpath_prefix = "php_";
 #endif
+			if (slash_suffix) {
+				spprintf(&libpath, 0, "%s%s%s." PHP_SHLIB_SUFFIX, extension_dir, libpath_prefix, filename); /* SAFE */
+			} else {
+				spprintf(&libpath, 0, "%s%c%s%s." PHP_SHLIB_SUFFIX, extension_dir, DEFAULT_SLASH, libpath_prefix, filename); /* SAFE */
+			}
+
 			if (VCWD_ACCESS(libpath, F_OK)) {
-				php_error_docref(NULL TSRMLS_CC, error_type, "Cannot access dynamic library '%s' (tried : %s, %s)", filename, orig_libpath, libpath);
+				php_error(error_type, "Cannot access dynamic library '%s' (tried : %s, %s)",
+					filename, orig_libpath, libpath);
 				efree(orig_libpath);
 				efree(libpath);
 				return FAILURE;
