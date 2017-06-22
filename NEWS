@@ -7,6 +7,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Change PHP_OS_FAMILY value from "OSX" to "Darwin". (sb, kalle)
+  . Fixed bug #74780 (parse_url() borken when query string contains colon). 
+    (jhdxr)
 
 - GD:
   . Fixed bug #74744 (gd.h: stdarg.h include missing for va_list use in
