@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #74780 (parse_url() borken when query string contains colon). 
     (jhdxr)
 
+- SPL:
+  . Fixed bug #73471 (PHP freezes with AppendIterator). (jhdxr)
+
 22 Jun 2017, PHP 7.2.0alpha2
 
 - Core:
