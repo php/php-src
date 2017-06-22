@@ -3374,7 +3374,12 @@ SPL_METHOD(AppendIterator, append)
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "O", &it, zend_ce_iterator) == FAILURE) {
 		return;
 	}
-	spl_array_iterator_append(&intern->u.append.zarrayit, it);
+	if (intern->u.append.iterator->funcs->valid(intern->u.append.iterator) == SUCCESS) {
+		spl_array_iterator_append(&intern->u.append.zarrayit, it);
+		intern->u.append.iterator->funcs->move_forward(intern->u.append.iterator);
+	}else{
+		spl_array_iterator_append(&intern->u.append.zarrayit, it);
+	}
 
 	if (!intern->inner.iterator || spl_dual_it_valid(intern) != SUCCESS) {
 		if (intern->u.append.iterator->funcs->valid(intern->u.append.iterator) != SUCCESS) {
