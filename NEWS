@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #74780 (parse_url() borken when query string contains colon). 
     (jhdxr)
+  . Fixed bug #74761 (Unary operator expected error on some systems). (petk)
 
 - SPL:
   . Fixed bug #73471 (PHP freezes with AppendIterator). (jhdxr)
