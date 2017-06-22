@@ -19,8 +19,7 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fixed bug #74720 (pkcs7_en/decrypt does not work if \x1a is used in
     content). (Anatol)
-  . Use TLS_ANY for default ssl:// and tls:// negotiation.
-    (Niklas Keller, me at kelunik dot com)
+  . Use TLS_ANY for default ssl:// and tls:// negotiation. (kelunik)
   . Fix leak in openssl_spki_new(). (jelle at vdwaa dot nl)
 
 - PDO_OCI:
@@ -34,8 +33,7 @@ PHP                                                                        NEWS
     (mhagstrand at gmail dot com)
 
 - Streams:
-  . Default ssl/single_dh_use and ssl/honor_cipher_order to true.
-    (me at kelunik dot com)
+  . Default ssl/single_dh_use and ssl/honor_cipher_order to true. (kelunik)
 
 - SQLite3:
   . Update to Sqlite 3.19.3. (cmb)
