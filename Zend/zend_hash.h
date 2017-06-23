@@ -839,7 +839,7 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 					} \
 					Z_NEXT(prev->val) = Z_NEXT(_p->val); \
 				} else { \
-					 HT_HASH(__ht, _p->h | __ht->nTableMask) = Z_NEXT(_p->val); \
+					HT_HASH(__ht, nIndex) = Z_NEXT(_p->val); \
 				} \
 			} while (0); \
 		} \
