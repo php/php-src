@@ -68,7 +68,7 @@ static zend_always_inline void zend_object_store_ctor_failed(zend_object *obj)
 	GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
 }
 
-ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects);
+ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects, zend_bool fast_shutdown);
 
 #define ZEND_OBJECTS_STORE_HANDLERS 0, zend_object_std_dtor, zend_objects_destroy_object, zend_objects_clone_obj
 

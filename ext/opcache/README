@@ -47,7 +47,6 @@ opcache.memory_consumption=128
 opcache.interned_strings_buffer=8
 opcache.max_accelerated_files=4000
 opcache.revalidate_freq=60
-opcache.fast_shutdown=1
 opcache.enable_cli=1
 
 You also may add the following, but it may break some applications and
@@ -136,11 +135,6 @@ opcache.save_comments (default "1")
 	If disabled, all PHPDoc comments are dropped from the code to reduce the
 	size of the optimized code. Disabling "Doc Comments" may break some
 	existing applications and frameworks (e.g. Doctrine, ZF2, PHPUnit)
-
-opcache.fast_shutdown (default "0")
-	If enabled, a fast shutdown sequence is used for the accelerated code
-	The fast shutdown sequence doesn't free each allocated block, but lets
-	the Zend Engine Memory Manager do the work.
 
 opcache.enable_file_override (default "0")
 	Allow file existence override (file_exists, etc.) performance feature.

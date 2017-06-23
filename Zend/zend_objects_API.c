@@ -76,7 +76,7 @@ ZEND_API void zend_objects_store_mark_destructed(zend_objects_store *objects)
 	}
 }
 
-ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects)
+ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects, zend_bool fast_shutdown)
 {
 	zend_object **obj_ptr, **end, *obj;
 
@@ -88,20 +88,37 @@ ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects
 	end = objects->object_buckets + 1;
 	obj_ptr = objects->object_buckets + objects->top;
 
-	do {
-		obj_ptr--;
-		obj = *obj_ptr;
-		if (IS_OBJ_VALID(obj)) {
-			if (!(GC_FLAGS(obj) & IS_OBJ_FREE_CALLED)) {
-				GC_FLAGS(obj) |= IS_OBJ_FREE_CALLED;
-				if (obj->handlers->free_obj) {
-					GC_REFCOUNT(obj)++;
-					obj->handlers->free_obj(obj);
-					GC_REFCOUNT(obj)--;
+	if (fast_shutdown) {
+		do {
+			obj_ptr--;
+			obj = *obj_ptr;
+			if (IS_OBJ_VALID(obj)) {
+				if (!(GC_FLAGS(obj) & IS_OBJ_FREE_CALLED)) {
+					GC_FLAGS(obj) |= IS_OBJ_FREE_CALLED;
+					if (obj->handlers->free_obj && obj->handlers->free_obj != zend_object_std_dtor) {
+						GC_REFCOUNT(obj)++;
+						obj->handlers->free_obj(obj);
+						GC_REFCOUNT(obj)--;
+					}
 				}
 			}
-		}
-	} while (obj_ptr != end);
+		} while (obj_ptr != end);
+	} else {
+		do {
+			obj_ptr--;
+			obj = *obj_ptr;
+			if (IS_OBJ_VALID(obj)) {
+				if (!(GC_FLAGS(obj) & IS_OBJ_FREE_CALLED)) {
+					GC_FLAGS(obj) |= IS_OBJ_FREE_CALLED;
+					if (obj->handlers->free_obj) {
+						GC_REFCOUNT(obj)++;
+						obj->handlers->free_obj(obj);
+						GC_REFCOUNT(obj)--;
+					}
+				}
+			}
+		} while (obj_ptr != end);
+	}
 }
 
 
