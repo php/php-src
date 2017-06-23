@@ -266,12 +266,12 @@ void shutdown_executor(void) /* {{{ */
 
 	/* All resources and objects are destroyed. */
 	/* No PHP callback functions may be called after this point. */
+	EG(active) = 0;
+	EG(valid_symbol_table) = 0;
 
 	zend_try {
 		zend_llist_apply(&zend_extensions, (llist_apply_func_t) zend_extension_deactivator);
 	} zend_end_try();
-
-	EG(valid_symbol_table) = 0;
 
 	if (fast_shutdown) {
 		/* Fast Request Shutdown
@@ -392,8 +392,6 @@ void shutdown_executor(void) /* {{{ */
 	zend_cleanup_internal_classes();
 
 	zend_shutdown_fpu();
-
-	EG(active) = 0;
 }
 /* }}} */
 
