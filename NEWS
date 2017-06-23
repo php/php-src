@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - SQLite3:
   . Updated to SQLite 3.20.0. (cmb)
 
+- SPL:
+  . Added spl_object_id(). (Tyson Andre)
+
 03 Aug 2017, PHP 7.2.0beta2
 
 - Core:
