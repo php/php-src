@@ -7,6 +7,10 @@ PHP                                                                        NEWS
     (jhdxr)
   . Fixed bug #74761 (Unary operator expected error on some systems). (petk)
 
+- Opcache:
+  . Fixed bug #74623 (Infinite loop in type inference when using HTMLPurifier).
+    (nikic)
+
 - SPL:
   . Fixed bug #73471 (PHP freezes with AppendIterator). (jhdxr)
 

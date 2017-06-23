@@ -3109,7 +3109,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 				    opline->opcode == ZEND_FETCH_OBJ_RW ||
 				    opline->opcode == ZEND_FETCH_OBJ_FUNC_ARG) {
 					if (opline->opcode != ZEND_FETCH_DIM_FUNC_ARG) {
-						if (t1 & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_NULL)) {
+						if (t1 & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) {
 							tmp &= ~(MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE);
 							tmp |= MAY_BE_OBJECT | MAY_BE_RC1 | MAY_BE_RCN;
 						}
