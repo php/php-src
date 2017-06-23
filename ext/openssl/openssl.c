@@ -5387,12 +5387,12 @@ PHP_FUNCTION(openssl_pkcs7_decrypt)
 		goto clean_exit;
 	}
 
-	in = BIO_new_file(infilename, "r");
+	in = BIO_new_file(infilename, PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY));
 	if (in == NULL) {
 		php_openssl_store_errors();
 		goto clean_exit;
 	}
-	out = BIO_new_file(outfilename, "w");
+	out = BIO_new_file(outfilename, PHP_OPENSSL_BIO_MODE_W(PKCS7_BINARY));
 	if (out == NULL) {
 		php_openssl_store_errors();
 		goto clean_exit;
