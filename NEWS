@@ -9,6 +9,10 @@ PHP                                                                        NEWS
   . Allow loading PHP/Zend extensions by name in ini files (extension=<name>).
     (francois at tekwire dot net)
 
+- OpenSSL:
+  . Fixed bug #74798 (pkcs7_en/decrypt does not work if \x0a is used in content).
+    (Anatol)
+
 - SPL:
   . Fixed bug #73471 (PHP freezes with AppendIterator). (jhdxr)
 
