@@ -51,6 +51,12 @@ PHP 7.2 INTERNALS UPGRADE NOTES
 3. Module changes
 ========================
 
+- Pcre:
+  . php_pcre_replace and php_pcre_replace_impl expect a zend_string instead of a zval and
+    is_callable_replace options is removed:
+    - PHPAPI zend_string *php_pcre_replace(zend_string *regex, zend_string *subject_str, char *subject, int subject_len, zend_string *replace_str, int limit, int *replace_count);
+    - PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *subject_str, char *subject, int subject_len, zend_string *replace_str, int limit, int *replace_count);
+
 - Session:
   . php_session_start()/session_reset_id() return value is changed from void to int.
     It returns SUCCESS/FAILURE.
