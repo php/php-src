@@ -167,7 +167,6 @@ ZEND_DECLARE_MODULE_GLOBALS(soap)
 
 static void (*old_error_handler)(int, const char *, const uint32_t, const char*, va_list);
 
-#ifdef va_copy
 #define call_old_error_handler(error_num, error_filename, error_lineno, format, args) \
 { \
 	va_list copy; \
@@ -175,12 +174,6 @@ static void (*old_error_handler)(int, const char *, const uint32_t, const char*,
 	old_error_handler(error_num, error_filename, error_lineno, format, copy); \
 	va_end(copy); \
 }
-#else
-#define call_old_error_handler(error_num, error_filename, error_lineno, format, args) \
-{ \
-	old_error_handler(error_num, error_filename, error_lineno, format, args); \
-}
-#endif
 
 #define PHP_SOAP_SERVER_CLASSNAME "SoapServer"
 #define PHP_SOAP_CLIENT_CLASSNAME "SoapClient"
@@ -2163,19 +2156,14 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 			char* code = SOAP_GLOBAL(error_code);
 			char buffer[1024];
 			size_t buffer_len;
-#ifdef va_copy
 			va_list argcopy;
-#endif
 			zend_object **old_objects;
 			int old = PG(display_errors);
 
-#ifdef va_copy
 			va_copy(argcopy, args);
 			buffer_len = vslprintf(buffer, sizeof(buffer)-1, format, argcopy);
 			va_end(argcopy);
-#else
-			buffer_len = vslprintf(buffer, sizeof(buffer)-1, format, args);
-#endif
+
 			buffer[sizeof(buffer)-1]=0;
 			if (buffer_len > sizeof(buffer) - 1 || buffer_len == (size_t)-1) {
 				buffer_len = sizeof(buffer) - 1;
@@ -2216,9 +2204,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 		int old = PG(display_errors);
 		int fault = 0;
 		zval fault_obj;
-#ifdef va_copy
 		va_list argcopy;
-#endif
 
 		if (error_num == E_USER_ERROR ||
 		    error_num == E_COMPILE_ERROR ||
@@ -2246,13 +2232,10 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 				size_t buffer_len;
 				zval outbuflen;
 
-#ifdef va_copy
 				va_copy(argcopy, args);
 				buffer_len = vslprintf(buffer, sizeof(buffer)-1, format, argcopy);
 				va_end(argcopy);
-#else
-				buffer_len = vslprintf(buffer, sizeof(buffer)-1, format, args);
-#endif
+
 				buffer[sizeof(buffer)-1]=0;
 				if (buffer_len > sizeof(buffer) - 1 || buffer_len == (size_t)-1) {
 					buffer_len = sizeof(buffer) - 1;

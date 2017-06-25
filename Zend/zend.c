@@ -1230,22 +1230,9 @@ static ZEND_COLD void zend_error_va_list(int type, const char *format, va_list a
 			break;
 		default:
 			/* Handle the error in user space */
-/* va_copy() is __va_copy() in old gcc versions.
- * According to the autoconf manual, using
- * memcpy(&dst, &src, sizeof(va_list))
- * gives maximum portability. */
-#ifndef va_copy
-# ifdef __va_copy
-#  define va_copy(dest, src)	__va_copy((dest), (src))
-# else
-#  define va_copy(dest, src)	memcpy(&(dest), &(src), sizeof(va_list))
-# endif
-#endif
 			va_copy(usr_copy, args);
 			ZVAL_STR(&params[1], zend_vstrpprintf(0, format, usr_copy));
-#ifdef va_copy
 			va_end(usr_copy);
-#endif
 
 			ZVAL_LONG(&params[0], type);
 
