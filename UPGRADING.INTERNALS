@@ -4,6 +4,7 @@ PHP 7.2 INTERNALS UPGRADE NOTES
   a. Path related functions
   b. php_win32_get_random_bytes()
   c. nice() Windows implementation
+  d. ZEND_ACC_CLONE
 
 2. Build system changes
   a. Unix build system changes
@@ -29,6 +30,7 @@ PHP 7.2 INTERNALS UPGRADE NOTES
 	   SetPriorityClass(). See the implementation for more in-depth details. This also 
 	   defines HAVE_NICE.
 
+  d. ZEND_ACC_CLONE is removed, but was not used in previous versions
 
 ========================
 2. Build system changes
