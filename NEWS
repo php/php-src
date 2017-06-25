@@ -20,6 +20,12 @@ PHP                                                                        NEWS
   . Add support for extension name as argument to dl().
     (francois at tekwire dot net)
 
+- zlib:
+  . Fixed bug #73944 (dictionary option of inflate_init() does not work).
+    (wapmorgan)
+  . Expose inflate_get_status() and inflate_get_read_len() functions.
+    (Matthew Trescott)
+
 22 Jun 2017, PHP 7.2.0alpha2
 
 - Core:
