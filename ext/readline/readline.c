@@ -326,7 +326,7 @@ PHP_FUNCTION(readline_info)
 			if (value) {
 				/* XXX if (rl_readline_name) free(rl_readline_name); */
 				convert_to_string_ex(value);
-				rl_readline_name = strdup(Z_STRVAL_P(value));;
+				rl_readline_name = strdup(Z_STRVAL_P(value));
 			}
 			RETVAL_STRING(SAFE_STRING(oldstr));
 		} else if (!strcasecmp(what, "attempted_completion_over")) {

@@ -6,7 +6,7 @@ inflate_get_status()
 <?php
 
 $uncompressed = "Hello world.";
-$random_junk = str_repeat("qebsouesl", 128);;
+$random_junk = str_repeat("qebsouesl", 128);
 
 $compressed = zlib_encode($uncompressed, ZLIB_ENCODING_DEFLATE);
 $compressed_len = strlen($compressed);

@@ -1007,7 +1007,7 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, zen
 				/* fall through */
 
 			case PHP_STREAM_PERSISTENT_FAILURE:
-				efree(persistent_id);;
+				efree(persistent_id);
 				return ret;
 		}
 	}

@@ -15,7 +15,7 @@ __HALT_COMPILER(); ?>";
 // compressed file length does not match incompressed lentgh for an uncompressed file
 
 $files = array();
-$files['a'] = array('cont'=>'a','ulen'=>1,'clen'=>2);;
+$files['a'] = array('cont'=>'a','ulen'=>1,'clen'=>2);
 include 'files/phar_test.inc';
 try {
 include $fname;

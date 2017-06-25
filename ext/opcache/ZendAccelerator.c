@@ -596,7 +596,7 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 	ZEND_HASH_FOREACH_BUCKET(CG(auto_globals), p) {
 		zend_auto_global *auto_global;
 
-		auto_global = (zend_auto_global*)Z_PTR(p->val);;
+		auto_global = (zend_auto_global*)Z_PTR(p->val);
 
 		zend_string_addref(auto_global->name);
 		auto_global->name = new_interned_string(auto_global->name);
