@@ -22,6 +22,10 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #73471 (PHP freezes with AppendIterator). (jhdxr)
 
+- Wddx:
+  . Fixed bug #73173 (huge memleak when wddx_unserialize).
+    (tloi at fortinet dot com)
+
 - zlib:
   . Fixed bug #73944 (dictionary option of inflate_init() does not work).
     (wapmorgan)
