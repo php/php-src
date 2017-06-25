@@ -216,7 +216,7 @@ U_CFUNC PHP_METHOD( IntlDateFormatter, __construct )
 	return_value = getThis();
 	if (datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1) == FAILURE) {
 		if (!EG(exception)) {
-			zend_throw_exception(IntlException_ce_ptr, "Constructor failed", 0);
+			zend_throw_exception(IntlException_ce_ptr, ZSTR_VAL(intl_error_get_message(NULL)), intl_error_get_code(NULL));
 		}
 	}
 	zend_restore_error_handling(&error_handling);
