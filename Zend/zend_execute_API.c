@@ -703,19 +703,18 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 	}
 
 	if (!fci_cache || !fci_cache->initialized) {
-		zend_string *callable_name;
 		char *error = NULL;
 
 		if (!fci_cache) {
 			fci_cache = &fci_cache_local;
 		}
 
-		if (!zend_is_callable_ex(&fci->function_name, fci->object, IS_CALLABLE_CHECK_SILENT, &callable_name, fci_cache, &error)) {
+		if (!zend_is_callable_ex(&fci->function_name, fci->object, IS_CALLABLE_CHECK_SILENT, NULL, fci_cache, &error)) {
 			if (error) {
+				zend_string *callable_name
+					= zend_get_callable_name_ex(&fci->function_name, fci->object);
 				zend_error(E_WARNING, "Invalid callback %s, %s", ZSTR_VAL(callable_name), error);
 				efree(error);
-			}
-			if (callable_name) {
 				zend_string_release(callable_name);
 			}
 			if (EG(current_execute_data) == &dummy_execute_data) {
@@ -730,16 +729,12 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 			zend_error(E_DEPRECATED, "%s", error);
 			efree(error);
 			if (UNEXPECTED(EG(exception))) {
-				if (callable_name) {
-					zend_string_release(callable_name);
-				}
 				if (EG(current_execute_data) == &dummy_execute_data) {
 					EG(current_execute_data) = dummy_execute_data.prev_execute_data;
 				}
 				return FAILURE;
 			}
 		}
-		zend_string_release(callable_name);
 	}
 
 	func = fci_cache->function_handler;

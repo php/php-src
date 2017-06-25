@@ -264,7 +264,6 @@ PHP_FUNCTION(ibase_set_event_handler)
 	 * link resource id (int) as arguments. The value returned from the function is
 	 * used to determine if the event handler should remain set.
 	 */
-	zend_string *cb_name;
 	zval *args, *cb_arg;
 	ibase_db_link *ib_link;
 	ibase_event *event;
@@ -318,12 +317,12 @@ PHP_FUNCTION(ibase_set_event_handler)
 	}
 
 	/* get the callback */
-	if (!zend_is_callable(cb_arg, 0, &cb_name)) {
+	if (!zend_is_callable(cb_arg, 0, NULL)) {
+		zend_string *cb_name = zend_get_callable_name(cb_arg);
 		_php_ibase_module_error("Callback argument %s is not a callable function", ZSTR_VAL(cb_name));
 		zend_string_release(cb_name);
 		RETURN_FALSE;
 	}
-	zend_string_release(cb_name);
 
 	/* allocate the event resource */
 	event = (ibase_event *) safe_emalloc(sizeof(ibase_event), 1, 0);

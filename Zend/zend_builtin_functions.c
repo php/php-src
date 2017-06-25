@@ -1593,7 +1593,6 @@ ZEND_FUNCTION(trigger_error)
 ZEND_FUNCTION(set_error_handler)
 {
 	zval *error_handler;
-	zend_string *error_handler_name = NULL;
 	zend_long error_type = E_ALL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|l", &error_handler, &error_type) == FAILURE) {
@@ -1601,13 +1600,13 @@ ZEND_FUNCTION(set_error_handler)
 	}
 
 	if (Z_TYPE_P(error_handler) != IS_NULL) { /* NULL == unset */
-		if (!zend_is_callable(error_handler, 0, &error_handler_name)) {
+		if (!zend_is_callable(error_handler, 0, NULL)) {
+			zend_string *error_handler_name = zend_get_callable_name(error_handler);
 			zend_error(E_WARNING, "%s() expects the argument (%s) to be a valid callback",
 					   get_active_function_name(), error_handler_name?ZSTR_VAL(error_handler_name):"unknown");
 			zend_string_release(error_handler_name);
 			return;
 		}
-		zend_string_release(error_handler_name);
 	}
 
 	if (Z_TYPE(EG(user_error_handler)) != IS_UNDEF) {
@@ -1662,20 +1661,19 @@ ZEND_FUNCTION(restore_error_handler)
 ZEND_FUNCTION(set_exception_handler)
 {
 	zval *exception_handler;
-	zend_string *exception_handler_name = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &exception_handler) == FAILURE) {
 		return;
 	}
 
 	if (Z_TYPE_P(exception_handler) != IS_NULL) { /* NULL == unset */
-		if (!zend_is_callable(exception_handler, 0, &exception_handler_name)) {
+		if (!zend_is_callable(exception_handler, 0, NULL)) {
+		zend_string *exception_handler_name = zend_get_callable_name(exception_handler);
 			zend_error(E_WARNING, "%s() expects the argument (%s) to be a valid callback",
 					   get_active_function_name(), exception_handler_name?ZSTR_VAL(exception_handler_name):"unknown");
 			zend_string_release(exception_handler_name);
 			return;
 		}
-		zend_string_release(exception_handler_name);
 	}
 
 	if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
