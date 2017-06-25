@@ -23,4 +23,4 @@ Fatal error: Uncaught TypeError: Return value of class@anonymous::a() must be an
 Stack trace:
 #0 %s(16): class@anonymous->a()
 #1 {main}
-  thrown in /%s on line 13
+  thrown in %s on line 13
