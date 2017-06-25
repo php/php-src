@@ -1758,16 +1758,9 @@ convert_to_array:
 				zend_error(E_NOTICE, "Indirect modification of overloaded element of %s has no effect", ZSTR_VAL(ce->name));
 			} else if (EXPECTED(retval && Z_TYPE_P(retval) != IS_UNDEF)) {
 				if (!Z_ISREF_P(retval)) {
-					if (Z_REFCOUNTED_P(retval) &&
-					    Z_REFCOUNT_P(retval) > 1) {
-						if (Z_TYPE_P(retval) != IS_OBJECT) {
-							Z_DELREF_P(retval);
-							ZVAL_DUP(result, retval);
-							retval = result;
-						} else {
-							ZVAL_COPY_VALUE(result, retval);
-							retval = result;
-						}
+					if (result != retval) {
+						ZVAL_COPY(result, retval);
+						retval = result;
 					}
 					if (Z_TYPE_P(retval) != IS_OBJECT) {
 						zend_class_entry *ce = Z_OBJCE_P(container);
