@@ -4,7 +4,8 @@ PHP 7.2 INTERNALS UPGRADE NOTES
   a. Path related functions
   b. php_win32_get_random_bytes()
   c. nice() Windows implementation
-  d. ZEND_ACC_CLONE
+  d. ZEND_ACC_CLONE removed
+  e. IS_TYPE_IMMUTABLE removed
 
 2. Build system changes
   a. Unix build system changes
@@ -31,6 +32,9 @@ PHP 7.2 INTERNALS UPGRADE NOTES
 	   defines HAVE_NICE.
 
   d. ZEND_ACC_CLONE is removed, but was not used in previous versions
+
+  e. IS_TYPE_IMMUTABLE is removed, IS_TYPE_COPYABLE can be used instead
+     Z_IMMUTABLE() check function is still available
 
 ========================
 2. Build system changes
