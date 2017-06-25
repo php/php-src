@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ?? 2017, PHP 5.6.31
 
+- Core
+  . Fixed bug #73807 (Performance problem with processing post request over
+    2000000 chars). (Nikita)
+
 19 Jan 2017, PHP 5.6.30
 
 - EXIF:
