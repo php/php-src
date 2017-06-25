@@ -323,6 +323,8 @@ ZEND_API ZEND_COLD void zend_wrong_param_count(void);
 
 #define IS_CALLABLE_STRICT  (IS_CALLABLE_CHECK_IS_STATIC)
 
+ZEND_API zend_string *zend_get_callable_name_ex(zval *callable, zend_object *object);
+ZEND_API zend_string *zend_get_callable_name(zval *callable);
 ZEND_API zend_bool zend_is_callable_ex(zval *callable, zend_object *object, uint32_t check_flags, zend_string **callable_name, zend_fcall_info_cache *fcc, char **error);
 ZEND_API zend_bool zend_is_callable(zval *callable, uint32_t check_flags, zend_string **callable_name);
 ZEND_API zend_bool zend_make_callable(zval *callable, zend_string **callable_name);
