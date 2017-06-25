@@ -1102,8 +1102,6 @@ ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) /* {{{ */
 static ZEND_COLD void zend_error_va_list(int type, const char *format, va_list args)
 #endif
 {
-	char *str;
-	int len;
 #if !defined(HAVE_NORETURN) || defined(HAVE_NORETURN_ALIAS)
 	va_list args;
 #endif
@@ -1244,9 +1242,7 @@ static ZEND_COLD void zend_error_va_list(int type, const char *format, va_list a
 # endif
 #endif
 			va_copy(usr_copy, args);
-			len = (int)zend_vspprintf(&str, 0, format, usr_copy);
-			ZVAL_NEW_STR(&params[1], zend_string_init(str, len, 0));
-			efree(str);
+			ZVAL_STR(&params[1], zend_vstrpprintf(0, format, usr_copy));
 #ifdef va_copy
 			va_end(usr_copy);
 #endif
