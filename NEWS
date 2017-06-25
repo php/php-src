@@ -10,6 +10,10 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #73471 (PHP freezes with AppendIterator). (jhdxr)
 
+- zlib:
+  . Fixed bug #73944 (dictionary option of inflate_init() does not work).
+    (wapmorgan)
+
 06 Jul 2017 PHP 7.0.21
 
 - Core:
