@@ -1667,7 +1667,7 @@ ZEND_API int zend_set_local_var(zend_string *name, zval *value, int force) /* {{
 			if (force) {
 				zend_array *symbol_table = zend_rebuild_symbol_table();
 				if (symbol_table) {
-					return zend_hash_update(symbol_table, name, value) ? SUCCESS : FAILURE;;
+					return zend_hash_update(symbol_table, name, value) ? SUCCESS : FAILURE;
 				}
 			}
 		} else {
@@ -1709,7 +1709,7 @@ ZEND_API int zend_set_local_var_str(const char *name, size_t len, zval *value, i
 			if (force) {
 				zend_array *symbol_table = zend_rebuild_symbol_table();
 				if (symbol_table) {
-					return zend_hash_str_update(symbol_table, name, len, value) ? SUCCESS : FAILURE;;
+					return zend_hash_str_update(symbol_table, name, len, value) ? SUCCESS : FAILURE;
 				}
 			}
 		} else {

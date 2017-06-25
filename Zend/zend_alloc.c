@@ -1880,7 +1880,7 @@ ZEND_API size_t zend_mm_gc(zend_mm_heap *heap)
 			if (free_counter == bin_elements[i]) {
 				has_free_pages = 1;
 			}
-			chunk->map[page_num] = ZEND_MM_SRUN_EX(i, free_counter);;
+			chunk->map[page_num] = ZEND_MM_SRUN_EX(i, free_counter);
 			p = p->next_free_slot;
 		}
 
@@ -1907,7 +1907,7 @@ ZEND_API size_t zend_mm_gc(zend_mm_heap *heap)
 			ZEND_ASSERT(ZEND_MM_SRUN_BIN_NUM(info) == i);
 			if (ZEND_MM_SRUN_FREE_COUNTER(info) == bin_elements[i]) {
 				/* remove from cache */
-				p = p->next_free_slot;;
+				p = p->next_free_slot;
 				*q = p;
 			} else {
 				q = &p->next_free_slot;
