@@ -507,6 +507,10 @@ static inline int object_common2(UNSERIALIZE_PARAMETER, zend_long elements)
 		&& zend_hash_str_exists(&Z_OBJCE_P(rval)->function_table, "__wakeup", sizeof("__wakeup")-1);
 
 	ht = Z_OBJPROP_P(rval);
+	if (elements >= HT_MAX_SIZE - zend_hash_num_elements(ht)) {
+		return 0;
+	}
+
 	zend_hash_extend(ht, zend_hash_num_elements(ht) + elements, (ht->u.flags & HASH_FLAG_PACKED));
 	if (!process_nested_data(UNSERIALIZE_PASSTHRU, ht, elements, 1)) {
 		if (has_wakeup) {
@@ -769,7 +773,7 @@ use_double:
 	*p = YYCURSOR;
     if (!var_hash) return 0;
 
-	if (elements < 0) {
+	if (elements < 0 || elements >= HT_MAX_SIZE) {
 		return 0;
 	}
 
@@ -792,7 +796,7 @@ use_double:
     if (!var_hash) return 0;
 
 	elements = object_common1(UNSERIALIZE_PASSTHRU, ZEND_STANDARD_CLASS_DEF_PTR);
-	if (elements < 0) {
+	if (elements < 0 || elements >= HT_MAX_SIZE) {
 		return 0;
 	}
 	return object_common2(UNSERIALIZE_PASSTHRU, elements);
