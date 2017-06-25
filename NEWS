@@ -14,6 +14,9 @@ PHP                                                                        NEWS
 - OpenSSL:
  . Fixed bug #74798 (pkcs7_en/decrypt does not work if \x0a is used in content).
    (Anatol)
+ . Added OPENSSL_DONT_ZERO_PAD_KEY constant to prevent key padding and fix bug
+   #71917 (openssl_open() returns junk on envelope < 16 bytes) and bug #72362
+   (OpenSSL Blowfish encryption is incorrect for short keys). (Jakub Zelenka)
 
 - SPL:
   . Fixed bug #73471 (PHP freezes with AppendIterator). (jhdxr)
