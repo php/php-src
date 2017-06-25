@@ -6,6 +6,7 @@ PHP 7.2 INTERNALS UPGRADE NOTES
   c. nice() Windows implementation
   d. ZEND_ACC_CLONE removed
   e. IS_TYPE_IMMUTABLE removed
+  f. zend_arg_info.class_name removed
 
 2. Build system changes
   a. Unix build system changes
@@ -35,6 +36,8 @@ PHP 7.2 INTERNALS UPGRADE NOTES
 
   e. IS_TYPE_IMMUTABLE is removed, IS_TYPE_COPYABLE can be used instead
      Z_IMMUTABLE() check function is still available
+
+  f. zend_arg_info class_name member is removed, use ZEND_TYPE_NAME instead
 
 ========================
 2. Build system changes
