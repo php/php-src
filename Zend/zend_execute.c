@@ -648,7 +648,6 @@ static ZEND_COLD void zend_verify_type_error_common(
 {
 	zend_bool is_interface = 0;
 	*fname = ZSTR_VAL(zf->common.function_name);
-
 	if (zf->common.scope) {
 		*fsep =  "::";
 		*fclass = ZSTR_VAL(zf->common.scope->name);
@@ -674,6 +673,10 @@ static ZEND_COLD void zend_verify_type_error_common(
 		}
 	} else {
 		switch (ZEND_TYPE_CODE(arg_info->type)) {
+			case IS_OBJECT:
+				*need_msg = "be an ";
+				*need_kind = "object";
+				break;
 			case IS_CALLABLE:
 				*need_msg = "be callable";
 				*need_kind = "";
