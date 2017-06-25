@@ -241,6 +241,9 @@ static int wddx_stack_destroy(wddx_stack *stack)
 		}
 		efree(stack->elements);
 	}
+	if (stack->varname) {
+		efree(stack->varname);
+	}
 	return SUCCESS;
 }
 /* }}} */
