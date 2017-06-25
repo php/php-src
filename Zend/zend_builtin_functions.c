@@ -574,7 +574,7 @@ ZEND_FUNCTION(func_get_args)
 {
 	zval *p, *q;
 	uint32_t arg_count, first_extra_arg;
-	uint32_t i, n;
+	uint32_t i;
 	zend_execute_data *ex = EX(prev_execute_data);
 
 	if (ZEND_CALL_INFO(ex) & ZEND_CALL_CODE) {
@@ -594,7 +594,6 @@ ZEND_FUNCTION(func_get_args)
 		zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 			i = 0;
-			n = 0;
 			p = ZEND_CALL_ARG(ex, 1);
 			if (arg_count > first_extra_arg) {
 				while (i < first_extra_arg) {
@@ -604,7 +603,8 @@ ZEND_FUNCTION(func_get_args)
 						if (Z_OPT_REFCOUNTED_P(q)) { 
 							Z_ADDREF_P(q);
 						}
-						n++;
+					} else {
+						q = &EG(uninitialized_zval);
 					}
 					ZEND_HASH_FILL_ADD(q);
 					p++;
@@ -619,14 +619,15 @@ ZEND_FUNCTION(func_get_args)
 					if (Z_OPT_REFCOUNTED_P(q)) { 
 						Z_ADDREF_P(q);
 					}
-					n++;
+				} else {
+					q = &EG(uninitialized_zval);
 				}
 				ZEND_HASH_FILL_ADD(q);
 				p++;
 				i++;
 			}
 		} ZEND_HASH_FILL_END();
-		Z_ARRVAL_P(return_value)->nNumOfElements = n;
+		Z_ARRVAL_P(return_value)->nNumOfElements = arg_count;
 	}
 }
 /* }}} */
@@ -2301,7 +2302,6 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 	array_init_size(arg_array, num_args);
 	if (num_args) {
 		uint32_t i = 0;
-		uint32_t n = 0;
 		zval *p = ZEND_CALL_ARG(call, 1);
 
 		zend_hash_real_init(Z_ARRVAL_P(arg_array), 1);
@@ -2324,12 +2324,9 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 							if (Z_OPT_REFCOUNTED_P(arg)) {
 								Z_ADDREF_P(arg);
 							}
-							n++;
 							ZEND_HASH_FILL_ADD(arg);
 						} else {
-							zval tmp;
-							ZVAL_UNDEF(&tmp);
-							ZEND_HASH_FILL_ADD(&tmp);
+							ZEND_HASH_FILL_ADD(&EG(uninitialized_zval));
 						}
 						i++;
 					}
@@ -2339,9 +2336,10 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 							if (Z_OPT_REFCOUNTED_P(p)) {
 								Z_ADDREF_P(p);
 							}
-							n++;
+							ZEND_HASH_FILL_ADD(p);
+						} else {
+							ZEND_HASH_FILL_ADD(&EG(uninitialized_zval));
 						}
-						ZEND_HASH_FILL_ADD(p);
 						p++;
 						i++;
 					}
@@ -2354,14 +2352,15 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 					if (Z_OPT_REFCOUNTED_P(p)) {
 						Z_ADDREF_P(p);
 					}
-					n++;
+					ZEND_HASH_FILL_ADD(p);
+				} else {
+					ZEND_HASH_FILL_ADD(&EG(uninitialized_zval));
 				}
-				ZEND_HASH_FILL_ADD(p);
 				p++;
 				i++;
 			}
 		} ZEND_HASH_FILL_END();
-		Z_ARRVAL_P(arg_array)->nNumOfElements = n;
+		Z_ARRVAL_P(arg_array)->nNumOfElements = num_args;
 	}
 }
 /* }}} */
