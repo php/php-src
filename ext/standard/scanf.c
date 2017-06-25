@@ -921,7 +921,7 @@ literal:
 					if (numVars) {
 						char __buf[2];
 						__buf[0] = sch;
-						__buf[1] = '\0';;
+						__buf[1] = '\0';
 						current = args[objIndex++];
 						zval_dtor(*current);
 						ZVAL_STRINGL( *current, __buf, 1);

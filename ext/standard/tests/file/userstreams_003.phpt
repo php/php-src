@@ -19,9 +19,9 @@ class test_wrapper extends test_wrapper_base {
 		var_dump($value);
 		echo "ptrparam:\n";
 		var_dump($ptrparam);
-		echo "\$option === $option === " . $this->expected_option . ":\n";;
+		echo "\$option === $option === " . $this->expected_option . ":\n";
 		var_dump($option === $this->expected_option);
-		echo "\$value === $value === " . $this->expected_value. ":\n";;
+		echo "\$value === $value === " . $this->expected_value. ":\n";
 		var_dump($value === $this->expected_value);
 		return $this->return_value;
 	}
