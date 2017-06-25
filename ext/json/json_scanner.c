@@ -623,6 +623,14 @@ yy79:
 		++YYCURSOR;
 yy80:
 		{
+		if (s->options & PHP_JSON_INVALID_UTF8_IGNORE) {
+			PHP_JSON_CONDITION_GOTO(STR_P1);
+		}
+		if (s->options & PHP_JSON_INVALID_UTF8_SUBSTITUTE) {
+			s->utf8_sub_needed = 1;
+			s->utf8_sub_len += 2 - (s->cursor - s->token);
+			PHP_JSON_CONDITION_GOTO(STR_P1);
+		}
 		s->errcode = PHP_JSON_ERROR_UTF8;
 		return PHP_JSON_T_ERROR;
 	}
