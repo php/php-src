@@ -1325,7 +1325,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_ARRAY_SPEC_HANDLER(ZEND_O
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *args, *op2;
+	zval *args;
 
 	SAVE_OPLINE();
 	args = get_zval_ptr(opline->op1_type, opline->op1, &free_op1, BP_VAR_R);
