@@ -5954,7 +5954,7 @@ ZEND_VM_C_LABEL(fe_fetch_r_exit):
 			GC_REFCOUNT(gc)++;
 		}
 	}
-	ZEND_VM_NEXT_OPCODE();
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY, JMP_ADDR)
@@ -6128,7 +6128,7 @@ ZEND_VM_C_LABEL(fe_fetch_w_exit):
 		Z_ADDREF_P(value);
 		ZVAL_REF(EX_VAR(opline->op2.var), Z_REF_P(value));
 	}
-	ZEND_VM_NEXT_OPCODE();
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 ZEND_VM_HANDLER(114, ZEND_ISSET_ISEMPTY_VAR, CONST|TMPVAR|CV, UNUSED, VAR_FETCH|ISSET)
@@ -8803,7 +8803,7 @@ ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_FE_FETCH_R, op->op2_type == IS_CV && (op1_inf
 
 	variable_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op2.var EXECUTE_DATA_CC);
 	zend_assign_to_variable(variable_ptr, value, IS_CV);
-	ZEND_VM_NEXT_OPCODE();
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 ZEND_VM_DEFINE_OP(137, ZEND_OP_DATA);
