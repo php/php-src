@@ -5570,8 +5570,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 
 						case IS_OBJECT:
 							zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
-								"with an object type can only be NULL",
-								zend_get_type_by_const(ZEND_TYPE_CODE(arg_info->type)));
+								"with an object type can only be NULL");
 							break;
 							
 						default:
