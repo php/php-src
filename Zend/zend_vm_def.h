@@ -4447,7 +4447,7 @@ ZEND_VM_HANDLER(119, ZEND_SEND_ARRAY, ANY, ANY, NUM)
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *args, *op2;
+	zval *args;
 
 	SAVE_OPLINE();
 	args = GET_OP1_ZVAL_PTR(BP_VAR_R);
