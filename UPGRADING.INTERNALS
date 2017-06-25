@@ -1,4 +1,4 @@
-PHP 7.1 INTERNALS UPGRADE NOTES
+PHP 7.2 INTERNALS UPGRADE NOTES
 
 1. Internal API changes
   a. Path related functions
