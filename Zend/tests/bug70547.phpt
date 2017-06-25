@@ -53,27 +53,43 @@ string(3) "1st"
 string(3) "2nd"
 NULL
 string(3) "4th"
-array(3) {
+array(4) {
   [0]=>
   string(3) "1st"
   [1]=>
   &string(3) "2nd"
+  [2]=>
+  NULL
   [3]=>
   string(3) "4th"
 }
-array(2) {
+array(4) {
+  [0]=>
+  NULL
   [1]=>
   string(3) "2nd"
+  [2]=>
+  NULL
   [3]=>
   string(3) "4th"
 }
-array(2) {
+array(4) {
+  [0]=>
+  NULL
   [1]=>
   &string(3) "2nd"
+  [2]=>
+  NULL
   [3]=>
   string(3) "4th"
 }
-array(1) {
+array(4) {
+  [0]=>
+  NULL
+  [1]=>
+  NULL
+  [2]=>
+  NULL
   [3]=>
   string(3) "4th"
 }

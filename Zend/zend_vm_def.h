@@ -8224,9 +8224,11 @@ ZEND_VM_HANDLER(195, ZEND_FUNC_GET_ARGS, UNUSED|CONST, UNUSED)
 						if (Z_OPT_REFCOUNTED_P(q)) {
 							Z_ADDREF_P(q);
 						}
-						n++;
+					} else {
+						q = &EG(uninitialized_zval);
 					}
 					ZEND_HASH_FILL_ADD(q);
+					n++;
 					p++;
 					i++;
 				}
@@ -8239,9 +8241,11 @@ ZEND_VM_HANDLER(195, ZEND_FUNC_GET_ARGS, UNUSED|CONST, UNUSED)
 					if (Z_OPT_REFCOUNTED_P(q)) {
 						Z_ADDREF_P(q);
 					}
-					n++;
+				} else {
+					q = &EG(uninitialized_zval);
 				}
 				ZEND_HASH_FILL_ADD(q);
+				n++;
 				p++;
 				i++;
 			}

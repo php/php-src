@@ -8186,9 +8186,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FUNC_GET_ARGS_SPEC_CONST_UNUSE
 						if (Z_OPT_REFCOUNTED_P(q)) {
 							Z_ADDREF_P(q);
 						}
-						n++;
+					} else {
+						q = &EG(uninitialized_zval);
 					}
 					ZEND_HASH_FILL_ADD(q);
+					n++;
 					p++;
 					i++;
 				}
@@ -8201,9 +8203,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FUNC_GET_ARGS_SPEC_CONST_UNUSE
 					if (Z_OPT_REFCOUNTED_P(q)) {
 						Z_ADDREF_P(q);
 					}
-					n++;
+				} else {
+					q = &EG(uninitialized_zval);
 				}
 				ZEND_HASH_FILL_ADD(q);
+				n++;
 				p++;
 				i++;
 			}
@@ -29268,9 +29272,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FUNC_GET_ARGS_SPEC_UNUSED_UNUS
 						if (Z_OPT_REFCOUNTED_P(q)) {
 							Z_ADDREF_P(q);
 						}
-						n++;
+					} else {
+						q = &EG(uninitialized_zval);
 					}
 					ZEND_HASH_FILL_ADD(q);
+					n++;
 					p++;
 					i++;
 				}
@@ -29283,9 +29289,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FUNC_GET_ARGS_SPEC_UNUSED_UNUS
 					if (Z_OPT_REFCOUNTED_P(q)) {
 						Z_ADDREF_P(q);
 					}
-					n++;
+				} else {
+					q = &EG(uninitialized_zval);
 				}
 				ZEND_HASH_FILL_ADD(q);
+				n++;
 				p++;
 				i++;
 			}
