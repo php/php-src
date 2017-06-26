@@ -3549,56 +3549,6 @@ PHP_FUNCTION(ldap_exop_whoami)
 
 /* }}} */
 
-#ifdef HAVE_LDAP_REFRESH
-/* {{{ proto ? ldap_refresh(resource link , string dn , int ttl, [int *newttl])
-   DDS refresh extended operation */
-PHP_FUNCTION(ldap_refresh)
-{
-	zval *link, *dn, *ttl, *newttl;
-	struct berval ldn;
-	ber_int_t lttl;
-	ber_int_t lnewttl;
-	ldap_linkdata *ld;
-	LDAP *ldap;
-	LDAPMessage *ldap_res;
-	int rc, msgid, myargcount = ZEND_NUM_ARGS();
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzz|z", &link, &dn, &ttl, &newttl) != SUCCESS) {
-		WRONG_PARAM_COUNT;
-	}
-
-	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
-	}
-
-	ldn.bv_len = 0;
-	convert_to_string_ex(dn);
-	ldn.bv_val = Z_STRVAL_P(dn);
-	ldn.bv_len = Z_STRLEN_P(dn);
-
-	convert_to_long_ex(ttl);
-	lttl = (ber_int_t)Z_LVAL_P(ttl);
-
-	/* asynchronous call */
-	rc = ldap_refresh_s(ld->link, &ldn, lttl, &lnewttl, NULL, NULL);
-	if (rc != LDAP_SUCCESS ) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,
-				 "Refresh extended operation failed: %s (%d)",
-				 ldap_err2string(rc), rc);
-		RETURN_FALSE;
-	}
-
-	if (myargcount == 4) {
-		zval_dtor(newttl);
-		ZVAL_LONG(newttl, (long)lnewttl);
-	}
-	RETURN_TRUE;
-}
-#else
-/* TODO: implement based on ldap_extended_operation_s() */
-/* }}} */
-#endif
-
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_connect, 0, 0, 0)
 	ZEND_ARG_INFO(0, hostname)
@@ -3918,15 +3868,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_parse_exop_whoami, 0, 0, 3)
 	ZEND_ARG_INFO(1, authzid)
 ZEND_END_ARG_INFO()
 #endif
-
-#ifdef HAVE_LDAP_REFRESH
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_refresh, 0, 0, 4)
-	ZEND_ARG_INFO(0, link)
-	ZEND_ARG_INFO(0, dn)
-	ZEND_ARG_INFO(0, ttl)
-	ZEND_ARG_INFO(0, newttl)
-ZEND_END_ARG_INFO()
-#endif
 /* }}} */
 
 /*
@@ -4000,10 +3941,6 @@ const zend_function_entry ldap_functions[] = {
 	PHP_FE(ldap_parse_exop,								arginfo_ldap_parse_exop)
 	PHP_FE(ldap_parse_exop_passwd,						arginfo_ldap_parse_exop_passwd)
 	PHP_FE(ldap_parse_exop_whoami,						arginfo_ldap_parse_exop_whoami)
-#endif
-#ifdef HAVE_LDAP_REFRESH
-	PHP_FE(ldap_refresh,
-	arginfo_ldap_refresh)
 #endif
 #endif
 
