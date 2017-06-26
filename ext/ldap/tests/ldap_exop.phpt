@@ -23,10 +23,10 @@ function ber_encode($string) {
 // ldap_exop(resource link, string reqoid [, string reqdata [, string retoid [, string retdata]]])
 // bool ldap_parse_exop(resource link, resource result [, string retoid [, string retdata]])
 var_dump(
-	ldap_exop($link, "1.3.6.1.4.1.4203.1.11.3", NULL, $retoid, $retdata),
+	ldap_exop($link, LDAP_EXOP_WHO_AM_I, NULL, $retoid, $retdata),
 	$retdata,
 	$retoid,
-	$r = ldap_exop($link, "1.3.6.1.4.1.4203.1.11.3"),
+	$r = ldap_exop($link, LDAP_EXOP_WHO_AM_I),
 	ldap_parse_exop($link, $r, $retoid2, $retdata2),
 	$retdata2,
 	$retoid2
