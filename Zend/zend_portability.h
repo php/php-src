@@ -498,6 +498,18 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 #define ZEND_VALID_SOCKET(sock) ((sock) >= 0)
 #endif
 
+/* va_copy() is __va_copy() in old gcc versions.
+ * According to the autoconf manual, using
+ * memcpy(&dst, &src, sizeof(va_list))
+ * gives maximum portability. */
+#ifndef va_copy
+# ifdef __va_copy
+#  define va_copy(dest, src) __va_copy((dest), (src))
+# else
+#  define va_copy(dest, src) memcpy(&(dest), &(src), sizeof(va_list))
+# endif
+#endif
+
 #endif /* ZEND_PORTABILITY_H */
 
 /*

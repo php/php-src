@@ -17,7 +17,7 @@ if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
 ?>
 --FILE--
 <?php
-	require_once('connect.inc');;
+	require_once('connect.inc');
 
 	if (NULL !== ($tmp = @mysqli_debug()))
 		printf("[001] Expecting NULL/NULL, got %s/%s\n", gettype($tmp), $tmp);

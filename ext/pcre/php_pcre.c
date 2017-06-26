@@ -2037,7 +2037,6 @@ static PHP_FUNCTION(preg_replace_callback)
 {
 	zval *regex, *replace, *subject, *zcount = NULL;
 	zend_long limit = -1;
-	zend_string	*callback_name;
 	int replace_count;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
@@ -2052,13 +2051,13 @@ static PHP_FUNCTION(preg_replace_callback)
 		Z_PARAM_ZVAL_DEREF(zcount)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (!zend_is_callable_ex(replace, NULL, 0, &callback_name, &fcc, NULL)) {
+	if (!zend_is_callable_ex(replace, NULL, 0, NULL, &fcc, NULL)) {
+		zend_string	*callback_name = zend_get_callable_name(replace);
 		php_error_docref(NULL, E_WARNING, "Requires argument 2, '%s', to be a valid callback", ZSTR_VAL(callback_name));
 		zend_string_release(callback_name);
 		ZVAL_STR(return_value, zval_get_string(subject));
 		return;
 	}
-	zend_string_release(callback_name);
 
 	fci.size = sizeof(fci);
 	fci.object = NULL;
@@ -2079,7 +2078,6 @@ static PHP_FUNCTION(preg_replace_callback_array)
 	zval regex, zv, *replace, *subject, *pattern, *zcount = NULL;
 	zend_long limit = -1;
 	zend_string *str_idx;
-	zend_string *callback_name;
 	int replace_count = 0;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
@@ -2105,7 +2103,8 @@ static PHP_FUNCTION(preg_replace_callback_array)
 			RETURN_NULL();
 		}
 
-		if (!zend_is_callable_ex(replace, NULL, 0, &callback_name, &fcc, NULL)) {
+		if (!zend_is_callable_ex(replace, NULL, 0, NULL, &fcc, NULL)) {
+			zend_string *callback_name = zend_get_callable_name(replace);
 			php_error_docref(NULL, E_WARNING, "'%s' is not a valid callback", ZSTR_VAL(callback_name));
 			zend_string_release(callback_name);
 			zval_ptr_dtor(&regex);
@@ -2113,7 +2112,6 @@ static PHP_FUNCTION(preg_replace_callback_array)
 			ZVAL_COPY(return_value, subject);
 			return;
 		}
-		zend_string_release(callback_name);
 
 		ZVAL_COPY_VALUE(&fci.function_name, replace);
 

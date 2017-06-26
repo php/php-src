@@ -638,7 +638,6 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	zend_get_windows_version_info(&executor_globals->windows_version_info);
 #endif
 	executor_globals->flags = EG_FLAGS_INITIAL;
-	executor_globals->valid_symbol_table = 0;
 }
 /* }}} */
 
@@ -1102,8 +1101,6 @@ ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) /* {{{ */
 static ZEND_COLD void zend_error_va_list(int type, const char *format, va_list args)
 #endif
 {
-	char *str;
-	int len;
 #if !defined(HAVE_NORETURN) || defined(HAVE_NORETURN_ALIAS)
 	va_list args;
 #endif
@@ -1232,24 +1229,9 @@ static ZEND_COLD void zend_error_va_list(int type, const char *format, va_list a
 			break;
 		default:
 			/* Handle the error in user space */
-/* va_copy() is __va_copy() in old gcc versions.
- * According to the autoconf manual, using
- * memcpy(&dst, &src, sizeof(va_list))
- * gives maximum portability. */
-#ifndef va_copy
-# ifdef __va_copy
-#  define va_copy(dest, src)	__va_copy((dest), (src))
-# else
-#  define va_copy(dest, src)	memcpy(&(dest), &(src), sizeof(va_list))
-# endif
-#endif
 			va_copy(usr_copy, args);
-			len = (int)zend_vspprintf(&str, 0, format, usr_copy);
-			ZVAL_NEW_STR(&params[1], zend_string_init(str, len, 0));
-			efree(str);
-#ifdef va_copy
+			ZVAL_STR(&params[1], zend_vstrpprintf(0, format, usr_copy));
 			va_end(usr_copy);
-#endif
 
 			ZVAL_LONG(&params[0], type);
 

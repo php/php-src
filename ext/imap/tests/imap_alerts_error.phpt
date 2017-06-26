@@ -16,7 +16,7 @@ echo "*** Testing imap_alerts() : error conditions ***\n";
 
 // One argument
 echo "\n-- Testing imap_alerts() function with one argument --\n";
-$extra_arg = 10;;
+$extra_arg = 10;
 var_dump( imap_alerts($extra_arg) );
 
 ?>

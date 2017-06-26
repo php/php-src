@@ -2783,7 +2783,6 @@ PHP_FUNCTION(ldap_set_rebind_proc)
 {
 	zval *link, *callback;
 	ldap_linkdata *ld;
-	zend_string *callback_name;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz", &link, &callback) != SUCCESS) {
 		RETURN_FALSE;
@@ -2804,12 +2803,12 @@ PHP_FUNCTION(ldap_set_rebind_proc)
 	}
 
 	/* callable? */
-	if (!zend_is_callable(callback, 0, &callback_name)) {
+	if (!zend_is_callable(callback, 0, NULL)) {
+		zend_string *callback_name = zend_get_callable_name(callback);
 		php_error_docref(NULL, E_WARNING, "Two arguments expected for '%s' to be a valid callback", ZSTR_VAL(callback_name));
 		zend_string_release(callback_name);
 		RETURN_FALSE;
 	}
-	zend_string_release(callback_name);
 
 	/* register rebind procedure */
 	if (Z_ISUNDEF(ld->rebindproc)) {

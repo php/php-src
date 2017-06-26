@@ -772,6 +772,33 @@ static zend_always_inline void *zend_hash_index_find_ptr(const HashTable *ht, ze
 	}
 }
 
+static zend_always_inline zval *zend_hash_index_find_deref(HashTable *ht, zend_ulong h)
+{
+	zval *zv = zend_hash_index_find(ht, h);
+	if (zv) {
+		ZVAL_DEREF(zv);
+	}
+	return zv;
+}
+
+static zend_always_inline zval *zend_hash_find_deref(HashTable *ht, zend_string *str)
+{
+	zval *zv = zend_hash_find(ht, str);
+	if (zv) {
+		ZVAL_DEREF(zv);
+	}
+	return zv;
+}
+
+static zend_always_inline zval *zend_hash_str_find_deref(HashTable *ht, const char *str, size_t len)
+{
+	zval *zv = zend_hash_str_find(ht, str, len);
+	if (zv) {
+		ZVAL_DEREF(zv);
+	}
+	return zv;
+}
+
 static zend_always_inline void *zend_symtable_str_find_ptr(HashTable *ht, const char *str, size_t len)
 {
 	zend_ulong idx;

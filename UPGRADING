@@ -41,6 +41,7 @@ PHP 7.2 UPGRADE NOTES
   . Minimum supported Windows versions are Windows 7/Server 2008 R2.
   . Initial trait property value compatibility check will no longer perform
     any casts. (Bug #74269)
+  . "object" (in any case) can no longer be used as a class name.
 
 - BCMath:
   . The bcmod() function no longer truncates fractional numbers to integers. As
@@ -101,6 +102,8 @@ PHP 7.2 UPGRADE NOTES
     (https://wiki.php.net/rfc/allow-abstract-function-override)
   . A trailing comma in group use statements is now allowed.
     (https://wiki.php.net/rfc/list-syntax-trailing-commas)
+  . The "object" type annotation is now supported.
+    (https://wiki.php.net/rfc/object-typehint)
 
 - DBA:
   . Implemented support for the LMDB backend.

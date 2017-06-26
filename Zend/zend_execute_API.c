@@ -146,7 +146,6 @@ void init_executor(void) /* {{{ */
 	zend_vm_stack_init();
 
 	zend_hash_init(&EG(symbol_table), 64, NULL, ZVAL_PTR_DTOR, 0);
-	EG(valid_symbol_table) = 1;
 
 	zend_llist_apply(&zend_extensions, (llist_apply_func_t) zend_extension_activator);
 
@@ -267,7 +266,6 @@ void shutdown_executor(void) /* {{{ */
 	/* All resources and objects are destroyed. */
 	/* No PHP callback functions may be called after this point. */
 	EG(active) = 0;
-	EG(valid_symbol_table) = 0;
 
 	zend_try {
 		zend_llist_apply(&zend_extensions, (llist_apply_func_t) zend_extension_deactivator);
@@ -703,19 +701,18 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 	}
 
 	if (!fci_cache || !fci_cache->initialized) {
-		zend_string *callable_name;
 		char *error = NULL;
 
 		if (!fci_cache) {
 			fci_cache = &fci_cache_local;
 		}
 
-		if (!zend_is_callable_ex(&fci->function_name, fci->object, IS_CALLABLE_CHECK_SILENT, &callable_name, fci_cache, &error)) {
+		if (!zend_is_callable_ex(&fci->function_name, fci->object, IS_CALLABLE_CHECK_SILENT, NULL, fci_cache, &error)) {
 			if (error) {
+				zend_string *callable_name
+					= zend_get_callable_name_ex(&fci->function_name, fci->object);
 				zend_error(E_WARNING, "Invalid callback %s, %s", ZSTR_VAL(callable_name), error);
 				efree(error);
-			}
-			if (callable_name) {
 				zend_string_release(callable_name);
 			}
 			if (EG(current_execute_data) == &dummy_execute_data) {
@@ -730,16 +727,12 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 			zend_error(E_DEPRECATED, "%s", error);
 			efree(error);
 			if (UNEXPECTED(EG(exception))) {
-				if (callable_name) {
-					zend_string_release(callable_name);
-				}
 				if (EG(current_execute_data) == &dummy_execute_data) {
 					EG(current_execute_data) = dummy_execute_data.prev_execute_data;
 				}
 				return FAILURE;
 			}
 		}
-		zend_string_release(callable_name);
 	}
 
 	func = fci_cache->function_handler;
@@ -1672,7 +1665,7 @@ ZEND_API int zend_set_local_var(zend_string *name, zval *value, int force) /* {{
 			if (force) {
 				zend_array *symbol_table = zend_rebuild_symbol_table();
 				if (symbol_table) {
-					return zend_hash_update(symbol_table, name, value) ? SUCCESS : FAILURE;;
+					return zend_hash_update(symbol_table, name, value) ? SUCCESS : FAILURE;
 				}
 			}
 		} else {
@@ -1714,7 +1707,7 @@ ZEND_API int zend_set_local_var_str(const char *name, size_t len, zval *value, i
 			if (force) {
 				zend_array *symbol_table = zend_rebuild_symbol_table();
 				if (symbol_table) {
-					return zend_hash_str_update(symbol_table, name, len, value) ? SUCCESS : FAILURE;;
+					return zend_hash_str_update(symbol_table, name, len, value) ? SUCCESS : FAILURE;
 				}
 			}
 		} else {

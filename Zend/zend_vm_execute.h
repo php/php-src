@@ -1325,7 +1325,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_ARRAY_SPEC_HANDLER(ZEND_O
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *args, *op2;
+	zval *args;
 
 	SAVE_OPLINE();
 	args = get_zval_ptr(opline->op1_type, opline->op1, &free_op1, BP_VAR_R);
@@ -8151,32 +8151,31 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FUNC_GET_ARGS_SPEC_CONST_UNUSE
 {
 	USE_OPLINE
 	zend_array *ht;
-	uint32_t arg_count, first_extra_arg, i, n;
-	zval *p, *q;
+	uint32_t arg_count, result_size, skip;
 
 	arg_count = EX_NUM_ARGS();
-	ht = (zend_array *) emalloc(sizeof(zend_array));
 	if (IS_CONST == IS_CONST) {
-		i = Z_LVAL_P(EX_CONSTANT(opline->op1));
-		if (arg_count < i) {
-			i = 0;
+		skip = Z_LVAL_P(EX_CONSTANT(opline->op1));
+		if (arg_count < skip) {
+			result_size = 0;
 		} else {
-			i = arg_count - i;
+			result_size = arg_count - skip;
 		}
-		zend_hash_init(ht, i, NULL, ZVAL_PTR_DTOR, 0);
 	} else {
-		zend_hash_init(ht, arg_count, NULL, ZVAL_PTR_DTOR, 0);
+		skip = 0;
+		result_size = arg_count;
 	}
+
+	ht = (zend_array *) emalloc(sizeof(zend_array));
+	zend_hash_init(ht, result_size, NULL, ZVAL_PTR_DTOR, 0);
 	ZVAL_ARR(EX_VAR(opline->result.var), ht);
-	if (arg_count) {
-		first_extra_arg = EX(func)->op_array.num_args;
+
+	if (result_size) {
+		uint32_t first_extra_arg = EX(func)->op_array.num_args;
 		zend_hash_real_init(ht, 1);
 		ZEND_HASH_FILL_PACKED(ht) {
-			i = 0;
-			n = 0;
-			if (IS_CONST == IS_CONST) {
-				i = Z_LVAL_P(EX_CONSTANT(opline->op1));
-			}
+			zval *p, *q;
+			uint32_t i = skip;
 			p = EX_VAR_NUM(i);
 			if (arg_count > first_extra_arg) {
 				while (i < first_extra_arg) {
@@ -8186,13 +8185,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FUNC_GET_ARGS_SPEC_CONST_UNUSE
 						if (Z_OPT_REFCOUNTED_P(q)) {
 							Z_ADDREF_P(q);
 						}
-						n++;
+					} else {
+						q = &EG(uninitialized_zval);
 					}
 					ZEND_HASH_FILL_ADD(q);
 					p++;
 					i++;
 				}
-				p = EX_VAR_NUM(EX(func)->op_array.last_var + EX(func)->op_array.T);
+				if (skip < first_extra_arg) {
+					skip = 0;
+				} else {
+					skip -= first_extra_arg;
+				}
+				p = EX_VAR_NUM(EX(func)->op_array.last_var + EX(func)->op_array.T + skip);
 			}
 			while (i < arg_count) {
 				q = p;
@@ -8201,14 +8206,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FUNC_GET_ARGS_SPEC_CONST_UNUSE
 					if (Z_OPT_REFCOUNTED_P(q)) {
 						Z_ADDREF_P(q);
 					}
-					n++;
+				} else {
+					q = &EG(uninitialized_zval);
 				}
 				ZEND_HASH_FILL_ADD(q);
 				p++;
 				i++;
 			}
 		} ZEND_HASH_FILL_END();
-		ht->nNumOfElements = n;
+		ht->nNumOfElements = result_size;
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -16866,7 +16872,7 @@ fe_fetch_r_exit:
 			GC_REFCOUNT(gc)++;
 		}
 	}
-	ZEND_VM_NEXT_OPCODE();
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_RW_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -17040,7 +17046,7 @@ fe_fetch_w_exit:
 		Z_ADDREF_P(value);
 		ZVAL_REF(EX_VAR(opline->op2.var), Z_REF_P(value));
 	}
-	ZEND_VM_NEXT_OPCODE();
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMP_SET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -24255,7 +24261,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_R_SIMPLE_
 
 	variable_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op2.var EXECUTE_DATA_CC);
 	zend_assign_to_variable(variable_ptr, value, IS_CV);
-	ZEND_VM_NEXT_OPCODE();
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 
@@ -24307,7 +24313,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_R_SIMPLE_
 
 	variable_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op2.var EXECUTE_DATA_CC);
 	zend_assign_to_variable(variable_ptr, value, IS_CV);
-	ZEND_VM_NEXT_OPCODE();
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 
@@ -29233,32 +29239,31 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FUNC_GET_ARGS_SPEC_UNUSED_UNUS
 {
 	USE_OPLINE
 	zend_array *ht;
-	uint32_t arg_count, first_extra_arg, i, n;
-	zval *p, *q;
+	uint32_t arg_count, result_size, skip;
 
 	arg_count = EX_NUM_ARGS();
-	ht = (zend_array *) emalloc(sizeof(zend_array));
 	if (IS_UNUSED == IS_CONST) {
-		i = Z_LVAL_P(EX_CONSTANT(opline->op1));
-		if (arg_count < i) {
-			i = 0;
+		skip = Z_LVAL_P(EX_CONSTANT(opline->op1));
+		if (arg_count < skip) {
+			result_size = 0;
 		} else {
-			i = arg_count - i;
+			result_size = arg_count - skip;
 		}
-		zend_hash_init(ht, i, NULL, ZVAL_PTR_DTOR, 0);
 	} else {
-		zend_hash_init(ht, arg_count, NULL, ZVAL_PTR_DTOR, 0);
+		skip = 0;
+		result_size = arg_count;
 	}
+
+	ht = (zend_array *) emalloc(sizeof(zend_array));
+	zend_hash_init(ht, result_size, NULL, ZVAL_PTR_DTOR, 0);
 	ZVAL_ARR(EX_VAR(opline->result.var), ht);
-	if (arg_count) {
-		first_extra_arg = EX(func)->op_array.num_args;
+
+	if (result_size) {
+		uint32_t first_extra_arg = EX(func)->op_array.num_args;
 		zend_hash_real_init(ht, 1);
 		ZEND_HASH_FILL_PACKED(ht) {
-			i = 0;
-			n = 0;
-			if (IS_UNUSED == IS_CONST) {
-				i = Z_LVAL_P(EX_CONSTANT(opline->op1));
-			}
+			zval *p, *q;
+			uint32_t i = skip;
 			p = EX_VAR_NUM(i);
 			if (arg_count > first_extra_arg) {
 				while (i < first_extra_arg) {
@@ -29268,13 +29273,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FUNC_GET_ARGS_SPEC_UNUSED_UNUS
 						if (Z_OPT_REFCOUNTED_P(q)) {
 							Z_ADDREF_P(q);
 						}
-						n++;
+					} else {
+						q = &EG(uninitialized_zval);
 					}
 					ZEND_HASH_FILL_ADD(q);
 					p++;
 					i++;
 				}
-				p = EX_VAR_NUM(EX(func)->op_array.last_var + EX(func)->op_array.T);
+				if (skip < first_extra_arg) {
+					skip = 0;
+				} else {
+					skip -= first_extra_arg;
+				}
+				p = EX_VAR_NUM(EX(func)->op_array.last_var + EX(func)->op_array.T + skip);
 			}
 			while (i < arg_count) {
 				q = p;
@@ -29283,14 +29294,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FUNC_GET_ARGS_SPEC_UNUSED_UNUS
 					if (Z_OPT_REFCOUNTED_P(q)) {
 						Z_ADDREF_P(q);
 					}
-					n++;
+				} else {
+					q = &EG(uninitialized_zval);
 				}
 				ZEND_HASH_FILL_ADD(q);
 				p++;
 				i++;
 			}
 		} ZEND_HASH_FILL_END();
-		ht->nNumOfElements = n;
+		ht->nNumOfElements = result_size;
 	}
 	ZEND_VM_NEXT_OPCODE();
 }

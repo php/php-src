@@ -454,7 +454,7 @@ ZEND_FUNCTION(func_get_args)
 {
 	zval *p, *q;
 	uint32_t arg_count, first_extra_arg;
-	uint32_t i, n;
+	uint32_t i;
 	zend_execute_data *ex = EX(prev_execute_data);
 
 	if (ZEND_CALL_INFO(ex) & ZEND_CALL_CODE) {
@@ -474,7 +474,6 @@ ZEND_FUNCTION(func_get_args)
 		zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 			i = 0;
-			n = 0;
 			p = ZEND_CALL_ARG(ex, 1);
 			if (arg_count > first_extra_arg) {
 				while (i < first_extra_arg) {
@@ -484,7 +483,8 @@ ZEND_FUNCTION(func_get_args)
 						if (Z_OPT_REFCOUNTED_P(q)) { 
 							Z_ADDREF_P(q);
 						}
-						n++;
+					} else {
+						q = &EG(uninitialized_zval);
 					}
 					ZEND_HASH_FILL_ADD(q);
 					p++;
@@ -499,14 +499,15 @@ ZEND_FUNCTION(func_get_args)
 					if (Z_OPT_REFCOUNTED_P(q)) { 
 						Z_ADDREF_P(q);
 					}
-					n++;
+				} else {
+					q = &EG(uninitialized_zval);
 				}
 				ZEND_HASH_FILL_ADD(q);
 				p++;
 				i++;
 			}
 		} ZEND_HASH_FILL_END();
-		Z_ARRVAL_P(return_value)->nNumOfElements = n;
+		Z_ARRVAL_P(return_value)->nNumOfElements = arg_count;
 	}
 }
 /* }}} */
@@ -1592,7 +1593,6 @@ ZEND_FUNCTION(trigger_error)
 ZEND_FUNCTION(set_error_handler)
 {
 	zval *error_handler;
-	zend_string *error_handler_name = NULL;
 	zend_long error_type = E_ALL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|l", &error_handler, &error_type) == FAILURE) {
@@ -1600,13 +1600,13 @@ ZEND_FUNCTION(set_error_handler)
 	}
 
 	if (Z_TYPE_P(error_handler) != IS_NULL) { /* NULL == unset */
-		if (!zend_is_callable(error_handler, 0, &error_handler_name)) {
+		if (!zend_is_callable(error_handler, 0, NULL)) {
+			zend_string *error_handler_name = zend_get_callable_name(error_handler);
 			zend_error(E_WARNING, "%s() expects the argument (%s) to be a valid callback",
 					   get_active_function_name(), error_handler_name?ZSTR_VAL(error_handler_name):"unknown");
 			zend_string_release(error_handler_name);
 			return;
 		}
-		zend_string_release(error_handler_name);
 	}
 
 	if (Z_TYPE(EG(user_error_handler)) != IS_UNDEF) {
@@ -1661,20 +1661,19 @@ ZEND_FUNCTION(restore_error_handler)
 ZEND_FUNCTION(set_exception_handler)
 {
 	zval *exception_handler;
-	zend_string *exception_handler_name = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &exception_handler) == FAILURE) {
 		return;
 	}
 
 	if (Z_TYPE_P(exception_handler) != IS_NULL) { /* NULL == unset */
-		if (!zend_is_callable(exception_handler, 0, &exception_handler_name)) {
+		if (!zend_is_callable(exception_handler, 0, NULL)) {
+		zend_string *exception_handler_name = zend_get_callable_name(exception_handler);
 			zend_error(E_WARNING, "%s() expects the argument (%s) to be a valid callback",
 					   get_active_function_name(), exception_handler_name?ZSTR_VAL(exception_handler_name):"unknown");
 			zend_string_release(exception_handler_name);
 			return;
 		}
-		zend_string_release(exception_handler_name);
 	}
 
 	if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
@@ -2122,7 +2121,6 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 	array_init_size(arg_array, num_args);
 	if (num_args) {
 		uint32_t i = 0;
-		uint32_t n = 0;
 		zval *p = ZEND_CALL_ARG(call, 1);
 
 		zend_hash_real_init(Z_ARRVAL_P(arg_array), 1);
@@ -2145,12 +2143,9 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 							if (Z_OPT_REFCOUNTED_P(arg)) {
 								Z_ADDREF_P(arg);
 							}
-							n++;
 							ZEND_HASH_FILL_ADD(arg);
 						} else {
-							zval tmp;
-							ZVAL_UNDEF(&tmp);
-							ZEND_HASH_FILL_ADD(&tmp);
+							ZEND_HASH_FILL_ADD(&EG(uninitialized_zval));
 						}
 						i++;
 					}
@@ -2160,9 +2155,10 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 							if (Z_OPT_REFCOUNTED_P(p)) {
 								Z_ADDREF_P(p);
 							}
-							n++;
+							ZEND_HASH_FILL_ADD(p);
+						} else {
+							ZEND_HASH_FILL_ADD(&EG(uninitialized_zval));
 						}
-						ZEND_HASH_FILL_ADD(p);
 						p++;
 						i++;
 					}
@@ -2175,14 +2171,15 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 					if (Z_OPT_REFCOUNTED_P(p)) {
 						Z_ADDREF_P(p);
 					}
-					n++;
+					ZEND_HASH_FILL_ADD(p);
+				} else {
+					ZEND_HASH_FILL_ADD(&EG(uninitialized_zval));
 				}
-				ZEND_HASH_FILL_ADD(p);
 				p++;
 				i++;
 			}
 		} ZEND_HASH_FILL_END();
-		Z_ARRVAL_P(arg_array)->nNumOfElements = n;
+		Z_ARRVAL_P(arg_array)->nNumOfElements = num_args;
 	}
 }
 /* }}} */
