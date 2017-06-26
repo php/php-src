@@ -7,6 +7,7 @@ PHP 7.2 INTERNALS UPGRADE NOTES
   d. ZEND_ACC_CLONE removed
   e. IS_TYPE_IMMUTABLE removed
   f. zend_arg_info.class_name removed
+  g. ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX changed
 
 2. Build system changes
   a. Unix build system changes
@@ -38,6 +39,10 @@ PHP 7.2 INTERNALS UPGRADE NOTES
      Z_IMMUTABLE() check function is still available
 
   f. zend_arg_info class_name member is removed, use ZEND_TYPE_NAME instead
+
+  g. ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX classname option is removed
+     use ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX for simple type
+     use ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX for object
 
 ========================
 2. Build system changes
