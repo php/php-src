@@ -2630,6 +2630,7 @@ PHP_FUNCTION(ldap_parse_exop)
 	RETURN_TRUE;
 }
 /* }}} */
+#endif
 
 #ifdef HAVE_LDAP_PARSE_PASSWD
 /* {{{ proto bool ldap_parse_exop_passwd(resource link, resource result, string newpasswd)
@@ -2670,8 +2671,6 @@ PHP_FUNCTION(ldap_parse_exop_passwd)
 
 	RETURN_TRUE;
 }
-#else
-/* TODO: implement based on ldap_parse_exop() */
 /* }}} */
 #endif
 
@@ -2714,12 +2713,9 @@ PHP_FUNCTION(ldap_parse_exop_whoami)
 	}
 	RETURN_TRUE;
 }
-#else
-/* TODO: implement based on ldap_parse_extended_result() */
 /* }}} */
 #endif
 /* }}} */
-#endif
 
 /* {{{ proto resource ldap_first_reference(resource link, resource result)
    Return first reference */
@@ -3400,6 +3396,7 @@ PHP_FUNCTION(ldap_exop)
 	RETVAL_RES(zend_register_resource(ldap_res, le_result));
 }
 /* }}} */
+#endif
 
 #ifdef HAVE_LDAP_PASSWD_S
 /* {{{ proto ? ldap_exop_passwd(resource link [, string user [, string oldpw [, string newpw [, string newpasswd ]]]])
@@ -3487,8 +3484,6 @@ PHP_FUNCTION(ldap_exop_passwd)
 	/* return a PHP control object */
 	RETVAL_RES(zend_register_resource(ldap_res, le_result));
 }
-#else
-/* TODO: implement based on ldap_extended_operation_s() */
 /* }}} */
 #endif
 
@@ -3548,9 +3543,6 @@ PHP_FUNCTION(ldap_exop_whoami)
 	/* return a PHP control object */
 	RETVAL_RES(zend_register_resource(ldap_res, le_result));
 }
-#else
-/* TODO: implement based on ldap_extended_operation_s() */
-#endif
 /* }}} */
 #endif
 /* }}} */
@@ -3841,7 +3833,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_exop, 0, 0, 5)
 	ZEND_ARG_INFO(1, repoid)
 	ZEND_ARG_INFO(1, repdata)
 ZEND_END_ARG_INFO()
+#endif
 
+#ifdef HAVE_LDAP_PASSWD_S
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_exop_passwd, 0, 0, 5)
 	ZEND_ARG_INFO(0, link)
 	ZEND_ARG_INFO(0, user)
@@ -3849,7 +3843,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_exop_passwd, 0, 0, 5)
 	ZEND_ARG_INFO(0, newpw)
 	ZEND_ARG_INFO(1, newpasswd)
 ZEND_END_ARG_INFO()
+#endif
 
+#ifdef HAVE_LDAP_WHOAMI_S
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_exop_whoami, 0, 0, 2)
 	ZEND_ARG_INFO(0, link)
 	ZEND_ARG_INFO(1, authzid)
@@ -3863,13 +3859,17 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_parse_exop, 0, 0, 4)
 	ZEND_ARG_INFO(1, retoid)
 	ZEND_ARG_INFO(1, retdata)
 ZEND_END_ARG_INFO()
+#endif
 
+#ifdef HAVE_LDAP_PARSE_PASSWD
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_parse_exop_passwd, 0, 0, 3)
 	ZEND_ARG_INFO(0, link)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(1, newpasswd)
 ZEND_END_ARG_INFO()
+#endif
 
+#ifdef HAVE_LDAP_PARSE_WHOAMI
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_parse_exop_whoami, 0, 0, 3)
 	ZEND_ARG_INFO(0, link)
 	ZEND_ARG_INFO(0, result)
@@ -3942,12 +3942,20 @@ const zend_function_entry ldap_functions[] = {
 #endif
 #ifdef HAVE_LDAP_EXTENDED_OPERATION_S
 	PHP_FE(ldap_exop,									arginfo_ldap_exop)
+#endif
+#ifdef HAVE_LDAP_PASSWD_S
 	PHP_FE(ldap_exop_passwd,							arginfo_ldap_exop_passwd)
+#endif
+#ifdef HAVE_LDAP_WHOAMI_S
 	PHP_FE(ldap_exop_whoami,							arginfo_ldap_exop_whoami)
 #endif
 #ifdef HAVE_LDAP_PARSE_EXTENDED_RESULT
 	PHP_FE(ldap_parse_exop,								arginfo_ldap_parse_exop)
+#endif
+#ifdef HAVE_LDAP_PARSE_PASSWD
 	PHP_FE(ldap_parse_exop_passwd,						arginfo_ldap_parse_exop_passwd)
+#endif
+#ifdef HAVE_LDAP_PARSE_WHOAMI
 	PHP_FE(ldap_parse_exop_whoami,						arginfo_ldap_parse_exop_whoami)
 #endif
 #endif
