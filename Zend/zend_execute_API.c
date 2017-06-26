@@ -146,7 +146,6 @@ void init_executor(void) /* {{{ */
 	zend_vm_stack_init();
 
 	zend_hash_init(&EG(symbol_table), 64, NULL, ZVAL_PTR_DTOR, 0);
-	EG(valid_symbol_table) = 1;
 
 	zend_llist_apply(&zend_extensions, (llist_apply_func_t) zend_extension_activator);
 
@@ -267,7 +266,6 @@ void shutdown_executor(void) /* {{{ */
 	/* All resources and objects are destroyed. */
 	/* No PHP callback functions may be called after this point. */
 	EG(active) = 0;
-	EG(valid_symbol_table) = 0;
 
 	zend_try {
 		zend_llist_apply(&zend_extensions, (llist_apply_func_t) zend_extension_deactivator);
