@@ -2577,7 +2577,7 @@ PHP_FUNCTION(ldap_parse_exop)
 	struct berval *lretdata;
 	int rc, myargcount = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr|zz", &link, &result, &retoid, &retdata) == SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr|z/z/", &link, &result, &retoid, &retdata) != SUCCESS) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -3314,7 +3314,7 @@ PHP_FUNCTION(ldap_exop)
 	int rc, msgid, myargcount = ZEND_NUM_ARGS();
 	/* int reqoid_len, reqdata_len, retdata_len, retoid_len, retdat_len; */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz|zzz", &link, &reqoid, &reqdata, &retoid, &retdata) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz|zz/z/", &link, &reqoid, &reqdata, &retoid, &retdata) != SUCCESS) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -3879,7 +3879,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_exop, 0, 0, 5)
 	ZEND_ARG_INFO(0, link)
 	ZEND_ARG_INFO(0, reqoid)
-	ZEND_ARG_INFO(1, reqdata)
+	ZEND_ARG_INFO(0, reqdata)
 	ZEND_ARG_INFO(1, repoid)
 	ZEND_ARG_INFO(1, repdata)
 ZEND_END_ARG_INFO()
