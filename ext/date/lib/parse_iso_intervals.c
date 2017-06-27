@@ -215,7 +215,7 @@ static void timelib_get_zone(char **ptr, timelib_time *t)
 		t->zone_type = TIMELIB_ZONETYPE_ABBR;
 		t->dst = 0;
 		t->z = 0;
-		t->tz_abbr = 'Z';
+		t->tz_abbr = timelib_strdup("Z");
 	}
 }
 
