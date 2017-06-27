@@ -203,17 +203,17 @@ static timelib_long timelib_get_zone(char **ptr, timelib_time *t)
 		t->is_localtime = 1;
 		t->zone_type = TIMELIB_ZONETYPE_OFFSET;
 		t->dst = 0;
-		retval = timelib_parse_tz_cor(ptr);
+		retval = -timelib_parse_tz_cor(ptr);
 	} else if (**ptr == '-') {
 		++*ptr;
 		t->is_localtime = 1;
 		t->zone_type = TIMELIB_ZONETYPE_OFFSET;
 		t->dst = 0;
-		retval = -timelib_parse_tz_cor(ptr);
+		retval = timelib_parse_tz_cor(ptr);
 	} else if (**ptr == 'Z') {
+		++*ptr;
 		t->dst = 0;
 		t->zone_type = TIMELIB_ZONETYPE_ABBR;
-		++*ptr;
 	}
 	return retval;
 }
@@ -256,7 +256,7 @@ daylzz  = "0" [0-9] | [1-2][0-9] | "3" [01];
 secondlz = minutelz;
 year4 = [0-9]{4};
 weekofyear = "0"[1-9] | [1-4][0-9] | "5"[0-3];
-timezone = "Z" | [+-][0-1][0-9] | [+-][0-1][0-9][:][0-9][0-9] | [+-][0-1][0-9]{4};
+timezone = "Z" | [+-][0-1][0-9] | [+-][0-1][0-9][:]?[0-9]{2};
 
 space = [ \t]+;
 datetimebasic  = year4 monthlz daylz "T" hour24lz minutelz secondlz timezone;
