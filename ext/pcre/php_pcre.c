@@ -2177,14 +2177,14 @@ static PHP_FUNCTION(preg_split)
 	}
 
 	pce->refcount++;
-	php_pcre_split_impl(pce, ZSTR_VAL(subject), (int)ZSTR_LEN(subject), return_value, (int)limit_val, flags);
+	php_pcre_split_impl(pce, subject, return_value, (int)limit_val, flags);
 	pce->refcount--;
 }
 /* }}} */
 
 /* {{{ php_pcre_split
  */
-PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subject_len, zval *return_value,
+PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str, zval *return_value,
 	zend_long limit_val, zend_long flags)
 {
 	pcre_extra		*extra = pce->extra;/* Holds results of studying */
@@ -2235,7 +2235,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 	/* Start at the beginning of the string */
 	start_offset = 0;
 	next_offset = 0;
-	last_match = subject;
+	last_match = ZSTR_VAL(subject_str);
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 
 #ifdef HAVE_PCRE_JIT_SUPPORT
@@ -2249,13 +2249,13 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 #ifdef HAVE_PCRE_JIT_SUPPORT
 		if ((extra->flags & PCRE_EXTRA_EXECUTABLE_JIT)
 		 && no_utf_check && !g_notempty) {
-			count = pcre_jit_exec(pce->re, extra, subject,
-						  subject_len, start_offset,
+			count = pcre_jit_exec(pce->re, extra, ZSTR_VAL(subject_str),
+						  ZSTR_LEN(subject_str), start_offset,
 						  no_utf_check|g_notempty, offsets, size_offsets, jit_stack);
 		} else
 #endif
-		count = pcre_exec(pce->re, extra, subject,
-						  subject_len, start_offset,
+		count = pcre_exec(pce->re, extra, ZSTR_VAL(subject_str),
+						  ZSTR_LEN(subject_str), start_offset,
 						  no_utf_check|g_notempty, offsets, size_offsets);
 
 		/* the string was already proved to be valid UTF-8 */
@@ -2269,14 +2269,14 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 
 		/* If something matched */
 		if (count > 0 && (offsets[1] - offsets[0] >= 0)) {
-			if (!no_empty || &subject[offsets[0]] != last_match) {
+			if (!no_empty || &ZSTR_VAL(subject_str)[offsets[0]] != last_match) {
 
 				if (offset_capture) {
 					/* Add (match, offset) pair to the return value */
-					add_offset_pair(return_value, last_match, (int)(&subject[offsets[0]]-last_match), next_offset, NULL, 0);
+					add_offset_pair(return_value, last_match, (int)(&ZSTR_VAL(subject_str)[offsets[0]]-last_match), next_offset, NULL, 0);
 				} else {
 					/* Add the piece to the return value */
-					ZVAL_STRINGL(&tmp, last_match, &subject[offsets[0]]-last_match);
+					ZVAL_STRINGL(&tmp, last_match, &ZSTR_VAL(subject_str)[offsets[0]]-last_match);
 					zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 				}
 
@@ -2285,7 +2285,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 					limit_val--;
 			}
 
-			last_match = &subject[offsets[1]];
+			last_match = &ZSTR_VAL(subject_str)[offsets[1]];
 			next_offset = offsets[1];
 
 			if (delim_capture) {
@@ -2295,9 +2295,9 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 					/* If we have matched a delimiter */
 					if (!no_empty || match_len > 0) {
 						if (offset_capture) {
-							add_offset_pair(return_value, &subject[offsets[i<<1]], match_len, offsets[i<<1], NULL, 0);
+							add_offset_pair(return_value, &ZSTR_VAL(subject_str)[offsets[i<<1]], match_len, offsets[i<<1], NULL, 0);
 						} else {
-							ZVAL_STRINGL(&tmp, &subject[offsets[i<<1]], match_len);
+							ZVAL_STRINGL(&tmp, &ZSTR_VAL(subject_str)[offsets[i<<1]], match_len);
 							zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 						}
 					}
@@ -2318,8 +2318,8 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 			   this is not necessarily the end. We need to advance
 			   the start offset, and continue. Fudge the offset values
 			   to achieve this, unless we're already at the end of the string. */
-			if (g_notempty != 0 && start_offset < subject_len) {
-				start_offset += calculate_unit_length(pce, subject + start_offset);
+			if (g_notempty != 0 && start_offset < ZSTR_LEN(subject_str)) {
+				start_offset += calculate_unit_length(pce, ZSTR_VAL(subject_str) + start_offset);
 				g_notempty = 0;
 			} else {
 				break;
@@ -2331,15 +2331,19 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 	}
 
 
-	start_offset = (int)(last_match - subject); /* the offset might have been incremented, but without further successful matches */
+	start_offset = (int)(last_match - ZSTR_VAL(subject_str)); /* the offset might have been incremented, but without further successful matches */
 
-	if (!no_empty || start_offset < subject_len) {
+	if (!no_empty || start_offset < ZSTR_LEN(subject_str)) {
 		if (offset_capture) {
 			/* Add the last (match, offset) pair to the return value */
-			add_offset_pair(return_value, &subject[start_offset], subject_len - start_offset, start_offset, NULL, 0);
+			add_offset_pair(return_value, &ZSTR_VAL(subject_str)[start_offset], ZSTR_LEN(subject_str) - start_offset, start_offset, NULL, 0);
 		} else {
 			/* Add the last piece to the return value */
-			ZVAL_STRINGL(&tmp, last_match, subject + subject_len - last_match);
+			if (last_match == ZSTR_VAL(subject_str)) {
+				ZVAL_STR_COPY(&tmp, subject_str);
+			} else {
+				ZVAL_STRINGL(&tmp, last_match, ZSTR_VAL(subject_str) + ZSTR_LEN(subject_str) - last_match);
+			}
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 		}
 	}
