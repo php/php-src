@@ -3334,12 +3334,6 @@ static zend_bool zend_is_callable_impl(zval *callable, zend_object *object, uint
 	fcc->function_handler = NULL;
 	fcc->object = NULL;
 
-	if (object &&
-	    (!EG(objects_store).object_buckets ||
-	     !IS_OBJ_VALID(EG(objects_store).object_buckets[object->handle]))) {
-		return 0;
-	}
-
 again:
 	switch (Z_TYPE_P(callable)) {
 		case IS_STRING:
@@ -3398,10 +3392,6 @@ again:
 						}
 
 					} else if (Z_TYPE_P(obj) == IS_OBJECT) {
-						if (!EG(objects_store).object_buckets ||
-						    !IS_OBJ_VALID(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(obj)])) {
-							return 0;
-						}
 
 						fcc->calling_scope = Z_OBJCE_P(obj); /* TBFixed: what if it's overloaded? */
 

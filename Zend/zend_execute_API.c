@@ -741,15 +741,6 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 
 	call = zend_vm_stack_push_call_frame(ZEND_CALL_TOP_FUNCTION | ZEND_CALL_DYNAMIC,
 		func, fci->param_count, fci_cache->called_scope, fci->object);
-	if (fci->object &&
-	    (!EG(objects_store).object_buckets ||
-	     !IS_OBJ_VALID(EG(objects_store).object_buckets[fci->object->handle]))) {
-		zend_vm_stack_free_call_frame(call);
-		if (EG(current_execute_data) == &dummy_execute_data) {
-			EG(current_execute_data) = dummy_execute_data.prev_execute_data;
-		}
-		return FAILURE;
-	}
 
 	if (func->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED)) {
 		if (func->common.fn_flags & ZEND_ACC_ABSTRACT) {
