@@ -196,8 +196,6 @@ static void timelib_eat_until_separator(char **ptr)
 
 static void timelib_get_zone(char **ptr, timelib_time *t)
 {
-	timelib_long retval = 0;
-
 	if (**ptr == '+') {
 		++*ptr;
 		t->is_localtime = 1;
@@ -214,7 +212,8 @@ static void timelib_get_zone(char **ptr, timelib_time *t)
 		++*ptr;
 		t->zone_type = TIMELIB_ZONETYPE_ABBR;
 		t->dst = 0;
-		t->z = "Z";
+		t->z = 0;
+		t->tz_abbr = 'Z';
 	}
 }
 
