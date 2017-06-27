@@ -194,7 +194,7 @@ static void timelib_eat_until_separator(char **ptr)
 	}
 }
 
-static timelib_long timelib_get_zone(char **ptr, timelib_time *t)
+static void timelib_get_zone(char **ptr, timelib_time *t)
 {
 	timelib_long retval = 0;
 
@@ -203,19 +203,19 @@ static timelib_long timelib_get_zone(char **ptr, timelib_time *t)
 		t->is_localtime = 1;
 		t->zone_type = TIMELIB_ZONETYPE_OFFSET;
 		t->dst = 0;
-		retval = -timelib_parse_tz_cor(ptr);
+		t->z = -timelib_parse_tz_cor(ptr);
 	} else if (**ptr == '-') {
 		++*ptr;
 		t->is_localtime = 1;
 		t->zone_type = TIMELIB_ZONETYPE_OFFSET;
 		t->dst = 0;
-		retval = timelib_parse_tz_cor(ptr);
+		t->z = timelib_parse_tz_cor(ptr);
 	} else if (**ptr == 'Z') {
 		++*ptr;
-		t->dst = 0;
 		t->zone_type = TIMELIB_ZONETYPE_ABBR;
+		t->dst = 0;
+		t->z = "Z";
 	}
-	return retval;
 }
 
 #define timelib_split_free(arg) {       \
@@ -303,7 +303,7 @@ isoweek          = year4 "-"? "W" weekofyear;
 		current->h = timelib_get_nr((char **) &ptr, 2);
 		current->i = timelib_get_nr((char **) &ptr, 2);
 		current->s = timelib_get_nr((char **) &ptr, 2);
-		current->z = timelib_get_zone((char **) &ptr, current);
+		timelib_get_zone((char **) &ptr, current);
 		s->have_date = 1;
 		TIMELIB_DEINIT;
 		return TIMELIB_ISO_DATE;
