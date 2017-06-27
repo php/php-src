@@ -2359,6 +2359,8 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 		} zend_end_try();
 	}
 
+	virtual_cwd_deactivate();
+
 	sapi_deactivate();
 	module_startup = 0;
 

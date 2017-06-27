@@ -888,13 +888,9 @@ void zend_post_startup(void) /* {{{ */
 	}
 	free(EG(zend_constants));
 
-	virtual_cwd_deactivate();
-
 	executor_globals_ctor(executor_globals);
 	global_persistent_list = &EG(persistent_list);
 	zend_copy_ini_directives();
-#else
-	virtual_cwd_deactivate();
 #endif
 }
 /* }}} */
