@@ -5,7 +5,7 @@ Bug #65657 (Use of a timezone other than 'Z' causes parser to fail)
 <?php
 $iso = 'R2/2013-09-09T12:00:15+02:00/P1D';
 $periods = new DatePeriod($iso);
-print_r $periods;
+print_r($periods);
 ?>
 --EXPECT--
 DatePeriod Object

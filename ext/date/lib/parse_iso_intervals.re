@@ -194,36 +194,25 @@ static void timelib_eat_until_separator(char **ptr)
 	}
 }
 
-static timelib_long timelib_get_zone(char **ptr, int *dst, timelib_time *t, int *tz_not_found, const timelib_tzdb *tzdb)
+static timelib_long timelib_get_zone(char **ptr, timelib_time *t)
 {
 	timelib_long retval = 0;
 
-	*tz_not_found = 0;
-
-	while (**ptr == ' ' || **ptr == '\t' || **ptr == '(') {
-		++*ptr;
-	}
-	if ((*ptr)[0] == 'G' && (*ptr)[1] == 'M' && (*ptr)[2] == 'T' && ((*ptr)[3] == '+' || (*ptr)[3] == '-')) {
-		*ptr += 3;
-	}
 	if (**ptr == '+') {
 		++*ptr;
 		t->is_localtime = 1;
 		t->zone_type = TIMELIB_ZONETYPE_OFFSET;
-		*tz_not_found = 0;
 		t->dst = 0;
-
-		retval = -1 * timelib_parse_tz_cor(ptr);
+		retval = timelib_parse_tz_cor(ptr);
 	} else if (**ptr == '-') {
 		++*ptr;
 		t->is_localtime = 1;
 		t->zone_type = TIMELIB_ZONETYPE_OFFSET;
-		*tz_not_found = 0;
 		t->dst = 0;
-
-		retval = timelib_parse_tz_cor(ptr);
-	}
-	while (**ptr == ')') {
+		retval = -timelib_parse_tz_cor(ptr);
+	} else if (**ptr == 'Z') {
+		t->dst = 0;
+		t->zone_type = TIMELIB_ZONETYPE_ABBR;
 		++*ptr;
 	}
 	return retval;
@@ -267,10 +256,11 @@ daylzz  = "0" [0-9] | [1-2][0-9] | "3" [01];
 secondlz = minutelz;
 year4 = [0-9]{4};
 weekofyear = "0"[1-9] | [1-4][0-9] | "5"[0-3];
+timezone = "Z" | [+-][0-1][0-9] | [+-][0-1][0-9][:][0-9][0-9] | [+-][0-1][0-9]{4};
 
 space = [ \t]+;
-datetimebasic  = year4 monthlz daylz "T" hour24lz minutelz secondlz "Z";
-datetimeextended  = year4 "-" monthlz "-" daylz "T" hour24lz ':' minutelz ':' secondlz "Z";
+datetimebasic  = year4 monthlz daylz "T" hour24lz minutelz secondlz timezone;
+datetimeextended  = year4 "-" monthlz "-" daylz "T" hour24lz ':' minutelz ':' secondlz timezone;
 period   = "P" (number "Y")? (number "M")? (number "W")? (number "D")? ("T" (number "H")? (number "M")? (number "S")?)?;
 combinedrep = "P" year4 "-" monthlzz "-" daylzz "T" hour24lz ':' minutelz ':' secondlz;
 
@@ -313,6 +303,7 @@ isoweek          = year4 "-"? "W" weekofyear;
 		current->h = timelib_get_nr((char **) &ptr, 2);
 		current->i = timelib_get_nr((char **) &ptr, 2);
 		current->s = timelib_get_nr((char **) &ptr, 2);
+		current->z = timelib_get_zone((char **) &ptr, current);
 		s->have_date = 1;
 		TIMELIB_DEINIT;
 		return TIMELIB_ISO_DATE;
