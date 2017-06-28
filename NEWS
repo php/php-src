@@ -3,7 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2017, PHP 7.1.8
 
 - Core:
-  . Fixed bug #74780 (parse_url() borken when query string contains colon). 
+  . Fixed bug #74780 (parse_url() broken when query string contains colon). 
     (jhdxr)
   . Fixed bug #74761 (Unary operator expected error on some systems). (petk)
   . Fixed bug #73900 (Use After Free in unserialize() SplFixedArray). (nikic)
