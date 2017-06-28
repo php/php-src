@@ -3077,16 +3077,20 @@ ZEND_API zval *zend_get_zval_ptr(int op_type, const znode_op *node, const zend_e
 		case IS_CONST:
 			ret = EX_CONSTANT(*node);
 			*should_free = NULL;
+			break;
 		case IS_TMP_VAR:
 		case IS_VAR:
 			ret = EX_VAR(node->var);
 			*should_free = ret;
+			break;
 		case IS_CV:
 			ret = EX_VAR(node->var);
 			*should_free = NULL;
+			break;
 		default:
 			ret = NULL;
 			*should_free = ret;
+			break;
 	}
 	return ret;
 }
