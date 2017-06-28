@@ -9,6 +9,8 @@ PHP                                                                        NEWS
   . Allow loading PHP/Zend extensions by name in ini files (extension=<name>).
     (francois at tekwire dot net)
   . Added object type annotation. (brzuchal)
+  . Fixed bug #74815 (crash with a combination of INI entries at startup).
+    (Anatol)
 
 - OpenSSL:
   . Fixed bug #74798 (pkcs7_en/decrypt does not work if \x0a is used in content).
