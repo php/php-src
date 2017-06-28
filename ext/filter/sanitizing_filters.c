@@ -213,7 +213,7 @@ void php_filter_string(PHP_INPUT_FILTER_PARAM_DECL)
 	Z_STRLEN_P(value) = new_len;
 
 	if (new_len == 0) {
-		zval_dtor(value);
+		zval_ptr_dtor(value);
 		if (flags & FILTER_FLAG_EMPTY_STRING_NULL) {
 			ZVAL_NULL(value);
 		} else {
@@ -293,7 +293,7 @@ void php_filter_unsafe_raw(PHP_INPUT_FILTER_PARAM_DECL)
 
 		php_filter_encode_html(value, enc);
 	} else if (flags & FILTER_FLAG_EMPTY_STRING_NULL && Z_STRLEN_P(value) == 0) {
-		zval_dtor(value);
+		zval_ptr_dtor(value);
 		ZVAL_NULL(value);
 	}
 }

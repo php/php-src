@@ -1899,11 +1899,11 @@ ZEND_BEGIN_ARG_INFO(arginfo_mt_getrandmax, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ random.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_random_bytes, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_random_bytes, 0, 0, 1)
 	ZEND_ARG_INFO(0, length)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_random_int, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_random_int, 0, 0, 2)
 	ZEND_ARG_INFO(0, min)
 	ZEND_ARG_INFO(0, max)
 ZEND_END_ARG_INFO()
@@ -4306,12 +4306,12 @@ PHP_FUNCTION(getopt)
 		Z_PARAM_STRING(options, options_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY(p_longopts)
-		Z_PARAM_ZVAL_DEREF_EX(zoptind, 0, 1)
+		Z_PARAM_ZVAL_DEREF(zoptind)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	/* Init zoptind to 1 */
 	if (zoptind) {
-		zval_dtor(zoptind);
+		zval_ptr_dtor(zoptind);
 		ZVAL_LONG(zoptind, 1);
 	}
 
@@ -4976,19 +4976,13 @@ static int user_shutdown_function_call(zval *zv) /* {{{ */
 {
     php_shutdown_function_entry *shutdown_function_entry = Z_PTR_P(zv);
 	zval retval;
-	zend_string *function_name;
 
-	if (!zend_is_callable(&shutdown_function_entry->arguments[0], 0, &function_name)) {
-		if (function_name) {
-			php_error(E_WARNING, "(Registered shutdown functions) Unable to call %s() - function does not exist", ZSTR_VAL(function_name));
-			zend_string_release(function_name);
-		} else {
-			php_error(E_WARNING, "(Registered shutdown functions) Unable to call - function does not exist");
-		}
-		return 0;
-	}
-	if (function_name) {
+	if (!zend_is_callable(&shutdown_function_entry->arguments[0], 0, NULL)) {
+		zend_string *function_name
+			= zend_get_callable_name(&shutdown_function_entry->arguments[0]);
+		php_error(E_WARNING, "(Registered shutdown functions) Unable to call %s() - function does not exist", ZSTR_VAL(function_name));
 		zend_string_release(function_name);
+		return 0;
 	}
 
 	if (call_user_function(EG(function_table), NULL,
@@ -5102,7 +5096,6 @@ PHPAPI void php_free_shutdown_functions(void) /* {{{ */
 PHP_FUNCTION(register_shutdown_function)
 {
 	php_shutdown_function_entry shutdown_function_entry;
-	zend_string *callback_name = NULL;
 	int i;
 
 	shutdown_function_entry.arg_count = ZEND_NUM_ARGS();
@@ -5119,13 +5112,12 @@ PHP_FUNCTION(register_shutdown_function)
 	}
 
 	/* Prevent entering of anything but valid callback (syntax check only!) */
-	if (!zend_is_callable(&shutdown_function_entry.arguments[0], 0, &callback_name)) {
-		if (callback_name) {
-			php_error_docref(NULL, E_WARNING, "Invalid shutdown callback '%s' passed", ZSTR_VAL(callback_name));
-		} else {
-			php_error_docref(NULL, E_WARNING, "Invalid shutdown callback passed");
-		}
+	if (!zend_is_callable(&shutdown_function_entry.arguments[0], 0, NULL)) {
+		zend_string *callback_name
+			= zend_get_callable_name(&shutdown_function_entry.arguments[0]);
+		php_error_docref(NULL, E_WARNING, "Invalid shutdown callback '%s' passed", ZSTR_VAL(callback_name));
 		efree(shutdown_function_entry.arguments);
+		zend_string_release(callback_name);
 		RETVAL_FALSE;
 	} else {
 		if (!BG(user_shutdown_function_names)) {
@@ -5137,9 +5129,6 @@ PHP_FUNCTION(register_shutdown_function)
 			if (Z_REFCOUNTED(shutdown_function_entry.arguments[i])) Z_ADDREF(shutdown_function_entry.arguments[i]);
 		}
 		zend_hash_next_index_insert_mem(BG(user_shutdown_function_names), &shutdown_function_entry, sizeof(php_shutdown_function_entry));
-	}
-	if (callback_name) {
-		zend_string_release(callback_name);
 	}
 }
 /* }}} */
@@ -5278,7 +5267,7 @@ PHP_FUNCTION(highlight_string)
 	int old_error_reporting = EG(error_reporting);
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_ZVAL_DEREF(expr)
+		Z_PARAM_ZVAL(expr)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(i)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
@@ -5572,7 +5561,7 @@ PHP_FUNCTION(print_r)
 	zend_bool do_return = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_ZVAL_DEREF(var)
+		Z_PARAM_ZVAL(var)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(do_return)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
@@ -5805,7 +5794,7 @@ PHP_FUNCTION(unregister_tick_function)
 	user_tick_function_entry tick_fe;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL_DEREF_EX(function, 0, 1)
+		Z_PARAM_ZVAL(function)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!BG(user_tick_functions)) {

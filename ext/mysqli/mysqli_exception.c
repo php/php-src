@@ -44,7 +44,7 @@ void php_mysqli_throw_sql_exception(char *sqlstate, int errorno, char *format, .
 
 	va_start(arg, format);
 	vspprintf(&message, 0, format, arg);
-	va_end(arg);;
+	va_end(arg);
 
 	if (!(MyG(report_mode) & MYSQLI_REPORT_STRICT)) {
 	 	php_error_docref(NULL, E_WARNING, "(%s/%d): %s", sqlstate, errorno, message);

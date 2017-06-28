@@ -144,9 +144,9 @@ PHP_MINFO_FUNCTION(exif)
 		php_info_print_table_row(2, "Multibyte decoding support using mbstring", "disabled");
 	}
 
-	php_info_print_table_row(2, "Extended EXIF tag formats", "Canon, Casio, Fujifilm, Nikon, Olympus, Samsung, Panasonic, DJI, Sony, Pentax, Minolta, Sigma, Foveon");
-
+	php_info_print_table_row(2, "Extended EXIF tag formats", "Canon, Casio, Fujifilm, Nikon, Olympus, Samsung, Panasonic, DJI, Sony, Pentax, Minolta, Sigma, Foveon, Kyocera, Ricoh, AGFA, Epson");
 	php_info_print_table_end();
+
 	DISPLAY_INI_ENTRIES();
 }
 /* }}} */
@@ -1318,6 +1318,20 @@ static tag_info_array tag_table_VND_SIGMA = {
   TAG_TABLE_END
 };
 
+static tag_info_array tag_table_VND_KYOCERA = {
+  { 0x0001, "FormatThumbnail"}, 
+  { 0x0E00, "PrintImageMatchingInfo"}, 
+  TAG_TABLE_END
+};
+
+static tag_info_array tag_table_VND_RICOH = {
+  { 0x0001, "MakerNoteDataType"}, 
+  { 0x0002, "Version"}, 
+  { 0x0E00, "PrintImageMatchingInfo"}, 
+  { 0x2001, "RicohCameraInfoMakerNoteSubIFD"}, 
+  TAG_TABLE_END
+};
+
 typedef enum mn_byte_order_t {
 	MN_ORDER_INTEL    = 0,
 	MN_ORDER_MOTOROLA = 1,
@@ -1343,20 +1357,27 @@ typedef struct {
 
 /* Remember to update PHP_MINFO if updated */
 static const maker_note_type maker_note_array[] = {
-  { tag_table_VND_CANON,     "Canon",                   NULL,  NULL,                       0,  0,  MN_ORDER_INTEL,    MN_OFFSET_GUESS},
-  { tag_table_VND_CASIO,     "CASIO",                   NULL,  NULL,                       0,  0,  MN_ORDER_MOTOROLA, MN_OFFSET_NORMAL},
-  { tag_table_VND_FUJI,      "FUJIFILM",                NULL,  "FUJIFILM\x0C\x00\x00\x00", 12, 12, MN_ORDER_INTEL,    MN_OFFSET_MAKER},
-  { tag_table_VND_NIKON,     "NIKON",                   NULL,  "Nikon\x00\x01\x00",        8,  8,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
-  { tag_table_VND_NIKON_990, "NIKON",                   NULL,  NULL,                       0,  0,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
-  { tag_table_VND_OLYMPUS,   "OLYMPUS OPTICAL CO.,LTD", NULL,  "OLYMP\x00\x01\x00",        8,  8,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
-  { tag_table_VND_SAMSUNG,   "SAMSUNG",                 NULL, NULL,                        0,  0,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
-  { tag_table_VND_PANASONIC, "Panasonic",               NULL, "Panasonic\x00\x00\x00",     12, 12, MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
-  { tag_table_VND_DJI,       "DJI",                     NULL, NULL,                        0, 0,   MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
-  { tag_table_VND_SONY,      "SONY",                    NULL, "SONY DSC \x00\x00\x00",     12, 12, MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
-  { tag_table_VND_PENTAX,    "PENTAX",                  NULL, "AOC\x00",                   6,  6,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
-  { tag_table_VND_MINOLTA,   "Minolta, KONICA MINOLTA", NULL, NULL,                        0,  0,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
-  { tag_table_VND_SIGMA,     "SIGMA, FOVEON",           NULL, "SIGMA\x00\x00\x00",         10, 10, MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
-  { tag_table_VND_SIGMA,     "SIGMA, FOVEON",           NULL, "FOVEON\x00\x00\x00",        10, 10, MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}
+  { tag_table_VND_CANON,     "Canon",                   NULL,  NULL,							 0,  0,  MN_ORDER_INTEL,    MN_OFFSET_GUESS},
+  { tag_table_VND_CASIO,     "CASIO",                   NULL,  NULL,							 0,  0,  MN_ORDER_MOTOROLA, MN_OFFSET_NORMAL},
+  { tag_table_VND_FUJI,      "FUJIFILM",                NULL,  "FUJIFILM\x0C\x00\x00\x00",		 12, 12, MN_ORDER_INTEL,    MN_OFFSET_MAKER},
+  { tag_table_VND_NIKON,     "NIKON",                   NULL,  "Nikon\x00\x01\x00",				 8,  8,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
+  { tag_table_VND_NIKON_990, "NIKON",                   NULL,  NULL,							 0,  0,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
+  { tag_table_VND_OLYMPUS,   "OLYMPUS OPTICAL CO.,LTD", NULL,  "OLYMP\x00\x01\x00",				 8,  8,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
+  { tag_table_VND_SAMSUNG,   "SAMSUNG",                 NULL, NULL,								 0,  0,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
+  { tag_table_VND_PANASONIC, "Panasonic",               NULL, "Panasonic\x00\x00\x00",			 12, 12, MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
+  { tag_table_VND_DJI,       "DJI",                     NULL, NULL,								 0, 0,   MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
+  { tag_table_VND_SONY,      "SONY",                    NULL, "SONY DSC \x00\x00\x00",	         12, 12, MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
+  { tag_table_VND_PENTAX,    "PENTAX",                  NULL, "AOC\x00",						 6,  6,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
+  { tag_table_VND_MINOLTA,   "Minolta, KONICA MINOLTA", NULL, NULL,								 0,  0,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
+  { tag_table_VND_SIGMA,     "SIGMA, FOVEON",           NULL, "SIGMA\x00\x00\x00",				 10, 10, MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
+  { tag_table_VND_SIGMA,     "SIGMA, FOVEON",           NULL, "FOVEON\x00\x00\x00",				 10, 10, MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
+  { tag_table_VND_KYOCERA,   "KYOCERA, CONTAX",			NULL, "KYOCERA            \x00\x00\x00", 22, 22, MN_ORDER_NORMAL,   MN_OFFSET_MAKER}, 
+  { tag_table_VND_RICOH,	 "RICOH",					NULL, "Ricoh",							 5,  5,  MN_ORDER_MOTOROLA, MN_OFFSET_NORMAL}, 
+  { tag_table_VND_RICOH,     "RICOH",					NULL, "RICOH",							 5,  5,  MN_ORDER_MOTOROLA, MN_OFFSET_NORMAL}, 
+
+  /* These re-uses existing formats */
+  { tag_table_VND_OLYMPUS,   "AGFA",					NULL, "AGFA \x00\x01",					 8,  8,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
+  { tag_table_VND_OLYMPUS,   "EPSON",					NULL, "EPSON\x00\x01\x00",			     8,  8,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}
 };
 /* }}} */
 
@@ -2988,7 +3009,7 @@ static int exif_process_user_comment(image_info_type *ImageInfo, char **pszInfoP
 {
 	int   a;
 	char  *decode;
-	size_t len;;
+	size_t len;
 
 	*pszEncoding = NULL;
 	/* Copy the comment */

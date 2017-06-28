@@ -1,7 +1,7 @@
 /* This file was converted by gperf_unfold_key_conv.py
       from gperf output file. */
-/* ANSI-C code produced by gperf version 3.0.3 */
-/* Command-line: /Library/Developer/CommandLineTools/usr/bin/gperf -n -C -T -c -t -j1 -L ANSI-C -F,-1,0 -N unicode_unfold_key unicode_unfold_key.gperf  */
+/* ANSI-C code produced by gperf version 3.0.4 */
+/* Command-line: gperf -n -C -T -c -t -j1 -L ANSI-C -F,-1,0 -N unicode_unfold_key unicode_unfold_key.gperf  */
 /* Computed positions: -k'1-3' */
 
 
@@ -64,6 +64,12 @@ hash(OnigCodePoint codes[])
   return asso_values[(unsigned char)onig_codes_byte_at(codes, 2)+35] + asso_values[(unsigned char)onig_codes_byte_at(codes, 1)+1] + asso_values[(unsigned char)onig_codes_byte_at(codes, 0)];
 }
 
+#ifdef __GNUC__
+__inline
+#if defined __GNUC_STDC_INLINE__ || defined __GNUC_GNU_INLINE__
+__attribute__ ((__gnu_inline__))
+#endif
+#endif
 const struct ByUnfoldKey *
 unicode_unfold_key(OnigCodePoint code)
 {
@@ -2840,11 +2846,11 @@ unicode_unfold_key(OnigCodePoint code)
     {
       int key = hash(&code);
 
-      if (key <= MAX_HASH_VALUE)
+      if (key <= MAX_HASH_VALUE && key >= 0)
         {
           OnigCodePoint gcode = wordlist[key].code;
 
-          if (code == gcode)
+          if (code == gcode && wordlist[key].index >= 0)
             return &wordlist[key];
         }
     }

@@ -8,7 +8,7 @@ data-interchange format as specified in RFC 7159
 The parser is implemented using re2c and Bison. The used versions
 of both tools for generating files in the repository are following:
 
-re2c 0.14.3
+re2c 0.16
 Bison 3.0.4
 
 It is recommended to do all contributions to the JSON extension

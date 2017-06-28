@@ -982,11 +982,11 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 
 #define ZVAL_COPY_UNREF(z, v) do {						\
 		zval *_z3 = (v);								\
-		if (Z_REFCOUNTED_P(_z3)) {						\
-			if (UNEXPECTED(Z_ISREF_P(_z3))				\
+		if (Z_OPT_REFCOUNTED_P(_z3)) {					\
+			if (UNEXPECTED(Z_OPT_ISREF_P(_z3))			\
 			 && UNEXPECTED(Z_REFCOUNT_P(_z3) == 1)) {	\
 				ZVAL_UNREF(_z3);						\
-				if (Z_REFCOUNTED_P(_z3)) {				\
+				if (Z_OPT_REFCOUNTED_P(_z3)) {			\
 					Z_ADDREF_P(_z3);					\
 				}										\
 			} else {									\

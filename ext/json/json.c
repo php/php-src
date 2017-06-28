@@ -227,7 +227,7 @@ static PHP_FUNCTION(json_encode)
 	zend_long depth = PHP_JSON_PARSER_DEFAULT_DEPTH;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
-		Z_PARAM_ZVAL_DEREF(parameter)
+		Z_PARAM_ZVAL(parameter)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(options)
 		Z_PARAM_LONG(depth)

@@ -103,9 +103,9 @@ MD5 sums. If you do not have this directory, create it.
 15. Now the RC can be found on http://downloads.php.net/~yourname,
 f.e. http://downloads.php.net/~derick/
 
-16. Once the release has been tagged, contact the PHP Windows development team
-(internals-win@lists.php.net) so that Windows binaries can be created. Once
-those are made, they should be placed into the same directory as the source snapshots.
+16. Once the release has been tagged, contact the release-managers@ distribution list
+so that Windows binaries can be created.  Once those are made, they can be found at
+http://windows.php.net/download
 
 Getting the non stable release (alpha/beta/RC) announced
 --------------------------------------------------------
@@ -125,16 +125,27 @@ Getting the non stable release (alpha/beta/RC) announced
 
  b. ``$PHP_x_RC_DATE`` = "06 September 2007"
 
-3. Commit and push changes to qa and web
+3. Add a short notice to phpweb stating that there is a new release, and 
+highlight the major important things (security fixes) and when it is important
+to upgrade.
+
+ a. Call php bin/createNewsEntry in your local phpweb checkout
+    Use category "releases" for all non-stable releases.
+    Use category "frontpage" for X.Y.0 non-stable releases only.
+
+ b. Add the content for the news entry. Be sure to include the text:
+    "THIS IS A DEVELOPMENT PREVIEW - DO NOT USE IT IN PRODUCTION!"
+
+4. Commit and push changes to qa and web
 
 *Wait for web and qa sites to update with new information before sending announce*
 
-4. Send an email **To** ``internals@lists.php.net`` and ``php-general@lists.php.net`` 
+5. Send an email **To** ``internals@lists.php.net`` and ``php-general@lists.php.net`` 
 lists pointing out "the location of the release" and "the possible release date of
 either the next RC, or the final release". Include in this information the verification
 information output by ``gen_verify_stub``.
 
-5. Send an email (see example here http://news.php.net/php.pear.qa/5201) **To**
+6. Send an email (see example here http://news.php.net/php.pear.qa/5201) **To**
 ``php-qa@lists.php.net`` and ``primary-qa-tester@lists.php.net``.
 This email is to notify the selected projects about a new release so that they
 can make sure their projects keep working. Make sure that you have been setup
@@ -145,7 +156,7 @@ Derick) run the following commands for you:
 
 ``sudo -u ezmlm ezmlm-sub ~ezmlm/primary-qa-tester/mod moderator-email-address``
 
-6. For the first RC, write the doc team (phpdoc@lists.php.net) about updating the
+7. For the first RC, write the doc team (phpdoc@lists.php.net) about updating the
 INSTALL and win32/install.txt files which are generated from the PHP manual sources.
 
 Rolling a stable release
@@ -319,11 +330,13 @@ will not accidentally hit the php-announce@ mailinglist.
 New Release Manager Checklist
 -----------------------------
 
-1. Email systems@ to get setup for access to downloads.php.net
+1. Email systems@ to get setup for access to downloads.php.net and to be added to the
+   release-managers@ distribution list.
 
 2. Create a GPG key for your @php.net address and publish it by editing `include/gpg-keys.inc`
    in the `web-php` repository, adding the output of `gpg --fingerprint "$USER@php.net"`. Let
-   one or more of the previous RMs sign your key.
+   one or more of the previous RMs sign your key. Publish your public key to pgp.mit.edu with:
+   `gpg --keyserver pgp.mit.edu --send-keys $KEYID`
 
 3. Request karma to eding main/php_version.h. Possibly karma for other restricted parts of 
    php-src might come in question.

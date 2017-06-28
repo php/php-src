@@ -469,6 +469,7 @@ PHP_FUNCTION(msg_send)
 	if (result == -1) {
 		php_error_docref(NULL, E_WARNING, "msgsnd failed: %s", strerror(errno));
 		if (zerror) {
+			zval_ptr_dtor(zerror);
 			ZVAL_LONG(zerror, errno);
 		}
 	} else {

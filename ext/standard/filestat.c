@@ -339,7 +339,7 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_PATH(filename, filename_len)
-		Z_PARAM_ZVAL_DEREF_EX(group, 0, 1)
+		Z_PARAM_ZVAL(group)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0);
@@ -475,7 +475,7 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_PATH(filename, filename_len)
-		Z_PARAM_ZVAL_DEREF_EX(user, 0, 1)
+		Z_PARAM_ZVAL(user)
 	ZEND_PARSE_PARAMETERS_END();
 
 	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0);
@@ -996,7 +996,7 @@ PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zva
 /* another quickie macro to make defining similar functions easier */
 /* {{{ FileFunction(name, funcnum) */
 #define FileFunction(name, funcnum) \
-void name(INTERNAL_FUNCTION_PARAMETERS) { \
+ZEND_NAMED_FUNCTION(name) { \
 	char *filename; \
 	size_t filename_len; \
 	\

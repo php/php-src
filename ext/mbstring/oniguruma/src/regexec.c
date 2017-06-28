@@ -462,6 +462,7 @@ stack_double(int is_alloca, char** arg_alloc_base,
   unsigned int n;
   int used;
   size_t size;
+  size_t new_size;
   char* alloc_base;
   char* new_alloc_base;
   OnigStackType *stk_base, *stk_end, *stk;
@@ -472,10 +473,11 @@ stack_double(int is_alloca, char** arg_alloc_base,
   stk      = *arg_stk;
 
   n = stk_end - stk_base;
-  n *= 2;
   size = sizeof(OnigStackIndex) * msa->ptr_num + sizeof(OnigStackType) * n;
+  n *= 2;
+  new_size = sizeof(OnigStackIndex) * msa->ptr_num + sizeof(OnigStackType) * n;
   if (is_alloca != 0) {
-    new_alloc_base = (char* )xmalloc(size);
+    new_alloc_base = (char* )xmalloc(new_size);
     if (IS_NULL(new_alloc_base)) {
       STACK_SAVE;
       return ONIGERR_MEMORY;
@@ -489,7 +491,7 @@ stack_double(int is_alloca, char** arg_alloc_base,
       else
         n = MatchStackLimitSize;
     }
-    new_alloc_base = (char* )xrealloc(alloc_base, size);
+    new_alloc_base = (char* )xrealloc(alloc_base, new_size);
     if (IS_NULL(new_alloc_base)) {
       STACK_SAVE;
       return ONIGERR_MEMORY;
@@ -1242,16 +1244,24 @@ onig_statistics_init(void)
   MaxStackDepth = 0;
 }
 
-extern void
+extern int
 onig_print_statistics(FILE* f)
 {
+  int r;
   int i;
-  fprintf(f, "   count      prev        time\n");
+
+  r = fprintf(f, "   count      prev        time\n");
+  if (r < 0) return -1;
+
   for (i = 0; OnigOpInfo[i].opcode >= 0; i++) {
-    fprintf(f, "%8d: %8d: %10ld: %s\n",
-	    OpCounter[i], OpPrevCounter[i], OpTime[i], OnigOpInfo[i].name);
+    r = fprintf(f, "%8d: %8d: %10ld: %s\n",
+                OpCounter[i], OpPrevCounter[i], OpTime[i], OnigOpInfo[i].name);
+    if (r < 0) return -1;
   }
-  fprintf(f, "\nmax stack depth: %d\n", MaxStackDepth);
+  r = fprintf(f, "\nmax stack depth: %d\n", MaxStackDepth);
+  if (r < 0) return -1;
+
+  return 0;
 }
 
 #define STACK_INC do {\
@@ -1336,8 +1346,8 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
       fprintf(stderr, "%4d> \"", (int )(s - str));
       bp = buf;
       for (i = 0, q = s; i < 7 && q < end; i++) {
-	len = enclen(encode, q);
-	while (len-- > 0) *bp++ = *q++;
+        len = enclen(encode, q);
+        while (len-- > 0) *bp++ = *q++;
       }
       if (q < end) { xmemcpy(bp, "...\"", 4); bp += 4; }
       else         { xmemcpy(bp, "\"",    1); bp += 1; }
@@ -1463,14 +1473,9 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
       break;
 
     case OP_EXACT1:  MOP_IN(OP_EXACT1);
-#if 0
       DATA_ENSURE(1);
       if (*p != *s) goto fail;
       p++; s++;
-#endif
-      if (*p != *s++) goto fail;
-      DATA_ENSURE(0);
-      p++;
       MOP_OUT;
       break;
 
@@ -3149,6 +3154,8 @@ forward_search_range(regex_t* reg, const UChar* str, const UChar* end, UChar* s,
     }
     else {
       UChar *q = p + reg->dmin;
+
+      if (q >= end) return 0; /* fail */
       while (p < q) p += enclen(reg->enc, p);
     }
   }
@@ -3228,18 +3235,25 @@ forward_search_range(regex_t* reg, const UChar* str, const UChar* end, UChar* s,
     }
     else {
       if (reg->dmax != ONIG_INFINITE_DISTANCE) {
-        *low = p - reg->dmax;
-        if (*low > s) {
-          *low = onigenc_get_right_adjust_char_head_with_prev(reg->enc, s,
-                                          *low, (const UChar** )low_prev);
-          if (low_prev && IS_NULL(*low_prev))
-            *low_prev = onigenc_get_prev_char_head(reg->enc,
-                                                   (pprev ? pprev : s), *low);
+        if (p - str < reg->dmax) {
+          *low = (UChar* )str;
+          if (low_prev)
+            *low_prev = onigenc_get_prev_char_head(reg->enc, str, *low);
         }
         else {
-          if (low_prev)
-            *low_prev = onigenc_get_prev_char_head(reg->enc,
-                                                   (pprev ? pprev : str), *low);
+          *low = p - reg->dmax;
+          if (*low > s) {
+            *low = onigenc_get_right_adjust_char_head_with_prev(reg->enc, s,
+                                                 *low, (const UChar** )low_prev);
+            if (low_prev && IS_NULL(*low_prev))
+              *low_prev = onigenc_get_prev_char_head(reg->enc,
+                                                     (pprev ? pprev : s), *low);
+          }
+          else {
+            if (low_prev)
+              *low_prev = onigenc_get_prev_char_head(reg->enc,
+                                                     (pprev ? pprev : str), *low);
+          }
         }
       }
     }
@@ -3493,15 +3507,14 @@ onig_search(regex_t* reg, const UChar* str, const UChar* end,
           start = min_semi_end - reg->anchor_dmax;
           if (start < end)
             start = onigenc_get_right_adjust_char_head(reg->enc, str, start);
-          else { /* match with empty at end */
-            start = onigenc_get_prev_char_head(reg->enc, str, end);
-          }
         }
         if ((OnigLen )(max_semi_end - (range - 1)) < reg->anchor_dmin) {
           range = max_semi_end - reg->anchor_dmin + 1;
         }
 
-        if (start >= range) goto mismatch_no_msa;
+        if (start > range) goto mismatch_no_msa;
+        /* If start == range, match with empty at end.
+           Backward search is used. */
       }
       else {
         if ((OnigLen )(min_semi_end - range) > reg->anchor_dmax) {
@@ -3626,9 +3639,11 @@ onig_search(regex_t* reg, const UChar* str, const UChar* end,
             prev = s;
             s += enclen(reg->enc, s);
 
-            while (!ONIGENC_IS_MBC_NEWLINE(reg->enc, prev, end) && s < range) {
-              prev = s;
-              s += enclen(reg->enc, s);
+            if ((reg->anchor & (ANCHOR_LOOK_BEHIND | ANCHOR_PREC_READ_NOT)) == 0) {
+              while (!ONIGENC_IS_MBC_NEWLINE(reg->enc, prev, end) && s < range) {
+                prev = s;
+                s += enclen(reg->enc, s);
+              }
             }
           } while (s < range);
           goto mismatch;
@@ -3779,8 +3794,10 @@ onig_scan(regex_t* reg, const UChar* str, const UChar* end,
       if (rs != 0)
         return rs;
 
-      if (region->end[0] == start - str)
-        start++;
+      if (region->end[0] == start - str) {
+        if (start >= end) break;
+        start += enclen(reg->enc, start);
+      }
       else
         start = str + region->end[0];
 

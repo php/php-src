@@ -409,7 +409,7 @@ PHP_FUNCTION(ldap_connect)
 	{
 		int rc = LDAP_SUCCESS;
 		char	*url = host;
-		if (!ldap_is_ldap_url(url)) {
+		if (url && !ldap_is_ldap_url(url)) {
 			int	urllen = hostlen + sizeof( "ldap://:65535" );
 
 			if (port <= 0 || port > 65535) {
@@ -419,7 +419,7 @@ PHP_FUNCTION(ldap_connect)
 			}
 
 			url = emalloc(urllen);
-			snprintf( url, urllen, "ldap://%s:" ZEND_LONG_FMT, host ? host : "", port );
+			snprintf( url, urllen, "ldap://%s:" ZEND_LONG_FMT, host, port );
 		}
 
 #ifdef LDAP_API_FEATURE_X_OPENLDAP
@@ -2783,7 +2783,6 @@ PHP_FUNCTION(ldap_set_rebind_proc)
 {
 	zval *link, *callback;
 	ldap_linkdata *ld;
-	zend_string *callback_name;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz", &link, &callback) != SUCCESS) {
 		RETURN_FALSE;
@@ -2804,12 +2803,12 @@ PHP_FUNCTION(ldap_set_rebind_proc)
 	}
 
 	/* callable? */
-	if (!zend_is_callable(callback, 0, &callback_name)) {
+	if (!zend_is_callable(callback, 0, NULL)) {
+		zend_string *callback_name = zend_get_callable_name(callback);
 		php_error_docref(NULL, E_WARNING, "Two arguments expected for '%s' to be a valid callback", ZSTR_VAL(callback_name));
 		zend_string_release(callback_name);
 		RETURN_FALSE;
 	}
-	zend_string_release(callback_name);
 
 	/* register rebind procedure */
 	if (Z_ISUNDEF(ld->rebindproc)) {

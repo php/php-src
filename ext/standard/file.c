@@ -341,7 +341,7 @@ PHP_FUNCTION(flock)
 		Z_PARAM_RESOURCE(res)
 		Z_PARAM_LONG(operation)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL_DEREF_EX(wouldblock, 0, 1)
+		Z_PARAM_ZVAL_DEREF(wouldblock)
 	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_STREAM_TO_ZVAL(stream, res);
@@ -353,7 +353,7 @@ PHP_FUNCTION(flock)
 	}
 
 	if (wouldblock) {
-		zval_dtor(wouldblock);
+		zval_ptr_dtor(wouldblock);
 		ZVAL_LONG(wouldblock, 0);
 	}
 
@@ -591,7 +591,7 @@ PHP_FUNCTION(file_put_contents)
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_PATH(filename, filename_len)
-		Z_PARAM_ZVAL_DEREF_EX(data, 0, 1)
+		Z_PARAM_ZVAL(data)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(flags)
 		Z_PARAM_RESOURCE_EX(zcontext, 1, 0)
@@ -2008,7 +2008,7 @@ PHP_FUNCTION(fgetcsv)
 		ZEND_PARSE_PARAMETERS_START(1, 5)
 			Z_PARAM_RESOURCE(fd)
 			Z_PARAM_OPTIONAL
-			Z_PARAM_ZVAL_DEREF(len_zv)
+			Z_PARAM_ZVAL(len_zv)
 			Z_PARAM_STRING(delimiter_str, delimiter_str_len)
 			Z_PARAM_STRING(enclosure_str, enclosure_str_len)
 			Z_PARAM_STRING(escape_str, escape_str_len)

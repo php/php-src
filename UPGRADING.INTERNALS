@@ -1,9 +1,13 @@
-PHP 7.1 INTERNALS UPGRADE NOTES
+PHP 7.2 INTERNALS UPGRADE NOTES
 
 1. Internal API changes
   a. Path related functions
   b. php_win32_get_random_bytes()
   c. nice() Windows implementation
+  d. ZEND_ACC_CLONE removed
+  e. IS_TYPE_IMMUTABLE removed
+  f. zend_arg_info.class_name removed
+  g. ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX changed
 
 2. Build system changes
   a. Unix build system changes
@@ -29,6 +33,16 @@ PHP 7.1 INTERNALS UPGRADE NOTES
 	   SetPriorityClass(). See the implementation for more in-depth details. This also 
 	   defines HAVE_NICE.
 
+  d. ZEND_ACC_CLONE is removed, but was not used in previous versions
+
+  e. IS_TYPE_IMMUTABLE is removed, IS_TYPE_COPYABLE can be used instead
+     Z_IMMUTABLE() check function is still available
+
+  f. zend_arg_info class_name member is removed, use ZEND_TYPE_NAME instead
+
+  g. ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX classname option is removed
+     use ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX for simple type
+     use ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX for object
 
 ========================
 2. Build system changes
@@ -48,6 +62,12 @@ PHP 7.1 INTERNALS UPGRADE NOTES
 ========================
 3. Module changes
 ========================
+
+- Pcre:
+  . php_pcre_replace and php_pcre_replace_impl expect a zend_string instead of a zval and
+    is_callable_replace options is removed:
+    - PHPAPI zend_string *php_pcre_replace(zend_string *regex, zend_string *subject_str, char *subject, int subject_len, zend_string *replace_str, int limit, int *replace_count);
+    - PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *subject_str, char *subject, int subject_len, zend_string *replace_str, int limit, int *replace_count);
 
 - Session:
   . php_session_start()/session_reset_id() return value is changed from void to int.

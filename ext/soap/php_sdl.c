@@ -2623,7 +2623,7 @@ static sdlAttributePtr make_persistent_sdl_attribute(sdlAttributePtr attr, HashT
 		pattr->extraAttributes = malloc(sizeof(HashTable));
 		zend_hash_init(pattr->extraAttributes, zend_hash_num_elements(attr->extraAttributes), NULL, delete_extra_attribute_persistent, 1);
 
-		ZEND_HASH_FOREACH_STR_KEY_PTR(pattr->extraAttributes, key, tmp) {
+		ZEND_HASH_FOREACH_STR_KEY_PTR(attr->extraAttributes, key, tmp) {
 			if (key) {
 				pextra = malloc(sizeof(sdlExtraAttribute));
 				memset(pextra, 0, sizeof(sdlExtraAttribute));

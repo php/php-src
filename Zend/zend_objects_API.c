@@ -50,9 +50,14 @@ ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects)
 			if (IS_OBJ_VALID(obj)) {
 				if (!(GC_FLAGS(obj) & IS_OBJ_DESTRUCTOR_CALLED)) {
 					GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
-					GC_REFCOUNT(obj)++;
-					obj->handlers->dtor_obj(obj);
-					GC_REFCOUNT(obj)--;
+
+					if (obj->handlers->dtor_obj
+					 && (obj->handlers->dtor_obj != zend_objects_destroy_object
+					  || obj->ce->destructor)) {
+						GC_REFCOUNT(obj)++;
+						obj->handlers->dtor_obj(obj);
+						GC_REFCOUNT(obj)--;
+					}
 				}
 			}
 		}
@@ -76,7 +81,7 @@ ZEND_API void zend_objects_store_mark_destructed(zend_objects_store *objects)
 	}
 }
 
-ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects)
+ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects, zend_bool fast_shutdown)
 {
 	zend_object **obj_ptr, **end, *obj;
 
@@ -88,20 +93,37 @@ ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects
 	end = objects->object_buckets + 1;
 	obj_ptr = objects->object_buckets + objects->top;
 
-	do {
-		obj_ptr--;
-		obj = *obj_ptr;
-		if (IS_OBJ_VALID(obj)) {
-			if (!(GC_FLAGS(obj) & IS_OBJ_FREE_CALLED)) {
-				GC_FLAGS(obj) |= IS_OBJ_FREE_CALLED;
-				if (obj->handlers->free_obj) {
-					GC_REFCOUNT(obj)++;
-					obj->handlers->free_obj(obj);
-					GC_REFCOUNT(obj)--;
+	if (fast_shutdown) {
+		do {
+			obj_ptr--;
+			obj = *obj_ptr;
+			if (IS_OBJ_VALID(obj)) {
+				if (!(GC_FLAGS(obj) & IS_OBJ_FREE_CALLED)) {
+					GC_FLAGS(obj) |= IS_OBJ_FREE_CALLED;
+					if (obj->handlers->free_obj && obj->handlers->free_obj != zend_object_std_dtor) {
+						GC_REFCOUNT(obj)++;
+						obj->handlers->free_obj(obj);
+						GC_REFCOUNT(obj)--;
+					}
 				}
 			}
-		}
-	} while (obj_ptr != end);
+		} while (obj_ptr != end);
+	} else {
+		do {
+			obj_ptr--;
+			obj = *obj_ptr;
+			if (IS_OBJ_VALID(obj)) {
+				if (!(GC_FLAGS(obj) & IS_OBJ_FREE_CALLED)) {
+					GC_FLAGS(obj) |= IS_OBJ_FREE_CALLED;
+					if (obj->handlers->free_obj) {
+						GC_REFCOUNT(obj)++;
+						obj->handlers->free_obj(obj);
+						GC_REFCOUNT(obj)--;
+					}
+				}
+			}
+		} while (obj_ptr != end);
+	}
 }
 
 
@@ -132,17 +154,6 @@ ZEND_API void zend_objects_store_put(zend_object *object)
             SET_OBJ_BUCKET_NUMBER(EG(objects_store).object_buckets[handle], EG(objects_store).free_list_head);	\
 			EG(objects_store).free_list_head = handle;
 
-ZEND_API void zend_objects_store_free(zend_object *object) /* {{{ */
-{
-	uint32_t handle = object->handle;
-	void *ptr = ((char*)object) - object->handlers->offset;
-
-	GC_REMOVE_FROM_BUFFER(object);
-	efree(ptr);
-	ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST(handle);
-}
-/* }}} */
-
 ZEND_API void zend_objects_store_del(zend_object *object) /* {{{ */
 {
 	/*	Make sure we hold a reference count during the destructor call
@@ -155,7 +166,9 @@ ZEND_API void zend_objects_store_del(zend_object *object) /* {{{ */
 			if (!(GC_FLAGS(object) & IS_OBJ_DESTRUCTOR_CALLED)) {
 				GC_FLAGS(object) |= IS_OBJ_DESTRUCTOR_CALLED;
 
-				if (object->handlers->dtor_obj) {
+				if (object->handlers->dtor_obj
+				 && (object->handlers->dtor_obj != zend_objects_destroy_object
+				  || object->ce->destructor)) {
 					GC_REFCOUNT(object)++;
 					object->handlers->dtor_obj(object);
 					GC_REFCOUNT(object)--;
@@ -186,18 +199,6 @@ ZEND_API void zend_objects_store_del(zend_object *object) /* {{{ */
 	}
 }
 /* }}} */
-
-/* zend_object_store_set_object:
- * It is ONLY valid to call this function from within the constructor of an
- * overloaded object.  Its purpose is to set the object pointer for the object
- * when you can't possibly know its value until you have parsed the arguments
- * from the constructor function.  You MUST NOT use this function for any other
- * weird games, or call it at any other time after the object is constructed.
- * */
-ZEND_API void zend_object_store_set_object(zval *zobject, zend_object *object)
-{
-	EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(zobject)] = object;
-}
 
 ZEND_API zend_object_handlers *zend_get_std_object_handlers(void)
 {

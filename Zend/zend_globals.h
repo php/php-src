@@ -208,7 +208,6 @@ struct _zend_executor_globals {
 	struct _zend_module_entry *current_module;
 
 	zend_bool active;
-	zend_bool valid_symbol_table;
 	zend_uchar flags;
 
 	zend_long assertions;

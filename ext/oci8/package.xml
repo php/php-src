@@ -46,12 +46,12 @@ Interoperability Support" (ID 207303.1) for details.
   <active>no</active>
  </lead>
 
- <date>2017-04-12</date>
+ <date>2017-06-20</date>
  <time>12:00:00</time>
 
   <version>
-   <release>2.1.4</release>
-   <api>2.1.4</api>
+   <release>2.1.5</release>
+   <api>2.1.5</api>
   </version>
   <stability>
    <release>stable</release>
@@ -60,7 +60,8 @@ Interoperability Support" (ID 207303.1) for details.
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
 This version is for PHP 7 only.
-Fixed uninitialized data causing random crash
+Added TAF callback support (PR #2459, KoenigsKind) 
+Fixed bug #74625 (Integer overflow in oci_bind_array_by_name). (Ingmar Runge)
   </notes>
  <contents>
   <dir name="/">
@@ -164,6 +165,7 @@ Fixed uninitialized data causing random crash
     <file name="bug71422.phpt" role="test" />
     <file name="bug71600.phpt" role="test" />
     <file name="bug72524.phpt" role="test" />
+    <file name="bug74625.phpt" role="test" />
     <file name="clientversion.phpt" role="test" />
     <file name="close.phpt" role="test" />
     <file name="coll_001.phpt" role="test" />
@@ -447,6 +449,7 @@ Fixed uninitialized data causing random crash
    <file name="oci8_interface.c" role="src" />
    <file name="oci8_lob.c" role="src" />
    <file name="oci8_statement.c" role="src" />
+   <file name="oci8_failover.c" role="src" />
    <file name="php_oci8.h" role="src" />
    <file name="php_oci8_int.h" role="src" />
    <file name="README" role="doc" />
@@ -467,6 +470,22 @@ Fixed uninitialized data causing random crash
   <configureoption default="autodetect" name="with-oci8" prompt="Please provide the path to the ORACLE_HOME directory. Use &apos;instantclient,/path/to/instant/client/lib&apos; if you&apos;re compiling with Oracle Instant Client" />
  </extsrcrelease>
  <changelog>
+
+<release>
+  <version>
+   <release>2.1.4</release>
+   <api>2.1.4</api>
+  </version>
+  <stability>
+   <release>stable</release>
+   <api>stable</api>
+  </stability>
+  <license uri="http://www.php.net/license">PHP</license>
+  <notes>
+This version is for PHP 7 only.
+Fixed uninitialized data causing random crash
+  </notes>
+</release>
 
 <release>
   <version>

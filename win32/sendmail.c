@@ -134,47 +134,45 @@ static zend_string *php_win32_mail_trim_header(char *header)
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
 
 	zend_string *result, *result2;
-	zval replace;
+	zend_string *replace;
 	zend_string *regex;
 
 	if (!header) {
 		return NULL;
 	}
 
-	ZVAL_STRINGL(&replace, PHP_WIN32_MAIL_UNIFY_REPLACE, strlen(PHP_WIN32_MAIL_UNIFY_REPLACE));
+	replace = zend_string_init(PHP_WIN32_MAIL_UNIFY_REPLACE, strlen(PHP_WIN32_MAIL_UNIFY_REPLACE), 0);
 	regex = zend_string_init(PHP_WIN32_MAIL_UNIFY_PATTERN, sizeof(PHP_WIN32_MAIL_UNIFY_PATTERN)-1, 0);
 
 	result = php_pcre_replace(regex,
 				  NULL, header, (int)strlen(header),
-				  &replace,
-				  0,
+				  replace,
 				  -1,
 				  NULL);
 
-	zval_ptr_dtor(&replace);
+	zend_string_release(replace);
 	zend_string_release(regex);
 
 	if (NULL == result) {
 		return NULL;
 	}
 
-	ZVAL_STRING(&replace, PHP_WIN32_MAIL_RMVDBL_PATTERN);
+	replace = zend_string_init(PHP_WIN32_MAIL_RMVDBL_PATTERN, strlen(PHP_WIN32_MAIL_RMVDBL_PATTERN), 0);
 	regex = zend_string_init(PHP_WIN32_MAIL_RMVDBL_PATTERN, sizeof(PHP_WIN32_MAIL_RMVDBL_PATTERN)-1, 0);
 
 	result2 = php_pcre_replace(regex,
 				   result, ZSTR_VAL(result), (int)ZSTR_LEN(result),
-				   &replace,
-				  0,
+				   replace,
 				  -1,
 				  NULL);
-	zval_ptr_dtor(&replace);
+	zend_string_release(replace);
 	zend_string_release(regex);
 	zend_string_release(result);
 
 	return result2;
 #else
 	/* In case we don't have PCRE support (for whatever reason...) simply do nothing and return the unmodified header */
-	return estrdup(header);
+	return zend_string_init(header, strlen(header), 0);
 #endif
 }
 

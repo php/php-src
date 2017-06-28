@@ -1,4 +1,4 @@
-Oniguruma Regular Expressions Version 6.0.0    2016/08/18
+Oniguruma Regular Expressions Version 6.3.0    2017/05/19
 
 syntax: ONIG_SYNTAX_RUBY (default)
 
@@ -22,6 +22,7 @@ syntax: ONIG_SYNTAX_RUBY (default)
   \a           bell                   (0x07)
   \e           escape                 (0x1B)
   \nnn         octal char             (encoded byte value)
+  \o{17777777777} wide octal char     (character code point value)
   \xHH         hexadecimal char       (encoded byte value)
   \x{7HHHHHHH} wide hexadecimal char  (character code point value)
   \cx          control char           (character code point value)

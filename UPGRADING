@@ -41,6 +41,7 @@ PHP 7.2 UPGRADE NOTES
   . Minimum supported Windows versions are Windows 7/Server 2008 R2.
   . Initial trait property value compatibility check will no longer perform
     any casts. (Bug #74269)
+  . "object" (in any case) can no longer be used as a class name.
 
 - BCMath:
   . The bcmod() function no longer truncates fractional numbers to integers. As
@@ -55,11 +56,6 @@ PHP 7.2 UPGRADE NOTES
   . The json_decode() option JSON_OBJECT_AS_ARRAY is used if the second
     parameter (assoc) is null. Previously JSON_OBJECT_AS_ARRAY was always
     ignored.
-
-- PCRE:
-  . preg_match() and other PCRE functions now distinguish between unmatched
-    subpatterns and empty matches by reporting NULL and "" (empty string),
-    respectively. Formerly, either was reported as empty string.
 
 - Session:
   . Removed register_globals related code and "!" can be used as $_SESSION key name.
@@ -106,9 +102,23 @@ PHP 7.2 UPGRADE NOTES
     (https://wiki.php.net/rfc/allow-abstract-function-override)
   . A trailing comma in group use statements is now allowed.
     (https://wiki.php.net/rfc/list-syntax-trailing-commas)
+  . The "object" type annotation is now supported.
+    (https://wiki.php.net/rfc/object-typehint)
+
+- DBA:
+  . Implemented support for the LMDB backend.
+
+- OCI8:
+  . Added Oracle Database Transparent Application Failover (TAF) callback support.
 
 - PCRE:
   . Added `J` modifier for setting PCRE_DUPNAMES.
+  . Added `PREG_UNMATCHED_AS_NULL` flag to allow distinguish between unmatched
+    subpatterns and empty matches by reporting NULL and "" (empty string),
+    respectively.
+
+- SQLite3:
+  . Implemented writing to BLOBs.
 
 - Standard:
   . Simplified password hashing API updated to support Argon2i hashes when PHP is compiled with libargon2
@@ -214,6 +224,10 @@ See also: https://wiki.php.net/rfc/deprecations_php_7_2
   . Added mb_chr() and mb_ord().
   . Added mb_scurb() that scrub broken multibyte strings.
 
+- OCI8:
+  . Added oci_register_taf_callback() and oci_disable_taf_callback() for
+    Oracle Database TAF callback support.
+
 - Sockets:
   . Added socket_addrinfo_lookup(), socket_addrinfo_connect(),
     socket_addrinfo_bind() and socket_addrinfo_explain().
@@ -238,7 +252,8 @@ See also: https://wiki.php.net/rfc/deprecations_php_7_2
 
 - EXIF:
    . Added extended exif tag support for the following formats: 
-     Samsung, DJI, Panasonic, Sony, Pentax, Minolta & Sigma/Foveon.
+     Samsung, DJI, Panasonic, Sony, Pentax, Minolta, Sigma/Foveon, 
+	 AGFA, Kyocera, Ricoh & Epson.
 
 - GD:
   . Removed --enable-gd-native-ttf configuration option which was unused as
@@ -252,6 +267,10 @@ See also: https://wiki.php.net/rfc/deprecations_php_7_2
     encodings are checked recursively.
   . mb_convert_encoding() accepts array parameter. Only value encodings
     are converted recursively.
+
+- PDO_OCI:
+  . The '--with-pdo-oci' configure syntax no longer needs the vesion number of the
+    Oracle Instant Client.
 
 - pdo_sqlite
   . Use sqlite3_prepare_v2() and sqlite3_close_v2() functions instead of their
@@ -276,6 +295,9 @@ See also: https://wiki.php.net/rfc/deprecations_php_7_2
 - GD:
   . IMG_EFFECT_MULTIPLY
   . IMG_BMP
+
+- PCRE
+  . PREG_UNMATCHED_AS_NULL
 
 - Standard:
   . PASSWORD_ARGON2_DEFAULT_MEMORY_COST
