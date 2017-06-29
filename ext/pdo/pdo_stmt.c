@@ -2111,9 +2111,10 @@ static PHP_METHOD(PDOStatement, debugDumpParams)
 	/* show parsed SQL if emulated prepares enabled */
 	/* pointers will be equal if PDO::query() was invoked */
 	if (stmt->active_query_string != NULL && stmt->active_query_string != stmt->query_string) {
-		php_stream_printf(out, "Sent SQL: [%zd] %.*s\n",
-			stmt->active_query_stringlen,
-			(int) stmt->active_query_stringlen, stmt->active_query_string);
+		/* break into multiple operations so query string won't be truncated at FORMAT_CONV_MAX_PRECISION */
+		php_stream_printf(out, "Sent SQL: [%zd] ", stmt->active_query_stringlen);
+		php_stream_write(out, stmt->active_query_string, stmt->active_query_stringlen);
+		php_stream_write(out, "\n", 1);
 	}
 
 	php_stream_printf(out, "Params:  %d\n",
