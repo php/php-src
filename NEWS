@@ -8,6 +8,10 @@ PHP                                                                        NEWS
   . Fixed bug #74761 (Unary operator expected error on some systems). (petk)
   . Fixed bug #73900 (Use After Free in unserialize() SplFixedArray). (nikic)
 
+- PDO:
+  . Fixed bug #69356 (PDOStatement::debugDumpParams() truncates query). (Adam
+    Baratz)
+
 - SPL:
   . Fixed bug #73471 (PHP freezes with AppendIterator). (jhdxr)
 

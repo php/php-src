@@ -2110,9 +2110,10 @@ static PHP_METHOD(PDOStatement, debugDumpParams)
 		RETURN_FALSE;
 	}
 
-	php_stream_printf(out, "SQL: [%zd] %.*s\n",
-		stmt->query_stringlen,
-		(int) stmt->query_stringlen, stmt->query_string);
+	/* break into multiple operations so query string won't be truncated at FORMAT_CONV_MAX_PRECISION */
+	php_stream_printf(out, "SQL: [%zd] ", stmt->query_stringlen);
+	php_stream_write(out, stmt->query_string, stmt->query_stringlen);
+	php_stream_write(out, "\n", 1);
 
 	php_stream_printf(out, "Params:  %d\n",
 		stmt->bound_params ? zend_hash_num_elements(stmt->bound_params) : 0);
