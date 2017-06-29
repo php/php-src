@@ -63121,7 +63121,7 @@ ZEND_API void zend_execute(zend_op_array *op_array, zval *return_value)
 		execute_data->symbol_table = &EG(symbol_table);
 	}
 	EX(prev_execute_data) = EG(current_execute_data);
-	i_init_execute_data(execute_data, op_array, return_value);
+	i_init_code_execute_data(execute_data, op_array, return_value);
 	zend_execute_ex(execute_data);
 	zend_vm_stack_free_call_frame(execute_data);
 }
