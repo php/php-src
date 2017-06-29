@@ -742,27 +742,17 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 	call = zend_vm_stack_push_call_frame(ZEND_CALL_TOP_FUNCTION | ZEND_CALL_DYNAMIC,
 		func, fci->param_count, fci_cache->called_scope, fci->object);
 
-	if (func->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED)) {
-		if (func->common.fn_flags & ZEND_ACC_ABSTRACT) {
-			zend_throw_error(NULL, "Cannot call abstract method %s::%s()", ZSTR_VAL(func->common.scope->name), ZSTR_VAL(func->common.function_name));
+	if (UNEXPECTED(func->common.fn_flags & ZEND_ACC_DEPRECATED)) {
+		zend_error(E_DEPRECATED, "Function %s%s%s() is deprecated",
+			func->common.scope ? ZSTR_VAL(func->common.scope->name) : "",
+			func->common.scope ? "::" : "",
+			ZSTR_VAL(func->common.function_name));
+		if (UNEXPECTED(EG(exception))) {
 			zend_vm_stack_free_call_frame(call);
 			if (EG(current_execute_data) == &dummy_execute_data) {
 				EG(current_execute_data) = dummy_execute_data.prev_execute_data;
 			}
 			return FAILURE;
-		}
-		if (func->common.fn_flags & ZEND_ACC_DEPRECATED) {
- 			zend_error(E_DEPRECATED, "Function %s%s%s() is deprecated",
-				func->common.scope ? ZSTR_VAL(func->common.scope->name) : "",
-				func->common.scope ? "::" : "",
-				ZSTR_VAL(func->common.function_name));
-			if (UNEXPECTED(EG(exception))) {
-				zend_vm_stack_free_call_frame(call);
-				if (EG(current_execute_data) == &dummy_execute_data) {
-					EG(current_execute_data) = dummy_execute_data.prev_execute_data;
-				}
-				return FAILURE;
-			}
 		}
 	}
 
@@ -844,12 +834,6 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 		EG(current_execute_data) = call->prev_execute_data;
 		zend_vm_stack_free_args(call);
 
-		/*  We shouldn't fix bad extensions here,
-			because it can break proper ones (Bug #34045)
-		if (!EX(function_state).function->common.return_reference)
-		{
-			INIT_PZVAL(f->retval);
-		}*/
 		if (EG(exception)) {
 			zval_ptr_dtor(fci->retval);
 			ZVAL_UNDEF(fci->retval);
