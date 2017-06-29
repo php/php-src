@@ -20,10 +20,7 @@ var_dump(
   $genpw,
   test_bind($host, $port, "cn=userA,$base", $genpw, $protocol_version),
   ldap_exop_passwd($link, "cn=userA,$base", $genpw, "newPassword"),
-  test_bind($host, $port, "cn=userA,$base", "newPassword", $protocol_version),
-  $r = ldap_exop_passwd($link, "cn=userA,$base", "newPassword", ""),
-  ldap_parse_exop_passwd($link, $r, $result),
-  $result
+  test_bind($host, $port, "cn=userA,$base", "newPassword", $protocol_version)
 );
 ?>
 ===DONE===
@@ -41,7 +38,4 @@ string(%d) "%s"
 bool(true)
 bool(true)
 bool(true)
-resource(%d) of type (ldap result)
-bool(true)
-string(%d) "%s"
 ===DONE===

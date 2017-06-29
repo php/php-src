@@ -2631,90 +2631,6 @@ PHP_FUNCTION(ldap_parse_exop)
 }
 /* }}} */
 #endif
-
-#ifdef HAVE_LDAP_PARSE_PASSWD
-/* {{{ proto bool ldap_parse_exop_passwd(resource link, resource result, string newpasswd)
-   Extract information from RFC 3062 password modify extended operation result */
-PHP_FUNCTION(ldap_parse_exop_passwd)
-{
-	zval *link, *result, *newpasswd;
-	ldap_linkdata *ld;
-	LDAPMessage *ldap_result;
-	struct berval lnewpasswd;
-	int rc, myargcount = ZEND_NUM_ARGS();
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrz/", &link, &result, &newpasswd) != SUCCESS) {
-		WRONG_PARAM_COUNT;
-	}
-
-	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
-	}
-
-	if ((ldap_result = (LDAPMessage *)zend_fetch_resource(Z_RES_P(result), "ldap result", le_result)) == NULL) {
-		RETURN_FALSE;
-	}
-
-	rc = ldap_parse_passwd(ld->link, ldap_result, &lnewpasswd);
-	if (rc != LDAP_SUCCESS) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to parse passwd modify extended operation result: %s", ldap_err2string(rc));
-		RETURN_FALSE;
-	}
-
-	zval_dtor(newpasswd);
-	if (lnewpasswd.bv_len == 0) {
-		ZVAL_EMPTY_STRING(newpasswd);
-	} else {
-		ZVAL_STRINGL(newpasswd, lnewpasswd.bv_val, lnewpasswd.bv_len);
-		ldap_memfree(lnewpasswd.bv_val);
-	}
-
-	RETURN_TRUE;
-}
-/* }}} */
-#endif
-
-#ifdef HAVE_LDAP_PARSE_WHOAMI
-/* {{{ proto bool ldap_parse_exop_whoami(resource link, resource result, string authzid)
-   Extract information from <draft-zeilenga-ldap-authzid> whoami extended operation result (a Work in Progress) */
-PHP_FUNCTION(ldap_parse_exop_whoami)
-{
-	zval *link, *result, *authzid;
-	ldap_linkdata *ld;
-	LDAPMessage *ldap_result;
-	struct berval *lauthzid;
-	int rc, myargcount = ZEND_NUM_ARGS();
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrz/", &link, &result, &authzid) != SUCCESS) {
-		WRONG_PARAM_COUNT;
-	}
-
-	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
-	}
-
-	if ((ldap_result = (LDAPMessage *)zend_fetch_resource(Z_RES_P(result), "ldap result", le_result)) == NULL) {
-		RETURN_FALSE;
-	}
-
-	rc = ldap_parse_whoami(ld->link, ldap_result, &lauthzid );
-	if (rc != LDAP_SUCCESS) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to parse whoami extended operation result: %s", ldap_err2string(rc));
-		RETURN_FALSE;
-	}
-
-	zval_dtor(authzid);
-	if (lauthzid == NULL) {
-		ZVAL_EMPTY_STRING(authzid);
-	} else {
-		ZVAL_STRINGL(authzid, lauthzid->bv_val, lauthzid->bv_len);
-		ldap_memfree(lauthzid->bv_val);
-		ldap_memfree(lauthzid);
-	}
-	RETURN_TRUE;
-}
-/* }}} */
-#endif
 /* }}} */
 
 /* {{{ proto resource ldap_first_reference(resource link, resource result)
@@ -3399,7 +3315,7 @@ PHP_FUNCTION(ldap_exop)
 #endif
 
 #ifdef HAVE_LDAP_PASSWD_S
-/* {{{ proto ? ldap_exop_passwd(resource link [, string user [, string oldpw [, string newpw [, string newpasswd ]]]])
+/* {{{ proto bool ldap_exop_passwd(resource link [, string user [, string oldpw [, string newpw [, string genpasswd ]]]])
    Passwd modify extended operation */
 PHP_FUNCTION(ldap_exop_passwd)
 {
@@ -3440,55 +3356,34 @@ PHP_FUNCTION(ldap_exop_passwd)
 			luser.bv_len = Z_STRLEN_P(user);
 	}
 
-	if (myargcount > 4 || lnewpw.bv_len > 0) {
-		/* synchronous call */
-		rc = ldap_passwd_s(ld->link, &luser,
-			loldpw.bv_len > 0 ? &loldpw : NULL,
-			lnewpw.bv_len > 0 ? &lnewpw : NULL,
-			&lnewpasswd, NULL, NULL);
-		if (rc != LDAP_SUCCESS ) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Passwd modify extended operation failed: %s (%d)", ldap_err2string(rc), rc);
-			RETURN_FALSE;
-		}
-
-		if (myargcount > 4) {
-			zval_dtor(newpasswd);
-			if (lnewpasswd.bv_len == 0) {
-				ZVAL_EMPTY_STRING(newpasswd);
-			} else {
-				ZVAL_STRINGL(newpasswd, lnewpasswd.bv_val, lnewpasswd.bv_len);
-			}
-		}
-
-		ldap_memfree(lnewpasswd.bv_val);
-
-		RETURN_TRUE;
-	}
-
-	/* asynchronous call */
-	rc = ldap_passwd(ld->link, &luser,
+	/* synchronous call */
+	rc = ldap_passwd_s(ld->link, &luser,
 		loldpw.bv_len > 0 ? &loldpw : NULL,
 		lnewpw.bv_len > 0 ? &lnewpw : NULL,
-		NULL, NULL, &msgid);
+		&lnewpasswd, NULL, NULL);
 	if (rc != LDAP_SUCCESS ) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Passwd modify extended operation failed: %s (%d)", ldap_err2string(rc), rc);
 		RETURN_FALSE;
 	}
 
-	rc = ldap_result(ld->link, msgid, 1 /* LDAP_MSG_ALL */, NULL, &ldap_res);
-	if (rc == -1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Passwd modify extended operation failed");
-		RETURN_FALSE;
+	if (myargcount > 4) {
+		zval_dtor(newpasswd);
+		if (lnewpasswd.bv_len == 0) {
+			ZVAL_EMPTY_STRING(newpasswd);
+		} else {
+			ZVAL_STRINGL(newpasswd, lnewpasswd.bv_val, lnewpasswd.bv_len);
+		}
 	}
 
-	/* return a PHP control object */
-	RETVAL_RES(zend_register_resource(ldap_res, le_result));
+	ldap_memfree(lnewpasswd.bv_val);
+
+	RETURN_TRUE;
 }
 /* }}} */
 #endif
 
 #ifdef HAVE_LDAP_WHOAMI_S
-/* {{{ proto ? ldap_exop_whoami(resource link [, string authzid])
+/* {{{ proto bool ldap_exop_whoami(resource link , string authzid)
    Whoami extended operation */
 PHP_FUNCTION(ldap_exop_whoami)
 {
@@ -3499,7 +3394,7 @@ PHP_FUNCTION(ldap_exop_whoami)
 	LDAPMessage *ldap_res;
 	int rc, msgid, myargcount = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|z/", &link, &authzid) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/", &link, &authzid) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -3507,41 +3402,23 @@ PHP_FUNCTION(ldap_exop_whoami)
 		RETURN_FALSE;
 	}
 
-	if (myargcount == 2) {
-		/* synchronous call */
-		rc = ldap_whoami_s(ld->link, &lauthzid, NULL, NULL);
-		if (rc != LDAP_SUCCESS ) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Whoami extended operation failed: %s (%d)", ldap_err2string(rc), rc);
-			RETURN_FALSE;
-		}
-
-		zval_dtor(authzid);
-		if (lauthzid == NULL) {
-			ZVAL_EMPTY_STRING(authzid);
-		} else {
-			ZVAL_STRINGL(authzid, lauthzid->bv_val, lauthzid->bv_len);
-			ldap_memfree(lauthzid->bv_val);
-			ldap_memfree(lauthzid);
-		}
-
-		RETURN_TRUE;
-	}
-
-	/* asynchronous call */
-	rc = ldap_whoami(ld->link, NULL, NULL, &msgid);
+	/* synchronous call */
+	rc = ldap_whoami_s(ld->link, &lauthzid, NULL, NULL);
 	if (rc != LDAP_SUCCESS ) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Whoami extended operation failed: %s (%d)", ldap_err2string(rc), rc);
 		RETURN_FALSE;
 	}
 
-	rc = ldap_result(ld->link, msgid, 1 /* LDAP_MSG_ALL */, NULL, &ldap_res);
-	if (rc == -1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Whoami extended operation failed");
-		RETURN_FALSE;
+	zval_dtor(authzid);
+	if (lauthzid == NULL) {
+		ZVAL_EMPTY_STRING(authzid);
+	} else {
+		ZVAL_STRINGL(authzid, lauthzid->bv_val, lauthzid->bv_len);
+		ldap_memfree(lauthzid->bv_val);
+		ldap_memfree(lauthzid);
 	}
 
-	/* return a PHP control object */
-	RETVAL_RES(zend_register_resource(ldap_res, le_result));
+	RETURN_TRUE;
 }
 /* }}} */
 #endif
@@ -3860,22 +3737,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_parse_exop, 0, 0, 4)
 	ZEND_ARG_INFO(1, retdata)
 ZEND_END_ARG_INFO()
 #endif
-
-#ifdef HAVE_LDAP_PARSE_PASSWD
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_parse_exop_passwd, 0, 0, 3)
-	ZEND_ARG_INFO(0, link)
-	ZEND_ARG_INFO(0, result)
-	ZEND_ARG_INFO(1, newpasswd)
-ZEND_END_ARG_INFO()
-#endif
-
-#ifdef HAVE_LDAP_PARSE_WHOAMI
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_parse_exop_whoami, 0, 0, 3)
-	ZEND_ARG_INFO(0, link)
-	ZEND_ARG_INFO(0, result)
-	ZEND_ARG_INFO(1, authzid)
-ZEND_END_ARG_INFO()
-#endif
 /* }}} */
 
 /*
@@ -3951,12 +3812,6 @@ const zend_function_entry ldap_functions[] = {
 #endif
 #ifdef HAVE_LDAP_PARSE_EXTENDED_RESULT
 	PHP_FE(ldap_parse_exop,								arginfo_ldap_parse_exop)
-#endif
-#ifdef HAVE_LDAP_PARSE_PASSWD
-	PHP_FE(ldap_parse_exop_passwd,						arginfo_ldap_parse_exop_passwd)
-#endif
-#ifdef HAVE_LDAP_PARSE_WHOAMI
-	PHP_FE(ldap_parse_exop_whoami,						arginfo_ldap_parse_exop_whoami)
 #endif
 #endif
 
