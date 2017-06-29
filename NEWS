@@ -19,6 +19,10 @@ PHP                                                                        NEWS
    #71917 (openssl_open() returns junk on envelope < 16 bytes) and bug #72362
    (OpenSSL Blowfish encryption is incorrect for short keys). (Jakub Zelenka)
 
+- PDO:
+  . Fixed bug #69356 (PDOStatement::debugDumpParams() truncates query). (Adam
+    Baratz)
+
 - SPL:
   . Fixed bug #73471 (PHP freezes with AppendIterator). (jhdxr)
 
