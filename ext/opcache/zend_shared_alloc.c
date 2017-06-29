@@ -426,14 +426,8 @@ void zend_shared_alloc_unlock(void)
 
 void zend_shared_alloc_init_xlat_table(void)
 {
-
-	/* Prepare translation table
-	 *
-	 * Make it persistent so that it uses malloc() and allocated blocks
-	 * won't be taken from space which is freed by efree in memdup.
-	 * Otherwise it leads to false matches in memdup check.
-	 */
-	zend_hash_init(&ZCG(xlat_table), 128, NULL, NULL, 1);
+	/* Prepare translation table */
+	zend_hash_init(&ZCG(xlat_table), 128, NULL, NULL, 0);
 }
 
 void zend_shared_alloc_destroy_xlat_table(void)
