@@ -2574,18 +2574,18 @@ PHP_FUNCTION(ldap_parse_result)
 
 /* {{{ Extended operation response parsing, Pierangelo Masarati */
 #ifdef HAVE_LDAP_PARSE_EXTENDED_RESULT
-/* {{{ proto bool ldap_parse_exop(resource link, resource result [, string retoid [, string retdata]])
+/* {{{ proto bool ldap_parse_exop(resource link, resource result [, string retdata [, string retoid]])
    Extract information from extended operation result */
 PHP_FUNCTION(ldap_parse_exop)
 {
-	zval *link, *result, *retoid, *retdata;
+	zval *link, *result, *retdata, *retoid;
 	ldap_linkdata *ld;
 	LDAPMessage *ldap_result;
 	char *lretoid;
 	struct berval *lretdata;
 	int rc, myargcount = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr|z/z/", &link, &result, &retoid, &retdata) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr|z/z/", &link, &result, &retdata, &retoid) != SUCCESS) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -2598,8 +2598,8 @@ PHP_FUNCTION(ldap_parse_exop)
 	}
 
 	rc = ldap_parse_extended_result(ld->link, ldap_result,
-				myargcount > 2 ? &lretoid: NULL,
-				myargcount > 3 ? &lretdata: NULL,
+				myargcount > 3 ? &lretoid: NULL,
+				myargcount > 2 ? &lretdata: NULL,
 				0);
 	if (rc != LDAP_SUCCESS) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to parse extended operation result: %s", ldap_err2string(rc));
@@ -2609,7 +2609,15 @@ PHP_FUNCTION(ldap_parse_exop)
 	/* Reverse -> fall through */
 	switch (myargcount) {
 		case 4:
-			/* use arg #4 as the data returned by the server */
+			zval_dtor(retoid);
+			if (lretoid == NULL) {
+				ZVAL_EMPTY_STRING(retoid);
+			} else {
+				ZVAL_STRING(retoid, lretoid);
+				ldap_memfree(lretoid);
+			}
+		case 3:
+			/* use arg #3 as the data returned by the server */
 			zval_dtor(retdata);
 			if (lretdata == NULL) {
 				ZVAL_EMPTY_STRING(retdata);
@@ -2617,14 +2625,6 @@ PHP_FUNCTION(ldap_parse_exop)
 				ZVAL_STRINGL(retdata, lretdata->bv_val, lretdata->bv_len);
 				ldap_memfree(lretdata->bv_val);
 				ldap_memfree(lretdata);
-			}
-		case 3:
-			zval_dtor(retoid);
-			if (lretoid == NULL) {
-				ZVAL_EMPTY_STRING(retoid);
-			} else {
-				ZVAL_STRING(retoid, lretoid);
-				ldap_memfree(lretoid);
 			}
 	}
 	RETURN_TRUE;
@@ -3221,11 +3221,11 @@ PHP_FUNCTION(ldap_control_paged_result_response)
 
 /* {{{ Extended operations, Pierangelo Masarati */
 #ifdef HAVE_LDAP_EXTENDED_OPERATION_S
-/* {{{ proto ? ldap_exop(resource link, string reqoid [, string reqdata [, string retoid [, string retdata]]])
+/* {{{ proto ? ldap_exop(resource link, string reqoid [, string reqdata [, string retdata [, string retoid]]])
    Extended operation */
 PHP_FUNCTION(ldap_exop)
 {
-	zval *link, *reqoid, *reqdata, *retoid, *retdata;
+	zval *link, *reqoid, *reqdata, *retdata, *retoid;
 	char *lreqoid, *lretoid = NULL;
 	struct berval lreqdata, *lretdata = NULL;
 	ldap_linkdata *ld;
@@ -3234,7 +3234,7 @@ PHP_FUNCTION(ldap_exop)
 	int rc, msgid, myargcount = ZEND_NUM_ARGS();
 	/* int reqoid_len, reqdata_len, retdata_len, retoid_len, retdat_len; */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz|zz/z/", &link, &reqoid, &reqdata, &retoid, &retdata) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz|zz/z/", &link, &reqoid, &reqdata, &retdata, &retoid) != SUCCESS) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -3261,8 +3261,8 @@ PHP_FUNCTION(ldap_exop)
 			lreqdata.bv_len > 0 ? &lreqdata: NULL,
 			NULL,
 			NULL,
-			&lretoid,
-			myargcount > 4 ? &lretdata : NULL );
+			myargcount > 4 ? &lretoid : NULL,
+			&lretdata );
 		if (rc != LDAP_SUCCESS ) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Extended operation %s failed: %s (%d)", lreqoid, ldap_err2string(rc), rc);
 			RETURN_FALSE;
@@ -3271,6 +3271,14 @@ PHP_FUNCTION(ldap_exop)
 		/* Reverse -> fall through */
 		switch (myargcount) {
 			case 5:
+				zval_dtor(retoid);
+				if (lretoid == NULL) {
+					ZVAL_EMPTY_STRING(retoid);
+				} else {
+					ZVAL_STRING(retoid, lretoid);
+					ldap_memfree(lretoid);
+				}
+			case 4:
 				/* use arg #4 as the data returned by the server */
 				zval_dtor(retdata);
 				if (lretdata == NULL) {
@@ -3279,14 +3287,6 @@ PHP_FUNCTION(ldap_exop)
 					ZVAL_STRINGL(retdata, lretdata->bv_val, lretdata->bv_len);
 					ldap_memfree(lretdata->bv_val);
 					ldap_memfree(lretdata);
-				}
-			case 4:
-				zval_dtor(retoid);
-				if (lretoid == NULL) {
-					ZVAL_EMPTY_STRING(retoid);
-				} else {
-					ZVAL_STRING(retoid, lretoid);
-					ldap_memfree(lretoid);
 				}
 		}
 
@@ -3707,8 +3707,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_exop, 0, 0, 5)
 	ZEND_ARG_INFO(0, link)
 	ZEND_ARG_INFO(0, reqoid)
 	ZEND_ARG_INFO(0, reqdata)
-	ZEND_ARG_INFO(1, repoid)
-	ZEND_ARG_INFO(1, repdata)
+	ZEND_ARG_INFO(1, retdata)
+	ZEND_ARG_INFO(1, retoid)
 ZEND_END_ARG_INFO()
 #endif
 
@@ -3733,8 +3733,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_parse_exop, 0, 0, 4)
 	ZEND_ARG_INFO(0, link)
 	ZEND_ARG_INFO(0, result)
-	ZEND_ARG_INFO(1, retoid)
 	ZEND_ARG_INFO(1, retdata)
+	ZEND_ARG_INFO(1, retoid)
 ZEND_END_ARG_INFO()
 #endif
 /* }}} */
