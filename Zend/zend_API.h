@@ -107,12 +107,67 @@ typedef struct _zend_fcall_info_cache {
 #define ZEND_ARG_VARIADIC_TYPE_INFO(pass_by_ref, name, type_hint, allow_null) { #name, ZEND_TYPE_ENCODE(type_hint, allow_null), pass_by_ref, 1 },
 #define ZEND_ARG_VARIADIC_OBJ_INFO(pass_by_ref, name, classname, allow_null)  { #name, ZEND_TYPE_ENCODE_CLASS_CONST(#classname, allow_null), pass_by_ref, 1 },
 
-
-#define ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(name, return_reference, required_num_args, classname, allow_null) \
+/**
+ * Start extended argument information block with an object return type
+ * declaration.
+ *
+ * ## Examples
+ * ```c
+ * ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arg_info_f, 0, 0, T, 0)
+ * ZEND_END_ARG_INFO()
+ * ```
+ *
+ * Above example argument information applied to a function _f_ would result in
+ * the following PHP function signature:
+ *
+ * ```php
+ * function f(): T {}
+ * ```
+ *
+ * @param[in] name
+ *     of the variable where the argument information should be assigned to.
+ * @param[in] return_reference
+ *     whether the routine returns by reference (`1`) or not (`0`).
+ * @param[in] required_num_args
+ *     total amount of required (non-optional) arguments of the routine.
+ * @param[in] class_name
+ *     of the object that this routine must return.
+ * @param[in] allow_null
+ *     whether the routine's return type is nullable (`1`) or not (`0`).
+ * @see ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO
+ *     for routines that do not take any arguments.
+ */
+#define ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(name, return_reference, required_num_args, class_name, allow_null) \
 	static const zend_internal_arg_info name[] = { \
-		{ (const char*)(zend_uintptr_t)(required_num_args), ZEND_TYPE_ENCODE_CLASS_CONST(#classname, allow_null), return_reference, 0 },
+		{ (const char*)(zend_uintptr_t)(required_num_args), ZEND_TYPE_ENCODE_CLASS_CONST(#class_name, allow_null), return_reference, 0 },
+
+/**
+ * Start argument information block with return object return type declaration.
+ *
+ * ## Examples
+ * ```c
+ * ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(arg_info_f, T, 0)
+ * ZEND_END_ARG_INFO()
+ * ```
+ *
+ * Above example argument information applied to a function _f_ would result
+ * in the following PHP function signature:
+ *
+ * ```php
+ * function f(): T {}
+ * ```
+ *
+ * @param[in] name
+ *     of the variable where the argument information should be assigned to.
+ * @param[in] class_name
+ *     of the object that this routine must return.
+ * @param[in] allow_null
+ *     whether the routine's return type is nullable (`1`) or not (`0`).
+ * @see ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX
+ *     which allows the specification of the total amount of required arguments.
+ */
 #define ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(name, class_name, allow_null) \
-	ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(name, 0, -1, class_name, allow_null)
+	ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(name, 0, -1, class_name, allow_null)
 
 #define ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(name, return_reference, required_num_args, type, allow_null) \
 	static const zend_internal_arg_info name[] = { \
