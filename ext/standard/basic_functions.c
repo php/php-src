@@ -3707,6 +3707,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 #endif
 
 	BASIC_MINIT_SUBMODULE(random)
+	BASIC_MINIT_SUBMODULE(uuid)
 
 	return SUCCESS;
 }

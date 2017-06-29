@@ -2,21 +2,24 @@
 ReflectionExtension::getClassNames() method on an extension which actually returns some information
 --CREDITS--
 Felix De Vliegher <felix.devliegher@gmail.com>
+Richard Fussenegger <php@fleshgrinder.com>
 --FILE--
 <?php
 $standard = new ReflectionExtension('standard');
 var_dump($standard->getClassNames());
 ?>
-==DONE==
---EXPECTF--
-array(4) {
+--EXPECT--
+array(6) {
   [0]=>
-  %s(22) "__PHP_Incomplete_Class"
+  string(22) "__PHP_Incomplete_Class"
   [1]=>
-  %s(15) "php_user_filter"
+  string(15) "php_user_filter"
   [2]=>
-  %s(9) "Directory"
+  string(9) "Directory"
   [3]=>
-  %s(14) "AssertionError"
+  string(14) "AssertionError"
+  [4]=>
+  string(12) "PHP\Std\UUID"
+  [5]=>
+  string(26) "PHP\Std\UUIDParseException"
 }
-==DONE==
