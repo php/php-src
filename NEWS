@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2017, PHP 7.1.8
 
 - Core:
+  . Fixed bug #74832 (Loading PHP extension with already registered function 
+    name leads to a crash). (jpauli)
   . Fixed bug #74780 (parse_url() broken when query string contains colon). 
     (jhdxr)
   . Fixed bug #74761 (Unary operator expected error on some systems). (petk)
