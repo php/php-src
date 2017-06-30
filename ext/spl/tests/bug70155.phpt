@@ -8,43 +8,10 @@ $data = unserialize($exploit);
 
 var_dump($data);
 ?>
-===DONE===
 --EXPECTF--
-object(ArrayObject)#1 (2) {
-  [0]=>
-  int(0)
-  ["storage":"ArrayObject":private]=>
-  object(DateInterval)#2 (15) {
-    ["y"]=>
-    int(3)
-    ["m"]=>
-    int(-1)
-    ["d"]=>
-    int(-1)
-    ["h"]=>
-    int(-1)
-    ["i"]=>
-    int(-1)
-    ["s"]=>
-    int(-1)
-    ["weekday"]=>
-    int(-1)
-    ["weekday_behavior"]=>
-    int(-1)
-    ["first_last_day_of"]=>
-    int(-1)
-    ["invert"]=>
-    int(0)
-    ["days"]=>
-    int(-1)
-    ["special_type"]=>
-    int(0)
-    ["special_amount"]=>
-    int(-1)
-    ["have_weekday_relative"]=>
-    int(0)
-    ["have_special_relative"]=>
-    int(0)
-  }
-}
-===DONE===
+Fatal error: Uncaught InvalidArgumentException: Overloaded object of type DateInterval is not compatible with ArrayObject in %s
+Stack trace:
+%s
+%s
+%s
+%s

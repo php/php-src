@@ -1741,7 +1741,7 @@ SPL_METHOD(Array, unserialize)
 	size_t buf_len;
 	const unsigned char *p, *s;
 	php_unserialize_data_t var_hash;
-	zval *members, *zflags, array;
+	zval *members, *zflags, *array;
 	zend_long flags;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &buf, &buf_len) == FAILURE) {
@@ -1792,24 +1792,22 @@ SPL_METHOD(Array, unserialize)
 		zval_ptr_dtor(&intern->array);
 		ZVAL_UNDEF(&intern->array);
 
-		if (!php_var_unserialize(&array, &p, s + buf_len, &var_hash)
-				|| (Z_TYPE(array) != IS_ARRAY && Z_TYPE(array) != IS_OBJECT)) {
+		array = var_tmp_var(&var_hash);
+		if (!php_var_unserialize(array, &p, s + buf_len, &var_hash)
+				|| (Z_TYPE_P(array) != IS_ARRAY && Z_TYPE_P(array) != IS_OBJECT)) {
 			goto outexcept;
 		}
-
-		if (Z_TYPE(array) == IS_ARRAY ||
-			Z_OBJ_HT(array) == &spl_handler_ArrayObject ||
-			Z_OBJ_HT(array) == &spl_handler_ArrayIterator) {
-			spl_array_set_array(object, intern, &array, 0L, 1);
+		if (Z_TYPE_P(array) == IS_ARRAY) {
+			ZVAL_COPY(&intern->array, array);
 		} else {
-			ZVAL_COPY(&intern->array, &array);
+			spl_array_set_array(object, intern, array, 0L, 1);
 		}
-		var_push_dtor(&var_hash, &intern->array);
+
+		if (*p != ';') {
+            goto outexcept;
+        }
+        ++p;
 	}
-	if (*p != ';') {
-		goto outexcept;
-	}
-	++p;
 
 	/* members */
 	if (*p!= 'm' || *++p != ':') {

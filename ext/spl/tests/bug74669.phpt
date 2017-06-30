@@ -45,6 +45,14 @@ class Container implements Iterator
     }
 }
 
+class SelfArray extends ArrayObject
+{
+    public function __construct()
+    {
+        parent::__construct($this);
+    }
+}
+
 $container = new Container();
 $container->append('test1');
 $container->append('test2');
@@ -69,8 +77,15 @@ foreach($arObj as $key => $value) {
 
 $payload = 'x:i:33554432;O:8:"stdClass":0:{};m:a:0:{}';
 $str = 'C:11:"ArrayObject":' . strlen($payload) . ':{' . $payload . '}';
+
 $ao = unserialize($str);
 var_dump($ao['foo']);
+
+$selfArray = new SelfArray();
+$serialized = serialize($selfArray);
+unset($selfArray);
+$selfArray = unserialize($serialized);
+var_dump($selfArray);
 
 ?>
 --EXPECTF--
@@ -81,4 +96,9 @@ var_dump($ao['foo']);
 
 Notice: Undefined index: foo in %s on line %s
 NULL
+object(SelfArray)#9 (1) {
+  ["storage":"ArrayObject":private]=>
+  array(0) {
+  }
+}
 
