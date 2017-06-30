@@ -1762,7 +1762,7 @@ static PHP_FUNCTION(session_name)
 		RETURN_FALSE;
 	}
 
-	if (SG(headers_sent)) {
+	if (name && SG(headers_sent)) {
 		php_error_docref(NULL, E_WARNING, "Cannot change session name when headers already sent");
 		RETURN_FALSE;
 	}
@@ -1793,7 +1793,7 @@ static PHP_FUNCTION(session_module_name)
 		RETURN_FALSE;
 	}
 
-	if (SG(headers_sent)) {
+	if (name && SG(headers_sent)) {
 		php_error_docref(NULL, E_WARNING, "Cannot change save handler module when headers already sent");
 		RETURN_FALSE;
 	}
@@ -2004,7 +2004,7 @@ static PHP_FUNCTION(session_save_path)
 		RETURN_FALSE;
 	}
 
-	if (SG(headers_sent)) {
+	if (name && SG(headers_sent)) {
 		php_error_docref(NULL, E_WARNING, "Cannot change save path when headers already sent");
 		RETURN_FALSE;
 	}
@@ -2232,7 +2232,7 @@ static PHP_FUNCTION(session_cache_limiter)
 		RETURN_FALSE;
 	}
 
-	if (SG(headers_sent)) {
+	if (limiter && SG(headers_sent)) {
 		php_error_docref(NULL, E_WARNING, "Cannot change cache limiter when headers already sent");
 		RETURN_FALSE;
 	}
@@ -2263,7 +2263,7 @@ static PHP_FUNCTION(session_cache_expire)
 		RETURN_LONG(PS(cache_expire));
 	}
 
-	if (SG(headers_sent)) {
+	if (expires && SG(headers_sent)) {
 		php_error_docref(NULL, E_WARNING, "Cannot change cache expire when headers already sent");
 		RETURN_FALSE;
 	}

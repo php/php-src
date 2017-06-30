@@ -19,6 +19,10 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #73471 (PHP freezes with AppendIterator). (jhdxr)
 
+- Session:
+  . Fixed bug #74514 (5 session functions incorrectly warn when calling in
+    read-only/getter mode). (Yasuo)
+
 - Standard:
   . Add support for extension name as argument to dl().
     (francois at tekwire dot net)
