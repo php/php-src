@@ -41,6 +41,7 @@
 	{ "adt",   1, -10800, "Atlantic/Bermuda"              },
 	{ "adt",   1, -10800, "Canada/Atlantic"               },
 	{ "adt",   1,  14400, "Asia/Baghdad"                  },
+	{ "krat",  0,  25200, "Asia/Barnaul"                  },
 	{ "aedt",  1,  39600, "Australia/Melbourne"           },
 	{ "aedt",  1,  39600, "Antarctica/Macquarie"          },
 	{ "aedt",  1,  39600, "Australia/ACT"                 },
