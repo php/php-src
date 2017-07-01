@@ -109,6 +109,7 @@ void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *c
 					 */
 					if ((op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) &&
 					    (opline->opcode == ZEND_RETURN ||
+					     opline->opcode == ZEND_GENERATOR_RETURN ||
 					     opline->opcode == ZEND_RETURN_BY_REF ||
 					     opline->opcode == ZEND_FREE ||
 					     opline->opcode == ZEND_FE_FREE)) {

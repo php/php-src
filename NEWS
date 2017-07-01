@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #74761 (Unary operator expected error on some systems). (petk)
   . Fixed bug #73900 (Use After Free in unserialize() SplFixedArray). (nikic)
 
+- Opcache:
+  . Fixed bug #74840 (Opcache overwrites argument of GENERATOR_RETURN within
+    finally). (Bob)
+
 - PDO:
   . Fixed bug #69356 (PDOStatement::debugDumpParams() truncates query). (Adam
     Baratz)
