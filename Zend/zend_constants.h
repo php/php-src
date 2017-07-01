@@ -64,7 +64,6 @@ void free_zend_constant(zval *zv);
 int zend_startup_constants(void);
 int zend_shutdown_constants(void);
 void zend_register_standard_constants(void);
-void clean_non_persistent_constants(void);
 ZEND_API int zend_verify_const_access(zend_class_constant *c, zend_class_entry *ce);
 ZEND_API zval *zend_get_constant(zend_string *name);
 ZEND_API zval *zend_get_constant_str(const char *name, size_t name_len);

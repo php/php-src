@@ -231,14 +231,14 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 				}
 			}
 
-			zval_ptr_dtor(zv);
+			i_zval_ptr_dtor(zv ZEND_FILE_LINE_CC);
 		}
 		next = var_dtor_hash->next;
 		efree_size(var_dtor_hash, sizeof(var_dtor_entries));
 		var_dtor_hash = next;
 	}
 
-	zval_ptr_dtor(&wakeup_name);
+	zval_ptr_dtor_nogc(&wakeup_name);
 }
 
 /* }}} */

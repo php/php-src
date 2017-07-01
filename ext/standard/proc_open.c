@@ -448,7 +448,7 @@ PHP_FUNCTION(proc_open)
 	ZEND_PARSE_PARAMETERS_START(3, 6)
 		Z_PARAM_STRING(command, command_len)
 		Z_PARAM_ARRAY(descriptorspec)
-		Z_PARAM_ZVAL_DEREF_EX(pipes, 0, 1)
+		Z_PARAM_ZVAL_DEREF(pipes)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING_EX(cwd, cwd_len, 1, 0)
 		Z_PARAM_ARRAY_EX(environment, 1, 0)
@@ -874,10 +874,7 @@ PHP_FUNCTION(proc_open)
 #endif
 	proc->env = env;
 
-	if (pipes != NULL) {
-		zval_dtor(pipes);
-	}
-
+	zval_ptr_dtor(pipes);
 	array_init(pipes);
 
 #if PHP_CAN_DO_PTS

@@ -47,7 +47,7 @@
 #elif defined(BSD) || defined(__DragonFly__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
 # define PHP_OS_FAMILY			"BSD"
 #elif defined(__APPLE__) || defined(__MACH__)
-# define PHP_OS_FAMILY			"OSX"
+# define PHP_OS_FAMILY			"Darwin"
 #elif defined(__sun__)
 # define PHP_OS_FAMILY			"Solaris"
 #elif defined(__linux__)
@@ -237,14 +237,6 @@ typedef unsigned int socklen_t;
 #else
 # if HAVE_SYS_VARARGS_H
 # include <sys/varargs.h>
-# endif
-#endif
-
-#ifndef va_copy
-# ifdef __va_copy
-#  define va_copy(ap1, ap2)         __va_copy((ap1), (ap2))
-# else
-#  define va_copy(ap1, ap2)         memcpy((&ap1), (&ap2), sizeof(va_list))
 # endif
 #endif
 

@@ -636,6 +636,20 @@
   正常終了戻り値: ONIG_NORMAL
 
 
+# unsigned int onig_get_parse_depth_limit(void)
+
+  再帰パース処理の最大深さを返す。
+  (デフォルト: regint.h で定義されている DEFAULT_PARSE_DEPTH_LIMIT。現在は 4096)
+
+
+# int onig_set_parse_depth_limit(unsigned int depth)
+
+  再帰パース処理の最大深さを指定する。
+  (depth = 0: regint.h で定義されたデフォルト値に設定する。)
+
+  正常終了戻り値: ONIG_NORMAL
+
+
 # int onig_end(void)
 
   ライブラリの使用を終了する。

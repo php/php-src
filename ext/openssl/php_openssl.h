@@ -31,6 +31,7 @@ extern zend_module_entry openssl_module_entry;
 
 #define OPENSSL_RAW_DATA 1
 #define OPENSSL_ZERO_PADDING 2
+#define OPENSSL_DONT_ZERO_PAD_KEY 4
 
 #define OPENSSL_ERROR_X509_PRIVATE_KEY_VALUES_MISMATCH 0x0B080074
 
@@ -97,6 +98,7 @@ PHP_FUNCTION(openssl_pkcs7_verify);
 PHP_FUNCTION(openssl_pkcs7_decrypt);
 PHP_FUNCTION(openssl_pkcs7_sign);
 PHP_FUNCTION(openssl_pkcs7_encrypt);
+PHP_FUNCTION(openssl_pkcs7_read);
 
 PHP_FUNCTION(openssl_error_string);
 

@@ -54,7 +54,7 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
 	 */
 	function eof()
 	{
-		return eof($this->fp);
+		return feof($this->fp);
 	}
 
 	/** increase current line number

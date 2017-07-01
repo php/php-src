@@ -37,6 +37,8 @@ void init_executor(void);
 void shutdown_executor(void);
 void shutdown_destructors(void);
 ZEND_API void zend_init_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value);
+ZEND_API void zend_init_func_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value);
+ZEND_API void zend_init_code_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value);
 ZEND_API void zend_execute(zend_op_array *op_array, zval *return_value);
 ZEND_API void execute_ex(zend_execute_data *execute_data);
 ZEND_API void execute_internal(zend_execute_data *execute_data, zval *return_value);
@@ -298,8 +300,7 @@ ZEND_API zend_class_entry *zend_fetch_class(zend_string *class_name, int fetch_t
 ZEND_API zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, const zval *key, int fetch_type);
 void zend_verify_abstract_class(zend_class_entry *ce);
 
-ZEND_API void zend_fetch_dimension_by_zval(zval *result, zval *container, zval *dim);
-ZEND_API void zend_fetch_dimension_by_zval_is(zval *result, zval *container, zval *dim, int dim_type);
+ZEND_API void zend_fetch_dimension_const(zval *result, zval *container, zval *dim, int type);
 
 ZEND_API zval* zend_get_compiled_variable_value(const zend_execute_data *execute_data_ptr, uint32_t var);
 

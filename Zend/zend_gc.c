@@ -379,9 +379,7 @@ tail_call:
 		zend_object_get_gc_t get_gc;
 		zend_object *obj = (zend_object*)ref;
 
-		ZEND_ASSERT(EG(objects_store).object_buckets != NULL);
 		if (EXPECTED(!(GC_FLAGS(ref) & IS_OBJ_FREE_CALLED) &&
-		             IS_OBJ_VALID(EG(objects_store).object_buckets[obj->handle]) &&
 		             (get_gc = obj->handlers->get_gc) != NULL)) {
 			int n;
 			zval *zv, *end;
@@ -491,9 +489,7 @@ tail_call:
 			zend_object_get_gc_t get_gc;
 			zend_object *obj = (zend_object*)ref;
 
-			ZEND_ASSERT(EG(objects_store).object_buckets != NULL);
 			if (EXPECTED(!(GC_FLAGS(ref) & IS_OBJ_FREE_CALLED) &&
-			             IS_OBJ_VALID(EG(objects_store).object_buckets[obj->handle]) &&
 		                 (get_gc = obj->handlers->get_gc) != NULL)) {
 				int n;
 				zval *zv, *end;
@@ -606,9 +602,7 @@ tail_call:
 				zend_object_get_gc_t get_gc;
 				zend_object *obj = (zend_object*)ref;
 
-				ZEND_ASSERT(EG(objects_store).object_buckets != NULL);
 				if (EXPECTED(!(GC_FLAGS(ref) & IS_OBJ_FREE_CALLED) &&
-				             IS_OBJ_VALID(EG(objects_store).object_buckets[obj->handle]) &&
 				             (get_gc = obj->handlers->get_gc) != NULL)) {
 					int n;
 					zval *zv, *end;
@@ -770,9 +764,7 @@ tail_call:
 			zend_object_get_gc_t get_gc;
 			zend_object *obj = (zend_object*)ref;
 
-			ZEND_ASSERT(EG(objects_store).object_buckets != NULL);
 			if (EXPECTED(!(GC_FLAGS(ref) & IS_OBJ_FREE_CALLED) &&
-			             IS_OBJ_VALID(EG(objects_store).object_buckets[obj->handle]) &&
 			             (get_gc = obj->handlers->get_gc) != NULL)) {
 				int n;
 				zval *zv, *end;
@@ -964,9 +956,7 @@ tail_call:
 			zend_object_get_gc_t get_gc;
 			zend_object *obj = (zend_object*)ref;
 
-			ZEND_ASSERT(EG(objects_store).object_buckets != NULL);
 			if (EXPECTED(!(GC_FLAGS(ref) & IS_OBJ_FREE_CALLED) &&
-			             IS_OBJ_VALID(EG(objects_store).object_buckets[obj->handle]) &&
 		                 (get_gc = obj->handlers->get_gc) != NULL)) {
 				int n;
 				zval *zv, *end;
@@ -1122,11 +1112,12 @@ ZEND_API int zend_gc_collect_cycles(void)
 				if (GC_TYPE(p) == IS_OBJECT) {
 					zend_object *obj = (zend_object*)p;
 
-					if (IS_OBJ_VALID(EG(objects_store).object_buckets[obj->handle]) &&
-						!(GC_FLAGS(obj) & IS_OBJ_DESTRUCTOR_CALLED)) {
+					if (!(GC_FLAGS(obj) & IS_OBJ_DESTRUCTOR_CALLED)) {
 						GC_TRACE_REF(obj, "calling destructor");
 						GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
-						if (obj->handlers->dtor_obj) {
+						if (obj->handlers->dtor_obj
+						 && (obj->handlers->dtor_obj != zend_objects_destroy_object
+						  || obj->ce->destructor)) {
 							GC_REFCOUNT(obj)++;
 							obj->handlers->dtor_obj(obj);
 							GC_REFCOUNT(obj)--;
@@ -1158,21 +1149,19 @@ ZEND_API int zend_gc_collect_cycles(void)
 			if (GC_TYPE(p) == IS_OBJECT) {
 				zend_object *obj = (zend_object*)p;
 
-				if (IS_OBJ_VALID(EG(objects_store).object_buckets[obj->handle])) {
-					EG(objects_store).object_buckets[obj->handle] = SET_OBJ_INVALID(obj);
-					GC_TYPE(obj) = IS_NULL;
-					if (!(GC_FLAGS(obj) & IS_OBJ_FREE_CALLED)) {
-						GC_FLAGS(obj) |= IS_OBJ_FREE_CALLED;
-						if (obj->handlers->free_obj) {
-							GC_REFCOUNT(obj)++;
-							obj->handlers->free_obj(obj);
-							GC_REFCOUNT(obj)--;
-						}
+				EG(objects_store).object_buckets[obj->handle] = SET_OBJ_INVALID(obj);
+				GC_TYPE(obj) = IS_NULL;
+				if (!(GC_FLAGS(obj) & IS_OBJ_FREE_CALLED)) {
+					GC_FLAGS(obj) |= IS_OBJ_FREE_CALLED;
+					if (obj->handlers->free_obj) {
+						GC_REFCOUNT(obj)++;
+						obj->handlers->free_obj(obj);
+						GC_REFCOUNT(obj)--;
 					}
-					SET_OBJ_BUCKET_NUMBER(EG(objects_store).object_buckets[obj->handle], EG(objects_store).free_list_head);
-					EG(objects_store).free_list_head = obj->handle;
-					p = current->ref = (zend_refcounted*)(((char*)obj) - obj->handlers->offset);
 				}
+				SET_OBJ_BUCKET_NUMBER(EG(objects_store).object_buckets[obj->handle], EG(objects_store).free_list_head);
+				EG(objects_store).free_list_head = obj->handle;
+				p = current->ref = (zend_refcounted*)(((char*)obj) - obj->handlers->offset);
 			} else if (GC_TYPE(p) == IS_ARRAY) {
 				zend_array *arr = (zend_array*)p;
 

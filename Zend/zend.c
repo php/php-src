@@ -638,7 +638,6 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	zend_get_windows_version_info(&executor_globals->windows_version_info);
 #endif
 	executor_globals->flags = EG_FLAGS_INITIAL;
-	executor_globals->valid_symbol_table = 0;
 }
 /* }}} */
 
@@ -889,13 +888,9 @@ void zend_post_startup(void) /* {{{ */
 	}
 	free(EG(zend_constants));
 
-	virtual_cwd_deactivate();
-
 	executor_globals_ctor(executor_globals);
 	global_persistent_list = &EG(persistent_list);
 	zend_copy_ini_directives();
-#else
-	virtual_cwd_deactivate();
 #endif
 }
 /* }}} */
@@ -903,31 +898,6 @@ void zend_post_startup(void) /* {{{ */
 void zend_shutdown(void) /* {{{ */
 {
 	zend_destroy_rsrc_list(&EG(persistent_list));
-	if (EG(active))
-	{
-		/*
-		 * The order of destruction is important here.
-		 * See bugs #65463 and 66036.
-		 */
-		zend_function *func;
-		zend_class_entry *ce;
-
-		ZEND_HASH_REVERSE_FOREACH_PTR(GLOBAL_FUNCTION_TABLE, func) {
-			if (func->type == ZEND_USER_FUNCTION) {
-				zend_cleanup_op_array_data((zend_op_array *) func);
-			}
-		} ZEND_HASH_FOREACH_END();
-		ZEND_HASH_REVERSE_FOREACH_PTR(GLOBAL_CLASS_TABLE, ce) {
-			if (ce->type == ZEND_USER_CLASS) {
-				zend_cleanup_user_class_data(ce);
-			} else {
-				break;
-			}
-		} ZEND_HASH_FOREACH_END();
-		zend_cleanup_internal_classes();
-		zend_hash_reverse_apply(GLOBAL_FUNCTION_TABLE, (apply_func_t) clean_non_persistent_function_full);
-		zend_hash_reverse_apply(GLOBAL_CLASS_TABLE, (apply_func_t) clean_non_persistent_class_full);
-	}
 	zend_destroy_modules();
 
 	virtual_cwd_deactivate();
@@ -1127,8 +1097,6 @@ ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) /* {{{ */
 static ZEND_COLD void zend_error_va_list(int type, const char *format, va_list args)
 #endif
 {
-	char *str;
-	int len;
 #if !defined(HAVE_NORETURN) || defined(HAVE_NORETURN_ALIAS)
 	va_list args;
 #endif
@@ -1257,24 +1225,9 @@ static ZEND_COLD void zend_error_va_list(int type, const char *format, va_list a
 			break;
 		default:
 			/* Handle the error in user space */
-/* va_copy() is __va_copy() in old gcc versions.
- * According to the autoconf manual, using
- * memcpy(&dst, &src, sizeof(va_list))
- * gives maximum portability. */
-#ifndef va_copy
-# ifdef __va_copy
-#  define va_copy(dest, src)	__va_copy((dest), (src))
-# else
-#  define va_copy(dest, src)	memcpy(&(dest), &(src), sizeof(va_list))
-# endif
-#endif
 			va_copy(usr_copy, args);
-			len = (int)zend_vspprintf(&str, 0, format, usr_copy);
-			ZVAL_NEW_STR(&params[1], zend_string_init(str, len, 0));
-			efree(str);
-#ifdef va_copy
+			ZVAL_STR(&params[1], zend_vstrpprintf(0, format, usr_copy));
 			va_end(usr_copy);
-#endif
 
 			ZVAL_LONG(&params[0], type);
 

@@ -241,6 +241,9 @@ static int wddx_stack_destroy(wddx_stack *stack)
 		}
 		efree(stack->elements);
 	}
+	if (stack->varname) {
+		efree(stack->varname);
+	}
 	return SUCCESS;
 }
 /* }}} */
@@ -471,10 +474,6 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 	 */
 	if (call_user_function_ex(CG(function_table), obj, &fname, &retval, 0, 0, 1, NULL) == SUCCESS) {
 		if (!Z_ISUNDEF(retval) && (sleephash = HASH_OF(&retval))) {
-			PHP_CLASS_ATTRIBUTES;
-
-			PHP_SET_CLASS_ATTRIBUTES(obj);
-
 			php_wddx_add_chunk_static(packet, WDDX_STRUCT_S);
 			snprintf(tmp_buf, WDDX_BUF_LEN, WDDX_VAR_S, PHP_CLASS_NAME_VAR);
 			php_wddx_add_chunk(packet, tmp_buf);

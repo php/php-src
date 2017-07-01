@@ -100,28 +100,21 @@ static void zend_extension_deactivator(zend_extension *extension) /* {{{ */
 }
 /* }}} */
 
-static int clean_non_persistent_function(zval *zv) /* {{{ */
+static int clean_non_persistent_constant_full(zval *zv) /* {{{ */
 {
-	zend_function *function = Z_PTR_P(zv);
-	return (function->type == ZEND_INTERNAL_FUNCTION) ? ZEND_HASH_APPLY_STOP : ZEND_HASH_APPLY_REMOVE;
+	zend_constant *c = Z_PTR_P(zv);
+	return (c->flags & CONST_PERSISTENT) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_REMOVE;
 }
 /* }}} */
 
-ZEND_API int clean_non_persistent_function_full(zval *zv) /* {{{ */
+static int clean_non_persistent_function_full(zval *zv) /* {{{ */
 {
 	zend_function *function = Z_PTR_P(zv);
 	return (function->type == ZEND_INTERNAL_FUNCTION) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_REMOVE;
 }
 /* }}} */
 
-static int clean_non_persistent_class(zval *zv) /* {{{ */
-{
-	zend_class_entry *ce = Z_PTR_P(zv);
-	return (ce->type == ZEND_INTERNAL_CLASS) ? ZEND_HASH_APPLY_STOP : ZEND_HASH_APPLY_REMOVE;
-}
-/* }}} */
-
-ZEND_API int clean_non_persistent_class_full(zval *zv) /* {{{ */
+static int clean_non_persistent_class_full(zval *zv) /* {{{ */
 {
 	zend_class_entry *ce = Z_PTR_P(zv);
 	return (ce->type == ZEND_INTERNAL_CLASS) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_REMOVE;
@@ -153,7 +146,6 @@ void init_executor(void) /* {{{ */
 	zend_vm_stack_init();
 
 	zend_hash_init(&EG(symbol_table), 64, NULL, ZVAL_PTR_DTOR, 0);
-	EG(valid_symbol_table) = 1;
 
 	zend_llist_apply(&zend_extensions, (llist_apply_func_t) zend_extension_activator);
 
@@ -253,126 +245,116 @@ void shutdown_destructors(void) /* {{{ */
 
 void shutdown_executor(void) /* {{{ */
 {
-	zend_function *func;
-	zend_class_entry *ce;
-
-	zend_try {
-
-/* Removed because this can not be safely done, e.g. in this situation:
-   Object 1 creates object 2
-   Object 3 holds reference to object 2.
-   Now when 1 and 2 are destroyed, 3 can still access 2 in its destructor, with
-   very problematic results */
-/* 		zend_objects_store_call_destructors(&EG(objects_store)); */
-
-/* Moved after symbol table cleaners, because  some of the cleaners can call
-   destructors, which would use EG(symtable_cache_ptr) and thus leave leaks */
-/*		while (EG(symtable_cache_ptr)>=EG(symtable_cache)) {
-			zend_hash_destroy(*EG(symtable_cache_ptr));
-			efree(*EG(symtable_cache_ptr));
-			EG(symtable_cache_ptr)--;
-		}
-*/
-		zend_llist_apply(&zend_extensions, (llist_apply_func_t) zend_extension_deactivator);
-
-		if (CG(unclean_shutdown)) {
-			EG(symbol_table).pDestructor = zend_unclean_zval_ptr_dtor;
-		}
-		zend_hash_graceful_reverse_destroy(&EG(symbol_table));
-	} zend_end_try();
-	EG(valid_symbol_table) = 0;
-
-	zend_try {
-		zval *zeh;
-		/* remove error handlers before destroying classes and functions,
-		 * so that if handler used some class, crash would not happen */
-		if (Z_TYPE(EG(user_error_handler)) != IS_UNDEF) {
-			zeh = &EG(user_error_handler);
-			zval_ptr_dtor(zeh);
-			ZVAL_UNDEF(&EG(user_error_handler));
-		}
-
-		if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
-			zeh = &EG(user_exception_handler);
-			zval_ptr_dtor(zeh);
-			ZVAL_UNDEF(&EG(user_exception_handler));
-		}
-
-		zend_stack_clean(&EG(user_error_handlers_error_reporting), NULL, 1);
-		zend_stack_clean(&EG(user_error_handlers), (void (*)(void *))ZVAL_PTR_DTOR, 1);
-		zend_stack_clean(&EG(user_exception_handlers), (void (*)(void *))ZVAL_PTR_DTOR, 1);
-	} zend_end_try();
-
-	zend_try {
-		/* Cleanup static data for functions and arrays.
-		 * We need a separate cleanup stage because of the following problem:
-		 * Suppose we destroy class X, which destroys the class's function table,
-		 * and in the function table we have function foo() that has static $bar.
-		 * Now if an object of class X is assigned to $bar, its destructor will be
-		 * called and will fail since X's function table is in mid-destruction.
-		 * So we want first of all to clean up all data and then move to tables destruction.
-		 * Note that only run-time accessed data need to be cleaned up, pre-defined data can
-		 * not contain objects and thus are not probelmatic */
-		if (EG(full_tables_cleanup)) {
-			ZEND_HASH_FOREACH_PTR(EG(function_table), func) {
-				if (func->type == ZEND_USER_FUNCTION) {
-					zend_cleanup_op_array_data((zend_op_array *) func);
-				}
-			} ZEND_HASH_FOREACH_END();
-			ZEND_HASH_REVERSE_FOREACH_PTR(EG(class_table), ce) {
-				if (ce->type == ZEND_USER_CLASS) {
-					zend_cleanup_user_class_data(ce);
-				} else {
-					zend_cleanup_internal_class_data(ce);
-				}
-			} ZEND_HASH_FOREACH_END();
-		} else {
-			ZEND_HASH_REVERSE_FOREACH_PTR(EG(function_table), func) {
-				if (func->type != ZEND_USER_FUNCTION) {
-					break;
-				}
-				zend_cleanup_op_array_data((zend_op_array *) func);
-			} ZEND_HASH_FOREACH_END();
-			ZEND_HASH_REVERSE_FOREACH_PTR(EG(class_table), ce) {
-				if (ce->type != ZEND_USER_CLASS) {
-					break;
-				}
-				zend_cleanup_user_class_data(ce);
-			} ZEND_HASH_FOREACH_END();
-			zend_cleanup_internal_classes();
-		}
-	} zend_end_try();
+	zend_string *key;
+	zval *zv;
+#if ZEND_DEBUG
+	zend_bool fast_shutdown = 0;
+#else
+	zend_bool fast_shutdown = is_zend_mm() && !EG(full_tables_cleanup);
+#endif
 
 	zend_try {
 		zend_llist_destroy(&CG(open_files));
 	} zend_end_try();
 
 	zend_try {
-		clean_non_persistent_constants();
-    } zend_end_try();
-
-	zend_try {
 		zend_close_rsrc_list(&EG(regular_list));
 	} zend_end_try();
 
-#if ZEND_DEBUG
-	if (GC_G(gc_enabled) && !CG(unclean_shutdown)) {
-		gc_collect_cycles();
-	}
-#endif
+	zend_objects_store_free_object_storage(&EG(objects_store), fast_shutdown);
+
+	/* All resources and objects are destroyed. */
+	/* No PHP callback functions may be called after this point. */
+	EG(active) = 0;
 
 	zend_try {
-		zend_objects_store_free_object_storage(&EG(objects_store));
+		zend_llist_apply(&zend_extensions, (llist_apply_func_t) zend_extension_deactivator);
+	} zend_end_try();
+
+	if (fast_shutdown) {
+		/* Fast Request Shutdown
+		 * =====================
+		 * Zend Memory Manager frees memory by its own. We don't have to free
+		 * each allocated block separately.
+		 */
+		ZEND_HASH_REVERSE_FOREACH_VAL(EG(zend_constants), zv) {
+			zend_constant *c = Z_PTR_P(zv);
+			if (c->flags & CONST_PERSISTENT) {
+				break;
+			}
+		} ZEND_HASH_FOREACH_END_DEL();
+		ZEND_HASH_REVERSE_FOREACH_VAL(EG(function_table), zv) {
+			zend_function *func = Z_PTR_P(zv);
+			if (func->type == ZEND_INTERNAL_FUNCTION) {
+				break;
+			}
+		} ZEND_HASH_FOREACH_END_DEL();
+		ZEND_HASH_REVERSE_FOREACH_VAL(EG(class_table), zv) {
+			zend_class_entry *ce = Z_PTR_P(zv);
+			if (ce->type == ZEND_INTERNAL_CLASS) {
+				break;
+			}
+		} ZEND_HASH_FOREACH_END_DEL();
+	} else {
+		zend_hash_graceful_reverse_destroy(&EG(symbol_table));
+
+#if ZEND_DEBUG
+		if (GC_G(gc_enabled) && !CG(unclean_shutdown)) {
+			gc_collect_cycles();
+		}
+#endif
+
+		/* remove error handlers before destroying classes and functions,
+		 * so that if handler used some class, crash would not happen */
+		if (Z_TYPE(EG(user_error_handler)) != IS_UNDEF) {
+			zval_ptr_dtor(&EG(user_error_handler));
+			ZVAL_UNDEF(&EG(user_error_handler));
+		}
+
+		if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
+			zval_ptr_dtor(&EG(user_exception_handler));
+			ZVAL_UNDEF(&EG(user_exception_handler));
+		}
+
+		zend_stack_clean(&EG(user_error_handlers_error_reporting), NULL, 1);
+		zend_stack_clean(&EG(user_error_handlers), (void (*)(void *))ZVAL_PTR_DTOR, 1);
+		zend_stack_clean(&EG(user_exception_handlers), (void (*)(void *))ZVAL_PTR_DTOR, 1);
 
 		zend_vm_stack_destroy();
 
-		/* Destroy all op arrays */
 		if (EG(full_tables_cleanup)) {
+			zend_hash_reverse_apply(EG(zend_constants), clean_non_persistent_constant_full);
 			zend_hash_reverse_apply(EG(function_table), clean_non_persistent_function_full);
 			zend_hash_reverse_apply(EG(class_table), clean_non_persistent_class_full);
 		} else {
-			zend_hash_reverse_apply(EG(function_table), clean_non_persistent_function);
-			zend_hash_reverse_apply(EG(class_table), clean_non_persistent_class);
+			ZEND_HASH_REVERSE_FOREACH_STR_KEY_VAL(EG(zend_constants), key, zv) {
+				zend_constant *c = Z_PTR_P(zv);
+				if (c->flags & CONST_PERSISTENT) {
+					break;
+				}
+				zval_ptr_dtor(&c->value);
+				if (c->name) {
+					zend_string_release(c->name);
+				}
+				efree(c);
+				zend_string_release(key);
+			} ZEND_HASH_FOREACH_END_DEL();
+			ZEND_HASH_REVERSE_FOREACH_STR_KEY_VAL(EG(function_table), key, zv) {
+				zend_function *func = Z_PTR_P(zv);
+				if (func->type == ZEND_INTERNAL_FUNCTION) {
+					break;
+				}
+				destroy_op_array(&func->op_array);
+				zend_string_release(key);
+			} ZEND_HASH_FOREACH_END_DEL();
+			ZEND_HASH_REVERSE_FOREACH_STR_KEY_VAL(EG(class_table), key, zv) {
+				zend_class_entry *ce = Z_PTR_P(zv);
+				if (ce->type == ZEND_INTERNAL_CLASS) {
+					break;
+				}
+				destroy_zend_class(zv);
+				zend_string_release(key);
+			} ZEND_HASH_FOREACH_END_DEL();
 		}
 
 		while (EG(symtable_cache_ptr)>=EG(symtable_cache)) {
@@ -380,12 +362,6 @@ void shutdown_executor(void) /* {{{ */
 			FREE_HASHTABLE(*EG(symtable_cache_ptr));
 			EG(symtable_cache_ptr)--;
 		}
-	} zend_end_try();
-
-	zend_try {
-#if 0&&ZEND_DEBUG
-	signal(SIGSEGV, original_sigsegv_handler);
-#endif
 
 		zend_hash_destroy(&EG(included_files));
 
@@ -397,9 +373,11 @@ void shutdown_executor(void) /* {{{ */
 			zend_hash_destroy(EG(in_autoload));
 			FREE_HASHTABLE(EG(in_autoload));
 		}
-	} zend_end_try();
 
-	zend_shutdown_fpu();
+		if (EG(ht_iterators) != EG(ht_iterators_slots)) {
+			efree(EG(ht_iterators));
+		}
+	}
 
 #if ZEND_DEBUG
 	if (EG(ht_iterators_used) && !CG(unclean_shutdown)) {
@@ -408,11 +386,10 @@ void shutdown_executor(void) /* {{{ */
 #endif
 
 	EG(ht_iterators_used) = 0;
-	if (EG(ht_iterators) != EG(ht_iterators_slots)) {
-		efree(EG(ht_iterators));
-	}
 
-	EG(active) = 0;
+	zend_cleanup_internal_classes();
+
+	zend_shutdown_fpu();
 }
 /* }}} */
 
@@ -724,19 +701,18 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 	}
 
 	if (!fci_cache || !fci_cache->initialized) {
-		zend_string *callable_name;
 		char *error = NULL;
 
 		if (!fci_cache) {
 			fci_cache = &fci_cache_local;
 		}
 
-		if (!zend_is_callable_ex(&fci->function_name, fci->object, IS_CALLABLE_CHECK_SILENT, &callable_name, fci_cache, &error)) {
+		if (!zend_is_callable_ex(&fci->function_name, fci->object, IS_CALLABLE_CHECK_SILENT, NULL, fci_cache, &error)) {
 			if (error) {
+				zend_string *callable_name
+					= zend_get_callable_name_ex(&fci->function_name, fci->object);
 				zend_error(E_WARNING, "Invalid callback %s, %s", ZSTR_VAL(callable_name), error);
 				efree(error);
-			}
-			if (callable_name) {
 				zend_string_release(callable_name);
 			}
 			if (EG(current_execute_data) == &dummy_execute_data) {
@@ -751,16 +727,12 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 			zend_error(E_DEPRECATED, "%s", error);
 			efree(error);
 			if (UNEXPECTED(EG(exception))) {
-				if (callable_name) {
-					zend_string_release(callable_name);
-				}
 				if (EG(current_execute_data) == &dummy_execute_data) {
 					EG(current_execute_data) = dummy_execute_data.prev_execute_data;
 				}
 				return FAILURE;
 			}
 		}
-		zend_string_release(callable_name);
 	}
 
 	func = fci_cache->function_handler;
@@ -769,15 +741,6 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 
 	call = zend_vm_stack_push_call_frame(ZEND_CALL_TOP_FUNCTION | ZEND_CALL_DYNAMIC,
 		func, fci->param_count, fci_cache->called_scope, fci->object);
-	if (fci->object &&
-	    (!EG(objects_store).object_buckets ||
-	     !IS_OBJ_VALID(EG(objects_store).object_buckets[fci->object->handle]))) {
-		zend_vm_stack_free_call_frame(call);
-		if (EG(current_execute_data) == &dummy_execute_data) {
-			EG(current_execute_data) = dummy_execute_data.prev_execute_data;
-		}
-		return FAILURE;
-	}
 
 	if (func->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED)) {
 		if (func->common.fn_flags & ZEND_ACC_ABSTRACT) {
@@ -859,7 +822,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 		int call_via_handler = (func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) != 0;
 		const zend_op *current_opline_before_exception = EG(opline_before_exception);
 
-		zend_init_execute_data(call, &func->op_array, fci->retval);
+		zend_init_func_execute_data(call, &func->op_array, fci->retval);
 		zend_execute_ex(call);
 		EG(opline_before_exception) = current_opline_before_exception;
 		if (call_via_handler) {
@@ -1693,7 +1656,7 @@ ZEND_API int zend_set_local_var(zend_string *name, zval *value, int force) /* {{
 			if (force) {
 				zend_array *symbol_table = zend_rebuild_symbol_table();
 				if (symbol_table) {
-					return zend_hash_update(symbol_table, name, value) ? SUCCESS : FAILURE;;
+					return zend_hash_update(symbol_table, name, value) ? SUCCESS : FAILURE;
 				}
 			}
 		} else {
@@ -1735,7 +1698,7 @@ ZEND_API int zend_set_local_var_str(const char *name, size_t len, zval *value, i
 			if (force) {
 				zend_array *symbol_table = zend_rebuild_symbol_table();
 				if (symbol_table) {
-					return zend_hash_str_update(symbol_table, name, len, value) ? SUCCESS : FAILURE;;
+					return zend_hash_str_update(symbol_table, name, len, value) ? SUCCESS : FAILURE;
 				}
 			}
 		} else {

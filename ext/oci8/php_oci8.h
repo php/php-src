@@ -43,11 +43,12 @@
  */
 #undef PHP_OCI8_VERSION
 #endif
-#define PHP_OCI8_VERSION "2.1.4"
+#define PHP_OCI8_VERSION "2.1.5"
 
 extern zend_module_entry oci8_module_entry;
 #define phpext_oci8_ptr &oci8_module_entry
 #define phpext_oci8_11g_ptr &oci8_module_entry
+#define phpext_oci8_12c_ptr &oci8_module_entry
 
 
 PHP_MINIT_FUNCTION(oci);

@@ -39,7 +39,7 @@ typedef struct _zend_closure {
 	zend_function     func;
 	zval              this_ptr;
 	zend_class_entry *called_scope;
-	void (*orig_internal_handler)(INTERNAL_FUNCTION_PARAMETERS);
+	zif_handler       orig_internal_handler;
 } zend_closure;
 
 /* non-static since it needs to be referenced */
@@ -235,7 +235,7 @@ ZEND_METHOD(Closure, bind)
 }
 /* }}} */
 
-static void zend_closure_call_magic(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */ {
+static ZEND_NAMED_FUNCTION(zend_closure_call_magic) /* {{{ */ {
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
 	zval params[2];
@@ -628,7 +628,7 @@ void zend_register_closure_ce(void) /* {{{ */
 }
 /* }}} */
 
-static void zend_closure_internal_handler(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
+static ZEND_NAMED_FUNCTION(zend_closure_internal_handler) /* {{{ */
 {
 	zend_closure *closure = (zend_closure*)EX(func)->common.prototype;
 	closure->orig_internal_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU);

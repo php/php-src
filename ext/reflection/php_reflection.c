@@ -380,6 +380,9 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 
 		ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->constants_table, key, c) {
 			_class_const_string(str, ZSTR_VAL(key), c, ZSTR_VAL(sub_indent));
+			if (UNEXPECTED(EG(exception))) {
+				return;
+			}
 		} ZEND_HASH_FOREACH_END();
 	}
 	smart_str_append_printf(str, "%s  }\n", indent);
@@ -637,7 +640,10 @@ static void _parameter_string(smart_str *str, zend_function *fptr, struct _zend_
 
 			smart_str_appends(str, " = ");
 			ZVAL_DUP(&zv, RT_CONSTANT(&fptr->op_array, precv->op2));
-			zval_update_constant_ex(&zv, fptr->common.scope);
+			if (UNEXPECTED(zval_update_constant_ex(&zv, fptr->common.scope) == FAILURE)) {
+				zval_ptr_dtor(&zv);
+				return;
+			}
 			if (Z_TYPE(zv) == IS_TRUE) {
 				smart_str_appends(str, "true");
 			} else if (Z_TYPE(zv) == IS_FALSE) {
@@ -2898,15 +2904,15 @@ static zend_string *reflection_type_name(type_reference *param) {
 		return zend_string_copy(ZEND_TYPE_NAME(param->arg_info->type));
 	}
 	switch (ZEND_TYPE_CODE(param->arg_info->type)) {
-		case IS_ARRAY:    return zend_string_init("array", sizeof("array") - 1, 0);
-		case IS_CALLABLE: return zend_string_init("callable", sizeof("callable") - 1, 0);
-		case IS_STRING:   return zend_string_init("string", sizeof("string") - 1, 0);
+		/* keep this for BC, bool vs boolean, int vs integer */
 		case _IS_BOOL:    return zend_string_init("bool", sizeof("bool") - 1, 0);
 		case IS_LONG:     return zend_string_init("int", sizeof("int") - 1, 0);
-		case IS_DOUBLE:   return zend_string_init("float", sizeof("float") - 1, 0);
-		case IS_VOID:     return zend_string_init("void", sizeof("void") - 1, 0);
-		case IS_ITERABLE: return zend_string_init("iterable", sizeof("iterable") - 1, 0);
-		EMPTY_SWITCH_DEFAULT_CASE()
+		/* use zend API for other types */
+		default:
+			{
+			char *name = zend_get_type_by_const(ZEND_TYPE_CODE(param->arg_info->type));
+			return zend_string_init(name, strlen(name), 0);
+			}
 	}
 }
 /* }}} */
@@ -4747,7 +4753,7 @@ ZEND_METHOD(reflection_class, newInstance)
 
 		fcc.initialized = 1;
 		fcc.function_handler = constructor;
-		fcc.calling_scope = zend_get_executed_scope();;
+		fcc.calling_scope = zend_get_executed_scope();
 		fcc.called_scope = Z_OBJCE_P(return_value);
 		fcc.object = Z_OBJ_P(return_value);
 
@@ -5111,9 +5117,9 @@ ZEND_METHOD(reflection_class, implementsInterface)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionClass::isIterateable()
-   Returns whether this class is iterateable (can be used inside foreach) */
-ZEND_METHOD(reflection_class, isIterateable)
+/* {{{ proto public bool ReflectionClass::isIterable()
+   Returns whether this class is iterable (can be used inside foreach) */
+ZEND_METHOD(reflection_class, isIterable)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
@@ -5125,7 +5131,12 @@ ZEND_METHOD(reflection_class, isIterateable)
 	METHOD_NOTSTATIC(reflection_class_ptr);
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	RETURN_BOOL(ce->get_iterator != NULL);
+	if (ce->ce_flags & (ZEND_ACC_INTERFACE | ZEND_ACC_IMPLICIT_ABSTRACT_CLASS |
+	                    ZEND_ACC_TRAIT     | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
+		RETURN_FALSE;
+	}
+
+	RETURN_BOOL(ce->get_iterator || instanceof_function(ce, zend_ce_traversable));
 }
 /* }}} */
 
@@ -6459,7 +6470,8 @@ static const zend_function_entry reflection_class_functions[] = {
 	ZEND_ME(reflection_class, getStaticPropertyValue, arginfo_reflection_class_getStaticPropertyValue, 0)
 	ZEND_ME(reflection_class, setStaticPropertyValue, arginfo_reflection_class_setStaticPropertyValue, 0)
 	ZEND_ME(reflection_class, getDefaultProperties, arginfo_reflection__void, 0)
-	ZEND_ME(reflection_class, isIterateable, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_class, isIterable, arginfo_reflection__void, 0)
+	ZEND_MALIAS(reflection_class, isIterateable, isIterable, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, implementsInterface, arginfo_reflection_class_implementsInterface, 0)
 	ZEND_ME(reflection_class, getExtension, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, getExtensionName, arginfo_reflection__void, 0)

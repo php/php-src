@@ -41,6 +41,7 @@ PHP 7.2 UPGRADE NOTES
   . Minimum supported Windows versions are Windows 7/Server 2008 R2.
   . Initial trait property value compatibility check will no longer perform
     any casts. (Bug #74269)
+  . "object" (in any case) can no longer be used as a class name.
 
 - BCMath:
   . The bcmod() function no longer truncates fractional numbers to integers. As
@@ -85,6 +86,13 @@ PHP 7.2 UPGRADE NOTES
         session_start()
     . Session no longer initialize $_SESSION for invalid and useless session.
         session_start()
+    . When headers are already sent and try to set new INI values, session_name(),
+      session_module_name(), session_save_path(), session_cache_limiter() and
+      session_cache_expire() are no longer works. Older PHPs accepts new values even
+      if new values will not be effective.
+      This new corrected behavior may affect command line mode CLI scripts that manage
+      sessions. Use output buffer just like web applications to resolve problems on
+      CLI scripts.
 
 
 ========================================
@@ -101,12 +109,23 @@ PHP 7.2 UPGRADE NOTES
     (https://wiki.php.net/rfc/allow-abstract-function-override)
   . A trailing comma in group use statements is now allowed.
     (https://wiki.php.net/rfc/list-syntax-trailing-commas)
+  . The "object" type annotation is now supported.
+    (https://wiki.php.net/rfc/object-typehint)
+
+- DBA:
+  . Implemented support for the LMDB backend.
+
+- OCI8:
+  . Added Oracle Database Transparent Application Failover (TAF) callback support.
 
 - PCRE:
   . Added `J` modifier for setting PCRE_DUPNAMES.
   . Added `PREG_UNMATCHED_AS_NULL` flag to allow distinguish between unmatched
     subpatterns and empty matches by reporting NULL and "" (empty string),
     respectively.
+
+- SQLite3:
+  . Implemented writing to BLOBs.
 
 - Standard:
   . Simplified password hashing API updated to support Argon2i hashes when PHP is compiled with libargon2
@@ -212,6 +231,10 @@ See also: https://wiki.php.net/rfc/deprecations_php_7_2
   . Added mb_chr() and mb_ord().
   . Added mb_scurb() that scrub broken multibyte strings.
 
+- OCI8:
+  . Added oci_register_taf_callback() and oci_disable_taf_callback() for
+    Oracle Database TAF callback support.
+
 - Sockets:
   . Added socket_addrinfo_lookup(), socket_addrinfo_connect(),
     socket_addrinfo_bind() and socket_addrinfo_explain().
@@ -251,6 +274,10 @@ See also: https://wiki.php.net/rfc/deprecations_php_7_2
     encodings are checked recursively.
   . mb_convert_encoding() accepts array parameter. Only value encodings
     are converted recursively.
+
+- PDO_OCI:
+  . The '--with-pdo-oci' configure syntax no longer needs the vesion number of the
+    Oracle Instant Client.
 
 - pdo_sqlite
   . Use sqlite3_prepare_v2() and sqlite3_close_v2() functions instead of their

@@ -7,7 +7,7 @@ Bug #38944 (newly created ZipArchive segfaults when accessing comment property)
 
 $arc_name = dirname(__FILE__)."/bug38944.zip";
 $foo = new ZipArchive;
-$foo->open($arc_name, ZIPARCHIVE::CREATE);;
+$foo->open($arc_name, ZIPARCHIVE::CREATE);
 
 var_dump($foo->status);
 var_dump($foo->statusSys);

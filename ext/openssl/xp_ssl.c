@@ -1252,12 +1252,12 @@ static int set_server_specific_opts(php_stream *stream, SSL_CTX *ctx) /* {{{ */
 
 	set_server_dh_param(stream, ctx);
 	zv = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", "single_dh_use");
-	if (zv != NULL && zend_is_true(zv)) {
+	if (zv == NULL || zend_is_true(zv)) {
 		ssl_ctx_options |= SSL_OP_SINGLE_DH_USE;
 	}
 
 	zv = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", "honor_cipher_order");
-	if (zv != NULL && zend_is_true(zv)) {
+	if (zv == NULL || zend_is_true(zv)) {
 		ssl_ctx_options |= SSL_OP_CIPHER_SERVER_PREFERENCE;
 	}
 
@@ -2557,7 +2557,7 @@ php_stream *php_openssl_ssl_socket_factory(const char *proto, size_t protolen,
 
 	if (strncmp(proto, "ssl", protolen) == 0) {
 		sslsock->enable_on_connect = 1;
-		sslsock->method = get_crypto_method(context, STREAM_CRYPTO_METHOD_ANY_CLIENT);
+		sslsock->method = get_crypto_method(context, STREAM_CRYPTO_METHOD_TLS_ANY_CLIENT);
 	} else if (strncmp(proto, "sslv2", protolen) == 0) {
 		php_error_docref(NULL, E_WARNING, "SSLv2 unavailable in this PHP version");
 		php_stream_close(stream);
@@ -2573,7 +2573,7 @@ php_stream *php_openssl_ssl_socket_factory(const char *proto, size_t protolen,
 #endif
 	} else if (strncmp(proto, "tls", protolen) == 0) {
 		sslsock->enable_on_connect = 1;
-		sslsock->method = get_crypto_method(context, STREAM_CRYPTO_METHOD_TLS_CLIENT);
+		sslsock->method = get_crypto_method(context, STREAM_CRYPTO_METHOD_TLS_ANY_CLIENT);
 	} else if (strncmp(proto, "tlsv1.0", protolen) == 0) {
 		sslsock->enable_on_connect = 1;
 		sslsock->method = STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT;

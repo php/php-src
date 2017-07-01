@@ -16,7 +16,7 @@ echo "*** Testing posix_uname() : error conditions ***\n";
 
 // One argument
 echo "\n-- Testing posix_uname() function with one argument --\n";
-$extra_arg = 10;;
+$extra_arg = 10;
 var_dump( posix_uname($extra_arg) );
 
 echo "Done";
