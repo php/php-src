@@ -122,11 +122,13 @@ struct _zend_module_dep {
 	unsigned char type;		/* dependency type */
 };
 
+BEGIN_EXTERN_C()
 extern ZEND_API HashTable module_registry;
 
 void module_destructor(zend_module_entry *module);
 int module_registry_request_startup(zend_module_entry *module);
 int module_registry_unload_temp(const zend_module_entry *module);
+END_EXTERN_C()
 
 #endif
 
