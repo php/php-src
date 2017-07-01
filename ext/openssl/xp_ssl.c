@@ -2467,6 +2467,16 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 					/* fall through */
 					break;
 			}
+			break;
+
+		case STREAM_XPORT_OP_SHUTDOWN:
+			if (sslsock->ssl_active && (xparam->how == STREAM_SHUT_WR || xparam->how == STREAM_SHUT_RDWR)) {
+				if (SSL_shutdown(sslsock->ssl_handle) == -1) {
+					php_stream_socket_ops.set_option(stream, option, value, ptrparam); /* ensure socket shutdown either way, but report failure */
+					return PHP_STREAM_OPTION_RETURN_ERR;
+				}
+			}
+			break;
 	}
 
 	return php_stream_socket_ops.set_option(stream, option, value, ptrparam);
