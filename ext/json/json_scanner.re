@@ -40,7 +40,7 @@
 	PHP_JSON_CONDITION_GOTO(condition)
 #define PHP_JSON_CONDITION_GOTO_STR_P2() \
 	do { \
-		if (s->utf8_sub_needed) { \
+		if (s->utf8_sub) { \
 			PHP_JSON_CONDITION_GOTO(STR_P2_BIN); \
 		} else { \
 			PHP_JSON_CONDITION_GOTO(STR_P2_UTF); \
@@ -270,7 +270,7 @@ std:
 		if (s->str_esc) {
 			s->pstr = (php_json_ctype *) Z_STRVAL(s->value);
 			s->cursor = s->str_start;
-			if (s->utf8_sub_needed) {
+			if (s->utf8_sub) {
 				PHP_JSON_CONDITION_SET_AND_GOTO(STR_P2_BIN);
 			} else {
 				PHP_JSON_CONDITION_SET_AND_GOTO(STR_P2_UTF);
@@ -287,8 +287,7 @@ std:
 			PHP_JSON_CONDITION_GOTO(STR_P1);
 		}
 		if (s->options & PHP_JSON_INVALID_UTF8_SUBSTITUTE) {
-			s->utf8_sub_needed = 1;
-			s->utf8_sub_len += 2 - (s->cursor - s->token);
+			s->utf8_sub = 1;
 			PHP_JSON_CONDITION_GOTO(STR_P1);
 		}
 		s->errcode = PHP_JSON_ERROR_UTF8;
@@ -371,6 +370,12 @@ std:
 	}
 	<STR_P2_BIN>UTF8         { PHP_JSON_CONDITION_GOTO(STR_P2_BIN); }
 	<STR_P2_BIN>ANY          {
+		if (s->utf8_sub) {
+			php_json_scanner_copy_string(s, 2 - (s->cursor - s->token));
+			*(s->pstr++) = (char) (0xc0 | (0xfffd >> 6));
+			*(s->pstr++) = (char) (0x80 | (0xfffd & 0x3f));
+			s->str_start = s->cursor;
+		}
 		PHP_JSON_CONDITION_GOTO(STR_P2_BIN);
 	}
 	<STR_P2_UTF>ANY          { PHP_JSON_CONDITION_GOTO(STR_P2_UTF); }
