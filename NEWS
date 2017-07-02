@@ -18,6 +18,8 @@ PHP                                                                        NEWS
 
 - SPL:
   . Fixed bug #73471 (PHP freezes with AppendIterator). (jhdxr)
+  . Fixed bug #71412 (Incorrect arginfo for ArrayIterator::__construct).
+    (tysonandre775 at hotmail dot com)
 
 - Session:
   . Fixed bug #74514 (5 session functions incorrectly warn when calling in
