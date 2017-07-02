@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug #75579 (Interned strings buffer overflow may cause crash).
     (Dmitry)
 
+- Phar:
+  . Fixed bug #74782 (remove file name from output to avoid XSS). (stas)
+
 07 Dec 2017, PHP 7.1.13RC1
 
 - Core:
