@@ -1,5 +1,5 @@
 --TEST--
-json_encode() invalide UTF8
+json_encode() invalid UTF8
 --SKIPIF--
 <?php
 if (!extension_loaded("json")) print "skip";

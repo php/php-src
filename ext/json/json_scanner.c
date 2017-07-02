@@ -41,7 +41,7 @@
 	PHP_JSON_CONDITION_GOTO(condition)
 #define PHP_JSON_CONDITION_GOTO_STR_P2() \
 	do { \
-		if (s->utf8_sub) { \
+		if (s->utf8_invalid) { \
 			PHP_JSON_CONDITION_GOTO(STR_P2_BIN); \
 		} else { \
 			PHP_JSON_CONDITION_GOTO(STR_P2_UTF); \
@@ -582,7 +582,7 @@ yy75:
 		++YYCURSOR;
 		{
 		zend_string *str;
-		size_t len = s->cursor - s->str_start - s->str_esc - 1;
+		size_t len = s->cursor - s->str_start - s->str_esc - 1 + s->utf8_invalid_count;
 		if (len == 0) {
 			PHP_JSON_CONDITION_SET(JS);
 			ZVAL_EMPTY_STRING(&s->value);
@@ -591,14 +591,10 @@ yy75:
 		str = zend_string_alloc(len, 0);
 		ZSTR_VAL(str)[len] = '\0';
 		ZVAL_STR(&s->value, str);
-		if (s->str_esc) {
+		if (s->str_esc || s->utf8_invalid) {
 			s->pstr = (php_json_ctype *) Z_STRVAL(s->value);
 			s->cursor = s->str_start;
-			if (s->utf8_sub) {
-				PHP_JSON_CONDITION_SET_AND_GOTO(STR_P2_BIN);
-			} else {
-				PHP_JSON_CONDITION_SET_AND_GOTO(STR_P2_UTF);
-			}
+			PHP_JSON_CONDITION_GOTO_STR_P2();
 		} else {
 			memcpy(Z_STRVAL(s->value), s->str_start, len);
 			PHP_JSON_CONDITION_SET(JS);
@@ -641,11 +637,10 @@ yy79:
 		++YYCURSOR;
 yy80:
 		{
-		if (s->options & PHP_JSON_INVALID_UTF8_IGNORE) {
-			PHP_JSON_CONDITION_GOTO(STR_P1);
-		}
-		if (s->options & PHP_JSON_INVALID_UTF8_SUBSTITUTE) {
-			s->utf8_sub = 1;
+		if (s->options & (PHP_JSON_INVALID_UTF8_IGNORE | PHP_JSON_INVALID_UTF8_SUBSTITUTE)) {
+			int utf8_addition = (s->options & PHP_JSON_INVALID_UTF8_SUBSTITUTE) ? 4 : 1;
+			s->utf8_invalid = 1;
+			s->utf8_invalid_count = utf8_addition - (s->cursor - s->token);
 			PHP_JSON_CONDITION_GOTO(STR_P1);
 		}
 		s->errcode = PHP_JSON_ERROR_UTF8;
@@ -1026,8 +1021,7 @@ yy130:
 				esc = '\b';
 				break;
 			case 'f':
-				esc = '\f';
-				break;
+				esc = '\f';				break;
 			case 'n':
 				esc = '\n';
 				break;
@@ -1055,10 +1049,13 @@ yy131:
 		++YYCURSOR;
 yy132:
 		{
-		if (s->utf8_sub) {
+		if (s->utf8_invalid) {
 			php_json_scanner_copy_string(s, 2 - (s->cursor - s->token));
-			*(s->pstr++) = (char) (0xc0 | (0xfffd >> 6));
-			*(s->pstr++) = (char) (0x80 | (0xfffd & 0x3f));
+			if (s->options & PHP_JSON_INVALID_UTF8_SUBSTITUTE) {
+				*(s->pstr++) = (char) (0xe0 | (0xfffd >> 12));
+				*(s->pstr++) = (char) (0x80 | ((0xfffd >> 6) & 0x3f));
+				*(s->pstr++) = (char) (0x80 | (0xfffd & 0x3f));
+			}
 			s->str_start = s->cursor;
 		}
 		PHP_JSON_CONDITION_GOTO(STR_P2_BIN);
@@ -1386,8 +1383,7 @@ yy176:
 				esc = '\b';
 				break;
 			case 'f':
-				esc = '\f';
-				break;
+				esc = '\f';				break;
 			case 'n':
 				esc = '\n';
 				break;
