@@ -56,4 +56,9 @@ associated to a file descriptor
 */
 PHP_WINUTIL_API BOOL php_win32_console_fileno_set_vt100(zend_long fileno, BOOL enable);
 
+/* Check, whether the program has its own console. If a process was launched
+	through a GUI, it will have it's own console. For more info see
+	http://support.microsoft.com/kb/99115 */
+PHP_WINUTIL_API BOOL php_win32_console_is_own(void);
+
 #endif

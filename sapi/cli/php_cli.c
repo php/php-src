@@ -675,8 +675,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 	char *arg_free=NULL, **arg_excp=&arg_free;
 	char *script_file=NULL, *translated_path = NULL;
 #if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE) && (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
-	DWORD pl[1];
-	int interactive = (GetConsoleProcessList(pl, 1) == 1) && !IsDebuggerPresent();
+	int interactive = php_win32_console_is_own();
 #else
 	int interactive=0;
 #endif

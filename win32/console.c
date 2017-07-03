@@ -91,3 +91,15 @@ PHP_WINUTIL_API BOOL php_win32_console_fileno_set_vt100(zend_long fileno, BOOL e
 	}
 	return result;
 }
+
+PHP_WINUTIL_API BOOL php_win32_console_is_own(void)
+{
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+
+	if (GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi) && !IsDebuggerPresent()) {
+		return !csbi.dwCursorPosition.X && !csbi.dwCursorPosition.Y;
+	}
+
+	return FALSE;
+}
+
