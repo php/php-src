@@ -2585,7 +2585,7 @@ PHP_FUNCTION(ldap_parse_exop)
 	struct berval *lretdata;
 	int rc, myargcount = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr|z/z/", &link, &result, &retdata, &retoid) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rr|z/z/", &link, &result, &retdata, &retoid) != SUCCESS) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -2602,7 +2602,7 @@ PHP_FUNCTION(ldap_parse_exop)
 				myargcount > 2 ? &lretdata: NULL,
 				0);
 	if (rc != LDAP_SUCCESS) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to parse extended operation result: %s", ldap_err2string(rc));
+		php_error_docref(NULL, E_WARNING, "Unable to parse extended operation result: %s", ldap_err2string(rc));
 		RETURN_FALSE;
 	}
 
@@ -3234,7 +3234,7 @@ PHP_FUNCTION(ldap_exop)
 	int rc, msgid, myargcount = ZEND_NUM_ARGS();
 	/* int reqoid_len, reqdata_len, retdata_len, retoid_len, retdat_len; */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz|zz/z/", &link, &reqoid, &reqdata, &retdata, &retoid) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz|zz/z/", &link, &reqoid, &reqdata, &retdata, &retoid) != SUCCESS) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -3264,7 +3264,7 @@ PHP_FUNCTION(ldap_exop)
 			myargcount > 4 ? &lretoid : NULL,
 			&lretdata );
 		if (rc != LDAP_SUCCESS ) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Extended operation %s failed: %s (%d)", lreqoid, ldap_err2string(rc), rc);
+			php_error_docref(NULL, E_WARNING, "Extended operation %s failed: %s (%d)", lreqoid, ldap_err2string(rc), rc);
 			RETURN_FALSE;
 		}
 
@@ -3298,13 +3298,13 @@ PHP_FUNCTION(ldap_exop)
 		lreqdata.bv_len > 0 ? &lreqdata: NULL,
 		NULL, NULL, &msgid);
 	if (rc != LDAP_SUCCESS ) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Extended operation %s failed: %s (%d)", lreqoid, ldap_err2string(rc), rc);
+		php_error_docref(NULL, E_WARNING, "Extended operation %s failed: %s (%d)", lreqoid, ldap_err2string(rc), rc);
 		RETURN_FALSE;
 	}
 
 	rc = ldap_result(ld->link, msgid, 1 /* LDAP_MSG_ALL */, NULL, &ldap_res);
 	if (rc == -1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Extended operation %s failed", lreqoid);
+		php_error_docref(NULL, E_WARNING, "Extended operation %s failed", lreqoid);
 		RETURN_FALSE;
 	}
 
@@ -3326,7 +3326,7 @@ PHP_FUNCTION(ldap_exop_passwd)
 	LDAPMessage *ldap_res;
 	int rc, msgid, myargcount = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|zzzz/", &link, &user, &oldpw, &newpw, &newpasswd) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|zzzz/", &link, &user, &oldpw, &newpw, &newpasswd) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -3362,7 +3362,7 @@ PHP_FUNCTION(ldap_exop_passwd)
 		lnewpw.bv_len > 0 ? &lnewpw : NULL,
 		&lnewpasswd, NULL, NULL);
 	if (rc != LDAP_SUCCESS ) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Passwd modify extended operation failed: %s (%d)", ldap_err2string(rc), rc);
+		php_error_docref(NULL, E_WARNING, "Passwd modify extended operation failed: %s (%d)", ldap_err2string(rc), rc);
 		RETURN_FALSE;
 	}
 
@@ -3394,7 +3394,7 @@ PHP_FUNCTION(ldap_exop_whoami)
 	LDAPMessage *ldap_res;
 	int rc, msgid, myargcount = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/", &link, &authzid) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz/", &link, &authzid) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -3405,7 +3405,7 @@ PHP_FUNCTION(ldap_exop_whoami)
 	/* synchronous call */
 	rc = ldap_whoami_s(ld->link, &lauthzid, NULL, NULL);
 	if (rc != LDAP_SUCCESS ) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Whoami extended operation failed: %s (%d)", ldap_err2string(rc), rc);
+		php_error_docref(NULL, E_WARNING, "Whoami extended operation failed: %s (%d)", ldap_err2string(rc), rc);
 		RETURN_FALSE;
 	}
 
