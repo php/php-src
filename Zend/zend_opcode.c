@@ -695,6 +695,7 @@ ZEND_API binary_op_type get_binary_op(int opcode)
 		case ZEND_ASSIGN_MUL:
 			return (binary_op_type) mul_function;
 		case ZEND_POW:
+		case ZEND_ASSIGN_POW:
 			return (binary_op_type) pow_function;
 		case ZEND_DIV:
 		case ZEND_ASSIGN_DIV:
@@ -717,6 +718,7 @@ ZEND_API binary_op_type get_binary_op(int opcode)
 		case ZEND_IS_NOT_IDENTICAL:
 			return (binary_op_type) is_not_identical_function;
 		case ZEND_IS_EQUAL:
+		case ZEND_CASE:
 			return (binary_op_type) is_equal_function;
 		case ZEND_IS_NOT_EQUAL:
 			return (binary_op_type) is_not_equal_function;
