@@ -3229,7 +3229,6 @@ PHP_FUNCTION(ldap_exop)
 	char *lreqoid, *lretoid = NULL;
 	struct berval lreqdata, *lretdata = NULL;
 	ldap_linkdata *ld;
-	LDAP *ldap;
 	LDAPMessage *ldap_res;
 	int rc, msgid, myargcount = ZEND_NUM_ARGS();
 	/* int reqoid_len, reqdata_len, retdata_len, retoid_len, retdat_len; */
@@ -3322,9 +3321,7 @@ PHP_FUNCTION(ldap_exop_passwd)
 	zval *link, *user, *newpw, *oldpw, *newpasswd;
 	struct berval luser, loldpw, lnewpw, lnewpasswd;
 	ldap_linkdata *ld;
-	LDAP *ldap;
-	LDAPMessage *ldap_res;
-	int rc, msgid, myargcount = ZEND_NUM_ARGS();
+	int rc, myargcount = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|zzzz/", &link, &user, &oldpw, &newpw, &newpasswd) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -3390,9 +3387,7 @@ PHP_FUNCTION(ldap_exop_whoami)
 	zval *link, *authzid;
 	struct berval *lauthzid;
 	ldap_linkdata *ld;
-	LDAP *ldap;
-	LDAPMessage *ldap_res;
-	int rc, msgid, myargcount = ZEND_NUM_ARGS();
+	int rc, myargcount = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz/", &link, &authzid) == FAILURE) {
 		WRONG_PARAM_COUNT;
