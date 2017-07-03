@@ -473,8 +473,8 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 } /* }}} */
 #define ZEND_NAN (_zend_get_nan())
 
-#define ZEND_STRL(str)		(str), (sizeof(str)-1)
-#define ZEND_STRS(str)		(str), (sizeof(str))
+#define ZEND_STRL(str)		(str), (strlen(str))
+#define ZEND_STRS(str)		(str), (strlen(str) + 1)
 #define ZEND_NORMALIZE_BOOL(n)			\
 	((n) ? (((n)>0) ? 1 : -1) : 0)
 #define ZEND_TRUTH(x)		((x) ? 1 : 0)
