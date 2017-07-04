@@ -319,7 +319,7 @@ static zend_bool opline_supports_assign_contraction(
 	return 1;
 }
 
-void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, zend_ssa *ssa)
+void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, zend_ssa *ssa, zend_call_info **call_map)
 {
 	if (ctx->debug_level & ZEND_DUMP_BEFORE_DFA_PASS) {
 		zend_dump_op_array(op_array, ZEND_DUMP_SSA, "before dfa pass", ssa);
@@ -331,6 +331,8 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 		int remove_nops = 0;
 		zend_op *opline;
 		zval tmp;
+
+		sccp_optimize_op_array(op_array, ssa, call_map);
 
 		for (v = op_array->last_var; v < ssa->vars_count; v++) {
 
@@ -598,7 +600,7 @@ void zend_optimize_dfa(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		return;
 	}
 
-	zend_dfa_optimize_op_array(op_array, ctx, &ssa);
+	zend_dfa_optimize_op_array(op_array, ctx, &ssa, NULL);
 
 	/* Destroy SSA */
 	zend_arena_release(&ctx->arena, checkpoint);

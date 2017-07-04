@@ -53,6 +53,25 @@ void zend_optimizer_collect_constant(zend_optimizer_ctx *ctx, zval *name, zval* 
 	zend_hash_add(ctx->constants, Z_STR_P(name), &val);
 }
 
+zend_uchar zend_compound_assign_to_binary_op(zend_uchar opcode)
+{
+	switch (opcode) {
+		case ZEND_ASSIGN_ADD: return ZEND_ADD;
+		case ZEND_ASSIGN_SUB: return ZEND_SUB;
+		case ZEND_ASSIGN_MUL: return ZEND_MUL;
+		case ZEND_ASSIGN_DIV: return ZEND_DIV;
+		case ZEND_ASSIGN_MOD: return ZEND_MOD;
+		case ZEND_ASSIGN_SL: return ZEND_SL;
+		case ZEND_ASSIGN_SR: return ZEND_SR;
+		case ZEND_ASSIGN_CONCAT: return ZEND_CONCAT;
+		case ZEND_ASSIGN_BW_OR: return ZEND_BW_OR;
+		case ZEND_ASSIGN_BW_AND: return ZEND_BW_AND;
+		case ZEND_ASSIGN_BW_XOR: return ZEND_BW_XOR;
+		case ZEND_ASSIGN_POW: return ZEND_POW;
+		EMPTY_SWITCH_DEFAULT_CASE()
+	}
+}
+
 int zend_optimizer_eval_binary_op(zval *result, zend_uchar opcode, zval *op1, zval *op2) /* {{{ */
 {
 	binary_op_type binary_op = get_binary_op(opcode);
@@ -242,6 +261,14 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 			MAKE_NOP(opline);
 			zval_ptr_dtor_nogc(val);
 			return 1;
+		case ZEND_SEND_VAR_EX:
+		case ZEND_FETCH_DIM_W:
+		case ZEND_FETCH_DIM_RW:
+		case ZEND_FETCH_DIM_FUNC_ARG:
+		case ZEND_FETCH_DIM_UNSET:
+		case ZEND_ASSIGN_DIM:
+		case ZEND_RETURN_BY_REF:
+			return 0;
 		case ZEND_INIT_STATIC_METHOD_CALL:
 		case ZEND_CATCH:
 		case ZEND_FETCH_CONSTANT:
@@ -1172,7 +1199,7 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level, zend
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
 			func_info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
 			if (func_info) {
-				zend_dfa_optimize_op_array(call_graph.op_arrays[i], &ctx, &func_info->ssa);
+				zend_dfa_optimize_op_array(call_graph.op_arrays[i], &ctx, &func_info->ssa, func_info->call_map);
 			}
 		}
 
