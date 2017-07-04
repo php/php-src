@@ -627,13 +627,13 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSR
 			zend_bailout();
 		}
 		compilation_successful=1;
-	}
 
 #if defined(ZEND_SIGNALS) && !defined(_WIN32)
-	zend_try { zend_sigaction(SIGBUS, &old_sigbus_signal, 0 TSRMLS_CC); } zend_end_try();
+		zend_try { zend_sigaction(SIGBUS, &old_sigbus_signal, 0 TSRMLS_CC); } zend_end_try();
 #elif !defined(_WIN32)
-	sigaction(SIGBUS, &old_sigbus_signal, 0);
+		sigaction(SIGBUS, &old_sigbus_signal, 0);
 #endif
+	}
 
 	if (retval) {
 		CG(active_op_array) = original_active_op_array;
