@@ -316,4 +316,6 @@ ZEND_API void *zend_llist_get_prev_ex(zend_llist *l, zend_llist_position *pos)
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

@@ -1723,4 +1723,6 @@ void zend_check_deprecated_constructor(const zend_class_entry *ce) /* {{{ */
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

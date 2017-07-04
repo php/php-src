@@ -1087,4 +1087,6 @@ static zend_always_inline void _zend_hash_append_ind(HashTable *ht, zend_string 
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

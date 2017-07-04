@@ -211,4 +211,6 @@ ZEND_API zend_object_handlers *zend_get_std_object_handlers(void)
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

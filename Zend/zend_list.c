@@ -343,4 +343,6 @@ const char *zend_rsrc_list_get_rsrc_type(zend_resource *res)
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

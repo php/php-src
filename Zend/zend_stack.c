@@ -171,4 +171,6 @@ ZEND_API void zend_stack_clean(zend_stack *stack, void (*func)(void *), zend_boo
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

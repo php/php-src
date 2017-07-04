@@ -443,6 +443,6 @@ void zend_signal_startup(void)
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

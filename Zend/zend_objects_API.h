@@ -94,4 +94,6 @@ static zend_always_inline size_t zend_object_properties_size(zend_class_entry *c
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

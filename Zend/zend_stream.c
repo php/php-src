@@ -345,3 +345,13 @@ ZEND_API int zend_compare_file_handles(zend_file_handle *fh1, zend_file_handle *
 	}
 	return 0;
 } /* }}} */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */
