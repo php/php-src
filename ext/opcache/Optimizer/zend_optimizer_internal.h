@@ -24,14 +24,8 @@
 
 #include "zend_ssa.h"
 
-#define ZEND_RESULT_TYPE(opline)		(opline)->result_type
-#define ZEND_RESULT(opline)				(opline)->result
-#define ZEND_OP1_TYPE(opline)			(opline)->op1_type
-#define ZEND_OP1(opline)				(opline)->op1
 #define ZEND_OP1_LITERAL(opline)		(op_array)->literals[(opline)->op1.constant]
 #define ZEND_OP1_JMP_ADDR(opline)		OP_JMP_ADDR(opline, (opline)->op1)
-#define ZEND_OP2_TYPE(opline)			(opline)->op2_type
-#define ZEND_OP2(opline)				(opline)->op2
 #define ZEND_OP2_LITERAL(opline)		(op_array)->literals[(opline)->op2.constant]
 #define ZEND_OP2_JMP_ADDR(opline)		OP_JMP_ADDR(opline, (opline)->op2)
 

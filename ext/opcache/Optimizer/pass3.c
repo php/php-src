@@ -93,8 +93,8 @@ void zend_optimizer_pass3(zend_op_array *op_array)
 						break;
 					}
 
-					if ((ZEND_OP2_TYPE(opline) & (IS_VAR | IS_CV))
-						&& ZEND_OP2(opline).var == ZEND_OP1(next_opline).var &&
+					if ((opline->op2_type & (IS_VAR | IS_CV))
+						&& opline->op2.var == next_opline->op1.var &&
 						(opline->opcode == ZEND_ADD ||
 						 opline->opcode == ZEND_MUL ||
 						 opline->opcode == ZEND_BW_OR ||
@@ -107,16 +107,16 @@ void zend_optimizer_pass3(zend_op_array *op_array)
 						znode_op tmp = opline->op1;
 
 						if (opline->opcode != ZEND_ADD
-								|| (ZEND_OP1_TYPE(opline) == IS_CONST
+								|| (opline->op1_type == IS_CONST
 									&& Z_TYPE(ZEND_OP1_LITERAL(opline)) != IS_ARRAY)) {
 							/* protection from array add: $a = array + $a is not commutative! */
 							COPY_NODE(opline->op1, opline->op2);
 							COPY_NODE(opline->op2, tmp);
 						}
 					}
-					if ((ZEND_OP1_TYPE(opline) & (IS_VAR | IS_CV))
-						&& ZEND_OP1(opline).var == ZEND_OP1(next_opline).var
-						&& ZEND_OP1_TYPE(opline) == ZEND_OP1_TYPE(next_opline)) {
+					if ((opline->op1_type & (IS_VAR | IS_CV))
+						&& opline->op1.var == next_opline->op1.var
+						&& opline->op1_type == next_opline->op1_type) {
 						switch (opline->opcode) {
 							case ZEND_ADD:
 								opline->opcode = ZEND_ASSIGN_ADD;
@@ -258,7 +258,7 @@ void zend_optimizer_pass3(zend_op_array *op_array)
 					/* convert L: T = JMPZ_EX X,L+1 to T = BOOL(X) */
 					/* convert L: T = JMPZ_EX T,L+1 to NOP */
 					if (ZEND_OP2_JMP_ADDR(opline) == opline + 1) {
-						if (ZEND_OP1(opline).var == ZEND_RESULT(opline).var) {
+						if (opline->op1.var == opline->result.var) {
 							MAKE_NOP(opline);
 						} else {
 							opline->opcode = ZEND_BOOL;
@@ -317,8 +317,8 @@ continue_jmp_ex_optimization:
 					{
 						zend_op *op;
 						for(op = opline+1; op<end; op++) {
-							if(ZEND_RESULT_TYPE(op) == IS_TMP_VAR &&
-							   ZEND_RESULT(op).var == ZEND_RESULT(opline).var) {
+							if(op->result_type == IS_TMP_VAR &&
+							   op->result.var == opline->result.var) {
 								break; /* can pass to part 2 */
 							}
 
@@ -338,21 +338,21 @@ continue_jmp_ex_optimization:
 								break;
 							}
 
-							if(ZEND_OP1_TYPE(op) == IS_TMP_VAR &&
-							   ZEND_OP1(op).var == ZEND_RESULT(opline).var) {
+							if(op->op1_type == IS_TMP_VAR &&
+							   op->op1.var == opline->result.var) {
 								goto done_jmp_optimization;
 							}
 
-							if(ZEND_OP2_TYPE(op) == IS_TMP_VAR &&
-							   ZEND_OP2(op).var == ZEND_RESULT(opline).var) {
+							if(op->op2_type == IS_TMP_VAR &&
+							   op->op2.var == opline->result.var) {
 								goto done_jmp_optimization;
 							}
 						} /* for */
 
-						for(op = &op_array->opcodes[ZEND_OP2(opline).opline_num]; op<end; op++) {
+						for(op = &op_array->opcodes[opline->op2.opline_num]; op<end; op++) {
 
-							if(ZEND_RESULT_TYPE(op) == IS_TMP_VAR &&
-							   ZEND_RESULT(op).var == ZEND_RESULT(opline).var) {
+							if(op->result_type == IS_TMP_VAR &&
+							   op->result.var == opline->result.var) {
 								break; /* can pass to optimization */
 							}
 
@@ -372,13 +372,13 @@ continue_jmp_ex_optimization:
 								break;
 							}
 
-							if(ZEND_OP1_TYPE(op) == IS_TMP_VAR &&
-							   ZEND_OP1(op).var == ZEND_RESULT(opline).var) {
+							if(op->op1_type == IS_TMP_VAR &&
+							   op->op1.var == opline->result.var) {
 								goto done_jmp_optimization;
 							}
 
-							if(ZEND_OP2_TYPE(op) == IS_TMP_VAR &&
-							   ZEND_OP2(op).var == ZEND_RESULT(opline).var) {
+							if(op->op2_type == IS_TMP_VAR &&
+							   op->op2.var == opline->result.var) {
 								goto done_jmp_optimization;
 							}
 						}
@@ -422,10 +422,10 @@ continue_jmpznz_optimization:
 						break;
 					}
 					if (next_op->opcode == ZEND_FREE &&
-						ZEND_OP1(next_op).var == ZEND_RESULT(opline).var) {
+						next_op->op1.var == opline->result.var) {
 						MAKE_NOP(next_op);
 						opline->opcode -= 2;
-						ZEND_RESULT_TYPE(opline) = IS_UNUSED;
+						opline->result_type = IS_UNUSED;
 					}
 				}
 				break;

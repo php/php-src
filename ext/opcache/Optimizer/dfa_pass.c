@@ -231,7 +231,7 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa)
 
 			do {
 				*opline_num -= shiftlist[*opline_num];
-				opline_num = &ZEND_RESULT(&op_array->opcodes[*opline_num]).opline_num;
+				opline_num = &op_array->opcodes[*opline_num].result.opline_num;
 			} while (*opline_num != (uint32_t)-1);
 		}
 
