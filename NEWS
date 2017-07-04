@@ -13,6 +13,8 @@ PHP                                                                        NEWS
     (Anatol)
   . Fixed bug #74836 (isset on zero-prefixed numeric indexes in array broken).
     (Dmitry)
+  . Fixed bug #74101, bug #74614 (Unserialize Heap Use-After-Free (READ: 1) in
+    zval_get_type). (Nikita)
 
 - CLI:
   . Fixed bug #74849 (Process is started as interactive shell in PhpStorm).
