@@ -38,7 +38,7 @@
 
 static void zend_optimizer_zval_dtor_wrapper(zval *zvalue)
 {
-	zval_dtor(zvalue);
+	zval_ptr_dtor_nogc(zvalue);
 }
 
 void zend_optimizer_collect_constant(zend_optimizer_ctx *ctx, zval *name, zval* value)
@@ -91,7 +91,7 @@ int zend_optimizer_is_disabled_func(const char *name, size_t len) {
 static inline void drop_leading_backslash(zval *val) {
 	if (Z_STRVAL_P(val)[0] == '\\') {
 		zend_string *str = zend_string_init(Z_STRVAL_P(val) + 1, Z_STRLEN_P(val) - 1, 0);
-		zval_dtor(val);
+		zval_ptr_dtor_nogc(val);
 		ZVAL_STR(val, str);
 	}
 }
@@ -107,14 +107,14 @@ static inline void alloc_cache_slots_op2(zend_op_array *op_array, zend_op *oplin
 
 #define REQUIRES_STRING(val) do { \
 	if (Z_TYPE_P(val) != IS_STRING) { \
-		zval_dtor(val); \
+		zval_ptr_dtor_nogc(val); \
 		return 0; \
 	} \
 } while (0)
 
 #define TO_STRING_NOWARN(val) do { \
 	if (Z_TYPE_P(val) >= IS_ARRAY) { \
-		zval_dtor(val); \
+		zval_ptr_dtor_nogc(val); \
 		return 0; \
 	} \
 	convert_to_string(val); \
@@ -127,7 +127,7 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 	switch (opline->opcode) {
 		case ZEND_FREE:
 			MAKE_NOP(opline);
-			zval_dtor(val);
+			zval_ptr_dtor_nogc(val);
 			return 1;
 		case ZEND_INIT_STATIC_METHOD_CALL:
 		case ZEND_CATCH:
@@ -158,16 +158,16 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 		case ZEND_SEPARATE:
 		case ZEND_SEND_VAR_NO_REF:
 		case ZEND_SEND_VAR_NO_REF_EX:
-			zval_ptr_dtor(val);
+			zval_ptr_dtor_nogc(val);
 			return 0;
 		case ZEND_VERIFY_RETURN_TYPE:
 			/* This would require a non-local change.
 			 * zend_optimizer_replace_by_const() supports this. */
-			zval_ptr_dtor(val);
+			zval_ptr_dtor_nogc(val);
 			return 0;
 		case ZEND_CASE:
 		case ZEND_FETCH_LIST:
-			zval_ptr_dtor(val);
+			zval_ptr_dtor_nogc(val);
 			return 0;
 		case ZEND_CONCAT:
 		case ZEND_FAST_CONCAT:
@@ -198,7 +198,7 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 	switch (opline->opcode) {
 		case ZEND_ASSIGN_REF:
 		case ZEND_FAST_CALL:
-			zval_dtor(val);
+			zval_ptr_dtor_nogc(val);
 			return 0;
 		case ZEND_FETCH_CLASS:
 		case ZEND_INIT_FCALL_BY_NAME:
@@ -229,14 +229,14 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 		case ZEND_INIT_DYNAMIC_CALL:
 			if (Z_TYPE_P(val) == IS_STRING) {
 				if (zend_memrchr(Z_STRVAL_P(val), ':', Z_STRLEN_P(val))) {
-					zval_dtor(val);
+					zval_ptr_dtor_nogc(val);
 					return 0;
 				}
 
 				if (zend_optimizer_classify_function(Z_STR_P(val), opline->extended_value)) {
 					/* Dynamic call to various special functions must stay dynamic,
 					 * otherwise would drop a warning */
-					zval_dtor(val);
+					zval_ptr_dtor_nogc(val);
 					return 0;
 				}
 
@@ -309,7 +309,7 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 			if (Z_TYPE_P(val) == IS_STRING) {
 				zend_ulong index;
 				if (ZEND_HANDLE_NUMERIC(Z_STR_P(val), index)) {
-					zval_dtor(val);
+					zval_ptr_dtor_nogc(val);
 					ZVAL_LONG(val, index);
 				}
 			}
@@ -394,7 +394,7 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 				case ZEND_ASSIGN_DIM:
 				case ZEND_SEPARATE:
 				case ZEND_RETURN_BY_REF:
-					zval_dtor(val);
+					zval_ptr_dtor_nogc(val);
 					return 0;
 				case ZEND_SEND_VAR:
 					opline->extended_value = 0;
@@ -405,7 +405,7 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 					opline->opcode = ZEND_SEND_VAL_EX;
 					break;
 				case ZEND_SEND_VAR_NO_REF:
-					zval_dtor(val);
+					zval_ptr_dtor_nogc(val);
 					return 0;
 				case ZEND_SEND_VAR_NO_REF_EX:
 					opline->opcode = ZEND_SEND_VAL;
@@ -440,7 +440,7 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 
 					ZEND_ASSERT(m->opcode == ZEND_FREE && m->op1_type == type && m->op1.var == var);
 					MAKE_NOP(m);
-					zval_dtor(val);
+					zval_ptr_dtor_nogc(val);
 					zend_optimizer_remove_live_range(op_array, var);
 					return 1;
 				}
@@ -462,7 +462,7 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 					if (!in_switch) {
 						ZEND_ASSERT(opline->opcode == ZEND_FREE);
 						MAKE_NOP(opline);
-						zval_dtor(val);
+						zval_ptr_dtor_nogc(val);
 						return 1;
 					}
 
@@ -497,7 +497,7 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 						}
 						m++;
 					}
-					zval_dtor(val);
+					zval_ptr_dtor_nogc(val);
 					zend_optimizer_remove_live_range(op_array, var);
 					return 1;
 				}
@@ -507,7 +507,7 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 						|| ZEND_TYPE_CODE(ret_info->type) == IS_CALLABLE
 						|| !ZEND_SAME_FAKE_TYPE(ZEND_TYPE_CODE(ret_info->type), Z_TYPE_P(val))
 						|| (op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
-						zval_dtor(val);
+						zval_ptr_dtor_nogc(val);
 						return 0;
 					}
 					MAKE_NOP(opline);

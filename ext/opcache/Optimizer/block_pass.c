@@ -261,7 +261,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					Z_TYPE_INFO(ZEND_OP1_LITERAL(last_op)) = IS_STRING_EX;
 					memcpy(Z_STRVAL(ZEND_OP1_LITERAL(last_op)) + old_len, Z_STRVAL(ZEND_OP1_LITERAL(opline)), Z_STRLEN(ZEND_OP1_LITERAL(opline)));
 					Z_STRVAL(ZEND_OP1_LITERAL(last_op))[l] = '\0';
-					zval_dtor(&ZEND_OP1_LITERAL(opline));
+					zval_ptr_dtor_nogc(&ZEND_OP1_LITERAL(opline));
 					ZVAL_STR(&ZEND_OP1_LITERAL(opline), zend_new_interned_string(Z_STR(ZEND_OP1_LITERAL(last_op))));
 					ZVAL_NULL(&ZEND_OP1_LITERAL(last_op));
 					MAKE_NOP(last_op);

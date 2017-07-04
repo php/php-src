@@ -330,7 +330,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 				use_copy = zend_make_printable_zval(op_array->literals + i, &zv);
 				fprintf(stderr, "Literal %d, val (%d):%s\n", i, Z_STRLEN(zv), Z_STRVAL(zv));
 				if (use_copy) {
-					zval_dtor(&zv);
+					zval_ptr_dtor_nogc(&zv);
 				}
 			}
 			fflush(stderr);
@@ -345,7 +345,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 		for (i = 0; i < op_array->last_literal; i++) {
 			if (!info[i].flags) {
 				/* unsed literal */
-				zval_dtor(&op_array->literals[i]);
+				zval_ptr_dtor_nogc(&op_array->literals[i]);
 				continue;
 			}
 			switch (Z_TYPE(op_array->literals[i])) {
@@ -453,11 +453,11 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 
 						zend_string_release(key);
 						map[i] = Z_LVAL_P(pos);
-						zval_dtor(&op_array->literals[i]);
+						zval_ptr_dtor_nogc(&op_array->literals[i]);
 						n = LITERAL_NUM_RELATED(info[i].flags);
 						while (n > 1) {
 							i++;
-							zval_dtor(&op_array->literals[i]);
+							zval_ptr_dtor_nogc(&op_array->literals[i]);
 							n--;
 						}
 					} else {
@@ -495,7 +495,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 							}
 							j++;
 						} else {
-							zval_dtor(&op_array->literals[i]);
+							zval_ptr_dtor_nogc(&op_array->literals[i]);
 						}
 						map[i] = l_empty_arr;
 						break;
@@ -541,7 +541,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 				use_copy = zend_make_printable_zval(op_array->literals + i, &zv);
 				fprintf(stderr, "Literal %d, val (%d):%s\n", i, Z_STRLEN(zv), Z_STRVAL(zv));
 				if (use_copy) {
-					zval_dtor(&zv);
+					zval_ptr_dtor_nogc(&zv);
 				}
 			}
 			fflush(stderr);

@@ -61,7 +61,7 @@ typedef struct _zend_optimizer_ctx {
 	} while (0)
 
 #define literal_dtor(zv) do { \
-		zval_dtor(zv); \
+		zval_ptr_dtor_nogc(zv); \
 		ZVAL_NULL(zv); \
 	} while (0)
 
