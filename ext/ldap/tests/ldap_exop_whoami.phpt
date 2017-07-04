@@ -14,8 +14,7 @@ insert_dummy_data($link, $base);
 
 // ldap_exop_whoami(resource link [, string authzid])
 var_dump(
-  ldap_exop_whoami($link, $authzid),
-  $authzid
+  ldap_exop_whoami($link)
 );
 ?>
 ===DONE===
@@ -28,6 +27,5 @@ $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
-bool(true)
 string(%d) "dn:%s"
 ===DONE===
