@@ -39,6 +39,8 @@ PHP                                                                        NEWS
   . Fixed bug #74658 (Undefined constants in array properties result in broken
     properties). (Laruence)
   . Fixed misparsing of abstract unix domain socket names. (Sara)
+  . Fixed bug #74101, bug #74614 (Unserialize Heap Use-After-Free (READ: 1) in
+    zval_get_type). (Nikita)
 
 - DOM:
   . Fixed bug #69373 (References to deleted XPath query results). (ttoohey)
