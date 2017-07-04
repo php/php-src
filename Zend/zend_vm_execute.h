@@ -6110,8 +6110,7 @@ isset_str_offset:
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
-					|| (IS_CONST != IS_CONST
-						&& Z_TYPE_P(offset) == IS_STRING /* or numeric string */
+					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				lval = zval_get_long(offset);
 				goto isset_str_offset;
@@ -9979,8 +9978,7 @@ isset_str_offset:
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
-					|| (IS_CV != IS_CONST
-						&& Z_TYPE_P(offset) == IS_STRING /* or numeric string */
+					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				lval = zval_get_long(offset);
 				goto isset_str_offset;
@@ -11901,8 +11899,7 @@ isset_str_offset:
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
-					|| ((IS_TMP_VAR|IS_VAR) != IS_CONST
-						&& Z_TYPE_P(offset) == IS_STRING /* or numeric string */
+					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				lval = zval_get_long(offset);
 				goto isset_str_offset;
@@ -37840,8 +37837,7 @@ isset_str_offset:
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
-					|| (IS_CONST != IS_CONST
-						&& Z_TYPE_P(offset) == IS_STRING /* or numeric string */
+					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				lval = zval_get_long(offset);
 				goto isset_str_offset;
@@ -44125,8 +44121,7 @@ isset_str_offset:
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
-					|| (IS_CV != IS_CONST
-						&& Z_TYPE_P(offset) == IS_STRING /* or numeric string */
+					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				lval = zval_get_long(offset);
 				goto isset_str_offset;
@@ -47626,8 +47621,7 @@ isset_str_offset:
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
-					|| ((IS_TMP_VAR|IS_VAR) != IS_CONST
-						&& Z_TYPE_P(offset) == IS_STRING /* or numeric string */
+					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				lval = zval_get_long(offset);
 				goto isset_str_offset;
@@ -49660,8 +49654,7 @@ isset_str_offset:
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
-					|| (IS_CONST != IS_CONST
-						&& Z_TYPE_P(offset) == IS_STRING /* or numeric string */
+					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				lval = zval_get_long(offset);
 				goto isset_str_offset;
@@ -51849,8 +51842,7 @@ isset_str_offset:
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
-					|| (IS_CV != IS_CONST
-						&& Z_TYPE_P(offset) == IS_STRING /* or numeric string */
+					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				lval = zval_get_long(offset);
 				goto isset_str_offset;
@@ -53138,8 +53130,7 @@ isset_str_offset:
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
-					|| ((IS_TMP_VAR|IS_VAR) != IS_CONST
-						&& Z_TYPE_P(offset) == IS_STRING /* or numeric string */
+					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				lval = zval_get_long(offset);
 				goto isset_str_offset;
