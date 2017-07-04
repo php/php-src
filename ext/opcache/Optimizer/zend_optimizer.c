@@ -58,17 +58,45 @@ int zend_optimizer_eval_binary_op(zval *result, zend_uchar opcode, zval *op1, zv
 	binary_op_type binary_op = get_binary_op(opcode);
 	int er, ret;
 
-	if ((opcode == ZEND_DIV || opcode == ZEND_MOD) &&
-		zval_get_long(op2) == 0) {
-		/* div by 0 */
-		return FAILURE;
-	} else if ((opcode == ZEND_SL || opcode == ZEND_SR) &&
-		zval_get_long(op2) < 0) {
-		/* shift by negative number */
-		return FAILURE;
-	} else if (zend_binary_op_produces_numeric_string_error(opcode, op1, op2)) {
+	if (zend_binary_op_produces_numeric_string_error(opcode, op1, op2)) {
 		/* produces numeric string E_NOTICE/E_WARNING */
 		return FAILURE;
+	}
+
+	switch (opcode) {
+		case ZEND_ADD:
+			if ((Z_TYPE_P(op1) == IS_ARRAY
+			  || Z_TYPE_P(op2) == IS_ARRAY)
+			 && Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
+				/* produces "Unsupported operand types" exception */
+				return FAILURE;
+			}
+			break;
+		case ZEND_DIV:
+		case ZEND_MOD:
+			if (zval_get_long(op2) == 0) {
+				/* division by 0 */
+				return FAILURE;
+			}
+			/* break missing intentionally */
+		case ZEND_SUB:
+		case ZEND_MUL:
+		case ZEND_POW:
+		case ZEND_CONCAT:
+		case ZEND_FAST_CONCAT:
+			if (Z_TYPE_P(op1) == IS_ARRAY
+			 || Z_TYPE_P(op2) == IS_ARRAY) {
+				/* produces "Unsupported operand types" exception */
+				return FAILURE;
+			}
+			break;
+		case ZEND_SL:
+		case ZEND_SR:
+			if (zval_get_long(op2) < 0) {
+				/* shift by negative number */
+				return FAILURE;
+			}
+			break;
 	}
 
 	er = EG(error_reporting);
@@ -85,6 +113,13 @@ int zend_optimizer_eval_unary_op(zval *result, zend_uchar opcode, zval *op1) /* 
 	unary_op_type unary_op = get_unary_op(opcode);
 
 	if (unary_op) {
+		if (opcode == ZEND_BW_NOT
+		 && Z_TYPE_P(op1) != IS_LONG
+		 && Z_TYPE_P(op1) != IS_DOUBLE
+		 && Z_TYPE_P(op1) != IS_STRING) {
+			/* produces "Unsupported operand types" exception */
+			return FAILURE;
+		}
 		return unary_op(result, op1);
 	} else { /* ZEND_BOOL */
 		ZVAL_BOOL(result, zend_is_true(op1));
