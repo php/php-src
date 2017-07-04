@@ -792,7 +792,7 @@ use_double:
 }
 
 "o:" iv ":" ["] {
-	long elements;
+	zend_long elements;
     if (!var_hash) return 0;
 
 	elements = object_common1(UNSERIALIZE_PASSTHRU, ZEND_STANDARD_CLASS_DEF_PTR);
