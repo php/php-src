@@ -49,6 +49,7 @@ PHP                                                                        NEWS
   . Fixed bug #73473 (Stack Buffer Overflow in msgfmt_parse_message). (libnex)
   . Fixed bug #74705 (Wrong reflection on Collator::getSortKey and
     collator_get_sort_key). (Tyson Andre, Remi)
+  . Fixed bug #73634 (grapheme_strpos illegal memory access). (Stas)
 
 - Mbstring:
   . Add oniguruma upstream fix (CVE-2017-9224, CVE-2017-9226, CVE-2017-9227,
@@ -77,6 +78,7 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #74708 (Invalid Reflection signatures for random_bytes and
     random_int). (Tyson Andre, Remi)
+  . Fixed bug #73648 (Heap buffer overflow in substr). (Stas)
 
 - FTP:
   . Fixed bug #74598 (ftp:// wrapper ignores context arg). (Sara)
