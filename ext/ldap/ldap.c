@@ -2129,6 +2129,8 @@ PHP_FUNCTION(ldap_sort)
 PHP_FUNCTION(ldap_get_option)
 {
 	zval *link, *retval;
+	zval tmp1;
+	int num_entries;
 	ldap_linkdata *ld;
 	zend_long option;
 
@@ -2273,9 +2275,37 @@ PHP_FUNCTION(ldap_get_option)
 			ZVAL_STRING(retval, val);
 			ldap_memfree(val);
 		} break;
-/* options not implemented
 	case LDAP_OPT_SERVER_CONTROLS:
 	case LDAP_OPT_CLIENT_CONTROLS:
+		{
+			LDAPControl **ctrls = NULL, **ctrlp;
+
+			if (ldap_get_option(ld->link, option, &ctrls) || ctrls == NULL) {
+				if (ctrls) {
+					ldap_memfree(ctrls);
+				}
+				RETURN_FALSE;
+			}
+
+			zval_ptr_dtor(retval);
+			array_init(retval);
+			num_entries = 0;
+			ctrlp = ctrls;
+			while (*ctrlp != NULL)
+			{
+				array_init(&tmp1);
+				add_assoc_string(&tmp1, "oid", (*ctrlp)->ldctl_oid);
+				add_assoc_bool(&tmp1, "iscritical", ((*ctrlp)->ldctl_iscritical != 0));
+				if ((*ctrlp)->ldctl_value.bv_len) {
+					add_assoc_stringl(&tmp1, "value", (*ctrlp)->ldctl_value.bv_val, (*ctrlp)->ldctl_value.bv_len);
+				}
+				zend_hash_index_update(Z_ARRVAL_P(retval), num_entries, &tmp1);
+				num_entries++;
+				ctrlp++;
+			}
+			ldap_controls_free(ctrls);
+		} break;
+/* options not implemented
 	case LDAP_OPT_API_INFO:
 	case LDAP_OPT_API_FEATURE_INFO:
 */
