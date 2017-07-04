@@ -222,14 +222,12 @@ static inline void alloc_cache_slots_op2(zend_op_array *op_array, zend_op *oplin
 
 #define REQUIRES_STRING(val) do { \
 	if (Z_TYPE_P(val) != IS_STRING) { \
-		zval_ptr_dtor_nogc(val); \
 		return 0; \
 	} \
 } while (0)
 
 #define TO_STRING_NOWARN(val) do { \
 	if (Z_TYPE_P(val) >= IS_ARRAY) { \
-		zval_ptr_dtor_nogc(val); \
 		return 0; \
 	} \
 	convert_to_string(val); \
