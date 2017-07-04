@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-22 Jun 2017, PHP 7.1.7RC1
+06 Jul 2017, PHP 7.1.7
 
 - Core:
   . Fixed bug #74738 (Multiple [PATH=] and [HOST=] sections not properly
@@ -8,6 +8,8 @@ PHP                                                                        NEWS
   . Fixed bug #74658 (Undefined constants in array properties result in broken
     properties). (Laruence)
   . Fixed misparsing of abstract unix domain socket names. (Sara)
+  . Fixed bug #74101, bug #74614 (Unserialize Heap Use-After-Free (READ: 1) in
+    zval_get_type). (Nikita)
 
 - Date:
   . Fixed bug #74639 (implement clone for DatePeriod and DateInterval).
