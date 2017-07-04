@@ -194,6 +194,8 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 						VAR_SOURCE(op1) = NULL;
 						literal_dtor(&ZEND_OP1_LITERAL(src));
 						MAKE_NOP(src);
+					} else {
+						zval_ptr_dtor_nogc(&c);
 					}
 				}
 			}
@@ -215,6 +217,8 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					VAR_SOURCE(op2) = NULL;
 					literal_dtor(&ZEND_OP1_LITERAL(src));
 					MAKE_NOP(src);
+				} else {
+					zval_ptr_dtor_nogc(&c);
 				}
 			}
 		}
@@ -388,10 +392,6 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 				if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
 					/* CASE variable will be deleted later by FREE, so we can't optimize it */
 					Tsource[VAR_NUM(opline->op1.var)] = NULL;
-					break;
-				}
-				if (opline->op1_type == IS_CONST &&
-				    opline->op2_type == IS_CONST) {
 					break;
 				}
 				/* break missing intentionally */
@@ -723,59 +723,56 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 				if (opline->op1_type == IS_CONST &&
 				    opline->op2_type == IS_CONST) {
 					/* evaluate constant expressions */
-					binary_op_type binary_op;
 					zval result;
-					int er;
 
 optimize_constant_binary_op:
-					binary_op = get_binary_op(opline->opcode);
-		            if ((opline->opcode == ZEND_DIV || opline->opcode == ZEND_MOD) &&
-		                zval_get_long(&ZEND_OP2_LITERAL(opline)) == 0) {
-						SET_VAR_SOURCE(opline);
-		                opline++;
-						continue;
-		            } else if ((opline->opcode == ZEND_SL || opline->opcode == ZEND_SR) &&
-		                zval_get_long(&ZEND_OP2_LITERAL(opline)) < 0) {
-						SET_VAR_SOURCE(opline);
-		                opline++;
-						continue;
-					} else if (zend_binary_op_produces_numeric_string_error(opline->opcode, &ZEND_OP1_LITERAL(opline), &ZEND_OP2_LITERAL(opline))) {
-						SET_VAR_SOURCE(opline);
-		                opline++;
-						continue;
-					}
-					er = EG(error_reporting);
-					EG(error_reporting) = 0;
-					if (binary_op(&result, &ZEND_OP1_LITERAL(opline), &ZEND_OP2_LITERAL(opline)) == SUCCESS) {
+					if (zend_optimizer_eval_binary_op(&result, opline->opcode, &ZEND_OP1_LITERAL(opline), &ZEND_OP2_LITERAL(opline)) == SUCCESS) {
 						literal_dtor(&ZEND_OP1_LITERAL(opline));
 						literal_dtor(&ZEND_OP2_LITERAL(opline));
 						opline->opcode = ZEND_QM_ASSIGN;
 						SET_UNUSED(opline->op2);
 						zend_optimizer_update_op1_const(op_array, opline, &result);
 					}
-					EG(error_reporting) = er;
 				}
 				break;
 
 			case ZEND_BW_NOT:
 				if (opline->op1_type == IS_CONST) {
 					/* evaluate constant unary ops */
-					unary_op_type unary_op;
 					zval result;
 
 optimize_const_unary_op:
-					unary_op = get_unary_op(opline->opcode);
-					if (unary_op) {
-						unary_op(&result, &ZEND_OP1_LITERAL(opline));
+					if (zend_optimizer_eval_unary_op(&result, opline->opcode, &ZEND_OP1_LITERAL(opline)) == SUCCESS) {
 						literal_dtor(&ZEND_OP1_LITERAL(opline));
-					} else {
-						/* BOOL */
-						ZVAL_COPY_VALUE(&result, &ZEND_OP1_LITERAL(opline));
-						convert_to_boolean(&result);
-						ZVAL_NULL(&ZEND_OP1_LITERAL(opline));
+						opline->opcode = ZEND_QM_ASSIGN;
+						zend_optimizer_update_op1_const(op_array, opline, &result);
 					}
-					opline->opcode = ZEND_QM_ASSIGN;
-					zend_optimizer_update_op1_const(op_array, opline, &result);
+				}
+				break;
+
+			case ZEND_CAST:
+				if (opline->op1_type == IS_CONST) {
+					/* cast of constant operand */
+					zval result;
+
+					if (zend_optimizer_eval_cast(&result, opline->extended_value, &ZEND_OP1_LITERAL(opline)) == SUCCESS) {
+						literal_dtor(&ZEND_OP1_LITERAL(opline));
+						opline->opcode = ZEND_QM_ASSIGN;
+						opline->extended_value = 0;
+						zend_optimizer_update_op1_const(op_array, opline, &result);
+					}
+				}
+				break;
+
+			case ZEND_STRLEN:
+				if (opline->op1_type == IS_CONST) {
+					zval result;
+
+					if (zend_optimizer_eval_strlen(&result, &ZEND_OP1_LITERAL(opline)) == SUCCESS) {
+						literal_dtor(&ZEND_OP1_LITERAL(opline));
+						opline->opcode = ZEND_QM_ASSIGN;
+						zend_optimizer_update_op1_const(op_array, opline, &result);
+					}
 				}
 				break;
 
