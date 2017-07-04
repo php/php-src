@@ -24,7 +24,7 @@
 
 PHP_WIN32_IPC_API key_t
 ftok(const char *pathname, int proj_id)
-{
+{/*{{{*/
 	HANDLE fh;
 	struct stat st;
 	BY_HANDLE_FILE_INFORMATION bhfi;
@@ -48,5 +48,13 @@ ftok(const char *pathname, int proj_id)
 	CloseHandle(fh);
 
 	return ret;
-}
+}/*}}}*/
 
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */
