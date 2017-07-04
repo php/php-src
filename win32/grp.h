@@ -18,12 +18,17 @@
 
 /* $Id$ */
 
+#ifndef PHP_WIN32_GRP_H
+#define PHP_WIN32_GRP_H
+
 struct group {
 	char *gr_name;
 	char *gr_passwd;
 	int gr_gid;
 	char **gr_mem;
 };
+
+#endif
 
 /*
  * Local variables:

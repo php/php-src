@@ -18,9 +18,14 @@
 
 /* $Id$ */
 
+#ifndef PHP_WIN32_SELECT_H
+#define PHP_WIN32_SELECT_H
+
 #include "php_network.h"
 
 PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, struct timeval *tv);
+
+#endif
 
 /*
  * Local variables:

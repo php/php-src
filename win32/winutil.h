@@ -16,6 +16,9 @@
    +----------------------------------------------------------------------+
  */
 
+#ifndef PHP_WIN32_WINUTIL_H
+#define PHP_WIN32_WINUTIL_H
+
 #ifdef PHP_EXPORTS
 # define PHP_WINUTIL_API __declspec(dllexport)
 #else
@@ -49,6 +52,8 @@ PHP_WINUTIL_API int php_win32_code_to_errno(unsigned long w32Err);
 	} while (0)
 
 PHP_WINUTIL_API char *php_win32_get_username(void);
+
+#endif
 
 /*
  * Local variables:
