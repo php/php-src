@@ -980,6 +980,10 @@ static void zend_optimize(zend_op_array      *op_array,
 		}
 	}
 
+	if (ZEND_OPTIMIZER_PASS_7 & ctx->optimization_level) {
+		return;
+	}
+
 	if (ctx->debug_level & ZEND_DUMP_AFTER_OPTIMIZER) {
 		zend_dump_op_array(op_array, 0, "after optimizer", NULL);
 	}
@@ -1223,6 +1227,20 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level, zend
 						*op_array = *orig_op_array;
 						op_array->static_variables = ht;
 					}
+				}
+			} ZEND_HASH_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
+	}
+
+	if (debug_level & ZEND_DUMP_AFTER_OPTIMIZER) {
+		ZEND_HASH_FOREACH_PTR(&script->function_table, op_array) {
+			zend_dump_op_array(op_array, ZEND_DUMP_RT_CONSTANTS, "after optimizer", NULL);
+		} ZEND_HASH_FOREACH_END();
+
+		ZEND_HASH_FOREACH_PTR(&script->class_table, ce) {
+			ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->function_table, name, op_array) {
+				if (op_array->scope == ce) {
+					zend_dump_op_array(op_array, ZEND_DUMP_RT_CONSTANTS, "after optimizer", NULL);
 				}
 			} ZEND_HASH_FOREACH_END();
 		} ZEND_HASH_FOREACH_END();
