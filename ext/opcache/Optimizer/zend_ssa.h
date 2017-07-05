@@ -92,6 +92,13 @@ typedef struct _zend_ssa_op {
 	int                    res_use_chain;
 } zend_ssa_op;
 
+typedef enum _zend_ssa_alias_kind {
+	NO_ALIAS,
+	SYMTABLE_ALIAS,
+	PHP_ERRORMSG_ALIAS,
+	HTTP_RESPONSE_HEADER_ALIAS
+} zend_ssa_alias_kind;
+
 typedef struct _zend_ssa_var {
 	int                    var;            /* original var number; op.var for CVs and following numbers for VARs and TMP_VARs */
 	int                    scc;            /* strongly connected component */
@@ -102,6 +109,7 @@ typedef struct _zend_ssa_var {
 	zend_ssa_phi          *sym_use_chain;  /* uses of this value in Pi constaints */
 	unsigned int           no_val : 1;     /* value doesn't mater (used as op1 in ZEND_ASSIGN) */
 	unsigned int           scc_entry : 1;
+	zend_ssa_alias_kind    alias : 2;  /* value may be changed indirectly */
 } zend_ssa_var;
 
 typedef struct _zend_ssa_var_info {
