@@ -761,20 +761,20 @@ static void php_wddx_push_element(void *user_data, const XML_Char *name, const X
 	} else if (!strcmp((char *)name, EL_BOOLEAN)) {
 		int i;
 
+		ALLOC_ZVAL(ent.data);
+		INIT_PZVAL(ent.data);
+		Z_TYPE_P(ent.data) = IS_BOOL;
+		ent.type = ST_BOOLEAN;
+		SET_STACK_VARNAME;
 		if (atts) for (i = 0; atts[i]; i++) {
 			if (!strcmp((char *)atts[i], EL_VALUE) && atts[i+1] && atts[i+1][0]) {
-				ent.type = ST_BOOLEAN;
-				SET_STACK_VARNAME;
-
 				ZVAL_TRUE(&ent.data);
 				wddx_stack_push((wddx_stack *)stack, &ent, sizeof(st_entry));
 				php_wddx_process_data(user_data, atts[i+1], strlen((char *)atts[i+1]));
 				break;
 			}
 		} else {
-			ent.type = ST_BOOLEAN;
-			SET_STACK_VARNAME;
-			ZVAL_FALSE(&ent.data);
+			ZVAL_FALSE(ent.data);
 			wddx_stack_push((wddx_stack *)stack, &ent, sizeof(st_entry));
 		}
 	} else if (!strcmp((char *)name, EL_NULL)) {
