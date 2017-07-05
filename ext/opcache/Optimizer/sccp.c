@@ -531,6 +531,59 @@ static inline int ct_eval_func_call(
 		}
 		ZVAL_STR(result, str);
 		return SUCCESS;
+	} else {
+		uint32_t i;
+		zend_execute_data *execute_data;
+		zend_function *func;
+		int overflow;
+
+		if ((zend_string_equals_literal(name, "array_keys")
+				|| zend_string_equals_literal(name, "array_values"))
+				&& num_args == 1
+				&& Z_TYPE_P(args[0]) == IS_ARRAY) {
+			/* pass */
+		} else if (zend_string_equals_literal(name, "str_repeat")
+				&& num_args == 2
+				&& Z_TYPE_P(args[0]) == IS_STRING
+				&& Z_TYPE_P(args[1]) == IS_LONG
+				&& zend_safe_address(Z_STRLEN_P(args[0]), Z_LVAL_P(args[1]), 0, &overflow) < 64 * 1024 * 1024
+				&& !overflow) {
+			/* pass */
+		} else if ((zend_string_equals_literal(name, "array_merge")
+				|| zend_string_equals_literal(name, "array_replace")
+				|| zend_string_equals_literal(name, "array_merge_recursive")
+				|| zend_string_equals_literal(name, "array_merge_recursive"))
+				&& num_args > 0) {
+			for (i = 0; i < num_args; i++) {
+				if (Z_TYPE_P(args[i]) != IS_ARRAY) {
+					return FAILURE;
+				}
+			}
+		} else {
+#if 0
+			fprintf(stderr, "constant ICALL to %s()\n", ZSTR_VAL(name));
+#endif
+			return FAILURE;
+		}
+
+		func = zend_hash_find_ptr(CG(function_table), name);
+		if (!func || func->type != ZEND_INTERNAL_FUNCTION) {
+			return FAILURE;
+		}
+
+		execute_data = safe_emalloc(num_args, sizeof(zval), ZEND_CALL_FRAME_SLOT * sizeof(zval));
+		memset(execute_data, 0, sizeof(zend_execute_data));
+		EX(func) = func;
+		EX_NUM_ARGS() = num_args;
+		for (i = 0; i < num_args; i++) {
+			ZVAL_COPY(EX_VAR_NUM(i), args[i]);
+		}
+		func->internal_function.handler(execute_data, result);
+		for (i = 0; i < num_args; i++) {
+			zval_ptr_dtor_nogc(EX_VAR_NUM(i));
+		}
+		efree(execute_data);
+		return SUCCESS;
 	}
 	return FAILURE;
 }
