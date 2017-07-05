@@ -38,6 +38,9 @@
 #ifdef PHP_WIN32
 # include <Winuser.h>
 #endif
+#ifndef _WIN32
+# include "zend_signal.h"
+#endif
 #include "zend_alloc.h"
 #include <zend_language_parser.h>
 #include "zend_compile.h"
@@ -124,6 +127,14 @@ do {																			\
 #define ZEND_IS_HEX(c)  (((c)>='0' && (c)<='9') || ((c)>='a' && (c)<='f') || ((c)>='A' && (c)<='F'))
 
 BEGIN_EXTERN_C()
+
+#ifndef _WIN32
+static sigjmp_buf sigbus_jmpbuf;
+static void sigbus_handler (int sig, siginfo_t *siginfo, void *ptr)
+{
+	siglongjmp(sigbus_jmpbuf, 1);
+}
+#endif
 
 static size_t encoding_filter_script_to_internal(unsigned char **to, size_t *to_length, const unsigned char *from, size_t from_length TSRMLS_DC)
 {
@@ -580,6 +591,30 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSR
 		}
 		compilation_successful=0;
 	} else {
+#ifndef _WIN32
+		struct sigaction sigbus_signal;
+		struct sigaction old_sigbus_signal;
+
+		memset(&sigbus_signal, 0, sizeof(sigbus_signal));
+		memset(&old_sigbus_signal, 0, sizeof(old_sigbus_signal));
+		sigbus_signal.sa_sigaction = sigbus_handler;
+		sigbus_signal.sa_flags = SA_SIGINFO;
+#endif
+
+#if defined(ZEND_SIGNALS) && !defined(_WIN32)
+		zend_try { zend_sigaction(SIGBUS, &sigbus_signal, &old_sigbus_signal TSRMLS_CC); } zend_end_try();
+#elif !defined(_WIN32)
+		sigaction(SIGBUS, &sigbus_signal, &old_sigbus_signal);
+#endif
+
+#ifndef _WIN32
+		if (sigsetjmp(sigbus_jmpbuf, 1)) {
+			if (file_handle->type != ZEND_HANDLE_STREAM) {
+				file_handle->type = ZEND_HANDLE_STREAM;
+			}
+		}
+#endif
+
 		init_op_array(op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE TSRMLS_CC);
 		CG(in_compilation) = 1;
 		CG(active_op_array) = op_array;
@@ -592,6 +627,12 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSR
 			zend_bailout();
 		}
 		compilation_successful=1;
+
+#if defined(ZEND_SIGNALS) && !defined(_WIN32)
+		zend_try { zend_sigaction(SIGBUS, &old_sigbus_signal, 0 TSRMLS_CC); } zend_end_try();
+#elif !defined(_WIN32)
+		sigaction(SIGBUS, &old_sigbus_signal, 0);
+#endif
 	}
 
 	if (retval) {
