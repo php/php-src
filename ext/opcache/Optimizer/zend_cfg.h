@@ -92,6 +92,7 @@ typedef struct _zend_cfg {
 	unsigned int      split_at_live_ranges : 1;
 	unsigned int      split_at_calls : 1;
 	unsigned int      split_at_recv : 1;
+	unsigned int      dynamic : 1;        /* accesses varables by name   */
 } zend_cfg;
 
 /* Build Flags */

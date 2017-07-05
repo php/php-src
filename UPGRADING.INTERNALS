@@ -8,6 +8,7 @@ PHP 7.2 INTERNALS UPGRADE NOTES
   e. IS_TYPE_IMMUTABLE removed
   f. zend_arg_info.class_name removed
   g. ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX changed
+  h. valid_symbol_table removed
 
 2. Build system changes
   a. Unix build system changes
@@ -43,6 +44,9 @@ PHP 7.2 INTERNALS UPGRADE NOTES
   g. ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX classname option is removed
      use ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX for simple type
      use ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX for object
+
+  h. valid_symbol_table is removed from executor_globals.
+     Use EG(active) instead of removed EG(valid_symbol_table)
 
 ========================
 2. Build system changes
