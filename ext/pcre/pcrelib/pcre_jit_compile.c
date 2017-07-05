@@ -7307,7 +7307,7 @@ if (opcode == OP_COND || opcode == OP_SCOND)
 
     if (*matchingpath == OP_FAIL)
       stacksize = 0;
-    if (*matchingpath == OP_RREF)
+    else if (*matchingpath == OP_RREF)
       {
       stacksize = GET2(matchingpath, 1);
       if (common->currententry == NULL)
