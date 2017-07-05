@@ -41,9 +41,18 @@ PHP                                                                        NEWS
   . Fixed misparsing of abstract unix domain socket names. (Sara)
   . Fixed bug #74101, bug #74614 (Unserialize Heap Use-After-Free (READ: 1) in
     zval_get_type). (Nikita)
+  . Fixed bug #74111 (Heap buffer overread (READ: 1) finish_nested_data from
+    unserialize). (Nikita)
+  . Fixed bug #74603 (PHP INI Parsing Stack Buffer Overflow Vulnerability).
+    (Stas)
+  . Fixed bug #74819 (wddx_deserialize() heap out-of-bound read via
+    php_parse_date()). (Derick)
 
 - DOM:
   . Fixed bug #69373 (References to deleted XPath query results). (ttoohey)
+
+- GD:
+  . Fixed bug #74435 (Buffer over-read into uninitialized memory). (cmb)
 
 - Intl:
   . Fixed bug #73473 (Stack Buffer Overflow in msgfmt_parse_message). (libnex)
@@ -62,6 +71,14 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug #74663 (Segfault with opcache.memory_protect and
     validate_timestamp). (Laruence)
+
+- OpenSSL:
+  . Fixed bug #74651 (negative-size-param (-1) in memcpy in zif_openssl_seal()).
+    (Stas)
+
+- PCRE:
+  . Fixed bug #74087 (Segmentation fault in PHP7.1.1(compiled using the bundled PCRE library)).
+    (Stas)
 
 - PDO_OCI:
   . Support Instant Client 12.2 in --with-pdo-oci configure option.
