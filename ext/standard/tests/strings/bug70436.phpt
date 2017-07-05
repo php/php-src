@@ -48,7 +48,7 @@ DONE
 --EXPECTF--
 Notice: unserialize(): Error at offset 0 of 3 bytes in %sbug70436.php on line %d
 
-Notice: unserialize(): Error at offset 17 of 17 bytes in %sbug70436.php on line %d
+Notice: unserialize(): Error at offset 16 of 17 bytes in %sbug70436.php on line %d
 array(4) {
   [0]=>
   int(1)
