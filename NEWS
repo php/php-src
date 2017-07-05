@@ -259,6 +259,8 @@ WDDX:
   . Fixed bug #66797 (mb_substr only takes 32-bit signed integer). (cmb)
   . Fixed bug #72910 (Out of bounds heap read in mbc_to_code() / triggered by
     mb_ereg_match()). (Stas)
+  . Add oniguruma upstream fix (CVE-2017-9224, CVE-2017-9226, CVE-2017-9227,
+    CVE-2017-9228, CVE-2017-9229) (Remi, Mamoru TASAKA)
 
 - MSSQL:
   . Fixed bug #72039 (Use of uninitialised value on mssql_guid_string). (Kalle)
