@@ -140,12 +140,31 @@ foreach ($not_strings as $type ) {
   var_dump( is_string($type) );
 }
 
+echo "\n*** Testing is_string() second parameter ***\n";
+
+echo "-- objects not allowed; string input --\n";
+var_dump(is_string("string", false));
+echo "-- objects allowed; string input --\n";
+var_dump(is_string("string", true));
+
+echo "-- objects not allowed; non-__toString() object input --\n";
+var_dump(is_string(new stdClass(), false));
+echo "-- objects allowed; non-__toString() object input --\n";
+var_dump(is_string(new stdClass(), true));
+
+$toStringObject = new class() { public function __toString() { return ''; } };
+echo "-- objects not allowed; __toString() object input --\n";
+var_dump(is_string($toStringObject, false));
+echo "-- objects allowed; __toString() object input --\n";
+var_dump(is_string($toStringObject, true));
+
+
 echo "\n*** Testing error conditions ***\n";
 //Zero argument
 var_dump( is_string() );
 
 //arguments more than expected 
-var_dump( is_string("string", "test") );
+var_dump( is_string("string", false, "test") );
  
 echo "Done\n";
 
@@ -293,11 +312,25 @@ bool(false)
 -- Iteration 45 --
 bool(false)
 
+*** Testing is_string() second parameter ***
+-- objects not allowed; string input --
+bool(true)
+-- objects allowed; string input --
+bool(true)
+-- objects not allowed; non-__toString() object input --
+bool(false)
+-- objects allowed; non-__toString() object input --
+bool(false)
+-- objects not allowed; __toString() object input --
+bool(false)
+-- objects allowed; __toString() object input --
+bool(true)
+
 *** Testing error conditions ***
 
-Warning: is_string() expects exactly 1 parameter, 0 given in %s on line %d
+Warning: is_string() expects at least 1 parameter, 0 given in %s on line %d
 bool(false)
 
-Warning: is_string() expects exactly 1 parameter, 2 given in %s on line %d
+Warning: is_string() expects at most 2 parameters, 3 given in %s on line %d
 bool(false)
 Done

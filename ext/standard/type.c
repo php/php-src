@@ -263,12 +263,30 @@ PHP_FUNCTION(is_float)
 }
 /* }}} */
 
-/* {{{ proto bool is_string(mixed var)
+/* {{{ proto bool is_string(mixed var [, bool allow_objects])
    Returns true if variable is a string
    Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(is_string)
 {
-	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_STRING);
+	zval *var;
+	zend_bool allow_objects = 0;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ZVAL(var)
+		Z_PARAM_OPTIONAL Z_PARAM_BOOL(allow_objects)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+
+	switch (Z_TYPE_P(var)) {
+		case IS_STRING:
+			RETURN_TRUE;
+			break;
+		case IS_OBJECT:
+			RETURN_BOOL(allow_objects == 1 && Z_OBJCE_P(var)->__tostring);
+			break;
+		default:
+			RETURN_FALSE;
+			break;
+	}
 }
 /* }}} */
 
