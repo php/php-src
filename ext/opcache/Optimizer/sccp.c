@@ -1329,7 +1329,11 @@ static void sccp_context_init(sccp_ctx *ctx,
 		MAKE_BOT(&ctx->values[i]);
 	}
 	for (; i < ssa->vars_count; ++i) {
-		MAKE_TOP(&ctx->values[i]);
+		if (ssa->vars[i].alias) {
+			MAKE_BOT(&ctx->values[i]);
+		} else {
+			MAKE_TOP(&ctx->values[i]);
+		}
 	}
 }
 
