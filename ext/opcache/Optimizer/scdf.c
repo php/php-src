@@ -87,6 +87,7 @@ static void mark_edge_feasible(scdf_ctx *ctx, int from, const int *to_ptr, int s
 		zend_ssa_block *ssa_block = &ctx->ssa->blocks[to];
 		zend_ssa_phi *phi;
 		for (phi = ssa_block->phis; phi; phi = phi->next) {
+			zend_bitset_excl(ctx->phi_var_worklist, phi->ssa_var);
 			ctx->handlers.visit_phi(ctx, ctx->ctx, phi);
 		}
 	}
