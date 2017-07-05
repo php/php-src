@@ -30,10 +30,8 @@ typedef struct _scdf_ctx {
 	zend_bitset phi_var_worklist;
 	zend_bitset block_worklist;
 	zend_bitset executable_blocks;
-	/* Edge encoding: 2 bits per block, one for each successor */
+	/* 1 bit per edge, see scdf_edge(cfg, from, to) */
 	zend_bitset feasible_edges;
-	/* If there are more than two successors, an HT is used instead */
-	HashTable *feasible_edges_ht;
 	uint32_t instr_worklist_len;
 	uint32_t phi_var_worklist_len;
 	uint32_t block_worklist_len;
@@ -79,21 +77,23 @@ static inline void scdf_add_def_to_worklist(scdf_ctx *scdf, int var_num) {
 	}
 }
 
-static inline zend_bool scdf_is_edge_feasible(scdf_ctx *scdf, int from, int to) {
-	zend_basic_block *block = &scdf->ssa->cfg.blocks[from];
-	int s;
-	for (s = 0; s < block->successors_count; s++) {
-		if (block->successors[s] == to) {
-			if (s < 2) {
-				return zend_bitset_in(scdf->feasible_edges, 2 * from + s);
-			} else {
-				return scdf->feasible_edges_ht
-					&& zend_hash_index_exists(scdf->feasible_edges_ht,
-							(zend_long) (intptr_t) &block->successors[s]);
-			}
+static inline uint32_t scdf_edge(zend_cfg *cfg, int from, int to) {
+	zend_basic_block *to_block = cfg->blocks + to;
+	int i;
+
+	for (i = 0; i < to_block->predecessors_count; i++) {
+		uint32_t edge = to_block->predecessor_offset + i;
+
+		if (cfg->predecessors[edge] == from) {
+			return edge;
 		}
 	}
 	ZEND_ASSERT(0);
+}
+
+static inline zend_bool scdf_is_edge_feasible(scdf_ctx *scdf, int from, int to) {
+	uint32_t edge = scdf_edge(&scdf->ssa->cfg, from, to);
+	return zend_bitset_in(scdf->feasible_edges, edge);
 }
 
 #endif

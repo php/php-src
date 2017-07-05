@@ -52,29 +52,16 @@
 #define DEBUG_PRINT(...)
 #endif
 
-static void mark_edge_feasible(scdf_ctx *ctx, int from, const int *to_ptr, int suc_num) {
-	int to = *to_ptr;
-	if (suc_num < 2) {
-		int edge = from * 2 + suc_num;
-		if (zend_bitset_in(ctx->feasible_edges, edge)) {
-			/* We already handled this edge */
-			return;
-		}
+static void mark_edge_feasible(scdf_ctx *ctx, int from, int to) {
+	uint32_t edge = scdf_edge(&ctx->ssa->cfg, from, to);
 
-		DEBUG_PRINT("Marking edge %d->%d (successor %d) feasible\n", from, to, suc_num);
-		zend_bitset_incl(ctx->feasible_edges, edge);
-	} else {
-		if (!ctx->feasible_edges_ht) {
-			ALLOC_HASHTABLE(ctx->feasible_edges_ht);
-			zend_hash_init(ctx->feasible_edges_ht, 0, NULL, NULL, 0);
-		}
-		if (!zend_hash_index_add_empty_element(
-				ctx->feasible_edges_ht, (zend_long) (intptr_t) to_ptr)) {
-			/* We already handled this edge */
-			return;
-		}
-		DEBUG_PRINT("Marking edge %d->%d (successor %d) feasible\n", from, to, suc_num);
+	if (zend_bitset_in(ctx->feasible_edges, edge)) {
+		/* We already handled this edge */
+		return;
 	}
+
+	DEBUG_PRINT("Marking edge %d->%d feasible\n", from, to);
+	zend_bitset_incl(ctx->feasible_edges, edge);
 
 	if (!zend_bitset_in(ctx->executable_blocks, to)) {
 		if (!zend_bitset_in(ctx->block_worklist, to)) {
@@ -120,16 +107,16 @@ static void handle_instr(scdf_ctx *ctx, int block_num, zend_op *opline, zend_ssa
 			// TODO For now consider all edges feasible
 			int s;
 			for (s = 0; s < block->successors_count; s++) {
-				mark_edge_feasible(ctx, block_num, &block->successors[s], s);
+				mark_edge_feasible(ctx, block_num, block->successors[s]);
 			}
 		} else {
 			zend_bool suc[2] = {0};
 			if (get_feasible_successors(ctx, block, opline, ssa_op, suc)) {
 				if (suc[0]) {
-					mark_edge_feasible(ctx, block_num, &block->successors[0], 0);
+					mark_edge_feasible(ctx, block_num, block->successors[0]);
 				}
 				if (suc[1]) {
-					mark_edge_feasible(ctx, block_num, &block->successors[1], 1);
+					mark_edge_feasible(ctx, block_num, block->successors[1]);
 				}
 			}
 		}
@@ -137,7 +124,12 @@ static void handle_instr(scdf_ctx *ctx, int block_num, zend_op *opline, zend_ssa
 }
 
 void scdf_init(scdf_ctx *ctx, zend_op_array *op_array, zend_ssa *ssa, void *extra_ctx) {
-	zend_ulong *bitsets;
+	uint32_t edges_count = 0;
+	int b;
+
+	for (b = 0; b < ssa->cfg.blocks_count; b++) {
+		edges_count += ssa->cfg.blocks[b].predecessors_count;
+	}
 
 	ctx->op_array = op_array;
 	ctx->ssa = ssa;
@@ -147,32 +139,20 @@ void scdf_init(scdf_ctx *ctx, zend_op_array *op_array, zend_ssa *ssa, void *extr
 	ctx->phi_var_worklist_len = zend_bitset_len(ssa->vars_count);
 	ctx->block_worklist_len = zend_bitset_len(ssa->cfg.blocks_count);
 
-	bitsets = safe_emalloc(
-		ctx->instr_worklist_len + ctx->phi_var_worklist_len + 4 * ctx->block_worklist_len,
-		sizeof(zend_ulong), 0);
+	ctx->instr_worklist = ecalloc(
+		ctx->instr_worklist_len + ctx->phi_var_worklist_len + 2 * ctx->block_worklist_len + zend_bitset_len(edges_count),
+		sizeof(zend_ulong));
 
-	ctx->instr_worklist = bitsets;
 	ctx->phi_var_worklist = ctx->instr_worklist + ctx->instr_worklist_len;
 	ctx->block_worklist = ctx->phi_var_worklist + ctx->phi_var_worklist_len;
 	ctx->executable_blocks = ctx->block_worklist + ctx->block_worklist_len;
 	ctx->feasible_edges = ctx->executable_blocks + ctx->block_worklist_len;
-	ctx->feasible_edges_ht = NULL;
-
-	zend_bitset_clear(ctx->instr_worklist, ctx->instr_worklist_len);
-	zend_bitset_clear(ctx->phi_var_worklist, ctx->phi_var_worklist_len);
-	zend_bitset_clear(ctx->block_worklist, ctx->block_worklist_len);
-	zend_bitset_clear(ctx->executable_blocks, ctx->block_worklist_len);
-	zend_bitset_clear(ctx->feasible_edges, ctx->block_worklist_len * 2);
 
 	zend_bitset_incl(ctx->block_worklist, 0);
 	zend_bitset_incl(ctx->executable_blocks, 0);
 }
 
 void scdf_free(scdf_ctx *ctx) {
-	if (ctx->feasible_edges_ht) {
-		zend_hash_destroy(ctx->feasible_edges_ht);
-		efree(ctx->feasible_edges_ht);
-	}
 	efree(ctx->instr_worklist);
 }
 
@@ -225,7 +205,7 @@ void scdf_solve(scdf_ctx *ctx, const char *name) {
 
 			if (block->len == 0) {
 				/* Zero length blocks don't have a last instruction that would normally do this */
-				mark_edge_feasible(ctx, i, &block->successors[0], 0);
+				mark_edge_feasible(ctx, i, block->successors[0]);
 			}
 		}
 	}
