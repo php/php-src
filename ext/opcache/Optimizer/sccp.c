@@ -477,7 +477,10 @@ static inline int ct_eval_func_call(
 		return SUCCESS;
 	} else if (zend_string_equals_literal(name, "strpos")) {
 		const char *found;
-		if (num_args != 2 || Z_TYPE_P(args[0]) != IS_STRING || Z_TYPE_P(args[1]) != IS_STRING) {
+		if (num_args != 2
+				|| Z_TYPE_P(args[0]) != IS_STRING
+				|| Z_TYPE_P(args[1]) != IS_STRING
+				|| !Z_STRLEN_P(args[1])) {
 			return FAILURE;
 		}
 
