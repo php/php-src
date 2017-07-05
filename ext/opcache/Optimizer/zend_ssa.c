@@ -1170,7 +1170,11 @@ void zend_ssa_remove_instr(zend_ssa *ssa, zend_op *opline, zend_ssa_op *ssa_op) 
 		ssa_op->res_use_chain = -1;
 	}
 	if (ssa_op->op1_use >= 0) {
-		zend_ssa_unlink_use_chain(ssa, ssa_op - ssa->ops, ssa_op->op1_use);
+		if (ssa_op->op1_use != ssa_op->op2_use) {
+			zend_ssa_unlink_use_chain(ssa, ssa_op - ssa->ops, ssa_op->op1_use);
+		} else {
+			ssa_op->op2_use_chain = ssa_op->op1_use_chain;
+		}
 		ssa_op->op1_use = -1;
 		ssa_op->op1_use_chain = -1;
 	}

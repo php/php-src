@@ -1203,7 +1203,11 @@ static void replace_constant_operands(sccp_ctx *ctx) {
 			zend_ssa_op *ssa_op = &ssa->ops[use];
 			if (try_replace_op1(ctx, opline, ssa_op, i, value)) {
 				ZEND_ASSERT(ssa_op->op1_def == -1);
-				zend_ssa_unlink_use_chain(ssa, use, ssa_op->op1_use);
+				if (ssa_op->op1_use != ssa_op->op2_use) {
+					zend_ssa_unlink_use_chain(ssa, use, ssa_op->op1_use);
+				} else {
+					ssa_op->op2_use_chain = ssa_op->op1_use_chain;
+				}
 				ssa_op->op1_use = -1;
 				ssa_op->op1_use_chain = -1;
 			}
