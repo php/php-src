@@ -203,6 +203,9 @@ static zend_bool can_replace_op1(
 			return !(opline->extended_value & ZEND_ARRAY_ELEMENT_REF);
 		case ZEND_YIELD:
 			return !(op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE);
+		case ZEND_VERIFY_RETURN_TYPE:
+			// TODO: This would require a non-local change ???
+			return 0;
 		default:
 			if (ssa_op->op1_def != -1) {
 				ZEND_ASSERT(0);
