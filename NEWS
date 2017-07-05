@@ -14,18 +14,22 @@ PHP                                                                        NEWS
   . Fixed bug #74819 (wddx_deserialize() heap out-of-bound read via 
     php_parse_date()). (Derick)
 
-GD:
+- GD:
   . Fixed bug #74435 (Buffer over-read into uninitialized memory). (cmb)
 
-mbstring:
+- mbstring:
   . Add oniguruma upstream fix (CVE-2017-9224, CVE-2017-9226, CVE-2017-9227,
     CVE-2017-9228, CVE-2017-9229) (Remi, Mamoru TASAKA)
 
-OpenSSL:
+- OpenSSL:
   . Fixed bug #74651 (negative-size-param (-1) in memcpy in zif_openssl_seal()).
     (Stas)
 
-WDDX:
+- PCRE:
+  . Fixed bug #74087 (Segmentation fault in PHP7.1.1(compiled using the bundled PCRE library)).
+    (Stas)
+
+- WDDX:
    . Fixed bug #74145 (wddx parsing empty boolean tag leads to SIGSEGV). (Stas)
 
 19 Jan 2017, PHP 5.6.30
