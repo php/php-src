@@ -216,14 +216,18 @@ static zend_bool kept_alive_by_live_range(scdf_ctx *scdf, uint32_t block) {
 /* Removes unreachable blocks. This will remove both the instructions (and phis) in the
  * blocks, as well as remove them from the successor / predecessor lists and mark them
  * unreachable. Blocks already marked unreachable are not removed. */
-void scdf_remove_unreachable_blocks(scdf_ctx *scdf) {
+int scdf_remove_unreachable_blocks(scdf_ctx *scdf) {
 	zend_ssa *ssa = scdf->ssa;
 	int i;
+	int removed_ops = 0;
+
 	for (i = 0; i < ssa->cfg.blocks_count; i++) {
 		if (!zend_bitset_in(scdf->executable_blocks, i)
 				&& (ssa->cfg.blocks[i].flags & ZEND_BB_REACHABLE)
 				&& !kept_alive_by_live_range(scdf, i)) {
+			removed_ops += ssa->cfg.blocks[i].len;
 			zend_ssa_remove_block(scdf->op_array, ssa, i);
 		}
 	}
+	return removed_ops;
 }

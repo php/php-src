@@ -1209,11 +1209,12 @@ static zval *value_from_type_and_range(sccp_ctx *ctx, int var_num, zval *tmp) {
 /* This will try to replace uses of SSA variables we have determined to be constant. Not all uses
  * can be replaced, because some instructions don't accept constant operands or only accept them
  * if they have a certain type. */
-static void replace_constant_operands(sccp_ctx *ctx) {
+static int replace_constant_operands(sccp_ctx *ctx) {
 	zend_ssa *ssa = ctx->ssa;
 	zend_op_array *op_array = ctx->op_array;
 	int i;
 	zval tmp;
+	int removed_ops;
 
 	/* We iterate the variables backwards, so we can eliminate sequences like INIT_ROPE
 	 * and INIT_ARRAY. */
@@ -1291,10 +1292,12 @@ static void replace_constant_operands(sccp_ctx *ctx) {
 						zend_ssa_remove_instr(ssa, call->arg_info[i].opline,
 							&ssa->ops[call->arg_info[i].opline - op_array->opcodes]);
 					}
+					removed_ops = call->num_args + 2;
 				} else {
 					/* Ordinary computational instruction -> remove it */
 					zend_ssa_remove_result_def(ssa, ssa_op);
 					zend_ssa_remove_instr(ssa, opline, ssa_op);
+					removed_ops++;
 				}
 			} else if (ssa_op->op1_def == i) {
 				/* Compound assign or incdec -> convert to direct ASSIGN */
@@ -1318,6 +1321,7 @@ static void replace_constant_operands(sccp_ctx *ctx) {
 
 				/* Remove OP_DATA opcode */
 				if (opline->opcode == ZEND_ASSIGN_DIM) {
+					removed_ops++;
 					zend_ssa_remove_instr(ssa, opline + 1, ssa_op + 1);
 				}
 
@@ -1334,6 +1338,8 @@ static void replace_constant_operands(sccp_ctx *ctx) {
 			zend_ssa_remove_phi(ssa, var->definition_phi);
 		}*/
 	}
+
+	return removed_ops;
 }
 
 static void sccp_context_init(sccp_ctx *ctx,
@@ -1370,10 +1376,11 @@ static void sccp_context_free(sccp_ctx *ctx) {
 	efree(ctx->values);
 }
 
-void sccp_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_call_info **call_map)
+int sccp_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_call_info **call_map)
 {
 	scdf_ctx scdf;
 	sccp_ctx ctx;
+	int removed_ops = 0;
 
 	sccp_context_init(&ctx, ssa, op_array, call_map);
 
@@ -1384,9 +1391,11 @@ void sccp_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_call_in
 	scdf_init(&scdf, op_array, ssa, &ctx);
 	scdf_solve(&scdf, "SCCP");
 
-	scdf_remove_unreachable_blocks(&scdf);
-	replace_constant_operands(&ctx);
+	removed_ops += scdf_remove_unreachable_blocks(&scdf);
+	removed_ops += replace_constant_operands(&ctx);
 
 	scdf_free(&scdf);
 	sccp_context_free(&ctx);
+
+	return removed_ops;
 }

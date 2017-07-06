@@ -332,7 +332,9 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 		zend_op *opline;
 		zval tmp;
 
-		sccp_optimize_op_array(op_array, ssa, call_map);
+		if (sccp_optimize_op_array(op_array, ssa, call_map)) {
+			remove_nops = 1;
+		}
 
 		for (v = op_array->last_var; v < ssa->vars_count; v++) {
 
