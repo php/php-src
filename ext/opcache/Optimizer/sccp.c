@@ -235,11 +235,11 @@ static zend_bool try_replace_op1(
 		sccp_ctx *ctx, zend_op *opline, zend_ssa_op *ssa_op, int var, zval *value) {
 	if (ssa_op->op1_use == var && can_replace_op1(ctx->op_array, opline, ssa_op)) {
 		zval zv;
-		ZVAL_DUP(&zv, value);
+		ZVAL_COPY(&zv, value);
 		if (zend_optimizer_update_op1_const(ctx->op_array, opline, &zv)) {
 			return 1;
 		} else {
-			zval_ptr_dtor(&zv);
+			zval_ptr_dtor_nogc(&zv);
 		}
 	}
 	return 0;
@@ -249,11 +249,11 @@ static zend_bool try_replace_op2(
 		sccp_ctx *ctx, zend_op *opline, zend_ssa_op *ssa_op, int var, zval *value) {
 	if (ssa_op->op2_use == var && can_replace_op2(ctx->op_array, opline, ssa_op)) {
 		zval zv;
-		ZVAL_DUP(&zv, value);
+		ZVAL_COPY(&zv, value);
 		if (zend_optimizer_update_op2_const(ctx->op_array, opline, &zv)) {
 			return 1;
 		} else {
-			zval_ptr_dtor(&zv);
+			zval_ptr_dtor_nogc(&zv);
 		}
 	}
 	return 0;
