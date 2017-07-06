@@ -8,6 +8,8 @@ PHP                                                                        NEWS
   . Fixed bug #74658 (Undefined constants in array properties result in broken
     properties). (Laruence)
   . Fixed misparsing of abstract unix domain socket names. (Sara)
+  . Fixed bug #74603 (PHP INI Parsing Stack Buffer Overflow Vulnerability).
+    (Stas)
   . Fixed bug #74101, bug #74614 (Unserialize Heap Use-After-Free (READ: 1) in
     zval_get_type). (Nikita)
   . Fixed bug #74111 (Heap buffer overread (READ: 1) finish_nested_data from
