@@ -14,6 +14,8 @@ PHP                                                                        NEWS
     zval_get_type). (Nikita)
   . Fixed bug #74111 (Heap buffer overread (READ: 1) finish_nested_data from
     unserialize). (Nikita)
+  . Fixed bug #74819 (wddx_deserialize() heap out-of-bound read via
+    php_parse_date()). (Derick)
 
 - Date:
   . Fixed bug #74639 (implement clone for DatePeriod and DateInterval).
