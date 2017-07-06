@@ -1293,6 +1293,9 @@ static int replace_constant_operands(sccp_ctx *ctx) {
 							&ssa->ops[call->arg_info[i].opline - op_array->opcodes]);
 					}
 					removed_ops = call->num_args + 2;
+
+					// TODO: remove call_info completely???
+					call->callee_func = NULL;
 				} else {
 					/* Ordinary computational instruction -> remove it */
 					zend_ssa_remove_result_def(ssa, ssa_op);
