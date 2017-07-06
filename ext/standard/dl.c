@@ -116,17 +116,15 @@ PHPAPI int php_load_extension(char *filename, int type, int start_now)
 		} else {
 			spprintf(&libpath, 0, "%s%c%s", extension_dir, DEFAULT_SLASH, filename); /* SAFE */
 		}
+
 		if (VCWD_ACCESS(libpath, F_OK)) {
 			/* If file does not exist, consider as extension name and build file name */
-			const char *libpath_prefix = "";
 			char *orig_libpath = libpath;
-#if PHP_WIN32
-			libpath_prefix = "php_";
-#endif
+
 			if (slash_suffix) {
-				spprintf(&libpath, 0, "%s%s%s." PHP_SHLIB_SUFFIX, extension_dir, libpath_prefix, filename); /* SAFE */
+				spprintf(&libpath, 0, "%s" PHP_SHLIB_EXT_PREFIX "%s." PHP_SHLIB_SUFFIX, extension_dir, filename); /* SAFE */
 			} else {
-				spprintf(&libpath, 0, "%s%c%s%s." PHP_SHLIB_SUFFIX, extension_dir, DEFAULT_SLASH, libpath_prefix, filename); /* SAFE */
+				spprintf(&libpath, 0, "%s%c" PHP_SHLIB_EXT_PREFIX "%s." PHP_SHLIB_SUFFIX, extension_dir, DEFAULT_SLASH, filename); /* SAFE */
 			}
 
 			if (VCWD_ACCESS(libpath, F_OK)) {
