@@ -18,6 +18,9 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug #69373 (References to deleted XPath query results). (ttoohey)
 
+- GD:
+  . Fixed bug #74435 (Buffer over-read into uninitialized memory). (cmb)
+
 - Intl:
   . Fixed bug #73473 (Stack Buffer Overflow in msgfmt_parse_message). (libnex)
   . Fixed bug #74705 (Wrong reflection on Collator::getSortKey and
