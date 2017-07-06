@@ -50,6 +50,8 @@ PHP                                                                        NEWS
     (Stas)
   . Fixed bug #74101, bug #74614 (Unserialize Heap Use-After-Free (READ: 1) in
     zval_get_type). (Nikita)
+  . Fixed bug #74111 (Heap buffer overread (READ: 1) finish_nested_data from
+    unserialize). (Nikita)
 
 - Date:
   . Fixed bug #74639 (implement clone for DatePeriod and DateInterval).
