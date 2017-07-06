@@ -84,6 +84,8 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fixed bug #74720 (pkcs7_en/decrypt does not work if \x1a is used in
     content). (Anatol)
+  . Fixed bug #74651 (negative-size-param (-1) in memcpy in zif_openssl_seal()).
+    (Stas)
 
 - PDO_OCI:
   . Support Instant Client 12.2 in --with-pdo-oci configure option.
