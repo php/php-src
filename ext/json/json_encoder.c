@@ -285,6 +285,7 @@ static int php_json_escape_string(
 	do {
 		us = (unsigned char)s[pos];
 		if (us >= 0x80) {
+			int utf8_sub = 0;
 			size_t prev_pos = pos;
 
 			us = php_next_utf8_char((unsigned char *)s, len, &pos, &status);
@@ -297,6 +298,7 @@ static int php_json_escape_string(
 				} else if (options & PHP_JSON_INVALID_UTF8_SUBSTITUTE) {
 					/* Use Unicode character 'REPLACEMENT CHARACTER' (U+FFFD) */
 					us = 0xfffd;
+					utf8_sub = 1;
 				} else {
 					if (buf->s) {
 						ZSTR_LEN(buf->s) = checkpoint;
@@ -315,7 +317,11 @@ static int php_json_escape_string(
 			if ((options & PHP_JSON_UNESCAPED_UNICODE)
 			    && ((options & PHP_JSON_UNESCAPED_LINE_TERMINATORS)
 					|| us < 0x2028 || us > 0x2029)) {
-				smart_str_appendl(buf, s + prev_pos, pos - prev_pos);
+				if (utf8_sub) {
+					smart_str_appendl(buf, "\xef\xbf\xbd", 3);
+				} else {
+					smart_str_appendl(buf, s + prev_pos, pos - prev_pos);
+				}
 				continue;
 			}
 			/* From http://en.wikipedia.org/wiki/UTF16 */
