@@ -130,8 +130,8 @@ highlight the major important things (security fixes) and when it is important
 to upgrade.
 
  a. Call php bin/createNewsEntry in your local phpweb checkout
-    Use category "releases" for all non-stable releases.
-    Use category "frontpage" for X.Y.0 non-stable releases only.
+    Use category "releases" for all stable releases.
+    Use category "frontpage" for X.Y.0 non-stable releases only (news only).
 
  b. Add the content for the news entry. Be sure to include the text:
     "THIS IS A DEVELOPMENT PREVIEW - DO NOT USE IT IN PRODUCTION!"

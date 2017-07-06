@@ -136,6 +136,7 @@
 #define HAVE_FNMATCH
 #define HAVE_GLOB
 #define PHP_SHLIB_SUFFIX "dll"
+#define PHP_SHLIB_EXT_PREFIX "php_"
 #define HAVE_SQLDATASOURCES
 
 /* Win32 supports strcoll */
