@@ -1186,10 +1186,13 @@ static zval *value_from_type_and_range(sccp_ctx *ctx, int var_num, zval *tmp) {
  * if they have a certain type. */
 static void replace_constant_operands(sccp_ctx *ctx) {
 	zend_ssa *ssa = ctx->ssa;
+	zend_op_array *op_array = ctx->op_array;
 	int i;
 	zval tmp;
 
-	for (i = 0; i < ssa->vars_count; i++) {
+	/* We iterate the variables backwards, so we can eliminate sequences like INIT_ROPE
+	 * and INIT_ARRAY. */
+	for (i = ssa->vars_count - 1; i >= 0; i--) {
 		zend_ssa_var *var = &ssa->vars[i];
 		zval *value;
 		int use;
@@ -1204,7 +1207,7 @@ static void replace_constant_operands(sccp_ctx *ctx) {
 		}
 
 		FOREACH_USE(var, use) {
-			zend_op *opline = &ctx->op_array->opcodes[use];
+			zend_op *opline = &op_array->opcodes[use];
 			zend_ssa_op *ssa_op = &ssa->ops[use];
 			if (try_replace_op1(ctx, opline, ssa_op, i, value)) {
 				ZEND_ASSERT(ssa_op->op1_def == -1);
@@ -1223,30 +1226,20 @@ static void replace_constant_operands(sccp_ctx *ctx) {
 				ssa_op->op2_use_chain = -1;
 			}
 		} FOREACH_USE_END();
-	}
-}
 
-/* This is a basic DCE pass we run after SCCP. It only works on those instructions those result
- * value(s) were determined by SCCP. It removes dead computational instructions and converts
- * CV-affecting instructions into CONST ASSIGNs. This basic DCE is performed for multiple reasons:
- * a) During operand replacement we eliminate FREEs. The corresponding computational instructions
- *    must be removed to avoid leaks. This way SCCP can run independently of the full DCE pass.
- * b) The main DCE pass relies on type analysis to determine whether instructions have side-effects
- *    and can't be DCEd. This means that it will not be able collect all instructions rendered dead
- *    by SCCP, because they may have potentially side-effecting types, but the actual values are
- *    not. As such doing DCE here will allow us to eliminate more dead code in combination.
- * c) The ordinary DCE pass cannot collect dead calls. However SCCP can result in dead calls, which
- *    we need to collect. */
-static void eliminate_dead_instructions(sccp_ctx *ctx) {
-	zend_ssa *ssa = ctx->ssa;
-	zend_op_array *op_array = ctx->op_array;
-	int i;
+		/* This is a basic DCE pass we run after SCCP. It only works on those instructions those result
+		 * value(s) were determined by SCCP. It removes dead computational instructions and converts
+		 * CV-affecting instructions into CONST ASSIGNs. This basic DCE is performed for multiple reasons:
+		 * a) During operand replacement we eliminate FREEs. The corresponding computational instructions
+		 *    must be removed to avoid leaks. This way SCCP can run independently of the full DCE pass.
+		 * b) The main DCE pass relies on type analysis to determine whether instructions have side-effects
+		 *    and can't be DCEd. This means that it will not be able collect all instructions rendered dead
+		 *    by SCCP, because they may have potentially side-effecting types, but the actual values are
+		 *    not. As such doing DCE here will allow us to eliminate more dead code in combination.
+		 * c) The ordinary DCE pass cannot collect dead calls. However SCCP can result in dead calls, which
+		 *    we need to collect. */
 
-	/* We iterate the variables backwards, so we can eliminate sequences like INIT_ROPE
-	 * and INIT_ARRAY. */
-	for (i = ssa->vars_count - 1; i >= 0; i--) {
-		zend_ssa_var *var = &ssa->vars[i];
-		if (value_known(&ctx->values[i]) && var->definition >= 0) {
+		if (var->definition >= 0 && value_known(&ctx->values[i])) {
 			zend_op *opline = &op_array->opcodes[var->definition];
 			zend_ssa_op *ssa_op = &ssa->ops[var->definition];
 			if (opline->opcode == ZEND_ASSIGN) {
@@ -1254,11 +1247,11 @@ static void eliminate_dead_instructions(sccp_ctx *ctx) {
 				continue;
 			}
 
-			if (ssa_op->result_def >= 0
+			if (ssa_op->result_def == i
 					&& ssa_op->op1_def < 0
 					&& ssa_op->op2_def < 0
-					&& ssa->vars[ssa_op->result_def].use_chain < 0
-					&& ssa->vars[ssa_op->result_def].phi_use_chain == NULL) {
+					&& var->use_chain < 0
+					&& var->phi_use_chain == NULL) {
 				if (opline->opcode == ZEND_DO_ICALL) {
 					/* Call instruction -> remove opcodes that are part of the call */
 					zend_call_info *call = ctx->call_map[var->definition];
@@ -1278,10 +1271,8 @@ static void eliminate_dead_instructions(sccp_ctx *ctx) {
 					zend_ssa_remove_result_def(ssa, ssa_op);
 					zend_ssa_remove_instr(ssa, opline, ssa_op);
 				}
-			} else if (ssa_op->op1_def >= 0) {
+			} else if (ssa_op->op1_def == i) {
 				/* Compound assign or incdec -> convert to direct ASSIGN */
-				zval *val = &ctx->values[ssa_op->op1_def];
-				ZEND_ASSERT(value_known(val));
 
 				/* Destroy previous op2 */
 				if (opline->op2_type == IS_CONST) {
@@ -1308,8 +1299,8 @@ static void eliminate_dead_instructions(sccp_ctx *ctx) {
 				/* Convert to ASSIGN */
 				opline->opcode = ZEND_ASSIGN;
 				opline->op2_type = IS_CONST;
-				opline->op2.constant = zend_optimizer_add_literal(op_array, val);
-				Z_TRY_ADDREF_P(val);
+				opline->op2.constant = zend_optimizer_add_literal(op_array, value);
+				Z_TRY_ADDREF_P(value);
 			}
 		}
 		/*if (var->definition_phi
@@ -1354,17 +1345,6 @@ static void sccp_context_free(sccp_ctx *ctx) {
 	efree(ctx->values);
 }
 
-static void sccp_apply_results(sccp_ctx *ctx) {
-	replace_constant_operands(ctx);
-#if 0
-	zend_dump_op_array(ctx->op_array, ZEND_DUMP_SSA, "SCCP-1", ctx->ssa);
-#endif
-	eliminate_dead_instructions(ctx);
-#if 0
-	zend_dump_op_array(ctx->op_array, ZEND_DUMP_SSA, "SCCP-2", ctx->ssa);
-#endif
-}
-
 void sccp_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_call_info **call_map)
 {
 	scdf_ctx scdf;
@@ -1380,7 +1360,7 @@ void sccp_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_call_in
 	scdf_solve(&scdf, "SCCP");
 
 	scdf_remove_unreachable_blocks(&scdf);
-	sccp_apply_results(&ctx);
+	replace_constant_operands(&ctx);
 
 	scdf_free(&scdf);
 	sccp_context_free(&ctx);
