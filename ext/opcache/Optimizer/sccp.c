@@ -355,11 +355,10 @@ static inline int ct_eval_isset_dim(zval *result, uint32_t extended_value, zval 
 	}
 }
 
-// TODO Avoid the copy_ctor
 static inline int ct_eval_add_array_elem(zval *result, zval *value, zval *key) {
 	if (!key) {
 		if ((value = zend_hash_next_index_insert(Z_ARR_P(result), value))) {
-			zval_copy_ctor(value);
+			Z_TRY_ADDREF_P(value);
 			return SUCCESS;
 		}
 		return FAILURE;
@@ -389,7 +388,7 @@ static inline int ct_eval_add_array_elem(zval *result, zval *value, zval *key) {
 			return FAILURE;
 	}
 
-	zval_copy_ctor(value);
+	Z_TRY_ADDREF_P(value);
 	return SUCCESS;
 }
 
