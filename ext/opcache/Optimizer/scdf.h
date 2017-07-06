@@ -38,12 +38,12 @@ typedef struct _scdf_ctx {
 
 	struct {
 		void (*visit_instr)(
-			struct _scdf_ctx *scdf, void *ctx, zend_op *opline, zend_ssa_op *ssa_op);
+			struct _scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_op);
 		void (*visit_phi)(
-			struct _scdf_ctx *scdf, void *ctx, zend_ssa_phi *phi);
-		zend_bool (*get_feasible_successors)(
-			struct _scdf_ctx *scdf, void *ctx, zend_basic_block *block,
-			zend_op *opline, zend_ssa_op *ssa_op, zend_bool *suc);
+			struct _scdf_ctx *scdf, zend_ssa_phi *phi);
+		void (*mark_feasible_successors)(
+			struct _scdf_ctx *scdf, int block_num, zend_basic_block *block,
+			zend_op *opline, zend_ssa_op *ssa_op);
 	} handlers;
 } scdf_ctx;
 
@@ -95,5 +95,7 @@ static inline zend_bool scdf_is_edge_feasible(scdf_ctx *scdf, int from, int to) 
 	uint32_t edge = scdf_edge(&scdf->ssa->cfg, from, to);
 	return zend_bitset_in(scdf->feasible_edges, edge);
 }
+
+void scdf_mark_edge_feasible(scdf_ctx *ctx, int from, int to);
 
 #endif

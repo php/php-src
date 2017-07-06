@@ -601,14 +601,9 @@ static inline int ct_eval_func_call(
 
 #define SKIP_IF_TOP(op) if (IS_TOP(op)) break;
 
-static void sccp_visit_instr(scdf_ctx *scdf, void *void_ctx, zend_op *opline, zend_ssa_op *ssa_op) {
-	sccp_ctx *ctx = (sccp_ctx *) void_ctx;
+static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_op) {
+	sccp_ctx *ctx = (sccp_ctx *) scdf->ctx;
 	zval *op1, *op2, zv; /* zv is a temporary to hold result values */
-
-	if (opline->opcode == ZEND_OP_DATA) {
-		opline--;
-		ssa_op--;
-	}
 
 	op1 = get_op1_value(ctx, opline, ssa_op);
 	op2 = get_op2_value(ctx, opline, ssa_op);
@@ -1032,11 +1027,13 @@ static void sccp_visit_instr(scdf_ctx *scdf, void *void_ctx, zend_op *opline, ze
 }
 
 /* Returns whether there is a successor */
-static zend_bool sccp_get_feasible_successors(
-		scdf_ctx *scdf, void *void_ctx, zend_basic_block *block,
-		zend_op *opline, zend_ssa_op *ssa_op, zend_bool *suc) {
-	sccp_ctx *ctx = (sccp_ctx *) void_ctx;
+static void sccp_mark_feasible_successors(
+		scdf_ctx *scdf,
+		int block_num, zend_basic_block *block,
+		zend_op *opline, zend_ssa_op *ssa_op) {
+	sccp_ctx *ctx = (sccp_ctx *) scdf->ctx;
 	zval *op1;
+	int s;
 
 	/* We can't determine the branch target at compile-time for these */
 	switch (opline->opcode) {
@@ -1046,51 +1043,56 @@ static zend_bool sccp_get_feasible_successors(
 		case ZEND_DECLARE_ANON_INHERITED_CLASS:
 		case ZEND_FE_FETCH_R:
 		case ZEND_FE_FETCH_RW:
-			suc[0] = 1;
-			suc[1] = 1;
-			return 1;
+			scdf_mark_edge_feasible(scdf, block_num, block->successors[0]);
+			scdf_mark_edge_feasible(scdf, block_num, block->successors[1]);
+			return;
 	}
 
 	op1 = get_op1_value(ctx, opline, ssa_op);
 
-	/* Branch target not yet known */
-	if (IS_TOP(op1)) {
-		return 0;
+	/* Branch target can be either one */
+	if (!op1 || IS_BOT(op1)) {
+		for (s = 0; s < block->successors_count; s++) {
+			scdf_mark_edge_feasible(scdf, block_num, block->successors[s]);
+		}
+		return;
 	}
 
-	/* Branch target can be either one */
-	if (IS_BOT(op1)) {
-		suc[0] = 1;
-		suc[1] = 1;
-		return 1;
+	/* Branch target not yet known */
+	if (IS_TOP(op1)) {
+		return;
 	}
 
 	switch (opline->opcode) {
 		case ZEND_JMPZ:
 		case ZEND_JMPZNZ:
 		case ZEND_JMPZ_EX:
-			suc[zend_is_true(op1)] = 1;
+			s = zend_is_true(op1);
 			break;
 		case ZEND_JMPNZ:
 		case ZEND_JMPNZ_EX:
 		case ZEND_JMP_SET:
-			suc[!zend_is_true(op1)] = 1;
+			s = !zend_is_true(op1);
 			break;
 		case ZEND_COALESCE:
-			suc[Z_TYPE_P(op1) == IS_NULL] = 1;
+			s = (Z_TYPE_P(op1) == IS_NULL);
 			break;
 		case ZEND_FE_RESET_R:
 		case ZEND_FE_RESET_RW:
-			if (Z_TYPE_P(op1) == IS_ARRAY) {
-				suc[zend_hash_num_elements(Z_ARR_P(op1)) != 0] = 1;
-			} else {
-				suc[0] = 1;
-				suc[1] = 1;
+			if (Z_TYPE_P(op1) != IS_ARRAY) {
+				scdf_mark_edge_feasible(scdf, block_num, block->successors[0]);
+				scdf_mark_edge_feasible(scdf, block_num, block->successors[1]);
+				return;
 			}
+			s = zend_hash_num_elements(Z_ARR_P(op1)) != 0;
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default:
+			for (s = 0; s < block->successors_count; s++) {
+				scdf_mark_edge_feasible(scdf, block_num, block->successors[s]);
+			}
+			return;
 	}
-	return 1;
+	scdf_mark_edge_feasible(scdf, block_num, block->successors[s]);
 }
 
 static void join_phi_values(zval *a, zval *b) {
@@ -1108,8 +1110,8 @@ static void join_phi_values(zval *a, zval *b) {
 	}
 }
 
-static void sccp_visit_phi(scdf_ctx *scdf, void *void_ctx, zend_ssa_phi *phi) {
-	sccp_ctx *ctx = (sccp_ctx *) void_ctx;
+static void sccp_visit_phi(scdf_ctx *scdf, zend_ssa_phi *phi) {
+	sccp_ctx *ctx = (sccp_ctx *) scdf->ctx;
 	zend_ssa *ssa = ctx->ssa;
 	ZEND_ASSERT(phi->ssa_var >= 0);
 	if (!IS_BOT(&ctx->values[phi->ssa_var])) {
@@ -1372,7 +1374,7 @@ void sccp_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_call_in
 
 	scdf.handlers.visit_instr = sccp_visit_instr;
 	scdf.handlers.visit_phi = sccp_visit_phi;
-	scdf.handlers.get_feasible_successors = sccp_get_feasible_successors;
+	scdf.handlers.mark_feasible_successors = sccp_mark_feasible_successors;
 
 	scdf_init(&scdf, op_array, ssa, &ctx);
 	scdf_solve(&scdf, "SCCP");
