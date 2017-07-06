@@ -239,6 +239,19 @@ static zend_bool try_replace_op1(
 		if (zend_optimizer_update_op1_const(ctx->op_array, opline, &zv)) {
 			return 1;
 		} else {
+			// TODO: check the following special cases ???
+			switch (opline->opcode) {
+				case ZEND_FETCH_LIST:
+				case ZEND_CASE:
+				case ZEND_SWITCH_STRING:
+				case ZEND_SWITCH_LONG:
+					if (Z_TYPE(zv) == IS_STRING) {
+						zend_string_hash_val(Z_STR(zv));
+					}
+					opline->op1.constant = zend_optimizer_add_literal(ctx->op_array, &zv);
+					opline->op1_type = IS_CONST;
+					return 1;
+			}
 			zval_ptr_dtor_nogc(&zv);
 		}
 	}
@@ -300,14 +313,14 @@ static inline int fetch_array_elem(zval **result, zval *op1, zval *op2) {
 	}
 }
 
-static inline int ct_eval_fetch_dim(zval *result, zval *op1, zval *op2) {
+static inline int ct_eval_fetch_dim(zval *result, zval *op1, zval *op2, int support_strings) {
 	if (Z_TYPE_P(op1) == IS_ARRAY) {
 		zval *value;
 		if (fetch_array_elem(&value, op1, op2) == SUCCESS && value) {
 			ZVAL_COPY(result, value);
 			return SUCCESS;
 		}
-	} else if (Z_TYPE_P(op1) == IS_STRING) {
+	} else if (support_strings && Z_TYPE_P(op1) == IS_STRING) {
 		zend_long index;
 		if (zval_to_string_offset(&index, op2) == FAILURE) {
 			return FAILURE;
@@ -697,6 +710,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 		case ZEND_BW_AND:
 		case ZEND_BW_XOR:
 		case ZEND_BOOL_XOR:
+		case ZEND_CASE:
 			SKIP_IF_TOP(op1);
 			SKIP_IF_TOP(op2);
 
@@ -796,11 +810,23 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			}
 			SET_RESULT_BOT(result);
 			break;
+		case ZEND_COUNT:
+			SKIP_IF_TOP(op1);
+			if (Z_TYPE_P(op1) == IS_ARRAY) {
+				ZVAL_LONG(&zv, zend_hash_num_elements(Z_ARRVAL_P(op1)));
+				SET_RESULT(result, &zv);
+				zval_ptr_dtor_nogc(&zv);
+				break;
+			}
+			SET_RESULT_BOT(result);
+			break;
 		case ZEND_FETCH_DIM_R:
+		case ZEND_FETCH_DIM_IS:
+		case ZEND_FETCH_LIST:
 			SKIP_IF_TOP(op1);
 			SKIP_IF_TOP(op2);
 
-			if (ct_eval_fetch_dim(&zv, op1, op2) == SUCCESS) {
+			if (ct_eval_fetch_dim(&zv, op1, op2, (opline->opcode != ZEND_FETCH_LIST)) == SUCCESS) {
 				SET_RESULT(result, &zv);
 				zval_ptr_dtor_nogc(&zv);
 				break;
