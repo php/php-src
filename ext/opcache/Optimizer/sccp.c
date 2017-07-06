@@ -1217,7 +1217,7 @@ static void replace_constant_operands(sccp_ctx *ctx) {
 
 	/* We iterate the variables backwards, so we can eliminate sequences like INIT_ROPE
 	 * and INIT_ARRAY. */
-	for (i = ssa->vars_count - 1; i >= 0; i--) {
+	for (i = ssa->vars_count - 1; i >= op_array->last_var; i--) {
 		zend_ssa_var *var = &ssa->vars[i];
 		zval *value;
 		int use;
@@ -1364,7 +1364,7 @@ static void sccp_context_init(sccp_ctx *ctx,
 
 static void sccp_context_free(sccp_ctx *ctx) {
 	int i;
-	for (i = 0; i < ctx->ssa->vars_count; ++i) {
+	for (i = ctx->op_array->last_var; i < ctx->ssa->vars_count; ++i) {
 		zval_ptr_dtor_nogc(&ctx->values[i]);
 	}
 	efree(ctx->values);
