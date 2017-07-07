@@ -826,6 +826,10 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 #ifdef HAVE_PCRE_JIT_SUPPORT
 		if ((extra->flags & PCRE_EXTRA_EXECUTABLE_JIT)
 		 && no_utf_check && !g_notempty) {
+			if (start_offset < 0 || start_offset > subject_len) {
+				pcre_handle_exec_error(PCRE_ERROR_BADOFFSET);
+				break;
+			}
 			count = pcre_jit_exec(pce->re, extra, subject, (int)subject_len, (int)start_offset,
 						  no_utf_check|g_notempty, offsets, size_offsets, jit_stack);
 		} else

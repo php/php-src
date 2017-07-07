@@ -21,6 +21,10 @@ PHP                                                                        NEWS
   . Fixed bug #74651 (negative-size-param (-1) in memcpy in zif_openssl_seal()).
     (Stas)
 
+- PCRE:
+  . Fixed bug #74873 (Minor BC break: PCRE_JIT changes output of preg_match()).
+    (Dmitry)
+
 06 Jul 2017, PHP 7.2.0alpha3
 
 - Core:
