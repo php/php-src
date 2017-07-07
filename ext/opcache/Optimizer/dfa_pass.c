@@ -453,7 +453,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 		zval tmp;
 
 		if (ZEND_OPTIMIZER_PASS_8 & ctx->optimization_level) {
-			if (sccp_optimize_op_array(op_array, ssa, call_map)) {
+			if (sccp_optimize_op_array(ctx, op_array, ssa, call_map)) {
 				remove_nops = 1;
 			}
 			if (ZEND_FUNC_INFO(op_array)) {

@@ -1348,57 +1348,57 @@ static int replace_constant_operands(sccp_ctx *ctx) {
 	return removed_ops;
 }
 
-static void sccp_context_init(sccp_ctx *ctx,
+static void sccp_context_init(zend_optimizer_ctx *ctx, sccp_ctx *sccp,
 		zend_ssa *ssa, zend_op_array *op_array, zend_call_info **call_map) {
 	int i;
-	ctx->call_map = call_map;
-	ctx->values = emalloc(sizeof(zval) * ssa->vars_count);
+	sccp->call_map = call_map;
+	sccp->values = zend_arena_alloc(&ctx->arena, sizeof(zval) * ssa->vars_count);
 
-	MAKE_TOP(&ctx->top);
-	MAKE_BOT(&ctx->bot);
+	MAKE_TOP(&sccp->top);
+	MAKE_BOT(&sccp->bot);
 
 	i = 0;
 	for (; i < op_array->last_var; ++i) {
 		/* These are all undefined variables, which we have to mark BOT.
 		 * Otherwise the undefined variable warning might not be preserved. */
-		MAKE_BOT(&ctx->values[i]);
+		MAKE_BOT(&sccp->values[i]);
 	}
 	for (; i < ssa->vars_count; ++i) {
 		if (ssa->vars[i].alias) {
-			MAKE_BOT(&ctx->values[i]);
+			MAKE_BOT(&sccp->values[i]);
 		} else {
-			MAKE_TOP(&ctx->values[i]);
+			MAKE_TOP(&sccp->values[i]);
 		}
 	}
 }
 
-static void sccp_context_free(sccp_ctx *ctx) {
+static void sccp_context_free(sccp_ctx *sccp) {
 	int i;
-	for (i = ctx->scdf.op_array->last_var; i < ctx->scdf.ssa->vars_count; ++i) {
-		zval_ptr_dtor_nogc(&ctx->values[i]);
+	for (i = sccp->scdf.op_array->last_var; i < sccp->scdf.ssa->vars_count; ++i) {
+		zval_ptr_dtor_nogc(&sccp->values[i]);
 	}
-	efree(ctx->values);
 }
 
-int sccp_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_call_info **call_map)
+int sccp_optimize_op_array(zend_optimizer_ctx *ctx, zend_op_array *op_array, zend_ssa *ssa, zend_call_info **call_map)
 {
-	sccp_ctx ctx;
+	sccp_ctx sccp;
 	int removed_ops = 0;
+	void *checkpoint = zend_arena_checkpoint(ctx->arena);
 
-	sccp_context_init(&ctx, ssa, op_array, call_map);
+	sccp_context_init(ctx, &sccp, ssa, op_array, call_map);
 
-	ctx.scdf.handlers.visit_instr = sccp_visit_instr;
-	ctx.scdf.handlers.visit_phi = sccp_visit_phi;
-	ctx.scdf.handlers.mark_feasible_successors = sccp_mark_feasible_successors;
+	sccp.scdf.handlers.visit_instr = sccp_visit_instr;
+	sccp.scdf.handlers.visit_phi = sccp_visit_phi;
+	sccp.scdf.handlers.mark_feasible_successors = sccp_mark_feasible_successors;
 
-	scdf_init(&ctx.scdf, op_array, ssa);
-	scdf_solve(&ctx.scdf, "SCCP");
+	scdf_init(ctx, &sccp.scdf, op_array, ssa);
+	scdf_solve(&sccp.scdf, "SCCP");
 
-	removed_ops += scdf_remove_unreachable_blocks(&ctx.scdf);
-	removed_ops += replace_constant_operands(&ctx);
+	removed_ops += scdf_remove_unreachable_blocks(&sccp.scdf);
+	removed_ops += replace_constant_operands(&sccp);
 
-	sccp_context_free(&ctx);
-	scdf_free(&ctx.scdf);
+	sccp_context_free(&sccp);
+	zend_arena_release(&ctx->arena, checkpoint);
 
 	return removed_ops;
 }

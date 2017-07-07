@@ -46,9 +46,8 @@ typedef struct _scdf_ctx {
 	} handlers;
 } scdf_ctx;
 
-void scdf_init(scdf_ctx *scdf, zend_op_array *op_array, zend_ssa *ssa);
+void scdf_init(zend_optimizer_ctx *ctx, scdf_ctx *scdf, zend_op_array *op_array, zend_ssa *ssa);
 void scdf_solve(scdf_ctx *scdf, const char *name);
-void scdf_free(scdf_ctx *scdf);
 
 int scdf_remove_unreachable_blocks(scdf_ctx *scdf);
 
@@ -95,6 +94,6 @@ static inline zend_bool scdf_is_edge_feasible(scdf_ctx *scdf, int from, int to) 
 	return zend_bitset_in(scdf->feasible_edges, edge);
 }
 
-void scdf_mark_edge_feasible(scdf_ctx *ctx, int from, int to);
+void scdf_mark_edge_feasible(scdf_ctx *scdf, int from, int to);
 
 #endif
