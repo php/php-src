@@ -1396,6 +1396,11 @@ session.cookie_domain =
 ; http://php.net/session.cookie-httponly
 session.cookie_httponly =
 
+; Add SameSite attribute to cookie to help mitigate Cross-Site Request Forgery (CSRF/XSRF)
+; Current valid values are "Lax" or "Strict"
+; https://tools.ietf.org/html/draft-west-first-party-cookies-07
+session.cookie_samesite =
+
 ; Handler used to serialize data.  php is the standard serializer of PHP.
 ; http://php.net/session.serialize-handler
 session.serialize_handler = php

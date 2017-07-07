@@ -8,6 +8,7 @@ session.cookie_path="/"
 session.cookie_domain=""
 session.cookie_secure=0
 session.cookie_httponly=0
+session.cookie_samesite=""
 --FILE--
 <?php
 
@@ -22,9 +23,9 @@ ob_start();
 echo "*** Testing session_get_cookie_params() : basic functionality ***\n";
 
 var_dump(session_get_cookie_params());
-var_dump(session_set_cookie_params(3600, "/path", "blah", FALSE, FALSE));
+var_dump(session_set_cookie_params(3600, "/path", "blah", FALSE, FALSE, "foo"));
 var_dump(session_get_cookie_params());
-var_dump(session_set_cookie_params(1234567890, "/guff", "foo", TRUE, TRUE));
+var_dump(session_set_cookie_params(1234567890, "/guff", "foo", TRUE, TRUE, "blah"));
 var_dump(session_get_cookie_params());
 
 echo "Done";
@@ -32,7 +33,7 @@ ob_end_flush();
 ?>
 --EXPECTF--
 *** Testing session_get_cookie_params() : basic functionality ***
-array(5) {
+array(6) {
   ["lifetime"]=>
   int(0)
   ["path"]=>
@@ -43,9 +44,11 @@ array(5) {
   bool(false)
   ["httponly"]=>
   bool(false)
+  ["samesite"]=>
+  string(0) ""
 }
 bool(true)
-array(5) {
+array(6) {
   ["lifetime"]=>
   int(3600)
   ["path"]=>
@@ -56,9 +59,11 @@ array(5) {
   bool(false)
   ["httponly"]=>
   bool(false)
+  ["samesite"]=>
+  string(3) "foo"
 }
 bool(true)
-array(5) {
+array(6) {
   ["lifetime"]=>
   int(1234567890)
   ["path"]=>
@@ -69,5 +74,7 @@ array(5) {
   bool(true)
   ["httponly"]=>
   bool(true)
+  ["samesite"]=>
+  string(4) "blah"
 }
 Done

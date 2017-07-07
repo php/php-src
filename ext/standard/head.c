@@ -80,8 +80,7 @@ PHPAPI int php_header(void)
 	}
 }
 
-
-PHPAPI int php_setcookie(zend_string *name, zend_string *value, time_t expires, zend_string *path, zend_string *domain, int secure, int url_encode, int httponly)
+PHPAPI int php_setcookie(zend_string *name, zend_string *value, time_t expires, zend_string *path, zend_string *domain, int secure, int url_encode, int httponly, zend_string *samesite)
 {
 	char *cookie;
 	size_t len = sizeof("Set-Cookie: ");
@@ -120,6 +119,9 @@ PHPAPI int php_setcookie(zend_string *name, zend_string *value, time_t expires, 
 	}
 	if (domain) {
 		len += ZSTR_LEN(domain);
+	}
+	if (samesite) {
+		len += ZSTR_LEN(samesite);
 	}
 
 	cookie = emalloc(len + 100);
@@ -182,6 +184,10 @@ PHPAPI int php_setcookie(zend_string *name, zend_string *value, time_t expires, 
 	if (httponly) {
 		strlcat(cookie, COOKIE_HTTPONLY, len + 100);
 	}
+	if (samesite && ZSTR_LEN(samesite)) {
+		strlcat(cookie, COOKIE_SAMESITE, len + 100);
+		strlcat(cookie, ZSTR_VAL(samesite), len + 100);
+	}
 
 	ctr.line = cookie;
 	ctr.line_len = (uint32_t)strlen(cookie);
@@ -193,15 +199,15 @@ PHPAPI int php_setcookie(zend_string *name, zend_string *value, time_t expires, 
 
 
 /* php_set_cookie(name, value, expires, path, domain, secure) */
-/* {{{ proto bool setcookie(string name [, string value [, int expires [, string path [, string domain [, bool secure[, bool httponly]]]]]])
+/* {{{ proto bool setcookie(string name [, string value [, int expires [, string path [, string domain [, bool secure[, bool httponly[, string samesite]]]]]]])
    Send a cookie */
 PHP_FUNCTION(setcookie)
 {
-	zend_string *name, *value = NULL, *path = NULL, *domain = NULL;
+	zend_string *name, *value = NULL, *path = NULL, *domain = NULL, *samesite = NULL;
 	zend_long expires = 0;
 	zend_bool secure = 0, httponly = 0;
 
-	ZEND_PARSE_PARAMETERS_START(1, 7)
+	ZEND_PARSE_PARAMETERS_START(1, 8)
 		Z_PARAM_STR(name)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR(value)
@@ -210,9 +216,10 @@ PHP_FUNCTION(setcookie)
 		Z_PARAM_STR(domain)
 		Z_PARAM_BOOL(secure)
 		Z_PARAM_BOOL(httponly)
+		Z_PARAM_STR(samesite)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (php_setcookie(name, value, expires, path, domain, secure, 1, httponly) == SUCCESS) {
+	if (php_setcookie(name, value, expires, path, domain, secure, 1, httponly, samesite) == SUCCESS) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
@@ -220,15 +227,15 @@ PHP_FUNCTION(setcookie)
 }
 /* }}} */
 
-/* {{{ proto bool setrawcookie(string name [, string value [, int expires [, string path [, string domain [, bool secure[, bool httponly]]]]]])
+/* {{{ proto bool setrawcookie(string name [, string value [, int expires [, string path [, string domain [, bool secure[, bool httponly[, string samesite]]]]]]])
    Send a cookie with no url encoding of the value */
 PHP_FUNCTION(setrawcookie)
 {
-	zend_string *name, *value = NULL, *path = NULL, *domain = NULL;
+	zend_string *name, *value = NULL, *path = NULL, *domain = NULL, *samesite = NULL;
 	zend_long expires = 0;
 	zend_bool secure = 0, httponly = 0;
 
-	ZEND_PARSE_PARAMETERS_START(1, 7)
+	ZEND_PARSE_PARAMETERS_START(1, 8)
 		Z_PARAM_STR(name)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR(value)
@@ -237,9 +244,10 @@ PHP_FUNCTION(setrawcookie)
 		Z_PARAM_STR(domain)
 		Z_PARAM_BOOL(secure)
 		Z_PARAM_BOOL(httponly)
+		Z_PARAM_STR(samesite)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (php_setcookie(name, value, expires, path, domain, secure, 0, httponly) == SUCCESS) {
+	if (php_setcookie(name, value, expires, path, domain, secure, 0, httponly, samesite) == SUCCESS) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
