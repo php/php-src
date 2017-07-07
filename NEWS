@@ -63,7 +63,7 @@ PHP                                                                        NEWS
 22 Jun 2017, PHP 7.2.0alpha2
 
 - Core:
-  . Change PHP_OS_FAMILY value from "OSX" to "Darwin". (sb, kalle)
+  . Change PHP_OS_FAMILY value from "OSX" to "Darwin". (Sebastian, Kalle)
 
 - GD:
   . Fixed bug #74744 (gd.h: stdarg.h include missing for va_list use in
