@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug #74761 (Unary operator expected error on some systems). (petk)
   . Fixed bug #73900 (Use After Free in unserialize() SplFixedArray). (nikic)
 
+- OCI8:
+  . Fixed bug #74625 (Integer overflow in oci_bind_array_by_name). (Ingmar Runge)
+
 - Opcache:
   . Fixed bug #74623 (Infinite loop in type inference when using HTMLPurifier).
     (nikic)
@@ -76,7 +79,6 @@ PHP                                                                        NEWS
 
 - OCI8:
   . Add TAF callback (PR #2459). (KoenigsKind)
-  . Fixed bug #74625 (Integer overflow in oci_bind_array_by_name). (Ingmar Runge)
 
 - Opcache:
   . Fixed bug #74663 (Segfault with opcache.memory_protect and
