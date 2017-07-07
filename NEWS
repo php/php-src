@@ -9,6 +9,10 @@ PHP                                                                        NEWS
     unserialize). (Nikita)
   . Fixed bug #74819 (wddx_deserialize() heap out-of-bound read via
     php_parse_date()). (Derick)
+	
+- EXIF:
+  . Fixed bug #74428 (exif_read_data(): "Illegal IFD size" warning occurs with 
+    correct exif format). (bradpiccho at gmail dot com, Kalle)
 
 - GD:
   . Fixed bug #74435 (Buffer over-read into uninitialized memory). (cmb)

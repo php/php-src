@@ -3553,7 +3553,7 @@ static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *dir_start,
 
 	ImageInfo->sections_found |= FOUND_IFD0;
 
-	if ((dir_start + 2) >= (offset_base+IFDlength)) {
+	if ((dir_start + 2) > (offset_base+IFDlength)) {
 		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Illegal IFD size");
 		return FALSE;
 	}
@@ -3581,7 +3581,7 @@ static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *dir_start,
 	 * Hack to make it process IDF1 I hope
 	 * There are 2 IDFs, the second one holds the keys (0x0201 and 0x0202) to the thumbnail
 	 */
-	if ((dir_start+2+12*de + 4) >= (offset_base+IFDlength)) {
+	if ((dir_start+2+12*de + 4) > (offset_base+IFDlength)) {
 		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Illegal IFD size");
 		return FALSE;
 	}
