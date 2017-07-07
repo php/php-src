@@ -156,7 +156,7 @@ PHPAPI int php_load_extension(char *filename, int type, int start_now)
 
 			handle = php_attempt_dl_load(libpath, &err2);
 			if (!handle) {
-				php_error_docref(NULL, error_type, "Unable to load dynamic library '%s' (tried : %s -> %s, %s -> %s)",
+				php_error_docref(NULL, error_type, "Unable to load dynamic library '%s' (tried: %s (%s), %s (%s))",
 					filename, orig_libpath, err1, libpath, err2);
 				efree(orig_libpath);
 				efree(err1);
