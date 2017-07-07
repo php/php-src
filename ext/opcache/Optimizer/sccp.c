@@ -1280,9 +1280,13 @@ static int replace_constant_operands(sccp_ctx *ctx) {
 					&& var->phi_use_chain == NULL) {
 				if (opline->opcode == ZEND_DO_ICALL) {
 					/* Call instruction -> remove opcodes that are part of the call */
-					zend_call_info *call = ctx->call_map[var->definition];
+					zend_call_info *call;
 					int i;
 
+					ZEND_ASSERT(ctx->call_map);
+					call = ctx->call_map[var->definition];
+					ZEND_ASSERT(call);
+					ZEND_ASSERT(call->caller_call_opline == opline);
 					zend_ssa_remove_result_def(ssa, ssa_op);
 					zend_ssa_remove_instr(ssa, opline, ssa_op);
 					zend_ssa_remove_instr(ssa, call->caller_init_opline,

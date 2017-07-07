@@ -319,6 +319,126 @@ static zend_bool opline_supports_assign_contraction(
 	return 1;
 }
 
+int zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
+{
+	zend_func_info *func_info = ZEND_FUNC_INFO(op_array);
+	int removed_ops = 0;
+
+	if (func_info->callee_info) {
+		zend_call_info *call_info = func_info->callee_info;
+		static zend_function *in_array_function = NULL;
+
+		if (!in_array_function) {
+			in_array_function = zend_hash_str_find_ptr(CG(function_table), "in_array", sizeof("in_array")-1);
+		}
+		do {
+			if (call_info->callee_func == in_array_function
+			 && (call_info->caller_init_opline->extended_value == 2
+			  || (call_info->caller_init_opline->extended_value == 3
+			   && (call_info->caller_call_opline - 1)->opcode == ZEND_SEND_VAL
+			   && (call_info->caller_call_opline - 1)->op1_type == IS_CONST))) {
+
+				zend_op *send_array;
+				zend_op *send_needly;
+				zend_bool strict = 0;
+
+				if (call_info->caller_init_opline->extended_value == 2) {
+					send_array = call_info->caller_call_opline - 1;
+					send_needly = call_info->caller_call_opline - 2;
+				} else {
+					if (zend_is_true(CT_CONSTANT_EX(op_array, (call_info->caller_call_opline - 1)->op1.constant))) {
+						strict = 1;
+					}
+					send_array = call_info->caller_call_opline - 2;
+					send_needly = call_info->caller_call_opline - 3;
+				}
+
+				if (send_array->opcode == ZEND_SEND_VAL
+				 && send_array->op1_type == IS_CONST
+				 && Z_TYPE_P(CT_CONSTANT_EX(op_array, send_array->op1.constant)) == IS_ARRAY
+				 && (send_needly->opcode == ZEND_SEND_VAL
+				  || send_needly->opcode == ZEND_SEND_VAR)
+			    ) {
+					int ok = 1;
+
+					HashTable *src = Z_ARRVAL_P(CT_CONSTANT_EX(op_array, send_array->op1.constant));
+					HashTable *dst;
+					zval *val, tmp;
+					zend_ulong idx;
+
+					ZVAL_TRUE(&tmp);
+					dst = emalloc(sizeof(HashTable));
+					zend_hash_init(dst, zend_hash_num_elements(src), NULL, ZVAL_PTR_DTOR, 0);
+					if (strict) {
+						ZEND_HASH_FOREACH_VAL(src, val) {
+							if (Z_TYPE_P(val) == IS_STRING) {
+								zend_hash_add(dst, Z_STR_P(val), &tmp);
+							} else if (Z_TYPE_P(val) == IS_LONG) {
+								zend_hash_index_add(dst, Z_LVAL_P(val), &tmp);
+							} else {
+								zend_array_destroy(dst);
+								ok = 0;
+								break;
+							}
+						} ZEND_HASH_FOREACH_END();
+					} else {
+						ZEND_HASH_FOREACH_VAL(src, val) {
+							if (Z_TYPE_P(val) != IS_STRING || ZEND_HANDLE_NUMERIC(Z_STR_P(val), idx)) {
+								zend_array_destroy(dst);
+								ok = 0;
+								break;
+							}
+							zend_hash_add(dst, Z_STR_P(val), &tmp);
+						} ZEND_HASH_FOREACH_END();
+					}
+
+					if (ok) {
+						uint32_t op_num = send_needly - op_array->opcodes;
+						zend_ssa_op *ssa_op = ssa->ops + op_num;
+
+						if (ssa_op->op1_use >= 0) {
+							/* Reconstruct SSA */
+							int var_num = ssa_op->op1_use;
+							zend_ssa_var *var = ssa->vars + var_num;
+
+							ZEND_ASSERT(ssa_op->op1_def < 0);
+							zend_ssa_unlink_use_chain(ssa, op_num, ssa_op->op1_use);
+							ssa_op->op1_use = -1;
+							ssa_op->op1_use_chain = -1;
+							op_num = call_info->caller_call_opline - op_array->opcodes;
+							ssa_op = ssa->ops + op_num;
+							ssa_op->op1_use = var_num;
+							ssa_op->op1_use_chain = var->use_chain;
+							var->use_chain = op_num;
+						}
+
+						ZVAL_ARR(&tmp, dst);
+
+						/* Update opcode */
+						call_info->caller_call_opline->opcode = ZEND_IN_ARRAY;
+						call_info->caller_call_opline->extended_value = strict;
+						call_info->caller_call_opline->op1_type = send_needly->op1_type;
+						call_info->caller_call_opline->op1.num = send_needly->op1.num;
+						call_info->caller_call_opline->op2_type = IS_CONST;
+						call_info->caller_call_opline->op2.constant = zend_optimizer_add_literal(op_array, &tmp);
+						if (call_info->caller_init_opline->extended_value == 3) {
+							MAKE_NOP(call_info->caller_call_opline - 1);
+						}
+						MAKE_NOP(call_info->caller_init_opline);
+						MAKE_NOP(send_needly);
+						MAKE_NOP(send_array);
+						removed_ops++;
+
+					}
+				}
+			}
+			call_info = call_info->next_callee;
+		} while (call_info);
+	}
+
+	return removed_ops;
+}
+
 void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, zend_ssa *ssa, zend_call_info **call_map)
 {
 	if (ctx->debug_level & ZEND_DUMP_BEFORE_DFA_PASS) {
@@ -332,8 +452,18 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 		zend_op *opline;
 		zval tmp;
 
-		if (sccp_optimize_op_array(op_array, ssa, call_map)) {
-			remove_nops = 1;
+		if (ZEND_OPTIMIZER_PASS_8 & ctx->optimization_level) {
+			if (sccp_optimize_op_array(op_array, ssa, call_map)) {
+				remove_nops = 1;
+			}
+			if (ZEND_FUNC_INFO(op_array)) {
+				if (zend_dfa_optimize_calls(op_array, ssa)) {
+					remove_nops = 1;
+				}
+			}
+			if (ctx->debug_level & ZEND_DUMP_AFTER_SCCP_PASS) {
+				zend_dump_op_array(op_array, ZEND_DUMP_SSA, "after sccp pass", ssa);
+			}
 		}
 
 		for (v = op_array->last_var; v < ssa->vars_count; v++) {
@@ -578,122 +708,6 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 				opline->result_type = opline->op1_type;
 				opline->result.var = opline->op1.var;
 
-			}
-		}
-
-		if (ZEND_FUNC_INFO(op_array)) {
-			zend_func_info *func_info = ZEND_FUNC_INFO(op_array);
-
-			if (func_info->callee_info) {
-				zend_call_info *call_info = func_info->callee_info;
-				static zend_function *in_array_function = NULL;
-
-				if (!in_array_function) {
-					in_array_function = zend_hash_str_find_ptr(CG(function_table), "in_array", sizeof("in_array")-1);
-				}
-				do {
-					if (call_info->callee_func == in_array_function
-					 && (call_info->caller_init_opline->extended_value == 2
-					  || (call_info->caller_init_opline->extended_value == 3
-					   && (call_info->caller_call_opline - 1)->opcode == ZEND_SEND_VAL
-					   && (call_info->caller_call_opline - 1)->op1_type == IS_CONST))) {
-
-						zend_op *send_array;
-						zend_op *send_needly;
-						zend_bool strict = 0;
-
-						if (call_info->caller_init_opline->extended_value == 2) {
-							send_array = call_info->caller_call_opline - 1;
-							send_needly = call_info->caller_call_opline - 2;
-						} else {
-							if (zend_is_true(CT_CONSTANT_EX(op_array, (call_info->caller_call_opline - 1)->op1.constant))) {
-								strict = 1;
-							}
-							send_array = call_info->caller_call_opline - 2;
-							send_needly = call_info->caller_call_opline - 3;
-						}
-
-						if (send_array->opcode == ZEND_SEND_VAL
-						 && send_array->op1_type == IS_CONST
-						 && Z_TYPE_P(CT_CONSTANT_EX(op_array, send_array->op1.constant)) == IS_ARRAY
-						 && (send_needly->opcode == ZEND_SEND_VAL
-						  || send_needly->opcode == ZEND_SEND_VAR)
-					    ) {
-							int ok = 1;
-
-							HashTable *src = Z_ARRVAL_P(CT_CONSTANT_EX(op_array, send_array->op1.constant));
-							HashTable *dst;
-							zval *val, tmp;
-							zend_ulong idx;
-
-							ZVAL_TRUE(&tmp);
-							dst = emalloc(sizeof(HashTable));
-							zend_hash_init(dst, zend_hash_num_elements(src), NULL, ZVAL_PTR_DTOR, 0);
-							if (strict) {
-								ZEND_HASH_FOREACH_VAL(src, val) {
-									if (Z_TYPE_P(val) == IS_STRING) {
-										zend_hash_add(dst, Z_STR_P(val), &tmp);
-									} else if (Z_TYPE_P(val) == IS_LONG) {
-										zend_hash_index_add(dst, Z_LVAL_P(val), &tmp);
-									} else {
-										zend_array_destroy(dst);
-										ok = 0;
-										break;
-									}
-								} ZEND_HASH_FOREACH_END();
-							} else {
-								ZEND_HASH_FOREACH_VAL(src, val) {
-									if (Z_TYPE_P(val) != IS_STRING || ZEND_HANDLE_NUMERIC(Z_STR_P(val), idx)) {
-										zend_array_destroy(dst);
-										ok = 0;
-										break;
-									}
-									zend_hash_add(dst, Z_STR_P(val), &tmp);
-								} ZEND_HASH_FOREACH_END();
-							}
-
-							if (ok) {
-								uint32_t op_num = send_needly - op_array->opcodes;
-								zend_ssa_op *ssa_op = ssa->ops + op_num;
-
-								if (ssa_op->op1_use >= 0) {
-									/* Reconstruct SSA */
-									int var_num = ssa_op->op1_use;
-									zend_ssa_var *var = ssa->vars + var_num;
-
-									ZEND_ASSERT(ssa_op->op1_def < 0);
-									zend_ssa_unlink_use_chain(ssa, op_num, ssa_op->op1_use);
-									ssa_op->op1_use = -1;
-									ssa_op->op1_use_chain = -1;
-									op_num = call_info->caller_call_opline - op_array->opcodes;
-									ssa_op = ssa->ops + op_num;
-									ssa_op->op1_use = var_num;
-									ssa_op->op1_use_chain = var->use_chain;
-									var->use_chain = op_num;
-								}
-
-								ZVAL_ARR(&tmp, dst);
-
-								/* Update opcode */
-								call_info->caller_call_opline->opcode = ZEND_IN_ARRAY;
-								call_info->caller_call_opline->extended_value = strict;
-								call_info->caller_call_opline->op1_type = send_needly->op1_type;
-								call_info->caller_call_opline->op1.num = send_needly->op1.num;
-								call_info->caller_call_opline->op2_type = IS_CONST;
-								call_info->caller_call_opline->op2.constant = zend_optimizer_add_literal(op_array, &tmp);
-								if (call_info->caller_init_opline->extended_value == 3) {
-									MAKE_NOP(call_info->caller_call_opline - 1);
-								}
-								MAKE_NOP(call_info->caller_init_opline);
-								MAKE_NOP(send_needly);
-								MAKE_NOP(send_array);
-								remove_nops = 1;
-
-							}
-						}
-					}
-					call_info = call_info->next_callee;
-				} while (call_info);
 			}
 		}
 
