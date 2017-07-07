@@ -9,6 +9,7 @@ PHP                                                                        NEWS
     unserialize). (Nikita)
   . Fixed bug #74819 (wddx_deserialize() heap out-of-bound read via
     php_parse_date()). (Derick)
+  . Fixed bug #74878 (Data race in ZTS builds). (Nikita)
 	
 - EXIF:
   . Fixed bug #74428 (exif_read_data(): "Illegal IFD size" warning occurs with 
