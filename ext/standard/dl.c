@@ -76,10 +76,9 @@ PHPAPI PHP_FUNCTION(dl)
 
 #if defined(HAVE_LIBDL)
 
-
 static void *php_attempt_dl_load(char *path, char **errp)
 {
-	char *handle;
+	void *handle;
 	char *err;
 
 	handle = DL_LOAD(path);
@@ -99,8 +98,8 @@ static void *php_attempt_dl_load(char *path, char **errp)
 		GET_DL_ERROR(); /* free the buffer storing the error */
 #endif
 	}
+	return NULL;
 }
-
 
 /* {{{ php_load_extension
  */
@@ -111,7 +110,7 @@ PHPAPI int php_load_extension(char *filename, int type, int start_now)
 	zend_module_entry *module_entry;
 	zend_module_entry *(*get_module)(void);
 	int error_type, slash_suffix;
-	char *extension_dir, *err1, *err2;
+	char *extension_dir;
 
 	if (type == MODULE_PERSISTENT) {
 		extension_dir = INI_STR("extension_dir");
@@ -135,6 +134,7 @@ PHPAPI int php_load_extension(char *filename, int type, int start_now)
 		libpath = estrdup(filename);
 	} else if (extension_dir && extension_dir[0]) {
 		int extension_dir_len = (int)strlen(extension_dir);
+		char *err1, *err2;
 		slash_suffix = IS_SLASH(extension_dir[extension_dir_len-1]);
 		/* Try as filename first */
 		if (slash_suffix) {
