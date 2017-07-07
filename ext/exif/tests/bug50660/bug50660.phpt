@@ -13,7 +13,7 @@ $infile = dirname(__FILE__).'/bug50660-2.jpg';
 var_dump(exif_read_data($infile) !== false);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 ===DONE===
