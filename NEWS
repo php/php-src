@@ -13,6 +13,10 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #74435 (Buffer over-read into uninitialized memory). (cmb)
 
+- IMAP:
+  . Fixed bug #72324 (imap_mailboxmsginfo() return wrong size). 
+    (ronaldpoon at udomain dot com dot hk, Kalle)
+
 - OpenSSL:
   . Fixed bug #74651 (negative-size-param (-1) in memcpy in zif_openssl_seal()).
     (Stas)
