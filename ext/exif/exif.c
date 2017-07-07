@@ -1340,8 +1340,10 @@ typedef enum mn_byte_order_t {
 
 typedef enum mn_offset_mode_t {
 	MN_OFFSET_NORMAL,
-	MN_OFFSET_MAKER,
-	MN_OFFSET_GUESS
+	MN_OFFSET_MAKER
+#ifdef KALLE_0
+	, MN_OFFSET_GUESS
+#endif
 } mn_offset_mode_t;
 
 typedef struct {
@@ -3176,6 +3178,7 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * valu
 		case MN_OFFSET_MAKER:
 			offset_base = value_ptr;
 			break;
+#ifdef KALLE_0
 		case MN_OFFSET_GUESS:
 			if (maker_note->offset + 10 + 4 >= value_len) {
 				/* Can not read dir_start+10 since it's beyond value end */
@@ -3192,6 +3195,7 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * valu
 			}
 			offset_base = value_ptr + offset_diff;
 			break;
+#endif
 		default:
 		case MN_OFFSET_NORMAL:
 			break;
