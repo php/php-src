@@ -836,6 +836,7 @@ PHP_FUNCTION(inflate_init)
 	size_t dictlen = 0;
 	HashTable *options = NULL;
 	zval *option_buffer;
+	size_t maxSize = ~0;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l|H", &encoding, &options)) {
 		return;
@@ -843,10 +844,21 @@ PHP_FUNCTION(inflate_init)
 
 	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("window"))) != NULL) {
 		window = zval_get_long(option_buffer);
+
+		if (window < 8 || window > 15) {
+			php_error_docref(NULL, E_WARNING, "zlib window size (logarithm) (" ZEND_LONG_FMT ") must be within 8..15", window);
+			RETURN_FALSE;
+		}
 	}
-	if (window < 8 || window > 15) {
-		php_error_docref(NULL, E_WARNING, "zlib window size (lograithm) (%pd) must be within 8..15", window);
-		RETURN_FALSE;
+
+	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("max_size"))) != NULL) {
+		zend_long maxSize_long = zval_get_long(option_buffer);
+		maxSize = maxSize_long;
+
+		if (maxSize_long < 0) {
+			php_error_docref(NULL, E_WARNING, "maximum inflated size must be positive, currently " ZEND_LONG_FMT, maxSize);
+			RETURN_FALSE;
+		}
 	}
 
 	if (!zlib_create_dictionary_string(options, &dict, &dictlen)) {
@@ -869,6 +881,7 @@ PHP_FUNCTION(inflate_init)
 	((php_zlib_context *) ctx)->inflateDict = dict;
 	((php_zlib_context *) ctx)->inflateDictlen = dictlen;
 	((php_zlib_context *) ctx)->status = Z_OK;
+	((php_zlib_context *) ctx)->maxSize = maxSize;
 
 	if (encoding < 0) {
 		encoding += 15 - window;
@@ -901,19 +914,21 @@ PHP_FUNCTION(inflate_init)
 }
 /* }}} */
 
-/* {{{ proto string inflate_add(resource context, string encoded_data[, int flush_mode = ZLIB_SYNC_FLUSH])
+/* {{{ proto string inflate_add(resource context, string encoded_data[, int flush_mode = ZLIB_SYNC_FLUSH[, int &$sizeDelta = 0]])
    Incrementally inflate encoded data in the specified context */
 PHP_FUNCTION(inflate_add)
 {
 	zend_string *out;
 	char *in_buf;
-	size_t in_len, buffer_used = 0, CHUNK_SIZE = 8192;
+	size_t in_len, buffer_used = 0, CHUNK_SIZE = 4096 /* power of 2 */;
 	zval *res;
 	z_stream *ctx;
+	php_zlib_context *php_ctx;
 	zend_long flush_type = Z_SYNC_FLUSH;
+	zval *sizeDelta = NULL;
 	int status;
 
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "rs|l", &res, &in_buf, &in_len, &flush_type)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "rs|lz/", &res, &in_buf, &in_len, &flush_type, &sizeDelta)) {
 		return;
 	}
 
@@ -921,6 +936,7 @@ PHP_FUNCTION(inflate_add)
 		php_error_docref(NULL, E_WARNING, "Invalid zlib.inflate resource");
 		RETURN_FALSE;
 	}
+	php_ctx = (php_zlib_context *) ctx;
 
 	switch (flush_type) {
 		case Z_NO_FLUSH:
@@ -932,9 +948,25 @@ PHP_FUNCTION(inflate_add)
 			break;
 
 		default:
-			php_error_docref(NULL, E_WARNING,
-				"flush mode must be ZLIB_NO_FLUSH, ZLIB_PARTIAL_FLUSH, ZLIB_SYNC_FLUSH, ZLIB_FULL_FLUSH, ZLIB_BLOCK or ZLIB_FINISH");
+			php_error_docref(NULL, E_WARNING, "flush mode must be ZLIB_NO_FLUSH, ZLIB_PARTIAL_FLUSH, ZLIB_SYNC_FLUSH, ZLIB_FULL_FLUSH, ZLIB_BLOCK or ZLIB_FINISH");
 			RETURN_FALSE;
+	}
+
+	if (sizeDelta) {
+		zend_long maxSizeAdd = zval_get_long(sizeDelta);
+
+		if (maxSizeAdd < 0) {
+			php_error_docref(NULL, E_WARNING, "maximum inflated size to increase must be positive, currently " ZEND_LONG_FMT, maxSizeAdd);
+			RETURN_FALSE;
+		}
+
+		php_ctx->maxSize += maxSizeAdd;
+		if (maxSizeAdd < php_ctx->maxSize) { /* overflow check */
+			php_ctx->maxSize = ~0;
+		}
+	} else if (php_ctx->maxSize == 0) {
+		php_error_docref(NULL, E_WARNING, "no space available for more data: increase the max_size option");
+		return;
 	}
 	
 	/* Lazy-resetting the zlib stream so ctx->total_in remains available until the next inflate_add() call. */
@@ -948,7 +980,11 @@ PHP_FUNCTION(inflate_add)
 		RETURN_EMPTY_STRING();
 	}
 
-	out = zend_string_alloc((in_len > CHUNK_SIZE) ? in_len : CHUNK_SIZE, 0);
+	if (in_len > CHUNK_SIZE) {
+		CHUNK_SIZE = in_len & ~(CHUNK_SIZE - 1);
+	}
+
+	out = zend_string_alloc(php_ctx->maxSize > CHUNK_SIZE * 2 ? CHUNK_SIZE * 2 : php_ctx->maxSize, 0);
 	ctx->next_in = (Bytef *) in_buf;
 	ctx->next_out = (Bytef *) ZSTR_VAL(out);
 	ctx->avail_in = in_len;
@@ -958,24 +994,28 @@ PHP_FUNCTION(inflate_add)
 		status = inflate(ctx, flush_type);
 		buffer_used = ZSTR_LEN(out) - ctx->avail_out;
 
-		((php_zlib_context *) ctx)->status = status; /* Save status for exposing to userspace */
+		php_ctx->status = status; /* Save status for exposing to userspace */
 
 		switch (status) {
-			case Z_OK:
-				if (ctx->avail_out == 0) {
-					/* more output buffer space needed; realloc and try again */
-					out = zend_string_realloc(out, ZSTR_LEN(out) + CHUNK_SIZE, 0);
-					ctx->avail_out = CHUNK_SIZE;
-					ctx->next_out = (Bytef *) ZSTR_VAL(out) + buffer_used;
-					break;
-				} else {
-					goto complete;
-				}
 			case Z_STREAM_END:
 				goto complete;
 			case Z_BUF_ERROR:
-				if (flush_type == Z_FINISH && ctx->avail_out == 0) {
+				if (flush_type != Z_FINISH) {
+					goto complete;
+				}
+			case Z_OK:
+				if (ctx->avail_in != 0 && ctx->avail_out == 0) {
 					/* more output buffer space needed; realloc and try again */
+					if (php_ctx->maxSize == buffer_used) {
+						if (sizeDelta) {
+							goto complete;
+						}
+						zend_string_release(out);
+						php_error_docref(NULL, E_WARNING, "not enough space available for decompressing current input: increase the max_size option");
+						RETURN_FALSE;
+					} else if (php_ctx->maxSize - buffer_used < CHUNK_SIZE) {
+						CHUNK_SIZE = php_ctx->maxSize - buffer_used;
+					}
 					out = zend_string_realloc(out, ZSTR_LEN(out) + CHUNK_SIZE, 0);
 					ctx->avail_out = CHUNK_SIZE;
 					ctx->next_out = (Bytef *) ZSTR_VAL(out) + buffer_used;
@@ -985,8 +1025,7 @@ PHP_FUNCTION(inflate_add)
 					goto complete;
 				}
 			case Z_NEED_DICT:
-				if (((php_zlib_context *) ctx)->inflateDict) {
-					php_zlib_context *php_ctx = (php_zlib_context *) ctx;
+				if (php_ctx->inflateDict) {
 					switch (inflateSetDictionary(ctx, (Bytef *) php_ctx->inflateDict, php_ctx->inflateDictlen)) {
 						case Z_OK:
 							efree(php_ctx->inflateDict);
@@ -1013,8 +1052,13 @@ PHP_FUNCTION(inflate_add)
 	} while (1);
 
 	complete: {
+		php_ctx->maxSize -= buffer_used;
 		out = zend_string_realloc(out, buffer_used, 0);
 		ZSTR_VAL(out)[buffer_used] = 0;
+		if (sizeDelta) {
+			zval_ptr_dtor(sizeDelta);
+			ZVAL_LONG(sizeDelta, in_len - ctx->avail_in);
+		}
 		RETURN_STR(out);
 	}
 }
@@ -1370,7 +1414,9 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_inflate_add, 0, 0, 2)
 	ZEND_ARG_INFO(0, resource)
+	ZEND_ARG_INFO(0, add)
 	ZEND_ARG_INFO(0, flush_behavior)
+	ZEND_ARG_INFO(1, size_delta)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_inflate_get_status, 0, 0, 1)

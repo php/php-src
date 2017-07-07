@@ -50,6 +50,7 @@ typedef struct _php_zlib_context {
 	char *inflateDict;
 	size_t status;
 	size_t inflateDictlen;
+	size_t maxSize;
 	php_zlib_buffer buffer;
 } php_zlib_context;
 

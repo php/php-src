@@ -43,24 +43,26 @@ $flushTypes = [
     'ZLIB_BLOCK' => ZLIB_BLOCK,
 ];
 
-$uncompressed = "";
+$random = "";
 for ($i=0;$i<(32768*2);$i++) {
-    $uncompressed .= chr(rand(48,125));
+    $random .= chr(rand(48,125));
 }
 
-foreach ($modes as $modeKey => $mode) {
-    $compressed = zlib_encode($uncompressed, $mode);
-    $compressedLen = strlen($compressed);
-    foreach ($flushSizes as $flushSize) {
-        foreach ($flushTypes as $flushTypeKey => $flushType) {
-            $inflated = "";
-            $stream = inflateStream($mode, $flushSize, $flushType);
-            for ($i=0;$i<$compressedLen;$i++) {
-                $inflated .= $stream->send($compressed[$i]);
-            }
-            $inflated .= $stream->send(null);
-            if ($inflated !== $uncompressed) {
-                echo "Error: {$modeKey} | {$flushSize} | {$flushTypeKey}\n";
+foreach ([$random, str_repeat("a", 32768*2)] as $uncompressed) {
+    foreach ($modes as $modeKey => $mode) {
+        $compressed = zlib_encode($uncompressed, $mode);
+        $compressedLen = strlen($compressed);
+        foreach ($flushSizes as $flushSize) {
+            foreach ($flushTypes as $flushTypeKey => $flushType) {
+                $inflated = "";
+                $stream = inflateStream($mode, $flushSize, $flushType);
+                for ($i=0;$i<$compressedLen;$i++) {
+                    $inflated .= $stream->send($compressed[$i]);
+                }
+                $inflated .= $stream->send(null);
+                if ($inflated !== $uncompressed) {
+                    echo "Error: {$modeKey} | {$flushSize} | {$flushTypeKey}\n";
+                }
             }
         }
 
