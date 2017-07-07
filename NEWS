@@ -13,6 +13,9 @@ PHP                                                                        NEWS
 - EXIF:
   . Fixed bug #74428 (exif_read_data(): "Illegal IFD size" warning occurs with 
     correct exif format). (bradpiccho at gmail dot com, Kalle)
+  . Fixed bug #72819 (EXIF thumbnails not read anymore). (Kalle)
+  . Fixed bug #62523 (php crashes with segfault when exif_read_data called). 
+    (Kalle)
   . Fixed bug #50660 (exif_read_data(): Illegal IFD offset (works fine with 
     other exif readers). (skinny dot bravo at gmail dot com, Kalle)
 

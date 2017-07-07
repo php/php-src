@@ -1357,7 +1357,7 @@ typedef struct {
 
 /* Remember to update PHP_MINFO if updated */
 static const maker_note_type maker_note_array[] = {
-  { tag_table_VND_CANON,     "Canon",                   NULL,  NULL,							 0,  0,  MN_ORDER_INTEL,    MN_OFFSET_GUESS},
+  { tag_table_VND_CANON,     "Canon",                   NULL,  NULL,							 0,  0,  MN_ORDER_INTEL,    MN_OFFSET_NORMAL},
   { tag_table_VND_CASIO,     "CASIO",                   NULL,  NULL,							 0,  0,  MN_ORDER_MOTOROLA, MN_OFFSET_NORMAL},
   { tag_table_VND_FUJI,      "FUJIFILM",                NULL,  "FUJIFILM\x0C\x00\x00\x00",		 12, 12, MN_ORDER_INTEL,    MN_OFFSET_MAKER},
   { tag_table_VND_NIKON,     "NIKON",                   NULL,  "Nikon\x00\x01\x00",				 8,  8,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
