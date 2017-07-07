@@ -13,6 +13,8 @@ PHP                                                                        NEWS
 - EXIF:
   . Fixed bug #74428 (exif_read_data(): "Illegal IFD size" warning occurs with 
     correct exif format). (bradpiccho at gmail dot com, Kalle)
+  . Fixed bug #50660 (exif_read_data(): Illegal IFD offset (works fine with 
+    other exif readers). (skinny dot bravo at gmail dot com, Kalle)
 
 - GD:
   . Fixed bug #74435 (Buffer over-read into uninitialized memory). (cmb)
