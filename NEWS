@@ -235,6 +235,8 @@ PHP                                                                        NEWS
   . Fixed bug #73961 (environmental build dependency in hash sha3 source).
     (krakjoe)
   . Changed HashContext from resource to object. (Rouven Weßling, Sara)
+  . Disallowed usage of non-cryptographic hash functions with HMAC and PBKDF2.
+    (Andrey Andreev, Nikita)
 
 - intl:
   . Fixed bug #74433 (wrong reflection for Normalizer methods). (villfa)
