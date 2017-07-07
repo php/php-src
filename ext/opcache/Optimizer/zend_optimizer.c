@@ -332,6 +332,8 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
                                     zend_op       *opline,
                                     zval          *val)
 {
+	zval tmp;
+
 	switch (opline->opcode) {
 		case ZEND_ASSIGN_REF:
 		case ZEND_FAST_CALL:
@@ -358,7 +360,13 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 			break;
 		case ZEND_INIT_FCALL:
 			REQUIRES_STRING(val);
-			zend_str_tolower(Z_STRVAL_P(val), Z_STRLEN_P(val));
+			if (Z_REFCOUNT_P(val) == 1) {
+				zend_str_tolower(Z_STRVAL_P(val), Z_STRLEN_P(val));
+			} else {
+				ZVAL_STR(&tmp, zend_string_tolower(Z_STR_P(val)));
+				zval_ptr_dtor_nogc(val);
+				val = &tmp;
+			}
 			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
 			alloc_cache_slots_op2(op_array, opline, 1);
 			break;
