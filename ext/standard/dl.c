@@ -76,15 +76,15 @@ PHPAPI PHP_FUNCTION(dl)
 
 #if defined(HAVE_LIBDL)
 
-static void *php_attempt_dl_load(char *path, char **errp)
+/* {{{ php_load_shlib
+ */
+PHPAPI void *php_load_shlib(char *path, char **errp)
 {
 	void *handle;
 	char *err;
 
 	handle = DL_LOAD(path);
-	if (handle) {
-		return handle;
-	} else {
+	if (!handle) {
 		err = GET_DL_ERROR();
 #ifdef PHP_WIN32
 		if (err && (*err)) {
@@ -98,7 +98,7 @@ static void *php_attempt_dl_load(char *path, char **errp)
 		GET_DL_ERROR(); /* free the buffer storing the error */
 #endif
 	}
-	return NULL;
+	return handle;
 }
 
 /* {{{ php_load_extension
@@ -143,7 +143,7 @@ PHPAPI int php_load_extension(char *filename, int type, int start_now)
 			spprintf(&libpath, 0, "%s%c%s", extension_dir, DEFAULT_SLASH, filename); /* SAFE */
 		}
 
-		handle = php_attempt_dl_load(libpath, &err1);
+		handle = php_load_shlib(libpath, &err1);
 		if (!handle) {
 			/* Now, consider 'filename' as extension name and build file name */
 			char *orig_libpath = libpath;
@@ -154,7 +154,7 @@ PHPAPI int php_load_extension(char *filename, int type, int start_now)
 				spprintf(&libpath, 0, "%s%c" PHP_SHLIB_EXT_PREFIX "%s." PHP_SHLIB_SUFFIX, extension_dir, DEFAULT_SLASH, filename); /* SAFE */
 			}
 
-			handle = php_attempt_dl_load(libpath, &err2);
+			handle = php_load_shlib(libpath, &err2);
 			if (!handle) {
 				php_error_docref(NULL, error_type, "Unable to load dynamic library '%s' (tried: %s (%s), %s (%s))",
 					filename, orig_libpath, err1, libpath, err2);
