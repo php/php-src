@@ -73,8 +73,7 @@
 #endif
 
 typedef struct _sccp_ctx {
-	zend_op_array *op_array;
-	zend_ssa *ssa;
+	scdf_ctx scdf;
 	zend_call_info **call_map;
 	zval *values;
 	zval top;
@@ -121,7 +120,7 @@ static void set_value(scdf_ctx *scdf, sccp_ctx *ctx, int var, zval *new) {
 
 static zval *get_op1_value(sccp_ctx *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
 	if (opline->op1_type == IS_CONST) {
-		return CT_CONSTANT_EX(ctx->op_array, opline->op1.constant);
+		return CT_CONSTANT_EX(ctx->scdf.op_array, opline->op1.constant);
 	} else if (ssa_op->op1_use != -1) {
 		return &ctx->values[ssa_op->op1_use];
 	} else {
@@ -131,7 +130,7 @@ static zval *get_op1_value(sccp_ctx *ctx, zend_op *opline, zend_ssa_op *ssa_op) 
 
 static zval *get_op2_value(sccp_ctx *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
 	if (opline->op2_type == IS_CONST) {
-		return CT_CONSTANT_EX(ctx->op_array, opline->op2.constant);
+		return CT_CONSTANT_EX(ctx->scdf.op_array, opline->op2.constant);
 	} else if (ssa_op->op2_use != -1) {
 		return &ctx->values[ssa_op->op2_use];
 	} else {
@@ -233,10 +232,10 @@ static zend_bool can_replace_op2(
 
 static zend_bool try_replace_op1(
 		sccp_ctx *ctx, zend_op *opline, zend_ssa_op *ssa_op, int var, zval *value) {
-	if (ssa_op->op1_use == var && can_replace_op1(ctx->op_array, opline, ssa_op)) {
+	if (ssa_op->op1_use == var && can_replace_op1(ctx->scdf.op_array, opline, ssa_op)) {
 		zval zv;
 		ZVAL_COPY(&zv, value);
-		if (zend_optimizer_update_op1_const(ctx->op_array, opline, &zv)) {
+		if (zend_optimizer_update_op1_const(ctx->scdf.op_array, opline, &zv)) {
 			return 1;
 		} else {
 			// TODO: check the following special cases ???
@@ -248,7 +247,7 @@ static zend_bool try_replace_op1(
 					if (Z_TYPE(zv) == IS_STRING) {
 						zend_string_hash_val(Z_STR(zv));
 					}
-					opline->op1.constant = zend_optimizer_add_literal(ctx->op_array, &zv);
+					opline->op1.constant = zend_optimizer_add_literal(ctx->scdf.op_array, &zv);
 					opline->op1_type = IS_CONST;
 					return 1;
 			}
@@ -260,10 +259,10 @@ static zend_bool try_replace_op1(
 
 static zend_bool try_replace_op2(
 		sccp_ctx *ctx, zend_op *opline, zend_ssa_op *ssa_op, int var, zval *value) {
-	if (ssa_op->op2_use == var && can_replace_op2(ctx->op_array, opline, ssa_op)) {
+	if (ssa_op->op2_use == var && can_replace_op2(ctx->scdf.op_array, opline, ssa_op)) {
 		zval zv;
 		ZVAL_COPY(&zv, value);
-		if (zend_optimizer_update_op2_const(ctx->op_array, opline, &zv)) {
+		if (zend_optimizer_update_op2_const(ctx->scdf.op_array, opline, &zv)) {
 			return 1;
 		} else {
 			zval_ptr_dtor_nogc(&zv);
@@ -614,7 +613,7 @@ static inline int ct_eval_func_call(
 #define SKIP_IF_TOP(op) if (IS_TOP(op)) break;
 
 static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_op) {
-	sccp_ctx *ctx = (sccp_ctx *) scdf->ctx;
+	sccp_ctx *ctx = (sccp_ctx *) scdf;
 	zval *op1, *op2, zv; /* zv is a temporary to hold result values */
 
 	op1 = get_op1_value(ctx, opline, ssa_op);
@@ -624,7 +623,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 		case ZEND_ASSIGN:
 			/* The value of op1 is irrelevant here, because we are overwriting it
 			 * -- unless it can be a reference, in which case we propagate a BOT. */
-			if (IS_BOT(op1) && (ctx->ssa->var_info[ssa_op->op1_use].type & MAY_BE_REF)) {
+			if (IS_BOT(op1) && (ctx->scdf.ssa->var_info[ssa_op->op1_use].type & MAY_BE_REF)) {
 				SET_RESULT_BOT(op1);
 			} else {
 				SET_RESULT(op1, op2);
@@ -636,7 +635,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			/* We may be able to evaluate TYPE_CHECK based on type inference info,
 			 * even if we don't know the precise value. */
 			if (!value_known(op1)) {
-				uint32_t type = ctx->ssa->var_info[ssa_op->op1_use].type;
+				uint32_t type = ctx->scdf.ssa->var_info[ssa_op->op1_use].type;
 				uint32_t expected_type = opline->extended_value == _IS_BOOL
 					? (MAY_BE_TRUE|MAY_BE_FALSE) : (1 << opline->extended_value);
 				if (!(type & expected_type) && !(type & MAY_BE_UNDEF)) {
@@ -654,7 +653,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			break;
 		case ZEND_ASSIGN_DIM:
 			/* If $a in $a[$b]=$c is UNDEF, treat it like NULL. There is no warning. */
-			if ((ctx->ssa->var_info[ssa_op->op1_use].type & MAY_BE_ANY) == 0) {
+			if ((ctx->scdf.ssa->var_info[ssa_op->op1_use].type & MAY_BE_ANY) == 0) {
 				op1 = &EG(uninitialized_zval);
 			}
 			break;
@@ -668,13 +667,13 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 				return;
 			}
 
-			call = ctx->call_map[opline - ctx->op_array->opcodes];
+			call = ctx->call_map[opline - ctx->scdf.op_array->opcodes];
 			if (IS_TOP(op1) || !call || call->caller_call_opline->opcode != ZEND_DO_ICALL) {
 				return;
 			}
 
 			opline = call->caller_call_opline;
-			ssa_op = &ctx->ssa->ops[opline - ctx->op_array->opcodes];
+			ssa_op = &ctx->scdf.ssa->ops[opline - ctx->scdf.op_array->opcodes];
 			break;
 		}
 	}
@@ -983,8 +982,8 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 				break;
 			}
 
-			call = ctx->call_map[opline - ctx->op_array->opcodes];
-			name = CT_CONSTANT_EX(ctx->op_array, call->caller_init_opline->op2.constant);
+			call = ctx->call_map[opline - ctx->scdf.op_array->opcodes];
+			name = CT_CONSTANT_EX(ctx->scdf.op_array, call->caller_init_opline->op2.constant);
 
 			/* We already know it can't be evaluated, don't bother checking again */
 			if (ssa_op->result_def < 0 || IS_BOT(&ctx->values[ssa_op->result_def])) {
@@ -1005,7 +1004,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 				}
 
 				args[i] = get_op1_value(ctx, opline,
-					&ctx->ssa->ops[opline - ctx->op_array->opcodes]);
+					&ctx->scdf.ssa->ops[opline - ctx->scdf.op_array->opcodes]);
 				if (args[i]) {
 					if (IS_BOT(args[i])) {
 						SET_RESULT_BOT(result);
@@ -1056,7 +1055,7 @@ static void sccp_mark_feasible_successors(
 		scdf_ctx *scdf,
 		int block_num, zend_basic_block *block,
 		zend_op *opline, zend_ssa_op *ssa_op) {
-	sccp_ctx *ctx = (sccp_ctx *) scdf->ctx;
+	sccp_ctx *ctx = (sccp_ctx *) scdf;
 	zval *op1;
 	int s;
 
@@ -1136,8 +1135,8 @@ static void join_phi_values(zval *a, zval *b) {
 }
 
 static void sccp_visit_phi(scdf_ctx *scdf, zend_ssa_phi *phi) {
-	sccp_ctx *ctx = (sccp_ctx *) scdf->ctx;
-	zend_ssa *ssa = ctx->ssa;
+	sccp_ctx *ctx = (sccp_ctx *) scdf;
+	zend_ssa *ssa = scdf->ssa;
 	ZEND_ASSERT(phi->ssa_var >= 0);
 	if (!IS_BOT(&ctx->values[phi->ssa_var])) {
 		zend_basic_block *block = &ssa->cfg.blocks[phi->block];
@@ -1170,10 +1169,10 @@ static void sccp_visit_phi(scdf_ctx *scdf, zend_ssa_phi *phi) {
 }
 
 static zval *value_from_type_and_range(sccp_ctx *ctx, int var_num, zval *tmp) {
-	zend_ssa *ssa = ctx->ssa;
+	zend_ssa *ssa = ctx->scdf.ssa;
 	zend_ssa_var_info *info = &ssa->var_info[var_num];
 
-	if (ssa->vars[var_num].var >= ctx->op_array->last_var) {
+	if (ssa->vars[var_num].var >= ctx->scdf.op_array->last_var) {
 		// TODO Non-CVs may cause issues with FREEs
 		return NULL;
 	}
@@ -1210,8 +1209,8 @@ static zval *value_from_type_and_range(sccp_ctx *ctx, int var_num, zval *tmp) {
  * can be replaced, because some instructions don't accept constant operands or only accept them
  * if they have a certain type. */
 static int replace_constant_operands(sccp_ctx *ctx) {
-	zend_ssa *ssa = ctx->ssa;
-	zend_op_array *op_array = ctx->op_array;
+	zend_ssa *ssa = ctx->scdf.ssa;
+	zend_op_array *op_array = ctx->scdf.op_array;
 	int i;
 	zval tmp;
 	int removed_ops;
@@ -1352,8 +1351,6 @@ static int replace_constant_operands(sccp_ctx *ctx) {
 static void sccp_context_init(sccp_ctx *ctx,
 		zend_ssa *ssa, zend_op_array *op_array, zend_call_info **call_map) {
 	int i;
-	ctx->op_array = op_array;
-	ctx->ssa = ssa;
 	ctx->call_map = call_map;
 	ctx->values = emalloc(sizeof(zval) * ssa->vars_count);
 
@@ -1377,7 +1374,7 @@ static void sccp_context_init(sccp_ctx *ctx,
 
 static void sccp_context_free(sccp_ctx *ctx) {
 	int i;
-	for (i = ctx->op_array->last_var; i < ctx->ssa->vars_count; ++i) {
+	for (i = ctx->scdf.op_array->last_var; i < ctx->scdf.ssa->vars_count; ++i) {
 		zval_ptr_dtor_nogc(&ctx->values[i]);
 	}
 	efree(ctx->values);
@@ -1385,24 +1382,23 @@ static void sccp_context_free(sccp_ctx *ctx) {
 
 int sccp_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_call_info **call_map)
 {
-	scdf_ctx scdf;
 	sccp_ctx ctx;
 	int removed_ops = 0;
 
 	sccp_context_init(&ctx, ssa, op_array, call_map);
 
-	scdf.handlers.visit_instr = sccp_visit_instr;
-	scdf.handlers.visit_phi = sccp_visit_phi;
-	scdf.handlers.mark_feasible_successors = sccp_mark_feasible_successors;
+	ctx.scdf.handlers.visit_instr = sccp_visit_instr;
+	ctx.scdf.handlers.visit_phi = sccp_visit_phi;
+	ctx.scdf.handlers.mark_feasible_successors = sccp_mark_feasible_successors;
 
-	scdf_init(&scdf, op_array, ssa, &ctx);
-	scdf_solve(&scdf, "SCCP");
+	scdf_init(&ctx.scdf, op_array, ssa);
+	scdf_solve(&ctx.scdf, "SCCP");
 
-	removed_ops += scdf_remove_unreachable_blocks(&scdf);
+	removed_ops += scdf_remove_unreachable_blocks(&ctx.scdf);
 	removed_ops += replace_constant_operands(&ctx);
 
-	scdf_free(&scdf);
 	sccp_context_free(&ctx);
+	scdf_free(&ctx.scdf);
 
 	return removed_ops;
 }

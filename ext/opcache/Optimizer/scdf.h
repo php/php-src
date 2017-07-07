@@ -22,7 +22,6 @@
 #include "zend_bitset.h"
 
 typedef struct _scdf_ctx {
-	void *ctx;
 	zend_op_array *op_array;
 	zend_ssa *ssa;
 	zend_bitset instr_worklist;
@@ -47,7 +46,7 @@ typedef struct _scdf_ctx {
 	} handlers;
 } scdf_ctx;
 
-void scdf_init(scdf_ctx *scdf, zend_op_array *op_array, zend_ssa *ssa, void *ctx);
+void scdf_init(scdf_ctx *scdf, zend_op_array *op_array, zend_ssa *ssa);
 void scdf_solve(scdf_ctx *scdf, const char *name);
 void scdf_free(scdf_ctx *scdf);
 

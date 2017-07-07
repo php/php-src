@@ -80,7 +80,7 @@ void scdf_mark_edge_feasible(scdf_ctx *ctx, int from, int to) {
 	}
 }
 
-void scdf_init(scdf_ctx *ctx, zend_op_array *op_array, zend_ssa *ssa, void *extra_ctx) {
+void scdf_init(scdf_ctx *ctx, zend_op_array *op_array, zend_ssa *ssa) {
 	uint32_t edges_count = 0;
 	int b;
 
@@ -90,7 +90,6 @@ void scdf_init(scdf_ctx *ctx, zend_op_array *op_array, zend_ssa *ssa, void *extr
 
 	ctx->op_array = op_array;
 	ctx->ssa = ssa;
-	ctx->ctx = extra_ctx;
 
 	ctx->instr_worklist_len = zend_bitset_len(op_array->last);
 	ctx->phi_var_worklist_len = zend_bitset_len(ssa->vars_count);
