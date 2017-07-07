@@ -3389,7 +3389,7 @@ function check_binary_tools_sdk()
 
 	/* Basic test, extend by need. */
 	if (BIN_TOOLS_SDK_VER_MAJOR < 2) {
-		ERROR("Incompatible binary tools version. Please consult https://wiki.php.net/internals/windows/stepbystepbuild_sdk_2");
+		ERROR("Incompatible binary tools version. Please consult\r\nhttps://wiki.php.net/internals/windows/stepbystepbuild_sdk_2");
 	}
 }
 
