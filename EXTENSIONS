@@ -269,7 +269,7 @@ STATUS:              Working
 SINCE:               5.3
 -------------------------------------------------------------------------------
 EXTENSION:           exif
-PRIMARY MAINTAINER:  Marcus Boerger <helly@php.net>
+PRIMARY MAINTAINER:  Kalle Sommer Nielsen <kalle@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               4.2
