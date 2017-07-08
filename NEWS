@@ -12,6 +12,7 @@ PHP                                                                        NEWS
   . Fixed bug #74878 (Data race in ZTS builds). (Nikita)
 	
 - EXIF:
+  . Deprecated the read_exif_data() alias. (Kalle)
   . Fixed bug #74428 (exif_read_data(): "Illegal IFD size" warning occurs with 
     correct exif format). (bradpiccho at gmail dot com, Kalle)
   . Fixed bug #72819 (EXIF thumbnails not read anymore). (Kalle)

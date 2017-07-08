@@ -164,6 +164,9 @@ PHP 8.0.
   . The create_function() function has been deprecated, use anonymous functions
     instead.
   . The each() function has been deprecated, use a foreach loop instead.
+  
+- EXIF:
+  . The read_exif_data() alias have been deprecated, use exif_read_data() instead.
 
 - GD:
   . png2wbmp() and jpeg2wbmp() have been deprecated.

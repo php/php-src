@@ -120,7 +120,7 @@ ZEND_END_ARG_INFO()
  */
 const zend_function_entry exif_functions[] = {
 	PHP_FE(exif_read_data, arginfo_exif_read_data)
-	PHP_FALIAS(read_exif_data, exif_read_data, arginfo_exif_read_data)
+	PHP_DEP_FALIAS(read_exif_data, exif_read_data, arginfo_exif_read_data)
 	PHP_FE(exif_tagname, arginfo_exif_tagname)
 	PHP_FE(exif_thumbnail, arginfo_exif_thumbnail)
 	PHP_FE(exif_imagetype, arginfo_exif_imagetype)
