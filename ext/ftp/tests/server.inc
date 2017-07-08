@@ -267,7 +267,46 @@ if ($pid) {
 				}
 			}
 
-		} elseif (preg_match("~^CWD ([A-Za-z./]+)\r\n$~", $buf, $m)) {
+		} elseif (preg_match("~^APPE ([\w/.-]+)\r\n$~", $buf, $m)) {
+			fputs($s, "150 File status okay; about to open data connection\r\n");
+
+			if(empty($pasv))
+			{
+				if (!$fs = stream_socket_client("tcp://$host:$port")) {
+					fputs($s, "425 Can't open data connection\r\n");
+					continue;
+				}
+
+				$data = stream_get_contents($fs);
+				$orig = file_get_contents(dirname(__FILE__).'/'.$m[1]);
+
+
+				if (isset($ascii) && !$ascii && $orig === $data) {
+					fputs($s, "226 Closing data Connection.\r\n");
+
+				} elseif ((!empty($ascii) || isset($bug39583)) && $data === strtr($orig, array("\r\n" => "\n", "\r" => "\n", "\n" => "\r\n"))) {
+					fputs($s, "226 Closing data Connection.\r\n");
+
+				} else {
+					var_dump($data);
+					var_dump($orig);
+					fputs($s, "552 Requested file action aborted.\r\n");
+				}
+				fclose($fs);
+			}else{
+				$data = file_get_contents('nm2.php');
+				$orig = file_get_contents(dirname(__FILE__).'/'.$m[1]);
+				if ( $orig === $data) {
+					fputs($s, "226 Closing data Connection.\r\n");
+
+				} else {
+					var_dump($data);
+					var_dump($orig);
+					fputs($s, "552 Requested file action aborted.\r\n");
+				}
+			}
+
+		}elseif (preg_match("~^CWD ([A-Za-z./]+)\r\n$~", $buf, $m)) {
 			change_dir($m[1]);
 			fputs($s, "250 CWD command successful.\r\n");
 
