@@ -278,33 +278,15 @@ if ($pid) {
 				}
 
 				$data = stream_get_contents($fs);
-				$orig = file_get_contents(dirname(__FILE__).'/'.$m[1]);
-
-
-				if (isset($ascii) && !$ascii && $orig === $data) {
-					fputs($s, "226 Closing data Connection.\r\n");
-
-				} elseif ((!empty($ascii) || isset($bug39583)) && $data === strtr($orig, array("\r\n" => "\n", "\r" => "\n", "\n" => "\r\n"))) {
-					fputs($s, "226 Closing data Connection.\r\n");
-
-				} else {
-					var_dump($data);
-					var_dump($orig);
-					fputs($s, "552 Requested file action aborted.\r\n");
-				}
+				file_put_contents(__DIR__.'/'.$m[1], $data, FILE_APPEND);
+				fputs($s, "226 Closing data Connection.\r\n");
 				fclose($fs);
 			}else{
-				$data = file_get_contents('nm2.php');
-				$orig = file_get_contents(dirname(__FILE__).'/'.$m[1]);
-				if ( $orig === $data) {
-					fputs($s, "226 Closing data Connection.\r\n");
-
-				} else {
-					var_dump($data);
-					var_dump($orig);
-					fputs($s, "552 Requested file action aborted.\r\n");
-				}
-			}
+				$data = stream_get_contents($fs);
+				file_put_contents(__DIR__.'/'.$m[1], $data, FILE_APPEND);
+				fputs($s, "226 Closing data Connection.\r\n");
+				fclose($fs);
+            }
 
 		}elseif (preg_match("~^CWD ([A-Za-z./]+)\r\n$~", $buf, $m)) {
 			change_dir($m[1]);
