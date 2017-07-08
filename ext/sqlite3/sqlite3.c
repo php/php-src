@@ -103,6 +103,7 @@ PHP_METHOD(sqlite3, open)
 	char *filename, *encryption_key, *fullpath;
 	size_t filename_len, encryption_key_len = 0;
 	zend_long flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
+	int rc;
 
 	db_obj = Z_SQLITE3_DB_P(object);
 
@@ -133,11 +134,13 @@ PHP_METHOD(sqlite3, open)
 	}
 
 #if SQLITE_VERSION_NUMBER >= 3005000
-	if (sqlite3_open_v2(fullpath, &(db_obj->db), flags, NULL) != SQLITE_OK) {
+	rc = sqlite3_open_v2(fullpath, &(db_obj->db), flags, NULL);
 #else
-	if (sqlite3_open(fullpath, &(db_obj->db)) != SQLITE_OK) {
+	rc = sqlite3_open(fullpath, &(db_obj->db));
 #endif
-		zend_throw_exception_ex(zend_ce_exception, 0, "Unable to open database: %s", sqlite3_errmsg(db_obj->db));
+	if (rc != SQLITE_OK) {
+		zend_throw_exception_ex(zend_ce_exception, 0, "Unable to open database: %s",
+				db_obj->db ? sqlite3_errmsg(db_obj->db) : sqlite3_errstr(rc));
 		if (fullpath != filename) {
 			efree(fullpath);
 		}
