@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.2.0beta3
 
+- FTP:
+  . Added ftp_append() function. (blar)
+
 - Mbstring:
   . Fixed bug #75001 (Wrong reflection on mb_eregi_replace). (Fabien
     Villepinte)

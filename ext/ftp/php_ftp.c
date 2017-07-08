@@ -191,6 +191,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_put, 0, 0, 4)
 	ZEND_ARG_INFO(0, startpos)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_append, 0, 0, 4)
+	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_INFO(0, remote_file)
+	ZEND_ARG_INFO(0, local_file)
+	ZEND_ARG_INFO(0, mode)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_nb_put, 0, 0, 4)
 	ZEND_ARG_INFO(0, ftp)
 	ZEND_ARG_INFO(0, remote_file)
@@ -265,6 +272,7 @@ const zend_function_entry php_ftp_functions[] = {
 	PHP_FE(ftp_get,				arginfo_ftp_get)
 	PHP_FE(ftp_fget,			arginfo_ftp_fget)
 	PHP_FE(ftp_put,				arginfo_ftp_put)
+	PHP_FE(ftp_append,			arginfo_ftp_append)
 	PHP_FE(ftp_fput,			arginfo_ftp_fput)
 	PHP_FE(ftp_size,			arginfo_ftp_size)
 	PHP_FE(ftp_mdtm,			arginfo_ftp_mdtm)
@@ -1272,6 +1280,41 @@ PHP_FUNCTION(ftp_put)
 }
 /* }}} */
 
+/* {{{ proto bool ftp_append(resource stream, string remote_file, string local_file, int mode)
+   Append content of a file a another file on the FTP server */
+PHP_FUNCTION(ftp_append)
+{
+	zval		*z_ftp;
+	ftpbuf_t	*ftp;
+	ftptype_t	xtype;
+	char		*remote, *local;
+	size_t		remote_len, local_len;
+	zend_long		mode;
+	php_stream 	*instream;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rppl", &z_ftp, &remote, &remote_len, &local, &local_len, &mode) == FAILURE) {
+		return;
+	}
+
+	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {
+		RETURN_FALSE;
+	}
+	XTYPE(xtype, mode);
+
+	if (!(instream = php_stream_open_wrapper(local, mode == FTPTYPE_ASCII ? "rt" : "rb", REPORT_ERRORS, NULL))) {
+		RETURN_FALSE;
+	}
+
+	if (!ftp_append(ftp, remote, remote_len, instream, xtype)) {
+		php_stream_close(instream);
+		php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		RETURN_FALSE;
+	}
+	php_stream_close(instream);
+
+	RETURN_TRUE;
+}
+/* }}} */
 
 /* {{{ proto int ftp_nb_put(resource stream, string remote_file, string local_file, int mode[, int startpos])
    Stores a file on the FTP server */

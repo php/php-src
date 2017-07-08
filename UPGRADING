@@ -233,6 +233,9 @@ See also: https://wiki.php.net/rfc/deprecations_php_7_2
   . DomNodeList implements Countable, added DomNodeList::count().
   . DOMNamedNodeMap implements Countable, added DOMNamedNodeMap::count().
 
+- FTP:
+  . Added ftp_append().
+
 - GD:
   . Added imagesetclip() and imagegetclip().
   . Added imageopenpolygon().
