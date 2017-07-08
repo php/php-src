@@ -3120,7 +3120,10 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * valu
 {
 	size_t i;
 	int de, section_index = SECTION_MAKERNOTE;
-	int NumDirEntries, old_motorola_intel, offset_diff;
+	int NumDirEntries, old_motorola_intel;
+#ifdef KALLE_0
+	int offset_diff;
+#endif
 	const maker_note_type *maker_note;
 	char *dir_start;
 	
