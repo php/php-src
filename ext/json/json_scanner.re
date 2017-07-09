@@ -280,9 +280,9 @@ std:
 	<STR_P1>UTF8             { PHP_JSON_CONDITION_GOTO(STR_P1); }
 	<STR_P1>ANY              {
 		if (s->options & (PHP_JSON_INVALID_UTF8_IGNORE | PHP_JSON_INVALID_UTF8_SUBSTITUTE)) {
-			int utf8_addition = (s->options & PHP_JSON_INVALID_UTF8_SUBSTITUTE) ? 4 : 1;
+			int utf8_addition = (s->options & PHP_JSON_INVALID_UTF8_SUBSTITUTE) ? 3 : 0;
 			s->utf8_invalid = 1;
-			s->utf8_invalid_count = utf8_addition - (s->cursor - s->token);
+			s->utf8_invalid_count += utf8_addition - 1;
 			PHP_JSON_CONDITION_GOTO(STR_P1);
 		}
 		s->errcode = PHP_JSON_ERROR_UTF8;
@@ -365,7 +365,7 @@ std:
 	<STR_P2_BIN>UTF8         { PHP_JSON_CONDITION_GOTO(STR_P2_BIN); }
 	<STR_P2_BIN>ANY          {
 		if (s->utf8_invalid) {
-			php_json_scanner_copy_string(s, 2 - (s->cursor - s->token));
+			PHP_JSON_SCANNER_COPY_ESC();
 			if (s->options & PHP_JSON_INVALID_UTF8_SUBSTITUTE) {
 				*(s->pstr++) = (char) (0xe0 | (0xfffd >> 12));
 				*(s->pstr++) = (char) (0x80 | ((0xfffd >> 6) & 0x3f));
