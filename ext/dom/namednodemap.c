@@ -342,18 +342,15 @@ PHP_FUNCTION(dom_namednodemap_count)
 {
 	zval *id;
 	dom_object *intern;
-	zval *count;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &id, dom_namednodemap_class_entry) == FAILURE) {
 		return;
 	}
 
 	intern = Z_DOMOBJ_P(id);
-	if(dom_namednodemap_length_read(intern, &count)) {
+	if(dom_namednodemap_length_read(intern, return_value) == FAILURE) {
 		RETURN_FALSE;
 	}
-
-	RETURN_LONG(count);
 }
 /* }}} end dom_namednodemap_count */
 
