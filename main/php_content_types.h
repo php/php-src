@@ -29,3 +29,11 @@ int php_startup_sapi_content_types(void);
 int php_setup_sapi_content_types(void);
 
 #endif /* PHP_CONTENT_TYPES_H */
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */
