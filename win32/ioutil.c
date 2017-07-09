@@ -399,7 +399,7 @@ PW32IO wchar_t *php_win32_ioutil_getcwd_w(wchar_t *buf, size_t len)
 {/*{{{*/
 	DWORD err = 0;
 	wchar_t *tmp_buf = NULL;
-	DWORD tmp_len;
+	DWORD tmp_len = (DWORD)len;
 
 	/* If buf was NULL, the result has to be freed outside here. */
 	if (!buf) {
