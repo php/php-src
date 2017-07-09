@@ -36,6 +36,10 @@ PHP                                                                        NEWS
   . Fixed bug #74873 (Minor BC break: PCRE_JIT changes output of preg_match()).
     (Dmitry)
 
+- SQLite3:
+  . Fixed bug #74883 (SQLite3::__construct() produces "out of memory" exception
+    with invalid flags). (Anatol)
+
 06 Jul 2017, PHP 7.2.0alpha3
 
 - Core:
