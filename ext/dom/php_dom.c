@@ -707,6 +707,7 @@ PHP_MINIT_FUNCTION(dom)
 	dom_nodelist_class_entry = zend_register_internal_class_ex(&ce, NULL);
 	dom_nodelist_class_entry->get_iterator = php_dom_get_iterator;
 	zend_class_implements(dom_nodelist_class_entry, 1, zend_ce_traversable);
+	zend_class_implements(dom_nodelist_class_entry, 1, zend_ce_countable);
 
 	zend_hash_init(&dom_nodelist_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
 	dom_register_prop_handler(&dom_nodelist_prop_handlers, "length", sizeof("length")-1, dom_nodelist_length_read, NULL);
@@ -717,6 +718,7 @@ PHP_MINIT_FUNCTION(dom)
 	dom_namednodemap_class_entry = zend_register_internal_class_ex(&ce, NULL);
 	dom_namednodemap_class_entry->get_iterator = php_dom_get_iterator;
 	zend_class_implements(dom_namednodemap_class_entry, 1, zend_ce_traversable);
+	zend_class_implements(dom_namednodemap_class_entry, 1, zend_ce_countable);
 
 	zend_hash_init(&dom_namednodemap_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
 	dom_register_prop_handler(&dom_namednodemap_prop_handlers, "length", sizeof("length")-1, dom_namednodemap_length_read, NULL);

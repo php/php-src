@@ -267,7 +267,28 @@ if ($pid) {
 				}
 			}
 
-		} elseif (preg_match("~^CWD ([A-Za-z./]+)\r\n$~", $buf, $m)) {
+		} elseif (preg_match("~^APPE ([\w/.-]+)\r\n$~", $buf, $m)) {
+			fputs($s, "150 File status okay; about to open data connection\r\n");
+
+			if(empty($pasv))
+			{
+				if (!$fs = stream_socket_client("tcp://$host:$port")) {
+					fputs($s, "425 Can't open data connection\r\n");
+					continue;
+				}
+
+				$data = stream_get_contents($fs);
+				file_put_contents(__DIR__.'/'.$m[1], $data, FILE_APPEND);
+				fputs($s, "226 Closing data Connection.\r\n");
+				fclose($fs);
+			}else{
+				$data = stream_get_contents($fs);
+				file_put_contents(__DIR__.'/'.$m[1], $data, FILE_APPEND);
+				fputs($s, "226 Closing data Connection.\r\n");
+				fclose($fs);
+            }
+
+		}elseif (preg_match("~^CWD ([A-Za-z./]+)\r\n$~", $buf, $m)) {
 			change_dir($m[1]);
 			fputs($s, "250 CWD command successful.\r\n");
 
