@@ -1973,11 +1973,7 @@ static uint32_t assign_dim_result_type(
 				tmp |= MAY_BE_ARRAY_KEY_LONG;
 			}
 			if (dim_type & MAY_BE_STRING) {
-				tmp |= MAY_BE_ARRAY_KEY_STRING;
-				if (dim_op_type != IS_CONST) {
-					// FIXME: numeric string
-					tmp |= MAY_BE_ARRAY_KEY_LONG;
-				}
+				tmp |= (MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_KEY_STRING);
 			}
 			if (dim_type & (MAY_BE_UNDEF|MAY_BE_NULL)) {
 				tmp |= MAY_BE_ARRAY_KEY_STRING;

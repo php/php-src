@@ -31,7 +31,7 @@ class Test implements ArrayAccess {
 
 $test = new Test;
 
-// these should all produce string(...) "..." output
+// These should all produce string(...) "..." output
 // the incorrect output is int(...)
 isset($test['0']);
 isset($test['123']);
@@ -42,7 +42,7 @@ $test['123'] = true;
 $foo = $test['0'];
 $foo = $test['123'];
 
-// these caused the same bug, but in opcache rather than the compiler
+// These caused the same bug, but in opcache rather than the compiler
 isset($test[(string)'0']);
 isset($test[(string)'123']);
 unset($test[(string)'0']);
@@ -51,6 +51,20 @@ $test[(string)'0'] = true;
 $test[(string)'123'] = true;
 $foo = $test[(string)'0'];
 $foo = $test[(string)'123'];
+
+/**
+ * @see https://github.com/php/php-src/pull/2607#issuecomment-313781748
+ */
+function test(): string {
+    $array["10"] = 42;
+
+    foreach ($array as $key => $value) {
+        return $key;
+    }
+}
+
+var_dump(test());
+
 ?>
 --EXPECT--
 offsetExists given string(1) "0"
@@ -69,3 +83,4 @@ offsetSet given string(1) "0"
 offsetSet given string(3) "123"
 offsetGet given string(1) "0"
 offsetGet given string(3) "123"
+string(2) "10"
