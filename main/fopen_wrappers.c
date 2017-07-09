@@ -140,8 +140,8 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 	char local_open_basedir[MAXPATHLEN];
 	char path_tmp[MAXPATHLEN];
 	char *path_file;
-	int resolved_basedir_len;
-	int resolved_name_len;
+	size_t resolved_basedir_len;
+	size_t resolved_name_len;
 	size_t path_len;
 	int nesting_level = 0;
 
@@ -214,9 +214,9 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 
 	/* Resolve open_basedir to resolved_basedir */
 	if (expand_filepath(local_open_basedir, resolved_basedir) != NULL) {
-		int basedir_len = (int)strlen(basedir);
+		size_t basedir_len = strlen(basedir);
 		/* Handler for basedirs that end with a / */
-		resolved_basedir_len = (int)strlen(resolved_basedir);
+		resolved_basedir_len = strlen(resolved_basedir);
 #ifdef PHP_WIN32
 		if (basedir[basedir_len - 1] == PHP_DIR_SEPARATOR || basedir[basedir_len - 1] == '/') {
 #else
@@ -231,7 +231,7 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 				resolved_basedir[resolved_basedir_len] = '\0';
 		}
 
-		resolved_name_len = (int)strlen(resolved_name);
+		resolved_name_len = strlen(resolved_name);
 		if (path_tmp[path_len - 1] == PHP_DIR_SEPARATOR) {
 			if (resolved_name[resolved_name_len - 1] != PHP_DIR_SEPARATOR) {
 				resolved_name[resolved_name_len] = PHP_DIR_SEPARATOR;
