@@ -521,7 +521,7 @@ PW32IO php_win32_ioutil_normalization_result php_win32_ioutil_normalize_path_w(w
 		return PHP_WIN32_IOUTIL_NORM_FAIL;
 	}
 
-	while (NULL != (pos = wcschr(idx, PHP_WIN32_IOUTIL_FW_SLASHW)) && idx - *buf <= len) {
+	while (NULL != (pos = wcschr(idx, PHP_WIN32_IOUTIL_FW_SLASHW)) && (size_t)(idx - *buf) <= len) {
 		*pos = PHP_WIN32_IOUTIL_DEFAULT_SLASHW;
 		idx = pos++;
 	}
