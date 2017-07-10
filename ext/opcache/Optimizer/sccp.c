@@ -1280,6 +1280,9 @@ static int replace_constant_operands(sccp_ctx *ctx) {
 			zend_op *opline = &op_array->opcodes[use];
 			zend_ssa_op *ssa_op = &ssa->ops[use];
 			if (try_replace_op1(ctx, opline, ssa_op, i, value)) {
+				if (opline->opcode == ZEND_NOP) {
+					removed_ops++;
+				}
 				ZEND_ASSERT(ssa_op->op1_def == -1);
 				if (ssa_op->op1_use != ssa_op->op2_use) {
 					zend_ssa_unlink_use_chain(ssa, use, ssa_op->op1_use);
@@ -1392,11 +1395,12 @@ static int replace_constant_operands(sccp_ctx *ctx) {
 				Z_TRY_ADDREF_P(value);
 			}
 		}
-		/*if (var->definition_phi
+		if (var->definition_phi
+				&& value_known(&ctx->values[i])
 				&& var->use_chain < 0
-				&& ssa->phi_use_chain == NULL) {
+				&& var->phi_use_chain == NULL) {
 			zend_ssa_remove_phi(ssa, var->definition_phi);
-		}*/
+		}
 	}
 
 	return removed_ops;
