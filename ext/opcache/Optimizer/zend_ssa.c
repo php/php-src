@@ -1262,22 +1262,26 @@ static inline void zend_ssa_remove_defs_of_instr(zend_ssa *ssa, zend_ssa_op *ssa
 }
 /* }}} */
 
-static inline void zend_ssa_remove_phi_source(zend_ssa *ssa, zend_ssa_phi *phi, int i) /* {{{ */
+static inline void zend_ssa_remove_phi_source(zend_ssa *ssa, zend_ssa_phi *phi, int pred_offset, int predecessors_count) /* {{{ */
 {
-	int j, var_num = phi->sources[i];
+	int j, var_num = phi->sources[pred_offset];
+
+	predecessors_count--;
+	if (pred_offset < predecessors_count) {
+		memmove(phi->sources + pred_offset, phi->sources + pred_offset + 1, (predecessors_count - pred_offset) * sizeof(uint32_t));
+	}
 
 	/* Check if they same var is used in a different phi operand as well, in this case we don't
 	 * need to adjust the use chain (but may have to move the next pointer). */
-	for (j = 0; j < ssa->cfg.blocks[phi->block].predecessors_count; j++) {
+	for (j = 0; j < predecessors_count; j++) {
 		if (phi->sources[j] == var_num) {
-			if (j < i) {
-				phi->sources[i] = -1;
+			if (j < pred_offset) {
+				ZEND_ASSERT(phi->use_chains[pred_offset] == NULL);
 				return;
 			}
-			if (j > i) {
-				phi->use_chains[j] = phi->use_chains[i];
-				phi->use_chains[i] = NULL;
-				phi->sources[i] = -1;
+			if (j >= pred_offset) {
+				phi->use_chains[j] = phi->use_chains[pred_offset];
+				phi->use_chains[pred_offset] = NULL;
 				return;
 			}
 		}
@@ -1285,8 +1289,7 @@ static inline void zend_ssa_remove_phi_source(zend_ssa *ssa, zend_ssa_phi *phi, 
 
 	/* Variable only used in one operand, remove the phi from the use chain. */
 	zend_ssa_remove_use_of_phi_source(ssa, phi, var_num);
-	phi->sources[i] = -1;
-	phi->use_chains[i] = NULL;
+	phi->use_chains[pred_offset] = NULL;
 }
 /* }}} */
 
@@ -1387,13 +1390,17 @@ void zend_ssa_remove_block(zend_op_array *op_array, zend_ssa *ssa, int i) /* {{{
 				}
 			} else {
 				if (phi->sources[pred_offset] >= 0) {
-					zend_ssa_remove_phi_source(ssa, phi, pred_offset);
+					zend_ssa_remove_phi_source(ssa, phi, pred_offset, next_block->predecessors_count);
 				}
 			}
 		}
 
 		/* Remove this predecessor */
-		predecessors[pred_offset] = -1;
+		next_block->predecessors_count--;
+		if (pred_offset < next_block->predecessors_count) {
+			predecessors = &ssa->cfg.predecessors[next_block->predecessor_offset + pred_offset];
+			memmove(predecessors, predecessors + 1, (next_block->predecessors_count - pred_offset) * sizeof(uint32_t));
+		}
 	}
 
 	/* Remove successors of predecessors */
@@ -1413,6 +1420,29 @@ void zend_ssa_remove_block(zend_op_array *op_array, zend_ssa *ssa, int i) /* {{{
 			}
 		}
 	}
+
+	block->successors_count = 0;
+	block->predecessors_count = 0;
+
+	/* Remove from dominators tree */
+	if (block->idom >= 0) {
+		j = ssa->cfg.blocks[block->idom].children;
+		if (j == i) {
+			ssa->cfg.blocks[block->idom].children = block->next_child;
+		} else if (j >= 0) {
+			while (ssa->cfg.blocks[j].next_child >= 0) {
+				if (ssa->cfg.blocks[j].next_child == i) {
+					ssa->cfg.blocks[j].next_child = block->next_child;
+					break;
+				}
+				j = ssa->cfg.blocks[j].next_child;
+			}
+		}
+	}
+	block->idom = -1;
+	block->level = -1;
+	block->children = -1;
+	block->next_child = -1;
 }
 /* }}} */
 
