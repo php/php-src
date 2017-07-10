@@ -935,6 +935,38 @@ PHP_MINFO_FUNCTION(dom)
 
 PHP_MSHUTDOWN_FUNCTION(dom) /* {{{ */
 {
+#if defined(LIBXML_XPATH_ENABLED)
+	zend_unregister_functions(dom_xpath_class_entry->info.internal.builtin_functions, -1, &dom_xpath_class_entry->function_table);
+#endif
+	zend_unregister_functions(dom_node_class_entry->info.internal.builtin_functions, -1, &dom_node_class_entry->function_table);
+	zend_unregister_functions(dom_domexception_class_entry->info.internal.builtin_functions, -1, &dom_domexception_class_entry->function_table);
+	zend_unregister_functions(dom_domstringlist_class_entry->info.internal.builtin_functions, -1, &dom_domstringlist_class_entry->function_table);
+	zend_unregister_functions(dom_namelist_class_entry->info.internal.builtin_functions, -1, &dom_namelist_class_entry->function_table);
+	zend_unregister_functions(dom_domimplementationlist_class_entry->info.internal.builtin_functions, -1, &dom_domimplementationlist_class_entry->function_table);
+	zend_unregister_functions(dom_domimplementationsource_class_entry->info.internal.builtin_functions, -1, &dom_domimplementationsource_class_entry->function_table);
+	zend_unregister_functions(dom_domimplementation_class_entry->info.internal.builtin_functions, -1, &dom_domimplementation_class_entry->function_table);
+	zend_unregister_functions(dom_documentfragment_class_entry->info.internal.builtin_functions, -1, &dom_documentfragment_class_entry->function_table);
+	zend_unregister_functions(dom_document_class_entry->info.internal.builtin_functions, -1, &dom_document_class_entry->function_table);
+	zend_unregister_functions(dom_nodelist_class_entry->info.internal.builtin_functions, -1, &dom_nodelist_class_entry->function_table);
+	zend_unregister_functions(dom_namednodemap_class_entry->info.internal.builtin_functions, -1, &dom_namednodemap_class_entry->function_table);
+	zend_unregister_functions(dom_characterdata_class_entry->info.internal.builtin_functions, -1, &dom_characterdata_class_entry->function_table);
+	zend_unregister_functions(dom_attr_class_entry->info.internal.builtin_functions, -1, &dom_attr_class_entry->function_table);
+	zend_unregister_functions(dom_element_class_entry->info.internal.builtin_functions, -1, &dom_element_class_entry->function_table);
+	zend_unregister_functions(dom_text_class_entry->info.internal.builtin_functions, -1, &dom_text_class_entry->function_table);
+	zend_unregister_functions(dom_comment_class_entry->info.internal.builtin_functions, -1, &dom_comment_class_entry->function_table);
+	zend_unregister_functions(dom_typeinfo_class_entry->info.internal.builtin_functions, -1, &dom_typeinfo_class_entry->function_table);
+	zend_unregister_functions(dom_userdatahandler_class_entry->info.internal.builtin_functions, -1, &dom_userdatahandler_class_entry->function_table);
+	zend_unregister_functions(dom_domerror_class_entry->info.internal.builtin_functions, -1, &dom_domerror_class_entry->function_table);
+	zend_unregister_functions(dom_domerrorhandler_class_entry->info.internal.builtin_functions, -1, &dom_domerrorhandler_class_entry->function_table);
+	zend_unregister_functions(dom_domlocator_class_entry->info.internal.builtin_functions, -1, &dom_domlocator_class_entry->function_table);
+	zend_unregister_functions(dom_domconfiguration_class_entry->info.internal.builtin_functions, -1, &dom_domconfiguration_class_entry->function_table);
+	zend_unregister_functions(dom_cdatasection_class_entry->info.internal.builtin_functions, -1, &dom_cdatasection_class_entry->function_table);
+	zend_unregister_functions(dom_documenttype_class_entry->info.internal.builtin_functions, -1, &dom_documenttype_class_entry->function_table);
+	zend_unregister_functions(dom_notation_class_entry->info.internal.builtin_functions, -1, &dom_notation_class_entry->function_table);
+	zend_unregister_functions(dom_entity_class_entry->info.internal.builtin_functions, -1, &dom_entity_class_entry->function_table);
+	zend_unregister_functions(dom_entityreference_class_entry->info.internal.builtin_functions, -1, &dom_entityreference_class_entry->function_table);
+	zend_unregister_functions(dom_processinginstruction_class_entry->info.internal.builtin_functions, -1, &dom_processinginstruction_class_entry->function_table);
+	zend_unregister_functions(dom_string_extend_class_entry->info.internal.builtin_functions, -1, &dom_string_extend_class_entry->function_table);
 	zend_hash_destroy(&dom_domstringlist_prop_handlers);
 	zend_hash_destroy(&dom_namelist_prop_handlers);
 	zend_hash_destroy(&dom_domimplementationlist_prop_handlers);
