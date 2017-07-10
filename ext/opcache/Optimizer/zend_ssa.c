@@ -1315,7 +1315,9 @@ void zend_ssa_remove_uses_of_var(zend_ssa *ssa, int var_num) /* {{{ */
 		int i, end = NUM_PHI_SOURCES(phi);
 		for (i = 0; i < end; i++) {
 			if (phi->sources[i] == var_num) {
+#if 0
 				phi->sources[i] = -1;
+#endif
 				phi->use_chains[i] = NULL;
 			}
 		}
