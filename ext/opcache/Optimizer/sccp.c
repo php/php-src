@@ -596,6 +596,21 @@ static inline int ct_eval_func_call(
 				&& ((num_args == 1 && Z_TYPE_P(args[0]) == IS_ARRAY)
 					|| (num_args == 2 && Z_TYPE_P(args[0]) == IS_STRING && Z_TYPE_P(args[1]) == IS_ARRAY)
 					|| (num_args == 2 && Z_TYPE_P(args[0]) == IS_ARRAY && Z_TYPE_P(args[1]) == IS_STRING))) {
+			zval *entry;
+
+			if (Z_TYPE_P(args[0]) == IS_ARRAY) {
+				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args[0]), entry) {
+					if (Z_TYPE_P(entry) > IS_STRING) {
+						return FAILURE;
+					}
+				} ZEND_HASH_FOREACH_END();
+			} else {
+				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args[1]), entry) {
+					if (Z_TYPE_P(entry) > IS_STRING) {
+						return FAILURE;
+					}
+				} ZEND_HASH_FOREACH_END();
+			}
 			/* pass */
 		} else {
 			return FAILURE;
