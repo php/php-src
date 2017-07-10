@@ -25,7 +25,7 @@
 #include "timelib.h"
 #include <math.h>
 
-timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
+timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two, bool absolute)
 {
 	timelib_rel_time *rt;
 	timelib_time *swp;
@@ -33,7 +33,7 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 	timelib_time one_backup, two_backup;
 
 	rt = timelib_rel_time_ctor();
-	rt->invert = 0;
+	rt->invert = absolute;
 	if (one->sse > two->sse) {
 		swp = two;
 		two = one;

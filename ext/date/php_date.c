@@ -3714,7 +3714,7 @@ PHP_FUNCTION(date_diff)
 
 	php_date_instantiate(date_ce_interval, return_value);
 	interval = Z_PHPINTERVAL_P(return_value);
-	interval->diff = timelib_diff(dateobj1->time, dateobj2->time);
+	interval->diff = timelib_diff(dateobj1->time, dateobj2->time, absolute);
 	if (absolute) {
 		interval->diff->invert = 0;
 	}
@@ -4071,7 +4071,7 @@ static int date_interval_initialize(timelib_rel_time **rt, /*const*/ char *forma
 			if(b && e) {
 				timelib_update_ts(b, NULL);
 				timelib_update_ts(e, NULL);
-				*rt = timelib_diff(b, e);
+				*rt = timelib_diff(b, e, false);
 				retval = SUCCESS;
 			} else {
 				php_error_docref(NULL, E_WARNING, "Failed to parse interval (%s)", format);
