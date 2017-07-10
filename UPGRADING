@@ -143,6 +143,8 @@ PHP 7.2 UPGRADE NOTES
       ZipArchive::EM_AES_192
       ZipArchive::EM_AES_256
   . accept 'password' from zip stream context
+  . ZipArchive implements countable, added ZipArchive::count() method.
+
 
 ========================================
 3. Changes in SAPI modules

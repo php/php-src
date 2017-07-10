@@ -1229,8 +1229,7 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 		/* we look for directory separator from the end of string, thus hopefuly reducing our work load */
 		char *e;
 		zend_stat_t sb;
-		int dir_len = (int)strlen(dir);
-		int offset = 0;
+		size_t dir_len = strlen(dir), offset = 0;
 		char buf[MAXPATHLEN];
 
 		if (!expand_filepath_with_mode(dir, buf, NULL, 0, CWD_EXPAND )) {
@@ -1438,7 +1437,7 @@ PHPAPI php_stream *_php_stream_fopen_with_path(const char *filename, const char 
 	const char *ptr;
 	char trypath[MAXPATHLEN];
 	php_stream *stream;
-	int filename_length;
+	size_t filename_length;
 	zend_string *exec_filename;
 
 	if (opened_path) {
@@ -1449,7 +1448,7 @@ PHPAPI php_stream *_php_stream_fopen_with_path(const char *filename, const char 
 		return NULL;
 	}
 
-	filename_length = (int)strlen(filename);
+	filename_length = strlen(filename);
 #ifndef PHP_WIN32
 	(void) filename_length;
 #endif

@@ -49,6 +49,9 @@ PHP                                                                        NEWS
   . Fixed bug #74883 (SQLite3::__construct() produces "out of memory" exception
     with invalid flags). (Anatol)
 
+- ZIP:
+  . ZipArchive implements countable, added ZipArchive::count() method. (Remi)
+
 06 Jul 2017, PHP 7.2.0alpha3
 
 - Core:

@@ -29,9 +29,15 @@ $p = proc_open(
 		array("bypass_shell" => true)
 		);
 
-echo fread($pipes[1], 1024);
+$out = "";
+
+while (!feof($pipes[1])) {
+	$out .= fread($pipes[1], 1024);
+}
 
 proc_close($p);
+
+echo $out;
 
 ?>
 ==DONE==
