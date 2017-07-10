@@ -92,6 +92,7 @@ int  zend_optimizer_replace_by_const(zend_op_array *op_array,
                                      zval          *val);
 
 void zend_optimizer_remove_live_range(zend_op_array *op_array, uint32_t var);
+void zend_optimizer_remove_live_range_ex(zend_op_array *op_array, uint32_t var, uint32_t start);
 void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx);
 void zend_optimizer_pass2(zend_op_array *op_array);
 void zend_optimizer_pass3(zend_op_array *op_array);

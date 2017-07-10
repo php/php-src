@@ -23,6 +23,7 @@
 #include "zend_ssa.h"
 #include "zend_dump.h"
 #include "zend_inference.h"
+#include "Optimizer/zend_optimizer_internal.h"
 
 static zend_bool dominates(const zend_basic_block *blocks, int a, int b) {
 	while (blocks[b].level > blocks[a].level) {
@@ -1361,6 +1362,9 @@ void zend_ssa_remove_block(zend_op_array *op_array, zend_ssa *ssa, int i) /* {{{
 			continue;
 		}
 
+		if (op_array->opcodes[j].result_type & (IS_TMP_VAR|IS_VAR)) {
+			zend_optimizer_remove_live_range_ex(op_array, op_array->opcodes[j].result.var, j + 1);
+		}
 		zend_ssa_remove_defs_of_instr(ssa, &ssa->ops[j]);
 		zend_ssa_remove_instr(ssa, &op_array->opcodes[j], &ssa->ops[j]);
 	}

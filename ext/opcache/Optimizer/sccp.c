@@ -1331,6 +1331,9 @@ static int replace_constant_operands(sccp_ctx *ctx) {
 					call = ctx->call_map[var->definition];
 					ZEND_ASSERT(call);
 					ZEND_ASSERT(call->caller_call_opline == opline);
+					if (opline->result_type & (IS_TMP_VAR|IS_VAR)) {
+						zend_optimizer_remove_live_range_ex(op_array, opline->result.var, var->definition + 1);
+					}
 					zend_ssa_remove_result_def(ssa, ssa_op);
 					zend_ssa_remove_instr(ssa, opline, ssa_op);
 					zend_ssa_remove_instr(ssa, call->caller_init_opline,
@@ -1346,6 +1349,9 @@ static int replace_constant_operands(sccp_ctx *ctx) {
 					call->callee_func = NULL;
 				} else {
 					/* Ordinary computational instruction -> remove it */
+					if (opline->result_type & (IS_TMP_VAR|IS_VAR)) {
+						zend_optimizer_remove_live_range_ex(op_array, opline->result.var, var->definition + 1);
+					}
 					zend_ssa_remove_result_def(ssa, ssa_op);
 					zend_ssa_remove_instr(ssa, opline, ssa_op);
 					removed_ops++;
@@ -1366,6 +1372,9 @@ static int replace_constant_operands(sccp_ctx *ctx) {
 				if (ssa_op->result_def >= 0
 						&& ssa->vars[ssa_op->result_def].use_chain < 0
 						&& ssa->vars[ssa_op->result_def].phi_use_chain == NULL) {
+					if (opline->result_type & (IS_TMP_VAR|IS_VAR)) {
+						zend_optimizer_remove_live_range_ex(op_array, opline->result.var, var->definition + 1);
+					}
 					zend_ssa_remove_result_def(ssa, ssa_op);
 					opline->result_type = IS_UNUSED;
 				}
