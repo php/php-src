@@ -573,6 +573,12 @@ static inline int ct_eval_func_call(
 					return FAILURE;
 				}
 			}
+			/* pass */
+		} else if (zend_string_equals_literal(name, "implode")
+				&& ((num_args == 1 && Z_TYPE_P(args[0]) == IS_ARRAY)
+					|| (num_args == 2 && Z_TYPE_P(args[0]) == IS_STRING && Z_TYPE_P(args[1]) == IS_ARRAY)
+					|| (num_args == 2 && Z_TYPE_P(args[0]) == IS_ARRAY && Z_TYPE_P(args[1]) == IS_STRING))) {
+			/* pass */
 		} else {
 #if 0
 			fprintf(stderr, "constant ICALL to %s()\n", ZSTR_VAL(name));
