@@ -2016,7 +2016,7 @@ static int date_interval_has_property(zval *object, zval *member, int type, void
 	zval *prop;
 	int retval = 0;
 
-	if (Z_TYPE_P(member) != IS_STRING) {
+	if (UNEXPECTED(Z_TYPE_P(member) != IS_STRING)) {
 		ZVAL_COPY(&tmp_member, member);
 		convert_to_string(&tmp_member);
 		member = &tmp_member;
@@ -2032,10 +2032,10 @@ static int date_interval_has_property(zval *object, zval *member, int type, void
 		}
 		return retval;
 	}
-
-	prop = date_interval_read_property(object, member, type, cache_slot, &rv);
-
-	if (prop != NULL) {
+	
+	prop = date_interval_read_property(object, member, BP_VAR_IS, cache_slot, &rv);
+	
+	if (prop != &EG(uninitialized_zval)) {
 		if (type == 2) {
 			retval = 1;
 		} else if (type == 1) {
