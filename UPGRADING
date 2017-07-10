@@ -56,6 +56,9 @@ Core:
 9. Other Changes to Extensions
 ========================================
 
+ FTP:
+  . Set default transfer mode to binary
+
  ODBC: 
   . Support for Birdstep has been removed.
 
