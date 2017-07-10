@@ -22,16 +22,6 @@ if (PHP_PDO_DBLIB != "no") {
 ARG_WITH("pdo-mssql", "Native MS-SQL support for PDO", "no");
 
 if (PHP_PDO_MSSQL != "no") {
-	/* if they pointed us to a freetds dir, pick that up,
-	 * otherwise we'll poke around and look for MSSQL libs */
-
-	pdo_mssql_locations = new Array(
-		PHP_PDO_MSSQL,
-		"\\Program Files\\Microsoft SQL Server\\80",
-		"\\MSSQL8",
-		"\\MSSQL7",
-		PHP_PHP_BUILD + "\\MSSQL80"
-	);
 	PDO_DBLIB_FLAVOUR = 0;
 
 	if (CHECK_LIB("sybdb.lib", "pdo_mssql", PHP_PDO_MSSQL) &&
@@ -39,35 +29,14 @@ if (PHP_PDO_MSSQL != "no") {
 			PHP_PDO_MSSQL, null, null, true)) {
 		/* smells like FreeTDS (or maybe native sybase dblib) */
 		PDO_DBLIB_FLAVOUR = "freetds";
-	} else {
-		
-		for (i = 0; i < pdo_mssql_locations.length; i++) {
-			if (CHECK_LIB("ntwdblib.lib", "pdo_mssql",
-					pdo_mssql_locations[i] + "\\DevTools\\Lib") &&
-					CHECK_HEADER_ADD_INCLUDE("sqlfront.h", "CFLAGS_PDO_MSSQL",
-					pdo_mssql_locations[i] + "\\DevTools\\Include",
-					null, null, true)) {
-				if (pdo_mssql_locations[i] == 'yes') {
-					PDO_DBLIB_FLAVOUR = 70;
-				} else {
-					pdo_mssql_locations[i].match(new RegExp("(\\d)"));
-					PDO_DBLIB_FLAVOUR = RegExp.$1 + 0;
-				}
-				break;
-			}
-		}
 	}
 
 	if (PDO_DBLIB_FLAVOUR != 0) {
 		EXTENSION("pdo_mssql", "pdo_dblib.c dblib_driver.c dblib_stmt.c", null, null, null, "ext\\pdo_mssql");
-		if (PDO_DBLIB_FLAVOUR != "freetds") {
-			ADD_FLAG("CFLAGS_PDO_MSSQL", "/DPHP_DBLIB_IS_MSSQL=1 /DDBNTWIN32=1 /DMSSQL" + PDO_DBLIB_FLAVOUR + "0=1 /DMSSQL_VERSION=\\\"" + PDO_DBLIB_FLAVOUR + ".0\\\"");
-			ADD_FLAG("CFLAGS_PDO_MSSQL", "/DPDO_DBLIB_IS_MSSQL=" + PDO_DBLIB_FLAVOUR);
-			PDO_DBLIB_FLAVOUR = "MSSQL_" + PDO_DBLIB_FLAVOUR;
-		}
 		ADD_FLAG('CFLAGS_PDO_MSSQL', "/D PDO_DBLIB_FLAVOUR=\\\"" + PDO_DBLIB_FLAVOUR + "\\\"");
 		ADD_EXTENSION_DEP('pdo_mssql', 'pdo');
 	} else {
 		WARNING("pdo_mssql not enabled, libraries or headers not found")
 	}
 }
+
