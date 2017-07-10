@@ -2199,8 +2199,6 @@ PHP_FUNCTION(ldap_sort)
 PHP_FUNCTION(ldap_get_option)
 {
 	zval *link, *retval;
-	zval tmp1;
-	int num_entries;
 	ldap_linkdata *ld;
 	zend_long option;
 
@@ -2348,6 +2346,8 @@ PHP_FUNCTION(ldap_get_option)
 	case LDAP_OPT_SERVER_CONTROLS:
 	case LDAP_OPT_CLIENT_CONTROLS:
 		{
+			zval tmp1;
+			int num_entries;
 			LDAPControl **ctrls = NULL, **ctrlp;
 
 			if (ldap_get_option(ld->link, option, &ctrls) || ctrls == NULL) {
