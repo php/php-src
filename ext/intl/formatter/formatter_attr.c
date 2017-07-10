@@ -415,6 +415,10 @@ PHP_FUNCTION( numfmt_set_pattern )
 	}
 	INTL_METHOD_CHECK_STATUS( nfo, "Error setting pattern value" );
 
+	if (value) {
+        zend_update_property_string(NumberFormatter_ce_ptr, object, "pattern", sizeof("pattern") - 1, value);
+    }
+
 	RETURN_TRUE;
 }
 /* }}} */

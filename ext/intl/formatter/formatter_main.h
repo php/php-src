@@ -23,5 +23,6 @@ PHP_FUNCTION( numfmt_create );
 PHP_FUNCTION( numfmt_get_error_code );
 PHP_FUNCTION( numfmt_get_error_message );
 PHP_METHOD( NumberFormatter, __construct );
+PHP_METHOD( NumberFormatter, __wakeup );
 
 #endif // FORMATTER_FORMAT_H

@@ -20,7 +20,13 @@ echo "== didn't crash ==".PHP_EOL;
 --EXPECT--
 array(3) {
   [0]=>
-  object(NumberFormatter)#1 (0) {
+  object(NumberFormatter)#1 (3) {
+    ["locale":"NumberFormatter":private]=>
+    string(0) ""
+    ["style":"NumberFormatter":private]=>
+    int(0)
+    ["pattern":"NumberFormatter":private]=>
+    string(0) ""
   }
   [1]=>
   float(2147483648)
