@@ -224,6 +224,10 @@ See also: https://wiki.php.net/rfc/deprecations_php_7_2
   . Added stream_isatty().
   . Added sapi_windows_vt100_support().
 
+- DOM:
+  . DomNodeList implements Countable, added DomNodeList::count().
+  . DOMNamedNodeMap implements Countable, added DOMNamedNodeMap::count().
+
 - GD:
   . Added imagesetclip() and imagegetclip().
   . Added imageopenpolygon().
