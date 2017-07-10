@@ -391,7 +391,7 @@ static zend_always_inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTab
 		ZVAL_UNDEF(&key);
 
 		if (!php_var_unserialize_internal(&key, p, max, NULL)) {
-			zval_dtor(&key);
+			zval_ptr_dtor(&key);
 			return 0;
 		}
 
@@ -421,7 +421,7 @@ numeric_key:
 					data = zend_hash_add_new(ht, Z_STR(key), &d);
 				}
 			} else {
-				zval_dtor(&key);
+				zval_ptr_dtor(&key);
 				return 0;
 			}
 		} else {
@@ -435,7 +435,7 @@ string_key:
 					size_t unmangled_prop_len;
 
 					if (UNEXPECTED(zend_unmangle_property_name_ex(Z_STR(key), &unmangled_class, &unmangled_prop, &unmangled_prop_len) == FAILURE)) {
-						zval_dtor(&key);
+						zval_ptr_dtor(&key);
 						return 0;
 					}
 
@@ -465,7 +465,7 @@ string_key:
 							new_key = unmangled;
 						}
 						zend_string_release(Z_STR(key));
-						Z_STR(key) = new_key;
+						ZVAL_STR(&key, new_key);
 					} else {
 						zend_string_release(unmangled);
 					}
@@ -485,13 +485,13 @@ string_key:
 				convert_to_string(&key);
 				goto string_key;
 			} else {
-				zval_dtor(&key);
+				zval_ptr_dtor(&key);
 				return 0;
 			}
 		}
 
 		if (!php_var_unserialize_internal(data, p, max, var_hash)) {
-			zval_dtor(&key);
+			zval_ptr_dtor(&key);
 			return 0;
 		}
 
@@ -505,7 +505,7 @@ string_key:
 			var_push_dtor(var_hash, data);
 		}
 
-		zval_dtor(&key);
+		zval_ptr_dtor(&key);
 
 		if (elements && *(*p-1) != ';' && *(*p-1) != '}') {
 			(*p)--;
