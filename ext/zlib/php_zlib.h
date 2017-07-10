@@ -48,7 +48,7 @@ typedef struct _php_zlib_buffer {
 typedef struct _php_zlib_context {
 	z_stream Z;
 	char *inflateDict;
-	size_t status;
+	int status;
 	size_t inflateDictlen;
 	php_zlib_buffer buffer;
 } php_zlib_context;
