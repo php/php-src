@@ -545,6 +545,24 @@ static inline int ct_eval_func_call(
 		}
 		ZVAL_STR(result, str);
 		return SUCCESS;
+	} else if (zend_string_equals_literal(name, "ini_get")) {
+		zend_ini_entry *ini_entry;
+
+		if (num_args != 1 || Z_TYPE_P(args[0]) != IS_STRING) {
+			return FAILURE;
+		}
+
+		ini_entry = zend_hash_find_ptr(EG(ini_directives), Z_STR_P(args[0]));
+		if (!ini_entry) {
+			ZVAL_FALSE(result);
+		} else if (ini_entry->modifiable != ZEND_INI_SYSTEM) {
+			return FAILURE;
+		} else if (ini_entry->value) {
+			ZVAL_STR_COPY(result, ini_entry->value);
+		} else {
+			ZVAL_EMPTY_STRING(result);
+		}
+		return SUCCESS;
 	} else {
 		uint32_t i;
 		zend_execute_data *execute_data;
@@ -580,9 +598,6 @@ static inline int ct_eval_func_call(
 					|| (num_args == 2 && Z_TYPE_P(args[0]) == IS_ARRAY && Z_TYPE_P(args[1]) == IS_STRING))) {
 			/* pass */
 		} else {
-#if 0
-			fprintf(stderr, "constant ICALL to %s()\n", ZSTR_VAL(name));
-#endif
 			return FAILURE;
 		}
 
