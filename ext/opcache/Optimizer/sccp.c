@@ -1213,7 +1213,7 @@ static int replace_constant_operands(sccp_ctx *ctx) {
 	zend_op_array *op_array = ctx->scdf.op_array;
 	int i;
 	zval tmp;
-	int removed_ops;
+	int removed_ops = 0;
 
 	/* We iterate the variables backwards, so we can eliminate sequences like INIT_ROPE
 	 * and INIT_ARRAY. */
