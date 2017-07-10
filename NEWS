@@ -17,6 +17,10 @@ PHP                                                                        NEWS
   . Fixed bug #74852 (property_exists returns true on unknown DateInterval 
     property). (jhdxr)	
 
+- DOM:
+  . Implement #74837 (Implement Countable for DomNodeList and DOMNamedNodeMap).
+    (Andreas Treichel)
+
 - EXIF:
   . Deprecated the read_exif_data() alias. (Kalle)
   . Fixed bug #74428 (exif_read_data(): "Illegal IFD size" warning occurs with 
