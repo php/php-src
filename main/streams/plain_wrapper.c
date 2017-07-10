@@ -1139,11 +1139,11 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_f
 	}
 
 #ifdef PHP_WIN32
-	if (!php_win32_check_trailing_space(url_from, (int)strlen(url_from))) {
+	if (!php_win32_check_trailing_space(url_from, strlen(url_from))) {
 		php_win32_docref2_from_error(ERROR_INVALID_NAME, url_from, url_to);
 		return 0;
 	}
-	if (!php_win32_check_trailing_space(url_to, (int)strlen(url_to))) {
+	if (!php_win32_check_trailing_space(url_to, strlen(url_to))) {
 		php_win32_docref2_from_error(ERROR_INVALID_NAME, url_from, url_to);
 		return 0;
 	}
@@ -1311,7 +1311,7 @@ static int php_plain_files_rmdir(php_stream_wrapper *wrapper, const char *url, i
 	}
 
 #ifdef PHP_WIN32
-	if (!php_win32_check_trailing_space(url, (int)strlen(url))) {
+	if (!php_win32_check_trailing_space(url, strlen(url))) {
 		php_error_docref1(NULL, url, E_WARNING, "%s", strerror(ENOENT));
 		return 0;
 	}
@@ -1337,12 +1337,9 @@ static int php_plain_files_metadata(php_stream_wrapper *wrapper, const char *url
 #endif
 	mode_t mode;
 	int ret = 0;
-#ifdef PHP_WIN32
-	int url_len = (int)strlen(url);
-#endif
 
 #ifdef PHP_WIN32
-	if (!php_win32_check_trailing_space(url, url_len)) {
+	if (!php_win32_check_trailing_space(url, strlen(url))) {
 		php_error_docref1(NULL, url, E_WARNING, "%s", strerror(ENOENT));
 		return 0;
 	}

@@ -137,7 +137,7 @@ typedef enum {
 #define PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, ret, dealloc) do { \
 		if (!PHP_WIN32_IOUTIL_PATH_IS_OK_W(pathw, wcslen(pathw))) { \
 			if (dealloc) { \
-				free(pathw); \
+				free((void *)pathw); \
 			} \
 			SET_ERRNO_FROM_WIN32_CODE(ERROR_ACCESS_DENIED); \
 			return ret; \
@@ -222,7 +222,7 @@ PW32IO size_t php_win32_ioutil_dirname(char *buf, size_t len);
 PW32IO int php_win32_ioutil_open_w(const wchar_t *path, int flags, ...);
 PW32IO int php_win32_ioutil_chdir_w(const wchar_t *path);
 PW32IO int php_win32_ioutil_rename_w(const wchar_t *oldname, const wchar_t *newname);
-PW32IO wchar_t *php_win32_ioutil_getcwd_w(const wchar_t *buf, int len);
+PW32IO wchar_t *php_win32_ioutil_getcwd_w(wchar_t *buf, size_t len);
 
 #if 0
 PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode);

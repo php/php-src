@@ -36,9 +36,9 @@ PHP_WINUTIL_API char *php_win32_error_to_msg(HRESULT error)
 	return (buf ? (char *) buf : "");
 }/*}}}*/
 
-int php_win32_check_trailing_space(const char * path, const int path_len)
+int php_win32_check_trailing_space(const char * path, const size_t path_len)
 {/*{{{*/
-	if (path_len < 1) {
+	if (path_len > MAXPATHLEN - 1) {
 		return 1;
 	}
 	if (path) {

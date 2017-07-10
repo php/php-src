@@ -1691,7 +1691,7 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 				MFO.WriteLine("\t@$(CC) $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " /Fo" + sub_build + d + obj);
 
 				if ("clang" == PHP_ANALYZER) {
-					MFO.WriteLine("\t\"@$(CLANG_CL)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER) $(" + bd_flags_name + "_ANALYZER) " + dir + "\\" + src); 
+					MFO.WriteLine("\t@\"$(CLANG_CL)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER) $(" + bd_flags_name + "_ANALYZER) " + dir + "\\" + src); 
 				} else if ("cppcheck" == PHP_ANALYZER) {
 					MFO.WriteLine("\t\"@$(CPPCHECK)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER) $(" + bd_flags_name + "_ANALYZER) " + analyzer_base_flags + " " + dir + "\\" + src); 
 				}else if (PHP_ANALYZER == "pvs") {

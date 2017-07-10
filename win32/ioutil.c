@@ -395,14 +395,15 @@ PW32IO int php_win32_ioutil_rename_w(const wchar_t *oldname, const wchar_t *newn
 	return ret;
 }/*}}}*/
 
-PW32IO wchar_t *php_win32_ioutil_getcwd_w(const wchar_t *buf, int len)
+PW32IO wchar_t *php_win32_ioutil_getcwd_w(wchar_t *buf, size_t len)
 {/*{{{*/
 	DWORD err = 0;
 	wchar_t *tmp_buf = NULL;
+	DWORD tmp_len = (DWORD)len;
 
 	/* If buf was NULL, the result has to be freed outside here. */
 	if (!buf) {
-		DWORD tmp_len = GetCurrentDirectoryW(0, NULL) + 1;
+		tmp_len = GetCurrentDirectoryW(0, NULL) + 1;
 		if (!tmp_len) {
 			err = GetLastError();
 			SET_ERRNO_FROM_WIN32_CODE(err);
@@ -412,9 +413,7 @@ PW32IO wchar_t *php_win32_ioutil_getcwd_w(const wchar_t *buf, int len)
 			return NULL;
 		}
 
-		len = tmp_len;
-
-		tmp_buf = (wchar_t *)malloc((len)*sizeof(wchar_t));
+		tmp_buf = (wchar_t *)malloc((tmp_len)*sizeof(wchar_t));
 		if (!tmp_buf) {
 			SET_ERRNO_FROM_WIN32_CODE(ERROR_NOT_ENOUGH_MEMORY);
 			return NULL;
@@ -422,7 +421,7 @@ PW32IO wchar_t *php_win32_ioutil_getcwd_w(const wchar_t *buf, int len)
 		buf = tmp_buf;
 	}
 	
-	if (!GetCurrentDirectoryW(len, buf)) {
+	if (!GetCurrentDirectoryW(tmp_len, buf)) {
 		err = GetLastError();
 		SET_ERRNO_FROM_WIN32_CODE(err);
 		free(tmp_buf);
@@ -522,7 +521,7 @@ PW32IO php_win32_ioutil_normalization_result php_win32_ioutil_normalize_path_w(w
 		return PHP_WIN32_IOUTIL_NORM_FAIL;
 	}
 
-	while (NULL != (pos = wcschr(idx, PHP_WIN32_IOUTIL_FW_SLASHW)) && idx - *buf <= len) {
+	while (NULL != (pos = wcschr(idx, PHP_WIN32_IOUTIL_FW_SLASHW)) && (size_t)(idx - *buf) <= len) {
 		*pos = PHP_WIN32_IOUTIL_DEFAULT_SLASHW;
 		idx = pos++;
 	}

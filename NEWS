@@ -9,6 +9,21 @@ PHP                                                                        NEWS
     unserialize). (Nikita)
   . Fixed bug #74819 (wddx_deserialize() heap out-of-bound read via
     php_parse_date()). (Derick)
+  . Fixed bug #74878 (Data race in ZTS builds). (Nikita)
+
+- Date:
+  . Fixed bug #74852 (property_exists returns true on unknown DateInterval 
+    property). (jhdxr)	
+
+- EXIF:
+  . Deprecated the read_exif_data() alias. (Kalle)
+  . Fixed bug #74428 (exif_read_data(): "Illegal IFD size" warning occurs with 
+    correct exif format). (bradpiccho at gmail dot com, Kalle)
+  . Fixed bug #72819 (EXIF thumbnails not read anymore). (Kalle)
+  . Fixed bug #62523 (php crashes with segfault when exif_read_data called). 
+    (Kalle)
+  . Fixed bug #50660 (exif_read_data(): Illegal IFD offset (works fine with 
+    other exif readers). (skinny dot bravo at gmail dot com, Kalle)
 
 - GD:
   . Fixed bug #74435 (Buffer over-read into uninitialized memory). (cmb)
@@ -24,6 +39,10 @@ PHP                                                                        NEWS
 - PCRE:
   . Fixed bug #74873 (Minor BC break: PCRE_JIT changes output of preg_match()).
     (Dmitry)
+
+- SQLite3:
+  . Fixed bug #74883 (SQLite3::__construct() produces "out of memory" exception
+    with invalid flags). (Anatol)
 
 06 Jul 2017, PHP 7.2.0alpha3
 
@@ -229,6 +248,8 @@ PHP                                                                        NEWS
   . Fixed bug #73961 (environmental build dependency in hash sha3 source).
     (krakjoe)
   . Changed HashContext from resource to object. (Rouven Weßling, Sara)
+  . Disallowed usage of non-cryptographic hash functions with HMAC and PBKDF2.
+    (Andrey Andreev, Nikita)
 
 - intl:
   . Fixed bug #74433 (wrong reflection for Normalizer methods). (villfa)

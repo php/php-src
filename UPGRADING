@@ -49,8 +49,8 @@ PHP 7.2 UPGRADE NOTES
     example `bcmod('4', '3.5')` now returns '0.5' instead of '1'.
 
 - Hash:
-  . The hash_hmac(), hash_hmac_file() and hash_pbkdf2() functions no longer
-    accept non-cryptographic hashes.
+  . The hash_hmac(), hash_hmac_file(), hash_pbkdf2() and hash_init() (with
+    HASH_HMAC) functions no longer accept non-cryptographic hashes.
 
 - JSON
   . The json_decode() option JSON_OBJECT_AS_ARRAY is used if the second
@@ -164,6 +164,9 @@ PHP 8.0.
   . The create_function() function has been deprecated, use anonymous functions
     instead.
   . The each() function has been deprecated, use a foreach loop instead.
+  
+- EXIF:
+  . The read_exif_data() alias have been deprecated, use exif_read_data() instead.
 
 - GD:
   . png2wbmp() and jpeg2wbmp() have been deprecated.

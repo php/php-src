@@ -114,7 +114,7 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, zend_st
 	}
 
 #ifdef PHP_WIN32
-	if (!php_win32_check_trailing_space(pfx, (const int)strlen(pfx))) {
+	if (!php_win32_check_trailing_space(pfx, strlen(pfx))) {
 		SetLastError(ERROR_INVALID_NAME);
 		return -1;
 	}
