@@ -256,7 +256,41 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
                                     zend_op       *opline,
                                     zval          *val)
 {
+	zend_op *target_opline;
+
 	switch (opline->opcode) {
+		case ZEND_JMPZ:
+			if (zend_is_true(val)) {
+				MAKE_NOP(opline);
+			} else {
+				opline->opcode = ZEND_JMP;
+				COPY_NODE(opline->op1, opline->op2);
+				opline->op2_type = IS_UNUSED;
+			}
+			zval_ptr_dtor_nogc(val);
+			return 1;
+		case ZEND_JMPNZ:
+			if (zend_is_true(val)) {
+				opline->opcode = ZEND_JMP;
+				COPY_NODE(opline->op1, opline->op2);
+				opline->op2_type = IS_UNUSED;
+			} else {
+				MAKE_NOP(opline);
+			}
+			zval_ptr_dtor_nogc(val);
+			return 1;
+		case ZEND_JMPZNZ:
+			if (zend_is_true(val)) {
+				target_opline = ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value);
+			} else {
+				target_opline = ZEND_OP2_JMP_ADDR(opline);
+			}
+			ZEND_SET_OP_JMP_ADDR(opline, opline->op1, target_opline);
+			opline->op1_type = IS_UNUSED;
+			opline->extended_value = 0;
+			opline->opcode = ZEND_JMP;
+			zval_ptr_dtor_nogc(val);
+			return 1;
 		case ZEND_FREE:
 			MAKE_NOP(opline);
 			zval_ptr_dtor_nogc(val);
