@@ -570,7 +570,8 @@ static inline int ct_eval_func_call(
 		int overflow;
 
 		if ((zend_string_equals_literal(name, "array_keys")
-				|| zend_string_equals_literal(name, "array_values"))
+				|| zend_string_equals_literal(name, "array_values")
+				|| zend_string_equals_literal(name, "array_flip"))
 				&& num_args == 1
 				&& Z_TYPE_P(args[0]) == IS_ARRAY) {
 			/* pass */
@@ -584,7 +585,10 @@ static inline int ct_eval_func_call(
 		} else if ((zend_string_equals_literal(name, "array_merge")
 				|| zend_string_equals_literal(name, "array_replace")
 				|| zend_string_equals_literal(name, "array_merge_recursive")
-				|| zend_string_equals_literal(name, "array_merge_recursive"))
+				|| zend_string_equals_literal(name, "array_merge_recursive")
+				|| zend_string_equals_literal(name, "array_diff")
+				|| zend_string_equals_literal(name, "array_diff_assoc")
+				|| zend_string_equals_literal(name, "array_diff_key"))
 				&& num_args > 0) {
 			for (i = 0; i < num_args; i++) {
 				if (Z_TYPE_P(args[i]) != IS_ARRAY) {
@@ -611,6 +615,11 @@ static inline int ct_eval_func_call(
 					}
 				} ZEND_HASH_FOREACH_END();
 			}
+			/* pass */
+		} else if (zend_string_equals_literal(name, "version_comapre")
+			&& (num_args == 2 || (num_args == 3 && Z_TYPE_P(args[2]) == IS_STRING))
+			&& Z_TYPE_P(args[0]) == IS_STRING
+			&& Z_TYPE_P(args[1]) == IS_STRING) {
 			/* pass */
 		} else {
 			return FAILURE;
