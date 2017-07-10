@@ -72,7 +72,6 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 	}
 
 	rt->days = fabs(floor((one->sse - two->sse - (dst_h_corr * 3600) - (dst_m_corr * 60)) / 86400));
-
 	timelib_do_rel_normalize(rt->invert ? one : two, rt);
 
 	/* We need to do this after normalisation otherwise we can't get "24H" */
@@ -83,6 +82,10 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 		} else {
 			rt->h += dst_h_corr;
 			rt->i += dst_m_corr;
+		}
+		// because of adding DST correlation there could be negative values which need to be normalized.
+		if (rt->d < 0 || rt->h < 0 || rt->i < 0) {
+			timelib_do_rel_normalize(rt->invert ? one : two, rt);
 		}
 	}
 
