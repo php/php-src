@@ -419,6 +419,12 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               4.0.2
 -------------------------------------------------------------------------------
+EXTENSION:           sodium
+PRIMARY MAINTAINER:  Frank Denis <jedisct1@php.net>
+MAINTENANCE:         Maintained
+STATUS:              Working
+SINCE:               7.2.0
+-------------------------------------------------------------------------------
 EXTENSION:           spl
 PRIMARY MAINTAINER:  Marcus Boerger <helly@php.net>, Etienne Kneuss <colder@php.net>
 MAINTENANCE:         Maintained
