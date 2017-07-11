@@ -2,7 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.1.9
 
-
+- Session:
+  . Fixed bug #74892 (Url Rewriting (trans_sid) not working on urls that start
+    with "#"). (Andrew Nester)
 
 03 Aug 2017, PHP 7.1.8
 
