@@ -37,6 +37,9 @@ PHP                                                                        NEWS
   . Fixed bug #72324 (imap_mailboxmsginfo() return wrong size). 
     (ronaldpoon at udomain dot com dot hk, Kalle)
 
+- LDAP:
+  . Fixed passing an empty array to ldap_set_option for client or server controls.
+
 - OpenSSL:
   . Fixed bug #74651 (negative-size-param (-1) in memcpy in zif_openssl_seal()).
     (Stas)
@@ -77,7 +80,7 @@ PHP                                                                        NEWS
     (Anatol)
 
 - LDAP:
-  . Fixed bug #69445 (Support for LDAP EXOP operations)
+  . Implemented FR #69445 (Support for LDAP EXOP operations)
   . Fixed support for LDAP_OPT_SERVER_CONTROLS and LDAP_OPT_CLIENT_CONTROLS in ldap_get_option
 
 - OpenSSL:
