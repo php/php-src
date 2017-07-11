@@ -4,34 +4,31 @@ Check for libsodium-based key exchange
 <?php if (!extension_loaded("sodium")) print "skip"; ?>
 --FILE--
 <?php
-$client_secretkey = sodium_hex2bin("8520f0098930a754748b7ddcb43ef75a0dbf3a0d26381af4eba4a98eaa9b4e6a");
-$client_publickey = sodium_crypto_box_publickey_from_secretkey($client_secretkey);
+$client_seed = sodium_hex2bin('0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef');
+$client_keypair = sodium_crypto_kx_seed_keypair($client_seed);
+$server_seed = sodium_hex2bin('f123456789abcdef0123456789abcdef0123456789abcdef0123456789abcde0');
+$server_keypair = sodium_crypto_kx_seed_keypair($server_seed);
 
-$server_secretkey = sodium_hex2bin("948f00e90a246fb5909f8648c2ac6f21515771235523266439e0d775ba0c3671");
-$server_publickey = sodium_crypto_box_publickey_from_secretkey($server_secretkey);
+var_dump(sodium_bin2hex($client_keypair));
+var_dump(sodium_bin2hex($server_keypair));
 
-$shared_key_computed_by_client =
-  sodium_crypto_kx($client_secretkey, $server_publickey,
-					$client_publickey, $server_publickey);
+$client_session_keys =
+  sodium_crypto_kx_client_session_keys($client_keypair,
+    sodium_crypto_kx_publickey($server_keypair));
 
-$shared_key_computed_by_server =
-  sodium_crypto_kx($server_secretkey, $client_publickey,
-					$client_publickey, $server_publickey);
+$server_session_keys =
+  sodium_crypto_kx_server_session_keys($server_keypair,
+    sodium_crypto_kx_publickey($client_keypair));
 
-var_dump(sodium_bin2hex($shared_key_computed_by_client));
-var_dump(sodium_bin2hex($shared_key_computed_by_server));
-try {
-	sodium_crypto_kx(
-		substr($client_secretkey, 1),
-		$server_publickey,
-		$client_publickey,
-		$server_publickey
-	);
-} catch (SodiumException $ex) {
-	var_dump(true);
-}
+var_dump(sodium_bin2hex($client_session_keys[0]));
+var_dump(sodium_bin2hex($server_session_keys[1]));
+var_dump(sodium_bin2hex($client_session_keys[1]));
+var_dump(sodium_bin2hex($server_session_keys[0]));
 ?>
 --EXPECT--
-string(64) "509a1580c2ee30c565317e29e0fea0b1c232e0ef3a7871d91dc64814b19a3bd2"
-string(64) "509a1580c2ee30c565317e29e0fea0b1c232e0ef3a7871d91dc64814b19a3bd2"
-bool(true)
+string(128) "b85c84f9828524519d32b97cd3dda961fdba2dbf407ae4601e2129229aa463c224eaf70f070a925d6d5176f20495d4d90867624d9a10379e2a9aef0955c9bf4e"
+string(128) "016e814c32b8b66225a403db45bf50fdd1966fb802c3115bf8aa90738c6a02de420ccdb534930fed9aaff12188bedc76e66251f399c404f2e4a15678fd4a484a"
+string(64) "99a430e61d718b71979ebcea6735c4648bc828cfb456890aeda4b628b77d5ac7"
+string(64) "99a430e61d718b71979ebcea6735c4648bc828cfb456890aeda4b628b77d5ac7"
+string(64) "876bef865a5ab3f4ae569ea5aaefe5014c3ec22a558c0a2f0274aa9985bd328d"
+string(64) "876bef865a5ab3f4ae569ea5aaefe5014c3ec22a558c0a2f0274aa9985bd328d"
