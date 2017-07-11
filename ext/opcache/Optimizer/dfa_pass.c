@@ -153,6 +153,7 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa)
 					if (i != target) {
 						op_array->opcodes[target] = op_array->opcodes[i];
 						ssa->ops[target] = ssa->ops[i];
+						ssa->cfg.map[target] = b - blocks;
 					}
 					target++;
 				}
