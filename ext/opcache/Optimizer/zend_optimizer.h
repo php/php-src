@@ -37,8 +37,8 @@
 #define ZEND_OPTIMIZER_PASS_10		(1<<9)   /* NOP removal                 */
 #define ZEND_OPTIMIZER_PASS_11		(1<<10)  /* Merge equal constants       */
 #define ZEND_OPTIMIZER_PASS_12		(1<<11)  /* Adjust used stack           */
-#define ZEND_OPTIMIZER_PASS_13		(1<<12)
-#define ZEND_OPTIMIZER_PASS_14		(1<<13)
+#define ZEND_OPTIMIZER_PASS_13		(1<<12)  /* Remove unused variables     */
+#define ZEND_OPTIMIZER_PASS_14		(1<<13)  /* DCE (dead code elimination) */
 #define ZEND_OPTIMIZER_PASS_15		(1<<14)  /* Collect constants */
 #define ZEND_OPTIMIZER_PASS_16		(1<<15)  /* Inline functions */
 
@@ -78,6 +78,7 @@
 #define ZEND_DUMP_DFA_SSA           (1<<27)
 #define ZEND_DUMP_DFA_SSA_VARS      (1<<28)
 #define ZEND_DUMP_AFTER_SCCP_PASS   (1<<29)
+#define ZEND_DUMP_AFTER_DCE_PASS    (1<<30)
 
 typedef struct _zend_script {
 	zend_string   *filename;

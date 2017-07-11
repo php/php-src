@@ -1450,6 +1450,135 @@ void zend_ssa_remove_block(zend_op_array *op_array, zend_ssa *ssa, int i) /* {{{
 }
 /* }}} */
 
+static void propagate_phi_type_widening(zend_ssa *ssa, int var) /* {{{ */
+{
+	zend_ssa_phi *phi;
+	FOREACH_PHI_USE(&ssa->vars[var], phi) {
+		if (ssa->var_info[var].type & ~ssa->var_info[phi->ssa_var].type) {
+			ssa->var_info[phi->ssa_var].type |= ssa->var_info[var].type;
+			propagate_phi_type_widening(ssa, phi->ssa_var);
+		}
+	} FOREACH_PHI_USE_END();
+}
+/* }}} */
+
+void zend_ssa_rename_var_uses(zend_ssa *ssa, int old, int new, zend_bool update_types) /* {{{ */
+{
+	zend_ssa_var *old_var = &ssa->vars[old];
+	zend_ssa_var *new_var = &ssa->vars[new];
+	int use;
+	zend_ssa_phi *phi;
+
+	ZEND_ASSERT(old >= 0 && new >= 0);
+	ZEND_ASSERT(old != new);
+
+	/* Only a no_val is both variables are */
+	new_var->no_val &= old_var->no_val;
+
+	/* Update ssa_op use chains */
+	FOREACH_USE(old_var, use) {
+		zend_ssa_op *ssa_op = &ssa->ops[use];
+
+		/* If the op already uses the new var, don't add the op to the use
+		 * list again. Instead move the use_chain to the correct operand. */
+		zend_bool add_to_use_chain = 1;
+		if (ssa_op->result_use == new) {
+			add_to_use_chain = 0;
+		} else if (ssa_op->op1_use == new) {
+			if (ssa_op->result_use == old) {
+				ssa_op->res_use_chain = ssa_op->op1_use_chain;
+				ssa_op->op1_use_chain = -1;
+			}
+			add_to_use_chain = 0;
+		} else if (ssa_op->op2_use == new) {
+			if (ssa_op->result_use == old) {
+				ssa_op->res_use_chain = ssa_op->op2_use_chain;
+				ssa_op->op2_use_chain = -1;
+			} else if (ssa_op->op1_use == old) {
+				ssa_op->op1_use_chain = ssa_op->op2_use_chain;
+				ssa_op->op2_use_chain = -1;
+			}
+			add_to_use_chain = 0;
+		}
+
+		/* Perform the actual renaming */
+		if (ssa_op->result_use == old) {
+			ssa_op->result_use = new;
+		}
+		if (ssa_op->op1_use == old) {
+			ssa_op->op1_use = new;
+		}
+		if (ssa_op->op2_use == old) {
+			ssa_op->op2_use = new;
+		}
+
+		/* Add op to use chain of new var (if it isn't already). We use the
+		 * first use chain of (result, op1, op2) that has the new variable. */
+		if (add_to_use_chain) {
+			if (ssa_op->result_use == new) {
+				ssa_op->res_use_chain = new_var->use_chain;
+				new_var->use_chain = use;
+			} else if (ssa_op->op1_use == new) {
+				ssa_op->op1_use_chain = new_var->use_chain;
+				new_var->use_chain = use;
+			} else {
+				ZEND_ASSERT(ssa_op->op2_use == new);
+				ssa_op->op2_use_chain = new_var->use_chain;
+				new_var->use_chain = use;
+			}
+		}
+	} FOREACH_USE_END();
+	old_var->use_chain = -1;
+
+	/* Update phi use chains */
+	FOREACH_PHI_USE(old_var, phi) {
+		int j;
+		zend_bool after_first_new_source = 0;
+
+		/* If the phi already uses the new var, find its use chain, as we may
+		 * need to move it to a different source operand. */
+		zend_ssa_phi **existing_use_chain_ptr = NULL;
+		for (j = 0; j < ssa->cfg.blocks[phi->block].predecessors_count; j++) {
+			if (phi->sources[j] == new) {
+				existing_use_chain_ptr = &phi->use_chains[j];
+				break;
+			}
+		}
+
+		for (j = 0; j < ssa->cfg.blocks[phi->block].predecessors_count; j++) {
+			if (phi->sources[j] == new) {
+				after_first_new_source = 1;
+			} else if (phi->sources[j] == old) {
+				phi->sources[j] = new;
+
+				/* Either move existing use chain to this source, or add the phi
+				 * to the phi use chain of the new variables. Do this only once. */
+				if (!after_first_new_source) {
+					if (existing_use_chain_ptr) {
+						phi->use_chains[j] = *existing_use_chain_ptr;
+						*existing_use_chain_ptr = NULL;
+					} else {
+						phi->use_chains[j] = new_var->phi_use_chain;
+						new_var->phi_use_chain = phi;
+					}
+					after_first_new_source = 1;
+				}
+			}
+		}
+
+		/* Make sure phi result types are not incorrectly narrow after renaming.
+		 * This should not normally happen, but can occur if we DCE an assignment
+		 * or unset and there is an improper phi-indirected use lateron. */
+		// TODO Alternatively we could rerun type-inference after DCE
+		if (update_types && (ssa->var_info[new].type & ~ssa->var_info[phi->ssa_var].type)) {
+			ssa->var_info[phi->ssa_var].type |= ssa->var_info[new].type;
+			propagate_phi_type_widening(ssa, phi->ssa_var);
+		}
+	} FOREACH_PHI_USE_END();
+	old_var->phi_use_chain = NULL;
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4

@@ -1068,6 +1068,15 @@ static void zend_optimize(zend_op_array      *op_array,
 		}
 	}
 
+	if ((ZEND_OPTIMIZER_PASS_13 & ctx->optimization_level) &&
+	    (!(ZEND_OPTIMIZER_PASS_6 & ctx->optimization_level) ||
+	     !(ZEND_OPTIMIZER_PASS_7 & ctx->optimization_level))) {
+		zend_optimizer_compact_vars(op_array);
+		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_13) {
+			zend_dump_op_array(op_array, 0, "after pass 13", NULL);
+		}
+	}
+
 	if (ZEND_OPTIMIZER_PASS_7 & ctx->optimization_level) {
 		return;
 	}
@@ -1279,6 +1288,15 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level, zend
 				zend_optimizer_compact_literals(call_graph.op_arrays[i], &ctx);
 				if (debug_level & ZEND_DUMP_AFTER_PASS_11) {
 					zend_dump_op_array(call_graph.op_arrays[i], 0, "after pass 11", NULL);
+				}
+			}
+		}
+
+		if (ZEND_OPTIMIZER_PASS_13 & optimization_level) {
+			for (i = 0; i < call_graph.op_arrays_count; i++) {
+				zend_optimizer_compact_vars(call_graph.op_arrays[i]);
+				if (debug_level & ZEND_DUMP_AFTER_PASS_13) {
+					zend_dump_op_array(call_graph.op_arrays[i], 0, "after pass 13", NULL);
 				}
 			}
 		}
