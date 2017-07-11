@@ -240,7 +240,7 @@ static zend_always_inline zend_bool zend_ssa_is_no_val_use(const zend_op *opline
 	zend_ssa_phi *_phi = (phi); \
 	int _i, _end = NUM_PHI_SOURCES(phi); \
 	for (_i = 0; _i < _end; _i++) { \
-		if (_phi->sources[_i] < 0) continue; \
+		ZEND_ASSERT(_phi->sources[_i] >= 0); \
 		source = _phi->sources[_i];
 #define FOREACH_PHI_SOURCE_END() \
 	} \

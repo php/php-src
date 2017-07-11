@@ -1192,13 +1192,14 @@ static void sccp_visit_phi(scdf_ctx *scdf, zend_ssa_phi *phi) {
 		MAKE_TOP(&result);
 		SCP_DEBUG("Handling PHI(");
 		if (phi->pi >= 0) {
-			if (phi->sources[0] >= 0 && scdf_is_edge_feasible(scdf, phi->pi, phi->block)) {
+			ZEND_ASSERT(phi->sources[0] >= 0);
+			if (scdf_is_edge_feasible(scdf, phi->pi, phi->block)) {
 				join_phi_values(&result, &ctx->values[phi->sources[0]]);
 			}
 		} else {
 			for (i = 0; i < block->predecessors_count; i++) {
-				if (phi->sources[i] >= 0
-						&& scdf_is_edge_feasible(scdf, predecessors[i], phi->block)) {
+				ZEND_ASSERT(phi->sources[i] >= 0);
+				if (scdf_is_edge_feasible(scdf, predecessors[i], phi->block)) {
 					SCP_DEBUG("val, ");
 					join_phi_values(&result, &ctx->values[phi->sources[i]]);
 				} else {

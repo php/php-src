@@ -1061,15 +1061,16 @@ int zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_array *op_
 			ssa_vars[phi->ssa_var].var = phi->var;
 			ssa_vars[phi->ssa_var].definition_phi = phi;
 			if (phi->pi >= 0) {
-				if (phi->sources[0] >= 0) {
-					zend_ssa_phi *p = ssa_vars[phi->sources[0]].phi_use_chain;
-					while (p && p != phi) {
-						p = zend_ssa_next_use_phi(ssa, phi->sources[0], p);
-					}
-					if (!p) {
-						phi->use_chains[0] = ssa_vars[phi->sources[0]].phi_use_chain;
-						ssa_vars[phi->sources[0]].phi_use_chain = phi;
-					}
+				zend_ssa_phi *p;
+
+				ZEND_ASSERT(phi->sources[0] >= 0);
+				p = ssa_vars[phi->sources[0]].phi_use_chain;
+				while (p && p != phi) {
+					p = zend_ssa_next_use_phi(ssa, phi->sources[0], p);
+				}
+				if (!p) {
+					phi->use_chains[0] = ssa_vars[phi->sources[0]].phi_use_chain;
+					ssa_vars[phi->sources[0]].phi_use_chain = phi;
 				}
 				if (phi->has_range_constraint) {
 					/* min and max variables can't be used together */
@@ -1086,15 +1087,16 @@ int zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_array *op_
 				int j;
 
 				for (j = 0; j < ssa->cfg.blocks[i].predecessors_count; j++) {
-					if (phi->sources[j] >= 0) {
-						zend_ssa_phi *p = ssa_vars[phi->sources[j]].phi_use_chain;
-						while (p && p != phi) {
-							p = zend_ssa_next_use_phi(ssa, phi->sources[j], p);
-						}
-						if (!p) {
-							phi->use_chains[j] = ssa_vars[phi->sources[j]].phi_use_chain;
-							ssa_vars[phi->sources[j]].phi_use_chain = phi;
-						}
+					zend_ssa_phi *p;
+
+					ZEND_ASSERT(phi->sources[j] >= 0);
+					p = ssa_vars[phi->sources[j]].phi_use_chain;
+					while (p && p != phi) {
+						p = zend_ssa_next_use_phi(ssa, phi->sources[j], p);
+					}
+					if (!p) {
+						phi->use_chains[j] = ssa_vars[phi->sources[j]].phi_use_chain;
+						ssa_vars[phi->sources[j]].phi_use_chain = phi;
 					}
 				}
 			}
@@ -1315,9 +1317,6 @@ void zend_ssa_remove_uses_of_var(zend_ssa *ssa, int var_num) /* {{{ */
 		int i, end = NUM_PHI_SOURCES(phi);
 		for (i = 0; i < end; i++) {
 			if (phi->sources[i] == var_num) {
-#if 0
-				phi->sources[i] = -1;
-#endif
 				phi->use_chains[i] = NULL;
 			}
 		}
@@ -1395,9 +1394,8 @@ void zend_ssa_remove_block(zend_op_array *op_array, zend_ssa *ssa, int i) /* {{{
 					zend_ssa_remove_phi(ssa, phi);
 				}
 			} else {
-				if (phi->sources[pred_offset] >= 0) {
-					zend_ssa_remove_phi_source(ssa, phi, pred_offset, next_block->predecessors_count);
-				}
+				ZEND_ASSERT(phi->sources[pred_offset] >= 0);
+				zend_ssa_remove_phi_source(ssa, phi, pred_offset, next_block->predecessors_count);
 			}
 		}
 
