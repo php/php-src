@@ -10,6 +10,7 @@ PHP                                                                        NEWS
   . Fixed bug #74761 (Unary operator expected error on some systems). (petk)
   . Fixed bug #73900 (Use After Free in unserialize() SplFixedArray). (nikic)
   . Fixed bug #74913 (fixed incorrect poll.h include). (petk)
+  . Fixed bug #74906 (fixed incorrect errno.h include). (petk)
 
 - Date:
   . Fixed bug #74852 (property_exists returns true on unknown DateInterval 
