@@ -23,10 +23,11 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "php_libsodium.h"
 #include "zend_exceptions.h"
 
 #include <sodium.h>
+#include "php_libsodium.h"
+
 #include <stdint.h>
 
 #define PHP_SODIUM_ZSTR_TRUNCATE(zs, len) do { ZSTR_LEN(zs) = (len); } while(0)
