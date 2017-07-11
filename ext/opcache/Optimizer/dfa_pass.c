@@ -87,7 +87,7 @@ int zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, 
 	}
 
 	if (ctx->debug_level & ZEND_DUMP_DFA_SSA) {
-		zend_dump_op_array(op_array, ZEND_DUMP_SSA, "before dfa pass", ssa);
+		zend_dump_op_array(op_array, ZEND_DUMP_SSA, "dfa ssa", ssa);
 	}
 
 
