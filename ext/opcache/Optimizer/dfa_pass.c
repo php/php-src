@@ -608,24 +608,28 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 
 // op_1: ASSIGN #orig_var.CV [undef,scalar] -> #v.CV, CONST|TMPVAR => QM_ASSIGN v.CV, CONST|TMPVAR
 
-						if (zend_ssa_unlink_use_chain(ssa, op_1, orig_var)) {
-							/* Reconstruct SSA */
-							ssa->ops[op_1].result_def = v;
-							ssa->ops[op_1].op1_def = -1;
-							ssa->ops[op_1].op1_use = ssa->ops[op_1].op2_use;
-							ssa->ops[op_1].op1_use_chain = ssa->ops[op_1].op2_use_chain;
-							ssa->ops[op_1].op2_use = -1;
-							ssa->ops[op_1].op2_use_chain = -1;
-
-							/* Update opcode */
-							opline->result_type = opline->op1_type;
-							opline->result.var = opline->op1.var;
-							opline->op1_type = opline->op2_type;
-							opline->op1.var = opline->op2.var;
-							opline->op2_type = IS_UNUSED;
-							opline->op2.var = 0;
-							opline->opcode = ZEND_QM_ASSIGN;
+						if (ssa->ops[op_1].op1_use != ssa->ops[op_1].op2_use) {
+							ZEND_ASSERT(zend_ssa_unlink_use_chain(ssa, op_1, orig_var));
+						} else {
+							ssa->ops[op_1].op2_use_chain = ssa->ops[op_1].op1_use_chain;
 						}
+
+						/* Reconstruct SSA */
+						ssa->ops[op_1].result_def = v;
+						ssa->ops[op_1].op1_def = -1;
+						ssa->ops[op_1].op1_use = ssa->ops[op_1].op2_use;
+						ssa->ops[op_1].op1_use_chain = ssa->ops[op_1].op2_use_chain;
+						ssa->ops[op_1].op2_use = -1;
+						ssa->ops[op_1].op2_use_chain = -1;
+
+						/* Update opcode */
+						opline->result_type = opline->op1_type;
+						opline->result.var = opline->op1.var;
+						opline->op1_type = opline->op2_type;
+						opline->op1.var = opline->op2.var;
+						opline->op2_type = IS_UNUSED;
+						opline->op2.var = 0;
+						opline->opcode = ZEND_QM_ASSIGN;
 					}
 				}
 
