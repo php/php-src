@@ -1636,8 +1636,7 @@ PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256)
 							  &passwd, &passwd_len,
 							  &salt, &salt_len,
 							  &opslimit, &memlimit) == FAILURE ||
-		hash_len <= 0 || hash_len >= SIZE_MAX ||
-		opslimit <= 0 || memlimit <= 0 || memlimit > SIZE_MAX) {
+		hash_len <= 0 || opslimit <= 0 || memlimit <= 0) {
 		zend_throw_exception(sodium_exception_ce, "crypto_pwhash_scryptsalsa208sha256(): invalid parameters", 0);
 		return;
 	}
@@ -1650,11 +1649,11 @@ PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256)
 				   0);
 		return;
 	}
-	if (opslimit < crypto_pwhash_scryptsalsa208sha256_opslimit_interactive()) {
+	if ((size_t)opslimit < crypto_pwhash_scryptsalsa208sha256_opslimit_interactive()) {
 		zend_error(E_WARNING,
 				   "number of operations for the scrypt function is low");
 	}
-	if (memlimit < crypto_pwhash_scryptsalsa208sha256_memlimit_interactive()) {
+	if ((size_t)memlimit < crypto_pwhash_scryptsalsa208sha256_memlimit_interactive()) {
 		zend_error(E_WARNING,
 				   "maximum memory for the scrypt function is low");
 	}
@@ -1683,7 +1682,7 @@ PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256_str)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sll",
 							  &passwd, &passwd_len,
 							  &opslimit, &memlimit) == FAILURE ||
-		opslimit <= 0 || memlimit <= 0 || memlimit > SIZE_MAX) {
+		opslimit <= 0 || memlimit <= 0) {
 		zend_throw_exception(sodium_exception_ce,
 				   "crypto_pwhash_scryptsalsa208sha256_str(): invalid parameters",
 				   0);
@@ -1692,11 +1691,11 @@ PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256_str)
 	if (passwd_len <= 0) {
 		zend_error(E_WARNING, "empty password");
 	}
-	if (opslimit < crypto_pwhash_scryptsalsa208sha256_opslimit_interactive()) {
+	if ((size_t)opslimit < crypto_pwhash_scryptsalsa208sha256_opslimit_interactive()) {
 		zend_error(E_WARNING,
 				   "number of operations for the scrypt function is low");
 	}
-	if (memlimit < crypto_pwhash_scryptsalsa208sha256_memlimit_interactive()) {
+	if ((size_t)memlimit < crypto_pwhash_scryptsalsa208sha256_memlimit_interactive()) {
 		zend_error(E_WARNING,
 				   "maximum memory for the scrypt function is low");
 	}
@@ -1760,8 +1759,7 @@ PHP_FUNCTION(sodium_crypto_pwhash)
 							  &passwd, &passwd_len,
 							  &salt, &salt_len,
 							  &opslimit, &memlimit) == FAILURE ||
-		hash_len <= 0 || hash_len >= SIZE_MAX ||
-		opslimit <= 0 || memlimit <= 0 || memlimit > SIZE_MAX) {
+		hash_len <= 0 || opslimit <= 0 || memlimit <= 0) {
 		zend_throw_exception(sodium_exception_ce, "crypto_pwhash(): invalid parameters", 0);
 		return;
 	}
