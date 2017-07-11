@@ -646,9 +646,13 @@ int zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg) /* {{{ */
 	for (j = 0; j < cfg->blocks_count; j++) {
 		if (blocks[j].flags & ZEND_BB_REACHABLE) {
 			for (s = 0; s < blocks[j].successors_count; s++) {
-				zend_basic_block *b = blocks + blocks[j].successors[s];
-				predecessors[b->predecessor_offset + b->predecessors_count] = j;
-				b->predecessors_count++;
+				/* SWITCH_STRING/LONG may have few following identical successors */
+				if (s == 0 || blocks[j].successors[s-1] != blocks[j].successors[s]) {
+					zend_basic_block *b = blocks + blocks[j].successors[s];
+
+					predecessors[b->predecessor_offset + b->predecessors_count] = j;
+					b->predecessors_count++;
+				}
 			}
 		}
 	}
