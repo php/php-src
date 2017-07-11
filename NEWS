@@ -76,6 +76,10 @@ PHP                                                                        NEWS
   . Fixed bug #74849 (Process is started as interactive shell in PhpStorm).
     (Anatol)
 
+- LDAP:
+  . Fixed bug #69445 (Support for LDAP EXOP operations)
+  . Fixed support for LDAP_OPT_SERVER_CONTROLS and LDAP_OPT_CLIENT_CONTROLS in ldap_get_option
+
 - OpenSSL:
   . Fixed bug #74798 (pkcs7_en/decrypt does not work if \x0a is used in content).
     (Anatol)
