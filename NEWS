@@ -45,6 +45,9 @@ PHP                                                                        NEWS
   . Fixed bug #74873 (Minor BC break: PCRE_JIT changes output of preg_match()).
     (Dmitry)
 
+- Sodium:
+  . New cryptographic extension
+
 - SQLite3:
   . Fixed bug #74883 (SQLite3::__construct() produces "out of memory" exception
     with invalid flags). (Anatol)

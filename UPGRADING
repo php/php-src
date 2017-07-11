@@ -124,6 +124,9 @@ PHP 7.2 UPGRADE NOTES
     subpatterns and empty matches by reporting NULL and "" (empty string),
     respectively.
 
+- Sodium
+  . New cryptographic extension
+
 - SQLite3:
   . Implemented writing to BLOBs.
 
