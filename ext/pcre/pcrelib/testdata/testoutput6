@@ -2557,4 +2557,28 @@ No match
     \x{37e}
  0: \x{37e}
 
+/[^[:^ascii:]\d]/8W
+    a
+ 0: a
+    ~
+ 0: ~
+    0
+No match
+    \a
+ 0: \x{07}
+    \x{7f}
+ 0: \x{7f}
+    \x{389}
+No match
+    \x{20ac}
+No match
+
+/(?=.*b)\pL/
+    11bb
+ 0: b
+    
+/(?(?=.*b)(?=.*b)\pL|.*c)/
+    11bb
+ 0: b
+
 /-- End of testinput6 --/

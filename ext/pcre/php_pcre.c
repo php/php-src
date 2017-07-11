@@ -175,6 +175,10 @@ static PHP_MINFO_FUNCTION(pcre)
 	php_info_print_table_row(2, "PCRE JIT Support", "not compiled in" );
 #endif
 
+#ifdef HAVE_PCRE_VALGRIND_SUPPORT
+	php_info_print_table_row(2, "PCRE Valgrind Support", "enabled" );
+#endif
+
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();
