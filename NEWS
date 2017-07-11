@@ -54,6 +54,7 @@ PHP                                                                        NEWS
 
 - ZIP:
   . ZipArchive implements countable, added ZipArchive::count() method. (Remi)
+  . Fix segfault in php_stream_context_get_option call. (Remi)
 
 06 Jul 2017, PHP 7.2.0alpha3
 
