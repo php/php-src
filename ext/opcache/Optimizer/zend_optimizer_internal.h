@@ -115,9 +115,4 @@ zend_uchar zend_compound_assign_to_binary_op(zend_uchar opcode);
 int sccp_optimize_op_array(zend_optimizer_ctx *ctx, zend_op_array *op_arrya, zend_ssa *ssa, zend_call_info **call_map);
 int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_bool reorder_dtor_effects);
 
-static inline zend_bool zend_has_improper_op1_use(zend_op *opline) {
-	return opline->opcode == ZEND_ASSIGN
-		|| (opline->opcode == ZEND_UNSET_VAR && opline->extended_value & ZEND_QUICK_SET);
-}
-
 #endif

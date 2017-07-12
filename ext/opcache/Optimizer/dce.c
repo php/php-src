@@ -228,10 +228,10 @@ static inline void add_operands_to_worklists(context *ctx, zend_op *opline, zend
 	if (ssa_op->result_use >= 0) {
 		add_to_worklists(ctx, ssa_op->result_use);
 	}
-	if (ssa_op->op1_use >= 0 && !zend_has_improper_op1_use(opline)) {
+	if (ssa_op->op1_use >= 0 && !zend_ssa_is_no_val_use(opline, ssa_op, ssa_op->op1_use)) {
 		add_to_worklists(ctx, ssa_op->op1_use);
 	}
-	if (ssa_op->op2_use >= 0) {
+	if (ssa_op->op2_use >= 0 && !zend_ssa_is_no_val_use(opline, ssa_op, ssa_op->op2_use)) {
 		add_to_worklists(ctx, ssa_op->op2_use);
 	}
 }
@@ -501,9 +501,11 @@ int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_bool reor
 	/* Improper uses don't count as "uses" for the purpose of instruction elimination,
 	 * but we have to retain phis defining them. Push those phis to the worklist. */
 	FOREACH_INSTR_NUM(i) {
-		if (zend_has_improper_op1_use(&op_array->opcodes[i])) {
-			ZEND_ASSERT(ssa->ops[i].op1_use >= 0);
+		if (ssa->ops[i].op1_use >= 0 && zend_ssa_is_no_val_use(&op_array->opcodes[i], &ssa->ops[i], ssa->ops[i].op1_use)) {
 			add_to_phi_worklist_only(&ctx, ssa->ops[i].op1_use);
+		}
+		if (ssa->ops[i].op2_use >= 0 && zend_ssa_is_no_val_use(&op_array->opcodes[i], &ssa->ops[i], ssa->ops[i].op2_use)) {
+			add_to_phi_worklist_only(&ctx, ssa->ops[i].op2_use);
 		}
 	} FOREACH_INSTR_NUM_END();
 
