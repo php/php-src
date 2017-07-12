@@ -4455,7 +4455,7 @@ PHP_FUNCTION(exif_read_data)
 		convert_to_string(stream);
 
 		if (!Z_STRLEN_P(stream)) {
-			exif_error_docref(NULL, EXIFERR_CC, &ImageInfo, E_WARNING, "Filename cannot be empty");
+			exif_error_docref(NULL EXIFERR_CC, &ImageInfo, E_WARNING, "Filename cannot be empty");
 
 			RETURN_FALSE;
 		}
