@@ -465,7 +465,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 					remove_nops = 1;
 				}
 			}
-			if (ctx->debug_level & ZEND_DUMP_AFTER_SCCP_PASS) {
+			if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_8) {
 				zend_dump_op_array(op_array, ZEND_DUMP_SSA, "after sccp pass", ssa);
 			}
 		}

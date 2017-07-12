@@ -105,4 +105,30 @@ Starting chars: S s \xff
     SSss\x{17f}
  0: SSss\x{17f}
 
+/[\D]/8
+    \x{1d7cf}
+ 0: \x{1d7cf}
+
+/[\D\P{Nd}]/8
+    \x{1d7cf}
+ 0: \x{1d7cf}
+
+/[^\D]/8
+    a9b
+ 0: 9
+    ** Failers
+No match
+    \x{1d7cf}
+No match
+
+/[^\D\P{Nd}]/8
+    a9b
+ 0: 9
+    \x{1d7cf}
+ 0: \x{1d7cf}
+    ** Failers
+No match
+    \x{10000}
+No match
+
 /-- End of testinput19 --/ 

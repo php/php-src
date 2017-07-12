@@ -21,6 +21,8 @@ PHP                                                                        NEWS
     (Andreas Treichel)
 
 - EXIF:
+  . Implemented #65187 (exif_read_data/thumbnail: add support for stream 
+    resource). (Kalle)
   . Deprecated the read_exif_data() alias. (Kalle)
   . Fixed bug #74428 (exif_read_data(): "Illegal IFD size" warning occurs with 
     correct exif format). (bradpiccho at gmail dot com, Kalle)
@@ -37,6 +39,9 @@ PHP                                                                        NEWS
   . Fixed bug #72324 (imap_mailboxmsginfo() return wrong size). 
     (ronaldpoon at udomain dot com dot hk, Kalle)
 
+- LDAP:
+  . Fixed passing an empty array to ldap_set_option for client or server controls.
+
 - OpenSSL:
   . Fixed bug #74651 (negative-size-param (-1) in memcpy in zif_openssl_seal()).
     (Stas)
@@ -45,12 +50,16 @@ PHP                                                                        NEWS
   . Fixed bug #74873 (Minor BC break: PCRE_JIT changes output of preg_match()).
     (Dmitry)
 
+- Sodium:
+  . New cryptographic extension
+
 - SQLite3:
   . Fixed bug #74883 (SQLite3::__construct() produces "out of memory" exception
     with invalid flags). (Anatol)
 
 - ZIP:
   . ZipArchive implements countable, added ZipArchive::count() method. (Remi)
+  . Fix segfault in php_stream_context_get_option call. (Remi)
 
 06 Jul 2017, PHP 7.2.0alpha3
 
@@ -71,6 +80,10 @@ PHP                                                                        NEWS
 - CLI:
   . Fixed bug #74849 (Process is started as interactive shell in PhpStorm).
     (Anatol)
+
+- LDAP:
+  . Implemented FR #69445 (Support for LDAP EXOP operations)
+  . Fixed support for LDAP_OPT_SERVER_CONTROLS and LDAP_OPT_CLIENT_CONTROLS in ldap_get_option
 
 - OpenSSL:
   . Fixed bug #74798 (pkcs7_en/decrypt does not work if \x0a is used in content).

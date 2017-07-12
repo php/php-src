@@ -77,7 +77,6 @@
 #define ZEND_DUMP_DFA_PHI           (1<<26)
 #define ZEND_DUMP_DFA_SSA           (1<<27)
 #define ZEND_DUMP_DFA_SSA_VARS      (1<<28)
-#define ZEND_DUMP_AFTER_SCCP_PASS   (1<<29)
 #define ZEND_DUMP_AFTER_DCE_PASS    (1<<30)
 
 typedef struct _zend_script {

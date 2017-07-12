@@ -1,7 +1,7 @@
 /*
  *    Stack-less Just-In-Time compiler
  *
- *    Copyright 2009-2012 Zoltan Herczeg (hzmester@freemail.hu). All rights reserved.
+ *    Copyright Zoltan Herczeg (hzmester@freemail.hu). All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are
  * permitted provided that the following conditions are met:
@@ -86,7 +86,7 @@ static SLJIT_INLINE void* alloc_chunk(sljit_uw size)
 	return VirtualAlloc(NULL, size, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
 }
 
-static SLJIT_INLINE void free_chunk(void* chunk, sljit_uw size)
+static SLJIT_INLINE void free_chunk(void *chunk, sljit_uw size)
 {
 	SLJIT_UNUSED_ARG(size);
 	VirtualFree(chunk, 0, MEM_RELEASE);
@@ -96,7 +96,7 @@ static SLJIT_INLINE void free_chunk(void* chunk, sljit_uw size)
 
 static SLJIT_INLINE void* alloc_chunk(sljit_uw size)
 {
-	void* retval;
+	void *retval;
 
 #ifdef MAP_ANON
 	retval = mmap(NULL, size, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANON, -1, 0);
@@ -111,7 +111,7 @@ static SLJIT_INLINE void* alloc_chunk(sljit_uw size)
 	return (retval != MAP_FAILED) ? retval : NULL;
 }
 
-static SLJIT_INLINE void free_chunk(void* chunk, sljit_uw size)
+static SLJIT_INLINE void free_chunk(void *chunk, sljit_uw size)
 {
 	munmap(chunk, size);
 }
@@ -137,10 +137,10 @@ struct free_block {
 };
 
 #define AS_BLOCK_HEADER(base, offset) \
-	((struct block_header*)(((sljit_ub*)base) + offset))
+	((struct block_header*)(((sljit_u8*)base) + offset))
 #define AS_FREE_BLOCK(base, offset) \
-	((struct free_block*)(((sljit_ub*)base) + offset))
-#define MEM_START(base)		((void*)(((sljit_ub*)base) + sizeof(struct block_header)))
+	((struct free_block*)(((sljit_u8*)base) + offset))
+#define MEM_START(base)		((void*)(((sljit_u8*)base) + sizeof(struct block_header)))
 #define ALIGN_SIZE(size)	(((size) + sizeof(struct block_header) + 7) & ~7)
 
 static struct free_block* free_blocks;
@@ -153,7 +153,7 @@ static SLJIT_INLINE void sljit_insert_free_block(struct free_block *free_block, 
 	free_block->size = size;
 
 	free_block->next = free_blocks;
-	free_block->prev = 0;
+	free_block->prev = NULL;
 	if (free_blocks)
 		free_blocks->prev = free_block;
 	free_blocks = free_block;
@@ -180,8 +180,8 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_malloc_exec(sljit_uw size)
 	sljit_uw chunk_size;
 
 	allocator_grab_lock();
-	if (size < sizeof(struct free_block))
-		size = sizeof(struct free_block);
+	if (size < (64 - sizeof(struct block_header)))
+		size = (64 - sizeof(struct block_header));
 	size = ALIGN_SIZE(size);
 
 	free_block = free_blocks;
