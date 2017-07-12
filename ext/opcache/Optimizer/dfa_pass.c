@@ -32,7 +32,7 @@
 #include "zend_dump.h"
 
 #ifndef ZEND_DEBUG_DFA
-# define ZEND_DEBUG_DFA 0
+# define ZEND_DEBUG_DFA ZEND_DEBUG
 #endif
 
 #if ZEND_DEBUG_DFA
