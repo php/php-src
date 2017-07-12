@@ -22,6 +22,13 @@ echo Updating dependencies in %DEPS_DIR%
 cmd /c phpsdk_deps --update --no-backup --branch %BRANCH% --stability %STABILITY% --deps %DEPS_DIR%
 if %errorlevel% neq 0 exit /b 3
 
+rem Something went wrong, most likely when concurrent builds were to fetch deps
+rem updates. It might be, that some locking mechanism is needed.
+if not exist "%DEPS_DIR%" (
+	cmd /c phpsdk_deps --update --force --no-backup --branch %BRANCH% --stability %STABILITY% --deps %DEPS_DIR%
+)
+if %errorlevel% neq 0 exit /b 3
+
 cmd /c buildconf.bat --force
 if %errorlevel% neq 0 exit /b 3
 
