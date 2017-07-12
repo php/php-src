@@ -69,13 +69,9 @@ static inline zend_bool is_bad_mod(const zend_ssa *ssa, int use, int def) {
 }
 
 static inline zend_bool may_have_side_effects(
-		const context *ctx, const zend_op *opline, const zend_ssa_op *ssa_op) {
-	zend_op_array *op_array = ctx->op_array;
-	zend_ssa *ssa = ctx->ssa;
-	if (zend_may_throw(opline, op_array, ssa)) {
-		return 1;
-	}
-
+		zend_op_array *op_array, zend_ssa *ssa,
+		const zend_op *opline, const zend_ssa_op *ssa_op,
+		zend_bool reorder_dtor_effects) {
 	switch (opline->opcode) {
 		case ZEND_NOP:
 		case ZEND_IS_IDENTICAL:
@@ -154,15 +150,10 @@ static inline zend_bool may_have_side_effects(
 			return 1;
 		case ZEND_ASSIGN:
 		{
-			uint32_t t1 = OP1_INFO();
 			if (is_bad_mod(ssa, ssa_op->op1_use, ssa_op->op1_def)) {
 				return 1;
 			}
-			if (!ctx->reorder_dtor_effects) {
-				if (t1 & MAY_HAVE_DTOR) {
-					/* DCE might extend lifetime */
-					return 1;
-				}
+			if (!reorder_dtor_effects) {
 				if (opline->op2_type != IS_CONST && (OP2_INFO() & MAY_HAVE_DTOR)) {
 					/* DCE might shorten lifetime */
 					return 1;
@@ -181,10 +172,6 @@ static inline zend_bool may_have_side_effects(
 				 * an unset may be considered dead even if there is a later assignment to the
 				 * variable. Removing the unset in this case would not be correct if the variable
 				 * is a reference, because unset breaks references. */
-				return 1;
-			}
-			if (!ctx->reorder_dtor_effects && (t1 & MAY_HAVE_DTOR)) {
-				/* DCE might extend lifetime */
 				return 1;
 			}
 			return 0;
@@ -481,7 +468,9 @@ int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_bool reor
 
 	/* Mark instruction with side effects as live */
 	FOREACH_INSTR_NUM(i) {
-		if (may_have_side_effects(&ctx, &op_array->opcodes[i], &ssa->ops[i]) || has_varargs) {
+		if (may_have_side_effects(op_array, ssa, &op_array->opcodes[i], &ssa->ops[i], ctx.reorder_dtor_effects)
+				|| zend_may_throw(&op_array->opcodes[i], op_array, ssa)
+				|| has_varargs) {
 			zend_bitset_excl(ctx.instr_dead, i);
 			add_operands_to_worklists(&ctx, &op_array->opcodes[i], &ssa->ops[i]);
 		}
