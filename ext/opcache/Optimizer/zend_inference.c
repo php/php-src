@@ -4172,6 +4172,8 @@ int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa
 			return (opline->op2_type != IS_UNUSED) && (t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
 		case ZEND_STRLEN:
 			return (t1 & MAY_BE_ANY) != MAY_BE_STRING;
+		case ZEND_COUNT:
+			return (t1 & MAY_BE_ANY) != MAY_BE_ARRAY;
 		case ZEND_RECV_INIT:
 			if (Z_CONSTANT_P(CRT_CONSTANT_EX(op_array, opline->op2, ssa->rt_constants))) {
 				return 1;
@@ -4191,6 +4193,8 @@ int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa
 			} else {
 				return 0;
 			}
+		case ZEND_FETCH_IS:
+			return (t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT));
 		case ZEND_ISSET_ISEMPTY_DIM_OBJ:
 		case ZEND_FETCH_DIM_IS:
 			return (t1 & MAY_BE_OBJECT) || (t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT));

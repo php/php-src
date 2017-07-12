@@ -108,6 +108,15 @@ static inline zend_bool may_have_side_effects(
 		case ZEND_ROPE_END:
 		case ZEND_INIT_ARRAY:
 		case ZEND_ADD_ARRAY_ELEMENT:
+		case ZEND_SPACESHIP:
+		case ZEND_STRLEN:
+		case ZEND_COUNT:
+		case ZEND_GET_TYPE:
+		case ZEND_ISSET_ISEMPTY_THIS:
+		case ZEND_ISSET_ISEMPTY_DIM_OBJ:
+		case ZEND_FETCH_DIM_IS:
+		case ZEND_ISSET_ISEMPTY_VAR:
+		case ZEND_FETCH_IS:
 			/* No side effects */
 			return 0;
 		case ZEND_JMP:
