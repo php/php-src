@@ -59,7 +59,12 @@ PHP_FUNCTION(sodium_crypto_generichash);
 PHP_FUNCTION(sodium_crypto_generichash_final);
 PHP_FUNCTION(sodium_crypto_generichash_init);
 PHP_FUNCTION(sodium_crypto_generichash_update);
-PHP_FUNCTION(sodium_crypto_kx);
+PHP_FUNCTION(sodium_crypto_kx_client_session_keys);
+PHP_FUNCTION(sodium_crypto_kx_keypair);
+PHP_FUNCTION(sodium_crypto_kx_publickey);
+PHP_FUNCTION(sodium_crypto_kx_secretkey);
+PHP_FUNCTION(sodium_crypto_kx_seed_keypair);
+PHP_FUNCTION(sodium_crypto_kx_server_session_keys);
 PHP_FUNCTION(sodium_crypto_pwhash);
 PHP_FUNCTION(sodium_crypto_pwhash_str);
 PHP_FUNCTION(sodium_crypto_pwhash_str_verify);
@@ -96,15 +101,9 @@ PHP_FUNCTION(sodium_add);
 PHP_FUNCTION(sodium_memcmp);
 PHP_FUNCTION(sodium_memzero);
 
-#ifndef crypto_kx_BYTES
 #define crypto_kx_BYTES crypto_scalarmult_BYTES
-#endif
-#ifndef crypto_kx_PUBLICKEYBYTES
 #define crypto_kx_PUBLICKEYBYTES crypto_scalarmult_SCALARBYTES
-#endif
-#ifndef crypto_kx_SECRETKEYBYTES
 #define crypto_kx_SECRETKEYBYTES crypto_scalarmult_SCALARBYTES
-#endif
 
 #endif	/* PHP_LIBSODIUM_H */
 

@@ -43,12 +43,12 @@ var_dump($str, $str2);
 
 ?>
 --EXPECT--
-increment(): a PHP string is required
+a PHP string is required
 string(3) "bbc"
 string(3) "abc"
 string(3) "bbc"
 string(3) "abc"
-add(): PHP strings are required
+PHP strings are required
 string(3) "cbc"
 string(3) "abc"
 string(3) "cbc"
