@@ -72,6 +72,36 @@ static void spl_filesystem_file_free_line(spl_filesystem_object *intern) /* {{{ 
 	}
 } /* }}} */
 
+static void spl_filesystem_object_destroy_object(zend_object *object) /* {{{ */
+{
+	spl_filesystem_object *intern = spl_filesystem_from_obj(object);
+
+	zend_objects_destroy_object(object);
+
+	switch(intern->type) {
+	case SPL_FS_DIR:
+		if (intern->u.dir.dirp) {
+			php_stream_close(intern->u.dir.dirp);
+			intern->u.dir.dirp = NULL;
+		}
+		break;
+	case SPL_FS_FILE:
+		if (intern->u.file.stream) {
+			/*
+			if (intern->u.file.zcontext) {
+			   zend_list_delref(Z_RESVAL_P(intern->zcontext));
+			}
+			*/
+			if (!intern->u.file.stream->is_persistent) {
+				php_stream_close(intern->u.file.stream);
+			} else {
+				php_stream_pclose(intern->u.file.stream);
+			}
+		}
+		break;
+	}
+} /* }}} */
+
 static void spl_filesystem_object_free_storage(zend_object *object) /* {{{ */
 {
 	spl_filesystem_object *intern = spl_filesystem_from_obj(object);
@@ -92,26 +122,12 @@ static void spl_filesystem_object_free_storage(zend_object *object) /* {{{ */
 	case SPL_FS_INFO:
 		break;
 	case SPL_FS_DIR:
-		if (intern->u.dir.dirp) {
-			php_stream_close(intern->u.dir.dirp);
-			intern->u.dir.dirp = NULL;
-		}
 		if (intern->u.dir.sub_path) {
 			efree(intern->u.dir.sub_path);
 		}
 		break;
 	case SPL_FS_FILE:
 		if (intern->u.file.stream) {
-			/*
-			if (intern->u.file.zcontext) {
-			   zend_list_delref(Z_RESVAL_P(intern->zcontext));
-			}
-			*/
-			if (!intern->u.file.stream->is_persistent) {
-				php_stream_close(intern->u.file.stream);
-			} else {
-				php_stream_pclose(intern->u.file.stream);
-			}
 			if (intern->u.file.open_mode) {
 				efree(intern->u.file.open_mode);
 			}
@@ -3108,7 +3124,7 @@ PHP_MINIT_FUNCTION(spl_directory)
 	spl_filesystem_object_handlers.clone_obj = spl_filesystem_object_clone;
 	spl_filesystem_object_handlers.cast_object = spl_filesystem_object_cast;
 	spl_filesystem_object_handlers.get_debug_info  = spl_filesystem_object_get_debug_info;
-	spl_filesystem_object_handlers.dtor_obj = zend_objects_destroy_object;
+	spl_filesystem_object_handlers.dtor_obj = spl_filesystem_object_destroy_object;
 	spl_filesystem_object_handlers.free_obj = spl_filesystem_object_free_storage;
 	spl_ce_SplFileInfo->serialize = zend_class_serialize_deny;
 	spl_ce_SplFileInfo->unserialize = zend_class_unserialize_deny;

@@ -154,6 +154,7 @@ void init_executor(void) /* {{{ */
 	EG(ticks_count) = 0;
 
 	ZVAL_UNDEF(&EG(user_error_handler));
+	ZVAL_UNDEF(&EG(user_exception_handler));
 
 	EG(current_execute_data) = NULL;
 
