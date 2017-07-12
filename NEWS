@@ -15,6 +15,7 @@ PHP                                                                        NEWS
     (Francois Laupretre)
   . Fixed bug #74923 (Crash when crawling through network share). (Anatol)
   . Fixed bug #74913 (fixed incorrect poll.h include). (petk)
+  . Fixed bug #74906 (fixed incorrect errno.h include). (petk)
 
 - Date:
   . Fixed bug #74852 (property_exists returns true on unknown DateInterval 
