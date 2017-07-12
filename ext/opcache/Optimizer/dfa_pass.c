@@ -723,7 +723,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 			if (dce_optimize_op_array(op_array, ssa, 0)) {
 				remove_nops = 1;
 			}
-			if (ctx->debug_level & ZEND_DUMP_AFTER_DCE_PASS) {
+			if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_14) {
 				zend_dump_op_array(op_array, ZEND_DUMP_SSA, "after dce pass", ssa);
 			}
 		}
