@@ -31,6 +31,14 @@
 #include "zend_inference.h"
 #include "zend_dump.h"
 
+#ifndef ZEND_DEBUG_DFA
+# define ZEND_DEBUG_DFA 0
+#endif
+
+#if ZEND_DEBUG_DFA
+# include "ssa_integrity.c"
+#endif
+
 int zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, zend_ssa *ssa, uint32_t *flags)
 {
 	uint32_t build_flags;
@@ -460,6 +468,9 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 			if (sccp_optimize_op_array(ctx, op_array, ssa, call_map)) {
 				remove_nops = 1;
 			}
+#if ZEND_DEBUG_DFA
+			ssa_verify_integrity(op_array, ssa, "after sccp");
+#endif
 			if (ZEND_FUNC_INFO(op_array)) {
 				if (zend_dfa_optimize_calls(op_array, ssa)) {
 					remove_nops = 1;
@@ -468,6 +479,9 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 			if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_8) {
 				zend_dump_op_array(op_array, ZEND_DUMP_SSA, "after sccp pass", ssa);
 			}
+#if ZEND_DEBUG_DFA
+			ssa_verify_integrity(op_array, ssa, "after calls");
+#endif
 		}
 
 		if (ZEND_OPTIMIZER_PASS_14 & ctx->optimization_level) {
@@ -477,6 +491,9 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 			if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_14) {
 				zend_dump_op_array(op_array, ZEND_DUMP_SSA, "after dce pass", ssa);
 			}
+#if ZEND_DEBUG_DFA
+			ssa_verify_integrity(op_array, ssa, "after dce");
+#endif
 		}
 
 		for (v = op_array->last_var; v < ssa->vars_count; v++) {
@@ -728,8 +745,15 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 			}
 		}
 
+#if ZEND_DEBUG_DFA
+		ssa_verify_integrity(op_array, ssa, "after dfa");
+#endif
+
 		if (remove_nops) {
 			zend_ssa_remove_nops(op_array, ssa);
+#if ZEND_DEBUG_DFA
+			ssa_verify_integrity(op_array, ssa, "after nop");
+#endif
 		}
 	}
 
