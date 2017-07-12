@@ -4312,6 +4312,8 @@ static int exif_read_from_stream(image_info_type *ImageInfo, php_stream *stream,
 	int ret;
 	zend_stat_t st;
 
+	php_printf("exif_read_from_stream");
+
 	/* Start with an empty image information structure. */
 	memset(ImageInfo, 0, sizeof(*ImageInfo));
 
@@ -4374,6 +4376,8 @@ static int exif_read_from_file(image_info_type *ImageInfo, char *FileName, int r
 {
 	int ret;
 	php_stream *stream;
+
+	php_printf("exif_read_from_file");
 
 	stream = php_stream_open_wrapper(FileName, "rb", STREAM_MUST_SEEK | IGNORE_PATH, NULL);
 
@@ -4453,6 +4457,12 @@ PHP_FUNCTION(exif_read_data)
 		ret = exif_read_from_stream(&ImageInfo, p_stream, read_thumbnail, read_all);
 	} else {
 		convert_to_string(stream);
+
+		if (!Z_STRLEN_P(stream)) {
+			exif_error_docref(NULL EXIFERR_CC, &ImageInfo, E_WARNING, "Filename cannot be empty");
+
+			RETURN_FALSE;
+		}
 
 		ret = exif_read_from_file(&ImageInfo, Z_STRVAL_P(stream), read_thumbnail, read_all);
 	}
@@ -4617,6 +4627,12 @@ PHP_FUNCTION(exif_thumbnail)
 		ret = exif_read_from_stream(&ImageInfo, p_stream, 1, 0);
 	} else {
 		convert_to_string(stream);
+
+		if (!Z_STRLEN_P(stream)) {
+			exif_error_docref(NULL EXIFERR_CC, &ImageInfo, E_WARNING, "Filename cannot be empty");
+
+			RETURN_FALSE;
+		}
 
 		ret = exif_read_from_file(&ImageInfo, Z_STRVAL_P(stream), 1, 0);
 	}
