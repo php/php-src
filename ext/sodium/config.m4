@@ -1,11 +1,8 @@
 dnl $Id$
 dnl config.m4 for extension sodium
 
-PHP_ARG_WITH(libsodium, for libsodium library location,
-[  --with-libsodium[[=DIR]]  libsodium library location, else rely on pkg-config])
-
 PHP_ARG_WITH(sodium, for sodium support,
-[  --with-sodium           Include sodium support])
+[  --with-sodium[=DIR]     Include sodium support])
 
 if test "$PHP_SODIUM" != "no"; then
   SEARCH_PATH="/usr/local /usr"     # you might want to change this
@@ -15,9 +12,9 @@ if test "$PHP_SODIUM" != "no"; then
   AC_MSG_CHECKING([for libsodium])
 
   dnl user provided location
-  if test -r $PHP_LIBSODIUM/$SEARCH_FOR; then # path given as parameter
-    LIBSODIUM_DIR=$PHP_LIBSODIUM
-    AC_MSG_RESULT([found in $PHP_LIBSODIUM])
+  if test -r $PHP_SODIUM/$SEARCH_FOR; then # path given as parameter
+    LIBSODIUM_DIR=$PHP_SODIUM
+    AC_MSG_RESULT([found in $PHP_SODIUM])
 
   dnl pkg-config output
   elif test -x "$PKG_CONFIG" && $PKG_CONFIG --exists libsodium; then
