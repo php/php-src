@@ -4305,32 +4305,34 @@ static int exif_discard_imageinfo(image_info_type *ImageInfo)
 }
 /* }}} */
 
-/* {{{ exif_read_file
+/* {{{ exif_read_from_stream
  */
-static int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_thumbnail, int read_all)
+static int exif_read_from_stream(image_info_type *ImageInfo, php_stream *stream, int read_thumbnail, int read_all)
 {
 	int ret;
 	zend_stat_t st;
-	zend_string *base;
 
 	/* Start with an empty image information structure. */
 	memset(ImageInfo, 0, sizeof(*ImageInfo));
 
-	ImageInfo->motorola_intel = -1; /* flag as unknown */
-
-	ImageInfo->infile = php_stream_open_wrapper(FileName, "rb", STREAM_MUST_SEEK|IGNORE_PATH, NULL);
-	if (!ImageInfo->infile) {
-		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Unable to open file");
-		return FALSE;
-	}
+	ImageInfo->motorola_intel	= -1; /* flag as unknown */
+	ImageInfo->infile			= stream;
+	ImageInfo->FileName			= NULL;
 
 	if (php_stream_is(ImageInfo->infile, PHP_STREAM_IS_STDIO)) {
-		if (VCWD_STAT(FileName, &st) >= 0) {
+		if (VCWD_STAT(stream->orig_path, &st) >= 0) {
+			zend_string *base;
 			if ((st.st_mode & S_IFMT) != S_IFREG) {
 				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Not a file");
 				php_stream_close(ImageInfo->infile);
 				return FALSE;
 			}
+
+			/* Store file name */
+			base = php_basename(stream->orig_path, strlen(stream->orig_path), NULL, 0);
+			ImageInfo->FileName = estrndup(ZSTR_VAL(base), ZSTR_LEN(base));
+
+			zend_string_release(base);
 
 			/* Store file date/time. */
 			ImageInfo->FileDateTime = st.st_mtime;
@@ -4345,51 +4347,76 @@ static int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_t
 		}
 	}
 
-	base = php_basename(FileName, strlen(FileName), NULL, 0);
-	ImageInfo->FileName          = estrndup(ZSTR_VAL(base), ZSTR_LEN(base));
-	zend_string_release(base);
-	ImageInfo->read_thumbnail = read_thumbnail;
-	ImageInfo->read_all = read_all;
-	ImageInfo->Thumbnail.filetype = IMAGE_FILETYPE_UNKNOWN;
+	ImageInfo->read_thumbnail		= read_thumbnail;
+	ImageInfo->read_all				= read_all;
+	ImageInfo->Thumbnail.filetype	= IMAGE_FILETYPE_UNKNOWN;
 
-	ImageInfo->encode_unicode    = estrdup(EXIF_G(encode_unicode));
-	ImageInfo->decode_unicode_be = estrdup(EXIF_G(decode_unicode_be));
-	ImageInfo->decode_unicode_le = estrdup(EXIF_G(decode_unicode_le));
-	ImageInfo->encode_jis        = estrdup(EXIF_G(encode_jis));
-	ImageInfo->decode_jis_be     = estrdup(EXIF_G(decode_jis_be));
-	ImageInfo->decode_jis_le     = estrdup(EXIF_G(decode_jis_le));
+	ImageInfo->encode_unicode		= estrdup(EXIF_G(encode_unicode));
+	ImageInfo->decode_unicode_be	= estrdup(EXIF_G(decode_unicode_be));
+	ImageInfo->decode_unicode_le	= estrdup(EXIF_G(decode_unicode_le));
+	ImageInfo->encode_jis			= estrdup(EXIF_G(encode_jis));
+	ImageInfo->decode_jis_be	 	= estrdup(EXIF_G(decode_jis_be));
+	ImageInfo->decode_jis_le		= estrdup(EXIF_G(decode_jis_le));
 
 
 	ImageInfo->ifd_nesting_level = 0;
 
-	/* Scan the JPEG headers. */
+	/* Scan the headers */
 	ret = exif_scan_FILE_header(ImageInfo);
 
-	php_stream_close(ImageInfo->infile);
 	return ret;
 }
 /* }}} */
 
-/* {{{ proto array exif_read_data(string filename [, string sections_needed [, bool sub_arrays[, bool read_thumbnail]]])
-   Reads header data from the JPEG/TIFF image filename and optionally reads the internal thumbnails */
+/* {{{ exif_read_from_file
+ */
+static int exif_read_from_file(image_info_type *ImageInfo, char *FileName, int read_thumbnail, int read_all)
+{
+	int ret;
+	php_stream *stream;
+
+	stream = php_stream_open_wrapper(FileName, "rb", STREAM_MUST_SEEK | IGNORE_PATH, NULL);
+
+	if (!stream) {
+		memset(&ImageInfo, 0, sizeof(ImageInfo));
+
+		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Unable to open file");
+
+		return FALSE;
+	}
+
+	ret = exif_read_from_stream(ImageInfo, stream, read_thumbnail, read_all);
+
+	php_stream_close(stream);
+
+	return ret;
+}
+/* }}} */
+
+/* {{{ proto array exif_read_data(mixed stream [, string sections_needed [, bool sub_arrays[, bool read_thumbnail]]])
+   Reads header data from an image and optionally reads the internal thumbnails */
 PHP_FUNCTION(exif_read_data)
 {
-	char *p_name, *p_sections_needed = NULL;
-	size_t p_name_len, p_sections_needed_len = 0;
-	zend_bool sub_arrays=0, read_thumbnail=0, read_all=0;
-
-	int i, ret, sections_needed=0;
+	zend_string *z_sections_needed = NULL;
+	zend_bool sub_arrays = 0, read_thumbnail = 0, read_all = 0;
+	zval *stream;
+	int i, ret, sections_needed = 0;
 	image_info_type ImageInfo;
 	char tmp[64], *sections_str, *s;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|sbb", &p_name, &p_name_len, &p_sections_needed, &p_sections_needed_len, &sub_arrays, &read_thumbnail) == FAILURE) {
-		return;
-	}
+	/* Parse arguments */
+	ZEND_PARSE_PARAMETERS_START(1, 4)
+		Z_PARAM_ZVAL(stream)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR(z_sections_needed)
+		Z_PARAM_BOOL(sub_arrays)
+		Z_PARAM_BOOL(read_thumbnail)
+	ZEND_PARSE_PARAMETERS_END();
 
 	memset(&ImageInfo, 0, sizeof(ImageInfo));
 
-	if (p_sections_needed) {
-		spprintf(&sections_str, 0, ",%s,", p_sections_needed);
+	if (z_sections_needed) {
+		spprintf(&sections_str, 0, ",%s,", ZSTR_VAL(z_sections_needed));
 		/* sections_str DOES start with , and SPACES are NOT allowed in names */
 		s = sections_str;
 		while (*++s) {
@@ -4409,19 +4436,33 @@ PHP_FUNCTION(exif_read_data)
 #ifdef EXIF_DEBUG
 		sections_str = exif_get_sectionlist(sections_needed);
 		if (!sections_str) {
+			zend_string_release(z_sections_needed);
 			RETURN_FALSE;
 		}
 		exif_error_docref(NULL EXIFERR_CC, &ImageInfo, E_NOTICE, "Sections needed: %s", sections_str[0] ? sections_str : "None");
 		EFREE_IF(sections_str);
 #endif
+		zend_string_release(z_sections_needed);
 	}
 
-	ret = exif_read_file(&ImageInfo, p_name, read_thumbnail, read_all);
+	if (Z_TYPE_P(stream) == IS_RESOURCE) {
+		php_stream *p_stream = NULL;
+
+		php_stream_from_res(p_stream, Z_RES_P(stream));
+
+		ret = exif_read_from_stream(&ImageInfo, p_stream, read_thumbnail, read_all);
+	} else {
+		convert_to_string(stream);
+
+		ret = exif_read_from_file(&ImageInfo, Z_STRVAL_P(stream), read_thumbnail, read_all);
+	}
+
 	sections_str = exif_get_sectionlist(ImageInfo.sections_found);
 
 #ifdef EXIF_DEBUG
-	if (sections_str)
+	if (sections_str) {
 		exif_error_docref(NULL EXIFERR_CC, &ImageInfo, E_NOTICE, "Sections found: %s", sections_str[0] ? sections_str : "None");
+	}
 #endif
 
 	ImageInfo.sections_found |= FOUND_COMPUTED|FOUND_FILE;/* do not inform about in debug*/
@@ -4552,24 +4593,35 @@ PHP_FUNCTION(exif_read_data)
    Reads the embedded thumbnail */
 PHP_FUNCTION(exif_thumbnail)
 {
-	zval *p_width = 0, *p_height = 0, *p_imagetype = 0;
-	char *p_name;
-	size_t p_name_len;
 	int ret, arg_c = ZEND_NUM_ARGS();
 	image_info_type ImageInfo;
+	zval *stream;
+	zval *z_width = NULL, *z_height = NULL, *z_imagetype = NULL;
+
+	/* Parse arguments */
+	ZEND_PARSE_PARAMETERS_START(1, 4)
+		Z_PARAM_ZVAL(stream)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL_DEREF(z_width)
+		Z_PARAM_ZVAL_DEREF(z_height)
+		Z_PARAM_ZVAL_DEREF(z_imagetype)
+	ZEND_PARSE_PARAMETERS_END();
 
 	memset(&ImageInfo, 0, sizeof(ImageInfo));
 
-	if (arg_c!=1 && arg_c!=3 && arg_c!=4) {
-		WRONG_PARAM_COUNT;
+	if (Z_TYPE_P(stream) == IS_RESOURCE) {
+		php_stream *p_stream = NULL;
+
+		php_stream_from_res(p_stream, Z_RES_P(stream));
+
+		ret = exif_read_from_stream(&ImageInfo, p_stream, 1, 0);
+	} else {
+		convert_to_string(stream);
+
+		ret = exif_read_from_file(&ImageInfo, Z_STRVAL_P(stream), 1, 0);
 	}
 
-	if (zend_parse_parameters(arg_c, "p|z/z/z/", &p_name, &p_name_len, &p_width, &p_height, &p_imagetype) == FAILURE) {
-		return;
-	}
-
-	ret = exif_read_file(&ImageInfo, p_name, 1, 0);
-	if (ret==FALSE) {
+	if (ret == FALSE) {
 		exif_discard_imageinfo(&ImageInfo);
 		RETURN_FALSE;
 	}
@@ -4591,14 +4643,14 @@ PHP_FUNCTION(exif_thumbnail)
 		if (!ImageInfo.Thumbnail.width || !ImageInfo.Thumbnail.height) {
 			exif_scan_thumbnail(&ImageInfo);
 		}
-		zval_dtor(p_width);
-		zval_dtor(p_height);
-		ZVAL_LONG(p_width,  ImageInfo.Thumbnail.width);
-		ZVAL_LONG(p_height, ImageInfo.Thumbnail.height);
+		zval_dtor(z_width);
+		zval_dtor(z_height);
+		ZVAL_LONG(z_width,  ImageInfo.Thumbnail.width);
+		ZVAL_LONG(z_height, ImageInfo.Thumbnail.height);
 	}
 	if (arg_c >= 4)	{
-		zval_dtor(p_imagetype);
-		ZVAL_LONG(p_imagetype, ImageInfo.Thumbnail.filetype);
+		zval_dtor(z_imagetype);
+		ZVAL_LONG(z_imagetype, ImageInfo.Thumbnail.filetype);
 	}
 
 #ifdef EXIF_DEBUG

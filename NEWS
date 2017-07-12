@@ -21,6 +21,8 @@ PHP                                                                        NEWS
     (Andreas Treichel)
 
 - EXIF:
+  . Implemented #65187 (exif_read_data/thumbnail: add support for stream 
+    resource). (Kalle)
   . Deprecated the read_exif_data() alias. (Kalle)
   . Fixed bug #74428 (exif_read_data(): "Illegal IFD size" warning occurs with 
     correct exif format). (bradpiccho at gmail dot com, Kalle)
