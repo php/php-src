@@ -2540,10 +2540,11 @@ PHP_FUNCTION(ldap_set_option)
 			int ncontrols;
 			char error=0;
 
-			if ((Z_TYPE_P(newval) != IS_ARRAY) || !(ncontrols = zend_hash_num_elements(Z_ARRVAL_P(newval)))) {
-				php_error_docref(NULL, E_WARNING, "Expected non-empty array value for this option");
+			if (Z_TYPE_P(newval) != IS_ARRAY) {
+				php_error_docref(NULL, E_WARNING, "Expected array value for this option");
 				RETURN_FALSE;
 			}
+			ncontrols = zend_hash_num_elements(Z_ARRVAL_P(newval));
 			ctrls = safe_emalloc((1 + ncontrols), sizeof(*ctrls), 0);
 			*ctrls = NULL;
 			ctrlp = ctrls;

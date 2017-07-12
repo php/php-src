@@ -1136,4 +1136,9 @@ Failed: setting UTF is disabled by the application at offset 0
 /abc/89
 Failed: setting UTF is disabled by the application at offset 0
 
+//8+L
+    \xf1\xad\xae\xae
+ 0: 
+ 0+ \x{6dbae}
+
 /-- End of testinput15 --/

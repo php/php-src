@@ -124,6 +124,9 @@ PHP 7.2 UPGRADE NOTES
     subpatterns and empty matches by reporting NULL and "" (empty string),
     respectively.
 
+- Sodium
+  . New cryptographic extension
+
 - SQLite3:
   . Implemented writing to BLOBs.
 
@@ -270,6 +273,8 @@ See also: https://wiki.php.net/rfc/deprecations_php_7_2
    . Added extended exif tag support for the following formats: 
      Samsung, DJI, Panasonic, Sony, Pentax, Minolta, Sigma/Foveon, 
 	 AGFA, Kyocera, Ricoh & Epson.
+   . exif_read_data() and exif_thumbnail() now supports a passed streams as their 
+     first parameter.
 
 - GD:
   . Removed --enable-gd-native-ttf configuration option which was unused as

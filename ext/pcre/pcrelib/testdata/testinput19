@@ -25,4 +25,21 @@
 /s+/i8SI
     SSss\x{17f}
 
+/[\D]/8
+    \x{1d7cf}
+
+/[\D\P{Nd}]/8
+    \x{1d7cf}
+
+/[^\D]/8
+    a9b
+    ** Failers
+    \x{1d7cf}
+
+/[^\D\P{Nd}]/8
+    a9b
+    \x{1d7cf}
+    ** Failers
+    \x{10000}
+
 /-- End of testinput19 --/ 

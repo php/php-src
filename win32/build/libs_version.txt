@@ -8,6 +8,7 @@ libiconv-1.15
 libmpir-3.0.0
 libpng-1.6.29
 libpq-9.6.2
+libsodium-1.0.12
 libssh2-1.8.0
 libtidy-5.4.0
 libxslt-1.1.29

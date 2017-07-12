@@ -316,7 +316,7 @@ them both to 0; an emulation function will be used. */
 #define PACKAGE_NAME "PCRE"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "PCRE 8.38"
+#define PACKAGE_STRING "PCRE 8.41"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "pcre"
@@ -325,7 +325,7 @@ them both to 0; an emulation function will be used. */
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "8.38"
+#define PACKAGE_VERSION "8.41"
 
 /* to make a symbol visible */
 /* #undef PCRECPP_EXP_DECL */
@@ -439,11 +439,13 @@ them both to 0; an emulation function will be used. */
 /* #undef SUPPORT_UTF8 */
 
 /* Valgrind support to find invalid memory reads. */
-/* #undef SUPPORT_VALGRIND */
+#if HAVE_PCRE_VALGRIND_SUPPORT
+#define SUPPORT_VALGRIND 1
+#endif
 
 /* Version number of package */
 #ifndef VERSION
-#define VERSION "8.38"
+#define VERSION "8.41"
 #endif
 
 /* Define to empty if `const' does not conform to ANSI C. */

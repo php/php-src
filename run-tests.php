@@ -1915,14 +1915,19 @@ TEST $file
 		$env['USE_ZEND_ALLOC'] = '0';
 		$env['ZEND_DONT_UNLOAD_MODULES'] = 1;
 
+		$valgrind_cmd = "valgrind -q --tool=memcheck --trace-children=yes";
+		if (strpos($test_file, "pcre") !== false) {
+			$valgrind_cmd .= " --smc-check=all";
+		}
+
 		/* --vex-iropt-register-updates=allregs-at-mem-access is necessary for phpdbg watchpoint tests */
 		if (version_compare($valgrind_version, '3.8.0', '>=')) {
 			/* valgrind 3.3.0+ doesn't have --log-file-exactly option */
-			$cmd = "valgrind -q --tool=memcheck --trace-children=yes --vex-iropt-register-updates=allregs-at-mem-access --log-file=$memcheck_filename $cmd";
+			$cmd = "$valgrind_cmd --vex-iropt-register-updates=allregs-at-mem-access --log-file=$memcheck_filename $cmd";
 		} elseif (version_compare($valgrind_version, '3.3.0', '>=')) {
-			$cmd = "valgrind -q --tool=memcheck --trace-children=yes --vex-iropt-precise-memory-exns=yes --log-file=$memcheck_filename $cmd";
+			$cmd = "$valgrind_cmd --vex-iropt-precise-memory-exns=yes --log-file=$memcheck_filename $cmd";
 		} else {
-			$cmd = "valgrind -q --tool=memcheck --trace-children=yes --vex-iropt-precise-memory-exns=yes --log-file-exactly=$memcheck_filename $cmd";
+			$cmd = "$valgrind_cmd --vex-iropt-precise-memory-exns=yes --log-file-exactly=$memcheck_filename $cmd";
 		}
 
 	} else {

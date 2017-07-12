@@ -43,7 +43,9 @@ var_dump(
 	$controls_get[0]['iscritical'],
 	bin2hex($controls_get[0]['value']),
 	$result = ldap_search($link, $base, "(objectClass=person)", array('cn')),
-	ldap_get_entries($link, $result)['count']
+	ldap_get_entries($link, $result)['count'],
+	ldap_set_option($link, LDAP_OPT_SERVER_CONTROLS, array()),
+	ldap_get_option($link, LDAP_OPT_SERVER_CONTROLS, $controls_get)
 );
 ?>
 ===DONE===
@@ -65,4 +67,6 @@ bool(true)
 string(14) "30050201010400"
 resource(%d) of type (ldap result)
 int(1)
+bool(true)
+bool(false)
 ===DONE===
