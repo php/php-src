@@ -1220,7 +1220,8 @@ PHP_FUNCTION(mysqli_fetch_fields)
 
 	array_init(return_value);
 
-	for (i = 0; i < mysql_num_fields(result); i++) {
+	unsigned int num_fields = mysql_num_fields(result);
+	for (i = 0; i < num_fields; i++) {
 		const MYSQL_FIELD *field = mysql_fetch_field_direct(result, i);
 
 		object_init(&obj);
@@ -1285,7 +1286,8 @@ PHP_FUNCTION(mysqli_fetch_lengths)
 
 	array_init(return_value);
 
-	for (i = 0; i < mysql_num_fields(result); i++) {
+	unsigned int num_fields = mysql_num_fields(result);
+	for (i = 0; i < num_fields; i++) {
 		add_index_long(return_value, i, ret[i]);
 	}
 }

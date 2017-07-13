@@ -1167,7 +1167,8 @@ void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend
 	array_init(return_value);
 	field_len = mysql_fetch_lengths(result);
 
-	for (i = 0; i < mysql_num_fields(result); i++) {
+	unsigned int num_fields = mysql_num_fields(result);
+	for (i = 0; i < num_fields; i++) {
 		if (row[i]) {
 			zval res;
 
