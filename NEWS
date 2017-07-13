@@ -11,6 +11,8 @@ PHP                                                                        NEWS
     php_parse_date()). (Derick)
   . Fixed bug #49649 (unserialize() doesn't handle changes in property 
     visibility). (pmmaga)
+  . Fixed #74866 (extension_dir = "./ext" now use current directory for base).
+    (Francois Laupretre)
 
 - Date:
   . Fixed bug #74852 (property_exists returns true on unknown DateInterval 
