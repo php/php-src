@@ -229,3 +229,8 @@ win32/wsyslog.h
 **/tests/**/*.db
 **/tests/**/*.txt
 **/tests/**/*.tmp
+
+# special cases to invert previous ignore rules
+!ext/fileinfo/libmagic.patch
+!ext/mbstring/oniguruma.patch
+
