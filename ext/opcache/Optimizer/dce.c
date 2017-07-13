@@ -457,14 +457,29 @@ static void try_remove_trivial_phi(context *ctx, zend_ssa_phi *phi) {
 	}
 }
 
+static inline zend_bool may_break_varargs(const zend_op_array *op_array, const zend_ssa *ssa, const zend_ssa_op *ssa_op) {
+	if (ssa_op->op1_def >= 0
+			&& ssa->vars[ssa_op->op1_def].var < op_array->num_args) {
+		return 1;
+	}
+	if (ssa_op->op2_def >= 0
+			&& ssa->vars[ssa_op->op2_def].var < op_array->num_args) {
+		return 1;
+	}
+	if (ssa_op->result_def >= 0
+			&& ssa->vars[ssa_op->result_def].var < op_array->num_args) {
+		return 1;
+	}
+	return 0;
+}
+
 int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_bool reorder_dtor_effects) {
 	int i;
 	zend_ssa_phi *phi;
 	int removed_ops = 0;
 
-	/* DCE of CV operations may affect vararg functions. For now simply treat all instructions
-	 * as live if varargs in use and only collect dead phis. */
-	zend_bool has_varargs = (ZEND_FUNC_INFO(op_array)->flags & ZEND_FUNC_VARARG) != 0;
+	/* DCE of CV operations that changes arguments may affect vararg functions. */
+	zend_bool has_varargs = ssa->cfg.vararg;
 
 	context ctx;
 	ctx.ssa = ssa;
@@ -504,7 +519,7 @@ int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_bool reor
 				add_operands_to_worklists(&ctx, &op_array->opcodes[i], &ssa->ops[i], 0);
 			} else if (may_have_side_effects(op_array, ssa, &op_array->opcodes[i], &ssa->ops[i], ctx.reorder_dtor_effects)
 					|| zend_may_throw(&op_array->opcodes[i], op_array, ssa)
-					|| has_varargs) {
+					|| (has_varargs && may_break_varargs(op_array, ssa, &ssa->ops[i]))) {
 				add_operands_to_worklists(&ctx, &op_array->opcodes[i], &ssa->ops[i], 0);
 			} else {
 				zend_bitset_incl(ctx.instr_dead, i);
