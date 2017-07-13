@@ -106,9 +106,6 @@ PHP_FUNCTION(sodium_hex2bin);
 PHP_FUNCTION(sodium_increment);
 PHP_FUNCTION(sodium_memcmp);
 PHP_FUNCTION(sodium_memzero);
-PHP_FUNCTION(sodium_randombytes_buf);
-PHP_FUNCTION(sodium_randombytes_random16);
-PHP_FUNCTION(sodium_randombytes_uniform);
 
 #define crypto_kx_BYTES crypto_scalarmult_BYTES
 #define crypto_kx_PUBLICKEYBYTES crypto_scalarmult_SCALARBYTES
