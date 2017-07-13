@@ -100,6 +100,7 @@ PHPAPI void *php_load_shlib(char *path, char **errp)
 	}
 	return handle;
 }
+/* }}} */
 
 /* {{{ php_load_extension
  */
