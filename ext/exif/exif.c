@@ -4305,9 +4305,9 @@ static int exif_discard_imageinfo(image_info_type *ImageInfo)
 }
 /* }}} */
 
-/* {{{ exif_read_from_stream
+/* {{{ exif_read_from_impl
  */
-static int exif_read_from_stream(image_info_type *ImageInfo, php_stream *stream, int read_thumbnail, int read_all)
+static int exif_read_from_impl(image_info_type *ImageInfo, php_stream *stream, int read_thumbnail, int read_all)
 {
 	int ret;
 	zend_stat_t st;
@@ -4363,6 +4363,27 @@ static int exif_read_from_stream(image_info_type *ImageInfo, php_stream *stream,
 
 	/* Scan the headers */
 	ret = exif_scan_FILE_header(ImageInfo);
+
+	return ret;
+}
+/* }}} */
+
+/* {{{ exif_read_from_stream
+ */
+static int exif_read_from_stream(image_info_type *ImageInfo, php_stream *stream, int read_thumbnail, int read_all)
+{
+	int ret;
+	off_t old_pos = php_stream_tell(stream);
+
+	if (old_pos) {
+		php_stream_seek(stream, 0, SEEK_SET);
+	}
+
+	ret = exif_read_from_impl(ImageInfo, stream, read_thumbnail, read_all);
+
+	if (old_pos) {
+		php_stream_seek(stream, old_pos, SEEK_SET);
+	}
 
 	return ret;
 }
