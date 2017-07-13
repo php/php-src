@@ -49,6 +49,8 @@
  */
 #undef EXIF_DEBUG
 
+#define EXIF_DEBUG 1
+
 #ifdef EXIF_DEBUG
 #define EXIFERR_DC , const char *_file, size_t _line
 #define EXIFERR_CC , __FILE__, __LINE__
@@ -1552,7 +1554,7 @@ char * exif_dump_data(int *dump_free, int format, int components, int length, in
 		return value_ptr ? value_ptr : "<no data>";
 	}
 	if (format == TAG_FMT_UNDEFINED) {
-		return "<undefined>\n";
+		return "<undefined>";
 	}
 	if (format == TAG_FMT_IFD) {
 		return "";
