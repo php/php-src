@@ -46,7 +46,8 @@ var PHP_TEST_INI_EXT_EXCLUDE = "";
 
 var PHP_MAKEFILE_FRAGMENTS = PHP_SRC_DIR + "\\Makefile.fragments.w32";
 
-/* Care also about NTDDI_VERSION and _WIN32_WINNT in config.w32.h.in */
+/* Care also about NTDDI_VERSION and _WIN32_WINNT in config.w32.h.in 
+   and manifest. */
 var WINVER = "0x0601"; /* 7/2008r2 */
 
 // There's a minimum requirement for re2c..
