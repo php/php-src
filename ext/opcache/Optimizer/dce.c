@@ -51,6 +51,7 @@ typedef struct {
 	zend_bitset phi_dead;
 	zend_bitset instr_worklist;
 	zend_bitset phi_worklist;
+	zend_bitset phi_worklist_no_val;
 	uint32_t instr_worklist_len;
 	uint32_t phi_worklist_len;
 	unsigned reorder_dtor_effects : 1;
@@ -213,43 +214,51 @@ static inline zend_bool may_have_side_effects(
 	}
 }
 
-static inline void add_to_worklists(context *ctx, int var_num) {
+static zend_always_inline void add_to_worklists(context *ctx, int var_num, int check) {
 	zend_ssa_var *var = &ctx->ssa->vars[var_num];
 	if (var->definition >= 0) {
-		if (zend_bitset_in(ctx->instr_dead, var->definition)) {
+		if (!check || zend_bitset_in(ctx->instr_dead, var->definition)) {
 			zend_bitset_incl(ctx->instr_worklist, var->definition);
 		}
 	} else if (var->definition_phi) {
-		if (zend_bitset_in(ctx->phi_dead, var_num)) {
+		if (!check || zend_bitset_in(ctx->phi_dead, var_num)) {
 			zend_bitset_incl(ctx->phi_worklist, var_num);
 		}
 	}
 }
 
-static inline void add_to_phi_worklist_only(context *ctx, int var_num) {
+static inline void add_to_phi_worklist_no_val(context *ctx, int var_num) {
 	zend_ssa_var *var = &ctx->ssa->vars[var_num];
 	if (var->definition_phi && zend_bitset_in(ctx->phi_dead, var_num)) {
-		zend_bitset_incl(ctx->phi_worklist, var_num);
+		zend_bitset_incl(ctx->phi_worklist_no_val, var_num);
 	}
 }
 
-static inline void add_operands_to_worklists(context *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
+static zend_always_inline void add_operands_to_worklists(context *ctx, zend_op *opline, zend_ssa_op *ssa_op, int check) {
 	if (ssa_op->result_use >= 0) {
-		add_to_worklists(ctx, ssa_op->result_use);
+		add_to_worklists(ctx, ssa_op->result_use, check);
 	}
-	if (ssa_op->op1_use >= 0 && !zend_ssa_is_no_val_use(opline, ssa_op, ssa_op->op1_use)) {
-		add_to_worklists(ctx, ssa_op->op1_use);
+	if (ssa_op->op1_use >= 0) {
+		if (!zend_ssa_is_no_val_use(opline, ssa_op, ssa_op->op1_use)) {
+			add_to_worklists(ctx, ssa_op->op1_use, check);
+		} else {
+			add_to_phi_worklist_no_val(ctx, ssa_op->op1_use);
+		}
 	}
-	if (ssa_op->op2_use >= 0 && !zend_ssa_is_no_val_use(opline, ssa_op, ssa_op->op2_use)) {
-		add_to_worklists(ctx, ssa_op->op2_use);
+	if (ssa_op->op2_use >= 0) {
+		if (!zend_ssa_is_no_val_use(opline, ssa_op, ssa_op->op2_use)) {
+			add_to_worklists(ctx, ssa_op->op2_use, check);
+		} else {
+			add_to_phi_worklist_no_val(ctx, ssa_op->op2_use);
+		}
 	}
 }
 
-static inline void add_phi_sources_to_worklists(context *ctx, zend_ssa_phi *phi) {
+static zend_always_inline void add_phi_sources_to_worklists(context *ctx, zend_ssa_phi *phi, int check) {
 	zend_ssa *ssa = ctx->ssa;
 	int source;
 	FOREACH_PHI_SOURCE(phi, source) {
-		add_to_worklists(ctx, source);
+		add_to_worklists(ctx, source, check);
 	} FOREACH_PHI_SOURCE_END();
 }
 
@@ -303,6 +312,7 @@ static zend_bool dce_instr(context *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
 		ssa_op->op1_use = free_var;
 		ssa_op->op1_use_chain = ssa->vars[free_var].use_chain;
 		ssa->vars[free_var].use_chain = ssa_op - ssa->ops;
+		return 0;
 	}
 	return 1;
 }
@@ -468,64 +478,70 @@ int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_bool reor
 	ctx.phi_worklist_len = zend_bitset_len(ssa->vars_count);
 	ctx.phi_worklist = alloca(sizeof(zend_ulong) * ctx.phi_worklist_len);
 	memset(ctx.phi_worklist, 0, sizeof(zend_ulong) * ctx.phi_worklist_len);
+	ctx.phi_worklist_no_val = alloca(sizeof(zend_ulong) * ctx.phi_worklist_len);
+	memset(ctx.phi_worklist_no_val, 0, sizeof(zend_ulong) * ctx.phi_worklist_len);
 
 	/* Optimistically assume all instructions and phis to be dead */
 	ctx.instr_dead = alloca(sizeof(zend_ulong) * ctx.instr_worklist_len);
-	memset(ctx.instr_dead, 0xff, sizeof(zend_ulong) * ctx.instr_worklist_len);
+	memset(ctx.instr_dead, 0, sizeof(zend_ulong) * ctx.instr_worklist_len);
 	ctx.phi_dead = alloca(sizeof(zend_ulong) * ctx.phi_worklist_len);
 	memset(ctx.phi_dead, 0xff, sizeof(zend_ulong) * ctx.phi_worklist_len);
 
-	/* Mark instruction with side effects as live */
-	FOREACH_INSTR_NUM(i) {
-		if (may_have_side_effects(op_array, ssa, &op_array->opcodes[i], &ssa->ops[i], ctx.reorder_dtor_effects)
-				|| zend_may_throw(&op_array->opcodes[i], op_array, ssa)
-				|| has_varargs) {
-			zend_bitset_excl(ctx.instr_dead, i);
-			add_operands_to_worklists(&ctx, &op_array->opcodes[i], &ssa->ops[i]);
+	/* Mark reacable instruction without side effects as dead */
+	int b = ssa->cfg.blocks_count;
+	while (b > 0) {
+		b--;
+		zend_basic_block *block = &ssa->cfg.blocks[b];
+		if (!(block->flags & ZEND_BB_REACHABLE)) {
+			continue;
 		}
-	} FOREACH_INSTR_NUM_END();
+		i = block->start + block->len;
+		while (i > block->start) {
+			i--;
+
+			if (zend_bitset_in(ctx.instr_worklist, i)) {
+				zend_bitset_excl(ctx.instr_worklist, i);
+				add_operands_to_worklists(&ctx, &op_array->opcodes[i], &ssa->ops[i], 0);
+			} else if (may_have_side_effects(op_array, ssa, &op_array->opcodes[i], &ssa->ops[i], ctx.reorder_dtor_effects)
+					|| zend_may_throw(&op_array->opcodes[i], op_array, ssa)
+					|| has_varargs) {
+				add_operands_to_worklists(&ctx, &op_array->opcodes[i], &ssa->ops[i], 0);
+			} else {
+				zend_bitset_incl(ctx.instr_dead, i);
+			}
+
+		}
+	}
 
 	/* Propagate liveness backwards to all definitions of used vars */
 	while (!zend_bitset_empty(ctx.instr_worklist, ctx.instr_worklist_len)
 			|| !zend_bitset_empty(ctx.phi_worklist, ctx.phi_worklist_len)) {
 		while ((i = zend_bitset_pop_first(ctx.instr_worklist, ctx.instr_worklist_len)) >= 0) {
 			zend_bitset_excl(ctx.instr_dead, i);
-			add_operands_to_worklists(&ctx, &op_array->opcodes[i], &ssa->ops[i]);
+			add_operands_to_worklists(&ctx, &op_array->opcodes[i], &ssa->ops[i], 1);
 		}
 		while ((i = zend_bitset_pop_first(ctx.phi_worklist, ctx.phi_worklist_len)) >= 0) {
 			zend_bitset_excl(ctx.phi_dead, i);
-			add_phi_sources_to_worklists(&ctx, ssa->vars[i].definition_phi);
+			zend_bitset_excl(ctx.phi_worklist_no_val, i);
+			add_phi_sources_to_worklists(&ctx, ssa->vars[i].definition_phi, 1);
 		}
 	}
 
 	/* Eliminate dead instructions */
-	FOREACH_INSTR_NUM(i) {
-		if (zend_bitset_in(ctx.instr_dead, i)) {
-			if (dce_instr(&ctx, &op_array->opcodes[i], &ssa->ops[i])) {
-				removed_ops++;
-			}
-		}
-	} FOREACH_INSTR_NUM_END();
+	ZEND_BITSET_FOREACH(ctx.instr_dead, ctx.instr_worklist_len, i) {
+		removed_ops += dce_instr(&ctx, &op_array->opcodes[i], &ssa->ops[i]);
+	} ZEND_BITSET_FOREACH_END();
 
 	/* Improper uses don't count as "uses" for the purpose of instruction elimination,
-	 * but we have to retain phis defining them. Push those phis to the worklist. */
-	FOREACH_INSTR_NUM(i) {
-		if (ssa->ops[i].op1_use >= 0 && zend_ssa_is_no_val_use(&op_array->opcodes[i], &ssa->ops[i], ssa->ops[i].op1_use)) {
-			add_to_phi_worklist_only(&ctx, ssa->ops[i].op1_use);
-		}
-		if (ssa->ops[i].op2_use >= 0 && zend_ssa_is_no_val_use(&op_array->opcodes[i], &ssa->ops[i], ssa->ops[i].op2_use)) {
-			add_to_phi_worklist_only(&ctx, ssa->ops[i].op2_use);
-		}
-	} FOREACH_INSTR_NUM_END();
-
-	/* Propagate this information backwards, marking any phi with an improperly used
+	 * but we have to retain phis defining them.
+	 * Propagate this information backwards, marking any phi with an improperly used
 	 * target as non-dead. */
-	while ((i = zend_bitset_pop_first(ctx.phi_worklist, ctx.phi_worklist_len)) >= 0) {
+	while ((i = zend_bitset_pop_first(ctx.phi_worklist_no_val, ctx.phi_worklist_len)) >= 0) {
 		zend_ssa_phi *phi = ssa->vars[i].definition_phi;
 		int source;
 		zend_bitset_excl(ctx.phi_dead, i);
 		FOREACH_PHI_SOURCE(phi, source) {
-			add_to_phi_worklist_only(&ctx, source);
+			add_to_phi_worklist_no_val(&ctx, source);
 		} FOREACH_PHI_SOURCE_END();
 	}
 
@@ -534,12 +550,10 @@ int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_bool reor
 		if (zend_bitset_in(ctx.phi_dead, phi->ssa_var)) {
 			zend_ssa_remove_uses_of_var(ssa, phi->ssa_var);
 			zend_ssa_remove_phi(ssa, phi);
+		} else {
+			/* Remove trivial phis (phis with identical source operands) */
+			try_remove_trivial_phi(&ctx, phi);
 		}
-	} FOREACH_PHI_END();
-
-	/* Remove trivial phis (phis with identical source operands) */
-	FOREACH_PHI(phi) {
-		try_remove_trivial_phi(&ctx, phi);
 	} FOREACH_PHI_END();
 
 	removed_ops += simplify_jumps(ssa, op_array);
