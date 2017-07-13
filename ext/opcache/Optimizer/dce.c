@@ -276,6 +276,68 @@ static inline zend_bool is_var_dead(context *ctx, int var_num) {
 	}
 }
 
+// Sometimes we can mark the var as EXT_UNUSED
+static zend_bool try_remove_var_def(context *ctx, int free_var, int use_chain, zend_op *opline) {
+	if (use_chain >= 0) {
+		return 0;
+	}
+	zend_ssa_var *var = &ctx->ssa->vars[free_var];
+	int def = var->definition;
+
+	if (def >= 0) {
+		zend_ssa_op *def_op = &ctx->ssa->ops[def];
+
+		if (def_op->result_def == free_var
+				&& var->phi_use_chain == NULL
+				&& var->use_chain == (opline - ctx->op_array->opcodes)) {
+			zend_op *def_opline = &ctx->op_array->opcodes[def];
+
+			switch (def_opline->opcode) {
+				case ZEND_ASSIGN:
+				case ZEND_ASSIGN_REF:
+				case ZEND_ASSIGN_DIM:
+				case ZEND_ASSIGN_OBJ:
+				case ZEND_ASSIGN_ADD:
+				case ZEND_ASSIGN_SUB:
+				case ZEND_ASSIGN_MUL:
+				case ZEND_ASSIGN_DIV:
+				case ZEND_ASSIGN_MOD:
+				case ZEND_ASSIGN_SL:
+				case ZEND_ASSIGN_SR:
+				case ZEND_ASSIGN_CONCAT:
+				case ZEND_ASSIGN_BW_OR:
+				case ZEND_ASSIGN_BW_AND:
+				case ZEND_ASSIGN_BW_XOR:
+				case ZEND_ASSIGN_POW:
+				case ZEND_PRE_INC:
+				case ZEND_POST_INC:
+				case ZEND_PRE_DEC:
+				case ZEND_POST_DEC:
+				case ZEND_PRE_INC_OBJ:
+				case ZEND_POST_INC_OBJ:
+				case ZEND_PRE_DEC_OBJ:
+				case ZEND_POST_DEC_OBJ:
+				case ZEND_DO_ICALL:
+				case ZEND_DO_UCALL:
+				case ZEND_DO_FCALL_BY_NAME:
+				case ZEND_DO_FCALL:
+				case ZEND_INCLUDE_OR_EVAL:
+				case ZEND_YIELD:
+				case ZEND_YIELD_FROM:
+				case ZEND_ASSERT_CHECK:
+					def_opline->result_type = IS_UNUSED;
+					def_opline->result.var = 0;
+					def_op->result_def = -1;
+					var->definition = -1;
+					return 1;
+				default:
+					break;
+			}
+		}
+	}
+	return 0;
+}
+
 /* Returns whether the instruction has been DCEd */
 static zend_bool dce_instr(context *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
 	zend_ssa *ssa = ctx->ssa;
@@ -291,20 +353,28 @@ static zend_bool dce_instr(context *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
 		return 0;
 	}
 
-	// TODO Two free vars?
 	if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) && !is_var_dead(ctx, ssa_op->op1_use)) {
-		free_var = ssa_op->op1_use;
-		free_var_type = opline->op1_type;
-	} else if ((opline->op2_type & (IS_VAR|IS_TMP_VAR)) && !is_var_dead(ctx, ssa_op->op2_use)) {
-		free_var = ssa_op->op2_use;
-		free_var_type = opline->op2_type;
+		if (!try_remove_var_def(ctx, ssa_op->op1_use, ssa_op->op1_use_chain, opline)) {
+			free_var = ssa_op->op1_use;
+			free_var_type = opline->op1_type;
+		}
+	}
+	if ((opline->op2_type & (IS_VAR|IS_TMP_VAR)) && !is_var_dead(ctx, ssa_op->op2_use)) {
+		if (!try_remove_var_def(ctx, ssa_op->op2_use, ssa_op->op2_use_chain, opline)) {
+			if (free_var >= 0) {
+				// TODO: We can't free two vars. Keep instruction alive.
+				zend_bitset_excl(ctx->instr_dead, opline - ctx->op_array->opcodes);
+				return 0;
+			}
+			free_var = ssa_op->op2_use;
+			free_var_type = opline->op2_type;
+		}
 	}
 
 	zend_ssa_rename_defs_of_instr(ctx->ssa, ssa_op);
 	zend_ssa_remove_instr(ctx->ssa, opline, ssa_op);
 
 	if (free_var >= 0) {
-		// TODO Sometimes we can mark the var as EXT_UNUSED
 		opline->opcode = ZEND_FREE;
 		opline->op1.var = (uintptr_t) ZEND_CALL_VAR_NUM(NULL, ssa->vars[free_var].var);
 		opline->op1_type = free_var_type;
