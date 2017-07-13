@@ -76,6 +76,31 @@ PHPAPI PHP_FUNCTION(dl)
 
 #if defined(HAVE_LIBDL)
 
+/* {{{ php_load_shlib
+ */
+PHPAPI void *php_load_shlib(char *path, char **errp)
+{
+	void *handle;
+	char *err;
+
+	handle = DL_LOAD(path);
+	if (!handle) {
+		err = GET_DL_ERROR();
+#ifdef PHP_WIN32
+		if (err && (*err)) {
+			(*errp)=estrdup(err);
+			LocalFree(err);
+		} else {
+			(*errp) = estrdup("<No message>");
+		}
+#else
+		(*errp) = estrdup(err);
+		GET_DL_ERROR(); /* free the buffer storing the error */
+#endif
+	}
+	return handle;
+}
+
 /* {{{ php_load_extension
  */
 PHPAPI int php_load_extension(char *filename, int type, int start_now)
@@ -109,6 +134,7 @@ PHPAPI int php_load_extension(char *filename, int type, int start_now)
 		libpath = estrdup(filename);
 	} else if (extension_dir && extension_dir[0]) {
 		int extension_dir_len = (int)strlen(extension_dir);
+		char *err1, *err2;
 		slash_suffix = IS_SLASH(extension_dir[extension_dir_len-1]);
 		/* Try as filename first */
 		if (slash_suffix) {
@@ -117,8 +143,9 @@ PHPAPI int php_load_extension(char *filename, int type, int start_now)
 			spprintf(&libpath, 0, "%s%c%s", extension_dir, DEFAULT_SLASH, filename); /* SAFE */
 		}
 
-		if (VCWD_ACCESS(libpath, F_OK)) {
-			/* If file does not exist, consider as extension name and build file name */
+		handle = php_load_shlib(libpath, &err1);
+		if (!handle) {
+			/* Now, consider 'filename' as extension name and build file name */
 			char *orig_libpath = libpath;
 
 			if (slash_suffix) {
@@ -127,37 +154,23 @@ PHPAPI int php_load_extension(char *filename, int type, int start_now)
 				spprintf(&libpath, 0, "%s%c" PHP_SHLIB_EXT_PREFIX "%s." PHP_SHLIB_SUFFIX, extension_dir, DEFAULT_SLASH, filename); /* SAFE */
 			}
 
-			if (VCWD_ACCESS(libpath, F_OK)) {
-				php_error(error_type, "Cannot access dynamic library '%s' (tried : %s, %s)",
-					filename, orig_libpath, libpath);
+			handle = php_load_shlib(libpath, &err2);
+			if (!handle) {
+				php_error_docref(NULL, error_type, "Unable to load dynamic library '%s' (tried: %s (%s), %s (%s))",
+					filename, orig_libpath, err1, libpath, err2);
 				efree(orig_libpath);
+				efree(err1);
 				efree(libpath);
+				efree(err2);
 				return FAILURE;
 			}
 			efree(orig_libpath);
+			efree(err1);
 		}
 	} else {
 		return FAILURE; /* Not full path given or extension_dir is not set */
 	}
 
-	/* load dynamic symbol */
-	handle = DL_LOAD(libpath);
-	if (!handle) {
-#ifdef PHP_WIN32
-		char *err = GET_DL_ERROR();
-		if (err && (*err != '\0')) {
-			php_error_docref(NULL, error_type, "Unable to load dynamic library '%s' - %s", libpath, err);
-			LocalFree(err);
-		} else {
-			php_error_docref(NULL, error_type, "Unable to load dynamic library '%s' - %s", libpath, "Unknown reason");
-		}
-#else
-		php_error_docref(NULL, error_type, "Unable to load dynamic library '%s' - %s", libpath, GET_DL_ERROR());
-		GET_DL_ERROR(); /* free the buffer storing the error */
-#endif
-		efree(libpath);
-		return FAILURE;
-	}
 	efree(libpath);
 
 	get_module = (zend_module_entry *(*)(void)) DL_FETCH_SYMBOL(handle, "get_module");
