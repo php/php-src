@@ -49,8 +49,6 @@
  */
 #undef EXIF_DEBUG
 
-#define EXIF_DEBUG 1
-
 #ifdef EXIF_DEBUG
 #define EXIFERR_DC , const char *_file, size_t _line
 #define EXIFERR_CC , __FILE__, __LINE__
