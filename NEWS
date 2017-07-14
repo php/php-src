@@ -9,6 +9,7 @@ PHP                                                                        NEWS
     (jhdxr)
   . Fixed bug #74761 (Unary operator expected error on some systems). (petk)
   . Fixed bug #73900 (Use After Free in unserialize() SplFixedArray). (nikic)
+  . Fixed bug #74923 (Crash when crawling through network share). (Anatol)
 
 - Date:
   . Fixed bug #74852 (property_exists returns true on unknown DateInterval 
