@@ -1035,8 +1035,8 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 				break;
 			}
 
-			/* We're only interested in functions with one or two arguments right now */
-			if (call->num_args == 0 || call->num_args > 2) {
+			/* We're only interested in functions with one, two or three arguments right now */
+			if (call->num_args == 0 || call->num_args > 3) {
 				SET_RESULT_BOT(result);
 				break;
 			}
