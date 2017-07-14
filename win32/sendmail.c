@@ -678,7 +678,8 @@ static int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders)
 
 	if (xheaders) {
 		headers_lc = estrdup(xheaders);
-		for (i = 0; i < strlen(headers_lc); i++) {
+		size_t size_headers_lc = strlen(headers_lc);
+		for (i = 0; i < size_headers_lc; i++) {
 			headers_lc[i] = tolower(headers_lc[i]);
 		}
 	}
