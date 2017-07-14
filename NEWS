@@ -13,6 +13,7 @@ PHP                                                                        NEWS
     visibility). (pmmaga)
   . Fixed #74866 (extension_dir = "./ext" now use current directory for base).
     (Francois Laupretre)
+  . Fixed bug #74923 (Crash when crawling through network share). (Anatol)
 
 - Date:
   . Fixed bug #74852 (property_exists returns true on unknown DateInterval 
