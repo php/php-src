@@ -1552,7 +1552,7 @@ char * exif_dump_data(int *dump_free, int format, int components, int length, in
 		return value_ptr ? value_ptr : "<no data>";
 	}
 	if (format == TAG_FMT_UNDEFINED) {
-		return "<undefined>\n";
+		return "<undefined>";
 	}
 	if (format == TAG_FMT_IFD) {
 		return "";
@@ -3723,7 +3723,7 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo)
 	unsigned int ll, lh;
 	uchar *Data;
 	size_t fpos, size, got, itemlen;
-	jpeg_sof_info  sof_info;
+	jpeg_sof_info sof_info;
 
 	for(section=0;;section++) {
 #ifdef EXIF_DEBUG
@@ -4305,9 +4305,9 @@ static int exif_discard_imageinfo(image_info_type *ImageInfo)
 }
 /* }}} */
 
-/* {{{ exif_read_from_stream
+/* {{{ exif_read_from_impl
  */
-static int exif_read_from_stream(image_info_type *ImageInfo, php_stream *stream, int read_thumbnail, int read_all)
+static int exif_read_from_impl(image_info_type *ImageInfo, php_stream *stream, int read_thumbnail, int read_all)
 {
 	int ret;
 	zend_stat_t st;
@@ -4363,6 +4363,27 @@ static int exif_read_from_stream(image_info_type *ImageInfo, php_stream *stream,
 
 	/* Scan the headers */
 	ret = exif_scan_FILE_header(ImageInfo);
+
+	return ret;
+}
+/* }}} */
+
+/* {{{ exif_read_from_stream
+ */
+static int exif_read_from_stream(image_info_type *ImageInfo, php_stream *stream, int read_thumbnail, int read_all)
+{
+	int ret;
+	off_t old_pos = php_stream_tell(stream);
+
+	if (old_pos) {
+		php_stream_seek(stream, 0, SEEK_SET);
+	}
+
+	ret = exif_read_from_impl(ImageInfo, stream, read_thumbnail, read_all);
+
+	if (old_pos) {
+		php_stream_seek(stream, old_pos, SEEK_SET);
+	}
 
 	return ret;
 }
@@ -4590,7 +4611,7 @@ PHP_FUNCTION(exif_read_data)
 	exif_discard_imageinfo(&ImageInfo);
 
 #ifdef EXIF_DEBUG
-	php_error_docref1(NULL, p_name, E_NOTICE, "done");
+	php_error_docref1(NULL, (Z_TYPE_P(stream) == IS_RESOURCE ? "<stream>" : Z_STRVAL_P(stream)), E_NOTICE, "Done");
 #endif
 }
 /* }}} */
@@ -4672,7 +4693,7 @@ PHP_FUNCTION(exif_thumbnail)
 	exif_discard_imageinfo(&ImageInfo);
 
 #ifdef EXIF_DEBUG
-	php_error_docref1(NULL, p_name, E_NOTICE, "Done");
+	php_error_docref1(NULL, (Z_TYPE_P(stream) == IS_RESOURCE ? "<stream>" : Z_STRVAL_P(stream)), E_NOTICE, "Done");
 #endif
 }
 /* }}} */
