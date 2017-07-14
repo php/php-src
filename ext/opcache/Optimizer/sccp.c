@@ -571,8 +571,9 @@ static inline int ct_eval_func_call(
 
 		if ((zend_string_equals_literal(name, "array_keys")
 				|| zend_string_equals_literal(name, "array_values")
-				|| zend_string_equals_literal(name, "array_flip"))
-				&& num_args == 1
+// TODO: array_flip may throw warnings if the array contains non-int/string values
+//				|| zend_string_equals_literal(name, "array_flip")
+			)	&& num_args == 1
 				&& Z_TYPE_P(args[0]) == IS_ARRAY) {
 			/* pass */
 		} else if (zend_string_equals_literal(name, "str_repeat")
