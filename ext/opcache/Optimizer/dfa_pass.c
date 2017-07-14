@@ -338,13 +338,12 @@ int zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
 
 	if (func_info->callee_info) {
 		zend_call_info *call_info = func_info->callee_info;
-		static zend_function *in_array_function = NULL;
 
-		if (!in_array_function) {
-			in_array_function = zend_hash_str_find_ptr(CG(function_table), "in_array", sizeof("in_array")-1);
-		}
 		do {
-			if (call_info->callee_func == in_array_function
+			if (call_info->caller_call_opline->opcode == ZEND_DO_ICALL
+			 && call_info->callee_func
+			 && ZSTR_LEN(call_info->callee_func->common.function_name) == sizeof("in_array")-1
+			 && memcmp(ZSTR_VAL(call_info->callee_func->common.function_name), "in_array", sizeof("in_array")-1) == 0
 			 && (call_info->caller_init_opline->extended_value == 2
 			  || (call_info->caller_init_opline->extended_value == 3
 			   && (call_info->caller_call_opline - 1)->opcode == ZEND_SEND_VAL
