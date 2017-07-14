@@ -4196,8 +4196,9 @@ int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa
 		case ZEND_FETCH_IS:
 			return (t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT));
 		case ZEND_ISSET_ISEMPTY_DIM_OBJ:
-		case ZEND_FETCH_DIM_IS:
 			return (t1 & MAY_BE_OBJECT) || (t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT));
+		case ZEND_FETCH_DIM_IS:
+			return (t1 & MAY_BE_OBJECT) || (t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
 		case ZEND_CAST:
 			switch (opline->extended_value) {
 				case IS_NULL:
