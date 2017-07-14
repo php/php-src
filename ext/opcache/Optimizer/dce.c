@@ -428,13 +428,13 @@ static int simplify_jumps(zend_ssa *ssa, zend_op_array *op_array) {
 		switch (opline->opcode) {
 			case ZEND_JMPZ_EX:
 			case ZEND_JMPNZ_EX:
-				if (block->successors[1] < 0 && block->successors[0] != block_num + 1) {
+				if (block->successors_count == 1 && block->successors[0] != block_num + 1) {
 					opline->opcode = ZEND_BOOL;
 				}
 				break;
 			case ZEND_JMP_SET:
 			case ZEND_COALESCE:
-				if (block->successors[1] < 0 && block->successors[0] != block_num + 1) {
+				if (block->successors_count == 1 && block->successors[0] != block_num + 1) {
 					opline->opcode = ZEND_QM_ASSIGN;
 				}
 				break;
