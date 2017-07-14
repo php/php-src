@@ -201,4 +201,6 @@ No match, mark = m (JIT)
     aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabax
 Error -8 (match limit exceeded)
 
+/((?(?!))x)(?'name')(?1)/S++
+
 /-- End of testinput12 --/

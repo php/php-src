@@ -44,7 +44,7 @@
 #endif
 
 #define SMART_STRING_DO_REALLOC(d, what) \
-	(d)->c = SMART_STRING_REALLOC((d)->c, (d)->a + 1, (what))
+	(d)->c = (char *) SMART_STRING_REALLOC((d)->c, (d)->a + 1, (what))
 
 /* wrapper */
 
@@ -137,3 +137,13 @@ static zend_always_inline void smart_string_setl(smart_string *dest, char *src, 
 }
 
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

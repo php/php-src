@@ -23,7 +23,7 @@
 void php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	zval retval;
-	zval *args;
+	zval args[1];
 	int status;
 
 	if (!option_array || !zend_is_callable(option_array, IS_CALLABLE_CHECK_NO_ACCESS, NULL)) {
@@ -33,7 +33,6 @@ void php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL)
 		return;
 	}
 
-	args = safe_emalloc(sizeof(zval), 1, 0);
 	ZVAL_COPY(&args[0], value);
 	status = call_user_function_ex(EG(function_table), NULL, option_array, &retval, 1, args, 0, NULL);
 
@@ -46,7 +45,6 @@ void php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL)
 	}
 
 	zval_ptr_dtor(&args[0]);
-	efree(args);
 }
 
 /*

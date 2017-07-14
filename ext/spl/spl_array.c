@@ -153,7 +153,7 @@ static zend_always_inline uint32_t *spl_array_get_pos_ptr(HashTable *ht, spl_arr
 static void spl_array_object_free_storage(zend_object *object)
 {
 	spl_array_object *intern = spl_array_from_obj(object);
-	
+
 	if (intern->ht_iter != (uint32_t) -1) {
 		zend_hash_iterator_del(intern->ht_iter);
 	}
@@ -1192,8 +1192,7 @@ zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object,
 /* }}} */
 
 /* {{{ proto void ArrayObject::__construct([array|object ar = array() [, int flags = 0 [, string iterator_class = "ArrayIterator"]]])
-       proto void ArrayIterator::__construct([array|object ar = array() [, int flags = 0]])
-   Constructs a new array iterator from a path. */
+   Constructs a new array object from an array or object. */
 SPL_METHOD(Array, __construct)
 {
 	zval *object = getThis();
@@ -1215,6 +1214,31 @@ SPL_METHOD(Array, __construct)
 	if (ZEND_NUM_ARGS() > 2) {
 		intern->ce_get_iterator = ce_get_iterator;
 	}
+
+	ar_flags &= ~SPL_ARRAY_INT_MASK;
+
+	spl_array_set_array(object, intern, array, ar_flags, ZEND_NUM_ARGS() == 1);
+}
+ /* }}} */
+
+/* {{{ proto void ArrayIterator::__construct([array|object ar = array() [, int flags = 0]])
+   Constructs a new array iterator from an array or object. */
+SPL_METHOD(ArrayIterator, __construct)
+{
+	zval *object = getThis();
+	spl_array_object *intern;
+	zval *array;
+	zend_long ar_flags = 0;
+
+	if (ZEND_NUM_ARGS() == 0) {
+		return; /* nothing to do */
+	}
+
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "z|l", &array, &ar_flags) == FAILURE) {
+		return;
+	}
+
+	intern = Z_SPLARRAY_P(object);
 
 	ar_flags &= ~SPL_ARRAY_INT_MASK;
 
@@ -1839,6 +1863,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_array___construct, 0, 0, 0)
 	ZEND_ARG_INFO(0, iterator_class)
 ZEND_END_ARG_INFO()
 
+/* ArrayIterator::__construct and ArrayObject::__construct have different signatures */
+ZEND_BEGIN_ARG_INFO_EX(arginfo_array_iterator___construct, 0, 0, 0)
+	ZEND_ARG_INFO(0, array)
+	ZEND_ARG_INFO(0, ar_flags)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_array_offsetGet, 0, 0, 1)
 	ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO()
@@ -1907,7 +1937,7 @@ static const zend_function_entry spl_funcs_ArrayObject[] = {
 };
 
 static const zend_function_entry spl_funcs_ArrayIterator[] = {
-	SPL_ME(Array, __construct,      arginfo_array___construct,      ZEND_ACC_PUBLIC)
+	SPL_ME(ArrayIterator, __construct, arginfo_array_iterator___construct,      ZEND_ACC_PUBLIC)
 	SPL_ME(Array, offsetExists,     arginfo_array_offsetGet,        ZEND_ACC_PUBLIC)
 	SPL_ME(Array, offsetGet,        arginfo_array_offsetGet,        ZEND_ACC_PUBLIC)
 	SPL_ME(Array, offsetSet,        arginfo_array_offsetSet,        ZEND_ACC_PUBLIC)

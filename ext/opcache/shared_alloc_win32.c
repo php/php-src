@@ -221,8 +221,10 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	*/
 #if defined(_WIN64)
 	void *vista_mapping_base_set[] = { (void *) 0x0000100000000000, (void *) 0x0000200000000000, (void *) 0x0000300000000000, (void *) 0x0000700000000000, 0 };
+	DWORD size_high = (requested_size >> 32), size_low = (requested_size & 0xffffffff);
 #else
 	void *vista_mapping_base_set[] = { (void *) 0x20000000, (void *) 0x21000000, (void *) 0x30000000, (void *) 0x31000000, (void *) 0x50000000, 0 };
+	DWORD size_high = 0, size_low = requested_size;
 #endif
 	void **wanted_mapping_base = default_mapping_base_set;
 
@@ -275,7 +277,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	shared_segment = (zend_shared_segment *)((char *)(*shared_segments_p) + sizeof(void *));
 	(*shared_segments_p)[0] = shared_segment;
 
-	memfile	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, requested_size,
+	memfile	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, size_high, size_low,
 								create_name_with_username(ACCEL_FILEMAP_NAME));
 	if (memfile == NULL) {
 		err = GetLastError();

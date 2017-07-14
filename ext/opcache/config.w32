@@ -23,7 +23,7 @@ if (PHP_OPCACHE != "no") {
 		zend_shared_alloc.c \
 		shared_alloc_win32.c", true, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 
-	ADD_SOURCES(configure_module_dirname + "/Optimizer", "zend_optimizer.c pass1_5.c pass2.c pass3.c optimize_func_calls.c block_pass.c optimize_temp_vars_5.c nop_removal.c compact_literals.c zend_cfg.c zend_dfg.c dfa_pass.c zend_ssa.c zend_inference.c zend_func_info.c zend_call_graph.c zend_dump.c", "opcache", "OptimizerObj");
+	ADD_SOURCES(configure_module_dirname + "/Optimizer", "zend_optimizer.c pass1_5.c pass2.c pass3.c optimize_func_calls.c block_pass.c optimize_temp_vars_5.c nop_removal.c compact_literals.c zend_cfg.c zend_dfg.c dfa_pass.c zend_ssa.c zend_inference.c zend_func_info.c zend_call_graph.c sccp.c scdf.c dce.c compact_vars.c zend_dump.c", "opcache", "OptimizerObj");
 
   
 	ADD_FLAG('CFLAGS_OPCACHE', "/I " + configure_module_dirname);

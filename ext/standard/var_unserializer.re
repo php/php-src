@@ -231,14 +231,14 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 				}
 			}
 
-			zval_ptr_dtor(zv);
+			i_zval_ptr_dtor(zv ZEND_FILE_LINE_CC);
 		}
 		next = var_dtor_hash->next;
 		efree_size(var_dtor_hash, sizeof(var_dtor_entries));
 		var_dtor_hash = next;
 	}
 
-	zval_ptr_dtor(&wakeup_name);
+	zval_ptr_dtor_nogc(&wakeup_name);
 }
 
 /* }}} */
@@ -391,7 +391,7 @@ static zend_always_inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTab
 		ZVAL_UNDEF(&key);
 
 		if (!php_var_unserialize_internal(&key, p, max, NULL)) {
-			zval_dtor(&key);
+			zval_ptr_dtor(&key);
 			return 0;
 		}
 
@@ -421,33 +421,77 @@ numeric_key:
 					data = zend_hash_add_new(ht, Z_STR(key), &d);
 				}
 			} else {
-				zval_dtor(&key);
+				zval_ptr_dtor(&key);
 				return 0;
 			}
 		} else {
 			if (EXPECTED(Z_TYPE(key) == IS_STRING)) {
 string_key:
-				if ((old_data = zend_hash_find(ht, Z_STR(key))) != NULL) {
-					if (Z_TYPE_P(old_data) == IS_INDIRECT) {
-						old_data = Z_INDIRECT_P(old_data);
+				{
+					zend_property_info *existing_propinfo;
+					zend_string *new_key, *unmangled;
+					const char *unmangled_class = NULL; 
+					const char *unmangled_prop;
+					size_t unmangled_prop_len;
+
+					if (UNEXPECTED(zend_unmangle_property_name_ex(Z_STR(key), &unmangled_class, &unmangled_prop, &unmangled_prop_len) == FAILURE)) {
+						zval_ptr_dtor(&key);
+						return 0;
 					}
-					var_push_dtor(var_hash, old_data);
-					data = zend_hash_update_ind(ht, Z_STR(key), &d);
-				} else {
-					data = zend_hash_add_new(ht, Z_STR(key), &d);
+
+					unmangled = zend_string_init(unmangled_prop, unmangled_prop_len, 0);
+					if (Z_TYPE_P(rval) == IS_OBJECT
+							&& ((existing_propinfo = zend_hash_find_ptr(&Z_OBJCE_P(rval)->properties_info, unmangled)) != NULL) 
+							&& (existing_propinfo->flags & ZEND_ACC_PPP_MASK)) {
+						if (existing_propinfo->flags & ZEND_ACC_PROTECTED) {
+							new_key = zend_mangle_property_name(
+								"*", 1, ZSTR_VAL(unmangled), ZSTR_LEN(unmangled), Z_OBJCE_P(rval)->type & ZEND_INTERNAL_CLASS);
+							zend_string_release(unmangled);
+						} else if (existing_propinfo->flags & ZEND_ACC_PRIVATE) {
+							if (unmangled_class != NULL && strcmp(unmangled_class, "*") != 0) {
+								new_key = zend_mangle_property_name(
+									unmangled_class, strlen(unmangled_class),
+									ZSTR_VAL(unmangled), ZSTR_LEN(unmangled),
+									Z_OBJCE_P(rval)->type & ZEND_INTERNAL_CLASS);
+							} else {
+								new_key = zend_mangle_property_name(
+									ZSTR_VAL(existing_propinfo->ce->name), ZSTR_LEN(existing_propinfo->ce->name),
+									ZSTR_VAL(unmangled), ZSTR_LEN(unmangled),
+									Z_OBJCE_P(rval)->type & ZEND_INTERNAL_CLASS);
+							}
+							zend_string_release(unmangled);
+						} else {
+							ZEND_ASSERT(existing_propinfo->flags & ZEND_ACC_PUBLIC);
+							new_key = unmangled;
+						}
+						zend_string_release(Z_STR(key));
+						ZVAL_STR(&key, new_key);
+					} else {
+						zend_string_release(unmangled);
+					}
+
+					if ((old_data = zend_hash_find(ht, Z_STR(key))) != NULL) {
+						if (Z_TYPE_P(old_data) == IS_INDIRECT) {
+							old_data = Z_INDIRECT_P(old_data);
+						}
+						var_push_dtor(var_hash, old_data);
+						data = zend_hash_update_ind(ht, Z_STR(key), &d);
+					} else {
+						data = zend_hash_add_new(ht, Z_STR(key), &d);
+					}
 				}
 			} else if (Z_TYPE(key) == IS_LONG) {
 				/* object properties should include no integers */
 				convert_to_string(&key);
 				goto string_key;
 			} else {
-				zval_dtor(&key);
+				zval_ptr_dtor(&key);
 				return 0;
 			}
 		}
 
 		if (!php_var_unserialize_internal(data, p, max, var_hash)) {
-			zval_dtor(&key);
+			zval_ptr_dtor(&key);
 			return 0;
 		}
 
@@ -461,7 +505,7 @@ string_key:
 			var_push_dtor(var_hash, data);
 		}
 
-		zval_dtor(&key);
+		zval_ptr_dtor(&key);
 
 		if (elements && *(*p-1) != ';' && *(*p-1) != '}') {
 			(*p)--;
@@ -474,13 +518,12 @@ string_key:
 
 static inline int finish_nested_data(UNSERIALIZE_PARAMETER)
 {
-	if (*((*p)++) == '}')
-		return 1;
+	if (*p >= max || **p != '}') {
+		return 0;
+	}
 
-#if SOMETHING_NEW_MIGHT_LEAD_TO_CRASH_ENABLE_IF_YOU_ARE_BRAVE
-	zval_ptr_dtor(rval);
-#endif
-	return 0;
+	(*p)++;
+	return 1;
 }
 
 static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
@@ -549,6 +592,10 @@ static inline int object_common2(UNSERIALIZE_PARAMETER, zend_long elements)
 		&& zend_hash_str_exists(&Z_OBJCE_P(rval)->function_table, "__wakeup", sizeof("__wakeup")-1);
 
 	ht = Z_OBJPROP_P(rval);
+	if (elements >= HT_MAX_SIZE - zend_hash_num_elements(ht)) {
+		return 0;
+	}
+
 	zend_hash_extend(ht, zend_hash_num_elements(ht) + elements, (ht->u.flags & HASH_FLAG_PACKED));
 	if (!process_nested_data(UNSERIALIZE_PASSTHRU, ht, elements, 1)) {
 		if (has_wakeup) {
@@ -811,7 +858,7 @@ use_double:
 	*p = YYCURSOR;
     if (!var_hash) return 0;
 
-	if (elements < 0) {
+	if (elements < 0 || elements >= HT_MAX_SIZE) {
 		return 0;
 	}
 
@@ -836,11 +883,11 @@ use_double:
 }
 
 "o:" uiv ":" ["] {
-	long elements;
+	zend_long elements;
     if (!var_hash) return 0;
 
 	elements = object_common1(UNSERIALIZE_PASSTHRU, ZEND_STANDARD_CLASS_DEF_PTR);
-	if (elements < 0) {
+	if (elements < 0 || elements >= HT_MAX_SIZE) {
 		return 0;
 	}
 	return object_common2(UNSERIALIZE_PASSTHRU, elements);

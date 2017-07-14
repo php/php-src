@@ -515,7 +515,6 @@ static PHP_METHOD(SQLite, sqliteCreateFunction)
 	size_t func_name_len;
 	zend_long argc = -1;
 	zend_long flags = 0;
-	zend_string *cbname = NULL;
 	pdo_dbh_t *dbh;
 	pdo_sqlite_db_handle *H;
 	int ret;
@@ -531,12 +530,12 @@ static PHP_METHOD(SQLite, sqliteCreateFunction)
 	dbh = Z_PDO_DBH_P(getThis());
 	PDO_CONSTRUCT_CHECK;
 
-	if (!zend_is_callable(callback, 0, &cbname)) {
+	if (!zend_is_callable(callback, 0, NULL)) {
+		zend_string *cbname = zend_get_callable_name(callback);
 		php_error_docref(NULL, E_WARNING, "function '%s' is not callable", ZSTR_VAL(cbname));
 		zend_string_release(cbname);
 		RETURN_FALSE;
 	}
-	zend_string_release(cbname);
 
 	H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
@@ -588,7 +587,6 @@ static PHP_METHOD(SQLite, sqliteCreateAggregate)
 	char *func_name;
 	size_t func_name_len;
 	zend_long argc = -1;
-	zend_string *cbname = NULL;
 	pdo_dbh_t *dbh;
 	pdo_sqlite_db_handle *H;
 	int ret;
@@ -604,18 +602,19 @@ static PHP_METHOD(SQLite, sqliteCreateAggregate)
 	dbh = Z_PDO_DBH_P(getThis());
 	PDO_CONSTRUCT_CHECK;
 
-	if (!zend_is_callable(step_callback, 0, &cbname)) {
+	if (!zend_is_callable(step_callback, 0, NULL)) {
+		zend_string *cbname = zend_get_callable_name(step_callback);
 		php_error_docref(NULL, E_WARNING, "function '%s' is not callable", ZSTR_VAL(cbname));
 		zend_string_release(cbname);
 		RETURN_FALSE;
 	}
-	zend_string_release(cbname);
-	if (!zend_is_callable(fini_callback, 0, &cbname)) {
+
+	if (!zend_is_callable(fini_callback, 0, NULL)) {
+		zend_string *cbname = zend_get_callable_name(fini_callback);
 		php_error_docref(NULL, E_WARNING, "function '%s' is not callable", ZSTR_VAL(cbname));
 		zend_string_release(cbname);
 		RETURN_FALSE;
 	}
-	zend_string_release(cbname);
 
 	H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
@@ -651,7 +650,6 @@ static PHP_METHOD(SQLite, sqliteCreateCollation)
 	zval *callback;
 	char *collation_name;
 	size_t collation_name_len;
-	zend_string *cbname = NULL;
 	pdo_dbh_t *dbh;
 	pdo_sqlite_db_handle *H;
 	int ret;
@@ -664,12 +662,12 @@ static PHP_METHOD(SQLite, sqliteCreateCollation)
 	dbh = Z_PDO_DBH_P(getThis());
 	PDO_CONSTRUCT_CHECK;
 
-	if (!zend_is_callable(callback, 0, &cbname)) {
+	if (!zend_is_callable(callback, 0, NULL)) {
+		zend_string *cbname = zend_get_callable_name(callback);
 		php_error_docref(NULL, E_WARNING, "function '%s' is not callable", ZSTR_VAL(cbname));
 		zend_string_release(cbname);
 		RETURN_FALSE;
 	}
-	zend_string_release(cbname);
 
 	H = (pdo_sqlite_db_handle *)dbh->driver_data;
 

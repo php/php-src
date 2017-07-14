@@ -275,3 +275,13 @@ static zend_always_inline zend_ast *zend_ast_list_rtrim(zend_ast *ast) {
 	return ast;
 }
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

@@ -132,7 +132,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, initialize_result_set_rest)(MYSQLND_RE
 						meta->fields[i].max_length = len;
 					}
 				}
-				zval_ptr_dtor(&current_row[i]);
+				zval_ptr_dtor_nogc(&current_row[i]);
 			}
 		}
 		mnd_efree(current_row);
@@ -156,7 +156,7 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, free_last_data)(MYSQLND_RES_UNBUFFERED
 	if (unbuf->last_row_data) {
 		unsigned int i;
 		for (i = 0; i < unbuf->field_count; i++) {
-			zval_ptr_dtor(&(unbuf->last_row_data[i]));
+			zval_ptr_dtor_nogc(&(unbuf->last_row_data[i]));
 		}
 
 		/* Free last row's zvals */
@@ -225,7 +225,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_zval, free_result)(MYSQLND_RES_BUFFERED_Z
 
 			if (current_row != NULL) {
 				for (col = field_count - 1; col >= 0; --col) {
-					zval_ptr_dtor(&(current_row[col]));
+					zval_ptr_dtor_nogc(&(current_row[col]));
 				}
 			}
 		}
@@ -1244,7 +1244,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, fetch_row)(MYSQLND_RES * result, void 
 				It also simplifies the handling of Z_ADDREF_P because we don't need to check if only
 				either NUM or ASSOC is set but not both.
 			*/
-			zval_ptr_dtor(data);
+			zval_ptr_dtor_nogc(data);
 		}
 		mnd_efree(current_row);
 		++set->current_row;
@@ -1822,7 +1822,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_all)(MYSQLND_RES * result, const unsigned int 
 	do {
 		mysqlnd_fetch_into(result, flags, &row, MYSQLND_MYSQLI);
 		if (Z_TYPE(row) != IS_ARRAY) {
-			zval_ptr_dtor(&row);
+			zval_ptr_dtor_nogc(&row);
 			break;
 		}
 		add_index_zval(return_value, i++, &row);

@@ -112,6 +112,10 @@ typedef enum {
 
 #define PHP_WIN32_IOUTIL_IS_LONG_PATHW(pathw, path_lenw) (path_lenw >= PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW \
 	&& 0 == wcsncmp((pathw), PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW, PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW))
+#define PHP_WIN32_IOUTIL_IS_UNC_PATHW(pathw, path_lenw) (path_lenw >= PHP_WIN32_IOUTIL_UNC_PATH_PREFIX_LENW \
+	&& 0 == wcsncmp((pathw), PHP_WIN32_IOUTIL_UNC_PATH_PREFIXW, PHP_WIN32_IOUTIL_UNC_PATH_PREFIX_LENW))
+#define PHP_WIN32_IOUTIL_IS_JUNCTION_PATHW(pathw, path_lenw) (path_lenw >= PHP_WIN32_IOUTIL_JUNCTION_PREFIX_LENW \
+	&& 0 == wcsncmp((pathw), PHP_WIN32_IOUTIL_JUNCTION_PREFIXW, PHP_WIN32_IOUTIL_JUNCTION_PREFIX_LENW))
 #define PHP_WIN32_IOUTIL_IS_ABSOLUTEW(pathw, path_lenw) (PHP_WIN32_IOUTIL_IS_LONG_PATHW(pathw, path_lenw) \
 	|| path_lenw >= 3 && PHP_WIN32_IOUTIL_IS_LETTERW(pathw[0]) && L':' == pathw[1] && IS_SLASHW(pathw[2]))
 #define PHP_WIN32_IOUTIL_IS_UNC(pathw, path_lenw) (path_lenw >= 2 && PHP_WIN32_IOUTIL_IS_SLASHW(pathw[0]) && PHP_WIN32_IOUTIL_IS_SLASHW(pathw[1]) \
@@ -137,7 +141,7 @@ typedef enum {
 #define PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, ret, dealloc) do { \
 		if (!PHP_WIN32_IOUTIL_PATH_IS_OK_W(pathw, wcslen(pathw))) { \
 			if (dealloc) { \
-				free(pathw); \
+				free((void *)pathw); \
 			} \
 			SET_ERRNO_FROM_WIN32_CODE(ERROR_ACCESS_DENIED); \
 			return ret; \
@@ -165,6 +169,8 @@ __forceinline static wchar_t *php_win32_ioutil_conv_any_to_w(const char* in, siz
 
 	/* Only prefix with long if it's needed. */
 	if (mb_len > _MAX_PATH) {
+		size_t new_mb_len;
+
 		ret = (wchar_t *) malloc((mb_len + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW + 1) * sizeof(wchar_t));
 		if (!ret) {
 			free(mb);
@@ -176,9 +182,19 @@ __forceinline static wchar_t *php_win32_ioutil_conv_any_to_w(const char* in, siz
 		   Partial normalization could still do a better job further. And
 		   otherwise, the path might be unchanged which is ok if the path
 		   was valid long one. */
-		(void)php_win32_ioutil_normalize_path_w(&mb, mb_len, &mb_len);
+		(void)php_win32_ioutil_normalize_path_w(&mb, mb_len, &new_mb_len);
 
-		if (PHP_WIN32_IOUTIL_IS_LONG_PATHW(mb, mb_len)) {
+		if (new_mb_len > mb_len) {
+			wchar_t *tmp = (wchar_t *) realloc(ret, (new_mb_len + 1) * sizeof(wchar_t));
+			if (!tmp) {
+				free(ret);
+				return NULL;
+			}
+			ret = tmp;
+			mb_len = new_mb_len;
+		}
+
+		if (PHP_WIN32_IOUTIL_IS_LONG_PATHW(mb, mb_len) || PHP_WIN32_IOUTIL_IS_JUNCTION_PATHW(mb, mb_len) || PHP_WIN32_IOUTIL_IS_UNC_PATHW(mb, mb_len)) {
 			memmove(ret, mb, mb_len * sizeof(wchar_t));
 			ret[mb_len] = L'\0';
 		} else {
@@ -222,7 +238,7 @@ PW32IO size_t php_win32_ioutil_dirname(char *buf, size_t len);
 PW32IO int php_win32_ioutil_open_w(const wchar_t *path, int flags, ...);
 PW32IO int php_win32_ioutil_chdir_w(const wchar_t *path);
 PW32IO int php_win32_ioutil_rename_w(const wchar_t *oldname, const wchar_t *newname);
-PW32IO wchar_t *php_win32_ioutil_getcwd_w(const wchar_t *buf, int len);
+PW32IO wchar_t *php_win32_ioutil_getcwd_w(wchar_t *buf, size_t len);
 
 #if 0
 PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode);

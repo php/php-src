@@ -103,6 +103,7 @@ PHP_METHOD(sqlite3, open)
 	char *filename, *encryption_key, *fullpath;
 	size_t filename_len, encryption_key_len = 0;
 	zend_long flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
+	int rc;
 
 	db_obj = Z_SQLITE3_DB_P(object);
 
@@ -133,11 +134,13 @@ PHP_METHOD(sqlite3, open)
 	}
 
 #if SQLITE_VERSION_NUMBER >= 3005000
-	if (sqlite3_open_v2(fullpath, &(db_obj->db), flags, NULL) != SQLITE_OK) {
+	rc = sqlite3_open_v2(fullpath, &(db_obj->db), flags, NULL);
 #else
-	if (sqlite3_open(fullpath, &(db_obj->db)) != SQLITE_OK) {
+	rc = sqlite3_open(fullpath, &(db_obj->db));
 #endif
-		zend_throw_exception_ex(zend_ce_exception, 0, "Unable to open database: %s", sqlite3_errmsg(db_obj->db));
+	if (rc != SQLITE_OK) {
+		zend_throw_exception_ex(zend_ce_exception, 0, "Unable to open database: %s",
+				db_obj->db ? sqlite3_errmsg(db_obj->db) : sqlite3_errstr(rc));
 		if (fullpath != filename) {
 			efree(fullpath);
 		}
@@ -907,7 +910,6 @@ PHP_METHOD(sqlite3, createFunction)
 	char *sql_func;
 	size_t sql_func_len;
 	zval *callback_func;
-	zend_string *callback_name;
 	zend_long sql_func_num_args = -1;
 	zend_long flags = 0;
 	db_obj = Z_SQLITE3_DB_P(object);
@@ -922,12 +924,12 @@ PHP_METHOD(sqlite3, createFunction)
 		RETURN_FALSE;
 	}
 
-	if (!zend_is_callable(callback_func, 0, &callback_name)) {
+	if (!zend_is_callable(callback_func, 0, NULL)) {
+		zend_string *callback_name = zend_get_callable_name(callback_func);
 		php_sqlite3_error(db_obj, "Not a valid callback function %s", ZSTR_VAL(callback_name));
 		zend_string_release(callback_name);
 		RETURN_FALSE;
 	}
-	zend_string_release(callback_name);
 
 	func = (php_sqlite3_func *)ecalloc(1, sizeof(*func));
 
@@ -956,7 +958,6 @@ PHP_METHOD(sqlite3, createAggregate)
 	zval *object = getThis();
 	php_sqlite3_func *func;
 	char *sql_func;
-	zend_string *callback_name;
 	size_t sql_func_len;
 	zval *step_callback, *fini_callback;
 	zend_long sql_func_num_args = -1;
@@ -972,19 +973,19 @@ PHP_METHOD(sqlite3, createAggregate)
 		RETURN_FALSE;
 	}
 
-	if (!zend_is_callable(step_callback, 0, &callback_name)) {
+	if (!zend_is_callable(step_callback, 0, NULL)) {
+		zend_string *callback_name = zend_get_callable_name(step_callback);
 		php_sqlite3_error(db_obj, "Not a valid callback function %s", ZSTR_VAL(callback_name));
 		zend_string_release(callback_name);
 		RETURN_FALSE;
 	}
-	zend_string_release(callback_name);
 
-	if (!zend_is_callable(fini_callback, 0, &callback_name)) {
+	if (!zend_is_callable(fini_callback, 0, NULL)) {
+		zend_string *callback_name = zend_get_callable_name(fini_callback);
 		php_sqlite3_error(db_obj, "Not a valid callback function %s", ZSTR_VAL(callback_name));
 		zend_string_release(callback_name);
 		RETURN_FALSE;
 	}
-	zend_string_release(callback_name);
 
 	func = (php_sqlite3_func *)ecalloc(1, sizeof(*func));
 
@@ -1014,7 +1015,6 @@ PHP_METHOD(sqlite3, createCollation)
 	zval *object = getThis();
 	php_sqlite3_collation *collation;
 	char *collation_name;
-	zend_string *callback_name;
 	size_t collation_name_len;
 	zval *callback_func;
 	db_obj = Z_SQLITE3_DB_P(object);
@@ -1029,12 +1029,12 @@ PHP_METHOD(sqlite3, createCollation)
 		RETURN_FALSE;
 	}
 
-	if (!zend_is_callable(callback_func, 0, &callback_name)) {
+	if (!zend_is_callable(callback_func, 0, NULL)) {
+		zend_string *callback_name = zend_get_callable_name(callback_func);
 		php_sqlite3_error(db_obj, "Not a valid callback function %s", ZSTR_VAL(callback_name));
 		zend_string_release(callback_name);
 		RETURN_FALSE;
 	}
-	zend_string_release(callback_name);
 
 	collation = (php_sqlite3_collation *)ecalloc(1, sizeof(*collation));
 	if (sqlite3_create_collation(db_obj->db, collation_name, SQLITE_UTF8, collation, php_sqlite3_callback_compare) == SQLITE_OK) {

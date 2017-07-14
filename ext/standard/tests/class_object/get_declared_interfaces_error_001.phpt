@@ -12,7 +12,7 @@ echo "*** Testing get_declared_interfaces() : error conditions ***\n";
 
 // One argument
 echo "\n-- Testing get_declared_interfaces() function with one argument --\n";
-$extra_arg = 10;;
+$extra_arg = 10;
 var_dump( get_declared_interfaces($extra_arg) );
 
 echo "Done";

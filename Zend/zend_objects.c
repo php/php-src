@@ -76,7 +76,7 @@ ZEND_API void zend_object_std_dtor(zend_object *object)
 
 ZEND_API void zend_objects_destroy_object(zend_object *object)
 {
-	zend_function *destructor = object ? object->ce->destructor : NULL;
+	zend_function *destructor = object->ce->destructor;
 
 	if (destructor) {
 		zend_object *old_exception;
@@ -263,4 +263,6 @@ ZEND_API zend_object *zend_objects_clone_obj(zval *zobject)
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

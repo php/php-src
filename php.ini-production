@@ -867,64 +867,63 @@ default_socket_timeout = 60
 ; If you wish to have an extension loaded automatically, use the following
 ; syntax:
 ;
-;   extension=modulename.extension
+;   extension=modulename
 ;
-; For example, on Windows:
+; For example:
 ;
-;   extension=mysqli.dll
-;
-; ... or under UNIX:
-;
-;   extension=mysqli.so
-;
-; ... or with a path:
+;   extension=mysqli
+; 
+; When the extension library to load is not located in the default extension
+; directory, You may specify an absolute path to the library file:
 ;
 ;   extension=/path/to/extension/mysqli.so
 ;
-; If you only provide the name of the extension, PHP will look for it in its
-; default extension directory.
+; Note : The syntax used in previous PHP versions ('extension=<ext>.so' and
+; 'extension='php_<ext>.dll') is supported for legacy reasons and may be
+; deprecated in a future PHP major version. So, when it is possible, please
+; move to the new ('extension=<ext>) syntax.
 ;
-; Windows Extensions
-; Note that ODBC support is built in, so no dll is needed for it.
-; Note that many DLL files are located in the extensions/ (PHP 4) ext/ (PHP 5+)
-; extension folders as well as the separate PECL DLL download (PHP 5+).
-; Be sure to appropriately set the extension_dir directive.
+; Notes for Windows environments :
 ;
-;extension=php_bz2.dll
-;extension=php_curl.dll
-;extension=php_fileinfo.dll
-;extension=php_ftp.dll
-;extension=php_gd2.dll
-;extension=php_gettext.dll
-;extension=php_gmp.dll
-;extension=php_intl.dll
-;extension=php_imap.dll
-;extension=php_interbase.dll
-;extension=php_ldap.dll
-;extension=php_mbstring.dll
-;extension=php_exif.dll      ; Must be after mbstring as it depends on it
-;extension=php_mysqli.dll
-;extension=php_oci8_12c.dll  ; Use with Oracle Database 12c Instant Client
-;extension=php_openssl.dll
-;extension=php_pdo_firebird.dll
-;extension=php_pdo_mysql.dll
-;extension=php_pdo_oci.dll
-;extension=php_pdo_odbc.dll
-;extension=php_pdo_pgsql.dll
-;extension=php_pdo_sqlite.dll
-;extension=php_pgsql.dll
-;extension=php_shmop.dll
+; - ODBC support is built in, so no dll is needed for it.
+; - Many DLL files are located in the extensions/ (PHP 4) or ext/ (PHP 5+)
+;   extension folders as well as the separate PECL DLL download (PHP 5+).
+;   Be sure to appropriately set the extension_dir directive.
+;
+;extension=bz2
+;extension=curl
+;extension=fileinfo
+;extension=gd2
+;extension=gettext
+;extension=gmp
+;extension=intl
+;extension=imap
+;extension=interbase
+;extension=ldap
+;extension=mbstring
+;extension=exif      ; Must be after mbstring as it depends on it
+;extension=mysqli
+;extension=oci8_12c  ; Use with Oracle Database 12c Instant Client
+;extension=openssl
+;extension=pdo_firebird
+;extension=pdo_mysql
+;extension=pdo_oci
+;extension=pdo_odbc
+;extension=pdo_pgsql
+;extension=pdo_sqlite
+;extension=pgsql
+;extension=shmop
 
 ; The MIBS data available in the PHP distribution must be installed.
 ; See http://www.php.net/manual/en/snmp.installation.php
-;extension=php_snmp.dll
+;extension=snmp
 
-;extension=php_soap.dll
-;extension=php_sockets.dll
-;extension=php_sqlite3.dll
-;extension=php_tidy.dll
-;extension=php_xmlrpc.dll
-;extension=php_xsl.dll
+;extension=soap
+;extension=sockets
+;extension=sqlite3
+;extension=tidy
+;extension=xmlrpc
+;extension=xsl
 
 ;;;;;;;;;;;;;;;;;;;
 ; Module Settings ;

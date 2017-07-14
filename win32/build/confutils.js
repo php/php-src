@@ -46,7 +46,8 @@ var PHP_TEST_INI_EXT_EXCLUDE = "";
 
 var PHP_MAKEFILE_FRAGMENTS = PHP_SRC_DIR + "\\Makefile.fragments.w32";
 
-/* Care also about NTDDI_VERSION and _WIN32_WINNT in config.w32.h.in */
+/* Care also about NTDDI_VERSION and _WIN32_WINNT in config.w32.h.in 
+   and manifest. */
 var WINVER = "0x0601"; /* 7/2008r2 */
 
 // There's a minimum requirement for re2c..
@@ -67,12 +68,14 @@ VC_VERSIONS[1700] = 'MSVC11 (Visual C++ 2012)';
 VC_VERSIONS[1800] = 'MSVC12 (Visual C++ 2013)';
 VC_VERSIONS[1900] = 'MSVC14 (Visual C++ 2015)';
 VC_VERSIONS[1910] = 'MSVC15 (Visual C++ 2017)';
+VC_VERSIONS[1911] = 'MSVC15 (Visual C++ 2017)';
 
 var VC_VERSIONS_SHORT = new Array();
 VC_VERSIONS_SHORT[1700] = 'VC11';
 VC_VERSIONS_SHORT[1800] = 'VC12';
 VC_VERSIONS_SHORT[1900] = 'VC14';
 VC_VERSIONS_SHORT[1910] = 'VC15';
+VC_VERSIONS_SHORT[1911] = 'VC15';
 
 if (PROGRAM_FILES == null) {
 	PROGRAM_FILES = "C:\\Program Files";
@@ -1228,9 +1231,6 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 		}
 
 		ldflags += " /PGD:$(PGOPGD_DIR)\\" + makefiletarget.substring(0, makefiletarget.indexOf(".")) + ".pgd";
-	} else if (PHP_DEBUG != "yes") {
-		ADD_FLAG('CFLAGS_' + SAPI, "/GL");
-		ADD_FLAG('LDFLAGS_' + SAPI, "/LTCG:INCREMENTAL");
 	}
 
 	if (MODE_PHPIZE) {
@@ -1431,9 +1431,6 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 			ADD_FLAG('CFLAGS_' + EXT, "/GL /O2");
 
 			ldflags = " /PGD:$(PGOPGD_DIR)\\" + dllname.substring(0, dllname.indexOf(".")) + ".pgd";
-		} else if (PHP_DEBUG != "yes") {
-			ADD_FLAG('CFLAGS_' + EXT, "/GL");
-			ADD_FLAG('LDFLAGS_' + EXT, "/LTCG:INCREMENTAL");
 		}
 
 		MFO.WriteLine("$(BUILD_DIR)\\" + libname + ": $(BUILD_DIR)\\" + dllname);
@@ -1476,9 +1473,6 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 				ADD_FLAG("STATIC_EXT_CFLAGS", "/GL /O2");
 				static_pgo_enabled = true;
 			}
-		} else if (PHP_DEBUG != "yes") {
-			ADD_FLAG("STATIC_EXT_CFLAGS", "/GL");
-			ADD_FLAG('STATIC_EXT_LDFLAGS', "/LTCG:INCREMENTAL");
 		}
 
 		/* find the header that declares the module pointer,
@@ -1691,7 +1685,7 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 				MFO.WriteLine("\t@$(CC) $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " /Fo" + sub_build + d + obj);
 
 				if ("clang" == PHP_ANALYZER) {
-					MFO.WriteLine("\t\"@$(CLANG_CL)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER) $(" + bd_flags_name + "_ANALYZER) " + dir + "\\" + src); 
+					MFO.WriteLine("\t@\"$(CLANG_CL)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER) $(" + bd_flags_name + "_ANALYZER) " + dir + "\\" + src); 
 				} else if ("cppcheck" == PHP_ANALYZER) {
 					MFO.WriteLine("\t\"@$(CPPCHECK)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER) $(" + bd_flags_name + "_ANALYZER) " + analyzer_base_flags + " " + dir + "\\" + src); 
 				}else if (PHP_ANALYZER == "pvs") {
@@ -3389,7 +3383,7 @@ function check_binary_tools_sdk()
 
 	/* Basic test, extend by need. */
 	if (BIN_TOOLS_SDK_VER_MAJOR < 2) {
-		ERROR("Incompatible binary tools version. Please consult https://wiki.php.net/internals/windows/stepbystepbuild_sdk_2");
+		ERROR("Incompatible binary tools version. Please consult\r\nhttps://wiki.php.net/internals/windows/stepbystepbuild_sdk_2");
 	}
 }
 

@@ -363,4 +363,7 @@ correctly, but that messes up comparisons). --/
 
 /abc/89
 
+//8+L
+    \xf1\xad\xae\xae
+
 /-- End of testinput15 --/

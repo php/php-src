@@ -37,7 +37,7 @@ ZEND_API void zend_{%EXECUTOR_NAME%}(zend_op_array *op_array, zval *return_value
 		execute_data->symbol_table = &EG(symbol_table);
 	}
 	EX(prev_execute_data) = EG(current_execute_data);
-	i_init_execute_data(execute_data, op_array, return_value);
+	i_init_code_execute_data(execute_data, op_array, return_value);
 	zend_{%EXECUTOR_NAME%}_ex(execute_data);
 	zend_vm_stack_free_call_frame(execute_data);
 }

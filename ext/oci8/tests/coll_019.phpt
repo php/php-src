@@ -13,7 +13,7 @@ require(dirname(__FILE__).'/skipif.inc');
 
 require dirname(__FILE__)."/connect.inc";
 
-$ora_sql = "DROP TYPE ".$type_name;;
+$ora_sql = "DROP TYPE ".$type_name;
 $statement = oci_parse($c,$ora_sql);
 @oci_execute($statement);
 

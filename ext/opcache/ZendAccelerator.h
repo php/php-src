@@ -175,7 +175,6 @@ typedef struct _zend_accel_directives {
 	zend_bool      validate_timestamps;
 	zend_bool      revalidate_path;
 	zend_bool      save_comments;
-	zend_bool      fast_shutdown;
 	zend_bool      protect_memory;
 	zend_bool      file_override_enabled;
 	zend_bool      inherited_hack;

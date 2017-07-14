@@ -404,17 +404,26 @@ static void log_message (const char *fmt, ...)
 #define DEBUG_MESSAGE(fmt, ...)
 #endif
 
+static int lsapi_activate_user_ini(TSRMLS_D);
+
+static int sapi_lsapi_activate(TSRMLS_D)
+{
+    if (parse_user_ini && lsapi_activate_user_ini(TSRMLS_C) == FAILURE) {
+        return FAILURE;
+    }
+    return SUCCESS;
+}
 /* {{{ sapi_module_struct cgi_sapi_module
  */
 static sapi_module_struct lsapi_sapi_module =
 {
     "litespeed",
-    "LiteSpeed V6.10",
+    "LiteSpeed V6.11",
 
     php_lsapi_startup,              /* startup */
     php_module_shutdown_wrapper,    /* shutdown */
 
-    NULL,                           /* activate */
+    sapi_lsapi_activate,            /* activate */
     sapi_lsapi_deactivate,          /* deactivate */
 
     sapi_lsapi_ub_write,            /* unbuffered write */
@@ -540,8 +549,6 @@ static int lsapi_execute_script( zend_file_handle * file_handle)
 
 }
 
-static int lsapi_activate_user_ini();
-
 static int lsapi_module_main(int show_source)
 {
     zend_file_handle file_handle = {0};
@@ -550,10 +557,6 @@ static int lsapi_module_main(int show_source)
         return -1;
     }
     
-    if (parse_user_ini && lsapi_activate_user_ini() == FAILURE) {
-        return -1;
-    }
-
     if (show_source) {
         zend_syntax_highlighter_ini syntax_highlighter_ini;
 
@@ -577,10 +580,15 @@ static int alter_ini( const char * pKey, int keyLen, const char * pValue, int va
     zend_string * psKey;
 #endif
     int type = ZEND_INI_PERDIR;
+    int stage = PHP_INI_STAGE_RUNTIME;
     if ( '\001' == *pKey ) {
         ++pKey;
         if ( *pKey == 4 ) {
             type = ZEND_INI_SYSTEM;
+        }
+        else
+        {
+            stage = PHP_INI_STAGE_HTACCESS;
         }
         ++pKey;
         --keyLen;
@@ -596,12 +604,12 @@ static int alter_ini( const char * pKey, int keyLen, const char * pValue, int va
             psKey = zend_string_init(pKey, keyLen, 1);
             zend_alter_ini_entry_chars(psKey,
                              (char *)pValue, valLen,
-                             type, PHP_INI_STAGE_ACTIVATE);
+                             type, stage);
             zend_string_release(psKey);
 #else
             zend_alter_ini_entry((char *)pKey, keyLen,
                              (char *)pValue, valLen,
-                             type, PHP_INI_STAGE_ACTIVATE);
+                             type, stage);
 #endif
         }
     }

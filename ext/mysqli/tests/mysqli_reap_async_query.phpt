@@ -38,7 +38,7 @@ if (!$IS_MYSQLND)
 
 	function poll_async($offset, $link, $links, $errors, $reject, $exp_ready, $use_oo_syntax) {
 
-		if ($exp_ready !== ($tmp = mysqli_poll($links, $errors, $reject, 0, 1000)))
+		if ($exp_ready !== ($tmp = mysqli_poll($links, $errors, $reject, 0, 2000)))
 			printf("[%03d + 1] There should be %d links ready to read from, %d ready\n",
 				$offset, $exp_ready, $tmp);
 

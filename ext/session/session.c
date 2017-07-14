@@ -1762,7 +1762,7 @@ static PHP_FUNCTION(session_name)
 		RETURN_FALSE;
 	}
 
-	if (SG(headers_sent)) {
+	if (name && SG(headers_sent)) {
 		php_error_docref(NULL, E_WARNING, "Cannot change session name when headers already sent");
 		RETURN_FALSE;
 	}
@@ -1793,7 +1793,7 @@ static PHP_FUNCTION(session_module_name)
 		RETURN_FALSE;
 	}
 
-	if (SG(headers_sent)) {
+	if (name && SG(headers_sent)) {
 		php_error_docref(NULL, E_WARNING, "Cannot change save handler module when headers already sent");
 		RETURN_FALSE;
 	}
@@ -1830,7 +1830,6 @@ static PHP_FUNCTION(session_set_save_handler)
 {
 	zval *args = NULL;
 	int i, num_args, argc = ZEND_NUM_ARGS();
-	zend_string *name;
 	zend_string *ini_name, *ini_val;
 
 	if (PS(session_status) == php_session_active) {
@@ -1960,12 +1959,12 @@ static PHP_FUNCTION(session_set_save_handler)
 
 	/* At this point argc can only be between 6 and PS_NUM_APIS */
 	for (i = 0; i < argc; i++) {
-		if (!zend_is_callable(&args[i], 0, &name)) {
+		if (!zend_is_callable(&args[i], 0, NULL)) {
+			zend_string *name = zend_get_callable_name(&args[i]);
 			php_error_docref(NULL, E_WARNING, "Argument %d is not a valid callback", i+1);
 			zend_string_release(name);
 			RETURN_FALSE;
 		}
-		zend_string_release(name);
 	}
 
 	if (PS(mod) && PS(mod) != &ps_mod_user) {
@@ -2005,7 +2004,7 @@ static PHP_FUNCTION(session_save_path)
 		RETURN_FALSE;
 	}
 
-	if (SG(headers_sent)) {
+	if (name && SG(headers_sent)) {
 		php_error_docref(NULL, E_WARNING, "Cannot change save path when headers already sent");
 		RETURN_FALSE;
 	}
@@ -2233,7 +2232,7 @@ static PHP_FUNCTION(session_cache_limiter)
 		RETURN_FALSE;
 	}
 
-	if (SG(headers_sent)) {
+	if (limiter && SG(headers_sent)) {
 		php_error_docref(NULL, E_WARNING, "Cannot change cache limiter when headers already sent");
 		RETURN_FALSE;
 	}
@@ -2264,7 +2263,7 @@ static PHP_FUNCTION(session_cache_expire)
 		RETURN_LONG(PS(cache_expire));
 	}
 
-	if (SG(headers_sent)) {
+	if (expires && SG(headers_sent)) {
 		php_error_docref(NULL, E_WARNING, "Cannot change cache expire when headers already sent");
 		RETURN_FALSE;
 	}
