@@ -348,6 +348,7 @@ int ssa_verify_integrity(zend_op_array *op_array, zend_ssa *ssa, const char *ext
 
 		for (j = 0; j < block->predecessors_count; j++) {
 			if (predecessors[j] >= 0) {
+				int k;
 				zend_basic_block *prev_block = &cfg->blocks[predecessors[j]];
 				if (!(prev_block->flags & ZEND_BB_REACHABLE)) {
 					FAIL("Predecessor %d of %d not reachable\n", predecessors[j], i);
@@ -355,16 +356,11 @@ int ssa_verify_integrity(zend_op_array *op_array, zend_ssa *ssa, const char *ext
 				if (!is_in_successors(prev_block, i)) {
 					FAIL("Block %d successors missing %d\n", predecessors[j], i);
 				}
-				// TODO Right now CFG construction can generate the same predecessor multiple
-				// times. Decide whether or not it should do that, for now disable the check.
-#if 0
-				int k;
 				for (k = 0; k < block->predecessors_count; k++) {
 					if (k != j && predecessors[k] == predecessors[j]) {
 						FAIL("Block %d has duplicate predecessor %d\n", i, predecessors[j]);
 					}
 				}
-#endif
 			}
 		}
 	}
