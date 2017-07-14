@@ -3723,7 +3723,7 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo)
 	unsigned int ll, lh;
 	uchar *Data;
 	size_t fpos, size, got, itemlen;
-	jpeg_sof_info  sof_info;
+	jpeg_sof_info sof_info;
 
 	for(section=0;;section++) {
 #ifdef EXIF_DEBUG
