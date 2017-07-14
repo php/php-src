@@ -44,6 +44,11 @@ PHP                                                                        NEWS
 - LDAP:
   . Fixed passing an empty array to ldap_set_option for client or server controls.
 
+- Opcache:
+  . Added goblal optimisation passes based on data flow analyses using SSA form:
+    SCCP - Sparse Conditional Constant Propagation, DCE - Dead Code Elimination
+    and removing of unused local variables (Nikita, Dmitry)
+
 - OpenSSL:
   . Fixed bug #74651 (negative-size-param (-1) in memcpy in zif_openssl_seal()).
     (Stas)
