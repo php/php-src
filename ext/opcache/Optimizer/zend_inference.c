@@ -4100,7 +4100,7 @@ int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa
 			 || (t2 & MAY_BE_ANY) == MAY_BE_NULL) {
 				return 0;
 			}
-			return (t1 & MAY_BE_OBJECT) || (t2 & MAY_BE_OBJECT);
+			return (t1 & (MAY_BE_OBJECT|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_ARRAY_OF_OBJECT)) || (t2 & (MAY_BE_OBJECT|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_ARRAY_OF_OBJECT));
 		case ZEND_ASSIGN_ADD:
 			if (opline->extended_value != 0) {
 				return 1;
