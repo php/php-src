@@ -4208,7 +4208,7 @@ int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa
 					return (t1 & MAY_BE_OBJECT);
 				case IS_LONG:
 				case IS_DOUBLE:
-					return (t1 & (MAY_BE_STRING|MAY_BE_OBJECT));
+					return (t1 & MAY_BE_OBJECT);
 				case IS_STRING:
 					return (t1 & (MAY_BE_ARRAY|MAY_BE_OBJECT));
 				case IS_ARRAY:
