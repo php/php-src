@@ -1,5 +1,5 @@
 --TEST--
-exif_read_data() with streams test
+exif_read_data() with streams seeking test
 --SKIPIF--
 <?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
 --INI--
