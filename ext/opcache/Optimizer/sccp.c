@@ -1367,7 +1367,9 @@ static int replace_constant_operands(sccp_ctx *ctx) {
 				if (opline->op2_type == IS_CONST) {
 					literal_dtor(&ZEND_OP2_LITERAL(opline));
 				} else if (ssa_op->op2_use >= 0) {
-					zend_ssa_unlink_use_chain(ssa, var->definition, ssa_op->op2_use);
+					if (ssa_op->op2_use != ssa_op->op1_use) {
+						zend_ssa_unlink_use_chain(ssa, var->definition, ssa_op->op2_use);
+					}
 					ssa_op->op2_use = -1;
 					ssa_op->op2_use_chain = -1;
 				}
