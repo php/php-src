@@ -282,7 +282,8 @@ int zend_ssa_find_false_dependencies(const zend_op_array *op_array, zend_ssa *ss
 				}
 			} else {
 				for (j = 0; j < ssa->cfg.blocks[p->block].predecessors_count; j++) {
-					if (p->sources[j] >= 0 && ssa->vars[p->sources[j]].no_val) {
+					ZEND_ASSERT(p->sources[j] >= 0);
+					if (ssa->vars[p->sources[j]].no_val) {
 						ssa_vars[p->sources[j]].no_val = 0; /* used indirectly */
 						zend_bitset_incl(worklist, p->sources[j]);
 					}
@@ -854,7 +855,8 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 			}
 		} else {
 			for (i = 0; i < ssa->cfg.blocks[p->block].predecessors_count; i++) {
-				if (p->sources[i] >= 0 && ssa->var_info[p->sources[i]].has_range) {
+				ZEND_ASSERT(p->sources[i] >= 0);
+				if (ssa->var_info[p->sources[i]].has_range) {
 					/* union */
 					tmp->underflow |= ssa->var_info[p->sources[i]].range.underflow;
 					tmp->min = MIN(tmp->min, ssa->var_info[p->sources[i]].range.min);
@@ -3328,17 +3330,18 @@ int zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script
 				}
 				UPDATE_SSA_TYPE(tmp, j);
 				for (i = 0; i < blocks[p->block].predecessors_count; i++) {
-					if (p->sources[i] >= 0) {
-						zend_ssa_var_info *info = &ssa_var_info[p->sources[i]];
-						if (info->type & MAY_BE_OBJECT) {
-							if (first) {
-								ce = info->ce;
-								is_instanceof = info->is_instanceof;
-								first = 0;
-							} else {
-								is_instanceof |= info->is_instanceof;
-								ce = join_class_entries(ce, info->ce, &is_instanceof);
-							}
+					zend_ssa_var_info *info;
+
+					ZEND_ASSERT(p->sources[i] >= 0);
+					info = &ssa_var_info[p->sources[i]];
+					if (info->type & MAY_BE_OBJECT) {
+						if (first) {
+							ce = info->ce;
+							is_instanceof = info->is_instanceof;
+							first = 0;
+						} else {
+							is_instanceof |= info->is_instanceof;
+							ce = join_class_entries(ce, info->ce, &is_instanceof);
 						}
 					}
 				}
