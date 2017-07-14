@@ -634,7 +634,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 // op_1: ASSIGN #orig_var.CV [undef,scalar] -> #v.CV, CONST|TMPVAR => QM_ASSIGN v.CV, CONST|TMPVAR
 
 						if (ssa->ops[op_1].op1_use != ssa->ops[op_1].op2_use) {
-							ZEND_ASSERT(zend_ssa_unlink_use_chain(ssa, op_1, orig_var));
+							zend_ssa_unlink_use_chain(ssa, op_1, orig_var);
 						} else {
 							ssa->ops[op_1].op2_use_chain = ssa->ops[op_1].op1_use_chain;
 						}
