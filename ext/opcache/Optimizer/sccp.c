@@ -580,7 +580,7 @@ static inline int ct_eval_func_call(
 				&& num_args == 2
 				&& Z_TYPE_P(args[0]) == IS_STRING
 				&& Z_TYPE_P(args[1]) == IS_LONG
-				&& zend_safe_address(Z_STRLEN_P(args[0]), Z_LVAL_P(args[1]), 0, &overflow) < 64 * 1024 * 1024
+				&& zend_safe_address(Z_STRLEN_P(args[0]), Z_LVAL_P(args[1]), 0, &overflow) < 64 * 1024
 				&& !overflow) {
 			/* pass */
 		} else if ((zend_string_equals_literal(name, "array_merge")
