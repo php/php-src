@@ -3932,7 +3932,7 @@ int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa
 	uint32_t t1 = OP1_INFO();
 	uint32_t t2 = OP2_INFO();
 
-    if (opline->op1_type == IS_CV) {
+	if (opline->op1_type == IS_CV) {
 		if (t1 & MAY_BE_UNDEF) {
 			switch (opline->opcode) {
 				case ZEND_UNSET_VAR:
