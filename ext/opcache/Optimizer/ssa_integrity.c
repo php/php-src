@@ -22,38 +22,6 @@
 /* The ssa_verify_integrity() function ensures that that certain invariants of the SSA form and
  * CFG are upheld and prints messages to stderr if this is not the case. */
 
-#define FOREACH_PHI(phi) do { \
-	int _i; \
-	for (_i = 0; _i < ssa->cfg.blocks_count; _i++) { \
-		phi = ssa->blocks[_i].phis; \
-		for (; phi; phi = phi->next) {
-#define FOREACH_PHI_END() \
-		} \
-	} \
-} while (0)
-
-#define FOREACH_BLOCK(block) do { \
-	int _i; \
-	for (_i = 0; _i < ssa->cfg.blocks_count; _i++) { \
-		(block) = &ssa->cfg.blocks[_i]; \
-		if (!((block)->flags & ZEND_BB_REACHABLE)) { \
-			continue; \
-		}
-#define FOREACH_BLOCK_END() \
-	} \
-} while (0)
-
-/* Does not support "break" */
-#define FOREACH_INSTR_NUM(i) do { \
-	zend_basic_block *_block; \
-	FOREACH_BLOCK(_block) { \
-		uint32_t _end = _block->start + _block->len; \
-		for ((i) = _block->start; (i) < _end; (i)++) {
-#define FOREACH_INSTR_NUM_END() \
-		} \
-	} FOREACH_BLOCK_END(); \
-} while (0)
-
 static inline zend_bool is_in_use_chain(zend_ssa *ssa, int var, int check) {
 	int use;
 	FOREACH_USE(&ssa->vars[var], use) {
