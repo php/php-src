@@ -3940,6 +3940,7 @@ int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa
 					if (opline->extended_value & ZEND_QUICK_SET) {
 						break;
 					}
+					return 1;
 				case ZEND_ISSET_ISEMPTY_DIM_OBJ:
 				case ZEND_ISSET_ISEMPTY_PROP_OBJ:
 				case ZEND_ASSIGN:
