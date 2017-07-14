@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #74947 (Segfault in scanner on INF number). (Laruence)
   . Fixed bug #74954 (null deref and segfault in zend_generator_resume()). (Bob)
 
+- cURL:
+  . Fixed bug #74125 (Fixed finding CURL on systems with multiarch support).
+    (cebe)
+
 - Mbstring:
   . Fixed bug #71606 (Segmentation fault mb_strcut with HTML-ENTITIES encoding).
     (cmb)
