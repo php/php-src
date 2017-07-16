@@ -42,6 +42,11 @@ PHP                                                                        NEWS
   . Fixed bug #72324 (imap_mailboxmsginfo() return wrong size). 
     (ronaldpoon at udomain dot com dot hk, Kalle)
 
+- JSON:
+  . Add JSON_INVALID_UTF8_IGNORE and JSON_INVALID_UTF8_SUBSTITUTE options for
+    json_encode and json_decode to ignore or replace invalid UTF-8 byte
+    sequences - it addresses request #65082. (Jakub Zelenka)
+
 - LDAP:
   . Fixed passing an empty array to ldap_set_option for client or server controls.
 
