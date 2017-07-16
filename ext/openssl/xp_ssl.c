@@ -1299,7 +1299,35 @@ static int server_sni_callback(SSL *ssl_handle, int *al, void *arg) /* {{{ */
 }
 /* }}} */
 
-static int enable_server_sni(php_stream *stream, php_openssl_netstream_data_t *sslsock)
+static SSL_CTX *create_sni_server_ctx(char *cert_path, char *key_path)  /* {{{ */
+{
+	/* The hello method is not inherited by SSL structs when assigning a new context
+	 * inside the SNI callback, so the just use SSLv23 */
+	SSL_CTX *ctx = SSL_CTX_new(SSLv23_server_method());
+
+	if (SSL_CTX_use_certificate_chain_file(ctx, cert_path) != 1) {
+		php_error_docref(NULL, E_WARNING,
+			"failed setting local cert chain file `%s'; " \
+			"check that your cafile/capath settings include " \
+			"details of your certificate and its issuer",
+			cert_path
+		);
+		SSL_CTX_free(ctx);
+		return NULL;
+	} else if (SSL_CTX_use_PrivateKey_file(ctx, key_path, SSL_FILETYPE_PEM) != 1) {
+		php_error_docref(NULL, E_WARNING,
+			"failed setting private key from file `%s'",
+			key_path
+		);
+		SSL_CTX_free(ctx);
+		return NULL;
+	}
+
+	return ctx;
+}
+/* }}} */
+
+static int enable_server_sni(php_stream *stream, php_openssl_netstream_data_t *sslsock)  /* {{{ */
 {
 	zval *val;
 	zval *current;
@@ -1349,32 +1377,45 @@ static int enable_server_sni(php_stream *stream, php_openssl_netstream_data_t *s
 			return FAILURE;
 		}
 
-		if (VCWD_REALPATH(Z_STRVAL_P(current), resolved_path_buff)) {
-			/* The hello method is not inherited by SSL structs when assigning a new context
-			 * inside the SNI callback, so the just use SSLv23 */
-			ctx = SSL_CTX_new(SSLv23_server_method());
+		if (Z_TYPE_P(current) == IS_ARRAY) {
+			zval *local_pk, *local_cert;
+			char resolved_cert_path_buff[MAXPATHLEN], resolved_pk_path_buff[MAXPATHLEN];
 
-			if (SSL_CTX_use_certificate_chain_file(ctx, resolved_path_buff) != 1) {
+			local_cert = zend_hash_str_find(Z_ARRVAL_P(current), "local_cert", sizeof("local_cert")-1);
+			if (local_cert == NULL) {
 				php_error_docref(NULL, E_WARNING,
-					"failed setting local cert chain file `%s'; " \
-					"check that your cafile/capath settings include " \
-					"details of your certificate and its issuer",
-					resolved_path_buff
+					"local_cert not present in the array",
+					Z_STRVAL_P(local_cert)
 				);
-				SSL_CTX_free(ctx);
 				return FAILURE;
-			} else if (SSL_CTX_use_PrivateKey_file(ctx, resolved_path_buff, SSL_FILETYPE_PEM) != 1) {
-				php_error_docref(NULL, E_WARNING,
-					"failed setting private key from file `%s'",
-					resolved_path_buff
-				);
-				SSL_CTX_free(ctx);
-				return FAILURE;
-			} else {
-				sslsock->sni_certs[i].name = pestrdup(ZSTR_VAL(key), php_stream_is_persistent(stream));
-				sslsock->sni_certs[i].ctx = ctx;
-				++i;
 			}
+			convert_to_string_ex(local_cert);
+			if (!VCWD_REALPATH(Z_STRVAL_P(local_cert), resolved_cert_path_buff)) {
+				php_error_docref(NULL, E_WARNING,
+					"failed setting local cert chain file `%s'; file not found"
+				);
+				return FAILURE;
+			}
+			local_pk = zend_hash_str_find(Z_ARRVAL_P(current), "local_pk", sizeof("local_pk")-1);
+			if (local_pk == NULL) {
+				php_error_docref(NULL, E_WARNING,
+					"local_pk not present in the array"
+				);
+				return FAILURE;
+			}
+			convert_to_string_ex(local_pk);
+			if (!VCWD_REALPATH(Z_STRVAL_P(local_pk), resolved_pk_path_buff)) {
+				php_error_docref(NULL, E_WARNING,
+					"failed setting local private key file `%s'; file not found",
+					Z_STRVAL_P(local_pk)
+				);
+				return FAILURE;
+			}
+
+			ctx = create_sni_server_ctx(resolved_cert_path_buff, resolved_pk_path_buff);
+
+		} else if (VCWD_REALPATH(Z_STRVAL_P(current), resolved_path_buff)) {
+			ctx = create_sni_server_ctx(resolved_path_buff, resolved_path_buff);
 		} else {
 			php_error_docref(NULL, E_WARNING,
 				"failed setting local cert chain file `%s'; file not found",
@@ -1382,12 +1423,22 @@ static int enable_server_sni(php_stream *stream, php_openssl_netstream_data_t *s
 			);
 			return FAILURE;
 		}
+
+		if (ctx == NULL) {
+			return FAILURE;
+		}
+
+		sslsock->sni_certs[i].name = pestrdup(ZSTR_VAL(key), php_stream_is_persistent(stream));
+		sslsock->sni_certs[i].ctx = ctx;
+		++i;
+
 	} ZEND_HASH_FOREACH_END();
 
 	SSL_CTX_set_tlsext_servername_callback(sslsock->ctx, server_sni_callback);
 
 	return SUCCESS;
 }
+/* }}} */
 
 static void enable_client_sni(php_stream *stream, php_openssl_netstream_data_t *sslsock) /* {{{ */
 {
