@@ -79,7 +79,7 @@ static php_password_algo php_password_determine_algo(const zend_string *hash)
 	const size_t len = ZSTR_LEN(hash);
 	if (len == 60 && h[0] == '$' && h[1] == '2' && h[2] == 'y') {
 		return PHP_PASSWORD_BCRYPT;
-	} 
+	}
 #if HAVE_ARGON2LIB
 	if (len >= sizeof("$argon2i$")-1 && !memcmp(h, "$argon2i$", sizeof("$argon2i$")-1)) {
     	return PHP_PASSWORD_ARGON2I;
@@ -135,20 +135,20 @@ static zend_string* php_password_make_salt(size_t length) /* {{{ */
 	zend_string *ret, *buffer;
 
 	if (length > (INT_MAX / 3)) {
-		php_error(E_WARNING, "Length is too large to safely generate");
+		php_error_docref(NULL, E_WARNING, "Length is too large to safely generate");
 		return NULL;
 	}
 
 	buffer = zend_string_alloc(length * 3 / 4 + 1, 0);
 	if (FAILURE == php_random_bytes_silent(ZSTR_VAL(buffer), ZSTR_LEN(buffer))) {
-		php_error(E_WARNING, "Unable to generate salt");
+		php_error_docref(NULL, E_WARNING, "Unable to generate salt");
 		zend_string_release(buffer);
 		return NULL;
 	}
 
 	ret = zend_string_alloc(length, 0);
 	if (php_password_salt_to64(ZSTR_VAL(buffer), ZSTR_LEN(buffer), length, ZSTR_VAL(ret)) == FAILURE) {
-		php_error(E_WARNING, "Generated salt too short");
+		php_error_docref(NULL, E_WARNING, "Generated salt too short");
 		zend_string_release(buffer);
 		zend_string_release(ret);
 		return NULL;
@@ -341,22 +341,81 @@ PHP_FUNCTION(password_verify)
 }
 /* }}} */
 
+static zend_string* php_password_get_salt(zval *return_value, int required_salt_len, HashTable *options) {
+	zend_string *buffer;
+	zval *option_buffer;
+
+	if (!options || !(option_buffer = zend_hash_str_find(options, "salt", sizeof("salt") - 1))) {
+		buffer = php_password_make_salt(required_salt_len);
+		if (!buffer) {
+			RETVAL_FALSE;
+		}
+		return buffer;
+	}
+
+	php_error_docref(NULL, E_DEPRECATED, "Use of the 'salt' option to password_hash is deprecated");
+
+	switch (Z_TYPE_P(option_buffer)) {
+		case IS_STRING:
+			buffer = zend_string_copy(Z_STR_P(option_buffer));
+			break;
+		case IS_LONG:
+		case IS_DOUBLE:
+		case IS_OBJECT:
+			buffer = zval_get_string(option_buffer);
+			break;
+		case IS_FALSE:
+		case IS_TRUE:
+		case IS_NULL:
+		case IS_RESOURCE:
+		case IS_ARRAY:
+		default:
+			php_error_docref(NULL, E_WARNING, "Non-string salt parameter supplied");
+			return NULL;
+	}
+
+	/* XXX all the crypt related APIs work with int for string length.
+		That should be revised for size_t and then we maybe don't require
+		the > INT_MAX check. */
+	if (ZSTR_LEN(buffer) > INT_MAX) {
+		php_error_docref(NULL, E_WARNING, "Supplied salt is too long");
+		zend_string_release(buffer);
+		return NULL;
+	}
+
+	if (ZSTR_LEN(buffer) < required_salt_len) {
+		php_error_docref(NULL, E_WARNING, "Provided salt is too short: %zd expecting %zd", ZSTR_LEN(buffer), required_salt_len);
+		zend_string_release(buffer);
+		return NULL;
+	}
+
+	if (php_password_salt_is_alphabet(ZSTR_VAL(buffer), ZSTR_LEN(buffer)) == FAILURE) {
+		zend_string *salt = zend_string_alloc(required_salt_len, 0);
+		if (php_password_salt_to64(ZSTR_VAL(buffer), ZSTR_LEN(buffer), required_salt_len, ZSTR_VAL(salt)) == FAILURE) {
+			php_error_docref(NULL, E_WARNING, "Provided salt is too short: %zd", ZSTR_LEN(buffer));
+			zend_string_release(salt);
+			zend_string_release(buffer);
+			return NULL;
+		}
+		zend_string_release(buffer);
+		return salt;
+	} else {
+		zend_string *salt = zend_string_alloc(required_salt_len, 0);
+		memcpy(ZSTR_VAL(salt), ZSTR_VAL(buffer), required_salt_len);
+		zend_string_release(buffer);
+		return salt;
+	}
+}
+
 /* {{{ proto string password_hash(string password, int algo[, array options = array()])
 Hash a password */
 PHP_FUNCTION(password_hash)
 {
-	char hash_format[8];
-	zend_long algo = 0;
-	zend_string *password, *salt;
-	size_t required_salt_len = 0, hash_format_len;
-	HashTable *options = 0;
-	zval *option_buffer;
+	zend_string *password;
+	zend_long algo = PHP_PASSWORD_DEFAULT;
+	HashTable *options = NULL;
 
 #if HAVE_ARGON2LIB
-	size_t time_cost = PHP_PASSWORD_ARGON2_TIME_COST; 
-	size_t memory_cost = PHP_PASSWORD_ARGON2_MEMORY_COST;
-	size_t threads = PHP_PASSWORD_ARGON2_THREADS;
-	argon2_type type = Argon2_i;
 #endif
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
@@ -369,6 +428,10 @@ PHP_FUNCTION(password_hash)
 	switch (algo) {
 		case PHP_PASSWORD_BCRYPT:
 			{
+				char hash_format[10];
+				size_t hash_format_len;
+				zend_string *result, *hash, *salt;
+				zval *option_buffer;
 				zend_long cost = PHP_PASSWORD_BCRYPT_COST;
 
 				if (options && (option_buffer = zend_hash_str_find(options, "cost", sizeof("cost")-1)) != NULL) {
@@ -380,109 +443,10 @@ PHP_FUNCTION(password_hash)
 					RETURN_NULL();
 				}
 
-				required_salt_len = 22;
-				sprintf(hash_format, "$2y$%02ld$", (long) cost);
-				hash_format_len = 7;
-			}
-			break;
-#if HAVE_ARGON2LIB
-		case PHP_PASSWORD_ARGON2I:
-			{
-				if (options && (option_buffer = zend_hash_str_find(options, "memory_cost", sizeof("memory_cost")-1)) != NULL) {
-					memory_cost = zval_get_long(option_buffer);
+				hash_format_len = snprintf(hash_format, sizeof(hash_format), "$2y$%02ld$", (long) cost);
+				if (!(salt = php_password_get_salt(return_value, 22, options))) {
+					return;
 				}
-
-				if (memory_cost > ARGON2_MAX_MEMORY || memory_cost < ARGON2_MIN_MEMORY) {
-					php_error_docref(NULL, E_WARNING, "Memory cost is outside of allowed memory range", memory_cost);
-					RETURN_NULL();
-				}
-
-				if (options && (option_buffer = zend_hash_str_find(options, "time_cost", sizeof("time_cost")-1)) != NULL) {
-					time_cost = zval_get_long(option_buffer);
-				}
-
-				if (time_cost > ARGON2_MAX_TIME || time_cost < ARGON2_MIN_TIME) {
-					php_error_docref(NULL, E_WARNING, "Time cost is outside of allowed time range", time_cost);
-					RETURN_NULL();
-				}
-				
-				if (options && (option_buffer = zend_hash_str_find(options, "threads", sizeof("threads")-1)) != NULL) {
-					threads = zval_get_long(option_buffer);
-				}
-
-				if (threads > ARGON2_MAX_LANES || threads == 0) {
-					php_error_docref(NULL, E_WARNING, "Invalid number of threads", threads);
-					RETURN_NULL();
-				}
-
-				required_salt_len = 16;
-			}
-			break;
-#endif
-		case PHP_PASSWORD_UNKNOWN:
-		default:
-			php_error_docref(NULL, E_WARNING, "Unknown password hashing algorithm: " ZEND_LONG_FMT, algo);
-			RETURN_NULL();
-	}
-
-	if (options && (option_buffer = zend_hash_str_find(options, "salt", sizeof("salt")-1)) != NULL) {
-		zend_string *buffer;
-
-		php_error_docref(NULL, E_DEPRECATED, "Use of the 'salt' option to password_hash is deprecated");
-
-		switch (Z_TYPE_P(option_buffer)) {
-			case IS_STRING:
-				buffer = zend_string_copy(Z_STR_P(option_buffer));
-				break;
-			case IS_LONG:
-			case IS_DOUBLE:
-			case IS_OBJECT:
-				buffer = zval_get_string(option_buffer);
-				break;
-			case IS_FALSE:
-			case IS_TRUE:
-			case IS_NULL:
-			case IS_RESOURCE:
-			case IS_ARRAY:
-			default:
-				php_error_docref(NULL, E_WARNING, "Non-string salt parameter supplied");
-				RETURN_NULL();
-		}
-
-		/* XXX all the crypt related APIs work with int for string length.
-			That should be revised for size_t and then we maybe don't require
-			the > INT_MAX check. */
-		if (ZSTR_LEN(buffer) > INT_MAX) {
-			php_error_docref(NULL, E_WARNING, "Supplied salt is too long");
-			RETURN_NULL();
-		} else if (ZSTR_LEN(buffer) < required_salt_len) {
-			php_error_docref(NULL, E_WARNING, "Provided salt is too short: %zd expecting %zd", ZSTR_LEN(buffer), required_salt_len);
-			zend_string_release(buffer);
-			RETURN_NULL();
-		} else if (php_password_salt_is_alphabet(ZSTR_VAL(buffer), ZSTR_LEN(buffer)) == FAILURE) {
-			salt = zend_string_alloc(required_salt_len, 0);
-			if (php_password_salt_to64(ZSTR_VAL(buffer), ZSTR_LEN(buffer), required_salt_len, ZSTR_VAL(salt)) == FAILURE) {
-				zend_string_release(salt);
-				php_error_docref(NULL, E_WARNING, "Provided salt is too short: %zd", ZSTR_LEN(buffer));
-				zend_string_release(buffer);
-				RETURN_NULL();
-			}
-		} else {
-			salt = zend_string_alloc(required_salt_len, 0);
-			memcpy(ZSTR_VAL(salt), ZSTR_VAL(buffer), required_salt_len);
-		}
-		zend_string_release(buffer);
-	} else {
-		salt = php_password_make_salt(required_salt_len);
-		if (!salt) {
-			RETURN_FALSE;
-		}
-	}
-
-	switch (algo) {
-		case PHP_PASSWORD_BCRYPT:
-			{
-				zend_string *result, *hash;
 				ZSTR_VAL(salt)[ZSTR_LEN(salt)] = 0;
 
 				hash = zend_string_alloc(ZSTR_LEN(salt) + hash_format_len, 0);
@@ -510,11 +474,47 @@ PHP_FUNCTION(password_hash)
 #if HAVE_ARGON2LIB
 		case PHP_PASSWORD_ARGON2I:
 			{
+				zval *boption_buffer;
+				zend_string *salt, *out, *encoded;
+				size_t time_cost = PHP_PASSWORD_ARGON2_TIME_COST; 
+				size_t memory_cost = PHP_PASSWORD_ARGON2_MEMORY_COST;
+				size_t threads = PHP_PASSWORD_ARGON2_THREADS;
+				argon2_type type = Argon2_i;
 				size_t encoded_len;
 				int status = 0;
-				zend_string *out = zend_string_alloc(32, 0);
-				zend_string *encoded;
 
+				if (options && (option_buffer = zend_hash_str_find(options, "memory_cost", sizeof("memory_cost")-1)) != NULL) {
+					memory_cost = zval_get_long(option_buffer);
+				}
+
+				if (memory_cost > ARGON2_MAX_MEMORY || memory_cost < ARGON2_MIN_MEMORY) {
+					php_error_docref(NULL, E_WARNING, "Memory cost is outside of allowed memory range", memory_cost);
+					RETURN_NULL();
+				}
+
+				if (options && (option_buffer = zend_hash_str_find(options, "time_cost", sizeof("time_cost")-1)) != NULL) {
+					time_cost = zval_get_long(option_buffer);
+				}
+
+				if (time_cost > ARGON2_MAX_TIME || time_cost < ARGON2_MIN_TIME) {
+					php_error_docref(NULL, E_WARNING, "Time cost is outside of allowed time range", time_cost);
+					RETURN_NULL();
+				}
+
+				if (options && (option_buffer = zend_hash_str_find(options, "threads", sizeof("threads")-1)) != NULL) {
+					threads = zval_get_long(option_buffer);
+				}
+
+				if (threads > ARGON2_MAX_LANES || threads == 0) {
+					php_error_docref(NULL, E_WARNING, "Invalid number of threads", threads);
+					RETURN_NULL();
+				}
+
+				if (!(salt = php_password_get_salt(return_value, 16, options))) {
+					return;
+				}
+
+				out = zend_string_alloc(32, 0);
 				encoded_len = argon2_encodedlen(
 					time_cost,
 					memory_cost,
@@ -527,7 +527,6 @@ PHP_FUNCTION(password_hash)
 				);
 
 				encoded = zend_string_alloc(encoded_len, 0);
-
 				status = argon2_hash(
 					time_cost,
 					memory_cost,
@@ -549,7 +548,7 @@ PHP_FUNCTION(password_hash)
 
 				if (status != ARGON2_OK) {
 					zend_string_free(encoded);
-					php_error(E_WARNING, "%s", argon2_error_message(status));
+					php_error_docref(NULL, E_WARNING, "%s", argon2_error_message(status));
 					RETURN_FALSE;
 				}
 
@@ -558,8 +557,10 @@ PHP_FUNCTION(password_hash)
 			}
 			break;
 #endif
+		case PHP_PASSWORD_UNKNOWN:
 		default:
-			RETURN_FALSE;
+			php_error_docref(NULL, E_WARNING, "Unknown password hashing algorithm: " ZEND_LONG_FMT, algo);
+			RETURN_NULL();
 	}
 }
 /* }}} */
