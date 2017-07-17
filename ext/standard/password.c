@@ -341,7 +341,7 @@ PHP_FUNCTION(password_verify)
 }
 /* }}} */
 
-static zend_string* php_password_get_salt(zval *return_value, int required_salt_len, HashTable *options) {
+static zend_string* php_password_get_salt(zval *return_value, size_t required_salt_len, HashTable *options) {
 	zend_string *buffer;
 	zval *option_buffer;
 
@@ -377,7 +377,7 @@ static zend_string* php_password_get_salt(zval *return_value, int required_salt_
 	/* XXX all the crypt related APIs work with int for string length.
 		That should be revised for size_t and then we maybe don't require
 		the > INT_MAX check. */
-	if (ZSTR_LEN(buffer) > INT_MAX) {
+	if (ZEND_SIZE_T_INT_OVFL(ZSTR_LEN(buffer))) {
 		php_error_docref(NULL, E_WARNING, "Supplied salt is too long");
 		zend_string_release(buffer);
 		return NULL;
@@ -443,8 +443,8 @@ PHP_FUNCTION(password_hash)
 					RETURN_NULL();
 				}
 
-				hash_format_len = snprintf(hash_format, sizeof(hash_format), "$2y$%02ld$", (long) cost);
-				if (!(salt = php_password_get_salt(return_value, 22, options))) {
+				hash_format_len = snprintf(hash_format, sizeof(hash_format), "$2y$%02" ZEND_LONG_FMT_SPEC "$", cost);
+				if (!(salt = php_password_get_salt(return_value, Z_UL(22), options))) {
 					return;
 				}
 				ZSTR_VAL(salt)[ZSTR_LEN(salt)] = 0;
@@ -510,7 +510,7 @@ PHP_FUNCTION(password_hash)
 					RETURN_NULL();
 				}
 
-				if (!(salt = php_password_get_salt(return_value, 16, options))) {
+				if (!(salt = php_password_get_salt(return_value, Z_UL(16), options))) {
 					return;
 				}
 
