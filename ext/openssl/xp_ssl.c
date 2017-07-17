@@ -70,6 +70,9 @@
 #endif
 #endif
 
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L && !defined(LIBRESSL_VERSION_NUMBER)
+#define HAVE_SEC_LEVEL 1
+#endif
 
 /* Flags for determining allowed stream crypto methods */
 #define STREAM_CRYPTO_IS_CLIENT            (1<<0)
@@ -1611,6 +1614,20 @@ int php_openssl_setup_crypto(php_stream *stream,
 		if (SSL_CTX_set_cipher_list(sslsock->ctx, cipherlist) != 1) {
 			return FAILURE;
 		}
+	}
+
+	if (GET_VER_OPT("security_level")) {
+#ifdef HAVE_SEC_LEVEL
+		convert_to_long(val);
+		if (Z_LVAL_P(val) < 0 || Z_LVAL_P(val) > 5) {
+			php_error_docref(NULL, E_WARNING, "Security level must be between 0 and 5");
+		}
+		SSL_CTX_set_security_level(sslsock->ctx, Z_LVAL_P(val));
+#else
+		php_error_docref(NULL, E_WARNING,
+				"security_level is not supported by the linked OpenSSL library "
+				"- it is supported from version 1.1.0");
+#endif
 	}
 
 	GET_VER_OPT_STRING("alpn_protocols", alpn_protocols);
