@@ -2174,6 +2174,7 @@ function generate_phpize()
 	CJ.WriteLine("var PHP_DEBUG=" + '"' + PHP_DEBUG + '"');
 	CJ.WriteLine("var PHP_DLL_LIB =" + '"' + get_define('PHPLIB') + '"');
 	CJ.WriteLine("var PHP_DLL =" + '"' + get_define('PHPDLL') + '"');
+	CJ.WriteLine("var PHP_SECURITY_FLAGS =" + '"' + PHP_SECURITY_FLAGS + '"');
 
 	/* The corresponding configure options aren't enabled through phpize,
 		thus these dummy declarations are required. */
