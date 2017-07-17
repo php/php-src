@@ -39,7 +39,11 @@
 #	include <sys/select.h>
 #	include <sys/time.h>
 #	include <sys/types.h>
-#	include <sys/poll.h>
+#	if HAVE_POLL_H
+#		include <poll.h>
+#	elif HAVE_SYS_POLL_H
+#		include <sys/poll.h>
+#	endif
 #	include <netinet/in.h>
 #	include <unistd.h>
 #	include <arpa/inet.h>
