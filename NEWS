@@ -3,6 +3,9 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.2.0beta1
 
 - Core:
+  . Added new VM instuctions ISSET_ISEMPTY_CV and UNSET_CV. Previously they
+    were implemented as ISSET_ISEMPTY_VAR and UNSET_VAR variants with
+    ZEND_QUICK_SET flag. (Nikita, Dmitry)
   . Fixed bug #74603 (PHP INI Parsing Stack Buffer Overflow Vulnerability).
     (Stas)
   . Fixed bug #74111 (Heap buffer overread (READ: 1) finish_nested_data from
