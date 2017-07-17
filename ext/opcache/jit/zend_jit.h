@@ -49,7 +49,7 @@
 #define ZEND_JIT_CPU_FLAGS(n)      (((n) / 1000) % 10)
 
 
-#define ZEND_JIT_DEFAULT           "5"
+#define ZEND_JIT_DEFAULT           "1205"
 
 
 /* Makes profile based JIT (opcache.jit=2*) to generate code only for most
