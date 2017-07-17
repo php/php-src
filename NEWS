@@ -14,6 +14,7 @@ PHP                                                                        NEWS
   . Fixed #74866 (extension_dir = "./ext" now use current directory for base).
     (Francois Laupretre)
   . Fixed bug #74923 (Crash when crawling through network share). (Anatol)
+  . Fixed bug #74913 (fixed incorrect poll.h include). (petk)
 
 - Date:
   . Fixed bug #74852 (property_exists returns true on unknown DateInterval 
