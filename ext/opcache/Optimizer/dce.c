@@ -118,6 +118,7 @@ static inline zend_bool may_have_side_effects(
 		case ZEND_FETCH_DIM_IS:
 		case ZEND_ISSET_ISEMPTY_VAR:
 		case ZEND_FETCH_IS:
+		case ZEND_IN_ARRAY:
 			/* No side effects */
 			return 0;
 		case ZEND_JMP:
