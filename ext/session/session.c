@@ -1999,7 +1999,7 @@ static PHP_FUNCTION(session_save_path)
 		return;
 	}
 
-	if (PS(session_status) == php_session_active) {
+	if (name && PS(session_status) == php_session_active) {
 		php_error_docref(NULL, E_WARNING, "Cannot change save path when session is active");
 		RETURN_FALSE;
 	}
@@ -2227,7 +2227,7 @@ static PHP_FUNCTION(session_cache_limiter)
 		return;
 	}
 
-	if (PS(session_status) == php_session_active) {
+	if (limiter && PS(session_status) == php_session_active) {
 		php_error_docref(NULL, E_WARNING, "Cannot change cache limiter when session is active");
 		RETURN_FALSE;
 	}
@@ -2258,7 +2258,7 @@ static PHP_FUNCTION(session_cache_expire)
 		return;
 	}
 
-	if (PS(session_status) == php_session_active) {
+	if (expires && PS(session_status) == php_session_active) {
 		php_error_docref(NULL, E_WARNING, "Cannot change cache expire when session is active");
 		RETURN_LONG(PS(cache_expire));
 	}

@@ -5,6 +5,11 @@ PHP                                                                        NEWS
 - Session:
   . Fixed bug #74892 (Url Rewriting (trans_sid) not working on urls that start
     with "#"). (Andrew Nester)
+  . Fixed bug #74936 (session_cache_expire/cache_limiter/save_path() trigger a
+    warning in read mode). (morozov)
+
+- SPL:
+  . Fixed bug #74669 (Unserialize ArrayIterator broken). (Andrew Nester)
 
 20 Jul 2017, PHP 7.2.0beta1
 
