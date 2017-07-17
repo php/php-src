@@ -40127,13 +40127,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_CV_SPEC_CV_UNUSED_HANDLE
 		zend_refcounted *garbage = Z_COUNTED_P(var);
 
 		ZVAL_UNDEF(var);
+		SAVE_OPLINE();
 		if (!--GC_REFCOUNT(garbage)) {
-			SAVE_OPLINE();
 			zval_dtor_func(garbage);
-			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		} else {
 			gc_check_possible_root(garbage);
 		}
+		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	} else {
 		ZVAL_UNDEF(var);
 	}

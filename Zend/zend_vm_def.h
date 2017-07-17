@@ -5336,13 +5336,13 @@ ZEND_VM_HANDLER(196, ZEND_UNSET_CV, CV, UNUSED)
 		zend_refcounted *garbage = Z_COUNTED_P(var);
 
 		ZVAL_UNDEF(var);
+		SAVE_OPLINE();
 		if (!--GC_REFCOUNT(garbage)) {
-			SAVE_OPLINE();
 			zval_dtor_func(garbage);
-			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		} else {
 			gc_check_possible_root(garbage);
 		}
+		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	} else {
 		ZVAL_UNDEF(var);
 	}
