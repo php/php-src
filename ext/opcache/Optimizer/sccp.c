@@ -999,7 +999,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 		case ZEND_DO_ICALL:
 		{
 			zend_call_info *call;
-			zval *name, *args[2] = {NULL};
+			zval *name, *args[3] = {NULL};
 			int i;
 
 			if (!ctx->call_map) {
