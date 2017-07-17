@@ -713,12 +713,10 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 						//NEW_SSA_VAR(opline->op1.var)
 					}
 					break;
-				case ZEND_UNSET_VAR:
-					if (opline->extended_value & ZEND_QUICK_SET) {
-						ssa_ops[k].op1_def = ssa_vars_count;
-						var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
-						ssa_vars_count++;
-					}
+				case ZEND_UNSET_CV:
+					ssa_ops[k].op1_def = ssa_vars_count;
+					var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
+					ssa_vars_count++;
 					break;
 				case ZEND_UNSET_DIM:
 				case ZEND_UNSET_OBJ:

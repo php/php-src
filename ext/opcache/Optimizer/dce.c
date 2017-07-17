@@ -116,6 +116,7 @@ static inline zend_bool may_have_side_effects(
 		case ZEND_ISSET_ISEMPTY_THIS:
 		case ZEND_ISSET_ISEMPTY_DIM_OBJ:
 		case ZEND_FETCH_DIM_IS:
+		case ZEND_ISSET_ISEMPTY_CV:
 		case ZEND_ISSET_ISEMPTY_VAR:
 		case ZEND_FETCH_IS:
 			/* No side effects */
@@ -172,11 +173,10 @@ static inline zend_bool may_have_side_effects(
 			return 0;
 		}
 		case ZEND_UNSET_VAR:
+			return 1;
+		case ZEND_UNSET_CV:
 		{
 			uint32_t t1 = OP1_INFO();
-			if (!(opline->extended_value & ZEND_QUICK_SET)) {
-				return 1;
-			}
 			if (t1 & MAY_BE_REF) {
 				/* We don't consider uses as the LHS of an assignment as real uses during DCE, so
 				 * an unset may be considered dead even if there is a later assignment to the

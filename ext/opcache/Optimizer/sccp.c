@@ -192,11 +192,9 @@ static zend_bool can_replace_op1(
 		case ZEND_BIND_STATIC:
 		case ZEND_BIND_GLOBAL:
 		case ZEND_MAKE_REF:
+		case ZEND_UNSET_CV:
+		case ZEND_ISSET_ISEMPTY_CV:
 			return 0;
-		case ZEND_UNSET_VAR:
-		case ZEND_ISSET_ISEMPTY_VAR:
-			/* CV has special meaning here - cannot simply be replaced */
-			return (opline->extended_value & ZEND_QUICK_SET) == 0;
 		case ZEND_INIT_ARRAY:
 		case ZEND_ADD_ARRAY_ELEMENT:
 			return !(opline->extended_value & ZEND_ARRAY_ELEMENT_REF);
@@ -440,10 +438,6 @@ static inline int ct_eval_incdec(zval *result, zend_uchar opcode, zval *op1) {
 }
 
 static inline int ct_eval_isset_isempty(zval *result, uint32_t extended_value, zval *op1) {
-	if (!(extended_value & ZEND_QUICK_SET)) {
-		return FAILURE;
-	}
-
 	if (extended_value & ZEND_ISSET) {
 		ZVAL_BOOL(result, Z_TYPE_P(op1) != IS_NULL);
 	} else {
@@ -879,7 +873,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			}
 			SET_RESULT(result, op1);
 			break;
-		case ZEND_ISSET_ISEMPTY_VAR:
+		case ZEND_ISSET_ISEMPTY_CV:
 			SKIP_IF_TOP(op1);
 			if (ct_eval_isset_isempty(&zv, opline->extended_value, op1) == SUCCESS) {
 				SET_RESULT(result, &zv);
