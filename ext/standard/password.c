@@ -474,7 +474,7 @@ PHP_FUNCTION(password_hash)
 #if HAVE_ARGON2LIB
 		case PHP_PASSWORD_ARGON2I:
 			{
-				zval *boption_buffer;
+				zval *option_buffer;
 				zend_string *salt, *out, *encoded;
 				size_t time_cost = PHP_PASSWORD_ARGON2_TIME_COST; 
 				size_t memory_cost = PHP_PASSWORD_ARGON2_MEMORY_COST;
