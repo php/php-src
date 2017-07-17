@@ -59,6 +59,8 @@ PHP                                                                        NEWS
     (Nikita, Dmitry)
 
 - OpenSSL:
+  . Add ssl security_level stream option to support OpenSSL security levels.
+    (Jakub Zelenka).
   . Allow setting SNI cert and private key in separate files. (Jakub Zelenka)
   . Fixed bug #74651 (negative-size-param (-1) in memcpy in zif_openssl_seal()).
     (Stas)
