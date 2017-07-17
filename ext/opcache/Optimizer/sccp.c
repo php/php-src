@@ -455,6 +455,42 @@ static inline void ct_eval_type_check(zval *result, uint32_t type, zval *op1) {
 	}
 }
 
+static inline int ct_eval_in_array(zval *result, uint32_t extended_value, zval *op1, zval *op2) {
+	HashTable *ht;
+	zend_bool res;
+
+	if (Z_TYPE_P(op2) != IS_ARRAY) {
+		return FAILURE;
+	}
+	ht = Z_ARRVAL_P(op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		res = zend_hash_exists(ht, Z_STR_P(op1));
+	} else if (extended_value) {
+		if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+			res = zend_hash_index_exists(ht, Z_LVAL_P(op1));
+		} else {
+			res = 0;
+		}
+	} else if (Z_TYPE_P(op1) <= IS_FALSE) {
+		res = zend_hash_exists(ht, ZSTR_EMPTY_ALLOC());
+	} else {
+		zend_string *key;
+		zval tmp;
+
+		res = 0;
+		ZEND_HASH_FOREACH_STR_KEY(ht, key) {
+			ZVAL_STR(&tmp, key);
+			compare_function(&tmp, op1, &tmp);
+			if (Z_LVAL(tmp) == 0) {
+				res = 1;
+				break;
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+	ZVAL_BOOL(result, res);
+	return SUCCESS;
+}
+
 /* The functions chosen here are simple to implement and either likely to affect a branch,
  * or just happened to be commonly used with constant operands in WP (need to test other
  * applications as well, of course). */
@@ -500,7 +536,11 @@ static inline int ct_eval_func_call(
 		}
 		return SUCCESS;
 	} else if (zend_string_equals_literal(name, "in_array")) {
-		if (num_args != 2 || Z_TYPE_P(args[1]) != IS_ARRAY) {
+		if ((num_args != 2
+					&& (num_args != 3
+						|| (Z_TYPE_P(args[2]) != IS_FALSE
+							&& Z_TYPE_P(args[2]) != IS_TRUE)))
+				|| Z_TYPE_P(args[1]) != IS_ARRAY) {
 			return FAILURE;
 		}
 		/* pass */
@@ -831,6 +871,16 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			SKIP_IF_TOP(op1);
 			if (Z_TYPE_P(op1) == IS_ARRAY) {
 				ZVAL_LONG(&zv, zend_hash_num_elements(Z_ARRVAL_P(op1)));
+				SET_RESULT(result, &zv);
+				zval_ptr_dtor_nogc(&zv);
+				break;
+			}
+			SET_RESULT_BOT(result);
+			break;
+		case ZEND_IN_ARRAY:
+			SKIP_IF_TOP(op1);
+			SKIP_IF_TOP(op2);
+			if (ct_eval_in_array(&zv, opline->extended_value, op1, op2) == SUCCESS) {
 				SET_RESULT(result, &zv);
 				zval_ptr_dtor_nogc(&zv);
 				break;
