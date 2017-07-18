@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2017, PHP 7.1.8
+?? ??? ????, PHP 7.1.9
+
+
+
+03 Aug 2017, PHP 7.1.8
 
 - Core:
   . Fixed bug #74832 (Loading PHP extension with already registered function 
