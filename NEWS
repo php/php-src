@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #74892 (Url Rewriting (trans_sid) not working on urls that start
     with "#"). (Andrew Nester)
 
+- SPL:
+  . Fixed bug #74669 (Unserialize ArrayIterator broken). (Andrew Nester)
+
 03 Aug 2017, PHP 7.1.8
 
 - Core:
