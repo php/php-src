@@ -59,13 +59,6 @@ ZEND_BEGIN_ARG_INFO_EX(AI_StringRef_And_String, 0, 0, 2)
 	ZEND_ARG_INFO(0, string_2)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(AI_FourStrings, 0, 0, 3)
-	ZEND_ARG_INFO(0, string_1)
-	ZEND_ARG_INFO(0, string_2)
-	ZEND_ARG_INFO(0, string_3)
-	ZEND_ARG_INFO(0, string_4)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(AI_StringAndKey, 0, 0, 2)
 	ZEND_ARG_INFO(0, string)
 	ZEND_ARG_INFO(0, key)
