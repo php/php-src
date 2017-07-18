@@ -475,13 +475,13 @@ static inline int ct_eval_in_array(zval *result, uint32_t extended_value, zval *
 		res = zend_hash_exists(ht, ZSTR_EMPTY_ALLOC());
 	} else {
 		zend_string *key;
-		zval tmp;
+		zval key_tmp, result_tmp;
 
 		res = 0;
 		ZEND_HASH_FOREACH_STR_KEY(ht, key) {
-			ZVAL_STR(&tmp, key);
-			compare_function(&tmp, op1, &tmp);
-			if (Z_LVAL(tmp) == 0) {
+			ZVAL_STR(&key_tmp, key);
+			compare_function(&result_tmp, op1, &key_tmp);
+			if (Z_LVAL(result_tmp) == 0) {
 				res = 1;
 				break;
 			}
@@ -614,7 +614,7 @@ static inline int ct_eval_func_call(
 		} else if (zend_string_equals_literal(name, "str_split")) {
 			if (Z_TYPE_P(args[0]) != IS_STRING
 					|| Z_TYPE_P(args[1]) != IS_LONG
-					|| !Z_LVAL_P(args[1]) <= 0) {
+					|| Z_LVAL_P(args[1]) <= 0) {
 				return FAILURE;
 			}
 			/* pass */
