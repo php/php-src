@@ -68,6 +68,8 @@ PHP_FUNCTION(sodium_crypto_generichash_final);
 PHP_FUNCTION(sodium_crypto_generichash_init);
 PHP_FUNCTION(sodium_crypto_generichash_keygen);
 PHP_FUNCTION(sodium_crypto_generichash_update);
+PHP_FUNCTION(sodium_crypto_kdf_derive_from_key);
+PHP_FUNCTION(sodium_crypto_kdf_keygen);
 PHP_FUNCTION(sodium_crypto_kx_client_session_keys);
 PHP_FUNCTION(sodium_crypto_kx_keypair);
 PHP_FUNCTION(sodium_crypto_kx_publickey);
