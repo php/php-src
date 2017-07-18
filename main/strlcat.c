@@ -20,7 +20,7 @@
 
 #include "php.h"
 
-#ifndef HAVE_STRLCAT
+#ifdef USE_STRLCAT_PHP_IMPL
 
 /*     $OpenBSD: strlcat.c,v 1.17 2016/10/14 18:19:04 dtucker Exp $    */
 

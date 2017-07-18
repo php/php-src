@@ -127,6 +127,94 @@ add_extra_dirs();
 
 //DEFINE("PHP_BUILD", PHP_PHP_BUILD);
 
+ARG_WITH("analyzer", "Enable static analyzer. Pass vs for Visual Studio, clang for clang, cppcheck for Cppcheck, pvs for PVS-Studio", "no");
+if (PHP_ANALYZER == "vs") {
+	ADD_FLAG("CFLAGS", " /analyze ");
+	ADD_FLAG("CFLAGS", " /wd6308 ");
+} else if (PHP_ANALYZER == "clang") {
+	var clang_cl = false;
+
+	if (FSO.FileExists(PROGRAM_FILES + "\\LLVM\\bin\\clang-cl.exe")) {
+		clang_cl = PROGRAM_FILES + "\\LLVM\\bin\\clang-cl.exe";
+	} else if (FSO.FileExists(PROGRAM_FILESx86 + "\\LLVM\\bin\\clang-cl.exe")) {
+		clang_cl = PROGRAM_FILESx86 + "\\LLVM\\bin\\clang-cl.exe";
+	}
+
+	if (!clang_cl) {
+		if (false == PATH_PROG('clang-cl', null, 'CLANG_CL')) {
+			WARNING("Couldn't find clang binaries, static analyze was disabled");
+			PHP_ANALYZER = "no";
+		}
+	} else {
+		DEFINE("CLANG_CL", clang_cl);
+	}
+} else if (PHP_ANALYZER == "cppcheck") {
+
+	var cppcheck = false;
+
+	if (FSO.FileExists(PROGRAM_FILES + "\\Cppcheck\\cppcheck.exe")) {
+		cppcheck = PROGRAM_FILES + "\\Cppcheck\\cppcheck.exe";
+	} else if (FSO.FileExists(PROGRAM_FILESx86 + "\\Cppcheck\\cppcheck.exe")) {
+		cppcheck = PROGRAM_FILESx86 + "\\Cppcheck\\cppcheck.exe";
+	}
+	if (!cppcheck) {
+		if (false == PATH_PROG('cppcheck', null, 'CPPCHECK')) {
+			WARNING("Couldn't find Cppcheck binaries, static analyze was disabled");
+			PHP_ANALYZER = "no";
+		} else {
+			cppcheck = get_define("CPPCHECK");
+		}
+	} else {
+		DEFINE("CPPCHECK", cppcheck);
+	}
+
+	if (cppcheck) {
+		var _tmp = execute(cppcheck + " --version").split(/ /)[1];
+		var cppcheck_ver = [
+			parseInt(_tmp.split(".")[0]),
+			parseInt(_tmp.split(".")[1]),
+		];
+		if (cppcheck_ver[0] > 1 || cppcheck_ver[0] == 1 && cppcheck_ver[1] >= 77) {
+			var build_dir = get_define("BUILD_DIR");
+			var cppcheck_build_dir = build_dir + "\\cppcheck_build";
+			if (!FSO.FolderExists(cppcheck_build_dir)) {
+				FSO.CreateFolder(cppcheck_build_dir);
+			}
+			DEFINE("CPPCHECK_BUILD_DIR", cppcheck_build_dir);
+		}
+	}
+
+} else if (PHP_ANALYZER == "pvs") {
+	var pvs_studio = false;
+
+	if (FSO.FileExists(PROGRAM_FILES + "\\PVS-Studio\\x64\\PVS-Studio.exe")) {
+		pvs_studio = PROGRAM_FILES + "\\PVS-Studio\\x86\\PVS-Studio.exe";
+	} else if (FSO.FileExists(PROGRAM_FILESx86 + "\\PVS-Studio\\x64\\PVS-Studio.exe")) {
+		pvs_studio = PROGRAM_FILESx86 + "\\PVS-Studio\\x64\\PVS-Studio.exe";
+	}
+
+	if (!pvs_studio) {
+		WARNING("Couldn't find PVS-Studio binaries, static analyze was disabled");
+		PHP_ANALYZER = "no";
+	} else {
+		var pvscfg = FSO.CreateTextFile("PVS-Studio.conf", true);
+		DEFINE("PVS_STUDIO", pvs_studio);
+
+		pvscfg.WriteLine("exclude-path = " + VCINSTALLDIR);
+		if (FSO.FolderExists(PROGRAM_FILESx86 + "\\windows kits\\")) {
+			pvscfg.WriteLine("exclude-path = " + PROGRAM_FILESx86 + "\\windows kits\\");
+		} else if (FSO.FolderExists(PROGRAM_FILES + "\\windows kits\\")) {
+			pvscfg.WriteLine("exclude-path = " + PROGRAM_FILES + "\\windows kits\\");
+		}
+		pvscfg.WriteLine("vcinstalldir = " + VCINSTALLDIR);
+		pvscfg.WriteLine("platform = " + (X64 ? 'x64' : 'Win32'));
+		pvscfg.WriteLine("preprocessor = visualcpp");
+		pvscfg.WriteLine("language = C");
+	}
+} else {
+	PHP_ANALYZER = "no"
+}
+
 STDOUT.WriteBlankLines(1);
 STDOUT.WriteLine("Build dir: " + get_define('BUILD_DIR'));
 STDOUT.WriteLine("PHP Core:  " + get_define('PHPDLL') + " and " + get_define('PHPLIB'));
@@ -216,80 +304,20 @@ if (PHP_SECURITY_FLAGS == "yes") {
 	ADD_FLAG("LDFLAGS", "/NXCOMPAT /DYNAMICBASE ");
 }
 
-ARG_WITH("analyzer", "Enable static analyzer. Pass vs for Visual Studio, clang for clang, cppcheck for Cppcheck, pvs for PVS-Studio", "no");
-if (PHP_ANALYZER == "vs") {
-	ADD_FLAG("CFLAGS", " /analyze ");
-	ADD_FLAG("CFLAGS", " /wd6308 ");
-} else if (PHP_ANALYZER == "clang") {
-	var clang_cl = false;
-
-	if (FSO.FileExists(PROGRAM_FILES + "\\LLVM\\bin\\clang-cl.exe")) {
-		clang_cl = PROGRAM_FILES + "\\LLVM\\bin\\clang-cl.exe";
-	} else if (FSO.FileExists(PROGRAM_FILESx86 + "\\LLVM\\bin\\clang-cl.exe")) {
-		clang_cl = PROGRAM_FILESx86 + "\\LLVM\\bin\\clang-cl.exe";
-	}
-
-	if (!clang_cl) {
-		if (false == PATH_PROG('clang-cl', null, 'CLANG_CL')) {
-			WARNING("Couldn't find clang binaries, static analyze was disabled");
-			PHP_ANALYZER = "no";
-		}
-	} else {
-		DEFINE("CLANG_CL", clang_cl);
-	}
-} else if (PHP_ANALYZER == "cppcheck") {
-
-	var cppcheck = false;
-
-	if (FSO.FileExists(PROGRAM_FILES + "\\Cppcheck\\cppcheck.exe")) {
-		cppcheck = PROGRAM_FILES + "\\Cppcheck\\cppcheck.exe";
-	} else if (FSO.FileExists(PROGRAM_FILESx86 + "\\Cppcheck\\cppcheck.exe")) {
-		cppcheck = PROGRAM_FILESx86 + "\\Cppcheck\\cppcheck.exe";
-	}
-	if (!cppcheck) {
-		if (false == PATH_PROG('cppcheck', null, 'CPPCHECK')) {
-			WARNING("Couldn't find Cppcheck binaries, static analyze was disabled");
-			PHP_ANALYZER = "no";
-		}
-	} else {
-		DEFINE("CPPCHECK", cppcheck);
-	}
-} else if (PHP_ANALYZER == "pvs") {
-	var pvs_studio = false;
-
-	if (FSO.FileExists(PROGRAM_FILES + "\\PVS-Studio\\x64\\PVS-Studio.exe")) {
-		pvs_studio = PROGRAM_FILES + "\\PVS-Studio\\x86\\PVS-Studio.exe";
-	} else if (FSO.FileExists(PROGRAM_FILESx86 + "\\PVS-Studio\\x64\\PVS-Studio.exe")) {
-		pvs_studio = PROGRAM_FILESx86 + "\\PVS-Studio\\x64\\PVS-Studio.exe";
-	}
-
-	if (!pvs_studio) {
-		WARNING("Couldn't find PVS-Studio binaries, static analyze was disabled");
-		PHP_ANALYZER = "no";
-	} else {
-		var pvscfg = FSO.CreateTextFile("PVS-Studio.conf", true);
-		DEFINE("PVS_STUDIO", pvs_studio);
-
-		pvscfg.WriteLine("exclude-path = " + VCINSTALLDIR);
-		if (FSO.FolderExists(PROGRAM_FILESx86 + "\\windows kits\\")) {
-			pvscfg.WriteLine("exclude-path = " + PROGRAM_FILESx86 + "\\windows kits\\");
-		} else if (FSO.FolderExists(PROGRAM_FILES + "\\windows kits\\")) {
-			pvscfg.WriteLine("exclude-path = " + PROGRAM_FILES + "\\windows kits\\");
-		}
-		pvscfg.WriteLine("vcinstalldir = " + VCINSTALLDIR);
-		pvscfg.WriteLine("platform = " + (X64 ? 'x64' : 'Win32'));
-		pvscfg.WriteLine("preprocessor = visualcpp");
-		pvscfg.WriteLine("language = C");
-	}
-} else {
-	PHP_ANALYZER = "no"
-}
-
 if (CLANG_TOOLSET) {
 	ARG_WITH("uncritical-warn-choke", "Disable some uncritical warnings", "yes");
 	if (PHP_UNCRITICAL_WARN_CHOKE != "no") {
 		ADD_FLAG("CFLAGS", "-Wno-ignored-attributes -Wno-deprecated-declarations -Wno-missing-braces \
-		-Wno-logical-op-parentheses -Wno-msvc-include -Wno-invalid-source-encoding -Wno-unknown-pragmas");
+		-Wno-logical-op-parentheses -Wno-msvc-include -Wno-invalid-source-encoding -Wno-unknown-pragmas \
+		-Wno-unused-command-line-argument");
+	}
+
+	ARG_ENABLE("sanitizer", "Enable address sanitizer extension", "no");
+	if (PHP_SANITIZER == "yes") {
+		if (COMPILER_NUMERIC_VERSION < 500) {
+			ERROR("Clang at least 5.0.0 required for sanitation plugins");
+		}
+		add_asan_opts("CFLAGS", "LIBS", "LDFLAGS");
 	}
 }
 

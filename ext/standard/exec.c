@@ -217,9 +217,9 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		Z_PARAM_STRING(cmd, cmd_len)
 		Z_PARAM_OPTIONAL
 		if (!mode) {
-			Z_PARAM_ZVAL_DEREF_EX(ret_array, 0, 1)
+			Z_PARAM_ZVAL_DEREF(ret_array)
 		}
-		Z_PARAM_ZVAL_DEREF_EX(ret_code, 0, 1)
+		Z_PARAM_ZVAL_DEREF(ret_code)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if (!cmd_len) {
@@ -235,13 +235,16 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		ret = php_exec(mode, cmd, NULL, return_value);
 	} else {
 		if (Z_TYPE_P(ret_array) != IS_ARRAY) {
-			zval_dtor(ret_array);
+			zval_ptr_dtor(ret_array);
 			array_init(ret_array);
+		} else if (Z_REFCOUNT_P(ret_array) > 1) {
+			zval_ptr_dtor(ret_array);
+			ZVAL_ARR(ret_array, zend_array_dup(Z_ARR_P(ret_array)));
 		}
 		ret = php_exec(2, cmd, ret_array, return_value);
 	}
 	if (ret_code) {
-		zval_dtor(ret_code);
+		zval_ptr_dtor(ret_code);
 		ZVAL_LONG(ret_code, ret);
 	}
 }

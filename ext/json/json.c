@@ -17,8 +17,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -115,6 +113,10 @@ static PHP_MINIT_FUNCTION(json)
 	PHP_JSON_REGISTER_CONSTANT("JSON_OBJECT_AS_ARRAY", PHP_JSON_OBJECT_AS_ARRAY);
 	PHP_JSON_REGISTER_CONSTANT("JSON_BIGINT_AS_STRING", PHP_JSON_BIGINT_AS_STRING);
 
+	/* common options for json_decode and json_encode */
+	PHP_JSON_REGISTER_CONSTANT("JSON_INVALID_UTF8_IGNORE", PHP_JSON_INVALID_UTF8_IGNORE);
+	PHP_JSON_REGISTER_CONSTANT("JSON_INVALID_UTF8_SUBSTITUTE", PHP_JSON_INVALID_UTF8_SUBSTITUTE);
+
 	/* json error constants */
 	PHP_JSON_REGISTER_CONSTANT("JSON_ERROR_NONE", PHP_JSON_ERROR_NONE);
 	PHP_JSON_REGISTER_CONSTANT("JSON_ERROR_DEPTH", PHP_JSON_ERROR_DEPTH);
@@ -184,19 +186,24 @@ static PHP_MINFO_FUNCTION(json)
 }
 /* }}} */
 
-PHP_JSON_API int php_json_encode(smart_str *buf, zval *val, int options) /* {{{ */
+PHP_JSON_API int php_json_encode_ex(smart_str *buf, zval *val, int options, zend_long depth) /* {{{ */
 {
 	php_json_encoder encoder;
 	int return_code;
 
 	php_json_encode_init(&encoder);
-	encoder.max_depth = JSON_G(encode_max_depth);
-	encoder.error_code = PHP_JSON_ERROR_NONE;
+	encoder.max_depth = depth;
 
 	return_code = php_json_encode_zval(buf, val, options, &encoder);
 	JSON_G(error_code) = encoder.error_code;
 
 	return return_code;
+}
+/* }}} */
+
+PHP_JSON_API int php_json_encode(smart_str *buf, zval *val, int options) /* {{{ */
+{
+	return php_json_encode_ex(buf, val, options, JSON_G(encode_max_depth));
 }
 /* }}} */
 
@@ -227,7 +234,7 @@ static PHP_FUNCTION(json_encode)
 	zend_long depth = PHP_JSON_PARSER_DEFAULT_DEPTH;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
-		Z_PARAM_ZVAL_DEREF(parameter)
+		Z_PARAM_ZVAL(parameter)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(options)
 		Z_PARAM_LONG(depth)
@@ -235,7 +242,6 @@ static PHP_FUNCTION(json_encode)
 
 	php_json_encode_init(&encoder);
 	encoder.max_depth = (int)depth;
-	encoder.error_code = PHP_JSON_ERROR_NONE;
 	php_json_encode_zval(&buf, parameter, (int)options, &encoder);
 	JSON_G(error_code) = encoder.error_code;
 
@@ -259,13 +265,14 @@ static PHP_FUNCTION(json_decode)
 	char *str;
 	size_t str_len;
 	zend_bool assoc = 0; /* return JS objects as PHP objects by default */
+	zend_bool assoc_null = 1;
 	zend_long depth = PHP_JSON_PARSER_DEFAULT_DEPTH;
 	zend_long options = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_STRING(str, str_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_BOOL(assoc)
+		Z_PARAM_BOOL_EX(assoc, assoc_null, 1, 0)
 		Z_PARAM_LONG(depth)
 		Z_PARAM_LONG(options)
 	ZEND_PARSE_PARAMETERS_END();
@@ -288,10 +295,12 @@ static PHP_FUNCTION(json_decode)
 	}
 
 	/* For BC reasons, the bool $assoc overrides the long $options bit for PHP_JSON_OBJECT_AS_ARRAY */
-	if (assoc) {
-		options |=  PHP_JSON_OBJECT_AS_ARRAY;
-	} else {
-		options &= ~PHP_JSON_OBJECT_AS_ARRAY;
+	if (!assoc_null) {
+		if (assoc) {
+			options |=  PHP_JSON_OBJECT_AS_ARRAY;
+		} else {
+			options &= ~PHP_JSON_OBJECT_AS_ARRAY;
+		}
 	}
 
 	php_json_decode_ex(return_value, str, str_len, options, depth);

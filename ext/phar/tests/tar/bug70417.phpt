@@ -13,7 +13,7 @@ if ($status !== 0) {
 --FILE--
 <?php
 function countOpenFiles() {
-    exec('lsof -p ' . getmypid(), $out);
+    exec('lsof -p ' . escapeshellarg(getmypid()) . ' 2> /dev/null', $out);
     return count($out);
 }
 $filename = __DIR__ . '/bug70417.tar';

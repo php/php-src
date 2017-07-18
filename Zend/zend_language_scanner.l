@@ -1142,7 +1142,8 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN(T_RETURN);
 }
 
-<ST_IN_SCRIPTING>"yield"{WHITESPACE}"from" {
+<ST_IN_SCRIPTING>"yield"{WHITESPACE}"from"[^a-zA-Z0-9_\x80-\xff] {
+	yyless(yyleng - 1);
 	HANDLE_NEWLINES(yytext, yyleng);
 	RETURN_TOKEN(T_YIELD_FROM);
 }
@@ -1959,6 +1960,9 @@ inline_char_handler:
 
 <ST_IN_SCRIPTING>"?>"{NEWLINE}? {
 	BEGIN(INITIAL);
+	if (yytext[yyleng-1] != '>') {
+		CG(increment_lineno) = 1;
+	}
 	RETURN_TOKEN(T_CLOSE_TAG);  /* implicit ';' at php-end tag */
 }
 

@@ -580,12 +580,6 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{
 		compiler_globals->static_members_table = NULL;
 	}
 	compiler_globals->script_encoding_list = NULL;
-
-	compiler_globals->empty_string = zend_zts_interned_string_init("", sizeof("")-1);
-
-	memset(compiler_globals->one_char_string, 0, sizeof(compiler_globals->one_char_string));
-
-	zend_known_interned_strings_init(&compiler_globals->known_strings, &compiler_globals->known_strings_count);
 }
 /* }}} */
 
@@ -610,11 +604,6 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals) /* {{
 		pefree((char*)compiler_globals->script_encoding_list, 1);
 	}
 	compiler_globals->last_static_member = 0;
-
-	zend_zts_interned_string_free(&compiler_globals->empty_string);
-
-	compiler_globals->known_strings = NULL;
-	compiler_globals->known_strings_count = 0;
 }
 /* }}} */
 
@@ -623,7 +612,7 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	ZEND_TSRMLS_CACHE_UPDATE();
 
 	zend_startup_constants();
-	zend_copy_constants(EG(zend_constants), GLOBAL_CONSTANTS_TABLE);
+	zend_copy_constants(executor_globals->zend_constants, GLOBAL_CONSTANTS_TABLE);
 	zend_init_rsrc_plist();
 	zend_init_exception_op();
 	zend_init_call_trampoline_op();
@@ -649,7 +638,6 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	zend_get_windows_version_info(&executor_globals->windows_version_info);
 #endif
 	executor_globals->flags = EG_FLAGS_INITIAL;
-	executor_globals->valid_symbol_table = 0;
 }
 /* }}} */
 
@@ -856,6 +844,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 
 #ifdef ZTS
 	tsrm_set_new_thread_end_handler(zend_new_thread_end_handler);
+	tsrm_set_shutdown_handler(zend_interned_strings_dtor);
 #endif
 
 	return SUCCESS;
@@ -899,13 +888,9 @@ void zend_post_startup(void) /* {{{ */
 	}
 	free(EG(zend_constants));
 
-	virtual_cwd_deactivate();
-
 	executor_globals_ctor(executor_globals);
 	global_persistent_list = &EG(persistent_list);
 	zend_copy_ini_directives();
-#else
-	virtual_cwd_deactivate();
 #endif
 }
 /* }}} */
@@ -913,31 +898,6 @@ void zend_post_startup(void) /* {{{ */
 void zend_shutdown(void) /* {{{ */
 {
 	zend_destroy_rsrc_list(&EG(persistent_list));
-	if (EG(active))
-	{
-		/*
-		 * The order of destruction is important here.
-		 * See bugs #65463 and 66036.
-		 */
-		zend_function *func;
-		zend_class_entry *ce;
-
-		ZEND_HASH_REVERSE_FOREACH_PTR(GLOBAL_FUNCTION_TABLE, func) {
-			if (func->type == ZEND_USER_FUNCTION) {
-				zend_cleanup_op_array_data((zend_op_array *) func);
-			}
-		} ZEND_HASH_FOREACH_END();
-		ZEND_HASH_REVERSE_FOREACH_PTR(GLOBAL_CLASS_TABLE, ce) {
-			if (ce->type == ZEND_USER_CLASS) {
-				zend_cleanup_user_class_data(ce);
-			} else {
-				break;
-			}
-		} ZEND_HASH_FOREACH_END();
-		zend_cleanup_internal_classes();
-		zend_hash_reverse_apply(GLOBAL_FUNCTION_TABLE, (apply_func_t) clean_non_persistent_function_full);
-		zend_hash_reverse_apply(GLOBAL_CLASS_TABLE, (apply_func_t) clean_non_persistent_class_full);
-	}
 	zend_destroy_modules();
 
 	virtual_cwd_deactivate();
@@ -967,7 +927,9 @@ void zend_shutdown(void) /* {{{ */
 #endif
 	zend_destroy_rsrc_list_dtors();
 
+#ifndef ZTS
 	zend_interned_strings_dtor();
+#endif
 }
 /* }}} */
 
@@ -991,7 +953,7 @@ ZEND_COLD void zenderror(const char *error) /* {{{ */
 /* }}} */
 
 BEGIN_EXTERN_C()
-ZEND_API ZEND_COLD void _zend_bailout(char *filename, uint32_t lineno) /* {{{ */
+ZEND_API ZEND_COLD void _zend_bailout(const char *filename, uint32_t lineno) /* {{{ */
 {
 
 	if (!EG(bailout)) {
@@ -1135,8 +1097,6 @@ ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) /* {{{ */
 static ZEND_COLD void zend_error_va_list(int type, const char *format, va_list args)
 #endif
 {
-	char *str;
-	int len;
 #if !defined(HAVE_NORETURN) || defined(HAVE_NORETURN_ALIAS)
 	va_list args;
 #endif
@@ -1265,24 +1225,9 @@ static ZEND_COLD void zend_error_va_list(int type, const char *format, va_list a
 			break;
 		default:
 			/* Handle the error in user space */
-/* va_copy() is __va_copy() in old gcc versions.
- * According to the autoconf manual, using
- * memcpy(&dst, &src, sizeof(va_list))
- * gives maximum portability. */
-#ifndef va_copy
-# ifdef __va_copy
-#  define va_copy(dest, src)	__va_copy((dest), (src))
-# else
-#  define va_copy(dest, src)	memcpy(&(dest), &(src), sizeof(va_list))
-# endif
-#endif
 			va_copy(usr_copy, args);
-			len = (int)zend_vspprintf(&str, 0, format, usr_copy);
-			ZVAL_NEW_STR(&params[1], zend_string_init(str, len, 0));
-			efree(str);
-#ifdef va_copy
+			ZVAL_STR(&params[1], zend_vstrpprintf(0, format, usr_copy));
 			va_end(usr_copy);
-#endif
 
 			ZVAL_LONG(&params[0], type);
 
@@ -1597,4 +1542,6 @@ void free_estring(char **str_p) /* {{{ */
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

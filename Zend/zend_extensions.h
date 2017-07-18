@@ -46,7 +46,7 @@ You can use the following macro to check the extension API version for compatibi
 
 /* The first number is the engine version and the rest is the date (YYYYMMDD).
  * This way engine 2/3 API no. is always greater than engine 1 API no..  */
-#define ZEND_EXTENSION_API_NO	320160731
+#define ZEND_EXTENSION_API_NO	320170718
 
 typedef struct _zend_extension_version_info {
 	int zend_extension_api_no;
@@ -145,6 +145,7 @@ void zend_shutdown_extensions(void);
 
 BEGIN_EXTERN_C()
 ZEND_API int zend_load_extension(const char *path);
+ZEND_API int zend_load_extension_handle(DL_HANDLE handle, const char *path);
 ZEND_API int zend_register_extension(zend_extension *new_extension, DL_HANDLE handle);
 ZEND_API zend_extension *zend_get_extension(const char *extension_name);
 ZEND_API size_t zend_extensions_op_array_persist_calc(zend_op_array *op_array);
@@ -159,4 +160,6 @@ END_EXTERN_C()
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

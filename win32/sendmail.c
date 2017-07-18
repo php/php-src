@@ -58,9 +58,8 @@
    because the content is in *error_message now */
 #define SMTP_ERROR_RESPONSE(response)	{ \
 											if (response && error_message) { \
-												if (NULL != (*error_message = ecalloc(1, sizeof(SMTP_ERROR_RESPONSE_SPEC) + strlen(response)))) { \
-													snprintf(*error_message, sizeof(SMTP_ERROR_RESPONSE_SPEC) + strlen(response), SMTP_ERROR_RESPONSE_SPEC, response); \
-												} \
+												*error_message = ecalloc(1, sizeof(SMTP_ERROR_RESPONSE_SPEC) + strlen(response)); \
+												snprintf(*error_message, sizeof(SMTP_ERROR_RESPONSE_SPEC) + strlen(response), SMTP_ERROR_RESPONSE_SPEC, response); \
 												efree(response); \
 											} \
 										}
@@ -135,47 +134,45 @@ static zend_string *php_win32_mail_trim_header(char *header)
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
 
 	zend_string *result, *result2;
-	zval replace;
+	zend_string *replace;
 	zend_string *regex;
 
 	if (!header) {
 		return NULL;
 	}
 
-	ZVAL_STRINGL(&replace, PHP_WIN32_MAIL_UNIFY_REPLACE, strlen(PHP_WIN32_MAIL_UNIFY_REPLACE));
+	replace = zend_string_init(PHP_WIN32_MAIL_UNIFY_REPLACE, strlen(PHP_WIN32_MAIL_UNIFY_REPLACE), 0);
 	regex = zend_string_init(PHP_WIN32_MAIL_UNIFY_PATTERN, sizeof(PHP_WIN32_MAIL_UNIFY_PATTERN)-1, 0);
 
 	result = php_pcre_replace(regex,
 				  NULL, header, (int)strlen(header),
-				  &replace,
-				  0,
+				  replace,
 				  -1,
 				  NULL);
 
-	zval_ptr_dtor(&replace);
+	zend_string_release(replace);
 	zend_string_release(regex);
 
 	if (NULL == result) {
 		return NULL;
 	}
 
-	ZVAL_STRING(&replace, PHP_WIN32_MAIL_RMVDBL_PATTERN);
+	replace = zend_string_init(PHP_WIN32_MAIL_RMVDBL_PATTERN, strlen(PHP_WIN32_MAIL_RMVDBL_PATTERN), 0);
 	regex = zend_string_init(PHP_WIN32_MAIL_RMVDBL_PATTERN, sizeof(PHP_WIN32_MAIL_RMVDBL_PATTERN)-1, 0);
 
 	result2 = php_pcre_replace(regex,
 				   result, ZSTR_VAL(result), (int)ZSTR_LEN(result),
-				   &replace,
-				  0,
+				   replace,
 				  -1,
 				  NULL);
-	zval_ptr_dtor(&replace);
+	zend_string_release(replace);
 	zend_string_release(regex);
 	zend_string_release(result);
 
 	return result2;
 #else
 	/* In case we don't have PCRE support (for whatever reason...) simply do nothing and return the unmodified header */
-	return estrdup(header);
+	return zend_string_init(header, strlen(header), 0);
 #endif
 }
 
@@ -283,9 +280,7 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 			zend_string_free(headers_lc);
 		}
 		/* 128 is safe here, the specifier in snprintf isn't longer than that */
-		if (NULL == (*error_message = ecalloc(1, HOST_NAME_LEN + 128))) {
-			return FAILURE;
-		}
+		*error_message = ecalloc(1, HOST_NAME_LEN + 128);
 		snprintf(*error_message, HOST_NAME_LEN + 128,
 			"Failed to connect to mailserver at \"%s\" port %d, verify your \"SMTP\" "
 			"and \"smtp_port\" setting in php.ini or use ini_set()",
@@ -525,7 +520,7 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 		efree(tempMailTo);
 	}
 	else if (headers) {
-		if (pos1 = strstr(headers_lc, "bcc:")) {
+		if ((pos1 = strstr(headers_lc, "bcc:")) && (pos1 == headers_lc || *(pos1-1) == '\n')) {
 			/* Real offset is memaddress from the original headers + difference of
 			 * string found in the lowercase headrs + 4 characters to jump over
 			 * the bcc: */
@@ -559,9 +554,7 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 
 			/* Now that we've identified that we've a Bcc list,
 			   remove it from the current header. */
-			if (NULL == (stripped_header = ecalloc(1, strlen(headers)))) {
-				return OUT_OF_MEMORY;
-			}
+			stripped_header = ecalloc(1, strlen(headers));
 			/* headers = point to string start of header
 			   pos1    = pointer IN headers where the Bcc starts
 			   '4'     = Length of the characters 'bcc:'
@@ -581,9 +574,7 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 	/* Simplify the code that we create a copy of stripped_header no matter if
 	   we actually strip something or not. So we've a single efree() later. */
 	if (headers && !stripped_header) {
-		if (NULL == (stripped_header = estrndup(headers, strlen(headers)))) {
-			return OUT_OF_MEMORY;
-		}
+		stripped_header = estrndup(headers, strlen(headers));
 	}
 
 	if ((res = Post("DATA\r\n")) != SUCCESS) {
@@ -659,9 +650,7 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 
 static int addToHeader(char **header_buffer, const char *specifier, char *string)
 {
-	if (NULL == (*header_buffer = erealloc(*header_buffer, strlen(*header_buffer) + strlen(specifier) + strlen(string) + 1))) {
-		return 0;
-	}
+	*header_buffer = erealloc(*header_buffer, strlen(*header_buffer) + strlen(specifier) + strlen(string) + 1);
 	sprintf(*header_buffer + strlen(*header_buffer), specifier, string);
 	return 1;
 }
@@ -688,9 +677,7 @@ static int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders)
 	size_t i;
 
 	if (xheaders) {
-		if (NULL == (headers_lc = estrdup(xheaders))) {
-			return OUT_OF_MEMORY;
-		}
+		headers_lc = estrdup(xheaders);
 		for (i = 0; i < strlen(headers_lc); i++) {
 			headers_lc[i] = tolower(headers_lc[i]);
 		}

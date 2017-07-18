@@ -122,7 +122,7 @@ MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const s)
 	} else {
 		COPY_CLIENT_ERROR(conn->error_info, result->stored_data->error_info);
 		stmt->result->m.free_result_contents(stmt->result);
-		mnd_efree(stmt->result);
+		mnd_pefree(stmt->result, stmt->result->persistent);
 		stmt->result = NULL;
 		stmt->state = MYSQLND_STMT_PREPARED;
 	}
@@ -347,7 +347,7 @@ mysqlnd_stmt_prepare_read_eof(MYSQLND_STMT * s)
 		if (FAIL == (ret = PACKET_READ(fields_eof))) {
 			if (stmt->result) {
 				stmt->result->m.free_result_contents(stmt->result);
-				mnd_efree(stmt->result);
+				mnd_pefree(stmt->result, stmt->result->persistent);
 				/* XXX: This will crash, because we will null also the methods.
 					But seems it happens in extreme cases or doesn't. Should be fixed by exporting a function
 					(from mysqlnd_driver.c?) to do the reset.

@@ -140,8 +140,8 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 	char local_open_basedir[MAXPATHLEN];
 	char path_tmp[MAXPATHLEN];
 	char *path_file;
-	int resolved_basedir_len;
-	int resolved_name_len;
+	size_t resolved_basedir_len;
+	size_t resolved_name_len;
 	size_t path_len;
 	int nesting_level = 0;
 
@@ -214,9 +214,9 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 
 	/* Resolve open_basedir to resolved_basedir */
 	if (expand_filepath(local_open_basedir, resolved_basedir) != NULL) {
-		int basedir_len = (int)strlen(basedir);
+		size_t basedir_len = strlen(basedir);
 		/* Handler for basedirs that end with a / */
-		resolved_basedir_len = (int)strlen(resolved_basedir);
+		resolved_basedir_len = strlen(resolved_basedir);
 #ifdef PHP_WIN32
 		if (basedir[basedir_len - 1] == PHP_DIR_SEPARATOR || basedir[basedir_len - 1] == '/') {
 #else
@@ -231,7 +231,7 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 				resolved_basedir[resolved_basedir_len] = '\0';
 		}
 
-		resolved_name_len = (int)strlen(resolved_name);
+		resolved_name_len = strlen(resolved_name);
 		if (path_tmp[path_len - 1] == PHP_DIR_SEPARATOR) {
 			if (resolved_name[resolved_name_len - 1] != PHP_DIR_SEPARATOR) {
 				resolved_name[resolved_name_len] = PHP_DIR_SEPARATOR;
@@ -406,16 +406,14 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
 		IS_ABSOLUTE_PATH(PG(doc_root), length)) {
 		int path_len = (int)strlen(path_info);
 		filename = emalloc(length + path_len + 2);
-		if (filename) {
-			memcpy(filename, PG(doc_root), length);
-			if (!IS_SLASH(filename[length - 1])) {	/* length is never 0 */
-				filename[length++] = PHP_DIR_SEPARATOR;
-			}
-			if (IS_SLASH(path_info[0])) {
-				length--;
-			}
-			strncpy(filename + length, path_info, path_len + 1);
+		memcpy(filename, PG(doc_root), length);
+		if (!IS_SLASH(filename[length - 1])) {	/* length is never 0 */
+			filename[length++] = PHP_DIR_SEPARATOR;
 		}
+		if (IS_SLASH(path_info[0])) {
+			length--;
+		}
+		strncpy(filename + length, path_info, path_len + 1);
 	} else {
 		filename = SG(request_info).path_translated;
 	}
@@ -503,7 +501,7 @@ PHPAPI zend_string *php_resolve_path(const char *filename, int filename_length, 
 	     (IS_SLASH(filename[1]) ||
 	      ((filename[1] == '.') && IS_SLASH(filename[2])))) ||
 	    IS_ABSOLUTE_PATH(filename, filename_length) ||
-#if PHP_WIN32
+#ifdef PHP_WIN32
 		/* This should count as an absolute local path as well, however
 		   IS_ABSOLUTE_PATH doesn't care about this path form till now. It
 		   might be a big thing to extend, thus just a local handling for

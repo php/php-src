@@ -224,7 +224,7 @@ static void php_libxml_node_free(xmlNodePtr node)
 	}
 }
 
-static void php_libxml_node_free_list(xmlNodePtr node)
+PHP_LIBXML_API void php_libxml_node_free_list(xmlNodePtr node)
 {
 	xmlNodePtr curnode;
 

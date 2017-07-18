@@ -908,7 +908,7 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 		efree(docref_buf);
 	}
 
-	if (PG(track_errors) && module_initialized && EG(valid_symbol_table) &&
+	if (PG(track_errors) && module_initialized && EG(active) &&
 			(Z_TYPE(EG(user_error_handler)) == IS_UNDEF || !(EG(user_error_handler_error_reporting) & type))) {
 		zval tmp;
 		ZVAL_STRINGL(&tmp, buffer, buffer_len);
@@ -1235,7 +1235,7 @@ static ZEND_COLD void php_error_cb(int type, const char *error_filename, const u
 		return;
 	}
 
-	if (PG(track_errors) && module_initialized && EG(valid_symbol_table)) {
+	if (PG(track_errors) && module_initialized && EG(active)) {
 		zval tmp;
 
 		ZVAL_STRINGL(&tmp, buffer, buffer_len);
@@ -1601,6 +1601,8 @@ int php_request_startup(void)
 {
 	int retval = SUCCESS;
 
+	zend_interned_strings_activate();
+
 #ifdef HAVE_DTRACE
 	DTRACE_REQUEST_STARTUP(SAFE_FILENAME(SG(request_info).path_translated), SAFE_FILENAME(SG(request_info).request_uri), (char *)SAFE_FILENAME(SG(request_info).request_method));
 #endif /* HAVE_DTRACE */
@@ -1679,6 +1681,8 @@ int php_request_startup(void)
 {
 	int retval = SUCCESS;
 
+	zend_interned_strings_activate();
+
 #if PHP_SIGCHILD
 	signal(SIGCHLD, sigchld_handler);
 #endif
@@ -1711,6 +1715,8 @@ int php_request_startup_for_hook(void)
 {
 	int retval = SUCCESS;
 
+	zend_interned_strings_activate();
+
 #if PHP_SIGCHLD
 	signal(SIGCHLD, sigchld_handler);
 #endif
@@ -1734,8 +1740,8 @@ void php_request_shutdown_for_exec(void *dummy)
 
 	/* used to close fd's in the 3..255 range here, but it's problematic
 	 */
+	zend_interned_strings_deactivate();
 	shutdown_memory_manager(1, 1);
-	zend_interned_strings_restore();
 }
 /* }}} */
 
@@ -1778,11 +1784,11 @@ void php_request_shutdown_for_hook(void *dummy)
 		php_shutdown_stream_hashes();
 	} zend_end_try();
 
+	zend_interned_strings_deactivate();
+
 	zend_try {
 		shutdown_memory_manager(CG(unclean_shutdown), 0);
 	} zend_end_try();
-
-	zend_interned_strings_restore();
 
 #ifdef ZEND_SIGNALS
 	zend_try {
@@ -1891,7 +1897,7 @@ void php_request_shutdown(void *dummy)
 	} zend_end_try();
 
 	/* 15. Free Willy (here be crashes) */
-	zend_interned_strings_restore();
+	zend_interned_strings_deactivate();
 	zend_try {
 		shutdown_memory_manager(CG(unclean_shutdown) || !report_memleaks, 0);
 	} zend_end_try();
@@ -1942,6 +1948,7 @@ static size_t php_output_wrapper(const char *str, size_t str_length)
 static void core_globals_ctor(php_core_globals *core_globals)
 {
 	memset(core_globals, 0, sizeof(*core_globals));
+	php_startup_ticks();
 }
 /* }}} */
 #endif
@@ -2053,14 +2060,13 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	zend_utility_functions zuf;
 	zend_utility_values zuv;
 	int retval = SUCCESS, module_number=0;	/* for REGISTER_INI_ENTRIES() */
-	char *php_os, *php_os_family;
+	char *php_os;
 	zend_module_entry *module;
 
 #ifdef PHP_WIN32
 	WORD wVersionRequested = MAKEWORD(2, 0);
 	WSADATA wsaData;
-#endif
-#ifdef PHP_WIN32
+
 	php_os = "WINNT";
 
 	old_invalid_parameter_handler =
@@ -2074,21 +2080,6 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 #else
 	php_os = PHP_OS;
 #endif
-
-#if defined(PHP_WIN32)
-	php_os_family = "WIN";
-#elif defined(BSD) || defined(__DragonFly__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
-	php_os_family = "BSD";
-#elif defined(__APPLE__) || defined(__MACH__)
-	php_os_family = "OSX";
-#elif defined(__sun__)
-	php_os_family = "SOLARIS";
-#elif defined(__linux__)
-	php_os_family = "LINUX";
-#else
-	php_os_family = "unknown";
-#endif
-
 
 #ifdef ZTS
 	(void)ts_resource(0);
@@ -2116,7 +2107,6 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 #ifdef ZTS
 	ts_allocate_id(&core_globals_id, sizeof(php_core_globals), (ts_allocate_ctor) core_globals_ctor, (ts_allocate_dtor) core_globals_dtor);
-	php_startup_ticks();
 #ifdef PHP_WIN32
 	ts_allocate_id(&php_win32_core_globals_id, sizeof(php_win32_core_globals), (ts_allocate_ctor) php_win32_core_globals_ctor, (ts_allocate_dtor) php_win32_core_globals_dtor);
 #endif
@@ -2173,7 +2163,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 #endif
 	REGISTER_MAIN_LONG_CONSTANT("PHP_DEBUG", PHP_DEBUG, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_STRINGL_CONSTANT("PHP_OS", php_os, strlen(php_os), CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_STRINGL_CONSTANT("PHP_OS_FAMILY", php_os_family, strlen(php_os_family), CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_STRINGL_CONSTANT("PHP_OS_FAMILY", PHP_OS_FAMILY, sizeof(PHP_OS_FAMILY)-1, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_STRINGL_CONSTANT("PHP_SAPI", sapi_module.name, strlen(sapi_module.name), CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_STRINGL_CONSTANT("DEFAULT_INCLUDE_PATH", PHP_INCLUDE_PATH, sizeof(PHP_INCLUDE_PATH)-1, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_STRINGL_CONSTANT("PEAR_INSTALL_DIR", PEAR_INSTALLDIR, sizeof(PEAR_INSTALLDIR)-1, CONST_PERSISTENT | CONST_CS);
@@ -2369,12 +2359,15 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 		} zend_end_try();
 	}
 
+	virtual_cwd_deactivate();
+
 	sapi_deactivate();
 	module_startup = 0;
 
 	shutdown_memory_manager(1, 0);
-	zend_interned_strings_snapshot();
  	virtual_cwd_activate();
+
+	zend_interned_strings_switch_storage();
 
 	/* we're done */
 	return retval;

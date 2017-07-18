@@ -95,7 +95,7 @@ TSRMLS_CACHE_EXTERN()
 #define	SHM_RND		FILE_MAP_WRITE
 #define	SHM_REMAP	FILE_MAP_COPY
 
-char * tsrm_win32_get_path_sid_key(const char *pathname );
+char * tsrm_win32_get_path_sid_key(const char *pathname, size_t pathname_len, size_t *key_len);
 
 TSRM_API void tsrm_win32_startup(void);
 TSRM_API void tsrm_win32_shutdown(void);
@@ -113,3 +113,12 @@ TSRM_API int shmctl(int key, int cmd, struct shmid_ds *buf);
 
 TSRM_API char *realpath(char *orig_path, char *buffer);
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

@@ -38,6 +38,7 @@ typedef struct {
 	ub4			prefetch;
 	ub2			charset;
 	sword		last_err;
+	sb4			max_char_width;
 
 	unsigned	attached:1;
 	unsigned	_reserved:31;

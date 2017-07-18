@@ -266,6 +266,29 @@ int zend_build_call_graph(zend_arena **arena, zend_script *script, uint32_t buil
 }
 /* }}} */
 
+zend_call_info **zend_build_call_map(zend_arena **arena, zend_func_info *info, zend_op_array *op_array) /* {{{ */
+{
+	zend_call_info **map, *call;
+	if (!info->callee_info) {
+		/* Don't build call map if function contains no calls */
+		return NULL;
+	}
+
+	map = zend_arena_calloc(arena, sizeof(zend_call_info *), op_array->last);
+	for (call = info->callee_info; call; call = call->next_callee) {
+		int i;
+		map[call->caller_init_opline - op_array->opcodes] = call;
+		map[call->caller_call_opline - op_array->opcodes] = call;
+		for (i = 0; i < call->num_args; i++) {
+			if (call->arg_info[i].opline) {
+				map[call->arg_info[i].opline - op_array->opcodes] = call;
+			}
+		}
+	}
+	return map;
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4

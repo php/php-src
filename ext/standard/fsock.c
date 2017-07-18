@@ -55,8 +55,8 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		Z_PARAM_STRING(host, host_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(port)
-		Z_PARAM_ZVAL_DEREF_EX(zerrno, 0, 1)
-		Z_PARAM_ZVAL_DEREF_EX(zerrstr, 0, 1)
+		Z_PARAM_ZVAL_DEREF(zerrno)
+		Z_PARAM_ZVAL_DEREF(zerrstr)
 		Z_PARAM_DOUBLE(timeout)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
@@ -82,11 +82,11 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	tv.tv_usec = conv % 1000000;
 
 	if (zerrno)	{
-		zval_dtor(zerrno);
+		zval_ptr_dtor(zerrno);
 		ZVAL_LONG(zerrno, 0);
 	}
 	if (zerrstr) {
-		zval_dtor(zerrstr);
+		zval_ptr_dtor(zerrstr);
 		ZVAL_EMPTY_STRING(zerrstr);
 	}
 
@@ -106,12 +106,12 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 	if (stream == NULL)	{
 		if (zerrno) {
-			zval_dtor(zerrno);
+			zval_ptr_dtor(zerrno);
 			ZVAL_LONG(zerrno, err);
 		}
 		if (zerrstr && errstr) {
 			/* no need to dup; we need to efree buf anyway */
-			zval_dtor(zerrstr);
+			zval_ptr_dtor(zerrstr);
 			ZVAL_STR(zerrstr, errstr);
 		} else if (!zerrstr && errstr) {
 			zend_string_release(errstr);

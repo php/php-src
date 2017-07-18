@@ -2676,7 +2676,7 @@ EOF
   done
 
   echo "'[$]0' \\" >> $1
-  if test `expr -- [$]0 : "'.*"` = 0; then
+  if test `expr " [$]0" : " '.*"` = 0; then
     CONFIGURE_COMMAND="$CONFIGURE_COMMAND '[$]0'"
   else 
     CONFIGURE_COMMAND="$CONFIGURE_COMMAND [$]0"
@@ -3224,3 +3224,23 @@ AC_DEFUN([PHP_CHECK_BUILTIN_SSUBLL_OVERFLOW], [
 
 dnl Load the AX_CHECK_COMPILE_FLAG macro from the autoconf archive.
 m4_include([build/ax_check_compile_flag.m4])
+
+dnl PHP_CHECK_VALGRIND
+AC_DEFUN([PHP_CHECK_VALGRIND], [
+  AC_MSG_CHECKING([for valgrind])
+
+  SEARCH_PATH="/usr/local /usr"
+  SEARCH_FOR="/include/valgrind/valgrind.h"
+  for i in $SEARCH_PATH ; do
+    if test -r $i/$SEARCH_FOR; then
+      VALGRIND_DIR=$i
+    fi
+  done
+
+  if test -z "$VALGRIND_DIR"; then
+    AC_MSG_RESULT([not found])
+  else
+    AC_MSG_RESULT(found in $VALGRIND_DIR)
+    AC_DEFINE(HAVE_VALGRIND, 1, [ ])
+  fi
+])

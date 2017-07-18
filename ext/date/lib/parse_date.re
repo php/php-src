@@ -913,7 +913,7 @@ datefull         = day ([ \t.-])* monthtext ([ \t.-])* year;
 datenoday        = monthtext ([ .\t-])* year4;
 datenodayrev     = year4 ([ .\t-])* monthtext;
 datetextual      = monthtext ([ .\t-])* day [,.stndrh\t ]+ year;
-datenoyear       = monthtext ([ .\t-])* day [,.stndrh\t ]*;
+datenoyear       = monthtext ([ .\t-])* day ([,.stndrh\t ]+|[\000]);
 datenoyearrev    = day ([ .\t-])* monthtext;
 datenocolon      = year4 monthlz daylz;
 

@@ -49,7 +49,7 @@ ZEND_END_ARG_INFO();
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_has_child_nodes, 0, 0, 0)
 ZEND_END_ARG_INFO();
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_clone_node, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_clone_node, 0, 0, 0)
 	ZEND_ARG_INFO(0, deep)
 ZEND_END_ARG_INFO();
 
@@ -337,6 +337,8 @@ int dom_node_node_value_write(dom_object *obj, zval *newval)
 		case XML_ATTRIBUTE_NODE:
 			if (nodep->children) {
 				node_list_unlink(nodep->children);
+				php_libxml_node_free_list((xmlNodePtr) nodep->children);
+				nodep->children = NULL;
 			}
 		case XML_TEXT_NODE:
 		case XML_COMMENT_NODE:
@@ -852,6 +854,14 @@ int dom_node_text_content_write(dom_object *obj, zval *newval)
 	if (nodep == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 0);
 		return FAILURE;
+	}
+
+	if (nodep->type == XML_ELEMENT_NODE || nodep->type == XML_ATTRIBUTE_NODE) {
+		if (nodep->children) {
+			node_list_unlink(nodep->children);
+			php_libxml_node_free_list((xmlNodePtr) nodep->children);
+			nodep->children = NULL;
+		}
 	}
 
 	str = zval_get_string(newval);

@@ -18,7 +18,7 @@ API adjustment to the old output control code:
 		// php_start_ob_buffer(zhandler, chunk_size, erase);
 		php_output_start_user(zhandler, chunk_size, flags);
 
-	Starting an internal handler whithout context:
+	Starting an internal handler without context:
 		// php_ob_set_internal_handler(my_php_output_handler_func_t, buffer_size, "output handler name", erase);
 		php_output_start_internal(handler_name, handler_name_len, my_php_output_handler_func_t, chunk_size, flags);
 

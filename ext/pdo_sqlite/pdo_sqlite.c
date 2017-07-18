@@ -69,6 +69,10 @@ ZEND_GET_MODULE(pdo_sqlite)
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(pdo_sqlite)
 {
+#ifdef SQLITE_DETERMINISTIC
+	REGISTER_PDO_CLASS_CONST_LONG("SQLITE_DETERMINISTIC", (zend_long)SQLITE_DETERMINISTIC);
+#endif
+
 	return php_pdo_register_driver(&pdo_sqlite_driver);
 }
 /* }}} */

@@ -17,7 +17,7 @@ echo "-- Testing sizeof() with zero arguments --\n";
 var_dump( sizeof() );
 echo "-- Testing sizeof() function with more than two arguments under COUNT_NORMAL mode --\n";
 $var = 100;
-$extra_arg = 10;;
+$extra_arg = 10;
 var_dump( sizeof($var, COUNT_NORMAL, $extra_arg) );
 echo "-- Testing sizeof() function with more than two arguments under COUNT_RECURSIVE mode --\n";
 var_dump( sizeof($var, COUNT_RECURSIVE, $extra_arg) );

@@ -861,11 +861,10 @@ PHPDBG_API int phpdbg_xml_vasprintf(char **buf, const char *format, zend_bool es
 	*buf = NULL;
 
 	if (cc >= 0) {
-		if ((*buf = emalloc(++cc)) != NULL) {
-			if ((cc = phpdbg_xml_vsnprintf(*buf, cc, format, escape_xml, ap)) < 0) {
-				efree(*buf);
-				*buf = NULL;
-			}
+		*buf = emalloc(++cc);
+		if ((cc = phpdbg_xml_vsnprintf(*buf, cc, format, escape_xml, ap)) < 0) {
+			efree(*buf);
+			*buf = NULL;
 		}
 	}
 

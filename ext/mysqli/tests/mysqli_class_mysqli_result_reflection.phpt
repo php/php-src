@@ -52,7 +52,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: 8448
+Modifiers: 256
 Number of Parameters: 0
 Number of Required Parameters: 0
 
@@ -68,7 +68,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: 8448
+Modifiers: 256
 Number of Parameters: 0
 Number of Required Parameters: 0
 
@@ -233,7 +233,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: 268435712
+Modifiers: 256
 Number of Parameters: 2
 Number of Required Parameters: 0
 

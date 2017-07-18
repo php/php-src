@@ -138,6 +138,8 @@ PHPAPI int php_setcookie(zend_string *name, zend_string *value, time_t expires, 
 		if (expires > 0) {
 			const char *p;
 			char tsdelta[13];
+			double diff;
+
 			strlcat(cookie, COOKIE_EXPIRES, len + 100);
 			dt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, expires, 0);
 			/* check to make sure that the year does not exceed 4 digits in length */
@@ -152,7 +154,11 @@ PHPAPI int php_setcookie(zend_string *name, zend_string *value, time_t expires, 
 			strlcat(cookie, ZSTR_VAL(dt), len + 100);
 			zend_string_free(dt);
 
-			snprintf(tsdelta, sizeof(tsdelta), ZEND_LONG_FMT, (zend_long) difftime(expires, time(NULL)));
+			diff = difftime(expires, time(NULL));
+			if (diff < 0) {
+				diff = 0;
+			}
+			snprintf(tsdelta, sizeof(tsdelta), ZEND_LONG_FMT, (zend_long) diff);
 			strlcat(cookie, COOKIE_MAX_AGE, len + 100);
 			strlcat(cookie, tsdelta, len + 100);
 		}
@@ -252,8 +258,8 @@ PHP_FUNCTION(headers_sent)
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL_DEREF_EX(arg1, 0, 1)
-		Z_PARAM_ZVAL_DEREF_EX(arg2, 0, 1)
+		Z_PARAM_ZVAL_DEREF(arg1)
+		Z_PARAM_ZVAL_DEREF(arg2)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (SG(headers_sent)) {
@@ -263,10 +269,10 @@ PHP_FUNCTION(headers_sent)
 
 	switch(ZEND_NUM_ARGS()) {
 	case 2:
-		zval_dtor(arg2);
+		zval_ptr_dtor(arg2);
 		ZVAL_LONG(arg2, line);
 	case 1:
-		zval_dtor(arg1);
+		zval_ptr_dtor(arg1);
 		if (file) {
 			ZVAL_STRING(arg1, file);
 		} else {

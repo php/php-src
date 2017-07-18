@@ -359,6 +359,25 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 		zend_file_cache_serialize_hash(ht, script, info, buf, zend_file_cache_serialize_zval);
 	}
 
+	if (op_array->scope && !IS_SERIALIZED(op_array->opcodes)) {
+		if (UNEXPECTED(zend_shared_alloc_get_xlat_entry(op_array->opcodes))) {
+			op_array->refcount = (uint32_t*)(intptr_t)-1;
+			SERIALIZE_PTR(op_array->literals);
+			SERIALIZE_PTR(op_array->opcodes);
+			SERIALIZE_PTR(op_array->arg_info);
+			SERIALIZE_PTR(op_array->vars);
+			SERIALIZE_STR(op_array->function_name);
+			SERIALIZE_STR(op_array->filename);
+			SERIALIZE_PTR(op_array->live_range);
+			SERIALIZE_PTR(op_array->scope);
+			SERIALIZE_STR(op_array->doc_comment);
+			SERIALIZE_PTR(op_array->try_catch_array);
+			SERIALIZE_PTR(op_array->prototype);
+			return;
+		}
+		zend_shared_alloc_register_xlat_entry(op_array->opcodes, op_array->opcodes);
+	}
+
 	if (op_array->literals && !IS_SERIALIZED(op_array->literals)) {
 		zval *p, *end;
 
@@ -412,6 +431,8 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 				case ZEND_DECLARE_ANON_INHERITED_CLASS:
 				case ZEND_FE_FETCH_R:
 				case ZEND_FE_FETCH_RW:
+				case ZEND_SWITCH_LONG:
+				case ZEND_SWITCH_STRING:
 					/* relative extended_value don't have to be changed */
 					break;
 			}
@@ -437,14 +458,14 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 					SERIALIZE_STR(p->name);
 				}
 				if (ZEND_TYPE_IS_CLASS(p->type)) {
+					zend_bool allow_null = ZEND_TYPE_ALLOW_NULL(p->type);
 					zend_string *type_name = ZEND_TYPE_NAME(p->type);
 
-					if (!IS_SERIALIZED(type_name)) {
-						zend_bool allow_null = ZEND_TYPE_ALLOW_NULL(p->type);
-
-						SERIALIZE_STR(type_name);
-						p->type = ZEND_TYPE_ENCODE_CLASS(type_name, allow_null);
-					}
+					SERIALIZE_STR(type_name);
+					p->type =
+						(Z_UL(1) << (sizeof(zend_type)*8-1)) | /* type is class */
+						(allow_null ? (Z_UL(1) << (sizeof(zend_type)*8-2)) : Z_UL(0)) | /* type allow null */
+						(zend_type)type_name;
 				}
 				p++;
 			}
@@ -944,6 +965,22 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 				script, buf, zend_file_cache_unserialize_zval, ZVAL_PTR_DTOR);
 	}
 
+	if (op_array->refcount) {
+		op_array->refcount = NULL;
+		UNSERIALIZE_PTR(op_array->literals);
+		UNSERIALIZE_PTR(op_array->opcodes);
+		UNSERIALIZE_PTR(op_array->arg_info);
+		UNSERIALIZE_PTR(op_array->vars);
+		UNSERIALIZE_STR(op_array->function_name);
+		UNSERIALIZE_STR(op_array->filename);
+		UNSERIALIZE_PTR(op_array->live_range);
+		UNSERIALIZE_PTR(op_array->scope);
+		UNSERIALIZE_STR(op_array->doc_comment);
+		UNSERIALIZE_PTR(op_array->try_catch_array);
+		UNSERIALIZE_PTR(op_array->prototype);
+		return;
+	}
+
 	if (op_array->literals && !IS_UNSERIALIZED(op_array->literals)) {
 		zval *p, *end;
 
@@ -995,6 +1032,8 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 				case ZEND_DECLARE_ANON_INHERITED_CLASS:
 				case ZEND_FE_FETCH_R:
 				case ZEND_FE_FETCH_RW:
+				case ZEND_SWITCH_LONG:
+				case ZEND_SWITCH_STRING:
 					/* relative extended_value don't have to be changed */
 					break;
 			}
@@ -1018,15 +1057,12 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 				if (!IS_UNSERIALIZED(p->name)) {
 					UNSERIALIZE_STR(p->name);
 				}
-				if (ZEND_TYPE_IS_CLASS(p->type)) {
-					zend_string *type_name = ZEND_TYPE_NAME(p->type);
+				if (p->type & (Z_UL(1) << (sizeof(zend_type)*8-1))) { /* type is class */
+					zend_bool allow_null = (p->type & (Z_UL(1) << (sizeof(zend_type)*8-2))) != 0; /* type allow null */
+					zend_string *type_name = (zend_string*)(p->type & ~(((Z_UL(1) << (sizeof(zend_type)*8-1))) | ((Z_UL(1) << (sizeof(zend_type)*8-2)))));
 
-					if (!IS_UNSERIALIZED(type_name)) {
-						zend_bool allow_null = ZEND_TYPE_ALLOW_NULL(p->type);
-
-						UNSERIALIZE_STR(type_name);
-						p->type = ZEND_TYPE_ENCODE_CLASS(type_name, allow_null);
-					}
+					UNSERIALIZE_STR(type_name);
+					p->type = ZEND_TYPE_ENCODE_CLASS(type_name, allow_null);
 				}
 				p++;
 			}

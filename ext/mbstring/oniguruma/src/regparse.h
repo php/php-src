@@ -306,6 +306,7 @@ typedef struct {
   int curr_max_regnum;
   int has_recursion;
 #endif
+  unsigned int parse_depth;
 } ScanEnv;
 
 

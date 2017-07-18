@@ -148,51 +148,6 @@ ZEND_API void zend_function_dtor(zval *zv)
 	}
 }
 
-ZEND_API void zend_cleanup_op_array_data(zend_op_array *op_array)
-{
-	if (op_array->static_variables &&
-	    !(GC_FLAGS(op_array->static_variables) & IS_ARRAY_IMMUTABLE)
-	) {
-		/* The static variables are initially shared when inheriting methods and will
-		 * be separated on first use. If they are never used, they stay shared. Cleaning
-		 * a shared static variables table is safe, as the intention is to clean all
-		 * such tables. */
-		HT_ALLOW_COW_VIOLATION(op_array->static_variables);
-
-		zend_hash_clean(op_array->static_variables);
-	}
-}
-
-ZEND_API void zend_cleanup_user_class_data(zend_class_entry *ce)
-{
-	/* Clean all parts that can contain run-time data */
-	/* Note that only run-time accessed data need to be cleaned up, pre-defined data can
-	   not contain objects and thus are not probelmatic */
-	if (ce->ce_flags & ZEND_HAS_STATIC_IN_METHODS) {
-		zend_function *func;
-
-		ZEND_HASH_FOREACH_PTR(&ce->function_table, func) {
-			if (func->type == ZEND_USER_FUNCTION) {
-				zend_cleanup_op_array_data((zend_op_array *) func);
-			}
-		} ZEND_HASH_FOREACH_END();
-	}
-	if (ce->static_members_table) {
-		zval *static_members = ce->static_members_table;
-		zval *p = static_members;
-		zval *end = p + ce->default_static_members_count;
-
-
-		ce->default_static_members_count = 0;
-		ce->default_static_members_table = ce->static_members_table = NULL;
-		while (p != end) {
-			i_zval_ptr_dtor(p ZEND_FILE_LINE_CC);
-			p++;
-		}
-		efree(static_members);
-	}
-}
-
 ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce)
 {
 	if (CE_STATIC_MEMBERS(ce)) {
@@ -670,6 +625,19 @@ ZEND_API int pass_two(zend_op_array *op_array)
 					opline->opcode = ZEND_GENERATOR_RETURN;
 				}
 				break;
+			case ZEND_SWITCH_LONG:
+			case ZEND_SWITCH_STRING:
+			{
+				/* absolute indexes to relative offsets */
+				HashTable *jumptable = Z_ARRVAL_P(CT_CONSTANT(opline->op2));
+				zval *zv;
+				ZEND_HASH_FOREACH_VAL(jumptable, zv) {
+					Z_LVAL_P(zv) = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, Z_LVAL_P(zv));
+				} ZEND_HASH_FOREACH_END();
+
+				opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, opline->extended_value);
+				break;
+			}
 		}
 		if (opline->op1_type == IS_CONST) {
 			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline->op1);
@@ -727,6 +695,7 @@ ZEND_API binary_op_type get_binary_op(int opcode)
 		case ZEND_ASSIGN_MUL:
 			return (binary_op_type) mul_function;
 		case ZEND_POW:
+		case ZEND_ASSIGN_POW:
 			return (binary_op_type) pow_function;
 		case ZEND_DIV:
 		case ZEND_ASSIGN_DIV:
@@ -749,6 +718,7 @@ ZEND_API binary_op_type get_binary_op(int opcode)
 		case ZEND_IS_NOT_IDENTICAL:
 			return (binary_op_type) is_not_identical_function;
 		case ZEND_IS_EQUAL:
+		case ZEND_CASE:
 			return (binary_op_type) is_equal_function;
 		case ZEND_IS_NOT_EQUAL:
 			return (binary_op_type) is_not_equal_function;
@@ -780,4 +750,6 @@ ZEND_API binary_op_type get_binary_op(int opcode)
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

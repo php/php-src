@@ -110,11 +110,6 @@ struct _zend_compiler_globals {
 
 	zend_arena *arena;
 
-	zend_string *empty_string;
-	zend_string *one_char_string[256];
-	zend_string **known_strings;
-	uint32_t    known_strings_count;
-
 	HashTable interned_strings;
 
 	const zend_encoding **script_encoding_list;
@@ -213,7 +208,6 @@ struct _zend_executor_globals {
 	struct _zend_module_entry *current_module;
 
 	zend_bool active;
-	zend_bool valid_symbol_table;
 	zend_uchar flags;
 
 	zend_long assertions;
@@ -308,4 +302,6 @@ struct _zend_php_scanner_globals {
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

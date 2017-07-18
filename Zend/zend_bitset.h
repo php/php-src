@@ -245,6 +245,14 @@ static inline int zend_bitset_last(zend_bitset set, uint32_t len)
 	} \
 } while (0)
 
+static inline int zend_bitset_pop_first(zend_bitset set, uint32_t len) {
+	int i = zend_bitset_first(set, len);
+	if (i >= 0) {
+		zend_bitset_excl(set, i);
+	}
+	return i;
+}
+
 #endif /* _ZEND_BITSET_H_ */
 
 /*
@@ -253,4 +261,6 @@ static inline int zend_bitset_last(zend_bitset set, uint32_t len)
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

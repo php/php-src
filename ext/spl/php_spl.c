@@ -184,7 +184,6 @@ PHP_FUNCTION(class_uses)
 	SPL_ADD_CLASS(BadMethodCallException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(CachingIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(CallbackFilterIterator, z_list, sub, allow, ce_flags); \
-	SPL_ADD_CLASS(Countable, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(DirectoryIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(DomainException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(EmptyIterator, z_list, sub, allow, ce_flags); \
@@ -392,7 +391,7 @@ static void autoload_func_info_dtor(zval *element)
  Try all registerd autoload function to load the requested class */
 PHP_FUNCTION(spl_autoload_call)
 {
-	zval *class_name, *retval = NULL;
+	zval *class_name, retval;
 	zend_string *lc_name, *func_name;
 	autoload_func_info *alfi;
 
@@ -403,34 +402,64 @@ PHP_FUNCTION(spl_autoload_call)
 	if (SPL_G(autoload_functions)) {
 		HashPosition pos;
 		zend_ulong num_idx;
+		zend_function *func;
+		zend_fcall_info fci;
+		zend_fcall_info_cache fcic;
+		zend_class_entry *called_scope = zend_get_called_scope(execute_data);
 		int l_autoload_running = SPL_G(autoload_running);
+
 		SPL_G(autoload_running) = 1;
-		lc_name = zend_string_alloc(Z_STRLEN_P(class_name), 0);
-		zend_str_tolower_copy(ZSTR_VAL(lc_name), Z_STRVAL_P(class_name), Z_STRLEN_P(class_name));
+		lc_name = zend_string_tolower(Z_STR_P(class_name));
+
+		fci.size = sizeof(fci);
+		fci.retval = &retval;
+		fci.param_count = 1;
+		fci.params = class_name;
+		fci.no_separation = 1;
+
+		ZVAL_UNDEF(&fci.function_name); /* Unused */
+		fcic.initialized = 1;
+
 		zend_hash_internal_pointer_reset_ex(SPL_G(autoload_functions), &pos);
 		while (zend_hash_get_current_key_ex(SPL_G(autoload_functions), &func_name, &num_idx, &pos) == HASH_KEY_IS_STRING) {
 			alfi = zend_hash_get_current_data_ptr_ex(SPL_G(autoload_functions), &pos);
-			if (UNEXPECTED(alfi->func_ptr->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
-				zend_function *copy = emalloc(sizeof(zend_op_array));
-
-				memcpy(copy, alfi->func_ptr, sizeof(zend_op_array));
-				copy->op_array.function_name = zend_string_copy(alfi->func_ptr->op_array.function_name);
-				zend_call_method(Z_ISUNDEF(alfi->obj)? NULL : &alfi->obj, alfi->ce, &copy, ZSTR_VAL(func_name), ZSTR_LEN(func_name), retval, 1, class_name, NULL);
+			func = alfi->func_ptr;
+			if (UNEXPECTED(func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
+				func = emalloc(sizeof(zend_op_array));
+				memcpy(func, alfi->func_ptr, sizeof(zend_op_array));
+				zend_string_addref(func->op_array.function_name);
+			}
+			ZVAL_UNDEF(&retval);
+			fcic.function_handler = func;
+			if (Z_ISUNDEF(alfi->obj)) {
+				fci.object = NULL;
+				fcic.object = NULL;
+				fcic.calling_scope = alfi->ce;
+				if (alfi->ce &&
+				    (!called_scope ||
+				     !instanceof_function(called_scope, alfi->ce))) {
+					fcic.called_scope = alfi->ce;
+				} else {
+					fcic.called_scope = called_scope;
+				}
 			} else {
-				zend_call_method(Z_ISUNDEF(alfi->obj)? NULL : &alfi->obj, alfi->ce, &alfi->func_ptr, ZSTR_VAL(func_name), ZSTR_LEN(func_name), retval, 1, class_name, NULL);
+				fci.object = Z_OBJ(alfi->obj);
+				fcic.object = Z_OBJ(alfi->obj);
+				fcic.called_scope = Z_OBJCE(alfi->obj);
 			}
+
+			zend_call_function(&fci, &fcic);
+
 			zend_exception_save();
-			if (retval) {
-				zval_ptr_dtor(retval);
-				retval = NULL;
-			}
-			if (zend_hash_exists(EG(class_table), lc_name)) {
+			zval_ptr_dtor(&retval);
+			if (pos + 1 == SPL_G(autoload_functions)->nNumUsed ||
+			    zend_hash_exists(EG(class_table), lc_name)) {
 				break;
 			}
 			zend_hash_move_forward_ex(SPL_G(autoload_functions), &pos);
 		}
 		zend_exception_restore();
-		zend_string_free(lc_name);
+		zend_string_release(lc_name);
 		SPL_G(autoload_running) = l_autoload_running;
 	} else {
 		/* do not use or overwrite &EG(autoload_func) here */

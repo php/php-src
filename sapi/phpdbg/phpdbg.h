@@ -48,7 +48,7 @@
 #include "zend_signal.h"
 #if !defined(_WIN32) && !defined(ZEND_SIGNALS) && defined(HAVE_SIGNAL_H)
 #	include <signal.h>
-#elif PHP_WIN32
+#elif defined(PHP_WIN32)
 #	include "win32/signal.h"
 #endif
 #include "SAPI.h"

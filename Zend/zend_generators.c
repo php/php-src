@@ -108,7 +108,7 @@ static void zend_generator_cleanup_unfinished_execution(
 		if (UNEXPECTED(generator->frozen_call_stack)) {
 			zend_generator_restore_call_stack(generator);
 		}
-		zend_cleanup_unfinished_execution(execute_data, op_num, 0);
+		zend_cleanup_unfinished_execution(execute_data, op_num, catch_op_num);
 	}
 }
 /* }}} */
@@ -1261,4 +1261,6 @@ void zend_register_generator_ce(void) /* {{{ */
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

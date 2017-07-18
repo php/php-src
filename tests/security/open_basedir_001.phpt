@@ -2,7 +2,7 @@
 openbase_dir runtime tightning
 --SKIPIF--
 <?php
-if(PHP_OS_FAMILY === "WIN") {
+if(PHP_OS_FAMILY === "Windows") {
 	die('skip.. only for unix');
 }
 if (!is_dir("/usr/local/bin")) {

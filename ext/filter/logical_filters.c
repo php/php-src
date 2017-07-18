@@ -314,7 +314,7 @@ void php_filter_boolean(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	if (ret == -1) {
 		RETURN_VALIDATION_FAILED
 	} else {
-		zval_dtor(value);
+		zval_ptr_dtor(value);
 		ZVAL_BOOL(value, ret);
 	}
 }

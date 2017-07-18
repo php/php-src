@@ -158,9 +158,9 @@ PHP_FUNCTION(assert)
 	}
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_ZVAL_DEREF(assertion)
+		Z_PARAM_ZVAL(assertion)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL_DEREF(description)
+		Z_PARAM_ZVAL(description)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (Z_TYPE_P(assertion) == IS_STRING) {
@@ -297,7 +297,7 @@ PHP_FUNCTION(assert_options)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_LONG(what)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL_DEREF(value)
+		Z_PARAM_ZVAL(value)
 	ZEND_PARSE_PARAMETERS_END();
 
 	switch (what) {

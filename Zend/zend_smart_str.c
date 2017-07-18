@@ -124,3 +124,13 @@ ZEND_API void ZEND_FASTCALL smart_str_append_printf(smart_str *dest, const char 
 	zend_printf_to_smart_str(dest, format, arg);
 	va_end(arg);
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

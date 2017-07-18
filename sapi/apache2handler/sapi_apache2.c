@@ -59,33 +59,6 @@
 #define PHP_SOURCE_MAGIC_TYPE "application/x-httpd-php-source"
 #define PHP_SCRIPT "php7-script"
 
-/* if apache's version is newer than 2.2.31 or 2.4.16 */
-#if MODULE_MAGIC_COOKIE == 0x41503232UL && AP_MODULE_MAGIC_AT_LEAST(20051115,40) || \
-	MODULE_MAGIC_COOKIE == 0x41503234UL && AP_MODULE_MAGIC_AT_LEAST(20120211,47)
-#define php_ap_map_http_request_error ap_map_http_request_error
-#else
-static int php_ap_map_http_request_error(apr_status_t rv, int status)
-{
-	switch (rv) {
-	case AP_FILTER_ERROR: {
-		return AP_FILTER_ERROR;
-	}
-	case APR_ENOSPC: {
-		return HTTP_REQUEST_ENTITY_TOO_LARGE;
-	}
-	case APR_ENOTIMPL: {
-		return HTTP_NOT_IMPLEMENTED;
-	}
-	case APR_ETIMEDOUT: {
-		return HTTP_REQUEST_TIME_OUT;
-	}
-	default: {
-		return status;
-	}
-	}
-}
-#endif
-
 /* A way to specify the location of the php.ini dir in an apache directive */
 char *apache2_php_ini_path_override = NULL;
 #if defined(PHP_WIN32) && defined(ZTS)
@@ -207,7 +180,6 @@ php_apache_sapi_read_post(char *buf, size_t count_bytes)
 	php_struct *ctx = SG(server_context);
 	request_rec *r;
 	apr_bucket_brigade *brigade;
-	apr_status_t ret;
 
 	r = ctx->r;
 	brigade = ctx->brigade;
@@ -219,7 +191,7 @@ php_apache_sapi_read_post(char *buf, size_t count_bytes)
 	 * need to make sure that if data is available we fill the buffer completely.
 	 */
 
-	while ((ret=ap_get_brigade(r->input_filters, brigade, AP_MODE_READBYTES, APR_BLOCK_READ, len)) == APR_SUCCESS) {
+	while (ap_get_brigade(r->input_filters, brigade, AP_MODE_READBYTES, APR_BLOCK_READ, len) == APR_SUCCESS) {
 		apr_brigade_flatten(brigade, buf, &len);
 		apr_brigade_cleanup(brigade);
 		tlen += len;
@@ -228,15 +200,6 @@ php_apache_sapi_read_post(char *buf, size_t count_bytes)
 		}
 		buf += len;
 		len = count_bytes - tlen;
-	}
-
-	if (ret != APR_SUCCESS) {
-		AP2(post_read_error) = 1;
-		if (APR_STATUS_IS_TIMEUP(ret)) {
-			SG(sapi_headers).http_response_code = php_ap_map_http_request_error(ret, HTTP_REQUEST_TIME_OUT);
-		} else {
-			SG(sapi_headers).http_response_code = php_ap_map_http_request_error(ret, HTTP_BAD_REQUEST);
-		}
 	}
 
 	return tlen;
@@ -547,7 +510,6 @@ static int php_apache_request_ctor(request_rec *r, php_struct *ctx)
 	SG(request_info).proto_num = r->proto_num;
 	SG(request_info).request_uri = apr_pstrdup(r->pool, r->uri);
 	SG(request_info).path_translated = apr_pstrdup(r->pool, r->filename);
-	AP2(post_read_error) = 0;
 	r->no_local_copy = 1;
 
 	content_length = (char *) apr_table_get(r->headers_in, "Content-Length");
@@ -715,13 +677,6 @@ zend_first_try {
 		}
 		ctx->r = r;
 		brigade = ctx->brigade;
-	}
-
-	if (AP2(post_read_error)) {
-		ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, "Error while attempting to read POST data: %d", SG(sapi_headers).http_response_code);
-		apr_brigade_cleanup(brigade);
-		PHPAP_INI_OFF;
-		return SG(sapi_headers).http_response_code;
 	}
 
 	if (AP2(last_modified)) {

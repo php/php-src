@@ -906,9 +906,6 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net)
 	zend_bool any_flag = FALSE;
 
 	DBG_ENTER("mysqlnd_net::enable_ssl");
-	if (!context) {
-		DBG_RETURN(FAIL);
-	}
 
 	if (net->data->options.ssl_key) {
 		zval key_zval;

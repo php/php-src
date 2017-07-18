@@ -439,6 +439,13 @@ if test "$PHP_PASSWORD_ARGON2" != "no"; then
   ], [
     AC_MSG_ERROR([Problem with libargon2.(a|so). Please verify that Argon2 header and libaries are installed])
   ])
+
+  AC_CHECK_LIB(argon2, argon2id_hash_raw, [
+    LIBS="$LIBS -largon2"
+    AC_DEFINE(HAVE_ARGON2ID, 1, [ Define to 1 if Argon2 library has support for Argon2ID])
+  ], [
+    AC_MSG_RESULT([not found])
+  ])
 fi
 
 dnl

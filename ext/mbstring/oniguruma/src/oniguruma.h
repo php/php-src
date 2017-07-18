@@ -35,8 +35,8 @@ extern "C" {
 
 #define ONIGURUMA
 #define ONIGURUMA_VERSION_MAJOR   6
-#define ONIGURUMA_VERSION_MINOR   1
-#define ONIGURUMA_VERSION_TEENY   2
+#define ONIGURUMA_VERSION_MINOR   3
+#define ONIGURUMA_VERSION_TEENY   0
 
 #ifdef __cplusplus
 # ifndef  HAVE_PROTOTYPES
@@ -372,7 +372,7 @@ int onigenc_is_valid_mbc_string P_((OnigEncoding enc, const OnigUChar* s, const 
 
 /* config parameters */
 #define ONIG_NREGION                          10
-#define ONIG_MAX_CAPTURE_NUM               32767
+#define ONIG_MAX_CAPTURE_NUM          2147483647  /* 2**31 - 1 */
 #define ONIG_MAX_BACKREF_NUM                1000
 #define ONIG_MAX_REPEAT_NUM               100000
 #define ONIG_MAX_MULTI_BYTE_RANGES_NUM     10000
@@ -473,6 +473,7 @@ ONIG_EXTERN OnigSyntaxType*   OnigDefaultSyntax;
 #define ONIG_SYN_OP_ESC_OCTAL3                  (1U<<28)  /* \OOO */
 #define ONIG_SYN_OP_ESC_X_HEX2                  (1U<<29)  /* \xHH */
 #define ONIG_SYN_OP_ESC_X_BRACE_HEX8            (1U<<30)  /* \x{7HHHHHHH} */
+#define ONIG_SYN_OP_ESC_O_BRACE_OCTAL           (1U<<31)  /* \o{1OOOOOOOOOO} */
 
 #define ONIG_SYN_OP2_ESC_CAPITAL_Q_QUOTE        (1U<<0)  /* \Q...\E */
 #define ONIG_SYN_OP2_QMARK_GROUP_EFFECT         (1U<<1)  /* (?...) */
@@ -543,6 +544,7 @@ ONIG_EXTERN OnigSyntaxType*   OnigDefaultSyntax;
 #define ONIGERR_UNDEFINED_BYTECODE                            -13
 #define ONIGERR_UNEXPECTED_BYTECODE                           -14
 #define ONIGERR_MATCH_STACK_LIMIT_OVER                        -15
+#define ONIGERR_PARSE_DEPTH_LIMIT_OVER                        -16
 #define ONIGERR_DEFAULT_ENCODING_IS_NOT_SETTED                -21
 #define ONIGERR_SPECIFIED_ENCODING_CANT_CONVERT_TO_WIDE_CHAR  -22
 #define ONIGERR_FAIL_TO_INITIALIZE                            -23
@@ -820,6 +822,12 @@ ONIG_EXTERN
 unsigned int onig_get_match_stack_limit_size P_((void));
 ONIG_EXTERN
 int onig_set_match_stack_limit_size P_((unsigned int size));
+ONIG_EXTERN
+unsigned int onig_get_parse_depth_limit P_((void));
+ONIG_EXTERN
+int onig_set_capture_num_limit P_((int num));
+ONIG_EXTERN
+int onig_set_parse_depth_limit P_((unsigned int depth));
 ONIG_EXTERN
 int onig_unicode_define_user_property P_((const char* name, OnigCodePoint* ranges));
 ONIG_EXTERN

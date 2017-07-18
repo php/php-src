@@ -25,7 +25,7 @@ L14-16 foo() %s - %s + 8 ops
  L15   #4     DO_%cCALL                                                          @0                  
  L15   #5     SEND_VAR                @0                   1                                        
  L15   #6     DO_%cCALL                                                                              
- L16   #7     RETURN                  null                                                          
+ L16   #7     RETURN<-1>              null                                                          
 prompt> [L15 %s INIT_FCALL%s %d %s "var_dump"                                %s]
 prompt> 
 --FILE--

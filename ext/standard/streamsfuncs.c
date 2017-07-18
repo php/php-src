@@ -30,6 +30,9 @@
 #include "streamsfuncs.h"
 #include "php_network.h"
 #include "php_string.h"
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #ifndef PHP_WIN32
 #define php_select(m, r, w, e, t)	select(m, r, w, e, t)
@@ -106,8 +109,8 @@ PHP_FUNCTION(stream_socket_client)
 	ZEND_PARSE_PARAMETERS_START(1, 6)
 		Z_PARAM_STR(host)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL_DEREF_EX(zerrno, 0, 1)
-		Z_PARAM_ZVAL_DEREF_EX(zerrstr, 0, 1)
+		Z_PARAM_ZVAL_DEREF(zerrno)
+		Z_PARAM_ZVAL_DEREF(zerrstr)
 		Z_PARAM_DOUBLE(timeout)
 		Z_PARAM_LONG(flags)
 		Z_PARAM_RESOURCE(zcontext)
@@ -129,11 +132,11 @@ PHP_FUNCTION(stream_socket_client)
 	tv.tv_usec = conv % 1000000;
 #endif
 	if (zerrno)	{
-		zval_dtor(zerrno);
+		zval_ptr_dtor(zerrno);
 		ZVAL_LONG(zerrno, 0);
 	}
 	if (zerrstr) {
-		zval_dtor(zerrstr);
+		zval_ptr_dtor(zerrstr);
 		ZVAL_EMPTY_STRING(zerrstr);
 	}
 
@@ -157,11 +160,11 @@ PHP_FUNCTION(stream_socket_client)
 
 	if (stream == NULL)	{
 		if (zerrno) {
-			zval_dtor(zerrno);
+			zval_ptr_dtor(zerrno);
 			ZVAL_LONG(zerrno, err);
 		}
 		if (zerrstr && errstr) {
-			zval_dtor(zerrstr);
+			zval_ptr_dtor(zerrstr);
 			ZVAL_STR(zerrstr, errstr);
 		} else if (errstr) {
 			zend_string_release(errstr);
@@ -196,8 +199,8 @@ PHP_FUNCTION(stream_socket_server)
 	ZEND_PARSE_PARAMETERS_START(1, 5)
 		Z_PARAM_STRING(host, host_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL_DEREF_EX(zerrno, 0, 1)
-		Z_PARAM_ZVAL_DEREF_EX(zerrstr, 0, 1)
+		Z_PARAM_ZVAL_DEREF(zerrno)
+		Z_PARAM_ZVAL_DEREF(zerrstr)
 		Z_PARAM_LONG(flags)
 		Z_PARAM_RESOURCE(zcontext)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
@@ -209,11 +212,11 @@ PHP_FUNCTION(stream_socket_server)
 	}
 
 	if (zerrno)	{
-		zval_dtor(zerrno);
+		zval_ptr_dtor(zerrno);
 		ZVAL_LONG(zerrno, 0);
 	}
 	if (zerrstr) {
-		zval_dtor(zerrstr);
+		zval_ptr_dtor(zerrstr);
 		ZVAL_EMPTY_STRING(zerrstr);
 	}
 
@@ -227,11 +230,11 @@ PHP_FUNCTION(stream_socket_server)
 
 	if (stream == NULL)	{
 		if (zerrno) {
-			zval_dtor(zerrno);
+			zval_ptr_dtor(zerrno);
 			ZVAL_LONG(zerrno, err);
 		}
 		if (zerrstr && errstr) {
-			zval_dtor(zerrstr);
+			zval_ptr_dtor(zerrstr);
 			ZVAL_STR(zerrstr, errstr);
 		} else if (errstr) {
 			zend_string_release(errstr);
@@ -264,7 +267,7 @@ PHP_FUNCTION(stream_socket_accept)
 		Z_PARAM_RESOURCE(zstream)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_DOUBLE(timeout)
-		Z_PARAM_ZVAL_EX(zpeername, 0, 1)
+		Z_PARAM_ZVAL_DEREF(zpeername)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	php_stream_from_zval(stream, zstream);
@@ -279,7 +282,7 @@ PHP_FUNCTION(stream_socket_accept)
 	tv.tv_usec = conv % 1000000;
 #endif
 	if (zpeername) {
-		zval_dtor(zpeername);
+		zval_ptr_dtor(zpeername);
 		ZVAL_NULL(zpeername);
 	}
 
@@ -324,6 +327,11 @@ PHP_FUNCTION(stream_socket_get_name)
 				&name,
 				NULL, NULL
 				) || !name) {
+		RETURN_FALSE;
+	}
+
+	if (!ZSTR_LEN(name)) {
+		zend_string_release(name);
 		RETURN_FALSE;
 	}
 
@@ -381,13 +389,13 @@ PHP_FUNCTION(stream_socket_recvfrom)
 		Z_PARAM_LONG(to_read)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(flags)
-		Z_PARAM_ZVAL_DEREF_EX(zremote, 0, 1)
+		Z_PARAM_ZVAL_DEREF(zremote)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	php_stream_from_zval(stream, zstream);
 
 	if (zremote) {
-		zval_dtor(zremote);
+		zval_ptr_dtor(zremote);
 		ZVAL_NULL(zremote);
 	}
 
@@ -1168,7 +1176,7 @@ static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
 		Z_PARAM_STRING(filtername, filternamelen)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(read_write)
-		Z_PARAM_ZVAL_DEREF(filterparams)
+		Z_PARAM_ZVAL(filterparams)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	php_stream_from_zval(stream, zstream);
@@ -1569,7 +1577,7 @@ PHP_FUNCTION(stream_is_local)
 	php_stream_wrapper *wrapper = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL_DEREF(zstream)
+		Z_PARAM_ZVAL(zstream)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if (Z_TYPE_P(zstream) == IS_RESOURCE) {
@@ -1629,38 +1637,23 @@ PHP_FUNCTION(stream_isatty)
 
 	if (php_stream_can_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT) == SUCCESS) {
 		php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT, (void*)&fileno, 0);
-	}
-	else if (php_stream_can_cast(stream, PHP_STREAM_AS_FD) == SUCCESS) {
+	} else if (php_stream_can_cast(stream, PHP_STREAM_AS_FD) == SUCCESS) {
 		php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)&fileno, 0);
-	}
-	else {
+	} else {
 		RETURN_FALSE;
 	}
 
 #ifdef PHP_WIN32
 	/* Check if the Windows standard handle is redirected to file */
-	if (php_win32_console_fileno_is_console(fileno)) {
-		RETURN_TRUE;
-	}
-	else {
-		RETURN_FALSE;
-	}
-#elif HAVE_POSIX
+	RETVAL_BOOL(php_win32_console_fileno_is_console(fileno));
+#elif HAVE_UNISTD_H
 	/* Check if the file descriptor identifier is a terminal */
-	if (isatty(fileno)) {
-		RETURN_TRUE;
-	}
-	else {
-		RETURN_FALSE;
-	}
+	RETVAL_BOOL(isatty(fileno));
 #else
-	zend_stat_t stat;
-	if (zend_fstat(fileno, &stat) == 0) {
-		if ((stat.st_mode & /*S_IFMT*/0170000) == /*S_IFCHR*/0020000) {
-			RETURN_TRUE;
-		}
+	{
+		zend_stat_t stat = {0};
+		RETVAL_BOOL(zend_fstat(fileno, &stat) == 0 && (stat.st_mode & /*S_IFMT*/0170000) == /*S_IFCHR*/0020000);
 	}
-	RETURN_NULL();
 #endif
 }
 

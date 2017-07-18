@@ -43,20 +43,20 @@ foreach ($tests as $test) {
 	print "wanted = Monday            00:00:00\n\n";
 }
 ?>
---EXPECT--
+--EXPECTF--
 Europe/Andorra
 ts     = Monday 2037-10-19 17:17:17 CEST
 result = Monday 2037-10-26 00:00:00 CET
 wanted = Monday            00:00:00
 
 Asia/Dubai
-ts     = Thursday 1970-01-01 17:17:17 GST
-result = Monday 1970-01-05 00:00:00 GST
+ts     = Thursday 1970-01-01 17:17:17 %s
+result = Monday 1970-01-05 00:00:00 %s
 wanted = Monday            00:00:00
 
 Asia/Kabul
-ts     = Thursday 1970-01-01 17:17:17 AFT
-result = Monday 1970-01-05 00:00:00 AFT
+ts     = Thursday 1970-01-01 17:17:17 %s
+result = Monday 1970-01-05 00:00:00 %s
 wanted = Monday            00:00:00
 
 America/Antigua
@@ -130,8 +130,8 @@ result = Monday 1971-01-04 00:00:00 AST
 wanted = Monday            00:00:00
 
 Asia/Dacca
-ts     = Friday 1971-01-01 17:17:17 DACT
-result = Monday 1971-01-04 00:00:00 DACT
+ts     = Friday 1971-01-01 17:17:17 %s
+result = Monday 1971-01-04 00:00:00 %s
 wanted = Monday            00:00:00
 
 Europe/Brussels
@@ -150,13 +150,13 @@ result = Monday 1983-04-18 01:00:00 CEST
 wanted = Monday            00:00:00
 
 America/Buenos_Aires
-ts     = Monday 1974-09-30 17:17:17 ART
-result = Monday 1974-10-07 00:00:00 ART
+ts     = Monday 1974-09-30 17:17:17 %s
+result = Monday 1974-10-07 00:00:00 %s
 wanted = Monday            00:00:00
 
 America/Rosario
-ts     = Monday 1974-09-30 17:17:17 ART
-result = Monday 1974-10-07 00:00:00 ART
+ts     = Monday 1974-09-30 17:17:17 %s
+result = Monday 1974-10-07 00:00:00 %s
 wanted = Monday            00:00:00
 
 Europe/Vienna

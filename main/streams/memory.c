@@ -62,12 +62,8 @@ static size_t php_stream_memory_write(php_stream *stream, const char *buf, size_
 		} else {
 			tmp = erealloc(ms->data, ms->fpos + count);
 		}
-		if (!tmp) {
-			count = ms->fsize - ms->fpos + 1;
-		} else {
-			ms->data = tmp;
-			ms->fsize = ms->fpos + count;
-		}
+		ms->data = tmp;
+		ms->fsize = ms->fpos + count;
 	}
 	if (!ms->data)
 		count = 0;
@@ -493,9 +489,14 @@ static int php_stream_temp_cast(php_stream *stream, int castas, void **ret)
 		return FAILURE;
 	}
 
+	file = php_stream_fopen_tmpfile();
+	if (file == NULL) {
+		php_error_docref(NULL, E_WARNING, "Unable to create temporary file.");
+		return FAILURE;
+	}
+
 	/* perform the conversion and then pass the request on to the innerstream */
 	membuf = php_stream_memory_get_buffer(ts->innerstream, &memsize);
-	file = php_stream_fopen_tmpfile();
 	php_stream_write(file, membuf, memsize);
 	pos = php_stream_tell(ts->innerstream);
 
@@ -617,10 +618,10 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 	php_stream *stream;
 	php_stream_temp_data *ts;
 	char *comma, *semi, *sep, *key;
-	size_t mlen, dlen, plen, vlen;
+	size_t mlen, dlen, plen, vlen, ilen;
 	zend_off_t newoffs;
 	zval meta;
-	int base64 = 0, ilen;
+	int base64 = 0;
 	zend_string *base64_comma = NULL;
 
 	ZVAL_NULL(&meta);
@@ -719,11 +720,11 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 			return NULL;
 		}
 		comma = ZSTR_VAL(base64_comma);
-		ilen = (int)ZSTR_LEN(base64_comma);
+		ilen = ZSTR_LEN(base64_comma);
 	} else {
 		comma = estrndup(comma, dlen);
 		dlen = php_url_decode(comma, dlen);
-		ilen = (int)dlen;
+		ilen = dlen;
 	}
 
 	if ((stream = php_stream_temp_create_rel(0, ~0u)) != NULL) {

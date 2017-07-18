@@ -119,6 +119,8 @@ U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,
 	}
 
 	if (millis) {
+		php_date_obj *datetime;
+
 		ZVAL_STRING(&zfuncname, "getTimestamp");
 		if (call_user_function(NULL, z, &zfuncname, &retval, 0, NULL)
 				!= SUCCESS || Z_TYPE(retval) != IS_LONG) {
@@ -131,7 +133,8 @@ U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,
 			return FAILURE;
 		}
 
-		*millis = U_MILLIS_PER_SECOND * (double)Z_LVAL(retval);
+		datetime = Z_PHPDATE_P(z);
+		*millis = U_MILLIS_PER_SECOND * ((double)Z_LVAL(retval) + datetime->time->f);
 		zval_ptr_dtor(&zfuncname);
 	}
 
@@ -139,8 +142,8 @@ U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,
 		php_date_obj *datetime;
 		datetime = Z_PHPDATE_P(z);
 		if (!datetime->time) {
-			spprintf(&message, 0, "%s: the DateTime object is not properly "
-					"initialized", func);
+			spprintf(&message, 0, "%s: the %s object is not properly "
+					"initialized", func, ZSTR_VAL(Z_OBJCE_P(z)->name));
 			intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR,
 				message, 1);
 			efree(message);
@@ -199,7 +202,7 @@ U_CFUNC double intl_zval_to_millis(zval *z, intl_error *err, const char *func)
 		rv = U_MILLIS_PER_SECOND * Z_DVAL_P(z);
 		break;
 	case IS_OBJECT:
-		if (instanceof_function(Z_OBJCE_P(z), php_date_get_date_ce())) {
+		if (instanceof_function(Z_OBJCE_P(z), php_date_get_interface_ce())) {
 			intl_datetime_decompose(z, &rv, NULL, err, func);
 		} else if (instanceof_function(Z_OBJCE_P(z), Calendar_ce_ptr)) {
 			Calendar_object *co = Z_INTL_CALENDAR_P(z);
@@ -222,7 +225,7 @@ U_CFUNC double intl_zval_to_millis(zval *z, intl_error *err, const char *func)
 		} else {
 			/* TODO: try with cast(), get() to obtain a number */
 			spprintf(&message, 0, "%s: invalid object type for date/time "
-					"(only IntlCalendar and DateTime permitted)", func);
+					"(only IntlCalendar and DateTimeInterface permitted)", func);
 			intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR,
 				message, 1);
 			efree(message);

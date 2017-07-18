@@ -75,7 +75,6 @@ typedef struct {
 	zend_bool engine;
 	zend_bool xbithack;
 	zend_bool last_modified;
-	zend_bool post_read_error;
 } php_apache2_info_struct;
 
 extern zend_module_entry apache2_module_entry;

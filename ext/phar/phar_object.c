@@ -573,7 +573,18 @@ PHP_METHOD(Phar, webPhar)
 	}
 
 	/* retrieve requested file within phar */
-	if (!(SG(request_info).request_method && SG(request_info).request_uri && (!strcmp(SG(request_info).request_method, "GET") || !strcmp(SG(request_info).request_method, "POST")))) {
+	if (!(SG(request_info).request_method
+          && SG(request_info).request_uri
+          && (!strcmp(SG(request_info).request_method, "GET")
+           || !strcmp(SG(request_info).request_method, "POST")
+           || !strcmp(SG(request_info).request_method, "DELETE")
+           || !strcmp(SG(request_info).request_method, "HEAD")
+           || !strcmp(SG(request_info).request_method, "OPTIONS")
+           || !strcmp(SG(request_info).request_method, "PATCH")
+           || !strcmp(SG(request_info).request_method, "PUT")
+          )
+         )
+      ) {
 		return;
 	}
 
@@ -2019,7 +2030,7 @@ static int phar_copy_file_contents(phar_entry_info *entry, php_stream *fp) /* {{
 }
 /* }}} */
 
-static zend_object *phar_rename_archive(phar_archive_data **sphar, char *ext, zend_bool compress) /* {{{ */
+static zend_object *phar_rename_archive(phar_archive_data **sphar, char *ext) /* {{{ */
 {
 	const char *oldname = NULL;
 	phar_archive_data *phar = *sphar;
@@ -2031,9 +2042,28 @@ static zend_object *phar_rename_archive(phar_archive_data **sphar, char *ext, ze
 	char *error;
 	const char *pcr_error;
 	int ext_len = ext ? strlen(ext) : 0;
-	size_t new_len, oldname_len;
+	size_t new_len, oldname_len, phar_ext_len;
 	phar_archive_data *pphar = NULL;
 	php_stream_statbuf ssb;
+
+	int phar_ext_list_len, i = 0;
+	char *ext_pos = NULL;
+	/* Array of PHAR extensions, Must be in order, starting with longest
+	 * ending with the shortest. */
+	char *phar_ext_list[] = {
+		".phar.tar.bz2",
+		".phar.tar.gz",
+		".phar.php",
+		".phar.bz2",
+		".phar.zip",
+		".phar.tar",
+		".phar.gz",
+		".tar.bz2",
+		".tar.gz",
+		".phar",
+		".tar",
+		".zip"
+	};
 
 	if (!ext) {
 		if (phar->is_zip) {
@@ -2091,9 +2121,6 @@ static zend_object *phar_rename_archive(phar_archive_data **sphar, char *ext, ze
 		return NULL;
 	}
 
-	if (ext[0] == '.') {
-		++ext;
-	}
 
 	oldpath = estrndup(phar->fname, phar->fname_len);
 	if ((oldname = zend_memrchr(phar->fname, '/', phar->fname_len))) {
@@ -2101,10 +2128,41 @@ static zend_object *phar_rename_archive(phar_archive_data **sphar, char *ext, ze
 	} else {
 		oldname = phar->fname;
 	}
-	oldname_len = strlen(oldname);
 
+	oldname_len = strlen(oldname);
+	/* Copy the old name to create base for the new name */
 	basename = estrndup(oldname, oldname_len);
-	spprintf(&newname, 0, "%s.%s", strtok(basename, "."), ext);
+
+	phar_ext_list_len = sizeof(phar_ext_list)/sizeof(phar_ext_list[0]);
+	/* Remove possible PHAR extensions */
+	/* phar_ext_list must be in order of longest extension to shortest */
+	for (i=0; i < phar_ext_list_len; i++) {
+		phar_ext_len = strlen(phar_ext_list[i]);
+		if (phar_ext_len && oldname_len > phar_ext_len) {
+			/* Check if the basename strings ends with the extension */
+			if (memcmp(phar_ext_list[i], basename + (oldname_len - phar_ext_len), phar_ext_len) == 0) {
+				ext_pos = basename + (oldname_len - phar_ext_len);
+				ext_pos[0] = '\0';
+				break;
+			}
+		}
+		ext_pos = NULL;
+	}
+
+	/* If no default PHAR extension found remove the last extension */
+	if (!ext_pos) {
+		ext_pos = strrchr(basename, '.');
+		if (ext_pos) {
+			ext_pos[0] = '\0';
+		}
+	}
+	ext_pos = NULL;
+
+	if (ext[0] == '.') {
+		++ext;
+	}
+	/* Append extension to the basename */
+	spprintf(&newname, 0, "%s.%s", basename, ext);
 	efree(basename);
 
 	basepath = estrndup(oldpath, (strlen(oldpath) - oldname_len));
@@ -2321,7 +2379,7 @@ no_copy:
 		phar_add_virtual_dirs(phar, newentry.filename, newentry.filename_len);
 	} ZEND_HASH_FOREACH_END();
 
-	if ((ret = phar_rename_archive(&phar, ext, 0))) {
+	if ((ret = phar_rename_archive(&phar, ext))) {
 		return ret;
 	} else {
 		if(phar != NULL) {
@@ -5090,7 +5148,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_phar___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, filename)
 	ZEND_ARG_INFO(0, flags)
 	ZEND_ARG_INFO(0, alias)
-	ZEND_ARG_INFO(0, fileformat)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_createDS, 0, 0, 0)
@@ -5134,7 +5191,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_webPhar, 0, 0, 0)
 	ZEND_ARG_INFO(0, rewrites)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_running, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_running, 0, 0, 0)
 	ZEND_ARG_INFO(0, retphar)
 ZEND_END_ARG_INFO()
 
@@ -5300,6 +5357,75 @@ zend_function_entry php_archive_methods[] = {
 	PHP_FE_END
 };
 
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_data___construct, 0, 0, 1)
+    ZEND_ARG_INFO(0, filename)
+    ZEND_ARG_INFO(0, flags)
+    ZEND_ARG_INFO(0, alias)
+    ZEND_ARG_INFO(0, fileformat)
+ZEND_END_ARG_INFO()
+
+zend_function_entry php_data_methods[] = {
+    PHP_ME(Phar, __construct,           arginfo_data___construct,  ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, __destruct,            arginfo_phar__void,        ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, addEmptyDir,           arginfo_phar_emptydir,     ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, addFile,               arginfo_phar_addfile,      ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, addFromString,         arginfo_phar_fromstring,   ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, buildFromDirectory,    arginfo_phar_fromdir,      ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, buildFromIterator,     arginfo_phar_build,        ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, compressFiles,         arginfo_phar_comp,         ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, decompressFiles,       arginfo_phar__void,        ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, compress,              arginfo_phar_comps,        ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, decompress,            arginfo_phar_decomp,       ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, convertToExecutable,   arginfo_phar_conv,         ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, convertToData,         arginfo_phar_conv,         ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, copy,                  arginfo_phar_copy,         ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, count,                 arginfo_phar__void,        ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, delete,                arginfo_phar_delete,       ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, delMetadata,           arginfo_phar__void,        ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, extractTo,             arginfo_phar_extract,      ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, getAlias,              arginfo_phar__void,        ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, getPath,               arginfo_phar__void,        ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, getMetadata,           arginfo_phar__void,        ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, getModified,           arginfo_phar__void,        ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, getSignature,          arginfo_phar__void,        ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, getStub,               arginfo_phar__void,        ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, getVersion,            arginfo_phar__void,        ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, hasMetadata,           arginfo_phar__void,        ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, isBuffering,           arginfo_phar__void,        ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, isCompressed,          arginfo_phar__void,        ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, isFileFormat,          arginfo_phar_isff,         ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, isWritable,            arginfo_phar__void,        ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, offsetExists,          arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, offsetGet,             arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, offsetSet,             arginfo_phar_offsetSet,    ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, offsetUnset,           arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, setAlias,              arginfo_phar_setAlias,     ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, setDefaultStub,        arginfo_phar_createDS,     ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, setMetadata,           arginfo_phar_setMetadata,  ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, setSignatureAlgorithm, arginfo_phar_setSigAlgo,   ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, setStub,               arginfo_phar_setStub,      ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, startBuffering,        arginfo_phar__void,        ZEND_ACC_PUBLIC)
+    PHP_ME(Phar, stopBuffering,         arginfo_phar__void,        ZEND_ACC_PUBLIC)
+    /* static member functions */
+    PHP_ME(Phar, apiVersion,            arginfo_phar__void,        ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+    PHP_ME(Phar, canCompress,           arginfo_phar_cancompress,  ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+    PHP_ME(Phar, canWrite,              arginfo_phar__void,        ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+    PHP_ME(Phar, createDefaultStub,     arginfo_phar_createDS,     ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+    PHP_ME(Phar, getSupportedCompression,arginfo_phar__void,       ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+    PHP_ME(Phar, getSupportedSignatures,arginfo_phar__void,        ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+    PHP_ME(Phar, interceptFileFuncs,    arginfo_phar__void,        ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+    PHP_ME(Phar, isValidPharFilename,   arginfo_phar_isvalidpharfilename, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+    PHP_ME(Phar, loadPhar,              arginfo_phar_loadPhar,     ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+    PHP_ME(Phar, mapPhar,               arginfo_phar_mapPhar,      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+    PHP_ME(Phar, running,               arginfo_phar_running,      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+    PHP_ME(Phar, mount,                 arginfo_phar_mount,        ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+    PHP_ME(Phar, mungServer,            arginfo_phar_mungServer,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+    PHP_ME(Phar, unlinkArchive,         arginfo_phar_ua,           ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+    PHP_ME(Phar, webPhar,               arginfo_phar_webPhar,      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+    PHP_FE_END
+};
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_entry___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
@@ -5345,12 +5471,12 @@ void phar_object_init(void) /* {{{ */
 	INIT_CLASS_ENTRY(ce, "Phar", php_archive_methods);
 	phar_ce_archive = zend_register_internal_class_ex(&ce, spl_ce_RecursiveDirectoryIterator);
 
-	zend_class_implements(phar_ce_archive, 2, spl_ce_Countable, zend_ce_arrayaccess);
+	zend_class_implements(phar_ce_archive, 2, zend_ce_countable, zend_ce_arrayaccess);
 
-	INIT_CLASS_ENTRY(ce, "PharData", php_archive_methods);
+	INIT_CLASS_ENTRY(ce, "PharData", php_data_methods);
 	phar_ce_data = zend_register_internal_class_ex(&ce, spl_ce_RecursiveDirectoryIterator);
 
-	zend_class_implements(phar_ce_data, 2, spl_ce_Countable, zend_ce_arrayaccess);
+	zend_class_implements(phar_ce_data, 2, zend_ce_countable, zend_ce_arrayaccess);
 
 	INIT_CLASS_ENTRY(ce, "PharFileInfo", php_entry_methods);
 	phar_ce_entry = zend_register_internal_class_ex(&ce, spl_ce_SplFileInfo);

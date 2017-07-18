@@ -16,8 +16,21 @@
    +----------------------------------------------------------------------+
  */
 
+#ifndef PHP_WIN32_INET_H
+#define PHP_WIN32_INET_H
 
 #include <php.h>
 #include <Winsock2.h>
 
 PHPAPI int inet_aton(const char *cp, struct in_addr *inp);
+
+#endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

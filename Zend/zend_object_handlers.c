@@ -533,7 +533,7 @@ ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *membe
 			ALLOC_HASHTABLE(guards);
 			zend_hash_init(guards, 8, NULL, zend_property_guard_dtor, 0);
 			/* mark pointer as "special" using low bit */
-			zend_hash_add_new_ptr(guards, member,
+			zend_hash_add_new_ptr(guards, str,
 				(void*)(((zend_uintptr_t)&zv->u2.property_guard) | 1));
 			zend_string_release(Z_STR_P(zv));
 			ZVAL_ARR(zv, guards);
@@ -1682,7 +1682,7 @@ int zend_std_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **f
 
 	ce = Z_OBJCE_P(obj);
 
-	if ((func = zend_hash_find(&ce->function_table, CG(known_strings)[ZEND_STR_MAGIC_INVOKE])) == NULL) {
+	if ((func = zend_hash_find(&ce->function_table, ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE))) == NULL) {
 		return FAILURE;
 	}
 	*fptr_ptr = Z_FUNC_P(func);
@@ -1740,4 +1740,6 @@ ZEND_API zend_object_handlers std_object_handlers = {
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

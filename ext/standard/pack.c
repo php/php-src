@@ -969,7 +969,7 @@ PHP_FUNCTION(unpack)
 						zend_long len = (inputlen - inputpos) * 2;	/* Remaining */
 						int nibbleshift = (type == 'h') ? 0 : 4;
 						int first = 1;
-						char *buf;
+						zend_string *buf;
 						zend_long ipos, opos;
 
 						/* If size was given take minimum of len and size */
@@ -981,7 +981,7 @@ PHP_FUNCTION(unpack)
 							len -= argb % 2;
 						}
 
-						buf = emalloc(len + 1);
+						buf = zend_string_alloc(len, 0);
 
 						for (ipos = opos = 0; opos < len; opos++) {
 							char cc = (input[inputpos + ipos] >> nibbleshift) & 0xf;
@@ -992,7 +992,7 @@ PHP_FUNCTION(unpack)
 								cc += 'a' - 10;
 							}
 
-							buf[opos] = cc;
+							ZSTR_VAL(buf)[opos] = cc;
 							nibbleshift = (nibbleshift + 4) & 7;
 
 							if (first-- == 0) {
@@ -1001,9 +1001,8 @@ PHP_FUNCTION(unpack)
 							}
 						}
 
-						buf[len] = '\0';
-						add_assoc_stringl(return_value, n, buf, len);
-						efree(buf);
+						ZSTR_VAL(buf)[len] = '\0';
+						add_assoc_str(return_value, n, buf);
 						break;
 					}
 

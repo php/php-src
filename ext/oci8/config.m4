@@ -335,7 +335,7 @@ if test "$PHP_OCI8" != "no"; then
 
     PHP_ADD_LIBRARY(clntsh, 1, OCI8_SHARED_LIBADD)
     PHP_ADD_LIBPATH($OCI8_DIR/$OCI8_LIB_DIR, OCI8_SHARED_LIBADD)
-    PHP_NEW_EXTENSION(oci8, oci8.c oci8_lob.c oci8_statement.c oci8_collection.c oci8_interface.c, $ext_shared)
+    PHP_NEW_EXTENSION(oci8, oci8.c oci8_lob.c oci8_statement.c oci8_collection.c oci8_interface.c oci8_failover.c, $ext_shared)
     AC_DEFINE(HAVE_OCI8,1,[Defined to 1 if the PHP OCI8 extension for Oracle Database is configured])
 
     PHP_SUBST_OLD(OCI8_SHARED_LIBADD)
@@ -406,7 +406,7 @@ if test "$PHP_OCI8" != "no"; then
 
     AC_DEFINE(HAVE_OCI_INSTANT_CLIENT,1,[Defined to 1 if OCI8 configuration located Oracle's Instant Client libraries])
 
-    PHP_NEW_EXTENSION(oci8, oci8.c oci8_lob.c oci8_statement.c oci8_collection.c oci8_interface.c, $ext_shared)
+    PHP_NEW_EXTENSION(oci8, oci8.c oci8_lob.c oci8_statement.c oci8_collection.c oci8_interface.c oci8_failover.c, $ext_shared)
     AC_DEFINE(HAVE_OCI8,1,[Defined to 1 if the PHP OCI8 extension for Oracle Database is configured])
 
     PHP_SUBST_OLD(OCI8_SHARED_LIBADD)

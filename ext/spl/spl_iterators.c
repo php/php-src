@@ -60,7 +60,6 @@ PHPAPI zend_class_entry *spl_ce_EmptyIterator;
 PHPAPI zend_class_entry *spl_ce_AppendIterator;
 PHPAPI zend_class_entry *spl_ce_RegexIterator;
 PHPAPI zend_class_entry *spl_ce_RecursiveRegexIterator;
-PHPAPI zend_class_entry *spl_ce_Countable;
 PHPAPI zend_class_entry *spl_ce_RecursiveTreeIterator;
 
 ZEND_BEGIN_ARG_INFO(arginfo_recursive_it_void, 0)
@@ -2080,7 +2079,7 @@ SPL_METHOD(RegexIterator, accept)
 		case REGIT_MODE_SPLIT:
 			zval_ptr_dtor(&intern->current.data);
 			ZVAL_UNDEF(&intern->current.data);
-			php_pcre_split_impl(intern->u.regex.pce, ZSTR_VAL(subject), ZSTR_LEN(subject), &intern->current.data, -1, intern->u.regex.preg_flags);
+			php_pcre_split_impl(intern->u.regex.pce, subject, &intern->current.data, -1, intern->u.regex.preg_flags);
 			count = zend_hash_num_elements(Z_ARRVAL(intern->current.data));
 			RETVAL_BOOL(count > 1);
 			break;
@@ -2092,7 +2091,7 @@ SPL_METHOD(RegexIterator, accept)
 				convert_to_string(&tmp_replacement);
 				replacement = &tmp_replacement;
 			}
-			result = php_pcre_replace_impl(intern->u.regex.pce, subject, ZSTR_VAL(subject), ZSTR_LEN(subject), replacement, 0, -1, &count);
+			result = php_pcre_replace_impl(intern->u.regex.pce, subject, ZSTR_VAL(subject), ZSTR_LEN(subject), Z_STR_P(replacement), -1, &count);
 
 			if (intern->u.regex.flags & REGIT_USE_KEY) {
 				zval_ptr_dtor(&intern->current.key);
@@ -3374,7 +3373,12 @@ SPL_METHOD(AppendIterator, append)
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "O", &it, zend_ce_iterator) == FAILURE) {
 		return;
 	}
-	spl_array_iterator_append(&intern->u.append.zarrayit, it);
+	if (intern->u.append.iterator->funcs->valid(intern->u.append.iterator) == SUCCESS) {
+		spl_array_iterator_append(&intern->u.append.zarrayit, it);
+		intern->u.append.iterator->funcs->move_forward(intern->u.append.iterator);
+	}else{
+		spl_array_iterator_append(&intern->u.append.zarrayit, it);
+	}
 
 	if (!intern->inner.iterator || spl_dual_it_valid(intern) != SUCCESS) {
 		if (intern->u.append.iterator->funcs->valid(intern->u.append.iterator) != SUCCESS) {
@@ -3670,11 +3674,6 @@ static const zend_function_entry spl_funcs_OuterIterator[] = {
 	PHP_FE_END
 };
 
-static const zend_function_entry spl_funcs_Countable[] = {
-	SPL_ABSTRACT_ME(Countable, count,   arginfo_recursive_it_void)
-	PHP_FE_END
-};
-
 /* {{{ PHP_MINIT_FUNCTION(spl_iterators)
  */
 PHP_MINIT_FUNCTION(spl_iterators)
@@ -3729,7 +3728,6 @@ PHP_MINIT_FUNCTION(spl_iterators)
 
 	REGISTER_SPL_SUB_CLASS_EX(ParentIterator, RecursiveFilterIterator, spl_dual_it_new, spl_funcs_ParentIterator);
 
-	REGISTER_SPL_INTERFACE(Countable);
 	REGISTER_SPL_INTERFACE(SeekableIterator);
 	REGISTER_SPL_ITERATOR(SeekableIterator);
 

@@ -35,7 +35,13 @@ PHP 7.2 UPGRADE NOTES
     /^(0|(-?[1-9][0-9]*))$/ where PHP_INT_MIN <= n <= PHP_INT_MAX) to integer
     keys. This fixes the behaviour of previous versions, where numeric string
     property names would become inaccessible string keys.
+  . Unqualified references to undefined constants now generate a Warning instead
+    of a notice. They will generate an Error in a future version of PHP.
+    (https://wiki.php.net/rfc/deprecate-bareword-strings)
   . Minimum supported Windows versions are Windows 7/Server 2008 R2.
+  . Initial trait property value compatibility check will no longer perform
+    any casts. (Bug #74269)
+  . "object" (in any case) can no longer be used as a class name.
 
 - BCMath:
   . The bcmod() function no longer truncates fractional numbers to integers. As
@@ -43,17 +49,17 @@ PHP 7.2 UPGRADE NOTES
     example `bcmod('4', '3.5')` now returns '0.5' instead of '1'.
 
 - Hash:
-  . The hash_hmac(), hash_hmac_file() and hash_pbkdf2() functions no longer
-    accept non-cryptographic hashes.
+  . The hash_hmac(), hash_hmac_file(), hash_pbkdf2() and hash_init() (with
+    HASH_HMAC) functions no longer accept non-cryptographic hashes.
 
-- PCRE:
-  . preg_match() and other PCRE functions now distinguish between unmatched
-    subpatterns and empty matches by reporting NULL and "" (empty string),
-    respectively. Formerly, either was reported as empty string.
+- JSON
+  . The json_decode() option JSON_OBJECT_AS_ARRAY is used if the second
+    parameter (assoc) is null. Previously JSON_OBJECT_AS_ARRAY was always
+    ignored.
 
 - Session:
   . Removed register_globals related code and "!" can be used as $_SESSION key name.
-  . Session is made to manage session status corretly and prevents invalid operations.
+  . Session is made to manage session status correctly and prevents invalid operations.
     Only inappropriate codes are affected by this change. If you have problems with this,
     it means you have problem in your code.
     . Functions are made to set or return correct session status.
@@ -80,6 +86,13 @@ PHP 7.2 UPGRADE NOTES
         session_start()
     . Session no longer initialize $_SESSION for invalid and useless session.
         session_start()
+    . When headers are already sent and try to set new INI values, session_name(),
+      session_module_name(), session_save_path(), session_cache_limiter() and
+      session_cache_expire() are no longer works. Older PHPs accepts new values even
+      if new values will not be effective.
+      This new corrected behavior may affect command line mode CLI scripts that manage
+      sessions. Use output buffer just like web applications to resolve problems on
+      CLI scripts.
 
 
 ========================================
@@ -91,14 +104,50 @@ PHP 7.2 UPGRADE NOTES
     inherited method. This complies with contravariance of method argument types
     under the Liskov Substitution Principle.
     (https://wiki.php.net/rfc/parameter-no-type-variance)
+  . It is now allowed to override an abstract method with another abstract
+    method in a child class.
+    (https://wiki.php.net/rfc/allow-abstract-function-override)
+  . A trailing comma in group use statements is now allowed.
+    (https://wiki.php.net/rfc/list-syntax-trailing-commas)
+  . The "object" type annotation is now supported.
+    (https://wiki.php.net/rfc/object-typehint)
+
+- DBA:
+  . Implemented support for the LMDB backend.
+
+- OCI8:
+  . Added Oracle Database Transparent Application Failover (TAF) callback support.
 
 - PCRE:
   . Added `J` modifier for setting PCRE_DUPNAMES.
+  . Added `PREG_UNMATCHED_AS_NULL` flag to allow distinguish between unmatched
+    subpatterns and empty matches by reporting NULL and "" (empty string),
+    respectively.
+
+- Sodium
+  . New cryptographic extension
+
+- SQLite3:
+  . Implemented writing to BLOBs.
 
 - Standard:
   . Simplified password hashing API updated to support Argon2i hashes when PHP is compiled with libargon2
     (https://wiki.php.net/rfc/argon2_password_hash).
   . proc_nice() is now supported on Windows platforms.
+
+- Zip:
+  . read/write encrypted archive, relying on libzip 1.2.0,
+    using new methods:
+      ZipArchive::setEncryptionName($name, $method [, $password]);
+      ZipArchive::setEncryptionIndex($index, $method [, $password]);
+    and new constants:
+      ZipArchive::EM_NONE
+      ZipArchive::EM_AES_128
+      ZipArchive::EM_AES_192
+      ZipArchive::EM_AES_256
+  . accept 'password' from zip stream context
+  . ZipArchive implements countable, added ZipArchive::count() method.
+
 
 ========================================
 3. Changes in SAPI modules
@@ -120,6 +169,9 @@ PHP 8.0.
   . The create_function() function has been deprecated, use anonymous functions
     instead.
   . The each() function has been deprecated, use a foreach loop instead.
+  
+- EXIF:
+  . The read_exif_data() alias have been deprecated, use exif_read_data() instead.
 
 - GD:
   . png2wbmp() and jpeg2wbmp() have been deprecated.
@@ -153,7 +205,7 @@ See also: https://wiki.php.net/rfc/deprecations_php_7_2
     'PASSWORD_ARGON2_DEFAULT_TIME_COST', and 'PASSWORD_ARGON2_DEFAULT_THREADS' respectively if not set.
   . password_verify() can verify Argon2i hashes.
   . password_get_info() and password_needs_rehash() can accept Argon2i hashes.
-  . mail()/mb_send_mail() accept array $extra_header. Array paramter is checked against RFC 2822.
+  . mail()/mb_send_mail() accept array $extra_header. Array parameter is checked against RFC 2822.
     Array format is 
     $extra_headers = [
       'Header-Name' => 'Header value',
@@ -163,6 +215,7 @@ See also: https://wiki.php.net/rfc/deprecations_php_7_2
   . count() now raises a warning when an invalid parameter is passed.
     Only arrays and objects implementing the Countable interface should be passed.
   . pack() and unpack() now support float and double in both little and big endian.
+  . number_format() ensures zero values never contain a negative sign.
 
 - XML:
   . utf8_encode() and utf8_decode() have been moved to the Standard extension
@@ -176,6 +229,10 @@ See also: https://wiki.php.net/rfc/deprecations_php_7_2
   . Added stream_isatty().
   . Added sapi_windows_vt100_support().
 
+- DOM:
+  . DomNodeList implements Countable, added DomNodeList::count().
+  . DOMNamedNodeMap implements Countable, added DOMNamedNodeMap::count().
+
 - GD:
   . Added imagesetclip() and imagegetclip().
   . Added imageopenpolygon().
@@ -185,6 +242,10 @@ See also: https://wiki.php.net/rfc/deprecations_php_7_2
 - Mbstring:
   . Added mb_chr() and mb_ord().
   . Added mb_scurb() that scrub broken multibyte strings.
+
+- OCI8:
+  . Added oci_register_taf_callback() and oci_disable_taf_callback() for
+    Oracle Database TAF callback support.
 
 - Sockets:
   . Added socket_addrinfo_lookup(), socket_addrinfo_connect(),
@@ -210,7 +271,10 @@ See also: https://wiki.php.net/rfc/deprecations_php_7_2
 
 - EXIF:
    . Added extended exif tag support for the following formats: 
-     Samsung, DJI, Panasonic, Sony, Pentax, Minolta & Sigma/Foveon.
+     Samsung, DJI, Panasonic, Sony, Pentax, Minolta, Sigma/Foveon, 
+	 AGFA, Kyocera, Ricoh & Epson.
+   . exif_read_data() and exif_thumbnail() now supports a passed streams as their 
+     first parameter.
 
 - GD:
   . Removed --enable-gd-native-ttf configuration option which was unused as
@@ -221,9 +285,13 @@ See also: https://wiki.php.net/rfc/deprecations_php_7_2
 
 - Mbstring
   . mb_check_encoding() accepts array parameter. Both key and value
-    ecodings are checked recursively.
+    encodings are checked recursively.
   . mb_convert_encoding() accepts array parameter. Only value encodings
     are converted recursively.
+
+- PDO_OCI:
+  . The '--with-pdo-oci' configure syntax no longer needs the vesion number of the
+    Oracle Instant Client.
 
 - pdo_sqlite
   . Use sqlite3_prepare_v2() and sqlite3_close_v2() functions instead of their
@@ -248,6 +316,9 @@ See also: https://wiki.php.net/rfc/deprecations_php_7_2
 - GD:
   . IMG_EFFECT_MULTIPLY
   . IMG_BMP
+
+- PCRE
+  . PREG_UNMATCHED_AS_NULL
 
 - Standard:
   . PASSWORD_ARGON2_DEFAULT_MEMORY_COST

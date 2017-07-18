@@ -1475,11 +1475,11 @@ static void php_getimagesize_from_any(INTERNAL_FUNCTION_PARAMETERS, int mode) { 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STRING(input, input_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL_DEREF_EX(info, 0, 1)
+		Z_PARAM_ZVAL_DEREF(info)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (argc == 2) {
-		zval_dtor(info);
+		zval_ptr_dtor(info);
 		array_init(info);
 	}
 

@@ -26,7 +26,7 @@
 #include <dmalloc.h>
 #endif
 
-#define PHP_API_VERSION 20160731
+#define PHP_API_VERSION 20170718
 #define PHP_HAVE_STREAMS
 #define YYDEBUG 0
 #define PHP_DEFAULT_CHARSET "UTF-8"
@@ -40,6 +40,21 @@
 
 #undef sprintf
 #define sprintf php_sprintf
+
+/* Operating system family defintion */
+#ifdef PHP_WIN32
+# define PHP_OS_FAMILY			"Windows"
+#elif defined(BSD) || defined(__DragonFly__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+# define PHP_OS_FAMILY			"BSD"
+#elif defined(__APPLE__) || defined(__MACH__)
+# define PHP_OS_FAMILY			"Darwin"
+#elif defined(__sun__)
+# define PHP_OS_FAMILY			"Solaris"
+#elif defined(__linux__)
+# define PHP_OS_FAMILY			"Linux"
+#else
+# define PHP_OS_FAMILY			"Unknown"
+#endif
 
 /* PHP's DEBUG value must match Zend's ZEND_DEBUG value */
 #undef PHP_DEBUG
@@ -166,6 +181,8 @@ PHPAPI size_t php_strlcpy(char *dst, const char *src, size_t siz);
 END_EXTERN_C()
 #undef strlcpy
 #define strlcpy php_strlcpy
+#define HAVE_STRLCPY 1
+#define USE_STRLCPY_PHP_IMPL 1
 #endif
 
 #ifndef HAVE_STRLCAT
@@ -174,6 +191,8 @@ PHPAPI size_t php_strlcat(char *dst, const char *src, size_t siz);
 END_EXTERN_C()
 #undef strlcat
 #define strlcat php_strlcat
+#define HAVE_STRLCAT 1
+#define USE_STRLCAT_PHP_IMPL 1
 #endif
 
 #ifndef HAVE_EXPLICIT_BZERO
@@ -191,7 +210,7 @@ END_EXTERN_C()
 #endif
 
 #ifndef HAVE_SOCKLEN_T
-# if PHP_WIN32
+# ifdef PHP_WIN32
 typedef int socklen_t;
 # else
 typedef unsigned int socklen_t;
@@ -218,14 +237,6 @@ typedef unsigned int socklen_t;
 #else
 # if HAVE_SYS_VARARGS_H
 # include <sys/varargs.h>
-# endif
-#endif
-
-#ifndef va_copy
-# ifdef __va_copy
-#  define va_copy(ap1, ap2)         __va_copy((ap1), (ap2))
-# else
-#  define va_copy(ap1, ap2)         memcpy((&ap1), (&ap2), sizeof(va_list))
 # endif
 #endif
 
@@ -304,7 +315,7 @@ END_EXTERN_C()
 #define STR_PRINT(str)	((str)?(str):"")
 
 #ifndef MAXPATHLEN
-# if PHP_WIN32
+# ifdef PHP_WIN32
 #  include "win32/ioutil.h"
 #  define MAXPATHLEN PHP_WIN32_IOUTIL_MAXPATHLEN
 # elif PATH_MAX

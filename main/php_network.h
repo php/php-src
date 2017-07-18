@@ -122,8 +122,12 @@ typedef int php_socket_t;
 /* uncomment this to debug poll(2) emulation on systems that have poll(2) */
 /* #define PHP_USE_POLL_2_EMULATION 1 */
 
-#if defined(HAVE_SYS_POLL_H) && defined(HAVE_POLL)
-# include <sys/poll.h>
+#if defined(HAVE_POLL)
+# if defined(HAVE_POLL_H)
+#  include <poll.h>
+# elif defined(HAVE_SYS_POLL_H)
+#  include <sys/poll.h>
+# endif
 typedef struct pollfd php_pollfd;
 #else
 typedef struct _php_pollfd {
@@ -340,7 +344,9 @@ END_EXTERN_C()
 
 /*
  * Local variables:
- * tab-width: 8
- * c-basic-offset: 8
+ * tab-width: 4
+ * c-basic-offset: 4
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

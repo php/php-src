@@ -280,7 +280,7 @@ static void php_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_t
 				size_t key_len;
 
 				/* PATH sections */
-				if (!strncasecmp(Z_STRVAL_P(arg1), "PATH", sizeof("PATH") - 1)) {
+				if (!zend_binary_strncasecmp(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1), "PATH", sizeof("PATH") - 1, sizeof("PATH") - 1)) {
 					key = Z_STRVAL_P(arg1);
 					key = key + sizeof("PATH") - 1;
 					key_len = Z_STRLEN_P(arg1) - sizeof("PATH") + 1;
@@ -291,7 +291,7 @@ static void php_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_t
 					TRANSLATE_SLASHES_LOWER(key);
 
 				/* HOST sections */
-				} else if (!strncasecmp(Z_STRVAL_P(arg1), "HOST", sizeof("HOST") - 1)) {
+				} else if (!zend_binary_strncasecmp(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1), "HOST", sizeof("HOST") - 1, sizeof("HOST") - 1)) {
 					key = Z_STRVAL_P(arg1);
 					key = key + sizeof("HOST") - 1;
 					key_len = Z_STRLEN_P(arg1) - sizeof("HOST") + 1;
@@ -328,7 +328,9 @@ static void php_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_t
 						zend_hash_init(Z_ARRVAL(section_arr), 8, NULL, (dtor_func_t) config_zval_dtor, 1);
 						entry = zend_hash_str_update(target_hash, key, key_len, &section_arr);
 					}
-					active_ini_hash = Z_ARRVAL_P(entry);
+					if (Z_TYPE_P(entry) == IS_ARRAY) {
+						active_ini_hash = Z_ARRVAL_P(entry);
+					}
 				}
 			}
 			break;
@@ -360,16 +362,46 @@ static void php_load_zend_extension_cb(void *arg)
 	if (IS_ABSOLUTE_PATH(filename, length)) {
 		zend_load_extension(filename);
 	} else {
-	    char *libpath;
+		DL_HANDLE handle;
+		char *libpath;
 		char *extension_dir = INI_STR("extension_dir");
 		int extension_dir_len = (int)strlen(extension_dir);
-
-		if (IS_SLASH(extension_dir[extension_dir_len-1])) {
-			spprintf(&libpath, 0, "%s%s", extension_dir, filename);
+		int slash_suffix = IS_SLASH(extension_dir[extension_dir_len-1]);
+		char *err1, *err2;
+		/* Try as filename first */
+		if (slash_suffix) {
+			spprintf(&libpath, 0, "%s%s", extension_dir, filename); /* SAFE */
 		} else {
-			spprintf(&libpath, 0, "%s%c%s", extension_dir, DEFAULT_SLASH, filename);
+			spprintf(&libpath, 0, "%s%c%s", extension_dir, DEFAULT_SLASH, filename); /* SAFE */
 		}
-		zend_load_extension(libpath);
+
+		handle = (DL_HANDLE)php_load_shlib(libpath, &err1);
+		if (!handle) {
+			/* If file does not exist, consider as extension name and build file name */
+			char *orig_libpath = libpath;
+
+			if (slash_suffix) {
+				spprintf(&libpath, 0, "%s" PHP_SHLIB_EXT_PREFIX "%s." PHP_SHLIB_SUFFIX, extension_dir, filename); /* SAFE */
+			} else {
+				spprintf(&libpath, 0, "%s%c" PHP_SHLIB_EXT_PREFIX "%s." PHP_SHLIB_SUFFIX, extension_dir, DEFAULT_SLASH, filename); /* SAFE */
+			}
+
+			handle = (DL_HANDLE)php_load_shlib(libpath, &err2);
+			if (!handle) {
+				php_error(E_CORE_WARNING, "Failed loading Zend extension '%s' (tried: %s (%s), %s (%s))",
+					filename, orig_libpath, err1, libpath, err2);
+				efree(orig_libpath);
+				efree(err1);
+				efree(libpath);
+				efree(err2);
+				return;
+			}
+
+			efree(orig_libpath);
+			efree(err1);
+		}
+
+		zend_load_extension_handle(handle, libpath);
 		efree(libpath);
 	}
 }
@@ -804,11 +836,11 @@ PHPAPI void php_ini_activate_per_dir_config(char *path, size_t path_len)
 	zval *tmp2;
 	char *ptr;
 
-#if PHP_WIN32
+#ifdef PHP_WIN32
 	char path_bak[MAXPATHLEN];
 #endif
 
-#if PHP_WIN32
+#ifdef PHP_WIN32
 	/* MAX_PATH is \0-terminated, path_len == MAXPATHLEN would overrun path_bak */
 	if (path_len >= MAXPATHLEN) {
 #else
@@ -817,7 +849,7 @@ PHPAPI void php_ini_activate_per_dir_config(char *path, size_t path_len)
 		return;
 	}
 
-#if PHP_WIN32
+#ifdef PHP_WIN32
 	memcpy(path_bak, path, path_len);
 	path_bak[path_len] = 0;
 	TRANSLATE_SLASHES_LOWER(path_bak);

@@ -74,22 +74,11 @@ PHPAPI php_stream_bucket *php_stream_bucket_new(php_stream *stream, char *buf, s
 	php_stream_bucket *bucket;
 
 	bucket = (php_stream_bucket*)pemalloc(sizeof(php_stream_bucket), is_persistent);
-
-	if (bucket == NULL) {
-		return NULL;
-	}
-
 	bucket->next = bucket->prev = NULL;
 
 	if (is_persistent && !buf_persistent) {
 		/* all data in a persistent bucket must also be persistent */
 		bucket->buf = pemalloc(buflen, 1);
-
-		if (bucket->buf == NULL) {
-			pefree(bucket, 1);
-			return NULL;
-		}
-
 		memcpy(bucket->buf, buf, buflen);
 		bucket->buflen = buflen;
 		bucket->own_buf = 1;
@@ -141,10 +130,6 @@ PHPAPI int php_stream_bucket_split(php_stream_bucket *in, php_stream_bucket **le
 	*left = (php_stream_bucket*)pecalloc(1, sizeof(php_stream_bucket), in->is_persistent);
 	*right = (php_stream_bucket*)pecalloc(1, sizeof(php_stream_bucket), in->is_persistent);
 
-	if (*left == NULL || *right == NULL) {
-		goto exit_fail;
-	}
-
 	(*left)->buf = pemalloc(length, in->is_persistent);
 	(*left)->buflen = length;
 	memcpy((*left)->buf, in->buf, length);
@@ -160,21 +145,6 @@ PHPAPI int php_stream_bucket_split(php_stream_bucket *in, php_stream_bucket **le
 	(*right)->is_persistent = in->is_persistent;
 
 	return SUCCESS;
-
-exit_fail:
-	if (*right) {
-		if ((*right)->buf) {
-			pefree((*right)->buf, in->is_persistent);
-		}
-		pefree(*right, in->is_persistent);
-	}
-	if (*left) {
-		if ((*left)->buf) {
-			pefree((*left)->buf, in->is_persistent);
-		}
-		pefree(*left, in->is_persistent);
-	}
-	return FAILURE;
 }
 
 PHPAPI void php_stream_bucket_delref(php_stream_bucket *bucket)

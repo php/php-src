@@ -5,7 +5,7 @@ Test sapi_windows_vt100_support on older Windows versions with redirected STDOUT
 if (getenv("SKIP_IO_CAPTURE_TESTS")) {
 	die("skip I/O capture test");
 }
-if(PHP_OS_FAMILY !== "WIN") {
+if(PHP_OS_FAMILY !== "Windows") {
     echo "skip Only for Windows systems";
 } elseif (version_compare(
     PHP_WINDOWS_VERSION_MAJOR.'.'.PHP_WINDOWS_VERSION_MINOR.'.'.PHP_WINDOWS_VERSION_BUILD,

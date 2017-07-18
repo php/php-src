@@ -37,7 +37,7 @@
 
 #include <string.h>
 
-#if PHP_WIN32
+#ifdef PHP_WIN32
 # include <windows.h>
 # include <Wincrypt.h>
 #endif
@@ -123,7 +123,7 @@ to64(char *s, int32_t v, int n)
 	}
 }
 
-#if PHP_WIN32
+#ifdef PHP_WIN32
 char * php_md5_crypt_r(const char *pw, const char *salt, char *out) {
 	HCRYPTPROV hCryptProv;
 	HCRYPTHASH ctx, ctx1;

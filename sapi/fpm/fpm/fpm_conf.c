@@ -1275,7 +1275,7 @@ static void fpm_conf_cleanup(int which, void *arg) /* {{{ */
 static void fpm_conf_ini_parser_include(char *inc, void *arg) /* {{{ */
 {
 	char *filename;
-	int *error = (int *)arg;;
+	int *error = (int *)arg;
 #ifdef HAVE_GLOB
 	glob_t g;
 #endif
@@ -1490,17 +1490,17 @@ static void fpm_conf_ini_parser(zval *arg1, zval *arg2, zval *arg3, int callback
 	switch(callback_type) {
 		case ZEND_INI_PARSER_ENTRY:
 			fpm_conf_ini_parser_entry(arg1, arg2, error);
-			break;;
+			break;
 		case ZEND_INI_PARSER_SECTION:
 			fpm_conf_ini_parser_section(arg1, error);
-			break;;
+			break;
 		case ZEND_INI_PARSER_POP_ENTRY:
 			fpm_conf_ini_parser_array(arg1, arg3, arg2, error);
-			break;;
+			break;
 		default:
 			zlog(ZLOG_ERROR, "[%s:%d] Unknown INI syntax", ini_filename, ini_lineno);
 			*error = 1;
-			break;;
+			break;
 	}
 }
 /* }}} */
