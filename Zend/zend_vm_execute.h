@@ -6422,13 +6422,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IN_ARRAY_SPEC_CONST_CONST_HAND
 		result = zend_hash_exists(ht, ZSTR_EMPTY_ALLOC());
 	} else {
 		zend_string *key;
-		zval tmp;
+		zval key_tmp, result_tmp;
 
 		result = 0;
 		ZEND_HASH_FOREACH_STR_KEY(ht, key) {
-			ZVAL_STR(&tmp, key);
-			compare_function(&tmp, op1, &tmp);
-			if (Z_LVAL(tmp) == 0) {
+			ZVAL_STR(&key_tmp, key);
+			compare_function(&result_tmp, op1, &key_tmp);
+			if (Z_LVAL(result_tmp) == 0) {
 				result = 1;
 				break;
 			}
@@ -13847,13 +13847,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IN_ARRAY_SPEC_TMP_CONST_HANDLE
 		result = zend_hash_exists(ht, ZSTR_EMPTY_ALLOC());
 	} else {
 		zend_string *key;
-		zval tmp;
+		zval key_tmp, result_tmp;
 
 		result = 0;
 		ZEND_HASH_FOREACH_STR_KEY(ht, key) {
-			ZVAL_STR(&tmp, key);
-			compare_function(&tmp, op1, &tmp);
-			if (Z_LVAL(tmp) == 0) {
+			ZVAL_STR(&key_tmp, key);
+			compare_function(&result_tmp, op1, &key_tmp);
+			if (Z_LVAL(result_tmp) == 0) {
 				result = 1;
 				break;
 			}
@@ -19909,13 +19909,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IN_ARRAY_SPEC_VAR_CONST_HANDLE
 		result = zend_hash_exists(ht, ZSTR_EMPTY_ALLOC());
 	} else {
 		zend_string *key;
-		zval tmp;
+		zval key_tmp, result_tmp;
 
 		result = 0;
 		ZEND_HASH_FOREACH_STR_KEY(ht, key) {
-			ZVAL_STR(&tmp, key);
-			compare_function(&tmp, op1, &tmp);
-			if (Z_LVAL(tmp) == 0) {
+			ZVAL_STR(&key_tmp, key);
+			compare_function(&result_tmp, op1, &key_tmp);
+			if (Z_LVAL(result_tmp) == 0) {
 				result = 1;
 				break;
 			}
@@ -38265,13 +38265,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IN_ARRAY_SPEC_CV_CONST_HANDLER
 		result = zend_hash_exists(ht, ZSTR_EMPTY_ALLOC());
 	} else {
 		zend_string *key;
-		zval tmp;
+		zval key_tmp, result_tmp;
 
 		result = 0;
 		ZEND_HASH_FOREACH_STR_KEY(ht, key) {
-			ZVAL_STR(&tmp, key);
-			compare_function(&tmp, op1, &tmp);
-			if (Z_LVAL(tmp) == 0) {
+			ZVAL_STR(&key_tmp, key);
+			compare_function(&result_tmp, op1, &key_tmp);
+			if (Z_LVAL(result_tmp) == 0) {
 				result = 1;
 				break;
 			}
