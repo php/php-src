@@ -163,7 +163,9 @@ int zend_optimizer_eval_cast(zval *result, uint32_t type, zval *op1) /* {{{ */
 			ZVAL_DOUBLE(result, zval_get_double(op1));
 			return SUCCESS;
 		case IS_STRING:
-			if (Z_TYPE_P(op1) != IS_ARRAY) {
+			/* Conversion from double to string takes into account run-time
+			   'precision' setting and cannot be evaluated at compile-time */
+			if (Z_TYPE_P(op1) != IS_ARRAY && Z_TYPE_P(op1) != IS_DOUBLE) {
 				ZVAL_STR(result, zval_get_string(op1));
 				return SUCCESS;
 			}
