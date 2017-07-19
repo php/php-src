@@ -283,6 +283,11 @@ typedef struct _php_userstream_data php_userstream_data_t;
 
 static void user_stream_create_object(struct php_user_stream_wrapper *uwrap, php_stream_context *context, zval *object)
 {
+	if (uwrap->ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
+		ZVAL_UNDEF(object);
+		return;
+	}
+
 	/* create an instance of our class */
 	object_init_ex(object, uwrap->ce);
 
