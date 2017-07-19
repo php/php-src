@@ -99,25 +99,31 @@ static int prop_lookup(unsigned long code, unsigned long n)
 
 }
 
-MBSTRING_API int php_unicode_is_prop(unsigned long code, unsigned long mask1,
-		unsigned long mask2)
+MBSTRING_API int php_unicode_is_prop1(unsigned long code, int prop)
 {
-	unsigned long i;
+	return prop_lookup(code, prop);
+}
 
-	if (mask1 == 0 && mask2 == 0)
-		return 0;
+MBSTRING_API int php_unicode_is_prop(unsigned long code, ...)
+{
+	int result = 0;
+	va_list va;
+	va_start(va, code);
 
-	for (i = 0; mask1 && i < 32; i++) {
-		if ((mask1 & masks32[i]) && prop_lookup(code, i))
-			return 1;
+	while (1) {
+		int prop = va_arg(va, int);
+		if (prop < 0) {
+			break;
+		}
+
+		if (prop_lookup(code, prop)) {
+			result = 1;
+			break;
+		}
 	}
 
-	for (i = 32; mask2 && i < _ucprop_size; i++) {
-		if ((mask2 & masks32[i & 31]) && prop_lookup(code, i))
-			return 1;
-	}
-
-	return 0;
+	va_end(va);
+	return result;
 }
 
 static unsigned long case_lookup(unsigned long code, long l, long r, int field)
@@ -312,7 +318,7 @@ MBSTRING_API char *php_unicode_convert_case(int case_mode, const char *srcstr, s
 			for (i = 0; i < unicode_len; i+=4) {
 				int res = php_unicode_is_prop(
 					BE_ARY_TO_UINT32(&unicode_ptr[i]),
-					UC_MN|UC_ME|UC_CF|UC_LM|UC_SK|UC_LU|UC_LL|UC_LT|UC_PO|UC_OS, 0);
+					UC_MN, UC_ME, UC_CF, UC_LM, UC_SK, UC_LU, UC_LL, UC_LT, UC_PO, UC_OS, -1);
 				if (mode) {
 					if (res) {
 						UINT32_TO_BE_ARY(&unicode_ptr[i],
