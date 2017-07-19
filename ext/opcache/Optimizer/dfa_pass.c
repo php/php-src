@@ -649,6 +649,11 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 						ZVAL_DOUBLE(&tmp, zval_get_double(zv));
 						opline->op2.constant = zend_optimizer_add_literal(op_array, &tmp);
 					}
+				} else if (opline->opcode == ZEND_CONCAT) {
+					if (!(OP1_INFO() & MAY_BE_OBJECT)
+					 && !(OP2_INFO() & MAY_BE_OBJECT)) {
+						opline->opcode = ZEND_FAST_CONCAT;
+					}
 				}
 			}
 
