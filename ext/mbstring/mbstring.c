@@ -703,6 +703,19 @@ static sapi_post_entry mbstr_post_entries[] = {
 };
 /* }}} */
 
+static const mbfl_encoding *php_mb_get_encoding(const char *encoding_name) {
+	if (encoding_name) {
+		const mbfl_encoding *encoding = mbfl_name2encoding(encoding_name);
+		if (!encoding) {
+			php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", encoding_name);
+			return NULL;
+		}
+		return encoding;
+	} else {
+		return MBSTRG(current_internal_encoding);
+	}
+}
+
 /* {{{ static int php_mb_parse_encoding_list()
  *  Return 0 if input contains any illegal encoding, otherwise 1.
  *  Even if any illegal encoding is detected the result may contain a list
@@ -5143,14 +5156,9 @@ static inline zend_long php_mb_ord(const char* str, size_t str_len, const char* 
 	unsigned char char_len;
 	zend_long cp;
 
-	if (enc_name == NULL) {
-		enc = MBSTRG(current_internal_encoding);
-	} else {
-		enc = mbfl_name2encoding(enc_name);
-		if (!enc) {
-			php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", enc_name);
-			return -1;
-		}
+	enc = php_mb_get_encoding(enc_name);
+	if (!enc) {
+		return -1;
 	}
 
 	no_enc = enc->no_encoding;
@@ -5240,14 +5248,9 @@ static inline char* php_mb_chr(zend_long cp, const char* enc_name, size_t *outpu
 	char* ret;
 	size_t ret_len;
 
-	if (enc_name == NULL) {
-		enc = MBSTRG(current_internal_encoding);
-	} else {
-		enc = mbfl_name2encoding(enc_name);
-		if (!enc) {
-			php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", enc_name);
-			return NULL;
-		}
+	enc = php_mb_get_encoding(enc_name);
+	if (!enc) {
+		return NULL;
 	}
 
 	no_enc = enc->no_encoding;
@@ -5434,14 +5437,9 @@ PHP_FUNCTION(mb_scrub)
 		Z_PARAM_STRING(enc_name, enc_name_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (enc_name == NULL) {
-		enc = MBSTRG(current_internal_encoding);
-	} else {
-		enc = mbfl_name2encoding(enc_name);
-		if (!enc) {
-			php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", enc_name);
-			RETURN_FALSE;
-		}
+	enc = php_mb_get_encoding(enc_name);
+	if (!enc) {
+		RETURN_FALSE;
 	}
 
 	ret = php_mb_scrub(str, str_len, enc);
