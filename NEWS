@@ -2,5 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.0alpha1
 
+ ODBC:
+  . Removed support for Birdstep. (Kalle)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

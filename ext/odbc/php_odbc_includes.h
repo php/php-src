@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Stig Sæther Bakken <ssb@php.net>                            |
    |          Andreas Karajannis <Andreas.Karajannis@gmd.de>              |
-   |	      Kevin N. Shallow <kshallow@tampabay.rr.com> (Birdstep)      |
+   |	      Kevin N. Shallow <kshallow@tampabay.rr.com>                 |
    +----------------------------------------------------------------------+
 */
 
@@ -149,23 +149,6 @@ PHP_FUNCTION(solid_fetch_prev);
 #ifndef SQLUSMALLINT
 #define SQLUSMALLINT UWORD
 #endif
-
-#elif defined(HAVE_BIRDSTEP) /* Raima Birdstep */
-
-#define ODBC_TYPE "Birdstep"
-#define UNIX
-/*
- * Extended Fetch in the Birdstep ODBC API is incapable of returning zend_long varchar (memo) fields.
- * So the following line has been commented-out to accommodate. - KNS
- *
- * #define HAVE_SQL_EXTENDED_FETCH 1
- */
-#include <sql.h>
-#include <sqlext.h>
-#define SQLINTEGER SDWORD
-#define SQLSMALLINT SWORD
-#define SQLUSMALLINT UWORD
-
 
 #elif defined(HAVE_DBMAKER) /* DBMaker */
 

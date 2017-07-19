@@ -309,55 +309,6 @@ PHP_ARG_WITH(empress-bcs,,
 fi
 
 if test -z "$ODBC_TYPE"; then
-PHP_ARG_WITH(birdstep,,
-[  --with-birdstep[=DIR]     Include Birdstep support [/usr/local/birdstep]])
-  
-  AC_MSG_CHECKING(for Birdstep support)
-  if test "$PHP_BIRDSTEP" != "no"; then
-    if test "$PHP_BIRDSTEP" = "yes"; then
-        ODBC_INCDIR=/usr/local/birdstep/include
-        ODBC_LIBDIR=/usr/local/birdstep/lib
-    else
-        ODBC_INCDIR=$PHP_BIRDSTEP/include
-        ODBC_LIBDIR=$PHP_BIRDSTEP/$PHP_LIBDIR
-    fi
-   
-    case $host_alias in
-      *aix*[)]
-        AC_DEFINE(AIX,1,[ ]);;
-      *hpux*[)]
-        AC_DEFINE(HPUX,1,[ ]);;
-      *linux*[)]
-        AC_DEFINE(LINUX,1,[ ]);;
-      *qnx*[)]
-        AC_DEFINE(NEUTRINO,1,[ ]);;
-      i?86-*-solaris*[)]
-        AC_DEFINE(ISOLARIS,1,[ ]);;
-      sparc-*-solaris*[)]
-        AC_DEFINE(SOLARIS,1,[ ]);;
-      *unixware*[)]
-        AC_DEFINE(UNIXWARE,1,[ ]);;
-    esac
-
-    ODBC_INCLUDE=-I$ODBC_INCDIR
-    ODBC_TYPE=birdstep
-    ODBC_LFLAGS=-L$ODBC_LIBDIR
-    ODBC_LIBS="-lCadm -lCdict -lCenc -lCrdm -lCrpc -lCrdbc -lCrm -lCuapi -lutil"
-
-    if test -f "$ODBC_LIBDIR/libCrdbc32.$SHLIB_SUFFIX_NAME"; then
-      ODBC_LIBS="-lCrdbc32 -lCadm32 -lCncp32 -lCrm32 -lCsql32 -lCdict32 -lCrdm32 -lCrpc32 -lutil"
-    elif test -f "$ODBC_LIBDIR/libCrdbc.$SHLIB_SUFFIX_NAME"; then
-      ODBC_LIBS="-lCrdbc -lCadm -lCncp -lCrm -lCsql -lCdict -lCrdm -lCrpc -lutil"
-    fi
-
-    AC_DEFINE(HAVE_BIRDSTEP,1,[ ])
-    AC_MSG_RESULT([$ext_output])
-  else
-    AC_MSG_RESULT(no)
-  fi
-fi
-
-if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH(custom-odbc,,
 [  --with-custom-odbc[=DIR]  Include user defined ODBC support. DIR is ODBC install base
                           directory [/usr/local]. Make sure to define CUSTOM_ODBC_LIBS and
@@ -536,7 +487,7 @@ dnl
 if test -n "$ODBC_TYPE"; then
   if test "$ODBC_TYPE" != "dbmaker"; then
     PHP_EVAL_LIBLINE([$ODBC_LFLAGS $ODBC_LIBS], ODBC_SHARED_LIBADD)
-    if test "$ODBC_TYPE" != "birdstep" && test "$ODBC_TYPE" != "solid"; then
+    if test "$ODBC_TYPE" != "solid"; then
       AC_DEFINE(HAVE_SQLDATASOURCES,1,[ ])
     fi
   fi
