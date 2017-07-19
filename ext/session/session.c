@@ -2035,7 +2035,7 @@ static PHP_FUNCTION(session_id)
 		return;
 	}
 
-	if (name && SG(headers_sent)) {
+	if (name && PS(use_cookies) && SG(headers_sent)) {
 		php_error_docref(NULL, E_WARNING, "Cannot change session id when headers already sent");
 		RETURN_FALSE;
 	}
@@ -2356,7 +2356,7 @@ static PHP_FUNCTION(session_start)
 	 * required. i.e. There shouldn't be any outputs in output buffer, otherwise session
 	 * module is unable to rewrite output.
 	 */
-	if (SG(headers_sent)) {
+	if (PS(use_cookies) && SG(headers_sent)) {
 		php_error_docref(NULL, E_WARNING, "Cannot start session when headers already sent");
 		RETURN_FALSE;
 	}

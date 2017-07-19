@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     with "#"). (Andrew Nester)
   . Fixed bug #74936 (session_cache_expire/cache_limiter/save_path() trigger a
     warning in read mode). (morozov)
+  . Fixed bug #74941 (session fails to start after having headers sent). 
+    (morozov)
 
 - SPL:
   . Fixed bug #74669 (Unserialize ArrayIterator broken). (Andrew Nester)
