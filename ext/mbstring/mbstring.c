@@ -3514,12 +3514,13 @@ PHP_FUNCTION(mb_convert_encoding)
    Returns a case-folded version of sourcestring */
 PHP_FUNCTION(mb_convert_case)
 {
-	const char *from_encoding = MBSTRG(current_internal_encoding)->mime_name;
+	const char *from_encoding = NULL;
 	char *str;
 	size_t str_len, from_encoding_len;
 	zend_long case_mode = 0;
 	char *newstr;
 	size_t ret_len;
+	const mbfl_encoding *enc;
 
 	RETVAL_FALSE;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|s!", &str, &str_len,
@@ -3527,7 +3528,12 @@ PHP_FUNCTION(mb_convert_case)
 		return;
 	}
 
-	newstr = php_unicode_convert_case(case_mode, str, (size_t) str_len, &ret_len, from_encoding);
+	enc = php_mb_get_encoding(from_encoding);
+	if (!enc) {
+		return;
+	}
+
+	newstr = php_unicode_convert_case(case_mode, str, str_len, &ret_len, enc);
 
 	if (newstr) {
 		// TODO: avoid reallocation ???
@@ -3542,17 +3548,24 @@ PHP_FUNCTION(mb_convert_case)
  */
 PHP_FUNCTION(mb_strtoupper)
 {
-	const char *from_encoding = MBSTRG(current_internal_encoding)->mime_name;
+	const char *from_encoding = NULL;
 	char *str;
 	size_t str_len, from_encoding_len;
 	char *newstr;
 	size_t ret_len;
+	const mbfl_encoding *enc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s!", &str, &str_len,
 				&from_encoding, &from_encoding_len) == FAILURE) {
 		return;
 	}
-	newstr = php_unicode_convert_case(PHP_UNICODE_CASE_UPPER, str, (size_t) str_len, &ret_len, from_encoding);
+
+	enc = php_mb_get_encoding(from_encoding);
+	if (!enc) {
+		RETURN_FALSE;
+	}
+
+	newstr = php_unicode_convert_case(PHP_UNICODE_CASE_UPPER, str, str_len, &ret_len, enc);
 
 	if (newstr) {
 		// TODO: avoid reallocation ???
@@ -3569,17 +3582,24 @@ PHP_FUNCTION(mb_strtoupper)
  */
 PHP_FUNCTION(mb_strtolower)
 {
-	const char *from_encoding = MBSTRG(current_internal_encoding)->mime_name;
+	const char *from_encoding = NULL;
 	char *str;
 	size_t str_len, from_encoding_len;
 	char *newstr;
 	size_t ret_len;
+	const mbfl_encoding *enc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s!", &str, &str_len,
 				&from_encoding, &from_encoding_len) == FAILURE) {
 		return;
 	}
-	newstr = php_unicode_convert_case(PHP_UNICODE_CASE_LOWER, str, (size_t) str_len, &ret_len, from_encoding);
+
+	enc = php_mb_get_encoding(from_encoding);
+	if (!enc) {
+		RETURN_FALSE;
+	}
+
+	newstr = php_unicode_convert_case(PHP_UNICODE_CASE_LOWER, str, str_len, &ret_len, enc);
 
 	if (newstr) {
 		// TODO: avoid reallocation ???
@@ -5566,20 +5586,25 @@ MBSTRING_API char *php_mb_safe_strrchr(const char *s, unsigned int c, size_t nby
  */
 MBSTRING_API int php_mb_stripos(int mode, const char *old_haystack, unsigned int old_haystack_len, const char *old_needle, unsigned int old_needle_len, long offset, const char *from_encoding)
 {
-	int n;
+	int n = -1;
 	mbfl_string haystack, needle;
-	n = -1;
+	const mbfl_encoding *enc;
+
+	enc = php_mb_get_encoding(from_encoding);
+	if (!enc) {
+		return -1;
+	}
 
 	mbfl_string_init(&haystack);
 	mbfl_string_init(&needle);
 	haystack.no_language = MBSTRG(language);
-	haystack.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
+	haystack.no_encoding = enc->no_encoding;
 	needle.no_language = MBSTRG(language);
-	needle.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
+	needle.no_encoding = enc->no_encoding;
 
 	do {
 		size_t len = 0;
-		haystack.val = (unsigned char *)php_unicode_convert_case(PHP_UNICODE_CASE_UPPER, (char *)old_haystack, old_haystack_len, &len, from_encoding);
+		haystack.val = (unsigned char *)php_unicode_convert_case(PHP_UNICODE_CASE_UPPER, (char *)old_haystack, old_haystack_len, &len, enc);
 		haystack.len = len;
 
 		if (!haystack.val) {
@@ -5590,7 +5615,7 @@ MBSTRING_API int php_mb_stripos(int mode, const char *old_haystack, unsigned int
 			break;
 		}
 
-		needle.val = (unsigned char *)php_unicode_convert_case(PHP_UNICODE_CASE_UPPER, (char *)old_needle, old_needle_len, &len, from_encoding);
+		needle.val = (unsigned char *)php_unicode_convert_case(PHP_UNICODE_CASE_UPPER, (char *)old_needle, old_needle_len, &len, enc);
 		needle.len = len;
 
 		if (!needle.val) {
@@ -5598,12 +5623,6 @@ MBSTRING_API int php_mb_stripos(int mode, const char *old_haystack, unsigned int
 		}
 
 		if (needle.len <= 0) {
-			break;
-		}
-
-		haystack.no_encoding = needle.no_encoding = mbfl_name2no_encoding(from_encoding);
-		if (haystack.no_encoding == mbfl_no_encoding_invalid) {
-			php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", from_encoding);
 			break;
 		}
 

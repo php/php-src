@@ -94,8 +94,10 @@
 
 MBSTRING_API int php_unicode_is_prop(unsigned long code, ...);
 MBSTRING_API int php_unicode_is_prop1(unsigned long code, int prop);
-MBSTRING_API char *php_unicode_convert_case(int case_mode, const char *srcstr, size_t srclen, size_t *retlen,
-		const char *src_encoding);
+
+MBSTRING_API char *php_unicode_convert_case(
+		int case_mode, const char *srcstr, size_t srclen, size_t *retlen,
+		const mbfl_encoding *src_encoding);
 
 #define PHP_UNICODE_CASE_UPPER	0
 #define PHP_UNICODE_CASE_LOWER	1

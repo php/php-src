@@ -274,22 +274,15 @@ MBSTRING_API unsigned long php_unicode_totitle(unsigned long code, enum mbfl_no_
 	((unsigned char*)(ptr))[3] = (v    ) & 0xff;\
 }
 
-MBSTRING_API char *php_unicode_convert_case(int case_mode, const char *srcstr, size_t srclen, size_t *ret_len,
-		const char *src_encoding_name)
+MBSTRING_API char *php_unicode_convert_case(
+		int case_mode, const char *srcstr, size_t srclen, size_t *ret_len,
+		const mbfl_encoding *src_encoding)
 {
 	char *unicode, *newstr;
 	size_t unicode_len;
 	unsigned char *unicode_ptr;
 	size_t i;
-	enum mbfl_no_encoding src_no_encoding;
-
-	const mbfl_encoding *src_encoding = mbfl_name2encoding(src_encoding_name);
-	if (!src_encoding) {
-		php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", src_encoding_name);
-		return NULL;
-	}
-
-	src_no_encoding = src_encoding->no_encoding;
+	enum mbfl_no_encoding src_no_encoding = src_encoding->no_encoding;
 
 	unicode = php_mb_convert_encoding_ex(srcstr, srclen, &mbfl_encoding_ucs4be, src_encoding, &unicode_len);
 	if (unicode == NULL)
