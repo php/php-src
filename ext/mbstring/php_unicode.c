@@ -43,6 +43,7 @@
 #include "mbstring.h"
 #include "php_unicode.h"
 #include "unicode_data.h"
+#include "libmbfl/filters/mbfilter_ucs4.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(mbstring)
 
@@ -268,20 +269,23 @@ MBSTRING_API unsigned long php_unicode_totitle(unsigned long code, enum mbfl_no_
 }
 
 MBSTRING_API char *php_unicode_convert_case(int case_mode, const char *srcstr, size_t srclen, size_t *ret_len,
-		const char *src_encoding)
+		const char *src_encoding_name)
 {
 	char *unicode, *newstr;
 	size_t unicode_len;
 	unsigned char *unicode_ptr;
 	size_t i;
-	enum mbfl_no_encoding _src_encoding = mbfl_name2no_encoding(src_encoding);
+	enum mbfl_no_encoding src_no_encoding;
 
-	if (_src_encoding == mbfl_no_encoding_invalid) {
-		php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", src_encoding);
+	const mbfl_encoding *src_encoding = mbfl_name2encoding(src_encoding_name);
+	if (!src_encoding) {
+		php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", src_encoding_name);
 		return NULL;
 	}
 
-	unicode = php_mb_convert_encoding(srcstr, srclen, "UCS-4BE", src_encoding, &unicode_len);
+	src_no_encoding = src_encoding->no_encoding;
+
+	unicode = php_mb_convert_encoding_ex(srcstr, srclen, &mbfl_encoding_ucs4be, src_encoding, &unicode_len);
 	if (unicode == NULL)
 		return NULL;
 
@@ -291,14 +295,14 @@ MBSTRING_API char *php_unicode_convert_case(int case_mode, const char *srcstr, s
 		case PHP_UNICODE_CASE_UPPER:
 			for (i = 0; i < unicode_len; i+=4) {
 				UINT32_TO_BE_ARY(&unicode_ptr[i],
-					php_unicode_toupper(BE_ARY_TO_UINT32(&unicode_ptr[i]), _src_encoding));
+					php_unicode_toupper(BE_ARY_TO_UINT32(&unicode_ptr[i]), src_no_encoding));
 			}
 			break;
 
 		case PHP_UNICODE_CASE_LOWER:
 			for (i = 0; i < unicode_len; i+=4) {
 				UINT32_TO_BE_ARY(&unicode_ptr[i],
-					php_unicode_tolower(BE_ARY_TO_UINT32(&unicode_ptr[i]), _src_encoding));
+					php_unicode_tolower(BE_ARY_TO_UINT32(&unicode_ptr[i]), src_no_encoding));
 			}
 			break;
 
@@ -312,7 +316,7 @@ MBSTRING_API char *php_unicode_convert_case(int case_mode, const char *srcstr, s
 				if (mode) {
 					if (res) {
 						UINT32_TO_BE_ARY(&unicode_ptr[i],
-							php_unicode_tolower(BE_ARY_TO_UINT32(&unicode_ptr[i]), _src_encoding));
+							php_unicode_tolower(BE_ARY_TO_UINT32(&unicode_ptr[i]), src_no_encoding));
 					} else {
 						mode = 0;
 					}
@@ -320,7 +324,7 @@ MBSTRING_API char *php_unicode_convert_case(int case_mode, const char *srcstr, s
 					if (res) {
 						mode = 1;
 						UINT32_TO_BE_ARY(&unicode_ptr[i],
-							php_unicode_totitle(BE_ARY_TO_UINT32(&unicode_ptr[i]), _src_encoding));
+							php_unicode_totitle(BE_ARY_TO_UINT32(&unicode_ptr[i]), src_no_encoding));
 					}
 				}
 			}
@@ -328,7 +332,8 @@ MBSTRING_API char *php_unicode_convert_case(int case_mode, const char *srcstr, s
 
 	}
 
-	newstr = php_mb_convert_encoding(unicode, unicode_len, src_encoding, "UCS-4BE", ret_len);
+	newstr = php_mb_convert_encoding_ex(
+		unicode, unicode_len, src_encoding, &mbfl_encoding_ucs4be, ret_len);
 	efree(unicode);
 
 	return newstr;
