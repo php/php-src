@@ -64,16 +64,11 @@ Chapter 1. General Installation Considerations
    You may also rent webspace at a company. This way, you don't need to
    set up anything on your own, only write your PHP scripts, upload it to
    the server you rent, and see the results in your browser.
-
-   In case of setting up the server and PHP on your own, you have two
-   choices for the method of connecting PHP to the server. For many
-   servers PHP has a direct module interface (also called SAPI). These
-   servers include Apache, Microsoft Internet Information Server, Netscape
-   and iPlanet servers. Many other servers have support for ISAPI, the
-   Microsoft module interface (OmniHTTPd for example). If PHP has no
-   module support for your web server, you can always use it as a CGI or
-   FastCGI processor. This means you set up your server to use the CGI
-   executable of PHP to process all PHP file requests on the server.
+ 
+   If PHP has no module  support  for your web server, ´you can always use 
+   it as a CGI or FastCGI  processor.  This  means  you set up your server 
+   to use the  CGI executable of PHP to process all  PHP file  requests on 
+   the server.
 
    If you are also interested to use PHP for command line scripting (e.g.
    write scripts autogenerating some images for you offline, or processing
@@ -236,7 +231,7 @@ c:\php
 
    Server modules provide significantly better performance and additional
    functionality compared to the CGI binary. The FastCGI is significantly
-   more stable and can be faster than the ISAPI module with IIS.
+   more stable and can be a faster module with IIS.
    The CLI version is designed to let you use PHP for command line 
    scripting. More information about CLI is available in the chapter 
    about using PHP from the command line.
@@ -406,67 +401,6 @@ General considerations for all installations of PHP with IIS
        before firing up PHP. This means that the web server will provide
        sensible 404 style error messages instead of CGI errors complaining
        that PHP did not output any data.
-     __________________________________________________________________
-
-Windows NT/200x/XP and IIS 4 or newer
-
-   PHP may be installed as a CGI binary, or with the ISAPI module. In
-   either case, you need to start the Microsoft Management Console (may
-   appear as 'Internet Services Manager', either in your Windows NT 4.0
-   Option Pack branch or the Control Panel=>Administrative Tools under
-   Windows 2000/XP). Then right click on your Web server node (this will
-   most probably appear as 'Default Web Server'), and select 'Properties'.
-
-   If you want to use the CGI binary, do the following:
-
-     * Under 'Home Directory', 'Virtual Directory', or 'Directory', do the
-       following:
-     * Change the Execute Permissions to 'Scripts only'
-     * Click on the 'Configuration' button, and choose the Application
-       Mappings tab. Click Add and set the Executable path to the
-       appropriate CGI file. An example PHP 7 value is: C:\php\php-cgi.exe
-       Supply .php as the extension. Leave 'Method exclusions' blank, and
-       check the 'Script engine' checkbox. Now, click OK a few times.
-     * Set up the appropriate security. (This is done in Internet Service
-       Manager), and if your NT Server uses NTFS file system, add execute
-       rights for I_USR_ to the directory that contains php.exe /
-       php-cgi.exe.
-
-   To use the ISAPI module, do the following:
-
-     * If you don't want to perform HTTP Authentication using PHP, you can
-       (and should) skip this step. Under ISAPI Filters, add a new ISAPI
-       filter. Use PHP as the filter name, and supply a path to the
-       php7isapi.dll.
-     * Under 'Home Directory', 'Virtual Directory', or 'Directory', do the
-       following:
-     * Change the Execute Permissions to 'Scripts only'
-     * Click on the 'Configuration' button, and choose the Application
-       Mappings tab. Click Add and set the Executable path to the
-       appropriate ISAPI DLL. An example PHP 7 value is:
-       C:\php\php7isapi.dll Supply .php as the extension. Leave 'Method
-       exclusions' blank, and check the 'Script engine' checkbox. Now,
-       click OK a few times.
-     * Stop IIS completely (NET STOP iisadmin)
-     * Start IIS again (NET START w3svc)
-
-   With IIS 6 (2003 Server), open up the IIS Manager, go to Web Service
-   Extensions, choose "Add a new Web service extension", enter in a name
-   such as PHP, choose the Add button and for the value browse to either
-   the ISAPI file (php7isapi.dll) or CGI (php.exe or
-   php-cgi.exe) then check "Set extension status to Allowed" and click OK.
-
-   In order to use index.php as a default content page, do the following:
-   From within the Documents tab, choose Add. Type in index.php and click
-   OK. Adjust the order by choosing Move Up or Move Down. This is similar
-   to setting DirectoryIndex with Apache.
-
-   The steps above must be repeated for each extension that is to be
-   associated with PHP scripts. .php is the most common although .php3 may
-   be required for legacy applications.
-
-   If you experience 100% CPU usage after some time, turn off the IIS
-   setting Cache ISAPI Application.
      __________________________________________________________________
 
 Windows and IIS
@@ -683,18 +617,6 @@ PHPIniDir "C:/php"
    ship with your downloaded PHP version.
      __________________________________________________________________
 
-Sun, iPlanet and Netscape servers on Microsoft Windows
-
-   This section contains notes and hints specific to Sun Java System Web
-   Server, Sun ONE Web Server, iPlanet and Netscape server installs of PHP
-   on Windows.
-
-   From PHP 4.3.3 on you can use PHP scripts with the NSAPI module to
-   generate custom directory listings and error pages. Additional
-   functions for Apache compatibility are also available. For support in
-   current web servers read the note about subrequests.
-     __________________________________________________________________
-
 CGI setup on Sun, iPlanet and Netscape servers
 
    To install PHP as a CGI handler, do the following:
@@ -718,70 +640,6 @@ ftype PHPScript=c:\php\php.exe %1 %*
 
    More details about setting up PHP as a CGI executable can be found
    here: http://benoit.noss.free.fr/php/install-php.html
-     __________________________________________________________________
-
-NSAPI setup on Sun, iPlanet and Netscape servers
-
-   To install PHP with NSAPI, do the following:
-
-     * Copy php7ts.dll to your systemroot (the directory where you
-       installed Windows)
-     * Make a file association from the command line. Type the following
-       two lines:
-
-assoc .php=PHPScript
-ftype PHPScript=c:\php\php.exe %1 %*
-
-     * In the Netscape Enterprise Administration Server create a new mime
-       type (Category: type, Content-Type: magnus-internal/x-httpd-php,
-       File Suffix: php).
-     * Edit magnus.conf (for servers >= 6) or obj.conf (for servers < 6)
-       and add the following: You should place the lines after mime types
-       init.
-
-Init fn="load-modules" funcs="php7_init,php7_execute,php7_auth_trans" shlib="c:/
-php/sapi/php7nsapi.dll"
-Init fn="php7_init" LateInit="yes" errorString="Failed to initialise PHP!" [php_
-ini="c:/path/to/php.ini"]
-
-       The php_ini parameter is optional but with it you
-       can place your php.ini in your web server configuration directory.
-     * Configure the default object in obj.conf (for virtual server
-       classes [Sun Web Server 6.0+] in their vserver.obj.conf): In the
-       <Object name="default"> section, place this line necessarily after
-       all 'ObjectType' and before all 'AddLog' lines:
-
-Service fn="php7_execute" type="magnus-internal/x-httpd-php" [inikey=value inike
-y=value ...]
-
-       As additional parameters you can add some special
-       php.ini-values, for example you can set a
-       docroot="/path/to/docroot" specific to the context php7_execute is
-       called. For boolean ini-keys please use 0/1 as value, not
-       "On","Off",... (this will not work correctly), e.g.
-       zlib.output_compression=1 instead of zlib.output_compression="On"
-     * This is only needed if you want to configure a directory that only
-       consists of PHP scripts (same like a cgi-bin directory):
-
-<Object name="x-httpd-php">
-ObjectType fn="force-type" type="magnus-internal/x-httpd-php"
-Service fn=php7_execute [inikey=value inikey=value ...]
-</Object>
-
-       After that you can configure a directory in the Administration
-       server and assign it the style x-httpd-php. All files in it will
-       get executed as PHP. This is nice to hide PHP usage by renaming
-       files to .html.
-     * Restart your web service and apply changes
-     * Do it for each web server instance you want PHP to run
-
-     Note: More details about setting up PHP as an NSAPI filter can be
-     found here: http://benoit.noss.free.fr/php/install-php4.html
-
-     Note: The stacksize that PHP uses depends on the configuration of
-     the web server. If you get crashes with very large PHP scripts, it
-     is recommended to raise it with the Admin Server (in the section
-     "MAGNUS EDITOR").
      __________________________________________________________________
 
 CGI environment and recommended modifications in php.ini
@@ -832,35 +690,6 @@ pt.php" [inikey=value inikey=value...]
    $_SERVER['PATH_TRANSLATED'].
      __________________________________________________________________
 
-Note about nsapi_virtual() and subrequests (PHP >= 4.3.3)
-
-   The NSAPI module now supports the nsapi_virtual() function (alias:
-   virtual()) to make subrequests on the web server and insert the result
-   in the web page. The problem is, that this function uses some
-   undocumented features from the NSAPI library.
-
-   Under Unix this is not a problem, because the module automatically
-   looks for the needed functions and uses them if available. If not,
-   nsapi_virtual() is disabled.
-
-   Under Windows limitations in the DLL handling need the use of a
-   automatic detection of the most recent ns-httpdXX.dll file. This is
-   tested for servers till version 6.1. If a newer version of the Sun
-   server is used, the detection fails and nsapi_virtual() is disabled.
-
-   If this is the case, try the following: Add the following parameter to
-   php7_init in magnus.conf/obj.conf:
-   Init fn=php7_init ... server_lib="ns-httpdXX.dll"
-
-   where XX is the correct DLL version number. To get it, look in the
-   server-root for the correct DLL name. The DLL with the biggest filesize
-   is the right one.
-
-   You can check the status by using the phpinfo() function.
-
-     Note: But be warned: Support for nsapi_virtual() is EXPERIMENTAL!!!
-     __________________________________________________________________
-
 OmniHTTPd Server
 
    This section contains notes and hints specific to OmniHTTPd on Windows.
@@ -875,8 +704,7 @@ OmniHTTPd Server
 
    You need to complete the following steps to make PHP work with
    OmniHTTPd. This is a CGI executable setup. SAPI is supported by
-   OmniHTTPd, but some tests have shown that it is not so stable to use
-   PHP as an ISAPI module.
+   OmniHTTPd.
 
      Important for CGI users: Read the faq on cgi.force_redirect for
      important details. This directive needs to be set to 0.
@@ -988,20 +816,12 @@ extension=php_bz2.dll
    Extension Description Notes
    php_bz2.dll bzip2 compression functions None
    php_calendar.dll Calendar conversion functions
-   php_cpdf.dll ClibPDF functions None
-   php_crack.dll Crack functions None
    php_ctype.dll ctype family functions
    php_curl.dll CURL, Client URL library functions Requires: libeay32.dll,
    ssleay32.dll (bundled)
-   php_db.dll DBM functions Deprecated. Use DBA instead (php_dba.dll)
    php_dba.dll DBA: DataBase (dbm-style) Abstraction layer functions None
-   php_dbase.dll dBase functions None
-   php_dbx.dll dbx functions
    php_exif.dll EXIF functions php_mbstring.dll. And, php_exif.dll must be
    loaded after php_mbstring.dll in php.ini.
-   php_fdf.dll FDF: Forms Data Format functions. Requires: fdftk.dll
-   (bundled)
-   php_filepro.dll filePro functions Read-only access
    php_ftp.dll FTP functions
    php_gd2.dll GD library image functions GD2
    php_gettext.dll Gettext functions, requires libintl-1.dll, 
@@ -1011,10 +831,6 @@ extension=php_bz2.dll
    php_interbase.dll InterBase functions Requires: gds32.dll (bundled)
    php_ldap.dll LDAP functions requires libeay32.dll, ssleay32.dll (bundled)
    php_mbstring.dll Multi-Byte String functions None
-   php_mime_magic.dll Mimetype functions Requires: magic.mime (bundled)
-   php_ming.dll Ming functions for Flash None
-   php_msql.dll mSQL functions Requires: msql.dll (bundled)
-   php_mssql.dll MSSQL functions Requires: ntwdblib.dll (bundled)
    php_mysql.dll MySQL functions PHP >= 5.0.0, requires libmysql.dll
    (bundled)
    php_mysqli.dll MySQLi functions PHP >= 5.0.0, requires libmysql.dll
@@ -1023,13 +839,11 @@ extension=php_bz2.dll
    php_openssl.dll OpenSSL functions Requires: libeay32.dll (bundled)
    php_oracle.dll Oracle functions Requires: Oracle 7 client libraries
    php_pgsql.dll PostgreSQL functions None
-   php_printer.dll Printer functions None
    php_shmop.dll Shared Memory functions None
    php_snmp.dll SNMP get and walk functions NT only!
    php_soap.dll SOAP functions PHP >= 5.0.0
    php_sockets.dll Socket functions None
    php_sodium.dll Sodium cryptography library PHP >= 7.2.0
-   php_sybase_ct.dll Sybase functions Requires: Sybase client libraries
    php_tidy.dll Tidy functions PHP >= 5.0.0
    php_tokenizer.dll Tokenizer functions Built in since PHP 4.3.0
    php_xmlrpc.dll XML-RPC functions PHP >= 4.2.1 requires: iconv.dll
@@ -1247,8 +1061,7 @@ The configuration file
    php.ini is searched in these locations (in order):
 
      * SAPI module specific location (PHPIniDir directive in Apache 2, -c
-       command line option in CGI and CLI, php_ini parameter in NSAPI,
-       PHP_INI_PATH environment variable in THTTPD)
+       command line option in CGI and CLI)
      * The PHPRC environment variable. Before PHP 5.2.0 this was checked
        after the registry key mentioned below.
      * As of PHP 5.2.0, the following registry locations are searched in

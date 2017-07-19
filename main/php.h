@@ -101,9 +101,7 @@ typedef int gid_t;
 typedef char * caddr_t;
 typedef unsigned int uint;
 typedef unsigned long ulong;
-# if !NSAPI
 typedef int pid_t;
-# endif
 
 # ifndef PHP_DEBUG
 #  ifdef inline
