@@ -11,6 +11,10 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #74669 (Unserialize ArrayIterator broken). (Andrew Nester)
 
+- Standard:
+  . Fixed bug #74851 (uniqid() without more_entropy performs badly).
+    (Emmanuel Dreyfus)
+
 20 Jul 2017, PHP 7.2.0beta1
 
 - Core:
