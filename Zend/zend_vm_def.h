@@ -2667,8 +2667,51 @@ ZEND_VM_HANDLER(53, ZEND_FAST_CONCAT, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 	zval *op1, *op2;
 	zend_string *op1_str, *op2_str, *str;
 
-	SAVE_OPLINE();
+
 	op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+	op2 = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
+	if ((OP1_TYPE == IS_CONST || EXPECTED(Z_TYPE_P(op1) == IS_STRING)) &&
+	    (OP2_TYPE == IS_CONST || EXPECTED(Z_TYPE_P(op2) == IS_STRING))) {
+		zend_string *op1_str = Z_STR_P(op1);
+		zend_string *op2_str = Z_STR_P(op2);
+		zend_string *str;
+
+		do {
+			if (OP1_TYPE != IS_CONST) {
+				if (UNEXPECTED(ZSTR_LEN(op1_str) == 0)) {
+					ZVAL_STR_COPY(EX_VAR(opline->result.var), op2_str);
+					FREE_OP1();
+					break;
+				}
+			}
+			if (OP2_TYPE != IS_CONST) {
+				if (UNEXPECTED(ZSTR_LEN(op2_str) == 0)) {
+					ZVAL_STR_COPY(EX_VAR(opline->result.var), op1_str);
+					FREE_OP1();
+					break;
+				}
+			}
+			if (OP1_TYPE != IS_CONST && OP1_TYPE != IS_CV &&
+			    !ZSTR_IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
+			    size_t len = ZSTR_LEN(op1_str);
+
+				str = zend_string_extend(op1_str, len + ZSTR_LEN(op2_str), 0);
+				memcpy(ZSTR_VAL(str) + len, ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
+				ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+				break;
+			} else {
+				str = zend_string_alloc(ZSTR_LEN(op1_str) + ZSTR_LEN(op2_str), 0);
+				memcpy(ZSTR_VAL(str), ZSTR_VAL(op1_str), ZSTR_LEN(op1_str));
+				memcpy(ZSTR_VAL(str) + ZSTR_LEN(op1_str), ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
+				ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+			}
+			FREE_OP1();
+		} while (0);
+		FREE_OP2();
+		ZEND_VM_NEXT_OPCODE();
+	}
+
+	SAVE_OPLINE();
 	if (OP1_TYPE == IS_CONST) {
 		op1_str = Z_STR_P(op1);
 	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
@@ -2679,7 +2722,6 @@ ZEND_VM_HANDLER(53, ZEND_FAST_CONCAT, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 		}
 		op1_str = _zval_get_string_func(op1);
 	}
-	op2 = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
 	if (OP2_TYPE == IS_CONST) {
 		op2_str = Z_STR_P(op2);
 	} else if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
