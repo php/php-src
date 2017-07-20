@@ -47,19 +47,6 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(mbstring)
 
-/*
- * A simple array of 32-bit masks for lookup.
- */
-static unsigned long masks32[32] = {
-    0x00000001, 0x00000002, 0x00000004, 0x00000008, 0x00000010, 0x00000020,
-    0x00000040, 0x00000080, 0x00000100, 0x00000200, 0x00000400, 0x00000800,
-    0x00001000, 0x00002000, 0x00004000, 0x00008000, 0x00010000, 0x00020000,
-    0x00040000, 0x00080000, 0x00100000, 0x00200000, 0x00400000, 0x00800000,
-    0x01000000, 0x02000000, 0x04000000, 0x08000000, 0x10000000, 0x20000000,
-    0x40000000, 0x80000000
-};
-
-
 static int prop_lookup(unsigned long code, unsigned long n)
 {
 	long l, r, m;
@@ -151,26 +138,21 @@ static unsigned long case_lookup(unsigned long code, long l, long r, int field)
 	return code;
 }
 
-MBSTRING_API unsigned long php_turkish_toupper(unsigned long code, long l, long r, int field)
-{
-	if (code == 0x0069L) {
-		return 0x0130L;
-	}
-	return case_lookup(code, l, r, field);
-}
-
-MBSTRING_API unsigned long php_turkish_tolower(unsigned long code, long l, long r, int field)
-{
-	if (code == 0x0049L) {
-		return 0x0131L;
-	}
-	return case_lookup(code, l, r, field);
-}
-
 MBSTRING_API unsigned long php_unicode_toupper(unsigned long code, enum mbfl_no_encoding enc)
 {
 	int field;
 	long l, r;
+
+	if (code < 0x80) {
+		/* Fast path for ASCII */
+		if (code >= 0x61 && code <= 0x7A) {
+			if (enc == mbfl_no_encoding_8859_9 && code == 0x0069L) {
+				return 0x0130L;
+			}
+			return code - 0x20;
+		}
+		return code;
+	}
 
 	if (php_unicode_is_upper(code))
 		return code;
@@ -182,11 +164,6 @@ MBSTRING_API unsigned long php_unicode_toupper(unsigned long code, enum mbfl_no_
 		field = 2;
 		l = _uccase_len[0];
 		r = (l + _uccase_len[1]) - 3;
-
-		if (enc == mbfl_no_encoding_8859_9) {
-			return php_turkish_toupper(code, l, r, field);
-		}
-
 	} else {
 		/*
 		 * The character is title case.
@@ -203,6 +180,17 @@ MBSTRING_API unsigned long php_unicode_tolower(unsigned long code, enum mbfl_no_
 	int field;
 	long l, r;
 
+	if (code < 0x80) {
+		/* Fast path for ASCII */
+		if (code >= 0x41 && code <= 0x5A) {
+			if (enc == mbfl_no_encoding_8859_9 && code == 0x0049L) {
+				return 0x0131L;
+			}
+			return code + 0x20;
+		}
+		return code;
+	}
+
 	if (php_unicode_is_lower(code))
 		return code;
 
@@ -213,11 +201,6 @@ MBSTRING_API unsigned long php_unicode_tolower(unsigned long code, enum mbfl_no_
 		field = 1;
 		l = 0;
 		r = _uccase_len[0] - 3;
-
-		if (enc == mbfl_no_encoding_8859_9) {
-			return php_turkish_tolower(code, l, r, field);
-		}
-
 	} else {
 		/*
 		 * The character is title case.
