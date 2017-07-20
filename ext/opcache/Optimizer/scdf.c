@@ -81,13 +81,6 @@ void scdf_mark_edge_feasible(scdf_ctx *scdf, int from, int to) {
 }
 
 void scdf_init(zend_optimizer_ctx *ctx, scdf_ctx *scdf, zend_op_array *op_array, zend_ssa *ssa) {
-	uint32_t edges_count = 0;
-	int b;
-
-	for (b = 0; b < ssa->cfg.blocks_count; b++) {
-		edges_count += ssa->cfg.blocks[b].predecessors_count;
-	}
-
 	scdf->op_array = op_array;
 	scdf->ssa = ssa;
 
@@ -96,7 +89,7 @@ void scdf_init(zend_optimizer_ctx *ctx, scdf_ctx *scdf, zend_op_array *op_array,
 	scdf->block_worklist_len = zend_bitset_len(ssa->cfg.blocks_count);
 
 	scdf->instr_worklist = zend_arena_calloc(&ctx->arena,
-		scdf->instr_worklist_len + scdf->phi_var_worklist_len + 2 * scdf->block_worklist_len + zend_bitset_len(edges_count),
+		scdf->instr_worklist_len + scdf->phi_var_worklist_len + 2 * scdf->block_worklist_len + zend_bitset_len(ssa->cfg.edges_count),
 		sizeof(zend_ulong));
 
 	scdf->phi_var_worklist = scdf->instr_worklist + scdf->instr_worklist_len;
