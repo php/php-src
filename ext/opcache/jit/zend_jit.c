@@ -2439,7 +2439,7 @@ pass:
 					}
 					break;
 				case ZEND_NEW:
-					if (!zend_jit_new(&dasm_state, opline, &i, op_array, ssa)) {
+					if (!zend_jit_new(&dasm_state, opline, &i, op_array, ssa, call_level)) {
 						goto jit_failure;
 					}
 					break;
