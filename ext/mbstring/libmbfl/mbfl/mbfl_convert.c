@@ -435,7 +435,7 @@ mbfl_convert_filter_copy(
 
 int mbfl_convert_filter_devcat(mbfl_convert_filter *filter, mbfl_memory_device *src)
 {
-	int n;
+	size_t n;
 	unsigned char *p;
 
 	p = src->buffer;
@@ -447,7 +447,7 @@ int mbfl_convert_filter_devcat(mbfl_convert_filter *filter, mbfl_memory_device *
 		n--;
 	}
 
-	return n;
+	return 0;
 }
 
 int mbfl_convert_filter_strcat(mbfl_convert_filter *filter, const unsigned char *p)

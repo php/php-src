@@ -934,7 +934,8 @@ static size_t php_mb_zend_encoding_converter(unsigned char **to, size_t *to_leng
 {
 	mbfl_string string, result;
 	mbfl_buffer_converter *convd;
-	int status, loc;
+	int status;
+	size_t loc;
 
 	/* new encoding */
 	/* initialize string */
@@ -948,7 +949,7 @@ static size_t php_mb_zend_encoding_converter(unsigned char **to, size_t *to_leng
 	/* initialize converter */
 	convd = mbfl_buffer_converter_new2((const mbfl_encoding *)encoding_from, (const mbfl_encoding *)encoding_to, string.len);
 	if (convd == NULL) {
-		return -1;
+		return (size_t) -1;
 	}
 	mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode));
 	mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));
@@ -1095,11 +1096,11 @@ static int php_mb_nls_get_default_detect_order_list(enum mbfl_no_language lang, 
 }
 /* }}} */
 
-static char *php_mb_rfc1867_substring_conf(const zend_encoding *encoding, char *start, int len, char quote)
+static char *php_mb_rfc1867_substring_conf(const zend_encoding *encoding, char *start, size_t len, char quote)
 {
 	char *result = emalloc(len + 2);
 	char *resp = result;
-	int i;
+	size_t i;
 
 	for (i = 0; i < len && start[i] != quote; ++i) {
 		if (start[i] == '\\' && (start[i + 1] == '\\' || (quote && start[i + 1] == quote))) {
@@ -2213,7 +2214,8 @@ PHP_FUNCTION(mb_output_handler)
 	const char *charset;
 	char *p;
 	const mbfl_encoding *encoding;
-	int last_feed, len;
+	int last_feed;
+	size_t len;
 	unsigned char send_text_mimetype = 0;
 	char *s, *mimetype = NULL;
 
@@ -2313,20 +2315,13 @@ PHP_FUNCTION(mb_strlen)
 	int n;
 	mbfl_string string;
 	char *enc_name = NULL;
-	size_t enc_name_len, string_len;
+	size_t enc_name_len;
 
 	mbfl_string_init(&string);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", (char **)&string.val, &string_len, &enc_name, &enc_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", (char **)&string.val, &string.len, &enc_name, &enc_name_len) == FAILURE) {
 		return;
 	}
-
-	if (ZEND_SIZE_T_UINT_OVFL(string_len)) {
-			php_error_docref(NULL, E_WARNING, "String overflows the max allowed length of %u", UINT_MAX);
-			return;
-	}
-
-	string.len = (uint32_t)string_len;
 
 	string.no_language = MBSTRG(language);
 	if (enc_name == NULL) {
@@ -2340,7 +2335,7 @@ PHP_FUNCTION(mb_strlen)
 	}
 
 	n = mbfl_strlen(&string);
-	if (n >= 0) {
+	if (!mbfl_is_error(n)) {
 		RETVAL_LONG(n);
 	} else {
 		RETVAL_FALSE;
@@ -2352,11 +2347,11 @@ PHP_FUNCTION(mb_strlen)
    Find position of first occurrence of a string within another */
 PHP_FUNCTION(mb_strpos)
 {
-	int n, reverse = 0;
+	int reverse = 0;
 	zend_long offset = 0, slen;
 	mbfl_string haystack, needle;
 	char *enc_name = NULL;
-	size_t enc_name_len, haystack_len, needle_len;
+	size_t enc_name_len, n;
 
 	mbfl_string_init(&haystack);
 	mbfl_string_init(&needle);
@@ -2365,20 +2360,9 @@ PHP_FUNCTION(mb_strpos)
 	needle.no_language = MBSTRG(language);
 	needle.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|ls", (char **)&haystack.val, &haystack_len, (char **)&needle.val, &needle_len, &offset, &enc_name, &enc_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|ls", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &offset, &enc_name, &enc_name_len) == FAILURE) {
 		return;
 	}
-
-	if (ZEND_SIZE_T_UINT_OVFL(haystack_len)) {
-			php_error_docref(NULL, E_WARNING, "Haystack length overflows the max allowed length of %u", UINT_MAX);
-			return;
-	} else if (ZEND_SIZE_T_UINT_OVFL(needle_len)) {
-			php_error_docref(NULL, E_WARNING, "Needle length overflows the max allowed length of %u", UINT_MAX);
-			return;
-	}
-
-	haystack.len = (uint32_t)haystack_len;
-	needle.len = (uint32_t)needle_len;
 
 	if (enc_name != NULL) {
 		haystack.no_encoding = needle.no_encoding = mbfl_name2no_encoding(enc_name);
@@ -2402,7 +2386,7 @@ PHP_FUNCTION(mb_strpos)
 	}
 
 	n = mbfl_strpos(&haystack, &needle, offset, reverse);
-	if (n >= 0) {
+	if (!mbfl_is_error(n)) {
 		RETVAL_LONG(n);
 	} else {
 		switch (-n) {
@@ -2430,12 +2414,11 @@ PHP_FUNCTION(mb_strpos)
    Find position of last occurrence of a string within another */
 PHP_FUNCTION(mb_strrpos)
 {
-	int n;
 	mbfl_string haystack, needle;
 	char *enc_name = NULL;
-	size_t enc_name_len, haystack_len, needle_len;
+	size_t enc_name_len;
 	zval *zoffset = NULL;
-	long offset = 0, str_flg;
+	long offset = 0, str_flg, n;
 	char *enc_name2 = NULL;
 	int enc_name_len2;
 
@@ -2446,20 +2429,9 @@ PHP_FUNCTION(mb_strrpos)
 	needle.no_language = MBSTRG(language);
 	needle.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|zs", (char **)&haystack.val, &haystack_len, (char **)&needle.val, &needle_len, &zoffset, &enc_name, &enc_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|zs", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &zoffset, &enc_name, &enc_name_len) == FAILURE) {
 		return;
 	}
-
-	if (ZEND_SIZE_T_UINT_OVFL(haystack_len)) {
-			php_error_docref(NULL, E_WARNING, "Haystack length overflows the max allowed length of %u", UINT_MAX);
-			return;
-	} else if (ZEND_SIZE_T_UINT_OVFL(needle_len)) {
-			php_error_docref(NULL, E_WARNING, "Needle length overflows the max allowed length of %u", UINT_MAX);
-			return;
-	}
-
-	haystack.len = (uint32_t)haystack_len;
-	needle.len = (uint32_t)needle_len;
 
 	if (zoffset) {
 		if (Z_TYPE_P(zoffset) == IS_STRING) {
@@ -2510,15 +2482,8 @@ PHP_FUNCTION(mb_strrpos)
 		}
 	}
 
-	if (haystack.len <= 0) {
-		RETURN_FALSE;
-	}
-	if (needle.len <= 0) {
-		RETURN_FALSE;
-	}
-
 	{
-		int haystack_char_len = mbfl_strlen(&haystack);
+		size_t haystack_char_len = mbfl_strlen(&haystack);
 		if ((offset > 0 && offset > haystack_char_len) ||
 			(offset < 0 && -offset > haystack_char_len)) {
 			php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
@@ -2527,7 +2492,7 @@ PHP_FUNCTION(mb_strrpos)
 	}
 
 	n = mbfl_strpos(&haystack, &needle, offset, 1);
-	if (n >= 0) {
+	if (!mbfl_is_error(n)) {
 		RETVAL_LONG(n);
 	} else {
 		RETVAL_FALSE;
@@ -2539,34 +2504,24 @@ PHP_FUNCTION(mb_strrpos)
    Finds position of first occurrence of a string within another, case insensitive */
 PHP_FUNCTION(mb_stripos)
 {
-	int n = -1;
+	size_t n = (size_t) -1;
 	zend_long offset = 0;
 	mbfl_string haystack, needle;
 	const char *from_encoding = MBSTRG(current_internal_encoding)->mime_name;
-	size_t from_encoding_len, haystack_len, needle_len;
+	size_t from_encoding_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|ls", (char **)&haystack.val, &haystack_len, (char **)&needle.val, &needle_len, &offset, &from_encoding, &from_encoding_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|ls", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &offset, &from_encoding, &from_encoding_len) == FAILURE) {
 		return;
 	}
-
-	if (ZEND_SIZE_T_UINT_OVFL(haystack_len)) {
-			php_error_docref(NULL, E_WARNING, "Haystack length overflows the max allowed length of %u", UINT_MAX);
-			return;
-	} else if (ZEND_SIZE_T_UINT_OVFL(needle_len)) {
-			php_error_docref(NULL, E_WARNING, "Needle length overflows the max allowed length of %u", UINT_MAX);
-			return;
-	}
-
-	haystack.len = (uint32_t)haystack_len;
-	needle.len = (uint32_t)needle_len;
 
 	if (needle.len == 0) {
 		php_error_docref(NULL, E_WARNING, "Empty delimiter");
 		RETURN_FALSE;
 	}
+
 	n = php_mb_stripos(0, (char *)haystack.val, haystack.len, (char *)needle.val, needle.len, offset, from_encoding);
 
-	if (n >= 0) {
+	if (!mbfl_is_error(n)) {
 		RETVAL_LONG(n);
 	} else {
 		RETVAL_FALSE;
@@ -2578,30 +2533,19 @@ PHP_FUNCTION(mb_stripos)
    Finds position of last occurrence of a string within another, case insensitive */
 PHP_FUNCTION(mb_strripos)
 {
-	int n = -1;
+	size_t n = (size_t) -1;
 	zend_long offset = 0;
 	mbfl_string haystack, needle;
 	const char *from_encoding = MBSTRG(current_internal_encoding)->mime_name;
-	size_t from_encoding_len, haystack_len, needle_len;
+	size_t from_encoding_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|ls", (char **)&haystack.val, &haystack_len, (char **)&needle.val, &needle_len, &offset, &from_encoding, &from_encoding_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|ls", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &offset, &from_encoding, &from_encoding_len) == FAILURE) {
 		return;
 	}
 
-	if (ZEND_SIZE_T_UINT_OVFL(haystack_len)) {
-			php_error_docref(NULL, E_WARNING, "Haystack length overflows the max allowed length of %u", UINT_MAX);
-			return;
-	} else if (ZEND_SIZE_T_UINT_OVFL(needle_len)) {
-			php_error_docref(NULL, E_WARNING, "Needle length overflows the max allowed length of %u", UINT_MAX);
-			return;
-	}
-
-	haystack.len = (uint32_t)haystack_len;
-	needle.len = (uint32_t)needle_len;
-
 	n = php_mb_stripos(1, (char *)haystack.val, haystack.len, (char *)needle.val, needle.len, offset, from_encoding);
 
-	if (n >= 0) {
+	if (!mbfl_is_error(n)) {
 		RETVAL_LONG(n);
 	} else {
 		RETVAL_FALSE;
@@ -2613,10 +2557,10 @@ PHP_FUNCTION(mb_strripos)
    Finds first occurrence of a string within another */
 PHP_FUNCTION(mb_strstr)
 {
-	int n, len, mblen;
+	size_t n;
 	mbfl_string haystack, needle, result, *ret = NULL;
 	char *enc_name = NULL;
-	size_t enc_name_len, haystack_len, needle_len;
+	size_t enc_name_len;
 	zend_bool part = 0;
 
 	mbfl_string_init(&haystack);
@@ -2626,20 +2570,9 @@ PHP_FUNCTION(mb_strstr)
 	needle.no_language = MBSTRG(language);
 	needle.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|bs", (char **)&haystack.val, &haystack_len, (char **)&needle.val, &needle_len, &part, &enc_name, &enc_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|bs", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &part, &enc_name, &enc_name_len) == FAILURE) {
 		return;
 	}
-
-	if (ZEND_SIZE_T_UINT_OVFL(haystack_len)) {
-			php_error_docref(NULL, E_WARNING, "Haystack length overflows the max allowed length of %u", UINT_MAX);
-			return;
-	} else if (ZEND_SIZE_T_UINT_OVFL(needle_len)) {
-			php_error_docref(NULL, E_WARNING, "Needle length overflows the max allowed length of %u", UINT_MAX);
-			return;
-	}
-
-	haystack.len = (uint32_t)haystack_len;
-	needle.len = (uint32_t)needle_len;
 
 	if (enc_name != NULL) {
 		haystack.no_encoding = needle.no_encoding = mbfl_name2no_encoding(enc_name);
@@ -2649,13 +2582,14 @@ PHP_FUNCTION(mb_strstr)
 		}
 	}
 
-	if (needle.len <= 0) {
+	if (needle.len == 0) {
 		php_error_docref(NULL, E_WARNING, "Empty delimiter");
 		RETURN_FALSE;
 	}
+
 	n = mbfl_strpos(&haystack, &needle, 0, 0);
-	if (n >= 0) {
-		mblen = mbfl_strlen(&haystack);
+	if (!mbfl_is_error(n)) {
+		size_t mblen = mbfl_strlen(&haystack);
 		if (part) {
 			ret = mbfl_substr(&haystack, &result, 0, n);
 			if (ret != NULL) {
@@ -2666,7 +2600,7 @@ PHP_FUNCTION(mb_strstr)
 				RETVAL_FALSE;
 			}
 		} else {
-			len = (mblen - n);
+			size_t len = (mblen - n);
 			ret = mbfl_substr(&haystack, &result, n, len);
 			if (ret != NULL) {
 				// TODO: avoid reallocation ???
@@ -2686,10 +2620,10 @@ PHP_FUNCTION(mb_strstr)
    Finds the last occurrence of a character in a string within another */
 PHP_FUNCTION(mb_strrchr)
 {
-	int n, len, mblen;
+	size_t n;
 	mbfl_string haystack, needle, result, *ret = NULL;
 	char *enc_name = NULL;
-	size_t enc_name_len, haystack_len, needle_len;
+	size_t enc_name_len;
 	zend_bool part = 0;
 
 	mbfl_string_init(&haystack);
@@ -2699,20 +2633,9 @@ PHP_FUNCTION(mb_strrchr)
 	needle.no_language = MBSTRG(language);
 	needle.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|bs", (char **)&haystack.val, &haystack_len, (char **)&needle.val, &needle_len, &part, &enc_name, &enc_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|bs", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &part, &enc_name, &enc_name_len) == FAILURE) {
 		return;
 	}
-
-	if (ZEND_SIZE_T_UINT_OVFL(haystack_len)) {
-			php_error_docref(NULL, E_WARNING, "Haystack length overflows the max allowed length of %u", UINT_MAX);
-			return;
-	} else if (ZEND_SIZE_T_UINT_OVFL(needle_len)) {
-			php_error_docref(NULL, E_WARNING, "Needle length overflows the max allowed length of %u", UINT_MAX);
-			return;
-	}
-
-	haystack.len = (uint32_t)haystack_len;
-	needle.len = (uint32_t)needle_len;
 
 	if (enc_name != NULL) {
 		haystack.no_encoding = needle.no_encoding = mbfl_name2no_encoding(enc_name);
@@ -2722,15 +2645,16 @@ PHP_FUNCTION(mb_strrchr)
 		}
 	}
 
-	if (haystack.len <= 0) {
+	if (haystack.len == 0) {
 		RETURN_FALSE;
 	}
-	if (needle.len <= 0) {
+	if (needle.len == 0) {
 		RETURN_FALSE;
 	}
+
 	n = mbfl_strpos(&haystack, &needle, 0, 1);
-	if (n >= 0) {
-		mblen = mbfl_strlen(&haystack);
+	if (!mbfl_is_error(n)) {
+		size_t mblen = mbfl_strlen(&haystack);
 		if (part) {
 			ret = mbfl_substr(&haystack, &result, 0, n);
 			if (ret != NULL) {
@@ -2741,7 +2665,7 @@ PHP_FUNCTION(mb_strrchr)
 				RETVAL_FALSE;
 			}
 		} else {
-			len = (mblen - n);
+			size_t len = (mblen - n);
 			ret = mbfl_substr(&haystack, &result, n, len);
 			if (ret != NULL) {
 				// TODO: avoid reallocation ???
@@ -2762,8 +2686,7 @@ PHP_FUNCTION(mb_strrchr)
 PHP_FUNCTION(mb_stristr)
 {
 	zend_bool part = 0;
-	size_t from_encoding_len, len, mblen, haystack_len, needle_len;
-	int n;
+	size_t from_encoding_len, n, len, mblen;
 	mbfl_string haystack, needle, result, *ret = NULL;
 	const char *from_encoding = MBSTRG(current_internal_encoding)->mime_name;
 	mbfl_string_init(&haystack);
@@ -2773,21 +2696,9 @@ PHP_FUNCTION(mb_stristr)
 	needle.no_language = MBSTRG(language);
 	needle.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
 
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|bs", (char **)&haystack.val, &haystack_len, (char **)&needle.val, &needle_len, &part, &from_encoding, &from_encoding_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|bs", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &part, &from_encoding, &from_encoding_len) == FAILURE) {
 		return;
 	}
-
-	if (ZEND_SIZE_T_UINT_OVFL(haystack_len)) {
-			php_error_docref(NULL, E_WARNING, "Haystack length overflows the max allowed length of %u", UINT_MAX);
-			return;
-	} else if (ZEND_SIZE_T_UINT_OVFL(needle_len)) {
-			php_error_docref(NULL, E_WARNING, "Needle length overflows the max allowed length of %u", UINT_MAX);
-			return;
-	}
-
-	haystack.len = (uint32_t)haystack_len;
-	needle.len = (uint32_t)needle_len;
 
 	if (!needle.len) {
 		php_error_docref(NULL, E_WARNING, "Empty delimiter");
@@ -2801,8 +2712,7 @@ PHP_FUNCTION(mb_stristr)
 	}
 
 	n = php_mb_stripos(0, (char *)haystack.val, haystack.len, (char *)needle.val, needle.len, 0, from_encoding);
-
-	if (n <0) {
+	if (mbfl_is_error(n)) {
 		RETURN_FALSE;
 	}
 
@@ -2836,8 +2746,8 @@ PHP_FUNCTION(mb_stristr)
 PHP_FUNCTION(mb_strrichr)
 {
 	zend_bool part = 0;
-	int n, len, mblen;
-	size_t from_encoding_len, haystack_len, needle_len;
+	size_t n, len, mblen;
+	size_t from_encoding_len;
 	mbfl_string haystack, needle, result, *ret = NULL;
 	const char *from_encoding = MBSTRG(current_internal_encoding)->name;
 	mbfl_string_init(&haystack);
@@ -2848,20 +2758,9 @@ PHP_FUNCTION(mb_strrichr)
 	needle.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
 
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|bs", (char **)&haystack.val, &haystack_len, (char **)&needle.val, &needle_len, &part, &from_encoding, &from_encoding_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|bs", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &part, &from_encoding, &from_encoding_len) == FAILURE) {
 		return;
 	}
-
-	if (ZEND_SIZE_T_UINT_OVFL(haystack_len)) {
-			php_error_docref(NULL, E_WARNING, "Haystack length overflows the max allowed length of %u", UINT_MAX);
-			return;
-	} else if (ZEND_SIZE_T_UINT_OVFL(needle_len)) {
-			php_error_docref(NULL, E_WARNING, "Needle length overflows the max allowed length of %u", UINT_MAX);
-			return;
-	}
-
-	haystack.len = (uint32_t)haystack_len;
-	needle.len = (uint32_t)needle_len;
 
 	haystack.no_encoding = needle.no_encoding = mbfl_name2no_encoding(from_encoding);
 	if (haystack.no_encoding == mbfl_no_encoding_invalid) {
@@ -2870,8 +2769,7 @@ PHP_FUNCTION(mb_strrichr)
 	}
 
 	n = php_mb_stripos(1, (char *)haystack.val, haystack.len, (char *)needle.val, needle.len, 0, from_encoding);
-
-	if (n <0) {
+	if (mbfl_is_error(n)) {
 		RETURN_FALSE;
 	}
 
@@ -2904,10 +2802,10 @@ PHP_FUNCTION(mb_strrichr)
    Count the number of substring occurrences */
 PHP_FUNCTION(mb_substr_count)
 {
-	int n;
+	size_t n;
 	mbfl_string haystack, needle;
 	char *enc_name = NULL;
-	size_t enc_name_len, haystack_len, needle_len;
+	size_t enc_name_len;
 
 	mbfl_string_init(&haystack);
 	mbfl_string_init(&needle);
@@ -2916,20 +2814,9 @@ PHP_FUNCTION(mb_substr_count)
 	needle.no_language = MBSTRG(language);
 	needle.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|s", (char **)&haystack.val, &haystack_len, (char **)&needle.val, &needle_len, &enc_name, &enc_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|s", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &enc_name, &enc_name_len) == FAILURE) {
 		return;
 	}
-
-	if (ZEND_SIZE_T_UINT_OVFL(haystack_len)) {
-			php_error_docref(NULL, E_WARNING, "Haystack length overflows the max allowed length of %u", UINT_MAX);
-			return;
-	} else if (ZEND_SIZE_T_UINT_OVFL(needle_len)) {
-			php_error_docref(NULL, E_WARNING, "Needle length overflows the max allowed length of %u", UINT_MAX);
-			return;
-	}
-
-	haystack.len = (uint32_t)haystack_len;
-	needle.len = (uint32_t)needle_len;
 
 	if (enc_name != NULL) {
 		haystack.no_encoding = needle.no_encoding = mbfl_name2no_encoding(enc_name);
@@ -2939,13 +2826,13 @@ PHP_FUNCTION(mb_substr_count)
 		}
 	}
 
-	if (needle.len <= 0) {
+	if (needle.len == 0) {
 		php_error_docref(NULL, E_WARNING, "Empty substring");
 		RETURN_FALSE;
 	}
 
 	n = mbfl_substr_count(&haystack, &needle);
-	if (n >= 0) {
+	if (!mbfl_is_error(n)) {
 		RETVAL_LONG(n);
 	} else {
 		RETVAL_FALSE;
@@ -2959,7 +2846,7 @@ PHP_FUNCTION(mb_substr)
 {
 	char *str, *encoding = NULL;
 	zend_long from, len;
-	int mblen;
+	size_t mblen;
 	size_t str_len, encoding_len;
 	zend_bool len_is_null = 1;
 	mbfl_string string, result, *ret;
@@ -3042,7 +2929,7 @@ PHP_FUNCTION(mb_strcut)
 {
 	char *encoding = NULL;
 	zend_long from, len;
-	size_t encoding_len, string_len;
+	size_t encoding_len;
 	zend_bool len_is_null = 1;
 	mbfl_string string, result, *ret;
 
@@ -3050,16 +2937,9 @@ PHP_FUNCTION(mb_strcut)
 	string.no_language = MBSTRG(language);
 	string.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|l!s", (char **)&string.val, &string_len, &from, &len, &len_is_null, &encoding, &encoding_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|l!s", (char **)&string.val, &string.len, &from, &len, &len_is_null, &encoding, &encoding_len) == FAILURE) {
 		return;
 	}
-
-	if (ZEND_SIZE_T_UINT_OVFL(string_len)) {
-			php_error_docref(NULL, E_WARNING, "String length overflows the max allowed length of %u", UINT_MAX);
-			return;
-	}
-
-	string.len = (uint32_t)string_len;
 
 	if (encoding) {
 		string.no_encoding = mbfl_name2no_encoding(encoding);
@@ -3112,26 +2992,19 @@ PHP_FUNCTION(mb_strcut)
    Gets terminal width of a string */
 PHP_FUNCTION(mb_strwidth)
 {
-	int n;
+	size_t n;
 	mbfl_string string;
 	char *enc_name = NULL;
-	size_t enc_name_len, string_len;
+	size_t enc_name_len;
 
 	mbfl_string_init(&string);
 
 	string.no_language = MBSTRG(language);
 	string.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", (char **)&string.val, &string_len, &enc_name, &enc_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", (char **)&string.val, &string.len, &enc_name, &enc_name_len) == FAILURE) {
 		return;
 	}
-
-	if (ZEND_SIZE_T_UINT_OVFL(string_len)) {
-			php_error_docref(NULL, E_WARNING, "String length overflows the max allowed length of %u", UINT_MAX);
-			return;
-	}
-
-	string.len = (uint32_t)string_len;
 
 	if (enc_name != NULL) {
 		string.no_encoding = mbfl_name2no_encoding(enc_name);
@@ -3142,7 +3015,7 @@ PHP_FUNCTION(mb_strwidth)
 	}
 
 	n = mbfl_strwidth(&string);
-	if (n >= 0) {
+	if (!mbfl_is_error(n)) {
 		RETVAL_LONG(n);
 	} else {
 		RETVAL_FALSE;
@@ -3841,7 +3714,7 @@ PHP_FUNCTION(mb_decode_mimeheader)
    Conversion between full-width character and half-width character (Japanese) */
 PHP_FUNCTION(mb_convert_kana)
 {
-	int opt, i;
+	int opt;
 	mbfl_string string, result, *ret;
 	char *optstr = NULL;
 	size_t optstr_len;
@@ -3866,8 +3739,7 @@ PHP_FUNCTION(mb_convert_kana)
 	/* option */
 	if (optstr != NULL) {
 		char *p = optstr;
-		int n = optstr_len;
-		i = 0;
+		size_t i = 0, n = optstr_len;
 		opt = 0;
 		while (i < n) {
 			i++;
@@ -5584,15 +5456,15 @@ MBSTRING_API char *php_mb_safe_strrchr(const char *s, unsigned int c, size_t nby
 
 /* {{{ MBSTRING_API int php_mb_stripos()
  */
-MBSTRING_API int php_mb_stripos(int mode, const char *old_haystack, unsigned int old_haystack_len, const char *old_needle, unsigned int old_needle_len, long offset, const char *from_encoding)
+MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t old_haystack_len, const char *old_needle, size_t old_needle_len, long offset, const char *from_encoding)
 {
-	int n = -1;
+	size_t n = (size_t) -1;
 	mbfl_string haystack, needle;
 	const mbfl_encoding *enc;
 
 	enc = php_mb_get_encoding(from_encoding);
 	if (!enc) {
-		return -1;
+		return (size_t) -1;
 	}
 
 	mbfl_string_init(&haystack);
@@ -5611,7 +5483,7 @@ MBSTRING_API int php_mb_stripos(int mode, const char *old_haystack, unsigned int
 			break;
 		}
 
-		if (haystack.len <= 0) {
+		if (haystack.len == 0) {
 			break;
 		}
 
@@ -5622,12 +5494,12 @@ MBSTRING_API int php_mb_stripos(int mode, const char *old_haystack, unsigned int
 			break;
 		}
 
-		if (needle.len <= 0) {
+		if (needle.len == 0) {
 			break;
 		}
 
  		{
- 			int haystack_char_len = mbfl_strlen(&haystack);
+ 			size_t haystack_char_len = mbfl_strlen(&haystack);
 
  			if (mode) {
  				if ((offset > 0 && offset > haystack_char_len) ||

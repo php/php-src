@@ -126,20 +126,20 @@ struct _mbfl_buffer_converter {
 	const mbfl_encoding *to;
 };
 
-MBFLAPI extern mbfl_buffer_converter * mbfl_buffer_converter_new(enum mbfl_no_encoding from, enum mbfl_no_encoding to, int buf_initsz);
-MBFLAPI extern mbfl_buffer_converter * mbfl_buffer_converter_new2(const mbfl_encoding *from, const mbfl_encoding *to, int buf_initsz);
+MBFLAPI extern mbfl_buffer_converter * mbfl_buffer_converter_new(enum mbfl_no_encoding from, enum mbfl_no_encoding to, size_t buf_initsz);
+MBFLAPI extern mbfl_buffer_converter * mbfl_buffer_converter_new2(const mbfl_encoding *from, const mbfl_encoding *to, size_t buf_initsz);
 MBFLAPI extern void mbfl_buffer_converter_delete(mbfl_buffer_converter *convd);
 MBFLAPI extern void mbfl_buffer_converter_reset(mbfl_buffer_converter *convd);
 MBFLAPI extern int mbfl_buffer_converter_illegal_mode(mbfl_buffer_converter *convd, int mode);
 MBFLAPI extern int mbfl_buffer_converter_illegal_substchar(mbfl_buffer_converter *convd, int substchar);
-MBFLAPI extern int mbfl_buffer_converter_strncat(mbfl_buffer_converter *convd, const unsigned char *p, int n);
+MBFLAPI extern int mbfl_buffer_converter_strncat(mbfl_buffer_converter *convd, const unsigned char *p, size_t n);
 MBFLAPI extern int mbfl_buffer_converter_feed(mbfl_buffer_converter *convd, mbfl_string *string);
-MBFLAPI extern int mbfl_buffer_converter_feed2(mbfl_buffer_converter *convd, mbfl_string *string, int *loc);
+MBFLAPI extern int mbfl_buffer_converter_feed2(mbfl_buffer_converter *convd, mbfl_string *string, size_t *loc);
 MBFLAPI extern int mbfl_buffer_converter_flush(mbfl_buffer_converter *convd);
 MBFLAPI extern mbfl_string * mbfl_buffer_converter_getbuffer(mbfl_buffer_converter *convd, mbfl_string *result);
 MBFLAPI extern mbfl_string * mbfl_buffer_converter_result(mbfl_buffer_converter *convd, mbfl_string *result);
 MBFLAPI extern mbfl_string * mbfl_buffer_converter_feed_result(mbfl_buffer_converter *convd, mbfl_string *string, mbfl_string *result);
-MBFLAPI extern int mbfl_buffer_illegalchars(mbfl_buffer_converter *convd);
+MBFLAPI extern size_t mbfl_buffer_illegalchars(mbfl_buffer_converter *convd);
 
 /*
  * encoding detector
@@ -175,54 +175,60 @@ mbfl_identify_encoding(mbfl_string *string, enum mbfl_no_encoding *elist, int el
 
 MBFLAPI extern const mbfl_encoding *
 mbfl_identify_encoding2(mbfl_string *string, const mbfl_encoding **elist, int elistsz, int strict);
+
+/* Lengths -1 through -16 are reserved for error return values */
+static inline int mbfl_is_error(size_t len) {
+	return len >= (size_t) -16;
+}
+
 /*
  * strlen
  */
-MBFLAPI extern int
+MBFLAPI extern size_t
 mbfl_strlen(mbfl_string *string);
 
 /*
  * oddlen
  */
-MBFLAPI extern int
+MBFLAPI extern size_t
 mbfl_oddlen(mbfl_string *string);
 
 /*
  * strpos
  */
-MBFLAPI extern int
-mbfl_strpos(mbfl_string *haystack, mbfl_string *needle, int offset, int reverse);
+MBFLAPI extern size_t
+mbfl_strpos(mbfl_string *haystack, mbfl_string *needle, ssize_t offset, int reverse);
 
 
 /*
  * substr_count
  */
-MBFLAPI extern int
+MBFLAPI extern size_t
 mbfl_substr_count(mbfl_string *haystack, mbfl_string *needle);
 
 /*
  * substr
  */
 MBFLAPI extern mbfl_string *
-mbfl_substr(mbfl_string *string, mbfl_string *result, int from, int length);
+mbfl_substr(mbfl_string *string, mbfl_string *result, size_t from, size_t length);
 
 /*
  * strcut
  */
 MBFLAPI extern mbfl_string *
-mbfl_strcut(mbfl_string *string, mbfl_string *result, int from, int length);
+mbfl_strcut(mbfl_string *string, mbfl_string *result, size_t from, size_t length);
 
 /*
  *  strwidth
  */
-MBFLAPI extern int
+MBFLAPI extern size_t
 mbfl_strwidth(mbfl_string *string);
 
 /*
  *  strimwidth
  */
 MBFLAPI extern mbfl_string *
-mbfl_strimwidth(mbfl_string *string, mbfl_string *marker, mbfl_string *result, int from, int width);
+mbfl_strimwidth(mbfl_string *string, mbfl_string *marker, mbfl_string *result, size_t from, size_t width);
 
 /*
  * MIME header encode
