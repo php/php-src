@@ -356,14 +356,21 @@ static zend_always_inline zend_ulong zend_inline_hash_func(const char *str, size
 		hash = ((hash << 5) + hash) + *str++;
 		hash = ((hash << 5) + hash) + *str++;
 	}
+	/*   Shifting with 8 on tailing bytes ensures an unique hash value transformation
+	 * for a given combination of tailing bytes.
+	 *   XOR is mandatory instead of ADD for avoiding byte level overflows.
+	 *   When checking for exact key matching for two keys with equal hash values,
+	 * the tailing bytes comparison can be skipped as there identity was already checked
+	 * by the hash values equality.
+	 */
 	switch (len) {
-		case 7: hash = ((hash << 5) + hash) + *str++; /* fallthrough... */
-		case 6: hash = ((hash << 5) + hash) + *str++; /* fallthrough... */
-		case 5: hash = ((hash << 5) + hash) + *str++; /* fallthrough... */
-		case 4: hash = ((hash << 5) + hash) + *str++; /* fallthrough... */
-		case 3: hash = ((hash << 5) + hash) + *str++; /* fallthrough... */
-		case 2: hash = ((hash << 5) + hash) + *str++; /* fallthrough... */
-		case 1: hash = ((hash << 5) + hash) + *str++; break;
+		case 7: hash = ((hash << 8) ^ hash) ^ *str++; /* fallthrough... */
+		case 6: hash = ((hash << 8) ^ hash) ^ *str++; /* fallthrough... */
+		case 5: hash = ((hash << 8) ^ hash) ^ *str++; /* fallthrough... */
+		case 4: hash = ((hash << 8) ^ hash) ^ *str++; /* fallthrough... */
+		case 3: hash = ((hash << 8) ^ hash) ^ *str++; /* fallthrough... */
+		case 2: hash = ((hash << 8) ^ hash) ^ *str++; /* fallthrough... */
+		case 1: hash = ((hash << 8) ^ hash) ^ *str++; break;
 		case 0: break;
 EMPTY_SWITCH_DEFAULT_CASE()
 	}
