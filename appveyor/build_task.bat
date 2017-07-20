@@ -2,6 +2,8 @@
 
 if "%APPVEYOR%" equ "True" rmdir /s /q C:\cygwin >NUL 2>NUL
 if %errorlevel% neq 0 exit /b 3
+if "%APPVEYOR%" equ "True" rmdir /s /q C:\cygwin64 >NUL 2>NUL
+if %errorlevel% neq 0 exit /b 3
 if "%APPVEYOR%" equ "True" rmdir /s /q C:\mingw >NUL 2>NUL
 if %errorlevel% neq 0 exit /b 3
 if "%APPVEYOR%" equ "True" rmdir /s /q C:\mingw-w64 >NUL 2>NUL
