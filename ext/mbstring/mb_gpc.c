@@ -203,9 +203,9 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 	mbfl_encoding_detector *identd = NULL;
 	mbfl_buffer_converter *convd = NULL;
 
-	mbfl_string_init_set(&string, info->to_language, info->to_encoding->no_encoding);
-	mbfl_string_init_set(&resvar, info->to_language, info->to_encoding->no_encoding);
-	mbfl_string_init_set(&resval, info->to_language, info->to_encoding->no_encoding);
+	mbfl_string_init_set(&string, info->to_language, info->to_encoding);
+	mbfl_string_init_set(&resvar, info->to_language, info->to_encoding);
+	mbfl_string_init_set(&resval, info->to_language, info->to_encoding);
 
 	if (!res || *res == '\0') {
 		goto out;
@@ -268,7 +268,7 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 	} else {
 		/* auto detect */
 		from_encoding = NULL;
-		identd = mbfl_encoding_detector_new2(info->from_encodings, info->num_from_encodings, MBSTRG(strict_detection));
+		identd = mbfl_encoding_detector_new(info->from_encodings, info->num_from_encodings, MBSTRG(strict_detection));
 		if (identd != NULL) {
 			n = 0;
 			while (n < num) {
@@ -279,7 +279,7 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 				}
 				n++;
 			}
-			from_encoding = mbfl_encoding_detector_judge2(identd);
+			from_encoding = mbfl_encoding_detector_judge(identd);
 			mbfl_encoding_detector_delete(identd);
 		}
 		if (!from_encoding) {
@@ -292,7 +292,7 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 
 	convd = NULL;
 	if (from_encoding != &mbfl_encoding_pass) {
-		convd = mbfl_buffer_converter_new2(from_encoding, info->to_encoding, 0);
+		convd = mbfl_buffer_converter_new(from_encoding, info->to_encoding, 0);
 		if (convd != NULL) {
 			mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode));
 			mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));
@@ -305,7 +305,7 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 	}
 
 	/* convert encoding */
-	string.no_encoding = from_encoding->no_encoding;
+	string.encoding = from_encoding;
 
 	n = 0;
 	while (n < num) {

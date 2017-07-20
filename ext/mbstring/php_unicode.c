@@ -43,7 +43,7 @@
 #include "mbstring.h"
 #include "php_unicode.h"
 #include "unicode_data.h"
-#include "libmbfl/filters/mbfilter_ucs4.h"
+#include "libmbfl/mbfl/mbfilter_wchar.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(mbstring)
 
@@ -310,8 +310,8 @@ MBSTRING_API char *php_unicode_convert_case(
 	mbfl_memory_device_init(&device, srclen + 1, 0);
 
 	/* encoding -> wchar filter */
-	to_wchar = mbfl_convert_filter_new(src_encoding->no_encoding,
-			mbfl_no_encoding_wchar, convert_case_filter, NULL, &data);
+	to_wchar = mbfl_convert_filter_new(src_encoding,
+			&mbfl_encoding_wchar, convert_case_filter, NULL, &data);
 	if (to_wchar == NULL) {
 		mbfl_memory_device_clear(&device);
 		return NULL;
@@ -319,7 +319,7 @@ MBSTRING_API char *php_unicode_convert_case(
 
 	/* wchar -> encoding filter */
 	from_wchar = mbfl_convert_filter_new(
-			mbfl_no_encoding_wchar, src_encoding->no_encoding,
+			&mbfl_encoding_wchar, src_encoding,
 			mbfl_memory_device_output, NULL, &device);
 	if (from_wchar == NULL) {
 		mbfl_convert_filter_delete(to_wchar);
@@ -355,7 +355,7 @@ MBSTRING_API char *php_unicode_convert_case(
 	}
 
 	*ret_len = result.len;
-	return result.val;
+	return (char *) result.val;
 }
 
 
