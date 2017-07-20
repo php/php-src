@@ -43,6 +43,7 @@
 #include "mbstring.h"
 #include "php_unicode.h"
 #include "unicode_data.h"
+#include "libmbfl/filters/mbfilter_ucs4.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(mbstring)
 
@@ -98,25 +99,31 @@ static int prop_lookup(unsigned long code, unsigned long n)
 
 }
 
-MBSTRING_API int php_unicode_is_prop(unsigned long code, unsigned long mask1,
-		unsigned long mask2)
+MBSTRING_API int php_unicode_is_prop1(unsigned long code, int prop)
 {
-	unsigned long i;
+	return prop_lookup(code, prop);
+}
 
-	if (mask1 == 0 && mask2 == 0)
-		return 0;
+MBSTRING_API int php_unicode_is_prop(unsigned long code, ...)
+{
+	int result = 0;
+	va_list va;
+	va_start(va, code);
 
-	for (i = 0; mask1 && i < 32; i++) {
-		if ((mask1 & masks32[i]) && prop_lookup(code, i))
-			return 1;
+	while (1) {
+		int prop = va_arg(va, int);
+		if (prop < 0) {
+			break;
+		}
+
+		if (prop_lookup(code, prop)) {
+			result = 1;
+			break;
+		}
 	}
 
-	for (i = 32; mask2 && i < _ucprop_size; i++) {
-		if ((mask2 & masks32[i & 31]) && prop_lookup(code, i))
-			return 1;
-	}
-
-	return 0;
+	va_end(va);
+	return result;
 }
 
 static unsigned long case_lookup(unsigned long code, long l, long r, int field)
@@ -267,21 +274,17 @@ MBSTRING_API unsigned long php_unicode_totitle(unsigned long code, enum mbfl_no_
 	((unsigned char*)(ptr))[3] = (v    ) & 0xff;\
 }
 
-MBSTRING_API char *php_unicode_convert_case(int case_mode, const char *srcstr, size_t srclen, size_t *ret_len,
-		const char *src_encoding)
+MBSTRING_API char *php_unicode_convert_case(
+		int case_mode, const char *srcstr, size_t srclen, size_t *ret_len,
+		const mbfl_encoding *src_encoding)
 {
 	char *unicode, *newstr;
 	size_t unicode_len;
 	unsigned char *unicode_ptr;
 	size_t i;
-	enum mbfl_no_encoding _src_encoding = mbfl_name2no_encoding(src_encoding);
+	enum mbfl_no_encoding src_no_encoding = src_encoding->no_encoding;
 
-	if (_src_encoding == mbfl_no_encoding_invalid) {
-		php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", src_encoding);
-		return NULL;
-	}
-
-	unicode = php_mb_convert_encoding(srcstr, srclen, "UCS-4BE", src_encoding, &unicode_len);
+	unicode = php_mb_convert_encoding_ex(srcstr, srclen, &mbfl_encoding_ucs4be, src_encoding, &unicode_len);
 	if (unicode == NULL)
 		return NULL;
 
@@ -291,14 +294,14 @@ MBSTRING_API char *php_unicode_convert_case(int case_mode, const char *srcstr, s
 		case PHP_UNICODE_CASE_UPPER:
 			for (i = 0; i < unicode_len; i+=4) {
 				UINT32_TO_BE_ARY(&unicode_ptr[i],
-					php_unicode_toupper(BE_ARY_TO_UINT32(&unicode_ptr[i]), _src_encoding));
+					php_unicode_toupper(BE_ARY_TO_UINT32(&unicode_ptr[i]), src_no_encoding));
 			}
 			break;
 
 		case PHP_UNICODE_CASE_LOWER:
 			for (i = 0; i < unicode_len; i+=4) {
 				UINT32_TO_BE_ARY(&unicode_ptr[i],
-					php_unicode_tolower(BE_ARY_TO_UINT32(&unicode_ptr[i]), _src_encoding));
+					php_unicode_tolower(BE_ARY_TO_UINT32(&unicode_ptr[i]), src_no_encoding));
 			}
 			break;
 
@@ -308,11 +311,11 @@ MBSTRING_API char *php_unicode_convert_case(int case_mode, const char *srcstr, s
 			for (i = 0; i < unicode_len; i+=4) {
 				int res = php_unicode_is_prop(
 					BE_ARY_TO_UINT32(&unicode_ptr[i]),
-					UC_MN|UC_ME|UC_CF|UC_LM|UC_SK|UC_LU|UC_LL|UC_LT|UC_PO|UC_OS, 0);
+					UC_MN, UC_ME, UC_CF, UC_LM, UC_SK, UC_LU, UC_LL, UC_LT, UC_PO, UC_OS, -1);
 				if (mode) {
 					if (res) {
 						UINT32_TO_BE_ARY(&unicode_ptr[i],
-							php_unicode_tolower(BE_ARY_TO_UINT32(&unicode_ptr[i]), _src_encoding));
+							php_unicode_tolower(BE_ARY_TO_UINT32(&unicode_ptr[i]), src_no_encoding));
 					} else {
 						mode = 0;
 					}
@@ -320,7 +323,7 @@ MBSTRING_API char *php_unicode_convert_case(int case_mode, const char *srcstr, s
 					if (res) {
 						mode = 1;
 						UINT32_TO_BE_ARY(&unicode_ptr[i],
-							php_unicode_totitle(BE_ARY_TO_UINT32(&unicode_ptr[i]), _src_encoding));
+							php_unicode_totitle(BE_ARY_TO_UINT32(&unicode_ptr[i]), src_no_encoding));
 					}
 				}
 			}
@@ -328,7 +331,8 @@ MBSTRING_API char *php_unicode_convert_case(int case_mode, const char *srcstr, s
 
 	}
 
-	newstr = php_mb_convert_encoding(unicode, unicode_len, src_encoding, "UCS-4BE", ret_len);
+	newstr = php_mb_convert_encoding_ex(
+		unicode, unicode_len, src_encoding, &mbfl_encoding_ucs4be, ret_len);
 	efree(unicode);
 
 	return newstr;

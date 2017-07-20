@@ -405,10 +405,9 @@ PHPAPI int _php_stream_free(php_stream *stream, int close_options) /* {{{ */
 		php_stream *enclosing_stream = stream->enclosing_stream;
 		stream->enclosing_stream = NULL;
 		/* we force PHP_STREAM_CALL_DTOR because that's from where the
-		 * enclosing stream can free this stream. We remove rsrc_dtor because
-		 * we want the enclosing stream to be deleted from the resource list */
+		 * enclosing stream can free this stream. */
 		return php_stream_free(enclosing_stream,
-			(close_options | PHP_STREAM_FREE_CALL_DTOR) & ~PHP_STREAM_FREE_RSRC_DTOR);
+			(close_options | PHP_STREAM_FREE_CALL_DTOR | PHP_STREAM_FREE_KEEP_RSRC) & ~PHP_STREAM_FREE_RSRC_DTOR);
 	}
 
 	/* if we are releasing the stream only (and preserving the underlying handle),

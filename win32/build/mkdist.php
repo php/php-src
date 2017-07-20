@@ -45,12 +45,6 @@ function get_depends($module)
 		/* apache 2 */
 		'libhttpd.dll', 'libapr.dll', 'libaprutil.dll','libapr-1.dll', 'libaprutil-1.dll',
 
-		/* pi3web */
-		'piapi.dll', 'pi3api.dll',
-
-		/* nsapi */
-		'ns-httpd30.dll', 'ns-httpd35.dll', 'ns-httpd36.dll', 'ns-httpd40.dll',
-
 		/* oracle */
 		'oci.dll', 'ociw32.dll',
 

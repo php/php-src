@@ -2192,6 +2192,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 		case ZEND_JMPNZ_EX:
 		case ZEND_CASE:
 		case ZEND_BOOL:
+		case ZEND_ISSET_ISEMPTY_CV:
 		case ZEND_ISSET_ISEMPTY_VAR:
 		case ZEND_ISSET_ISEMPTY_DIM_OBJ:
 		case ZEND_ISSET_ISEMPTY_PROP_OBJ:
@@ -2879,8 +2880,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 				UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
 			}
 			break;
-		case ZEND_UNSET_VAR:
-			ZEND_ASSERT(opline->extended_value & ZEND_QUICK_SET);
+		case ZEND_UNSET_CV:
 			tmp = MAY_BE_UNDEF;
 			if (!op_array->function_name) {
 				/* In global scope, we know nothing */
@@ -3937,9 +3937,6 @@ int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa
 			switch (opline->opcode) {
 				case ZEND_UNSET_VAR:
 				case ZEND_ISSET_ISEMPTY_VAR:
-					if (opline->extended_value & ZEND_QUICK_SET) {
-						break;
-					}
 					return 1;
 				case ZEND_ISSET_ISEMPTY_DIM_OBJ:
 				case ZEND_ISSET_ISEMPTY_PROP_OBJ:
@@ -3950,6 +3947,8 @@ int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa
 				case ZEND_FETCH_DIM_IS:
 				case ZEND_FETCH_OBJ_IS:
 				case ZEND_SEND_REF:
+				case ZEND_UNSET_CV:
+				case ZEND_ISSET_ISEMPTY_CV:
 					break;
 				default:
 					/* undefined variable warning */
@@ -4026,6 +4025,7 @@ int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa
 		case ZEND_SWITCH_LONG:
 		case ZEND_SWITCH_STRING:
 		case ZEND_ISSET_ISEMPTY_VAR:
+		case ZEND_ISSET_ISEMPTY_CV:
 			return 0;
 		case ZEND_INIT_FCALL:
 			/* can't throw, because call is resolved at compile time */
