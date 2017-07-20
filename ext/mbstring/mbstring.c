@@ -2338,15 +2338,19 @@ PHP_FUNCTION(mb_strlen)
 {
 	int n;
 	mbfl_string string;
-	char *enc_name = NULL;
-	size_t enc_name_len;
+	char *str, *enc_name = NULL;
+	size_t str_len, enc_name_len;
 
 	mbfl_string_init(&string);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", (char **)&string.val, &string.len, &enc_name, &enc_name_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING(enc_name, enc_name_len)
+	ZEND_PARSE_PARAMETERS_END();
 
+	string.val = (unsigned char *) str;
+	string.len = str_len;
 	string.no_language = MBSTRG(language);
 	string.encoding = php_mb_get_encoding(enc_name);
 	if (!string.encoding) {
