@@ -2487,7 +2487,7 @@ PHP_FUNCTION(sodium_crypto_scalarmult)
 		return;
 	}
 	if (n_len != crypto_scalarmult_SCALARBYTES ||
-		p_len != crypto_scalarmult_SCALARBYTES) {
+		p_len != crypto_scalarmult_BYTES) {
 		zend_throw_exception(sodium_exception_ce, "scalar and point must be "
 				   "CRYPTO_SCALARMULT_SCALARBYTES bytes",
 				   0);
