@@ -1577,9 +1577,6 @@ static PHP_GSHUTDOWN_FUNCTION(mbstring)
 #if HAVE_MBREGEX
 	php_mb_regex_globals_free(mbstring_globals->mb_regex_globals);
 #endif
-	if (mbstring_globals->last_used_encoding_name) {
-		efree(mbstring_globals->last_used_encoding_name);
-	}
 }
 /* }}} */
 
@@ -1722,6 +1719,11 @@ PHP_RSHUTDOWN_FUNCTION(mbstring)
 	MBSTRG(http_input_identify_get) = NULL;
 	MBSTRG(http_input_identify_cookie) = NULL;
 	MBSTRG(http_input_identify_string) = NULL;
+
+	if (MBSTRG(last_used_encoding_name)) {
+		efree(MBSTRG(last_used_encoding_name));
+		MBSTRG(last_used_encoding_name) = NULL;
+	}
 
  	/*  clear overloaded function. */
 	if (MBSTRG(func_overload)){
