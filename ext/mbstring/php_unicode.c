@@ -257,68 +257,105 @@ MBSTRING_API unsigned long php_unicode_totitle(unsigned long code, enum mbfl_no_
 	((unsigned char*)(ptr))[3] = (v    ) & 0xff;\
 }
 
+struct convert_case_data {
+	mbfl_convert_filter *next_filter;
+	enum mbfl_no_encoding no_encoding;
+	int case_mode;
+	int title_mode;
+};
+
+static int convert_case_filter(int c, void *void_data)
+{
+	struct convert_case_data *data = (struct convert_case_data *) void_data;
+	switch (data->case_mode) {
+		case PHP_UNICODE_CASE_UPPER:
+			c = php_unicode_toupper(c, data->no_encoding);
+			break;
+
+		case PHP_UNICODE_CASE_LOWER:
+			c = php_unicode_tolower(c, data->no_encoding);
+			break;
+
+		case PHP_UNICODE_CASE_TITLE:
+		{
+			int res = php_unicode_is_prop(c,
+				UC_MN, UC_ME, UC_CF, UC_LM, UC_SK, UC_LU, UC_LL, UC_LT, UC_PO, UC_OS, -1);
+			if (data->title_mode) {
+				if (res) {
+					c = php_unicode_tolower(c, data->no_encoding);
+				} else {
+					data->title_mode = 0;
+				}
+			} else {
+				if (res) {
+					data->title_mode = 1;
+					c = php_unicode_totitle(c, data->no_encoding);
+				}
+			}
+			break;
+		}
+	}
+	return (*data->next_filter->filter_function)(c, data->next_filter);
+}
+
 MBSTRING_API char *php_unicode_convert_case(
 		int case_mode, const char *srcstr, size_t srclen, size_t *ret_len,
 		const mbfl_encoding *src_encoding)
 {
-	char *unicode, *newstr;
-	size_t unicode_len;
-	unsigned char *unicode_ptr;
-	size_t i;
-	enum mbfl_no_encoding src_no_encoding = src_encoding->no_encoding;
+	struct convert_case_data data;
+	mbfl_convert_filter *from_wchar, *to_wchar;
+	mbfl_string result, *result_ptr;
 
-	unicode = php_mb_convert_encoding_ex(srcstr, srclen, &mbfl_encoding_ucs4be, src_encoding, &unicode_len);
-	if (unicode == NULL)
+	mbfl_memory_device device;
+	mbfl_memory_device_init(&device, srclen + 1, 0);
+
+	/* encoding -> wchar filter */
+	to_wchar = mbfl_convert_filter_new(src_encoding->no_encoding,
+			mbfl_no_encoding_wchar, convert_case_filter, NULL, &data);
+	if (to_wchar == NULL) {
+		mbfl_memory_device_clear(&device);
 		return NULL;
-
-	unicode_ptr = (unsigned char *)unicode;
-
-	switch(case_mode) {
-		case PHP_UNICODE_CASE_UPPER:
-			for (i = 0; i < unicode_len; i+=4) {
-				UINT32_TO_BE_ARY(&unicode_ptr[i],
-					php_unicode_toupper(BE_ARY_TO_UINT32(&unicode_ptr[i]), src_no_encoding));
-			}
-			break;
-
-		case PHP_UNICODE_CASE_LOWER:
-			for (i = 0; i < unicode_len; i+=4) {
-				UINT32_TO_BE_ARY(&unicode_ptr[i],
-					php_unicode_tolower(BE_ARY_TO_UINT32(&unicode_ptr[i]), src_no_encoding));
-			}
-			break;
-
-		case PHP_UNICODE_CASE_TITLE: {
-			int mode = 0;
-
-			for (i = 0; i < unicode_len; i+=4) {
-				int res = php_unicode_is_prop(
-					BE_ARY_TO_UINT32(&unicode_ptr[i]),
-					UC_MN, UC_ME, UC_CF, UC_LM, UC_SK, UC_LU, UC_LL, UC_LT, UC_PO, UC_OS, -1);
-				if (mode) {
-					if (res) {
-						UINT32_TO_BE_ARY(&unicode_ptr[i],
-							php_unicode_tolower(BE_ARY_TO_UINT32(&unicode_ptr[i]), src_no_encoding));
-					} else {
-						mode = 0;
-					}
-				} else {
-					if (res) {
-						mode = 1;
-						UINT32_TO_BE_ARY(&unicode_ptr[i],
-							php_unicode_totitle(BE_ARY_TO_UINT32(&unicode_ptr[i]), src_no_encoding));
-					}
-				}
-			}
-		} break;
-
 	}
 
-	newstr = php_mb_convert_encoding_ex(
-		unicode, unicode_len, src_encoding, &mbfl_encoding_ucs4be, ret_len);
-	efree(unicode);
+	/* wchar -> encoding filter */
+	from_wchar = mbfl_convert_filter_new(
+			mbfl_no_encoding_wchar, src_encoding->no_encoding,
+			mbfl_memory_device_output, NULL, &device);
+	if (from_wchar == NULL) {
+		mbfl_convert_filter_delete(to_wchar);
+		mbfl_memory_device_clear(&device);
+		return NULL;
+	}
 
-	return newstr;
+	data.next_filter = from_wchar;
+	data.no_encoding = src_encoding->no_encoding;
+	data.case_mode = case_mode;
+	data.title_mode = 0;
+
+	{
+		/* feed data */
+		const unsigned char *p = (const unsigned char *) srcstr;
+		size_t n = srclen;
+		while (n > 0) {
+			if ((*to_wchar->filter_function)(*p++, to_wchar) < 0) {
+				break;
+			}
+			n--;
+		}
+	}
+
+	mbfl_convert_filter_flush(to_wchar);
+	mbfl_convert_filter_flush(from_wchar);
+	result_ptr = mbfl_memory_device_result(&device, &result);
+	mbfl_convert_filter_delete(to_wchar);
+	mbfl_convert_filter_delete(from_wchar);
+
+	if (!result_ptr) {
+		return NULL;
+	}
+
+	*ret_len = result.len;
+	return result.val;
 }
 
 
