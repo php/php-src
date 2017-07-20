@@ -979,7 +979,7 @@ size_t
 mbfl_strpos(
     mbfl_string *haystack,
     mbfl_string *needle,
-    ssize_t offset,
+    long offset,
     int reverse)
 {
 	size_t result;

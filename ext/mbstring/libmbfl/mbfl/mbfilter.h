@@ -197,7 +197,7 @@ mbfl_oddlen(mbfl_string *string);
  * strpos
  */
 MBFLAPI extern size_t
-mbfl_strpos(mbfl_string *haystack, mbfl_string *needle, ssize_t offset, int reverse);
+mbfl_strpos(mbfl_string *haystack, mbfl_string *needle, long offset, int reverse);
 
 
 /*
