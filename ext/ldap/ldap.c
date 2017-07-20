@@ -3513,7 +3513,44 @@ PHP_FUNCTION(ldap_exop_whoami)
 }
 /* }}} */
 #endif
+
+#ifdef HAVE_LDAP_REFRESH_S
+/* {{{ proto bool|int ldap_exop_refresh(resource link , string dn , int ttl)
+   DDS refresh extended operation */
+PHP_FUNCTION(ldap_exop_refresh)
+{
+	zval *link, *dn, *ttl;
+	struct berval ldn;
+	ber_int_t lttl;
+	ber_int_t newttl;
+	ldap_linkdata *ld;
+	int rc;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rzz", &link, &dn, &ttl) != SUCCESS) {
+		WRONG_PARAM_COUNT;
+	}
+
+	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
+		RETURN_FALSE;
+	}
+
+	convert_to_string_ex(dn);
+	ldn.bv_val = Z_STRVAL_P(dn);
+	ldn.bv_len = Z_STRLEN_P(dn);
+
+	convert_to_long_ex(ttl);
+	lttl = (ber_int_t)Z_LVAL_P(ttl);
+
+	rc = ldap_refresh_s(ld->link, &ldn, lttl, &newttl, NULL, NULL);
+	if (rc != LDAP_SUCCESS ) {
+		php_error_docref(NULL, E_WARNING, "Refresh extended operation failed: %s (%d)", ldap_err2string(rc), rc);
+		RETURN_FALSE;
+	}
+
+	RETURN_LONG(newttl);
+}
 /* }}} */
+#endif
 
 /* }}} */
 
@@ -3818,6 +3855,14 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_exop_whoami, 0, 0, 1)
 ZEND_END_ARG_INFO()
 #endif
 
+#ifdef HAVE_LDAP_REFRESH_S
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_exop_refresh, 0, 0, 3)
+	ZEND_ARG_INFO(0, link)
+	ZEND_ARG_INFO(0, dn)
+	ZEND_ARG_INFO(0, ttl)
+ZEND_END_ARG_INFO()
+#endif
+
 #ifdef HAVE_LDAP_PARSE_EXTENDED_RESULT
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_parse_exop, 0, 0, 4)
 	ZEND_ARG_INFO(0, link)
@@ -3898,6 +3943,9 @@ const zend_function_entry ldap_functions[] = {
 #endif
 #ifdef HAVE_LDAP_WHOAMI_S
 	PHP_FE(ldap_exop_whoami,							arginfo_ldap_exop_whoami)
+#endif
+#ifdef HAVE_LDAP_REFRESH_S
+	PHP_FE(ldap_exop_refresh,							arginfo_ldap_exop_refresh)
 #endif
 #ifdef HAVE_LDAP_PARSE_EXTENDED_RESULT
 	PHP_FE(ldap_parse_exop,								arginfo_ldap_parse_exop)

@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #74941 (session fails to start after having headers sent). 
     (morozov)
 
+- LDAP:
+  . Added ldap_exop_refresh helper for EXOP REFRESH operation with dds overlay
+
 - ODBC:
   . Removed support for Birdstep. (Kalle)
 
