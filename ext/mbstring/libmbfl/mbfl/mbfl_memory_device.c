@@ -119,7 +119,7 @@ mbfl_memory_device_result(mbfl_memory_device *device, mbfl_string *result)
 {
 	if (device && result) {
 		result->len = device->pos;
-		mbfl_memory_device_output4('\0', device);
+		mbfl_memory_device_output('\0', device);
 		result->val = device->buffer;
 		device->buffer = (unsigned char *)0;
 		device->length = 0;
