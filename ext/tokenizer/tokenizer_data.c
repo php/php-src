@@ -304,6 +304,6 @@ char *get_token_type_name(int token_type)
 		case T_ELLIPSIS: return "T_ELLIPSIS";
 
 	}
-	return "UNKNOWN";
+	return NULL;
 }
 
