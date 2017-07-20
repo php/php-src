@@ -716,6 +716,14 @@ static const mbfl_encoding *php_mb_get_encoding(const char *encoding_name) {
 	}
 }
 
+static enum mbfl_no_encoding php_mb_get_no_encoding(const char *encoding_name) {
+	const mbfl_encoding *encoding = php_mb_get_encoding(encoding_name);
+	if (!encoding) {
+		return mbfl_no_encoding_invalid;
+	}
+	return encoding->no_encoding;
+}
+
 /* {{{ static int php_mb_parse_encoding_list()
  *  Return 0 if input contains any illegal encoding, otherwise 1.
  *  Even if any illegal encoding is detected the result may contain a list
@@ -2324,14 +2332,9 @@ PHP_FUNCTION(mb_strlen)
 	}
 
 	string.no_language = MBSTRG(language);
-	if (enc_name == NULL) {
-		string.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
-	} else {
-		string.no_encoding = mbfl_name2no_encoding(enc_name);
-		if (string.no_encoding == mbfl_no_encoding_invalid) {
-			php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", enc_name);
-			RETURN_FALSE;
-		}
+	string.no_encoding = php_mb_get_no_encoding(enc_name);
+	if (string.no_encoding == mbfl_no_encoding_invalid) {
+		RETURN_FALSE;
 	}
 
 	n = mbfl_strlen(&string);
@@ -2355,21 +2358,15 @@ PHP_FUNCTION(mb_strpos)
 
 	mbfl_string_init(&haystack);
 	mbfl_string_init(&needle);
-	haystack.no_language = MBSTRG(language);
-	haystack.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
-	needle.no_language = MBSTRG(language);
-	needle.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|ls", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &offset, &enc_name, &enc_name_len) == FAILURE) {
 		return;
 	}
 
-	if (enc_name != NULL) {
-		haystack.no_encoding = needle.no_encoding = mbfl_name2no_encoding(enc_name);
-		if (haystack.no_encoding == mbfl_no_encoding_invalid) {
-			php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", enc_name);
-			RETURN_FALSE;
-		}
+	haystack.no_language = needle.no_language = MBSTRG(language);
+	haystack.no_encoding = needle.no_encoding = php_mb_get_no_encoding(enc_name);
+	if (haystack.no_encoding == mbfl_no_encoding_invalid) {
+		RETURN_FALSE;
 	}
 
 	slen = mbfl_strlen(&haystack);
@@ -2424,13 +2421,15 @@ PHP_FUNCTION(mb_strrpos)
 
 	mbfl_string_init(&haystack);
 	mbfl_string_init(&needle);
-	haystack.no_language = MBSTRG(language);
-	haystack.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
-	needle.no_language = MBSTRG(language);
-	needle.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|zs", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &zoffset, &enc_name, &enc_name_len) == FAILURE) {
 		return;
+	}
+
+	haystack.no_language = needle.no_language = MBSTRG(language);
+	haystack.no_encoding = needle.no_encoding = php_mb_get_no_encoding(enc_name);
+	if (haystack.no_encoding == mbfl_no_encoding_invalid) {
+		RETURN_FALSE;
 	}
 
 	if (zoffset) {
@@ -2471,14 +2470,6 @@ PHP_FUNCTION(mb_strrpos)
 		} else {
 			convert_to_long_ex(zoffset);
 			offset = Z_LVAL_P(zoffset);
-		}
-	}
-
-	if (enc_name != NULL) {
-		haystack.no_encoding = needle.no_encoding = mbfl_name2no_encoding(enc_name);
-		if (haystack.no_encoding == mbfl_no_encoding_invalid) {
-			php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", enc_name);
-			RETURN_FALSE;
 		}
 	}
 
@@ -2565,21 +2556,15 @@ PHP_FUNCTION(mb_strstr)
 
 	mbfl_string_init(&haystack);
 	mbfl_string_init(&needle);
-	haystack.no_language = MBSTRG(language);
-	haystack.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
-	needle.no_language = MBSTRG(language);
-	needle.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|bs", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &part, &enc_name, &enc_name_len) == FAILURE) {
 		return;
 	}
 
-	if (enc_name != NULL) {
-		haystack.no_encoding = needle.no_encoding = mbfl_name2no_encoding(enc_name);
-		if (haystack.no_encoding == mbfl_no_encoding_invalid) {
-			php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", enc_name);
-			RETURN_FALSE;
-		}
+	haystack.no_language = needle.no_language = MBSTRG(language);
+	haystack.no_encoding = needle.no_encoding = php_mb_get_no_encoding(enc_name);
+	if (haystack.no_encoding == mbfl_no_encoding_invalid) {
+		RETURN_FALSE;
 	}
 
 	if (needle.len == 0) {
@@ -2628,21 +2613,15 @@ PHP_FUNCTION(mb_strrchr)
 
 	mbfl_string_init(&haystack);
 	mbfl_string_init(&needle);
-	haystack.no_language = MBSTRG(language);
-	haystack.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
-	needle.no_language = MBSTRG(language);
-	needle.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|bs", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &part, &enc_name, &enc_name_len) == FAILURE) {
 		return;
 	}
 
-	if (enc_name != NULL) {
-		haystack.no_encoding = needle.no_encoding = mbfl_name2no_encoding(enc_name);
-		if (haystack.no_encoding == mbfl_no_encoding_invalid) {
-			php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", enc_name);
-			RETURN_FALSE;
-		}
+	haystack.no_language = needle.no_language = MBSTRG(language);
+	haystack.no_encoding = needle.no_encoding = php_mb_get_no_encoding(enc_name);
+	if (haystack.no_encoding == mbfl_no_encoding_invalid) {
+		RETURN_FALSE;
 	}
 
 	if (haystack.len == 0) {
@@ -2688,26 +2667,22 @@ PHP_FUNCTION(mb_stristr)
 	zend_bool part = 0;
 	size_t from_encoding_len, n, len, mblen;
 	mbfl_string haystack, needle, result, *ret = NULL;
-	const char *from_encoding = MBSTRG(current_internal_encoding)->mime_name;
+	const char *from_encoding = NULL;
 	mbfl_string_init(&haystack);
 	mbfl_string_init(&needle);
-	haystack.no_language = MBSTRG(language);
-	haystack.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
-	needle.no_language = MBSTRG(language);
-	needle.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|bs", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &part, &from_encoding, &from_encoding_len) == FAILURE) {
 		return;
 	}
 
-	if (!needle.len) {
-		php_error_docref(NULL, E_WARNING, "Empty delimiter");
+	haystack.no_language = needle.no_language = MBSTRG(language);
+	haystack.no_encoding = needle.no_encoding = php_mb_get_no_encoding(from_encoding);
+	if (haystack.no_encoding == mbfl_no_encoding_invalid) {
 		RETURN_FALSE;
 	}
 
-	haystack.no_encoding = needle.no_encoding = mbfl_name2no_encoding(from_encoding);
-	if (haystack.no_encoding == mbfl_no_encoding_invalid) {
-		php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", from_encoding);
+	if (!needle.len) {
+		php_error_docref(NULL, E_WARNING, "Empty delimiter");
 		RETURN_FALSE;
 	}
 
@@ -2749,22 +2724,17 @@ PHP_FUNCTION(mb_strrichr)
 	size_t n, len, mblen;
 	size_t from_encoding_len;
 	mbfl_string haystack, needle, result, *ret = NULL;
-	const char *from_encoding = MBSTRG(current_internal_encoding)->name;
+	const char *from_encoding = NULL;
 	mbfl_string_init(&haystack);
 	mbfl_string_init(&needle);
-	haystack.no_language = MBSTRG(language);
-	haystack.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
-	needle.no_language = MBSTRG(language);
-	needle.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
-
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|bs", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &part, &from_encoding, &from_encoding_len) == FAILURE) {
 		return;
 	}
 
-	haystack.no_encoding = needle.no_encoding = mbfl_name2no_encoding(from_encoding);
+	haystack.no_language = needle.no_language = MBSTRG(language);
+	haystack.no_encoding = needle.no_encoding = php_mb_get_no_encoding(from_encoding);
 	if (haystack.no_encoding == mbfl_no_encoding_invalid) {
-		php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", from_encoding);
 		RETURN_FALSE;
 	}
 
@@ -2809,21 +2779,15 @@ PHP_FUNCTION(mb_substr_count)
 
 	mbfl_string_init(&haystack);
 	mbfl_string_init(&needle);
-	haystack.no_language = MBSTRG(language);
-	haystack.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
-	needle.no_language = MBSTRG(language);
-	needle.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|s", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &enc_name, &enc_name_len) == FAILURE) {
 		return;
 	}
 
-	if (enc_name != NULL) {
-		haystack.no_encoding = needle.no_encoding = mbfl_name2no_encoding(enc_name);
-		if (haystack.no_encoding == mbfl_no_encoding_invalid) {
-			php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", enc_name);
-			RETURN_FALSE;
-		}
+	haystack.no_language = needle.no_language = MBSTRG(language);
+	haystack.no_encoding = needle.no_encoding = php_mb_get_no_encoding(enc_name);
+	if (haystack.no_encoding == mbfl_no_encoding_invalid) {
+		RETURN_FALSE;
 	}
 
 	if (needle.len == 0) {
@@ -2857,14 +2821,9 @@ PHP_FUNCTION(mb_substr)
 
 	mbfl_string_init(&string);
 	string.no_language = MBSTRG(language);
-	string.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
-
-	if (encoding) {
-		string.no_encoding = mbfl_name2no_encoding(encoding);
-		if (string.no_encoding == mbfl_no_encoding_invalid) {
-			php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", encoding);
-			RETURN_FALSE;
-		}
+	string.no_encoding = php_mb_get_no_encoding(encoding);
+	if (string.no_encoding == mbfl_no_encoding_invalid) {
+		RETURN_FALSE;
 	}
 
 	string.val = (unsigned char *)str;
@@ -2934,19 +2893,15 @@ PHP_FUNCTION(mb_strcut)
 	mbfl_string string, result, *ret;
 
 	mbfl_string_init(&string);
-	string.no_language = MBSTRG(language);
-	string.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|l!s", (char **)&string.val, &string.len, &from, &len, &len_is_null, &encoding, &encoding_len) == FAILURE) {
 		return;
 	}
 
-	if (encoding) {
-		string.no_encoding = mbfl_name2no_encoding(encoding);
-		if (string.no_encoding == mbfl_no_encoding_invalid) {
-			php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", encoding);
-			RETURN_FALSE;
-		}
+	string.no_language = MBSTRG(language);
+	string.no_encoding = php_mb_get_no_encoding(encoding);
+	if (string.no_encoding == mbfl_no_encoding_invalid) {
+		RETURN_FALSE;
 	}
 
 	if (len_is_null) {
@@ -2999,19 +2954,14 @@ PHP_FUNCTION(mb_strwidth)
 
 	mbfl_string_init(&string);
 
-	string.no_language = MBSTRG(language);
-	string.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
-
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", (char **)&string.val, &string.len, &enc_name, &enc_name_len) == FAILURE) {
 		return;
 	}
 
-	if (enc_name != NULL) {
-		string.no_encoding = mbfl_name2no_encoding(enc_name);
-		if (string.no_encoding == mbfl_no_encoding_invalid) {
-			php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", enc_name);
-			RETURN_FALSE;
-		}
+	string.no_language = MBSTRG(language);
+	string.no_encoding = php_mb_get_no_encoding(enc_name);
+	if (string.no_encoding == mbfl_no_encoding_invalid) {
+		RETURN_FALSE;
 	}
 
 	n = mbfl_strwidth(&string);
@@ -3038,23 +2988,17 @@ PHP_FUNCTION(mb_strimwidth)
 
 	mbfl_string_init(&string);
 	mbfl_string_init(&marker);
-	string.no_language = MBSTRG(language);
-	string.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
-	marker.no_language = MBSTRG(language);
-	marker.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
-	marker.val = NULL;
-	marker.len = 0;
 
-	if (encoding) {
-		string.no_encoding = marker.no_encoding = mbfl_name2no_encoding(encoding);
-		if (string.no_encoding == mbfl_no_encoding_invalid) {
-			php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", encoding);
-			RETURN_FALSE;
-		}
+	string.no_language = marker.no_language = MBSTRG(language);
+	string.no_encoding = marker.no_encoding = php_mb_get_no_encoding(encoding);
+	if (string.no_encoding == mbfl_no_encoding_invalid) {
+		RETURN_FALSE;
 	}
 
 	string.val = (unsigned char *)str;
 	string.len = str_len;
+	marker.val = NULL;
+	marker.len = 0;
 
 	if ((from < 0) || (width < 0)) {
 		swidth = mbfl_strwidth(&string);
@@ -3621,23 +3565,16 @@ PHP_FUNCTION(mb_encode_mimeheader)
 	char *trans_enc_name = NULL;
 	size_t trans_enc_name_len;
 	char *linefeed = "\r\n";
-	size_t linefeed_len, string_len;
+	size_t linefeed_len;
 	zend_long indent = 0;
 
 	mbfl_string_init(&string);
 	string.no_language = MBSTRG(language);
 	string.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|sssl", (char **)&string.val, &string_len, &charset_name, &charset_name_len, &trans_enc_name, &trans_enc_name_len, &linefeed, &linefeed_len, &indent) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|sssl", (char **)&string.val, &string.len, &charset_name, &charset_name_len, &trans_enc_name, &trans_enc_name_len, &linefeed, &linefeed_len, &indent) == FAILURE) {
 		return;
 	}
-
-	if (ZEND_SIZE_T_UINT_OVFL(string_len)) {
-			php_error_docref(NULL, E_WARNING, "String length overflows the max allowed length of %u", UINT_MAX);
-			return;
-	}
-
-	string.len = (uint32_t)string_len;
 
 	charset = mbfl_no_encoding_pass;
 	transenc = mbfl_no_encoding_base64;
@@ -3719,22 +3656,13 @@ PHP_FUNCTION(mb_convert_kana)
 	char *optstr = NULL;
 	size_t optstr_len;
 	char *encname = NULL;
-	size_t encname_len, string_len;
+	size_t encname_len;
 
 	mbfl_string_init(&string);
-	string.no_language = MBSTRG(language);
-	string.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|ss", (char **)&string.val, &string_len, &optstr, &optstr_len, &encname, &encname_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|ss", (char **)&string.val, &string.len, &optstr, &optstr_len, &encname, &encname_len) == FAILURE) {
 		return;
 	}
-
-	if (ZEND_SIZE_T_UINT_OVFL(string_len)) {
-			php_error_docref(NULL, E_WARNING, "String length overflows the max allowed length of %u", UINT_MAX);
-			return;
-	}
-
-	string.len = (uint32_t)string_len;
 
 	/* option */
 	if (optstr != NULL) {
@@ -3802,12 +3730,10 @@ PHP_FUNCTION(mb_convert_kana)
 	}
 
 	/* encoding */
-	if (encname != NULL) {
-		string.no_encoding = mbfl_name2no_encoding(encname);
-		if (string.no_encoding == mbfl_no_encoding_invalid) {
-			php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", encname);
-			RETURN_FALSE;
-		}
+	string.no_language = MBSTRG(language);
+	string.no_encoding = php_mb_get_no_encoding(encname);
+	if (string.no_encoding == mbfl_no_encoding_invalid) {
+		RETURN_FALSE;
 	}
 
 	ret = mbfl_ja_jp_hantozen(&string, &result, opt);
