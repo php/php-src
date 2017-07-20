@@ -103,6 +103,24 @@ MBSTRING_API char *php_unicode_convert_case(
 #define PHP_UNICODE_CASE_LOWER	1
 #define PHP_UNICODE_CASE_TITLE	2
 
+/* Optimize the common ASCII case for lower/upper */
+
+static inline int php_unicode_is_lower(unsigned long code) {
+	if (code < 0x80) {
+		return code >= 0x61 && code <= 0x7A;
+	} else {
+		return php_unicode_is_prop1(code, UC_LL);
+	}
+}
+
+static inline int php_unicode_is_upper(unsigned long code) {
+	if (code < 0x80) {
+		return code >= 0x41 && code <= 0x5A;
+	} else {
+		return php_unicode_is_prop1(code, UC_LU);
+	}
+}
+
 #define php_unicode_is_alpha(cc) php_unicode_is_prop(cc, UC_LU, UC_LL, UC_LM, UC_LO, UC_LT, -1)
 #define php_unicode_is_digit(cc) php_unicode_is_prop1(cc, UC_ND)
 #define php_unicode_is_alnum(cc) php_unicode_is_prop(cc, UC_LU, UC_LL, UC_LM, UC_LO, UC_LT, UC_ND, -1)
@@ -118,8 +136,6 @@ MBSTRING_API char *php_unicode_convert_case(
                                UC_LU, UC_LL, UC_LT, UC_LM, UC_LO, UC_PC, UC_PD, \
                                UC_PS, UC_PE, UC_PO, UC_SM, UC_SM, UC_SC, UC_SK, \
                                UC_SO, UC_ZS, UC_PI, UC_PF, -1)
-#define php_unicode_is_upper(cc) php_unicode_is_prop1(cc, UC_LU)
-#define php_unicode_is_lower(cc) php_unicode_is_prop1(cc, UC_LL)
 #define php_unicode_is_title(cc) php_unicode_is_prop1(cc, UC_LT)
 #define php_unicode_is_xdigit(cc) php_unicode_is_prop1(cc, UC_HD)
 
