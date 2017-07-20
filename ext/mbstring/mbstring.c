@@ -705,11 +705,23 @@ static sapi_post_entry mbstr_post_entries[] = {
 
 static const mbfl_encoding *php_mb_get_encoding(const char *encoding_name) {
 	if (encoding_name) {
-		const mbfl_encoding *encoding = mbfl_name2encoding(encoding_name);
+		const mbfl_encoding *encoding;
+		if (MBSTRG(last_used_encoding_name)
+				&& !strcasecmp(encoding_name, MBSTRG(last_used_encoding_name))) {
+			return MBSTRG(last_used_encoding);
+		}
+
+		encoding = mbfl_name2encoding(encoding_name);
 		if (!encoding) {
 			php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", encoding_name);
 			return NULL;
 		}
+
+		if (MBSTRG(last_used_encoding_name)) {
+			efree(MBSTRG(last_used_encoding_name));
+		}
+		MBSTRG(last_used_encoding_name) = estrdup(encoding_name);
+		MBSTRG(last_used_encoding) = encoding;
 		return encoding;
 	} else {
 		return MBSTRG(current_internal_encoding);
@@ -1545,6 +1557,8 @@ ZEND_TSRMLS_CACHE_UPDATE();
 #if HAVE_MBREGEX
 	mbstring_globals->mb_regex_globals = php_mb_regex_globals_alloc();
 #endif
+	mbstring_globals->last_used_encoding_name = NULL;
+	mbstring_globals->last_used_encoding = NULL;
 }
 /* }}} */
 
@@ -1563,6 +1577,9 @@ static PHP_GSHUTDOWN_FUNCTION(mbstring)
 #if HAVE_MBREGEX
 	php_mb_regex_globals_free(mbstring_globals->mb_regex_globals);
 #endif
+	if (mbstring_globals->last_used_encoding_name) {
+		efree(mbstring_globals->last_used_encoding_name);
+	}
 }
 /* }}} */
 

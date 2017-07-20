@@ -192,6 +192,8 @@ ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 #if HAVE_MBREGEX
     struct _zend_mb_regex_globals *mb_regex_globals;
 #endif
+	char *last_used_encoding_name;
+	const mbfl_encoding *last_used_encoding;
 ZEND_END_MODULE_GLOBALS(mbstring)
 
 #define MB_OVERLOAD_MAIL 1
