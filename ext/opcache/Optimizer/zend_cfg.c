@@ -635,6 +635,7 @@ int zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg) /* {{{ */
 		}
 	}
 
+	cfg->edges_count = edges;
 	cfg->predecessors = predecessors = (int*)zend_arena_calloc(arena, sizeof(int), edges);
 
 	edges = 0;
