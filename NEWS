@@ -2,7 +2,11 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.0alpha1
 
- ODBC:
+- Session:
+  . Fixed bug #74941 (session fails to start after having headers sent). 
+    (morozov)
+
+- ODBC:
   . Removed support for Birdstep. (Kalle)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
