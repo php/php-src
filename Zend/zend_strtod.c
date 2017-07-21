@@ -206,8 +206,6 @@ static void Bug(const char *message) {
 #include "stdlib.h"
 #include "string.h"
 
-#define NO_ERRNO
-
 #ifdef USE_LOCALE
 #include "locale.h"
 #endif
