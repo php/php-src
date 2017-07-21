@@ -1676,7 +1676,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		if (errno == ERANGE) { /* Overflow */
 			errno = 0;
 			if (yytext[0] == '0') { /* octal overflow */
-				errno = 0;
 				ZVAL_DOUBLE(zendlval, zend_oct_strtod(yytext, (const char **)&end));
 			} else {
 				ZVAL_DOUBLE(zendlval, zend_strtod(yytext, (const char **)&end));
@@ -1688,7 +1687,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 				ZVAL_UNDEF(zendlval);
 				RETURN_TOKEN(T_DNUMBER);
 			}
-			ZEND_ASSERT(!errno);
 			RETURN_TOKEN(T_DNUMBER);
 		}
 		/* Also not an assert for the same reason */
