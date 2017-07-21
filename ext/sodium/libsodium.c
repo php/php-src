@@ -2989,9 +2989,6 @@ PHP_FUNCTION(sodium_crypto_kdf_derive_from_key)
 	if (key_len != crypto_kdf_KEYBYTES) {
 		zend_throw_exception(sodium_exception_ce, "key should be sodium_crypto_kdf_KEYBYTES bytes", 0);
 	}
-	if (key_len != crypto_kdf_KEYBYTES) {
-		zend_throw_exception(sodium_exception_ce, "context should be sodium_crypto_kdf_KEYBYTES bytes", 0);
-	}
 	memcpy(ctx_padded, ctx, crypto_kdf_CONTEXTBYTES);
 	memset(ctx_padded + crypto_kdf_CONTEXTBYTES, 0, sizeof ctx_padded - crypto_kdf_CONTEXTBYTES);
 	salt[0] = (unsigned char) (((uint64_t) subkey_id)	  );
