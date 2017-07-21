@@ -62,6 +62,9 @@ var sapi_enabled = new Array();
 /* Store the headers to install */
 var headers_install = new Array();
 
+/* Store unknown configure options */
+var INVALID_CONFIG_ARGS = new Array();
+
 /* Mapping CL version > human readable name */
 var VC_VERSIONS = new Array();
 VC_VERSIONS[1700] = 'MSVC11 (Visual C++ 2012)';
@@ -402,8 +405,12 @@ function conf_process_args()
 			}
 		}
 		if (!found) {
+			INVALID_CONFIG_ARGS[INVALID_CONFIG_ARGS.length] = argname;
+
+			/*
 			STDERR.WriteLine("Unknown option " + argname + "; please try configure.js --help for a list of valid options");
 			WScript.Quit(2);
+			*/
 		}
 	}
 
@@ -2005,6 +2012,17 @@ function generate_files()
 	STDOUT.WriteLine("Done.");
 	STDOUT.WriteBlankLines(1);
 	write_summary();
+
+	if (INVALID_CONFIG_ARGS.length) {
+		STDOUT.WriteLine('WARNING');
+		STDOUT.WriteLine('The following arguments is invalid, and therefore ignored:');
+
+		for (var i = 0; i < INVALID_CONFIG_ARGS.length; ++i) {
+			STDOUT.WriteLine(' ' + INVALID_CONFIG_ARGS[i]);
+		}
+
+		STDOUT.WriteBlankLines(2);
+	}
 
 	if (PHP_SNAPSHOT_BUILD != "no") {
 		STDOUT.WriteLine("Type 'nmake snap' to build a PHP snapshot");
