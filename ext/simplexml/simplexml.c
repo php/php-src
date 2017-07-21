@@ -2321,16 +2321,16 @@ SXE_METHOD(__construct)
 	}
 
 	if (ZEND_SIZE_T_INT_OVFL(data_len)) {
-		php_error_docref(NULL, E_WARNING, "Data is too long");
-		RETURN_FALSE;
+		zend_throw_exception(zend_ce_exception, "Data is too long", 0);
+		return;
 	}
 	if (ZEND_SIZE_T_INT_OVFL(ns_len)) {
-		php_error_docref(NULL, E_WARNING, "Namespace is too long");
-		RETURN_FALSE;
+		zend_throw_exception(zend_ce_exception, "Namespace is too long", 0);
+		return;
 	}
 	if (ZEND_LONG_EXCEEDS_INT(options)) {
-		php_error_docref(NULL, E_WARNING, "Invalid options");
-		RETURN_FALSE;
+		zend_throw_exception(zend_ce_exception, "Invalid options", 0);
+		return;
 	}
 
 	docp = is_url ? xmlReadFile(data, NULL, (int)options) : xmlReadMemory(data, (int)data_len, NULL, NULL, (int)options);
