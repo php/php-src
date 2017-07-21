@@ -833,6 +833,9 @@ PHP_MINFO_FUNCTION(ibase)
 			info_func(s = tmp);
 		}
 		php_info_print_table_row(2, "Run-time Client Library Version", s);
+#ifdef PHP_WIN32
+		FreeLibrary(l);
+#endif
 	} while (0);
 #endif
 	php_info_print_table_end();
