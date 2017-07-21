@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #74947 (Segfault in scanner on INF number). (Laruence)
 
+- SimpleXML:
+  . Fixed bug #74950 (nullpointer deref in simplexml_element_getDocNamespaces).
+    (Laruence)
+
 - SPL:
   . Fixed bug #74669 (Unserialize ArrayIterator broken). (Andrew Nester)
 
