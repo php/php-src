@@ -135,8 +135,7 @@ PHPAPI int php_load_extension(char *filename, int type, int start_now)
 		}
 		libpath = estrdup(filename);
 	} else if (extension_dir && extension_dir[0]) {
-		int extension_dir_len = (int)strlen(extension_dir);
-		slash_suffix = IS_SLASH(extension_dir[extension_dir_len-1]);
+		slash_suffix = IS_SLASH(extension_dir[strlen(extension_dir)-1]);
 		/* Try as filename first */
 		if (slash_suffix) {
 			spprintf(&libpath, 0, "%s%s", extension_dir, filename); /* SAFE */
