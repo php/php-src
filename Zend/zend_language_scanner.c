@@ -1160,7 +1160,7 @@ yyc_INITIAL:
 yy4:
 	YYDEBUG(4, *YYCURSOR);
 	yyleng = YYCURSOR - SCNG(yy_text);
-#line 1805 "Zend/zend_language_scanner.l"
+#line 1803 "Zend/zend_language_scanner.l"
 	{
 	if (YYCURSOR > YYLIMIT) {
 		RETURN_TOKEN(END);
@@ -1221,7 +1221,7 @@ yy5:
 yy7:
 	YYDEBUG(7, *YYCURSOR);
 	yyleng = YYCURSOR - SCNG(yy_text);
-#line 1796 "Zend/zend_language_scanner.l"
+#line 1794 "Zend/zend_language_scanner.l"
 	{
 	if (CG(short_tags)) {
 		BEGIN(ST_IN_SCRIPTING);
@@ -1236,7 +1236,7 @@ yy8:
 	++YYCURSOR;
 	YYDEBUG(9, *YYCURSOR);
 	yyleng = YYCURSOR - SCNG(yy_text);
-#line 1783 "Zend/zend_language_scanner.l"
+#line 1781 "Zend/zend_language_scanner.l"
 	{
 	BEGIN(ST_IN_SCRIPTING);
 	RETURN_TOKEN(T_OPEN_TAG_WITH_ECHO);
@@ -1272,7 +1272,7 @@ yy14:
 yy15:
 	YYDEBUG(15, *YYCURSOR);
 	yyleng = YYCURSOR - SCNG(yy_text);
-#line 1789 "Zend/zend_language_scanner.l"
+#line 1787 "Zend/zend_language_scanner.l"
 	{
 	HANDLE_NEWLINE(yytext[yyleng-1]);
 	BEGIN(ST_IN_SCRIPTING);
@@ -1335,7 +1335,7 @@ yyc_ST_BACKQUOTE:
 yy20:
 		YYDEBUG(20, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 2215 "Zend/zend_language_scanner.l"
+#line 2213 "Zend/zend_language_scanner.l"
 		{
 	if (YYCURSOR > YYLIMIT) {
 		RETURN_TOKEN(END);
@@ -1400,7 +1400,7 @@ yy22:
 		++YYCURSOR;
 		YYDEBUG(23, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 2159 "Zend/zend_language_scanner.l"
+#line 2157 "Zend/zend_language_scanner.l"
 		{
 	BEGIN(ST_IN_SCRIPTING);
 	RETURN_TOKEN('`');
@@ -1426,7 +1426,7 @@ yy25:
 yy27:
 		YYDEBUG(27, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 1870 "Zend/zend_language_scanner.l"
+#line 1868 "Zend/zend_language_scanner.l"
 		{
 	zend_copy_value(zendlval, (yytext+1), (yyleng-1));
 	RETURN_TOKEN(T_VARIABLE);
@@ -1448,7 +1448,7 @@ yy30:
 		++YYCURSOR;
 		YYDEBUG(31, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 2146 "Zend/zend_language_scanner.l"
+#line 2144 "Zend/zend_language_scanner.l"
 		{
 	Z_LVAL_P(zendlval) = (zend_long) '{';
 	yy_push_state(ST_IN_SCRIPTING);
@@ -1469,7 +1469,7 @@ yy34:
 		++YYCURSOR;
 		YYDEBUG(35, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 1863 "Zend/zend_language_scanner.l"
+#line 1861 "Zend/zend_language_scanner.l"
 		{
 	yyless(yyleng - 1);
 	yy_push_state(ST_VAR_OFFSET);
@@ -1494,7 +1494,7 @@ yy37:
 		++YYCURSOR;
 		YYDEBUG(38, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 1854 "Zend/zend_language_scanner.l"
+#line 1852 "Zend/zend_language_scanner.l"
 		{
 	yyless(yyleng - 3);
 	yy_push_state(ST_LOOKING_FOR_PROPERTY);
@@ -1554,7 +1554,7 @@ yyc_ST_DOUBLE_QUOTES:
 yy42:
 		YYDEBUG(42, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 2165 "Zend/zend_language_scanner.l"
+#line 2163 "Zend/zend_language_scanner.l"
 		{
 	if (GET_DOUBLE_QUOTES_SCANNED_LENGTH()) {
 		YYCURSOR += GET_DOUBLE_QUOTES_SCANNED_LENGTH() - 1;
@@ -1609,7 +1609,7 @@ yy43:
 		++YYCURSOR;
 		YYDEBUG(44, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 2154 "Zend/zend_language_scanner.l"
+#line 2152 "Zend/zend_language_scanner.l"
 		{
 	BEGIN(ST_IN_SCRIPTING);
 	RETURN_TOKEN('"');
@@ -1653,7 +1653,7 @@ yy47:
 yy49:
 		YYDEBUG(49, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 1870 "Zend/zend_language_scanner.l"
+#line 1868 "Zend/zend_language_scanner.l"
 		{
 	zend_copy_value(zendlval, (yytext+1), (yyleng-1));
 	RETURN_TOKEN(T_VARIABLE);
@@ -1675,7 +1675,7 @@ yy52:
 		++YYCURSOR;
 		YYDEBUG(53, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 2146 "Zend/zend_language_scanner.l"
+#line 2144 "Zend/zend_language_scanner.l"
 		{
 	Z_LVAL_P(zendlval) = (zend_long) '{';
 	yy_push_state(ST_IN_SCRIPTING);
@@ -1696,7 +1696,7 @@ yy56:
 		++YYCURSOR;
 		YYDEBUG(57, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 1863 "Zend/zend_language_scanner.l"
+#line 1861 "Zend/zend_language_scanner.l"
 		{
 	yyless(yyleng - 1);
 	yy_push_state(ST_VAR_OFFSET);
@@ -1721,7 +1721,7 @@ yy59:
 		++YYCURSOR;
 		YYDEBUG(60, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 1854 "Zend/zend_language_scanner.l"
+#line 1852 "Zend/zend_language_scanner.l"
 		{
 	yyless(yyleng - 3);
 	yy_push_state(ST_LOOKING_FOR_PROPERTY);
@@ -1739,7 +1739,7 @@ yyc_ST_END_HEREDOC:
 	++YYCURSOR;
 	YYDEBUG(64, *YYCURSOR);
 	yyleng = YYCURSOR - SCNG(yy_text);
-#line 2132 "Zend/zend_language_scanner.l"
+#line 2130 "Zend/zend_language_scanner.l"
 	{
 	zend_heredoc_label *heredoc_label = zend_ptr_stack_pop(&SCNG(heredoc_label_stack));
 
@@ -1800,7 +1800,7 @@ yyc_ST_HEREDOC:
 yy68:
 		YYDEBUG(68, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 2257 "Zend/zend_language_scanner.l"
+#line 2255 "Zend/zend_language_scanner.l"
 		{
 	int newline = 0;
 
@@ -1912,7 +1912,7 @@ yy71:
 yy73:
 		YYDEBUG(73, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 1870 "Zend/zend_language_scanner.l"
+#line 1868 "Zend/zend_language_scanner.l"
 		{
 	zend_copy_value(zendlval, (yytext+1), (yyleng-1));
 	RETURN_TOKEN(T_VARIABLE);
@@ -1934,7 +1934,7 @@ yy76:
 		++YYCURSOR;
 		YYDEBUG(77, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 2146 "Zend/zend_language_scanner.l"
+#line 2144 "Zend/zend_language_scanner.l"
 		{
 	Z_LVAL_P(zendlval) = (zend_long) '{';
 	yy_push_state(ST_IN_SCRIPTING);
@@ -1955,7 +1955,7 @@ yy80:
 		++YYCURSOR;
 		YYDEBUG(81, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 1863 "Zend/zend_language_scanner.l"
+#line 1861 "Zend/zend_language_scanner.l"
 		{
 	yyless(yyleng - 1);
 	yy_push_state(ST_VAR_OFFSET);
@@ -1980,7 +1980,7 @@ yy83:
 		++YYCURSOR;
 		YYDEBUG(84, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 1854 "Zend/zend_language_scanner.l"
+#line 1852 "Zend/zend_language_scanner.l"
 		{
 	yyless(yyleng - 3);
 	yy_push_state(ST_LOOKING_FOR_PROPERTY);
@@ -2156,7 +2156,7 @@ yy87:
 		++YYCURSOR;
 		YYDEBUG(88, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 2388 "Zend/zend_language_scanner.l"
+#line 2386 "Zend/zend_language_scanner.l"
 		{
 	if (YYCURSOR > YYLIMIT) {
 		RETURN_TOKEN(END);
@@ -2200,7 +2200,7 @@ yy94:
 		++YYCURSOR;
 		YYDEBUG(95, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 2036 "Zend/zend_language_scanner.l"
+#line 2034 "Zend/zend_language_scanner.l"
 		{
 	int bprefix = (yytext[0] != '"') ? 1 : 0;
 
@@ -2247,7 +2247,7 @@ yy96:
 		++YYCURSOR;
 		YYDEBUG(97, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 1899 "Zend/zend_language_scanner.l"
+#line 1897 "Zend/zend_language_scanner.l"
 		{
 	while (YYCURSOR < YYLIMIT) {
 		switch (*YYCURSOR++) {
@@ -2307,7 +2307,7 @@ yy101:
 		++YYCURSOR;
 		YYDEBUG(102, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 1967 "Zend/zend_language_scanner.l"
+#line 1965 "Zend/zend_language_scanner.l"
 		{
 	register char *s, *t;
 	char *end;
@@ -2525,7 +2525,6 @@ yy111:
 		if (errno == ERANGE) { /* Overflow */
 			errno = 0;
 			if (yytext[0] == '0') { /* octal overflow */
-				errno = 0;
 				ZVAL_DOUBLE(zendlval, zend_oct_strtod(yytext, (const char **)&end));
 			} else {
 				ZVAL_DOUBLE(zendlval, zend_strtod(yytext, (const char **)&end));
@@ -2537,7 +2536,6 @@ yy111:
 				ZVAL_UNDEF(zendlval);
 				RETURN_TOKEN(T_DNUMBER);
 			}
-			ZEND_ASSERT(!errno);
 			RETURN_TOKEN(T_DNUMBER);
 		}
 		/* Also not an assert for the same reason */
@@ -2550,7 +2548,7 @@ yy111:
 	ZEND_ASSERT(!errno);
 	RETURN_TOKEN(T_LNUMBER);
 }
-#line 2554 "Zend/zend_language_scanner.c"
+#line 2552 "Zend/zend_language_scanner.c"
 yy112:
 		YYDEBUG(112, *YYCURSOR);
 		yyaccept = 1;
@@ -2631,12 +2629,12 @@ yy119:
 yy120:
 		YYDEBUG(120, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 1893 "Zend/zend_language_scanner.l"
+#line 1891 "Zend/zend_language_scanner.l"
 		{
 	zend_copy_value(zendlval, yytext, yyleng);
 	RETURN_TOKEN(T_STRING);
 }
-#line 2640 "Zend/zend_language_scanner.c"
+#line 2638 "Zend/zend_language_scanner.c"
 yy121:
 		YYDEBUG(121, *YYCURSOR);
 		yyaccept = 2;
@@ -2925,7 +2923,7 @@ yy142:
 		{
 	RETURN_TOKEN(T_NS_SEPARATOR);
 }
-#line 2929 "Zend/zend_language_scanner.c"
+#line 2927 "Zend/zend_language_scanner.c"
 yy144:
 		YYDEBUG(144, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -2941,12 +2939,12 @@ yy146:
 		++YYCURSOR;
 		YYDEBUG(147, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 2126 "Zend/zend_language_scanner.l"
+#line 2124 "Zend/zend_language_scanner.l"
 		{
 	BEGIN(ST_BACKQUOTE);
 	RETURN_TOKEN('`');
 }
-#line 2950 "Zend/zend_language_scanner.c"
+#line 2948 "Zend/zend_language_scanner.c"
 yy148:
 		YYDEBUG(148, *YYCURSOR);
 		++YYCURSOR;
@@ -2957,7 +2955,7 @@ yy148:
 	yy_push_state(ST_IN_SCRIPTING);
 	RETURN_TOKEN('{');
 }
-#line 2961 "Zend/zend_language_scanner.c"
+#line 2959 "Zend/zend_language_scanner.c"
 yy150:
 		YYDEBUG(150, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -2977,7 +2975,7 @@ yy151:
 	}
 	RETURN_TOKEN('}');
 }
-#line 2981 "Zend/zend_language_scanner.c"
+#line 2979 "Zend/zend_language_scanner.c"
 yy153:
 		YYDEBUG(153, *YYCURSOR);
 		++YYCURSOR;
@@ -2989,7 +2987,7 @@ yy154:
 		{
 	RETURN_TOKEN(T_IS_NOT_EQUAL);
 }
-#line 2993 "Zend/zend_language_scanner.c"
+#line 2991 "Zend/zend_language_scanner.c"
 yy155:
 		YYDEBUG(155, *YYCURSOR);
 		++YYCURSOR;
@@ -3014,12 +3012,12 @@ yy155:
 yy157:
 		YYDEBUG(157, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 1870 "Zend/zend_language_scanner.l"
+#line 1868 "Zend/zend_language_scanner.l"
 		{
 	zend_copy_value(zendlval, (yytext+1), (yyleng-1));
 	RETURN_TOKEN(T_VARIABLE);
 }
-#line 3023 "Zend/zend_language_scanner.c"
+#line 3021 "Zend/zend_language_scanner.c"
 yy158:
 		YYDEBUG(158, *YYCURSOR);
 		++YYCURSOR;
@@ -3029,7 +3027,7 @@ yy158:
 		{
 	RETURN_TOKEN(T_MOD_EQUAL);
 }
-#line 3033 "Zend/zend_language_scanner.c"
+#line 3031 "Zend/zend_language_scanner.c"
 yy160:
 		YYDEBUG(160, *YYCURSOR);
 		++YYCURSOR;
@@ -3039,7 +3037,7 @@ yy160:
 		{
 	RETURN_TOKEN(T_BOOLEAN_AND);
 }
-#line 3043 "Zend/zend_language_scanner.c"
+#line 3041 "Zend/zend_language_scanner.c"
 yy162:
 		YYDEBUG(162, *YYCURSOR);
 		++YYCURSOR;
@@ -3049,7 +3047,7 @@ yy162:
 		{
 	RETURN_TOKEN(T_AND_EQUAL);
 }
-#line 3053 "Zend/zend_language_scanner.c"
+#line 3051 "Zend/zend_language_scanner.c"
 yy164:
 		YYDEBUG(164, *YYCURSOR);
 		++YYCURSOR;
@@ -3183,7 +3181,7 @@ yy176:
 		{
 	RETURN_TOKEN(T_POW);
 }
-#line 3187 "Zend/zend_language_scanner.c"
+#line 3185 "Zend/zend_language_scanner.c"
 yy178:
 		YYDEBUG(178, *YYCURSOR);
 		++YYCURSOR;
@@ -3193,7 +3191,7 @@ yy178:
 		{
 	RETURN_TOKEN(T_MUL_EQUAL);
 }
-#line 3197 "Zend/zend_language_scanner.c"
+#line 3195 "Zend/zend_language_scanner.c"
 yy180:
 		YYDEBUG(180, *YYCURSOR);
 		++YYCURSOR;
@@ -3203,7 +3201,7 @@ yy180:
 		{
 	RETURN_TOKEN(T_INC);
 }
-#line 3207 "Zend/zend_language_scanner.c"
+#line 3205 "Zend/zend_language_scanner.c"
 yy182:
 		YYDEBUG(182, *YYCURSOR);
 		++YYCURSOR;
@@ -3213,7 +3211,7 @@ yy182:
 		{
 	RETURN_TOKEN(T_PLUS_EQUAL);
 }
-#line 3217 "Zend/zend_language_scanner.c"
+#line 3215 "Zend/zend_language_scanner.c"
 yy184:
 		YYDEBUG(184, *YYCURSOR);
 		++YYCURSOR;
@@ -3223,7 +3221,7 @@ yy184:
 		{
 	RETURN_TOKEN(T_DEC);
 }
-#line 3227 "Zend/zend_language_scanner.c"
+#line 3225 "Zend/zend_language_scanner.c"
 yy186:
 		YYDEBUG(186, *YYCURSOR);
 		++YYCURSOR;
@@ -3233,7 +3231,7 @@ yy186:
 		{
 	RETURN_TOKEN(T_MINUS_EQUAL);
 }
-#line 3237 "Zend/zend_language_scanner.c"
+#line 3235 "Zend/zend_language_scanner.c"
 yy188:
 		YYDEBUG(188, *YYCURSOR);
 		++YYCURSOR;
@@ -3244,7 +3242,7 @@ yy188:
 	yy_push_state(ST_LOOKING_FOR_PROPERTY);
 	RETURN_TOKEN(T_OBJECT_OPERATOR);
 }
-#line 3248 "Zend/zend_language_scanner.c"
+#line 3246 "Zend/zend_language_scanner.c"
 yy190:
 		YYDEBUG(190, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -3267,7 +3265,7 @@ yy191:
 yy193:
 		YYDEBUG(193, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 1741 "Zend/zend_language_scanner.l"
+#line 1739 "Zend/zend_language_scanner.l"
 		{
 	const char *end;
 
@@ -3276,7 +3274,7 @@ yy193:
 	ZEND_ASSERT(end == yytext + yyleng);
 	RETURN_TOKEN(T_DNUMBER);
 }
-#line 3280 "Zend/zend_language_scanner.c"
+#line 3278 "Zend/zend_language_scanner.c"
 yy194:
 		YYDEBUG(194, *YYCURSOR);
 		++YYCURSOR;
@@ -3286,7 +3284,7 @@ yy194:
 		{
 	RETURN_TOKEN(T_CONCAT_EQUAL);
 }
-#line 3290 "Zend/zend_language_scanner.c"
+#line 3288 "Zend/zend_language_scanner.c"
 yy196:
 		YYDEBUG(196, *YYCURSOR);
 		yyaccept = 4;
@@ -3295,7 +3293,7 @@ yy196:
 yy197:
 		YYDEBUG(197, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 1928 "Zend/zend_language_scanner.l"
+#line 1926 "Zend/zend_language_scanner.l"
 		{
 	int doc_com;
 
@@ -3328,7 +3326,7 @@ yy197:
 
 	RETURN_TOKEN(T_COMMENT);
 }
-#line 3332 "Zend/zend_language_scanner.c"
+#line 3330 "Zend/zend_language_scanner.c"
 yy198:
 		YYDEBUG(198, *YYCURSOR);
 		++YYCURSOR;
@@ -3338,7 +3336,7 @@ yy198:
 		{
 	RETURN_TOKEN(T_DIV_EQUAL);
 }
-#line 3342 "Zend/zend_language_scanner.c"
+#line 3340 "Zend/zend_language_scanner.c"
 yy200:
 		YYDEBUG(200, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -3374,7 +3372,7 @@ yy203:
 		{
 	RETURN_TOKEN(T_PAAMAYIM_NEKUDOTAYIM);
 }
-#line 3378 "Zend/zend_language_scanner.c"
+#line 3376 "Zend/zend_language_scanner.c"
 yy205:
 		YYDEBUG(205, *YYCURSOR);
 		yyaccept = 5;
@@ -3389,7 +3387,7 @@ yy206:
 		{
 	RETURN_TOKEN(T_SL);
 }
-#line 3393 "Zend/zend_language_scanner.c"
+#line 3391 "Zend/zend_language_scanner.c"
 yy207:
 		YYDEBUG(207, *YYCURSOR);
 		++YYCURSOR;
@@ -3400,7 +3398,7 @@ yy207:
 		{
 	RETURN_TOKEN(T_IS_SMALLER_OR_EQUAL);
 }
-#line 3404 "Zend/zend_language_scanner.c"
+#line 3402 "Zend/zend_language_scanner.c"
 yy209:
 		YYDEBUG(209, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -3415,7 +3413,7 @@ yy210:
 		{
 	RETURN_TOKEN(T_IS_EQUAL);
 }
-#line 3419 "Zend/zend_language_scanner.c"
+#line 3417 "Zend/zend_language_scanner.c"
 yy212:
 		YYDEBUG(212, *YYCURSOR);
 		++YYCURSOR;
@@ -3425,7 +3423,7 @@ yy212:
 		{
 	RETURN_TOKEN(T_DOUBLE_ARROW);
 }
-#line 3429 "Zend/zend_language_scanner.c"
+#line 3427 "Zend/zend_language_scanner.c"
 yy214:
 		YYDEBUG(214, *YYCURSOR);
 		++YYCURSOR;
@@ -3435,7 +3433,7 @@ yy214:
 		{
 	RETURN_TOKEN(T_IS_GREATER_OR_EQUAL);
 }
-#line 3439 "Zend/zend_language_scanner.c"
+#line 3437 "Zend/zend_language_scanner.c"
 yy216:
 		YYDEBUG(216, *YYCURSOR);
 		++YYCURSOR;
@@ -3446,7 +3444,7 @@ yy216:
 		{
 	RETURN_TOKEN(T_SR);
 }
-#line 3450 "Zend/zend_language_scanner.c"
+#line 3448 "Zend/zend_language_scanner.c"
 yy218:
 		YYDEBUG(218, *YYCURSOR);
 		++YYCURSOR;
@@ -3455,12 +3453,12 @@ yy218:
 yy219:
 		YYDEBUG(219, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 1961 "Zend/zend_language_scanner.l"
+#line 1959 "Zend/zend_language_scanner.l"
 		{
 	BEGIN(INITIAL);
 	RETURN_TOKEN(T_CLOSE_TAG);  /* implicit ';' at php-end tag */
 }
-#line 3464 "Zend/zend_language_scanner.c"
+#line 3462 "Zend/zend_language_scanner.c"
 yy220:
 		YYDEBUG(220, *YYCURSOR);
 		++YYCURSOR;
@@ -3470,7 +3468,7 @@ yy220:
 		{
 	RETURN_TOKEN(T_COALESCE);
 }
-#line 3474 "Zend/zend_language_scanner.c"
+#line 3472 "Zend/zend_language_scanner.c"
 yy222:
 		YYDEBUG(222, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -3501,7 +3499,7 @@ yy225:
 		{
 	RETURN_TOKEN(T_AS);
 }
-#line 3505 "Zend/zend_language_scanner.c"
+#line 3503 "Zend/zend_language_scanner.c"
 yy227:
 		YYDEBUG(227, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -3591,7 +3589,7 @@ yy234:
 		{
 	RETURN_TOKEN(T_DO);
 }
-#line 3595 "Zend/zend_language_scanner.c"
+#line 3593 "Zend/zend_language_scanner.c"
 yy236:
 		YYDEBUG(236, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -3680,7 +3678,7 @@ yy247:
 		{
 	RETURN_TOKEN(T_IF);
 }
-#line 3684 "Zend/zend_language_scanner.c"
+#line 3682 "Zend/zend_language_scanner.c"
 yy249:
 		YYDEBUG(249, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -3745,7 +3743,7 @@ yy255:
 		{
 	RETURN_TOKEN(T_LOGICAL_OR);
 }
-#line 3749 "Zend/zend_language_scanner.c"
+#line 3747 "Zend/zend_language_scanner.c"
 yy257:
 		YYDEBUG(257, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -3863,7 +3861,7 @@ yy270:
 		{
 	RETURN_TOKEN(T_XOR_EQUAL);
 }
-#line 3867 "Zend/zend_language_scanner.c"
+#line 3865 "Zend/zend_language_scanner.c"
 yy272:
 		YYDEBUG(272, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -3895,7 +3893,7 @@ yy273:
 		{
 	RETURN_TOKEN(T_OR_EQUAL);
 }
-#line 3899 "Zend/zend_language_scanner.c"
+#line 3897 "Zend/zend_language_scanner.c"
 yy275:
 		YYDEBUG(275, *YYCURSOR);
 		++YYCURSOR;
@@ -3905,7 +3903,7 @@ yy275:
 		{
 	RETURN_TOKEN(T_BOOLEAN_OR);
 }
-#line 3909 "Zend/zend_language_scanner.c"
+#line 3907 "Zend/zend_language_scanner.c"
 yy277:
 		YYDEBUG(277, *YYCURSOR);
 		++YYCURSOR;
@@ -3915,7 +3913,7 @@ yy277:
 		{
 	RETURN_TOKEN(T_IS_NOT_IDENTICAL);
 }
-#line 3919 "Zend/zend_language_scanner.c"
+#line 3917 "Zend/zend_language_scanner.c"
 yy279:
 		YYDEBUG(279, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -3985,7 +3983,7 @@ yy289:
 		{
 	RETURN_TOKEN(T_POW_EQUAL);
 }
-#line 3989 "Zend/zend_language_scanner.c"
+#line 3987 "Zend/zend_language_scanner.c"
 yy291:
 		YYDEBUG(291, *YYCURSOR);
 		++YYCURSOR;
@@ -3995,7 +3993,7 @@ yy291:
 		{
 	RETURN_TOKEN(T_ELLIPSIS);
 }
-#line 3999 "Zend/zend_language_scanner.c"
+#line 3997 "Zend/zend_language_scanner.c"
 yy293:
 		YYDEBUG(293, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -4047,7 +4045,7 @@ yy294:
 		RETURN_TOKEN(T_DNUMBER);
 	}
 }
-#line 4051 "Zend/zend_language_scanner.c"
+#line 4049 "Zend/zend_language_scanner.c"
 yy297:
 		YYDEBUG(297, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -4073,7 +4071,7 @@ yy300:
 		}
 		YYDEBUG(302, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 1692 "Zend/zend_language_scanner.l"
+#line 1690 "Zend/zend_language_scanner.l"
 		{
 	char *hex = yytext + 2; /* Skip "0x" */
 	int len = yyleng - 2;
@@ -4101,7 +4099,7 @@ yy300:
 		RETURN_TOKEN(T_DNUMBER);
 	}
 }
-#line 4105 "Zend/zend_language_scanner.c"
+#line 4103 "Zend/zend_language_scanner.c"
 yy303:
 		YYDEBUG(303, *YYCURSOR);
 		++YYCURSOR;
@@ -4140,7 +4138,7 @@ yy305:
 		{
 	RETURN_TOKEN(T_SL_EQUAL);
 }
-#line 4144 "Zend/zend_language_scanner.c"
+#line 4142 "Zend/zend_language_scanner.c"
 yy307:
 		YYDEBUG(307, *YYCURSOR);
 		++YYCURSOR;
@@ -4150,7 +4148,7 @@ yy307:
 		{
 	RETURN_TOKEN(T_SPACESHIP);
 }
-#line 4154 "Zend/zend_language_scanner.c"
+#line 4152 "Zend/zend_language_scanner.c"
 yy309:
 		YYDEBUG(309, *YYCURSOR);
 		++YYCURSOR;
@@ -4160,7 +4158,7 @@ yy309:
 		{
 	RETURN_TOKEN(T_IS_IDENTICAL);
 }
-#line 4164 "Zend/zend_language_scanner.c"
+#line 4162 "Zend/zend_language_scanner.c"
 yy311:
 		YYDEBUG(311, *YYCURSOR);
 		++YYCURSOR;
@@ -4170,7 +4168,7 @@ yy311:
 		{
 	RETURN_TOKEN(T_SR_EQUAL);
 }
-#line 4174 "Zend/zend_language_scanner.c"
+#line 4172 "Zend/zend_language_scanner.c"
 yy313:
 		YYDEBUG(313, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -4198,7 +4196,7 @@ yy316:
 		{
 	RETURN_TOKEN(T_LOGICAL_AND);
 }
-#line 4202 "Zend/zend_language_scanner.c"
+#line 4200 "Zend/zend_language_scanner.c"
 yy318:
 		YYDEBUG(318, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -4283,7 +4281,7 @@ yy329:
 		{
 	RETURN_TOKEN(T_EXIT);
 }
-#line 4287 "Zend/zend_language_scanner.c"
+#line 4285 "Zend/zend_language_scanner.c"
 yy331:
 		YYDEBUG(331, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -4369,7 +4367,7 @@ yy340:
 		{
 	RETURN_TOKEN(T_FOR);
 }
-#line 4373 "Zend/zend_language_scanner.c"
+#line 4371 "Zend/zend_language_scanner.c"
 yy341:
 		YYDEBUG(341, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -4442,7 +4440,7 @@ yy351:
 		{
 	RETURN_TOKEN(T_NEW);
 }
-#line 4446 "Zend/zend_language_scanner.c"
+#line 4444 "Zend/zend_language_scanner.c"
 yy353:
 		YYDEBUG(353, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -4519,7 +4517,7 @@ yy362:
 		{
 	RETURN_TOKEN(T_TRY);
 }
-#line 4523 "Zend/zend_language_scanner.c"
+#line 4521 "Zend/zend_language_scanner.c"
 yy364:
 		YYDEBUG(364, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -4538,7 +4536,7 @@ yy365:
 		{
 	RETURN_TOKEN(T_USE);
 }
-#line 4542 "Zend/zend_language_scanner.c"
+#line 4540 "Zend/zend_language_scanner.c"
 yy367:
 		YYDEBUG(367, *YYCURSOR);
 		++YYCURSOR;
@@ -4551,7 +4549,7 @@ yy367:
 		{
 	RETURN_TOKEN(T_VAR);
 }
-#line 4555 "Zend/zend_language_scanner.c"
+#line 4553 "Zend/zend_language_scanner.c"
 yy369:
 		YYDEBUG(369, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -4570,7 +4568,7 @@ yy370:
 		{
 	RETURN_TOKEN(T_LOGICAL_XOR);
 }
-#line 4574 "Zend/zend_language_scanner.c"
+#line 4572 "Zend/zend_language_scanner.c"
 yy372:
 		YYDEBUG(372, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -4788,7 +4786,7 @@ yy401:
 		{
 	RETURN_TOKEN(T_CASE);
 }
-#line 4792 "Zend/zend_language_scanner.c"
+#line 4790 "Zend/zend_language_scanner.c"
 yy403:
 		YYDEBUG(403, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -4843,7 +4841,7 @@ yy410:
 		{
 	RETURN_TOKEN(T_ECHO);
 }
-#line 4847 "Zend/zend_language_scanner.c"
+#line 4845 "Zend/zend_language_scanner.c"
 yy412:
 		YYDEBUG(412, *YYCURSOR);
 		++YYCURSOR;
@@ -4871,7 +4869,7 @@ yy413:
 		{
 	RETURN_TOKEN(T_ELSE);
 }
-#line 4875 "Zend/zend_language_scanner.c"
+#line 4873 "Zend/zend_language_scanner.c"
 yy414:
 		YYDEBUG(414, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -4920,7 +4918,7 @@ yy420:
 		{
 	RETURN_TOKEN(T_EVAL);
 }
-#line 4924 "Zend/zend_language_scanner.c"
+#line 4922 "Zend/zend_language_scanner.c"
 yy422:
 		YYDEBUG(422, *YYCURSOR);
 		++YYCURSOR;
@@ -4933,7 +4931,7 @@ yy422:
 		{
 	RETURN_TOKEN(T_EXIT);
 }
-#line 4937 "Zend/zend_language_scanner.c"
+#line 4935 "Zend/zend_language_scanner.c"
 yy424:
 		YYDEBUG(424, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -4976,7 +4974,7 @@ yy429:
 		{
 	RETURN_TOKEN(T_GOTO);
 }
-#line 4980 "Zend/zend_language_scanner.c"
+#line 4978 "Zend/zend_language_scanner.c"
 yy431:
 		YYDEBUG(431, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -5029,7 +5027,7 @@ yy436:
 		{
 	RETURN_TOKEN(T_LIST);
 }
-#line 5033 "Zend/zend_language_scanner.c"
+#line 5031 "Zend/zend_language_scanner.c"
 yy438:
 		YYDEBUG(438, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -5220,7 +5218,7 @@ yy467:
 		{
 	RETURN_TOKEN(T_INT_CAST);
 }
-#line 5224 "Zend/zend_language_scanner.c"
+#line 5222 "Zend/zend_language_scanner.c"
 yy470:
 		YYDEBUG(470, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -5317,7 +5315,7 @@ yy480:
 yy481:
 		YYDEBUG(481, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 2078 "Zend/zend_language_scanner.l"
+#line 2076 "Zend/zend_language_scanner.l"
 		{
 	char *s;
 	int bprefix = (yytext[0] != '<') ? 1 : 0;
@@ -5364,7 +5362,7 @@ yy481:
 
 	RETURN_TOKEN(T_START_HEREDOC);
 }
-#line 5368 "Zend/zend_language_scanner.c"
+#line 5366 "Zend/zend_language_scanner.c"
 yy482:
 		YYDEBUG(482, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -5388,7 +5386,7 @@ yy484:
 		{
 	RETURN_TOKEN(T_ARRAY);
 }
-#line 5392 "Zend/zend_language_scanner.c"
+#line 5390 "Zend/zend_language_scanner.c"
 yy486:
 		YYDEBUG(486, *YYCURSOR);
 		++YYCURSOR;
@@ -5401,7 +5399,7 @@ yy486:
 		{
 	RETURN_TOKEN(T_BREAK);
 }
-#line 5405 "Zend/zend_language_scanner.c"
+#line 5403 "Zend/zend_language_scanner.c"
 yy488:
 		YYDEBUG(488, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -5420,7 +5418,7 @@ yy489:
 		{
 	RETURN_TOKEN(T_CATCH);
 }
-#line 5424 "Zend/zend_language_scanner.c"
+#line 5422 "Zend/zend_language_scanner.c"
 yy491:
 		YYDEBUG(491, *YYCURSOR);
 		++YYCURSOR;
@@ -5433,7 +5431,7 @@ yy491:
 		{
 	RETURN_TOKEN(T_CLASS);
 }
-#line 5437 "Zend/zend_language_scanner.c"
+#line 5435 "Zend/zend_language_scanner.c"
 yy493:
 		YYDEBUG(493, *YYCURSOR);
 		++YYCURSOR;
@@ -5446,7 +5444,7 @@ yy493:
 		{
 	RETURN_TOKEN(T_CLONE);
 }
-#line 5450 "Zend/zend_language_scanner.c"
+#line 5448 "Zend/zend_language_scanner.c"
 yy495:
 		YYDEBUG(495, *YYCURSOR);
 		++YYCURSOR;
@@ -5459,7 +5457,7 @@ yy495:
 		{
 	RETURN_TOKEN(T_CONST);
 }
-#line 5463 "Zend/zend_language_scanner.c"
+#line 5461 "Zend/zend_language_scanner.c"
 yy497:
 		YYDEBUG(497, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -5496,7 +5494,7 @@ yy501:
 		{
 	RETURN_TOKEN(T_EMPTY);
 }
-#line 5500 "Zend/zend_language_scanner.c"
+#line 5498 "Zend/zend_language_scanner.c"
 yy503:
 		YYDEBUG(503, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -5521,7 +5519,7 @@ yy505:
 		{
 	RETURN_TOKEN(T_ENDIF);
 }
-#line 5525 "Zend/zend_language_scanner.c"
+#line 5523 "Zend/zend_language_scanner.c"
 yy507:
 		YYDEBUG(507, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -5567,7 +5565,7 @@ yy511:
 		{
 	RETURN_TOKEN(T_FINAL);
 }
-#line 5571 "Zend/zend_language_scanner.c"
+#line 5569 "Zend/zend_language_scanner.c"
 yy512:
 		YYDEBUG(512, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -5628,7 +5626,7 @@ yy520:
 		{
 	RETURN_TOKEN(T_ISSET);
 }
-#line 5632 "Zend/zend_language_scanner.c"
+#line 5630 "Zend/zend_language_scanner.c"
 yy522:
 		YYDEBUG(522, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -5647,7 +5645,7 @@ yy523:
 		{
 	RETURN_TOKEN(T_PRINT);
 }
-#line 5651 "Zend/zend_language_scanner.c"
+#line 5649 "Zend/zend_language_scanner.c"
 yy525:
 		YYDEBUG(525, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -5702,7 +5700,7 @@ yy532:
 		{
 	RETURN_TOKEN(T_THROW);
 }
-#line 5706 "Zend/zend_language_scanner.c"
+#line 5704 "Zend/zend_language_scanner.c"
 yy534:
 		YYDEBUG(534, *YYCURSOR);
 		++YYCURSOR;
@@ -5715,7 +5713,7 @@ yy534:
 		{
 	RETURN_TOKEN(T_TRAIT);
 }
-#line 5719 "Zend/zend_language_scanner.c"
+#line 5717 "Zend/zend_language_scanner.c"
 yy536:
 		YYDEBUG(536, *YYCURSOR);
 		++YYCURSOR;
@@ -5728,7 +5726,7 @@ yy536:
 		{
 	RETURN_TOKEN(T_UNSET);
 }
-#line 5732 "Zend/zend_language_scanner.c"
+#line 5730 "Zend/zend_language_scanner.c"
 yy538:
 		YYDEBUG(538, *YYCURSOR);
 		++YYCURSOR;
@@ -5741,7 +5739,7 @@ yy538:
 		{
 	RETURN_TOKEN(T_WHILE);
 }
-#line 5745 "Zend/zend_language_scanner.c"
+#line 5743 "Zend/zend_language_scanner.c"
 yy540:
 		YYDEBUG(540, *YYCURSOR);
 		yyaccept = 6;
@@ -5763,7 +5761,7 @@ yy541:
 		{
 	RETURN_TOKEN(T_YIELD);
 }
-#line 5767 "Zend/zend_language_scanner.c"
+#line 5765 "Zend/zend_language_scanner.c"
 yy542:
 		YYDEBUG(542, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -5859,7 +5857,7 @@ yy555:
 		{
 	RETURN_TOKEN(T_BOOL_CAST);
 }
-#line 5863 "Zend/zend_language_scanner.c"
+#line 5861 "Zend/zend_language_scanner.c"
 yy558:
 		YYDEBUG(558, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -5893,7 +5891,7 @@ yy562:
 		{
 	RETURN_TOKEN(T_DOUBLE_CAST);
 }
-#line 5897 "Zend/zend_language_scanner.c"
+#line 5895 "Zend/zend_language_scanner.c"
 yy564:
 		YYDEBUG(564, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -5962,7 +5960,7 @@ yy573:
 		{
 	RETURN_TOKEN(T_ELSEIF);
 }
-#line 5966 "Zend/zend_language_scanner.c"
+#line 5964 "Zend/zend_language_scanner.c"
 yy575:
 		YYDEBUG(575, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -5996,7 +5994,7 @@ yy577:
 		{
 	RETURN_TOKEN(T_ENDFOR);
 }
-#line 6000 "Zend/zend_language_scanner.c"
+#line 5998 "Zend/zend_language_scanner.c"
 yy578:
 		YYDEBUG(578, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -6045,7 +6043,7 @@ yy584:
 		{
 	RETURN_TOKEN(T_GLOBAL);
 }
-#line 6049 "Zend/zend_language_scanner.c"
+#line 6047 "Zend/zend_language_scanner.c"
 yy586:
 		YYDEBUG(586, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -6106,7 +6104,7 @@ yy594:
 		{
 	RETURN_TOKEN(T_PUBLIC);
 }
-#line 6110 "Zend/zend_language_scanner.c"
+#line 6108 "Zend/zend_language_scanner.c"
 yy596:
 		YYDEBUG(596, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -6125,7 +6123,7 @@ yy597:
 		{
 	RETURN_TOKEN(T_RETURN);
 }
-#line 6129 "Zend/zend_language_scanner.c"
+#line 6127 "Zend/zend_language_scanner.c"
 yy599:
 		YYDEBUG(599, *YYCURSOR);
 		++YYCURSOR;
@@ -6138,7 +6136,7 @@ yy599:
 		{
 	RETURN_TOKEN(T_STATIC);
 }
-#line 6142 "Zend/zend_language_scanner.c"
+#line 6140 "Zend/zend_language_scanner.c"
 yy601:
 		YYDEBUG(601, *YYCURSOR);
 		++YYCURSOR;
@@ -6151,7 +6149,7 @@ yy601:
 		{
 	RETURN_TOKEN(T_SWITCH);
 }
-#line 6155 "Zend/zend_language_scanner.c"
+#line 6153 "Zend/zend_language_scanner.c"
 yy603:
 		YYDEBUG(603, *YYCURSOR);
 		++YYCURSOR;
@@ -6235,7 +6233,7 @@ yy614:
 		{
 	RETURN_TOKEN(T_ARRAY_CAST);
 }
-#line 6239 "Zend/zend_language_scanner.c"
+#line 6237 "Zend/zend_language_scanner.c"
 yy616:
 		YYDEBUG(616, *YYCURSOR);
 		++YYCURSOR;
@@ -6285,7 +6283,7 @@ yy622:
 		{
 	RETURN_TOKEN(T_UNSET_CAST);
 }
-#line 6289 "Zend/zend_language_scanner.c"
+#line 6287 "Zend/zend_language_scanner.c"
 yy624:
 		YYDEBUG(624, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -6316,7 +6314,7 @@ yy627:
 		{
 	RETURN_TOKEN(T_DECLARE);
 }
-#line 6320 "Zend/zend_language_scanner.c"
+#line 6318 "Zend/zend_language_scanner.c"
 yy629:
 		YYDEBUG(629, *YYCURSOR);
 		++YYCURSOR;
@@ -6329,7 +6327,7 @@ yy629:
 		{
 	RETURN_TOKEN(T_DEFAULT);
 }
-#line 6333 "Zend/zend_language_scanner.c"
+#line 6331 "Zend/zend_language_scanner.c"
 yy631:
 		YYDEBUG(631, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -6366,7 +6364,7 @@ yy635:
 		{
 	RETURN_TOKEN(T_EXTENDS);
 }
-#line 6370 "Zend/zend_language_scanner.c"
+#line 6368 "Zend/zend_language_scanner.c"
 yy637:
 		YYDEBUG(637, *YYCURSOR);
 		++YYCURSOR;
@@ -6379,7 +6377,7 @@ yy637:
 		{
 	RETURN_TOKEN(T_FINALLY);
 }
-#line 6383 "Zend/zend_language_scanner.c"
+#line 6381 "Zend/zend_language_scanner.c"
 yy639:
 		YYDEBUG(639, *YYCURSOR);
 		++YYCURSOR;
@@ -6392,7 +6390,7 @@ yy639:
 		{
 	RETURN_TOKEN(T_FOREACH);
 }
-#line 6396 "Zend/zend_language_scanner.c"
+#line 6394 "Zend/zend_language_scanner.c"
 yy641:
 		YYDEBUG(641, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -6430,7 +6428,7 @@ yy644:
 		{
 	RETURN_TOKEN(T_INCLUDE);
 }
-#line 6434 "Zend/zend_language_scanner.c"
+#line 6432 "Zend/zend_language_scanner.c"
 yy645:
 		YYDEBUG(645, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -6467,7 +6465,7 @@ yy649:
 		{
 	RETURN_TOKEN(T_PRIVATE);
 }
-#line 6471 "Zend/zend_language_scanner.c"
+#line 6469 "Zend/zend_language_scanner.c"
 yy651:
 		YYDEBUG(651, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -6499,7 +6497,7 @@ yy653:
 		{
 	RETURN_TOKEN(T_REQUIRE);
 }
-#line 6503 "Zend/zend_language_scanner.c"
+#line 6501 "Zend/zend_language_scanner.c"
 yy654:
 		YYDEBUG(654, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -6519,11 +6517,11 @@ yy656:
 		}
 		YYDEBUG(657, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 1774 "Zend/zend_language_scanner.l"
+#line 1772 "Zend/zend_language_scanner.l"
 		{
 	RETURN_TOKEN(T_DIR);
 }
-#line 6527 "Zend/zend_language_scanner.c"
+#line 6525 "Zend/zend_language_scanner.c"
 yy658:
 		YYDEBUG(658, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -6572,7 +6570,7 @@ yy665:
 		{
 	RETURN_TOKEN(T_STRING_CAST);
 }
-#line 6576 "Zend/zend_language_scanner.c"
+#line 6574 "Zend/zend_language_scanner.c"
 yy667:
 		YYDEBUG(667, *YYCURSOR);
 		++YYCURSOR;
@@ -6582,7 +6580,7 @@ yy667:
 		{
 	RETURN_TOKEN(T_OBJECT_CAST);
 }
-#line 6586 "Zend/zend_language_scanner.c"
+#line 6584 "Zend/zend_language_scanner.c"
 yy669:
 		YYDEBUG(669, *YYCURSOR);
 		++YYCURSOR;
@@ -6595,7 +6593,7 @@ yy669:
 		{
 	RETURN_TOKEN(T_ABSTRACT);
 }
-#line 6599 "Zend/zend_language_scanner.c"
+#line 6597 "Zend/zend_language_scanner.c"
 yy671:
 		YYDEBUG(671, *YYCURSOR);
 		++YYCURSOR;
@@ -6608,7 +6606,7 @@ yy671:
 		{
 	RETURN_TOKEN(T_CALLABLE);
 }
-#line 6612 "Zend/zend_language_scanner.c"
+#line 6610 "Zend/zend_language_scanner.c"
 yy673:
 		YYDEBUG(673, *YYCURSOR);
 		++YYCURSOR;
@@ -6621,7 +6619,7 @@ yy673:
 		{
 	RETURN_TOKEN(T_CONTINUE);
 }
-#line 6625 "Zend/zend_language_scanner.c"
+#line 6623 "Zend/zend_language_scanner.c"
 yy675:
 		YYDEBUG(675, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -6652,7 +6650,7 @@ yy678:
 		{
 	RETURN_TOKEN(T_ENDWHILE);
 }
-#line 6656 "Zend/zend_language_scanner.c"
+#line 6654 "Zend/zend_language_scanner.c"
 yy680:
 		YYDEBUG(680, *YYCURSOR);
 		++YYCURSOR;
@@ -6665,7 +6663,7 @@ yy680:
 		{
 	RETURN_TOKEN(T_FUNCTION);
 }
-#line 6669 "Zend/zend_language_scanner.c"
+#line 6667 "Zend/zend_language_scanner.c"
 yy682:
 		YYDEBUG(682, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -6733,11 +6731,11 @@ yy692:
 		}
 		YYDEBUG(693, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 1770 "Zend/zend_language_scanner.l"
+#line 1768 "Zend/zend_language_scanner.l"
 		{
 	RETURN_TOKEN(T_FILE);
 }
-#line 6741 "Zend/zend_language_scanner.c"
+#line 6739 "Zend/zend_language_scanner.c"
 yy694:
 		YYDEBUG(694, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -6758,11 +6756,11 @@ yy696:
 		}
 		YYDEBUG(697, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 1766 "Zend/zend_language_scanner.l"
+#line 1764 "Zend/zend_language_scanner.l"
 		{
 	RETURN_TOKEN(T_LINE);
 }
-#line 6766 "Zend/zend_language_scanner.c"
+#line 6764 "Zend/zend_language_scanner.c"
 yy698:
 		YYDEBUG(698, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -6803,7 +6801,7 @@ yy703:
 		{
 	RETURN_TOKEN(T_ENDSWITCH);
 }
-#line 6807 "Zend/zend_language_scanner.c"
+#line 6805 "Zend/zend_language_scanner.c"
 yy705:
 		YYDEBUG(705, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -6834,7 +6832,7 @@ yy708:
 		{
     RETURN_TOKEN(T_INSTEADOF);
 }
-#line 6838 "Zend/zend_language_scanner.c"
+#line 6836 "Zend/zend_language_scanner.c"
 yy710:
 		YYDEBUG(710, *YYCURSOR);
 		++YYCURSOR;
@@ -6847,7 +6845,7 @@ yy710:
 		{
 	RETURN_TOKEN(T_INTERFACE);
 }
-#line 6851 "Zend/zend_language_scanner.c"
+#line 6849 "Zend/zend_language_scanner.c"
 yy712:
 		YYDEBUG(712, *YYCURSOR);
 		++YYCURSOR;
@@ -6860,7 +6858,7 @@ yy712:
 		{
 	RETURN_TOKEN(T_NAMESPACE);
 }
-#line 6864 "Zend/zend_language_scanner.c"
+#line 6862 "Zend/zend_language_scanner.c"
 yy714:
 		YYDEBUG(714, *YYCURSOR);
 		++YYCURSOR;
@@ -6873,7 +6871,7 @@ yy714:
 		{
 	RETURN_TOKEN(T_PROTECTED);
 }
-#line 6877 "Zend/zend_language_scanner.c"
+#line 6875 "Zend/zend_language_scanner.c"
 yy716:
 		YYDEBUG(716, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -6894,11 +6892,11 @@ yy718:
 		}
 		YYDEBUG(719, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 1750 "Zend/zend_language_scanner.l"
+#line 1748 "Zend/zend_language_scanner.l"
 		{
 	RETURN_TOKEN(T_CLASS_C);
 }
-#line 6902 "Zend/zend_language_scanner.c"
+#line 6900 "Zend/zend_language_scanner.c"
 yy720:
 		YYDEBUG(720, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -6930,11 +6928,11 @@ yy724:
 		}
 		YYDEBUG(725, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 1754 "Zend/zend_language_scanner.l"
+#line 1752 "Zend/zend_language_scanner.l"
 		{
 	RETURN_TOKEN(T_TRAIT_C);
 }
-#line 6938 "Zend/zend_language_scanner.c"
+#line 6936 "Zend/zend_language_scanner.c"
 yy726:
 		YYDEBUG(726, *YYCURSOR);
 		++YYCURSOR;
@@ -6947,7 +6945,7 @@ yy726:
 		{
 	RETURN_TOKEN(T_ENDDECLARE);
 }
-#line 6951 "Zend/zend_language_scanner.c"
+#line 6949 "Zend/zend_language_scanner.c"
 yy728:
 		YYDEBUG(728, *YYCURSOR);
 		++YYCURSOR;
@@ -6960,7 +6958,7 @@ yy728:
 		{
 	RETURN_TOKEN(T_ENDFOREACH);
 }
-#line 6964 "Zend/zend_language_scanner.c"
+#line 6962 "Zend/zend_language_scanner.c"
 yy730:
 		YYDEBUG(730, *YYCURSOR);
 		++YYCURSOR;
@@ -6973,7 +6971,7 @@ yy730:
 		{
 	RETURN_TOKEN(T_IMPLEMENTS);
 }
-#line 6977 "Zend/zend_language_scanner.c"
+#line 6975 "Zend/zend_language_scanner.c"
 yy732:
 		YYDEBUG(732, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -6992,7 +6990,7 @@ yy733:
 		{
 	RETURN_TOKEN(T_INSTANCEOF);
 }
-#line 6996 "Zend/zend_language_scanner.c"
+#line 6994 "Zend/zend_language_scanner.c"
 yy735:
 		YYDEBUG(735, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -7040,11 +7038,11 @@ yy739:
 		}
 		YYDEBUG(740, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 1762 "Zend/zend_language_scanner.l"
+#line 1760 "Zend/zend_language_scanner.l"
 		{
 	RETURN_TOKEN(T_METHOD_C);
 }
-#line 7048 "Zend/zend_language_scanner.c"
+#line 7046 "Zend/zend_language_scanner.c"
 yy741:
 		YYDEBUG(741, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -7074,7 +7072,7 @@ yy744:
 	HANDLE_NEWLINES(yytext, yyleng);
 	RETURN_TOKEN(T_YIELD_FROM);
 }
-#line 7078 "Zend/zend_language_scanner.c"
+#line 7076 "Zend/zend_language_scanner.c"
 yy746:
 		YYDEBUG(746, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -7103,7 +7101,7 @@ yy749:
 		{
 	RETURN_TOKEN(T_INCLUDE_ONCE);
 }
-#line 7107 "Zend/zend_language_scanner.c"
+#line 7105 "Zend/zend_language_scanner.c"
 yy751:
 		YYDEBUG(751, *YYCURSOR);
 		++YYCURSOR;
@@ -7116,7 +7114,7 @@ yy751:
 		{
 	RETURN_TOKEN(T_REQUIRE_ONCE);
 }
-#line 7120 "Zend/zend_language_scanner.c"
+#line 7118 "Zend/zend_language_scanner.c"
 yy753:
 		YYDEBUG(753, *YYCURSOR);
 		++YYCURSOR;
@@ -7125,11 +7123,11 @@ yy753:
 		}
 		YYDEBUG(754, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 1758 "Zend/zend_language_scanner.l"
+#line 1756 "Zend/zend_language_scanner.l"
 		{
 	RETURN_TOKEN(T_FUNC_C);
 }
-#line 7133 "Zend/zend_language_scanner.c"
+#line 7131 "Zend/zend_language_scanner.c"
 yy755:
 		YYDEBUG(755, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -7155,11 +7153,11 @@ yy758:
 		}
 		YYDEBUG(759, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 1778 "Zend/zend_language_scanner.l"
+#line 1776 "Zend/zend_language_scanner.l"
 		{
 	RETURN_TOKEN(T_NS_C);
 }
-#line 7163 "Zend/zend_language_scanner.c"
+#line 7161 "Zend/zend_language_scanner.c"
 yy760:
 		YYDEBUG(760, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -7177,7 +7175,7 @@ yy761:
 		{
 	RETURN_TOKEN(T_HALT_COMPILER);
 }
-#line 7181 "Zend/zend_language_scanner.c"
+#line 7179 "Zend/zend_language_scanner.c"
 	}
 /* *********************************** */
 yyc_ST_LOOKING_FOR_PROPERTY:
@@ -7249,7 +7247,7 @@ yy766:
 	yy_pop_state();
 	goto restart;
 }
-#line 7253 "Zend/zend_language_scanner.c"
+#line 7251 "Zend/zend_language_scanner.c"
 yy767:
 		YYDEBUG(767, *YYCURSOR);
 		++YYCURSOR;
@@ -7266,7 +7264,7 @@ yy767:
 	HANDLE_NEWLINES(yytext, yyleng);
 	RETURN_TOKEN(T_WHITESPACE);
 }
-#line 7270 "Zend/zend_language_scanner.c"
+#line 7268 "Zend/zend_language_scanner.c"
 yy770:
 		YYDEBUG(770, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -7289,7 +7287,7 @@ yy771:
 	zend_copy_value(zendlval, yytext, yyleng);
 	RETURN_TOKEN(T_STRING);
 }
-#line 7293 "Zend/zend_language_scanner.c"
+#line 7291 "Zend/zend_language_scanner.c"
 yy774:
 		YYDEBUG(774, *YYCURSOR);
 		++YYCURSOR;
@@ -7299,7 +7297,7 @@ yy774:
 		{
 	RETURN_TOKEN(T_OBJECT_OPERATOR);
 }
-#line 7303 "Zend/zend_language_scanner.c"
+#line 7301 "Zend/zend_language_scanner.c"
 	}
 /* *********************************** */
 yyc_ST_LOOKING_FOR_VARNAME:
@@ -7363,7 +7361,7 @@ yy779:
 	yy_push_state(ST_IN_SCRIPTING);
 	goto restart;
 }
-#line 7367 "Zend/zend_language_scanner.c"
+#line 7365 "Zend/zend_language_scanner.c"
 yy780:
 		YYDEBUG(780, *YYCURSOR);
 		yych = *(YYMARKER = ++YYCURSOR);
@@ -7418,7 +7416,7 @@ yy784:
 	yy_push_state(ST_IN_SCRIPTING);
 	RETURN_TOKEN(T_STRING_VARNAME);
 }
-#line 7422 "Zend/zend_language_scanner.c"
+#line 7420 "Zend/zend_language_scanner.c"
 	}
 /* *********************************** */
 yyc_ST_NOWDOC:
@@ -7429,7 +7427,7 @@ yyc_ST_NOWDOC:
 	++YYCURSOR;
 	YYDEBUG(789, *YYCURSOR);
 	yyleng = YYCURSOR - SCNG(yy_text);
-#line 2331 "Zend/zend_language_scanner.l"
+#line 2329 "Zend/zend_language_scanner.l"
 	{
 	int newline = 0;
 
@@ -7485,7 +7483,7 @@ nowdoc_scan_done:
 	HANDLE_NEWLINES(yytext, yyleng - newline);
 	RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
 }
-#line 7489 "Zend/zend_language_scanner.c"
+#line 7487 "Zend/zend_language_scanner.c"
 /* *********************************** */
 yyc_ST_VAR_OFFSET:
 	{
@@ -7573,7 +7571,7 @@ yy792:
 		++YYCURSOR;
 		YYDEBUG(793, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 2388 "Zend/zend_language_scanner.l"
+#line 2386 "Zend/zend_language_scanner.l"
 		{
 	if (YYCURSOR > YYLIMIT) {
 		RETURN_TOKEN(END);
@@ -7582,13 +7580,13 @@ yy792:
 	zend_error(E_COMPILE_WARNING,"Unexpected character in input:  '%c' (ASCII=%d) state=%d", yytext[0], yytext[0], YYSTATE);
 	goto restart;
 }
-#line 7586 "Zend/zend_language_scanner.c"
+#line 7584 "Zend/zend_language_scanner.c"
 yy794:
 		YYDEBUG(794, *YYCURSOR);
 		++YYCURSOR;
 		YYDEBUG(795, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 1885 "Zend/zend_language_scanner.l"
+#line 1883 "Zend/zend_language_scanner.l"
 		{
 	/* Invalid rule to return a more explicit parse error with proper line number */
 	yyless(0);
@@ -7596,19 +7594,19 @@ yy794:
 	ZVAL_NULL(zendlval);
 	RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
 }
-#line 7600 "Zend/zend_language_scanner.c"
+#line 7598 "Zend/zend_language_scanner.c"
 yy796:
 		YYDEBUG(796, *YYCURSOR);
 		++YYCURSOR;
 yy797:
 		YYDEBUG(797, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 1880 "Zend/zend_language_scanner.l"
+#line 1878 "Zend/zend_language_scanner.l"
 		{
 	/* Only '[' or '-' can be valid, but returning other tokens will allow a more explicit parse error */
 	RETURN_TOKEN(yytext[0]);
 }
-#line 7612 "Zend/zend_language_scanner.c"
+#line 7610 "Zend/zend_language_scanner.c"
 yy798:
 		YYDEBUG(798, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -7643,7 +7641,7 @@ yy799:
 yy800:
 		YYDEBUG(800, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 1720 "Zend/zend_language_scanner.l"
+#line 1718 "Zend/zend_language_scanner.l"
 		{ /* Offset could be treated as a long */
 	if (yyleng < MAX_LENGTH_OF_LONG - 1 || (yyleng == MAX_LENGTH_OF_LONG - 1 && strcmp(yytext, long_min_digits) < 0)) {
 		char *end;
@@ -7659,7 +7657,7 @@ string:
 	}
 	RETURN_TOKEN(T_NUM_STRING);
 }
-#line 7663 "Zend/zend_language_scanner.c"
+#line 7661 "Zend/zend_language_scanner.c"
 yy801:
 		YYDEBUG(801, *YYCURSOR);
 		++YYCURSOR;
@@ -7681,23 +7679,23 @@ yy803:
 		}
 		YYDEBUG(805, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 1893 "Zend/zend_language_scanner.l"
+#line 1891 "Zend/zend_language_scanner.l"
 		{
 	zend_copy_value(zendlval, yytext, yyleng);
 	RETURN_TOKEN(T_STRING);
 }
-#line 7690 "Zend/zend_language_scanner.c"
+#line 7688 "Zend/zend_language_scanner.c"
 yy806:
 		YYDEBUG(806, *YYCURSOR);
 		++YYCURSOR;
 		YYDEBUG(807, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 1875 "Zend/zend_language_scanner.l"
+#line 1873 "Zend/zend_language_scanner.l"
 		{
 	yy_pop_state();
 	RETURN_TOKEN(']');
 }
-#line 7701 "Zend/zend_language_scanner.c"
+#line 7699 "Zend/zend_language_scanner.c"
 yy808:
 		YYDEBUG(808, *YYCURSOR);
 		++YYCURSOR;
@@ -7722,12 +7720,12 @@ yy808:
 yy810:
 		YYDEBUG(810, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 1870 "Zend/zend_language_scanner.l"
+#line 1868 "Zend/zend_language_scanner.l"
 		{
 	zend_copy_value(zendlval, (yytext+1), (yyleng-1));
 	RETURN_TOKEN(T_VARIABLE);
 }
-#line 7731 "Zend/zend_language_scanner.c"
+#line 7729 "Zend/zend_language_scanner.c"
 yy811:
 		YYDEBUG(811, *YYCURSOR);
 		++YYCURSOR;
@@ -7739,12 +7737,12 @@ yy811:
 yy813:
 		YYDEBUG(813, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 1736 "Zend/zend_language_scanner.l"
+#line 1734 "Zend/zend_language_scanner.l"
 		{ /* Offset must be treated as a string */
 	ZVAL_STRINGL(zendlval, yytext, yyleng);
 	RETURN_TOKEN(T_NUM_STRING);
 }
-#line 7748 "Zend/zend_language_scanner.c"
+#line 7746 "Zend/zend_language_scanner.c"
 yy814:
 		YYDEBUG(814, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -7784,6 +7782,6 @@ yy819:
 		goto yy813;
 	}
 }
-#line 2397 "Zend/zend_language_scanner.l"
+#line 2395 "Zend/zend_language_scanner.l"
 
 }
