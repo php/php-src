@@ -1,9 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.2.0beta2
+?? ??? 2017, PHP 7.2.0beta2
 
 - Core:
   . Fixed bug #74947 (Segfault in scanner on INF number). (Laruence)
+  . Fixed bug #74954 (null deref and segfault in zend_generator_resume()). (Bob)
 
 - Session:
   . Fixed bug #74892 (Url Rewriting (trans_sid) not working on urls that start
