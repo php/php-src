@@ -109,10 +109,6 @@ PHP_FUNCTION(sodium_increment);
 PHP_FUNCTION(sodium_memcmp);
 PHP_FUNCTION(sodium_memzero);
 
-#define crypto_kx_BYTES crypto_scalarmult_BYTES
-#define crypto_kx_PUBLICKEYBYTES crypto_scalarmult_SCALARBYTES
-#define crypto_kx_SECRETKEYBYTES crypto_scalarmult_SCALARBYTES
-
 #endif	/* PHP_LIBSODIUM_H */
 
 /*
