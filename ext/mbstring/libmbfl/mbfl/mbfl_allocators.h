@@ -31,6 +31,7 @@
 #ifndef MBFL_ALLOCATORS_H
 #define MBFL_ALLOCATORS_H
 
+#include <stddef.h>
 #include "mbfl_defs.h"
 
 typedef struct _mbfl_allocators {
