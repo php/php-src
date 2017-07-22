@@ -1382,7 +1382,12 @@ void zend_ssa_remove_block(zend_op_array *op_array, zend_ssa *ssa, int i) /* {{{
 				break;
 			}
 		}
-		ZEND_ASSERT(pred_offset != -1);
+
+		/* If there are duplicate successors, the predecessors may have been removed in
+		 * a previous iteration already. */
+		if (pred_offset == -1) {
+			continue;
+		}
 
 		/* For phis in successor blocks, remove the operands associated with this block */
 		for (phi = next_ssa_block->phis; phi; phi = phi->next) {
