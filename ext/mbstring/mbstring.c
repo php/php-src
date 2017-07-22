@@ -849,8 +849,9 @@ php_mb_parse_encoding_array(zval *array, const mbfl_encoding ***return_list, siz
 {
 	zval *hash_entry;
 	HashTable *target_hash;
-	int i, n, size, bauto, ret = SUCCESS;
+	int i, n, bauto, ret = SUCCESS;
 	const mbfl_encoding **list, **entry;
+	size_t size;
 
 	list = NULL;
 	if (Z_TYPE_P(array) == IS_ARRAY) {
@@ -2014,7 +2015,7 @@ PHP_FUNCTION(mb_detect_order)
 }
 /* }}} */
 
-static inline int php_mb_check_code_point(long cp)
+static inline int php_mb_check_code_point(zend_long cp)
 {
 	enum mbfl_no_encoding no_enc;
 	char* buf;
@@ -2336,7 +2337,7 @@ PHP_FUNCTION(mb_output_handler)
    Get character numbers of a string */
 PHP_FUNCTION(mb_strlen)
 {
-	int n;
+	size_t n;
 	mbfl_string string;
 	char *str, *enc_name = NULL;
 	size_t str_len, enc_name_len;
@@ -2437,7 +2438,7 @@ PHP_FUNCTION(mb_strrpos)
 	zval *zoffset = NULL;
 	zend_long offset = 0, str_flg, n;
 	char *enc_name2 = NULL;
-	int enc_name_len2;
+	size_t enc_name_len2;
 
 	mbfl_string_init(&haystack);
 	mbfl_string_init(&needle);
@@ -4314,7 +4315,7 @@ out:
 
 PHP_FUNCTION(mb_send_mail)
 {
-	int n;
+	size_t n;
 	char *to = NULL;
 	size_t to_len;
 	char *message = NULL;
@@ -5399,7 +5400,7 @@ MBSTRING_API char *php_mb_safe_strrchr(const char *s, unsigned int c, size_t nby
 
 /* {{{ MBSTRING_API int php_mb_stripos()
  */
-MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t old_haystack_len, const char *old_needle, size_t old_needle_len, long offset, const char *from_encoding)
+MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t old_haystack_len, const char *old_needle, size_t old_needle_len, zend_long offset, const char *from_encoding)
 {
 	size_t n = (size_t) -1;
 	mbfl_string haystack, needle;
