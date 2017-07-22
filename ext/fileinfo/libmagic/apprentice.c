@@ -3340,12 +3340,3 @@ file_magicfind(struct magic_set *ms, const char *name, struct mlist *v)
 	}
 	return -1;
 }
-
-public const char *
-file_magicfile(struct magic_set *ms)
-{
-	if(strncmp(ms->file, "unknown", strlen("unknown")) == 0) {
-		return "";
-	}
-	return ms->file;
-}

@@ -655,7 +655,7 @@ PHP_FUNCTION(finfo_magic_file_get)
 		}
 	}
 
-	ret_val = (char *) file_magicfile(finfo->magic);
+	ret_val = (char *) magic_magic_file_get(finfo->magic);
 	RETVAL_STRING(ret_val);
 }
 /* }}} */
