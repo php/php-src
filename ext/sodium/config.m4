@@ -18,12 +18,16 @@ if test "$PHP_SODIUM" != "no"; then
 
   dnl pkg-config output
   elif test -x "$PKG_CONFIG" && $PKG_CONFIG --exists libsodium; then
-    LIBSODIUM_CFLAGS=`$PKG_CONFIG libsodium --cflags`
-    LIBSODIUM_LIBS=`$PKG_CONFIG libsodium --libs`
     LIBSODIUM_VERSION=`$PKG_CONFIG libsodium --modversion`
-    AC_MSG_RESULT(version $LIBSODIUM_VERSION found using pkg-config)
-    PHP_EVAL_LIBLINE($LIBSODIUM_LIBS, SODIUM_SHARED_LIBADD)
-    PHP_EVAL_INCLINE($LIBSODIUM_CFLAGS)
+    if $PKG_CONFIG libsodium --atleast-version=1.0.8; then
+      LIBSODIUM_CFLAGS=`$PKG_CONFIG libsodium --cflags`
+      LIBSODIUM_LIBS=`$PKG_CONFIG libsodium --libs`
+      AC_MSG_RESULT(version $LIBSODIUM_VERSION found using pkg-config)
+      PHP_EVAL_LIBLINE($LIBSODIUM_LIBS, SODIUM_SHARED_LIBADD)
+      PHP_EVAL_INCLINE($LIBSODIUM_CFLAGS)
+    else
+      AC_MSG_ERROR([Libsodium $LIBSODIUM_VERSION is too old, version >= 1.0.8 required])
+    fi
 
   dnl search default path list
   else
@@ -39,7 +43,7 @@ if test "$PHP_SODIUM" != "no"; then
   fi
 
   LIBNAME=sodium
-  LIBSYMBOL=crypto_pwhash_scryptsalsa208sha256
+  LIBSYMBOL=sodium_add
 
   if test -n "$LIBSODIUM_DIR"; then
     PHP_ADD_INCLUDE($LIBSODIUM_DIR/include)
@@ -50,13 +54,8 @@ if test "$PHP_SODIUM" != "no"; then
   [
     AC_DEFINE(HAVE_LIBSODIUMLIB,1,[ ])
   ],[
-    AC_MSG_ERROR([wrong libsodium lib version or lib not found])
+    AC_MSG_ERROR([wrong libsodium lib version (< 1.0.8) or lib not found])
   ],[
-  ])
-  PHP_CHECK_LIBRARY($LIBNAME,crypto_aead_aes256gcm_encrypt,
-  [
-    AC_DEFINE(HAVE_CRYPTO_AEAD_AES256GCM,1,[ ])
-  ],[],[
   ])
 
   PHP_SUBST(SODIUM_SHARED_LIBADD)

@@ -175,6 +175,10 @@ ZEND_END_ARG_INFO()
 # define HAVE_AESGCM 1
 #endif
 
+#ifndef crypto_aead_chacha20poly1305_ietf_KEYBYTES
+# define crypto_aead_chacha20poly1305_ietf_KEYBYTES crypto_aead_chacha20poly1305_KEYBYTES
+#endif
+
 const zend_function_entry sodium_functions[] = {
 	PHP_FE(sodium_crypto_aead_aes256gcm_is_available, AI_None)
 #ifdef HAVE_AESGCM
