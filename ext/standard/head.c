@@ -268,9 +268,10 @@ PHP_FUNCTION(http_cookie_set)
 {
 	zend_string *name, *value = NULL, *path = NULL, *domain = NULL;
 	zend_long expires = 0;
-	zend_bool secure = 0, httponly = 0, encode = HTTP_COOKIE_ENCODE_RFC1738;
+	zend_bool secure = 0, httponly = 0;
+	int encode = HTTP_COOKIE_ENCODE_RFC1738;
 	zval *option_buffer;
-	HashTable *options = 0;
+	HashTable *options;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(name)
