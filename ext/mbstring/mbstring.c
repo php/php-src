@@ -654,17 +654,17 @@ static char *get_output_encoding(void) {
 
 
 /* {{{ allocators */
-static void *_php_mb_allocators_malloc(unsigned int sz)
+static void *_php_mb_allocators_malloc(size_t sz)
 {
 	return emalloc(sz);
 }
 
-static void *_php_mb_allocators_realloc(void *ptr, unsigned int sz)
+static void *_php_mb_allocators_realloc(void *ptr, size_t sz)
 {
 	return erealloc(ptr, sz);
 }
 
-static void *_php_mb_allocators_calloc(unsigned int nelems, unsigned int szelem)
+static void *_php_mb_allocators_calloc(size_t nelems, size_t szelem)
 {
 	return ecalloc(nelems, szelem);
 }
@@ -674,12 +674,12 @@ static void _php_mb_allocators_free(void *ptr)
 	efree(ptr);
 }
 
-static void *_php_mb_allocators_pmalloc(unsigned int sz)
+static void *_php_mb_allocators_pmalloc(size_t sz)
 {
 	return pemalloc(sz, 1);
 }
 
-static void *_php_mb_allocators_prealloc(void *ptr, unsigned int sz)
+static void *_php_mb_allocators_prealloc(void *ptr, size_t sz)
 {
 	return perealloc(ptr, sz, 1);
 }
