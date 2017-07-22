@@ -28,11 +28,17 @@
 #define COOKIE_SECURE     "; secure"
 #define COOKIE_HTTPONLY   "; HttpOnly"
 
+#define HTTP_COOKIE_ENCODE_NONE 0
+#define HTTP_COOKIE_ENCODE_RFC1738 1
+#define HTTP_COOKIE_ENCODE_RFC3986 2
+
 extern PHP_RINIT_FUNCTION(head);
 PHP_FUNCTION(header);
 PHP_FUNCTION(header_remove);
 PHP_FUNCTION(setcookie);
 PHP_FUNCTION(setrawcookie);
+PHP_FUNCTION(http_cookie_set);
+PHP_FUNCTION(http_cookie_remove);
 PHP_FUNCTION(headers_sent);
 PHP_FUNCTION(headers_list);
 PHP_FUNCTION(http_response_code);

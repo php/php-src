@@ -1437,6 +1437,16 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_setrawcookie, 0, 0, 1)
 	ZEND_ARG_INFO(0, httponly)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_http_cookie_set, 0, 0, 2)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, value)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_http_cookie_remove, 0)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_headers_sent, 0, 0, 0)
 	ZEND_ARG_INFO(1, file)
 	ZEND_ARG_INFO(1, line)
@@ -3034,6 +3044,8 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 
 	PHP_FE(setcookie,														arginfo_setcookie)
 	PHP_FE(setrawcookie,													arginfo_setrawcookie)
+	PHP_FE(http_cookie_set,													arginfo_http_cookie_set)
+	PHP_FE(http_cookie_remove,												arginfo_http_cookie_remove)
 	PHP_FE(header,															arginfo_header)
 	PHP_FE(header_remove,													arginfo_header_remove)
 	PHP_FE(headers_sent,													arginfo_headers_sent)
@@ -3619,6 +3631,10 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	REGISTER_LONG_CONSTANT("PHP_URL_FRAGMENT", PHP_URL_FRAGMENT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHP_QUERY_RFC1738", PHP_QUERY_RFC1738, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHP_QUERY_RFC3986", PHP_QUERY_RFC3986, CONST_CS | CONST_PERSISTENT);
+
+	REGISTER_LONG_CONSTANT("HTTP_COOKIE_ENCODE_NONE", HTTP_COOKIE_ENCODE_NONE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("HTTP_COOKIE_ENCODE_RFC1738", HTTP_COOKIE_ENCODE_RFC1738, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("HTTP_COOKIE_ENCODE_RFC3986", HTTP_COOKIE_ENCODE_RFC3986, CONST_CS | CONST_PERSISTENT);
 
 #define REGISTER_MATH_CONSTANT(x)  REGISTER_DOUBLE_CONSTANT(#x, x, CONST_CS | CONST_PERSISTENT)
 	REGISTER_MATH_CONSTANT(M_E);

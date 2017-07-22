@@ -93,26 +93,40 @@ PHPAPI int php_setcookie(zend_string *name, zend_string *value, time_t expires, 
 	if (!ZSTR_LEN(name)) {
 		zend_error( E_WARNING, "Cookie names must not be empty" );
 		return FAILURE;
-	} else if (strpbrk(ZSTR_VAL(name), "=,; \t\r\n\013\014") != NULL) {   /* man isspace for \013 and \014 */
-		zend_error(E_WARNING, "Cookie names cannot contain any of the following '=,; \\t\\r\\n\\013\\014'" );
-		return FAILURE;
 	}
 
-	if (!url_encode && value &&
-			strpbrk(ZSTR_VAL(value), ",; \t\r\n\013\014") != NULL) { /* man isspace for \013 and \014 */
-		zend_error(E_WARNING, "Cookie values cannot contain any of the following ',; \\t\\r\\n\\013\\014'" );
+	/* man isspace for \013 and \014 */
+	if (strpbrk(ZSTR_VAL(name), "=,; \t\r\n\013\014") != NULL) {
+		zend_error(E_WARNING, "Cookie names cannot contain any of the following '=,; \\t\\r\\n\\013\\014'" );
 		return FAILURE;
 	}
 
 	len += ZSTR_LEN(name);
 	if (value) {
-		if (url_encode) {
-			encoded_value = php_url_encode(ZSTR_VAL(value), ZSTR_LEN(value));
-			len += ZSTR_LEN(encoded_value);
-		} else {
-			encoded_value = zend_string_copy(value);
-			len += ZSTR_LEN(encoded_value);
+		switch(url_encode) {
+			case HTTP_COOKIE_ENCODE_NONE:
+				/* man isspace for \013 and \014 */
+				if (strpbrk(ZSTR_VAL(value), ",; \t\r\n\013\014") != NULL) {
+					zend_error(E_WARNING, "Cookie values cannot contain any of the following ',; \\t\\r\\n\\013\\014'" );
+					return FAILURE;
+				}
+				encoded_value = zend_string_copy(value);
+				break;
+
+			case HTTP_COOKIE_ENCODE_RFC1738:
+				encoded_value = php_url_encode(ZSTR_VAL(value), ZSTR_LEN(value));
+				break;
+
+			case HTTP_COOKIE_ENCODE_RFC3986:
+				encoded_value = php_raw_url_encode(ZSTR_VAL(value), ZSTR_LEN(value));
+				break;
+
+			default: {
+				zend_error(E_WARNING, "Invalid cookie encoding.");
+				return FAILURE;
+			}
 		}
+		len += ZSTR_LEN(encoded_value);
 	}
 
 	if (path) {
@@ -212,7 +226,7 @@ PHP_FUNCTION(setcookie)
 		Z_PARAM_BOOL(httponly)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (php_setcookie(name, value, expires, path, domain, secure, 1, httponly) == SUCCESS) {
+	if (php_setcookie(name, value, expires, path, domain, secure, HTTP_COOKIE_ENCODE_RFC1738, httponly) == SUCCESS) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
@@ -239,7 +253,7 @@ PHP_FUNCTION(setrawcookie)
 		Z_PARAM_BOOL(httponly)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (php_setcookie(name, value, expires, path, domain, secure, 0, httponly) == SUCCESS) {
+	if (php_setcookie(name, value, expires, path, domain, secure, HTTP_COOKIE_ENCODE_NONE, httponly) == SUCCESS) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
@@ -247,6 +261,76 @@ PHP_FUNCTION(setrawcookie)
 }
 /* }}} */
 
+/* http_cookie_set(name, value, options) */
+/* {{{ proto bool http_cookie_set(string name, string value, [array options])
+   Send a cookie */
+PHP_FUNCTION(http_cookie_set)
+{
+	zend_string *name, *value = NULL, *path = NULL, *domain = NULL;
+	zend_long expires = 0;
+	zend_bool secure = 0, httponly = 0, encode = HTTP_COOKIE_ENCODE_RFC1738;
+	zval *option_buffer;
+	HashTable *options = 0;
+
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STR(name)
+		Z_PARAM_STR(value)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY_OR_OBJECT_HT(options)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if(options) {
+		if ((option_buffer = zend_hash_str_find(options, "expires", sizeof("expires")-1)) != NULL) {
+			expires = zval_get_long(option_buffer);
+		}
+
+		if ((option_buffer = zend_hash_str_find(options, "path", sizeof("path")-1)) != NULL) {
+			path = zval_get_string(option_buffer);
+		}
+
+		if ((option_buffer = zend_hash_str_find(options, "domain", sizeof("domain")-1)) != NULL) {
+			domain = zval_get_string(option_buffer);
+		}
+
+		if ((option_buffer = zend_hash_str_find(options, "secure", sizeof("secure")-1)) != NULL) {
+			secure = zval_get_long(option_buffer);
+		}
+
+		if ((option_buffer = zend_hash_str_find(options, "httponly", sizeof("httponly")-1)) != NULL) {
+			httponly = zval_get_long(option_buffer);
+		}
+
+		if ((option_buffer = zend_hash_str_find(options, "encode", sizeof("encode")-1)) != NULL) {
+			encode = zval_get_long(option_buffer);
+		}
+	}
+
+	if (php_setcookie(name, value, expires, path, domain, secure, encode, httponly) == SUCCESS) {
+		RETVAL_TRUE;
+	} else {
+		RETVAL_FALSE;
+	}
+}
+/* }}} */
+
+/* http_cookie_remove(name) */
+/* {{{ proto bool http_cookie_remove(string name)
+   Remove a cookie */
+PHP_FUNCTION(http_cookie_remove)
+{
+	zend_string *name;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(name)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (php_setcookie(name, NULL, 0, NULL, NULL, 0, HTTP_COOKIE_ENCODE_NONE, 0) == SUCCESS) {
+		RETVAL_TRUE;
+	} else {
+		RETVAL_FALSE;
+	}
+}
+/* }}} */
 
 /* {{{ proto bool headers_sent([string &$file [, int &$line]])
    Returns true if headers have already been sent, false otherwise */
