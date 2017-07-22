@@ -1,0 +1,26 @@
+--TEST--
+Test the external magic file path from env
+--SKIPIF--
+<?php
+if (!class_exists('finfo'))
+	die('skip no fileinfo extension');
+--FILE--
+<?php
+
+putenv('MAGIC=' . __DIR__ .'/magic');
+
+$finfo = new finfo(FILEINFO_NONE);
+$path = $finfo->getMagicFile();
+var_dump(substr($path, strlen(dirname(__DIR__, 3))));
+
+$finfo = finfo_open(FILEINFO_NONE);
+$path = finfo_magic_file_get($finfo);
+var_dump(substr($path, strlen(dirname(__DIR__, 3))));
+
+?>
+===DONE===
+--EXPECT--
+string(25) "/ext/fileinfo/tests/magic"
+string(25) "/ext/fileinfo/tests/magic"
+===DONE===
+

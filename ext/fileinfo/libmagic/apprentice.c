@@ -632,8 +632,6 @@ file_apprentice(struct magic_set *ms, const char *fn, int action)
 		fn = p;
 	}
 
-	efree(mfn);
-
 	if (errs == -1) {
 		for (i = 0; i < MAGIC_SETS; i++) {
 			mlist_free(ms->mlist[i]);
@@ -3341,4 +3339,13 @@ file_magicfind(struct magic_set *ms, const char *name, struct mlist *v)
 		}
 	}
 	return -1;
+}
+
+public const char *
+file_magicfile(struct magic_set *ms)
+{
+	if(strncmp(ms->file, "unknown", strlen("unknown")) == 0) {
+		return "";
+	}
+	return ms->file;
 }
