@@ -98,6 +98,15 @@
 #include "mbfl_convert.h"
 #include "mbfl_ident.h"
 
+/* Prefer local fix, otherwise need to include too much. */
+#ifndef ssize_t
+#if defined(_WIN64)
+#define ssize_t __int64
+#elif defined(_WIN32)
+#define ssize_t __int32
+#endif
+#endif
+
 /*
  * version information
  */
@@ -191,7 +200,7 @@ mbfl_oddlen(mbfl_string *string);
  * strpos
  */
 MBFLAPI extern size_t
-mbfl_strpos(mbfl_string *haystack, mbfl_string *needle, long offset, int reverse);
+mbfl_strpos(mbfl_string *haystack, mbfl_string *needle, ssize_t offset, int reverse);
 
 
 /*

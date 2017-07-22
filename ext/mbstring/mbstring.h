@@ -186,7 +186,7 @@ ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	long func_overload;
 	zend_bool encoding_translation;
 	long strict_detection;
-	long illegalchars;
+	size_t illegalchars;
 	mbfl_buffer_converter *outconv;
     void *http_output_conv_mimetypes;
 #if HAVE_MBREGEX

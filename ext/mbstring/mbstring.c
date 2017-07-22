@@ -2435,7 +2435,7 @@ PHP_FUNCTION(mb_strrpos)
 	char *enc_name = NULL;
 	size_t enc_name_len;
 	zval *zoffset = NULL;
-	long offset = 0, str_flg, n;
+	zend_long offset = 0, str_flg, n;
 	char *enc_name2 = NULL;
 	int enc_name_len2;
 
@@ -4811,7 +4811,7 @@ static inline mbfl_buffer_converter *php_mb_init_convd(const mbfl_encoding *enco
 
 static inline int php_mb_check_encoding_impl(mbfl_buffer_converter *convd, const char *input, size_t length, const mbfl_encoding *encoding) {
 	mbfl_string string, result, *ret = NULL;
-	long illegalchars = 0;
+	size_t illegalchars = 0;
 
 	/* initialize string */
 	mbfl_string_init_set(&string, mbfl_no_language_neutral, encoding);
