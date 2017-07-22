@@ -644,14 +644,12 @@ failure:
 
 ZEND_API void zend_generator_resume(zend_generator *orig_generator) /* {{{ */
 {
-	zend_generator *generator;
+	zend_generator *generator = zend_generator_get_current(orig_generator);
 
 	/* The generator is already closed, thus can't resume */
-	if (UNEXPECTED(!orig_generator->execute_data)) {
+	if (UNEXPECTED(!generator->execute_data)) {
 		return;
 	}
-
-	generator = zend_generator_get_current(orig_generator);
 
 try_again:
 	if (generator->flags & ZEND_GENERATOR_CURRENTLY_RUNNING) {
