@@ -113,7 +113,9 @@ MBSTRING_API int php_unicode_is_prop(unsigned long code, ...)
 	return result;
 }
 
-static unsigned long case_lookup(unsigned long code, long l, long r, int field)
+#define CODE_NOT_FOUND ((unsigned long) -1)
+
+static unsigned long case_lookup(unsigned long code, long l, long r)
 {
 	long m;
 	const unsigned int *tmp;
@@ -127,23 +129,20 @@ static unsigned long case_lookup(unsigned long code, long l, long r, int field)
 		 * the beginning of a case mapping triple.
 		 */
 		m = (l + r) >> 1;
-		tmp = &_uccase_map[m*3];
+		tmp = &_uccase_map[m*2];
 		if (code > *tmp)
 			l = m + 1;
 		else if (code < *tmp)
 			r = m - 1;
 		else if (code == *tmp)
-			return tmp[field];
+			return tmp[1];
 	}
 
-	return code;
+	return CODE_NOT_FOUND;
 }
 
 MBSTRING_API unsigned long php_unicode_toupper(unsigned long code, enum mbfl_no_encoding enc)
 {
-	int field;
-	long l, r;
-
 	if (code < 0x80) {
 		/* Fast path for ASCII */
 		if (code >= 0x61 && code <= 0x7A) {
@@ -153,34 +152,19 @@ MBSTRING_API unsigned long php_unicode_toupper(unsigned long code, enum mbfl_no_
 			return code - 0x20;
 		}
 		return code;
-	}
-
-	if (php_unicode_is_upper(code))
-		return code;
-
-	if (php_unicode_is_lower(code)) {
-		/*
-		 * The character is lower case.
-		 */
-		field = 1;
-		l = _uccase_len[0];
-		r = (l + _uccase_len[1]) - 1;
 	} else {
-		/*
-		 * The character is title case.
-		 */
-		field = 1;
-		l = _uccase_len[0] + _uccase_len[1];
-		r = _uccase_size - 1;
+		long l = 0;
+		long r = _uccase_len[0] - 1;
+		unsigned long new_code = case_lookup(code, l, r);
+		if (new_code != CODE_NOT_FOUND) {
+			return new_code;
+		}
+		return code;
 	}
-	return case_lookup(code, l, r, field);
 }
 
 MBSTRING_API unsigned long php_unicode_tolower(unsigned long code, enum mbfl_no_encoding enc)
 {
-	int field;
-	long l, r;
-
 	if (code < 0x80) {
 		/* Fast path for ASCII */
 		if (code >= 0x41 && code <= 0x5A) {
@@ -190,72 +174,28 @@ MBSTRING_API unsigned long php_unicode_tolower(unsigned long code, enum mbfl_no_
 			return code + 0x20;
 		}
 		return code;
-	}
-
-	if (php_unicode_is_lower(code))
-		return code;
-
-	if (php_unicode_is_upper(code)) {
-		/*
-		 * The character is upper case.
-		 */
-		field = 1;
-		l = 0;
-		r = _uccase_len[0] - 1;
 	} else {
-		/*
-		 * The character is title case.
-		 */
-		field = 2;
-		l = _uccase_len[0] + _uccase_len[1];
-		r = _uccase_size - 1;
+		long l = _uccase_len[0];
+		long r = _uccase_len[0] + _uccase_len[1] - 1;
+		unsigned long new_code = case_lookup(code, l, r);
+		if (new_code != CODE_NOT_FOUND) {
+			return new_code;
+		}
+		return code;
 	}
-	return case_lookup(code, l, r, field);
 }
 
 MBSTRING_API unsigned long php_unicode_totitle(unsigned long code, enum mbfl_no_encoding enc)
 {
-	int field;
-	long l, r;
-
-	if (php_unicode_is_title(code))
-		return code;
-
-	/*
-	 * The offset will always be the same for converting to title case.
-	 */
-	field = 2;
-
-	if (php_unicode_is_upper(code)) {
-		/*
-		 * The character is upper case.
-		 */
-		l = 0;
-		r = _uccase_len[0] - 1;
-	} else {
-		/*
-		 * The character is lower case.
-		 */
-		l = _uccase_len[0];
-		r = (l + _uccase_len[1]) - 1;
+	long l = _uccase_len[0] + _uccase_len[1];
+	long r = _uccase_size - 1;
+	unsigned long new_code = case_lookup(code, l, r);
+	if (new_code != CODE_NOT_FOUND) {
+		return new_code;
 	}
-	return case_lookup(code, l, r, field);
 
-}
-
-
-#define BE_ARY_TO_UINT32(ptr) (\
-	((unsigned char*)(ptr))[0]<<24 |\
-	((unsigned char*)(ptr))[1]<<16 |\
-	((unsigned char*)(ptr))[2]<< 8 |\
-	((unsigned char*)(ptr))[3] )
-
-#define UINT32_TO_BE_ARY(ptr,val) { \
-	unsigned int v = val; \
-	((unsigned char*)(ptr))[0] = (v>>24) & 0xff,\
-	((unsigned char*)(ptr))[1] = (v>>16) & 0xff,\
-	((unsigned char*)(ptr))[2] = (v>> 8) & 0xff,\
-	((unsigned char*)(ptr))[3] = (v    ) & 0xff;\
+	/* No dedicated title-case variant, use to-upper instead */
+	return php_unicode_toupper(code, enc);
 }
 
 struct convert_case_data {

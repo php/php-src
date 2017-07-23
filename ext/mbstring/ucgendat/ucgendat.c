@@ -164,8 +164,7 @@ static ac_uint4 comps_used;
  */
 typedef struct {
     ac_uint4 key;
-    ac_uint4 other1;
-    ac_uint4 other2;
+    ac_uint4 other;
 } _case_t;
 
 static _case_t *upper;
@@ -534,18 +533,9 @@ add_decomp(ac_uint4 code, short compat)
 }
 
 static void
-add_title(ac_uint4 code)
+add_to_title(ac_uint4 code)
 {
     ac_uint4 i, j;
-
-    /*
-     * Always map the code to itself.
-     */
-    cases[2] = code;
-
-    /* If lower/upper case does not exist, stay the same */
-    if (!cases[0]) cases[0] = code;
-    if (!cases[1]) cases[1] = code;
 
     if (title_used == title_size) {
         if (title_size == 0)
@@ -570,29 +560,16 @@ add_title(ac_uint4 code)
                         sizeof(_case_t));
     }
 
-    title[i].key = cases[2];    /* Title */
-    title[i].other1 = cases[0]; /* Upper */
-    title[i].other2 = cases[1]; /* Lower */
+    title[i].key = code;
+    title[i].other = cases[2]; /* Title */
 
     title_used++;
 }
 
 static void
-add_upper(ac_uint4 code)
+add_to_upper(ac_uint4 code)
 {
     ac_uint4 i, j;
-
-    /*
-     * Always map the code to itself.
-     */
-    cases[0] = code;
-
-    /*
-     * If the title case character is not present, then make it the same as
-     * the upper case.
-     */
-    if (cases[2] == 0)
-      cases[2] = code;
 
     if (upper_used == upper_size) {
         if (upper_size == 0)
@@ -617,29 +594,16 @@ add_upper(ac_uint4 code)
                         sizeof(_case_t));
     }
 
-    upper[i].key = cases[0];    /* Upper */
-    upper[i].other1 = cases[1]; /* Lower */
-    upper[i].other2 = cases[2]; /* Title */
+    upper[i].key = code;
+    upper[i].other = cases[0]; /* Upper */
 
     upper_used++;
 }
 
 static void
-add_lower(ac_uint4 code)
+add_to_lower(ac_uint4 code)
 {
     ac_uint4 i, j;
-
-    /*
-     * Always map the code to itself.
-     */
-    cases[1] = code;
-
-    /*
-     * If the title case character is empty, then make it the same as the
-     * upper case.
-     */
-    if (cases[2] == 0)
-      cases[2] = cases[0];
 
     if (lower_used == lower_size) {
         if (lower_size == 0)
@@ -664,9 +628,8 @@ add_lower(ac_uint4 code)
                         sizeof(_case_t));
     }
 
-    lower[i].key = cases[1];    /* Lower */
-    lower[i].other1 = cases[0]; /* Upper */
-    lower[i].other2 = cases[2]; /* Title */
+    lower[i].key = code;
+    lower[i].other = cases[1]; /* Lower */
 
     lower_used++;
 }
@@ -833,8 +796,6 @@ read_cdata(FILE *in)
 
     lineno = skip = 0;
     while (fgets(line, sizeof(line), in)) {
-        int is_title = 0;
-
         if( (s=strchr(line, '\n')) ) *s = '\0';
         lineno++;
 
@@ -977,10 +938,6 @@ read_cdata(FILE *in)
         for (e = s; *e && *e != ';'; e++) ;
 
         ordered_range_insert(code, s, e - s);
-
-        if (e - s == 2 && s[0] == 'L' && s[1] == 't') {
-            is_title = 1;
-        }
 
         /*
          * Locate the combining class code.
@@ -1126,23 +1083,12 @@ read_cdata(FILE *in)
             if (*s == ';')
               s++;
         }
-        if (is_title)
-          /*
-           * Add the upper and lower mappings for a title case character.
-           */
-          add_title(code);
-        else if (cases[1])
-          /*
-           * Add the lower and title case mappings for the upper case
-           * character.
-           */
-          add_upper(code);
-        else if (cases[0])
-          /*
-           * Add the upper and title case mappings for the lower case
-           * character.
-           */
-          add_lower(code);
+        if (cases[2])
+          add_to_title(code);
+        if (cases[1])
+          add_to_lower(code);
+        if (cases[0])
+          add_to_upper(code);
     }
 }
 
@@ -1295,9 +1241,8 @@ write_case(FILE *out, _case_t *tab, int num, int first)
     for (i=0; i<num; i++) {
 	if (first) first = 0;
 	else fprintf(out, ",");
-	fprintf(out, "\n\t0x%08lx, 0x%08lx, 0x%08lx",
-		(unsigned long) tab[i].key, (unsigned long) tab[i].other1,
-		(unsigned long) tab[i].other2);
+	fprintf(out, "\n\t0x%08lx, 0x%08lx",
+		(unsigned long) tab[i].key, (unsigned long) tab[i].other);
     }
 }
 
@@ -1461,19 +1406,19 @@ write_cdata(char *opath)
 
     if (upper_used > 0)
       /*
-       * Write the upper case table.
+       * Write the to-upper case table.
        */
       write_case(out, upper, upper_used, 1);
 
     if (lower_used > 0)
       /*
-       * Write the lower case table.
+       * Write the to-lower case table.
        */
       write_case(out, lower, lower_used, !upper_used);
 
     if (title_used > 0)
       /*
-       * Write the title case table.
+       * Write the to-title case table.
        */
       write_case(out, title, title_used, !(upper_used||lower_used));
 
