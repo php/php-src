@@ -173,7 +173,7 @@ MBSTRING_API unsigned long php_unicode_toupper(unsigned long code, enum mbfl_no_
 		/*
 		 * The character is lower case.
 		 */
-		field = 2;
+		field = 1;
 		l = _uccase_len[0];
 		r = (l + _uccase_len[1]) - 1;
 
