@@ -202,12 +202,16 @@ mbfl_oddlen(mbfl_string *string);
 MBFLAPI extern size_t
 mbfl_strpos(mbfl_string *haystack, mbfl_string *needle, ssize_t offset, int reverse);
 
-
 /*
  * substr_count
  */
 MBFLAPI extern size_t
 mbfl_substr_count(mbfl_string *haystack, mbfl_string *needle);
+
+/*
+ * If specified as length, the substr until the end of the string is taken.
+ */
+#define MBFL_SUBSTR_UNTIL_END ((size_t) -1)
 
 /*
  * substr

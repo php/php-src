@@ -2595,7 +2595,6 @@ PHP_FUNCTION(mb_strstr)
 
 	n = mbfl_strpos(&haystack, &needle, 0, 0);
 	if (!mbfl_is_error(n)) {
-		size_t mblen = mbfl_strlen(&haystack);
 		if (part) {
 			ret = mbfl_substr(&haystack, &result, 0, n);
 			if (ret != NULL) {
@@ -2606,8 +2605,7 @@ PHP_FUNCTION(mb_strstr)
 				RETVAL_FALSE;
 			}
 		} else {
-			size_t len = (mblen - n);
-			ret = mbfl_substr(&haystack, &result, n, len);
+			ret = mbfl_substr(&haystack, &result, n, MBFL_SUBSTR_UNTIL_END);
 			if (ret != NULL) {
 				// TODO: avoid reallocation ???
 				RETVAL_STRINGL((char *)ret->val, ret->len);
@@ -2654,7 +2652,6 @@ PHP_FUNCTION(mb_strrchr)
 
 	n = mbfl_strpos(&haystack, &needle, 0, 1);
 	if (!mbfl_is_error(n)) {
-		size_t mblen = mbfl_strlen(&haystack);
 		if (part) {
 			ret = mbfl_substr(&haystack, &result, 0, n);
 			if (ret != NULL) {
@@ -2665,8 +2662,7 @@ PHP_FUNCTION(mb_strrchr)
 				RETVAL_FALSE;
 			}
 		} else {
-			size_t len = (mblen - n);
-			ret = mbfl_substr(&haystack, &result, n, len);
+			ret = mbfl_substr(&haystack, &result, n, MBFL_SUBSTR_UNTIL_END);
 			if (ret != NULL) {
 				// TODO: avoid reallocation ???
 				RETVAL_STRINGL((char *)ret->val, ret->len);
@@ -2686,7 +2682,7 @@ PHP_FUNCTION(mb_strrchr)
 PHP_FUNCTION(mb_stristr)
 {
 	zend_bool part = 0;
-	size_t from_encoding_len, n, len, mblen;
+	size_t from_encoding_len, n;
 	mbfl_string haystack, needle, result, *ret = NULL;
 	const char *from_encoding = NULL;
 	mbfl_string_init(&haystack);
@@ -2712,8 +2708,6 @@ PHP_FUNCTION(mb_stristr)
 		RETURN_FALSE;
 	}
 
-	mblen = mbfl_strlen(&haystack);
-
 	if (part) {
 		ret = mbfl_substr(&haystack, &result, 0, n);
 		if (ret != NULL) {
@@ -2724,8 +2718,7 @@ PHP_FUNCTION(mb_stristr)
 			RETVAL_FALSE;
 		}
 	} else {
-		len = (mblen - n);
-		ret = mbfl_substr(&haystack, &result, n, len);
+		ret = mbfl_substr(&haystack, &result, n, MBFL_SUBSTR_UNTIL_END);
 		if (ret != NULL) {
 			// TODO: avoid reallocaton ???
 			RETVAL_STRINGL((char *)ret->val, ret->len);
@@ -2742,7 +2735,7 @@ PHP_FUNCTION(mb_stristr)
 PHP_FUNCTION(mb_strrichr)
 {
 	zend_bool part = 0;
-	size_t n, len, mblen;
+	size_t n;
 	size_t from_encoding_len;
 	mbfl_string haystack, needle, result, *ret = NULL;
 	const char *from_encoding = NULL;
@@ -2764,8 +2757,6 @@ PHP_FUNCTION(mb_strrichr)
 		RETURN_FALSE;
 	}
 
-	mblen = mbfl_strlen(&haystack);
-
 	if (part) {
 		ret = mbfl_substr(&haystack, &result, 0, n);
 		if (ret != NULL) {
@@ -2776,8 +2767,7 @@ PHP_FUNCTION(mb_strrichr)
 			RETVAL_FALSE;
 		}
 	} else {
-		len = (mblen - n);
-		ret = mbfl_substr(&haystack, &result, n, len);
+		ret = mbfl_substr(&haystack, &result, n, MBFL_SUBSTR_UNTIL_END);
 		if (ret != NULL) {
 			// TODO: avoid reallocation ???
 			RETVAL_STRINGL((char *)ret->val, ret->len);
@@ -2831,7 +2821,7 @@ PHP_FUNCTION(mb_substr)
 {
 	char *str, *encoding = NULL;
 	zend_long from, len;
-	size_t mblen;
+	size_t mblen, real_from, real_len;
 	size_t str_len, encoding_len;
 	zend_bool len_is_null = 1;
 	mbfl_string string, result, *ret;
@@ -2850,42 +2840,42 @@ PHP_FUNCTION(mb_substr)
 	string.val = (unsigned char *)str;
 	string.len = str_len;
 
-	if (len_is_null) {
-		len = str_len;
-	}
-
 	/* measures length */
 	mblen = 0;
-	if (from < 0 || len < 0) {
+	if (from < 0 || (!len_is_null && len < 0)) {
 		mblen = mbfl_strlen(&string);
 	}
 
 	/* if "from" position is negative, count start position from the end
 	 * of the string
 	 */
-	if (from < 0) {
-		from = mblen + from;
-		if (from < 0) {
-			from = 0;
-		}
+	if (from >= 0) {
+		real_from = (size_t) from;
+	} else if (-from < mblen) {
+		real_from = mblen + from;
+	} else {
+		real_from = 0;
 	}
 
 	/* if "length" position is negative, set it to the length
 	 * needed to stop that many chars from the end of the string
 	 */
-	if (len < 0) {
-		len = (mblen - from) + len;
-		if (len < 0) {
-			len = 0;
-		}
+	if (len_is_null) {
+		real_len = MBFL_SUBSTR_UNTIL_END;
+	} else if (len >= 0) {
+		real_len = (size_t) len;
+	} else if (real_from < mblen && -len < mblen - real_from) {
+		real_len = (mblen - real_from) + len;
+	} else {
+		real_len = 0;
 	}
 
 	if (((MBSTRG(func_overload) & MB_OVERLOAD_STRING) == MB_OVERLOAD_STRING)
-		&& (from >= mbfl_strlen(&string))) {
+		&& (real_from >= mbfl_strlen(&string))) {
 		RETURN_FALSE;
 	}
 
-	ret = mbfl_substr(&string, &result, from, len);
+	ret = mbfl_substr(&string, &result, real_from, real_len);
 	if (NULL == ret) {
 		RETURN_FALSE;
 	}

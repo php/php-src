@@ -1159,46 +1159,55 @@ mbfl_substr(
 	if ((encoding->flag & (MBFL_ENCTYPE_SBCS | MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE | MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) ||
 	   encoding->mblen_table != NULL) {
 		len = string->len;
-		start = from;
-		end = from + length;
-		if (encoding->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE)) {
-			start *= 2;
-			end = start + length*2;
+		if (encoding->flag & MBFL_ENCTYPE_SBCS) {
+			start = from;
+		} else if (encoding->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE)) {
+			start = from*2;
 		} else if (encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) {
-			start *= 4;
-			end = start + length*4;
-		} else if (encoding->mblen_table != NULL) {
+			start = from*4;
+		} else {
 			const unsigned char *mbtab = encoding->mblen_table;
 			start = 0;
-			end = 0;
 			n = 0;
 			k = 0;
 			p = string->val;
-			if (p != NULL) {
-				/* search start position */
-				while (k <= from) {
-					start = n;
-					if (n >= len) {
-						break;
-					}
-					m = mbtab[*p];
-					n += m;
-					p += m;
-					k++;
+			/* search start position */
+			while (k <= from) {
+				start = n;
+				if (n >= len) {
+					break;
 				}
-				/* detect end position */
-				k = 0;
-				end = start;
-				while (k < length) {
-					end = n;
-					if (n >= len) {
-						break;
-					}
-					m = mbtab[*p];
-					n += m;
-					p += m;
-					k++;
+				m = mbtab[*p];
+				n += m;
+				p += m;
+				k++;
+			}
+		}
+
+		if (length == MBFL_SUBSTR_UNTIL_END) {
+			end = len;
+		} else if (encoding->flag & MBFL_ENCTYPE_SBCS) {
+			end = start + length;
+		} else if (encoding->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE)) {
+			end = start + length*2;
+		} else if (encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) {
+			end = start + length*4;
+		} else {
+			const unsigned char *mbtab = encoding->mblen_table;
+			end = start;
+			n = start;
+			k = 0;
+			p = string->val + start;
+			/* detect end position */
+			while (k <= length) {
+				end = n;
+				if (n >= len) {
+					break;
 				}
+				m = mbtab[*p];
+				n += m;
+				p += m;
+				k++;
 			}
 		}
 
@@ -1215,21 +1224,11 @@ mbfl_substr(
 		/* allocate memory and copy */
 		n = end - start;
 		result->len = 0;
-		result->val = w = (unsigned char*)mbfl_malloc((n + 8)*sizeof(unsigned char));
+		result->val = w = (unsigned char*)mbfl_malloc(n + 1);
 		if (w != NULL) {
-			p = string->val;
-			if (p != NULL) {
-				p += start;
-				result->len = n;
-				while (n > 0) {
-					*w++ = *p++;
-					n--;
-				}
-			}
-			*w++ = '\0';
-			*w++ = '\0';
-			*w++ = '\0';
-			*w = '\0';
+			result->len = n;
+			memcpy(w, string->val + start, n);
+			w[n] = '\0';
 		} else {
 			result = NULL;
 		}
@@ -1238,6 +1237,10 @@ mbfl_substr(
 		struct collector_substr_data pc;
 		mbfl_convert_filter *decoder;
 		mbfl_convert_filter *encoder;
+
+		if (length == MBFL_SUBSTR_UNTIL_END) {
+			length = mbfl_strlen(string) - from;
+		}
 
 		mbfl_memory_device_init(&device, length + 1, 0);
 		mbfl_string_init(result);
