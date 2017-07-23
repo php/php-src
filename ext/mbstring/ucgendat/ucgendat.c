@@ -336,7 +336,9 @@ ordered_range_insert(ac_uint4 c, char *name, int len)
         (len == 3 &&
          (memcmp(name, "NSM", 3) == 0 || memcmp(name, "PDF", 3) == 0 ||
           memcmp(name, "LRE", 3) == 0 || memcmp(name, "LRO", 3) == 0 ||
-          memcmp(name, "RLE", 3) == 0 || memcmp(name, "RLO", 3) == 0))) {
+          memcmp(name, "RLE", 3) == 0 || memcmp(name, "RLO", 3) == 0 ||
+          memcmp(name, "LRI", 3) == 0 || memcmp(name, "RLI", 3) == 0 ||
+          memcmp(name, "FSI", 3) == 0 || memcmp(name, "PDI", 3) == 0))) {
         /*
          * Mark all of these as Other Neutral to preserve compatibility with
          * older versions.
@@ -350,8 +352,10 @@ ordered_range_insert(ac_uint4 c, char *name, int len)
           break;
     }
 
-    if (i == NUMPROPS)
-      return;
+    if (i == NUMPROPS) {
+        printf("Unknown property %s\n", name);
+        return;
+    }
 
     /*
      * Have a match, so insert the code in order.
