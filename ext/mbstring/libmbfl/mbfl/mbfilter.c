@@ -736,7 +736,8 @@ struct collector_strpos_data {
 static int
 collector_strpos(int c, void* data)
 {
-	int *p, *h, *m, n;
+	int *p, *h, *m;
+	ssize_t n;
 	struct collector_strpos_data *pc = (struct collector_strpos_data*)data;
 
 	if (pc->output >= pc->start) {
