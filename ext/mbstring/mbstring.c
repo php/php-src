@@ -3498,7 +3498,7 @@ PHP_FUNCTION(mb_detect_encoding)
 	}
 
 	if (ZEND_NUM_ARGS() < 3) {
-		strict = (zend_bool)MBSTRG(strict_detection);
+		strict = MBSTRG(strict_detection);
 	}
 
 	if (size > 0 && list != NULL) {
