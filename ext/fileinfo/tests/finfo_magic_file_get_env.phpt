@@ -19,8 +19,8 @@ var_dump(substr($path, strlen(dirname(__DIR__, 3))));
 
 ?>
 ===DONE===
---EXPECT--
-string(25) "/ext/fileinfo/tests/magic"
-string(25) "/ext/fileinfo/tests/magic"
+--EXPECTF--
+string(25) "%eext%efileinfo%etests%emagic"
+string(25) "%eext%efileinfo%etests%emagic"
 ===DONE===
 

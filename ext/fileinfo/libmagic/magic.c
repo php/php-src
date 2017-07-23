@@ -407,7 +407,7 @@ magic_getparam(struct magic_set *ms, int param, void *val)
 public const char *
 magic_magic_file_get(struct magic_set *ms)
 {
-	if(strncmp(ms->file, "unknown", strlen("unknown")) == 0) {
+	if(strncmp(ms->file, "unknown", sizeof("unknown")-1) == 0) {
 		return "";
 	}
 	return ms->file;
