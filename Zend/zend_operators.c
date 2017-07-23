@@ -2166,6 +2166,16 @@ ZEND_API int ZEND_FASTCALL is_not_equal_function(zval *result, zval *op1, zval *
 
 ZEND_API int ZEND_FASTCALL is_smaller_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
+	if (UNEXPECTED((Z_TYPE_P(op1) == IS_DOUBLE) && isnan(Z_DVAL_P(op1)))) {
+		ZVAL_FALSE(result);
+		return SUCCESS;
+	}
+
+	if (UNEXPECTED((Z_TYPE_P(op2) == IS_DOUBLE) && isnan(Z_DVAL_P(op2)))) {
+		ZVAL_FALSE(result);
+		return SUCCESS;
+	}
+
 	if (compare_function(result, op1, op2) == FAILURE) {
 		return FAILURE;
 	}
@@ -2176,6 +2186,16 @@ ZEND_API int ZEND_FASTCALL is_smaller_function(zval *result, zval *op1, zval *op
 
 ZEND_API int ZEND_FASTCALL is_smaller_or_equal_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
+	if (UNEXPECTED((Z_TYPE_P(op1) == IS_DOUBLE) && isnan(Z_DVAL_P(op1)))) {
+		ZVAL_FALSE(result);
+		return SUCCESS;
+	}
+
+	if (UNEXPECTED((Z_TYPE_P(op2) == IS_DOUBLE) && isnan(Z_DVAL_P(op2)))) {
+		ZVAL_FALSE(result);
+		return SUCCESS;
+	}
+
 	if (compare_function(result, op1, op2) == FAILURE) {
 		return FAILURE;
 	}
