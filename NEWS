@@ -9,7 +9,7 @@ PHP                                                                        NEWS
 
 - LDAP:
   . Added ldap_exop_refresh helper for EXOP REFRESH operation with dds overlay. 
-    (Côme)
+    (Come)
 
 - ODBC:
   . Removed support for Birdstep. (Kalle)
