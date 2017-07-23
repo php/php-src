@@ -161,7 +161,6 @@ int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, uint32_t n
 
 ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	char *internal_encoding_name;
-	enum mbfl_no_language language;
 	const mbfl_encoding *internal_encoding;
 	const mbfl_encoding *current_internal_encoding;
 	const mbfl_encoding *http_output_encoding;
@@ -183,9 +182,10 @@ ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	int filter_illegal_substchar;
 	int current_filter_illegal_mode;
 	int current_filter_illegal_substchar;
-	long func_overload;
+	zend_long func_overload;
+	enum mbfl_no_language language;
 	zend_bool encoding_translation;
-	long strict_detection;
+	zend_bool strict_detection;
 	size_t illegalchars;
 	mbfl_buffer_converter *outconv;
     void *http_output_conv_mimetypes;
