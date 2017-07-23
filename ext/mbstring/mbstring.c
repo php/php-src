@@ -2885,13 +2885,6 @@ PHP_FUNCTION(mb_substr)
 		RETURN_FALSE;
 	}
 
-	if (from > INT_MAX) {
-		from = INT_MAX;
-	}
-	if (len > INT_MAX) {
-		len = INT_MAX;
-	}
-
 	ret = mbfl_substr(&string, &result, from, len);
 	if (NULL == ret) {
 		RETURN_FALSE;
@@ -3639,22 +3632,14 @@ PHP_FUNCTION(mb_encode_mimeheader)
 PHP_FUNCTION(mb_decode_mimeheader)
 {
 	mbfl_string string, result, *ret;
-	size_t string_len;
 
 	mbfl_string_init(&string);
 	string.no_language = MBSTRG(language);
 	string.encoding = MBSTRG(current_internal_encoding);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", (char **)&string.val, &string_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", (char **)&string.val, &string.len) == FAILURE) {
 		return;
 	}
-
-	if (ZEND_SIZE_T_UINT_OVFL(string_len)) {
-			php_error_docref(NULL, E_WARNING, "String length overflows the max allowed length of %u", UINT_MAX);
-			return;
-	}
-
-	string.len = (uint32_t)string_len;
 
 	mbfl_string_init(&result);
 	ret = mbfl_mime_header_decode(&string, &result, MBSTRG(current_internal_encoding));
