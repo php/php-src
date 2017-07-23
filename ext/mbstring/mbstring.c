@@ -4971,8 +4971,7 @@ static inline zend_long php_mb_ord(const char* str, size_t str_len, const char* 
 	const mbfl_encoding *enc;
 	enum mbfl_no_encoding no_enc;
 	char* ret;
-	size_t ret_len;
-	unsigned char char_len;
+	size_t ret_len, char_len;
 	zend_long cp;
 
 	enc = php_mb_get_encoding(enc_name);
@@ -5429,16 +5428,16 @@ MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t ol
  			size_t haystack_char_len = mbfl_strlen(&haystack);
 
  			if (mode) {
- 				if ((offset > 0 && offset > haystack_char_len) ||
- 					(offset < 0 && -offset > haystack_char_len)) {
+				if ((offset > 0 && (size_t)offset > haystack_char_len) ||
+					(offset < 0 && (size_t)(-offset) > haystack_char_len)) {
  					php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
  					break;
  				}
  			} else {
 				if (offset < 0) {
-					offset += (long)haystack_char_len;
+					offset += (zend_long)haystack_char_len;
 				}
- 				if (offset < 0 || offset > haystack_char_len) {
+				if (offset < 0 || (size_t)offset > haystack_char_len) {
  					php_error_docref(NULL, E_WARNING, "Offset not contained in string");
  					break;
  				}
