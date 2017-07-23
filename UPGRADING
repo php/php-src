@@ -19,6 +19,11 @@ PHP 7.3 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+Core:
+  . The ext_skel utility has been completely redesigned with new options and 
+    some old options removed. This is now written in PHP and have no external 
+	dependencies.
+
 ========================================
 2. New Features
 ========================================

@@ -2,14 +2,20 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.0alpha1
 
-- Session:
-  . Fixed bug #74941 (session fails to start after having headers sent). 
-    (morozov)
+- Core:
+  . Redesigned the old ext_skel program written in PHP, run: 
+    'php ext_skel.php' for all options. This means there is no dependencies 
+    thrus making it work on Windows out of the box. (Kalle)
 
 - LDAP:
-  . Added ldap_exop_refresh helper for EXOP REFRESH operation with dds overlay
+  . Added ldap_exop_refresh helper for EXOP REFRESH operation with dds overlay. 
+    (Côme)
 
 - ODBC:
   . Removed support for Birdstep. (Kalle)
+
+- Session:
+  . Fixed bug #74941 (session fails to start after having headers sent). 
+    (morozov)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
