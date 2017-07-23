@@ -2469,7 +2469,7 @@ static const unsigned int _uccase_size = 2470;
  * LowerIndex = _uccase_len[0]
  * TitleIndex = LowerIndex + _uccase_len[1] */
 
-static const unsigned short _uccase_len[2] = {3687, 3711};
+static const unsigned short _uccase_len[2] = {1229, 1237};
 
 static const unsigned int _uccase_map[] = {
 	0x00000041, 0x00000061, 0x00000041,

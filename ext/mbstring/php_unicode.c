@@ -122,6 +122,7 @@ MBSTRING_API int php_unicode_is_prop(unsigned long code, unsigned long mask1,
 static unsigned long case_lookup(unsigned long code, long l, long r, int field)
 {
 	long m;
+	const unsigned int *tmp;
 
 	/*
 	 * Do the binary search.
@@ -132,13 +133,13 @@ static unsigned long case_lookup(unsigned long code, long l, long r, int field)
 		 * the beginning of a case mapping triple.
 		 */
 		m = (l + r) >> 1;
-		m -= (m % 3);
-		if (code > _uccase_map[m])
-			l = m + 3;
-		else if (code < _uccase_map[m])
-			r = m - 3;
-		else if (code == _uccase_map[m])
-			return _uccase_map[m + field];
+		tmp = &_uccase_map[m*3];
+		if (code > *tmp)
+			l = m + 1;
+		else if (code < *tmp)
+			r = m - 1;
+		else if (code == *tmp)
+			return tmp[field];
 	}
 
 	return code;
@@ -174,7 +175,7 @@ MBSTRING_API unsigned long php_unicode_toupper(unsigned long code, enum mbfl_no_
 		 */
 		field = 2;
 		l = _uccase_len[0];
-		r = (l + _uccase_len[1]) - 3;
+		r = (l + _uccase_len[1]) - 1;
 
 		if (enc == mbfl_no_encoding_8859_9) {
 			return php_turkish_toupper(code, l, r, field);
@@ -186,7 +187,7 @@ MBSTRING_API unsigned long php_unicode_toupper(unsigned long code, enum mbfl_no_
 		 */
 		field = 1;
 		l = _uccase_len[0] + _uccase_len[1];
-		r = _uccase_size - 3;
+		r = _uccase_size - 1;
 	}
 	return case_lookup(code, l, r, field);
 }
@@ -205,7 +206,7 @@ MBSTRING_API unsigned long php_unicode_tolower(unsigned long code, enum mbfl_no_
 		 */
 		field = 1;
 		l = 0;
-		r = _uccase_len[0] - 3;
+		r = _uccase_len[0] - 1;
 
 		if (enc == mbfl_no_encoding_8859_9) {
 			return php_turkish_tolower(code, l, r, field);
@@ -217,7 +218,7 @@ MBSTRING_API unsigned long php_unicode_tolower(unsigned long code, enum mbfl_no_
 		 */
 		field = 2;
 		l = _uccase_len[0] + _uccase_len[1];
-		r = _uccase_size - 3;
+		r = _uccase_size - 1;
 	}
 	return case_lookup(code, l, r, field);
 }
@@ -240,13 +241,13 @@ MBSTRING_API unsigned long php_unicode_totitle(unsigned long code, enum mbfl_no_
 		 * The character is upper case.
 		 */
 		l = 0;
-		r = _uccase_len[0] - 3;
+		r = _uccase_len[0] - 1;
 	} else {
 		/*
 		 * The character is lower case.
 		 */
 		l = _uccase_len[0];
-		r = (l + _uccase_len[1]) - 3;
+		r = (l + _uccase_len[1]) - 1;
 	}
 	return case_lookup(code, l, r, field);
 

@@ -1442,7 +1442,7 @@ write_cdata(char *opath)
         " * LowerIndex = _uccase_len[0]\n"
         " * TitleIndex = LowerIndex + _uccase_len[1] */\n\n");
     fprintf(out, PREF "unsigned short _uccase_len[2] = {%ld, %ld};\n\n",
-        (long) upper_used * 3, (long) lower_used * 3);
+        (long) upper_used, (long) lower_used);
     fprintf(out, PREF "unsigned int _uccase_map[] = {");
 
     if (upper_used > 0)
