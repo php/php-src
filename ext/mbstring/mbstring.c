@@ -4685,10 +4685,10 @@ PHP_FUNCTION(mb_send_mail)
 		p = ZSTR_VAL(str_headers);
 		n = ZSTR_LEN(str_headers);
 		mbfl_memory_device_strncat(&device, p, n);
-		zend_string_release(str_headers);
 		if (n > 0 && p[n - 1] != '\n') {
 			mbfl_memory_device_strncat(&device, "\n", 1);
 		}
+		zend_string_release(str_headers);
 	}
 
 	if (!zend_hash_str_exists(&ht_headers, "MIME-VERSION", sizeof("MIME-VERSION") - 1)) {
