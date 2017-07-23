@@ -4316,15 +4316,15 @@ out:
 PHP_FUNCTION(mb_send_mail)
 {
 	size_t n;
-	char *to = NULL;
+	char *to;
 	size_t to_len;
-	char *message = NULL;
+	char *message;
 	size_t message_len;
-	char *subject = NULL;
+	char *subject;
 	size_t subject_len;
 	zval *headers = NULL;
 	zend_string *extra_cmd = NULL;
-	zend_string *str_headers=NULL, *tmp_headers;
+	zend_string *str_headers = NULL, *tmp_headers;
 	int i;
 	char *to_r = NULL;
 	char *force_extra_parameters = INI_STR("mail.force_extra_parameters");
@@ -4455,82 +4455,66 @@ PHP_FUNCTION(mb_send_mail)
 	}
 
 	/* To: */
-	if (to != NULL) {
-		if (to_len > 0) {
-			to_r = estrndup(to, to_len);
-			for (; to_len; to_len--) {
-				if (!isspace((unsigned char) to_r[to_len - 1])) {
-					break;
-				}
-				to_r[to_len - 1] = '\0';
+	if (to_len > 0) {
+		to_r = estrndup(to, to_len);
+		for (; to_len; to_len--) {
+			if (!isspace((unsigned char) to_r[to_len - 1])) {
+				break;
 			}
-			for (i = 0; to_r[i]; i++) {
-			if (iscntrl((unsigned char) to_r[i])) {
-				/* According to RFC 822, section 3.1.1 long headers may be separated into
-				 * parts using CRLF followed at least one linear-white-space character ('\t' or ' ').
-				 * To prevent these separators from being replaced with a space, we use the
-				 * SKIP_LONG_HEADER_SEP_MBSTRING to skip over them.
-				 */
-				SKIP_LONG_HEADER_SEP_MBSTRING(to_r, i);
-				to_r[i] = ' ';
-			}
-			}
-		} else {
-			to_r = to;
+			to_r[to_len - 1] = '\0';
+		}
+		for (i = 0; to_r[i]; i++) {
+		if (iscntrl((unsigned char) to_r[i])) {
+			/* According to RFC 822, section 3.1.1 long headers may be separated into
+			 * parts using CRLF followed at least one linear-white-space character ('\t' or ' ').
+			 * To prevent these separators from being replaced with a space, we use the
+			 * SKIP_LONG_HEADER_SEP_MBSTRING to skip over them.
+			 */
+			SKIP_LONG_HEADER_SEP_MBSTRING(to_r, i);
+			to_r[i] = ' ';
+		}
 		}
 	} else {
-		php_error_docref(NULL, E_WARNING, "Missing To: field");
-		err = 1;
+		to_r = to;
 	}
 
 	/* Subject: */
-	if (subject != NULL) {
-		orig_str.no_language = MBSTRG(language);
-		orig_str.val = (unsigned char *)subject;
-		orig_str.len = subject_len;
-		orig_str.encoding = MBSTRG(current_internal_encoding);
-		if (orig_str.encoding->no_encoding == mbfl_no_encoding_invalid
-				|| orig_str.encoding->no_encoding == mbfl_no_encoding_pass) {
-			orig_str.encoding = mbfl_identify_encoding(&orig_str, MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size), MBSTRG(strict_detection));
-		}
-		pstr = mbfl_mime_header_encode(&orig_str, &conv_str, tran_cs, head_enc, "\n", sizeof("Subject: [PHP-jp nnnnnnnn]"));
-		if (pstr != NULL) {
-			subject_buf = subject = (char *)pstr->val;
-		}
-	} else {
-		php_error_docref(NULL, E_WARNING, "Missing Subject: field");
-		err = 1;
+	orig_str.no_language = MBSTRG(language);
+	orig_str.val = (unsigned char *)subject;
+	orig_str.len = subject_len;
+	orig_str.encoding = MBSTRG(current_internal_encoding);
+	if (orig_str.encoding->no_encoding == mbfl_no_encoding_invalid
+			|| orig_str.encoding->no_encoding == mbfl_no_encoding_pass) {
+		orig_str.encoding = mbfl_identify_encoding(&orig_str, MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size), MBSTRG(strict_detection));
+	}
+	pstr = mbfl_mime_header_encode(&orig_str, &conv_str, tran_cs, head_enc, "\n", sizeof("Subject: [PHP-jp nnnnnnnn]"));
+	if (pstr != NULL) {
+		subject_buf = subject = (char *)pstr->val;
 	}
 
 	/* message body */
-	if (message != NULL) {
-		orig_str.no_language = MBSTRG(language);
-		orig_str.val = (unsigned char *)message;
-		orig_str.len = (unsigned int)message_len;
-		orig_str.encoding = MBSTRG(current_internal_encoding);
+	orig_str.no_language = MBSTRG(language);
+	orig_str.val = (unsigned char *)message;
+	orig_str.len = (unsigned int)message_len;
+	orig_str.encoding = MBSTRG(current_internal_encoding);
 
-		if (orig_str.encoding->no_encoding == mbfl_no_encoding_invalid
-				|| orig_str.encoding->no_encoding == mbfl_no_encoding_pass) {
-			orig_str.encoding = mbfl_identify_encoding(&orig_str, MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size), MBSTRG(strict_detection));
-		}
+	if (orig_str.encoding->no_encoding == mbfl_no_encoding_invalid
+			|| orig_str.encoding->no_encoding == mbfl_no_encoding_pass) {
+		orig_str.encoding = mbfl_identify_encoding(&orig_str, MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size), MBSTRG(strict_detection));
+	}
 
-		pstr = NULL;
-		{
-			mbfl_string tmpstr;
+	pstr = NULL;
+	{
+		mbfl_string tmpstr;
 
-			if (mbfl_convert_encoding(&orig_str, &tmpstr, tran_cs) != NULL) {
-				tmpstr.encoding = &mbfl_encoding_8bit;
-				pstr = mbfl_convert_encoding(&tmpstr, &conv_str, body_enc);
-				efree(tmpstr.val);
-			}
+		if (mbfl_convert_encoding(&orig_str, &tmpstr, tran_cs) != NULL) {
+			tmpstr.encoding = &mbfl_encoding_8bit;
+			pstr = mbfl_convert_encoding(&tmpstr, &conv_str, body_enc);
+			efree(tmpstr.val);
 		}
-		if (pstr != NULL) {
-			message_buf = message = (char *)pstr->val;
-		}
-	} else {
-		/* this is not really an error, so it is allowed. */
-		php_error_docref(NULL, E_WARNING, "Empty message body");
-		message = NULL;
+	}
+	if (pstr != NULL) {
+		message_buf = message = (char *)pstr->val;
 	}
 
 	/* other headers */
