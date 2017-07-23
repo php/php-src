@@ -270,8 +270,11 @@ PHP_FUNCTION(http_cookie_set)
 	zend_long expires = 0;
 	zend_bool secure = 0, httponly = 0;
 	int encode = HTTP_COOKIE_ENCODE_RFC1738;
-	zval *option_buffer;
 	HashTable *options;
+
+	zend_ulong option_index;
+	zend_string *option_key;
+	zval *option_value;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(name)
@@ -280,31 +283,29 @@ PHP_FUNCTION(http_cookie_set)
 		Z_PARAM_ARRAY_OR_OBJECT_HT(options)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if(options) {
-		if ((option_buffer = zend_hash_str_find(options, "expires", sizeof("expires")-1)) != NULL) {
-			expires = zval_get_long(option_buffer);
+	ZEND_HASH_FOREACH_KEY_VAL(options, option_index, option_key, option_value) {
+		if(strcmp("expires", ZSTR_VAL(option_key)) == 0) {
+			expires = zval_get_long(option_value);
 		}
-
-		if ((option_buffer = zend_hash_str_find(options, "path", sizeof("path")-1)) != NULL) {
-			path = zval_get_string(option_buffer);
+		else if(strcmp("path", ZSTR_VAL(option_key)) == 0) {
+			path = zval_get_string(option_value);
 		}
-
-		if ((option_buffer = zend_hash_str_find(options, "domain", sizeof("domain")-1)) != NULL) {
-			domain = zval_get_string(option_buffer);
+		else if(strcmp("domain", ZSTR_VAL(option_key)) == 0) {
+			domain = zval_get_string(option_value);
 		}
-
-		if ((option_buffer = zend_hash_str_find(options, "secure", sizeof("secure")-1)) != NULL) {
-			secure = zval_get_long(option_buffer);
+		else if(strcmp("secure", ZSTR_VAL(option_key)) == 0) {
+			secure = zval_get_long(option_value);
 		}
-
-		if ((option_buffer = zend_hash_str_find(options, "httponly", sizeof("httponly")-1)) != NULL) {
-			httponly = zval_get_long(option_buffer);
+		else if(strcmp("httponly", ZSTR_VAL(option_key)) == 0) {
+			httponly = zval_get_long(option_value);
 		}
-
-		if ((option_buffer = zend_hash_str_find(options, "encode", sizeof("encode")-1)) != NULL) {
-			encode = zval_get_long(option_buffer);
+		else if(strcmp("encode", ZSTR_VAL(option_key)) == 0) {
+			encode = zval_get_long(option_value);
 		}
-	}
+		else {
+			php_error_docref(NULL, E_WARNING, "Ignore unsupported option '%s'.", ZSTR_VAL(option_key));
+		}
+	} ZEND_HASH_FOREACH_END();
 
 	if (php_setcookie(name, value, expires, path, domain, secure, encode, httponly) == SUCCESS) {
 		RETVAL_TRUE;
