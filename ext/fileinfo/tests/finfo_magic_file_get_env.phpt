@@ -7,7 +7,7 @@ if (!class_exists('finfo'))
 --FILE--
 <?php
 
-putenv('MAGIC=' . __DIR__ .'/magic');
+putenv('MAGIC=' . __DIR__ . DIRECTORY_SEPARATOR . 'magic');
 
 $finfo = new finfo(FILEINFO_NONE);
 $path = $finfo->getMagicFile();
