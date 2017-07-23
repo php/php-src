@@ -30,15 +30,15 @@ function error($message) {
 /* {{{ print_help
  */
 function print_help() {
-	printf('php ext_skel.php --ext=<name> [--experimental] [--author=<name>]%s', PHP_EOL);
-	printf('                 [--dir=<path>] [--std] [--onlyunix]%s', PHP_EOL);
+	printf('php ext_skel.php --ext <name> [--experimental] [--author <name>]%s', PHP_EOL);
+	printf('                 [--dir <path>] [--std] [--onlyunix]%s', PHP_EOL);
 	printf('                 [--onlywindows] [--help]%1$s%1$s', PHP_EOL);
-	printf('  --ext=<name>		The name of the extension defined as <name>%s', PHP_EOL);
+	printf('  --ext <name>		The name of the extension defined as <name>%s', PHP_EOL);
 	printf('  --experimental	Passed if this extension is experimental, this creates%s', PHP_EOL);
 	printf('                        the EXPERIMENTAL file in the root of the extension%s', PHP_EOL);
-	printf('  --author=<name>       Your name, this is used if --header is passed and%s', PHP_EOL);
+	printf('  --author <name>       Your name, this is used if --header is passed and%s', PHP_EOL);
 	printf('                        for the CREDITS file%s', PHP_EOL);
-	printf('  --dir=<path>		Path to the directory for where extension should be%s', PHP_EOL);
+	printf('  --dir <path>		Path to the directory for where extension should be%s', PHP_EOL);
 	printf('                        created. Defaults to the directory of where this script%s', PHP_EOL);
 	printf(' 			lives%s', PHP_EOL);
 	printf('  --std			If passed, the standard header and vim rules footer used%s', PHP_EOL);
