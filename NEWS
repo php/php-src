@@ -11,6 +11,9 @@ PHP                                                                        NEWS
   . Added ldap_exop_refresh helper for EXOP REFRESH operation with dds overlay. 
     (Come)
 
+- Mbstring:
+  . Fixed bug #73528 (Crash in zif_mb_send_mail). (Nikita)
+
 - ODBC:
   . Removed support for Birdstep. (Kalle)
 

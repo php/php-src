@@ -4315,7 +4315,6 @@ out:
 
 PHP_FUNCTION(mb_send_mail)
 {
-	size_t n;
 	char *to;
 	size_t to_len;
 	char *message;
@@ -4325,7 +4324,7 @@ PHP_FUNCTION(mb_send_mail)
 	zval *headers = NULL;
 	zend_string *extra_cmd = NULL;
 	zend_string *str_headers = NULL, *tmp_headers;
-	int i;
+	size_t n, i;
 	char *to_r = NULL;
 	char *force_extra_parameters = INI_STR("mail.force_extra_parameters");
 	struct {
