@@ -552,9 +552,7 @@ PHP_FUNCTION(sodium_increment)
 {
 	zval		  *val_zv;
 	unsigned char *val;
-	size_t		   i;
 	size_t		   val_len;
-	unsigned int   c;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(),
 							  "z", &val_zv) == FAILURE) {
@@ -569,12 +567,7 @@ PHP_FUNCTION(sodium_increment)
 	sodium_separate_string(val_zv);
 	val = (unsigned char *) Z_STRVAL(*val_zv);
 	val_len = Z_STRLEN(*val_zv);
-	c = 1U << 8;
-	for (i = (size_t) 0U; i < val_len; i++) {
-		c >>= 8;
-		c += val[i];
-		val[i] = (unsigned char) c;
-	}
+	sodium_increment(val, val_len);
 }
 
 PHP_FUNCTION(sodium_add)
@@ -582,10 +575,8 @@ PHP_FUNCTION(sodium_add)
 	zval		  *val_zv;
 	unsigned char *val;
 	unsigned char *addv;
-	size_t		   i;
 	size_t		   val_len;
 	size_t		   addv_len;
-	unsigned int   c;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(),
 							  "zs", &val_zv, &addv, &addv_len) == FAILURE) {
@@ -604,12 +595,7 @@ PHP_FUNCTION(sodium_add)
 		zend_throw_exception(sodium_exception_ce, "values must have the same length", 0);
 		return;
 	}
-	c = 0U;
-	for (i = (size_t) 0U; i < val_len; i++) {
-		c += val[i] + addv[i];
-		val[i] = (unsigned char) c;
-		c >>= 8;
-	}
+	sodium_add(val, addv, val_len);
 }
 
 PHP_FUNCTION(sodium_memcmp)
