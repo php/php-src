@@ -24,6 +24,8 @@ PHP                                                                        NEWS
 
 - SPL:
   . Fixed bug #74669 (Unserialize ArrayIterator broken). (Andrew Nester)
+  . Fixed bug #74977 (Appending AppendIterator leads to segfault). 
+    (Andrew Nester)
 
 03 Aug 2017, PHP 7.1.8
 
