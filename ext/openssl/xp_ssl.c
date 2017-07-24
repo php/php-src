@@ -1170,7 +1170,7 @@ static int set_server_dh_param(php_stream * stream, SSL_CTX *ctx) /* {{{ */
 	}
 
 	convert_to_string_ex(zdhpath);
-	bio = BIO_new_file(Z_STRVAL_P(zdhpath), "r");
+	bio = BIO_new_file(Z_STRVAL_P(zdhpath), PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY));
 
 	if (bio == NULL) {
 		php_error_docref(NULL, E_WARNING, "invalid dh_param");

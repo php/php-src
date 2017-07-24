@@ -87,14 +87,6 @@
 #define HAVE_EVP_PKEY_EC 1
 #endif
 
-#ifdef PHP_WIN32
-#define PHP_OPENSSL_BIO_MODE_R(flags) (((flags) & PKCS7_BINARY) ? "rb" : "r")
-#define PHP_OPENSSL_BIO_MODE_W(flags) (((flags) & PKCS7_BINARY) ? "wb" : "w")
-#else
-#define PHP_OPENSSL_BIO_MODE_R(flags) "r"
-#define PHP_OPENSSL_BIO_MODE_W(flags) "w"
-#endif
-
 ZEND_DECLARE_MODULE_GLOBALS(openssl)
 
 /* FIXME: Use the openssl constants instead of
