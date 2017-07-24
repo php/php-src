@@ -161,7 +161,7 @@ All the deprecated functionality listed in the following will be removed in
 PHP 8.0.
 
 - Core:
-  . The trace_errors ini directive has been deprecated.
+  . The track_errors ini directive has been deprecated.
   . The __autoload() mechanism has been deprecated, use spl_autoload_register()
     instead.
   . The (unset) cast has been deprecated. This does not affect the unset($var)
