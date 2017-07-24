@@ -406,12 +406,12 @@ function conf_process_args()
 		}
 		if (!found) {
 			INVALID_CONFIG_ARGS[INVALID_CONFIG_ARGS.length] = argname;
-
-			/*
-			STDERR.WriteLine("Unknown option " + argname + "; please try configure.js --help for a list of valid options");
-			WScript.Quit(2);
-			*/
 		}
+	}
+
+	if (PHP_SNAPSHOT_BUILD != 'no' && INVALID_CONFIG_ARGS.length) {
+		STDERR.WriteLine('Unknown option ' + INVALID_CONFIG_ARGS[0] + '; please try configure.js --help for a list of valid options');
+		WScript.Quit(2);
 	}
 
 	if (configure_help_mode) {
