@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2016 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -40,7 +40,7 @@
 #include "php_oci8.h"
 #include "php_oci8_int.h"
 
-/* {{{ callback_fn() 
+/* {{{ callback_fn()
    OCI TAF callback function, calling userspace function */
 sb4 callback_fn(OCISvcCtx *svchp, OCIEnv *envhp, php_oci_connection *fo_ctx, ub4 fo_type, ub4 fo_event)
 {
