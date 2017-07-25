@@ -123,6 +123,10 @@ PHP                                                                        NEWS
 - Sodium:
   . New cryptographic extension
 
+- SPL:
+  . Added spl_object_id() function returning an integer (the object handle) for an object.
+    (Tyson Andre)
+
 - SQLite3:
   . Fixed bug #74883 (SQLite3::__construct() produces "out of memory" exception
     with invalid flags). (Anatol)
