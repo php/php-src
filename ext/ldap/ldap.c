@@ -488,7 +488,7 @@ PHP_FUNCTION(ldap_connect)
 		int rc = LDAP_SUCCESS;
 		char	*url = host;
 		if (url && !ldap_is_ldap_url(url)) {
-			int	urllen = hostlen + sizeof( "ldap://:65535" );
+			size_t urllen = hostlen + sizeof( "ldap://:65535" );
 
 			if (port <= 0 || port > 65535) {
 				efree(ld);
@@ -1722,9 +1722,9 @@ PHP_FUNCTION(ldap_delete)
 
 /* {{{ _ldap_str_equal_to_const
  */
-static int _ldap_str_equal_to_const(const char *str, uint32_t str_len, const char *cstr)
+static size_t _ldap_str_equal_to_const(const char *str, size_t str_len, const char *cstr)
 {
-	uint32_t i;
+	size_t i;
 
 	if (strlen(cstr) != str_len)
 		return 0;
@@ -1741,9 +1741,9 @@ static int _ldap_str_equal_to_const(const char *str, uint32_t str_len, const cha
 
 /* {{{ _ldap_strlen_max
  */
-static int _ldap_strlen_max(const char *str, uint32_t max_len)
+static size_t _ldap_strlen_max(const char *str, size_t max_len)
 {
-	uint32_t i;
+	size_t i;
 
 	for (i = 0; i < max_len; ++i) {
 		if (str[i] == '\0') {
@@ -1819,7 +1819,7 @@ PHP_FUNCTION(ldap_modify_batch)
 		zend_ulong tmpUlong;
 
 		/* make sure the DN contains no NUL bytes */
-		if ((size_t)_ldap_strlen_max(dn, dn_len) != dn_len) {
+		if (_ldap_strlen_max(dn, dn_len) != dn_len) {
 			php_error_docref(NULL, E_WARNING, "DN must not contain NUL bytes");
 			RETURN_FALSE;
 		}
@@ -1879,7 +1879,7 @@ PHP_FUNCTION(ldap_modify_batch)
 						RETURN_FALSE;
 					}
 
-					if (Z_STRLEN_P(modinfo) != (size_t)_ldap_strlen_max(Z_STRVAL_P(modinfo), Z_STRLEN_P(modinfo))) {
+					if (Z_STRLEN_P(modinfo) != _ldap_strlen_max(Z_STRVAL_P(modinfo), Z_STRLEN_P(modinfo))) {
 						php_error_docref(NULL, E_WARNING, "A '" LDAP_MODIFY_BATCH_ATTRIB "' value must not contain NUL bytes");
 						RETURN_FALSE;
 					}
@@ -2436,7 +2436,11 @@ PHP_FUNCTION(ldap_set_option)
 			int val;
 
 			convert_to_long_ex(newval);
-			val = Z_LVAL_P(newval);
+			if (ZEND_LONG_EXCEEDS_INT(Z_LVAL_P(newval))) {
+				php_error_docref(NULL, E_WARNING, "Option value is too big");
+				RETURN_FALSE;
+			}
+			val = (int)Z_LVAL_P(newval);
 			if (ldap_set_option(ldap, option, &val)) {
 				RETURN_FALSE;
 			}
@@ -3030,9 +3034,9 @@ static zend_string* php_ldap_do_escape(const zend_bool *map, const char *value, 
 	return ret;
 }
 
-static void php_ldap_escape_map_set_chars(zend_bool *map, const char *chars, const int charslen, char escape)
+static void php_ldap_escape_map_set_chars(zend_bool *map, const char *chars, const size_t charslen, char escape)
 {
-	int i = 0;
+	size_t i = 0;
 	while (i < charslen) {
 		map[(unsigned char) chars[i++]] = escape;
 	}

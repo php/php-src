@@ -196,7 +196,7 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 	const char *s1, *s2;
 	char *strtok_buf = NULL, **val_list = NULL;
 	zval *array_ptr = (zval *) arg;
-	int n, num, *len_list = NULL;
+	size_t n, num, *len_list = NULL;
 	size_t val_len, new_val_len;
 	mbfl_string string, resvar, resval;
 	const mbfl_encoding *from_encoding = NULL;
@@ -225,7 +225,7 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 	num *= 2; /* need space for variable name and value */
 
 	val_list = (char **)ecalloc(num, sizeof(char *));
-	len_list = (int *)ecalloc(num, sizeof(int));
+	len_list = (size_t *)ecalloc(num, sizeof(size_t));
 
 	/* split and decode the query */
 	n = 0;
@@ -253,7 +253,7 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 		var = php_strtok_r(NULL, info->separator, &strtok_buf);
 	}
 
-	if (n > (PG(max_input_vars) * 2)) {
+	if (ZEND_SIZE_T_GT_ZEND_LONG(n, (PG(max_input_vars) * 2))) {
 		php_error_docref(NULL, E_WARNING, "Input variables exceeded " ZEND_LONG_FMT ". To increase the limit change max_input_vars in php.ini.", PG(max_input_vars));
 		goto out;
 	}

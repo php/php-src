@@ -157,7 +157,7 @@ MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t ol
 MBSTRING_API int php_mb_check_encoding(const char *input, size_t length, const char *enc);
 
 /* internal use only */
-int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, uint32_t new_value_length);
+int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, size_t new_value_length);
 
 ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	char *internal_encoding_name;
