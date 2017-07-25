@@ -228,7 +228,7 @@ function parseUnicodeData($input) {
         if ($lowerCase) {
             $data->addCaseMapping(UnicodeData::TO_LOWER, $code, $lowerCase);
         }
-        if ($titleCase) {
+        if ($titleCase && $titleCase != $upperCase) {
             $data->addCaseMapping(UnicodeData::TO_TITLE, $code, $titleCase);
         }
     }
