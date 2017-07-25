@@ -834,7 +834,7 @@ read_cdata(FILE *in)
          * 3. D800-DFFF Surrogates.
          * 4. E000-F8FF Private Use Area.
          * 5. F900-FA2D Han compatibility.
-	 * ...Plus additional ranges in newer Unicode versions...
+         * ...Plus additional ranges in newer Unicode versions...
          */
         switch (code) {
 	  case 0x3400:
@@ -854,7 +854,7 @@ read_cdata(FILE *in)
             /*
              * Add the characters to the defined category.
              */
-            add_range(0x4e00, 0x9fa5, "Cp", 0);
+            add_range(0x4e00, 0x9fea, "Cp", 0);
 
             skip = 1;
             break;
@@ -876,7 +876,7 @@ read_cdata(FILE *in)
              * Make a range of all surrogates and assume some default
              * properties.
              */
-            add_range(0x010000, 0x10ffff, "Cs", "L");
+            add_range(0xd800, 0xdfff, "Cs", "L");
             skip = 5;
             break;
           case 0xe000:
@@ -886,19 +886,6 @@ read_cdata(FILE *in)
             add_range(0xe000, 0xf8ff, "Co", "L");
             skip = 1;
             break;
-          case 0xf900:
-            /*
-             * The CJK compatibility area.
-             */
-            add_range(0xf900, 0xfaff, "Lo", "L");
-
-            /*
-             * Add the characters to the defined category.
-             */
-            add_range(0xf900, 0xfaff, "Cp", 0);
-
-            skip = 1;
-	    break;
 	  case 0x20000:
 	    /* CJK Ideograph Extension B */
             add_range(0x20000, 0x2a6d6, "Lo", "L");
