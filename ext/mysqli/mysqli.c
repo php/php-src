@@ -1152,7 +1152,7 @@ void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend
 {
 #if !defined(MYSQLI_USE_MYSQLND)
 	MYSQL_ROW row;
-	unsigned int	i;
+	unsigned int	i, num_fields;
 	MYSQL_FIELD		*fields;
 	zend_ulong	*field_len;
 
@@ -1166,8 +1166,9 @@ void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend
 
 	array_init(return_value);
 	field_len = mysql_fetch_lengths(result);
+	num_fields = mysql_num_fields(result);
 
-	for (i = 0; i < mysql_num_fields(result); i++) {
+	for (i = 0; i < num_fields; i++) {
 		if (row[i]) {
 			zval res;
 
