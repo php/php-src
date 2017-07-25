@@ -70,87 +70,87 @@ echo "Done\n";
 *** Testing fputcsv() : with no CSV format in the field ***
 
 -- file opened in r+ --
-int(16)
-int(16)
+int(14)
+int(14)
 bool(false)
-string(16) ""water_fruit\n"
+string(14) "water_fruit\n
 "
 
 -- file opened in r+b --
-int(16)
-int(16)
+int(14)
+int(14)
 bool(false)
-string(16) ""water_fruit\n"
+string(14) "water_fruit\n
 "
 
 -- file opened in r+t --
-int(16)
-int(16)
+int(14)
+int(14)
 bool(false)
-string(%d) ""water_fruit\n"
+string(%d) "water_fruit\n
 "
 
 -- file opened in a+ --
-int(16)
-int(16)
+int(14)
+int(14)
 bool(false)
-string(16) ""water_fruit\n"
+string(14) "water_fruit\n
 "
 
 -- file opened in a+b --
-int(16)
-int(16)
+int(14)
+int(14)
 bool(false)
-string(16) ""water_fruit\n"
+string(14) "water_fruit\n
 "
 
 -- file opened in a+t --
-int(16)
-int(16)
+int(14)
+int(14)
 bool(false)
-string(%d) ""water_fruit\n"
+string(%d) "water_fruit\n
 "
 
 -- file opened in w+ --
-int(16)
-int(16)
+int(14)
+int(14)
 bool(false)
-string(16) ""water_fruit\n"
+string(14) "water_fruit\n
 "
 
 -- file opened in w+b --
-int(16)
-int(16)
+int(14)
+int(14)
 bool(false)
-string(16) ""water_fruit\n"
+string(14) "water_fruit\n
 "
 
 -- file opened in w+t --
-int(16)
-int(16)
+int(14)
+int(14)
 bool(false)
-string(%d) ""water_fruit\n"
+string(%d) "water_fruit\n
 "
 
 -- file opened in x+ --
-int(16)
-int(16)
+int(14)
+int(14)
 bool(false)
-string(16) ""water_fruit\n"
+string(14) "water_fruit\n
 "
 
 -- file opened in x+b --
-int(16)
-int(16)
+int(14)
+int(14)
 bool(false)
-string(16) ""water_fruit\n"
+string(14) "water_fruit\n
 "
 
 -- file opened in x+t --
-int(16)
-int(16)
+int(14)
+int(14)
 bool(false)
-string(%d) ""water_fruit\n"
+string(%d) "water_fruit\n
 "
 
 -- file opened in r+ --

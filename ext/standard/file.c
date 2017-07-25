@@ -1864,7 +1864,7 @@ PHP_FUNCTION(fputcsv)
 {
 	char delimiter = ',';	 /* allow this to be set as parameter */
 	char enclosure = '"';	 /* allow this to be set as parameter */
-	char escape_char = '\\'; /* allow this to be set as parameter */
+	char escape_char = '\0'; /* allow this to be set as parameter */
 	php_stream *stream;
 	zval *fp = NULL, *fields = NULL;
 	size_t ret;
@@ -1987,7 +1987,7 @@ PHP_FUNCTION(fgetcsv)
 {
 	char delimiter = ',';	/* allow this to be set as parameter */
 	char enclosure = '"';	/* allow this to be set as parameter */
-	char escape = '\\';
+	char escape = '\0';
 
 	/* first section exactly as php_fgetss */
 
@@ -2231,7 +2231,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char
 							default:
 								if (*bptr == enclosure) {
 									state = 2;
-								} else if (*bptr == escape_char) {
+								} else if (*bptr != '\0' && *bptr == escape_char) {
 									state = 1;
 								}
 								bptr++;
