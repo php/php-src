@@ -23,6 +23,11 @@
 user = @php_fpm_user@
 group = @php_fpm_group@
 
+; When Cgroups are supported you can use this option to put worker processes to
+; specified cgroup.
+; Default Value: no set
+;cgroup = webserver/fpm
+
 ; The address on which to accept FastCGI requests.
 ; Valid syntaxes are:
 ;   'ip.add.re.ss:port'    - to listen on a TCP socket to a specific IPv4 address on

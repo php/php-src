@@ -586,6 +586,9 @@ if test "$PHP_FPM" != "no"; then
   PHP_ARG_WITH(fpm-acl,,
   [  --with-fpm-acl          Use POSIX Access Control Lists], no, no)
 
+  PHP_ARG_WITH(fpm-cgroup,,
+  [  --with-fpm-cgroup       Use CGroups], no, no)
+
   if test "$PHP_FPM_SYSTEMD" != "no" ; then
     if test -z "$PKG_CONFIG"; then
       AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
@@ -637,6 +640,17 @@ if test "$PHP_FPM" != "no"; then
       AC_MSG_ERROR(libacl required not found)
     ])
   fi
+
+  if test "$PHP_FPM_CGROUP" != "no" ; then
+    AC_CHECK_HEADERS([libcgroup.h])
+    AC_CHECK_LIB(cgroup, cgroup_init, [
+      PHP_ADD_LIBRARY(cgroup)
+      AC_DEFINE(HAVE_FPM_CGROUP, 1, [ CGroups support ])
+    ],[
+      AC_MSG_ERROR(libcgroup required not found)
+    ])
+  fi
+
 
   PHP_SUBST_OLD(php_fpm_systemd)
   AC_DEFINE_UNQUOTED(PHP_FPM_SYSTEMD, "$php_fpm_systemd", [fpm systemd service type])

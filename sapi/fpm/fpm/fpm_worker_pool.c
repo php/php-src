@@ -30,6 +30,9 @@ void fpm_worker_pool_free(struct fpm_worker_pool_s *wp) /* {{{ */
 	if (wp->home) {
 		free(wp->home);
 	}
+#ifdef HAVE_FPM_CGROUP
+	cgroup_free(&wp->cgroup);
+#endif
 	fpm_unix_free_socket_premissions(wp);
 	free(wp);
 }

@@ -157,6 +157,9 @@ static struct ini_value_parser_s ini_fpm_pool_options[] = {
 #ifdef HAVE_APPARMOR
 	{ "apparmor_hat",              &fpm_conf_set_string,      WPO(apparmor_hat) },
 #endif
+#ifdef HAVE_FPM_CGROUP
+	{ "cgroup",                    &fpm_conf_set_string,      WPO(cgroup) },
+#endif
 	{ 0, 0, 0 }
 };
 
@@ -657,6 +660,9 @@ int fpm_worker_pool_config_free(struct fpm_worker_pool_config_s *wpc) /* {{{ */
 	free(wpc->security_limit_extensions);
 #ifdef HAVE_APPARMOR
 	free(wpc->apparmor_hat);
+#endif
+#ifdef HAVE_FPM_CGROUP
+	free(wpc->cgroup);
 #endif
 
 	for (kv = wpc->php_values; kv; kv = kv_next) {
@@ -1606,6 +1612,9 @@ static void fpm_conf_dump() /* {{{ */
 		zlog(ZLOG_NOTICE, "\tprefix = %s",                     STR2STR(wp->config->prefix));
 		zlog(ZLOG_NOTICE, "\tuser = %s",                       STR2STR(wp->config->user));
 		zlog(ZLOG_NOTICE, "\tgroup = %s",                      STR2STR(wp->config->group));
+#ifdef HAVE_FPM_CGROUP
+		zlog(ZLOG_NOTICE, "\tcgroup = %s",                     STR2STR(wp->config->cgroup));
+#endif
 		zlog(ZLOG_NOTICE, "\tlisten = %s",                     STR2STR(wp->config->listen_address));
 		zlog(ZLOG_NOTICE, "\tlisten.backlog = %d",             wp->config->listen_backlog);
 #ifdef HAVE_FPM_ACL

@@ -97,6 +97,9 @@ struct fpm_worker_pool_config_s {
 	char *listen_acl_users;
 	char *listen_acl_groups;
 #endif
+#ifdef HAVE_FPM_CGROUP
+	char *cgroup;
+#endif
 };
 
 struct ini_value_parser_s {
