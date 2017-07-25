@@ -35,7 +35,7 @@
  * THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-if ($argc != 2) {
+if ($argc < 2) {
     echo "Usage: php ucgendata.php UnicodeData.txt\n";
     return;
 }
@@ -62,10 +62,6 @@ class Range {
 }
 
 class UnicodeData {
-    const TO_UPPER = 0;
-    const TO_LOWER = 1;
-    const TO_TITLE = 2;
-
     public $propIndexes;
     public $numProps;
     public $propRanges;
@@ -88,9 +84,9 @@ class UnicodeData {
 
         $this->propRanges = array_fill(0, $this->numProps, []);
         $this->caseMaps = [
-            self::TO_UPPER => [],
-            self::TO_LOWER => [],
-            self::TO_TITLE => [],
+            'upper' => [],
+            'lower' => [],
+            'title' => [],
         ];
     }
 
@@ -132,7 +128,7 @@ class UnicodeData {
         $this->propRanges[$propIdx][] = new Range($startCode, $endCode);
     }
 
-    public function addCaseMapping(int $case, int $origCode, int $mappedCode) {
+    public function addCaseMapping(string $case, int $origCode, int $mappedCode) {
         $this->caseMaps[$case][$origCode] = $mappedCode;
     }
 
@@ -223,20 +219,20 @@ function parseUnicodeData($input) {
         $lowerCase = intval($fields[13], 16);
         $titleCase = intval($fields[14], 16);
         if ($upperCase) {
-            $data->addCaseMapping(UnicodeData::TO_UPPER, $code, $upperCase);
+            $data->addCaseMapping('upper', $code, $upperCase);
         }
         if ($lowerCase) {
-            $data->addCaseMapping(UnicodeData::TO_LOWER, $code, $lowerCase);
+            $data->addCaseMapping('lower', $code, $lowerCase);
         }
         if ($titleCase && $titleCase != $upperCase) {
-            $data->addCaseMapping(UnicodeData::TO_TITLE, $code, $titleCase);
+            $data->addCaseMapping('title', $code, $titleCase);
         }
     }
 
     return $data;
 }
 
-function formatArray(array $values, int $width, int $hexWidth) : string {
+function formatArray(array $values, int $width, string $format) : string {
     $result = '';
     $i = 0;
     $c = count($values);
@@ -246,16 +242,19 @@ function formatArray(array $values, int $width, int $hexWidth) : string {
         }
 
         $result .= $i % $width == 0 ? "\n\t" : " ";
-        $result .= sprintf("0x%0" . $hexWidth . "x", $values[$i]);
+        $result .= sprintf($format, $values[$i]);
     }
     return $result;
 }
 
-function formatShortARray(array $values, int $width) : string {
-    return formatArray($values, $width, 4);
+function formatShortHexArray(array $values, int $width) : string {
+    return formatArray($values, $width, "0x%04x");
+}
+function formatShortDecArray(array $values, int $width) : string {
+    return formatArray($values, $width, "% 5d");
 }
 function formatIntArray(array $values, int $width) : string {
-    return formatArray($values, $width, 8);
+    return formatArray($values, $width, "0x%08x");
 }
 
 function generatePropData(UnicodeData $data) {
@@ -284,7 +283,7 @@ function generatePropData(UnicodeData $data) {
     $result = "";
     $result .= "static const unsigned short _ucprop_size = $data->numProps;\n\n";
     $result .= "static const unsigned short  _ucprop_offsets[] = {";
-    $result .= formatShortArray($propOffsets, 8);
+    $result .= formatShortHexArray($propOffsets, 8);
     $result .= "\n};\n\n";
 
     $values = [];
@@ -301,36 +300,38 @@ function generatePropData(UnicodeData $data) {
     return $result;
 }
 
-function generateCaseData(UnicodeData $data) {
-    $numUpper = count($data->caseMaps[UnicodeData::TO_UPPER]);
-    $numLower = count($data->caseMaps[UnicodeData::TO_LOWER]); 
-    $numTitle = count($data->caseMaps[UnicodeData::TO_TITLE]); 
-
-    $result = "";
-    $result .= sprintf("static const unsigned int _uccase_size = %d;\n\n",
-        $numUpper + $numLower + $numTitle);
-
-    $result .= <<<'HEADER'
-/* Starting indexes of the case tables
- * UpperIndex = 0
- * LowerIndex = _uccase_len[0]
- * TitleIndex = LowerIndex + _uccase_len[1] */
-HEADER;
-    $result .= "\n\n";
-    $result .= sprintf("static const unsigned short _uccase_len[2] = {%d, %d};\n\n",
-        $numUpper, $numLower);
-
-    $values = [];
-    foreach ($data->caseMaps as $map) {
-        foreach ($map as $orig => $mapped) {
-            $values[] = $orig;
-            $values[] = $mapped;
+function flatten(array $array) {
+    $result = [];
+    foreach ($array as $arr) {
+        foreach ($arr as $v) {
+            $result[] = $v;
         }
     }
+    return $result;
+}
 
-    $result .= "static const unsigned int _uccase_map[] = {";
-    $result .= formatIntArray($values, 2);
+function generateCaseMPH(string $name, array $map) {
+    $prefix = "_uccase_" . $name;
+    list($gTable, $table) = generateMPH($map, $fast = false);
+    echo "$name: n=", count($table), ", g=", count($gTable), "\n";
+
+    $result = "";
+    $result .= "static const unsigned {$prefix}_g_size = " . count($gTable) . ";\n";
+    $result .= "static const short {$prefix}_g[] = {";
+    $result .= formatShortDecArray($gTable, 8);
     $result .= "\n};\n\n";
+    $result .= "static const unsigned {$prefix}_table_size = " . count($table) . ";\n";
+    $result .= "static const unsigned {$prefix}_table[] = {";
+    $result .= formatIntArray(flatten($table), 4);
+    $result .= "\n};\n\n";
+    return $result;
+}
+
+function generateCaseData(UnicodeData $data) {
+    $result = "";
+    $result .= generateCaseMPH('upper', $data->caseMaps['upper']);
+    $result .= generateCaseMPH('lower', $data->caseMaps['lower']);
+    $result .= generateCaseMPH('title', $data->caseMaps['title']);
     return $result;
 }
 
@@ -352,4 +353,124 @@ HEADER;
     $result .= generateCaseData($data);
 
     return $result;
+}
+
+/*
+ * Minimal Perfect Hash Generation
+ *
+ * Based on "Hash, displace, and compress" algorithm due to
+ * Belazzougui, Botelho and Dietzfelbinger.
+ *
+ * Hash function based on https://stackoverflow.com/a/12996028/385378.
+ * MPH implementation based on http://stevehanov.ca/blog/index.php?id=119.
+ */
+
+function hashInt(int $d, int $x) {
+    $x ^= $d;
+    $x = (($x >> 16) ^ $x) * 0x45d9f3b;
+    return $x & 0xffffffff;
+}
+
+function tryGenerateMPH(array $map, int $gSize) {
+    $tableSize = count($map);
+    $table = [];
+    $gTable = array_fill(0, $gSize, 0x7fff);
+    $buckets = [];
+
+    foreach ($map as $k => $v) {
+        $h = hashInt(0, $k) % $gSize;
+        $buckets[$h][] = [$k, $v];
+    }
+
+    // Sort by descending number of collisions
+    usort($buckets, function ($b1, $b2) {
+        return -(count($b1) <=> count($b2));
+    });
+
+    foreach ($buckets as $bucket) {
+        $collisions = count($bucket);
+        if ($collisions <= 1) {
+            continue;
+        }
+
+        // Try values of $d until all elements placed in different slots
+        $d = 1;
+        $i = 0;
+        $used = [];
+        while ($i < $collisions) {
+            if ($d > 0x7fff) {
+                return [];
+            }
+
+            list($k) = $bucket[$i];
+            $slot = hashInt($d, $k) % $tableSize;
+            if (isset($table[$slot]) || isset($used[$slot])) {
+                $d++;
+                $i = 0;
+                $used = [];
+            } else {
+                $i++;
+                $used[$slot] = true;
+            }
+        }
+
+        $g = hashInt(0, $bucket[0][0]) % $gSize;
+        $gTable[$g] = $d;
+        foreach ($bucket as $elem) {
+            $table[hashInt($d, $elem[0]) % $tableSize] = $elem;
+        }
+    }
+
+    $freeSlots = [];
+    for ($i = 0; $i < $tableSize; $i++) {
+        if (!isset($table[$i])) {
+            $freeSlots[] = $i;
+        }
+    }
+
+    // For buckets with only one element, we directly store the index
+    $freeIdx = 0;
+    foreach ($buckets as $bucket) {
+        if (count($bucket) != 1) {
+            continue;
+        }
+
+        $elem = $bucket[0];
+        $slot = $freeSlots[$freeIdx++];
+        $table[$slot] = $elem;
+
+        $g = hashInt(0, $elem[0]) % $gSize;
+        $gTable[$g] = -$slot;
+    }
+
+    ksort($gTable);
+    ksort($table);
+
+    return [$gTable, $table];
+}
+
+function generateMPH(array $map, bool $fast) {
+    if ($fast) {
+        // Check size starting lambda=5.0 in 0.5 increments
+        for ($lambda = 5.0;; $lambda -= 0.5) {
+            $m = (int) (count($map) / $lambda);
+            $tmpMph = tryGenerateMPH($map, $m);
+            if (!empty($tmpMph)) {
+                $mph = $tmpMph;
+                break;
+            }
+        }
+    } else {
+        // Check all sizes starting lambda=7.0
+        $m = (int) (count($map) / 7.0);
+        for (;; $m++) {
+            $tmpMph = tryGenerateMPH($map, $m);
+            if (!empty($tmpMph)) {
+                $mph = $tmpMph;
+                break;
+            }
+        }
+    }
+
+    return $mph;
 }

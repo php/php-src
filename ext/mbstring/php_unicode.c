@@ -113,35 +113,39 @@ MBSTRING_API int php_unicode_is_prop(unsigned long code, ...)
 	return result;
 }
 
-#define CODE_NOT_FOUND ((unsigned long) -1)
+static inline unsigned mph_hash(unsigned d, unsigned x) {
+    x ^= d;
+    x = ((x >> 16) ^ x) * 0x45d9f3b;
+    return x;
+}
 
-static unsigned long case_lookup(unsigned long code, long l, long r)
+#define CODE_NOT_FOUND ((unsigned) -1)
+
+static inline unsigned mph_lookup(
+		unsigned code,
+		const short *g_table, unsigned g_table_size,
+		const unsigned *table, unsigned table_size)
 {
-	long m;
-	const unsigned int *tmp;
+	short g = g_table[mph_hash(0, code) % g_table_size];
 
-	/*
-	 * Do the binary search.
-	 */
-	while (l <= r) {
-		/*
-		 * Determine a "mid" point and adjust to make sure the mid point is at
-		 * the beginning of a case mapping triple.
-		 */
-		m = (l + r) >> 1;
-		tmp = &_uccase_map[m*2];
-		if (code > *tmp)
-			l = m + 1;
-		else if (code < *tmp)
-			r = m - 1;
-		else if (code == *tmp)
-			return tmp[1];
+	unsigned idx;
+	if (g <= 0) {
+		idx = -g;
+	} else {
+		idx = mph_hash(g, code) % table_size;
 	}
 
+	if (table[2*idx] == code) {
+		return table[2*idx + 1];
+	}
 	return CODE_NOT_FOUND;
 }
 
-MBSTRING_API unsigned long php_unicode_toupper(unsigned long code, enum mbfl_no_encoding enc)
+#define CASE_LOOKUP(code, type) \
+	mph_lookup(code, _uccase_##type##_g, _uccase_##type##_g_size, \
+			_uccase_##type##_table, _uccase_##type##_table_size)
+
+unsigned php_unicode_toupper(unsigned code, enum mbfl_no_encoding enc)
 {
 	if (code < 0x80) {
 		/* Fast path for ASCII */
@@ -153,9 +157,7 @@ MBSTRING_API unsigned long php_unicode_toupper(unsigned long code, enum mbfl_no_
 		}
 		return code;
 	} else {
-		long l = 0;
-		long r = _uccase_len[0] - 1;
-		unsigned long new_code = case_lookup(code, l, r);
+		unsigned new_code = CASE_LOOKUP(code, upper);
 		if (new_code != CODE_NOT_FOUND) {
 			return new_code;
 		}
@@ -163,7 +165,7 @@ MBSTRING_API unsigned long php_unicode_toupper(unsigned long code, enum mbfl_no_
 	}
 }
 
-MBSTRING_API unsigned long php_unicode_tolower(unsigned long code, enum mbfl_no_encoding enc)
+unsigned php_unicode_tolower(unsigned code, enum mbfl_no_encoding enc)
 {
 	if (code < 0x80) {
 		/* Fast path for ASCII */
@@ -175,9 +177,7 @@ MBSTRING_API unsigned long php_unicode_tolower(unsigned long code, enum mbfl_no_
 		}
 		return code;
 	} else {
-		long l = _uccase_len[0];
-		long r = _uccase_len[0] + _uccase_len[1] - 1;
-		unsigned long new_code = case_lookup(code, l, r);
+		unsigned new_code = CASE_LOOKUP(code, lower);
 		if (new_code != CODE_NOT_FOUND) {
 			return new_code;
 		}
@@ -185,11 +185,9 @@ MBSTRING_API unsigned long php_unicode_tolower(unsigned long code, enum mbfl_no_
 	}
 }
 
-MBSTRING_API unsigned long php_unicode_totitle(unsigned long code, enum mbfl_no_encoding enc)
+unsigned php_unicode_totitle(unsigned code, enum mbfl_no_encoding enc)
 {
-	long l = _uccase_len[0] + _uccase_len[1];
-	long r = _uccase_size - 1;
-	unsigned long new_code = case_lookup(code, l, r);
+	unsigned new_code = CASE_LOOKUP(code, title);
 	if (new_code != CODE_NOT_FOUND) {
 		return new_code;
 	}
