@@ -1347,7 +1347,7 @@ static PHP_INI_MH(OnUpdate_mbstring_http_output)
 /* }}} */
 
 /* {{{ static _php_mb_ini_mbstring_internal_encoding_set */
-int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, uint32_t new_value_length)
+int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, size_t new_value_length)
 {
 	const mbfl_encoding *encoding;
 
@@ -2932,7 +2932,7 @@ PHP_FUNCTION(mb_strcut)
 		}
 	}
 
-	if ((unsigned int)from > string.len) {
+	if (from > string.len) {
 		RETURN_FALSE;
 	}
 
@@ -4469,7 +4469,7 @@ PHP_FUNCTION(mb_send_mail)
 	/* message body */
 	orig_str.no_language = MBSTRG(language);
 	orig_str.val = (unsigned char *)message;
-	orig_str.len = (unsigned int)message_len;
+	orig_str.len = message_len;
 	orig_str.encoding = MBSTRG(current_internal_encoding);
 
 	if (orig_str.encoding->no_encoding == mbfl_no_encoding_invalid
