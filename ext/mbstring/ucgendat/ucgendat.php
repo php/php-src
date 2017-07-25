@@ -161,14 +161,6 @@ class UnicodeData {
             if ($lastRange->end == -1) {
                 $lastRange = $range;
             } else if ($range->start == $lastRange->end + 1) {
-                // TODO: This check can be dropped. It only makes sure the output is
-                // the same as previously.
-                if ($range->end != $range->start + 1) {
-                    $newRanges[] = $lastRange;
-                    $lastRange = $range;
-                    continue;
-                }
-
                 $lastRange->end = $range->end;
             } else if ($range->start > $lastRange->end + 1) {
                 $newRanges[] = $lastRange;
@@ -197,17 +189,12 @@ class UnicodeData {
 function parseUnicodeData($input) {
     $data = new UnicodeData;
     $lines = array_map('trim', explode("\n", $input));
+    $numLines = count($lines);
+    for ($i = 0; $i < $numLines; $i++) {
+        $line = $lines[$i];
 
-    $skip = 0;
-    $i = 0;
-    foreach ($lines as $line) {
         // Skip empty lines and comments
         if ($line === '' || $line[0] === '#') {
-            continue;
-        }
-
-        if ($skip) {
-            $skip--;
             continue;
         }
 
@@ -218,74 +205,29 @@ function parseUnicodeData($input) {
 
         $code = intval($fields[0], 16);
 
-        /*
-         * Handle the following special cases:
-         * 1. 4E00-9FA5 CJK Ideographs.
-         * 2. AC00-D7A3 Hangul Syllables.
-         * 3. D800-DFFF Surrogates.
-         * 4. E000-F8FF Private Use Area.
-         * 5. F900-FA2D Han compatibility.
-         * ...Plus additional ranges in newer Unicode versions...
-         */
-        switch ($code) {
-            case 0x3400:
-                /* CJK Ideograph Extension A */
-                $data->addPropRange(0x3400, 0x4db5, "Lo");
-                $data->addPropRange(0x3400, 0x4db5, "L");
-                $data->addPropRange(0x3400, 0x4db5, "Cp");
-                $skip = 1;
-                break;
-            case 0x4e00:
-                /* The Han ideographs. */
-                $data->addPropRange(0x4e00, 0x9fff, "Lo");
-                $data->addPropRange(0x4e00, 0x9fff, "L");
-                $data->addPropRange(0x4e00, 0x9fea, "Cp");
-                $skip = 1;
-                break;
-            case 0xac00:
-                /* The Hangul syllables. */
-                $data->addPropRange(0xac00, 0xd7a3, "Lo");
-                $data->addPropRange(0xac00, 0xd7a3, "L");
-                $data->addPropRange(0xac00, 0xd7a3, "Cp");
-                $skip = 1;
-                break;
-            case 0xd800:
-                /*
-                 * Make a range of all surrogates and assume some default
-                 * properties.
-                 */
-                $data->addPropRange(0xd800, 0xdfff, "Cs");
-                $data->addPropRange(0xd800, 0xdfff, "L");
-                $skip = 5;
-                break;
-            case 0xe000:
-                /* The Private Use area. Add with a default set of properties. */
-                $data->addPropRange(0xe000, 0xf8ff, "Co");
-                $data->addPropRange(0xe000, 0xf8ff, "L");
-                $skip = 1;
-                break;
-            case 0x20000:
-                /* CJK Ideograph Extension B */
-                $data->addPropRange(0x20000, 0x2a6d6, "Lo");
-                $data->addPropRange(0x20000, 0x2a6d6, "L");
-                $data->addPropRange(0x20000, 0x2a6d6, "Cp");
-                $skip = 1;
-                break;
-            case 0xf0000:
-                /* Plane 15 private use */
-                $data->addPropRange(0xf0000, 0xffffd, "Co");
-                $data->addPropRange(0xf0000, 0xffffd, "L");
-                $skip = 1;
-                break;
-            case 0x100000:
-                /* Plane 16 private use */
-                $data->addPropRange(0x100000, 0x10fffd, "Co");
-                $data->addPropRange(0x100000, 0x10fffd, "L");
-                $skip = 1;
-                break;
+        $name = $fields[1];
+        if ($name === '') {
+            throw new Exception("Empty name");
         }
 
-        if ($skip) {
+        if ($name[0] === '<' && $name !== '<control>') {
+            // This is a character range
+            $nextLine = $lines[$i + 1];
+            $nextFields = explode(';', $nextLine);
+            $nextCode = intval($nextFields[0], 16);
+
+            $generalCategory = $fields[2];
+            $data->addPropRange($code, $nextCode, $generalCategory);
+
+            $bidiClass = $fields[4];
+            $data->addPropRange($code, $nextCode, $bidiClass);
+
+            // Excluding surrogates and private use area, mark as defined
+            if ($code !== 0xd800 && $code !== 0xe000 && $code != 0xf0000) {
+                $data->addPropRange($code, $nextCode, "Cp");
+            }
+
+            $i++;
             continue;
         }
 
