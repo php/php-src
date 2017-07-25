@@ -73,18 +73,7 @@ class UnicodeData {
 
     public function __construct() {
         /*
-         * List of properties expected to be found in the Unicode Character Database
-         * including some implementation specific properties.
-         *
-         * The implementation specific properties are:
-         * Cm = Composed (can be decomposed)
-         * Nb = Non-breaking
-         * Sy = Symmetric (has left and right forms)
-         * Hd = Hex digit
-         * Qm = Quote marks
-         * Mr = Mirroring
-         * Ss = Space, other
-         * Cp = Defined character
+         * List of properties expected to be found in the Unicode Character Database.
          */
         $this->propIndexes = array_flip([
             "Mn", "Mc", "Me", "Nd", "Nl", "No",
@@ -93,9 +82,7 @@ class UnicodeData {
             "Lo", "Pc", "Pd", "Ps", "Pe", "Po",
             "Sm", "Sc", "Sk", "So", "L", "R",
             "EN", "ES", "ET", "AN", "CS", "B",
-            "S", "WS", "ON",
-            "Cm", "Nb", "Sy", "Hd", "Qm", "Mr",
-            "Ss", "Cp", "Pi", "Pf", "AL"
+            "S", "WS", "ON", "Pi", "Pf", "AL"
         ]);
         $this->numProps = count($this->propIndexes);
 
@@ -222,28 +209,15 @@ function parseUnicodeData($input) {
             $bidiClass = $fields[4];
             $data->addPropRange($code, $nextCode, $bidiClass);
 
-            // Excluding surrogates and private use area, mark as defined
-            if ($code !== 0xd800 && $code !== 0xe000 && $code != 0xf0000) {
-                $data->addPropRange($code, $nextCode, "Cp");
-            }
-
             $i++;
             continue;
         }
-
-        /* Add the code to the defined category. */
-        $data->addProp($code, "Cp");
 
         $generalCategory = $fields[2];
         $data->addProp($code, $generalCategory);
 
         $bidiClass = $fields[4];
         $data->addProp($code, $bidiClass);
-
-        $composition = $fields[5];
-        if ($composition && $composition[0] != '<') {
-            $data->addProp($code, "Cm");
-        }
 
         $upperCase = intval($fields[12], 16);
         $lowerCase = intval($fields[13], 16);

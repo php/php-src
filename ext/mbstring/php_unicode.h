@@ -74,23 +74,9 @@
 #define UC_S  36 /* Segment Separator          */
 #define UC_WS 37 /* Whitespace                 */
 #define UC_ON 38 /* Other Neutrals             */
-/*
- * Implementation specific character properties.
- */
-#define UC_CM 39 /* Composite                  */
-#define UC_NB 40 /* Non-Breaking               */
-#define UC_SY 41 /* Symmetric                  */
-#define UC_HD 42 /* Hex Digit                  */
-#define UC_QM 43 /* Quote Mark                 */
-#define UC_MR 44 /* Mirroring                  */
-#define UC_SS 45 /* Space, other               */
-#define UC_CP 46 /* Defined                    */
-
-/*
- * Added for UnicodeData-2.1.3.
- */
-#define UC_PI 47 /* Punctuation, Initial       */
-#define UC_PF 48 /* Punctuation, Final         */
+#define UC_PI 39 /* Punctuation, Initial       */
+#define UC_PF 40 /* Punctuation, Final         */
+#define UC_AL 41 /* Arabic Letter              */
 
 MBSTRING_API int php_unicode_is_prop(unsigned long code, ...);
 MBSTRING_API int php_unicode_is_prop1(unsigned long code, int prop);
@@ -125,7 +111,6 @@ static inline int php_unicode_is_upper(unsigned long code) {
 #define php_unicode_is_digit(cc) php_unicode_is_prop1(cc, UC_ND)
 #define php_unicode_is_alnum(cc) php_unicode_is_prop(cc, UC_LU, UC_LL, UC_LM, UC_LO, UC_LT, UC_ND, -1)
 #define php_unicode_is_cntrl(cc) php_unicode_is_prop(cc, UC_CC, UC_CF, -1)
-#define php_unicode_is_space(cc) php_unicode_is_prop(cc, UC_ZS, UC_SS, -1)
 #define php_unicode_is_blank(cc) php_unicode_is_prop1(cc, UC_ZS)
 #define php_unicode_is_punct(cc) php_unicode_is_prop(cc, UC_PD, UC_PS, UC_PE, UC_PO, UC_PI, UC_PF, -1)
 #define php_unicode_is_graph(cc) php_unicode_is_prop(cc, UC_MN, UC_MC, UC_ME, UC_ND, UC_NL, UC_NO, \
@@ -137,7 +122,6 @@ static inline int php_unicode_is_upper(unsigned long code) {
                                UC_PS, UC_PE, UC_PO, UC_SM, UC_SM, UC_SC, UC_SK, \
                                UC_SO, UC_ZS, UC_PI, UC_PF, -1)
 #define php_unicode_is_title(cc) php_unicode_is_prop1(cc, UC_LT)
-#define php_unicode_is_xdigit(cc) php_unicode_is_prop1(cc, UC_HD)
 
 #define php_unicode_is_isocntrl(cc) php_unicode_is_prop1(cc, UC_CC)
 #define php_unicode_is_fmtcntrl(cc) php_unicode_is_prop1(cc, UC_CF)
@@ -149,13 +133,6 @@ static inline int php_unicode_is_upper(unsigned long code) {
 #define php_unicode_is_closepunct(cc) php_unicode_is_prop1(cc, UC_PE)
 #define php_unicode_is_initialpunct(cc) php_unicode_is_prop1(cc, UC_PI)
 #define php_unicode_is_finalpunct(cc) php_unicode_is_prop1(cc, UC_PF)
-
-#define php_unicode_is_composite(cc) php_unicode_is_prop1(cc, UC_CM)
-#define php_unicode_is_hex(cc) php_unicode_is_prop1(cc, UC_HD)
-#define php_unicode_is_quote(cc) php_unicode_is_prop1(cc, UC_QM)
-#define php_unicode_is_symmetric(cc) php_unicode_is_prop1(cc, UC_SY)
-#define php_unicode_is_mirroring(cc) php_unicode_is_prop1(cc, UC_MR)
-#define php_unicode_is_nonbreaking(cc) php_unicode_is_prop1(cc, UC_NB)
 
 /*
  * Directionality macros.
@@ -189,9 +166,6 @@ static inline int php_unicode_is_upper(unsigned long code) {
 #define php_unicode_is_identstart(cc) php_unicode_is_prop(cc, UC_LU, UC_LL, UC_LT, UC_LO, UC_NL, -1)
 #define php_unicode_is_identpart(cc) php_unicode_is_prop(cc, UC_LU, UC_LL, UC_LT, UC_LO, UC_NL, \
                                    UC_MN, UC_MC, UC_ND, UC_PC, UC_CF, -1)
-
-#define php_unicode_is_defined(cc) php_unicode_is_prop1(cc, UC_CP)
-#define php_unicode_is_undefined(cc) !php_unicode_is_prop1(cc, UC_CP)
 
 /*
  * Other miscellaneous character property macros.
