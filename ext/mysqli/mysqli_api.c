@@ -1210,7 +1210,7 @@ PHP_FUNCTION(mysqli_fetch_fields)
 	zval		*mysql_result;
 	zval		obj;
 
-	unsigned int i;
+	unsigned int i, num_fields;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &mysql_result, mysqli_result_class_entry) == FAILURE) {
 		return;
@@ -1219,8 +1219,9 @@ PHP_FUNCTION(mysqli_fetch_fields)
 	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
 
 	array_init(return_value);
+	num_fields = mysql_num_fields(result);
 
-	for (i = 0; i < mysql_num_fields(result); i++) {
+	for (i = 0; i < num_fields; i++) {
 		const MYSQL_FIELD *field = mysql_fetch_field_direct(result, i);
 
 		object_init(&obj);
@@ -1266,7 +1267,7 @@ PHP_FUNCTION(mysqli_fetch_lengths)
 {
 	MYSQL_RES		*result;
 	zval			*mysql_result;
-	unsigned int	i;
+	unsigned int	i, num_fields;
 	zend_ulong	*ret;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &mysql_result, mysqli_result_class_entry) == FAILURE) {
@@ -1280,8 +1281,9 @@ PHP_FUNCTION(mysqli_fetch_lengths)
 	}
 
 	array_init(return_value);
+	num_fields = mysql_num_fields(result);
 
-	for (i = 0; i < mysql_num_fields(result); i++) {
+	for (i = 0; i < num_fields; i++) {
 		add_index_long(return_value, i, ret[i]);
 	}
 }
