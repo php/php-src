@@ -25,6 +25,9 @@ PHP                                                                        NEWS
   . Fixed bug #74991 (include_path has a 4096 char limit in some cases).
     (bwbroersma)
 
+- Session:
+  . Fixed bug #74833 (SID constant created with wrong module number). (Anatol)
+
 - SimpleXML:
   . Fixed bug #74950 (nullpointer deref in simplexml_element_getDocNamespaces).
     (Laruence)
