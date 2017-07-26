@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug #74125 (Fixed finding CURL on systems with multiarch support).
     (cebe)
 
+- Intl:
+  . Fixed bug #74993 (Wrong reflection on some locale_* functions). (Sara)
+
 - Mbstring:
   . Fixed bug #71606 (Segmentation fault mb_strcut with HTML-ENTITIES encoding).
     (cmb)
