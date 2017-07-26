@@ -245,6 +245,21 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 					control_value = NULL;
 				}
 			}
+		} else if (strcmp(control_oid, LDAP_CONTROL_ASSERT) == 0) {
+			zval* tmp;
+			char* assert;
+			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(val), "filter", sizeof("filter") - 1)) != NULL) {
+				convert_to_string_ex(tmp);
+				assert = Z_STRVAL_P(tmp);
+				control_value = ber_memalloc(sizeof * control_value);
+				if (control_value != NULL) {
+					rc = ldap_create_assertion_control_value(ld, assert, control_value);
+					if (rc != LDAP_SUCCESS) {
+						php_error_docref(NULL, E_WARNING, "Failed to create assert control value: %s (%d)", ldap_err2string(rc), rc);
+						control_value = NULL;
+					}
+				}
+			}
 		} else {
 			php_error_docref(NULL, E_WARNING, "Control OID %s does not expect an array as value", control_oid);
 		}
