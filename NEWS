@@ -18,6 +18,9 @@ PHP                                                                        NEWS
   . Fixed bug #74968 (PHP crashes when calling mysqli_result::fetch_object with
     an abstract class). (Anatol)
 
+- OCI8:
+  . Expose oci_unregister_taf_callback() (Tianfang Yang)
+
 - Opcache:
   . Fixed bug #74980 (Narrowing occurred during type inference). (Laruence)
 
