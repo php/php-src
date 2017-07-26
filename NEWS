@@ -31,6 +31,7 @@ PHP                                                                        NEWS
 - Session:
   . Fixed bug #74892 (Url Rewriting (trans_sid) not working on urls that start
     with "#"). (Andrew Nester)
+  . Fixed bug #74833 (SID constant created with wrong module number). (Anatol)
 
 - SimpleXML:
   . Fixed bug #74950 (nullpointer deref in simplexml_element_getDocNamespaces).
