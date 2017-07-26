@@ -21,6 +21,10 @@ PHP                                                                        NEWS
 - ODBC:
   . Removed support for Birdstep. (Kalle)
 
+- phar:
+  . Fixed bug #74991 (include_path has a 4096 char limit in some cases).
+    (bwbroersma)
+
 - Session:
   . Fixed bug #74941 (session fails to start after having headers sent). 
     (morozov)
