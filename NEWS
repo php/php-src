@@ -44,6 +44,7 @@ PHP                                                                        NEWS
     warning in read mode). (morozov)
   . Fixed bug #74941 (session fails to start after having headers sent). 
     (morozov)
+  . Fixed bug #74833 (SID constant created with wrong module number). (Anatol)
 
 - SimpleXML:
   . Fixed bug #74950 (nullpointer deref in simplexml_element_getDocNamespaces).
