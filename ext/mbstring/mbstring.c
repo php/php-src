@@ -2372,7 +2372,7 @@ PHP_FUNCTION(mb_strlen)
 PHP_FUNCTION(mb_strpos)
 {
 	int reverse = 0;
-	zend_long offset = 0, slen;
+	zend_long offset = 0;
 	mbfl_string haystack, needle;
 	char *enc_name = NULL;
 	size_t enc_name_len, n;
@@ -2390,14 +2390,17 @@ PHP_FUNCTION(mb_strpos)
 		RETURN_FALSE;
 	}
 
-	slen = mbfl_strlen(&haystack);
-	if (offset < 0) {
-		offset += slen;
+	if (offset != 0) {
+		size_t slen = mbfl_strlen(&haystack);
+		if (offset < 0) {
+			offset += slen;
+		}
+		if (offset < 0 || offset > slen) {
+			php_error_docref(NULL, E_WARNING, "Offset not contained in string");
+			RETURN_FALSE;
+		}
 	}
-	if (offset < 0 || offset > slen) {
-		php_error_docref(NULL, E_WARNING, "Offset not contained in string");
-		RETURN_FALSE;
-	}
+
 	if (needle.len == 0) {
 		php_error_docref(NULL, E_WARNING, "Empty delimiter");
 		RETURN_FALSE;
@@ -2494,7 +2497,7 @@ PHP_FUNCTION(mb_strrpos)
 		}
 	}
 
-	{
+	if (offset != 0) {
 		size_t haystack_char_len = mbfl_strlen(&haystack);
 		if ((offset > 0 && offset > haystack_char_len) ||
 			(offset < 0 && -offset > haystack_char_len)) {
@@ -5399,7 +5402,7 @@ MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t ol
 			break;
 		}
 
- 		{
+ 		if (offset != 0) {
  			size_t haystack_char_len = mbfl_strlen(&haystack);
 
  			if (mode) {
