@@ -17,6 +17,8 @@ PHP                                                                        NEWS
 
 - Mbstring:
   . Fixed bug #73528 (Crash in zif_mb_send_mail). (Nikita)
+  . Fixed bug #74929 (mbstring functions version 7.1.1 are slow compared to 5.3
+    on Windows). (Nikita)
 
 - ODBC:
   . Removed support for Birdstep. (Kalle)
