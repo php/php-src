@@ -536,7 +536,7 @@ ZEND_END_MODULE_GLOBALS(oci) /* }}} */
 /* {{{ transparent failover related prototypes */
 
 int php_oci_register_taf_callback(php_oci_connection *connection, zval *callback);
-int php_oci_disable_taf_callback(php_oci_connection *connection);
+int php_oci_unregister_taf_callback(php_oci_connection *connection);
 
 /* }}} */
 
