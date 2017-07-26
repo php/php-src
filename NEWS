@@ -33,6 +33,10 @@ PHP                                                                        NEWS
   . Fixed bug #74903 (openssl_pkcs7_encrypt() uses different EOL than before).
     (Anatol)
 
+- phar:
+  . Fixed bug #74991 (include_path has a 4096 char limit in some cases).
+    (bwbroersma)
+
 - Session:
   . Fixed bug #74892 (Url Rewriting (trans_sid) not working on urls that start
     with "#"). (Andrew Nester)
