@@ -21,6 +21,10 @@ PHP                                                                        NEWS
 - OCI8:
   . Expose oci_unregister_taf_callback() (Tianfang Yang)
 
+- phar:
+  . Fixed bug #74991 (include_path has a 4096 char limit in some cases).
+    (bwbroersma)
+
 - SimpleXML:
   . Fixed bug #74950 (nullpointer deref in simplexml_element_getDocNamespaces).
     (Laruence)
