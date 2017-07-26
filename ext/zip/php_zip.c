@@ -137,18 +137,18 @@ static char * php_zip_make_relative_path(char *path, size_t path_len) /* {{{ */
 # define CWD_STATE_FREE(s)  efree(s)
 
 /* {{{ php_zip_extract_file */
-static int php_zip_extract_file(struct zip * za, char *dest, char *file, int file_len)
+static int php_zip_extract_file(struct zip * za, char *dest, char *file, size_t file_len)
 {
 	php_stream_statbuf ssb;
 	struct zip_file *zf;
 	struct zip_stat sb;
 	char b[8192];
-	int n, len, ret;
+	int n, ret;
 	php_stream *stream;
 	char *fullpath;
 	char *file_dirname_fullpath;
 	char file_dirname[MAXPATHLEN];
-	size_t dir_len;
+	size_t dir_len, len;
 	int is_dir_only = 0;
 	char *path_cleaned;
 	size_t path_cleaned_len;
@@ -181,7 +181,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 		memcpy(file_dirname, path_cleaned, path_cleaned_len);
 		dir_len = php_dirname(file_dirname, path_cleaned_len);
 
-		if (dir_len <= 0 || (dir_len == 1 && file_dirname[0] == '.')) {
+		if (!dir_len || (dir_len == 1 && file_dirname[0] == '.')) {
 			len = spprintf(&file_dirname_fullpath, 0, "%s", dest);
 		} else {
 			len = spprintf(&file_dirname_fullpath, 0, "%s/%s", dest, file_dirname);

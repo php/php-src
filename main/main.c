@@ -1427,7 +1427,7 @@ PHPAPI int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *h
 }
 /* }}} */
 
-static zend_string *php_resolve_path_for_zend(const char *filename, int filename_len) /* {{{ */
+static zend_string *php_resolve_path_for_zend(const char *filename, size_t filename_len) /* {{{ */
 {
 	return php_resolve_path(filename, filename_len, PG(include_path));
 }
