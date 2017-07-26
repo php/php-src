@@ -98,6 +98,9 @@ zend_class_entry *php_session_update_timestamp_iface_entry;
 
 static void php_session_send_cookie(void);
 
+/* Initialized in MINIT, readonly otherwise. */
+static int my_module_number = 0;
+
 /* Dispatched by RINIT and by php_session_destroy */
 static inline void php_rinit_session_globals(void) /* {{{ */
 {
@@ -108,6 +111,7 @@ static inline void php_rinit_session_globals(void) /* {{{ */
 	PS(mod_user_is_open) = 0;
 	PS(define_sid) = 1;
 	PS(session_vars) = NULL;
+	PS(module_number) = my_module_number;
 	ZVAL_UNDEF(&PS(http_session_vars));
 }
 /* }}} */
@@ -2730,7 +2734,8 @@ static PHP_MINIT_FUNCTION(session) /* {{{ */
 
 	zend_register_auto_global(zend_string_init("_SESSION", sizeof("_SESSION") - 1, 1), 0, NULL);
 
-	PS(module_number) = module_number; /* if we really need this var we need to init it in zts mode as well! */
+	my_module_number = module_number;
+	PS(module_number) = module_number;
 
 	PS(session_status) = php_session_none;
 	REGISTER_INI_ENTRIES();
