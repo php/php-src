@@ -57,11 +57,11 @@ function get_attr($conn)
 ?>
 --EXPECT--
 **Test 1.1 - Default values for the attribute **************
-The value of DRIVER_NAME is PHP OCI8 : 2.1.6
+The value of DRIVER_NAME is PHP OCI8 : 2.1.7
 
 ***Test 1.2 - Get the values from different connections **************
 Testing with oci_pconnect()
-The value of DRIVER_NAME is PHP OCI8 : 2.1.6
+The value of DRIVER_NAME is PHP OCI8 : 2.1.7
 Testing with oci_new_connect()
-The value of DRIVER_NAME is PHP OCI8 : 2.1.6
+The value of DRIVER_NAME is PHP OCI8 : 2.1.7
 Done
