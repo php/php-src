@@ -3291,9 +3291,11 @@ int zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script
 	zend_ssa_var_info *ssa_var_info = ssa->var_info;
 	int ssa_vars_count = ssa->vars_count;
 	int i, j;
-	uint32_t tmp;
+	uint32_t tmp, worklist_len = zend_bitset_len(ssa_vars_count);
 
-	WHILE_WORKLIST(worklist, zend_bitset_len(ssa_vars_count), j) {
+	while (!zend_bitset_empty(worklist, worklist_len)) {
+		j = zend_bitset_first(worklist, worklist_len);
+		zend_bitset_excl(worklist, j);
 		if (ssa_vars[j].definition_phi) {
 			zend_ssa_phi *p = ssa_vars[j].definition_phi;
 			if (p->pi >= 0) {
@@ -3353,7 +3355,7 @@ int zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script
 				return FAILURE;
 			}
 		}
-	} WHILE_WORKLIST_END();
+	}
 	return SUCCESS;
 }
 
