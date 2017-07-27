@@ -85,10 +85,15 @@ MBSTRING_API char *php_unicode_convert_case(
 		int case_mode, const char *srcstr, size_t srclen, size_t *retlen,
 		const mbfl_encoding *src_encoding);
 
-#define PHP_UNICODE_CASE_UPPER	0
-#define PHP_UNICODE_CASE_LOWER	1
-#define PHP_UNICODE_CASE_TITLE	2
-#define PHP_UNICODE_CASE_FOLD	3
+#define PHP_UNICODE_CASE_UPPER        0
+#define PHP_UNICODE_CASE_LOWER        1
+#define PHP_UNICODE_CASE_TITLE        2
+#define PHP_UNICODE_CASE_FOLD         3
+#define PHP_UNICODE_CASE_UPPER_SIMPLE 4
+#define PHP_UNICODE_CASE_LOWER_SIMPLE 5
+#define PHP_UNICODE_CASE_TITLE_SIMPLE 6
+#define PHP_UNICODE_CASE_FOLD_SIMPLE  7
+#define PHP_UNICODE_CASE_MODE_MAX     7
 
 /* Optimize the common ASCII case for lower/upper */
 

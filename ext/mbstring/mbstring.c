@@ -1603,6 +1603,11 @@ ZEND_TSRMLS_CACHE_UPDATE();
 	REGISTER_LONG_CONSTANT("MB_CASE_UPPER", PHP_UNICODE_CASE_UPPER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MB_CASE_LOWER", PHP_UNICODE_CASE_LOWER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MB_CASE_TITLE", PHP_UNICODE_CASE_TITLE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MB_CASE_FOLD", PHP_UNICODE_CASE_FOLD, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MB_CASE_UPPER_SIMPLE", PHP_UNICODE_CASE_UPPER_SIMPLE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MB_CASE_LOWER_SIMPLE", PHP_UNICODE_CASE_LOWER_SIMPLE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MB_CASE_TITLE_SIMPLE", PHP_UNICODE_CASE_TITLE_SIMPLE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MB_CASE_FOLD_SIMPLE", PHP_UNICODE_CASE_FOLD_SIMPLE, CONST_CS | CONST_PERSISTENT);
 
 #if HAVE_MBREGEX
 	PHP_MINIT(mb_regex) (INIT_FUNC_ARGS_PASSTHRU);
@@ -3354,6 +3359,11 @@ PHP_FUNCTION(mb_convert_case)
 
 	enc = php_mb_get_encoding(from_encoding);
 	if (!enc) {
+		return;
+	}
+	
+	if (case_mode < 0 || case_mode > PHP_UNICODE_CASE_MODE_MAX) {
+		php_error_docref(NULL, E_WARNING, "Invalid case mode");
 		return;
 	}
 
@@ -5379,8 +5389,11 @@ MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t ol
 	needle.encoding = enc;
 
 	do {
+		/* We're using simple case-folding here, because we'd have to deal with remapping of
+		 * offsets otherwise. */
+
 		size_t len = 0;
-		haystack.val = (unsigned char *)php_unicode_convert_case(PHP_UNICODE_CASE_FOLD, (char *)old_haystack, old_haystack_len, &len, enc);
+		haystack.val = (unsigned char *)php_unicode_convert_case(PHP_UNICODE_CASE_FOLD_SIMPLE, (char *)old_haystack, old_haystack_len, &len, enc);
 		haystack.len = len;
 
 		if (!haystack.val) {
@@ -5391,7 +5404,7 @@ MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t ol
 			break;
 		}
 
-		needle.val = (unsigned char *)php_unicode_convert_case(PHP_UNICODE_CASE_FOLD, (char *)old_needle, old_needle_len, &len, enc);
+		needle.val = (unsigned char *)php_unicode_convert_case(PHP_UNICODE_CASE_FOLD_SIMPLE, (char *)old_needle, old_needle_len, &len, enc);
 		needle.len = len;
 
 		if (!needle.val) {

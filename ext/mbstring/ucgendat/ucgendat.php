@@ -41,16 +41,17 @@ if ($argc < 2) {
     return;
 }
 
-$unicodeDataFile = $argv[1]. '/UnicodeData.txt';
-if (!file_exists($unicodeDataFile)) {
-    echo "File $unicodeDataFile does not exist.\n";
-    return;
-}
+$dir = $argv[1];
+$unicodeDataFile = $dir . '/UnicodeData.txt';
+$caseFoldingFile = $dir . '/CaseFolding.txt';
+$specialCasingFile = $dir . '/SpecialCasing.txt';
 
-$caseFoldingFile = $argv[1] . '/CaseFolding.txt';
-if (!file_exists($caseFoldingFile)) {
-    echo "File $caseFoldingFile does not exist.\n";
-    return;
+$files = [$unicodeDataFile, $caseFoldingFile, $specialCasingFile];
+foreach ($files as $file) {
+    if (!file_exists($file)) {
+        echo "File $file does not exist.\n";
+        return;
+    }
 }
 
 $outputFile = __DIR__ . "/../unicode_data.h";
@@ -58,6 +59,7 @@ $outputFile = __DIR__ . "/../unicode_data.h";
 $data = new UnicodeData;
 parseUnicodeData($data, file_get_contents($unicodeDataFile));
 parseCaseFolding($data, file_get_contents($caseFoldingFile));
+parseSpecialCasing($data, file_get_contents($specialCasingFile));
 file_put_contents($outputFile, generateData($data));
 
 class Range {
@@ -75,6 +77,7 @@ class UnicodeData {
     public $numProps;
     public $propRanges;
     public $caseMaps;
+    public $extraCaseData;
 
     public function __construct() {
         /*
@@ -98,6 +101,7 @@ class UnicodeData {
             'title' => [],
             'fold' => [],
         ];
+        $this->extraCaseData = [];
     }
 
     function propToIndex(string $prop) : int {
@@ -234,17 +238,25 @@ function parseUnicodeData(UnicodeData $data, string $input) : void {
 
         $upperCase = intval($fields[12], 16);
         $lowerCase = intval($fields[13], 16);
-        $titleCase = intval($fields[14], 16);
+        $titleCase = intval($fields[14], 16) ?: $upperCase;
         if ($upperCase) {
             $data->addCaseMapping('upper', $code, $upperCase);
         }
         if ($lowerCase) {
             $data->addCaseMapping('lower', $code, $lowerCase);
         }
-        if ($titleCase && $titleCase != $upperCase) {
+        if ($titleCase) {
             $data->addCaseMapping('title', $code, $titleCase);
         }
     }
+}
+
+function parseCodes(string $strCodes) : array {
+    $codes = [];
+    foreach (explode(' ', $strCodes) as $strCode) {
+        $codes[] = intval($strCode, 16);
+    }
+    return $codes;
 }
 
 function parseCaseFolding(UnicodeData $data, string $input) : void {
@@ -255,13 +267,75 @@ function parseCaseFolding(UnicodeData $data, string $input) : void {
 
         $code = intval($fields[0], 16);
         $status = $fields[1];
-        if ($status != 'C' && $status != 'S') {
-            // We use simple case folding
+        if ($status == 'T') {
+            // Use language-agnostic case folding
             continue;
         }
 
-        $foldCode = intval($fields[2], 16);
-        $data->addCaseMapping('fold', $code, $foldCode);
+        if ($status == 'C' || $status == 'S') {
+            $foldCode = intval($fields[2], 16);
+            if (!isset($data->caseMaps['fold'][$code])) {
+                $data->addCaseMapping('fold', $code, $foldCode);
+            } else {
+                // Add simple mapping to full mapping data
+                assert(is_array($data->caseMaps['fold'][$code]));
+                $data->caseMaps['fold'][$code][0] = $foldCode;
+            }
+        } else if ($status == 'F') {
+            $foldCodes = parseCodes($fields[2]);
+            $existingFoldCode = $data->caseMaps['fold'][$code] ?? $code;
+            $data->caseMaps['fold'][$code] = array_merge([$code], $foldCodes);
+        } else {
+            assert(0);
+        }
+    }
+}
+
+function addSpecialCasing(UnicodeData $data, string $type, int $code, array $caseCodes) : void {
+    $simpleCaseCode = $data->caseMaps[$type][$code] ?? $code;
+    if (count($caseCodes) == 1) {
+        if ($caseCodes[0] != $simpleCaseCode) {
+            throw new Exception("Simple case code in special casing does not match");
+        }
+
+        // Special case: If a title-case character maps to itself, we may still have to store it,
+        // if there is a non-trivial upper-case mapping for it
+        if ($type == 'title' && $code == $caseCodes[0]
+                && ($data->caseMaps['upper'][$code] ?? $code) != $code) {
+            $data->caseMaps['title'][$code] = $code;
+        }
+        return;
+    }
+
+    if (count($caseCodes) > 3) {
+        throw new Exception("Special case mapping with more than 3 code points");
+    }
+
+    $data->caseMaps[$type][$code] = array_merge([$simpleCaseCode], $caseCodes);
+}
+
+function parseSpecialCasing(UnicodeData $data, string $input) : void {
+    foreach (parseDataFile($input) as $fields) {
+        if (count($fields) != 5 && count($fields) != 6) {
+            throw new Exception("Line does not contain 5 or 6 fields");
+        }
+
+        $code = intval($fields[0], 16);
+        $lower = parseCodes($fields[1]);
+        $title = parseCodes($fields[2]);
+        $upper = parseCodes($fields[3]);
+
+        $cond = $fields[4];
+        if ($cond) {
+            // Only use unconditional mappings
+            continue;
+        }
+
+        addSpecialCasing($data, 'lower', $code, $lower);
+        addSpecialCasing($data, 'upper', $code, $upper);
+
+        // Should happen last
+        addSpecialCasing($data, 'title', $code, $title);
     }
 }
 
@@ -343,6 +417,32 @@ function flatten(array $array) {
     return $result;
 }
 
+function prepareCaseData(UnicodeData $data) {
+    // Don't store titlecase if it's the same as uppercase
+    foreach ($data->caseMaps['title'] as $code => $titleCode) {
+        if ($titleCode == ($data->caseMaps['upper'][$code] ?? $code)) {
+            unset($data->caseMaps['title'][$code]);
+        }
+    }
+
+    // Store full (multi-char) case mappings in a separate table and only
+    // store an index into it
+    foreach ($data->caseMaps as $type => $caseMap) {
+        foreach ($caseMap as $code => $caseCode) {
+            if (is_array($caseCode)) {
+                // -1 because the first entry is the simple case mapping
+                $len = count($caseCode) - 1;
+                $idx = count($data->extraCaseData);
+                $data->caseMaps[$type][$code] = ($len << 24) | $idx;
+
+                foreach ($caseCode as $c) {
+                    $data->extraCaseData[] = $c;
+                }
+            }
+        }
+    }
+}
+
 function generateCaseMPH(string $name, array $map) {
     $prefix = "_uccase_" . $name;
     list($gTable, $table) = generateMPH($map, $fast = false);
@@ -361,11 +461,16 @@ function generateCaseMPH(string $name, array $map) {
 }
 
 function generateCaseData(UnicodeData $data) {
+    prepareCaseData($data);
+
     $result = "";
     $result .= generateCaseMPH('upper', $data->caseMaps['upper']);
     $result .= generateCaseMPH('lower', $data->caseMaps['lower']);
     $result .= generateCaseMPH('title', $data->caseMaps['title']);
     $result .= generateCaseMPH('fold', $data->caseMaps['fold']);
+    $result .= "static const unsigned _uccase_extra_table[] = {";
+    $result .= formatIntArray($data->extraCaseData, 4);
+    $result .= "\n};\n\n";
     return $result;
 }
 
