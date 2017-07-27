@@ -737,6 +737,7 @@ static size_t tsrm_realpath_r(char *path, size_t start, size_t len, int *ll, tim
 		while (i > start && !IS_SLASH(path[i-1])) {
 			i--;
 		}
+		assert(i < MAXPATHLEN);
 
 		if (i == len ||
 			(i + 1 == len && path[i] == '.')) {
@@ -744,7 +745,7 @@ static size_t tsrm_realpath_r(char *path, size_t start, size_t len, int *ll, tim
 			len = i - 1;
 			is_dir = 1;
 			continue;
-		} else if (i == len - 2 && path[i] == '.' && path[i+1] == '.') {
+		} else if (i + 2 == len && path[i] == '.' && path[i+1] == '.') {
 			/* remove '..' and previous directory */
 			is_dir = 1;
 			if (link_is_dir) {
@@ -754,11 +755,13 @@ static size_t tsrm_realpath_r(char *path, size_t start, size_t len, int *ll, tim
 				return start ? start : len;
 			}
 			j = tsrm_realpath_r(path, start, i-1, ll, t, use_realpath, 1, NULL);
-			if (j > start) {
+			if (j > start && j != (size_t)-1) {
 				j--;
+				assert(i < MAXPATHLEN);
 				while (j > start && !IS_SLASH(path[j])) {
 					j--;
 				}
+				assert(i < MAXPATHLEN);
 				if (!start) {
 					/* leading '..' must not be removed in case of relative path */
 					if (j == 0 && path[0] == '.' && path[1] == '.' &&
@@ -1119,7 +1122,7 @@ static size_t tsrm_realpath_r(char *path, size_t start, size_t len, int *ll, tim
 			} else {
 				/* some leading directories may be unaccessable */
 				j = tsrm_realpath_r(path, start, i-1, ll, t, save ? CWD_FILEPATH : use_realpath, 1, NULL);
-				if (j > start) {
+				if (j > start && j != (size_t)-1) {
 					path[j++] = DEFAULT_SLASH;
 				}
 			}
