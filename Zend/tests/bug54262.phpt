@@ -11,7 +11,7 @@ echo "ok\n";
 --EXPECTF--
 bool(false)
 
-Warning: Attempt to modify property of non-object in %sbug54262.php on line 4
+Warning: Attempt to modify property 'a' of non-object in %sbug54262.php on line 4
 
 Warning: Cannot use a scalar value as an array in %sbug54262.php on line 5
 ok
