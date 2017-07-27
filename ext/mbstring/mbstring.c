@@ -5380,7 +5380,7 @@ MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t ol
 
 	do {
 		size_t len = 0;
-		haystack.val = (unsigned char *)php_unicode_convert_case(PHP_UNICODE_CASE_UPPER, (char *)old_haystack, old_haystack_len, &len, enc);
+		haystack.val = (unsigned char *)php_unicode_convert_case(PHP_UNICODE_CASE_FOLD, (char *)old_haystack, old_haystack_len, &len, enc);
 		haystack.len = len;
 
 		if (!haystack.val) {
@@ -5391,7 +5391,7 @@ MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t ol
 			break;
 		}
 
-		needle.val = (unsigned char *)php_unicode_convert_case(PHP_UNICODE_CASE_UPPER, (char *)old_needle, old_needle_len, &len, enc);
+		needle.val = (unsigned char *)php_unicode_convert_case(PHP_UNICODE_CASE_FOLD, (char *)old_needle, old_needle_len, &len, enc);
 		needle.len = len;
 
 		if (!needle.val) {

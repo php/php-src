@@ -196,6 +196,26 @@ unsigned php_unicode_totitle(unsigned code, enum mbfl_no_encoding enc)
 	return php_unicode_toupper(code, enc);
 }
 
+unsigned php_unicode_tofold(unsigned code, enum mbfl_no_encoding enc)
+{
+	if (code < 0x80) {
+		/* Fast path for ASCII */
+		if (code >= 0x41 && code <= 0x5A) {
+			if (enc == mbfl_no_encoding_8859_9 && code == 0x0049L) {
+				return 0x0131L;
+			}
+			return code + 0x20;
+		}
+		return code;
+	} else {
+		unsigned new_code = CASE_LOOKUP(code, fold);
+		if (new_code != CODE_NOT_FOUND) {
+			return new_code;
+		}
+		return code;
+	}
+}
+
 struct convert_case_data {
 	mbfl_convert_filter *next_filter;
 	enum mbfl_no_encoding no_encoding;
@@ -233,6 +253,10 @@ static int convert_case_filter(int c, void *void_data)
 			}
 			break;
 		}
+
+		case PHP_UNICODE_CASE_FOLD:
+			c = php_unicode_tofold(c, data->no_encoding);
+			break;
 	}
 	return (*data->next_filter->filter_function)(c, data->next_filter);
 }

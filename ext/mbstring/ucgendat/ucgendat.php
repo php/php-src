@@ -36,19 +36,28 @@
  */
 
 if ($argc < 2) {
-    echo "Usage: php ucgendata.php UnicodeData.txt\n";
+    echo "Usage: php ucgendata.php ./datadir\n";
+    echo "./datadir must contain UnicodeData.txt and CaseFolding.txt\n";
     return;
 }
 
-$inputFile = $argv[1];
-if (!file_exists($inputFile)) {
-    echo "File $inputFile does not exist.\n";
+$unicodeDataFile = $argv[1]. '/UnicodeData.txt';
+if (!file_exists($unicodeDataFile)) {
+    echo "File $unicodeDataFile does not exist.\n";
+    return;
+}
+
+$caseFoldingFile = $argv[1] . '/CaseFolding.txt';
+if (!file_exists($caseFoldingFile)) {
+    echo "File $caseFoldingFile does not exist.\n";
     return;
 }
 
 $outputFile = __DIR__ . "/../unicode_data.h";
 
-$data = parseUnicodeData(file_get_contents($inputFile));
+$data = new UnicodeData;
+parseUnicodeData($data, file_get_contents($unicodeDataFile));
+parseCaseFolding($data, file_get_contents($caseFoldingFile));
 file_put_contents($outputFile, generateData($data));
 
 class Range {
@@ -87,6 +96,7 @@ class UnicodeData {
             'upper' => [],
             'lower' => [],
             'title' => [],
+            'fold' => [],
         ];
     }
 
@@ -169,19 +179,28 @@ class UnicodeData {
     }
 }
 
-function parseUnicodeData($input) {
-    $data = new UnicodeData;
-    $lines = array_map('trim', explode("\n", $input));
-    $numLines = count($lines);
-    for ($i = 0; $i < $numLines; $i++) {
-        $line = $lines[$i];
+function parseDataFile(string $input) {
+    $lines = explode("\n", $input);
+    foreach ($lines as $line) {
+        // Strip comments
+        if (false !== $hashPos = strpos($line, '#')) {
+            $line = substr($line, 0, $hashPos);
+        }
 
-        // Skip empty lines and comments
-        if ($line === '' || $line[0] === '#') {
+        // Skip empty lines
+        $line = trim($line);
+        if ($line === '') {
             continue;
         }
 
-        $fields = explode(';', $line);
+        $fields = array_map('trim', explode(';', $line));
+        yield $fields;
+    }
+}
+
+function parseUnicodeData(UnicodeData $data, string $input) : void {
+    $lines = parseDataFile($input);
+    foreach ($lines as $fields) {
         if (count($fields) != 15) {
             throw new Exception("Line does not contain 15 fields");
         }
@@ -195,8 +214,8 @@ function parseUnicodeData($input) {
 
         if ($name[0] === '<' && $name !== '<control>') {
             // This is a character range
-            $nextLine = $lines[$i + 1];
-            $nextFields = explode(';', $nextLine);
+            $lines->next();
+            $nextFields = $lines->current();
             $nextCode = intval($nextFields[0], 16);
 
             $generalCategory = $fields[2];
@@ -204,8 +223,6 @@ function parseUnicodeData($input) {
 
             $bidiClass = $fields[4];
             $data->addPropRange($code, $nextCode, $bidiClass);
-
-            $i++;
             continue;
         }
 
@@ -228,8 +245,24 @@ function parseUnicodeData($input) {
             $data->addCaseMapping('title', $code, $titleCase);
         }
     }
+}
 
-    return $data;
+function parseCaseFolding(UnicodeData $data, string $input) : void {
+    foreach (parseDataFile($input) as $fields) {
+        if (count($fields) != 4) {
+            throw new Exception("Line does not contain 4 fields");
+        }
+
+        $code = intval($fields[0], 16);
+        $status = $fields[1];
+        if ($status != 'C' && $status != 'S') {
+            // We use simple case folding
+            continue;
+        }
+
+        $foldCode = intval($fields[2], 16);
+        $data->addCaseMapping('fold', $code, $foldCode);
+    }
 }
 
 function formatArray(array $values, int $width, string $format) : string {
@@ -332,6 +365,7 @@ function generateCaseData(UnicodeData $data) {
     $result .= generateCaseMPH('upper', $data->caseMaps['upper']);
     $result .= generateCaseMPH('lower', $data->caseMaps['lower']);
     $result .= generateCaseMPH('title', $data->caseMaps['title']);
+    $result .= generateCaseMPH('fold', $data->caseMaps['fold']);
     return $result;
 }
 
