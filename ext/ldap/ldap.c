@@ -3322,10 +3322,11 @@ PHP_FUNCTION(ldap_control_paged_result_response)
 
 /* {{{ Extended operations, Pierangelo Masarati */
 #ifdef HAVE_LDAP_EXTENDED_OPERATION_S
-/* {{{ proto ? ldap_exop(resource link, string reqoid [, string reqdata [, string retdata [, string retoid]]])
+/* {{{ proto resource ldap_exop(resource link, string reqoid [, string reqdata [, array servercontrols [, array clientcontrols [, string &retdata [, string &retoid]]]]])
    Extended operation */
 PHP_FUNCTION(ldap_exop)
 {
+	zval *servercontrols, *clientcontrols;
 	zval *link, *reqoid, *reqdata, *retdata, *retoid;
 	char *lreqoid, *lretoid = NULL;
 	struct berval lreqdata, *lretdata = NULL;
@@ -3334,7 +3335,7 @@ PHP_FUNCTION(ldap_exop)
 	int rc, msgid, myargcount = ZEND_NUM_ARGS();
 	/* int reqoid_len, reqdata_len, retdata_len, retoid_len, retdat_len; */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz|zz/z/", &link, &reqoid, &reqdata, &retdata, &retoid) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz|zzzz/z/", &link, &reqoid, &reqdata, &servercontrols, &clientcontrols, &retdata, &retoid) != SUCCESS) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -3343,6 +3344,8 @@ PHP_FUNCTION(ldap_exop)
 	}
 
 	switch (myargcount) {
+	case 7:
+	case 6:
 	case 5:
 	case 4:
 	case 3:
@@ -3355,13 +3358,13 @@ PHP_FUNCTION(ldap_exop)
 		lreqoid = Z_STRVAL_P(reqoid);
 	}
 
-	if (myargcount > 3) {
+	if (myargcount > 5) {
 		/* synchronous call */
 		rc = ldap_extended_operation_s(ld->link, lreqoid,
 			lreqdata.bv_len > 0 ? &lreqdata: NULL,
 			NULL,
 			NULL,
-			myargcount > 4 ? &lretoid : NULL,
+			myargcount > 6 ? &lretoid : NULL,
 			&lretdata );
 		if (rc != LDAP_SUCCESS ) {
 			php_error_docref(NULL, E_WARNING, "Extended operation %s failed: %s (%d)", lreqoid, ldap_err2string(rc), rc);
@@ -3370,7 +3373,7 @@ PHP_FUNCTION(ldap_exop)
 
 		/* Reverse -> fall through */
 		switch (myargcount) {
-			case 5:
+			case 7:
 				zval_dtor(retoid);
 				if (lretoid == NULL) {
 					ZVAL_EMPTY_STRING(retoid);
@@ -3378,7 +3381,7 @@ PHP_FUNCTION(ldap_exop)
 					ZVAL_STRING(retoid, lretoid);
 					ldap_memfree(lretoid);
 				}
-			case 4:
+			case 6:
 				/* use arg #4 as the data returned by the server */
 				zval_dtor(retdata);
 				if (lretdata == NULL) {
@@ -3794,10 +3797,12 @@ ZEND_END_ARG_INFO()
 #endif
 
 #ifdef HAVE_LDAP_EXTENDED_OPERATION_S
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_exop, 0, 0, 5)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_exop, 0, 0, 2)
 	ZEND_ARG_INFO(0, link)
 	ZEND_ARG_INFO(0, reqoid)
 	ZEND_ARG_INFO(0, reqdata)
+	ZEND_ARG_INFO(0, servercontrols)
+	ZEND_ARG_INFO(0, clientcontrols)
 	ZEND_ARG_INFO(1, retdata)
 	ZEND_ARG_INFO(1, retoid)
 ZEND_END_ARG_INFO()
