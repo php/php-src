@@ -40,6 +40,9 @@ PHP                                                                        NEWS
   . Fixed bug #74991 (include_path has a 4096 char limit in some cases).
     (bwbroersma)
 
+- Reflection:
+  . Fixed bug #74949 (null pointer dereference in _function_string). (Laruence)
+
 - Session:
   . Fixed bug #74892 (Url Rewriting (trans_sid) not working on urls that start
     with "#"). (Andrew Nester)
