@@ -130,7 +130,7 @@ static ZEND_INI_MH(OnUpdateAssertions) /* {{{ */
 
 	p = (zend_long *) (base+(size_t) mh_arg1);
 
-	val = zend_atol(ZSTR_VAL(new_value), (int)ZSTR_LEN(new_value));
+	val = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
 
 	if (stage != ZEND_INI_STAGE_STARTUP &&
 	    stage != ZEND_INI_STAGE_SHUTDOWN &&
