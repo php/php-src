@@ -21,6 +21,8 @@ PHP                                                                        NEWS
   . Fixed bug #69267 (mb_strtolower fails on titlecase characters). (Nikita)
   . Fixed bug #71606 (Segmentation fault mb_strcut with HTML-ENTITIES encoding).
     (cmb)
+  . Fixed bug #62934 (mb_convert_kana() does not convert iteration marks).
+    (Nikita)
 
 - MySQLi:
   . Fixed bug #74968 (PHP crashes when calling mysqli_result::fetch_object with
