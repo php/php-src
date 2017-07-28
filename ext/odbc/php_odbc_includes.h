@@ -39,9 +39,7 @@
 # include <cli0defs.h>
 # include <cli0env.h>
 #elif defined(HAVE_SOLID_35)
-# if !defined(PHP_WIN32)
-#  include <sqlunix.h>
-# endif		/* end: #if !defined(PHP_WIN32) */
+# include <sqlunix.h>
 # include <sqltypes.h>
 # include <sqlucode.h>
 # include <sqlext.h>
