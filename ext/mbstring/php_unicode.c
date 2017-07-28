@@ -311,7 +311,7 @@ static int convert_case_filter(int c, void *void_data)
 {
 	struct convert_case_data *data = (struct convert_case_data *) void_data;
 	unsigned out[3];
-	unsigned len;
+	unsigned len, i;
 	switch (data->case_mode) {
 		case PHP_UNICODE_CASE_UPPER_SIMPLE:
 			out[0] = php_unicode_toupper_simple(c, data->no_encoding);
@@ -368,7 +368,7 @@ static int convert_case_filter(int c, void *void_data)
 			break;
 	}
 
-	for (unsigned i = 0; i < len; i++) {
+	for (i = 0; i < len; i++) {
 		(*data->next_filter->filter_function)(out[i], data->next_filter);
 	}
 	return 0;
