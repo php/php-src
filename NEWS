@@ -18,6 +18,8 @@ PHP                                                                        NEWS
     (cmb)
   . Fixed bug #62934 (mb_convert_kana() does not convert iteration marks).
     (Nikita)
+  . Fixed bug #75001 (Wrong reflection on mb_eregi_replace). (Fabien
+    Villepinte)
 
 - MySQLi:
   . Fixed bug #74968 (PHP crashes when calling mysqli_result::fetch_object with
