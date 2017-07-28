@@ -78,6 +78,11 @@
 #define UC_PF 40 /* Punctuation, Final         */
 #define UC_AL 41 /* Arabic Letter              */
 
+/* Derived properties from DerivedCoreProperties.txt */
+#define UC_CASED          42
+#define UC_CASE_IGNORABLE 43
+
+
 MBSTRING_API int php_unicode_is_prop(unsigned long code, ...);
 MBSTRING_API int php_unicode_is_prop1(unsigned long code, int prop);
 
@@ -179,6 +184,13 @@ static inline int php_unicode_is_upper(unsigned long code) {
 #define php_unicode_is_han(cc) (((cc) >= 0x4e00 && (cc) <= 0x9fff) ||\
                      ((cc) >= 0xf900 && (cc) <= 0xfaff))
 #define php_unicode_is_hangul(cc) ((cc) >= 0xac00 && (cc) <= 0xd7ff)
+
+/*
+ * Derived core properties.
+ */
+
+#define php_unicode_is_cased(cc) php_unicode_is_prop1(cc, UC_CASED)
+#define php_unicode_is_case_ignorable(cc) php_unicode_is_prop1(cc, UC_CASE_IGNORABLE)
 
 
 #endif

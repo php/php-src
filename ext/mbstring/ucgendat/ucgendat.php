@@ -37,7 +37,8 @@
 
 if ($argc < 2) {
     echo "Usage: php ucgendata.php ./datadir\n";
-    echo "./datadir must contain UnicodeData.txt and CaseFolding.txt\n";
+    echo "./datadir must contain:\n";
+    echo "UnicodeData.txt, CaseFolding.txt, SpecialCasing.txt and DerivedCoreProperties.txt\n";
     return;
 }
 
@@ -45,8 +46,9 @@ $dir = $argv[1];
 $unicodeDataFile = $dir . '/UnicodeData.txt';
 $caseFoldingFile = $dir . '/CaseFolding.txt';
 $specialCasingFile = $dir . '/SpecialCasing.txt';
+$derivedCorePropertiesFile = $dir . '/DerivedCoreProperties.txt';
 
-$files = [$unicodeDataFile, $caseFoldingFile, $specialCasingFile];
+$files = [$unicodeDataFile, $caseFoldingFile, $specialCasingFile, $derivedCorePropertiesFile];
 foreach ($files as $file) {
     if (!file_exists($file)) {
         echo "File $file does not exist.\n";
@@ -60,6 +62,7 @@ $data = new UnicodeData;
 parseUnicodeData($data, file_get_contents($unicodeDataFile));
 parseCaseFolding($data, file_get_contents($caseFoldingFile));
 parseSpecialCasing($data, file_get_contents($specialCasingFile));
+parseDerivedCoreProperties($data, file_get_contents($derivedCorePropertiesFile));
 file_put_contents($outputFile, generateData($data));
 
 class Range {
@@ -90,7 +93,8 @@ class UnicodeData {
             "Lo", "Pc", "Pd", "Ps", "Pe", "Po",
             "Sm", "Sc", "Sk", "So", "L", "R",
             "EN", "ES", "ET", "AN", "CS", "B",
-            "S", "WS", "ON", "Pi", "Pf", "AL"
+            "S", "WS", "ON", "Pi", "Pf", "AL",
+            "Cased", "Case_Ignorable"
         ]);
         $this->numProps = count($this->propIndexes);
 
@@ -336,6 +340,28 @@ function parseSpecialCasing(UnicodeData $data, string $input) : void {
 
         // Should happen last
         addSpecialCasing($data, 'title', $code, $title);
+    }
+}
+
+function parseDerivedCoreProperties(UnicodeData $data, string $input) : void {
+    foreach (parseDataFile($input) as $fields) {
+        if (count($fields) != 2) {
+            throw new Exception("Line does not contain 2 fields");
+        }
+
+        $property = $fields[1];
+        if ($property != 'Cased' && $property != 'Case_Ignorable') {
+            continue;
+        }
+
+        $range = explode('..', $fields[0]);
+        if (count($range) == 2) {
+            $data->addPropRange(intval($range[0], 16), intval($range[1], 16), $property);
+        } else if (count($range) == 1) {
+            $data->addProp(intval($range[0], 16), $property);
+        } else {
+            throw new Exception("Invalid range");
+        }
     }
 }
 

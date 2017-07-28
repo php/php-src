@@ -16,6 +16,10 @@ PHP                                                                        NEWS
     (Come)
 
 - Mbstring:
+  . Fixed bug #65544 (mb title case conversion-first word in quotation isn't
+    capitalized). (Nikita)
+  . Fixed bug #71298 (MB_CASE_TITLE misbehaves with curled apostrophe/quote.
+    (Nikita)
   . Fixed bug #73528 (Crash in zif_mb_send_mail). (Nikita)
   . Fixed bug #74929 (mbstring functions version 7.1.1 are slow compared to 5.3
     on Windows). (Nikita)

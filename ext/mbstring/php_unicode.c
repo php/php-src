@@ -343,31 +343,23 @@ static int convert_case_filter(int c, void *void_data)
 		case PHP_UNICODE_CASE_TITLE_SIMPLE:
 		case PHP_UNICODE_CASE_TITLE:
 		{
-			int res = php_unicode_is_prop(c,
-				UC_MN, UC_ME, UC_CF, UC_LM, UC_SK, UC_LU, UC_LL, UC_LT, UC_PO, UC_OS, -1);
-			out[0] = c;
-			len = 1;
 			if (data->title_mode) {
-				if (res) {
-					if (data->case_mode == PHP_UNICODE_CASE_TITLE_SIMPLE) {
-						out[0] = php_unicode_tolower_simple(c, data->no_encoding);
-						len = 1;
-					} else {
-						len = php_unicode_tolower_full(c, data->no_encoding, out);
-					}
+				if (data->case_mode == PHP_UNICODE_CASE_TITLE_SIMPLE) {
+					out[0] = php_unicode_tolower_simple(c, data->no_encoding);
+					len = 1;
 				} else {
-					data->title_mode = 0;
+					len = php_unicode_tolower_full(c, data->no_encoding, out);
 				}
 			} else {
-				if (res) {
-					data->title_mode = 1;
-					if (data->case_mode == PHP_UNICODE_CASE_TITLE_SIMPLE) {
-						out[0] = php_unicode_totitle_simple(c, data->no_encoding);
-						len = 1;
-					} else {
-						len = php_unicode_totitle_full(c, data->no_encoding, out);
-					}
+				if (data->case_mode == PHP_UNICODE_CASE_TITLE_SIMPLE) {
+					out[0] = php_unicode_totitle_simple(c, data->no_encoding);
+					len = 1;
+				} else {
+					len = php_unicode_totitle_full(c, data->no_encoding, out);
 				}
+			}
+			if (!php_unicode_is_case_ignorable(c)) {
+				data->title_mode = php_unicode_is_cased(c);
 			}
 			break;
 		}
