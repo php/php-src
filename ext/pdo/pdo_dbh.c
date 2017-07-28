@@ -36,6 +36,8 @@
 #include "zend_object_handlers.h"
 #include "zend_hash.h"
 
+PHPAPI zend_class_entry *php_pdo_dbh_interface_ce;
+
 static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value);
 
 void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *sqlstate, const char *supp) /* {{{ */
@@ -1237,6 +1239,23 @@ ZEND_BEGIN_ARG_INFO(arginfo_pdo__void, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
 
+static const zend_function_entry pdo_dbh_interface[] = {
+    PHP_ABSTRACT_ME(PDOInterface, prepare,               arginfo_pdo_prepare)
+    PHP_ABSTRACT_ME(PDOInterface, beginTransaction,      arginfo_pdo__void)
+    PHP_ABSTRACT_ME(PDOInterface, commit,                arginfo_pdo__void)
+    PHP_ABSTRACT_ME(PDOInterface, rollBack,              arginfo_pdo__void)
+    PHP_ABSTRACT_ME(PDOInterface, inTransaction,         arginfo_pdo__void)
+    PHP_ABSTRACT_ME(PDOInterface, setAttribute,          arginfo_pdo_setattribute)
+    PHP_ABSTRACT_ME(PDOInterface, exec,                  arginfo_pdo_exec)
+    PHP_ABSTRACT_ME(PDOInterface, query,                 NULL)
+    PHP_ABSTRACT_ME(PDOInterface, lastInsertId,          arginfo_pdo_lastinsertid)
+    PHP_ABSTRACT_ME(PDOInterface, errorCode,             arginfo_pdo__void)
+    PHP_ABSTRACT_ME(PDOInterface, errorInfo,             arginfo_pdo__void)
+    PHP_ABSTRACT_ME(PDOInterface, getAttribute,          arginfo_pdo_getattribute)
+    PHP_ABSTRACT_ME(PDOInterface, quote,                 arginfo_pdo_quote)
+    PHP_FE_END
+};
+
 const zend_function_entry pdo_dbh_functions[] = /* {{{ */ {
 	ZEND_MALIAS(PDO, __construct, dbh_constructor,	arginfo_pdo___construct,	ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, prepare, 				arginfo_pdo_prepare,		ZEND_ACC_PUBLIC)
@@ -1392,11 +1411,16 @@ static void pdo_dbh_free_storage(zend_object *std);
 
 void pdo_dbh_init(void)
 {
-	zend_class_entry ce;
+	zend_class_entry ce, ce_interface;
 
 	INIT_CLASS_ENTRY(ce, "PDO", pdo_dbh_functions);
 	pdo_dbh_ce = zend_register_internal_class(&ce);
 	pdo_dbh_ce->create_object = pdo_dbh_new;
+
+	INIT_CLASS_ENTRY(ce_interface, "PDOInterface", pdo_dbh_interface);
+	php_pdo_dbh_interface_ce = zend_register_internal_interface(&ce_interface);
+
+	zend_class_implements(pdo_dbh_ce, 1, php_pdo_dbh_interface_ce);
 
 	memcpy(&pdo_dbh_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	pdo_dbh_object_handlers.offset = XtOffsetOf(pdo_dbh_object_t, std);

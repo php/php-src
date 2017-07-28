@@ -37,6 +37,8 @@
 #include "zend_interfaces.h"
 #include "php_memory_streams.h"
 
+PHPAPI zend_class_entry *php_pdo_dbstmt_interface_ce;
+
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO(arginfo_pdostatement__void, 0)
 ZEND_END_ARG_INFO()
@@ -2160,6 +2162,29 @@ static PHP_METHOD(PDOStatement, __sleep)
 }
 /* }}} */
 
+const zend_function_entry pdo_dbstmt_interface[] = {
+	PHP_ABSTRACT_ME(PDOStatementInterface, execute,         arginfo_pdostatement_execute)
+	PHP_ABSTRACT_ME(PDOStatementInterface, fetch,           arginfo_pdostatement_fetch)
+	PHP_ABSTRACT_ME(PDOStatementInterface, bindParam,       arginfo_pdostatement_bindparam)
+	PHP_ABSTRACT_ME(PDOStatementInterface, bindColumn,      arginfo_pdostatement_bindcolumn)
+	PHP_ABSTRACT_ME(PDOStatementInterface, bindValue,       arginfo_pdostatement_bindvalue)
+	PHP_ABSTRACT_ME(PDOStatementInterface, rowCount,        arginfo_pdostatement__void)
+	PHP_ABSTRACT_ME(PDOStatementInterface, fetchColumn,     arginfo_pdostatement_fetchcolumn)
+	PHP_ABSTRACT_ME(PDOStatementInterface, fetchAll,        arginfo_pdostatement_fetchall)
+	PHP_ABSTRACT_ME(PDOStatementInterface, fetchObject,     arginfo_pdostatement_fetchobject)
+	PHP_ABSTRACT_ME(PDOStatementInterface, errorCode,       arginfo_pdostatement__void)
+	PHP_ABSTRACT_ME(PDOStatementInterface, errorInfo,       arginfo_pdostatement__void)
+	PHP_ABSTRACT_ME(PDOStatementInterface, setAttribute,    arginfo_pdostatement_setattribute)
+	PHP_ABSTRACT_ME(PDOStatementInterface, getAttribute,    arginfo_pdostatement_getattribute)
+	PHP_ABSTRACT_ME(PDOStatementInterface, columnCount,     arginfo_pdostatement__void)
+	PHP_ABSTRACT_ME(PDOStatementInterface, getColumnMeta,   arginfo_pdostatement_getcolumnmeta)
+	PHP_ABSTRACT_ME(PDOStatementInterface, setFetchMode,    arginfo_pdostatement_setfetchmode)
+	PHP_ABSTRACT_ME(PDOStatementInterface, nextRowset,      arginfo_pdostatement__void)
+	PHP_ABSTRACT_ME(PDOStatementInterface, closeCursor,     arginfo_pdostatement__void)
+	PHP_ABSTRACT_ME(PDOStatementInterface, debugDumpParams, arginfo_pdostatement__void)
+	PHP_FE_END
+};
+
 const zend_function_entry pdo_dbstmt_functions[] = {
 	PHP_ME(PDOStatement, execute,		arginfo_pdostatement_execute,		ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, fetch,			arginfo_pdostatement_fetch,			ZEND_ACC_PUBLIC)
@@ -2278,13 +2303,18 @@ static int pdo_row_serialize(zval *object, unsigned char **buffer, size_t *buf_l
 
 void pdo_stmt_init(void)
 {
-	zend_class_entry ce;
+	zend_class_entry ce, ce_interface;
 
 	INIT_CLASS_ENTRY(ce, "PDOStatement", pdo_dbstmt_functions);
 	pdo_dbstmt_ce = zend_register_internal_class(&ce);
 	pdo_dbstmt_ce->get_iterator = pdo_stmt_iter_get;
 	pdo_dbstmt_ce->create_object = pdo_dbstmt_new;
-	zend_class_implements(pdo_dbstmt_ce, 1, zend_ce_traversable);
+
+	INIT_CLASS_ENTRY(ce_interface, "PDOStatementInterface", pdo_dbstmt_interface);
+	php_pdo_dbstmt_interface_ce = zend_register_internal_interface(&ce_interface);
+
+	zend_class_implements(pdo_dbstmt_ce, 2, zend_ce_traversable, php_pdo_dbstmt_interface_ce);
+
 	zend_declare_property_null(pdo_dbstmt_ce, "queryString", sizeof("queryString")-1, ZEND_ACC_PUBLIC);
 
 	memcpy(&pdo_dbstmt_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
