@@ -60,6 +60,7 @@ Core:
   . Set default transfer mode to binary
 
  ODBC: 
+  . Support for ODBCRouter has been removed.
   . Support for Birdstep has been removed.
 
 ========================================

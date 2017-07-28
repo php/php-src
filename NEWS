@@ -21,6 +21,7 @@ PHP                                                                        NEWS
     on Windows). (Nikita)
 
 - ODBC:
+  . Removed support for ODBCRouter. (Kalle)
   . Removed support for Birdstep. (Kalle)
 
 - phar:
