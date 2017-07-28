@@ -310,7 +310,7 @@ static PHP_INI_MH(OnUpdateTimeout)
 
 /* {{{ php_get_display_errors_mode() helper function
  */
-static int php_get_display_errors_mode(char *value, int value_length)
+static int php_get_display_errors_mode(char *value, size_t value_length)
 {
 	int mode;
 
@@ -343,7 +343,7 @@ static int php_get_display_errors_mode(char *value, int value_length)
  */
 static PHP_INI_MH(OnUpdateDisplayErrors)
 {
-	PG(display_errors) = (zend_bool) php_get_display_errors_mode(ZSTR_VAL(new_value), (int)ZSTR_LEN(new_value));
+	PG(display_errors) = (zend_bool) php_get_display_errors_mode(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
 
 	return SUCCESS;
 }
@@ -353,15 +353,16 @@ static PHP_INI_MH(OnUpdateDisplayErrors)
  */
 static PHP_INI_DISP(display_errors_mode)
 {
-	int mode, tmp_value_length, cgi_or_cli;
+	int mode, cgi_or_cli;
+	size_t tmp_value_length;
 	char *tmp_value;
 
 	if (type == ZEND_INI_DISPLAY_ORIG && ini_entry->modified) {
 		tmp_value = (ini_entry->orig_value ? ZSTR_VAL(ini_entry->orig_value) : NULL );
-		tmp_value_length = (int)(ini_entry->orig_value? ZSTR_LEN(ini_entry->orig_value) : 0);
+		tmp_value_length = (ini_entry->orig_value? ZSTR_LEN(ini_entry->orig_value) : 0);
 	} else if (ini_entry->value) {
 		tmp_value = ZSTR_VAL(ini_entry->value);
-		tmp_value_length = (int)ZSTR_LEN(ini_entry->value);
+		tmp_value_length = ZSTR_LEN(ini_entry->value);
 	} else {
 		tmp_value = NULL;
 		tmp_value_length = 0;
