@@ -140,22 +140,22 @@ float(%f)
 
 --empty array--
 
-Warning: gettimeofday() expects parameter 1 to be boolean, array given in %s on line %d
+Warning: gettimeofday() expects parameter 1 to be boolean (or integer, float or string), array given in %s on line %d
 NULL
 
 --int indexed array--
 
-Warning: gettimeofday() expects parameter 1 to be boolean, array given in %s on line %d
+Warning: gettimeofday() expects parameter 1 to be boolean (or integer, float or string), array given in %s on line %d
 NULL
 
 --associative array--
 
-Warning: gettimeofday() expects parameter 1 to be boolean, array given in %s on line %d
+Warning: gettimeofday() expects parameter 1 to be boolean (or integer, float or string), array given in %s on line %d
 NULL
 
 --nested arrays--
 
-Warning: gettimeofday() expects parameter 1 to be boolean, array given in %s on line %d
+Warning: gettimeofday() expects parameter 1 to be boolean (or integer, float or string), array given in %s on line %d
 NULL
 
 --uppercase NULL--
@@ -250,12 +250,12 @@ float(%f)
 
 --instance of classWithToString--
 
-Warning: gettimeofday() expects parameter 1 to be boolean, object given in %s on line %d
+Warning: gettimeofday() expects parameter 1 to be boolean (or integer, float or string), object given in %s on line %d
 NULL
 
 --instance of classWithoutToString--
 
-Warning: gettimeofday() expects parameter 1 to be boolean, object given in %s on line %d
+Warning: gettimeofday() expects parameter 1 to be boolean (or integer, float or string), object given in %s on line %d
 NULL
 
 --undefined var--

@@ -70,7 +70,7 @@ Warning: file_get_contents( ): failed to open stream: No such file or directory 
 bool(false)
 -- Iteration 6 --
 
-Warning: file_get_contents() expects parameter 1 to be a valid path, string given in %s on line %d
+Warning: file_get_contents() expects parameter 1 to be a valid path, null-byte-containing string given in %s on line %d
 NULL
 -- Iteration 7 --
 

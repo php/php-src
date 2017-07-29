@@ -125,15 +125,15 @@ array(1) {
 }
 -- Iteration 9 --
 
-Warning: sscanf() expects parameter 1 to be string, array given in %s on line %d
+Warning: sscanf() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 10 --
 
-Warning: sscanf() expects parameter 1 to be string, array given in %s on line %d
+Warning: sscanf() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: sscanf() expects parameter 1 to be string, array given in %s on line %d
+Warning: sscanf() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 12 --
 array(1) {
@@ -160,7 +160,7 @@ array(1) {
 }
 -- Iteration 19 --
 
-Warning: sscanf() expects parameter 1 to be string, resource given in %s on line %d
+Warning: sscanf() expects parameter 1 to be string (or integer, float, boolean or convertible object), resource given in %s on line %d
 NULL
 -- Iteration 20 --
 NULL

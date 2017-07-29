@@ -136,27 +136,27 @@ array(1) {
 Error: 8 - Array to string conversion, %sparse_url_variation_001.php(%d)
 
 Arg value Array 
-Error: 2 - parse_url() expects parameter 1 to be string, array given, %s(70)
+Error: 2 - parse_url() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given, %s(70)
 NULL
 Error: 8 - Array to string conversion, %sparse_url_variation_001.php(%d)
 
 Arg value Array 
-Error: 2 - parse_url() expects parameter 1 to be string, array given, %s(70)
+Error: 2 - parse_url() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given, %s(70)
 NULL
 Error: 8 - Array to string conversion, %sparse_url_variation_001.php(%d)
 
 Arg value Array 
-Error: 2 - parse_url() expects parameter 1 to be string, array given, %s(70)
+Error: 2 - parse_url() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given, %s(70)
 NULL
 Error: 8 - Array to string conversion, %sparse_url_variation_001.php(%d)
 
 Arg value Array 
-Error: 2 - parse_url() expects parameter 1 to be string, array given, %s(70)
+Error: 2 - parse_url() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given, %s(70)
 NULL
 Error: 8 - Array to string conversion, %sparse_url_variation_001.php(%d)
 
 Arg value Array 
-Error: 2 - parse_url() expects parameter 1 to be string, array given, %s(70)
+Error: 2 - parse_url() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given, %s(70)
 NULL
 
 Arg value  
@@ -209,7 +209,7 @@ array(1) {
 Error: 4096 - Object of class stdClass could not be converted to string, %s(69)
 
 Arg value  
-Error: 2 - parse_url() expects parameter 1 to be string, object given, %s(70)
+Error: 2 - parse_url() expects parameter 1 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given, %s(70)
 NULL
 
 Arg value  

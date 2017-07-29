@@ -87,10 +87,10 @@ bool(false)
 Warning: str_word_count(): Invalid format value 999999999 in %s on line %d
 bool(false)
 
-Warning: str_word_count() expects parameter 2 to be integer, array given in %s on line %d
+Warning: str_word_count() expects parameter 2 to be integer (or convertible float, convertible string or boolean), array given in %s on line %d
 NULL
 
-Warning: str_word_count() expects parameter 2 to be integer, string given in %s on line %d
+Warning: str_word_count() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 string(55) "Hello friend, you're  
     looking          good today!"
@@ -98,10 +98,10 @@ int(5)
 int(6)
 int(5)
 
-Warning: str_word_count() expects parameter 3 to be string, array given in %s on line %d
+Warning: str_word_count() expects parameter 3 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
-Warning: str_word_count() expects parameter 3 to be string, object given in %s on line %d
+Warning: str_word_count() expects parameter 3 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given in %s on line %d
 NULL
 int(7)
 array(5) {
@@ -143,10 +143,10 @@ array(5) {
   string(3) "foo"
 }
 
-Warning: str_word_count() expects parameter 3 to be string, array given in %s on line %d
+Warning: str_word_count() expects parameter 3 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
-Warning: str_word_count() expects parameter 3 to be string, object given in %s on line %d
+Warning: str_word_count() expects parameter 3 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given in %s on line %d
 NULL
 array(7) {
   [0]=>
@@ -203,10 +203,10 @@ array(5) {
   string(3) "foo"
 }
 
-Warning: str_word_count() expects parameter 3 to be string, array given in %s on line %d
+Warning: str_word_count() expects parameter 3 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
-Warning: str_word_count() expects parameter 3 to be string, object given in %s on line %d
+Warning: str_word_count() expects parameter 3 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given in %s on line %d
 NULL
 array(7) {
   [0]=>

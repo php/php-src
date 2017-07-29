@@ -157,22 +157,22 @@ object(DateTime)#%d (3) {
 
 -- empty array --
 
-Warning: date_modify() expects parameter 2 to be string, array given in %sdate_modify_variation2.php on line 99
+Warning: date_modify() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %sdate_modify_variation2.php on line 99
 bool(false)
 
 -- int indexed array --
 
-Warning: date_modify() expects parameter 2 to be string, array given in %sdate_modify_variation2.php on line 99
+Warning: date_modify() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %sdate_modify_variation2.php on line 99
 bool(false)
 
 -- associative array --
 
-Warning: date_modify() expects parameter 2 to be string, array given in %sdate_modify_variation2.php on line 99
+Warning: date_modify() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %sdate_modify_variation2.php on line 99
 bool(false)
 
 -- nested arrays --
 
-Warning: date_modify() expects parameter 2 to be string, array given in %sdate_modify_variation2.php on line 99
+Warning: date_modify() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %sdate_modify_variation2.php on line 99
 bool(false)
 
 -- uppercase NULL --
@@ -242,7 +242,7 @@ bool(false)
 
 -- instance of classWithoutToString --
 
-Warning: date_modify() expects parameter 2 to be string, object given in %sdate_modify_variation2.php on line 99
+Warning: date_modify() expects parameter 2 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given in %sdate_modify_variation2.php on line 99
 bool(false)
 
 -- undefined var --
@@ -257,6 +257,6 @@ bool(false)
 
 -- resource --
 
-Warning: date_modify() expects parameter 2 to be string, resource given in %sdate_modify_variation2.php on line 99
+Warning: date_modify() expects parameter 2 to be string (or integer, float, boolean or convertible object), resource given in %sdate_modify_variation2.php on line 99
 bool(false)
 ===DONE===

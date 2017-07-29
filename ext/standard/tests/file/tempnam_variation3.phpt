@@ -101,7 +101,7 @@ File permissions are => 100600
 File created in => directory specified
 -- Iteration 6 --
 
-Warning: tempnam() expects parameter 2 to be a valid path, string given in %s on line %d
+Warning: tempnam() expects parameter 2 to be a valid path, null-byte-containing string given in %s on line %d
 -- File is not created --
 
 Warning: unlink(): %s in %s on line %d

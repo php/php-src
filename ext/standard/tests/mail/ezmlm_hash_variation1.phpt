@@ -133,15 +133,15 @@ array(1) {
 }
 -- Iteration 10 --
 
-Warning: explode() expects parameter 1 to be string, array given in %s on line %d
+Warning: explode() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: explode() expects parameter 1 to be string, array given in %s on line %d
+Warning: explode() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: explode() expects parameter 1 to be string, array given in %s on line %d
+Warning: explode() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 13 --
 array(2) {
@@ -180,7 +180,7 @@ array(1) {
 }
 -- Iteration 20 --
 
-Warning: explode() expects parameter 1 to be string, resource given in %s on line %d
+Warning: explode() expects parameter 1 to be string (or integer, float, boolean or convertible object), resource given in %s on line %d
 NULL
 -- Iteration 21 --
 

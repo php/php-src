@@ -11,4 +11,4 @@ try {
 
 ?>
 --EXPECTF--
-string(74) "SplFileObject::__construct() expects parameter 2 to be string, array given"
+string(125) "SplFileObject::__construct() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given"

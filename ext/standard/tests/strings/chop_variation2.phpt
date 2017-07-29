@@ -128,23 +128,23 @@ string(17) "hello world12345 "
 string(17) "hello world12345 "
 -- Iteration 10 --
 
-Warning: chop() expects parameter 2 to be string, array given in %s on line %d
+Warning: chop() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: chop() expects parameter 2 to be string, array given in %s on line %d
+Warning: chop() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: chop() expects parameter 2 to be string, array given in %s on line %d
+Warning: chop() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 13 --
 
-Warning: chop() expects parameter 2 to be string, array given in %s on line %d
+Warning: chop() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 14 --
 
-Warning: chop() expects parameter 2 to be string, array given in %s on line %d
+Warning: chop() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 15 --
 string(17) "hello world12345 "
@@ -166,7 +166,7 @@ string(17) "hello world12345 "
 string(17) "hello world12345 "
 -- Iteration 24 --
 
-Warning: chop() expects parameter 2 to be string, resource given in %s on line %d
+Warning: chop() expects parameter 2 to be string (or integer, float, boolean or convertible object), resource given in %s on line %d
 NULL
 -- Iteration 25 --
 string(17) "hello world12345 "

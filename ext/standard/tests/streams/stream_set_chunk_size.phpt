@@ -89,5 +89,5 @@ bool(false)
 Warning: stream_set_chunk_size(): The chunk size must be a positive integer, given -1 in %s on line %d
 bool(false)
 
-Warning: stream_set_chunk_size() expects parameter 2 to be integer, array given in %s on line %d
+Warning: stream_set_chunk_size() expects parameter 2 to be integer (or convertible float, convertible string or boolean), array given in %s on line %d
 bool(false)

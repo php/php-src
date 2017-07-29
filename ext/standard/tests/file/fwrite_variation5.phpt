@@ -134,16 +134,16 @@ unlink($filename);
 --float .5--
 0.5
 --empty array--
-Error: 2 - fwrite() expects parameter 2 to be string, array given, %s(%d)
+Error: 2 - fwrite() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given, %s(%d)
 
 --int indexed array--
-Error: 2 - fwrite() expects parameter 2 to be string, array given, %s(%d)
+Error: 2 - fwrite() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given, %s(%d)
 
 --associative array--
-Error: 2 - fwrite() expects parameter 2 to be string, array given, %s(%d)
+Error: 2 - fwrite() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given, %s(%d)
 
 --nested arrays--
-Error: 2 - fwrite() expects parameter 2 to be string, array given, %s(%d)
+Error: 2 - fwrite() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given, %s(%d)
 
 --uppercase NULL--
 
@@ -164,7 +164,7 @@ Error: 2 - fwrite() expects parameter 2 to be string, array given, %s(%d)
 --instance of classWithToString--
 Class A object
 --instance of classWithoutToString--
-Error: 2 - fwrite() expects parameter 2 to be string, object given, %s(%d)
+Error: 2 - fwrite() expects parameter 2 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given, %s(%d)
 
 --undefined var--
 

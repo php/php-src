@@ -128,16 +128,16 @@ FAILED: DateTimeZone::__construct(): Unknown or bad timezone (10.5)
 FAILED: DateTimeZone::__construct(): Unknown or bad timezone (0.5)
 
 -- empty array --
-FAILED: DateTimeZone::__construct() expects parameter 1 to be string, array given
+FAILED: DateTimeZone::__construct() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given
 
 -- int indexed array --
-FAILED: DateTimeZone::__construct() expects parameter 1 to be string, array given
+FAILED: DateTimeZone::__construct() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given
 
 -- associative array --
-FAILED: DateTimeZone::__construct() expects parameter 1 to be string, array given
+FAILED: DateTimeZone::__construct() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given
 
 -- nested arrays --
-FAILED: DateTimeZone::__construct() expects parameter 1 to be string, array given
+FAILED: DateTimeZone::__construct() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given
 
 -- uppercase NULL --
 FAILED: DateTimeZone::__construct(): Unknown or bad timezone ()
@@ -179,7 +179,7 @@ FAILED: DateTimeZone::__construct(): Unknown or bad timezone (hello world)
 FAILED: DateTimeZone::__construct(): Unknown or bad timezone (Class A object)
 
 -- instance of classWithoutToString --
-FAILED: DateTimeZone::__construct() expects parameter 1 to be string, object given
+FAILED: DateTimeZone::__construct() expects parameter 1 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given
 
 -- undefined var --
 FAILED: DateTimeZone::__construct(): Unknown or bad timezone ()
@@ -188,5 +188,5 @@ FAILED: DateTimeZone::__construct(): Unknown or bad timezone ()
 FAILED: DateTimeZone::__construct(): Unknown or bad timezone ()
 
 -- resource --
-FAILED: DateTimeZone::__construct() expects parameter 1 to be string, resource given
+FAILED: DateTimeZone::__construct() expects parameter 1 to be string (or integer, float, boolean or convertible object), resource given
 ===DONE===

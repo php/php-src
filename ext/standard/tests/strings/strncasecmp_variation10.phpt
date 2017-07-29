@@ -129,33 +129,33 @@ int(-%d)
 int(-%d)
 -- Iteration 15 --
 
-Warning: strlen() expects parameter 1 to be string, array given in %s on line 88
+Warning: strlen() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line 88
 
-Warning: strncasecmp() expects parameter 1 to be string, array given in %s on line 89
+Warning: strncasecmp() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line 89
 NULL
 -- Iteration 16 --
 
-Warning: strlen() expects parameter 1 to be string, array given in %s on line 88
+Warning: strlen() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line 88
 
-Warning: strncasecmp() expects parameter 1 to be string, array given in %s on line 89
+Warning: strncasecmp() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line 89
 NULL
 -- Iteration 17 --
 
-Warning: strlen() expects parameter 1 to be string, array given in %s on line 88
+Warning: strlen() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line 88
 
-Warning: strncasecmp() expects parameter 1 to be string, array given in %s on line 89
+Warning: strncasecmp() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line 89
 NULL
 -- Iteration 18 --
 
-Warning: strlen() expects parameter 1 to be string, array given in %s on line 88
+Warning: strlen() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line 88
 
-Warning: strncasecmp() expects parameter 1 to be string, array given in %s on line 89
+Warning: strncasecmp() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line 89
 NULL
 -- Iteration 19 --
 
-Warning: strlen() expects parameter 1 to be string, array given in %s on line 88
+Warning: strlen() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line 88
 
-Warning: strncasecmp() expects parameter 1 to be string, array given in %s on line 89
+Warning: strncasecmp() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line 89
 NULL
 -- Iteration 20 --
 int(-%d)
@@ -179,9 +179,9 @@ int(-%d)
 int(-%d)
 -- Iteration 30 --
 
-Warning: strlen() expects parameter 1 to be string, resource given in %s on line 88
+Warning: strlen() expects parameter 1 to be string (or integer, float, boolean or convertible object), resource given in %s on line 88
 
-Warning: strncasecmp() expects parameter 1 to be string, resource given in %s on line 89
+Warning: strncasecmp() expects parameter 1 to be string (or integer, float, boolean or convertible object), resource given in %s on line 89
 NULL
 -- Iteration 31 --
 int(-%d)

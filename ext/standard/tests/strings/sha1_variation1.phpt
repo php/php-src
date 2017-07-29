@@ -110,23 +110,23 @@ string(40) "681b45cae882ad795afd54ccc2a04ad58e056b83"
 string(40) "1b390cd54a0c0d4f27fa7adf23e3c45536e9f37c"
 -- Iteration 10 --
 
-Warning: sha1() expects parameter 1 to be string, array given in %s on line %d
+Warning: sha1() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: sha1() expects parameter 1 to be string, array given in %s on line %d
+Warning: sha1() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: sha1() expects parameter 1 to be string, array given in %s on line %d
+Warning: sha1() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 13 --
 
-Warning: sha1() expects parameter 1 to be string, array given in %s on line %d
+Warning: sha1() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 14 --
 
-Warning: sha1() expects parameter 1 to be string, array given in %s on line %d
+Warning: sha1() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 -- Iteration 15 --
 string(40) "da39a3ee5e6b4b0d3255bfef95601890afd80709"
@@ -152,6 +152,6 @@ string(40) "da39a3ee5e6b4b0d3255bfef95601890afd80709"
 string(40) "da39a3ee5e6b4b0d3255bfef95601890afd80709"
 -- Iteration 26 --
 
-Warning: sha1() expects parameter 1 to be string, resource given in %s on line %d
+Warning: sha1() expects parameter 1 to be string (or integer, float, boolean or convertible object), resource given in %s on line %d
 NULL
 ===DONE===

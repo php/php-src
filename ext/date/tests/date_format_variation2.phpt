@@ -133,22 +133,22 @@ string(3) "0.5"
 
 -- empty array --
 
-Warning: date_format() expects parameter 2 to be string, array given in %s on line %d
+Warning: date_format() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 bool(false)
 
 -- int indexed array --
 
-Warning: date_format() expects parameter 2 to be string, array given in %s on line %d
+Warning: date_format() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 bool(false)
 
 -- associative array --
 
-Warning: date_format() expects parameter 2 to be string, array given in %s on line %d
+Warning: date_format() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 bool(false)
 
 -- nested arrays --
 
-Warning: date_format() expects parameter 2 to be string, array given in %s on line %d
+Warning: date_format() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 bool(false)
 
 -- uppercase NULL --
@@ -192,7 +192,7 @@ string(66) "CThursdaypm4141 PM 2005b14Europe/London2005-07-14T22:30:41+01:0031"
 
 -- instance of classWithoutToString --
 
-Warning: date_format() expects parameter 2 to be string, object given in %s on line %d
+Warning: date_format() expects parameter 2 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given in %s on line %d
 bool(false)
 
 -- undefined var --
@@ -203,6 +203,6 @@ string(0) ""
 
 -- resource --
 
-Warning: date_format() expects parameter 2 to be string, resource given in %s on line %d
+Warning: date_format() expects parameter 2 to be string (or integer, float, boolean or convertible object), resource given in %s on line %d
 bool(false)
 ===DONE===

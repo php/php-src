@@ -16,12 +16,12 @@ echo "Done\n";
 Warning: Parameter 1 to sort() expected to be a reference, value given in %sbug41970.php on line 5
 bool(true)
 
-Warning: strlen() expects parameter 1 to be string, array given in %sbug41970.php on line 6
+Warning: strlen() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %sbug41970.php on line 6
 NULL
 
 Warning: Parameter 1 to sort() expected to be a reference, value given in %sbug41970.php on line 7
 bool(true)
 
-Warning: strlen() expects parameter 1 to be string, array given in %sbug41970.php on line 8
+Warning: strlen() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %sbug41970.php on line 8
 NULL
 Done

@@ -54,17 +54,17 @@ Warning: getrusage() expects at most 1 parameter, 2 given in %s on line %d
 
 -- Testing getrusage() function with invalid argument - non-numeric STRING--
 
-Warning: getrusage() expects parameter 1 to be integer, string given in %s on line %d
+Warning: getrusage() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 
 -- Testing getrusage() function with invalid argument - ARRAY--
 
-Warning: getrusage() expects parameter 1 to be integer, array given in %s on line %d
+Warning: getrusage() expects parameter 1 to be integer (or convertible float, convertible string or boolean), array given in %s on line %d
 
 -- Testing getrusage() function with invalid argument - OBJECT --
 
-Warning: getrusage() expects parameter 1 to be integer, object given in %s on line %d
+Warning: getrusage() expects parameter 1 to be integer (or convertible float, convertible string or boolean), object given in %s on line %d
 
 -- Testing getrusage() function with invalid argument - RESOURCE --
 
-Warning: getrusage() expects parameter 1 to be integer, resource given in %s on line %d
+Warning: getrusage() expects parameter 1 to be integer (or convertible float, convertible string or boolean), resource given in %s on line %d
 ===DONE===

@@ -118,23 +118,23 @@ string(20) "1. 07 65 43 21 E- 9 "
 string(5) "0. 5 "
 -- Iteration 10 --
 
-Warning: chunk_split() expects parameter 1 to be string, array given in %s on line 87
+Warning: chunk_split() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line 87
 NULL
 -- Iteration 11 --
 
-Warning: chunk_split() expects parameter 1 to be string, array given in %s on line 87
+Warning: chunk_split() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line 87
 NULL
 -- Iteration 12 --
 
-Warning: chunk_split() expects parameter 1 to be string, array given in %s on line 87
+Warning: chunk_split() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line 87
 NULL
 -- Iteration 13 --
 
-Warning: chunk_split() expects parameter 1 to be string, array given in %s on line 87
+Warning: chunk_split() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line 87
 NULL
 -- Iteration 14 --
 
-Warning: chunk_split() expects parameter 1 to be string, array given in %s on line 87
+Warning: chunk_split() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line 87
 NULL
 -- Iteration 15 --
 string(1) " "
@@ -164,6 +164,6 @@ string(1) " "
 string(1) " "
 -- Iteration 28 --
 
-Warning: chunk_split() expects parameter 1 to be string, resource given in %s on line 87
+Warning: chunk_split() expects parameter 1 to be string (or integer, float, boolean or convertible object), resource given in %s on line 87
 NULL
 Done

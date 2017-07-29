@@ -251,7 +251,7 @@ TypeError: Argument 1 passed to iterableF() must be iterable or null, integer gi
 Stack trace:
 #0 %s(60): iterableF(1)
 #1 {main}
-TypeError: Argument 1 passed to intF() must be of the type integer or null, object given, called in %s on line 68 and defined in %s:65
+TypeError: Argument 1 passed to intF() must be an integer (or convertible float, convertible string or boolean) or null, object given, called in %s on line 68 and defined in %s:65
 Stack trace:
 #0 %s(68): intF(Object(stdClass))
 #1 {main}
@@ -287,7 +287,7 @@ TypeError: Return value of returnIterable() must be iterable or null, integer re
 Stack trace:
 #0 %s(148): returnIterable()
 #1 {main}
-TypeError: Return value of returnInt() must be of the type integer or null, object returned in %s:154
+TypeError: Return value of returnInt() must be an integer (or convertible float, convertible string or boolean) or null, object returned in %s:154
 Stack trace:
 #0 %s(158): returnInt()
 #1 {main}
@@ -311,7 +311,7 @@ TypeError: Return value of returnMissingIterable() must be iterable or null, non
 Stack trace:
 #0 %s(203): returnMissingIterable()
 #1 {main}
-TypeError: Return value of returnMissingInt() must be of the type integer or null, none returned in %s:209
+TypeError: Return value of returnMissingInt() must be an integer (or convertible float, convertible string or boolean) or null, none returned in %s:209
 Stack trace:
 #0 %s(212): returnMissingInt()
 #1 {main}

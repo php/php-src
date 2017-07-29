@@ -41,7 +41,7 @@ PHP Quality Assurance Team
 %a
 bool(true)
 
-Warning: phpcredits() expects parameter 1 to be integer, array given in %sphpcredits.php on line 4
+Warning: phpcredits() expects parameter 1 to be integer (or convertible float, convertible string or boolean), array given in %sphpcredits.php on line 4
 NULL
 --
 PHP Credits

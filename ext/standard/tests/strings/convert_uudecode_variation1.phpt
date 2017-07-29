@@ -120,15 +120,15 @@ Warning: convert_uudecode(): The given parameter is not a valid uuencoded string
 bool(false)
 -- Iteration 10 --
 
-Warning: convert_uudecode() expects parameter 1 to be string, array given in %s on line %d
+Warning: convert_uudecode() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 bool(false)
 -- Iteration 11 --
 
-Warning: convert_uudecode() expects parameter 1 to be string, array given in %s on line %d
+Warning: convert_uudecode() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 bool(false)
 -- Iteration 12 --
 
-Warning: convert_uudecode() expects parameter 1 to be string, array given in %s on line %d
+Warning: convert_uudecode() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 bool(false)
 -- Iteration 13 --
 
@@ -152,7 +152,7 @@ Warning: convert_uudecode(): The given parameter is not a valid uuencoded string
 bool(false)
 -- Iteration 20 --
 
-Warning: convert_uudecode() expects parameter 1 to be string, resource given in %s on line %d
+Warning: convert_uudecode() expects parameter 1 to be string (or integer, float, boolean or convertible object), resource given in %s on line %d
 bool(false)
 -- Iteration 21 --
 bool(false)

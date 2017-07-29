@@ -299,6 +299,6 @@ array(12) {
   bool(false)
 }
 
-Warning: date_parse() expects parameter 1 to be string, array given in %sdate_parse_001.php on line %d
+Warning: date_parse() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %sdate_parse_001.php on line %d
 bool(false)
 Done

@@ -197,7 +197,7 @@ Error: 2 - file(Class A object): failed to open stream: %s, %s(%d)
 bool(false)
 
 --instance of classWithoutToString--
-Error: 2 - file() expects parameter 1 to be a valid path, object given, %s(%d)
+Error: 2 - file() expects parameter 1 to be a valid path, non-convertible (does not support __toString) object given, %s(%d)
 NULL
 
 --undefined var--

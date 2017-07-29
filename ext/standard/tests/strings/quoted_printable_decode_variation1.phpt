@@ -128,27 +128,27 @@ string(6) "302e35"
 
 -- Iteration 10 --
 
-Warning: quoted_printable_decode() expects parameter 1 to be string, array given in %s on line %d
+Warning: quoted_printable_decode() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 string(0) ""
 
 -- Iteration 11 --
 
-Warning: quoted_printable_decode() expects parameter 1 to be string, array given in %s on line %d
+Warning: quoted_printable_decode() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 string(0) ""
 
 -- Iteration 12 --
 
-Warning: quoted_printable_decode() expects parameter 1 to be string, array given in %s on line %d
+Warning: quoted_printable_decode() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 string(0) ""
 
 -- Iteration 13 --
 
-Warning: quoted_printable_decode() expects parameter 1 to be string, array given in %s on line %d
+Warning: quoted_printable_decode() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 string(0) ""
 
 -- Iteration 14 --
 
-Warning: quoted_printable_decode() expects parameter 1 to be string, array given in %s on line %d
+Warning: quoted_printable_decode() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 string(0) ""
 
 -- Iteration 15 --
@@ -186,6 +186,6 @@ string(0) ""
 
 -- Iteration 26 --
 
-Warning: quoted_printable_decode() expects parameter 1 to be string, resource given in %s on line %d
+Warning: quoted_printable_decode() expects parameter 1 to be string (or integer, float, boolean or convertible object), resource given in %s on line %d
 string(0) ""
 ===DONE===

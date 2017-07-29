@@ -119,38 +119,38 @@ bool(false)
 bool(false)
 -- Iteration 10 --
 
-Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
+Warning: strrpos() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 bool(false)
 
-Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
+Warning: strrpos() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 bool(false)
 -- Iteration 11 --
 
-Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
+Warning: strrpos() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 bool(false)
 
-Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
+Warning: strrpos() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 bool(false)
 -- Iteration 12 --
 
-Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
+Warning: strrpos() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 bool(false)
 
-Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
+Warning: strrpos() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 bool(false)
 -- Iteration 13 --
 
-Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
+Warning: strrpos() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 bool(false)
 
-Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
+Warning: strrpos() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 bool(false)
 -- Iteration 14 --
 
-Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
+Warning: strrpos() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 bool(false)
 
-Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
+Warning: strrpos() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 bool(false)
 -- Iteration 15 --
 bool(false)
@@ -185,10 +185,10 @@ bool(false)
 bool(false)
 -- Iteration 24 --
 
-Warning: strrpos() expects parameter 1 to be string, resource given in %s on line %d
+Warning: strrpos() expects parameter 1 to be string (or integer, float, boolean or convertible object), resource given in %s on line %d
 bool(false)
 
-Warning: strrpos() expects parameter 1 to be string, resource given in %s on line %d
+Warning: strrpos() expects parameter 1 to be string (or integer, float, boolean or convertible object), resource given in %s on line %d
 bool(false)
 -- Iteration 25 --
 bool(false)

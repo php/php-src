@@ -102,9 +102,9 @@ bool(false)
 Warning: rename() %s in %s on line %d
 bool(false)
 
-Warning: file_exists() expects parameter 1 to be a valid path, string given in %s on line %d
+Warning: file_exists() expects parameter 1 to be a valid path, null-byte-containing string given in %s on line %d
 
-Warning: rename() expects parameter 1 to be a valid path, string given in %s on line %d
+Warning: rename() expects parameter 1 to be a valid path, null-byte-containing string given in %s on line %d
 bool(false)
 -- testing 'Array' --
 

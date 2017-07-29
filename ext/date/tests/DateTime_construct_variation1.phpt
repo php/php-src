@@ -180,20 +180,20 @@ object(DateTime)#%d (3) {
 }
 
 -- empty array --
-FAILED: DateTime::__construct() expects parameter 1 to be string, array given
-FAILED: DateTime::__construct() expects parameter 1 to be string, array given
+FAILED: DateTime::__construct() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given
+FAILED: DateTime::__construct() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given
 
 -- int indexed array --
-FAILED: DateTime::__construct() expects parameter 1 to be string, array given
-FAILED: DateTime::__construct() expects parameter 1 to be string, array given
+FAILED: DateTime::__construct() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given
+FAILED: DateTime::__construct() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given
 
 -- associative array --
-FAILED: DateTime::__construct() expects parameter 1 to be string, array given
-FAILED: DateTime::__construct() expects parameter 1 to be string, array given
+FAILED: DateTime::__construct() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given
+FAILED: DateTime::__construct() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given
 
 -- nested arrays --
-FAILED: DateTime::__construct() expects parameter 1 to be string, array given
-FAILED: DateTime::__construct() expects parameter 1 to be string, array given
+FAILED: DateTime::__construct() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given
+FAILED: DateTime::__construct() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given
 
 -- uppercase NULL --
 object(DateTime)#%d (3) {
@@ -332,8 +332,8 @@ FAILED: DateTime::__construct(): Failed to parse time string (Class A object) at
 FAILED: DateTime::__construct(): Failed to parse time string (Class A object) at position 0 (C): The timezone could not be found in the database
 
 -- instance of classWithoutToString --
-FAILED: DateTime::__construct() expects parameter 1 to be string, object given
-FAILED: DateTime::__construct() expects parameter 1 to be string, object given
+FAILED: DateTime::__construct() expects parameter 1 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given
+FAILED: DateTime::__construct() expects parameter 1 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given
 
 -- undefined var --
 object(DateTime)#%d (3) {
@@ -372,6 +372,6 @@ object(DateTime)#%d (3) {
 }
 
 -- resource --
-FAILED: DateTime::__construct() expects parameter 1 to be string, resource given
-FAILED: DateTime::__construct() expects parameter 1 to be string, resource given
+FAILED: DateTime::__construct() expects parameter 1 to be string (or integer, float, boolean or convertible object), resource given
+FAILED: DateTime::__construct() expects parameter 1 to be string (or integer, float, boolean or convertible object), resource given
 ===DONE===

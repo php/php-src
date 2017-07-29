@@ -119,27 +119,27 @@ string(3) "5.0"
 
 -- Iterator 10 --
 
-Warning: strrev() expects parameter 1 to be string, array given in %s on line %d
+Warning: strrev() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
 -- Iterator 11 --
 
-Warning: strrev() expects parameter 1 to be string, array given in %s on line %d
+Warning: strrev() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
 -- Iterator 12 --
 
-Warning: strrev() expects parameter 1 to be string, array given in %s on line %d
+Warning: strrev() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
 -- Iterator 13 --
 
-Warning: strrev() expects parameter 1 to be string, array given in %s on line %d
+Warning: strrev() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
 -- Iterator 14 --
 
-Warning: strrev() expects parameter 1 to be string, array given in %s on line %d
+Warning: strrev() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
 -- Iterator 15 --
@@ -171,7 +171,7 @@ string(6) "tcejbo"
 
 -- Iterator 24 --
 
-Warning: strrev() expects parameter 1 to be string, resource given in %s on line %d
+Warning: strrev() expects parameter 1 to be string (or integer, float, boolean or convertible object), resource given in %s on line %d
 NULL
 
 -- Iterator 25 --

@@ -35,8 +35,8 @@ try {
 
 ?>
 --EXPECTF--
-Ok - ReflectionFunction::__construct() expects parameter 1 to be string, array given
+Ok - ReflectionFunction::__construct() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given
 Function nonExistentFunction() does not exist
 Ok - ReflectionFunction::__construct() expects exactly 1 parameter, 0 given
 Ok - ReflectionFunction::__construct() expects exactly 1 parameter, 2 given
-Ok - ReflectionFunction::__construct() expects parameter 1 to be string, array given
+Ok - ReflectionFunction::__construct() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given

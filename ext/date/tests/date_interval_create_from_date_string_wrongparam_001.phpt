@@ -8,4 +8,4 @@ $wrong_parameter = array();
 $i = date_interval_create_from_date_string($wrong_parameter);
 ?>
 --EXPECTF--
-Warning: date_interval_create_from_date_string() expects parameter 1 to be string, array given in %s on line %d
+Warning: date_interval_create_from_date_string() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d

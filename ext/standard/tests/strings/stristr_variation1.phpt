@@ -98,15 +98,15 @@ bool(false)
 bool(false)
 -- Iteration 8 --
 
-Warning: stristr() expects parameter 1 to be string, array given in %s on line %d2
+Warning: stristr() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d2
 NULL
 -- Iteration 9 --
 
-Warning: stristr() expects parameter 1 to be string, array given in %s on line %d2
+Warning: stristr() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d2
 NULL
 -- Iteration 10 --
 
-Warning: stristr() expects parameter 1 to be string, array given in %s on line %d2
+Warning: stristr() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d2
 NULL
 -- Iteration 11 --
 bool(false)
@@ -124,7 +124,7 @@ bool(false)
 string(7) " object"
 -- Iteration 18 --
 
-Warning: stristr() expects parameter 1 to be string, resource given in %s on line %d2
+Warning: stristr() expects parameter 1 to be string (or integer, float, boolean or convertible object), resource given in %s on line %d2
 NULL
 -- Iteration 19 --
 bool(false)

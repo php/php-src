@@ -95,12 +95,12 @@ string(24) "application/octet-stream"
 
 -- Iteration 6 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer, array given in %s on line %d
+Warning: image_type_to_mime_type() expects parameter 1 to be integer (or convertible float, convertible string or boolean), array given in %s on line %d
 NULL
 
 -- Iteration 7 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer, array given in %s on line %d
+Warning: image_type_to_mime_type() expects parameter 1 to be integer (or convertible float, convertible string or boolean), array given in %s on line %d
 NULL
 
 -- Iteration 8 --
@@ -123,27 +123,27 @@ string(24) "application/octet-stream"
 
 -- Iteration 14 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer, string given in %s on line %d
+Warning: image_type_to_mime_type() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 15 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer, string given in %s on line %d
+Warning: image_type_to_mime_type() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 16 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer, string given in %s on line %d
+Warning: image_type_to_mime_type() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 17 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer, string given in %s on line %d
+Warning: image_type_to_mime_type() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
 -- Iteration 18 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer, object given in %s on line %d
+Warning: image_type_to_mime_type() expects parameter 1 to be integer (or convertible float, convertible string or boolean), object given in %s on line %d
 NULL
 
 -- Iteration 19 --

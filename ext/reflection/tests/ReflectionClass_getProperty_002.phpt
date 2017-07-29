@@ -65,8 +65,8 @@ Property 1 does not exist
 Property 1.5 does not exist
 Property 1 does not exist
 
-Warning: ReflectionClass::getProperty() expects parameter 1 to be string, array given in %s on line 39
+Warning: ReflectionClass::getProperty() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line 39
 NULL
 
-Warning: ReflectionClass::getProperty() expects parameter 1 to be string, object given in %s on line 44
+Warning: ReflectionClass::getProperty() expects parameter 1 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given in %s on line 44
 NULL

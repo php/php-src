@@ -200,19 +200,19 @@ string(0) ""
 string(21) "array( array(), null)"
 -- Iteration 9 --
 
-Warning: pathinfo() expects parameter 1 to be string, object given in %s on line %d
+Warning: pathinfo() expects parameter 1 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given in %s on line %d
 NULL
 
-Warning: pathinfo() expects parameter 1 to be string, object given in %s on line %d
+Warning: pathinfo() expects parameter 1 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given in %s on line %d
 NULL
 
-Warning: pathinfo() expects parameter 1 to be string, object given in %s on line %d
+Warning: pathinfo() expects parameter 1 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given in %s on line %d
 NULL
 
-Warning: pathinfo() expects parameter 1 to be string, object given in %s on line %d
+Warning: pathinfo() expects parameter 1 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given in %s on line %d
 NULL
 
-Warning: pathinfo() expects parameter 1 to be string, object given in %s on line %d
+Warning: pathinfo() expects parameter 1 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given in %s on line %d
 NULL
 -- Iteration 10 --
 array(3) {

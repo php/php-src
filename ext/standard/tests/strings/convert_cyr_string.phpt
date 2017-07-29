@@ -34,7 +34,7 @@ Warning: convert_cyr_string(): Unknown source charset:  in %s on line %d
 Warning: convert_cyr_string(): Unknown destination charset:  in %s on line %d
 string(0) ""
 
-Warning: convert_cyr_string() expects parameter 1 to be string, array given in %s on line %d
+Warning: convert_cyr_string() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
 Warning: convert_cyr_string(): Unknown source charset: q in %s on line %d

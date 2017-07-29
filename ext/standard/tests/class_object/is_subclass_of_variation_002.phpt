@@ -116,27 +116,27 @@ bool(false)
 Error: 8 - Array to string conversion, %sis_subclass_of_variation_002.php(%d)
 
 Arg value Array 
-Error: 2 - is_subclass_of() expects parameter 2 to be string, array given, %s(%d)
+Error: 2 - is_subclass_of() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given, %s(%d)
 NULL
 Error: 8 - Array to string conversion, %sis_subclass_of_variation_002.php(%d)
 
 Arg value Array 
-Error: 2 - is_subclass_of() expects parameter 2 to be string, array given, %s(%d)
+Error: 2 - is_subclass_of() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given, %s(%d)
 NULL
 Error: 8 - Array to string conversion, %sis_subclass_of_variation_002.php(%d)
 
 Arg value Array 
-Error: 2 - is_subclass_of() expects parameter 2 to be string, array given, %s(%d)
+Error: 2 - is_subclass_of() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given, %s(%d)
 NULL
 Error: 8 - Array to string conversion, %sis_subclass_of_variation_002.php(%d)
 
 Arg value Array 
-Error: 2 - is_subclass_of() expects parameter 2 to be string, array given, %s(%d)
+Error: 2 - is_subclass_of() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given, %s(%d)
 NULL
 Error: 8 - Array to string conversion, %sis_subclass_of_variation_002.php(%d)
 
 Arg value Array 
-Error: 2 - is_subclass_of() expects parameter 2 to be string, array given, %s(%d)
+Error: 2 - is_subclass_of() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given, %s(%d)
 NULL
 
 Arg value  
@@ -165,7 +165,7 @@ bool(false)
 Error: 4096 - Object of class stdClass could not be converted to string, %s(%d)
 
 Arg value  
-Error: 2 - is_subclass_of() expects parameter 2 to be string, object given, %s(%d)
+Error: 2 - is_subclass_of() expects parameter 2 to be string (or integer, float, boolean or convertible object), non-convertible (does not support __toString) object given, %s(%d)
 NULL
 
 Arg value  

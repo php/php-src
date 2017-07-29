@@ -30,10 +30,10 @@ Warning: define() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 bool(true)
 
-Warning: define() expects parameter 3 to be boolean, array given in %s on line %d
+Warning: define() expects parameter 3 to be boolean (or integer, float or string), array given in %s on line %d
 NULL
 
-Warning: define() expects parameter 1 to be string, array given in %s on line %d
+Warning: define() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 bool(true)
 bool(true)

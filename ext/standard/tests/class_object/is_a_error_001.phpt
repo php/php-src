@@ -44,7 +44,7 @@ NULL
 
 -- Testing is_a() function with non-boolean in last position --
 
-Warning: is_a() expects parameter 3 to be boolean, object given in %s on line 21
+Warning: is_a() expects parameter 3 to be boolean (or integer, float or string), object given in %s on line 21
 NULL
 
 -- Testing is_a() function with less than expected no. of arguments --

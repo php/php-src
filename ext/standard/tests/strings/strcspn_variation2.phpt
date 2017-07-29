@@ -151,57 +151,57 @@ int(9)
 
 -- Iteration with mask value as "Array" --
 
-Warning: strcspn() expects parameter 2 to be string, array given in %s on line %d
+Warning: strcspn() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
-Warning: strcspn() expects parameter 2 to be string, array given in %s on line %d
+Warning: strcspn() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
-Warning: strcspn() expects parameter 2 to be string, array given in %s on line %d
-NULL
-
--- Iteration with mask value as "Array" --
-
-Warning: strcspn() expects parameter 2 to be string, array given in %s on line %d
-NULL
-
-Warning: strcspn() expects parameter 2 to be string, array given in %s on line %d
-NULL
-
-Warning: strcspn() expects parameter 2 to be string, array given in %s on line %d
+Warning: strcspn() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
 -- Iteration with mask value as "Array" --
 
-Warning: strcspn() expects parameter 2 to be string, array given in %s on line %d
+Warning: strcspn() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
-Warning: strcspn() expects parameter 2 to be string, array given in %s on line %d
+Warning: strcspn() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
-Warning: strcspn() expects parameter 2 to be string, array given in %s on line %d
-NULL
-
--- Iteration with mask value as "Array" --
-
-Warning: strcspn() expects parameter 2 to be string, array given in %s on line %d
-NULL
-
-Warning: strcspn() expects parameter 2 to be string, array given in %s on line %d
-NULL
-
-Warning: strcspn() expects parameter 2 to be string, array given in %s on line %d
+Warning: strcspn() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
 -- Iteration with mask value as "Array" --
 
-Warning: strcspn() expects parameter 2 to be string, array given in %s on line %d
+Warning: strcspn() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
-Warning: strcspn() expects parameter 2 to be string, array given in %s on line %d
+Warning: strcspn() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
-Warning: strcspn() expects parameter 2 to be string, array given in %s on line %d
+Warning: strcspn() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
+NULL
+
+-- Iteration with mask value as "Array" --
+
+Warning: strcspn() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
+NULL
+
+Warning: strcspn() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
+NULL
+
+Warning: strcspn() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
+NULL
+
+-- Iteration with mask value as "Array" --
+
+Warning: strcspn() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
+NULL
+
+Warning: strcspn() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
+NULL
+
+Warning: strcspn() expects parameter 2 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
 -- Iteration with mask value as "" --
@@ -261,12 +261,12 @@ int(9)
 
 -- Iteration with mask value as "Resource id #%d" --
 
-Warning: strcspn() expects parameter 2 to be string, resource given in %s on line %d
+Warning: strcspn() expects parameter 2 to be string (or integer, float, boolean or convertible object), resource given in %s on line %d
 NULL
 
-Warning: strcspn() expects parameter 2 to be string, resource given in %s on line %d
+Warning: strcspn() expects parameter 2 to be string (or integer, float, boolean or convertible object), resource given in %s on line %d
 NULL
 
-Warning: strcspn() expects parameter 2 to be string, resource given in %s on line %d
+Warning: strcspn() expects parameter 2 to be string (or integer, float, boolean or convertible object), resource given in %s on line %d
 NULL
 Done

@@ -102,15 +102,15 @@ string(24) "252b3328502b4334600a600a"
 string(40) "2c2c3360512c432c542d3338572c2360500a600a"
 -- Iteration 10 --
 
-Warning: convert_uuencode() expects parameter 1 to be string, array given in %s on line %d
+Warning: convert_uuencode() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 string(0) ""
 -- Iteration 11 --
 
-Warning: convert_uuencode() expects parameter 1 to be string, array given in %s on line %d
+Warning: convert_uuencode() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 string(0) ""
 -- Iteration 12 --
 
-Warning: convert_uuencode() expects parameter 1 to be string, array given in %s on line %d
+Warning: convert_uuencode() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 string(0) ""
 -- Iteration 13 --
 string(16) "212c3060600a600a"
@@ -128,7 +128,7 @@ string(0) ""
 string(48) "2d3c56254d3c26514528265d423a4635433d6060600a600a"
 -- Iteration 20 --
 
-Warning: convert_uuencode() expects parameter 1 to be string, resource given in %s on line %d
+Warning: convert_uuencode() expects parameter 1 to be string (or integer, float, boolean or convertible object), resource given in %s on line %d
 string(0) ""
 -- Iteration 21 --
 string(0) ""

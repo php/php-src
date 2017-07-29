@@ -11,4 +11,4 @@ $nano = time_nanosleep('A', 100000);
 
 ?>
 --EXPECTF--
-Warning: time_nanosleep() expects parameter 1 to be integer, string given in %s.php on line %d
+Warning: time_nanosleep() expects parameter 1 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s.php on line %d

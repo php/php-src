@@ -696,18 +696,31 @@ END_EXTERN_C()
 #define FAST_ZPP 1
 
 #define Z_EXPECTED_TYPES(_) \
-	_(Z_EXPECTED_LONG,		"integer") \
-	_(Z_EXPECTED_BOOL,		"boolean") \
-	_(Z_EXPECTED_STRING,	"string") \
-	_(Z_EXPECTED_ARRAY,		"array") \
-	_(Z_EXPECTED_FUNC,		"valid callback") \
-	_(Z_EXPECTED_RESOURCE,	"resource") \
-	_(Z_EXPECTED_PATH,		"a valid path") \
-	_(Z_EXPECTED_OBJECT,	"object") \
-	_(Z_EXPECTED_DOUBLE,	"float")
+	_(Z_EXPECTED_LONG, \
+		"integer (or convertible float, convertible string or boolean)", \
+		"integer" \
+	) \
+	_(Z_EXPECTED_DOUBLE, \
+		"float (or integer, convertible string or boolean)", \
+		"float (or integer)" \
+	) \
+	_(Z_EXPECTED_STRING, \
+		"string (or integer, float, boolean or convertible object)", \
+		"string" \
+	) \
+	_(Z_EXPECTED_BOOL, \
+		"boolean (or integer, float or string)", \
+		"boolean" \
+	) \
+	_(Z_EXPECTED_ARRAY,		"array",			"array") \
+	_(Z_EXPECTED_FUNC,		"valid callback",	"valid callback") \
+	_(Z_EXPECTED_RESOURCE,	"resource",			"resource") \
+	_(Z_EXPECTED_PATH,		"a valid path",		"a valid path") \
+	_(Z_EXPECTED_OBJECT,	"object",			"object")
 
-#define Z_EXPECTED_TYPE_ENUM(id, str) id,
-#define Z_EXPECTED_TYPE_STR(id, str)  str,
+#define Z_EXPECTED_TYPE_ENUM(id, str_weak, str_strict) id,
+#define Z_EXPECTED_TYPE_STR_WEAK(id, str_weak, str_strict)  str_weak,
+#define Z_EXPECTED_TYPE_STR_STRICT(id, str_weak, str_strict)  str_strict,
 
 typedef enum _zend_expected_type {
 	Z_EXPECTED_TYPES(Z_EXPECTED_TYPE_ENUM)
@@ -715,7 +728,7 @@ typedef enum _zend_expected_type {
 } zend_expected_type;
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_count_error(zend_bool throw_, int num_args, int min_num_args, int max_num_args);
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_type_error(zend_bool throw_, int num, zend_expected_type expected_type, zval *arg);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_type_error(zend_bool throw_, int num, zend_expected_type expected_type, zval *arg, const char *error_adjective);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_error(zend_bool throw_, int num, char *name, zval *arg);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(zend_bool throw_, int severity, int num, char *error);
 
@@ -738,6 +751,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(zend_bool throw_
 		zend_bool _dummy; \
 		zend_bool _optional = 0; \
 		int error_code = ZPP_ERROR_OK; \
+		const char *_error_adjective = ""; \
 		((void)_i); \
 		((void)_real_arg); \
 		((void)_arg); \
@@ -775,7 +789,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(zend_bool throw_
 				} else if (error_code == ZPP_ERROR_WRONG_CLASS) { \
 					zend_wrong_parameter_class_error(_flags & ZEND_PARSE_PARAMS_THROW, _i, _error, _arg); \
 				} else if (error_code == ZPP_ERROR_WRONG_ARG) { \
-					zend_wrong_parameter_type_error(_flags & ZEND_PARSE_PARAMS_THROW, _i, _expected_type, _arg); \
+					zend_wrong_parameter_type_error(_flags & ZEND_PARSE_PARAMS_THROW, _i, _expected_type, _arg, _error_adjective); \
 				} \
 			} \
 			failure; \
@@ -867,7 +881,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(zend_bool throw_
 /* old "d" */
 #define Z_PARAM_DOUBLE_EX2(dest, is_null, check_null, deref, separate) \
 		Z_PARAM_PROLOGUE(deref, separate); \
-		if (UNEXPECTED(!zend_parse_arg_double(_arg, &dest, &is_null, check_null))) { \
+		if (UNEXPECTED(!zend_parse_arg_double(_arg, &dest, &is_null, check_null, &_error_adjective))) { \
 			_expected_type = Z_EXPECTED_DOUBLE; \
 			error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
@@ -934,7 +948,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(zend_bool throw_
 /* old "l" */
 #define Z_PARAM_LONG_EX2(dest, is_null, check_null, deref, separate) \
 		Z_PARAM_PROLOGUE(deref, separate); \
-		if (UNEXPECTED(!zend_parse_arg_long(_arg, &dest, &is_null, check_null, 0))) { \
+		if (UNEXPECTED(!zend_parse_arg_long(_arg, &dest, &is_null, check_null, 0, &_error_adjective))) { \
 			_expected_type = Z_EXPECTED_LONG; \
 			error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
@@ -949,7 +963,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(zend_bool throw_
 /* old "L" */
 #define Z_PARAM_STRICT_LONG_EX2(dest, is_null, check_null, deref, separate) \
 		Z_PARAM_PROLOGUE(deref, separate); \
-		if (UNEXPECTED(!zend_parse_arg_long(_arg, &dest, &is_null, check_null, 1))) { \
+		if (UNEXPECTED(!zend_parse_arg_long(_arg, &dest, &is_null, check_null, 1, &_error_adjective))) { \
 			_expected_type = Z_EXPECTED_LONG; \
 			error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
@@ -1000,7 +1014,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(zend_bool throw_
 /* old "p" */
 #define Z_PARAM_PATH_EX2(dest, dest_len, check_null, deref, separate) \
 		Z_PARAM_PROLOGUE(deref, separate); \
-		if (UNEXPECTED(!zend_parse_arg_path(_arg, &dest, &dest_len, check_null))) { \
+		if (UNEXPECTED(!zend_parse_arg_path(_arg, &dest, &dest_len, check_null, &_error_adjective))) { \
 			_expected_type = Z_EXPECTED_PATH; \
 			error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
@@ -1015,7 +1029,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(zend_bool throw_
 /* old "P" */
 #define Z_PARAM_PATH_STR_EX2(dest, check_null, deref, separate) \
 		Z_PARAM_PROLOGUE(deref, separate); \
-		if (UNEXPECTED(!zend_parse_arg_path_str(_arg, &dest, check_null))) { \
+		if (UNEXPECTED(!zend_parse_arg_path_str(_arg, &dest, check_null, &_error_adjective))) { \
 			_expected_type = Z_EXPECTED_PATH; \
 			error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
@@ -1045,7 +1059,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(zend_bool throw_
 /* old "s" */
 #define Z_PARAM_STRING_EX2(dest, dest_len, check_null, deref, separate) \
 		Z_PARAM_PROLOGUE(deref, separate); \
-		if (UNEXPECTED(!zend_parse_arg_string(_arg, &dest, &dest_len, check_null))) { \
+		if (UNEXPECTED(!zend_parse_arg_string(_arg, &dest, &dest_len, check_null, &_error_adjective))) { \
 			_expected_type = Z_EXPECTED_STRING; \
 			error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
@@ -1060,7 +1074,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(zend_bool throw_
 /* old "S" */
 #define Z_PARAM_STR_EX2(dest, check_null, deref, separate) \
 		Z_PARAM_PROLOGUE(deref, separate); \
-		if (UNEXPECTED(!zend_parse_arg_str(_arg, &dest, check_null))) { \
+		if (UNEXPECTED(!zend_parse_arg_str(_arg, &dest, check_null, &_error_adjective))) { \
 			_expected_type = Z_EXPECTED_STRING; \
 			error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
@@ -1115,14 +1129,14 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(zend_bool throw_
 ZEND_API int ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **pce, int num, int check_null);
 ZEND_API int ZEND_FASTCALL zend_parse_arg_bool_slow(zval *arg, zend_bool *dest);
 ZEND_API int ZEND_FASTCALL zend_parse_arg_bool_weak(zval *arg, zend_bool *dest);
-ZEND_API int ZEND_FASTCALL zend_parse_arg_long_slow(zval *arg, zend_long *dest);
-ZEND_API int ZEND_FASTCALL zend_parse_arg_long_weak(zval *arg, zend_long *dest);
-ZEND_API int ZEND_FASTCALL zend_parse_arg_long_cap_slow(zval *arg, zend_long *dest);
-ZEND_API int ZEND_FASTCALL zend_parse_arg_long_cap_weak(zval *arg, zend_long *dest);
-ZEND_API int ZEND_FASTCALL zend_parse_arg_double_slow(zval *arg, double *dest);
-ZEND_API int ZEND_FASTCALL zend_parse_arg_double_weak(zval *arg, double *dest);
-ZEND_API int ZEND_FASTCALL zend_parse_arg_str_slow(zval *arg, zend_string **dest);
-ZEND_API int ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, zend_string **dest);
+ZEND_API int ZEND_FASTCALL zend_parse_arg_long_slow(zval *arg, zend_long *dest, const char **error_adjective);
+ZEND_API int ZEND_FASTCALL zend_parse_arg_long_weak(zval *arg, zend_long *dest, const char **error_adjective);
+ZEND_API int ZEND_FASTCALL zend_parse_arg_long_cap_slow(zval *arg, zend_long *dest, const char **error_adjective);
+ZEND_API int ZEND_FASTCALL zend_parse_arg_long_cap_weak(zval *arg, zend_long *dest, const char **error_adjective);
+ZEND_API int ZEND_FASTCALL zend_parse_arg_double_slow(zval *arg, double *dest, const char **error_adjective);
+ZEND_API int ZEND_FASTCALL zend_parse_arg_double_weak(zval *arg, double *dest, const char **error_adjective);
+ZEND_API int ZEND_FASTCALL zend_parse_arg_str_slow(zval *arg, zend_string **dest, const char **error_adjective);
+ZEND_API int ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, zend_string **dest, const char **error_adjective);
 
 static zend_always_inline int zend_parse_arg_bool(zval *arg, zend_bool *dest, zend_bool *is_null, int check_null)
 {
@@ -1142,7 +1156,7 @@ static zend_always_inline int zend_parse_arg_bool(zval *arg, zend_bool *dest, ze
 	return 1;
 }
 
-static zend_always_inline int zend_parse_arg_long(zval *arg, zend_long *dest, zend_bool *is_null, int check_null, int cap)
+static zend_always_inline int zend_parse_arg_long(zval *arg, zend_long *dest, zend_bool *is_null, int check_null, int cap, const char **error_adjective)
 {
 	if (check_null) {
 		*is_null = 0;
@@ -1153,14 +1167,14 @@ static zend_always_inline int zend_parse_arg_long(zval *arg, zend_long *dest, ze
 		*is_null = 1;
 		*dest = 0;
 	} else if (cap) {
-		return zend_parse_arg_long_cap_slow(arg, dest);
+		return zend_parse_arg_long_cap_slow(arg, dest, error_adjective);
 	} else {
-		return zend_parse_arg_long_slow(arg, dest);
+		return zend_parse_arg_long_slow(arg, dest, error_adjective);
 	}
 	return 1;
 }
 
-static zend_always_inline int zend_parse_arg_double(zval *arg, double *dest, zend_bool *is_null, int check_null)
+static zend_always_inline int zend_parse_arg_double(zval *arg, double *dest, zend_bool *is_null, int check_null, const char **error_adjective)
 {
 	if (check_null) {
 		*is_null = 0;
@@ -1171,28 +1185,28 @@ static zend_always_inline int zend_parse_arg_double(zval *arg, double *dest, zen
 		*is_null = 1;
 		*dest = 0.0;
 	} else {
-		return zend_parse_arg_double_slow(arg, dest);
+		return zend_parse_arg_double_slow(arg, dest, error_adjective);
 	}
 	return 1;
 }
 
-static zend_always_inline int zend_parse_arg_str(zval *arg, zend_string **dest, int check_null)
+static zend_always_inline int zend_parse_arg_str(zval *arg, zend_string **dest, int check_null, const char **error_adjective)
 {
 	if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
 		*dest = Z_STR_P(arg);
 	} else if (check_null && Z_TYPE_P(arg) == IS_NULL) {
 		*dest = NULL;
 	} else {
-		return zend_parse_arg_str_slow(arg, dest);
+		return zend_parse_arg_str_slow(arg, dest, error_adjective);
 	}
 	return 1;
 }
 
-static zend_always_inline int zend_parse_arg_string(zval *arg, char **dest, size_t *dest_len, int check_null)
+static zend_always_inline int zend_parse_arg_string(zval *arg, char **dest, size_t *dest_len, int check_null, const char **error_adjective)
 {
 	zend_string *str;
 
-	if (!zend_parse_arg_str(arg, &str, check_null)) {
+	if (!zend_parse_arg_str(arg, &str, check_null, error_adjective)) {
 		return 0;
 	}
 	if (check_null && UNEXPECTED(!str)) {
@@ -1205,20 +1219,23 @@ static zend_always_inline int zend_parse_arg_string(zval *arg, char **dest, size
 	return 1;
 }
 
-static zend_always_inline int zend_parse_arg_path_str(zval *arg, zend_string **dest, int check_null)
+static zend_always_inline int zend_parse_arg_path_str(zval *arg, zend_string **dest, int check_null, const char **error_adjective)
 {
-	if (!zend_parse_arg_str(arg, dest, check_null) ||
-	    (*dest && UNEXPECTED(CHECK_NULL_PATH(ZSTR_VAL(*dest), ZSTR_LEN(*dest))))) {
+	if (!zend_parse_arg_str(arg, dest, check_null, error_adjective)) {
+		return 0;
+	}
+	if (UNEXPECTED(CHECK_NULL_PATH(ZSTR_VAL(*dest), ZSTR_LEN(*dest)))) {
+		*error_adjective = "null-byte-containing ";
 		return 0;
 	}
 	return 1;
 }
 
-static zend_always_inline int zend_parse_arg_path(zval *arg, char **dest, size_t *dest_len, int check_null)
+static zend_always_inline int zend_parse_arg_path(zval *arg, char **dest, size_t *dest_len, int check_null, const char **error_adjective)
 {
 	zend_string *str;
 
-	if (!zend_parse_arg_path_str(arg, &str, check_null)) {
+	if (!zend_parse_arg_path_str(arg, &str, check_null, error_adjective)) {
 		return 0;
 	}
 	if (check_null && UNEXPECTED(!str)) {

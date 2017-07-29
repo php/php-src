@@ -111,27 +111,27 @@ string(3) "0.5"
 
 Arg value Array 
 
-Warning: utf8_decode() expects parameter 1 to be string, array given in %s on line %d
+Warning: utf8_decode() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
 Arg value Array 
 
-Warning: utf8_decode() expects parameter 1 to be string, array given in %s on line %d
+Warning: utf8_decode() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
 Arg value Array 
 
-Warning: utf8_decode() expects parameter 1 to be string, array given in %s on line %d
+Warning: utf8_decode() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
 Arg value Array 
 
-Warning: utf8_decode() expects parameter 1 to be string, array given in %s on line %d
+Warning: utf8_decode() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
 Arg value Array 
 
-Warning: utf8_decode() expects parameter 1 to be string, array given in %s on line %d
+Warning: utf8_decode() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
 Arg value  

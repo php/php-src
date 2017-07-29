@@ -27,7 +27,7 @@ NULL
 Warning: constant(): Couldn't find constant  in %s on line %d
 NULL
 
-Warning: constant() expects parameter 1 to be string, array given in %s on line %d
+Warning: constant() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 int(1)
 string(4) "test"

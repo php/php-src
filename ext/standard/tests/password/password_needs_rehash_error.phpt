@@ -22,10 +22,10 @@ NULL
 Warning: password_needs_rehash() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 
-Warning: password_needs_rehash() expects parameter 2 to be integer, string given in %s on line %d
+Warning: password_needs_rehash() expects parameter 2 to be integer (or convertible float, convertible string or boolean), non-numeric string given in %s on line %d
 NULL
 
-Warning: password_needs_rehash() expects parameter 1 to be string, array given in %s on line %d
+Warning: password_needs_rehash() expects parameter 1 to be string (or integer, float, boolean or convertible object), array given in %s on line %d
 NULL
 
 Warning: password_needs_rehash() expects parameter 3 to be array, string given in %s on line %d
