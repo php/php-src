@@ -115,6 +115,8 @@ ZEND_BEGIN_ARG_INFO_EX(AI_LengthAndPasswordAndSaltAndOpsLimitAndMemLimit, 0, 0, 
 	ZEND_ARG_INFO(0, salt)
 	ZEND_ARG_INFO(0, opslimit)
 	ZEND_ARG_INFO(0, memlimit)
+	/* optional */
+	ZEND_ARG_INFO(0, alg)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(AI_PasswordAndOpsLimitAndMemLimit, 0, 0, 3)
@@ -447,6 +449,14 @@ PHP_MINIT_FUNCTION(sodium)
 	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_GENERICHASH_KEYBYTES_MAX",
 						   crypto_generichash_KEYBYTES_MAX, CONST_CS | CONST_PERSISTENT);
 #ifdef crypto_pwhash_SALTBYTES
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_PWHASH_ALG_ARGON2I13",
+						   crypto_pwhash_ALG_ARGON2I13, CONST_CS | CONST_PERSISTENT);
+# ifdef crypto_pwhash_ALG_ARGON2ID13
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_PWHASH_ALG_ARGON2ID13",
+						   crypto_pwhash_ALG_ARGON2ID13, CONST_CS | CONST_PERSISTENT);
+# endif
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_PWHASH_ALG_DEFAULT",
+						   crypto_pwhash_ALG_DEFAULT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_PWHASH_SALTBYTES",
 						   crypto_pwhash_SALTBYTES, CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("SODIUM_CRYPTO_PWHASH_STRPREFIX",
@@ -1778,17 +1788,27 @@ PHP_FUNCTION(sodium_crypto_pwhash)
 	zend_long	   hash_len;
 	zend_long	   memlimit;
 	zend_long	   opslimit;
+	zend_long	   alg;
 	size_t		   passwd_len;
 	size_t		   salt_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lssll",
+	alg = (zend_long) crypto_pwhash_ALG_DEFAULT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lssll|l",
 							  &hash_len,
 							  &passwd, &passwd_len,
 							  &salt, &salt_len,
-							  &opslimit, &memlimit) == FAILURE ||
+							  &opslimit, &memlimit, &alg) == FAILURE ||
 		hash_len <= 0 || hash_len >= SIZE_MAX ||
 		opslimit <= 0 || memlimit <= 0 || memlimit > SIZE_MAX) {
 		zend_throw_exception(sodium_exception_ce, "invalid parameters", 0);
+		return;
+	}
+	if (alg != crypto_pwhash_ALG_ARGON2I13
+# ifdef crypto_pwhash_ALG_ARGON2ID13
+		&& alg != crypto_pwhash_ALG_ARGON2ID13
+# endif
+		&& alg != crypto_pwhash_ALG_DEFAULT) {
+		zend_throw_exception(sodium_exception_ce, "unsupported password hashing algorithm", 0);
 		return;
 	}
 	if (passwd_len <= 0) {
@@ -1810,7 +1830,7 @@ PHP_FUNCTION(sodium_crypto_pwhash)
 		((unsigned char *) ZSTR_VAL(hash), (unsigned long long) hash_len,
 		 passwd, (unsigned long long) passwd_len, salt,
 		 (unsigned long long) opslimit, (size_t) memlimit,
-		 crypto_pwhash_alg_default()) != 0) {
+		 (int) alg) != 0) {
 		zend_string_free(hash);
 		zend_throw_exception(sodium_exception_ce, "internal error", 0);
 		return;
