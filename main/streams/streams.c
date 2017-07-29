@@ -2188,6 +2188,10 @@ PHPAPI zval *php_stream_context_get_option(php_stream_context *context,
 {
 	zval *wrapperhash;
 
+	if(!context) {
+		return NULL;
+	}
+
 	if (NULL == (wrapperhash = zend_hash_str_find(Z_ARRVAL(context->options), wrappername, strlen(wrappername)))) {
 		return NULL;
 	}
