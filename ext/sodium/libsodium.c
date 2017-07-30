@@ -1670,7 +1670,7 @@ PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256)
 							  &passwd, &passwd_len,
 							  &salt, &salt_len,
 							  &opslimit, &memlimit) == FAILURE ||
-		hash_len <= 0 || hash_len >= SIZE_MAX ||
+		hash_len <= 0 || hash_len >= SIZE_MAX || hash_len > 0x1fffffffe0ULL ||
 		opslimit <= 0 || memlimit <= 0 || memlimit > SIZE_MAX) {
 		zend_throw_exception(sodium_exception_ce, "invalid parameters", 0);
 		return;
