@@ -189,10 +189,8 @@ const zend_function_entry sodium_functions[] = {
 #endif
 	PHP_FE(sodium_crypto_aead_chacha20poly1305_decrypt, AI_StringAndADAndNonceAndKey)
 	PHP_FE(sodium_crypto_aead_chacha20poly1305_encrypt, AI_StringAndADAndNonceAndKey)
-#ifdef crypto_aead_chacha20poly1305_IETF_NPUBBYTES
 	PHP_FE(sodium_crypto_aead_chacha20poly1305_ietf_decrypt, AI_StringAndADAndNonceAndKey)
 	PHP_FE(sodium_crypto_aead_chacha20poly1305_ietf_encrypt, AI_StringAndADAndNonceAndKey)
-#endif
 #ifdef crypto_aead_xchacha20poly1305_IETF_NPUBBYTES
 	PHP_FE(sodium_crypto_aead_xchacha20poly1305_ietf_decrypt, AI_StringAndADAndNonceAndKey)
 	PHP_FE(sodium_crypto_aead_xchacha20poly1305_ietf_encrypt, AI_StringAndADAndNonceAndKey)
