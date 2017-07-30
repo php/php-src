@@ -225,9 +225,11 @@ const zend_function_entry sodium_functions[] = {
 	PHP_FE(sodium_crypto_pwhash_str, AI_PasswordAndOpsLimitAndMemLimit)
 	PHP_FE(sodium_crypto_pwhash_str_verify, AI_HashAndPassword)
 #endif
+#ifdef crypto_pwhash_scryptsalsa208sha256_SALTBYTES
 	PHP_FE(sodium_crypto_pwhash_scryptsalsa208sha256, AI_LengthAndPasswordAndSaltAndOpsLimitAndMemLimit)
 	PHP_FE(sodium_crypto_pwhash_scryptsalsa208sha256_str, AI_PasswordAndOpsLimitAndMemLimit)
 	PHP_FE(sodium_crypto_pwhash_scryptsalsa208sha256_str_verify, AI_HashAndPassword)
+#endif
 	PHP_FE(sodium_crypto_scalarmult, AI_TwoStrings)
 	PHP_FE(sodium_crypto_secretbox, AI_StringAndNonceAndKey)
 	PHP_FE(sodium_crypto_secretbox_open, AI_StringAndNonceAndKey)
@@ -472,11 +474,9 @@ PHP_MINIT_FUNCTION(sodium)
 	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_PWHASH_MEMLIMIT_SENSITIVE",
 						   crypto_pwhash_memlimit_sensitive(), CONST_CS | CONST_PERSISTENT);
 #endif
+#ifdef crypto_pwhash_scryptsalsa208sha256_SALTBYTES
 	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_SALTBYTES",
 						   crypto_pwhash_scryptsalsa208sha256_SALTBYTES, CONST_CS | CONST_PERSISTENT);
-#ifndef crypto_pwhash_scryptsalsa208sha256_STRPREFIX
-# define crypto_pwhash_scryptsalsa208sha256_STRPREFIX "$7$"
-#endif
 	REGISTER_STRING_CONSTANT("SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_STRPREFIX",
 							 crypto_pwhash_scryptsalsa208sha256_STRPREFIX, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_OPSLIMIT_INTERACTIVE",
@@ -487,6 +487,7 @@ PHP_MINIT_FUNCTION(sodium)
 						   crypto_pwhash_scryptsalsa208sha256_opslimit_sensitive(), CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_MEMLIMIT_SENSITIVE",
 						   crypto_pwhash_scryptsalsa208sha256_memlimit_sensitive(), CONST_CS | CONST_PERSISTENT);
+#endif
 	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_SCALARMULT_BYTES",
 						   crypto_scalarmult_BYTES, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_SCALARMULT_SCALARBYTES",
@@ -1654,6 +1655,7 @@ PHP_FUNCTION(sodium_crypto_stream_xor)
 	RETURN_STR(ciphertext);
 }
 
+#ifdef crypto_pwhash_scryptsalsa208sha256_SALTBYTES
 PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256)
 {
 	zend_string   *hash;
@@ -1670,7 +1672,7 @@ PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256)
 							  &passwd, &passwd_len,
 							  &salt, &salt_len,
 							  &opslimit, &memlimit) == FAILURE ||
-		hash_len <= 0 || hash_len >= SIZE_MAX ||
+		hash_len <= 0 || hash_len >= SIZE_MAX || hash_len > 0x1fffffffe0ULL ||
 		opslimit <= 0 || memlimit <= 0 || memlimit > SIZE_MAX) {
 		zend_throw_exception(sodium_exception_ce, "invalid parameters", 0);
 		return;
@@ -1776,6 +1778,7 @@ PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256_str_verify)
 	}
 	RETURN_FALSE;
 }
+#endif
 
 #ifdef crypto_pwhash_SALTBYTES
 PHP_FUNCTION(sodium_crypto_pwhash)
