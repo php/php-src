@@ -1559,7 +1559,7 @@ PHP_FUNCTION(stream_resolve_include_path)
 		Z_PARAM_PATH(filename, filename_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	resolved_path = zend_resolve_path(filename, (int)filename_len);
+	resolved_path = zend_resolve_path(filename, filename_len);
 
 	if (resolved_path) {
 		RETURN_STR(resolved_path);

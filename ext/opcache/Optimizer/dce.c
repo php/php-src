@@ -116,8 +116,10 @@ static inline zend_bool may_have_side_effects(
 		case ZEND_ISSET_ISEMPTY_THIS:
 		case ZEND_ISSET_ISEMPTY_DIM_OBJ:
 		case ZEND_FETCH_DIM_IS:
+		case ZEND_ISSET_ISEMPTY_CV:
 		case ZEND_ISSET_ISEMPTY_VAR:
 		case ZEND_FETCH_IS:
+		case ZEND_IN_ARRAY:
 			/* No side effects */
 			return 0;
 		case ZEND_JMP:
@@ -172,11 +174,10 @@ static inline zend_bool may_have_side_effects(
 			return 0;
 		}
 		case ZEND_UNSET_VAR:
+			return 1;
+		case ZEND_UNSET_CV:
 		{
 			uint32_t t1 = OP1_INFO();
-			if (!(opline->extended_value & ZEND_QUICK_SET)) {
-				return 1;
-			}
 			if (t1 & MAY_BE_REF) {
 				/* We don't consider uses as the LHS of an assignment as real uses during DCE, so
 				 * an unset may be considered dead even if there is a later assignment to the
@@ -349,25 +350,31 @@ static zend_bool dce_instr(context *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
 	}
 
 	/* We mark FREEs as dead, but they're only really dead if the destroyed var is dead */
-	if (opline->opcode == ZEND_FREE && !is_var_dead(ctx, ssa_op->op1_use)) {
+	if (opline->opcode == ZEND_FREE
+			&& (ssa->var_info[ssa_op->op1_use].type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))
+			&& !is_var_dead(ctx, ssa_op->op1_use)) {
 		return 0;
 	}
 
-	if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) && !is_var_dead(ctx, ssa_op->op1_use)) {
+	if ((opline->op1_type & (IS_VAR|IS_TMP_VAR))&& !is_var_dead(ctx, ssa_op->op1_use)) {
 		if (!try_remove_var_def(ctx, ssa_op->op1_use, ssa_op->op1_use_chain, opline)) {
-			free_var = ssa_op->op1_use;
-			free_var_type = opline->op1_type;
+			if (ssa->var_info[ssa_op->op1_use].type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
+				free_var = ssa_op->op1_use;
+				free_var_type = opline->op1_type;
+			}
 		}
 	}
 	if ((opline->op2_type & (IS_VAR|IS_TMP_VAR)) && !is_var_dead(ctx, ssa_op->op2_use)) {
 		if (!try_remove_var_def(ctx, ssa_op->op2_use, ssa_op->op2_use_chain, opline)) {
-			if (free_var >= 0) {
-				// TODO: We can't free two vars. Keep instruction alive.
-				zend_bitset_excl(ctx->instr_dead, opline - ctx->op_array->opcodes);
-				return 0;
+			if (ssa->var_info[ssa_op->op2_use].type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
+				if (free_var >= 0) {
+					// TODO: We can't free two vars. Keep instruction alive.
+					zend_bitset_excl(ctx->instr_dead, opline - ctx->op_array->opcodes);
+					return 0;
+				}
+				free_var = ssa_op->op2_use;
+				free_var_type = opline->op2_type;
 			}
-			free_var = ssa_op->op2_use;
-			free_var_type = opline->op2_type;
 		}
 	}
 
@@ -543,6 +550,69 @@ static inline zend_bool may_break_varargs(const zend_op_array *op_array, const z
 	return 0;
 }
 
+static void dce_live_ranges(context *ctx, zend_op_array *op_array, zend_ssa *ssa)
+{
+	int i = 0;
+	int j = 0;
+	zend_live_range *live_range = op_array->live_range;
+
+	while (i < op_array->last_live_range) {
+		if ((live_range->var & ZEND_LIVE_MASK) != ZEND_LIVE_TMPVAR) {
+			/* keep */
+			j++;
+		} else {
+			uint32_t var = live_range->var & ~ZEND_LIVE_MASK;
+			uint32_t def = live_range->start - 1;
+
+			if (op_array->opcodes[def].result_type == IS_UNUSED) {
+				if (op_array->opcodes[def].opcode == ZEND_DO_FCALL) {
+					/* constructor call */
+					do {
+						def--;
+						if ((op_array->opcodes[def].result_type & (IS_TMP_VAR|IS_VAR))
+								&& op_array->opcodes[def].result.var == var) {
+							ZEND_ASSERT(op_array->opcodes[def].opcode == ZEND_NEW);
+							break;
+						}
+					} while (def > 0);
+				} else if (op_array->opcodes[def].opcode == ZEND_OP_DATA) {
+					def--;
+				}
+			}
+
+#if ZEND_DEBUG
+			ZEND_ASSERT(op_array->opcodes[def].result_type & (IS_TMP_VAR|IS_VAR));
+			ZEND_ASSERT(op_array->opcodes[def].result.var == var);
+			ZEND_ASSERT(ssa->ops[def].result_def >= 0);
+#else
+			if (!(op_array->opcodes[def].result_type & (IS_TMP_VAR|IS_VAR))
+					|| op_array->opcodes[def].result.var != var
+					|| ssa->ops[def].result_def < 0) {
+				/* TODO: Some wrong live-range? keep it. */
+				j++;
+				live_range++;
+				i++;
+				continue;
+			}
+#endif
+
+			var = ssa->ops[def].result_def;
+
+			if ((ssa->var_info[var].type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))
+					&& !is_var_dead(ctx, var)) {
+				/* keep */
+				j++;
+			} else if (i != j) {
+				op_array->live_range[j] = *live_range;
+			}
+		}
+
+		live_range++;
+		i++;
+	}
+	op_array->last_live_range = j;
+}
+
 int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_bool reorder_dtor_effects) {
 	int i;
 	zend_ssa_phi *phi;
@@ -610,6 +680,10 @@ int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_bool reor
 			zend_bitset_excl(ctx.phi_worklist_no_val, i);
 			add_phi_sources_to_worklists(&ctx, ssa->vars[i].definition_phi, 1);
 		}
+	}
+
+	if (op_array->live_range) {
+		dce_live_ranges(&ctx, op_array, ssa);
 	}
 
 	/* Eliminate dead instructions */

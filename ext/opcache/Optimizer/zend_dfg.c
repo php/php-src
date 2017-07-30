@@ -89,9 +89,7 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 							goto op1_def;
 						}
 						goto op1_use;
-					case ZEND_UNSET_VAR:
-						ZEND_ASSERT(opline->extended_value & ZEND_QUICK_SET);
-						/* break missing intentionally */
+					case ZEND_UNSET_CV:
 					case ZEND_ASSIGN:
 					case ZEND_ASSIGN_REF:
 					case ZEND_BIND_GLOBAL:
@@ -144,11 +142,11 @@ op1_use:
 					}
 				} else if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
 					var_num = EX_VAR_TO_NUM(opline->op1.var);
+					if (!DFG_ISSET(def, set_size, j, var_num)) {
+						DFG_SET(use, set_size, j, var_num);
+					}
 					if (opline->opcode == ZEND_VERIFY_RETURN_TYPE) {
-						DFG_SET(use, set_size, j, var_num);
 						DFG_SET(def, set_size, j, var_num);
-					} else if (!DFG_ISSET(def, set_size, j, var_num)) {
-						DFG_SET(use, set_size, j, var_num);
 					}
 				}
 				if (opline->op2_type == IS_CV) {

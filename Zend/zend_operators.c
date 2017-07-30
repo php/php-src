@@ -80,12 +80,12 @@ static const unsigned char tolower_map[256] = {
 		zend_binary_strncasecmp
  */
 
-ZEND_API int ZEND_FASTCALL zend_atoi(const char *str, int str_len) /* {{{ */
+ZEND_API int ZEND_FASTCALL zend_atoi(const char *str, size_t str_len) /* {{{ */
 {
 	int retval;
 
 	if (!str_len) {
-		str_len = (int)strlen(str);
+		str_len = strlen(str);
 	}
 	retval = ZEND_STRTOL(str, NULL, 0);
 	if (str_len>0) {
@@ -108,12 +108,12 @@ ZEND_API int ZEND_FASTCALL zend_atoi(const char *str, int str_len) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_long ZEND_FASTCALL zend_atol(const char *str, int str_len) /* {{{ */
+ZEND_API zend_long ZEND_FASTCALL zend_atol(const char *str, size_t str_len) /* {{{ */
 {
 	zend_long retval;
 
 	if (!str_len) {
-		str_len = (int)strlen(str);
+		str_len = strlen(str);
 	}
 	retval = ZEND_STRTOL(str, NULL, 0);
 	if (str_len>0) {

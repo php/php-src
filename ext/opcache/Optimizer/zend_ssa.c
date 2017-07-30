@@ -713,12 +713,10 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 						//NEW_SSA_VAR(opline->op1.var)
 					}
 					break;
-				case ZEND_UNSET_VAR:
-					if (opline->extended_value & ZEND_QUICK_SET) {
-						ssa_ops[k].op1_def = ssa_vars_count;
-						var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
-						ssa_vars_count++;
-					}
+				case ZEND_UNSET_CV:
+					ssa_ops[k].op1_def = ssa_vars_count;
+					var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
+					ssa_vars_count++;
 					break;
 				case ZEND_UNSET_DIM:
 				case ZEND_UNSET_OBJ:
@@ -1384,7 +1382,12 @@ void zend_ssa_remove_block(zend_op_array *op_array, zend_ssa *ssa, int i) /* {{{
 				break;
 			}
 		}
-		ZEND_ASSERT(pred_offset != -1);
+
+		/* If there are duplicate successors, the predecessors may have been removed in
+		 * a previous iteration already. */
+		if (pred_offset == -1) {
+			continue;
+		}
 
 		/* For phis in successor blocks, remove the operands associated with this block */
 		for (phi = next_ssa_block->phis; phi; phi = phi->next) {

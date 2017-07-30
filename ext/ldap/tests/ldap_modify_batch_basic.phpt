@@ -76,7 +76,7 @@ array(2) {
       ["count"]=>
       int(1)
       [0]=>
-      string(4) "oops"
+      string(%d) "%s"
     }
     [2]=>
     string(12) "userpassword"

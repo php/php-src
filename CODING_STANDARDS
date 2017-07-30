@@ -93,12 +93,12 @@ User Functions/Methods Naming Conventions
     readability of the function name itself::
 
     Good:
-    'mcrypt_enc_self_test'
-    'mysql_list_fields'
+    'str_word_count'
+    'array_key_exists'
 
     Ok:
-    'mcrypt_module_get_algo_supported_key_sizes'
-    (could be 'mcrypt_mod_get_algo_sup_key_sizes'?)
+    'date_interval_create_from_date_string'
+    (could be 'date_intvl_create_from_date_str'?)
     'get_html_translation_table'
     (could be 'html_get_trans_table'?)
 

@@ -115,7 +115,6 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 
 		case ZEND_BW_NOT:
 		case ZEND_BOOL_NOT:
-		case ZEND_BOOL:
 			if (opline->op1_type == IS_CONST) {
 				/* unary operation on constant operand */
 				zval result;

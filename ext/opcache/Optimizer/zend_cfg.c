@@ -418,8 +418,7 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 			}
 			case ZEND_UNSET_VAR:
 			case ZEND_ISSET_ISEMPTY_VAR:
-				if (((opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_LOCAL) &&
-				    !(opline->extended_value & ZEND_QUICK_SET)) {
+				if ((opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_LOCAL) {
 					flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
 				} else if (((opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_GLOBAL ||
 				            (opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_GLOBAL_LOCK) &&
@@ -636,6 +635,7 @@ int zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg) /* {{{ */
 		}
 	}
 
+	cfg->edges_count = edges;
 	cfg->predecessors = predecessors = (int*)zend_arena_calloc(arena, sizeof(int), edges);
 
 	edges = 0;
@@ -649,9 +649,18 @@ int zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg) /* {{{ */
 
 	for (j = 0; j < cfg->blocks_count; j++) {
 		if (blocks[j].flags & ZEND_BB_REACHABLE) {
+			/* SWITCH_STRING/LONG may have few identical successors */
 			for (s = 0; s < blocks[j].successors_count; s++) {
-				/* SWITCH_STRING/LONG may have few following identical successors */
-				if (s == 0 || blocks[j].successors[s-1] != blocks[j].successors[s]) {
+				int duplicate = 0;
+				int p;
+
+				for (p = 0; p < s; p++) {
+					if (blocks[j].successors[p] == blocks[j].successors[s]) {
+						duplicate = 1;
+						break;
+					}
+				}
+				if (!duplicate) {
 					zend_basic_block *b = blocks + blocks[j].successors[s];
 
 					predecessors[b->predecessor_offset + b->predecessors_count] = j;

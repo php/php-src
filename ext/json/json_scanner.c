@@ -36,6 +36,18 @@
 
 #define PHP_JSON_CONDITION_SET(condition) YYSETCONDITION(yyc##condition)
 #define PHP_JSON_CONDITION_GOTO(condition) goto yyc_##condition
+#define PHP_JSON_CONDITION_SET_AND_GOTO(condition) \
+	PHP_JSON_CONDITION_SET(condition); \
+	PHP_JSON_CONDITION_GOTO(condition)
+#define PHP_JSON_CONDITION_GOTO_STR_P2() \
+	do { \
+		if (s->utf8_invalid) { \
+			PHP_JSON_CONDITION_GOTO(STR_P2_BIN); \
+		} else { \
+			PHP_JSON_CONDITION_GOTO(STR_P2_UTF); \
+		} \
+	} while(0)
+
 
 #define PHP_JSON_SCANNER_COPY_ESC() php_json_scanner_copy_string(s, 0)
 #define PHP_JSON_SCANNER_COPY_UTF() php_json_scanner_copy_string(s, 5)
@@ -101,13 +113,17 @@ std:
 	{
 		YYCTYPE yych;
 		unsigned int yyaccept = 0;
-		if (YYGETCONDITION() < 1) {
-			goto yyc_JS;
-		} else {
-			if (YYGETCONDITION() < 2) {
-				goto yyc_STR_P1;
+		if (YYGETCONDITION() < 2) {
+			if (YYGETCONDITION() < 1) {
+				goto yyc_JS;
 			} else {
-				goto yyc_STR_P2;
+				goto yyc_STR_P1;
+			}
+		} else {
+			if (YYGETCONDITION() < 3) {
+				goto yyc_STR_P2_BIN;
+			} else {
+				goto yyc_STR_P2_UTF;
 			}
 		}
 /* *********************************** */
@@ -276,8 +292,7 @@ yy14:
 			{
 		s->str_start = s->cursor;
 		s->str_esc = 0;
-		PHP_JSON_CONDITION_SET(STR_P1);
-		PHP_JSON_CONDITION_GOTO(STR_P1);
+		PHP_JSON_CONDITION_SET_AND_GOTO(STR_P1);
 	}
 yy16:
 			++YYCURSOR;
@@ -567,7 +582,7 @@ yy75:
 		++YYCURSOR;
 		{
 		zend_string *str;
-		size_t len = s->cursor - s->str_start - s->str_esc - 1;
+		size_t len = s->cursor - s->str_start - s->str_esc - 1 + s->utf8_invalid_count;
 		if (len == 0) {
 			PHP_JSON_CONDITION_SET(JS);
 			ZVAL_EMPTY_STRING(&s->value);
@@ -576,11 +591,10 @@ yy75:
 		str = zend_string_alloc(len, 0);
 		ZSTR_VAL(str)[len] = '\0';
 		ZVAL_STR(&s->value, str);
-		if (s->str_esc) {
+		if (s->str_esc || s->utf8_invalid) {
 			s->pstr = (php_json_ctype *) Z_STRVAL(s->value);
 			s->cursor = s->str_start;
-			PHP_JSON_CONDITION_SET(STR_P2);
-			PHP_JSON_CONDITION_GOTO(STR_P2);
+			PHP_JSON_CONDITION_GOTO_STR_P2();
 		} else {
 			memcpy(Z_STRVAL(s->value), s->str_start, len);
 			PHP_JSON_CONDITION_SET(JS);
@@ -623,6 +637,12 @@ yy79:
 		++YYCURSOR;
 yy80:
 		{
+		if (s->options & (PHP_JSON_INVALID_UTF8_IGNORE | PHP_JSON_INVALID_UTF8_SUBSTITUTE)) {
+			int utf8_addition = (s->options & PHP_JSON_INVALID_UTF8_SUBSTITUTE) ? 3 : 0;
+			s->utf8_invalid = 1;
+			s->utf8_invalid_count += utf8_addition - 1;
+			PHP_JSON_CONDITION_GOTO(STR_P1);
+		}
 		s->errcode = PHP_JSON_ERROR_UTF8;
 		return PHP_JSON_T_ERROR;
 	}
@@ -955,12 +975,32 @@ yy121:
 		PHP_JSON_CONDITION_GOTO(STR_P1);
 	}
 /* *********************************** */
-yyc_STR_P2:
+yyc_STR_P2_BIN:
 		yych = *YYCURSOR;
-		if (yych == '"') goto yy127;
-		if (yych == '\\') goto yy129;
+		if (yych <= 0xDF) {
+			if (yych <= '[') {
+				if (yych == '"') goto yy127;
+			} else {
+				if (yych <= '\\') goto yy129;
+				if (yych <= 0x7F) goto yy125;
+				if (yych <= 0xC1) goto yy131;
+				goto yy133;
+			}
+		} else {
+			if (yych <= 0xEF) {
+				if (yych <= 0xE0) goto yy134;
+				if (yych == 0xED) goto yy136;
+				goto yy135;
+			} else {
+				if (yych <= 0xF0) goto yy137;
+				if (yych <= 0xF3) goto yy138;
+				if (yych <= 0xF4) goto yy139;
+				goto yy131;
+			}
+		}
+yy125:
 		++YYCURSOR;
-		{ PHP_JSON_CONDITION_GOTO(STR_P2); }
+		{ PHP_JSON_CONDITION_GOTO(STR_P2_BIN); }
 yy127:
 		++YYCURSOR;
 		YYSETCONDITION(yycJS);
@@ -969,8 +1009,9 @@ yy127:
 		return PHP_JSON_T_STRING;
 	}
 yy129:
+		yyaccept = 0;
 		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych == 'u') goto yy131;
+		if (yych == 'u') goto yy140;
 yy130:
 		{
 		char esc;
@@ -980,8 +1021,7 @@ yy130:
 				esc = '\b';
 				break;
 			case 'f':
-				esc = '\f';
-				break;
+				esc = '\f';				break;
 			case 'n':
 				esc = '\n';
 				break;
@@ -1003,181 +1043,251 @@ yy130:
 		*(s->pstr++) = esc;
 		++YYCURSOR;
 		s->str_start = s->cursor;
-		PHP_JSON_CONDITION_GOTO(STR_P2);
+		PHP_JSON_CONDITION_GOTO_STR_P2();
 	}
 yy131:
+		++YYCURSOR;
+yy132:
+		{
+		if (s->utf8_invalid) {
+			PHP_JSON_SCANNER_COPY_ESC();
+			if (s->options & PHP_JSON_INVALID_UTF8_SUBSTITUTE) {
+				*(s->pstr++) = (char) (0xe0 | (0xfffd >> 12));
+				*(s->pstr++) = (char) (0x80 | ((0xfffd >> 6) & 0x3f));
+				*(s->pstr++) = (char) (0x80 | (0xfffd & 0x3f));
+			}
+			s->str_start = s->cursor;
+		}
+		PHP_JSON_CONDITION_GOTO(STR_P2_BIN);
+	}
+yy133:
+		yych = *++YYCURSOR;
+		if (yych <= 0x7F) goto yy132;
+		if (yych <= 0xBF) goto yy125;
+		goto yy132;
+yy134:
+		yyaccept = 1;
+		yych = *(YYMARKER = ++YYCURSOR);
+		if (yych <= 0x9F) goto yy132;
+		if (yych <= 0xBF) goto yy142;
+		goto yy132;
+yy135:
+		yyaccept = 1;
+		yych = *(YYMARKER = ++YYCURSOR);
+		if (yych <= 0x7F) goto yy132;
+		if (yych <= 0xBF) goto yy142;
+		goto yy132;
+yy136:
+		yyaccept = 1;
+		yych = *(YYMARKER = ++YYCURSOR);
+		if (yych <= 0x7F) goto yy132;
+		if (yych <= 0x9F) goto yy142;
+		goto yy132;
+yy137:
+		yyaccept = 1;
+		yych = *(YYMARKER = ++YYCURSOR);
+		if (yych <= 0x8F) goto yy132;
+		if (yych <= 0xBF) goto yy143;
+		goto yy132;
+yy138:
+		yyaccept = 1;
+		yych = *(YYMARKER = ++YYCURSOR);
+		if (yych <= 0x7F) goto yy132;
+		if (yych <= 0xBF) goto yy143;
+		goto yy132;
+yy139:
+		yyaccept = 1;
+		yych = *(YYMARKER = ++YYCURSOR);
+		if (yych <= 0x7F) goto yy132;
+		if (yych <= 0x8F) goto yy143;
+		goto yy132;
+yy140:
 		yych = *++YYCURSOR;
 		if (yych <= 'D') {
 			if (yych <= '9') {
-				if (yych <= '/') goto yy132;
-				if (yych <= '0') goto yy133;
-				goto yy134;
+				if (yych <= '/') goto yy141;
+				if (yych <= '0') goto yy144;
+				goto yy145;
 			} else {
-				if (yych <= '@') goto yy132;
-				if (yych <= 'C') goto yy134;
-				goto yy135;
+				if (yych <= '@') goto yy141;
+				if (yych <= 'C') goto yy145;
+				goto yy146;
 			}
 		} else {
 			if (yych <= 'c') {
-				if (yych <= 'F') goto yy134;
-				if (yych >= 'a') goto yy134;
+				if (yych <= 'F') goto yy145;
+				if (yych >= 'a') goto yy145;
 			} else {
-				if (yych <= 'd') goto yy135;
-				if (yych <= 'f') goto yy134;
+				if (yych <= 'd') goto yy146;
+				if (yych <= 'f') goto yy145;
 			}
-		}
-yy132:
-		YYCURSOR = YYMARKER;
-		goto yy130;
-yy133:
-		yych = *++YYCURSOR;
-		if (yych <= '9') {
-			if (yych <= '/') goto yy132;
-			if (yych <= '0') goto yy136;
-			if (yych <= '7') goto yy137;
-			goto yy138;
-		} else {
-			if (yych <= 'F') {
-				if (yych <= '@') goto yy132;
-				goto yy138;
-			} else {
-				if (yych <= '`') goto yy132;
-				if (yych <= 'f') goto yy138;
-				goto yy132;
-			}
-		}
-yy134:
-		yych = *++YYCURSOR;
-		if (yych <= '@') {
-			if (yych <= '/') goto yy132;
-			if (yych <= '9') goto yy138;
-			goto yy132;
-		} else {
-			if (yych <= 'F') goto yy138;
-			if (yych <= '`') goto yy132;
-			if (yych <= 'f') goto yy138;
-			goto yy132;
-		}
-yy135:
-		yych = *++YYCURSOR;
-		if (yych <= '@') {
-			if (yych <= '/') goto yy132;
-			if (yych <= '7') goto yy138;
-			if (yych <= '9') goto yy139;
-			goto yy132;
-		} else {
-			if (yych <= 'B') goto yy139;
-			if (yych <= '`') goto yy132;
-			if (yych <= 'b') goto yy139;
-			goto yy132;
-		}
-yy136:
-		yych = *++YYCURSOR;
-		if (yych <= '@') {
-			if (yych <= '/') goto yy132;
-			if (yych <= '7') goto yy140;
-			if (yych <= '9') goto yy141;
-			goto yy132;
-		} else {
-			if (yych <= 'F') goto yy141;
-			if (yych <= '`') goto yy132;
-			if (yych <= 'f') goto yy141;
-			goto yy132;
-		}
-yy137:
-		yych = *++YYCURSOR;
-		if (yych <= '@') {
-			if (yych <= '/') goto yy132;
-			if (yych <= '9') goto yy141;
-			goto yy132;
-		} else {
-			if (yych <= 'F') goto yy141;
-			if (yych <= '`') goto yy132;
-			if (yych <= 'f') goto yy141;
-			goto yy132;
-		}
-yy138:
-		yych = *++YYCURSOR;
-		if (yych <= '@') {
-			if (yych <= '/') goto yy132;
-			if (yych <= '9') goto yy142;
-			goto yy132;
-		} else {
-			if (yych <= 'F') goto yy142;
-			if (yych <= '`') goto yy132;
-			if (yych <= 'f') goto yy142;
-			goto yy132;
-		}
-yy139:
-		yych = *++YYCURSOR;
-		if (yych <= '@') {
-			if (yych <= '/') goto yy132;
-			if (yych <= '9') goto yy143;
-			goto yy132;
-		} else {
-			if (yych <= 'F') goto yy143;
-			if (yych <= '`') goto yy132;
-			if (yych <= 'f') goto yy143;
-			goto yy132;
-		}
-yy140:
-		yych = *++YYCURSOR;
-		if (yych <= '@') {
-			if (yych <= '/') goto yy132;
-			if (yych <= '9') goto yy144;
-			goto yy132;
-		} else {
-			if (yych <= 'F') goto yy144;
-			if (yych <= '`') goto yy132;
-			if (yych <= 'f') goto yy144;
-			goto yy132;
 		}
 yy141:
-		yych = *++YYCURSOR;
-		if (yych <= '@') {
-			if (yych <= '/') goto yy132;
-			if (yych <= '9') goto yy146;
-			goto yy132;
+		YYCURSOR = YYMARKER;
+		if (yyaccept == 0) {
+			goto yy130;
 		} else {
-			if (yych <= 'F') goto yy146;
-			if (yych <= '`') goto yy132;
-			if (yych <= 'f') goto yy146;
 			goto yy132;
 		}
 yy142:
 		yych = *++YYCURSOR;
-		if (yych <= '@') {
-			if (yych <= '/') goto yy132;
-			if (yych <= '9') goto yy148;
-			goto yy132;
-		} else {
-			if (yych <= 'F') goto yy148;
-			if (yych <= '`') goto yy132;
-			if (yych <= 'f') goto yy148;
-			goto yy132;
-		}
+		if (yych <= 0x7F) goto yy141;
+		if (yych <= 0xBF) goto yy125;
+		goto yy141;
 yy143:
 		yych = *++YYCURSOR;
-		if (yych <= '@') {
-			if (yych <= '/') goto yy132;
-			if (yych <= '9') goto yy150;
-			goto yy132;
-		} else {
-			if (yych <= 'F') goto yy150;
-			if (yych <= '`') goto yy132;
-			if (yych <= 'f') goto yy150;
-			goto yy132;
-		}
+		if (yych <= 0x7F) goto yy141;
+		if (yych <= 0xBF) goto yy142;
+		goto yy141;
 yy144:
+		yych = *++YYCURSOR;
+		if (yych <= '9') {
+			if (yych <= '/') goto yy141;
+			if (yych <= '0') goto yy147;
+			if (yych <= '7') goto yy148;
+			goto yy149;
+		} else {
+			if (yych <= 'F') {
+				if (yych <= '@') goto yy141;
+				goto yy149;
+			} else {
+				if (yych <= '`') goto yy141;
+				if (yych <= 'f') goto yy149;
+				goto yy141;
+			}
+		}
+yy145:
+		yych = *++YYCURSOR;
+		if (yych <= '@') {
+			if (yych <= '/') goto yy141;
+			if (yych <= '9') goto yy149;
+			goto yy141;
+		} else {
+			if (yych <= 'F') goto yy149;
+			if (yych <= '`') goto yy141;
+			if (yych <= 'f') goto yy149;
+			goto yy141;
+		}
+yy146:
+		yych = *++YYCURSOR;
+		if (yych <= '@') {
+			if (yych <= '/') goto yy141;
+			if (yych <= '7') goto yy149;
+			if (yych <= '9') goto yy150;
+			goto yy141;
+		} else {
+			if (yych <= 'B') goto yy150;
+			if (yych <= '`') goto yy141;
+			if (yych <= 'b') goto yy150;
+			goto yy141;
+		}
+yy147:
+		yych = *++YYCURSOR;
+		if (yych <= '@') {
+			if (yych <= '/') goto yy141;
+			if (yych <= '7') goto yy151;
+			if (yych <= '9') goto yy152;
+			goto yy141;
+		} else {
+			if (yych <= 'F') goto yy152;
+			if (yych <= '`') goto yy141;
+			if (yych <= 'f') goto yy152;
+			goto yy141;
+		}
+yy148:
+		yych = *++YYCURSOR;
+		if (yych <= '@') {
+			if (yych <= '/') goto yy141;
+			if (yych <= '9') goto yy152;
+			goto yy141;
+		} else {
+			if (yych <= 'F') goto yy152;
+			if (yych <= '`') goto yy141;
+			if (yych <= 'f') goto yy152;
+			goto yy141;
+		}
+yy149:
+		yych = *++YYCURSOR;
+		if (yych <= '@') {
+			if (yych <= '/') goto yy141;
+			if (yych <= '9') goto yy153;
+			goto yy141;
+		} else {
+			if (yych <= 'F') goto yy153;
+			if (yych <= '`') goto yy141;
+			if (yych <= 'f') goto yy153;
+			goto yy141;
+		}
+yy150:
+		yych = *++YYCURSOR;
+		if (yych <= '@') {
+			if (yych <= '/') goto yy141;
+			if (yych <= '9') goto yy154;
+			goto yy141;
+		} else {
+			if (yych <= 'F') goto yy154;
+			if (yych <= '`') goto yy141;
+			if (yych <= 'f') goto yy154;
+			goto yy141;
+		}
+yy151:
+		yych = *++YYCURSOR;
+		if (yych <= '@') {
+			if (yych <= '/') goto yy141;
+			if (yych <= '9') goto yy155;
+			goto yy141;
+		} else {
+			if (yych <= 'F') goto yy155;
+			if (yych <= '`') goto yy141;
+			if (yych <= 'f') goto yy155;
+			goto yy141;
+		}
+yy152:
+		yych = *++YYCURSOR;
+		if (yych <= '@') {
+			if (yych <= '/') goto yy141;
+			if (yych <= '9') goto yy157;
+			goto yy141;
+		} else {
+			if (yych <= 'F') goto yy157;
+			if (yych <= '`') goto yy141;
+			if (yych <= 'f') goto yy157;
+			goto yy141;
+		}
+yy153:
+		yych = *++YYCURSOR;
+		if (yych <= '@') {
+			if (yych <= '/') goto yy141;
+			if (yych <= '9') goto yy159;
+			goto yy141;
+		} else {
+			if (yych <= 'F') goto yy159;
+			if (yych <= '`') goto yy141;
+			if (yych <= 'f') goto yy159;
+			goto yy141;
+		}
+yy154:
+		yych = *++YYCURSOR;
+		if (yych <= '@') {
+			if (yych <= '/') goto yy141;
+			if (yych <= '9') goto yy161;
+			goto yy141;
+		} else {
+			if (yych <= 'F') goto yy161;
+			if (yych <= '`') goto yy141;
+			if (yych <= 'f') goto yy161;
+			goto yy141;
+		}
+yy155:
 		++YYCURSOR;
 		{
 		int utf16 = php_json_ucs2_to_int(s, 2);
 		PHP_JSON_SCANNER_COPY_UTF();
 		*(s->pstr++) = (char) utf16;
 		s->str_start = s->cursor;
-		PHP_JSON_CONDITION_GOTO(STR_P2);
+		PHP_JSON_CONDITION_GOTO_STR_P2();
 	}
-yy146:
+yy157:
 		++YYCURSOR;
 		{
 		int utf16 = php_json_ucs2_to_int(s, 3);
@@ -1185,9 +1295,9 @@ yy146:
 		*(s->pstr++) = (char) (0xc0 | (utf16 >> 6));
 		*(s->pstr++) = (char) (0x80 | (utf16 & 0x3f));
 		s->str_start = s->cursor;
-		PHP_JSON_CONDITION_GOTO(STR_P2);
+		PHP_JSON_CONDITION_GOTO_STR_P2();
 	}
-yy148:
+yy159:
 		++YYCURSOR;
 		{
 		int utf16 = php_json_ucs2_to_int(s, 4);
@@ -1196,43 +1306,43 @@ yy148:
 		*(s->pstr++) = (char) (0x80 | ((utf16 >> 6) & 0x3f));
 		*(s->pstr++) = (char) (0x80 | (utf16 & 0x3f));
 		s->str_start = s->cursor;
-		PHP_JSON_CONDITION_GOTO(STR_P2);
+		PHP_JSON_CONDITION_GOTO_STR_P2();
 	}
-yy150:
+yy161:
 		yych = *++YYCURSOR;
-		if (yych != '\\') goto yy132;
+		if (yych != '\\') goto yy141;
 		yych = *++YYCURSOR;
-		if (yych != 'u') goto yy132;
+		if (yych != 'u') goto yy141;
 		yych = *++YYCURSOR;
-		if (yych == 'D') goto yy153;
-		if (yych != 'd') goto yy132;
-yy153:
+		if (yych == 'D') goto yy164;
+		if (yych != 'd') goto yy141;
+yy164:
 		yych = *++YYCURSOR;
-		if (yych <= 'B') goto yy132;
-		if (yych <= 'F') goto yy154;
-		if (yych <= 'b') goto yy132;
-		if (yych >= 'g') goto yy132;
-yy154:
-		yych = *++YYCURSOR;
-		if (yych <= '@') {
-			if (yych <= '/') goto yy132;
-			if (yych >= ':') goto yy132;
-		} else {
-			if (yych <= 'F') goto yy155;
-			if (yych <= '`') goto yy132;
-			if (yych >= 'g') goto yy132;
-		}
-yy155:
+		if (yych <= 'B') goto yy141;
+		if (yych <= 'F') goto yy165;
+		if (yych <= 'b') goto yy141;
+		if (yych >= 'g') goto yy141;
+yy165:
 		yych = *++YYCURSOR;
 		if (yych <= '@') {
-			if (yych <= '/') goto yy132;
-			if (yych >= ':') goto yy132;
+			if (yych <= '/') goto yy141;
+			if (yych >= ':') goto yy141;
 		} else {
-			if (yych <= 'F') goto yy156;
-			if (yych <= '`') goto yy132;
-			if (yych >= 'g') goto yy132;
+			if (yych <= 'F') goto yy166;
+			if (yych <= '`') goto yy141;
+			if (yych >= 'g') goto yy141;
 		}
-yy156:
+yy166:
+		yych = *++YYCURSOR;
+		if (yych <= '@') {
+			if (yych <= '/') goto yy141;
+			if (yych >= ':') goto yy141;
+		} else {
+			if (yych <= 'F') goto yy167;
+			if (yych <= '`') goto yy141;
+			if (yych >= 'g') goto yy141;
+		}
+yy167:
 		++YYCURSOR;
 		{
 		int utf32, utf16_hi, utf16_lo;
@@ -1245,7 +1355,299 @@ yy156:
 		*(s->pstr++) = (char) (0x80 | ((utf32 >> 6) & 0x3f));
 		*(s->pstr++) = (char) (0x80 | (utf32 & 0x3f));
 		s->str_start = s->cursor;
-		PHP_JSON_CONDITION_GOTO(STR_P2);
+		PHP_JSON_CONDITION_GOTO_STR_P2();
+	}
+/* *********************************** */
+yyc_STR_P2_UTF:
+		yych = *YYCURSOR;
+		if (yych == '"') goto yy173;
+		if (yych == '\\') goto yy175;
+		++YYCURSOR;
+		{ PHP_JSON_CONDITION_GOTO(STR_P2_UTF); }
+yy173:
+		++YYCURSOR;
+		YYSETCONDITION(yycJS);
+		{
+		PHP_JSON_SCANNER_COPY_ESC();
+		return PHP_JSON_T_STRING;
+	}
+yy175:
+		yych = *(YYMARKER = ++YYCURSOR);
+		if (yych == 'u') goto yy177;
+yy176:
+		{
+		char esc;
+		PHP_JSON_SCANNER_COPY_ESC();
+		switch (*s->cursor) {
+			case 'b':
+				esc = '\b';
+				break;
+			case 'f':
+				esc = '\f';				break;
+			case 'n':
+				esc = '\n';
+				break;
+			case 'r':
+				esc = '\r';
+				break;
+			case 't':
+				esc = '\t';
+				break;
+			case '\\':
+			case '/':
+			case '"':
+				esc = *s->cursor;
+				break;
+			default:
+				s->errcode = PHP_JSON_ERROR_SYNTAX;
+				return PHP_JSON_T_ERROR;
+		}
+		*(s->pstr++) = esc;
+		++YYCURSOR;
+		s->str_start = s->cursor;
+		PHP_JSON_CONDITION_GOTO_STR_P2();
+	}
+yy177:
+		yych = *++YYCURSOR;
+		if (yych <= 'D') {
+			if (yych <= '9') {
+				if (yych <= '/') goto yy178;
+				if (yych <= '0') goto yy179;
+				goto yy180;
+			} else {
+				if (yych <= '@') goto yy178;
+				if (yych <= 'C') goto yy180;
+				goto yy181;
+			}
+		} else {
+			if (yych <= 'c') {
+				if (yych <= 'F') goto yy180;
+				if (yych >= 'a') goto yy180;
+			} else {
+				if (yych <= 'd') goto yy181;
+				if (yych <= 'f') goto yy180;
+			}
+		}
+yy178:
+		YYCURSOR = YYMARKER;
+		goto yy176;
+yy179:
+		yych = *++YYCURSOR;
+		if (yych <= '9') {
+			if (yych <= '/') goto yy178;
+			if (yych <= '0') goto yy182;
+			if (yych <= '7') goto yy183;
+			goto yy184;
+		} else {
+			if (yych <= 'F') {
+				if (yych <= '@') goto yy178;
+				goto yy184;
+			} else {
+				if (yych <= '`') goto yy178;
+				if (yych <= 'f') goto yy184;
+				goto yy178;
+			}
+		}
+yy180:
+		yych = *++YYCURSOR;
+		if (yych <= '@') {
+			if (yych <= '/') goto yy178;
+			if (yych <= '9') goto yy184;
+			goto yy178;
+		} else {
+			if (yych <= 'F') goto yy184;
+			if (yych <= '`') goto yy178;
+			if (yych <= 'f') goto yy184;
+			goto yy178;
+		}
+yy181:
+		yych = *++YYCURSOR;
+		if (yych <= '@') {
+			if (yych <= '/') goto yy178;
+			if (yych <= '7') goto yy184;
+			if (yych <= '9') goto yy185;
+			goto yy178;
+		} else {
+			if (yych <= 'B') goto yy185;
+			if (yych <= '`') goto yy178;
+			if (yych <= 'b') goto yy185;
+			goto yy178;
+		}
+yy182:
+		yych = *++YYCURSOR;
+		if (yych <= '@') {
+			if (yych <= '/') goto yy178;
+			if (yych <= '7') goto yy186;
+			if (yych <= '9') goto yy187;
+			goto yy178;
+		} else {
+			if (yych <= 'F') goto yy187;
+			if (yych <= '`') goto yy178;
+			if (yych <= 'f') goto yy187;
+			goto yy178;
+		}
+yy183:
+		yych = *++YYCURSOR;
+		if (yych <= '@') {
+			if (yych <= '/') goto yy178;
+			if (yych <= '9') goto yy187;
+			goto yy178;
+		} else {
+			if (yych <= 'F') goto yy187;
+			if (yych <= '`') goto yy178;
+			if (yych <= 'f') goto yy187;
+			goto yy178;
+		}
+yy184:
+		yych = *++YYCURSOR;
+		if (yych <= '@') {
+			if (yych <= '/') goto yy178;
+			if (yych <= '9') goto yy188;
+			goto yy178;
+		} else {
+			if (yych <= 'F') goto yy188;
+			if (yych <= '`') goto yy178;
+			if (yych <= 'f') goto yy188;
+			goto yy178;
+		}
+yy185:
+		yych = *++YYCURSOR;
+		if (yych <= '@') {
+			if (yych <= '/') goto yy178;
+			if (yych <= '9') goto yy189;
+			goto yy178;
+		} else {
+			if (yych <= 'F') goto yy189;
+			if (yych <= '`') goto yy178;
+			if (yych <= 'f') goto yy189;
+			goto yy178;
+		}
+yy186:
+		yych = *++YYCURSOR;
+		if (yych <= '@') {
+			if (yych <= '/') goto yy178;
+			if (yych <= '9') goto yy190;
+			goto yy178;
+		} else {
+			if (yych <= 'F') goto yy190;
+			if (yych <= '`') goto yy178;
+			if (yych <= 'f') goto yy190;
+			goto yy178;
+		}
+yy187:
+		yych = *++YYCURSOR;
+		if (yych <= '@') {
+			if (yych <= '/') goto yy178;
+			if (yych <= '9') goto yy192;
+			goto yy178;
+		} else {
+			if (yych <= 'F') goto yy192;
+			if (yych <= '`') goto yy178;
+			if (yych <= 'f') goto yy192;
+			goto yy178;
+		}
+yy188:
+		yych = *++YYCURSOR;
+		if (yych <= '@') {
+			if (yych <= '/') goto yy178;
+			if (yych <= '9') goto yy194;
+			goto yy178;
+		} else {
+			if (yych <= 'F') goto yy194;
+			if (yych <= '`') goto yy178;
+			if (yych <= 'f') goto yy194;
+			goto yy178;
+		}
+yy189:
+		yych = *++YYCURSOR;
+		if (yych <= '@') {
+			if (yych <= '/') goto yy178;
+			if (yych <= '9') goto yy196;
+			goto yy178;
+		} else {
+			if (yych <= 'F') goto yy196;
+			if (yych <= '`') goto yy178;
+			if (yych <= 'f') goto yy196;
+			goto yy178;
+		}
+yy190:
+		++YYCURSOR;
+		{
+		int utf16 = php_json_ucs2_to_int(s, 2);
+		PHP_JSON_SCANNER_COPY_UTF();
+		*(s->pstr++) = (char) utf16;
+		s->str_start = s->cursor;
+		PHP_JSON_CONDITION_GOTO_STR_P2();
+	}
+yy192:
+		++YYCURSOR;
+		{
+		int utf16 = php_json_ucs2_to_int(s, 3);
+		PHP_JSON_SCANNER_COPY_UTF();
+		*(s->pstr++) = (char) (0xc0 | (utf16 >> 6));
+		*(s->pstr++) = (char) (0x80 | (utf16 & 0x3f));
+		s->str_start = s->cursor;
+		PHP_JSON_CONDITION_GOTO_STR_P2();
+	}
+yy194:
+		++YYCURSOR;
+		{
+		int utf16 = php_json_ucs2_to_int(s, 4);
+		PHP_JSON_SCANNER_COPY_UTF();
+		*(s->pstr++) = (char) (0xe0 | (utf16 >> 12));
+		*(s->pstr++) = (char) (0x80 | ((utf16 >> 6) & 0x3f));
+		*(s->pstr++) = (char) (0x80 | (utf16 & 0x3f));
+		s->str_start = s->cursor;
+		PHP_JSON_CONDITION_GOTO_STR_P2();
+	}
+yy196:
+		yych = *++YYCURSOR;
+		if (yych != '\\') goto yy178;
+		yych = *++YYCURSOR;
+		if (yych != 'u') goto yy178;
+		yych = *++YYCURSOR;
+		if (yych == 'D') goto yy199;
+		if (yych != 'd') goto yy178;
+yy199:
+		yych = *++YYCURSOR;
+		if (yych <= 'B') goto yy178;
+		if (yych <= 'F') goto yy200;
+		if (yych <= 'b') goto yy178;
+		if (yych >= 'g') goto yy178;
+yy200:
+		yych = *++YYCURSOR;
+		if (yych <= '@') {
+			if (yych <= '/') goto yy178;
+			if (yych >= ':') goto yy178;
+		} else {
+			if (yych <= 'F') goto yy201;
+			if (yych <= '`') goto yy178;
+			if (yych >= 'g') goto yy178;
+		}
+yy201:
+		yych = *++YYCURSOR;
+		if (yych <= '@') {
+			if (yych <= '/') goto yy178;
+			if (yych >= ':') goto yy178;
+		} else {
+			if (yych <= 'F') goto yy202;
+			if (yych <= '`') goto yy178;
+			if (yych >= 'g') goto yy178;
+		}
+yy202:
+		++YYCURSOR;
+		{
+		int utf32, utf16_hi, utf16_lo;
+		utf16_hi = php_json_ucs2_to_int(s, 4);
+		utf16_lo = php_json_ucs2_to_int_ex(s, 4, 7);
+		utf32 = ((utf16_lo & 0x3FF) << 10) + (utf16_hi & 0x3FF) + 0x10000;
+		PHP_JSON_SCANNER_COPY_UTF_SP();
+		*(s->pstr++) = (char) (0xf0 | (utf32 >> 18));
+		*(s->pstr++) = (char) (0x80 | ((utf32 >> 12) & 0x3f));
+		*(s->pstr++) = (char) (0x80 | ((utf32 >> 6) & 0x3f));
+		*(s->pstr++) = (char) (0x80 | (utf32 & 0x3f));
+		s->str_start = s->cursor;
+		PHP_JSON_CONDITION_GOTO_STR_P2();
 	}
 	}
 

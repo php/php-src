@@ -52,7 +52,7 @@ struct _mbfl_convert_filter {
 	const mbfl_encoding *to;
 	int illegal_mode;
 	int illegal_substchar;
-	int num_illegalchar;
+	size_t num_illegalchar;
 	void *opaque;
 };
 
@@ -69,8 +69,8 @@ struct mbfl_convert_vtbl {
 MBFLAPI extern const struct mbfl_convert_vtbl *mbfl_convert_filter_list[];
 
 MBFLAPI extern mbfl_convert_filter *mbfl_convert_filter_new(
-    enum mbfl_no_encoding from,
-    enum mbfl_no_encoding to,
+    const mbfl_encoding *from,
+    const mbfl_encoding *to,
     int (*output_function)(int, void *),
     int (*flush_function)(void *),
     void *data );
@@ -82,7 +82,7 @@ MBFLAPI extern mbfl_convert_filter *mbfl_convert_filter_new2(
 MBFLAPI extern void mbfl_convert_filter_delete(mbfl_convert_filter *filter);
 MBFLAPI extern int mbfl_convert_filter_feed(int c, mbfl_convert_filter *filter);
 MBFLAPI extern int mbfl_convert_filter_flush(mbfl_convert_filter *filter);
-MBFLAPI extern void mbfl_convert_filter_reset(mbfl_convert_filter *filter, enum mbfl_no_encoding from, enum mbfl_no_encoding to);
+MBFLAPI extern void mbfl_convert_filter_reset(mbfl_convert_filter *filter, const mbfl_encoding *from, const mbfl_encoding *to);
 MBFLAPI extern void mbfl_convert_filter_copy(mbfl_convert_filter *src, mbfl_convert_filter *dist);
 MBFLAPI extern int mbfl_filt_conv_illegal_output(int c, mbfl_convert_filter *filter);
 MBFLAPI extern const struct mbfl_convert_vtbl * mbfl_convert_filter_get_vtbl(enum mbfl_no_encoding from, enum mbfl_no_encoding to);

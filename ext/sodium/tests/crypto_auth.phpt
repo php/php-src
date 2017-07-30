@@ -5,7 +5,7 @@ Check for libsodium auth
 --FILE--
 <?php
 $msg = random_bytes(1000);
-$key = random_bytes(SODIUM_CRYPTO_AUTH_KEYBYTES);
+$key = sodium_crypto_auth_keygen();
 $mac = sodium_crypto_auth($msg, $key);
 
 // This should validate

@@ -349,11 +349,7 @@ static int mysql_handle_commit(pdo_dbh_t *dbh)
 {
 	PDO_DBG_ENTER("mysql_handle_commit");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
-#if MYSQL_VERSION_ID >= 40100 || defined(PDO_USE_MYSQLND)
-	PDO_DBG_RETURN(0 <= mysql_commit(((pdo_mysql_db_handle *)dbh->driver_data)->server));
-#else
-	PDO_DBG_RETURN(0 <= mysql_handle_doer(dbh, ZEND_STRL("COMMIT")));
-#endif
+	PDO_DBG_RETURN(0 == mysql_commit(((pdo_mysql_db_handle *)dbh->driver_data)->server));
 }
 /* }}} */
 
@@ -362,11 +358,7 @@ static int mysql_handle_rollback(pdo_dbh_t *dbh)
 {
 	PDO_DBG_ENTER("mysql_handle_rollback");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
-#if MYSQL_VERSION_ID >= 40100 || defined(PDO_USE_MYSQLND)
 	PDO_DBG_RETURN(0 <= mysql_rollback(((pdo_mysql_db_handle *)dbh->driver_data)->server));
-#else
-	PDO_DBG_RETURN(0 <= mysql_handle_doer(dbh, ZEND_STRL("ROLLBACK")));
-#endif
 }
 /* }}} */
 
@@ -376,15 +368,7 @@ static inline int mysql_handle_autocommit(pdo_dbh_t *dbh)
 	PDO_DBG_ENTER("mysql_handle_autocommit");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
 	PDO_DBG_INF_FMT("dbh->autocommit=%d", dbh->auto_commit);
-#if MYSQL_VERSION_ID >= 40100 || defined(PDO_USE_MYSQLND)
 	PDO_DBG_RETURN(0 <= mysql_autocommit(((pdo_mysql_db_handle *)dbh->driver_data)->server, dbh->auto_commit));
-#else
-	if (dbh->auto_commit) {
-		PDO_DBG_RETURN(0 <= mysql_handle_doer(dbh, ZEND_STRL("SET AUTOCOMMIT=1")));
-	} else {
-		PDO_DBG_RETURN(0 <= mysql_handle_doer(dbh, ZEND_STRL("SET AUTOCOMMIT=0")));
-	}
-#endif
 }
 /* }}} */
 
@@ -516,31 +500,13 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 static int pdo_mysql_check_liveness(pdo_dbh_t *dbh)
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
-#if MYSQL_VERSION_ID <= 32230
-	void (*handler) (int);
-	unsigned int my_errno;
-#endif
 
 	PDO_DBG_ENTER("pdo_mysql_check_liveness");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
 
-#if MYSQL_VERSION_ID > 32230
 	if (mysql_ping(H->server)) {
 		PDO_DBG_RETURN(FAILURE);
 	}
-#else /* no mysql_ping() */
-	handler = signal(SIGPIPE, SIG_IGN);
-	mysql_stat(H->server);
-	switch (mysql_errno(H->server)) {
-		case CR_SERVER_GONE_ERROR:
-		case CR_SERVER_LOST:
-			signal(SIGPIPE, handler);
-			PDO_DBG_RETURN(FAILURE);
-		default:
-			break;
-	}
-	signal(SIGPIPE, handler);
-#endif /* end mysql_ping() */
 	PDO_DBG_RETURN(SUCCESS);
 }
 /* }}} */

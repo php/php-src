@@ -2192,6 +2192,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 		case ZEND_JMPNZ_EX:
 		case ZEND_CASE:
 		case ZEND_BOOL:
+		case ZEND_ISSET_ISEMPTY_CV:
 		case ZEND_ISSET_ISEMPTY_VAR:
 		case ZEND_ISSET_ISEMPTY_DIM_OBJ:
 		case ZEND_ISSET_ISEMPTY_PROP_OBJ:
@@ -2879,8 +2880,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 				UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
 			}
 			break;
-		case ZEND_UNSET_VAR:
-			ZEND_ASSERT(opline->extended_value & ZEND_QUICK_SET);
+		case ZEND_UNSET_CV:
 			tmp = MAY_BE_UNDEF;
 			if (!op_array->function_name) {
 				/* In global scope, we know nothing */
@@ -3291,9 +3291,11 @@ int zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script
 	zend_ssa_var_info *ssa_var_info = ssa->var_info;
 	int ssa_vars_count = ssa->vars_count;
 	int i, j;
-	uint32_t tmp;
+	uint32_t tmp, worklist_len = zend_bitset_len(ssa_vars_count);
 
-	WHILE_WORKLIST(worklist, zend_bitset_len(ssa_vars_count), j) {
+	while (!zend_bitset_empty(worklist, worklist_len)) {
+		j = zend_bitset_first(worklist, worklist_len);
+		zend_bitset_excl(worklist, j);
 		if (ssa_vars[j].definition_phi) {
 			zend_ssa_phi *p = ssa_vars[j].definition_phi;
 			if (p->pi >= 0) {
@@ -3353,7 +3355,7 @@ int zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script
 				return FAILURE;
 			}
 		}
-	} WHILE_WORKLIST_END();
+	}
 	return SUCCESS;
 }
 
@@ -3937,9 +3939,6 @@ int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa
 			switch (opline->opcode) {
 				case ZEND_UNSET_VAR:
 				case ZEND_ISSET_ISEMPTY_VAR:
-					if (opline->extended_value & ZEND_QUICK_SET) {
-						break;
-					}
 					return 1;
 				case ZEND_ISSET_ISEMPTY_DIM_OBJ:
 				case ZEND_ISSET_ISEMPTY_PROP_OBJ:
@@ -3950,6 +3949,8 @@ int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa
 				case ZEND_FETCH_DIM_IS:
 				case ZEND_FETCH_OBJ_IS:
 				case ZEND_SEND_REF:
+				case ZEND_UNSET_CV:
+				case ZEND_ISSET_ISEMPTY_CV:
 					break;
 				default:
 					/* undefined variable warning */
@@ -4026,6 +4027,7 @@ int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa
 		case ZEND_SWITCH_LONG:
 		case ZEND_SWITCH_STRING:
 		case ZEND_ISSET_ISEMPTY_VAR:
+		case ZEND_ISSET_ISEMPTY_CV:
 			return 0;
 		case ZEND_INIT_FCALL:
 			/* can't throw, because call is resolved at compile time */

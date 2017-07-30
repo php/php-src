@@ -5,7 +5,7 @@ Check for libsodium stream
 --FILE--
 <?php
 $nonce = random_bytes(SODIUM_CRYPTO_STREAM_NONCEBYTES);
-$key = random_bytes(SODIUM_CRYPTO_STREAM_KEYBYTES);
+$key = sodium_crypto_stream_keygen();
 
 $len = 100;
 $stream = sodium_crypto_stream($len, $nonce, $key);
@@ -16,7 +16,7 @@ $stream2 = sodium_crypto_stream($len, $nonce, $key);
 $nonce = random_bytes(SODIUM_CRYPTO_STREAM_NONCEBYTES);
 $stream3 = sodium_crypto_stream($len, $nonce, $key);
 
-$key = random_bytes(SODIUM_CRYPTO_STREAM_KEYBYTES);
+$key = sodium_crypto_stream_keygen();
 $stream4 = sodium_crypto_stream($len, $nonce, $key);
 
 var_dump($stream === $stream2);

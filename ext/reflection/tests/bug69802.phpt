@@ -18,7 +18,7 @@ object(ReflectionClass)#4 (1) {
 }
 Parameter #0 [ <required> stdClass $x ]
 stdClass
-Method [ <internal, prototype Closure> public method __invoke ] {
+Method [ <internal> public method __invoke ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> stdClass $x ]

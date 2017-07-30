@@ -1210,7 +1210,7 @@ PHP_FUNCTION(mysqli_fetch_fields)
 	zval		*mysql_result;
 	zval		obj;
 
-	unsigned int i;
+	unsigned int i, num_fields;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &mysql_result, mysqli_result_class_entry) == FAILURE) {
 		return;
@@ -1219,8 +1219,9 @@ PHP_FUNCTION(mysqli_fetch_fields)
 	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
 
 	array_init(return_value);
+	num_fields = mysql_num_fields(result);
 
-	for (i = 0; i < mysql_num_fields(result); i++) {
+	for (i = 0; i < num_fields; i++) {
 		const MYSQL_FIELD *field = mysql_fetch_field_direct(result, i);
 
 		object_init(&obj);
@@ -1266,7 +1267,7 @@ PHP_FUNCTION(mysqli_fetch_lengths)
 {
 	MYSQL_RES		*result;
 	zval			*mysql_result;
-	unsigned int	i;
+	unsigned int	i, num_fields;
 #if defined(MYSQLI_USE_MYSQLND)
 	const size_t	*ret;
 #else
@@ -1284,8 +1285,9 @@ PHP_FUNCTION(mysqli_fetch_lengths)
 	}
 
 	array_init(return_value);
+	num_fields = mysql_num_fields(result);
 
-	for (i = 0; i < mysql_num_fields(result); i++) {
+	for (i = 0; i < num_fields; i++) {
 		add_index_long(return_value, i, ret[i]);
 	}
 }
@@ -1712,14 +1714,12 @@ static int mysqli_options_get_option_zval_type(int option)
 #ifdef MYSQL_OPT_PROTOCOL
                 case MYSQL_OPT_PROTOCOL:
 #endif /* MySQL 4.1.0 */
-#if MYSQL_VERSION_ID > 40101 || defined(MYSQLI_USE_MYSQLND)
 		case MYSQL_OPT_READ_TIMEOUT:
 		case MYSQL_OPT_WRITE_TIMEOUT:
 		case MYSQL_OPT_GUESS_CONNECTION:
 		case MYSQL_OPT_USE_EMBEDDED_CONNECTION:
 		case MYSQL_OPT_USE_REMOTE_CONNECTION:
 		case MYSQL_SECURE_AUTH:
-#endif
 #ifdef MYSQL_OPT_RECONNECT
 		case MYSQL_OPT_RECONNECT:
 #endif /* MySQL 5.0.13 */

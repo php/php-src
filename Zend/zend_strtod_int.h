@@ -72,6 +72,10 @@ typedef unsigned long int uint32_t;
 #define NO_INFNAN_CHECK
 #endif
 
+#ifndef NO_ERRNO
+#define NO_ERRNO
+#endif
+
 #ifdef WORDS_BIGENDIAN
 #define IEEE_BIG_ENDIAN 1
 #else

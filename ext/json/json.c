@@ -17,8 +17,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -115,6 +113,10 @@ static PHP_MINIT_FUNCTION(json)
 	PHP_JSON_REGISTER_CONSTANT("JSON_OBJECT_AS_ARRAY", PHP_JSON_OBJECT_AS_ARRAY);
 	PHP_JSON_REGISTER_CONSTANT("JSON_BIGINT_AS_STRING", PHP_JSON_BIGINT_AS_STRING);
 
+	/* common options for json_decode and json_encode */
+	PHP_JSON_REGISTER_CONSTANT("JSON_INVALID_UTF8_IGNORE", PHP_JSON_INVALID_UTF8_IGNORE);
+	PHP_JSON_REGISTER_CONSTANT("JSON_INVALID_UTF8_SUBSTITUTE", PHP_JSON_INVALID_UTF8_SUBSTITUTE);
+
 	/* json error constants */
 	PHP_JSON_REGISTER_CONSTANT("JSON_ERROR_NONE", PHP_JSON_ERROR_NONE);
 	PHP_JSON_REGISTER_CONSTANT("JSON_ERROR_DEPTH", PHP_JSON_ERROR_DEPTH);
@@ -184,19 +186,24 @@ static PHP_MINFO_FUNCTION(json)
 }
 /* }}} */
 
-PHP_JSON_API int php_json_encode(smart_str *buf, zval *val, int options) /* {{{ */
+PHP_JSON_API int php_json_encode_ex(smart_str *buf, zval *val, int options, zend_long depth) /* {{{ */
 {
 	php_json_encoder encoder;
 	int return_code;
 
 	php_json_encode_init(&encoder);
-	encoder.max_depth = JSON_G(encode_max_depth);
-	encoder.error_code = PHP_JSON_ERROR_NONE;
+	encoder.max_depth = depth;
 
 	return_code = php_json_encode_zval(buf, val, options, &encoder);
 	JSON_G(error_code) = encoder.error_code;
 
 	return return_code;
+}
+/* }}} */
+
+PHP_JSON_API int php_json_encode(smart_str *buf, zval *val, int options) /* {{{ */
+{
+	return php_json_encode_ex(buf, val, options, JSON_G(encode_max_depth));
 }
 /* }}} */
 
@@ -235,7 +242,6 @@ static PHP_FUNCTION(json_encode)
 
 	php_json_encode_init(&encoder);
 	encoder.max_depth = (int)depth;
-	encoder.error_code = PHP_JSON_ERROR_NONE;
 	php_json_encode_zval(&buf, parameter, (int)options, &encoder);
 	JSON_G(error_code) = encoder.error_code;
 

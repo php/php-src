@@ -1235,7 +1235,7 @@ FileInfoFunction(isLink, FS_IS_LINK)
 SPL_METHOD(SplFileInfo, getLinkTarget)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
-	int ret;
+	ssize_t ret;
 	char buff[MAXPATHLEN];
 	zend_error_handling error_handling;
 
