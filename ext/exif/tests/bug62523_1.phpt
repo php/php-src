@@ -12,5 +12,5 @@ var_dump(count(exif_read_data(__DIR__."/bug62523_1.jpg")));
 Done
 --EXPECT--
 Test
-int(86)
+int(84)
 Done
