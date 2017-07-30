@@ -189,10 +189,8 @@ const zend_function_entry sodium_functions[] = {
 #endif
 	PHP_FE(sodium_crypto_aead_chacha20poly1305_decrypt, AI_StringAndADAndNonceAndKey)
 	PHP_FE(sodium_crypto_aead_chacha20poly1305_encrypt, AI_StringAndADAndNonceAndKey)
-#ifdef crypto_aead_chacha20poly1305_IETF_NPUBBYTES
 	PHP_FE(sodium_crypto_aead_chacha20poly1305_ietf_decrypt, AI_StringAndADAndNonceAndKey)
 	PHP_FE(sodium_crypto_aead_chacha20poly1305_ietf_encrypt, AI_StringAndADAndNonceAndKey)
-#endif
 #ifdef crypto_aead_xchacha20poly1305_IETF_NPUBBYTES
 	PHP_FE(sodium_crypto_aead_xchacha20poly1305_ietf_decrypt, AI_StringAndADAndNonceAndKey)
 	PHP_FE(sodium_crypto_aead_xchacha20poly1305_ietf_encrypt, AI_StringAndADAndNonceAndKey)
@@ -537,7 +535,7 @@ PHP_MINFO_FUNCTION(sodium)
 
 PHP_FUNCTION(sodium_memzero)
 {
-	zval	  *buf_zv;
+	zval      *buf_zv;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(),
 							  "z", &buf_zv) == FAILURE) {
@@ -560,9 +558,9 @@ PHP_FUNCTION(sodium_memzero)
 
 PHP_FUNCTION(sodium_increment)
 {
-	zval		  *val_zv;
+	zval          *val_zv;
 	unsigned char *val;
-	size_t		   val_len;
+	size_t         val_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(),
 							  "z", &val_zv) == FAILURE) {
@@ -582,11 +580,11 @@ PHP_FUNCTION(sodium_increment)
 
 PHP_FUNCTION(sodium_add)
 {
-	zval		  *val_zv;
+	zval          *val_zv;
 	unsigned char *val;
 	unsigned char *addv;
-	size_t		   val_len;
-	size_t		   addv_len;
+	size_t         val_len;
+	size_t         addv_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(),
 							  "zs", &val_zv, &addv, &addv_len) == FAILURE) {
@@ -610,10 +608,10 @@ PHP_FUNCTION(sodium_add)
 
 PHP_FUNCTION(sodium_memcmp)
 {
-	char	  *buf1;
-	char	  *buf2;
-	size_t	   len1;
-	size_t	   len2;
+	char      *buf1;
+	char      *buf2;
+	size_t     len1;
+	size_t     len2;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss",
 							  &buf1, &len1,
@@ -629,11 +627,11 @@ PHP_FUNCTION(sodium_memcmp)
 
 PHP_FUNCTION(sodium_crypto_shorthash)
 {
-	zend_string	  *hash;
+	zend_string   *hash;
 	unsigned char *key;
 	unsigned char *msg;
-	size_t		   key_len;
-	size_t		   msg_len;
+	size_t         key_len;
+	size_t         msg_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss",
 							  &msg, &msg_len,
@@ -660,13 +658,13 @@ PHP_FUNCTION(sodium_crypto_shorthash)
 
 PHP_FUNCTION(sodium_crypto_secretbox)
 {
-	zend_string	  *ciphertext;
+	zend_string   *ciphertext;
 	unsigned char *key;
 	unsigned char *msg;
 	unsigned char *nonce;
-	size_t		   key_len;
-	size_t		   msg_len;
-	size_t		   nonce_len;
+	size_t         key_len;
+	size_t         msg_len;
+	size_t         nonce_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss",
 							  &msg, &msg_len,
@@ -705,13 +703,13 @@ PHP_FUNCTION(sodium_crypto_secretbox)
 
 PHP_FUNCTION(sodium_crypto_secretbox_open)
 {
-	zend_string	  *msg;
+	zend_string   *msg;
 	unsigned char *key;
 	unsigned char *ciphertext;
 	unsigned char *nonce;
-	size_t		   key_len;
-	size_t		   ciphertext_len;
-	size_t		   nonce_len;
+	size_t         key_len;
+	size_t         ciphertext_len;
+	size_t         nonce_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss",
 							  &ciphertext, &ciphertext_len,
@@ -749,12 +747,12 @@ PHP_FUNCTION(sodium_crypto_secretbox_open)
 
 PHP_FUNCTION(sodium_crypto_generichash)
 {
-	zend_string	  *hash;
+	zend_string   *hash;
 	unsigned char *key = NULL;
 	unsigned char *msg;
-	zend_long	   hash_len = crypto_generichash_BYTES;
-	size_t		   key_len = 0;
-	size_t		   msg_len;
+	zend_long      hash_len = crypto_generichash_BYTES;
+	size_t         key_len = 0;
+	size_t         msg_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|sl",
 							  &msg, &msg_len,
@@ -789,11 +787,11 @@ PHP_FUNCTION(sodium_crypto_generichash)
 PHP_FUNCTION(sodium_crypto_generichash_init)
 {
 	crypto_generichash_state  state_tmp;
-	zend_string				 *state;
-	unsigned char			 *key = NULL;
-	size_t					  state_len = sizeof (crypto_generichash_state);
-	zend_long				  hash_len = crypto_generichash_BYTES;
-	size_t					  key_len = 0;
+	zend_string              *state;
+	unsigned char            *key = NULL;
+	size_t                    state_len = sizeof (crypto_generichash_state);
+	zend_long                 hash_len = crypto_generichash_BYTES;
+	size_t                    key_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|sl",
 							  &key, &key_len,
@@ -827,11 +825,11 @@ PHP_FUNCTION(sodium_crypto_generichash_init)
 PHP_FUNCTION(sodium_crypto_generichash_update)
 {
 	crypto_generichash_state  state_tmp;
-	zval					 *state_zv;
-	unsigned char			 *msg;
-	unsigned char			 *state;
-	size_t					  msg_len;
-	size_t					  state_len;
+	zval                     *state_zv;
+	unsigned char            *msg;
+	unsigned char            *state;
+	size_t                    msg_len;
+	size_t                    state_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zs",
 							  &state_zv, &msg, &msg_len) == FAILURE) {
@@ -865,11 +863,11 @@ PHP_FUNCTION(sodium_crypto_generichash_update)
 PHP_FUNCTION(sodium_crypto_generichash_final)
 {
 	crypto_generichash_state  state_tmp;
-	zend_string				 *hash;
-	zval					 *state_zv;
-	unsigned char			 *state;
-	size_t					  state_len;
-	zend_long				  hash_len = crypto_generichash_BYTES;
+	zend_string              *hash;
+	zval                     *state_zv;
+	unsigned char            *state;
+	size_t                    state_len;
+	zend_long                 hash_len = crypto_generichash_BYTES;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|l",
 							  &state_zv, &hash_len) == FAILURE) {
@@ -913,7 +911,7 @@ PHP_FUNCTION(sodium_crypto_generichash_final)
 PHP_FUNCTION(sodium_crypto_box_keypair)
 {
 	zend_string *keypair;
-	size_t		 keypair_len;
+	size_t       keypair_len;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -934,10 +932,10 @@ PHP_FUNCTION(sodium_crypto_box_keypair)
 
 PHP_FUNCTION(sodium_crypto_box_seed_keypair)
 {
-	zend_string	  *keypair;
+	zend_string   *keypair;
 	unsigned char *seed;
-	size_t		   keypair_len;
-	size_t		   seed_len;
+	size_t         keypair_len;
+	size_t         seed_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
 							  &seed, &seed_len) == FAILURE) {
@@ -967,11 +965,11 @@ PHP_FUNCTION(sodium_crypto_box_seed_keypair)
 PHP_FUNCTION(sodium_crypto_box_keypair_from_secretkey_and_publickey)
 {
 	zend_string *keypair;
-	char		*publickey;
-	char		*secretkey;
-	size_t		 keypair_len;
-	size_t		 publickey_len;
-	size_t		 secretkey_len;
+	char        *publickey;
+	char        *secretkey;
+	size_t       keypair_len;
+	size_t       publickey_len;
+	size_t       secretkey_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss",
 							  &secretkey, &secretkey_len,
@@ -1002,9 +1000,9 @@ PHP_FUNCTION(sodium_crypto_box_keypair_from_secretkey_and_publickey)
 
 PHP_FUNCTION(sodium_crypto_box_secretkey)
 {
-	zend_string	  *secretkey;
+	zend_string   *secretkey;
 	unsigned char *keypair;
-	size_t		   keypair_len;
+	size_t         keypair_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
 							  &keypair, &keypair_len) == FAILURE) {
@@ -1026,9 +1024,9 @@ PHP_FUNCTION(sodium_crypto_box_secretkey)
 
 PHP_FUNCTION(sodium_crypto_box_publickey)
 {
-	zend_string	  *publickey;
+	zend_string   *publickey;
 	unsigned char *keypair;
-	size_t		   keypair_len;
+	size_t         keypair_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
 							  &keypair, &keypair_len) == FAILURE) {
@@ -1051,9 +1049,9 @@ PHP_FUNCTION(sodium_crypto_box_publickey)
 
 PHP_FUNCTION(sodium_crypto_box_publickey_from_secretkey)
 {
-	zend_string	  *publickey;
+	zend_string   *publickey;
 	unsigned char *secretkey;
-	size_t		   secretkey_len;
+	size_t         secretkey_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
 							  &secretkey, &secretkey_len) == FAILURE) {
@@ -1078,15 +1076,15 @@ PHP_FUNCTION(sodium_crypto_box_publickey_from_secretkey)
 
 PHP_FUNCTION(sodium_crypto_box)
 {
-	zend_string	  *ciphertext;
+	zend_string   *ciphertext;
 	unsigned char *keypair;
 	unsigned char *msg;
 	unsigned char *nonce;
 	unsigned char *publickey;
 	unsigned char *secretkey;
-	size_t		   keypair_len;
-	size_t		   msg_len;
-	size_t		   nonce_len;
+	size_t         keypair_len;
+	size_t         msg_len;
+	size_t         nonce_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss",
 							  &msg, &msg_len,
@@ -1127,15 +1125,15 @@ PHP_FUNCTION(sodium_crypto_box)
 
 PHP_FUNCTION(sodium_crypto_box_open)
 {
-	zend_string	  *msg;
+	zend_string   *msg;
 	unsigned char *ciphertext;
 	unsigned char *keypair;
 	unsigned char *nonce;
 	unsigned char *publickey;
 	unsigned char *secretkey;
-	size_t		   ciphertext_len;
-	size_t		   keypair_len;
-	size_t		   nonce_len;
+	size_t         ciphertext_len;
+	size_t         keypair_len;
+	size_t         nonce_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss",
 							  &ciphertext, &ciphertext_len,
@@ -1175,11 +1173,11 @@ PHP_FUNCTION(sodium_crypto_box_open)
 #ifdef crypto_box_SEALBYTES
 PHP_FUNCTION(sodium_crypto_box_seal)
 {
-	zend_string	  *ciphertext;
+	zend_string   *ciphertext;
 	unsigned char *msg;
 	unsigned char *publickey;
-	size_t		   msg_len;
-	size_t		   publickey_len;
+	size_t         msg_len;
+	size_t         publickey_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss",
 							  &msg, &msg_len,
@@ -1210,13 +1208,13 @@ PHP_FUNCTION(sodium_crypto_box_seal)
 
 PHP_FUNCTION(sodium_crypto_box_seal_open)
 {
-	zend_string	  *msg;
+	zend_string   *msg;
 	unsigned char *ciphertext;
 	unsigned char *keypair;
 	unsigned char *publickey;
 	unsigned char *secretkey;
-	size_t		   ciphertext_len;
-	size_t		   keypair_len;
+	size_t         ciphertext_len;
+	size_t         keypair_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss",
 							  &ciphertext, &ciphertext_len,
@@ -1250,7 +1248,7 @@ PHP_FUNCTION(sodium_crypto_box_seal_open)
 PHP_FUNCTION(sodium_crypto_sign_keypair)
 {
 	zend_string *keypair;
-	size_t		 keypair_len;
+	size_t       keypair_len;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -1271,10 +1269,10 @@ PHP_FUNCTION(sodium_crypto_sign_keypair)
 
 PHP_FUNCTION(sodium_crypto_sign_seed_keypair)
 {
-	zend_string	  *keypair;
+	zend_string   *keypair;
 	unsigned char *seed;
-	size_t		   keypair_len;
-	size_t		   seed_len;
+	size_t         keypair_len;
+	size_t         seed_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
 							  &seed, &seed_len) == FAILURE) {
@@ -1304,11 +1302,11 @@ PHP_FUNCTION(sodium_crypto_sign_seed_keypair)
 PHP_FUNCTION(sodium_crypto_sign_keypair_from_secretkey_and_publickey)
 {
 	zend_string *keypair;
-	char		*publickey;
-	char		*secretkey;
-	size_t		 keypair_len;
-	size_t		 publickey_len;
-	size_t		 secretkey_len;
+	char        *publickey;
+	char        *secretkey;
+	size_t       keypair_len;
+	size_t       publickey_len;
+	size_t       secretkey_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss",
 							  &secretkey, &secretkey_len,
@@ -1340,8 +1338,8 @@ PHP_FUNCTION(sodium_crypto_sign_keypair_from_secretkey_and_publickey)
 PHP_FUNCTION(sodium_crypto_sign_publickey_from_secretkey)
 {
 	zend_string *publickey;
-	char		*secretkey;
-	size_t		 secretkey_len;
+	char        *secretkey;
+	size_t       secretkey_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
 							  &secretkey, &secretkey_len) == FAILURE) {
@@ -1368,9 +1366,9 @@ PHP_FUNCTION(sodium_crypto_sign_publickey_from_secretkey)
 
 PHP_FUNCTION(sodium_crypto_sign_secretkey)
 {
-	zend_string	  *secretkey;
+	zend_string   *secretkey;
 	unsigned char *keypair;
-	size_t		   keypair_len;
+	size_t         keypair_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
 							  &keypair, &keypair_len) == FAILURE) {
@@ -1392,9 +1390,9 @@ PHP_FUNCTION(sodium_crypto_sign_secretkey)
 
 PHP_FUNCTION(sodium_crypto_sign_publickey)
 {
-	zend_string	  *publickey;
+	zend_string   *publickey;
 	unsigned char *keypair;
-	size_t		   keypair_len;
+	size_t         keypair_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
 							  &keypair, &keypair_len) == FAILURE) {
@@ -1417,13 +1415,13 @@ PHP_FUNCTION(sodium_crypto_sign_publickey)
 
 PHP_FUNCTION(sodium_crypto_sign)
 {
-	zend_string		   *msg_signed;
-	unsigned char	   *msg;
-	unsigned char	   *secretkey;
-	unsigned long long	msg_signed_real_len;
-	size_t				msg_len;
-	size_t				msg_signed_len;
-	size_t				secretkey_len;
+	zend_string        *msg_signed;
+	unsigned char      *msg;
+	unsigned char      *secretkey;
+	unsigned long long  msg_signed_real_len;
+	size_t              msg_len;
+	size_t              msg_signed_len;
+	size_t              secretkey_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss",
 							  &msg, &msg_len,
@@ -1463,13 +1461,13 @@ PHP_FUNCTION(sodium_crypto_sign)
 
 PHP_FUNCTION(sodium_crypto_sign_open)
 {
-	zend_string		   *msg;
-	unsigned char	   *msg_signed;
-	unsigned char	   *publickey;
-	unsigned long long	msg_real_len;
-	size_t				msg_len;
-	size_t				msg_signed_len;
-	size_t				publickey_len;
+	zend_string        *msg;
+	unsigned char      *msg_signed;
+	unsigned char      *publickey;
+	unsigned long long  msg_real_len;
+	size_t              msg_len;
+	size_t              msg_signed_len;
+	size_t              publickey_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss",
 							  &msg_signed, &msg_signed_len,
@@ -1507,12 +1505,12 @@ PHP_FUNCTION(sodium_crypto_sign_open)
 
 PHP_FUNCTION(sodium_crypto_sign_detached)
 {
-	zend_string		   *signature;
-	unsigned char	   *msg;
-	unsigned char	   *secretkey;
-	unsigned long long	signature_real_len;
-	size_t				msg_len;
-	size_t				secretkey_len;
+	zend_string        *signature;
+	unsigned char      *msg;
+	unsigned char      *secretkey;
+	unsigned long long  signature_real_len;
+	size_t              msg_len;
+	size_t              secretkey_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss",
 							  &msg, &msg_len,
@@ -1549,9 +1547,9 @@ PHP_FUNCTION(sodium_crypto_sign_verify_detached)
 	unsigned char *msg;
 	unsigned char *publickey;
 	unsigned char *signature;
-	size_t		   msg_len;
-	size_t		   publickey_len;
-	size_t		   signature_len;
+	size_t         msg_len;
+	size_t         publickey_len;
+	size_t         signature_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss",
 							  &signature, &signature_len,
@@ -1581,12 +1579,12 @@ PHP_FUNCTION(sodium_crypto_sign_verify_detached)
 
 PHP_FUNCTION(sodium_crypto_stream)
 {
-	zend_string	  *ciphertext;
+	zend_string   *ciphertext;
 	unsigned char *key;
 	unsigned char *nonce;
-	zend_long	   ciphertext_len;
-	size_t		   key_len;
-	size_t		   nonce_len;
+	zend_long      ciphertext_len;
+	size_t         key_len;
+	size_t         nonce_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lss",
 							  &ciphertext_len,
@@ -1620,14 +1618,14 @@ PHP_FUNCTION(sodium_crypto_stream)
 
 PHP_FUNCTION(sodium_crypto_stream_xor)
 {
-	zend_string	  *ciphertext;
+	zend_string   *ciphertext;
 	unsigned char *key;
 	unsigned char *msg;
 	unsigned char *nonce;
-	size_t		   ciphertext_len;
-	size_t		   key_len;
-	size_t		   msg_len;
-	size_t		   nonce_len;
+	size_t         ciphertext_len;
+	size_t         key_len;
+	size_t         msg_len;
+	size_t         nonce_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss",
 							  &msg, &msg_len,
@@ -1658,14 +1656,14 @@ PHP_FUNCTION(sodium_crypto_stream_xor)
 
 PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256)
 {
-	zend_string	  *hash;
+	zend_string   *hash;
 	unsigned char *salt;
-	char		  *passwd;
-	zend_long	   hash_len;
-	zend_long	   memlimit;
-	zend_long	   opslimit;
-	size_t		   passwd_len;
-	size_t		   salt_len;
+	char          *passwd;
+	zend_long      hash_len;
+	zend_long      memlimit;
+	zend_long      opslimit;
+	size_t         passwd_len;
+	size_t         salt_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lssll",
 							  &hash_len,
@@ -1711,10 +1709,10 @@ PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256)
 PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256_str)
 {
 	zend_string *hash_str;
-	char		*passwd;
-	zend_long	 memlimit;
-	zend_long	 opslimit;
-	size_t		 passwd_len;
+	char        *passwd;
+	zend_long    memlimit;
+	zend_long    opslimit;
+	size_t       passwd_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sll",
 							  &passwd, &passwd_len,
@@ -1752,10 +1750,10 @@ PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256_str)
 
 PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256_str_verify)
 {
-	char	  *hash_str;
-	char	  *passwd;
-	size_t	   hash_str_len;
-	size_t	   passwd_len;
+	char      *hash_str;
+	char      *passwd;
+	size_t     hash_str_len;
+	size_t     passwd_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss",
 							  &hash_str, &hash_str_len,
@@ -1782,15 +1780,15 @@ PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256_str_verify)
 #ifdef crypto_pwhash_SALTBYTES
 PHP_FUNCTION(sodium_crypto_pwhash)
 {
-	zend_string	  *hash;
+	zend_string   *hash;
 	unsigned char *salt;
-	char		  *passwd;
-	zend_long	   hash_len;
-	zend_long	   memlimit;
-	zend_long	   opslimit;
-	zend_long	   alg;
-	size_t		   passwd_len;
-	size_t		   salt_len;
+	char          *passwd;
+	zend_long      hash_len;
+	zend_long      memlimit;
+	zend_long      opslimit;
+	zend_long      alg;
+	size_t         passwd_len;
+	size_t         salt_len;
 
 	alg = (zend_long) crypto_pwhash_ALG_DEFAULT;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lssll|l",
@@ -1798,7 +1796,8 @@ PHP_FUNCTION(sodium_crypto_pwhash)
 							  &passwd, &passwd_len,
 							  &salt, &salt_len,
 							  &opslimit, &memlimit, &alg) == FAILURE ||
-		hash_len <= 0 || hash_len >= SIZE_MAX ||
+		hash_len <= 0 || hash_len >= 0xffffffff ||
+		passwd_len >= 0xffffffff ||
 		opslimit <= 0 || memlimit <= 0 || memlimit > SIZE_MAX) {
 		zend_throw_exception(sodium_exception_ce, "invalid parameters", 0);
 		return;
@@ -1843,19 +1842,19 @@ PHP_FUNCTION(sodium_crypto_pwhash)
 PHP_FUNCTION(sodium_crypto_pwhash_str)
 {
 	zend_string *hash_str;
-	char		*passwd;
-	zend_long	 memlimit;
-	zend_long	 opslimit;
-	size_t		 passwd_len;
-	size_t		 len;
+	char        *passwd;
+	zend_long    memlimit;
+	zend_long    opslimit;
+	size_t       passwd_len;
+	size_t       len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sll",
 							  &passwd, &passwd_len,
 							  &opslimit, &memlimit) == FAILURE ||
-		opslimit <= 0 || memlimit <= 0 || memlimit > SIZE_MAX) {
+		opslimit <= 0 || memlimit <= 0 || memlimit > SIZE_MAX ||
+		passwd_len >= 0xffffffff) {
 		zend_throw_exception(sodium_exception_ce,
-				   "invalid parameters",
-				   0);
+				   "invalid parameters", 0);
 		return;
 	}
 	if (passwd_len <= 0) {
@@ -1887,17 +1886,21 @@ PHP_FUNCTION(sodium_crypto_pwhash_str)
 
 PHP_FUNCTION(sodium_crypto_pwhash_str_verify)
 {
-	char	  *hash_str;
-	char	  *passwd;
-	size_t	   hash_str_len;
-	size_t	   passwd_len;
+	char      *hash_str;
+	char      *passwd;
+	size_t     hash_str_len;
+	size_t     passwd_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss",
 							  &hash_str, &hash_str_len,
 							  &passwd, &passwd_len) == FAILURE) {
 		zend_throw_exception(sodium_exception_ce,
-				   "invalid parameters",
-				   0);
+				   "invalid parameters", 0);
+		return;
+	}
+	if (passwd_len >= 0xffffffff) {
+		zend_throw_exception(sodium_exception_ce,
+				   "unsupported password length", 0);
 		return;
 	}
 	if (passwd_len <= 0) {
@@ -1926,17 +1929,17 @@ PHP_FUNCTION(sodium_crypto_aead_aes256gcm_is_available)
 #ifdef HAVE_AESGCM
 PHP_FUNCTION(sodium_crypto_aead_aes256gcm_encrypt)
 {
-	zend_string		   *ciphertext;
-	unsigned char	   *ad;
-	unsigned char	   *msg;
-	unsigned char	   *npub;
-	unsigned char	   *secretkey;
-	unsigned long long	ciphertext_real_len;
-	size_t				ad_len;
-	size_t				ciphertext_len;
-	size_t				msg_len;
-	size_t				npub_len;
-	size_t				secretkey_len;
+	zend_string        *ciphertext;
+	unsigned char      *ad;
+	unsigned char      *msg;
+	unsigned char      *npub;
+	unsigned char      *secretkey;
+	unsigned long long  ciphertext_real_len;
+	size_t              ad_len;
+	size_t              ciphertext_len;
+	size_t              msg_len;
+	size_t              npub_len;
+	size_t              secretkey_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ssss",
 							  &msg, &msg_len,
@@ -1963,6 +1966,10 @@ PHP_FUNCTION(sodium_crypto_aead_aes256gcm_encrypt)
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		return;
 	}
+	if ((unsigned long long) msg_len > (16ULL * ((1ULL << 32) - 2ULL)) - crypto_aead_aes256gcm_ABYTES) {
+		zend_throw_exception(sodium_exception_ce, "message too long for a single key", 0);
+		return;
+	}
 	ciphertext_len = msg_len + crypto_aead_aes256gcm_ABYTES;
 	ciphertext = zend_string_alloc((size_t) ciphertext_len, 0);
 	if (crypto_aead_aes256gcm_encrypt
@@ -1987,17 +1994,17 @@ PHP_FUNCTION(sodium_crypto_aead_aes256gcm_encrypt)
 
 PHP_FUNCTION(sodium_crypto_aead_aes256gcm_decrypt)
 {
-	zend_string		   *msg;
-	unsigned char	   *ad;
-	unsigned char	   *ciphertext;
-	unsigned char	   *npub;
-	unsigned char	   *secretkey;
-	unsigned long long	msg_real_len;
-	size_t				ad_len;
-	size_t				ciphertext_len;
-	size_t				msg_len;
-	size_t				npub_len;
-	size_t				secretkey_len;
+	zend_string        *msg;
+	unsigned char      *ad;
+	unsigned char      *ciphertext;
+	unsigned char      *npub;
+	unsigned char      *secretkey;
+	unsigned long long  msg_real_len;
+	size_t              ad_len;
+	size_t              ciphertext_len;
+	size_t              msg_len;
+	size_t              npub_len;
+	size_t              secretkey_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ssss",
 							  &ciphertext, &ciphertext_len,
@@ -2020,14 +2027,20 @@ PHP_FUNCTION(sodium_crypto_aead_aes256gcm_decrypt)
 				   0);
 		return;
 	}
+	if (ciphertext_len < crypto_aead_aes256gcm_ABYTES) {
+		RETURN_FALSE;
+	}
+	if (ciphertext_len - crypto_aead_aes256gcm_ABYTES > 16ULL * ((1ULL << 32) - 2ULL)) {
+		zend_throw_exception(sodium_exception_ce, "message too long for a single key", 0);
+		return;
+	}
 	msg_len = ciphertext_len;
 	if (msg_len >= SIZE_MAX) {
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		return;
 	}
 	msg = zend_string_alloc((size_t) msg_len, 0);
-	if (ciphertext_len < crypto_aead_aes256gcm_ABYTES ||
-		crypto_aead_aes256gcm_decrypt
+	if (crypto_aead_aes256gcm_decrypt
 		((unsigned char *) ZSTR_VAL(msg), &msg_real_len, NULL,
 		 ciphertext, (unsigned long long) ciphertext_len,
 		 ad, (unsigned long long) ad_len, npub, secretkey) != 0) {
@@ -2048,17 +2061,17 @@ PHP_FUNCTION(sodium_crypto_aead_aes256gcm_decrypt)
 
 PHP_FUNCTION(sodium_crypto_aead_chacha20poly1305_encrypt)
 {
-	zend_string		   *ciphertext;
-	unsigned char	   *ad;
-	unsigned char	   *msg;
-	unsigned char	   *npub;
-	unsigned char	   *secretkey;
-	unsigned long long	ciphertext_real_len;
-	size_t				ad_len;
-	size_t				ciphertext_len;
-	size_t				msg_len;
-	size_t				npub_len;
-	size_t				secretkey_len;
+	zend_string        *ciphertext;
+	unsigned char      *ad;
+	unsigned char      *msg;
+	unsigned char      *npub;
+	unsigned char      *secretkey;
+	unsigned long long  ciphertext_real_len;
+	size_t              ad_len;
+	size_t              ciphertext_len;
+	size_t              msg_len;
+	size_t              npub_len;
+	size_t              secretkey_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ssss",
 							  &msg, &msg_len,
@@ -2109,17 +2122,17 @@ PHP_FUNCTION(sodium_crypto_aead_chacha20poly1305_encrypt)
 
 PHP_FUNCTION(sodium_crypto_aead_chacha20poly1305_decrypt)
 {
-	zend_string		   *msg;
-	unsigned char	   *ad;
-	unsigned char	   *ciphertext;
-	unsigned char	   *npub;
-	unsigned char	   *secretkey;
-	unsigned long long	msg_real_len;
-	size_t				ad_len;
-	size_t				ciphertext_len;
-	size_t				msg_len;
-	size_t				npub_len;
-	size_t				secretkey_len;
+	zend_string        *msg;
+	unsigned char      *ad;
+	unsigned char      *ciphertext;
+	unsigned char      *npub;
+	unsigned char      *secretkey;
+	unsigned long long  msg_real_len;
+	size_t              ad_len;
+	size_t              ciphertext_len;
+	size_t              msg_len;
+	size_t              npub_len;
+	size_t              secretkey_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ssss",
 							  &ciphertext, &ciphertext_len,
@@ -2142,14 +2155,16 @@ PHP_FUNCTION(sodium_crypto_aead_chacha20poly1305_decrypt)
 				   0);
 		return;
 	}
+	if (ciphertext_len < crypto_aead_chacha20poly1305_ABYTES) {
+		RETURN_FALSE;
+	}
 	msg_len = ciphertext_len;
 	if (msg_len >= SIZE_MAX) {
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		return;
 	}
 	msg = zend_string_alloc((size_t) msg_len, 0);
-	if (ciphertext_len < crypto_aead_chacha20poly1305_ABYTES ||
-		crypto_aead_chacha20poly1305_decrypt
+	if (crypto_aead_chacha20poly1305_decrypt
 		((unsigned char *) ZSTR_VAL(msg), &msg_real_len, NULL,
 		 ciphertext, (unsigned long long) ciphertext_len,
 		 ad, (unsigned long long) ad_len, npub, secretkey) != 0) {
@@ -2167,20 +2182,19 @@ PHP_FUNCTION(sodium_crypto_aead_chacha20poly1305_decrypt)
 	RETURN_STR(msg);
 }
 
-#ifdef crypto_aead_chacha20poly1305_IETF_NPUBBYTES
 PHP_FUNCTION(sodium_crypto_aead_chacha20poly1305_ietf_encrypt)
 {
-	zend_string		   *ciphertext;
-	unsigned char	   *ad;
-	unsigned char	   *msg;
-	unsigned char	   *npub;
-	unsigned char	   *secretkey;
-	unsigned long long	ciphertext_real_len;
-	size_t				ad_len;
-	size_t				ciphertext_len;
-	size_t				msg_len;
-	size_t				npub_len;
-	size_t				secretkey_len;
+	zend_string        *ciphertext;
+	unsigned char      *ad;
+	unsigned char      *msg;
+	unsigned char      *npub;
+	unsigned char      *secretkey;
+	unsigned long long  ciphertext_real_len;
+	size_t              ad_len;
+	size_t              ciphertext_len;
+	size_t              msg_len;
+	size_t              npub_len;
+	size_t              secretkey_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ssss",
 							  &msg, &msg_len,
@@ -2196,22 +2210,22 @@ PHP_FUNCTION(sodium_crypto_aead_chacha20poly1305_ietf_encrypt)
 				   0);
 		return;
 	}
-	if (secretkey_len != crypto_aead_chacha20poly1305_KEYBYTES) {
+	if (secretkey_len != crypto_aead_chacha20poly1305_IETF_KEYBYTES) {
 		zend_throw_exception(sodium_exception_ce,
 				   "secret key size should be "
 				   "CRYPTO_AEAD_CHACHA20POLY1305_IETF_KEYBYTES bytes",
 				   0);
 		return;
 	}
-	if (SIZE_MAX - msg_len <= crypto_aead_chacha20poly1305_ABYTES) {
+	if (SIZE_MAX - msg_len <= crypto_aead_chacha20poly1305_IETF_ABYTES) {
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		return;
 	}
 	if ((unsigned long long) msg_len > 64ULL * (1ULL << 32) - 64ULL) {
-		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
+		zend_throw_exception(sodium_exception_ce, "message too long for a single key", 0);
 		return;
 	}
-	ciphertext_len = msg_len + crypto_aead_chacha20poly1305_ABYTES;
+	ciphertext_len = msg_len + crypto_aead_chacha20poly1305_IETF_ABYTES;
 	ciphertext = zend_string_alloc((size_t) ciphertext_len, 0);
 	if (crypto_aead_chacha20poly1305_ietf_encrypt
 		((unsigned char *) ZSTR_VAL(ciphertext), &ciphertext_real_len, msg,
@@ -2235,17 +2249,17 @@ PHP_FUNCTION(sodium_crypto_aead_chacha20poly1305_ietf_encrypt)
 
 PHP_FUNCTION(sodium_crypto_aead_chacha20poly1305_ietf_decrypt)
 {
-	zend_string		   *msg;
-	unsigned char	   *ad;
-	unsigned char	   *ciphertext;
-	unsigned char	   *npub;
-	unsigned char	   *secretkey;
-	unsigned long long	msg_real_len;
-	size_t				ad_len;
-	size_t				ciphertext_len;
-	size_t				msg_len;
-	size_t				npub_len;
-	size_t				secretkey_len;
+	zend_string        *msg;
+	unsigned char      *ad;
+	unsigned char      *ciphertext;
+	unsigned char      *npub;
+	unsigned char      *secretkey;
+	unsigned long long  msg_real_len;
+	size_t              ad_len;
+	size_t              ciphertext_len;
+	size_t              msg_len;
+	size_t              npub_len;
+	size_t              secretkey_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ssss",
 							  &ciphertext, &ciphertext_len,
@@ -2261,7 +2275,7 @@ PHP_FUNCTION(sodium_crypto_aead_chacha20poly1305_ietf_decrypt)
 				   0);
 		return;
 	}
-	if (secretkey_len != crypto_aead_chacha20poly1305_KEYBYTES) {
+	if (secretkey_len != crypto_aead_chacha20poly1305_IETF_KEYBYTES) {
 		zend_throw_exception(sodium_exception_ce,
 				   "secret key size should be "
 				   "CRYPTO_AEAD_CHACHA20POLY1305_IETF_KEYBYTES bytes",
@@ -2273,14 +2287,16 @@ PHP_FUNCTION(sodium_crypto_aead_chacha20poly1305_ietf_decrypt)
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		return;
 	}
+	if (ciphertext_len < crypto_aead_chacha20poly1305_IETF_ABYTES) {
+		RETURN_FALSE;
+	}
 	if ((unsigned long long) ciphertext_len -
-		crypto_aead_chacha20poly1305_ABYTES > 64ULL * (1ULL << 32) - 64ULL) {
-		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
+		crypto_aead_chacha20poly1305_IETF_ABYTES > 64ULL * (1ULL << 32) - 64ULL) {
+		zend_throw_exception(sodium_exception_ce, "message too long for a single key", 0);
 		return;
 	}
 	msg = zend_string_alloc((size_t) msg_len, 0);
-	if (ciphertext_len < crypto_aead_chacha20poly1305_ABYTES ||
-		crypto_aead_chacha20poly1305_ietf_decrypt
+	if (crypto_aead_chacha20poly1305_ietf_decrypt
 		((unsigned char *) ZSTR_VAL(msg), &msg_real_len, NULL,
 		 ciphertext, (unsigned long long) ciphertext_len,
 		 ad, (unsigned long long) ad_len, npub, secretkey) != 0) {
@@ -2297,22 +2313,21 @@ PHP_FUNCTION(sodium_crypto_aead_chacha20poly1305_ietf_decrypt)
 
 	RETURN_STR(msg);
 }
-#endif
 
 #ifdef crypto_aead_xchacha20poly1305_IETF_NPUBBYTES
 PHP_FUNCTION(sodium_crypto_aead_xchacha20poly1305_ietf_encrypt)
 {
-	zend_string		   *ciphertext;
-	unsigned char	   *ad;
-	unsigned char	   *msg;
-	unsigned char	   *npub;
-	unsigned char	   *secretkey;
-	unsigned long long	ciphertext_real_len;
-	size_t				ad_len;
-	size_t				ciphertext_len;
-	size_t				msg_len;
-	size_t				npub_len;
-	size_t				secretkey_len;
+	zend_string        *ciphertext;
+	unsigned char      *ad;
+	unsigned char      *msg;
+	unsigned char      *npub;
+	unsigned char      *secretkey;
+	unsigned long long  ciphertext_real_len;
+	size_t              ad_len;
+	size_t              ciphertext_len;
+	size_t              msg_len;
+	size_t              npub_len;
+	size_t              secretkey_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ssss",
 							  &msg, &msg_len,
@@ -2336,10 +2351,6 @@ PHP_FUNCTION(sodium_crypto_aead_xchacha20poly1305_ietf_encrypt)
 		return;
 	}
 	if (SIZE_MAX - msg_len <= crypto_aead_xchacha20poly1305_IETF_ABYTES) {
-		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
-		return;
-	}
-	if ((unsigned long long) msg_len > 64ULL * (1ULL << 32) - 64ULL) {
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		return;
 	}
@@ -2367,17 +2378,17 @@ PHP_FUNCTION(sodium_crypto_aead_xchacha20poly1305_ietf_encrypt)
 
 PHP_FUNCTION(sodium_crypto_aead_xchacha20poly1305_ietf_decrypt)
 {
-	zend_string		   *msg;
-	unsigned char	   *ad;
-	unsigned char	   *ciphertext;
-	unsigned char	   *npub;
-	unsigned char	   *secretkey;
-	unsigned long long	msg_real_len;
-	size_t				ad_len;
-	size_t				ciphertext_len;
-	size_t				msg_len;
-	size_t				npub_len;
-	size_t				secretkey_len;
+	zend_string        *msg;
+	unsigned char      *ad;
+	unsigned char      *ciphertext;
+	unsigned char      *npub;
+	unsigned char      *secretkey;
+	unsigned long long  msg_real_len;
+	size_t              ad_len;
+	size_t              ciphertext_len;
+	size_t              msg_len;
+	size_t              npub_len;
+	size_t              secretkey_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ssss",
 							  &ciphertext, &ciphertext_len,
@@ -2400,8 +2411,11 @@ PHP_FUNCTION(sodium_crypto_aead_xchacha20poly1305_ietf_decrypt)
 				   0);
 		return;
 	}
+	if (ciphertext_len < crypto_aead_xchacha20poly1305_IETF_ABYTES) {
+		RETURN_FALSE;
+	}
 	msg_len = ciphertext_len;
-	if (msg_len >= SIZE_MAX) {
+	if (msg_len - crypto_aead_xchacha20poly1305_IETF_ABYTES >= SIZE_MAX) {
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		return;
 	}
@@ -2411,8 +2425,7 @@ PHP_FUNCTION(sodium_crypto_aead_xchacha20poly1305_ietf_decrypt)
 		return;
 	}
 	msg = zend_string_alloc((size_t) msg_len, 0);
-	if (ciphertext_len < crypto_aead_xchacha20poly1305_IETF_ABYTES ||
-		crypto_aead_xchacha20poly1305_ietf_decrypt
+	if (crypto_aead_xchacha20poly1305_ietf_decrypt
 		((unsigned char *) ZSTR_VAL(msg), &msg_real_len, NULL,
 		 ciphertext, (unsigned long long) ciphertext_len,
 		 ad, (unsigned long long) ad_len, npub, secretkey) != 0) {
@@ -2433,10 +2446,10 @@ PHP_FUNCTION(sodium_crypto_aead_xchacha20poly1305_ietf_decrypt)
 
 PHP_FUNCTION(sodium_bin2hex)
 {
-	zend_string	  *hex;
+	zend_string   *hex;
 	unsigned char *bin;
-	size_t		   bin_len;
-	size_t		   hex_len;
+	size_t         bin_len;
+	size_t         hex_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
 							  &bin, &bin_len) == FAILURE) {
@@ -2456,13 +2469,13 @@ PHP_FUNCTION(sodium_bin2hex)
 
 PHP_FUNCTION(sodium_hex2bin)
 {
-	zend_string	  *bin;
-	char		  *hex;
-	char		  *ignore = NULL;
-	size_t		   bin_real_len;
-	size_t		   bin_len;
-	size_t		   hex_len;
-	size_t		   ignore_len = 0;
+	zend_string   *bin;
+	char          *hex;
+	char          *ignore = NULL;
+	size_t         bin_real_len;
+	size_t         bin_len;
+	size_t         hex_len;
+	size_t         ignore_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s",
 							  &hex, &hex_len,
@@ -2486,11 +2499,11 @@ PHP_FUNCTION(sodium_hex2bin)
 
 PHP_FUNCTION(sodium_crypto_scalarmult)
 {
-	zend_string	  *q;
+	zend_string   *q;
 	unsigned char *n;
 	unsigned char *p;
-	size_t		   n_len;
-	size_t		   p_len;
+	size_t         n_len;
+	size_t         p_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss",
 							  &n, &n_len, &p, &p_len) == FAILURE) {
@@ -2519,7 +2532,7 @@ PHP_FUNCTION(sodium_crypto_kx_seed_keypair)
 	unsigned char *sk;
 	unsigned char *pk;
 	unsigned char *seed;
-	size_t		 seed_len;
+	size_t       seed_len;
 	zend_string   *keypair;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
@@ -2569,7 +2582,7 @@ PHP_FUNCTION(sodium_crypto_kx_secretkey)
 {
 	zend_string   *secretkey;
 	unsigned char *keypair;
-	size_t		 keypair_len;
+	size_t       keypair_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
 							  &keypair, &keypair_len) == FAILURE) {
@@ -2593,7 +2606,7 @@ PHP_FUNCTION(sodium_crypto_kx_publickey)
 {
 	zend_string   *publickey;
 	unsigned char *keypair;
-	size_t		 keypair_len;
+	size_t       keypair_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
 							  &keypair, &keypair_len) == FAILURE) {
@@ -2623,8 +2636,8 @@ PHP_FUNCTION(sodium_crypto_kx_client_session_keys)
 	unsigned char *client_pk;
 	unsigned char *server_pk;
 	unsigned char  session_keys[2 * crypto_kx_SESSIONKEYBYTES];
-	size_t		 keypair_len;
-	size_t		 server_pk_len;
+	size_t       keypair_len;
+	size_t       server_pk_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss",
 							  &keypair, &keypair_len,
@@ -2672,8 +2685,8 @@ PHP_FUNCTION(sodium_crypto_kx_server_session_keys)
 	unsigned char *server_pk;
 	unsigned char *client_pk;
 	unsigned char  session_keys[2 * crypto_kx_SESSIONKEYBYTES];
-	size_t		 keypair_len;
-	size_t		 client_pk_len;
+	size_t       keypair_len;
+	size_t       client_pk_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss",
 							  &keypair, &keypair_len,
@@ -2715,10 +2728,10 @@ PHP_FUNCTION(sodium_crypto_kx_server_session_keys)
 PHP_FUNCTION(sodium_crypto_auth)
 {
 	zend_string *mac;
-	char		*key;
-	char		*msg;
-	size_t		 msg_len;
-	size_t		 key_len;
+	char        *key;
+	char        *msg;
+	size_t       msg_len;
+	size_t       key_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss",
 							  &msg, &msg_len,
@@ -2743,12 +2756,12 @@ PHP_FUNCTION(sodium_crypto_auth)
 
 PHP_FUNCTION(sodium_crypto_auth_verify)
 {
-	char	  *mac;
-	char	  *key;
-	char	  *msg;
-	size_t	   mac_len;
-	size_t	   msg_len;
-	size_t	   key_len;
+	char      *mac;
+	char      *key;
+	char      *msg;
+	size_t     mac_len;
+	size_t     msg_len;
+	size_t     key_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss",
 							  &mac, &mac_len,
@@ -2775,8 +2788,8 @@ PHP_FUNCTION(sodium_crypto_auth_verify)
 PHP_FUNCTION(sodium_crypto_sign_ed25519_sk_to_curve25519)
 {
 	zend_string *ecdhkey;
-	char		*eddsakey;
-	size_t		 eddsakey_len;
+	char        *eddsakey;
+	size_t       eddsakey_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
 							  &eddsakey, &eddsakey_len) == FAILURE) {
@@ -2803,8 +2816,8 @@ PHP_FUNCTION(sodium_crypto_sign_ed25519_sk_to_curve25519)
 PHP_FUNCTION(sodium_crypto_sign_ed25519_pk_to_curve25519)
 {
 	zend_string *ecdhkey;
-	char		*eddsakey;
-	size_t		 eddsakey_len;
+	char        *eddsakey;
+	size_t       eddsakey_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
 							  &eddsakey, &eddsakey_len) == FAILURE) {
@@ -2832,10 +2845,10 @@ PHP_FUNCTION(sodium_crypto_sign_ed25519_pk_to_curve25519)
 	(SODIUM_LIBRARY_VERSION_MAJOR == 7 && SODIUM_LIBRARY_VERSION_MINOR >= 6)
 PHP_FUNCTION(sodium_compare)
 {
-	char	  *buf1;
-	char	  *buf2;
-	size_t	   len1;
-	size_t	   len2;
+	char      *buf1;
+	char      *buf2;
+	size_t     len1;
+	size_t     len2;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss",
 							  &buf1, &len1,
@@ -2969,13 +2982,13 @@ PHP_FUNCTION(sodium_crypto_kdf_derive_from_key)
 {
 	unsigned char  ctx_padded[crypto_generichash_blake2b_PERSONALBYTES];
 	unsigned char  salt[crypto_generichash_blake2b_SALTBYTES];
-	char		  *ctx;
-	char		  *key;
+	char          *ctx;
+	char          *key;
 	zend_string   *subkey;
-	long		   subkey_id;
-	long		   subkey_len;
-	size_t		 ctx_len;
-	size_t		 key_len;
+	long           subkey_id;
+	long           subkey_len;
+	size_t         ctx_len;
+	size_t         key_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "llss",
 							  &subkey_len,
@@ -3001,7 +3014,7 @@ PHP_FUNCTION(sodium_crypto_kdf_derive_from_key)
 	}
 	memcpy(ctx_padded, ctx, crypto_kdf_CONTEXTBYTES);
 	memset(ctx_padded + crypto_kdf_CONTEXTBYTES, 0, sizeof ctx_padded - crypto_kdf_CONTEXTBYTES);
-	salt[0] = (unsigned char) (((uint64_t) subkey_id)	  );
+	salt[0] = (unsigned char) (((uint64_t) subkey_id)      );
 	salt[1] = (unsigned char) (((uint64_t) subkey_id) >>  8);
 	salt[2] = (unsigned char) (((uint64_t) subkey_id) >> 16);
 	salt[3] = (unsigned char) (((uint64_t) subkey_id) >> 24);
