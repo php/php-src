@@ -1,6 +1,6 @@
 --TEST--
 imagetypes() - BMP support
---SKIP--
+--SKIPIF--
 <?php
 if (!extension_loaded('gd')) die('skip ext/gd required');
 ?>
