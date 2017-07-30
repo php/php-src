@@ -23,13 +23,13 @@ var_dump($arr);
 --EXPECT--
 *** Testing getimagesize() : tiff_mm format ***
 array(5) {
-  [0]=>
+  ["width"]=>
   int(2)
-  [1]=>
+  ["height"]=>
   int(2)
-  [2]=>
+  ["type"]=>
   int(8)
-  [3]=>
+  ["text"]=>
   string(20) "width="2" height="2""
   ["mime"]=>
   string(10) "image/tiff"

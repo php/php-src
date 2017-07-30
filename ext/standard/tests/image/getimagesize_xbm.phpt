@@ -23,13 +23,13 @@ var_dump($arr);
 --EXPECT--
 *** Testing getimagesize() : xbm format ***
 array(5) {
-  [0]=>
+  ["width"]=>
   int(75)
-  [1]=>
+  ["height"]=>
   int(50)
-  [2]=>
+  ["type"]=>
   int(16)
-  [3]=>
+  ["text"]=>
   string(22) "width="75" height="50""
   ["mime"]=>
   string(9) "image/xbm"

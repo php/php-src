@@ -15,13 +15,13 @@ var_dump(getimagesize(FILENAME));
 
 Warning: getimagesize(): corrupt JPEG data: 3 extraneous bytes before marker in %s%ebug72278.php on line %d
 array(7) {
-  [0]=>
+  ["width"]=>
   int(300)
-  [1]=>
+  ["height"]=>
   int(300)
-  [2]=>
+  ["type"]=>
   int(2)
-  [3]=>
+  ["text"]=>
   string(24) "width="300" height="300""
   ["bits"]=>
   int(8)

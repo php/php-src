@@ -51,13 +51,13 @@ foreach($imagetype_filenames as $key => $filename) {
 
 -- GIF image file (200x100.gif) --
 array(7) {
-  [0]=>
+  ["width"]=>
   int(200)
-  [1]=>
+  ["height"]=>
   int(100)
-  [2]=>
+  ["type"]=>
   int(1)
-  [3]=>
+  ["text"]=>
   string(24) "width="200" height="100""
   ["bits"]=>
   int(8)
@@ -71,13 +71,13 @@ array(0) {
 
 -- JPEG image file (200x100.jpg) --
 array(7) {
-  [0]=>
+  ["width"]=>
   int(200)
-  [1]=>
+  ["height"]=>
   int(100)
-  [2]=>
+  ["type"]=>
   int(2)
-  [3]=>
+  ["text"]=>
   string(24) "width="200" height="100""
   ["bits"]=>
   int(8)
@@ -93,13 +93,13 @@ array(1) {
 
 -- PNG image file (200x100.png) --
 array(6) {
-  [0]=>
+  ["width"]=>
   int(200)
-  [1]=>
+  ["height"]=>
   int(100)
-  [2]=>
+  ["type"]=>
   int(3)
-  [3]=>
+  ["text"]=>
   string(24) "width="200" height="100""
   ["bits"]=>
   int(8)
@@ -111,13 +111,13 @@ array(0) {
 
 -- SWF image file (200x100.swf) --
 array(5) {
-  [0]=>
+  ["width"]=>
   int(200)
-  [1]=>
+  ["height"]=>
   int(100)
-  [2]=>
+  ["type"]=>
   int(4)
-  [3]=>
+  ["text"]=>
   string(24) "width="200" height="100""
   ["mime"]=>
   string(29) "application/x-shockwave-flash"
@@ -127,13 +127,13 @@ array(0) {
 
 -- BMP image file (200x100.bmp) --
 array(6) {
-  [0]=>
+  ["width"]=>
   int(200)
-  [1]=>
+  ["height"]=>
   int(100)
-  [2]=>
+  ["type"]=>
   int(6)
-  [3]=>
+  ["text"]=>
   string(24) "width="200" height="100""
   ["bits"]=>
   int(24)
@@ -145,13 +145,13 @@ array(0) {
 
 -- TIFF intel byte order image file (200x100.tif) --
 array(5) {
-  [0]=>
+  ["width"]=>
   int(200)
-  [1]=>
+  ["height"]=>
   int(100)
-  [2]=>
+  ["type"]=>
   int(7)
-  [3]=>
+  ["text"]=>
   string(24) "width="200" height="100""
   ["mime"]=>
   string(10) "image/tiff"
@@ -161,13 +161,13 @@ array(0) {
 
 -- JPC image file (test1pix.jpc) --
 array(7) {
-  [0]=>
+  ["width"]=>
   int(1)
-  [1]=>
+  ["height"]=>
   int(1)
-  [2]=>
+  ["type"]=>
   int(9)
-  [3]=>
+  ["text"]=>
   string(20) "width="1" height="1""
   ["bits"]=>
   int(8)
@@ -181,13 +181,13 @@ array(0) {
 
 -- JP2 image file (test1pix.jp2) --
 array(7) {
-  [0]=>
+  ["width"]=>
   int(1)
-  [1]=>
+  ["height"]=>
   int(1)
-  [2]=>
+  ["type"]=>
   int(10)
-  [3]=>
+  ["text"]=>
   string(20) "width="1" height="1""
   ["bits"]=>
   int(8)
@@ -201,13 +201,13 @@ array(0) {
 
 -- IFF image file (test4pix.iff) --
 array(6) {
-  [0]=>
+  ["width"]=>
   int(4)
-  [1]=>
+  ["height"]=>
   int(1)
-  [2]=>
+  ["type"]=>
   int(14)
-  [3]=>
+  ["text"]=>
   string(20) "width="4" height="1""
   ["bits"]=>
   int(4)

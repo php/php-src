@@ -26,13 +26,13 @@ GetImageSize()
 array(16) {
   ["test-1pix.bmp"]=>
   array(6) {
-    [0]=>
+    ["width"]=>
     int(1)
-    [1]=>
+    ["height"]=>
     int(1)
-    [2]=>
+    ["type"]=>
     int(6)
-    [3]=>
+    ["text"]=>
     string(20) "width="1" height="1""
     ["bits"]=>
     int(24)
@@ -41,13 +41,13 @@ array(16) {
   }
   ["test12pix.webp"]=>
   array(6) {
-    [0]=>
+    ["width"]=>
     int(4)
-    [1]=>
+    ["height"]=>
     int(3)
-    [2]=>
+    ["type"]=>
     int(18)
-    [3]=>
+    ["text"]=>
     string(20) "width="4" height="3""
     ["bits"]=>
     int(8)
@@ -56,13 +56,13 @@ array(16) {
   }
   ["test1bpix.bmp"]=>
   array(6) {
-    [0]=>
+    ["width"]=>
     int(500)
-    [1]=>
+    ["height"]=>
     int(345)
-    [2]=>
+    ["type"]=>
     int(6)
-    [3]=>
+    ["text"]=>
     string(24) "width="500" height="345""
     ["bits"]=>
     int(32)
@@ -71,13 +71,13 @@ array(16) {
   }
   ["test1pix.bmp"]=>
   array(6) {
-    [0]=>
+    ["width"]=>
     int(1)
-    [1]=>
+    ["height"]=>
     int(1)
-    [2]=>
+    ["type"]=>
     int(6)
-    [3]=>
+    ["text"]=>
     string(20) "width="1" height="1""
     ["bits"]=>
     int(24)
@@ -86,13 +86,13 @@ array(16) {
   }
   ["test1pix.jp2"]=>
   array(7) {
-    [0]=>
+    ["width"]=>
     int(1)
-    [1]=>
+    ["height"]=>
     int(1)
-    [2]=>
+    ["type"]=>
     int(10)
-    [3]=>
+    ["text"]=>
     string(20) "width="1" height="1""
     ["bits"]=>
     int(8)
@@ -103,13 +103,13 @@ array(16) {
   }
   ["test1pix.jpc"]=>
   array(7) {
-    [0]=>
+    ["width"]=>
     int(1)
-    [1]=>
+    ["height"]=>
     int(1)
-    [2]=>
+    ["type"]=>
     int(9)
-    [3]=>
+    ["text"]=>
     string(20) "width="1" height="1""
     ["bits"]=>
     int(8)
@@ -120,13 +120,13 @@ array(16) {
   }
   ["test1pix.jpg"]=>
   array(7) {
-    [0]=>
+    ["width"]=>
     int(1)
-    [1]=>
+    ["height"]=>
     int(1)
-    [2]=>
+    ["type"]=>
     int(2)
-    [3]=>
+    ["text"]=>
     string(20) "width="1" height="1""
     ["bits"]=>
     int(8)
@@ -137,13 +137,13 @@ array(16) {
   }
   ["test2pix.gif"]=>
   array(7) {
-    [0]=>
+    ["width"]=>
     int(2)
-    [1]=>
+    ["height"]=>
     int(1)
-    [2]=>
+    ["type"]=>
     int(1)
-    [3]=>
+    ["text"]=>
     string(20) "width="2" height="1""
     ["bits"]=>
     int(1)
@@ -154,13 +154,13 @@ array(16) {
   }
   ["test3llpix.webp"]=>
   array(6) {
-    [0]=>
+    ["width"]=>
     int(1)
-    [1]=>
+    ["height"]=>
     int(3)
-    [2]=>
+    ["type"]=>
     int(18)
-    [3]=>
+    ["text"]=>
     string(20) "width="1" height="3""
     ["bits"]=>
     int(8)
@@ -169,13 +169,13 @@ array(16) {
   }
   ["test3pix.webp"]=>
   array(6) {
-    [0]=>
+    ["width"]=>
     int(1)
-    [1]=>
+    ["height"]=>
     int(3)
-    [2]=>
+    ["type"]=>
     int(18)
-    [3]=>
+    ["text"]=>
     string(20) "width="1" height="3""
     ["bits"]=>
     int(8)
@@ -184,13 +184,13 @@ array(16) {
   }
   ["test4pix.gif"]=>
   array(7) {
-    [0]=>
+    ["width"]=>
     int(4)
-    [1]=>
+    ["height"]=>
     int(1)
-    [2]=>
+    ["type"]=>
     int(1)
-    [3]=>
+    ["text"]=>
     string(20) "width="4" height="1""
     ["bits"]=>
     int(2)
@@ -201,13 +201,13 @@ array(16) {
   }
   ["test4pix.iff"]=>
   array(6) {
-    [0]=>
+    ["width"]=>
     int(4)
-    [1]=>
+    ["height"]=>
     int(1)
-    [2]=>
+    ["type"]=>
     int(14)
-    [3]=>
+    ["text"]=>
     string(20) "width="4" height="1""
     ["bits"]=>
     int(4)
@@ -216,13 +216,13 @@ array(16) {
   }
   ["test4pix.png"]=>
   array(6) {
-    [0]=>
+    ["width"]=>
     int(4)
-    [1]=>
+    ["height"]=>
     int(1)
-    [2]=>
+    ["type"]=>
     int(3)
-    [3]=>
+    ["text"]=>
     string(20) "width="4" height="1""
     ["bits"]=>
     int(4)
@@ -231,39 +231,39 @@ array(16) {
   }
   ["test4pix.psd"]=>
   array(5) {
-    [0]=>
+    ["width"]=>
     int(4)
-    [1]=>
+    ["height"]=>
     int(1)
-    [2]=>
+    ["type"]=>
     int(5)
-    [3]=>
+    ["text"]=>
     string(20) "width="4" height="1""
     ["mime"]=>
     string(9) "image/psd"
   }
   ["test4pix.swf"]=>
   array(5) {
-    [0]=>
+    ["width"]=>
     int(550)
-    [1]=>
+    ["height"]=>
     int(400)
-    [2]=>
+    ["type"]=>
     int(4)
-    [3]=>
+    ["text"]=>
     string(24) "width="550" height="400""
     ["mime"]=>
     string(29) "application/x-shockwave-flash"
   }
   ["test4pix.tif"]=>
   array(5) {
-    [0]=>
+    ["width"]=>
     int(4)
-    [1]=>
+    ["height"]=>
     int(1)
-    [2]=>
+    ["type"]=>
     int(7)
-    [3]=>
+    ["text"]=>
     string(20) "width="4" height="1""
     ["mime"]=>
     string(10) "image/tiff"

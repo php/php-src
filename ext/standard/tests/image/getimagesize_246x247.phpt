@@ -26,13 +26,13 @@ GetImageSize() with 246x247 pixels
 array(1) {
   ["246x247.png"]=>
   array(6) {
-    [0]=>
+    ["width"]=>
     int(246)
-    [1]=>
+    ["height"]=>
     int(247)
-    [2]=>
+    ["type"]=>
     int(3)
-    [3]=>
+    ["text"]=>
     string(24) "width="246" height="247""
     ["bits"]=>
     int(4)

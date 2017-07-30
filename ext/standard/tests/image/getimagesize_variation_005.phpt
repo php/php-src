@@ -22,13 +22,13 @@ var_dump( $info );
 --EXPECTF--
 *** Testing getimagesize() : basic functionality ***
 array(5) {
-  [0]=>
+  ["width"]=>
   int(550)
-  [1]=>
+  ["height"]=>
   int(400)
-  [2]=>
+  ["type"]=>
   int(13)
-  [3]=>
+  ["text"]=>
   string(24) "width="550" height="400""
   ["mime"]=>
   string(29) "application/x-shockwave-flash"

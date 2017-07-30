@@ -26,13 +26,13 @@ GetImageSize() with 384x385 pixels
 array(1) {
   ["384x385.png"]=>
   array(6) {
-    [0]=>
+    ["width"]=>
     int(384)
-    [1]=>
+    ["height"]=>
     int(385)
-    [2]=>
+    ["type"]=>
     int(3)
-    [3]=>
+    ["text"]=>
     string(24) "width="384" height="385""
     ["bits"]=>
     int(1)
