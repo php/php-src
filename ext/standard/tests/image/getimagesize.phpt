@@ -57,13 +57,13 @@ array(16) {
   ["test1bpix.bmp"]=>
   array(6) {
     [0]=>
-    int(500)
+    int(1)
     [1]=>
-    int(345)
+    int(1)
     [2]=>
     int(6)
     [3]=>
-    string(24) "width="500" height="345""
+    string(20) "width="1" height="1""
     ["bits"]=>
     int(32)
     ["mime"]=>
