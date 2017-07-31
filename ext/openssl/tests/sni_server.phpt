@@ -27,6 +27,9 @@ CODE;
 $clientCode = <<<'CODE'
     $flags = STREAM_CLIENT_CONNECT;
     $ctxArr = [
+        'verify_peer'  => false,
+        'verify_peer_name' => false,
+        'allow_self_signed' => true,
         'cafile' => __DIR__ . '/sni_server_ca.pem',
         'capture_peer_cert' => true
     ];
