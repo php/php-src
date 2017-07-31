@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2017, PHP 7.2.0beta2
 
 - Core:
+  . Implemented FR #74963 (Improved error message on fetching property of
+    non-object). (Laruence)
   . Fixed bug #74947 (Segfault in scanner on INF number). (Laruence)
   . Fixed bug #74954 (null deref and segfault in zend_generator_resume()). (Bob)
 
