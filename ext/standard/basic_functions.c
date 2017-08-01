@@ -1489,6 +1489,15 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_http_build_query, 0, 0, 1)
 	ZEND_ARG_INFO(0, arg_separator)
 	ZEND_ARG_INFO(0, enc_type)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_http_query_encode, 0, 0, 1)
+	ZEND_ARG_INFO(0, data)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_http_query_decode, 0)
+	ZEND_ARG_INFO(0, query)
+ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ image.c */
 ZEND_BEGIN_ARG_INFO(arginfo_image_type_to_mime_type, 0)
@@ -2826,7 +2835,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(levenshtein,														arginfo_levenshtein)
 	PHP_FE(chr,																arginfo_chr)
 	PHP_FE(ord,																arginfo_ord)
-	PHP_FE(parse_str,														arginfo_parse_str)
+	PHP_DEP_FE(parse_str,													arginfo_parse_str)
 	PHP_FE(str_getcsv,														arginfo_str_getcsv)
 	PHP_FE(str_pad,															arginfo_str_pad)
 	PHP_FALIAS(chop,				rtrim,									arginfo_rtrim)
@@ -2839,12 +2848,14 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(vfprintf,														arginfo_vfprintf)
 	PHP_FE(sscanf,															arginfo_sscanf)
 	PHP_FE(fscanf,															arginfo_fscanf)
-	PHP_FE(parse_url,														arginfo_parse_url)
+	PHP_DEP_FE(parse_url,													arginfo_parse_url)
 	PHP_FE(urlencode,														arginfo_urlencode)
 	PHP_FE(urldecode,														arginfo_urldecode)
 	PHP_FE(rawurlencode,													arginfo_rawurlencode)
 	PHP_FE(rawurldecode,													arginfo_rawurldecode)
-	PHP_FE(http_build_query,												arginfo_http_build_query)
+	PHP_DEP_FE(http_build_query,											arginfo_http_build_query)
+	PHP_FE(http_query_encode,												arginfo_http_query_encode)
+	PHP_FE(http_query_decode,												arginfo_http_query_decode)
 
 #if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
 	PHP_FE(readlink,														arginfo_readlink)
@@ -3617,8 +3628,13 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	REGISTER_LONG_CONSTANT("PHP_URL_PATH", PHP_URL_PATH, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHP_URL_QUERY", PHP_URL_QUERY, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHP_URL_FRAGMENT", PHP_URL_FRAGMENT, CONST_CS | CONST_PERSISTENT);
+
 	REGISTER_LONG_CONSTANT("PHP_QUERY_RFC1738", PHP_QUERY_RFC1738, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHP_QUERY_RFC3986", PHP_QUERY_RFC3986, CONST_CS | CONST_PERSISTENT);
+
+	REGISTER_LONG_CONSTANT("HTTP_ENCODING_NONE", PHP_HTTP_ENCODING_NONE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("HTTP_ENCODING_RFC1738", PHP_HTTP_ENCODING_RFC1738, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("HTTP_ENCODING_RFC3986", PHP_HTTP_ENCODING_RFC3986, CONST_CS | CONST_PERSISTENT);
 
 #define REGISTER_MATH_CONSTANT(x)  REGISTER_DOUBLE_CONSTANT(#x, x, CONST_CS | CONST_PERSISTENT)
 	REGISTER_MATH_CONSTANT(M_E);

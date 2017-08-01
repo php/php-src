@@ -23,6 +23,12 @@
 
 #include "php.h"
 #include "zend_smart_str.h"
+#include "SAPI.h"
+#include "php_variables.h"
+
+#define PHP_HTTP_ENCODING_NONE 0
+#define PHP_HTTP_ENCODING_RFC1738 1
+#define PHP_HTTP_ENCODING_RFC3986 2
 
 PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				const char *num_prefix, size_t num_prefix_len,
@@ -32,6 +38,8 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 #define php_url_encode_hash(ht, formstr)	php_url_encode_hash_ex((ht), (formstr), NULL, 0, NULL, 0, NULL, 0, NULL)
 
 PHP_FUNCTION(http_build_query);
+PHP_FUNCTION(http_query_encode);
+PHP_FUNCTION(http_query_decode);
 
 #endif
 

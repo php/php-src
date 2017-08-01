@@ -80,7 +80,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 		if (Z_TYPE_P(zdata) == IS_ARRAY || Z_TYPE_P(zdata) == IS_OBJECT) {
 			if (key) {
 				zend_string *ekey;
-				if (enc_type == PHP_QUERY_RFC3986) {
+				if (enc_type == PHP_HTTP_ENCODING_RFC3986) {
 					ekey = php_raw_url_encode(prop_name, prop_len);
 				} else {
 					ekey = php_url_encode(prop_name, prop_len);
@@ -155,7 +155,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 			smart_str_appendl(formstr, key_prefix, key_prefix_len);
 			if (key) {
 				zend_string *ekey;
-				if (enc_type == PHP_QUERY_RFC3986) {
+				if (enc_type == PHP_HTTP_ENCODING_RFC3986) {
 					ekey = php_raw_url_encode(prop_name, prop_len);
 				} else {
 					ekey = php_url_encode(prop_name, prop_len);
@@ -174,7 +174,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 			switch (Z_TYPE_P(zdata)) {
 				case IS_STRING: {
 						zend_string *ekey;
-						if (enc_type == PHP_QUERY_RFC3986) {
+						if (enc_type == PHP_HTTP_ENCODING_RFC3986) {
 							ekey = php_raw_url_encode(Z_STRVAL_P(zdata), Z_STRLEN_P(zdata));
 						} else {
 							ekey = php_url_encode(Z_STRVAL_P(zdata), Z_STRLEN_P(zdata));
@@ -205,7 +205,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 					{
 						zend_string *ekey;
 						zend_string *tmp = zval_get_string(zdata);
-						if (enc_type == PHP_QUERY_RFC3986) {
+						if (enc_type == PHP_HTTP_ENCODING_RFC3986) {
 							ekey = php_raw_url_encode(ZSTR_VAL(tmp), ZSTR_LEN(tmp));
 						} else {
 							ekey = php_url_encode(ZSTR_VAL(tmp), ZSTR_LEN(tmp));
@@ -230,7 +230,7 @@ PHP_FUNCTION(http_build_query)
 	char *prefix = NULL, *arg_sep=NULL;
 	size_t arg_sep_len = 0, prefix_len = 0;
 	smart_str formstr = {0};
-	zend_long enc_type = PHP_QUERY_RFC1738;
+	zend_long enc_type = PHP_HTTP_ENCODING_RFC1738;
 
 	ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_ZVAL(formdata)
@@ -259,6 +259,88 @@ PHP_FUNCTION(http_build_query)
 	smart_str_0(&formstr);
 
 	RETURN_NEW_STR(formstr.s);
+}
+/* }}} */
+
+/* {{{ proto string http_query_encode(mixed data [, array options]]])
+   Generates a form-encoded query string from an associative array or object. */
+PHP_FUNCTION(http_query_encode)
+{
+	zval *data;
+	zend_string *numeric_prefix, *arg_separator;
+	zend_long encoding = PHP_HTTP_ENCODING_RFC1738;
+
+	smart_str query = {0};
+
+	HashTable *options;
+	zend_string *option_name;
+	zval *option_value;
+
+	ALLOC_HASHTABLE(options);
+	zend_hash_init(options, 8, NULL, NULL, 0);
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ZVAL(data)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY_OR_OBJECT_HT(options)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+
+	if (Z_TYPE_P(data) != IS_ARRAY && Z_TYPE_P(data) != IS_OBJECT) {
+		php_error_docref(NULL, E_WARNING, "Parameter 1 expected to be Array or Object. Incorrect value given");
+		RETURN_FALSE;
+	}
+
+	numeric_prefix = zend_string_init("", 0, 0);
+	arg_separator = zend_string_init("", 0, 0);
+
+	ZEND_HASH_FOREACH_STR_KEY_VAL(options, option_name, option_value) {
+		if(strcmp("numeric_prefix", ZSTR_VAL(option_name)) == 0) {
+			numeric_prefix = zval_get_string(option_value);
+		}
+		else if(strcmp("arg_separator", ZSTR_VAL(option_name)) == 0) {
+			arg_separator = zval_get_string(option_value);
+		}
+		else if(strcmp("encoding", ZSTR_VAL(option_name)) == 0) {
+			encoding = zval_get_long(option_value);
+		}
+		else {
+			php_error_docref(NULL, E_WARNING, "Ignore unsupported option '%s'.", ZSTR_VAL(option_name));
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	if (php_url_encode_hash_ex(HASH_OF(data), &query, ZSTR_VAL(numeric_prefix), ZSTR_LEN(numeric_prefix), NULL, 0, NULL, 0, (Z_TYPE_P(data) == IS_OBJECT ? data : NULL), ZSTR_LEN(arg_separator) ? ZSTR_VAL(arg_separator) : NULL, (int) encoding) == FAILURE) {
+		if (query.s) {
+			smart_str_free(&query);
+		}
+		RETURN_FALSE;
+	}
+
+	if (!query.s) {
+		RETURN_EMPTY_STRING();
+	}
+
+	smart_str_0(&query);
+
+	RETURN_NEW_STR(query.s);
+}
+/* }}} */
+
+/* {{{ proto array http_query_decode(string query)
+   Parses GET/POST/COOKIE data */
+PHP_FUNCTION(http_query_decode)
+{
+	char *res = NULL;
+	char *query;
+	size_t query_len;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(query, query_len)
+	ZEND_PARSE_PARAMETERS_END();
+
+	res = estrndup(query, query_len);
+
+	array_init(return_value);
+	sapi_module.treat_data(PARSE_STRING, res, return_value);
 }
 /* }}} */
 
