@@ -42,6 +42,7 @@ PHP                                                                        NEWS
 
 - SPL:
   . Fixed bug #74669 (Unserialize ArrayIterator broken). (Andrew Nester)
+  . Fixed bug #75015 (Crash in recursive iterator destructors). (Julien)
 
 03 Aug 2017 PHP 7.0.22
 
