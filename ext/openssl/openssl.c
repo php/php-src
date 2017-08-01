@@ -651,6 +651,8 @@ int DSA_set0_key(DSA *d, BIGNUM *pub_key, BIGNUM *priv_key)
 }
 
 #if OPENSSL_VERSION_NUMBER < 0x10002000L || defined (LIBRESSL_VERSION_NUMBER)
+#define EVP_PKEY_id(_pkey) _pkey->type
+#define EVP_PKEY_base_id(_key) EVP_PKEY_type(_key->type)
 
 static int X509_get_signature_nid(const X509 *x)
 {
