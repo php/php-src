@@ -64,6 +64,7 @@ PHP                                                                        NEWS
   . Fixed bug #74669 (Unserialize ArrayIterator broken). (Andrew Nester)
   . Fixed bug #74977 (Appending AppendIterator leads to segfault). 
     (Andrew Nester)
+  . Fixed bug #75015 (Crash in recursive iterator destructors). (Julien)
 
 - Standard:
   . Fixed bug #74851 (uniqid() without more_entropy performs badly).
