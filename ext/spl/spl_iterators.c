@@ -942,6 +942,7 @@ static void spl_RecursiveIteratorIterator_free_storage(zend_object *_object)
 	if (object->iterators) {
 		efree(object->iterators);
 		object->iterators = NULL;
+		object->level     = 0;
 	}
 
 	zend_object_std_dtor(&object->std);
