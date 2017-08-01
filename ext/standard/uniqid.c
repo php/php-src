@@ -58,19 +58,17 @@ PHP_FUNCTION(uniqid)
 		Z_PARAM_BOOL(more_entropy)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (!more_entropy) {
-		/* This implementation needs current microsecond to change,
-		 * hence we poll time until it does. This is much faster than
-		 * calling usleep(1) which may cause the kernel to schedule
-		 * another process, causing a pause of around 10ms.
-		 */
-		do {
-			(void)gettimeofday((struct timeval *) &tv, (struct timezone *) NULL);
-		} while (tv.tv_sec == prev_tv.tv_sec && tv.tv_usec == prev_tv.tv_usec);
+	/* This implementation needs current microsecond to change,
+	 * hence we poll time until it does. This is much faster than
+	 * calling usleep(1) which may cause the kernel to schedule
+	 * another process, causing a pause of around 10ms.
+	 */
+	do {
+		(void)gettimeofday((struct timeval *) &tv, (struct timezone *) NULL);
+	} while (tv.tv_sec == prev_tv.tv_sec && tv.tv_usec == prev_tv.tv_usec);
 
-		prev_tv.tv_sec = tv.tv_sec;
-		prev_tv.tv_usec = tv.tv_usec;
-	}
+	prev_tv.tv_sec = tv.tv_sec;
+	prev_tv.tv_usec = tv.tv_usec;
 
 	sec = (int) tv.tv_sec;
 	usec = (int) (tv.tv_usec % 0x100000);
