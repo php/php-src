@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2017, PHP 7.2.0beta2
+03 Aug 2017, PHP 7.2.0beta2
 
 - Core:
   . Implemented FR #74963 (Improved error message on fetching property of
