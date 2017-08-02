@@ -1,16 +1,16 @@
 --TEST--
-json_decode() and json_encode(): JSON_THROW_EXCEPTIONS flag
+json_decode() and json_encode(): JSON_THROW_ON_ERROR flag
 --FILE--
 <?php
 
 try {
-    var_dump(json_decode("{", false, 512, JSON_THROW_EXCEPTIONS));
+    var_dump(json_decode("{", false, 512, JSON_THROW_ON_ERROR));
 } catch (JsonException $e) {
     var_dump($e);
 }
 
 try {
-    var_dump(json_encode("\x80", JSON_THROW_EXCEPTIONS));
+    var_dump(json_encode("\x80", JSON_THROW_ON_ERROR));
 } catch (JsonException $e) {
     var_dump($e);
 }
@@ -18,7 +18,7 @@ try {
 try {
     // JSON_PARTIAL_OUTPUT_ON_ERROR is incompatible with exceptions
     // Therefore, we expect it to be ignored
-    var_dump(json_encode("\x80", JSON_THROW_EXCEPTIONS | JSON_PARTIAL_OUTPUT_ON_ERROR));
+    var_dump(json_encode("\x80", JSON_THROW_ON_ERROR | JSON_PARTIAL_OUTPUT_ON_ERROR));
 } catch (JsonException $e) {
     var_dump($e);
 }
