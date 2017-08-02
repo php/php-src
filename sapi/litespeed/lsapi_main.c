@@ -23,7 +23,8 @@
 #include "php_variables.h"
 #include "zend_highlight.h"
 #include "zend.h"
-
+#include "ext/standard/basic_functions.h"
+#include "ext/standard/info.h"
 #include "lsapilib.h"
 
 #include <stdio.h>
@@ -130,10 +131,10 @@ static int php_lsapi_startup(sapi_module_struct *sapi_module)
 
 static void sapi_lsapi_ini_defaults(HashTable *configuration_hash)
 {
-    zval *tmp, *entry;
-
 #if PHP_MAJOR_VERSION > 4
 /*
+    zval *tmp, *entry;
+
     MAKE_STD_ZVAL(tmp);
 
     INI_DEFAULT("register_long_arrays", "0");
@@ -476,62 +477,6 @@ static void init_request_info( void )
     php_handle_auth_data(pAuth);
 }
 
-static char s_cur_chdir[4096] = "";
-
-static int lsapi_chdir_primary_script( zend_file_handle * file_handle )
-{
-#if PHP_MAJOR_VERSION > 4
-    char * p;
-    char ch;
-
-    SG(options) |= SAPI_OPTION_NO_CHDIR;
-    getcwd( s_cur_chdir, sizeof( s_cur_chdir ) );
-
-    p = strrchr( file_handle->filename, '/' );
-    if ( *p )
-    {
-        *p = 0;
-        if ( strcmp( file_handle->filename, s_cur_chdir ) != 0 ) {
-            chdir( file_handle->filename );
-        }
-        *p++ = '/';
-        ch = *p;
-        *p = 0;
-        if ( !CWDG(cwd).cwd ||
-             ( strcmp( file_handle->filename, CWDG(cwd).cwd ) != 0 ) ) {
-            CWDG(cwd).cwd_length = p - file_handle->filename;
-            CWDG(cwd).cwd = (char *) realloc(CWDG(cwd).cwd, CWDG(cwd).cwd_length+1);
-            memmove( CWDG(cwd).cwd, file_handle->filename, CWDG(cwd).cwd_length+1 );
-        }
-        *p = ch;
-    }
-    /* virtual_file_ex(&CWDG(cwd), file_handle->filename, NULL, CWD_REALPATH); */
-#else
-    VCWD_CHDIR_FILE( file_handle->filename );
-#endif
-    return 0;
-}
-
-static int lsapi_fopen_primary_script( zend_file_handle * file_handle )
-{
-    FILE * fp;
-    char * p;
-    fp = fopen( SG(request_info).path_translated, "rb" );
-    if ( !fp )
-    {
-        return -1;
-    }
-    file_handle->type = ZEND_HANDLE_FP;
-    file_handle->handle.fp = fp;
-    file_handle->filename = SG(request_info).path_translated;
-    file_handle->free_filename = 0;
-    file_handle->opened_path = NULL;
-
-    lsapi_chdir_primary_script( file_handle );
-
-    return 0;
-}
-
 static int lsapi_execute_script( zend_file_handle * file_handle)
 {
     char *p;
@@ -558,8 +503,8 @@ static int lsapi_execute_script( zend_file_handle * file_handle)
 
 static int lsapi_module_main(int show_source)
 {
-    zend_file_handle file_handle = {0};
-
+    zend_file_handle file_handle;
+    memset(&file_handle, 0, sizeof(file_handle));
     if (php_request_startup() == FAILURE ) {
         return -1;
     }
@@ -831,7 +776,7 @@ static int lsapi_activate_user_ini_walk_down_the_path(_lsapi_activate_user_ini_c
                                                       void* next)
 {
     time_t request_time = sapi_get_request_time();
-    uint path_len, docroot_len;
+    uint docroot_len;
     int rc = SUCCESS;
     fn_activate_user_ini_chain_t *fn_next = next;
 
@@ -1130,8 +1075,8 @@ static int cli_main( int argc, char * argv[] )
         }
         if ( ret == -1 ) {
             if ( *p ) {
-                zend_file_handle file_handle = {0};
-
+                zend_file_handle file_handle;
+                memset(&file_handle, 0, sizeof(file_handle));
                 file_handle.type = ZEND_HANDLE_FP;
                 file_handle.handle.fp = VCWD_FOPEN(*p, "rb");
 
