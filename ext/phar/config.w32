@@ -43,4 +43,6 @@ if (PHP_PHAR != "no") {
 		}
 	}
 	ADD_EXTENSION_DEP('phar', 'spl', true);
+
+	ADD_MAKEFILE_FRAGMENT();
 }

@@ -7791,4 +7791,18 @@ Matched, but offsets vector is too small to show all matches
     aaa 
 No match
 
+/()()a+/O=
+    aaa\D
+** Show all captures ignored after DFA matching
+ 0: aaa
+ 1: aa
+ 2: a
+    a\D
+** Show all captures ignored after DFA matching
+ 0: a
+
+/(02-)?[0-9]{3}-[0-9]{3}/
+    02-123-123
+ 0: 02-123-123
+
 /-- End of testinput8 --/

@@ -762,6 +762,10 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(zend_bool throw_
 #define ZEND_PARSE_PARAMETERS_START(min_num_args, max_num_args) \
 	ZEND_PARSE_PARAMETERS_START_EX(0, min_num_args, max_num_args)
 
+#define ZEND_PARSE_PARAMETERS_NONE()  \
+	ZEND_PARSE_PARAMETERS_START(0, 0) \
+	ZEND_PARSE_PARAMETERS_END()
+
 #define ZEND_PARSE_PARAMETERS_END_EX(failure) \
 		} while (0); \
 		if (UNEXPECTED(error_code != ZPP_ERROR_OK)) { \

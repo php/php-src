@@ -196,16 +196,16 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 	const char *s1, *s2;
 	char *strtok_buf = NULL, **val_list = NULL;
 	zval *array_ptr = (zval *) arg;
-	int n, num, *len_list = NULL;
+	size_t n, num, *len_list = NULL;
 	size_t val_len, new_val_len;
 	mbfl_string string, resvar, resval;
 	const mbfl_encoding *from_encoding = NULL;
 	mbfl_encoding_detector *identd = NULL;
 	mbfl_buffer_converter *convd = NULL;
 
-	mbfl_string_init_set(&string, info->to_language, info->to_encoding->no_encoding);
-	mbfl_string_init_set(&resvar, info->to_language, info->to_encoding->no_encoding);
-	mbfl_string_init_set(&resval, info->to_language, info->to_encoding->no_encoding);
+	mbfl_string_init_set(&string, info->to_language, info->to_encoding);
+	mbfl_string_init_set(&resvar, info->to_language, info->to_encoding);
+	mbfl_string_init_set(&resval, info->to_language, info->to_encoding);
 
 	if (!res || *res == '\0') {
 		goto out;
@@ -225,7 +225,7 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 	num *= 2; /* need space for variable name and value */
 
 	val_list = (char **)ecalloc(num, sizeof(char *));
-	len_list = (int *)ecalloc(num, sizeof(int));
+	len_list = (size_t *)ecalloc(num, sizeof(size_t));
 
 	/* split and decode the query */
 	n = 0;
@@ -253,7 +253,7 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 		var = php_strtok_r(NULL, info->separator, &strtok_buf);
 	}
 
-	if (n > (PG(max_input_vars) * 2)) {
+	if (ZEND_SIZE_T_GT_ZEND_LONG(n, (PG(max_input_vars) * 2))) {
 		php_error_docref(NULL, E_WARNING, "Input variables exceeded " ZEND_LONG_FMT ". To increase the limit change max_input_vars in php.ini.", PG(max_input_vars));
 		goto out;
 	}
@@ -268,7 +268,7 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 	} else {
 		/* auto detect */
 		from_encoding = NULL;
-		identd = mbfl_encoding_detector_new2(info->from_encodings, info->num_from_encodings, MBSTRG(strict_detection));
+		identd = mbfl_encoding_detector_new(info->from_encodings, info->num_from_encodings, MBSTRG(strict_detection));
 		if (identd != NULL) {
 			n = 0;
 			while (n < num) {
@@ -279,7 +279,7 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 				}
 				n++;
 			}
-			from_encoding = mbfl_encoding_detector_judge2(identd);
+			from_encoding = mbfl_encoding_detector_judge(identd);
 			mbfl_encoding_detector_delete(identd);
 		}
 		if (!from_encoding) {
@@ -292,7 +292,7 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 
 	convd = NULL;
 	if (from_encoding != &mbfl_encoding_pass) {
-		convd = mbfl_buffer_converter_new2(from_encoding, info->to_encoding, 0);
+		convd = mbfl_buffer_converter_new(from_encoding, info->to_encoding, 0);
 		if (convd != NULL) {
 			mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode));
 			mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));
@@ -305,7 +305,7 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 	}
 
 	/* convert encoding */
-	string.no_encoding = from_encoding->no_encoding;
+	string.encoding = from_encoding;
 
 	n = 0;
 	while (n < num) {

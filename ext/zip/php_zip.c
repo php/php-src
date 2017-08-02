@@ -28,6 +28,11 @@
 #include "ext/standard/php_string.h"
 #include "ext/pcre/php_pcre.h"
 #include "ext/standard/php_filestat.h"
+#if PHP_VERSION_ID >= 70200
+#include "zend_interfaces.h"
+#elif defined(HAVE_SPL)
+#include "ext/spl/spl_iterators.h"
+#endif
 #include "php_zip.h"
 
 /* zip_open is a macro for renaming libzip zipopen, so we need to use PHP_NAMED_FUNCTION */
@@ -132,18 +137,18 @@ static char * php_zip_make_relative_path(char *path, size_t path_len) /* {{{ */
 # define CWD_STATE_FREE(s)  efree(s)
 
 /* {{{ php_zip_extract_file */
-static int php_zip_extract_file(struct zip * za, char *dest, char *file, int file_len)
+static int php_zip_extract_file(struct zip * za, char *dest, char *file, size_t file_len)
 {
 	php_stream_statbuf ssb;
 	struct zip_file *zf;
 	struct zip_stat sb;
 	char b[8192];
-	int n, len, ret;
+	int n, ret;
 	php_stream *stream;
 	char *fullpath;
 	char *file_dirname_fullpath;
 	char file_dirname[MAXPATHLEN];
-	size_t dir_len;
+	size_t dir_len, len;
 	int is_dir_only = 0;
 	char *path_cleaned;
 	size_t path_cleaned_len;
@@ -176,7 +181,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 		memcpy(file_dirname, path_cleaned, path_cleaned_len);
 		dir_len = php_dirname(file_dirname, path_cleaned_len);
 
-		if (dir_len <= 0 || (dir_len == 1 && file_dirname[0] == '.')) {
+		if (!dir_len || (dir_len == 1 && file_dirname[0] == '.')) {
 			len = spprintf(&file_dirname_fullpath, 0, "%s", dest);
 		} else {
 			len = spprintf(&file_dirname_fullpath, 0, "%s/%s", dest, file_dirname);
@@ -1545,6 +1550,23 @@ static ZIPARCHIVE_METHOD(close)
 	} else {
 		RETURN_FALSE;
 	}
+}
+/* }}} */
+
+/* {{{ proto bool ZipArchive::count()
+close the zip archive */
+static ZIPARCHIVE_METHOD(count)
+{
+	struct zip *intern;
+	zval *self = getThis();
+
+	if (!self) {
+		RETURN_FALSE;
+	}
+
+	ZIP_FROM_OBJECT(intern, self);
+
+	RETVAL_LONG(zip_get_num_files(intern));
 }
 /* }}} */
 
@@ -3069,6 +3091,7 @@ static const zend_function_entry zip_class_functions[] = {
 	ZIPARCHIVE_ME(open,					arginfo_ziparchive_open, ZEND_ACC_PUBLIC)
 	ZIPARCHIVE_ME(setPassword,			arginfo_ziparchive_setpassword, ZEND_ACC_PUBLIC)
 	ZIPARCHIVE_ME(close,				arginfo_ziparchive__void, ZEND_ACC_PUBLIC)
+	ZIPARCHIVE_ME(count,				arginfo_ziparchive__void, ZEND_ACC_PUBLIC)
 	ZIPARCHIVE_ME(getStatusString,		arginfo_ziparchive__void, ZEND_ACC_PUBLIC)
 	ZIPARCHIVE_ME(addEmptyDir,			arginfo_ziparchive_addemptydir, ZEND_ACC_PUBLIC)
 	ZIPARCHIVE_ME(addFromString,		arginfo_ziparchive_addfromstring, ZEND_ACC_PUBLIC)
@@ -3141,6 +3164,11 @@ static PHP_MINIT_FUNCTION(zip)
 	php_zip_register_prop_handler(&zip_prop_handlers, "numFiles",  php_zip_get_num_files, NULL, NULL, IS_LONG);
 	php_zip_register_prop_handler(&zip_prop_handlers, "filename", NULL, NULL, php_zipobj_get_filename, IS_STRING);
 	php_zip_register_prop_handler(&zip_prop_handlers, "comment", NULL, php_zipobj_get_zip_comment, NULL, IS_STRING);
+#if PHP_VERSION_ID >= 70200
+	zend_class_implements(zip_class_entry, 1, zend_ce_countable);
+#elif defined(HAVE_SPL)
+	zend_class_implements(zip_class_entry, 1, spl_ce_Countable);
+#endif
 
 	REGISTER_ZIP_CLASS_CONST_LONG("CREATE", ZIP_CREATE);
 	REGISTER_ZIP_CLASS_CONST_LONG("EXCL", ZIP_EXCL);

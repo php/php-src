@@ -646,7 +646,7 @@ static void sapi_header_add_op(sapi_header_op_enum op, sapi_header_struct *sapi_
 				char sav = *colon_offset;
 
 				*colon_offset = 0;
-		        sapi_remove_header(&SG(sapi_headers).headers, sapi_header->header, (int)strlen(sapi_header->header));
+		        sapi_remove_header(&SG(sapi_headers).headers, sapi_header->header, strlen(sapi_header->header));
 				*colon_offset = sav;
 			}
 		}

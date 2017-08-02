@@ -56,7 +56,7 @@ bool(false)
 testing property access
 string(4) "data"
 
-Notice: Trying to get property of non-object in %s on line %d
+Notice: Trying to get property 'textContent' of non-object in %s on line %d
 NULL
 testing offset not a long
 array(1) {
@@ -64,7 +64,7 @@ array(1) {
   string(4) "test"
 }
 
-Notice: Trying to get property of non-object in %s on line %d
+Notice: Trying to get property 'textContent' of non-object in %s on line %d
 bool(false)
 NULL
 array(1) {

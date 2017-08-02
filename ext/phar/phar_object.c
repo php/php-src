@@ -4164,7 +4164,7 @@ PHP_METHOD(Phar, delMetadata)
 }
 /* }}} */
 
-static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *dest, int dest_len, char **error) /* {{{ */
+static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *dest, size_t dest_len, char **error) /* {{{ */
 {
 	php_stream_statbuf ssb;
 	size_t len;
@@ -4206,13 +4206,13 @@ static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *
 #ifdef PHP_WIN32
 	/* unixify the path back, otherwise non zip formats might be broken */
 	{
-		int cnt = filename_len;
+		size_t cnt = 0;
 
 		do {
 			if ('\\' == filename[cnt]) {
 				filename[cnt] = '/';
 			}
-		} while (cnt-- >= 0);
+		} while (cnt++ <= filename_len);
 	}
 #endif
 
@@ -4433,7 +4433,7 @@ PHP_METHOD(Phar, extractTo)
 							zend_throw_exception_ex(phar_ce_PharException, 0,
 								"Phar Error: attempted to extract non-existent file \"%s\" from phar \"%s\"", Z_STRVAL_P(zval_file), phar_obj->archive->fname);
 						}
-						if (FAILURE == phar_extract_file(overwrite, entry, pathto, (int)pathto_len, &error)) {
+						if (FAILURE == phar_extract_file(overwrite, entry, pathto, pathto_len, &error)) {
 							zend_throw_exception_ex(phar_ce_PharException, 0,
 								"Extraction from phar \"%s\" failed: %s", phar_obj->archive->fname, error);
 							efree(error);
@@ -4454,7 +4454,7 @@ PHP_METHOD(Phar, extractTo)
 			return;
 		}
 
-		if (FAILURE == phar_extract_file(overwrite, entry, pathto, (int)pathto_len, &error)) {
+		if (FAILURE == phar_extract_file(overwrite, entry, pathto, pathto_len, &error)) {
 			zend_throw_exception_ex(phar_ce_PharException, 0,
 				"Extraction from phar \"%s\" failed: %s", phar_obj->archive->fname, error);
 			efree(error);
@@ -4470,7 +4470,7 @@ all_files:
 		}
 
 		ZEND_HASH_FOREACH_PTR(&phar->manifest, entry) {
-			if (FAILURE == phar_extract_file(overwrite, entry, pathto, (int)pathto_len, &error)) {
+			if (FAILURE == phar_extract_file(overwrite, entry, pathto, pathto_len, &error)) {
 				zend_throw_exception_ex(phar_ce_PharException, 0,
 					"Extraction from phar \"%s\" failed: %s", phar->fname, error);
 				efree(error);

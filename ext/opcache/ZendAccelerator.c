@@ -114,7 +114,7 @@ zend_bool fallback_process = 0; /* process uses file cache fallback */
 
 static zend_op_array *(*accelerator_orig_compile_file)(zend_file_handle *file_handle, int type);
 static int (*accelerator_orig_zend_stream_open_function)(const char *filename, zend_file_handle *handle );
-static zend_string *(*accelerator_orig_zend_resolve_path)(const char *filename, int filename_len);
+static zend_string *(*accelerator_orig_zend_resolve_path)(const char *filename, size_t filename_len);
 static zif_handler orig_chdir = NULL;
 static ZEND_INI_MH((*orig_include_path_on_modify)) = NULL;
 
@@ -1015,7 +1015,7 @@ int validate_timestamp_and_record_ex(zend_persistent_script *persistent_script, 
 /* Instead of resolving full real path name each time we need to identify file,
  * we create a key that consist from requested file name, current working
  * directory, current include_path, etc */
-char *accel_make_persistent_key(const char *path, int path_length, int *key_len)
+char *accel_make_persistent_key(const char *path, size_t path_length, int *key_len)
 {
 	int key_length;
 
@@ -1171,7 +1171,7 @@ char *accel_make_persistent_key(const char *path, int path_length, int *key_len)
 	return (char*)path;
 }
 
-int zend_accel_invalidate(const char *filename, int filename_len, zend_bool force)
+int zend_accel_invalidate(const char *filename, size_t filename_len, zend_bool force)
 {
 	zend_string *realpath;
 	zend_persistent_script *persistent_script;
@@ -2018,7 +2018,7 @@ static int persistent_stream_open_function(const char *filename, zend_file_handl
 }
 
 /* zend_resolve_path() replacement for PHP 5.3 and above */
-static zend_string* persistent_zend_resolve_path(const char *filename, int filename_len)
+static zend_string* persistent_zend_resolve_path(const char *filename, size_t filename_len)
 {
 	if (ZCG(enabled) && accel_startup_ok &&
 	    (ZCG(counted) || ZCSG(accelerator_enabled)) &&
@@ -2319,7 +2319,6 @@ static inline int accel_find_sapi(void)
 		"cli-server",
 		"cgi-fcgi",
 		"fpm-fcgi",
-		"isapi",
 		"apache2filter",
 		"apache2handler",
 		"litespeed",
@@ -2598,7 +2597,7 @@ static int accel_startup(zend_extension *extension)
 		    strcmp(sapi_module.name, "cli") == 0) {
 			zps_startup_failure("Opcode Caching is disabled for CLI", NULL, accelerator_remove_cb);
 		} else {
-			zps_startup_failure("Opcode Caching is only supported in Apache, ISAPI, FPM, FastCGI and LiteSpeed SAPIs", NULL, accelerator_remove_cb);
+			zps_startup_failure("Opcode Caching is only supported in Apache, FPM, FastCGI and LiteSpeed SAPIs", NULL, accelerator_remove_cb);
 		}
 		return SUCCESS;
 	}

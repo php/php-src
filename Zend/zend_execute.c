@@ -1886,7 +1886,9 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 				object_init(container);
 			} else {
 				if (container_op_type != IS_VAR || EXPECTED(!Z_ISERROR_P(container))) {
-					zend_error(E_WARNING, "Attempt to modify property of non-object");
+					zend_string *property_name = zval_get_string(prop_ptr);
+					zend_error(E_WARNING, "Attempt to modify property '%s' of non-object", ZSTR_VAL(property_name));
+					zend_string_release(property_name);
 				}
 				ZVAL_ERROR(result);
 				return;
@@ -2780,7 +2782,7 @@ static zend_never_inline zend_op_array* ZEND_FASTCALL zend_include_or_eval(zval 
 					zend_file_handle file_handle;
 					zend_string *resolved_path;
 
-					resolved_path = zend_resolve_path(Z_STRVAL_P(inc_filename), (int)Z_STRLEN_P(inc_filename));
+					resolved_path = zend_resolve_path(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename));
 					if (resolved_path) {
 						if (zend_hash_exists(&EG(included_files), resolved_path)) {
 							goto already_compiled;

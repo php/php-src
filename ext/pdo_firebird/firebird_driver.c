@@ -545,6 +545,9 @@ static int firebird_handle_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *v
 				info_func(tmp);
 				ZVAL_STRING(val, tmp);
 			}
+#ifdef PHP_WIN32
+			FreeLibrary(l);
+#endif
 #else
 			ZVAL_NULL(val);
 #endif

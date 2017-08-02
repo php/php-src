@@ -5411,9 +5411,9 @@ PHP_FUNCTION(ini_get_all)
 }
 /* }}} */
 
-static int php_ini_check_path(char *option_name, int option_len, char *new_option_name, int new_option_len) /* {{{ */
+static int php_ini_check_path(char *option_name, size_t option_len, char *new_option_name, size_t new_option_len) /* {{{ */
 {
-	if (option_len != (new_option_len - 1)) {
+	if (option_len + 1 != new_option_len) {
 		return 0;
 	}
 
@@ -5434,7 +5434,7 @@ PHP_FUNCTION(ini_set)
 		Z_PARAM_STR(new_value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	old_value = zend_ini_string(ZSTR_VAL(varname), (int)ZSTR_LEN(varname), 0);
+	old_value = zend_ini_string(ZSTR_VAL(varname), ZSTR_LEN(varname), 0);
 
 	/* copy to return here, because alter might free it! */
 	if (old_value) {
@@ -5451,7 +5451,7 @@ PHP_FUNCTION(ini_set)
 		RETVAL_FALSE;
 	}
 
-#define _CHECK_PATH(var, var_len, ini) php_ini_check_path(var, (int)var_len, ini, sizeof(ini))
+#define _CHECK_PATH(var, var_len, ini) php_ini_check_path(var, var_len, ini, sizeof(ini))
 	/* open basedir check */
 	if (PG(open_basedir)) {
 		if (_CHECK_PATH(ZSTR_VAL(varname), ZSTR_LEN(varname), "error_log") ||
@@ -5466,6 +5466,7 @@ PHP_FUNCTION(ini_set)
 			}
 		}
 	}
+#undef _CHECK_PATH
 
 	if (zend_alter_ini_entry_ex(varname, new_value, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0) == FAILURE) {
 		zval_dtor(return_value);
@@ -5917,7 +5918,7 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int cal
 			}
 
 			if (!(Z_STRLEN_P(arg1) > 1 && Z_STRVAL_P(arg1)[0] == '0') && is_numeric_string(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1), NULL, NULL, 0) == IS_LONG) {
-				zend_ulong key = (zend_ulong) zend_atol(Z_STRVAL_P(arg1), (int)Z_STRLEN_P(arg1));
+				zend_ulong key = (zend_ulong) zend_atol(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1));
 				if ((find_hash = zend_hash_index_find(Z_ARRVAL_P(arr), key)) == NULL) {
 					array_init(&hash);
 					find_hash = zend_hash_index_update(Z_ARRVAL_P(arr), key, &hash);

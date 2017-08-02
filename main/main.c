@@ -157,7 +157,7 @@ static PHP_INI_MH(OnSetSerializePrecision)
 static PHP_INI_MH(OnChangeMemoryLimit)
 {
 	if (new_value) {
-		PG(memory_limit) = zend_atol(ZSTR_VAL(new_value), (int)ZSTR_LEN(new_value));
+		PG(memory_limit) = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
 	} else {
 		PG(memory_limit) = 1<<30;		/* effectively, no limit */
 	}
@@ -310,7 +310,7 @@ static PHP_INI_MH(OnUpdateTimeout)
 
 /* {{{ php_get_display_errors_mode() helper function
  */
-static int php_get_display_errors_mode(char *value, int value_length)
+static int php_get_display_errors_mode(char *value, size_t value_length)
 {
 	int mode;
 
@@ -343,7 +343,7 @@ static int php_get_display_errors_mode(char *value, int value_length)
  */
 static PHP_INI_MH(OnUpdateDisplayErrors)
 {
-	PG(display_errors) = (zend_bool) php_get_display_errors_mode(ZSTR_VAL(new_value), (int)ZSTR_LEN(new_value));
+	PG(display_errors) = (zend_bool) php_get_display_errors_mode(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
 
 	return SUCCESS;
 }
@@ -353,15 +353,16 @@ static PHP_INI_MH(OnUpdateDisplayErrors)
  */
 static PHP_INI_DISP(display_errors_mode)
 {
-	int mode, tmp_value_length, cgi_or_cli;
+	int mode, cgi_or_cli;
+	size_t tmp_value_length;
 	char *tmp_value;
 
 	if (type == ZEND_INI_DISPLAY_ORIG && ini_entry->modified) {
 		tmp_value = (ini_entry->orig_value ? ZSTR_VAL(ini_entry->orig_value) : NULL );
-		tmp_value_length = (int)(ini_entry->orig_value? ZSTR_LEN(ini_entry->orig_value) : 0);
+		tmp_value_length = (ini_entry->orig_value? ZSTR_LEN(ini_entry->orig_value) : 0);
 	} else if (ini_entry->value) {
 		tmp_value = ZSTR_VAL(ini_entry->value);
-		tmp_value_length = (int)ZSTR_LEN(ini_entry->value);
+		tmp_value_length = ZSTR_LEN(ini_entry->value);
 	} else {
 		tmp_value = NULL;
 		tmp_value_length = 0;
@@ -981,10 +982,10 @@ PHPAPI ZEND_COLD void php_win32_docref2_from_error(DWORD error, const char *para
 		php_error_docref2(NULL, param1, param2, E_WARNING, "%s", strerror(errno));
 	} else {
 		char buf[PHP_WIN32_ERROR_MSG_BUFFER_SIZE + 1];
-		int buf_len;
+		size_t buf_len;
 
 		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, error, 0, buf, PHP_WIN32_ERROR_MSG_BUFFER_SIZE, NULL);
-		buf_len = (int)strlen(buf);
+		buf_len = strlen(buf);
 		if (buf_len >= 2) {
 			buf[buf_len - 1] = '\0';
 			buf[buf_len - 2] = '\0';
@@ -1427,7 +1428,7 @@ PHPAPI int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *h
 }
 /* }}} */
 
-static zend_string *php_resolve_path_for_zend(const char *filename, int filename_len) /* {{{ */
+static zend_string *php_resolve_path_for_zend(const char *filename, size_t filename_len) /* {{{ */
 {
 	return php_resolve_path(filename, filename_len, PG(include_path));
 }
@@ -2111,6 +2112,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	ts_allocate_id(&php_win32_core_globals_id, sizeof(php_win32_core_globals), (ts_allocate_ctor) php_win32_core_globals_ctor, (ts_allocate_dtor) php_win32_core_globals_dtor);
 #endif
 #else
+	memset(&core_globals, 0, sizeof(core_globals));
 	php_startup_ticks();
 #endif
 	gc_globals_ctor();

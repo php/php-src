@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -42,27 +42,28 @@
 
 /* {{{ callback_fn() 
    OCI TAF callback function, calling userspace function */
-sb4 callback_fn(OCISvcCtx *svchp, OCIEnv *envhp, php_oci_connection *fo_ctx, ub4 fo_type, ub4 fo_event)
+sb4 callback_fn(void *svchp, void *envhp, void *fo_ctx, ub4 fo_type, ub4 fo_event)
 {
 	/* Create zval */
 	zval retval, params[3];
+    php_oci_connection *connection = (php_oci_connection*)fo_ctx;
 
 	/* Default return value */
 	sb4 returnValue = 0;
 
-	/* Check if userspace callback function was disabled */
-	if (Z_ISUNDEF(fo_ctx->taf_callback) || Z_ISNULL(fo_ctx->taf_callback)) {
+	/* Check if userspace callback function was unregistered */
+	if (Z_ISUNDEF(connection->taf_callback) || Z_ISNULL(connection->taf_callback)) {
 		return 0;
 	}
 
 	/* Initialize zval */
-	ZVAL_RES(&params[0], fo_ctx->id);
+	ZVAL_RES(&params[0], connection->id);
 	ZVAL_LONG(&params[1], fo_event);
 	ZVAL_LONG(&params[2], fo_type);
 
 	/* Call user function (if possible) */
-	if (call_user_function(EG(function_table), NULL, &fo_ctx->taf_callback, &retval, 3, params) == FAILURE) {
-		php_error_docref(NULL, E_WARNING, "Unable to call taf callback function, is it defined?");
+	if (call_user_function(EG(function_table), NULL, &connection->taf_callback, &retval, 3, params) == FAILURE) {
+		php_error_docref(NULL, E_WARNING, "Unable to call Oracle TAF callback function");
 	}
 
 	/* Set return value */
@@ -83,10 +84,10 @@ sb4 callback_fn(OCISvcCtx *svchp, OCIEnv *envhp, php_oci_connection *fo_ctx, ub4
 }
 /* }}} */
 
-/* {{{ php_oci_disable_taf_callback()
-   Disables the userspace callback function for Oracle TAF,
+/* {{{ php_oci_unregister_taf_callback()
+   Unregister the userspace callback function for Oracle TAF,
    while keeping the OCI callback alive */
-int php_oci_disable_taf_callback(php_oci_connection *connection)
+int php_oci_unregister_taf_callback(php_oci_connection *connection)
 {
 	return php_oci_register_taf_callback(connection, NULL);
 }
@@ -103,9 +104,9 @@ int php_oci_register_taf_callback(php_oci_connection *connection, zval *callback
 	OCIFocbkStruct failover;
 
 	if (!callback) {
-		/* Disable callback */
+		/* Unregister callback */
 		if (Z_ISUNDEF(connection->taf_callback) || Z_ISNULL(connection->taf_callback)) {
-			return 0; // Nothing to disable
+			return 0; // Nothing to unregister 
 		}
 
 		registered = 1;

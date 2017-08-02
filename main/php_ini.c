@@ -353,7 +353,7 @@ static void php_load_php_extension_cb(void *arg)
 static void php_load_zend_extension_cb(void *arg)
 {
 	char *filename = *((char **) arg);
-	const int length = (int)strlen(filename);
+	const size_t length = strlen(filename);
 
 #ifndef PHP_WIN32
 	(void) length;
@@ -362,10 +362,16 @@ static void php_load_zend_extension_cb(void *arg)
 	if (IS_ABSOLUTE_PATH(filename, length)) {
 		zend_load_extension(filename);
 	} else {
+		DL_HANDLE handle;
 		char *libpath;
 		char *extension_dir = INI_STR("extension_dir");
-		int extension_dir_len = (int)strlen(extension_dir);
-		int slash_suffix = IS_SLASH(extension_dir[extension_dir_len-1]);
+		int slash_suffix = 0;
+		char *err1, *err2;
+
+		if (extension_dir && extension_dir[0]) {
+			slash_suffix = IS_SLASH(extension_dir[strlen(extension_dir)-1]);
+		}
+
 		/* Try as filename first */
 		if (slash_suffix) {
 			spprintf(&libpath, 0, "%s%s", extension_dir, filename); /* SAFE */
@@ -373,7 +379,8 @@ static void php_load_zend_extension_cb(void *arg)
 			spprintf(&libpath, 0, "%s%c%s", extension_dir, DEFAULT_SLASH, filename); /* SAFE */
 		}
 
-		if (VCWD_ACCESS(libpath, F_OK)) {
+		handle = (DL_HANDLE)php_load_shlib(libpath, &err1);
+		if (!handle) {
 			/* If file does not exist, consider as extension name and build file name */
 			char *orig_libpath = libpath;
 
@@ -383,18 +390,22 @@ static void php_load_zend_extension_cb(void *arg)
 				spprintf(&libpath, 0, "%s%c" PHP_SHLIB_EXT_PREFIX "%s." PHP_SHLIB_SUFFIX, extension_dir, DEFAULT_SLASH, filename); /* SAFE */
 			}
 
-			if (VCWD_ACCESS(libpath, F_OK)) {
-				php_error(E_CORE_WARNING, "Cannot access Zend extension %s (Tried: %s, %s)\n",
-					filename, orig_libpath, libpath);
+			handle = (DL_HANDLE)php_load_shlib(libpath, &err2);
+			if (!handle) {
+				php_error(E_CORE_WARNING, "Failed loading Zend extension '%s' (tried: %s (%s), %s (%s))",
+					filename, orig_libpath, err1, libpath, err2);
 				efree(orig_libpath);
+				efree(err1);
 				efree(libpath);
+				efree(err2);
 				return;
 			}
 
 			efree(orig_libpath);
+			efree(err1);
 		}
 
-		zend_load_extension(libpath);
+		zend_load_extension_handle(handle, libpath);
 		efree(libpath);
 	}
 }

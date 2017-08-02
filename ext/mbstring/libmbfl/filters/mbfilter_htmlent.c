@@ -88,7 +88,8 @@ const struct mbfl_convert_vtbl vtbl_html_wchar = {
 	mbfl_filt_conv_html_dec_ctor,
 	mbfl_filt_conv_html_dec_dtor,
 	mbfl_filt_conv_html_dec,
-	mbfl_filt_conv_html_dec_flush };
+	mbfl_filt_conv_html_dec_flush,
+	mbfl_filt_conv_html_dec_copy };
 
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
@@ -309,4 +310,9 @@ int mbfl_filt_conv_html_dec_flush(mbfl_convert_filter *filter)
 	return err;
 }
 
-
+void mbfl_filt_conv_html_dec_copy(mbfl_convert_filter *src, mbfl_convert_filter *dest)
+{
+	*dest = *src;
+	dest->opaque = mbfl_malloc(html_enc_buffer_size+1);
+	memcpy(dest->opaque, src->opaque, html_enc_buffer_size+1);
+}

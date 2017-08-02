@@ -21,12 +21,14 @@ echo $orstr,"\n";
 echo $new_str,"\n";
 echo $recovstr,"\n";
 
-var_dump(($orstr == $recovstr) == $recovstr2);
+var_dump($orstr === $recovstr);
+var_dump($orstr === $recovstr2);
 
 echo "Done.\n";
 --EXPECT--
 オーシャンビュー
 ōshanbyū
 オーシャンビュー
+bool(true)
 bool(true)
 Done.

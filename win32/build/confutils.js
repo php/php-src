@@ -46,7 +46,8 @@ var PHP_TEST_INI_EXT_EXCLUDE = "";
 
 var PHP_MAKEFILE_FRAGMENTS = PHP_SRC_DIR + "\\Makefile.fragments.w32";
 
-/* Care also about NTDDI_VERSION and _WIN32_WINNT in config.w32.h.in */
+/* Care also about NTDDI_VERSION and _WIN32_WINNT in config.w32.h.in 
+   and manifest. */
 var WINVER = "0x0601"; /* 7/2008r2 */
 
 // There's a minimum requirement for re2c..
@@ -61,18 +62,23 @@ var sapi_enabled = new Array();
 /* Store the headers to install */
 var headers_install = new Array();
 
+/* Store unknown configure options */
+var INVALID_CONFIG_ARGS = new Array();
+
 /* Mapping CL version > human readable name */
 var VC_VERSIONS = new Array();
 VC_VERSIONS[1700] = 'MSVC11 (Visual C++ 2012)';
 VC_VERSIONS[1800] = 'MSVC12 (Visual C++ 2013)';
 VC_VERSIONS[1900] = 'MSVC14 (Visual C++ 2015)';
 VC_VERSIONS[1910] = 'MSVC15 (Visual C++ 2017)';
+VC_VERSIONS[1911] = 'MSVC15 (Visual C++ 2017)';
 
 var VC_VERSIONS_SHORT = new Array();
 VC_VERSIONS_SHORT[1700] = 'VC11';
 VC_VERSIONS_SHORT[1800] = 'VC12';
 VC_VERSIONS_SHORT[1900] = 'VC14';
 VC_VERSIONS_SHORT[1910] = 'VC15';
+VC_VERSIONS_SHORT[1911] = 'VC15';
 
 if (PROGRAM_FILES == null) {
 	PROGRAM_FILES = "C:\\Program Files";
@@ -399,9 +405,13 @@ function conf_process_args()
 			}
 		}
 		if (!found) {
-			STDERR.WriteLine("Unknown option " + argname + "; please try configure.js --help for a list of valid options");
-			WScript.Quit(2);
+			INVALID_CONFIG_ARGS[INVALID_CONFIG_ARGS.length] = argname;
 		}
+	}
+
+	if (PHP_SNAPSHOT_BUILD != 'no' && INVALID_CONFIG_ARGS.length) {
+		STDERR.WriteLine('Unknown option ' + INVALID_CONFIG_ARGS[0] + '; please try configure.js --help for a list of valid options');
+		WScript.Quit(2);
 	}
 
 	if (configure_help_mode) {
@@ -1228,9 +1238,6 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 		}
 
 		ldflags += " /PGD:$(PGOPGD_DIR)\\" + makefiletarget.substring(0, makefiletarget.indexOf(".")) + ".pgd";
-	} else if (PHP_DEBUG != "yes") {
-		ADD_FLAG('CFLAGS_' + SAPI, "/GL");
-		ADD_FLAG('LDFLAGS_' + SAPI, "/LTCG:INCREMENTAL");
 	}
 
 	if (MODE_PHPIZE) {
@@ -1431,9 +1438,6 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 			ADD_FLAG('CFLAGS_' + EXT, "/GL /O2");
 
 			ldflags = " /PGD:$(PGOPGD_DIR)\\" + dllname.substring(0, dllname.indexOf(".")) + ".pgd";
-		} else if (PHP_DEBUG != "yes") {
-			ADD_FLAG('CFLAGS_' + EXT, "/GL");
-			ADD_FLAG('LDFLAGS_' + EXT, "/LTCG:INCREMENTAL");
 		}
 
 		MFO.WriteLine("$(BUILD_DIR)\\" + libname + ": $(BUILD_DIR)\\" + dllname);
@@ -1476,9 +1480,6 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 				ADD_FLAG("STATIC_EXT_CFLAGS", "/GL /O2");
 				static_pgo_enabled = true;
 			}
-		} else if (PHP_DEBUG != "yes") {
-			ADD_FLAG("STATIC_EXT_CFLAGS", "/GL");
-			ADD_FLAG('STATIC_EXT_LDFLAGS', "/LTCG:INCREMENTAL");
 		}
 
 		/* find the header that declares the module pointer,
@@ -2012,6 +2013,17 @@ function generate_files()
 	STDOUT.WriteBlankLines(1);
 	write_summary();
 
+	if (INVALID_CONFIG_ARGS.length) {
+		STDOUT.WriteLine('WARNING');
+		STDOUT.WriteLine('The following arguments is invalid, and therefore ignored:');
+
+		for (var i = 0; i < INVALID_CONFIG_ARGS.length; ++i) {
+			STDOUT.WriteLine(' ' + INVALID_CONFIG_ARGS[i]);
+		}
+
+		STDOUT.WriteBlankLines(2);
+	}
+
 	if (PHP_SNAPSHOT_BUILD != "no") {
 		STDOUT.WriteLine("Type 'nmake snap' to build a PHP snapshot");
 	} else {
@@ -2271,6 +2283,7 @@ function generate_phpize()
 	CJ.WriteLine("var PHP_DEBUG=" + '"' + PHP_DEBUG + '"');
 	CJ.WriteLine("var PHP_DLL_LIB =" + '"' + get_define('PHPLIB') + '"');
 	CJ.WriteLine("var PHP_DLL =" + '"' + get_define('PHPDLL') + '"');
+	CJ.WriteLine("var PHP_SECURITY_FLAGS =" + '"' + PHP_SECURITY_FLAGS + '"');
 
 	/* The corresponding configure options aren't enabled through phpize,
 		thus these dummy declarations are required. */

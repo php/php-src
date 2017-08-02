@@ -38,17 +38,15 @@
 #include "php_lcg.h"
 #include "uniqid.h"
 
+#ifdef HAVE_GETTIMEOFDAY
+ZEND_TLS struct timeval prev_tv = { 0, 0 };
+
 /* {{{ proto string uniqid([string prefix [, bool more_entropy]])
    Generates a unique ID */
-#ifdef HAVE_GETTIMEOFDAY
 PHP_FUNCTION(uniqid)
 {
 	char *prefix = "";
-#if defined(__CYGWIN__)
-	zend_bool more_entropy = 1;
-#else
 	zend_bool more_entropy = 0;
-#endif
 	zend_string *uniqid;
 	int sec, usec;
 	size_t prefix_len = 0;
@@ -60,17 +58,18 @@ PHP_FUNCTION(uniqid)
 		Z_PARAM_BOOL(more_entropy)
 	ZEND_PARSE_PARAMETERS_END();
 
-#if HAVE_USLEEP && !defined(PHP_WIN32)
-	if (!more_entropy) {
-#if defined(__CYGWIN__)
-		php_error_docref(NULL, E_WARNING, "You must use 'more entropy' under CYGWIN");
-		RETURN_FALSE;
-#else
-		usleep(1);
-#endif
-	}
-#endif
-	gettimeofday((struct timeval *) &tv, (struct timezone *) NULL);
+	/* This implementation needs current microsecond to change,
+	 * hence we poll time until it does. This is much faster than
+	 * calling usleep(1) which may cause the kernel to schedule
+	 * another process, causing a pause of around 10ms.
+	 */
+	do {
+		(void)gettimeofday((struct timeval *) &tv, (struct timezone *) NULL);
+	} while (tv.tv_sec == prev_tv.tv_sec && tv.tv_usec == prev_tv.tv_usec);
+
+	prev_tv.tv_sec = tv.tv_sec;
+	prev_tv.tv_usec = tv.tv_usec;
+
 	sec = (int) tv.tv_sec;
 	usec = (int) (tv.tv_usec % 0x100000);
 
