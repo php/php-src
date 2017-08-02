@@ -1280,7 +1280,7 @@ PHP_FUNCTION(ftp_put)
 }
 /* }}} */
 
-/* {{{ proto bool ftp_append(resource stream, string remote_file, string local_file, int mode)
+/* {{{ proto bool ftp_append(resource stream, string remote_file, string local_file [, int mode])
    Append content of a file a another file on the FTP server */
 PHP_FUNCTION(ftp_append)
 {
@@ -1289,10 +1289,10 @@ PHP_FUNCTION(ftp_append)
 	ftptype_t	xtype;
 	char		*remote, *local;
 	size_t		remote_len, local_len;
-	zend_long		mode;
+	zend_long		mode=FTPTYPE_IMAGE;
 	php_stream 	*instream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rppl", &z_ftp, &remote, &remote_len, &local, &local_len, &mode) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rpp|l", &z_ftp, &remote, &remote_len, &local, &local_len, &mode) == FAILURE) {
 		return;
 	}
 
