@@ -1,13 +1,7 @@
 --TEST--
-json_decode() and json_encode(): JSON_THROW_ON_ERROR flag
+Test json_encode() function : JSON_THROW_ON_ERROR flag
 --FILE--
 <?php
-
-try {
-    var_dump(json_decode("{", false, 512, JSON_THROW_ON_ERROR));
-} catch (JsonException $e) {
-    var_dump($e);
-}
 
 try {
     var_dump(json_encode("\x80", JSON_THROW_ON_ERROR));
@@ -27,15 +21,15 @@ try {
 --EXPECTF--
 object(JsonException)#1 (7) {
   ["message":protected]=>
-  string(12) "Syntax error"
+  string(56) "Malformed UTF-8 characters, possibly incorrectly encoded"
   ["string":"Exception":private]=>
   string(0) ""
   ["code":protected]=>
-  int(4)
+  int(5)
   ["file":protected]=>
   string(%d) "%s"
   ["line":protected]=>
-  int(4)
+  int(%d)
   ["trace":"Exception":private]=>
   array(1) {
     [0]=>
@@ -43,18 +37,14 @@ object(JsonException)#1 (7) {
       ["file"]=>
       string(%d) "%s"
       ["line"]=>
-      int(4)
+      int(%d)
       ["function"]=>
-      string(11) "json_decode"
+      string(11) "json_encode"
       ["args"]=>
-      array(4) {
+      array(2) {
         [0]=>
-        string(1) "{"
+        string(1) "%s"
         [1]=>
-        bool(false)
-        [2]=>
-        int(512)
-        [3]=>
         int(4194304)
       }
     }
@@ -72,7 +62,7 @@ object(JsonException)#2 (7) {
   ["file":protected]=>
   string(%d) "%s"
   ["line":protected]=>
-  int(10)
+  int(%d)
   ["trace":"Exception":private]=>
   array(1) {
     [0]=>
@@ -80,40 +70,7 @@ object(JsonException)#2 (7) {
       ["file"]=>
       string(%d) "%s"
       ["line"]=>
-      int(10)
-      ["function"]=>
-      string(11) "json_encode"
-      ["args"]=>
-      array(2) {
-        [0]=>
-        string(1) "%s"
-        [1]=>
-        int(4194304)
-      }
-    }
-  }
-  ["previous":"Exception":private]=>
-  NULL
-}
-object(JsonException)#1 (7) {
-  ["message":protected]=>
-  string(56) "Malformed UTF-8 characters, possibly incorrectly encoded"
-  ["string":"Exception":private]=>
-  string(0) ""
-  ["code":protected]=>
-  int(5)
-  ["file":protected]=>
-  string(%d) "%s"
-  ["line":protected]=>
-  int(18)
-  ["trace":"Exception":private]=>
-  array(1) {
-    [0]=>
-    array(4) {
-      ["file"]=>
-      string(%d) "%s"
-      ["line"]=>
-      int(18)
+      int(%d)
       ["function"]=>
       string(11) "json_encode"
       ["args"]=>
