@@ -701,7 +701,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 	zend_compile_file = compile_file;
 	zend_execute_ex = execute_ex;
 	zend_execute_internal = NULL;
-#endif /* HAVE_SYS_SDT_H */
+#endif /* HAVE_DTRACE */
 	zend_compile_string = compile_string;
 	zend_throw_exception_hook = NULL;
 
