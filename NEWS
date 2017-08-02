@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.2.0beta3
 
+- Mbstring:
+  . Fixed bug #75001 (Wrong reflection on mb_eregi_replace). (Fabien
+    Villepinte)
+
 - SQLite3:
   . Updated to SQLite 3.20.0. (cmb)
 
