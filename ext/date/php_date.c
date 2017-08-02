@@ -1932,6 +1932,10 @@ static void date_period_it_rewind(zend_object_iterator *iter)
 	if (iterator->object->current) {
 		timelib_time_dtor(iterator->object->current);
 	}
+	if (!iterator->object->start) {
+		zend_throw_error(NULL, "DatePeriod has not been initialized correctly");
+		return;
+	}
 	iterator->object->current = timelib_time_clone(iterator->object->start);
 	date_period_it_invalidate_current(iter);
 }
