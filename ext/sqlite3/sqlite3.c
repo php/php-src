@@ -148,7 +148,11 @@ PHP_METHOD(sqlite3, open)
 #endif
 	if (rc != SQLITE_OK) {
 		zend_throw_exception_ex(zend_ce_exception, 0, "Unable to open database: %s",
+#ifdef HAVE_SQLITE3_ERRSTR
 				db_obj->db ? sqlite3_errmsg(db_obj->db) : sqlite3_errstr(rc));
+#else
+				db_obj->db ? sqlite3_errmsg(db_obj->db) : "");
+#endif
 		if (fullpath != filename) {
 			efree(fullpath);
 		}
