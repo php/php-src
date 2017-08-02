@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.2.0beta3
 
+- Date:
+  . Fixed bug #75002 (Null Pointer Dereference in timelib_time_clone). (Derick)
+
 - FTP:
   . Added ftp_append() function. (blar)
 
