@@ -12,6 +12,10 @@ PHP                                                                        NEWS
 - SPL:
   . Added spl_object_id(). (Tyson Andre)
 
+- XMLRPC:
+  . Fixed bug #74975 (Incorrect xmlrpc serialization for classes with declared
+    properties). (blar)
+
 03 Aug 2017, PHP 7.2.0beta2
 
 - Core:
