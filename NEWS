@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug #74125 (Fixed finding CURL on systems with multiarch support).
     (cebe)
 
+- Date:
+  . Fixed bug #75002 (Null Pointer Dereference in timelib_time_clone). (Derick)
+
 - Intl:
   . Fixed bug #74993 (Wrong reflection on some locale_* functions). (Sara)
 
