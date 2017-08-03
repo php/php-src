@@ -467,14 +467,26 @@ int mbfl_convert_filter_strcat(mbfl_convert_filter *filter, const unsigned char 
 int
 mbfl_filt_conv_illegal_output(int c, mbfl_convert_filter *filter)
 {
-	int mode_backup, ret, n, m, r;
+	int mode_backup, substchar_backup, ret, n, m, r;
 
 	ret = 0;
+
 	mode_backup = filter->illegal_mode;
-	filter->illegal_mode = MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE;
+	substchar_backup = filter->illegal_substchar;
+
+	/* The used substitution character may not be supported by the target character encoding.
+	 * If that happens, first try to use "?" instead and if that also fails, silently drop the
+	 * character. */
+	if (filter->illegal_mode == MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR
+			&& filter->illegal_substchar != 0x3f) {
+		filter->illegal_substchar = 0x3f;
+	} else {
+		filter->illegal_mode = MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE;
+	}
+
 	switch (mode_backup) {
 	case MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR:
-		ret = (*filter->filter_function)(filter->illegal_substchar, filter);
+		ret = (*filter->filter_function)(substchar_backup, filter);
 		break;
 	case MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG:
 		if (c >= 0) {
@@ -560,14 +572,16 @@ mbfl_filt_conv_illegal_output(int c, mbfl_convert_filter *filter)
 				}
 				ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)";");
 			} else {
-				ret = (*filter->filter_function)(filter->illegal_substchar, filter);
+				ret = (*filter->filter_function)(substchar_backup, filter);
 			}
 		}
 		break;
 	default:
 		break;
 	}
+
 	filter->illegal_mode = mode_backup;
+	filter->illegal_substchar = substchar_backup;
 	filter->num_illegalchar++;
 
 	return ret;
