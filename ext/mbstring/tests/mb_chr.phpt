@@ -6,7 +6,7 @@ mb_chr()
 <?php
 var_dump(
     "\u{20bb7}" === mb_chr(0x20bb7),
-    "\x8f\xa1\xef" === mb_chr(0x8fa1ef, "EUC-JP-2004"),
+    "\x8f\xa1\xef" === mb_chr(0x50aa, "EUC-JP-2004"),
     "?" === mb_chr(0xd800)
 );
 

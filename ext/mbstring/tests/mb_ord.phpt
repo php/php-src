@@ -7,7 +7,7 @@ mb_ord()
 var_dump(
     0x20bb7 === mb_ord("\u{20bb7}"),
     0x3f === mb_ord("\u{d800}"),
-    0x8fa1ef === mb_ord("\x8f\xa1\xef", "EUC-JP-2004")
+    0x50aa === mb_ord("\x8f\xa1\xef", "EUC-JP-2004")
 );
 
 // Invalid
