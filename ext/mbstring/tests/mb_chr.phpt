@@ -15,9 +15,8 @@ mb_substitute_character(0xfffd);
 var_dump(
     "\u{fffd}" === mb_chr(0xd800, "UTF-8")
 );
-mb_substitute_character(0xd800);
 var_dump(
-    "?" === mb_chr(0xd800, "UTF-8")
+    "\u{fffd}" === mb_chr(0xd800, "UTF-8")
 );
 
 mb_internal_encoding("EUC-JP");
@@ -43,15 +42,15 @@ bool(true)
 bool(true)
 bool(true)
 
-Warning: mb_chr(): Unknown encoding "typo" in %s on line 26
+Warning: mb_chr(): Unknown encoding "typo" in %s on line %d
 
-Warning: mb_chr(): Unsupported encoding "pass" in %s on line 27
+Warning: mb_chr(): Unsupported encoding "pass" in %s on line %d
 
-Warning: mb_chr(): Unsupported encoding "jis" in %s on line 28
+Warning: mb_chr(): Unsupported encoding "jis" in %s on line %d
 
-Warning: mb_chr(): Unsupported encoding "cp50222" in %s on line 29
+Warning: mb_chr(): Unsupported encoding "cp50222" in %s on line %d
 
-Warning: mb_chr(): Unsupported encoding "utf-7" in %s on line 30
+Warning: mb_chr(): Unsupported encoding "utf-7" in %s on line %d
 bool(false)
 bool(false)
 bool(false)

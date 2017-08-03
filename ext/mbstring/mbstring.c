@@ -2023,69 +2023,21 @@ PHP_FUNCTION(mb_detect_order)
 
 static inline int php_mb_check_code_point(zend_long cp)
 {
-	enum mbfl_no_encoding no_enc;
-	char* buf;
-	char buf_len;
-
-	no_enc = MBSTRG(current_internal_encoding)->no_encoding;
-
-	if (php_mb_is_no_encoding_utf8(no_enc)) {
-
-		if ((cp > 0 && 0xd800 > cp) || (cp > 0xdfff && 0x110000 > cp)) {
-			return 1;
-		}
-
+	if (cp <= 0 || cp >= 0x110000) {
+		/* Out of Unicode range */
 		return 0;
-	} else if (php_mb_is_no_encoding_unicode(no_enc)) {
-
-		if (0 > cp || cp > 0x10ffff) {
-			return 0;
-		}
-
-		return 1;
-
-	// backward compatibility
-	} else if (php_mb_is_unsupported_no_encoding(no_enc)) {
-		return cp < 0xffff && cp > 0x0;
 	}
 
-	if (cp < 0x100) {
-		buf_len = 1;
-		buf = (char *) safe_emalloc(buf_len, 1, 1);
-		buf[0] = cp;
-		buf[1] = 0;
-	} else if (cp < 0x10000) {
-		buf_len = 2;
-		buf = (char *) safe_emalloc(buf_len, 1, 1);
-		buf[0] = cp >> 8;
-		buf[1] = cp & 0xff;
-		buf[2] = 0;
-	} else if (cp < 0x1000000) {
-		buf_len = 3;
-		buf = (char *) safe_emalloc(buf_len, 1, 1);
-		buf[0] = cp >> 16;
-		buf[1] = (cp >> 8) & 0xff;
-		buf[2] = cp & 0xff;
-		buf[3] = 0;
-	} else {
-		buf_len = 4;
-		buf = (char *) safe_emalloc(buf_len, 1, 1);
-		buf[0] = cp >> 24;
-		buf[1] = (cp >> 16) & 0xff;
-		buf[2] = (cp >> 8) & 0xff;
-		buf[3] = cp & 0xff;
-		buf[4] = 0;
+	if (cp >= 0xd800 && cp <= 0xdfff) {
+		/* Surrogate code-point. These are never valid on their own and we only allow a single
+		 * substitute character. */
+		return 0;
 	}
 
-	if (php_mb_check_encoding(buf, buf_len, NULL)) {
-		efree(buf);
-
-		return 1;
-	}
-
-	efree(buf);
-
-	return 0;
+	/* As the we do not know the target encoding of the conversion operation that is going to
+	 * use the substitution character, we cannot check whether the codepoint is actually mapped
+	 * in the given encoding at this point. Thus we have to accept everything. */
+	return 1;
 }
 
 /* {{{ proto mixed mb_substitute_character([mixed substchar])
@@ -2126,7 +2078,7 @@ PHP_FUNCTION(mb_substitute_character)
 						MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
 						MBSTRG(current_filter_illegal_substchar) = Z_LVAL_P(arg1);
 					} else {
-						php_error_docref(NULL, E_WARNING, "Unknown character.");
+						php_error_docref(NULL, E_WARNING, "Unknown character");
 						RETURN_FALSE;
 					}
 				}
@@ -2137,7 +2089,7 @@ PHP_FUNCTION(mb_substitute_character)
 					MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
 					MBSTRG(current_filter_illegal_substchar) = Z_LVAL_P(arg1);
 				} else {
-					php_error_docref(NULL, E_WARNING, "Unknown character.");
+					php_error_docref(NULL, E_WARNING, "Unknown character");
 					RETURN_FALSE;
 				}
 				break;
