@@ -106,8 +106,6 @@ static void php_mb_gpc_set_input_encoding(const zend_encoding *encoding);
 
 static inline zend_bool php_mb_is_unsupported_no_encoding(enum mbfl_no_encoding no_enc);
 
-static inline zend_bool php_mb_is_no_encoding_unicode(enum mbfl_no_encoding no_enc);
-
 static inline zend_bool php_mb_is_no_encoding_utf8(enum mbfl_no_encoding no_enc);
 /* }}} */
 
@@ -3172,13 +3170,6 @@ static inline zend_bool php_mb_is_unsupported_no_encoding(enum mbfl_no_encoding 
 }
 
 
-/* See mbfl_no_encoding definition for list of unicode encodings */
-static inline zend_bool php_mb_is_no_encoding_unicode(enum mbfl_no_encoding no_enc)
-{
-	return (no_enc >= mbfl_no_encoding_ucs4 && no_enc <= mbfl_no_encoding_utf8_sb);
-}
-
-
 /* See mbfl_no_encoding definition for list of UTF-8 encodings */
 static inline zend_bool php_mb_is_no_encoding_utf8(enum mbfl_no_encoding no_enc)
 {
@@ -5143,10 +5134,18 @@ static inline char* php_mb_chr(zend_long cp, const char* enc, size_t *output_len
 		}
 	}
 
-	if (php_mb_is_no_encoding_utf8(no_enc)) {
+	if (php_mb_is_unsupported_no_encoding(no_enc)) {
+		php_error_docref(NULL, E_WARNING, "Unsupported encoding \"%s\"", enc);
+		return NULL;
+	}
 
-		if (0 > cp || cp > 0x10ffff || (cp > 0xd7ff && 0xe000 > cp)) {
-			cp = MBSTRG(current_filter_illegal_substchar);
+	if (cp < 0 || cp > 0x10ffff) {
+		return NULL;
+	}
+
+	if (php_mb_is_no_encoding_utf8(no_enc)) {
+		if (cp > 0xd7ff && 0xe000 > cp) {
+			return NULL;
 		}
 
 		if (cp < 0x80) {
@@ -5182,20 +5181,6 @@ static inline char* php_mb_chr(zend_long cp, const char* enc, size_t *output_len
 		}
 
 		return ret;
-
-	} else if (php_mb_is_unsupported_no_encoding(no_enc)) {
-		php_error_docref(NULL, E_WARNING, "Unsupported encoding \"%s\"", enc);
-		return NULL;
-	}
-
-	if (0 > cp || 0x10ffff < cp) {
-
-		if (php_mb_is_no_encoding_unicode(MBSTRG(current_internal_encoding)->no_encoding)) {
-			cp = MBSTRG(current_filter_illegal_substchar);
-		} else {
-			cp = 0x3f;
-		}
-
 	}
 
 	buf_len = 4;
@@ -5206,9 +5191,21 @@ static inline char* php_mb_chr(zend_long cp, const char* enc, size_t *output_len
 	buf[3] = cp & 0xff;
 	buf[4] = 0;
 
-	ret = php_mb_convert_encoding(buf, buf_len, enc, "UCS-4BE", &ret_len);
-	efree(buf);
+	{
+		long orig_illegalchars = MBSTRG(illegalchars);
+		MBSTRG(illegalchars) = 0;
+		ret = php_mb_convert_encoding(buf, buf_len, enc, "UCS-4BE", &ret_len);
+		if (MBSTRG(illegalchars) != 0) {
+			efree(buf);
+			efree(ret);
+			MBSTRG(illegalchars) = orig_illegalchars;
+			return NULL;
+		}
 
+		MBSTRG(illegalchars) = orig_illegalchars;
+	}
+
+	efree(buf);
 	if (output_len) {
 		*output_len = ret_len;
 	}

@@ -7,22 +7,8 @@ mb_chr()
 var_dump(
     "\u{20bb7}" === mb_chr(0x20bb7),
     "\x8f\xa1\xef" === mb_chr(0x50aa, "EUC-JP-2004"),
-    "?" === mb_chr(0xd800)
-);
-
-mb_internal_encoding("UCS-4BE");
-mb_substitute_character(0xfffd);
-var_dump(
-    "\u{fffd}" === mb_chr(0xd800, "UTF-8")
-);
-var_dump(
-    "\u{fffd}" === mb_chr(0xd800, "UTF-8")
-);
-
-mb_internal_encoding("EUC-JP");
-mb_substitute_character(0xa4a2);
-var_dump(
-    "\u{a4a2}" === mb_chr(0xd800, "UTF-8")
+    false === mb_chr(0xd800),
+    false === mb_chr(0x1f600, "EUC-JP-2004")
 );
 
 // Invalid
@@ -35,8 +21,6 @@ var_dump(
 );
 ?>
 --EXPECTF--
-bool(true)
-bool(true)
 bool(true)
 bool(true)
 bool(true)
