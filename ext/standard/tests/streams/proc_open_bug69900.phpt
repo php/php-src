@@ -6,7 +6,7 @@ Bug #69900 Commandline input/output weird behaviour with STDIO
 error_reporting(E_ALL);
 
 $fl = dirname(__FILE__) . DIRECTORY_SEPARATOR . "test69900.php";
-$max_ms = ((bool)getenv('TRAVIS')) ? 3 : 1;
+$max_ms = ((bool)getenv('TRAVIS')) ? 5 : 1;
 
 $test_content = '<?php
 
