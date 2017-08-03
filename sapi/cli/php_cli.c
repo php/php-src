@@ -674,11 +674,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 	char *exec_direct=NULL, *exec_run=NULL, *exec_begin=NULL, *exec_end=NULL;
 	char *arg_free=NULL, **arg_excp=&arg_free;
 	char *script_file=NULL, *translated_path = NULL;
-#if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE) && (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
-	int interactive = php_win32_console_is_own();
-#else
 	int interactive=0;
-#endif
 	int lineno = 0;
 	const char *param_error=NULL;
 	int hide_argv = 0;
@@ -917,6 +913,20 @@ static int do_cli(int argc, char **argv) /* {{{ */
 			exit_status=1;
 			goto err;
 		}
+
+#if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE) && (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
+		if (!interactive) {
+		/* The -a option was not passed. If there is no file, it could
+		 	still make sense to run interactively. The presense of a file
+			is essential to mitigate buggy console info. */
+			interactive = php_win32_console_is_own() &&
+				!(script_file ||
+					argc > php_optind && behavior!=PHP_MODE_CLI_DIRECT &&
+					behavior!=PHP_MODE_PROCESS_STDIN &&
+					strcmp(argv[php_optind-1],"--")
+				);
+		}
+#endif
 
 		if (interactive) {
 #if (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
