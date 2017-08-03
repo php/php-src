@@ -22,7 +22,7 @@ var_dump(
 mb_internal_encoding("EUC-JP");
 mb_substitute_character(0xa4a2);
 var_dump(
-    "?" === mb_chr(0xd800, "UTF-8")
+    "\u{a4a2}" === mb_chr(0xd800, "UTF-8")
 );
 
 // Invalid

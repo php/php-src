@@ -970,6 +970,7 @@ static size_t php_mb_zend_encoding_converter(unsigned char **to, size_t *to_leng
 	if (convd == NULL) {
 		return (size_t) -1;
 	}
+
 	mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode));
 	mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));
 
@@ -3053,27 +3054,7 @@ MBSTRING_API char *php_mb_convert_encoding_ex(const char *input, size_t length, 
 	}
 
 	mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode));
-	if (string.encoding == MBSTRG(current_internal_encoding)) {
-		mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));
-	} else if (php_mb_is_no_encoding_unicode(string.encoding->no_encoding)
-			&& php_mb_is_no_encoding_unicode(MBSTRG(current_internal_encoding)->no_encoding)) {
-
-		if (php_mb_is_no_encoding_utf8(string.encoding->no_encoding)) {
-			if (MBSTRG(current_filter_illegal_substchar) > 0xd7ff &&
-				0xe000 > MBSTRG(current_filter_illegal_substchar)
-			) {
-				mbfl_buffer_converter_illegal_substchar(convd, 0x3f);
-			} else {
-				mbfl_buffer_converter_illegal_substchar(convd,
-					MBSTRG(current_filter_illegal_substchar));
-			}
-		} else {
-			mbfl_buffer_converter_illegal_substchar(convd,
-				MBSTRG(current_filter_illegal_substchar));
-		}
-	} else {
-		mbfl_buffer_converter_illegal_substchar(convd, 0x3f);
-	}
+	mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));
 
 	/* do it */
 	ret = mbfl_buffer_converter_feed_result(convd, &string, &result);
@@ -5017,17 +4998,7 @@ static inline char* php_mb_chr(zend_long cp, const char* enc_name, size_t *outpu
 	if (php_mb_is_no_encoding_utf8(no_enc)) {
 
 		if (0 > cp || cp > 0x10ffff || (cp > 0xd7ff && 0xe000 > cp)) {
-			if (php_mb_is_no_encoding_utf8(MBSTRG(current_internal_encoding)->no_encoding)) {
-				cp = MBSTRG(current_filter_illegal_substchar);
-			} else if (php_mb_is_no_encoding_unicode(MBSTRG(current_internal_encoding)->no_encoding)) {
-				if (0xd800 > MBSTRG(current_filter_illegal_substchar) || MBSTRG(current_filter_illegal_substchar) > 0xdfff) {
-					cp = MBSTRG(current_filter_illegal_substchar);
-				} else {
-					cp = 0x3f;
-				}
-			} else {
-				cp = 0x3f;
-			}
+			cp = MBSTRG(current_filter_illegal_substchar);
 		}
 
 		if (cp < 0x80) {
