@@ -78,7 +78,7 @@ if test $PHP_SQLITE3 != "no"; then
       debug_flags="-DSQLITE_DEBUG=1"
     fi
 
-    other_flags="-DSQLITE_ENABLE_FTS3=1 -DSQLITE_ENABLE_FTS4=1 -DSQLITE_ENABLE_FTS5=1 -DSQLITE_CORE=1 -DSQLITE_ENABLE_COLUMN_METADATA=1 -DHAVE_SQLITE3_ERRSTR=1"
+    other_flags="-DSQLITE_ENABLE_FTS3=1 -DSQLITE_ENABLE_FTS4=1 -DSQLITE_ENABLE_FTS5=1 -DSQLITE_CORE=1 -DSQLITE_ENABLE_COLUMN_METADATA=1"
 
 	dnl As long as intl is not shared we can have ICU support
     if test "$PHP_INTL" = "yes" && test "$PHP_INTL_SHARED" != "yes"; then
@@ -89,6 +89,7 @@ if test $PHP_SQLITE3 != "no"; then
     PHP_INSTALL_HEADERS([ext/sqlite3/libsqlite/sqlite3.h])
   fi
 
+  AC_DEFINE(HAVE_SQLITE3_ERRSTR, 1, [have sqlite3_errstr function])
   AC_DEFINE(HAVE_SQLITE3,1,[ ])
 
   sqlite3_sources="sqlite3.c $sqlite3_extra_sources"
