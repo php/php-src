@@ -1,6 +1,5 @@
 /*
  * charset=UTF-8
- * vim600: encoding=utf-8
  */
 
 /*
@@ -1053,16 +1052,7 @@ mbfl_substr_count(
 	if (filter == NULL) {
 		return (size_t) -4;
 	}
-	p = needle->val;
-	n = needle->len;
-	if (p != NULL) {
-		while (n > 0) {
-			if ((*filter->filter_function)(*p++, filter) < 0) {
-				break;
-			}
-			n--;
-		}
-	}
+	mbfl_convert_filter_feed_string(filter, needle->val, needle->len);
 	mbfl_convert_filter_flush(filter);
 	mbfl_convert_filter_delete(filter);
 	pc.needle_len = pc.needle.pos;

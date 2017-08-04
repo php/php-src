@@ -63,6 +63,7 @@
 #include "libmbfl/mbfl/mbfl_allocators.h"
 #include "libmbfl/mbfl/mbfilter_8bit.h"
 #include "libmbfl/mbfl/mbfilter_pass.h"
+#include "libmbfl/mbfl/mbfilter_wchar.h"
 #include "libmbfl/filters/mbfilter_ascii.h"
 #include "libmbfl/filters/mbfilter_base64.h"
 #include "libmbfl/filters/mbfilter_qprint.h"
@@ -4883,9 +4884,6 @@ static inline zend_long php_mb_ord(const char* str, size_t str_len, const char* 
 {
 	const mbfl_encoding *enc;
 	enum mbfl_no_encoding no_enc;
-	char* ret;
-	size_t ret_len;
-	zend_long cp;
 
 	enc = php_mb_get_encoding(enc_name);
 	if (!enc) {
@@ -4904,32 +4902,32 @@ static inline zend_long php_mb_ord(const char* str, size_t str_len, const char* 
 	}
 
 	{
-		long orig_illegalchars = MBSTRG(illegalchars);
-		MBSTRG(illegalchars) = 0;
-		ret = php_mb_convert_encoding_ex(str, str_len, &mbfl_encoding_ucs4be, enc, &ret_len);
-		if (MBSTRG(illegalchars) != 0) {
-			if (ret) {
-				efree(ret);
-			}
-			MBSTRG(illegalchars) = orig_illegalchars;
+		mbfl_wchar_device dev;
+		mbfl_convert_filter *filter;
+		zend_long cp;
+
+		mbfl_wchar_device_init(&dev);
+		filter = mbfl_convert_filter_new(
+			enc, &mbfl_encoding_wchar,
+			mbfl_wchar_device_output, 0, &dev);
+		if (!filter) {
+			php_error_docref(NULL, E_WARNING, "Creation of filter failed");
 			return -1;
 		}
 
-		MBSTRG(illegalchars) = orig_illegalchars;
+		mbfl_convert_filter_feed_string(filter, (const unsigned char *) str, str_len);
+		mbfl_convert_filter_flush(filter);
+		mbfl_convert_filter_delete(filter);
+
+		if (dev.pos < 1 || filter->num_illegalchar || dev.buffer[0] >= MBFL_WCSGROUP_UCS4MAX) {
+			mbfl_wchar_device_clear(&dev);
+			return -1;
+		}
+
+		cp = dev.buffer[0];
+		mbfl_wchar_device_clear(&dev);
+		return cp;
 	}
-
-	if (ret == NULL) {
-		return -1;
-	}
-
-	cp = (unsigned char) ret[0] << 24 | \
-		 (unsigned char) ret[1] << 16 | \
-		 (unsigned char) ret[2] <<  8 | \
-		 (unsigned char) ret[3];
-
-	efree(ret);
-
-	return cp;
 }
 
 
