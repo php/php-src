@@ -53,10 +53,11 @@ static size_t php_stream_memory_write(php_stream *stream, const char *buf, size_
 
 	if (ms->mode & TEMP_STREAM_READONLY) {
 		return 0;
+	} else if (ms->mode & TEMP_STREAM_APPEND) {
+		ms->fpos = ms->fsize;
 	}
 	if (ms->fpos + count > ms->fsize) {
 		char *tmp;
-
 		if (!ms->data) {
 			tmp = emalloc(ms->fpos + count);
 		} else {
@@ -276,6 +277,29 @@ PHPAPI php_stream_ops	php_stream_memory_ops = {
 	php_stream_memory_set_option
 };
 
+/* {{{ */
+PHPAPI int php_stream_mode_from_str(const char *mode)
+{
+	if (strpbrk(mode, "a")) {
+		return TEMP_STREAM_APPEND;
+	} else if (strpbrk(mode, "w+")) {
+		return TEMP_STREAM_DEFAULT;
+	}
+	return TEMP_STREAM_READONLY;
+}
+/* }}} */
+
+/* {{{ */
+PHPAPI const char *_php_stream_mode_to_str(int mode)
+{
+	if (mode == TEMP_STREAM_READONLY) {
+		return "rb";
+	} else if (mode == TEMP_STREAM_APPEND) {
+		return "a+b";
+	}
+	return "w+b";
+}
+/* }}} */
 
 /* {{{ */
 PHPAPI php_stream *_php_stream_memory_create(int mode STREAMS_DC)
@@ -290,7 +314,7 @@ PHPAPI php_stream *_php_stream_memory_create(int mode STREAMS_DC)
 	self->smax = ~0u;
 	self->mode = mode;
 
-	stream = php_stream_alloc_rel(&php_stream_memory_ops, self, 0, mode & TEMP_STREAM_READONLY ? "rb" : "w+b");
+	stream = php_stream_alloc_rel(&php_stream_memory_ops, self, 0, _php_stream_mode_to_str(mode));
 	stream->flags |= PHP_STREAM_FLAG_NO_BUFFER;
 	return stream;
 }
@@ -564,7 +588,7 @@ PHPAPI php_stream *_php_stream_temp_create_ex(int mode, size_t max_memory_usage,
 	if (tmpdir) {
 		self->tmpdir = estrdup(tmpdir);
 	}
-	stream = php_stream_alloc_rel(&php_stream_temp_ops, self, 0, mode & TEMP_STREAM_READONLY ? "rb" : "w+b");
+	stream = php_stream_alloc_rel(&php_stream_temp_ops, self, 0, _php_stream_mode_to_str(mode));
 	stream->flags |= PHP_STREAM_FLAG_NO_BUFFER;
 	self->innerstream = php_stream_memory_create_rel(mode);
 	php_stream_encloses(stream, self->innerstream);
