@@ -110,173 +110,6 @@ static char mbfl_hexchar_table[] = {
 	0x30,0x31,0x32,0x33,0x34,0x35,0x36,0x37,0x38,0x39,0x41,0x42,0x43,0x44,0x45,0x46
 };
 
-/* Input filters going from encoding -> wchar */
-static const struct mbfl_convert_vtbl *mbfl_input_filter_list[] = {
-	&vtbl_utf8_wchar,
-	&vtbl_eucjp_wchar,
-	&vtbl_sjis_wchar,
-	&vtbl_sjis_open_wchar,
-	&vtbl_sjis2004_wchar,
-	&vtbl_cp51932_wchar,
-	&vtbl_jis_wchar,
-	&vtbl_jis_ms_wchar,
-	&vtbl_2022jp_wchar,
-	&vtbl_2022jpms_wchar,
-	&vtbl_2022jp_2004_wchar,
-	&vtbl_2022jp_kddi_wchar,
-	&vtbl_eucjpwin_wchar,
-	&vtbl_eucjp2004_wchar,
-	&vtbl_cp932_wchar,
- 	&vtbl_sjis_docomo_wchar,
- 	&vtbl_sjis_kddi_wchar,
- 	&vtbl_sjis_sb_wchar,
- 	&vtbl_sjis_mac_wchar,
-	&vtbl_utf8_docomo_wchar,
-	&vtbl_utf8_kddi_a_wchar,
-	&vtbl_utf8_kddi_b_wchar,
-	&vtbl_utf8_sb_wchar,
-	&vtbl_euccn_wchar,
-	&vtbl_cp936_wchar,
-	&vtbl_gb18030_wchar,
-	&vtbl_hz_wchar,
-	&vtbl_euctw_wchar,
-	&vtbl_big5_wchar,
-	&vtbl_cp950_wchar,
-	&vtbl_euckr_wchar,
-	&vtbl_uhc_wchar,
-	&vtbl_2022kr_wchar,
-	&vtbl_cp1251_wchar,
-	&vtbl_cp866_wchar,
-	&vtbl_koi8r_wchar,
-	&vtbl_koi8u_wchar,
-	&vtbl_cp1252_wchar,
-	&vtbl_cp1254_wchar,
-	&vtbl_cp50220_wchar,
-	&vtbl_cp50220raw_wchar,
-	&vtbl_cp50221_wchar,
-	&vtbl_cp50222_wchar,
-	&vtbl_ascii_wchar,
-	&vtbl_8859_1_wchar,
-	&vtbl_8859_2_wchar,
-	&vtbl_8859_3_wchar,
-	&vtbl_8859_4_wchar,
-	&vtbl_8859_5_wchar,
-	&vtbl_8859_6_wchar,
-	&vtbl_8859_7_wchar,
-	&vtbl_8859_8_wchar,
-	&vtbl_8859_9_wchar,
-	&vtbl_8859_10_wchar,
-	&vtbl_8859_13_wchar,
-	&vtbl_8859_14_wchar,
-	&vtbl_8859_15_wchar,
-	&vtbl_html_wchar,
-	&vtbl_utf7_wchar,
-	&vtbl_utf7imap_wchar,
-	&vtbl_utf16_wchar,
-	&vtbl_utf16be_wchar,
-	&vtbl_utf16le_wchar,
-	&vtbl_utf32_wchar,
-	&vtbl_utf32be_wchar,
-	&vtbl_utf32le_wchar,
-	&vtbl_ucs4_wchar,
-	&vtbl_ucs4be_wchar,
-	&vtbl_ucs4le_wchar,
-	&vtbl_ucs2_wchar,
-	&vtbl_ucs2be_wchar,
-	&vtbl_ucs2le_wchar,
-	&vtbl_byte4be_wchar,
-	&vtbl_byte4le_wchar,
-	&vtbl_byte2be_wchar,
-	&vtbl_byte2le_wchar,
-	&vtbl_armscii8_wchar,
-	&vtbl_cp850_wchar,
-	NULL
-};
-
-/* Output filters going from wchar -> encoding */
-static const struct mbfl_convert_vtbl *mbfl_output_filter_list[] = {
-	&vtbl_wchar_utf8,
-	&vtbl_wchar_eucjp,
-	&vtbl_wchar_sjis,
-	&vtbl_wchar_sjis_open,
-	&vtbl_wchar_sjis2004,
-	&vtbl_wchar_cp51932,
-	&vtbl_wchar_jis,
-	&vtbl_wchar_jis_ms,
-	&vtbl_wchar_2022jp,
-	&vtbl_wchar_2022jpms,
-	&vtbl_wchar_2022jp_2004,
-	&vtbl_wchar_2022jp_kddi,
-	&vtbl_wchar_eucjpwin,
-	&vtbl_wchar_eucjp2004,
-	&vtbl_wchar_cp932,
- 	&vtbl_wchar_sjis_docomo,
- 	&vtbl_wchar_sjis_kddi,
- 	&vtbl_wchar_sjis_sb,
- 	&vtbl_wchar_sjis_mac,
-	&vtbl_wchar_utf8_docomo,
-	&vtbl_wchar_utf8_kddi_a,
-	&vtbl_wchar_utf8_kddi_b,
-	&vtbl_wchar_utf8_sb,
-	&vtbl_wchar_euccn,
-	&vtbl_wchar_cp936,
-	&vtbl_wchar_gb18030,
-	&vtbl_wchar_hz,
-	&vtbl_wchar_euctw,
-	&vtbl_wchar_big5,
-	&vtbl_wchar_cp950,
-	&vtbl_wchar_euckr,
-	&vtbl_wchar_uhc,
-	&vtbl_wchar_2022kr,
-	&vtbl_wchar_cp1251,
-	&vtbl_wchar_cp866,
-	&vtbl_wchar_koi8r,
-	&vtbl_wchar_koi8u,
-	&vtbl_wchar_cp1252,
-	&vtbl_wchar_cp1254,
-	&vtbl_wchar_cp50220,
-	&vtbl_wchar_cp50220raw,
-	&vtbl_wchar_cp50221,
-	&vtbl_wchar_cp50222,
-	&vtbl_wchar_ascii,
-	&vtbl_wchar_8859_1,
-	&vtbl_wchar_8859_2,
-	&vtbl_wchar_8859_3,
-	&vtbl_wchar_8859_4,
-	&vtbl_wchar_8859_5,
-	&vtbl_wchar_8859_6,
-	&vtbl_wchar_8859_7,
-	&vtbl_wchar_8859_8,
-	&vtbl_wchar_8859_9,
-	&vtbl_wchar_8859_10,
-	&vtbl_wchar_8859_13,
-	&vtbl_wchar_8859_14,
-	&vtbl_wchar_8859_15,
-	&vtbl_wchar_html,
-	&vtbl_wchar_utf7,
-	&vtbl_wchar_utf7imap,
-	&vtbl_wchar_utf16,
-	&vtbl_wchar_utf16be,
-	&vtbl_wchar_utf16le,
-	&vtbl_wchar_utf32,
-	&vtbl_wchar_utf32be,
-	&vtbl_wchar_utf32le,
-	&vtbl_wchar_ucs4,
-	&vtbl_wchar_ucs4be,
-	&vtbl_wchar_ucs4le,
-	&vtbl_wchar_ucs2,
-	&vtbl_wchar_ucs2be,
-	&vtbl_wchar_ucs2le,
-	&vtbl_wchar_byte4be,
-	&vtbl_wchar_byte4le,
-	&vtbl_wchar_byte2be,
-	&vtbl_wchar_byte2le,
-	&vtbl_wchar_armscii8,
-	&vtbl_wchar_cp850,
-	NULL
-};
-
-/* Special filters that don't fall in either category */
 static const struct mbfl_convert_vtbl *mbfl_special_filter_list[] = {
 	&vtbl_8bit_b64,
 	&vtbl_b64_8bit,
@@ -337,7 +170,7 @@ mbfl_convert_filter_new(
 	mbfl_convert_filter * filter;
 	const struct mbfl_convert_vtbl *vtbl;
 
-	vtbl = mbfl_convert_filter_get_vtbl(from->no_encoding, to->no_encoding);
+	vtbl = mbfl_convert_filter_get_vtbl(from, to);
 
 	if (vtbl == NULL) {
 		vtbl = &vtbl_pass;
@@ -420,7 +253,7 @@ void mbfl_convert_filter_reset(mbfl_convert_filter *filter,
 	/* destruct old filter */
 	(*filter->filter_dtor)(filter);
 
-	vtbl = mbfl_convert_filter_get_vtbl(from->no_encoding, to->no_encoding);
+	vtbl = mbfl_convert_filter_get_vtbl(from, to);
 
 	if (vtbl == NULL) {
 		vtbl = &vtbl_pass;
@@ -597,38 +430,33 @@ mbfl_filt_conv_illegal_output(int c, mbfl_convert_filter *filter)
 	return ret;
 }
 
-const struct mbfl_convert_vtbl * mbfl_convert_filter_get_vtbl(enum mbfl_no_encoding from, enum mbfl_no_encoding to)
+const struct mbfl_convert_vtbl * mbfl_convert_filter_get_vtbl(
+		const mbfl_encoding *from, const mbfl_encoding *to)
 {
-	const struct mbfl_convert_vtbl *vtbl;
-	const struct mbfl_convert_vtbl **list;
-	int i;
-
-	if (to == mbfl_no_encoding_base64 ||
-	    to == mbfl_no_encoding_qprint ||
-	    to == mbfl_no_encoding_7bit) {
-		from = mbfl_no_encoding_8bit;
-	} else if (from == mbfl_no_encoding_base64 ||
-			   from == mbfl_no_encoding_qprint ||
-			   from == mbfl_no_encoding_uuencode) {
-		to = mbfl_no_encoding_8bit;
+	if (to->no_encoding == mbfl_no_encoding_base64 ||
+	    to->no_encoding == mbfl_no_encoding_qprint ||
+	    to->no_encoding == mbfl_no_encoding_7bit) {
+		from = &mbfl_encoding_8bit;
+	} else if (from->no_encoding == mbfl_no_encoding_base64 ||
+			   from->no_encoding == mbfl_no_encoding_qprint ||
+			   from->no_encoding == mbfl_no_encoding_uuencode) {
+		to = &mbfl_encoding_8bit;
 	}
 
-	if (to == mbfl_no_encoding_wchar) {
-		list = mbfl_input_filter_list;
-	} else if (from == mbfl_no_encoding_wchar) {
-		list = mbfl_output_filter_list;
+	if (to->no_encoding == mbfl_no_encoding_wchar) {
+		return from->input_filter;
+	} else if (from->no_encoding == mbfl_no_encoding_wchar) {
+		return to->output_filter;
 	} else {
-		list = mbfl_special_filter_list;
-	}
-
-	i = 0;
-	while ((vtbl = list[i++]) != NULL){
-		if (vtbl->from == from && vtbl->to == to) {
-			return vtbl;
+		int i = 0;
+		const struct mbfl_convert_vtbl *vtbl;
+		while ((vtbl = mbfl_special_filter_list[i++]) != NULL){
+			if (vtbl->from == from->no_encoding && vtbl->to == to->no_encoding) {
+				return vtbl;
+			}
 		}
+		return NULL;
 	}
-
-	return NULL;
 }
 
 /*

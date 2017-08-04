@@ -65,7 +65,9 @@ const mbfl_encoding mbfl_encoding_euc_cn = {
 	"CN-GB",
 	(const char *(*)[])&mbfl_encoding_euc_cn_aliases,
 	mblen_table_euccn,
-	MBFL_ENCTYPE_MBCS
+	MBFL_ENCTYPE_MBCS,
+	&vtbl_euccn_wchar,
+	&vtbl_wchar_euccn
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_euccn = {

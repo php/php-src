@@ -65,7 +65,9 @@ const mbfl_encoding mbfl_encoding_uhc = {
 	"UHC",
 	(const char *(*)[])&mbfl_encoding_uhc_aliases,
 	mblen_table_uhc,
-	MBFL_ENCTYPE_MBCS
+	MBFL_ENCTYPE_MBCS,
+	&vtbl_uhc_wchar,
+	&vtbl_wchar_uhc
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_uhc = {
