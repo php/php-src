@@ -6,6 +6,7 @@ PHP                                                                        NEWS
   . Redesigned the old ext_skel program written in PHP, run: 
     'php ext_skel.php' for all options. This means there is no dependencies 
     thrus making it work on Windows out of the box. (Kalle)
+  . Fixed bug #75031 (support append mode in temp/memory streams). (adsr)
 
 - cURL:
   . Fixed bug #74125 (Fixed finding CURL on systems with multiarch support).
