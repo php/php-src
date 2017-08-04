@@ -4898,7 +4898,20 @@ static inline zend_long php_mb_ord(const char* str, size_t str_len, const char* 
 		return -1;
 	}
 
-	ret = php_mb_convert_encoding_ex(str, str_len, &mbfl_encoding_ucs4be, enc, &ret_len);
+	{
+		long orig_illegalchars = MBSTRG(illegalchars);
+		MBSTRG(illegalchars) = 0;
+		ret = php_mb_convert_encoding_ex(str, str_len, &mbfl_encoding_ucs4be, enc, &ret_len);
+		if (MBSTRG(illegalchars) != 0) {
+			if (ret) {
+				efree(ret);
+			}
+			MBSTRG(illegalchars) = orig_illegalchars;
+			return -1;
+		}
+
+		MBSTRG(illegalchars) = orig_illegalchars;
+	}
 
 	if (ret == NULL) {
 		return -1;

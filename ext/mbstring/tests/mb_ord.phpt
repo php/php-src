@@ -6,7 +6,7 @@ mb_ord()
 <?php
 var_dump(
     0x20bb7 === mb_ord("\u{20bb7}"),
-    0x3f === mb_ord("\u{d800}"),
+    false === mb_ord("\u{d800}"),
     0x50aa === mb_ord("\x8f\xa1\xef", "EUC-JP-2004")
 );
 
