@@ -66,8 +66,6 @@ struct mbfl_convert_vtbl {
 	void (*filter_copy)(mbfl_convert_filter *src, mbfl_convert_filter *dest);
 };
 
-MBFLAPI extern const struct mbfl_convert_vtbl *mbfl_convert_filter_list[];
-
 MBFLAPI extern mbfl_convert_filter *mbfl_convert_filter_new(
     const mbfl_encoding *from,
     const mbfl_encoding *to,
