@@ -4957,14 +4957,13 @@ PHP_FUNCTION(mb_ord)
 /* }}} */
 
 
-static inline char* php_mb_chr(zend_long cp, const char* enc_name, size_t *output_len)
+static inline zend_string *php_mb_chr(zend_long cp, const char *enc_name)
 {
 	const mbfl_encoding *enc;
 	enum mbfl_no_encoding no_enc;
+	zend_string *ret;
 	char* buf;
 	size_t buf_len;
-	char* ret;
-	size_t ret_len;
 
 	enc = php_mb_get_encoding(enc_name);
 	if (!enc) {
@@ -4987,42 +4986,32 @@ static inline char* php_mb_chr(zend_long cp, const char* enc_name, size_t *outpu
 		}
 
 		if (cp < 0x80) {
-			ret_len = 1;
-			ret = (char *) safe_emalloc(ret_len, 1, 1);
-			ret[0] = cp;
-			ret[1] = 0;
+			ret = ZSTR_CHAR(cp);
 		} else if (cp < 0x800) {
-			ret_len = 2;
-			ret = (char *) safe_emalloc(ret_len, 1, 1);
-			ret[0] = 0xc0 | (cp >> 6);
-			ret[1] = 0x80 | (cp & 0x3f);
-			ret[2] = 0;
+			ret = zend_string_alloc(2, 0);
+			ZSTR_VAL(ret)[0] = 0xc0 | (cp >> 6);
+			ZSTR_VAL(ret)[1] = 0x80 | (cp & 0x3f);
+			ZSTR_VAL(ret)[2] = 0;
 		} else if (cp < 0x10000) {
-			ret_len = 3;
-			ret = (char *) safe_emalloc(ret_len, 1, 1);
-			ret[0] = 0xe0 | (cp >> 12);
-			ret[1] = 0x80 | ((cp >> 6) & 0x3f);
-			ret[2] = 0x80 | (cp & 0x3f);
-			ret[3] = 0;
+			ret = zend_string_alloc(3, 0);
+			ZSTR_VAL(ret)[0] = 0xe0 | (cp >> 12);
+			ZSTR_VAL(ret)[1] = 0x80 | ((cp >> 6) & 0x3f);
+			ZSTR_VAL(ret)[2] = 0x80 | (cp & 0x3f);
+			ZSTR_VAL(ret)[3] = 0;
 		} else {
-			ret_len = 4;
-			ret = (char *) safe_emalloc(ret_len, 1, 1);
-			ret[0] = 0xf0 | (cp >> 18);
-			ret[1] = 0x80 | ((cp >> 12) & 0x3f);
-			ret[2] = 0x80 | ((cp >> 6) & 0x3f);
-			ret[3] = 0x80 | (cp & 0x3f);
-			ret[4] = 0;
-		}
-
-		if (output_len) {
-			*output_len = ret_len;
+			ret = zend_string_alloc(4, 0);
+			ZSTR_VAL(ret)[0] = 0xf0 | (cp >> 18);
+			ZSTR_VAL(ret)[1] = 0x80 | ((cp >> 12) & 0x3f);
+			ZSTR_VAL(ret)[2] = 0x80 | ((cp >> 6) & 0x3f);
+			ZSTR_VAL(ret)[3] = 0x80 | (cp & 0x3f);
+			ZSTR_VAL(ret)[4] = 0;
 		}
 
 		return ret;
 	}
 
 	buf_len = 4;
-	buf = (char *) safe_emalloc(buf_len, 1, 1);
+	buf = (char *) emalloc(buf_len + 1);
 	buf[0] = (cp >> 24) & 0xff;
 	buf[1] = (cp >> 16) & 0xff;
 	buf[2] = (cp >>  8) & 0xff;
@@ -5030,24 +5019,24 @@ static inline char* php_mb_chr(zend_long cp, const char* enc_name, size_t *outpu
 	buf[4] = 0;
 
 	{
+		char *ret_str;
+		size_t ret_len;
 		long orig_illegalchars = MBSTRG(illegalchars);
 		MBSTRG(illegalchars) = 0;
-		ret = php_mb_convert_encoding_ex(buf, buf_len, enc, &mbfl_encoding_ucs4be, &ret_len);
+		ret_str = php_mb_convert_encoding_ex(buf, buf_len, enc, &mbfl_encoding_ucs4be, &ret_len);
 		if (MBSTRG(illegalchars) != 0) {
 			efree(buf);
-			efree(ret);
+			efree(ret_str);
 			MBSTRG(illegalchars) = orig_illegalchars;
 			return NULL;
 		}
 
+		ret = zend_string_init(ret_str, ret_len, 0);
+		efree(ret_str);
 		MBSTRG(illegalchars) = orig_illegalchars;
 	}
 
 	efree(buf);
-	if (output_len) {
-		*output_len = ret_len;
-	}
-
 	return ret;
 }
 
@@ -5058,8 +5047,7 @@ PHP_FUNCTION(mb_chr)
 	zend_long cp;
 	char* enc = NULL;
 	size_t enc_len;
-	char* ret;
-	size_t ret_len;
+	zend_string* ret;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_LONG(cp)
@@ -5067,14 +5055,12 @@ PHP_FUNCTION(mb_chr)
 		Z_PARAM_STRING(enc, enc_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	ret = php_mb_chr(cp, enc, &ret_len);
-
+	ret = php_mb_chr(cp, enc);
 	if (ret == NULL) {
 		RETURN_FALSE;
 	}
 
-	RETVAL_STRING(ret);
-	efree(ret);
+	RETURN_STR(ret);
 }
 /* }}} */
 
