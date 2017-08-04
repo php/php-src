@@ -16,7 +16,8 @@ var_dump(
 	mb_ord("\u{d800}", "pass"),
 	mb_ord("\u{d800}", "jis"),
 	mb_ord("\u{d800}", "cp50222"),
-	mb_ord("\u{d800}", "utf-7")
+	mb_ord("\u{d800}", "utf-7"),
+	mb_ord("")
 );
 ?>
 --EXPECTF--
@@ -33,6 +34,9 @@ Warning: mb_ord(): Unsupported encoding "jis" %s 12
 Warning: mb_ord(): Unsupported encoding "cp50222" %s 13
 
 Warning: mb_ord(): Unsupported encoding "utf-7" %s 14
+
+Warning: mb_ord(): Empty string in %s on line %d
+bool(false)
 bool(false)
 bool(false)
 bool(false)

@@ -5074,6 +5074,11 @@ static inline zend_long php_mb_ord(const char* str, size_t str_len, const char* 
 		return -1;
 	}
 
+	if (str_len == 0) {
+		php_error_docref(NULL, E_WARNING, "Empty string");
+		return -1;
+	}
+
 	{
 		long orig_illegalchars = MBSTRG(illegalchars);
 		MBSTRG(illegalchars) = 0;
