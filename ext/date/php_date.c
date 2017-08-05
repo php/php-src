@@ -1211,14 +1211,20 @@ static zend_string *date_format(char *format, size_t format_len, timelib_time *t
 			case 'Z': length = slprintf(buffer, 32, "%d", localtime ? offset->offset : 0); break;
 
 			/* full date/time */
-			case 'c': length = slprintf(buffer, 96, "%04d-%02d-%02dT%02d:%02d:%02d%c%02d:%02d",
-							                (int) t->y, (int) t->m, (int) t->d,
-											(int) t->h, (int) t->i, (int) t->s,
-											localtime ? ((offset->offset < 0) ? '-' : '+') : '+',
-											localtime ? abs(offset->offset / 3600) : 0,
-											localtime ? abs((offset->offset % 3600) / 60) : 0
-							  );
-					  break;
+			case 'c': {
+				const char *fmt = t->y < 0 && t->y > -1000
+					/* Ensure 4 digits for years -1 thru -999 */
+					? "%05lld-%02d-%02dT%02d:%02d:%02d%c%02d:%02d"
+					: "%04lld-%02d-%02dT%02d:%02d:%02d%c%02d:%02d";
+				length = slprintf(buffer, 96, fmt,
+					t->y, (int) t->m, (int) t->d,
+					(int) t->h, (int) t->i, (int) t->s,
+					localtime ? ((offset->offset < 0) ? '-' : '+') : '+',
+					localtime ? abs(offset->offset / 3600) : 0,
+					localtime ? abs((offset->offset % 3600) / 60) : 0
+				);
+				break;
+			}
 			case 'r': length = slprintf(buffer, 96, "%3s, %02d %3s %04d %02d:%02d:%02d %c%02d%02d",
 							                php_date_short_day_name(t->y, t->m, t->d),
 											(int) t->d, mon_short_names[t->m - 1],
