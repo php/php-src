@@ -1951,7 +1951,9 @@ static void ZEND_FASTCALL zend_jit_fetch_obj_r_slow(zend_object *zobj, zval *off
 	zval tmp;
 
 	if (UNEXPECTED(zobj->handlers->read_property == NULL)) {
-		zend_error(E_NOTICE, "Trying to get property of non-object");
+		zend_string *property_name = zval_get_string(offset);
+		zend_error(E_NOTICE, "Trying to get property '%s' of non-object", ZSTR_VAL(property_name));
+		zend_string_release(property_name);
 		ZVAL_NULL(result);
 	} else {
 		ZVAL_OBJ(&tmp, zobj);
