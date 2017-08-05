@@ -60,6 +60,7 @@ PHP_FUNCTION(ftp_pasv);
 PHP_FUNCTION(ftp_get);
 PHP_FUNCTION(ftp_fget);
 PHP_FUNCTION(ftp_put);
+PHP_FUNCTION(ftp_append);
 PHP_FUNCTION(ftp_fput);
 PHP_FUNCTION(ftp_size);
 PHP_FUNCTION(ftp_mdtm);

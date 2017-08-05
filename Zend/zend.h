@@ -189,7 +189,7 @@ typedef struct _zend_utility_functions {
 	void (*printf_to_smart_string_function)(smart_string *buf, const char *format, va_list ap);
 	void (*printf_to_smart_str_function)(smart_str *buf, const char *format, va_list ap);
 	char *(*getenv_function)(char *name, size_t name_len);
-	zend_string *(*resolve_path_function)(const char *filename, int filename_len);
+	zend_string *(*resolve_path_function)(const char *filename, size_t filename_len);
 } zend_utility_functions;
 
 typedef struct _zend_utility_values {
@@ -269,7 +269,7 @@ extern ZEND_API int (*zend_stream_open_function)(const char *filename, zend_file
 extern void (*zend_printf_to_smart_string)(smart_string *buf, const char *format, va_list ap);
 extern void (*zend_printf_to_smart_str)(smart_str *buf, const char *format, va_list ap);
 extern ZEND_API char *(*zend_getenv)(char *name, size_t name_len);
-extern ZEND_API zend_string *(*zend_resolve_path)(const char *filename, int filename_len);
+extern ZEND_API zend_string *(*zend_resolve_path)(const char *filename, size_t filename_len);
 
 ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);

@@ -190,6 +190,11 @@ int		ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, const size_
  */
 int		ftp_put(ftpbuf_t *ftp, const char *path, const size_t path_len, php_stream *instream, ftptype_t type, zend_long startpos);
 
+/* append the data from a file, socket, or process as a file on the remote server
+ * returns true on success, false on error
+ */
+int		ftp_append(ftpbuf_t *ftp, const char *path, const size_t path_len, php_stream *instream, ftptype_t type);
+
 /* returns the size of the given file, or -1 on error */
 zend_long		ftp_size(ftpbuf_t *ftp, const char *path, const size_t path_len);
 

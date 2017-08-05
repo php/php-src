@@ -35,5 +35,5 @@ var_dump(bin2hex(mb_convert_encoding($string_mb, "ISO-8859-1", "UTF-8")));
 string(14) "3f3f3f3f3f3f3f"
 string(14) "42424242424242"
 string(0) ""
-string(0) ""
+string(14) "3f3f3f3f3f3f3f"
 ===DONE===

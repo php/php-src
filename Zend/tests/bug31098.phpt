@@ -44,7 +44,7 @@ ok
 ok
 ok
 
-Notice: Trying to get property of non-object in %s on line %d
+Notice: Trying to get property 'wrong' of non-object in %s on line %d
 ok
 
 Warning: Illegal string offset 'wrong' in %s on line %d

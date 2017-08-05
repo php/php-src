@@ -229,10 +229,10 @@ if(sizeof($pecl_targets)) {
 $text_files = array(
 	"LICENSE" => "license.txt",
 	"NEWS" => "news.txt",
+	"INSTALL" => "install.txt", 
 	"README.REDIST.BINS" => "readme-redist-bins.txt",
 	"php.ini-development" => "php.ini-development",
-	"php.ini-production" => "php.ini-production",
-	"win32/install.txt" => "install.txt",
+	"php.ini-production" => "php.ini-production"
 );
 
 foreach ($text_files as $src => $dest) {

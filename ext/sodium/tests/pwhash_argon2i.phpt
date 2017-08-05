@@ -1,5 +1,5 @@
 --TEST--
-Check for libsodium utils
+Check for libsodium argon2i
 --SKIPIF--
 <?php if (!extension_loaded("sodium")) print "skip";
 if (!defined('SODIUM_CRYPTO_PWHASH_SALTBYTES')) print "skip libsodium without argon2i"; ?>
@@ -32,8 +32,14 @@ $out_len = 100;
 $key = sodium_crypto_pwhash
   ($out_len, $passwd, $salt,
    SODIUM_CRYPTO_PWHASH_OPSLIMIT_INTERACTIVE,
-   SODIUM_CRYPTO_PWHASH_MEMLIMIT_INTERACTIVE);
+   SODIUM_CRYPTO_PWHASH_MEMLIMIT_INTERACTIVE,
+   SODIUM_CRYPTO_PWHASH_ALG_DEFAULT);
 var_dump(strlen($key) === $out_len);
+$key2 = sodium_crypto_pwhash
+  ($out_len, $passwd, $salt,
+   SODIUM_CRYPTO_PWHASH_OPSLIMIT_INTERACTIVE,
+   SODIUM_CRYPTO_PWHASH_MEMLIMIT_INTERACTIVE);
+var_dump($key2 === $key);
 ?>
 --EXPECT--
 bool(true)
@@ -41,4 +47,5 @@ bool(true)
 bool(false)
 bool(true)
 bool(false)
+bool(true)
 bool(true)

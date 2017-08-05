@@ -739,9 +739,9 @@ int fcgi_listen(const char *path, int backlog)
 		return listen_socket;
 
 #else
-		int path_len = strlen(path);
+		size_t path_len = strlen(path);
 
-		if (path_len >= (int)sizeof(sa.sa_unix.sun_path)) {
+		if (path_len >= sizeof(sa.sa_unix.sun_path)) {
 			fcgi_log(FCGI_ERROR, "Listening socket's path name is too long.\n");
 			return -1;
 		}

@@ -220,28 +220,6 @@ You need to source your DB2 environment before running PHP configure:
 fi
 
 if test -z "$ODBC_TYPE"; then
-PHP_ARG_WITH(ODBCRouter,,
-[  --with-ODBCRouter[=DIR]   Include ODBCRouter.com support [/usr]])
-
-  AC_MSG_CHECKING(for ODBCRouter.com support)
-  if test "$PHP_ODBCROUTER" != "no"; then
-    if test "$PHP_ODBCROUTER" = "yes"; then
-      PHP_ODBCROUTER=/usr
-    fi
-    ODBC_INCDIR=$PHP_ODBCROUTER/include
-    ODBC_LIBDIR=$PHP_ODBCROUTER/lib
-    ODBC_LFLAGS=-L$ODBC_LIBDIR
-    ODBC_INCLUDE=-I$ODBC_INCDIR
-    ODBC_LIBS=-lodbcsdk
-    ODBC_TYPE=ODBCRouter
-    AC_DEFINE(HAVE_ODBC_ROUTER,1,[ ])
-    AC_MSG_RESULT([$ext_output])
-  else
-    AC_MSG_RESULT(no)
-  fi
-fi
-
-if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH(empress,,
 [  --with-empress[=DIR]      Include Empress support [\$EMPRESSPATH]
                           (Empress Version >= 8.60 required)])

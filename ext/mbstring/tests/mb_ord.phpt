@@ -6,8 +6,8 @@ mb_ord()
 <?php
 var_dump(
     0x20bb7 === mb_ord("\u{20bb7}"),
-    0x3f === mb_ord("\u{d800}"),
-    0x8fa1ef === mb_ord("\x8f\xa1\xef", "EUC-JP-2004")
+    false === mb_ord("\u{d800}"),
+    0x50aa === mb_ord("\x8f\xa1\xef", "EUC-JP-2004")
 );
 
 // Invalid
@@ -16,7 +16,8 @@ var_dump(
 	mb_ord("\u{d800}", "pass"),
 	mb_ord("\u{d800}", "jis"),
 	mb_ord("\u{d800}", "cp50222"),
-	mb_ord("\u{d800}", "utf-7")
+	mb_ord("\u{d800}", "utf-7"),
+	mb_ord("")
 );
 ?>
 --EXPECTF--
@@ -33,6 +34,9 @@ Warning: mb_ord(): Unsupported encoding "jis" %s 12
 Warning: mb_ord(): Unsupported encoding "cp50222" %s 13
 
 Warning: mb_ord(): Unsupported encoding "utf-7" %s 14
+
+Warning: mb_ord(): Empty string in %s on line %d
+bool(false)
 bool(false)
 bool(false)
 bool(false)

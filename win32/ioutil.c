@@ -560,6 +560,8 @@ BOOL php_win32_ioutil_init(void)
 		if (!canonicalize_path_w) {
 			canonicalize_path_w = (MyPathCchCanonicalizeEx)MyPathCchCanonicalizeExFallback;
 		}
+
+		FreeLibrary(hMod);
 	} else {
 		canonicalize_path_w = (MyPathCchCanonicalizeEx)MyPathCchCanonicalizeExFallback;
 	}
