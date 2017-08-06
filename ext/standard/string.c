@@ -2789,11 +2789,16 @@ PHP_FUNCTION(chr)
 
 /* {{{ php_ucfirst
    Uppercase the first character of the word in a native string */
-static void php_ucfirst(char *str)
+static zend_string* php_ucfirst(zend_string *str)
 {
-	register char *r;
-	r = str;
-	*r = toupper((unsigned char) *r);
+	unsigned char r = toupper(ZSTR_VAL(str)[0]);
+	if (r == ZSTR_VAL(str)[0]) {
+		return zend_string_copy(str);
+	} else {
+		zend_string *s = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), 0);
+		ZSTR_VAL(s)[0] = r;
+		return s;
+	}
 }
 /* }}} */
 
@@ -2811,18 +2816,22 @@ PHP_FUNCTION(ucfirst)
 		RETURN_EMPTY_STRING();
 	}
 
-	ZVAL_STRINGL(return_value, ZSTR_VAL(str), ZSTR_LEN(str));
-	php_ucfirst(Z_STRVAL_P(return_value));
+	RETURN_STR(php_ucfirst(str));
 }
 /* }}} */
 
 /* {{{
    Lowercase the first character of the word in a native string */
-static void php_lcfirst(char *str)
+static zend_string* php_lcfirst(zend_string *str)
 {
-	register char *r;
-	r = str;
-	*r = tolower((unsigned char) *r);
+	unsigned char r = tolower(ZSTR_VAL(str)[0]);
+	if (r == ZSTR_VAL(str)[0]) {
+		return zend_string_copy(str);
+	} else {
+		zend_string *s = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), 0);
+		ZSTR_VAL(s)[0] = r;
+		return s;
+	}
 }
 /* }}} */
 
@@ -2840,8 +2849,7 @@ PHP_FUNCTION(lcfirst)
 		RETURN_EMPTY_STRING();
 	}
 
-	ZVAL_STRINGL(return_value, ZSTR_VAL(str), ZSTR_LEN(str));
-	php_lcfirst(Z_STRVAL_P(return_value));
+	RETURN_STR(php_lcfirst(str));
 }
 /* }}} */
 
