@@ -292,6 +292,7 @@ yy14:
 			{
 		s->str_start = s->cursor;
 		s->str_esc = 0;
+		s->utf8_invalid_count = 0;
 		PHP_JSON_CONDITION_SET_AND_GOTO(STR_P1);
 	}
 yy16:
