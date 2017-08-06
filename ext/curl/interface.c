@@ -210,7 +210,7 @@ static int php_curl_option_url(php_curl *ch, const char *url, const size_t len) 
 			return FAILURE;
 		}
 
-		if (uri->scheme && !strncasecmp("file", uri->scheme, sizeof("file"))) {
+		if (uri->scheme && zend_string_equals_literal_ci(uri->scheme, "file")) {
 			php_error_docref(NULL, E_WARNING, "Protocol 'file' disabled in cURL");
 			php_url_free(uri);
 			return FAILURE;

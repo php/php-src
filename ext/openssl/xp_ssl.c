@@ -2581,9 +2581,9 @@ static char *php_openssl_get_url_name(const char *resourcename,
 	}
 
 	if (url->host) {
-		const char * host = url->host;
+		const char * host = ZSTR_VAL(url->host);
 		char * url_name = NULL;
-		size_t len = strlen(host);
+		size_t len = ZSTR_LEN(url->host);
 
 		/* skip trailing dots */
 		while (len && host[len-1] == '.') {
