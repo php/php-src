@@ -210,6 +210,10 @@ require_once('skipifconnectfailure.inc');
 		$expected_constants["MYSQLI_TYPE_JSON"]	= true;
 	}
 
+	if ($IS_MYSQLND || $version >= 50710) {
+		$expected_constants['MYSQLI_OPT_TLS_VERSION']	= true;
+	}
+
 	$unexpected_constants = array();
 
 	foreach ($constants as $group => $consts) {
