@@ -863,6 +863,7 @@ year  = [0-9]{1,4};
 year2 = [0-9]{2};
 year4 = [0-9]{4};
 year4withsign = [+-]? [0-9]{4};
+yearx = [+-]? [0-9]{5,};
 
 dayofyear = "00"[1-9] | "0"[1-9][0-9] | [1-2][0-9][0-9] | "3"[0-5][0-9] | "36"[0-6];
 weekofyear = "0"[1-9] | [1-4][0-9] | "5"[0-3];
@@ -905,6 +906,7 @@ iso8601dateslash = year4 "/" monthlz "/" daylz "/"?;
 dateslash        = year4 "/" month "/" day;
 iso8601date4     = year4withsign "-" monthlz "-" daylz;
 iso8601date2     = year2 "-" monthlz "-" daylz;
+iso8601datex     = yearx "-" monthlz "-" daylz;
 gnudateshorter   = year4 "-" month;
 gnudateshort     = year "-" month "-" day;
 pointeddate4     = day [.\t-] month [.-] year4;
@@ -1304,6 +1306,18 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		s->time->m = timelib_get_nr((char **) &ptr, 2);
 		s->time->d = timelib_get_nr((char **) &ptr, 2);
 		TIMELIB_PROCESS_YEAR(s->time->y, length);
+		TIMELIB_DEINIT;
+		return TIMELIB_ISO_DATE;
+	}
+
+	iso8601datex
+	{
+		DEBUG_OUTPUT("iso8601datex");
+		TIMELIB_INIT;
+		TIMELIB_HAVE_DATE();
+		s->time->y = timelib_get_unsigned_nr((char **) &ptr, 20);
+		s->time->m = timelib_get_nr((char **) &ptr, 2);
+		s->time->d = timelib_get_nr((char **) &ptr, 2);
 		TIMELIB_DEINIT;
 		return TIMELIB_ISO_DATE;
 	}
