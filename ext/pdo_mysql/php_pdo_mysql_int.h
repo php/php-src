@@ -182,6 +182,9 @@ enum {
 #ifdef PDO_USE_MYSQLND
 	PDO_MYSQL_ATTR_SSL_VERIFY_SERVER_CERT,
 #endif
+#if MYSQL_VERSION_ID >= 50710 || defined(PDO_USE_MYSQLND)
+    PDO_MYSQL_ATTR_TLS_VERSION,
+#endif
 };
 
 #endif

@@ -257,6 +257,7 @@ typedef struct st_mysqlnd_vio_options
 
 #define MYSQLND_SSL_PEER_DEFAULT_ACTION  MYSQLND_SSL_PEER_VERIFY
 	} ssl_verify_peer;
+	php_stream_xport_crypt_method_t ssl_tls_version;
 } MYSQLND_VIO_OPTIONS;
 
 

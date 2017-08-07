@@ -1684,6 +1684,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 		case MYSQLND_OPT_SSL_CAPATH:
 		case MYSQLND_OPT_SSL_CIPHER:
 		case MYSQL_OPT_SSL_VERIFY_SERVER_CERT:
+		case MYSQL_OPT_TLS_VERSION:
 		case MYSQL_OPT_CONNECT_TIMEOUT:
 		case MYSQLND_OPT_NET_READ_BUFFER_SIZE:
 			ret = conn->vio->data->m.set_client_option(conn->vio, option, value);

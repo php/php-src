@@ -1751,6 +1751,9 @@ static int mysqli_options_get_option_zval_type(int option)
 #if MYSQL_VERSION_ID > 50605 || defined(MYSQLI_USE_MYSQLND)
 		case MYSQL_SERVER_PUBLIC_KEY:
 #endif
+#if MYSQL_VERSION_ID >= 50710 || defined(MYSQLI_USE_MYSQLND)
+		case MYSQL_OPT_TLS_VERSION:
+#endif
 			return IS_STRING;
 
 		default:

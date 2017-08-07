@@ -741,6 +741,20 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		}
 #endif
 
+#if MYSQL_VERSION_ID >= 50710 || defined(PDO_USE_MYSQLND)
+		{
+			zend_string *tls_version = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_TLS_VERSION, NULL);
+			if (tls_version) {
+				if (mysql_options(H->server, MYSQL_OPT_TLS_VERSION, ZSTR_VAL(tls_version))) {
+					pdo_mysql_error(dbh);
+					zend_string_release(tls_version);
+					goto cleanup;
+				}
+				zend_string_release(tls_version);
+			}
+		}
+#endif
+
 #ifdef PDO_USE_MYSQLND
 		{
 			zend_long ssl_verify_cert = pdo_attr_lval(driver_options,

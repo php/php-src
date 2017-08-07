@@ -49,6 +49,11 @@ if (!extension_loaded('mysqli') && !extension_loaded('mysqlnd')) {
 		$expected['MYSQL_ATTR_SERVER_PUBLIC_KEY']		= true;
 	}
 
+	// TLS version pinning is only supported by mysqlnd or mysql client version 5.7.10 or higher
+	if (MySQLPDOTest::isPDOMySQLnd() || MySQLPDOTest::getClientVersion(MySQLPDOTest::factory()) >= 50710) {
+		$expected['MYSQL_ATTR_TLS_VERSION']				= true;
+	}
+
 	/*
 	TODO
 

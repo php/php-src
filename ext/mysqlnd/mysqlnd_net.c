@@ -817,6 +817,29 @@ MYSQLND_METHOD(mysqlnd_net, set_client_option)(MYSQLND_NET * const net, enum mys
 			net->data->options.ssl_verify_peer = val;
 			break;
 		}
+		case MYSQL_OPT_TLS_VERSION:
+			if (strcmp(value, "TLSv1") == 0) {
+				net->data->options.ssl_tls_version = STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT;
+			} else if (strstr(value, "TLSv1.") == value && strlen(value) == sizeof("TLSv1.x")-1) {
+				switch (value[sizeof("TLSv1.x")-2]) {
+					case '2':
+						net->data->options.ssl_tls_version = STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT;
+						break;
+					case '1':
+						net->data->options.ssl_tls_version = STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT;
+						break;
+					case '0':
+						// This option is actually not supported by MySQL but lets support it anyway
+						net->data->options.ssl_tls_version = STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT;
+						break;
+					default:
+						net->data->options.ssl_tls_version = STREAM_CRYPTO_METHOD_TLS_ANY_CLIENT;
+						break;
+				}
+			} else {
+				net->data->options.ssl_tls_version = STREAM_CRYPTO_METHOD_TLS_ANY_CLIENT;
+			}
+			break;
 		case MYSQL_OPT_READ_TIMEOUT:
 			DBG_INF("MYSQL_OPT_READ_TIMEOUT");
 			net->data->options.timeout_read = *(unsigned int*) value;
@@ -971,7 +994,7 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net)
 		}
 	}
 	php_stream_context_set(net_stream, context);
-	if (php_stream_xport_crypto_setup(net_stream, STREAM_CRYPTO_METHOD_TLS_CLIENT, NULL) < 0 ||
+	if (php_stream_xport_crypto_setup(net_stream, net->data->options.ssl_tls_version, NULL) < 0 ||
 	    php_stream_xport_crypto_enable(net_stream, 1) < 0)
 	{
 		DBG_ERR("Cannot connect to MySQL by using SSL");
@@ -1103,6 +1126,8 @@ MYSQLND_METHOD(mysqlnd_net, init)(MYSQLND_NET * const net, MYSQLND_STATS * const
 
 	buf_size = MYSQLND_G(net_read_timeout); /* this is long, cast to unsigned int*/
 	net->data->m.set_client_option(net, MYSQL_OPT_READ_TIMEOUT, (char *)&buf_size);
+
+	net->data->m.set_client_option(net, MYSQL_OPT_TLS_VERSION, "");
 
 	DBG_RETURN(PASS);
 }
