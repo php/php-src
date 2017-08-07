@@ -12,6 +12,9 @@ PHP                                                                        NEWS
   . Fixed bug #74125 (Fixed finding CURL on systems with multiarch support).
     (cebe)
 
+- GD:
+  . Added support for WebP in imagecreatefromstring() (Andreas Treichel, cmb).
+
 - LDAP:
   . Added ldap_exop_refresh helper for EXOP REFRESH operation with dds overlay. 
     (Come)
