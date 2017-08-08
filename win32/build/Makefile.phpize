@@ -8,6 +8,15 @@ PHPLIB=$(PHPSDK_DIR)\lib\$(PHPLIB)
 LDFLAGS=$(LDFLAGS) /libpath:"$(PHPSDK_DIR)\lib\;$(PHPSDK_DIR)"
 BUILD_DIR_DEV=$(PHPSDK_DIR)
 
+!if "$(DEBUGGER)" == "1"
+DEBUGGER_CMD=devenv
+DEBUGGER_ARGS=/debugexe
+!else
+DEBUGGER_CMD=
+DEBUGGER_ARGS=
+!endif
+
+all: generated_files $(EXT_TARGETS) $(PECL_TARGETS) $(SAPI_TARGETS)
 all: $(EXT_TARGETS) $(PECL_TARGETS)
 
 build_dirs: $(BUILD_DIR) $(BUILD_DIRS_SUB)
@@ -35,7 +44,10 @@ _EXTENSION_DLL=$(EXT_TARGETS)
 !endif
 
 test: set-tmp-env
-	"$(PHP_PREFIX)\php.exe" -d open_basedir= -d output_buffering=0 run-tests.php $(TESTS) -p "$(PHP_PREFIX)\php.exe" -d extension=$(BUILD_DIR)\$(_EXTENSION_DLL)
+	$(DEBUGGER_CMD) $(DEBUGGER_ARGS) "$(PHP_PREFIX)\php.exe" -d open_basedir= -d output_buffering=0 run-tests.php $(TESTS) -p "$(PHP_PREFIX)\php.exe" -d extension=$(BUILD_DIR)\$(_EXTENSION_DLL)
+
+run: set-tmp-env
+	$(DEBUGGER_CMD) $(DEBUGGER_ARGS) "$(PHP_PREFIX)\php.exe" -n -d extension=$(BUILD_DIR)\\$(_EXTENSION_DLL) $(ARGS)
 
 !if $(MT) == ""
 _VC_MANIFEST_EMBED_EXE=
