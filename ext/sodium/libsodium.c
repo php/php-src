@@ -177,8 +177,14 @@ ZEND_END_ARG_INFO()
 # define HAVE_AESGCM 1
 #endif
 
-#ifndef crypto_aead_chacha20poly1305_ietf_KEYBYTES
-# define crypto_aead_chacha20poly1305_ietf_KEYBYTES crypto_aead_chacha20poly1305_KEYBYTES
+#ifndef crypto_aead_chacha20poly1305_IETF_KEYBYTES
+# define crypto_aead_chacha20poly1305_IETF_KEYBYTES crypto_aead_chacha20poly1305_KEYBYTES
+#endif
+#ifndef crypto_aead_chacha20poly1305_IETF_NSECBYTES
+# define crypto_aead_chacha20poly1305_IETF_NSECBYTES crypto_aead_chacha20poly1305_NSECBYTES
+#endif
+#ifndef crypto_aead_chacha20poly1305_IETF_ABYTES
+# define crypto_aead_chacha20poly1305_IETF_ABYTES crypto_aead_chacha20poly1305_ABYTES
 #endif
 
 const zend_function_entry sodium_functions[] = {
@@ -365,13 +371,13 @@ PHP_MINIT_FUNCTION(sodium)
 	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_ABYTES",
 						   crypto_aead_chacha20poly1305_ABYTES, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_IETF_KEYBYTES",
-						   crypto_aead_chacha20poly1305_KEYBYTES, CONST_CS | CONST_PERSISTENT);
+						   crypto_aead_chacha20poly1305_IETF_KEYBYTES, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_IETF_NSECBYTES",
-						   crypto_aead_chacha20poly1305_NSECBYTES, CONST_CS | CONST_PERSISTENT);
+						   crypto_aead_chacha20poly1305_IETF_NSECBYTES, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_IETF_NPUBBYTES",
 						   crypto_aead_chacha20poly1305_IETF_NPUBBYTES, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_IETF_ABYTES",
-						   crypto_aead_chacha20poly1305_ABYTES, CONST_CS | CONST_PERSISTENT);
+						   crypto_aead_chacha20poly1305_IETF_ABYTES, CONST_CS | CONST_PERSISTENT);
 #ifdef crypto_aead_xchacha20poly1305_IETF_NPUBBYTES
 	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_AEAD_XCHACHA20POLY1305_IETF_KEYBYTES",
 						   crypto_aead_xchacha20poly1305_IETF_KEYBYTES, CONST_CS | CONST_PERSISTENT);
@@ -2892,7 +2898,7 @@ PHP_FUNCTION(sodium_crypto_aead_chacha20poly1305_keygen)
 
 PHP_FUNCTION(sodium_crypto_aead_chacha20poly1305_ietf_keygen)
 {
-	unsigned char key[crypto_aead_chacha20poly1305_ietf_KEYBYTES];
+	unsigned char key[crypto_aead_chacha20poly1305_IETF_KEYBYTES];
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -2904,7 +2910,7 @@ PHP_FUNCTION(sodium_crypto_aead_chacha20poly1305_ietf_keygen)
 #ifdef crypto_aead_xchacha20poly1305_IETF_NPUBBYTES
 PHP_FUNCTION(sodium_crypto_aead_xchacha20poly1305_ietf_keygen)
 {
-	unsigned char key[crypto_aead_xchacha20poly1305_ietf_KEYBYTES];
+	unsigned char key[crypto_aead_xchacha20poly1305_IETF_KEYBYTES];
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
