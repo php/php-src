@@ -621,6 +621,7 @@ PHP_FUNCTION(sodium_memcmp)
 	}
 	if (len1 != len2) {
 		zend_throw_exception(sodium_exception_ce, "arguments have different sizes", 0);
+		return;
 	} else {
 		RETURN_LONG(sodium_memcmp(buf1, buf2, len1));
 	}
@@ -2860,6 +2861,7 @@ PHP_FUNCTION(sodium_compare)
 	}
 	if (len1 != len2) {
 		zend_throw_exception(sodium_exception_ce, "arguments have different sizes", 0);
+		return;
 	} else {
 		RETURN_LONG(sodium_compare((const unsigned char *) buf1,
 								   (const unsigned char *) buf2, (size_t) len1));
@@ -3002,18 +3004,23 @@ PHP_FUNCTION(sodium_crypto_kdf_derive_from_key)
 	}
 	if (subkey_len < crypto_kdf_BYTES_MIN) {
 		zend_throw_exception(sodium_exception_ce, "subkey cannot be smaller than sodium_crypto_kdf_BYTES_MIN", 0);
+		return;
 	}
 	if (subkey_len > crypto_kdf_BYTES_MAX) {
 		zend_throw_exception(sodium_exception_ce, "subkey cannot be larger than sodium_crypto_kdf_BYTES_MAX", 0);
+		return;
 	}
 	if (subkey_id < 0) {
 		zend_throw_exception(sodium_exception_ce, "subkey_id cannot be negative", 0);
+		return;
 	}
 	if (ctx_len != crypto_kdf_CONTEXTBYTES) {
 		zend_throw_exception(sodium_exception_ce, "context should be sodium_crypto_kdf_CONTEXTBYTES bytes", 0);
+		return;
 	}
 	if (key_len != crypto_kdf_KEYBYTES) {
 		zend_throw_exception(sodium_exception_ce, "key should be sodium_crypto_kdf_KEYBYTES bytes", 0);
+		return;
 	}
 	memcpy(ctx_padded, ctx, crypto_kdf_CONTEXTBYTES);
 	memset(ctx_padded + crypto_kdf_CONTEXTBYTES, 0, sizeof ctx_padded - crypto_kdf_CONTEXTBYTES);
@@ -3034,6 +3041,7 @@ PHP_FUNCTION(sodium_crypto_kdf_derive_from_key)
 												 crypto_kdf_KEYBYTES,
 												 salt, ctx_padded) != 0) {
 		zend_throw_exception(sodium_exception_ce, "internal error", 0);
+		return;
 	}
 	ZSTR_VAL(subkey)[subkey_len] = 0;
 
