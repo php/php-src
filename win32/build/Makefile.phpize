@@ -16,7 +16,6 @@ DEBUGGER_CMD=
 DEBUGGER_ARGS=
 !endif
 
-all: generated_files $(EXT_TARGETS) $(PECL_TARGETS) $(SAPI_TARGETS)
 all: $(EXT_TARGETS) $(PECL_TARGETS)
 
 build_dirs: $(BUILD_DIR) $(BUILD_DIRS_SUB)
