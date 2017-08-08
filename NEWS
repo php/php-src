@@ -578,6 +578,7 @@ PHP                                                                        NEWS
 
 - JSON:
   . Fixed bug #73526 (php_json_encode depth issue). (Jakub Zelenka)
+  . Install headers on windows. (Darek Slusarczyk)
 
 - Mysqlnd:
   . Fixed bug #64526 (Add missing mysqlnd.* parameters to php.ini-*). (cmb)
