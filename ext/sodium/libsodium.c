@@ -2990,8 +2990,8 @@ PHP_FUNCTION(sodium_crypto_kdf_derive_from_key)
 	char          *ctx;
 	char          *key;
 	zend_string   *subkey;
-	long           subkey_id;
-	long           subkey_len;
+	zend_long      subkey_id;
+	zend_long      subkey_len;
 	size_t         ctx_len;
 	size_t         key_len;
 
@@ -3006,7 +3006,7 @@ PHP_FUNCTION(sodium_crypto_kdf_derive_from_key)
 		zend_throw_exception(sodium_exception_ce, "subkey cannot be smaller than sodium_crypto_kdf_BYTES_MIN", 0);
 		return;
 	}
-	if (subkey_len > crypto_kdf_BYTES_MAX) {
+	if (subkey_len > crypto_kdf_BYTES_MAX || subkey_len > SIZE_MAX) {
 		zend_throw_exception(sodium_exception_ce, "subkey cannot be larger than sodium_crypto_kdf_BYTES_MAX", 0);
 		return;
 	}
@@ -3033,7 +3033,7 @@ PHP_FUNCTION(sodium_crypto_kdf_derive_from_key)
 	salt[6] = (unsigned char) (((uint64_t) subkey_id) >> 48);
 	salt[7] = (unsigned char) (((uint64_t) subkey_id) >> 56);
 	memset(salt + 8, 0, (sizeof salt) - 8);
-	subkey = zend_string_alloc(subkey_len, 0);
+	subkey = zend_string_alloc((size_t) subkey_len, 0);
 	if (crypto_generichash_blake2b_salt_personal((unsigned char *) ZSTR_VAL(subkey),
 												 (size_t) subkey_len,
 												 NULL, 0,
