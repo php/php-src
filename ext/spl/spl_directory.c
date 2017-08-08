@@ -99,6 +99,8 @@ static void spl_filesystem_object_destroy_object(zend_object *object) /* {{{ */
 			}
 		}
 		break;
+	default:
+		break;
 	}
 } /* }}} */
 
