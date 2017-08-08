@@ -622,9 +622,8 @@ PHP_FUNCTION(sodium_memcmp)
 	if (len1 != len2) {
 		zend_throw_exception(sodium_exception_ce, "arguments have different sizes", 0);
 		return;
-	} else {
-		RETURN_LONG(sodium_memcmp(buf1, buf2, len1));
 	}
+	RETURN_LONG(sodium_memcmp(buf1, buf2, len1));
 }
 
 PHP_FUNCTION(sodium_crypto_shorthash)
