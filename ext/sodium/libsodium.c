@@ -1823,10 +1823,10 @@ PHP_FUNCTION(sodium_crypto_pwhash)
 	}
 	if (opslimit < crypto_pwhash_OPSLIMIT_INTERACTIVE) {
 		zend_error(E_WARNING,
-				   "number of operations for the argon2i function is low");
+				   "number of operations for the password hashing function is low");
 	}
 	if (memlimit < crypto_pwhash_MEMLIMIT_INTERACTIVE) {
-		zend_error(E_WARNING, "maximum memory for the argon2i function is low");
+		zend_error(E_WARNING, "maximum memory for the password hashing function is low");
 	}
 	hash = zend_string_alloc((size_t) hash_len, 0);
 	if (crypto_pwhash
@@ -1866,11 +1866,11 @@ PHP_FUNCTION(sodium_crypto_pwhash_str)
 	}
 	if (opslimit < crypto_pwhash_OPSLIMIT_INTERACTIVE) {
 		zend_error(E_WARNING,
-				   "number of operations for the argon2i function is low");
+				   "number of operations for the password hashing function is low");
 	}
 	if (memlimit < crypto_pwhash_MEMLIMIT_INTERACTIVE) {
 		zend_error(E_WARNING,
-				   "maximum memory for the argon2i function is low");
+				   "maximum memory for the password hashing function is low");
 	}
 	hash_str = zend_string_alloc(crypto_pwhash_STRBYTES - 1, 0);
 	if (crypto_pwhash_str
