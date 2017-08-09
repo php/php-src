@@ -488,7 +488,7 @@ PHP_FUNCTION(ldap_connect)
 		int rc = LDAP_SUCCESS;
 		char	*url = host;
 		if (url && !ldap_is_ldap_url(url)) {
-			int	urllen = hostlen + sizeof( "ldap://:65535" );
+			size_t urllen = hostlen + sizeof( "ldap://:65535" );
 
 			if (port <= 0 || port > 65535) {
 				efree(ld);
@@ -1722,9 +1722,9 @@ PHP_FUNCTION(ldap_delete)
 
 /* {{{ _ldap_str_equal_to_const
  */
-static int _ldap_str_equal_to_const(const char *str, uint32_t str_len, const char *cstr)
+static size_t _ldap_str_equal_to_const(const char *str, size_t str_len, const char *cstr)
 {
-	uint32_t i;
+	size_t i;
 
 	if (strlen(cstr) != str_len)
 		return 0;
@@ -1741,9 +1741,9 @@ static int _ldap_str_equal_to_const(const char *str, uint32_t str_len, const cha
 
 /* {{{ _ldap_strlen_max
  */
-static int _ldap_strlen_max(const char *str, uint32_t max_len)
+static size_t _ldap_strlen_max(const char *str, size_t max_len)
 {
-	uint32_t i;
+	size_t i;
 
 	for (i = 0; i < max_len; ++i) {
 		if (str[i] == '\0') {
@@ -1819,7 +1819,7 @@ PHP_FUNCTION(ldap_modify_batch)
 		zend_ulong tmpUlong;
 
 		/* make sure the DN contains no NUL bytes */
-		if ((size_t)_ldap_strlen_max(dn, dn_len) != dn_len) {
+		if (_ldap_strlen_max(dn, dn_len) != dn_len) {
 			php_error_docref(NULL, E_WARNING, "DN must not contain NUL bytes");
 			RETURN_FALSE;
 		}
@@ -1879,7 +1879,7 @@ PHP_FUNCTION(ldap_modify_batch)
 						RETURN_FALSE;
 					}
 
-					if (Z_STRLEN_P(modinfo) != (size_t)_ldap_strlen_max(Z_STRVAL_P(modinfo), Z_STRLEN_P(modinfo))) {
+					if (Z_STRLEN_P(modinfo) != _ldap_strlen_max(Z_STRVAL_P(modinfo), Z_STRLEN_P(modinfo))) {
 						php_error_docref(NULL, E_WARNING, "A '" LDAP_MODIFY_BATCH_ATTRIB "' value must not contain NUL bytes");
 						RETURN_FALSE;
 					}
@@ -2436,7 +2436,11 @@ PHP_FUNCTION(ldap_set_option)
 			int val;
 
 			convert_to_long_ex(newval);
-			val = Z_LVAL_P(newval);
+			if (ZEND_LONG_EXCEEDS_INT(Z_LVAL_P(newval))) {
+				php_error_docref(NULL, E_WARNING, "Option value is too big");
+				RETURN_FALSE;
+			}
+			val = (int)Z_LVAL_P(newval);
 			if (ldap_set_option(ldap, option, &val)) {
 				RETURN_FALSE;
 			}
@@ -3030,9 +3034,9 @@ static zend_string* php_ldap_do_escape(const zend_bool *map, const char *value, 
 	return ret;
 }
 
-static void php_ldap_escape_map_set_chars(zend_bool *map, const char *chars, const int charslen, char escape)
+static void php_ldap_escape_map_set_chars(zend_bool *map, const char *chars, const size_t charslen, char escape)
 {
-	int i = 0;
+	size_t i = 0;
 	while (i < charslen) {
 		map[(unsigned char) chars[i++]] = escape;
 	}
@@ -3322,10 +3326,11 @@ PHP_FUNCTION(ldap_control_paged_result_response)
 
 /* {{{ Extended operations, Pierangelo Masarati */
 #ifdef HAVE_LDAP_EXTENDED_OPERATION_S
-/* {{{ proto ? ldap_exop(resource link, string reqoid [, string reqdata [, string retdata [, string retoid]]])
+/* {{{ proto resource ldap_exop(resource link, string reqoid [, string reqdata [, array servercontrols [, array clientcontrols [, string &retdata [, string &retoid]]]]])
    Extended operation */
 PHP_FUNCTION(ldap_exop)
 {
+	zval *servercontrols, *clientcontrols;
 	zval *link, *reqoid, *reqdata, *retdata, *retoid;
 	char *lreqoid, *lretoid = NULL;
 	struct berval lreqdata, *lretdata = NULL;
@@ -3334,7 +3339,7 @@ PHP_FUNCTION(ldap_exop)
 	int rc, msgid, myargcount = ZEND_NUM_ARGS();
 	/* int reqoid_len, reqdata_len, retdata_len, retoid_len, retdat_len; */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz|zz/z/", &link, &reqoid, &reqdata, &retdata, &retoid) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz|zzzz/z/", &link, &reqoid, &reqdata, &servercontrols, &clientcontrols, &retdata, &retoid) != SUCCESS) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -3343,6 +3348,8 @@ PHP_FUNCTION(ldap_exop)
 	}
 
 	switch (myargcount) {
+	case 7:
+	case 6:
 	case 5:
 	case 4:
 	case 3:
@@ -3355,13 +3362,13 @@ PHP_FUNCTION(ldap_exop)
 		lreqoid = Z_STRVAL_P(reqoid);
 	}
 
-	if (myargcount > 3) {
+	if (myargcount > 5) {
 		/* synchronous call */
 		rc = ldap_extended_operation_s(ld->link, lreqoid,
 			lreqdata.bv_len > 0 ? &lreqdata: NULL,
 			NULL,
 			NULL,
-			myargcount > 4 ? &lretoid : NULL,
+			myargcount > 6 ? &lretoid : NULL,
 			&lretdata );
 		if (rc != LDAP_SUCCESS ) {
 			php_error_docref(NULL, E_WARNING, "Extended operation %s failed: %s (%d)", lreqoid, ldap_err2string(rc), rc);
@@ -3370,7 +3377,7 @@ PHP_FUNCTION(ldap_exop)
 
 		/* Reverse -> fall through */
 		switch (myargcount) {
-			case 5:
+			case 7:
 				zval_dtor(retoid);
 				if (lretoid == NULL) {
 					ZVAL_EMPTY_STRING(retoid);
@@ -3378,7 +3385,7 @@ PHP_FUNCTION(ldap_exop)
 					ZVAL_STRING(retoid, lretoid);
 					ldap_memfree(lretoid);
 				}
-			case 4:
+			case 6:
 				/* use arg #4 as the data returned by the server */
 				zval_dtor(retdata);
 				if (lretdata == NULL) {
@@ -3513,7 +3520,44 @@ PHP_FUNCTION(ldap_exop_whoami)
 }
 /* }}} */
 #endif
+
+#ifdef HAVE_LDAP_REFRESH_S
+/* {{{ proto bool|int ldap_exop_refresh(resource link , string dn , int ttl)
+   DDS refresh extended operation */
+PHP_FUNCTION(ldap_exop_refresh)
+{
+	zval *link, *dn, *ttl;
+	struct berval ldn;
+	ber_int_t lttl;
+	ber_int_t newttl;
+	ldap_linkdata *ld;
+	int rc;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rzz", &link, &dn, &ttl) != SUCCESS) {
+		WRONG_PARAM_COUNT;
+	}
+
+	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
+		RETURN_FALSE;
+	}
+
+	convert_to_string_ex(dn);
+	ldn.bv_val = Z_STRVAL_P(dn);
+	ldn.bv_len = Z_STRLEN_P(dn);
+
+	convert_to_long_ex(ttl);
+	lttl = (ber_int_t)Z_LVAL_P(ttl);
+
+	rc = ldap_refresh_s(ld->link, &ldn, lttl, &newttl, NULL, NULL);
+	if (rc != LDAP_SUCCESS ) {
+		php_error_docref(NULL, E_WARNING, "Refresh extended operation failed: %s (%d)", ldap_err2string(rc), rc);
+		RETURN_FALSE;
+	}
+
+	RETURN_LONG(newttl);
+}
 /* }}} */
+#endif
 
 /* }}} */
 
@@ -3794,10 +3838,12 @@ ZEND_END_ARG_INFO()
 #endif
 
 #ifdef HAVE_LDAP_EXTENDED_OPERATION_S
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_exop, 0, 0, 5)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_exop, 0, 0, 2)
 	ZEND_ARG_INFO(0, link)
 	ZEND_ARG_INFO(0, reqoid)
 	ZEND_ARG_INFO(0, reqdata)
+	ZEND_ARG_INFO(0, servercontrols)
+	ZEND_ARG_INFO(0, clientcontrols)
 	ZEND_ARG_INFO(1, retdata)
 	ZEND_ARG_INFO(1, retoid)
 ZEND_END_ARG_INFO()
@@ -3815,6 +3861,14 @@ ZEND_END_ARG_INFO()
 #ifdef HAVE_LDAP_WHOAMI_S
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_exop_whoami, 0, 0, 1)
 	ZEND_ARG_INFO(0, link)
+ZEND_END_ARG_INFO()
+#endif
+
+#ifdef HAVE_LDAP_REFRESH_S
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_exop_refresh, 0, 0, 3)
+	ZEND_ARG_INFO(0, link)
+	ZEND_ARG_INFO(0, dn)
+	ZEND_ARG_INFO(0, ttl)
 ZEND_END_ARG_INFO()
 #endif
 
@@ -3898,6 +3952,9 @@ const zend_function_entry ldap_functions[] = {
 #endif
 #ifdef HAVE_LDAP_WHOAMI_S
 	PHP_FE(ldap_exop_whoami,							arginfo_ldap_exop_whoami)
+#endif
+#ifdef HAVE_LDAP_REFRESH_S
+	PHP_FE(ldap_exop_refresh,							arginfo_ldap_exop_refresh)
 #endif
 #ifdef HAVE_LDAP_PARSE_EXTENDED_RESULT
 	PHP_FE(ldap_parse_exop,								arginfo_ldap_parse_exop)

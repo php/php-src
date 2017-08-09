@@ -133,7 +133,7 @@ static void php_image_filter_pixelate(INTERNAL_FUNCTION_PARAMETERS);
 static gdImagePtr _php_image_create_from_string (zval *Data, char *tn, gdImagePtr (*ioctx_func_p)());
 static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, gdImagePtr (*func_p)(), gdImagePtr (*ioctx_func_p)());
 static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)());
-static int _php_image_type(char data[8]);
+static int _php_image_type(char data[12]);
 static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type);
 static void _php_image_bw_convert(gdImagePtr im_org, gdIOCtx *out, int threshold);
 
@@ -2224,7 +2224,7 @@ static int _php_ctx_getmbi(gdIOCtx *ctx)
  */
 static const char php_sig_gd2[3] = {'g', 'd', '2'};
 
-static int _php_image_type (char data[8])
+static int _php_image_type (char data[12])
 {
 	/* Based on ext/standard/image.c */
 
@@ -2232,18 +2232,18 @@ static int _php_image_type (char data[8])
 		return -1;
 	}
 
-	if (!memcmp(data, php_sig_gd2, 3)) {
+	if (!memcmp(data, php_sig_gd2, sizeof(php_sig_gd2))) {
 		return PHP_GDIMG_TYPE_GD2;
-	} else if (!memcmp(data, php_sig_jpg, 3)) {
+	} else if (!memcmp(data, php_sig_jpg, sizeof(php_sig_jpg))) {
 		return PHP_GDIMG_TYPE_JPG;
-	} else if (!memcmp(data, php_sig_png, 3)) {
-		if (!memcmp(data, php_sig_png, 8)) {
-			return PHP_GDIMG_TYPE_PNG;
-		}
-	} else if (!memcmp(data, php_sig_gif, 3)) {
+	} else if (!memcmp(data, php_sig_png, sizeof(php_sig_png))) {
+		return PHP_GDIMG_TYPE_PNG;
+	} else if (!memcmp(data, php_sig_gif, sizeof(php_sig_gif))) {
 		return PHP_GDIMG_TYPE_GIF;
 	} else if (!memcmp(data, php_sig_bmp, sizeof(php_sig_bmp))) {
 		return PHP_GDIMG_TYPE_BMP;
+	} else if(!memcmp(data, php_sig_riff, sizeof(php_sig_riff)) && !memcmp(data + sizeof(php_sig_riff) + sizeof(uint32_t), php_sig_webp, sizeof(php_sig_webp))) {
+		return PHP_GDIMG_TYPE_WEBP;
 	}
 	else {
 		gdIOCtx *io_ctx;
@@ -2294,19 +2294,19 @@ PHP_FUNCTION(imagecreatefromstring)
 	zval *data;
 	gdImagePtr im;
 	int imtype;
-	char sig[8];
+	char sig[12];
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &data) == FAILURE) {
 		return;
 	}
 
 	convert_to_string_ex(data);
-	if (Z_STRLEN_P(data) < 8) {
+	if (Z_STRLEN_P(data) < sizeof(sig)) {
 		php_error_docref(NULL, E_WARNING, "Empty string or invalid image");
 		RETURN_FALSE;
 	}
 
-	memcpy(sig, Z_STRVAL_P(data), 8);
+	memcpy(sig, Z_STRVAL_P(data), sizeof(sig));
 
 	imtype = _php_image_type(sig);
 
@@ -2344,6 +2344,15 @@ PHP_FUNCTION(imagecreatefromstring)
 		case PHP_GDIMG_TYPE_BMP:
 			im = _php_image_create_from_string(data, "BMP", gdImageCreateFromBmpCtx);
 			break;
+
+		case PHP_GDIMG_TYPE_WEBP:
+#ifdef HAVE_GD_WEBP
+			im = _php_image_create_from_string(data, "WEBP", gdImageCreateFromWebpCtx);
+			break;
+#else
+			php_error_docref(NULL, E_WARNING, "No WEBP support in this PHP build");
+			RETURN_FALSE;
+#endif
 
 		default:
 			php_error_docref(NULL, E_WARNING, "Data is not in a recognized format");

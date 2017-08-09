@@ -60,29 +60,32 @@ DEFINE("BASE_INCLUDES", "/I . /I main /I Zend /I TSRM /I ext ");
 
 toolset_setup_common_cflags();
 
-ARG_WITH('mp', 'Tell Visual Studio use up to [n,auto,disable] processes for compilation', 'auto');
-var PHP_MP_DISABLED = true;
-if (VS_TOOLSET && PHP_MP != 'disable') {
-	if(PHP_DEBUG == 'yes') {
-		STDOUT.WriteLine('WARNING: Debug builds cannot be built using multi processing');
-	} else {
-		// no from disable-all 
-		if(PHP_MP == 'auto' || PHP_MP == 'no') {
-			 ADD_FLAG('CFLAGS', ' /MP ');
-			PHP_MP_DISABLED = false;
+if (VS_TOOLSET) {
+	ARG_WITH('mp', 'Tell Visual Studio use up to [n,auto,disable] processes for compilation', 'auto');
+	var PHP_MP_DISABLED = true;
+
+	if (PHP_MP != 'disable') {
+		if(PHP_DEBUG == 'yes') {
+			STDOUT.WriteLine('WARNING: Debug builds cannot be built using multi processing');
 		} else {
-			if(parseInt(PHP_MP) != 0) {
-				ADD_FLAG('CFLAGS', ' /MP'+ PHP_MP +' ');
+			// no from disable-all 
+			if(PHP_MP == 'auto' || PHP_MP == 'no') {
+				ADD_FLAG('CFLAGS', ' /MP ');
 				PHP_MP_DISABLED = false;
 			} else {
-				STDOUT.WriteLine('WARNING: Invalid argument for MP: ' + PHP_MP);
+				if(parseInt(PHP_MP) != 0) {
+					ADD_FLAG('CFLAGS', ' /MP'+ PHP_MP +' ');
+					PHP_MP_DISABLED = false;
+				} else {
+					STDOUT.WriteLine('WARNING: Invalid argument for MP: ' + PHP_MP);
+				}
 			}
 		}
 	}
-}
 
-if (!PHP_MP_DISABLED) {
-	STDOUT.WriteLine('Enabling multi process build');
+	if (!PHP_MP_DISABLED) {
+		STDOUT.WriteLine('Enabling multi process build');
+	}
 }
 
 // General link flags

@@ -1181,7 +1181,7 @@ static int php_openssl_set_server_dh_param(php_stream * stream, SSL_CTX *ctx) /*
 	}
 
 	convert_to_string_ex(zdhpath);
-	bio = BIO_new_file(Z_STRVAL_P(zdhpath), "r");
+	bio = BIO_new_file(Z_STRVAL_P(zdhpath), PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY));
 
 	if (bio == NULL) {
 		php_error_docref(NULL, E_WARNING, "invalid dh_param");
@@ -2581,9 +2581,9 @@ static char *php_openssl_get_url_name(const char *resourcename,
 	}
 
 	if (url->host) {
-		const char * host = url->host;
+		const char * host = ZSTR_VAL(url->host);
 		char * url_name = NULL;
-		size_t len = strlen(host);
+		size_t len = ZSTR_LEN(url->host);
 
 		/* skip trailing dots */
 		while (len && host[len-1] == '.') {

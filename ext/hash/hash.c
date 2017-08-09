@@ -597,6 +597,22 @@ PHP_FUNCTION(hash_algos)
 }
 /* }}} */
 
+/* {{{ proto array hash_hmac_algos(void)
+Return a list of registered hashing algorithms suitable for hash_hmac() */
+PHP_FUNCTION(hash_hmac_algos)
+{
+	zend_string *str;
+	const php_hash_ops *ops;
+
+	array_init(return_value);
+	ZEND_HASH_FOREACH_STR_KEY_PTR(&php_hash_hashtable, str, ops) {
+		if (ops->is_crypto) {
+			add_next_index_str(return_value, zend_string_copy(str));
+		}
+	} ZEND_HASH_FOREACH_END();
+}
+/* }}} */
+
 /* {{{ proto string hash_hkdf(string algo, string ikm [, int length = 0, string info = '', string salt = ''])
 RFC5869 HMAC-based key derivation function */
 PHP_FUNCTION(hash_hkdf)
@@ -1429,6 +1445,7 @@ const zend_function_entry hash_functions[] = {
 	PHP_FE(hash_copy,								arginfo_hash_copy)
 
 	PHP_FE(hash_algos,								arginfo_hash_algos)
+	PHP_FE(hash_hmac_algos,							arginfo_hash_algos)
 	PHP_FE(hash_pbkdf2,								arginfo_hash_pbkdf2)
 	PHP_FE(hash_equals,								arginfo_hash_equals)
 	PHP_FE(hash_hkdf,								arginfo_hash_hkdf)

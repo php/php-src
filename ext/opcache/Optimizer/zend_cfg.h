@@ -86,6 +86,7 @@ typedef struct _zend_basic_block {
 
 typedef struct _zend_cfg {
 	int               blocks_count;       /* number of basic blocks      */
+	int               edges_count;        /* number of edges             */
 	zend_basic_block *blocks;             /* array of basic blocks       */
 	int              *predecessors;
 	uint32_t         *map;

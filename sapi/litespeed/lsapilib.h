@@ -361,6 +361,8 @@ void LSAPI_Set_Server_fd( int fd );
 
 int LSAPI_Prefork_Accept_r( LSAPI_Request * pReq );
 
+void LSAPI_No_Check_ppid(void);
+
 void LSAPI_Set_Max_Reqs( int reqs );
 
 void LSAPI_Set_Max_Idle( int secs );

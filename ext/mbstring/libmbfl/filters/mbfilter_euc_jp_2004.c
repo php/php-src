@@ -48,7 +48,9 @@ const mbfl_encoding mbfl_encoding_eucjp2004 = {
 	"EUC-JP",
 	(const char *(*)[])&mbfl_encoding_eucjp2004_aliases,
 	mblen_table_eucjp,
-	MBFL_ENCTYPE_MBCS
+	MBFL_ENCTYPE_MBCS,
+	&vtbl_eucjp2004_wchar,
+	&vtbl_wchar_eucjp2004
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_eucjp2004 = {

@@ -43,7 +43,9 @@ const mbfl_encoding mbfl_encoding_8859_16 = {
 	"ISO-8859-16",
 	(const char *(*)[])&mbfl_encoding_8859_16_aliases,
 	NULL,
-	MBFL_ENCTYPE_SBCS
+	MBFL_ENCTYPE_SBCS,
+	&vtbl_8859_16_wchar,
+	&vtbl_wchar_8859_16
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_8859_16 = {

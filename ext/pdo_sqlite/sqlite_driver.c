@@ -161,7 +161,11 @@ static int sqlite_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 
 		pdo_sqlite_cleanup_callbacks(H);
 		if (H->db) {
+#ifdef HAVE_SQLITE3_CLOSE_V2
 			sqlite3_close_v2(H->db);
+#else
+			sqlite3_close(H->db);
+#endif
 			H->db = NULL;
 		}
 		if (einfo->errmsg) {

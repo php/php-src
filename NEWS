@@ -2,11 +2,46 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.0alpha1
 
+- Core:
+  . Redesigned the old ext_skel program written in PHP, run: 
+    'php ext_skel.php' for all options. This means there is no dependencies 
+    thrus making it work on Windows out of the box. (Kalle)
+  . Fixed bug #75031 (support append mode in temp/memory streams). (adsr)
+
+- cURL:
+  . Fixed bug #74125 (Fixed finding CURL on systems with multiarch support).
+    (cebe)
+
+- GD:
+  . Added support for WebP in imagecreatefromstring() (Andreas Treichel, cmb).
+
+- LDAP:
+  . Added ldap_exop_refresh helper for EXOP REFRESH operation with dds overlay. 
+    (Come)
+
+- Mbstring:
+  . Fixed bug #65544 (mb title case conversion-first word in quotation isn't
+    capitalized). (Nikita)
+  . Fixed bug #71298 (MB_CASE_TITLE misbehaves with curled apostrophe/quote.
+    (Nikita)
+  . Fixed bug #73528 (Crash in zif_mb_send_mail). (Nikita)
+  . Fixed bug #74929 (mbstring functions version 7.1.1 are slow compared to 5.3
+    on Windows). (Nikita)
+
+- ODBC:
+  . Removed support for ODBCRouter. (Kalle)
+  . Removed support for Birdstep. (Kalle)
+
+- phar:
+  . Fixed bug #74991 (include_path has a 4096 char limit in some cases).
+    (bwbroersma)
+
 - Session:
   . Fixed bug #74941 (session fails to start after having headers sent). 
     (morozov)
 
-- ODBC:
-  . Removed support for Birdstep. (Kalle)
+- SPL:
+  . Fixed bug #74977 (Appending AppendIterator leads to segfault). 
+    (Andrew Nester)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

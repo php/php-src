@@ -68,6 +68,9 @@ if test "$PHP_PDO_SQLITE" != "no"; then
     PHP_CHECK_LIBRARY(sqlite3,sqlite3_key,[
       AC_DEFINE(HAVE_SQLITE3_KEY,1, [have commercial sqlite3 with crypto support])
     ])
+    PHP_CHECK_LIBRARY(sqlite3,sqlite3_close_v2,[
+      AC_DEFINE(HAVE_SQLITE3_CLOSE_V2, 1, [have sqlite3_close_v2])
+    ])
 
     PHP_SUBST(PDO_SQLITE_SHARED_LIBADD)
     PHP_NEW_EXTENSION(pdo_sqlite, $php_pdo_sqlite_sources_core, $ext_shared,,-I$pdo_cv_inc_path)
@@ -79,6 +82,7 @@ if test "$PHP_PDO_SQLITE" != "no"; then
         threadsafe_flags="-DSQLITE_THREADSAFE=0"
       fi
 
+      AC_DEFINE(HAVE_SQLITE3_CLOSE_V2, 1, [have sqlite3_close_v2])
       other_flags="-DSQLITE_ENABLE_FTS3=1 -DSQLITE_ENABLE_FTS4=1 -DSQLITE_ENABLE_FTS5=1 -DSQLITE_CORE=1 -DSQLITE_ENABLE_COLUMN_METADATA=1"
 
 	  dnl As long as intl is not shared we can have ICU support

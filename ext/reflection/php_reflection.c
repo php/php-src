@@ -210,6 +210,15 @@ static zend_function *_copy_function(zend_function *fptr) /* {{{ */
 }
 /* }}} */
 
+static void _fix_closure_prototype(zend_function *fptr) /* {{{ */
+{
+	/* Actually we are setting proxy function's prototype to null
+	 * as for it, the prototype is an object not a function
+	 * which could cause serias problems, see #74949 */
+	fptr->common.prototype = NULL;
+}
+/* }}} */
+
 static void _free_function(zend_function *fptr) /* {{{ */
 {
 	if (fptr
@@ -511,6 +520,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 						&& memcmp(ZSTR_VAL(mptr->common.function_name), ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
 						&& (closure = zend_get_closure_invoke_method(Z_OBJ_P(obj))) != NULL)
 					{
+						_fix_closure_prototype(closure);
 						mptr = closure;
 					} else {
 						closure = NULL;
@@ -2267,7 +2277,6 @@ ZEND_METHOD(reflection_generator, getExecutingGenerator)
 }
 /* }}} */
 
-
 /* {{{ proto public static mixed ReflectionParameter::export(mixed function, mixed parameter [, bool return]) throws ReflectionException
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection_parameter, export)
@@ -2352,6 +2361,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 				{
 					/* nothing to do. don't set is_closure since is the invoke handler,
 					   not the closure itself */
+					_fix_closure_prototype(fptr);
 				} else if ((fptr = zend_hash_str_find_ptr(&ce->function_table, lcname, lcname_len)) == NULL) {
 					efree(lcname);
 					zend_throw_exception_ex(reflection_exception_ptr, 0,
@@ -3032,6 +3042,7 @@ ZEND_METHOD(reflection_method, __construct)
 		&& (mptr = zend_get_closure_invoke_method(Z_OBJ_P(orig_obj))) != NULL)
 	{
 		/* do nothing, mptr already set */
+		_fix_closure_prototype(mptr);
 	} else if ((mptr = zend_hash_str_find_ptr(&ce->function_table, lcname, name_len)) == NULL) {
 		efree(lcname);
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
@@ -4157,6 +4168,7 @@ ZEND_METHOD(reflection_class, getMethod)
 	{
 		/* don't assign closure_object since we only reflect the invoke handler
 		   method and not the closure definition itself */
+		_fix_closure_prototype(mptr);
 		reflection_method_factory(ce, mptr, NULL, return_value);
 		efree(lc_name);
 	} else if (ce == zend_ce_closure && Z_ISUNDEF(intern->obj) && (name_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
@@ -4164,6 +4176,7 @@ ZEND_METHOD(reflection_class, getMethod)
 		&& object_init_ex(&obj_tmp, ce) == SUCCESS && (mptr = zend_get_closure_invoke_method(Z_OBJ(obj_tmp))) != NULL) {
 		/* don't assign closure_object since we only reflect the invoke handler
 		   method and not the closure definition itself */
+		_fix_closure_prototype(mptr);
 		reflection_method_factory(ce, mptr, NULL, return_value);
 		zval_dtor(&obj_tmp);
 		efree(lc_name);
@@ -4190,6 +4203,7 @@ static void _addmethod(zend_function *mptr, zend_class_entry *ce, zval *retval, 
 			&& memcmp(ZSTR_VAL(mptr->common.function_name), ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
 			&& (closure = zend_get_closure_invoke_method(Z_OBJ_P(obj))) != NULL)
 		{
+			_fix_closure_prototype(closure);
 			mptr = closure;
 		}
 		/* don't assign closure_object since we only reflect the invoke handler
@@ -4241,6 +4255,7 @@ ZEND_METHOD(reflection_class, getMethods)
 	if (Z_TYPE(intern->obj) != IS_UNDEF && instanceof_function(ce, zend_ce_closure)) {
 		zend_function *closure = zend_get_closure_invoke_method(Z_OBJ(intern->obj));
 		if (closure) {
+			_fix_closure_prototype(closure);
 			_addmethod(closure, ce, return_value, filter, &intern->obj);
 			_free_function(closure);
 		}

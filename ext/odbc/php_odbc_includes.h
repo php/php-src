@@ -39,9 +39,7 @@
 # include <cli0defs.h>
 # include <cli0env.h>
 #elif defined(HAVE_SOLID_35)
-# if !defined(PHP_WIN32)
-#  include <sqlunix.h>
-# endif		/* end: #if !defined(PHP_WIN32) */
+# include <sqlunix.h>
 # include <sqltypes.h>
 # include <sqlucode.h>
 # include <sqlext.h>
@@ -120,20 +118,6 @@ PHP_FUNCTION(solid_fetch_prev);
 #include <sql.h>
 #include <sqlext.h>
 #define HAVE_SQL_EXTENDED_FETCH 1
-
-#elif defined(HAVE_ODBC_ROUTER) /* ODBCRouter.com */
-
-#ifdef CHAR
-#undef CHAR
-#endif
-
-#ifdef SQLCHAR
-#undef SQLCHAR
-#endif
-
-#define ODBC_TYPE "ODBCRouter"
-#include <odbcsdk.h>
-#undef HAVE_SQL_EXTENDED_FETCH
 
 #elif defined(HAVE_OPENLINK) /* OpenLink ODBC drivers */
 

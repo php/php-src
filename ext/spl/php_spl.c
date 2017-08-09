@@ -564,8 +564,14 @@ PHP_FUNCTION(spl_autoload_register)
 			ZSTR_VAL(lc_name)[ZSTR_LEN(lc_name)] = '\0';
 		} else {
 			ZVAL_UNDEF(&alfi.closure);
-			lc_name = zend_string_alloc(ZSTR_LEN(func_name), 0);
-			zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(func_name), ZSTR_LEN(func_name));
+			/* Skip leading \ */
+			if (ZSTR_VAL(func_name)[0] == '\\') {
+				lc_name = zend_string_alloc(ZSTR_LEN(func_name) - 1, 0);
+				zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(func_name) + 1, ZSTR_LEN(func_name) - 1);
+			} else {
+				lc_name = zend_string_alloc(ZSTR_LEN(func_name), 0);
+				zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(func_name), ZSTR_LEN(func_name));
+			}
 		}
 		zend_string_release(func_name);
 
@@ -683,8 +689,14 @@ PHP_FUNCTION(spl_autoload_unregister)
 		memcpy(ZSTR_VAL(lc_name) + ZSTR_LEN(func_name), &Z_OBJ_HANDLE_P(zcallable), sizeof(uint32_t));
 		ZSTR_VAL(lc_name)[ZSTR_LEN(lc_name)] = '\0';
 	} else {
-		lc_name = zend_string_alloc(ZSTR_LEN(func_name), 0);
-		zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(func_name), ZSTR_LEN(func_name));
+		/* Skip leading \ */
+		if (ZSTR_VAL(func_name)[0] == '\\') {
+			lc_name = zend_string_alloc(ZSTR_LEN(func_name) - 1, 0);
+			zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(func_name) + 1, ZSTR_LEN(func_name) - 1);
+		} else {
+			lc_name = zend_string_alloc(ZSTR_LEN(func_name), 0);
+			zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(func_name), ZSTR_LEN(func_name));
+		}
 	}
 	zend_string_release(func_name);
 
@@ -791,6 +803,20 @@ PHP_FUNCTION(spl_object_hash)
 	}
 
 	RETURN_NEW_STR(php_spl_object_hash(obj));
+}
+/* }}} */
+
+/* {{{ proto int spl_object_id(object obj)
+ Returns the integer object handle for the given object */
+PHP_FUNCTION(spl_object_id)
+{
+	zval *obj;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT(obj)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_LONG((zend_long)Z_OBJ_HANDLE_P(obj));
 }
 /* }}} */
 
@@ -915,6 +941,10 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_spl_object_hash, 0, 0, 1)
 	ZEND_ARG_INFO(0, obj)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_spl_object_id, 0, 0, 1)
+	ZEND_ARG_INFO(0, obj)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ spl_functions
@@ -931,6 +961,7 @@ const zend_function_entry spl_functions[] = {
 	PHP_FE(class_implements,        arginfo_class_implements)
 	PHP_FE(class_uses,              arginfo_class_uses)
 	PHP_FE(spl_object_hash,         arginfo_spl_object_hash)
+	PHP_FE(spl_object_id,           arginfo_spl_object_id)
 #ifdef SPL_ITERATORS_H
 	PHP_FE(iterator_to_array,       arginfo_iterator_to_array)
 	PHP_FE(iterator_count,          arginfo_iterator)

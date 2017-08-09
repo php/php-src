@@ -76,7 +76,9 @@ const mbfl_encoding mbfl_encoding_eucjp_win = {
 	"EUC-JP",
 	(const char *(*)[])&mbfl_encoding_eucjp_win_aliases,
 	mblen_table_eucjp,
-	MBFL_ENCTYPE_MBCS
+	MBFL_ENCTYPE_MBCS,
+	&vtbl_eucjpwin_wchar,
+	&vtbl_wchar_eucjpwin
 };
 
 const struct mbfl_convert_vtbl vtbl_eucjpwin_wchar = {

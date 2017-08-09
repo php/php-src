@@ -62,6 +62,8 @@ PHPAPI extern const char php_sig_gif[3];
 PHPAPI extern const char php_sig_jpg[3];
 PHPAPI extern const char php_sig_png[8];
 PHPAPI extern const char php_sig_bmp[2];
+PHPAPI extern const char php_sig_riff[4];
+PHPAPI extern const char php_sig_webp[4];
 
 extern zend_module_entry gd_module_entry;
 #define phpext_gd_ptr &gd_module_entry
