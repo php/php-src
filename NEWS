@@ -51,6 +51,8 @@ PHP                                                                        NEWS
     (Laruence)
 
 - SPL:
+  . Fixed bug #75049 (spl_autoload_unregister can't handle
+    spl_autoload_functions results). (Laruence)
   . Fixed bug #74669 (Unserialize ArrayIterator broken). (Andrew Nester)
   . Fixed bug #74977 (Appending AppendIterator leads to segfault). 
     (Andrew Nester)
