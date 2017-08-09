@@ -9176,11 +9176,13 @@ static int zend_jit_fetch_obj_read(dasm_State **Dst, zend_op *opline, zend_op_ar
 			}
 			|.if X64
 				|	mov CARG1, E_NOTICE
-				|	LOAD_ADDR CARG2, "Trying to get property of non-object"
+				|	LOAD_ADDR CARG2, "Trying to get property '%s' of non-object"
+				|	LOAD_ADDR CARG3, Z_STRVAL_P(member)
 				|	EXT_CALL zend_error, r0
 			|.else
-				|	sub r4, 8
-				|	push "Trying to get property of non-object"
+				|	sub r4, 4
+				|	push Z_STRVAL_P(member)
+				|	push "Trying to get property '%s' of non-object"
 				|	push E_NOTICE
 				|	EXT_CALL zend_error, r0
 				|	add r4, 16
