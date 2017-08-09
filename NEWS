@@ -16,6 +16,8 @@ PHP                                                                        NEWS
   . Updated to SQLite 3.20.0. (cmb)
 
 - SPL:
+  . Fixed bug #75049 (spl_autoload_unregister can't handle
+    spl_autoload_functions results). (Laruence)
   . Added spl_object_id(). (Tyson Andre)
 
 - XMLRPC:
