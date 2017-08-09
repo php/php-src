@@ -5848,8 +5848,14 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval(Z_DVAL_P(offset));
-			goto num_index;
+			if (Z_DVAL_P(offset) <= INT_MAX) {
+				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				goto num_index;
+			} else {
+				convert_to_string(offset);
+				str = Z_STR_P(offset);
+				goto str_index;
+			}
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -7632,8 +7638,14 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval(Z_DVAL_P(offset));
-			goto num_index;
+			if (Z_DVAL_P(offset) <= INT_MAX) {
+				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				goto num_index;
+			} else {
+				convert_to_string(offset);
+				str = Z_STR_P(offset);
+				goto str_index;
+			}
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -9867,8 +9879,14 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval(Z_DVAL_P(offset));
-			goto num_index;
+			if (Z_DVAL_P(offset) <= INT_MAX) {
+				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				goto num_index;
+			} else {
+				convert_to_string(offset);
+				str = Z_STR_P(offset);
+				goto str_index;
+			}
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -11835,8 +11853,14 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval(Z_DVAL_P(offset));
-			goto num_index;
+			if (Z_DVAL_P(offset) <= INT_MAX) {
+				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				goto num_index;
+			} else {
+				convert_to_string(offset);
+				str = Z_STR_P(offset);
+				goto str_index;
+			}
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -13782,8 +13806,14 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval(Z_DVAL_P(offset));
-			goto num_index;
+			if (Z_DVAL_P(offset) <= INT_MAX) {
+				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				goto num_index;
+			} else {
+				convert_to_string(offset);
+				str = Z_STR_P(offset);
+				goto str_index;
+			}
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -14511,8 +14541,14 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval(Z_DVAL_P(offset));
-			goto num_index;
+			if (Z_DVAL_P(offset) <= INT_MAX) {
+				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				goto num_index;
+			} else {
+				convert_to_string(offset);
+				str = Z_STR_P(offset);
+				goto str_index;
+			}
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -15134,8 +15170,14 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval(Z_DVAL_P(offset));
-			goto num_index;
+			if (Z_DVAL_P(offset) <= INT_MAX) {
+				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				goto num_index;
+			} else {
+				convert_to_string(offset);
+				str = Z_STR_P(offset);
+				goto str_index;
+			}
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -15657,8 +15699,14 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval(Z_DVAL_P(offset));
-			goto num_index;
+			if (Z_DVAL_P(offset) <= INT_MAX) {
+				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				goto num_index;
+			} else {
+				convert_to_string(offset);
+				str = Z_STR_P(offset);
+				goto str_index;
+			}
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -19747,8 +19795,14 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval(Z_DVAL_P(offset));
-			goto num_index;
+			if (Z_DVAL_P(offset) <= INT_MAX) {
+				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				goto num_index;
+			} else {
+				convert_to_string(offset);
+				str = Z_STR_P(offset);
+				goto str_index;
+			}
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -21509,8 +21563,14 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval(Z_DVAL_P(offset));
-			goto num_index;
+			if (Z_DVAL_P(offset) <= INT_MAX) {
+				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				goto num_index;
+			} else {
+				convert_to_string(offset);
+				str = Z_STR_P(offset);
+				goto str_index;
+			}
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -24057,8 +24117,14 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval(Z_DVAL_P(offset));
-			goto num_index;
+			if (Z_DVAL_P(offset) <= INT_MAX) {
+				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				goto num_index;
+			} else {
+				convert_to_string(offset);
+				str = Z_STR_P(offset);
+				goto str_index;
+			}
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -26555,8 +26621,14 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval(Z_DVAL_P(offset));
-			goto num_index;
+			if (Z_DVAL_P(offset) <= INT_MAX) {
+				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				goto num_index;
+			} else {
+				convert_to_string(offset);
+				str = Z_STR_P(offset);
+				goto str_index;
+			}
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -37748,8 +37820,14 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval(Z_DVAL_P(offset));
-			goto num_index;
+			if (Z_DVAL_P(offset) <= INT_MAX) {
+				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				goto num_index;
+			} else {
+				convert_to_string(offset);
+				str = Z_STR_P(offset);
+				goto str_index;
+			}
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -40456,8 +40534,14 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval(Z_DVAL_P(offset));
-			goto num_index;
+			if (Z_DVAL_P(offset) <= INT_MAX) {
+				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				goto num_index;
+			} else {
+				convert_to_string(offset);
+				str = Z_STR_P(offset);
+				goto str_index;
+			}
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -44254,8 +44338,14 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval(Z_DVAL_P(offset));
-			goto num_index;
+			if (Z_DVAL_P(offset) <= INT_MAX) {
+				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				goto num_index;
+			} else {
+				convert_to_string(offset);
+				str = Z_STR_P(offset);
+				goto str_index;
+			}
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -47823,8 +47913,14 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval(Z_DVAL_P(offset));
-			goto num_index;
+			if (Z_DVAL_P(offset) <= INT_MAX) {
+				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				goto num_index;
+			} else {
+				convert_to_string(offset);
+				str = Z_STR_P(offset);
+				goto str_index;
+			}
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;

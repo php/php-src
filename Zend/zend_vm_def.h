@@ -5181,8 +5181,14 @@ ZEND_VM_C_LABEL(num_index):
 			str = ZSTR_EMPTY_ALLOC();
 			ZEND_VM_C_GOTO(str_index);
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval(Z_DVAL_P(offset));
-			ZEND_VM_C_GOTO(num_index);
+			if (Z_DVAL_P(offset) <= INT_MAX) {
+				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				ZEND_VM_C_GOTO(num_index);
+			} else {
+				convert_to_string(offset);
+				str = Z_STR_P(offset);
+				ZEND_VM_C_GOTO(str_index);
+			}
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			ZEND_VM_C_GOTO(num_index);

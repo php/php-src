@@ -1570,8 +1570,17 @@ str_index:
 				offset_key = ZSTR_EMPTY_ALLOC();
 				goto str_index;
 			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(dim));
-				goto num_index;
+				if (Z_DVAL_P(dim) <= INT_MAX) {
+					hval = zend_dval_to_lval(Z_DVAL_P(dim));
+					goto num_index;
+				} else {
+					zval tmp;
+					ZVAL_COPY(&tmp, dim);
+					convert_to_string(&tmp);
+					offset_key = Z_STR(tmp);
+					zval_ptr_dtor(&tmp);
+					goto str_index;
+				}
 			case IS_RESOURCE:
 				zend_error(E_NOTICE, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(dim), Z_RES_HANDLE_P(dim));
 				hval = Z_RES_HANDLE_P(dim);
