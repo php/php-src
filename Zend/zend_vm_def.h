@@ -5181,12 +5181,15 @@ ZEND_VM_C_LABEL(num_index):
 			str = ZSTR_EMPTY_ALLOC();
 			ZEND_VM_C_GOTO(str_index);
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			if (Z_DVAL_P(offset) <= INT_MAX) {
+			if (Z_DVAL_P(offset) <= INT_MAX && Z_DVAL_P(offset) >= INT_MIN) {
 				hval = zend_dval_to_lval(Z_DVAL_P(offset));
 				ZEND_VM_C_GOTO(num_index);
 			} else {
-				convert_to_string(offset);
-				str = Z_STR_P(offset);
+				zval tmp;
+				ZVAL_COPY(&tmp, offset);
+				convert_to_string(&tmp);
+				str = Z_STR(tmp);
+				zval_dtor(&tmp);
 				ZEND_VM_C_GOTO(str_index);
 			}
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {

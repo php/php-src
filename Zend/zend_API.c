@@ -1682,11 +1682,14 @@ ZEND_API int array_set_zval_key(HashTable *ht, zval *key, zval *value) /* {{{ */
 			result = zend_hash_index_update(ht, Z_LVAL_P(key), value);
 			break;
 		case IS_DOUBLE:
-			if (Z_DVAL_P(key) <= INT_MAX) {
+			if (Z_DVAL_P(key) <= INT_MAX && Z_DVAL_P(key) >= INT_MIN) {
 				result = zend_hash_index_update(ht, zend_dval_to_lval(Z_DVAL_P(key)), value);
 			} else {
-				convert_to_string(key);
-				result = zend_symtable_update(ht, Z_STR_P(key), value);
+				zval tmp;
+				ZVAL_COPY(&tmp, key);
+				convert_to_string(&tmp);
+				result = zend_symtable_update(ht, Z_STR(tmp), value);
+				zval_dtor(&tmp);
 			}
 			break;
 		default:

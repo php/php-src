@@ -1485,9 +1485,10 @@ static zend_always_inline HashTable *zend_get_target_symbol_table(int fetch_type
 
 static zend_always_inline zval *zend_fetch_dimension_address_inner(HashTable *ht, const zval *dim, int dim_type, int type EXECUTE_DATA_DC)
 {
-	zval *retval;
+	zval *retval, tmp;
 	zend_string *offset_key;
 	zend_ulong hval;
+	int clean_tmp = 0;
 
 try_again:
 	if (EXPECTED(Z_TYPE_P(dim) == IS_LONG)) {
@@ -1561,6 +1562,10 @@ str_index:
 					break;
 			}
 		}
+		if (clean_tmp) {
+			zval_dtor(&tmp);
+			clean_tmp = 0;
+		}
 	} else {
 		switch (Z_TYPE_P(dim)) {
 			case IS_UNDEF:
@@ -1570,15 +1575,14 @@ str_index:
 				offset_key = ZSTR_EMPTY_ALLOC();
 				goto str_index;
 			case IS_DOUBLE:
-				if (Z_DVAL_P(dim) <= INT_MAX) {
+				if (Z_DVAL_P(dim) <= INT_MAX && Z_DVAL_P(dim) >= INT_MIN) {
 					hval = zend_dval_to_lval(Z_DVAL_P(dim));
 					goto num_index;
 				} else {
-					zval tmp;
 					ZVAL_COPY(&tmp, dim);
 					convert_to_string(&tmp);
 					offset_key = Z_STR(tmp);
-					zval_ptr_dtor(&tmp);
+					clean_tmp = 1;
 					goto str_index;
 				}
 			case IS_RESOURCE:
