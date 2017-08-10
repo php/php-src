@@ -281,9 +281,16 @@ std:
 	<STR_P1>UTF8             { PHP_JSON_CONDITION_GOTO(STR_P1); }
 	<STR_P1>ANY              {
 		if (s->options & (PHP_JSON_INVALID_UTF8_IGNORE | PHP_JSON_INVALID_UTF8_SUBSTITUTE)) {
-			int utf8_addition = (s->options & PHP_JSON_INVALID_UTF8_SUBSTITUTE) ? 3 : 0;
+			if (s->options & PHP_JSON_INVALID_UTF8_SUBSTITUTE) {
+				if (s->utf8_invalid_count > INT_MAX - 2) {
+					s->errcode = PHP_JSON_ERROR_UTF8;
+					return PHP_JSON_T_ERROR;
+				}
+				s->utf8_invalid_count += 2;
+			} else {
+				s->utf8_invalid_count--;
+			}
 			s->utf8_invalid = 1;
-			s->utf8_invalid_count += utf8_addition - 1;
 			PHP_JSON_CONDITION_GOTO(STR_P1);
 		}
 		s->errcode = PHP_JSON_ERROR_UTF8;
