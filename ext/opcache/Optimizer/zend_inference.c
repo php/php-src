@@ -3173,7 +3173,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 			UPDATE_SSA_TYPE(MAY_BE_LONG, ssa_ops[i].result_def);
 			break;
 		case ZEND_FUNC_GET_ARGS:
-			UPDATE_SSA_TYPE(MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_ANY, ssa_ops[i].result_def);
+			UPDATE_SSA_TYPE(MAY_BE_RC1| MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_ANY, ssa_ops[i].result_def);
 			break;
 		case ZEND_GET_CLASS:
 		case ZEND_GET_CALLED_CLASS:
