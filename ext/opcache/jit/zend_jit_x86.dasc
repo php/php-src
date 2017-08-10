@@ -9359,7 +9359,7 @@ static zend_bool zend_jit_opline_supports_reg(zend_op_array *op_array, zend_ssa 
 		case ZEND_SUB:
 		case ZEND_MUL:
 			op1_info = OP1_INFO();
-			op2_info = OP1_INFO();
+			op2_info = OP2_INFO();
 			return
 			    !(op1_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE))) &&
 			    !(op2_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE)));
@@ -9370,7 +9370,7 @@ static zend_bool zend_jit_opline_supports_reg(zend_op_array *op_array, zend_ssa 
 		case ZEND_SR:
 		case ZEND_MOD:
 			op1_info = OP1_INFO();
-			op2_info = OP1_INFO();
+			op2_info = OP2_INFO();
 			return
 			    !(op1_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-MAY_BE_LONG)) &&
 			    !(op2_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-MAY_BE_LONG));
