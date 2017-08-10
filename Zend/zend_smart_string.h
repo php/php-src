@@ -136,6 +136,10 @@ static zend_always_inline void smart_string_setl(smart_string *dest, char *src, 
 	dest->c = src;
 }
 
+static zend_always_inline void smart_string_reset(smart_string *str) {
+	str->len = 0;
+}
+
 #endif
 
 /*
