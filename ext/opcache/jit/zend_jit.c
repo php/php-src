@@ -986,10 +986,11 @@ tail_call:
 	return block_order;
 }
 
-static void zend_jit_compute_block_order(zend_ssa *ssa, int *block_order)
+static int zend_jit_compute_block_order(zend_ssa *ssa, int *block_order)
 {
 	int *end = zend_jit_compute_block_order_int(ssa, 0, block_order);
-	ZEND_ASSERT(end - block_order == ssa->cfg.blocks_count);
+
+	return end - block_order;
 }
 
 static zend_bool zend_jit_in_loop(zend_ssa *ssa, int header, zend_basic_block *b)
@@ -1086,13 +1087,12 @@ static int zend_jit_compute_liveness(zend_op_array *op_array, zend_ssa *ssa, zen
 
 	memset(intervals, 0, ssa->vars_count * sizeof(zend_lifetime_interval*));
 	zend_bitset_clear(live_in, set_size * ssa->cfg.blocks_count);
-	zend_jit_compute_block_order(ssa, block_order);
 
 	/* TODO: Provide a linear block order where all dominators of a block
 	 * are before this block, and where all blocks belonging to the same loop
 	 * are contiguous ???
 	 */
-	for (l = ssa->cfg.blocks_count - 1; l >= 0; l--) {
+	for (l = zend_jit_compute_block_order(ssa, block_order) - 1; l >= 0; l--) {
 		zend_basic_block *b;
 
 		i = block_order[l];
