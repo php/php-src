@@ -818,7 +818,7 @@ MYSQLND_METHOD(mysqlnd_net, set_client_option)(MYSQLND_NET * const net, enum mys
 			break;
 		}
 		case MYSQL_OPT_TLS_VERSION:
-			if (strcmp(value, "TLSv1") == 0) {
+			if (strlen(value) == sizeof("TLSv1")-1 && strncmp(value, "TLSv1", sizeof("TLSv1")-1) == 0) {
 				net->data->options.ssl_tls_version = STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT;
 			} else if (strstr(value, "TLSv1.") == value && strlen(value) == sizeof("TLSv1.x")-1) {
 				switch (value[sizeof("TLSv1.x")-2]) {

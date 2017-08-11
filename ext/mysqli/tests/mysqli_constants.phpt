@@ -211,7 +211,7 @@ require_once('skipifconnectfailure.inc');
 	}
 
 	if ($IS_MYSQLND || $version >= 50710) {
-		$expected_constants['MYSQLI_OPT_TLS_VERSION']	= true;
+		$expected_constants['MYSQLI_OPT_TLS_VERSION'] = true;
 	}
 
 	$unexpected_constants = array();
