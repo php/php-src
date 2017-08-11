@@ -53,6 +53,7 @@
 #include "php_ini.h"
 #include "php_globals.h"
 #include "php_main.h"
+#include "php_syslog.h"
 #include "fopen_wrappers.h"
 #include "ext/standard/php_standard.h"
 #include "ext/standard/php_string.h"
@@ -329,6 +330,28 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 }
 /* }}} */
 
+/* {{{ PHP_INI_MH
+ */
+static PHP_INI_MH(OnSetLogFilter)
+{
+	const char *filter  = ZSTR_VAL(new_value);
+
+	if (!strcmp(filter, "none")) {
+		PG(syslog_filter) = PHP_SYSLOG_FILTER_NONE;
+		return SUCCESS;
+	}
+	if (!strcmp(filter, "no-ctrl")) {
+		PG(syslog_filter) = PHP_SYSLOG_FILTER_NO_CTRL;
+		return SUCCESS;
+	}
+	if (!strcmp(filter, "ascii")) {
+		PG(syslog_filter) = PHP_SYSLOG_FILTER_ASCII;
+		return SUCCESS;
+	}
+
+	return FAILURE;
+}
+/* }}} */
 
 /* {{{ php_disable_functions
  */
@@ -775,6 +798,7 @@ PHP_INI_BEGIN()
 #endif
 	STD_PHP_INI_ENTRY("syslog.facility",		"LOG_USER",		PHP_INI_SYSTEM,		OnSetFacility,		syslog_facility,	php_core_globals,		core_globals)
 	STD_PHP_INI_ENTRY("syslog.ident",		"php",			PHP_INI_SYSTEM,		OnUpdateString,		syslog_ident,		php_core_globals,		core_globals)
+	STD_PHP_INI_ENTRY("syslog.filter",		"no-ctrl",		PHP_INI_ALL,		OnSetLogFilter,		syslog_filter,		php_core_globals, 		core_globals)
 PHP_INI_END()
 /* }}} */
 

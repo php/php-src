@@ -517,6 +517,14 @@ report_memleaks = On
 ; This setting is on by default.
 ;report_zend_debug = 0
 
+; Set this to disable filtering control characters (the default).
+; Some loggers only accept NVT-ASCII, others accept anything that's not
+; control characters.  If your logger accepts everything, then no filtering
+; is needed at all.
+; Values are: ascii (space-tilde), no_ctrl (all characters space and above),
+; and none (all characters)
+;syslog.filter = ascii
+
 ; Store the last error/warning message in $php_errormsg (boolean).
 ; This directive is DEPRECATED.
 ; Default Value: Off
