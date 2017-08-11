@@ -558,8 +558,8 @@ void zend_optimizer_remove_live_range_ex(zend_op_array *op_array, uint32_t var, 
 	uint32_t i = 0;
 
 	while (i < op_array->last_live_range) {
-		if (op_array->live_range[i].var == var
-				&& op_array->live_range[i].start == start) {
+		if ((op_array->live_range[i].var & ~ZEND_LIVE_MASK) == var
+			&& op_array->live_range[i].start == start) {
 			op_array->last_live_range--;
 			if (i < op_array->last_live_range) {
 				memmove(&op_array->live_range[i], &op_array->live_range[i+1], (op_array->last_live_range - i) * sizeof(zend_live_range));
