@@ -1570,6 +1570,7 @@ str_index:
 				offset_key = ZSTR_EMPTY_ALLOC();
 				goto str_index;
 			case IS_DOUBLE:
+				CHECK_LONG_INDEX_OVERFLOW(dim);
 				hval = zend_dval_to_lval(Z_DVAL_P(dim));
 				goto num_index;
 			case IS_RESOURCE:

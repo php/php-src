@@ -52,6 +52,13 @@
 	 !ZEND_USER_CODE(EX(prev_execute_data)->func->common.type) || \
 	 (EX(prev_execute_data)->opline->result_type != IS_UNUSED))
 
+#define CHECK_LONG_INDEX_OVERFLOW(key)	\
+	if (Z_DVAL_P(key) > ZEND_LONG_MAX) {	\
+		zend_error(E_WARNING, "Array index overflows the maximum integer value");	\
+	} else if (Z_DVAL_P(key) < ZEND_LONG_MIN) { \
+		zend_error(E_WARNING, "Array index overflows the minimum integer value");	\
+	}
+
 #ifdef ZEND_ENABLE_STATIC_TSRMLS_CACHE
 #define ZEND_TSRMG TSRMG_STATIC
 #define ZEND_TSRMLS_CACHE_EXTERN() TSRMLS_CACHE_EXTERN()

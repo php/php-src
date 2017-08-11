@@ -6956,6 +6956,7 @@ static zend_bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 					zend_symtable_update(Z_ARRVAL_P(result), Z_STR_P(key), value);
 					break;
 				case IS_DOUBLE:
+					CHECK_LONG_INDEX_OVERFLOW(key);
 					zend_hash_index_update(Z_ARRVAL_P(result),
 						zend_dval_to_lval(Z_DVAL_P(key)), value);
 					break;
