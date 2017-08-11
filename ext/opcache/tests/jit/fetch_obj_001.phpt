@@ -115,7 +115,7 @@ object(stdClass)#%d (2) {
   }
 }
 
-Warning: Attempt to modify property of non-object in %sfetch_obj_001.php on line 40
+Warning: Attempt to modify property 'abc' of non-object in %sfetch_obj_001.php on line 40
 array(0) {
 }
 object(stdClass)#%d (1) {
