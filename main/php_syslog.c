@@ -86,11 +86,23 @@ PHPAPI void php_syslog(int priority, const char *format, ...) /* {{{ */
 			break;
 		}
 
-		if (c != '\n')
+		/* check for NVT ASCII only unless test disabled */
+		if (((0x20 <= c) && (c <= 0x7e)))
 			smart_string_appendc(&sbuf, c);
-		else {
+		else if ((c >= 0x80) && (PG(syslog_filter) != PHP_SYSLOG_FILTER_ASCII))
+			smart_string_appendc(&sbuf, c);
+		else if (c == '\n') {
 			syslog(priority, "%.*s", (int)sbuf.len, sbuf.c);
 			smart_string_reset(&sbuf);
+		} else if ((c < 0x20) && (PG(syslog_filter) == PHP_SYSLOG_FILTER_NONE))
+			smart_string_appendc(&sbuf, c);
+		else {
+			const char xdigits[] = "0123456789abcdef";
+
+			smart_string_appendl(&sbuf, "\\x", 2);
+			smart_string_appendc(&sbuf, xdigits[(c / 0x10)]);
+			c &= 0x0f;
+			smart_string_appendc(&sbuf, xdigits[c]);
 		}
 	}
 
