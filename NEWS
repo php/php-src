@@ -59,6 +59,12 @@ PHP                                                                        NEWS
     (Andrew Nester)
   . Fixed bug #75015 (Crash in recursive iterator destructors). (Julien)
 
+- Standard:
+  . Fixed bug #74103 (heap-use-after-free when unserializing invalid array
+    size). (Nikita)
+  . Fixed bug #75054 (A Denial of Service Vulnerability was found when
+    performing deserialization). (Nikita)
+
 - XMLRPC:
   . Fixed bug #74975 (Incorrect xmlrpc serialization for classes with declared
     properties). (blar)

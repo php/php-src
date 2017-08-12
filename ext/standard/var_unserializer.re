@@ -454,16 +454,7 @@ string_key:
 			return 0;
 		}
 
-		if (UNEXPECTED(Z_ISUNDEF_P(data))) {
-			if (Z_TYPE(key) == IS_LONG) {
-				zend_hash_index_del(ht, Z_LVAL(key));
-			} else {
-				zend_hash_del_ind(ht, Z_STR(key));
-			}
-		} else {
-			var_push_dtor(var_hash, data);
-		}
-
+		var_push_dtor(var_hash, data);
 		zval_dtor(&key);
 
 		if (elements && *(*p-1) != ';' && *(*p-1) != '}') {
@@ -636,11 +627,10 @@ static int php_var_unserialize_internal(UNSERIALIZE_PARAMETER)
 		return 0;
 	}
 
-	zval_ptr_dtor(rval);
 	if (Z_ISUNDEF_P(rval_ref) || (Z_ISREF_P(rval_ref) && Z_ISUNDEF_P(Z_REFVAL_P(rval_ref)))) {
-		ZVAL_UNDEF(rval);
-		return 1;
+		return 0;
 	}
+
 	if (Z_ISREF_P(rval_ref)) {
 		ZVAL_COPY(rval, rval_ref);
 	} else {
@@ -667,8 +657,7 @@ static int php_var_unserialize_internal(UNSERIALIZE_PARAMETER)
 	}
 
 	if (Z_ISUNDEF_P(rval_ref) || (Z_ISREF_P(rval_ref) && Z_ISUNDEF_P(Z_REFVAL_P(rval_ref)))) {
-		ZVAL_UNDEF(rval);
-		return 1;
+		return 0;
 	}
 
 	ZVAL_COPY(rval, rval_ref);
