@@ -105,7 +105,9 @@
 	} else { \
 		(error_info).error_no = (a); \
 		strlcpy((error_info).sqlstate, (b), sizeof((error_info).sqlstate)); \
-		strlcpy((error_info).error, (c), sizeof((error_info).error)); \
+		if (&(error_info).error != (c)) { \
+			strlcpy((error_info).error, (c), sizeof((error_info).error)); \
+		} \
 		if ((error_info).error_list) {\
 			MYSQLND_ERROR_LIST_ELEMENT error_for_the_list = {0}; \
 																	\
