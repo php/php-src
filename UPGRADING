@@ -169,6 +169,8 @@ PHP 8.0.
   . The create_function() function has been deprecated, use anonymous functions
     instead.
   . The each() function has been deprecated, use a foreach loop instead.
+  . The $errcontext error handler argument has been deprecated. However, using
+    it does not trigger a deprecation warning for technical reasons.
   
 - EXIF:
   . The read_exif_data() alias have been deprecated, use exif_read_data() instead.
