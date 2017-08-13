@@ -26,6 +26,9 @@ PHP                                                                        NEWS
   . Fixed bug #75054 (A Denial of Service Vulnerability was found when
     performing deserialization). (Nikita)
 
+- WDDX:
+  . Fixed bug #73793 (WDDX uses wrong decimal seperator). (cmb)
+
 - XMLRPC:
   . Fixed bug #74975 (Incorrect xmlrpc serialization for classes with declared
     properties). (blar)
