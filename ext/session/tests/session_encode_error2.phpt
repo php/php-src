@@ -141,7 +141,9 @@ bool(true)
 
 -- Iteration 7 --
 bool(true)
-string(33) "123456789000|s:12:"Hello World!";"
+
+Notice: session_encode(): Skipping numeric key %s in %s on line %d
+bool(false)
 bool(true)
 
 -- Iteration 8 --

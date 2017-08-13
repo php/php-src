@@ -5181,7 +5181,7 @@ ZEND_VM_C_LABEL(num_index):
 			str = ZSTR_EMPTY_ALLOC();
 			ZEND_VM_C_GOTO(str_index);
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			if (Z_DVAL_P(offset) <= INT_MAX && Z_DVAL_P(offset) >= INT_MIN) {
+			if (ZEND_DOUBLE_FITS_LONG(Z_DVAL_P(offset))) {
 				hval = zend_dval_to_lval(Z_DVAL_P(offset));
 				ZEND_VM_C_GOTO(num_index);
 			} else {

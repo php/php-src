@@ -1575,7 +1575,7 @@ str_index:
 				offset_key = ZSTR_EMPTY_ALLOC();
 				goto str_index;
 			case IS_DOUBLE:
-				if (Z_DVAL_P(dim) <= INT_MAX && Z_DVAL_P(dim) >= INT_MIN) {
+				if (ZEND_DOUBLE_FITS_LONG(Z_DVAL_P(dim))) {
 					hval = zend_dval_to_lval(Z_DVAL_P(dim));
 					goto num_index;
 				} else {
