@@ -2375,6 +2375,11 @@ static HashTable *date_object_get_properties_timezone(zval *object) /* {{{ */
 	return props;
 } /* }}} */
 
+static inline void date_object_update_properties_timezone(zval *object) /* {{{ */
+{
+	date_object_get_properties_timezone(object);
+} /* }}} */
+
 static inline zend_object *date_object_new_interval_ex(zend_class_entry *class_type, int init_props) /* {{{ */
 {
 	php_interval_obj *intern;
@@ -3369,6 +3374,7 @@ PHP_FUNCTION(date_timezone_get)
 		php_date_instantiate(date_ce_timezone, return_value);
 		tzobj = Z_PHPTIMEZONE_P(return_value);
 		set_timezone_from_timelib_time(tzobj, dateobj->time);
+		date_object_update_properties_timezone(return_value);
 	} else {
 		RETURN_FALSE;
 	}
@@ -3768,6 +3774,7 @@ PHP_FUNCTION(timezone_open)
 		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
+	date_object_update_properties_timezone(return_value);
 }
 /* }}} */
 
@@ -3788,6 +3795,7 @@ PHP_METHOD(DateTimeZone, __construct)
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
 	tzobj = Z_PHPTIMEZONE_P(getThis());
 	timezone_initialize(tzobj, tz, tz_len);
+	date_object_update_properties_timezone(getThis());
 	zend_restore_error_handling(&error_handling);
 }
 /* }}} */
@@ -3806,6 +3814,7 @@ static int php_date_timezone_initialize_from_hash(zval **return_value, php_timez
 				return FAILURE;
 			}
 			if (SUCCESS == timezone_initialize(*tzobj, Z_STRVAL_P(z_timezone), Z_STRLEN_P(z_timezone))) {
+				date_object_update_properties_timezone(*return_value);
 				return SUCCESS;
 			}
 		}
@@ -3848,7 +3857,7 @@ PHP_METHOD(DateTimeZone, __wakeup)
 
 	myht = Z_OBJPROP_P(object);
 
-	if(php_date_timezone_initialize_from_hash(&return_value, &tzobj, myht) != SUCCESS) {
+	if(php_date_timezone_initialize_from_hash(&object, &tzobj, myht) != SUCCESS) {
 		zend_throw_error(NULL, "Timezone initialization failed");
 	}
 }
