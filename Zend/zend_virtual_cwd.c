@@ -389,16 +389,21 @@ static void cwd_globals_dtor(virtual_cwd_globals *cwd_g) /* {{{ */
 }
 /* }}} */
 
-CWD_API void virtual_cwd_startup(void) /* {{{ */
+void virtual_cwd_main_cwd_init(uint8_t reinit) /* {{{ */
 {
 	char cwd[MAXPATHLEN];
 	char *result;
 
+	if (reinit) {
+		free(main_cwd_state.cwd);
+	}
 
 #ifdef ZEND_WIN32
 	ZeroMemory(&cwd, sizeof(cwd));
-#endif
+	result = php_win32_ioutil_getcwd(cwd, sizeof(cwd));
+#else
 	result = getcwd(cwd, sizeof(cwd));
+#endif
 
 	if (!result) {
 		cwd[0] = '\0';
@@ -411,7 +416,12 @@ CWD_API void virtual_cwd_startup(void) /* {{{ */
 	}
 #endif
 	main_cwd_state.cwd = strdup(cwd);
+}
+/* }}} */
 
+CWD_API void virtual_cwd_startup(void) /* {{{ */
+{
+	virtual_cwd_main_cwd_init(0);
 #ifdef ZTS
 	ts_allocate_id(&cwd_globals_id, sizeof(virtual_cwd_globals), (ts_allocate_ctor) cwd_globals_ctor, (ts_allocate_dtor) cwd_globals_dtor);
 #else

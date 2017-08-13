@@ -2230,6 +2230,20 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	/* Register Zend ini entries */
 	zend_register_standard_ini_entries();
 
+#ifdef ZEND_WIN32
+	/* Until the current ini values was setup, the current cp is 65001.
+		If the actual ini vaues are different, some stuff needs to be updated.
+		It concerns at least main_cwd_state and there might be more. As we're
+		still in the startup phase, lets use the chance and reinit the relevant
+		item according to the current codepage. Still, if ini_set() is used
+		later on, a more intelligent way to update such stuff is needed.
+		Startup/shutdown routines could involve touching globals and thus
+		can't always be used on demand. */
+	if (!php_win32_cp_use_unicode()) {
+		virtual_cwd_main_cwd_init(1);
+	}
+#endif
+
 	/* Disable realpath cache if an open_basedir is set */
 	if (PG(open_basedir) && *PG(open_basedir)) {
 		CWDG(realpath_cache_size_limit) = 0;
