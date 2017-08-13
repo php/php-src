@@ -24,6 +24,11 @@ Core:
     some old options removed. This is now written in PHP and have no external 
 	dependencies.
 
+Standard:
+  . getimagesize() and related functions now report the mime type of BMP images
+	  as image/bmp instead of image/x-ms-bmp, since the former has been registered
+		with the IANA (see RFC 7903).
+
 ========================================
 2. New Features
 ========================================
