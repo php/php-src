@@ -5175,9 +5175,8 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 			case ZEND_IS_EQUAL:
 			case ZEND_IS_IDENTICAL:
 			case ZEND_CASE:
-				| jp >1
+				| jp => target_label
 				| jne => target_label
-				|1:
 				break;
 			case ZEND_IS_NOT_EQUAL:
 			case ZEND_IS_NOT_IDENTICAL:
@@ -5187,15 +5186,19 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 				break;
 			case ZEND_IS_SMALLER:
 				if (swap) {
+					| jp => target_label
 					| jbe => target_label
 				} else {
+					| jp => target_label
 					| jae => target_label
 				}
 				break;
 			case ZEND_IS_SMALLER_OR_EQUAL:
 				if (swap) {
+					| jp => target_label
 					| jb => target_label
 				} else {
+					| jp => target_label
 					| ja => target_label
 				}
 				break;
@@ -5216,22 +5219,25 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 				break;
 			case ZEND_IS_NOT_EQUAL:
 			case ZEND_IS_NOT_IDENTICAL:
-				| jp >1
+				| jp => target_label
 				| jne => target_label
-				|1:
 				break;
 			case ZEND_IS_SMALLER:
 				if (swap) {
 					| ja => target_label
 				} else {
+					| jp >1
 					| jb => target_label
+                    |1:
 				}
 				break;
 			case ZEND_IS_SMALLER_OR_EQUAL:
 				if (swap) {
 					| jae => target_label
 				} else {
+					| jp >1
 					| jbe => target_label
+					|1:
 				}
 				break;
 			default:
@@ -5240,40 +5246,44 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 	} else if ((opline+1)->opcode == ZEND_JMPZNZ &&
 	           (opline+1)->op1_type == IS_TMP_VAR &&
 	           (opline+1)->op1.var == opline->result.var) {
+		unsigned int target_label2 = ssa->cfg.blocks[b].successors[1];
+
 		target_label = ssa->cfg.blocks[b].successors[0];
 		switch (opline->opcode) {
 			case ZEND_IS_EQUAL:
 			case ZEND_IS_IDENTICAL:
 			case ZEND_CASE:
-				| jp >1
+				| jp => target_label
 				| jne => target_label
-				|1:
 				break;
 			case ZEND_IS_NOT_EQUAL:
 			case ZEND_IS_NOT_IDENTICAL:
-				| jp >1
+				| jp => target_label2
 				| je => target_label
 				|1:
 				break;
 			case ZEND_IS_SMALLER:
 				if (swap) {
+					| jp => target_label
 					| jbe => target_label
 				} else {
+					| jp => target_label
 					| jae => target_label
 				}
 				break;
 			case ZEND_IS_SMALLER_OR_EQUAL:
 				if (swap) {
+					| jp => target_label
 					| jb => target_label
 				} else {
+					| jp => target_label
 					| ja => target_label
 				}
 				break;
 			default:
 				ZEND_ASSERT(0);
 		}
-		target_label = ssa->cfg.blocks[b].successors[1];
-		| jmp => target_label
+		| jmp => target_label2
 	} else if ((opline+1)->opcode == ZEND_JMPZ_EX &&
 	    (opline+1)->op1_type == IS_TMP_VAR &&
 	    (opline+1)->op1.var == opline->result.var) {
@@ -5285,10 +5295,9 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 			case ZEND_IS_IDENTICAL:
 			case ZEND_CASE:
 				|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
-				|	jp >1
+				|	jp => target_label
 				|	jne => target_label
 				|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
-				|1:
 				break;
 			case ZEND_IS_NOT_EQUAL:
 			case ZEND_IS_NOT_IDENTICAL:
@@ -5300,32 +5309,28 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 				break;
 			case ZEND_IS_SMALLER:
 				if (swap) {
-					|	seta al
-					|	movzx eax, al
-					|	lea eax, [eax + 2]
-					|	SET_ZVAL_TYPE_INFO res_addr, eax
-					|	jnae => target_label
+					|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
+					|	jp => target_label
+					|	jbe => target_label
+					|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
 				} else {
-					|	setb al
-					|	movzx eax, al
-					|	lea eax, [eax + 2]
-					|	SET_ZVAL_TYPE_INFO res_addr, eax
+					|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
+					|	jp => target_label
 					|	jae => target_label
+					|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
 				}
 				break;
 			case ZEND_IS_SMALLER_OR_EQUAL:
 				if (swap) {
-					|	setae al
-					|	movzx eax, al
-					|	lea eax, [eax + 2]
-					|	SET_ZVAL_TYPE_INFO res_addr, eax
-					|	jnae => target_label
+					|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
+					|	jp => target_label
+					|	jb => target_label
+					|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
 				} else {
-					|	setbe al
-					|	movzx eax, al
-					|	lea eax, [eax + 2]
-					|	SET_ZVAL_TYPE_INFO res_addr, eax
+					|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
+					|	jp => target_label
 					|	ja => target_label
+					|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
 				}
 				break;
 			default:
@@ -5350,10 +5355,9 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 			case ZEND_IS_NOT_EQUAL:
 			case ZEND_IS_NOT_IDENTICAL:
 				|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
-				|	jp >1
+				|	jp => target_label
 				|	jne => target_label
 				|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
-				|1:
 				break;
 			case ZEND_IS_SMALLER:
 				if (swap) {
@@ -5363,11 +5367,11 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 					|	SET_ZVAL_TYPE_INFO res_addr, eax
 					|	ja => target_label
 				} else {
-					|	setb al
-					|	movzx eax, al
-					|	lea eax, [eax + 2]
-					|	SET_ZVAL_TYPE_INFO res_addr, eax
-					|	jnae => target_label
+					|	jp >1
+					|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
+					|	jb => target_label
+					|1:
+					|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
 				}
 				break;
 			case ZEND_IS_SMALLER_OR_EQUAL:
@@ -5378,11 +5382,11 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 					|	SET_ZVAL_TYPE_INFO res_addr, eax
 					|	jae => target_label
 				} else {
-					|	setbe al
-					|	movzx eax, al
-					|	lea eax, [eax + 2]
-					|	SET_ZVAL_TYPE_INFO res_addr, eax
-					|	jna => target_label
+					|	jp >1
+					|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
+					|	jbe => target_label
+					|1:
+					|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
 				}
 				break;
 			default:
@@ -5417,9 +5421,12 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 					|	movzx eax, al
 					|	add eax, 2
 				} else {
-					|	setb al
-					|	movzx eax, al
-					|	add eax, 2
+					|	jp >1
+					|	mov eax, IS_TRUE
+					|	jb >2
+					|1:
+					|	mov eax, IS_FALSE
+					|2:
 				}
 				break;
 			case ZEND_IS_SMALLER_OR_EQUAL:
@@ -5428,9 +5435,12 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 					|	movzx eax, al
 					|	add eax, 2
 				} else {
-					|	setbe al
-					|	movzx eax, al
-					|	add eax, 2
+					|	jp >1
+					|	mov eax, IS_TRUE
+					|	jbe >2
+					|1:
+					|	mov eax, IS_FALSE
+					|2:
 				}
 				break;
 			default:
