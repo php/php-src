@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.2.0beta3
 
+- Core:
+  . Fixed bug #75063 (Main CWD initialized with wrong codepage). (Anatol)
+
 - Date:
   . Fixed bug #75002 (Null Pointer Dereference in timelib_time_clone). (Derick)
 
