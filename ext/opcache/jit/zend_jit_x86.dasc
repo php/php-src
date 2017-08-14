@@ -5187,14 +5187,14 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 				break;
 			case ZEND_IS_SMALLER:
 				if (swap) {
-					| jna => target_label
+					| jbe => target_label
 				} else {
 					| jae => target_label
 				}
 				break;
 			case ZEND_IS_SMALLER_OR_EQUAL:
 				if (swap) {
-					| jnae => target_label
+					| jb => target_label
 				} else {
 					| ja => target_label
 				}
@@ -5224,14 +5224,14 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 				if (swap) {
 					| ja => target_label
 				} else {
-					| jnae => target_label
+					| jb => target_label
 				}
 				break;
 			case ZEND_IS_SMALLER_OR_EQUAL:
 				if (swap) {
 					| jae => target_label
 				} else {
-					| jna => target_label
+					| jbe => target_label
 				}
 				break;
 			default:
@@ -5257,14 +5257,14 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 				break;
 			case ZEND_IS_SMALLER:
 				if (swap) {
-					| jna => target_label
+					| jbe => target_label
 				} else {
 					| jae => target_label
 				}
 				break;
 			case ZEND_IS_SMALLER_OR_EQUAL:
 				if (swap) {
-					| jnae => target_label
+					| jb => target_label
 				} else {
 					| ja => target_label
 				}
@@ -5306,7 +5306,7 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 					|	SET_ZVAL_TYPE_INFO res_addr, eax
 					|	jnae => target_label
 				} else {
-					|	setnae al
+					|	setb al
 					|	movzx eax, al
 					|	lea eax, [eax + 2]
 					|	SET_ZVAL_TYPE_INFO res_addr, eax
@@ -5321,7 +5321,7 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 					|	SET_ZVAL_TYPE_INFO res_addr, eax
 					|	jnae => target_label
 				} else {
-					|	setna al
+					|	setbe al
 					|	movzx eax, al
 					|	lea eax, [eax + 2]
 					|	SET_ZVAL_TYPE_INFO res_addr, eax
@@ -5363,7 +5363,7 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 					|	SET_ZVAL_TYPE_INFO res_addr, eax
 					|	ja => target_label
 				} else {
-					|	setnae al
+					|	setb al
 					|	movzx eax, al
 					|	lea eax, [eax + 2]
 					|	SET_ZVAL_TYPE_INFO res_addr, eax
@@ -5378,7 +5378,7 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 					|	SET_ZVAL_TYPE_INFO res_addr, eax
 					|	jae => target_label
 				} else {
-					|	setna al
+					|	setbe al
 					|	movzx eax, al
 					|	lea eax, [eax + 2]
 					|	SET_ZVAL_TYPE_INFO res_addr, eax
@@ -5417,7 +5417,7 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 					|	movzx eax, al
 					|	add eax, 2
 				} else {
-					|	setnae al
+					|	setb al
 					|	movzx eax, al
 					|	add eax, 2
 				}
@@ -5428,7 +5428,7 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 					|	movzx eax, al
 					|	add eax, 2
 				} else {
-					|	setna al
+					|	setbe al
 					|	movzx eax, al
 					|	add eax, 2
 				}
