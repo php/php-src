@@ -6,6 +6,7 @@ PHP                                                                        NEWS
   . Fixed bug #74947 (Segfault in scanner on INF number). (Laruence)
   . Fixed bug #74954 (null deref and segfault in zend_generator_resume()). (Bob)
   . Fixed bug #74725 (html_errors=1 breaks unhandled exceptions). (Andrea)
+  . Fixed bug #75063 (Main CWD initialized with wrong codepage). (Anatol)
 
 - cURL:
   . Fixed bug #74125 (Fixed finding CURL on systems with multiarch support).
