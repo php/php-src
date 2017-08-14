@@ -1776,6 +1776,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(
 	if (throw_op->result_type & (IS_VAR | IS_TMP_VAR)) {
 		switch (throw_op->opcode) {
 			case ZEND_ADD_ARRAY_ELEMENT:
+			case ZEND_ROPE_INIT:
 			case ZEND_ROPE_ADD:
 				break; /* exception while building structures, live range handling will free those */
 
