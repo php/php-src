@@ -678,10 +678,12 @@ static int pdo_oci_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ *
 	int i, ret = 0;
 	struct pdo_data_src_parser vars[] = {
 		{ "charset",  NULL,	0 },
-		{ "dbname",   "",	0 }
+		{ "dbname",   "",	0 },
+		{ "user",     NULL, 0 },
+		{ "password", NULL, 0 }
 	};
 
-	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, 2);
+	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, 4);
 
 	H = pecalloc(1, sizeof(*H), dbh->is_persistent);
 	dbh->driver_data = H;
@@ -745,6 +747,10 @@ static int pdo_oci_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ *
 	}
 
 	/* username */
+	if (!dbh->username && vars[2].optval) {
+		dbh->username = vars[2].optval;
+	}
+
 	if (dbh->username) {
 		H->last_err = OCIAttrSet(H->session, OCI_HTYPE_SESSION,
 			   	dbh->username, (ub4) strlen(dbh->username),
@@ -756,6 +762,10 @@ static int pdo_oci_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ *
 	}
 
 	/* password */
+	if (!dbh->password && vars[3].optval) {
+		dbh->password = vars[3].optval;
+	}
+
 	if (dbh->password) {
 		H->last_err = OCIAttrSet(H->session, OCI_HTYPE_SESSION,
 			   	dbh->password, (ub4) strlen(dbh->password),

@@ -250,6 +250,14 @@ PHP 7.4 UPGRADE NOTES
     PREG_OFFSET_CAPTURE and PREG_UNMATCHED_AS_NULL flags. This influences the
     format of the matches array passed to to the callback function.
 
+- PDO:
+  . The username and password can now be specified as part of the PDO DSN for
+    the mysql, mssql, sybase, dblib, firebird and oci drivers. Previously this
+    was only supported by the pgsql driver. If a username/password is specified
+    both in the constructor and the DSN, the constructor takes precedence.
+
+        new PDO("mysql:host=xxx;port=xxx;dbname=xxx;user=xxx;password=xxx");
+
 - PDO_OCI:
   . PDOStatement::getColumnMeta() is now available
 
