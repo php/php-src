@@ -1186,7 +1186,7 @@ PHPAPI char * php_image_type_to_mime_type(int image_type)
 		case IMAGE_FILETYPE_PSD:
 			return "image/psd";
 		case IMAGE_FILETYPE_BMP:
-			return "image/x-ms-bmp";
+			return "image/bmp";
 		case IMAGE_FILETYPE_TIFF_II:
 		case IMAGE_FILETYPE_TIFF_MM:
 			return "image/tiff";

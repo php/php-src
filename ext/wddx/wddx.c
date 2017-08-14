@@ -420,11 +420,15 @@ static void php_wddx_serialize_string(wddx_packet *packet, zval *var)
  */
 static void php_wddx_serialize_number(wddx_packet *packet, zval *var)
 {
-	char tmp_buf[WDDX_BUF_LEN];
+	char tmp_buf[WDDX_BUF_LEN], *dec_point;
 	zend_string *str = zval_get_string(var);
 	snprintf(tmp_buf, sizeof(tmp_buf), WDDX_NUMBER, ZSTR_VAL(str));
 	zend_string_release(str);
 
+	dec_point = strchr(tmp_buf, ',');
+	if (dec_point) {
+		*dec_point = '.';
+	}
 	php_wddx_add_chunk(packet, tmp_buf);
 }
 /* }}} */

@@ -49,18 +49,28 @@ PHP_FUNCTION(oci_register_taf_callback)
 	zval *z_connection;
 	php_oci_connection *connection;
 	zval *callback;
+	zend_string *callback_name;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|z!", &z_connection, &callback) == FAILURE) {
 		return;
 	}
 
 	if (callback) {
-		if (!zend_is_callable(callback, 0, NULL)) {
-			zend_string *callback_name = zend_get_callable_name(callback);
+#if PHP_MAJOR_VERSION > 7 || (PHP_MAJOR_VERSION == 7 && PHP_MINOR_VERSION >= 2)    
+		if (!zend_is_callable(callback, 0, 0)) {
+			callback_name = zend_get_callable_name(callback);
 			php_error_docref(NULL, E_WARNING, "function '%s' is not callable", ZSTR_VAL(callback_name));
 			zend_string_release(callback_name);
 			RETURN_FALSE;
 		}
+#else
+		if (!zend_is_callable(callback, 0, &callback_name)) {
+			php_error_docref(NULL, E_WARNING, "function '%s' is not callable", ZSTR_VAL(callback_name));
+			zend_string_release(callback_name);
+			RETURN_FALSE;
+		}
+		zend_string_release(callback_name);
+#endif
 	}
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
