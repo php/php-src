@@ -33,8 +33,12 @@ var_dump($would);
 var_dump(flock($fp, -1));
 var_dump(flock($fp, 0));
 
-@unlink($file);
 echo "Done\n";
+?>
+--CLEAN--
+<?php
+$file = dirname(__FILE__)."/flock.dat";
+unlink($file);
 ?>
 --EXPECTF--	
 Warning: flock() expects at least 2 parameters, 0 given in %s on line %d
