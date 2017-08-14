@@ -557,6 +557,24 @@ void zend_optimizer_remove_live_range_ex(zend_op_array *op_array, uint32_t var, 
 {
 	uint32_t i = 0;
 
+	switch (op_array->opcodes[start].opcode) {
+		case ZEND_ROPE_ADD:
+		case ZEND_ADD_ARRAY_ELEMENT:
+			return;
+		case ZEND_ROPE_INIT:
+			var |= ZEND_LIVE_ROPE;
+			break;
+		case ZEND_BEGIN_SILENCE:
+			var |= ZEND_LIVE_SILENCE;
+			break;
+		case ZEND_FE_RESET_R:
+		case ZEND_FE_RESET_RW:
+			var |= ZEND_LIVE_LOOP;
+			/* break missing intentionally */
+		default:
+			start++;
+	}
+
 	while (i < op_array->last_live_range) {
 		if (op_array->live_range[i].var == var
 				&& op_array->live_range[i].start == start) {

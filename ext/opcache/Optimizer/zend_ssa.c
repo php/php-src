@@ -1362,7 +1362,7 @@ void zend_ssa_remove_block(zend_op_array *op_array, zend_ssa *ssa, int i) /* {{{
 		}
 
 		if (op_array->opcodes[j].result_type & (IS_TMP_VAR|IS_VAR)) {
-			zend_optimizer_remove_live_range_ex(op_array, op_array->opcodes[j].result.var, j + 1);
+			zend_optimizer_remove_live_range_ex(op_array, op_array->opcodes[j].result.var, j);
 		}
 		zend_ssa_remove_defs_of_instr(ssa, &ssa->ops[j]);
 		zend_ssa_remove_instr(ssa, &op_array->opcodes[j], &ssa->ops[j]);
