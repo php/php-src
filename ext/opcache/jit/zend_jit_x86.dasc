@@ -5990,9 +5990,23 @@ static int zend_jit_identical(dasm_State **Dst, const zend_op *opline, int b, in
 		}
 	} else {
 		if (opline->op1_type != IS_CONST) {
+			if (Z_MODE(op1_addr) == IS_REG) {
+				zend_jit_addr real_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->op1.var);
+				if (!zend_jit_spill_store(Dst, op1_addr, real_addr, op1_info, 1)) {
+					return 0;
+				}
+				op1_addr = real_addr;
+			}
 			|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
 		}
 		if (opline->op2_type != IS_CONST) {
+			if (Z_MODE(op2_addr) == IS_REG) {
+				zend_jit_addr real_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->op2.var);
+				if (!zend_jit_spill_store(Dst, op2_addr, real_addr, op2_info, 1)) {
+					return 0;
+				}
+				op2_addr = real_addr;
+			}
 			|	LOAD_ZVAL_ADDR FCARG2a, op2_addr
 		}
 	}
