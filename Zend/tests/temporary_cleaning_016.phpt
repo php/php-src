@@ -8,7 +8,6 @@ try {
     $a = [];
     $str = "$a${"y$a$a"}y";
 } catch (Exception $e) {
-    echo "Exception\n";
 }
 ?>
 DONE
