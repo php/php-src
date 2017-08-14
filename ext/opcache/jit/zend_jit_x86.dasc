@@ -5187,7 +5187,7 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 				break;
 			case ZEND_IS_SMALLER:
 				if (swap) {
-					| jnae => target_label
+					| jna => target_label
 				} else {
 					| jae => target_label
 				}
@@ -5222,7 +5222,7 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 				break;
 			case ZEND_IS_SMALLER:
 				if (swap) {
-					| jae => target_label
+					| ja => target_label
 				} else {
 					| jnae => target_label
 				}
@@ -5257,7 +5257,7 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 				break;
 			case ZEND_IS_SMALLER:
 				if (swap) {
-					| jnae => target_label
+					| jna => target_label
 				} else {
 					| jae => target_label
 				}
@@ -5300,7 +5300,7 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 				break;
 			case ZEND_IS_SMALLER:
 				if (swap) {
-					|	setae al
+					|	seta al
 					|	movzx eax, al
 					|	lea eax, [eax + 2]
 					|	SET_ZVAL_TYPE_INFO res_addr, eax
@@ -5357,11 +5357,11 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 				break;
 			case ZEND_IS_SMALLER:
 				if (swap) {
-					|	setae al
+					|	seta al
 					|	movzx eax, al
 					|	lea eax, [eax + 2]
 					|	SET_ZVAL_TYPE_INFO res_addr, eax
-					|	jae => target_label
+					|	ja => target_label
 				} else {
 					|	setnae al
 					|	movzx eax, al
@@ -5413,7 +5413,7 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 				break;
 			case ZEND_IS_SMALLER:
 				if (swap) {
-					|	setae al
+					|	seta al
 					|	movzx eax, al
 					|	add eax, 2
 				} else {
