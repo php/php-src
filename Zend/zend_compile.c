@@ -7844,7 +7844,7 @@ static void zend_compile_encaps_list(znode *result, zend_ast *ast) /* {{{ */
 		GET_NODE(result, opline->result);
 	} else {
 		uint32_t var;
-		uint32_t range = zend_start_live_range(CG(active_op_array), rope_init_lineno);
+		uint32_t range = zend_start_live_range_ex(CG(active_op_array), rope_init_lineno);
 
 		init_opline->extended_value = j;
 		opline->opcode = ZEND_ROPE_END;
