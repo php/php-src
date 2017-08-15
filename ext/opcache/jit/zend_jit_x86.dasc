@@ -6236,9 +6236,19 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, int b, 
 	} else if (opline->opcode == ZEND_JMPZ_EX) {
 		set_bool = 1;
 		false_label = ssa->cfg.blocks[b].successors[0];
+		if ((op_array->opcodes + ssa->cfg.blocks[false_label].start)->opcode == ZEND_JMPZ) {
+			false_label = ssa->cfg.blocks[false_label].successors[0];
+		} else if ((op_array->opcodes + ssa->cfg.blocks[false_label].start)->opcode == ZEND_JMPNZ) {
+			false_label++;
+		}
 	} else if (opline->opcode == ZEND_JMPNZ_EX) {
 		set_bool = 1;
 		true_label = ssa->cfg.blocks[b].successors[0];
+		if ((op_array->opcodes + ssa->cfg.blocks[true_label].start)->opcode == ZEND_JMPNZ) {
+			true_label = ssa->cfg.blocks[true_label].successors[0];
+		} else if ((op_array->opcodes + ssa->cfg.blocks[true_label].start)->opcode == ZEND_JMPZ) {
+			true_label++;
+		}
 	} else {
 		ZEND_ASSERT(0);
 	}
