@@ -843,6 +843,7 @@ static zend_always_inline zend_bool zend_check_type(
 		if (EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
 			return instanceof_function(Z_OBJCE_P(arg), *ce);
 		}
+		return Z_TYPE_P(arg) == IS_NULL && (ZEND_TYPE_ALLOW_NULL(type) || (default_value && is_null_constant(scope, default_value)));
 	} else if (EXPECTED(ZEND_TYPE_CODE(type) == Z_TYPE_P(arg))) {
 		return 1;
 	}
