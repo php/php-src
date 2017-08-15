@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2017 PHP 7.0.23
+?? ??? 2017 PHP 7.0.24
+
+
+
+31 Aug 2017 PHP 7.0.23
 
 - Core:
   . Fixed bug #74947 (Segfault in scanner on INF number). (Laruence)
