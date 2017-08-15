@@ -24,7 +24,6 @@ var_dump( timezone_name_from_abbr("EDT") );
 echo "-- Lookup with name and offset--\n"; 
 var_dump( timezone_name_from_abbr("ADT", -10800) );
 var_dump( timezone_name_from_abbr("ADT", 14400) );
-var_dump( timezone_name_from_abbr("AMST", -10800) );
 
 echo "-- Tests without valid name - uses gmtOffset and isdst to find match --\n"; 
 var_dump( timezone_name_from_abbr("", 3600, 1) );
@@ -47,8 +46,7 @@ string(13) "Europe/Berlin"
 string(16) "America/New_York"
 -- Lookup with name and offset--
 string(15) "America/Halifax"
-string(12) "Asia/Baghdad"
-string(17) "America/Boa_Vista"
+string(15) "America/Halifax"
 -- Tests without valid name - uses gmtOffset and isdst to find match --
 string(13) "Europe/London"
 string(17) "America/Sao_Paulo"

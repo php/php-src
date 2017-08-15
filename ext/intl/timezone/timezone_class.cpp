@@ -83,8 +83,8 @@ U_CFUNC zval *timezone_convert_to_datetimezone(const TimeZone *timeZone,
 		 * so we must mess with DateTimeZone structure ourselves */
 		tzobj->initialized	  = 1;
 		tzobj->type			  = TIMELIB_ZONETYPE_OFFSET;
-		//convert offset from milliseconds to minutes
-		tzobj->tzi.utc_offset = -1 * timeZone->getRawOffset() / (60 * 1000);
+		//convert offset from milliseconds to seconds
+		tzobj->tzi.utc_offset = timeZone->getRawOffset() / 1000;
 	} else {
 		zend_string *u8str;
 		/* Call the constructor! */
