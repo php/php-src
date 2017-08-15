@@ -61,6 +61,7 @@ PHP                                                                        NEWS
   . Fixed bug #75015 (Crash in recursive iterator destructors). (Julien)
 
 - Standard:
+  . Fixed bug #75075 (unpack with X* causes infinity loop). (Laruence)
   . Fixed bug #74103 (heap-use-after-free when unserializing invalid array
     size). (Nikita)
   . Fixed bug #75054 (A Denial of Service Vulnerability was found when
