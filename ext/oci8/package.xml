@@ -12,7 +12,7 @@ Use the OCI8 extension to access Oracle Database.  Use 'pecl install
 oci8' to install for PHP 7.  Use 'pecl install oci8-2.0.12' to install
 for PHP 5.2 - PHP 5.6.  Use 'pecl install oci8-1.4.10' to install for
 PHP 4.3.9 - PHP 5.1.  The OCI8 extension can be linked with Oracle
-client libraries from Oracle Database 12.1, 11, or 10.2.  These
+client libraries from Oracle Database 12, 11, or 10.2.  These
 libraries are found in your database installation, or in the free
 Oracle Instant Client from
 http://www.oracle.com/technetwork/database/features/instant-client/.
@@ -25,6 +25,12 @@ Interoperability Support" (ID 207303.1) for details.
   <name>Christopher Jones</name>
   <user>sixd</user>
   <email>sixd@php.net</email>
+  <active>yes</active>
+ </lead>
+ <lead>
+  <name>Tianfang Yang</name>
+  <user>tianfyan</user>
+  <email>tianfyan@php.net</email>
   <active>yes</active>
  </lead>
  <lead>
@@ -46,7 +52,7 @@ Interoperability Support" (ID 207303.1) for details.
   <active>no</active>
  </lead>
 
- <date>2017-06-20</date>
+ <date>2017-08-15</date>
  <time>12:00:00</time>
 
   <version>
