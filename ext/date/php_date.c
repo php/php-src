@@ -3992,7 +3992,9 @@ PHP_FUNCTION(timezone_transitions_get)
 	zval                *object, element;
 	php_timezone_obj    *tzobj;
 	unsigned int         i, begin = 0, found;
-	zend_long            timestamp_begin = ZEND_LONG_MIN, timestamp_end = ZEND_LONG_MAX;
+	/* We use INT32_MIN instead of ZEND_LONG_MIN here, because php_format_date took very long in add_nominal and
+	   no transition exists now (2017-08-16) before the timestamp -2147483648 (1901-12-13) */
+	zend_long            timestamp_begin = INT32_MIN, timestamp_end = ZEND_LONG_MAX;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|ll", &object, date_ce_timezone, &timestamp_begin, &timestamp_end) == FAILURE) {
 		RETURN_FALSE;
@@ -4025,7 +4027,7 @@ PHP_FUNCTION(timezone_transitions_get)
 
 	array_init(return_value);
 
-	if (timestamp_begin == ZEND_LONG_MIN) {
+	if (timestamp_begin == INT32_MIN) {
 		add_nominal();
 		begin = 0;
 		found = 1;
