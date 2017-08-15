@@ -10,22 +10,22 @@ echo "Done\n";
 --EXPECTF--	
 array(9) {
   ["sunrise"]=>
-  int(1165897782)
+  int(1165897761)
   ["sunset"]=>
-  int(1165934168)
+  int(1165934160)
   ["transit"]=>
-  int(1165915975)
+  int(1165915961)
   ["civil_twilight_begin"]=>
-  int(1165896176)
+  int(1165896156)
   ["civil_twilight_end"]=>
-  int(1165935773)
+  int(1165935765)
   ["nautical_twilight_begin"]=>
-  int(1165894353)
+  int(1165894334)
   ["nautical_twilight_end"]=>
-  int(1165937597)
+  int(1165937588)
   ["astronomical_twilight_begin"]=>
-  int(1165892570)
+  int(1165892551)
   ["astronomical_twilight_end"]=>
-  int(1165939380)
+  int(1165939371)
 }
 Done
