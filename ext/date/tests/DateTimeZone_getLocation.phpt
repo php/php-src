@@ -56,12 +56,5 @@ Array
     [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => 
-)
-Array
-(
-    [country_code] => %s
-    [latitude] => %f
-    [longitude] => %f
     [comments] => %s
 )

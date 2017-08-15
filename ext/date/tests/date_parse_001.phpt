@@ -104,7 +104,7 @@ array(15) {
   ["zone_type"]=>
   int(1)
   ["zone"]=>
-  int(720)
+  int(-43200)
   ["is_dst"]=>
   bool(false)
 }
@@ -228,7 +228,7 @@ array(15) {
   ["zone_type"]=>
   int(1)
   ["zone"]=>
-  int(180)
+  int(-10800)
   ["is_dst"]=>
   bool(false)
 }
