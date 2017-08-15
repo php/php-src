@@ -782,6 +782,10 @@ PHP_FUNCTION(unpack)
 			/* Never use any input */
 			case 'X':
 				size = -1;
+				if (arg < 0) {
+					php_error_docref(NULL, E_WARNING, "Type %c: '*' ignored", type);
+					arg = 1;
+				}
 				break;
 
 			case '@':
