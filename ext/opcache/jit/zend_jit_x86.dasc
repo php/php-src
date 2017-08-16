@@ -9518,7 +9518,7 @@ static zend_regset zend_jit_get_scratch_regset(zend_op_array *op_array, zend_ssa
 		case ZEND_SEND_VAL:
 		case ZEND_SEND_VAL_EX:
 			if (ssa->ops[line].op1_use == current_var) {
-				regset = ZEND_REGSET_EMPTY;
+				regset = ZEND_REGSET(ZREG_R0);
 				break;
 			}
 			op1_info = OP1_INFO();
