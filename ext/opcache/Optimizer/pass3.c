@@ -33,9 +33,6 @@
 #include "zend_execute.h"
 #include "zend_vm.h"
 
-/* compares opcodes with allowing oc1 be _EX of oc2 */
-#define SAME_OPCODE_EX(oc1, oc2) ((oc1 == oc2) || (oc1 == ZEND_JMPZ_EX && oc2 == ZEND_JMPZ) || (oc1 == ZEND_JMPNZ_EX && oc2 == ZEND_JMPNZ))
-
 /* we use "jmp_hitlist" to avoid infinity loops during jmp optimization */
 #define CHECK_JMP(target, label) 			\
 	for (i=0; i<jmp_hitlist_count; i++) {	\
@@ -270,13 +267,17 @@ void zend_optimizer_pass3(zend_op_array *op_array)
 					while (ZEND_OP2_JMP_ADDR(opline) < end) {
 						zend_op *target = ZEND_OP2_JMP_ADDR(opline);
 
-						if (SAME_OPCODE_EX(opline->opcode, target->opcode) &&
+						if (target->opcode == opline->opcode-3 &&
 							SAME_VAR(target->op1, T)) {
-							/* Check for JMPZ_EX to JMPZ[_EX] with the same condition, either with _EX or not */
-							if (target->opcode == opline->opcode) {
-								/* change T only if we have _EX opcode there */
-								COPY_NODE(T, target->result);
-							}
+						   /* convert T=JMPZ_EX(X,L1), L1: JMPZ(T,L2) to
+							  JMPZ_EX(X,L2) */
+							CHECK_JMP2(target, continue_jmp_ex_optimization);
+							ZEND_SET_OP_JMP_ADDR(opline, opline->op2, ZEND_OP2_JMP_ADDR(target));
+						} else if (target->opcode == opline->opcode &&
+							SAME_VAR(target->op1, T) &&
+							SAME_VAR(target->result, T)) {
+						   /* convert T=JMPZ_EX(X,L1), L1: T=JMPZ_EX(T,L2) to
+							  JMPZ_EX(X,L2) */
 							CHECK_JMP2(target, continue_jmp_ex_optimization);
 							ZEND_SET_OP_JMP_ADDR(opline, opline->op2, ZEND_OP2_JMP_ADDR(target));
 						} else if (target->opcode == ZEND_JMPZNZ &&
@@ -296,6 +297,19 @@ void zend_optimizer_pass3(zend_op_array *op_array)
 									target->opcode == INV_EX_COND(opline->opcode)) &&
 									SAME_VAR(opline->op1, target->op1)) {
 						   /* convert JMPZ_EX(X,L1), L1: JMPNZ_EX(X,L2) to
+							  JMPZ_EX(X,L1+1) */
+							ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target + 1);
+							break;
+						} else if (target->opcode == INV_EX_COND(opline->opcode) &&
+									SAME_VAR(target->op1, T)) {
+						   /* convert T=JMPZ_EX(X,L1), L1: JMPNZ(T,L2) to
+							  JMPZ_EX(X,L1+1) */
+							ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target + 1);
+							break;
+						} else if (target->opcode == INV_EX_COND_EX(opline->opcode) &&
+									SAME_VAR(target->op1, T) &&
+									SAME_VAR(target->result, T)) {
+						   /* convert T=JMPZ_EX(X,L1), L1: T=JMPNZ_EX(T,L2) to
 							  JMPZ_EX(X,L1+1) */
 							ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target + 1);
 							break;
