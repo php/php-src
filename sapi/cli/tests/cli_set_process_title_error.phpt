@@ -5,7 +5,7 @@ Patrick Allaert patrickallaert@php.net
 @nephp #nephp17
 --SKIPIF--
 <?php
-if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN')
+if (PHP_SAPI !== "cli")
   die("skip");
 ?>
 --FILE--
