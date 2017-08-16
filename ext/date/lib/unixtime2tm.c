@@ -295,3 +295,10 @@ int timelib_apply_localtime(timelib_time *t, unsigned int localtime)
 	}
 	return 0;
 }
+
+#if HAVE_GETTIMEOFDAY
+void timelib_set_fraction_from_timeval(timelib_time *t, struct timeval tp)
+{
+	t->f = (double) tp.tv_usec / 1000000;
+}
+#endif

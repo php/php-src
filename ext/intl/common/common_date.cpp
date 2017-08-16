@@ -140,7 +140,7 @@ U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,
 		}
 
 		datetime = Z_PHPDATE_P(z);
-		*millis = U_MILLIS_PER_SECOND * (double)Z_LVAL(retval) + (datetime->time->us / 1000);
+		*millis = U_MILLIS_PER_SECOND * ((double)Z_LVAL(retval) + datetime->time->f);
 		zval_ptr_dtor(&zfuncname);
 	}
 

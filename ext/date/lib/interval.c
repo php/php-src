@@ -65,6 +65,7 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 	rt->h = two->h - one->h;
 	rt->i = two->i - one->i;
 	rt->s = two->s - one->s;
+	rt->f = two->f - one->f;
 	if (one_backup.dst == 0 && two_backup.dst == 1 && two->sse >= one->sse + 86400 - dst_corr) {
 		rt->h += dst_h_corr;
 		rt->i += dst_m_corr;
@@ -110,6 +111,7 @@ timelib_time *timelib_add(timelib_time *old_time, timelib_rel_time *interval)
 		t->relative.h = interval->h * bias;
 		t->relative.i = interval->i * bias;
 		t->relative.s = interval->s * bias;
+		t->relative.f = interval->f * bias;
 	}
 	t->have_relative = 1;
 	t->sse_uptodate = 0;
@@ -145,6 +147,7 @@ timelib_time *timelib_sub(timelib_time *old_time, timelib_rel_time *interval)
 	t->relative.h = 0 - (interval->h * bias);
 	t->relative.i = 0 - (interval->i * bias);
 	t->relative.s = 0 - (interval->s * bias);
+	t->relative.f = 0 - (interval->f * bias);
 	t->have_relative = 1;
 	t->sse_uptodate = 0;
 

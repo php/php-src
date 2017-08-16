@@ -2442,7 +2442,7 @@ static HashTable *date_object_get_properties_interval(zval *object) /* {{{ */
 	PHP_DATE_INTERVAL_ADD_PROPERTY("h", h);
 	PHP_DATE_INTERVAL_ADD_PROPERTY("i", i);
 	PHP_DATE_INTERVAL_ADD_PROPERTY("s", s);
-	ZVAL_DOUBLE(&zv, (double)intervalobj->diff->us / 1000000.0);
+	ZVAL_DOUBLE(&zv, (double)intervalobj->diff->f);
 	zend_hash_str_update(props, "f", sizeof("f") - 1, &zv);
 	PHP_DATE_INTERVAL_ADD_PROPERTY("weekday", weekday);
 	PHP_DATE_INTERVAL_ADD_PROPERTY("weekday_behavior", weekday_behavior);
@@ -2578,7 +2578,7 @@ static void update_errors_warnings(timelib_error_container *last_errors) /* {{{ 
 
 static void php_date_set_time_fraction(timelib_time *time, int microseconds)
 {
-	time->us = microseconds;
+	time->f = (double) microseconds / 1000000;
 }
 
 static void php_date_get_current_time_with_fraction(time_t *sec, suseconds_t *usec)
@@ -3168,8 +3168,8 @@ static int php_date_modify(zval *object, char *modify, size_t modify_len) /* {{{
 		}
 	}
 
-	if (tmp_time->us != -99999) {
-		dateobj->time->us = tmp_time->us;
+	if (tmp_time->f != -99999) {
+		dateobj->time->f = tmp_time->f;
 	}
 
 	timelib_time_dtor(tmp_time);
@@ -3480,7 +3480,7 @@ static void php_date_time_set(zval *object, zend_long h, zend_long i, zend_long 
 	dateobj->time->h = h;
 	dateobj->time->i = i;
 	dateobj->time->s = s;
-	dateobj->time->us = ms;
+	dateobj->time->f = ((double) ms) / 1000000;
 	timelib_update_ts(dateobj->time, NULL);
 } /* }}} */
 
@@ -4130,7 +4130,7 @@ zval *date_interval_read_property(zval *object, zval *member, int type, void **c
 		GET_VALUE_FROM_STRUCT(i, "i");
 		GET_VALUE_FROM_STRUCT(s, "s");
 		if (strcmp(Z_STRVAL_P(member), "f") == 0) {
-			fvalue = obj->diff->us / 1000000;
+			fvalue = obj->diff->f;
 			break;
 		}
 		GET_VALUE_FROM_STRUCT(invert, "invert");
@@ -4201,7 +4201,7 @@ void date_interval_write_property(zval *object, zval *member, zval *value, void 
 		SET_VALUE_FROM_STRUCT(i, "i");
 		SET_VALUE_FROM_STRUCT(s, "s");
 		if (strcmp(Z_STRVAL_P(member), "f") == 0) {
-			obj->diff->us = zval_get_double(value) * 1000000;
+			obj->diff->f = zval_get_double(value);
 			break;
 		}
 		SET_VALUE_FROM_STRUCT(invert, "invert");
@@ -4284,14 +4284,7 @@ static int php_date_interval_initialize_from_hash(zval **return_value, php_inter
 	PHP_DATE_INTERVAL_READ_PROPERTY("h", h, timelib_sll, -1)
 	PHP_DATE_INTERVAL_READ_PROPERTY("i", i, timelib_sll, -1)
 	PHP_DATE_INTERVAL_READ_PROPERTY("s", s, timelib_sll, -1)
-	do {
-		zval *z_arg = zend_hash_str_find(myht, "f", sizeof("f") - 1);
-		if (z_arg) {
-			(*intobj)->diff->us = ((double)zval_get_double(z_arg) * 1000000);
-		} else {
-			(*intobj)->diff->us = (double) -1000000;
-		}
-	} while (0);
+	PHP_DATE_INTERVAL_READ_PROPERTY_DOUBLE("f", f, -1)
 	PHP_DATE_INTERVAL_READ_PROPERTY("weekday", weekday, int, -1)
 	PHP_DATE_INTERVAL_READ_PROPERTY("weekday_behavior", weekday_behavior, int, -1)
 	PHP_DATE_INTERVAL_READ_PROPERTY("first_last_day_of", first_last_day_of, int, -1)
@@ -4401,8 +4394,8 @@ static zend_string *date_interval_format(char *format, size_t format_len, timeli
 				case 'S': length = slprintf(buffer, 32, "%02" ZEND_LONG_FMT_SPEC, (zend_long) t->s); break;
 				case 's': length = slprintf(buffer, 32, ZEND_LONG_FMT, (zend_long) t->s); break;
 
-				case 'F': length = slprintf(buffer, 32, "%06" ZEND_LONG_FMT_SPEC, (zend_long) t->us); break;
-				case 'f': length = slprintf(buffer, 32, ZEND_LONG_FMT, (zend_long) t->us); break;
+				case 'F': length = slprintf(buffer, 32, "%06" ZEND_LONG_FMT_SPEC, (zend_long) (t->f * 1000000)); break;
+				case 'f': length = slprintf(buffer, 32, ZEND_LONG_FMT, (zend_long) (t->f * 1000000)); break;
 
 				case 'a': {
 					if ((int) t->days != -99999) {
