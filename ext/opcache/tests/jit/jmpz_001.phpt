@@ -1,5 +1,5 @@
 --TEST--
-JIT continue jmps
+JIT JMPZ: JMPZ may require code for "smart branch" and at the same time be a target of another JMP.
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
