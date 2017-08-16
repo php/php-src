@@ -15,5 +15,5 @@ if (cli_set_process_title("title") === true &&
   echo "Successfully set title\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 Successfully set title
