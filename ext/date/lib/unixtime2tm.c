@@ -23,7 +23,18 @@
  */
 
 #include "timelib.h"
-#include "timelib_private.h"
+
+#include <stdio.h>
+
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
+#ifdef HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
 
 static int month_tab_leap[12] = { -1, 30, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
 static int month_tab[12] =      { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
@@ -49,7 +60,7 @@ void timelib_unixtime2gmt(timelib_time* tm, timelib_sll ts)
 	if (ts >= 0) {
 		tmp_days = days + 1;
 
-		if (tmp_days > DAYS_PER_LYEAR_PERIOD || tmp_days <= -DAYS_PER_LYEAR_PERIOD) {
+		if (tmp_days >= DAYS_PER_LYEAR_PERIOD || tmp_days <= -DAYS_PER_LYEAR_PERIOD) {
 			cur_year += YEARS_PER_LYEAR_PERIOD * (tmp_days / DAYS_PER_LYEAR_PERIOD);
 			tmp_days -= DAYS_PER_LYEAR_PERIOD * (tmp_days / DAYS_PER_LYEAR_PERIOD);
 		}
@@ -138,7 +149,7 @@ void timelib_update_from_sse(timelib_time *tm)
 	switch (tm->zone_type) {
 		case TIMELIB_ZONETYPE_ABBR:
 		case TIMELIB_ZONETYPE_OFFSET: {
-			timelib_unixtime2gmt(tm, tm->sse + tm->z + (tm->dst * 3600));
+			timelib_unixtime2gmt(tm, tm->sse - (tm->z * 60) + (tm->dst * 3600));
 
 			goto cleanup;
 		}
@@ -176,7 +187,7 @@ void timelib_unixtime2local(timelib_time *tm, timelib_sll ts)
 			int z = tm->z;
 			signed int dst = tm->dst;
 
-			timelib_unixtime2gmt(tm, ts + tm->z + (tm->dst * 3600));
+			timelib_unixtime2gmt(tm, ts - (tm->z * 60) + (tm->dst * 3600));
 
 			tm->sse = ts;
 			tm->z = z;

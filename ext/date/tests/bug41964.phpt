@@ -40,20 +40,20 @@ echo "\n";
 NULL
 NULL
 
-int(3600)
+int(-60)
 string(1) "A"
 
-int(3600)
+int(-60)
 string(1) "A"
 
-int(3600)
+int(-60)
 string(1) "A"
 
-int(3600)
+int(-60)
 string(1) "A"
 
-int(3600)
+int(-60)
 string(1) "A"
 
-int(3600)
+int(-60)
 string(1) "A"

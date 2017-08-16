@@ -109,38 +109,38 @@ foreach($inputs as $key =>$value) {
 
 --int 0--
 string(5) "18:22"
-float(18.373%d)
-int(62545)
+float(18.377%d)
+int(62558)
 
 --int 1--
 string(5) "18:22"
-float(18.373%d)
-int(62545)
+float(18.377%d)
+int(62558)
 
 --int 12345--
 string(5) "18:22"
-float(18.373%d)
-int(62545)
+float(18.377%d)
+int(62558)
 
 --int -12345--
 string(5) "18:22"
-float(18.373%d)
-int(62545)
+float(18.377%d)
+int(62558)
 
 --float 10.5--
 string(5) "18:22"
-float(18.373%d)
-int(62545)
+float(18.377%d)
+int(62558)
 
 --float -10.5--
 string(5) "18:22"
-float(18.373%d)
-int(62545)
+float(18.377%d)
+int(62558)
 
 --float .5--
 string(5) "18:22"
-float(18.373%d)
-int(62545)
+float(18.377%d)
+int(62558)
 
 --empty array--
 
@@ -188,33 +188,33 @@ bool(false)
 
 --uppercase NULL--
 string(5) "18:22"
-float(18.373%d)
-int(62545)
+float(18.377%d)
+int(62558)
 
 --lowercase null--
 string(5) "18:22"
-float(18.373%d)
-int(62545)
+float(18.377%d)
+int(62558)
 
 --lowercase true--
 string(5) "18:22"
-float(18.373%d)
-int(62545)
+float(18.377%d)
+int(62558)
 
 --lowercase false--
 string(5) "18:22"
-float(18.373%d)
-int(62545)
+float(18.377%d)
+int(62558)
 
 --uppercase TRUE--
 string(5) "18:22"
-float(18.373%d)
-int(62545)
+float(18.377%d)
+int(62558)
 
 --uppercase FALSE--
 string(5) "18:22"
-float(18.373%d)
-int(62545)
+float(18.377%d)
+int(62558)
 
 --empty string DQ--
 
@@ -306,11 +306,11 @@ bool(false)
 
 --undefined var--
 string(5) "18:22"
-float(18.373%d)
-int(62545)
+float(18.377%d)
+int(62558)
 
 --unset var--
 string(5) "18:22"
-float(18.373%d)
-int(62545)
+float(18.377%d)
+int(62558)
 ===DONE===
