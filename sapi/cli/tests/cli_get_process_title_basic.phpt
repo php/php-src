@@ -10,13 +10,9 @@ if (PHP_SAPI !== "cli")
 ?>
 --FILE--
 <?php
-if (cli_get_process_title() === "") {
-    echo "Title empty!\n";
-}
 if (cli_set_process_title("title") && cli_get_process_title() === "title")
   echo "Title correctly retrieved!\n";
 
 ?>
 --EXPECT--
-Title empty!
 Title correctly retrieved!
