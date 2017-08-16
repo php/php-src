@@ -29,7 +29,6 @@
 #include "php_date.h"
 #include "zend_interfaces.h"
 #include "lib/timelib.h"
-#include "lib/timelib_private.h"
 #ifndef PHP_WIN32
 #include <time.h>
 #else
@@ -936,7 +935,6 @@ PHP_MINFO_FUNCTION(date)
 static timelib_tzinfo *php_date_parse_tzfile(char *formal_tzname, const timelib_tzdb *tzdb)
 {
 	timelib_tzinfo *tzi;
-	int dummy_error_code;
 
 	if(!DATEG(tzcache)) {
 		ALLOC_HASHTABLE(DATEG(tzcache));
@@ -947,14 +945,14 @@ static timelib_tzinfo *php_date_parse_tzfile(char *formal_tzname, const timelib_
 		return tzi;
 	}
 
-	tzi = timelib_parse_tzfile(formal_tzname, tzdb, &dummy_error_code);
+	tzi = timelib_parse_tzfile(formal_tzname, tzdb);
 	if (tzi) {
 		zend_hash_str_add_ptr(DATEG(tzcache), formal_tzname, strlen(formal_tzname), tzi);
 	}
 	return tzi;
 }
 
-timelib_tzinfo *php_date_parse_tzfile_wrapper(char *formal_tzname, const timelib_tzdb *tzdb, int *dummy_error_code)
+timelib_tzinfo *php_date_parse_tzfile_wrapper(char *formal_tzname, const timelib_tzdb *tzdb)
 {
 	return php_date_parse_tzfile(formal_tzname, tzdb);
 }
@@ -1106,13 +1104,13 @@ static zend_string *date_format(char *format, size_t format_len, timelib_time *t
 	if (localtime) {
 		if (t->zone_type == TIMELIB_ZONETYPE_ABBR) {
 			offset = timelib_time_offset_ctor();
-			offset->offset = (t->z + (t->dst * 3600));
+			offset->offset = (t->z - (t->dst * 60)) * -60;
 			offset->leap_secs = 0;
 			offset->is_dst = t->dst;
 			offset->abbr = timelib_strdup(t->tz_abbr);
 		} else if (t->zone_type == TIMELIB_ZONETYPE_OFFSET) {
 			offset = timelib_time_offset_ctor();
-			offset->offset = (t->z);
+			offset->offset = (t->z) * -60;
 			offset->leap_secs = 0;
 			offset->is_dst = 0;
 			offset->abbr = timelib_malloc(9); /* GMT±xxxx\0 */
@@ -1177,8 +1175,8 @@ static zend_string *date_format(char *format, size_t format_len, timelib_time *t
 			case 'H': length = slprintf(buffer, 32, "%02d", (int) t->h); break;
 			case 'i': length = slprintf(buffer, 32, "%02d", (int) t->i); break;
 			case 's': length = slprintf(buffer, 32, "%02d", (int) t->s); break;
-			case 'u': length = slprintf(buffer, 32, "%06d", (int) floor(t->us)); break;
-			case 'v': length = slprintf(buffer, 32, "%03d", (int) floor(t->us / 1000)); break;
+			case 'u': length = slprintf(buffer, 32, "%06d", (int) floor(t->f * 1000000 + 0.5)); break;
+			case 'v': length = slprintf(buffer, 32, "%03d", (int) floor(t->f * 1000 + 0.5)); break;
 
 			/* timezone */
 			case 'I': length = slprintf(buffer, 32, "%d", localtime ? offset->is_dst : 0); break;
@@ -1316,13 +1314,13 @@ PHPAPI int php_idate(char format, time_t ts, int localtime)
 	if (!localtime) {
 		if (t->zone_type == TIMELIB_ZONETYPE_ABBR) {
 			offset = timelib_time_offset_ctor();
-			offset->offset = (t->z + (t->dst * 3600));
+			offset->offset = (t->z - (t->dst * 60)) * -60;
 			offset->leap_secs = 0;
 			offset->is_dst = t->dst;
 			offset->abbr = timelib_strdup(t->tz_abbr);
 		} else if (t->zone_type == TIMELIB_ZONETYPE_OFFSET) {
 			offset = timelib_time_offset_ctor();
-			offset->offset = (t->z + (t->dst * 3600));
+			offset->offset = (t->z - (t->dst * 60)) * -60;
 			offset->leap_secs = 0;
 			offset->is_dst = t->dst;
 			offset->abbr = timelib_malloc(9); /* GMT±xxxx\0 */
@@ -2270,9 +2268,9 @@ static HashTable *date_object_get_properties(zval *object) /* {{{ */
 				timelib_sll utc_offset = dateobj->time->z;
 
 				ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), sizeof("+05:00"), "%c%02d:%02d",
-					utc_offset < 0 ? '-' : '+',
-					abs(utc_offset / 3600),
-					abs(((utc_offset % 3600) / 60)));
+					utc_offset > 0 ? '-' : '+',
+					abs(utc_offset / 60),
+					abs((utc_offset % 60)));
 
 				ZVAL_NEW_STR(&zv, tmpstr);
 				}
@@ -2362,9 +2360,9 @@ static HashTable *date_object_get_properties_timezone(zval *object) /* {{{ */
 			zend_string *tmpstr = zend_string_alloc(sizeof("UTC+05:00")-1, 0);
 
 			ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), sizeof("+05:00"), "%c%02d:%02d",
-				tzobj->tzi.utc_offset < 0 ? '-' : '+',
-				abs(tzobj->tzi.utc_offset / 3600),
-				abs(((tzobj->tzi.utc_offset % 3600) / 60)));
+			tzobj->tzi.utc_offset > 0 ? '-' : '+',
+			abs(tzobj->tzi.utc_offset / 60),
+			abs((tzobj->tzi.utc_offset % 60)));
 
 			ZVAL_NEW_STR(&zv, tmpstr);
 			}
@@ -3003,10 +3001,10 @@ void php_date_do_return_parsed_time(INTERNAL_FUNCTION_PARAMETERS, timelib_time *
 	PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(minute,    i);
 	PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(second,    s);
 
-	if (parsed_time->us == -99999) {
+	if (parsed_time->f == -99999) {
 		add_assoc_bool(return_value, "fraction", 0);
 	} else {
-		add_assoc_double(return_value, "fraction", (double)parsed_time->us / 1000000.0);
+		add_assoc_double(return_value, "fraction", parsed_time->f);
 	}
 
 	zval_from_error_container(return_value, error);
@@ -3460,10 +3458,10 @@ PHP_FUNCTION(date_offset_get)
 				timelib_time_offset_dtor(offset);
 				break;
 			case TIMELIB_ZONETYPE_OFFSET:
-				RETVAL_LONG(dateobj->time->z);
+				RETVAL_LONG(dateobj->time->z * -60);
 				break;
 			case TIMELIB_ZONETYPE_ABBR:
-				RETVAL_LONG((dateobj->time->z + (3600 * dateobj->time->dst)));
+				RETVAL_LONG((dateobj->time->z - (60 * dateobj->time->dst)) * -60);
 				break;
 		}
 		return;
@@ -3880,9 +3878,9 @@ PHP_FUNCTION(timezone_name_get)
 			timelib_sll utc_offset = tzobj->tzi.utc_offset;
 
 			ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), sizeof("+05:00"), "%c%02d:%02d",
-				utc_offset < 0 ? '-' : '+',
-				abs(utc_offset / 3600),
-				abs(((utc_offset % 3600) / 60)));
+				utc_offset > 0 ? '-' : '+',
+				abs(utc_offset / 60),
+				abs((utc_offset % 60)));
 
 			RETURN_NEW_STR(tmpstr);
 			}
@@ -3943,10 +3941,10 @@ PHP_FUNCTION(timezone_offset_get)
 			timelib_time_offset_dtor(offset);
 			break;
 		case TIMELIB_ZONETYPE_OFFSET:
-			RETURN_LONG(tzobj->tzi.utc_offset);
+			RETURN_LONG(tzobj->tzi.utc_offset * -60);
 			break;
 		case TIMELIB_ZONETYPE_ABBR:
-			RETURN_LONG(tzobj->tzi.z.utc_offset + (tzobj->tzi.z.dst * 3600));
+			RETURN_LONG((tzobj->tzi.z.utc_offset - (tzobj->tzi.z.dst*60)) * -60);
 			break;
 	}
 }

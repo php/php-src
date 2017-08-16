@@ -56,8 +56,8 @@ U_CFUNC TimeZone *timezone_convert_datetimezone(int type,
 			break;
 		case TIMELIB_ZONETYPE_OFFSET: {
 			int offset_mins = is_datetime
-				? ((php_date_obj*)object)->time->z / 60
-				: (int)((php_timezone_obj*)object)->tzi.utc_offset / 60,
+				? -((php_date_obj*)object)->time->z
+				: -(int)((php_timezone_obj*)object)->tzi.utc_offset,
 				hours = offset_mins / 60,
 				minutes = offset_mins - hours * 60;
 			minutes *= minutes > 0 ? 1 : -1;

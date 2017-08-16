@@ -69,15 +69,12 @@ TL_CHECK_INT_TYPE(uint32_t)
 
 dnl Check for headers needed by timelib
 AC_CHECK_HEADERS([ \
-sys/time.h \
 sys/types.h \
+inttypes.h \
 stdint.h \
-dirent.h \
 string.h \
-strings.h \
-unistd.h \
-io.h
+stdlib.h
 ])
 
 dnl Check for strtoll, atoll
-AC_CHECK_FUNCS(strtoll atoll strftime gettimeofday)
+AC_CHECK_FUNCS(strtoll atoll strftime)
