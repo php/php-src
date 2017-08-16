@@ -2071,6 +2071,58 @@ pass:
 #endif
 		}
 
+		if (ssa->cfg.blocks[b].len == 1 &&
+		    ssa->cfg.blocks[b].start != 0 &&
+		    zend_is_smart_branch(&op_array->opcodes[ssa->cfg.blocks[b].start-1])) {
+
+			/* Special handling for splitted smart branch instruction pairs */
+			opline = &op_array->opcodes[ssa->cfg.blocks[b].start];
+			if (zend_jit_level >= ZEND_JIT_LEVEL_INLINE) {
+				if ((opline->opcode == ZEND_JMPZ ||
+				     opline->opcode == ZEND_JMPNZ ||
+				     opline->opcode == ZEND_JMPZNZ ||
+				     opline->opcode == ZEND_JMPZ_EX ||
+				     opline->opcode == ZEND_JMPNZ_EX) &&
+				    ((opline-1)->opcode == ZEND_IS_EQUAL ||
+				     (opline-1)->opcode == ZEND_IS_NOT_EQUAL ||
+				     (opline-1)->opcode == ZEND_IS_SMALLER ||
+				     (opline-1)->opcode == ZEND_IS_SMALLER_OR_EQUAL ||
+				     (opline-1)->opcode == ZEND_CASE)) {
+					zend_jit_jmp(&dasm_state, b + 1);
+				} else if (opline->opcode == ZEND_JMPZ ||
+						   opline->opcode == ZEND_JMPNZ) {
+					    /* smart branch */
+					if (!zend_jit_cond_jmp(&dasm_state, opline + 1, ssa->cfg.blocks[b].successors[0])) {
+						goto jit_failure;
+					}
+					zend_jit_jmp(&dasm_state, b + 1);
+				}
+			} else {
+				if (opline->opcode == ZEND_JMPZ ||
+				    opline->opcode == ZEND_JMPNZ) {
+				    opline--;
+					if ((opline->opcode == ZEND_IS_EQUAL ||
+					     opline->opcode == ZEND_IS_NOT_EQUAL ||
+					     opline->opcode == ZEND_IS_SMALLER ||
+					     opline->opcode == ZEND_IS_SMALLER_OR_EQUAL ||
+					     opline->opcode == ZEND_CASE) &&
+					    ((OP1_INFO() & (MAY_BE_ANY-(MAY_BE_LONG|MAY_BE_DOUBLE))) ||
+					     (OP2_INFO() & (MAY_BE_ANY-(MAY_BE_LONG|MAY_BE_DOUBLE))))) {
+						/* might be smart branch */
+						if (!zend_jit_smart_branch(&dasm_state, opline + 1, (b + 1), ssa->cfg.blocks[b].successors[0])) {
+							goto jit_failure;
+						}
+					} else {
+						/* smart branch */
+						if (!zend_jit_cond_jmp(&dasm_state, opline + 2, ssa->cfg.blocks[b].successors[0])) {
+							goto jit_failure;
+						}
+						zend_jit_jmp(&dasm_state, b + 1);
+					}
+				}
+			}
+		}
+
 		zend_jit_label(&dasm_state, b);
 		if (ssa->cfg.blocks[b].flags & ZEND_BB_TARGET) {
 			if (!zend_jit_reset_opline(&dasm_state, op_array->opcodes + ssa->cfg.blocks[b].start)) {
@@ -2269,13 +2321,15 @@ pass:
 					case ZEND_JMPZNZ:
 					case ZEND_JMPZ_EX:
 					case ZEND_JMPNZ_EX:
-						if ((opline-1)->opcode == ZEND_IS_EQUAL ||
-						    (opline-1)->opcode == ZEND_IS_NOT_EQUAL ||
-						    (opline-1)->opcode == ZEND_IS_SMALLER ||
-						    (opline-1)->opcode == ZEND_IS_SMALLER_OR_EQUAL ||
-						    (opline-1)->opcode == ZEND_CASE) {
+						if (i != ssa->cfg.blocks[b].start &&
+						    ((opline-1)->opcode == ZEND_IS_EQUAL ||
+						     (opline-1)->opcode == ZEND_IS_NOT_EQUAL ||
+						     (opline-1)->opcode == ZEND_IS_SMALLER ||
+						     (opline-1)->opcode == ZEND_IS_SMALLER_OR_EQUAL ||
+						     (opline-1)->opcode == ZEND_CASE)) {
 							/* skip */
-						} else if ((opline->opcode == ZEND_JMPZ ||
+						} else if (i != ssa->cfg.blocks[b].start &&
+						           (opline->opcode == ZEND_JMPZ ||
 						           (opline->opcode == ZEND_JMPNZ)) &&
 							       zend_is_smart_branch(opline-1)) {
 						    /* smart branch */
@@ -2393,7 +2447,7 @@ pass:
 					break;
 				case ZEND_JMPZ:
 				case ZEND_JMPNZ:
-					if (i != 0) {
+					if (i != ssa->cfg.blocks[b].start) {
 						if ((opline-1)->opcode == ZEND_IS_EQUAL ||
 						    (opline-1)->opcode == ZEND_IS_NOT_EQUAL ||
 						    (opline-1)->opcode == ZEND_IS_SMALLER ||
