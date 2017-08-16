@@ -77,4 +77,4 @@ stdlib.h
 ])
 
 dnl Check for strtoll, atoll
-AC_CHECK_FUNCS(strtoll atoll strftime)
+AC_CHECK_FUNCS(strtoll atoll strftime gettimeofday)
