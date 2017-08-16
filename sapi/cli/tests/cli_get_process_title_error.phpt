@@ -13,4 +13,4 @@ if (PHP_SAPI !== "cli")
 cli_get_process_title("foo");
 ?>
 --EXPECTF--
-Warning: cli_get_process_title() expects exactly 0 parameters, 1 given in %ssapi/cli/tests/cli_get_process_title_error.php on line 2
+Warning: cli_get_process_title() expects exactly 0 parameters, 1 given in %scli_get_process_title_error.php on line 2
