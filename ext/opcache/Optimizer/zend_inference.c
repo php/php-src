@@ -2978,8 +2978,14 @@ static int zend_update_type_info(const zend_op_array *op_array,
 						}
 						tmp |= MAY_BE_ARRAY | MAY_BE_RC1;
 					}
-					if (t1 & (MAY_BE_STRING|MAY_BE_ARRAY)) {
+					if (t1 & MAY_BE_STRING) {
 						tmp |= MAY_BE_RC1;
+					}
+					if (t1 & MAY_BE_ARRAY) {
+						tmp |= MAY_BE_RC1;
+						if (opline->opcode == ZEND_FETCH_DIM_FUNC_ARG) {
+							tmp |= MAY_BE_RCN;
+						}
 					}
 					if (t1 & (MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
 						tmp |= t1 & (MAY_BE_RC1|MAY_BE_RCN);
