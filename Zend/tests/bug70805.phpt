@@ -27,7 +27,7 @@ $c = new A;
 $array = array($c); //This is used to leave a room for $GLOBALS["a"]
 unset($c);
 
-while ($i++ < 9997) {
+while ($i++ < 9998) {
 	$t = [];
 	$t[] = &$t;
 	unset($t);

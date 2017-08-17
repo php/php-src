@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -533,7 +533,7 @@ ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *membe
 			ALLOC_HASHTABLE(guards);
 			zend_hash_init(guards, 8, NULL, zend_property_guard_dtor, 0);
 			/* mark pointer as "special" using low bit */
-			zend_hash_add_new_ptr(guards, member,
+			zend_hash_add_new_ptr(guards, str,
 				(void*)(((zend_uintptr_t)&zv->u2.property_guard) | 1));
 			zend_string_release(Z_STR_P(zv));
 			ZVAL_ARR(zv, guards);
@@ -1246,7 +1246,6 @@ static zend_always_inline zend_function *zend_get_user_callstatic_function(zend_
 ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_string *function_name, const zval *key) /* {{{ */
 {
 	zend_function *fbc = NULL;
-	char *lc_class_name;
 	zend_string *lc_function_name;
 	zend_object *object;
 	zend_class_entry *scope;
@@ -1257,21 +1256,19 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 		lc_function_name = zend_string_tolower(function_name);
 	}
 
-	if (ZSTR_LEN(function_name) == ZSTR_LEN(ce->name) && ce->constructor) {
-		lc_class_name = zend_str_tolower_dup(ZSTR_VAL(ce->name), ZSTR_LEN(ce->name));
-		/* Only change the method to the constructor if the constructor isn't called __construct
-		 * we check for __ so we can be binary safe for lowering, we should use ZEND_CONSTRUCTOR_FUNC_NAME
-		 */
-		if (!memcmp(lc_class_name, ZSTR_VAL(lc_function_name), ZSTR_LEN(function_name)) && memcmp(ZSTR_VAL(ce->constructor->common.function_name), "__", sizeof("__") - 1)) {
-			fbc = ce->constructor;
-		}
-		efree(lc_class_name);
-	}
-
-	if (EXPECTED(!fbc)) {
+	do {
 		zval *func = zend_hash_find(&ce->function_table, lc_function_name);
 		if (EXPECTED(func != NULL)) {
 			fbc = Z_FUNC_P(func);
+		} else if (ce->constructor
+			&& ZSTR_LEN(lc_function_name) == ZSTR_LEN(ce->name)
+			&& zend_binary_strncasecmp(ZSTR_VAL(lc_function_name), ZSTR_LEN(lc_function_name), ZSTR_VAL(ce->name), ZSTR_LEN(lc_function_name), ZSTR_LEN(lc_function_name)) == 0
+			/* Only change the method to the constructor if the constructor isn't called __construct
+			 * we check for __ so we can be binary safe for lowering, we should use ZEND_CONSTRUCTOR_FUNC_NAME
+			 */
+			&& (ZSTR_VAL(ce->constructor->common.function_name)[0] != '_'
+				|| ZSTR_VAL(ce->constructor->common.function_name)[1] != '_')) {
+			fbc = ce->constructor;
 		} else {
 			if (UNEXPECTED(!key)) {
 				zend_string_release(lc_function_name);
@@ -1294,7 +1291,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 	   			return NULL;
 			}
 		}
-	}
+	} while (0);
 
 #if MBO_0
 	/* right now this function is used for non static method lookup too */
@@ -1685,7 +1682,7 @@ int zend_std_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **f
 
 	ce = Z_OBJCE_P(obj);
 
-	if ((func = zend_hash_find(&ce->function_table, CG(known_strings)[ZEND_STR_MAGIC_INVOKE])) == NULL) {
+	if ((func = zend_hash_find(&ce->function_table, ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE))) == NULL) {
 		return FAILURE;
 	}
 	*fptr_ptr = Z_FUNC_P(func);
@@ -1743,4 +1740,6 @@ ZEND_API zend_object_handlers std_object_handlers = {
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

@@ -1,3 +1,74 @@
+To ease testing LDAP-Setups we've created a vagrant-setup.
+
+Prerequisits:
+=============
+
+You will need vagrant on your box. Get it from https://www.vagrantup.com
+
+Usage:
+======
+
+To use it follow these steps:
+
+* Create a Vagrant-file with the following content.
+* Go to that directory and run "vagrant up"
+
+```
+$setup = <<<SETUP
+apt-get update
+
+DEBIAN_FRONTEND=noninteractive aptitude install -q -y slapd ldap-utils
+
+export SLAPPASS=`slappasswd -s password`
+
+echo "dn: olcDatabase={1}hdb,cn=config
+changetype: modify
+replace: olcSuffix
+olcSuffix: dc=nodomain
+-
+replace: olcRootDN
+olcRootDN: dc=admin,dc=nodomain
+-
+replace: olcRootPW
+olcRootPW: ${SLAPPASS}" | ldapmodify -Y EXTERNAL -H ldapi:///
+
+echo "dn: dc=nodomain
+objectClass: dcObject
+objectClass: organization
+o: Example
+dc: example
+
+dn: ou=extldap,dc=nodomain
+objectClass: organizationalUnit
+ou: extldap" | ldapadd -c -x -H ldap://localhost:389 -D "dc=admin,dc=nodomain" -w password
+SETUP
+
+Vagrant.configure(2) do |config|
+  config.vm.box = "ubuntu/trusty64"
+  config.vm.network "private_network", ip: "192.168.33.10"
+  config.vm.provision "shell", inline: $setup
+end
+```
+
+Now you will have a virtual machine up and running on IP-Address 192.168.10.33 listening on port 369 for incomming LDAP-connections. The machine is already configured to execute the LDAP-Tests
+
+The next step is to go into the PHP-Source-directory. Configure and make the source as appropriate.
+
+Before running the LDAP-Tests you need to set some environment-variables:
+
+export LDAP_TEST_PASSWD="password"
+export LDAP_TEST_BASE="ou=extldap,dc=nodomain"
+export LDAP_TEST_USER="dc=admin,dc=nodomain"
+export LDAP_TEST_HOST=192.168.33.10
+
+Now you can run the test-suite by calling "make test". To test only the LDAP-Tests, run "make test TESTS=ext/ldap"
+
+CAVEAT: The current setup does not (yet) test secure connections. 
+
+
+========
+OLD README
+
 Most tests here relies on the availability of an LDAP server configured with TLS.
 
 Client/Server configuration:

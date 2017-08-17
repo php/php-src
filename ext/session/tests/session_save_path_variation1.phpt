@@ -4,6 +4,7 @@ Test session_save_path() function : variation
 session.gc_probability=0
 session.save_path=
 session.name=PHPSESSID
+session.save_handler=files
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
@@ -41,15 +42,11 @@ string(0) ""
 string(0) ""
 string(%d) "%stests"
 bool(true)
-
-Warning: session_save_path(): Cannot change save path when session is active in %s on line 19
-bool(false)
+string(%d) "%stests"
 
 Warning: session_save_path(): Cannot change save path when session is active in %s on line 20
 bool(false)
-
-Warning: session_save_path(): Cannot change save path when session is active in %s on line 21
-bool(false)
+string(%d) "%stests"
 bool(true)
 string(%d) "%stests"
 Done

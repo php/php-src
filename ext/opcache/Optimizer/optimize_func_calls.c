@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -30,10 +30,10 @@
 #include "zend_vm.h"
 
 #define ZEND_OP1_IS_CONST_STRING(opline) \
-	(ZEND_OP1_TYPE(opline) == IS_CONST && \
+	(opline->op1_type == IS_CONST && \
 	Z_TYPE(op_array->literals[(opline)->op1.constant]) == IS_STRING)
 #define ZEND_OP2_IS_CONST_STRING(opline) \
-	(ZEND_OP2_TYPE(opline) == IS_CONST && \
+	(opline->op2_type == IS_CONST && \
 	Z_TYPE(op_array->literals[(opline)->op2.constant]) == IS_STRING)
 
 typedef struct _optimizer_call_info {

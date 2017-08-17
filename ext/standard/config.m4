@@ -288,7 +288,7 @@ dnl Check for available functions
 dnl
 dnl log2 could be used to improve the log function, however it requires C99. The check for log2 should be turned on,
 dnl as soon as we support C99.
-AC_CHECK_FUNCS(getcwd getwd asinh acosh atanh log1p hypot glob strfmon nice fpclass isinf isnan mempcpy strpncpy)
+AC_CHECK_FUNCS(getcwd getwd asinh acosh atanh log1p hypot glob strfmon nice fpclass mempcpy strpncpy)
 AC_FUNC_FNMATCH	
 
 dnl
@@ -340,6 +340,7 @@ dnl Detect library functions needed by php dns_xxx functions
 dnl ext/standard/php_dns.h will collect these in a single define: HAVE_FULL_DNS_FUNCS
 dnl
 PHP_CHECK_FUNC(res_nsearch, resolv, bind, socket)
+PHP_CHECK_FUNC(res_ndestroy, resolv, bind, socket)
 PHP_CHECK_FUNC(dns_search, resolv, bind, socket)
 PHP_CHECK_FUNC(dn_expand, resolv, bind, socket)
 PHP_CHECK_FUNC(dn_skipname, resolv, bind, socket)
@@ -409,11 +410,6 @@ dnl
 AC_CHECK_DECLS([arc4random_buf])
 
 dnl
-dnl Check for getrandom on newer Linux kernels
-dnl
-AC_CHECK_DECLS([getrandom])
-
-dnl
 dnl Check for argon2
 dnl
 PHP_ARG_WITH(password-argon2, for Argon2 support,
@@ -442,6 +438,13 @@ if test "$PHP_PASSWORD_ARGON2" != "no"; then
     AC_DEFINE(HAVE_ARGON2LIB, 1, [ Define to 1 if you have the <argon2.h> header file ])
   ], [
     AC_MSG_ERROR([Problem with libargon2.(a|so). Please verify that Argon2 header and libaries are installed])
+  ])
+
+  AC_CHECK_LIB(argon2, argon2id_hash_raw, [
+    LIBS="$LIBS -largon2"
+    AC_DEFINE(HAVE_ARGON2ID, 1, [ Define to 1 if Argon2 library has support for Argon2ID])
+  ], [
+    AC_MSG_RESULT([not found])
   ])
 fi
 

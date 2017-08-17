@@ -3,9 +3,6 @@ Bug #60860 (session.save_handler=user without defined function core dumps)
 --SKIPIF--
 <?php
 include('skipif.inc');
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip not for Windows');
-}
 ?>
 --INI--
 session.save_handler=user

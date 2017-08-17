@@ -12,7 +12,7 @@ echo "*** Testing ob_get_level() : error conditions ***\n";
 
 // One argument
 echo "\n-- Testing ob_get_level() function with one argument --\n";
-$extra_arg = 10;;
+$extra_arg = 10;
 var_dump( ob_get_level($extra_arg) );
 
 echo "Done";

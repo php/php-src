@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -366,8 +366,8 @@ ZEND_API int ZEND_FASTCALL zend_compare_symbol_tables(HashTable *ht1, HashTable 
 ZEND_API int ZEND_FASTCALL zend_compare_arrays(zval *a1, zval *a2);
 ZEND_API int ZEND_FASTCALL zend_compare_objects(zval *o1, zval *o2);
 
-ZEND_API int ZEND_FASTCALL zend_atoi(const char *str, int str_len);
-ZEND_API zend_long ZEND_FASTCALL zend_atol(const char *str, int str_len);
+ZEND_API int ZEND_FASTCALL zend_atoi(const char *str, size_t str_len);
+ZEND_API zend_long ZEND_FASTCALL zend_atol(const char *str, size_t str_len);
 
 ZEND_API void ZEND_FASTCALL zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_DC);
 
@@ -906,4 +906,6 @@ END_EXTERN_C()
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

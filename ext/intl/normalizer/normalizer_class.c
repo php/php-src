@@ -29,10 +29,9 @@ zend_class_entry *Normalizer_ce_ptr = NULL;
 
 /* {{{ Normalizer methods arguments info */
 
-ZEND_BEGIN_ARG_INFO_EX( normalizer_3_args, 0, 0, 3 )
-	ZEND_ARG_INFO( 0, arg1 )
-	ZEND_ARG_INFO( 0, arg2 )
-	ZEND_ARG_INFO( 0, arg3 )
+ZEND_BEGIN_ARG_INFO_EX( normalizer_args, 0, 0, 1 )
+	ZEND_ARG_INFO( 0, input )
+	ZEND_ARG_INFO( 0, form )
 ZEND_END_ARG_INFO()
 
 /* }}} */
@@ -42,8 +41,8 @@ ZEND_END_ARG_INFO()
  */
 
 zend_function_entry Normalizer_class_functions[] = {
-	ZEND_FENTRY( normalize, ZEND_FN( normalizer_normalize ), normalizer_3_args, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
-	ZEND_FENTRY( isNormalized, ZEND_FN( normalizer_is_normalized ), normalizer_3_args, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
+	ZEND_FENTRY( normalize, ZEND_FN( normalizer_normalize ), normalizer_args, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
+	ZEND_FENTRY( isNormalized, ZEND_FN( normalizer_is_normalized ), normalizer_args, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
 	PHP_FE_END
 };
 /* }}} */

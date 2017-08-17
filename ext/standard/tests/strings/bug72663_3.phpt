@@ -1,7 +1,5 @@
 --TEST--
 Bug #72663: Create an Unexpected Object and Don't Invoke __wakeup() in Deserialization
---XFAIL--
-Memory leak, TBF later.
 --FILE--
 <?php
 class obj {
@@ -16,5 +14,5 @@ unserialize($poc);
 ?>
 DONE
 --EXPECTF--
-Notice: unserialize(): Error at offset 51 of 50 bytes in %sbug72663_3.php on line %d
+Notice: unserialize(): Error at offset 50 of 50 bytes in %sbug72663_3.php on line %d
 DONE

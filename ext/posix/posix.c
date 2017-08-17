@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -795,7 +795,7 @@ PHP_FUNCTION(posix_ttyname)
 #endif
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL_DEREF(z_fd)
+		Z_PARAM_ZVAL(z_fd)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	switch (Z_TYPE_P(z_fd)) {
@@ -840,7 +840,7 @@ PHP_FUNCTION(posix_isatty)
 	int fd;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL_DEREF(z_fd)
+		Z_PARAM_ZVAL(z_fd)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	switch (Z_TYPE_P(z_fd)) {

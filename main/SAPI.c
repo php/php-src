@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -646,7 +646,7 @@ static void sapi_header_add_op(sapi_header_op_enum op, sapi_header_struct *sapi_
 				char sav = *colon_offset;
 
 				*colon_offset = 0;
-		        sapi_remove_header(&SG(sapi_headers).headers, sapi_header->header, (int)strlen(sapi_header->header));
+		        sapi_remove_header(&SG(sapi_headers).headers, sapi_header->header, strlen(sapi_header->header));
 				*colon_offset = sav;
 			}
 		}

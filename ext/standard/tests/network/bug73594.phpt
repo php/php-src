@@ -19,8 +19,9 @@ if (empty($out)) die("skip local resolver does not return additional records");
 <?php
 $auth = array();
 $additional = array();
-dns_get_record('php.net', DNS_MX, $auth, $additional);
-var_dump(empty($additional));
+$res = dns_get_record('php.net', DNS_MX, $auth, $additional);
+// only check $additional if dns_get_record is successful
+var_dump(!empty($res) && empty($additional));
 ?>
 --EXPECT--
 bool(false)

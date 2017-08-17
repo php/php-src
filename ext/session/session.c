@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -105,6 +105,9 @@ zend_class_entry *php_session_update_timestamp_iface_entry;
 static int php_session_send_cookie(void);
 static int php_session_abort(void);
 
+/* Initialized in MINIT, readonly otherwise. */
+static int my_module_number = 0;
+
 /* Dispatched by RINIT and by php_session_destroy */
 static inline void php_rinit_session_globals(void) /* {{{ */
 {
@@ -118,6 +121,7 @@ static inline void php_rinit_session_globals(void) /* {{{ */
 	PS(mod_user_is_open) = 0;
 	PS(define_sid) = 1;
 	PS(session_vars) = NULL;
+	PS(module_number) = my_module_number;
 	ZVAL_UNDEF(&PS(http_session_vars));
 }
 /* }}} */
@@ -151,7 +155,7 @@ static inline void php_rshutdown_session_globals(void) /* {{{ */
 }
 /* }}} */
 
-static int php_session_destroy(void) /* {{{ */
+PHPAPI int php_session_destroy(void) /* {{{ */
 {
 	int retval = SUCCESS;
 
@@ -435,8 +439,7 @@ static int php_session_initialize(void) /* {{{ */
 	php_session_track_init();
 	if (PS(mod)->s_read(&PS(mod_data), PS(id), &val, PS(gc_maxlifetime)) == FAILURE) {
 		php_session_abort();
-		/* Some broken save handler implementation returns FAILURE for non-existent session ID */
-		/* It's better to raise error for this, but disabled error for better compatibility */
+		/* FYI: Some broken save handlers return FAILURE for non-existent session ID, this is incorrect */
 		php_error_docref(NULL, E_WARNING, "Failed to read session data: %s (path: %s)", PS(mod)->s_name, PS(save_path));
 		return FAILURE;
 	}
@@ -767,7 +770,7 @@ static PHP_INI_MH(OnUpdateLazyWrite) /* {{{ */
 static PHP_INI_MH(OnUpdateRfc1867Freq) /* {{{ */
 {
 	int tmp;
-	tmp = zend_atoi(ZSTR_VAL(new_value), (int)ZSTR_LEN(new_value));
+	tmp = zend_atoi(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
 	if(tmp < 0) {
 		php_error_docref(NULL, E_WARNING, "session.upload_progress.freq must be greater than or equal to zero");
 		return FAILURE;
@@ -1606,7 +1609,7 @@ PHPAPI int php_session_start(void) /* {{{ */
 }
 /* }}} */
 
-static int php_session_flush(int write) /* {{{ */
+PHPAPI int php_session_flush(int write) /* {{{ */
 {
 	if (PS(session_status) == php_session_active) {
 		php_session_save_current_state(write);
@@ -1671,7 +1674,7 @@ static PHP_FUNCTION(session_set_cookie_params)
 		return;
 	}
 
- 
+
 	if (PS(session_status) == php_session_active) {
 		php_error_docref(NULL, E_WARNING, "Cannot change session cookie parameters when session is active");
 		RETURN_FALSE;
@@ -1763,7 +1766,7 @@ static PHP_FUNCTION(session_name)
 		RETURN_FALSE;
 	}
 
-	if (SG(headers_sent)) {
+	if (name && SG(headers_sent)) {
 		php_error_docref(NULL, E_WARNING, "Cannot change session name when headers already sent");
 		RETURN_FALSE;
 	}
@@ -1794,7 +1797,7 @@ static PHP_FUNCTION(session_module_name)
 		RETURN_FALSE;
 	}
 
-	if (SG(headers_sent)) {
+	if (name && SG(headers_sent)) {
 		php_error_docref(NULL, E_WARNING, "Cannot change save handler module when headers already sent");
 		RETURN_FALSE;
 	}
@@ -1831,7 +1834,6 @@ static PHP_FUNCTION(session_set_save_handler)
 {
 	zval *args = NULL;
 	int i, num_args, argc = ZEND_NUM_ARGS();
-	zend_string *name;
 	zend_string *ini_name, *ini_val;
 
 	if (PS(session_status) == php_session_active) {
@@ -1961,12 +1963,12 @@ static PHP_FUNCTION(session_set_save_handler)
 
 	/* At this point argc can only be between 6 and PS_NUM_APIS */
 	for (i = 0; i < argc; i++) {
-		if (!zend_is_callable(&args[i], 0, &name)) {
+		if (!zend_is_callable(&args[i], 0, NULL)) {
+			zend_string *name = zend_get_callable_name(&args[i]);
 			php_error_docref(NULL, E_WARNING, "Argument %d is not a valid callback", i+1);
 			zend_string_release(name);
 			RETURN_FALSE;
 		}
-		zend_string_release(name);
 	}
 
 	if (PS(mod) && PS(mod) != &ps_mod_user) {
@@ -2001,12 +2003,12 @@ static PHP_FUNCTION(session_save_path)
 		return;
 	}
 
-	if (PS(session_status) == php_session_active) {
+	if (name && PS(session_status) == php_session_active) {
 		php_error_docref(NULL, E_WARNING, "Cannot change save path when session is active");
 		RETURN_FALSE;
 	}
 
-	if (SG(headers_sent)) {
+	if (name && SG(headers_sent)) {
 		php_error_docref(NULL, E_WARNING, "Cannot change save path when headers already sent");
 		RETURN_FALSE;
 	}
@@ -2037,8 +2039,13 @@ static PHP_FUNCTION(session_id)
 		return;
 	}
 
-	if (name && SG(headers_sent)) {
+	if (name && PS(use_cookies) && SG(headers_sent)) {
 		php_error_docref(NULL, E_WARNING, "Cannot change session id when headers already sent");
+		RETURN_FALSE;
+	}
+
+	if (name && PS(session_status) == php_session_active) {
+		php_error_docref(NULL, E_WARNING, "Cannot change session id when session is active");
 		RETURN_FALSE;
 	}
 
@@ -2229,12 +2236,12 @@ static PHP_FUNCTION(session_cache_limiter)
 		return;
 	}
 
-	if (PS(session_status) == php_session_active) {
+	if (limiter && PS(session_status) == php_session_active) {
 		php_error_docref(NULL, E_WARNING, "Cannot change cache limiter when session is active");
 		RETURN_FALSE;
 	}
 
-	if (SG(headers_sent)) {
+	if (limiter && SG(headers_sent)) {
 		php_error_docref(NULL, E_WARNING, "Cannot change cache limiter when headers already sent");
 		RETURN_FALSE;
 	}
@@ -2260,12 +2267,12 @@ static PHP_FUNCTION(session_cache_expire)
 		return;
 	}
 
-	if (PS(session_status) == php_session_active) {
+	if (expires && PS(session_status) == php_session_active) {
 		php_error_docref(NULL, E_WARNING, "Cannot change cache expire when session is active");
 		RETURN_LONG(PS(cache_expire));
 	}
 
-	if (SG(headers_sent)) {
+	if (expires && SG(headers_sent)) {
 		php_error_docref(NULL, E_WARNING, "Cannot change cache expire when headers already sent");
 		RETURN_FALSE;
 	}
@@ -2358,7 +2365,7 @@ static PHP_FUNCTION(session_start)
 	 * required. i.e. There shouldn't be any outputs in output buffer, otherwise session
 	 * module is unable to rewrite output.
 	 */
-	if (SG(headers_sent)) {
+	if (PS(use_cookies) && SG(headers_sent)) {
 		php_error_docref(NULL, E_WARNING, "Cannot start session when headers already sent");
 		RETURN_FALSE;
 	}
@@ -2661,6 +2668,10 @@ ZEND_BEGIN_ARG_INFO(arginfo_session_class_updateTimestamp, 0)
 	ZEND_ARG_INFO(0, key)
 	ZEND_ARG_INFO(0, val)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_session_start, 0, 0, 0)
+	ZEND_ARG_INFO(0, options) /* array */
+ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ session_functions[]
@@ -2674,7 +2685,7 @@ static const zend_function_entry session_functions[] = {
 	PHP_FE(session_regenerate_id,     arginfo_session_regenerate_id)
 	PHP_FE(session_decode,            arginfo_session_decode)
 	PHP_FE(session_encode,            arginfo_session_void)
-	PHP_FE(session_start,             arginfo_session_void)
+	PHP_FE(session_start,             arginfo_session_start)
 	PHP_FE(session_destroy,           arginfo_session_void)
 	PHP_FE(session_unset,             arginfo_session_void)
 	PHP_FE(session_gc,                arginfo_session_void)
@@ -2838,7 +2849,8 @@ static PHP_MINIT_FUNCTION(session) /* {{{ */
 
 	zend_register_auto_global(zend_string_init("_SESSION", sizeof("_SESSION") - 1, 1), 0, NULL);
 
-	PS(module_number) = module_number; /* if we really need this var we need to init it in zts mode as well! */
+	my_module_number = module_number;
+	PS(module_number) = module_number;
 
 	PS(session_status) = php_session_none;
 	REGISTER_INI_ENTRIES();
@@ -3211,6 +3223,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 				if (PS(rfc1867_cleanup)) {
 					php_session_rfc1867_cleanup(progress);
 				} else {
+					SEPARATE_ARRAY(&progress->data);
 					add_assoc_bool_ex(&progress->data, "done", sizeof("done") - 1, 1);
 					Z_LVAL_P(progress->post_bytes_processed) = data->post_bytes_processed;
 					php_session_rfc1867_update(progress, 1);

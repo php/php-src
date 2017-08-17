@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -217,7 +217,23 @@ static int firebird_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 	}
 	memmove(cp, var->aliasname, var->aliasname_length);
 	*(cp+var->aliasname_length) = '\0';
-	col->param_type = PDO_PARAM_STR;
+
+	if (var->sqlscale < 0) {
+		col->param_type = PDO_PARAM_STR;
+	} else {
+		switch (var->sqltype & ~1) {
+			case SQL_SHORT:
+			case SQL_LONG:
+#if SIZEOF_ZEND_LONG >= 8 
+			case SQL_INT64:
+#endif
+				col->param_type = PDO_PARAM_INT;
+				break;
+			default:
+				col->param_type = PDO_PARAM_STR;
+				break;
+		}
+	}
 
 	return 1;
 }
@@ -373,16 +389,24 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 					*len = var->sqllen;
 					break;
 				case SQL_SHORT:
-				    *ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);
-					*len = slprintf(*ptr, CHAR_BUF_LEN, "%d", *(short*)var->sqldata);
+					*len = sizeof(zend_long);
+					*ptr = FETCH_BUF(S->fetch_buf[colno], zend_long, 1, NULL);
+					*(zend_long *)*ptr = *(short*)var->sqldata;
 					break;
 				case SQL_LONG:
-					*ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);
-					*len = slprintf(*ptr, CHAR_BUF_LEN, "%d", *(ISC_LONG*)var->sqldata);
+					*len = sizeof(zend_long);
+					*ptr = FETCH_BUF(S->fetch_buf[colno], zend_long, 1, NULL);
+					*(zend_long *)*ptr = *(ISC_LONG*)var->sqldata;
 					break;
 				case SQL_INT64:
+#if SIZEOF_ZEND_LONG >= 8 
+					*len = sizeof(zend_long);
+					*ptr = FETCH_BUF(S->fetch_buf[colno], zend_long, 1, NULL);
+					*(zend_long *)*ptr = *(ISC_INT64*)var->sqldata;
+#else
 					*ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);
 					*len = slprintf(*ptr, CHAR_BUF_LEN, "%" LL_MASK "d", *(ISC_INT64*)var->sqldata);
+#endif
 					break;
 				case SQL_FLOAT:
 					*ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);

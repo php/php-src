@@ -23,9 +23,9 @@ function php_cli_server_start($ini = "") {
 
 	// note: even when server prints 'Listening on localhost:8964...Press Ctrl-C to quit.'
 	//       it might not be listening yet...need to wait until fsockopen() call returns
-	$error = "Unable to connect to servers\n";
+	$error = "Unable to connect to server\n";
 	for ($i=0; $i < 60; $i++) {
-		usleep(25000); // 25ms per try
+		usleep(50000); // 50ms per try
 		$status = proc_get_status($handle);
 		$fp = @fsockopen(PHP_CLI_SERVER_HOSTNAME, PHP_CLI_SERVER_PORT);
 		// Failure, the server is no longer running
@@ -53,6 +53,14 @@ function php_cli_server_start($ini = "") {
 	register_shutdown_function(
 		function($handle) {
 			proc_terminate($handle);
+			/* Wait for server to shutdown */
+			for ($i = 0; $i < 60; $i++) {
+				$status = proc_get_status($handle);
+				if (!($status && $status['running'])) {
+					break;
+				}
+			usleep(50000);
+			}
 		},
 		$handle
 	);

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -102,6 +102,7 @@ int fcgi_accept_request(fcgi_request *req);
 int fcgi_finish_request(fcgi_request *req, int force_close);
 const char *fcgi_get_last_client_ip();
 void fcgi_set_in_shutdown(int new_value);
+void fcgi_request_set_keep(fcgi_request *req, int new_value);
 
 #ifndef HAVE_ATTRIBUTE_WEAK
 typedef void (*fcgi_logger)(int type, const char *fmt, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
@@ -118,7 +119,8 @@ void  fcgi_loadenv(fcgi_request *req, fcgi_apply_func load_func, zval *array);
 int fcgi_read(fcgi_request *req, char *str, int len);
 
 int fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int len);
-int fcgi_flush(fcgi_request *req, int close);
+int fcgi_flush(fcgi_request *req, int end);
+int fcgi_end(fcgi_request *req);
 
 #ifdef PHP_WIN32
 void fcgi_impersonate(void);

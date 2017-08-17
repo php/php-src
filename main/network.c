@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -48,7 +48,9 @@
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
-#if HAVE_SYS_POLL_H
+#if HAVE_POLL_H
+#include <poll.h>
+#elif HAVE_SYS_POLL_H
 #include <sys/poll.h>
 #endif
 
@@ -647,7 +649,7 @@ PHPAPI void php_network_populate_name_from_sockaddr(
 
 					if (ua->sun_path[0] == '\0') {
 						/* abstract name */
-						int len = strlen(ua->sun_path + 1) + 1;
+						int len = sl - sizeof(sa_family_t);
 						*textaddr = zend_string_init((char*)ua->sun_path, len, 0);
 					} else {
 						int len = strlen(ua->sun_path);

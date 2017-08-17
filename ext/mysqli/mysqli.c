@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -568,11 +568,9 @@ PHP_MINIT_FUNCTION(mysqli)
 
 	REGISTER_INI_ENTRIES();
 #ifndef MYSQLI_USE_MYSQLND
-#if MYSQL_VERSION_ID >= 40000
 	if (mysql_server_init(0, NULL, NULL)) {
 		return FAILURE;
 	}
-#endif
 #endif
 
 	memcpy(&mysqli_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
@@ -691,9 +689,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_CONNECT_TIMEOUT", MYSQL_OPT_CONNECT_TIMEOUT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_LOCAL_INFILE", MYSQL_OPT_LOCAL_INFILE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_INIT_COMMAND", MYSQL_INIT_COMMAND, CONST_CS | CONST_PERSISTENT);
-#if MYSQL_VERSION_ID > 40101 || defined(MYSQLI_USE_MYSQLND)
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_READ_TIMEOUT", MYSQL_OPT_READ_TIMEOUT, CONST_CS | CONST_PERSISTENT);
-#endif
 #if defined(MYSQLI_USE_MYSQLND)
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_NET_CMD_BUFFER_SIZE", MYSQLND_OPT_NET_CMD_BUFFER_SIZE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_NET_READ_BUFFER_SIZE", MYSQLND_OPT_NET_READ_BUFFER_SIZE, CONST_CS | CONST_PERSISTENT);
@@ -885,7 +881,6 @@ PHP_MINIT_FUNCTION(mysqli)
 PHP_MSHUTDOWN_FUNCTION(mysqli)
 {
 #ifndef MYSQLI_USE_MYSQLND
-#if MYSQL_VERSION_ID >= 40000
 #ifdef PHP_WIN32
 	zend_ulong client_ver = mysql_get_client_version();
 	/*
@@ -897,7 +892,6 @@ PHP_MSHUTDOWN_FUNCTION(mysqli)
 	}
 #else
 	mysql_server_end();
-#endif
 #endif
 #endif
 
@@ -917,7 +911,7 @@ PHP_MSHUTDOWN_FUNCTION(mysqli)
  */
 PHP_RINIT_FUNCTION(mysqli)
 {
-#if !defined(MYSQLI_USE_MYSQLND) && defined(ZTS) && MYSQL_VERSION_ID >= 40000
+#if !defined(MYSQLI_USE_MYSQLND) && defined(ZTS)
 	if (mysql_thread_init()) {
 		return FAILURE;
 	}
@@ -954,7 +948,7 @@ PHP_RSHUTDOWN_FUNCTION(mysqli)
 {
 	/* check persistent connections, move used to free */
 
-#if !defined(MYSQLI_USE_MYSQLND) && defined(ZTS) && MYSQL_VERSION_ID >= 40000
+#if !defined(MYSQLI_USE_MYSQLND) && defined(ZTS)
 	mysql_thread_end();
 #endif
 	if (MyG(error_msg)) {
@@ -1152,7 +1146,7 @@ void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend
 {
 #if !defined(MYSQLI_USE_MYSQLND)
 	MYSQL_ROW row;
-	unsigned int	i;
+	unsigned int	i, num_fields;
 	MYSQL_FIELD		*fields;
 	zend_ulong	*field_len;
 
@@ -1166,8 +1160,9 @@ void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend
 
 	array_init(return_value);
 	field_len = mysql_fetch_lengths(result);
+	num_fields = mysql_num_fields(result);
 
-	for (i = 0; i < mysql_num_fields(result); i++) {
+	for (i = 0; i < num_fields; i++) {
 		if (row[i]) {
 			zval res;
 
@@ -1247,6 +1242,10 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 			php_error_docref(NULL, E_WARNING, "Could not find class '%s'", ZSTR_VAL(class_name));
 			return;
 		}
+		if (UNEXPECTED(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))) {
+			zend_throw_error(NULL, "Class '%s' cannot be instantiated", ZSTR_VAL(ce->name));
+			return;
+		}
 		fetchtype = MYSQLI_ASSOC;
 	} else {
 		if (override_flags) {
@@ -1318,9 +1317,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 			} else {
 				zval_ptr_dtor(&retval);
 			}
-			if (fci.params) {
-				efree(fci.params);
-			}
+			zend_fcall_info_args_clear(&fci, 1);
 		} else if (ctor_params) {
 			zend_throw_exception_ex(zend_ce_exception, 0, "Class %s does not have a constructor hence you cannot use ctor_params", ZSTR_VAL(ce->name));
 		}

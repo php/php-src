@@ -5733,4 +5733,13 @@ AbcdCBefgBhiBqz
 "(?|(\k'Pm')|(?'Pm'))"
     abcd
 
+/(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[,;:])(?=.{8,16})(?!.*[\s])/
+    \  Fred:099
+
+/(?=.*X)X$/ 
+    \  X
+     
+/X+(?#comment)?/
+    >XXX<
+
 /-- End of testinput1 --/

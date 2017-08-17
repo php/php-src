@@ -43,7 +43,9 @@ character tables for PCRE. The tables are built according to the current
 locale. Now that pcre_maketables is a function visible to the outside world, we
 make use of its code from here in order to be consistent. */
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 
 #include <ctype.h>
 #include <stdio.h>

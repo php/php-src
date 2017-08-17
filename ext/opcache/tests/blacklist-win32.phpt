@@ -18,7 +18,7 @@ $conf[4] = preg_replace("!^\\Q".dirname(__FILE__)."\\E!", "__DIR__", $conf[4]);
 print_r($conf);
 include("blacklist.inc");
 $status = opcache_get_status();
-print_r(count($status['scripts']));
+print_r(count($status['scripts']) > 0);
 ?>
 --EXPECTF--
 Array

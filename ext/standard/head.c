@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -42,9 +42,12 @@ PHP_FUNCTION(header)
 	sapi_header_line ctr = {0};
 	size_t len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|bl", &ctr.line,
-				&len, &rep, &ctr.response_code) == FAILURE)
-		return;
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_STRING(ctr.line, len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(rep)
+		Z_PARAM_LONG(ctr.response_code)
+	ZEND_PARSE_PARAMETERS_END();
 
 	ctr.line_len = (uint32_t)len;
 	sapi_header_op(rep ? SAPI_HEADER_REPLACE:SAPI_HEADER_ADD, &ctr);
@@ -58,9 +61,10 @@ PHP_FUNCTION(header_remove)
 	sapi_header_line ctr = {0};
 	size_t len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &ctr.line,
-	                          &len) == FAILURE)
-		return;
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING(ctr.line, len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	ctr.line_len = (uint32_t)len;
 	sapi_header_op(ZEND_NUM_ARGS() == 0 ? SAPI_HEADER_DELETE_ALL : SAPI_HEADER_DELETE, &ctr);
@@ -134,6 +138,8 @@ PHPAPI int php_setcookie(zend_string *name, zend_string *value, time_t expires, 
 		if (expires > 0) {
 			const char *p;
 			char tsdelta[13];
+			double diff;
+
 			strlcat(cookie, COOKIE_EXPIRES, len + 100);
 			dt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, expires, 0);
 			/* check to make sure that the year does not exceed 4 digits in length */
@@ -148,7 +154,11 @@ PHPAPI int php_setcookie(zend_string *name, zend_string *value, time_t expires, 
 			strlcat(cookie, ZSTR_VAL(dt), len + 100);
 			zend_string_free(dt);
 
-			snprintf(tsdelta, sizeof(tsdelta), ZEND_LONG_FMT, (zend_long) difftime(expires, time(NULL)));
+			diff = difftime(expires, time(NULL));
+			if (diff < 0) {
+				diff = 0;
+			}
+			snprintf(tsdelta, sizeof(tsdelta), ZEND_LONG_FMT, (zend_long) diff);
 			strlcat(cookie, COOKIE_MAX_AGE, len + 100);
 			strlcat(cookie, tsdelta, len + 100);
 		}
@@ -191,10 +201,16 @@ PHP_FUNCTION(setcookie)
 	zend_long expires = 0;
 	zend_bool secure = 0, httponly = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|SlSSbb",
-				&name, &value, &expires, &path, &domain, &secure, &httponly) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 7)
+		Z_PARAM_STR(name)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR(value)
+		Z_PARAM_LONG(expires)
+		Z_PARAM_STR(path)
+		Z_PARAM_STR(domain)
+		Z_PARAM_BOOL(secure)
+		Z_PARAM_BOOL(httponly)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (php_setcookie(name, value, expires, path, domain, secure, 1, httponly) == SUCCESS) {
 		RETVAL_TRUE;
@@ -212,10 +228,16 @@ PHP_FUNCTION(setrawcookie)
 	zend_long expires = 0;
 	zend_bool secure = 0, httponly = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|SlSSbb",
-				&name, &value, &expires, &path, &domain, &secure, &httponly) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 7)
+		Z_PARAM_STR(name)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR(value)
+		Z_PARAM_LONG(expires)
+		Z_PARAM_STR(path)
+		Z_PARAM_STR(domain)
+		Z_PARAM_BOOL(secure)
+		Z_PARAM_BOOL(httponly)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (php_setcookie(name, value, expires, path, domain, secure, 0, httponly) == SUCCESS) {
 		RETVAL_TRUE;
@@ -234,8 +256,11 @@ PHP_FUNCTION(headers_sent)
 	const char *file="";
 	int line=0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|z/z/", &arg1, &arg2) == FAILURE)
-		return;
+	ZEND_PARSE_PARAMETERS_START(0, 2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL_DEREF(arg1)
+		Z_PARAM_ZVAL_DEREF(arg2)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (SG(headers_sent)) {
 		line = php_output_get_start_lineno();
@@ -244,10 +269,10 @@ PHP_FUNCTION(headers_sent)
 
 	switch(ZEND_NUM_ARGS()) {
 	case 2:
-		zval_dtor(arg2);
+		zval_ptr_dtor(arg2);
 		ZVAL_LONG(arg2, line);
 	case 1:
-		zval_dtor(arg1);
+		zval_ptr_dtor(arg1);
 		if (file) {
 			ZVAL_STRING(arg1, file);
 		} else {
@@ -294,9 +319,10 @@ PHP_FUNCTION(http_response_code)
 {
 	zend_long response_code = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &response_code) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(response_code)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (response_code)
 	{

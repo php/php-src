@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -28,7 +28,8 @@ const php_hash_ops php_hash_md5_ops = {
 	(php_hash_copy_func_t) php_hash_copy,
 	16,
 	64,
-	sizeof(PHP_MD5_CTX)
+	sizeof(PHP_MD5_CTX),
+	1
 };
 
 const php_hash_ops php_hash_md4_ops = {
@@ -38,7 +39,8 @@ const php_hash_ops php_hash_md4_ops = {
 	(php_hash_copy_func_t) php_hash_copy,
 	16,
 	64,
-	sizeof(PHP_MD4_CTX)
+	sizeof(PHP_MD4_CTX),
+	1
 };
 
 const php_hash_ops php_hash_md2_ops = {
@@ -48,7 +50,8 @@ const php_hash_ops php_hash_md2_ops = {
 	(php_hash_copy_func_t) php_hash_copy,
 	16,
 	16,
-	sizeof(PHP_MD2_CTX)
+	sizeof(PHP_MD2_CTX),
+	1
 };
 
 /* MD common stuff */

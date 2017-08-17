@@ -13,6 +13,7 @@ display_errors = 1
 $sa = "0 $ 0";
 var_dump($r2 = assert($sa, "Describing what was asserted"));
 --EXPECTF--
+Deprecated: assert(): Calling assert() with a string argument is deprecated in %s on line %d
 
 Fatal error: Uncaught ParseError: syntax error, unexpected '$', expecting ';' in %s(%d) : assert code:1
 Stack trace:

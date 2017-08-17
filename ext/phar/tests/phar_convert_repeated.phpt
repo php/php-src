@@ -91,10 +91,10 @@ var_dump($phar->getAlias());
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar.zip');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar.tar');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.2.phar.zip');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.2.2.phar.tar');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.3.phar.zip');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.2.2.3.phar.zip');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.3.phar.tar');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.3.phar');
 ?>

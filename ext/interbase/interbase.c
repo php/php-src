@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -833,6 +833,9 @@ PHP_MINFO_FUNCTION(ibase)
 			info_func(s = tmp);
 		}
 		php_info_print_table_row(2, "Run-time Client Library Version", s);
+#ifdef PHP_WIN32
+		FreeLibrary(l);
+#endif
 	} while (0);
 #endif
 	php_info_print_table_end();

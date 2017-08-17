@@ -4217,4 +4217,36 @@ backtracking verbs. --/
 
 /a[[:punct:]b]/BZ
 
+/L(?#(|++<!(2)?/BZ
+
+/L(?#(|++<!(2)?/BOZ
+
+/L(?#(|++<!(2)?/BCZ
+
+/L(?#(|++<!(2)?/BCOZ
+
+/(A*)\E+/CBZ
+
+/()\Q\E*]/BCZ
+
+/(?<A>)(?J:(?<B>)(?<B>))(?<C>)/
+    \O\CC
+
+/(?=a\K)/ 
+    ring bpattingbobnd $ 1,oern cou \rb\L
+
+/(?<=((?C)0))/
+    9010
+    abcd
+     
+/((?J)(?'R'(?'R'(?'R'(?'R'(?'R'(?|(\k'R'))))))))/
+
+/\N(?(?C)0?!.)*/
+
+/(?<RA>abc)(?(R)xyz)/BZ
+
+/(?<R>abc)(?(R)xyz)/BZ
+
+/(?=.*[A-Z])/I
+
 /-- End of testinput2 --/

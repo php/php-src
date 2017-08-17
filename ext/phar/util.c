@@ -3,7 +3,7 @@
   | phar php single-file executable PHP extension                        |
   | utility functions                                                    |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2016 The PHP Group                                |
+  | Copyright (c) 2005-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -309,7 +309,7 @@ splitted:
 		efree(test);
 	}
 
-	spprintf(&path, MAXPATHLEN, "phar://%s/%s%c%s", arch, PHAR_G(cwd), DEFAULT_DIR_SEPARATOR, PG(include_path));
+	spprintf(&path, MAXPATHLEN + 1 + strlen(PG(include_path)), "phar://%s/%s%c%s", arch, PHAR_G(cwd), DEFAULT_DIR_SEPARATOR, PG(include_path));
 	efree(arch);
 	ret = php_resolve_path(filename, filename_len, path);
 	efree(path);

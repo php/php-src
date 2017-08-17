@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar php single-file executable PHP extension                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2016 The PHP Group                                |
+  | Copyright (c) 2006-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -155,28 +155,28 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	int         require_hash;
 	int         request_done;
 	int         request_ends;
-	void        (*orig_fopen)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_file_get_contents)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_is_file)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_is_link)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_is_dir)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_opendir)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_file_exists)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_fileperms)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_fileinode)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_filesize)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_fileowner)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_filegroup)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_fileatime)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_filemtime)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_filectime)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_filetype)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_is_writable)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_is_readable)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_is_executable)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_lstat)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_readfile)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_stat)(INTERNAL_FUNCTION_PARAMETERS);
+	zif_handler orig_fopen;
+	zif_handler orig_file_get_contents;
+	zif_handler orig_is_file;
+	zif_handler orig_is_link;
+	zif_handler orig_is_dir;
+	zif_handler orig_opendir;
+	zif_handler orig_file_exists;
+	zif_handler orig_fileperms;
+	zif_handler orig_fileinode;
+	zif_handler orig_filesize;
+	zif_handler orig_fileowner;
+	zif_handler orig_filegroup;
+	zif_handler orig_fileatime;
+	zif_handler orig_filemtime;
+	zif_handler orig_filectime;
+	zif_handler orig_filetype;
+	zif_handler orig_is_writable;
+	zif_handler orig_is_readable;
+	zif_handler orig_is_executable;
+	zif_handler orig_lstat;
+	zif_handler orig_readfile;
+	zif_handler orig_stat;
 	/* used for includes with . in them inside front controller */
 	char*       cwd;
 	int         cwd_len;

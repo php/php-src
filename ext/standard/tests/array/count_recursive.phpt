@@ -239,7 +239,7 @@ NULL
 Warning: count() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 
-Notice: Use of undefined constant ABCD - assumed 'ABCD' in %s on line %d
+Warning: Use of undefined constant ABCD - assumed 'ABCD' (this will throw an Error in a future version of PHP) in %s on line %d
 
 Warning: count() expects parameter 2 to be integer, %s given in %s on line %d
 NULL

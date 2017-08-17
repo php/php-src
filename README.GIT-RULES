@@ -74,7 +74,7 @@ The next few rules are more of a technical nature::
 
    1. All changes should first go to the lowest branch (i.e. 5.6) and then
       get merged up to all other branches. If a change is not needed for
-      later branches (i.e. fixes for features which where dropped from later
+      later branches (i.e. fixes for features which were dropped from later
       branches) an empty merge should be done.
 
    2. All news updates intended for public viewing, such as new features,

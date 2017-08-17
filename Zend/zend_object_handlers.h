@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -155,12 +155,12 @@ struct _zend_object_handlers {
 	zend_object_compare_zvals_t				compare;
 };
 
+BEGIN_EXTERN_C()
 extern ZEND_API zend_object_handlers std_object_handlers;
 
 #define zend_get_function_root_class(fbc) \
 	((fbc)->common.prototype ? (fbc)->common.prototype->common.scope : (fbc)->common.scope)
 
-BEGIN_EXTERN_C()
 ZEND_API union _zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_string *function_name_strval, const zval *key);
 ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *property_name, zend_bool silent);
 ZEND_API ZEND_COLD zend_bool zend_std_unset_static_property(zend_class_entry *ce, zend_string *property_name);
@@ -200,4 +200,6 @@ END_EXTERN_C()
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -210,7 +210,7 @@ static int php_curl_option_url(php_curl *ch, const char *url, const size_t len) 
 			return FAILURE;
 		}
 
-		if (uri->scheme && !strncasecmp("file", uri->scheme, sizeof("file"))) {
+		if (uri->scheme && zend_string_equals_literal_ci(uri->scheme, "file")) {
 			php_error_docref(NULL, E_WARNING, "Protocol 'file' disabled in cURL");
 			php_url_free(uri);
 			return FAILURE;
@@ -2111,7 +2111,6 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 	CURLcode error = CURLE_OK;
 	zend_long lval;
 
-	ZVAL_DEREF(zvalue);
 	switch (option) {
 		/* Long options */
 		case CURLOPT_SSL_VERIFYHOST:
@@ -2509,7 +2508,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 						zval_ptr_dtor(&ch->handlers->write_header->stream);
 						ch->handlers->write_header->fp = fp;
 						ch->handlers->write_header->method = PHP_CURL_FILE;
-						ZVAL_COPY(&ch->handlers->write_header->stream, zvalue);;
+						ZVAL_COPY(&ch->handlers->write_header->stream, zvalue);
 					} else {
 						php_error_docref(NULL, E_WARNING, "the provided file handle is not writable");
 						return FAILURE;
@@ -2989,6 +2988,7 @@ PHP_FUNCTION(curl_setopt_array)
 					"Array keys must be CURLOPT constants or equivalent integer values");
 			RETURN_FALSE;
 		}
+		ZVAL_DEREF(entry);
 		if (_php_curl_setopt(ch, (zend_long) option, entry) == FAILURE) {
 			RETURN_FALSE;
 		}

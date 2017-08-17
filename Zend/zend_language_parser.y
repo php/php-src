@@ -3,7 +3,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -338,17 +338,22 @@ use_type:
 ;
 
 group_use_declaration:
-		namespace_name T_NS_SEPARATOR '{' unprefixed_use_declarations '}'
+		namespace_name T_NS_SEPARATOR '{' unprefixed_use_declarations possible_comma '}'
 			{ $$ = zend_ast_create(ZEND_AST_GROUP_USE, $1, $4); }
-	|	T_NS_SEPARATOR namespace_name T_NS_SEPARATOR '{' unprefixed_use_declarations '}'
+	|	T_NS_SEPARATOR namespace_name T_NS_SEPARATOR '{' unprefixed_use_declarations possible_comma '}'
 			{ $$ = zend_ast_create(ZEND_AST_GROUP_USE, $2, $5); }
 ;
 
 mixed_group_use_declaration:
-		namespace_name T_NS_SEPARATOR '{' inline_use_declarations '}'
+		namespace_name T_NS_SEPARATOR '{' inline_use_declarations possible_comma '}'
 			{ $$ = zend_ast_create(ZEND_AST_GROUP_USE, $1, $4);}
-	|	T_NS_SEPARATOR namespace_name T_NS_SEPARATOR '{' inline_use_declarations '}'
+	|	T_NS_SEPARATOR namespace_name T_NS_SEPARATOR '{' inline_use_declarations possible_comma '}'
 			{ $$ = zend_ast_create(ZEND_AST_GROUP_USE, $2, $5); }
+;
+
+possible_comma:
+		/* empty */
+	|	','
 ;
 
 inline_use_declarations:
@@ -1030,7 +1035,7 @@ function_call:
 
 class_name:
 		T_STATIC
-			{ zval zv; ZVAL_INTERNED_STR(&zv, CG(known_strings)[ZEND_STR_STATIC]);
+			{ zval zv; ZVAL_INTERNED_STR(&zv, ZSTR_KNOWN(ZEND_STR_STATIC));
 			  $$ = zend_ast_create_zval_ex(&zv, ZEND_NAME_NOT_FQ); }
 	|	name { $$ = $1; }
 ;
@@ -1370,4 +1375,6 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

@@ -246,48 +246,19 @@ enum fpm_address_domain fpm_sockets_domain_from_address(char *address) /* {{{ */
 }
 /* }}} */
 
-static int fpm_socket_af_inet_listening_socket(struct fpm_worker_pool_s *wp) /* {{{ */
+static int fpm_socket_af_inet_socket_by_addr(struct fpm_worker_pool_s *wp, const char *addr, const char *port) /* {{{ */
 {
 	struct addrinfo hints, *servinfo, *p;
-	char *dup_address = strdup(wp->config->listen_address);
-	char *port_str = strrchr(dup_address, ':');
-	char *addr = NULL;
 	char tmpbuf[INET6_ADDRSTRLEN];
-	int addr_len;
-	int port = 0;
-	int sock = -1;
 	int status;
-
-	if (port_str) { /* this is host:port pair */
-		*port_str++ = '\0';
-		port = atoi(port_str);
-		addr = dup_address;
-	} else if (strlen(dup_address) == strspn(dup_address, "0123456789")) { /* this is port */
-		port = atoi(dup_address);
-		port_str = dup_address;
-		/* IPv6 catch-all + IPv4-mapped */
-		addr = "::";
-	}
-
-	if (port == 0) {
-		zlog(ZLOG_ERROR, "invalid port value '%s'", port_str);
-		return -1;
-	}
-
-	/* strip brackets from address for getaddrinfo */
-	addr_len = strlen(addr);
-	if (addr[0] == '[' && addr[addr_len - 1] == ']') {
-		addr[addr_len - 1] = '\0';
-		addr++;
-	}
+	int sock = -1;
 
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 
-	if ((status = getaddrinfo(addr, port_str, &hints, &servinfo)) != 0) {
+	if ((status = getaddrinfo(addr, port, &hints, &servinfo)) != 0) {
 		zlog(ZLOG_ERROR, "getaddrinfo: %s\n", gai_strerror(status));
-		free(dup_address);
 		return -1;
 	}
 
@@ -302,8 +273,65 @@ static int fpm_socket_af_inet_listening_socket(struct fpm_worker_pool_s *wp) /* 
 		}
 	}
 
-	free(dup_address);
 	freeaddrinfo(servinfo);
+
+	return sock;
+}
+/* }}} */
+
+static int fpm_socket_af_inet_listening_socket(struct fpm_worker_pool_s *wp) /* {{{ */
+{
+	char *dup_address = strdup(wp->config->listen_address);
+	char *port_str = strrchr(dup_address, ':');
+	char *addr = NULL;
+	int addr_len;
+	int port = 0;
+	int sock = -1;
+
+	if (port_str) { /* this is host:port pair */
+		*port_str++ = '\0';
+		port = atoi(port_str);
+		addr = dup_address;
+
+		/* strip brackets from address for getaddrinfo */
+		addr_len = strlen(addr);
+		if (addr[0] == '[' && addr[addr_len - 1] == ']') {
+			addr[addr_len - 1] = '\0';
+			addr++;
+		}
+
+	} else if (strlen(dup_address) == strspn(dup_address, "0123456789")) { /* this is port */
+		port = atoi(dup_address);
+		port_str = dup_address;
+	}
+
+	if (port == 0) {
+		zlog(ZLOG_ERROR, "invalid port value '%s'", port_str);
+		return -1;
+	}
+
+	if (addr) {
+		/* Bind a specific address */
+		sock = fpm_socket_af_inet_socket_by_addr(wp, addr, port_str);
+	} else {
+		/* Bind ANYADDR
+		 *
+		 * Try "::" first as that covers IPv6 ANYADDR and mapped IPv4 ANYADDR
+		 * silencing warnings since failure is an option
+		 *
+		 * If that fails (because AF_INET6 is unsupported) retry with 0.0.0.0
+		 */
+		int old_level = zlog_set_level(ZLOG_ALERT);
+		sock = fpm_socket_af_inet_socket_by_addr(wp, "::", port_str);
+		zlog_set_level(old_level);
+
+		if (sock < 0) {
+			zlog(ZLOG_NOTICE, "Failed implicitly binding to ::, retrying with 0.0.0.0");
+			sock = fpm_socket_af_inet_socket_by_addr(wp, "0.0.0.0", port_str);
+		}
+	}
+
+	free(dup_address);
 
 	return sock;
 }

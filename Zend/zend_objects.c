@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,24 +29,14 @@
 
 ZEND_API void zend_object_std_init(zend_object *object, zend_class_entry *ce)
 {
-	zval *p, *end;
-
 	GC_REFCOUNT(object) = 1;
 	GC_TYPE_INFO(object) = IS_OBJECT | (GC_COLLECTABLE << GC_FLAGS_SHIFT);
 	object->ce = ce;
 	object->properties = NULL;
 	zend_objects_store_put(object);
-	p = object->properties_table;
-	if (EXPECTED(ce->default_properties_count != 0)) {
-		end = p + ce->default_properties_count;
-		do {
-			ZVAL_UNDEF(p);
-			p++;
-		} while (p != end);
-	}
 	if (UNEXPECTED(ce->ce_flags & ZEND_ACC_USE_GUARDS)) {
 		GC_FLAGS(object) |= IS_OBJ_USE_GUARDS;
-		ZVAL_UNDEF(p);
+		ZVAL_UNDEF(object->properties_table + object->ce->default_properties_count);
 	}
 }
 
@@ -86,7 +76,7 @@ ZEND_API void zend_object_std_dtor(zend_object *object)
 
 ZEND_API void zend_objects_destroy_object(zend_object *object)
 {
-	zend_function *destructor = object ? object->ce->destructor : NULL;
+	zend_function *destructor = object->ce->destructor;
 
 	if (destructor) {
 		zend_object *old_exception;
@@ -252,6 +242,16 @@ ZEND_API zend_object *zend_objects_clone_obj(zval *zobject)
 	old_object = Z_OBJ_P(zobject);
 	new_object = zend_objects_new(old_object->ce);
 
+	/* zend_objects_clone_members() expect the properties to be initialized. */
+	if (new_object->ce->default_properties_count) {
+		zval *p = new_object->properties_table;
+		zval *end = p + new_object->ce->default_properties_count;
+		do {
+			ZVAL_UNDEF(p);
+			p++;
+		} while (p != end);
+	}
+
 	zend_objects_clone_members(new_object, old_object);
 
 	return new_object;
@@ -263,4 +263,6 @@ ZEND_API zend_object *zend_objects_clone_obj(zval *zobject)
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

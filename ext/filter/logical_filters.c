@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -364,7 +364,7 @@ void php_filter_boolean(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	if (ret == -1) {
 		RETURN_VALIDATION_FAILED("Bool validation: Invalid bool");
 	} else {
-		zval_dtor(value);
+		zval_ptr_dtor(value);
 		ZVAL_BOOL(value, ret);
 	}
 }
@@ -750,7 +750,8 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		RETURN_VALIDATION_FAILED("URL validation: Failed to parse URL");
 	}
 
-	if (url->scheme != NULL && (!strcasecmp(url->scheme, "http") || !strcasecmp(url->scheme, "https"))) {
+	if (url->scheme != NULL &&
+		(zend_string_equals_literal_ci(url->scheme, "http") || zend_string_equals_literal_ci(url->scheme, "https"))) {
 		char *e, *s, *t;
 		size_t l;
 
@@ -758,9 +759,9 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 			goto bad_url;
 		}
 
-		s = url->host;
-		l = strlen(s);
-		e = url->host + l;
+		s = ZSTR_VAL(url->host);
+		l = ZSTR_LEN(url->host);
+		e = s + l;
 		t = e - 1;
 
 		/* An IPv6 enclosed by square brackets is a valid hostname */
@@ -770,7 +771,7 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		}
 
 		// Validate domain
-		if (!_php_filter_validate_domain(url->host, l, FILTER_FLAG_HOSTNAME)) {
+		if (!_php_filter_validate_domain(ZSTR_VAL(url->host), l, FILTER_FLAG_HOSTNAME)) {
 			php_url_free(url);
 			RETURN_VALIDATION_FAILED("URL validation: Invalid domain");
 		}
@@ -779,7 +780,7 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	if (
 		url->scheme == NULL ||
 		/* some schemas allow the host to be empty */
-		(url->host == NULL && (strcmp(url->scheme, "mailto") && strcmp(url->scheme, "news") && strcmp(url->scheme, "file"))) ||
+		(url->host == NULL && (strcmp(ZSTR_VAL(url->scheme), "mailto") && strcmp(ZSTR_VAL(url->scheme), "news") && strcmp(ZSTR_VAL(url->scheme), "file"))) ||
 		((flags & FILTER_FLAG_PATH_REQUIRED) && url->path == NULL) || ((flags & FILTER_FLAG_QUERY_REQUIRED) && url->query == NULL)
 	) {
 bad_url:

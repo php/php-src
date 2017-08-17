@@ -23,11 +23,14 @@ if not exist "%PHP_BUILD_CACHE_SDK_DIR%" (
 	git --git-dir="%PHP_BUILD_CACHE_SDK_DIR%\.git" --work-tree="%PHP_BUILD_CACHE_SDK_DIR%" checkout --force %SDK_BRANCH% 
 )
 
-set SDK_RUNNER=%PHP_BUILD_CACHE_SDK_DIR%\phpsdk-vc14-%PLATFORM%.bat
+set SDK_RUNNER=%PHP_BUILD_CACHE_SDK_DIR%\phpsdk-%PHP_BUILD_CRT%-%PLATFORM%.bat
 if not exist "%SDK_RUNNER%" (
 	echo "%SDK_RUNNER%" doesn't exist
 	exit /b 3
 )
 
-call %SDK_RUNNER% -t %APPVEYOR_BUILD_FOLDER%\appveyor\build_task.bat
+cmd /c %SDK_RUNNER% -t %APPVEYOR_BUILD_FOLDER%\appveyor\build_task.bat
+if %errorlevel% neq 0 exit /b 3
+
+exit /b 0
 

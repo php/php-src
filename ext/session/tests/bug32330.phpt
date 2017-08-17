@@ -9,6 +9,7 @@ session.name=sid
 session.save_path=/tmp
 session.gc_probability=1
 session.gc_divisor=1
+session.save_handler=files
 --FILE--
 <?php
 error_reporting(E_ALL);

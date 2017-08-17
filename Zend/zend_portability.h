@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -129,6 +129,12 @@
 
 #if defined(HAVE_LIBDL) && !defined(ZEND_WIN32)
 
+# if defined(__has_feature)
+#  if __has_feature(address_sanitizer)
+#   define __SANITIZE_ADDRESS__
+#  endif
+# endif
+
 # ifndef RTLD_LAZY
 #  define RTLD_LAZY 1    /* Solaris 1, FreeBSD's (2.1.7.1 and older) */
 # endif
@@ -139,7 +145,7 @@
 
 # if defined(RTLD_GROUP) && defined(RTLD_WORLD) && defined(RTLD_PARENT)
 #  define DL_LOAD(libname)			dlopen(libname, RTLD_LAZY | RTLD_GLOBAL | RTLD_GROUP | RTLD_WORLD | RTLD_PARENT)
-# elif defined(RTLD_DEEPBIND)
+# elif defined(RTLD_DEEPBIND) && !defined(__SANITIZE_ADDRESS__)
 #  define DL_LOAD(libname)			dlopen(libname, RTLD_LAZY | RTLD_GLOBAL | RTLD_DEEPBIND)
 # else
 #  define DL_LOAD(libname)			dlopen(libname, RTLD_LAZY | RTLD_GLOBAL)
@@ -237,11 +243,13 @@ char *alloca();
 # define ZEND_FASTCALL
 #endif
 
-#if defined(__GNUC__) && ZEND_GCC_VERSION >= 3004
-#else
-# define __restrict__
+#ifndef restrict
+# if defined(__GNUC__) && ZEND_GCC_VERSION >= 3004
+# else
+#  define __restrict__
+# endif
+# define restrict __restrict__
 #endif
-#define restrict __restrict__
 
 #if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__)) || __has_attribute(noreturn)
 # define HAVE_NORETURN
@@ -468,7 +476,7 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 #define ZEND_STRL(str)		(str), (sizeof(str)-1)
 #define ZEND_STRS(str)		(str), (sizeof(str))
 #define ZEND_NORMALIZE_BOOL(n)			\
-	((n) ? (((n)>0) ? 1 : -1) : 0)
+	((n) ? (((n)<0) ? -1 : 1) : 0)
 #define ZEND_TRUTH(x)		((x) ? 1 : 0)
 #define ZEND_LOG_XOR(a, b)		(ZEND_TRUTH(a) ^ ZEND_TRUTH(b))
 
@@ -480,7 +488,7 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 #ifdef ZEND_WIN32
 #define ZEND_SECURE_ZERO(var, size) RtlSecureZeroMemory((var), (size))
 #else
-#define ZEND_SECURE_ZERO(var, size) memset((var), 0, (size))
+#define ZEND_SECURE_ZERO(var, size) explicit_bzero((var), (size))
 #endif
 
 /* This check should only be used on network socket, not file descriptors */
@@ -488,6 +496,18 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 #define ZEND_VALID_SOCKET(sock) (INVALID_SOCKET != (sock))
 #else
 #define ZEND_VALID_SOCKET(sock) ((sock) >= 0)
+#endif
+
+/* va_copy() is __va_copy() in old gcc versions.
+ * According to the autoconf manual, using
+ * memcpy(&dst, &src, sizeof(va_list))
+ * gives maximum portability. */
+#ifndef va_copy
+# ifdef __va_copy
+#  define va_copy(dest, src) __va_copy((dest), (src))
+# else
+#  define va_copy(dest, src) memcpy(&(dest), &(src), sizeof(va_list))
+# endif
 #endif
 
 #endif /* ZEND_PORTABILITY_H */
@@ -498,4 +518,6 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

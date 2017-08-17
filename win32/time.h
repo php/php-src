@@ -41,6 +41,8 @@ struct timespec
 #define ITIMER_VIRT    1		/*generates sigvtalrm */
 #define ITIMER_PROF    2		/*generates sigprof */
 
+typedef long suseconds_t;
+
 /* Prototype stuff ********************************************************** */
 PHPAPI extern int gettimeofday(struct timeval *time_Info, struct timezone *timezone_Info);
 
@@ -59,3 +61,12 @@ void php_win32_init_gettimeofday(void);
 #endif
 
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

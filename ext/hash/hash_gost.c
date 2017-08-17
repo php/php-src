@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -227,14 +227,13 @@ static inline void Gost(PHP_GOST_CTX *context, uint32_t data[8])
 static inline void GostTransform(PHP_GOST_CTX *context, const unsigned char input[32])
 {
 	int i, j;
-	uint32_t data[8], temp = 0, save = 0;
+	uint32_t data[8], temp = 0;
 
 	for (i = 0, j = 0; i < 8; ++i, j += 4) {
 		data[i] =	((uint32_t) input[j]) | (((uint32_t) input[j + 1]) << 8) |
 					(((uint32_t) input[j + 2]) << 16) | (((uint32_t) input[j + 3]) << 24);
-		save = context->state[i + 8];
 		context->state[i + 8] += data[i] + temp;
-		temp = ((context->state[i + 8] < data[i]) || (context->state[i + 8] < save)) ? 1 : 0;
+		temp = context->state[i + 8] < data[i] ? 1 : (context->state[i + 8] == data[i] ? temp : 0);
 	}
 
 	Gost(context, data);
@@ -316,7 +315,8 @@ const php_hash_ops php_hash_gost_ops = {
 	(php_hash_copy_func_t) php_hash_copy,
 	32,
 	32,
-	sizeof(PHP_GOST_CTX)
+	sizeof(PHP_GOST_CTX),
+	1
 };
 
 const php_hash_ops php_hash_gost_crypto_ops = {
@@ -326,7 +326,8 @@ const php_hash_ops php_hash_gost_crypto_ops = {
 	(php_hash_copy_func_t) php_hash_copy,
 	32,
 	32,
-	sizeof(PHP_GOST_CTX)
+	sizeof(PHP_GOST_CTX),
+	1
 };
 
 /*

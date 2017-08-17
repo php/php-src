@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -248,7 +248,7 @@ static void print_extensions(void) /* {{{ */
 #define STDERR_FILENO 2
 #endif
 
-static inline int sapi_cli_select(int fd)
+static inline int sapi_cli_select(php_socket_t fd)
 {
 	fd_set wfd, dfd;
 	struct timeval tv;
@@ -384,6 +384,9 @@ static void sapi_cli_register_variables(zval *track_vars_array) /* {{{ */
 static void sapi_cli_log_message(char *message, int syslog_type_int) /* {{{ */
 {
 	fprintf(stderr, "%s\n", message);
+#ifdef PHP_WIN32
+	fflush(stderr);
+#endif
 }
 /* }}} */
 
@@ -512,7 +515,7 @@ static void php_cli_usage(char *argv0)
 				"   %s [options] -r <code> [--] [args...]\n"
 				"   %s [options] [-B <begin_code>] -R <code> [-E <end_code>] [--] [args...]\n"
 				"   %s [options] [-B <begin_code>] -F <file> [-E <end_code>] [--] [args...]\n"
-				"   %s [options] -S <addr>:<port> [-t docroot]\n"
+				"   %s [options] -S <addr>:<port> [-t docroot] [router]\n"
 				"   %s [options] -- [args...]\n"
 				"   %s [options] -a\n"
 				"\n"
@@ -694,7 +697,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				goto out;
 
 			case 'v': /* show php version & quit */
-				php_printf("PHP %s (%s) (built: %s %s) ( %s)\nCopyright (c) 1997-2016 The PHP Group\n%s",
+				php_printf("PHP %s (%s) (built: %s %s) ( %s)\nCopyright (c) 1997-2017 The PHP Group\n%s",
 					PHP_VERSION, cli_sapi_module.name, __DATE__, __TIME__,
 #if ZTS
 					"ZTS "
@@ -910,6 +913,20 @@ static int do_cli(int argc, char **argv) /* {{{ */
 			exit_status=1;
 			goto err;
 		}
+
+#if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE) && (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
+		if (!interactive) {
+		/* The -a option was not passed. If there is no file, it could
+		 	still make sense to run interactively. The presense of a file
+			is essential to mitigate buggy console info. */
+			interactive = php_win32_console_is_own() &&
+				!(script_file ||
+					argc > php_optind && behavior!=PHP_MODE_CLI_DIRECT &&
+					behavior!=PHP_MODE_PROCESS_STDIN &&
+					strcmp(argv[php_optind-1],"--")
+				);
+		}
+#endif
 
 		if (interactive) {
 #if (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)

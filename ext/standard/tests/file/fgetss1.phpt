@@ -29,9 +29,12 @@ foreach ($array as $str) {
 	var_dump(fgetss($fp, 10, "<script>,<a>"));
 }
 
-@unlink($filename);
-
 echo "Done\n";
+?>
+--CLEAN--
+<?php
+$filename = dirname(__FILE__)."/fgetss1.html";
+unlink($filename);
 ?>
 --EXPECTF--	
 string(21) "askasdfasdf<b>aaaaaa

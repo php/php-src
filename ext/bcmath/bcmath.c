@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -403,8 +403,8 @@ PHP_FUNCTION(bcmod)
 	bc_init_num(&first);
 	bc_init_num(&second);
 	bc_init_num(&result);
-	bc_str2num(&first, ZSTR_VAL(left), 0);
-	bc_str2num(&second, ZSTR_VAL(right), 0);
+	php_str2num(&first, ZSTR_VAL(left));
+	php_str2num(&second, ZSTR_VAL(right));
 
 	switch (bc_modulo(first, second, &result, 0)) {
 		case 0:

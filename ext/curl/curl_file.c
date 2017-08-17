@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -35,7 +35,7 @@ static void curlfile_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	zval *cf = return_value;
 
 	ZEND_PARSE_PARAMETERS_START(1,3)
-		Z_PARAM_STR(fname)
+		Z_PARAM_PATH_STR(fname)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR(mime)
 		Z_PARAM_STR(postname)

@@ -157,14 +157,10 @@ Warning: mb_strtolower(): Unknown encoding "0.5" in %s on line %d
 bool(false)
 
 -- Iteration 10 --
-
-Warning: mb_strtolower(): Unknown encoding "(null)" in %s on line %d
-bool(false)
+string(24) "68656c6c6f2c20776f726c64"
 
 -- Iteration 11 --
-
-Warning: mb_strtolower(): Unknown encoding "(null)" in %s on line %d
-bool(false)
+string(24) "68656c6c6f2c20776f726c64"
 
 -- Iteration 12 --
 
@@ -209,14 +205,10 @@ string(24) "68656c6c6f2c20776f726c64"
 string(24) "68656c6c6f2c20776f726c64"
 
 -- Iteration 22 --
-
-Warning: mb_strtolower(): Unknown encoding "(null)" in %s on line %d
-bool(false)
+string(24) "68656c6c6f2c20776f726c64"
 
 -- Iteration 23 --
-
-Warning: mb_strtolower(): Unknown encoding "(null)" in %s on line %d
-bool(false)
+string(24) "68656c6c6f2c20776f726c64"
 
 -- Iteration 24 --
 

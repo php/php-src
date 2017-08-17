@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -223,17 +223,7 @@ int pdo_stmt_describe_columns(pdo_stmt_t *stmt) /* {{{ */
 			}
 		}
 
-#if 0
 		/* update the column index on named bound parameters */
-		if (stmt->bound_params) {
-			struct pdo_bound_param_data *param;
-
-			if (SUCCESS == zend_hash_find(stmt->bound_params, stmt->columns[col].name,
-						stmt->columns[col].namelen, (void**)&param)) {
-				param->paramno = col;
-			}
-		}
-#endif
 		if (stmt->bound_columns) {
 			struct pdo_bound_param_data *param;
 
@@ -432,9 +422,10 @@ static PHP_METHOD(PDOStatement, execute)
 	int ret = 1;
 	PHP_STMT_GET_OBJ;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "|a!", &input_params)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY_EX(input_params, 1, 0)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	PDO_STMT_CLEAR_ERR();
 
@@ -867,7 +858,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_
 			case PDO_FETCH_NAMED:
 				if (!return_all) {
 					ZVAL_NEW_ARR(return_value);
-					zend_hash_init(Z_ARRVAL_P(return_value), stmt->column_count, NULL, ZVAL_PTR_DTOR, 0);;
+					zend_hash_init(Z_ARRVAL_P(return_value), stmt->column_count, NULL, ZVAL_PTR_DTOR, 0);
 				} else {
 					array_init(return_value);
 				}
@@ -1261,10 +1252,12 @@ static PHP_METHOD(PDOStatement, fetch)
 	zend_long off = 0;
     PHP_STMT_GET_OBJ;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "|lll", &how,
-			&ori, &off)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 3)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(how)
+		Z_PARAM_LONG(ori)
+		Z_PARAM_LONG(off)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	PDO_STMT_CLEAR_ERR();
 
@@ -1293,9 +1286,11 @@ static PHP_METHOD(PDOStatement, fetchObject)
 
 	PHP_STMT_GET_OBJ;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "|S!a", &class_name, &ctor_args)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_EX(class_name, 1, 0)
+		Z_PARAM_ARRAY(ctor_args)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	PDO_STMT_CLEAR_ERR();
 
@@ -1351,9 +1346,10 @@ static PHP_METHOD(PDOStatement, fetchColumn)
 	zend_long col_n = 0;
 	PHP_STMT_GET_OBJ;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &col_n)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(col_n)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	PDO_STMT_CLEAR_ERR();
 
@@ -1378,9 +1374,12 @@ static PHP_METHOD(PDOStatement, fetchAll)
 	int error = 0, flags, old_arg_count;
 	PHP_STMT_GET_OBJ;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "|lzz", &how, &arg2, &ctor_args)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 3)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(how)
+		Z_PARAM_ZVAL(arg2)
+		Z_PARAM_ZVAL(ctor_args)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if (!pdo_stmt_verify_mode(stmt, how, 1)) {
 		RETURN_FALSE;
@@ -1698,9 +1697,10 @@ static PHP_METHOD(PDOStatement, setAttribute)
 	zval *value = NULL;
 	PHP_STMT_GET_OBJ;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "lz!", &attr, &value)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_LONG(attr)
+		Z_PARAM_ZVAL_EX(value, 1, 0)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if (!stmt->methods->set_attribute) {
 		goto fail;
@@ -1739,9 +1739,9 @@ static PHP_METHOD(PDOStatement, getAttribute)
 	zend_long attr;
 	PHP_STMT_GET_OBJ;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "l", &attr)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(attr)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if (!stmt->methods->get_attribute) {
 		if (!generic_stmt_attr_get(stmt, return_value, attr)) {
@@ -1793,9 +1793,10 @@ static PHP_METHOD(PDOStatement, getColumnMeta)
 	struct pdo_column_data *col;
 	PHP_STMT_GET_OBJ;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "l", &colno)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(colno)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+
 	if(colno < 0) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "42P10", "column number must be non-negative");
 		RETURN_FALSE;
@@ -2102,16 +2103,18 @@ static PHP_METHOD(PDOStatement, debugDumpParams)
 		RETURN_FALSE;
 	}
 
-	php_stream_printf(out, "SQL: [%zd] %.*s\n",
-		stmt->query_stringlen,
-		(int) stmt->query_stringlen, stmt->query_string);
+	/* break into multiple operations so query string won't be truncated at FORMAT_CONV_MAX_PRECISION */
+	php_stream_printf(out, "SQL: [%zd] ", stmt->query_stringlen);
+	php_stream_write(out, stmt->query_string, stmt->query_stringlen);
+	php_stream_write(out, "\n", 1);
 
 	/* show parsed SQL if emulated prepares enabled */
 	/* pointers will be equal if PDO::query() was invoked */
 	if (stmt->active_query_string != NULL && stmt->active_query_string != stmt->query_string) {
-		php_stream_printf(out, "Sent SQL: [%zd] %.*s\n",
-			stmt->active_query_stringlen,
-			(int) stmt->active_query_stringlen, stmt->active_query_string);
+		/* break into multiple operations so query string won't be truncated at FORMAT_CONV_MAX_PRECISION */
+		php_stream_printf(out, "Sent SQL: [%zd] ", stmt->active_query_stringlen);
+		php_stream_write(out, stmt->active_query_string, stmt->active_query_stringlen);
+		php_stream_write(out, "\n", 1);
 	}
 
 	php_stream_printf(out, "Params:  %d\n",

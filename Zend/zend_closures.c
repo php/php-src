@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -39,7 +39,7 @@ typedef struct _zend_closure {
 	zend_function     func;
 	zval              this_ptr;
 	zend_class_entry *called_scope;
-	void (*orig_internal_handler)(INTERNAL_FUNCTION_PARAMETERS);
+	zif_handler       orig_internal_handler;
 } zend_closure;
 
 /* non-static since it needs to be referenced */
@@ -235,7 +235,7 @@ ZEND_METHOD(Closure, bind)
 }
 /* }}} */
 
-static void zend_closure_call_magic(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */ {
+static ZEND_NAMED_FUNCTION(zend_closure_call_magic) /* {{{ */ {
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
 	zval params[2];
@@ -369,7 +369,7 @@ ZEND_API zend_function *zend_get_closure_invoke_method(zend_object *object) /* {
 	invoke->internal_function.handler = ZEND_MN(Closure___invoke);
 	invoke->internal_function.module = 0;
 	invoke->internal_function.scope = zend_ce_closure;
-	invoke->internal_function.function_name = CG(known_strings)[ZEND_STR_MAGIC_INVOKE];
+	invoke->internal_function.function_name = ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE);
 	return invoke;
 }
 /* }}} */
@@ -509,12 +509,12 @@ static HashTable *zend_closure_get_debug_info(zval *object, int *is_temp) /* {{{
 	if (closure->func.type == ZEND_USER_FUNCTION && closure->func.op_array.static_variables) {
 		HashTable *static_variables = closure->func.op_array.static_variables;
 		ZVAL_ARR(&val, zend_array_dup(static_variables));
-		zend_hash_update(debug_info, CG(known_strings)[ZEND_STR_STATIC], &val);
+		zend_hash_update(debug_info, ZSTR_KNOWN(ZEND_STR_STATIC), &val);
 	}
 
 	if (Z_TYPE(closure->this_ptr) != IS_UNDEF) {
 		Z_ADDREF(closure->this_ptr);
-		zend_hash_update(debug_info, CG(known_strings)[ZEND_STR_THIS], &closure->this_ptr);
+		zend_hash_update(debug_info, ZSTR_KNOWN(ZEND_STR_THIS), &closure->this_ptr);
 	}
 
 	if (arg_info &&
@@ -628,7 +628,7 @@ void zend_register_closure_ce(void) /* {{{ */
 }
 /* }}} */
 
-static void zend_closure_internal_handler(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
+static ZEND_NAMED_FUNCTION(zend_closure_internal_handler) /* {{{ */
 {
 	zend_closure *closure = (zend_closure*)EX(func)->common.prototype;
 	closure->orig_internal_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU);
@@ -726,4 +726,6 @@ void zend_closure_bind_var(zval *closure_zv, zend_string *var_name, zval *var) /
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

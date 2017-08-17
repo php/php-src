@@ -16,7 +16,7 @@ __HALT_COMPILER(); ?>";
 // compressed file length does not match incompressed lentgh for an uncompressed file
 
 $files = array();
-$files['a/subdir/here'] = array('cont'=>'a','ulen'=>1,'clen'=>1);;
+$files['a/subdir/here'] = array('cont'=>'a','ulen'=>1,'clen'=>1);
 include 'files/phar_test.inc';
 
 $b = new PharFileInfo($pname . '/a/subdir');

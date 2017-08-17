@@ -2,7 +2,7 @@
 Overloaded function 002
 --SKIPIF--
 <?php
-if (!PHP_DEBUG) die("skip only run in debug version");
+if (!class_exists('_ZendTestClass')) die("skip needs class with overloaded function");
 ?>
 --FILE--
 <?php

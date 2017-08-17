@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Stig Sæther Bakken <ssb@php.net>                            |
+   | Authors: Stig SÃ¦ther Bakken <ssb@php.net>                            |
    |          Thies C. Arntzen <thies@thieso.net>                         |
    |                                                                      |
    | Collection support by Andy Sautins <asautins@veripost.net>           |
@@ -164,6 +164,8 @@ typedef struct {
 #ifdef HAVE_OCI8_DTRACE
 	char		   *client_id;					/* The oci_set_client_identifier() value */
 #endif
+
+	zval		    taf_callback;				/* The Oracle TAF callback function in the userspace */
 } php_oci_connection;
 /* }}} */
 
@@ -530,6 +532,13 @@ ZEND_BEGIN_MODULE_GLOBALS(oci) /* {{{ Module globals */
 	zend_bool	 events;
 	char		*edition;
 ZEND_END_MODULE_GLOBALS(oci) /* }}} */
+
+/* {{{ transparent failover related prototypes */
+
+int php_oci_register_taf_callback(php_oci_connection *connection, zval *callback);
+int php_oci_unregister_taf_callback(php_oci_connection *connection);
+
+/* }}} */
 
 #ifdef ZTS
 #define OCI_G(v) TSRMG(oci_globals_id, zend_oci_globals *, v)

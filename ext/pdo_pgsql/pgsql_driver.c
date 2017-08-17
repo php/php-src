@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -379,7 +379,6 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, size_t *
 		*len = PQgetlength(res, 0, 0);
 	} else {
 		pdo_pgsql_error(dbh, status, pdo_pgsql_sqlstate(res));
-		*len = spprintf(&id, 0, ZEND_LONG_FMT, (zend_long) H->pgoid);
 	}
 
 	if (res) {

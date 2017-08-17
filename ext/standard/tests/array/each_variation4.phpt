@@ -35,6 +35,8 @@ echo "Done";
 
 -- Array made up of referenced variables: --
 -- Call each until at the end of the array: --
+
+Deprecated: The each() function is deprecated. This message will be suppressed on further calls in %s on line %d
 array(4) {
   [1]=>
   string(3) "foo"

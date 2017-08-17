@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -189,6 +189,7 @@ typedef struct _zend_ast_decl {
 typedef void (*zend_ast_process_t)(zend_ast *ast);
 extern ZEND_API zend_ast_process_t zend_ast_process;
 
+ZEND_API zend_ast *zend_ast_create_zval_with_lineno(zval *zv, zend_ast_attr attr, uint32_t lineno);
 ZEND_API zend_ast *zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr);
 
 ZEND_API zend_ast *zend_ast_create_ex(zend_ast_kind kind, zend_ast_attr attr, ...);
@@ -274,3 +275,13 @@ static zend_always_inline zend_ast *zend_ast_list_rtrim(zend_ast *ast) {
 	return ast;
 }
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

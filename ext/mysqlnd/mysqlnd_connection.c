@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2016 The PHP Group                                |
+  | Copyright (c) 2006-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -1859,7 +1859,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option_2d)(MYSQLND_CONN_DATA * cons
 			DBG_INF_FMT("Adding [%s][%s]", key, value);
 			{
 				zval attrz;
-				ZVAL_NEW_STR(&attrz, zend_string_init(value, strlen(value), 1));
+				ZVAL_NEW_STR(&attrz, zend_string_init(value, strlen(value), conn->persistent));
 				zend_hash_str_update(conn->options->connect_attr, key, strlen(key), &attrz);
 			}
 			break;

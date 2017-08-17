@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -107,7 +107,7 @@ PHP_FUNCTION(curl_share_setopt)
 	ZEND_PARSE_PARAMETERS_START(3,3)
 		Z_PARAM_RESOURCE(zid)
 		Z_PARAM_LONG(options)
-		Z_PARAM_ZVAL_DEREF(zvalue)
+		Z_PARAM_ZVAL(zvalue)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ((sh = (php_curlsh *)zend_fetch_resource(Z_RES_P(zid), le_curl_share_handle_name, le_curl_share_handle)) == NULL) {

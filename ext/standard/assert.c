@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -157,9 +157,11 @@ PHP_FUNCTION(assert)
 		RETURN_TRUE;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|z", &assertion, &description) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ZVAL(assertion)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL(description)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (Z_TYPE_P(assertion) == IS_STRING) {
 		zval retval;
@@ -168,6 +170,8 @@ PHP_FUNCTION(assert)
 		if (zend_forbid_dynamic_call("assert() with string argument") == FAILURE) {
 			RETURN_FALSE;
 		}
+
+		php_error_docref(NULL, E_DEPRECATED, "Calling assert() with a string argument is deprecated");
 
 		myeval = Z_STRVAL_P(assertion);
 
@@ -290,9 +294,11 @@ PHP_FUNCTION(assert_options)
 	int ac = ZEND_NUM_ARGS();
 	zend_string *key;
 
-	if (zend_parse_parameters(ac, "l|z", &what, &value) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_LONG(what)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END();
 
 	switch (what) {
 	case ASSERT_ACTIVE:

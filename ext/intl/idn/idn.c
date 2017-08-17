@@ -291,6 +291,10 @@ static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	}
 	/* don't check options; it wasn't checked before */
 
+	if (variant == INTL_IDN_VARIANT_2003) {
+		php_error_docref(NULL, E_DEPRECATED, "INTL_IDNA_VARIANT_2003 is deprecated");
+	}
+
 	if (idna_info != NULL) {
 		if (variant == INTL_IDN_VARIANT_2003) {
 			php_error_docref0(NULL, E_NOTICE,

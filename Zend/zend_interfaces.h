@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,6 +31,7 @@ extern ZEND_API zend_class_entry *zend_ce_aggregate;
 extern ZEND_API zend_class_entry *zend_ce_iterator;
 extern ZEND_API zend_class_entry *zend_ce_arrayaccess;
 extern ZEND_API zend_class_entry *zend_ce_serializable;
+extern ZEND_API zend_class_entry *zend_ce_countable;
 
 typedef struct _zend_user_iterator {
 	zend_object_iterator     it;
@@ -88,4 +89,6 @@ END_EXTERN_C()
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

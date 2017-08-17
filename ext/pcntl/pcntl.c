@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -45,6 +45,14 @@
 #endif
 
 #include <errno.h>
+
+#ifndef NSIG
+# ifdef SIGRTMAX
+#  define NSIG (SIGRTMAX + 1)
+# else
+#  define NSIG 32
+# endif
+#endif
 
 ZEND_DECLARE_MODULE_GLOBALS(pcntl)
 static PHP_GINIT_FUNCTION(pcntl);
@@ -300,6 +308,12 @@ void php_register_signal_constants(INIT_FUNC_ARGS)
 #ifdef SIGSYS
 	REGISTER_LONG_CONSTANT("SIGSYS",   (zend_long) SIGSYS, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SIGBABY",  (zend_long) SIGSYS, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef SIGRTMIN
+	REGISTER_LONG_CONSTANT("SIGRTMIN", (zend_long) SIGRTMIN, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef SIGRTMAX
+	REGISTER_LONG_CONSTANT("SIGRTMAX", (zend_long) SIGRTMAX, CONST_CS | CONST_PERSISTENT);
 #endif
 
 #if HAVE_GETPRIORITY || HAVE_SETPRIORITY
@@ -560,11 +574,6 @@ PHP_RSHUTDOWN_FUNCTION(pcntl)
 	while (PCNTL_G(head)) {
 		sig = PCNTL_G(head);
 		PCNTL_G(head) = sig->next;
-#ifdef HAVE_STRUCT_SIGINFO_T
-		if (sig->siginfo) {
-			zend_array_destroy(sig->siginfo);
-		}
-#endif
 		efree(sig);
 	}
 	while (PCNTL_G(spares)) {
@@ -981,7 +990,6 @@ PHP_FUNCTION(pcntl_exec)
 PHP_FUNCTION(pcntl_signal)
 {
 	zval *handle;
-	zend_string *func_name;
 	zend_long signo;
 	zend_bool restart_syscalls = 1;
 
@@ -989,7 +997,7 @@ PHP_FUNCTION(pcntl_signal)
 		return;
 	}
 
-	if (signo < 1 || signo > 32) {
+	if (signo < 1 || signo >= NSIG) {
 		php_error_docref(NULL, E_WARNING, "Invalid signal");
 		RETURN_FALSE;
 	}
@@ -998,7 +1006,7 @@ PHP_FUNCTION(pcntl_signal)
 		/* since calling malloc() from within a signal handler is not portable,
 		 * pre-allocate a few records for recording signals */
 		int i;
-		for (i = 0; i < 32; i++) {
+		for (i = 0; i < NSIG; i++) {
 			struct php_pcntl_pending_signal *psig;
 
 			psig = emalloc(sizeof(*psig));
@@ -1022,13 +1030,13 @@ PHP_FUNCTION(pcntl_signal)
 		RETURN_TRUE;
 	}
 
-	if (!zend_is_callable(handle, 0, &func_name)) {
+	if (!zend_is_callable(handle, 0, NULL)) {
+		zend_string *func_name = zend_get_callable_name(handle);
 		PCNTL_G(last_error) = EINVAL;
 		php_error_docref(NULL, E_WARNING, "%s is not a callable function name error", ZSTR_VAL(func_name));
 		zend_string_release(func_name);
 		RETURN_FALSE;
 	}
-	zend_string_release(func_name);
 
 	/* Add the function name to our signal table */
 	if (zend_hash_index_update(&PCNTL_G(php_signal_table), signo, handle)) {
@@ -1117,7 +1125,7 @@ PHP_FUNCTION(pcntl_sigprocmask)
 		} else {
 			zend_hash_clean(Z_ARRVAL_P(user_oldset));
 		}
-		for (signo = 1; signo < MAX(NSIG-1, SIGRTMAX); ++signo) {
+		for (signo = 1; signo < NSIG; ++signo) {
 			if (sigismember(&oldset, signo) != 1) {
 				continue;
 			}
@@ -1379,11 +1387,7 @@ static void pcntl_signal_handler(int signo)
 	psig->next = NULL;
 
 #ifdef HAVE_STRUCT_SIGINFO_T
-	zval user_siginfo;
-	array_init(&user_siginfo);
-	pcntl_siginfo_to_zval(signo, siginfo, &user_siginfo);
-	psig->siginfo = zend_array_dup(Z_ARRVAL(user_siginfo));
-	zval_ptr_dtor(&user_siginfo);
+	psig->siginfo = *siginfo;
 #endif
 
 	/* the head check is important, as the tick handler cannot atomically clear both
@@ -1428,14 +1432,14 @@ void pcntl_signal_dispatch()
 	PCNTL_G(head) = NULL; /* simple stores are atomic */
 
 	/* Allocate */
-
 	while (queue) {
 		if ((handle = zend_hash_index_find(&PCNTL_G(php_signal_table), queue->signo)) != NULL) {
 			if (Z_TYPE_P(handle) != IS_LONG) {
 				ZVAL_NULL(&retval);
 				ZVAL_LONG(&params[0], queue->signo);
 #ifdef HAVE_STRUCT_SIGINFO_T
-				ZVAL_ARR(&params[1], queue->siginfo);
+				array_init(&params[1]);
+				pcntl_siginfo_to_zval(queue->signo, &queue->siginfo, &params[1]);
 #else
 				ZVAL_NULL(&params[1]);
 #endif

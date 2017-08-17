@@ -42,7 +42,7 @@
 
 static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ */
 {
-	int callers_limit = 20;
+	int callers_limit = child->wp->config->request_slowlog_trace_depth;
 	pid_t pid = child->pid;
 	struct timeval tv;
 	static const int buf_size = 1024;
@@ -101,9 +101,9 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ *
 					return -1;
 				}
 
-				if (ZEND_CALL_KIND_EX((*call_info) >> 24) == ZEND_CALL_TOP_CODE) {
+				if (ZEND_CALL_KIND_EX((*call_info) >> ZEND_CALL_INFO_SHIFT) == ZEND_CALL_TOP_CODE) {
 					return 0;
-				} else if (ZEND_CALL_KIND_EX(*(call_info) >> 24) == ZEND_CALL_NESTED_CODE) {
+				} else if (ZEND_CALL_KIND_EX(*(call_info) >> ZEND_CALL_INFO_SHIFT) == ZEND_CALL_NESTED_CODE) {
 					memcpy(buf, "[INCLUDE_OR_EVAL]", sizeof("[INCLUDE_OR_EVAL]"));
 				} else {
 					ZEND_ASSERT(0);

@@ -14,7 +14,7 @@ set_time_limit($t);
 function f()
 {
 	echo "call";
-	busy_wait(4);
+	busy_wait(5);
 }
 
 register_shutdown_function("f");

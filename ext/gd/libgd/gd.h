@@ -46,6 +46,18 @@ extern "C" {
 #include <stdio.h>
 #include "gd_io.h"
 
+/* va_list needed in gdErrorMethod */
+#ifdef PHP_WIN32
+# include <stdarg.h>
+#else
+# if HAVE_STDARG_H
+# include <stdarg.h>
+# else
+#  if HAVE_SYS_VARARGS_H
+#  include <sys/varargs.h>
+#  endif
+# endif
+#endif
 
 /* The maximum number of palette entries in palette-based images.
 	In the wonderful new world of gd 2.0, you can of course have
@@ -362,6 +374,10 @@ gdImagePtr gdImageCreateFromWebp(FILE *fd);
 gdImagePtr gdImageCreateFromWebpCtx(gdIOCtxPtr in);
 gdImagePtr gdImageCreateFromWebpPtr (int size, void *data);
 
+gdImagePtr gdImageCreateFromBmp (FILE * inFile);
+gdImagePtr gdImageCreateFromBmpPtr (int size, void *data);
+gdImagePtr gdImageCreateFromBmpCtx (gdIOCtxPtr infile);
+
 int gdJpegGetVersionInt();
 const char * gdPngGetVersionString();
 
@@ -579,6 +595,11 @@ void gdImagePng(gdImagePtr im, FILE *out);
 void gdImagePngCtx(gdImagePtr im, gdIOCtx *out);
 void gdImageGif(gdImagePtr im, FILE *out);
 void gdImageGifCtx(gdImagePtr im, gdIOCtx *out);
+
+void * gdImageBmpPtr(gdImagePtr im, int *size, int compression);
+void gdImageBmp(gdImagePtr im, FILE *outFile, int compression);
+void gdImageBmpCtx(gdImagePtr im, gdIOCtxPtr out, int compression);
+
 /* 2.0.12: Compression level: 0-9 or -1, where 0 is NO COMPRESSION at all,
  * 1 is FASTEST but produces larger files, 9 provides the best
  * compression (smallest files) but takes a long time to compress, and
@@ -685,8 +706,6 @@ void gdImageCopyResampled(gdImagePtr dst, gdImagePtr src, int dstX, int dstY, in
 gdImagePtr gdImageRotate90(gdImagePtr src, int ignoretransparent);
 gdImagePtr gdImageRotate180(gdImagePtr src, int ignoretransparent);
 gdImagePtr gdImageRotate270(gdImagePtr src, int ignoretransparent);
-gdImagePtr gdImageRotate45(gdImagePtr src, double dAngle, int clrBack, int ignoretransparent);
-gdImagePtr gdImageRotate (gdImagePtr src, double dAngle, int clrBack, int ignoretransparent);
 gdImagePtr gdImageRotateInterpolated(const gdImagePtr src, const float angle, int bgcolor);
 
 void gdImageSetBrush(gdImagePtr im, gdImagePtr brush);

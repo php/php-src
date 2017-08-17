@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -37,9 +37,9 @@
 #define MAX_ACCEL_FILES 1000000
 #define TOKENTOSTR(X) #X
 
-static void (*orig_file_exists)(INTERNAL_FUNCTION_PARAMETERS) = NULL;
-static void (*orig_is_file)(INTERNAL_FUNCTION_PARAMETERS) = NULL;
-static void (*orig_is_readable)(INTERNAL_FUNCTION_PARAMETERS) = NULL;
+static zif_handler orig_file_exists = NULL;
+static zif_handler orig_is_file = NULL;
+static zif_handler orig_is_readable = NULL;
 
 ZEND_BEGIN_ARG_INFO(arginfo_opcache_none, 0)
 ZEND_END_ARG_INFO()
@@ -285,9 +285,9 @@ ZEND_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("opcache.revalidate_path"    , "0", PHP_INI_ALL   , OnUpdateBool, accel_directives.revalidate_path    , zend_accel_globals, accel_globals)
 
 	STD_PHP_INI_ENTRY("opcache.log_verbosity_level"   , "1"   , PHP_INI_SYSTEM, OnUpdateLong, accel_directives.log_verbosity_level,       zend_accel_globals, accel_globals)
-	STD_PHP_INI_ENTRY("opcache.memory_consumption"    , "64"  , PHP_INI_SYSTEM, OnUpdateMemoryConsumption,    accel_directives.memory_consumption,        zend_accel_globals, accel_globals)
-	STD_PHP_INI_ENTRY("opcache.interned_strings_buffer", "4"  , PHP_INI_SYSTEM, OnUpdateLong,                 accel_directives.interned_strings_buffer,   zend_accel_globals, accel_globals)
-	STD_PHP_INI_ENTRY("opcache.max_accelerated_files" , "2000", PHP_INI_SYSTEM, OnUpdateMaxAcceleratedFiles,	 accel_directives.max_accelerated_files,     zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.memory_consumption"    , "128"  , PHP_INI_SYSTEM, OnUpdateMemoryConsumption,    accel_directives.memory_consumption,        zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.interned_strings_buffer", "8"  , PHP_INI_SYSTEM, OnUpdateLong,                 accel_directives.interned_strings_buffer,   zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.max_accelerated_files" , "10000", PHP_INI_SYSTEM, OnUpdateMaxAcceleratedFiles,	 accel_directives.max_accelerated_files,     zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.max_wasted_percentage" , "5"   , PHP_INI_SYSTEM, OnUpdateMaxWastedPercentage,	 accel_directives.max_wasted_percentage,     zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.consistency_checks"    , "0"   , PHP_INI_ALL   , OnUpdateLong,	             accel_directives.consistency_checks,        zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.force_restart_timeout" , "180" , PHP_INI_SYSTEM, OnUpdateLong,	             accel_directives.force_restart_timeout,     zend_accel_globals, accel_globals)
@@ -299,7 +299,6 @@ ZEND_INI_BEGIN()
 
 	STD_PHP_INI_ENTRY("opcache.protect_memory"        , "0"  , PHP_INI_SYSTEM, OnUpdateBool,                  accel_directives.protect_memory,            zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.save_comments"         , "1"  , PHP_INI_SYSTEM, OnUpdateBool,                  accel_directives.save_comments,             zend_accel_globals, accel_globals)
-	STD_PHP_INI_ENTRY("opcache.fast_shutdown"         , "0"  , PHP_INI_SYSTEM, OnUpdateBool,                  accel_directives.fast_shutdown,             zend_accel_globals, accel_globals)
 
 	STD_PHP_INI_ENTRY("opcache.optimization_level"    , DEFAULT_OPTIMIZATION_LEVEL , PHP_INI_SYSTEM, OnUpdateLong, accel_directives.optimization_level,   zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.opt_debug_level"       , "0"      , PHP_INI_SYSTEM, OnUpdateLong,             accel_directives.opt_debug_level,            zend_accel_globals, accel_globals)
@@ -342,7 +341,7 @@ static int filename_is_in_cache(zend_string *filename)
 			handle.type = ZEND_HANDLE_FILENAME;
 
 			if (ZCG(accel_directives).validate_timestamps) {
-				return validate_timestamp_and_record(persistent_script, &handle) == SUCCESS;
+				return validate_timestamp_and_record_ex(persistent_script, &handle) == SUCCESS;
 			}
 
 			return 1;
@@ -365,7 +364,7 @@ static int accel_file_in_cache(INTERNAL_FUNCTION_PARAMETERS)
 	return filename_is_in_cache(Z_STR(zfilename));
 }
 
-static void accel_file_exists(INTERNAL_FUNCTION_PARAMETERS)
+static ZEND_NAMED_FUNCTION(accel_file_exists)
 {
 	if (accel_file_in_cache(INTERNAL_FUNCTION_PARAM_PASSTHRU)) {
 		RETURN_TRUE;
@@ -374,7 +373,7 @@ static void accel_file_exists(INTERNAL_FUNCTION_PARAMETERS)
 	}
 }
 
-static void accel_is_file(INTERNAL_FUNCTION_PARAMETERS)
+static ZEND_NAMED_FUNCTION(accel_is_file)
 {
 	if (accel_file_in_cache(INTERNAL_FUNCTION_PARAM_PASSTHRU)) {
 		RETURN_TRUE;
@@ -383,7 +382,7 @@ static void accel_is_file(INTERNAL_FUNCTION_PARAMETERS)
 	}
 }
 
-static void accel_is_readable(INTERNAL_FUNCTION_PARAMETERS)
+static ZEND_NAMED_FUNCTION(accel_is_readable)
 {
 	if (accel_file_in_cache(INTERNAL_FUNCTION_PARAM_PASSTHRU)) {
 		RETURN_TRUE;
@@ -722,7 +721,6 @@ static ZEND_FUNCTION(opcache_get_configuration)
 
 	add_assoc_bool(&directives,   "opcache.protect_memory",         ZCG(accel_directives).protect_memory);
 	add_assoc_bool(&directives,   "opcache.save_comments",          ZCG(accel_directives).save_comments);
-	add_assoc_bool(&directives,   "opcache.fast_shutdown",          ZCG(accel_directives).fast_shutdown);
 	add_assoc_bool(&directives,   "opcache.enable_file_override",   ZCG(accel_directives).file_override_enabled);
 	add_assoc_long(&directives, 	 "opcache.optimization_level",     ZCG(accel_directives).optimization_level);
 

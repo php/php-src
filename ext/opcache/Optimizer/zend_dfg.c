@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, DFG - Data Flow Graph                                   |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -89,9 +89,7 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 							goto op1_def;
 						}
 						goto op1_use;
-					case ZEND_UNSET_VAR:
-						ZEND_ASSERT(opline->extended_value & ZEND_QUICK_SET);
-						/* break missing intentionally */
+					case ZEND_UNSET_CV:
 					case ZEND_ASSIGN:
 					case ZEND_ASSIGN_REF:
 					case ZEND_BIND_GLOBAL:
@@ -144,11 +142,11 @@ op1_use:
 					}
 				} else if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
 					var_num = EX_VAR_TO_NUM(opline->op1.var);
+					if (!DFG_ISSET(def, set_size, j, var_num)) {
+						DFG_SET(use, set_size, j, var_num);
+					}
 					if (opline->opcode == ZEND_VERIFY_RETURN_TYPE) {
-						DFG_SET(use, set_size, j, var_num);
 						DFG_SET(def, set_size, j, var_num);
-					} else if (!DFG_ISSET(def, set_size, j, var_num)) {
-						DFG_SET(use, set_size, j, var_num);
 					}
 				}
 				if (opline->op2_type == IS_CV) {
@@ -191,6 +189,10 @@ op2_use:
 				}
 				if (opline->result_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
 					var_num = EX_VAR_TO_NUM(opline->result.var);
+					if ((build_flags & ZEND_SSA_USE_CV_RESULTS)
+					 && opline->result_type == IS_CV) {
+						DFG_SET(use, set_size, j, var_num);
+					}
 					DFG_SET(def, set_size, j, var_num);
 				}
 			}
@@ -216,10 +218,10 @@ op2_use:
 			if ((blocks[j].flags & ZEND_BB_REACHABLE) == 0) {
 				continue;
 			}
-			if (blocks[j].successors[0] >= 0) {
+			if (blocks[j].successors_count != 0) {
 				zend_bitset_copy(DFG_BITSET(out, set_size, j), DFG_BITSET(in, set_size, blocks[j].successors[0]), set_size);
-				if (blocks[j].successors[1] >= 0) {
-					zend_bitset_union(DFG_BITSET(out, set_size, j), DFG_BITSET(in, set_size, blocks[j].successors[1]), set_size);
+				for (k = 1; k < blocks[j].successors_count; k++) {
+					zend_bitset_union(DFG_BITSET(out, set_size, j), DFG_BITSET(in, set_size, blocks[j].successors[k]), set_size);
 				}
 			} else {
 				zend_bitset_clear(DFG_BITSET(out, set_size, j), set_size);

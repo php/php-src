@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -107,9 +107,10 @@ static inline void strip_header(char *header_bag, char *lc_header_bag,
 	}
 }
 
-php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
+static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 		const char *path, const char *mode, int options, zend_string **opened_path,
-		php_stream_context *context, int redirect_max, int flags STREAMS_DC) /* {{{ */
+		php_stream_context *context, int redirect_max, int flags,
+		zval *response_header STREAMS_DC) /* {{{ */
 {
 	php_stream *stream = NULL;
 	php_url *resource = NULL;
@@ -118,9 +119,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 	zend_string *tmp = NULL;
 	char *ua_str = NULL;
 	zval *ua_zval = NULL, *tmpzval = NULL, ssl_proxy_peer_name;
-	int body = 0;
 	char location[HTTP_HEADER_BLOCK_SIZE];
-	zval response_header;
 	int reqok = 0;
 	char *http_header_line = NULL;
 	char tmp_line[128];
@@ -138,11 +137,9 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 	zend_bool follow_location = 1;
 	php_stream_filter *transfer_encoding = NULL;
 	int response_code;
-	zend_array *symbol_table;
 	smart_str req_buf = {0};
 	zend_bool custom_request_method;
 
-	ZVAL_UNDEF(&response_header);
 	tmp_line[0] = '\0';
 
 	if (redirect_max < 1) {
@@ -155,7 +152,8 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 		return NULL;
 	}
 
-	if (strncasecmp(resource->scheme, "http", sizeof("http")) && strncasecmp(resource->scheme, "https", sizeof("https"))) {
+	if (!zend_string_equals_literal_ci(resource->scheme, "http") &&
+		!zend_string_equals_literal_ci(resource->scheme, "https")) {
 		if (!context ||
 			(tmpzval = php_stream_context_get_option(context, wrapper->wops->label, "proxy")) == NULL ||
 			Z_TYPE_P(tmpzval) != IS_STRING ||
@@ -179,7 +177,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 			return NULL;
 		}
 
-		use_ssl = resource->scheme && (strlen(resource->scheme) > 4) && resource->scheme[4] == 's';
+		use_ssl = resource->scheme && (ZSTR_LEN(resource->scheme) > 4) && ZSTR_VAL(resource->scheme)[4] == 's';
 		/* choose default ports */
 		if (use_ssl && resource->port == 0)
 			resource->port = 443;
@@ -194,7 +192,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 			transport_len = Z_STRLEN_P(tmpzval);
 			transport_string = estrndup(Z_STRVAL_P(tmpzval), Z_STRLEN_P(tmpzval));
 		} else {
-			transport_len = spprintf(&transport_string, 0, "%s://%s:%d", use_ssl ? "ssl" : "tcp", resource->host, resource->port);
+			transport_len = spprintf(&transport_string, 0, "%s://%s:%d", use_ssl ? "ssl" : "tcp", ZSTR_VAL(resource->host), resource->port);
 		}
 	}
 
@@ -237,13 +235,13 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 
 		/* Set peer_name or name verification will try to use the proxy server name */
 		if (!context || (tmpzval = php_stream_context_get_option(context, "ssl", "peer_name")) == NULL) {
-			ZVAL_STRING(&ssl_proxy_peer_name, resource->host);
+			ZVAL_STR_COPY(&ssl_proxy_peer_name, resource->host);
 			php_stream_context_set_option(PHP_STREAM_CONTEXT(stream), "ssl", "peer_name", &ssl_proxy_peer_name);
 			zval_ptr_dtor(&ssl_proxy_peer_name);
 		}
 
 		smart_str_appendl(&header, "CONNECT ", sizeof("CONNECT ")-1);
-		smart_str_appends(&header, resource->host);
+		smart_str_appends(&header, ZSTR_VAL(resource->host));
 		smart_str_appendc(&header, ':');
 		smart_str_append_unsigned(&header, resource->port);
 		smart_str_appendl(&header, " HTTP/1.0\r\n", sizeof(" HTTP/1.0\r\n")-1);
@@ -391,8 +389,8 @@ finish:
 		/* Send the traditional /path/to/file?query_string */
 
 		/* file */
-		if (resource->path && *resource->path) {
-			smart_str_appends(&req_buf, resource->path);
+		if (resource->path && ZSTR_LEN(resource->path)) {
+			smart_str_appends(&req_buf, ZSTR_VAL(resource->path));
 		} else {
 			smart_str_appendc(&req_buf, '/');
 		}
@@ -400,7 +398,7 @@ finish:
 		/* query string */
 		if (resource->query) {
 			smart_str_appendc(&req_buf, '?');
-			smart_str_appends(&req_buf, resource->query);
+			smart_str_appends(&req_buf, ZSTR_VAL(resource->query));
 		}
 	}
 
@@ -534,15 +532,15 @@ finish:
 		zend_string *stmp;
 
 		/* decode the strings first */
-		php_url_decode(resource->user, strlen(resource->user));
+		php_url_decode(ZSTR_VAL(resource->user), ZSTR_LEN(resource->user));
 
-		strcpy(scratch, resource->user);
+		strcpy(scratch, ZSTR_VAL(resource->user));
 		strcat(scratch, ":");
 
 		/* Note: password is optional! */
 		if (resource->pass) {
-			php_url_decode(resource->pass, strlen(resource->pass));
-			strcat(scratch, resource->pass);
+			php_url_decode(ZSTR_VAL(resource->pass), ZSTR_LEN(resource->pass));
+			strcat(scratch, ZSTR_VAL(resource->pass));
 		}
 
 		stmp = php_base64_encode((unsigned char*)scratch, strlen(scratch));
@@ -567,7 +565,7 @@ finish:
 	/* Send Host: header so name-based virtual hosts work */
 	if ((have_header & HTTP_HEADER_HOST) == 0) {
 		smart_str_appends(&req_buf, "Host: ");
-		smart_str_appends(&req_buf, resource->host);
+		smart_str_appends(&req_buf, ZSTR_VAL(resource->host));
 		if ((use_ssl && resource->port != 443 && resource->port != 0) ||
 			(!use_ssl && resource->port != 80 && resource->port != 0)) {
 			smart_str_appendc(&req_buf, ':');
@@ -660,22 +658,8 @@ finish:
 
 	location[0] = '\0';
 
-	symbol_table = zend_rebuild_symbol_table();
-
-	if (header_init) {
-		zval ztmp;
-		array_init(&ztmp);
-		zend_set_local_var_str("http_response_header", sizeof("http_response_header")-1, &ztmp, 0);
-	}
-
-	{
-		zval *response_header_ptr = zend_hash_str_find_ind(symbol_table, "http_response_header", sizeof("http_response_header")-1);
-		if (!response_header_ptr || Z_TYPE_P(response_header_ptr) != IS_ARRAY) {
-			ZVAL_UNDEF(&response_header);
-			goto out;
-		} else {
-			ZVAL_COPY(&response_header, response_header_ptr);
-		}
+	if (Z_ISUNDEF_P(response_header)) {
+		array_init(response_header);
 	}
 
 	if (!php_stream_eof(stream)) {
@@ -742,7 +726,7 @@ finish:
 				}
 			}
 			ZVAL_STRINGL(&http_response, tmp_line, tmp_line_len);
-			zend_hash_next_index_insert(Z_ARRVAL(response_header), &http_response);
+			zend_hash_next_index_insert(Z_ARRVAL_P(response_header), &http_response);
 		}
 	} else {
 		php_stream_wrapper_log_error(wrapper, options, "HTTP request failed, unexpected end of socket!");
@@ -753,10 +737,12 @@ finish:
 
 	http_header_line = emalloc(HTTP_HEADER_BLOCK_SIZE);
 
-	while (!body && !php_stream_eof(stream)) {
+	while (!php_stream_eof(stream)) {
 		size_t http_header_line_length;
+		
 		if (php_stream_get_line(stream, http_header_line, HTTP_HEADER_BLOCK_SIZE, &http_header_line_length) && *http_header_line != '\n' && *http_header_line != '\r') {
 			char *e = http_header_line + http_header_line_length - 1;
+			char *http_header_value;
 			if (*e != '\n') {
 				do { /* partial header */
 					if (php_stream_get_line(stream, http_header_line, HTTP_HEADER_BLOCK_SIZE, &http_header_line_length) == NULL) {
@@ -767,29 +753,57 @@ finish:
 				} while (*e != '\n');
 				continue;
 			}
-			while (*e == '\n' || *e == '\r') {
+			while (e >= http_header_line && (*e == '\n' || *e == '\r')) {
 				e--;
 			}
-			http_header_line_length = e - http_header_line + 1;
-			http_header_line[http_header_line_length] = '\0';
 
-			if (!strncasecmp(http_header_line, "Location: ", 10)) {
+			/* The primary definition of an HTTP header in RFC 7230 states:
+			 * > Each header field consists of a case-insensitive field name followed
+			 * > by a colon (":"), optional leading whitespace, the field value, and
+			 * > optional trailing whitespace. */
+
+			/* Strip trailing whitespace */
+			while (e >= http_header_line && (*e == ' ' || *e == '\t')) {
+				e--;
+			}
+
+			/* Terminate header line */
+			e++;
+			*e = '\0';
+			http_header_line_length = e - http_header_line;
+
+			http_header_value = memchr(http_header_line, ':', http_header_line_length);
+			if (http_header_value) {
+				http_header_value++; /* Skip ':' */
+
+				/* Strip leading whitespace */
+				while (http_header_value < e
+						&& (*http_header_value == ' ' || *http_header_value == '\t')) {
+					http_header_value++;
+				}
+			}
+
+			if (!strncasecmp(http_header_line, "Location:", sizeof("Location:")-1)) {
 				if (context && (tmpzval = php_stream_context_get_option(context, "http", "follow_location")) != NULL) {
 					follow_location = zval_is_true(tmpzval);
-				} else if (!((response_code >= 300 && response_code < 304) || 307 == response_code || 308 == response_code)) {
+				} else if (!((response_code >= 300 && response_code < 304)
+						|| 307 == response_code || 308 == response_code)) {
 					/* we shouldn't redirect automatically
 					if follow_location isn't set and response_code not in (300, 301, 302, 303 and 307)
 					see http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.3.1
 					RFC 7238 defines 308: http://tools.ietf.org/html/rfc7238 */
 					follow_location = 0;
 				}
-				strlcpy(location, http_header_line + 10, sizeof(location));
-			} else if (!strncasecmp(http_header_line, "Content-Type: ", 14)) {
-				php_stream_notify_info(context, PHP_STREAM_NOTIFY_MIME_TYPE_IS, http_header_line + 14, 0);
-			} else if (!strncasecmp(http_header_line, "Content-Length: ", 16)) {
-				file_size = atoi(http_header_line + 16);
+				strlcpy(location, http_header_value, sizeof(location));
+			} else if (!strncasecmp(http_header_line, "Content-Type:", sizeof("Content-Type:")-1)) {
+				php_stream_notify_info(context, PHP_STREAM_NOTIFY_MIME_TYPE_IS, http_header_value, 0);
+			} else if (!strncasecmp(http_header_line, "Content-Length:", sizeof("Content-Length")-1)) {
+				file_size = atoi(http_header_value);
 				php_stream_notify_file_size(context, file_size, http_header_line, 0);
-			} else if (!strncasecmp(http_header_line, "Transfer-Encoding: chunked", sizeof("Transfer-Encoding: chunked"))) {
+			} else if (
+				!strncasecmp(http_header_line, "Transfer-Encoding:", sizeof("Transfer-Encoding")-1)
+				&& !strncasecmp(http_header_value, "Chunked", sizeof("Chunked")-1)
+			) {
 
 				/* create filter to decode response body */
 				if (!(options & STREAM_ONLY_GET_HEADERS)) {
@@ -808,14 +822,10 @@ finish:
 				}
 			}
 
-			if (http_header_line[0] == '\0') {
-				body = 1;
-			} else {
+			{
 				zval http_header;
-
 				ZVAL_STRINGL(&http_header, http_header_line, http_header_line_length);
-
-				zend_hash_next_index_insert(Z_ARRVAL(response_header), &http_header);
+				zend_hash_next_index_insert(Z_ARRVAL_P(response_header), &http_header);
 			}
 		} else {
 			break;
@@ -846,21 +856,24 @@ finish:
 			{
 				if (*location != '/') {
 					if (*(location+1) != '\0' && resource->path) {
-						char *s = strrchr(resource->path, '/');
+						char *s = strrchr(ZSTR_VAL(resource->path), '/');
 						if (!s) {
-							s = resource->path;
-							if (!s[0]) {
-								efree(s);
-								s = resource->path = estrdup("/");
+							s = ZSTR_VAL(resource->path);
+							if (!ZSTR_LEN(resource->path)) {
+								zend_string_release(resource->path);
+								resource->path = zend_string_init("/", 1, 0);
+								s = ZSTR_VAL(resource->path);
 							} else {
 								*s = '/';
 							}
 						}
 						s[1] = '\0';
-						if (resource->path && *(resource->path) == '/' && *(resource->path + 1) == '\0') {
-							snprintf(loc_path, sizeof(loc_path) - 1, "%s%s", resource->path, location);
+						if (resource->path &&
+							ZSTR_VAL(resource->path)[0] == '/' &&
+							ZSTR_VAL(resource->path)[1] == '\0') {
+							snprintf(loc_path, sizeof(loc_path) - 1, "%s%s", ZSTR_VAL(resource->path), location);
 						} else {
-							snprintf(loc_path, sizeof(loc_path) - 1, "%s/%s", resource->path, location);
+							snprintf(loc_path, sizeof(loc_path) - 1, "%s/%s", ZSTR_VAL(resource->path), location);
 						}
 					} else {
 						snprintf(loc_path, sizeof(loc_path) - 1, "/%s", location);
@@ -869,9 +882,9 @@ finish:
 					strlcpy(loc_path, location, sizeof(loc_path));
 				}
 				if ((use_ssl && resource->port != 443) || (!use_ssl && resource->port != 80)) {
-					snprintf(new_path, sizeof(new_path) - 1, "%s://%s:%d%s", resource->scheme, resource->host, resource->port, loc_path);
+					snprintf(new_path, sizeof(new_path) - 1, "%s://%s:%d%s", ZSTR_VAL(resource->scheme), ZSTR_VAL(resource->host), resource->port, loc_path);
 				} else {
-					snprintf(new_path, sizeof(new_path) - 1, "%s://%s%s", resource->scheme, resource->host, loc_path);
+					snprintf(new_path, sizeof(new_path) - 1, "%s://%s%s", ZSTR_VAL(resource->scheme), ZSTR_VAL(resource->host), loc_path);
 				}
 			} else {
 				strlcpy(new_path, location, sizeof(new_path));
@@ -887,9 +900,8 @@ finish:
 #define CHECK_FOR_CNTRL_CHARS(val) { \
 	if (val) { \
 		unsigned char *s, *e; \
-		size_t l; \
-		l = php_url_decode(val, strlen(val)); \
-		s = (unsigned char*)val; e = s + l; \
+		ZSTR_LEN(val) = php_url_decode(ZSTR_VAL(val), ZSTR_LEN(val)); \
+		s = (unsigned char*)ZSTR_VAL(val); e = s + ZSTR_LEN(val); \
 		while (s < e) { \
 			if (iscntrl(*s)) { \
 				php_stream_wrapper_log_error(wrapper, options, "Invalid redirect URL! %s", new_path); \
@@ -901,11 +913,13 @@ finish:
 }
 			/* check for control characters in login, password & path */
 			if (strncasecmp(new_path, "http://", sizeof("http://") - 1) || strncasecmp(new_path, "https://", sizeof("https://") - 1)) {
-				CHECK_FOR_CNTRL_CHARS(resource->user)
-				CHECK_FOR_CNTRL_CHARS(resource->pass)
-				CHECK_FOR_CNTRL_CHARS(resource->path)
+				CHECK_FOR_CNTRL_CHARS(resource->user);
+				CHECK_FOR_CNTRL_CHARS(resource->pass);
+				CHECK_FOR_CNTRL_CHARS(resource->path);
 			}
-			stream = php_stream_url_wrap_http_ex(wrapper, new_path, mode, options, opened_path, context, --redirect_max, HTTP_WRAPPER_REDIRECTED STREAMS_CC);
+			stream = php_stream_url_wrap_http_ex(
+				wrapper, new_path, mode, options, opened_path, context,
+				--redirect_max, HTTP_WRAPPER_REDIRECTED, response_header STREAMS_CC);
 		} else {
 			php_stream_wrapper_log_error(wrapper, options, "HTTP request failed! %s", tmp_line);
 		}
@@ -924,7 +938,7 @@ out:
 
 	if (stream) {
 		if (header_init) {
-			ZVAL_COPY(&stream->wrapperdata, &response_header);
+			ZVAL_COPY(&stream->wrapperdata, response_header);
 		}
 		php_stream_notify_progress_init(context, 0, file_size);
 
@@ -951,15 +965,28 @@ out:
 		}
 	}
 
-	zval_ptr_dtor(&response_header);
-
 	return stream;
 }
 /* }}} */
 
 php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC) /* {{{ */
 {
-	return php_stream_url_wrap_http_ex(wrapper, path, mode, options, opened_path, context, PHP_URL_REDIRECT_MAX, HTTP_WRAPPER_HEADER_INIT STREAMS_CC);
+	php_stream *stream;
+	zval headers;
+	ZVAL_UNDEF(&headers);
+	
+	stream = php_stream_url_wrap_http_ex(
+		wrapper, path, mode, options, opened_path, context,
+		PHP_URL_REDIRECT_MAX, HTTP_WRAPPER_HEADER_INIT, &headers STREAMS_CC);
+
+	if (!Z_ISUNDEF(headers)) {
+		if (FAILURE == zend_set_local_var_str(
+				"http_response_header", sizeof("http_response_header")-1, &headers, 0)) {
+			zval_ptr_dtor(&headers);
+		}
+	}
+
+	return stream;
 }
 /* }}} */
 

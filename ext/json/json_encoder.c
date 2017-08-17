@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
   |         Jakub Zelenka <bukka@php.net>                                |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -246,43 +244,6 @@ static int php_json_encode_array(smart_str *buf, zval *val, int options, php_jso
 }
 /* }}} */
 
-static int php_json_utf8_to_utf16(unsigned short *utf16, char utf8[], size_t len) /* {{{ */
-{
-	size_t pos = 0, us;
-	int j, status;
-
-	if (utf16) {
-		/* really convert the utf8 string */
-		for (j=0 ; pos < len ; j++) {
-			us = php_next_utf8_char((const unsigned char *)utf8, len, &pos, &status);
-			if (status != SUCCESS) {
-				return -1;
-			}
-			/* From http://en.wikipedia.org/wiki/UTF16 */
-			if (us >= 0x10000) {
-				us -= 0x10000;
-				utf16[j++] = (unsigned short)((us >> 10) | 0xd800);
-				utf16[j] = (unsigned short)((us & 0x3ff) | 0xdc00);
-			} else {
-				utf16[j] = (unsigned short)us;
-			}
-		}
-	} else {
-		/* Only check if utf8 string is valid, and compute utf16 length */
-		for (j=0 ; pos < len ; j++) {
-			us = php_next_utf8_char((const unsigned char *)utf8, len, &pos, &status);
-			if (status != SUCCESS) {
-				return -1;
-			}
-			if (us >= 0x10000) {
-				j++;
-			}
-		}
-	}
-	return j;
-}
-/* }}} */
-
 static int php_json_escape_string(
 		smart_str *buf, char *s, size_t len,
 		int options, php_json_encoder *encoder) /* {{{ */
@@ -312,18 +273,6 @@ static int php_json_escape_string(
 		}
 
 	}
-
-	if (options & PHP_JSON_UNESCAPED_UNICODE) {
-		/* validate UTF-8 string first */
-		if (php_json_utf8_to_utf16(NULL, s, len) < 0) {
-			encoder->error_code = PHP_JSON_ERROR_UTF8;
-			if (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) {
-				smart_str_appendl(buf, "null", 4);
-			}
-			return FAILURE;
-		}
-	}
-
 	pos = 0;
 	checkpoint = buf->s ? ZSTR_LEN(buf->s) : 0;
 
@@ -333,26 +282,44 @@ static int php_json_escape_string(
 
 	do {
 		us = (unsigned char)s[pos];
-		if (us >= 0x80 && (!(options & PHP_JSON_UNESCAPED_UNICODE) || us == 0xE2)) {
-			/* UTF-8 character */
-			us = php_next_utf8_char((const unsigned char *)s, len, &pos, &status);
+		if (us >= 0x80) {
+			int utf8_sub = 0;
+			size_t prev_pos = pos;
+
+			us = php_next_utf8_char((unsigned char *)s, len, &pos, &status);
+
+			/* check whether UTF8 character is correct */
 			if (status != SUCCESS) {
-				if (buf->s) {
-					ZSTR_LEN(buf->s) = checkpoint;
+				if (options & PHP_JSON_INVALID_UTF8_IGNORE) {
+					/* ignore invalid UTF8 character */
+					continue;
+				} else if (options & PHP_JSON_INVALID_UTF8_SUBSTITUTE) {
+					/* Use Unicode character 'REPLACEMENT CHARACTER' (U+FFFD) */
+					us = 0xfffd;
+					utf8_sub = 1;
+				} else {
+					if (buf->s) {
+						ZSTR_LEN(buf->s) = checkpoint;
+					}
+					encoder->error_code = PHP_JSON_ERROR_UTF8;
+					if (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) {
+						smart_str_appendl(buf, "null", 4);
+					}
+					return FAILURE;
 				}
-				encoder->error_code = PHP_JSON_ERROR_UTF8;
-				if (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) {
-					smart_str_appendl(buf, "null", 4);
-				}
-				return FAILURE;
 			}
+
 			/* Escape U+2028/U+2029 line terminators, UNLESS both
 			   JSON_UNESCAPED_UNICODE and
 			   JSON_UNESCAPED_LINE_TERMINATORS were provided */
 			if ((options & PHP_JSON_UNESCAPED_UNICODE)
-				&& ((options & PHP_JSON_UNESCAPED_LINE_TERMINATORS)
+			    && ((options & PHP_JSON_UNESCAPED_LINE_TERMINATORS)
 					|| us < 0x2028 || us > 0x2029)) {
-				smart_str_appendl(buf, &s[pos - 3], 3);
+				if (utf8_sub) {
+					smart_str_appendl(buf, "\xef\xbf\xbd", 3);
+				} else {
+					smart_str_appendl(buf, s + prev_pos, pos - prev_pos);
+				}
 				continue;
 			}
 			/* From http://en.wikipedia.org/wiki/UTF16 */
@@ -374,90 +341,93 @@ static int php_json_escape_string(
 			smart_str_appendc(buf, digits[(us & 0xf0)   >> 4]);
 			smart_str_appendc(buf, digits[(us & 0xf)]);
 		} else {
+			static const uint32_t charmap[4] = {
+				0xffffffff, 0x500080c4, 0x10000000, 0x00000000};
+
 			pos++;
+			if (EXPECTED(!(charmap[us >> 5] & (1 << (us & 0x1f))))) {
+				smart_str_appendc(buf, (unsigned char) us);
+			} else {
+				switch (us) {
+					case '"':
+						if (options & PHP_JSON_HEX_QUOT) {
+							smart_str_appendl(buf, "\\u0022", 6);
+						} else {
+							smart_str_appendl(buf, "\\\"", 2);
+						}
+						break;
 
-			switch (us) {
-				case '"':
-					if (options & PHP_JSON_HEX_QUOT) {
-						smart_str_appendl(buf, "\\u0022", 6);
-					} else {
-						smart_str_appendl(buf, "\\\"", 2);
-					}
-					break;
+					case '\\':
+						smart_str_appendl(buf, "\\\\", 2);
+						break;
 
-				case '\\':
-					smart_str_appendl(buf, "\\\\", 2);
-					break;
+					case '/':
+						if (options & PHP_JSON_UNESCAPED_SLASHES) {
+							smart_str_appendc(buf, '/');
+						} else {
+							smart_str_appendl(buf, "\\/", 2);
+						}
+						break;
 
-				case '/':
-					if (options & PHP_JSON_UNESCAPED_SLASHES) {
-						smart_str_appendc(buf, '/');
-					} else {
-						smart_str_appendl(buf, "\\/", 2);
-					}
-					break;
+					case '\b':
+						smart_str_appendl(buf, "\\b", 2);
+						break;
 
-				case '\b':
-					smart_str_appendl(buf, "\\b", 2);
-					break;
+					case '\f':
+						smart_str_appendl(buf, "\\f", 2);
+						break;
 
-				case '\f':
-					smart_str_appendl(buf, "\\f", 2);
-					break;
+					case '\n':
+						smart_str_appendl(buf, "\\n", 2);
+						break;
 
-				case '\n':
-					smart_str_appendl(buf, "\\n", 2);
-					break;
+					case '\r':
+						smart_str_appendl(buf, "\\r", 2);
+						break;
 
-				case '\r':
-					smart_str_appendl(buf, "\\r", 2);
-					break;
+					case '\t':
+						smart_str_appendl(buf, "\\t", 2);
+						break;
 
-				case '\t':
-					smart_str_appendl(buf, "\\t", 2);
-					break;
+					case '<':
+						if (options & PHP_JSON_HEX_TAG) {
+							smart_str_appendl(buf, "\\u003C", 6);
+						} else {
+							smart_str_appendc(buf, '<');
+						}
+						break;
 
-				case '<':
-					if (options & PHP_JSON_HEX_TAG) {
-						smart_str_appendl(buf, "\\u003C", 6);
-					} else {
-						smart_str_appendc(buf, '<');
-					}
-					break;
+					case '>':
+						if (options & PHP_JSON_HEX_TAG) {
+							smart_str_appendl(buf, "\\u003E", 6);
+						} else {
+							smart_str_appendc(buf, '>');
+						}
+						break;
 
-				case '>':
-					if (options & PHP_JSON_HEX_TAG) {
-						smart_str_appendl(buf, "\\u003E", 6);
-					} else {
-						smart_str_appendc(buf, '>');
-					}
-					break;
+					case '&':
+						if (options & PHP_JSON_HEX_AMP) {
+							smart_str_appendl(buf, "\\u0026", 6);
+						} else {
+							smart_str_appendc(buf, '&');
+						}
+						break;
 
-				case '&':
-					if (options & PHP_JSON_HEX_AMP) {
-						smart_str_appendl(buf, "\\u0026", 6);
-					} else {
-						smart_str_appendc(buf, '&');
-					}
-					break;
+					case '\'':
+						if (options & PHP_JSON_HEX_APOS) {
+							smart_str_appendl(buf, "\\u0027", 6);
+						} else {
+							smart_str_appendc(buf, '\'');
+						}
+						break;
 
-				case '\'':
-					if (options & PHP_JSON_HEX_APOS) {
-						smart_str_appendl(buf, "\\u0027", 6);
-					} else {
-						smart_str_appendc(buf, '\'');
-					}
-					break;
-
-				default:
-					if (us >= ' ') {
-						smart_str_appendc(buf, (unsigned char) us);
-					} else {
+					default:
+						ZEND_ASSERT(us < ' ');
 						smart_str_appendl(buf, "\\u00", sizeof("\\u00")-1);
 						smart_str_appendc(buf, digits[(us & 0xf0)   >> 4]);
 						smart_str_appendc(buf, digits[(us & 0xf)]);
-					}
-					break;
+						break;
+				}
 			}
 		}
 	} while (pos < len);

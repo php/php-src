@@ -20,6 +20,12 @@ Supported character encodings:
 * CP1251:  contributed by Byte
 
 
+New feature of version 6.3.0
+--------------------------
+
+* NEW SYNTAX: escape-o-brace for octal codepoint.
+
+
 New feature of version 6.1.2
 --------------------------
 

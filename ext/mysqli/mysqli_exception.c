@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -44,7 +44,7 @@ void php_mysqli_throw_sql_exception(char *sqlstate, int errorno, char *format, .
 
 	va_start(arg, format);
 	vspprintf(&message, 0, format, arg);
-	va_end(arg);;
+	va_end(arg);
 
 	if (!(MyG(report_mode) & MYSQLI_REPORT_STRICT)) {
 	 	php_error_docref(NULL, E_WARNING, "(%s/%d): %s", sqlstate, errorno, message);

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -469,6 +469,7 @@ PHP_FUNCTION(msg_send)
 	if (result == -1) {
 		php_error_docref(NULL, E_WARNING, "msgsnd failed: %s", strerror(errno));
 		if (zerror) {
+			zval_ptr_dtor(zerror);
 			ZVAL_LONG(zerror, errno);
 		}
 	} else {

@@ -16,8 +16,6 @@ echo "*** Testing hash_hmac() : basic functionality ***\n";
 $content = "This is a sample string used to test the hash_hmac function with various hashing algorithms";
 $key = 'secret';
 
-echo "adler32: " . hash_hmac('adler32', $content, $key) . "\n";
-echo "crc32: " . hash_hmac('crc32', $content, $key) . "\n";
 echo "gost: " . hash_hmac('gost', $content, $key) . "\n";
 echo "haval128,3: " . hash_hmac('haval128,3', $content, $key) . "\n";
 echo "md2: " . hash_hmac('md2', $content, $key) . "\n";
@@ -34,7 +32,6 @@ echo "sha512: " . hash_hmac('sha512', $content, $key) . "\n";
 echo "snefru: " . hash_hmac('snefru', $content, $key) . "\n";
 echo "tiger192,3: " . hash_hmac('tiger192,3', $content, $key) . "\n";
 echo "whirlpool: " . hash_hmac('whirlpool', $content, $key) . "\n";
-echo "adler32(raw): " . bin2hex(hash_hmac('adler32', $content, $key, TRUE)) . "\n";
 echo "md5(raw): " . bin2hex(hash_hmac('md5', $content, $key, TRUE)) . "\n";
 echo "sha256(raw): " . bin2hex(hash_hmac('sha256', $content, $key, TRUE)) . "\n";
 
@@ -42,8 +39,6 @@ echo "sha256(raw): " . bin2hex(hash_hmac('sha256', $content, $key, TRUE)) . "\n"
 ===Done===
 --EXPECTF--
 *** Testing hash_hmac() : basic functionality ***
-adler32: 12c803f7
-crc32: 96859101
 gost: a4a3c80bdf3f8665bf07376a34dc9c1b11af7c813f4928f62e39f0c0dc564dad
 haval128,3: 4d1318607f0406bd1b7bd50907772672
 md2: 6d111dab563025e4cb5f4425c991fa12
@@ -60,7 +55,6 @@ sha512: 7de05636b18e2b0ca3427e03f53074af3a48a7b9df226daba4f22324c570638e7d7b2643
 snefru: 67af483046f9cf16fe19f9087929ccfc6ad176ade3290b4d33f43e0ddb07e711
 tiger192,3: 00a0f884f15a9e5549ed0e40ca0190522d369027e16d5b59
 whirlpool: 4a0f1582b21b7aff59bfba7f9c29131c69741b2ce80acdc7d314040f3b768cf5a17e30b74cceb86fbc6b34b1692e0addd5bfd7cfc043d40c0621f1b97e26fa49
-adler32(raw): 12c803f7
 md5(raw): 2a632783e2812cf23de100d7d6a463ae
 sha256(raw): 49bde3496b9510a17d0edd8a4b0ac70148e32a1d51e881ec76faa96534125838
 ===Done===

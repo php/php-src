@@ -4,7 +4,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -94,6 +94,28 @@ if (ob_get_level()) echo "Not all buffers were deleted.\n";
 error_reporting(E_ALL);
 
 $environment = isset($_ENV) ? $_ENV : array();
+// Note: php.ini-development sets variables_order="GPCS" not "EGPCS", in which case $_ENV is NOT populated.
+//       detect and handle this case, or die or warn
+if (empty($environment)) {
+	// not documented, but returns array of all environment variables
+	$environment = getenv();
+}
+if (empty($environment['TEMP'])) {
+	$environment['TEMP'] = sys_get_temp_dir();
+	
+	if (empty($environment['TEMP'])) {
+		// for example, OpCache on Windows will fail in this case because child processes (for tests) will not get
+		// a TEMP variable, so GetTempPath() will fallback to c:\windows, while GetTempPath() will return %TEMP% for parent
+		// (likely a different path). The parent will initialize the OpCache in that path, and child will fail to reattach to
+		// the OpCache because it will be using the wrong path.
+		die("TEMP environment is NOT set");
+	} else if (count($environment)==1) {
+		// not having other environment variables, only having TEMP, is probably ok, but strange and may make a 
+		// difference in the test pass rate, so warn the user.
+		echo "WARNING: Only 1 environment variable will be available to tests(TEMP environment variable)".PHP_EOL;
+	}
+}
+//
 if ((substr(PHP_OS, 0, 3) == "WIN") && empty($environment["SystemRoot"])) {
   $environment["SystemRoot"] = getenv("SystemRoot");
 }
@@ -217,7 +239,7 @@ $ini_overwrites = array(
 		'display_startup_errors=1',
 		'log_errors=0',
 		'html_errors=0',
-		'track_errors=1',
+		'track_errors=0',
 		'report_memleaks=1',
 		'report_zend_debug=0',
 		'docref_root=',
@@ -232,6 +254,7 @@ $ini_overwrites = array(
 		'log_errors_max_len=0',
 		'opcache.fast_shutdown=0',
 		'opcache.file_update_protection=0',
+		'zend.assertions=1',
 	);
 
 $no_file_cache = '-d opcache.file_cache= -d opcache.file_cache_only=0';
@@ -273,6 +296,9 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
 		$phpdbg_info = '';
 	}
 
+	if (function_exists('opcache_invalidate')) {
+		opcache_invalidate($info_file, true);
+	}
 	@unlink($info_file);
 
 	// load list of enabled extensions
@@ -293,6 +319,9 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
 		}
 	}
 
+	if (function_exists('opcache_invalidate')) {
+		opcache_invalidate($info_file, true);
+	}
 	@unlink($info_file);
 
 	// Write test context information.
@@ -450,9 +479,10 @@ function save_or_mail_results()
 $test_files = array();
 $redir_tests = array();
 $test_results = array();
-$PHP_FAILED_TESTS = array('BORKED' => array(), 'FAILED' => array(), 'WARNED' => array(), 'LEAKED' => array(), 'XFAILED' => array());
+$PHP_FAILED_TESTS = array('BORKED' => array(), 'FAILED' => array(), 'WARNED' => array(), 'LEAKED' => array(), 'XFAILED' => array(), 'SLOW' => array());
 
 // If parameters given assume they represent selected tests to run.
+$result_tests_file= false;
 $failed_tests_file= false;
 $pass_option_n = false;
 $pass_options = '';
@@ -468,6 +498,7 @@ $temp_target = null;
 $temp_urlbase = null;
 $conf_passed = null;
 $no_clean = false;
+$slow_min_ms = INF;
 
 $cfgtypes = array('show', 'keep');
 $cfgfiles = array('skip', 'php', 'clean', 'out', 'diff', 'exp');
@@ -552,6 +583,9 @@ if (isset($argc) && $argc > 1) {
 				case 'a':
 					$failed_tests_file = fopen($argv[++$i], 'a+t');
 					break;
+				case 'W':
+					$result_tests_file = fopen($argv[++$i], 'w+t');
+					break;
 				case 'c':
 					$conf_passed = $argv[++$i];
 					break;
@@ -559,7 +593,7 @@ if (isset($argc) && $argc > 1) {
 					$ini_overwrites[] = $argv[++$i];
 					break;
 				case 'g':
-					$SHOW_ONLY_GROUPS = explode(",", $argv[++$i]);;
+					$SHOW_ONLY_GROUPS = explode(",", $argv[++$i]);
 					break;
 				//case 'h'
 				case '--keep-all':
@@ -625,6 +659,9 @@ if (isset($argc) && $argc > 1) {
 						$cfg['show'][$file] = true;
 					}
 					break;
+				case '--show-slow':
+					$slow_min_ms = $argv[++$i];
+					break;
 				case '--temp-source':
 					$temp_source = $argv[++$i];
 					break;
@@ -684,6 +721,8 @@ Options:
 
     -a <file>   Same as -w but append rather then truncating <file>.
 
+    -W <file>   Write a list of all tests and their result status to <file>.
+
     -c <file>   Look for php.ini in directory <file> or use <file> as ini.
 
     -n          Pass -n option to the php binary (Do not use a php.ini).
@@ -739,6 +778,9 @@ Options:
                 'exp' or the difference between them 'diff'. The result types
                 get written independent of the log format, however 'diff' only
                 exists when a test fails.
+
+    --show-slow [n]
+                Show all tests that took longer than [n] milliseconds to run.
 
     --no-clean  Do not execute clean section if any.
 
@@ -813,6 +855,10 @@ HELP;
 			fclose($failed_tests_file);
 		}
 
+		if ($result_tests_file) {
+			fclose($result_tests_file);
+		}
+
 		compute_summary();
 		if ($html_output) {
 			fwrite($html_file, "<hr/>\n" . get_summary(false, true));
@@ -830,7 +876,7 @@ HELP;
 
 		junit_save_xml();
 
-		if (getenv('REPORT_EXIT_STATUS') == 1 and $sum_results['FAILED']) {
+		if (getenv('REPORT_EXIT_STATUS') == 1 && ($sum_results['FAILED'] || $sum_results['BORKED'])) {
 			exit(1);
 		}
 
@@ -946,6 +992,10 @@ if ($failed_tests_file) {
 	fclose($failed_tests_file);
 }
 
+if ($result_tests_file) {
+	fclose($result_tests_file);
+}
+
 // Summarize results
 
 if (0 == count($test_results)) {
@@ -966,7 +1016,7 @@ save_or_mail_results();
 
 junit_save_xml();
 
-if (getenv('REPORT_EXIT_STATUS') == 1 and $sum_results['FAILED']) {
+if (getenv('REPORT_EXIT_STATUS') == 1 && ($sum_results['FAILED'] || $sum_results['BORKED'])) {
 	exit(1);
 }
 exit(0);
@@ -1147,7 +1197,7 @@ function system_with_timeout($commandline, $env = null, $stdin = null, $captureS
 
 function run_all_tests($test_files, $env, $redir_tested = null)
 {
-	global $test_results, $failed_tests_file, $php, $test_idx;
+	global $test_results, $failed_tests_file, $result_tests_file, $php, $test_idx;
 
 	foreach($test_files as $name) {
 
@@ -1169,6 +1219,9 @@ function run_all_tests($test_files, $env, $redir_tested = null)
 			$test_results[$index] = $result;
 			if ($failed_tests_file && ($result == 'XFAILED' || $result == 'FAILED' || $result == 'WARNED' || $result == 'LEAKED')) {
 				fwrite($failed_tests_file, "$index\n");
+			}
+			if ($result_tests_file) {
+				fwrite($result_tests_file, "$result\t$index\n");
 			}
 		}
 	}
@@ -1205,6 +1258,7 @@ function run_test($php, $file, $env)
 	global $valgrind_version;
 	global $SHOW_ONLY_GROUPS;
 	global $no_file_cache;
+	global $slow_min_ms;
 	$temp_filenames = null;
 	$org_file = $file;
 
@@ -1609,6 +1663,11 @@ TEST $file
 					$info = " (warn: $m[1])";
 				}
 			}
+
+			if (!strncasecmp('xfail', ltrim($output), 5)) {
+				// Pretend we have an XFAIL section
+				$section_text['XFAIL'] = trim(substr(ltrim($output), 5));
+			}
 		}
 	}
 
@@ -1856,14 +1915,19 @@ TEST $file
 		$env['USE_ZEND_ALLOC'] = '0';
 		$env['ZEND_DONT_UNLOAD_MODULES'] = 1;
 
+		$valgrind_cmd = "valgrind -q --tool=memcheck --trace-children=yes";
+		if (strpos($test_file, "pcre") !== false) {
+			$valgrind_cmd .= " --smc-check=all";
+		}
+
 		/* --vex-iropt-register-updates=allregs-at-mem-access is necessary for phpdbg watchpoint tests */
 		if (version_compare($valgrind_version, '3.8.0', '>=')) {
 			/* valgrind 3.3.0+ doesn't have --log-file-exactly option */
-			$cmd = "valgrind -q --tool=memcheck --trace-children=yes --vex-iropt-register-updates=allregs-at-mem-access --log-file=$memcheck_filename $cmd";
+			$cmd = "$valgrind_cmd --vex-iropt-register-updates=allregs-at-mem-access --log-file=$memcheck_filename $cmd";
 		} elseif (version_compare($valgrind_version, '3.3.0', '>=')) {
-			$cmd = "valgrind -q --tool=memcheck --trace-children=yes --vex-iropt-precise-memory-exns=yes --log-file=$memcheck_filename $cmd";
+			$cmd = "$valgrind_cmd --vex-iropt-precise-memory-exns=yes --log-file=$memcheck_filename $cmd";
 		} else {
-			$cmd = "valgrind -q --tool=memcheck --trace-children=yes --vex-iropt-precise-memory-exns=yes --log-file-exactly=$memcheck_filename $cmd";
+			$cmd = "$valgrind_cmd --vex-iropt-precise-memory-exns=yes --log-file-exactly=$memcheck_filename $cmd";
 		}
 
 	} else {
@@ -1884,10 +1948,21 @@ COMMAND $cmd
 ";
 
 	junit_start_timer($shortname);
+	$startTime = microtime(true);
 
 	$out = system_with_timeout($cmd, $env, isset($section_text['STDIN']) ? $section_text['STDIN'] : null, $captureStdIn, $captureStdOut, $captureStdErr);
 
 	junit_finish_timer($shortname);
+	$time = microtime(true) - $startTime;
+	if ($time * 1000 >= $slow_min_ms) {
+		$PHP_FAILED_TESTS['SLOW'][] = array(
+			'name'      => $file,
+			'test_name' => (is_array($IN_REDIRECT) ? $IN_REDIRECT['via'] : '') . $tested . " [$tested_file]",
+			'output'    => '',
+			'diff'      => '',
+			'info'      => $time,
+		);
+	}
 
 	if (array_key_exists('CLEAN', $section_text) && (!$no_clean || $cfg['keep']['clean'])) {
 
@@ -2404,7 +2479,7 @@ function compute_summary()
 	$sum_results['SKIPPED'] += $ignored_by_ext;
 	$percent_results = array();
 
-	while (list($v, $n) = each($sum_results)) {
+	foreach ($sum_results as $v => $n) {
 		$percent_results[$v] = (100.0 * $n) / $n_total;
 	}
 }
@@ -2468,6 +2543,22 @@ Time taken      : ' . sprintf('%4d seconds', $end_time - $start_time) . '
 =====================================================================
 ';
 	$failed_test_summary = '';
+
+	if (count($PHP_FAILED_TESTS['SLOW'])) {
+		usort($PHP_FAILED_TESTS['SLOW'], function($a, $b) {
+			return $a['info'] < $b['info'] ? 1 : -1;
+		});
+
+		$failed_test_summary .= '
+=====================================================================
+SLOW TEST SUMMARY
+---------------------------------------------------------------------
+';
+		foreach ($PHP_FAILED_TESTS['SLOW'] as $failed_test_data) {
+			$failed_test_summary .= sprintf('(%.3f s) ', $failed_test_data['info']) . $failed_test_data['test_name'] . "\n";
+		}
+		$failed_test_summary .=  "=====================================================================\n";
+	}
 
 	if (count($PHP_FAILED_TESTS['XFAILED'])) {
 		$failed_test_summary .= '

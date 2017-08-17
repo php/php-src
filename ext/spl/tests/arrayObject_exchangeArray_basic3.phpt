@@ -105,7 +105,7 @@ array(1) {
 
 
 --> exchangeArray() with bad arg type:
-Exception:Passed variable is not an array or object, using empty array instead
+Exception:Passed variable is not an array or object
 
 Notice: Undefined variable: copy in %s on line 46
 object(ArrayObject)#3 (1) {

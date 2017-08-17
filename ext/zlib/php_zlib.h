@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -48,6 +48,7 @@ typedef struct _php_zlib_buffer {
 typedef struct _php_zlib_context {
 	z_stream Z;
 	char *inflateDict;
+	int status;
 	size_t inflateDictlen;
 	php_zlib_buffer buffer;
 } php_zlib_context;

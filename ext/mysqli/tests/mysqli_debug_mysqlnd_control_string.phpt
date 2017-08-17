@@ -20,7 +20,7 @@ if (!$IS_MYSQLND)
 ?>
 --FILE--
 <?php
-	require_once('connect.inc');;
+	require_once('connect.inc');
 	require_once('table.inc');
 
 	function try_control_string($link, $control_string, $trace_file, $offset) {

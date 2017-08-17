@@ -10,6 +10,7 @@ if (!extension_loaded('openssl')) {
 if (substr(PHP_OS, 0, 3) != 'WIN' ) {
 	die('skip windows only test');
 }
+if (OPENSSL_VERSION_NUMBER < 0x10100000) die("skip OpenSSLv1.1.0 required");
 ?>
 --FILE--
 <?php
@@ -47,11 +48,11 @@ bool(false)
 Warning: stream_socket_enable_crypto(): SSLv2 unavailable in this PHP version in %s on line %d
 bool(false)
 
-Warning: stream_socket_enable_crypto(): SSL: A request to send or receive data was disallowed because the socket is not connected and (when sending on a datagram socket using a sendto call) no address was supplied.
- in %s on line %d
+Warning: stream_socket_enable_crypto(): SSLv3 unavailable %s in %s on line %d
 bool(false)
 
-Warning: stream_socket_enable_crypto(): SSL/TLS already set-up for this stream in %s on line %d
+Warning: stream_socket_enable_crypto(): SSL: The operation completed successfully.
+ in %s on line %d
 bool(false)
 
 Warning: stream_socket_enable_crypto(): SSL/TLS already set-up for this stream in %s on line %d
