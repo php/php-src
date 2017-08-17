@@ -1,5 +1,5 @@
 --TEST--
-JIT ASSIGN: 007
+JIT SEND_VAR_EX fails on SHOULD_SEND_BY_REF checking
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
