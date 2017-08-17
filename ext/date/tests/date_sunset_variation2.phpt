@@ -125,7 +125,7 @@ Warning: date_sunset() expects parameter 2 to be integer, float given in %s on l
 bool(false)
 
 --float .5--
-int(1218199253)
+int(1218199264)
 
 --empty array--
 
@@ -148,22 +148,22 @@ Warning: date_sunset() expects parameter 2 to be integer, array given in %s on l
 bool(false)
 
 --uppercase NULL--
-int(1218199253)
+int(1218199264)
 
 --lowercase null--
-int(1218199253)
+int(1218199264)
 
 --lowercase true--
-string(5) "18:10"
+string(5) "18:11"
 
 --lowercase false--
-int(1218199253)
+int(1218199264)
 
 --uppercase TRUE--
-string(5) "18:10"
+string(5) "18:11"
 
 --uppercase FALSE--
-int(1218199253)
+int(1218199264)
 
 --empty string DQ--
 
@@ -206,8 +206,8 @@ Warning: date_sunset() expects parameter 2 to be integer, object given in %s on 
 bool(false)
 
 --undefined var--
-int(1218199253)
+int(1218199264)
 
 --unset var--
-int(1218199253)
+int(1218199264)
 ===DONE===
