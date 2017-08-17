@@ -303,11 +303,10 @@ zend_module_entry sodium_module_entry = {
 ZEND_GET_MODULE(sodium)
 #endif
 
-static zend_object *sodium_exception_create_object(zend_class_entry *ce) {
-	zend_object *obj = zend_ce_exception->create_object(ce);
+/* Remove argument information from backtrace to prevent information leaks */
+static void sodium_remove_param_values_from_backtrace(zend_object *obj) {
 	zval obj_zv, rv, *trace;
 
-	/* Remove argument information from backtrace to prevent information leaks */
 	ZVAL_OBJ(&obj_zv, obj);
 	trace = zend_read_property(zend_ce_exception, &obj_zv, "trace", sizeof("trace")-1, 0, &rv);
 	if (trace && Z_TYPE_P(trace) == IS_ARRAY) {
@@ -321,7 +320,11 @@ static zend_object *sodium_exception_create_object(zend_class_entry *ce) {
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
+}
 
+static zend_object *sodium_exception_create_object(zend_class_entry *ce) {
+	zend_object *obj = zend_ce_exception->create_object(ce);
+	sodium_remove_param_values_from_backtrace(obj);
 	return obj;
 }
 
