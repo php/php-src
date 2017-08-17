@@ -7619,13 +7619,7 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, zend_op_ar
 	}
 
 	if (opline->opcode == ZEND_SEND_VAR_EX || opline->opcode == ZEND_SEND_VAR_NO_REF_EX) {
-		uint32_t mask;
-
-		if (opline->opcode == ZEND_SEND_VAR_EX) {
-			mask = ZEND_SEND_BY_REF << ((arg_num + 3) * 2);
-		} else {
-			mask = (ZEND_SEND_BY_REF|ZEND_SEND_PREFER_REF) << ((arg_num + 3) * 2);
-		}
+		uint32_t mask = (ZEND_SEND_BY_REF|ZEND_SEND_PREFER_REF) << ((arg_num + 3) * 2);
 
 		|	mov r0, EX:RX->func
 		if (arg_num <= MAX_ARG_FLAG_NUM) {
