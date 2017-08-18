@@ -240,7 +240,7 @@ const zend_function_entry zend_test_functions[] = {
 
 zend_module_entry zend_test_module_entry = {
 	STANDARD_MODULE_HEADER,
-	"test",
+	"zend-test",
 	zend_test_functions,
 	PHP_MINIT(zend_test),
 	PHP_MSHUTDOWN(zend_test),

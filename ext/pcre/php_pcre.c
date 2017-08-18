@@ -2537,7 +2537,7 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 	int				*offsets;			/* Array of subpattern offsets */
 	int				 size_offsets;		/* Size of the offsets array */
 	int				 count = 0;			/* Count of matched subpatterns */
-	int				 no_utf_check = 0;	/* Execution options */
+	int				 no_utf_check;		/* Execution options */
 	zend_string		*string_key;
 	zend_ulong		 num_key;
 	zend_bool		 invert;			/* Whether to return non-matching
@@ -2569,18 +2569,13 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 
-#ifdef HAVE_PCRE_JIT_SUPPORT
-	if (!(pce->compile_options & PCRE_UTF8)) {
-		no_utf_check = PCRE_NO_UTF8_CHECK;
-	}
-#endif
-
 	/* Go through the input array */
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(input), num_key, string_key, entry) {
 		zend_string *subject_str = zval_get_string(entry);
 
 		/* Perform the match */
 #ifdef HAVE_PCRE_JIT_SUPPORT
+		no_utf_check = (pce->compile_options & PCRE_UTF8) ? 0 : PCRE_NO_UTF8_CHECK;
 		if ((extra->flags & PCRE_EXTRA_EXECUTABLE_JIT)
 		 && no_utf_check) {
 			count = pcre_jit_exec(pce->re, extra, ZSTR_VAL(subject_str),

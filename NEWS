@@ -36,6 +36,17 @@ PHP                                                                        NEWS
   . Fixed bug #74991 (include_path has a 4096 char limit in some cases).
     (bwbroersma)
 
+- pgsql:
+  . Added new error constants for pg_result_error(): (Kalle)
+    - Requires Postgres 9.3
+      - PGSQL_DIAG_SCHEMA_NAME
+	  - PGSQL_DIAG_TABLE_NAME
+	  - PGSQL_DIAG_COLUMN_NAME
+	  - PGSQL_DIAG_DATATYPE_NAME
+	  - PGSQL_DIAG_CONSTRAINT_NAME
+	- Requires Postgres 9.6
+	  - PGSQL_DIAG_SEVERITY_NONLOCALIZED
+
 - Session:
   . Fixed bug #74941 (session fails to start after having headers sent). 
     (morozov)
