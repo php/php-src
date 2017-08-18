@@ -2980,6 +2980,9 @@ static int zend_update_type_info(const zend_op_array *op_array,
 					}
 					if (t1 & (MAY_BE_STRING|MAY_BE_ARRAY)) {
 						tmp |= MAY_BE_RC1;
+						if (opline->opcode == ZEND_FETCH_DIM_FUNC_ARG) {
+							tmp |= t1 & MAY_BE_RCN;
+						}
 					}
 					if (t1 & (MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
 						tmp |= t1 & (MAY_BE_RC1|MAY_BE_RCN);
