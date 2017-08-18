@@ -373,6 +373,7 @@ PHP_MINIT_FUNCTION(filter)
 
 	INIT_CLASS_ENTRY(cex, "FilterValidateException", php_filter_validate_exception_methods);
 	php_filter_validate_exception_class_entry = zend_register_internal_class_ex(&cex, zend_ce_exception);
+	php_filter_validate_exception_class_entry->create_object = zend_ce_exception->create_object;
 	/* php_filter_validate_exception_class_entry->ce_flags |= ZEND_ACC_FINAL; */
 	zend_declare_property_null(php_filter_validate_exception_class_entry, ZEND_STRL("invalid_key"), ZEND_ACC_PROTECTED);
 	zend_declare_property_null(php_filter_validate_exception_class_entry, ZEND_STRL("invalid_value"), ZEND_ACC_PROTECTED);
