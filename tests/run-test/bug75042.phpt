@@ -2,10 +2,7 @@
 phpt EXTENSIONS directive with shared module
 --SKIPIF--
 <?php
-if(empty($_ENV['TEST_PHP_EXECUTABLE'])) {
-	die('skip TEST_PHP_EXECUTABLE not set');
-}
-$php = $_ENV['TEST_PHP_EXECUTABLE'];
+$php = getenv('TEST_PHP_EXECUTABLE');
 if (false !== stripos(`$php -n -m`, 'openssl')) {
 	die('skip openssl is built static');
 }
