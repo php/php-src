@@ -73,6 +73,8 @@ if test "$PHP_CURL" != "no"; then
    
     save_CFLAGS="$CFLAGS"
     CFLAGS="`$CURL_CONFIG --cflags`"
+    save_LDFLAGS="$LDFLAGS"
+    LDFLAGS="`$CURL_CONFIG --libs`"
    
     AC_PROG_CPP
     AC_MSG_CHECKING([for openssl support in libcurl])
@@ -130,6 +132,7 @@ int main(int argc, char *argv[])
     ])
    
     CFLAGS="$save_CFLAGS"
+    LDFLAGS="$save_LDFLAGS"
   else
     AC_MSG_RESULT([no])
   fi
