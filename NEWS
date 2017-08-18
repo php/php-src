@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.2.0RC1
 
+- PCRE:
+  . Fixed bug #75089 (preg_grep() is not reporting PREG_BAD_UTF8_ERROR after
+    first input string). (Dmitry)
 
 17 Aug 2017, PHP 7.2.0beta3
 
