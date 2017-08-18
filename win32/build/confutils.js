@@ -2280,6 +2280,11 @@ function generate_makefile()
 
 	MF.WriteBlankLines(2);
 
+	MF.WriteLine("dump-tmp-env: set-tmp-env");
+	MF.WriteLine("	@set");
+
+	MF.WriteBlankLines(2);
+
 	MFO.Close();
 	TF = FSO.OpenTextFile("Makefile.objects", 1);
 	if (!TF.AtEndOfStream) {
