@@ -86,8 +86,14 @@ sapi\phpdbg\phpdbg_lexer.c: sapi\phpdbg\phpdbg_lexer.l
 	$(RE2C) $(RE2C_FLAGS) --no-generation-date -cbdFo sapi/phpdbg/phpdbg_lexer.c sapi/phpdbg/phpdbg_lexer.l
 !endif
 
+!if "$(ZTS)" == "1"
+PHP7_PGD_SUFFIX=ts
+!else
+PHP7_PGD_SUFFIX=
+!endif
+
 !if $(PGOMGR) != ""
-PHP7_PGD_OPTION=/PGD:$(PGOPGD_DIR)\php7.pgd
+PHP7_PGD_OPTION=/PGD:$(PGOPGD_DIR)\php7$(PHP7_PGD_SUFFIX).pgd
 !else
 PHP7_PGD_OPTION=
 !endif
