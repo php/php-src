@@ -9,6 +9,9 @@ if test "$PHP_BZ2" != "no"; then
   if test -r $PHP_BZ2/include/bzlib.h; then
     BZIP_DIR=$PHP_BZ2
   else
+  if test -r $PHP_BZ2/develop/headers/bzlib.h; then
+    BZIP_DIR=$PHP_BZ2
+  else
     AC_MSG_CHECKING(for BZip2 in default path)
     for i in /usr/local /usr; do
       if test -r $i/include/bzlib.h; then
