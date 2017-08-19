@@ -19,6 +19,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #75063 (Main CWD initialized with wrong codepage). (Anatol)
+  . Fixed bug #74725 (html_errors=1 breaks unhandled exceptions). (Andrea)
 
 - Date:
   . Fixed bug #75002 (Null Pointer Dereference in timelib_time_clone). (Derick)
