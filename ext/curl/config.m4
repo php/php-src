@@ -9,9 +9,6 @@ if test "$PHP_CURL" != "no"; then
   if test -r $PHP_CURL/include/curl/easy.h; then
     CURL_DIR=$PHP_CURL
   else
-  if test -r $PHP_CURL/develop/headers/curl/easy.h; then
-    CURL_DIR=$PHP_CURL
-  else
     AC_MSG_CHECKING(for cURL in default path)
     for i in /usr/local /usr; do
       if test -r $i/include/curl/easy.h; then
