@@ -37,6 +37,17 @@
 #define syslog std_syslog
 #endif
 
+#ifdef PHP_WIN32
+PHPAPI void php_syslog(int priority, const char *format, ...) /* {{{ */
+{
+	va_list args;
+
+	va_start(args, format);
+	vsyslog(priority, format, args);
+	va_end(args);
+}
+/* }}} */
+#else
 PHPAPI void php_syslog(int priority, const char *format, ...) /* {{{ */
 {
 	const char *ptr;
@@ -68,8 +79,8 @@ PHPAPI void php_syslog(int priority, const char *format, ...) /* {{{ */
 	smart_string_free(&fbuf);
 	smart_string_free(&sbuf);
 }
-
 /* }}} */
+#endif
 
 /*
  * Local variables:
