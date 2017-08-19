@@ -8,6 +8,8 @@ PHP                                                                        NEWS
 - CURL:
   . Fixed bug #75093 (OpenSSL support not detected). (Remi)
 
+- Standard:
+  . Fixed bug #75097 (gethostname fails if your host name is 64 chars long). (Andrea)
 
 31 Aug 2017, PHP 7.1.9
 
