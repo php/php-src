@@ -10,31 +10,19 @@ if test "$PHP_CURL" != "no"; then
     CURL_DIR=$PHP_CURL
   else
     AC_MSG_CHECKING(for cURL in default path)
-    for i in /usr/local /usr; do
-      if test -r $i/include/curl/easy.h; then
+    for i in /usr/local /usr /system; do
+      if test -r $i/develop/headers/curl/easy.h; then
         CURL_DIR=$i
         AC_MSG_RESULT(found in $i)
         break
       fi
     done
-    if test -z "$CURL_DIR"; then
-      AC_MSG_RESULT(not found)
-      if which dpkg-architecture>/dev/null; then
-        AC_MSG_CHECKING(for cURL in multiarch path)
-        CURL_MULTIARCH_INCLUDE=/usr/include/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
-        if test -r $CURL_MULTIARCH_INCLUDE/curl/easy.h; then
-          CURL_DIR=/usr
-          AC_MSG_RESULT(found in $CURL_MULTIARCH_INCLUDE)
-        else
-          AC_MSG_RESULT(not found)
-        fi
-      fi
-    fi
   fi
 
   if test -z "$CURL_DIR"; then
-    AC_MSG_ERROR(Could not find cURL, please reinstall the libcurl distribution -
-    easy.h should be in <curl-dir>/include/curl/)
+    AC_MSG_RESULT(not found)
+    AC_MSG_ERROR(Please reinstall the libcurl distribution -
+    easy.h should be in <curl-dir>/develop/headers/curl/)
   fi
 
   CURL_CONFIG="curl-config"
@@ -57,11 +45,7 @@ if test "$PHP_CURL" != "no"; then
     AC_MSG_ERROR(cURL version 7.10.5 or later is required to compile php with cURL support)
   fi
 
-  if test -z "$CURL_MULTIARCH_INCLUDE"; then
-    PHP_ADD_INCLUDE($CURL_DIR/include)
-  else
-    PHP_ADD_INCLUDE($CURL_MULTIARCH_INCLUDE)
-  fi
+  PHP_ADD_INCLUDE($CURL_DIR/include)
   PHP_EVAL_LIBLINE($CURL_LIBS, CURL_SHARED_LIBADD)
   PHP_ADD_LIBRARY_WITH_PATH(curl, $CURL_DIR/$PHP_LIBDIR, CURL_SHARED_LIBADD)
   
@@ -73,13 +57,10 @@ if test "$PHP_CURL" != "no"; then
    
     save_CFLAGS="$CFLAGS"
     CFLAGS="`$CURL_CONFIG --cflags`"
-    save_LDFLAGS="$LDFLAGS"
-    LDFLAGS="`$CURL_CONFIG --libs`"
    
     AC_PROG_CPP
     AC_MSG_CHECKING([for openssl support in libcurl])
     AC_TRY_RUN([
-#include <strings.h>
 #include <curl/curl.h>
 
 int main(int argc, char *argv[])
@@ -107,7 +88,6 @@ int main(int argc, char *argv[])
    
     AC_MSG_CHECKING([for gnutls support in libcurl])
     AC_TRY_RUN([
-#include <strings.h>
 #include <curl/curl.h>
 
 int main(int argc, char *argv[])
@@ -134,7 +114,6 @@ int main(int argc, char *argv[])
     ])
    
     CFLAGS="$save_CFLAGS"
-    LDFLAGS="$save_LDFLAGS"
   else
     AC_MSG_RESULT([no])
   fi
