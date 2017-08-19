@@ -18,6 +18,6 @@ var_dump(
 ?>
 ===DONE===
 --EXPECT--
-int(2)
-int(2)
+bool(false)
+NULL
 ===DONE===
