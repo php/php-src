@@ -3004,6 +3004,13 @@ static int zend_update_type_info(const zend_op_array *op_array,
 							tmp |= MAY_BE_ARRAY_KEY_STRING;
 						}
 					}
+				} else if (opline->opcode == ZEND_FETCH_DIM_UNSET) {
+					if (t1 & MAY_BE_ARRAY) {
+						tmp |= MAY_BE_RC1;
+					}
+					if (t1 & MAY_BE_OBJECT) {
+						tmp |= t1 & MAY_BE_RCN;
+					}
 				}
 				j = ssa_vars[ssa_ops[i].result_def].use_chain;
 				while (j >= 0) {
