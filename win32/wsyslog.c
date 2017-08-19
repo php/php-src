@@ -58,6 +58,7 @@
 
 #include "php_win32_globals.h"
 #include "wsyslog.h"
+#include "codepage.h"
 
 void closelog(void)
 {
@@ -92,6 +93,7 @@ void vsyslog(int priority, const char *message, va_list args)
 	unsigned short etype;
 	char *tmp = NULL;
 	DWORD evid;
+	wchar_t *strsw[2];
 
 	/* default event source */
 	if (INVALID_HANDLE_VALUE == PW32G(log_source))
@@ -110,11 +112,28 @@ void vsyslog(int priority, const char *message, va_list args)
 			etype = EVENTLOG_WARNING_TYPE;
 			evid = PHP_SYSLOG_WARNING_TYPE;
 	}
+
 	vspprintf(&tmp, 0, message, args);	/* build message */
+
+	strsw[0] = php_win32_cp_any_to_w(PW32G(log_header));
+	strsw[1] = php_win32_cp_any_to_w(tmp);
+
+	/* report the event */
+	if (strsw[0] && strsw[1]) {
+		ReportEventW(PW32G(log_source), etype, (unsigned short) priority, evid, NULL, 2, 0, strsw, NULL);
+		free(strsw[0]);
+		free(strsw[1]);
+		efree(tmp);
+		return;
+	}
+
+	free(strsw[0]);
+	free(strsw[1]);
+
 	strs[0] = PW32G(log_header);	/* write header */
 	strs[1] = tmp;				/* then the message */
-	/* report the event */
-	ReportEvent(PW32G(log_source), etype, (unsigned short) priority, evid, NULL, 2, 0, strs, NULL);
+
+	ReportEventA(PW32G(log_source), etype, (unsigned short) priority, evid, NULL, 2, 0, strs, NULL);
 	efree(tmp);
 }
 
