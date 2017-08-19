@@ -1736,7 +1736,7 @@ phpdbg_main:
 				exit(0);
 			}
 
-#ifndef _WIN32
+#if !defined(_WIN32) & !defined(__HAIKU__)
 			zend_sigaction(SIGIO, &sigio_struct, NULL);
 #endif
 
