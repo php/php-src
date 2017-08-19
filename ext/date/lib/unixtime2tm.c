@@ -32,7 +32,7 @@ static int month_tab[12] =      { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 3
 /* Converts a Unix timestamp value into broken down time, in GMT */
 void timelib_unixtime2gmt(timelib_time* tm, timelib_sll ts)
 {
-	timelib_sll days = 0, remainder = 0, tmp_years = 0;
+	timelib_sll days = 0, remainder = 0;
 	timelib_sll cur_year = 1970;
 	timelib_sll i;
 	timelib_sll hours, minutes, seconds;
@@ -40,23 +40,23 @@ void timelib_unixtime2gmt(timelib_time* tm, timelib_sll ts)
 
 	remainder = ts;
 	days = remainder / SECS_PER_DAY;
-	remainder -= days * SECS_PER_DAY;
+	remainder %= SECS_PER_DAY;
 
 	if (ts < 0 && remainder == 0) {
 		days++;
 		remainder -= SECS_PER_DAY;
 	}
 
-	tmp_years = days / DAYS_PER_LYEAR_PERIOD * YEARS_PER_LYEAR_PERIOD;
-	cur_year += tmp_years;
-	days -= tmp_years * DAYS_PER_LYEAR_PERIOD / YEARS_PER_LYEAR_PERIOD;
+	cur_year += days / DAYS_PER_LYEAR_PERIOD * YEARS_PER_LYEAR_PERIOD;
+	days %= DAYS_PER_LYEAR_PERIOD;
+
+	TIMELIB_DEBUG(printf("days=%lld, year=%lld\n", days, cur_year););
 
 	if (ts >= 0) {
 		days++;
 
 		while (days >= DAYS_PER_LYEAR) {
 			cur_year++;
-			TIMELIB_DEBUG(printf("days=%lld, year=%lld\n", days, cur_year););
 			if (timelib_is_leap(cur_year)) {
 				days -= DAYS_PER_LYEAR;
 			} else {
@@ -69,7 +69,6 @@ void timelib_unixtime2gmt(timelib_time* tm, timelib_sll ts)
 
 		while (days <= 0) {
 			cur_year--;
-			TIMELIB_DEBUG(printf("days=%lld, year=%lld\n", days, cur_year););
 			if (timelib_is_leap(cur_year)) {
 				days += DAYS_PER_LYEAR;
 			} else {
