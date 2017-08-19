@@ -4302,6 +4302,7 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 				|.code
 			}
 	    } else if (in_cold) {
+			ZEND_ASSERT(RC_MAY_BE_1(var_info));
 			|.code
 	    }
 		|5:
