@@ -47,8 +47,10 @@ void timelib_unixtime2gmt(timelib_time* tm, timelib_sll ts)
 		remainder -= SECS_PER_DAY;
 	}
 
-	cur_year += days / DAYS_PER_LYEAR_PERIOD * YEARS_PER_LYEAR_PERIOD;
-	days %= DAYS_PER_LYEAR_PERIOD;
+	if (days >= DAYS_PER_LYEAR_PERIOD || days <= -DAYS_PER_LYEAR_PERIOD) {
+		cur_year += days / DAYS_PER_LYEAR_PERIOD * YEARS_PER_LYEAR_PERIOD;
+		days %= DAYS_PER_LYEAR_PERIOD;
+	}
 
 	TIMELIB_DEBUG(printf("days=%lld, year=%lld\n", days, cur_year););
 
