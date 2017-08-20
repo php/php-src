@@ -50,17 +50,23 @@ AC_DEFUN([PHP_GD_ZLIB],[
 		elif test -f "$PHP_ZLIB_DIR/include/zlib.h"; then
 			PHP_ZLIB_DIR="$PHP_ZLIB_DIR"
 			PHP_ZLIB_INCDIR="$PHP_ZLIB_DIR/include"
+		elif test -f "$PHP_ZLIB_DIR/develop/headers/zlib.h"; then
+			PHP_ZLIB_DIR="$PHP_ZLIB_DIR"
+			PHP_ZLIB_INCDIR="$PHP_ZLIB_DIR/develop/headers"
 		else
 			AC_MSG_ERROR([Can't find zlib headers under "$PHP_ZLIB_DIR"])
 		fi
 	else
-		for i in /usr/local /usr; do
+		for i in /usr/local /usr /system; do
 			if test -f "$i/include/zlib/zlib.h"; then
 				PHP_ZLIB_DIR="$i"
 				PHP_ZLIB_INCDIR="$i/include/zlib"
 			elif test -f "$i/include/zlib.h"; then
 				PHP_ZLIB_DIR="$i"
 				PHP_ZLIB_INCDIR="$i/include"
+			elif test -f "$i/develop/headers/zlib.h"; then
+				PHP_ZLIB_DIR="$i"
+				PHP_ZLIB_INCDIR="$i/develop/headers"
 			fi
 		done
 	fi
@@ -71,6 +77,7 @@ AC_DEFUN([PHP_GD_WEBP],[
 
     for i in $PHP_WEBP_DIR /usr/local /usr; do
       test -f $i/include/webp/decode.h && GD_WEBP_DIR=$i && break
+      test -f $i/develop/headers/webp/decode.h && GD_WEBP_DIR=$i && break
     done
 
     if test -z "$GD_WEBP_DIR"; then
@@ -79,6 +86,7 @@ AC_DEFUN([PHP_GD_WEBP],[
 
     for i in $PHP_WEBP_DIR /usr/local /usr; do
       test -f $i/include/webp/encode.h && GD_WEBP_DIR=$i && break
+      test -f $i/develop/headers/webp/encode.h && GD_WEBP_DIR=$i && break
     done
 
     if test -z "$GD_WEBP_DIR"; then
@@ -103,8 +111,9 @@ AC_DEFUN([PHP_GD_WEBP],[
 AC_DEFUN([PHP_GD_JPEG],[
   if test "$PHP_JPEG_DIR" != "no"; then
 
-    for i in $PHP_JPEG_DIR /usr/local /usr; do
+    for i in $PHP_JPEG_DIR /usr/local /usr /system; do
       test -f $i/include/jpeglib.h && GD_JPEG_DIR=$i && break
+      test -f $i/develop/headers/jpeglib.h && GD_JPEG_DIR=$i && break
     done
 
     if test -z "$GD_JPEG_DIR"; then
@@ -130,6 +139,7 @@ AC_DEFUN([PHP_GD_PNG],[
 
     for i in $PHP_PNG_DIR /usr/local /usr; do
       test -f $i/include/png.h && GD_PNG_DIR=$i && break
+      test -f $i/develop/headers/png.h && GD_PNG_DIR=$i && break
     done
 
     if test -z "$GD_PNG_DIR"; then
@@ -162,6 +172,8 @@ AC_DEFUN([PHP_GD_XPM],[
     for i in $PHP_XPM_DIR /usr/local /usr/X11R6 /usr; do
       test -f $i/include/xpm.h && GD_XPM_DIR=$i && GD_XPM_INC=$i && break
       test -f $i/include/X11/xpm.h && GD_XPM_DIR=$i && GD_XPM_INC=$i/X11 && break
+      test -f $i/develop/headers/xpm.h && GD_XPM_DIR=$i && GD_XPM_INC=$i && break
+      test -f $i/develop/headers/X11/xpm.h && GD_XPM_DIR=$i && GD_XPM_INC=$i/X11 && break
     done
 
     if test -z "$GD_XPM_DIR"; then
@@ -186,7 +198,7 @@ AC_DEFUN([PHP_GD_XPM],[
 AC_DEFUN([PHP_GD_FREETYPE2],[
   if test "$PHP_FREETYPE_DIR" != "no"; then
 
-    for i in $PHP_FREETYPE_DIR /usr/local /usr; do
+    for i in $PHP_FREETYPE_DIR /usr/local /usr /system; do
       if test -f "$i/bin/freetype-config"; then
         FREETYPE2_DIR=$i
         FREETYPE2_CONFIG="$i/bin/freetype-config"
@@ -317,7 +329,7 @@ dnl Various checks for GD features
   PHP_GD_FREETYPE2
 
 dnl Header path
-  for i in include/gd include/gd2 include gd ""; do
+  for i in include/gd include/gd2 include gd develop/headers ""; do
     test -f "$PHP_GD/$i/gd.h" && GD_INCLUDE="$PHP_GD/$i"
   done
 
