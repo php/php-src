@@ -27,6 +27,10 @@ if test $PHP_SQLITE3 != "no"; then
         SQLITE3_DIR=$i
         AC_MSG_RESULT(found in $i)
         break
+      elif test -r $i/develop/headers/sqlite3.h; then
+        SQLITE3_DIR=$i
+        AC_MSG_RESULT(found in $i)
+        break
       fi
     done
 

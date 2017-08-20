@@ -33,7 +33,7 @@ if test "$PHP_PDO_SQLITE" != "no"; then
   php_pdo_sqlite_sources_core="pdo_sqlite.c sqlite_driver.c sqlite_statement.c"
 
   if test "$PHP_PDO_SQLITE" != "yes"; then
-    SEARCH_PATH="$PHP_PDO_SQLITE /usr/local /usr"     # you might want to change this
+    SEARCH_PATH="$PHP_PDO_SQLITE /usr/local /usr /system"     # you might want to change this
     SEARCH_FOR="/include/sqlite3.h"  # you most likely want to change this
     if test -r $PHP_PDO_SQLITE/$SEARCH_FOR; then # path given as parameter
       PDO_SQLITE_DIR=$PHP_PDO_SQLITE
@@ -41,6 +41,9 @@ if test "$PHP_PDO_SQLITE" != "no"; then
       AC_MSG_CHECKING([for sqlite3 files in default path])
       for i in $SEARCH_PATH ; do
         if test -r $i/$SEARCH_FOR; then
+          PDO_SQLITE_DIR=$i
+          AC_MSG_RESULT(found in $i)
+        elif test -r $i/develop/headers/sqlite3.h; then
           PDO_SQLITE_DIR=$i
           AC_MSG_RESULT(found in $i)
         fi
