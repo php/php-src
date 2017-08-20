@@ -19,15 +19,21 @@ if test "$PHP_ZLIB" != "no" || test "$PHP_ZLIB_DIR" != "no"; then
     elif test -f $PHP_ZLIB/include/zlib.h; then
       ZLIB_DIR=$PHP_ZLIB
       ZLIB_INCDIR=$ZLIB_DIR/include
+    elif test -f $PHP_ZLIB/develop/headers/zlib.h; then
+      ZLIB_DIR=$PHP_ZLIB
+      ZLIB_INCDIR=$ZLIB_DIR/develop/headers
     fi
   else 
-    for i in /usr/local /usr $PHP_ZLIB_DIR; do
+    for i in /usr/local /usr /system $PHP_ZLIB_DIR; do
       if test -f $i/include/zlib/zlib.h; then
         ZLIB_DIR=$i
         ZLIB_INCDIR=$i/include/zlib
       elif test -f $i/include/zlib.h; then
         ZLIB_DIR=$i
         ZLIB_INCDIR=$i/include
+      elif test -f $i/develop/headers/zlib.h; then
+        ZLIB_DIR=$i
+        ZLIB_INCDIR=$i/develop/headers
       fi
     done
   fi
@@ -42,7 +48,7 @@ if test "$PHP_ZLIB" != "no" || test "$PHP_ZLIB_DIR" != "no"; then
   esac
 
   AC_MSG_CHECKING([for zlib version >= 1.2.0.4])
-  ZLIB_VERSION=`$EGREP "define ZLIB_VERSION" $ZLIB_DIR/include/zlib.h | $SED -e 's/[[^0-9\.]]//g'`
+  ZLIB_VERSION=`$EGREP "define ZLIB_VERSION" $ZLIB_INCDIR/zlib.h | $SED -e 's/[[^0-9\.]]//g'`
   AC_MSG_RESULT([$ZLIB_VERSION])
   if test `echo $ZLIB_VERSION | $SED -e 's/[[^0-9]]/ /g' | $AWK '{print $1*1000000 + $2*10000 + $3*100 + $4}'` -lt 1020004; then
     AC_MSG_ERROR([libz version greater or equal to 1.2.0.4 required])
