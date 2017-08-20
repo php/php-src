@@ -26,17 +26,23 @@ if test "$PHP_ZIP" != "no"; then
     elif test -f "$PHP_ZLIB_DIR/include/zlib.h"; then
       PHP_ZLIB_DIR="$PHP_ZLIB_DIR"
       PHP_ZLIB_INCDIR="$PHP_ZLIB_DIR/include"
+    elif test -f "$PHP_ZLIB_DIR/develop/headers/zlib.h"; then
+      PHP_ZLIB_DIR="$PHP_ZLIB_DIR"
+      PHP_ZLIB_INCDIR="$PHP_ZLIB_DIR/develop/headers"
     else
       AC_MSG_ERROR([Can not find zlib headers under "$PHP_ZLIB_DIR"])
     fi
   else
-    for i in /usr/local /usr; do
+    for i in /usr/local /usr /system; do
       if test -f "$i/include/zlib/zlib.h"; then
         PHP_ZLIB_DIR="$i"
         PHP_ZLIB_INCDIR="$i/include/zlib"
       elif test -f "$i/include/zlib.h"; then
         PHP_ZLIB_DIR="$i"
         PHP_ZLIB_INCDIR="$i/include"
+      elif test -f "$i/develop/headers/zlib.h"; then
+        PHP_ZLIB_DIR="$i"
+        PHP_ZLIB_INCDIR="$i/develop/headers"
       fi
     done
   fi
@@ -73,9 +79,15 @@ if test "$PHP_ZIP" != "no"; then
       fi
 
     else
-      for i in /usr/local /usr; do
+      for i in /usr/local /usr /system; do
         if test -r $i/include/zip.h; then
           LIBZIP_CFLAGS="-I$i/include"
+          LIBZIP_LIBDIR="$i/$PHP_LIBDIR"
+          AC_MSG_RESULT(in default path: found in $i)
+          break
+        fi
+        if test -r $i/develop/headers/zip.h; then
+          LIBZIP_CFLAGS="-I$i/develop/headers"
           LIBZIP_LIBDIR="$i/$PHP_LIBDIR"
           AC_MSG_RESULT(in default path: found in $i)
           break
