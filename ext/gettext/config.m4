@@ -6,8 +6,9 @@ PHP_ARG_WITH(gettext,for GNU gettext support,
 [  --with-gettext[=DIR]      Include GNU gettext support])
 
 if test "$PHP_GETTEXT" != "no"; then
-  for i in $PHP_GETTEXT /usr/local /usr; do
-    test -r $i/include/libintl.h && GETTEXT_DIR=$i && break
+  for i in $PHP_GETTEXT /usr/local /usr /system; do
+    test -r $i/include/libintl.h && GETTEXT_DIR=$i && GETTEXT_INCDIR=$GETTEXT_DIR/include && break
+    test -r $i/develop/headers/libintl.h && GETTEXT_DIR=$i && GETTEXT_INCDIR=$GETTEXT_DIR/develop/headers && break
   done
 
   if test -z "$GETTEXT_DIR"; then
@@ -15,7 +16,6 @@ if test "$PHP_GETTEXT" != "no"; then
   fi
 
   GETTEXT_LIBDIR=$GETTEXT_DIR/$PHP_LIBDIR
-  GETTEXT_INCDIR=$GETTEXT_DIR/include
   
   O_LDFLAGS=$LDFLAGS
   LDFLAGS="$LDFLAGS -L$GETTEXT_LIBDIR"
