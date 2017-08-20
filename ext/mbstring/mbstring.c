@@ -1740,7 +1740,7 @@ PHP_FUNCTION(mb_language)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &name, &name_len) == FAILURE) {
 		return;
 	}
-	if (name == NULL) {
+	if (name_len == 0) {
 		RETVAL_STRING((char *)mbfl_no_language2name(MBSTRG(language)), 1);
 	} else {
 		if (FAILURE == zend_alter_ini_entry(
