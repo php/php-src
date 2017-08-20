@@ -14,8 +14,9 @@ else
 fi
 
 if test "$PHP_READLINE" && test "$PHP_READLINE" != "no"; then
-  for i in $PHP_READLINE /usr/local /usr; do
+  for i in $PHP_READLINE /usr/local /usr /system; do
     test -f $i/include/readline/readline.h && READLINE_DIR=$i && break
+    test -f $i/develop/headers/readline/readline.h && READLINE_DIR=$i && break
   done
 
   if test -z "$READLINE_DIR"; then
