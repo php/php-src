@@ -31,8 +31,6 @@
 phpt.*
 core
 dynlib.m4
-preflight.sh
-.gitignore
 Makefile
 Makefile.fragments
 Makefile.objects
