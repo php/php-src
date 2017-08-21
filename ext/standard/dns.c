@@ -126,13 +126,13 @@ static zend_string *php_gethostbyname(char *name);
    Get the host name of the current machine */
 PHP_FUNCTION(gethostname)
 {
-	char buf[HOST_NAME_MAX];
+	char buf[HOST_NAME_MAX + 1];
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
-	if (gethostname(buf, sizeof(buf) - 1)) {
+	if (gethostname(buf, sizeof(buf))) {
 		php_error_docref(NULL, E_WARNING, "unable to fetch host [%d]: %s", errno, strerror(errno));
 		RETURN_FALSE;
 	}

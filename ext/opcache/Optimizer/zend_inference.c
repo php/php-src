@@ -3187,10 +3187,10 @@ static int zend_update_type_info(const zend_op_array *op_array,
 			break;
 		case ZEND_GET_CLASS:
 		case ZEND_GET_CALLED_CLASS:
-			UPDATE_SSA_TYPE(MAY_BE_FALSE|MAY_BE_STRING, ssa_ops[i].result_def);
+			UPDATE_SSA_TYPE(MAY_BE_FALSE|MAY_BE_STRING|MAY_BE_RCN, ssa_ops[i].result_def);
 			break;
 		case ZEND_GET_TYPE:
-			UPDATE_SSA_TYPE(MAY_BE_STRING, ssa_ops[i].result_def);
+			UPDATE_SSA_TYPE(MAY_BE_STRING|MAY_BE_RC1|MAY_BE_RCN, ssa_ops[i].result_def);
 			break;
 		case ZEND_TYPE_CHECK:
 		case ZEND_DEFINED:
