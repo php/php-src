@@ -23,6 +23,7 @@
 #include "mysqlnd_statistics.h"
 #include "mysqlnd_debug.h"
 #include "mysqlnd_ext_plugin.h"
+#include "mysqlnd_connection.h"
 #include "php_network.h"
 
 #ifndef PHP_WIN32
@@ -415,28 +416,14 @@ MYSQLND_METHOD(mysqlnd_vio, set_client_option)(MYSQLND_VIO * const net, enum_mys
 			break;
 		}
 		case MYSQL_OPT_TLS_VERSION:
-			if (strlen(value) == sizeof("TLSv1")-1 && strncmp(value, "TLSv1", sizeof("TLSv1")-1) == 0) {
-				net->data->options.ssl_tls_version = STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT;
-			} else if (strstr(value, "TLSv1.") == value && strlen(value) == sizeof("TLSv1.x")-1) {
-				switch (value[sizeof("TLSv1.x")-2]) {
-					case '2':
-						net->data->options.ssl_tls_version = STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT;
-						break;
-					case '1':
-						net->data->options.ssl_tls_version = STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT;
-						break;
-					case '0':
-						// This option is actually not supported by MySQL but lets support it anyway
-						net->data->options.ssl_tls_version = STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT;
-						break;
-					default:
-						net->data->options.ssl_tls_version = STREAM_CRYPTO_METHOD_TLS_ANY_CLIENT;
-						break;
+			{
+				int result = mysqlnd_process_tls_version(value);
+				if (result <= 0) {
+					DBG_RETURN(FAIL);
 				}
-			} else {
-				net->data->options.ssl_tls_version = STREAM_CRYPTO_METHOD_TLS_ANY_CLIENT;
+				net->data->options.ssl_tls_version = result;
+				break;
 			}
-			break;
 		case MYSQL_OPT_READ_TIMEOUT:
 			net->data->options.timeout_read = *(unsigned int*) value;
 			break;

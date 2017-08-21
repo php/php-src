@@ -24,6 +24,7 @@ PHPAPI extern const char * const mysqlnd_out_of_sync;
 PHPAPI extern const char * const mysqlnd_server_gone;
 PHPAPI extern const char * const mysqlnd_out_of_memory;
 
+int mysqlnd_process_tls_version(const char* tls_version);
 
 void mysqlnd_upsert_status_init(MYSQLND_UPSERT_STATUS * const upsert_status);
 

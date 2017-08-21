@@ -2751,6 +2751,50 @@ mysqlnd_connection_init(const size_t client_flags, const zend_bool persistent, M
 }
 /* }}} */
 
+/* {{{ mysqlnd_process_tls_version */
+int mysqlnd_process_tls_version(const char *tls_version)
+{
+	// Based on process_tls_version from mysql-server
+	// see here: https://github.com/mysql/mysql-server/blob/5.7/vio/viosslfactories.c#L433
+	// Difference is that MySQL allows with negative values, basically disallowing a certain tls version instead of allowing
+	const char* separator = ",";
+	char *token, *lasts = NULL;
+
+	unsigned int tls_versions_count = 3;
+	const char *tls_version_name_list[3] = {"TLSv1", "TLSv1.1", "TLSv1.2"};
+	const char default_versions[] = "TLSv1,TLSv1.1,TLSv1.2";
+	const int tls_method_list[3] = {STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT, STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT, STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT};
+	int result = 0;
+
+
+	unsigned int index = 0;
+	char tls_version_option[256] = "";
+	int tls_found = 0;
+
+	if (tls_version == NULL || tls_version[0] == '\0' || strcasecmp(tls_version, default_versions) == 0) {
+		return STREAM_CRYPTO_METHOD_TLS_ANY_CLIENT;
+	}
+
+	if (strlen(tls_version) - 1 > sizeof(tls_version_option)) {
+		return 0;
+	}
+
+	tls_version_option[sizeof(tls_version_option)-1] = '\0';
+	strncpy(tls_version_option, tls_version, sizeof(tls_version_option)-1);
+	token = php_strtok_r(tls_version_option, separator, &lasts);
+	while (token) {
+		for (index = 0; index < tls_versions_count; index++) {
+			if (strcasecmp(tls_version_name_list[index], token) == 0) {
+				result |= tls_method_list[index];
+				break;
+			}
+		}
+		token = php_strtok_r(NULL, separator, &lasts);
+	}
+
+	return result;
+}
+/* }}} */
 
 /*
  * Local variables:
