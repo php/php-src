@@ -2766,10 +2766,8 @@ int mysqlnd_process_tls_version(const char *tls_version)
 	const int tls_method_list[3] = {STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT, STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT, STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT};
 	int result = 0;
 
-
 	unsigned int index = 0;
 	char tls_version_option[256] = "";
-	int tls_found = 0;
 
 	if (tls_version == NULL || tls_version[0] == '\0' || strcasecmp(tls_version, default_versions) == 0) {
 		return STREAM_CRYPTO_METHOD_TLS_ANY_CLIENT;
