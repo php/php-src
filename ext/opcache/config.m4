@@ -461,6 +461,7 @@ fi
 	Optimizer/sccp.c \
 	Optimizer/scdf.c \
 	Optimizer/dce.c \
+	Optimizer/escape_analysis.c \
 	Optimizer/compact_vars.c \
 	Optimizer/zend_dump.c \
 	$ZEND_JIT_SRC,

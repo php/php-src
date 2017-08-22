@@ -341,7 +341,7 @@ PHP_MINIT_FUNCTION(sodium)
 {
 	zend_class_entry ce;
 
-	if (sodium_init() != 0) {
+	if (sodium_init() < 0) {
 		zend_error(E_ERROR, "sodium_init()");
 	}
 

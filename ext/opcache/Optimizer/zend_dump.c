@@ -320,8 +320,11 @@ static void zend_dump_ssa_var(const zend_op_array *op_array, const zend_ssa *ssa
 	zend_dump_var(op_array, (var_num < op_array->last_var ? IS_CV : var_type), var_num);
 
 	if (ssa_var_num >= 0 && ssa->vars) {
-		if (ssa_var_num >= 0 && ssa->vars[ssa_var_num].no_val) {
+		if (ssa->vars[ssa_var_num].no_val) {
 			fprintf(stderr, " NOVAL");
+		}
+		if (ssa->vars[ssa_var_num].escape_state == ESCAPE_STATE_NO_ESCAPE) {
+			fprintf(stderr, " NOESC");
 		}
 		if (ssa->var_info) {
 			zend_dump_ssa_var_info(ssa, ssa_var_num, dump_flags);
