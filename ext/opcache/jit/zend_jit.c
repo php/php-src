@@ -1248,7 +1248,7 @@ static int zend_jit_compute_liveness(zend_op_array *op_array, zend_ssa *ssa, zen
 	}
 
 	if (zend_jit_reg_alloc >= ZEND_JIT_REG_ALLOC_GLOBAL) {
-		/* Register hinting (a cheap way for register coalesing) */
+		/* Register hinting (a cheap way for register coalescing) */
 		for (i = 0; i < ssa->vars_count; i++) {
 			if (intervals[i]) {
 				int var = intervals[i]->ssa_var;
