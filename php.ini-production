@@ -584,6 +584,12 @@ html_errors = On
 ;error_log = php_errors.log
 ; Log errors to syslog (Event Log on Windows).
 ;error_log = syslog
+; Log errors to syslog (Event Log on Windows).
+;error_log = syslog
+; the next two lines ony happen if the previous line sending errors to syslog
+; has been set as well.
+;syslog.ident = php
+;syslog.facility = user
 
 ;windows.show_crt_warning
 ; Default value: 0

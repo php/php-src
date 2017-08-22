@@ -166,6 +166,10 @@ struct _php_core_globals {
 #ifdef PHP_WIN32
 	zend_bool windows_show_crt_warning;
 #endif
+
+	zend_long syslog_facility;
+	char *syslog_ident;
+	zend_bool have_called_openlog;
 };
 
 

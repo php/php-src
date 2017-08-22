@@ -42,6 +42,15 @@ PHPAPI void php_syslog(int priority, const char *format, ...) /* {{{ */
 {
 	va_list args;
 
+	/*
+	 * don't rely on openlog() being called by syslog() if it's
+	 * not already been done; call it ourselves and pass the
+	 * correct parameters!
+	 */
+	if (!PG(have_called_openlog)) {
+		php_openlog(PG(syslog_ident), 0, PG(syslog_facility));
+	}
+
 	va_start(args, format);
 	vsyslog(priority, format, args);
 	va_end(args);
@@ -55,6 +64,15 @@ PHPAPI void php_syslog(int priority, const char *format, ...) /* {{{ */
 	smart_string fbuf = {0};
 	smart_string sbuf = {0};
 	va_list args;
+
+	/*
+	 * don't rely on openlog() being called by syslog() if it's
+	 * not already been done; call it ourselves and pass the
+	 * correct parameters!
+	 */
+	if (!PG(have_called_openlog)) {
+		php_openlog(PG(syslog_ident), 0, PG(syslog_facility));
+	}
 
 	va_start(args, format);
 	zend_printf_to_smart_string(&fbuf, format, args);

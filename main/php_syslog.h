@@ -34,6 +34,7 @@
 
 BEGIN_EXTERN_C()
 PHPAPI void php_syslog(int, const char *format, ...);
+PHPAPI void php_openlog(const char *, int, int);
 END_EXTERN_C()
 
 #endif
