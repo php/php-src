@@ -4723,8 +4723,7 @@ PHP_FUNCTION(timezone_identifiers_list)
 	}
 
 	tzdb = DATE_TIMEZONEDB;
-	item_count = tzdb->index_size;
-	table = tzdb->index;
+	table = timelib_timezone_identifiers_list(tzdb, &item_count);
 
 	array_init(return_value);
 
