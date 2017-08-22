@@ -99,6 +99,13 @@ typedef enum _zend_ssa_alias_kind {
 	HTTP_RESPONSE_HEADER_ALIAS
 } zend_ssa_alias_kind;
 
+typedef enum _zend_ssa_escape_state {
+	ESCAPE_STATE_UNKNOWN,
+	ESCAPE_STATE_NO_ESCAPE,
+	ESCAPE_STATE_FUNCTION_ESCAPE,
+	ESCAPE_STATE_GLOBAL_ESCAPE
+} zend_ssa_escape_state;
+
 typedef struct _zend_ssa_var {
 	int                    var;            /* original var number; op.var for CVs and following numbers for VARs and TMP_VARs */
 	int                    scc;            /* strongly connected component */
@@ -110,6 +117,7 @@ typedef struct _zend_ssa_var {
 	unsigned int           no_val : 1;     /* value doesn't mater (used as op1 in ZEND_ASSIGN) */
 	unsigned int           scc_entry : 1;
 	zend_ssa_alias_kind    alias : 2;  /* value may be changed indirectly */
+	zend_ssa_escape_state  escape_state : 2;
 } zend_ssa_var;
 
 typedef struct _zend_ssa_var_info {
