@@ -12,6 +12,10 @@ PHP                                                                        NEWS
   . Fixed bug #75089 (preg_grep() is not reporting PREG_BAD_UTF8_ERROR after
     first input string). (Dmitry)
 
+- PDO_OCI:
+  . Fixed bug #74631 (PDO_PCO with PHP-FPM: OCI environment initialized
+    before PHP-FPM sets it up). (Ingmar Runge)
+
 - Standard:
   . Fixed bug #75097 (gethostname fails if your host name is 64 chars long). (Andrea)
 
