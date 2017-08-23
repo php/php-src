@@ -477,17 +477,6 @@ void calendar_register_IntlCalendar_class(void)
 	Calendar_handlers.dtor_obj = Calendar_objects_dtor;
 	Calendar_handlers.free_obj = Calendar_objects_free;
 
-	/* Create and register 'IntlGregorianCalendar' class. */
-	INIT_CLASS_ENTRY(ce, "IntlGregorianCalendar", GregorianCalendar_class_functions);
-	GregorianCalendar_ce_ptr = zend_register_internal_class_ex(&ce,
-		Calendar_ce_ptr);
-	if (!GregorianCalendar_ce_ptr) {
-		//can't happen know without bigger problems before
-		php_error_docref0(NULL, E_ERROR,
-			"IntlGregorianCalendar: class registration has failed.");
-		return;
-	}
-
 	/* Declare 'IntlCalendar' class constants */
 #define CALENDAR_DECL_LONG_CONST(name, val) \
 	zend_declare_class_constant_long(Calendar_ce_ptr, name, sizeof(name) - 1, \
@@ -541,5 +530,16 @@ void calendar_register_IntlCalendar_class(void)
 	CALENDAR_DECL_LONG_CONST("WALLTIME_LAST",				UCAL_WALLTIME_LAST);
 	CALENDAR_DECL_LONG_CONST("WALLTIME_NEXT_VALID",			UCAL_WALLTIME_NEXT_VALID);
 #endif
+
+	/* Create and register 'IntlGregorianCalendar' class. */
+	INIT_CLASS_ENTRY(ce, "IntlGregorianCalendar", GregorianCalendar_class_functions);
+	GregorianCalendar_ce_ptr = zend_register_internal_class_ex(&ce,
+		Calendar_ce_ptr);
+	if (!GregorianCalendar_ce_ptr) {
+		//can't happen know without bigger problems before
+		php_error_docref0(NULL, E_ERROR,
+			"IntlGregorianCalendar: class registration has failed.");
+		return;
+	}
 }
 /* }}} */
