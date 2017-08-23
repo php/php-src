@@ -497,7 +497,7 @@ again:
 				smart_str_appendc(buf, '\n');
 				buffer_append_spaces(buf, level - 1);
 			}
-			smart_str_appendl(buf, "array (\n", 8);
+			smart_str_appendl(buf, "[\n", 2);
 			ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, val) {
 				php_array_element_export(val, index, key, level, buf);
 			} ZEND_HASH_FOREACH_END();
@@ -507,7 +507,7 @@ again:
 			if (level > 1) {
 				buffer_append_spaces(buf, level - 1);
 			}
-			smart_str_appendc(buf, ')');
+			smart_str_appendc(buf, ']');
 
 			break;
 
@@ -528,7 +528,7 @@ again:
 			}
 
 			smart_str_append(buf, Z_OBJCE_P(struc)->name);
-			smart_str_appendl(buf, "::__set_state(array(\n", 21);
+			smart_str_appendl(buf, "::__set_state([\n", 16);
 
 			if (myht) {
 				ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, val) {
@@ -539,7 +539,7 @@ again:
 			if (level > 1) {
 				buffer_append_spaces(buf, level - 1);
 			}
-			smart_str_appendl(buf, "))", 2);
+			smart_str_appendl(buf, "])", 2);
 
 			break;
 		case IS_REFERENCE:
