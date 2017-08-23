@@ -26,6 +26,15 @@
 
 /* $Id$ */
 
+define('INIT_DIR', getcwd());
+
+// change into the PHP source directory.
+if (getenv('TEST_PHP_SRCDIR')) {
+	@chdir(getenv('TEST_PHP_SRCDIR'));
+}
+define('TEST_PHP_SRCDIR', getcwd());
+
+
 /* Sanity check to ensure that pcre extension needed by this script is available.
  * In the event it is not, print a nice error message indicating that this script will
  * not run without it.
@@ -64,22 +73,12 @@ if (ini_get('date.timezone') == '') {
 	date_default_timezone_set('UTC');
 }
 
-// store current directory
-$CUR_DIR = getcwd();
-
-// change into the PHP source directory.
-
-if (getenv('TEST_PHP_SRCDIR')) {
-	@chdir(getenv('TEST_PHP_SRCDIR'));
-}
-
 // Delete some security related environment variables
 putenv('SSH_CLIENT=deleted');
 putenv('SSH_AUTH_SOCK=deleted');
 putenv('SSH_TTY=deleted');
 putenv('SSH_CONNECTION=deleted');
 
-$cwd = getcwd();
 set_time_limit(0);
 
 ini_set('pcre.backtrack_limit', PHP_INT_MAX);
@@ -132,11 +131,11 @@ if (getenv('TEST_PHP_EXECUTABLE')) {
 	$php = getenv('TEST_PHP_EXECUTABLE');
 
 	if ($php=='auto') {
-		$php = $cwd . '/sapi/cli/php';
+		$php = TEST_PHP_SRCDIR . '/sapi/cli/php';
 		putenv("TEST_PHP_EXECUTABLE=$php");
 
 		if (!getenv('TEST_PHP_CGI_EXECUTABLE')) {
-			$php_cgi = $cwd . '/sapi/cgi/php-cgi';
+			$php_cgi = TEST_PHP_SRCDIR . '/sapi/cgi/php-cgi';
 
 			if (file_exists($php_cgi)) {
 				putenv("TEST_PHP_CGI_EXECUTABLE=$php_cgi");
@@ -152,7 +151,7 @@ if (getenv('TEST_PHP_CGI_EXECUTABLE')) {
 	$php_cgi = getenv('TEST_PHP_CGI_EXECUTABLE');
 
 	if ($php_cgi=='auto') {
-		$php_cgi = $cwd . '/sapi/cgi/php-cgi';
+		$php_cgi = TEST_PHP_SRCDIR . '/sapi/cgi/php-cgi';
 		putenv("TEST_PHP_CGI_EXECUTABLE=$php_cgi");
 	}
 
@@ -180,7 +179,7 @@ if (getenv('TEST_PHPDBG_EXECUTABLE')) {
 	$phpdbg = getenv('TEST_PHPDBG_EXECUTABLE');
 
 	if ($phpdbg=='auto') {
-		$phpdbg = $cwd . '/sapi/phpdbg/phpdbg';
+		$phpdbg = TEST_PHP_SRCDIR . '/sapi/phpdbg/phpdbg';
 		putenv("TEST_PHPDBG_EXECUTABLE=$phpdbg");
 	}
 
@@ -261,7 +260,7 @@ $no_file_cache = '-d opcache.file_cache= -d opcache.file_cache_only=0';
 
 function write_information()
 {
-	global $cwd, $php, $php_cgi, $phpdbg, $php_info, $user_tests, $ini_overwrites, $pass_options, $exts_to_test, $leak_check, $valgrind_header, $no_file_cache;
+	global $php, $php_cgi, $phpdbg, $php_info, $user_tests, $ini_overwrites, $pass_options, $exts_to_test, $leak_check, $valgrind_header, $no_file_cache;
 
 	// Get info from php
 	$info_file = __DIR__ . '/run-test-info.php';
@@ -328,7 +327,7 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
 	echo "
 =====================================================================
 PHP         : $php $php_info $php_cgi_info $phpdbg_info
-CWD         : $cwd
+CWD         : ".TEST_PHP_SRCDIR."
 Extra dirs  : ";
 	foreach ($user_tests as $test_dir) {
 		echo "{$test_dir}\n              ";
@@ -347,7 +346,7 @@ define('TRAVIS_CI' , (bool) getenv('TRAVIS'));
 function save_or_mail_results()
 {
 	global $sum_results, $just_save_results, $failed_test_summary,
-		   $PHP_FAILED_TESTS, $CUR_DIR, $php, $output_file;
+		   $PHP_FAILED_TESTS, $php, $output_file;
 
 	/* We got failed Tests, offer the user to send an e-mail to QA team, unless NO_INTERACTION is set */
 	if (!getenv('NO_INTERACTION') && !TRAVIS_CI) {
@@ -419,7 +418,7 @@ function save_or_mail_results()
 				}
 
 				/* Always use the generated libtool - Mac OSX uses 'glibtool' */
-				$libtool = shell_exec($CUR_DIR . '/libtool --version');
+				$libtool = shell_exec(INIT_DIR . '/libtool --version');
 
 				/* Use shtool to find out if there is glibtool present (MacOSX) */
 				$sys_libtool_path = shell_exec(__DIR__ . '/build/shtool path glibtool libtool');
@@ -487,7 +486,7 @@ $failed_tests_file= false;
 $pass_option_n = false;
 $pass_options = '';
 
-$output_file = $CUR_DIR . '/php_test_results_' . date('Ymd_Hi') . '.txt';
+$output_file = INIT_DIR . '/php_test_results_' . date('Ymd_Hi') . '.txt';
 
 $just_save_results = false;
 $leak_check = false;
@@ -908,7 +907,7 @@ foreach ($exts_to_test as $key => $val) {
 }
 
 foreach ($test_dirs as $dir) {
-	find_files("{$cwd}/{$dir}", ($dir == 'ext'));
+	find_files(TEST_PHP_SRCDIR."/{$dir}", ($dir == 'ext'));
 }
 
 foreach ($user_tests as $dir) {
@@ -962,13 +961,11 @@ function test_name($name)
 
 function test_sort($a, $b)
 {
-	global $cwd;
-
 	$a = test_name($a);
 	$b = test_name($b);
 
-	$ta = strpos($a, "{$cwd}/tests") === 0 ? 1 + (strpos($a, "{$cwd}/tests/run-test") === 0 ? 1 : 0) : 0;
-	$tb = strpos($b, "{$cwd}/tests") === 0 ? 1 + (strpos($b, "{$cwd}/tests/run-test") === 0 ? 1 : 0) : 0;
+	$ta = strpos($a, TEST_PHP_SRCDIR."/tests") === 0 ? 1 + (strpos($a, TEST_PHP_SRCDIR."/tests/run-test") === 0 ? 1 : 0) : 0;
+	$tb = strpos($b, TEST_PHP_SRCDIR."/tests") === 0 ? 1 + (strpos($b, TEST_PHP_SRCDIR."/tests/run-test") === 0 ? 1 : 0) : 0;
 
 	if ($ta == $tb) {
 		return strcmp($a, $b);
@@ -1116,7 +1113,7 @@ function error_report($testname, $logname, $tested)
 
 function system_with_timeout($commandline, $env = null, $stdin = null, $captureStdIn = true, $captureStdOut = true, $captureStdErr = true)
 {
-	global $leak_check, $cwd;
+	global $leak_check;
 
 	$data = '';
 
@@ -1135,7 +1132,7 @@ function system_with_timeout($commandline, $env = null, $stdin = null, $captureS
 	if ($captureStdErr) {
 		$descriptorspec[2] = array('pipe', 'w');
 	}
-	$proc = proc_open($commandline, $descriptorspec, $pipes, $cwd, $bin_env, array('suppress_errors' => true, 'binary_pipes' => true));
+	$proc = proc_open($commandline, $descriptorspec, $pipes, TEST_PHP_SRCDIR, $bin_env, array('suppress_errors' => true, 'binary_pipes' => true));
 
 	if (!$proc) {
 		return false;
@@ -1251,7 +1248,7 @@ function show_file_block($file, $block, $section = null)
 //
 function run_test($php, $file, $env)
 {
-	global $log_format, $ini_overwrites, $cwd, $PHP_FAILED_TESTS;
+	global $log_format, $ini_overwrites, $PHP_FAILED_TESTS;
 	global $pass_options, $DETAILED, $IN_REDIRECT, $test_cnt, $test_idx;
 	global $leak_check, $temp_source, $temp_target, $cfg, $environment;
 	global $no_clean;
@@ -1390,7 +1387,7 @@ TEST $file
 	}
 	fclose($fp);
 
-	$shortname = str_replace($cwd . '/', '', $file);
+	$shortname = str_replace(TEST_PHP_SRCDIR . '/', '', $file);
 	$tested_file = $shortname;
 
 	if ($borked) {
@@ -2269,7 +2266,7 @@ $output
 
 	$diff = empty($diff) ? '' : preg_replace('/\e/', '<esc>', $diff);
 
-	junit_mark_test_as($restype, str_replace($cwd . '/', '', $tested_file), $tested, null, $info, $diff);
+	junit_mark_test_as($restype, str_replace(TEST_PHP_SRCDIR . '/', '', $tested_file), $tested, null, $info, $diff);
 
 	return $restype[0] . 'ED';
 }
