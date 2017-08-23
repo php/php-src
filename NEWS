@@ -8,6 +8,10 @@ PHP                                                                        NEWS
 - CURL:
   . Fixed bug #75093 (OpenSSL support not detected). (Remi)
 
+- Intl:
+  . Fixed bug #75090 (IntlGregorianCalendar doesn't have constants from parent
+    class). (tpunt)
+
 - PDO_OCI:
   . Fixed bug #74631 (PDO_PCO with PHP-FPM: OCI environment initialized
     before PHP-FPM sets it up). (Ingmar Runge)
