@@ -1183,7 +1183,7 @@ PHP_FUNCTION(sodium_crypto_box_open)
 	}
 	if (keypair_len != crypto_box_SECRETKEYBYTES + crypto_box_PUBLICKEYBYTES) {
 		zend_throw_exception(sodium_exception_ce,
-				   "keypair size should be SODIUM_CRYPTO_BOX_KEYBYTES bytes",
+				   "keypair size should be SODIUM_CRYPTO_BOX_KEYPAIRBYTES bytes",
 				   0);
 		return;
 	}
@@ -1259,7 +1259,7 @@ PHP_FUNCTION(sodium_crypto_box_seal_open)
 	}
 	if (keypair_len != crypto_box_SECRETKEYBYTES + crypto_box_PUBLICKEYBYTES) {
 		zend_throw_exception(sodium_exception_ce,
-				   "keypair size should be SODIUM_CRYPTO_BOX_KEYBYTES bytes",
+				   "keypair size should be SODIUM_CRYPTO_BOX_KEYPAIRBYTES bytes",
 				   0);
 		return;
 	}
