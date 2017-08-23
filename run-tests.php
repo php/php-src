@@ -83,9 +83,6 @@ set_time_limit(0);
 
 ini_set('pcre.backtrack_limit', PHP_INT_MAX);
 
-$valgrind_version = 0;
-$valgrind_header = '';
-
 // delete as much output buffers as possible
 while(@ob_end_clean());
 if (ob_get_level()) echo "Not all buffers were deleted.\n";
@@ -260,7 +257,7 @@ $no_file_cache = '-d opcache.file_cache= -d opcache.file_cache_only=0';
 
 function write_information()
 {
-	global $php, $php_cgi, $phpdbg, $php_info, $user_tests, $ini_overwrites, $pass_options, $exts_to_test, $leak_check, $valgrind_header, $no_file_cache;
+	global $php, $php_cgi, $phpdbg, $php_info, $user_tests, $ini_overwrites, $pass_options, $exts_to_test, $valgrind, $no_file_cache;
 
 	// Get info from php
 	$info_file = __DIR__ . '/run-test-info.php';
@@ -333,7 +330,7 @@ Extra dirs  : ";
 		echo "{$test_dir}\n              ";
 	}
 	echo "
-VALGRIND    : " . ($leak_check ? $valgrind_header : 'Not used') . "
+VALGRIND    : " . ($valgrind ? $valgrind->getHeader() : 'Not used') . "
 =====================================================================
 ";
 }
@@ -489,7 +486,7 @@ $pass_options = '';
 $output_file = INIT_DIR . '/php_test_results_' . date('Ymd_Hi') . '.txt';
 
 $just_save_results = false;
-$leak_check = false;
+$valgrind = null;
 $html_output = false;
 $html_file = null;
 $temp_source = null;
@@ -602,19 +599,7 @@ if (isset($argc) && $argc > 1) {
 					break;
 				//case 'l'
 				case 'm':
-					$leak_check = true;
-					$valgrind_cmd = "valgrind --version";
-					$valgrind_header = system_with_timeout($valgrind_cmd, $environment);
-					$replace_count = 0;
-					if (!$valgrind_header) {
-						error("Valgrind returned no version info, cannot proceed.\nPlease check if Valgrind is installed.");
-					} else {
-						$valgrind_version = preg_replace("/valgrind-(\d+)\.(\d+)\.(\d+)([.\w_-]+)?(\s+)/", '$1.$2.$3', $valgrind_header, 1, $replace_count);
-						if ($replace_count != 1) {
-							error("Valgrind returned invalid version info (\"$valgrind_header\"), cannot proceed.");
-						}
-						$valgrind_header = trim($valgrind_header);
-					}
+					$valgrind = new RuntestsValgrind($environment);
 					break;
 				case 'n':
 					if (!$pass_option_n) {
@@ -1113,7 +1098,7 @@ function error_report($testname, $logname, $tested)
 
 function system_with_timeout($commandline, $env = null, $stdin = null, $captureStdIn = true, $captureStdOut = true, $captureStdErr = true)
 {
-	global $leak_check;
+	global $valgrind;
 
 	$data = '';
 
@@ -1146,7 +1131,7 @@ function system_with_timeout($commandline, $env = null, $stdin = null, $captureS
 		unset($pipes[0]);
 	}
 
-	$timeout = $leak_check ? 300 : (isset($env['TEST_TIMEOUT']) ? $env['TEST_TIMEOUT'] : 60);
+	$timeout = $valgrind ? 300 : (isset($env['TEST_TIMEOUT']) ? $env['TEST_TIMEOUT'] : 60);
 
 	while (true) {
 		/* hide errors from interrupted syscalls */
@@ -1250,9 +1235,8 @@ function run_test($php, $file, $env)
 {
 	global $log_format, $ini_overwrites, $PHP_FAILED_TESTS;
 	global $pass_options, $DETAILED, $IN_REDIRECT, $test_cnt, $test_idx;
-	global $leak_check, $temp_source, $temp_target, $cfg, $environment;
+	global $valgrind, $temp_source, $temp_target, $cfg, $environment;
 	global $no_clean;
-	global $valgrind_version;
 	global $SHOW_ONLY_GROUPS;
 	global $no_file_cache;
 	global $slow_min_ms;
@@ -1617,7 +1601,7 @@ TEST $file
 			$extra = substr(PHP_OS, 0, 3) !== "WIN" ?
 				"unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;": "";
 
-			if ($leak_check) {
+			if ($valgrind) {
 				$env['USE_ZEND_ALLOC'] = '0';
 				$env['ZEND_DONT_UNLOAD_MODULES'] = 1;
 			} else {
@@ -1912,25 +1896,11 @@ TEST $file
 		$cmd = "$php $pass_options $ini_settings -f \"$test_file\" $args$cmdRedirect";
 	}
 
-	if ($leak_check) {
+	if ($valgrind) {
 		$env['USE_ZEND_ALLOC'] = '0';
 		$env['ZEND_DONT_UNLOAD_MODULES'] = 1;
 
-		$valgrind_cmd = "valgrind -q --tool=memcheck --trace-children=yes";
-		if (strpos($test_file, "pcre") !== false) {
-			$valgrind_cmd .= " --smc-check=all";
-		}
-
-		/* --vex-iropt-register-updates=allregs-at-mem-access is necessary for phpdbg watchpoint tests */
-		if (version_compare($valgrind_version, '3.8.0', '>=')) {
-			/* valgrind 3.3.0+ doesn't have --log-file-exactly option */
-			$cmd = "$valgrind_cmd --vex-iropt-register-updates=allregs-at-mem-access --log-file=$memcheck_filename $cmd";
-		} elseif (version_compare($valgrind_version, '3.3.0', '>=')) {
-			$cmd = "$valgrind_cmd --vex-iropt-precise-memory-exns=yes --log-file=$memcheck_filename $cmd";
-		} else {
-			$cmd = "$valgrind_cmd --vex-iropt-precise-memory-exns=yes --log-file-exactly=$memcheck_filename $cmd";
-		}
-
+		$cmd = $valgrind->wrapCommand($cmd, $memcheck_filename, strpos($test_file, "pcre") !== false);
 	} else {
 		$env['USE_ZEND_ALLOC'] = '1';
 		$env['ZEND_DONT_UNLOAD_MODULES'] = 0;
@@ -1991,7 +1961,7 @@ COMMAND $cmd
 	$leaked = false;
 	$passed = false;
 
-	if ($leak_check) { // leak check
+	if ($valgrind) { // leak check
 		$leaked = filesize($memcheck_filename) > 0;
 
 		if (!$leaked) {
@@ -2487,7 +2457,7 @@ function compute_summary()
 
 function get_summary($show_ext_summary, $show_html)
 {
-	global $exts_skipped, $exts_tested, $n_total, $sum_results, $percent_results, $end_time, $start_time, $failed_test_summary, $PHP_FAILED_TESTS, $leak_check;
+	global $exts_skipped, $exts_tested, $n_total, $sum_results, $percent_results, $end_time, $start_time, $failed_test_summary, $PHP_FAILED_TESTS, $valgrind;
 
 	$x_total = $n_total - $sum_results['SKIPPED'] - $sum_results['BORKED'];
 
@@ -2532,7 +2502,7 @@ Tests warned    : ' . sprintf('%4d (%5.1f%%)', $sum_results['WARNED'], $percent_
 Tests failed    : ' . sprintf('%4d (%5.1f%%)', $sum_results['FAILED'], $percent_results['FAILED']) . ' ' . sprintf('(%5.1f%%)', $x_failed) . '
 Expected fail   : ' . sprintf('%4d (%5.1f%%)', $sum_results['XFAILED'], $percent_results['XFAILED']) . ' ' . sprintf('(%5.1f%%)', $x_xfailed);
 
-	if ($leak_check) {
+	if ($valgrind) {
 		$summary .= '
 Tests leaked    : ' . sprintf('%4d (%5.1f%%)', $sum_results['LEAKED'], $percent_results['LEAKED']) . ' ' . sprintf('(%5.1f%%)', $x_leaked);
 	}
@@ -2973,6 +2943,54 @@ function junit_finish_timer($file_name) {
 	$start = $JUNIT['files'][$file_name]['start'];
 	$JUNIT['files'][$file_name]['total'] += microtime(true) - $start;
 	unset($JUNIT['files'][$file_name]['start']);
+}
+
+class RuntestsValgrind {
+	protected $version = '';
+	protected $header = '';
+	protected $version_3_3_0 = false;
+	protected $verison_3_8_0 = false;
+
+	public function getVersion() {
+		return $this->version;
+	}
+
+	public function getHeader() {
+		return $this->header;
+	}
+
+	public function __construct(array $environment) {
+	    $header = system_with_timeout('valgrind --version', $environment);
+		if (!$header) {
+			error("Valgrind returned no version info, cannot proceed.\nPlease check if Valgrind is installed.");
+		}
+		$count = 0;
+		$version = preg_replace("/valgrind-(\d+)\.(\d+)\.(\d+)([.\w_-]+)?(\s+)/", '$1.$2.$3', $header, 1, $count);
+		if ($count != 1) {
+			error("Valgrind returned invalid version info (\"{$header}\"), cannot proceed.");
+		}
+		$this->version = $version;
+		$this->header = trim($header);
+		$this->version_3_3_0 = version_compare($version, '3.3.0', '>=');
+		$this->version_3_8_0 = version_compare($version, '3.8.0', '>=');
+	}
+
+    public function wrapCommand($cmd, $memcheck_filename, $check_all) {
+		$vcmd = 'valgrind -q --tool=memcheck --trace-children=yes';
+		if ($check_all) {
+			$vcmd .= ' --smc-check=all';
+		}
+
+		/* --vex-iropt-register-updates=allregs-at-mem-access is necessary for phpdbg watchpoint tests */
+		if ($this->version_3_8_0) {
+			/* valgrind 3.3.0+ doesn't have --log-file-exactly option */
+			return "$vcmd --vex-iropt-register-updates=allregs-at-mem-access --log-file=$memcheck_filename $cmd";
+		} elseif ($this->version_3_3_0) {
+			return "$vcmd --vex-iropt-precise-memory-exns=yes --log-file=$memcheck_filename $cmd";
+		} else {
+			return "$vcmd --vex-iropt-precise-memory-exns=yes --log-file-exactly=$memcheck_filename $cmd";
+		}
+	}
 }
 
 /*
