@@ -2899,7 +2899,7 @@ long_str:
 			goto err;
 		}
 
-		lstep = step;
+		lstep = (zend_ulong)step;
 
 		Z_TYPE_INFO(tmp) = IS_LONG;
 		if (low > high) { 		/* Negative steps */
@@ -3992,7 +3992,7 @@ PHP_FUNCTION(array_keys)
 			if (HT_IS_PACKED(arrval) && HT_IS_WITHOUT_HOLES(arrval)) {
 				/* Optimistic case: range(0..n-1) for vector-like packed array */
 				ZVAL_LONG(&new_val, 0);
-				for (; Z_LVAL(new_val) < elem_count; ++Z_LVAL(new_val)) {
+				for (; (zend_ulong)Z_LVAL(new_val) < elem_count; ++Z_LVAL(new_val)) {
 					ZEND_HASH_FILL_ADD(&new_val);
 				}
 			} else {
@@ -5738,7 +5738,7 @@ PHP_FUNCTION(array_rand)
 	if (num_req == 1) {
 		HashTable *ht = Z_ARRVAL_P(input);
 
-		if (num_avail < ht->nNumUsed - (ht->nNumUsed>>1)) {
+		if ((uint32_t)num_avail < ht->nNumUsed - (ht->nNumUsed>>1)) {
 			/* If less than 1/2 of elements are used, don't sample. Instead search for a
 			 * specific offset using linear scan. */
 			zend_long i = 0, randval = php_mt_rand_range(0, num_avail - 1);

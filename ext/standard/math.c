@@ -1193,7 +1193,7 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 	 * we requested due to internal buffer limitations */
 	if (dec) {
 		size_t declen = (dp ? s - dp : 0);
-		size_t topad = dec > declen ? dec - declen : 0;
+		size_t topad = (size_t)dec > declen ? dec - declen : 0;
 
 		/* pad with '0's */
 		while (topad--) {

@@ -902,7 +902,7 @@ static inline int php_url_scanner_reset_var_impl(zend_string *name, int encode, 
 	}
 	/* Check preceeding separator */
 	if (!sep_removed
-		&& start - PG(arg_separator).output >= separator_len
+		&& (size_t)(start - PG(arg_separator).output) >= separator_len
 		&& !memcmp(start - separator_len, PG(arg_separator).output, separator_len)) {
 		start -= separator_len;
 	}
