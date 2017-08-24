@@ -85,6 +85,7 @@ static ZEND_FUNCTION(gc_collect_cycles);
 static ZEND_FUNCTION(gc_enabled);
 static ZEND_FUNCTION(gc_enable);
 static ZEND_FUNCTION(gc_disable);
+static ZEND_FUNCTION(gc_hint);
 
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO(arginfo_zend__void, 0)
@@ -228,6 +229,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_extension_loaded, 0, 0, 1)
 	ZEND_ARG_INFO(0, extension_name)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_gc_hint, 0, 0, 2)
+	ZEND_ARG_INFO(1, val)
+	ZEND_ARG_INFO(0, collectable)
+ZEND_END_ARG_INFO()
+
 /* }}} */
 
 static const zend_function_entry builtin_functions[] = { /* {{{ */
@@ -289,6 +295,7 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(gc_enabled, 		arginfo_zend__void)
 	ZEND_FE(gc_enable, 		arginfo_zend__void)
 	ZEND_FE(gc_disable, 		arginfo_zend__void)
+	ZEND_FE(gc_hint, 		arginfo_gc_hint)
 	ZEND_FE_END
 };
 /* }}} */
@@ -378,6 +385,32 @@ ZEND_FUNCTION(gc_disable)
 	zend_string *key = zend_string_init("zend.enable_gc", sizeof("zend.enable_gc")-1, 0);
 	zend_alter_ini_entry_chars(key, "0", sizeof("0")-1, ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
 	zend_string_release(key);
+}
+/* }}} */
+
+/* {{{ proto void gc_hint($val, bool $collectable)
+   Deactivates/Activates the circular reference collector for certain zval */
+ZEND_FUNCTION(gc_hint)
+{
+	zval *val = NULL;
+	zend_refcounted *ref = NULL;
+	zend_bool collectable = 1;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ZVAL_EX(val, 1, 0)
+		Z_PARAM_BOOL(collectable)
+	ZEND_PARSE_PARAMETERS_END();
+
+	val = Z_REFVAL_P(val);
+
+	if (Z_REFCOUNTED_P(val)) {
+		ref = Z_COUNTED_P(val);
+		if (!collectable && GC_MAY_LEAK(ref)) {
+			GC_FLAGS(ref) &= ~GC_COLLECTABLE;
+		} else if (collectable && (GC_TYPE_INFO(ref) & (IS_ARRAY|IS_OBJECT))) {
+			GC_FLAGS(ref) ^= GC_COLLECTABLE;
+		}
+	}
 }
 /* }}} */
 
@@ -480,7 +513,7 @@ ZEND_FUNCTION(func_get_args)
 					q = p;
 					if (EXPECTED(Z_TYPE_INFO_P(q) != IS_UNDEF)) {
 						ZVAL_DEREF(q);
-						if (Z_OPT_REFCOUNTED_P(q)) { 
+						if (Z_OPT_REFCOUNTED_P(q)) {
 							Z_ADDREF_P(q);
 						}
 					} else {
@@ -496,7 +529,7 @@ ZEND_FUNCTION(func_get_args)
 				q = p;
 				if (EXPECTED(Z_TYPE_INFO_P(q) != IS_UNDEF)) {
 					ZVAL_DEREF(q);
-					if (Z_OPT_REFCOUNTED_P(q)) { 
+					if (Z_OPT_REFCOUNTED_P(q)) {
 						Z_ADDREF_P(q);
 					}
 				} else {
@@ -1275,7 +1308,7 @@ ZEND_FUNCTION(method_exists)
 		Z_PARAM_ZVAL(klass)
 		Z_PARAM_STR(method_name)
 	ZEND_PARSE_PARAMETERS_END();
-	
+
 	if (Z_TYPE_P(klass) == IS_OBJECT) {
 		ce = Z_OBJCE_P(klass);
 	} else if (Z_TYPE_P(klass) == IS_STRING) {
