@@ -1415,6 +1415,9 @@ PHP_MINIT_FUNCTION(openssl)
 	le_x509 = zend_register_list_destructors_ex(php_openssl_x509_free, NULL, "OpenSSL X.509", module_number);
 	le_csr = zend_register_list_destructors_ex(php_openssl_csr_free, NULL, "OpenSSL X.509 CSR", module_number);
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+	OPENSSL_config(NULL); /* already called by OpenSSL_add_all_algorithms() in 1.1 */
+#endif
 	SSL_library_init();
 	OpenSSL_add_all_ciphers();
 	OpenSSL_add_all_digests();
@@ -1597,6 +1600,9 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 	CRYPTO_set_locking_callback(NULL);
 	/* free allocated error strings */
 	ERR_free_strings();
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+	CONF_modules_free(); /* needed when OPENSSL_config is called in MINIT */
+#endif
 
 	php_unregister_url_stream_wrapper("https");
 	php_unregister_url_stream_wrapper("ftps");
