@@ -13,6 +13,9 @@ $a = array();
 $conf = array('config' => dirname(__FILE__) . DIRECTORY_SEPARATOR . 'openssl.cnf');
 var_dump(openssl_csr_new(array(), $a, $conf, array()));
 
+$wrongfile = "file://" . dirname(__FILE__) . "/nonexistant.key";
+var_dump(openssl_csr_new(["countryName" => "NL"], $wrongfile, $conf));
+
 // this leaks
 $a = array(1,2);
 $b = array(1,2);
@@ -22,6 +25,8 @@ var_dump(openssl_csr_new($a, $b, $conf));
 $x = openssl_pkey_new($conf);
 var_dump(openssl_csr_new(["countryName" => "DE"], $x, $conf + ["x509_extensions" => 0xDEADBEEF]));
 
+$privkey = 'file://' . dirname(__FILE__) . '/private_rsa_2048.key';
+var_dump(openssl_csr_new(["countryName" => "DE"], $privkey, $conf + ["x509_extensions" => 0xDEADBEEF]));
 
 echo "Done\n";
 ?>
@@ -36,6 +41,10 @@ Warning: openssl_csr_new(): key array must be of the form array(0 => key, 1 => p
 
 Warning: openssl_csr_new(): add1_attr_by_txt challengePassword_min -> 4 (failed; check error queue and value of string_mask OpenSSL option if illegal characters are reported) in %s on line %d
 bool(false)
+
+Warning: openssl_csr_new(): error opening file %s in %s on line %d
+resource(%d) of type (OpenSSL X.509 CSR)
+resource(%d) of type (OpenSSL X.509 CSR)
 resource(%d) of type (OpenSSL X.509 CSR)
 resource(%d) of type (OpenSSL X.509 CSR)
 Done

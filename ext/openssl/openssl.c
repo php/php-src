@@ -3836,6 +3836,9 @@ static EVP_PKEY * php_openssl_evp_from_zval(
 			}
 
 			if (in == NULL) {
+				if (filename) {
+					php_error_docref(NULL, E_WARNING, "error opening file %s", filename);
+				}
 				TMP_CLEAN;
 			}
 			if (passphrase == NULL) {
