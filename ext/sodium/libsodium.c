@@ -66,7 +66,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(AI_StringAndLength, 0, 0, 2)
 	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, key)
+	ZEND_ARG_INFO(0, length)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(AI_StringAndKeyPair, 0, 0, 2)
