@@ -2,7 +2,7 @@ ARG_ENABLE("opcache", "whether to enable Zend OPcache support", "yes");
 
 ARG_ENABLE("opcache-file", "whether to enable file based caching", "yes");
 
-var PHP_OPCACHE_PGO = false;
+/* var PHP_OPCACHE_PGO = false; */
 
 if (PHP_OPCACHE != "no") {
 
@@ -29,4 +29,4 @@ if (PHP_OPCACHE != "no") {
 	ADD_FLAG('CFLAGS_OPCACHE', "/I " + configure_module_dirname);
 
 }
-	
+
