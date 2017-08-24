@@ -64,6 +64,11 @@ ZEND_BEGIN_ARG_INFO_EX(AI_StringAndKey, 0, 0, 2)
 	ZEND_ARG_INFO(0, key)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(AI_StringAndLength, 0, 0, 2)
+	ZEND_ARG_INFO(0, string)
+	ZEND_ARG_INFO(0, key)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(AI_StringAndKeyPair, 0, 0, 2)
 	ZEND_ARG_INFO(0, string)
 	ZEND_ARG_INFO(0, keypair)
@@ -279,6 +284,9 @@ const zend_function_entry sodium_functions[] = {
 	PHP_FE(sodium_crypto_kdf_keygen, AI_None)
 	PHP_FE(sodium_crypto_shorthash_keygen, AI_None)
 	PHP_FE(sodium_crypto_stream_keygen, AI_None)
+
+	PHP_FE(sodium_pad, AI_StringAndLength)
+	PHP_FE(sodium_unpad, AI_StringAndLength)
 
 	PHP_FALIAS(sodium_crypto_scalarmult_base, sodium_crypto_box_publickey_from_secretkey, AI_TwoStrings)
 
@@ -3116,6 +3124,141 @@ PHP_FUNCTION(sodium_crypto_kdf_derive_from_key)
 	ZSTR_VAL(subkey)[subkey_len] = 0;
 
 	RETURN_STR(subkey);
+}
+
+PHP_FUNCTION(sodium_pad)
+{
+	zend_string    *padded;
+	char           *unpadded;
+	zend_long       blocksize;
+	volatile size_t st;
+	size_t          i, j, k;
+	size_t          unpadded_len;
+	size_t          xpadlen;
+	size_t          xpadded_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl",
+							  &unpadded, &unpadded_len, &blocksize) == FAILURE) {
+		sodium_remove_param_values_from_backtrace(EG(exception));
+		return;
+	}
+	if (blocksize <= 0) {
+		zend_throw_exception(sodium_exception_ce, "block size cannot be less than 1", 0);
+		return;
+	}
+	if (blocksize > SIZE_MAX) {
+		zend_throw_exception(sodium_exception_ce, "block size is too large", 0);
+		return;
+	}
+	xpadlen = blocksize - 1U;
+	if ((blocksize & (blocksize - 1U)) == 0U) {
+		xpadlen -= unpadded_len & ((size_t) blocksize - 1U);
+	} else {
+		xpadlen -= unpadded_len % (size_t) blocksize;
+	}
+	if ((size_t) SIZE_MAX - unpadded_len <= xpadlen) {
+		zend_throw_exception(sodium_exception_ce, "input is too large", 0);
+		return;
+	}
+	xpadded_len = unpadded_len + xpadlen;
+	padded = zend_string_alloc(xpadded_len + 1U, 0);
+	st = 1U;
+	i = 0U;
+	k = unpadded_len;
+	for (j = 0U; j <= xpadded_len; j++) {
+		ZSTR_VAL(padded)[j] = unpadded[i];
+		k -= st;
+		st = (~(((((k >> 48) | (k >> 32) | (k >> 16) | k) & 0xffff) - 1U) >> 16)) & 1U;
+		i += st;
+	}
+#if SODIUM_LIBRARY_VERSION_MAJOR > 9 || (SODIUM_LIBRARY_VERSION_MAJOR == 9 && SODIUM_LIBRARY_VERSION_MINOR >= 6)
+	if (sodium_pad(NULL, (unsigned char *) ZSTR_VAL(padded), unpadded_len,
+				   (size_t) blocksize, xpadded_len + 1U) != 0) {
+		zend_throw_exception(sodium_exception_ce, "internal error", 0);
+		return;
+	}
+#else
+	{
+		char                   *tail;
+		volatile unsigned char  mask;
+		unsigned char           barrier_mask;
+
+		tail = &ZSTR_VAL(padded)[xpadded_len];
+		mask = 0U;
+		for (i = 0; i < blocksize; i++) {
+			barrier_mask = (unsigned char) (((i ^ xpadlen) - 1U) >> 8);
+			tail[-i] = (tail[-i] & mask) | (0x80 & barrier_mask);
+			mask |= barrier_mask;
+		}
+	}
+#endif
+	ZSTR_VAL(padded)[xpadded_len + 1U] = 0;
+
+	RETURN_STR(padded);
+}
+
+PHP_FUNCTION(sodium_unpad)
+{
+	zend_string *unpadded;
+	char        *padded;
+	size_t       padded_len;
+	size_t       unpadded_len;
+	zend_long    blocksize;
+	int          ret;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl",
+							  &padded, &padded_len, &blocksize) == FAILURE) {
+		sodium_remove_param_values_from_backtrace(EG(exception));
+		return;
+	}
+	if (blocksize <= 0) {
+		zend_throw_exception(sodium_exception_ce, "block size cannot be less than 1", 0);
+		return;
+	}
+	if (blocksize > SIZE_MAX) {
+		zend_throw_exception(sodium_exception_ce, "block size is too large", 0);
+		return;
+	}
+	if (padded_len < blocksize) {
+		zend_throw_exception(sodium_exception_ce, "invalid padding", 0);
+		return;
+	}
+
+#if SODIUM_LIBRARY_VERSION_MAJOR > 9 || (SODIUM_LIBRARY_VERSION_MAJOR == 9 && SODIUM_LIBRARY_VERSION_MINOR >= 6)
+	ret = sodium_unpad(&unpadded_len, (const unsigned char *) padded,
+					   padded_len, (size_t) blocksize);
+#else
+	{
+		const char      *tail;
+		unsigned char    acc = 0U;
+		unsigned char    c;
+		unsigned char    valid = 0U;
+		volatile size_t  pad_len = 0U;
+		size_t           i;
+		size_t           is_barrier;
+
+		tail = &padded[padded_len - 1U];
+
+		for (i = 0U; i < (size_t) blocksize; i++) {
+			c = tail[-i];
+			is_barrier =
+				(( (acc - 1U) & (pad_len - 1U) & ((c ^ 0x80) - 1U) ) >> 8) & 1U;
+			acc |= c;
+			pad_len |= (i & - is_barrier);
+			valid |= (unsigned char) is_barrier;
+		}
+		unpadded_len = padded_len - 1U - pad_len;
+		ret = (int) (valid - 1U);
+	}
+#endif
+	if (ret != 0 || unpadded_len > LONG_MAX) {
+		zend_throw_exception(sodium_exception_ce, "invalid padding", 0);
+		return;
+	}
+	unpadded = zend_string_init(padded, padded_len, 0);
+	PHP_SODIUM_ZSTR_TRUNCATE(unpadded, unpadded_len);
+	ZSTR_VAL(unpadded)[unpadded_len] = 0;
+	RETURN_STR(unpadded);
 }
 
 /*
