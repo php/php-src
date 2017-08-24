@@ -3066,6 +3066,7 @@ PHP_FUNCTION(sodium_crypto_kdf_derive_from_key)
 							  &subkey_id,
 							  &ctx, &ctx_len,
 							  &key, &key_len) == FAILURE) {
+		sodium_remove_param_values_from_backtrace(EG(exception));
 		return;
 	}
 	if (subkey_len < crypto_kdf_BYTES_MIN) {
