@@ -583,7 +583,7 @@ static inline int object_common2(UNSERIALIZE_PARAMETER, zend_long elements)
 		&& zend_hash_str_exists(&Z_OBJCE_P(rval)->function_table, "__wakeup", sizeof("__wakeup")-1);
 
 	ht = Z_OBJPROP_P(rval);
-	if (elements >= HT_MAX_SIZE - zend_hash_num_elements(ht)) {
+	if (elements >= (zend_long)(HT_MAX_SIZE - zend_hash_num_elements(ht))) {
 		return 0;
 	}
 

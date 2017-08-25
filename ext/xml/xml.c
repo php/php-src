@@ -70,7 +70,7 @@ ZEND_GET_MODULE(xml)
 /* }}} */
 
 
-#define SKIP_TAGSTART(str) ((str) + (parser->toffset > strlen(str) ? strlen(str) : parser->toffset))
+#define SKIP_TAGSTART(str) ((str) + (parser->toffset > (int)strlen(str) ? strlen(str) : parser->toffset))
 
 
 /* {{{ function prototypes */

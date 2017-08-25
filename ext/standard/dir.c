@@ -511,7 +511,7 @@ no_results:
 	}
 
 	array_init(return_value);
-	for (n = 0; n < globbuf.gl_pathc; n++) {
+	for (n = 0; n < (size_t)globbuf.gl_pathc; n++) {
 		if (PG(open_basedir) && *PG(open_basedir)) {
 			if (php_check_open_basedir_ex(globbuf.gl_pathv[n], 0)) {
 				basedir_limit = 1;

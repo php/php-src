@@ -2202,9 +2202,9 @@ int phar_split_fname(const char *filename, int filename_len, char **arch, int *a
 
 	ext_len = 0;
 #ifdef PHP_WIN32
-	save = filename;
+	save = (char *)filename;
 	filename = estrndup(filename, filename_len);
-	phar_unixify_path_separators(filename, filename_len);
+	phar_unixify_path_separators((char *)filename, filename_len);
 #endif
 	if (phar_detect_phar_fname_ext(filename, filename_len, &ext_str, &ext_len, executable, for_create, 0) == FAILURE) {
 		if (ext_len != -1) {
@@ -2218,7 +2218,7 @@ int phar_split_fname(const char *filename, int filename_len, char **arch, int *a
 			}
 
 #ifdef PHP_WIN32
-			efree(filename);
+			efree((char *)filename);
 #endif
 			return FAILURE;
 		}
@@ -2243,7 +2243,7 @@ int phar_split_fname(const char *filename, int filename_len, char **arch, int *a
 	}
 
 #ifdef PHP_WIN32
-	efree(filename);
+	efree((char *)filename);
 #endif
 
 	return SUCCESS;

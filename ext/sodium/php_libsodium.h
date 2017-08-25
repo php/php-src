@@ -108,6 +108,8 @@ PHP_FUNCTION(sodium_hex2bin);
 PHP_FUNCTION(sodium_increment);
 PHP_FUNCTION(sodium_memcmp);
 PHP_FUNCTION(sodium_memzero);
+PHP_FUNCTION(sodium_pad);
+PHP_FUNCTION(sodium_unpad);
 
 #endif	/* PHP_LIBSODIUM_H */
 
