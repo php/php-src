@@ -7,6 +7,7 @@ PHP                                                                        NEWS
 
 - CURL:
   . Fixed bug #75093 (OpenSSL support not detected). (Remi)
+  . Better fix for #74125 (use pkg-config instead of curl-config). (Remi)
 
 - GD:
   . Fixed bug #75111 (Memory disclosure or DoS via crafted .bmp image). (cmb)
