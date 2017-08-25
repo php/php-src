@@ -12,6 +12,10 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #75111 (Memory disclosure or DoS via crafted .bmp image). (cmb)
 
+- Intl:
+  . Fixed bug #75090 (IntlGregorianCalendar doesn't have constants from parent
+    class). (tpunt)
+
 - PCRE:
   . Fixed bug #75089 (preg_grep() is not reporting PREG_BAD_UTF8_ERROR after
     first input string). (Dmitry)
