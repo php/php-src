@@ -456,12 +456,7 @@ void calendar_register_IntlCalendar_class(void)
 	INIT_CLASS_ENTRY(ce, "IntlCalendar", Calendar_class_functions);
 	ce.create_object = Calendar_object_create;
 	Calendar_ce_ptr = zend_register_internal_class(&ce);
-	if (!Calendar_ce_ptr) {
-		//can't happen now without bigger problems before
-		php_error_docref0(NULL, E_ERROR,
-			"IntlCalendar: class registration has failed.");
-		return;
-	}
+
 	memcpy( &Calendar_handlers, zend_get_std_object_handlers(),
 		sizeof Calendar_handlers);
 	Calendar_handlers.offset = XtOffsetOf(Calendar_object, zo);
@@ -525,11 +520,5 @@ void calendar_register_IntlCalendar_class(void)
 	INIT_CLASS_ENTRY(ce, "IntlGregorianCalendar", GregorianCalendar_class_functions);
 	GregorianCalendar_ce_ptr = zend_register_internal_class_ex(&ce,
 		Calendar_ce_ptr);
-	if (!GregorianCalendar_ce_ptr) {
-		//can't happen know without bigger problems before
-		php_error_docref0(NULL, E_ERROR,
-			"IntlGregorianCalendar: class registration has failed.");
-		return;
-	}
 }
 /* }}} */

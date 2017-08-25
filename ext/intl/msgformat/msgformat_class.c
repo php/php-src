@@ -157,14 +157,6 @@ void msgformat_register_class( void )
 	MessageFormatter_handlers.offset = XtOffsetOf(MessageFormatter_object, zo);
 	MessageFormatter_handlers.clone_obj = MessageFormatter_object_clone;
 	MessageFormatter_handlers.free_obj = MessageFormatter_object_free;
-
-
-	/* Declare 'MessageFormatter' class properties. */
-	if( !MessageFormatter_ce_ptr )
-	{
-		zend_error(E_ERROR, "Failed to register MessageFormatter class");
-		return;
-	}
 }
 /* }}} */
 
