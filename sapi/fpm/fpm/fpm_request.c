@@ -92,7 +92,7 @@ void fpm_request_reading_headers() /* {{{ */
 	proc->request_method[0] = '\0';
 	proc->script_filename[0] = '\0';
 	proc->query_string[0] = '\0';
-	proc->query_string[0] = '\0';
+	proc->client[0] = '\0';
 	proc->auth_user[0] = '\0';
 	proc->content_length = 0;
 	fpm_scoreboard_proc_release(proc);
@@ -110,6 +110,7 @@ void fpm_request_info() /* {{{ */
 	char *request_method = fpm_php_request_method(TSRMLS_C);
 	char *script_filename = fpm_php_script_filename(TSRMLS_C);
 	char *query_string = fpm_php_query_string(TSRMLS_C);
+	char *client = fpm_php_client(TSRMLS_C);
 	char *auth_user = fpm_php_auth_user(TSRMLS_C);
 	size_t content_length = fpm_php_content_length(TSRMLS_C);
 	struct timeval now;
@@ -136,6 +137,10 @@ void fpm_request_info() /* {{{ */
 	if (query_string) {
 		strlcpy(proc->query_string, query_string, sizeof(proc->query_string));
 	}
+
+        if (client) {
+                strlcpy(proc->client, client, sizeof(proc->client));
+        }
 
 	if (auth_user) {
 		strlcpy(proc->auth_user, auth_user, sizeof(proc->auth_user));

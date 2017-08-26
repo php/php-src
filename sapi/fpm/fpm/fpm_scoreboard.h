@@ -36,6 +36,7 @@ struct fpm_scoreboard_proc_s {
 	char request_method[16];
 	size_t content_length; /* used with POST only */
 	char script_filename[256];
+	char client[40];
 	char auth_user[32];
 #ifdef HAVE_TIMES
 	struct tms cpu_accepted;

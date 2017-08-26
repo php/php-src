@@ -181,6 +181,13 @@ char *fpm_php_query_string(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
+char *fpm_php_client(TSRMLS_D) /* {{{ */
+{
+        fcgi_request *request = (fcgi_request*) SG(server_context);
+        return fcgi_getenv(request, "REMOTE_ADDR", sizeof("REMOTE_ADDR") - 1 TSRMLS_CC);
+}
+/* }}} */
+
 char *fpm_php_auth_user(TSRMLS_D) /* {{{ */
 {
 	return SG(request_info).auth_user;
