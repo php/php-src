@@ -168,6 +168,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 					"<table border=\"1\">\n"
 					"<tr>"
 						"<th>pid</th>"
+						"<th>client</th>"
 						"<th>state</th>"
 						"<th>start time</th>"
 						"<th>start since</th>"
@@ -187,6 +188,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 				full_syntax =
 					"<tr>"
 						"<td>%d</td>"
+						"<td>%s</td>"
 						"<td>%s</td>"
 						"<td>%s</td>"
 						"<td>%lu</td>"
@@ -239,6 +241,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 					full_syntax = 
 						"<process>"
 							"<pid>%d</pid>"
+							"<client>%s</client>"
 							"<state>%s</state>"
 							"<start-time>%s</start-time>"
 							"<start-since>%lu</start-since>"
@@ -290,6 +293,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 
 				full_syntax = "{"
 					"\"pid\":%d,"
+					"\"client\":\"%s\","
 					"\"state\":\"%s\","
 					"\"start time\":%s,"
 					"\"start since\":%lu,"
@@ -337,6 +341,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 						"\n"
 						"************************\n"
 						"pid:                  %d\n"
+						"client:               %s\n"
 						"state:                %s\n"
 						"start time:           %s\n"
 						"start since:          %lu\n"
@@ -439,6 +444,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 				strftime(time_buffer, sizeof(time_buffer) - 1, time_format, localtime(&proc.start_epoch));
 				spprintf(&buffer, 0, full_syntax,
 					proc.pid,
+					proc.client[0] != '\0' ? proc.client: "-",
 					fpm_request_get_stage_name(proc.request_stage),
 					time_buffer,
 					now_epoch - proc.start_epoch,
