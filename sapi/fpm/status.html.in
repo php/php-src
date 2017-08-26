@@ -64,11 +64,11 @@
 			</table>
 			<h1>Active Processes status</h1> 
 			<table border="0" cellpadding="3" width="95%" id="active">
-				<tr class="h"><th>PID&darr;</th><th>Start Time</th><th>Start Since</th><th>Requests Served</th><th>Request Duration</th><th>Request method</th><th>Request URI</th><th>Content Length</th><th>User</th><th>Script</th></tr>
+				<tr class="h"><th>PID&darr;</th><th>Client</th><th>Start Time</th><th>Start Since</th><th>Requests Served</th><th>Request Duration</th><th>Request method</th><th>Request URI</th><th>Content Length</th><th>User</th><th>Script</th></tr>
 			</table>
 			<h1>Idle Processes status</h1> 
 			<table border="0" cellpadding="3" width="95%" id="idle">
-				<tr class="h"><th>PID&darr;</th><th>Start Time</th><th>Start Since</th><th>Requests Served</th><th>Request Duration</th><th>Request method</th><th>Request URI</th><th>Content Length</th><th>User</th><th>Script</th><th>Last Request %CPU</th><th>Last Request Memory</th></tr>
+				<tr class="h"><th>PID&darr;</th><th>Client</th><th>Start Time</th><th>Start Since</th><th>Requests Served</th><th>Request Duration</th><th>Request method</th><th>Request URI</th><th>Content Length</th><th>User</th><th>Script</th><th>Last Request %CPU</th><th>Last Request Memory</th></tr>
 			</table>
 		</div>
 		<p>
@@ -328,6 +328,10 @@
 						row.className = c;
 						row.insertCell(-1).innerHTML = proc.pid;
 						row.cells[row.cells.length - 1].__search_v = proc.pid;
+						row.cells[row.cells.length - 1].__search_t = 0;
+
+						row.insertCell(-1).innerHTML = proc.client;
+						row.cells[row.cells.length - 1].__search_v = proc.client;
 						row.cells[row.cells.length - 1].__search_t = 0;
 
 						row.insertCell(-1).innerHTML = date(proc['start time'] * 1000);;

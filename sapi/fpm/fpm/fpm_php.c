@@ -180,6 +180,13 @@ char *fpm_php_query_string(void) /* {{{ */
 }
 /* }}} */
 
+char *fpm_php_client(void) /* {{{ */
+{
+	fcgi_request *request = (fcgi_request*) SG(server_context);
+        return FCGI_GETENV(request, "REMOTE_ADDR");
+}
+/* }}} */
+
 char *fpm_php_auth_user(void) /* {{{ */
 {
 	return SG(request_info).auth_user;

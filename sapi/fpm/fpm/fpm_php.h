@@ -38,6 +38,7 @@ char *fpm_php_script_filename(void);
 char *fpm_php_request_uri(void);
 char *fpm_php_request_method(void);
 char *fpm_php_query_string(void);
+char *fpm_php_client(void);
 char *fpm_php_auth_user(void);
 size_t fpm_php_content_length(void);
 void fpm_php_soft_quit();

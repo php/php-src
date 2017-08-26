@@ -185,6 +185,7 @@ pm.max_spare_servers = 3
 ;   http://www.foo.bar/status?xml&full
 ; The Full status returns for each process:
 ;   pid                  - the PID of the process;
+;   client               - client address (REMOTE_ADDR) (or '-' if not set);
 ;   state                - the state of the process (Idle, Running, ...);
 ;   start time           - the date and time the process has started;
 ;   start since          - the number of seconds since the process has started;
@@ -209,6 +210,7 @@ pm.max_spare_servers = 3
 ; Example output:
 ;   ************************
 ;   pid:                  31330
+;   client:               127.0.0.1
 ;   state:                Running
 ;   start time:           01/Jul/2011:17:53:49 +0200
 ;   start since:          63087
