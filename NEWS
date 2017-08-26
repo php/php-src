@@ -24,6 +24,9 @@ PHP                                                                        NEWS
   . Fixed bug #74631 (PDO_PCO with PHP-FPM: OCI environment initialized
     before PHP-FPM sets it up). (Ingmar Runge)
 
+- SQLite3:
+  . Update to Sqlite 3.20.1. (cmb)
+
 - Standard:
   . Fixed bug #75097 (gethostname fails if your host name is 64 chars long). (Andrea)
 
