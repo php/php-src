@@ -37,6 +37,7 @@
 #include "zend_interfaces.h"
 #include "zend_closures.h"
 #include "zend_generators.h"
+#include "zend_fiber.h"
 #include "zend_vm.h"
 #include "zend_dtrace.h"
 #include "zend_inheritance.h"
@@ -177,7 +178,12 @@ static zend_always_inline zend_vm_stack zend_vm_stack_new_page(size_t size, zend
 
 ZEND_API void zend_vm_stack_init(void)
 {
-	EG(vm_stack) = zend_vm_stack_new_page(ZEND_VM_STACK_PAGE_SIZE, NULL);
+	zend_vm_stack_init_ex(ZEND_VM_STACK_PAGE_SLOTS, NULL);
+}
+
+ZEND_API void zend_vm_stack_init_ex(size_t size, zend_vm_stack prev)
+{
+	EG(vm_stack) = zend_vm_stack_new_page(ZEND_VM_STACK_PAGE_SIZE, prev);
 	EG(vm_stack)->top++;
 	EG(vm_stack_top) = EG(vm_stack)->top;
 	EG(vm_stack_end) = EG(vm_stack)->end;

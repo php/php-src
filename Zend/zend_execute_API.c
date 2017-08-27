@@ -180,6 +180,8 @@ void init_executor(void) /* {{{ */
 
 	EG(each_deprecation_thrown) = 0;
 
+	EG(vm_fiber) = NULL;
+
 	EG(active) = 1;
 }
 /* }}} */

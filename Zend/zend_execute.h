@@ -161,6 +161,7 @@ struct _zend_vm_stack {
 #endif
 
 ZEND_API void zend_vm_stack_init(void);
+ZEND_API void zend_vm_stack_init_ex(size_t size, zend_vm_stack prev);
 ZEND_API void zend_vm_stack_destroy(void);
 ZEND_API void* zend_vm_stack_extend(size_t size);
 

@@ -3991,6 +3991,77 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_CONST_HANDLER(
 	ZEND_VM_RETURN();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_AWAIT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zend_fiber *fiber = (zend_fiber *) EG(vm_fiber);
+
+	SAVE_OPLINE();
+
+	if (!fiber) {
+		zend_throw_error(NULL, "Cannot await out of Fiber");
+		FREE_UNFETCHED_OP(opline->op2_type, opline->op2.var);
+
+		UNDEF_RESULT();
+		HANDLE_EXCEPTION();
+	}
+
+	/* Destroy the previously yielded value */
+	zval_ptr_dtor(&fiber->value);
+
+	/* Set the new yielded value */
+	if (IS_CONST != IS_UNUSED) {
+
+		zval *value = EX_CONSTANT(opline->op1);
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_CONST == IS_CONST) {
+			ZVAL_COPY_VALUE(&fiber->value, value);
+			if (UNEXPECTED(Z_OPT_REFCOUNTED(fiber->value))) {
+				Z_ADDREF(fiber->value);
+			}
+		} else if (IS_CONST == IS_TMP_VAR) {
+			ZVAL_COPY_VALUE(&fiber->value, value);
+		} else if ((IS_CONST & (IS_VAR|IS_CV)) && Z_ISREF_P(value)) {
+			ZVAL_COPY(&fiber->value, Z_REFVAL_P(value));
+
+		} else {
+			ZVAL_COPY_VALUE(&fiber->value, value);
+			if (IS_CONST == IS_CV) {
+				if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
+			}
+		}
+	} else {
+		/* If no value was specified yield null */
+		ZVAL_NULL(&fiber->value);
+	}
+
+	if (RETURN_VALUE_USED(opline)) {
+		fiber->send_target = EX_VAR(opline->result.var);
+		ZVAL_NULL(fiber->send_target);
+	} else {
+		fiber->send_target = NULL;
+	}
+
+	fiber->execute_data = EG(current_execute_data);
+	fiber->stack = EG(vm_stack);
+	fiber->stack_top = EG(vm_stack_top);
+	fiber->stack_end = EG(vm_stack_end);
+
+	fiber->status = ZEND_FIBER_STATUS_SUSPENDED;
+
+	/* We increment to the next op, so we are at the correct position when the
+	 * generator is resumed. */
+	ZEND_VM_INC_OPCODE();
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_STRLEN_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -13414,6 +13485,77 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_TMP_HANDLER(ZE
 	ZEND_VM_RETURN();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_AWAIT_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zend_fiber *fiber = (zend_fiber *) EG(vm_fiber);
+
+	SAVE_OPLINE();
+
+	if (!fiber) {
+		zend_throw_error(NULL, "Cannot await out of Fiber");
+		FREE_UNFETCHED_OP(opline->op2_type, opline->op2.var);
+		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+		UNDEF_RESULT();
+		HANDLE_EXCEPTION();
+	}
+
+	/* Destroy the previously yielded value */
+	zval_ptr_dtor(&fiber->value);
+
+	/* Set the new yielded value */
+	if (IS_TMP_VAR != IS_UNUSED) {
+		zend_free_op free_op1;
+		zval *value = _get_zval_ptr_tmp(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_TMP_VAR == IS_CONST) {
+			ZVAL_COPY_VALUE(&fiber->value, value);
+			if (UNEXPECTED(Z_OPT_REFCOUNTED(fiber->value))) {
+				Z_ADDREF(fiber->value);
+			}
+		} else if (IS_TMP_VAR == IS_TMP_VAR) {
+			ZVAL_COPY_VALUE(&fiber->value, value);
+		} else if ((IS_TMP_VAR & (IS_VAR|IS_CV)) && Z_ISREF_P(value)) {
+			ZVAL_COPY(&fiber->value, Z_REFVAL_P(value));
+
+		} else {
+			ZVAL_COPY_VALUE(&fiber->value, value);
+			if (IS_TMP_VAR == IS_CV) {
+				if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
+			}
+		}
+	} else {
+		/* If no value was specified yield null */
+		ZVAL_NULL(&fiber->value);
+	}
+
+	if (RETURN_VALUE_USED(opline)) {
+		fiber->send_target = EX_VAR(opline->result.var);
+		ZVAL_NULL(fiber->send_target);
+	} else {
+		fiber->send_target = NULL;
+	}
+
+	fiber->execute_data = EG(current_execute_data);
+	fiber->stack = EG(vm_stack);
+	fiber->stack_top = EG(vm_stack_top);
+	fiber->stack_end = EG(vm_stack_end);
+
+	fiber->status = ZEND_FIBER_STATUS_SUSPENDED;
+
+	/* We increment to the next op, so we are at the correct position when the
+	 * generator is resumed. */
+	ZEND_VM_INC_OPCODE();
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_TYPE_CHECK_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -17384,6 +17526,77 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_VAR_HANDLER(ZE
 
 	/* This generator has no send target (though the generator we delegate to might have one) */
 	generator->send_target = NULL;
+
+	/* We increment to the next op, so we are at the correct position when the
+	 * generator is resumed. */
+	ZEND_VM_INC_OPCODE();
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_AWAIT_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zend_fiber *fiber = (zend_fiber *) EG(vm_fiber);
+
+	SAVE_OPLINE();
+
+	if (!fiber) {
+		zend_throw_error(NULL, "Cannot await out of Fiber");
+		FREE_UNFETCHED_OP(opline->op2_type, opline->op2.var);
+		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+		UNDEF_RESULT();
+		HANDLE_EXCEPTION();
+	}
+
+	/* Destroy the previously yielded value */
+	zval_ptr_dtor(&fiber->value);
+
+	/* Set the new yielded value */
+	if (IS_VAR != IS_UNUSED) {
+		zend_free_op free_op1;
+		zval *value = _get_zval_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_VAR == IS_CONST) {
+			ZVAL_COPY_VALUE(&fiber->value, value);
+			if (UNEXPECTED(Z_OPT_REFCOUNTED(fiber->value))) {
+				Z_ADDREF(fiber->value);
+			}
+		} else if (IS_VAR == IS_TMP_VAR) {
+			ZVAL_COPY_VALUE(&fiber->value, value);
+		} else if ((IS_VAR & (IS_VAR|IS_CV)) && Z_ISREF_P(value)) {
+			ZVAL_COPY(&fiber->value, Z_REFVAL_P(value));
+			zval_ptr_dtor_nogc(free_op1);
+		} else {
+			ZVAL_COPY_VALUE(&fiber->value, value);
+			if (IS_VAR == IS_CV) {
+				if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
+			}
+		}
+	} else {
+		/* If no value was specified yield null */
+		ZVAL_NULL(&fiber->value);
+	}
+
+	if (RETURN_VALUE_USED(opline)) {
+		fiber->send_target = EX_VAR(opline->result.var);
+		ZVAL_NULL(fiber->send_target);
+	} else {
+		fiber->send_target = NULL;
+	}
+
+	fiber->execute_data = EG(current_execute_data);
+	fiber->stack = EG(vm_stack);
+	fiber->stack_top = EG(vm_stack_top);
+	fiber->stack_end = EG(vm_stack_end);
+
+	fiber->status = ZEND_FIBER_STATUS_SUSPENDED;
 
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
@@ -26916,6 +27129,77 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_EXIT_SPEC_UNUSED_HANDLER(ZEND_
 	ZEND_VM_NEXT_OPCODE(); /* Never reached */
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_AWAIT_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zend_fiber *fiber = (zend_fiber *) EG(vm_fiber);
+
+	SAVE_OPLINE();
+
+	if (!fiber) {
+		zend_throw_error(NULL, "Cannot await out of Fiber");
+		FREE_UNFETCHED_OP(opline->op2_type, opline->op2.var);
+
+		UNDEF_RESULT();
+		HANDLE_EXCEPTION();
+	}
+
+	/* Destroy the previously yielded value */
+	zval_ptr_dtor(&fiber->value);
+
+	/* Set the new yielded value */
+	if (IS_UNUSED != IS_UNUSED) {
+
+		zval *value = NULL;
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_UNUSED == IS_CONST) {
+			ZVAL_COPY_VALUE(&fiber->value, value);
+			if (UNEXPECTED(Z_OPT_REFCOUNTED(fiber->value))) {
+				Z_ADDREF(fiber->value);
+			}
+		} else if (IS_UNUSED == IS_TMP_VAR) {
+			ZVAL_COPY_VALUE(&fiber->value, value);
+		} else if ((IS_UNUSED & (IS_VAR|IS_CV)) && Z_ISREF_P(value)) {
+			ZVAL_COPY(&fiber->value, Z_REFVAL_P(value));
+
+		} else {
+			ZVAL_COPY_VALUE(&fiber->value, value);
+			if (IS_UNUSED == IS_CV) {
+				if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
+			}
+		}
+	} else {
+		/* If no value was specified yield null */
+		ZVAL_NULL(&fiber->value);
+	}
+
+	if (RETURN_VALUE_USED(opline)) {
+		fiber->send_target = EX_VAR(opline->result.var);
+		ZVAL_NULL(fiber->send_target);
+	} else {
+		fiber->send_target = NULL;
+	}
+
+	fiber->execute_data = EG(current_execute_data);
+	fiber->stack = EG(vm_stack);
+	fiber->stack_top = EG(vm_stack_top);
+	fiber->stack_end = EG(vm_stack_end);
+
+	fiber->status = ZEND_FIBER_STATUS_SUSPENDED;
+
+	/* We increment to the next op, so we are at the correct position when the
+	 * generator is resumed. */
+	ZEND_VM_INC_OPCODE();
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(binary_op_type binary_op ZEND_OPCODE_HANDLER_ARGS_DC)
 {
 	USE_OPLINE
@@ -34406,6 +34690,77 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_CV_HANDLER(ZEN
 
 	/* This generator has no send target (though the generator we delegate to might have one) */
 	generator->send_target = NULL;
+
+	/* We increment to the next op, so we are at the correct position when the
+	 * generator is resumed. */
+	ZEND_VM_INC_OPCODE();
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_AWAIT_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zend_fiber *fiber = (zend_fiber *) EG(vm_fiber);
+
+	SAVE_OPLINE();
+
+	if (!fiber) {
+		zend_throw_error(NULL, "Cannot await out of Fiber");
+		FREE_UNFETCHED_OP(opline->op2_type, opline->op2.var);
+
+		UNDEF_RESULT();
+		HANDLE_EXCEPTION();
+	}
+
+	/* Destroy the previously yielded value */
+	zval_ptr_dtor(&fiber->value);
+
+	/* Set the new yielded value */
+	if (IS_CV != IS_UNUSED) {
+
+		zval *value = _get_zval_ptr_cv_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_CV == IS_CONST) {
+			ZVAL_COPY_VALUE(&fiber->value, value);
+			if (UNEXPECTED(Z_OPT_REFCOUNTED(fiber->value))) {
+				Z_ADDREF(fiber->value);
+			}
+		} else if (IS_CV == IS_TMP_VAR) {
+			ZVAL_COPY_VALUE(&fiber->value, value);
+		} else if ((IS_CV & (IS_VAR|IS_CV)) && Z_ISREF_P(value)) {
+			ZVAL_COPY(&fiber->value, Z_REFVAL_P(value));
+
+		} else {
+			ZVAL_COPY_VALUE(&fiber->value, value);
+			if (IS_CV == IS_CV) {
+				if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
+			}
+		}
+	} else {
+		/* If no value was specified yield null */
+		ZVAL_NULL(&fiber->value);
+	}
+
+	if (RETURN_VALUE_USED(opline)) {
+		fiber->send_target = EX_VAR(opline->result.var);
+		ZVAL_NULL(fiber->send_target);
+	} else {
+		fiber->send_target = NULL;
+	}
+
+	fiber->execute_data = EG(current_execute_data);
+	fiber->stack = EG(vm_stack);
+	fiber->stack_top = EG(vm_stack_top);
+	fiber->stack_end = EG(vm_stack_end);
+
+	fiber->status = ZEND_FIBER_STATUS_SUSPENDED;
 
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
@@ -58684,6 +59039,11 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ISSET_ISEMPTY_CV_SPEC_CV_UNUSED_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_AWAIT_SPEC_CONST_LABEL,
+			(void*)&&ZEND_AWAIT_SPEC_TMP_LABEL,
+			(void*)&&ZEND_AWAIT_SPEC_VAR_LABEL,
+			(void*)&&ZEND_AWAIT_SPEC_UNUSED_LABEL,
+			(void*)&&ZEND_AWAIT_SPEC_CV_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ADD_LONG_NO_OVERFLOW_SPEC_CONST_TMPVARCV_LABEL,
 			(void*)&&ZEND_ADD_LONG_NO_OVERFLOW_SPEC_CONST_TMPVARCV_LABEL,
@@ -59961,6 +60321,9 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			HYBRID_CASE(ZEND_YIELD_FROM_SPEC_CONST):
 				ZEND_YIELD_FROM_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_AWAIT_SPEC_CONST):
+				ZEND_AWAIT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_STRLEN_SPEC_CONST):
 				ZEND_STRLEN_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
@@ -60618,6 +60981,9 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			HYBRID_CASE(ZEND_YIELD_FROM_SPEC_TMP):
 				ZEND_YIELD_FROM_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_AWAIT_SPEC_TMP):
+				ZEND_AWAIT_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_TYPE_CHECK_SPEC_TMP):
 				ZEND_TYPE_CHECK_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
@@ -60833,6 +61199,9 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_YIELD_FROM_SPEC_VAR):
 				ZEND_YIELD_FROM_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_AWAIT_SPEC_VAR):
+				ZEND_AWAIT_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_TYPE_CHECK_SPEC_VAR):
 				ZEND_TYPE_CHECK_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -61578,6 +61947,9 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			HYBRID_CASE(ZEND_EXIT_SPEC_UNUSED):
 				ZEND_EXIT_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_AWAIT_SPEC_UNUSED):
+				ZEND_AWAIT_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_ASSIGN_ADD_SPEC_UNUSED_CONST_OBJ):
 				ZEND_ASSIGN_ADD_SPEC_UNUSED_CONST_OBJ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
@@ -62003,6 +62375,9 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_YIELD_FROM_SPEC_CV):
 				ZEND_YIELD_FROM_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_AWAIT_SPEC_CV):
+				ZEND_AWAIT_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_STRLEN_SPEC_CV):
 				ZEND_STRLEN_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -67674,6 +68049,11 @@ void zend_init_opcodes_handlers(void)
 		ZEND_NULL_HANDLER,
 		ZEND_ISSET_ISEMPTY_CV_SPEC_CV_UNUSED_HANDLER,
 		ZEND_NULL_HANDLER,
+		ZEND_AWAIT_SPEC_CONST_HANDLER,
+		ZEND_AWAIT_SPEC_TMP_HANDLER,
+		ZEND_AWAIT_SPEC_VAR_HANDLER,
+		ZEND_AWAIT_SPEC_UNUSED_HANDLER,
+		ZEND_AWAIT_SPEC_CV_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ADD_LONG_NO_OVERFLOW_SPEC_CONST_TMPVARCV_HANDLER,
 		ZEND_ADD_LONG_NO_OVERFLOW_SPEC_CONST_TMPVARCV_HANDLER,
@@ -68792,7 +69172,7 @@ void zend_init_opcodes_handlers(void)
 		2257 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		2282 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		2307 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		4921,
+		4926,
 		2332,
 		2333,
 		2334,
@@ -68877,7 +69257,7 @@ void zend_init_opcodes_handlers(void)
 		3531 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		3556 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		3581 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		4921,
+		4926,
 		3606 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		3631 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		3656 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
@@ -68890,7 +69270,8 @@ void zend_init_opcodes_handlers(void)
 		3831 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		3856 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		3881 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		4921
+		3906 | SPEC_RULE_OP1,
+		4926
 	};
 #if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
 	zend_opcode_handler_funcs = labels;
@@ -69085,7 +69466,7 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3906 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 3911 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 				if (op->op1_type > op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -69093,7 +69474,7 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3931 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 3936 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 				if (op->op1_type > op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -69101,7 +69482,7 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3956 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 3961 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 				if (op->op1_type > op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -69112,17 +69493,17 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3981 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 3986 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 			} else if (op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 4006 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 4011 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 4031 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 4036 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 			}
 			break;
 		case ZEND_MUL:
@@ -69130,7 +69511,7 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 4056 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 4061 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 				if (op->op1_type > op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -69138,7 +69519,7 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 4081 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 4086 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 				if (op->op1_type > op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -69146,7 +69527,7 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 4106 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 4111 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 				if (op->op1_type > op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -69157,7 +69538,7 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 4131 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 4136 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 				if (op->op1_type > op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -69165,7 +69546,7 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 4206 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 4211 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 				if (op->op1_type > op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -69176,7 +69557,7 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 4281 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 4286 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 				if (op->op1_type > op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -69184,7 +69565,7 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 4356 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 4361 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 				if (op->op1_type > op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -69195,12 +69576,12 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 4431 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 4436 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 4506 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 4511 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 			}
 			break;
 		case ZEND_IS_SMALLER_OR_EQUAL:
@@ -69208,75 +69589,75 @@ ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 4581 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 4586 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 4656 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 4661 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 			}
 			break;
 		case ZEND_QM_ASSIGN:
 			if (op1_info == MAY_BE_DOUBLE) {
-				spec = 4821 | SPEC_RULE_OP1;
-			} else if (!(op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE)))) {
 				spec = 4826 | SPEC_RULE_OP1;
+			} else if (!(op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE)))) {
+				spec = 4831 | SPEC_RULE_OP1;
 			}
 			break;
 		case ZEND_PRE_INC:
 			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG) {
-				spec = 4731 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL;
+				spec = 4736 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL;
 			} else if (op1_info == MAY_BE_LONG) {
-				spec = 4741 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL;
+				spec = 4746 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL;
 			} else if (op1_info == (MAY_BE_LONG|MAY_BE_DOUBLE)) {
-				spec = 4751 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL;
+				spec = 4756 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL;
 			}
 			break;
 		case ZEND_PRE_DEC:
 			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG) {
-				spec = 4761 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL;
+				spec = 4766 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL;
 			} else if (op1_info == MAY_BE_LONG) {
-				spec = 4771 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL;
+				spec = 4776 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL;
 			} else if (op1_info == (MAY_BE_LONG|MAY_BE_DOUBLE)) {
-				spec = 4781 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL;
+				spec = 4786 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL;
 			}
 			break;
 		case ZEND_POST_INC:
 			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG) {
-				spec = 4791 | SPEC_RULE_OP1;
-			} else if (op1_info == MAY_BE_LONG) {
 				spec = 4796 | SPEC_RULE_OP1;
-			} else if (op1_info == (MAY_BE_LONG|MAY_BE_DOUBLE)) {
+			} else if (op1_info == MAY_BE_LONG) {
 				spec = 4801 | SPEC_RULE_OP1;
+			} else if (op1_info == (MAY_BE_LONG|MAY_BE_DOUBLE)) {
+				spec = 4806 | SPEC_RULE_OP1;
 			}
 			break;
 		case ZEND_POST_DEC:
 			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG) {
-				spec = 4806 | SPEC_RULE_OP1;
-			} else if (op1_info == MAY_BE_LONG) {
 				spec = 4811 | SPEC_RULE_OP1;
-			} else if (op1_info == (MAY_BE_LONG|MAY_BE_DOUBLE)) {
+			} else if (op1_info == MAY_BE_LONG) {
 				spec = 4816 | SPEC_RULE_OP1;
+			} else if (op1_info == (MAY_BE_LONG|MAY_BE_DOUBLE)) {
+				spec = 4821 | SPEC_RULE_OP1;
 			}
 			break;
 		case ZEND_SEND_VAR_EX:
 			if ((op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) == 0) {
-				spec = 4861 | SPEC_RULE_OP1 | SPEC_RULE_QUICK_ARG;
+				spec = 4866 | SPEC_RULE_OP1 | SPEC_RULE_QUICK_ARG;
 			}
 			break;
 		case ZEND_FE_FETCH_R:
 			if (op->op2_type == IS_CV && (op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_ARRAY) {
-				spec = 4871 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_RETVAL;
+				spec = 4876 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_RETVAL;
 			}
 			break;
 		case ZEND_FETCH_DIM_R:
 			if (!(op2_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
-				spec = 4831 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 4836 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 			}
 			break;
 		case ZEND_SEND_VAR:
 			if ((op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) == 0) {
-				spec = 4856 | SPEC_RULE_OP1;
+				spec = 4861 | SPEC_RULE_OP1;
 			}
 			break;
 		default:
