@@ -11,6 +11,7 @@ PHP                                                                        NEWS
 
 - GD:
   . Fixed bug #75111 (Memory disclosure or DoS via crafted .bmp image). (cmb)
+  . Fixed bug #75124 (gdImageGrayScale() may produce colors). (cmb)
 
 - Intl:
   . Fixed bug #75090 (IntlGregorianCalendar doesn't have constants from parent
