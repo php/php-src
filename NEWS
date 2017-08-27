@@ -8,6 +8,9 @@ PHP                                                                        NEWS
 - CURL:
   . Fixed bug #75093 (OpenSSL support not detected). (Remi)
 
+- GD:
+  . Fixed bug #75124 (gdImageGrayScale() may produce colors). (cmb)
+
 - Intl:
   . Fixed bug #75090 (IntlGregorianCalendar doesn't have constants from parent
     class). (tpunt)
