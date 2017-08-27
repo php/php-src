@@ -53,11 +53,16 @@ int gdImageGrayScale(gdImagePtr src)
 	int new_pxl, pxl;
 	typedef int (*FuncPtr)(gdImagePtr, int, int);
 	FuncPtr f;
+	int alpha_blending;
+
 	f = GET_PIXEL_FUNCTION(src);
 
 	if (src==NULL) {
 		return 0;
 	}
+
+	alpha_blending = src->alphaBlendingFlag;
+	gdImageAlphaBlending(src, gdEffectReplace);
 
 	for (y=0; y<src->sy; ++y) {
 		for (x=0; x<src->sx; ++x) {
@@ -75,6 +80,8 @@ int gdImageGrayScale(gdImagePtr src)
 			gdImageSetPixel (src, x, y, new_pxl);
 		}
 	}
+	gdImageAlphaBlending(src, alpha_blending);
+
 	return 1;
 }
 
