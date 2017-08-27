@@ -156,16 +156,19 @@ ZEND_API const zend_internal_function zend_pass_function = {
 
 #define CV_DEF_OF(i) (EX(func)->op_array.vars[i])
 
-#define ZEND_VM_STACK_PAGE_SLOTS (16 * 1024) /* should be a power of 2 */
+#define ZEND_VM_MAIN_STACK_PAGE_SLOTS (16 * 1024) /* should be a power of 2 */
+#define ZEND_VM_FIBER_STACK_PAGE_SLOTS (256)
 
-#define ZEND_VM_STACK_PAGE_SIZE  (ZEND_VM_STACK_PAGE_SLOTS * sizeof(zval))
+#define ZEND_VM_STACK_PAGE_SLOTS(gen) ((gen) ? ZEND_VM_FIBER_STACK_PAGE_SLOTS : ZEND_VM_MAIN_STACK_PAGE_SLOTS)
 
-#define ZEND_VM_STACK_FREE_PAGE_SIZE \
-	((ZEND_VM_STACK_PAGE_SLOTS - ZEND_VM_STACK_HEADER_SLOTS) * sizeof(zval))
+#define ZEND_VM_STACK_PAGE_SIZE(gen)  (ZEND_VM_STACK_PAGE_SLOTS(gen) * sizeof(zval))
 
-#define ZEND_VM_STACK_PAGE_ALIGNED_SIZE(size) \
+#define ZEND_VM_STACK_FREE_PAGE_SIZE(gen) \
+	((ZEND_VM_STACK_PAGE_SLOTS(gen) - ZEND_VM_STACK_HEADER_SLOTS) * sizeof(zval))
+
+#define ZEND_VM_STACK_PAGE_ALIGNED_SIZE(gen, size) \
 	(((size) + ZEND_VM_STACK_HEADER_SLOTS * sizeof(zval) \
-	  + (ZEND_VM_STACK_PAGE_SIZE - 1)) & ~(ZEND_VM_STACK_PAGE_SIZE - 1))
+	  + (ZEND_VM_STACK_PAGE_SIZE(gen) - 1)) & ~(ZEND_VM_STACK_PAGE_SIZE(gen) - 1))
 
 static zend_always_inline zend_vm_stack zend_vm_stack_new_page(size_t size, zend_vm_stack prev) {
 	zend_vm_stack page = (zend_vm_stack)emalloc(size);
@@ -178,12 +181,15 @@ static zend_always_inline zend_vm_stack zend_vm_stack_new_page(size_t size, zend
 
 ZEND_API void zend_vm_stack_init(void)
 {
-	zend_vm_stack_init_ex(ZEND_VM_STACK_PAGE_SLOTS, NULL);
+	EG(vm_stack) = zend_vm_stack_new_page(ZEND_VM_STACK_PAGE_SIZE(0), NULL);
+	EG(vm_stack)->top++;
+	EG(vm_stack_top) = EG(vm_stack)->top;
+	EG(vm_stack_end) = EG(vm_stack)->end;
 }
 
-ZEND_API void zend_vm_stack_init_ex(size_t size, zend_vm_stack prev)
+ZEND_API void zend_fiber_stack_init(void)
 {
-	EG(vm_stack) = zend_vm_stack_new_page(ZEND_VM_STACK_PAGE_SIZE, prev);
+	EG(vm_stack) = zend_vm_stack_new_page(ZEND_VM_STACK_PAGE_SIZE(1), NULL);
 	EG(vm_stack)->top++;
 	EG(vm_stack_top) = EG(vm_stack)->top;
 	EG(vm_stack_end) = EG(vm_stack)->end;
@@ -204,12 +210,15 @@ ZEND_API void* zend_vm_stack_extend(size_t size)
 {
 	zend_vm_stack stack;
 	void *ptr;
+	int gen;
 
 	stack = EG(vm_stack);
 	stack->top = EG(vm_stack_top);
+
+	gen = EXPECTED(EG(vm_fiber)) ? 1 : 0;
 	EG(vm_stack) = stack = zend_vm_stack_new_page(
-		EXPECTED(size < ZEND_VM_STACK_FREE_PAGE_SIZE) ?
-			ZEND_VM_STACK_PAGE_SIZE : ZEND_VM_STACK_PAGE_ALIGNED_SIZE(size),
+		EXPECTED(size < ZEND_VM_STACK_FREE_PAGE_SIZE(gen)) ?
+			ZEND_VM_STACK_PAGE_SIZE(gen) : ZEND_VM_STACK_PAGE_ALIGNED_SIZE(gen, size),
 		stack);
 	ptr = stack->top;
 	EG(vm_stack_top) = (void*)(((char*)ptr) + size);
@@ -571,7 +580,7 @@ static inline zval *_get_zval_ptr_ptr(int op_type, znode_op node, zend_free_op *
 }
 
 static zend_always_inline zval *_get_obj_zval_ptr_unused(EXECUTE_DATA_D)
-{	
+{
 	return &EX(This);
 }
 
@@ -949,7 +958,7 @@ static ZEND_COLD void zend_verify_return_error(
 
 	zend_verify_type_error_common(
 		zf, arg_info, ce, value,
-		&fname, &fsep, &fclass, &need_msg, &need_kind, &need_or_null, &given_msg, &given_kind); 
+		&fname, &fsep, &fclass, &need_msg, &need_kind, &need_or_null, &given_msg, &given_kind);
 
 	zend_type_error("Return value of %s%s%s() must %s%s%s, %s%s returned",
 		fclass, fsep, fname, need_msg, need_kind, need_or_null, given_msg, given_kind);
@@ -965,7 +974,7 @@ static ZEND_COLD void zend_verify_internal_return_error(
 
 	zend_verify_type_error_common(
 		zf, arg_info, ce, value,
-		&fname, &fsep, &fclass, &need_msg, &need_kind, &need_or_null, &given_msg, &given_kind); 
+		&fname, &fsep, &fclass, &need_msg, &need_kind, &need_or_null, &given_msg, &given_kind);
 
 	zend_error_noreturn(E_CORE_ERROR, "Return value of %s%s%s() must %s%s%s, %s%s returned",
 		fclass, fsep, fname, need_msg, need_kind, need_or_null, given_msg, given_kind);
@@ -1013,7 +1022,7 @@ static zend_always_inline void zend_verify_return_type(zend_function *zf, zval *
 {
 	zend_arg_info *ret_info = zf->common.arg_info - 1;
 	zend_class_entry *ce = NULL;
-	
+
 	if (UNEXPECTED(!zend_check_type(ret_info->type, ret, &ce, cache_slot, NULL, NULL, 1))) {
 		zend_verify_return_error(zf, ce, ret);
 	}
@@ -1362,7 +1371,7 @@ static zend_never_inline void zend_pre_incdec_overloaded_property(zval *object, 
 
 	if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 		zval *z, *zptr, obj;
-				
+
 		ZVAL_OBJ(&obj, Z_OBJ_P(object));
 		Z_ADDREF(obj);
 		zptr = z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, cache_slot, &rv);
@@ -1572,7 +1581,7 @@ str_index:
 		switch (Z_TYPE_P(dim)) {
 			case IS_UNDEF:
 				zval_undefined_cv(EX(opline)->op2.var EXECUTE_DATA_CC);
-				/* break missing intentionally */				
+				/* break missing intentionally */
 			case IS_NULL:
 				offset_key = ZSTR_EMPTY_ALLOC();
 				goto str_index;
@@ -1947,7 +1956,7 @@ use_read_property:
 			ZVAL_INDIRECT(result, ptr);
 		}
 	} else if (EXPECTED(Z_OBJ_HT_P(container)->read_property)) {
-		goto use_read_property; 
+		goto use_read_property;
 	} else {
 		zend_error(E_WARNING, "This object doesn't support property references");
 		ZVAL_ERROR(result);
@@ -2353,7 +2362,7 @@ static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t o
 		zend_op *opline = EX(func)->op_array.opcodes + op_num;
 		int level;
 		int do_exit;
-		
+
 		if (UNEXPECTED(opline->opcode == ZEND_INIT_FCALL ||
 			opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
 			opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||

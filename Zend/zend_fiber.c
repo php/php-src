@@ -249,7 +249,7 @@ ZEND_METHOD(Fiber, __construct)
 	zval *current_stack_top = EG(vm_stack_top);
 	zval *current_stack_end = EG(vm_stack_end);
 
-	zend_vm_stack_init();
+	zend_fiber_stack_init();
 
 	fiber->stack = EG(vm_stack);
 	fiber->stack_top = EG(vm_stack_top);
