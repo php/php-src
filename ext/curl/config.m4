@@ -14,7 +14,7 @@ if test "$PHP_CURL" != "no"; then
     dnl using pkg-config output
 
     AC_MSG_CHECKING(for libcurl.pc)
-    if test "$PHP_CURL" == "yes"; then
+    if test "$PHP_CURL" == "yes" -o "$PHP_CURL" == "/usr"; then
       PKNAME=libcurl
       AC_MSG_RESULT(using default path)
     elif test -r $PHP_CURL/$PHP_LIBDIR/pkgconfig/libcurl.pc; then
@@ -24,9 +24,12 @@ if test "$PHP_CURL" != "no"; then
       PKNAME=$PHP_CURL/lib/pkgconfig/libcurl.pc
       AC_MSG_RESULT(using $PKNAME)
     else
-      AC_MSG_ERROR(Could not find libcurl.pc)
+      AC_MSG_RESULT(not found)
+      AC_MSG_WARN(Could not find libcurl.pc. Try without $PHP_CURL or set PKG_CONFIG_PATH)
     fi
+  fi
 
+  if test -n "$PKNAME"; then
     AC_MSG_CHECKING(for cURL 7.10.5 or greater)
     if $PKG_CONFIG --atleast-version 7.10.5 $PKNAME; then
       curl_version_full=`$PKG_CONFIG --modversion $PKNAME`
@@ -40,6 +43,7 @@ if test "$PHP_CURL" != "no"; then
     CURL_SSL=`$PKG_CONFIG --variable=supported_features $PKNAME| $EGREP SSL`
   else
     dnl fallback to old vay, using curl-config
+    AC_MSG_WARN(Fallback: search for curl headers and curl-config)
 
     if test -r $PHP_CURL/include/curl/easy.h; then
       CURL_DIR=$PHP_CURL
