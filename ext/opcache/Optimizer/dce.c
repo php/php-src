@@ -204,11 +204,23 @@ static inline zend_bool may_have_side_effects(
 		case ZEND_ASSIGN_BW_AND:
 		case ZEND_ASSIGN_BW_XOR:
 		case ZEND_ASSIGN_POW:
-			if (opline->extended_value) {
-				/* ASSIGN_DIM has no side-effect, but we can't deal with OP_DATA anyway */
+			return is_bad_mod(ssa, ssa_op->op1_use, ssa_op->op1_def)
+				|| (opline->extended_value
+					&& ssa->vars[ssa_op->op1_def].escape_state != ESCAPE_STATE_NO_ESCAPE);
+		case ZEND_ASSIGN_DIM:
+		case ZEND_ASSIGN_OBJ:
+			if (is_bad_mod(ssa, ssa_op->op1_use, ssa_op->op1_def)
+				|| ssa->vars[ssa_op->op1_def].escape_state != ESCAPE_STATE_NO_ESCAPE) {
 				return 1;
 			}
-			return is_bad_mod(ssa, ssa_op->op1_use, ssa_op->op1_def);
+			if (!reorder_dtor_effects) {
+				opline++;
+				if (opline->op1_type != IS_CONST && (OP1_INFO() & MAY_HAVE_DTOR)) {
+					/* DCE might shorten lifetime */
+					return 1;
+				}
+			}
+			return 0;
 		default:
 			/* For everything we didn't handle, assume a side-effect */
 			return 1;
@@ -645,6 +657,8 @@ int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_bool reor
 	/* Mark reacable instruction without side effects as dead */
 	int b = ssa->cfg.blocks_count;
 	while (b > 0) {
+		int	op_data = -1;
+
 		b--;
 		zend_basic_block *block = &ssa->cfg.blocks[b];
 		if (!(block->flags & ZEND_BB_REACHABLE)) {
@@ -654,17 +668,31 @@ int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_bool reor
 		while (i > block->start) {
 			i--;
 
+			if (op_array->opcodes[i].opcode == ZEND_OP_DATA) {
+				op_data = i;
+				continue;
+			}
+
 			if (zend_bitset_in(ctx.instr_worklist, i)) {
 				zend_bitset_excl(ctx.instr_worklist, i);
 				add_operands_to_worklists(&ctx, &op_array->opcodes[i], &ssa->ops[i], 0);
+				if (op_data >= 0) {
+					add_operands_to_worklists(&ctx, &op_array->opcodes[op_data], &ssa->ops[op_data], 0);
+				}
 			} else if (may_have_side_effects(op_array, ssa, &op_array->opcodes[i], &ssa->ops[i], ctx.reorder_dtor_effects)
 					|| zend_may_throw(&op_array->opcodes[i], op_array, ssa)
 					|| (has_varargs && may_break_varargs(op_array, ssa, &ssa->ops[i]))) {
 				add_operands_to_worklists(&ctx, &op_array->opcodes[i], &ssa->ops[i], 0);
+				if (op_data >= 0) {
+					add_operands_to_worklists(&ctx, &op_array->opcodes[op_data], &ssa->ops[op_data], 0);
+				}
 			} else {
 				zend_bitset_incl(ctx.instr_dead, i);
+				if (op_data >= 0) {
+					zend_bitset_incl(ctx.instr_dead, op_data);
+				}
 			}
-
+			op_data = -1;
 		}
 	}
 
@@ -674,6 +702,10 @@ int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_bool reor
 		while ((i = zend_bitset_pop_first(ctx.instr_worklist, ctx.instr_worklist_len)) >= 0) {
 			zend_bitset_excl(ctx.instr_dead, i);
 			add_operands_to_worklists(&ctx, &op_array->opcodes[i], &ssa->ops[i], 1);
+			if (i < op_array->last && op_array->opcodes[i+1].opcode == ZEND_OP_DATA) {
+				zend_bitset_excl(ctx.instr_dead, i+1);
+				add_operands_to_worklists(&ctx, &op_array->opcodes[i+1], &ssa->ops[i+1], 1);
+			}
 		}
 		while ((i = zend_bitset_pop_first(ctx.phi_worklist, ctx.phi_worklist_len)) >= 0) {
 			zend_bitset_excl(ctx.phi_dead, i);
