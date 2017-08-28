@@ -4,7 +4,10 @@ is_soap_fault 1: test against null
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-echo (int) is_soap_fault(null);
+var_dump(is_soap_fault(null));
+$fault = new SoapFault("code", "message");
+var_dump(is_soap_fault($fault));
 ?>
 --EXPECT--
-0
+bool(false)
+bool(true)
