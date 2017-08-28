@@ -356,7 +356,10 @@ int zend_ssa_escape_analysis(zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
 	/* 2. Identify Allocations */
 	num_non_escaped = 0;
 	for (i = 0; i < ssa_vars_count; i++) {
-		if (ssa_vars[i].definition >= 0) {
+		if (ssa_vars[i].alias) {
+			root = ees[i];
+			ssa_vars[root].escape_state = ESCAPE_STATE_GLOBAL_ESCAPE;
+		} else if (ssa_vars[i].definition >= 0) {
 			root = ees[i];
 			if (ssa_vars[root].escape_state == ESCAPE_STATE_UNKNOWN) {
 				if (is_allocation_def(op_array, ssa, ssa_vars[i].definition, i)) {
