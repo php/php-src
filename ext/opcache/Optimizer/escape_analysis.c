@@ -89,9 +89,7 @@ static int zend_build_equi_escape_sets(int *parent, zend_op_array *op_array, zen
 	union_find_init(parent, size, ssa_vars_count);
 
 	for (i = 0; i < ssa_vars_count; i++) {
-		if (ssa_vars[i].no_val) {
-			/* skip */
-		} else if (ssa_vars[i].definition_phi) {
+		if (ssa_vars[i].definition_phi) {
 			p = ssa_vars[i].definition_phi;
 			if (p->pi >= 0) {
 				union_find_unite(parent, size, i, p->sources[0]);
