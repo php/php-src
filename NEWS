@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.2.0RC2
 
+- OpenSSL
+  . Automatically load OpenSSL configuration file. (Jakub Zelenka)
 
 31 Aug 2017, PHP 7.2.0RC1
 
