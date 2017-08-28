@@ -39,10 +39,6 @@
 # include "ssa_integrity.c"
 #endif
 
-#ifndef HAVE_ESCAPE_ANALYSIS
-# define HAVE_ESCAPE_ANALYSIS 0
-#endif
-
 int zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, zend_ssa *ssa, uint32_t *flags)
 {
 	uint32_t build_flags;
@@ -111,11 +107,9 @@ int zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, 
 		return FAILURE;
 	}
 
-#if HAVE_ESCAPE_ANALYSIS
 	if (zend_ssa_escape_analysis(op_array, ssa) != SUCCESS) {
 		return FAILURE;
 	}
-#endif
 
 	if (zend_ssa_find_sccs(op_array, ssa) != SUCCESS){
 		return FAILURE;
