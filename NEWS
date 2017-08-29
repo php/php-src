@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.2.0RC1
+31 Aug 2017, PHP 7.2.0RC1
 
 - Core:
   . Fixed #75042 run-tests.php issues with EXTENSION block). (John Boehr)
