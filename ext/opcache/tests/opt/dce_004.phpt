@@ -1,5 +1,5 @@
 --TEST--
-DCE 004: Elimination of assignment to escaping arrays
+DCE 004: Elimination of assignment to non-escaping arrays
 --INI--
 opcache.enable=1
 opcache.enable_cli=1

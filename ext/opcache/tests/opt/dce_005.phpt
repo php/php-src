@@ -1,5 +1,5 @@
 --TEST--
-DCE 005: Elimination of assignment to escaping objects (can't remove NEW yet)
+DCE 005: Elimination of assignment to non-escaping objects (can't remove NEW yet)
 --INI--
 opcache.enable=1
 opcache.enable_cli=1

@@ -1,5 +1,5 @@
 --TEST--
-DCE 006: Objects with destructors don't escape
+DCE 006: Objects with destructors escape
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
