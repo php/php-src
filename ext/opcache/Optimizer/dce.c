@@ -166,7 +166,9 @@ static inline zend_bool may_have_side_effects(
 				return 1;
 			}
 			if (!reorder_dtor_effects) {
-				if (opline->op2_type != IS_CONST && (OP2_INFO() & MAY_HAVE_DTOR)) {
+				if (opline->op2_type != IS_CONST
+					&& (OP2_INFO() & MAY_HAVE_DTOR)
+					&& ssa->vars[ssa_op->op2_use].escape_state != ESCAPE_STATE_NO_ESCAPE) {
 					/* DCE might shorten lifetime */
 					return 1;
 				}
@@ -215,7 +217,10 @@ static inline zend_bool may_have_side_effects(
 			}
 			if (!reorder_dtor_effects) {
 				opline++;
-				if (opline->op1_type != IS_CONST && (OP1_INFO() & MAY_HAVE_DTOR)) {
+				ssa_op++;
+				if (opline->op1_type != IS_CONST
+					&& (OP1_INFO() & MAY_HAVE_DTOR)
+					&& ssa->vars[ssa_op->op1_use].escape_state != ESCAPE_STATE_NO_ESCAPE) {
 					/* DCE might shorten lifetime */
 					return 1;
 				}
