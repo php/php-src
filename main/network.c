@@ -271,22 +271,19 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 #define O_NONBLOCK O_NDELAY
 #endif
 
-#if !defined(__BEOS__)
-# define HAVE_NON_BLOCKING_CONNECT 1
-# ifdef PHP_WIN32
+#ifdef PHP_WIN32
 typedef u_long php_non_blocking_flags_t;
 #  define SET_SOCKET_BLOCKING_MODE(sock, save) \
      save = TRUE; ioctlsocket(sock, FIONBIO, &save)
 #  define RESTORE_SOCKET_BLOCKING_MODE(sock, save) \
 	 ioctlsocket(sock, FIONBIO, &save)
-# else
+#else
 typedef int php_non_blocking_flags_t;
 #  define SET_SOCKET_BLOCKING_MODE(sock, save) \
 	 save = fcntl(sock, F_GETFL, 0); \
 	 fcntl(sock, F_SETFL, save | O_NONBLOCK)
 #  define RESTORE_SOCKET_BLOCKING_MODE(sock, save) \
 	 fcntl(sock, F_SETFL, save)
-# endif
 #endif
 
 /* Connect to a socket using an interruptible connect with optional timeout.
@@ -302,7 +299,6 @@ PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 		zend_string **error_string,
 		int *error_code)
 {
-#if HAVE_NON_BLOCKING_CONNECT
 	php_non_blocking_flags_t orig_flags;
 	int n;
 	int error = 0;
@@ -380,12 +376,6 @@ ok:
 		}
 	}
 	return ret;
-#else
-	if (asynchronous) {
-		php_error_docref(NULL, E_WARNING, "Asynchronous connect() not supported on this platform");
-	}
-	return (connect(sockfd, addr, addrlen) == 0) ? 0 : -1;
-#endif
 }
 /* }}} */
 

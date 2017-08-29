@@ -962,7 +962,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_gethostname, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !defined(__BEOS__))
+#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dns_check_record, 0, 0, 1)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, type)
@@ -984,7 +984,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_dns_get_mx, 0, 0, 2)
 ZEND_END_ARG_INFO()
 # endif
 
-#endif /* defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !defined(__BEOS__)) */
+#endif /* defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC */
 /* }}} */
 
 /* {{{ exec.c */
@@ -1204,7 +1204,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_fgetcsv, 0, 0, 1)
 	ZEND_ARG_INFO(0, escape)
 ZEND_END_ARG_INFO()
 
-#if (!defined(__BEOS__) && HAVE_REALPATH) || defined(ZTS)
+#if HAVE_REALPATH || defined(ZTS)
 ZEND_BEGIN_ARG_INFO(arginfo_realpath, 0)
 	ZEND_ARG_INFO(0, path)
 ZEND_END_ARG_INFO()
@@ -3060,7 +3060,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(gethostname,													arginfo_gethostname)
 #endif
 
-#if defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !defined(__BEOS__))
+#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
 
 	PHP_FE(dns_check_record,												arginfo_dns_check_record)
 	PHP_FALIAS(checkdnsrr,			dns_check_record,						arginfo_dns_check_record)
@@ -3189,7 +3189,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 
 	PHP_FALIAS(socket_get_status, stream_get_meta_data,						arginfo_stream_get_meta_data)
 
-#if (!defined(__BEOS__) && HAVE_REALPATH) || defined(ZTS)
+#if HAVE_REALPATH || defined(ZTS)
 	PHP_FE(realpath,														arginfo_realpath)
 #endif
 
@@ -3700,7 +3700,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	php_register_url_stream_wrapper("http", &php_stream_http_wrapper);
 	php_register_url_stream_wrapper("ftp", &php_stream_ftp_wrapper);
 
-#if defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !defined(__BEOS__))
+#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
 # if defined(PHP_WIN32) || HAVE_FULL_DNS_FUNCS
 	BASIC_MINIT_SUBMODULE(dns)
 # endif
