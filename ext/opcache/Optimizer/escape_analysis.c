@@ -245,18 +245,12 @@ static int is_escape_use(zend_op_array *op_array, zend_ssa *ssa, int use, int va
 				}
 #endif
 				break;
+			case ZEND_ISSET_ISEMPTY_DIM_OBJ:
+			case ZEND_ISSET_ISEMPTY_PROP_OBJ:
 			case ZEND_FETCH_DIM_R:
 			case ZEND_FETCH_OBJ_R:
-//			case ZEND_FETCH_DIM_W:
-//			case ZEND_FETCH_OBJ_W:
-			case ZEND_FETCH_DIM_RW:
-			case ZEND_FETCH_OBJ_RW:
 			case ZEND_FETCH_DIM_IS:
 			case ZEND_FETCH_OBJ_IS:
-//			case ZEND_FETCH_DIM_FUNC_ARG:
-//			case ZEND_FETCH_OBJ_FUNC_ARG:
-//			case ZEND_FETCH_DIM_UNSET:
-//			case ZEND_FETCH_OBJ_UNSET:
 				break;
 			case ZEND_ASSIGN_ADD:
 			case ZEND_ASSIGN_SUB:
