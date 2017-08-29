@@ -64,6 +64,11 @@ Core:
 BCMath:
   . bcscale() can now also be used as getter to retrieve the current scale in use.
 
+readline:
+  . Support for the completion_append_character and completion_suppress_append
+    options has been added to readline_info(). These options are only available
+    if PHP is linked against libreadline (rather than libedit).
+
 ========================================
 3. Changes in SAPI modules
 ========================================

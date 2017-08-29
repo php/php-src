@@ -146,6 +146,10 @@ PHP                                                                        NEWS
   . Fixed bug #65414 (deal with leading slash when adding files correctly).
     (bishopb)
 
+- readline:
+  . Added completion_append_character and completion_suppress_append options
+    to readline_info() if linked against libreadline. (krageon)
+
 - Session:
   . Fixed bug #74941 (session fails to start after having headers sent). 
     (morozov)
