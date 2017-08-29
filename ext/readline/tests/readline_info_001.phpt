@@ -23,7 +23,7 @@ var_dump(readline_info('completion_suppress_append'));
 
 ?>
 --EXPECTF--
-array(11) {
+array(13) {
   ["line_buffer"]=>
   string(0) ""
   ["point"]=>
@@ -40,15 +40,15 @@ array(11) {
   string(0) ""
   ["terminal_name"]=>
   string(0) ""
+  ["completion_append_character"]=>
+  string(1) " "
+  ["completion_suppress_append"]=>
+  int(0)
   ["library_version"]=>
   string(%d) "%s"
   ["readline_name"]=>
   string(5) "other"
   ["attempted_completion_over"]=>
-  int(0)
-  ["completion_append_character"]=>
-  string(1) " "
-  ["completion_suppress_append"]=>
   int(0)
 }
 NULL
