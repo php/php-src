@@ -163,7 +163,7 @@ static inline zend_class_entry *get_class_entry(const zend_script *script, zend_
 }
 /* }}} */
 
-static int is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, int var) /* {{{ */
+static int is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, int var, const zend_script *script) /* {{{ */
 {
 	zend_ssa_op *op = ssa->ops + def;
 	zend_op *opline = op_array->opcodes + def;
@@ -175,9 +175,10 @@ static int is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, in
 			case ZEND_NEW:
 			    /* objects with destructors should escape */
 				if (opline->op1_type == IS_CONST) {
-					zend_class_entry *ce = get_class_entry(NULL, Z_STR_P(CRT_CONSTANT_EX(op_array, opline->op1, ssa->rt_constants)+1));
+					zend_class_entry *ce = get_class_entry(script, Z_STR_P(CRT_CONSTANT_EX(op_array, opline->op1, ssa->rt_constants)+1));
 					if (ce && !ce->create_object &&
-					    !ce->destructor && !ce->__get && !ce->__set) {
+					    !ce->destructor && !ce->__get && !ce->__set &&
+					    !(ce->ce_flags & ZEND_ACC_INHERITED)) {
 						return 1;
 					}
 			    }
@@ -316,7 +317,7 @@ static int is_escape_use(zend_op_array *op_array, zend_ssa *ssa, int use, int va
 }
 /* }}} */
 
-int zend_ssa_escape_analysis(zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
+int zend_ssa_escape_analysis(const zend_script *script, zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
 {
 	zend_ssa_var *ssa_vars = ssa->vars;
 	int ssa_vars_count = ssa->vars_count;
@@ -333,7 +334,7 @@ int zend_ssa_escape_analysis(zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
 	has_allocations = 0;
 	for (i = 0; i < ssa_vars_count; i++) {
 		if (ssa_vars[i].definition >= 0) {
-			if (is_allocation_def(op_array, ssa, ssa_vars[i].definition, i)) {
+			if (is_allocation_def(op_array, ssa, ssa_vars[i].definition, i, script)) {
 				has_allocations = 1;
 			}
 		}
@@ -362,7 +363,7 @@ int zend_ssa_escape_analysis(zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
 		} else if (ssa_vars[i].definition >= 0) {
 			root = ees[i];
 			if (ssa_vars[root].escape_state == ESCAPE_STATE_UNKNOWN) {
-				if (is_allocation_def(op_array, ssa, ssa_vars[i].definition, i)) {
+				if (is_allocation_def(op_array, ssa, ssa_vars[i].definition, i, script)) {
 					ssa_vars[root].escape_state = ESCAPE_STATE_NO_ESCAPE;
 					num_non_escaped++;
 				} else {

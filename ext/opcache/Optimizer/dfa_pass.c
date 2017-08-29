@@ -107,7 +107,7 @@ int zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, 
 		return FAILURE;
 	}
 
-	if (zend_ssa_escape_analysis(op_array, ssa) != SUCCESS) {
+	if (zend_ssa_escape_analysis(ctx->script, op_array, ssa) != SUCCESS) {
 		return FAILURE;
 	}
 
