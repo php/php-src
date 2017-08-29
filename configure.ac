@@ -416,6 +416,7 @@ dnl are usually in libnsl
 dnl Also, uClibc will bark at linking with glibc's libnsl.
 
 PHP_CHECK_FUNC(socket, socket)
+AC_CHECK_LIB(network, socket)
 PHP_CHECK_FUNC(socketpair, socket)
 PHP_CHECK_FUNC(htonl, socket)
 PHP_CHECK_FUNC(gethostname, nsl)
@@ -429,8 +430,8 @@ fi
 AC_CHECK_LIB(m, sin)
 
 dnl Check for inet_aton
-dnl in -lc, -lbind and -lresolv
-PHP_CHECK_FUNC(inet_aton, resolv, bind)
+dnl in -lc, -lbind, -lresolv and -lnetwork
+PHP_CHECK_FUNC(inet_aton, resolv, bind, network)
 
 dnl Then headers.
 dnl -------------------------------------------------------------------------
