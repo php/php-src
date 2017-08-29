@@ -270,7 +270,7 @@ const zend_function_entry sodium_functions[] = {
 	(SODIUM_LIBRARY_VERSION_MAJOR == 7 && SODIUM_LIBRARY_VERSION_MINOR >= 6)
 	PHP_FE(sodium_compare, AI_TwoStrings)
 #endif
-	PHP_FE(sodium_hex2bin, AI_AI_StringAndMaybeString)
+	PHP_FE(sodium_hex2bin, AI_StringAndMaybeString)
 	PHP_FE(sodium_increment, AI_StringRef)
 	PHP_FE(sodium_add, AI_StringRefAndString)
 	PHP_FE(sodium_memcmp, AI_TwoStrings)
