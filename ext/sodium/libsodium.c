@@ -54,7 +54,7 @@ ZEND_BEGIN_ARG_INFO_EX(AI_TwoStrings, 0, 0, 2)
 	ZEND_ARG_INFO(0, string_2)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(AI_StringRef_And_String, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(AI_StringRefAndString, 0, 0, 2)
 	ZEND_ARG_INFO(1, string_1)
 	ZEND_ARG_INFO(0, string_2)
 ZEND_END_ARG_INFO()
@@ -266,7 +266,7 @@ const zend_function_entry sodium_functions[] = {
 #endif
 	PHP_FE(sodium_hex2bin, AI_TwoStrings)
 	PHP_FE(sodium_increment, AI_StringRef)
-	PHP_FE(sodium_add, AI_StringRef_And_String)
+	PHP_FE(sodium_add, AI_StringRefAndString)
 	PHP_FE(sodium_memcmp, AI_TwoStrings)
 	PHP_FE(sodium_memzero, AI_FirstArgByReferenceSecondLength)
 
