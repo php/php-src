@@ -4408,7 +4408,7 @@ PHP_FUNCTION(array_flip)
 /* }}} */
 
 /* {{{ proto array array_change_key_case(array input [, int case=CASE_LOWER])
-   Retuns an array with all string keys lowercased [or uppercased] */
+   Returns an array with all string keys lowercased [or uppercased] */
 PHP_FUNCTION(array_change_key_case)
 {
 	zval *array, *entry;

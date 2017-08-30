@@ -202,12 +202,5 @@ void dateformat_register_IntlDateFormatter_class( void )
 	IntlDateFormatter_handlers.clone_obj = IntlDateFormatter_object_clone;
 	IntlDateFormatter_handlers.dtor_obj = IntlDateFormatter_object_dtor;
 	IntlDateFormatter_handlers.free_obj = IntlDateFormatter_object_free;
-
-	/* Declare 'IntlDateFormatter' class properties. */
-	if( !IntlDateFormatter_ce_ptr )
-	{
-		zend_error(E_ERROR, "Failed to register IntlDateFormatter class");
-		return;
-	}
 }
 /* }}} */

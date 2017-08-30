@@ -894,7 +894,7 @@ PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zva
 		case S_IFDIR: RETURN_STRING("dir");
 		case S_IFBLK: RETURN_STRING("block");
 		case S_IFREG: RETURN_STRING("file");
-#if defined(S_IFSOCK) && !defined(ZEND_WIN32)&&!defined(__BEOS__)
+#if defined(S_IFSOCK) && !defined(PHP_WIN32)
 		case S_IFSOCK: RETURN_STRING("socket");
 #endif
 		}
