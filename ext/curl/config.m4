@@ -23,6 +23,9 @@ if test "$PHP_CURL" != "no"; then
     elif test -r $PHP_CURL/lib/pkgconfig/libcurl.pc; then
       PKNAME=$PHP_CURL/lib/pkgconfig/libcurl.pc
       AC_MSG_RESULT(using $PKNAME)
+    elif test -r $PHP_CURL/develop/lib/pkgconfig/libcurl.pc; then
+      PKNAME=$PHP_CURL/develop/lib/pkgconfig/libcurl.pc
+      AC_MSG_RESULT(using $PKNAME)
     else
       AC_MSG_RESULT(not found)
       AC_MSG_WARN(Could not find libcurl.pc. Try without $PHP_CURL or set PKG_CONFIG_PATH)
