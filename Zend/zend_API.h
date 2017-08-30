@@ -832,7 +832,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(zend_bool throw_
 #define Z_PARAM_ARRAY_OR_OBJECT_EX(dest, check_null, separate) \
 	Z_PARAM_ARRAY_OR_OBJECT_EX2(dest, check_null, separate, separate)
 
-#define Z_PARAM_ARRAY_OR_OBJECT(dest, check_null, separate) \
+#define Z_PARAM_ARRAY_OR_OBJECT(dest) \
 	Z_PARAM_ARRAY_OR_OBJECT_EX(dest, 0, 0)
 
 /* old "b" */

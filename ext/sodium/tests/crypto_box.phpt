@@ -142,7 +142,7 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-keypair size should be CRYPTO_BOX_KEYPAIRBYTES bytes
+keypair size should be SODIUM_CRYPTO_BOX_KEYPAIRBYTES bytes
 bool(true)
 string(17) "Hi, this is Alice"
 string(21) "Hi Alice! This is Bob"

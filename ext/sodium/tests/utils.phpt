@@ -46,6 +46,13 @@ $str = 'stdClass';
 sodium_memzero($str);
 $obj = (object)array('foo' => 'bar');
 var_dump($obj);
+
+$str = 'xyz';
+$str_padded = sodium_pad($str, 16);
+var_dump(bin2hex($str_padded));
+
+$str_unpadded = sodium_unpad($str_padded, 16);
+var_dump($str_unpadded == $str);
 ?>
 --EXPECT--
 0
@@ -60,3 +67,5 @@ object(stdClass)#1 (1) {
   ["foo"]=>
   string(3) "bar"
 }
+string(32) "78797a80000000000000000000000000"
+bool(true)
