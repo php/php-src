@@ -301,7 +301,9 @@ void php_register_signal_constants(INIT_FUNC_ARGS)
 #ifdef SIGPOLL
 	REGISTER_LONG_CONSTANT("SIGPOLL",  (zend_long) SIGPOLL, CONST_CS | CONST_PERSISTENT);
 #endif
+#ifdef SIGIO
 	REGISTER_LONG_CONSTANT("SIGIO",    (zend_long) SIGIO, CONST_CS | CONST_PERSISTENT);
+#endif
 #ifdef SIGPWR
 	REGISTER_LONG_CONSTANT("SIGPWR",   (zend_long) SIGPWR, CONST_CS | CONST_PERSISTENT);
 #endif
@@ -622,7 +624,7 @@ PHP_FUNCTION(pcntl_alarm)
 
 #define PHP_RUSAGE_PARA(from, to, field) \
 	add_assoc_long(to, #field, from.field)
-#ifndef _OSD_POSIX
+#if !defined(_OSD_POSIX) && !defined(__HAIKU__)
 	#define PHP_RUSAGE_SPECIAL(from, to) \
 		PHP_RUSAGE_PARA(from, to, ru_oublock); \
 		PHP_RUSAGE_PARA(from, to, ru_inblock); \
