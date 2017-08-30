@@ -204,13 +204,17 @@ void fpm_children_bury() /* {{{ */
 
 		} else if (WIFSIGNALED(status)) {
 			const char *signame = fpm_signal_names[WTERMSIG(status)];
-			const char *have_core = WCOREDUMP(status) ? " - core dumped" : "";
+			#ifdef WCOREDUMP
+				const char *have_core = WCOREDUMP(status) ? " - core dumped" : "";
+			#endif
 
 			if (signame == NULL) {
 				signame = "";
 			}
 
-			snprintf(buf, sizeof(buf), "on signal %d (%s%s)", WTERMSIG(status), signame, have_core);
+			#ifndef __HAIKU__
+				snprintf(buf, sizeof(buf), "on signal %d (%s%s)", WTERMSIG(status), signame, have_core);
+			#endif
 
 			/* if it's been killed because of dynamic process management
 			 * don't restart it automaticaly

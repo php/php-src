@@ -373,10 +373,15 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 	if (is_root) {
 
 		if (wp->config->process_priority != 64) {
-			if (setpriority(PRIO_PROCESS, 0, wp->config->process_priority) < 0) {
-				zlog(ZLOG_SYSERROR, "[pool %s] Unable to set priority for this new process", wp->config->name);
+			#ifndef __HAIKU__
+				if (setpriority(PRIO_PROCESS, 0, wp->config->process_priority) < 0) {
+					zlog(ZLOG_SYSERROR, "[pool %s] Unable to set priority for this new process", wp->config->name);
+					return -1;
+				}
+			#else
 				return -1;
-			}
+			#endif
+
 		}
 
 		if (wp->set_gid) {
@@ -560,10 +565,14 @@ int fpm_unix_init_main() /* {{{ */
 
 	if (fpm_global_config.process_priority != 64) {
 		if (is_root) {
-			if (setpriority(PRIO_PROCESS, 0, fpm_global_config.process_priority) < 0) {
-				zlog(ZLOG_SYSERROR, "Unable to set priority for the master process");
+			#ifndef __HAIKU__
+				if (setpriority(PRIO_PROCESS, 0, fpm_global_config.process_priority) < 0) {
+					zlog(ZLOG_SYSERROR, "Unable to set priority for the master process");
+					return -1;
+				}
+			#else
 				return -1;
-			}
+			#endif
 		} else {
 			zlog(ZLOG_NOTICE, "'process.priority' directive is ignored when FPM is not running as root");
 		}
