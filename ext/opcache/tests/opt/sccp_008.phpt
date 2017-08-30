@@ -21,12 +21,12 @@ function foo(int $x) {
 --EXPECTF--
 $_main: ; (lines=1, args=0, vars=0, tmps=0)
     ; (after optimizer)
-    ; /home/dmitry/php/php-master/ext/opcache/tests/opt/sccp_008.php:1-11
+    ; %ssccp_008.php:1-11
 L0:     RETURN int(1)
 
 foo: ; (lines=8, args=1, vars=2, tmps=1)
     ; (after optimizer)
-    ; /home/dmitry/php/php-master/ext/opcache/tests/opt/sccp_008.php:2-9
+    ; %ssccp_008.php:2-9
 L0:     CV0($x) = RECV 1
 L1:     JMPZ CV0($x) L4
 L2:     CV1($a) = QM_ASSIGN array(...)
