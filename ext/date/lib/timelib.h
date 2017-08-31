@@ -660,7 +660,7 @@ const timelib_tzdb *timelib_builtin_db(void);
  * Each entry contains the time zone ID ('id' field), and the position within the time zone
  * information ('pos' field). The pos field should not be used.
  */
-const timelib_tzdb_index_entry *timelib_timezone_identifiers_list(timelib_tzdb *tzdb, int *count);
+const timelib_tzdb_index_entry *timelib_timezone_identifiers_list(const timelib_tzdb *tzdb, int *count);
 
 /* From parse_zoneinfo.c */
 
