@@ -21,6 +21,7 @@
 #include "ZendAccelerator.h"
 #include "Optimizer/zend_optimizer_internal.h"
 #include "Optimizer/zend_call_graph.h"
+#include "Optimizer/zend_inference.h"
 #include "Optimizer/scdf.h"
 #include "Optimizer/zend_dump.h"
 #include "ext/standard/php_string.h"
@@ -1916,6 +1917,184 @@ static zval *value_from_type_and_range(sccp_ctx *ctx, int var_num, zval *tmp) {
 	return NULL;
 }
 
+/* This is a basic DCE pass we run after SCCP. It only works on those instructions those result
+ * value(s) were determined by SCCP. It removes dead computational instructions and converts
+ * CV-affecting instructions into CONST ASSIGNs. This basic DCE is performed for multiple reasons:
+ * a) During operand replacement we eliminate FREEs. The corresponding computational instructions
+ *    must be removed to avoid leaks. This way SCCP can run independently of the full DCE pass.
+ * b) The main DCE pass relies on type analysis to determine whether instructions have side-effects
+ *    and can't be DCEd. This means that it will not be able collect all instructions rendered dead
+ *    by SCCP, because they may have potentially side-effecting types, but the actual values are
+ *    not. As such doing DCE here will allow us to eliminate more dead code in combination.
+ * c) The ordinary DCE pass cannot collect dead calls. However SCCP can result in dead calls, which
+ *    we need to collect.
+ * d) The ordinary DCE pass cannot collect construction of dead non-escaping arrays and objects.
+ */
+static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, zval *value)
+{
+	zend_ssa *ssa = ctx->scdf.ssa;
+	zend_op_array *op_array = ctx->scdf.op_array;
+	int removed_ops = 0;
+
+	if (var->definition >= 0) {
+		zend_op *opline = &op_array->opcodes[var->definition];
+		zend_ssa_op *ssa_op = &ssa->ops[var->definition];
+
+		if (opline->opcode == ZEND_ASSIGN) {
+			/* Leave assigns to DCE (due to dtor effects) */
+			return 0;
+		}
+
+		if (ssa_op->result_def == var_num
+				&& ssa_op->op1_def < 0
+				&& ssa_op->op2_def < 0
+				&& var->use_chain < 0
+				&& var->phi_use_chain == NULL) {
+			if (opline->opcode == ZEND_DO_ICALL) {
+				/* Call instruction -> remove opcodes that are part of the call */
+				zend_call_info *call;
+				int i;
+
+				ZEND_ASSERT(ctx->call_map);
+				call = ctx->call_map[var->definition];
+				ZEND_ASSERT(call);
+				ZEND_ASSERT(call->caller_call_opline == opline);
+				if (opline->result_type & (IS_TMP_VAR|IS_VAR)) {
+					zend_optimizer_remove_live_range_ex(op_array, opline->result.var, var->definition);
+				}
+				zend_ssa_remove_result_def(ssa, ssa_op);
+				zend_ssa_remove_instr(ssa, opline, ssa_op);
+				zend_ssa_remove_instr(ssa, call->caller_init_opline,
+					&ssa->ops[call->caller_init_opline - op_array->opcodes]);
+
+				for (i = 0; i < call->num_args; i++) {
+					zend_ssa_remove_instr(ssa, call->arg_info[i].opline,
+						&ssa->ops[call->arg_info[i].opline - op_array->opcodes]);
+				}
+				removed_ops = call->num_args + 2;
+
+				// TODO: remove call_info completely???
+				call->callee_func = NULL;
+			} else {
+				/* Ordinary computational instruction -> remove it */
+				if (opline->result_type & (IS_TMP_VAR|IS_VAR)) {
+					zend_optimizer_remove_live_range_ex(op_array, opline->result.var, var->definition);
+				}
+				zend_ssa_remove_result_def(ssa, ssa_op);
+				zend_ssa_remove_instr(ssa, opline, ssa_op);
+				removed_ops++;
+			}
+		} else if (ssa_op->op1_def == var_num) {
+			/* Compound assign or incdec -> convert to direct ASSIGN */
+
+			switch (opline->opcode) {
+				case ZEND_ASSIGN_DIM:
+				case ZEND_ASSIGN_OBJ:
+				case ZEND_ASSIGN_ADD:
+				case ZEND_ASSIGN_SUB:
+				case ZEND_ASSIGN_MUL:
+				case ZEND_ASSIGN_DIV:
+				case ZEND_ASSIGN_MOD:
+				case ZEND_ASSIGN_SL:
+				case ZEND_ASSIGN_SR:
+				case ZEND_ASSIGN_CONCAT:
+				case ZEND_ASSIGN_BW_OR:
+				case ZEND_ASSIGN_BW_AND:
+				case ZEND_ASSIGN_BW_XOR:
+				case ZEND_ASSIGN_POW:
+				case ZEND_PRE_INC_OBJ:
+				case ZEND_PRE_DEC_OBJ:
+				case ZEND_POST_INC_OBJ:
+				case ZEND_POST_DEC_OBJ:
+					if (opline->op2_type == IS_CV) {
+						if (OP2_INFO() & MAY_BE_UNDEF) {
+							return 0;
+						}
+					}
+				default:
+					break;
+			}
+
+			/* Mark result unused, if possible */
+			if (ssa_op->result_def >= 0) {
+				if (ssa->vars[ssa_op->result_def].use_chain < 0
+						&& ssa->vars[ssa_op->result_def].phi_use_chain == NULL) {
+					if (opline->result_type & (IS_TMP_VAR|IS_VAR)) {
+						zend_optimizer_remove_live_range_ex(op_array, opline->result.var, var->definition);
+					}
+					zend_ssa_remove_result_def(ssa, ssa_op);
+					opline->result_type = IS_UNUSED;
+				} else if (opline->opcode != ZEND_PRE_INC &&
+						opline->opcode != ZEND_PRE_DEC) {
+					/* op1_def and result_def are different */
+					return removed_ops;
+				}
+			}
+
+			/* Destroy previous op2 */
+			if (opline->op2_type == IS_CONST) {
+				literal_dtor(&ZEND_OP2_LITERAL(opline));
+			} else if (ssa_op->op2_use >= 0) {
+				if (ssa_op->op2_use != ssa_op->op1_use) {
+					zend_ssa_unlink_use_chain(ssa, var->definition, ssa_op->op2_use);
+				}
+				ssa_op->op2_use = -1;
+				ssa_op->op2_use_chain = -1;
+			}
+
+			/* Remove OP_DATA opcode */
+			switch (opline->opcode) {
+				case ZEND_ASSIGN_DIM:
+				case ZEND_ASSIGN_OBJ:
+					removed_ops++;
+					zend_ssa_remove_instr(ssa, opline + 1, ssa_op + 1);
+					break;
+				case ZEND_ASSIGN_ADD:
+				case ZEND_ASSIGN_SUB:
+				case ZEND_ASSIGN_MUL:
+				case ZEND_ASSIGN_DIV:
+				case ZEND_ASSIGN_MOD:
+				case ZEND_ASSIGN_SL:
+				case ZEND_ASSIGN_SR:
+				case ZEND_ASSIGN_CONCAT:
+				case ZEND_ASSIGN_BW_OR:
+				case ZEND_ASSIGN_BW_AND:
+				case ZEND_ASSIGN_BW_XOR:
+				case ZEND_ASSIGN_POW:
+					if (opline->extended_value) {
+						removed_ops++;
+						zend_ssa_remove_instr(ssa, opline + 1, ssa_op + 1);
+					}
+					break;
+				default:
+					break;
+			}
+
+			if (value) {
+				/* Convert to ASSIGN */
+				opline->opcode = ZEND_ASSIGN;
+				opline->op2_type = IS_CONST;
+				opline->op2.constant = zend_optimizer_add_literal(op_array, value);
+				Z_TRY_ADDREF_P(value);
+			} else {
+				/* Remove dead array or object construction */
+				removed_ops++;
+				if (var->use_chain >= 0 || var->phi_use_chain != NULL) {
+					zend_ssa_rename_var_uses(ssa, ssa_op->op1_def, ssa_op->op1_use, 1);
+				}
+				zend_ssa_remove_op1_def(ssa, ssa_op);
+				zend_ssa_remove_instr(ssa, opline, ssa_op);
+			}
+		}
+	}
+	if (var->definition_phi
+			&& var->use_chain < 0
+			&& var->phi_use_chain == NULL) {
+		zend_ssa_remove_phi(ssa, var->definition_phi);
+	}
+	return removed_ops;
+}
+
 /* This will try to replace uses of SSA variables we have determined to be constant. Not all uses
  * can be replaced, because some instructions don't accept constant operands or only accept them
  * if they have a certain type. */
@@ -1939,6 +2118,9 @@ static int replace_constant_operands(sccp_ctx *ctx) {
 				zend_array_destroy(Z_ARR(ctx->values[i]));
 			}
 			Z_TYPE_INFO(ctx->values[i]) = BOT;
+			if ((var->use_chain < 0 && var->phi_use_chain == NULL) || var->no_val) {
+				removed_ops += try_remove_definition(ctx, i, var, NULL);
+			}
 			continue;
 		} else if (value_known(&ctx->values[i])) {
 			value = &ctx->values[i];
@@ -1973,108 +2155,8 @@ static int replace_constant_operands(sccp_ctx *ctx) {
 			}
 		} FOREACH_USE_END();
 
-		/* This is a basic DCE pass we run after SCCP. It only works on those instructions those result
-		 * value(s) were determined by SCCP. It removes dead computational instructions and converts
-		 * CV-affecting instructions into CONST ASSIGNs. This basic DCE is performed for multiple reasons:
-		 * a) During operand replacement we eliminate FREEs. The corresponding computational instructions
-		 *    must be removed to avoid leaks. This way SCCP can run independently of the full DCE pass.
-		 * b) The main DCE pass relies on type analysis to determine whether instructions have side-effects
-		 *    and can't be DCEd. This means that it will not be able collect all instructions rendered dead
-		 *    by SCCP, because they may have potentially side-effecting types, but the actual values are
-		 *    not. As such doing DCE here will allow us to eliminate more dead code in combination.
-		 * c) The ordinary DCE pass cannot collect dead calls. However SCCP can result in dead calls, which
-		 *    we need to collect. */
-
-		if (var->definition >= 0 && value_known(&ctx->values[i])) {
-			zend_op *opline = &op_array->opcodes[var->definition];
-			zend_ssa_op *ssa_op = &ssa->ops[var->definition];
-			if (opline->opcode == ZEND_ASSIGN) {
-				/* Leave assigns to DCE (due to dtor effects) */
-				continue;
-			}
-
-			if (ssa_op->result_def == i
-					&& ssa_op->op1_def < 0
-					&& ssa_op->op2_def < 0
-					&& var->use_chain < 0
-					&& var->phi_use_chain == NULL) {
-				if (opline->opcode == ZEND_DO_ICALL) {
-					/* Call instruction -> remove opcodes that are part of the call */
-					zend_call_info *call;
-					int i;
-
-					ZEND_ASSERT(ctx->call_map);
-					call = ctx->call_map[var->definition];
-					ZEND_ASSERT(call);
-					ZEND_ASSERT(call->caller_call_opline == opline);
-					if (opline->result_type & (IS_TMP_VAR|IS_VAR)) {
-						zend_optimizer_remove_live_range_ex(op_array, opline->result.var, var->definition);
-					}
-					zend_ssa_remove_result_def(ssa, ssa_op);
-					zend_ssa_remove_instr(ssa, opline, ssa_op);
-					zend_ssa_remove_instr(ssa, call->caller_init_opline,
-						&ssa->ops[call->caller_init_opline - op_array->opcodes]);
-
-					for (i = 0; i < call->num_args; i++) {
-						zend_ssa_remove_instr(ssa, call->arg_info[i].opline,
-							&ssa->ops[call->arg_info[i].opline - op_array->opcodes]);
-					}
-					removed_ops = call->num_args + 2;
-
-					// TODO: remove call_info completely???
-					call->callee_func = NULL;
-				} else {
-					/* Ordinary computational instruction -> remove it */
-					if (opline->result_type & (IS_TMP_VAR|IS_VAR)) {
-						zend_optimizer_remove_live_range_ex(op_array, opline->result.var, var->definition);
-					}
-					zend_ssa_remove_result_def(ssa, ssa_op);
-					zend_ssa_remove_instr(ssa, opline, ssa_op);
-					removed_ops++;
-				}
-			} else if (ssa_op->op1_def == i) {
-				/* Compound assign or incdec -> convert to direct ASSIGN */
-
-				/* Destroy previous op2 */
-				if (opline->op2_type == IS_CONST) {
-					literal_dtor(&ZEND_OP2_LITERAL(opline));
-				} else if (ssa_op->op2_use >= 0) {
-					if (ssa_op->op2_use != ssa_op->op1_use) {
-						zend_ssa_unlink_use_chain(ssa, var->definition, ssa_op->op2_use);
-					}
-					ssa_op->op2_use = -1;
-					ssa_op->op2_use_chain = -1;
-				}
-
-				/* Mark result unused, if possible */
-				if (ssa_op->result_def >= 0
-						&& ssa->vars[ssa_op->result_def].use_chain < 0
-						&& ssa->vars[ssa_op->result_def].phi_use_chain == NULL) {
-					if (opline->result_type & (IS_TMP_VAR|IS_VAR)) {
-						zend_optimizer_remove_live_range_ex(op_array, opline->result.var, var->definition);
-					}
-					zend_ssa_remove_result_def(ssa, ssa_op);
-					opline->result_type = IS_UNUSED;
-				}
-
-				/* Remove OP_DATA opcode */
-				if (opline->opcode == ZEND_ASSIGN_DIM) {
-					removed_ops++;
-					zend_ssa_remove_instr(ssa, opline + 1, ssa_op + 1);
-				}
-
-				/* Convert to ASSIGN */
-				opline->opcode = ZEND_ASSIGN;
-				opline->op2_type = IS_CONST;
-				opline->op2.constant = zend_optimizer_add_literal(op_array, value);
-				Z_TRY_ADDREF_P(value);
-			}
-		}
-		if (var->definition_phi
-				&& value_known(&ctx->values[i])
-				&& var->use_chain < 0
-				&& var->phi_use_chain == NULL) {
-			zend_ssa_remove_phi(ssa, var->definition_phi);
+		if (value_known(&ctx->values[i])) {
+			removed_ops += try_remove_definition(ctx, i, var, value);
 		}
 	}
 
