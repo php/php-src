@@ -2559,6 +2559,28 @@ static int zend_update_type_info(const zend_op_array *op_array,
 				UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
 			}
 			break;
+		case ZEND_PRE_INC_OBJ:
+		case ZEND_PRE_DEC_OBJ:
+		case ZEND_POST_INC_OBJ:
+		case ZEND_POST_DEC_OBJ:
+			if (opline->op1_type == IS_CV) {
+				tmp = t1;
+				if (t1 & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) {
+					tmp &= ~(MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE);
+					tmp |= MAY_BE_OBJECT | MAY_BE_RC1 | MAY_BE_RCN;
+				}
+				if (tmp & MAY_BE_OBJECT) {
+					tmp |= MAY_BE_RC1 | MAY_BE_RCN;
+				}
+				UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
+				COPY_SSA_OBJ_TYPE(ssa_ops[i].op1_use, ssa_ops[i].op1_def);
+			}
+			if (ssa_ops[i].result_def >= 0) {
+				// TODO: ???
+				tmp = MAY_BE_REF | MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
+				UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
+			}
+			break;
 		case ZEND_ASSIGN:
 			if (opline->op2_type == IS_CV && ssa_ops[i].op2_def >= 0) {
 				tmp = t2;
