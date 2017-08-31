@@ -70,6 +70,9 @@ function get_depends($module)
 		'vcruntime140.dll',
 		'msvcp140.dll',
 		);
+	static $no_dist_re = array(
+		"api-ms-win-crt-.+\.dll",
+	);
 	global $build_dir, $extra_dll_deps, $ext_targets, $sapi_targets, $pecl_targets, $phpdll, $per_module_deps, $pecl_dll_deps;
 	
 	$bd = strtolower(realpath($build_dir));
@@ -97,6 +100,17 @@ function get_depends($module)
 		/* ignore some well-known system dlls */
 		if (in_array(basename($dep), $no_dist)) {
 			continue;
+		} else {
+			$skip = false;
+			foreach ($no_dist_re as $re) {
+				if (preg_match(",$re,", basename($dep)) > 0) {
+					$skip = true;
+					break;
+				}
+			}
+			if ($skip) {
+				continue;
+			}
 		}
 		
 		if ($is_pecl) {
