@@ -246,8 +246,8 @@ really-install:
 	@if not exist $(PHP_PREFIX)\ext mkdir $(PHP_PREFIX)\ext
 	@echo Installing files under $(PHP_PREFIX)
 	@copy $(BUILD_DIR)\*.exe $(PHP_PREFIX) /y >nul
-	@copy $(BUILD_DIR)\php_*.dll $(PHP_PREFIX)\ext /y >nul
-	dir /b $(BUILD_DIR)\php_*.dll > $(BUILD_DIR)\extension_dlls.txt
+	-@copy $(BUILD_DIR)\php_*.dll $(PHP_PREFIX)\ext /y >nul
+	-dir /b $(BUILD_DIR)\php_*.dll > $(BUILD_DIR)\extension_dlls.txt
 	@xcopy $(BUILD_DIR)\*.dll /exclude:$(BUILD_DIR)\extension_dlls.txt $(PHP_PREFIX) /y >nul
 	@echo Registering event source with syslog (requires admin rights)
 	@echo It's okay for this step to fail:
