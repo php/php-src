@@ -1987,32 +1987,42 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 		} else if (ssa_op->op1_def == var_num) {
 			/* Compound assign or incdec -> convert to direct ASSIGN */
 
-			switch (opline->opcode) {
-				case ZEND_ASSIGN_DIM:
-				case ZEND_ASSIGN_OBJ:
-				case ZEND_ASSIGN_ADD:
-				case ZEND_ASSIGN_SUB:
-				case ZEND_ASSIGN_MUL:
-				case ZEND_ASSIGN_DIV:
-				case ZEND_ASSIGN_MOD:
-				case ZEND_ASSIGN_SL:
-				case ZEND_ASSIGN_SR:
-				case ZEND_ASSIGN_CONCAT:
-				case ZEND_ASSIGN_BW_OR:
-				case ZEND_ASSIGN_BW_AND:
-				case ZEND_ASSIGN_BW_XOR:
-				case ZEND_ASSIGN_POW:
-				case ZEND_PRE_INC_OBJ:
-				case ZEND_PRE_DEC_OBJ:
-				case ZEND_POST_INC_OBJ:
-				case ZEND_POST_DEC_OBJ:
-					if (opline->op2_type == IS_CV) {
-						if (OP2_INFO() & MAY_BE_UNDEF) {
+			if (!value) {
+				/* In some cases zend_may_throw() may be avoided */
+				switch (opline->opcode) {
+					case ZEND_ASSIGN_DIM:
+					case ZEND_ASSIGN_OBJ:
+					case ZEND_ASSIGN_ADD:
+					case ZEND_ASSIGN_SUB:
+					case ZEND_ASSIGN_MUL:
+					case ZEND_ASSIGN_DIV:
+					case ZEND_ASSIGN_MOD:
+					case ZEND_ASSIGN_SL:
+					case ZEND_ASSIGN_SR:
+					case ZEND_ASSIGN_CONCAT:
+					case ZEND_ASSIGN_BW_OR:
+					case ZEND_ASSIGN_BW_AND:
+					case ZEND_ASSIGN_BW_XOR:
+					case ZEND_ASSIGN_POW:
+						if ((ssa_op->op2_use >= 0 && !value_known(&ctx->values[ssa_op->op2_use]))
+								|| ((ssa_op+1)->op1_use >= 0 &&!value_known(&ctx->values[(ssa_op+1)->op1_use]))) {
 							return 0;
 						}
-					}
-				default:
-					break;
+						break;
+					case ZEND_PRE_INC_OBJ:
+					case ZEND_PRE_DEC_OBJ:
+					case ZEND_POST_INC_OBJ:
+					case ZEND_POST_DEC_OBJ:
+						if (ssa_op->op2_use >= 0 && !value_known(&ctx->values[ssa_op->op2_use])) {
+							return 0;
+						}
+						break;
+					default:
+						if (zend_may_throw(opline, op_array, ssa)) {
+							return 0;
+						}
+						break;
+				}
 			}
 
 			/* Mark result unused, if possible */
