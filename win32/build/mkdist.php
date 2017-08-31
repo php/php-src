@@ -36,7 +36,8 @@ function get_depends($module)
 		'odbc32.dll', 'ole32.dll', 'oleaut32.dll', 'rpcrt4.dll',
 		'shell32.dll', 'shlwapi.dll', 'user32.dll', 'ws2_32.dll', 'ws2help.dll',
 		'comctl32.dll', 'winmm.dll', 'wsock32.dll', 'winspool.drv', 'msasn1.dll',
-		'secur32.dll', 'netapi32.dll',
+		'secur32.dll', 'netapi32.dll', 'dnsapi.dll', 'psapi.dll', 'normaliz.dll',
+		'iphlpapi.dll',
 
 		/* apache */
 		'apachecore.dll',
@@ -64,7 +65,9 @@ function get_depends($module)
 		 * (msvcrt7x.dll) are not */
 		'msvcrt.dll',
 		'msvcr90.dll',
-		'wldap32.dll'
+		'wldap32.dll',
+		'vcruntime140.dll',
+		'msvcp140.dll',
 		);
 	global $build_dir, $extra_dll_deps, $ext_targets, $sapi_targets, $pecl_targets, $phpdll, $per_module_deps, $pecl_dll_deps;
 	
