@@ -566,7 +566,7 @@ PHP_FUNCTION(sodium_memzero)
 	}
 	ZVAL_DEREF(buf_zv);
 	if (Z_TYPE_P(buf_zv) != IS_STRING) {
-		zend_throw_exception(sodium_exception_ce, "a PHP string is required", 0);
+		zend_wrong_parameter_type_error(ZEND_PARSE_PARAMS_THROW, 1, Z_EXPECTED_STRING, buf_zv);
 		return;
 	}
 	if (Z_REFCOUNTED_P(buf_zv) && Z_REFCOUNT_P(buf_zv) == 1) {
@@ -592,7 +592,7 @@ PHP_FUNCTION(sodium_increment)
 	}
 	ZVAL_DEREF(val_zv);
 	if (Z_TYPE_P(val_zv) != IS_STRING) {
-		zend_throw_exception(sodium_exception_ce, "a PHP string is required", 0);
+		zend_wrong_parameter_type_error(ZEND_PARSE_PARAMS_THROW, 1, Z_EXPECTED_STRING, val_zv);
 		return;
 	}
 
@@ -617,7 +617,7 @@ PHP_FUNCTION(sodium_add)
 	}
 	ZVAL_DEREF(val_zv);
 	if (Z_TYPE_P(val_zv) != IS_STRING) {
-		zend_throw_exception(sodium_exception_ce, "PHP strings are required", 0);
+		zend_wrong_parameter_type_error(ZEND_PARSE_PARAMS_THROW, 1, Z_EXPECTED_STRING, val_zv);
 		return;
 	}
 
@@ -869,7 +869,7 @@ PHP_FUNCTION(sodium_crypto_generichash_update)
 	}
 	ZVAL_DEREF(state_zv);
 	if (Z_TYPE_P(state_zv) != IS_STRING) {
-		zend_throw_exception(sodium_exception_ce, "a reference to a state is required", 0);
+		zend_wrong_parameter_type_error(ZEND_PARSE_PARAMS_THROW, 1, Z_EXPECTED_STRING, state_zv);
 		return;
 	}
 	sodium_separate_string(state_zv);
@@ -908,7 +908,7 @@ PHP_FUNCTION(sodium_crypto_generichash_final)
 	}
 	ZVAL_DEREF(state_zv);
 	if (Z_TYPE_P(state_zv) != IS_STRING) {
-		zend_throw_exception(sodium_exception_ce, "a reference to a state is required", 0);
+		zend_wrong_parameter_type_error(ZEND_PARSE_PARAMS_THROW, 1, Z_EXPECTED_STRING, state_zv);
 		return;
 	}
 	sodium_separate_string(state_zv);
