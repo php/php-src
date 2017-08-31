@@ -22,6 +22,7 @@
 #include "zend_bitset.h"
 #include "zend_cfg.h"
 #include "zend_ssa.h"
+#include "zend_inference.h"
 #include "zend_dump.h"
 
 /*
@@ -198,28 +199,13 @@ static int is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, in
 					return 1;
 				}
 				break;
-#if 0
-				// TODO: implicit object/array allocation
 			case ZEND_ASSIGN_DIM:
 			case ZEND_ASSIGN_OBJ:
-				return 1;
-			case ZEND_ASSIGN_ADD:
-			case ZEND_ASSIGN_SUB:
-			case ZEND_ASSIGN_MUL:
-			case ZEND_ASSIGN_DIV:
-			case ZEND_ASSIGN_MOD:
-			case ZEND_ASSIGN_SL:
-			case ZEND_ASSIGN_SR:
-			case ZEND_ASSIGN_CONCAT:
-			case ZEND_ASSIGN_BW_OR:
-			case ZEND_ASSIGN_BW_AND:
-			case ZEND_ASSIGN_BW_XOR:
-			case ZEND_ASSIGN_POW:
-				if (opline->extended_value) {
+				if (OP1_INFO() & (MAY_BE_UNDEF | MAY_BE_NULL | MAY_BE_FALSE)) {
+					/* implicit object/array allocation */
 					return 1;
 				}
 				break;
-#endif
 		}
 	}
 
