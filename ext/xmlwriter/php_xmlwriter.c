@@ -631,7 +631,10 @@ static char *_xmlwriter_get_valid_file_path(char *source, char *resolved_path, i
 			return NULL;
 		}
 
-		memcpy(file_dirname, source, strlen(source));
+		if (strlcpy(file_dirname, source, sizeof(file_dirname)) >= sizeof(file_dirname)) {
+			xmlFreeURI(uri);
+			return NULL;
+		}
 		dir_len = php_dirname(file_dirname, strlen(source));
 
 		if (dir_len > 0) {
