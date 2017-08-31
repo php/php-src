@@ -424,7 +424,7 @@ const timelib_tzdb *timelib_builtin_db(void)
 	return &timezonedb_builtin;
 }
 
-const timelib_tzdb_index_entry *timelib_timezone_identifiers_list(timelib_tzdb *tzdb, int *count)
+const timelib_tzdb_index_entry *timelib_timezone_identifiers_list(const timelib_tzdb *tzdb, int *count)
 {
 	*count = tzdb->index_size;
 	return tzdb->index;
