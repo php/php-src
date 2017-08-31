@@ -3075,7 +3075,7 @@ PHP_FUNCTION(sodium_crypto_kdf_derive_from_key)
 	size_t         ctx_len;
 	size_t         key_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "llss",
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "llss",
 							  &subkey_len,
 							  &subkey_id,
 							  &ctx, &ctx_len,
@@ -3143,7 +3143,7 @@ PHP_FUNCTION(sodium_pad)
 	size_t          xpadlen;
 	size_t          xpadded_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl",
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "sl",
 							  &unpadded, &unpadded_len, &blocksize) == FAILURE) {
 		sodium_remove_param_values_from_backtrace(EG(exception));
 		return;
@@ -3212,7 +3212,7 @@ PHP_FUNCTION(sodium_unpad)
 	zend_long    blocksize;
 	int          ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl",
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "sl",
 							  &padded, &padded_len, &blocksize) == FAILURE) {
 		sodium_remove_param_values_from_backtrace(EG(exception));
 		return;
