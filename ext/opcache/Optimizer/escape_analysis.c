@@ -257,6 +257,11 @@ static int is_escape_use(zend_op_array *op_array, zend_ssa *ssa, int use, int va
 			case ZEND_ASSIGN_DIM:
 			case ZEND_ASSIGN_OBJ:
 				break;
+			case ZEND_PRE_INC_OBJ:
+			case ZEND_PRE_DEC_OBJ:
+			case ZEND_POST_INC_OBJ:
+			case ZEND_POST_DEC_OBJ:
+				break;
 			default:
 				return 1;
 		}
