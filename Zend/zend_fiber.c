@@ -203,7 +203,9 @@ ZEND_API void zend_fiber_resume(zend_fiber *fiber) /* {{{ */
 		first_frame->prev_execute_data = original_execute_data;
 		zend_execute_ex(fiber->execute_data);
 	} else {
-		call_user_function(NULL, NULL, &fiber->closure, &fiber->value, fiber->n_vars, fiber->vars);
+		int n_vars = fiber->n_vars;
+		fiber->n_vars = 0;
+		call_user_function(NULL, NULL, &fiber->closure, &fiber->value, n_vars, fiber->vars);
 	}
 
 	if (fiber->execute_data) {
@@ -280,6 +282,7 @@ ZEND_METHOD(Fiber, resume)
 	/* Put sent value in the target VAR slot, if it is used */
 	if (fiber->send_target && fiber->vars) {
 		ZVAL_COPY(fiber->send_target, fiber->vars);
+		fiber->n_vars = 0;
 	}
 
 	zend_fiber_resume(fiber);

@@ -3479,8 +3479,15 @@ ZEND_VM_HOT_HANDLER(129, ZEND_DO_ICALL, ANY, ANY, SPEC(RETVAL))
 	ret = RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : &retval;
 	ZVAL_NULL(ret);
 
+	if (EG(vm_fiber)) {
+		((zend_fiber *)EG(vm_fiber))->n_vars++;
+	}
+
 	fbc->internal_function.handler(call, ret);
 
+	if (EG(vm_fiber)) {
+		((zend_fiber *)EG(vm_fiber))->n_vars--;
+	}
 #if ZEND_DEBUG
 	ZEND_ASSERT(
 		EG(exception) || !call->func ||
@@ -7469,6 +7476,14 @@ ZEND_VM_HANDLER(198, ZEND_AWAIT, CONST|TMP|VAR|CV|UNUSED, ANY, SRC)
 
 	if (!fiber) {
 		zend_throw_error(NULL, "Cannot await out of Fiber");
+		FREE_UNFETCHED_OP2();
+		FREE_UNFETCHED_OP1();
+		UNDEF_RESULT();
+		HANDLE_EXCEPTION();
+	}
+
+	if (fiber->n_vars) {
+		zend_throw_error(NULL, "Cannot await in internal call");
 		FREE_UNFETCHED_OP2();
 		FREE_UNFETCHED_OP1();
 		UNDEF_RESULT();

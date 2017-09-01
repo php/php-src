@@ -570,8 +570,15 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_RETV
 	ret = 0 ? EX_VAR(opline->result.var) : &retval;
 	ZVAL_NULL(ret);
 
+	if (EG(vm_fiber)) {
+		((zend_fiber *)EG(vm_fiber))->n_vars++;
+	}
+
 	fbc->internal_function.handler(call, ret);
 
+	if (EG(vm_fiber)) {
+		((zend_fiber *)EG(vm_fiber))->n_vars--;
+	}
 #if ZEND_DEBUG
 	ZEND_ASSERT(
 		EG(exception) || !call->func ||
@@ -614,8 +621,15 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_RETV
 	ret = 1 ? EX_VAR(opline->result.var) : &retval;
 	ZVAL_NULL(ret);
 
+	if (EG(vm_fiber)) {
+		((zend_fiber *)EG(vm_fiber))->n_vars++;
+	}
+
 	fbc->internal_function.handler(call, ret);
 
+	if (EG(vm_fiber)) {
+		((zend_fiber *)EG(vm_fiber))->n_vars--;
+	}
 #if ZEND_DEBUG
 	ZEND_ASSERT(
 		EG(exception) || !call->func ||
@@ -4001,6 +4015,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_AWAIT_SPEC_CONST_HANDLER(ZEND_
 
 	if (!fiber) {
 		zend_throw_error(NULL, "Cannot await out of Fiber");
+		FREE_UNFETCHED_OP(opline->op2_type, opline->op2.var);
+
+		UNDEF_RESULT();
+		HANDLE_EXCEPTION();
+	}
+
+	if (fiber->n_vars) {
+		zend_throw_error(NULL, "Cannot await in internal call");
 		FREE_UNFETCHED_OP(opline->op2_type, opline->op2.var);
 
 		UNDEF_RESULT();
@@ -13501,6 +13523,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_AWAIT_SPEC_TMP_HANDLER(ZEND_OP
 		HANDLE_EXCEPTION();
 	}
 
+	if (fiber->n_vars) {
+		zend_throw_error(NULL, "Cannot await in internal call");
+		FREE_UNFETCHED_OP(opline->op2_type, opline->op2.var);
+		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+		UNDEF_RESULT();
+		HANDLE_EXCEPTION();
+	}
+
 	/* Destroy the previously yielded value */
 	zval_ptr_dtor(&fiber->value);
 
@@ -17548,6 +17578,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_AWAIT_SPEC_VAR_HANDLER(ZEND_OP
 
 	if (!fiber) {
 		zend_throw_error(NULL, "Cannot await out of Fiber");
+		FREE_UNFETCHED_OP(opline->op2_type, opline->op2.var);
+		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+		UNDEF_RESULT();
+		HANDLE_EXCEPTION();
+	}
+
+	if (fiber->n_vars) {
+		zend_throw_error(NULL, "Cannot await in internal call");
 		FREE_UNFETCHED_OP(opline->op2_type, opline->op2.var);
 		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 		UNDEF_RESULT();
@@ -27145,6 +27183,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_AWAIT_SPEC_UNUSED_HANDLER(ZEND
 		HANDLE_EXCEPTION();
 	}
 
+	if (fiber->n_vars) {
+		zend_throw_error(NULL, "Cannot await in internal call");
+		FREE_UNFETCHED_OP(opline->op2_type, opline->op2.var);
+
+		UNDEF_RESULT();
+		HANDLE_EXCEPTION();
+	}
+
 	/* Destroy the previously yielded value */
 	zval_ptr_dtor(&fiber->value);
 
@@ -34712,6 +34758,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_AWAIT_SPEC_CV_HANDLER(ZEND_OPC
 
 	if (!fiber) {
 		zend_throw_error(NULL, "Cannot await out of Fiber");
+		FREE_UNFETCHED_OP(opline->op2_type, opline->op2.var);
+
+		UNDEF_RESULT();
+		HANDLE_EXCEPTION();
+	}
+
+	if (fiber->n_vars) {
+		zend_throw_error(NULL, "Cannot await in internal call");
 		FREE_UNFETCHED_OP(opline->op2_type, opline->op2.var);
 
 		UNDEF_RESULT();
