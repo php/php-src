@@ -27,14 +27,11 @@ $_main: ; (lines=1, args=0, vars=0, tmps=0)
     ; %ssccp_011.php:1-14
 L0:     RETURN int(1)
 
-foo: ; (lines=8, args=1, vars=1, tmps=1)
+foo: ; (lines=5, args=1, vars=1, tmps=1)
     ; (after optimizer)
     ; %ssccp_011.php:2-12
 L0:     CV0($x) = RECV 1
-L1:     V1 = NEW 0 string("stdClass")
-L2:     DO_FCALL
-L3:     FREE V1
-L4:     JMPZ CV0($x) L6
-L5:     JMP L6
-L6:     ECHO int(0)
-L7:     RETURN null
+L1:     JMPZ CV0($x) L3
+L2:     JMP L3
+L3:     ECHO int(0)
+L4:     RETURN null

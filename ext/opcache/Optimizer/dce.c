@@ -696,9 +696,17 @@ int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_bool reor
 			} else if (may_have_side_effects(op_array, ssa, &op_array->opcodes[i], &ssa->ops[i], ctx.reorder_dtor_effects)
 					|| zend_may_throw(&op_array->opcodes[i], op_array, ssa)
 					|| (has_varargs && may_break_varargs(op_array, ssa, &ssa->ops[i]))) {
-				add_operands_to_worklists(&ctx, &op_array->opcodes[i], &ssa->ops[i], 0);
-				if (op_data >= 0) {
-					add_operands_to_worklists(&ctx, &op_array->opcodes[op_data], &ssa->ops[op_data], 0);
+				if (op_array->opcodes[i].opcode == ZEND_NEW
+						&& op_array->opcodes[i+1].opcode == ZEND_DO_FCALL
+						&& ssa->ops[i].result_def >= 0
+						&& ssa->vars[ssa->ops[i].result_def].escape_state == ESCAPE_STATE_NO_ESCAPE) {
+					zend_bitset_incl(ctx.instr_dead, i);
+					zend_bitset_incl(ctx.instr_dead, i+1);
+				} else {
+					add_operands_to_worklists(&ctx, &op_array->opcodes[i], &ssa->ops[i], 0);
+					if (op_data >= 0) {
+						add_operands_to_worklists(&ctx, &op_array->opcodes[op_data], &ssa->ops[op_data], 0);
+					}
 				}
 			} else {
 				zend_bitset_incl(ctx.instr_dead, i);
