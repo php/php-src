@@ -38,7 +38,7 @@ function get_depends($module)
 		'shell32.dll', 'shlwapi.dll', 'user32.dll', 'ws2_32.dll', 'ws2help.dll',
 		'comctl32.dll', 'winmm.dll', 'wsock32.dll', 'winspool.drv', 'msasn1.dll',
 		'secur32.dll', 'netapi32.dll', 'dnsapi.dll', 'psapi.dll', 'normaliz.dll',
-		'iphlpapi.dll',
+		'iphlpapi.dll', 'bcrypt.dll',
 
 		/* apache */
 		'apachecore.dll',
