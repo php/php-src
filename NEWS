@@ -401,6 +401,10 @@ PHP                                                                        NEWS
 - Calendar:
   . Fix integer overflows (Joshua Rogers)
 
+- CLI server:
+  . Fixed bug #60471 (Random "Invalid request (unexpected EOF)" using a router
+    script). (SammyK)
+
 - Date:
   . Fixed bug #55407 (Impossible to prototype DateTime::createFromFormat).
     (kelunik)
