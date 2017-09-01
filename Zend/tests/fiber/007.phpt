@@ -17,17 +17,14 @@ $f = new Fiber(function () {
 });
 
 $f->resume();
-try {
-    $f->resume();
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
-    echo $e->getTraceAsString(), "\n";
-}
+$f->resume();
 
 --EXPECTF--
-Call to a member function foo() on null
+Fatal error: Uncaught Error: Call to a member function foo() on null in %s/Zend/tests/fiber/007.php:6
+Stack trace:
 #0 %s/Zend/tests/fiber/007.php(10): bar()
 #1 %s/Zend/tests/fiber/007.php(13): foo()
 #2 [internal function]: {closure}()
-#3 %s/Zend/tests/fiber/007.php(18): Fiber->resume()
+#3 %s/Zend/tests/fiber/007.php(17): Fiber->resume()
 #4 {main}
+  thrown in %s/Zend/tests/fiber/007.php on line 6
