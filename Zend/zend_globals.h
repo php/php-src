@@ -227,6 +227,7 @@ struct _zend_executor_globals {
 
 	zend_bool each_deprecation_thrown;
 
+	zval *vm_fiber;
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
 
