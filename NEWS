@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.2.0RC2
 
+- GD:
+  . Fixed bug #75139 (libgd/gd_interpolation.c:1786: suspicious if ?). (cmb)
+
 - OpenSSL
   . Automatically load OpenSSL configuration file. (Jakub Zelenka)
 
