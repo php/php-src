@@ -10,6 +10,7 @@ PHP                                                                        NEWS
 
 - GD:
   . Fixed bug #75124 (gdImageGrayScale() may produce colors). (cmb)
+  . Fixed bug #75139 (libgd/gd_interpolation.c:1786: suspicious if ?). (cmb)
 
 - Intl:
   . Fixed bug #75090 (IntlGregorianCalendar doesn't have constants from parent
