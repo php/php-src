@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - OpenSSL
   . Automatically load OpenSSL configuration file. (Jakub Zelenka)
 
+- ZIP:
+  . Fixed bug #75143 (new method setEncryptionName() seems not to exist
+    in ZipArchive). (Anatol)
+
 31 Aug 2017, PHP 7.2.0RC1
 
 - Core:
