@@ -17,5 +17,6 @@ function loadEntities($entity_information) {
 }
 
 loadEntities(array("first", "second")); 
+?>
 --EXPECT--
 bool(true)

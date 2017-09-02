@@ -146,9 +146,12 @@ static void set_value(scdf_ctx *scdf, sccp_ctx *ctx, int var, zval *new) {
 
 	/* Always replace PARTIAL_(ARRAY|OBJECT), as new maybe changed by join_partial_(arrays|object) */
 	if (IS_PARTIAL_ARRAY(new) || IS_PARTIAL_OBJECT(new)) {
-		zval_ptr_dtor_nogc(value);
-		ZVAL_COPY(value, new);
-		/*?? scdf_add_to_worklist(scdf, var); */
+		if (Z_TYPE_P(value) != Z_TYPE_P(new)
+			|| zend_hash_num_elements(Z_ARR_P(new)) != zend_hash_num_elements(Z_ARR_P(value))) {
+			zval_ptr_dtor_nogc(value);
+			ZVAL_COPY(value, new);
+			scdf_add_to_worklist(scdf, var);
+		}
 		return;
 	}
 
