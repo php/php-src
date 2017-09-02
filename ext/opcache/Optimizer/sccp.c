@@ -144,16 +144,16 @@ static void set_value(scdf_ctx *scdf, sccp_ctx *ctx, int var, zval *new) {
 		return;
 	}
 
-	/* PARTIAL_ARRAY is lower than IS_ARRAY */
-	if (Z_TYPE_P(value) == IS_ARRAY && IS_PARTIAL_ARRAY(new)) {
+	/* Always replace PARTIAL_(ARRAY|OBJECT), as new maybe changed by join_partial_(arrays|object) */
+	if (IS_PARTIAL_ARRAY(new) || IS_PARTIAL_OBJECT(new)) {
 		zval_ptr_dtor_nogc(value);
 		ZVAL_COPY(value, new);
-		scdf_add_to_worklist(scdf, var);
+		/*?? scdf_add_to_worklist(scdf, var); */
 		return;
 	}
 
 #if ZEND_DEBUG
-	ZEND_ASSERT(IS_PARTIAL_ARRAY(new) || IS_PARTIAL_OBJECT(new) || zend_is_identical(value, new));
+	ZEND_ASSERT(zend_is_identical(value, new));
 #endif
 }
 
