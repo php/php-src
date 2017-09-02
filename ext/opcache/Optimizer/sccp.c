@@ -133,11 +133,19 @@ static void set_value(scdf_ctx *scdf, sccp_ctx *ctx, int var, zval *new) {
 
 	if (IS_BOT(new)) {
 		SCP_DEBUG("Lowering var %d to BOT\n", var);
-	} else {
+	} else if (!IS_PARTIAL_ARRAY(new) && !IS_PARTIAL_OBJECT(new)) {
 		SCP_DEBUG("Lowering var %d to %Z\n", var, new);
 	}
 
 	if (IS_TOP(value) || IS_BOT(new)) {
+		zval_ptr_dtor_nogc(value);
+		ZVAL_COPY(value, new);
+		scdf_add_to_worklist(scdf, var);
+		return;
+	}
+
+	/* PARTIAL_ARRAY is lower than IS_ARRAY */
+	if (Z_TYPE_P(value) == IS_ARRAY && IS_PARTIAL_ARRAY(new)) {
 		zval_ptr_dtor_nogc(value);
 		ZVAL_COPY(value, new);
 		scdf_add_to_worklist(scdf, var);
@@ -1035,7 +1043,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 				if (!op2 && IS_PARTIAL_ARRAY(&zv)) {
 					/* We can't add NEXT element into partial array (skip it) */
 					SET_RESULT(result, data);
-					SET_RESULT(result, &zv);
+					SET_RESULT(op1, &zv);
 				} else if (ct_eval_assign_dim(&zv, data, op2) == SUCCESS) {
 					SET_RESULT(result, data);
 					SET_RESULT(op1, &zv);
@@ -2127,7 +2135,7 @@ static int replace_constant_operands(sccp_ctx *ctx) {
 			if (!Z_DELREF(ctx->values[i])) {
 				zend_array_destroy(Z_ARR(ctx->values[i]));
 			}
-			Z_TYPE_INFO(ctx->values[i]) = BOT;
+			MAKE_BOT(&ctx->values[i]);
 			if ((var->use_chain < 0 && var->phi_use_chain == NULL) || var->no_val) {
 				removed_ops += try_remove_definition(ctx, i, var, NULL);
 			}
