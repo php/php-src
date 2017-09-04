@@ -14,6 +14,10 @@ PHP                                                                        NEWS
 - OpenSSL
   . Automatically load OpenSSL configuration file. (Jakub Zelenka)
 
+- SPL:
+  . Fixed bug #75155 (AppendIterator::append() is broken when appending another
+    AppendIterator). (Nikita)
+
 - ZIP:
   . Fixed bug #75143 (new method setEncryptionName() seems not to exist
     in ZipArchive). (Anatol)
