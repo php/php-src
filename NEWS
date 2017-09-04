@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.2.0RC2
 
+- Date:
+  . Fixed bug #75149 (redefinition of typedefs ttinfo and t1info). (Remi)
+
 - GD:
   . Fixed bug #75139 (libgd/gd_interpolation.c:1786: suspicious if ?). (cmb)
 
