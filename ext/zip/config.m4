@@ -115,7 +115,7 @@ if test "$PHP_ZIP" != "no"; then
   else
     AC_MSG_WARN(========================================================)
     AC_MSG_WARN(Use of bundled libzip is deprecated and will be removed.)
-    AC_MSG_WARN(Some features such as encryption are not available.)
+    AC_MSG_WARN(Some features such as encryption and bzip2 are not available.)
     AC_MSG_WARN(Use system library and --with-libzip is recommended.)
     AC_MSG_WARN(========================================================)
 
