@@ -147,6 +147,7 @@ int zend_build_ssa(zend_arena **arena, const zend_script *script, const zend_op_
 int zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_array *op_array, zend_ssa *ssa);
 int zend_ssa_unlink_use_chain(zend_ssa *ssa, int op, int var);
 
+void zend_ssa_remove_predecessor(zend_ssa *ssa, int from, int to);
 void zend_ssa_remove_instr(zend_ssa *ssa, zend_op *opline, zend_ssa_op *ssa_op);
 void zend_ssa_remove_phi(zend_ssa *ssa, zend_ssa_phi *phi);
 void zend_ssa_remove_uses_of_var(zend_ssa *ssa, int var_num);
