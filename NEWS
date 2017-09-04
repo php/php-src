@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Core:
   . Fixed #75042 run-tests.php issues with EXTENSION block). (John Boehr)
 
+- CLI server:
+  . Fixed bug #70470 (Built-in server truncates headers spanning over TCP
+    packets). (bouk)
+
 - CURL:
   . Fixed bug #75093 (OpenSSL support not detected). (Remi)
 
