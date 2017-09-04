@@ -115,7 +115,7 @@
 		m = NULL;   \
 	}
 
-typedef struct ttinfo
+struct ttinfo
 {
 	int32_t      offset;
 	int          isdst;
@@ -123,13 +123,13 @@ typedef struct ttinfo
 
 	unsigned int isstdcnt;
 	unsigned int isgmtcnt;
-} ttinfo;
+};
 
-typedef struct tlinfo
+struct tlinfo
 {
 	int32_t  trans;
 	int32_t  offset;
-} tlinfo;
+};
 
 
 #ifndef LONG_MAX
