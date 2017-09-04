@@ -3367,7 +3367,7 @@ SPL_METHOD(AppendIterator, __construct)
    Append an iterator */
 SPL_METHOD(AppendIterator, append)
 {
-	spl_dual_it_object   *intern, *appender;
+	spl_dual_it_object   *intern;
 	zval *it;
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
@@ -3379,11 +3379,6 @@ SPL_METHOD(AppendIterator, append)
 		spl_array_iterator_append(&intern->u.append.zarrayit, it);
 		intern->u.append.iterator->funcs->move_forward(intern->u.append.iterator);
 	}else{
-		appender = Z_SPLDUAL_IT_P(it);
-		if (appender->dit_type == DIT_AppendIterator) {
-			spl_array_iterator_append(&intern->u.append.zarrayit, &appender->u.append.zarrayit);
-			return;
-		}
 		spl_array_iterator_append(&intern->u.append.zarrayit, it);
 	}
 
