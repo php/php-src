@@ -188,10 +188,13 @@ END_EXTERN_C()
 static zend_always_inline int zend_ssa_next_use(const zend_ssa_op *ssa_op, int var, int use)
 {
 	ssa_op += use;
-	if (ssa_op->result_use == var) {
+	if (ssa_op->op1_use == var) {
+		return ssa_op->op1_use_chain;
+	} else if (ssa_op->op2_use == var) {
+		return ssa_op->op2_use_chain;
+	} else {
 		return ssa_op->res_use_chain;
 	}
-	return (ssa_op->op1_use == var) ? ssa_op->op1_use_chain : ssa_op->op2_use_chain;
 }
 
 static zend_always_inline zend_ssa_phi* zend_ssa_next_use_phi(const zend_ssa *ssa, int var, const zend_ssa_phi *p)
@@ -218,7 +221,7 @@ static zend_always_inline zend_bool zend_ssa_is_no_val_use(const zend_op *opline
 		return ssa_op->op2_use == var && ssa_op->op1_use != var;
 	}
 	if (ssa_op->result_use == var && opline->opcode != ZEND_ADD_ARRAY_ELEMENT) {
-		return 1;
+		return ssa_op->op1_use != var && ssa_op->op2_use != var;
 	}
 	return 0;
 }
