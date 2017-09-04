@@ -70,16 +70,16 @@ typedef unsigned char uchar;
 #define YYDEBUG(s,c)
 #endif
 
-typedef struct Scanner {
+typedef struct _Scanner {
 	int           fd;
 	uchar        *lim, *str, *ptr, *cur, *tok, *pos;
 	unsigned int  line, len;
-	struct timelib_error_container *errors;
+	timelib_error_container *errors;
 
-	struct timelib_time     *begin;
-	struct timelib_time     *end;
-	struct timelib_rel_time *period;
-	int                      recurrences;
+	timelib_time     *begin;
+	timelib_time     *end;
+	timelib_rel_time *period;
+	int               recurrences;
 
 	int have_period;
 	int have_recurrences;
@@ -329,14 +329,14 @@ isoweek          = year4 "-"? "W" weekofyear;
 void timelib_strtointerval(char *s, size_t len,
                            timelib_time **begin, timelib_time **end,
 						   timelib_rel_time **period, int *recurrences,
-						   struct timelib_error_container **errors)
+						   timelib_error_container **errors)
 {
 	Scanner in;
 	int t;
 	char *e = s + len - 1;
 
 	memset(&in, 0, sizeof(in));
-	in.errors = timelib_malloc(sizeof(struct timelib_error_container));
+	in.errors = timelib_malloc(sizeof(timelib_error_container));
 	in.errors->warning_count = 0;
 	in.errors->warning_messages = NULL;
 	in.errors->error_count = 0;

@@ -48,12 +48,17 @@ void timelib_unixtime2gmt(timelib_time* tm, timelib_sll ts)
 
 	if (ts >= 0) {
 		tmp_days = days + 1;
+	} else {
+		tmp_days = days;
+	}
 
-		if (tmp_days > DAYS_PER_LYEAR_PERIOD || tmp_days <= -DAYS_PER_LYEAR_PERIOD) {
-			cur_year += YEARS_PER_LYEAR_PERIOD * (tmp_days / DAYS_PER_LYEAR_PERIOD);
-			tmp_days -= DAYS_PER_LYEAR_PERIOD * (tmp_days / DAYS_PER_LYEAR_PERIOD);
-		}
+	if (tmp_days > DAYS_PER_LYEAR_PERIOD || tmp_days <= -DAYS_PER_LYEAR_PERIOD) {
+		cur_year += YEARS_PER_LYEAR_PERIOD * (tmp_days / DAYS_PER_LYEAR_PERIOD);
+		tmp_days -= DAYS_PER_LYEAR_PERIOD * (tmp_days / DAYS_PER_LYEAR_PERIOD);
+	}
+	TIMELIB_DEBUG(printf("tmp_days=%lld, year=%lld\n", tmp_days, cur_year););
 
+	if (ts >= 0) {
 		while (tmp_days >= DAYS_PER_LYEAR) {
 			cur_year++;
 			if (timelib_is_leap(cur_year)) {
@@ -61,33 +66,17 @@ void timelib_unixtime2gmt(timelib_time* tm, timelib_sll ts)
 			} else {
 				tmp_days -= DAYS_PER_YEAR;
 			}
+			TIMELIB_DEBUG(printf("tmp_days=%lld, year=%lld\n", tmp_days, cur_year););
 		}
 	} else {
-		tmp_days = days;
-
-		/* Guess why this might be for, it has to do with a pope ;-). It's also
-		 * only valid for Great Brittain and it's colonies. It needs fixing for
-		 * other locales. *sigh*, why is this crap so complex! */
-		/*
-		if (ts <= TIMELIB_LL_CONST(-6857352000)) {
-			tmp_days -= 11;
-		}
-		*/
-
 		while (tmp_days <= 0) {
-			if (tmp_days < -1460970) {
-				cur_year -= 4000;
-				TIMELIB_DEBUG(printf("tmp_days=%lld, year=%lld\n", tmp_days, cur_year););
-				tmp_days += 1460970;
+			cur_year--;
+			if (timelib_is_leap(cur_year)) {
+				tmp_days += DAYS_PER_LYEAR;
 			} else {
-				cur_year--;
-				TIMELIB_DEBUG(printf("tmp_days=%lld, year=%lld\n", tmp_days, cur_year););
-				if (timelib_is_leap(cur_year)) {
-					tmp_days += DAYS_PER_LYEAR;
-				} else {
-					tmp_days += DAYS_PER_YEAR;
-				}
+				tmp_days += DAYS_PER_YEAR;
 			}
+			TIMELIB_DEBUG(printf("tmp_days=%lld, year=%lld\n", tmp_days, cur_year););
 		}
 		remainder += SECS_PER_DAY;
 	}

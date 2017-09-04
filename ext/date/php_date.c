@@ -1481,7 +1481,7 @@ PHP_FUNCTION(strtotime)
 {
 	zend_string *times;
 	int error1, error2;
-	struct timelib_error_container *error;
+	timelib_error_container *error;
 	zend_long preset_ts = 0, ts;
 	timelib_time *t, *now;
 	timelib_tzinfo *tzi;
@@ -3017,7 +3017,7 @@ PHP_FUNCTION(date_get_last_errors)
 }
 /* }}} */
 
-void php_date_do_return_parsed_time(INTERNAL_FUNCTION_PARAMETERS, timelib_time *parsed_time, struct timelib_error_container *error) /* {{{ */
+void php_date_do_return_parsed_time(INTERNAL_FUNCTION_PARAMETERS, timelib_time *parsed_time, timelib_error_container *error) /* {{{ */
 {
 	zval element;
 
@@ -3097,7 +3097,7 @@ void php_date_do_return_parsed_time(INTERNAL_FUNCTION_PARAMETERS, timelib_time *
 PHP_FUNCTION(date_parse)
 {
 	zend_string                    *date;
-	struct timelib_error_container *error;
+	timelib_error_container *error;
 	timelib_time                   *parsed_time;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -3115,7 +3115,7 @@ PHP_FUNCTION(date_parse)
 PHP_FUNCTION(date_parse_from_format)
 {
 	zend_string                    *date, *format;
-	struct timelib_error_container *error;
+	timelib_error_container *error;
 	timelib_time                   *parsed_time;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
@@ -3172,7 +3172,7 @@ static int php_date_modify(zval *object, char *modify, size_t modify_len) /* {{{
 		return 0;
 	}
 
-	memcpy(&dateobj->time->relative, &tmp_time->relative, sizeof(struct timelib_rel_time));
+	memcpy(&dateobj->time->relative, &tmp_time->relative, sizeof(timelib_rel_time));
 	dateobj->time->have_relative = tmp_time->have_relative;
 	dateobj->time->sse_uptodate = 0;
 
@@ -4096,7 +4096,7 @@ static int date_interval_initialize(timelib_rel_time **rt, /*const*/ char *forma
 	timelib_rel_time *p = NULL;
 	int               r = 0;
 	int               retval = 0;
-	struct timelib_error_container *errors;
+	timelib_error_container *errors;
 
 	timelib_strtointerval(format, format_length, &b, &e, &p, &r, &errors);
 
@@ -4497,7 +4497,7 @@ static int date_period_initialize(timelib_time **st, timelib_time **et, timelib_
 	timelib_rel_time *p = NULL;
 	int               r = 0;
 	int               retval = 0;
-	struct timelib_error_container *errors;
+	timelib_error_container *errors;
 
 	timelib_strtointerval(format, format_length, &b, &e, &p, &r, &errors);
 
@@ -4723,7 +4723,7 @@ PHP_FUNCTION(timezone_identifiers_list)
 	}
 
 	tzdb = DATE_TIMEZONEDB;
-	table = timelib_timezone_identifiers_list(tzdb, &item_count);
+	table = timelib_timezone_identifiers_list((timelib_tzdb*) tzdb, &item_count);
 
 	array_init(return_value);
 
