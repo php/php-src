@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #75139 (libgd/gd_interpolation.c:1786: suspicious if ?). (cmb)
 
+- Opcache
+  . Fixed incorect constant conditional jump elimination. (Dmitry)
+
 - OpenSSL
   . Automatically load OpenSSL configuration file. (Jakub Zelenka)
 
