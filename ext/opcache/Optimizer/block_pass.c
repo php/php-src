@@ -195,6 +195,52 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 						VAR_SOURCE(op1) = NULL;
 						literal_dtor(&ZEND_OP1_LITERAL(src));
 						MAKE_NOP(src);
+						switch (opline->opcode) {
+							case ZEND_JMPZ:
+								if (zend_is_true(&ZEND_OP1_LITERAL(opline))) {
+									MAKE_NOP(opline);
+									DEL_SOURCE(block, block->successors[0]);
+									block->successors_count = 1;
+									block->successors[0] = block->successors[1];
+								} else {
+									opline->opcode = ZEND_JMP;
+									COPY_NODE(opline->op1, opline->op2);
+									DEL_SOURCE(block, block->successors[1]);
+									block->successors_count = 1;
+								}
+								break;
+							case ZEND_JMPNZ:
+								if (zend_is_true(&ZEND_OP1_LITERAL(opline))) {
+									opline->opcode = ZEND_JMP;
+									COPY_NODE(opline->op1, opline->op2);
+									DEL_SOURCE(block, block->successors[1]);
+									block->successors_count = 1;
+								} else {
+									MAKE_NOP(opline);
+									DEL_SOURCE(block, block->successors[0]);
+									block->successors_count = 1;
+									block->successors[0] = block->successors[1];
+								}
+								break;
+							case ZEND_JMPZNZ:
+								if (zend_is_true(&ZEND_OP1_LITERAL(opline))) {
+									zend_op *target_opline = ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value);
+									ZEND_SET_OP_JMP_ADDR(opline, opline->op1, target_opline);
+									DEL_SOURCE(block, block->successors[0]);
+									block->successors[0] = block->successors[1];
+								} else {
+									zend_op *target_opline = ZEND_OP2_JMP_ADDR(opline);
+									ZEND_SET_OP_JMP_ADDR(opline, opline->op1, target_opline);
+									DEL_SOURCE(block, block->successors[0]);
+								}
+								block->successors_count = 1;
+								opline->op1_type = IS_UNUSED;
+								opline->extended_value = 0;
+								opline->opcode = ZEND_JMP;
+								break;
+							default:
+								break;
+						}
 					} else {
 						zval_ptr_dtor_nogc(&c);
 					}

@@ -1350,6 +1350,52 @@ void zend_ssa_remove_uses_of_var(zend_ssa *ssa, int var_num) /* {{{ */
 }
 /* }}} */
 
+void zend_ssa_remove_predecessor(zend_ssa *ssa, int from, int to) /* {{{ */
+{
+	zend_basic_block *next_block = &ssa->cfg.blocks[to];
+	zend_ssa_block *next_ssa_block = &ssa->blocks[to];
+	zend_ssa_phi *phi;
+	int j;
+
+	/* Find at which predecessor offset this block is referenced */
+	int pred_offset = -1;
+	int *predecessors = &ssa->cfg.predecessors[next_block->predecessor_offset];
+
+	for (j = 0; j < next_block->predecessors_count; j++) {
+		if (predecessors[j] == from) {
+			pred_offset = j;
+			break;
+		}
+	}
+
+	/* If there are duplicate successors, the predecessors may have been removed in
+	 * a previous iteration already. */
+	if (pred_offset == -1) {
+		return;
+	}
+
+	/* For phis in successor blocks, remove the operands associated with this block */
+	for (phi = next_ssa_block->phis; phi; phi = phi->next) {
+		if (phi->pi >= 0) {
+			if (phi->pi == from) {
+				zend_ssa_remove_uses_of_var(ssa, phi->ssa_var);
+				zend_ssa_remove_phi(ssa, phi);
+			}
+		} else {
+			ZEND_ASSERT(phi->sources[pred_offset] >= 0);
+			zend_ssa_remove_phi_source(ssa, phi, pred_offset, next_block->predecessors_count);
+		}
+	}
+
+	/* Remove this predecessor */
+	next_block->predecessors_count--;
+	if (pred_offset < next_block->predecessors_count) {
+		predecessors = &ssa->cfg.predecessors[next_block->predecessor_offset + pred_offset];
+		memmove(predecessors, predecessors + 1, (next_block->predecessors_count - pred_offset) * sizeof(uint32_t));
+	}
+}
+/* }}} */
+
 void zend_ssa_remove_block(zend_op_array *op_array, zend_ssa *ssa, int i) /* {{{ */
 {
 	zend_basic_block *block = &ssa->cfg.blocks[i];
@@ -1380,45 +1426,7 @@ void zend_ssa_remove_block(zend_op_array *op_array, zend_ssa *ssa, int i) /* {{{
 	}
 
 	for (s = 0; s < block->successors_count; s++) {
-		zend_basic_block *next_block = &ssa->cfg.blocks[block->successors[s]];
-		zend_ssa_block *next_ssa_block = &ssa->blocks[block->successors[s]];
-		zend_ssa_phi *phi;
-
-		/* Find at which predecessor offset this block is referenced */
-		int pred_offset = -1;
-		predecessors = &ssa->cfg.predecessors[next_block->predecessor_offset];
-		for (j = 0; j < next_block->predecessors_count; j++) {
-			if (predecessors[j] == i) {
-				pred_offset = j;
-				break;
-			}
-		}
-
-		/* If there are duplicate successors, the predecessors may have been removed in
-		 * a previous iteration already. */
-		if (pred_offset == -1) {
-			continue;
-		}
-
-		/* For phis in successor blocks, remove the operands associated with this block */
-		for (phi = next_ssa_block->phis; phi; phi = phi->next) {
-			if (phi->pi >= 0) {
-				if (phi->pi == i) {
-					zend_ssa_remove_uses_of_var(ssa, phi->ssa_var);
-					zend_ssa_remove_phi(ssa, phi);
-				}
-			} else {
-				ZEND_ASSERT(phi->sources[pred_offset] >= 0);
-				zend_ssa_remove_phi_source(ssa, phi, pred_offset, next_block->predecessors_count);
-			}
-		}
-
-		/* Remove this predecessor */
-		next_block->predecessors_count--;
-		if (pred_offset < next_block->predecessors_count) {
-			predecessors = &ssa->cfg.predecessors[next_block->predecessor_offset + pred_offset];
-			memmove(predecessors, predecessors + 1, (next_block->predecessors_count - pred_offset) * sizeof(uint32_t));
-		}
+		zend_ssa_remove_predecessor(ssa, i, block->successors[s]);
 	}
 
 	/* Remove successors of predecessors */
