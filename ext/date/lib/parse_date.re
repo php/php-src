@@ -125,18 +125,18 @@ typedef unsigned char uchar;
 #define YYDEBUG(s,c)
 #endif
 
-typedef struct timelib_elems {
+typedef struct _timelib_elems {
 	unsigned int   c; /* Number of elements */
 	char         **v; /* Values */
 } timelib_elems;
 
-typedef struct Scanner {
+typedef struct _Scanner {
 	int           fd;
 	uchar        *lim, *str, *ptr, *cur, *tok, *pos;
 	unsigned int  line, len;
-	struct timelib_error_container *errors;
+	timelib_error_container *errors;
 
-	struct timelib_time *time;
+	timelib_time        *time;
 	const timelib_tzdb  *tzdb;
 } Scanner;
 
@@ -1790,14 +1790,14 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 
 /*!max:re2c */
 
-timelib_time* timelib_strtotime(char *s, size_t len, struct timelib_error_container **errors, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_get_wrapper)
+timelib_time* timelib_strtotime(char *s, size_t len, timelib_error_container **errors, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_get_wrapper)
 {
 	Scanner in;
 	int t;
 	char *e = s + len - 1;
 
 	memset(&in, 0, sizeof(in));
-	in.errors = timelib_malloc(sizeof(struct timelib_error_container));
+	in.errors = timelib_malloc(sizeof(timelib_error_container));
 	in.errors->warning_count = 0;
 	in.errors->warning_messages = NULL;
 	in.errors->error_count = 0;
@@ -1917,7 +1917,7 @@ timelib_time *timelib_parse_from_format(char *format, char *string, size_t len, 
 	int allow_extra = 0;
 
 	memset(&in, 0, sizeof(in));
-	in.errors = timelib_malloc(sizeof(struct timelib_error_container));
+	in.errors = timelib_malloc(sizeof(timelib_error_container));
 	in.errors->warning_count = 0;
 	in.errors->warning_messages = NULL;
 	in.errors->error_count = 0;

@@ -115,7 +115,7 @@
 		m = NULL;   \
 	}
 
-struct ttinfo
+struct _ttinfo
 {
 	int32_t      offset;
 	int          isdst;
@@ -125,7 +125,7 @@ struct ttinfo
 	unsigned int isgmtcnt;
 };
 
-struct tlinfo
+struct _tlinfo
 {
 	int32_t  trans;
 	int32_t  offset;
