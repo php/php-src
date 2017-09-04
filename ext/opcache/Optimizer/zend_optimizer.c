@@ -1367,7 +1367,8 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level, zend
 		} ZEND_HASH_FOREACH_END();
 	}
 
-	if (debug_level & ZEND_DUMP_AFTER_OPTIMIZER) {
+	if ((debug_level & ZEND_DUMP_AFTER_OPTIMIZER) &&
+	    (ZEND_OPTIMIZER_PASS_7 & optimization_level)) {
 		zend_dump_op_array(&script->main_op_array, ZEND_DUMP_RT_CONSTANTS, "after optimizer", NULL);
 
 		ZEND_HASH_FOREACH_PTR(&script->function_table, op_array) {
