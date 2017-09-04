@@ -4396,10 +4396,6 @@ static void php_image_filter_brightness(INTERNAL_FUNCTION_PARAMETERS)
 		RETURN_FALSE;
 	}
 
-	if (im_src == NULL) {
-		RETURN_FALSE;
-	}
-
 	if (gdImageBrightness(im_src, (int)brightness) == 1) {
 		RETURN_TRUE;
 	}
@@ -4418,10 +4414,6 @@ static void php_image_filter_contrast(INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	if ((im_src = (gdImagePtr)zend_fetch_resource(Z_RES_P(SIM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
-	}
-
-	if (im_src == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -4444,10 +4436,6 @@ static void php_image_filter_colorize(INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	if ((im_src = (gdImagePtr)zend_fetch_resource(Z_RES_P(SIM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
-	}
-
-	if (im_src == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -4528,10 +4516,6 @@ static void php_image_filter_smooth(INTERNAL_FUNCTION_PARAMETERS)
 		RETURN_FALSE;
 	}
 
-	if (im_src == NULL) {
-		RETURN_FALSE;
-	}
-
 	if (gdImageSmooth(im_src, (float)weight)==1) {
 		RETURN_TRUE;
 	}
@@ -4551,10 +4535,6 @@ static void php_image_filter_pixelate(INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
-	}
-
-	if (im == NULL) {
 		RETURN_FALSE;
 	}
 
