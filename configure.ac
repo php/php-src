@@ -415,8 +415,7 @@ dnl to avoid -lnsl checks, if we already have the functions which
 dnl are usually in libnsl
 dnl Also, uClibc will bark at linking with glibc's libnsl.
 
-PHP_CHECK_FUNC(socket, socket)
-AC_CHECK_LIB(network, socket)
+PHP_CHECK_FUNC(socket, socket, network)
 PHP_CHECK_FUNC(socketpair, socket)
 PHP_CHECK_FUNC(htonl, socket)
 PHP_CHECK_FUNC(gethostname, nsl)
