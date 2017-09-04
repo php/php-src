@@ -9379,7 +9379,7 @@ static zend_bool zend_jit_opline_supports_reg(zend_op_array *op_array, zend_ssa 
 			op1_info = OP1_INFO();
 			op2_info = OP2_INFO();
 			return
-			    !(op1_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE))) &&
+			    !(op1_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE))) ||
 			    !(op2_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE)));
 		case ZEND_BW_OR:
 		case ZEND_BW_AND:
@@ -9456,7 +9456,8 @@ static zend_bool zend_jit_may_be_in_reg(zend_op_array *op_array, zend_ssa *ssa, 
 		int use = ssa->vars[var].use_chain;
 
 		do {
-			if (!zend_jit_opline_supports_reg(op_array, ssa, op_array->opcodes + use, var)) {
+			if (!zend_ssa_is_no_val_use(op_array->opcodes + use, ssa->ops + use, var) &&
+			    !zend_jit_opline_supports_reg(op_array, ssa, op_array->opcodes + use, var)) {
 				return 0;
 			}
 			use = zend_ssa_next_use(ssa->ops, var, use);
