@@ -177,7 +177,7 @@ static int is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, in
 			    /* objects with destructors should escape */
 				if (opline->op1_type == IS_CONST) {
 					zend_class_entry *ce = get_class_entry(script, Z_STR_P(CRT_CONSTANT_EX(op_array, opline->op1, ssa->rt_constants)+1));
-					if (ce && !ce->create_object &&
+					if (ce && !ce->create_object && !ce->constructor &&
 					    !ce->destructor && !ce->__get && !ce->__set &&
 					    !(ce->ce_flags & ZEND_ACC_INHERITED)) {
 						return 1;

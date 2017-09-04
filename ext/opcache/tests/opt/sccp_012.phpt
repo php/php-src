@@ -30,12 +30,9 @@ $_main: ; (lines=1, args=0, vars=0, tmps=0)
     ; %ssccp_012.php:1-17
 L0:     RETURN int(1)
 
-foo: ; (lines=6, args=0, vars=0, tmps=1)
+foo: ; (lines=3, args=0, vars=0, tmps=1)
     ; (after optimizer)
     ; %ssccp_012.php:2-15
-L0:     V0 = NEW 0 string("stdClass")
-L1:     DO_FCALL
-L2:     FREE V0
-L3:     ECHO int(1)
-L4:     ECHO int(4)
-L5:     RETURN null
+L0:     ECHO int(1)
+L1:     ECHO int(4)
+L2:     RETURN null
