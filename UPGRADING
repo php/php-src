@@ -356,3 +356,6 @@ See also: https://wiki.php.net/rfc/deprecations_php_7_2
 13. Other Changes
 ========================================
 
+- Build system
+
+  Autoconf minimal version is now 2.64.
