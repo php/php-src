@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed Bug #75142 (buildcheck.sh check for autoconf version needs to be updated
     for v2.64). (zizzy at zizzy dot net, Remi)
 
+- CLI server:
+  . Fixed bug #70470 (Built-in server truncates headers spanning over TCP
+    packets). (bouk)
+
 - Date:
   . Fixed bug #75149 (redefinition of typedefs ttinfo and t1info). (Remi)
 
