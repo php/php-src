@@ -1629,12 +1629,14 @@ static int php_cli_server_client_read_request_on_header_field(php_http_parser *p
 			size_t new_length = client->current_header_name_len + length;
 			client->current_header_name = perealloc(client->current_header_name, new_length + 1, 1);
 			memcpy(client->current_header_name + client->current_header_name_len, at, length);
+			client->current_header_name[new_length] = '\0';
 			client->current_header_name_len = new_length;
 		} else {
 			size_t new_length = client->current_header_name_len + length;
 			char* field = pemalloc(new_length + 1, 1);
 			memcpy(field, client->current_header_name, client->current_header_name_len);
 			memcpy(field + client->current_header_name_len, at, length);
+			field[new_length] = '\0';
 			client->current_header_name = field;
 			client->current_header_name_len = new_length;
 			client->current_header_name_allocated = 1;
@@ -1659,6 +1661,7 @@ static int php_cli_server_client_read_request_on_header_value(php_http_parser *p
 			size_t new_length = client->current_header_value_len + length;
 			client->current_header_value = perealloc(client->current_header_value, new_length + 1, 1);
 			memcpy(client->current_header_value + client->current_header_value_len, at, length);
+			client->current_header_value[new_length] = '\0';
 			client->current_header_value_len = new_length;
 		}
 		break;
