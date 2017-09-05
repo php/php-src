@@ -30,7 +30,7 @@ $_main: ; (lines=1, args=0, vars=0, tmps=0)
     ; %ssccp_012.php:1-17
 L0:     RETURN int(1)
 
-foo: ; (lines=3, args=0, vars=0, tmps=1)
+foo: ; (lines=3, args=0, vars=0, tmps=0)
     ; (after optimizer)
     ; %ssccp_012.php:2-15
 L0:     ECHO int(1)
