@@ -3,7 +3,7 @@ define ("PHP_CLI_SERVER_HOSTNAME", "localhost");
 define ("PHP_CLI_SERVER_PORT", 8964);
 define ("PHP_CLI_SERVER_ADDRESS", PHP_CLI_SERVER_HOSTNAME.":".PHP_CLI_SERVER_PORT);
 
-function php_cli_server_start($code = 'echo "Hello world";', $router = 'index.php', $cmd_args = null) {
+function php_cli_server_start($code = 'echo "Hello world";', $router = 'index.php', $cmd_args = null, $stdout_file = null, $stderr_file = null) {
 	$php_executable = getenv('TEST_PHP_EXECUTABLE');
 	$doc_root = __DIR__;
 
@@ -13,8 +13,8 @@ function php_cli_server_start($code = 'echo "Hello world";', $router = 'index.ph
 
 	$descriptorspec = array(
 		0 => STDIN,
-		1 => STDOUT,
-		2 => STDERR,
+		1 => $stdout_file ? ["file", $stdout_file, "w"] : STDOUT,
+		2 => $stderr_file ? ["file", $stderr_file, "w"] : STDERR,
 	);
 
 	if (substr(PHP_OS, 0, 3) == 'WIN') {
@@ -29,7 +29,9 @@ function php_cli_server_start($code = 'echo "Hello world";', $router = 'index.ph
 		if (!is_null($router)) {
 			$cmd .= " {$router}";
 		}
-		$cmd .= " 2>/dev/null";
+		if (!$stdout_file && !$stderr_file) {
+			$cmd .= " 2>/dev/null";
+		}
 
 		$handle = proc_open($cmd, $descriptorspec, $pipes, $doc_root);
 	}
