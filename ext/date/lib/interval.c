@@ -100,12 +100,12 @@ timelib_time *timelib_add(timelib_time *old_time, timelib_rel_time *interval)
 	timelib_time *t = timelib_time_clone(old_time);
 
 	if (interval->have_weekday_relative || interval->have_special_relative) {
-		memcpy(&t->relative, interval, sizeof(struct timelib_rel_time));
+		memcpy(&t->relative, interval, sizeof(timelib_rel_time));
 	} else {
 		if (interval->invert) {
 			bias = -1;
 		}
-		memset(&t->relative, 0, sizeof(struct timelib_rel_time));
+		memset(&t->relative, 0, sizeof(timelib_rel_time));
 		t->relative.y = interval->y * bias;
 		t->relative.m = interval->m * bias;
 		t->relative.d = interval->d * bias;
@@ -141,7 +141,7 @@ timelib_time *timelib_sub(timelib_time *old_time, timelib_rel_time *interval)
 		bias = -1;
 	}
 
-	memset(&t->relative, 0, sizeof(struct timelib_rel_time));
+	memset(&t->relative, 0, sizeof(timelib_rel_time));
 	t->relative.y = 0 - (interval->y * bias);
 	t->relative.m = 0 - (interval->m * bias);
 	t->relative.d = 0 - (interval->d * bias);

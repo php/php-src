@@ -2043,12 +2043,35 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 			return 0;
 		}
 
-		if (ssa_op->result_def == var_num
-				&& ssa_op->op1_def < 0
-				&& ssa_op->op2_def < 0
-				&& var->use_chain < 0
-				&& var->phi_use_chain == NULL) {
-			if (opline->opcode == ZEND_DO_ICALL) {
+		if (ssa_op->result_def == var_num) {
+			if (ssa_op->op1_def >= 0
+					|| ssa_op->op2_def >= 0) {
+				/* we cannot remove instruction that defines other varibales */
+				return 0;
+			} else if (var->use_chain >= 0
+					|| var->phi_use_chain != NULL) {
+				if (value
+						&& opline->result_type & (IS_VAR|IS_TMP_VAR)
+						&& opline->opcode != ZEND_QM_ASSIGN
+						&& opline->opcode != ZEND_ROPE_INIT
+						&& opline->opcode != ZEND_ROPE_ADD
+						&& opline->opcode != ZEND_INIT_ARRAY
+						&& opline->opcode != ZEND_ADD_ARRAY_ELEMENT) {
+					/* Replace with QM_ASSIGN */
+					zend_uchar old_type = opline->result_type;
+					zend_uchar old_var = opline->result.var;
+
+					ssa_op->result_def = -1;
+					zend_ssa_remove_instr(ssa, opline, ssa_op);
+					ssa_op->result_def = var_num;
+					opline->opcode = ZEND_QM_ASSIGN;
+					opline->result_type = old_type;
+					opline->result.var = old_var;
+					Z_TRY_ADDREF_P(value);
+					zend_optimizer_update_op1_const(ctx->scdf.op_array, opline, value);
+				}
+				return 0;
+			} else if (opline->opcode == ZEND_DO_ICALL) {
 				/* Call instruction -> remove opcodes that are part of the call */
 				zend_call_info *call;
 				int i;
@@ -2194,8 +2217,7 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 				zend_ssa_remove_instr(ssa, opline, ssa_op);
 			}
 		}
-	}
-	if (var->definition_phi
+	} else if (var->definition_phi
 			&& var->use_chain < 0
 			&& var->phi_use_chain == NULL) {
 		zend_ssa_remove_phi(ssa, var->definition_phi);
