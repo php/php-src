@@ -2083,7 +2083,16 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 						&& opline->opcode != ZEND_ROPE_INIT
 						&& opline->opcode != ZEND_ROPE_ADD
 						&& opline->opcode != ZEND_INIT_ARRAY
-						&& opline->opcode != ZEND_ADD_ARRAY_ELEMENT) {
+						&& opline->opcode != ZEND_ADD_ARRAY_ELEMENT
+						&& opline->opcode != ZEND_JMPZ_EX
+						&& opline->opcode != ZEND_JMPNZ_EX
+						&& opline->opcode != ZEND_JMP_SET
+						&& opline->opcode != ZEND_COALESCE
+						&& opline->opcode != ZEND_FE_RESET_R
+						&& opline->opcode != ZEND_FE_RESET_RW
+						&& opline->opcode != ZEND_FE_FETCH_R
+						&& opline->opcode != ZEND_FE_FETCH_RW
+						&& opline->opcode != ZEND_NEW) {
 					/* Replace with QM_ASSIGN */
 					zend_uchar old_type = opline->result_type;
 					zend_uchar old_var = opline->result.var;
