@@ -12,7 +12,7 @@ opcache.opt_debug_level=0x20000
 return isset($undef) || php_sapi_name() == php_sapi_name();
 ?>
 --EXPECTF--
-$_main: ; (lines=4, args=0, vars=1, tmps=3)
+$_main: ; (lines=4, args=0, vars=1, tmps=1)
     ; (after optimizer)
     ; %ssccp_016.php:1-4
 L0:     T1 = ISSET_ISEMPTY_CV (isset) CV0($undef)

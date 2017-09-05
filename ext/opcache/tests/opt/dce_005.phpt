@@ -21,7 +21,7 @@ $_main: ; (lines=1, args=0, vars=0, tmps=0)
     ; %sdce_005.php:1-8
 L0:     RETURN int(1)
 
-foo: ; (lines=2, args=1, vars=1, tmps=1)
+foo: ; (lines=2, args=1, vars=1, tmps=0)
     ; (after optimizer)
     ; %sdce_005.php:4-7
 L0:     CV0($x) = RECV 1
