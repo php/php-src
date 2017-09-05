@@ -1,5 +1,5 @@
 --TEST--
-SCCP 013: Conditional Constant Propagation of non-escaping object properties on PHI and Rewinding
+SCCP 015: Conditional Constant Propagation of non-escaping object properties on PHI and Rewinding
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
