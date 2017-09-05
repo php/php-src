@@ -2015,6 +2015,33 @@ static zval *value_from_type_and_range(sccp_ctx *ctx, int var_num, zval *tmp) {
 	return NULL;
 }
 
+/* Call instruction -> remove opcodes that are part of the call */
+static int remove_call(sccp_ctx *ctx, zend_op *opline, zend_ssa_op *ssa_op)
+{
+	zend_ssa *ssa = ctx->scdf.ssa;
+	zend_op_array *op_array = ctx->scdf.op_array;
+	zend_call_info *call;
+	int i;
+
+	ZEND_ASSERT(ctx->call_map);
+	call = ctx->call_map[opline - op_array->opcodes];
+	ZEND_ASSERT(call);
+	ZEND_ASSERT(call->caller_call_opline == opline);
+	zend_ssa_remove_instr(ssa, opline, ssa_op);
+	zend_ssa_remove_instr(ssa, call->caller_init_opline,
+		&ssa->ops[call->caller_init_opline - op_array->opcodes]);
+
+	for (i = 0; i < call->num_args; i++) {
+		zend_ssa_remove_instr(ssa, call->arg_info[i].opline,
+			&ssa->ops[call->arg_info[i].opline - op_array->opcodes]);
+	}
+
+	// TODO: remove call_info completely???
+	call->callee_func = NULL;
+
+	return call->num_args + 2;
+}
+
 /* This is a basic DCE pass we run after SCCP. It only works on those instructions those result
  * value(s) were determined by SCCP. It removes dead computational instructions and converts
  * CV-affecting instructions into CONST ASSIGNs. This basic DCE is performed for multiple reasons:
@@ -2062,7 +2089,12 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 					zend_uchar old_var = opline->result.var;
 
 					ssa_op->result_def = -1;
-					zend_ssa_remove_instr(ssa, opline, ssa_op);
+					zend_optimizer_remove_live_range_ex(op_array, opline->result.var, var->definition);
+					if (opline->opcode == ZEND_DO_ICALL) {
+						removed_ops = remove_call(ctx, opline, ssa_op) - 1;
+					} else {
+						zend_ssa_remove_instr(ssa, opline, ssa_op);
+					}
 					ssa_op->result_def = var_num;
 					opline->opcode = ZEND_QM_ASSIGN;
 					opline->result_type = old_type;
@@ -2071,39 +2103,17 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 					zend_optimizer_update_op1_const(ctx->scdf.op_array, opline, value);
 				}
 				return 0;
-			} else if (opline->opcode == ZEND_DO_ICALL) {
-				/* Call instruction -> remove opcodes that are part of the call */
-				zend_call_info *call;
-				int i;
-
-				ZEND_ASSERT(ctx->call_map);
-				call = ctx->call_map[var->definition];
-				ZEND_ASSERT(call);
-				ZEND_ASSERT(call->caller_call_opline == opline);
-				if (opline->result_type & (IS_TMP_VAR|IS_VAR)) {
-					zend_optimizer_remove_live_range_ex(op_array, opline->result.var, var->definition);
-				}
-				zend_ssa_remove_result_def(ssa, ssa_op);
-				zend_ssa_remove_instr(ssa, opline, ssa_op);
-				zend_ssa_remove_instr(ssa, call->caller_init_opline,
-					&ssa->ops[call->caller_init_opline - op_array->opcodes]);
-
-				for (i = 0; i < call->num_args; i++) {
-					zend_ssa_remove_instr(ssa, call->arg_info[i].opline,
-						&ssa->ops[call->arg_info[i].opline - op_array->opcodes]);
-				}
-				removed_ops = call->num_args + 2;
-
-				// TODO: remove call_info completely???
-				call->callee_func = NULL;
 			} else {
-				/* Ordinary computational instruction -> remove it */
 				if (opline->result_type & (IS_TMP_VAR|IS_VAR)) {
 					zend_optimizer_remove_live_range_ex(op_array, opline->result.var, var->definition);
 				}
 				zend_ssa_remove_result_def(ssa, ssa_op);
-				zend_ssa_remove_instr(ssa, opline, ssa_op);
-				removed_ops++;
+				if (opline->opcode == ZEND_DO_ICALL) {
+					removed_ops = remove_call(ctx, opline, ssa_op);
+				} else {
+					zend_ssa_remove_instr(ssa, opline, ssa_op);
+					removed_ops++;
+				}
 			}
 		} else if (ssa_op->op1_def == var_num) {
 			/* Compound assign or incdec -> convert to direct ASSIGN */
