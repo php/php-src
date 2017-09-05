@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.2.0RC2
 
+- Core:
+  . Fixed Bug #75142 (buildcheck.sh check for autoconf version needs to be updated
+    for v2.64). (zizzy at zizzy dot net, Remi)
+
 - Date:
   . Fixed bug #75149 (redefinition of typedefs ttinfo and t1info). (Remi)
 
