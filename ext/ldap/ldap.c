@@ -3331,87 +3331,74 @@ PHP_FUNCTION(ldap_control_paged_result_response)
 PHP_FUNCTION(ldap_exop)
 {
 	zval *servercontrols, *clientcontrols;
-	zval *link, *reqoid, *reqdata, *retdata, *retoid;
-	char *lreqoid, *lretoid = NULL;
+	zval *link, *retdata = NULL, *retoid = NULL;
+	char *lretoid = NULL;
+	zend_string *reqoid, *reqdata = NULL;
 	struct berval lreqdata, *lretdata = NULL;
 	ldap_linkdata *ld;
 	LDAPMessage *ldap_res;
-	int rc, msgid, myargcount = ZEND_NUM_ARGS();
-	/* int reqoid_len, reqdata_len, retdata_len, retoid_len, retdat_len; */
+	int rc, msgid;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz|zzzz/z/", &link, &reqoid, &reqdata, &servercontrols, &clientcontrols, &retdata, &retoid) != SUCCESS) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rS|S!zzz/z/", &link, &reqoid, &reqdata, &servercontrols, &clientcontrols, &retdata, &retoid) != SUCCESS) {
+		return;
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
 		RETURN_FALSE;
 	}
 
-	switch (myargcount) {
-	case 7:
-	case 6:
-	case 5:
-	case 4:
-	case 3:
-		convert_to_string_ex(reqdata);
-		lreqdata.bv_val = Z_STRVAL_P(reqdata);
-		lreqdata.bv_len = Z_STRLEN_P(reqdata);
-		/* fallthru */
-	case 2:
-		convert_to_string_ex(reqoid);
-		lreqoid = Z_STRVAL_P(reqoid);
+	if (reqdata) {
+		lreqdata.bv_val = ZSTR_VAL(reqdata);
+		lreqdata.bv_len = ZSTR_LEN(reqdata);
 	}
 
-	if (myargcount > 5) {
+	if (retdata) {
 		/* synchronous call */
-		rc = ldap_extended_operation_s(ld->link, lreqoid,
-			lreqdata.bv_len > 0 ? &lreqdata: NULL,
+		rc = ldap_extended_operation_s(ld->link, ZSTR_VAL(reqoid),
+			reqdata ? &lreqdata: NULL,
 			NULL,
 			NULL,
-			myargcount > 6 ? &lretoid : NULL,
+			retoid ? &lretoid : NULL,
 			&lretdata );
 		if (rc != LDAP_SUCCESS ) {
-			php_error_docref(NULL, E_WARNING, "Extended operation %s failed: %s (%d)", lreqoid, ldap_err2string(rc), rc);
+			php_error_docref(NULL, E_WARNING, "Extended operation %s failed: %s (%d)", ZSTR_VAL(reqoid), ldap_err2string(rc), rc);
 			RETURN_FALSE;
 		}
 
-		/* Reverse -> fall through */
-		switch (myargcount) {
-			case 7:
-				zval_dtor(retoid);
-				if (lretoid == NULL) {
-					ZVAL_EMPTY_STRING(retoid);
-				} else {
-					ZVAL_STRING(retoid, lretoid);
-					ldap_memfree(lretoid);
-				}
-			case 6:
-				/* use arg #4 as the data returned by the server */
-				zval_dtor(retdata);
-				if (lretdata == NULL) {
-					ZVAL_EMPTY_STRING(retdata);
-				} else {
-					ZVAL_STRINGL(retdata, lretdata->bv_val, lretdata->bv_len);
-					ldap_memfree(lretdata->bv_val);
-					ldap_memfree(lretdata);
-				}
+		if (retoid) {
+			zval_dtor(retoid);
+			if (lretoid) {
+				ZVAL_STRING(retoid, lretoid);
+				ldap_memfree(lretoid);
+			} else {
+				ZVAL_EMPTY_STRING(retoid);
+			}
+		}
+
+		zval_dtor(retdata);
+		if (lretdata) {
+			ZVAL_STRINGL(retdata, lretdata->bv_val, lretdata->bv_len);
+			ldap_memfree(lretdata->bv_val);
+			ldap_memfree(lretdata);
+		} else {
+			ZVAL_EMPTY_STRING(retdata);
 		}
 
 		RETURN_TRUE;
 	}
 
 	/* asynchronous call */
-	rc = ldap_extended_operation(ld->link, lreqoid,
+	rc = ldap_extended_operation(ld->link, ZSTR_VAL(reqoid),
 		lreqdata.bv_len > 0 ? &lreqdata: NULL,
 		NULL, NULL, &msgid);
 	if (rc != LDAP_SUCCESS ) {
-		php_error_docref(NULL, E_WARNING, "Extended operation %s failed: %s (%d)", lreqoid, ldap_err2string(rc), rc);
+		php_error_docref(NULL, E_WARNING, "Extended operation %s failed: %s (%d)", ZSTR_VAL(reqoid), ldap_err2string(rc), rc);
 		RETURN_FALSE;
 	}
 
 	rc = ldap_result(ld->link, msgid, 1 /* LDAP_MSG_ALL */, NULL, &ldap_res);
 	if (rc == -1) {
-		php_error_docref(NULL, E_WARNING, "Extended operation %s failed", lreqoid);
+		php_error_docref(NULL, E_WARNING, "Extended operation %s failed", ZSTR_VAL(reqoid));
 		RETURN_FALSE;
 	}
 
