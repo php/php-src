@@ -577,7 +577,7 @@ PHP_FUNCTION(bccomp)
 }
 /* }}} */
 
-/* {{{ proto bool bcscale(int scale)
+/* {{{ proto int bcscale([int scale])
    Sets default scale parameter for all bc math functions */
 PHP_FUNCTION(bcscale)
 {
@@ -591,7 +591,7 @@ PHP_FUNCTION(bcscale)
 	old_scale = BCG(bc_precision);
 
 	if (ZEND_NUM_ARGS() == 1) {
-	BCG(bc_precision) = ((int)new_scale < 0) ? 0 : new_scale;
+		BCG(bc_precision) = ((int)new_scale < 0) ? 0 : new_scale;
 	}
 
 	RETURN_LONG(old_scale);
