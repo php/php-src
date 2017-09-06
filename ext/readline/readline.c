@@ -321,7 +321,7 @@ PHP_FUNCTION(readline_info)
 				convert_to_long_ex(value);
 				rl_completion_suppress_append = Z_LVAL_P(value);
 			}
-			RETVAL_LONG(oldval);
+			RETVAL_BOOL(oldval);
 		} else if (!strcasecmp(what, "completion_append_character")) {
 			char completion_append_str[2];
 			oldval = rl_completion_append_character;
