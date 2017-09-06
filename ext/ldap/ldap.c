@@ -3525,16 +3525,17 @@ PHP_FUNCTION(ldap_control_paged_result_response)
    Extended operation */
 PHP_FUNCTION(ldap_exop)
 {
-	zval *servercontrols;
+	zval *serverctrls = NULL;
 	zval *link, *retdata = NULL, *retoid = NULL;
 	char *lretoid = NULL;
 	zend_string *reqoid, *reqdata = NULL;
 	struct berval lreqdata, *lretdata = NULL;
 	ldap_linkdata *ld;
 	LDAPMessage *ldap_res;
+	LDAPControl **lserverctrls = NULL;
 	int rc, msgid;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rS|S!zz/z/", &link, &reqoid, &reqdata, &servercontrols, &retdata, &retoid) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rS|S!a!z/z/", &link, &reqoid, &reqdata, &serverctrls, &retdata, &retoid) != SUCCESS) {
 		return;
 	}
 
@@ -3549,17 +3550,26 @@ PHP_FUNCTION(ldap_exop)
 		lreqdata.bv_len = 0;
 	}
 
+	if (serverctrls) {
+		lserverctrls = _php_ldap_controls_from_array(ld->link, serverctrls);
+		if (lserverctrls == NULL) {
+			RETVAL_FALSE;
+			goto cleanup;
+		}
+	}
+
 	if (retdata) {
 		/* synchronous call */
 		rc = ldap_extended_operation_s(ld->link, ZSTR_VAL(reqoid),
 			lreqdata.bv_len > 0 ? &lreqdata: NULL,
-			NULL,
+			lserverctrls,
 			NULL,
 			retoid ? &lretoid : NULL,
 			&lretdata );
 		if (rc != LDAP_SUCCESS ) {
 			php_error_docref(NULL, E_WARNING, "Extended operation %s failed: %s (%d)", ZSTR_VAL(reqoid), ldap_err2string(rc), rc);
-			RETURN_FALSE;
+			RETVAL_FALSE;
+			goto cleanup;
 		}
 
 		if (retoid) {
@@ -3581,26 +3591,36 @@ PHP_FUNCTION(ldap_exop)
 			ZVAL_EMPTY_STRING(retdata);
 		}
 
-		RETURN_TRUE;
+		RETVAL_TRUE;
+		goto cleanup;
 	}
 
 	/* asynchronous call */
 	rc = ldap_extended_operation(ld->link, ZSTR_VAL(reqoid),
 		lreqdata.bv_len > 0 ? &lreqdata: NULL,
-		NULL, NULL, &msgid);
+		lserverctrls,
+		NULL,
+		&msgid);
 	if (rc != LDAP_SUCCESS ) {
 		php_error_docref(NULL, E_WARNING, "Extended operation %s failed: %s (%d)", ZSTR_VAL(reqoid), ldap_err2string(rc), rc);
-		RETURN_FALSE;
+		RETVAL_FALSE;
+		goto cleanup;
 	}
 
 	rc = ldap_result(ld->link, msgid, 1 /* LDAP_MSG_ALL */, NULL, &ldap_res);
 	if (rc == -1) {
 		php_error_docref(NULL, E_WARNING, "Extended operation %s failed", ZSTR_VAL(reqoid));
-		RETURN_FALSE;
+		RETVAL_FALSE;
+		goto cleanup;
 	}
 
 	/* return a PHP control object */
 	RETVAL_RES(zend_register_resource(ldap_res, le_result));
+
+	cleanup:
+	if (lserverctrls) {
+		_php_ldap_controls_free(&lserverctrls);
+	}
 }
 /* }}} */
 #endif
@@ -3699,7 +3719,7 @@ PHP_FUNCTION(ldap_exop_passwd)
 	} else if (err == LDAP_SUCCESS) {
 		RETVAL_TRUE;
 	} else {
-		php_error_docref(NULL, E_WARNING, "Passwd modify extended operation failed: %s (%d)", errmsg, err);
+		php_error_docref(NULL, E_WARNING, "Passwd modify extended operation failed: %s (%d)", (errmsg ? errmsg : ldap_err2string(err)), err);
 		RETVAL_FALSE;
 	}
 
