@@ -75,17 +75,24 @@ bc_raisemod (bc_num base, bc_num expo, bc_num mod, bc_num *result, int scale)
 
   /* Do the calculation. */
   rscale = MAX(scale, base->n_scale);
-  while ( !bc_is_zero(exponent) )
+  if ( !bc_compare(mod, BCG(_one_)) )
     {
-      (void) bc_divmod (exponent, BCG(_two_), &exponent, &parity, 0);
-      if ( !bc_is_zero(parity) )
+      temp = bc_new_num (1, scale);
+    }
+  else
+    {
+      while ( !bc_is_zero(exponent) )
 	{
-	  bc_multiply (temp, power, &temp, rscale);
-	  (void) bc_modulo (temp, mod, &temp, scale);
-	}
+	  (void) bc_divmod (exponent, BCG(_two_), &exponent, &parity, 0);
+	  if ( !bc_is_zero(parity) )
+	    {
+	      bc_multiply (temp, power, &temp, rscale);
+	      (void) bc_modulo (temp, mod, &temp, scale);
+	    }
 
-      bc_multiply (power, power, &power, rscale);
-      (void) bc_modulo (power, mod, &power, scale);
+	  bc_multiply (power, power, &power, rscale);
+	  (void) bc_modulo (power, mod, &power, scale);
+	}
     }
 
   /* Assign the value. */
