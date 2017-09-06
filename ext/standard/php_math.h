@@ -44,7 +44,6 @@ PHP_FUNCTION(log10);
 PHP_FUNCTION(is_finite);
 PHP_FUNCTION(is_infinite);
 PHP_FUNCTION(is_nan);
-PHP_FUNCTION(pow);
 PHP_FUNCTION(sqrt);
 PHP_FUNCTION(rand);
 PHP_FUNCTION(mt_srand);

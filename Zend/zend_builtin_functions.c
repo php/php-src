@@ -282,8 +282,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_operator_mod, 0, 0, 2)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_operator_pow, 0, 0, 2)
-	ZEND_ARG_INFO(0, a)
-	ZEND_ARG_INFO(0, b)
+	ZEND_ARG_INFO(0, base)
+	ZEND_ARG_INFO(0, exponent)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_operator_bitwise_and, 0, 0, 2)
@@ -452,6 +452,7 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_NAMED_FE(/,			zend_operator_div,								arginfo_operator_div)
 	ZEND_NAMED_FE(%,			zend_operator_mod,								arginfo_operator_mod)
 	ZEND_NAMED_FE(**,			zend_operator_pow,								arginfo_operator_pow)
+	ZEND_NAMED_FE(pow,			zend_operator_pow,								arginfo_operator_pow)
 	ZEND_NAMED_FE(&,			zend_operator_bitwise_and,						arginfo_operator_bitwise_and)
 	ZEND_NAMED_FE(|,			zend_operator_bitwise_or,						arginfo_operator_bitwise_or)
 	ZEND_NAMED_FE(^,			zend_operator_bitwise_xor,						arginfo_operator_bitwise_xor)
@@ -2969,17 +2970,19 @@ ZEND_NAMED_FUNCTION(zend_operator_mod)
 }
 /* }}} */
 
-/* {{{ proto number **(number a, number b)
-   Returns result of raising a to the b'th power */
+/* also **() - note there is no `pow` operator */
+/* {{{ proto number pow(number base, number exponent)
+   Returns base raised to the power of exponent. Returns integer result when possible */
 ZEND_NAMED_FUNCTION(zend_operator_pow)
 {
-	zval *a, *b;
+	zval *zbase, *zexp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &a, &b) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ZVAL(zbase)
+		Z_PARAM_ZVAL(zexp)
+	ZEND_PARSE_PARAMETERS_END();
 
-	pow_function(return_value, a, b);
+	pow_function(return_value, zbase, zexp);
 }
 /* }}} */
 

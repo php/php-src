@@ -620,21 +620,6 @@ PHP_FUNCTION(is_nan)
 }
 /* }}} */
 
-/* {{{ proto number pow(number base, number exponent)
-   Returns base raised to the power of exponent. Returns integer result when possible */
-PHP_FUNCTION(pow)
-{
-	zval *zbase, *zexp;
-
-	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_ZVAL(zbase)
-		Z_PARAM_ZVAL(zexp)
-	ZEND_PARSE_PARAMETERS_END();
-
-	pow_function(return_value, zbase, zexp);
-}
-/* }}} */
-
 /* {{{ proto float exp(float number)
    Returns e raised to the power of the number */
 PHP_FUNCTION(exp)
