@@ -18,7 +18,7 @@ var_dump(readline_info('attempted_completion_over',1));
 var_dump(readline_info('attempted_completion_over'));
 var_dump(readline_info('completion_append_character', "\0"));
 var_dump(readline_info('completion_append_character'));
-var_dump(readline_info('completion_suppress_append', 1));
+var_dump(readline_info('completion_suppress_append', true));
 var_dump(readline_info('completion_suppress_append'));
 
 ?>
@@ -43,7 +43,7 @@ array(13) {
   ["completion_append_character"]=>
   string(1) " "
   ["completion_suppress_append"]=>
-  int(0)
+  bool(false)
   ["library_version"]=>
   string(%d) "%s"
   ["readline_name"]=>
@@ -61,5 +61,5 @@ int(0)
 int(1)
 string(1) " "
 string(0) ""
-int(0)
-int(1)
+bool(false)
+bool(true)
