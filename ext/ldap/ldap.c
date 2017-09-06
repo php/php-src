@@ -3350,12 +3350,14 @@ PHP_FUNCTION(ldap_exop)
 	if (reqdata) {
 		lreqdata.bv_val = ZSTR_VAL(reqdata);
 		lreqdata.bv_len = ZSTR_LEN(reqdata);
+	} else {
+		lreqdata.bv_len = 0;
 	}
 
 	if (retdata) {
 		/* synchronous call */
 		rc = ldap_extended_operation_s(ld->link, ZSTR_VAL(reqoid),
-			reqdata ? &lreqdata: NULL,
+			lreqdata.bv_len > 0 ? &lreqdata: NULL,
 			NULL,
 			NULL,
 			retoid ? &lretoid : NULL,
