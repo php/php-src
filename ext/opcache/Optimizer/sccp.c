@@ -1516,7 +1516,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 						dup_partial_object(&zv, op1);
 						ct_eval_assign_obj(&zv, &tmp2, op2);
 						if (opline->opcode == ZEND_PRE_INC_OBJ
-								|| ZEND_PRE_DEC_OBJ) {
+								|| opline->opcode == ZEND_PRE_DEC_OBJ) {
 							SET_RESULT(result, &tmp2);
 						} else {
 							SET_RESULT(result, &tmp1);
