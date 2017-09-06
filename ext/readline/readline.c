@@ -268,8 +268,8 @@ PHP_FUNCTION(readline_info)
 		add_assoc_string(return_value,"terminal_name",(char *)SAFE_STRING(rl_terminal_name));
 		completion_append_str[0] = (char)rl_completion_append_character;
 		completion_append_str[1] = '\0';
-		add_assoc_string(return_value,"completion_append_character",SAFE_STRING(completion_append_str));
-		add_assoc_long(return_value,"completion_suppress_append",rl_completion_suppress_append);
+		add_assoc_string(return_value,"completion_append_character",completion_append_str);
+		add_assoc_bool(return_value,"completion_suppress_append",rl_completion_suppress_append);
 #endif
 #if HAVE_ERASE_EMPTY_LINE
 		add_assoc_long(return_value,"erase_empty_line",rl_erase_empty_line);
@@ -327,7 +327,7 @@ PHP_FUNCTION(readline_info)
 			oldval = rl_completion_append_character;
 			if (value) {
 				convert_to_string_ex(value)
-				rl_completion_append_character = (int)strdup(Z_STRVAL_P(value))[0];
+				rl_completion_append_character = (int)Z_STRVAL_P(value)[0];
 			}
 			completion_append_str[0] = (char)oldval;
 			completion_append_str[1] = '\0';
