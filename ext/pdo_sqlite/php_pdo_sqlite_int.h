@@ -75,4 +75,9 @@ extern int _pdo_sqlite_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file,
 #define pdo_sqlite_error_stmt(s) _pdo_sqlite_error(stmt->dbh, stmt, __FILE__, __LINE__)
 
 extern struct pdo_stmt_methods sqlite_stmt_methods;
+
+enum {
+	PDO_SQLITE_ATTR_OPEN_FLAGS = PDO_ATTR_DRIVER_SPECIFIC,
+};
+
 #endif
