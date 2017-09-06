@@ -89,7 +89,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_bccomp, 0, 0, 2)
 	ZEND_ARG_INFO(0, scale)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_bcscale, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_bcscale, 0, 0, 0)
 	ZEND_ARG_INFO(0, scale)
 ZEND_END_ARG_INFO()
 
