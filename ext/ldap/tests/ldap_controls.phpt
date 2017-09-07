@@ -31,7 +31,8 @@ var_dump(
 	ldap_get_entries($link, $result),
 	ldap_delete($link, "o=test,$base", [['oid' => LDAP_CONTROL_ASSERT, 'iscritical' => TRUE, 'value' => ['filter' => '(description=desc2)']]]),
 	ldap_errno($link),
-	ldap_error($link)
+	ldap_error($link),
+	ldap_rename($link, "o=test,$base", "o=test2", "", TRUE, [['oid' => LDAP_CONTROL_ASSERT, 'iscritical' => TRUE, 'value' => ['filter' => '(description=desc2)']]])
 );
 ?>
 ===DONE===
@@ -117,4 +118,5 @@ array(2) {
 bool(false)
 int(122)
 string(16) "Assertion Failed"
+bool(false)
 ===DONE===

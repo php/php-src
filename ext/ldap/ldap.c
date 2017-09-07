@@ -3112,18 +3112,20 @@ PHP_FUNCTION(ldap_parse_reference)
 /* }}} */
 #endif
 
-/* {{{ proto bool ldap_rename(resource link, string dn, string newrdn, string newparent, bool deleteoldrdn)
+/* {{{ proto bool ldap_rename(resource link, string dn, string newrdn, string newparent, bool deleteoldrdn [, array servercontrols [, array clientcontrols]])
    Modify the name of an entry */
 PHP_FUNCTION(ldap_rename)
 {
+	zval *serverctrls = NULL, *clientctrls = NULL;
 	zval *link;
 	ldap_linkdata *ld;
+	LDAPControl **lserverctrls = NULL, **lclientctrls = NULL;
 	int rc;
 	char *dn, *newrdn, *newparent;
 	size_t dn_len, newrdn_len, newparent_len;
 	zend_bool deleteoldrdn;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsssb", &link, &dn, &dn_len, &newrdn, &newrdn_len, &newparent, &newparent_len, &deleteoldrdn) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsssb|aa", &link, &dn, &dn_len, &newrdn, &newrdn_len, &newparent, &newparent_len, &deleteoldrdn, &serverctrls, &clientctrls) != SUCCESS) {
 		return;
 	}
 
@@ -3136,10 +3138,29 @@ PHP_FUNCTION(ldap_rename)
 	}
 
 #if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || HAVE_ORALDAP
-	rc = ldap_rename_s(ld->link, dn, newrdn, newparent, deleteoldrdn, NULL, NULL);
+	if (serverctrls) {
+		lserverctrls = _php_ldap_controls_from_array(ld->link, serverctrls);
+		if (lserverctrls == NULL) {
+			RETVAL_FALSE;
+			goto cleanup;
+		}
+	}
+	if (clientctrls) {
+		lclientctrls = _php_ldap_controls_from_array(ld->link, clientctrls);
+		if (lclientctrls == NULL) {
+			RETVAL_FALSE;
+			goto cleanup;
+		}
+	}
+
+	rc = ldap_rename_s(ld->link, dn, newrdn, newparent, deleteoldrdn, lserverctrls, lclientctrls);
 #else
 	if (newparent_len != 0) {
 		php_error_docref(NULL, E_WARNING, "You are using old LDAP API, newparent must be the empty string, can only modify RDN");
+		RETURN_FALSE;
+	}
+	if (serverctrls || clientctrls) {
+		php_error_docref(NULL, E_WARNING, "You are using old LDAP API, controls are not supported");
 		RETURN_FALSE;
 	}
 /* could support old APIs but need check for ldap_modrdn2()/ldap_modrdn() */
@@ -3147,9 +3168,20 @@ PHP_FUNCTION(ldap_rename)
 #endif
 
 	if (rc == LDAP_SUCCESS) {
-		RETURN_TRUE;
+		RETVAL_TRUE;
+	} else {
+		RETVAL_FALSE;
 	}
-	RETURN_FALSE;
+
+cleanup:
+	if (lserverctrls) {
+		_php_ldap_controls_free(&lserverctrls);
+	}
+	if (lclientctrls) {
+		_php_ldap_controls_free(&lclientctrls);
+	}
+
+	return;
 }
 /* }}} */
 
@@ -4106,6 +4138,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_rename, 0, 0, 5)
 	ZEND_ARG_INFO(0, newrdn)
 	ZEND_ARG_INFO(0, newparent)
 	ZEND_ARG_INFO(0, deleteoldrdn)
+	ZEND_ARG_INFO(0, servercontrols)
+	ZEND_ARG_INFO(0, clientcontrols)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_get_option, 0, 0, 3)
