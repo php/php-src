@@ -1645,7 +1645,7 @@ PHP_FUNCTION(sodium_crypto_stream)
 		return;
 	}
 	if (ciphertext_len <= 0 || ciphertext_len >= SIZE_MAX) {
-		zend_throw_exception(sodium_exception_ce, "invalid length", 0);
+		zend_throw_exception(sodium_exception_ce, "ciphertext length must be greater than 0", 0);
 		return;
 	}
 	if (nonce_len != crypto_stream_NONCEBYTES) {
@@ -1727,9 +1727,16 @@ PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256)
 		sodium_remove_param_values_from_backtrace(EG(exception));
 		return;
 	}
-	if (hash_len <= 0 || hash_len >= SIZE_MAX || hash_len > 0x1fffffffe0ULL ||
-		opslimit <= 0 || memlimit <= 0 || memlimit > SIZE_MAX) {
-		zend_throw_exception(sodium_exception_ce, "invalid parameters", 0);
+	if (hash_len <= 0 || hash_len >= SIZE_MAX || hash_len > 0x1fffffffe0ULL) {
+		zend_throw_exception(sodium_exception_ce, "hash length must be greater than 0", 0);
+		return;
+	}
+	if (opslimit <= 0) {
+		zend_throw_exception(sodium_exception_ce, "ops limit must be greater than 0", 0);
+		return;
+	}
+	if (memlimit <= 0 || memlimit > SIZE_MAX) {
+		zend_throw_exception(sodium_exception_ce, "memory limit must be greater than 0", 0);
 		return;
 	}
 	if (passwd_len <= 0) {
@@ -1777,8 +1784,12 @@ PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256_str)
 		sodium_remove_param_values_from_backtrace(EG(exception));
 		return;
 	}
-	if (opslimit <= 0 || memlimit <= 0 || memlimit > SIZE_MAX) {
-		zend_throw_exception(sodium_exception_ce, "invalid parameters", 0);
+	if (opslimit <= 0) {
+		zend_throw_exception(sodium_exception_ce, "ops limit must be greater than 0", 0);
+		return;
+	}
+	if (memlimit <= 0 || memlimit > SIZE_MAX) {
+		zend_throw_exception(sodium_exception_ce, "memory limit must be greater than 0", 0);
 		return;
 	}
 	if (passwd_len <= 0) {
@@ -1856,10 +1867,20 @@ PHP_FUNCTION(sodium_crypto_pwhash)
 		sodium_remove_param_values_from_backtrace(EG(exception));
 		return;
 	}
-	if (hash_len <= 0 || hash_len >= 0xffffffff ||
-		passwd_len >= 0xffffffff ||
-		opslimit <= 0 || memlimit <= 0 || memlimit > SIZE_MAX) {
-		zend_throw_exception(sodium_exception_ce, "invalid parameters", 0);
+	if (hash_len <= 0 || hash_len >= 0xffffffff) {
+		zend_throw_exception(sodium_exception_ce, "hash length must be greater than 0", 0);
+		return;
+	}
+	if (passwd_len >= 0xffffffff) {
+		zend_throw_exception(sodium_exception_ce, "unsupported password length", 0);
+		return;
+	}
+	if (opslimit <= 0) {
+		zend_throw_exception(sodium_exception_ce, "ops limit must be greater than 0", 0);
+		return;
+	}
+	if (memlimit <= 0 || memlimit > SIZE_MAX) {
+		zend_throw_exception(sodium_exception_ce, "memory limit must be greater than 0", 0);
 		return;
 	}
 	if (alg != crypto_pwhash_ALG_ARGON2I13
@@ -1914,9 +1935,16 @@ PHP_FUNCTION(sodium_crypto_pwhash_str)
 		sodium_remove_param_values_from_backtrace(EG(exception));
 		return;
 	}
-	if (opslimit <= 0 || memlimit <= 0 || memlimit > SIZE_MAX ||
-		passwd_len >= 0xffffffff) {
-		zend_throw_exception(sodium_exception_ce, "invalid parameters", 0);
+	if (opslimit <= 0) {
+		zend_throw_exception(sodium_exception_ce, "ops limit must be greater than 0", 0);
+		return;
+	}
+	if (memlimit <= 0 || memlimit > SIZE_MAX) {
+		zend_throw_exception(sodium_exception_ce, "memory limit must be greater than 0", 0);
+		return;
+	}
+	if (passwd_len >= 0xffffffff) {
+		zend_throw_exception(sodium_exception_ce, "unsupported password length", 0);
 		return;
 	}
 	if (passwd_len <= 0) {
