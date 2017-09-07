@@ -3326,11 +3326,11 @@ PHP_FUNCTION(ldap_control_paged_result_response)
 
 /* {{{ Extended operations, Pierangelo Masarati */
 #ifdef HAVE_LDAP_EXTENDED_OPERATION_S
-/* {{{ proto resource ldap_exop(resource link, string reqoid [, string reqdata [, array servercontrols [, array clientcontrols [, string &retdata [, string &retoid]]]]])
+/* {{{ proto resource ldap_exop(resource link, string reqoid [, string reqdata [, array servercontrols [, string &retdata [, string &retoid]]]])
    Extended operation */
 PHP_FUNCTION(ldap_exop)
 {
-	zval *servercontrols, *clientcontrols;
+	zval *servercontrols;
 	zval *link, *retdata = NULL, *retoid = NULL;
 	char *lretoid = NULL;
 	zend_string *reqoid, *reqdata = NULL;
@@ -3339,7 +3339,7 @@ PHP_FUNCTION(ldap_exop)
 	LDAPMessage *ldap_res;
 	int rc, msgid;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rS|S!zzz/z/", &link, &reqoid, &reqdata, &servercontrols, &clientcontrols, &retdata, &retoid) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rS|S!zz/z/", &link, &reqoid, &reqdata, &servercontrols, &retdata, &retoid) != SUCCESS) {
 		return;
 	}
 
@@ -3832,7 +3832,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_exop, 0, 0, 2)
 	ZEND_ARG_INFO(0, reqoid)
 	ZEND_ARG_INFO(0, reqdata)
 	ZEND_ARG_INFO(0, servercontrols)
-	ZEND_ARG_INFO(0, clientcontrols)
 	ZEND_ARG_INFO(1, retdata)
 	ZEND_ARG_INFO(1, retoid)
 ZEND_END_ARG_INFO()
