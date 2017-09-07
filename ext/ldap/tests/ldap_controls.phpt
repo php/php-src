@@ -28,7 +28,10 @@ var_dump(
 	ldap_modify($link, "o=test,$base", ['description' => 'desc2'],
 		[['oid' => LDAP_CONTROL_ASSERT, 'iscritical' => TRUE, 'value' => ['filter' => '(!(description=*))']]]),
 	$result = ldap_read($link, "o=test,$base", "objectClass=*", array('description')),
-	ldap_get_entries($link, $result)
+	ldap_get_entries($link, $result),
+	ldap_delete($link, "o=test,$base", [['oid' => LDAP_CONTROL_ASSERT, 'iscritical' => TRUE, 'value' => ['filter' => '(description=desc2)']]]),
+	ldap_errno($link),
+	ldap_error($link)
 );
 ?>
 ===DONE===
@@ -43,6 +46,8 @@ remove_dummy_data($link, $base);
 Warning: ldap_search(): Search: Assertion Failed in %s on line %d
 
 Warning: ldap_modify(): Modify: Assertion Failed in %s on line %d
+
+Warning: ldap_delete(): Delete: Assertion Failed in %s on line %d
 resource(%d) of type (ldap result)
 array(2) {
   ["count"]=>
@@ -109,4 +114,7 @@ array(2) {
     string(%d) "o=test,%s"
   }
 }
+bool(false)
+int(122)
+string(16) "Assertion Failed"
 ===DONE===

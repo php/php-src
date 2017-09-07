@@ -1986,17 +1986,19 @@ PHP_FUNCTION(ldap_mod_del)
 }
 /* }}} */
 
-/* {{{ proto bool ldap_delete(resource link, string dn)
+/* {{{ proto bool ldap_delete(resource link, string dn [, array servercontrols [, array clientcontrols]])
    Delete an entry from a directory */
 PHP_FUNCTION(ldap_delete)
 {
+	zval *serverctrls = NULL, *clientctrls = NULL;
 	zval *link;
 	ldap_linkdata *ld;
+	LDAPControl **lserverctrls = NULL, **lclientctrls = NULL;
 	char *dn;
 	int rc;
 	size_t dn_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &link, &dn, &dn_len) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|aa", &link, &dn, &dn_len, &serverctrls, &clientctrls) != SUCCESS) {
 		return;
 	}
 
@@ -2004,12 +2006,37 @@ PHP_FUNCTION(ldap_delete)
 		RETURN_FALSE;
 	}
 
-	if ((rc = ldap_delete_ext_s(ld->link, dn, NULL, NULL)) != LDAP_SUCCESS) {
-		php_error_docref(NULL, E_WARNING, "Delete: %s", ldap_err2string(rc));
-		RETURN_FALSE;
+	if (serverctrls) {
+		lserverctrls = _php_ldap_controls_from_array(ld->link, serverctrls);
+		if (lserverctrls == NULL) {
+			RETVAL_FALSE;
+			goto cleanup;
+		}
+	}
+	if (clientctrls) {
+		lclientctrls = _php_ldap_controls_from_array(ld->link, clientctrls);
+		if (lclientctrls == NULL) {
+			RETVAL_FALSE;
+			goto cleanup;
+		}
 	}
 
-	RETURN_TRUE;
+	if ((rc = ldap_delete_ext_s(ld->link, dn, lserverctrls, lclientctrls)) != LDAP_SUCCESS) {
+		php_error_docref(NULL, E_WARNING, "Delete: %s", ldap_err2string(rc));
+		RETVAL_FALSE;
+	} else {
+		RETVAL_TRUE;
+	}
+
+cleanup:
+	if (lserverctrls) {
+		_php_ldap_controls_free(&lserverctrls);
+	}
+	if (lclientctrls) {
+		_php_ldap_controls_free(&lclientctrls);
+	}
+
+	return;
 }
 /* }}} */
 
@@ -3997,6 +4024,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_delete, 0, 0, 2)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, dn)
+	ZEND_ARG_INFO(0, servercontrols)
+	ZEND_ARG_INFO(0, clientcontrols)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_modify, 0, 0, 3)
