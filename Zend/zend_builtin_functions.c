@@ -1176,7 +1176,7 @@ ZEND_FUNCTION(get_object_vars)
 				 */
 				zend_hash_str_add_new(Z_ARRVAL_P(return_value), prop_name, prop_len, value);
 			} else {
-				zend_symbtable_add_new(Z_ARRVAL_P(return_value), key, value);
+				zend_symtable_add_new(Z_ARRVAL_P(return_value), key, value);
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
