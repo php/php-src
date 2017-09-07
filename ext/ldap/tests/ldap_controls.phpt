@@ -32,7 +32,10 @@ var_dump(
 	ldap_delete($link, "o=test,$base", [['oid' => LDAP_CONTROL_ASSERT, 'iscritical' => TRUE, 'value' => ['filter' => '(description=desc2)']]]),
 	ldap_errno($link),
 	ldap_error($link),
-	ldap_rename($link, "o=test,$base", "o=test2", "", TRUE, [['oid' => LDAP_CONTROL_ASSERT, 'iscritical' => TRUE, 'value' => ['filter' => '(description=desc2)']]])
+	ldap_rename($link, "o=test,$base", "o=test2", "", TRUE, [['oid' => LDAP_CONTROL_ASSERT, 'iscritical' => TRUE, 'value' => ['filter' => '(description=desc2)']]]),
+	ldap_compare($link, "o=test,$base", "o", "test"),
+	ldap_compare($link, "o=test,$base", "o", "test", [['oid' => LDAP_CONTROL_ASSERT, 'iscritical' => TRUE, 'value' => ['filter' => '(description=desc2)']]]),
+	ldap_compare($link, "o=test,$base", "o", "test", [['oid' => LDAP_CONTROL_ASSERT, 'iscritical' => TRUE, 'value' => ['filter' => '(description=desc)']]])
 );
 ?>
 ===DONE===
@@ -49,6 +52,8 @@ Warning: ldap_search(): Search: Assertion Failed in %s on line %d
 Warning: ldap_modify(): Modify: Assertion Failed in %s on line %d
 
 Warning: ldap_delete(): Delete: Assertion Failed in %s on line %d
+
+Warning: ldap_compare(): Compare: Assertion Failed in %s on line %d
 resource(%d) of type (ldap result)
 array(2) {
   ["count"]=>
@@ -119,4 +124,7 @@ bool(false)
 int(122)
 string(16) "Assertion Failed"
 bool(false)
+bool(true)
+int(-1)
+bool(true)
 ===DONE===

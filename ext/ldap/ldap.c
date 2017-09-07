@@ -2445,14 +2445,16 @@ PHP_FUNCTION(ldap_error)
    Determine if an entry has a specific value for one of its attributes */
 PHP_FUNCTION(ldap_compare)
 {
+	zval *serverctrls = NULL, *clientctrls = NULL;
 	zval *link;
 	char *dn, *attr, *value;
 	size_t dn_len, attr_len, value_len;
 	ldap_linkdata *ld;
+	LDAPControl **lserverctrls = NULL, **lclientctrls = NULL;
 	int errno;
 	struct berval lvalue;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsss", &link, &dn, &dn_len, &attr, &attr_len, &value, &value_len) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsss|aa", &link, &dn, &dn_len, &attr, &attr_len, &value, &value_len, &serverctrls, &clientctrls) != SUCCESS) {
 		return;
 	}
 
@@ -2460,23 +2462,49 @@ PHP_FUNCTION(ldap_compare)
 		RETURN_FALSE;
 	}
 
+	if (serverctrls) {
+		lserverctrls = _php_ldap_controls_from_array(ld->link, serverctrls);
+		if (lserverctrls == NULL) {
+			RETVAL_FALSE;
+			goto cleanup;
+		}
+	}
+	if (clientctrls) {
+		lclientctrls = _php_ldap_controls_from_array(ld->link, clientctrls);
+		if (lclientctrls == NULL) {
+			RETVAL_FALSE;
+			goto cleanup;
+		}
+	}
+
 	lvalue.bv_val = value;
 	lvalue.bv_len = value_len;
 
-	errno = ldap_compare_ext_s(ld->link, dn, attr, &lvalue, NULL, NULL);
+	errno = ldap_compare_ext_s(ld->link, dn, attr, &lvalue, lserverctrls, lclientctrls);
 
 	switch (errno) {
 		case LDAP_COMPARE_TRUE:
-			RETURN_TRUE;
+			RETVAL_TRUE;
 			break;
 
 		case LDAP_COMPARE_FALSE:
-			RETURN_FALSE;
+			RETVAL_FALSE;
 			break;
+
+		default:
+			php_error_docref(NULL, E_WARNING, "Compare: %s", ldap_err2string(errno));
+			RETVAL_LONG(-1);
 	}
 
-	php_error_docref(NULL, E_WARNING, "Compare: %s", ldap_err2string(errno));
-	RETURN_LONG(-1);
+cleanup:
+	if (lserverctrls) {
+		_php_ldap_controls_free(&lserverctrls);
+	}
+	if (lclientctrls) {
+		_php_ldap_controls_free(&lclientctrls);
+	}
+
+	return;
 }
 /* }}} */
 
@@ -4107,6 +4135,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_compare, 0, 0, 4)
 	ZEND_ARG_INFO(0, dn)
 	ZEND_ARG_INFO(0, attribute)
 	ZEND_ARG_INFO(0, value)
+	ZEND_ARG_INFO(0, servercontrols)
+	ZEND_ARG_INFO(0, clientcontrols)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_sort, 0, 0, 3)
