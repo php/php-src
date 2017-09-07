@@ -1951,7 +1951,7 @@ cleanup:
 }
 /* }}} */
 
-/* {{{ proto bool ldap_add(resource link, string dn, array entry)
+/* {{{ proto bool ldap_add(resource link, string dn, array entry [, array servercontrols [, array clientcontrols]])
    Add entries to LDAP directory */
 PHP_FUNCTION(ldap_add)
 {
@@ -1962,7 +1962,7 @@ PHP_FUNCTION(ldap_add)
 
 /* three functions for attribute base modifications, gerrit Thomson */
 
-/* {{{ proto bool ldap_mod_replace(resource link, string dn, array entry)
+/* {{{ proto bool ldap_mod_replace(resource link, string dn, array entry [, array servercontrols [, array clientcontrols]])
    Replace attribute values with new ones */
 PHP_FUNCTION(ldap_mod_replace)
 {
@@ -1970,7 +1970,7 @@ PHP_FUNCTION(ldap_mod_replace)
 }
 /* }}} */
 
-/* {{{ proto bool ldap_mod_add(resource link, string dn, array entry)
+/* {{{ proto bool ldap_mod_add(resource link, string dn, array entry [, array servercontrols [, array clientcontrols]])
    Add attribute values to current */
 PHP_FUNCTION(ldap_mod_add)
 {
@@ -1978,7 +1978,7 @@ PHP_FUNCTION(ldap_mod_add)
 }
 /* }}} */
 
-/* {{{ proto bool ldap_mod_del(resource link, string dn, array entry)
+/* {{{ proto bool ldap_mod_del(resource link, string dn, array entry [, array servercontrols [, array clientcontrols]])
    Delete attribute values */
 PHP_FUNCTION(ldap_mod_del)
 {
