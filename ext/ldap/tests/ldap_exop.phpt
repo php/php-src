@@ -42,7 +42,7 @@ var_dump(
 	ldap_exop($link, LDAP_EXOP_WHO_AM_I, NULL, NULL, $retdata, $retoid),
 	$retdata,
 	$retoid,
-	ldap_exop($link, LDAP_EXOP_WHO_AM_I, NULL, [['oid' => LDAP_CONTROL_PROXY_AUTHZ, 'value' => "dn:cn=userA,$base"]], [], $retdata),
+	ldap_exop($link, LDAP_EXOP_WHO_AM_I, NULL, [['oid' => LDAP_CONTROL_PROXY_AUTHZ, 'value' => "dn:cn=userA,$base"]], $retdata),
 	$retdata,
 	$r = ldap_exop($link, LDAP_EXOP_WHO_AM_I),
 	ldap_parse_exop($link, $r, $retdata2),
